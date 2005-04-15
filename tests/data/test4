@@ -1,6 +1,14 @@
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP added headers
+HTTP replaced headers
+</keywords>
+</info>
 #
 # Server-side
-<reply name="1">
+<reply>
 <data>
 HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT

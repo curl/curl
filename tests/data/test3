@@ -1,6 +1,14 @@
+<info>
+<keywords>
+HTTP
+HTTP POST
+HTTP Basic auth
+HTTP response-body but Content-Length: set to 0
+</keywords>
+</info>
 #
 # Server-side
-<reply name="1">
+<reply>
 <data>
 HTTP/1.0 200 OK
 Server: test-server/fake

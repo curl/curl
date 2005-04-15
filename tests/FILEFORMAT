@@ -13,6 +13,16 @@ command has been run ended up correctly.
 specified, that will be checked/used if specified. This document includes all
 the subsections currently supported.
 
+Main sections are 'info', 'reply', 'client' and 'verify'.
+
+<info>
+<keywords>
+A newline-separated list of keywords describing what this test case uses and
+tests. Try to use an already used keyword. These keywords will be used for
+statistical/informational purposes.
+</keywords>
+</info>
+
 <reply>
 <data [nocheck=1] [sendzero=yes] [base64=yes]>
 §data to sent to the client on its request and later verified that it arrived
