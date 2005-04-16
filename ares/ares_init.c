@@ -68,8 +68,8 @@ static int config_nameserver(struct server_state **servers, int *nservers,
 static int set_search(ares_channel channel, const char *str);
 static int set_options(ares_channel channel, const char *str);
 static const char *try_option(const char *p, const char *q, const char *opt);
-static int sortlist_alloc(struct apattern **sortlist, int *nsort, struct apattern *pat);
 #ifndef WIN32
+static int sortlist_alloc(struct apattern **sortlist, int *nsort, struct apattern *pat);
 static int ip_addr(const char *s, int len, struct in_addr *addr);
 static void natural_mask(struct apattern *pat);
 static int config_domain(ares_channel channel, char *str);
