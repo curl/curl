@@ -1,3 +1,9 @@
+<info>
+<keywords>
+non-existing host name
+FAILURE
+</keywords>
+</info>
 # Server-side
 <reply>
 <data>
@@ -7,7 +13,7 @@
 # Client-side
 <client>
 <server>
-http
+none
 </server>
  <name>
 attempt connect to non-existing host name
