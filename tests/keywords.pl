@@ -48,6 +48,11 @@ for(sort { $a <=> $b } @cmds) {
 }
 
 my $t;
+
+my %k; # keyword count
+my %t; # keyword to test case mapping
+my @miss; # test cases without keywords set
+
 for $t (split(/ /, $TESTCASES)) {
     if(loadtest("${TESTDIR}/test${t}")) {
         # bad case
@@ -55,9 +60,29 @@ for $t (split(/ /, $TESTCASES)) {
     }
     my @what = getpart("info", "keywords");
 
+    if(!$what[0]) {
+        push @miss, $t;
+    }
+
     for(@what) {
-        print "Test $t: $_";
+        chomp;
+        #print "Test $t: $_\n";
+        $k{$_}++;
+        $t{$_} .= "$_ ";
     }
 }
 
+my @mtest = reverse sort { $k{$a} <=> $k{$b} } keys %k;
 
+print <<TOP
+<table><tr><th>No Tests</th><th>Keyword</th></tr>
+TOP
+    ;
+for $t (@mtest) {
+    printf "<tr><td>%d</td><td>$t</td></tr>\n", $k{$t};
+}
+print "</table>\n";
+
+for(@miss) {
+    print STDERR "$_ ";
+}
