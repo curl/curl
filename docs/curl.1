@@ -887,9 +887,9 @@ This option may be used any number of times. To control where this URL is
 written, use the \fI-o/--output\fP or the \fI-O/--remote-name\fP options.
 .IP "-v/--verbose"
 Makes the fetching more verbose/talkative. Mostly usable for debugging. Lines
-starting with '>' means data sent by curl, '<' means data received by curl
-that is hidden in normal cases and lines starting with '*' means additional
-info provided by curl.
+starting with '>' means data sent by curl (this data may in itself contain
+newlines), '<' means data received by curl that is hidden in normal cases and
+lines starting with '*' means additional info provided by curl.
 
 Note that if you only want HTTP headers in the output, \fI-i/--include\fP
 might be option you're looking for.
