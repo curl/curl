@@ -1,6 +1,6 @@
 .\" $Id$
 .\"
-.TH curl_multi_fdset 3 "15 Apr 2004" "libcurl 7.9.5" "libcurl Manual"
+.TH curl_multi_fdset 3 "18 Apr 2005" "libcurl 7.9.5" "libcurl Manual"
 .SH NAME
 curl_multi_fdset - extracts file descriptor information from a multi handle
 .SH SYNOPSIS
@@ -15,15 +15,17 @@ CURLMcode curl_multi_fdset(CURLM *multi_handle,
 .ad
 .SH DESCRIPTION
 This function extracts file descriptor information from a given multi_handle.
-libcurl returns its fd_set sets. The application can use these to select()
-on. The \fIcurl_multi_perform(3)\fP function should be called as soon as one
-of them are ready to be read from or written to.
+libcurl returns its fd_set sets. The application can use these to select() on,
+but be sure to FD_ZERO them before calling this function as
+\fIcurl_multi_fdset(3)\fP only adds its own descriptors it doesn't zero or
+otherwise remove any other. The \fIcurl_multi_perform(3)\fP function should be
+called as soon as one of them are ready to be read from or written to.
 
 You should also be aware that when doing select(), you should consider using a
 rather small (single-digit number of seconds) timeout and call
 \fIcurl_multi_perform\fP regularly - even if no activity has been seen on the
 fd_sets - as otherwise libcurl-internal retries and timeouts may not work as
-you'd think.
+you'd think and want.
 .SH RETURN VALUE
 CURLMcode type, general libcurl multi interface error code. See
 \fIlibcurl-errors(3)\fP
