@@ -291,7 +291,7 @@ static int juggle(curl_socket_t *sockfdp,
     if(-1 == sockfd) {
       /* eeek, we are supposedly connected and then this cannot be -1 ! */
       logmsg("socket is -1! on %s:%d", __FILE__, __LINE__);
-      return FALSE;
+      maxfd = 0; /* stdin */
     }
     else {
       logmsg("waiting for data from client on socket %d", (int)sockfd);
