@@ -6,3 +6,4 @@ stamp-h*
 config.h
 Makefile
 getpart
+sockfilt
