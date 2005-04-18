@@ -572,7 +572,7 @@ sub PASV_command {
     eval {
         local $SIG{ALRM} = sub { die "alarm\n" };
 
-        alarm 2; # assume swift operations
+        alarm 5; # assume swift operations
 
         # Wait for 'CNCT'
         my $input = <DREAD>;
