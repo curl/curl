@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel (18 April 2005)
+- Toshiyuki Maezawa reported that when doing a POST with a read callback,
+  libcurl didn't properly send an Expect: 100-continue header. It does now.
+
+- I committed by mig change in the test suite's FTP server that moves out all
+  socket/TCP code to a separate C program named sockfilt. And added 4 new
+  test cases for FTP over IPv6.
+
 Daniel (8 April 2005)
 - Cory Nelson reported a problem with a HTTP server that responded with a 304
   response containing an "illegal" Content-Length: header, which was not

@@ -1347,6 +1347,27 @@ CURLcode Curl_http_done(struct connectdata *conn,
   return CURLE_OK;
 }
 
+/* check and possibly add an Expect: header */
+static CURLcode expect100(struct SessionHandle *data,
+                          send_buffer *req_buffer)
+{
+  CURLcode result = CURLE_OK;
+  if((data->set.httpversion != CURL_HTTP_VERSION_1_0) &&
+     !checkheaders(data, "Expect:")) {
+    /* if not doing HTTP 1.0 or disabled explicitly, we add a Expect:
+       100-continue to the headers which actually speeds up post
+       operations (as there is one packet coming back from the web
+       server) */
+    result = add_bufferf(req_buffer,
+                         "Expect: 100-continue\r\n");
+    if(result == CURLE_OK)
+      data->set.expect100header = TRUE;
+  }
+  return result;
+}
+
+
+
 /*
  * Curl_http() gets called from the generic Curl_do() function when a HTTP
  * request is to be performed. This creates and sends a properly constructed
@@ -1928,18 +1949,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           return result;
       }
 
-      if((data->set.httpversion != CURL_HTTP_VERSION_1_0) &&
-         !checkheaders(data, "Expect:")) {
-        /* if not doing HTTP 1.0 or disabled explicitly, we add a Expect:
-           100-continue to the headers which actually speeds up post
-           operations (as there is one packet coming back from the web
-           server) */
-        result = add_bufferf(req_buffer,
-                             "Expect: 100-continue\r\n");
-        if(result)
-          return result;
-        data->set.expect100header = TRUE;
-      }
+      result = expect100(data, req_buffer);
+      if(result)
+        return result;
 
       if(!checkheaders(data, "Content-Type:")) {
         /* Get Content-Type: line from Curl_formpostheader.
@@ -2002,18 +2014,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           return result;
       }
 
-      if((data->set.httpversion != CURL_HTTP_VERSION_1_0) &&
-         !checkheaders(data, "Expect:")) {
-        /* if not HTTP 1.0 or disabled explicitly, we add a Expect:
-           100-continue to the headers which actually speeds up post
-           operations (as there is one packet coming back from the web
-           server) */
-        result = add_bufferf(req_buffer,
-                             "Expect: 100-continue\r\n");
-        if(result)
-          return result;
-        data->set.expect100header = TRUE;
-      }
+      result = expect100(data, req_buffer);
+      if(result)
+        return result;
 
       result = add_buffer(req_buffer, "\r\n", 2); /* end of headers */
       if(result)
@@ -2121,21 +2124,18 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           /* set the upload size to the progress meter */
           Curl_pgrsSetUploadSize(data, http->postsize);
 
-          if((data->set.httpversion != CURL_HTTP_VERSION_1_0) &&
-             !checkheaders(data, "Expect:")) {
-            /* if not HTTP 1.0 or disabled explicitly, we add a Expect:
-               100-continue to the headers which actually speeds up post
-               operations (as there is one packet coming back from the web
-               server) */
-            add_bufferf(req_buffer,
-                        "Expect: 100-continue\r\n");
-            data->set.expect100header = TRUE;
-          }
+          result = expect100(data, req_buffer);
+          if(result)
+            return result;
 
           add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
         }
       }
       else {
+        result = expect100(data, req_buffer);
+        if(result)
+          return result;
+
         add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
 
         if(data->set.postfieldsize) {
