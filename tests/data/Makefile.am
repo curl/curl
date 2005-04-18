@@ -34,7 +34,7 @@ EXTRA_DIST = test1 test108 test117 test127 test20 test27 test34 test46	\
  test199 test225 test226 test227 test230 test231 test232 test228	\
  test229 test233 test234 test235 test236 test520 test237 test238 \
  test239 test243 test245 test246 test247 test248 test249 test250 \
- test251
+ test251 test252 test253 test254 test255
 
 # The following tests have been removed from the dist since they no longer
 # work. We need to fix the test suite's FTPS server first, then bring them

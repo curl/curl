@@ -30,6 +30,7 @@ use strict;
 
 require "getpart.pm"; # array functions
 require "valgrind.pm"; # valgrind report parser
+require "ftp.pm";
 
 my $srcdir = $ENV{'srcdir'} || '.';
 my $HOSTIP="127.0.0.1";
@@ -43,6 +44,7 @@ my $HTTPSPORT; # HTTPS server port
 my $FTPPORT; # FTP server port
 my $FTP2PORT; # FTP server 2 port
 my $FTPSPORT; # FTPS server port
+my $FTP6PORT; # FTP IPv6 server port
 
 my $CURL="../src/curl"; # what curl executable to run on the tests
 my $DBGCURL=$CURL; #"../src/.libs/curl";  # alternative for debugging
@@ -69,6 +71,7 @@ my $HTTPPIDFILE=".http.pid";
 my $HTTP6PIDFILE=".http6.pid";
 my $HTTPSPIDFILE=".https.pid";
 my $FTPPIDFILE=".ftp.pid";
+my $FTP6PIDFILE=".ftp6.pid";
 my $FTP2PIDFILE=".ftp2.pid";
 my $FTPSPIDFILE=".ftps.pid";
 
@@ -112,6 +115,7 @@ my $ssl_version; # set if libcurl is built with SSL support
 my $large_file;  # set if libcurl is built with large file support
 my $has_idn;     # set if libcurl is built with IDN support
 my $http_ipv6;   # set if HTTP server has IPv6 support
+my $ftp_ipv6;    # set if FTP server has IPv6 support
 my $has_ipv6;    # set if libcurl is built with IPv6 support
 my $has_libz;    # set if libcurl is built with libz support
 my $has_getrlimit;  # set if system has getrlimit()
@@ -365,7 +369,7 @@ sub runhttpserver {
     $pid = checkserver($pidfile);
 
     # verify if our/any server is running on this port
-    my $cmd = "$CURL -o log/verifiedserver -g \"http://$ip:$port/verifiedserver\" 2>log/verifystderr";
+    my $cmd = "$CURL -o log/verifiedserver -g \"http://$ip:$port/verifiedserver\" 2>log/verifyhttp";
     print "CMD; $cmd\n" if ($verbose);
     my $res = system($cmd);
 
@@ -425,7 +429,7 @@ sub runhttpserver {
     my $verified;
     for(1 .. 30) {
         # verify that our server is up and running:
-        my $data=`$CURL --silent -g \"$ip:$port/verifiedserver\" 2>/dev/null`;
+        my $data=`$CURL --silent -g \"$ip:$port/verifiedserver\" 2>>log/verifyhttp`;
 
         if ( $data =~ /WE ROOLZ: (\d+)/ ) {
             $pid = 0+$1;
@@ -503,24 +507,39 @@ sub runhttpsserver {
     return $pid;
 }
 
+
 #######################################################################
 # start the ftp server if needed
 #
 sub runftpserver {
-    my ($id, $verbose) = @_;
+    my ($id, $verbose, $ipv6) = @_;
     my $STATUS;
     my $RUNNING;
     my $port = $id?$FTP2PORT:$FTPPORT;
     # check for pidfile
-    my $pid = checkserver ($id?$FTP2PIDFILE:$FTPPIDFILE);
+    my $pidfile = $id?$FTP2PIDFILE:$FTPPIDFILE;
+    my $ip=$HOSTIP;
+    my $nameext;
+
+    ftpkillslaves();
+
+    if($ipv6) {
+        # if IPv6, use a different setup
+        $pidfile = $FTP6PIDFILE;
+        $port = $FTP6PORT;
+        $ip = $HOST6IP;
+        $nameext="-ipv6";
+    }
+
+    my $pid = checkserver ();
 
     if ($pid <= 0) {
-        print "RUN: Check port $port for the FTP$id server\n"
+        print "RUN: Check port $port for the FTP$id$nameext server\n"
             if ($verbose);
 
         my $time=time();
         # check if this is our server running on this port:
-        my @data=`$CURL -m4 --silent ftp://$HOSTIP:$port/verifiedserver 2>/dev/null`;
+        my @data=`$CURL -m4 --silent -vg \"ftp://$ip:$port/verifiedserver\" 2>log/verifyftp`;
         my $line;
 
         # if this took more than 2 secs, we assume it "hung" on a weird server
@@ -534,7 +553,7 @@ sub runftpserver {
         }
         if(!$pid && $data[0]) {
             # this is not a known server
-            print "RUN: Unknown server on our favourite FTP port: $port\n";
+            print "RUN: Unknown server on our favourite FTP$nameext port: $port\n";
             return -1;
         }
     }
@@ -543,7 +562,7 @@ sub runftpserver {
         print "RUN: Killing a previous server using pid $pid\n" if($verbose);
         my $res = kill (9, $pid); # die!
         if(!$res) {
-            print "RUN: Failed to kill FTP$id test server, do it manually and",
+            print "RUN: Failed to kill FTP$id$nameext test server, do it manually and",
             " restart the tests.\n";
             return -1;
         }
@@ -556,7 +575,10 @@ sub runftpserver {
     if($id) {
         $flag .="--id $id ";
     }
-    my $cmd="$perl $srcdir/ftpserver.pl $flag $port &";
+    if($ipv6) {
+        $flag .="--ipv6 ";
+    }
+    my $cmd="$perl $srcdir/ftpserver.pl $flag --port $port &";
     if($verbose) {
         print "CMD: $cmd\n";
     }
@@ -567,7 +589,7 @@ sub runftpserver {
     for(1 .. 30) {
         # verify that our server is up and running:
         my $line;
-        my $cmd="$CURL --silent ftp://$HOSTIP:$port/verifiedserver 2>/dev/null";
+        my $cmd="$CURL --silent -g \"ftp://$ip:$port/verifiedserver\" 2>>log/verifyftp";
         print "$cmd\n" if($verbose);
         my @data = `$cmd`;
         foreach $line (@data) {
@@ -579,7 +601,7 @@ sub runftpserver {
         }
         if(!$pid) {
             if($verbose) {
-                print STDERR "RUN: Retrying FTP$id server existence in a sec\n";
+                print STDERR "RUN: Retrying FTP$id$nameext server existence in a sec\n";
             }
             sleep(1);
             next;
@@ -594,7 +616,7 @@ sub runftpserver {
     }
 
     if($verbose) {
-        print "RUN: FTP$id server is now verified to be our server\n";
+        print "RUN: FTP$id$nameext server is now verified to be our server\n";
     }
 
     return $pid;
@@ -850,11 +872,20 @@ sub checkcurl {
     }
 
     if($has_ipv6) {
-        # client has ipv6 support, check that the HTTP server has it!
+        # client has ipv6 support
+
+        # check if the HTTP server has it!
         my @sws = `server/sws --version`;
         if($sws[0] =~ /IPv6/) {
             # HTTP server has ipv6 support!
             $http_ipv6 = 1;
+        }
+
+        # check if the FTP server has it!
+        my @sws = `server/sockfilt --version`;
+        if($sws[0] =~ /IPv6/) {
+            # FTP server has ipv6 support!
+            $ftp_ipv6 = 1;
         }
     }
 
@@ -877,6 +908,7 @@ sub checkcurl {
     printf("* libcurl debug:  %s\n", $curl_debug?"ON":"OFF");
     printf("* valgrind:       %s\n", $valgrind?"ON":"OFF");
     printf("* HTTP IPv6       %s\n", $http_ipv6?"ON":"OFF");
+    printf("* FTP IPv6        %s\n", $ftp_ipv6?"ON":"OFF");
 
     printf("* HTTP port:      %d\n", $HTTPPORT);
     printf("* FTP port:       %d\n", $FTPPORT);
@@ -887,6 +919,9 @@ sub checkcurl {
     }
     if($http_ipv6) {
         printf("* HTTP IPv6 port: %d\n", $HTTP6PORT);
+    }
+    if($ftp_ipv6) {
+        printf("* FTP IPv6 port:  %d\n", $FTP6PORT);
     }
     print "***************************************** \n";
 }
@@ -903,6 +938,7 @@ sub subVariables {
   $$thing =~ s/%HTTP6PORT/$HTTP6PORT/g;
   $$thing =~ s/%HTTPSPORT/$HTTPSPORT/g;
   $$thing =~ s/%FTPPORT/$FTPPORT/g;
+  $$thing =~ s/%FTP6PORT/$FTP6PORT/g;
   $$thing =~ s/%FTP2PORT/$FTP2PORT/g;
   $$thing =~ s/%FTPSPORT/$FTPSPORT/g;
   $$thing =~ s/%SRCDIR/$srcdir/g;
@@ -1533,6 +1569,7 @@ sub stopservers {
         printf ("* kill pid for %-5s => %-5d\n", $_, $run{$_}) if($verbose);
         stopserver($run{$_}); # the pid file is in the hash table
     }
+    ftpkillslaves();
 }
 
 #######################################################################
@@ -1564,6 +1601,16 @@ sub startservers {
                 }
                 printf ("* pid ftp2 => %-5d\n", $pid) if($verbose);
                 $run{'ftp2'}=$pid;
+            }
+        }
+        elsif($what eq "ftp-ipv6") {
+            if(!$run{'ftp-ipv6'}) {
+                $pid = runftpserver("", $verbose, "ipv6");
+                if($pid <= 0) {
+                    return "failed starting FTP-ipv6 server";
+                }
+                printf ("* pid ftp-ipv6 => %-5d\n", $pid) if($verbose);
+                $run{'ftp-ipv6'}=$pid;
             }
         }
         elsif($what eq "http") {
@@ -1803,6 +1850,7 @@ $FTPSPORT =  $base + 3; # FTPS server port
 $HTTP6PORT = $base + 4; # HTTP IPv6 server port (different IP protocol
                         # but we follow the same port scheme anyway)
 $FTP2PORT =  $base + 5; # FTP server 2 port
+$FTP6PORT =  $base + 6; # FTP IPv6 port
 
 #######################################################################
 # Output curl version and host info being tested

@@ -30,13 +30,14 @@
 # You may optionally specify port on the command line, otherwise it'll
 # default to port 8921.
 #
-
-use Socket;
-use FileHandle;
+# All socket/network/TCP related stuff is done by the 'sockfilt' program.
+#
 
 use strict;
+use IPC::Open2;
 
 require "getpart.pm";
+require "ftp.pm";
 
 my $ftpdnum="";
 
@@ -70,7 +71,10 @@ my $srcdir=".";
 my $nosave=0;
 my $controldelay=0; # set to 1 to delay the control connect data sending to
  # test that curl deals with that nicely
-
+my $slavepid; # for the DATA connection sockfilt slave process
+my $ipv6;
+my $ext; # append to log/pid file names
+my $grok_eprt;
 my $port = 8921; # just a default
 do {
     if($ARGV[0] eq "-v") {
@@ -84,25 +88,52 @@ do {
         $ftpdnum=$ARGV[1];
         shift @ARGV;
     }
-    elsif($ARGV[0] =~ /^(\d+)$/) {
-        $port = $1;
+    elsif($ARGV[0] eq "--ipv6") {
+        $ipv6="--ipv6";
+        $ext="ipv6";
+        $grok_eprt = 1;
+    }
+    elsif($ARGV[0] eq "--port") {
+        $port = $ARGV[1];
+        shift @ARGV;
     }
 } while(shift @ARGV);
 
-my $proto = getprotobyname('tcp') || 6;
+my $sfpid;
 
-socket(Server, PF_INET, SOCK_STREAM, $proto)|| die "socket: $!";
-setsockopt(Server, SOL_SOCKET, SO_REUSEADDR,
-           pack("l", 1)) || die "setsockopt: $!";
-bind(Server, sockaddr_in($port, INADDR_ANY))|| die "bind: $!";
-listen(Server,SOMAXCONN) || die "listen: $!";
+sub startsf {
+    my $cmd="./server/sockfilt --port $port --logfile log/sockctrl$ftpdnum$ext.log --pidfile .sockfilt$ftpdnum$ext.pid $ipv6";
+    $sfpid = open2(\*SFREAD, \*SFWRITE, $cmd);
 
+    print STDERR "$cmd\n" if($verbose);
 
-logmsg "FTP server started on port $port\n";
+    print SFWRITE "PING\n";
+    my $pong = <SFREAD>;
+
+    if($pong !~ /^PONG/) {
+        die "Failed to start sockfilt!";
+    }
+    open(STDIN,  "<&SFREAD")   || die "can't dup client to stdin";
+    open(STDOUT, ">&SFWRITE")   || die "can't dup client to stdout";
+}
+
+startsf();
+
+logmsg sprintf("FTP server started on port IPv%d/$port\n",
+               $ipv6?6:4);
 
 open(PID, ">.ftp$ftpdnum.pid");
 print PID $$;
 close(PID);
+
+sub sockfilt {
+    my $l;
+    foreach $l (@_) {
+        printf "DATA\n%04x\n", length($l);
+        print $l;
+    }
+}
+
 
 # Send data to the client on the control stream, which happens to be plain
 # stdout.
@@ -110,15 +141,15 @@ close(PID);
 sub sendcontrol {
     if(!$controldelay) {
         # spit it all out at once
-        print @_;
+        sockfilt @_;
     }
     else {
         my $a = join("", @_);
         my @a = split("", $a);
 
         for(@a) {
-            print $_;
-            select(undef, undef, undef, 0.02);
+            sockfilt $_;
+            select(undef, undef, undef, 0.01);
         }
     }
 
@@ -127,16 +158,11 @@ sub sendcontrol {
 # Send data to the client on the data stream
 
 sub senddata {
-    print SOCK @_;
-}
-
-my $waitedpid = 0;
-my $paddr;
-
-sub REAPER {
-    $waitedpid = wait;
-    $SIG{CHLD} = \&REAPER;  # loathe sysV
-    logmsg "reaped $waitedpid" . ($? ? " with exit $?\n" : "\n");
+    my $l;
+    foreach $l (@_) {
+        printf DWRITE "DATA\n%04x\n", length($l);
+        print DWRITE $l;
+    }
 }
 
 # USER is ok in fresh state
@@ -146,6 +172,7 @@ my %commandok = (
                  'PASV' => 'loggedin|twosock',
                  'EPSV' => 'loggedin|twosock',
                  'PORT' => 'loggedin|twosock',
+                 'EPRT' => 'loggedin|twosock',
                  'TYPE' => 'loggedin|twosock',
                  'LIST' => 'twosock',
                  'NLST' => 'twosock',
@@ -171,6 +198,7 @@ my %commandok = (
 my %statechange = ( 'USER' => 'passwd',    # USER goes to passwd state
                     'PASS' => 'loggedin',  # PASS goes to loggedin state
                     'PORT' => 'twosock',   # PORT goes to twosock
+                    'EPRT' => 'twosock',   # EPRT goes to twosock
                     'PASV' => 'twosock',   # PASV goes to twosock
                     'EPSV' => 'twosock',   # EPSV goes to twosock
                     );
@@ -196,6 +224,7 @@ my %displaytext = ('USER' => '331 We are happy you popped in!',
 
 # callback functions for certain commands
 my %commandfunc = ( 'PORT' => \&PORT_command,
+                    'EPRT' => \&PORT_command,
                     'LIST' => \&LIST_command,
                     'NLST' => \&NLST_command,
                     'PASV' => \&PASV_command,
@@ -210,8 +239,25 @@ my %commandfunc = ( 'PORT' => \&PORT_command,
 
 
 sub close_dataconn {
-    close(SOCK);
-    logmsg "Closed data connection\n";
+    my ($closed)=@_; # non-zero if already disconnected
+
+    if(!$closed) {
+        logmsg "time to kill the data connection\n";
+        print DWRITE "DISC\n";
+        my $i;
+        sysread DREAD, $i, 5;
+    }
+    else {
+        logmsg "data connection already disconnected\n";
+    }
+
+    logmsg "time to quit sockfilt for data\n";
+    print DWRITE "QUIT\n";
+    logmsg "told data slave to die (pid $slavepid)\n";
+    waitpid $slavepid, 0;
+    $slavepid=0;
+    logmsg "=====> Closed data connection\n";
+
 }
 
 my $rest=0;
@@ -240,9 +286,8 @@ my @ftpdir=("total 20\r\n",
     for(@ftpdir) {
         senddata $_;
     }
-    close_dataconn();
+    close_dataconn(0);
     logmsg "done passing data\n";
-
     sendcontrol "226 ASCII transfer complete\r\n";
     return 0;
 }
@@ -253,7 +298,7 @@ sub NLST_command {
     for(@ftpdir) {
         senddata "$_\r\n";
     }
-    close_dataconn();
+    close_dataconn(0);
     sendcontrol "226 ASCII transfer complete\r\n";
     return 0;
 }
@@ -291,6 +336,14 @@ sub SIZE_command {
     loadtest("$srcdir/data/test$testno");
 
     logmsg "SIZE file \"$testno\"\n";
+
+    if($testno eq "verifiedserver") {
+        my $response = "WE ROOLZ: $$\r\n";
+        my $size = length($response);
+        sendcontrol "213 $size\r\n";
+        logmsg "SIZE $testno returned $size\n";
+        return 0;
+    }
 
     my @data = getpart("reply", "size");
 
@@ -337,7 +390,8 @@ sub RETR_command {
         sendcontrol "150 Binary junk ($len bytes).\r\n";
         logmsg "pass our pid on the data connection\n";
         senddata "WE ROOLZ: $$\r\n";
-        close_dataconn();
+        close_dataconn(0);
+        logmsg "Data sent, sending a 226-reponse now\n";
         sendcontrol "226 File transfer complete\r\n";
         if($verbose) {
             print STDERR "FTPD: We returned proof we are the test server\n";
@@ -377,7 +431,7 @@ sub RETR_command {
                 my $send = $_;
                 senddata $send;
             }
-            close_dataconn();
+            close_dataconn(0);
             $retrweirdo=0; # switch off the weirdo again!
         }
         else {
@@ -394,7 +448,7 @@ sub RETR_command {
                 my $send = $_;
                 senddata $send;
             }
-            close_dataconn();
+            close_dataconn(0);
             sendcontrol "226 File transfer complete\r\n";
         }
     }
@@ -421,121 +475,184 @@ sub STOR_command {
 
     my $line;
     my $ulsize=0;
-    while (defined($line = <SOCK>)) {
-        $ulsize += length($line);
-        print FILE $line if(!$nosave);
+    my $disc=0;
+    while (5 == (sysread DREAD, $line, 5)) {
+        logmsg "command from sockfilt: $line";
+        if($line eq "DATA\n") {
+            my $i;
+            sysread DREAD, $i, 5;
+
+            #print STDERR "  GOT: $i";
+
+            my $size = hex($i);
+            sysread DREAD, $line, $size;
+            
+            #print STDERR "  GOT: $size bytes\n";
+
+            $ulsize += $size;
+            print FILE $line if(!$nosave);
+            logmsg "> Appending $size bytes to file\n";
+        }
+        elsif($line eq "DISC\n") {
+            # disconnect!
+            logmsg "DISC means disconnect!\n";
+            $disc=1;
+            last;
+        }
+        else {
+            logmsg "No support for: $line";
+            last;
+        }
     }
     if($nosave) {
         print FILE "$ulsize bytes would've been stored here\n";
     }
     close(FILE);
-    close_dataconn();
-
+    close_dataconn($disc);
     logmsg "received $ulsize bytes upload\n";
-
     sendcontrol "226 File transfer complete\r\n";
     return 0;
 }
 
-my $pasvport=9000;
 sub PASV_command {
     my ($arg, $cmd)=@_;
+    my $pasvport;
 
-    socket(Server2, PF_INET, SOCK_STREAM, $proto) || die "socket: $!";
-    setsockopt(Server2, SOL_SOCKET, SO_REUSEADDR,
-               pack("l", 1)) || die "setsockopt: $!";
+    # We fire up a new sockfilt to do the data tranfer for us.
+    $slavepid = open2(\*DREAD, \*DWRITE,
+                      "./server/sockfilt --port 0 --logfile log/sockdata$ftpdnum$ext.log --pidfile .sockdata$ftpdnum$ext.pid $ipv6");
 
-    my $ok=0;
+    print DWRITE "PING\n";
+    my $pong = <DREAD>;
 
-    $pasvport++; # don't reuse the previous
-    for(1 .. 10) {
-        if($pasvport > 65535) {
-            $pasvport = 1025;
-        }
-        if(bind(Server2, sockaddr_in($pasvport, INADDR_ANY))) {
-            $ok=1;
-            last;
-        }
-        $pasvport+= 3; # try another port please
-    }
-    if(!$ok) {
+    if($pong !~ /^PONG/) {
         sendcontrol "500 no free ports!\r\n";
         logmsg "couldn't find free port\n";
         return 0;
     }
-    listen(Server2,SOMAXCONN) || die "listen: $!";
+
+    logmsg "sockfilt for data on pid $slavepid\n";
+
+    # Find out what port we listen on
+    my $i;
+    print DWRITE "PORT\n";
+        
+    # READ the response code
+    sysread(DREAD, $i, 5) || die;
+
+    # READ the response size
+    sysread(DREAD, $i, 5) || die;
+
+    my $size = hex($i);
+        
+    # READ the response data
+    sysread(DREAD, $i, $size) || die;
+        
+    # The data is in the format
+    # IPvX/NNN
+
+    if($i =~ /IPv(\d)\/(\d+)/) {
+        # FIX: deal with IP protocol version
+        $pasvport = $2;
+    }
 
     if($cmd ne "EPSV") {
         # PASV reply
-        logmsg "replying to a $cmd command\n";
-        printf("227 Entering Passive Mode (127,0,0,1,%d,%d)\n",
-               ($pasvport/256), ($pasvport%256));
+        logmsg "replying to a $cmd command, waiting on port $pasvport\n";
+        sendcontrol sprintf("227 Entering Passive Mode (127,0,0,1,%d,%d)\n",
+                            ($pasvport/256), ($pasvport%256));
     }
     else {
         # EPSV reply
-        logmsg "replying to a $cmd command\n";
-        printf("229 Entering Passive Mode (|||%d|)\n", $pasvport);
+        logmsg "replying to a $cmd command, waiting on port $pasvport\n";
+        sendcontrol sprintf("229 Entering Passive Mode (|||%d|)\n", $pasvport);
     }
 
 
-    my $paddr;
     eval {
         local $SIG{ALRM} = sub { die "alarm\n" };
-        alarm 2; # assume swift operations!
-        $paddr = accept(SOCK, Server2);
+
+        alarm 2; # assume swift operations
+
+        # Wait for 'CNCT'
+        my $input = <DREAD>;
+
+        if($input !~ /^CNCT/) {
+            # we wait for a connected client
+            next;
+        }
+        logmsg "====> Client DATA connect\n";
+
         alarm 0;
     };
     if ($@) {
         # timed out
-        
-        close(Server2);
+
+        print DWRITE "QUIT\n";
+        waitpid $slavepid, 0;
         logmsg "accept failed\n";
+        $slavepid=0;
         return;
     }
     else {
-        logmsg "accept worked\n";
-
-        my($iport,$iaddr) = sockaddr_in($paddr);
-        my $name = gethostbyaddr($iaddr,AF_INET);
-
-        close(Server2); # close the listener when its served its purpose!
-
-        logmsg "data connection from $name [", inet_ntoa($iaddr),
-        "] at port $iport\n";
+        logmsg "data connection setup on port $pasvport\n";
     }
 
     return;
 }
 
+# Support both PORT and EPRT here. Consider LPRT too.
 
 sub PORT_command {
-    my $arg = $_[0];
+    my ($arg, $cmd) = @_;
+    my $port;
 
-    if($arg !~ /(\d+),(\d+),(\d+),(\d+),(\d+),(\d+)/) {
-        logmsg "bad PORT-line: $arg\n";
-        sendcontrol "500 silly you, go away\r\n";
+    # We always ignore the given IP and use localhost.
+
+    if($cmd eq "PORT") {
+        if($arg !~ /(\d+),(\d+),(\d+),(\d+),(\d+),(\d+)/) {
+            logmsg "bad PORT-line: $arg\n";
+            sendcontrol "500 silly you, go away\r\n";
+            return 0;
+        }
+        $port = ($5<<8)+$6;
+    }
+    # EPRT |2|::1|49706|
+    elsif(($cmd eq "EPRT") && ($grok_eprt)) {
+        if($arg !~ /(\d+)\|([^\|]+)\|(\d+)/) {
+            logmsg "bad EPRT-line: $arg\n";
+            sendcontrol "500 silly you, go away\r\n";
+            return 0;
+        }
+        sendcontrol "200 Thanks for dropping by. We contact you later\r\n";
+        $port = $3;
+    }
+    else {
+        logmsg "got a $cmd line we don't like\n";
+        sendcontrol "500 we don't like $cmd now\r\n";
         return 0;
     }
-    #my $iaddr = inet_aton("$1.$2.$3.$4");
-    my $iaddr = inet_aton("127.0.0.1"); # always use localhost
-
-    my $port = ($5<<8)+$6;
 
     if(!$port || $port > 65535) {
         print STDERR "very illegal PORT number: $port\n";
         return 1;
     }
 
-    my $paddr = sockaddr_in($port, $iaddr);
-    my $proto   = getprotobyname('tcp') || 6;
+    # We fire up a new sockfilt to do the data tranfer for us.
+    # FIX: make it use IPv6 if need be
+    $slavepid = open2(\*DREAD, \*DWRITE,
+                      "./server/sockfilt --connect $port --logfile log/sockdata$ftpdnum$ext.log --pidfile .sockdata$ftpdnum$ext.pid $ipv6");
 
-    socket(SOCK, PF_INET, SOCK_STREAM, $proto) || die "major failure";
-    connect(SOCK, $paddr)    || return 1;
+    print DWRITE "PING\n";
+    my $pong = <DREAD>;
 
-    return \&SOCK;
+    if($pong !~ /^PONG/) {
+        logmsg "sockfilt failed!\n";
+    }
+    logmsg "====> Client DATA connect to port $port\n";
+
+    return;
 }
-
-$SIG{CHLD} = \&REAPER;
 
 my %customreply;
 my %customcount;
@@ -595,22 +712,45 @@ my @welcome=(
             '220-  | (__| |_| |  _ <| |___ '."\r\n",
             '220    \___|\___/|_| \_\_____|'."\r\n");
 
-for ( $waitedpid = 0;
-      ($paddr = accept(Client,Server)) || $waitedpid;
-        $waitedpid = 0, close Client)
-{
-    next if $waitedpid and not $paddr;
-    my($port,$iaddr) = sockaddr_in($paddr);
-    my $name = gethostbyaddr($iaddr,AF_INET);
+
+while(1) {
+    #
+    # We read 'sockfilt' commands.
+    # 
+    my $input;
+    eval {
+        local $SIG{ALRM} = sub { die "alarm\n" };
+        alarm 5; # just in case things go bad
+        $input = <STDIN>;
+        alarm 0;
+    };
+    if ($@) {
+        # timed out
+        logmsg "reading stdin timed out\n";
+    }
+
+    if($input !~ /^CNCT/) {
+        # we wait for a connected client
+        if(!length($input)) {
+            # it probably died, restart it
+            kill(9, $sfpid);
+            waitpid $sfpid, 0;
+            startsf();
+            logmsg "restarted sockfilt\n";
+        }
+        else {
+            logmsg "sockfilt said: $input";
+        }
+        next;
+    }
+    logmsg "====> Client connect\n";
 
     # flush data:
     $| = 1;
+
+    kill(9, $slavepid) if($slavepid);
+    $slavepid=0;
         
-    logmsg "connection from $name [", inet_ntoa($iaddr), "] at port $port\n";
-    
-    open(STDIN,  "<&Client")   || die "can't dup client to stdin";
-    open(STDOUT, ">&Client")   || die "can't dup client to stdout";
-    
     &customize(); # read test control instructions
 
     sendcontrol @welcome;
@@ -622,8 +762,29 @@ for ( $waitedpid = 0;
     my $state="fresh";
 
     while(1) {
+        my $i;
 
-        last unless defined ($_ = <STDIN>);
+        # Now we expect to read DATA\n[hex size]\n[prot], where the [prot]
+        # part only is FTP lingo.
+
+        # COMMAND
+        sysread(STDIN, $i, 5) || die;
+
+        if($i !~ /^DATA/) {
+            logmsg "sockfilt said $i";
+            if($i =~ /^DISC/) {
+                # disconnect
+                last;
+            }
+            next;
+        }
+
+        # SIZE of data
+        sysread(STDIN, $i, 5) || die;
+        my $size = hex($i);
+
+        # data
+        sysread STDIN, $_, $size;
         
         ftpmsg $_;
         
@@ -632,7 +793,7 @@ for ( $waitedpid = 0;
 
         unless (m/^([A-Z]{3,4})\s?(.*)/i) {
             sendcontrol "500 '$_': command not understood.\r\n";
-            logmsg "unknown crap received, bailing out hard\n";
+            logmsg "unknown crap received: $_, bailing out hard\n";
             last;
         }
         my $FTPCMD=$1;
@@ -692,11 +853,14 @@ for ( $waitedpid = 0;
             my $func = $commandfunc{$FTPCMD};
             if($func) {
                 # it is!
-                \&$func($FTPARG, $FTPCMD);
+                &$func($FTPARG, $FTPCMD);
             }
         }
             
     } # while(1)
-    logmsg "client disconnected\n";
-    close(Client);
+    logmsg "====> Client disconnected\n";
 }
+
+print SFWRITE "QUIT\n";
+waitpid $sfpid, 0;
+exit;

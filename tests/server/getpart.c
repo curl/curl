@@ -218,19 +218,3 @@ const char *spitout(FILE *stream,
   return string;
 }
 
-#ifdef GETPART_TEST
-int main(int argc, char **argv)
-{
-  if(argc< 3) {
-    printf("./moo main sub\n");
-  }
-  else {
-    size_t size;
-    unsigned int i;
-    const char *buffer = spitout(stdin, argv[1], argv[2], &size);
-    for(i=0; i< size; i++)
-      printf("%c", buffer[i]);
-  }
-  return 0;
-}
-#endif
