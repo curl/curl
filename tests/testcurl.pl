@@ -522,7 +522,12 @@ if ($targetos =~ /netware/) {
 }
 elsif(!$crosscompile) {
   logit "display curl$binext --version output";
-  system("./src/curl$binext --version");
+  open(F, "./src/curl$binext --version|");
+  while(<F>) {
+      print;
+      print LOG;
+  }
+  close(F);
 }
 
 if ($configurebuild && !$crosscompile) {
