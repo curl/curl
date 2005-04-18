@@ -2707,8 +2707,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
   if (strequal(conn->protostr, "HTTP")) {
 #ifndef CURL_DISABLE_HTTP
-    conn->port = (data->set.use_port && data->state.allow_port)?
-      data->set.use_port:PORT_HTTP;
+    conn->port = PORT_HTTP;
     conn->remote_port = PORT_HTTP;
     conn->protocol |= PROT_HTTP;
     conn->curl_do = Curl_http;
@@ -2724,8 +2723,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   else if (strequal(conn->protostr, "HTTPS")) {
 #if defined(USE_SSL) && !defined(CURL_DISABLE_HTTP)
 
-    conn->port = (data->set.use_port && data->state.allow_port)?
-      data->set.use_port:PORT_HTTPS;
+    conn->port = PORT_HTTPS;
     conn->remote_port = PORT_HTTPS;
     conn->protocol |= PROT_HTTP|PROT_HTTPS|PROT_SSL;
 
@@ -2742,8 +2740,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   }
   else if (strequal(conn->protostr, "GOPHER")) {
 #ifndef CURL_DISABLE_GOPHER
-    conn->port = (data->set.use_port && data->state.allow_port)?
-      data->set.use_port:PORT_GOPHER;
+    conn->port = PORT_GOPHER;
     conn->remote_port = PORT_GOPHER;
     /* Skip /<item-type>/ in path if present */
     if (isdigit((int)conn->path[1])) {
@@ -2779,8 +2776,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 #endif /* !USE_SSL */
     }
 
-    conn->port = (data->set.use_port && data->state.allow_port)?
-      data->set.use_port:port;
+    conn->port = port;
     conn->remote_port = port;
     conn->protocol |= PROT_FTP;
 
@@ -2852,8 +2848,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     /* telnet testing factory */
     conn->protocol |= PROT_TELNET;
 
-    conn->port = (data->set.use_port && data->state.allow_port)?
-      data->set.use_port: PORT_TELNET;
+    conn->port = PORT_TELNET;
     conn->remote_port = PORT_TELNET;
     conn->curl_do = Curl_telnet;
     conn->curl_done = Curl_telnet_done;
@@ -2865,8 +2860,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   else if (strequal(conn->protostr, "DICT")) {
 #ifndef CURL_DISABLE_DICT
     conn->protocol |= PROT_DICT;
-    conn->port = (data->set.use_port && data->state.allow_port)?
-      data->set.use_port:PORT_DICT;
+    conn->port = PORT_DICT;
     conn->remote_port = PORT_DICT;
     conn->curl_do = Curl_dict;
     conn->curl_done = NULL; /* no DICT-specific done */
@@ -2878,8 +2872,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   else if (strequal(conn->protostr, "LDAP")) {
 #ifndef CURL_DISABLE_LDAP
     conn->protocol |= PROT_LDAP;
-    conn->port = (data->set.use_port && data->state.allow_port)?
-      data->set.use_port:PORT_LDAP;
+    conn->port = PORT_LDAP;
     conn->remote_port = PORT_LDAP;
     conn->curl_do = Curl_ldap;
     conn->curl_done = NULL; /* no LDAP-specific done */
@@ -3092,7 +3085,31 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   else
     tmp = strrchr(conn->host.name, ':');
 
-  if (tmp) {
+  if(data->set.use_port && data->state.allow_port) {
+    /* if set, we use this and ignore the port possibly given in the URL */
+    conn->remote_port = data->set.use_port;
+    if(tmp)
+      *tmp = '\0'; /* cut off the name there anyway - if there was a port
+                      number - since the port number is to be ignored! */
+    if(conn->bits.httpproxy) {
+      /* we need to create new URL with the new port number */
+      char *url;
+
+      url = aprintf("http://%s:%d%s", conn->host.name, conn->remote_port,
+                    conn->path);
+      if(!url)
+        return CURLE_OUT_OF_MEMORY;
+
+      if(data->change.url_alloc)
+        free(data->change.url);
+
+      data->change.url = url;
+      data->change.url_alloc = TRUE;
+    }
+  }
+  else if (tmp) {
+    /* no CURLOPT_PORT given, extract the one from the URL */
+
     char *rest;
     unsigned long port;
 

@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel (18 April 2005)
+- Olivier reported that even though he used CURLOPT_PORT, libcurl clearly
+  still used the default port. He was right. I fixed the problem and added the
+  test cases 521, 522 and 523 to verify the fix.
+
 - Toshiyuki Maezawa reported that when doing a POST with a read callback,
   libcurl didn't properly send an Expect: 100-continue header. It does now.
 

@@ -40,7 +40,7 @@ SUPPORTFILES = first.c test.h
 # These are all libcurl test programs
 noinst_PROGRAMS = lib500 lib501 lib502 lib503 lib504 lib505 lib506 lib507 \
   lib508 lib509 lib510 lib511 lib512 lib513 lib514 lib515 lib516 lib517 \
-  lib518 lib519 lib520
+  lib518 lib519 lib520 lib521 lib523
 
 lib500_SOURCES = lib500.c $(SUPPORTFILES)
 lib500_LDADD = $(LIBDIR)/libcurl.la
@@ -125,3 +125,11 @@ lib519_DEPENDENCIES = $(LIBDIR)/libcurl.la
 lib520_SOURCES = lib520.c $(SUPPORTFILES)
 lib520_LDADD = $(LIBDIR)/libcurl.la
 lib520_DEPENDENCIES = $(LIBDIR)/libcurl.la
+
+lib521_SOURCES = lib521.c $(SUPPORTFILES)
+lib521_LDADD = $(LIBDIR)/libcurl.la
+lib521_DEPENDENCIES = $(LIBDIR)/libcurl.la
+
+lib523_SOURCES = lib523.c $(SUPPORTFILES)
+lib523_LDADD = $(LIBDIR)/libcurl.la
+lib523_DEPENDENCIES = $(LIBDIR)/libcurl.la
