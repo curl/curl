@@ -481,7 +481,7 @@ int Curl_ssl_recv(struct connectdata *conn, /* connection data */
       return -1;
   }
 
-  return nread;
+  return (int)nread;
 
 #else /* USE_SSL */
   (void)conn;
