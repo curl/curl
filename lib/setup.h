@@ -95,13 +95,13 @@ typedef unsigned char bool;
 #define FORMAT_OFF_T "ld"
 #endif
 
-/*#ifdef NEED_REENTRANT*/
+#ifndef _REENTRANT
 /* Solaris needs _REENTRANT set for a few function prototypes and things to
    appear in the #include files. We need to #define it before all #include
    files. Unixware needs it to build proper reentrant code. Others may also
    need it. */
 #define _REENTRANT
-/*#endif */
+#endif
 
 #include <stdio.h>
 #ifdef HAVE_ASSERT_H

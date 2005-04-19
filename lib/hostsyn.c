@@ -26,8 +26,6 @@
 #include <string.h>
 #include <errno.h>
 
-#define _REENTRANT
-
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
 #include <malloc.h>
 #else
