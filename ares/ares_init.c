@@ -1010,6 +1010,7 @@ static const char *try_option(const char *p, const char *q, const char *opt)
   return ((size_t)(q - p) > len && !strncmp(p, opt, len)) ? &p[len] : NULL;
 }
 
+#ifndef WIN32
 static int sortlist_alloc(struct apattern **sortlist, int *nsort, struct apattern *pat)
 {
   struct apattern *newsort;
@@ -1022,7 +1023,6 @@ static int sortlist_alloc(struct apattern **sortlist, int *nsort, struct apatter
   return 1;
 }
 
-#ifndef WIN32
 static int ip_addr(const char *ipbuf, int len, struct in_addr *addr)
 {
 
