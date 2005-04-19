@@ -1006,46 +1006,50 @@ if test "$OPENSSL_ENABLED" != "1"; then
        gtlsprefix=`libgnutls-config --prefix`
      fi
     else
-      addlib="-L$OPT_GNUTLS/lib -lgnutls"
-      addcflags="-I$OPT_GNUTLS/include"
+      addlib=`$OPT_GNUTLS/bin/libgnutls-config --libs`
+      addcflags=`$OPT_GNUTLS/bin/libgnutls-config --cflags`
       version=`$OPT_GNUTLS/bin/libgnutls-config --version 2>/dev/null`
       gtlsprefix=$OPT_GNUTLS
       if test -z "$version"; then
         version="unknown"
       fi
     fi
+    if test -n "$addlib"; then
 
-    CLEANLDFLAGS="$LDFLAGS"
-    CLEANCPPFLAGS="$CPPFLAGS"
+      CLEANLDFLAGS="$LDFLAGS"
+      CLEANCPPFLAGS="$CPPFLAGS"
   
-    LDFLAGS="$LDFLAGS $addlib"
-    if test "$addcflags" != "-I/usr/include"; then
-       CPPFLAGS="$CPPFLAGS $addcflags"
-    fi
+      LDFLAGS="$LDFLAGS $addlib"
+      if test "$addcflags" != "-I/usr/include"; then
+         CPPFLAGS="$CPPFLAGS $addcflags"
+      fi
   
-    AC_CHECK_LIB(gnutls, gnutls_check_version,
+      AC_CHECK_LIB(gnutls, gnutls_check_version,
        [
        AC_DEFINE(USE_GNUTLS, 1, [if GnuTLS is enabled])
        AC_SUBST(USE_GNUTLS, [1])
        USE_GNUTLS="yes"
-     curl_ssl_msg="enabled (GnuTLS)"
+       curl_ssl_msg="enabled (GnuTLS)"
        ],
        [
          LDFLAGS="$CLEANLDFLAGS"
          CPPFLAGS="$CLEANCPPFLAGS"
        ])
   
-    if test "x$USE_GNUTLS" = "xyes"; then
-      AC_MSG_NOTICE([detected GnuTLS version $version])
+      if test "x$USE_GNUTLS" = "xyes"; then
+        AC_MSG_NOTICE([detected GnuTLS version $version])
 
-      dnl when shared libs were found in a path that the run-time
-      dnl linker doesn't search through, we need to add it to
-      dnl LD_LIBRARY_PATH to prevent further configure tests to fail
-      dnl due to this
+        dnl when shared libs were found in a path that the run-time
+        dnl linker doesn't search through, we need to add it to
+        dnl LD_LIBRARY_PATH to prevent further configure tests to fail
+        dnl due to this
 
-      LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$gtlsprefix/lib$libsuff"
-      export LD_LIBRARY_PATH
+        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$gtlsprefix/lib$libsuff"
+        export LD_LIBRARY_PATH
+      fi
+
     fi
+
   fi dnl GNUTLS not disabled
 
   if test X"$USE_GNUTLS" != "Xyes"; then
