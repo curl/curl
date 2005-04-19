@@ -836,10 +836,7 @@ if test X"$OPT_SSL" != Xno; then
     ])
 
 
-  if test X"$HAVECRYPTO" != X"yes"; then
-      AC_MSG_WARN([crypto lib was not found; SSL will be disabled])
-
-  else
+  if test X"$HAVECRYPTO" = X"yes"; then
     dnl This is only reasonable to do if crypto actually is there: check for
     dnl SSL libs NOTE: it is important to do this AFTER the crypto lib
 
