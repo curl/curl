@@ -891,11 +891,6 @@ if test X"$OPT_SSL" != Xno; then
     fi
   fi
 
-
-dnl **********************************************************************
-dnl Check for the CA bundle
-dnl **********************************************************************
-
   if test X"$OPENSSL_ENABLED" = X"1"; then
     dnl If the ENGINE library seems to be around, check for the OpenSSL engine
     dnl stuff, it is kind of "separated" from the main SSL check
@@ -904,30 +899,6 @@ dnl **********************************************************************
                 AC_CHECK_HEADERS(openssl/engine.h)
                 AC_CHECK_FUNCS( ENGINE_load_builtin_engines )
               ])
-
-    AC_MSG_CHECKING([CA cert bundle install path])
-
-    AC_ARG_WITH(ca-bundle,
-AC_HELP_STRING([--with-ca-bundle=FILE], [File name to install the CA bundle as])
-AC_HELP_STRING([--without-ca-bundle], [Don't install the CA bundle]),
-    [ ca="$withval" ],
-    [
-      if test "x$prefix" != xNONE; then
-        ca="\${prefix}/share/curl/curl-ca-bundle.crt"
-      else
-        ca="$ac_default_prefix/share/curl/curl-ca-bundle.crt"
-      fi
-    ] )
-
-    if test X"$OPT_SSL" = Xno; then
-      ca="no"
-    fi
-
-    if test "x$ca" != "xno"; then
-      CURL_CA_BUNDLE='"'$ca'"'
-      AC_SUBST(CURL_CA_BUNDLE)  
-    fi
-    AC_MSG_RESULT([$ca])
 
     dnl these can only exist if openssl exists
 
@@ -947,8 +918,6 @@ AC_HELP_STRING([--without-ca-bundle], [Don't install the CA bundle]),
   fi
 
 fi
-
-AM_CONDITIONAL(CABUNDLE, test x$ca != xno)
 
 dnl **********************************************************************
 dnl Check for the random seed preferences 
@@ -1058,6 +1027,38 @@ if test "$OPENSSL_ENABLED" != "1"; then
   fi
 
 fi dnl OPENSSL != 1
+
+dnl **********************************************************************
+dnl Check for the CA bundle
+dnl **********************************************************************
+
+if test X"$USE_GNUTLS$OPENSSL_ENABLED" != "X"; then
+
+  AC_MSG_CHECKING([CA cert bundle install path])
+
+  AC_ARG_WITH(ca-bundle,
+AC_HELP_STRING([--with-ca-bundle=FILE], [File name to install the CA bundle as])
+AC_HELP_STRING([--without-ca-bundle], [Don't install the CA bundle]),
+    [ ca="$withval" ],
+    [
+      if test "x$prefix" != xNONE; then
+        ca="\${prefix}/share/curl/curl-ca-bundle.crt"
+      else
+        ca="$ac_default_prefix/share/curl/curl-ca-bundle.crt"
+      fi
+    ] )
+
+    if test "x$ca" != "xno"; then
+      CURL_CA_BUNDLE='"'$ca'"'
+      AC_SUBST(CURL_CA_BUNDLE)  
+    fi
+    AC_MSG_RESULT([$ca])
+fi dnl only done if some kind of SSL was enabled
+
+AM_CONDITIONAL(CABUNDLE, test x$ca != xno)
+
+
+
   
 dnl **********************************************************************
 dnl Check for the presence of ZLIB libraries and headers
@@ -1797,4 +1798,5 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   Built-in manual: ${curl_manual_msg}
   Verbose errors:  ${curl_verbose_msg}
   SSPI support:    ${curl_sspi_msg}
+  ca cert path:    ${ca}
 ])
