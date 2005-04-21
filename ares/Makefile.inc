@@ -7,7 +7,7 @@ windows_port.c ares_expand_string.c ares_parse_ptr_reply.c                 \
 ares_parse_aaaa_reply.c inet_net_pton.c bitncmp.c
 
 HHEADERS = ares.h ares_private.h setup.h ares_dns.h ares_version.h nameser.h \
-           inet_net_pton.h
+           inet_net_pton.h ares_ipv6.h bitncmp.h
 
 MANPAGES= ares_destroy.3 ares_expand_name.3 ares_expand_string.3 ares_fds.3 \
  ares_free_hostent.3 ares_free_string.3 ares_gethostbyaddr.3		    \
