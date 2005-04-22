@@ -1,3 +1,12 @@
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP CONNECT
+HTTP Basic auth
+HTTP proxy Basic auth
+</keywords>
+</info>
 #
 # Server-side
 <reply>

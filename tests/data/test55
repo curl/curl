@@ -1,3 +1,10 @@
+<info>
+<keywords>
+HTTP
+HTTP GET
+followlocation
+</keywords>
+</info>
 <reply>
 <data>
 HTTP/1.1 302 OK swsclose
