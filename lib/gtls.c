@@ -308,9 +308,13 @@ Curl_gtls_connect(struct connectdata *conn,
   size=sizeof(certbuf);
   rc = gnutls_x509_crt_get_dn_by_oid(x509_cert, GNUTLS_OID_X520_COMMON_NAME,
                                      0, /* the first and only one */
-                                     TRUE, /* give to me raw please */
+                                     FALSE,
                                      certbuf,
                                      &size);
+  if(rc) {
+    infof(data, "error fetching CN from cert:%s\n",
+          gnutls_strerror(rc));
+  }
 
   /* This function will check if the given certificate's subject matches the
      given hostname. This is a basic implementation of the matching described
