@@ -71,20 +71,47 @@ for $t (split(/ /, $TESTCASES)) {
         chomp;
         #print "Test $t: $_\n";
         $k{$_}++;
-        $t{$_} .= "$_ ";
+        $t{$_} .= "$t ";
     }
     $count++;
+}
+
+sub show {
+    my ($list)=@_;
+    my @a = split(" ", $list);
+    my $ret;
+
+    my $c;
+    my @l = sort {rand(100) - 50} @a;
+    my @ll;
+
+    for(1 .. 6) {
+        my $v = shift @l;
+        if($v) {
+            push @ll, $v;
+        }
+    }
+
+    for (sort {$a <=> $b} @ll) {
+        if($c++ == 5) {
+            $ret .= "...";
+            last;
+        }
+        $ret .= "$_ ";
+    }
+    return $ret;
 }
 
 # numerically on amount, or alphebetically if same amount
 my @mtest = reverse sort { $k{$a} <=> $k{$b} || $b cmp $a } keys %k;
 
 print <<TOP
-<table><tr><th>No Tests</th><th>Keyword</th></tr>
+<table><tr><th>Num</th><th>Keyword</th><th>Test Cases</th></tr>
 TOP
     ;
 for $t (@mtest) {
-    printf "<tr><td>%d</td><td>$t</td></tr>\n", $k{$t};
+    printf "<tr><td>%d</td><td>$t</td><td>%s</td></tr>\n", $k{$t},
+    show($t{$t});
 }
 printf "</table><p> $count tests (%d lack keywords)\n",
     scalar(@miss);
