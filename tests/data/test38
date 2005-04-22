@@ -1,6 +1,14 @@
+<info>
+<keywords>
+HTTP
+HTTP GET
+Resume
+HTTP Range
+</keywords>
+</info>
 # Server-side
 <reply>
-<data nocheck=1>
+<data>
 HTTP/1.0 200 Mooo
 Date: Mon, 13 Nov 2000 13:41:09 GMT
 Server: myown/1.0
