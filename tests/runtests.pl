@@ -89,6 +89,7 @@ my $memanalyze="./memanalyze.pl";
 
 my $stunnel = checkcmd("stunnel");
 my $valgrind = checkcmd("valgrind");
+my $start;
 
 my $valgrind_tool;
 if($valgrind) {
@@ -959,7 +960,7 @@ sub fixarray {
 #
 
 sub singletest {
-    my $testnum=$_[0];
+    my ($testnum, $count, $total)=@_;
 
     my @what;
     my $why;
@@ -1312,7 +1313,7 @@ sub singletest {
 
     my @err = getpart("verify", "errorcode");
     my $errorcode = $err[0] || "0";
-
+    my $ok="";
     my $res;
     if (@validstdout) {
         # verify redirected stdout
@@ -1322,9 +1323,10 @@ sub singletest {
         if($res) {
             return 1;
         }
-        if(!$short) {
-            print " stdout OK";
-        }
+        $ok .= "s";
+    }
+    else {
+        $ok .= "-"; # stdout not checked
     }
 
     my %replyattr = getpartattr("reply", "data");
@@ -1335,9 +1337,10 @@ sub singletest {
         if ($res) {
             return 1;
         }
-        if(!$short) {
-            print " data OK";
-        }
+        $ok .= "d";
+    }
+    else {
+        $ok .= "-"; # data not checked
     }
 
     if(@upload) {
@@ -1347,9 +1350,10 @@ sub singletest {
         if ($res) {
             return 1;
         }
-        if(!$short) {
-            print " upload OK";
-        }
+        $ok .= "u";
+    }
+    else {
+        $ok .= "-"; # upload not checked
     }
 
     if(@protocol) {
@@ -1405,9 +1409,12 @@ sub singletest {
         if($res) {
             return 1;
         }
-        if(!$short) {
-            print " protocol OK";
-        }
+
+        $ok .= "p";
+
+    }
+    else {
+        $ok .= "-"; # protocol not checked
     }
 
     my @outfile=getpart("verify", "file");
@@ -1436,9 +1443,11 @@ sub singletest {
         if($res) {
             return 1;
         }
-        if(!$short) {
-            print " output OK";
-        }
+
+        $ok .= "o";
+    }
+    else {
+        $ok .= "-"; # output not checked
     }
 
     # accept multiple comma-separated error codes
@@ -1457,9 +1466,7 @@ sub singletest {
         if($verbose) {
             print " received exitcode $cmdres OK";
         }
-        elsif(!$short) {
-            print " exit OK";
-        }
+        $ok .= "e";
     }
     else {
         if(!$short) {
@@ -1502,12 +1509,14 @@ sub singletest {
                 return 1;
             }
             else {
-                if(!$short) {
-                    print " memory OK";
-                }
+                $ok .= "m";
             }
         }
     }
+    else {
+        $ok .= "-"; # memory not checked
+    }
+
     if($valgrind) {
         # this is the valid protocol blurb curl should generate
         my @disable= getpart("verify", "valgrind");
@@ -1536,20 +1545,28 @@ sub singletest {
                 print @e;
                 return 1;
             }
-            elsif(!$short) {
-                printf " valgrind OK";
-            }
+            $ok .= "v";
         }
         else {
             if(!$short) {
                 print " valgrind SKIPPED";
             }
+            $ok .= "-"; # skipped
         }
     }
-    if($short) {
-        print "OK";
+    else {
+        $ok .= "-"; # valgrind not checked
     }
-    print "\n";
+
+    print "$ok " if(!$short);
+
+    my $sofar= time()-$start;
+    my $esttotal = $sofar/$count * $total;
+    my $estleft = $esttotal - $sofar;
+    my $left=sprintf("remaining: %dm%ds",
+                     $estleft/60,
+                     $estleft%60);
+    printf "OK ($count out of $total, %s)\n", $left;
 
     # the test succeeded, remove all log files
     if(!$keepoutfiles) {
@@ -1936,12 +1953,17 @@ my $testnum;
 my $ok=0;
 my $total=0;
 my $lasttest;
+my @at = split(" ", $TESTCASES);
+my $count;
 
-foreach $testnum (split(" ", $TESTCASES)) {
+$start = time();
+
+foreach $testnum (@at) {
 
     $lasttest = $testnum if($testnum > $lasttest);
+    $count++;
 
-    my $error = singletest($testnum);
+    my $error = singletest($testnum, $count, scalar(@at));
     if($error < 0) {
         # not a test we can run
         next;
@@ -1992,7 +2014,8 @@ else {
 }
 
 if($all) {
-    print "TESTDONE: $all tests were considered.\n";
+    my $sofar = time()-$start;
+    print "TESTDONE: $all tests were considered during $sofar seconds.\n";
 }
 
 if($skipped) {
