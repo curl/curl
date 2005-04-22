@@ -2,6 +2,7 @@
 <keywords>
 HTTP
 HTTP GET
+HTTP proxy
 Resume
 HTTP Range
 FAILURE
@@ -25,10 +26,10 @@ todelooooo lalalala yada yada, we know nothing about ranges ;-)
 http
 </server>
  <name>
-HTTP resume request without server supporting it
+HTTP resume request over proxy with auth without server supporting it
  </name>
  <command option="no-output">
-http://%HOSTIP:%HTTPPORT/want/38 -C - -i -o log/fewl.txt
+-x http://%HOSTIP:%HTTPPORT http://%HOSTIP:%HTTPPORT/want/256 -C - -i -o log/fewl.txt -U daniel:stenberg
 </command>
 <file name="log/fewl.txt">
 This text is here to simulate a partly downloaded file to resume
@@ -45,7 +46,8 @@ download on.
 ^User-Agent:.*
 </strip>
 <protocol>
-GET /want/38 HTTP/1.1
+GET http://127.0.0.1:%HTTPPORT/want/256 HTTP/1.1
+Proxy-Authorization: Basic ZGFuaWVsOnN0ZW5iZXJn
 Range: bytes=78-
 Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
