@@ -1933,7 +1933,9 @@ sub displaylogs {
     print "== Contents of files in the log/ dir after test $testnum\n";
     foreach $log (sort @logs) {
         # the log file is not "." or ".." and contains more than zero bytes
-        if(($log !~ /\.(\.|)$/) && -s "$LOGDIR/$log") {
+        if(($log !~ /\.(\.|)$/) &&
+           ($log ne "memdump") && # and not "memdump"
+           -s "$LOGDIR/$log") {
             if($log =~ /^\.nfs/) {
                 next;
             }
