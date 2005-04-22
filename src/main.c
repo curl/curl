@@ -2940,10 +2940,9 @@ operate(struct Configurable *config, int argc, char *argv[])
   int res = 0;
   int i;
   int up; /* upload file counter within a single upload glob */
-  long retry_sleep_default = config->retry_delay?
-    config->retry_delay*1000:RETRY_SLEEP_DEFAULT; /* ms */
+  long retry_sleep_default;
   long retry_numretries;
-  long retry_sleep = retry_sleep_default;
+  long retry_sleep;
   long response;
   struct timeval retrystart;
 
@@ -3049,6 +3048,10 @@ operate(struct Configurable *config, int argc, char *argv[])
         return res;
     }
   }
+
+  retry_sleep_default = config->retry_delay?
+    config->retry_delay*1000:RETRY_SLEEP_DEFAULT; /* ms */
+  retry_sleep = retry_sleep_default;
 
   if((!config->url_list || !config->url_list->url) && !config->list_engines) {
     clean_getout(config);
