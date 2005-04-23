@@ -2900,6 +2900,17 @@ static void FindWin32CACert(struct Configurable *config,
 #define RETRY_SLEEP_DEFAULT 1000  /* ms */
 #define RETRY_SLEEP_MAX     600000 /* ms == 10 minutes */
 
+static bool
+output_expected(char* url, char* uploadfile)
+{
+  if(!uploadfile)
+    return TRUE;  /* download */
+  if(checkprefix("http://", url) || checkprefix("https://", url))
+    return TRUE;   /* HTTP(S) upload */
+
+  return FALSE; /* non-HTTP upload, probably no output should be expected */
+}
+
 static int
 operate(struct Configurable *config, int argc, char *argv[])
 {
@@ -3399,7 +3410,8 @@ operate(struct Configurable *config, int argc, char *argv[])
         if(uploadfile && config->resume_from_current)
           config->resume_from = -1; /* -1 will then force get-it-yourself */
 
-        if(outs.stream && isatty(fileno(outs.stream)))
+        if(output_expected(url, uploadfile)
+           && outs.stream && isatty(fileno(outs.stream)))
           /* we send the output to a tty, therefore we switch off the progress
              meter */
           config->conf |= CONF_NOPROGRESS;
