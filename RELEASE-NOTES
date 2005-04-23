@@ -15,6 +15,10 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o FTP uploads show the progress meter easier
+ o MSVC makefile fixes for static libcurl builds
+ o configure fix for static libcurl build on Windows
+ o --retry-delay
  o POST with read callback now uses Expect: 100-continue
  o CURLOPT_PORT didn't actually use the set port number
  o HTTP 304 response with Content-Length: header
@@ -24,11 +28,12 @@ Other curl-related news since the previous public release:
 
  o http://curl.mirroring.de/ is a new german curl mirror
  o pycurl 7.13.2: http://pycurl.sf.net/
+ o TclCurl 0.13.2: http://personal1.iddeo.es/andresgarci/tclcurl/english/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Christophe Legry, Cory Nelson, Gisle Vanem, Dan Fandrich, Toshiyuki Maezawa,
- Olivier
+ Olivier, Andres Garcia, Dave Dribin, Alex Suykov
 
         Thanks! (and sorry if I forgot to mention someone)

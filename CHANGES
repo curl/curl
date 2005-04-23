@@ -6,6 +6,22 @@
 
                                   Changelog
 
+
+Daniel (23 April 2005)
+- Alex Suykov made the curl tool now assume that uploads using HTTP:// or
+  HTTPS:// are the only ones that show output and thus motivates a switched
+  off progress meter if the output is sent to the terminal. This makes FTP
+  uploads without '>', -o or -O show the progress meter.
+
+Daniel (22 April 2005)
+- Dave Dribin's MSVC makefile fix: set CURL_STATICLIB when it builds static
+  library variants.
+
+- Andres Garcia fixed configure to set the proper define when building static
+  libcurl on windows.
+
+- --retry-delay didn't work.
+
 Daniel (18 April 2005)
 - Olivier reported that even though he used CURLOPT_PORT, libcurl clearly
   still used the default port. He was right. I fixed the problem and added the
