@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel (25 April 2005)
+- Based on feedback from Cory Nelson, I added some preprocessor magic in
+  */setup.h and */config-win32.h to build fine with VS2005 on x64.
+
 Daniel (23 April 2005)
 - Alex Suykov made the curl tool now assume that uploads using HTTP:// or
   HTTPS:// are the only ones that show output and thus motivates a switched

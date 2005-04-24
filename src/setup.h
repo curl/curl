@@ -29,6 +29,10 @@
 /* Borland fix */
 #define WIN32
 #endif
+#if !defined(WIN32) && defined(_WIN32)
+/* This works for VS2005 on x64 */
+#define WIN32
+#endif
 
 #ifdef HAVE_CONFIG_H
 #include "config.h" /* the configure script results */

@@ -37,6 +37,10 @@
 /* Define if you have the setlocale() function. */
 #define HAVE_SETLOCALE 1
 
+/* Defines set for VS2005 to _not_ decprecate a few functions we use. */
+#define _CRT_SECURE_NO_DEPRECATE
+#define _CRT_NONSTDC_NO_DEPRECATE
+
 /*************************************************
  * This section is for compiler specific defines.*
  *************************************************/
