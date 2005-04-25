@@ -1,6 +1,6 @@
 .\" $Id$
 .\"
-.TH curl_multi_fdset 3 "18 Apr 2005" "libcurl 7.9.5" "libcurl Manual"
+.TH curl_multi_fdset 3 "25 Apr 2005" "libcurl 7.9.5" "libcurl Manual"
 .SH NAME
 curl_multi_fdset - extracts file descriptor information from a multi handle
 .SH SYNOPSIS
@@ -20,6 +20,10 @@ but be sure to FD_ZERO them before calling this function as
 \fIcurl_multi_fdset(3)\fP only adds its own descriptors it doesn't zero or
 otherwise remove any other. The \fIcurl_multi_perform(3)\fP function should be
 called as soon as one of them are ready to be read from or written to.
+
+If no file descriptors are set by libcurl, \fImax_fd\fP will contain -1 when
+this function returns. Otherwise it will contain the higher descriptor number
+libcurl set.
 
 You should also be aware that when doing select(), you should consider using a
 rather small (single-digit number of seconds) timeout and call
