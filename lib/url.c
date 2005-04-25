@@ -3147,15 +3147,23 @@ static CURLcode CreateConnection(struct SessionHandle *data,
            user, passwd);
   }
 
+  conn->bits.netrc = FALSE;
   if (data->set.use_netrc != CURL_NETRC_IGNORED) {
     if(Curl_parsenetrc(conn->host.name,
                        user, passwd,
                        data->set.netrc_file)) {
-      infof(data, "Couldn't find host %s in the " DOT_CHAR "netrc file, using defaults\n",
+      infof(data, "Couldn't find host %s in the " DOT_CHAR
+            "netrc file, using defaults\n",
             conn->host.name);
     }
-    else
+    else {
+      /* set bits.netrc TRUE to remember that we got the name from a .netrc
+         file, so that it is safe to use even if we followed a Location: to a
+         different host or similar. */
+      conn->bits.netrc = TRUE;
+
       conn->bits.user_passwd = 1; /* enable user+password */
+    }
   }
 
   /* If our protocol needs a password and we have none, use the defaults */

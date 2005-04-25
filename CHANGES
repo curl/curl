@@ -8,6 +8,11 @@
 
 
 Daniel (25 April 2005)
+- Fred New reported a bug where we used Basic auth and user name and password
+  in .netrc, and when following a Location: the subsequent requests didn't
+  properly use the auth as found in the netrc file. Added test case 257 to
+  verify my fix.
+
 - Based on feedback from Cory Nelson, I added some preprocessor magic in
   */setup.h and */config-win32.h to build fine with VS2005 on x64.
 

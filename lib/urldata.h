@@ -420,6 +420,7 @@ struct ConnectBits {
   bool ftp_use_lprt;  /* As set with CURLOPT_FTP_USE_EPRT, but if we find out
                          LPRT doesn't work we disable it for the forthcoming
                          requests */
+  bool netrc;         /* name+password provided by netrc */
 };
 
 struct hostname {
