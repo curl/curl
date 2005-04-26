@@ -174,8 +174,11 @@ typedef unsigned char bool;
 
 #if !defined(__GNUC__) || defined(__MINGW32__)
 #define sclose(x) closesocket(x)
-#define sread(x,y,z) recv(x,y,z, SEND_4TH_ARG)
-#define swrite(x,y,z) (size_t)send(x,y,z, SEND_4TH_ARG)
+
+/* Since Windows doesn't have/use the POSIX prototype for send() and recv(),
+   we typecast the third argument in the macros to avoid compiler warnings. */
+#define sread(x,y,z) recv(x,y,(int)(z), SEND_4TH_ARG)
+#define swrite(x,y,z) (size_t)send(x,y, (int)(z), SEND_4TH_ARG)
 #undef HAVE_ALARM
 #else
      /* gcc-for-win is still good :) */
