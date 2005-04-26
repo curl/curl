@@ -114,7 +114,7 @@ inet_pton4(const char *src, unsigned char *dst)
     const char *pch;
 
     if ((pch = strchr(digits, ch)) != NULL) {
-      u_int val = *tp * 10 + (pch - digits);
+      u_int val = *tp * 10 + (u_int)(pch - digits);
 
       if (val > 255)
         return (0);

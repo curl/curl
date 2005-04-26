@@ -759,8 +759,8 @@ static int dprintf_formatf(
           *w-- = digits[num % base];
           num /= base;
         }
-        width -= workend - w;
-        prec -= workend - w;
+        width -= (long)(workend - w);
+        prec -= (long)(workend - w);
 
         if (alt && base == 8 && prec <= 0) {
           *w-- = '0';
@@ -839,7 +839,7 @@ static int dprintf_formatf(
 
         if (prec != -1 && (size_t) prec < len)
           len = prec;
-        width -= len;
+        width -= (long)len;
 
         if (p->flags & FLAGS_ALT)
           OUTCHAR('"');
@@ -869,7 +869,7 @@ static int dprintf_formatf(
           base = 16;
           digits = (p->flags & FLAGS_UPPER)? upper_digits : lower_digits;
           alt = 1;
-          num = (unsigned long) ptr;
+          num = (size_t) ptr;
           is_neg = 0;
           goto number;
         }

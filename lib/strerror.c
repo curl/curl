@@ -571,7 +571,7 @@ const char *Curl_strerror(struct connectdata *conn, int err)
   else {
     if (!get_winsock_error(err, buf, max) &&
         !FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
-                       LANG_NEUTRAL, buf, max, NULL))
+                       LANG_NEUTRAL, buf, (DWORD)max, NULL))
       snprintf(buf, max, "Unknown error %d (%#x)", err, err);
   }
 #endif

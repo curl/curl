@@ -266,8 +266,8 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
 
   ptr=buf + ftp->nread_resp;
 
-  perline= ptr-ftp->linestart_resp; /* number of bytes in the current line,
-                                       so far */
+  perline= (int)(ptr-ftp->linestart_resp); /* number of bytes in the current
+                                              line, so far */
   keepon=TRUE;
 
   while((ftp->nread_resp<BUFSIZE) && (keepon && !result)) {
@@ -1739,7 +1739,7 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
                  "%04d%02d%02d %02d:%02d:%02d GMT",
                  year, month, day, hour, minute, second);
         /* now, convert this into a time() value: */
-        data->info.filetime = curl_getdate(buf, &secs);
+        data->info.filetime = (long)curl_getdate(buf, &secs);
       }
 
       /* If we asked for a time of the file and we actually got one as well,
@@ -2086,7 +2086,7 @@ static CURLcode ftp_state_get_resp(struct connectdata *conn,
       char *bytes;
       bytes=strstr(buf, " bytes");
       if(bytes--) {
-        long in=bytes-buf;
+        long in=(long)(bytes-buf);
         /* this is a hint there is size information in there! ;-) */
         while(--in) {
           /* scan for the left parenthesis and break there */

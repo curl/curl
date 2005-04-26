@@ -270,9 +270,9 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   ssize_t nread; /* number of bytes read */
   int didwhat=0;
 
-  int fd_read;
-  int fd_write;
-  int select_res;
+  curl_socket_t fd_read;
+  curl_socket_t fd_write;
+  curl_socket_t select_res;
 
   curl_off_t contentlength;
 
@@ -395,7 +395,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
             /* decrease the size of the remaining (supposed) header line */
             rest_length = (k->end_ptr - k->str)+1;
-            nread -= rest_length;
+            nread -= (ssize_t)rest_length;
 
             k->str = k->end_ptr + 1; /* move past new line */
 
@@ -520,8 +520,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               if(result)
                 return result;
 
-              data->info.header_size += headerlen;
-              conn->headerbytecount += headerlen;
+              data->info.header_size += (long)headerlen;
+              conn->headerbytecount += (long)headerlen;
 
               conn->deductheadercount =
                 (100 == k->httpcode)?conn->headerbytecount:0;
@@ -900,7 +900,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               k->timeofdoc = curl_getdate(k->p+strlen("Last-Modified:"),
                                           &secs);
               if(data->set.get_filetime)
-                data->info.filetime = k->timeofdoc;
+                data->info.filetime = (long)k->timeofdoc;
             }
             else if((checkprefix("WWW-Authenticate:", k->p) &&
                      (401 == k->httpcode)) ||
@@ -963,8 +963,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             if(result)
               return result;
 
-            data->info.header_size += k->hbuflen;
-            conn->headerbytecount += k->hbuflen;
+            data->info.header_size += (long)k->hbuflen;
+            conn->headerbytecount += (long)k->hbuflen;
 
             /* reset hbufp pointer && hbuflen */
             k->hbufp = data->state.headerbuff;
@@ -1501,7 +1501,7 @@ void Curl_single_fdset(struct connectdata *conn,
   *max_fd = -1; /* init */
   if(conn->keep.keepon & KEEP_READ) {
     FD_SET(conn->sockfd, read_fd_set);
-    *max_fd = conn->sockfd;
+    *max_fd = (int)conn->sockfd;
   }
   if(conn->keep.keepon & KEEP_WRITE) {
     FD_SET(conn->writesockfd, write_fd_set);
@@ -1509,7 +1509,7 @@ void Curl_single_fdset(struct connectdata *conn,
     /* since sockets are curl_socket_t nowadays, we typecast it to int here
        to compare it nicely */
     if((int)conn->writesockfd > *max_fd)
-      *max_fd = conn->writesockfd;
+      *max_fd = (int)conn->writesockfd;
   }
   /* we don't use exceptions, only touch that one to prevent compiler
      warnings! */
@@ -1553,8 +1553,8 @@ Transfer(struct connectdata *conn)
     return CURLE_OK;
 
   while (!done) {
-    int fd_read;
-    int fd_write;
+    curl_socket_t fd_read;
+    curl_socket_t fd_write;
     int interval_ms;
 
     interval_ms = 1 * 1000;

@@ -464,7 +464,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         return_value = CURL_FORMADD_OPTION_TWICE;
       else
         current_form->namelength =
-          array_state?(long)array_value:va_arg(params, long);
+          array_state?(long)array_value:(long)va_arg(params, long);
       break;
 
       /*
@@ -1550,7 +1550,7 @@ char *Curl_FormBoundary(void)
   if(!retstring)
     return NULL; /* failed */
 
-  srand(time(NULL)+randomizer++); /* seed */
+  srand((unsigned int)time(NULL)+randomizer++); /* seed */
 
   strcpy(retstring, "----------------------------");
 

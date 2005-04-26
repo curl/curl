@@ -398,7 +398,7 @@ static time_t Curl_parsedate(const char *date)
 
     /* Add the time zone diff (between the given timezone and GMT) and the
        diff between the local time zone and GMT. */
-    delta = (tzoff!=-1?tzoff:0) + (t - t2);
+    delta = (long)((tzoff!=-1?tzoff:0) + (t - t2));
 
     if((delta>0) && (t + delta < t))
       return -1; /* time_t overflow */

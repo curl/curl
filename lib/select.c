@@ -151,7 +151,7 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
   }
 
   do {
-    r = select(maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
+    r = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
   } while((r == -1) && (Curl_ourerrno() == EINTR));
 
   if (r < 0)
@@ -236,7 +236,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
   }
 
   do {
-    r = select(maxfd + 1, &fds_read, &fds_write, &fds_err, ptimeout);
+    r = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, ptimeout);
   } while((r == -1) && (Curl_ourerrno() == EINTR));
 
   if (r < 0)

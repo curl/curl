@@ -652,7 +652,7 @@ singleipconnect(struct connectdata *conn,
   /* set socket non-blocking */
   Curl_nonblock(sockfd, TRUE);
 
-  rc = connect(sockfd, ai->ai_addr, ai->ai_addrlen);
+  rc = connect(sockfd, ai->ai_addr, (socklen_t)ai->ai_addrlen);
 
   if(-1 == rc) {
     error = Curl_ourerrno();

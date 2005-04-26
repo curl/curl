@@ -1748,7 +1748,7 @@ static int handleSock5Proxy(const char *proxy_name,
   ssize_t written;
   int result;
   CURLcode code;
-  int sock = conn->sock[FIRSTSOCKET];
+  curl_socket_t sock = conn->sock[FIRSTSOCKET];
 
   Curl_nonblock(sock, FALSE);
 
