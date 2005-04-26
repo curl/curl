@@ -15,6 +15,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o builds fine with VS2005 on x64
+ o auth fix for HTTP redirects and .netrc usage
  o FTP uploads show the progress meter easier
  o MSVC makefile fixes for static libcurl builds
  o configure fix for static libcurl build on Windows
@@ -34,6 +36,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Christophe Legry, Cory Nelson, Gisle Vanem, Dan Fandrich, Toshiyuki Maezawa,
- Olivier, Andres Garcia, Dave Dribin, Alex Suykov
+ Olivier, Andres Garcia, Dave Dribin, Alex Suykov, Cory Nelson, Fred New
 
         Thanks! (and sorry if I forgot to mention someone)

@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel (26 April 2005)
+- Cory Nelson's work on nuking compiler warnings when building on x64 with
+  VS2005.
+
 Daniel (25 April 2005)
 - Fred New reported a bug where we used Basic auth and user name and password
   in .netrc, and when following a Location: the subsequent requests didn't
