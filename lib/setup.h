@@ -30,7 +30,7 @@
 #define CURL_DISABLE_DICT
 #define CURL_DISABLE_FILE
 #define CURL_DISABLE_GOPHER
-#endif
+#endif /* HTTP_ONLY */
 
 #if !defined(WIN32) && defined(__WIN32__)
 /* This should be a good Borland fix. */
@@ -50,9 +50,9 @@
 #ifdef WIN32
 /* hand-modified win32 config.h! */
 #include "config-win32.h"
-#endif
-#endif
-#endif
+#endif /* WIN32 */
+#endif /* WIN32_WCE */
+#endif /* HAVE_CONFIG_H */
 
 #ifdef macintosh
 /* hand-modified MacOS config.h! */
@@ -82,7 +82,7 @@ typedef unsigned char bool;
 #ifdef _MSC_VER
 #define LONG_LONG __int64
 #define ENABLE_64BIT
-#endif
+#endif /* _MSC_VER */
 #endif /* HAVE_LONGLONG */
 
 #ifndef SIZEOF_CURL_OFF_T
@@ -97,7 +97,7 @@ typedef unsigned char bool;
 #define FORMAT_OFF_T "lld"
 #else
 #define FORMAT_OFF_T "ld"
-#endif
+#endif /* SIZEOF_CURL_OFF_T */
 
 #ifndef _REENTRANT
 /* Solaris needs _REENTRANT set for a few function prototypes and things to
@@ -135,7 +135,7 @@ typedef unsigned char bool;
 #define HAVE_MSG_NOSIGNAL 1 /* we have MSG_NOSIGNAL */
 #else
 #define SEND_4TH_ARG 0
-#endif
+#endif /* MSG_NOSIGNAL */
 
 /* To make large file support transparent even on Windows */
 #if defined(WIN32) && (SIZEOF_CURL_OFF_T > 4)
@@ -147,7 +147,7 @@ typedef unsigned char bool;
 #define fstat(fd,st) _fstati64(fd,st)
 #else
 #define struct_stat struct stat
-#endif
+#endif /* Win32 with large file support */
 
 /* Below we define four functions. They should
    1. close a socket
@@ -162,7 +162,7 @@ typedef unsigned char bool;
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN  /* Prevent including <winsock*.h> in <windows.h> */
-#endif
+#endif /* WIN32_LEAN_AND_MEAN */
 
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>        /* required by telnet.c */
@@ -183,12 +183,12 @@ typedef unsigned char bool;
 #define sread(x,y,z) recv(x,y,z, SEND_4TH_ARG)
 #define swrite(x,y,z) send(x,y,z, SEND_4TH_ARG)
 #define HAVE_ALARM
-#endif
+#endif /* !GNU or mingw */
 
 #define DIR_CHAR      "\\"
 #define DOT_CHAR      "_"
 
-#else
+#else /* WIN32 */
 
 #ifdef DJGPP
 #define sclose(x)         close_s(x)
@@ -201,21 +201,21 @@ typedef unsigned char bool;
 #undef word
 #endif
 
-#else
+#else /* DJGPP */
 
 #ifdef __BEOS__
 #define sclose(x) closesocket(x)
 #define sread(x,y,z) (ssize_t)recv(x,y,z, SEND_4TH_ARG)
 #define swrite(x,y,z) (ssize_t)send(x,y,z, SEND_4TH_ARG)
-#else
+#else /* __BEOS__ */
 #define sclose(x) close(x)
 #define sread(x,y,z) recv(x,y,z, SEND_4TH_ARG)
 #define swrite(x,y,z) send(x,y,z, SEND_4TH_ARG)
-#endif
+#endif /* __BEOS__ */
 
 #define HAVE_ALARM
 
-#endif
+#endif /* DJGPP */
 
 #ifdef _AMIGASF
 #undef HAVE_ALARM
@@ -235,7 +235,7 @@ typedef unsigned char bool;
 int fileno( FILE *stream);
 #endif
 
-#endif
+#endif /* WIN32 */
 
 /* now typedef our socket type */
 #ifdef WIN32
