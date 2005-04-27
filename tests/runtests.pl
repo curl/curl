@@ -757,6 +757,7 @@ sub checkcurl {
         if($_ =~ /^curl/) {
             $curl = $_;
             $curl =~ s/^(.*)(libcurl.*)/$1/g;
+
             $libcurl = $2;
             if($curl =~ /mingw32/) {
                 # This is a windows minw32 build, we need to translate the
@@ -813,11 +814,11 @@ sub checkcurl {
                # through a shell.
                chomp($pwd = `cygpath -m $pwd`);
            }
-           elsif ($curl =~ /openssl/i) {
+           elsif ($libcurl =~ /openssl/i) {
                # OpenSSL in use
                $has_openssl=1;
            }
-           elsif ($curl =~ /gnutls/i) {
+           elsif ($libcurl =~ /gnutls/i) {
                # GnuTLS in use
                $has_gnutls=1;
            }
@@ -924,6 +925,12 @@ sub checkcurl {
     if($ftp_ipv6) {
         printf("* FTP IPv6 port:  %d\n", $FTP6PORT);
     }
+    
+    if($ssl_version) {
+        printf("* SSL library:    %s\n",
+               $has_gnutls?"GnuTLS":($has_openssl?"OpenSSL":"<unknown>"));
+    }
+
     print "***************************************** \n";
 }
 
