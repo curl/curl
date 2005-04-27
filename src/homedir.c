@@ -87,7 +87,13 @@ char *GetEnv(const char *variable, char do_expand)
 /* return the home directory of the current user as an allocated string */
 char *homedir(void)
 {
-  char *home = GetEnv("HOME", FALSE);
+  char *home;
+
+  home = GetEnv("CURL_HOME", FALSE);
+  if(home)
+    return home;
+
+  home = GetEnv("HOME", FALSE);
   if(home)
     return home;
 

@@ -7,6 +7,14 @@
                                   Changelog
 
 
+Daniel (27 April 2005)
+- Paul Moore made curl check for the .curlrc file (_curlrc on windows) on two
+  more places. First, CURL_HOME is a new environment variable that is used
+  instead of HOME if it is set, to point out where the default config file
+  lives. If there's no config file in the dir pointed out by one of the
+  environment variables, the Windows version will instead check the same
+  directory the executable curl is located in.
+
 Daniel (26 April 2005)
 - Cory Nelson's work on nuking compiler warnings when building on x64 with
   VS2005.

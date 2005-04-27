@@ -2233,7 +2233,43 @@ static void parseconfig(const char *filename,
         snprintf(filebuffer, sizeof(filebuffer),
                  "%s%s%s", home, DIR_CHAR, CURLRC);
 
+#ifdef WIN32
+        /* Check if the file exists - if not, try CURLRC in the same
+         * directory as our executable
+         */
+        file = fopen(filebuffer, "r");
+        if (file != NULL) {
+          fclose(file);
+          filename = filebuffer;
+        }
+        else {
+          /* Get the filename of our executable. GetModuleFileName is
+           * defined in windows.h, which is #included into libcurl.
+           * We assume that we are using the ASCII version here.
+           */
+          int n = GetModuleFileName(0, filebuffer, sizeof(filebuffer));
+          if (n > 0 && n < sizeof(filebuffer)) {
+            /* We got a valid filename - get the directory part */
+            char *lastdirchar = strrchr(filebuffer, '\\');
+            if (lastdirchar) {
+              int remaining;
+              *lastdirchar = 0;
+              /* If we have enough space, build the RC filename */
+              remaining = sizeof(filebuffer) - strlen(filebuffer);
+              if (strlen(CURLRC) < remaining - 1) {
+                snprintf(lastdirchar, remaining,
+                         "%s%s", DIR_CHAR, CURLRC);
+                /* Don't bother checking if it exists - we do
+                 * that later
+                 */
+                filename = filebuffer;
+              }
+            }
+          }
+        }
+#else /* WIN32 */
         filename = filebuffer;
+#endif /* WIN32 */
       }
       free(home); /* we've used it, now free it */
     }
