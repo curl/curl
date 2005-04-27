@@ -644,7 +644,7 @@ int main(int argc, char *argv[])
     }
 
     /* start accepting connections */
-    listen(sock, 0);
+    listen(sock, 1);
 
   }
 
