@@ -55,11 +55,21 @@ my @miss; # test cases without keywords set
 
 my $count;
 
+my %errors;
+
 for $t (split(/ /, $TESTCASES)) {
     if(loadtest("${TESTDIR}/test${t}")) {
         # bad case
         next;
     }
+
+    my @ec = getpart("verify", "errorcode");
+    if($ec[0]) {
+        # count number of check error codes
+        $errors{ 0 + $ec[0] } ++;
+    }
+
+
     my @what = getpart("info", "keywords");
 
     if(!$what[0]) {
@@ -73,6 +83,14 @@ for $t (split(/ /, $TESTCASES)) {
         $k{$_}++;
         $t{$_} .= "$t ";
     }
+
+
+
+
+
+
+
+
     $count++;
 }
 
@@ -85,7 +103,7 @@ sub show {
     my @l = sort {rand(100) - 50} @a;
     my @ll;
 
-    for(1 .. 6) {
+    for(1 .. 11) {
         my $v = shift @l;
         if($v) {
             push @ll, $v;
@@ -93,7 +111,7 @@ sub show {
     }
 
     for (sort {$a <=> $b} @ll) {
-        if($c++ == 5) {
+        if($c++ == 10) {
             $ret .= "...";
             last;
         }
@@ -121,3 +139,13 @@ for(@miss) {
 }
 
 print STDERR "\n";
+
+print "<p>Error codes tested for:<br>\n";
+
+# numerically on amount, or alphebetically if same amount
+my @etest = sort { $a <=> $b} keys %errors;
+
+for(@etest) {
+    print "$_ ";
+}
+print "\n";
