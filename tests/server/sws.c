@@ -843,13 +843,13 @@ int main(int argc, char *argv[])
   else
     fprintf(stderr, "Couldn't write pid file\n");
 
-  logmsg("Running IPv%d version",
+  logmsg("Running IPv%d version on port %d",
 #ifdef ENABLE_IPV6
          (use_ipv6?6:4)
 #else
          4
 #endif
-    );
+	 , port );
 
   /* start accepting connections */
   listen(sock, 5);
