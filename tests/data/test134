@@ -1,3 +1,11 @@
+<info>
+<keywords>
+FTP
+EPSV
+LIST
+netrc
+</keywords>
+</info>
 #
 # Server-side
 <reply name="1">

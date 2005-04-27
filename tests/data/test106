@@ -1,3 +1,11 @@
+<info>
+<keywords>
+FTP
+EPSV
+TYPE A
+RETR
+</keywords>
+</info>
 # Server-side
 <reply>
 <data>

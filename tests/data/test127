@@ -1,3 +1,11 @@
+<info>
+<keywords>
+FTP
+PASV
+RETR
+--disable-epsv
+</keywords>
+</info>
 # Server-side
 <reply>
 <data>

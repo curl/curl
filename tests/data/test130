@@ -1,6 +1,14 @@
+<info>
+<keywords>
+FTP
+EPSV
+LIST
+netrc
+</keywords>
+</info>
 #
 # Server-side
-<reply name="1">
+<reply>
 <data>
 total 20
 drwxr-xr-x   8 98       98           512 Oct 22 13:06 .

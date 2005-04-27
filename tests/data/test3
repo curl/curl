@@ -3,7 +3,6 @@
 HTTP
 HTTP POST
 HTTP Basic auth
-HTTP response-body but Content-Length: set to 0
 </keywords>
 </info>
 #
