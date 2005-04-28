@@ -545,7 +545,7 @@ sub runftpserver {
     my $ip=$HOSTIP;
     my $nameext;
 
-    ftpkillslaves();
+    ftpkillslaves($verbose);
 
     if($ipv6) {
         # if IPv6, use a different setup
@@ -1572,10 +1572,10 @@ sub singletest {
 # Stop all running test servers
 sub stopservers {
     for(keys %run) {
-        printf ("* kill pid for %-5s => %-5d\n", $_, $run{$_});
+        printf ("* kill pid for %-5s => %-5d\n", $_, $run{$_}) if($verbose);
         stopserver($run{$_}); # the pid file is in the hash table
     }
-    ftpkillslaves();
+    ftpkillslaves($verbose);
 }
 
 #######################################################################
