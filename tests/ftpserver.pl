@@ -111,6 +111,8 @@ sub startsf {
     my $pong = <SFREAD>;
 
     if($pong !~ /^PONG/) {
+        logmsg "Failed sockfilt command: $cmd\n";
+        kill(9, $sfpid);
         die "Failed to start sockfilt!";
     }
     open(STDIN,  "<&SFREAD")   || die "can't dup client to stdin";
@@ -526,8 +528,9 @@ sub PASV_command {
     my $pong = <DREAD>;
 
     if($pong !~ /^PONG/) {
+        kill(9, $slavepid);
         sendcontrol "500 no free ports!\r\n";
-        logmsg "couldn't find free port\n";
+        logmsg "failed to run sockfilt for data connection\n";
         return 0;
     }
 
@@ -647,7 +650,8 @@ sub PORT_command {
     my $pong = <DREAD>;
 
     if($pong !~ /^PONG/) {
-        logmsg "sockfilt failed!\n";
+        logmsg "Failed sockfilt for data connection\n";
+        kill(9, $slavepid);
     }
     logmsg "====> Client DATA connect to port $port\n";
 
