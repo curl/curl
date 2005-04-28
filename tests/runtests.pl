@@ -156,6 +156,15 @@ chomp($pwd = `pwd`);
 $ENV{'CURL_MEMDEBUG'} = $memdump;
 $ENV{'HOME'}=$pwd;
 
+sub catch_zap {
+    my $signame = shift;
+    print STDERR "received SIG$signame, exiting\n";
+    stopservers();
+    die "Somebody sent me a SIG$signame";
+}
+$SIG{INT} = \&catch_zap;
+$SIG{KILL} = \&catch_zap;
+
 ##########################################################################
 # Clear all possible '*_proxy' environment variables for various protocols
 # to prevent them to interfere with our testing!
@@ -630,53 +639,6 @@ sub runftpserver {
 }
 
 #######################################################################
-# start the ftps server (or rather, tunnel) if needed
-#
-sub runftpsserver {
-    my $verbose = $_[0];
-    my $STATUS;
-    my $RUNNING;
-
-    if(!$stunnel) {
-        return 0;
-    }
-    my $pid=checkserver($FTPSPIDFILE );
-
-    if($pid > 0) {
-        # kill previous stunnel!
-        if($verbose) {
-            print "kills off running stunnel at $pid\n";
-        }
-        stopserver($FTPSPIDFILE);
-    }
-
-    my $flag=$debugprotocol?"-v ":"";
-    my $cmd="$perl $srcdir/ftpsserver.pl $flag -s \"$stunnel\" -d $srcdir -r $FTPPORT $FTPSPORT &";
-    system($cmd);
-    if($verbose) {
-        print "CMD: $cmd\n";
-    }
-    sleep(1);
-
-    for(1 .. 30) {
-
-        $pid=checkserver($FTPSPIDFILE );
-
-        if($pid <= 0) {
-            if($verbose) {
-                print STDERR "RUN: waiting one sec for FTPS server\n";
-            }
-            sleep(1);
-        }
-        else {
-            last;
-        }
-    }
-
-    return $pid;
-}
-
-#######################################################################
 # Remove all files in the specified directory
 #
 sub cleardir {
@@ -890,7 +852,7 @@ sub checkcurl {
         }
 
         # check if the FTP server has it!
-        my @sws = `server/sockfilt --version`;
+        @sws = `server/sockfilt --version`;
         if($sws[0] =~ /IPv6/) {
             # FTP server has ipv6 support!
             $ftp_ipv6 = 1;
@@ -922,7 +884,7 @@ sub checkcurl {
     printf("* FTP port:       %d\n", $FTPPORT);
     printf("* FTP port 2:     %d\n", $FTP2PORT);
     if($stunnel) {
-        printf("* FTPS port:      %d\n", $FTPSPORT);
+        #printf("* FTPS port:      %d\n", $FTPSPORT);
         printf("* HTTPS port:     %d\n", $HTTPSPORT);
     }
     if($http_ipv6) {
@@ -1475,7 +1437,6 @@ sub singletest {
     # accept multiple comma-separated error codes
     my @splerr = split(/ *, */, $errorcode);
     my $errok;
-    my $e;
     foreach $e (@splerr) {
         if($e == $cmdres) {
             # a fine error code
@@ -1485,9 +1446,6 @@ sub singletest {
     }
 
     if($errok) {
-        if($verbose) {
-            print " received exitcode $cmdres OK";
-        }
         $ok .= "e";
     }
     else {
@@ -1673,32 +1631,8 @@ sub startservers {
             }
         }
         elsif($what eq "ftps") {
-            if(!$stunnel) {
-                # we can't run ftps tests without stunnel
-                return "no stunnel";
-            }
-            if(!$ssl_version) {
-                # we can't run ftps tests if libcurl is SSL-less
-                return "curl lacks SSL support";
-            }
-            if(!$run{'ftp'}) {
-                $pid = runftpserver("", $verbose);
-                if($pid <= 0) {
-                    return "failed starting FTP server";
-                }
-                printf ("* pid ftp => %-5d\n", $pid) if($verbose);
-                $run{'ftp'}=$pid;
-            }
-            if(!$run{'ftps'}) {
-                return 2;
-
-                $pid = runftpsserver($verbose);
-                if($pid <= 0) {
-                    return "failed starting FTPS server (stunnel)";
-                }
-                printf ("* pid ftps => %-5d\n", $pid) if($verbose);
-                $run{'ftps'}=$pid;
-            }
+            # we can't run ftps tests at all for the moment
+            return "test suite lacks FTPS support";
         }
         elsif($what eq "file") {
             # we support it but have no server!
@@ -1978,7 +1912,7 @@ my $ok=0;
 my $total=0;
 my $lasttest;
 my @at = split(" ", $TESTCASES);
-my $count;
+my $count=0;
 
 $start = time();
 
