@@ -3,3 +3,5 @@ Makefile.in
 memdump
 log
 *.pid
+*.pdf
+*.html
