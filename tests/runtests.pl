@@ -304,9 +304,6 @@ sub torture {
 
     print "torture OK\n";
     return 0;
-
-    #stopservers();
-    #exit; # for now, we stop after these tests
 }
 
 #######################################################################
@@ -362,7 +359,7 @@ sub runhttpserver {
     my ($verbose, $ipv6) = @_;
     my $RUNNING;
     my $pid;
-
+    my $cmd;
     my $pidfile = $HTTPPIDFILE;
     my $port = $HTTPPORT;
     my $ip = $HOSTIP;
@@ -378,41 +375,44 @@ sub runhttpserver {
 
     $pid = checkserver($pidfile);
 
-    # verify if our/any server is running on this port
-    my $cmd = "$CURL -o log/verifiedserver -g \"http://$ip:$port/verifiedserver\" 2>log/verifyhttp";
-    print "CMD; $cmd\n" if ($verbose);
-    my $res = system($cmd);
+    if($pid <= 0 ) {
 
-    $res >>= 8; # rotate the result
-    my $data;
+        # verify if our/any server is running on this port
+        $cmd = "$CURL -o log/verifiedserver -g \"http://$ip:$port/verifiedserver\" 2>log/verifyhttp";
+        print "CMD; $cmd\n" if ($verbose);
+        my $res = system($cmd);
 
-    if($res && $verbose) {
-        open(ERR, "<log/verifystderr");
-        my @e = <ERR>;
-        close(ERR);
-        print "RUN: curl command returned $res\n";
-        for(@e) {
-            if($_ !~ /^([ \t]*)$/) {
-                print "RUN: $_";
+        $res >>= 8; # rotate the result
+        my $data;
+
+        if($res && $verbose) {
+            open(ERR, "<log/verifystderr");
+            my @e = <ERR>;
+            close(ERR);
+            print "RUN: curl command returned $res\n";
+            for(@e) {
+                if($_ !~ /^([ \t]*)$/) {
+                    print "RUN: $_";
+                }
             }
         }
-    }
-    open(FILE, "<log/verifiedserver");
-    my @file=<FILE>;
-    close(FILE);
-    $data=$file[0]; # first line
+        open(FILE, "<log/verifiedserver");
+        my @file=<FILE>;
+        close(FILE);
+        $data=$file[0]; # first line
 
-    if ( $data =~ /WE ROOLZ: (\d+)/ ) {
-        $pid = 0+$1;
-    }
-    elsif($res == 6) {
-        # curl: (6) Couldn't resolve host '::1'
-        print "RUN: failed to resolve host\n";
-        return -3;
-    }
-    elsif($data || ($res != 7)) {
-        print "RUN: Unknown server is running on port $port\n";
-        return -2;
+        if ( $data =~ /WE ROOLZ: (\d+)/ ) {
+            $pid = 0+$1;
+        }
+        elsif($res == 6) {
+            # curl: (6) Couldn't resolve host '::1'
+            print "RUN: failed to resolve host\n";
+            return -3;
+        }
+        elsif($data || ($res != 7)) {
+            print "RUN: Unknown server is running on port $port\n";
+            return -2;
+        }
     }
 
     if($pid > 0) {
@@ -420,6 +420,7 @@ sub runhttpserver {
         if(!$res) {
             print "RUN: Failed to kill test HTTP$nameext server, do it ",
             "manually and restart the tests.\n";
+            stopservers();
             exit;
         }
         sleep(1);
@@ -440,6 +441,13 @@ sub runhttpserver {
     for(1 .. 30) {
         # verify that our server is up and running:
         my $data=`$CURL --silent -g \"$ip:$port/verifiedserver\" 2>>log/verifyhttp`;
+
+        $pid = checkserver($pidfile);
+        if($pid) {
+            print STDERR "RUN: got http server pid from pidfile\n" if($verbose);
+            $verified = 1;
+            last;
+        }
 
         if ( $data =~ /WE ROOLZ: (\d+)/ ) {
             $pid = 0+$1;
@@ -1228,6 +1236,7 @@ sub singletest {
         if($@) {
             print "perl: $code\n";
             print "precommand: $@";
+            stopservers();
             exit;
         }
     }
@@ -1400,6 +1409,7 @@ sub singletest {
         my $filename=$hash{'name'};
         if(!$filename) {
             print "ERROR: section verify=>file has no name attribute!\n";
+            stopservers();
             exit;
         }
         my $filemode=$hash{'mode'};
@@ -1952,7 +1962,6 @@ foreach $testnum (@at) {
 # Close command log
 #
 close(CMDLOG);
-
 
 # Tests done, stop the servers
 stopservers();
