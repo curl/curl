@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl 1 "05 Apr 2005" "Curl 7.13.3" "Curl Manual"
+.TH curl 1 "28 Apr 2005" "Curl 7.14.0" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -497,6 +497,20 @@ line. So, it could look similar to this:
 url = "http://curl.haxx.se/docs/"
 
 This option can be used multiple times.
+
+When curl is invoked, it always (unless \fI-q\fP is used) checks for a default
+config file and uses it if found. The default config file is checked for in
+the following places in this order:
+
+1) curl tries to find the "home dir": It first checks for the CURL_HOME and
+then the HOME environment variables. Failing that, it uses getpwuid() on
+unix-like systems (which returns the home dir given the current user in your
+system). On Windows, it then checks for the APPDATA variable, or as a last
+resort the '%USERPROFILE%\Application Data'.
+
+2) On windows, if there is no _curlrc file in the home dir, it checks for one
+in the same dir the executable curl is placed. On unix-like systems, it will
+simply try to load .curlrc from the determined home dir.
 .IP "--limit-rate <speed>"
 Specify the maximum transfer rate you want curl to use. This feature is useful
 if you have a limited pipe and you'd like your transfer not use your entire
@@ -700,8 +714,9 @@ If this option is used several times, the last one will be used. Disable the
 use of PORT with \fI--ftp-pasv\fP. Disable the attempt to use the EPRT command
 instead of PORT by using \fI--disable-eprt\fP. EPRT is really PORT++.
 .IP "-q"
-If used as the first parameter on the command line, the \fI$HOME/.curlrc\fP
-file will not be read and used as a config file.
+If used as the first parameter on the command line, the \fIcurlrc\fP config
+file will not be read and used. See the \fI-K/--config\fP for details on the
+default config file search path.
 .IP "-Q/--quote <command>"
 (FTP) Send an arbitrary command to the remote FTP server. Quote commands are
 sent BEFORE the transfer is taking place (just after the initial PWD command
