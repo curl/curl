@@ -220,7 +220,11 @@ sub showdiff {
         print TEMP $_;
     }
     close(TEMP);
-    my @out = `diff -u $file2 $file1`;
+    my @out = `diff -u $file2 $file1 2>/dev/null`;
+
+    if(!$out[0]) {
+	@out = `diff -c $file2 $file1 2>/dev/null`;
+    }
 
     return @out;
 }
