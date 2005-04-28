@@ -582,7 +582,7 @@ int main(int argc, char *argv[])
       memset(&me6, 0, sizeof(me6));
       me6.sin6_family = AF_INET6;
       me6.sin6_port = htons(connectport);
-      Curl_inet_pton(AF_INET, "::1", &me6.sin6_addr);
+      Curl_inet_pton(AF_INET6, "::1", &me6.sin6_addr);
 
       rc = connect(sock, (struct sockaddr *) &me6, sizeof(me6));
     }
