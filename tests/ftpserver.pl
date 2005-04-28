@@ -99,6 +99,15 @@ do {
     }
 } while(shift @ARGV);
 
+sub catch_zap {
+    my $signame = shift;
+    print STDERR "ftpserver.pl received SIG$signame, exiting\n";
+    ftpkillslaves(1);
+    die "Somebody sent me a SIG$signame";
+}
+$SIG{INT} = \&catch_zap;
+$SIG{KILL} = \&catch_zap;
+
 my $sfpid;
 
 sub startsf {
