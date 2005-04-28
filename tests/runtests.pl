@@ -123,6 +123,8 @@ my $has_getrlimit;  # set if system has getrlimit()
 my $has_ntlm;    # set if libcurl is built with NTLM support
 my $has_openssl; # set if libcurl is built with OpenSSL
 my $has_gnutls;  # set if libcurl is built with GnuTLS
+my $has_textaware; # set if running on a system that has a text mode concept
+  # on files. Windows for example
 
 my $skipped=0;  # number of tests skipped; reported in main loop
 my %skipped;    # skipped{reason}=counter, reasons for skip
@@ -158,8 +160,8 @@ $ENV{'HOME'}=$pwd;
 
 sub catch_zap {
     my $signame = shift;
-    print STDERR "received SIG$signame, exiting\n";
-    stopservers();
+    print STDERR "runtests.pl received SIG$signame, exiting\n";
+    stopservers(1);
     die "Somebody sent me a SIG$signame";
 }
 $SIG{INT} = \&catch_zap;
@@ -190,17 +192,6 @@ sub checkcmd {
             return "$_/$cmd";
         }
     }
-}
-
-#######################################################################
-# Return the pid of the server as found in the given pid file
-#
-sub serverpid {
-    my $PIDFILE = $_[0];
-    open(PFILE, "<$PIDFILE");
-    my $PID=0+<PFILE>;
-    close(PFILE);
-    return $PID;
 }
 
 #######################################################################
@@ -297,7 +288,7 @@ sub torture {
         if($fail) {
             print " Failed on alloc number $limit in test.\n",
             " invoke with -t$limit to repeat this single case.\n";
-            stopservers();
+            stopservers($verbose);
             exit 1;
         }
     }
@@ -329,26 +320,6 @@ sub stopserver {
     elsif($verbose) {
         print "RUN: Test server pid $pid didn't exist\n";
     }
-}
-
-#######################################################################
-# check the given test server if it is still alive
-#
-sub checkserver {
-    my ($pidfile)=@_;
-    my $pid=0;
-
-    # check for pidfile
-    if ( -f $pidfile ) {
-        $pid=serverpid($pidfile);
-        if ($pid ne "" && kill(0, $pid)) {
-            return $pid;
-        }
-        else {
-            return -$pid; # negative means dead process
-        }
-    }
-    return 0;
 }
 
 #######################################################################
@@ -420,7 +391,7 @@ sub runhttpserver {
         if(!$res) {
             print "RUN: Failed to kill test HTTP$nameext server, do it ",
             "manually and restart the tests.\n";
-            stopservers();
+            stopservers($verbose);
             exit;
         }
         sleep(1);
@@ -719,7 +690,7 @@ sub compare {
 #######################################################################
 # display information about curl and the host the test suite runs on
 #
-sub checkcurl {
+sub checksystem {
 
     unlink($memdump); # remove this if there was one left
 
@@ -906,6 +877,8 @@ sub checkcurl {
         printf("* SSL library:    %s\n",
                $has_gnutls?"GnuTLS":($has_openssl?"OpenSSL":"<unknown>"));
     }
+
+    $has_textaware = ($^O eq 'MSWin32') || ($^O eq 'msys');
 
     print "***************************************** \n";
 }
@@ -1236,7 +1209,7 @@ sub singletest {
         if($@) {
             print "perl: $code\n";
             print "precommand: $@";
-            stopservers();
+            stopservers($verbose);
             exit;
         }
     }
@@ -1409,7 +1382,7 @@ sub singletest {
         my $filename=$hash{'name'};
         if(!$filename) {
             print "ERROR: section verify=>file has no name attribute!\n";
-            stopservers();
+            stopservers($verbose);
             exit;
         }
         my $filemode=$hash{'mode'};
@@ -1419,7 +1392,7 @@ sub singletest {
         # what parts to cut off from the file
         my @stripfile = getpart("verify", "stripfile");
         
-        if(($filemode eq "text") && ($^O eq 'MSWin32')) {
+        if(($filemode eq "text") && $has_textaware) {
             # text mode when running on windows means adding an extra
             # strip expression
             push @stripfile, "s/\r\n/\n/";
@@ -1571,6 +1544,7 @@ sub singletest {
 #######################################################################
 # Stop all running test servers
 sub stopservers {
+    my ($verbose)=@_;
     for(keys %run) {
         printf ("* kill pid for %-5s => %-5d\n", $_, $run{$_}) if($verbose);
         stopserver($run{$_}); # the pid file is in the hash table
@@ -1839,7 +1813,7 @@ $FTP6PORT =  $base + 6; # FTP IPv6 port
 #
 
 if(!$listonly) {
-    checkcurl();
+    checksystem();
 }
 
 #######################################################################
@@ -1963,7 +1937,7 @@ foreach $testnum (@at) {
 close(CMDLOG);
 
 # Tests done, stop the servers
-stopservers();
+stopservers($verbose);
 
 my $all = $total + $skipped;
 
