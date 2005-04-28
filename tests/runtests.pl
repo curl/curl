@@ -1571,9 +1571,8 @@ sub singletest {
 #######################################################################
 # Stop all running test servers
 sub stopservers {
-    print "Shutting down test suite servers:\n" if ($verbose);
     for(keys %run) {
-        printf ("* kill pid for %-5s => %-5d\n", $_, $run{$_}) if($verbose);
+        printf ("* kill pid for %-5s => %-5d\n", $_, $run{$_});
         stopserver($run{$_}); # the pid file is in the hash table
     }
     ftpkillslaves();

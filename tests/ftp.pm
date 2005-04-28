@@ -6,6 +6,7 @@ sub ftpkillslaves {
                 my $f = ".sock$base$id$ext.pid";
                 my $pid = checkserver($f);
                 if($pid > 0) {
+		    printf ("* kill pid for %-5s => %-5d\n", "ftp-$base$id$ext", $pid);
                     kill (9, $pid); # die!
                 }
                 unlink($f);
