@@ -34,20 +34,11 @@ sub getpartattr {
              ) {
             $inside++;
             my $attr=$1;
-            my @p=split("[\t]", $attr);
-            my $assign;
 
-            foreach $assign (@p) {
-                # $assign is a 'name="contents"' pair
-
-                if($assign =~ / *([^=]*)=\"([^\"]*)\"/) {
-                    # *with* quotes
-                    $hash{$1}=$2;
-                }
-                elsif($assign =~ / *([^=]*)=([^\"]*)/) {
-                    # *without* quotes
-                    $hash{$1}=$2;
-                }
+            while($attr =~ s/ *([^=]*)= *(\"([^\"]*)\"|([^\"> ]*))//) {
+                my ($var, $cont)=($1, $2);
+                $cont =~ s/^\"(.*)\"$/$1/;
+                $hash{$var}=$cont;
             }
             last;
         }
