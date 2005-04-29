@@ -5,16 +5,18 @@ Curl and libcurl 7.14.0
  Available command line options:           106
  Available curl_easy_setopt() options:     122
  Number of public functions in libcurl:    46
- Amount of public web site mirrors:        21
+ Amount of public web site mirrors:        22
  Number of known libcurl bindings:         31
 
 This release includes the following changes:
 
+ o more search paths for curl's default .curlrc config file check
  o GnuTLS support, use configure --with-gnutls. Work on this was sponsored
    by The Written Word.
 
 This release includes the following bugfixes:
 
+ o kill the HTTPS server better when stopping the test suite
  o builds fine with VS2005 on x64
  o auth fix for HTTP redirects and .netrc usage
  o FTP uploads show the progress meter easier
@@ -31,11 +33,13 @@ Other curl-related news since the previous public release:
  o http://curl.mirroring.de/ is a new german curl mirror
  o pycurl 7.13.2: http://pycurl.sf.net/
  o TclCurl 0.13.2: http://personal1.iddeo.es/andresgarci/tclcurl/english/
+ o http://curl.webhosting76.com/ is a new US curl mirror
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Christophe Legry, Cory Nelson, Gisle Vanem, Dan Fandrich, Toshiyuki Maezawa,
- Olivier, Andres Garcia, Dave Dribin, Alex Suykov, Cory Nelson, Fred New
+ Olivier, Andres Garcia, Dave Dribin, Alex Suykov, Cory Nelson, Fred New,
+ Paul Moore
 
         Thanks! (and sorry if I forgot to mention someone)

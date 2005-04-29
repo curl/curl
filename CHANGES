@@ -7,6 +7,17 @@
                                   Changelog
 
 
+Daniel (28 April 2005)
+- Working on fixing up test cases to mark sections as 'mode=text' for things
+  that curl writes as text files, since then they can get different line
+  endings depending on OS. Andrés García helps me work this out.
+
+  Did lots of other minor tweaks on the test scripts to work better and more
+  reliably find test servers and also kill test servers.
+
+- Dan Fandrich pointed out how the runtests.pl script killed the HTTP server
+  instead of the HTTPS server when closing it down.
+
 Daniel (27 April 2005)
 - Paul Moore made curl check for the .curlrc file (_curlrc on windows) on two
   more places. First, CURL_HOME is a new environment variable that is used
