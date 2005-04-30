@@ -66,7 +66,7 @@ int ourerrno(void)
 }
 
 /* someone else must set this properly */
-extern char *serverlogfile;
+extern const char *serverlogfile;
 
 void logmsg(const char *msg, ...)
 {
