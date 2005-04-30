@@ -1387,7 +1387,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             conn->size - k->bytecount);
       return CURLE_PARTIAL_FILE;
     }
-    else if(conn->bits.chunk &&
+    else if(!(conn->bits.no_body) &&
+            conn->bits.chunk &&
             (conn->proto.http->chunk.state != CHUNK_STOP)) {
       /*
        * In chunked mode, return an error if the connection is closed prior to
