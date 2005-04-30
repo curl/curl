@@ -29,10 +29,10 @@ noinst_PROGRAMS = sws getpart sockfilt
 
 useful = getpart.c getpart.h $(top_srcdir)/lib/strequal.c	\
  $(top_srcdir)/lib/base64.c $(top_srcdir)/lib/mprintf.c		\
- $(top_srcdir)/lib/memdebug.c
+ $(top_srcdir)/lib/memdebug.c $(top_srcdir)/lib/timeval.c
 
-sws_SOURCES= sws.c $(useful)
-sockfilt_SOURCES = sockfilt.c $(useful) $(top_srcdir)/lib/inet_pton.c
+sws_SOURCES= sws.c util.c $(useful)
+sockfilt_SOURCES = sockfilt.c util.c $(useful) $(top_srcdir)/lib/inet_pton.c
 getpart_SOURCES= testpart.c $(useful)
 
 extra_DIST = base64.pl

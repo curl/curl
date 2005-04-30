@@ -23,7 +23,8 @@
 
 /* Purpose
  *
- * 1. Accept a TCP connection on a custom port (ipv4 or ipv6).
+ * 1. Accept a TCP connection on a custom port (ipv4 or ipv6), or connect
+ *    to a given (localhost) port.
  *
  * 2. Get commands on STDIN. Pass data on to the TCP stream.
  *    Get data from TCP stream and pass on to STDOUT.
@@ -77,6 +78,7 @@
 #include "curlx.h" /* from the private lib dir */
 #include "getpart.h"
 #include "inet_pton.h"
+#include "util.h"
 
 #ifndef FALSE
 #define FALSE 0
@@ -118,43 +120,7 @@ const struct in6_addr in6addr_any = {{ IN6ADDR_ANY_INIT }};
 static volatile int sigpipe;  /* Why? It's not used */
 #endif
 
-char *socklogfile = (char *)DEFAULT_LOGFILE;
-
-/*
- * ourerrno() returns the errno (or equivalent) on this platform to
- * hide platform specific for the function that calls this.
- */
-static int ourerrno(void)
-{
-#ifdef WIN32
-  return (int)GetLastError();
-#else
-  return errno;
-#endif
-}
-
-static void logmsg(const char *msg, ...)
-{
-  time_t t = time(NULL);
-  va_list ap;
-  struct tm *curr_time = localtime(&t);
-  char buffer[256]; /* possible overflow if you pass in a huge string */
-  FILE *logfp;
-
-  va_start(ap, msg);
-  vsprintf(buffer, msg, ap);
-  va_end(ap);
-
-  logfp = fopen(socklogfile, "a");
-
-  fprintf(logfp?logfp:stderr, /* write to stderr if the logfile doesn't open */
-          "%02d:%02d:%02d %s\n",
-          curr_time->tm_hour,
-          curr_time->tm_min,
-          curr_time->tm_sec, buffer);
-  if(logfp)
-    fclose(logfp);
-}
+const char *serverlogfile = (char *)DEFAULT_LOGFILE;
 
 static void lograw(unsigned char *buffer, int len)
 {
@@ -492,7 +458,7 @@ int main(int argc, char *argv[])
     else if(!strcmp("--logfile", argv[arg])) {
       arg++;
       if(argc>arg)
-        socklogfile = argv[arg++];
+        serverlogfile = argv[arg++];
     }
     else if(!strcmp("--ipv6", argv[arg])) {
 #ifdef ENABLE_IPV6

@@ -57,6 +57,7 @@
 
 #include "curlx.h" /* from the private lib dir */
 #include "getpart.h"
+#include "util.h"
 
 #ifdef ENABLE_IPV6
 #define SWS_IPV6
@@ -124,6 +125,8 @@ void storerequest(char *reqbuf);
 #define DEFAULT_LOGFILE "log/sws.log"
 #endif
 
+const char *serverlogfile = DEFAULT_LOGFILE;
+
 #define SWSVERSION "cURL test suite HTTP server/0.1"
 
 #define REQUEST_DUMP  "log/server.input"
@@ -184,30 +187,6 @@ static const char *doc404 = "HTTP/1.1 404 Not Found\r\n"
 #ifdef SIGPIPE
 static volatile int sigpipe;  /* Why? It's not used */
 #endif
-
-static void logmsg(const char *msg, ...)
-{
-  time_t t = time(NULL);
-  va_list ap;
-  struct tm *curr_time = localtime(&t);
-  char buffer[256]; /* possible overflow if you pass in a huge string */
-  FILE *logfp;
-
-  va_start(ap, msg);
-  vsprintf(buffer, msg, ap);
-  va_end(ap);
-
-  logfp = fopen(DEFAULT_LOGFILE, "a");
-
-  fprintf(logfp?logfp:stderr, /* write to stderr if the logfile doesn't open */
-          "%02d:%02d:%02d %s\n",
-          curr_time->tm_hour,
-          curr_time->tm_min,
-          curr_time->tm_sec, buffer);
-  if(logfp)
-    fclose(logfp);
-}
-
 
 #ifdef SIGPIPE
 static void sigpipe_handler(int sig)
