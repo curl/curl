@@ -645,7 +645,7 @@ singleipconnect(struct connectdata *conn,
     CURLcode res = bindlocal(conn, sockfd);
     if(res) {
       sclose(sockfd); /* close socket and bail out */
-      return res;
+      return CURL_SOCKET_BAD;
     }
   }
 
