@@ -181,6 +181,25 @@ foreach $protocol (('ftp', 'http', 'ftps', 'https', 'gopher', 'no')) {
 }
 
 #######################################################################
+# Start a new thread/process and run the given command line in there.
+# Return the pid of the new child process to the parent.
+#
+sub startnew {
+    my ($cmd)=@_;
+
+    print "CMD: $cmd\n" if ($verbose);
+
+    my $child = fork();
+
+    if(0 == $child) {
+        # a child, run the given command instead!
+        exec($cmd);
+    }
+    return $child;
+}
+
+
+#######################################################################
 # Check for a command in the PATH.
 #
 sub checkcmd {
@@ -298,17 +317,12 @@ sub torture {
 }
 
 #######################################################################
-# stop the given test server
+# stop the given test server (pid)
 #
 sub stopserver {
-    my $pid = $_[0];
-    # check for pidfile
-    if ( -f $pid ) {
-        my $PIDFILE = $pid;
-        $pid = serverpid($PIDFILE);
-        unlink $PIDFILE; # server is killed
-    }
-    elsif($pid <= 0) {
+    my ($pid) = @_;
+    
+    if($pid <= 0) {
         return; # this is not a good pid
     }
 
@@ -323,8 +337,7 @@ sub stopserver {
 }
 
 #######################################################################
-# start the http server, or if it already runs, verify that it is our
-# test server on the test-port!
+# start the http server
 #
 sub runhttpserver {
     my ($verbose, $ipv6) = @_;
@@ -402,51 +415,27 @@ sub runhttpserver {
     if($dir) {
         $flag .= "-d \"$dir\" ";
     }
-    $cmd="$perl $srcdir/httpserver.pl -p $pidfile $flag $port $ipv6 &";
-    system($cmd);
-    if($verbose) {
-        print "CMD: $cmd\n";
-    }
+    $cmd="$perl $srcdir/httpserver.pl -p $pidfile $flag $port $ipv6";
+    my $httppid = startnew($cmd); # start the server in a new process
 
-    my $verified;
-    for(1 .. 30) {
-        # verify that our server is up and running:
-        my $data=`$CURL --silent -g \"$ip:$port/verifiedserver\" 2>>log/verifyhttp`;
-
-        $pid = checkserver($pidfile);
-        if($pid) {
-            print STDERR "RUN: got http server pid from pidfile\n" if($verbose);
-            $verified = 1;
-            last;
-        }
-
-        if ( $data =~ /WE ROOLZ: (\d+)/ ) {
-            $pid = 0+$1;
-            $verified = 1;
-            last;
-        }
-        else {
-            if($verbose) {
-                print STDERR "RUN: Retrying HTTP$nameext server existence in 1 sec\n";
-            }
-            sleep(1);
-            next;
-        }
-    }
-    if(!$verified) {
-        print STDERR "RUN: failed to start our HTTP$nameext server\n";
-        return -1;
+    if(!kill(0, $httppid)) {
+        # it is NOT alive
+        print "RUN: failed to start the HTTP server!\n";
+        stopservers($verbose);
+        exit;
     }
 
     if($verbose) {
-        print "RUN: HTTP$nameext server is now verified to be our server\n";
+        print "RUN: HTTP$nameext server is now running PID $httppid\n";
     }
 
-    return $pid;
+    sleep(1);
+
+    return $httppid;
 }
 
 #######################################################################
-# start the https server (or rather, tunnel) if needed
+# start the https server (or rather, tunnel)
 #
 sub runhttpsserver {
     my $verbose = $_[0];
@@ -461,50 +450,34 @@ sub runhttpsserver {
 
     if($pid > 0) {
         # kill previous stunnel!
-        if($verbose) {
-            print "RUN: kills off running stunnel at $pid\n";
-        }
-        stopserver($HTTPSPIDFILE);
+        stopserver($pid);
     }
 
     my $flag=$debugprotocol?"-v ":"";
-    my $cmd="$perl $srcdir/httpsserver.pl $flag -s \"$stunnel\" -d $srcdir -r $HTTPPORT $HTTPSPORT &";
-    system($cmd);
+    my $cmd="$perl $srcdir/httpsserver.pl $flag -s \"$stunnel\" -d $srcdir -r $HTTPPORT $HTTPSPORT";
+
+    my $httpspid = startnew($cmd);
+
+
+    if(!kill(0, $httpspid)) {
+        # it is NOT alive
+        print "RUN: failed to start the HTTPS server!\n";
+        stopservers($verbose);
+        exit;
+    }
+
     if($verbose) {
-        print "CMD: $cmd\n";
+        print "RUN: HTTPS server is now running PID $httpspid\n";
     }
 
-    for(1 .. 30) {
-        # verify that our HTTPS server is up and running:
-        $cmd="$CURL --silent --insecure \"https://$HOSTIP:$HTTPSPORT/verifiedserver\" 2>/dev/null";
-        if($verbose) {
-            print "CMD: $cmd\n";
-        }
+    sleep(1);
 
-        my $data=`$cmd`;
-
-        if ( $data =~ /WE ROOLZ: (\d+)/ ) {
-            # The replying server is the HTTP (_not_ HTTPS) server, so the
-            # pid it returns is of course not the pid we want here. We extract
-            # the pid from the fresh pid file instead.
-            $pid=checkserver($HTTPSPIDFILE);
-            if($verbose) {
-                print STDERR "RUN: extracted pid $pid from $HTTPSPIDFILE\n";
-            }
-            last;
-        }
-        if($verbose) {
-            print STDERR "RUN: waiting one sec for HTTPS server\n";
-        }
-        sleep(1);
-    }
-
-    return $pid;
+    return $httpspid;
 }
 
 
 #######################################################################
-# start the ftp server if needed
+# start the ftp server
 #
 sub runftpserver {
     my ($id, $verbose, $ipv6) = @_;
@@ -515,8 +488,6 @@ sub runftpserver {
     my $pidfile = $id?$FTP2PIDFILE:$FTPPIDFILE;
     my $ip=$HOSTIP;
     my $nameext;
-
-    ftpkillslaves($verbose);
 
     if($ipv6) {
         # if IPv6, use a different setup
@@ -533,8 +504,10 @@ sub runftpserver {
             if ($verbose);
 
         my $time=time();
+        my $cmd="$CURL -m4 --silent -vg \"ftp://$ip:$port/verifiedserver\" 2>log/verifyftp";
         # check if this is our server running on this port:
-        my @data=`$CURL -m4 --silent -vg \"ftp://$ip:$port/verifiedserver\" 2>log/verifyftp`;
+        my @data=`$cmd`;
+        print "RUN: $cmd\n" if($verbose);
         my $line;
 
         # if this took more than 2 secs, we assume it "hung" on a weird server
@@ -546,7 +519,7 @@ sub runftpserver {
                 $pid = 0+$1;
             }
         }
-        if(!$pid && $data[0]) {
+        if($pid <= 0 && $data[0]) {
             # this is not a known server
             print "RUN: Unknown server on our favourite FTP$nameext port: $port\n";
             return -1;
@@ -555,14 +528,14 @@ sub runftpserver {
 
     if($pid > 0) {
         print "RUN: Killing a previous server using pid $pid\n" if($verbose);
-        my $res = kill (9, $pid); # die!
+        my $res = kill(9, $pid); # die!
         if(!$res) {
             print "RUN: Failed to kill FTP$id$nameext test server, do it manually and",
             " restart the tests.\n";
             return -1;
         }
-        sleep(1);
     }
+    ftpkillslaves($verbose);
 
     # now (re-)start our server:
     my $flag=$debugprotocol?"-v ":"";
@@ -573,48 +546,24 @@ sub runftpserver {
     if($ipv6) {
         $flag .="--ipv6 ";
     }
-    my $cmd="$perl $srcdir/ftpserver.pl $flag --port $port &";
-    if($verbose) {
-        print "CMD: $cmd\n";
-    }
-    system($cmd);
+    my $cmd="$perl $srcdir/ftpserver.pl $flag --port $port";
 
-    my $verified;
-    $pid = 0;
-    for(1 .. 30) {
-        # verify that our server is up and running:
-        my $line;
-        my $cmd="$CURL --silent -g \"ftp://$ip:$port/verifiedserver\" 2>>log/verifyftp";
-        print "$cmd\n" if($verbose);
-        my @data = `$cmd`;
-        foreach $line (@data) {
-            if ( $line =~ /WE ROOLZ: (\d+)/ ) {
-                $pid = 0+$1;
-                $verified = 1;
-                last;
-            }
-        }
-        if(!$pid) {
-            if($verbose) {
-                print STDERR "RUN: Retrying FTP$id$nameext server existence in a sec\n";
-            }
-            sleep(1);
-            next;
-        }
-        else {
-            last;
-        }
-    }
-    if(!$verified) {
-        warn "RUN: failed to start our FTP$id server\n";
-        return -2;
+    my $ftppid = startnew($cmd);
+
+    if(!kill(0, $ftppid)) {
+        # it is NOT alive
+        print "RUN: failed to start the FTP$id$nameext server!\n";
+        stopservers($verbose);
+        exit;
     }
 
     if($verbose) {
-        print "RUN: FTP$id$nameext server is now verified to be our server\n";
+        print "RUN: FTP$id$nameext server is now running PID $ftppid\n";
     }
 
-    return $pid;
+    sleep(1);
+
+    return $ftppid;
 }
 
 #######################################################################
