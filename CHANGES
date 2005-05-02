@@ -7,6 +7,34 @@
                                   Changelog
 
 
+Daniel (2 May 2005)
+- Made curl recognize the environment variables Lynx (and others?) support for
+  pointing out the CA cert path/file: SSL_CERT_DIR and SSL_CERT_FILE. If
+  CURL_CA_BUNDLE is not set, they are checked afterwards.
+
+  Like before: on windows if none of these are set, it checks for the ca cert
+  file like this:
+
+  1. application's directory
+  2. current working directory
+  3. Windows System directory (e.g. C:\windows\system32)
+  4. Windows Directory (e.g. C:\windows)
+  5. all directories along %PATH%
+
+Daniel (1 May 2005)
+- The runtests.pl script now starts test servers by doing fork() and exec()
+  instead of the previous approach. This is less complicated and should
+  hopefully lead to less "leaked" servers (servers that aren't stopped
+  properly when the tests are stopped).
+
+- Alexander Zhuravlev found a case when you did "curl -I [URL]" and it
+  complained on the chunked encoding, even though a HEAD should never return a
+  body and thus it cannot be a chunked-encoding problem!
+
+Daniel (30 April 2005)
+- Alexander Zhuravlev found out that (lib)curl SIGSEGVed when using
+  --interface on an address that can't be bound.
+
 Daniel (28 April 2005)
 - Working on fixing up test cases to mark sections as 'mode=text' for things
   that curl writes as text files, since then they can get different line
