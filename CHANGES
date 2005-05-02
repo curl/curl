@@ -8,6 +8,11 @@
 
 
 Daniel (2 May 2005)
+- Added --trace-time that when used adds a time stamp to each trace line that
+  --trace, --trace-ascii and --verbose output. I also made the '>' display
+  separate each line on the linefeed so that HTTP requests etc look nicer in
+  the -v output.
+
 - Made curl recognize the environment variables Lynx (and others?) support for
   pointing out the CA cert path/file: SSL_CERT_DIR and SSL_CERT_FILE. If
   CURL_CA_BUNDLE is not set, they are checked afterwards.

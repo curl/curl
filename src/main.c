@@ -160,7 +160,6 @@ typedef enum {
 #define CONF_DEFAULT  0
 
 #define CONF_AUTO_REFERER (1<<4) /* the automatic referer-system please! */
-#define CONF_VERBOSE  (1<<5) /* talk a lot */
 #define CONF_HEADER   (1<<8) /* throw the header out too */
 #define CONF_NOPROGRESS (1<<10) /* shut off the progress meter */
 #define CONF_NOBODY   (1<<11) /* use HEAD to get http document */
@@ -307,6 +306,11 @@ struct getout {
 #define GETOUT_UPLOAD  (1<<3)   /* if set, -T has been used */
 #define GETOUT_NOUPLOAD  (1<<4) /* if set, -T "" has been used */
 
+typedef enum {
+    TRACE_BIN,   /* tcpdump inspired look */
+    TRACE_ASCII, /* like *BIN but without the hex output */
+    TRACE_PLAIN  /* -v/--verbose type */
+} trace;
 
 static void help(void)
 {
@@ -403,6 +407,7 @@ static void help(void)
     " -t/--telnet-option <OPT=val> Set telnet option",
     "    --trace <file>  Write a debug trace to the given file",
     "    --trace-ascii <file> Like --trace but without the hex output",
+    "    --trace-time    Add time stamps to trace/verbose output",
     " -T/--upload-file <file> Transfer <file> to remote site",
     "    --url <URL>     Spet URL to work with",
     " -u/--user <user[:password]> Set server user and password",
@@ -501,7 +506,8 @@ struct Configurable {
   char *trace_dump; /* file to dump the network trace to, or NULL */
   FILE *trace_stream;
   bool trace_fopened;
-  bool trace_ascii;
+  trace tracetype;
+  bool tracetime; /* include timestamp? */
   long httpversion;
   bool progressmode;
   bool nobuffer;
@@ -1260,6 +1266,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$l", "3p-quote", TRUE},
     {"$m", "ftp-account", TRUE},
     {"$n", "proxy-anyauth", FALSE},
+    {"$o", "trace-time", FALSE},
 
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
@@ -1433,10 +1440,11 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 #endif
       case 'g': /* --trace */
         GetStr(&config->trace_dump, nextarg);
+        config->tracetype = TRACE_BIN;
         break;
       case 'h': /* --trace-ascii */
         GetStr(&config->trace_dump, nextarg);
-        config->trace_ascii = TRUE;
+        config->tracetype = TRACE_ASCII;
         break;
       case 'i': /* --limit-rate */
         {
@@ -1646,6 +1654,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'n': /* --proxy-anyauth */
         config->proxyanyauth ^= TRUE;
+        break;
+      case 'o': /* --trace-time */
+        config->tracetime ^= TRUE;
         break;
       }
       break;
@@ -2083,7 +2094,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       checkpasswd("proxy", &config->proxyuserpwd);
       break;
     case 'v':
-      config->conf ^= CONF_VERBOSE; /* talk a lot */
+      GetStr(&config->trace_dump, (char *)"%");
+      config->tracetype = TRACE_PLAIN;
       break;
     case 'V':
     {
@@ -2742,26 +2754,26 @@ void progressbarinit(struct ProgressData *bar,
 }
 
 static
-void dump(const char *text,
+void dump(char *timebuf, const char *text,
           FILE *stream, unsigned char *ptr, size_t size,
-          bool nohex)
+          trace tracetype)
 {
   size_t i;
   size_t c;
 
   unsigned int width=0x10;
 
-  if(nohex)
+  if(tracetype == TRACE_ASCII)
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  fprintf(stream, "%s, %zd bytes (0x%zx)\n", text, size, size);
+  fprintf(stream, "%s%s, %zd bytes (0x%zx)\n", timebuf, text, size, size);
 
   for(i=0; i<size; i+= width) {
 
     fprintf(stream, "%04zx: ", i);
 
-    if(!nohex) {
+    if(tracetype == TRACE_BIN) {
       /* hex not disabled, show it */
       for(c = 0; c < width; c++)
         if(i+c < size)
@@ -2772,14 +2784,16 @@ void dump(const char *text,
 
     for(c = 0; (c < width) && (i+c < size); c++) {
       /* check for 0D0A; if found, skip past and start a new line of output */
-      if (nohex && (i+c+1 < size) && ptr[i+c]==0x0D && ptr[i+c+1]==0x0A) {
+      if ((tracetype == TRACE_ASCII) &&
+          (i+c+1 < size) && ptr[i+c]==0x0D && ptr[i+c+1]==0x0A) {
         i+=(c+2-width);
         break;
       }
       fprintf(stream, "%c",
               (ptr[i+c]>=0x20) && (ptr[i+c]<0x80)?ptr[i+c]:'.');
       /* check again for 0D0A, to avoid an extra \n if it's at width */
-      if (nohex && (i+c+2 < size) && ptr[i+c+1]==0x0D && ptr[i+c+2]==0x0A) {
+      if ((tracetype == TRACE_ASCII) &&
+          (i+c+2 < size) && ptr[i+c+1]==0x0D && ptr[i+c+2]==0x0A) {
         i+=(c+3-width);
         break;
       }
@@ -2797,12 +2811,28 @@ int my_trace(CURL *handle, curl_infotype type,
   struct Configurable *config = (struct Configurable *)userp;
   FILE *output=config->errors;
   const char *text;
+  struct timeval tv;
+  struct tm *now;
+  char timebuf[15];
+
   (void)handle; /* prevent compiler warning */
+
+  tv = curlx_tvnow();
+  now = localtime(&tv.tv_sec);  /* not multithread safe but we don't care */
+  if(config->tracetime)
+    snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%02d ",
+             now->tm_hour, now->tm_min, now->tm_sec,
+             tv.tv_usec/10000);
+  else
+    timebuf[0]=0;
 
   if(!config->trace_stream) {
     /* open for append */
     if(curlx_strequal("-", config->trace_dump))
       config->trace_stream = stdout;
+    else if(curlx_strequal("%", config->trace_dump))
+      /* Ok, this is somewhat hackish but we do it undocumented for now */
+      config->trace_stream = stderr;
     else {
       config->trace_stream = fopen(config->trace_dump, "w");
       config->trace_fopened = TRUE;
@@ -2812,9 +2842,55 @@ int my_trace(CURL *handle, curl_infotype type,
   if(config->trace_stream)
     output = config->trace_stream;
 
+  if(config->tracetype == TRACE_PLAIN) {
+    /*
+     * This is the trace look that is similar to what libcurl makes on its
+     * own.
+     */
+    static const char * const s_infotype[] = {
+      "*", "<", ">"
+    };
+    size_t i;
+    int st=0;
+    static bool newl = FALSE;
+
+    switch(type) {
+    case CURLINFO_HEADER_OUT:
+      for(i=0; i<size-1; i++) {
+        if(data[i] == '\n') { /* LF */
+          if(!newl) {
+            fprintf(config->trace_stream, "%s%s ",
+                    timebuf, s_infotype[type]);
+          }
+          fwrite(data+st, i-st+1, 1, config->trace_stream);
+          st = i+1;
+          newl = FALSE;
+        }
+      }
+      if(!newl)
+        fprintf(config->trace_stream, "%s%s ", timebuf, s_infotype[type]);
+      fwrite(data+st, i-st+1, 1, config->trace_stream);
+      break;
+    case CURLINFO_TEXT:
+    case CURLINFO_HEADER_IN:
+      if(!newl)
+        fprintf(config->trace_stream, "%s%s ", timebuf, s_infotype[type]);
+      fwrite(data, size, 1, config->trace_stream);
+      break;
+    default: /* nada */
+      newl = FALSE;
+      break;
+    }
+
+    newl = (size && (data[size-1] != '\n'));
+
+    return 0;
+  }
+
+
   switch (type) {
   case CURLINFO_TEXT:
-    fprintf(output, "== Info: %s", data);
+    fprintf(output, "%s== Info: %s", timebuf, data);
   default: /* in case a new one is introduced to shock us */
     return 0;
 
@@ -2838,7 +2914,7 @@ int my_trace(CURL *handle, curl_infotype type,
     break;
   }
 
-  dump(text, output, data, size, config->trace_ascii);
+  dump(timebuf, text, output, data, size, config->tracetype);
   return 0;
 }
 
@@ -3696,9 +3772,8 @@ operate(struct Configurable *config, int argc, char *argv[])
         if(config->trace_dump) {
           curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, my_trace);
           curl_easy_setopt(curl, CURLOPT_DEBUGDATA, config);
-          config->conf |= CONF_VERBOSE; /* force verbose */
+          curl_easy_setopt(curl, CURLOPT_VERBOSE, TRUE);
         }
-        curl_easy_setopt(curl, CURLOPT_VERBOSE, config->conf&CONF_VERBOSE);
 
         res = CURLE_OK;
 

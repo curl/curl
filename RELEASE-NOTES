@@ -10,6 +10,7 @@ Curl and libcurl 7.14.0
 
 This release includes the following changes:
 
+ o curl --trace-time added for time stamping trace logs
  o curl now respects the SSL_CERT_DIR and SSL_CERT_PATH environment variables
  o more search paths for curl's default .curlrc config file check
  o GnuTLS support, use configure --with-gnutls. Work on this was sponsored
