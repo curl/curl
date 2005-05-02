@@ -92,9 +92,6 @@ may have been fixed since this was written!
   libcurl thinks of it as the *compressed* length. Some explanations are here:
   http://curl.haxx.se/mail/lib-2003-06/0146.html
 
-4. IPv6 support on AIX 4.3.3 doesn't work due to a missing sockaddr_storage
-  struct. It has been reported to work on AIX 5.1 though.
-
 3. GOPHER transfers seem broken
 
 2. If a HTTP server responds to a HEAD request and includes a body (thus

@@ -258,7 +258,7 @@ exit (h == NULL ? 1 : 0); }],[
 ])
 
 dnl ************************************************************
-dnl check for working getaddrinfo()
+dnl check for working getaddrinfo() that works with AI_NUMERICHOST
 dnl
 AC_DEFUN([CURL_CHECK_WORKING_GETADDRINFO],[
   AC_CACHE_CHECK(for working getaddrinfo, ac_cv_working_getaddrinfo,[
@@ -273,6 +273,7 @@ int main(void)
     int error;
 
     memset(&hints, 0, sizeof(hints));
+    hints.ai_flags = AI_NUMERICHOST;
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     error = getaddrinfo("127.0.0.1", "8080", &hints, &ai);

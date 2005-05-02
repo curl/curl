@@ -8,6 +8,14 @@
 
 
 Daniel (2 May 2005)
+- Sort of "fixed" KNOWN_BUGS #4: curl now builds IPv6 enabled on AIX 4.3. At
+  least it should no longer cause a compiler error. However, it does not have
+  AI_NUMERICHOST so we cannot getaddrinfo() any numerical addresses with it
+  (we use that for FTP PORT/EPRT)! So, I modified the configure check that
+  checks if the getaddrinfo() is working, to use AI_NUMERICHOST since then
+  it'll fail on AIX 4.3 and it will automatically build with IPv6 support
+  disabled.
+
 - Added --trace-time that when used adds a time stamp to each trace line that
   --trace, --trace-ascii and --verbose output. I also made the '>' display
   separate each line on the linefeed so that HTTP requests etc look nicer in
