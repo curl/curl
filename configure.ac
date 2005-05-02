@@ -1400,6 +1400,8 @@ AC_CHECK_TYPE(ssize_t, ,
 TYPE_SOCKLEN_T
 TYPE_IN_ADDR_T
 
+TYPE_SOCKADDR_STORAGE
+
 AC_FUNC_SELECT_ARGTYPES
 
 dnl Checks for library functions.
