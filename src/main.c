@@ -3127,10 +3127,21 @@ operate(struct Configurable *config, int argc, char *argv[])
       !config->capath &&
       !config->insecure_ok) {
     env = curlx_getenv("CURL_CA_BUNDLE");
-    if(env) {
+    if(env)
       GetStr(&config->cacert, env);
-      curl_free(env);
+    else {
+      env = curlx_getenv("SSL_CERT_DIR");
+      if(env)
+        GetStr(&config->capath, env);
+      else {
+        env = curlx_getenv("SSL_CERT_FILE");
+        if(env)
+          GetStr(&config->cacert, env);
+      }
     }
+
+    if(env)
+      curl_free(env);
 #if defined(WIN32) && !defined(__CYGWIN32__)
     else
       FindWin32CACert(config, "curl-ca-bundle.crt");
