@@ -128,11 +128,12 @@ sub startsf {
     open(STDOUT, ">&SFWRITE")   || die "can't dup client to stdout";
 }
 
+# remove the file here so that if startsf() fails, it is very noticable 
+unlink(".ftp$ftpdnum.pid");
+
 startsf();
 
-logmsg sprintf("FTP server started on port IPv%d/$port\n",
-               $ipv6?6:4);
-
+logmsg sprintf("FTP server started on port IPv%d/$port\n", $ipv6?6:4);
 open(PID, ">.ftp$ftpdnum.pid");
 print PID $$;
 close(PID);
