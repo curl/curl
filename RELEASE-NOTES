@@ -10,12 +10,15 @@ Curl and libcurl 7.14.0
 
 This release includes the following changes:
 
+ o curl now respects the SSL_CERT_DIR and SSL_CERT_PATH environment variables
  o more search paths for curl's default .curlrc config file check
  o GnuTLS support, use configure --with-gnutls. Work on this was sponsored
    by The Written Word.
 
 This release includes the following bugfixes:
 
+ o curl --head could wrongly complain on bad chunked-encoding
+ o --interface SIGSEGVed on a bad address
  o kill the HTTPS server better when stopping the test suite
  o builds fine with VS2005 on x64
  o auth fix for HTTP redirects and .netrc usage
@@ -40,6 +43,6 @@ advice from friends like these:
 
  Christophe Legry, Cory Nelson, Gisle Vanem, Dan Fandrich, Toshiyuki Maezawa,
  Olivier, Andres Garcia, Dave Dribin, Alex Suykov, Cory Nelson, Fred New,
- Paul Moore
+ Paul Moore, Alexander Zhuravlev, Bryan Henderson
 
         Thanks! (and sorry if I forgot to mention someone)
