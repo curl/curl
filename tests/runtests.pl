@@ -180,6 +180,13 @@ foreach $protocol (('ftp', 'http', 'ftps', 'https', 'gopher', 'no')) {
     $ENV{uc($proxy)}=undef;
 }
 
+# make sure we don't get affected by other variables that control our
+# behaviour
+
+$ENV{'SSL_CERT_DIR'}=undef;
+$ENV{'SSL_CERT_PATH'}=undef;
+$ENV{'CURL_CA_BUNDLE'}=undef;
+
 #######################################################################
 # Start a new thread/process and run the given command line in there.
 # Return the pid of the new child process to the parent.
