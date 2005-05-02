@@ -999,25 +999,52 @@ operations.
 Pass a long as parameter. Set what version of SSL to attempt to use, 2 or
 3. By default, the SSL library will try to solve this by itself although some
 servers make this difficult why you at times may have to use this option.
+
+
 .IP CURLOPT_SSL_VERIFYPEER
-Pass a long that is set to a zero value to stop curl from verifying the peer's
-certificate (7.10 starting setting this option to non-zero by default).
-Alternate certificates to verify against can be specified with the
-\fICURLOPT_CAINFO\fP option or a certificate directory can be specified with
-the \fICURLOPT_CAPATH\fP option.  As of 7.10, curl installs a default bundle.
-\fICURLOPT_SSL_VERIFYHOST\fP may also need to be set to 1 or 0 if
-\fICURLOPT_SSL_VERIFYPEER\fP is disabled (it defaults to 2).
+
+Pass a long as parameter.
+
+This option determines whether curl verifies the authenticity of the
+peer's certificate.  A nonzero value means curl verifies; zero means it
+doesn't.  The default is nonzero, but before 7.10, it was zero.
+
+When negotiating an SSL connection, the server sends a certificate
+indicating its identity.  Curl verifies whether the certificate is
+authentic, i.e. that you can trust that the server is who the
+certificate says it is.  This trust is based on a chain of digital
+signatures, rooted in certification authority (CA) certificates you
+supply.  As of 7.10, curl installs a default bundle of CA certificates
+and you can specify alternate certificates with the
+\fICURLOPT_CAINFO\fP option or the \fICURLOPT_CAPATH\fP option.
+
+When \fICURLOPT_SSL_VERIFYPEER\fP is nonzero, and the verification
+fails to prove that the certificate is authentic, the connection
+fails.  When the option is zero, the connection succeeds regardless.
+
+Authenticating the certificate is not by itself very useful.  You
+typically want to ensure that the server, as authentically identified
+by its certificate, is the server you mean to be talking to.  Use
+\fICURLOPT_SSL_VERIFYHOST\fP to control that.
+
 .IP CURLOPT_CAINFO
 Pass a char * to a zero terminated string naming a file holding one or more
-certificates to verify the peer with. This only makes sense when used in
-combination with the \fICURLOPT_SSL_VERIFYPEER\fP option.
+certificates to verify the peer with.  This makes sense only when used in
+combination with the \fICURLOPT_SSL_VERIFYPEER\fP option.  If
+\fICURLOPT_SSL_VERIFYPEER\fP is zero, \fICURLOPT_CAINFO\fP need not
+even indicate an accessible file.
+
 .IP CURLOPT_CAPATH
-Pass a char * to a zero terminated string naming a directory holding multiple
-CA certificates to verify the peer with. The certificate directory must be
-prepared using the openssl c_rehash utility. This only makes sense when used
-in combination with the \fICURLOPT_SSL_VERIFYPEER\fP option. The
-\fICURLOPT_CAPATH\fP function apparently does not work in Windows due to some
-limitation in openssl. (Added in 7.9.8)
+Pass a char * to a zero terminated string naming a directory holding
+multiple CA certificates to verify the peer with. The certificate
+directory must be prepared using the openssl c_rehash utility. This
+makes sense only when used in combination with the
+\fICURLOPT_SSL_VERIFYPEER\fP option.  If \fICURLOPT_SSL_VERIFYPEER\fP
+is zero, \fICURLOPT_CAPATH\fP need not even indicate an accessible
+path.  The \fICURLOPT_CAPATH\fP function apparently does not work in
+Windows due to some limitation in openssl. (Added in 7.9.8)
+
+
 .IP CURLOPT_RANDOM_FILE
 Pass a char * to a zero terminated file name. The file will be used to read
 from to seed the random engine for SSL. The more random the specified file is,
@@ -1025,10 +1052,38 @@ the more secure the SSL connection will become.
 .IP CURLOPT_EGDSOCKET
 Pass a char * to the zero terminated path name to the Entropy Gathering Daemon
 socket. It will be used to seed the random engine for SSL.
+
 .IP CURLOPT_SSL_VERIFYHOST
-Pass a long. Set if we should verify the Common name from the peer certificate
-in the SSL handshake, set 1 to check existence, 2 to ensure that it matches
-the provided hostname. This is by default set to 2. (default changed in 7.10)
+
+Pass a long as parameter.
+
+This option determines whether curl verifies that the server claims to be
+who you want it to be.
+
+When negotiating an SSL connection, the server sends a certificate
+indicating its identity.
+
+When \fICURLOPT_SSL_VERIFYHOST\fP is 2, that certificate must indicate
+that the server is the server to which you meant to connect, or the
+connection fails.
+
+Curl considers the server the intended one when the Common Name field
+or a Subject Alternate Name field in the certificate matches the host
+name in the URL to which you told Curl to connect.
+
+When the value is 1, the certificate must contain a Common Name field,
+but it doesn't matter what name it says.  (This is not ordinarily a
+useful setting).
+
+When the value is 0, the connection succeeds regardless of the names in
+the certificate.
+
+The default, since 7.10, is 2.
+
+The checking this option controls is of the identity that the server
+\fIclaims\fP.  The server could be lying.  To control lying, see
+\fICURLOPT_SSL_VERIFYPEER\fP.
+
 .IP CURLOPT_SSL_CIPHER_LIST
 Pass a char *, pointing to a zero terminated string holding the list of
 ciphers to use for the SSL connection. The list must be syntactically correct,
@@ -1040,6 +1095,7 @@ compile OpenSSL.
 
 You'll find more details about cipher lists on this URL:
 \fIhttp://www.openssl.org/docs/apps/ciphers.html\fP
+
 .IP CURLOPT_KRB4LEVEL
 Pass a char * as parameter. Set the krb4 security level, this also enables
 krb4 awareness.  This is a string, 'clear', 'safe', 'confidential' or
