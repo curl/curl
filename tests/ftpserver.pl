@@ -123,7 +123,8 @@ sub startsf {
     print STDERR "$cmd\n" if($verbose);
 
     print SFWRITE "PING\n";
-    my $pong = <SFREAD>;
+    my $pong;
+    sysread SFREAD, $pong, 5;
 
     if($pong !~ /^PONG/) {
         logmsg "Failed sockfilt command: $cmd\n";
