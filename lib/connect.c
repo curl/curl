@@ -345,7 +345,8 @@ static CURLcode bindlocal(struct connectdata *conn,
 
         if(!bindworked) {
           data->state.os_errno = Curl_ourerrno();
-          failf(data, "%s", Curl_strerror(conn, data->state.os_errno));
+          failf(data, "bind failure: %s",
+                Curl_strerror(conn, data->state.os_errno));
           return CURLE_HTTP_PORT_FAILED;
         }
 
