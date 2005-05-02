@@ -541,7 +541,9 @@ sub PASV_command {
                       "./server/sockfilt --port 0 --logfile log/sockdata$ftpdnum$ext.log --pidfile .sockdata$ftpdnum$ext.pid $ipv6");
 
     print DWRITE "PING\n";
-    my $pong = <DREAD>;
+    my $pong;
+
+    sysread(DREAD, $pong, 5) || die;
 
     if($pong !~ /^PONG/) {
         kill(9, $slavepid);
@@ -668,7 +670,8 @@ sub PORT_command {
                       "./server/sockfilt --connect $port --logfile log/sockdata$ftpdnum$ext.log --pidfile .sockdata$ftpdnum$ext.pid $ipv6");
 
     print DWRITE "PING\n";
-    my $pong = <DREAD>;
+    my $pong;
+    sysread DREAD, $pong, 5;
 
     if($pong !~ /^PONG/) {
         logmsg "Failed sockfilt for data connection\n";
