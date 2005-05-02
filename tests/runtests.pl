@@ -557,11 +557,22 @@ sub runftpserver {
 
     my $ftppid = startnew($cmd);
 
-    if(!kill(0, $ftppid)) {
+    if(!$ftppid || !kill(0, $ftppid)) {
         # it is NOT alive
         print "RUN: failed to start the FTP$id$nameext server!\n";
-        stopservers($verbose);
-        exit;
+        return -1;
+    }
+
+    # Make sure there is a pidfile present before we proceed. Because if we
+    # don't see one within a few secs, the server doesn't work. This mostly
+    # happens when the server finds out it cannot use the ipv6 protocol.
+    my $count=3;
+    while(! -f $pidfile) {
+        if(!$count--) {
+            print "RUN: failed starting FTP$id$nameext server (no pidfile)!\n";
+            return -1;
+        }
+        sleep(1);
     }
 
     if($verbose) {
