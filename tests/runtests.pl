@@ -553,7 +553,7 @@ sub runftpserver {
     if($ipv6) {
         $flag .="--ipv6 ";
     }
-    my $cmd="$perl $srcdir/ftpserver.pl $flag --port $port";
+    my $cmd="$perl $srcdir/ftpserver.pl --pidfile $pidfile $flag --port $port";
 
     my $ftppid = startnew($cmd);
 

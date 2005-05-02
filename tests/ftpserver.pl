@@ -76,6 +76,8 @@ my $ipv6;
 my $ext; # append to log/pid file names
 my $grok_eprt;
 my $port = 8921; # just a default
+my $pidfile = ".ftpd.pid"; # a default, use --pidfile
+
 do {
     if($ARGV[0] eq "-v") {
         $verbose=1;
@@ -86,6 +88,10 @@ do {
     }
     elsif($ARGV[0] eq "--id") {
         $ftpdnum=$ARGV[1];
+        shift @ARGV;
+    }
+    elsif($ARGV[0] eq "--pidfile") {
+        $pidfile=$ARGV[1];
         shift @ARGV;
     }
     elsif($ARGV[0] eq "--ipv6") {
@@ -129,12 +135,12 @@ sub startsf {
 }
 
 # remove the file here so that if startsf() fails, it is very noticable 
-unlink(".ftp$ftpdnum.pid");
+unlink($pidfile);
 
 startsf();
 
 logmsg sprintf("FTP server started on port IPv%d/$port\n", $ipv6?6:4);
-open(PID, ">.ftp$ftpdnum.pid");
+open(PID, ">$pidfile");
 print PID $$;
 close(PID);
 
@@ -590,9 +596,8 @@ sub PASV_command {
 
         # Wait for 'CNCT'
 	my $input;
-	my $size;
 
-        while(sysread(DREAD, $input, $size)) {
+        while(sysread(DREAD, $input, 5)) {
 
 	    if($input !~ /^CNCT/) {
 		# we wait for a connected client
