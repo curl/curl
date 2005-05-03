@@ -142,8 +142,10 @@ startsf();
 
 logmsg sprintf("FTP server started on port IPv%d/$port\n", $ipv6?6:4);
 open(PID, ">$pidfile");
-print PID $$;
+print PID $$."\n";
 close(PID);
+
+logmsg("logged pid $$ in $pidfile\n");
 
 sub sockfilt {
     my $l;
