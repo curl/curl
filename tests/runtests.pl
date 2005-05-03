@@ -189,20 +189,44 @@ $ENV{'CURL_CA_BUNDLE'}=undef;
 
 #######################################################################
 # Start a new thread/process and run the given command line in there.
-# Return the pid of the new child process to the parent.
+# Return the pids (yes plural) of the new child process to the parent.
 #
 sub startnew {
-    my ($cmd)=@_;
+    my ($cmd, $pidfile)=@_;
 
     print "CMD: $cmd\n" if ($verbose);
 
     my $child = fork();
+    my $pid2;
 
     if(0 == $child) {
         # a child, run the given command instead!
+
+        # Calling exec() within a pseudo-process actually spawns the requested
+        # executable in a separate process and waits for it to complete before
+        # exiting with the same exit status as that process.  This means that
+        # the process ID reported within the running executable will be
+        # different from what the earlier Perl fork() might have returned.
+
         exec($cmd);
     }
-    return $child;
+
+    my $count=5;
+    while($count--) {
+        if(-f $pidfile) {
+            open(PID, "<$pidfile");
+            $pid2 = 0 + <PID>;
+            close(PID);
+            if(kill(0, $pid2)) {
+                # make sure this pid is alive, as otherwise it is just likely
+                # to be the _previous_ pidfile or similar!
+                last;
+            }
+        }
+        sleep(1);
+    }
+
+    return ($child, $pid2);
 }
 
 
@@ -328,18 +352,23 @@ sub torture {
 #
 sub stopserver {
     my ($pid) = @_;
-    
+
     if($pid <= 0) {
         return; # this is not a good pid
     }
 
+    if($pid =~ / /) {
+        # if it contains space, it might be more than one pid
+        my @pids = split(" ", $pid);
+        for(@pids) {
+            kill (9, $_); # die!
+        }
+    }
+
     my $res = kill (9, $pid); # die!
 
-    if($res && $verbose) {
+    if($verbose) {
         print "RUN: Test server pid $pid signalled to die\n";
-    }
-    elsif($verbose) {
-        print "RUN: Test server pid $pid didn't exist\n";
     }
 }
 
@@ -423,7 +452,8 @@ sub runhttpserver {
         $flag .= "-d \"$dir\" ";
     }
     $cmd="$perl $srcdir/httpserver.pl -p $pidfile $flag $port $ipv6";
-    my $httppid = startnew($cmd); # start the server in a new process
+    my ($httppid, $pid2) =
+        startnew($cmd, $pidfile); # start the server in a new process
 
     if(!kill(0, $httppid)) {
         # it is NOT alive
@@ -438,7 +468,7 @@ sub runhttpserver {
 
     sleep(1);
 
-    return $httppid;
+    return ($httppid, $pid2);
 }
 
 #######################################################################
@@ -463,8 +493,7 @@ sub runhttpsserver {
     my $flag=$debugprotocol?"-v ":"";
     my $cmd="$perl $srcdir/httpsserver.pl $flag -s \"$stunnel\" -d $srcdir -r $HTTPPORT $HTTPSPORT";
 
-    my $httpspid = startnew($cmd);
-
+    my ($httpspid, $pid2) = startnew($cmd, $HTTPSPIDFILE);
 
     if(!kill(0, $httpspid)) {
         # it is NOT alive
@@ -479,7 +508,7 @@ sub runhttpsserver {
 
     sleep(1);
 
-    return $httpspid;
+    return ($httpspid, $pid2);
 }
 
 
@@ -555,7 +584,7 @@ sub runftpserver {
     }
     my $cmd="$perl $srcdir/ftpserver.pl --pidfile $pidfile $flag --port $port";
 
-    my $ftppid = startnew($cmd);
+    my ($ftppid, $pid2) = startnew($cmd, $pidfile);
 
     if(!$ftppid || !kill(0, $ftppid)) {
         # it is NOT alive
@@ -581,7 +610,7 @@ sub runftpserver {
 
     sleep(1);
 
-    return $ftppid;
+    return ($pid2, $ftppid);
 }
 
 #######################################################################
@@ -1513,8 +1542,15 @@ sub singletest {
 sub stopservers {
     my ($verbose)=@_;
     for(keys %run) {
-        printf ("* kill pid for %-5s => %-5d\n", $_, $run{$_}) if($verbose);
-        stopserver($run{$_}); # the pid file is in the hash table
+        my $server = $_;
+        my $pids=$run{$server};
+        my $pid;
+
+        foreach $pid (split(" ", $pids)) {
+            printf ("* kill pid for %-5s => %-5d\n",
+                    $server, $pid) if($verbose);
+            stopserver($pid);
+        }
     }
     ftpkillslaves($verbose);
 }
@@ -1526,58 +1562,60 @@ sub stopservers {
 
 sub startservers {
     my @what = @_;
-    my $pid;
+    my ($pid, $pid2);
     for(@what) {
         my $what = lc($_);
         $what =~ s/[^a-z0-9-]//g;
         if($what eq "ftp") {
             if(!$run{'ftp'}) {
-                $pid = runftpserver("", $verbose);
+                ($pid, $pid2) = runftpserver("", $verbose);
                 if($pid <= 0) {
                     return "failed starting FTP server";
                 }
-                printf ("* pid ftp => %-5d\n", $pid) if($verbose);
-                $run{'ftp'}=$pid;
+                printf ("* pid ftp => %-5d %-5d\n", $pid, $pid2) if($verbose);
+                $run{'ftp'}="$pid $pid2";
             }
         }
         elsif($what eq "ftp2") {
             if(!$run{'ftp2'}) {
-                $pid = runftpserver("2", $verbose);
+                ($pid, $pid2) = runftpserver("2", $verbose);
                 if($pid <= 0) {
                     return "failed starting FTP2 server";
                 }
-                printf ("* pid ftp2 => %-5d\n", $pid) if($verbose);
-                $run{'ftp2'}=$pid;
+                printf ("* pid ftp2 => %-5d %-5d\n", $pid, $pid2) if($verbose);
+                $run{'ftp2'}="$pid $pid2";
             }
         }
         elsif($what eq "ftp-ipv6") {
             if(!$run{'ftp-ipv6'}) {
-                $pid = runftpserver("", $verbose, "ipv6");
+                ($pid, $pid2) = runftpserver("", $verbose, "ipv6");
                 if($pid <= 0) {
                     return "failed starting FTP-ipv6 server";
                 }
-                printf ("* pid ftp-ipv6 => %-5d\n", $pid) if($verbose);
-                $run{'ftp-ipv6'}=$pid;
+                printf("* pid ftp-ipv6 => %-5d %-5d\n", $pid,
+                       $pid2) if($verbose);
+                $run{'ftp-ipv6'}="$pid $pid2";
             }
         }
         elsif($what eq "http") {
             if(!$run{'http'}) {
-                $pid = runhttpserver($verbose);
+                ($pid, $pid2) = runhttpserver($verbose);
                 if($pid <= 0) {
                     return "failed starting HTTP server";
                 }
-                printf ("* pid http => %-5d\n", $pid) if($verbose);
-                $run{'http'}=$pid;
+                printf ("* pid http => %-5d %-5d\n", $pid, $pid2) if($verbose);
+                $run{'http'}="$pid $pid2";
             }
         }
         elsif($what eq "http-ipv6") {
             if(!$run{'http-ipv6'}) {
-                $pid = runhttpserver($verbose, "IPv6");
+                ($pid, $pid2) = runhttpserver($verbose, "IPv6");
                 if($pid <= 0) {
                     return "failed starting IPv6 HTTP server";
                 }
-                printf ("* pid http-ipv6 => %-5d\n", $pid) if($verbose);
-                $run{'http-ipv6'}=$pid;
+                printf("* pid http-ipv6 => %-5d %-5d\n", $pid, $pid2)
+                    if($verbose);
+                $run{'http-ipv6'}="$pid $pid2";
             }
         }
         elsif($what eq "ftps") {
@@ -1598,20 +1636,21 @@ sub startservers {
             }
 
             if(!$run{'http'}) {
-                $pid = runhttpserver($verbose);
+                ($pid, $pid2) = runhttpserver($verbose);
                 if($pid <= 0) {
                     return "failed starting HTTP server";
                 }
-                printf ("* pid http => %-5d\n", $pid) if($verbose);
-                $run{'http'}=$pid;
+                printf ("* pid http => %-5d %-5d\n", $pid, $pid2) if($verbose);
+                $run{'http'}="$pid $pid2";
             }
             if(!$run{'https'}) {
-                $pid = runhttpsserver($verbose);
+                ($pid, $pid2) = runhttpsserver($verbose);
                 if($pid <= 0) {
                     return "failed starting HTTPS server (stunnel)";
                 }
-                printf ("* pid https => %-5d\n", $pid) if($verbose);
-                $run{'https'}=$pid;
+                printf("* pid https => %-5d %-5d\n", $pid, $pid2)
+                    if($verbose);
+                $run{'https'}="$pid $pid2";
             }
         }
         elsif($what eq "none") {
