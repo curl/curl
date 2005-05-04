@@ -1155,7 +1155,7 @@ sub singletest {
     my $cmdargs;
     if(!$tool) {
         # run curl, add -v for debug information output
-        $cmdargs ="$out --include -v $cmd";
+        $cmdargs ="$out --include -v --trace-time $cmd";
     }
     else {
         $cmdargs = " $cmd"; # $cmd is the command line for the test file
