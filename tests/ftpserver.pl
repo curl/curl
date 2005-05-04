@@ -140,7 +140,7 @@ unlink($pidfile);
 
 startsf();
 
-logmsg sprintf("FTP server started on port IPv%d/$port\n", $ipv6?6:4);
+logmsg sprintf("FTP server listens on port IPv%d/$port\n", $ipv6?6:4);
 open(PID, ">$pidfile");
 print PID $$."\n";
 close(PID);
@@ -173,7 +173,11 @@ sub sendcontrol {
             select(undef, undef, undef, 0.01);
         }
     }
-
+    my $log;
+    foreach $log (@_) {
+        $log =~ s/[\r\n]//g;
+        logmsg "> \"$log\"\n";
+    }
 }
 
 # Send data to the client on the data stream
@@ -263,7 +267,7 @@ sub close_dataconn {
     my ($closed)=@_; # non-zero if already disconnected
 
     if(!$closed) {
-        logmsg "time to kill the data connection\n";
+        logmsg "* disconnect data connection\n";
         print DWRITE "DISC\n";
         my $i;
         sysread DREAD, $i, 5;
@@ -271,14 +275,12 @@ sub close_dataconn {
     else {
         logmsg "data connection already disconnected\n";
     }
-
-    logmsg "time to quit sockfilt for data\n";
-    print DWRITE "QUIT\n";
-    logmsg "told data slave to die (pid $slavepid)\n";
-    waitpid $slavepid, 0;
-    $slavepid=0;
     logmsg "=====> Closed data connection\n";
 
+    logmsg "* quit sockfilt for data (pid $slavepid)\n";
+    print DWRITE "QUIT\n";
+    waitpid $slavepid, 0;
+    $slavepid=0;
 }
 
 my $rest=0;
@@ -308,7 +310,6 @@ my @ftpdir=("total 20\r\n",
         senddata $_;
     }
     close_dataconn(0);
-    logmsg "done passing data\n";
     sendcontrol "226 ASCII transfer complete\r\n";
     return 0;
 }
@@ -555,7 +556,7 @@ sub PASV_command {
         return 0;
     }
 
-    logmsg "sockfilt for data on pid $slavepid\n";
+    logmsg "Run sockfilt for data on pid $slavepid\n";
 
     # Find out what port we listen on
     my $i;
@@ -582,16 +583,13 @@ sub PASV_command {
 
     if($cmd ne "EPSV") {
         # PASV reply
-        logmsg "replying to a $cmd command, waiting on port $pasvport\n";
         sendcontrol sprintf("227 Entering Passive Mode (127,0,0,1,%d,%d)\n",
                             ($pasvport/256), ($pasvport%256));
     }
     else {
         # EPSV reply
-        logmsg "replying to a $cmd command, waiting on port $pasvport\n";
         sendcontrol sprintf("229 Entering Passive Mode (|||%d|)\n", $pasvport);
     }
-
 
     eval {
         local $SIG{ALRM} = sub { die "alarm\n" };
@@ -831,7 +829,7 @@ while(1) {
         my $FTPARG=$2;
         my $full=$_;
                  
-        logmsg "Received \"$full\"\n";
+        logmsg "< \"$full\"\n";
 
         if($verbose) {
             print STDERR "IN: $full\n";
@@ -872,7 +870,6 @@ while(1) {
                 # used enough number of times, now blank the customreply
                 $customreply{$FTPCMD}="";
             }
-            logmsg "$FTPCMD made to send '$text'\n";
         }
         if($text) {
             sendcontrol "$text\r\n";
