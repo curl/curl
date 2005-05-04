@@ -499,6 +499,7 @@ int Curl_ssl_recv(struct connectdata *conn, /* connection data */
  */
 CURLcode Curl_ssl_initsessions(struct SessionHandle *data, long amount)
 {
+#ifdef USE_SSL
   struct curl_ssl_session *session;
 
   if(data->state.session)
@@ -517,6 +518,11 @@ CURLcode Curl_ssl_initsessions(struct SessionHandle *data, long amount)
   data->set.ssl.numsessions = amount;
   data->state.session = session;
   data->state.sessionage = 1; /* this is brand new */
+#else
+  /* without SSL, do nothing */
+  (void)data;
+  (void)amount;
+#endif
 
   return CURLE_OK;
 }
