@@ -175,8 +175,9 @@ sub sendcontrol {
     }
     my $log;
     foreach $log (@_) {
-        $log =~ s/[\r\n]//g;
-        logmsg "> \"$log\"\n";
+        my $l = $log;
+        $l =~ s/[\r\n]//g;
+        logmsg "> \"$l\"\n";
     }
 }
 
