@@ -331,8 +331,6 @@ sub MDTM_command {
 
     loadtest("$srcdir/data/test$testno");
 
-    logmsg "MDTM $testno\n";
-
     my @data = getpart("reply", "mdtm");
 
     my $reply = $data[0];
@@ -340,15 +338,12 @@ sub MDTM_command {
 
     if($reply <0) {
         sendcontrol "550 $testno: no such file.\r\n";
-        logmsg "MDTM $testno: no such file\n";
     }
     elsif($reply) {
         sendcontrol "$reply\r\n";
-        logmsg "MDTM $testno returned $reply\n";
     }
     else {
         sendcontrol "500 MDTM: no such command.\r\n";
-        logmsg "MDTM: no such command\n";
     }
     return 0;
 }
@@ -358,13 +353,10 @@ sub SIZE_command {
 
     loadtest("$srcdir/data/test$testno");
 
-    logmsg "SIZE file \"$testno\"\n";
-
     if($testno eq "verifiedserver") {
         my $response = "WE ROOLZ: $$\r\n";
         my $size = length($response);
         sendcontrol "213 $size\r\n";
-        logmsg "SIZE $testno returned $size\n";
         return 0;
     }
 
@@ -375,11 +367,9 @@ sub SIZE_command {
     if($size) {
         if($size > -1) {
             sendcontrol "213 $size\r\n";
-            logmsg "SIZE $testno returned $size\n";
         }
         else {
             sendcontrol "550 $testno: No such file or directory.\r\n";
-            logmsg "SIZE $testno: no such file\n";
         }
     }
     else {
@@ -390,11 +380,9 @@ sub SIZE_command {
         }
         if($size) {
             sendcontrol "213 $size\r\n";
-            logmsg "SIZE $testno returned $size\n";
         }
         else {
             sendcontrol "550 $testno: No such file or directory.\r\n";
-            logmsg "SIZE $testno: no such file\n";
         }
     }
     return 0;
@@ -403,23 +391,18 @@ sub SIZE_command {
 sub RETR_command {
     my ($testno) = @_;
 
-    logmsg "RETR file \"$testno\"\n";
-
     if($testno =~ /^verifiedserver$/) {
         # this is the secret command that verifies that this actually is
         # the curl test server
         my $response = "WE ROOLZ: $$\r\n";
         my $len = length($response);
         sendcontrol "150 Binary junk ($len bytes).\r\n";
-        logmsg "pass our pid on the data connection\n";
         senddata "WE ROOLZ: $$\r\n";
         close_dataconn(0);
-        logmsg "Data sent, sending a 226-reponse now\n";
         sendcontrol "226 File transfer complete\r\n";
         if($verbose) {
             print STDERR "FTPD: We returned proof we are the test server\n";
         }
-        logmsg "we returned proof that we are the test server\n";
         return 0;
     }
 
@@ -447,9 +430,7 @@ sub RETR_command {
         if($retrweirdo) {
             sendcontrol "150 Binary data connection for $testno () ($size bytes).\r\n",
             "226 File transfer complete\r\n";
-            logmsg "150+226 in one shot!\n";
 
-            logmsg "pass RETR data on data connection\n";
             for(@data) {
                 my $send = $_;
                 senddata $send;
@@ -464,9 +445,7 @@ sub RETR_command {
             }
 
             sendcontrol "150 Binary data connection for $testno () $sz.\r\n";
-            logmsg "150 Binary data connection for $testno () $sz.\n";
 
-            logmsg "pass RETR data on data connection\n";
             for(@data) {
                 my $send = $_;
                 senddata $send;
@@ -477,7 +456,6 @@ sub RETR_command {
     }
     else {
         sendcontrol "550 $testno: No such file or directory.\r\n";
-        logmsg "550 $testno: no such file\n";
     }
     return 0;
 }
@@ -491,8 +469,6 @@ sub STOR_command {
 
     sendcontrol "125 Gimme gimme gimme!\r\n";
 
-    logmsg "retrieve STOR data on data connection\n";
-
     open(FILE, ">$filename") ||
         return 0; # failed to open output
 
@@ -500,7 +476,6 @@ sub STOR_command {
     my $ulsize=0;
     my $disc=0;
     while (5 == (sysread DREAD, $line, 5)) {
-        logmsg "command from sockfilt: $line";
         if($line eq "DATA\n") {
             my $i;
             sysread DREAD, $i, 5;
@@ -518,7 +493,6 @@ sub STOR_command {
         }
         elsif($line eq "DISC\n") {
             # disconnect!
-            logmsg "DISC means disconnect!\n";
             $disc=1;
             last;
         }
@@ -648,7 +622,6 @@ sub PORT_command {
     # EPRT |2|::1|49706|
     elsif(($cmd eq "EPRT") && ($grok_eprt)) {
         if($arg !~ /(\d+)\|([^\|]+)\|(\d+)/) {
-            logmsg "bad EPRT-line: $arg\n";
             sendcontrol "500 silly you, go away\r\n";
             return 0;
         }
@@ -656,7 +629,6 @@ sub PORT_command {
         $port = $3;
     }
     else {
-        logmsg "got a $cmd line we don't like\n";
         sendcontrol "500 we don't like $cmd now\r\n";
         return 0;
     }
@@ -823,7 +795,6 @@ while(1) {
 
         unless (m/^([A-Z]{3,4})\s?(.*)/i) {
             sendcontrol "500 '$_': command not understood.\r\n";
-            logmsg "unknown crap received: $_, bailing out hard\n";
             last;
         }
         my $FTPCMD=$1;
