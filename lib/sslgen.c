@@ -507,12 +507,9 @@ CURLcode Curl_ssl_initsessions(struct SessionHandle *data, long amount)
     return CURLE_OK;
 
   session = (struct curl_ssl_session *)
-    malloc(amount * sizeof(struct curl_ssl_session));
+    calloc(sizeof(struct curl_ssl_session), amount);
   if(!session)
     return CURLE_OUT_OF_MEMORY;
-
-  /* "blank out" the newly allocated memory */
-  memset(session, 0, amount * sizeof(struct curl_ssl_session));
 
   /* store the info in the SSL section */
   data->set.ssl.numsessions = amount;
