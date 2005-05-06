@@ -373,13 +373,125 @@ sub stopserver {
 }
 
 #######################################################################
+# Verify that the server that runs on $ip, $port is our server.  This also
+# implies that we can speak with it, as there might be occasions when the
+# server runs fine but we cannot talk to it ("Failed to connect to ::1: Can't
+# assign requested address" #
+
+sub verifyhttp {
+    my ($proto, $ip, $port) = @_;
+    my $cmd = "$CURL -m4 -o log/verifiedserver -ksvg \"$proto://$ip:$port/verifiedserver\" 2>log/verifyhttp";
+    my $pid;
+
+    # verify if our/any server is running on this port
+    print "CMD; $cmd\n" if ($verbose);
+    my $res = system($cmd);
+
+    $res >>= 8; # rotate the result
+    my $data;
+
+    if($res && $verbose) {
+        open(ERR, "<log/verifyhttp");
+        my @e = <ERR>;
+        close(ERR);
+        print "RUN: curl command returned $res\n";
+        for(@e) {
+            if($_ !~ /^([ \t]*)$/) {
+                print "RUN: $_";
+            }
+        }
+    }
+    open(FILE, "<log/verifiedserver");
+    my @file=<FILE>;
+    close(FILE);
+    $data=$file[0]; # first line
+
+    if ( $data =~ /WE ROOLZ: (\d+)/ ) {
+        $pid = 0+$1;
+    }
+    elsif($res == 6) {
+        # curl: (6) Couldn't resolve host '::1'
+        print "RUN: failed to resolve host\n";
+        return 0;
+    }
+    elsif($data || ($res != 7)) {
+        print "RUN: Unknown server is running on port $port\n";
+        return 0;
+    }
+    return $pid;
+}
+
+#######################################################################
+# Verify that the server that runs on $ip, $port is our server.  This also
+# implies that we can speak with it, as there might be occasions when the
+# server runs fine but we cannot talk to it ("Failed to connect to ::1: Can't
+# assign requested address" #
+
+sub verifyftp {
+    my ($proto, $ip, $port) = @_;
+    my $pid;
+    my $time=time();
+    my $cmd="$CURL -m4 --silent -vg \"$proto://$ip:$port/verifiedserver\" 2>log/verifyftp";
+    # check if this is our server running on this port:
+    my @data=`$cmd`;
+    print "RUN: $cmd\n" if($verbose);
+    my $line;
+
+    # if this took more than 2 secs, we assume it "hung" on a weird server
+    my $took = time()-$time;
+
+    foreach $line (@data) {
+        if ( $line =~ /WE ROOLZ: (\d+)/ ) {
+            # this is our test server with a known pid!
+            $pid = 0+$1;
+            last;
+        }
+    }
+    if($pid <= 0 && $data[0]) {
+        # this is not a known server
+        print "RUN: Unknown server on our FTP port: $port\n";
+        return 0;
+    }
+    return $pid;
+}
+
+#######################################################################
+# Verify that the server that runs on $ip, $port is our server.
+# Retry during 5 seconds before giving up.
+#
+
+my %protofunc = ('http' => \&verifyhttp,
+                 'https' => \&verifyhttp,
+                 'ftp' => \&verifyftp);
+
+sub verifyserver {
+    my ($proto, $ip, $port) = @_;
+
+    my $count = 5; # try for this many seconds
+    my $pid;
+
+    while($count--) {
+        my $fun = $protofunc{$proto};
+
+        $pid = &$fun($proto, $ip, $port);
+
+        if($pid) {
+            last;
+        }
+        sleep(1);
+    }
+    return $pid;
+}
+
+
+
+#######################################################################
 # start the http server
 #
 sub runhttpserver {
     my ($verbose, $ipv6) = @_;
     my $RUNNING;
     my $pid;
-    my $cmd;
     my $pidfile = $HTTPPIDFILE;
     my $port = $HTTPPORT;
     my $ip = $HOSTIP;
@@ -395,55 +507,8 @@ sub runhttpserver {
 
     $pid = checkserver($pidfile);
 
-    if($pid <= 0 ) {
-
-        # verify if our/any server is running on this port
-        $cmd = "$CURL -o log/verifiedserver -g \"http://$ip:$port/verifiedserver\" 2>log/verifyhttp";
-        print "CMD; $cmd\n" if ($verbose);
-        my $res = system($cmd);
-
-        $res >>= 8; # rotate the result
-        my $data;
-
-        if($res && $verbose) {
-            open(ERR, "<log/verifystderr");
-            my @e = <ERR>;
-            close(ERR);
-            print "RUN: curl command returned $res\n";
-            for(@e) {
-                if($_ !~ /^([ \t]*)$/) {
-                    print "RUN: $_";
-                }
-            }
-        }
-        open(FILE, "<log/verifiedserver");
-        my @file=<FILE>;
-        close(FILE);
-        $data=$file[0]; # first line
-
-        if ( $data =~ /WE ROOLZ: (\d+)/ ) {
-            $pid = 0+$1;
-        }
-        elsif($res == 6) {
-            # curl: (6) Couldn't resolve host '::1'
-            print "RUN: failed to resolve host\n";
-            return -3;
-        }
-        elsif($data || ($res != 7)) {
-            print "RUN: Unknown server is running on port $port\n";
-            return -2;
-        }
-    }
-
     if($pid > 0) {
-        my $res = kill (9, $pid); # die!
-        if(!$res) {
-            print "RUN: Failed to kill test HTTP$nameext server, do it ",
-            "manually and restart the tests.\n";
-            stopservers($verbose);
-            exit;
-        }
-        sleep(1);
+        stopserver($pid);
     }
 
     my $flag=$debugprotocol?"-v ":"";
@@ -451,7 +516,8 @@ sub runhttpserver {
     if($dir) {
         $flag .= "-d \"$dir\" ";
     }
-    $cmd="$perl $srcdir/httpserver.pl -p $pidfile $flag $port $ipv6";
+
+    my $cmd="$perl $srcdir/httpserver.pl -p $pidfile $flag $port $ipv6";
     my ($httppid, $pid2) =
         startnew($cmd, $pidfile); # start the server in a new process
 
@@ -460,6 +526,14 @@ sub runhttpserver {
         print "RUN: failed to start the HTTP server!\n";
         stopservers($verbose);
         exit;
+    }
+
+    # Server is up. Verify that we can speak to it.
+    if(!verifyserver("http", $ip, $port)) {
+        print "RUN: HTTP$nameext server failed verification\n";
+        # failed to talk to it properly. Kill the server and return failure
+        stopserver("$httppid $pid2");
+        return (0,0);
     }
 
     if($verbose) {
@@ -475,12 +549,18 @@ sub runhttpserver {
 # start the https server (or rather, tunnel)
 #
 sub runhttpsserver {
-    my $verbose = $_[0];
+    my ($verbose, $ipv6) = @_;
     my $STATUS;
     my $RUNNING;
+    my $ip = $HOSTIP;
 
     if(!$stunnel) {
         return 0;
+    }
+
+    if($ipv6) {
+        # not complete yet
+        $ip = $HOST6IP;
     }
 
     my $pid=checkserver($HTTPSPIDFILE);
@@ -502,6 +582,14 @@ sub runhttpsserver {
         exit;
     }
 
+    # Server is up. Verify that we can speak to it.
+    if(!verifyserver("https", $ip, $HTTPSPORT)) {
+        print "RUN: HTTPS server failed verification\n";
+        # failed to talk to it properly. Kill the server and return failure
+        stopserver("$httpspid $pid2");
+        return (0,0);
+    }
+
     if($verbose) {
         print "RUN: HTTPS server is now running PID $httpspid\n";
     }
@@ -510,7 +598,6 @@ sub runhttpsserver {
 
     return ($httpspid, $pid2);
 }
-
 
 #######################################################################
 # start the ftp server
@@ -524,6 +611,7 @@ sub runftpserver {
     my $pidfile = $id?$FTP2PIDFILE:$FTPPIDFILE;
     my $ip=$HOSTIP;
     my $nameext;
+    my $cmd;
 
     if($ipv6) {
         # if IPv6, use a different setup
@@ -534,46 +622,13 @@ sub runftpserver {
     }
 
     my $pid = checkserver($pidfile);
-
-    if ($pid <= 0) {
-        print "RUN: Check port $port for the FTP$id$nameext server\n"
-            if ($verbose);
-
-        my $time=time();
-        my $cmd="$CURL -m4 --silent -vg \"ftp://$ip:$port/verifiedserver\" 2>log/verifyftp";
-        # check if this is our server running on this port:
-        my @data=`$cmd`;
-        print "RUN: $cmd\n" if($verbose);
-        my $line;
-
-        # if this took more than 2 secs, we assume it "hung" on a weird server
-        my $took = time()-$time;
-
-        foreach $line (@data) {
-            if ( $line =~ /WE ROOLZ: (\d+)/ ) {
-                # this is our test server with a known pid!
-                $pid = 0+$1;
-            }
-        }
-        if($pid <= 0 && $data[0]) {
-            # this is not a known server
-            print "RUN: Unknown server on our favourite FTP$nameext port: $port\n";
-            return -1;
-        }
+    if($pid >= 0) {
+        stopserver($pid);
     }
-
-    if($pid > 0) {
-        print "RUN: Killing a previous server using pid $pid\n" if($verbose);
-        my $res = kill(9, $pid); # die!
-        if(!$res) {
-            print "RUN: Failed to kill FTP$id$nameext test server, do it manually and",
-            " restart the tests.\n";
-            return -1;
-        }
-    }
+    # kill possible still-running slaves
     ftpkillslaves($verbose);
 
-    # now (re-)start our server:
+    # start our server:
     my $flag=$debugprotocol?"-v ":"";
     $flag .= "-s \"$srcdir\" ";
     if($id) {
@@ -582,7 +637,7 @@ sub runftpserver {
     if($ipv6) {
         $flag .="--ipv6 ";
     }
-    my $cmd="$perl $srcdir/ftpserver.pl --pidfile $pidfile $flag --port $port";
+    $cmd="$perl $srcdir/ftpserver.pl --pidfile $pidfile $flag --port $port";
 
     my ($ftppid, $pid2) = startnew($cmd, $pidfile);
 
@@ -592,16 +647,12 @@ sub runftpserver {
         return -1;
     }
 
-    # Make sure there is a pidfile present before we proceed. Because if we
-    # don't see one within a few secs, the server doesn't work. This mostly
-    # happens when the server finds out it cannot use the ipv6 protocol.
-    my $count=3;
-    while(! -f $pidfile) {
-        if(!$count--) {
-            print "RUN: failed starting FTP$id$nameext server (no pidfile)!\n";
-            return -1;
-        }
-        sleep(1);
+    # Server is up. Verify that we can speak to it.
+    if(!verifyserver("ftp", $ip, $port)) {
+        print "RUN: FTP$id$nameext server failed verification\n";
+        # failed to talk to it properly. Kill the server and return failure
+        stopserver("$ftppid $pid2");
+        return (0,0);
     }
 
     if($verbose) {
@@ -917,6 +968,7 @@ sub singletest {
     my @what;
     my $why;
     my %feature;
+    my $cmd;
 
     # load the test case file definition
     if(loadtest("${TESTDIR}/test${testnum}")) {
@@ -997,7 +1049,7 @@ sub singletest {
 
     if(!$why) {
         my @precheck = getpart("client", "precheck");
-        my $cmd = $precheck[0];
+        $cmd = $precheck[0];
         chomp $cmd;
         if($cmd) {
             my @o = `$cmd 2>/dev/null`;
@@ -1109,7 +1161,8 @@ sub singletest {
     }
 
     # get the command line options to use
-    my ($cmd, @blaha)= getpart("client", "command");
+    my @blaha;
+    ($cmd, @blaha)= getpart("client", "command");
 
     # make some nice replace operations
     $cmd =~ s/\n//g; # no newlines please
@@ -1124,9 +1177,9 @@ sub singletest {
     my @inputfile=getpart("client", "file");
     if(@inputfile) {
         # we need to generate a file before this test is invoked
-        my %hash = getpartattr("client", "file");
+        my %fileattr = getpartattr("client", "file");
 
-        my $filename=$hash{'name'};
+        my $filename=$fileattr{'name'};
 
         if(!$filename) {
             print "ERROR: section client=>file has no name attribute!\n";
@@ -1547,8 +1600,8 @@ sub stopservers {
         my $pid;
 
         foreach $pid (split(" ", $pids)) {
-            printf ("* kill pid for %-5s => %-5d\n",
-                    $server, $pid) if($verbose);
+            printf("* kill pid for %-5s => %-5d\n",
+                   $server, $pid) if($verbose);
             stopserver($pid);
         }
     }
