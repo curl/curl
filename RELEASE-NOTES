@@ -2,7 +2,7 @@ Curl and libcurl 7.14.0
 
  Public curl release number:               88
  Releases counted from the very beginning: 115
- Available command line options:           106
+ Available command line options:           107
  Available curl_easy_setopt() options:     122
  Number of public functions in libcurl:    46
  Amount of public web site mirrors:        22
@@ -18,6 +18,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o builds out-of-the-box on (presumably ipv6-enabled) AIX 4.3 hosts
  o curl --head could wrongly complain on bad chunked-encoding
  o --interface SIGSEGVed on a bad address
  o kill the HTTPS server better when stopping the test suite
