@@ -2163,8 +2163,6 @@ static CURLcode ftp_state_get_resp(struct connectdata *conn,
 static CURLcode ftp_state_loggedin(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
-  infof(data, "We have successfully logged in\n");
 
 #ifdef HAVE_KRB4
   if(data->set.krb4) {
@@ -2490,7 +2488,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
         }
       }
       state(conn, FTP_STOP); /* we are done with the CONNECT phase! */
-      infof(data, "protocol connect phase DONE\n");
+      DEBUGF(infof(data, "protocol connect phase DONE\n"));
       break;
 
     case FTP_QUOTE:
@@ -3044,26 +3042,27 @@ static CURLcode ftp_range(struct connectdata *conn)
     if((-1 == to) && (from>=0)) {
       /* X - */
       conn->resume_from = from;
-      infof(data, "FTP RANGE %" FORMAT_OFF_T " to end of file\n", from);
+      DEBUGF(infof(data, "FTP RANGE %" FORMAT_OFF_T " to end of file\n", from));
     }
     else if(from < 0) {
       /* -Y */
       totalsize = -from;
       conn->maxdownload = -from;
       conn->resume_from = from;
-      infof(data, "FTP RANGE the last %" FORMAT_OFF_T " bytes\n", totalsize);
+      DEBUGF(infof(data, "FTP RANGE the last %" FORMAT_OFF_T " bytes\n", totalsize));
     }
     else {
       /* X-Y */
       totalsize = to-from;
       conn->maxdownload = totalsize+1; /* include the last mentioned byte */
       conn->resume_from = from;
-      infof(data, "FTP RANGE from %" FORMAT_OFF_T
-            " getting %" FORMAT_OFF_T " bytes\n", from, conn->maxdownload);
+      DEBUGF(infof(data, "FTP RANGE from %" FORMAT_OFF_T
+                   " getting %" FORMAT_OFF_T " bytes\n",
+                   from, conn->maxdownload));
     }
-    infof(data, "range-download from %" FORMAT_OFF_T
-          " to %" FORMAT_OFF_T ", totally %" FORMAT_OFF_T " bytes\n",
-          from, to, conn->maxdownload);
+    DEBUGF(infof(data, "range-download from %" FORMAT_OFF_T
+                 " to %" FORMAT_OFF_T ", totally %" FORMAT_OFF_T " bytes\n",
+                 from, to, conn->maxdownload));
     ftp->dont_check = TRUE; /* dont check for successful transfer */
   }
   return CURLE_OK;
@@ -3085,7 +3084,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
   /* the ftp struct is inited in Curl_ftp_connect() */
   struct FTP *ftp = conn->proto.ftp;
 
-  infof(data, "DO-MORE phase starts\n");
+  DEBUGF(infof(data, "DO-MORE phase starts\n"));
 
   if(!ftp->no_transfer && !conn->bits.no_body) {
     /* a transfer is about to take place */
@@ -3122,7 +3121,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
     result=Curl_Transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
 
   /* end of transfer */
-  infof(data, "DO-MORE phase ends\n");
+  DEBUGF(infof(data, "DO-MORE phase ends\n"));
 
   return result;
 }
@@ -3146,7 +3145,7 @@ CURLcode ftp_perform(struct connectdata *conn,
   CURLcode result=CURLE_OK;
   struct SessionHandle *data=conn->data;
 
-  infof(data, "DO phase starts\n");
+  DEBUGF(infof(data, "DO phase starts\n"));
 
   *dophase_done = FALSE; /* not done yet */
 
@@ -3165,7 +3164,7 @@ CURLcode ftp_perform(struct connectdata *conn,
   *connected = conn->bits.tcpconnect;
 
   if(*dophase_done)
-    infof(data, "DO phase is comlete\n");
+    DEBUGF(infof(data, "DO phase is comlete\n"));
 
   return result;
 }
@@ -3822,7 +3821,7 @@ CURLcode Curl_ftp_doing(struct connectdata *conn,
   if(*dophase_done) {
     result = ftp_dophase_done(conn, FALSE /* not connected */);
 
-    infof(conn->data, "DO phase is comlete\n");
+    DEBUGF(infof(conn->data, "DO phase is comlete\n"));
   }
   return result;
 }

@@ -295,4 +295,10 @@ typedef int curl_socket_t;
 #define USE_NTLM
 #endif
 
+#ifdef CURLDEBUG
+#define DEBUGF(x) x
+#else
+#define DEBUGF(x)
+#endif
+
 #endif /* __CONFIG_H */
