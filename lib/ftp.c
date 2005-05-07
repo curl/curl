@@ -2165,7 +2165,7 @@ static CURLcode ftp_state_loggedin(struct connectdata *conn)
   CURLcode result = CURLE_OK;
 
 #ifdef HAVE_KRB4
-  if(data->set.krb4) {
+  if(conn->data->set.krb4) {
     /* We are logged in, asked to use Kerberos. Set the requested
      * protection level
      */
