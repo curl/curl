@@ -3027,7 +3027,6 @@ static CURLcode ftp_range(struct connectdata *conn)
   curl_off_t totalsize=-1;
   char *ptr;
   char *ptr2;
-  struct SessionHandle *data = conn->data;
   struct FTP *ftp = conn->proto.ftp;
 
   if(conn->bits.use_range && conn->range) {
@@ -3042,25 +3041,27 @@ static CURLcode ftp_range(struct connectdata *conn)
     if((-1 == to) && (from>=0)) {
       /* X - */
       conn->resume_from = from;
-      DEBUGF(infof(data, "FTP RANGE %" FORMAT_OFF_T " to end of file\n", from));
+      DEBUGF(infof(conn->data, "FTP RANGE %" FORMAT_OFF_T " to end of file\n",
+                   from));
     }
     else if(from < 0) {
       /* -Y */
       totalsize = -from;
       conn->maxdownload = -from;
       conn->resume_from = from;
-      DEBUGF(infof(data, "FTP RANGE the last %" FORMAT_OFF_T " bytes\n", totalsize));
+      DEBUGF(infof(conn->data, "FTP RANGE the last %" FORMAT_OFF_T " bytes\n",
+                   totalsize));
     }
     else {
       /* X-Y */
       totalsize = to-from;
       conn->maxdownload = totalsize+1; /* include the last mentioned byte */
       conn->resume_from = from;
-      DEBUGF(infof(data, "FTP RANGE from %" FORMAT_OFF_T
+      DEBUGF(infof(conn->data, "FTP RANGE from %" FORMAT_OFF_T
                    " getting %" FORMAT_OFF_T " bytes\n",
                    from, conn->maxdownload));
     }
-    DEBUGF(infof(data, "range-download from %" FORMAT_OFF_T
+    DEBUGF(infof(conn->data, "range-download from %" FORMAT_OFF_T
                  " to %" FORMAT_OFF_T ", totally %" FORMAT_OFF_T " bytes\n",
                  from, to, conn->maxdownload));
     ftp->dont_check = TRUE; /* dont check for successful transfer */
@@ -3143,9 +3144,8 @@ CURLcode ftp_perform(struct connectdata *conn,
 {
   /* this is FTP and no proxy */
   CURLcode result=CURLE_OK;
-  struct SessionHandle *data=conn->data;
 
-  DEBUGF(infof(data, "DO phase starts\n"));
+  DEBUGF(infof(conn->data, "DO phase starts\n"));
 
   *dophase_done = FALSE; /* not done yet */
 
@@ -3164,7 +3164,7 @@ CURLcode ftp_perform(struct connectdata *conn,
   *connected = conn->bits.tcpconnect;
 
   if(*dophase_done)
-    DEBUGF(infof(data, "DO phase is comlete\n"));
+    DEBUGF(infof(conn->data, "DO phase is comlete\n"));
 
   return result;
 }
