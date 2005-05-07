@@ -249,7 +249,6 @@ static int juggle(curl_socket_t *sockfdp,
   case PASSIVE_LISTEN:
     /* server mode */
     sockfd = listenfd;
-    logmsg("waiting for a client to connect on socket %d", (int)sockfd);
     /* there's always a socket to wait for */
     FD_SET(sockfd, &fds_read);
     maxfd = sockfd;
@@ -263,7 +262,6 @@ static int juggle(curl_socket_t *sockfdp,
       maxfd = 0; /* stdin */
     }
     else {
-      logmsg("waiting for data from client on socket %d", (int)sockfd);
       /* there's always a socket to wait for */
       FD_SET(sockfd, &fds_read);
       maxfd = sockfd;
@@ -277,7 +275,6 @@ static int juggle(curl_socket_t *sockfdp,
     if(sockfd != CURL_SOCKET_BAD) {
       FD_SET(sockfd, &fds_read);
       maxfd = sockfd;
-      logmsg("waiting for data from client on socket %d", (int)sockfd);
     }
     else {
       logmsg("No socket to read on");
@@ -290,8 +287,6 @@ static int juggle(curl_socket_t *sockfdp,
     r = select(maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
   } while((r == -1) && (ourerrno() == EINTR));
 
-  logmsg("select() returned %d", r);
-
   switch(r) {
   case -1:
     return FALSE;
@@ -303,7 +298,6 @@ static int juggle(curl_socket_t *sockfdp,
 
   if(FD_ISSET(fileno(stdin), &fds_read)) {
     size_t nread;
-    logmsg("data on stdin");
     /* read from stdin, commands/data to be dealt with and possibly passed on
        to the socket
 
@@ -321,7 +315,7 @@ static int juggle(curl_socket_t *sockfdp,
     nread = read(fileno(stdin), buffer, 5);
     if(5 == nread) {
 
-      logmsg("Received command %c%c%c%c",
+      logmsg("Received %c%c%c%c (on stdin)",
              buffer[0], buffer[1], buffer[2], buffer[3] );
 
       if(!memcmp("PING", buffer, 4)) {
@@ -358,7 +352,7 @@ static int juggle(curl_socket_t *sockfdp,
         lograw(buffer, len);
 
         if(*mode == PASSIVE_LISTEN) {
-          logmsg(".., but we are disconnected!");
+          logmsg("*** We are disconnected!");
           write(fileno(stdout), "DISC\n", 5);
         }
         else
@@ -385,7 +379,6 @@ static int juggle(curl_socket_t *sockfdp,
   }
 
   if((sockfd != CURL_SOCKET_BAD) && (FD_ISSET(sockfd, &fds_read)) ) {
-    logmsg("data on socket");
 
     if(*mode == PASSIVE_LISTEN) {
       /* there's no stream set up yet, this is an indication that there's a
