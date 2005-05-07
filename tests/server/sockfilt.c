@@ -211,9 +211,10 @@ unsigned short port = DEFAULT_PORT;
 unsigned short connectport = 0; /* if non-zero, we activate this mode */
 
 enum sockmode {
-  PASSIVE_LISTEN, /* as a server waiting for connections */
-  PASSIVE_CONNECT, /* as a server, connected to a client */
-  ACTIVE    /* as a client, connected to a server */
+  PASSIVE_LISTEN,    /* as a server waiting for connections */
+  PASSIVE_CONNECT,   /* as a server, connected to a client */
+  ACTIVE,            /* as a client, connected to a server */
+  ACTIVE_DISCONNECT  /* as a client, disconnected from server */
 };
 
 /*
@@ -281,6 +282,12 @@ static int juggle(curl_socket_t *sockfdp,
       maxfd = 0;
     }
     break;
+
+  case ACTIVE_DISCONNECT:
+    logmsg("disconnected, no socket to read on");
+    maxfd = 0;
+    sockfd = CURL_SOCKET_BAD;
+    break;
   }
 
   do {
@@ -335,7 +342,7 @@ static int juggle(curl_socket_t *sockfdp,
       else if(!memcmp("QUIT", buffer, 4)) {
         /* just die */
         logmsg("quits");
-        exit(0);
+        return FALSE;
       }
       else if(!memcmp("DATA", buffer, 4)) {
         /* data IN => data OUT */
@@ -366,6 +373,10 @@ static int juggle(curl_socket_t *sockfdp,
           logmsg("====> Client forcibly disconnected");
           sclose(sockfd);
           *sockfdp = CURL_SOCKET_BAD;
+          if(*mode == PASSIVE_CONNECT)
+            *mode = PASSIVE_LISTEN;
+          else
+            *mode = ACTIVE_DISCONNECT;
         }
         else
           logmsg("attempt to close already dead connection");
@@ -374,7 +385,7 @@ static int juggle(curl_socket_t *sockfdp,
     }
     else {
       logmsg("read %d from stdin, exiting", (int)nread);
-      exit(0);
+      return FALSE;
     }
   }
 
@@ -405,6 +416,8 @@ static int juggle(curl_socket_t *sockfdp,
       *sockfdp = CURL_SOCKET_BAD;
       if(*mode == PASSIVE_CONNECT)
         *mode = PASSIVE_LISTEN;
+      else
+        *mode = ACTIVE_DISCONNECT;
       return TRUE;
     }
 
@@ -491,7 +504,7 @@ int main(int argc, char *argv[])
            " --ipv4\n"
            " --ipv6\n"
            " --port [port]");
-      exit(0);
+      return 0;
     }
   }
 
@@ -522,7 +535,7 @@ int main(int argc, char *argv[])
   if (sock < 0) {
     perror("opening stream socket");
     logmsg("Error opening socket");
-    exit(1);
+    return 1;
   }
 
   if(connectport) {
@@ -552,7 +565,7 @@ int main(int argc, char *argv[])
     if(rc) {
       perror("connecting stream socket");
       logmsg("Error connecting to port %d", port);
-      exit(1);
+      return 1;
     }
     logmsg("====> Client connect");
     msgsock = sock; /* use this as stream */
@@ -587,7 +600,7 @@ int main(int argc, char *argv[])
     if(rc < 0) {
       perror("binding stream socket");
       logmsg("Error binding socket");
-      exit(1);
+      return 1;
     }
 
     if(!port) {
@@ -610,14 +623,6 @@ int main(int argc, char *argv[])
 
   }
 
-  pidfile = fopen(pidname, "w");
-  if(pidfile) {
-    fprintf(pidfile, "%d\n", (int)getpid());
-    fclose(pidfile);
-  }
-  else
-    fprintf(stderr, "Couldn't write pid file\n");
-
   logmsg("Running IPv%d version",
          (use_ipv6?6:4));
 
@@ -625,6 +630,16 @@ int main(int argc, char *argv[])
     logmsg("Connected to port %d", connectport);
   else
     logmsg("Listening on port %d", port);
+
+  pidfile = fopen(pidname, "w");
+  if(pidfile) {
+    int pid = (int)getpid();
+    fprintf(pidfile, "%d\n", pid);
+    fclose(pidfile);
+    logmsg("Wrote pid %d to %s", pid, pidname);
+  }
+  else
+    fprintf(stderr, "Couldn't write pid file\n");
 
   do {
     ok = juggle(&msgsock, sock, &mode);
