@@ -2678,7 +2678,7 @@ static CURLcode ftp_easy_statemach(struct connectdata *conn)
 
     rc = Curl_select(ftp->sendleft?CURL_SOCKET_BAD:sock, /* reading */
                      ftp->sendleft?sock:CURL_SOCKET_BAD, /* writing */
-                     timeout_ms);
+                     (int)timeout_ms);
 
     if(rc == -1) {
       failf(data, "select error");

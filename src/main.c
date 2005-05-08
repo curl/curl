@@ -2851,7 +2851,7 @@ int my_trace(CURL *handle, curl_infotype type,
       "*", "<", ">"
     };
     size_t i;
-    int st=0;
+    size_t st=0;
     static bool newl = FALSE;
 
     switch(type) {
