@@ -5,8 +5,9 @@ Curl and libcurl 7.14.0
  Available command line options:           107
  Available curl_easy_setopt() options:     122
  Number of public functions in libcurl:    46
- Amount of public web site mirrors:        22
+ Amount of public web site mirrors:        23
  Number of known libcurl bindings:         31
+ Number of contributors:                   394
 
 This release includes the following changes:
 
@@ -39,6 +40,7 @@ Other curl-related news since the previous public release:
  o pycurl 7.13.2: http://pycurl.sf.net/
  o TclCurl 0.13.2: http://personal1.iddeo.es/andresgarci/tclcurl/english/
  o http://curl.webhosting76.com/ is a new US curl mirror
+ o http://curl.meulie.net/ is a new Canadian curl mirror
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
