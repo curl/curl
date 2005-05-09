@@ -578,14 +578,14 @@ PORTS
         - MIPS IRIX 6.2, 6.5
         - MIPS Linux
         - Pocket PC/Win CE 3.0
-        - Power AIX 3.2.5, 4.2, 4.3.1, 4.3.2, 5.1
+        - Power AIX 3.2.5, 4.2, 4.3.1, 4.3.2, 5.1, 5.2
         - PowerPC Darwin 1.0
         - PowerPC Linux
         - PowerPC Mac OS 9
         - PowerPC Mac OS X
         - SINIX-Z v5
         - Sparc Linux
-        - Sparc Solaris 2.4, 2.5, 2.5.1, 2.6, 7, 8
+        - Sparc Solaris 2.4, 2.5, 2.5.1, 2.6, 7, 8, 9, 10
         - Sparc SunOS 4.1.X
         - StrongARM (and other ARM) RISC OS 3.1, 4.02
         - StrongARM Linux 2.4
@@ -596,14 +596,14 @@ PORTS
         - i386 Esix 4.1
         - i386 FreeBSD
         - i386 HURD
-        - i386 Linux 1.3, 2.0, 2.2, 2.3, 2.4
+        - i386 Linux 1.3, 2.0, 2.2, 2.3, 2.4, 2.6
         - i386 NetBSD
         - i386 Novell NetWare
         - i386 OS/2
         - i386 OpenBSD
         - i386 SCO unix
         - i386 Solaris 2.7
-        - i386 Windows 95, 98, ME, NT, 2000
+        - i386 Windows 95, 98, ME, NT, 2000, XP, 2003
         - i386 QNX 6
         - i486 ncr-sysv4.3.03 (NCR MP-RAS)
         - ia64 Linux 2.3.99
