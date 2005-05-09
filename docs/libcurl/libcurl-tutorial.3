@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH libcurl-tutorial 3 "25 Jan 2005" "libcurl" "libcurl programming"
+.TH libcurl-tutorial 3 "9 May 2005" "libcurl" "libcurl programming"
 .SH NAME
 libcurl-tutorial \- libcurl programming tutorial
 .SH "Objective"
@@ -246,16 +246,26 @@ you intend to make another transfer. libcurl will then attempt to re-use the
 previous
 
 .SH "Multi-threading Issues"
-libcurl is completely thread safe, except for two issues: signals and alarm
-handlers. Signals are needed for a SIGPIPE handler, and the alarm() call is
-used to deal with timeouts (during DNS lookup).
+The first basic rule is that you must \fBnever\fP share a libcurl handle (be
+it easy or multi or whatever) between multiple threads. Only use one handle in
+one thread at a time.
+
+libcurl is completely thread safe, except for two issues: signals and SSL/TLS
+handlers. Signals are used timeouting name resolves (during DNS lookup) - when
+built without c-ares support and not on Windows..
 
 If you are accessing HTTPS or FTPS URLs in a multi-threaded manner, you are
-then of course using OpenSSL multi-threaded and it has itself a few
-requirements on this. Basically, you need to provide one or two functions to
-allow it to function properly. For all details, see this:
+then of course using OpenSSL/GnuTLS multi-threaded and those libs have their
+own requirements on this issue. Basically, you need to provide one or two
+functions to allow it to function properly. For all details, see this:
 
- http://www.openssl.org/docs/crypto/threads.html#DESCRIPTION
+OpenSSL
+
+   http://www.openssl.org/docs/crypto/threads.html#DESCRIPTION
+
+GnuTLS
+
+ http://www.gnu.org/software/gnutls/manual/html_node/Multi_002dthreaded-applications.html
 
 When using multiple threads you should set the CURLOPT_NOSIGNAL option to
 TRUE for all handles. Everything will work fine except that timeouts are not
