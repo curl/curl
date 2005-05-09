@@ -1,110 +1,94 @@
- This project has been alive for several years. Countless people have provided
- feedback that have improved curl. Here follows a (incomplete) list of people
- that have contributed with non-trivial parts:
+ This project has been alive for many years. Countless people have provided
+ feedback that have improved curl. Here follows a list of people that have
+ contributed (a-z order).
 
-Daniel Stenberg <daniel@haxx.se>
-Rafael Sagula <sagula@inf.ufrgs.br>
-Sampo Kellomaki <sampo@iki.fi>
-Linas Vepstas <linas@linas.org>
-Bjorn Reese <breese@mail1.stofanet.dk>
-Johan Anderson <johan@homemail.com>
-Kjell Ericson <Kjell.Ericson@haxx.se>
-Troy Engel <tengel@sonic.net>
-Ryan Nelson <ryan@inch.com>
-Björn Stenberg <bjorn@haxx.se>
-Angus Mackay <amackay@gus.ml.org>
-Eric Young <eay@cryptsoft.com>
-Simon Dick <simond@totally.irrelevant.org>
-Oren Tirosh <oren@monty.hishome.net>
-Steven G. Johnson <stevenj@alum.mit.edu>
-Gilbert Ramirez Jr. <gram@verdict.uthscsa.edu>
-Andrés García <ornalux@redestb.es>
-Douglas E. Wegscheid <wegscd@whirlpool.com>
-Mark Butler <butlerm@xmission.com>
-Eric Thelin <eric@generation-i.com>
-Marc Boucher <marc@mbsi.ca>
-Greg Onufer <Greg.Onufer@Eng.Sun.COM>
-Doug Kaufman <dkaufman@rahul.net>
-David Eriksson <david@2good.com>
-Ralph Beckmann <rabe@uni-paderborn.de>
-T. Yamada <tai@imasy.or.jp>
-Lars J. Aas <larsa@sim.no>
-Jörn Hartroth <Joern.Hartroth@computer.org>
-Matthew Clarke <clamat@van.maves.ca>
-Linus Nielsen Feltzing <linus@haxx.se>
-Felix von Leitner <felix@convergence.de>
-Dan Zitter <dzitter@zitter.net>
-Jongki Suwandi <Jongki.Suwandi@eng.sun.com>
-Chris Maltby <chris@aurema.com>
-Ron Zapp <rzapper@yahoo.com>
-Paul Marquis <pmarquis@iname.com>
-Ellis Pritchard <ellis@citria.com>
-Damien Adant <dams@usa.net>
-Chris <cbayliss@csc.come>
-Marco G. Salvagno <mgs@whiz.cjb.net>
-Paul Marquis <pmarquis@iname.com>
-David LeBlanc <dleblanc@qnx.com>
-Rich Gray at Plus Technologies
-Luong Dinh Dung <u8luong@lhsystems.hu>
-Torsten Foertsch <torsten.foertsch@gmx.net>
-Kristian Köhntopp <kris@koehntopp.de>
-Fred Noz <FNoz@siac.com>
-Caolan McNamara <caolan@csn.ul.ie>
-Albert Chin-A-Young <china@thewrittenword.com>
-Stephen Kick <skick@epicrealm.com>
-Martin Hedenfalk <mhe@stacken.kth.se>
-Richard Prescott <rip at step.polymtl.ca>
-Jason S. Priebe <priebe@wral-tv.com>
-T. Bharath <TBharath@responsenetworks.com>
-Alexander Kourakos <awk@users.sourceforge.net>
-James Griffiths <griffiths_james@yahoo.com>
-Loic Dachary <loic@senga.org>
-Robert Weaver <robert.weaver@sabre.com>
-Ingo Ralf Blum <ingoralfblum@ingoralfblum.com>
-Jun-ichiro itojun Hagino <itojun@iijlab.net>
-Frederic Lepied <flepied@mandrakesoft.com>
-Georg Horn <horn@koblenz-net.de>
-Cris Bailiff <c.bailiff@awayweb.com>
-Sterling Hughes <sterling@designmultimedia.com>
-S. Moonesamy
-Ingo Wilken <iw@WWW.Ecce-Terram.DE>
-Pawel A. Gajda <mis@k2.net.pl>
-Patrick Bihan-Faou
-Nico Baggus <Nico.Baggus@mail.ing.nl>
-Sergio Ballestrero
-Andrew Francis <locust@familyhealth.com.au>
-Tomasz Lacki <Tomasz.Lacki@primark.pl>
-Georg Huettenegger <georg@ist.org>
-John Lask <johnlask@hotmail.com>
-Eric Lavigne <erlavigne@wanadoo.fr>
-Marcus Webster <marcus.webster@phocis.com>
-Götz Babin-Ebell <babin­ebell@trustcenter.de>
-Andreas Damm <andreas-sourceforge@radab.org>
-Jacky Lam <sylam@emsoftltd.com>
-James Gallagher <jgallagher@gso.uri.edu>
-Kjetil Jacobsen <kjetilja@cs.uit.no>
-Markus F.X.J. Oberhumer <markus@oberhumer.com>
-Miklos Nemeth <mnemeth@kfkisystems.com>
-Kevin Roth <kproth@users.sourceforge.net>
-Ralph Mitchell <rmitchell@eds.com>
-Dan Fandrich <dan@coneharvesters.com>
-Jean-Philippe Barrette-LaPierre <jpb@rrette.com>
-Richard Bramante <RBramante@on.com>
-Daniel Kouril <kouril@ics.muni.cz>
-Dirk Manske <dm@nettraffic.de>
-David Meyer <meyer@paracel.com>
-Dominick Meglio <codemstr@ptd.net>
-Gisle Vanem <gvanem@broadpark.no>
-Giuseppe Attardi <attardi@di.unipi.it>
-Tor Arntsen <tor@spacetec.no>
-David Byron <DByron@everdreamcorp.com>
-David Phillips
-Alexander Krasnostavsky
-Günter Knauf
-Bertrand Demiddelaer
-Peter Sylvester
-Alexis S. L. Carvalho
-Casey O'Donnell
-Marty Kuhrt
-James Bursa
-Greg Hewgill
+ If you have contributed but are missing here, please let us know!
+
+Alan Pinstein, Albert Chin-A-Young, Albert Choy, Aleksandar Milivojevic, Alex
+aka WindEagle, Alex Neblett, Alexander Kourakos, Alexander Krasnostavsky,
+Alexis Carvalho, Andi Jahja, Andreas Damm, Andreas Olsson, Andreas Rieke,
+Andrew Francis, Andrew Fuller, Andrés García, Andy Cedilnik, Andy Serpa, Angus
+Mackay, Antoine Calando, Anton Kalmykov, Arkadiusz Miskiewicz, Augustus
+Saunders, Avery Fay, Ben Greear, Benjamin Gerard, Bertrand Demiddelaer, Bjorn
+Reese, Björn Stenberg, Bob Schader, Brad Burdick, Brent Beardsley, Brian
+Akins, Brian R Duffy, Bruce Mitchener, Bryan Henderson, Bryan Kemp, Caolan
+McNamara, Casey O'Donnell, Chih-Chung Chang, Chris "Bob Bob", Chris Combes,
+Chris Gaukroger, Chris Maltby, Christian Kurz, Christian Robottom Reis,
+Christophe Demory, Christopher R. Palmer, Clarence Gardner, Clifford Wolf,
+Cody Jones, Colin Watson, Colm Buckley, Craig Davison, Craig Markwardt, Cris
+Bailiff, Cyrill Osterwalder, Damien Adant, Dan Becker, Dan C, Dan Fandrich,
+Dan Torop, Dan Zitter, Daniel at touchtunes, Daniel Stenberg, Dave Dribin,
+Dave Halbakken, Dave Hamilton, Dave May, David Byron, David Cohen, David
+Eriksson, David Houlder, David Hull, David J Meyer, David James, David Kimdon,
+David LeBlanc, David Odin, David Phillips, David Shaw, David Tarendash, David
+Thiel, Detlef Schmier, Diego Casorran, Dimitris Sarris, Dinar, Dirk
+Eddelbuettel, Dirk Manske, Dolbneff A.V, Domenico Andreoli, Dominick Meglio,
+Doug Kaufman, Doug Porter, Douglas E. Wegscheid, Douglas R. Horner, Dustin
+Boswell, Dylan Ellicott, Dylan Salisbury, Early Ehlinger, Edin Kadribasic,
+Ellis Pritchard, Emiliano Ida, Enrico Scholz, Enrik Berkhan, Eric Lavigne,
+Eric Melville, Eric Rautman, Eric Thelin, Eric Vergnaud, Eric Young, Erick
+Nuwendam, Erwan Legrand, Erwin Authried, Evan Jordan, Fabrizio Ammollo, Fedor
+Karpelevitch, Felix von Leitner, Florian Schoppmann, Forrest Cahoon, Frank
+Keeney, Frank Ticheler, Fred Noz, Frederic Lepied, Gautam Mani, Gaz Iqbal,
+Georg Horn, Georg Huettenegger, Gerd v. Egidy, Gerhard Herre, Giaslas
+Georgios, Gilad, Gilbert Ramirez Jr., Gisle Vanem, Giuseppe Attardi, Giuseppe
+D'Ambrosio, Glen Nakamura, Glen Scott, Günter Knauf, Greg Hewgill, Greg
+Onufer, Grigory Entin, Götz Babin-Ebell, Guenole Bescon, Guillaume Arluison,
+Gustaf Hui, Gwenole Beauchesne, Hamish Mackenzie, Hanno Kranzhoff, Hans
+Steegers, Hardeep Singh, Harshal Pradhan, Heikki Korpela, Henrik Storner,
+Hzhijun, Ian Ford, Ian Gulliver, Ian Wilkes, Ignacio Vazquez-Abrams, Ilguiz
+Latypov, Ingo Ralf Blum, Ingo Wilken, Jacky Lam, Jacob Meuser, James Bursa,
+James Clancy, James Cone, James Gallagher, James Griffiths, James MacMillan,
+Jamie Wilkinson, Jason S. Priebe, Jean-Claude Chauve, Jean-Louis Lemaire,
+Jean-Marc Ranger, Jean-Philippe Barrette-LaPierre, Jeff Lawson, Jeff Phillips,
+Jeff Pohlmeyer, Jeffrey Pohlmeyer, Jeremy Friesner, Jesper Jensen, Jesse
+Noller, Jim Drash, Joe Halpin, Joel Chen, Johan Anderson, Johan Nilsson, John
+Crow, John Janssen, John Lask, John McGowan, Jon Travis, Jon Turner, Jonas
+Forsman, Jonatan Lander, Jonathan Hseu, Jongki Suwandi, Josh Kapell, Jörg
+Mueller-Tolk, Jörn Hartroth, Juan F. Codagnone, Juan Ignacio Hervás, Juergen
+Wilke, Jukka Pihl, Julian Noble, Jun-ichiro itojun Hagino, Jurij Smakov, Kai
+Sommerfeld, Kai-Uwe Rommel, Kang-Jin Lee, Karol Pietrzak, Keith MacDonald,
+Keith McGuigan, Ken Hirsch, Ken Rastatter, Kevin Fisk, Kevin Roth, Kimmo
+Kinnunen, Kjell Ericson, Kjetil Jacobsen, Klevtsov Vadim, Kris Kennaway,
+Krishnendu Majumdar, Kristian Köhntopp, Kyle Sallee, Lachlan O'Dea, Larry
+Campbell, Larry Fahnoe, Lars Gustafsson, Lars J. Aas, Lars Nilsson, Lars
+Torben Wilson, Legoff Vincent, Lehel Bernadt, Len Krause, Linas Vepstas, Ling
+Thio, Linus Nielsen Feltzing, Loic Dachary, Loren Kirkby, Luca Altea, Luca
+Alteas, Lucas Adamski, Lukasz Czekierda, Luke Call, Luong Dinh Dung, Maciej
+W. Rozycki, Marc Boucher, Marcelo Juchem , Marcin Konicki, Marco G. Salvagno,
+Marcus Webster, Mark Butler, Markus Moeller, Markus Oberhumer, Martijn Koster,
+Martin C. Martin, Martin Hedenfalk, Marty Kuhrt, Maruko, Massimiliano
+Ziccardi, Mathias Axelsson, Mats Lidell, Matt Veenstra, Matthew Blain, Matthew
+Clarke, Maurice Barnum, Mekonikum, Mettgut Jamalla, Michael Benedict, Michael
+Curtis, Michael Mealling, Michal Bonino, Mihai Ionescu, Mike Bytnar, Mike
+Dobbs, Miklos Nemeth, Mitz Wark, Mohamed Lrhazi, Mohun Biswas, Moonesamy,
+Nathan O'Sullivan, Naveen Noel, Neil Dunbar, Neil Spring, Nic Roets, Nick
+Gimbrone, Nick Humfrey, Nico Baggus, Nicolas Berloquin, Nicolas Croiset, Niels
+van Tongeren, Nikita Schmidt, nk, Nodak Sodak, Oren Tirosh, P R Schaffner,
+Patrick Bihan-Faou, Patrick Smith, Paul Harrington, Paul Marquis, Paul Nolan,
+Pavel Cenek, Pavel Orehov, Pawel A. Gajda, Pedro Neves, Pete Su, Peter Bray,
+Peter Forret, Peter Pentchev, Peter Sylvester, Peter Todd, Peter Verhas, Peter
+Wullinger, Phil Karn, Philip Gladstone, Philippe Hameau, Philippe Raoult,
+Pierre, Puneet Pawaia, Rafael Sagula, Ralph Beckmann, Ralph Mitchell, Ramana
+Mokkapati, Randy McMurchy, RBramante, Reinout van Schouwen, Renaud Chaillat,
+Renaud Duhaut, Rene Bernhardt, Rene Rebe, Ricardo Cadime, Rich Gray, Richard
+Archer, Richard Atterer, Richard Bramante, Richard Cooper, Richard Gorton,
+Richard Prescott, Rick Jones, Rick Richardson, Rob Stanzel, Robert D. Young,
+Robert Olson, Robert Weaver, Robin Kay, Rodney Simmons, Roland Krikava, Roland
+Zimmermann, Roman Koifman, Ron Zapp, Rosimildo da Silva, Roy Shan, Rune
+Kleveland, runekl at opoint.com, Ryan Nelson, S. Moonesamy, Salvador Dávila,
+Salvatore Sorrentino, Sampo Kellomaki, Samuel Díaz García, Samuel Listopad,
+Sander Gates, Saul good, Sébastien Willemijns, Sebastien Willemijns, Sergio
+Ballestrero, Seshubabu Pasam, Shard, Shawn Poulson, Siddhartha Prakash Jain,
+Simon Dick, Simon Liu, Spiridonoff A.V, Stadler Stephan, Stefan Ulrich,
+Stephan Bergmann, Stephen Kick, Stephen More, Sterling Hughes, Steve Green,
+Steve Lhomme, Steve Marx, Steve Oliphant, Steven Bazyl, Steven G. Johnson,
+Stoned Elipot, Sven Neuhaus, swalkaus at yahoo.com, T. Bharath, T. Yamada,
+Thomas Schwinge, Thomas Tonino, Tim Baker, Tim Bartley, Tim Costello, Tim
+Sneddon, Toby Peterson, Tom Benoist, Tom Lee, Tom Mattison, Tom Moers, Tom
+Zerucha, Tomas Pospisek, Tomas Szepe, Tomasz Lacki, Tommy Tam, Ton Voon, Tor
+Arntsen, Torsten Foertsch, Traian Nicolescu, Troels Walsted Hansen, Troy
+Engel, Ulrich Zadow, Vincent Bronner, Vincent Penquerc'h, Vincent Sanders,
+Vojtech Janota, Vojtech Minarik, Walter J. Mack, Wayne Haigh, Werner Koch,
+Wesley Laxton, Wez Furlong, Wilfredo Sanchez, Wojciech Zwiefka, Yarram Sunil,
+Zvi Har'El
