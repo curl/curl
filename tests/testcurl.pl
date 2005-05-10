@@ -439,11 +439,12 @@ if (grepfile("define USE_ARES", "lib/config$confsuffix.h")) {
   logit "setup to build ares";
 
   logit "display ares/config$confsuffix.h";
-  open(F, "ares/config$confsuffix.h") or die "ares/config$confsuffix.h: $!";
-  while (<F>) {
-      print if /^ *#/;
+  if(open(F, "ares/config$confsuffix.h")) {
+      while (<F>) {
+          print if /^ *#/;
+      }
+      close(F);
   }
-  close(F);
 
   logit "build ares";
   chdir "ares";
