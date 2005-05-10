@@ -287,6 +287,11 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     fd_write = CURL_SOCKET_BAD;
 
   select_res = Curl_select(fd_read, fd_write, 0);
+  if(select_res & CSELECT_ERR) {
+    failf(data, "select/poll returned error: %s",
+          Curl_strerror(conn, Curl_ourerrno()));
+    return CURLE_SEND_ERROR;
+  }
 
   do {
     /* If we still have reading to do, we check if we have a readable
