@@ -101,8 +101,6 @@
 #include "share.h"
 #include "memory.h"
 #include "select.h"
-#include "strerror.h"
-#include "connect.h" /* for the Curl_ourerrno() proto */
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -290,8 +288,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
   select_res = Curl_select(fd_read, fd_write, 0);
   if(select_res & CSELECT_ERR) {
-    failf(data, "select/poll returned error: %s",
-          Curl_strerror(conn, Curl_ourerrno()));
+    failf(data, "select/poll returned error");
     return CURLE_SEND_ERROR;
   }
 
