@@ -101,6 +101,8 @@
 #include "share.h"
 #include "memory.h"
 #include "select.h"
+#include "strerror.h"
+#include "connect.h" /* for the Curl_ourerrno() proto */
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
