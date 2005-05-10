@@ -287,7 +287,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     fd_write = CURL_SOCKET_BAD;
 
   select_res = Curl_select(fd_read, fd_write, 0);
-  if(select_res & CSELECT_ERR) {
+  if(select_res == CSELECT_ERR) {
     failf(data, "select/poll returned error");
     return CURLE_SEND_ERROR;
   }
