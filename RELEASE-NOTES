@@ -11,6 +11,7 @@ Curl and libcurl 7.14.0
 
 This release includes the following changes:
 
+ o modified default HTTP request headers
  o curl --trace-time added for time stamping trace logs
  o curl now respects the SSL_CERT_DIR and SSL_CERT_PATH environment variables
  o more search paths for curl's default .curlrc config file check
@@ -19,6 +20,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o docs/THANKS now contains all known contributors
  o builds out-of-the-box on (presumably ipv6-enabled) AIX 4.3 hosts
  o curl --head could wrongly complain on bad chunked-encoding
  o --interface SIGSEGVed on a bad address
@@ -47,6 +49,6 @@ advice from friends like these:
 
  Christophe Legry, Cory Nelson, Gisle Vanem, Dan Fandrich, Toshiyuki Maezawa,
  Olivier, Andres Garcia, Dave Dribin, Alex Suykov, Cory Nelson, Fred New,
- Paul Moore, Alexander Zhuravlev, Bryan Henderson
+ Paul Moore, Alexander Zhuravlev, Bryan Henderson, Jeremy Brown
 
         Thanks! (and sorry if I forgot to mention someone)

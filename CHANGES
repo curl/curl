@@ -7,6 +7,35 @@
                                   Changelog
 
 
+Daniel (11 May 2005)
+- Starting now, libcurl sends a little different set of headers in its default
+  HTTP requests:
+  
+  A) Normal non-proxy HTTP:
+    - no more "Pragma: no-cache" (this only makes sense to proxies)
+
+  B) Non-CONNECT HTTP request over proxy:
+    - "Pragma: no-cache" is used (like before)
+    - "Proxy-Connection: Keep-alive" (for older style 1.0-proxies)
+
+  C) CONNECT HTTP request over proxy:
+    - "Host: [name]:[port]"
+    - "Proxy-Connection: Keep-alive"
+
+  The A) case is mostly to reduce the default header size and remove a
+  pointless header.
+
+  The B) is to address (rare) problems with HTTP 1.0 proxies
+
+  The C) headers are both to address (rare) problems with some proxies. The
+  code in libcurl that deals with CONNECT requests need a rewrite, but it
+  feels like a too big a job for me to do now. Details are added in the code
+  comments for now.
+
+  Updated a large amount of test cases to reflect the news.
+
+Version 7.14.0-pre1 (9 May 2005)
+
 Daniel (2 May 2005)
 - Sort of "fixed" KNOWN_BUGS #4: curl now builds IPv6 enabled on AIX 4.3. At
   least it should no longer cause a compiler error. However, it does not have
