@@ -143,8 +143,11 @@ TODO
    Clark)
 
  * Make curl's SSL layer capable of using other free SSL libraries.  Such as
-   the Mozilla Security Services:
-   http://www.mozilla.org/projects/security/pki/nss/
+   Mozilla Security Services
+   (http://www.mozilla.org/projects/security/pki/nss/), MatrixSSL
+   (http://www.matrixssl.org/) or yaSSL (http://yassl.com/). At least the
+   latter two could be alternatives for those looking to reduce the footprint
+   of libcurl built with OpenSSL or GnuTLS.
 
  LDAP
 
