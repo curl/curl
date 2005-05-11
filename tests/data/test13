@@ -36,7 +36,6 @@ http://%HOSTIP:%HTTPPORT/want/13 -X DELETE
 <protocol>
 DELETE /want/13 HTTP/1.1
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 
 </protocol>

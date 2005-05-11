@@ -49,7 +49,6 @@ PUT /33 HTTP/1.1
 Content-Range: bytes 50-99/100
 User-Agent: curl/7.6 (sparc-sun-solaris2.7) libcurl 7.6-pre4 (SSL 0.9.6) (krb4 enabled)
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 Content-Length: 50
 Expect: 100-continue

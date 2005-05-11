@@ -42,12 +42,10 @@ http://%HOSTIP:%HTTPPORT/197 --retry 1000
 <protocol>
 GET /197 HTTP/1.1
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 
 GET /197 HTTP/1.1
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 
 </protocol>

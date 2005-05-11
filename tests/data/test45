@@ -62,12 +62,10 @@ simple HTTP Location: without protocol in initial URL
 <protocol>
 GET /want/45 HTTP/1.1
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 
 GET /want/data.cgi?moo=http://&/450002 HTTP/1.1
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 
 </protocol>

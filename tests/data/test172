@@ -39,7 +39,6 @@ http://%HOSTIP:%HTTPPORT/we/want/172 -b log/jar172.txt -b "tool=curl; name=fool"
 <protocol>
 GET /we/want/172 HTTP/1.1
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 Cookie: nodomain=value; partmatch=present; tool=curl; name=fool
 

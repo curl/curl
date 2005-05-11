@@ -39,7 +39,6 @@ HTTP URL with slash but with "parameter"
 <protocol>
 GET /?mooo/59 HTTP/1.1
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 
 </protocol>

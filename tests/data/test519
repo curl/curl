@@ -58,13 +58,11 @@ http://%HOSTIP:%HTTPPORT/519
 GET /519 HTTP/1.1
 Authorization: Basic bW9uc3Rlcjp1bmRlcmJlZA==
 Host: %HOSTIP:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 
 GET /519 HTTP/1.1
 Authorization: Basic YW5vdGhlcm1vbnN0ZXI6aW53YXJkcm9iZQ==
 Host: %HOSTIP:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 
 </protocol>

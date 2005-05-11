@@ -48,6 +48,8 @@ https://test.anything.really.com:94 -x %HOSTIP:%HTTPPORT
 <protocol>
 CONNECT test.anything.really.com:94 HTTP/1.0
 User-Agent: curl/7.11.0-CVS (i686-pc-linux-gnu) libcurl/7.11.0-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4
+Host: test.anything.really.com:94
+Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>

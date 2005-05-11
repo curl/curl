@@ -50,7 +50,6 @@ HTTPS GET, receive no headers only data!
 <protocol>
 GET /306 HTTP/1.1
 Host: 127.0.0.1:%HTTPSPORT
-Pragma: no-cache
 Accept: */*
 
 </protocol>

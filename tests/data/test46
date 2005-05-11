@@ -56,7 +56,6 @@ www.loser.com	FALSE	/	FALSE	1139150993	UID	99
 <protocol>
 GET /want/46 HTTP/1.1
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 Cookie: empty=; mooo=indeed
 

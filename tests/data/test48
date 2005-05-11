@@ -39,7 +39,6 @@ HTTP with -d and -G and -I
 <protocol>
 HEAD /48?foo=moo&moo=poo HTTP/1.1
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 
 </protocol>

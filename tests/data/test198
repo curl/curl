@@ -51,12 +51,10 @@ http://%HOSTIP:%HTTPPORT/198 --retry 1000
 <protocol>
 GET /198 HTTP/1.1
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 
 GET /198 HTTP/1.1
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 
 </protocol>

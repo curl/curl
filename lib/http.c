@@ -811,6 +811,8 @@ struct send_buffer {
 };
 typedef struct send_buffer send_buffer;
 
+static CURLcode add_custom_headers(struct connectdata *conn,
+                                   send_buffer *req_buffer);
 static CURLcode
  add_buffer(send_buffer *in, const void *inptr, size_t size);
 
@@ -885,34 +887,47 @@ CURLcode add_buffer_send(send_buffer *in,
 
     *bytes_written += amount;
 
-    if((size_t)amount != size) {
-      /* The whole request could not be sent in one system call. We must queue
-         it up and send it later when we get the chance. We must not loop here
-         and wait until it might work again. */
+    if(http) {
+      if((size_t)amount != size) {
+        /* The whole request could not be sent in one system call. We must
+           queue it up and send it later when we get the chance. We must not
+           loop here and wait until it might work again. */
 
-      size -= amount;
+        size -= amount;
 
-      ptr = in->buffer + amount;
+        ptr = in->buffer + amount;
 
-      /* backup the currently set pointers */
-      http->backup.fread = conn->fread;
-      http->backup.fread_in = conn->fread_in;
-      http->backup.postdata = http->postdata;
-      http->backup.postsize = http->postsize;
+        /* backup the currently set pointers */
+        http->backup.fread = conn->fread;
+        http->backup.fread_in = conn->fread_in;
+        http->backup.postdata = http->postdata;
+        http->backup.postsize = http->postsize;
 
-      /* set the new pointers for the request-sending */
-      conn->fread = (curl_read_callback)readmoredata;
-      conn->fread_in = (void *)conn;
-      http->postdata = ptr;
-      http->postsize = (curl_off_t)size;
+        /* set the new pointers for the request-sending */
+        conn->fread = (curl_read_callback)readmoredata;
+        conn->fread_in = (void *)conn;
+        http->postdata = ptr;
+        http->postsize = (curl_off_t)size;
 
-      http->send_buffer = in;
-      http->sending = HTTPSEND_REQUEST;
+        http->send_buffer = in;
+        http->sending = HTTPSEND_REQUEST;
 
-      return CURLE_OK;
+        return CURLE_OK;
+      }
+      http->sending = HTTPSEND_BODY;
+      /* the full buffer was sent, clean up and return */
     }
-    http->sending = HTTPSEND_BODY;
-    /* the full buffer was sent, clean up and return */
+    else {
+      if((size_t)amount != size)
+        /* We have no continue-send mechanism now, fail. This can only happen
+           when this function is used from the CONNECT sending function. We
+           currently (stupidly) assume that the whole request is always sent
+           away in the first single chunk.
+
+           This needs FIXing.
+        */
+        return CURLE_SEND_ERROR;
+    }
   }
   if(in->buffer)
     free(in->buffer);
@@ -1038,9 +1053,15 @@ Curl_compareheader(char *headerline,    /* line to check */
 }
 
 /*
- * ConnectHTTPProxyTunnel() requires that we're connected to a HTTP proxy. This
- * function will issue the necessary commands to get a seamless tunnel through
- * this proxy. After that, the socket can be used just as a normal socket.
+ * ConnectHTTPProxyTunnel() requires that we're connected to a HTTP
+ * proxy. This function will issue the necessary commands to get a seamless
+ * tunnel through this proxy. After that, the socket can be used just as a
+ * normal socket.
+ *
+ * This badly needs to be rewritten. CONNECT should be sent and dealt with
+ * like any ordinary HTTP request, and not specially crafted like this. This
+ * function only remains here like this for now since the rewrite is a bit too
+ * much work to do at the moment.
  */
 
 CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
@@ -1063,6 +1084,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
   char *line_start;
   char *host_port;
   curl_socket_t tunnelsocket = conn->sock[sockindex];
+  send_buffer *req_buffer;
 
 #define SELECT_OK      0
 #define SELECT_ERROR   1
@@ -1080,26 +1102,66 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
       conn->newurl = NULL;
     }
 
+    /* initialize a dynamic send-buffer */
+    req_buffer = add_buffer_init();
+
+    if(!req_buffer)
+      return CURLE_OUT_OF_MEMORY;
+
     host_port = aprintf("%s:%d", hostname, remote_port);
     if(!host_port)
       return CURLE_OUT_OF_MEMORY;
 
     /* Setup the proxy-authorization header, if any */
     result = Curl_http_output_auth(conn, (char *)"CONNECT", host_port, TRUE);
-    if(CURLE_OK == result) {
 
-      /* OK, now send the connect request to the proxy */
-      result =
-        Curl_sendf(tunnelsocket, conn,
-                   "CONNECT %s:%d HTTP/1.0\015\012"
-                   "%s"
-                   "%s"
-                   "\r\n",
-                   hostname, remote_port,
-                   conn->allocptr.proxyuserpwd?
-                   conn->allocptr.proxyuserpwd:"",
-                   data->set.useragent?conn->allocptr.uagent:""
-                   );
+    if(CURLE_OK == result) {
+      char *host=(char *)"";
+      const char *proxyconn="";
+      char *ptr;
+
+      ptr = checkheaders(data, "Host:");
+      if(!ptr) {
+        host = aprintf("Host: %s\r\n", host_port);
+        if(!host)
+          result = CURLE_OUT_OF_MEMORY;
+      }
+      ptr = checkheaders(data, "Proxy-Connection:");
+      if(!ptr)
+        proxyconn = "Proxy-Connection: Keep-Alive\r\n";
+
+      if(CURLE_OK == result) {
+        /* Send the connect request to the proxy */
+        /* BLOCKING */
+        result =
+          add_bufferf(req_buffer,
+                      "CONNECT %s:%d HTTP/1.0\r\n"
+                      "%s"  /* Host: */
+                      "%s"  /* Proxy-Authorization */
+                      "%s"  /* User-Agent */
+                      "%s", /* Proxy-Connection */
+                      hostname, remote_port,
+                      host,
+                      conn->allocptr.proxyuserpwd?
+                      conn->allocptr.proxyuserpwd:"",
+                      data->set.useragent?conn->allocptr.uagent:"",
+                      proxyconn);
+
+        if(CURLE_OK == result)
+          result = add_custom_headers(conn, req_buffer);
+
+        if(host && *host)
+          free(host);
+
+        if(CURLE_OK == result)
+          /* CRLF terminate the request */
+          result = add_bufferf(req_buffer, "\r\n");
+
+        if(CURLE_OK == result)
+          /* Now send off the request */
+          result = add_buffer_send(req_buffer, conn,
+                                   &data->info.request_size);
+      }
       if(result)
         failf(data, "Failed sending CONNECT to proxy");
     }
@@ -1367,7 +1429,42 @@ static CURLcode expect100(struct SessionHandle *data,
   return result;
 }
 
+static CURLcode add_custom_headers(struct connectdata *conn,
+                                   send_buffer *req_buffer)
+{
+  CURLcode result = CURLE_OK;
+  char *ptr;
+  struct curl_slist *headers=conn->data->set.headers;
 
+  while(headers) {
+    ptr = strchr(headers->data, ':');
+    if(ptr) {
+      /* we require a colon for this to be a true header */
+
+      ptr++; /* pass the colon */
+      while(*ptr && isspace((int)*ptr))
+        ptr++;
+
+      if(*ptr) {
+        /* only send this if the contents was non-blank */
+
+        if(conn->allocptr.host &&
+           /* a Host: header was sent already, don't pass on any custom Host:
+              header as that will produce *two* in the same request! */
+           curl_strnequal("Host:", headers->data, 5))
+          ;
+        else {
+
+          result = add_bufferf(req_buffer, "%s\r\n", headers->data);
+          if(result)
+            return result;
+        }
+      }
+    }
+    headers = headers->next;
+  }
+  return result;
+}
 
 /*
  * Curl_http() gets called from the generic Curl_do() function when a HTTP
@@ -1620,8 +1717,10 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   }
 
 
-  if(!checkheaders(data, "Pragma:"))
-    http->p_pragma = "Pragma: no-cache\r\n";
+  http->p_pragma =
+    (!checkheaders(data, "Pragma:") &&
+     (conn->bits.httpproxy && !conn->bits.tunnel_proxy) )?
+    "Pragma: no-cache\r\n":NULL;
 
   if(!checkheaders(data, "Accept:"))
     http->p_accept = "Accept: */*\r\n";
@@ -1727,7 +1826,6 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       data->set.httpversion==CURL_HTTP_VERSION_1_0?"1.0":"1.1";
 
     send_buffer *req_buffer;
-    struct curl_slist *headers=data->set.headers;
     curl_off_t postsize; /* off_t type to be able to hold a large file size */
 
     /* initialize a dynamic send-buffer */
@@ -1750,6 +1848,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                   "%s" /* accept */
                   "%s" /* accept-encoding */
                   "%s" /* referer */
+                  "%s" /* Proxy-Connection */
                   "%s",/* transfer-encoding */
 
                 request,
@@ -1768,6 +1867,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                 (data->set.encoding && *data->set.encoding && conn->allocptr.accept_encoding)?
                 conn->allocptr.accept_encoding:"",
                 (data->change.referer && conn->allocptr.ref)?conn->allocptr.ref:"" /* Referer: <data> */,
+                (conn->bits.httpproxy && !conn->bits.tunnel_proxy)?
+                  "Proxy-Connection: Keep-Alive\r\n":"",
                 te
                 );
 
@@ -1874,33 +1975,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         return result;
     }
 
-    while(headers) {
-      ptr = strchr(headers->data, ':');
-      if(ptr) {
-        /* we require a colon for this to be a true header */
-
-        ptr++; /* pass the colon */
-        while(*ptr && isspace((int)*ptr))
-          ptr++;
-
-        if(*ptr) {
-          /* only send this if the contents was non-blank */
-
-          if(conn->allocptr.host &&
-            /* a Host: header was sent already, don't pass on any custom Host:
-               header as that will produce *two* in the same request! */
-             curl_strnequal("Host:", headers->data, 5))
-            ;
-          else {
-
-            result = add_bufferf(req_buffer, "%s\r\n", headers->data);
-            if(result)
-              return result;
-          }
-        }
-      }
-      headers = headers->next;
-    }
+    result = add_custom_headers(conn, req_buffer);
+    if(result)
+      return result;
 
     http->postdata = NULL;  /* nothing to post at this point */
     Curl_pgrsSetUploadSize(data, 0); /* upload size is 0 atm */

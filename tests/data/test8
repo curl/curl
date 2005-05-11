@@ -49,7 +49,6 @@ Set-Cookie: partmatch=present; domain=.0.0.1; path=/;
 <protocol>
 GET /we/want/8 HTTP/1.1
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 Cookie: partmatch=present; foobar=name
 

@@ -70,6 +70,7 @@ Authorization: Basic aWFtOm15c2VsZg==
 Host: first.host.it.is
 Pragma: no-cache
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 GET http://goto.second.host.now/2340002 HTTP/1.1
 Proxy-Authorization: Basic dGVzdGluZzp0aGlz
@@ -77,6 +78,7 @@ Authorization: Basic aWFtOm15c2VsZg==
 Host: goto.second.host.now
 Pragma: no-cache
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>

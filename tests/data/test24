@@ -36,7 +36,6 @@ http://%HOSTIP:%HTTPPORT/24 --fail
 GET /24 HTTP/1.1
 User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 
 </protocol>

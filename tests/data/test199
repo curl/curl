@@ -40,12 +40,10 @@ HTTP with -d, -G and {}
 <protocol>
 GET /199?foo=moo&moo=poo HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 
 GET /199?foo=moo&moo=poo HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 
 </protocol>

@@ -49,7 +49,6 @@ http://%HOSTIP/522 %HTTPPORT
 GET /522 HTTP/1.1
 Authorization: Basic eHh4Onl5eQ==
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 
 </protocol>

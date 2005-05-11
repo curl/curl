@@ -41,7 +41,6 @@ the
 <protocol>
 PUT /we/want/180 HTTP/1.0
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 Content-Length: 78
 

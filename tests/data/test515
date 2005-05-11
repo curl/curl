@@ -37,7 +37,6 @@ http://%HOSTIP:%HTTPPORT/515
 <protocol>
 POST /515 HTTP/1.1
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 Content-Length: 0
 Content-Type: application/x-www-form-urlencoded

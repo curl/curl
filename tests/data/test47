@@ -40,7 +40,6 @@ http://%HOSTIP:%HTTPPORT/47 -0
 <protocol>
 GET /47 HTTP/1.0
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 
 </protocol>

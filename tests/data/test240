@@ -43,7 +43,6 @@ HTTP-IPv6 GET
 <protocol>
 GET /240 HTTP/1.1
 Host: %HOST6IP:%HTTP6PORT
-Pragma: no-cache
 Accept: */*
 
 </protocol>

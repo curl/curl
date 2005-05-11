@@ -45,6 +45,7 @@ GET ftp://127.0.0.1:%HTTPPORT/we/want/that/page/79 HTTP/1.1
 Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>

@@ -80,15 +80,18 @@ http://test.remote.server.com:209/path/2090002 --proxy http://%HOSTIP:%HTTPPORT 
 </strip>
 <protocol>
 CONNECT test.remote.server.com:209 HTTP/1.0
+Host: test.remote.server.com:209
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAAAgIAAAAAAAAgAAAAAAAAACAAAAA=
+Proxy-Connection: Keep-Alive
 
 CONNECT test.remote.server.com:209 HTTP/1.0
+Host: test.remote.server.com:209
 Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEUAAAAYABgAXQAAAAAAAABAAAAABQAFAEAAAAAAAAAARQAAAAAAAAB1AAAAAYIAAHNpbGx5oB5CPMq0JDu5tbxLow3sHn3jfoYDE+7QJVE7DA0GyDEwvj2BxsBctP9tT4fnCtL1
+Proxy-Connection: Keep-Alive
 
 GET /path/2090002 HTTP/1.1
 User-Agent: curl/7.12.3-CVS (i686-pc-linux-gnu) libcurl/7.12.3-CVS OpenSSL/0.9.6b zlib/1.1.4
 Host: test.remote.server.com:209
-Pragma: no-cache
 Accept: */*
 
 </protocol>

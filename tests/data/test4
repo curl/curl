@@ -42,7 +42,6 @@ Replaced internal and added custom HTTP headers
 <protocol>
 GET /4 HTTP/1.1
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 extra-header: here
 Accept: replaced
 

@@ -37,7 +37,6 @@ http://%HOSTIP:%HTTPPORT/516
 <protocol>
 POST /516 HTTP/1.1
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 Content-Length: 0
 

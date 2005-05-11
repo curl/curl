@@ -36,7 +36,6 @@ http://%HOSTIP:%HTTPPORT/want/303 -m 2
 <protocol>
 GET /want/303 HTTP/1.1
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 
 </protocol>

@@ -60,7 +60,6 @@ http://%HOSTIP:%HTTPPORT/99 -C 9999999999
 GET /99 HTTP/1.1
 Range: bytes=9999999999-
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 
 </protocol>

@@ -30,6 +30,7 @@ User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6
 Host: a.galaxy.far.far.away
 Pragma: no-cache
 Accept: */*
+Proxy-Connection: Keep-Alive
 Content-Length: 0
 
 </protocol>

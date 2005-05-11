@@ -43,6 +43,7 @@ Proxy-Authorization: Basic ZmFrZUB1c2VyOqenp2xvb29vb29vb29vb29vb29vb29vb29vb29vb
 Host: we.want.that.site.com
 Pragma: no-cache
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>

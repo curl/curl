@@ -40,6 +40,7 @@ GET http://supertrooper.fake/c/179 HTTP/1.1
 Host: supertrooper.fake
 Pragma: no-cache
 Accept: */*
+Proxy-Connection: Keep-Alive
 Cookie: moo2=indeed
 
 </protocol>

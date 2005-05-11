@@ -69,19 +69,16 @@ HTTP, urlglob []-retrieval and -o #[num] usage
 GET /860001 HTTP/1.1
 User-Agent: curl/7.10.7-pre4 (i686-pc-linux-gnu) libcurl/7.10.7-pre4 OpenSSL/0.9.7a ipv6 zlib/1.1.3 GSS
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 
 GET /860002 HTTP/1.1
 User-Agent: curl/7.10.7-pre4 (i686-pc-linux-gnu) libcurl/7.10.7-pre4 OpenSSL/0.9.7a ipv6 zlib/1.1.3 GSS
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 
 GET /860003 HTTP/1.1
 User-Agent: curl/7.10.7-pre4 (i686-pc-linux-gnu) libcurl/7.10.7-pre4 OpenSSL/0.9.7a ipv6 zlib/1.1.3 GSS
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 
 </protocol>

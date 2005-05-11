@@ -46,7 +46,6 @@ request MOOO
 MOOO /that.site.com/17 HTTP/1.1
 User-Agent: agent007 license to drill	
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 
 </protocol>

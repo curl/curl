@@ -49,12 +49,13 @@ moo
 <verify>
 <protocol>
 CONNECT 127.0.0.1:%HTTPSPORT HTTP/1.0
+Host: 127.0.0.1:%HTTPSPORT
 Proxy-Authorization: Basic dGVzdDppbmc=
+Proxy-Connection: Keep-Alive
 
 GET /503 HTTP/1.1
 Authorization: Basic dGVzdDppbmc=
 Host: 127.0.0.1:%HTTPSPORT
-Pragma: no-cache
 Accept: */*
 
 </protocol>

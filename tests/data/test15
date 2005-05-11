@@ -49,7 +49,6 @@ http://127.0.0.1:%HTTPPORT/want/15 200 26
 <protocol>
 GET /want/15 HTTP/1.1
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 
 </protocol>

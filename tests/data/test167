@@ -49,6 +49,7 @@ User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6
 Host: data.from.server.requiring.digest.hohoho.com
 Pragma: no-cache
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 GET http://data.from.server.requiring.digest.hohoho.com/167 HTTP/1.1
 Proxy-Authorization: Basic Zm9vOmJhcg==
@@ -57,6 +58,7 @@ User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6
 Host: data.from.server.requiring.digest.hohoho.com
 Pragma: no-cache
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>

@@ -37,7 +37,6 @@ HTTP-IPv6 GET (using ip6-localhost)
 <protocol>
 GET /241 HTTP/1.1
 Host: ip6-localhost:%HTTP6PORT
-Pragma: no-cache
 Accept: */*
 
 </protocol>

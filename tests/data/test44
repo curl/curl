@@ -45,7 +45,6 @@ bar
 POST /we/want/44 HTTP/1.1
 User-Agent: curl/7.10.4 (i686-pc-linux-gnu) libcurl/7.10.4 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 Content-Length: 408
 Content-Type: multipart/form-data; boundary=----------------------------7c633d5c27ce

@@ -53,6 +53,7 @@ Authorization: Basic eHh4Onl5eQ==
 Host: www.haxx.se:19999
 Pragma: no-cache
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 </protocol>
 <stdout>

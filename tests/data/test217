@@ -30,6 +30,8 @@ http://test.remote.server.com:217/path/2170002 --proxy http://%HOSTIP:%HTTPPORT 
 </strip>
 <protocol>
 CONNECT test.remote.server.com:217 HTTP/1.0
+Host: test.remote.server.com:217
+Proxy-Connection: Keep-Alive
 
 </protocol>
 # CURLE_RECV_ERROR

@@ -40,7 +40,6 @@ more than one byte
 <protocol>
 PUT /bzz/60 HTTP/1.1
 Host: 127.0.0.1:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 Transfer-Encoding: chunked
 Content-Length: 1

@@ -87,6 +87,7 @@ User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6
 Host: data.from.server.requiring.digest.hohoho.com
 Pragma: no-cache
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 GET http://data.from.server.requiring.digest.hohoho.com/169 HTTP/1.1
 Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEMAAAAYABgAWwAAAAAAAABAAAAAAwADAEAAAAAAAAAAQwAAAAAAAABzAAAAAYIAAGZvb4P6B+XVQ6vQsx3DfDXUVhd9436GAxPu0IYcl2Z7LxHmNeOAWQ+vxUmhuCFJBUgXCQ==
@@ -94,6 +95,7 @@ User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6
 Host: data.from.server.requiring.digest.hohoho.com
 Pragma: no-cache
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 GET http://data.from.server.requiring.digest.hohoho.com/169 HTTP/1.1
 Authorization: Digest username="digest", realm="r e a l m", nonce="abcdef", uri="/169", response="95d48591985a03c4b49cb962aa7bd3e6"
@@ -101,6 +103,7 @@ User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6
 Host: data.from.server.requiring.digest.hohoho.com
 Pragma: no-cache
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>

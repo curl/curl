@@ -37,7 +37,6 @@ http://%HOSTIP:%HTTPPORT/we/want/73 -c log/jar73.txt -H "Host: host.NOT_DISCLOSE
 </strip>
 <protocol>
 GET /we/want/73 HTTP/1.1
-Pragma: no-cache
 Accept: */*
 Host: host.NOT_DISCLOSED.se
 
