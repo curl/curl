@@ -34,6 +34,14 @@ Daniel (11 May 2005)
 
   Updated a large amount of test cases to reflect the news.
 
+Daniel (10 May 2005)
+- Half-baked attempt to bail out if select() returns _only_ errorfds when the
+  transfer is in progress. An attempt to fix Allan's problem. See
+  http://curl.haxx.se/mail/lib-2005-05/0073.html and the rest of that thread
+  for details.
+
+  I'm still not sure this is the right fix, but...
+
 Version 7.14.0-pre1 (9 May 2005)
 
 Daniel (2 May 2005)
