@@ -410,7 +410,7 @@ is a more secure way to do authentication over public networks than the
 regular old-fashioned Basic method.
 .IP CURLAUTH_GSSNEGOTIATE
 HTTP GSS-Negotiate authentication. The GSS-Negotiate (also known as plain
-"Negotiate") method was designed by Microsoft and is used in their web
+\&"Negotiate") method was designed by Microsoft and is used in their web
 applications. It is primarily meant as a support for Kerberos5 authentication
 but may be also used along with another authentication methods. For more
 information see IETF draft draft-brezak-spnego-http-04.txt.
@@ -1035,14 +1035,12 @@ Authenticating the certificate is not by itself very useful.  You
 typically want to ensure that the server, as authentically identified
 by its certificate, is the server you mean to be talking to.  Use
 \fICURLOPT_SSL_VERIFYHOST\fP to control that.
-
 .IP CURLOPT_CAINFO
 Pass a char * to a zero terminated string naming a file holding one or more
 certificates to verify the peer with.  This makes sense only when used in
 combination with the \fICURLOPT_SSL_VERIFYPEER\fP option.  If
 \fICURLOPT_SSL_VERIFYPEER\fP is zero, \fICURLOPT_CAINFO\fP need not
 even indicate an accessible file.
-
 .IP CURLOPT_CAPATH
 Pass a char * to a zero terminated string naming a directory holding
 multiple CA certificates to verify the peer with. The certificate
@@ -1052,8 +1050,6 @@ makes sense only when used in combination with the
 is zero, \fICURLOPT_CAPATH\fP need not even indicate an accessible
 path.  The \fICURLOPT_CAPATH\fP function apparently does not work in
 Windows due to some limitation in openssl. (Added in 7.9.8)
-
-
 .IP CURLOPT_RANDOM_FILE
 Pass a char * to a zero terminated file name. The file will be used to read
 from to seed the random engine for SSL. The more random the specified file is,
@@ -1061,9 +1057,7 @@ the more secure the SSL connection will become.
 .IP CURLOPT_EGDSOCKET
 Pass a char * to the zero terminated path name to the Entropy Gathering Daemon
 socket. It will be used to seed the random engine for SSL.
-
 .IP CURLOPT_SSL_VERIFYHOST
-
 Pass a long as parameter.
 
 This option determines whether curl verifies that the server claims to be
@@ -1092,7 +1086,6 @@ The default, since 7.10, is 2.
 The checking this option controls is of the identity that the server
 \fIclaims\fP.  The server could be lying.  To control lying, see
 \fICURLOPT_SSL_VERIFYPEER\fP.
-
 .IP CURLOPT_SSL_CIPHER_LIST
 Pass a char *, pointing to a zero terminated string holding the list of
 ciphers to use for the SSL connection. The list must be syntactically correct,
@@ -1104,7 +1097,6 @@ compile OpenSSL.
 
 You'll find more details about cipher lists on this URL:
 \fIhttp://www.openssl.org/docs/apps/ciphers.html\fP
-
 .IP CURLOPT_KRB4LEVEL
 Pass a char * as parameter. Set the krb4 security level, this also enables
 krb4 awareness.  This is a string, 'clear', 'safe', 'confidential' or
