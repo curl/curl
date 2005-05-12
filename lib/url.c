@@ -3373,9 +3373,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 #ifdef HAVE_ALARM
     /* alarm() makes a signal get sent when the timeout fires off, and that
        will abort system calls */
-    prev_alarm = alarm(data->set.connecttimeout?
-                       data->set.connecttimeout:
-                       data->set.timeout);
+    prev_alarm = alarm((unsigned int) (data->set.connecttimeout?
+                                       data->set.connecttimeout:
+                                       data->set.timeout));
     /* We can expect the conn->created time to be "now", as that was just
        recently set in the beginning of this function and nothing slow
        has been done since then until now. */
