@@ -2205,6 +2205,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         if(-1 == stat(nextarg, &statbuf)) {
           /* failed, remove time condition */
           config->timecond = CURL_TIMECOND_NONE;
+          fprintf(stderr,
+                  "Warning: Illegal date format for -z/--timecond and not "
+                  "a file name.\n"
+                  "         See curl_getdate(3) for valid date syntax.\n");
         }
         else {
           /* pull the time out from the file */
