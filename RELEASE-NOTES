@@ -20,6 +20,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o reconnected proxy use with NTLM auth on the same handle
+ o warns about bad -z date syntax
  o docs/THANKS now contains all known contributors
  o builds out-of-the-box on (presumably ipv6-enabled) AIX 4.3 hosts
  o curl --head could wrongly complain on bad chunked-encoding
@@ -49,6 +51,6 @@ advice from friends like these:
 
  Christophe Legry, Cory Nelson, Gisle Vanem, Dan Fandrich, Toshiyuki Maezawa,
  Olivier, Andres Garcia, Dave Dribin, Alex Suykov, Cory Nelson, Fred New,
- Paul Moore, Alexander Zhuravlev, Bryan Henderson, Jeremy Brown
+ Paul Moore, Alexander Zhuravlev, Bryan Henderson, Jeremy Brown, Allan
 
         Thanks! (and sorry if I forgot to mention someone)

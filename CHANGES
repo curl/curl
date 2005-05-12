@@ -7,6 +7,19 @@
                                   Changelog
 
 
+Daniel (12 May 2005)
+- When doing a second request (after a disconnect) using the same easy handle,
+  over a proxy that uses NTLM authentication, libcurl failed to use NTLM again
+  properly (the auth method was accidentally reset to the same as had been set
+  for host auth, which defaults to Basic). Bug report #1200661 identified the
+  the problem and the fix.
+
+- If -z/--time-cond is used with an invalid date syntax, this is no longer
+  silently discarded. Instead a proper warning message is diplayed that
+  informs about it. But it still continues without the condition.
+
+Version 7.14.0-pre2 (11 May 2005)
+
 Daniel (11 May 2005)
 - Starting now, libcurl sends a little different set of headers in its default
   HTTP requests:
