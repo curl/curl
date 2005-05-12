@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_easy_setopt 3 "25 Jan 2005" "libcurl 7.13.0" "libcurl Manual"
+.TH curl_easy_setopt 3 "12 May 2005" "libcurl 7.14.0" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - set options for a curl easy handle
 .SH SYNOPSIS
@@ -996,13 +996,22 @@ operations.
 \fBNOTE:\fP If the crypto device cannot be set,
 \fICURLE_SSL_ENGINE_SETFAILED\fP is returned.
 .IP CURLOPT_SSLVERSION
-Pass a long as parameter. Set what version of SSL to attempt to use, 2 or
-3. By default, the SSL library will try to solve this by itself although some
-servers make this difficult why you at times may have to use this option.
-
-
+Pass a long as parameter to control what version of SSL/TLS to attempt to use.
+The available options are:
+.RS
+.IP CURL_SSLVERSION_DEFAULT
+The default action. When libcurl built with OpenSSL, this will attempt to
+figure out the remote SSL protocol version. Unfortunately there are a lot of
+ancient and broken servers in use which cannot handle this technique and will
+fail to connect. When libcurl is built with GnuTLS, this will mean SSLv3.
+.IP CURL_SSLVERSION_TLSv1
+Force TLSv1
+.IP CURL_SSLVERSION_SSLv2
+Force SSLv2
+.IP CURL_SSLVERSION_SSLv3
+Force SSLv3
+.RE
 .IP CURLOPT_SSL_VERIFYPEER
-
 Pass a long as parameter.
 
 This option determines whether curl verifies the authenticity of the
