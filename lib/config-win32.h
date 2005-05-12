@@ -235,7 +235,7 @@
 /* lber dynamic library file */
 /* #undef DL_LBER_FILE */
 
-/* Defines set for VS2005 to _not_ decprecate a few functions we use. */
+/* Defines set for VS2005 to _not_ deprecate a few functions we use. */
 #define _CRT_SECURE_NO_DEPRECATE
 #define _CRT_NONSTDC_NO_DEPRECATE
 
