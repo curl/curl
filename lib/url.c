@@ -1442,7 +1442,7 @@ CURLcode Curl_disconnect(struct connectdata *conn)
 
     data->state.authproxy.done = FALSE;
     data->state.authproxy.picked =
-      data->state.authhost.want;
+      data->state.authproxy.want;
 
     data->state.authproblem = FALSE;
 
