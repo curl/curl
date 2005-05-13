@@ -20,6 +20,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o uses select() instead of poll() even on Mac OS X 10.4
  o reconnected proxy use with NTLM auth on the same handle
  o warns about bad -z date syntax
  o docs/THANKS now contains all known contributors
@@ -51,6 +52,7 @@ advice from friends like these:
 
  Christophe Legry, Cory Nelson, Gisle Vanem, Dan Fandrich, Toshiyuki Maezawa,
  Olivier, Andres Garcia, Dave Dribin, Alex Suykov, Cory Nelson, Fred New,
- Paul Moore, Alexander Zhuravlev, Bryan Henderson, Jeremy Brown, Allan
+ Paul Moore, Alexander Zhuravlev, Bryan Henderson, Jeremy Brown, Allan,
+ Grigory Entin
 
         Thanks! (and sorry if I forgot to mention someone)
