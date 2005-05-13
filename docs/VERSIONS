@@ -20,7 +20,7 @@ Version Numbers and Releases
    N is pre-release number
 
  One of these numbers will get bumped in each new release. The numbers to the
- right of a bumped number will be reset to zero. If Z is zero, it is not
+ right of a bumped number will be reset to zero. If Z is zero, it may not be
  included in the version number. The pre release number is only included in
  pre releases (they're never used in public, official, releases).
 
@@ -49,7 +49,7 @@ Version Numbers and Releases
 
  As a service to any application that might want to support new libcurl
  features while still being able to build with older versions, all releases
- have the libcurl version stored in the curl/curl.h file using a static
+ have the libcurl version stored in the curl/curlver.h file using a static
  numbering scheme that can be used for comparison. The version number is
  defined as:
         
@@ -62,3 +62,6 @@ Version Numbers and Releases
  This 6-digit hexadecimal number does not show pre-release number, and it is
  always a greater number in a more recent release. It makes comparisons with
  greater than and less than work.
+
+ This number is also available as three separate defines:
+ LIBCURL_VERSION_MAJOR, LIBCURL_VERSION_MINOR and LIBCURL_VERSION_PATCH.
