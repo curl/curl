@@ -7,6 +7,12 @@
                                   Changelog
 
 
+Daniel (13 May 2005)
+- Grigory Entin reported that curl's configure detects a fine poll() for Mac
+  OS X 10.4 (while 10.3 or later detected a "bad" one), but the executable
+  doesn't work as good as if built without poll(). I've adjusted the configure
+  to always skip the fine-poll() test on Mac OS X (darwin).
+
 Daniel (12 May 2005)
 - When doing a second request (after a disconnect) using the same easy handle,
   over a proxy that uses NTLM authentication, libcurl failed to use NTLM again
