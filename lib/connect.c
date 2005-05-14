@@ -143,6 +143,7 @@ int Curl_nonblock(curl_socket_t sockfd,    /* operate on this */
     return fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
   else
     return fcntl(sockfd, F_SETFL, flags & (~O_NONBLOCK));
+#undef SETBLOCK
 #define SETBLOCK 1
 #endif
 
