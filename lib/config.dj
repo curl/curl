@@ -15,6 +15,7 @@
 #define HAVE_BASENAME          1
 #define HAVE_CLOSESOCKET       1
 #define HAVE_FCNTL_H           1
+#define HAVE_FIONBIO           1
 #define HAVE_GETHOSTBYADDR     1
 #define HAVE_GETHOSTNAME       1
 #define HAVE_GETPASS           1
@@ -104,7 +105,10 @@
 
 #define in_addr_t  u_long
 #define socklen_t  int
+
+#if __GNUC__ < 4   /* gcc 4.x built-in ? */
 #define ssize_t    int
+#endif
 
 #include <stdlib.h>
 #include <string.h>
