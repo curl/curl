@@ -1,5 +1,9 @@
   Changelog for the c-ares project
 
+* May 14
+
+- Added an inet_ntop function from BIND for systems that do not have it.
+
 * April 9
 
 - Made sortlist support IPv6 (this can probably use some testing).

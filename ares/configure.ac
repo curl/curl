@@ -199,6 +199,42 @@ int main()
      ], AC_MSG_RESULT(no),AC_MSG_RESULT(no))
 fi
 
+
+dnl Check for inet_ntop
+AC_CHECK_FUNCS(inet_ntop)
+dnl Again, some systems have it, but not IPv6
+if test "$ac_cv_func_inet_ntop" = "yes" ; then
+AC_MSG_CHECKING(if inet_ntop supports IPv6)
+AC_TRY_RUN(
+  [
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#include <errno.h>
+int main()
+  {
+    struct in6_addr addr6;
+    char buf[128];
+    if (inet_ntop(AF_INET6, &addr6, buf, 128) == 0 && errno == EAFNOSUPPORT)
+      exit(1);
+    else
+      exit(0);
+  }
+  ], [
+       AC_MSG_RESULT(yes)
+       AC_DEFINE_UNQUOTED(HAVE_INET_NTOP_IPV6,1,[Define to 1 if inet_ntop supports IPv6.])
+     ], AC_MSG_RESULT(no),AC_MSG_RESULT(no))
+fi
+
 AC_CHECK_SIZEOF(struct in6_addr, ,
 [
 #ifdef HAVE_SYS_TYPES_H
