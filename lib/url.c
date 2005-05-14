@@ -2217,7 +2217,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   char *at;
   CURLcode result=CURLE_OK;
   struct connectdata *conn;
-  struct connectdata *conn_temp;
+  struct connectdata *conn_temp = NULL;
   size_t urllen;
   struct Curl_dns_entry *hostaddr;
 #if defined(HAVE_ALARM) && !defined(USE_ARES)

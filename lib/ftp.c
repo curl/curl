@@ -2277,7 +2277,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
   static const char * const ftpauth[]  = {
     "SSL", "TLS"
   };
-  size_t nread;
+  size_t nread = 0;
 
   if(ftp->sendleft) {
     /* we have a piece of a command still left to send */
