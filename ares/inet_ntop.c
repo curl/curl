@@ -128,7 +128,7 @@ inet_ntop6(const unsigned char *src, char *dst, size_t size)
 	 */
 	char tmp[sizeof "ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255"], *tp;
 	struct { int base, len; } best, cur;
-	unsigned int words[IN6ADDRSZ / INT16SZ];
+	unsigned int words[NS_IN6ADDRSZ / NS_INT16SZ];
 	int i;
 
 	/*
@@ -137,11 +137,11 @@ inet_ntop6(const unsigned char *src, char *dst, size_t size)
 	 *	Find the longest run of 0x00's in src[] for :: shorthanding.
 	 */
 	memset(words, '\0', sizeof words);
-	for (i = 0; i < IN6ADDRSZ; i++)
+	for (i = 0; i < NS_IN6ADDRSZ; i++)
 		words[i / 2] |= (src[i] << ((1 - (i % 2)) << 3));
 	best.base = -1;
 	cur.base = -1;
-	for (i = 0; i < (IN6ADDRSZ / INT16SZ); i++) {
+	for (i = 0; i < (NS_IN6ADDRSZ / NS_INT16SZ); i++) {
 		if (words[i] == 0) {
 			if (cur.base == -1)
 				cur.base = i, cur.len = 1;
@@ -166,7 +166,7 @@ inet_ntop6(const unsigned char *src, char *dst, size_t size)
 	 * Format the result.
 	 */
 	tp = tmp;
-	for (i = 0; i < (IN6ADDRSZ / INT16SZ); i++) {
+	for (i = 0; i < (NS_IN6ADDRSZ / NS_INT16SZ); i++) {
 		/* Are we inside the best run of 0x00's? */
 		if (best.base != -1 && i >= best.base &&
 		    i < (best.base + best.len)) {
@@ -188,7 +188,7 @@ inet_ntop6(const unsigned char *src, char *dst, size_t size)
 		tp += SPRINTF((tp, "%x", words[i]));
 	}
 	/* Was it a trailing run of 0x00's? */
-	if (best.base != -1 && (best.base + best.len) == (IN6ADDRSZ / INT16SZ))
+	if (best.base != -1 && (best.base + best.len) == (NS_IN6ADDRSZ / NS_INT16SZ))
 		*tp++ = ':';
 	*tp++ = '\0';
 
