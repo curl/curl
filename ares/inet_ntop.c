@@ -70,16 +70,14 @@ static const char *inet_ntop6(const unsigned char *src, char *dst, size_t size);
  *	Paul Vixie, 1996.
  */
 const char *
-inet_ntop(int af, const void *src, char *dst, size_t size)
+ares_inet_ntop(int af, const void *src, char *dst, size_t size)
 {
 
 	switch (af) {
 	case AF_INET:
 		return (inet_ntop4(src, dst, size));
-#ifdef INET6
 	case AF_INET6:
 		return (inet_ntop6(src, dst, size));
-#endif
 	default:
 		errno = EAFNOSUPPORT;
 		return (NULL);
@@ -112,7 +110,6 @@ inet_ntop4(const unsigned char *src, char *dst, size_t size)
 	return (dst);
 }
 
-#ifdef INET6
 /* const char *
  * inet_ntop6(src, dst, size)
  *	convert IPv6 binary address into presentation (printable) format
@@ -205,6 +202,5 @@ inet_ntop6(const unsigned char *src, char *dst, size_t size)
 	strcpy(dst, tmp);
 	return (dst);
 }
-#endif
 
 #endif
