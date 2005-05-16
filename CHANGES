@@ -7,6 +7,8 @@
                                   Changelog
 
 
+Version 7.14.0 (16 May 2005)
+
 Daniel (13 May 2005)
 - Grigory Entin reported that curl's configure detects a fine poll() for Mac
   OS X 10.4 (while 10.3 or later detected a "bad" one), but the executable
