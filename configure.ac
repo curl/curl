@@ -1321,6 +1321,7 @@ if test x$cross_compiling != xyes; then
    dnl failure, now disable the function
    AC_MSG_RESULT(no)
    ac_cv_func_gmtime_r="no"
+   AC_DEFINE(HAVE_GMTIME_R, 0, [if you have gmtime_r])
    ,
    dnl not invoked when crosscompiling)
 ])
