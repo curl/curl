@@ -525,7 +525,7 @@ sub runhttpserver {
         # it is NOT alive
         print "RUN: failed to start the HTTP server!\n";
         stopservers($verbose);
-        exit;
+        return (0,0);
     }
 
     # Server is up. Verify that we can speak to it.
@@ -579,7 +579,7 @@ sub runhttpsserver {
         # it is NOT alive
         print "RUN: failed to start the HTTPS server!\n";
         stopservers($verbose);
-        exit;
+        return(0,0);
     }
 
     # Server is up. Verify that we can speak to it.
@@ -1183,7 +1183,7 @@ sub singletest {
 
         if(!$filename) {
             print "ERROR: section client=>file has no name attribute!\n";
-            exit;
+            return -1;
         }
         my $fileContent = join('', @inputfile);
         subVariables \$fileContent;
@@ -1259,7 +1259,7 @@ sub singletest {
             print "perl: $code\n";
             print "precommand: $@";
             stopservers($verbose);
-            exit;
+            return -1;
         }
     }
 
@@ -1432,7 +1432,7 @@ sub singletest {
         if(!$filename) {
             print "ERROR: section verify=>file has no name attribute!\n";
             stopservers($verbose);
-            exit;
+            return -1;
         }
         my $filemode=$hash{'mode'};
         
