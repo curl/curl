@@ -28,8 +28,8 @@ The
 .I ares_free_hostent
 function frees a
 .B struct hostent
-allocated by one of the functions \fIares_parse_a_reply(3)\fP or
-\fIares_parse_ptr_reply(3)\fP.
+allocated by one of the functions \fIares_parse_a_reply(3)\fP,
+\fIares_parse_aaaa_reply(3)\fP, or \fIares_parse_ptr_reply(3)\fP.
 .SH NOTES
 It is not necessary (and is not correct) to free the host structure passed to
 the callback functions for \fIares_gethostbyname(3)\fP or
@@ -37,6 +37,7 @@ the callback functions for \fIares_gethostbyname(3)\fP or
 host structures when the callback returns.
 .SH SEE ALSO
 .BR ares_parse_a_reply (3),
+.BR ares_parse_aaaa_reply (3),
 .BR ares_parse_ptr_reply (3)
 .SH AUTHOR
 Greg Hudson, MIT Information Systems
