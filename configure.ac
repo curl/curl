@@ -1254,7 +1254,7 @@ else
   dnl is there a strerror_r()
   CURL_CHECK_STRERROR_R()
 
-  AC_CHECK_FUNCS( gmtime_r )
+  checkfor_gmtime_r="yes"
 fi
 
 dnl for recent AIX versions, we skip all the thread-safe checks above since
@@ -1290,19 +1290,22 @@ if test "x$RECENTAIX" = "xyes"; then
   dnl is there a strerror_r()
   CURL_CHECK_STRERROR_R()
 
-  AC_CHECK_FUNCS( gmtime_r )
+  checkfor_gmtime_r="yes"
 fi
 
 if test x$cross_compiling != xyes; then
-  dnl if gmtime_r was found, verify that it actuall works, as (at least) HPUX
-  dnl 10.20 is known to have a buggy one. If it doesn't work, disable use of
-  dnl it.
 
-  AC_MSG_CHECKING([if gmtime_r works])
-  AC_RUN_IFELSE([[
-  #include <time.h>
-  int main(void)
-  {
+  if test x$checkfor_gmtime_r = xyes; then
+
+    dnl if gmtime_r was found, verify that it actuall works, as (at least) HPUX
+    dnl 10.20 is known to have a buggy one. If it doesn't work, disable use of
+    dnl it.
+
+    AC_MSG_CHECKING([if gmtime_r exists and works])
+    AC_RUN_IFELSE([[
+    #include <time.h>
+    int main(void)
+    {
     time_t local = 1170352587;
     struct tm *gmt;
     struct tm keeper;
@@ -1313,20 +1316,21 @@ if test x$cross_compiling != xyes; then
       return 0;
     }
     return 1; /* failure */
-  }
-   ]],
-   dnl success, do nothing
-   AC_MSG_RESULT(yes)
-   ,
-   dnl failure, now disable the function
-   AC_MSG_RESULT(no)
-   ac_cv_func_gmtime_r="no"
-   AC_DEFINE(HAVE_GMTIME_R, 0, [if you have gmtime_r])
-   ,
-   dnl not invoked when crosscompiling)
-])
- 
-
+    }
+     ]],
+     dnl success, do nothing
+     AC_MSG_RESULT(yes)
+     AC_DEFINE(HAVE_GMTIME_R, 1, [if you have (a working) gmtime_r])
+     ,
+     dnl failure, now disable the function
+     AC_MSG_RESULT(no)
+    ,
+    dnl not invoked when crosscompiling)
+    ])
+  fi
+else
+  dnl and for crosscompilings
+  AC_CHECK_FUNCS(gmtime_r)
 fi
 
 
