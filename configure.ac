@@ -1293,6 +1293,41 @@ if test "x$RECENTAIX" = "xyes"; then
   AC_CHECK_FUNCS( gmtime_r )
 fi
 
+if test x$cross_compiling != xyes; then
+  dnl if gmtime_r was found, verify that it actuall works, as (at least) HPUX
+  dnl 10.20 is known to have a buggy one. If it doesn't work, disable use of
+  dnl it.
+
+  AC_MSG_CHECKING([if gmtime_r works])
+  AC_RUN_IFELSE([[
+  #include <time.h>
+  int main(void)
+  {
+    time_t local = 1170352587;
+    struct tm *gmt;
+    struct tm keeper;
+    putenv("TZ=CST6CDT");
+    tzset();
+    gmt = gmtime_r(&local, &keeper);
+    if(gmt) {
+      return 0;
+    }
+    return 1; /* failure */
+  }
+   ]],
+   dnl success, do nothing
+   AC_MSG_RESULT(yes)
+   ,
+   dnl failure, now disable the function
+   AC_MSG_RESULT(no)
+   ac_cv_func_gmtime_r="no"
+   ,
+   dnl not invoked when crosscompiling)
+])
+ 
+
+fi
+
 
 dnl **********************************************************************
 dnl Back to "normal" configuring
