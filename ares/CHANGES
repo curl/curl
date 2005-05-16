@@ -1,5 +1,10 @@
   Changelog for the c-ares project
 
+* May 16
+
+- Added ares_getnameinfo which mimics the getnameinfo API (another feature
+  that could use testing).
+
 * May 14
 
 - Added an inet_ntop function from BIND for systems that do not have it.

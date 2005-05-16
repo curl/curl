@@ -38,7 +38,8 @@ const char *ares_strerror(int code)
     "Error reading file",
     "Out of memory",
     "Channel is being destroyed",
-    "Misformatted string"
+    "Misformatted string",
+    "Illegal flags specified"
   };
 
   assert(code >= 0 && code < (int)(sizeof(errtext) / sizeof(*errtext)));

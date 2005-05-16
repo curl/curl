@@ -19,6 +19,7 @@
 #else
 /* simple work-around for now, for systems without configure support */
 #define ssize_t int
+#define socklen_t int
 #endif
 
 /* Recent autoconf versions define these symbols in config.h. We don't want

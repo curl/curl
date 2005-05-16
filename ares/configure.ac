@@ -67,6 +67,7 @@ AC_CHECK_HEADERS(
        sys/socket.h \
        winsock.h \
        netinet/in.h \
+       net/if.h \
        arpa/nameser.h \
        arpa/nameser_compat.h \
        arpa/inet.h, , ,
@@ -80,8 +81,30 @@ dnl (and others?) is not designed to allow this.
 #ifdef HAVE_ARPA_NAMESER_H
 #include <arpa/nameser.h>
 #endif
+
+dnl *Sigh* these are needed in order for net/if.h to get properly detected.
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 ]
   )
+
+AC_CHECK_TYPE(socklen_t, ,
+   AC_DEFINE(socklen_t, int, [the length of a socket address]), 
+   [
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+   ])
 
 dnl check for AF_INET6
 CARES_CHECK_CONSTANT(
@@ -133,6 +156,41 @@ CARES_CHECK_STRUCT(
   ], [in6_addr], 
      AC_DEFINE_UNQUOTED(HAVE_STRUCT_IN6_ADDR,1,[Define to 1 if you have struct in6_addr.])
 )
+
+dnl check for the sockaddr_in6 structure
+CARES_CHECK_STRUCT(
+  [
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+  ], [sockaddr_in6], 
+     AC_DEFINE_UNQUOTED(HAVE_STRUCT_SOCKADDR_IN6,1,
+       [Define to 1 if you have struct sockaddr_in6.]) ac_have_sockaddr_in6=yes
+)
+
+if test "$ac_have_sockaddr_in6" = "yes" ; then
+CARES_CHECK_STRUCT_MEMBER(
+  [
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+  ], [sockaddr_in6], [sin6_scope_id],
+     AC_DEFINE_UNQUOTED(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID,1,
+       [Define to 1 if your struct sockaddr_in6 has sin6_scope_id.])
+)
+fi
 
 dnl check for inet_pton
 AC_CHECK_FUNCS(inet_pton)
@@ -268,7 +326,7 @@ AC_CHECK_SIZEOF(struct in_addr, ,
 ]
 )
 
-AC_CHECK_FUNCS(bitncmp)
+AC_CHECK_FUNCS([bitncmp if_indextoname])
 
 
 AC_OUTPUT(Makefile)

@@ -119,6 +119,26 @@ AC_DEFUN([CARES_CHECK_STRUCT], [
   fi
 ])
 
+dnl This macro determins if the specified struct contains a specific member.
+dnl Syntax:
+dnl CARES_CHECK_STRUCT_MEMBER(headers, struct name, member name, if found, [if not found])
+
+AC_DEFUN([CARES_CHECK_STRUCT_MEMBER], [
+  AC_MSG_CHECKING([if struct $2 has member $3])
+  AC_TRY_COMPILE([$1], 
+    [
+      struct $2 struct_instance;
+      struct_instance.$3 = 0;
+    ], ac_struct="yes", ac_found="no")
+  if test "$ac_struct" = "yes" ; then
+    AC_MSG_RESULT(yes)
+    $4
+  else
+    AC_MSG_RESULT(no)
+    $5
+  fi
+])
+
 dnl This macro determines if the specified constant exists in the specified file
 dnl Syntax:
 dnl CARES_CHECK_CONSTANT(headers, constant name, if found, [if not found])
