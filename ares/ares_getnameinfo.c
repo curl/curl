@@ -14,6 +14,7 @@
  */
 #include "setup.h"
 #include <sys/types.h>
+#include <ctype.h>
 
 #if defined(WIN32) && !defined(WATT32)
 #include "nameser.h"
@@ -63,7 +64,9 @@ struct nameinfo_query {
 
 static void nameinfo_callback(void *arg, int status, struct hostent *host);
 static char *lookup_service(unsigned short port, int flags, char *buf);
+#ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
 static char *append_scopeid(struct sockaddr_in6 *addr6, unsigned int scopeid, char *buf);
+#endif
 static char *ares_striendstr(const char *s1, const char *s2);
 
 void ares_getnameinfo(ares_channel channel, const struct sockaddr *sa, socklen_t salen,
@@ -206,7 +209,7 @@ static void nameinfo_callback(void *arg, int status, struct hostent *host)
                  *end = 0;
              }        
         }
-      callback(niquery->arg, ARES_SUCCESS, host->h_name, service);
+      niquery->callback(niquery->arg, ARES_SUCCESS, host->h_name, service);
       return;
     }
   /* We couldn't find the host, but it's OK, we can use the IP */
@@ -230,10 +233,10 @@ static void nameinfo_callback(void *arg, int status, struct hostent *host)
           else
             service = lookup_service(niquery->addr.addr6.sin6_port, niquery->flags, srvbuf);
         }
-      callback(niquery->arg, ARES_SUCCESS, ipbuf, service);
+      niquery->callback(niquery->arg, ARES_SUCCESS, ipbuf, service);
       return;
     }
-  callback(niquery->arg, status, NULL, NULL);
+  niquery->callback(niquery->arg, status, NULL, NULL);
   free(niquery);
 }
 
@@ -317,6 +320,6 @@ static char *ares_striendstr(const char *s1, const char *s2)
         }
     }
   if (c2 == c1 == NULL)
-    return c1_begin;
+    return (char *)c1_begin;
   return NULL;
 }
