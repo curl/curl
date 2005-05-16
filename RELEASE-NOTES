@@ -1,7 +1,7 @@
-Curl and libcurl 7.14.0
+Curl and libcurl 7.14.1
 
- Public curl release number:               88
- Releases counted from the very beginning: 115
+ Public curl release number:               89
+ Releases counted from the very beginning: 116
  Available command line options:           107
  Available curl_easy_setopt() options:     122
  Number of public functions in libcurl:    46
@@ -11,48 +11,19 @@ Curl and libcurl 7.14.0
 
 This release includes the following changes:
 
- o modified default HTTP request headers
- o curl --trace-time added for time stamping trace logs
- o curl now respects the SSL_CERT_DIR and SSL_CERT_PATH environment variables
- o more search paths for curl's default .curlrc config file check
- o GnuTLS support, use configure --with-gnutls. Work on this was sponsored
-   by The Written Word.
+ o 
 
 This release includes the following bugfixes:
 
- o uses select() instead of poll() even on Mac OS X 10.4
- o reconnected proxy use with NTLM auth on the same handle
- o warns about bad -z date syntax
- o docs/THANKS now contains all known contributors
- o builds out-of-the-box on (presumably ipv6-enabled) AIX 4.3 hosts
- o curl --head could wrongly complain on bad chunked-encoding
- o --interface SIGSEGVed on a bad address
- o kill the HTTPS server better when stopping the test suite
- o builds fine with VS2005 on x64
- o auth fix for HTTP redirects and .netrc usage
- o FTP uploads show the progress meter easier
- o MSVC makefile fixes for static libcurl builds
- o configure fix for static libcurl build on Windows
- o --retry-delay
- o POST with read callback now uses Expect: 100-continue
- o CURLOPT_PORT didn't actually use the set port number
- o HTTP 304 response with Content-Length: header
- o time-conditioned FTP uploads
+ o 
 
 Other curl-related news since the previous public release:
 
- o http://curl.mirroring.de/ is a new german curl mirror
- o pycurl 7.13.2: http://pycurl.sf.net/
- o TclCurl 0.13.2: http://personal1.iddeo.es/andresgarci/tclcurl/english/
- o http://curl.webhosting76.com/ is a new US curl mirror
- o http://curl.meulie.net/ is a new Canadian curl mirror
+ o 
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Christophe Legry, Cory Nelson, Gisle Vanem, Dan Fandrich, Toshiyuki Maezawa,
- Olivier, Andres Garcia, Dave Dribin, Alex Suykov, Cory Nelson, Fred New,
- Paul Moore, Alexander Zhuravlev, Bryan Henderson, Jeremy Brown, Allan,
- Grigory Entin
+ 
 
         Thanks! (and sorry if I forgot to mention someone)
