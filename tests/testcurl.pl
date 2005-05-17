@@ -403,6 +403,27 @@ if ($configurebuild) {
   logit "configure created (dummy message)"; # dummy message to feign success
 }
 
+sub findinpath {
+    my $c;
+    my $e;
+    my $p=$ENV{'PATH'};
+    my @pa = split(":", $p);
+    for $c (@_) {
+        for $e (@pa) {
+            if( -x "$e/$c") {
+                return $c;
+            }
+        }
+    }
+}
+
+
+my $make = findinpath("gmake", "make", "nmake");
+if(!$make) {
+    mydie "Couldn't find make in the PATH";
+}
+logit "going with $make as make";
+
 # change to build dir
 chdir "$pwd/$build";
 
@@ -423,8 +444,8 @@ if ($configurebuild) {
   elsif (($^O eq 'linux') || ($targetos =~ /netware/)) {
     system("cp -afr ../$CURLDIR/* ."); 
     system("cp -af ../$CURLDIR/Makefile.dist Makefile"); 
-    system("make -i -C lib -f Makefile.$targetos prebuild");
-    system("make -i -C src -f Makefile.$targetos prebuild");
+    system("$make -i -C lib -f Makefile.$targetos prebuild");
+    system("$make -i -C src -f Makefile.$targetos prebuild");
   }
 }
 
@@ -450,12 +471,12 @@ if (grepfile("define USE_ARES", "lib/config$confsuffix.h")) {
   chdir "ares";
 
   if ($targetos && !$configurebuild) {
-      logit "make -f Makefile.$targetos";
-      open(F, "make -f Makefile.$targetos 2>&1 |") or die;
+      logit "$make -f Makefile.$targetos";
+      open(F, "$make -f Makefile.$targetos 2>&1 |") or die;
   }
   else {
-      logit "make";
-      open(F, "make 2>&1 |") or die;
+      logit "$make";
+      open(F, "$make 2>&1 |") or die;
   }
   while (<F>) {
     s/$pwd//g;
@@ -474,8 +495,8 @@ if (grepfile("define USE_ARES", "lib/config$confsuffix.h")) {
 }
 
 if ($configurebuild) {
-  logit "make -i";
-  open(F, "make -i 2>&1 |") or die;
+  logit "$make -i";
+  open(F, "$make -i 2>&1 |") or die;
   while (<F>) {
     s/$pwd//g;
     print;
@@ -483,17 +504,17 @@ if ($configurebuild) {
   close(F);
 }
 else {
-  logit "make -i $targetos";
+  logit "$make -i $targetos";
   if ($^O eq 'MSWin32') {
     if ($targetos =~ /vc/) {
       open(F, "nmake -i $targetos|") or die;
     }
     else {
-      open(F, "make -i $targetos |") or die;
+      open(F, "$make -i $targetos |") or die;
     }
   }
   else {
-    open(F, "make -i $targetos 2>&1 |") or die;
+    open(F, "$make -i $targetos 2>&1 |") or die;
   }
   while (<F>) {
     s/$pwd//g;
@@ -536,8 +557,8 @@ if ($configurebuild && !$crosscompile) {
   if($runtestopts) {
       $o = "TEST_F=\"$runtestopts\" ";
   }
-  logit "make ${o}test-full";
-  open(F, "make ${o}test-full 2>&1 |") or die;
+  logit "$make ${o}test-full";
+  open(F, "$make ${o}test-full 2>&1 |") or die;
   open(LOG, ">$buildlog") or die;
   while (<F>) {
     s/$pwd//g;
