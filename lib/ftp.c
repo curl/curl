@@ -209,12 +209,12 @@ static CURLcode AllowServerConnect(struct connectdata *conn)
   default:
     /* we have received data here */
     {
-      curl_socket_t s;
+      curl_socket_t s = CURL_SOCKET_BAD;
       socklen_t size = (socklen_t) sizeof(struct sockaddr_in);
       struct sockaddr_in add;
 
-      getsockname(sock, (struct sockaddr *) &add, &size);
-      s=accept(sock, (struct sockaddr *) &add, &size);
+      if(0 == getsockname(sock, (struct sockaddr *) &add, &size))
+        s=accept(sock, (struct sockaddr *) &add, &size);
 
       sclose(sock); /* close the first socket */
 
