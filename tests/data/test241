@@ -26,6 +26,9 @@ HTTP-IPv6 GET (using ip6-localhost)
  <command>
 -g "http://ip6-localhost:%HTTP6PORT/241"
 </command>
+<precheck>
+./server/resolve --ipv6 ip6-localhost
+</precheck>
 </client>
 
 #

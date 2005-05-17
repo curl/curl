@@ -125,8 +125,8 @@ int main(int argc, char *argv[])
 
     he = gethostbyname(host);
 
-    printf("Resolve '%s' %s\n",
-           host, he?"SUCCESSFUL":"FAILED");
+    if(!he)
+      printf("Resolving '%s' FAILED\n", host);
 
     return he?0:1;
   }
@@ -143,8 +143,9 @@ int main(int argc, char *argv[])
     hints.ai_flags = AI_CANONNAME;
     rc = (getaddrinfo)(host, "80", &hints, &ai);
 
-    printf("Resolve '%s' %s\n",
-           host, !rc?"SUCCESSFUL":"FAILED");
+    if(rc)
+      printf("Resolving '%s' FAILED\n", host);
+
     return !rc?0:1;
   }
 #endif

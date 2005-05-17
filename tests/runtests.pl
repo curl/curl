@@ -1058,6 +1058,7 @@ sub singletest {
                 chomp $why;
             }
         }
+        print "prechecked $cmd\n" if($verbose);
     }
 
     if($why) {
