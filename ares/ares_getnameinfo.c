@@ -22,6 +22,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <arpa/inet.h>
 #include <arpa/nameser.h>
 #ifdef HAVE_ARPA_NAMESER_COMPAT_H
 #include <arpa/nameser_compat.h>
@@ -30,6 +31,10 @@
 
 #ifdef HAVE_NET_IF_H
 #include <net/if.h>
+#endif
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
 #endif
 
 #include <stdio.h>
@@ -250,7 +255,7 @@ static char *lookup_service(unsigned short port, int flags, char *buf)
       else
         {
           struct servent *se;
-          char *proto;
+          const char *proto;
  
           if (flags & ARES_NI_UDP)
             proto = "udp";
@@ -319,7 +324,7 @@ static char *ares_striendstr(const char *s1, const char *s2)
           c2++;
         }
     }
-  if (c2 == c1 == NULL)
+  if (c2 == c1 && c2 == NULL)
     return (char *)c1_begin;
   return NULL;
 }
