@@ -62,37 +62,6 @@
 #include "getpart.h"
 #include "util.h"
 
-#ifdef ENABLE_IPV6
-#define SWS_IPV6
-#endif
-
-#ifndef FALSE
-#define FALSE 0
-#endif
-#ifndef TRUE
-#define TRUE 1
-#endif
-
-#if defined(WIN32) && !defined(__CYGWIN__)
-#include <windows.h>
-#include <winsock2.h>
-#include <process.h>
-
-#define sleep(sec)   Sleep ((sec)*1000)
-
-#define EINPROGRESS  WSAEINPROGRESS
-#define EWOULDBLOCK  WSAEWOULDBLOCK
-#define EISCONN      WSAEISCONN
-#define ENOTSOCK     WSAENOTSOCK
-#define ECONNREFUSED WSAECONNREFUSED
-
-static void win32_cleanup(void);
-
-#if defined(ENABLE_IPV6) && defined(__MINGW32__)
-const struct in6_addr in6addr_any = {{ IN6ADDR_ANY_INIT }};
-#endif
-#endif
-
 /* include memdebug.h last */
 #include "memdebug.h"
 
@@ -196,24 +165,6 @@ static void sigpipe_handler(int sig)
 {
   (void)sig; /* prevent warning */
   sigpipe = 1;
-}
-#endif
-
-#if defined(WIN32) && !defined(__CYGWIN__)
-#undef perror
-#define perror(m) win32_perror(m)
-
-static void win32_perror (const char *msg)
-{
-  char buf[256];
-  DWORD err = WSAGetLastError();
-
-  if (!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
-                     LANG_NEUTRAL, buf, sizeof(buf), NULL))
-     snprintf(buf, sizeof(buf), "Unknown error %lu (%#lx)", err, err);
-  if (msg)
-     fprintf(stderr, "%s: ", msg);
-  fprintf(stderr, "%s\n", buf);
 }
 #endif
 
@@ -677,37 +628,6 @@ static int send_doc(int sock, struct httprequest *req)
 
   return 0;
 }
-
-#if defined(WIN32) && !defined(__CYGWIN__)
-static void win32_init(void)
-{
-  WORD wVersionRequested;
-  WSADATA wsaData;
-  int err;
-  wVersionRequested = MAKEWORD(2, 0);
-
-  err = WSAStartup(wVersionRequested, &wsaData);
-
-  if (err != 0) {
-    perror("Winsock init failed");
-    logmsg("Error initialising winsock -- aborting\n");
-    exit(1);
-  }
-
-  if ( LOBYTE( wsaData.wVersion ) != 2 ||
-       HIBYTE( wsaData.wVersion ) != 0 ) {
-
-    WSACleanup();
-    perror("Winsock init failed");
-    logmsg("No suitable winsock.dll found -- aborting\n");
-    exit(1);
-  }
-}
-static void win32_cleanup(void)
-{
-  WSACleanup();
-}
-#endif
 
 char use_ipv6=FALSE;
 
