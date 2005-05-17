@@ -312,7 +312,8 @@ static char *ares_striendstr(const char *s1, const char *s2)
     return NULL;
 
   /* Jump to the end of s1 minus the length of s2 */
-  c1 = (const char *)c1_begin = s1+s1_len-s2_len;
+  c1_begin = s1+s1_len-s2_len;
+  c1 = (const char *)c1_begin;
   c2 = s2;
   while (c2 < s2+s2_len)
     {
