@@ -210,11 +210,11 @@ static CURLcode AllowServerConnect(struct connectdata *conn)
     /* we have received data here */
     {
       curl_socket_t s;
-      size_t size = sizeof(struct sockaddr_in);
+      socklen_t size = (socklen_t) sizeof(struct sockaddr_in);
       struct sockaddr_in add;
 
-      getsockname(sock, (struct sockaddr *) &add, (socklen_t *)&size);
-      s=accept(sock, (struct sockaddr *) &add, (socklen_t *)&size);
+      getsockname(sock, (struct sockaddr *) &add, &size);
+      s=accept(sock, (struct sockaddr *) &add, &size);
 
       sclose(sock); /* close the first socket */
 
