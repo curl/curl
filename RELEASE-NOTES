@@ -10,12 +10,14 @@ Curl and libcurl 7.14.1
  Number of contributors:                   437
 
 This release includes the following changes:
-
- o 
+ 
+ o
 
 This release includes the following bugfixes:
 
- o 
+ o URL-without-slash as in http://somehost?data
+ o strerror_r() configure check for HP-UX 10.20 (and others)
+ o time parse work-around on HP-UX 10.20 since its gmtime_r() is broken
 
 Other curl-related news since the previous public release:
 
