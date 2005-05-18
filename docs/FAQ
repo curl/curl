@@ -1,4 +1,4 @@
-Updated: April 13, 2005 (http://curl.haxx.se/docs/faq.html)
+Updated: May 18, 2005 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -132,11 +132,11 @@ FAQ
 
   We pronounce curl and cURL with an initial k sound: [kurl].
 
-  NOTE: there are numerous sub-projects and related projects that also use the
-  word curl in the project names in various combinations, but you should take
+  There are numerous sub-projects and related projects that also use the word
+  curl in the project names in various combinations, but you should take
   notice that this FAQ is directed at the command-line tool named curl (and
   libcurl the library), and may therefore not be valid for other curl-related
-  projects.
+  projects. (There is however a small section for the PHP/CURL in this FAQ.)
 
   1.2 What is libcurl?
 
@@ -197,15 +197,14 @@ FAQ
 
   1.5 Who makes curl?
 
-  curl and libcurl are not made by any single individual. Sure, Daniel
-  Stenberg writes the major parts, but other persons' submissions are
+  curl and libcurl are not made by any single individual. Daniel Stenberg is
+  project leader and main developer, but other persons' submissions are
   important and crucial. Anyone can contribute and post their changes and
   improvements and have them inserted in the main sources (of course on the
   condition that developers agree on that the fixes are good).
 
-  The list of contributors in the docs/THANKS file is only a small part of all
-  the people that every day provide us with bug reports, suggestions, ideas
-  and source code.
+  The full list of the more than 400 contributors is found in the docs/THANKS
+  file.
 
   curl is developed by a community, with Daniel at the wheel.
 
@@ -220,12 +219,8 @@ FAQ
   have sponsored certain parts of the development in the past and I hope some
   will continue to do so in the future.
 
-  If you want to support our project with a donation or similar, one way of
-  doing that would be to buy "gift certificates" at useful online shopping
-  sites, such as amazon.com or thinkgeek.com. Another way would be to sponsor
-  us through a banner-program or even better: by helping us coding,
-  documenting, testing etc. You're welcome to send us a buck using paypal, as
-  described here: http://curl.haxx.se/donation.html
+  If you want to support our project, consider a donation or a banner-program
+  or even better: by helping us coding, documenting, testing etc.
 
   1.7 What about CURL from curl.com?
 
@@ -754,7 +749,7 @@ FAQ
   need to provide locking function(s) for libgcrypt (which is used by GnuTLS
   for the crypto functions).
 
-    [informative link missing]
+    http://www.gnu.org/software/gnutls/manual/html_node/Multi_002dthreaded-applications.html
 
   5.2 How can I receive all data into a large memory chunk?
 
