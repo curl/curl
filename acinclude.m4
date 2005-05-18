@@ -417,36 +417,25 @@ dnl      int strerror_r(int errnum, char *buf, size_t n);
 dnl
 AC_DEFUN([CURL_CHECK_STRERROR_R],
 [
-  dnl determine of strerror_r is present
-  AC_CHECK_FUNC(strerror_r,
-    strerror_r="yes",
-    [
+  AC_CHECK_FUNCS(strerror_r)
+
+  if test "x$ac_cv_func_strerror_r" = "xyes"; then
+
     AC_MSG_CHECKING(whether strerror_r is declared)
     AC_EGREP_CPP(strerror_r,[
 #include <string.h>],[
-      strerror_r="yes"
       AC_MSG_RESULT(yes)],[
       AC_MSG_RESULT(no)
-      AC_MSG_CHECKING(whether strerror_r with -D_THREAD_SAFE is declared)
+      AC_MSG_CHECKING(whether strerror_r with -D_REENTRANT is declared)
       AC_EGREP_CPP(strerror_r,[
-#define _THREAD_SAFE
+#define _REENTRANT
 #include <string.h>],[
-        strerror_r="yes"
-	CPPFLAGS="-D_THREAD_SAFE $CPPFLAGS"
+	CPPFLAGS="-D_REENTRANT $CPPFLAGS"
 	AC_MSG_RESULT(yes)],
-	AC_MSG_RESULT(no))])])
-
-  if test "x$strerror_r" = "xyes"; then
-
-    dnl check if strerror_r is properly declared in the headers
-    AC_CHECK_DECL(strerror_r, ,
-     AC_DEFINE(HAVE_NO_STRERROR_R_DECL, 1, [we have no strerror_r() proto])
-,
-[#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-])
+	AC_MSG_RESULT(no)
+        AC_DEFINE(HAVE_NO_STRERROR_R_DECL, 1, [we have no strerror_r() proto])
+       ) dnl with _THREAD_SAFE
+    ]) dnl plain cpp for it
 
     dnl determine if this strerror_r() is glibc or POSIX
     AC_MSG_CHECKING([for a glibc strerror_r API])
