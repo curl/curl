@@ -62,11 +62,11 @@ HTTP
 
 HTTPS (*1)
  - (all the HTTP features)
- - using certificates
+ - using client certificates
  - verify server certificate
  - via http-proxy
  - select desired encryption
- - force usage of a specific SSL version (SSLv2, SSLv3 or TLSv1)
+ - force usage of a specific SSL version (SSLv2(*7), SSLv3 or TLSv1)
 
 FTP
  - download
@@ -118,9 +118,10 @@ FILE
 FOOTNOTES
 =========
 
-  *1 = requires OpenSSL
+  *1 = requires OpenSSL or GnuTLS
   *2 = requires OpenLDAP
   *3 = requires a GSSAPI-compliant library, such as Heimdal or similar.
   *4 = requires FBopenssl
   *5 = requires a krb4 library, such as the MIT one or similar.
   *6 = requires c-ares
+  *7 = requires OpenSSL specificly, as GnuTLS only supports SSLv3 and TLSv1
