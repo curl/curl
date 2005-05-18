@@ -76,6 +76,7 @@ int main(int argc, char *argv[])
 {
   int arg=1;
   char *host;
+  int rc;
 
   while(argc>arg) {
     if(!strcmp("--version", argv[arg])) {
@@ -125,17 +126,13 @@ int main(int argc, char *argv[])
 
     he = gethostbyname(host);
 
-    if(!he)
-      printf("Resolving '%s' FAILED\n", host);
-
-    return he?0:1;
+    rc = !he;
   }
 #ifdef ENABLE_IPV6
   else {
     /* getaddrinfo() resolve */
     struct addrinfo *ai;
     struct addrinfo hints;
-    int rc;
 
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = PF_INET6;
@@ -143,12 +140,10 @@ int main(int argc, char *argv[])
     hints.ai_flags = AI_CANONNAME;
     rc = (getaddrinfo)(host, "80", &hints, &ai);
 
-    if(rc)
-      printf("Resolving '%s' FAILED\n", host);
-
-    return !rc?0:1;
   }
 #endif
+  if(rc)
+    printf("Resolving '%s' FAILED\n", host);
 
-  return 0;
+  return !rc?0:1;
 }
