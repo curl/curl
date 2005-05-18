@@ -418,7 +418,9 @@ dnl
 AC_DEFUN([CURL_CHECK_STRERROR_R],
 [
   dnl determine of strerror_r is present
-  AC_CHECK_FUNCS(strerror_r,[
+  AC_CHECK_FUNC(strerror_r,
+    strerror_r="yes",
+    [
     AC_MSG_CHECKING(whether strerror_r is declared)
     AC_EGREP_CPP(strerror_r,[
 #include <string.h>],[

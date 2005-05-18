@@ -22,6 +22,12 @@
 
 #include "setup.h"
 
+#ifdef HAVE_STRERROR_R
+#if !defined(HAVE_POSIX_STRERROR_R) && !defined(HAVE_GLIBC_STRERROR_R)
+#error "you MUST have either POSIX or glibc strerror_r if strerror_r is found"
+#endif /* !POSIX && !glibc */
+#endif /* HAVE_STRERROR_R */
+
 #include <curl/curl.h>
 #include <stdlib.h>
 #include <string.h>

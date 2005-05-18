@@ -7,6 +7,17 @@
                                   Changelog
 
 
+Daniel (18 May 2005)
+- The configure check for strerror_r() failed to detect the proper API at
+  times, like on my HP-UX 10.20 tests. And then lib/strerror.c badly assumed
+  the glibc version if the posix define wasn't set (since it _had_ found a
+  strerror_r).
+
+Daniel (16 May 2005)
+- The gmtime_r() function in HP-UX 10.20 is broken. About 13 test cases fail
+  due to this. There's now a configure check that attempts to detect the bad
+  function and not use it on such systems.
+
 Version 7.14.0 (16 May 2005)
 
 Daniel (13 May 2005)
