@@ -227,6 +227,10 @@ int ProcessRequest(struct httprequest *req)
 
       ptr++; /* skip the slash */
 
+      /* skip all non-numericals following the slash */
+      while(*ptr && !isdigit(*ptr))
+        ptr++;
+
       req->testno = strtol(ptr, &ptr, 10);
 
       if(req->testno > 10000) {
@@ -247,7 +251,7 @@ int ProcessRequest(struct httprequest *req)
       if(!stream) {
         logmsg("Couldn't open test file %d", req->testno);
         req->open = FALSE; /* closes connection */
-        return 0;
+        return 1; /* done */
       }
       else {
         char *cmd = NULL;

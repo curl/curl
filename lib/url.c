@@ -2382,8 +2382,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     strcpy(conn->protostr, "file"); /* store protocol string lowercase */
   }
   else {
-    /* Set default path */
-    strcpy(conn->path, "/");
+    /* clear path */
+    conn->path[0]=0;
 
     if (2 > sscanf(data->change.url,
                    "%15[^\n:]://%[^\n/]%[^\n]",
@@ -2444,13 +2444,26 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     tmp = strchr(conn->host.name, '?');
 
   if(tmp) {
-    /* The right part of the ?-letter needs to be moved to prefix
-       the current path buffer! */
-    size_t len = strlen(tmp);
-    /* move the existing path plus the zero byte */
-    memmove(conn->path+len+1, conn->path, strlen(conn->path)+1);
+    /* We must insert a slash before the '?'-letter in the URL. If the URL had
+       a slash after the '?', that is where the path currently begins and the
+       '?string' is still part of the host name.
+
+       We must move the trailing part from the host name and put it first in
+       the path. And have it all prefixed with a slash.
+    */
+
+    size_t hostlen = strlen(tmp);
+    size_t pathlen = strlen(conn->path);
+
+    /* move the existing path plus the zero byte forward, to make room for
+       the host-name part */
+    memmove(conn->path+hostlen+1, conn->path, pathlen+1);
+
+     /* now copy the trailing host part in front of the existing path */
+    memcpy(conn->path+1, tmp, hostlen);
+
     conn->path[0]='/'; /* prepend the missing slash */
-    memcpy(conn->path+1, tmp, len); /* now copy the prefix part */
+
     *tmp=0; /* now cut off the hostname at the ? */
   }
 
