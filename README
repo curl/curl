@@ -30,46 +30,32 @@ CONTACT
 
 WEB SITE
 
-  Visit the curl web site or mirrors for the latest news:
+  Visit the curl web site or mirrors for the latest news and downloads:
 
         Sweden    -- http://curl.haxx.se/
         Australia -- http://curl.planetmirror.com/
         Austria   -- http://curl.gds.tuwien.ac.at/
+        Canada    -- http://curl.meulie.net/
         Denmark   -- http://curl.cofman.dk/
         Estonia   -- http://curl.wildyou.net/
         France    -- http://curl.mirror.internet.tp/
         Germany   -- http://curl.kgt.org/
         Germany   -- http://curl.mirror.at.stealer.net/
+        Germany   -- http://curl.mirroring.de/
+        Germany   -- http://curl.mons-new-media.de/
         Germany   -- http://curl.netmirror.org/
         Russia    -- http://curl.tsuren.net/
         Taiwan    -- http://curl.cs.pu.edu.tw/
         Thailand  -- http://curl.siamu.ac.th/
+        US (AZ)   -- http://curl.islandofpoker.com/
         US (CA)   -- http://curl.mirror.redwire.net/
         US (CA)   -- http://curl.mirrormonster.com/
         US (CA)   -- http://curl.signal42.com/
+        US (CA)   -- http://curl.tolix.org/
+        US (CA)   -- http://curl.webhosting76.com/
         US (TX)   -- http://curl.109k.com/
-
-DOWNLOAD
-
-  The official download mirror sites are:
-
-        Australia -- http://curl.planetmirror.com/download.html
-        Austria   -- http://curl.gds.tuwien.ac.at/download.html
-        Estonia   -- http://curl.wildyou.net/download.html
-        Germany   -- ftp://ftp.fu-berlin.de/pub/unix/network/curl/
-        Germany   -- http://curl.mirror.at.stealer.net/download.html
-        Germany   -- http://curl.netmirror.org/download.html
-        Germany   -- http://www.mirrorspace.org/curl/
-        Hongkong  -- http://www.execve.net/curl/
-        Russia    -- http://curl.tsuren.net/download.html
-        Sweden    -- ftp://ftp.sunet.se/pub/www/utilities/curl/
-        Sweden    -- http://cool.haxx.se/curl/
-        Taiwan    -- http://curl.cs.pu.edu.tw/download.html
-        Thailand  -- http://curl.siamu.ac.th/download.html
-        US (CA)   -- http://curl.mirror.redwire.net/download.html
-        US (CA)   -- http://curl.mirrormonster.com/download.html
-        US (CA)   -- http://curl.signal42.com/download.html
-        US (TX)   -- http://curl.109k.com/download.html
+        US (TX)   -- http://curl.mirrors.cyberservers.net/
+        US (TX)   -- http://curl.seekmeup.com/
 
 CVS
 
