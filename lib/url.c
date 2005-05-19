@@ -2466,6 +2466,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
     *tmp=0; /* now cut off the hostname at the ? */
   }
+  else if(!conn->path[0]) {
+    /* if there's no path set, use a single slash */
+    strcpy(conn->path, "/");
+  }
 
   /* If the URL is malformatted (missing a '/' after hostname before path) we
    * insert a slash here. The only letter except '/' we accept to start a path
