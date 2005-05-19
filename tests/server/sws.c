@@ -37,6 +37,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <ctype.h>
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -228,7 +229,7 @@ int ProcessRequest(struct httprequest *req)
       ptr++; /* skip the slash */
 
       /* skip all non-numericals following the slash */
-      while(*ptr && !isdigit(*ptr))
+      while(*ptr && !isdigit((int)*ptr))
         ptr++;
 
       req->testno = strtol(ptr, &ptr, 10);
