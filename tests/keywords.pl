@@ -131,7 +131,8 @@ for $t (@mtest) {
     printf "<tr><td>%d</td><td>$t</td><td>%s</td></tr>\n", $k{$t},
     show($t{$t});
 }
-printf "</table><p> $count tests (%d lack keywords)\n",
+printf "</table><p> $count out of %d tests (%d lack keywords)\n",
+    scalar(@miss) + $count,
     scalar(@miss);
 
 for(@miss) {
@@ -140,7 +141,8 @@ for(@miss) {
 
 print STDERR "\n";
 
-print "<p>Error codes tested for:<br>\n";
+printf "<p> %d different error codes tested for:<br>\n",
+    scalar(keys %errors);
 
 # numerically on amount, or alphebetically if same amount
 my @etest = sort { $a <=> $b} keys %errors;
