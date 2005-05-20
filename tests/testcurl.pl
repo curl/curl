@@ -46,6 +46,7 @@
 # --mktarball=[command]    Command to run after completed test
 # --name=[name]            Set name to report as
 # --nocvsup                Don't update from CVS even though it is a CVS tree
+# --nobuildconf            Don't run buildconf
 # --runtestopts=[options]  Options to pass to runtests.pl
 # --setup=[file name]      File name to read setup from (deprecated)
 # --target=[your os]       Specify your target environment.
@@ -64,7 +65,7 @@ use vars qw($version $fixed $infixed $CURLDIR $CVS $pwd $build $buildlog
             $buildlogname $configurebuild $targetos $confsuffix $binext
             $libext);
 use vars qw($name $email $desc $confopts $runtestopts $setupfile $mktarball
-            $nocvsup $crosscompile);
+            $nocvsup $nobuildconf $crosscompile);
 
 # version of this script
 $version='$Revision$';
@@ -99,6 +100,10 @@ while ($ARGV[0]) {
   }
   elsif ($ARGV[0] =~ /--nocvsup/) {
     $nocvsup=1;
+    shift @ARGV;
+  }
+  elsif ($ARGV[0] =~ /--nobuildconf/) {
+    $nobuildconf=1;
     shift @ARGV;
   }
   elsif ($ARGV[0] =~ /--crosscompile/) {
@@ -348,11 +353,14 @@ if ($CVS) {
     mydie "failed to update from CVS ($cvsstat), exiting";
   }
 
-  # remove possible left-overs from the past
-  unlink "configure";
-  unlink "autom4te.cache";
+  if($nobuildconf) {
+      logit "told to not run buildconf";
+  }
+  elsif ($configurebuild) {
+    # remove possible left-overs from the past
+    unlink "configure";
+    unlink "autom4te.cache";
 
-  if ($configurebuild) {
     # generate the build files
     logit "invoke buildconf, but filter off the silly aclocal warnings";
     open(F, "./buildconf 2>&1 |") or die;
@@ -395,9 +403,9 @@ if ($CVS) {
 
 if ($configurebuild) {
   if (-f "configure") {
-    logit "configure created";
+    logit "configure created (at least it exists)";
   } else {
-    mydie "no configure created";
+    mydie "no configure created/found";
   }
 } else {
   logit "configure created (dummy message)"; # dummy message to feign success

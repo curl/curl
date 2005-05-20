@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH testcurl.pl 1 "15 Mar 2005" "Curl 7.13.2" "testcurl"
+.TH testcurl.pl 1 "20 May 2005" "Curl 7.14.1" "testcurl"
 .SH NAME
 testcurl.pl \- (automatically) test curl
 .SH SYNOPSIS
@@ -58,6 +58,11 @@ Set email address to report as. Displayed in the build logs on the site.
 Generic command to run after completed test.
 .IP "--name=[name]"
 Set name to report as. Displayed in the build summary on the site.
+.IP "--nobuildconf"
+Don't run buildconf. Useful when many builds use the same source tree, as then
+only one need to do this. Also, if multiple processes run tests simultaneously
+on the same source tree (like several hosts on a NFS mounted dir),
+simultaneous buildconf invokes may cause problems. (Added in 7.14.1)
 .IP "--nocvsup"
 Don't update from CVS even though it is a CVS tree. Useful to still be able to
 test even though your network is down, or similar.
