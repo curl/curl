@@ -1326,6 +1326,16 @@ sub singletest {
         # verify redirected stdout
         my @actual = loadarray($STDOUT);
 
+        # get all attributes
+        my %hash = getpartattr("verify", "stdout");
+
+        # get the mode attribute
+        my $filemode=$hash{'mode'};
+        if(($filemode eq "text") && $has_textaware) {
+            # text mode when running on windows: fix line endings
+            map s/\r\n/\n/g, @actual;
+        }
+
         $res = compare("stdout", \@actual, \@validstdout);
         if($res) {
             return 1;
