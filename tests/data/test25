@@ -63,7 +63,7 @@ Connection: close
 http
 </server>
  <name>
-looping HTTP Location: following with --max-redirs, no persistance
+looping HTTP Location: following with --max-redirs
  </name>
  <command>
 http://%HOSTIP:%HTTPPORT/want/25 -L --max-redirs 5
