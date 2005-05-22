@@ -1168,7 +1168,6 @@ case "$LIBIDN" in
        dnl if there is a given path, check that FIRST
        if test -n "$LIBIDN"; then
          if test "x$LIBIDN" != "xyes"; then
-            AC_MSG_WARN([moo moo $LIBIDN])
             oldLDFLAGS=$LDFLAGS
             oldCPPFLAGS=$CPPFLAGS
             LDFLAGS="$LDFLAGS -L$LIBIDN/lib"
