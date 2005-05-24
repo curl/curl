@@ -7,10 +7,23 @@
                                   Changelog
 
 
+Daniel (24 May 2005)
+- Andres Garcia provided a text mode patch for several test cases so that they
+  do text comparisions better on Windows (newline-wise).
+
+- Any 2xx response (and not just 200) is now considered a fine response to
+  TYPE, as some servers obviously sends a 226 there. Added test case 261 to
+  verify. Based on a question/report by Georg Wicherski.
+
+Daniel (20 May 2005)
+- Improved runtests.pl to allow stdout tests to be mode=text as well, just
+  as file comparisons already supports. Added this info to the FILEFORMAT
+  docs.
+
 Daniel (18 May 2005)
-- Bug report #1204435 identified a problem with malformed URLs like
-  "http://somehost?data" as it added a slash too much in the request ("GET
-  /?data/"...). Added test case 260 to verify.
+- John McGowan identified a problem in bug report #1204435 with malformed URLs
+  like "http://somehost?data" as it added a slash too much in the request
+  ("GET /?data/"...). Added test case 260 to verify.
 
 - The configure check for strerror_r() failed to detect the proper API at
   times, like on HP-UX 10.20. Then lib/strerror.c badly assumed the glibc
