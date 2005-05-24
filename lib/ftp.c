@@ -1826,10 +1826,17 @@ static CURLcode ftp_state_type_resp(struct connectdata *conn,
   CURLcode result = CURLE_OK;
   struct SessionHandle *data=conn->data;
 
-  if(ftpcode != 200) {
+  if(ftpcode/100 != 2) {
+    /* "sasserftpd" and "(u)r(x)bot ftpd" both responds with 226 after a
+       successful 'TYPE I'. While that is not as RFC959 says, it is still a
+       positive response code and we allow that. */
     failf(data, "Couldn't set desired mode");
     return CURLE_FTP_COULDNT_SET_BINARY; /* FIX */
   }
+  if(ftpcode != 200)
+    infof(data, "Got a %03d response code instead of the assumed 200\n",
+          ftpcode);
+
   if(instate == FTP_TYPE)
     result = ftp_state_post_type(conn);
   else if(instate == FTP_LIST_TYPE)
