@@ -722,7 +722,7 @@ while(1) {
     my $input;
     eval {
         local $SIG{ALRM} = sub { die "alarm\n" };
-        alarm 5; # just in case things go bad
+        alarm 360; # just in case things go REALLY bad
         $input = <STDIN>;
         alarm 0;
     };
