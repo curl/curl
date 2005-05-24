@@ -24,7 +24,7 @@ nothing
 #
 # Verify data after the test has been "shot"
 <verify>
-<stdout>
+<stdout mode=text>
 0: Sun, 06 Nov 1994 08:49:37 GMT => 784111777
 1: Sunday, 06-Nov-94 08:49:37 GMT => 784111777
 2: Sun Nov  6 08:49:37 1994 => 784111777
