@@ -768,20 +768,24 @@ if test X"$OPT_SSL" != Xno; then
       dnl only do pkg-config magic when not cross-compiling
       PKGTEST="yes"
     fi
-    EXTRA_SSL=/usr/local/ssl ;;
+    PREFIX_OPENSSL=/usr/local/ssl
+    LIB_OPENSSL="$PREFIX_OPENSSL/lib$libsuff"
+    ;;
   off)
     dnl no --with-ssl option given, just check default places
     if test x$cross_compiling != xyes; then
       dnl only do pkg-config magic when not cross-compiling
       PKGTEST="yes"
     fi
-    EXTRA_SSL= ;;
+    PREFIX_OPENSSL=
+    ;;
   *)
     dnl check the given --with-ssl spot
     PKGTEST="no"
-    EXTRA_SSL=$OPT_SSL
-    LDFLAGS="$LDFLAGS -L$EXTRA_SSL/lib$libsuff"
-    CPPFLAGS="$CPPFLAGS -I$EXTRA_SSL/include/openssl -I$EXTRA_SSL/include"
+    PREFIX_OPENSSL=$OPT_SSL
+    LIB_OPENSSL="$PREFIX_OPENSSL/lib$libsuff"
+    LDFLAGS="$LDFLAGS -L$LIB_OPENSSL"
+    CPPFLAGS="$CPPFLAGS -I$PREFIX_OPENSSL/include/openssl -I$PREFIX_OPENSSL/include"
     ;;
   esac
 
@@ -802,6 +806,8 @@ if test X"$OPT_SSL" != Xno; then
         SSL_LIBS=`$PKGCONFIG --libs-only-l openssl 2>/dev/null`
         SSL_LDFLAGS=`$PKGCONFIG --libs-only-L openssl 2>/dev/null`
         SSL_CPPFLAGS=`$PKGCONFIG --cflags-only-I openssl 2>/dev/null`
+
+	LIB_OPENSSL=`echo $SSL_LDFLAGS | sed -e 's/-L//g'`
 
         dnl use the values pkg-config reported
         LIBS="$LIBS $SSL_LIBS"
@@ -832,8 +838,8 @@ if test X"$OPT_SSL" != Xno; then
      HAVECRYPTO="yes"
      LIBS="-lcrypto $LIBS"
      ],[
-     LDFLAGS="$CLEANLDFLAGS -L$EXTRA_SSL/lib$libsuff"
-     CPPFLAGS="$CLEANCPPFLAGS -I$EXTRA_SSL/include/openssl -I$EXTRA_SSL/include"
+     LDFLAGS="$CLEANLDFLAGS -L$LIB_OPENSSL"
+     CPPFLAGS="$CLEANCPPFLAGS -I$PREFIX_OPENSSL/include/openssl -I$PREFIX_OPENSSL/include"
      AC_CHECK_LIB(crypto, CRYPTO_add_lock,[
        HAVECRYPTO="yes"
        LIBS="-lcrypto $LIBS"], [
@@ -921,8 +927,9 @@ if test X"$OPT_SSL" != Xno; then
     dnl when the ssl shared libs were found in a path that the run-time linker
     dnl doesn't search through, we need to add it to LD_LIBRARY_PATH to
     dnl prevent further configure tests to fail due to this
-    LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EXTRA_SSL/lib$libsuff"
+    LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_OPENSSL"
     export LD_LIBRARY_PATH
+    AC_MSG_NOTICE([Added $LIB_OPENSSL to LD_LIBRARY_PATH])
   fi
 
 fi
@@ -1023,6 +1030,7 @@ if test "$OPENSSL_ENABLED" != "1"; then
 
         LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$gtlsprefix/lib$libsuff"
         export LD_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $gtlsprefix/lib$libsuff to LD_LIBRARY_PATH])
       fi
 
     fi
