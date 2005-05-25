@@ -30,6 +30,24 @@ sub checkserver {
 }
 
 #############################################################################
+# Kill a specific slave
+#
+sub ftpkillslave {
+    my ($id, $ext, $verbose)=@_;
+    my $base;
+    for $base (('filt', 'data')) {
+        my $f = ".sock$base$id$ext.pid";
+        my $pid = checkserver($f);
+        if($pid > 0) {
+            printf ("* kill pid for %s => %d\n", "ftp-$base$id$ext", $pid) if($verbose);
+            kill (9, $pid); # die!
+        }
+        unlink($f);
+    }
+}
+
+
+#############################################################################
 # Make sure no FTP leftovers are still running. Kill all slave processes.
 # This uses pidfiles since it might be used by other processes.
 #
@@ -37,15 +55,7 @@ sub ftpkillslaves {
     my ($versbose) = @_;
     for $ext (("", "ipv6")) {
         for $id (("", "2")) {
-            for $base (('filt', 'data')) {
-                my $f = ".sock$base$id$ext.pid";
-                my $pid = checkserver($f);
-                if($pid > 0) {
-		    printf ("* kill pid for %-5s => %-5d\n", "ftp-$base$id$ext", $pid) if($verbose);
-                    kill (9, $pid); # die!
-                }
-                unlink($f);
-            }
+            ftpkillslave ($id, $ext, $verbose);
         }
     }
 }
