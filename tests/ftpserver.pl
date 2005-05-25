@@ -35,16 +35,21 @@
 
 use strict;
 use IPC::Open2;
+#use Time::HiRes qw( gettimeofday ); # not available in perl 5.6
 
 require "getpart.pm";
 require "ftp.pm";
+
 
 my $ftpdnum="";
 
 # open and close each time to allow removal at any time
 sub logmsg {
+ # if later than perl 5.6 is used
+ #   my ($seconds, $microseconds) = gettimeofday;
+    my $seconds = time();
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
-        localtime(time);
+        localtime($seconds);
     open(FTPLOG, ">>log/ftpd$ftpdnum.log");
     printf FTPLOG ("%02d:%02d:%02d ", $hour, $min, $sec);
     print FTPLOG @_;
@@ -116,9 +121,12 @@ $SIG{KILL} = \&catch_zap;
 
 my $sfpid;
 
+local(*SFREAD, *SFWRITE);
+
+
 sub startsf {
     my $cmd="./server/sockfilt --port $port --logfile log/sockctrl$ftpdnum$ext.log --pidfile .sockfilt$ftpdnum$ext.pid $ipv6";
-    $sfpid = open2(\*SFREAD, \*SFWRITE, $cmd);
+    $sfpid = open2(*SFREAD, *SFWRITE, $cmd);
 
     print STDERR "$cmd\n" if($verbose);
 
@@ -131,8 +139,6 @@ sub startsf {
         kill(9, $sfpid);
         die "Failed to start sockfilt!";
     }
-    open(STDIN,  "<&SFREAD")   || die "can't dup client to stdin";
-    open(STDOUT, ">&SFWRITE")   || die "can't dup client to stdout";
 }
 
 # remove the file here so that if startsf() fails, it is very noticable 
@@ -150,8 +156,8 @@ logmsg("logged pid $$ in $pidfile\n");
 sub sockfilt {
     my $l;
     foreach $l (@_) {
-        printf "DATA\n%04x\n", length($l);
-        print $l;
+        printf SFWRITE "DATA\n%04x\n", length($l);
+        print SFWRITE $l;
     }
 }
 
@@ -720,29 +726,13 @@ while(1) {
     # We read 'sockfilt' commands.
     # 
     my $input;
-    eval {
-        local $SIG{ALRM} = sub { die "alarm\n" };
-        alarm 360; # just in case things go REALLY bad
-        $input = <STDIN>;
-        alarm 0;
-    };
-    if ($@) {
-        # timed out
-        logmsg "reading stdin timed out\n";
-    }
+
+    logmsg "Awaiting input\n";
+    sysread(SFREAD, $input, 5) || die "ftp$ftpdnum$ext read zero";
 
     if($input !~ /^CNCT/) {
         # we wait for a connected client
-        if(!length($input)) {
-            # it probably died, restart it
-            kill(9, $sfpid);
-            waitpid $sfpid, 0;
-            startsf();
-            logmsg "restarted sockfilt\n";
-        }
-        else {
-            logmsg "sockfilt said: $input";
-        }
+        logmsg "sockfilt said: $input";
         next;
     }
     logmsg "====> Client connect\n";
@@ -770,7 +760,7 @@ while(1) {
         # part only is FTP lingo.
 
         # COMMAND
-        sysread(STDIN, $i, 5) || die;
+        sysread(SFREAD, $i, 5) || die "ftp$ftpdnum$ext read zero";
 
         if($i !~ /^DATA/) {
             logmsg "sockfilt said $i";
@@ -782,11 +772,11 @@ while(1) {
         }
 
         # SIZE of data
-        sysread(STDIN, $i, 5) || die;
+        sysread(SFREAD, $i, 5) || die;
         my $size = hex($i);
 
         # data
-        sysread STDIN, $_, $size;
+        sysread SFREAD, $_, $size;
         
         ftpmsg $_;
         
