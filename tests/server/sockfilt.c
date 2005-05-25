@@ -107,19 +107,32 @@ static void lograw(unsigned char *buffer, int len)
   int width=0;
 
   for(i=0; i<len; i++) {
-    sprintf(optr, "%c",
-            (isgraph(ptr[i]) || ptr[i]==0x20) ?ptr[i]:'.');
-    optr += 1;
-    width += 1;
+    switch(ptr[i]) {
+    case '\n':
+      sprintf(optr, "\\n");
+      width += 2;
+      optr += 2;
+      break;
+    case '\r':
+      sprintf(optr, "\\r");
+      width += 2;
+      optr += 2;
+      break;
+    default:
+      sprintf(optr, "%c", (isgraph(ptr[i]) || ptr[i]==0x20) ?ptr[i]:'.');
+      width++;
+      optr++;
+      break;
+    }
 
     if(width>60) {
-      logmsg("RAW: '%s'", data);
+      logmsg("'%s'", data);
       width = 0;
       optr = data;
     }
   }
   if(width)
-    logmsg("RAW: '%s'", data);
+    logmsg("'%s'", data);
 }
 
 #ifdef SIGPIPE
@@ -159,7 +172,7 @@ static int juggle(curl_socket_t *sockfdp,
   int r;
   unsigned char buffer[256]; /* FIX: bigger buffer */
   char data[256];
-  int sockfd;
+  curl_socket_t sockfd;
 
   timeout.tv_sec = 120;
   timeout.tv_usec = 0;
@@ -228,7 +241,7 @@ static int juggle(curl_socket_t *sockfdp,
 
 
   if(FD_ISSET(fileno(stdin), &fds_read)) {
-    size_t nread;
+    ssize_t nread;
     /* read from stdin, commands/data to be dealt with and possibly passed on
        to the socket
 
@@ -307,7 +320,7 @@ static int juggle(curl_socket_t *sockfdp,
         return TRUE;
       }
     }
-    else {
+    else if(nread == -1){
       logmsg("read %d from stdin, exiting", (int)nread);
       return FALSE;
     }
@@ -356,20 +369,101 @@ static int juggle(curl_socket_t *sockfdp,
   return TRUE;
 }
 
+static curl_socket_t sockdaemon(curl_socket_t sock,
+                                unsigned short *port)
+{
+  /* passive daemon style */
+  struct sockaddr_in me;
+#ifdef ENABLE_IPV6
+  struct sockaddr_in6 me6;
+#endif /* ENABLE_IPV6 */
+  int flag = 1;
+  int rc;
+
+  if (setsockopt
+      (sock, SOL_SOCKET, SO_REUSEADDR, (const void *) &flag,
+       sizeof(int)) < 0) {
+    perror("setsockopt(SO_REUSEADDR)");
+  }
+
+#ifdef ENABLE_IPV6
+  if(!use_ipv6) {
+#endif
+    me.sin_family = AF_INET;
+    me.sin_addr.s_addr = INADDR_ANY;
+    me.sin_port = htons(*port);
+    rc = bind(sock, (struct sockaddr *) &me, sizeof(me));
+#ifdef ENABLE_IPV6
+  }
+  else {
+    memset(&me6, 0, sizeof(struct sockaddr_in6));
+    me6.sin6_family = AF_INET6;
+    me6.sin6_addr = in6addr_any;
+    me6.sin6_port = htons(*port);
+    rc = bind(sock, (struct sockaddr *) &me6, sizeof(me6));
+  }
+#endif /* ENABLE_IPV6 */
+  if(rc < 0) {
+    perror("binding stream socket");
+    logmsg("Error binding socket");
+    return CURL_SOCKET_BAD;
+  }
+
+  if(!*port) {
+    /* The system picked a port number, now figure out which port we actually
+       got */
+    /* we succeeded to bind */
+    struct sockaddr_in add;
+    socklen_t socksize = sizeof(add);
+
+    if(getsockname(sock, (struct sockaddr *) &add,
+                   &socksize)<0) {
+      fprintf(stderr, "getsockname() failed");
+      return CURL_SOCKET_BAD;
+    }
+    *port = ntohs(add.sin_port);
+  }
+
+  /* start accepting connections */
+  listen(sock, 4);
+
+  return sock;
+}
+
+static curl_socket_t mksock(bool use_ipv6)
+{
+  curl_socket_t sock;
+#ifdef ENABLE_IPV6
+  if(!use_ipv6)
+#endif
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+#ifdef ENABLE_IPV6
+  else
+    sock = socket(AF_INET6, SOCK_STREAM, 0);
+#endif
+
+  if (sock < 0) {
+    perror("opening stream socket");
+    logmsg("Error opening socket");
+    return CURL_SOCKET_BAD;
+  }
+
+  return sock;
+}
+
+
 int main(int argc, char *argv[])
 {
   struct sockaddr_in me;
 #ifdef ENABLE_IPV6
   struct sockaddr_in6 me6;
 #endif /* ENABLE_IPV6 */
-  int sock;
-  int msgsock = CURL_SOCKET_BAD; /* no stream socket yet */
-  int flag;
+  curl_socket_t sock;
+  curl_socket_t msgsock;
   FILE *pidfile;
   char *pidname= (char *)".sockfilt.pid";
   int rc;
   int arg=1;
-  bool ok = FALSE;
   enum sockmode mode = PASSIVE_LISTEN; /* default */
 
   while(argc>arg) {
@@ -447,20 +541,8 @@ int main(int argc, char *argv[])
 #endif
 #endif
 
-#ifdef ENABLE_IPV6
-  if(!use_ipv6)
-#endif
-    sock = socket(AF_INET, SOCK_STREAM, 0);
-#ifdef ENABLE_IPV6
-  else
-    sock = socket(AF_INET6, SOCK_STREAM, 0);
-#endif
 
-  if (sock < 0) {
-    perror("opening stream socket");
-    logmsg("Error opening socket");
-    return 1;
-  }
+  sock = mksock(use_ipv6);
 
   if(connectport) {
     /* Active mode, we should connect to the given port number */
@@ -496,55 +578,10 @@ int main(int argc, char *argv[])
   }
   else {
     /* passive daemon style */
-
-    flag = 1;
-    if (setsockopt
-        (sock, SOL_SOCKET, SO_REUSEADDR, (const void *) &flag,
-         sizeof(int)) < 0) {
-      perror("setsockopt(SO_REUSEADDR)");
-    }
-
-#ifdef ENABLE_IPV6
-    if(!use_ipv6) {
-#endif
-      me.sin_family = AF_INET;
-      me.sin_addr.s_addr = INADDR_ANY;
-      me.sin_port = htons(port);
-      rc = bind(sock, (struct sockaddr *) &me, sizeof(me));
-#ifdef ENABLE_IPV6
-    }
-    else {
-      memset(&me6, 0, sizeof(struct sockaddr_in6));
-      me6.sin6_family = AF_INET6;
-      me6.sin6_addr = in6addr_any;
-      me6.sin6_port = htons(port);
-      rc = bind(sock, (struct sockaddr *) &me6, sizeof(me6));
-    }
-#endif /* ENABLE_IPV6 */
-    if(rc < 0) {
-      perror("binding stream socket");
-      logmsg("Error binding socket");
+    sock = sockdaemon(sock, &port);
+    if(CURL_SOCKET_BAD == sock)
       return 1;
-    }
-
-    if(!port) {
-      /* The system picked a port number, now figure out which port we actually
-         got */
-      /* we succeeded to bind */
-      struct sockaddr_in add;
-      socklen_t socksize = sizeof(add);
-
-      if(getsockname(sock, (struct sockaddr *) &add,
-                     &socksize)<0) {
-        fprintf(stderr, "getsockname() failed");
-        return 1;
-      }
-      port = ntohs(add.sin_port);
-    }
-
-    /* start accepting connections */
-    listen(sock, 1);
-
+    msgsock = CURL_SOCKET_BAD; /* no stream socket yet */
   }
 
   logmsg("Running IPv%d version",
@@ -565,9 +602,7 @@ int main(int argc, char *argv[])
   else
     fprintf(stderr, "Couldn't write pid file\n");
 
-  do {
-    ok = juggle(&msgsock, sock, &mode);
-  } while(ok);
+  while(juggle(&msgsock, sock, &mode));
 
   sclose(sock);
 
