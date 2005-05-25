@@ -24,6 +24,7 @@
 # These should be the only variables that might be needed to get edited:
 
 use strict;
+#use Time::HiRes qw( gettimeofday );
 #use warnings;
 
 @INC=(@INC, $ENV{'srcdir'}, ".");
@@ -152,6 +153,22 @@ my $torture;
 my $tortnum;
 my $tortalloc;
 
+# open and close each time to allow removal at any time
+sub logmsg {
+# uncomment the Time::HiRes usage for this
+#    my ($seconds, $microseconds) = gettimeofday;
+#    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+#        localtime($seconds);
+    my $t;
+    if(1) {
+#        $t = sprintf ("%02d:%02d:%02d.%06d ", $hour, $min, $sec,
+#                      $microseconds);
+    }
+    for(@_) {
+        print "${t}$_";
+    }
+}
+
 chomp($pwd = `pwd`);
 
 # enable memory debugging if curl is compiled with it
@@ -160,7 +177,7 @@ $ENV{'HOME'}=$pwd;
 
 sub catch_zap {
     my $signame = shift;
-    print STDERR "runtests.pl received SIG$signame, exiting\n";
+    logmsg "runtests.pl received SIG$signame, exiting\n";
     stopservers(1);
     die "Somebody sent me a SIG$signame";
 }
@@ -194,7 +211,7 @@ $ENV{'CURL_CA_BUNDLE'}=undef;
 sub startnew {
     my ($cmd, $pidfile)=@_;
 
-    print "CMD: $cmd\n" if ($verbose);
+    logmsg "startnew: $cmd\n" if ($verbose);
 
     my $child = fork();
     my $pid2;
@@ -257,7 +274,7 @@ sub torture {
     # First get URL from test server, ignore the output/result
     system($testcmd);
 
-    print " CMD: $testcmd\n" if($verbose);
+    logmsg " CMD: $testcmd\n" if($verbose);
 
     # memanalyze -v is our friend, get the number of allocations made
     my $count=0;
@@ -269,11 +286,11 @@ sub torture {
         }
     }
     if(!$count) {
-        print " found no allocs to make fail\n";
+        logmsg " found no allocs to make fail\n";
         return 0;
     }
 
-    print " $count allocations to make fail\n";
+    logmsg " $count allocations to make fail\n";
 
     for ( 1 .. $count ) {
         my $limit = $_;
@@ -284,7 +301,7 @@ sub torture {
             next;
         }
 
-        print "Fail alloc no: $limit\r" if($verbose);
+        logmsg "Fail alloc no: $limit\r" if($verbose);
 
         # make the memory allocation function number $limit return failure
         $ENV{'CURL_MEMLIMIT'} = $limit;
@@ -292,7 +309,7 @@ sub torture {
         # remove memdump first to be sure we get a new nice and clean one
         unlink($memdump);
 
-        print "**> Alloc number $limit is now set to fail <**\n" if($gdbthis);
+        logmsg "**> Alloc number $limit is now set to fail <**\n" if($gdbthis);
 
         my $ret;
         if($gdbthis) {
@@ -307,7 +324,7 @@ sub torture {
 
         if(-r "core") {
             # there's core file present now!
-            print " core dumped!\n";
+            logmsg " core dumped!\n";
             $dumped_core = 1;
             $fail = 2;
         }
@@ -315,7 +332,7 @@ sub torture {
         # verify that it returns a proper error code, doesn't leak memory
         # and doesn't core dump
         if($ret & 255) {
-            print " system() returned $ret\n";
+            logmsg " system() returned $ret\n";
             $fail=1;
         }
         else {
@@ -329,21 +346,21 @@ sub torture {
                 }
             }
             if($leak) {
-                print "** MEMORY FAILURE\n";
-                print @memdata;
-                print `$memanalyze -l $memdump`;
+                logmsg "** MEMORY FAILURE\n";
+                logmsg @memdata;
+                logmsg `$memanalyze -l $memdump`;
                 $fail = 1;
             }
         }
         if($fail) {
-            print " Failed on alloc number $limit in test.\n",
+            logmsg " Failed on alloc number $limit in test.\n",
             " invoke with -t$limit to repeat this single case.\n";
             stopservers($verbose);
             exit 1;
         }
     }
 
-    print "torture OK\n";
+    logmsg "torture OK\n";
     return 0;
 }
 
@@ -360,7 +377,7 @@ sub stopserver {
     if($pid =~ / /) {
         # if it contains space, it might be more than one pid
         my @pids = split(" ", $pid);
-        for(@pids) {
+        for (@pids) {
             kill (9, $_); # die!
         }
     }
@@ -368,7 +385,7 @@ sub stopserver {
     my $res = kill (9, $pid); # die!
 
     if($verbose) {
-        print "RUN: Test server pid $pid signalled to die\n";
+        logmsg "RUN: Test server pid $pid signalled to die\n";
     }
 }
 
@@ -384,7 +401,7 @@ sub verifyhttp {
     my $pid;
 
     # verify if our/any server is running on this port
-    print "CMD; $cmd\n" if ($verbose);
+    logmsg "CMD; $cmd\n" if ($verbose);
     my $res = system($cmd);
 
     $res >>= 8; # rotate the result
@@ -394,10 +411,10 @@ sub verifyhttp {
         open(ERR, "<log/verifyhttp");
         my @e = <ERR>;
         close(ERR);
-        print "RUN: curl command returned $res\n";
+        logmsg "RUN: curl command returned $res\n";
         for(@e) {
             if($_ !~ /^([ \t]*)$/) {
-                print "RUN: $_";
+                logmsg "RUN: $_";
             }
         }
     }
@@ -411,11 +428,11 @@ sub verifyhttp {
     }
     elsif($res == 6) {
         # curl: (6) Couldn't resolve host '::1'
-        print "RUN: failed to resolve host\n";
+        logmsg "RUN: failed to resolve host\n";
         return 0;
     }
     elsif($data || ($res != 7)) {
-        print "RUN: Unknown server is running on port $port\n";
+        logmsg "RUN: Unknown server is running on port $port\n";
         return 0;
     }
     return $pid;
@@ -434,7 +451,7 @@ sub verifyftp {
     my $cmd="$CURL -m4 --silent -vg \"$proto://$ip:$port/verifiedserver\" 2>log/verifyftp";
     # check if this is our server running on this port:
     my @data=`$cmd`;
-    print "RUN: $cmd\n" if($verbose);
+    logmsg "RUN: $cmd\n" if($verbose);
     my $line;
 
     # if this took more than 2 secs, we assume it "hung" on a weird server
@@ -449,7 +466,7 @@ sub verifyftp {
     }
     if($pid <= 0 && $data[0]) {
         # this is not a known server
-        print "RUN: Unknown server on our FTP port: $port\n";
+        logmsg "RUN: Unknown server on our FTP port: $port\n";
         return 0;
     }
     return $pid;
@@ -523,21 +540,21 @@ sub runhttpserver {
 
     if(!kill(0, $httppid)) {
         # it is NOT alive
-        print "RUN: failed to start the HTTP server!\n";
+        logmsg "RUN: failed to start the HTTP server!\n";
         stopservers($verbose);
         return (0,0);
     }
 
     # Server is up. Verify that we can speak to it.
     if(!verifyserver("http", $ip, $port)) {
-        print "RUN: HTTP$nameext server failed verification\n";
+        logmsg "RUN: HTTP$nameext server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$httppid $pid2");
         return (0,0);
     }
 
     if($verbose) {
-        print "RUN: HTTP$nameext server is now running PID $httppid\n";
+        logmsg "RUN: HTTP$nameext server is now running PID $httppid\n";
     }
 
     sleep(1);
@@ -577,21 +594,21 @@ sub runhttpsserver {
 
     if(!kill(0, $httpspid)) {
         # it is NOT alive
-        print "RUN: failed to start the HTTPS server!\n";
+        logmsg "RUN: failed to start the HTTPS server!\n";
         stopservers($verbose);
         return(0,0);
     }
 
     # Server is up. Verify that we can speak to it.
     if(!verifyserver("https", $ip, $HTTPSPORT)) {
-        print "RUN: HTTPS server failed verification\n";
+        logmsg "RUN: HTTPS server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$httpspid $pid2");
         return (0,0);
     }
 
     if($verbose) {
-        print "RUN: HTTPS server is now running PID $httpspid\n";
+        logmsg "RUN: HTTPS server is now running PID $httpspid\n";
     }
 
     sleep(1);
@@ -625,8 +642,6 @@ sub runftpserver {
     if($pid >= 0) {
         stopserver($pid);
     }
-    # kill possible still-running slaves
-    ftpkillslaves($verbose);
 
     # start our server:
     my $flag=$debugprotocol?"-v ":"";
@@ -639,24 +654,26 @@ sub runftpserver {
     }
     $cmd="$perl $srcdir/ftpserver.pl --pidfile $pidfile $flag --port $port";
 
+    unlink($pidfile);
+
     my ($ftppid, $pid2) = startnew($cmd, $pidfile);
 
     if(!$ftppid || !kill(0, $ftppid)) {
         # it is NOT alive
-        print "RUN: failed to start the FTP$id$nameext server!\n";
+        logmsg "RUN: failed to start the FTP$id$nameext server!\n";
         return -1;
     }
 
     # Server is up. Verify that we can speak to it.
     if(!verifyserver("ftp", $ip, $port)) {
-        print "RUN: FTP$id$nameext server failed verification\n";
+        logmsg "RUN: FTP$id$nameext server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$ftppid $pid2");
         return (0,0);
     }
 
     if($verbose) {
-        print "RUN: FTP$id$nameext server is now running PID $ftppid\n";
+        logmsg "RUN: FTP$id$nameext server is now running PID $ftppid\n";
     }
 
     sleep(1);
@@ -700,7 +717,7 @@ sub filteroff {
     open(OUT, ">$ofile")
         || return 1;
 
-    # print "FILTER: off $filter from $infile to $ofile\n";
+    # logmsg "FILTER: off $filter from $infile to $ofile\n";
 
     while(<IN>) {
         $_ =~ s/$filter//;
@@ -724,11 +741,11 @@ sub compare {
 
     if($result) {
         if(!$short) {
-            print "\n $subject FAILED:\n";
-            print showdiff($LOGDIR, $firstref, $secondref);
+            logmsg "\n $subject FAILED:\n";
+            logmsg showdiff($LOGDIR, $firstref, $secondref);
         }
         else {
-            print "FAILED\n";
+            logmsg "FAILED\n";
         }
     }
     return $result;
@@ -785,7 +802,7 @@ sub checksystem {
                     }
                 }
                 if(!$matchlen) {
-                    print "Serious error, can't find our \"real\" path!\n";
+                    logmsg "Serious error, can't find our \"real\" path!\n";
                 }
                 else {
                     # now prepend the prefix from the mount command to build
@@ -892,42 +909,42 @@ sub checksystem {
     my $hostname=`hostname`;
     my $hosttype=`uname -a`;
 
-    print "********* System characteristics ******** \n",
+    logmsg ("********* System characteristics ******** \n",
     "* $curl\n",
     "* $libcurl\n",
     "* Features: $feat\n",
     "* Host: $hostname",
-    "* System: $hosttype";
+    "* System: $hosttype");
 
-    printf("* Server SSL:     %s\n", $stunnel?"ON":"OFF");
-    printf("* libcurl SSL:    %s\n", $ssl_version?"ON":"OFF");
-    printf("* libcurl debug:  %s\n", $curl_debug?"ON":"OFF");
-    printf("* valgrind:       %s\n", $valgrind?"ON":"OFF");
-    printf("* HTTP IPv6       %s\n", $http_ipv6?"ON":"OFF");
-    printf("* FTP IPv6        %s\n", $ftp_ipv6?"ON":"OFF");
+    logmsg sprintf("* Server SSL:     %s\n", $stunnel?"ON":"OFF");
+    logmsg sprintf("* libcurl SSL:    %s\n", $ssl_version?"ON":"OFF");
+    logmsg sprintf("* libcurl debug:  %s\n", $curl_debug?"ON":"OFF");
+    logmsg sprintf("* valgrind:       %s\n", $valgrind?"ON":"OFF");
+    logmsg sprintf("* HTTP IPv6       %s\n", $http_ipv6?"ON":"OFF");
+    logmsg sprintf("* FTP IPv6        %s\n", $ftp_ipv6?"ON":"OFF");
 
-    printf("* HTTP port:      %d\n", $HTTPPORT);
-    printf("* FTP port:       %d\n", $FTPPORT);
-    printf("* FTP port 2:     %d\n", $FTP2PORT);
+    logmsg sprintf("* HTTP port:      %d\n", $HTTPPORT);
+    logmsg sprintf("* FTP port:       %d\n", $FTPPORT);
+    logmsg sprintf("* FTP port 2:     %d\n", $FTP2PORT);
     if($stunnel) {
-        #printf("* FTPS port:      %d\n", $FTPSPORT);
-        printf("* HTTPS port:     %d\n", $HTTPSPORT);
+        #logmsg sprintf("* FTPS port:      %d\n", $FTPSPORT);
+        logmsg sprintf("* HTTPS port:     %d\n", $HTTPSPORT);
     }
     if($http_ipv6) {
-        printf("* HTTP IPv6 port: %d\n", $HTTP6PORT);
+        logmsg sprintf("* HTTP IPv6 port: %d\n", $HTTP6PORT);
     }
     if($ftp_ipv6) {
-        printf("* FTP IPv6 port:  %d\n", $FTP6PORT);
+        logmsg sprintf("* FTP IPv6 port:  %d\n", $FTP6PORT);
     }
     
     if($ssl_version) {
-        printf("* SSL library:    %s\n",
+        logmsg sprintf("* SSL library:    %s\n",
                $has_gnutls?"GnuTLS":($has_openssl?"OpenSSL":"<unknown>"));
     }
 
     $has_textaware = ($^O eq 'MSWin32') || ($^O eq 'msys');
 
-    print "***************************************** \n";
+    logmsg "***************************************** \n";
 }
 
 #######################################################################
@@ -974,7 +991,7 @@ sub singletest {
     if(loadtest("${TESTDIR}/test${testnum}")) {
         if($verbose) {
             # this is not a test
-            print "RUN: $testnum doesn't look like a test case!\n";
+            logmsg "RUN: $testnum doesn't look like a test case!\n";
         }
         $why = "no test";
     }
@@ -1057,8 +1074,8 @@ sub singletest {
                 $why = $o[0];
                 chomp $why;
             }
+            logmsg "prechecked $cmd\n" if($verbose);
         }
-        print "prechecked $cmd\n" if($verbose);
     }
 
     if($why) {
@@ -1073,8 +1090,7 @@ sub singletest {
 
         return -1;
     }
-    printf("test %03d...", $testnum);
-
+    logmsg sprintf("test %03d...", $testnum);
 
     # extract the reply data
     my @reply = getpart("reply", "data");
@@ -1120,7 +1136,7 @@ sub singletest {
     if(!$short) {
         my $name = $testname[0];
         $name =~ s/\n//g;
-        print "[$name]\n";
+        logmsg "[$name]\n";
     }
 
     if($listonly) {
@@ -1183,12 +1199,12 @@ sub singletest {
         my $filename=$fileattr{'name'};
 
         if(!$filename) {
-            print "ERROR: section client=>file has no name attribute!\n";
+            logmsg "ERROR: section client=>file has no name attribute!\n";
             return -1;
         }
         my $fileContent = join('', @inputfile);
         subVariables \$fileContent;
-#        print "DEBUG: writing file " . $filename . "\n";
+#        logmsg "DEBUG: writing file " . $filename . "\n";
         open OUTFILE, ">$filename";
         binmode OUTFILE; # for crapage systems, use binary
         print OUTFILE $fileContent;
@@ -1241,7 +1257,7 @@ sub singletest {
     $CMDLINE .= "$cmdargs >>$STDOUT 2>>$STDERR";
 
     if($verbose) {
-        print "$CMDLINE\n";
+        logmsg "$CMDLINE\n";
     }
 
     print CMDLOG "$CMDLINE\n";
@@ -1257,8 +1273,8 @@ sub singletest {
         my $code = join("", @precommand);
         eval $code;
         if($@) {
-            print "perl: $code\n";
-            print "precommand: $@";
+            logmsg "perl: $code\n";
+            logmsg "precommand: $@";
             stopservers($verbose);
             return -1;
         }
@@ -1299,9 +1315,9 @@ sub singletest {
     }
 
     if($dumped_core) {
-        print "core dumped!\n";
+        logmsg "core dumped!\n";
         if(0 && $gdb) {
-            print "running gdb for post-mortem analysis:\n";
+            logmsg "running gdb for post-mortem analysis:\n";
             open(GDBCMD, ">log/gdbcmd2");
             print GDBCMD "bt\n";
             close(GDBCMD);
@@ -1441,17 +1457,16 @@ sub singletest {
 
         my $filename=$hash{'name'};
         if(!$filename) {
-            print "ERROR: section verify=>file has no name attribute!\n";
+            logmsg "ERROR: section verify=>file has no name attribute!\n";
             stopservers($verbose);
             return -1;
         }
-        my $filemode=$hash{'mode'};
-        
         my @generated=loadarray($filename);
 
         # what parts to cut off from the file
         my @stripfile = getpart("verify", "stripfile");
         
+        my $filemode=$hash{'mode'};
         if(($filemode eq "text") && $has_textaware) {
             # text mode when running on windows means adding an extra
             # strip expression
@@ -1495,7 +1510,7 @@ sub singletest {
         if(!$short) {
             printf "\ncurl returned $cmdres, %s was expected\n", $errorcode;
         }
-        print " exit FAILED\n";
+        logmsg " exit FAILED\n";
         return 1;
     }
 
@@ -1503,18 +1518,23 @@ sub singletest {
     for(@what) {
         my $serv = $_;
         chomp $serv;
+        if($serv =~ /^ftp(\d*)(-ipv6|)/) {
+            my ($id, $ext) = ($1, $2);
+            print STDERR "SERV $serv $id $ext\n";
+            ftpkillslave($id, $ext, 1);
+        }
         if($run{$serv}) {
             stopserver($run{$serv}); # the pid file is in the hash table
             $run{$serv}=0; # clear pid
         }
         else {
-            print STDERR "RUN: The $serv server is not running\n";
+            logmsg "RUN: The $serv server is not running\n";
         }
     }
 
     if($curl_debug) {
         if(! -f $memdump) {
-            print "\n** ALERT! memory debuggin without any output file?\n";
+            logmsg "\n** ALERT! memory debuggin without any output file?\n";
         }
         else {
             my @memdata=`$memanalyze $memdump`;
@@ -1527,8 +1547,8 @@ sub singletest {
                 }
             }
             if($leak) {
-                print "\n** MEMORY FAILURE\n";
-                print @memdata;
+                logmsg "\n** MEMORY FAILURE\n";
+                logmsg @memdata;
                 return 1;
             }
             else {
@@ -1564,15 +1584,15 @@ sub singletest {
             }
             my @e = valgrindparse($src, $feature{'SSL'}, "log/$l");
             if($e[0]) {
-                print " valgrind ERROR ";
-                print @e;
+                logmsg " valgrind ERROR ";
+                logmsg @e;
                 return 1;
             }
             $ok .= "v";
         }
         else {
             if(!$short) {
-                print " valgrind SKIPPED";
+                logmsg " valgrind SKIPPED";
             }
             $ok .= "-"; # skipped
         }
@@ -1581,7 +1601,7 @@ sub singletest {
         $ok .= "-"; # valgrind not checked
     }
 
-    print "$ok " if(!$short);
+    logmsg "$ok " if(!$short);
 
     my $sofar= time()-$start;
     my $esttotal = $sofar/$count * $total;
@@ -1609,11 +1629,16 @@ sub stopservers {
         my $server = $_;
         my $pids=$run{$server};
         my $pid;
+        my $prev;
 
         foreach $pid (split(" ", $pids)) {
-            printf("* kill pid for %-5s => %-5d\n",
-                   $server, $pid) if($verbose);
-            stopserver($pid);
+            if($pid != $prev) {
+                # no need to kill same pid twice!
+                logmsg sprintf("* kill pid for %s => %d\n",
+                               $server, $pid) if($verbose);
+                stopserver($pid);
+            }
+            $prev = $pid;
         }
     }
     ftpkillslaves($verbose);
@@ -1636,7 +1661,7 @@ sub startservers {
                 if($pid <= 0) {
                     return "failed starting FTP server";
                 }
-                printf ("* pid ftp => %-5d %-5d\n", $pid, $pid2) if($verbose);
+                printf ("* pid ftp => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'ftp'}="$pid $pid2";
             }
         }
@@ -1646,7 +1671,7 @@ sub startservers {
                 if($pid <= 0) {
                     return "failed starting FTP2 server";
                 }
-                printf ("* pid ftp2 => %-5d %-5d\n", $pid, $pid2) if($verbose);
+                printf ("* pid ftp2 => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'ftp2'}="$pid $pid2";
             }
         }
@@ -1656,7 +1681,7 @@ sub startservers {
                 if($pid <= 0) {
                     return "failed starting FTP-ipv6 server";
                 }
-                printf("* pid ftp-ipv6 => %-5d %-5d\n", $pid,
+                logmsg sprintf("* pid ftp-ipv6 => %d %d\n", $pid,
                        $pid2) if($verbose);
                 $run{'ftp-ipv6'}="$pid $pid2";
             }
@@ -1667,7 +1692,7 @@ sub startservers {
                 if($pid <= 0) {
                     return "failed starting HTTP server";
                 }
-                printf ("* pid http => %-5d %-5d\n", $pid, $pid2) if($verbose);
+                printf ("* pid http => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'http'}="$pid $pid2";
             }
         }
@@ -1677,7 +1702,7 @@ sub startservers {
                 if($pid <= 0) {
                     return "failed starting IPv6 HTTP server";
                 }
-                printf("* pid http-ipv6 => %-5d %-5d\n", $pid, $pid2)
+                logmsg sprintf("* pid http-ipv6 => %d %d\n", $pid, $pid2)
                     if($verbose);
                 $run{'http-ipv6'}="$pid $pid2";
             }
@@ -1704,7 +1729,7 @@ sub startservers {
                 if($pid <= 0) {
                     return "failed starting HTTP server";
                 }
-                printf ("* pid http => %-5d %-5d\n", $pid, $pid2) if($verbose);
+                printf ("* pid http => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'http'}="$pid $pid2";
             }
             if(!$run{'https'}) {
@@ -1712,13 +1737,13 @@ sub startservers {
                 if($pid <= 0) {
                     return "failed starting HTTPS server (stunnel)";
                 }
-                printf("* pid https => %-5d %-5d\n", $pid, $pid2)
+                logmsg sprintf("* pid https => %d %d\n", $pid, $pid2)
                     if($verbose);
                 $run{'https'}="$pid $pid2";
             }
         }
         elsif($what eq "none") {
-            print "* starts no server\n" if ($verbose);
+            logmsg "* starts no server\n" if ($verbose);
         }
         else {
             warn "we don't support a server for $what";
@@ -1742,7 +1767,7 @@ sub serverfortest {
     if(loadtest("${TESTDIR}/test${testnum}")) {
         if($verbose) {
             # this is not a test
-            print "$testnum doesn't look like a test case!\n";
+            logmsg "$testnum doesn't look like a test case!\n";
         }
         return "no test";
     }
@@ -1864,7 +1889,7 @@ if($valgrind) {
     my $code = system("valgrind >/dev/null 2>&1");
 
     if(($code>>8) != 1) {
-        #print "Valgrind failure, disable it\n";
+        #logmsg "Valgrind failure, disable it\n";
         undef $valgrind;
     }
 }
@@ -1918,7 +1943,7 @@ if ( $TESTCASES eq "all") {
 # Start the command line log
 #
 open(CMDLOG, ">$CURLLOG") ||
-    print "can't log command lines to $CURLLOG\n";
+    logmsg "can't log command lines to $CURLLOG\n";
 
 #######################################################################
 
@@ -1926,7 +1951,7 @@ sub displaylogcontent {
     my ($file)=@_;
     open(SINGLE, "<$file");
     while(<SINGLE>) {
-        print " $_";
+        logmsg " $_";
     }
     close(SINGLE);
 }
@@ -1939,7 +1964,7 @@ sub displaylogs {
     closedir DIR;
     my $log;
 
-    print "== Contents of files in the log/ dir after test $testnum\n";
+    logmsg "== Contents of files in the log/ dir after test $testnum\n";
     foreach $log (sort @logs) {
         # the log file is not "." or ".." and contains more than zero bytes
         if(($log !~ /\.(\.|)$/) &&
@@ -1948,9 +1973,9 @@ sub displaylogs {
             if($log =~ /^\.nfs/) {
                 next;
             }
-            print "== Start of file $log\n";
+            logmsg "== Start of file $log\n";
             displaylogcontent("$LOGDIR/$log");
-            print "== End of file $log\n";
+            logmsg "== End of file $log\n";
         }
     }
 }
@@ -1990,7 +2015,7 @@ foreach $testnum (@at) {
         }
         if(!$anyway) {
             # a test failed, abort
-            print "\n - abort tests\n";
+            logmsg "\n - abort tests\n";
             last;
         }
     }
@@ -2012,25 +2037,25 @@ stopservers($verbose);
 my $all = $total + $skipped;
 
 if($total) {
-    printf("TESTDONE: $ok tests out of $total reported OK: %d%%\n",
-           $ok/$total*100);
+    logmsg sprintf("TESTDONE: $ok tests out of $total reported OK: %d%%\n",
+                   $ok/$total*100);
 
     if($ok != $total) {
-        print "TESTFAIL: These test cases failed: $failed\n";
+        logmsg "TESTFAIL: These test cases failed: $failed\n";
     }
 }
 else {
-    print "TESTFAIL: No tests were performed!\n";
+    logmsg "TESTFAIL: No tests were performed!\n";
 }
 
 if($all) {
     my $sofar = time()-$start;
-    print "TESTDONE: $all tests were considered during $sofar seconds.\n";
+    logmsg "TESTDONE: $all tests were considered during $sofar seconds.\n";
 }
 
 if($skipped) {
     my $s=0;
-    print "TESTINFO: $skipped tests were skipped due to these restraints:\n";
+    logmsg "TESTINFO: $skipped tests were skipped due to these restraints:\n";
 
     for(keys %skipped) {
         my $r = $_;
@@ -2042,12 +2067,12 @@ if($skipped) {
         for(0 .. $lasttest) {
             my $t = $_;
             if($teststat[$_] eq $r) {
-                print ", " if($c);
-                print $_;
+                logmsg ", " if($c);
+                logmsg $_;
                 $c++;
             }
         }
-        print ")\n";
+        logmsg ")\n";
     }
 }
 if($total && ($ok != $total)) {
