@@ -2817,16 +2817,15 @@ int my_trace(CURL *handle, curl_infotype type,
   const char *text;
   struct timeval tv;
   struct tm *now;
-  char timebuf[15];
+  char timebuf[20];
 
   (void)handle; /* prevent compiler warning */
 
   tv = curlx_tvnow();
   now = localtime(&tv.tv_sec);  /* not multithread safe but we don't care */
   if(config->tracetime)
-    snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%02d ",
-             now->tm_hour, now->tm_min, now->tm_sec,
-             tv.tv_usec/10000);
+    snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06d ",
+             now->tm_hour, now->tm_min, now->tm_sec, tv.tv_usec);
   else
     timebuf[0]=0;
 
