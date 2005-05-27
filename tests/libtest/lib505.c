@@ -40,7 +40,7 @@ int test(char *URL)
   CURLcode res;
   FILE *hd_src ;
   int hd ;
-  struct stat file_info;
+  struct_stat file_info;
 
   struct curl_slist *headerlist=NULL;
   const char *buf_1 = "RNFR 505";
