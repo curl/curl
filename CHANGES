@@ -13,6 +13,12 @@ Daniel (30 May 2005)
   downloaded headers become incomplete. The fix is now verified with test case
   262.
 
+Daniel (25 May 2005)
+- Fixed problems with the test suite, and in particular the FTP test cases
+  since it previously was failing every now and then in a nonsense manner.
+
+- --trace-time now outputs the full microsecond, all 6 digits.
+
 Daniel (24 May 2005)
 - Andres Garcia provided a text mode patch for several test cases so that they
   do text comparisions better on Windows (newline-wise).

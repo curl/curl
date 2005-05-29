@@ -11,10 +11,12 @@ Curl and libcurl 7.14.1
 
 This release includes the following changes:
  
- o
+ o --trace-time now outputs the full microsecond, all 6 digits
 
 This release includes the following bugfixes:
 
+ o better treatment of binary zeroes in HTTP response headers
+ o fixed the notorius FTP server failure in the test suite
  o better checking of text output in the test suite on windows
  o TYPE response check less strict
  o URL-without-slash as in http://somehost?data
@@ -23,11 +25,11 @@ This release includes the following bugfixes:
 
 Other curl-related news since the previous public release:
 
- o 
+ o http://curl.miscellaneousmirror.org is a new German curl mirror
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- John McGowan, Georg Wicherski, Andres Garcia
+ John McGowan, Georg Wicherski, Andres Garcia, Eric Cooper
 
         Thanks! (and sorry if I forgot to mention someone)
