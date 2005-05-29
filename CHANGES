@@ -7,6 +7,12 @@
                                   Changelog
 
 
+Daniel (30 May 2005)
+- Eric Cooper reported about a problem with HTTP servers that responds with
+  binary zeroes within the headers. They confused libcurl to do wrong so the
+  downloaded headers become incomplete. The fix is now verified with test case
+  262.
+
 Daniel (24 May 2005)
 - Andres Garcia provided a text mode patch for several test cases so that they
   do text comparisions better on Windows (newline-wise).

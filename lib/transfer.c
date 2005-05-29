@@ -360,7 +360,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             /* str_start is start of line within buf */
             k->str_start = k->str;
 
-            k->end_ptr = strchr (k->str_start, '\n');
+            k->end_ptr = memchr(k->str_start, '\n', nread);
 
             if (!k->end_ptr) {
               /* Not a complete header line within buffer, append the data to
@@ -428,7 +428,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             }
 
             /* copy to end of line */
-            strncpy (k->hbufp, k->str_start, full_length);
+            memcpy(k->hbufp, k->str_start, full_length);
             k->hbufp += full_length;
             k->hbuflen += full_length;
             *k->hbufp = 0;
