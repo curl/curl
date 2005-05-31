@@ -7,6 +7,12 @@
                                   Changelog
 
 
+Daniel (31 May 2005)
+- Todd Kulesza reported a flaw in the proxy option, since a numerical IPv6
+  address was not possible to use. It is now, but requires it written
+  RFC2732-style, within brackets - which incidently is how you enter numerical
+  IPv6 addresses in URLs. Test case 263 added to verify.
+
 Daniel (30 May 2005)
 - Eric Cooper reported about a problem with HTTP servers that responds with
   binary zeroes within the headers. They confused libcurl to do wrong so the

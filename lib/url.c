@@ -2943,25 +2943,44 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
     /* We use 'proxyptr' to point to the proxy name from now on... */
     char *proxyptr=proxydup;
+    char *portptr;
 
     if(NULL == proxydup) {
       failf(data, "memory shortage");
       return CURLE_OUT_OF_MEMORY;
     }
 
-    /* Daniel Dec 10, 1998:
-       We do the proxy host string parsing here. We want the host name and the
-       port name. Accept a protocol:// prefix, even though it should just be
-       ignored. */
+    /* We do the proxy host string parsing here. We want the host name and the
+     * port name. Accept a protocol:// prefix, even though it should just be
+     * ignored.
+     */
 
-    /* 1. skip the protocol part if present */
+    /* Skip the protocol part if present */
     endofprot=strstr(proxyptr, "://");
-    if(endofprot) {
+    if(endofprot)
       proxyptr = endofprot+3;
+
+    /* start scanning for port number at this point */
+    portptr = proxyptr;
+
+    /* detect and extract RFC2732-style IPv6-addresses */
+    if(*proxyptr == '[') {
+      char *ptr = ++proxyptr; /* advance beyond the initial bracket */
+      while(*ptr && (isxdigit((int)*ptr) || (*ptr == ':')))
+        ptr++;
+      if(*ptr == ']') {
+        /* yeps, it ended nicely with a bracket as well */
+        *ptr = 0;
+        portptr = ptr+1;
+      }
+      /* Note that if this didn't end with a bracket, we still advanced the
+       * proxyptr first, but I can't see anything wrong with that as no host
+       * name nor a numeric can legally start with a bracket.
+       */
     }
 
-    /* allow user to specify proxy.server.com:1080 if desired */
-    prox_portno = strchr (proxyptr, ':');
+    /* Get port number off proxy.server.com:1080 */
+    prox_portno = strchr(portptr, ':');
     if (prox_portno) {
       *prox_portno = 0x0; /* cut off number from host name */
       prox_portno ++;

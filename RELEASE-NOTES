@@ -5,7 +5,7 @@ Curl and libcurl 7.14.1
  Available command line options:           107
  Available curl_easy_setopt() options:     122
  Number of public functions in libcurl:    46
- Amount of public web site mirrors:        23
+ Amount of public web site mirrors:        24
  Number of known libcurl bindings:         31
  Number of contributors:                   437
 
@@ -15,10 +15,11 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o proxy host set with numerical IPv6 address
  o better treatment of binary zeroes in HTTP response headers
  o fixed the notorius FTP server failure in the test suite
  o better checking of text output in the test suite on windows
- o TYPE response check less strict
+ o FTP servers' TYPE command response check made less strict
  o URL-without-slash as in http://somehost?data
  o strerror_r() configure check for HP-UX 10.20 (and others)
  o time parse work-around on HP-UX 10.20 since its gmtime_r() is broken
@@ -30,6 +31,6 @@ Other curl-related news since the previous public release:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- John McGowan, Georg Wicherski, Andres Garcia, Eric Cooper
+ John McGowan, Georg Wicherski, Andres Garcia, Eric Cooper, Todd Kulesza
 
         Thanks! (and sorry if I forgot to mention someone)
