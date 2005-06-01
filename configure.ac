@@ -1650,7 +1650,7 @@ AC_HELP_STRING([--disable-ares],[Disable ares for name lookups]),
        AC_SUBST(HAVE_ARES)
        curl_ares_msg="enabled"
 
-       LIBS="$LIBS -lcares"
+       LIBS="-lcares $LIBS"
 
        dnl For backwards compatibility default to includes/lib in srcdir/ares
        dnl If a value is specified it is assumed that the libs are in $val/lib
