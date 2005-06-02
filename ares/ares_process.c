@@ -45,6 +45,11 @@
 #include "ares_dns.h"
 #include "ares_private.h"
 
+#ifndef TRUE
+/* at least Solaris 7 does not have TRUE at this point */
+#define TRUE 1
+#endif
+
 #if (defined(WIN32) || defined(WATT32)) && !defined(MSDOS)
 #define GET_ERRNO()  WSAGetLastError()
 #else
