@@ -1,5 +1,19 @@
   Changelog for the c-ares project
 
+* June 2
+
+- William Ahern:
+
+  I'm not quite sure how this was happening, but I've been seeing PTR queries
+  which seem to return empty responses. At least, they were empty when calling
+  ares_expand_name() on the record. Here's a patch which guarantees to
+  NUL-terminate the expanded name. The old behavior failed to NUL-terminate if
+  len was 0, and this was causing strlen() to run past the end of the buffer
+  after calling ares_expand_name() and getting ARES_SUCCESS as the return
+  value. If q is not greater than *s then it's equal and *s is always
+  allocated with at least one byte.
+
+
 * May 16
 
 - Added ares_getnameinfo which mimics the getnameinfo API (another feature

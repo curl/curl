@@ -106,6 +106,8 @@ int ares_expand_name(const unsigned char *encoded, const unsigned char *abuf,
   /* Nuke the trailing period if we wrote one. */
   if (q > *s)
     *(q - 1) = 0;
+  else
+    *q = 0; /* zero terminate */
 
   return ARES_SUCCESS;
 }
