@@ -328,5 +328,6 @@ AC_CHECK_SIZEOF(struct in_addr, ,
 
 AC_CHECK_FUNCS([bitncmp if_indextoname])
 
+CURL_CHECK_NONBLOCKING_SOCKET
 
 AC_OUTPUT(Makefile)

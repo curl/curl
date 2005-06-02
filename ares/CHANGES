@@ -4,6 +4,13 @@
 
 - William Ahern:
 
+  Make UDP sockets non-blocking. I've confirmed that at least on Linux 2.4 a
+  read event can come back from poll() on a valid SOCK_DGRAM socket but
+  recv(2) will still block. This patch doesn't ignore EAGAIN in
+  read_udp_packets(), though maybe it should. (This patch was edited by Daniel
+  Stenberg and a new configure test was added (imported from curl's configure)
+  to properly detect what non-blocking socket approach to use.)
+
   I'm not quite sure how this was happening, but I've been seeing PTR queries
   which seem to return empty responses. At least, they were empty when calling
   ares_expand_name() on the record. Here's a patch which guarantees to
