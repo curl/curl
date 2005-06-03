@@ -7,6 +7,15 @@
                                   Changelog
 
 
+Daniel (3 June 2005)
+- Andres Garcia provided yet another text mode patch for several test cases so
+  that they do text comparisions better on Windows (newline-wise).
+
+Daniel (1 June 2005)
+- The configure check for c-ares now adds the cares lib before the other libs,
+  to make it build fine with mingw. Inspired by Tupone Alfredo's bug report
+  (and patch) #1212940
+
 Daniel (31 May 2005)
 - Todd Kulesza reported a flaw in the proxy option, since a numerical IPv6
   address was not possible to use. It is now, but requires it written

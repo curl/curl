@@ -1,7 +1,7 @@
 #
 # Server-side
 <reply>
-<data>
+<data mode="text">
 foo
    bar swsclose
 bar

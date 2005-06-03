@@ -1366,6 +1366,14 @@ sub singletest {
     if(!$replyattr{'nocheck'} && (@reply || $replyattr{'sendzero'})) {
         # verify the received data
         my @out = loadarray($CURLOUT);
+        my %hash = getpartattr("reply", "data");
+        # get the mode attribute
+        my $filemode=$hash{'mode'};
+        if(($filemode eq "text") && $has_textaware) {
+            # text mode when running on windows: fix line endings
+            map s/\r\n/\n/g, @out;
+        }
+
         $res = compare("data", \@out, \@reply);
         if ($res) {
             return 1;

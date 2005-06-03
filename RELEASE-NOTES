@@ -15,6 +15,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o c-ares enabled build with mingw
  o proxy host set with numerical IPv6 address
  o better treatment of binary zeroes in HTTP response headers
  o fixed the notorius FTP server failure in the test suite
@@ -31,6 +32,7 @@ Other curl-related news since the previous public release:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- John McGowan, Georg Wicherski, Andres Garcia, Eric Cooper, Todd Kulesza
+ John McGowan, Georg Wicherski, Andres Garcia, Eric Cooper, Todd Kulesza,
+ Tupone Alfredo
 
         Thanks! (and sorry if I forgot to mention someone)
