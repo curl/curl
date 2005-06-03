@@ -65,6 +65,7 @@ AC_CHECK_HEADERS(
        sys/time.h \
        sys/select.h \
        sys/socket.h \
+       sys/ioctl.h \
        winsock.h \
        netinet/in.h \
        net/if.h \
