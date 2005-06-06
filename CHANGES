@@ -8,6 +8,9 @@
 
 
 Daniel (3 June 2005)
+- Added docs/libcurl/getinfo-times, based on feedback from 'Edi':
+  http://curl.haxx.se/feedback/display.cgi?id=11178325798299&support=yes
+
 - Andres Garcia provided yet another text mode patch for several test cases so
   that they do text comparisions better on Windows (newline-wise).
 
