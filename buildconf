@@ -13,7 +13,7 @@ findtool(){
   IFS=":"
   for path in $PATH
   do
-    if test \( -x "$path/$file" \) -a \( ! \( -d "$path/$file" \) \) ; then
+    if test -r "$path/$file"; then
       echo "$path/$file"
       return
     fi
@@ -24,7 +24,7 @@ findtool(){
 # autoconf 2.57 or newer
 #
 need_autoconf="2.57"
-ac_version=`${AUTOCONF:-autoconf} --version 2>/dev/null|head -n 1| sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
+ac_version=`${AUTOCONF:-autoconf} --version 2>/dev/null|head -1| sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
 if test -z "$ac_version"; then
   echo "buildconf: autoconf not found."
   echo "            You need autoconf version $need_autoconf or newer installed."
@@ -45,7 +45,7 @@ echo "buildconf: autoconf version $ac_version (ok)"
 #--------------------------------------------------------------------------
 # autoheader 2.50 or newer
 #
-ah_version=`${AUTOHEADER:-autoheader} --version 2>/dev/null|head -n 1| sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
+ah_version=`${AUTOHEADER:-autoheader} --version 2>/dev/null|head -1| sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
 if test -z "$ah_version"; then
   echo "buildconf: autoheader not found."
   echo "            You need autoheader version 2.50 or newer installed."
@@ -67,7 +67,7 @@ echo "buildconf: autoheader version $ah_version (ok)"
 # automake 1.7 or newer
 #
 need_automake="1.7"
-am_version=`${AUTOMAKE:-automake} --version 2>/dev/null|head -n 1| sed -e 's/^.* \([0-9]\)/\1/' -e 's/[a-z]* *$//' -e 's/\(.*\)\(-p.*\)/\1/'`
+am_version=`${AUTOMAKE:-automake} --version 2>/dev/null|head -1| sed -e 's/^.* \([0-9]\)/\1/' -e 's/[a-z]* *$//' -e 's/\(.*\)\(-p.*\)/\1/'`
 if test -z "$am_version"; then
   echo "buildconf: automake not found."
   echo "            You need automake version $need_automake or newer installed."
@@ -113,7 +113,7 @@ fi
 # set the LIBTOOLIZE here so that glibtoolize is used if glibtool was found
 LIBTOOLIZE="${libtool}ize"
 
-lt_pversion=`$libtool --version 2>/dev/null|head -n 1|sed -e 's/^[^0-9]*//g' -e 's/[- ].*//'`
+lt_pversion=`$libtool --version 2>/dev/null|head -1|sed -e 's/^[^0-9]*//g' -e 's/[- ].*//'`
 if test -z "$lt_pversion"; then
   echo "buildconf: libtool not found."
   echo "            You need libtool version $LIBTOOL_WANTED_VERSION or newer installed"
@@ -160,7 +160,7 @@ fi
 #--------------------------------------------------------------------------
 # m4 check
 #
-m4=`${M4:-m4} --version 2>/dev/null|head -n 1`;
+m4=`${M4:-m4} --version 2>/dev/null|head -1`;
 m4_version=`echo $m4 | sed -e 's/^.* \([0-9]\)/\1/' -e 's/[a-z]* *$//'`
 
 if { echo $m4 | grep "GNU" >/dev/null 2>&1; } then
@@ -199,16 +199,10 @@ ${AUTOCONF:-autoconf}     || die "The autoconf command failed"
 
 if test -d ares; then
   cd ares
-  echo "buildconf: running libtoolize in the ares directory"
-  ${LIBTOOLIZE:-libtoolize} --copy --automake --force || die "The ares libtool command failed"
-  echo "buildconf: running autoheader in the ares directory"
-  ${AUTOHEADER:-autoheader} || die "The ares autoheader command failed"
   echo "buildconf: running aclocal in the ares directory"
   ${ACLOCAL:-aclocal} $ACLOCAL_FLAGS || die "The ares aclocal command failed"
   echo "buildconf: running autoconf in the ares directory"
   ${AUTOCONF:-autoconf}     || die "The ares autoconf command failed"
-  echo "buildconf: running automake in the ares directory"
-  ${AUTOMAKE:-automake} -a  || die "The ares automake command failed"
   cd ..
 fi
 
