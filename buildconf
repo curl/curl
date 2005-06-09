@@ -13,7 +13,7 @@ findtool(){
   IFS=":"
   for path in $PATH
   do
-    if test -r "$path/$file"; then
+    if test -f "$path/$file"; then
       echo "$path/$file"
       return
     fi
