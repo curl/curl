@@ -35,12 +35,14 @@ this.
 Pass a pointer to a long to receive the last received proxy response code to a
 CONNECT request.
 .IP CURLINFO_FILETIME
-Pass a pointer to a long to receive the remote time of the retrieved
-document. If you get -1, it can be because of many reasons (unknown, the
-server hides it or the server doesn't support the command that tells document
-time etc) and the time of the document is unknown. Note that you must tell the
-server to collect this information before the transfer is made, by using the
-CURLOPT_FILETIME option to \fIcurl_easy_setopt(3)\fP. (Added in 7.5)
+Pass a pointer to a long to receive the remote time of the retrieved document
+(in number of seconds since 1 jan 1970 in the GMT/UTC time zone). If you get
+-1, it can be because of many reasons (unknown, the server hides it or the
+server doesn't support the command that tells document time etc) and the time
+of the document is unknown. Note that you must tell the server to collect this
+information before the transfer is made, by using the CURLOPT_FILETIME option
+to \fIcurl_easy_setopt(3)\fP or you will unconditionally get a -1 back. (Added
+in 7.5)
 .IP CURLINFO_TOTAL_TIME
 Pass a pointer to a double to receive the total transaction time in seconds
 for the previous transfer. This time does not include the connect time, so if
