@@ -7,6 +7,30 @@
                                   Changelog
 
 
+Daniel (13 June 2005)
+- Made buildconf run libtoolize in the ares dir too (inspired by Tupone's
+  reverted patch).
+
+Daniel (9 June 2005)
+- Incorporated Tupone's findtool fix in buildconf (slightly edited)
+
+- Incorporated Tupone's head -n fix in buildconf.
+
+Daniel (8 June 2005)
+- Reverted Tupone's patch again, it broke numerous autobuilds. Let's apply it
+  in pieces, one by one and see what we need to adjust to work all over.
+
+Daniel (6 June 2005)
+- Tupone Alfredo fixed three problems in buildconf:
+
+  1) findtool does look per tool in PATH and think ./perl is the perl
+  executable, while is just a local directory (I have . in the PATH)
+
+  2) I got several warning for head -1 deprecated in favour of head -n 1
+ 
+  3) ares directory is missing some file (missing is missing :-) ) because
+  automake and friends is not run.
+
 Daniel (3 June 2005)
 - Added docs/libcurl/getinfo-times, based on feedback from 'Edi':
   http://curl.haxx.se/feedback/display.cgi?id=11178325798299&support=yes
