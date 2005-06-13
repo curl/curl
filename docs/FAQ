@@ -1,4 +1,4 @@
-Updated: May 18, 2005 (http://curl.haxx.se/docs/faq.html)
+Updated: June 13, 2005 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -64,6 +64,7 @@ FAQ
   4.10 My HTTP request using HEAD, PUT or DELETE doesn't work!
   4.11 Why does my HTTP range requests return the full document?
   4.12 Why do I get "certificate verify failed" ?
+  4.13 Why is curl -R on Windows one hour off?
 
  5. libcurl Issues
   5.1 Is libcurl thread-safe?
@@ -728,6 +729,13 @@ FAQ
 
   Details are also in the SSLCERTS file in the release archives, found online
   here: http://curl.haxx.se/docs/sslcerts.html
+
+  4.13 Why is curl -R on Windows one hour off?
+
+  During daylight savings time, when -R is used, curl will set a time that
+  appears one hour off. This happens due to a flaw in how Windows stores and
+  uses file modification times and it is not easily worked around. For details
+  on this problem, read this: http://www.codeproject.com/datetime/dstbugs.asp
 
 
 5. libcurl Issues
