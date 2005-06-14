@@ -299,7 +299,7 @@ static unsigned __stdcall getaddrinfo_thread (void *arg)
 #endif
 
 /*
- * Curl_destroy_thread_data() cleans up async resolver data.
+ * Curl_destroy_thread_data() cleans up async resolver data and thread handle.
  * Complementary of ares_destroy.
  */
 void Curl_destroy_thread_data (struct Curl_async *async)
@@ -320,6 +320,9 @@ void Curl_destroy_thread_data (struct Curl_async *async)
     td->mutex_waiting = NULL;
     if (td->event_resolved)
       CloseHandle(td->event_resolved);
+
+    if (td->thread_hnd)
+      CloseHandle(td->thread_hnd);
 
     free(async->os_specific);
   }
@@ -480,8 +483,6 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
   }
 
   TRACE(("elapsed %lu ms\n", GetTickCount()-ticks));
-
-  CloseHandle(td->thread_hnd);
 
   if(entry)
     *entry = conn->async.dns;
