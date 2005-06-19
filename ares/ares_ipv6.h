@@ -39,6 +39,20 @@ struct sockaddr_in6
 };
 #endif
 
+#ifndef HAVE_STRUCT_ADDRINFO
+struct addrinfo
+{
+  int ai_flags;
+  int ai_family;
+  int ai_socktype;
+  int ai_protocol;
+  size_t ai_addrlen;
+  char *ai_cannonname;
+  struct sockaddr *ai_addr;
+  struct addrinfo *ai_next;
+};
+#endif
+
 #ifndef NS_IN6ADDRSZ
 #if SIZEOF_STRUCT_IN6_ADDR == 0
 /* We cannot have it set to zero, so we pick a fixed value here */

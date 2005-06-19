@@ -1,5 +1,9 @@
   Changelog for the c-ares project
 
+* June 19
+
+- Added some checks for the addrinfo structure.
+
 * June 2
 
 - William Ahern:
@@ -19,7 +23,6 @@
   after calling ares_expand_name() and getting ARES_SUCCESS as the return
   value. If q is not greater than *s then it's equal and *s is always
   allocated with at least one byte.
-
 
 * May 16
 

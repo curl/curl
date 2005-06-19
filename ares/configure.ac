@@ -193,6 +193,23 @@ CARES_CHECK_STRUCT_MEMBER(
 )
 fi
 
+dnl check for the addrinfo structure
+CARES_CHECK_STRUCT(
+  [
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+  ], [addrinfo], 
+     AC_DEFINE_UNQUOTED(HAVE_STRUCT_ADDRINFO,1,
+       [Define to 1 if you have struct addrinfo.])
+)
+
 dnl check for inet_pton
 AC_CHECK_FUNCS(inet_pton)
 dnl Some systems have it, but not IPv6
