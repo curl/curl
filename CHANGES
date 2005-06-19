@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel (14 June 2005)
+- Gisle Vanem fixed a potential thread handle leak. Bug report #1216500.
+  Comment in http://curl.haxx.se/mail/lib-2005-06/0059.html
+
 Daniel (13 June 2005)
 - Made buildconf run libtoolize in the ares dir too (inspired by Tupone's
   reverted patch).

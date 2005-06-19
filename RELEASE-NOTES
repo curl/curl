@@ -15,6 +15,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o possible memory leak in windows name resolves
  o c-ares enabled build with mingw
  o proxy host set with numerical IPv6 address
  o better treatment of binary zeroes in HTTP response headers
