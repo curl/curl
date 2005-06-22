@@ -1,7 +1,7 @@
 # LIBCURL_CHECK_CONFIG ([DEFAULT-ACTION], [MINIMUM-VERSION],
 #                       [ACTION-IF-YES], [ACTION-IF-NO])
 # ----------------------------------------------------------
-#      David Shaw <dshaw@jabberwocky.com>   Jan-23-2005
+#      David Shaw <dshaw@jabberwocky.com>   Jun-21-2005
 #
 # Checks for libcurl.  DEFAULT-ACTION is the string yes or no to
 # specify whether to default to --with-libcurl or --without-libcurl.
@@ -32,13 +32,7 @@
 # found is after version 7.7.2, the first version that included the
 # curl-config script.  Note that it is very important for people
 # packaging binary versions of libcurl to include this script!
-# Without curl-config, we can only make educated guesses as to what
-# protocols are available.  Specifically, we assume that all of HTTP,
-# FTP, GOPHER, FILE, TELNET, LDAP, and DICT exist, and (if SSL exists)
-# HTTPS is present.  All of these protocols existed when libcurl was
-# first created in version 7, so this is a safe assumption.  If the
-# version is 7.11.0 or later, FTPS is assumed to be present as well.
-# FTPS existed before then, but was not yet fully standards compliant.
+# Without curl-config, we can only guess what protocols are available.
 
 AC_DEFUN([LIBCURL_CHECK_CONFIG],
 [
@@ -103,6 +97,15 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
            fi
            if test x"$LIBCURL" = "x" ; then
               LIBCURL=`$_libcurl_config --libs`
+
+              # This is so silly, but Apple actually has a bug in their
+	      # curl-config script.  Fixed in Tiger, but there are still
+	      # lots of Panther installs around.
+              case "${host}" in
+                 powerpc-apple-darwin7*)
+                    LIBCURL=`echo $LIBCURL | sed -e 's|-arch i386||g'`
+                 ;;
+              esac
            fi
 
 	   # All curl-config scripts support --feature
@@ -130,8 +133,8 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
            [
            _libcurl_save_cppflags=$CPPFLAGS
            CPPFLAGS="$CPPFLAGS $LIBCURL_CPPFLAGS"
-           _libcurl_save_ldflags=$LDFLAGS
-           LDFLAGS="$LDFLAGS $LIBCURL"
+           _libcurl_save_libs=$LIBS
+           LIBS="$LIBS $LIBCURL"
 
            AC_LINK_IFELSE(AC_LANG_PROGRAM([#include <curl/curl.h>],[
 /* Try and use a few common options to force a failure if we are
@@ -147,12 +150,30 @@ x=CURLOPT_VERBOSE;
 ]),libcurl_cv_lib_curl_usable=yes,libcurl_cv_lib_curl_usable=no)
 
            CPPFLAGS=$_libcurl_save_cppflags
-           LDFLAGS=$_libcurl_save_ldflags
+           LIBS=$_libcurl_save_libs
            unset _libcurl_save_cppflags
-           unset _libcurl_save_ldflags
+           unset _libcurl_save_libs
            ])
 
         if test $libcurl_cv_lib_curl_usable = yes ; then
+
+	   # Does curl_free() exist in this version of libcurl?
+	   # If not, fake it with free()
+
+           _libcurl_save_cppflags=$CPPFLAGS
+           CPPFLAGS="$CPPFLAGS $LIBCURL_CPPFLAGS"
+           _libcurl_save_libs=$LIBS
+           LIBS="$LIBS $LIBCURL"
+
+           AC_CHECK_FUNC(curl_free,,
+  	      AC_DEFINE(curl_free,free,
+		[Define curl_free() as free() if our version of curl lacks curl_free.]))
+
+           CPPFLAGS=$_libcurl_save_cppflags
+           LIBS=$_libcurl_save_libs
+           unset _libcurl_save_cppflags
+           unset _libcurl_save_libs
+
            AC_DEFINE(HAVE_LIBCURL,1,
              [Define to 1 if you have a functional curl library.])
            AC_SUBST(LIBCURL_CPPFLAGS)
