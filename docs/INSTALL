@@ -588,7 +588,7 @@ PORTS
         - Sparc Solaris 2.4, 2.5, 2.5.1, 2.6, 7, 8, 9, 10
         - Sparc SunOS 4.1.X
         - StrongARM (and other ARM) RISC OS 3.1, 4.02
-        - StrongARM Linux 2.4
+        - StrongARM/ARM7/ARM9 Linux 2.4, 2.6
         - StrongARM NetBSD 1.4.1
         - Ultrix 4.3a
         - i386 BeOS
