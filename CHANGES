@@ -7,6 +7,15 @@
                                   Changelog
 
 
+Daniel (23 June 2005)
+- David Shaw's fix that unifies proxy string treatment so that a proxy given
+  with CURLOPT_PROXY can use a http:// prefix and user + password. The user
+  and password fields are now also URL decoded properly. Test case 264 added
+  to verify.
+
+Daniel (22 June 2005)
+- David Shaw updated libcurl.m4
+
 Daniel (14 June 2005)
 - Gisle Vanem fixed a potential thread handle leak. Bug report #1216500.
   Comment in http://curl.haxx.se/mail/lib-2005-06/0059.html
