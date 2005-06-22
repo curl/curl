@@ -26,7 +26,7 @@ http
 HTTP with proxy string including http:// and user+password
  </name>
  <command>
-http://we.want.that.site.com/264 -x http://fake:user@%HOSTIP:%HTTPPORT
+http://we.want.that.site.com/264 -x http://f%61ke:user@%HOSTIP:%HTTPPORT
 </command>
 </client>
 
