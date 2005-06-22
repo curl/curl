@@ -2502,11 +2502,11 @@ static CURLcode CreateConnection(struct SessionHandle *data,
            "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^\n]",
            proxyuser, proxypasswd);
 
-    conn->proxyuser = strdup(proxyuser);
+    conn->proxyuser = curl_unescape(proxyuser,0);
     if(!conn->proxyuser)
       return CURLE_OUT_OF_MEMORY;
 
-    conn->proxypasswd = strdup(proxypasswd);
+    conn->proxypasswd = curl_unescape(proxypasswd,0);
     if(!conn->proxypasswd)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -2611,62 +2611,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
         }
 
         if(proxy && *proxy) {
-          /* we have a proxy here to set */
-          char *ptr;
-          char proxyuser[MAX_CURL_USER_LENGTH];
-          char proxypasswd[MAX_CURL_PASSWORD_LENGTH];
-
-          char *fineptr;
-
-          /* skip the possible protocol piece */
-          ptr=strstr(proxy, "://");
-          if(ptr)
-            ptr += 3;
-          else
-            ptr = proxy;
-
-          fineptr = ptr;
-
-          /* check for an @-letter */
-          ptr = strchr(ptr, '@');
-          if(ptr && (2 == sscanf(fineptr,
-                                 "%" MAX_CURL_USER_LENGTH_TXT"[^:]:"
-                                 "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^@]",
-                                 proxyuser, proxypasswd))) {
-            CURLcode res = CURLE_OK;
-
-            /* found user and password, rip them out */
-            Curl_safefree(conn->proxyuser);
-            conn->proxyuser = strdup(proxyuser);
-
-            if(!conn->proxyuser)
-              res = CURLE_OUT_OF_MEMORY;
-            else {
-              Curl_safefree(conn->proxypasswd);
-              conn->proxypasswd = strdup(proxypasswd);
-
-              if(!conn->proxypasswd)
-                res = CURLE_OUT_OF_MEMORY;
-            }
-
-            if(CURLE_OK == res) {
-              conn->bits.proxy_user_passwd = TRUE; /* enable it */
-              ptr = strdup(ptr+1); /* the right side of the @-letter */
-
-              if(ptr) {
-                free(proxy); /* free the former proxy string */
-                proxy = ptr; /* now use this instead */
-              }
-              else
-                res = CURLE_OUT_OF_MEMORY;
-            }
-
-            if(res) {
-              free(proxy); /* free the allocated proxy string */
-              return res;
-            }
-          }
-
           data->change.proxy = proxy;
           data->change.proxy_alloc=TRUE; /* this needs to be freed later */
           conn->bits.httpproxy = TRUE;
@@ -2944,6 +2888,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     /* We use 'proxyptr' to point to the proxy name from now on... */
     char *proxyptr=proxydup;
     char *portptr;
+    char *atsign;
 
     if(NULL == proxydup) {
       failf(data, "memory shortage");
@@ -2959,6 +2904,54 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     endofprot=strstr(proxyptr, "://");
     if(endofprot)
       proxyptr = endofprot+3;
+
+    /* Is there a username and password given in this proxy url? */
+    atsign = strchr(proxyptr, '@');
+    if(atsign) {
+      char proxyuser[MAX_CURL_USER_LENGTH];
+      char proxypasswd[MAX_CURL_PASSWORD_LENGTH];
+
+      if(2 == sscanf(proxyptr,
+		     "%" MAX_CURL_USER_LENGTH_TXT"[^:]:"
+		     "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^@]",
+		     proxyuser, proxypasswd)) {
+	CURLcode res = CURLE_OK;
+
+	/* found user and password, rip them out.  note that we are
+	   unescaping them, as there is otherwise no way to have a
+	   username or password with reserved characters like ':' in
+	   them. */
+	Curl_safefree(conn->proxyuser);
+	conn->proxyuser = curl_unescape(proxyuser,0);
+
+	if(!conn->proxyuser)
+	  res = CURLE_OUT_OF_MEMORY;
+	else {
+	  Curl_safefree(conn->proxypasswd);
+	  conn->proxypasswd = curl_unescape(proxypasswd,0);
+
+	  if(!conn->proxypasswd)
+	    res = CURLE_OUT_OF_MEMORY;
+	}
+
+	if(CURLE_OK == res) {
+	  conn->bits.proxy_user_passwd = TRUE; /* enable it */
+	  atsign = strdup(atsign+1); /* the right side of the @-letter */
+
+	  if(atsign) {
+	    free(proxydup); /* free the former proxy string */
+	    proxydup = proxyptr = atsign; /* now use this instead */
+	  }
+	  else
+	    res = CURLE_OUT_OF_MEMORY;
+	}
+
+	if(res) {
+	  free(proxydup); /* free the allocated proxy string */
+	  return res;
+	}
+      }
+    }
 
     /* start scanning for port number at this point */
     portptr = proxyptr;
