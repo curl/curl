@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl 1 "28 Apr 2005" "Curl 7.14.0" "Curl Manual"
+.TH curl 1 "24 Jun 2005" "Curl 7.14.1" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -958,11 +958,11 @@ SSPI is supported. If you use NTLM and set a blank user name, curl will
 authenticate with your current user and password.
 .RE
 .IP "-w/--write-out <format>"
-Defines what to display after a completed and successful operation. The format
-is a string that may contain plain text mixed with any number of variables. The
-string can be specified as "string", to get read from a particular file you
-specify it "@filename" and to tell curl to read the format from stdin you
-write "@-".
+Defines what to display on stdout after a completed and successful
+operation. The format is a string that may contain plain text mixed with any
+number of variables. The string can be specified as "string", to get read from
+a particular file you specify it "@filename" and to tell curl to read the
+format from stdin you write "@-".
 
 The variables present in the output format will be substituted by the value or
 text that curl thinks fit, as described below. All variables are specified
@@ -1057,6 +1057,10 @@ use. If there's an environment variable setting a proxy, you can set proxy to
 transparently be converted to HTTP. It means that certain protocol specific
 operations might not be available. This is not the case if you can tunnel
 through the proxy, as done with the \fI-p/--proxytunnel\fP option.
+
+Starting with 7.14.1, the proxy host can be specified the exact same way as
+the proxy environment variables, include protocol prefix (http://) and
+embedded user + password.
 
 If this option is used several times, the last one will be used.
 .IP "-X/--request <command>"
