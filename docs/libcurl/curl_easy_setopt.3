@@ -774,11 +774,15 @@ this data is sent off using the ACCT command. (Added in 7.13.0)
 .SH PROTOCOL OPTIONS
 .IP CURLOPT_TRANSFERTEXT
 A non-zero parameter tells the library to use ASCII mode for ftp transfers,
-instead of the default binary transfer. For LDAP transfers it gets the data in
-plain text instead of HTML and for win32 systems it does not set the stdout to
-binary mode. This option can be usable when transferring text data between
-systems with different views on certain characters, such as newlines or
-similar.
+instead of the default binary transfer. For win32 systems it does not set the
+stdout to binary mode. This option can be usable when transferring text data
+between systems with different views on certain characters, such as newlines
+or similar.
+
+\fBNOTE:\fP libcurl does not do a complete ASCII conversion when doing ASCII
+transfers over FTP. This is a known limitation/flaw that nobody has
+rectified. libcurl simply sets the mode to ascii and performs a standard
+transfer.
 .IP CURLOPT_CRLF
 Convert Unix newlines to CRLF newlines on transfers.
 .IP CURLOPT_RANGE
