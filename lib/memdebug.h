@@ -85,8 +85,16 @@ CURL_EXTERN int curl_fclose(FILE *file, int line, const char *source);
 #define accept(sock,addr,len)\
  curl_accept(sock,addr,len,__LINE__,__FILE__)
 
+#if defined(getaddrinfo) && defined(__osf__)
+/* OSF/1 and Tru64 have getaddrinfo as a define already, so we cannot define
+   our macro as for other platforms. Instead, we redefine the new name they
+   define getaddrinfo to become! */
+#define ogetaddrinfo(host,serv,hint,res) \
+  curl_dogetaddrinfo(host,serv,hint,res,__LINE__,__FILE__)
+#else
 #define getaddrinfo(host,serv,hint,res) \
   curl_dogetaddrinfo(host,serv,hint,res,__LINE__,__FILE__)
+#endif
 #define getnameinfo(sa,salen,host,hostlen,serv,servlen,flags) \
   curl_dogetnameinfo(sa,salen,host,hostlen,serv,servlen,flags, __LINE__, \
   __FILE__)
