@@ -457,8 +457,20 @@ main () {
     AC_DEFINE(HAVE_GLIBC_STRERROR_R, 1, [we have a glibc-style strerror_r()])
     AC_MSG_RESULT([yes]),
     AC_MSG_RESULT([no]),
-    dnl cross-compiling!
-    AC_MSG_NOTICE([cannot determine strerror_r() style: edit lib/config.h manually!])
+
+    dnl Use an inferior method of strerror_r detection while cross-compiling
+    AC_EGREP_CPP(yes, [
+#include <features.h>
+#ifdef __GLIBC__
+yes
+#endif
+], 
+      dnl looks like glibc, so assume a glibc-style strerror_r()
+      GLIBC_STRERROR_R="1"
+      AC_DEFINE(HAVE_GLIBC_STRERROR_R, 1, [we have a glibc-style strerror_r()])
+      AC_MSG_RESULT([yes]),
+      AC_MSG_NOTICE([cannot determine strerror_r() style: edit lib/config.h manually!])
+    ) dnl while cross-compiling
     )
 
     if test -z "$GLIBC_STRERROR_R"; then
