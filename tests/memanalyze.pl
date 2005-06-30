@@ -67,11 +67,11 @@ if($showlimit) {
 }
 
 
-
+my $lnum=0;
 while(<FILE>) {
     chomp $_;
     $line = $_;
-
+    $lnum++;
     if($line =~ /^LIMIT ([^ ]*):(\d*) (.*)/) {
         # new memory limit test prefix
         my $i = $3;
@@ -116,7 +116,8 @@ while(<FILE>) {
 
             if($sizeataddr{$addr}>0) {
                 # this means weeeeeirdo
-                print "Mixed debug compile, rebuild curl now\n";
+                print "Mixed debug compile ($source:$linenum at line $lnum), rebuild curl now\n";
+		print "We think $sizeataddr{$addr} bytes are already allocated at that memory address: $addr!\n";
             }
 
             $sizeataddr{$addr}=$size;
@@ -281,6 +282,9 @@ while(<FILE>) {
                 $addrinfofile{$add}="$source:$linenum";
                 $addrinfos++;
             }
+            if($trace) {
+                printf("GETADDRINFO ($source:$linenum)\n");
+            }
         }
         # fclose(0x1026c8)
         elsif($function =~ /freeaddrinfo\(0x([0-9a-f]*)\)/) {
@@ -291,9 +295,11 @@ while(<FILE>) {
                 $addrinfo{$1}=0;
                 $addrinfos--;
             }
+            if($trace) {
+                printf("FREEADDRINFO ($source:$linenum)\n");
+            }
         }
-
-        
+       
     }
     else {
         print "Not recognized prefix line: $line\n";
