@@ -1670,8 +1670,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
 
     /* BLOCKING */
     /* We want "seamless" FTP operations through HTTP proxy tunnel */
-    result = Curl_ConnectHTTPProxyTunnel(conn, SECONDARYSOCKET,
-                                         newhost, newport);
+    result = Curl_proxyCONNECT(conn, SECONDARYSOCKET, newhost, newport);
     if(CURLE_OK != result)
       return result;
   }
@@ -2745,8 +2744,8 @@ CURLcode Curl_ftp_connect(struct connectdata *conn,
   if (conn->bits.tunnel_proxy) {
     /* BLOCKING */
     /* We want "seamless" FTP operations through HTTP proxy tunnel */
-    result = Curl_ConnectHTTPProxyTunnel(conn, FIRSTSOCKET,
-                                         conn->host.name, conn->remote_port);
+    result = Curl_proxyCONNECT(conn, FIRSTSOCKET,
+                               conn->host.name, conn->remote_port);
     if(CURLE_OK != result)
       return result;
   }

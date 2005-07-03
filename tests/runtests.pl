@@ -1614,10 +1614,10 @@ sub singletest {
     my $sofar= time()-$start;
     my $esttotal = $sofar/$count * $total;
     my $estleft = $esttotal - $sofar;
-    my $left=sprintf("remaining: %dm%ds",
+    my $left=sprintf("remaining: %02d:%02d",
                      $estleft/60,
                      $estleft%60);
-    printf "OK ($count out of $total, %s)\n", $left;
+    printf "OK (%-3d out of %-3d, %s)\n", $count, $total, $left;
 
     # the test succeeded, remove all log files
     if(!$keepoutfiles) {

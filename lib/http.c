@@ -96,6 +96,7 @@
 #include "memory.h"
 #include "select.h"
 #include "parsedate.h" /* for the week day and month names */
+#include "strtoofft.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -1053,10 +1054,9 @@ Curl_compareheader(char *headerline,    /* line to check */
 }
 
 /*
- * ConnectHTTPProxyTunnel() requires that we're connected to a HTTP
- * proxy. This function will issue the necessary commands to get a seamless
- * tunnel through this proxy. After that, the socket can be used just as a
- * normal socket.
+ * Curl_proxyCONNECT() requires that we're connected to a HTTP proxy. This
+ * function will issue the necessary commands to get a seamless tunnel through
+ * this proxy. After that, the socket can be used just as a normal socket.
  *
  * This badly needs to be rewritten. CONNECT should be sent and dealt with
  * like any ordinary HTTP request, and not specially crafted like this. This
@@ -1064,10 +1064,10 @@ Curl_compareheader(char *headerline,    /* line to check */
  * much work to do at the moment.
  */
 
-CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
-                                     int sockindex,
-                                     char *hostname,
-                                     int remote_port)
+CURLcode Curl_proxyCONNECT(struct connectdata *conn,
+                           int sockindex,
+                           char *hostname,
+                           int remote_port)
 {
   int subversion=0;
   struct SessionHandle *data=conn->data;
@@ -1076,7 +1076,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
   int res;
   size_t nread;   /* total size read */
   int perline; /* count bytes per line */
-  bool keepon=TRUE;
+  int keepon=TRUE;
   ssize_t gotbytes;
   char *ptr;
   long timeout =
@@ -1085,6 +1085,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
   char *host_port;
   curl_socket_t tunnelsocket = conn->sock[sockindex];
   send_buffer *req_buffer;
+  curl_off_t cl=0;
 
 #define SELECT_OK      0
 #define SELECT_ERROR   1
@@ -1215,6 +1216,13 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
           int i;
 
           nread += gotbytes;
+
+          if(keepon > TRUE) {
+            cl -= gotbytes;
+            if(!cl)
+              break;
+          }
+          else
           for(i = 0; i < gotbytes; ptr++, i++) {
             perline++; /* amount of bytes in this line so far */
             if(*ptr=='\n') {
@@ -1242,7 +1250,21 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
               if(('\r' == line_start[0]) ||
                  ('\n' == line_start[0])) {
                 /* end of response-headers from the proxy */
-                keepon=FALSE;
+                if(cl && (407 == k->httpcode) && !data->state.authproblem) {
+                  /* If we get a 407 response code with content length when we
+                   * have no auth problem, we must ignore the whole
+                   * response-body */
+                  keepon = 2;
+                  infof(data, "Ignore %" FORMAT_OFF_T
+                        " bytes of response-body\n", cl);
+                  cl -= (gotbytes - i);/* remove the remaining chunk of what
+                                          we already read */
+                  if(cl<=0)
+                    /* if the whole thing was already read, we are done! */
+                    keepon=FALSE;
+                }
+                else
+                  keepon = FALSE;
                 break; /* breaks out of for-loop, not switch() */
               }
 
@@ -1256,6 +1278,10 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
                 result = Curl_http_input_auth(conn, k->httpcode, line_start);
                 if(result)
                   return result;
+              }
+              else if(checkprefix("Content-Length:", line_start)) {
+                cl = curlx_strtoofft(line_start + strlen("Content-Length:"),
+                                     NULL, 10);
               }
               else if(2 == sscanf(line_start, "HTTP/1.%d %d",
                                   &subversion,
@@ -1323,9 +1349,9 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
   if(conn->bits.tunnel_proxy) {
 
     /* either SSL over proxy, or explicitly asked for */
-    result = Curl_ConnectHTTPProxyTunnel(conn, FIRSTSOCKET,
-                                         conn->host.name,
-                                         conn->remote_port);
+    result = Curl_proxyCONNECT(conn, FIRSTSOCKET,
+                               conn->host.name,
+                               conn->remote_port);
     if(CURLE_OK != result)
       return result;
   }

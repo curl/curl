@@ -29,9 +29,9 @@ bool Curl_compareheader(char *headerline,     /* line to check */
                         const char *content); /* content string to find */
 
 /* ftp can use this as well */
-CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
-                                     int tunnelsocket,
-                                     char *hostname, int remote_port);
+CURLcode Curl_proxyCONNECT(struct connectdata *conn,
+                           int tunnelsocket,
+                           char *hostname, int remote_port);
 
 /* protocol-specific functions set up to be called by the main engine */
 CURLcode Curl_http(struct connectdata *conn, bool *done);

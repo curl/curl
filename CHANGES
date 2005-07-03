@@ -7,6 +7,24 @@
                                   Changelog
 
 
+Daniel (4 July 2005)
+- Andrew Bushnell provided enough info for me to tell that we badly needed to
+  fix the CONNECT authentication code with multi-pass auth methods (such as
+  NTLM) as it didn't previously properly ignore response-bodies - in fact it
+  stopped reading after all response headers had been received. This could
+  lead to libcurl sending the next request and reading the body from the first
+  request as response to the second request. (I also renamed the function,
+  which wasn't strictly necessary but...)
+
+  The best fix would to once and for all make the CONNECT code use the
+  ordinary request sending/receiving code, treating it as any ordinary request
+  instead of the special-purpose function we have now. It should make it
+  better for multi-interface too. And possibly lead to less code...
+
+  Added test case 265 for this. It doesn't work as a _really_ good test case
+  since the test proxy is too stupid, but the test case helps when running the
+  debugger to verify.
+
 Daniel (23 June 2005)
 - David Shaw's fix that unifies proxy string treatment so that a proxy given
   with CURLOPT_PROXY can use a http:// prefix and user + password. The user

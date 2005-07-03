@@ -16,6 +16,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o treats CONNECT 407 responses with bodies better during Digest/NTLM auth
+ o debug builds work on Tru64
  o improved libcurl.m4
  o possible memory leak in windows name resolves
  o c-ares enabled build with mingw
@@ -37,6 +39,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  John McGowan, Georg Wicherski, Andres Garcia, Eric Cooper, Todd Kulesza,
- Tupone Alfredo, Gisle Vanem, David Shaw
+ Tupone Alfredo, Gisle Vanem, David Shaw, Andrew Bushnell
 
         Thanks! (and sorry if I forgot to mention someone)
