@@ -17,6 +17,7 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o treats CONNECT 407 responses with bodies better during Digest/NTLM auth
+ o improved strerror_r() API guessing when cross-compiling
  o debug builds work on Tru64
  o improved libcurl.m4
  o possible memory leak in windows name resolves

@@ -25,6 +25,12 @@ Daniel (4 July 2005)
   since the test proxy is too stupid, but the test case helps when running the
   debugger to verify.
 
+Daniel (30 June 2005)
+- Dan Fandrich improved the configure script's ability to figure out what kind
+  of strerror_r() API that is used when cross-compiling. If __GLIB__ is
+  defined, it assumes the glibc API. If not, it issues a notice as before that
+  the user needs to manually edit lib/config.h for this.
+
 Daniel (23 June 2005)
 - David Shaw's fix that unifies proxy string treatment so that a proxy given
   with CURLOPT_PROXY can use a http:// prefix and user + password. The user
