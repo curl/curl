@@ -7,6 +7,13 @@
                                   Changelog
 
 
+Daniel (5 July 2005)
+- Gisle Vanem came up with a nice little work-around for bug #1230118. It
+  seems the Windows (MSVC) libc time functions may return data one hour off if
+  TZ is not set and automatic DST adjustment is enabled. This made
+  curl_getdate() return wrong value, and it also concerned internal cookie
+  expirations etc.
+
 Daniel (4 July 2005)
 - Andrew Bushnell provided enough info for me to tell that we badly needed to
   fix the CONNECT authentication code with multi-pass auth methods (such as
