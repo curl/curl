@@ -1218,9 +1218,14 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
           nread += gotbytes;
 
           if(keepon > TRUE) {
+            /* This means we are currently ignoring a response-body, so we
+               simply count down our counter and make sure to break out of the
+               loop when we're done! */
             cl -= gotbytes;
-            if(!cl)
+            if(cl<=0) {
+              keepon = FALSE;
               break;
+            }
           }
           else
           for(i = 0; i < gotbytes; ptr++, i++) {
