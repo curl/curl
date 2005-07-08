@@ -40,6 +40,9 @@ TODO
  * Add the following to curl_easy_getinfo(): GET_HTTP_IP, GET_FTP_IP and
    GET_FTP_DATA_IP. Return a string with the used IP. Suggested by Alan.
 
+ * Add option that changes the interval in which the progress callback is
+   called at most.
+
  LIBCURL - multi interface
 
  * Add a curl_multi_fdset() alternative. this allows apps to avoid the
