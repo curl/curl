@@ -1496,6 +1496,7 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   Curl_safefree(conn->allocptr.host);
   Curl_safefree(conn->allocptr.cookiehost);
   Curl_safefree(conn->ip_addr_str);
+  Curl_safefree(conn->trailer);
 
   /* possible left-overs from the async name resolvers */
 #if defined(USE_ARES)

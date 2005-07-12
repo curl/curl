@@ -7,6 +7,12 @@
                                   Changelog
 
 
+Daniel (12 July 2005)
+- Adrian Schuur added trailer support in the chunked encoding stream. The
+  trailer is then sent to the normal header callback/stream. I wrote up test
+  case 266 to verify the basic functionality. Do note that test case 34
+  contains a flawed chunked encoding stream that still works the same.
+
 Daniel (5 July 2005)
 - Gisle Vanem came up with a nice little work-around for bug #1230118. It
   seems the Windows (MSVC) libc time functions may return data one hour off if

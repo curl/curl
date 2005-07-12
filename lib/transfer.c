@@ -833,6 +833,20 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               /* init our chunky engine */
               Curl_httpchunk_init(conn);
             }
+
+            else if (checkprefix("Trailer:", k->p) ||
+                     checkprefix("Trailers:", k->p)) {
+              /*
+               * This test helps Curl_httpchunk_read() to determine to look
+               * for well formed trailers after the zero chunksize record. In
+               * this case a CRLF is required after the zero chunksize record
+               * when no trailers are sent, or after the last trailer record.
+               *
+               * It seems both Trailer: and Trailers: occur in the wild.
+               */
+              conn->bits.trailerHdrPresent = TRUE;
+            }
+
             else if (checkprefix("Content-Encoding:", k->p) &&
                      data->set.encoding) {
               /*
@@ -1074,6 +1088,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
              * the name says read, this function both reads and writes away
              * the data. The returned 'nread' holds the number of actual
              * data it wrote to the client.  */
+
             CHUNKcode res =
               Curl_httpchunk_read(conn, k->str, nread, &nread);
 

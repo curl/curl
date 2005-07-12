@@ -153,10 +153,17 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
       if(*datap == '\n') {
         /* we're now expecting data to come, unless size was zero! */
         if(0 == ch->datasize) {
-          ch->state = CHUNK_STOP; /* stop reading! */
-          if(1 == length) {
-            /* This was the final byte, return right now */
-            return CHUNKE_STOP;
+          if (conn->bits.trailerHdrPresent!=TRUE) {
+            /* No Trailer: header found - revert to original Curl processing */
+            ch->state = CHUNK_STOP;
+            if (1 == length) {
+               /* This is the final byte, return right now */
+               return CHUNKE_STOP;
+            }
+          }
+          else {
+            ch->state = CHUNK_TRAILER; /* attempt to read trailers */
+            conn->trlPos=0;
           }
         }
         else
@@ -243,6 +250,64 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
          * over.
          */
         Curl_httpchunk_init(conn);
+        datap++;
+        length--;
+      }
+      else
+        return CHUNKE_BAD_CHUNK;
+      break;
+
+    case CHUNK_TRAILER:
+      /* conn->trailer is assumed to be freed in url.c on a
+         connection basis */
+      if (conn->trlPos >= conn->trlMax) {
+        char *ptr;
+        if(conn->trlMax) {
+          conn->trlMax *= 2;
+          ptr = (char*)realloc(conn->trailer,conn->trlMax);
+        }
+        else {
+          conn->trlMax=128;
+          ptr = (char*)malloc(conn->trlMax);
+        }
+        if(!ptr)
+          return CHUNKE_OUT_OF_MEMORY;
+        conn->trailer = ptr;
+      }
+      conn->trailer[conn->trlPos++]=*datap;
+
+      if(*datap == '\r')
+        ch->state = CHUNK_TRAILER_CR;
+      else {
+        datap++;
+        length--;
+     }
+      break;
+
+    case CHUNK_TRAILER_CR:
+      if(*datap == '\r') {
+        ch->state = CHUNK_TRAILER_POSTCR;
+        datap++;
+        length--;
+      }
+      else
+        return CHUNKE_BAD_CHUNK;
+      break;
+
+    case CHUNK_TRAILER_POSTCR:
+      if (*datap == '\n') {
+        conn->trailer[conn->trlPos++]='\n';
+        conn->trailer[conn->trlPos]=0;
+        if (conn->trlPos==2) {
+          ch->state = CHUNK_STOP;
+          return CHUNKE_STOP;
+        }
+        else {
+          Curl_client_write(conn->data, CLIENTWRITE_HEADER,
+                            conn->trailer, conn->trlPos);
+        }
+        ch->state = CHUNK_TRAILER;
+        conn->trlPos=0;
         datap++;
         length--;
       }
