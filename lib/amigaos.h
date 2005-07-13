@@ -32,13 +32,19 @@
 #include <proto/exec.h>
 #include <proto/dos.h>
 
-#include <bsdsocket.h>
+#include <sys/socket.h>
 
 #include "config-amigaos.h"
 
-#define select(args...) WaitSelect( args, NULL)
-#define inet_ntoa(x)    Inet_NtoA( x ## .s_addr)
-#define ioctl(a,b,c,d)  IoctlSocket( (LONG)a, (ULONG)b, (char*)c)
+#ifndef select
+# define select(args...) WaitSelect( args, NULL)
+#endif
+#ifndef inet_ntoa
+# define inet_ntoa(x)    Inet_NtoA( x ## .s_addr)
+#endif
+#ifndef ioctl
+# define ioctl(a,b,c,d)  IoctlSocket( (LONG)a, (ULONG)b, (char*)c)
+#endif
 #define _AMIGASF        1
 
 extern void amiga_cleanup();

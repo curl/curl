@@ -34,7 +34,8 @@
 #include "if2ip.h"
 
 #if !defined(WIN32) && !defined(__BEOS__) && !defined(__CYGWIN32__) && \
-    !defined(__riscos__) && !defined(__INTERIX) && !defined(NETWARE)
+    !defined(__riscos__) && !defined(__INTERIX) && !defined(NETWARE) && \
+    !defined(_AMIGASF)
 
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>

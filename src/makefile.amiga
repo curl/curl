@@ -7,9 +7,9 @@
 ATCPSDKI=	/GG/netinclude
 
 
-CC	=	gcc
-CFLAGS	=	-I$(ATCPSDKI) -m68020-60 -noixemul -I. -I../include -W -Wall
-LIBS	=	../lib/libcurl.a -lsslnix -lcryptonix -lz
+CC	=	m68k-amigaos-gcc
+CFLAGS	=	-I$(ATCPSDKI) -m68020-60 -O2 -msoft-float -noixemul -g -I. -I../include -W -Wall
+LIBS	=	../lib/libcurl.a -lssl -lcrypto -lz
 MANPAGE =	../docs/curl.1
 README	=	../docs/MANUAL
 MKHELP	=	../src/mkhelp.pl
@@ -18,7 +18,7 @@ OBJS	=	getpass.c hugehelp.c main.c urlglob.c writeenv.c writeout.c
 
 
 all:	hugehelp.c $(OBJS:.c=.o)
-	$(CC) $(CFLAGS) -s -o cURL $(OBJS:.c=.o) $(LIBS)
+	$(CC) $(CFLAGS) -o cURL $(OBJS:.c=.o) $(LIBS) -Wl,-Map,cURL.map,--cref
 
 hugehelp.c: $(README) $(MANPAGE)  mkhelp.pl
 	rm -f hugehelp.c

@@ -22,28 +22,53 @@
  ***************************************************************************/
 
 #include "amigaos.h"
-#include <stdio.h> /* for stderr */
+#include <amitcp/socketbasetags.h>
 
 struct Library *SocketBase = NULL;
+extern int errno, h_errno;
+
+#ifdef __libnix__
+#include <stabs.h>
+void __request(const char *msg);
+#else
+# define __request( msg )	Printf( msg "\n\a")
+#endif
 
 void amiga_cleanup()
 {
-  if(SocketBase)
-    CloseLibrary(SocketBase);
-
-  SocketBase = NULL;
+	if(SocketBase) {
+		CloseLibrary(SocketBase);
+		SocketBase = NULL;
+	}
 }
 
 BOOL amiga_init()
 {
-  if(!SocketBase)
-    SocketBase = OpenLibrary("bsdsocket.library", 4);
-
-  if(!SocketBase) {
-    fprintf(stderr, "No TCP/IP Stack running!\n\a");
-    return FALSE;
-  }
-
-  atexit(amiga_cleanup);
-  return TRUE;
+	if(!SocketBase)
+		SocketBase = OpenLibrary("bsdsocket.library", 4);
+	
+	if(!SocketBase) {
+		__request("No TCP/IP Stack running!");
+		return FALSE;
+	}
+	
+	if(SocketBaseTags(
+		SBTM_SETVAL(SBTC_ERRNOPTR(sizeof(errno))), (ULONG) &errno,
+//		SBTM_SETVAL(SBTC_HERRNOLONGPTR),	   (ULONG) &h_errno,
+		SBTM_SETVAL(SBTC_LOGTAGPTR),		   (ULONG) "cURL",
+	TAG_DONE)) {
+		
+		__request("SocketBaseTags ERROR");
+		return FALSE;
+	}
+	
+#ifndef __libnix__
+	atexit(amiga_cleanup);
+#endif
+	
+	return TRUE;
 }
+
+#ifdef __libnix__
+ADD2EXIT(amiga_cleanup,-50);
+#endif

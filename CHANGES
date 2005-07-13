@@ -7,6 +7,9 @@
                                   Changelog
 
 
+Daniel (13 July 2005)
+- Diego Casorran provided patches to make curl build fine on Amiga again.
+
 Daniel (12 July 2005)
 - Adrian Schuur added trailer support in the chunked encoding stream. The
   trailer is then sent to the normal header callback/stream. I wrote up test

@@ -75,6 +75,9 @@
 # define BOOL char
 #endif
 
+#ifdef _AMIGASF
+# undef FORMAT_INT
+#endif
 
 /* Lower-case digits.  */
 static const char lower_digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";

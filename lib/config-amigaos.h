@@ -54,6 +54,7 @@
 #define HAVE_UTIME_H 1
 #define HAVE_WRITABLE_ARGV 1
 #define HAVE_ZLIB_H 1
+#define HAVE_SYS_IOCTL_H 1
 
 #define USE_OPENSSL 1
 #define USE_SSLEAY 1
@@ -80,7 +81,9 @@
 #define TIME_WITH_SYS_TIME 1
 
 #define in_addr_t int
-#define socklen_t int
+#ifndef socklen_t
+# define socklen_t int
+#endif
 
 #ifndef O_RDONLY
 # define O_RDONLY 0x0000

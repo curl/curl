@@ -17,6 +17,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o builds fine on AmigaOS again
  o corrected date parsing on Windows with auto-DST-adjust enabled
  o treats CONNECT 407 responses with bodies better during Digest/NTLM auth
  o improved strerror_r() API guessing when cross-compiling
@@ -44,6 +45,6 @@ advice from friends like these:
 
  John McGowan, Georg Wicherski, Andres Garcia, Eric Cooper, Todd Kulesza,
  Tupone Alfredo, Gisle Vanem, David Shaw, Andrew Bushnell, Dan Fandrich,
- Adrian Schuur
+ Adrian Schuur, Diego Casorran
 
         Thanks! (and sorry if I forgot to mention someone)

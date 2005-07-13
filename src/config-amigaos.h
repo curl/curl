@@ -17,13 +17,19 @@
 #define HAVE_SYS_TIME_H         1
 #define HAVE_TIME_H             1
 #define TIME_WITH_SYS_TIME      1
-#define HAVE_TERMIOS_H          1
-#define HAVE_FTRUNCATE          1
+
+#if 0
+# define HAVE_TERMIOS_H         1
+# define HAVE_FTRUNCATE         1
+#endif
 
 #define HAVE_PWD_H              1
 
 #ifndef F_OK
 # define F_OK 0
+#endif
+#ifndef O_RDONLY
+# define	O_RDONLY	0x0000		/* open for reading only */
 #endif
 #ifndef LONG_MAX
 # define        LONG_MAX        0x7fffffffL             /* max value for a long */
