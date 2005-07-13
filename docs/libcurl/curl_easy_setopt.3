@@ -171,13 +171,14 @@ argument in the progress callback set with \fICURLOPT_PROGRESSFUNCTION\fP.
 .IP CURLOPT_HEADERFUNCTION
 Function pointer that should match the following prototype: \fIsize_t
 function( void *ptr, size_t size, size_t nmemb, void *stream);\fP. This
-function gets called by libcurl as soon as there is received header data that
-needs to be written down. The headers are guaranteed to be written one-by-one
-and only complete lines are written. Parsing headers should be easy enough
+function gets called by libcurl as soon as it has received header data. The
+header callback will be called once for each header and only complete header
+lines are passed on to the callback. Parsing headers should be easy enough
 using this. The size of the data pointed to by \fIptr\fP is \fIsize\fP
-multiplied with \fInmemb\fP.  The pointer named \fIstream\fP will be the one
-you passed to libcurl with the \fICURLOPT_WRITEHEADER\fP option.  Return the
-number of bytes actually written or return -1 to signal error to the library
+multiplied with \fInmemb\fP. Do not assume that the header line is zero
+terminated! The pointer named \fIstream\fP is the one you set with the
+\fICURLOPT_WRITEHEADER\fP option. The callback function must return the number
+of bytes actually taken care of, or return -1 to signal error to the library
 (it will cause it to abort the transfer with a \fICURLE_WRITE_ERROR\fP return
 code).
 
@@ -189,10 +190,11 @@ it comes after the response-body. 2) it comes after the final header line (CR
 LF) 3) a Trailer: header among the response-headers mention what header to
 expect in the trailer.
 .IP CURLOPT_WRITEHEADER
-Pass a pointer to be used to write the header part of the received data to. If
-you don't use your own callback to take care of the writing, this must be a
-valid FILE *. See also the \fICURLOPT_HEADERFUNCTION\fP option above on how to
-set a custom get-all-headers callback.
+(This option is also known as \fBCURLOPT_HEADERDATA\fP) Pass a pointer to be
+used to write the header part of the received data to. If you don't use your
+own callback to take care of the writing, this must be a valid FILE *. See
+also the \fICURLOPT_HEADERFUNCTION\fP option above on how to set a custom
+get-all-headers callback.
 .IP CURLOPT_DEBUGFUNCTION
 Function pointer that should match the following prototype: \fIint
 curl_debug_callback (CURL *, curl_infotype, char *, size_t, void *);\fP
