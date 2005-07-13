@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_easy_setopt 3 "24 Jun 2005" "libcurl 7.14.1" "libcurl Manual"
+.TH curl_easy_setopt 3 "13 Jul 2005" "libcurl 7.14.1" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - set options for a curl easy handle
 .SH SYNOPSIS
@@ -180,6 +180,14 @@ you passed to libcurl with the \fICURLOPT_WRITEHEADER\fP option.  Return the
 number of bytes actually written or return -1 to signal error to the library
 (it will cause it to abort the transfer with a \fICURLE_WRITE_ERROR\fP return
 code).
+
+Since 7.14.1: When a server sends a chunked encoded transfer, it may contain a
+trailer. That trailer is identical to a HTTP header and if such a trailer is
+received it is passed to the application using this callback as well. There
+are several ways to detect it being a trailer and not an ordinary header: 1)
+it comes after the response-body. 2) it comes after the final header line (CR
+LF) 3) a Trailer: header among the response-headers mention what header to
+expect in the trailer.
 .IP CURLOPT_WRITEHEADER
 Pass a pointer to be used to write the header part of the received data to. If
 you don't use your own callback to take care of the writing, this must be a
