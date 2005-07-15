@@ -36,6 +36,7 @@ This release includes the following bugfixes:
 
 Other curl-related news since the previous public release:
 
+ o cURLpp 0.5.1 was released at http://rrette.com/curlpp.html
  o Rexx/CURL 1.3 was released at http://rexxcurl.sf.net/
  o http://curl.miscellaneousmirror.org is a new German curl mirror
  o LuaCURL by Alexander Marinov at http://luacurl.luaforge.net/
