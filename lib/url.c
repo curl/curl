@@ -372,13 +372,11 @@ CURLcode Curl_open(struct SessionHandle **curl)
   return CURLE_OK;
 }
 
-CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
+CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
+                     va_list param)
 {
-  va_list param;
   char *argptr;
   CURLcode result = CURLE_OK;
-
-  va_start(param, option);
 
   switch(option) {
   case CURLOPT_DNS_CACHE_TIMEOUT:

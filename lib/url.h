@@ -23,12 +23,15 @@
  * $Id$
  ***************************************************************************/
 
+#include <stdarg.h> /* to make sure we have ap_list */
+
 /*
  * Prototypes for library-wide functions provided by url.c
  */
 
 CURLcode Curl_open(struct SessionHandle **curl);
-CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...);
+CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
+                     va_list arg);
 CURLcode Curl_close(struct SessionHandle *data); /* opposite of curl_open() */
 CURLcode Curl_connect(struct SessionHandle *, struct connectdata **,
                       bool *async, bool *protocol_connect);
