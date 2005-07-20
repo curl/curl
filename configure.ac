@@ -567,14 +567,15 @@ OPT_KRB4=off
 AC_ARG_WITH(krb4,dnl
 AC_HELP_STRING([--with-krb4=DIR],[where to look for Kerberos4]),[
   OPT_KRB4="$withval"
-  if test X"$OPT_KRB4" != Xyes
-  then
-    LDFLAGS="$LDFLAGS -L$OPT_KRB4/lib$libsuff"
-    KRB4LIB="$OPT_KRB4/lib$libsuff"
-    CPPFLAGS="$CPPFLAGS -I$OPT_KRB4/include"
-    KRB4INC="$OPT_KRB4/include"
+  if test X"$OPT_KRB4" != Xno; then
+    want_krb4="yes"
+    if test X"$OPT_KRB4" != Xyes; then
+      LDFLAGS="$LDFLAGS -L$OPT_KRB4/lib$libsuff"
+      KRB4LIB="$OPT_KRB4/lib$libsuff"
+      CPPFLAGS="$CPPFLAGS -I$OPT_KRB4/include"
+      KRB4INC="$OPT_KRB4/include"
+    fi
   fi
-  want_krb4="yes"
  ])
 
 AC_MSG_CHECKING([if Kerberos4 support is requested])
@@ -643,10 +644,13 @@ dnl **********************************************************************
 
 AC_ARG_WITH(spnego,
   AC_HELP_STRING([--with-spnego=DIR],
-                 [Specify location of SPNEGO library fbopenssl]),
-  [ SPNEGO_ROOT="$withval"
-    want_spnego="yes" ]
-)
+                 [Specify location of SPNEGO library fbopenssl]), [
+  SPNEGO_ROOT="$withval"
+  if test x"$SPNEGO_ROOT" != xno; then
+    want_spnego="yes"
+  fi
+])
+
 AC_MSG_CHECKING([if SPNEGO support is requested])
 if test x"$want_spnego" = xyes; then
 
@@ -689,10 +693,12 @@ AC_ARG_WITH(gssapi-libs,
 
 AC_ARG_WITH(gssapi,
   AC_HELP_STRING([--with-gssapi=DIR],
-                 [Where to look for GSSAPI]),
-  [ GSSAPI_ROOT="$withval"
-    want_gss="yes" ]
-)
+                 [Where to look for GSSAPI]), [
+  GSSAPI_ROOT="$withval"
+  if test x"$GSSAPI_ROOT" != xno; then
+    want_gss="yes" 
+  fi
+])
 
 AC_MSG_CHECKING([if GSSAPI support is requested])
 if test x"$want_gss" = xyes; then
