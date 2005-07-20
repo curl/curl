@@ -766,8 +766,8 @@ AC_DEFUN([CURL_CC_DEBUG_OPTS],
          fi
 
          if test "$gccnum" -ge "304"; then
-           # try -Wunreachable-code on gcc 3.4
-           WARN="$WARN -Wunreachable-code"
+           # try these on gcc 3.4
+           WARN="$WARN -Wunreachable-code -Wdeclaration-after-statement"
          fi
 
          for flag in $CPPFLAGS; do
