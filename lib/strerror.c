@@ -69,10 +69,10 @@ curl_easy_strerror(CURLcode error)
     return "URL using bad/illegal format or missing URL";
 
   case CURLE_COULDNT_RESOLVE_PROXY:
-    return "couldnt resolve proxy name";
+    return "couldn't resolve proxy name";
 
   case CURLE_COULDNT_RESOLVE_HOST:
-    return "couldnt resolve host name";
+    return "couldn't resolve host name";
 
   case CURLE_COULDNT_CONNECT:
     return "couldn't connect to server";
@@ -492,7 +492,7 @@ get_winsock_error (int err, char *buf, size_t len)
     p = "Winsock library is not ready";
     break;
   case WSANOTINITIALISED:
-    p = "Winsock library not initalised";
+    p = "Winsock library not initialised";
     break;
   case WSAVERNOTSUPPORTED:
     p = "Winsock version not supported.";

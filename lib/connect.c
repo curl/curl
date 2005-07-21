@@ -359,13 +359,13 @@ static CURLcode bindlocal(struct connectdata *conn,
 
       } /* end of if  h */
       else {
-        failf(data,"could't find my own IP address (%s)", myhost);
+        failf(data,"couldn't find my own IP address (%s)", myhost);
         return CURLE_HTTP_PORT_FAILED;
       }
     } /* end of inet_addr */
 
     else {
-      failf(data, "could't find my own IP address (%s)", myhost);
+      failf(data, "couldn't find my own IP address (%s)", myhost);
       return CURLE_HTTP_PORT_FAILED;
     }
 

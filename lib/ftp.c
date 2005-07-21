@@ -1110,7 +1110,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     }
   }
   else {
-    failf(data, "could't find IP address to use");
+    failf(data, "couldn't find IP address to use");
     return CURLE_FTP_PORT_FAILED;
   }
 
@@ -3170,7 +3170,7 @@ CURLcode ftp_perform(struct connectdata *conn,
   *connected = conn->bits.tcpconnect;
 
   if(*dophase_done)
-    DEBUGF(infof(conn->data, "DO phase is comlete\n"));
+    DEBUGF(infof(conn->data, "DO phase is complete\n"));
 
   return result;
 }
@@ -3827,7 +3827,7 @@ CURLcode Curl_ftp_doing(struct connectdata *conn,
   if(*dophase_done) {
     result = ftp_dophase_done(conn, FALSE /* not connected */);
 
-    DEBUGF(infof(conn->data, "DO phase is comlete\n"));
+    DEBUGF(infof(conn->data, "DO phase is complete\n"));
   }
   return result;
 }
