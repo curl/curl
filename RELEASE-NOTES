@@ -18,6 +18,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CURLOPT_HTTPGET, CURLOPT_POST and CURLOPT_HTTPPOST resets CURLOPT_NOBODY
  o builds fine on AmigaOS again
  o corrected date parsing on Windows with auto-DST-adjust enabled
  o treats CONNECT 407 responses with bodies better during Digest/NTLM auth

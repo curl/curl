@@ -644,8 +644,10 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /* Does this option serve a purpose anymore? Yes it does, when
        CURLOPT_POSTFIELDS isn't used and the POST data is read off the
        callback! */
-    if(va_arg(param, long))
+    if(va_arg(param, long)) {
       data->set.httpreq = HTTPREQ_POST;
+      data->set.opt_no_body = FALSE; /* this is implied */
+    }
     else
       data->set.httpreq = HTTPREQ_GET;
     break;
@@ -680,6 +682,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      */
     data->set.httppost = va_arg(param, struct curl_httppost *);
     data->set.httpreq = HTTPREQ_POST_FORM;
+    data->set.opt_no_body = FALSE; /* this is implied */
     break;
 
   case CURLOPT_REFERER:
@@ -813,6 +816,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     if(va_arg(param, long)) {
       data->set.httpreq = HTTPREQ_GET;
       data->set.upload = FALSE; /* switch off upload */
+      data->set.opt_no_body = FALSE; /* this is implied */
     }
     break;
 
