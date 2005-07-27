@@ -184,6 +184,9 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
   case CURLINFO_SSL_ENGINES:
     *param_slistp = Curl_ssl_engines_list(data);
     break;
+  case CURLINFO_COOKIELIST:
+    *param_slistp = Curl_cookie_list(data);
+    break;
   default:
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }

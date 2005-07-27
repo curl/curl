@@ -10,7 +10,8 @@ EXTRA_DIST = README curlgtk.c sepheaders.c simple.c postit2.c		\
  post-callback.c multi-app.c multi-double.c multi-single.c		\
  multi-post.c fopen.c simplepost.c makefile.dj curlx.c https.c		\
  multi-debugcallback.c fileupload.c getinfo.c ftp3rdparty.c debug.c	\
- anyauthput.c htmltitle.cc htmltidy.c opensslthreadlock.c
+ anyauthput.c htmltitle.cc htmltidy.c opensslthreadlock.c		\
+ cookie_interface.c
 
 all:
 	@echo "done"

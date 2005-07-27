@@ -890,6 +890,9 @@ typedef enum {
      "account" info */
   CINIT(FTP_ACCOUNT, OBJECTPOINT, 134),
 
+  /* feed cookies into cookie engine */
+  CINIT(COOKIELIST, OBJECTPOINT, 135),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -1244,6 +1247,7 @@ typedef enum {
   CURLINFO_OS_ERRNO         = CURLINFO_LONG   + 25,
   CURLINFO_NUM_CONNECTS     = CURLINFO_LONG   + 26,
   CURLINFO_SSL_ENGINES      = CURLINFO_SLIST  + 27,
+  CURLINFO_COOKIELIST       = CURLINFO_SLIST  + 28,
   /* Fill in new entries below here! */
 
   CURLINFO_LASTONE          = 28

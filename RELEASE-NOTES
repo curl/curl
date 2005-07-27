@@ -11,6 +11,7 @@ Curl and libcurl 7.14.1
 
 This release includes the following changes:
 
+ o CURLOPT_COOKIELIST and CURLINFO_COOKIELIST
  o trailer support for chunked encoded data streams 
  o -x/CURL_PROXY strings may now contain user+password
  o --trace-time now outputs the full microsecond, all 6 digits
@@ -46,6 +47,6 @@ advice from friends like these:
 
  John McGowan, Georg Wicherski, Andres Garcia, Eric Cooper, Todd Kulesza,
  Tupone Alfredo, Gisle Vanem, David Shaw, Andrew Bushnell, Dan Fandrich,
- Adrian Schuur, Diego Casorran
+ Adrian Schuur, Diego Casorran, Peteris Krumins
 
         Thanks! (and sorry if I forgot to mention someone)

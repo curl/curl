@@ -773,6 +773,37 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      */
     data->set.cookiesession = (bool)va_arg(param, long);
     break;
+
+  case CURLOPT_COOKIELIST:
+    argptr = va_arg(param, char *);
+
+    if (argptr == NULL)
+      break;
+
+    if (strequal(argptr, "ALL")) {
+      if (data->cookies == NULL) {
+        break;
+      }
+      else {
+        /* clear all cookies */
+        Curl_cookie_freelist(data->cookies->cookies);
+        data->cookies->cookies = NULL;
+        break;
+      }
+    }
+
+    if (!data->cookies)
+      /* if cookie engine was not running, activate it */
+      data->cookies = Curl_cookie_init(data, NULL, NULL, TRUE);
+
+    if (checkprefix("Set-Cookie:", argptr))
+      /* HTTP Header format line */
+      Curl_cookie_add(data, data->cookies, TRUE, argptr + 11, NULL, NULL);
+
+    else
+      /* Netscape format line */
+      Curl_cookie_add(data, data->cookies, FALSE, argptr, NULL, NULL);
+    break;
 #endif /* CURL_DISABLE_COOKIES */
 
   case CURLOPT_HTTPGET:

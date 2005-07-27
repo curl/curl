@@ -134,6 +134,13 @@ counted).  Combined with \fICURLINFO_REDIRECT_COUNT\fP you are able to know
 how many times libcurl successfully reused existing connection(s) or not.  See
 the Connection Options of \fIcurl_easy_setopt(3)\fP to see how libcurl tries
 to make persistent connections to save time.  (Added in 7.12.3)
+.IP CURLINFO_COOKIELIST
+Pass a pointer to a 'struct curl_slist *' to receive a linked-list of all
+cookies cURL knows (expired ones, too). Don't forget to
+\fIcurl_slist_free_all(3)\fP the list after it has been used.
+If there are no cookies (cookies for the handle have not been enabled or
+simply none have been received) 'struct curl_slist *' will be set to
+point to NULL. 
 .SH RETURN VALUE
 If the operation was successful, CURLE_OK is returned. Otherwise an
 appropriate error code will be returned.

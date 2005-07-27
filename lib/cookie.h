@@ -92,4 +92,10 @@ void Curl_cookie_freelist(struct Cookie *);
 void Curl_cookie_cleanup(struct CookieInfo *);
 int Curl_cookie_output(struct CookieInfo *, char *);
 
+#if defined(CURL_DISABLE_HTTP) || defined(CURL_DISABLE_COOKIES)
+#define Curl_cookie_list(x) NULL
+#else
+struct curl_slist *Curl_cookie_list(struct SessionHandle *data);
+#endif
+
 #endif

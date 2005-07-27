@@ -7,6 +7,15 @@
                                   Changelog
 
 
+Daniel (27 July 2005)
+- Dan Fandrich changes over the last week: fixed numerous minor configure
+  option parsing flaws: --without-gnutls, --without-spnego --without-gssapi
+  and --without-krb4. Spellfixed several error messages.
+
+- Peteris Krumins added CURLOPT_COOKIELIST and CURLINFO_COOKIELIST, which is a
+  simple interface to extracting and setting cookies in libcurl's internal
+  "cookie jar". See the new cookie_interface.c example code.
+
 Daniel (13 July 2005)
 - Diego Casorran provided patches to make curl build fine on Amiga again.
 
