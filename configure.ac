@@ -977,7 +977,7 @@ dnl FIX: only check for GnuTLS if OpenSSL is not enabled
 dnl ----------------------------------------------------
 
 dnl Default to compiler & linker defaults for GnuTLS files & libraries.
-OPT_GNUTLS=off
+OPT_GNUTLS=no
 
 AC_ARG_WITH(gnutls,dnl
 AC_HELP_STRING([--with-gnutls=PATH],[where to look for GnuTLS, PATH points to the installation root (default: /usr/local/)])
@@ -986,7 +986,7 @@ AC_HELP_STRING([--without-gnutls], [disable GnuTLS detection]),
 
 if test "$OPENSSL_ENABLED" != "1"; then
 
-  if test X"$OPT_GNUTLS" != Xoff; then
+  if test X"$OPT_GNUTLS" != Xno; then
     if test "x$OPT_GNUTLS" = "xyes"; then
      check=`libgnutls-config --version 2>/dev/null`
      if test -n "$check"; then
