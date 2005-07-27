@@ -39,7 +39,8 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn, bool proxy, char *header);
 CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy);
 
 void Curl_ntlm_cleanup(struct connectdata *conn);
-#if !defined(USE_SSLEAY) && !defined(USE_WINDOWS_SSPI)
+#if (!defined(USE_SSLEAY) && !defined(USE_WINDOWS_SSPI)) || \
+    defined(CURL_DISABLE_HTTP)
 #define Curl_ntlm_cleanup(x)
 #endif
 
