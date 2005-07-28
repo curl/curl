@@ -788,6 +788,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
         /* clear all cookies */
         Curl_cookie_freelist(data->cookies->cookies);
         data->cookies->cookies = NULL;
+        data->cookies->numcookies = 0;
       }
       break;
     }
