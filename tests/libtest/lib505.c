@@ -8,6 +8,7 @@
  * $Id$
  */
 
+#include "setup.h" /* struct_stat etc. */
 #include "test.h"
 
 #ifdef HAVE_SYS_SOCKET_H
@@ -46,10 +47,16 @@ int test(char *URL)
   const char *buf_1 = "RNFR 505";
   const char *buf_2 = "RNTO 505-forreal";
 
+  if (!arg2) {
+    fprintf(stderr, "Usage: <url> <file-to-upload>\n");
+    return -1;
+  }
+
   /* get the file size of the local file */
   hd = stat(arg2, &file_info);
   if(hd == -1) {
     /* can't open file, bail out */
+    fprintf(stderr, "WARNING: cannot open file %s\n", arg2);
     return -1;
   }
 
