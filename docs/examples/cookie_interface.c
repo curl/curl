@@ -64,7 +64,7 @@ main(void)
     print_cookies(curl);
 
     printf("Erasing curl's knowledge of cookies!\n");
-    curl_easy_setopt(curl, CURLOPT_COOKIELIST, NULL);
+    curl_easy_setopt(curl, CURLOPT_COOKIELIST, "ALL");
 
     print_cookies(curl);
 
