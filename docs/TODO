@@ -61,6 +61,17 @@ TODO
    ready to accept read data. Today libcurl feeds the data as soon as it is
    available for reading, no matter what.
 
+ * Add curl_multi_socket() and family to the multi interface that gets file
+   descriptors, as an alternative to the curl_multi_fdset(). This is necessary
+   to allow apps to properly avoid the FD_SETSIZE problem.
+
+ * Make curl_easy_perform() a wrapper-function that simply creates a multi
+   handle, adds the easy handle to it, runs curl_multi_perform() until the
+   transfer is done, then detach the easy handle, destroy the multi handle and
+   return the easy handle's return code. This will thus make everything
+   internally use and assume the multi interface. The select()-loop should use
+   curl_multi_socket().
+
  DOCUMENTATION
 
  * More and better
@@ -151,6 +162,10 @@ TODO
    (http://www.matrixssl.org/) or yaSSL (http://yassl.com/). At least the
    latter two could be alternatives for those looking to reduce the footprint
    of libcurl built with OpenSSL or GnuTLS.
+
+ * Peter Sylvester's patch for SRP on the TLS layer.
+   Awaits OpenSSL support for this, no need to support this in libcurl before
+   there's an OpenSSL release that does it.
 
  LDAP
 

@@ -1,40 +1,8 @@
 Issues not sorted in any particular order.
 
-To get fixed in 7.14.0 (planned release: May/June 2005)
+To get fixed in 7.14.1 (planned release: August 2005)
 ======================
 
-   - Make the tests run better on more platforms.
+60 - CONNECT 407 responses that kills the connection
 
-To get fixed in 7.14.1 (planned release: June 2005)
-======================
-
-58 - Fix KNOWN_BUGS #19: "FTP 3rd party transfers with the multi interface
-     doesn't work"
-
-47 - Peter Sylvester's patch for SRP on the TLS layer
-     Awaits OpenSSL support for this, no need to support this in libcurl before
-     there's an OpenSSL release that does it.
-
-To get fixed in 7.15.0
-======================
-
-55 - Add a function to the multi interface that gets file descriptors, as an
-     alternative to the curl_multi_fdset(). This is necessary to allow apps to
-     properly avoid the FD_SETSIZE problem.
-
-56 - Make curl_easy_perform() a wrapper-function that simply creates a multi
-     handle, adds the easy handle to it, runs curl_multi_perform() until the
-     transfer is done, then detach the easy handle, destroy the multi handle
-     and return the easy handle's return code. This will thus make everything
-     internally use and assume the multi interface. The select()-loop should
-     use the new function from (55).
-
-To get fixed in 7.16.0
-======================
-
-57 - Add an interface to libcurl for getting and setting cookies from an easy
-     handle. One idea: http://curl.haxx.se/mail/lib-2004-12/0195.html the
-     older idea: http://curl.haxx.se/dev/COOKIES. We need to settle on some
-     middle ground I guess.
-
-60 - 
+61 - 
