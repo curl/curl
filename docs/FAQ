@@ -1,4 +1,4 @@
-Updated: June 13, 2005 (http://curl.haxx.se/docs/faq.html)
+Updated: July 31, 2005 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -981,8 +981,13 @@ FAQ
   7.1 What is PHP/CURL?
 
   The module for PHP that makes it possible for PHP programs to access curl-
-  functions from within PHP. We often call it PHP/CURL to differentiate from
-  curl the command line tool and libcurl the library.
+  functions from within PHP.
+
+  In the cURL project we call this module PHP/CURL to differentiate it from
+  curl the command line tool and libcurl the library. The PHP team however
+  does not refer to it like this (for unknown reasons). They call it plain
+  CURL (often using all caps) which causes much confusion to users which in
+  turn gives us a higher question load.
 
   7.2 Who write PHP/CURL?
 
