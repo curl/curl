@@ -662,10 +662,9 @@ cookies are cookies without expiry date and they are meant to be alive and
 existing for this "session" only.
 .IP CURLOPT_COOKIELIST
 Pass a char * to a cookie string. Cookie can be either in Netscape / Mozilla
-format or just regular HTTP-style header (Set-Cookie: ...) format.  The passed
-string will get modified so make sure it's writable.  If cURL cookie engine
-was not enabled it will enable its cookie engine.  Passing a magic string
-\&"ALL" will erase all cookies known by cURL.
+format or just regular HTTP-style header (Set-Cookie: ...) format. If cURL
+cookie engine was not enabled it will enable its cookie engine.  Passing a
+magic string \&"ALL" will erase all cookies known by cURL.
 .IP CURLOPT_HTTPGET
 Pass a long. If the long is non-zero, this forces the HTTP request to get back
 to GET. usable if a POST, HEAD, PUT or a custom request have been used
