@@ -843,7 +843,7 @@ static int config_sortlist(struct apattern **sortlist, int *nsort,
       while (*q && *q != '/' && *q != ';' && !isspace((unsigned char)*q))
         q++;
       memcpy(ipbuf, str, (int)(q-str));
-      ipbuf[(int)(q-str)] = 0;      
+      ipbuf[(int)(q-str)] = 0;
       /* Find the prefix */
       if (*q == '/')
         {
@@ -858,7 +858,8 @@ static int config_sortlist(struct apattern **sortlist, int *nsort,
         ipbufpfx[0] = 0;
       /* Lets see if it is CIDR */
       /* First we'll try IPv6 */
-      if ((bits = ares_inet_net_pton(AF_INET6, ipbufpfx ? ipbufpfx : ipbuf, &pat.addr.addr6, 
+      if ((bits = ares_inet_net_pton(AF_INET6, ipbufpfx ? ipbufpfx : ipbuf,
+                                     &pat.addr.addr6,
                                      sizeof(pat.addr.addr6))) > 0)
         {
           pat.type = PATTERN_CIDR;
@@ -867,8 +868,8 @@ static int config_sortlist(struct apattern **sortlist, int *nsort,
           if (!sortlist_alloc(sortlist, nsort, &pat))
             return ARES_ENOMEM;
         }
-      if (ipbufpfx && 
-          (bits = ares_inet_net_pton(AF_INET, ipbufpfx, &pat.addr.addr4, 
+      if (ipbufpfx &&
+          (bits = ares_inet_net_pton(AF_INET, ipbufpfx, &pat.addr.addr4,
                                      sizeof(pat.addr.addr4))) > 0)
         {
           pat.type = PATTERN_CIDR;
@@ -890,7 +891,7 @@ static int config_sortlist(struct apattern **sortlist, int *nsort,
           else
             natural_mask(&pat);
           pat.family = AF_INET;
-	  pat.type = PATTERN_MASK;
+          pat.type = PATTERN_MASK;
           if (!sortlist_alloc(sortlist, nsort, &pat))
             return ARES_ENOMEM;
         }
@@ -1011,7 +1012,8 @@ static const char *try_option(const char *p, const char *q, const char *opt)
 }
 
 #ifndef WIN32
-static int sortlist_alloc(struct apattern **sortlist, int *nsort, struct apattern *pat)
+static int sortlist_alloc(struct apattern **sortlist, int *nsort,
+                          struct apattern *pat)
 {
   struct apattern *newsort;
   newsort = realloc(*sortlist, (*nsort + 1) * sizeof(struct apattern));
