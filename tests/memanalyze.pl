@@ -158,10 +158,8 @@ while(<FILE>) {
 
             $getmem{$addr}="$source:$linenum";
         }
-        elsif($function =~ /realloc\(0x([0-9a-f]*), (\d*)\) = 0x([0-9a-f]*)/) {
-            $oldaddr = $1;
-            $newsize = $2;
-            $newaddr = $3;
+        elsif($function =~ /realloc\((\(nil\)|0x([0-9a-f]*)), (\d*)\) = 0x([0-9a-f]*)/) {
+            my ($oldaddr, $newsize, $newaddr) = ($2, $3, $4);
 
             $totalmem -= $sizeataddr{$oldaddr};
             if($trace) {
