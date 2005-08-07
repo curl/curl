@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel (7 August 2005)
+- When curl is built with GnuTLS, curl-config didn't include "SSL" when
+  --features was used.
+
 Daniel (28 July 2005)
 - If any of the options CURLOPT_HTTPGET, CURLOPT_POST and CURLOPT_HTTPPOST is
   set to 1, CURLOPT_NOBODY will now automatically be set to 0.

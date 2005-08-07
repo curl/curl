@@ -60,7 +60,9 @@ while test $# -gt 0; do
     --feature|--features)
 	if test "@USE_SSLEAY@" = "1"; then
           echo "SSL"
-          NTLM=1
+          NTLM=1 # OpenSSL implies NTLM
+        elif test -n "@USE_GNUTLS@"; then
+          echo "SSL"
         fi
 	if test "@KRB4_ENABLED@" = "1"; then
           echo "KRB4"
