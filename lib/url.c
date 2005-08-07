@@ -2651,9 +2651,13 @@ static CURLcode CreateConnection(struct SessionHandle *data,
         }
 
         if(proxy && *proxy) {
+          long bits = conn->protocol & (PROT_HTTPS|PROT_SSL);
           data->change.proxy = proxy;
           data->change.proxy_alloc=TRUE; /* this needs to be freed later */
           conn->bits.httpproxy = TRUE;
+
+          /* force this to become HTTP */
+          conn->protocol = PROT_HTTP | bits;
         }
       } /* if (!nope) - it wasn't specified non-proxy */
     } /* NO_PROXY wasn't specified or '*' */
@@ -2789,6 +2793,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 #ifndef CURL_DISABLE_HTTP
       conn->curl_do = Curl_http;
       conn->curl_done = Curl_http_done;
+      conn->protocol = PROT_HTTP; /* switch to HTTP */
 #else
       failf(data, "FTP over http proxy requires HTTP support built-in!");
       return CURLE_UNSUPPORTED_PROTOCOL;

@@ -7,6 +7,12 @@
                                   Changelog
 
 
+Daniel (8 August 2005)
+- Jon Grubbs filed bug report #1249962 which identified a problem with NTLM on
+  a HTTP proxy if an FTP URL was given. libcurl now properly switches to pure
+  HTTP internally when an HTTP proxy is used, even for FTP URLs. The problem
+  would also occur with other multi-pass auth methods.
+
 Daniel (7 August 2005)
 - When curl is built with GnuTLS, curl-config didn't include "SSL" when
   --features was used.

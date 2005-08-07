@@ -5,7 +5,7 @@ Curl and libcurl 7.14.1
  Available command line options:           107
  Available curl_easy_setopt() options:     122
  Number of public functions in libcurl:    46
- Amount of public web site mirrors:        24
+ Amount of public web site mirrors:        25
  Number of known libcurl bindings:         31
  Number of contributors:                   437
 
@@ -18,6 +18,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o using NTLM over proxy with an FTP URL
  o curl-config --features now displays SSL when built with GnuTLS too
  o CURLOPT_HTTPGET, CURLOPT_POST and CURLOPT_HTTPPOST reset CURLOPT_NOBODY
  o builds fine on AmigaOS again
@@ -50,6 +51,6 @@ advice from friends like these:
 
  John McGowan, Georg Wicherski, Andres Garcia, Eric Cooper, Todd Kulesza,
  Tupone Alfredo, Gisle Vanem, David Shaw, Andrew Bushnell, Dan Fandrich,
- Adrian Schuur, Diego Casorran, Peteris Krumins
+ Adrian Schuur, Diego Casorran, Peteris Krumins, Jon Grubbs
 
         Thanks! (and sorry if I forgot to mention someone)
