@@ -1,4 +1,4 @@
-Updated: July 31, 2005 (http://curl.haxx.se/docs/faq.html)
+Updated: August 7, 2005 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -251,6 +251,12 @@ FAQ
   lists also allows for others to learn from this (both current and future
   users thanks to the web based archives of the mailing lists), thus saving us
   from having to repeat ourselves even more. Thanks for respecting this.
+
+  If you have found or simply suspect a security problem in curl or libcurl,
+  mail curl-security at haxx.se (closed list of receivers, mails are not
+  disclosed) and tell. Then we can produce a fix in a timely manner before the
+  flaw is announced to the world, thus lessen the impact the problem will have
+  on existing users.
 
 
 2. Install Related Problems
