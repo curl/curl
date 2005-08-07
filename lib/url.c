@@ -2786,12 +2786,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
        !data->set.tunnel_thru_httpproxy) {
       /* Unless we have asked to tunnel ftp operations through the proxy, we
          switch and use HTTP operations only */
-      if(conn->protocol & PROT_FTPS) {
-        /* FTPS is a hacked protocol and does not work through your
-           ordinary http proxy! */
-        failf(data, "ftps does not work through http proxy!");
-        return CURLE_UNSUPPORTED_PROTOCOL;
-      }
 #ifndef CURL_DISABLE_HTTP
       conn->curl_do = Curl_http;
       conn->curl_done = Curl_http_done;
