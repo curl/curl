@@ -7,6 +7,13 @@
                                   Changelog
 
 
+Daniel (9 August 2005)
+- Christopher R. Palmer fixed the offsets used for date parsings when the time
+  zone name of a daylight savings time was used. For example, PDT vs PDS. This
+  flaw was introduced with the new date parser (11 sep 2004 - 7.12.2).
+  Fortunately, no web server or cookie string etc should be using such time
+  zone names thus limiting the effect of this bug.
+
 Daniel (8 August 2005)
 - Jon Grubbs filed bug report #1249962 which identified a problem with NTLM on
   a HTTP proxy if an FTP URL was given. libcurl now properly switches to pure

@@ -102,50 +102,51 @@ struct tzinfo {
 
 /* Here's a bunch of frequently used time zone names. These were supported
    by the old getdate parser. */
+#define tDAYZONE -60       /* offset for daylight savings time */
 static const struct tzinfo tz[]= {
-  {"GMT", 0},     /* Greenwich Mean */
-  {"UTC", 0},     /* Universal (Coordinated) */
-  {"WET", 0},     /* Western European */
-  {"BST", 0},     /* British Summer */
-  {"WAT", 60},    /* West Africa */
-  {"AST", 240},   /* Atlantic Standard */
-  {"ADT", 240},   /* Atlantic Daylight */
-  {"EST", 300},   /* Eastern Standard */
-  {"EDT", 300},   /* Eastern Daylight */
-  {"CST", 360},   /* Central Standard */
-  {"CDT", 360},   /* Central Daylight */
-  {"MST", 420},   /* Mountain Standard */
-  {"MDT", 420},   /* Mountain Daylight */
-  {"PST", 480},   /* Pacific Standard */
-  {"PDT", 480},   /* Pacific Daylight */
-  {"YST", 540},   /* Yukon Standard */
-  {"YDT", 540},   /* Yukon Daylight */
-  {"HST", 600},   /* Hawaii Standard */
-  {"HDT", 600},   /* Hawaii Daylight */
-  {"CAT", 600},   /* Central Alaska */
-  {"AHST", 600},  /* Alaska-Hawaii Standard */
-  {"NT",  660},   /* Nome */
-  {"IDLW", 720},  /* International Date Line West */
-  {"CET", -60},   /* Central European */
-  {"MET", -60},   /* Middle European */
-  {"MEWT", -60},  /* Middle European Winter */
-  {"MEST", -120}, /* Middle European Summer */
-  {"CEST", -120}, /* Central European Summer */
-  {"MESZ", -60},  /* Middle European Summer */
-  {"FWT", -60},   /* French Winter */
-  {"FST", -60},   /* French Summer */
-  {"EET", -120},  /* Eastern Europe, USSR Zone 1 */
-  {"WAST", -420}, /* West Australian Standard */
-  {"WADT", -420}, /* West Australian Daylight */
-  {"CCT", -480},  /* China Coast, USSR Zone 7 */
-  {"JST", -540},  /* Japan Standard, USSR Zone 8 */
-  {"EAST", -600}, /* Eastern Australian Standard */
-  {"EADT", -600}, /* Eastern Australian Daylight */
-  {"GST", -600},  /* Guam Standard, USSR Zone 9 */
-  {"NZT", -720},  /* New Zealand */
-  {"NZST", -720}, /* New Zealand Standard */
-  {"NZDT", -720}, /* New Zealand Daylight */
-  {"IDLE", -720}, /* International Date Line East */
+  {"GMT", 0},              /* Greenwich Mean */
+  {"UTC", 0},              /* Universal (Coordinated) */
+  {"WET", 0},              /* Western European */
+  {"BST", 0 tDAYZONE},     /* British Summer */
+  {"WAT", 60},             /* West Africa */
+  {"AST", 240},            /* Atlantic Standard */
+  {"ADT", 240 tDAYZONE},   /* Atlantic Daylight */
+  {"EST", 300},            /* Eastern Standard */
+  {"EDT", 300 tDAYZONE},   /* Eastern Daylight */
+  {"CST", 360},            /* Central Standard */
+  {"CDT", 360 tDAYZONE},   /* Central Daylight */
+  {"MST", 420},            /* Mountain Standard */
+  {"MDT", 420 tDAYZONE},   /* Mountain Daylight */
+  {"PST", 480},            /* Pacific Standard */
+  {"PDT", 480 tDAYZONE},   /* Pacific Daylight */
+  {"YST", 540},            /* Yukon Standard */
+  {"YDT", 540 tDAYZONE},   /* Yukon Daylight */
+  {"HST", 600},            /* Hawaii Standard */
+  {"HDT", 600 tDAYZONE},   /* Hawaii Daylight */
+  {"CAT", 600},            /* Central Alaska */
+  {"AHST", 600},           /* Alaska-Hawaii Standard */
+  {"NT",  660},            /* Nome */
+  {"IDLW", 720},           /* International Date Line West */
+  {"CET", -60},            /* Central European */
+  {"MET", -60},            /* Middle European */
+  {"MEWT", -60},           /* Middle European Winter */
+  {"MEST", -120 tDAYZONE}, /* Middle European Summer */
+  {"CEST", -120 tDAYZONE}, /* Central European Summer */
+  {"MESZ", -60 tDAYZONE},  /* Middle European Summer */
+  {"FWT", -60},            /* French Winter */
+  {"FST", -60 tDAYZONE},   /* French Summer */
+  {"EET", -120},           /* Eastern Europe, USSR Zone 1 */
+  {"WAST", -420},          /* West Australian Standard */
+  {"WADT", -420 tDAYZONE}, /* West Australian Daylight */
+  {"CCT", -480},           /* China Coast, USSR Zone 7 */
+  {"JST", -540},           /* Japan Standard, USSR Zone 8 */
+  {"EAST", -600},          /* Eastern Australian Standard */
+  {"EADT", -600 tDAYZONE}, /* Eastern Australian Daylight */
+  {"GST", -600},           /* Guam Standard, USSR Zone 9 */
+  {"NZT", -720},           /* New Zealand */
+  {"NZST", -720},          /* New Zealand Standard */
+  {"NZDT", -720 tDAYZONE}, /* New Zealand Daylight */
+  {"IDLE", -720},          /* International Date Line East */
 };
 
 /* returns:

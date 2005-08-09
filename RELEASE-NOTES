@@ -18,6 +18,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o date parsing of dates including daylight savings time zone names
  o using NTLM over proxy with an FTP URL
  o curl-config --features now displays SSL when built with GnuTLS too
  o CURLOPT_HTTPGET, CURLOPT_POST and CURLOPT_HTTPPOST reset CURLOPT_NOBODY
@@ -51,6 +52,7 @@ advice from friends like these:
 
  John McGowan, Georg Wicherski, Andres Garcia, Eric Cooper, Todd Kulesza,
  Tupone Alfredo, Gisle Vanem, David Shaw, Andrew Bushnell, Dan Fandrich,
- Adrian Schuur, Diego Casorran, Peteris Krumins, Jon Grubbs
+ Adrian Schuur, Diego Casorran, Peteris Krumins, Jon Grubbs, Christopher
+ R. Palmer
 
         Thanks! (and sorry if I forgot to mention someone)
