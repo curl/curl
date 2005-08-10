@@ -200,9 +200,21 @@ netware:
 	$(MAKE) -C lib -f Makefile.netware
 	$(MAKE) -C src -f Makefile.netware
 
+netware-ares:
+	$(MAKE) -C lib -f Makefile.netware WITH_ARES=1
+	$(MAKE) -C src -f Makefile.netware WITH_ARES=1
+
 netware-ssl:
-	$(MAKE) -C lib -f Makefile.netware SSL=1
-	$(MAKE) -C src -f Makefile.netware SSL=1
+	$(MAKE) -C lib -f Makefile.netware WITH_SSL=1
+	$(MAKE) -C src -f Makefile.netware WITH_SSL=1
+
+netware-ssl-zlib:
+	$(MAKE) -C lib -f Makefile.netware WITH_SSL=1 WITH_ZLIB=1
+	$(MAKE) -C src -f Makefile.netware WITH_SSL=1 WITH_ZLIB=1
+
+netware-zlib:
+	$(MAKE) -C lib -f Makefile.netware WITH_ZLIB=1
+	$(MAKE) -C src -f Makefile.netware WITH_ZLIB=1
 
 netware-clean:
 	$(MAKE) -C lib -f Makefile.netware clean
