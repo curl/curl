@@ -13,11 +13,13 @@ NDKBASE	= c:/novell
 endif
 
 # Edit the path below to point to the base of your Zlib sources.
-#ZLIB_PATH = ../../zlib-1.2.2
+ifndef ZLIB_PATH
+ZLIB_PATH = ../../zlib-1.2.3
+endif
 
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.7g
+OPENSSL_PATH = ../../openssl-0.9.8
 endif
 
 ifndef INSTDIR
@@ -111,7 +113,7 @@ CURL_LIB = ../lib
 
 INCLUDES = -I$(CURL_INC) -I$(CURL_LIB)
 
-ifdef ZLIB_PATH
+ifdef WITH_ZLIB
 	INCLUDES += -I$(ZLIB_PATH)
 	IMPORTS += @$(ZLIB_PATH)/nw/zlib.imp
 	MODULES += libz.nlm
@@ -119,7 +121,7 @@ endif
 
 ifeq ($(LIBARCH),LIBC)
 	INCLUDES += -I$(SDK_LIBC)/include -I$(SDK_LIBC)/include/nks
-	INCLUDES += -I$(SDK_LIBC)/include/winsock
+	# INCLUDES += -I$(SDK_LIBC)/include/winsock
 	# INCLUDES += -I$(SDK_LDAP)/libc/inc
 	CFLAGS += -D_POSIX_SOURCE
 	# CFLAGS += -D__ANSIC__
@@ -330,11 +332,11 @@ endif
 ifdef WITH_ARES
 	@echo $(DL)#define USE_ARES 1$(DL) >> $@
 endif
-ifdef ZLIB_PATH
+ifdef WITH_ZLIB
 	@echo $(DL)#define HAVE_ZLIB_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_LIBZ 1$(DL) >> $@
 endif
-ifdef SSL
+ifdef WITH_SSL
 	@echo $(DL)#define USE_SSLEAY 1$(DL) >> $@
 	@echo $(DL)#define HAVE_OPENSSL_X509_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_OPENSSL_SSL_H 1$(DL) >> $@

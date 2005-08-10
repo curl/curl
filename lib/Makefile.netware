@@ -13,11 +13,13 @@ NDKBASE	= c:/novell
 endif
 
 # Edit the path below to point to the base of your Zlib sources.
-#ZLIB_PATH = ../../zlib-1.2.2
+ifndef ZLIB_PATH
+ZLIB_PATH = ../../zlib-1.2.3
+endif
 
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.7g
+OPENSSL_PATH = ../../openssl-0.9.8
 endif
 
 ifndef INSTDIR
@@ -116,19 +118,20 @@ ifdef WITH_ARES
 	INCLUDES += -I../ares
 	LIBCARES = ../ares/libcares.lib
 endif
-ifdef ZLIB_PATH
+ifdef WITH_ZLIB
 	INCLUDES += -I$(ZLIB_PATH)
-	IMPORTS = @$(ZLIB_PATH)/nw/zlib.imp
+	IMPORTS = @$(ZLIB_PATH)/nw/libz.imp
 	MODULES = libz.nlm
 endif
-ifdef SSL
+ifdef WITH_SSL
 	INCLUDES += -I$(OPENSSL_PATH)/outinc_nw_libc -I$(OPENSSL_PATH)/outinc_nw_libc/openssl
 	LIBSSL = $(OPENSSL_PATH)/out_nw_libc/crypto.lib $(OPENSSL_PATH)/out_nw_libc/ssl.lib
+	IMPORTS += GetProcessSwitchCount RunningProcess
 endif
 
 ifeq ($(LIBARCH),LIBC)
 	INCLUDES += -I$(SDK_LIBC)/include -I$(SDK_LIBC)/include/nks
-	INCLUDES += -I$(SDK_LIBC)/include/winsock
+	# INCLUDES += -I$(SDK_LIBC)/include/winsock
 	# INCLUDES += -I$(SDK_LDAP)/libc/inc
 	CFLAGS += -D_POSIX_SOURCE
 	# CFLAGS += -D__ANSIC__
@@ -277,7 +280,7 @@ ifeq ($(LD),nlmconv)
 ifdef WITH_ARES
 	@echo $(DL)input $(LIBCARES)$(DL) >> $@
 endif
-ifdef SSL
+ifdef WITH_SSL
 	@echo $(DL)input $(LIBSSL)$(DL) >> $@
 endif
 	@echo $(DL)input $(OBJL)$(DL) >> $@
@@ -336,6 +339,13 @@ config.h: Makefile.netware
 	@echo $(DL)#define SIZEOF_CURL_OFF_T 4$(DL) >> $@
 	@echo $(DL)#define STDC_HEADERS 1$(DL) >> $@
 	@echo $(DL)#define TIME_WITH_SYS_TIME 1$(DL) >> $@
+	@echo $(DL)#define HAVE_AF_INET6 1$(DL) >> $@
+	@echo $(DL)#define HAVE_PF_INET6 1$(DL) >> $@
+	@echo $(DL)#define HAVE_STRUCT_IN6_ADDR 1$(DL) >> $@
+	@echo $(DL)#define HAVE_STRUCT_SOCKADDR_IN6 1$(DL) >> $@
+	@echo $(DL)#define HAVE_STRUCT_ADDRINFO 1$(DL) >> $@
+	@echo $(DL)#define SIZEOF_STRUCT_IN6_ADDR 16$(DL) >> $@
+	@echo $(DL)#define SIZEOF_STRUCT_IN_ADDR 4$(DL) >> $@
 ifdef DISABLE_LDAP
 	@echo $(DL)#define CURL_DISABLE_LDAP 1$(DL) >> $@
 else
@@ -355,11 +365,11 @@ endif
 ifdef WITH_ARES
 	@echo $(DL)#define USE_ARES 1$(DL) >> $@
 endif
-ifdef ZLIB_PATH
+ifdef WITH_ZLIB
 	@echo $(DL)#define HAVE_ZLIB_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_LIBZ 1$(DL) >> $@
 endif
-ifdef SSL
+ifdef WITH_SSL
 	@echo $(DL)#define USE_SSLEAY 1$(DL) >> $@
 	@echo $(DL)#define USE_OPENSSL 1$(DL) >> $@
 	@echo $(DL)#define HAVE_OPENSSL_X509_H 1$(DL) >> $@
