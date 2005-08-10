@@ -36,6 +36,9 @@
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
+#ifdef NETWARE
+#include <sys/filio.h>
+#endif
 #endif
 
 #include <string.h>

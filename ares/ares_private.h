@@ -33,6 +33,10 @@
 #define writev(s,v,c)     writev_s(s,v,c)
 #endif
 
+#ifdef NETWARE
+#include <time.h>
+#endif
+
 #define DEFAULT_TIMEOUT         5
 #define DEFAULT_TRIES           4
 #ifndef INADDR_NONE
