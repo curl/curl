@@ -104,7 +104,7 @@ SDK_LIBC = $(NDK_ROOT)/libc
 
 ifeq ($(LIBARCH),LIBC)
 	INCLUDES += -I$(SDK_LIBC)/include -I$(SDK_LIBC)/include/nks
-	INCLUDES += -I$(SDK_LIBC)/include/winsock
+	# INCLUDES += -I$(SDK_LIBC)/include/winsock
 	CFLAGS += -D_POSIX_SOURCE
 #	CFLAGS += -D__ANSIC__
 else
