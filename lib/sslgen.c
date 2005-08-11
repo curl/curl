@@ -473,8 +473,6 @@ int Curl_ssl_recv(struct connectdata *conn, /* connection data */
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
   if(nread == -1) {
-    infof(conn->data, "Curl_xxx_rcvs returned -1, block = %s\n",
-          block?"TRUE":"FALSE");
     if(!block)
       return 0; /* this is a true error, not EWOULDBLOCK */
     else
