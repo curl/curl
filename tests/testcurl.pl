@@ -141,9 +141,9 @@ if ($^O eq 'MSWin32' || $targetos) {
   }
 }
 
-if ($^O eq 'MSWin32') {
+if (($^O eq 'MSWin32') && ($targetos =~ /vc/ || $targetos =~ /mingw32/ || $targetos =~ /borland/)) {
 
-  # Set these things only when building ON Windows, not when simply building
+  # Set these things only when building ON Windows and for Win32 platform.
   # FOR Windows since we might be cross-compiling on another system. Non-
   # Windows builds still default to configure-style builds with no confsuffix.
 
