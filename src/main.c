@@ -1749,8 +1749,15 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
             postdata = file2memory(file, &config->postfieldsize);
           else
             postdata = file2string(file);
+
           if(file && (file != stdin))
             fclose(file);
+
+          if(!postdata) {
+            /* no data from the file, point to a zero byte string to make this
+               get sent as a POST anyway */
+            postdata=strdup("");
+          }
         }
         else {
           GetStr(&postdata, nextarg);
@@ -2205,10 +2212,11 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         if(-1 == stat(nextarg, &statbuf)) {
           /* failed, remove time condition */
           config->timecond = CURL_TIMECOND_NONE;
-          fprintf(stderr,
-                  "Warning: Illegal date format for -z/--timecond and not "
-                  "a file name.\n"
-                  "         See curl_getdate(3) for valid date syntax.\n");
+          if(!(config->conf & CONF_MUTE))
+            fprintf(stderr,
+                    "Warning: Illegal date format for -z/--timecond and not "
+                    "a file name.\n"
+                    "         See curl_getdate(3) for valid date syntax.\n");
         }
         else {
           /* pull the time out from the file */
