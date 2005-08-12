@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_getdate 3 "5 March 2001" "libcurl 7.0" "libcurl Manual"
+.TH curl_getdate 3 "12 Aug 2005" "libcurl 7.0" "libcurl Manual"
 .SH NAME
 curl_getdate - Convert an date string to number of seconds since January 1,
 1970
@@ -26,7 +26,7 @@ order of the items is immaterial.  A date string may contain many flavors of
 items:
 .TP 0.8i
 .B calendar date items
-Can be specified several ways. Month names can only be three-letter
+Can be specified several ways. Month names can only be three-letter english
 abbrivations, numbers can be zero-prefixed and the year may use 2 or 4 digits.
 Examples: 06 Nov 1994, 06-Nov-94 and Nov-94 6.
 .TP
@@ -94,7 +94,7 @@ crippled mktime(), \fIcurl_getdate\fP will return -1 in this case.
 .SH REWRITE
 The former version of this function was built with yacc and was not only very
 large, it was also never quite understood and it wasn't possible to build with
-non-GNU tools since only Bison could make it thread-safe!
+non-GNU tools since only GNU Bison could make it thread-safe!
 
 The rewrite was done for 7.12.2. The new one is much smaller and use simpler
 code.
