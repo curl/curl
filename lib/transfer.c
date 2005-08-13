@@ -1134,6 +1134,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               result = Curl_client_write(data, CLIENTWRITE_BODY,
                                          data->state.headerbuff,
                                          k->hbuflen);
+              if(result)
+                return result;
             }
             if(k->badheader < HEADER_ALLBAD) {
               /* This switch handles various content encodings. If there's an
