@@ -243,6 +243,161 @@ static int ftruncate64 (int fd, curl_off_t where)
 #define ftruncate(fd,where) ftruncate64(fd,where)
 #endif
 
+typedef enum {
+    TRACE_BIN,   /* tcpdump inspired look */
+    TRACE_ASCII, /* like *BIN but without the hex output */
+    TRACE_PLAIN  /* -v/--verbose type */
+} trace;
+
+struct Configurable {
+  bool remote_time;
+  char *random_file;
+  char *egd_file;
+  char *useragent;
+  char *cookie;     /* single line with specified cookies */
+  char *cookiejar;  /* write to this file */
+  char *cookiefile; /* read from this file */
+  bool cookiesession; /* new session? */
+  bool encoding;    /* Accept-Encoding please */
+  long authtype;    /* auth bitmask */
+  bool use_resume;
+  bool resume_from_current;
+  bool disable_epsv;
+  bool disable_eprt;
+  curl_off_t resume_from;
+  char *postfields;
+  long postfieldsize;
+  char *referer;
+  long timeout;
+  long connecttimeout;
+  long maxredirs;
+  curl_off_t max_filesize;
+  char *headerfile;
+  char *ftpport;
+  char *iface;
+  unsigned short porttouse;
+  char *range;
+  long low_speed_limit;
+  long low_speed_time;
+  bool showerror;
+  char *userpwd;
+  char *proxyuserpwd;
+  char *proxy;
+  bool proxytunnel;
+  long conf;
+  struct getout *url_list; /* point to the first node */
+  struct getout *url_last; /* point to the last/current node */
+  struct getout *url_get;  /* point to the node to fill in URL */
+  struct getout *url_out;  /* point to the node to fill in outfile */
+  char *cipher_list;
+  char *cert;
+  char *cert_type;
+  char *cacert;
+  char *capath;
+  char *key;
+  char *key_type;
+  char *key_passwd;
+  char *engine;
+  bool list_engines;
+  bool crlf;
+  char *customrequest;
+  char *krb4level;
+  char *trace_dump; /* file to dump the network trace to, or NULL */
+  FILE *trace_stream;
+  bool trace_fopened;
+  trace tracetype;
+  bool tracetime; /* include timestamp? */
+  long httpversion;
+  bool progressmode;
+  bool nobuffer;
+  bool globoff;
+  bool use_httpget;
+  bool insecure_ok; /* set TRUE to allow insecure SSL connects */
+  bool create_dirs;
+  bool ftp_create_dirs;
+  bool proxyntlm;
+  bool proxydigest;
+  bool proxybasic;
+  bool proxyanyauth;
+  char *writeout; /* %-styled format string to output */
+  bool writeenv; /* write results to environment, if available */
+  FILE *errors; /* if stderr redirect is requested */
+  bool errors_fopened;
+  struct curl_slist *quote;
+  struct curl_slist *postquote;
+  struct curl_slist *prequote;
+  long ssl_version;
+  long ip_version;
+  curl_TimeCond timecond;
+  time_t condtime;
+  struct curl_slist *headers;
+  struct curl_httppost *httppost;
+  struct curl_httppost *last_post;
+  struct curl_slist *telnet_options;
+  HttpReq httpreq;
+
+  /* for bandwidth limiting features: */
+  curl_off_t sendpersecond; /* send to peer */
+  curl_off_t recvpersecond; /* receive from peer */
+  struct timeval lastsendtime;
+  size_t lastsendsize;
+  struct timeval lastrecvtime;
+  size_t lastrecvsize;
+  bool ftp_ssl;
+  char *socks5proxy;
+  bool tcp_nodelay;
+  long req_retry;   /* number of retries */
+  long retry_delay; /* delay between retries (in seconds) */
+  long retry_maxtime; /* maximum time to keep retrying */
+
+  char *tp_url; /* third party URL */
+  char *tp_user; /* third party userpwd */
+  struct curl_slist *tp_quote;
+  struct curl_slist *tp_postquote;
+  struct curl_slist *tp_prequote;
+  char *ftp_account; /* for ACCT */
+};
+
+#define WARN_PREFIX "Warning: "
+#define WARN_TEXTWIDTH (79 - strlen(WARN_PREFIX))
+/* produce this text message to the user unless mute was selected */
+static void warnf(struct Configurable *config, const char *fmt, ...)
+{
+  if(!(config->conf & CONF_MUTE)) {
+    va_list ap;
+    int len;
+    char *ptr;
+    char print_buffer[256];
+
+    va_start(ap, fmt);
+    va_start(ap, fmt);
+    len = vsnprintf(print_buffer, sizeof(print_buffer), fmt, ap);
+    va_end(ap);
+
+    ptr = print_buffer;
+    while(len > 0) {
+      fputs(WARN_PREFIX, config->errors);
+
+      if(len > (int)WARN_TEXTWIDTH) {
+        int cut = WARN_TEXTWIDTH-1;
+
+        while(!isspace(ptr[cut]) && cut) {
+          cut--;
+        }
+
+        fwrite(ptr, cut + 1, 1, config->errors);
+        fputs("\n", config->errors);
+        ptr += cut+1; /* skip the space too */
+        len -= cut;
+      }
+      else {
+        fputs(ptr, config->errors);
+        len = 0;
+      }
+    }
+  }
+}
+
 /*
  * This is the main global constructor for the app. Call this before
  * _any_ libcurl usage. If this fails, *NO* libcurl functions may be
@@ -262,14 +417,15 @@ static void main_free(void)
   curl_global_cleanup();
 }
 
-static int SetHTTPrequest(HttpReq req, HttpReq *store)
+static int SetHTTPrequest(struct Configurable *config,
+                          HttpReq req, HttpReq *store)
 {
   if((*store == HTTPREQ_UNSPEC) ||
      (*store == req)) {
     *store = req;
     return 0;
   }
-  fprintf(stderr, "You can only select one HTTP request!\n");
+  warnf(config, "You can only select one HTTP request!\n");
   return 1;
 }
 
@@ -305,12 +461,6 @@ struct getout {
 #define GETOUT_USEREMOTE (1<<2) /* use remote file name locally */
 #define GETOUT_UPLOAD  (1<<3)   /* if set, -T has been used */
 #define GETOUT_NOUPLOAD  (1<<4) /* if set, -T "" has been used */
-
-typedef enum {
-    TRACE_BIN,   /* tcpdump inspired look */
-    TRACE_ASCII, /* like *BIN but without the hex output */
-    TRACE_PLAIN  /* -v/--verbose type */
-} trace;
 
 static void help(void)
 {
@@ -448,115 +598,6 @@ struct LongShort {
   const char *letter;
   const char *lname;
   bool extraparam;
-};
-
-struct Configurable {
-  bool remote_time;
-  char *random_file;
-  char *egd_file;
-  char *useragent;
-  char *cookie;     /* single line with specified cookies */
-  char *cookiejar;  /* write to this file */
-  char *cookiefile; /* read from this file */
-  bool cookiesession; /* new session? */
-  bool encoding;    /* Accept-Encoding please */
-  long authtype;    /* auth bitmask */
-  bool use_resume;
-  bool resume_from_current;
-  bool disable_epsv;
-  bool disable_eprt;
-  curl_off_t resume_from;
-  char *postfields;
-  long postfieldsize;
-  char *referer;
-  long timeout;
-  long connecttimeout;
-  long maxredirs;
-  curl_off_t max_filesize;
-  char *headerfile;
-  char *ftpport;
-  char *iface;
-  unsigned short porttouse;
-  char *range;
-  long low_speed_limit;
-  long low_speed_time;
-  bool showerror;
-  char *userpwd;
-  char *proxyuserpwd;
-  char *proxy;
-  bool proxytunnel;
-  long conf;
-  struct getout *url_list; /* point to the first node */
-  struct getout *url_last; /* point to the last/current node */
-  struct getout *url_get;  /* point to the node to fill in URL */
-  struct getout *url_out;  /* point to the node to fill in outfile */
-  char *cipher_list;
-  char *cert;
-  char *cert_type;
-  char *cacert;
-  char *capath;
-  char *key;
-  char *key_type;
-  char *key_passwd;
-  char *engine;
-  bool list_engines;
-  bool crlf;
-  char *customrequest;
-  char *krb4level;
-  char *trace_dump; /* file to dump the network trace to, or NULL */
-  FILE *trace_stream;
-  bool trace_fopened;
-  trace tracetype;
-  bool tracetime; /* include timestamp? */
-  long httpversion;
-  bool progressmode;
-  bool nobuffer;
-  bool globoff;
-  bool use_httpget;
-  bool insecure_ok; /* set TRUE to allow insecure SSL connects */
-  bool create_dirs;
-  bool ftp_create_dirs;
-  bool proxyntlm;
-  bool proxydigest;
-  bool proxybasic;
-  bool proxyanyauth;
-  char *writeout; /* %-styled format string to output */
-  bool writeenv; /* write results to environment, if available */
-  FILE *errors; /* if stderr redirect is requested */
-  bool errors_fopened;
-  struct curl_slist *quote;
-  struct curl_slist *postquote;
-  struct curl_slist *prequote;
-  long ssl_version;
-  long ip_version;
-  curl_TimeCond timecond;
-  time_t condtime;
-  struct curl_slist *headers;
-  struct curl_httppost *httppost;
-  struct curl_httppost *last_post;
-  struct curl_slist *telnet_options;
-  HttpReq httpreq;
-
-  /* for bandwidth limiting features: */
-  curl_off_t sendpersecond; /* send to peer */
-  curl_off_t recvpersecond; /* receive from peer */
-  struct timeval lastsendtime;
-  size_t lastsendsize;
-  struct timeval lastrecvtime;
-  size_t lastrecvsize;
-  bool ftp_ssl;
-  char *socks5proxy;
-  bool tcp_nodelay;
-  long req_retry;   /* number of retries */
-  long retry_delay; /* delay between retries (in seconds) */
-  long retry_maxtime; /* maximum time to keep retrying */
-
-  char *tp_url; /* third party URL */
-  char *tp_user; /* third party userpwd */
-  struct curl_slist *tp_quote;
-  struct curl_slist *tp_postquote;
-  struct curl_slist *tp_prequote;
-  char *ftp_account; /* for ACCT */
 };
 
 /* global variable to hold info about libcurl */
@@ -814,7 +855,8 @@ static void list_engines (const struct curl_slist *engines)
 #define FORM_FILE_SEPARATOR ','
 #define FORM_TYPE_SEPARATOR ';'
 
-static int formparse(char *input,
+static int formparse(struct Configurable *config,
+                     char *input,
                      struct curl_httppost **httppost,
                      struct curl_httppost **last_post,
                      bool literal_value)
@@ -890,7 +932,7 @@ static int formparse(char *input,
               /* verify that this is a fine type specifier */
               if(2 != sscanf(type, "%127[^/]/%127[^;,\n]",
                              major, minor)) {
-                fprintf(stderr, "Illegally formatted content-type field!\n");
+                warnf(config, "Illegally formatted content-type field!\n");
                 free(contents);
                 FreeMultiInfo (multi_start);
                 return 2; /* illegal content-type syntax! */
@@ -939,7 +981,7 @@ static int formparse(char *input,
 
         if (!AddMultiFiles (contp, type, filename, &multi_start,
                             &multi_current)) {
-          fprintf(stderr, "Error building form post!\n");
+          warnf(config, "Error building form post!\n");
           free(contents);
           FreeMultiInfo (multi_start);
           return 3;
@@ -976,7 +1018,7 @@ static int formparse(char *input,
         if (curl_formadd(httppost, last_post,
                          CURLFORM_COPYNAME, name,
                          CURLFORM_ARRAY, forms, CURLFORM_END) != 0) {
-          fprintf(stderr, "curl_formadd failed!\n");
+          warnf(config, "curl_formadd failed!\n");
           free(forms);
           free(contents);
           return 5;
@@ -1008,8 +1050,8 @@ static int formparse(char *input,
 
         if (curl_formadd(httppost, last_post,
                          CURLFORM_ARRAY, info, CURLFORM_END ) != 0) {
-          fprintf(stderr, "curl_formadd failed, possibly the file %s is bad!\n",
-                  contp+1);
+          warnf(config, "curl_formadd failed, possibly the file %s is bad!\n",
+                contp+1);
           free(contents);
           return 6;
         }
@@ -1021,7 +1063,7 @@ static int formparse(char *input,
         info[i].option = CURLFORM_END;
         if (curl_formadd(httppost, last_post,
                          CURLFORM_ARRAY, info, CURLFORM_END) != 0) {
-          fprintf(stderr, "curl_formadd failed!\n");
+          warnf(config, "curl_formadd failed!\n");
           free(contents);
           return 7;
         }
@@ -1030,7 +1072,7 @@ static int formparse(char *input,
 
   }
   else {
-    fprintf(stderr, "Illegally formatted input field!\n");
+    warnf(config, "Illegally formatted input field!\n");
     return 1;
   }
   free(contents);
@@ -1387,9 +1429,6 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     }
     *usedarg = FALSE; /* default is that we don't use the arg */
 
-#if 0
-    fprintf(stderr, "OPTION: %c %s\n", letter, nextarg?nextarg:"<null>");
-#endif
     if(hit < 0) {
       for(j=0; j< sizeof(aliases)/sizeof(aliases[0]); j++) {
         if(letter == aliases[j].letter[0]) {
@@ -1533,8 +1572,13 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 
       case 'v': /* --stderr */
         if(strcmp(nextarg, "-")) {
-          config->errors = fopen(nextarg, "wt");
-          config->errors_fopened = TRUE;
+          FILE *newfile = fopen(nextarg, "wt");
+          if(!config->errors)
+            warnf(config, "Failed to open %s!\n", nextarg);
+          else {
+            config->errors = newfile;
+            config->errors_fopened = TRUE;
+          }
         }
         else
           config->errors = stdout;
@@ -1742,8 +1786,12 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 
           if(curlx_strequal("-", nextarg))
             file = stdin;
-          else
+          else {
             file = fopen(nextarg, "rb");
+            if(!file)
+              warnf(config, "Couldn't read data from file \"%s\", this makes "
+                    "an empty POST.\n", nextarg);
+          }
 
           if(subletter == 'b') /* forced binary */
             postdata = file2memory(file, &config->postfieldsize);
@@ -1863,12 +1911,13 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     case 'F':
       /* "form data" simulation, this is a little advanced so lets do our best
          to sort this out slowly and carefully */
-      if(formparse(nextarg,
+      if(formparse(config,
+                   nextarg,
                    &config->httppost,
                    &config->last_post,
                    subletter=='s')) /* 's' means literal string */
         return PARAM_BAD_USE;
-      if(SetHTTPrequest(HTTPREQ_POST, &config->httpreq))
+      if(SetHTTPrequest(config, HTTPREQ_POST, &config->httpreq))
         return PARAM_BAD_USE;
       break;
 
@@ -1904,13 +1953,13 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
          (config->conf&(CONF_HEADER|CONF_NOBODY)) ) {
         /* one of them weren't set, set both */
         config->conf |= (CONF_HEADER|CONF_NOBODY);
-        if(SetHTTPrequest(HTTPREQ_HEAD, &config->httpreq))
+        if(SetHTTPrequest(config, HTTPREQ_HEAD, &config->httpreq))
           return PARAM_BAD_USE;
       }
       else {
         /* both were set, clear both */
         config->conf &= ~(CONF_HEADER|CONF_NOBODY);
-        if(SetHTTPrequest(HTTPREQ_GET, &config->httpreq))
+        if(SetHTTPrequest(config, HTTPREQ_GET, &config->httpreq))
           return PARAM_BAD_USE;
       }
       break;
@@ -1943,8 +1992,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       hugehelp();
       return PARAM_HELP_REQUESTED;
 #else
-      fprintf(stderr,
-              "curl: built-in manual was disabled at build-time!\n");
+      warnf(config,
+            "built-in manual was disabled at build-time!\n");
       return PARAM_OPTION_UNKNOWN;
 #endif
     case 'n':
@@ -2157,6 +2206,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         else
           file = fopen(nextarg, "r");
         config->writeout = file2string(file);
+        if(!config->writeout)
+          warnf(config, "Failed to read %s", file);
         if(file && (file != stdin))
           fclose(file);
       }
@@ -2212,11 +2263,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         if(-1 == stat(nextarg, &statbuf)) {
           /* failed, remove time condition */
           config->timecond = CURL_TIMECOND_NONE;
-          if(!(config->conf & CONF_MUTE))
-            fprintf(stderr,
-                    "Warning: Illegal date format for -z/--timecond and not "
-                    "a file name.\n"
-                    "         See curl_getdate(3) for valid date syntax.\n");
+          warnf(config,
+                "Illegal date format for -z/--timecond (and not "
+                "a file name). Disabling time condition. "
+                "See curl_getdate(3) for valid date syntax.\n");
         }
         else {
           /* pull the time out from the file */
@@ -2429,8 +2479,8 @@ static void parseconfig(const char *filename,
         }
         if(PARAM_HELP_REQUESTED != res) {
           const char *reason = param2text(res);
-          fprintf(stderr, "%s:%d: warning: '%s' %s\n",
-                  filename, lineno, option, reason);
+          warnf(config, "%s:%d: warning: '%s' %s\n",
+                filename, lineno, option, reason);
         }
       }
 
@@ -2493,8 +2543,10 @@ static int my_fwrite(void *buffer, size_t sz, size_t nmemb, void *stream)
   if(out && !out->stream) {
     /* open file for writing */
     out->stream=fopen(out->filename, "wb");
-    if(!out->stream)
+    if(!out->stream) {
+      warnf(config, "Failed to create the file %s\n", out->filename);
       return -1; /* failure */
+    }
   }
 
   if(config->recvpersecond) {
@@ -3241,14 +3293,15 @@ operate(struct Configurable *config, int argc, char *argv[])
       httpgetfields = strdup(config->postfields);
       free(config->postfields);
       config->postfields = NULL;
-      if(SetHTTPrequest((config->conf&CONF_NOBODY?HTTPREQ_HEAD:HTTPREQ_GET),
+      if(SetHTTPrequest(config,
+                        (config->conf&CONF_NOBODY?HTTPREQ_HEAD:HTTPREQ_GET),
                         &config->httpreq)) {
         free(httpgetfields);
         return PARAM_BAD_USE;
       }
     }
     else {
-      if(SetHTTPrequest(HTTPREQ_SIMPLEPOST, &config->httpreq))
+      if(SetHTTPrequest(config, HTTPREQ_SIMPLEPOST, &config->httpreq))
         return PARAM_BAD_USE;
     }
   }
@@ -3415,7 +3468,7 @@ operate(struct Configurable *config, int argc, char *argv[])
             free(storefile);
             if(!outfile) {
               /* bad globbing */
-              fprintf(stderr, "bad output glob!\n");
+              warnf(config, "bad output glob!\n");
               free(url);
               res = CURLE_FAILED_INIT;
               break;
@@ -3909,19 +3962,18 @@ operate(struct Configurable *config, int argc, char *argv[])
             }
 
             if(retry) {
-              if(!(config->conf&CONF_MUTE)) {
-                static const char * const m[]={NULL,
-                                              "timeout",
-                                              "HTTP error",
-                                              "FTP error"
-                };
-                fprintf(stderr, "Transient problem: %s\n"
-                        "Will retry in %ld seconds. "
-                        "%ld retries left.\n",
-                        m[retry],
-                        retry_sleep/1000,
-                        retry_numretries);
-              }
+              static const char * const m[]={NULL,
+                                             "timeout",
+                                             "HTTP error",
+                                             "FTP error"
+              };
+              warnf(config, "Transient problem: %s "
+                    "Will retry in %ld seconds. "
+                    "%ld retries left.\n",
+                    m[retry],
+                    retry_sleep/1000,
+                    retry_numretries);
+
               go_sleep(retry_sleep);
               retry_numretries--;
               if(!config->retry_delay) {
@@ -4134,6 +4186,8 @@ int main(int argc, char *argv[])
   int res;
   struct Configurable config;
   memset(&config, 0, sizeof(struct Configurable));
+
+  config.errors = stderr; /* default errors to stderr */
 
   checkfds();
 
