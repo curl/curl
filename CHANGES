@@ -7,6 +7,32 @@
                                   Changelog
 
 
+Daniel (15 August 2005)
+- Added more verbose "warning" messages to the curl client for cases where it
+  fails to open/read files etc to help users diagnose why it doesn't do what
+  you'd expect it to. Converted lots of old messages to use the new generic
+  function I wrote for this purpose.
+
+Daniel (13 August 2005)
+- James Bursa identified a libcurl HTTP bug and a good way to repeat it. If a
+  site responds with bad HTTP response that doesn't contain any header at all,
+  only a response body, and the write callback returns 0 to abort the
+  transfer, it didn't have any real effect but the write callback would be
+  called once more anyway.
+
+Daniel (12 August 2005)
+- Based on Richard Clayton's reports, I found out that using curl -d @filename
+  when 'filename' was not possible to access made curl use a GET request
+  instead.
+
+- The time condition illegal syntax warning is now inhibited if -s is used.
+
+Daniel (10 August 2005)
+- Mario Schroeder found out that one of the debug callbacks calls that regards
+  SSL data with the CURLINFO_TEXT type claimed that the data was one byte
+  larger than it actually is, thus falsely telling the application that the
+  terminating zero was part of the data.
+
 Daniel (9 August 2005)
 - Christopher R. Palmer fixed the offsets used for date parsings when the time
   zone name of a daylight savings time was used. For example, PDT vs PDS. This
