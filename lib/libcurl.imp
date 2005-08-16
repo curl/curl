@@ -23,6 +23,7 @@
 	curl_msprintf,
 	curl_msnprintf,
 	curl_mvfprintf,
+	curl_mvsnprintf,
 	curl_strequal,
 	curl_strnequal,
 	curl_easy_duphandle,
