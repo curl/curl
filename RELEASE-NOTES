@@ -18,6 +18,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o several client problems with files, such as doing -d @file when the file
+   isn't readable now gets a warning displayed
  o write callback abort didn't always "take"
  o the curl -z "bad syntax" warning is now hidden when -s is used
  o curl -d @nonexisting no longer makes a GET
@@ -45,7 +47,7 @@ This release includes the following bugfixes:
 
 Other curl-related news since the previous public release:
 
- o cURLpp 0.5.1 was released at http://rrette.com/curlpp.html
+ o cURLpp 0.5.2 was released at http://rrette.com/curlpp.html
  o Rexx/CURL 1.3 was released at http://rexxcurl.sf.net/
  o http://curl.miscellaneousmirror.org is a new German curl mirror
  o LuaCURL by Alexander Marinov at http://luacurl.luaforge.net/
