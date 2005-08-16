@@ -49,4 +49,5 @@ EXPORTS
 	curl_multi_strerror @ 41;
 	curl_share_strerror @ 42;
 	curl_easy_reset @ 43;
+	curl_mvsnprintf @ 44 ;
 
