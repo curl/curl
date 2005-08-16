@@ -381,7 +381,7 @@ static void warnf(struct Configurable *config, const char *fmt, ...)
       if(len > (int)WARN_TEXTWIDTH) {
         int cut = WARN_TEXTWIDTH-1;
 
-        while(!isspace(ptr[cut]) && cut) {
+        while(!isspace((int)ptr[cut]) && cut) {
           cut--;
         }
 
