@@ -18,6 +18,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o handles expiry times in cookie files that go beyond 32 bits in size
  o several client problems with files, such as doing -d @file when the file
    isn't readable now gets a warning displayed
  o write callback abort didn't always "take"
