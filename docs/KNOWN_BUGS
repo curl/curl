@@ -3,6 +3,10 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+23. We don't support SOCKS for IPv6. We don't support FTPS over a SOCKS proxy.
+  We don't have any test cases for SOCKS proxy. We probably have even more
+  bugs and lack of features when a SOCKS proxy is used.
+
 22. Sending files to a FTP server using curl on VMS, might lead to curl
   complaining on "unaligned file size" on completion. The problem is related
   to VMS file structures and the perceived file sizes stat() returns. A
