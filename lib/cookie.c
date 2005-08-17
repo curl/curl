@@ -343,7 +343,7 @@ Curl_cookie_add(struct SessionHandle *data,
               badcookie = TRUE;
               break;
             }
-            co->expires = (long)curl_getdate(what, &now);
+            co->expires = curl_getdate(what, &now);
           }
           else if(!co->name) {
             co->name = strdup(name);
