@@ -227,15 +227,23 @@ CURLcode Curl_close(struct SessionHandle *data)
   Curl_safefree(data->state.headerbuff);
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
-  if(data->change.cookielist) /* clean up list if any */
-    curl_slist_free_all(data->change.cookielist);
-
   Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
   if(data->set.cookiejar) {
+    if(data->change.cookielist)
+      /* If there is a list of cookie files to read, do it first so that
+         we have all the told files read before we write the new jar */
+      Curl_cookie_loadfiles(data);
+
     /* we have a "destination" for all the cookies to get dumped to */
     if(Curl_cookie_output(data->cookies, data->set.cookiejar))
       infof(data, "WARNING: failed to save cookies in %s\n",
             data->set.cookiejar);
+  }
+  else {
+    if(data->change.cookielist)
+      /* since nothing is written, we can just free the list of cookie file
+         names */
+      curl_slist_free_all(data->change.cookielist); /* clean up list */
   }
 
   if( !data->share || (data->cookies != data->share->cookies) ) {
@@ -2951,44 +2959,44 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       char proxypasswd[MAX_CURL_PASSWORD_LENGTH];
 
       if(2 == sscanf(proxyptr,
-		     "%" MAX_CURL_USER_LENGTH_TXT"[^:]:"
-		     "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^@]",
-		     proxyuser, proxypasswd)) {
-	CURLcode res = CURLE_OK;
+                     "%" MAX_CURL_USER_LENGTH_TXT"[^:]:"
+                     "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^@]",
+                     proxyuser, proxypasswd)) {
+        CURLcode res = CURLE_OK;
 
-	/* found user and password, rip them out.  note that we are
-	   unescaping them, as there is otherwise no way to have a
-	   username or password with reserved characters like ':' in
-	   them. */
-	Curl_safefree(conn->proxyuser);
-	conn->proxyuser = curl_unescape(proxyuser,0);
+        /* found user and password, rip them out.  note that we are
+           unescaping them, as there is otherwise no way to have a
+           username or password with reserved characters like ':' in
+           them. */
+        Curl_safefree(conn->proxyuser);
+        conn->proxyuser = curl_unescape(proxyuser,0);
 
-	if(!conn->proxyuser)
-	  res = CURLE_OUT_OF_MEMORY;
-	else {
-	  Curl_safefree(conn->proxypasswd);
-	  conn->proxypasswd = curl_unescape(proxypasswd,0);
+        if(!conn->proxyuser)
+          res = CURLE_OUT_OF_MEMORY;
+        else {
+          Curl_safefree(conn->proxypasswd);
+          conn->proxypasswd = curl_unescape(proxypasswd,0);
 
-	  if(!conn->proxypasswd)
-	    res = CURLE_OUT_OF_MEMORY;
-	}
+          if(!conn->proxypasswd)
+            res = CURLE_OUT_OF_MEMORY;
+        }
 
-	if(CURLE_OK == res) {
-	  conn->bits.proxy_user_passwd = TRUE; /* enable it */
-	  atsign = strdup(atsign+1); /* the right side of the @-letter */
+        if(CURLE_OK == res) {
+          conn->bits.proxy_user_passwd = TRUE; /* enable it */
+          atsign = strdup(atsign+1); /* the right side of the @-letter */
 
-	  if(atsign) {
-	    free(proxydup); /* free the former proxy string */
-	    proxydup = proxyptr = atsign; /* now use this instead */
-	  }
-	  else
-	    res = CURLE_OUT_OF_MEMORY;
-	}
+          if(atsign) {
+            free(proxydup); /* free the former proxy string */
+            proxydup = proxyptr = atsign; /* now use this instead */
+          }
+          else
+            res = CURLE_OUT_OF_MEMORY;
+        }
 
-	if(res) {
-	  free(proxydup); /* free the allocated proxy string */
-	  return res;
-	}
+        if(res) {
+          free(proxydup); /* free the allocated proxy string */
+          return res;
+        }
       }
     }
 

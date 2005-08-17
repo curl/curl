@@ -94,6 +94,8 @@ Example set of cookies:
 #include "strtok.h"
 #include "sendf.h"
 #include "memory.h"
+#include "share.h"
+#include "strtoofft.h"
 
 /* The last #include file should be: */
 #ifdef CURLDEBUG
@@ -131,6 +133,27 @@ static bool tailmatch(const char *little, const char *bigone)
     return FALSE;
 
   return (bool)strequal(little, bigone+biglen-littlelen);
+}
+
+/*
+ * Load cookies from all given cookie files (CURLOPT_COOKIEFILE).
+ */
+void Curl_cookie_loadfiles(struct SessionHandle *data)
+{
+  struct curl_slist *list = data->change.cookielist;
+  if(list) {
+    Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
+    while(list) {
+      data->cookies = Curl_cookie_init(data,
+                                       list->data,
+                                       data->cookies,
+                                       data->set.cookiesession);
+      list = list->next;
+    }
+    Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
+    curl_slist_free_all(data->change.cookielist); /* clean up list */
+    data->change.cookielist = NULL; /* don't do this again! */
+  }
 }
 
 /****************************************************************************
@@ -473,7 +496,7 @@ Curl_cookie_add(struct SessionHandle *data,
         co->secure = (bool)strequal(ptr, "TRUE");
         break;
       case 4:
-        co->expires = atoi(ptr);
+        co->expires = curlx_strtoofft(ptr, NULL, 10);
         break;
       case 5:
         co->name = strdup(ptr);
@@ -832,7 +855,7 @@ static char *get_netscape_format(const struct Cookie *co)
      "%s\t"   /* tailmatch */
      "%s\t"   /* path */
      "%s\t"   /* secure */
-     "%u\t"   /* expires */
+     "%" FORMAT_OFF_T "\t"   /* expires */
      "%s\t"   /* name */
      "%s",    /* value */
      /* Make sure all domains are prefixed with a dot if they allow
@@ -842,7 +865,7 @@ static char *get_netscape_format(const struct Cookie *co)
      co->tailmatch?"TRUE":"FALSE",
      co->path?co->path:"/",
      co->secure?"TRUE":"FALSE",
-     (unsigned int)co->expires,
+     co->expires,
      co->name,
      co->value?co->value:"");
 }

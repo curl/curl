@@ -1641,25 +1641,9 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
   data->state.authhost.want = data->set.httpauth;
   data->state.authproxy.want = data->set.proxyauth;
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
-  /* If there was a list of cookie files to read and we haven't done it before,
-     do it now! */
-  if(data->change.cookielist) {
-    struct curl_slist *list = data->change.cookielist;
-    Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
-    while(list) {
-      data->cookies = Curl_cookie_init(data,
-                                       list->data,
-                                       data->cookies,
-                                       data->set.cookiesession);
-      list = list->next;
-    }
-    Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
-    curl_slist_free_all(data->change.cookielist); /* clean up list */
-    data->change.cookielist = NULL; /* don't do this again! */
-  }
-#endif   /* CURL_DISABLE_HTTP */
-
+  /* If there is a list of cookie files to read, do it now! */
+  if(data->change.cookielist)
+    Curl_cookie_loadfiles(data);
 
  /* Allow data->set.use_port to set which port to use. This needs to be
   * disabled for example when we follow Location: headers to URLs using

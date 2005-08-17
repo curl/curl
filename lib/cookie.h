@@ -38,7 +38,7 @@ struct Cookie {
   char *value;       /* name = <this> */
   char *path;         /* path = <this> */
   char *domain;      /* domain = <this> */
-  long expires;    /* expires = <this> */
+  curl_off_t expires;  /* expires = <this> */
   char *expirestr;   /* the plain text version */
   bool tailmatch;    /* weather we do tail-matchning of the domain name */
 
@@ -94,8 +94,10 @@ int Curl_cookie_output(struct CookieInfo *, char *);
 
 #if defined(CURL_DISABLE_HTTP) || defined(CURL_DISABLE_COOKIES)
 #define Curl_cookie_list(x) NULL
+#define Curl_cookie_loadfiles(x)
 #else
 struct curl_slist *Curl_cookie_list(struct SessionHandle *data);
+void Curl_cookie_loadfiles(struct SessionHandle *data);
 #endif
 
 #endif

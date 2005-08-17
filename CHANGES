@@ -7,6 +7,17 @@
                                   Changelog
 
 
+Daniel (17 August 2005)
+- Jeff Pohlmeyer found out that if you ask libcurl to load a cookiefile (with
+  CURLOPT_COOKIEFILE), add a cookie (with CURLOPT_COOKIELIST), tell it to
+  write the result to a given cookie jar and then never actually call
+  curl_easy_perform() - the given file(s) to read was never read but the
+  output file was written and thus it caused a "funny" result.
+
+- While doing some tests for the bug above, I noticed that Firefox generates
+  large numbers (for the expire time) in the cookies.txt file and libcurl
+  didn't treat them properly. Now it does.
+
 Daniel (15 August 2005)
 - Added more verbose "warning" messages to the curl client for cases where it
   fails to open/read files etc to help users diagnose why it doesn't do what
