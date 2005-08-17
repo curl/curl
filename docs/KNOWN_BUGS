@@ -22,14 +22,6 @@ may have been fixed since this was written!
      specification).  The receiver will convert the data from the standard
      form to his own internal form.
 
-20. valgrind errors occur too often when 'make test' is used. It is because
-  too many third-party libs and tools have problems. When curl is built
-  without --disable-shared, the testing is done with a front-end script which
-  makes the valgrind testing include (ba)sh as well and that often causes
-  valgrind errors. Either we improve the valgrind error scanner a lot to
-  better identify (lib)curl errors only, or we disable valgrind checking by
-  default.
-
 19. FTP 3rd party transfers with the multi interface doesn't work. Test:
   define CURL_MULTIEASY, rebuild curl, run test case 230 - 232.
 
