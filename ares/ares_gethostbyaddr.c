@@ -68,7 +68,7 @@ void ares_gethostbyaddr(ares_channel channel, const void *addr, int addrlen,
       return;
     }
 
-  if ((family == AF_INET && addrlen != sizeof(struct in_addr)) || 
+  if ((family == AF_INET && addrlen != sizeof(struct in_addr)) ||
       (family == AF_INET6 && addrlen != sizeof(struct in6_addr)))
     {
       callback(arg, ARES_ENOTIMP, NULL);
@@ -107,7 +107,7 @@ static void next_lookup(struct addr_query *aquery)
       switch (*p)
         {
         case 'b':
-	  if (aquery->family == AF_INET)
+          if (aquery->family == AF_INET)
             {
               addr = ntohl(aquery->addr.addr4.s_addr);
               a1 = (int)((addr >> 24) & 0xff);

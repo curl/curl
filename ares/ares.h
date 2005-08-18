@@ -67,7 +67,7 @@ extern "C" {
 #define ARES_EBADSTR            17
 
 /* ares_getnameinfo error codes */
-#define ARES_EBADFLAGS		18
+#define ARES_EBADFLAGS          18
 
 /* Flag values */
 #define ARES_FLAG_USEVC         (1 << 0)
@@ -91,22 +91,22 @@ extern "C" {
 #define ARES_OPT_LOOKUPS        (1 << 8)
 
 /* Nameinfo flag values */
-#define ARES_NI_NOFQDN			(1 << 0)
-#define ARES_NI_NUMERICHOST		(1 << 1)
-#define ARES_NI_NAMEREQD		(1 << 2)
-#define ARES_NI_NUMERICSERV		(1 << 3)
-#define ARES_NI_DGRAM			(1 << 4)
-#define ARES_NI_TCP			0
-#define ARES_NI_UDP			ARES_NI_DGRAM
-#define ARES_NI_SCTP			(1 << 5)
-#define ARES_NI_DCCP			(1 << 6)
-#define ARES_NI_NUMERICSCOPE		(1 << 7)
-#define ARES_NI_LOOKUPHOST		(1 << 8)
-#define ARES_NI_LOOKUPSERVICE		(1 << 9)
+#define ARES_NI_NOFQDN                  (1 << 0)
+#define ARES_NI_NUMERICHOST             (1 << 1)
+#define ARES_NI_NAMEREQD                (1 << 2)
+#define ARES_NI_NUMERICSERV             (1 << 3)
+#define ARES_NI_DGRAM                   (1 << 4)
+#define ARES_NI_TCP                     0
+#define ARES_NI_UDP                     ARES_NI_DGRAM
+#define ARES_NI_SCTP                    (1 << 5)
+#define ARES_NI_DCCP                    (1 << 6)
+#define ARES_NI_NUMERICSCOPE            (1 << 7)
+#define ARES_NI_LOOKUPHOST              (1 << 8)
+#define ARES_NI_LOOKUPSERVICE           (1 << 9)
 /* Reserved for future use */
-#define ARES_NI_IDN			(1 << 10)
-#define ARES_NI_ALLOW_UNASSIGNED	(1 << 11)
-#define ARES_NI_USE_STD3_ASCII_RULES 	(1 << 12)
+#define ARES_NI_IDN                     (1 << 10)
+#define ARES_NI_ALLOW_UNASSIGNED        (1 << 11)
+#define ARES_NI_USE_STD3_ASCII_RULES    (1 << 12)
 
 struct ares_options {
   int flags;
@@ -150,7 +150,7 @@ void ares_gethostbyname(ares_channel channel, const char *name, int family,
 void ares_gethostbyaddr(ares_channel channel, const void *addr, int addrlen,
                         int family, ares_host_callback callback, void *arg);
 void ares_getnameinfo(ares_channel channel, const struct sockaddr *sa,
-                      socklen_t salen, int flags, ares_nameinfo_callback callback, 
+                      socklen_t salen, int flags, ares_nameinfo_callback callback,
                       void *arg);
 int ares_fds(ares_channel channel, fd_set *read_fds, fd_set *write_fds);
 struct timeval *ares_timeout(ares_channel channel, struct timeval *maxtv,

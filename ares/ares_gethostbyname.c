@@ -124,10 +124,10 @@ static void next_lookup(struct host_query *hquery)
         case 'b':
           /* DNS lookup */
           hquery->remaining_lookups = p + 1;
-	  if (hquery->family == AF_INET6)
-	    ares_search(hquery->channel, hquery->name, C_IN, T_AAAA, host_callback,
-	                hquery);
-	  else
+          if (hquery->family == AF_INET6)
+            ares_search(hquery->channel, hquery->name, C_IN, T_AAAA, host_callback,
+                        hquery);
+          else
             ares_search(hquery->channel, hquery->name, C_IN, T_A, host_callback,
                         hquery);
           return;
@@ -174,7 +174,7 @@ static void host_callback(void *arg, int status, unsigned char *abuf, int alen)
       hquery->family = AF_INET;
       ares_search(hquery->channel, hquery->name, C_IN, T_A, host_callback,
                   hquery);
-    }      
+    }
   else if (status == ARES_EDESTRUCTION)
     end_hquery(hquery, status, NULL);
   else
@@ -342,13 +342,13 @@ static int get_address_index(struct in_addr *addr, struct apattern *sortlist,
         continue;
       if (sortlist[i].type == PATTERN_MASK)
         {
-          if ((addr->s_addr & sortlist[i].mask.addr.addr4.s_addr) 
+          if ((addr->s_addr & sortlist[i].mask.addr.addr4.s_addr)
               == sortlist[i].addr.addr4.s_addr)
             break;
         }
       else
         {
-          if (!ares_bitncmp(&addr->s_addr, &sortlist[i].addr.addr4.s_addr, 
+          if (!ares_bitncmp(&addr->s_addr, &sortlist[i].addr.addr4.s_addr,
                             sortlist[i].mask.bits))
             break;
         }
