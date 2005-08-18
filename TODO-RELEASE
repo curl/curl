@@ -5,8 +5,6 @@ To get fixed in 7.14.1 (planned release: August 2005)
 
 60 - CONNECT 407 responses that kills the connection
 
-61 - Harshal Pradhan's Use-after-free with libcurl+ares on windows bug
-
 62 - The sending big POST data to HTTPS bug
 
 63 - 
