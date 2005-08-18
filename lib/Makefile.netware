@@ -23,7 +23,7 @@ OPENSSL_PATH = ../../openssl-0.9.8
 endif
 
 ifndef INSTDIR
-INSTDIR	= ../curl-$(LIBCURL_VERSION_STR)-bin-nw
+INSTDIR	= ..$(DS)curl-$(LIBCURL_VERSION_STR)-bin-nw
 endif
 
 # Edit the vars below to change NLM target settings.
@@ -155,7 +155,10 @@ endif
 
 ifeq ($(findstring linux,$(OSTYPE)),linux)
 DL	= '
+DS	= /
 #-include $(NDKBASE)/nlmconv/ncpfs.inc
+else
+DS	= \\
 endif
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
@@ -192,6 +195,9 @@ install: $(INSTDIR) all
 	@$(CP) ../COPYING $(INSTDIR)
 	@$(CP) ../README $(INSTDIR)
 	@$(CP) ../RELEASE-NOTES $(INSTDIR)
+ifdef WITH_SSL
+	@$(CP) ca-bundle.crt $(INSTDIR)
+endif
 
 clean:
 	-$(RM) config.h ca-bundle.h
