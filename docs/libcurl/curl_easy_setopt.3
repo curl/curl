@@ -640,6 +640,9 @@ dumped to a file.
 Given an empty or non-existing file or by passing the empty string (""), this
 option will enable cookies for this curl handle, making it understand and
 parse received cookies and then use matching cookies in future request.
+
+If you use this option multiple times, you just add more files to read.
+Subsequent files will add more cookies.
 .IP CURLOPT_COOKIEJAR
 Pass a file name as char *, zero terminated. This will make libcurl write all
 internally known cookies to the specified file when \fIcurl_easy_cleanup(3)\fP
