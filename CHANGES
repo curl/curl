@@ -7,6 +7,16 @@
                                   Changelog
 
 
+Daniel (19 August 2005)
+- Norbert Novotny had problems with FTPS and he helped me work out a patch
+  that made curl run fine in his end. The key was to make sure we do the
+  SSL/TLS negotiation immediately after the TCP connect is done and not after
+  a few other commands have been sent like we did previously. I don't consider
+  this change necessary to obey the standards, I think this server is pickier
+  than what the specs allow it to be, but I can't see how this modified
+  libcurl code can add any problems to those who are interpreting the
+  standards more liberally.
+
 Daniel (17 August 2005)
 - Jeff Pohlmeyer found out that if you ask libcurl to load a cookiefile (with
   CURLOPT_COOKIEFILE), add a cookie (with CURLOPT_COOKIELIST), tell it to

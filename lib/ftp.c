@@ -174,9 +174,13 @@ static bool isBadFtpString(const char *string)
  * to us. This function will sit and wait here until the server has
  * connected.
  *
+ * If FTP-SSL is used and SSL is requested for the data connection, this
+ * function will do that transport layer handshake too.
+ *
  */
 static CURLcode AllowServerConnect(struct connectdata *conn)
 {
+  CURLcode result;
   int timeout_ms;
   struct SessionHandle *data = conn->data;
   curl_socket_t sock = conn->sock[SECONDARYSOCKET];
@@ -229,6 +233,17 @@ static CURLcode AllowServerConnect(struct connectdata *conn)
       Curl_nonblock(s, TRUE); /* enable non-blocking */
     }
     break;
+  }
+
+  /* If PASV is used, this is is made elsewhere */
+  if(conn->ssl[SECONDARYSOCKET].use) {
+    /* since we only have a plaintext TCP connection here, we must now
+       do the TLS stuff */
+    infof(data, "Doing the SSL/TLS handshake on the data stream\n");
+    /* BLOCKING */
+    result = Curl_ssl_connect(conn, SECONDARYSOCKET);
+    if(result)
+      return result;
   }
 
   return CURLE_OK;
@@ -2017,16 +2032,6 @@ static CURLcode ftp_state_stor_resp(struct connectdata *conn,
       return result;
   }
 
-  if(conn->ssl[SECONDARYSOCKET].use) {
-    /* since we only have a plaintext TCP connection here, we must now
-       do the TLS stuff */
-    infof(data, "Doing the SSL/TLS handshake on the data stream\n");
-    /* BLOCKING */
-    result = Curl_ssl_connect(conn, SECONDARYSOCKET);
-    if(result)
-      return result;
-  }
-
   *(ftp->bytecountp)=0;
 
   /* When we know we're uploading a specified file, we can get the file
@@ -2123,15 +2128,6 @@ static CURLcode ftp_state_get_resp(struct connectdata *conn,
       /* BLOCKING */
       result = AllowServerConnect(conn);
       if( result )
-        return result;
-    }
-
-    if(conn->ssl[SECONDARYSOCKET].use) {
-      /* since we only have a plaintext TCP connection here, we must now
-         do the TLS stuff */
-      infof(data, "Doing the SSL/TLS handshake on the data stream\n");
-      result = Curl_ssl_connect(conn, SECONDARYSOCKET);
-      if(result)
         return result;
     }
 
@@ -3095,6 +3091,18 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
 
   if(!ftp->no_transfer && !conn->bits.no_body) {
     /* a transfer is about to take place */
+
+    if(conn->ssl[SECONDARYSOCKET].use &&
+       !data->set.ftp_use_port) {
+      /* PASV is used and we just got the data connection connected, then
+         it is time to handshake the secure stuff. */
+
+      infof(data, "Doing the SSL/TLS handshake on the data stream\n");
+      /* BLOCKING */
+      result = Curl_ssl_connect(conn, SECONDARYSOCKET);
+      if(result)
+        return result;
+    }
 
     if(data->set.upload) {
       NBFTPSENDF(conn, "TYPE %c", data->set.ftp_ascii?'A':'I');

@@ -7,10 +7,11 @@ Curl and libcurl 7.14.1
  Number of public functions in libcurl:    46
  Amount of public web site mirrors:        25
  Number of known libcurl bindings:         31
- Number of contributors:                   437
+ Number of contributors:                   447
 
 This release includes the following changes:
 
+ o negotiates data connection SSL earlier when doing FTPS with PASV
  o CURLOPT_COOKIELIST and CURLINFO_COOKIELIST
  o trailer support for chunked encoded data streams 
  o -x/CURL_PROXY strings may now contain user+password
@@ -60,6 +61,7 @@ advice from friends like these:
  John McGowan, Georg Wicherski, Andres Garcia, Eric Cooper, Todd Kulesza,
  Tupone Alfredo, Gisle Vanem, David Shaw, Andrew Bushnell, Dan Fandrich,
  Adrian Schuur, Diego Casorran, Peteris Krumins, Jon Grubbs, Christopher
- R. Palmer, Mario Schroeder, Richard Clayton, James Bursa, Jeff Pohlmeyer
+ R. Palmer, Mario Schroeder, Richard Clayton, James Bursa, Jeff Pohlmeyer,
+ Norbert Novotny
 
         Thanks! (and sorry if I forgot to mention someone)
