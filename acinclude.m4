@@ -758,7 +758,10 @@ AC_DEFUN([CURL_CC_DEBUG_OPTS],
          fi
 
          dnl -Wunreachable-code seems totally unreliable on my gcc 3.3.2 on
-         dnl on i686-Linux as it gives us heaps with false positives
+         dnl on i686-Linux as it gives us heaps with false positives.
+         dnl Also, on gcc 4.0.X it is totally unbearable and complains all
+         dnl over making it unusable for generic purposes. Let's not use it.
+
          if test "$gccnum" -ge "303"; then
            dnl gcc 3.3 and later
            WARN="$WARN -Wendif-labels -Wstrict-prototypes"
@@ -766,7 +769,7 @@ AC_DEFUN([CURL_CC_DEBUG_OPTS],
 
          if test "$gccnum" -ge "304"; then
            # try these on gcc 3.4
-           WARN="$WARN -Wunreachable-code -Wdeclaration-after-statement"
+           WARN="$WARN -Wdeclaration-after-statement"
          fi
 
          for flag in $CPPFLAGS; do
