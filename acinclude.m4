@@ -192,8 +192,7 @@ AC_DEFUN([TYPE_SOCKLEN_T],
 ])
 
 dnl Check for in_addr_t: it is used to receive the return code of inet_addr()
-dnl and a few other things. If not found, we set it to unsigned int, as even
-dnl 64-bit implementations use to set it to a 32-bit type.
+dnl and a few other things.
 AC_DEFUN([TYPE_IN_ADDR_T],
 [
    AC_CHECK_TYPE([in_addr_t], ,[
