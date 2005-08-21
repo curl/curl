@@ -327,6 +327,7 @@ static int get_iphlpapi_dns_info (char *ret_buf, size_t ret_size)
   size_t         ip_size = sizeof("255.255.255.255,")-1;
   size_t         left = ret_size;
   char          *ret = ret_buf;
+  HRESULT        res;
 
   if (!fi)
      return (0);
@@ -339,7 +340,8 @@ static int get_iphlpapi_dns_info (char *ret_buf, size_t ret_size)
   if (!GetNetworkParams)
      goto quit;
 
-  if ((*GetNetworkParams) (fi, &size) != ERROR_BUFFER_OVERFLOW)
+  res = (*GetNetworkParams) (fi, &size);
+  if ((res != ERROR_BUFFER_OVERFLOW) && (res != ERROR_SUCCESS))
      goto quit;
 
   fi = alloca (size);

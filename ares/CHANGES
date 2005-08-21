@@ -1,5 +1,10 @@
   Changelog for the c-ares project
 
+* August 21
+
+- Alfredo Tupone provided a fix for the Windows code in get_iphlpapi_dns_info()
+  when getting the DNS server etc.
+
 * June 19
 
 - Added some checks for the addrinfo structure.
