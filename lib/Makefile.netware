@@ -105,8 +105,6 @@ else
 endif
 endif
 
-LDLIBS	=
-
 NDK_ROOT = $(NDKBASE)/ndk
 SDK_CLIB = $(NDK_ROOT)/nwsdk
 SDK_LIBC = $(NDK_ROOT)/libc
@@ -116,17 +114,21 @@ INCLUDES = -I. -I../include
 
 ifdef WITH_ARES
 	INCLUDES += -I../ares
-	LIBCARES = ../ares/libcares.lib
-endif
-ifdef WITH_ZLIB
-	INCLUDES += -I$(ZLIB_PATH)
-	IMPORTS = @$(ZLIB_PATH)/nw/libz.imp
-	MODULES = libz.nlm
+	LDLIBS = ../ares/libcares.lib
 endif
 ifdef WITH_SSL
 	INCLUDES += -I$(OPENSSL_PATH)/outinc_nw_libc -I$(OPENSSL_PATH)/outinc_nw_libc/openssl
-	LIBSSL = $(OPENSSL_PATH)/out_nw_libc/crypto.lib $(OPENSSL_PATH)/out_nw_libc/ssl.lib
+	LDLIBS += $(OPENSSL_PATH)/out_nw_libc/crypto.lib $(OPENSSL_PATH)/out_nw_libc/ssl.lib
 	IMPORTS += GetProcessSwitchCount RunningProcess
+endif
+ifdef WITH_ZLIB
+	INCLUDES += -I$(ZLIB_PATH)
+ifdef LINK_STATIC
+	LDLIBS += $(ZLIB_PATH)/nw/libz.lib
+else
+	IMPORTS += @$(ZLIB_PATH)/nw/libz.imp
+	MODULES += libz.nlm
+endif
 endif
 
 ifeq ($(LIBARCH),LIBC)
@@ -164,7 +166,7 @@ endif
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
 
-OBJS	:= $(patsubst %.c,$(OBJDIR)/%.o,$(strip $(CSOURCES))) $(LIBCARES) $(LIBSSL)
+OBJS	:= $(patsubst %.c,$(OBJDIR)/%.o,$(strip $(CSOURCES))) $(LDLIBS)
 
 OBJL	= $(OBJS) $(OBJDIR)/nwlib.o
 
@@ -283,11 +285,8 @@ ifdef IMPORTS
 	@echo $(DL)import $(IMPORTS)$(DL) >> $@
 endif
 ifeq ($(LD),nlmconv)
-ifdef WITH_ARES
-	@echo $(DL)input $(LIBCARES)$(DL) >> $@
-endif
-ifdef WITH_SSL
-	@echo $(DL)input $(LIBSSL)$(DL) >> $@
+ifdef LDLIBS
+	@echo $(DL)input $(LDLIBS)$(DL) >> $@
 endif
 	@echo $(DL)input $(OBJL)$(DL) >> $@
 	@echo $(DL)input $(PRELUDE)$(DL) >> $@
