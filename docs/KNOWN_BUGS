@@ -3,6 +3,12 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+26. With libcurl built to use GnuTLS instead of OpenSSL, it fails to verify
+  the server's certificate with the use of a local CA cert bundle for servers
+  where the OpenSSL version of libcurl succeeds fine. This is possibly due to
+  a bug in libcurl. Details found in the posting as sent to the GnuTLS list:
+  http://lists.gnu.org/archive/html/help-gnutls/2005-08/msg00024.html
+
 25. When doing a CONNECT request with curl it doesn't properly handle if the
   proxy closes the connection within the authentication "negotiation phase".
   Like if you do HTTPS or similar over a proxy and you use perhaps
