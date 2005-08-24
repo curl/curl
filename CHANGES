@@ -8,6 +8,11 @@
 
 
 Daniel (24 August 2005)
+- (Trying hard to exclude emotions now.) valgrind version 3 suddenly renamed
+  the --logfile command line option to --log-file, and thus the test script
+  valgrind autodetection now has yet another version check to do and then it
+  alters the valgrind command line accordingly.
+
 - Fixed CA cert verification using GnuTLS with the default bundle, which
   previously failed due to GnuTLS not allowing x509 v1 CA certs by default.     
 

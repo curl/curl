@@ -19,6 +19,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o test suite works with valgrind 3
  o CA cert verification with GnuTLS builds
  o handles expiry times in cookie files that go beyond 32 bits in size
  o several client problems with files, such as doing -d @file when the file

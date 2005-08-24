@@ -90,6 +90,7 @@ my $memanalyze="./memanalyze.pl";
 
 my $stunnel = checkcmd("stunnel");
 my $valgrind = checkcmd("valgrind");
+my $valgrind_logfile="--logfile";
 my $start;
 
 my $valgrind_tool;
@@ -109,6 +110,15 @@ if($valgrind) {
         $valgrind=0;
     }
     close(C);
+
+    # valgrind 3 renamed the --logfile option to --log-file!!!
+    my $ver=`valgrind --version`;
+    # cut off all but digits and dots
+    $ver =~ s/[^0-9.]//g;
+
+    if($ver >= 3) {
+        $valgrind_logfile="--log-file";
+    }
 }
 
 my $gdb = checkcmd("gdb");
@@ -1251,7 +1261,7 @@ sub singletest {
     }
 
     if($valgrind) {
-        $CMDLINE = "valgrind ".$valgrind_tool."--leak-check=yes --num-callers=16 --logfile=log/valgrind$testnum $CMDLINE";
+        $CMDLINE = "valgrind ".$valgrind_tool."--leak-check=yes --num-callers=16 ${valgrind_logfile}=log/valgrind$testnum $CMDLINE";
     }
 
     $CMDLINE .= "$cmdargs >>$STDOUT 2>>$STDERR";
