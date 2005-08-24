@@ -356,6 +356,8 @@ struct Configurable {
   struct curl_slist *tp_postquote;
   struct curl_slist *tp_prequote;
   char *ftp_account; /* for ACCT */
+
+  bool ignorecl; /* --ignore-content-length */
 };
 
 #define WARN_PREFIX "Warning: "
@@ -514,6 +516,7 @@ static void help(void)
     " -G/--get           Send the -d data with a HTTP GET (H)",
     " -h/--help          This help text",
     " -H/--header <line> Custom header to pass to server (H)",
+    "    --ignore-content-length  Ignore the HTTP Content-Length header",
     " -i/--include       Include protocol headers in the output (H/F)",
     " -I/--head          Show document info only",
     " -j/--junk-session-cookies Ignore session cookies read from file (H)",
@@ -1309,6 +1312,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$m", "ftp-account", TRUE},
     {"$n", "proxy-anyauth", FALSE},
     {"$o", "trace-time", FALSE},
+    {"$p", "ignore-content-length", FALSE},
 
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
@@ -1701,6 +1705,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'o': /* --trace-time */
         config->tracetime ^= TRUE;
+        break;
+      case 'p': /* --ignore-content-length */
+        config->ignorecl ^= TRUE;
         break;
       }
       break;
@@ -3895,6 +3902,8 @@ operate(struct Configurable *config, int argc, char *argv[])
         curl_easy_setopt(curl, CURLOPT_SOURCE_POSTQUOTE, config->tp_postquote);
         curl_easy_setopt(curl, CURLOPT_SOURCE_QUOTE, config->tp_quote);
         curl_easy_setopt(curl, CURLOPT_FTP_ACCOUNT, config->ftp_account);
+
+        curl_easy_setopt(curl, CURLOPT_IGNORE_CONTENT_LENGTH, config->ignorecl);
 
         retry_numretries = config->req_retry;
 

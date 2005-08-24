@@ -2,8 +2,8 @@ Curl and libcurl 7.14.1
 
  Public curl release number:               89
  Releases counted from the very beginning: 116
- Available command line options:           107
- Available curl_easy_setopt() options:     122
+ Available command line options:           108
+ Available curl_easy_setopt() options:     123
  Number of public functions in libcurl:    46
  Amount of public web site mirrors:        25
  Number of known libcurl bindings:         31
@@ -11,6 +11,7 @@ Curl and libcurl 7.14.1
 
 This release includes the following changes:
 
+ o --ignore-content-length and CURLOPT_IGNORE_CONTENT_LENGTH added
  o negotiates data connection SSL earlier when doing FTPS with PASV
  o CURLOPT_COOKIELIST and CURLINFO_COOKIELIST
  o trailer support for chunked encoded data streams 
@@ -64,6 +65,6 @@ advice from friends like these:
  Tupone Alfredo, Gisle Vanem, David Shaw, Andrew Bushnell, Dan Fandrich,
  Adrian Schuur, Diego Casorran, Peteris Krumins, Jon Grubbs, Christopher
  R. Palmer, Mario Schroeder, Richard Clayton, James Bursa, Jeff Pohlmeyer,
- Norbert Novotny
+ Norbert Novotny, Toby Peterson
 
         Thanks! (and sorry if I forgot to mention someone)

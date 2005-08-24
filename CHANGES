@@ -8,6 +8,14 @@
 
 
 Daniel (24 August 2005)
+- Toby Peterson added CURLOPT_IGNORE_CONTENT_LENGTH to the library, accessible
+  from the command line tool with --ignore-content-length. This will make it
+  easier to download files from Apache 1.x (and similar) servers that are
+  still having problems serving files larger than 2 or 4 GB. When this option
+  is enabled, curl will simply have to wait for the server to close the
+  connection to signal end of transfer. I wrote test case 269 that runs a
+  simple test that this works.
+
 - (Trying hard to exclude emotions now.) valgrind version 3 suddenly renamed
   the --logfile command line option to --log-file, and thus the test script
   valgrind autodetection now has yet another version check to do and then it

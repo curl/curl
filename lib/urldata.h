@@ -1068,6 +1068,7 @@ struct UserDefined {
   bool global_dns_cache; /* subject for future removal */
   bool tcp_nodelay;      /* whether to enable TCP_NODELAY or not */
 
+  bool ignorecl;         /* ignore content length */
 };
 
 /*

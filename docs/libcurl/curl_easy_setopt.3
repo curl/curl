@@ -687,6 +687,11 @@ it thinks fit.
 Enforce HTTP 1.0 requests.
 .IP CURL_HTTP_VERSION_1_1
 Enforce HTTP 1.1 requests.
+.IP CURLOPT_IGNORE_CONTENT_LENGTH
+Ignore the Content-Length header. This is useful for Apache 1.x which will
+report incorrect content length for files over 2 gigabytes. If this option
+is used, curl will not be able to accurately report progress, and will
+simply stop the download when the server ends the connection.
 .RE
 .SH FTP OPTIONS
 .IP CURLOPT_FTPPORT

@@ -893,6 +893,9 @@ typedef enum {
   /* feed cookies into cookie engine */
   CINIT(COOKIELIST, OBJECTPOINT, 135),
 
+  /* ignore Content-Length */
+  CINIT(IGNORE_CONTENT_LENGTH, LONG, 136),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

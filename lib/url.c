@@ -1443,6 +1443,10 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.ftp_account = va_arg(param, char *);
     break;
 
+  case CURLOPT_IGNORE_CONTENT_LENGTH:
+    data->set.ignorecl = va_arg(param, long)?TRUE:FALSE;
+    break;
+
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_FAILED_INIT; /* correct this */
