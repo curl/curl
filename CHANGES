@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel (24 August 2005)
+- Fixed CA cert verification using GnuTLS with the default bundle, which
+  previously failed due to GnuTLS not allowing x509 v1 CA certs by default.     
+
 Daniel (19 August 2005)
 - Norbert Novotny had problems with FTPS and he helped me work out a patch
   that made curl run fine in his end. The key was to make sure we do the
