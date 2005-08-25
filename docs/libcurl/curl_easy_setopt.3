@@ -284,15 +284,16 @@ be prefixed with [protocol]:// since any such prefix will be ignored. The
 proxy's port number may optionally be specified with the separate option
 \fICURLOPT_PROXYPORT\fP.
 
-\fBNOTE:\fP when you tell the library to use an HTTP proxy, libcurl will
-transparently convert operations to HTTP even if you specify an FTP URL
-etc. This may have an impact on what other features of the library you can
-use, such as \fICURLOPT_QUOTE\fP and similar FTP specifics that don't work
-unless you tunnel through the HTTP proxy. Such tunneling is activated with
+When you tell the library to use an HTTP proxy, libcurl will transparently
+convert operations to HTTP even if you specify an FTP URL etc. This may have
+an impact on what other features of the library you can use, such as
+\fICURLOPT_QUOTE\fP and similar FTP specifics that don't work unless you
+tunnel through the HTTP proxy. Such tunneling is activated with
 \fICURLOPT_HTTPPROXYTUNNEL\fP.
 
-\fBNOTE2:\fP libcurl respects the environment variables \fBhttp_proxy\fP,
-\fBftp_proxy\fP, \fBall_proxy\fP etc, if any of those is set.
+libcurl respects the environment variables \fBhttp_proxy\fP, \fBftp_proxy\fP,
+\fBall_proxy\fP etc, if any of those is set. The \fICURLOPT_PROXY\fP option
+does however override any possibly set environment variables.
 
 Starting with 7.14.1, the proxy host string can be specified the exact same
 way as the proxy environment variables, include protocol prefix (http://) and
@@ -667,7 +668,7 @@ existing for this "session" only.
 Pass a char * to a cookie string. Cookie can be either in Netscape / Mozilla
 format or just regular HTTP-style header (Set-Cookie: ...) format. If cURL
 cookie engine was not enabled it will enable its cookie engine.  Passing a
-magic string \&"ALL" will erase all cookies known by cURL.
+magic string \&"ALL" will erase all cookies known by cURL. (Added in 7.14.1)
 .IP CURLOPT_HTTPGET
 Pass a long. If the long is non-zero, this forces the HTTP request to get back
 to GET. usable if a POST, HEAD, PUT or a custom request have been used
@@ -688,10 +689,11 @@ Enforce HTTP 1.0 requests.
 .IP CURL_HTTP_VERSION_1_1
 Enforce HTTP 1.1 requests.
 .IP CURLOPT_IGNORE_CONTENT_LENGTH
-Ignore the Content-Length header. This is useful for Apache 1.x which will
-report incorrect content length for files over 2 gigabytes. If this option
-is used, curl will not be able to accurately report progress, and will
-simply stop the download when the server ends the connection.
+Ignore the Content-Length header. This is useful for Apache 1.x (and similar
+servers) which will report incorrect content length for files over 2
+gigabytes. If this option is used, curl will not be able to accurately report
+progress, and will simply stop the download when the server ends the
+connection. (added in 7.14.1)
 .RE
 .SH FTP OPTIONS
 .IP CURLOPT_FTPPORT
