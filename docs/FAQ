@@ -1,4 +1,4 @@
-Updated: August 7, 2005 (http://curl.haxx.se/docs/faq.html)
+Updated: August 26, 2005 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -65,6 +65,7 @@ FAQ
   4.11 Why does my HTTP range requests return the full document?
   4.12 Why do I get "certificate verify failed" ?
   4.13 Why is curl -R on Windows one hour off?
+  4.14 Redirects work in browser but not with curl!
 
  5. libcurl Issues
   5.1 Is libcurl thread-safe?
@@ -397,6 +398,8 @@ FAQ
   -L/--location option. As in:
 
      curl -L http://redirector.com
+
+  Not all redirects are HTTP ones, see 4.14
 
   3.9 How do I use curl in my favorite programming language?
 
@@ -742,6 +745,21 @@ FAQ
   appears one hour off. This happens due to a flaw in how Windows stores and
   uses file modification times and it is not easily worked around. For details
   on this problem, read this: http://www.codeproject.com/datetime/dstbugs.asp
+
+  4.14 Redirects work in browser but not with curl!
+
+  curl supports HTTP redirects fine (see item 3.8). Browsers generally support
+  at least two other ways to perform directs that curl does not:
+
+    1 - Meta tags. You can write a HTML tag that will cause the browser to
+        redirect to another given URL after a certain time.
+
+    2 - Javascript. You can write a javascript program embeded in a HTML page
+        that redirects the browser to another given URL.
+
+  There is no way to make curl follow these redirects. You must either
+  manually figure out what the page is set to do, or you write a script that
+  parses the results and fetches the new URL.
 
 
 5. libcurl Issues
