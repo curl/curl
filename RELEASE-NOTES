@@ -21,6 +21,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o windows threaded resolver access violation with multi interface
  o test suite works with valgrind 3
  o CA cert verification with GnuTLS builds
  o handles expiry times in cookie files that go beyond 32 bits in size
@@ -66,6 +67,6 @@ advice from friends like these:
  Tupone Alfredo, Gisle Vanem, David Shaw, Andrew Bushnell, Dan Fandrich,
  Adrian Schuur, Diego Casorran, Peteris Krumins, Jon Grubbs, Christopher
  R. Palmer, Mario Schroeder, Richard Clayton, James Bursa, Jeff Pohlmeyer,
- Norbert Novotny, Toby Peterson, Simon Josefsson
+ Norbert Novotny, Toby Peterson, Simon Josefsson, Igor Polyakov
 
         Thanks! (and sorry if I forgot to mention someone)

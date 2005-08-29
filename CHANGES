@@ -8,6 +8,11 @@
 
 
 Daniel (29 August 2005)
+- Igor Polyakov fixed a rather nasty problem with the threaded name resolver
+  for Windows, that could lead to an Access Violation when the multi interface
+  was used due to an issue with how the resolver thread was and was not
+  terminated.
+
 - Simon Josefsson brought a patch that allows curl to get built to use GNU GSS
   instead of MIT/Heimdal for GSS capabilities.
 
@@ -18,7 +23,7 @@ Daniel (24 August 2005)
   still having problems serving files larger than 2 or 4 GB. When this option
   is enabled, curl will simply have to wait for the server to close the
   connection to signal end of transfer. I wrote test case 269 that runs a
-  simple test that this works.
+  simple test to verify that this works.
 
 - (Trying hard to exclude emotions now.) valgrind version 3 suddenly renamed
   the --logfile command line option to --log-file, and thus the test script
@@ -26,7 +31,8 @@ Daniel (24 August 2005)
   alters the valgrind command line accordingly.
 
 - Fixed CA cert verification using GnuTLS with the default bundle, which
-  previously failed due to GnuTLS not allowing x509 v1 CA certs by default.     
+  previously failed due to GnuTLS not allowing x509 v1 CA certs by default.
+  Ralph Mitchell reported.
 
 Daniel (19 August 2005)
 - Norbert Novotny had problems with FTPS and he helped me work out a patch

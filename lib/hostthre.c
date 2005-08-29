@@ -157,10 +157,118 @@ struct thread_data {
   FILE *stderr_file;
   HANDLE mutex_waiting;  /* marks that we are still waiting for a resolve */
   HANDLE event_resolved; /* marks that the thread obtained the information */
+  HANDLE event_thread_started; /* marks that the thread has initialized and
+                                  started */
+  HANDLE mutex_terminate; /* serializes access to flag_terminate */
+  HANDLE event_terminate; /* flag for thread to terminate instead of calling
+                             callbacks */
 #ifdef CURLRES_IPV6
   struct addrinfo hints;
 #endif
 };
+
+/* Data for synchronization between resolver thread and its parent */
+struct thread_sync_data {
+  HANDLE mutex_waiting;   /* thread_data.mutex_waiting duplicate */
+  HANDLE mutex_terminate; /* thread_data.mutex_terminate duplicate */
+  HANDLE event_terminate; /* thread_data.event_terminate duplicate */
+  char * hostname;        /* hostname to resolve, Curl_async.hostname
+                             duplicate */
+};
+
+/* Destroy resolver thread synchronization data */
+void destroy_thread_sync_data(struct thread_sync_data * tsd)
+{
+  if (tsd->hostname) {
+    free(tsd->hostname);
+    tsd->hostname = NULL;
+  }
+  if (tsd->event_terminate) {
+    CloseHandle(tsd->event_terminate);
+    tsd->event_terminate = NULL;
+  }
+  if (tsd->mutex_terminate) {
+    CloseHandle(tsd->mutex_terminate);
+    tsd->mutex_terminate = NULL;
+  }
+  if (tsd->mutex_waiting) {
+    CloseHandle(tsd->mutex_waiting);
+    tsd->mutex_waiting = NULL;
+  }
+}
+
+/* Initialize resolver thread synchronization data */
+BOOL init_thread_sync_data(struct thread_data * td,
+                           char * hostname,
+                           struct thread_sync_data * tsd)
+{
+  HANDLE curr_proc = GetCurrentProcess();
+
+  memset(tsd, 0, sizeof(tsd));
+  if (!DuplicateHandle(curr_proc, td->mutex_waiting,
+                       curr_proc, &tsd->mutex_waiting, 0, FALSE,
+                       DUPLICATE_SAME_ACCESS)) {
+    /* failed to duplicate the mutex, no point in continuing */
+    destroy_thread_sync_data(tsd);
+    return FALSE;
+  }
+  if (!DuplicateHandle(curr_proc, td->mutex_terminate,
+                       curr_proc, &tsd->mutex_terminate, 0, FALSE,
+                       DUPLICATE_SAME_ACCESS)) {
+    /* failed to duplicate the mutex, no point in continuing */
+    destroy_thread_sync_data(tsd);
+    return FALSE;
+  }
+  if (!DuplicateHandle(curr_proc, td->event_terminate,
+                       curr_proc, &tsd->event_terminate, 0, FALSE,
+                       DUPLICATE_SAME_ACCESS)) {
+    /* failed to duplicate the event, no point in continuing */
+    destroy_thread_sync_data(tsd);
+    return FALSE;
+  }
+  /* Copying hostname string because original can be destroyed by parent
+   * thread during gethostbyname execution.
+   */
+  tsd->hostname = strdup(hostname);
+  if (!tsd->hostname) {
+    /* Memory allocation failed */
+    destroy_thread_sync_data(tsd);
+    return FALSE;
+  }
+  return TRUE;
+}
+
+/* acquire resolver thread synchronization */
+BOOL acquire_thread_sync(struct thread_sync_data * tsd)
+{
+  /* is the thread initiator still waiting for us ? */
+  if (WaitForSingleObject(tsd->mutex_waiting, 0) == WAIT_TIMEOUT) {
+    /* yes, it is */
+
+    /* Waiting access to event_terminate */
+    if (WaitForSingleObject(tsd->mutex_terminate, INFINITE) != WAIT_OBJECT_0) {
+      /* Something went wrong - now just ignoring */
+    }
+    else {
+      if (WaitForSingleObject(tsd->event_terminate, 0) != WAIT_TIMEOUT) {
+        /* Parent thread signaled us to terminate.
+         * This means that all data in conn->async is now destroyed
+         * and we cannot use it.
+         */
+      }
+      else {
+        return TRUE;
+      }
+    }
+  }
+  return FALSE;
+}
+
+/* release resolver thread synchronization */
+void release_thread_sync(struct thread_sync_data * tsd)
+{
+  ReleaseMutex(tsd->mutex_terminate);
+}
 
 #if defined(CURLRES_IPV4)
 /*
@@ -177,17 +285,13 @@ static unsigned __stdcall gethostbyname_thread (void *arg)
   struct hostent *he;
   int    rc = 0;
 
-  /* Duplicate the passed mutex handle.
+  /* Duplicate the passed mutex and event handles.
    * This allows us to use it even after the container gets destroyed
    * due to a resolver timeout.
    */
-  HANDLE mutex_waiting = NULL;
-  HANDLE curr_proc = GetCurrentProcess();
-
-  if (!DuplicateHandle(curr_proc, td->mutex_waiting,
-                       curr_proc, &mutex_waiting, 0, FALSE,
-                       DUPLICATE_SAME_ACCESS)) {
-    /* failed to duplicate the mutex, no point in continuing */
+  struct thread_sync_data tsd = {0};
+  if (!init_thread_sync_data(td, conn->async.hostname, &tsd)) {
+    /* thread synchronization data initialization failed */
     return -1;
   }
 
@@ -200,17 +304,18 @@ static unsigned __stdcall gethostbyname_thread (void *arg)
 #endif
 
   WSASetLastError (conn->async.status = NO_DATA); /* pending status */
-  he = gethostbyname (conn->async.hostname);
 
-  /* is the thread initiator still waiting for us ? */
-  if (WaitForSingleObject(mutex_waiting, 0) == WAIT_TIMEOUT) {
-    /* yes, it is */
+  /* Signaling that we have initialized all copies of data and handles we
+     need */
+  SetEvent(td->event_thread_started);
 
-    /* Mark that we have obtained the information, and that we are
-     * calling back with it.
-     */
+  he = gethostbyname (tsd.hostname);
+
+  /* is parent thread waiting for us and are we able to access conn members? */
+  if (acquire_thread_sync(&tsd)) {
+    /* Mark that we have obtained the information, and that we are calling
+     * back with it. */
     SetEvent(td->event_resolved);
-
     if (he) {
       rc = Curl_addrinfo4_callback(conn, CURL_ASYNC_SUCCESS, he);
     }
@@ -219,10 +324,11 @@ static unsigned __stdcall gethostbyname_thread (void *arg)
     }
     TRACE(("Winsock-error %d, addr %s\n", conn->async.status,
            he ? inet_ntoa(*(struct in_addr*)he->h_addr) : "unknown"));
+    release_thread_sync(&tsd);
   }
 
   /* clean up */
-  CloseHandle(mutex_waiting);
+  destroy_thread_sync_data(&tsd);
 
   return (rc);
   /* An implicit _endthreadex() here */
@@ -244,18 +350,15 @@ static unsigned __stdcall getaddrinfo_thread (void *arg)
   struct addrinfo    *res;
   char   service [NI_MAXSERV];
   int    rc;
+  addrinfo hints = td->hints;
 
   /* Duplicate the passed mutex handle.
    * This allows us to use it even after the container gets destroyed
    * due to a resolver timeout.
    */
-  HANDLE mutex_waiting = NULL;
-  HANDLE curr_proc = GetCurrentProcess();
-
-  if (!DuplicateHandle(curr_proc, td->mutex_waiting,
-                       curr_proc, &mutex_waiting, 0, FALSE,
-                       DUPLICATE_SAME_ACCESS)) {
-    /* failed to duplicate the mutex, no point in continuing */
+  struct thread_sync_data tsd = {0};
+  if (!init_thread_sync_data(td, conn->async.hostname, &tsd)) {
+    /* thread synchronization data initialization failed */
     return -1;
   }
 
@@ -267,15 +370,16 @@ static unsigned __stdcall getaddrinfo_thread (void *arg)
 
   WSASetLastError(conn->async.status = NO_DATA); /* pending status */
 
-  rc = getaddrinfo(conn->async.hostname, service, &td->hints, &res);
+  /* Signaling that we have initialized all copies of data and handles we
+     need */
+  SetEvent(td->event_thread_started);
 
-  /* is the thread initiator still waiting for us ? */
-  if (WaitForSingleObject(mutex_waiting, 0) == WAIT_TIMEOUT) {
-    /* yes, it is */
+  rc = getaddrinfo(tsd.hostname, service, &hints, &res);
 
-    /* Mark that we have obtained the information, and that we are
-     * calling back with it.
-     */
+  /* is parent thread waiting for us and are we able to access conn members? */
+  if (acquire_thread_sync(&tsd)) {
+    /* Mark that we have obtained the information, and that we are calling
+       back with it. */
     SetEvent(td->event_resolved);
 
     if (rc == 0) {
@@ -288,10 +392,11 @@ static unsigned __stdcall getaddrinfo_thread (void *arg)
       rc = Curl_addrinfo6_callback(conn, (int)WSAGetLastError(), NULL);
       TRACE(("Winsock-error %d, no address\n", conn->async.status));
     }
+    release_thread_sync(&tsd);
   }
 
   /* clean up */
-  CloseHandle(mutex_waiting);
+  destroy_thread_sync_data(&tsd);
 
   return (rc);
   /* An implicit _endthreadex() here */
@@ -310,6 +415,24 @@ void Curl_destroy_thread_data (struct Curl_async *async)
   if (async->os_specific) {
     struct thread_data *td = (struct thread_data*) async->os_specific;
     curl_socket_t sock = td->dummy_sock;
+
+    if (td->mutex_terminate && td->event_terminate) {
+      /* Signaling resolver thread to terminate */
+      if (WaitForSingleObject(td->mutex_terminate, INFINITE) == WAIT_OBJECT_0) {
+        SetEvent(td->event_terminate);
+        ReleaseMutex(td->mutex_terminate);
+      }
+      else {
+        /* Something went wrong - just ignoring it */
+      }
+    }
+
+    if (td->mutex_terminate)
+      CloseHandle(td->mutex_terminate);
+    if (td->event_terminate)
+      CloseHandle(td->event_terminate);
+    if (td->event_thread_started)
+      CloseHandle(td->event_thread_started);
 
     if (sock != CURL_SOCKET_BAD)
       sclose(sock);
@@ -341,6 +464,7 @@ static bool init_resolve_thread (struct connectdata *conn,
                                  const Curl_addrinfo *hints)
 {
   struct thread_data *td = calloc(sizeof(*td), 1);
+  HANDLE thread_and_event[2] = {0};
 
   if (!td) {
     SetLastError(ENOMEM);
@@ -381,6 +505,31 @@ static bool init_resolve_thread (struct connectdata *conn,
     SetLastError(EAGAIN);
     return FALSE;
   }
+  /* Create the mutex used to serialize access to event_terminated
+   * between us and resolver thread.
+   */
+  td->mutex_terminate = CreateMutex(NULL, FALSE, NULL);
+  if (td->mutex_terminate == NULL) {
+    Curl_destroy_thread_data(&conn->async);
+    SetLastError(EAGAIN);
+    return FALSE;
+  }
+  /* Create the event used to signal thread that it should terminate.
+   */
+  td->event_terminate = CreateEvent(NULL, TRUE, FALSE, NULL);
+  if (td->event_terminate == NULL) {
+    Curl_destroy_thread_data(&conn->async);
+    SetLastError(EAGAIN);
+    return FALSE;
+  }
+  /* Create the event used by thread to inform it has initialized its own data.
+   */
+  td->event_thread_started = CreateEvent(NULL, TRUE, FALSE, NULL);
+  if (td->event_thread_started == NULL) {
+    Curl_destroy_thread_data(&conn->async);
+    SetLastError(EAGAIN);
+    return FALSE;
+  }
 
   td->stderr_file = stderr;
 
@@ -405,6 +554,15 @@ static bool init_resolve_thread (struct connectdata *conn,
      TRACE(("_beginthreadex() failed; %s\n", Curl_strerror(conn,errno)));
      Curl_destroy_thread_data(&conn->async);
      return FALSE;
+  }
+  /* Waiting until the thread will initialize its data or it will exit due errors.
+   */
+  thread_and_event[0] = td->thread_hnd;
+  thread_and_event[1] = td->event_thread_started;
+  if (WaitForMultipleObjects(sizeof(thread_and_event) / sizeof(thread_and_event[0]), thread_and_event, FALSE, INFINITE) == WAIT_FAILED) {
+    /* The resolver thread has been created,
+     * most probably it works now - ignoring this "minor" error
+     */
   }
   /* This socket is only to keep Curl_resolv_fdset() and select() happy;
    * should never become signalled for read/write since it's unbound but
