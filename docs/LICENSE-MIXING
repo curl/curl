@@ -27,29 +27,30 @@ libcurl http://curl.haxx.se/docs/copyright.html
 
 OpenSSL http://www.openssl.org/source/license.html
 
-        Uses an Original BSD-style license with an announement clause that
-        makes it "incompatible" with GPL. You are not allowed to ship binaries
-        that link with OpenSSL that includes GPL code (unless that specific
-        GPL code includes an exception for OpenSSL - a habit that is growing
-        more and more common). If OpenSSL's licensing is a problem for you,
-        consider using GnuTLS instead.
+        (May be used for SSL/TLS support) Uses an Original BSD-style license
+        with an announement clause that makes it "incompatible" with GPL. You
+        are not allowed to ship binaries that link with OpenSSL that includes
+        GPL code (unless that specific GPL code includes an exception for
+        OpenSSL - a habit that is growing more and more common). If OpenSSL's
+        licensing is a problem for you, consider using GnuTLS instead.
 
 GnuTLS  http://www.gnutls.org/
 
-        Uses the LGPL[3] license. If this is a problem for you, consider using
-        OpenSSL instead. Also note that GnuTLS itself depends on and uses
-        other libs (libgcrypt and libgpg-error) and they too are LGPL- or
-        GPL-licensed.
+        (May be used for SSL/TLS support) Uses the LGPL[3] license. If this is
+        a problem for you, consider using OpenSSL instead. Also note that
+        GnuTLS itself depends on and uses other libs (libgcrypt and
+        libgpg-error) and they too are LGPL- or GPL-licensed.
 
 c-ares  http://daniel.haxx.se/projects/c-ares/license.html
 
-        Uses an MIT license that is very liberal and imposes no restrictions
-        on any other library or part you may link with.
+        (Used for asynchronous name resolves) Uses an MIT license that is very
+        liberal and imposes no restrictions on any other library or part you
+        may link with.
 
 zlib    http://www.gzip.org/zlib/zlib_license.html
 
-        Uses an MIT-style license that shouldn't collide with any other
-        library.
+        (Used for compressed Transfer-Encoding support) Uses an MIT-style
+        license that shouldn't collide with any other library.
 
 krb4
 
@@ -59,33 +60,43 @@ krb4
         of the code in libcurl that is written to deal with Kerberos4 likewise
         have such a license.
 
-GSSAPI
+MIT Kerberos http://web.mit.edu/kerberos/www/dist/
 
-        While nothing in particular says that a GSS/Kerberos5 library must use
-        any particular license, the one I've used (Heimdal) is Original BSD-
-        licensed with the announcement clause.
+        (May be used for GSS support) MIT licensed, that shouldn't collide
+        with any other parts.
+
+Heimdal http://www.pdc.kth.se/heimdal/
+
+        (May be used for GSS support) Heimdal is Original BSD licensed with
+        the announcement clause.
+
+GNU GSS http://www.gnu.org/software/gss/
+
+        (May be used for GSS support) GNU GSS is GPL licensed. Note that you
+        may not distribute binary curl packages that uses this if you build
+        curl to also link and use any Original BSD licensed libraries!
 
 fbopenssl
 
-        Unclear license. Based on its name, I assume that it uses the OpenSSL
-        license and thus shares the same issues as described for OpenSSL
-        above.
+        (Used for SPNEGO support) Unclear license. Based on its name, I assume
+        that it uses the OpenSSL license and thus shares the same issues as
+        described for OpenSSL above.
 
 libidn  http://www.gnu.org/licenses/lgpl.html
 
-        Uses the GNU Lesser General Public License. LGPL is a variation of GPL
-        with slightly less aggressive "copyleft". This license requires more
-        requirements to be met when distributing binaries, see the license for
-        details. Also note that if you distribute a binary that includes this
-        library, you must also include the full LGPL license text. Please
-        properly point out what parts of the distributed package that the
-        license addresses.
+        (Used for IDNA support) Uses the GNU Lesser General Public
+        License. LGPL is a variation of GPL with slightly less aggressive
+        "copyleft". This license requires more requirements to be met when
+        distributing binaries, see the license for details. Also note that if
+        you distribute a binary that includes this library, you must also
+        include the full LGPL license text. Please properly point out what
+        parts of the distributed package that the license addresses.
 
 OpenLDAP http://www.openldap.org/software/release/license.html
 
-        Uses a Modified BSD-style license. Since libcurl uses OpenLDAP as a
-        shared library only, I have not heard of anyone that ships OpenLDAP
-        linked with libcurl in an app.
+        (Used for LDAP support) Uses a Modified BSD-style license. Since
+        libcurl uses OpenLDAP as a shared library only, I have not heard of
+        anyone that ships OpenLDAP linked with libcurl in an app.
 
 
 [1] = GPL - GNU General Public License: http://www.gnu.org/licenses/gpl.html
