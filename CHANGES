@@ -8,6 +8,8 @@
 
 
 Daniel (29 August 2005)
+- Kevin Lussier pointed out a problem with curllib.dsp and how to fix it.
+
 - Igor Polyakov fixed a rather nasty problem with the threaded name resolver
   for Windows, that could lead to an Access Violation when the multi interface
   was used due to an issue with how the resolver thread was and was not
