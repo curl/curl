@@ -167,6 +167,21 @@ TODO
    Awaits OpenSSL support for this, no need to support this in libcurl before
    there's an OpenSSL release that does it.
 
+ * make the configure --with-ssl option first check for OpenSSL and then for
+   GnuTLS if OpenSSL wasn't detected.
+
+ GnuTLS
+
+ * Get NTLM working using the functions provided by libgcrypt, since GnuTLS
+   already depends on that to function. Not strictly SSL/TLS related, but
+   hey... Another option is to get available DES and MD4 source code from the
+   cryptopp library. They are fine license-wise, but are C++.
+
+ * SSL engine stuff?
+
+ * Work out a common method with Peter Sylvester's OpenSSL-patch for SRP
+   on the TLS to provide name and password
+
  LDAP
 
  * Look over the implementation. The looping will have to "go away" from the
