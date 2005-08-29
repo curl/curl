@@ -1,5 +1,7 @@
   Changelog for the c-ares project
 
+Version 1.3.0 (August 29, 2004)
+
 * August 21
 
 - Alfredo Tupone provided a fix for the Windows code in get_iphlpapi_dns_info()
