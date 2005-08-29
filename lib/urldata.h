@@ -98,12 +98,14 @@
 #include "hash.h"
 
 #ifdef HAVE_GSSAPI
-#ifdef HAVE_GSSMIT
-#include <gssapi/gssapi.h>
-#include <gssapi/gssapi_generic.h>
-#else
-#include <gssapi.h>
-#endif
+# ifdef HAVE_GSSGNU
+#  include <gss.h>
+# elif defined HAVE_GSSMIT
+#  include <gssapi/gssapi.h>
+#  include <gssapi/gssapi_generic.h>
+# else
+#  include <gssapi.h>
+# endif
 #endif
 
 /* Download buffer size, keep it fairly big for speed reasons */

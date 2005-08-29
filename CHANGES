@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel (29 August 2005)
+- Simon Josefsson brought a patch that allows curl to get built to use GNU GSS
+  instead of MIT/Heimdal for GSS capabilities.
+
 Daniel (24 August 2005)
 - Toby Peterson added CURLOPT_IGNORE_CONTENT_LENGTH to the library, accessible
   from the command line tool with --ignore-content-length. This will make it

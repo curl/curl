@@ -687,7 +687,7 @@ AC_ARG_WITH(gssapi-includes,
 AC_ARG_WITH(gssapi-libs,
   AC_HELP_STRING([--with-gssapi-libs=DIR],
   		 [Specify location of GSSAPI libs]),
-  [ GSSAPI_LIBS="-L$withval -lgssapi"
+  [ GSSAPI_LIBS="-L$withval"
     want_gss="yes" ]
 )
 
@@ -702,6 +702,8 @@ AC_ARG_WITH(gssapi,
 
 AC_MSG_CHECKING([if GSSAPI support is requested])
 if test x"$want_gss" = xyes; then
+  AC_MSG_RESULT(yes)
+
   if test -z "$GSSAPI_INCS"; then
      if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
         GSSAPI_INCS=`$GSSAPI_ROOT/bin/krb5-config --cflags gssapi`
@@ -709,9 +711,51 @@ if test x"$want_gss" = xyes; then
         GSSAPI_INCS="-I$GSSAPI_ROOT/include"
      fi
   fi
+  save_CPPFLAGS="$CPPFLAGS"
   CPPFLAGS="$CPPFLAGS $GSSAPI_INCS"
-  
-  if test -z "$GSSAPI_LIB_DIR"; then
+
+  AC_CHECK_HEADER(gss.h,
+    [
+      dnl found in the given dirs
+      AC_DEFINE(HAVE_GSSGNU, 1, [if you have the GNU gssapi libraries])
+      gnu_gss=yes
+    ],
+    [
+      dnl not found, check Heimdal
+      AC_CHECK_HEADER(gssapi.h,
+        [
+          dnl found in the given dirs
+          AC_DEFINE(HAVE_GSSHEIMDAL, 1, [if you have the Heimdal gssapi libraries])
+        ],
+        [
+          dnl not found, check in gssapi/ subdir 
+          AC_CHECK_HEADER(gssapi/gssapi.h,
+            [
+              dnl found 
+              AC_DEFINE(HAVE_GSSMIT, 1, [if you have the MIT gssapi libraries])
+            ],
+            [
+              dnl no header found, disabling GSS
+              want_gss=no
+              AC_MSG_WARN(disabling GSSAPI since no header files was found)
+            ]
+          )
+        ]
+      )        
+    ]
+  )
+else
+  AC_MSG_RESULT(no)
+fi
+if test x"$want_gss" = xyes; then
+  AC_DEFINE(HAVE_GSSAPI, 1, [if you have the gssapi libraries])
+
+  curl_gss_msg="enabled (MIT/Heimdal)"
+
+  if test -n "$gnu_gss"; then
+    curl_gss_msg="enabled (GNU GSS)"
+    LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR -lgss"
+  elif test -z "$GSSAPI_LIB_DIR"; then
      if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
         gss_ldflags=`$GSSAPI_ROOT/bin/krb5-config --libs gssapi`
 	LDFLAGS="$LDFLAGS $gss_ldflags"
@@ -721,31 +765,10 @@ if test x"$want_gss" = xyes; then
         LDFLAGS="$LDFLAGS -lgssapi"
      fi
   else
-     LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
+     LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR -lgssapi"
   fi
-
-  AC_MSG_RESULT(yes)
-  AC_DEFINE(HAVE_GSSAPI, 1, [if you have the gssapi libraries])
-
-  curl_gss_msg="enabled"
-
-  AC_CHECK_HEADER(gssapi.h,
-    [
-       dnl found in the given dirs
-      AC_DEFINE(HAVE_GSSHEIMDAL, 1, [if you have the Heimdal gssapi libraries])
-    ],
-    [
-      dnl not found, check in gssapi/ subdir 
-      AC_CHECK_HEADER(gssapi/gssapi.h,
-        dnl found 
-        AC_DEFINE(HAVE_GSSMIT, 1, [if you have the MIT gssapi libraries])
-      )
-      
-    ]
-  )
-
 else
-  AC_MSG_RESULT(no)
+  CPPFLAGS="$save_CPPFLAGS"
 fi
   
 dnl **********************************************************************
