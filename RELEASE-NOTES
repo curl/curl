@@ -45,7 +45,7 @@ This release includes the following bugfixes:
  o c-ares enabled build with mingw
  o proxy host set with numerical IPv6 address
  o better treatment of binary zeroes in HTTP response headers
- o fixed the notorius FTP server failure in the test suite
+ o fixed the notorious FTP server failure in the test suite
  o better checking of text output in the test suite on windows
  o FTP servers' TYPE command response check made less strict
  o URL-without-slash as in http://somehost?data
