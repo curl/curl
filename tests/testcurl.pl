@@ -412,19 +412,22 @@ if ($configurebuild) {
 }
 
 sub findinpath {
-    my $c;
-    my $e;
-    my $p=$ENV{'PATH'};
-    my @pa = split(":", $p);
-    for $c (@_) {
-        for $e (@pa) {
-            if( -x "$e/$c") {
-                return $c;
-            }
-        }
+  my $c;
+  my $e;
+  my $x='';
+  $x='.exe' if ($^O eq 'MSWin32');
+  my $s=':';
+  $s=';' if ($^O eq 'MSWin32');
+  my $p=$ENV{'PATH'};
+  my @pa = split($s, $p);
+  for $c (@_) {
+    for $e (@pa) {
+      if( -x "$e/$c$x") {
+        return $c;
+      }
     }
+  }
 }
-
 
 my $make = findinpath("gmake", "make", "nmake");
 if(!$make) {
