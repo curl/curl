@@ -350,7 +350,7 @@ static unsigned __stdcall getaddrinfo_thread (void *arg)
   struct addrinfo    *res;
   char   service [NI_MAXSERV];
   int    rc;
-  addrinfo hints = td->hints;
+  struct addrinfo hints = td->hints;
 
   /* Duplicate the passed mutex handle.
    * This allows us to use it even after the container gets destroyed
