@@ -700,6 +700,7 @@ AC_ARG_WITH(gssapi,
   fi
 ])
 
+save_CPPFLAGS="$CPPFLAGS"
 AC_MSG_CHECKING([if GSSAPI support is requested])
 if test x"$want_gss" = xyes; then
   AC_MSG_RESULT(yes)
@@ -711,7 +712,6 @@ if test x"$want_gss" = xyes; then
         GSSAPI_INCS="-I$GSSAPI_ROOT/include"
      fi
   fi
-  save_CPPFLAGS="$CPPFLAGS"
   CPPFLAGS="$CPPFLAGS $GSSAPI_INCS"
 
   AC_CHECK_HEADER(gss.h,
