@@ -60,6 +60,7 @@ Other curl-related news since the previous public release:
  o http://curl.miscellaneousmirror.org is a new German curl mirror
  o LuaCURL by Alexander Marinov at http://luacurl.luaforge.net/
  o http://curl.hostingzero.com/ is a new US curl mirror
+ o ocurl 0.2.1 was released at http://sourceforge.net/projects/ocurl
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
