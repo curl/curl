@@ -233,6 +233,9 @@ perform operation will return the error code from this callback function.  Set
 the \fIparm\fP argument with the \fICURLOPT_SSL_CTX_DATA\fP option. This
 option was introduced in 7.11.0.
 
+This function will get called on all new connections made to a server, during
+the SSL negotiation. The SSL_CTX pointer will be a new one every time.
+
 \fBNOTE:\fP To use this properly, a non-trivial amount of knowledge of the
 openssl libraries is necessary. Using this function allows for example to use
 openssl callbacks to add additional validation code for certificates, and even
