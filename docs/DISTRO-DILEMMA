@@ -1,0 +1,183 @@
+Date: August 31, 2005
+Author: Daniel Stenberg <daniel@haxx.se>
+URL: 
+
+Condition
+
+ This document is written to describe the sitution as it is right now. libcurl
+ 7.14.0 is currently the latest version available. Things may (or perhaps
+ will) of course change in the future.
+
+ This document reflects my view and understanding of these things. Please tell
+ me where and how you think I'm wrong, and I'll try to correct my mistakes.
+
+Background 
+
+ The Free Software Foundation has deemed the Original BSD license[1] to be
+ "incompatible"[2] with GPL[3]. I'd rather say it is the other way around, but
+ the point is the same: if you distribute a binary version of a GPL program,
+ it MUST NOT be linked with any Original BSD-licenced parts or
+ libraries. Doing so will violate the GPL license. For a long time, very many
+ GPL licensed programs have avoided this license mess by adding an
+ exception[8] to their license. And many others have just closed their eyes
+ for this problem.
+
+ libcurl is MIT-style[4] licensed - how on earth did this dilemma fall onto
+ our plates?
+
+ libcurl is only a little library. libcurl can be built to use OpenSSL for its
+ SSL/TLS capabilities. OpenSSL is basically Original BSD licensed[5].
+
+ If libcurl built to use OpenSSL is used by a GPL-licensed application and you
+ decide to distribute a binary version of it (Linux distros - for example -
+ tend to), you have a clash. GPL vs Original BSD.
+
+ This dilemma is not libcurl-specific nor is it specific to any particular
+ Linux distro.
+
+Part of the Operating System
+
+ This would not be a problem if the used lib would be considered part of the
+ uderlying operating system, as then the GPL license has an exception
+ clause[6] that allows applications to use such libs without having to be
+ allowed to distribute it or its sources. Possibly some distros will claim
+ that OpenSSL is part of their operating system.
+
+ Debian does however not take this stance and has officially(?) claimed that
+ OpenSSL is not a required part of the Debian operating system
+
+Debian-legal
+
+ In August 2004 I figured I should start pulling people's attention to this to
+ see if anyone has any bright ideas or if they would dismiss my worries based
+ on some elegant writing I had missed somewhere:
+
+ My post to debian-legal on August 12 2004:
+
+        http://lists.debian.org/debian-legal/2004/08/msg00279.html
+
+ Several people agreed then that this is a known and rather big problem, but
+ the following discussion didn't result in much.
+
+GnuTLS
+
+ With the release of libcurl 7.14.0 (May 2005), it can now get built to use
+ GnuTLS instead of OpenSSL. GnuTLS is a LGPL[7] licensed library that offers a
+ matching set of features as OpenSSL does. Now, you can build and distribute
+ an SSL capable libcurl without including any Original BSD licensed code.
+
+ I believe Debian is the first distro to provide libcurl/GnutTLS packages.
+
+GnuTLS vs OpenSSL
+ 
+ While these two libraries offer similar features, they are not equal. Both
+ libraries have features the other one lacks. libcurl does not (yet) offer a
+ standardized stable ABI if you decide to switch from using libcurl-openssl to
+ libcurl-gnutls or vice versa. The GnuTLS support is very recent in libcurl
+ and it has not been tested nor used very extensively, while the OpenSSL
+ equivalent code has been used and thus matured for more than seven (7) years.
+
+ In August 2005, the debian-devel mailing list discovered the license issue as
+ a GPL licensed application wanted SSL capabilities from libcurl and thus was
+ forced to use the GnuTLS powered libcurl. For a reason that is unknown to me,
+ the application authors didn't want to or was unable to add an exception to
+ their GPL license. Alas, the license problem hit the fan again.
+
+The Better License, Original BSD or LGPL?
+
+ It isn't obvious or without debate to any objective interested party that
+ either of these licenses are the "better" or even the "preferred" one in a
+ generic situation. In the Debian camp they frawn upon OpenSSL's BSD license,
+ but that seems to merely stem from the general FSF friendliness and GPL
+ bigotry than based on a sane and proper analysis (assuming such a one is even
+ possible within an area as filled with religion and personal preferences such
+ as this). This is however not a subject suitable for this document.
+
+ Instead, I think we should accept the fact that the SSL/TLS libraries and
+ their different licenses will fit different applications and their authors
+ differently depending on the applications' licenses and their general usage
+ pattern (considering how LGPL libraries can be burdonsome for embedded
+ systems usage).
+
+More SSL Libraries
+
+ In libcurl, there's no stopping us here. There are at least a few more Open
+ Source/Free SSL/TLS libraries and we would very much like to support them as
+ well, to offer application authors an even wider scope of choice.
+
+Application Angle of this Problem
+
+ libcurl is built to use one SSL/TLS library. It uses a single fixed name (by
+ default), and applications are built/linked to use that single lib. Replacing
+ one libcurl instance with another one that uses the other SSL/TLS library
+ might break one or more applications (due to ABI differences and/or different
+ feature set). You want your application to use the libcurl it was built for.
+
+Project cURL Angle of this Problem
+
+ We distribute libcurl and everyone may build libcurl with either library. At
+ their choice. This problem is not directly a problem of ours. It merely
+ affects users - GPL application authors only - of our lib as it comes
+ included and delivered on some distros.
+
+Distro Angle of this Problem
+
+ A distro can provide separate libcurls built with different SSL/TLS libraries
+ to work around this, but at least Debian seems to be very hostile against
+ such an approach, probably since it makes things like devel packages for the
+ different libs collide since they would provide the same include files and
+ man pages etc.
+
+Fixing the Only Problem
+
+ The only problem is thus for distributions that want to offer libcurl
+ versions built with more than one SSL/TLS library.
+
+ Since multiple libcurl binaries using different names are ruled out, we need
+ to come up with a way to have one single libcurl that someone uses different
+ underlying libraries. The best(?) approach currently suggested involves this:
+
+ A new intermediate library (named lib2 so far in the discussions) with the
+ single purpose of providing libcurl with SSL/TLS capabilities. It would have
+ a unified API and ABI no matter what underlying library it would use.
+
+ There would be one lib2 binary provided for each supported SSL/TLS library.
+ For example: lib2-openssl, lib2-gnutls, lib2-yassl, lib2-matrixssl and
+ lib2-nossl. Yes, take note of the last one that provides the lib2 ABI but
+ that lacks the actual powers.
+
+ When libcurl is built and linked, it will be linked against a lib2 with the
+ set ABI.
+
+ When you link an app against libcurl, it would also need to provide one of
+ the (many) lib2 libs to decide what approach that fits the app. An app that
+ doesn't want SSL at all would still need to link with the lib2-nossl lib.
+
+ GPL apps can pick the lib2-gnutls, others may pick the lib2-openssl.
+
+ This concept works equally well both for shared and static libraries.
+
+When Will This Happen
+
+ Note again that this is not a problem in curl, it doesn't solve any actual
+ technical problems in our project. Don't hold your breath for this to happen
+ very soon (if at all) unless you step forward and contribute.
+
+ The suggestion that is outlined above is still only a suggestion. Feel free
+ to bring a better idea!
+
+ Also, to keep in mind: I don't want this new concept to have too much of an
+ impact on the existing code. Preferably it should be possible to build the
+ code like today (without the use of lib2), should you decide to ignore the
+ problems outlined in this document.
+
+Footnotes
+
+ [1] = http://www.xfree86.org/3.3.6/COPYRIGHT2.html#6
+ [2] = http://www.fsf.org/licensing/essays/bsd.html
+ [3] = http://www.fsf.org/licensing/licenses/gpl.html
+ [4] = http://curl.haxx.se/docs/copyright.html
+ [5] = http://www.openssl.org/source/license.html
+ [6] = http://www.fsf.org/licensing/licenses/gpl.html end of section 3
+ [7] = http://www.fsf.org/licensing/licenses/lgpl.html
+ [8] = http://en.wikipedia.org/wiki/OpenSSL_exception
