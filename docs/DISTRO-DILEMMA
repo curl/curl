@@ -87,11 +87,7 @@ The Better License, Original BSD or LGPL?
 
  It isn't obvious or without debate to any objective interested party that
  either of these licenses are the "better" or even the "preferred" one in a
- generic situation. In the Debian camp they frawn upon OpenSSL's BSD license,
- but that seems to merely stem from the general FSF friendliness and GPL
- bigotry than based on a sane and proper analysis (assuming such a one is even
- possible within an area as filled with religion and personal preferences such
- as this). This is however not a subject suitable for this document.
+ generic situation.
 
  Instead, I think we should accept the fact that the SSL/TLS libraries and
  their different licenses will fit different applications and their authors
@@ -157,6 +153,9 @@ Fixing the Only Problem
 
  This concept works equally well both for shared and static libraries.
 
+ A positive side effect of this approach could be a more generic "de facto"
+ standard API for SSL/TLS libraries.
+
 When Will This Happen
 
  Note again that this is not a problem in curl, it doesn't solve any actual
@@ -181,3 +180,7 @@ Footnotes
  [6] = http://www.fsf.org/licensing/licenses/gpl.html end of section 3
  [7] = http://www.fsf.org/licensing/licenses/lgpl.html
  [8] = http://en.wikipedia.org/wiki/OpenSSL_exception
+
+Feedback/Updates provided by
+
+ Eric Cooper
