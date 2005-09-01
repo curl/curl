@@ -1,7 +1,7 @@
-Curl and libcurl 7.14.1
+Curl and libcurl 7.14.2
 
- Public curl release number:               89
- Releases counted from the very beginning: 116
+ Public curl release number:               90
+ Releases counted from the very beginning: 117
  Available command line options:           108
  Available curl_easy_setopt() options:     123
  Number of public functions in libcurl:    46
@@ -11,64 +11,19 @@ Curl and libcurl 7.14.1
 
 This release includes the following changes:
 
- o GNU GSS support
- o --ignore-content-length and CURLOPT_IGNORE_CONTENT_LENGTH added
- o negotiates data connection SSL earlier when doing FTPS with PASV
- o CURLOPT_COOKIELIST and CURLINFO_COOKIELIST
- o trailer support for chunked encoded data streams 
- o -x/CURL_PROXY strings may now contain user+password
- o --trace-time now outputs the full microsecond, all 6 digits
+ o 
 
 This release includes the following bugfixes:
 
- o MSVC build problem with the DSP file
- o windows threaded resolver access violation with multi interface
- o test suite works with valgrind 3
- o CA cert verification with GnuTLS builds
- o handles expiry times in cookie files that go beyond 32 bits in size
- o several client problems with files, such as doing -d @file when the file
-   isn't readable now gets a warning displayed
- o write callback abort didn't always "take"
- o the curl -z "bad syntax" warning is now hidden when -s is used
- o curl -d @nonexisting no longer makes a GET
- o minor debug callback data size
- o date parsing of dates including daylight savings time zone names
- o using NTLM over proxy with an FTP URL
- o curl-config --features now displays SSL when built with GnuTLS too
- o CURLOPT_HTTPGET, CURLOPT_POST and CURLOPT_HTTPPOST reset CURLOPT_NOBODY
- o builds fine on AmigaOS again
- o corrected date parsing on Windows with auto-DST-adjust enabled
- o treats CONNECT 407 responses with bodies better during Digest/NTLM auth
- o improved strerror_r() API guessing when cross-compiling
- o debug builds work on Tru64
- o improved libcurl.m4
- o possible memory leak in windows name resolves
- o c-ares enabled build with mingw
- o proxy host set with numerical IPv6 address
- o better treatment of binary zeroes in HTTP response headers
- o fixed the notorious FTP server failure in the test suite
- o better checking of text output in the test suite on windows
- o FTP servers' TYPE command response check made less strict
- o URL-without-slash as in http://somehost?data
- o strerror_r() configure check for HP-UX 10.20 (and others)
- o time parse work-around on HP-UX 10.20 since its gmtime_r() is broken
+ o 
 
 Other curl-related news since the previous public release:
 
- o cURLpp 0.5.2 was released at http://rrette.com/curlpp.html
- o Rexx/CURL 1.3 was released at http://rexxcurl.sf.net/
- o http://curl.miscellaneousmirror.org is a new German curl mirror
- o LuaCURL by Alexander Marinov at http://luacurl.luaforge.net/
- o http://curl.hostingzero.com/ is a new US curl mirror
- o ocurl 0.2.1 was released at http://sourceforge.net/projects/ocurl
+ o 
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- John McGowan, Georg Wicherski, Andres Garcia, Eric Cooper, Todd Kulesza,
- Tupone Alfredo, Gisle Vanem, David Shaw, Andrew Bushnell, Dan Fandrich,
- Adrian Schuur, Diego Casorran, Peteris Krumins, Jon Grubbs, Christopher
- R. Palmer, Mario Schroeder, Richard Clayton, James Bursa, Jeff Pohlmeyer,
- Norbert Novotny, Toby Peterson, Simon Josefsson, Igor Polyakov, Kevin Lussier
+ 
 
         Thanks! (and sorry if I forgot to mention someone)
