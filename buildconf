@@ -209,7 +209,7 @@ ${LIBTOOLIZE:-libtoolize} --copy --automake --force || die "The libtool command 
 fi
 
 echo "buildconf: running automake"
-${AUTOMAKE:-automake} -a  || die "The automake command failed"
+${AUTOMAKE:-automake} -a -c  || die "The automake command failed"
 
 echo "buildconf: OK"
 exit 0
