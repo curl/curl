@@ -1,6 +1,6 @@
-Date: August 31, 2005
+Date: September 1, 2005
 Author: Daniel Stenberg <daniel@haxx.se>
-URL: 
+URL: http://curl.haxx.se/legal/distro-dilemma.html
 
 Condition
 
@@ -69,7 +69,7 @@ GnuTLS
  I believe Debian is the first distro to provide libcurl/GnutTLS packages.
 
 GnuTLS vs OpenSSL
- 
+
  While these two libraries offer similar features, they are not equal. Both
  libraries have features the other one lacks. libcurl does not (yet) offer a
  standardized stable ABI if you decide to switch from using libcurl-openssl to
