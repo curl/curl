@@ -309,6 +309,13 @@ typedef enum {
   CURLE_SSL_ENGINE_INITFAILED,   /* 66 - failed to initialise ENGINE */
   CURLE_LOGIN_DENIED,            /* 67 - user, password or similar was not
                                     accepted and we failed to login */
+  CURLE_TFTP_NOTFOUND,           /* 68 - file not found on server */
+  CURLE_TFTP_PERM,               /* 69 - permission problem on server */
+  CURLE_TFTP_DISKFULL,           /* 70 - out of disk space on server */
+  CURLE_TFTP_ILLEGAL,            /* 71 - Illegal TFTP operation */
+  CURLE_TFTP_UNKNOWNID,          /* 72 - Unknown transfer ID */
+  CURLE_TFTP_EXISTS,             /* 73 - File already exists */
+  CURLE_TFTP_NOSUCHUSER,         /* 74 - No such user */
   CURL_LAST /* never use! */
 } CURLcode;
 

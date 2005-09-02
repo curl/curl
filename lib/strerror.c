@@ -245,6 +245,27 @@ curl_easy_strerror(CURLcode error)
   case CURLE_LOGIN_DENIED:
     return "FTP: login denied";;
 
+  case CURLE_TFTP_NOTFOUND:
+    return "TFTP: File Not Found";;
+
+  case CURLE_TFTP_PERM:
+    return "TFTP: Access Violation";;
+
+  case CURLE_TFTP_DISKFULL:
+    return "TFTP: Disk full or allocation exceeded";;
+
+  case CURLE_TFTP_ILLEGAL:
+    return "TFTP: Illegal operation";;
+
+  case CURLE_TFTP_UNKNOWNID:
+    return "TFTP: Unknown transfer ID";;
+
+  case CURLE_TFTP_EXISTS:
+    return "TFTP: File already exists";;
+
+  case CURLE_TFTP_NOSUCHUSER:
+    return "TFTP: No such user";;
+
   case CURLE_URL_MALFORMAT_USER: /* not used by current libcurl */
   case CURLE_MALFORMAT_USER:     /* not used by current libcurl */
   case CURLE_BAD_CALLING_ORDER:  /* not used by current libcurl */

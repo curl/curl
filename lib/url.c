@@ -77,9 +77,7 @@
 #error "We can't compile without socket() support!"
 #endif
 
-
 #endif
-
 #ifdef USE_LIBIDN
 #include <idna.h>
 #include <tld.h>
@@ -123,6 +121,7 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
 #include "ftp.h"
 #include "dict.h"
 #include "telnet.h"
+#include "tftp.h"
 #include "http.h"
 #include "file.h"
 #include "ldap.h"
@@ -2915,6 +2914,43 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 #else
     failf(data, LIBCURL_NAME
           " was built with FILE disabled!");
+#endif
+  }
+  else if (strequal(conn->protostr, "TFTP")) {
+#ifndef CURL_DISABLE_TFTP
+    char *type;
+    conn->protocol |= PROT_TFTP;
+    conn->port = PORT_TFTP;
+    conn->remote_port = PORT_TFTP;
+    conn->curl_connect = Curl_tftp_connect;
+    conn->curl_do = Curl_tftp;
+    conn->curl_done = Curl_tftp_done; 
+    /* TFTP URLs support an extension like ";mode=<typecode>" that
+     * we'll try to get now! */
+    type=strstr(conn->path, ";mode=");
+    if(!type) {
+      type=strstr(conn->host.rawalloc, ";mode=");
+    }
+    if(type) {
+      char command;
+      *type=0;                     /* it was in the middle of the hostname */
+      command = toupper((int)type[6]);
+      switch(command) {
+      case 'A': /* ASCII mode */
+      case 'N': /* NETASCII mode */
+        data->set.ftp_ascii = 1;
+        break;
+      case 'O': /* octet mode */
+      case 'I': /* binary mode */
+      default:
+        /* switch off ASCII */
+        data->set.ftp_ascii = 0;
+        break;
+      }
+    }
+#else
+    failf(data, LIBCURL_NAME
+          " was built with TFTP disabled!");
 #endif
   }
   else {

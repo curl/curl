@@ -7,6 +7,11 @@
                                   Changelog
 
 
+Daniel (1 September 2005)
+- John Kelly added TFTP support to libcurl. A bunch of new error codes was
+  added. TODO: add them to docs. add TFTP server to test suite. add TFTP to
+  list of protocols whereever those are mentioned.
+
 Version 7.14.1 (1 September 2005)
 
 Daniel (29 August 2005)

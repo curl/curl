@@ -81,6 +81,9 @@ char *curl_version(void)
 /* data for curl_version_info */
 
 static const char * const protocols[] = {
+#ifndef CURL_DISABLE_TFTP
+  "tftp",
+#endif
 #ifndef CURL_DISABLE_FTP
   "ftp",
 #endif

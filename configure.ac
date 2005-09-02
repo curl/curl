@@ -251,6 +251,21 @@ AC_HELP_STRING([--disable-telnet],[Disable TELNET support]),
   esac ],
        AC_MSG_RESULT(yes)
 )
+AC_MSG_CHECKING([whether to support tftp])
+AC_ARG_ENABLE(tftp,
+AC_HELP_STRING([--enable-tftp],[Enable TFTP support])
+AC_HELP_STRING([--disable-tftp],[Disable TFTP support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_TFTP, 1, [to disable TFTP])
+       AC_SUBST(CURL_DISABLE_TFTP, [1])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
 
 dnl **********************************************************************
 dnl Check for built-in manual

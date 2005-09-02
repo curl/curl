@@ -660,8 +660,13 @@ singleipconnect(struct connectdata *conn,
   /* set socket non-blocking */
   Curl_nonblock(sockfd, TRUE);
 
-  rc = connect(sockfd, ai->ai_addr, (socklen_t)ai->ai_addrlen);
-
+  /* Connect TCP sockets, bind UDP */
+  if(ai->ai_socktype==SOCK_STREAM) {
+    rc = connect(sockfd, ai->ai_addr, (socklen_t)ai->ai_addrlen);
+  } else {
+    rc = 0;
+  }
+	
   if(-1 == rc) {
     error = Curl_ourerrno();
 

@@ -251,7 +251,12 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = pf;
-  hints.ai_socktype = SOCK_STREAM;
+
+  if(conn->protocol & PROT_TFTP)
+    hints.ai_socktype = SOCK_DGRAM;
+  else
+    hints.ai_socktype = SOCK_STREAM;
+
   hints.ai_flags = ai_flags;
   snprintf(sbuf, sizeof(sbuf), "%d", port);
   error = getaddrinfo(hostname, sbuf, &hints, &res);

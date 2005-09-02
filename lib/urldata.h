@@ -35,6 +35,7 @@
 #define PORT_HTTPS 443
 #define PORT_DICT 2628
 #define PORT_LDAP 389
+#define PORT_TFTP 69
 
 #define DICT_MATCH "/MATCH:"
 #define DICT_MATCH2 "/M:"
@@ -540,6 +541,7 @@ struct connectdata {
 #define PROT_DICT    (1<<6)
 #define PROT_LDAP    (1<<7)
 #define PROT_FILE    (1<<8)
+#define PROT_TFTP    (1<<11)
 #define PROT_FTPS    (1<<9)
 #define PROT_SSL     (1<<10) /* protocol requires SSL */
 
@@ -695,6 +697,7 @@ struct connectdata {
     struct HTTP *gopher; /* alias, just for the sake of being more readable */
     struct HTTP *https;  /* alias, just for the sake of being more readable */
     struct FTP *ftp;
+    void *tftp;        /* private for tftp.c-eyes only */
     struct FILEPROTO *file;
     void *telnet;        /* private for telnet.c-eyes only */
     void *generic;
