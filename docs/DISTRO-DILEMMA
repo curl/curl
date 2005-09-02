@@ -1,6 +1,6 @@
-Date: September 1, 2005
-Author: Daniel Stenberg <daniel@haxx.se>
-URL: http://curl.haxx.se/legal/distro-dilemma.html
+  Date: September 2, 2005
+  Author: Daniel Stenberg <daniel@haxx.se>
+  URL: http://curl.haxx.se/legal/distro-dilemma.html
 
 Condition
 
@@ -115,6 +115,16 @@ Project cURL Angle of this Problem
  their choice. This problem is not directly a problem of ours. It merely
  affects users - GPL application authors only - of our lib as it comes
  included and delivered on some distros.
+
+ libcurl has different ABI when built with different SSL/TLS libraries due to
+ two reasons:
+
+ 1. No one has worked on fixing this. The mutex/lock callbacks should be set
+    with a generic libcurl function that should use the proper underlying
+    functions.
+
+ 2. The CURLOPT_SSL_CTX_FUNCTION option is not possible to "emulate" on GnuTLS
+    but simply requires OpenSSL.
 
 Distro Angle of this Problem
 
