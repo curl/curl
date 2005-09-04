@@ -3911,7 +3911,7 @@ operate(struct Configurable *config, int argc, char *argv[])
 
         curl_easy_setopt(curl, CURLOPT_IGNORE_CONTENT_LENGTH, config->ignorecl);
 
-        /* curl 7.14.1 */
+        /* curl 7.14.2 */
         curl_easy_setopt(curl, CURLOPT_FTP_SKIP_PASV_IP,
                          config->ftp_skip_ip);
 
