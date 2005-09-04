@@ -116,6 +116,9 @@ while test $# -gt 0; do
 	if test "@CURL_DISABLE_DICT@" != "1"; then
           echo "DICT"
         fi
+	if test "@CURL_DISABLE_TFTP@" != "1"; then
+          echo "TFTP"
+        fi
 	;;
     --version)
 	echo libcurl @VERSION@
