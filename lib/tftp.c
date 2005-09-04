@@ -537,6 +537,10 @@ CURLcode Curl_tftp_connect(struct connectdata *conn, bool *done)
 
   /* Bind to any interface, random UDP port */
   rc = bind(state->sockfd, &state->local_addr, sizeof(state->local_addr));
+  if(rc) {
+    failf(conn->data, "failed to bind\n");
+    return CURLE_COULDNT_CONNECT;
+  }
 
   Curl_pgrsStartNow(conn->data);
 
