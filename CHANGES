@@ -7,6 +7,21 @@
                                   Changelog
 
 
+Daniel (4 September 2005)
+- I applied Nicolas François' man page patch he posted to the Debian bug
+  tracker. It corrected two lines that started with apostrophes, which isn't
+  legal nroff format.
+
+- Added --ftp-skip-pasv-ip to the command line tool, that sets the new
+  CURLOPT_FTP_SKIP_PASV_IP option. It makes libcurl re-use the control
+  connection's IP address when setting up the data connection instead of
+  extractting the IP address from the PASV response. It has turned out this
+  feature is frequently needed by people to circumvent silly servers and silly
+  firewalls, especially when FTPS is used and the PASV command-response is
+  sent encrtyped.
+
+  Sponsored by CU*Answers
+
 Daniel (1 September 2005)
 - John Kelly added TFTP support to libcurl. A bunch of new error codes was
   added. TODO: add them to docs. add TFTP server to test suite. add TFTP to

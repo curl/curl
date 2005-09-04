@@ -2,8 +2,8 @@ Curl and libcurl 7.14.2
 
  Public curl release number:               90
  Releases counted from the very beginning: 117
- Available command line options:           108
- Available curl_easy_setopt() options:     123
+ Available command line options:           109
+ Available curl_easy_setopt() options:     124
  Number of public functions in libcurl:    46
  Amount of public web site mirrors:        25
  Number of known libcurl bindings:         31
@@ -11,7 +11,8 @@ Curl and libcurl 7.14.2
 
 This release includes the following changes:
 
- o 
+ o --ftp-skip-pasv-ip / CURLOPT_FTP_SKIP_PASV_IP (sponsored by CU*Answers)
+ o TFTP support added
 
 This release includes the following bugfixes:
 
@@ -24,6 +25,6 @@ Other curl-related news since the previous public release:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- 
+ o John Kelly, Nicolas François
 
         Thanks! (and sorry if I forgot to mention someone)
