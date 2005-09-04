@@ -315,6 +315,7 @@ struct Configurable {
   bool insecure_ok; /* set TRUE to allow insecure SSL connects */
   bool create_dirs;
   bool ftp_create_dirs;
+  bool ftp_skip_ip;
   bool proxyntlm;
   bool proxydigest;
   bool proxybasic;
@@ -508,7 +509,8 @@ static void help(void)
     "    --crlf          Convert LF to CRLF in upload",
     " -f/--fail          Fail silently (no output at all) on errors (H)",
     "    --ftp-create-dirs Create the remote dirs if not present (F)",
-    "    --ftp-pasv      Use PASV instead of PORT (F)",
+    "    --ftp-pasv      Use PASV/EPSV instead of PORT (F)",
+    "    --ftp-skip-pasv-ip Skip the IP address for PASV (F)\n"
     "    --ftp-ssl       Enable SSL/TLS for the ftp transfer (F)",
     " -F/--form <name=content> Specify HTTP multipart POST data (H)",
     "    --form-string <name=string> Specify HTTP multipart POST data (H)",
@@ -1313,6 +1315,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$n", "proxy-anyauth", FALSE},
     {"$o", "trace-time", FALSE},
     {"$p", "ignore-content-length", FALSE},
+    {"$q", "ftp-skip-pasv-ip", FALSE},
 
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
@@ -1708,6 +1711,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'p': /* --ignore-content-length */
         config->ignorecl ^= TRUE;
+        break;
+      case 'q': /* --ftp-skip-pasv-ip */
+        config->ftp_skip_ip ^= TRUE;
         break;
       }
       break;
@@ -3904,6 +3910,10 @@ operate(struct Configurable *config, int argc, char *argv[])
         curl_easy_setopt(curl, CURLOPT_FTP_ACCOUNT, config->ftp_account);
 
         curl_easy_setopt(curl, CURLOPT_IGNORE_CONTENT_LENGTH, config->ignorecl);
+
+        /* curl 7.14.1 */
+        curl_easy_setopt(curl, CURLOPT_FTP_SKIP_PASV_IP,
+                         config->ftp_skip_ip);
 
         retry_numretries = config->req_retry;
 

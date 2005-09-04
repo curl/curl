@@ -70,6 +70,7 @@ sub ftpmsg {
 }
 
 my $verbose=0; # set to 1 for debugging
+my $pasvbadip=0;
 my $retrweirdo=0;
 my $retrnosize=0;
 my $srcdir=".";
@@ -564,7 +565,11 @@ sub PASV_command {
 
     if($cmd ne "EPSV") {
         # PASV reply
-        sendcontrol sprintf("227 Entering Passive Mode (127,0,0,1,%d,%d)\n",
+        my $p="127,0,0,1";
+        if($pasvbadip) {
+            $p="1,2,3,4";
+        }
+        sendcontrol sprintf("227 Entering Passive Mode ($p,%d,%d)\n",
                             ($pasvport/256), ($pasvport%256));
     }
     else {
@@ -702,6 +707,10 @@ sub customize {
         elsif($_ =~ /RETRNOSIZE/) {
             logmsg "FTPD: instructed to use RETRNOSIZE\n";
             $retrnosize=1;
+        }
+        elsif($_ =~ /PASVBADIP/) {
+            logmsg "FTPD: instructed to use PASVBADIP\n";
+            $pasvbadip=1;
         }
         elsif($_ =~ /NOSAVE/) {
             # don't actually store the file we upload - to be used when

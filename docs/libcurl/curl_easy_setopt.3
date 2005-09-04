@@ -767,6 +767,14 @@ curl is waiting for a response, this value overrides \fICURLOPT_TIMEOUT\fP. It
 is recommended that if used in conjunction with \fICURLOPT_TIMEOUT\fP, you set
 \fICURLOPT_FTP_RESPONSE_TIMEOUT\fP to a value smaller than
 \fICURLOPT_TIMEOUT\fP.  (Added in 7.10.8)
+.IP CURLOPT_FTP_SKIP_PASV_IP
+Pass a long. If set to a non-zero value, it instructs libcurl to not use the
+IP address the server suggests in its 227-response to libcurl's PASV command
+when libcurl connects the data connection. Instead libcurl will re-use the
+same IP address it already uses for the control connection. But it will use
+the port number from the 227-response. (Added in 7.14.1)
+
+This option has no effect if PORT, EPRT or EPSV is used instead of PASV.
 .IP CURLOPT_FTP_SSL
 Pass a long using one of the values from below, to make libcurl use your
 desired level of SSL for the ftp transfer. (Added in 7.11.0)

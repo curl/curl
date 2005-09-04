@@ -1601,8 +1601,18 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
       return CURLE_FTP_WEIRD_227_FORMAT;
     }
 
-    snprintf(newhost, sizeof(newhost),
-             "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+    /* we got OK from server */
+    if(data->set.ftp_skip_ip) {
+      /* told to ignore the remotely given IP but instead use the one we used
+         for the control connection */
+      infof(data, "Skips %d.%d.%d.%d for data connection, uses %s instead\n",
+            ip[0], ip[1], ip[2], ip[3],
+            conn->ip_addr_str);
+      snprintf(newhost, sizeof(newhost), "%s", conn->ip_addr_str);
+    }
+    else
+      snprintf(newhost, sizeof(newhost),
+               "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
     newport = (port[0]<<8) + port[1];
   }
   else if(ftp->count1 == 0) {
@@ -1621,8 +1631,6 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     failf(data, "Bad PASV/EPSV response: %03d", ftpcode);
     return CURLE_FTP_WEIRD_PASV_REPLY;
   }
-
-  /* we got OK from server */
 
   if(data->change.proxy && *data->change.proxy) {
     /*

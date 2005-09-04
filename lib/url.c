@@ -965,6 +965,14 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.ftp_use_epsv = va_arg(param, long)?TRUE:FALSE;
     break;
 
+  case CURLOPT_FTP_SKIP_PASV_IP:
+    /*
+     * Enable or disable FTP_SKIP_PASV_IP, which will disable/enable the
+     * bypass of the IP address in PASV responses.
+     */
+    data->set.ftp_skip_ip = (bool)va_arg(param, long);
+    break;
+
   case CURLOPT_INFILE:
     /*
      * FILE pointer to read the file to be uploaded from. Or possibly
@@ -1240,7 +1248,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Set a SSL_CTX callback
      */
-       data->set.ssl.fsslctx = va_arg(param, curl_ssl_ctx_callback);
+    data->set.ssl.fsslctx = va_arg(param, curl_ssl_ctx_callback);
     break;
   case CURLOPT_SSL_CTX_DATA:
     /*

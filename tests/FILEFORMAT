@@ -81,6 +81,7 @@ RETRWEIRDO
 RETRNOSIZE
 NOSAVE
 SLOWDOWN
+PASVBADIP  - makes PASV send back an illegal IP in its 227 response
 
 For HTTP, one specified command is supported:
  "auth_required" - if this is set and a POST/PUT is made without auth, the
