@@ -1,11 +1,11 @@
-  Date: September 2, 2005
+  Date: September 5, 2005
   Author: Daniel Stenberg <daniel@haxx.se>
   URL: http://curl.haxx.se/legal/distro-dilemma.html
 
 Condition
 
  This document is written to describe the sitution as it is right now. libcurl
- 7.14.0 is currently the latest version available. Things may (or perhaps
+ 7.14.1 is currently the latest version available. Things may (or perhaps
  will) of course change in the future.
 
  This document reflects my view and understanding of these things. Please tell
@@ -179,6 +179,10 @@ When Will This Happen
  impact on the existing code. Preferably it should be possible to build the
  code like today (without the use of lib2), should you decide to ignore the
  problems outlined in this document.
+
+ Update: Work on this has been initiated by Richard Atterer:
+
+        http://curl.haxx.se/mail/lib-2005-09/0066.html
 
 Footnotes
 
