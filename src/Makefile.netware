@@ -283,7 +283,7 @@ config.h: Makefile.netware
 	@echo $(DL)*/$(DL) >> $@
 	@echo $(DL)#define OS "i586-pc-NetWare"$(DL) >> $@
 	@echo $(DL)#define VERSION "$(LIBCURL_VERSION_STR)"$(DL) >> $@
-	@echo $(DL)#define PACKAGE_BUGREPORT "curl-bug@haxx.se"$(DL) >> $@
+	@echo $(DL)#define PACKAGE_BUGREPORT "a suitable curl mailing list => http://curl.haxx.se/mail/"$(DL) >> $@
 	@echo $(DL)#define USE_MANUAL 1$(DL) >> $@
 	@echo $(DL)#define HAVE_ARPA_INET_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_ASSERT_H 1$(DL) >> $@
