@@ -73,6 +73,8 @@
 #include "sendf.h"
 #include "tftp.h"
 #include "progress.h"
+#include "connect.h"
+#include "strerror.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -533,12 +535,18 @@ CURLcode Curl_tftp_connect(struct connectdata *conn, bool *done)
   state->sockfd = state->conn->sock[FIRSTSOCKET];
   state->state = TFTP_STATE_START;
 
+#ifdef WIN32
+  /* AF_UNSPEC == 0 (from above calloc) doesn't work on Winsock */
+  state->local_addr.sa_family = conn->ip_addr->ai_family;
+#endif
+
   tftp_set_timeouts(state);
 
   /* Bind to any interface, random UDP port */
   rc = bind(state->sockfd, &state->local_addr, sizeof(state->local_addr));
   if(rc) {
-    failf(conn->data, "failed to bind\n");
+    failf(conn->data, "bind() failed; %s\n",
+          Curl_strerror(conn,Curl_ourerrno()));
     return CURLE_COULDNT_CONNECT;
   }
 
