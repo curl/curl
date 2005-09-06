@@ -289,7 +289,7 @@ static unsigned __stdcall gethostbyname_thread (void *arg)
    * This allows us to use it even after the container gets destroyed
    * due to a resolver timeout.
    */
-  struct thread_sync_data tsd = {0};
+  struct thread_sync_data tsd = { 0,0,0,NULL };
   if (!init_thread_sync_data(td, conn->async.hostname, &tsd)) {
     /* thread synchronization data initialization failed */
     return -1;
@@ -356,7 +356,7 @@ static unsigned __stdcall getaddrinfo_thread (void *arg)
    * This allows us to use it even after the container gets destroyed
    * due to a resolver timeout.
    */
-  struct thread_sync_data tsd = {0};
+  struct thread_sync_data tsd = { 0,0,0,NULL };
   if (!init_thread_sync_data(td, conn->async.hostname, &tsd)) {
     /* thread synchronization data initialization failed */
     return -1;
