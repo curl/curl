@@ -7,6 +7,9 @@
                                   Changelog
 
 
+Daniel (6 September 2005)
+- Now curl warns if an unknown variable is used in the -w/--writeout argument.
+
 Daniel (4 September 2005)
 - I applied Nicolas François' man page patch he posted to the Debian bug
   tracker. It corrected two lines that started with apostrophes, which isn't
