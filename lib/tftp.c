@@ -147,7 +147,7 @@ typedef struct tftp_state_data {
   tftp_mode_t     mode;
   tftp_error_t    error;
   struct connectdata      *conn;
-  int             sockfd;
+  curl_socket_t   sockfd;
   int             retries;
   int             retry_time;
   int             retry_max;
