@@ -150,6 +150,11 @@ Scheme
   Bigloo binding written by Kirill Lisovsky
   http://curl.haxx.se/libcurl/scheme/
 
+S-Lang
+
+  S-Lang binding written by John E Davis
+  http://www.jedsoft.org/slang/modules/curl.html
+
 Tcl
 
   Tclcurl is written by Andrés García
@@ -161,7 +166,7 @@ Visual Basic
   http://sourceforge.net/projects/libcurl-vb/
 
 Q
-
+  The libcurl module is part of the default install
   http://q-lang.sourceforge.net/
 
 wxWidgets
