@@ -4159,14 +4159,14 @@ quit_curl:
   if (config->engine)
     free(config->engine);
 
+  /* cleanup the curl handle! */
+  curl_easy_cleanup(curl);
+
   if(config->headerfile && !headerfilep && heads.stream)
     fclose(heads.stream);
 
   if(allocuseragent)
     free(config->useragent);
-
-  /* cleanup the curl handle! */
-  curl_easy_cleanup(curl);
 
   if(config->trace_fopened && config->trace_stream)
     fclose(config->trace_stream);
