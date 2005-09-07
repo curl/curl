@@ -338,7 +338,7 @@ int ProcessRequest(struct httprequest *req)
     }
 
     if(chunked) {
-      if(strstr(req->reqbuf, "\r\n0\r\n"))
+      if(strstr(req->reqbuf, "\r\n0\r\n\r\n"))
         /* end of chunks reached */
         return 1; /* done */
       else
