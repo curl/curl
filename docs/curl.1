@@ -30,8 +30,8 @@ curl \- transfer a URL
 .SH DESCRIPTION
 .B curl
 is a tool to transfer data from or to a server, using one of the supported
-protocols (HTTP, HTTPS, FTP, FTPS, GOPHER, DICT, TELNET, LDAP or FILE). The
-command is designed to work without user interaction.
+protocols (HTTP, HTTPS, FTP, FTPS, TFTP, GOPHER, DICT, TELNET, LDAP or
+FILE). The command is designed to work without user interaction.
 
 curl offers a busload of useful tricks like proxy support, user
 authentication, ftp upload, HTTP post, SSL (https:) connections, cookies, file
@@ -63,6 +63,11 @@ several ones next to each other:
 
 You can specify any amount of URLs on the command line. They will be fetched
 in a sequential manner in the specified order.
+
+If you specify URL without protocol:// prefix, curl will attempt to guess what
+protocol you might want. It will then default to HTTP but try other protocols
+based on often-used host name prefixes. For example, for host names starting
+with "ftp." curl will assume you want to speak FTP.
 
 Curl will attempt to re-use connections for multiple file transfers, so that
 getting many files from the same server will not do multiple connects /
