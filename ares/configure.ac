@@ -176,7 +176,10 @@ CARES_CHECK_STRUCT(
 )
 
 if test "$ac_have_sockaddr_in6" = "yes" ; then
-CARES_CHECK_STRUCT_MEMBER(
+AC_CHECK_MEMBER(struct sockaddr_in6.sin6_scope_id,
+    AC_DEFINE_UNQUOTED(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID,1,
+      [Define to 1 if your struct sockaddr_in6 has sin6_scope_id.])
+   , ,
   [
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -188,8 +191,6 @@ CARES_CHECK_STRUCT_MEMBER(
 #include <netinet/in.h>
 #endif
   ], [sockaddr_in6], [sin6_scope_id],
-     AC_DEFINE_UNQUOTED(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID,1,
-       [Define to 1 if your struct sockaddr_in6 has sin6_scope_id.])
 )
 fi
 
