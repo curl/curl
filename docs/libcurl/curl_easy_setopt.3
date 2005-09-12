@@ -331,10 +331,14 @@ thread-safe and this will use a global variable.
 to using the share interface instead! See \fICURLOPT_SHARE\fP and
 \fIcurl_share_init(3)\fP.
 .IP CURLOPT_BUFFERSIZE
-Pass a long specifying your preferred size for the receive buffer in libcurl.
-The main point of this would be that the write callback gets called more often
-and with smaller chunks. This is just treated as a request, not an order. You
-cannot be guaranteed to actually get the given size. (Added in 7.10)
+Pass a long specifying your preferred size (in bytes) for the receive buffer
+in libcurl.  The main point of this would be that the write callback gets
+called more often and with smaller chunks. This is just treated as a request,
+not an order. You cannot be guaranteed to actually get the given size. (Added
+in 7.10)
+
+This size is by default set as big as possible (CURL_MAX_WRITE_SIZE), so it
+only makse sense to use this option if you want it smaller.
 .IP CURLOPT_PORT
 Pass a long specifying what remote port number to connect to, instead of the
 one specified in the URL or the default port for the used protocol.
