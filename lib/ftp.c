@@ -3819,6 +3819,7 @@ static CURLcode ftp_dophase_done(struct connectdata *conn,
     /* Failure detected, close the second socket if it was created already */
     sclose(conn->sock[SECONDARYSOCKET]);
     conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD;
+    return result;
   }
 
   if(ftp->no_transfer)
