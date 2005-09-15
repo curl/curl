@@ -46,6 +46,8 @@ my $FTPPORT; # FTP server port
 my $FTP2PORT; # FTP server 2 port
 my $FTPSPORT; # FTPS server port
 my $FTP6PORT; # FTP IPv6 server port
+my $TFTPPORT; # TFTP
+my $TFTP6PORT; # TFTP
 
 my $CURL="../src/curl"; # what curl executable to run on the tests
 my $DBGCURL=$CURL; #"../src/.libs/curl";  # alternative for debugging
@@ -75,6 +77,8 @@ my $FTPPIDFILE=".ftp.pid";
 my $FTP6PIDFILE=".ftp6.pid";
 my $FTP2PIDFILE=".ftp2.pid";
 my $FTPSPIDFILE=".ftps.pid";
+my $TFTPPIDFILE=".tftpd.pid";
+my $TFTP6PIDFILE=".tftp6.pid";
 
 # invoke perl like this:
 my $perl="perl -I$srcdir";
@@ -128,6 +132,7 @@ my $large_file;  # set if libcurl is built with large file support
 my $has_idn;     # set if libcurl is built with IDN support
 my $http_ipv6;   # set if HTTP server has IPv6 support
 my $ftp_ipv6;    # set if FTP server has IPv6 support
+my $tftp_ipv6;   # set if TFTP server has IPv6 support
 my $has_ipv6;    # set if libcurl is built with IPv6 support
 my $has_libz;    # set if libcurl is built with libz support
 my $has_getrlimit;  # set if system has getrlimit()
@@ -489,7 +494,8 @@ sub verifyftp {
 
 my %protofunc = ('http' => \&verifyhttp,
                  'https' => \&verifyhttp,
-                 'ftp' => \&verifyftp);
+                 'ftp' => \&verifyftp,
+                 'tftp' => \&verifyftp);
 
 sub verifyserver {
     my ($proto, $ip, $port) = @_;
@@ -690,6 +696,72 @@ sub runftpserver {
 
     return ($pid2, $ftppid);
 }
+
+#######################################################################
+# start the tftp server
+#
+sub runtftpserver {
+    my ($id, $verbose, $ipv6) = @_;
+    my $STATUS;
+    my $RUNNING;
+    my $port = $TFTPPORT;
+    # check for pidfile
+    my $pidfile = $TFTPPIDFILE;
+    my $ip=$HOSTIP;
+    my $nameext;
+    my $cmd;
+
+    if($ipv6) {
+        # if IPv6, use a different setup
+        $pidfile = $TFTP6PIDFILE;
+        $port = $TFTP6PORT;
+        $ip = $HOST6IP;
+        $nameext="-ipv6";
+    }
+
+    my $pid = checkserver($pidfile);
+    if($pid >= 0) {
+        stopserver($pid);
+    }
+
+    # start our server:
+    my $flag=$debugprotocol?"-v ":"";
+    $flag .= "-s \"$srcdir\" ";
+    if($id) {
+        $flag .="--id $id ";
+    }
+    if($ipv6) {
+        $flag .="--ipv6 ";
+    }
+    $cmd="$srcdir/server/tftpd --pidfile $pidfile $flag $port";
+
+    unlink($pidfile);
+
+    my ($tftppid, $pid2) = startnew($cmd, $pidfile);
+
+    if(!$tftppid || !kill(0, $tftppid)) {
+        # it is NOT alive
+        logmsg "RUN: failed to start the FTP$id$nameext server!\n";
+        return -1;
+    }
+
+    # Server is up. Verify that we can speak to it.
+    if(!verifyserver("tftp", $ip, $port)) {
+        logmsg "RUN: TFTP$id$nameext server failed verification\n";
+        # failed to talk to it properly. Kill the server and return failure
+        stopserver("$tftppid $pid2");
+        return (0,0);
+    }
+
+    if($verbose) {
+        logmsg "RUN: TFTP$id$nameext server is now running PID $tftppid\n";
+    }
+
+    sleep(1);
+
+    return ($pid2, $tftppid);
+}
+
 
 #######################################################################
 # Remove all files in the specified directory
@@ -946,6 +1018,10 @@ sub checksystem {
     if($ftp_ipv6) {
         logmsg sprintf("* FTP IPv6 port:  %d\n", $FTP6PORT);
     }
+    logmsg sprintf("* TFTP port:      %d\n", $TFTPPORT);
+    if($tftp_ipv6) {
+        logmsg sprintf("* TFTP IPv6 port: %d\n", $TFTP6PORT);
+    }
     
     if($ssl_version) {
         logmsg sprintf("* SSL library:    %s\n",
@@ -974,6 +1050,8 @@ sub subVariables {
   $$thing =~ s/%FTPSPORT/$FTPSPORT/g;
   $$thing =~ s/%SRCDIR/$srcdir/g;
   $$thing =~ s/%PWD/$pwd/g;
+  $$thing =~ s/%TFTPPORT/$TFTPPORT/g;
+  $$thing =~ s/%TFTP6PORT/$TFTP6PORT/g;
 }
 
 sub fixarray {
@@ -1760,6 +1838,26 @@ sub startservers {
                 $run{'https'}="$pid $pid2";
             }
         }
+        elsif($what eq "tftp") {
+            if(!$run{'tftp'}) {
+                ($pid, $pid2) = runtftpserver("", $verbose);
+                if($pid <= 0) {
+                    return "failed starting TFTP server";
+                }
+                printf ("* pid tftp => %d %d\n", $pid, $pid2) if($verbose);
+                $run{'tftp'}="$pid $pid2";
+            }
+        }
+        elsif($what eq "tftp-ipv6") {
+            if(!$run{'tftp-ipv6'}) {
+                ($pid, $pid2) = runtftpserver("", $verbose, "IPv6");
+                if($pid <= 0) {
+                    return "failed starting TFTP-IPv6 server";
+                }
+                printf("* pid tftp-ipv6 => %d %d\n", $pid, $pid2) if($verbose);
+                $run{'tftp-ipv6'}="$pid $pid2";
+            }
+        }
         elsif($what eq "none") {
             logmsg "* starts no server\n" if ($verbose);
         }
@@ -1920,6 +2018,8 @@ $HTTP6PORT = $base + 4; # HTTP IPv6 server port (different IP protocol
                         # but we follow the same port scheme anyway)
 $FTP2PORT =  $base + 5; # FTP server 2 port
 $FTP6PORT =  $base + 6; # FTP IPv6 port
+$TFTPPORT =  $base + 7; # TFTP (UDP) port
+$TFTP6PORT =  $base + 8; # TFTP IPv6 (UDP) port
 
 #######################################################################
 # Output curl version and host info being tested
