@@ -144,3 +144,13 @@ void win32_cleanup(void)
 }
 #endif
 
+/* set by the main code to point to where the test dir is */
+const char *path=".";
+
+char *test2file(long testno)
+{
+  static char filename[256];
+  snprintf(filename, sizeof(filename), TEST_DATA_PATH, path, testno);
+  return filename;
+}
+

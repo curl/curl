@@ -105,8 +105,6 @@ const char *serverlogfile = DEFAULT_LOGFILE;
 #define REQUEST_DUMP  "log/server.input"
 #define RESPONSE_DUMP "log/server.response"
 
-#define TEST_DATA_PATH "%s/data/test%ld"
-
 /* very-big-path support */
 #define MAXDOCNAMELEN 140000
 #define MAXDOCNAMELEN_TXT "139999"
@@ -116,9 +114,6 @@ const char *serverlogfile = DEFAULT_LOGFILE;
 #define CMD_AUTH_REQUIRED "auth_required"
 
 #define END_OF_HEADERS "\r\n\r\n"
-
-/* global variable, where to find the 'data' dir */
-const char *path=".";
 
 enum {
   DOCNUMBER_NOTHING = -7,
@@ -168,14 +163,6 @@ static void sigpipe_handler(int sig)
   sigpipe = 1;
 }
 #endif
-
-static char *test2file(long testno)
-{
-  static char filename[256];
-  sprintf(filename, TEST_DATA_PATH, path, testno);
-  return filename;
-}
-
 
 int ProcessRequest(struct httprequest *req)
 {
@@ -642,7 +629,8 @@ int main(int argc, char *argv[])
 #ifdef ENABLE_IPV6
   struct sockaddr_in6 me6;
 #endif /* ENABLE_IPV6 */
-  int sock, msgsock, flag;
+  curl_socket_t sock, msgsock;
+  int flag;
   unsigned short port = DEFAULT_PORT;
   FILE *pidfile;
   char *pidname= (char *)".http.pid";

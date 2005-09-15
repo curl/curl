@@ -33,6 +33,11 @@ void logmsg(const char *msg, ...);
 #define TRUE 1
 #endif
 
+#define TEST_DATA_PATH "%s/data/test%ld"
+
+/* global variable, where to find the 'data' dir */
+extern const char *path;
+
 #if defined(WIN32) && !defined(__CYGWIN__)
 #include <windows.h>
 #include <winsock2.h>
@@ -60,3 +65,6 @@ const struct in6_addr in6addr_any = {{ IN6ADDR_ANY_INIT }};
 
 void win32_init(void);
 void win32_cleanup(void);
+
+/* returns the path name to the test case file */
+char *test2file(long testno);
