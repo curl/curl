@@ -1,5 +1,10 @@
   Changelog for the c-ares project
 
+* September 10
+
+- configure fix for detecting a member in the sockaddr_in6 struct which failed
+  on ipv6-enabled HP-UX 11.00
+
 Version 1.3.0 (August 29, 2004)
 
 * August 21
