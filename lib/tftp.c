@@ -320,6 +320,7 @@ static void tftp_rx(tftp_state_data_t *state, tftp_event_t event)
 {
   int sbytes;
   int rblock;
+  struct SessionHandle *data = state->conn->data;
 
   switch(event) {
 
@@ -329,11 +330,11 @@ static void tftp_rx(tftp_state_data_t *state, tftp_event_t event)
     rblock = ntohs(state->rpacket.u.data.block);
     if ((state->block+1) != rblock) {
       /* No, log it, up the retry count and fail if over the limit */
-      infof(state->conn->data,
+      infof(data,
             "Received unexpected DATA packet block %d\n", rblock);
       state->retries++;
       if (state->retries>state->retry_max) {
-        failf(state->conn->data, "tftp_rx: giving up waiting for block %d\n",
+        failf(data, "tftp_rx: giving up waiting for block %d\n",
               state->block+1);
         return;
       }
@@ -346,7 +347,7 @@ static void tftp_rx(tftp_state_data_t *state, tftp_event_t event)
     sbytes = sendto(state->sockfd, &state->spacket, 4, MSG_NOSIGNAL,
                     &state->remote_addr, state->remote_addrlen);
     if(sbytes < 0) {
-      failf(state->conn->data, "%s\n", strerror(errno));
+      failf(data, "%s\n", strerror(errno));
     }
 
     /* Check if completed (That is, a less than full packet is recieved) */
@@ -361,7 +362,7 @@ static void tftp_rx(tftp_state_data_t *state, tftp_event_t event)
   case TFTP_EVENT_TIMEOUT:
     /* Increment the retry count and fail if over the limit */
     state->retries++;
-    infof(state->conn->data,
+    infof(data,
           "Timeout waiting for block %d ACK.  Retries = %d\n", state->retries);
     if(state->retries > state->retry_max) {
       state->error = TFTP_ERR_TIMEOUT;
@@ -373,7 +374,7 @@ static void tftp_rx(tftp_state_data_t *state, tftp_event_t event)
                       &state->remote_addr, state->remote_addrlen);
       /* Check all sbytes were sent */
       if(sbytes<0) {
-        failf(state->conn->data, "%s\n", strerror(errno));
+        failf(data, "%s\n", strerror(errno));
       }
     }
     break;
@@ -383,10 +384,10 @@ static void tftp_rx(tftp_state_data_t *state, tftp_event_t event)
     break;
 
   default:
-    failf(state->conn->data, "%s\n", "tftp_rx: internal error");
+    failf(data, "%s\n", "tftp_rx: internal error");
     break;
   }
-  Curl_pgrsSetDownloadCounter(state->conn->data,
+  Curl_pgrsSetDownloadCounter(data,
                               (curl_off_t) state->block*512);
 }
 
@@ -399,11 +400,11 @@ static void tftp_rx(tftp_state_data_t *state, tftp_event_t event)
  **********************************************************/
 static void tftp_tx(tftp_state_data_t *state, tftp_event_t event)
 {
+  struct SessionHandle *data = state->conn->data;
   int sbytes;
   int rblock;
 
   switch(event) {
-
 
   case TFTP_EVENT_ACK:
     /* Ack the packet */
@@ -411,12 +412,12 @@ static void tftp_tx(tftp_state_data_t *state, tftp_event_t event)
 
     if(rblock != state->block) {
       /* This isn't the expected block.  Log it and up the retry counter */
-      infof(state->conn->data, "Received ACK for block %d, expecting %d\n",
+      infof(data, "Received ACK for block %d, expecting %d\n",
             rblock, state->block);
       state->retries++;
       /* Bail out if over the maximum */
       if(state->retries>state->retry_max) {
-        failf(state->conn->data, "%s\n",
+        failf(data, "%s\n",
               "tftp_tx: giving up waiting for block %d ack",
               state->block);
       }
@@ -438,16 +439,14 @@ static void tftp_tx(tftp_state_data_t *state, tftp_event_t event)
                     &state->remote_addr, state->remote_addrlen);
     /* Check all sbytes were sent */
     if(sbytes<0) {
-      failf(state->conn->data, "%s\n", strerror(errno));
+      failf(data, "%s\n", strerror(errno));
     }
     break;
-
-
 
   case TFTP_EVENT_TIMEOUT:
     /* Increment the retry counter and log the timeout */
     state->retries++;
-    infof(state->conn->data, "Timeout waiting for block %d ACK. "
+    infof(data, "Timeout waiting for block %d ACK. "
           " Retries = %d\n", state->retries);
     /* Decide if we've had enough */
     if(state->retries > state->retry_max) {
@@ -460,26 +459,22 @@ static void tftp_tx(tftp_state_data_t *state, tftp_event_t event)
                       &state->remote_addr, state->remote_addrlen);
       /* Check all sbytes were sent */
       if(sbytes<0) {
-        failf(state->conn->data, "%s\n", strerror(errno));
+        failf(data, "%s\n", strerror(errno));
       }
     }
     break;
-
-
 
   case TFTP_EVENT_ERROR:
     state->state = TFTP_STATE_FIN;
     break;
 
-
-
   default:
-    failf(state->conn->data, "%s\n", "tftp_tx: internal error");
+    failf(data, "%s\n", "tftp_tx: internal error");
     break;
   }
 
   /* Update the progress meter */
-  Curl_pgrsSetUploadCounter(state->conn->data, (curl_off_t) state->block*512);
+  Curl_pgrsSetUploadCounter(data, (curl_off_t) state->block*512);
 }
 
 /**********************************************************
@@ -492,22 +487,26 @@ static void tftp_tx(tftp_state_data_t *state, tftp_event_t event)
 static CURLcode tftp_state_machine(tftp_state_data_t *state,
                                    tftp_event_t event)
 {
-
+  struct SessionHandle *data = state->conn->data;
   switch(state->state) {
   case TFTP_STATE_START:
+    DEBUGF(infof(data, "TFTP_STATE_START\n"));
     tftp_send_first(state, event);
     break;
   case TFTP_STATE_RX:
+    DEBUGF(infof(data, "TFTP_STATE_RX\n"));
     tftp_rx(state, event);
     break;
   case TFTP_STATE_TX:
+    DEBUGF(infof(data, "TFTP_STATE_TX\n"));
     tftp_tx(state, event);
     break;
   case TFTP_STATE_FIN:
-    infof(state->conn->data, "%s\n", "TFTP finished");
+    infof(data, "%s\n", "TFTP finished");
     break;
   default:
-    failf(state->conn->data, "%s\n", "Internal state machine error");
+    DEBUGF(infof(data, "STATE: %d\n", state->state));
+    failf(data, "%s\n", "Internal state machine error");
     break;
   }
   return CURLE_OK;
@@ -528,7 +527,7 @@ CURLcode Curl_tftp_connect(struct connectdata *conn, bool *done)
   int rc;
 
   if((state = conn->proto.tftp = calloc(sizeof(tftp_state_data_t), 1))==NULL) {
-    return  CURLE_OUT_OF_MEMORY;
+    return CURLE_OUT_OF_MEMORY;
   }
 
   state->conn = conn;
@@ -591,8 +590,6 @@ CURLcode Curl_tftp(struct connectdata *conn, bool *done)
   struct SessionHandle  *data = conn->data;
   tftp_state_data_t     *state = (tftp_state_data_t *)(conn->proto.tftp);
   tftp_event_t          event;
-  fd_set                readset;
-  struct timeval        tv;
   CURLcode              code;
   int                   rc;
   struct sockaddr       fromaddr;
@@ -606,29 +603,14 @@ CURLcode Curl_tftp(struct connectdata *conn, bool *done)
       state->state != TFTP_STATE_FIN;
       tftp_state_machine(state, event) ) {
 
-    /* Update the progress meter */
-    Curl_pgrsUpdate(conn);
-
-    /* Waiting on event from network or OS */
-    FD_ZERO(&readset);
-    FD_SET(state->sockfd, &readset);
-    tv.tv_sec=state->retry_time; tv.tv_usec=0;
-
-    restart:
-
     /* Wait until ready to read or timeout occurs */
-    rc=select(state->sockfd+1, &readset, NULL, NULL, &tv);
+    rc=Curl_select(state->sockfd, CURL_SOCKET_BAD, state->retry_time * 1000);
 
     if(rc == -1) {
-      /* Restart if a signal interrupt occured  */
-      if(errno == EINTR) {
-        goto restart;
-      }
-
-      /* Otherwise, bail out */
-      failf(state->conn->data, "%s\n", strerror(errno));
+      /* bail out */
+      int error = Curl_ourerrno();
+      failf(data, "%s\n", Curl_strerror(conn, error));
       event = TFTP_EVENT_ERROR;
-
     }
     else if (rc==0) {
       /* A timeout occured */
@@ -670,6 +652,10 @@ CURLcode Curl_tftp(struct connectdata *conn, bool *done)
         failf(conn->data, "%s\n", "Internal error: Unexpected packet");
         break;
       }
+
+      /* Update the progress meter */
+      Curl_pgrsUpdate(conn);
+
     }
 
     /* Check for transfer timeout every 10 blocks, or after timeout */
@@ -677,11 +663,12 @@ CURLcode Curl_tftp(struct connectdata *conn, bool *done)
       time_t current;
       time(&current);
       if(current>state->max_time) {
+        DEBUGF(infof(data, "timeout: %d > %d\n",
+                     current, state->max_time));
         state->error = TFTP_ERR_TIMEOUT;
         state->state = TFTP_STATE_FIN;
       }
     }
-
 
   }
 
