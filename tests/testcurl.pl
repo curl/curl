@@ -568,8 +568,8 @@ if ($configurebuild && !$crosscompile) {
   if($runtestopts) {
       $o = "TEST_F=\"$runtestopts\" ";
   }
-  logit "$make ${o}test-full";
-  open(F, "$make ${o}test-full 2>&1 |") or die;
+  logit "$make -k ${o}test-full";
+  open(F, "$make -k ${o}test-full 2>&1 |") or die;
   open(LOG, ">$buildlog") or die;
   while (<F>) {
     s/$pwd//g;
