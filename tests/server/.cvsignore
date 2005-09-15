@@ -8,3 +8,4 @@ Makefile
 getpart
 sockfilt
 resolve
+tftpd
