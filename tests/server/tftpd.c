@@ -49,16 +49,37 @@
  */
 
 #include "setup.h" /* portability help from the lib directory */
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#include <signal.h>
-#include <fcntl.h>
+#endif
 
+#include <signal.h>
+
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#ifdef HAVE_ARPA_TFTP_H
 #include <arpa/tftp.h>
+#endif
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
+#endif
+#ifdef HAVE_SYS_FILIO_H
+/* FIONREAD on Solaris 7 */
+#include <sys/filio.h>
+#endif
 
 #include <setjmp.h>
 #include <stdio.h>
@@ -683,7 +704,7 @@ static void sendfile(struct testcase *test, struct formats *pf)
 {
   struct tftphdr *dp;
   struct tftphdr *ap;    /* ack packet */
-  u_int16_t block = 1;
+  unsigned short block = 1;
   int size, n;
 
   mysignal(SIGALRM, timer);
@@ -752,7 +773,7 @@ static void recvfile(struct testcase *test, struct formats *pf)
 {
   struct tftphdr *dp;
   struct tftphdr *ap;    /* ack buffer */
-  u_int16_t block = 0;
+  unsigned short block = 0;
   int n, size;
 
   mysignal(SIGALRM, timer);

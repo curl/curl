@@ -1434,6 +1434,8 @@ AC_CHECK_HEADERS(
         libgen.h \
         locale.h \
         errno.h \
+        arpa/tftp.h \
+        sys/filio.h \
         setjmp.h,
 dnl to do if not found
 [],
