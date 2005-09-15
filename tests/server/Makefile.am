@@ -25,7 +25,7 @@ AUTOMAKE_OPTIONS = foreign
 
 INCLUDES = -I$(top_srcdir)/lib -I$(top_srcdir)/include
 
-noinst_PROGRAMS = sws getpart sockfilt resolve
+noinst_PROGRAMS = sws getpart sockfilt resolve tftpd
 
 useful = getpart.c getpart.h $(top_srcdir)/lib/strequal.c	\
  $(top_srcdir)/lib/base64.c $(top_srcdir)/lib/mprintf.c		\
@@ -36,5 +36,7 @@ sws_SOURCES= sws.c util.c util.h $(useful)
 sockfilt_SOURCES = sockfilt.c util.c util.h $(useful)	\
  $(top_srcdir)/lib/inet_pton.c
 getpart_SOURCES= testpart.c $(useful)
+tftpd_SOURCES = tftpd.c util.c util.h $(useful)
 
 extra_DIST = base64.pl
+
