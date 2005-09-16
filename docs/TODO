@@ -31,7 +31,7 @@ TODO
  * Introduce a new error code indicating authentication problems (for proxy
    CONNECT error 407 for example). This cannot be an error code, we must not
    return informational stuff as errors, consider a new info returned by
-   curl_easy_getinfo() #845941
+   curl_easy_getinfo() http://curl.haxx.se/bug/view.cgi?id=845941
 
  * Use 'struct lifreq' and SIOCGLIFADDR instead of 'struct ifreq' and
    SIOCGIFADDR on newer Solaris versions as they claim the latter is obsolete.

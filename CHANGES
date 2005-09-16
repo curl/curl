@@ -13,7 +13,7 @@ Daniel (6 September 2005)
 Daniel (4 September 2005)
 - I applied Nicolas François' man page patch he posted to the Debian bug
   tracker. It corrected two lines that started with apostrophes, which isn't
-  legal nroff format.
+  legal nroff format. http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=326511
 
 - Added --ftp-skip-pasv-ip to the command line tool, that sets the new
   CURLOPT_FTP_SKIP_PASV_IP option. It makes libcurl re-use the control
@@ -116,10 +116,11 @@ Daniel (9 August 2005)
   zone names thus limiting the effect of this bug.
 
 Daniel (8 August 2005)
-- Jon Grubbs filed bug report #1249962 which identified a problem with NTLM on
-  a HTTP proxy if an FTP URL was given. libcurl now properly switches to pure
-  HTTP internally when an HTTP proxy is used, even for FTP URLs. The problem
-  would also occur with other multi-pass auth methods.
+- Jon Grubbs filed bug report #1249962
+  (http://curl.haxx.se/bug/view.cgi?id=1249962) which identified a problem
+  with NTLM on a HTTP proxy if an FTP URL was given. libcurl now properly
+  switches to pure HTTP internally when an HTTP proxy is used, even for FTP
+  URLs. The problem would also occur with other multi-pass auth methods.
 
 Daniel (7 August 2005)
 - When curl is built with GnuTLS, curl-config didn't include "SSL" when
@@ -148,11 +149,11 @@ Daniel (12 July 2005)
   contains a flawed chunked encoding stream that still works the same.
 
 Daniel (5 July 2005)
-- Gisle Vanem came up with a nice little work-around for bug #1230118. It
-  seems the Windows (MSVC) libc time functions may return data one hour off if
-  TZ is not set and automatic DST adjustment is enabled. This made
-  curl_getdate() return wrong value, and it also concerned internal cookie
-  expirations etc.
+- Gisle Vanem came up with a nice little work-around for bug #1230118
+  (http://curl.haxx.se/bug/view.cgi?id=1230118). It seems the Windows (MSVC)
+  libc time functions may return data one hour off if TZ is not set and
+  automatic DST adjustment is enabled. This made curl_getdate() return wrong
+  value, and it also concerned internal cookie expirations etc.
 
 Daniel (4 July 2005)
 - Andrew Bushnell provided enough info for me to tell that we badly needed to
@@ -188,8 +189,9 @@ Daniel (22 June 2005)
 - David Shaw updated libcurl.m4
 
 Daniel (14 June 2005)
-- Gisle Vanem fixed a potential thread handle leak. Bug report #1216500.
-  Comment in http://curl.haxx.se/mail/lib-2005-06/0059.html
+- Gisle Vanem fixed a potential thread handle leak. Bug report #1216500
+  (http://curl.haxx.se/bug/view.cgi?id=1216500).  Comment in
+  http://curl.haxx.se/mail/lib-2005-06/0059.html
 
 Daniel (13 June 2005)
 - Made buildconf run libtoolize in the ares dir too (inspired by Tupone's
@@ -225,7 +227,7 @@ Daniel (3 June 2005)
 Daniel (1 June 2005)
 - The configure check for c-ares now adds the cares lib before the other libs,
   to make it build fine with mingw. Inspired by Tupone Alfredo's bug report
-  (and patch) #1212940
+  and patch: http://curl.haxx.se/bug/view.cgi?id=1212940
 
 Daniel (31 May 2005)
 - Todd Kulesza reported a flaw in the proxy option, since a numerical IPv6
@@ -237,7 +239,7 @@ Daniel (30 May 2005)
 - Eric Cooper reported about a problem with HTTP servers that responds with
   binary zeroes within the headers. They confused libcurl to do wrong so the
   downloaded headers become incomplete. The fix is now verified with test case
-  262.
+  262. http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=310948
 
 Daniel (25 May 2005)
 - Fixed problems with the test suite, and in particular the FTP test cases
@@ -259,9 +261,10 @@ Daniel (20 May 2005)
   docs.
 
 Daniel (18 May 2005)
-- John McGowan identified a problem in bug report #1204435 with malformed URLs
-  like "http://somehost?data" as it added a slash too much in the request
-  ("GET /?data/"...). Added test case 260 to verify.
+- John McGowan identified a problem in bug report #1204435
+  (http://curl.haxx.se/bug/view.cgi?id=1204435) with malformed URLs like
+  "http://somehost?data" as it added a slash too much in the request ("GET
+  /?data/"...). Added test case 260 to verify.
 
 - The configure check for strerror_r() failed to detect the proper API at
   times, like on HP-UX 10.20. Then lib/strerror.c badly assumed the glibc
@@ -284,8 +287,9 @@ Daniel (12 May 2005)
 - When doing a second request (after a disconnect) using the same easy handle,
   over a proxy that uses NTLM authentication, libcurl failed to use NTLM again
   properly (the auth method was accidentally reset to the same as had been set
-  for host auth, which defaults to Basic). Bug report #1200661 identified the
-  the problem and the fix.
+  for host auth, which defaults to Basic). Bug report #1200661
+  (http://curl.haxx.se/bug/view.cgi?id=1200661) identified the the problem and
+  the fix.
 
 - If -z/--time-cond is used with an invalid date syntax, this is no longer
   silently discarded. Instead a proper warning message is diplayed that
