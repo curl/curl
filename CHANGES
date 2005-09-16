@@ -7,6 +7,19 @@
                                   Changelog
 
 
+Daniel (15 September 2005)
+- Added a TFTP server to the test suite and made the test suite capable of
+  using it.
+
+Daniel (7 September 2005)
+- Ben Madsen's detailed reports that funnily enough only occurred with certain
+  glibc versions turned out to be curl using an already closed file handle
+  during certain conditions (like when saving FTP server "headers").
+
+- Scott Davis helped me track down a problem in the test HTTP server that made
+  test case 56 wrongly fail at times. It turned out it was due to the server
+  finding the end of a chunked-encoded POST too early.
+
 Daniel (6 September 2005)
 - Now curl warns if an unknown variable is used in the -w/--writeout argument.
 

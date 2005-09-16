@@ -6,7 +6,7 @@ Curl and libcurl 7.14.2
  Available curl_easy_setopt() options:     124
  Number of public functions in libcurl:    46
  Amount of public web site mirrors:        25
- Number of known libcurl bindings:         31
+ Number of known libcurl bindings:         32
  Number of contributors:                   451
 
 This release includes the following changes:
@@ -16,7 +16,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o 
+ o crash in --dump-header on FTP
+ o test 56 runs better
 
 Other curl-related news since the previous public release:
 
@@ -27,6 +28,6 @@ Other curl-related news since the previous public release:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- o John Kelly, Nicolas François
+ o John Kelly, Nicolas François, Scott Davis, Ben Madsen
 
         Thanks! (and sorry if I forgot to mention someone)
