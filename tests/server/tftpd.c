@@ -124,8 +124,8 @@ static void mysignal(int, void (*func)(int));
 struct formats;
 static int tftp(struct testcase *test, struct tftphdr *tp, int size);
 static void nak(int error);
-static void sendfile(struct testcase *test, struct formats *pf);
-static void recvfile(struct testcase *test, struct formats *pf);
+static void sendtftp(struct testcase *test, struct formats *pf);
+static void recvtftp(struct testcase *test, struct formats *pf);
 static int validate_access(struct testcase *test, const char *, int);
 
 static curl_socket_t peer;
@@ -609,9 +609,9 @@ again:
     return 1;
   }
   if (tp->th_opcode == WRQ)
-    recvfile(test, pf);
+    recvtftp(test, pf);
   else
-    sendfile(test, pf);
+    sendtftp(test, pf);
   return 0;
 }
 
@@ -706,7 +706,7 @@ static void timer(int signum)
 /*
  * Send the requested file.
  */
-static void sendfile(struct testcase *test, struct formats *pf)
+static void sendtftp(struct testcase *test, struct formats *pf)
 {
   struct tftphdr *dp;
   struct tftphdr *ap;    /* ack packet */
@@ -775,7 +775,7 @@ static void justquit(int signum)
 /*
  * Receive a file.
  */
-static void recvfile(struct testcase *test, struct formats *pf)
+static void recvtftp(struct testcase *test, struct formats *pf)
 {
   struct tftphdr *dp;
   struct tftphdr *ap;    /* ack buffer */
