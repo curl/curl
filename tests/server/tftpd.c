@@ -91,6 +91,10 @@
 #include <pwd.h>
 #include <grp.h>
 
+#define ENABLE_CURLX_PRINTF
+/* make the curlx header define all printf() functions to use the curlx_*
+   versions instead */
+#include "curlx.h" /* from the private lib dir */
 #include "getpart.h"
 #include "util.h"
 
