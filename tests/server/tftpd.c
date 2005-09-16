@@ -569,7 +569,8 @@ static int tftp(struct testcase *test, struct tftphdr *tp, int size)
   /* store input protocol */
   fprintf(test->server, "opcode: %x\n", tp->th_opcode);
 
-  filename = cp = tp->th_stuff;
+  cp = (char *)&tp->th_stuff;
+  filename = cp;
 again:
   while (cp < buf + size) {
     if (*cp == '\0')
