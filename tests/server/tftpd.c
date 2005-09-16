@@ -193,6 +193,7 @@ static int readit(struct testcase *test, struct tftphdr **dpp,
   return b->counter;
 }
 
+#undef MIN /* some systems have this defined already, some don't */
 #define MIN(x,y) ((x)<(y)?(x):(y));
 
 /*
