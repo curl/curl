@@ -3,6 +3,10 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+26. NTLM authentication using SSPI (on Windows) when (lib)curl is running in
+  "system context" will make it use wrong(?) user name - at least when compared
+  to what winhttp does. See http://curl.haxx.se/bug/view.cgi?id=1281867
+
 25. When doing a CONNECT request with curl it doesn't properly handle if the
   proxy closes the connection within the authentication "negotiation phase".
   Like if you do HTTPS or similar over a proxy and you use perhaps
@@ -23,7 +27,7 @@ may have been fixed since this was written!
   complaining on "unaligned file size" on completion. The problem is related
   to VMS file structures and the perceived file sizes stat() returns. A
   possible fix would involve sending a "STRU VMS" command.
-  http://sourceforge.net/support/tracker.php?aid=1156287
+  http://curl.haxx.se/bug/view.cgi?id=1156287
   
 21. FTP ASCII transfers do not follow RFC959. They don't convert the data
    accordingly (not for sending nor for receiving). RFC 959 section 3.1.1.1
@@ -69,11 +73,12 @@ may have been fixed since this was written!
 10. To get HTTP Negotiate authentication to work fine, you need to provide a
   (fake) user name (this concerns both curl and the lib) because the code
   wrongly only considers authentication if there's a user name provided.
-  Bug report #1004841. How? http://curl.haxx.se/mail/lib-2004-08/0182.html
+  http://curl.haxx.se/bug/view.cgi?id=1004841. How?
+  http://curl.haxx.se/mail/lib-2004-08/0182.html
 
 9. --limit-rate using -d or -F does not work. This is because the limit logic
   is provided by the curl app in its read/write callbacks, and when doing
-  -d/-F the callbacks aren't used! Bug report #921395.
+  -d/-F the callbacks aren't used! http://curl.haxx.se/bug/view.cgi?id=921395
 
 8. Doing resumed upload over HTTP does not work with '-C -', because curl
   doesn't do a HEAD first to get the initial size. This needs to be done
