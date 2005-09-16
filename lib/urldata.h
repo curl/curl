@@ -562,6 +562,7 @@ struct connectdata {
   char *ip_addr_str;
 
   char protostr[16];  /* store the protocol string in this buffer */
+  int socktype;  /* SOCK_STREAM or SOCK_DGRAM */
 
   struct hostname host;
   struct hostname proxy;

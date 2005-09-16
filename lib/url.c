@@ -2729,6 +2729,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    * Setup internals depending on protocol
    *************************************************************/
 
+  conn->socktype = SOCK_STREAM; /* most of them are TCP streams */
+
   if (strequal(conn->protostr, "HTTP")) {
 #ifndef CURL_DISABLE_HTTP
     conn->port = PORT_HTTP;
@@ -2927,12 +2929,13 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   else if (strequal(conn->protostr, "TFTP")) {
 #ifndef CURL_DISABLE_TFTP
     char *type;
+    conn->socktype = SOCK_DGRAM; /* UDP datagram based */
     conn->protocol |= PROT_TFTP;
     conn->port = PORT_TFTP;
     conn->remote_port = PORT_TFTP;
     conn->curl_connect = Curl_tftp_connect;
     conn->curl_do = Curl_tftp;
-    conn->curl_done = Curl_tftp_done; 
+    conn->curl_done = Curl_tftp_done;
     /* TFTP URLs support an extension like ";mode=<typecode>" that
      * we'll try to get now! */
     type=strstr(conn->path, ";mode=");

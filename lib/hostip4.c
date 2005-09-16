@@ -423,10 +423,10 @@ Curl_addrinfo *Curl_he2ai(struct hostent *he, int port)
       prevai->ai_next = ai;
 
     ai->ai_family = AF_INET;              /* we only support this */
-    if(port == PORT_TFTP)
-      ai->ai_socktype = SOCK_DGRAM;
-    else
-      ai->ai_socktype = SOCK_STREAM;
+
+    /* we return all names as STREAM, so when using this address for TFTP
+       the type must be ignored and conn->socktype be used instead! */
+    ai->ai_socktype = SOCK_STREAM;
 
     ai->ai_addrlen = sizeof(struct sockaddr_in);
     /* make the ai_addr point to the address immediately following this struct

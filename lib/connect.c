@@ -631,8 +631,9 @@ singleipconnect(struct connectdata *conn,
   int error;
   bool conected;
   struct SessionHandle *data = conn->data;
-  curl_socket_t sockfd = socket(ai->ai_family, ai->ai_socktype,
-                                ai->ai_protocol);
+  curl_socket_t sockfd;
+
+  sockfd = socket(ai->ai_family, conn->socktype, ai->ai_protocol);
   if (sockfd == CURL_SOCKET_BAD)
     return CURL_SOCKET_BAD;
 
@@ -661,12 +662,11 @@ singleipconnect(struct connectdata *conn,
   Curl_nonblock(sockfd, TRUE);
 
   /* Connect TCP sockets, bind UDP */
-  if(ai->ai_socktype==SOCK_STREAM) {
+  if(conn->socktype == SOCK_STREAM)
     rc = connect(sockfd, ai->ai_addr, (socklen_t)ai->ai_addrlen);
-  } else {
+  else
     rc = 0;
-  }
-	
+
   if(-1 == rc) {
     error = Curl_ourerrno();
 

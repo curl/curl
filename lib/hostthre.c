@@ -559,7 +559,10 @@ static bool init_resolve_thread (struct connectdata *conn,
    */
   thread_and_event[0] = td->thread_hnd;
   thread_and_event[1] = td->event_thread_started;
-  if (WaitForMultipleObjects(sizeof(thread_and_event) / sizeof(thread_and_event[0]), thread_and_event, FALSE, INFINITE) == WAIT_FAILED) {
+  if (WaitForMultipleObjects(sizeof(thread_and_event) /
+                             sizeof(thread_and_event[0]),
+                             thread_and_event, FALSE,
+                             INFINITE) == WAIT_FAILED) {
     /* The resolver thread has been created,
      * most probably it works now - ignoring this "minor" error
      */
@@ -804,10 +807,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = pf;
-  if(conn->protocol & PROT_TFTP)
-    hints.ai_socktype = SOCK_DGRAM;
-  else
-    hints.ai_socktype = SOCK_STREAM;
+  hints.ai_socktype = conn->socktype;
   hints.ai_flags = AI_CANONNAME;
   itoa(port, sbuf, 10);
 
