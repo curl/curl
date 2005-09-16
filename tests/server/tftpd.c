@@ -588,8 +588,8 @@ again:
   fprintf(test->server, "filename: %s\n", filename);
 
   for (cp = mode; *cp; cp++)
-    if (isupper(*cp))
-      *cp = tolower(*cp);
+    if (isupper((int)*cp))
+      *cp = tolower((int)*cp);
 
   /* store input protocol */
   fprintf(test->server, "mode: %s\n", mode);
