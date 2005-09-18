@@ -269,3 +269,50 @@ AC_DEFUN([CARES_CHECK_CONSTANT], [
 ])
 
 
+dnl This macro determines how many parameters getservbyport_r takes
+AC_DEFUN([CARES_CHECK_GETSERVBYPORT_R], [
+  AC_MSG_CHECKING([how many arguments getservbyport_r takes])
+  AC_TRY_COMPILE(
+    [#include <netdb.h>],
+    [
+      int p1, p5;
+      char *p2, p4[4096];
+      struct servent *p3, *p6;
+      getservbyport_r(p1, p2, p3, p4, p5, &p6);
+    ], ac_func_getservbyport_r=6,
+    [AC_TRY_COMPILE(
+      [#include <netdb.h>],
+      [
+        int p1, p5;
+        char *p2, p4[4096];
+        struct servent *p3;
+        getservbyport_r(p1, p2, p3, p4, p5);
+      ], ac_func_getservbyport_r=5,
+      [AC_TRY_COMPILE(
+        [#include <netdb.h>],
+        [
+          int p1;
+          char *p2;
+          struct servent *p3;
+          struct servent_data p4;
+          getservbyport_r(p1, p2, p3, &p4);
+        ], ac_func_getservbyport_r=4, ac_func_getservbyport_r=0
+      )]
+    )]
+  )
+if test $ac_func_getservbyport_r != "0" ; then
+  AC_MSG_RESULT($ac_func_getservbyport_r)
+  AC_DEFINE(HAVE_GETSERVBYPORT_R, 1, [Specifies whether getservbyport_r is present])
+  AC_DEFINE_UNQUOTED(GETSERVBYPORT_R_ARGS, $ac_func_getservbyport_r, [Specifies the number of arguments to 
+getservbyport_r])
+  if test $ac_func_getservbyport_r = "4" ; then
+   AC_DEFINE(GETSERVBYPORT_R_BUFSIZE, sizeof(struct servent_data), [Specifies the size of the buffer to pass to 
+getservbyport_r])
+  else
+   AC_DEFINE(GETSERVBYPORT_R_BUFSIZE, 4096, [Specifies the size of the buffer to pass to getservbyport_r])
+  fi
+else
+  AC_MSG_RESULT([not found])
+fi
+])
+

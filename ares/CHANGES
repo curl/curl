@@ -1,5 +1,12 @@
   Changelog for the c-ares project
 
+* September 18
+
+- Added constants that will be used by ares_getaddrinfo
+
+- Made ares_getnameinfo use the reentrant getservbyport (getservbyport_r) if it is
+  available to ensure it works properly in a threaded environment.
+
 * September 10
 
 - configure fix for detecting a member in the sockaddr_in6 struct which failed

@@ -256,7 +256,16 @@ static char *lookup_service(unsigned short port, int flags, char *buf)
         {
           struct servent *se;
           const char *proto;
- 
+#if GETSERVBYPORT_R_ARGS == 6
+          struct servent ret;
+          char buf[4096];
+          int len = 4096;
+#elif GETSERVBYPORT_R_ARGS == 5
+          char buf[4096];
+          int len = 4096;
+#elif GETSERVBYPORT_R_ARGS == 4
+          struct servent_data sed;
+#endif 
           if (flags & ARES_NI_UDP)
             proto = "udp";
           else if (flags & ARES_NI_SCTP)
@@ -265,7 +274,23 @@ static char *lookup_service(unsigned short port, int flags, char *buf)
             proto = "dccp";
           else
             proto = "tcp";
+#ifdef HAVE_GETSERVBYPORT_R
+  #if GETSERVBYPORT_R_ARGS == 6
+    if (getservbyport_r(port, proto, se, buf, len, &ret))
+      se = NULL;
+  #elif GETSERVBYPORT_R_ARGS == 5
+    se = getservbyport_r(port, proto, se, buf, len);
+  #elif GETSERVBYPORT_R_ARGS == 4
+    if (getservbyport_r(port, proto, se, &sed) == -1)
+      se = NULL;
+  #else
+    /* Lets just hope the OS uses TLS! */   
+    se = getservbyport(port, proto);
+  #endif
+#else
+          /* Lets just hope the OS uses TLS! */
           se = getservbyport(port, proto);
+#endif
           if (se && se->s_name)
             strcpy(buf, se->s_name);
           else

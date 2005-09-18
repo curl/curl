@@ -347,6 +347,9 @@ AC_CHECK_SIZEOF(struct in_addr, ,
 
 AC_CHECK_FUNCS([bitncmp if_indextoname])
 
+dnl God bless non-standardized functions! We need to see which getservbyport_r variant is available
+CARES_CHECK_GETSERVBYPORT_R
+
 CURL_CHECK_NONBLOCKING_SOCKET
 
 AC_OUTPUT(Makefile)
