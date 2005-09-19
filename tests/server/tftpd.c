@@ -98,6 +98,9 @@
 #include "getpart.h"
 #include "util.h"
 
+/* include memdebug.h last */
+#include "memdebug.h"
+
 struct testcase {
   char *buffer;   /* holds the file data to send to the client */
   size_t bufsize; /* size of the data in buffer */
@@ -509,10 +512,6 @@ int main(int argc, char **argv)
   do {
     FILE *server;
 
-    server = fopen(REQUEST_DUMP, "ab");
-    if(!server)
-      break;
-
     fromlen = sizeof(from);
     n = recvfrom(sock, buf, sizeof (buf), 0,
                  (struct sockaddr *)&from, &fromlen);
@@ -533,13 +532,19 @@ int main(int argc, char **argv)
       logmsg("connect: fail\n");
       return 1;
     }
+    maxtimeout = 5*TIMEOUT;
 
     tp = (struct tftphdr *)buf;
     tp->th_opcode = ntohs(tp->th_opcode);
     if (tp->th_opcode == RRQ || tp->th_opcode == WRQ) {
       memset(&test, 0, sizeof(test));
+      server = fopen(REQUEST_DUMP, "ab");
+      if(!server)
+        break;
       test.server = server;
       tftp(&test, tp, n);
+      if(test.buffer)
+        free(test.buffer);
     }
     fclose(server);
     sclose(peer);
@@ -612,6 +617,7 @@ again:
     recvtftp(test, pf);
   else
     sendtftp(test, pf);
+
   return 0;
 }
 
@@ -697,6 +703,8 @@ static void timer(int signum)
 {
   (void)signum;
 
+  logmsg("alarm!");
+
   timeout += rexmtval;
   if (timeout >= maxtimeout)
     exit(1);
@@ -720,7 +728,7 @@ static void sendtftp(struct testcase *test, struct formats *pf)
     size = readit(test, &dp, pf->f_convert);
     if (size < 0) {
       nak(errno + 100);
-      goto abort;
+      return;
     }
     dp->th_opcode = htons((u_short)DATA);
     dp->th_block = htons((u_short)block);
@@ -730,7 +738,7 @@ static void sendtftp(struct testcase *test, struct formats *pf)
     send_data:
     if (send(peer, dp, size + 4, 0) != size + 4) {
       logmsg("write\n");
-      goto abort;
+      return;
     }
     read_ahead(test, pf->f_convert);
     for ( ; ; ) {
@@ -739,13 +747,15 @@ static void sendtftp(struct testcase *test, struct formats *pf)
       alarm(0);
       if (n < 0) {
         logmsg("read: fail\n");
-        goto abort;
+        return;
       }
       ap->th_opcode = ntohs((u_short)ap->th_opcode);
       ap->th_block = ntohs((u_short)ap->th_block);
 
-      if (ap->th_opcode == ERROR)
-        goto abort;
+      if (ap->th_opcode == ERROR) {
+        logmsg("got ERROR");
+        return;
+      }
 
       if (ap->th_opcode == ACK) {
         if (ap->th_block == block) {
@@ -761,8 +771,6 @@ static void sendtftp(struct testcase *test, struct formats *pf)
     }
     block++;
   } while (size == SEGSIZE);
-  abort:
-  ;
 }
 
 static void justquit(int signum)
