@@ -387,6 +387,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     ULONG attrs;
     const char *user;
     int domlen;
+    TimeStamp tsDummy; /* For Windows 9x compatibility of SPPI calls */
 
     ntlm_sspi_cleanup(ntlm);
 
@@ -430,8 +431,8 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 
     if (AcquireCredentialsHandle(
           NULL, (char *)"NTLM", SECPKG_CRED_OUTBOUND, NULL, ntlm->p_identity,
-          NULL, NULL, &ntlm->handle, NULL
-        ) != SEC_E_OK) {
+          NULL, NULL, &ntlm->handle, &tsDummy
+          ) != SEC_E_OK) {
       return CURLE_OUT_OF_MEMORY;
     }
 
@@ -447,12 +448,22 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
                                        ISC_REQ_REPLAY_DETECT |
                                        ISC_REQ_CONNECTION,
                                        0, SECURITY_NETWORK_DREP, NULL, 0,
-                                       &ntlm->c_handle, &desc, &attrs, NULL
-                                      );
+                                       &ntlm->c_handle, &desc, &attrs, &tsDummy
+      );
 
     if (status == SEC_I_COMPLETE_AND_CONTINUE ||
         status == SEC_I_CONTINUE_NEEDED) {
-      CompleteAuthToken(&ntlm->c_handle, &desc);
+      /* CompleteAuthToken() is not present in Win9x, so load it dynamically */
+      SECURITY_STATUS (SEC_ENTRY * pCompleteAuthToken)
+        (PCtxtHandle,PSecBufferDesc);
+      HMODULE hSecur32 = GetModuleHandle("secur32.dll");
+      if (hSecur32 != NULL) {
+        *((void**)&pCompleteAuthToken) =
+          (void*)GetProcAddress(hSecur32, "CompleteAuthToken");
+        if( pCompleteAuthToken != NULL ) {
+          pCompleteAuthToken(&ntlm->c_handle, &desc);
+        }
+      }
     }
     else if (status != SEC_E_OK) {
       FreeCredentialsHandle(&ntlm->handle);
@@ -553,6 +564,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     SecBufferDesc type_2_desc, type_3_desc;
     SECURITY_STATUS status;
     ULONG attrs;
+    TimeStamp tsDummy; /* For Windows 9x compatibility of SPPI calls */
 
     type_2_desc.ulVersion  = type_3_desc.ulVersion  = SECBUFFER_VERSION;
     type_2_desc.cBuffers   = type_3_desc.cBuffers   = 1;
@@ -573,7 +585,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
                                        ISC_REQ_CONNECTION,
                                        0, SECURITY_NETWORK_DREP, &type_2_desc,
                                        0, &ntlm->c_handle, &type_3_desc,
-                                       &attrs, NULL);
+                                       &attrs, &tsDummy);
 
     if (status != SEC_E_OK)
       return CURLE_RECV_ERROR;

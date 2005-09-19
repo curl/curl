@@ -7,6 +7,9 @@
                                   Changelog
 
 
+Daniel (19 September 2005)
+- Dmitry Bartsevich made the SSPI support work on Windows 9x as well.
+
 Daniel (15 September 2005)
 - Added a TFTP server to the test suite and made the test suite capable of
   using it.

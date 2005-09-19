@@ -16,6 +16,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o SSPI works even for Windows 9x
  o crash in --dump-header on FTP
  o test 56 runs better
 
@@ -28,6 +29,6 @@ Other curl-related news since the previous public release:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- o John Kelly, Nicolas François, Scott Davis, Ben Madsen
+ o John Kelly, Nicolas François, Scott Davis, Ben Madsen, Dmitry Bartsevich
 
         Thanks! (and sorry if I forgot to mention someone)
