@@ -1690,7 +1690,7 @@ AC_HELP_STRING([--disable-ares],[Disable ares for name lookups]),
   *)   AC_MSG_RESULT(yes)
 
        if test "x$IPV6_ENABLED" = "x1"; then
-         AC_MSG_ERROR([ares doesn't work with ipv6, disable ipv6 to use ares])
+         AC_MSG_NOTICE([ares may not work properly with ipv6])
        fi
 
        AC_DEFINE(USE_ARES, 1, [Define if you want to enable ares support])
