@@ -454,7 +454,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     if (status == SEC_I_COMPLETE_AND_CONTINUE ||
         status == SEC_I_CONTINUE_NEEDED) {
       /* CompleteAuthToken() is not present in Win9x, so load it dynamically */
-      SECURITY_STATUS (SEC_ENTRY * pCompleteAuthToken)
+      SECURITY_STATUS (__stdcall * pCompleteAuthToken)
         (PCtxtHandle,PSecBufferDesc);
       HMODULE hSecur32 = GetModuleHandle("secur32.dll");
       if (hSecur32 != NULL) {
