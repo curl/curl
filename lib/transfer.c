@@ -1622,9 +1622,11 @@ Transfer(struct connectdata *conn)
 CURLcode Curl_pretransfer(struct SessionHandle *data)
 {
   CURLcode res;
-  if(!data->change.url)
+  if(!data->change.url) {
     /* we can't do anything wihout URL */
+    failf(data, "No URL set!\n");
     return CURLE_URL_MALFORMAT;
+  }
 
   /* Init the SSL session ID cache here. We do it here since we want to do it
      after the *_setopt() calls (that could change the size of the cache) but
