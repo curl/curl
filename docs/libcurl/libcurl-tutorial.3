@@ -243,7 +243,7 @@ where it'll store a human readable error message as well.
 If you then want to transfer another file, the handle is ready to be used
 again. Mind you, it is even preferred that you re-use an existing handle if
 you intend to make another transfer. libcurl will then attempt to re-use the
-previous
+previous connection.
 
 .SH "Multi-threading Issues"
 The first basic rule is that you must \fBnever\fP share a libcurl handle (be
