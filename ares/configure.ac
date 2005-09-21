@@ -176,7 +176,6 @@ CARES_CHECK_STRUCT(
        [Define to 1 if you have struct sockaddr_in6.]) ac_have_sockaddr_in6=yes
 )
 
-if test "$ac_have_sockaddr_in6" = "yes" ; then
 AC_CHECK_MEMBER(struct sockaddr_in6.sin6_scope_id,
     AC_DEFINE_UNQUOTED(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID,1,
       [Define to 1 if your struct sockaddr_in6 has sin6_scope_id.])
@@ -191,9 +190,7 @@ AC_CHECK_MEMBER(struct sockaddr_in6.sin6_scope_id,
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-  ], [sockaddr_in6], [sin6_scope_id],
-)
-fi
+  ])
 
 dnl check for the addrinfo structure
 AC_CHECK_MEMBER(struct addrinfo.ai_flags,
