@@ -66,6 +66,7 @@ AC_CHECK_HEADERS(
        sys/select.h \
        sys/socket.h \
        sys/ioctl.h \
+       netdb.h \
        winsock.h \
        netinet/in.h \
        net/if.h \
@@ -195,7 +196,9 @@ AC_CHECK_MEMBER(struct sockaddr_in6.sin6_scope_id,
 fi
 
 dnl check for the addrinfo structure
-CARES_CHECK_STRUCT(
+AC_CHECK_MEMBER(struct addrinfo.ai_flags,
+     AC_DEFINE_UNQUOTED(HAVE_STRUCT_ADDRINFO,1,
+       [Define to 1 if you have struct addrinfo.]),,
   [
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -206,9 +209,13 @@ CARES_CHECK_STRUCT(
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-  ], [addrinfo], 
-     AC_DEFINE_UNQUOTED(HAVE_STRUCT_ADDRINFO,1,
-       [Define to 1 if you have struct addrinfo.])
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
+  ]
 )
 
 dnl check for inet_pton
