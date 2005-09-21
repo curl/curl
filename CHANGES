@@ -7,6 +7,21 @@
                                   Changelog
 
 
+Daniel (21 September 2005)
+- Fixed "cut off" sentence in the libcurl-tutorial man page:
+  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=329305
+
+- Clarified in the curl_easy_setopt man page what the default
+  CURLOPT_WRITEFUNCTION and CURLOPT_WRITEDATA mean:
+  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=329311
+
+- Clarified in the curl_easy_setopt man page that CURLOPT_ERRORBUFFER
+  sometimes doesn't fill in the buffer even though it is supposed to:
+  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=329313
+
+- When CURLE_URL_MALFORMAT is returned due to a missing URL, it now has an
+  error string set.
+
 Daniel (19 September 2005)
 - Dmitry Bartsevich made the SSPI support work on Windows 9x as well.
 
