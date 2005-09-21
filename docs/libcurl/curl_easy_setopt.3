@@ -96,6 +96,10 @@ transfer and return \fICURLE_WRITE_ERROR\fP.
 This function may be called with zero bytes data if the transfered file is
 empty.
 
+Set this option to NULL to get the internal default function. The internal
+default function will write the data to the FILE * given with
+\fICURLOPT_WRITEDATA\fP.
+
 Set the \fIstream\fP argument with the \fICURLOPT_WRITEDATA\fP option.
 
 \fBNOTE:\fP you will be passed as much data as possible in all invokes, but
@@ -107,6 +111,9 @@ Data pointer to pass to the file write function. Note that if you specify the
 \fICURLOPT_WRITEFUNCTION\fP, this is the pointer you'll get as input. If you
 don't use a callback, you must pass a 'FILE *' as libcurl will pass this to
 fwrite() when writing data.
+
+The internal \fICURLOPT_WRITEFUNCTION\fP will write the data to the FILE *
+given with this option, or to stdout if this option hasn't been set.
 
 \fBNOTE:\fP If you're using libcurl as a win32 DLL, you MUST use the
 \fICURLOPT_WRITEFUNCTION\fP if you set this option or you will experience
