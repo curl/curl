@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_easy_setopt 3 "4 Sep 2005" "libcurl 7.14.2" "libcurl Manual"
+.TH curl_easy_setopt 3 "22 Sep 2005" "libcurl 7.14.2" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - set options for a curl easy handle
 .SH SYNOPSIS
@@ -136,13 +136,18 @@ server expected it, like when you've told you will upload N bytes and you
 upload less than N bytes), you may experience that the server "hangs" waiting
 for the rest of the data that won't come.
 
-In libcurl 7.12.1 and later, the read callback may return
-\fICURL_READFUNC_ABORT\fP to stop the current operation at once, with a
-\fICURLE_ABORTED_BY_CALLBACK\fP error code from the transfer.
+The read callback may return \fICURL_READFUNC_ABORT\fP to stop the current
+operation immediately, resulting in a \fICURLE_ABORTED_BY_CALLBACK\fP error
+code from the transfer (Added in 7.12.1)
+
+If you set the callback pointer to NULL, or doesn't set it at all, the default
+internal read function will be used. It is simply doing an fread() on the FILE
+* stream set with \fICURLOPT_READDATA\fP.
 .IP CURLOPT_READDATA
 Data pointer to pass to the file read function. If you use the
 \fICURLOPT_READFUNCTION\fP option, this is the pointer you'll get as input. If
-you don't specify a read callback, this must be a valid FILE *.
+you don't specify a read callback but instead rely on the default internal
+read function, this data must be a valid readable FILE *.
 
 If you're using libcurl as a win32 DLL, you MUST use a
 \fICURLOPT_READFUNCTION\fP if you set this option.
