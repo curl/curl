@@ -27,7 +27,7 @@ Other curl-related news since the previous public release:
  o All curl relatd mailing list information and subscribers on cool.haxx.se
    were lost due to a malicious user exploiting a security hole on the
    server. Attempts have been made to put back susbcribers on the lists, but
-   many have been lost.
+   many have been lost: http://curl.haxx.se/mail/lost.html
  o New S-Lang binding: http://curl.haxx.se/libcurl/slang/
  o TclCurl 0.14.1: http://personal1.iddeo.es/andresgarci/tclcurl/english/
  o pycurl 7.14.1: http://pycurl.sf.net/
@@ -35,6 +35,7 @@ Other curl-related news since the previous public release:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- o John Kelly, Nicolas François, Scott Davis, Ben Madsen, Dmitry Bartsevich
+ o John Kelly, Nicolas François, Scott Davis, Ben Madsen, Dmitry Bartsevich,
+   David Yan
 
         Thanks! (and sorry if I forgot to mention someone)
