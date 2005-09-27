@@ -880,11 +880,11 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               /* Content-Range: bytes [num]-
                  Content-Range: bytes: [num]-
 
-                 The second format was added August 1st 2000 by Igor
-                 Khristophorov since Sun's webserver JavaWebServer/1.1.1
-                 obviously sends the header this way! :-( */
+                 The second format was added since Sun's webserver
+                 JavaWebServer/1.1.1 obviously sends the header this way!
+              */
 
-              char *ptr = strstr(k->p, "bytes");
+              char *ptr = Curl_strcasestr(k->p, "bytes");
               ptr+=5;
 
               if(*ptr == ':')

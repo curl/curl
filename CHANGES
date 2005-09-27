@@ -8,6 +8,11 @@
 
 
 Daniel (27 September 2005)
+- An anonymous submitter filed bug #1299181
+  (http://curl.haxx.se/bug/view.cgi?id=1299181) that identified a silly
+  problem with Content-Range: headers with the 'bytes' keyword written in a
+  different case than all lowercase! It would cause a segfault!
+
 - TJ Saunders of the proftpd project identified and pointed out problems with
   the modified FTPS negotiation change of August 19 2005. Thus, we revert the
   change back to pre-7.14.1 status.

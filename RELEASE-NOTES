@@ -16,6 +16,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o HTTP Content-Range header parser crash
  o FTPS negotiation timeouts/errors
  o SSPI works even for Windows 9x
  o crash in --dump-header on FTP
@@ -23,6 +24,10 @@ This release includes the following bugfixes:
 
 Other curl-related news since the previous public release:
 
+ o All curl relatd mailing list information and subscribers on cool.haxx.se
+   were lost due to a malicious user exploiting a security hole on the
+   server. Attempts have been made to put back susbcribers on the lists, but
+   many have been lost.
  o New S-Lang binding: http://curl.haxx.se/libcurl/slang/
  o TclCurl 0.14.1: http://personal1.iddeo.es/andresgarci/tclcurl/english/
  o pycurl 7.14.1: http://pycurl.sf.net/
