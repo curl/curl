@@ -7,6 +7,11 @@
                                   Changelog
 
 
+Daniel (27 September 2005)
+- TJ Saunders of the proftpd project identified and pointed out problems with
+  the modified FTPS negotiation change of August 19 2005. Thus, we revert the
+  change back to pre-7.14.1 status.
+
 Daniel (21 September 2005)
 - Fixed "cut off" sentence in the libcurl-tutorial man page:
   http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=329305

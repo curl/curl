@@ -16,6 +16,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o FTPS negotiation timeouts/errors
  o SSPI works even for Windows 9x
  o crash in --dump-header on FTP
  o test 56 runs better
