@@ -2001,7 +2001,8 @@ static CURLcode ConnectPlease(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   char *hostname = data->change.proxy?conn->proxy.name:conn->host.name;
 
-  infof(data, "About to connect() to %s port %d\n",
+  infof(data, "About to connect() to %s%s port %d\n",
+        data->change.proxy?"proxy ":"",
         hostname, conn->port);
 
   /*************************************************************
