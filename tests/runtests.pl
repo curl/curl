@@ -733,7 +733,7 @@ sub runtftpserver {
     if($ipv6) {
         $flag .="--ipv6 ";
     }
-    $cmd="$srcdir/server/tftpd --pidfile $pidfile $flag $port";
+    $cmd="./server/tftpd --pidfile $pidfile $flag $port";
 
     unlink($pidfile);
 
