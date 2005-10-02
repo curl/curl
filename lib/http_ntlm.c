@@ -458,8 +458,9 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
         (PCtxtHandle,PSecBufferDesc);
       HMODULE hSecur32 = GetModuleHandle("secur32.dll");
       if (hSecur32 != NULL) {
-        *((void**)&pCompleteAuthToken) =
-          (void*)GetProcAddress(hSecur32, "CompleteAuthToken");
+        pCompleteAuthToken =
+          (SECURITY_STATUS (__stdcall *)(PCtxtHandle,PSecBufferDesc))
+            GetProcAddress(hSecur32, "CompleteAuthToken");
         if( pCompleteAuthToken != NULL ) {
           pCompleteAuthToken(&ntlm->c_handle, &desc);
         }
