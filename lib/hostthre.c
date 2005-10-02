@@ -88,6 +88,10 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
+#if defined(_MSC_VER) && defined(CURL_NO__BEGINTHREADEX)
+#pragma message ("No _beginthreadex() available in this RTL")
+#endif
+
 /***********************************************************************
  * Only for Windows threaded name resolves builds
  **********************************************************************/

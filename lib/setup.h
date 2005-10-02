@@ -262,6 +262,14 @@ typedef int curl_socket_t;
 #endif
 #endif
 
+/* "cl -ML" or "cl -MLd" implies a single-threaded runtime library where
+   _beginthreadex() is not available */
+#if defined(_MSC_VER) && !defined(_MT) && !defined(USE_ARES)
+#undef USE_THREADING_GETADDRINFO
+#undef USE_THREADING_GETHOSTBYNAME
+#define CURL_NO__BEGINTHREADEX
+#endif
+
 #ifdef mpeix
 #define IOCTL_3_ARGS
 #endif
