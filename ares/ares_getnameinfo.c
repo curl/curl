@@ -269,6 +269,7 @@ static char *lookup_service(unsigned short port, int flags,
           char buf[4096];
           int len = 4096;
 #elif GETSERVBYPORT_R_ARGS == 4
+          struct servent ret;
           struct servent_data sed;
 #endif
           if (flags & ARES_NI_UDP)
@@ -287,7 +288,7 @@ static char *lookup_service(unsigned short port, int flags,
 #elif GETSERVBYPORT_R_ARGS == 5
           se = getservbyport_r(port, proto, se, buf, len);
 #elif GETSERVBYPORT_R_ARGS == 4
-          se = &sed;
+          se = &ret;
           if (getservbyport_r(port, proto, se, &sed) == -1)
             se = NULL;
 #else
