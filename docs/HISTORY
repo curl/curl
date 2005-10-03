@@ -145,3 +145,9 @@ August 2004:
 April 2005:
 
 GnuTLS can now optionally be used for the secure layer when curl is built.
+
+September 2005:
+
+TFTP support was added.
+
+More than 100,000 unique visitors of the curl web site. 25 mirrors.
