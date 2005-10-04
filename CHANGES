@@ -7,6 +7,11 @@
                                   Changelog
 
 
+
+Daniel (4 October 2005)
+- Michael Wallner reported that the date parser had wrong offset stored for
+  the MEST and CEST time zones.
+
 Daniel (27 September 2005)
 - David Yan filed bug #1299181 (http://curl.haxx.se/bug/view.cgi?id=1299181)
   that identified a silly problem with Content-Range: headers with the 'bytes'

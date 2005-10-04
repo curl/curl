@@ -130,8 +130,8 @@ static const struct tzinfo tz[]= {
   {"CET", -60},            /* Central European */
   {"MET", -60},            /* Middle European */
   {"MEWT", -60},           /* Middle European Winter */
-  {"MEST", -120 tDAYZONE}, /* Middle European Summer */
-  {"CEST", -120 tDAYZONE}, /* Central European Summer */
+  {"MEST", -60 tDAYZONE},  /* Middle European Summer */
+  {"CEST", -60 tDAYZONE},  /* Central European Summer */
   {"MESZ", -60 tDAYZONE},  /* Middle European Summer */
   {"FWT", -60},            /* French Winter */
   {"FST", -60 tDAYZONE},   /* French Summer */
