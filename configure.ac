@@ -122,13 +122,13 @@ case $host in
   *-*-mingw*)
     AC_DEFINE(BUILDING_LIBCURL, 1, [when building libcurl itself])
     AC_MSG_RESULT(yes)
-    AC_MSG_CHECKING([if we need CURL_STATICLIB])
+    AC_MSG_CHECKING([if we need CURL_STATICLIB])
     if test "X$enable_shared" = "Xno"
     then
       AC_DEFINE(CURL_STATICLIB, 1, [when not building a shared library])
       AC_MSG_RESULT(yes)
-    else
-      AC_MSG_RESULT(no)
+    else
+      AC_MSG_RESULT(no)
     fi
     ;;
   *)
