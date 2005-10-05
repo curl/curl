@@ -1798,7 +1798,7 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
       switch(data->set.timecondition) {
       case CURL_TIMECOND_IFMODSINCE:
       default:
-        if(data->info.filetime < data->set.timevalue) {
+        if(data->info.filetime <= data->set.timevalue) {
           infof(data, "The requested document is not new enough\n");
           ftp->no_transfer = TRUE; /* mark this to not transfer data */
           state(conn, FTP_STOP);
