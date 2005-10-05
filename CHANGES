@@ -8,7 +8,16 @@
 
 
 
+Daniel (5 October 2005)
+- Darryl House reported a problem with using -z to download files from FTP.
+  It turned out that if the given time stamp was exact the same as the remote
+  time stamp, the file would still wrongly be downloaded. Added test case 272
+  to verify.
+
 Daniel (4 October 2005)
+- Domenico Andreoli fixed a man page malformat and removed odd (0xa0) bytes
+  from the configure script.
+
 - Michael Wallner reported that the date parser had wrong offset stored for
   the MEST and CEST time zones.
 

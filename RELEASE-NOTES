@@ -16,6 +16,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o Weird characters removed from the configure script
+ o Fixed time zone offsets for MEST and CEST for the time parser
  o HTTP Content-Range header parser crash
  o FTPS negotiation timeouts/errors
  o SSPI works even for Windows 9x
@@ -37,6 +39,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  o John Kelly, Nicolas François, Scott Davis, Ben Madsen, Dmitry Bartsevich,
-   David Yan, Michael Wallner
+   David Yan, Michael Wallner, Domenico Andreoli
 
         Thanks! (and sorry if I forgot to mention someone)
