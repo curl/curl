@@ -1,4 +1,4 @@
-Curl and libcurl 7.14.2
+Curl and libcurl 7.15.0
 
  Public curl release number:               90
  Releases counted from the very beginning: 117
@@ -16,6 +16,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o -z over FTP now considers equal timestamps "not modified since"
  o Weird characters removed from the configure script
  o Fixed time zone offsets for MEST and CEST for the time parser
  o HTTP Content-Range header parser crash
@@ -39,6 +40,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  o John Kelly, Nicolas François, Scott Davis, Ben Madsen, Dmitry Bartsevich,
-   David Yan, Michael Wallner, Domenico Andreoli
+   David Yan, Michael Wallner, Domenico Andreoli, Darryl House
 
         Thanks! (and sorry if I forgot to mention someone)

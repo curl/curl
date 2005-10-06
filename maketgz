@@ -25,7 +25,6 @@ CHEADER=src/version.h
 
 # Replace version number in header file:
 sed -e 's/^#define LIBCURL_VERSION .*/#define LIBCURL_VERSION "'$libversion'"/g' \
-    -e 's/^#define LIBCURL_VERSION_NUM .*/#define LIBCURL_VERSION_NUM 0x'$numeric'/g' \
     -e 's/^#define LIBCURL_VERSION_MAJOR .*/#define LIBCURL_VERSION_MAJOR '$major'/g' \
     -e 's/^#define LIBCURL_VERSION_MINOR .*/#define LIBCURL_VERSION_MINOR '$minor'/g' \
     -e 's/^#define LIBCURL_VERSION_PATCH .*/#define LIBCURL_VERSION_PATCH '$patch'/g' \
