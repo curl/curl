@@ -153,28 +153,28 @@ curk_easy_perform()
     |--|--|--|--ST
           |--|--|--TT
     |--|--|--|--|--RT
-
+.FI
 .IP NT
-CURLINFO_NAMELOOKUP_TIME. The time it took from the start until the name
+\fICURLINFO_NAMELOOKUP_TIME\fP. The time it took from the start until the name
 resolving was completed.
 .IP CT
-CURLINFO_CONNECT_TIME. The time it took from the start until the connect to
-the remote host (or proxy) was completed.
+\fICURLINFO_CONNECT_TIME\fP. The time it took from the start until the connect
+to the remote host (or proxy) was completed.
 .IP PT
-CURLINFO_PRETRANSFER_TIME. The time it took from the start until the file
-transfer is just about to begin. This includes all pre-transfer commands and
-negotiations that are specific to the particular protocol(s) involved.
+\fICURLINFO_PRETRANSFER_TIME\fP. The time it took from the start until the
+file transfer is just about to begin. This includes all pre-transfer commands
+and negotiations that are specific to the particular protocol(s) involved.
 .IP ST
-CURLINFO_STARTTRANSFER_TIME. The time it took from the start until the first
-byte is just about to be transferred.
+\fICURLINFO_STARTTRANSFER_TIME\fP. The time it took from the start until the
+first byte is just about to be transferred.
 .IP TT
-CURLINFO_TOTAL_TIME. Time of the previous transfer. This time does not include
-the connect time (CT), so if you want the complete operation time, you should
-add that.
+\fICURLINFO_TOTAL_TIME\fP. Time of the previous transfer. This time does not
+include the connect time (CT), so if you want the complete operation time, you
+should add that.
 .IP RT
-CURLINFO_REDIRECT_TIME. The time it took for all redirection steps include
-name lookup, connect, pretransfer and transfer before final transaction was
-started. So, this is zero if no redirection took place.
+\fICURLINFO_REDIRECT_TIME\fP. The time it took for all redirection steps
+include name lookup, connect, pretransfer and transfer before final
+transaction was started. So, this is zero if no redirection took place.
 .SH RETURN VALUE
 If the operation was successful, CURLE_OK is returned. Otherwise an
 appropriate error code will be returned.
