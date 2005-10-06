@@ -52,8 +52,7 @@ PDFPAGES = curl_easy_cleanup.pdf curl_easy_getinfo.pdf			\
 
 CLEANFILES = $(HTMLPAGES) $(PDFPAGES)
 
-EXTRA_DIST = $(man_MANS) $(HTMLPAGES) index.html $(PDFPAGES) libcurl.m4 \
- getinfo-times
+EXTRA_DIST = $(man_MANS) $(HTMLPAGES) index.html $(PDFPAGES) libcurl.m4
 
 MAN2HTML= roffit --mandir=. < $< >$@
 
