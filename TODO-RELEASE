@@ -1,12 +1,7 @@
-Issues not sorted in any particular order.
-
-To get fixed in 7.14.1 (planned release: August 2005)
+To get fixed in 7.15.0 (planned release: November 2005)
 ======================
 
-To get fixed in 7.14.2 (planned release: October 2005)
-======================
-
-60 - CONNECT 407 responses that kills the connection
+60 - CONNECT 407 responses that kills the connection (not very likely though)
 
 63 - 
 
