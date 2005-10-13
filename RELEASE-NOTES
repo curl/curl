@@ -1,46 +1,29 @@
-Curl and libcurl 7.15.0
+Curl and libcurl 7.15.1
 
- Public curl release number:               90
- Releases counted from the very beginning: 117
+ Public curl release number:               91
+ Releases counted from the very beginning: 118
  Available command line options:           109
  Available curl_easy_setopt() options:     124
  Number of public functions in libcurl:    46
  Amount of public web site mirrors:        24
  Number of known libcurl bindings:         32
- Number of contributors:                   451
+ Number of contributors:                   459
 
 This release includes the following changes:
 
- o --ftp-skip-pasv-ip / CURLOPT_FTP_SKIP_PASV_IP (sponsored by CU*Answers)
- o TFTP support added
+ o 
 
 This release includes the following bugfixes:
 
- o user+domain name buffer overflow in the NTLM code (security flaw)
- o -z over FTP now considers equal timestamps "not modified since"
- o Weird characters removed from the configure script
- o Fixed time zone offsets for MEST and CEST for the time parser
- o HTTP Content-Range header parser crash
- o FTPS negotiation timeouts/errors
- o SSPI works even for Windows 9x
- o crash in --dump-header on FTP
- o test 56 runs better
+ o 
 
 Other curl-related news since the previous public release:
 
- o http://curl.freemirror.de/ is a new German mirror
- o All curl relatd mailing list information and subscribers on cool.haxx.se
-   were lost due to a malicious user exploiting a security hole on the
-   server. Attempts have been made to put back susbcribers on the lists, but
-   many have been lost: http://curl.haxx.se/mail/lost.html
- o New S-Lang binding: http://curl.haxx.se/libcurl/slang/
- o TclCurl 0.14.1: http://personal1.iddeo.es/andresgarci/tclcurl/english/
- o pycurl 7.14.1: http://pycurl.sf.net/
+ o 
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- o John Kelly, Nicolas François, Scott Davis, Ben Madsen, Dmitry Bartsevich,
-   David Yan, Michael Wallner, Domenico Andreoli, Darryl House
+ o 
 
         Thanks! (and sorry if I forgot to mention someone)
