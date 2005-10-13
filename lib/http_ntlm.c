@@ -713,6 +713,13 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     size=64;
     ntlmbuf[62]=ntlmbuf[63]=0;
 
+    /* Make sure that the user and domain strings fit in the target buffer
+       before we copy them there. */
+    if(size + userlen + domlen >= sizeof(ntlmbuf)) {
+      failf(conn->data, "user + domain name too big");
+      return CURLE_OUT_OF_MEMORY;
+    }
+
     memcpy(&ntlmbuf[size], domain, domlen);
     size += domlen;
 
