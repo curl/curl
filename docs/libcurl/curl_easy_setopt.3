@@ -461,7 +461,8 @@ HTTP NTLM authentication. A proprietary protocol invented and used by
 Microsoft. It uses a challenge-response and hash concept similar to Digest, to
 prevent the password from being eavesdropped.
 
-You need to build libcurl with SSL support for this option to work.
+You need to build libcurl with OpenSSL support for this option to work, or
+build libcurl on Windows.
 .IP CURLAUTH_ANY
 This is a convenience macro that sets all bits and thus makes libcurl pick any
 it finds suitable. libcurl will automatically select the one it finds most
