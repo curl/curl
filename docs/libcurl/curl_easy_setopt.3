@@ -1132,26 +1132,25 @@ socket. It will be used to seed the random engine for SSL.
 .IP CURLOPT_SSL_VERIFYHOST
 Pass a long as parameter.
 
-This option determines whether curl verifies that the server claims to be
-who you want it to be.
+This option determines whether libcurl verifies that the server cert is for
+the server it is known as.
 
-When negotiating an SSL connection, the server sends a certificate
-indicating its identity.
+When negotiating an SSL connection, the server sends a certificate indicating
+its identity.
 
-When \fICURLOPT_SSL_VERIFYHOST\fP is 2, that certificate must indicate
-that the server is the server to which you meant to connect, or the
-connection fails.
+When \fICURLOPT_SSL_VERIFYHOST\fP is 2, that certificate must indicate that
+the server is the server to which you meant to connect, or the connection
+fails.
 
-Curl considers the server the intended one when the Common Name field
-or a Subject Alternate Name field in the certificate matches the host
-name in the URL to which you told Curl to connect.
+Curl considers the server the intended one when the Common Name field or a
+Subject Alternate Name field in the certificate matches the host name in the
+URL to which you told Curl to connect.
 
-When the value is 1, the certificate must contain a Common Name field,
-but it doesn't matter what name it says.  (This is not ordinarily a
-useful setting).
+When the value is 1, the certificate must contain a Common Name field, but it
+doesn't matter what name it says.  (This is not ordinarily a useful setting).
 
-When the value is 0, the connection succeeds regardless of the names in
-the certificate.
+When the value is 0, the connection succeeds regardless of the names in the
+certificate.
 
 The default, since 7.10, is 2.
 
