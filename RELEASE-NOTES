@@ -5,7 +5,7 @@ Curl and libcurl 7.15.0
  Available command line options:           109
  Available curl_easy_setopt() options:     124
  Number of public functions in libcurl:    46
- Amount of public web site mirrors:        25
+ Amount of public web site mirrors:        24
  Number of known libcurl bindings:         32
  Number of contributors:                   451
 
@@ -16,6 +16,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o user+domain name buffer overflow in the NTLM code (security flaw)
  o -z over FTP now considers equal timestamps "not modified since"
  o Weird characters removed from the configure script
  o Fixed time zone offsets for MEST and CEST for the time parser

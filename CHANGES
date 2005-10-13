@@ -8,6 +8,22 @@
 
 
 
+Version 7.15.0 (13 October 2005)
+
+Daniel (12 October 2005)
+- Michael Sutton of iDEFENSE reported and I fixed a securitfy flaw in the NTLM
+  code that would overflow a buffer if given a too long user name or domain
+  name. This would happen if you enable NTLM authentication and either
+
+  A - pass in a user name and domain name to libcurl that together are longer
+      than 192 bytes
+
+  B - allow (lib)curl to follow HTTP "redirects" (Location: and the
+      appropriate HTTP 30x response code) and the new URL contains a URL with
+      a user name and domain name that together are longer than 192 bytes
+
+  See http://curl.haxx.se/docs/security.html for further details and updates
+
 Daniel (5 October 2005)
 - Darryl House reported a problem with using -z to download files from FTP.
   It turned out that if the given time stamp was exact the same as the remote
