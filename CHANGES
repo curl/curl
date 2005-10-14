@@ -8,6 +8,12 @@
 
 
 
+Daniel (14 October 2005)
+- Reverted the LIBCURL_VERSION_NUM change from October 6. As Dave Dribin
+  reported, the define is used by the configure script and is assumed to use
+  the 0xYYXXZZ format. This made "curl-config --vernum" fail in the 7.15.0
+  release version.
+
 Version 7.15.0 (13 October 2005)
 
 Daniel (12 October 2005)

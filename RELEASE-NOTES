@@ -15,7 +15,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o 
+ o curl-config --vernum fixed
 
 Other curl-related news since the previous public release:
 
@@ -24,6 +24,6 @@ Other curl-related news since the previous public release:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- o 
+ Dave Dribin
 
         Thanks! (and sorry if I forgot to mention someone)

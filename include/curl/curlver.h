@@ -51,8 +51,6 @@
    and it is always a greater number in a more recent release. It makes
    comparisons with greater than and less than work.
 */
-#define LIBCURL_VERSION_NUM ((LIBCURL_VERSION_MAJOR << 16) | \
-                             (LIBCURL_VERSION_MINOR << 8) | \
-                             LIBCURL_VERSION_PATCH)
+#define LIBCURL_VERSION_NUM 0x070f01
 
 #endif /* __CURL_CURLVER_H */
