@@ -67,8 +67,8 @@ USEMM_LIBS = YES
 #############################################################
 ## Nothing more to do below this line!
 
-CCNODBG    = cl.exe /MD /O2 /DNDEBUG
-CCDEBUG    = cl.exe /MDd /Od /Gm /Zi /D_DEBUG /GZ
+CCNODBG    = cl.exe /MT /O2 /DNDEBUG
+CCDEBUG    = cl.exe /MTd /Od /Gm /Zi /D_DEBUG /GZ
 CFLAGSSSL  = /DUSE_SSLEAY /I "$(OPENSSL_PATH)/inc32" /I "$(OPENSSL_PATH)/inc32/openssl"
 CFLAGSZLIB = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ /I "$(ZLIB_PATH)"
 CFLAGS     = /I. /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c /DBUILDING_LIBCURL
