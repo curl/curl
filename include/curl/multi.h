@@ -91,7 +91,7 @@ typedef int curl_socket_t;
 #endif /* HAVE_CURL_MULTI_SOCKET */
 
 typedef enum {
-  CURLM_CALL_MULTI_PERFORM=-1, /* please call curl_multi_perform() soon */
+  CURLM_CALL_MULTI_PERFORM = -1, /* please call curl_multi_perform() soon */
   CURLM_OK,
   CURLM_BAD_HANDLE,      /* the passed-in handle is not a valid CURLM handle */
   CURLM_BAD_EASY_HANDLE, /* an easy handle was not good/valid */
