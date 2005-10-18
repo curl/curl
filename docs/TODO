@@ -83,7 +83,7 @@ TODO
 
  * Support GSS/Kerberos 5 for ftp file transfer. This will allow user
    authentication and file encryption.  Possible libraries and example clients
-   are available from MIT or Heimdal. Requsted by Markus Moeller.
+   are available from MIT or Heimdal. Requested by Markus Moeller.
 
  * REST fix for servers not behaving well on >2GB requests. This should fail
    if the server doesn't set the pointer to the requested index. The tricky
@@ -190,12 +190,6 @@ TODO
 
  NEW PROTOCOLS
 
- * TFTP - RFC1350 (protocol) and RFC3617 (URI format)
-
-   Dan Fandrich: I wrote a tftp protocol module as part of the I-Boot
-   bootloader under a BSD-style license with attribution clause
-   http://download.intrinsyc.com/supported/tools/i-boot-lite/i-boot-lite-1.8/src/libs/net/tftp.c
-
  * RTSP - RFC2326 (protocol - very HTTP-like, also contains URL description)
 
  * SFTP/SCP/SSH (no RFCs for protocol nor URI/URL format). An implementation
@@ -217,7 +211,7 @@ TODO
  * Globbing support for -d and -F, as in 'curl -d "name=foo[0-9]" URL'.
    Requested by Dane Jensen and others. This is easily scripted though.
 
- * Add an option that prevents cURL from overwiting existing local files. When
+ * Add an option that prevents cURL from overwriting existing local files. When
    used, and there already is an existing file with the target file name
    (either -O or -o), a number should be appended (and increased if already
    existing). So that index.html becomes first index.html.1 and then
