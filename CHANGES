@@ -8,6 +8,12 @@
 
 
 
+Daniel (20 October 2005)
+- Temprimus improved the MSVC makefile: "makes a build option available so if
+  you set rtlibcfg=static for the make, then it would build with /MT. The
+  default behaviour is /MD (the original)."
+  http://curl.haxx.se/bug/view.cgi?id=1326665
+
 Daniel (14 October 2005)
 - Reverted the LIBCURL_VERSION_NUM change from October 6. As Dave Dribin
   reported, the define is used by the configure script and is assumed to use
