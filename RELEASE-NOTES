@@ -15,6 +15,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o double WWW-Authenticate Digest headers are now handled
  o curl-config --vernum fixed
 
 Other curl-related news since the previous public release:

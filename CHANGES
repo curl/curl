@@ -9,6 +9,11 @@
 
 
 Daniel (20 October 2005)
+- Dave Dribin made libcurl understand and handle cases when the server
+  (wrongly) sends *two* WWW-Authenticate headers for Digest. While this should
+  never happen in a sane world, libcurl previously got into an infinite loop
+  when this occurred. Dave added test 273 to verify this.
+
 - Temprimus improved the MSVC makefile: "makes a build option available so if
   you set rtlibcfg=static for the make, then it would build with /MT. The
   default behaviour is /MD (the original)."
