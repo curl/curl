@@ -73,6 +73,7 @@
 #include "strerror.h"
 #include "url.h"
 #include "inet_pton.h"
+#include "connect.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -186,6 +187,26 @@ bool Curl_ipvalid(struct SessionHandle *data)
 }
 
 #ifndef USE_THREADING_GETADDRINFO
+
+#ifdef DEBUG_ADDRINFO
+static void dump_addrinfo(struct connectdata *conn, const struct addrinfo *ai)
+{
+  printf("dump_addrinfo:\n");
+  for ( ; ai; ai = ai->ai_next) {
+    char  buf[INET6_ADDRSTRLEN];
+
+    printf("    fam %2d, CNAME %s, ",
+           ai->ai_family, ai->ai_canonname ? ai->ai_canonname : "<none>");
+    if (Curl_printable_address(ai, buf, sizeof(buf)))
+      printf("%s\n", buf);
+    else
+      printf("failed; %s\n", Curl_strerror(conn, Curl_ourerrno()));
+  }
+}
+#else
+#define dump_addrinfo(x,y)
+#endif
+
 /*
  * Curl_getaddrinfo() when built ipv6-enabled (non-threading version).
  *
@@ -265,6 +286,8 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
     infof(data, "getaddrinfo(3) failed for %s:%d\n", hostname, port);
     return NULL;
   }
+
+  dump_addrinfo(conn, res);
 
   return res;
 }
