@@ -19,7 +19,9 @@ This release includes the following bugfixes:
 
 Other curl-related news since the previous public release:
 
- o 
+ o http://curl.mirror-server.net is a new mirror in Nuremberg, Germany
+ o http://curl.hoxt.com is a new mirror in Florida, US
+ o pycurl 7.15.0 was released http://pycurl.sf.net
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
