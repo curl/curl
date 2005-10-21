@@ -660,14 +660,21 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
       rc = CURLE_OUT_OF_MEMORY;
       failf(data, "Could not resolve host: %s", curl_easy_strerror(rc));
     }
+    else if(conn->async.done) {
+      if(conn->bits.httpproxy) {
+        failf(data, "Could not resolve proxy: %s; %s",
+              conn->proxy.dispname, Curl_strerror(conn, conn->async.status));
+        rc = CURLE_COULDNT_RESOLVE_PROXY;
+      }
+      else {
+        failf(data, "Could not resolve host: %s; %s",
+              conn->host.name, Curl_strerror(conn, conn->async.status));
+        rc = CURLE_COULDNT_RESOLVE_HOST;
+      }
+    }
     else if (td->thread_status == (DWORD)-1 || conn->async.status == NO_DATA) {
       failf(data, "Resolving host timed out: %s", conn->host.name);
       rc = CURLE_OPERATION_TIMEDOUT;
-    }
-    else if(conn->async.done) {
-      failf(data, "Could not resolve host: %s; %s",
-            conn->host.name, Curl_strerror(conn,conn->async.status));
-      rc = CURLE_COULDNT_RESOLVE_HOST;
     }
     else
       rc = CURLE_OPERATION_TIMEDOUT;

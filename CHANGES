@@ -8,6 +8,11 @@
 
 
 
+Daniel (21 October 2005)
+- Bradford Bruce made the windows resolver code properly return
+  CURLE_COULDNT_RESOLVE_PROXY and CURLE_COULDNT_RESOLVE_HOST on resolving
+  errors (as documented).
+
 Daniel (20 October 2005)
 - Dave Dribin made libcurl understand and handle cases when the server
   (wrongly) sends *two* WWW-Authenticate headers for Digest. While this should

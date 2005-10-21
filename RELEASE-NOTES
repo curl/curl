@@ -3,9 +3,9 @@ Curl and libcurl 7.15.1
  Public curl release number:               91
  Releases counted from the very beginning: 118
  Available command line options:           109
- Available curl_easy_setopt() options:     124
+ Available curl_easy_setopt() options:     125
  Number of public functions in libcurl:    46
- Amount of public web site mirrors:        24
+ Amount of public web site mirrors:        26
  Number of known libcurl bindings:         32
  Number of contributors:                   459
 
@@ -15,6 +15,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o name resolve error codes fixed for Windows builds
  o double WWW-Authenticate Digest headers are now handled
  o curl-config --vernum fixed
 
@@ -27,6 +28,6 @@ Other curl-related news since the previous public release:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dave Dribin
+ Dave Dribin, Bradford Bruce
 
         Thanks! (and sorry if I forgot to mention someone)
