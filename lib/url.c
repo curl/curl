@@ -3844,7 +3844,14 @@ CURLcode Curl_do(struct connectdata **connp, bool *done)
 
       /* conn may no longer be a good pointer */
 
-      if(CURLE_OK == result) {
+      /*
+       * According to bug report #1330310. We need to check for
+       * CURLE_SEND_ERROR here as well. I figure this could happen when the
+       * request failed on a FTP connection and thus Curl_done() itself tried
+       * to use the connection (again). Slight Lack of feedback in the report,
+       * but I don't think this extra check can do much harm.
+       */
+      if((CURLE_OK == result) || (CURLE_SEND_ERROR == result)) {
         bool async;
         bool protocol_done = TRUE;
 

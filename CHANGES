@@ -9,6 +9,10 @@
 
 
 Daniel (21 October 2005)
+- "Ofer" reported a problem when libcurl re-used a connection and failed to do
+  it, it could then accidentally actually crash. Presumably, this concerns FTP
+  connections.  http://curl.haxx.se/bug/view.cgi?id=1330310
+
 - Temprimus improved the MSVC makefile so that the static debug SSL libs are
   linked to the executable and not to the libcurld.lib
   http://curl.haxx.se/bug/view.cgi?id=1326676
