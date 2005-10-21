@@ -115,18 +115,6 @@ CC     = $(CCNODBG) $(RTLIB) $(CFLAGSLIB)
 CFGSET = TRUE
 !ENDIF
 
-##############################################################
-# Runtime library configuration
-
-RTLIB   = /MD
-RTLIBD  = /MDd
-
-!IF "$(RTLIBCFG)" == "static"
-RTLIB  = /MT
-RTLIBD = /MTd
-!ENDIF
-
-
 ######################
 # release-zlib
 
@@ -271,7 +259,7 @@ CFGSET = TRUE
 TARGET   = $(LIB_NAME_DEBUG).lib
 DIROBJ   = $(CFG)
 LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)\out32"
-LNK      = $(LNKLIB) $(SSLLIBS) $(LFLAGSSSL) /out:$(DIROBJ)\$(TARGET)
+LNK      = $(LNKLIB) $(LFLAGSSSL) /out:$(DIROBJ)\$(TARGET)
 CC       = $(CCDEBUG) $(RTLIBD) $(CFLAGSSSL) $(CFLAGSLIB)
 CFGSET   = TRUE
 !ENDIF
@@ -308,7 +296,7 @@ TARGET   = $(LIB_NAME_DEBUG).lib
 DIROBJ   = $(CFG)
 LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
 LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)\out32"
-LNK      = $(LNKLIB) $(SSLLIBS) $(ZLIBLIBS) $(LFLAGSSSL) $(LFLAGSZLIB) /out:$(DIROBJ)\$(TARGET)
+LNK      = $(LNKLIB) $(ZLIBLIBS) $(LFLAGSSSL) $(LFLAGSZLIB) /out:$(DIROBJ)\$(TARGET)
 CC       = $(CCDEBUG) $(RTLIBD) $(CFLAGSSSL) $(CFLAGSZLIB) $(CFLAGSLIB)
 CFGSET   = TRUE
 !ENDIF

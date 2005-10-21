@@ -9,6 +9,10 @@
 
 
 Daniel (21 October 2005)
+- Temprimus improved the MSVC makefile so that the static debug SSL libs are
+  linked to the executable and not to the libcurld.lib
+  http://curl.haxx.se/bug/view.cgi?id=1326676
+
 - Bradford Bruce made the windows resolver code properly return
   CURLE_COULDNT_RESOLVE_PROXY and CURLE_COULDNT_RESOLVE_HOST on resolving
   errors (as documented).

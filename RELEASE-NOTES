@@ -11,7 +11,7 @@ Curl and libcurl 7.15.1
 
 This release includes the following changes:
 
- o 
+ o improved MSVC makefile
 
 This release includes the following bugfixes:
 
@@ -28,6 +28,6 @@ Other curl-related news since the previous public release:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dave Dribin, Bradford Bruce
+ Dave Dribin, Bradford Bruce, Temprimus
 
         Thanks! (and sorry if I forgot to mention someone)
