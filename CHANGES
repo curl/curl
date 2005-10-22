@@ -8,6 +8,17 @@
 
 
 
+Daniel (22 October 2005)
+- Dima Barsky reported a problem with GnuTLS-enabled libcurl in bug report
+  #1334338 (http://curl.haxx.se/bug/view.cgi?id=1334338). When reading an SSL
+  stream from a server and the server requests a "rehandshake", the current
+  code simply returns this as an error. I have no good way to test this, but
+  I've added a crude attempt of dealing with this situation slightly better -
+  it makes a blocking handshake if this happens. Done like this because fixing
+  this the "proper" way (that would handshake asynchronously) will require
+  quite some work and I really need a good way to test this to do such a
+  change.
+
 Daniel (21 October 2005)
 - "Ofer" reported a problem when libcurl re-used a connection and failed to do
   it, it could then accidentally actually crash. Presumably, this concerns FTP
