@@ -5,7 +5,7 @@ Curl and libcurl 7.15.1
  Available command line options:           109
  Available curl_easy_setopt() options:     125
  Number of public functions in libcurl:    46
- Amount of public web site mirrors:        26
+ Amount of public web site mirrors:        27
  Number of known libcurl bindings:         32
  Number of contributors:                   459
 
@@ -15,12 +15,16 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o multi interface with multi IP hosts could leak socket descriptors
+ o the GnuTLS code didn't handle rehandshakes
+ o re-use of a dead FTP connection
  o name resolve error codes fixed for Windows builds
  o double WWW-Authenticate Digest headers are now handled
  o curl-config --vernum fixed
 
 Other curl-related news since the previous public release:
 
+ o http://curl.nedmirror.nl is a new mirror in Amsterdam, the Netherlands
  o http://curl.mirror-server.net is a new mirror in Nuremberg, Germany
  o http://curl.hoxt.com is a new mirror in Florida, US
  o pycurl 7.15.0 was released http://pycurl.sf.net

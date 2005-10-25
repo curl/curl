@@ -8,6 +8,14 @@
 
 
 
+Daniel (25 October 2005)
+- Amol Pattekar reported a bug with great detail and a fine example in bug
+  #1326306 (http://curl.haxx.se/bug/view.cgi?id=1326306). When using the multi
+  interface and connecting to a host with multiple IP addresses, and one of
+  the addresses fails to connect (the server must exist and respond, just not
+  accept connections) libcurl leaks a socket descriptor. Thanks to the fine
+  report, I could find and fix this.
+
 Daniel (22 October 2005)
 - Dima Barsky reported a problem with GnuTLS-enabled libcurl in bug report
   #1334338 (http://curl.haxx.se/bug/view.cgi?id=1334338). When reading an SSL
