@@ -32,32 +32,33 @@ WEB SITE
 
   Visit the curl web site or mirrors for the latest news and downloads:
 
-        Sweden    -- http://curl.haxx.se/
-        Australia -- http://curl.planetmirror.com/
-        Austria   -- http://curl.gds.tuwien.ac.at/
-        Denmark   -- http://curl.cofman.dk/
-        France    -- http://curl.fastmirror.net/
-        Germany   -- http://curl.miscellaneousmirror.org/
-        Germany   -- http://curl.mirror.at.stealer.net/
-        Germany   -- http://curl.mirroring.de/
-        Germany   -- http://curl.mons-new-media.de/
-        Germany   -- http://curl.mirror-server.net/
-        Germany   -- http://curl.freemirror.de/
-        Russia    -- http://curl.tsuren.net/
-        Taiwan    -- http://curl.cs.pu.edu.tw/
-        Thailand  -- http://curl.siamu.ac.th/
-        US (AZ)   -- http://curl.islandofpoker.com/
-        US (CA)   -- http://curl.mirror.redwire.net/
-        US (CA)   -- http://curl.mirrormonster.com/
-        US (CA)   -- http://curl.signal42.com/
-        US (CA)   -- http://curl.tolix.org/
-        US (CA)   -- http://curl.webhosting76.com/
-        US (CA)   -- http://curl.meulie.net/
-        US (FL)   -- http://curl.hoxt.com/
-        US (TX)   -- http://curl.109k.com/
-        US (TX)   -- http://curl.mirrors.cyberservers.net/
-        US (TX)   -- http://curl.seekmeup.com/
-        US (TX)   -- http://curl.hostingzero.com/
+        Sweden       http://curl.haxx.se/
+        Australia    http://curl.planetmirror.com/
+        Austria      http://curl.gds.tuwien.ac.at/
+        Denmark      http://curl.cofman.dk/
+        France       http://curl.fastmirror.net/
+        Germany      http://curl.miscellaneousmirror.org/
+        Germany      http://curl.mirror.at.stealer.net/
+        Germany      http://curl.mirroring.de/
+        Germany      http://curl.mons-new-media.de/
+        Germany      http://curl.mirror-server.net/
+        Germany      http://curl.freemirror.de/
+        Netherlands  http://curl.nedmirror.nl/
+        Russia       http://curl.tsuren.net/
+        Taiwan       http://curl.cs.pu.edu.tw/
+        Thailand     http://curl.siamu.ac.th/
+        US (AZ)      http://curl.islandofpoker.com/
+        US (CA)      http://curl.mirror.redwire.net/
+        US (CA)      http://curl.mirrormonster.com/
+        US (CA)      http://curl.signal42.com/
+        US (CA)      http://curl.tolix.org/
+        US (CA)      http://curl.webhosting76.com/
+        US (CA)      http://curl.meulie.net/
+        US (FL)      http://curl.hoxt.com/
+        US (TX)      http://curl.109k.com/
+        US (TX)      http://curl.mirrors.cyberservers.net/
+        US (TX)      http://curl.seekmeup.com/
+        US (TX)      http://curl.hostingzero.com/
 
 CVS
 
