@@ -472,6 +472,9 @@ static bool trynextip(struct connectdata *conn,
   if(sockindex != FIRSTSOCKET)
     return TRUE; /* no next */
 
+  /* first close the failed socket */
+  sclose(conn->sock[sockindex]);
+
   /* try the next address */
   ai = conn->ip_addr->ai_next;
 
