@@ -15,6 +15,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o Windows uploads from stdin using curl can now contain ctrl-Z bytes
  o -r [num] would produce an invalid HTTP Range: header
  o multi interface with multi IP hosts could leak socket descriptors
  o the GnuTLS code didn't handle rehandshakes
@@ -34,6 +35,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Dave Dribin, Bradford Bruce, Temprimus, Ofer, Dima Barsky, Amol Pattekar, Jaz
- Fresh
+ Fresh, tommink[at]post.pl, Gisle Vanem
 
         Thanks! (and sorry if I forgot to mention someone)

@@ -1797,8 +1797,13 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 
           nextarg++; /* pass the @ */
 
-          if(curlx_strequal("-", nextarg))
+          if(curlx_strequal("-", nextarg)) {
             file = stdin;
+#ifdef O_BINARY
+            if(subletter == 'b') /* forced binary */
+              setmode(fileno(stdin), O_BINARY);
+#endif
+          }
           else {
             file = fopen(nextarg, "rb");
             if(!file)
@@ -3620,6 +3625,9 @@ operate(struct Configurable *config, int argc, char *argv[])
 
         }
         else if(uploadfile && curlx_strequal(uploadfile, "-")) {
+#ifdef O_BINARY
+          setmode(fileno(stdin), O_BINARY);
+#endif
           infd = stdin;
         }
 

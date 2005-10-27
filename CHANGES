@@ -9,6 +9,13 @@
 
 
 Daniel (27 October 2005)
+- tommink[at]post.pl reported in bug report #1337723
+  (http://curl.haxx.se/bug/view.cgi?id=1337723) that curl could not upload
+  binary data from stdin on Windows if the data contained control-Z (hex 1a)
+  since that is treated as end-of-file when read in text mode. Gisle Vanem
+  pointed out the fix, and I made both -T and --data-binary take advantage of
+  it.
+
 - Jaz Fresh pointed out that if you used "-r [number]" as was wrongly described
   in the man page, curl would send an invalid HTTP Range: header. The correct
   way would be to use "-r [number]-" or even "-r -[number]". Starting now,
