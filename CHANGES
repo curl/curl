@@ -8,6 +8,13 @@
 
 
 
+Daniel (27 October 2005)
+- Jaz Fresh pointed out that if you used "-r [number]" as was wrongly described
+  in the man page, curl would send an invalid HTTP Range: header. The correct
+  way would be to use "-r [number]-" or even "-r -[number]". Starting now,
+  curl will warn if this is discovered, and automatically append a dash to the
+  range before passing it to libcurl.
+
 Daniel (25 October 2005)
 - Amol Pattekar reported a bug with great detail and a fine example in bug
   #1326306 (http://curl.haxx.se/bug/view.cgi?id=1326306). When using the multi

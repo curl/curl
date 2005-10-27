@@ -15,6 +15,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o -r [num] would produce an invalid HTTP Range: header
  o multi interface with multi IP hosts could leak socket descriptors
  o the GnuTLS code didn't handle rehandshakes
  o re-use of a dead FTP connection
@@ -32,6 +33,7 @@ Other curl-related news since the previous public release:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dave Dribin, Bradford Bruce, Temprimus
+ Dave Dribin, Bradford Bruce, Temprimus, Ofer, Dima Barsky, Amol Pattekar, Jaz
+ Fresh
 
         Thanks! (and sorry if I forgot to mention someone)
