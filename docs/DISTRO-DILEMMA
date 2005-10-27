@@ -1,11 +1,11 @@
-  Date: September 30, 2005
+  Date: October 27, 2005
   Author: Daniel Stenberg <daniel@haxx.se>
   URL: http://curl.haxx.se/legal/distro-dilemma.html
 
 Condition
 
  This document is written to describe the situation as it is right
- now. libcurl 7.14.1 is currently the latest version available. Things may (or
+ now. libcurl 7.15.0 is currently the latest version available. Things may (or
  perhaps will) of course change in the future.
 
  This document reflects my view and understanding of these things. Please tell
@@ -33,7 +33,10 @@ Background
  tend to), you have a clash. GPL vs Original BSD.
 
  This dilemma is not libcurl-specific nor is it specific to any particular
- Linux distro.
+ Linux distro. (This article mentions and refers to Debian several times, but
+ only because Debian seems to be the only Linux distro to have faced this
+ issue yet since no other distro is shipping libcurl built with two SSL
+ libraries.)
 
 Part of the Operating System
 
@@ -82,6 +85,18 @@ GnuTLS vs OpenSSL
  forced to use the GnuTLS powered libcurl. For a reason that is unknown to me,
  the application authors didn't want to or was unable to add an exception to
  their GPL license. Alas, the license problem hit the fan again.
+
+ GnuTLS
+   - LGPL licensened
+   - supports SRP
+   - lacks SSLv2 support
+   - lacks MD2 support (used by at least some CA certs)
+
+ OpenSSL
+   - Original BSD licensened
+   - lacks SRP
+   - supports SSLv2
+   - older and more widely used
 
 The Better License, Original BSD or LGPL?
 
@@ -143,6 +158,12 @@ Fixing the Only Problem
 
  The only problem is thus for distributions that want to offer libcurl
  versions built with more than one SSL/TLS library.
+
+ Debian is now (since mid September 2005) providing two different devel
+ packages, one for libcurl built with OpenSSL and one built with GnuTLS. They
+ use different .so names and can this both be installed in a single system
+ simultaneously. This has previously been said as a transitional system not
+ desired to keep in the long run.
 
  Since multiple libcurl binaries using different names are ruled out, we need
  to come up with a way to have one single libcurl that someone uses different
