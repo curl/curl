@@ -3211,6 +3211,7 @@ operate(struct Configurable *config, int argc, char *argv[])
   config->create_dirs=FALSE;
   config->lastrecvtime = curlx_tvnow();
   config->lastsendtime = curlx_tvnow();
+  config->maxredirs = DEFAULT_MAXREDIRS;
 
   if(argc>1 &&
      (!curlx_strnequal("--", argv[1], 2) && (argv[1][0] == '-')) &&
@@ -3803,11 +3804,7 @@ operate(struct Configurable *config, int argc, char *argv[])
           curl_easy_setopt(curl, CURLOPT_FILETIME, TRUE);
         }
 
-        if (config->maxredirs)
-          curl_easy_setopt(curl, CURLOPT_MAXREDIRS, config->maxredirs);
-        else
-          curl_easy_setopt(curl, CURLOPT_MAXREDIRS, DEFAULT_MAXREDIRS);
-
+        curl_easy_setopt(curl, CURLOPT_MAXREDIRS, config->maxredirs);
         curl_easy_setopt(curl, CURLOPT_CRLF, config->crlf);
         curl_easy_setopt(curl, CURLOPT_QUOTE, config->quote);
         curl_easy_setopt(curl, CURLOPT_POSTQUOTE, config->postquote);

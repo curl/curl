@@ -320,7 +320,7 @@ CURLcode Curl_open(struct SessionHandle **curl)
 
     data->set.infilesize = -1; /* we don't know any size */
     data->set.postfieldsize = -1;
-
+    data->set.maxredirs = -1; /* allow any amount by default */
     data->state.current_speed = -1; /* init to negative == impossible */
 
     data->set.httpreq = HTTPREQ_GET; /* Default HTTP request */

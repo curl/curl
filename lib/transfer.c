@@ -1765,7 +1765,7 @@ CURLcode Curl_follow(struct SessionHandle *data,
   size_t newlen;
   char *newest;
 
-  if (data->set.maxredirs &&
+  if ((data->set.maxredirs != -1) &&
       (data->set.followlocation >= data->set.maxredirs)) {
     failf(data,"Maximum (%d) redirects followed", data->set.maxredirs);
     return CURLE_TOO_MANY_REDIRECTS;

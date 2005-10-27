@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_easy_setopt 3 "22 Sep 2005" "libcurl 7.14.2" "libcurl Manual"
+.TH curl_easy_setopt 3 "27 Oct 2005" "libcurl 7.14.2" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - set options for a curl easy handle
 .SH SYNOPSIS
@@ -516,7 +516,9 @@ option is meaningful only when setting \fICURLOPT_FOLLOWLOCATION\fP.
 Pass a long. The set number will be the redirection limit. If that many
 redirections have been followed, the next redirect will cause an error
 (\fICURLE_TOO_MANY_REDIRECTS\fP). This option only makes sense if the
-\fICURLOPT_FOLLOWLOCATION\fP is used at the same time.
+\fICURLOPT_FOLLOWLOCATION\fP is used at the same time. Added in 7.15.1:
+Setting the limit to 0 will make libcurl refuse any redirect. Set it to -1 for
+an infinite number of redirects (which is the default)
 .IP CURLOPT_PUT
 A non-zero parameter tells the library to use HTTP PUT to transfer data. The
 data should be set with \fICURLOPT_READDATA\fP and \fICURLOPT_INFILESIZE\fP.

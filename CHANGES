@@ -9,6 +9,13 @@
 
 
 Daniel (27 October 2005)
+- Nis Jorgensen filed bug report #1338648
+  (http://curl.haxx.se/bug/view.cgi?id=1338648) which really is more of a
+  feature request, but anyway. It pointed out that --max-redirs did not allow
+  it to be set to 0, which then would return an error code on the first
+  Location: found. Based on Nis' patch, now libcurl supports CURLOPT_MAXREDIRS
+  set to 0, or -1 for infinity. Added test case 274 to verify.
+
 - tommink[at]post.pl reported in bug report #1337723
   (http://curl.haxx.se/bug/view.cgi?id=1337723) that curl could not upload
   binary data from stdin on Windows if the data contained control-Z (hex 1a)
