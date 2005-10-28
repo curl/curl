@@ -4,11 +4,11 @@
                             | (__| |_| |  _ <| |___
                              \___|\___/|_| \_\_____|
 
-To Think About When Contributing Source Code
+                        When Contributing Source Code
 
- This document is intended to offer some simple guidelines that can be useful
- to keep in mind when you decide to contribute to the project. This concerns
- new features as well as corrections to existing flaws or bugs.
+ This document is intended to offer guidelines that can be useful to keep in
+ mind when you decide to contribute to the project. This concerns new features
+ as well as corrections to existing flaws or bugs.
 
 Join the Community
 
@@ -20,13 +20,26 @@ Join the Community
 The License Issue
 
  When contributing with code, you agree to put your changes and new code under
- the same license curl and libcurl is already using unless stated otherwise.
+ the same license curl and libcurl is already using unless stated and agreed
+ otherwise.
 
  If you add a larger piece of code, you can opt to make that file or set of
  files to use a different license as long as they don't enforce any changes to
  the rest of the package and they make sense. Such "separate parts" can not be
- GPL (as we don't want the GPL virus to attack users of libcurl) but they must
- use "GPL compatible" licenses.
+ GPL licensed (as we don't want copyleft to affect users of libcurl) but they
+ must use "GPL compatible" licenses (as we want to allow users to use libcurl
+ properly in GPL licensed environments).
+
+ When changing existing source code, you do not alter the copyright of the
+ original file(s). The copyright will still be owned by the original
+ creator(s) or those who have been assigned copyright by the original
+ author(s).
+
+ By submitting a patch to the curl project, you are assumed to have the right
+ to the code and to be allowed by your employer or whatever to hand over that
+ patch/code to us. We will credit you for your changes as far as possible, to
+ give credit but also to keep a trace back to who made what changes. Please
+ always provide us with your full real name when contributing!
 
 What To Read
 
