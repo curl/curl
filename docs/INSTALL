@@ -132,172 +132,151 @@ UNIX
 Win32
 =====
 
-   Without SSL:
+   MingW32
+   -------
 
-      MingW32 (GCC-2.95) style
-      ------------------------
-        Run the 'mingw32.bat' file to get the proper environment variables
-        set, then run 'make mingw32' in the root dir.
+   Run the 'mingw32.bat' file to get the proper environment variables set,
+   then run 'make mingw32' in the root dir. Use  'make mingw32-ssl' to build
+   curl SSL enabled.
 
-        If you have any problems linking libraries or finding header files, be
-        sure to verify that the provided "Makefile.m32" files use the proper
-        paths, and adjust as necessary.
+   If you have any problems linking libraries or finding header files, be sure
+   to verify that the provided "Makefile.m32" files use the proper paths, and
+   adjust as necessary.
 
-      Cygwin style
-      ------------
-        Almost identical to the unix installation. Run the configure script in
-        the curl root with 'sh configure'. Make sure you have the sh
-        executable in /bin/ or you'll see the configure fail towards the end.
+   Cygwin
+   ------
 
-        Run 'make'
+   Almost identical to the unix installation. Run the configure script in the
+   curl root with 'sh configure'. Make sure you have the sh executable in
+   /bin/ or you'll see the configure fail towards the end.
 
-      Microsoft command line style
-      ----------------------------
-        Run the 'vcvars32.bat' file to get the proper environment variables
-        set, then run 'nmake vc' in the root dir.
+   Run 'make'
 
-        The vcvars32.bat file is part of the Microsoft development
-        environment.
+   Dev-Cpp
+   -------
 
-      IDE-style
-      -------------------------
-        If you use VC++, Borland or similar compilers. Include all lib source
-        files in a static lib "project" (all .c and .h files that is).
-        (you should name it libcurl or similar)
+   See the separate INSTALL.devcpp file for details.
 
-        Make the sources in the src/ drawer be a "win32 console application"
-        project. Name it curl.
+   MSVC from command line
+   ----------------------
 
-        For VC++ 6, there's an included Makefile.vc6 that should be possible
-        to use out-of-the-box.
+   Run the 'vcvars32.bat' file to get a proper environment. The
+   vcvars32.bat file is part of the Microsoft development environment and
+   you may find it in 'C:\Program Files\Microsoft Visual Studio\vc98\bin'
+   provided that you installed Visual C/C++ 6 in the default directory.
 
+   Then run 'nmake vc' in curl's root directory.
 
-   With SSL:
+   If you want to compile with zlib support, you will need to build
+   zlib (http://www.gzip.org/zlib/) as well. Please read the zlib
+   documentation on how to compile zlib. Define the ZLIB_PATH environment
+   variable to the location of zlib.h and zlib.lib, for example:
 
-      MingW32 (GCC-2.95) style
-      ------------------------
-        Run the 'mingw32.bat' file to get the proper environment variables
-        set, then run 'make mingw32-ssl' in the root dir.
+     set ZLIB_PATH=c:\zlib-1.2.1
 
-        If you have any problems linking libraries or finding header files, be
-        sure to look at the provided "Makefile.m32" files for the proper
-        paths, and adjust as necessary.
+   Then run 'nmake vc-zlib' in curl's root directory.
 
-      Cygwin style
-      ------------
-        Haven't done, nor got any reports on how to do. It should although be
-        identical to the unix setup for the same purpose. See above.
+   If you want to compile with SSL support you need the OpenSSL package.
+   Please read the OpenSSL documentation on how to compile and install
+   the OpenSSL libraries.  The build process of OpenSSL generates the
+   libeay32.dll and ssleay32.dll files in the out32dll subdirectory in
+   the OpenSSL home directory.  OpenSSL static libraries (libeay32.lib,
+   ssleay32.lib, RSAglue.lib) are created in the out32 subdirectory.
 
-      Microsoft command line style
-      ----------------------------
+   Before running nmake define the OPENSSL_PATH environment variable with
+   the root/base directory of OpenSSL, for example:
 
-        Run the 'vcvars32.bat' file to get a proper environment. The
-        vcvars32.bat file is part of the Microsoft development environment and
-        you may find it in 'C:\Program Files\Microsoft Visual Studio\vc98\bin'
-        provided that you installed Visual C/C++ 6 in the default directory.
+     set OPENSSL_PATH=c:\openssl-0.9.7d
 
-        Then run 'nmake vc' in curl's root directory.
+   Then run 'nmake vc-ssl' or 'nmake vc-ssl-dll' in curl's root
+   directory.  'nmake vc-ssl' will create a libcurl static and dynamic
+   libraries in the lib subdirectory, as well as a statically linked
+   version of curl.exe in the src subdirectory.  This statically linked
+   version is a standalone executable not requiring any DLL at
+   runtime. This make method requires that you have the static OpenSSL
+   libraries available in OpenSSL's out32 subdirectory.
+   'nmake vc-ssl-dll' creates the libcurl dynamic library and
+   links curl.exe against libcurl and OpenSSL dynamically.
+   This executable requires libcurl.dll and the OpenSSL DLLs
+   at runtime.
+   Run 'nmake vc-ssl-zlib' to build with both ssl and zlib support.
 
-        If you want to compile with zlib support, you will need to build
-        zlib (http://www.gzip.org/zlib/) as well. Please read the zlib
-        documentation on how to compile zlib. Define the ZLIB_PATH environment
-        variable to the location of zlib.h and zlib.lib, for example:
+   Borland C++ compiler
+   ---------------------
 
-          set ZLIB_PATH=c:\zlib-1.2.1
+   compile openssl
 
-        Then run 'nmake vc-zlib' in curl's root directory.
+   Make sure you include the paths to curl/include and openssl/inc32 in
+   your bcc32.cnf file
 
-        If you want to compile with SSL support you need the OpenSSL package.
-        Please read the OpenSSL documentation on how to compile and install
-        the OpenSSL libraries.  The build process of OpenSSL generates the
-        libeay32.dll and ssleay32.dll files in the out32dll subdirectory in
-        the OpenSSL home directory.  OpenSSL static libraries (libeay32.lib,
-        ssleay32.lib, RSAglue.lib) are created in the out32 subdirectory.
+   eg : -I"c:\Bcc55\include;c:\path_curl\include;c:\path_openssl\inc32"
 
-        Before running nmake define the OPENSSL_PATH environment variable with
-        the root/base directory of OpenSSL, for example:
+   Check to make sure that all of the sources listed in lib/Makefile.b32
+   are present in the /path_to_curl/lib directory. (Check the src
+   directory for missing ones.)
 
-          set OPENSSL_PATH=c:\openssl-0.9.7d
+   Make sure the environment variable "BCCDIR" is set to the install
+   location for the compiler eg : c:\Borland\BCC55
 
-        Then run 'nmake vc-ssl' or 'nmake vc-ssl-dll' in curl's root
-        directory.  'nmake vc-ssl' will create a libcurl static and dynamic
-        libraries in the lib subdirectory, as well as a statically linked
-        version of curl.exe in the src subdirectory.  This statically linked
-        version is a standalone executable not requiring any DLL at
-        runtime. This make method requires that you have the static OpenSSL
-        libraries available in OpenSSL's out32 subdirectory.
-        'nmake vc-ssl-dll' creates the libcurl dynamic library and
-        links curl.exe against libcurl and OpenSSL dynamically.
-        This executable requires libcurl.dll and the OpenSSL DLLs
-        at runtime.
-        Run 'nmake vc-ssl-zlib' to build with both ssl and zlib support.
+   command line:
+   make -f /path_to_curl/lib/Makefile-ssl.b32
 
-      Microsoft / Borland style
-      -------------------------
-        If you have OpenSSL, and want curl to take advantage of it, edit your
-        project properties to use the SSL include path, link with the SSL libs
-        and define the USE_SSLEAY symbol.
+   compile simplessl.c with appropriate links
 
-      Using Borland C++ compiler version 5.5.1 (available as free download
-      from Borland's site)
-      ---------------------------------------------------------------------
-
-        compile openssl
-
-        Make sure you include the paths to curl/include and openssl/inc32 in
-        your bcc32.cnf file
+   c:\curl\docs\examples\> bcc32 -L c:\path_to_curl\lib\libcurl.lib
+                                 -L c:\borland\bcc55\lib\psdk\ws2_32.lib
+                                 -L c:\openssl\out32\libeay32.lib
+                                 -L c:\openssl\out32\ssleay32.lib
+                                 simplessl.c
 
 
-        eg : -I"c:\Bcc55\include;c:\path_curl\include;c:\path_openssl\inc32"
+   MSVC IDE
+   --------
 
-        Check to make sure that all of the sources listed in lib/Makefile.b32
-        are present in the /path_to_curl/lib directory. (Check the src
-        directory for missing ones.)
+   If you use VC++, Borland or similar compilers. Include all lib source
+   files in a static lib "project" (all .c and .h files that is).
+   (you should name it libcurl or similar)
 
-        Make sure the environment variable "BCCDIR" is set to the install
-        location for the compiler eg : c:\Borland\BCC55
+   Make the sources in the src/ drawer be a "win32 console application"
+   project. Name it curl.
 
-        command line:
-        make -f /path_to_curl/lib/Makefile-ssl.b32
-
-        compile simplessl.c with appropriate links
-
-        c:\curl\docs\examples\> bcc32 -L c:\path_to_curl\lib\libcurl.lib
-                                      -L c:\borland\bcc55\lib\psdk\ws2_32.lib
-                                      -L c:\openssl\out32\libeay32.lib
-                                      -L c:\openssl\out32\ssleay32.lib
-                                      simplessl.c
-
-   Disabling Specific Protocols:
-
-      The configure utility, unfortunately, is not available for the Windows
-      environment, therefore, you cannot use the various disable-protocol
-      options of the configure utility on this platform.
-
-      However, you can use the following defines to disable specific
-      protocols:
-
-      HTTP_ONLY             disables all protocols except HTTP
-      CURL_DISABLE_FTP      disables FTP
-      CURL_DISABLE_LDAP     disables LDAP
-      CURL_DISABLE_TELNET   disables TELNET
-      CURL_DISABLE_DICT     disables DICT
-      CURL_DISABLE_FILE     disables FILE
-      CURL_DISABLE_GOPHER   disables GOPHER
-
-      If you want to set any of these defines you have the following
-      possibilities:
-
-      - Modify lib/setup.h
-      - Modify lib/Makefile.vc6
-      - Add defines to Project/Settings/C/C++/General/Preprocessor Definitions
-        in the curllib.dsw/curllib.dsp Visual C++ 6 IDE project.
+   For VC++ 6, there's an included Makefile.vc6 that should be possible
+   to use out-of-the-box.
 
 
-   Important (with SSL or not):
-      When building an application that uses the static libcurl library, you
-      must add '-DCURL_STATICLIB' to your CFLAGS.  Otherwise the linker will
-      look for dynamic import symbols.
+   Disabling Specific Protocols in Win32 builds
+   --------------------------------------------
+
+   The configure utility, unfortunately, is not available for the Windows
+   environment, therefore, you cannot use the various disable-protocol
+   options of the configure utility on this platform.
+
+   However, you can use the following defines to disable specific
+   protocols:
+
+   HTTP_ONLY             disables all protocols except HTTP
+   CURL_DISABLE_FTP      disables FTP
+   CURL_DISABLE_LDAP     disables LDAP
+   CURL_DISABLE_TELNET   disables TELNET
+   CURL_DISABLE_DICT     disables DICT
+   CURL_DISABLE_FILE     disables FILE
+   CURL_DISABLE_GOPHER   disables GOPHER
+
+   If you want to set any of these defines you have the following
+   possibilities:
+
+   - Modify lib/setup.h
+   - Modify lib/Makefile.vc6
+   - Add defines to Project/Settings/C/C++/General/Preprocessor Definitions
+     in the curllib.dsw/curllib.dsp Visual C++ 6 IDE project.
+
+
+   Important static libcurl usage note
+   -----------------------------------
+
+   When building an application that uses the static libcurl library, you must
+   add '-DCURL_STATICLIB' to your CFLAGS.  Otherwise the linker will look for
+   dynamic import symbols.
 
 
 IBM OS/2
