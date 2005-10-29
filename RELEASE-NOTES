@@ -11,6 +11,7 @@ Curl and libcurl 7.15.1
 
 This release includes the following changes:
 
+ o --max-redirs and CURLOPT_MAXREDIRS set to 0 limits redirects
  o improved MSVC makefile
 
 This release includes the following bugfixes:
@@ -35,6 +36,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Dave Dribin, Bradford Bruce, Temprimus, Ofer, Dima Barsky, Amol Pattekar, Jaz
- Fresh, tommink[at]post.pl, Gisle Vanem
+ Fresh, tommink[at]post.pl, Gisle Vanem, Nis Jorgensen
 
         Thanks! (and sorry if I forgot to mention someone)
