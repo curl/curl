@@ -8,6 +8,21 @@
 
 
 
+Daniel (31 October 2005)
+- Vilmos Nebehaj improved libcurl's LDAP abilities:
+
+  The LDAP code in libcurl can't handle LDAP servers of LDAPv3 nor binary
+  attributes in LDAP objects. So, I made a quick patch to address these
+  problems.
+
+  The solution is simple: if we connect to an LDAP server, first try LDAPv3
+  (which is the preferred protocol as of now) and then fall back to LDAPv2.
+  In case of binary attributes, we first convert them to base64, just like the
+  openldap client does. It uses ldap_get_values_len() instead of
+  ldap_get_values() to be able to retrieve binary attributes correctly. I
+  defined the necessary LDAP macros in lib/ldap.c to be able to compile
+  libcurl without the presence of libldap
+
 Daniel (27 October 2005)
 - Nis Jorgensen filed bug report #1338648
   (http://curl.haxx.se/bug/view.cgi?id=1338648) which really is more of a
