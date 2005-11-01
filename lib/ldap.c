@@ -160,7 +160,7 @@ static int DynaOpen(const char **mod_name)
   return (libldap != NULL);
 
 #else
-  (void) mod_name;
+  *mod_name = "";
   return (0);
 #endif
 }
