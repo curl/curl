@@ -631,6 +631,10 @@ This option requires that the library was built with GSSAPI support. This is
 not very common. Use \fI-V/--version\fP to see if your version supports
 GSS-Negotiate.
 
+When using this option, you must also provide a fake -u/--user option to
+activate the authentication code properly. Sending a '-u :' is enough as the
+user name and password from the -u option aren't actually used.
+
 If this option is used several times, the following occurrences make no
 difference.
 .IP "-N/--no-buffer"
