@@ -8,6 +8,18 @@
 
 
 
+Daniel (8 November 2005)
+- Dmitry Bartsevich discovered some issues in compatibilty of SSPI-enabled
+  version of libcurl with different Windows versions. Current version of
+  libcurl imports SSPI functions from secur32.dll. However, under Windows NT
+  4.0 these functions are located in security.dll, under Windows 9x - in
+  secur32.dll and Windows 2000 and XP contains both these DLLs (security.dll
+  just forwards calls to secur32.dll).
+
+  Dmitry's patch loads proper library dynamically depending on Windows
+  version. Function InitSecurityInterface() is used to obtain pointers to all
+  of SSPI function in one structure.
+
 Daniel (31 October 2005)
 - Vilmos Nebehaj improved libcurl's LDAP abilities:
 
