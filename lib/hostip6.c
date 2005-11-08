@@ -228,7 +228,6 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   curl_socket_t s;
   int pf;
   struct SessionHandle *data = conn->data;
-  int ai_flags;
 
   *waitp=0; /* don't wait, we have the response now */
 
@@ -263,20 +262,20 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
     }
   }
 
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_family = pf;
+  hints.ai_socktype = conn->socktype;
+
   if((1 == Curl_inet_pton(AF_INET, hostname, addrbuf)) ||
      (1 == Curl_inet_pton(AF_INET6, hostname, addrbuf))) {
     /* the given address is numerical only, prevent a reverse lookup */
-    ai_flags = AI_NUMERICHOST;
+    hints.ai_flags = AI_NUMERICHOST;
   }
+#if 0 /* removed nov 8 2005 before 7.15.1 */
   else
-    ai_flags = AI_CANONNAME;
+    hints.ai_flags = AI_CANONNAME;
+#endif
 
-  memset(&hints, 0, sizeof(hints));
-  hints.ai_family = pf;
-
-  hints.ai_socktype = conn->socktype;
-
-  hints.ai_flags = ai_flags;
   if(port) {
     snprintf(sbuf, sizeof(sbuf), "%d", port);
     sbufptr=sbuf;

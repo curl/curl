@@ -17,6 +17,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o no reverse lookups on IP addresses when ipv6-enabled
  o SSPI compatibility fix: using the proper DLLs
  o binary LDAP properties are now shown base64 encoded
  o Windows uploads from stdin using curl can now contain ctrl-Z bytes

@@ -9,6 +9,12 @@
 
 
 Daniel (8 November 2005)
+- Removed the use of AI_CANONNAME in the IPv6-enabled resolver functions since
+  we really have no use for reverse lookups of the address.
+
+  I truly hope these are the last reverse lookups we had lingering in the
+  code!
+
 - Dmitry Bartsevich discovered some issues in compatibilty of SSPI-enabled
   version of libcurl with different Windows versions. Current version of
   libcurl imports SSPI functions from secur32.dll. However, under Windows NT

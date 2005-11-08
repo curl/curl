@@ -819,7 +819,9 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = pf;
   hints.ai_socktype = conn->socktype;
+#if 0 /* removed nov 8 2005 before 7.15.1 */
   hints.ai_flags = AI_CANONNAME;
+#endif
   itoa(port, sbuf, 10);
 
   /* fire up a new resolver thread! */
