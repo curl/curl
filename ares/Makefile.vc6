@@ -1,0 +1,191 @@
+#
+# C-ares makefile fo MSVC6+
+# G. Vanem <giva@bgnett.no>.
+#
+
+CFG_MODEL   = MD
+DEBUG_MODEL = d
+USE_WATT32  = 0
+
+#
+# Configurations:
+#  -MD   - msvcrt.dll,  threads, release (normal)
+#  -MDd  - msvcrtd.dll, threads, debug
+#  -ML   - libc, no threads,     release
+#  -MLd  - libc, no threads,     debug
+#  -MT   - libc, threads,        release
+#  -MTd  - libc, threads,        debug
+
+CC = cl
+
+CFLAGS  = -nologo -$(CFG_MODEL)$(DEBUG_MODEL) -W2 -Yd -Zi
+LDFLAGS = -machine:i386 -map -warn:2
+
+OBJ_DIR  = VC6_obj
+DEF_FILE = cares.def
+
+!if "$(USE_WATT32)" == "1"
+CFLAGS  = $(CFLAGS) -UWIN32 -DWATT32 -I$(WATT_ROOT)\inc
+EX_LIBS = $(WATT_ROOT)\lib\wattcpvc_imp.lib
+
+!else
+CFLAGS  = $(CFLAGS) -DWIN32 -DWIN32_LEAN_AND_MEAN
+EX_LIBS = advapi32.lib ws2_32.lib
+!endif
+
+!if "$(DEBUG_MODEL)" == "d"
+CFLAGS  = $(CFLAGS) -D_DEBUG -GZ
+LDFLAGS = $(LDFLAGS) -debug -debugtype:coff -fixed:no
+
+!else
+CFLAGS  = $(CFLAGS) -O2 -Og
+LDFLAGS = $(LDFLAGS) -release
+!endif
+
+CFLAGS = $(CFLAGS) -DHAVE_AF_INET6 -DHAVE_PF_INET6 \
+         -DHAVE_STRUCT_IN6_ADDR -DHAVE_STRUCT_SOCKADDR_IN6 -DHAVE_STRUCT_ADDRINFO \
+         -DHAVE_IOCTLSOCKET
+
+OBJECTS = $(OBJ_DIR)\ares_fds.obj              \
+          $(OBJ_DIR)\ares_process.obj          \
+          $(OBJ_DIR)\ares_free_hostent.obj     \
+          $(OBJ_DIR)\ares_query.obj            \
+          $(OBJ_DIR)\ares__close_sockets.obj   \
+          $(OBJ_DIR)\ares_free_string.obj      \
+          $(OBJ_DIR)\ares_search.obj           \
+          $(OBJ_DIR)\ares__get_hostent.obj     \
+          $(OBJ_DIR)\ares_gethostbyaddr.obj    \
+          $(OBJ_DIR)\ares_send.obj             \
+          $(OBJ_DIR)\ares__read_line.obj       \
+          $(OBJ_DIR)\ares_gethostbyname.obj    \
+          $(OBJ_DIR)\ares_getnameinfo.obj      \
+          $(OBJ_DIR)\ares_strerror.obj         \
+          $(OBJ_DIR)\ares_cancel.obj           \
+          $(OBJ_DIR)\ares_init.obj             \
+          $(OBJ_DIR)\ares_timeout.obj          \
+          $(OBJ_DIR)\ares_destroy.obj          \
+          $(OBJ_DIR)\ares_mkquery.obj          \
+          $(OBJ_DIR)\ares_version.obj          \
+          $(OBJ_DIR)\ares_expand_name.obj      \
+          $(OBJ_DIR)\ares_parse_a_reply.obj    \
+          $(OBJ_DIR)\ares_parse_aaaa_reply.obj \
+          $(OBJ_DIR)\windows_port.obj          \
+          $(OBJ_DIR)\ares_expand_string.obj    \
+          $(OBJ_DIR)\ares_parse_ptr_reply.obj  \
+          $(OBJ_DIR)\bitncmp.obj               \
+          $(OBJ_DIR)\inet_net_pton.obj         \
+          $(OBJ_DIR)\inet_ntop.obj
+
+all: $(OBJ_DIR) cares.lib cares.dll cares_imp.lib ahost.exe adig.exe
+
+$(OBJ_DIR):
+	mkdir $(OBJ_DIR)
+
+cares.lib: $(OBJECTS)
+	lib -nologo -out:$@ $(OBJECTS)
+
+cares_imp.lib cares.dll: $(DEF_FILE) $(OBJECTS)
+	link $(LDFLAGS) -dll -implib:cares_imp.lib -out:cares.dll \
+	     -def:$(DEF_FILE) $(OBJECTS) $(EX_LIBS)
+
+$(DEF_FILE): $(OBJECTS) Makefile.VC6
+	@echo ; Generated. DO NOT EDIT  > $@
+	@echo LIBRARY cares.dll        >> $@
+	@echo EXPORTS                  >> $@
+	@echo   ares_cancel            >> $@
+	@echo   ares_destroy           >> $@
+	@echo   ares_expand_name       >> $@
+	@echo   ares_expand_string     >> $@
+	@echo   ares_fds               >> $@
+	@echo   ares_free_hostent      >> $@
+	@echo   ares_free_string       >> $@
+	@echo   ares_gethostbyaddr     >> $@
+	@echo   ares_gethostbyname     >> $@
+	@echo   ares_init              >> $@
+	@echo   ares_init_options      >> $@
+	@echo   ares_mkquery           >> $@
+	@echo   ares_parse_a_reply     >> $@
+	@echo   ares_parse_ptr_reply   >> $@
+	@echo   ares_process           >> $@
+	@echo   ares_query             >> $@
+	@echo   ares_search            >> $@
+	@echo   ares_strerror          >> $@
+	@echo   ares_strncasecmp       >> $@
+	@echo   ares_strcasecmp        >> $@
+	@echo   ares_timeout           >> $@
+	@echo   ares_version           >> $@
+	@echo   ares_inet_net_pton     >> $@
+	@echo   ares_inet_ntop         >> $@
+	@echo   ares_inet_pton         >> $@
+	@echo   ares_writev            >> $@
+	@echo   ares_getnameinfo       >> $@
+	@echo   ares_gettimeofday      >> $@
+	@echo   ares_parse_aaaa_reply  >> $@
+
+ahost.exe: $(OBJ_DIR)\ahost.obj cares_imp.lib
+	link $(LDFLAGS) -out:$@ $(OBJ_DIR)\ahost.obj cares_imp.lib $(EX_LIBS)
+
+adig.exe: $(OBJ_DIR)\adig.obj $(OBJ_DIR)\getopt.obj cares_imp.lib
+	link $(LDFLAGS) -out:$@ $(OBJ_DIR)\adig.obj $(OBJ_DIR)\getopt.obj cares_imp.lib $(EX_LIBS)
+
+clean:
+	- del $(OBJ_DIR)\*.obj *.ilk *.pdb *.pbt *.pbi *.pbo *._xe *.map
+
+vclean realclean: clean
+	- del $(DEF_FILE) cares.lib cares_imp.* cares.dll ahost.exe adig.exe
+	- rd $(OBJ_DIR)
+
+.c{$(OBJ_DIR)}.obj:
+	$(CC) $(CFLAGS) -Fo$*.obj -c $<
+
+#
+# Copyright "gcc -MM .."
+#
+$(OBJ_DIR)\ares_fds.obj: ares_fds.c setup.h ares.h ares_private.h ares_ipv6.h
+$(OBJ_DIR)\ares_process.obj: ares_process.c setup.h nameser.h ares.h ares_dns.h \
+  ares_private.h ares_ipv6.h
+$(OBJ_DIR)\ares_free_hostent.obj: ares_free_hostent.c setup.h ares.h ares_private.h \
+  ares_ipv6.h
+$(OBJ_DIR)\ares_query.obj: ares_query.c setup.h nameser.h ares.h ares_dns.h \
+  ares_private.h ares_ipv6.h
+$(OBJ_DIR)\ares__close_sockets.obj: ares__close_sockets.c setup.h ares.h \
+  ares_private.h ares_ipv6.h
+$(OBJ_DIR)\ares_free_string.obj: ares_free_string.c setup.h ares.h
+$(OBJ_DIR)\ares_search.obj: ares_search.c setup.h nameser.h ares.h ares_private.h \
+  ares_ipv6.h
+$(OBJ_DIR)\ares__get_hostent.obj: ares__get_hostent.c setup.h ares.h ares_private.h \
+  ares_ipv6.h inet_net_pton.h
+$(OBJ_DIR)\ares_gethostbyaddr.obj: ares_gethostbyaddr.c setup.h nameser.h ares.h \
+  ares_private.h ares_ipv6.h inet_net_pton.h
+$(OBJ_DIR)\ares_send.obj: ares_send.c setup.h nameser.h ares.h ares_dns.h \
+  ares_private.h ares_ipv6.h
+$(OBJ_DIR)\ares__read_line.obj: ares__read_line.c setup.h ares.h ares_private.h \
+  ares_ipv6.h
+$(OBJ_DIR)\ares_gethostbyname.obj: ares_gethostbyname.c setup.h nameser.h ares.h \
+  ares_private.h ares_ipv6.h inet_net_pton.h bitncmp.h
+$(OBJ_DIR)\ares_strerror.obj: ares_strerror.c setup.h ares.h
+$(OBJ_DIR)\ares_cancel.obj: ares_cancel.c setup.h ares.h ares_private.h ares_ipv6.h
+$(OBJ_DIR)\ares_init.obj: ares_init.c setup.h nameser.h ares.h ares_private.h \
+  ares_ipv6.h inet_net_pton.h
+$(OBJ_DIR)\ares_timeout.obj: ares_timeout.c setup.h ares.h ares_private.h ares_ipv6.h
+$(OBJ_DIR)\ares_destroy.obj: ares_destroy.c setup.h ares.h ares_private.h ares_ipv6.h
+$(OBJ_DIR)\ares_mkquery.obj: ares_mkquery.c setup.h nameser.h ares.h ares_dns.h
+$(OBJ_DIR)\ares_version.obj: ares_version.c setup.h ares_version.h
+$(OBJ_DIR)\ares_expand_name.obj: ares_expand_name.c setup.h nameser.h ares.h \
+  ares_private.h ares_ipv6.h
+$(OBJ_DIR)\ares_parse_a_reply.obj: ares_parse_a_reply.c setup.h nameser.h ares.h \
+  ares_dns.h ares_private.h ares_ipv6.h
+$(OBJ_DIR)\windows_port.obj: windows_port.c setup.h nameser.h ares.h ares_private.h \
+  ares_ipv6.h
+$(OBJ_DIR)\ares_expand_string.obj: ares_expand_string.c setup.h nameser.h ares.h \
+  ares_private.h ares_ipv6.h
+$(OBJ_DIR)\ares_parse_ptr_reply.obj: ares_parse_ptr_reply.c setup.h nameser.h ares.h \
+  ares_dns.h ares_private.h ares_ipv6.h
+$(OBJ_DIR)\ares_parse_aaaa_reply.obj: ares_parse_aaaa_reply.c setup.h nameser.h ares.h \
+  ares_dns.h inet_net_pton.h ares_private.h ares_ipv6.h
+$(OBJ_DIR)\ares_getnameinfo.obj: ares_getnameinfo.c setup.h nameser.h ares.h \
+  ares_private.h ares_ipv6.h inet_ntop.h
+$(OBJ_DIR)\inet_net_pton.obj: inet_net_pton.c setup.h nameser.h ares_ipv6.h \
+  inet_net_pton.h
+$(OBJ_DIR)\bitncmp.obj: bitncmp.c bitncmp.h
+$(OBJ_DIR)\inet_ntop.obj: inet_ntop.c setup.h nameser.h ares_ipv6.h inet_ntop.h
