@@ -9,7 +9,11 @@ include Makefile.inc
 WATT32_ROOT = $(subst \,/,$(WATT_ROOT))
 
 CC      = gcc
-CFLAGS  = -O2 -Wall -DWATT32 -Dselect=select_s -I$(WATT32_ROOT)/inc
+CFLAGS  = -O2 -Wall -DWATT32 -Dselect=select_s -DHAVE_AF_INET6 \
+          -DHAVE_PF_INET6 -DHAVE_IOCTLSOCKET -DHAVE_STRUCT_IN6_ADDR \
+          -DHAVE_STRUCT_SOCKADDR_IN6 -DHAVE_STRUCT_ADDRINFO \
+          -DHAVE_ARPA_NAMESER_H -DNS_INADDRSZ=4 -I$(WATT32_ROOT)/inc
+
 LDFLAGS = -s
 EX_LIBS = $(WATT32_ROOT)/lib/libwatt.a
 
