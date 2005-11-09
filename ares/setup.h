@@ -19,7 +19,9 @@
 #else
 /* simple work-around for now, for systems without configure support */
 #define ssize_t int
+#ifndef _MSC_VER
 #define socklen_t int
+#endif
 #endif
 
 /* Recent autoconf versions define these symbols in config.h. We don't want
@@ -35,7 +37,8 @@
 
 /* now typedef our socket type */
 #if defined(WIN32) && !defined(WATT32)
-#include <winsock.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
 typedef SOCKET ares_socket_t;
 #define ARES_SOCKET_BAD INVALID_SOCKET
 #else
