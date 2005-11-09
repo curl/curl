@@ -7,29 +7,24 @@
 ## Quick hack by Guenter; comments to: /dev/nul
 
 CC = gcc
-AR = ar
 RANLIB = ranlib
-STRIP = strip -g
-#RM = rm -f 
 
 ########################################################
 ## Nothing more to do below this line!
 
 LIB=libcares.a
 CC=gcc
-#CPPFLAGS=@CPPFLAGS@
-WARN_FLAGS=-Wall
-CFLAGS=-O2
-CFLAGS+=${WARN_CFLAGS} ${ERROR_CFLAGS}
-DEFS=-DMINGW32
+CFLAGS=-O2 -Wall -DHAVE_GETOPT_H -DHAVE_AF_INET6 -DHAVE_PF_INET6 \
+       -DHAVE_STRUCT_IN6_ADDR -DHAVE_STRUCT_SOCKADDR_IN6 -DHAVE_STRUCT_ADDRINFO \
+       -DHAVE_IOCTLSOCKET
+
 LDFLAGS=-s
 LIBS=-lwsock32
-ALL_CFLAGS=${CPPFLAGS} ${CFLAGS} ${DEFS}
 
 MANPAGES := $(patsubst %.c,%.o,$(wildcard ares_*.3))
 
 OBJS	:= $(patsubst %.c,%.o,$(wildcard ares_*.c))
-OBJS	+= windows_port.o
+OBJS	+= windows_port.o inet_ntop.o inet_net_pton.o bitncmp.o
 
 $(LIB): ${OBJS}
 	ar cru $@ ${OBJS}
@@ -51,7 +46,7 @@ ahost.exe: ahost.o $(LIB)
 ${OBJS}: ares.h ares_dns.h ares_private.h
 
 .c.o:
-	${CC} -c ${ALL_CFLAGS} $<
+	${CC} -c ${CFLAGS} $<
 
 check:
 
@@ -73,3 +68,4 @@ clean:
 
 distclean: clean
 	rm -f config.cache config.log config.status Makefile
+
