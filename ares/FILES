@@ -13,6 +13,7 @@ Makefile.in
 Makefile.dj
 Makefile.m32
 Makefile.netware
+Makefile.vc6
 install-sh
 mkinstalldirs
 configure
