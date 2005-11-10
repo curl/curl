@@ -43,10 +43,6 @@ CFLAGS  = $(CFLAGS) -O2 -Og
 LDFLAGS = $(LDFLAGS) -release
 !endif
 
-CFLAGS = $(CFLAGS) -DHAVE_AF_INET6 -DHAVE_PF_INET6 \
-         -DHAVE_STRUCT_IN6_ADDR -DHAVE_STRUCT_SOCKADDR_IN6 -DHAVE_STRUCT_ADDRINFO \
-         -DHAVE_IOCTLSOCKET
-
 OBJECTS = $(OBJ_DIR)\ares_fds.obj              \
           $(OBJ_DIR)\ares_process.obj          \
           $(OBJ_DIR)\ares_free_hostent.obj     \
