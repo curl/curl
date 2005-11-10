@@ -8,6 +8,18 @@
 
 
 
+Daniel (10 November 2005)
+- Introducing range stepping to the curl globbing support. Now you can specify
+  step counter by adding :[num] within the brackets when specifying a range:
+
+   [1-100:10]
+   [a-z:2]
+
+  If no step counter is set, it defaults to 1 as before:
+
+   [1-100]
+   [d-h]
+
 Daniel (8 November 2005)
 - Removed the use of AI_CANONNAME in the IPv6-enabled resolver functions since
   we really have no use for reverse lookups of the address.

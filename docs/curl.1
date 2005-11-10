@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl 1 "4 Sep 2005" "Curl 7.14.2" "Curl Manual"
+.TH curl 1 "10 Nov 2005" "Curl 7.15.1" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -63,6 +63,12 @@ several ones next to each other:
 
 You can specify any amount of URLs on the command line. They will be fetched
 in a sequential manner in the specified order.
+
+Since curl 7.15.1 you can also specify step counter for the ranges, so that
+you can get every Nth number or letter:
+
+ http://www.numericals.com/file[1-100:10].txt
+ http://www.letters.com/file[a-z:2].txt
 
 If you specify URL without protocol:// prefix, curl will attempt to guess what
 protocol you might want. It will then default to HTTP but try other protocols
