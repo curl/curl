@@ -208,10 +208,6 @@ TODO
    should also be used to set the mod date on the downloaded file.
    (idea from "Brianiac")
 
- * Add step parameter to the globbing. Like [0-1000;10] that would walk the
-   range increasing the number with 10 for every step. Requested by Jose:
-   http://curl.haxx.se/feedback/display.cgi?id=11315662266802
-
  * Globbing support for -d and -F, as in 'curl -d "name=foo[0-9]" URL'.
    Requested by Dane Jensen and others. This is easily scripted though.
 
