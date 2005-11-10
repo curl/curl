@@ -777,11 +777,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   /******************************************************************
    * IPv6-specific section
    */
-#ifdef HAVE_STRUCT_SOCKADDR_STORAGE
   struct sockaddr_storage ss;
-#else
-  char ss[256]; /* this should be big enough to fit a lot */
-#endif
   struct addrinfo *res, *ai;
   socklen_t sslen;
   char hbuf[NI_MAXHOST];

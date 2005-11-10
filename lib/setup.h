@@ -309,4 +309,11 @@ typedef int curl_socket_t;
 #define DEBUGF(x)
 #endif
 
-#endif /* __CONFIG_H */
+#ifndef HAVE_STRUCT_SOCKADDR_STORAGE
+struct sockaddr_storage
+  {
+    char buffer[256];   /* this should be big enough to fit a lot */
+  };
+#endif
+
+#endif /* __SETUP_H */
