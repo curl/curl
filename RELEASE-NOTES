@@ -18,6 +18,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o TFTP over IPv6 works
  o no reverse lookups on IP addresses when ipv6-enabled
  o SSPI compatibility fix: using the proper DLLs
  o binary LDAP properties are now shown base64 encoded
@@ -45,6 +46,6 @@ advice from friends like these:
 
  Dave Dribin, Bradford Bruce, Temprimus, Ofer, Dima Barsky, Amol Pattekar, Jaz
  Fresh, tommink[at]post.pl, Gisle Vanem, Nis Jorgensen, Vilmos Nebehaj,
- Dmitry Bartsevich
+ Dmitry Bartsevich, David Lang
 
         Thanks! (and sorry if I forgot to mention someone)

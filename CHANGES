@@ -9,6 +9,8 @@
 
 
 Daniel (10 November 2005)
+- David Lang fixed IPv6 support for TFTP!
+
 - Introducing range stepping to the curl globbing support. Now you can specify
   step counter by adding :[num] within the brackets when specifying a range:
 

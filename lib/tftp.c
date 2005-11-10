@@ -156,9 +156,9 @@ typedef struct tftp_state_data {
   time_t          start_time;
   time_t          max_time;
   unsigned short  block;
-  struct sockaddr local_addr;
+  struct sockaddr_storage   local_addr;
   socklen_t       local_addrlen;
-  struct sockaddr remote_addr;
+  struct sockaddr_storage   remote_addr;
   socklen_t       remote_addrlen;
   int             rbytes;
   int             sbytes;
@@ -345,7 +345,8 @@ static void tftp_rx(tftp_state_data_t *state, tftp_event_t event)
     state->spacket.event = htons(TFTP_EVENT_ACK);
     state->spacket.u.ack.block = htons(state->block);
     sbytes = sendto(state->sockfd, &state->spacket, 4, MSG_NOSIGNAL,
-                    &state->remote_addr, state->remote_addrlen);
+                    (struct sockaddr *)&state->remote_addr,
+                    state->remote_addrlen);
     if(sbytes < 0) {
       failf(data, "%s\n", strerror(errno));
     }
@@ -371,7 +372,8 @@ static void tftp_rx(tftp_state_data_t *state, tftp_event_t event)
       /* Resend the previous ACK */
       sbytes = sendto(state->sockfd, &state->spacket,
                       4, MSG_NOSIGNAL,
-                      &state->remote_addr, state->remote_addrlen);
+                      (struct sockaddr *)&state->remote_addr,
+                      state->remote_addrlen);
       /* Check all sbytes were sent */
       if(sbytes<0) {
         failf(data, "%s\n", strerror(errno));
@@ -436,7 +438,8 @@ static void tftp_tx(tftp_state_data_t *state, tftp_event_t event)
     Curl_fillreadbuffer(state->conn, 512, &state->sbytes);
     sbytes = sendto(state->sockfd, &state->spacket,
                     4+state->sbytes, MSG_NOSIGNAL,
-                    &state->remote_addr, state->remote_addrlen);
+                    (struct sockaddr *)&state->remote_addr,
+                    state->remote_addrlen);
     /* Check all sbytes were sent */
     if(sbytes<0) {
       failf(data, "%s\n", strerror(errno));
@@ -456,7 +459,8 @@ static void tftp_tx(tftp_state_data_t *state, tftp_event_t event)
       /* Re-send the data packet */
       sbytes = sendto(state->sockfd, &state->spacket,
                       4+state->sbytes, MSG_NOSIGNAL,
-                      &state->remote_addr, state->remote_addrlen);
+                      (struct sockaddr *)&state->remote_addr,
+                      state->remote_addrlen);
       /* Check all sbytes were sent */
       if(sbytes<0) {
         failf(data, "%s\n", strerror(errno));
@@ -542,7 +546,8 @@ CURLcode Curl_tftp_connect(struct connectdata *conn, bool *done)
   tftp_set_timeouts(state);
 
   /* Bind to any interface, random UDP port */
-  rc = bind(state->sockfd, &state->local_addr, sizeof(state->local_addr));
+  rc = bind(state->sockfd, (struct sockaddr *)&state->local_addr,
+            sizeof(state->local_addr));
   if(rc) {
     failf(conn->data, "bind() failed; %s\n",
           Curl_strerror(conn,Curl_ourerrno()));
@@ -592,7 +597,7 @@ CURLcode Curl_tftp(struct connectdata *conn, bool *done)
   tftp_event_t          event;
   CURLcode              code;
   int                   rc;
-  struct sockaddr       fromaddr;
+  struct sockaddr_storage    fromaddr;
   socklen_t             fromlen;
   int                   check_time = 0;
 
@@ -626,7 +631,7 @@ CURLcode Curl_tftp(struct connectdata *conn, bool *done)
       fromlen=sizeof(fromaddr);
       state->rbytes = recvfrom(state->sockfd,
                                (void *)&state->rpacket, sizeof(state->rpacket),
-                               0, &fromaddr, &fromlen);
+                               0, (struct sockaddr *)&fromaddr, &fromlen);
       if(state->remote_addrlen==0) {
         memcpy(&state->remote_addr, &fromaddr, fromlen);
         state->remote_addrlen = fromlen;
