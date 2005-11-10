@@ -34,7 +34,7 @@ HTTP, urlglob retrieval with bad range
 3
 </errorcode>
 <stdout mode=text>
-curl: (3) [globbing] error: illegal pattern or range specification after pos 24
+curl: (3) [globbing] error: bad range specification after pos 24
 
 </stdout>
 </verify>
