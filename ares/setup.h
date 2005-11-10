@@ -17,12 +17,19 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #else
+
+#ifdef WIN32
+#include "config-win32.h"
+#endif
+
 /* simple work-around for now, for systems without configure support */
+#ifndef __DJGPP__
 #define ssize_t int
+#endif
 #ifndef _MSC_VER
 #define socklen_t int
 #endif
-#endif
+#endif  /* HAVE_CONFIG_H */
 
 /* Recent autoconf versions define these symbols in config.h. We don't want
    them (since they collide with the libcurl ones when we build
@@ -61,7 +68,7 @@ typedef int ares_socket_t;
 #endif
 
 #if (defined(WIN32) || defined(WATT32)) && \
-   !(defined(__MINGW32__) || defined(NETWARE))
+   !(defined(__MINGW32__) || defined(NETWARE) || defined(__DJGPP__))
 /* protos for the functions we provide in windows_port.c */
 int ares_strncasecmp(const char *s1, const char *s2, int n);
 int ares_strcasecmp(const char *s1, const char *s2);
