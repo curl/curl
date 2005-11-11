@@ -176,6 +176,18 @@ static CURLcode handshake(struct connectdata *conn,
   return CURLE_OK;
 }
 
+static gnutls_x509_crt_fmt_t do_file_type(const char *type)
+{
+  if(!type || !type[0])
+    return GNUTLS_X509_FMT_PEM;
+  if(curl_strequal(type, "PEM"))
+    return GNUTLS_X509_FMT_PEM;
+  if(curl_strequal(type, "DER"))
+    return GNUTLS_X509_FMT_DER;
+  return -1;
+}
+
+
 /*
  * This function is called after the TCP connect has completed. Setup the TLS
  * layer and do all necessary magic.
@@ -253,7 +265,17 @@ Curl_gtls_connect(struct connectdata *conn,
   if(rc < 0)
     return CURLE_SSL_CONNECT_ERROR;
 
-  /* put the anonymous credentials to the current session */
+  if(data->set.cert) {
+    if( gnutls_certificate_set_x509_key_file(
+          conn->ssl[sockindex].cred, data->set.cert,
+          data->set.key != 0 ? data->set.key : data->set.cert,
+          do_file_type(data->set.cert_type) ) ) {
+      failf(data, "error reading X.509 key or certificate file");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+  }
+
+  /* put the credentials to the current session */
   rc = gnutls_credentials_set(session, GNUTLS_CRD_CERTIFICATE,
                               conn->ssl[sockindex].cred);
 

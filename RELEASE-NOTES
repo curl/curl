@@ -18,6 +18,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o the GnuTLS code didn't support client certificates
  o TFTP over IPv6 works
  o no reverse lookups on IP addresses when ipv6-enabled
  o SSPI compatibility fix: using the proper DLLs

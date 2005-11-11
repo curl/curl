@@ -8,6 +8,10 @@
 
 
 
+Daniel (12 November 2005)
+- Dima Barsky patched problem #1348930: the GnuTLS code completely ignored
+  client certificates! (http://curl.haxx.se/bug/view.cgi?id=1348930).
+
 Daniel (10 November 2005)
 - David Lang fixed IPv6 support for TFTP!
 
