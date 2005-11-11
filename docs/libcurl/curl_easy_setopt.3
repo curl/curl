@@ -420,6 +420,11 @@ find the a .netrc file in the current user's home directory. (Added in 7.10.9)
 Pass a char * as parameter, which should be [user name]:[password] to use for
 the connection. Use \fICURLOPT_HTTPAUTH\fP to decide authentication method.
 
+When using NTLM, you can set domain by prepending it to the user name and
+separating the domain and name with a forward (/) or backward slash (\\). Like
+this: "domain/user:password" or "domain\\user:password". Some HTTP servers (on
+Windows) support this style even for Basic authentication.
+
 When using HTTP and \fICURLOPT_FOLLOWLOCATION\fP, libcurl might perform
 several requests to possibly different hosts. libcurl will only send this user
 and password information to hosts using the initial host name (unless
