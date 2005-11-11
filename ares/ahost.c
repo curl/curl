@@ -29,11 +29,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "ares.h"
 #include "ares_dns.h"
+#include "inet_ntop.h"
+#include "inet_net_pton.h"
 
 #ifndef INADDR_NONE
 #define INADDR_NONE 0xffffffff
+#endif
+
+#ifndef HAVE_STRUCT_IN6_ADDR
+struct in6_addr
+{
+  unsigned char s6_addr[16];
+};
 #endif
 
 static void callback(void *arg, int status, struct hostent *host);
@@ -45,7 +55,8 @@ int main(int argc, char **argv)
   int status, nfds;
   fd_set read_fds, write_fds;
   struct timeval *tvp, tv;
-  struct in_addr addr;
+  struct in_addr addr4;
+  struct in6_addr addr6;
 
 #ifdef WIN32
   WORD wVersionRequested = MAKEWORD(1,1);
@@ -66,13 +77,20 @@ int main(int argc, char **argv)
   /* Initiate the queries, one per command-line argument. */
   for (argv++; *argv; argv++)
     {
-      addr.s_addr = inet_addr(*argv);
-      if (addr.s_addr == INADDR_NONE)
-        ares_gethostbyname(channel, *argv, AF_INET, callback, *argv);
+      if (ares_inet_pton(AF_INET, *argv, &addr4) == 1)
+        {
+          ares_gethostbyaddr(channel, &addr4, sizeof(addr4), AF_INET, callback,
+                             *argv);
+        }
+      else if (ares_inet_pton(AF_INET6, *argv, &addr6) == 1)
+        {
+          ares_gethostbyaddr(channel, &addr6, sizeof(addr6), AF_INET6, callback,
+                             *argv);
+        }
       else
         {
-          ares_gethostbyaddr(channel, &addr, sizeof(addr), AF_INET, callback,
-                             *argv);
+          /* assume user wants A-records */
+          ares_gethostbyname(channel, *argv, AF_INET, callback, *argv);
         }
     }
 
@@ -95,7 +113,6 @@ int main(int argc, char **argv)
 
 static void callback(void *arg, int status, struct hostent *host)
 {
-  struct in_addr addr;
   char **p;
 
   if (status != ARES_SUCCESS)
@@ -106,8 +123,21 @@ static void callback(void *arg, int status, struct hostent *host)
 
   for (p = host->h_addr_list; *p; p++)
     {
-      memcpy(&addr, *p, sizeof(struct in_addr));
-      printf("%-32s\t%s\n", host->h_name, inet_ntoa(addr));
+      char addr_buf[46] = "??";
+
+      ares_inet_ntop(host->h_addrtype, *p, addr_buf, sizeof(addr_buf));
+      printf("%-32s\t%s", host->h_name, addr_buf);
+#if 0
+      if (host->h_aliases[0])
+        {
+           int i;
+
+	   printf (", Aliases: ");
+	   for (i = 0; host->h_aliases[i]; i++)
+               printf("%s ", host->h_aliases[i]);
+        }
+#endif
+      puts("");
     }
 }
 
