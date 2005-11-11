@@ -1,3 +1,5 @@
+/* $Id$ */
+
 /* Copyright 1998 by the Massachusetts Institute of Technology.
  *
  * Permission to use, copy, modify, and distribute this
@@ -44,13 +46,13 @@ int ares_fds(ares_channel channel, fd_set *read_fds, fd_set *write_fds)
             nfds = server->udp_socket + 1;
         }
       if (server->tcp_socket != ARES_SOCKET_BAD)
-        {
-          FD_SET(server->tcp_socket, read_fds);
-          if (server->qhead)
-            FD_SET(server->tcp_socket, write_fds);
-          if (server->tcp_socket >= nfds)
-            nfds = server->tcp_socket + 1;
-        }
+       {
+         FD_SET(server->tcp_socket, read_fds);
+         if (server->qhead)
+           FD_SET(server->tcp_socket, write_fds);
+         if (server->tcp_socket >= nfds)
+           nfds = server->tcp_socket + 1;
+	}
     }
   return (int)nfds;
 }
