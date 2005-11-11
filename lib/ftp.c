@@ -94,6 +94,7 @@
 #include "inet_ntop.h"
 #include "select.h"
 #include "parsedate.h" /* for the week day and month names */
+#include "sockaddr.h" /* required for sockaddr_storage */
 
 #if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)
 #include "inet_ntoa_r.h"

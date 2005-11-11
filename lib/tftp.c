@@ -75,6 +75,7 @@
 #include "progress.h"
 #include "connect.h"
 #include "strerror.h"
+#include "sockaddr.h" /* required for sockaddr_storage */
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
