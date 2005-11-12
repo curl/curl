@@ -25,7 +25,7 @@
 
 #include "setup.h"
 
-#ifndef HAVE_STRUCT_SOCKADDR_STORAGE
+#ifdef HAVE_STRUCT_SOCKADDR_STORAGE
 struct Curl_sockaddr_storage {
   struct sockaddr_storage buffer;
 }
