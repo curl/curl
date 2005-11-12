@@ -1591,10 +1591,10 @@ AC_CHECK_DECL(basename, ,
 #endif
 )
 
-AC_MSG_CHECKING([if we are Mac OS X (to disable poll)])
+AC_MSG_CHECKING([if we are Mac OS X or cygwin to disable poll])
 disable_poll=no
 case $host in
-  *-*-darwin*)
+  *-*-darwin* | *-*-cygwin)
     disable_poll="yes";
     ;;
   *)

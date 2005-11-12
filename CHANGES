@@ -9,6 +9,11 @@
 
 
 Daniel (12 November 2005)
+- Eugene Kotlyarov found out that cygwin's poll() function isn't doing things
+  right: http://curl.haxx.se/mail/archive-2005-11/0045.html so we now disable
+  poll() and use select() on cygwin too (we already do the same choice on Mac
+  OS X)
+
 - Dima Barsky patched problem #1348930: the GnuTLS code completely ignored
   client certificates! (http://curl.haxx.se/bug/view.cgi?id=1348930).
 
