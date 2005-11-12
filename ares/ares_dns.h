@@ -18,6 +18,7 @@
 #ifndef ARES__DNS_H
 #define ARES__DNS_H
 
+#if 0
 #define DNS__16BIT(p)                   (((p)[0] << 8) | (p)[1])
 #define DNS__32BIT(p)                   (((p)[0] << 24) | ((p)[1] << 16) | \
                                          ((p)[2] << 8) | (p)[3])
@@ -27,6 +28,12 @@
                                          ((p)[1] = ((v) >> 16) & 0xff), \
                                          ((p)[2] = ((v) >> 8) & 0xff), \
                                          ((p)[3] = (v) & 0xff))
+#else  /* big-endian aware versions */
+#define DNS__16BIT(p)                   ntohs(*(unsigned short*)(p))
+#define DNS__32BIT(p)                   ntohl(*(unsigned long*)(p))
+#define DNS__SET16BIT(p, v)             *(unsigned short*)(p) = htons(v)
+#define DNS__SET32BIT(p, v)             *(unsigned long*)(p) = htonl(v)
+#endif
 
 /* Macros for parsing a DNS header */
 #define DNS_HEADER_QID(h)               DNS__16BIT(h)
