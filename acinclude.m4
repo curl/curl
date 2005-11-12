@@ -142,6 +142,9 @@ AC_DEFUN([TYPE_SOCKADDR_STORAGE],
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#endif
    ])
 
 ])
