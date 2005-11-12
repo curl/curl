@@ -28,7 +28,7 @@
 #ifdef HAVE_STRUCT_SOCKADDR_STORAGE
 struct Curl_sockaddr_storage {
   struct sockaddr_storage buffer;
-}
+};
 #else
 struct Curl_sockaddr_storage {
   char buffer[256];   /* this should be big enough to fit a lot */
