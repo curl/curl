@@ -27,14 +27,23 @@
 #include <unistd.h>
 #include <netdb.h>
 #endif
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
+
 #include "ares.h"
 #include "ares_dns.h"
+#include "inet_ntop.h"
+
+#ifdef WATT32
+#undef WIN32  /* Redefined in MingW headers */
+#endif
 
 #ifndef INADDR_NONE
 #define INADDR_NONE 0xffffffff
@@ -45,8 +54,10 @@
 #define T_SRV 33 /* server selection */
 #endif
 
+#ifndef optind
 extern int optind;
 extern char *optarg;
+#endif
 
 struct nv {
   const char *name;
@@ -412,7 +423,7 @@ static const unsigned char *display_rr(const unsigned char *aptr,
   char *name;
   int type, dnsclass, ttl, dlen, status;
   long len;
-  struct in_addr addr;
+  char addr[46];
 
   /* Parse the RR name. */
   status = ares_expand_name(aptr, abuf, alen, &name, &len);
@@ -474,12 +485,12 @@ static const unsigned char *display_rr(const unsigned char *aptr,
       len = *p;
       if (p + len + 1 > aptr + dlen)
         return NULL;
-      printf("\t%.*s", len, p + 1);
+      printf("\t%.*s", (int)len, p + 1);
       p += len + 1;
       len = *p;
       if (p + len + 1 > aptr + dlen)
         return NULL;
-      printf("\t%.*s", len, p + 1);
+      printf("\t%.*s", (int)len, p + 1);
       break;
 
     case T_MINFO:
@@ -504,7 +515,7 @@ static const unsigned char *display_rr(const unsigned char *aptr,
        */
       if (dlen < 2)
         return NULL;
-      printf("\t%d", (aptr[0] << 8) | aptr[1]);
+      printf("\t%d", DNS__16BIT(aptr));
       status = ares_expand_name(aptr + 2, abuf, alen, &name, &len);
       if (status != ARES_SUCCESS)
         return NULL;
@@ -531,12 +542,9 @@ static const unsigned char *display_rr(const unsigned char *aptr,
       p += len;
       if (p + 20 > aptr + dlen)
         return NULL;
-      printf("\t\t\t\t\t\t( %d %d %d %d %d )",
-             (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3],
-             (p[4] << 24) | (p[5] << 16) | (p[6] << 8) | p[7],
-             (p[8] << 24) | (p[9] << 16) | (p[10] << 8) | p[11],
-             (p[12] << 24) | (p[13] << 16) | (p[14] << 8) | p[15],
-             (p[16] << 24) | (p[17] << 16) | (p[18] << 8) | p[19]);
+      printf("\t\t\t\t\t\t( %lu %lu %lu %lu %lu )",
+             DNS__32BIT(p), DNS__32BIT(p+4), DNS__32BIT(p+8),
+             DNS__32BIT(p+12), DNS__32BIT(p+16));
       break;
 
     case T_TXT:
@@ -548,7 +556,7 @@ static const unsigned char *display_rr(const unsigned char *aptr,
           len = *p;
           if (p + len + 1 > aptr + dlen)
             return NULL;
-          printf("\t%.*s", len, p + 1);
+          printf("\t%.*s", (int)len, p + 1);
           p += len + 1;
         }
       break;
@@ -557,8 +565,14 @@ static const unsigned char *display_rr(const unsigned char *aptr,
       /* The RR data is a four-byte Internet address. */
       if (dlen != 4)
         return NULL;
-      memcpy(&addr, aptr, sizeof(struct in_addr));
-      printf("\t%s", inet_ntoa(addr));
+      printf("\t%s", ares_inet_ntop(AF_INET,aptr,addr,sizeof(addr)));
+      break;
+
+    case T_AAAA:
+      /* The RR data is a 16-byte IPv6 address. */
+      if (dlen != 16)
+        return NULL;
+      printf("\t%s", ares_inet_ntop(AF_INET6,aptr,addr,sizeof(addr)));
       break;
 
     case T_WKS:
@@ -583,6 +597,7 @@ static const unsigned char *display_rr(const unsigned char *aptr,
 
     default:
       printf("\t[Unknown RR; cannot parse]");
+      break;
     }
   printf("\n");
 
