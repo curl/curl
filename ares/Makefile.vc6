@@ -1,6 +1,6 @@
 # $Id$
 #
-# C-ares makefile fo MSVC6+
+# C-ares makefile for MSVC6+
 # G. Vanem <giva@bgnett.no>.
 #
 
@@ -76,64 +76,64 @@ OBJECTS = $(OBJ_DIR)\ares_fds.obj              \
 all: $(OBJ_DIR) cares.lib cares.dll cares_imp.lib ahost.exe adig.exe
 
 $(OBJ_DIR):
-	mkdir $(OBJ_DIR)
+       mkdir $(OBJ_DIR)
 
 cares.lib: $(OBJECTS)
-	lib -nologo -out:$@ $(OBJECTS)
+       lib -nologo -out:$@ $(OBJECTS)
 
 cares_imp.lib cares.dll: $(DEF_FILE) $(OBJECTS)
-	link $(LDFLAGS) -dll -implib:cares_imp.lib -out:cares.dll \
-	     -def:$(DEF_FILE) $(OBJECTS) $(EX_LIBS)
+       link $(LDFLAGS) -dll -implib:cares_imp.lib -out:cares.dll \
+            -def:$(DEF_FILE) $(OBJECTS) $(EX_LIBS)
 
 $(DEF_FILE): $(OBJECTS) Makefile.VC6
-	@echo ; Generated. DO NOT EDIT  > $@
-	@echo LIBRARY cares.dll        >> $@
-	@echo EXPORTS                  >> $@
-	@echo   ares_cancel            >> $@
-	@echo   ares_destroy           >> $@
-	@echo   ares_expand_name       >> $@
-	@echo   ares_expand_string     >> $@
-	@echo   ares_fds               >> $@
-	@echo   ares_free_hostent      >> $@
-	@echo   ares_free_string       >> $@
-	@echo   ares_gethostbyaddr     >> $@
-	@echo   ares_gethostbyname     >> $@
-	@echo   ares_init              >> $@
-	@echo   ares_init_options      >> $@
-	@echo   ares_mkquery           >> $@
-	@echo   ares_parse_a_reply     >> $@
-	@echo   ares_parse_ptr_reply   >> $@
-	@echo   ares_process           >> $@
-	@echo   ares_query             >> $@
-	@echo   ares_search            >> $@
-	@echo   ares_strerror          >> $@
-	@echo   ares_strncasecmp       >> $@
-	@echo   ares_strcasecmp        >> $@
-	@echo   ares_timeout           >> $@
-	@echo   ares_version           >> $@
-	@echo   ares_inet_net_pton     >> $@
-	@echo   ares_inet_ntop         >> $@
-	@echo   ares_inet_pton         >> $@
-	@echo   ares_writev            >> $@
-	@echo   ares_getnameinfo       >> $@
-	@echo   ares_gettimeofday      >> $@
-	@echo   ares_parse_aaaa_reply  >> $@
+       @echo ; Generated. DO NOT EDIT  > $@
+       @echo LIBRARY cares.dll        >> $@
+       @echo EXPORTS                  >> $@
+       @echo   ares_cancel            >> $@
+       @echo   ares_destroy           >> $@
+       @echo   ares_expand_name       >> $@
+       @echo   ares_expand_string     >> $@
+       @echo   ares_fds               >> $@
+       @echo   ares_free_hostent      >> $@
+       @echo   ares_free_string       >> $@
+       @echo   ares_gethostbyaddr     >> $@
+       @echo   ares_gethostbyname     >> $@
+       @echo   ares_init              >> $@
+       @echo   ares_init_options      >> $@
+       @echo   ares_mkquery           >> $@
+       @echo   ares_parse_a_reply     >> $@
+       @echo   ares_parse_ptr_reply   >> $@
+       @echo   ares_process           >> $@
+       @echo   ares_query             >> $@
+       @echo   ares_search            >> $@
+       @echo   ares_strerror          >> $@
+       @echo   ares_strncasecmp       >> $@
+       @echo   ares_strcasecmp        >> $@
+       @echo   ares_timeout           >> $@
+       @echo   ares_version           >> $@
+       @echo   ares_inet_net_pton     >> $@
+       @echo   ares_inet_ntop         >> $@
+       @echo   ares_inet_pton         >> $@
+       @echo   ares_writev            >> $@
+       @echo   ares_getnameinfo       >> $@
+       @echo   ares_gettimeofday      >> $@
+       @echo   ares_parse_aaaa_reply  >> $@
 
 ahost.exe: $(OBJ_DIR)\ahost.obj cares_imp.lib
-	link $(LDFLAGS) -out:$@ $(OBJ_DIR)\ahost.obj cares_imp.lib $(EX_LIBS)
+       link $(LDFLAGS) -out:$@ $(OBJ_DIR)\ahost.obj cares_imp.lib $(EX_LIBS)
 
 adig.exe: $(OBJ_DIR)\adig.obj $(OBJ_DIR)\getopt.obj cares_imp.lib
-	link $(LDFLAGS) -out:$@ $(OBJ_DIR)\adig.obj $(OBJ_DIR)\getopt.obj cares_imp.lib $(EX_LIBS)
+       link $(LDFLAGS) -out:$@ $(OBJ_DIR)\adig.obj $(OBJ_DIR)\getopt.obj cares_imp.lib $(EX_LIBS)
 
 clean:
-	- del $(OBJ_DIR)\*.obj *.ilk *.pdb *.pbt *.pbi *.pbo *._xe *.map
+       - del $(OBJ_DIR)\*.obj *.ilk *.pdb *.pbt *.pbi *.pbo *._xe *.map
 
 vclean realclean: clean
-	- del $(DEF_FILE) cares.lib cares_imp.* cares.dll ahost.exe adig.exe
-	- rd $(OBJ_DIR)
+       - del $(DEF_FILE) cares.lib cares_imp.* cares.dll ahost.exe adig.exe
+       - rd $(OBJ_DIR)
 
 .c{$(OBJ_DIR)}.obj:
-	$(CC) $(CFLAGS) -Fo$*.obj -c $<
+       $(CC) $(CFLAGS) -Fo$*.obj -c $<
 
 #
 # Copyright "gcc -MM .."
