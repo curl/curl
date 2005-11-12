@@ -4,10 +4,9 @@ lib_LTLIBRARIES = libcares.la
 
 man_MANS = $(MANPAGES)
 
-MSVCFILES = vc/adig/adig.dep vc/adig/adig.dsp vc/adig/adig.mak	\
- vc/adig/adig.plg vc/vc.dsw vc/ahost/ahost.dep vc/ahost/ahost.dsp	\
- vc/ahost/ahost.mak vc/ahost/ahost.plg vc/areslib/areslib.dep		\
- vc/areslib/areslib.dsp vc/areslib/areslib.mak vc/areslib/areslib.plg
+MSVCFILES = vc/adig/adig.dep vc/adig/adig.dsp vc/vc.dsw vc/ahost/ahost.dep \
+ vc/ahost/ahost.dsp vc/areslib/areslib.dep vc/areslib/areslib.dsp	   \
+ vc/areslib/areslib.dsw
 
 # adig and ahost are just sample programs and thus not mentioned with the
 # regular sources and headers
