@@ -232,6 +232,9 @@
 /* use ioctlsocket() for non-blocking sockets */
 #define HAVE_IOCTLSOCKET
 
+/* Define this if you have struct sockaddr_storage */
+#define HAVE_STRUCT_SOCKADDR_STORAGE
+
 /* lber dynamic library file */
 /* #undef DL_LBER_FILE */
 
