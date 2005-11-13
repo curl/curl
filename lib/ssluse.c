@@ -1162,7 +1162,7 @@ Curl_ossl_connect(struct connectdata *conn,
 #ifdef SSL_CTRL_SET_MSG_CALLBACK
   if (data->set.fdebug) {
     if (!SSL_CTX_callback_ctrl(connssl->ctx, SSL_CTRL_SET_MSG_CALLBACK,
-                               ssl_tls_trace)) {
+                               (void (*)(void))ssl_tls_trace)) {
       failf(data, "SSL: couldn't set callback!");
       return CURLE_SSL_CONNECT_ERROR;
     }
