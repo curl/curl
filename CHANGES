@@ -9,6 +9,11 @@
 
 
 Daniel (13 November 2005)
+- Debian bug report 338681 by Jan Kunder: make curl better detect and report
+  bad limit-rate units:
+  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=338681 Now curl will return
+  error if a bad unit is used.
+
 - Thanks to this nice summary of poll() implementations:
   http://www.greenend.org.uk/rjk/2001/06/poll.html and further tests by Eugene
   Kotlyarov, we now know that cygwin's poll returns only POLLHUP on remote
