@@ -1499,7 +1499,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           curl_off_t value = curlx_strtoofft(nextarg, &unit, 0);
 
           if(strlen(unit) != 1)
-            unit="w"; /* unsupported */
+            unit=(char *)"w"; /* unsupported */
 
           switch(*unit) {
           case 'G':
