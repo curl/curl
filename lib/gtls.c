@@ -176,7 +176,7 @@ static CURLcode handshake(struct connectdata *conn,
   return CURLE_OK;
 }
 
-static gnutls_x509_crt_fmt_t do_file_type(const char *type)
+static gnutls_x509_crt_fmt do_file_type(const char *type)
 {
   if(!type || !type[0])
     return GNUTLS_X509_FMT_PEM;
