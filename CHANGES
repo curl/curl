@@ -8,6 +8,13 @@
 
 
 
+Daniel (13 November 2005)
+- Thanks to this nice summary of poll() implementations:
+  http://www.greenend.org.uk/rjk/2001/06/poll.html and further tests by Eugene
+  Kotlyarov, we now know that cygwin's poll returns only POLLHUP on remote
+  connectin closure so we check for that case (too) and re-enable poll for
+  cygwin builds.
+
 Daniel (12 November 2005)
 - Eugene Kotlyarov found out that cygwin's poll() function isn't doing things
   right: http://curl.haxx.se/mail/archive-2005-11/0045.html so we now disable

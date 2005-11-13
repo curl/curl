@@ -18,7 +18,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o don't use poll() on cygwin, it is defective
+ o fixed libcurl's use of poll() on cygwin
  o the GnuTLS code didn't support client certificates
  o TFTP over IPv6 works
  o no reverse lookups on IP addresses when ipv6-enabled
