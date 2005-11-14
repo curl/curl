@@ -1,3 +1,5 @@
+/* $Id$ */
+
 /* Copyright 2005 by Dominick Meglio
  *
  * Permission to use, copy, modify, and distribute this
@@ -77,8 +79,8 @@ static char *ares_striendstr(const char *s1, const char *s2);
 void ares_getnameinfo(ares_channel channel, const struct sockaddr *sa, socklen_t salen,
                       int flags, ares_nameinfo_callback callback, void *arg)
 {
-  struct sockaddr_in *addr;
-  struct sockaddr_in6 *addr6;
+  struct sockaddr_in *addr = NULL;
+  struct sockaddr_in6 *addr6 = NULL;
   struct nameinfo_query *niquery;
 
   /* Verify the buffer size */
@@ -337,6 +339,7 @@ static char *append_scopeid(struct sockaddr_in6 *addr6, unsigned int flags,
     }
 #else
   sprintf(&tmpbuf[1], "%u", addr6->sin6_scope_id);
+  (void) flags;
 #endif
   strcat(buf, tmpbuf);
   return buf;
