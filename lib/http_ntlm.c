@@ -342,7 +342,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 #endif
   size_t size;
   char *base64=NULL;
-  unsigned char ntlmbuf[256]; /* enough, unless the host/domain is very long */
+  unsigned char ntlmbuf[512]; /* enough, unless the host/domain is very long */
 
   /* point to the address of the pointer that holds the string to sent to the
      server, which is for a plain host or for a HTTP proxy */
@@ -477,13 +477,15 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     buf.BufferType = SECBUFFER_TOKEN;
     buf.pvBuffer   = ntlmbuf;
 
-    status = s_pSecFn->InitializeSecurityContext(&ntlm->handle, NULL, (char *) host,
-                                       ISC_REQ_CONFIDENTIALITY |
-                                       ISC_REQ_REPLAY_DETECT |
-                                       ISC_REQ_CONNECTION,
-                                       0, SECURITY_NETWORK_DREP, NULL, 0,
-                                       &ntlm->c_handle, &desc, &attrs, &tsDummy
-      );
+    status = s_pSecFn->InitializeSecurityContext(&ntlm->handle, NULL,
+                                                 (char *) host,
+                                                 ISC_REQ_CONFIDENTIALITY |
+                                                 ISC_REQ_REPLAY_DETECT |
+                                                 ISC_REQ_CONNECTION,
+                                                 0, SECURITY_NETWORK_DREP,
+                                                 NULL, 0,
+                                                 &ntlm->c_handle, &desc,
+                                                 &attrs, &tsDummy);
 
     if (status == SEC_I_COMPLETE_AND_CONTINUE ||
         status == SEC_I_CONTINUE_NEEDED) {
