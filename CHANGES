@@ -8,6 +8,15 @@
 
 
 
+Daniel (14 November 2005)
+- Jan Kunder's debian bug report
+  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=338680 identified a weird
+  error message for when you try to upload a file and the requested directory
+  doesn't exist on the target server.
+
+- Yang Tse fixed compiler warnings in lib/ssluse.c with OpenSSL 0.9.8 and in
+  lib/memdebug.h that showed up in his msvc builds.
+
 Daniel (13 November 2005)
 - Debian bug report 338681 by Jan Kunder: make curl better detect and report
   bad limit-rate units:

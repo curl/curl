@@ -2526,9 +2526,11 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
           NBFTPSENDF(conn, "MKD %s", ftp->dirs[ftp->count1 - 1]);
           state(conn, FTP_MKD);
         }
-        else
+        else {
           /* return failure */
+          failf(data, "Server denied you to change to the given directory");
           return CURLE_FTP_ACCESS_DENIED;
+        }
       }
       else {
         /* success */
