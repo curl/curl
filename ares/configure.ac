@@ -356,4 +356,10 @@ CARES_CHECK_GETSERVBYPORT_R
 
 CURL_CHECK_NONBLOCKING_SOCKET
 
+AC_C_BIGENDIAN(
+    [AC_DEFINE(ARES_BIG_ENDIAN, 1, [define this if ares is built for a big endian system])],
+    ,
+    [AC_MSG_WARN([couldn't figure out endianess, assuming little endian!])]
+)
+
 AC_OUTPUT(Makefile)
