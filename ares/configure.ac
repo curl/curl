@@ -68,6 +68,7 @@ AC_CHECK_HEADERS(
        sys/ioctl.h \
        netdb.h \
        winsock.h \
+       ws2tcpip.h \
        netinet/in.h \
        net/if.h \
        arpa/nameser.h \
@@ -152,6 +153,9 @@ CARES_CHECK_STRUCT(
 #ifdef HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
+#ifdef HAVE_WS2TCPIP.H
+#include <ws2tcpip.h>
+#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -167,6 +171,9 @@ CARES_CHECK_STRUCT(
 #endif
 #ifdef HAVE_WINSOCK_H
 #include <winsock.h>
+#endif
+#ifdef HAVE_WS2TCPIP.H
+#include <ws2tcpip.h>
 #endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -187,6 +194,9 @@ AC_CHECK_MEMBER(struct sockaddr_in6.sin6_scope_id,
 #ifdef HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
+#ifdef HAVE_WS2TCPIP.H
+#include <ws2tcpip.h>
+#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -202,6 +212,9 @@ AC_CHECK_MEMBER(struct addrinfo.ai_flags,
 #endif
 #ifdef HAVE_WINSOCK_H
 #include <winsock.h>
+#endif
+#ifdef HAVE_WS2TCPIP.H
+#include <ws2tcpip.h>
 #endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
