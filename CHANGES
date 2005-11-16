@@ -8,6 +8,10 @@
 
 
 
+Daniel (16 November 2005)
+- Applied Albert Chin's patch that makes the libcurl.pc pkgconfig file get
+  installed on 'make install' time.
+
 Daniel (14 November 2005)
 - Quagmire reported that he needed to raise a NTLM buffer for SSPI to work
   properly for a case, and so we did. We raised it even for non-SSPI builds

@@ -11,6 +11,7 @@ Curl and libcurl 7.15.1
 
 This release includes the following changes:
 
+ o the libcurl.pc pkgconfig file now gets installed on make install
  o URL globbing now offers "range steps": [1-100:10]
  o LDAPv3 is now the preferred LDAP protocol version
  o --max-redirs and CURLOPT_MAXREDIRS set to 0 limits redirects
@@ -49,6 +50,7 @@ advice from friends like these:
 
  Dave Dribin, Bradford Bruce, Temprimus, Ofer, Dima Barsky, Amol Pattekar, Jaz
  Fresh, tommink[at]post.pl, Gisle Vanem, Nis Jorgensen, Vilmos Nebehaj,
- Dmitry Bartsevich, David Lang, Eugene Kotlyarov, Jan Kunder
+ Dmitry Bartsevich, David Lang, Eugene Kotlyarov, Jan Kunder, Yang Tse,
+ Quagmire, Albert Chin
 
         Thanks! (and sorry if I forgot to mention someone)

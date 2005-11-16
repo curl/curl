@@ -31,6 +31,9 @@ bin_SCRIPTS = curl-config
 SUBDIRS = lib src
 DIST_SUBDIRS = $(SUBDIRS) tests include packages docs
 
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = libcurl.pc
+
 dist-hook:
 	rm -rf $(top_builddir)/tests/log
 	find $(distdir) -name "*.dist" -exec rm {} \;
