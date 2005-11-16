@@ -67,7 +67,7 @@ AC_CHECK_HEADERS(
        sys/socket.h \
        sys/ioctl.h \
        netdb.h \
-       winsock.h \
+       winsock2.h \
        ws2tcpip.h \
        netinet/in.h \
        net/if.h \
@@ -89,8 +89,8 @@ dnl *Sigh* these are needed in order for net/if.h to get properly detected.
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_WINSOCK_H
-#include <winsock.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
 #endif
 ]
   )
@@ -104,8 +104,8 @@ AC_CHECK_TYPE(socklen_t, ,
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_WINSOCK_H
-#include <winsock.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
 #endif
    ])
 
@@ -118,8 +118,8 @@ CARES_CHECK_CONSTANT(
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_WINSOCK_H
-#include <winsock.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
 #endif
 
   ], [PF_INET6], 
@@ -135,8 +135,8 @@ CARES_CHECK_CONSTANT(
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_WINSOCK_H
-#include <winsock.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
 #endif
 
   ], [AF_INET6], 
@@ -150,10 +150,10 @@ CARES_CHECK_STRUCT(
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_WINSOCK_H
-#include <winsock.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
 #endif
-#ifdef HAVE_WS2TCPIP.H
+#ifdef HAVE_WS2TCPIP_H
 #include <ws2tcpip.h>
 #endif
 #ifdef HAVE_NETINET_IN_H
@@ -169,10 +169,10 @@ CARES_CHECK_STRUCT(
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_WINSOCK_H
-#include <winsock.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
 #endif
-#ifdef HAVE_WS2TCPIP.H
+#ifdef HAVE_WS2TCPIP_H
 #include <ws2tcpip.h>
 #endif
 #ifdef HAVE_NETINET_IN_H
@@ -191,10 +191,10 @@ AC_CHECK_MEMBER(struct sockaddr_in6.sin6_scope_id,
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_WINSOCK_H
-#include <winsock.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
 #endif
-#ifdef HAVE_WS2TCPIP.H
+#ifdef HAVE_WS2TCPIP_H
 #include <ws2tcpip.h>
 #endif
 #ifdef HAVE_NETINET_IN_H
@@ -210,10 +210,10 @@ AC_CHECK_MEMBER(struct addrinfo.ai_flags,
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_WINSOCK_H
-#include <winsock.h>
+#ifdef HAVE_WINSOCaK2_H
+#include <winsock2.h>
 #endif
-#ifdef HAVE_WS2TCPIP.H
+#ifdef HAVE_WS2TCPIP_H
 #include <ws2tcpip.h>
 #endif
 #ifdef HAVE_NETINET_IN_H
