@@ -2217,6 +2217,19 @@ CURLcode Curl_perform(struct SessionHandle *data)
   if(newurl)
     free(newurl);
 
+  if(res && !data->state.errorbuf) {
+    /*
+     * As an extra precaution: if no error string has been set and there was
+     * an error, use the strerror() string or if things are so bad that not
+     * even that is good, set a bad string that mentions the error code.
+     */
+    char *str = curl_easy_strerror(res);
+    if(!str)
+      failf(data, "unspecified error %d", (int)res);
+    else
+      failf(data, "%s", str);
+  }
+
   /* run post-transfer uncondionally, but don't clobber the return code if
      we already have an error code recorder */
   res2 = Curl_posttransfer(data);

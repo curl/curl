@@ -270,12 +270,6 @@ debug/trace why errors happen.
 If the library does not return an error, the buffer may not have been
 touched. Do not rely on the contents in those cases.
 
-In a few rare cases, there is no text string associated with the error in
-libcurl and then you may not get a string in the buffer even though it returns
-an error. This is considered a bug and we appreciate your reports about these
-cases. Anyway, you can avoid problems with these cases in your program by
-making sure to clear the first byte of the error buffer before you call
-curl_easy_perform().
 .IP CURLOPT_STDERR
 Pass a FILE * as parameter. Tell libcurl to use this stream instead of stderr
 when showing the progress meter and displaying \fICURLOPT_VERBOSE\fP data.

@@ -19,6 +19,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CURLOPT_ERRORBUFFER is now always filled in on errors
  o curl outputs error on bad --limit-rate units
  o fixed libcurl's use of poll() on cygwin
  o the GnuTLS code didn't support client certificates
@@ -51,6 +52,6 @@ advice from friends like these:
  Dave Dribin, Bradford Bruce, Temprimus, Ofer, Dima Barsky, Amol Pattekar, Jaz
  Fresh, tommink[at]post.pl, Gisle Vanem, Nis Jorgensen, Vilmos Nebehaj,
  Dmitry Bartsevich, David Lang, Eugene Kotlyarov, Jan Kunder, Yang Tse,
- Quagmire, Albert Chin
+ Quagmire, Albert Chin, David Shaw
 
         Thanks! (and sorry if I forgot to mention someone)
