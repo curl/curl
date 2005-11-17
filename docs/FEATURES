@@ -95,6 +95,9 @@ FTPS (*1)
  - implicit "AUTH TSL" and "AUTH SSL" usage to "upgrade" plain ftp://
    connection to use SSL for both or one of the connections
 
+TFTP
+ - download / upload
+
 TELNET
  - connection negotiation
  - custom telnet options
