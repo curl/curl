@@ -2223,7 +2223,7 @@ CURLcode Curl_perform(struct SessionHandle *data)
      * an error, use the strerror() string or if things are so bad that not
      * even that is good, set a bad string that mentions the error code.
      */
-    char *str = curl_easy_strerror(res);
+    const char *str = curl_easy_strerror(res);
     if(!str)
       failf(data, "unspecified error %d", (int)res);
     else
