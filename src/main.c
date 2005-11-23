@@ -1944,7 +1944,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
                    nextarg,
                    &config->httppost,
                    &config->last_post,
-                   subletter=='s')) /* 's' means literal string */
+                   (bool) (subletter=='s'))) /* 's' means literal string */
         return PARAM_BAD_USE;
       if(SetHTTPrequest(config, HTTPREQ_POST, &config->httpreq))
         return PARAM_BAD_USE;
