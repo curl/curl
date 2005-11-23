@@ -301,8 +301,10 @@ typedef int curl_socket_t;
 #define USE_SSL    /* Either OpenSSL || GnuTLS */
 #endif
 
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_NTLM)
 #if defined(USE_SSLEAY) || defined(USE_WINDOWS_SSPI)
 #define USE_NTLM
+#endif
 #endif
 
 #ifdef CURLDEBUG
