@@ -27,7 +27,10 @@
 /* #undef size_t */
 
 /* Define this to 'int' if ssize_t is not an available typedefed type */
+#if defined(__WATCOMC__) && (__WATCOMC__ >= 1240)
+#else
 #define ssize_t int
+#endif
 
 /* Define this to 'int' if socklen_t is not an available typedefed type */
 #if !defined(ENABLE_IPV6) && ((_MSC_VER < 1300) || !defined(USE_SSLEAY))
