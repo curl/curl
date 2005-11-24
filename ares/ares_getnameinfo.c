@@ -263,6 +263,7 @@ static char *lookup_service(unsigned short port, int flags,
         {
           struct servent *se;
           const char *proto;
+#ifdef HAVE_GETSERVBYPORT_R
 #if GETSERVBYPORT_R_ARGS == 6
           struct servent ret;
           char buf[4096];
@@ -274,6 +275,7 @@ static char *lookup_service(unsigned short port, int flags,
           struct servent ret;
           struct servent_data sed;
 #endif
+#endif /* HAVE_GETSERVBYPORT_R */
           if (flags & ARES_NI_UDP)
             proto = "udp";
           else if (flags & ARES_NI_SCTP)
