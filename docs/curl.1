@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl 1 "10 Nov 2005" "Curl 7.15.1" "Curl Manual"
+.TH curl 1 "24 Nov 2005" "Curl 7.15.1" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -927,9 +927,17 @@ If this option is used several times, each occurrence will toggle it on/off.
 Specify user and password to use for server authentication. Overrides
 \fI-n/--netrc\fP and \fI--netrc-optional\fP.
 
+If you use an SSPI-enabled curl binary and do NTLM autentication, you can
+force curl to pick up the user name and password from your environment by
+simply specifying a single colon with this option: "-u :".
+
 If this option is used several times, the last one will be used.
 .IP "-U/--proxy-user <user:password>"
 Specify user and password to use for proxy authentication.
+
+If you use an SSPI-enabled curl binary and do NTLM autentication, you can
+force curl to pick up the user name and password from your environment by
+simply specifying a single colon with this option: "-U :".
 
 If this option is used several times, the last one will be used.
 .IP "--url <URL>"
