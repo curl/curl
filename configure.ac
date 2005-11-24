@@ -1504,6 +1504,13 @@ dnl Checks for library functions.
 dnl AC_PROG_GCC_TRADITIONAL
 AC_TYPE_SIGNAL
 dnl AC_FUNC_VPRINTF
+case $host in
+  *msdosdjgpp)
+     ac_cv_func_pipe=no
+     skipcheck_pipe=yes
+     AC_MSG_NOTICE([skip check for pipe on msdosdjgpp])
+    ;;
+esac
 AC_CHECK_FUNCS( strtoll \
                 socket \
                 select \
@@ -1541,7 +1548,8 @@ AC_CHECK_FUNCS( strtoll \
 dnl if found
 [],
 dnl if not found, $ac_func is the name we check for
-  func="$ac_func"
+func="$ac_func"
+if test "skipcheck_$func" != "yes"; then
   AC_MSG_CHECKING([deeper for $func])
   AC_TRY_LINK( [],
                [ $func ();],
@@ -1551,7 +1559,7 @@ dnl if not found, $ac_func is the name we check for
                AC_DEFINE_UNQUOTED($def, 1, [If you have $func]),
                AC_MSG_RESULT(but still no)
                )
-
+fi
 )
 
 dnl For some reason, the check above doesn't properly detect select() with
@@ -1588,6 +1596,9 @@ AC_CHECK_DECL(basename, ,
 #endif
 #ifdef HAVE_LIBGEN_H
 #include <libgen.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
 #endif
 )
 

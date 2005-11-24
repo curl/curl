@@ -8,6 +8,13 @@
 
 
 
+Daniel (24 November 2005)
+- Doug Kaufman provided a set of patches to make curl build fine on DJGPP
+  again using configure.
+
+- Yang Tse provided a whole series of patches to clear up compiler warnings on
+  MSVC 6.
+
 Daniel (17 November 2005)
 - I extended a patch from David Shaw to make libcurl _always_ provide an error
   string in the given error buffer to address the flaw mention on 21 sep 2005.

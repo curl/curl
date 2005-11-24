@@ -200,6 +200,7 @@ typedef unsigned char bool;
 #define sread(x,y,z)      read_s(x,y,z)
 #define swrite(x,y,z)     write_s(x,y,z)
 #define select(n,r,w,x,t) select_s(n,r,w,x,t)
+#define ioctl(x,y,z) ioctlsocket(x,y,(char *)(z))
 #define IOCTL_3_ARGS
 #include <tcp.h>
 #ifdef word
@@ -229,7 +230,9 @@ typedef unsigned char bool;
 #endif
 
 #define DIR_CHAR      "/"
+#ifndef DOT_CHAR
 #define DOT_CHAR      "."
+#endif
 
 #ifdef DJGPP
 #undef DOT_CHAR
