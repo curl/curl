@@ -105,7 +105,7 @@ Content-Disposition: form-data; name="FILECONTENT"
 /* Length of the random boundary string. */
 #define BOUNDARY_LENGTH 40
 
-#ifndef CURL_DISABLE_HTTP
+#if !defined(CURL_DISABLE_HTTP) || defined(USE_SSLEAY)
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -127,6 +127,10 @@ Content-Disposition: form-data; name="FILECONTENT"
 
 /* The last #include file should be: */
 #include "memdebug.h"
+
+#endif  /* !defined(CURL_DISABLE_HTTP) || defined(USE_SSLEAY) */
+
+#ifndef CURL_DISABLE_HTTP
 
 #if defined(HAVE_BASENAME) && defined(NEED_BASENAME_PROTO)
 /* This system has a basename() but no prototype for it! */
@@ -1511,7 +1515,7 @@ int main()
   return 0;
 }
 
-#endif
+#endif  /* _FORM_DEBUG */
 
 #else  /* CURL_DISABLE_HTTP */
 CURLFORMcode curl_formadd(struct curl_httppost **httppost,
@@ -1530,6 +1534,8 @@ void curl_formfree(struct curl_httppost *form)
 }
 
 #endif  /* CURL_DISABLE_HTTP */
+
+#if !defined(CURL_DISABLE_HTTP) || defined(USE_SSLEAY)
 
 /*
  * Curl_FormBoundary() creates a suitable boundary string and returns an
@@ -1563,3 +1569,5 @@ char *Curl_FormBoundary(void)
 
   return retstring;
 }
+
+#endif  /* !defined(CURL_DISABLE_HTTP) || defined(USE_SSLEAY) */
