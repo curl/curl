@@ -310,6 +310,10 @@ typedef int curl_socket_t;
 #endif
 #endif
 
+#if defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_GOPHER)
+#define CURL_DISABLE_GOPHER
+#endif
+
 #ifdef CURLDEBUG
 #define DEBUGF(x) x
 #else
