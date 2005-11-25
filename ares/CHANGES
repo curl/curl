@@ -1,5 +1,9 @@
   Changelog for the c-ares project
 
+* November 25
+
+- Yang Tse fixed some send() / recv() compiler warnings
+
 * September 18
 
 - Added constants that will be used by ares_getaddrinfo
