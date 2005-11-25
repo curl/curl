@@ -12,3 +12,4 @@ depcomp
 config.guess
 config.sub
 ltmain.sh
+libcurl.pc
