@@ -25,13 +25,13 @@
 
 #include "setup.h"
 
+char *Curl_inet_ntop(int af, const void *addr, char *buf, size_t size);
+
 #ifdef HAVE_INET_NTOP
-#define Curl_inet_ntop(af,addr,buf,size) inet_ntop(af,addr,buf,size)
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#else
-char *Curl_inet_ntop(int af, const void *addr, char *buf, size_t size);
+#define Curl_inet_ntop(af,addr,buf,size) inet_ntop(af,addr,buf,size)
 #endif
 
 #endif /* __INET_NTOP_H */
