@@ -213,8 +213,8 @@ static void read_tcp_data(ares_channel channel, fd_set *read_fds, time_t now)
            * what's left to read of it).
            */
           count = recv(server->tcp_socket,
-                       (void *)(server->tcp_lenbuf + server->tcp_buffer_pos),
-                       2 - server->tcp_buffer_pos, 0);
+                       (void *)(server->tcp_lenbuf + server->tcp_lenbuf_pos),
+                       2 - server->tcp_lenbuf_pos, 0);
           if (count <= 0)
             {
               handle_error(channel, i, now);
