@@ -164,7 +164,8 @@ static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
           /* Can't allocate iovecs; just send the first request. */
           sendreq = server->qhead;
 
-          scount = send(server->tcp_socket, sendreq->data, sendreq->len, 0);
+          scount = send(server->tcp_socket, (void *)sendreq->data,
+                        sendreq->len, 0);
 
           if (scount < 0)
             {
@@ -212,7 +213,7 @@ static void read_tcp_data(ares_channel channel, fd_set *read_fds, time_t now)
            * what's left to read of it).
            */
           count = recv(server->tcp_socket,
-                       server->tcp_lenbuf + server->tcp_buffer_pos,
+                       (void *)(server->tcp_lenbuf + server->tcp_buffer_pos),
                        2 - server->tcp_buffer_pos, 0);
           if (count <= 0)
             {
@@ -238,7 +239,7 @@ static void read_tcp_data(ares_channel channel, fd_set *read_fds, time_t now)
         {
           /* Read data into the allocated buffer. */
           count = recv(server->tcp_socket,
-                       server->tcp_buffer + server->tcp_buffer_pos,
+                       (void *)(server->tcp_buffer + server->tcp_buffer_pos),
                        server->tcp_length - server->tcp_buffer_pos, 0);
           if (count <= 0)
             {
@@ -280,7 +281,7 @@ static void read_udp_packets(ares_channel channel, fd_set *read_fds,
           !FD_ISSET(server->udp_socket, read_fds))
         continue;
 
-      count = recv(server->udp_socket, buf, sizeof(buf), 0);
+      count = recv(server->udp_socket, (void *)buf, sizeof(buf), 0);
       if (count <= 0)
         handle_error(channel, i, now);
 
@@ -465,7 +466,8 @@ void ares__send_query(ares_channel channel, struct query *query, time_t now)
               return;
             }
         }
-      if (send(server->udp_socket, query->qbuf, query->qlen, 0) == -1)
+      if (send(server->udp_socket, (void *)query->qbuf,
+               query->qlen, 0) == -1)
         {
           query->skip_server[query->server] = 1;
           next_server(channel, query, now);
