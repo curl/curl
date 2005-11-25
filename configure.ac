@@ -1549,7 +1549,8 @@ dnl if found
 [],
 dnl if not found, $ac_func is the name we check for
 func="$ac_func"
-if test "skipcheck_$func" != "yes"; then
+eval skipcheck=\$skipcheck_$func
+if test "x$skipcheck" != "xyes"; then
   AC_MSG_CHECKING([deeper for $func])
   AC_TRY_LINK( [],
                [ $func ();],
