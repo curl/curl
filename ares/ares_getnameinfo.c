@@ -72,7 +72,8 @@ struct nameinfo_query {
 static void nameinfo_callback(void *arg, int status, struct hostent *host);
 static char *lookup_service(unsigned short port, int flags, char *buf);
 #ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
-static char *append_scopeid(struct sockaddr_in6 *addr6, unsigned int scopeid, char *buf);
+static void append_scopeid(struct sockaddr_in6 *addr6, unsigned int scopeid,
+                           char *buf, size_t buflen);
 #endif
 static char *ares_striendstr(const char *s1, const char *s2);
 
@@ -139,7 +140,7 @@ void ares_getnameinfo(ares_channel channel, const struct sockaddr *sa, socklen_t
             port = addr6->sin6_port;
             /* If the system supports scope IDs, use it */
 #ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
-            append_scopeid(addr6, flags, ipbuf);
+            append_scopeid(addr6, flags, ipbuf, sizeof(ipbuf));
 #endif
           }
         else
@@ -231,7 +232,7 @@ static void nameinfo_callback(void *arg, int status, struct hostent *host)
         {
           ares_inet_ntop(AF_INET6, &niquery->addr.addr6.sin6_addr, ipbuf, IPBUFSIZ);
 #ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
-          append_scopeid(&niquery->addr.addr6, niquery->flags, ipbuf);
+          append_scopeid(&niquery->addr.addr6, niquery->flags, ipbuf, sizeof(ipbuf));
 #endif
         }
       /* They want a service too */
@@ -321,30 +322,39 @@ static char *lookup_service(unsigned short port, int flags,
 }
 
 #ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
-static char *append_scopeid(struct sockaddr_in6 *addr6, unsigned int flags,
-                            char *buf)
+static void append_scopeid(struct sockaddr_in6 *addr6, unsigned int flags,
+                           char *buf, size_t buflen)
 {
-  char tmpbuf[IF_NAMESIZE + 1];
+  char fmt_u[] = "%u";
+  char fmt_lu[] = "%lu";
+  char tmpbuf[IF_NAMESIZE + 2];
+  size_t bufl;
+  char *fmt = (sizeof(addr6->sin6_scope_id) > sizeof(unsigned int))?fmt_lu:fmt_u;
 
   tmpbuf[0] = '%';
+
 #ifdef HAVE_IF_INDEXTONAME
   if ((flags & ARES_NI_NUMERICSCOPE) ||
       (!IN6_IS_ADDR_LINKLOCAL(&addr6->sin6_addr)
        && !IN6_IS_ADDR_MC_LINKLOCAL(&addr6->sin6_addr)))
     {
-       sprintf(&tmpbuf[1], "%u", addr6->sin6_scope_id);
+       sprintf(&tmpbuf[1], fmt, addr6->sin6_scope_id);
     }
   else
     {
       if (if_indextoname(addr6->sin6_scope_id, &tmpbuf[1]) == NULL)
-        sprintf(&tmpbuf[1], "%u", addr6->sin6_scope_id);
+        sprintf(&tmpbuf[1], fmt, addr6->sin6_scope_id);
     }
 #else
-  sprintf(&tmpbuf[1], "%u", addr6->sin6_scope_id);
+  sprintf(&tmpbuf[1], fmt, addr6->sin6_scope_id);
   (void) flags;
 #endif
-  strcat(buf, tmpbuf);
-  return buf;
+  tmpbuf[IF_NAMESIZE + 1] = '\0';
+  bufl = strlen(buf);
+
+  if(bufl + strlen(tmpbuf) < buflen)
+    /* only append the scopeid string if it fits in the target buffer */
+    strcpy(&buf[bufl], tmpbuf);
 }
 #endif
 
