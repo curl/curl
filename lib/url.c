@@ -327,7 +327,7 @@ CURLcode Curl_open(struct SessionHandle **curl)
     data->set.ftp_use_epsv = TRUE;   /* FTP defaults to EPSV operations */
     data->set.ftp_use_eprt = TRUE;   /* FTP defaults to EPRT operations */
     data->set.ftp_use_lprt = TRUE;   /* FTP defaults to EPRT operations */
-
+    data->set.ftp_filemethod = FTPFILE_MULTICWD;
     data->set.dns_cache_timeout = 60; /* Timeout every 60 seconds by default */
 
     /* make libcurl quiet by default: */
@@ -556,6 +556,12 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * We want to upload and append to an existing (FTP) file.
      */
     data->set.ftp_append = va_arg(param, long)?TRUE:FALSE;
+    break;
+  case CURLOPT_FTP_FILEMETHOD:
+    /*
+     * How do access files over FTP.
+     */
+    data->set.ftp_filemethod = va_arg(param, long);
     break;
   case CURLOPT_NETRC:
     /*

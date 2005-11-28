@@ -909,6 +909,9 @@ typedef enum {
      control connection. */
   CINIT(FTP_SKIP_PASV_IP, LONG, 137),
 
+  /* Select "file method" to use when doing FTP */
+  CINIT(FTP_FILEMETHOD, LONG, 138),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

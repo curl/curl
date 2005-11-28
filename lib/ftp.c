@@ -3642,8 +3642,6 @@ static CURLcode ftp_3rdparty_transfer(struct connectdata *conn)
   return CURLE_OK;
 }
 
-
-
 /***********************************************************************
  *
  * ftp_parse_url_path()
@@ -3667,58 +3665,87 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
   ftp = conn->proto.ftp;
   ftp->ctl_valid = FALSE;
 
-  ftp->dirdepth = 0;
-  ftp->diralloc = 5; /* default dir depth to allocate */
-  ftp->dirs = (char **)calloc(ftp->diralloc, sizeof(ftp->dirs[0]));
-  if(!ftp->dirs)
-    return CURLE_OUT_OF_MEMORY;
+  switch(data->set.ftp_filemethod) {
+  case FTPFILE_NOCWD:
+    /* fastest, but less standard-compliant */
+    ftp->file = conn->path;  /* this is a full file path */
+    break;
 
-  /* parse the URL path into separate path components */
-  while((slash_pos=strchr(cur_pos, '/'))) {
-    /* 1 or 0 to indicate absolute directory */
-    bool absolute_dir = (cur_pos - conn->path > 0) && (ftp->dirdepth == 0);
+  case FTPFILE_SINGLECWD:
+    /* get the last slash */
+    slash_pos=strrchr(cur_pos, '/');
+    if(slash_pos) {
+      ftp->dirdepth = 1; /* we consider it to be a single dir */
+      ftp->dirs = (char **)calloc(1, sizeof(ftp->dirs[0]));
+      if(!ftp->dirs)
+        return CURLE_OUT_OF_MEMORY;
 
-    /* seek out the next path component */
-    if (slash_pos-cur_pos) {
-      /* we skip empty path components, like "x//y" since the FTP command CWD
-         requires a parameter and a non-existant parameter a) doesn't work on
-         many servers and b) has no effect on the others. */
-      int len = (int)(slash_pos - cur_pos + absolute_dir);
-      ftp->dirs[ftp->dirdepth] = curl_unescape(cur_pos - absolute_dir, len);
-
-      if (!ftp->dirs[ftp->dirdepth]) { /* run out of memory ... */
-        failf(data, "no memory");
-        freedirs(ftp);
+      ftp->dirs[0] = curl_unescape(cur_pos, slash_pos-cur_pos);
+      if(!ftp->dirs[0]) {
+        free(ftp->dirs);
         return CURLE_OUT_OF_MEMORY;
       }
-      if (isBadFtpString(ftp->dirs[ftp->dirdepth])) {
-        freedirs(ftp);
-        return CURLE_URL_MALFORMAT;
-      }
+      ftp->file = slash_pos+1;  /* the rest is the file name */
     }
-    else {
-      cur_pos = slash_pos + 1; /* jump to the rest of the string */
-      continue;
-    }
+    else
+      ftp->file = cur_pos;  /* this is a file name only */
+    break;
 
-    if(!retcode) {
-      cur_pos = slash_pos + 1; /* jump to the rest of the string */
-      if(++ftp->dirdepth >= ftp->diralloc) {
-        /* enlarge array */
-        char *bigger;
-        ftp->diralloc *= 2; /* double the size each time */
-        bigger = realloc(ftp->dirs, ftp->diralloc * sizeof(ftp->dirs[0]));
-        if(!bigger) {
-          ftp->dirdepth--;
+  default: /* allow pretty much anything */
+  case FTPFILE_MULTICWD:
+    ftp->dirdepth = 0;
+    ftp->diralloc = 5; /* default dir depth to allocate */
+    ftp->dirs = (char **)calloc(ftp->diralloc, sizeof(ftp->dirs[0]));
+    if(!ftp->dirs)
+      return CURLE_OUT_OF_MEMORY;
+
+    /* parse the URL path into separate path components */
+    while((slash_pos=strchr(cur_pos, '/'))) {
+      /* 1 or 0 to indicate absolute directory */
+      bool absolute_dir = (cur_pos - conn->path > 0) && (ftp->dirdepth == 0);
+
+      /* seek out the next path component */
+      if (slash_pos-cur_pos) {
+        /* we skip empty path components, like "x//y" since the FTP command CWD
+           requires a parameter and a non-existant parameter a) doesn't work on
+           many servers and b) has no effect on the others. */
+        int len = (int)(slash_pos - cur_pos + absolute_dir);
+        ftp->dirs[ftp->dirdepth] = curl_unescape(cur_pos - absolute_dir, len);
+
+        if (!ftp->dirs[ftp->dirdepth]) { /* run out of memory ... */
+          failf(data, "no memory");
           freedirs(ftp);
           return CURLE_OUT_OF_MEMORY;
         }
-        ftp->dirs = (char **)bigger;
+        if (isBadFtpString(ftp->dirs[ftp->dirdepth])) {
+          freedirs(ftp);
+          return CURLE_URL_MALFORMAT;
+        }
+      }
+      else {
+        cur_pos = slash_pos + 1; /* jump to the rest of the string */
+        continue;
+      }
+
+      if(!retcode) {
+        cur_pos = slash_pos + 1; /* jump to the rest of the string */
+        if(++ftp->dirdepth >= ftp->diralloc) {
+          /* enlarge array */
+          char *bigger;
+          ftp->diralloc *= 2; /* double the size each time */
+          bigger = realloc(ftp->dirs, ftp->diralloc * sizeof(ftp->dirs[0]));
+          if(!bigger) {
+            ftp->dirdepth--;
+            freedirs(ftp);
+            return CURLE_OUT_OF_MEMORY;
+          }
+          ftp->dirs = (char **)bigger;
+        }
       }
     }
-  }
 
-  ftp->file = cur_pos;  /* the rest is the file name */
+    ftp->file = cur_pos;  /* the rest is the file name */
+  }
 
   if(*ftp->file) {
     ftp->file = curl_unescape(ftp->file, 0);

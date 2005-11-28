@@ -357,6 +357,7 @@ struct Configurable {
   struct curl_slist *tp_postquote;
   struct curl_slist *tp_prequote;
   char *ftp_account; /* for ACCT */
+  int ftp_filemethod;
 
   bool ignorecl; /* --ignore-content-length */
 };
@@ -1244,6 +1245,18 @@ static ParameterError add2list(struct curl_slist **list,
   return PARAM_OK;
 }
 
+static int ftpfilemethod(struct Configurable *config, char *str)
+{
+  if(strequal("singlecwd", str))
+    return 3;
+  if(strequal("nocwd", str))
+    return 2;
+  if(strequal("multicwd", str))
+    return 1;
+  warnf(config, "unrecognized ftp file method '%s', using default\n", str);
+  return 1;
+}
+
 static ParameterError getparameter(char *flag, /* f or -long-flag */
                                    char *nextarg, /* NULL if unset */
                                    bool *usedarg, /* set to TRUE if the arg
@@ -1316,6 +1329,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$o", "trace-time", FALSE},
     {"$p", "ignore-content-length", FALSE},
     {"$q", "ftp-skip-pasv-ip", FALSE},
+    {"$r", "ftp-method", TRUE},
 
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
@@ -1725,6 +1739,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'q': /* --ftp-skip-pasv-ip */
         config->ftp_skip_ip ^= TRUE;
+        break;
+      case 'r': /* --ftp-method (undocumented at this point) */
+        config->ftp_filemethod = ftpfilemethod(config, nextarg);
         break;
       }
       break;
@@ -3944,8 +3961,10 @@ operate(struct Configurable *config, int argc, char *argv[])
         curl_easy_setopt(curl, CURLOPT_IGNORE_CONTENT_LENGTH, config->ignorecl);
 
         /* curl 7.14.2 */
-        curl_easy_setopt(curl, CURLOPT_FTP_SKIP_PASV_IP,
-                         config->ftp_skip_ip);
+        curl_easy_setopt(curl, CURLOPT_FTP_SKIP_PASV_IP, config->ftp_skip_ip);
+
+        /* curl 7.15.1 */
+        curl_easy_setopt(curl, CURLOPT_FTP_FILEMETHOD, config->ftp_filemethod);
 
         retry_numretries = config->req_retry;
 

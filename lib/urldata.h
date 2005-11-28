@@ -310,6 +310,12 @@ typedef enum {
   FTP_LAST  /* never used */
 } ftpstate;
 
+typedef enum {
+  FTPFILE_MULTICWD  = 1, /* as defined by RFC1738 */
+  FTPFILE_NOCWD     = 2, /* use SIZE / RETR / STOR on the full path */
+  FTPFILE_SINGLECWD = 3  /* make one CWD, then SIZE / RETR / STOR on the file */
+} curl_ftpfile;
+
 struct FTP {
   curl_off_t *bytecountp;
   char *user;    /* user name string */
@@ -424,10 +430,10 @@ struct ConnectBits {
                          LPRT doesn't work we disable it for the forthcoming
                          requests */
   bool netrc;         /* name+password provided by netrc */
-  
+
   bool trailerHdrPresent; /* Set when Trailer: header found in HTTP response.
-                             Required to determine whether to look for trailers 
-                             in case of Transfer-Encoding: chunking */ 
+                             Required to determine whether to look for trailers
+                             in case of Transfer-Encoding: chunking */
 };
 
 struct hostname {
@@ -1034,6 +1040,8 @@ struct UserDefined {
 
   char *source_url;     /* for 3rd party transfer */
   char *source_userpwd;  /* for 3rd party transfer */
+
+  curl_ftpfile ftp_filemethod; /* how to get to a file when FTP is used  */
 
 /* Here follows boolean settings that define how to behave during
    this session. They are STATIC, set by libcurl users or at least initially
