@@ -1603,6 +1603,15 @@ AC_CHECK_DECL(basename, ,
 #endif
 )
 
+AC_CHECK_DECL(inet_pton, ,
+   AC_DEFINE(HAVE_NO_INET_PTON_PROTO),
+[
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+]
+)
+
 AC_MSG_CHECKING([if we are Mac OS X (to disable poll)])
 disable_poll=no
 case $host in

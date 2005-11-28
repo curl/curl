@@ -28,6 +28,11 @@
 int Curl_inet_pton(int, const char *, void *);
 
 #ifdef HAVE_INET_PTON
+
+#if defined(HAVE_NO_INET_PTON_PROTO)
+int inet_pton(int af, const char *src, void *dst);
+#endif
+
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
