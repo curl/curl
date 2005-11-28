@@ -66,6 +66,15 @@
 #include <sys/types.h>
 #endif
 
+/*
+ * This header file should not really need to include "curl.h" since curl.h
+ * itself includes this file and we expect user applications to do #include
+ * <curl/curl.h> without the need for especially including multi.h.
+ *
+ * For some reason we added this include here at one point, and rather than to
+ * break existing (wrongly written) libcurl applications, we leave it as-is
+ * but with this warning attached.
+ */
 #include "curl.h"
 
 #ifdef  __cplusplus
