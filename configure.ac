@@ -1604,7 +1604,8 @@ AC_CHECK_DECL(basename, ,
 )
 
 AC_CHECK_DECL(inet_pton, ,
-   AC_DEFINE(HAVE_NO_INET_PTON_PROTO),
+              AC_DEFINE(HAVE_NO_INET_PTON_PROTO, 1,
+                        [Defined if no inet_pton() prototype available]),
 [
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
