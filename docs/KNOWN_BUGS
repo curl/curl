@@ -3,12 +3,6 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
-27. "libcurl built with GNUTLS ignores the SSLCERT option" - Unlike
-  Curl_ossl_connect(), the Curl_gtls_connect() function does not send the user
-  certificate to the peer. In fact, it ignores the conn->data->set.cert field
-  completely, it always uses the anonymous credentials. See
-  http://curl.haxx.se/bug/view.cgi?id=1348930 
-
 26. NTLM authentication using SSPI (on Windows) when (lib)curl is running in
   "system context" will make it use wrong(?) user name - at least when compared
   to what winhttp does. See http://curl.haxx.se/bug/view.cgi?id=1281867
