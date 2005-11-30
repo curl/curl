@@ -561,7 +561,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * How do access files over FTP.
      */
-    data->set.ftp_filemethod = va_arg(param, long);
+    data->set.ftp_filemethod = (curl_ftpfile)va_arg(param, long);
     break;
   case CURLOPT_NETRC:
     /*
