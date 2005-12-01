@@ -158,12 +158,12 @@ CURLcode Curl_file_connect(struct connectdata *conn)
 #endif
   file->freepath = real_path; /* free this when done */
 
+  file->fd = fd;
   if(!conn->data->set.upload && (fd == -1)) {
     failf(conn->data, "Couldn't open file %s", conn->path);
     Curl_file_done(conn, CURLE_FILE_COULDNT_READ_FILE);
     return CURLE_FILE_COULDNT_READ_FILE;
   }
-  file->fd = fd;
 
   return CURLE_OK;
 }

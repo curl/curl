@@ -8,6 +8,10 @@
 
 
 
+Daniel (2 December 2005)
+- Jamie Newton pointed out that libcurl's file:// code would close() a zero
+  file descriptor if given a non-existing file.
+
 Daniel (24 November 2005)
 - Doug Kaufman provided a set of patches to make curl build fine on DJGPP
   again using configure.
