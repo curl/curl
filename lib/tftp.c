@@ -86,10 +86,6 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-#ifndef MSG_NOSIGNAL
-#define MSG_NOSIGNAL 0
-#endif
-
 typedef enum {
   TFTP_MODE_NETASCII=0,
   TFTP_MODE_OCTET
@@ -347,7 +343,7 @@ static void tftp_rx(tftp_state_data_t *state, tftp_event_t event)
     state->spacket.event = htons(TFTP_EVENT_ACK);
     state->spacket.u.ack.block = htons(state->block);
     sbytes = sendto(state->sockfd, (void *)&state->spacket,
-                    4, MSG_NOSIGNAL,
+                    4, SEND_4TH_ARG,
                     (struct sockaddr *)&state->remote_addr,
                     state->remote_addrlen);
     if(sbytes < 0) {
@@ -374,7 +370,7 @@ static void tftp_rx(tftp_state_data_t *state, tftp_event_t event)
     } else {
       /* Resend the previous ACK */
       sbytes = sendto(state->sockfd, (void *)&state->spacket,
-                      4, MSG_NOSIGNAL,
+                      4, SEND_4TH_ARG,
                       (struct sockaddr *)&state->remote_addr,
                       state->remote_addrlen);
       /* Check all sbytes were sent */
@@ -440,7 +436,7 @@ static void tftp_tx(tftp_state_data_t *state, tftp_event_t event)
     }
     Curl_fillreadbuffer(state->conn, 512, &state->sbytes);
     sbytes = sendto(state->sockfd, (void *)&state->spacket,
-                    4+state->sbytes, MSG_NOSIGNAL,
+                    4+state->sbytes, SEND_4TH_ARG,
                     (struct sockaddr *)&state->remote_addr,
                     state->remote_addrlen);
     /* Check all sbytes were sent */
@@ -461,7 +457,7 @@ static void tftp_tx(tftp_state_data_t *state, tftp_event_t event)
     } else {
       /* Re-send the data packet */
       sbytes = sendto(state->sockfd, (void *)&state->spacket,
-                      4+state->sbytes, MSG_NOSIGNAL,
+                      4+state->sbytes, SEND_4TH_ARG,
                       (struct sockaddr *)&state->remote_addr,
                       state->remote_addrlen);
       /* Check all sbytes were sent */
