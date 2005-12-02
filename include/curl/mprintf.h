@@ -1,3 +1,5 @@
+#ifndef __CURL_MPRINTF_H
+#define __CURL_MPRINTF_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -20,9 +22,6 @@
  *
  * $Id$
  ***************************************************************************/
-
-#ifndef H_MPRINTF
-#define H_MPRINTF
 
 #include <stdarg.h>
 #include <stdio.h> /* needed for FILE */
@@ -53,4 +52,4 @@ CURL_EXTERN char *curl_mvaprintf(const char *format, va_list args);
 # define vaprintf curl_mvaprintf
 #endif
 
-#endif /* H_MPRINTF */
+#endif /* __CURL_MPRINTF_H */
