@@ -42,7 +42,7 @@
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
-#ifdef HAVE_NO_STRERROR_R_DECL
+#if defined(HAVE_STRERROR_R) && defined(HAVE_NO_STRERROR_R_DECL)
 #ifdef HAVE_POSIX_STRERROR_R
 /* seen on AIX 5100-02 gcc 2.9 */
 extern int strerror_r(int errnum, char *strerrbuf, size_t buflen);
