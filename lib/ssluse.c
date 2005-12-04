@@ -1121,7 +1121,7 @@ Curl_ossl_connect(struct connectdata *conn,
   long lerr;
   int what;
   char * str;
-  SSL_METHOD *req_method;
+  const SSL_METHOD *req_method;
   void *ssl_sessionid=NULL;
   ASN1_TIME *certdate;
   curl_socket_t sockfd = conn->sock[sockindex];
