@@ -529,6 +529,25 @@ CURLcode Curl_tftp_connect(struct connectdata *conn, bool *done)
   tftp_state_data_t     *state;
   int rc;
 
+  /*
+   * The TFTP code is not portable because it sends C structs directly over
+   * the wire.  Since C gives compiler writers a wide latitude in padding and
+   * aligning structs, this fails on many architectures (e.g. ARM).
+   * 
+   * The only portable way to fix this is to copy each struct item into a
+   * flat buffer and send the flat buffer instead of the struct.  The
+   * alternative, trying to get the compiler to eliminate padding bytes
+   * within the struct, is a nightmare to maintain (each compiler does it
+   * differently), and is still not guaranteed to work because some
+   * architectures can't handle the resulting alignment.
+   *
+   * This check can be removed once the code has been fixed.
+   */
+  if(sizeof(struct tftp_packet) != 516) {
+    failf(conn->data, "tftp not supported on this architecture");
+    return CURLE_FAILED_INIT;
+  }
+
   if((state = conn->proto.tftp = calloc(sizeof(tftp_state_data_t), 1))==NULL) {
     return CURLE_OUT_OF_MEMORY;
   }
