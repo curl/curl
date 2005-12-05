@@ -104,9 +104,14 @@
 #undef HAVE_PKCS12_SUPPORT
 #endif
 
-
 #if OPENSSL_VERSION_NUMBER >= 0x00906001L
 #define HAVE_ERR_ERROR_STRING_N 1
+#endif
+
+#if OPENSSL_VERSION_NUMBER >= 0x00909000L
+#define SSL_METHOD_QUAL const
+#else
+#define SSL_METHOD_QUAL
 #endif
 
 /*
@@ -1121,7 +1126,7 @@ Curl_ossl_connect(struct connectdata *conn,
   long lerr;
   int what;
   char * str;
-  const SSL_METHOD *req_method;
+  SSL_METHOD_QUAL SSL_METHOD *req_method=NULL;
   void *ssl_sessionid=NULL;
   ASN1_TIME *certdate;
   curl_socket_t sockfd = conn->sock[sockindex];
