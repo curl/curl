@@ -843,7 +843,9 @@ sub checksystem {
     my $feat;
     my $curl;
     my $libcurl;
-    my @version=`$CURL --version 2>/dev/null`;
+    my $versionerr="$LOGDIR/versionerr.log";
+    my $versioncmd="$CURL --version 2>$versionerr";
+    my @version=`$versioncmd`;
     for(@version) {
         chomp;
 
@@ -953,7 +955,19 @@ sub checksystem {
         }
     }
     if(!$curl) {
-        die "couldn't run '$CURL'"
+        logmsg "unable to get curl's version! further details are:\n";
+        logmsg "CURL: \n";
+        logmsg "$CURL \n";
+        logmsg "VERSIONCMD: \n";
+        logmsg "$versioncmd \n";
+        logmsg "STDOUT: \n";
+        for(@version) {
+            chomp;
+            logmsg "$_ \n";
+        }
+        logmsg "STDERR: \n";
+        displaylogcontent("$versionerr");
+        die "couldn't get curl's version!";
     }
 
     if(-r "../lib/config.h") {
