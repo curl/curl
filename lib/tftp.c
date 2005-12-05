@@ -261,7 +261,7 @@ static void tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
     if(data->set.upload) {
       /* If we are uploading, send an WRQ */
       state->spacket.event = htons(TFTP_EVENT_WRQ);
-      filename = curl_unescape(filename, strlen(filename));
+      filename = curl_unescape(filename, (int)strlen(filename));
       state->conn->upload_fromhere = (char *)state->spacket.u.data.data;
       if(data->set.infilesize != -1) {
         Curl_pgrsSetUploadSize(data, data->set.infilesize);
@@ -273,7 +273,7 @@ static void tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
     }
     sprintf((char *)state->spacket.u.request.data, "%s%c%s%c",
             filename, '\0',  mode, '\0');
-    sbytes = 4 + strlen(filename) + strlen(mode);
+    sbytes = 4 + (int)strlen(filename) + (int)strlen(mode);
     sbytes = sendto(state->sockfd, (void *)&state->spacket,
                     sbytes, 0,
                     state->conn->ip_addr->ai_addr,

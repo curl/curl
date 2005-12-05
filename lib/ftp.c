@@ -3680,7 +3680,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
       if(!ftp->dirs)
         return CURLE_OUT_OF_MEMORY;
 
-      ftp->dirs[0] = curl_unescape(cur_pos, slash_pos-cur_pos);
+      ftp->dirs[0] = curl_unescape(cur_pos, (int)(slash_pos-cur_pos));
       if(!ftp->dirs[0]) {
         free(ftp->dirs);
         return CURLE_OUT_OF_MEMORY;

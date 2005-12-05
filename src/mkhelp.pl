@@ -156,7 +156,7 @@ void hugehelp(void)
     return;
 
   headerlen = 10;
-  z.avail_in = sizeof(hugehelpgz) - headerlen;
+  z.avail_in = (unsigned int)(sizeof(hugehelpgz) - headerlen);
   z.next_in = (unsigned char *)hugehelpgz + headerlen;
   z.zalloc = (alloc_func)Z_NULL;
   z.zfree = (free_func)Z_NULL;
