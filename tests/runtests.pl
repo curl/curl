@@ -2036,18 +2036,19 @@ $TFTPPORT =  $base + 7; # TFTP (UDP) port
 $TFTP6PORT =  $base + 8; # TFTP IPv6 (UDP) port
 
 #######################################################################
+# clear and create logging directory:
+#
+
+cleardir($LOGDIR);
+mkdir($LOGDIR, 0777);
+
+#######################################################################
 # Output curl version and host info being tested
 #
 
 if(!$listonly) {
     checksystem();
 }
-
-#######################################################################
-# clear and create logging directory:
-#
-cleardir($LOGDIR);
-mkdir($LOGDIR, 0777);
 
 #######################################################################
 # If 'all' tests are requested, find out all test numbers
