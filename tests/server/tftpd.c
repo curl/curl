@@ -228,7 +228,7 @@ static void read_ahead(struct testcase *test,
     /* decrease amount, advance pointer */
     test->rcount -= copy_n;
     test->rptr += copy_n;
-    b->counter = copy_n;
+    b->counter = (int)copy_n;
     return;
   }
 
