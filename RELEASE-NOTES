@@ -1,61 +1,28 @@
-Curl and libcurl 7.15.1
+Curl and libcurl 7.15.2
 
- Public curl release number:               91
- Releases counted from the very beginning: 118
+ Public curl release number:               92
+ Releases counted from the very beginning: 119
  Available command line options:           109
  Available curl_easy_setopt() options:     125
  Number of public functions in libcurl:    46
  Amount of public web site mirrors:        27
  Number of known libcurl bindings:         32
- Number of contributors:                   459
+ Number of contributors:                   474
 
 This release includes the following changes:
 
- o the libcurl.pc pkgconfig file now gets installed on make install
- o URL globbing now offers "range steps": [1-100:10]
- o LDAPv3 is now the preferred LDAP protocol version
- o --max-redirs and CURLOPT_MAXREDIRS set to 0 limits redirects
- o improved MSVC makefile
+ o 
 
 This release includes the following bugfixes:
 
- o buffer overflow problem: http://curl.haxx.se/docs/adv_20051207.html
- o using file:// on non-existing files are properly handled
- o builds fine on DJGPP
- o CURLOPT_ERRORBUFFER is now always filled in on errors
- o curl outputs error on bad --limit-rate units
- o fixed libcurl's use of poll() on cygwin
- o the GnuTLS code didn't support client certificates
- o TFTP over IPv6 works
- o no reverse lookups on IP addresses when ipv6-enabled
- o SSPI compatibility fix: using the proper DLLs
- o binary LDAP properties are now shown base64 encoded
- o Windows uploads from stdin using curl can now contain ctrl-Z bytes
- o -r [num] would produce an invalid HTTP Range: header
- o multi interface with multi IP hosts could leak socket descriptors
- o the GnuTLS code didn't handle rehandshakes
- o re-use of a dead FTP connection
- o name resolve error codes fixed for Windows builds
- o double WWW-Authenticate Digest headers are now handled
- o curl-config --vernum fixed
+ o 
 
 Other curl-related news since the previous public release:
 
- o FTP-SSL is now RFC4217
- o CurlPas 2005-11-05 was released: http://curlpas.sf.net/
- o pycurl 7.15.0 was released http://pycurl.sf.net
- o New web mirrors:
-   http://curl.triplemind.com/ located in Mannheim, Germany
-   http://curl.nedmirror.nl located in Amsterdam, the Netherlands
-   http://curl.hoxt.com located in Florida, US
+ o 
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dave Dribin, Bradford Bruce, Temprimus, Ofer, Dima Barsky, Amol Pattekar, Jaz
- Fresh, tommink[at]post.pl, Gisle Vanem, Nis Jorgensen, Vilmos Nebehaj, Dmitry
- Bartsevich, David Lang, Eugene Kotlyarov, Jan Kunder, Yang Tse, Quagmire,
- Albert Chin, David Shaw, Doug Kaufman, Bryan Henderson, Jamie Newton, Stefan
- Esser
-
+ 
         Thanks! (and sorry if I forgot to mention someone)
