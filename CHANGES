@@ -8,6 +8,39 @@
 
 
 
+Version 7.15.1 (7 December 2005)
+
+Daniel (6 December 2005)
+- Full text here: http://curl.haxx.se/docs/adv_20051207.html Pointed out by
+  Stefan Esser.
+
+  VULNERABILITY
+
+  libcurl's URL parser function can overflow a malloced buffer in two ways, if
+  given a too long URL.
+
+  These overflows happen if you
+ 
+  1 - pass in a URL with no protocol (like "http://") prefix, using no slash
+      and the string is 256 bytes or longer. This leads to a single zero byte
+      overflow of the malloced buffer.
+
+  2 - pass in a URL with only a question mark as separator (no slash) between
+      the host and the query part of the URL. This leads to a single zero byte
+      overflow of the malloced buffer.
+
+  Both overflows can be made with the same input string, leading to two single
+  zero byte overwrites.
+
+  The affected flaw cannot be triggered by a redirect, but the long URL must
+  be passed in "directly" to libcurl. It makes this a "local" problem. Of
+  course, lots of programs may still pass in user-provided URLs to libcurl
+  without doing much syntax checking of their own, allowing a user to exploit
+  this vulnerability.
+
+  There is no known exploit at the time of this writing.
+
+
 Daniel (2 December 2005)
 - Jamie Newton pointed out that libcurl's file:// code would close() a zero
   file descriptor if given a non-existing file.

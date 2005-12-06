@@ -19,6 +19,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o buffer overflow problem: http://curl.haxx.se/docs/adv_20051207.html
  o using file:// on non-existing files are properly handled
  o builds fine on DJGPP
  o CURLOPT_ERRORBUFFER is now always filled in on errors
@@ -54,6 +55,7 @@ advice from friends like these:
  Dave Dribin, Bradford Bruce, Temprimus, Ofer, Dima Barsky, Amol Pattekar, Jaz
  Fresh, tommink[at]post.pl, Gisle Vanem, Nis Jorgensen, Vilmos Nebehaj, Dmitry
  Bartsevich, David Lang, Eugene Kotlyarov, Jan Kunder, Yang Tse, Quagmire,
- Albert Chin, David Shaw, Doug Kaufman, Bryan Henderson, Jamie Newton
+ Albert Chin, David Shaw, Doug Kaufman, Bryan Henderson, Jamie Newton, Stefan
+ Esser
 
         Thanks! (and sorry if I forgot to mention someone)
