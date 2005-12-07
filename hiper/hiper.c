@@ -15,8 +15,15 @@
  *
  */
 
+/* The maximum number of simultanoues connections/transfers we support */
+#define NCONNECTIONS 50000
+
+#define __FD_SETSIZE NCONNECTIONS
+#define FD_SETSIZE NCONNECTIONS
+
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <sys/time.h>
 #include <time.h>
 #include <unistd.h>
@@ -25,9 +32,6 @@
 #include <curl/curl.h>
 
 #define MICROSEC 1000000 /* number of microseconds in one second */
-
-/* The maximum number of simultanoues connections/transfers we support */
-#define NCONNECTIONS 50000
 
 /* The maximum time (in microseconds) we run the test */
 #define RUN_FOR_THIS_LONG (10*MICROSEC)
@@ -47,6 +51,7 @@ struct connection {
   char *url;
   size_t dlcounter;
   struct globalinfo *global;
+  char error[CURL_ERROR_SIZE];
 };
 
 /* on port 8999 we run a modified (fork-) sws that supports pure idle and full
@@ -101,8 +106,6 @@ struct conncount {
   long maxtime;
 };
 
-struct conncount timecount[NCONNECTIONS+1];
-
 static struct timeval timerpause;
 static void timer_pause(void)
 {
@@ -115,13 +118,6 @@ static void timer_pause(void)
     long lap;
 
     lap = tvdiff(&timerpause, &cont);
-
-    timecount[still_running].time_us += lap;
-    timecount[still_running].laps++; /* number of times added */
-
-    if(lap > timecount[still_running].maxtime) {
-      timecount[still_running].maxtime = lap;
-    }
   }
 }
 
@@ -150,7 +146,7 @@ static void timer_total(void)
 }
 
 struct globalinfo info;
-struct connection conns[NCONNECTIONS];
+struct connection *conns;
 
 long selects;
 long selectsalive;
@@ -199,6 +195,7 @@ static void report(void)
 
   printf("%ld select() timeouts\n", timeouts);
 
+#if 0
   for(i=1; i< num_total; i++) {
     if(timecount[i].laps) {
       printf("Time %d connections, average %ld max %ld (%ld laps) "
@@ -210,6 +207,7 @@ static void report(void)
              (timecount[i].time_us/timecount[i].laps)/i );
     }
   }
+#endif
 }
 
 int main(int argc, char **argv)
@@ -237,6 +235,12 @@ int main(int argc, char **argv)
 
   num_total = num_idle + num_active;
 
+  conns = calloc(num_total, sizeof(struct connection));
+  if(!conns) {
+    printf("Out of memory\n");
+    return 3;
+  }
+
   if(num_total >= NCONNECTIONS) {
     printf("Increase NCONNECTIONS!\n");
     return 2;
@@ -260,6 +264,12 @@ int main(int argc, char **argv)
     printf("%d: Add URL %s\n", i, conns[i].url);
 #endif
     e  = curl_easy_init();
+
+    if(!e) {
+      printf("curl_easy_init() for handle %d failed, exiting!\n", i);
+      return 2;
+    }
+
     conns[i].e = e;
     conns[i].id = i;
     conns[i].global = &info;
@@ -269,8 +279,9 @@ int main(int argc, char **argv)
     curl_easy_setopt(e, CURLOPT_WRITEDATA, &conns[i]);
 #if 0
     curl_easy_setopt(e, CURLOPT_VERBOSE, 1);
-    curl_easy_setopt(e, CURLOPT_ERRORBUFFER, errorbuffer);
 #endif
+    curl_easy_setopt(e, CURLOPT_ERRORBUFFER, conns[i].error);
+    curl_easy_setopt(e, CURLOPT_PRIVATE, &conns[i]);
 
     /* add the easy to the multi */
     curl_multi_add_handle(multi_handle, e);
@@ -283,7 +294,7 @@ int main(int argc, char **argv)
   printf("Starting timer, expects to run for %ldus\n", RUN_FOR_THIS_LONG);
   timer_start();
 
-  while(still_running) {
+  while(still_running == num_total) {
     struct timeval timeout;
     int rc; /* select() return code */
 
@@ -302,6 +313,7 @@ int main(int argc, char **argv)
 
     /* get file descriptors from the transfers */
     curl_multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
+    printf("maxfd: %d\n", maxfd);
 
     timer_pause();
     selects++;
@@ -340,30 +352,28 @@ int main(int argc, char **argv)
       break;
     }
 
-    if((prevalive == still_running) && (prevtotal == info.dlcounter) &&
-       info.dlcounter) {
-      /* The same amount of still alive transfers as last lap, increase
-         counter. Only do this if _anything_ has been downloaded since it
-         tends to come here during the initial name lookup phase when using
-         asynch DNS libcurl otherwise.
-       */
-      prevsamecounter++;
-
-      if(prevsamecounter >= IDLE_TIME) {
-        /* for the sake of being efficient, we stop the operation when
-           IDLE_TIME has passed without any bytes transfered */
-        printf("Idle time (%d secs) reached (with %d still claimed alive),"
-               " exiting\n",
-               IDLE_TIME, still_running);
-        break;
-      }
-    }
-    else {
-      prevsamecounter=0;
+    if(prevalive != still_running) {
+      printf("%d connections alive\n", still_running);
     }
     prevalive = still_running;
-    prevtotal = info.dlcounter;
+
     timer_total(); /* calculate the total time spent so far */
+  }
+
+  if(still_running != num_total) {
+    /* something made connections fail, extract the reason and tell */
+    int msgs_left;
+    struct connection *cptr;
+    while ((msg = curl_multi_info_read(multi_handle, &msgs_left))) {
+      if (msg->msg == CURLMSG_DONE) {
+        printf("Handle %p returned %d\n", msg->easy_handle, msg->data.result);
+
+        curl_easy_getinfo(msg->easy_handle, CURLINFO_PRIVATE, &cptr);
+
+        printf("   Error message: %s\n", cptr->error);
+      }
+    }
+
   }
 
   curl_multi_cleanup(multi_handle);
