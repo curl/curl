@@ -7,7 +7,11 @@
  *
  * $Id$
  *
- * Connect to N sites simultanouesly and download data.
+ * Connect N connections. Z are idle, and X are active. Transfer as fast as
+ * possible.
+ *
+ * Run for a specific amount of time (10 secs for now). Output detailed timing
+ * information.
  *
  */
 
@@ -20,12 +24,13 @@
 
 #include <curl/curl.h>
 
-/* The number of simultanoues connections/transfers we do */
-#define NCONNECTIONS 2000
+#define MICROSEC 1000000 /* number of microseconds in one second */
 
-/* The least number of connections we are interested in, so when we go below
-   this amount we can just as well stop */
-#define NMARGIN 50
+/* The maximum number of simultanoues connections/transfers we support */
+#define NCONNECTIONS 50000
+
+/* The maximum time (in microseconds) we run the test */
+#define RUN_FOR_THIS_LONG (10*MICROSEC)
 
 /* Number of loops (seconds) we allow the total download amount and alive
    connections to remain the same until we bail out. Set this slightly higher
@@ -39,10 +44,19 @@ struct globalinfo {
 struct connection {
   CURL *e;
   int id; /* just a counter for easy browsing */
-  char url[80];
+  char *url;
   size_t dlcounter;
   struct globalinfo *global;
 };
+
+/* on port 8999 we run a modified (fork-) sws that supports pure idle and full
+   stream mode */
+#define PORT "8999"
+
+#define HOST "192.168.1.13"
+
+#define URL_IDLE   "http://" HOST ":" PORT "/1000"
+#define URL_ACTIVE "http://" HOST ":" PORT "/1001"
 
 static size_t
 writecallback(void *ptr, size_t size, size_t nmemb, void *data)
@@ -124,7 +138,7 @@ static void timer_continue(void)
 }
 
 static long total; /* amount of us from start to stop */
-static void timer_stop(void)
+static void timer_total(void)
 {
   struct timeval stop;
   /* Capture the time of the operation stopped moment, now calculate how long
@@ -147,35 +161,36 @@ long performalive;
 long performselect;
 long topselect;
 
+int num_total;
+int num_idle;
+int num_active;
+
 static void report(void)
 {
   int i;
   long active = total - paused;
   long numdl = 0;
 
-  for(i=0; i < NCONNECTIONS; i++) {
+  for(i=0; i < num_total; i++) {
     if(conns[i].dlcounter)
       numdl++;
   }
 
-  printf("Summary from %d simultanoues transfers:\n",
-         NCONNECTIONS);
+  printf("Summary from %d simultanoues transfers (%d active)\n",
+         num_total, num_active);
+  printf("%d out of %d connections provided data\n", numdl, num_total);
 
-  printf("Total time %ldus - Paused %ldus = Active %ldus =\n Active/total"
-         " %ldus\n",
-         total, paused, active, active/NCONNECTIONS);
+  printf("Total time: %ldus select(): %ldus curl_multi_perform(): %ldus\n",
+         total, paused, active);
 
-  printf(" Active/(connections that delivered data) = %ldus\n",
-         active/numdl);
-
-  printf("%d out of %d connections provided data\n", numdl, NCONNECTIONS);
-
-  printf("%d calls to curl_multi_perform(), average %d alive. "
+  printf("%d calls to curl_multi_perform() average %d alive "
          "Average time: %dus\n",
          perform, performalive/perform, active/perform);
 
-  printf("%d calls to select(), average %d alive\n",
-         selects, selectsalive/selects);
+  printf("%d calls to select(), average %d alive "
+         "Average time: %dus\n",
+         selects, selectsalive/selects,
+         paused/selects);
   printf(" Average number of readable connections per select() return: %d\n",
          performselect/selects);
   printf(" Max number of readable connections for a single select() "
@@ -184,9 +199,10 @@ static void report(void)
 
   printf("%ld select() timeouts\n", timeouts);
 
-  for(i=1; i< NCONNECTIONS; i++) {
+  for(i=1; i< num_total; i++) {
     if(timecount[i].laps) {
-      printf("Time %d connections, average %ld max %ld (%ld laps) average/conn: %ld\n",
+      printf("Time %d connections, average %ld max %ld (%ld laps) "
+             "average/conn: %ld\n",
              i,
              timecount[i].time_us/timecount[i].laps,
              timecount[i].maxtime,
@@ -204,9 +220,6 @@ int main(int argc, char **argv)
   CURLMcode mcode = CURLM_OK;
   int rc;
   int i;
-  FILE *urls;
-  int startindex=0;
-  char buffer[256];
 
   int prevalive=-1;
   int prevsamecounter=0;
@@ -214,50 +227,38 @@ int main(int argc, char **argv)
 
   memset(&info, 0, sizeof(struct globalinfo));
 
-  if(argc < 2) {
-    printf("Usage: hiper [file] [start index]\n");
+  if(argc < 3) {
+    printf("Usage: hiper [num idle] [num active]\n");
     return 1;
   }
 
-  urls = fopen(argv[1], "r");
-  if(!urls)
-    /* failed to open list of urls */
-    return 1;
+  num_idle = atoi(argv[1]);
+  num_active = atoi(argv[2]);
 
-  if(argc > 2)
-    startindex = atoi(argv[2]);
+  num_total = num_idle + num_active;
 
-  if(startindex) {
-    /* Pass this many lines before we start using URLs from the file. On
-       repeated invokes, try using different indexes to avoid torturing the
-       same servers. */
-    while(startindex--) {
-      if(!fgets(buffer, sizeof(buffer), urls))
-        break;
-    }
+  if(num_total >= NCONNECTIONS) {
+    printf("Increase NCONNECTIONS!\n");
+    return 2;
   }
 
   /* init the multi stack */
   multi_handle = curl_multi_init();
 
-  for(i=0; i< NCONNECTIONS; i++) {
+  for(i=0; i< num_total; i++) {
     CURL *e;
     char *nl;
 
     memset(&conns[i], 0, sizeof(struct connection));
 
-    /* read a line from the file of URLs */
-    if(!fgets(conns[i].url, sizeof(conns[i].url), urls))
-      /* failed to read a line */
-      break;
+    if(i < num_idle)
+      conns[i].url = URL_IDLE;
+    else
+      conns[i].url = URL_ACTIVE;
 
-    /* strip off trailing newlines */
-    nl = strchr(conns[i].url, '\n');
-    if(nl)
-      *nl=0; /* cut */
-
+#if 0
     printf("%d: Add URL %s\n", i, conns[i].url);
-
+#endif
     e  = curl_easy_init();
     conns[i].e = e;
     conns[i].id = i;
@@ -279,7 +280,7 @@ int main(int argc, char **argv)
   while(CURLM_CALL_MULTI_PERFORM ==
         curl_multi_perform(multi_handle, &still_running));
 
-  printf("Starting timer!\n");
+  printf("Starting timer, expects to run for %ldus\n", RUN_FOR_THIS_LONG);
   timer_start();
 
   while(still_running) {
@@ -307,9 +308,10 @@ int main(int argc, char **argv)
     selectsalive += still_running;
     rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
 
+#if 0
     /* Output this here to make it outside the timer */
     printf("Running: %d (%d bytes)\n", still_running, info.dlcounter);
-
+#endif
     timer_continue();
 
     switch(rc) {
@@ -332,9 +334,9 @@ int main(int argc, char **argv)
         topselect = rc;
       break;
     }
-    if(still_running < NMARGIN) {
-      printf("Only %d connections left alive, existing\n",
-             still_running);
+
+    if(total > RUN_FOR_THIS_LONG) {
+      printf("Stopped after %ldus\n", total);
       break;
     }
 
@@ -361,9 +363,8 @@ int main(int argc, char **argv)
     }
     prevalive = still_running;
     prevtotal = info.dlcounter;
+    timer_total(); /* calculate the total time spent so far */
   }
-
-  timer_stop();
 
   curl_multi_cleanup(multi_handle);
 
