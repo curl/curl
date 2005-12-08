@@ -843,9 +843,24 @@ sub checksystem {
     my $feat;
     my $curl;
     my $libcurl;
-    my $versionerr="$LOGDIR/versionerr.log";
-    my $versioncmd="$CURL --version 2>$versionerr";
-    my @version=`$versioncmd`;
+    my $versretval;
+    my $versnoexec;
+    my @version=();
+
+    my $curlverout="$LOGDIR/curlverout.log";
+    my $curlvererr="$LOGDIR/curlvererr.log";
+    my $versioncmd="$CURL --version 1>$curlverout 2>$curlvererr";
+
+    unlink($curlverout);
+    unlink($curlvererr);
+
+    $versretval = system($versioncmd);
+    $versnoexec = $!;
+
+    open(VERSOUT, $curlverout);
+    @version = <VERSOUT>;
+    close(VERSOUT);
+
     for(@version) {
         chomp;
 
@@ -956,17 +971,23 @@ sub checksystem {
     }
     if(!$curl) {
         logmsg "unable to get curl's version! further details are:\n";
-        logmsg "CURL: \n";
-        logmsg "$CURL \n";
-        logmsg "VERSIONCMD: \n";
+        logmsg "issued command: \n";
         logmsg "$versioncmd \n";
-        logmsg "STDOUT: \n";
-        for(@version) {
-            chomp;
-            logmsg "$_ \n";
+        if ($versretval == -1) {
+            logmsg "command failed with: \n";
+            logmsg "$versnoexec \n";
         }
-        logmsg "STDERR: \n";
-        displaylogcontent("$versionerr");
+        elsif ($versretval & 127) {
+            logmsg sprintf("command died with signal %d, and %s coredump. \n", 
+                           ($versretval & 127), ($versretval & 128)?"a":"no");
+        }
+        else {
+            logmsg sprintf("command exited with value %d \n", $versretval >> 8);
+        }
+        logmsg "contents of $curlverout: \n";
+        displaylogcontent("$curlverout");
+        logmsg "contents of $curlvererr: \n";
+        displaylogcontent("$curlvererr");
         die "couldn't get curl's version!";
     }
 
