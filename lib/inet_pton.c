@@ -114,7 +114,7 @@ inet_pton4(const char *src, unsigned char *dst)
     const char *pch;
 
     if ((pch = strchr(digits, ch)) != NULL) {
-      u_int val = *tp * 10 + (u_int)(pch - digits);
+      unsigned int val = *tp * 10 + (unsigned int)(pch - digits);
 
       if (val > 255)
         return (0);
@@ -161,7 +161,7 @@ inet_pton6(const char *src, unsigned char *dst)
   unsigned char tmp[IN6ADDRSZ], *tp, *endp, *colonp;
   const char *xdigits, *curtok;
   int ch, saw_xdigit;
-  u_int val;
+  unsigned int val;
 
   memset((tp = tmp), 0, IN6ADDRSZ);
   endp = tp + IN6ADDRSZ;

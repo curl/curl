@@ -68,9 +68,9 @@
  * Returns `dst' (as a const)
  * Note:
  *  - uses no statics
- *  - takes a u_char* not an in_addr as input
+ *  - takes a unsigned char* not an in_addr as input
  */
-static char *inet_ntop4 (const u_char *src, char *dst, size_t size)
+static char *inet_ntop4 (const unsigned char *src, char *dst, size_t size)
 {
 #if defined(HAVE_INET_NTOA_R_2_ARGS)
   const char *ptr;
@@ -97,7 +97,7 @@ static char *inet_ntop4 (const u_char *src, char *dst, size_t size)
 /*
  * Convert IPv6 binary address into presentation (printable) format.
  */
-static char *inet_ntop6 (const u_char *src, char *dst, size_t size)
+static char *inet_ntop6 (const unsigned char *src, char *dst, size_t size)
 {
   /*
    * Note that int32_t and int16_t need only be "at least" large enough
@@ -208,10 +208,10 @@ char *Curl_inet_ntop(int af, const void *src, char *buf, size_t size)
 {
   switch (af) {
   case AF_INET:
-    return inet_ntop4((const u_char*)src, buf, size);
+    return inet_ntop4((const unsigned char*)src, buf, size);
 #ifdef ENABLE_IPV6
   case AF_INET6:
-    return inet_ntop6((const u_char*)src, buf, size);
+    return inet_ntop6((const unsigned char*)src, buf, size);
 #endif
   default:
     SET_ERRNO(EAFNOSUPPORT);
