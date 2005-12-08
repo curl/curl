@@ -54,7 +54,7 @@ and the Content-Encoding type is not checked.
 * The curl interface:
 
 Use the --compressed option with curl to cause it to ask servers to compress
-responses using deflate.
+responses using any format supported by curl.
 
 James Gallagher <jgallagher@gso.uri.edu>
 Dan Fandrich <dan@coneharvesters.com>
