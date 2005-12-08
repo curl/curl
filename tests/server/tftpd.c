@@ -159,7 +159,7 @@ int prevchar = -1;      /* putbuf: previous char (cr check) */
 
 static void read_ahead(struct testcase *test,
                        int convert /* if true, convert to ascii */);
-static int write_behind(struct testcase *test, int convert);
+static ssize_t write_behind(struct testcase *test, int convert);
 static struct tftphdr *rw_init(int);
 static struct tftphdr *w_init(void) { return rw_init(0); } /* write-behind */
 static struct tftphdr *r_init(void) { return rw_init(1); } /* read-ahead */
@@ -281,7 +281,7 @@ static int writeit(struct testcase *test, struct tftphdr **dpp,
  * Note spec is undefined if we get CR as last byte of file or a
  * CR followed by anything else.  In this case we leave it alone.
  */
-static int write_behind(struct testcase *test, int convert)
+static ssize_t write_behind(struct testcase *test, int convert)
 {
   char *buf;
   int count;
