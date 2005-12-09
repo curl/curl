@@ -275,6 +275,18 @@ typedef int curl_socket_t;
 #define CURL_NO__BEGINTHREADEX
 #endif
 
+/*
+ * msvc 6.0 does not have struct sockaddr_storage and
+ * does not define IPPROTO_ESP in winsock2.h. But both
+ * are available if PSDK is properly installed.
+ */
+
+#ifdef _MSC_VER
+#if !defined(HAVE_WINSOCK2_H) || ((_MSC_VER < 1300) && !defined(IPPROTO_ESP))
+#undef HAVE_STRUCT_SOCKADDR_STORAGE
+#endif
+#endif
+
 #ifdef mpeix
 #define IOCTL_3_ARGS
 #endif
