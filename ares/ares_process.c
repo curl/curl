@@ -103,7 +103,7 @@ static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
   struct iovec *vec;
   int i;
   ssize_t scount;
-  int wcount;
+  ssize_t wcount;
   size_t n;
 
   for (i = 0; i < channel->nservers; i++)
