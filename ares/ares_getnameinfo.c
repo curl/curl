@@ -270,6 +270,7 @@ static char *lookup_service(unsigned short port, int flags,
           char buf[4096];
           int len = 4096;
 #elif GETSERVBYPORT_R_ARGS == 5
+          struct servent ret;
           char buf[4096];
           int len = 4096;
 #elif GETSERVBYPORT_R_ARGS == 4
@@ -291,6 +292,7 @@ static char *lookup_service(unsigned short port, int flags,
           if (getservbyport_r(port, proto, se, buf, len, &ret))
             se = NULL;
 #elif GETSERVBYPORT_R_ARGS == 5
+          se = &ret;
           se = getservbyport_r(port, proto, se, buf, len);
 #elif GETSERVBYPORT_R_ARGS == 4
           se = &ret;
