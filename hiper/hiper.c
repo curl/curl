@@ -18,9 +18,6 @@
 /* The maximum number of simultanoues connections/transfers we support */
 #define NCONNECTIONS 50000
 
-#define __FD_SETSIZE NCONNECTIONS
-#define FD_SETSIZE NCONNECTIONS
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -34,7 +31,7 @@
 #define MICROSEC 1000000 /* number of microseconds in one second */
 
 /* The maximum time (in microseconds) we run the test */
-#define RUN_FOR_THIS_LONG (10*MICROSEC)
+#define RUN_FOR_THIS_LONG (20*MICROSEC)
 
 /* Number of loops (seconds) we allow the total download amount and alive
    connections to remain the same until we bail out. Set this slightly higher
@@ -210,6 +207,13 @@ static void report(void)
 #endif
 }
 
+struct ourfdset {
+  char fdbuffer[NCONNECTIONS/8];
+};
+#define FD2_ZERO(x) FD_ZERO((fd_set *)x)
+
+typedef struct ourfdset fd2_set;
+
 int main(int argc, char **argv)
 {
   CURLM *multi_handle;
@@ -222,8 +226,13 @@ int main(int argc, char **argv)
   int prevalive=-1;
   int prevsamecounter=0;
   int prevtotal = -1;
+  fd2_set fdsizecheck;
+  int selectmaxamount;
 
   memset(&info, 0, sizeof(struct globalinfo));
+
+  selectmaxamount = sizeof(fdsizecheck) * 8;
+  printf("select() supports max %d connections\n", selectmaxamount);
 
   if(argc < 3) {
     printf("Usage: hiper [num idle] [num active]\n");
@@ -234,6 +243,11 @@ int main(int argc, char **argv)
   num_active = atoi(argv[2]);
 
   num_total = num_idle + num_active;
+
+  if(num_total > selectmaxamount) {
+    printf("Requested more connections than supported!\n");
+    return 4;
+  }
 
   conns = calloc(num_total, sizeof(struct connection));
   if(!conns) {
@@ -284,7 +298,10 @@ int main(int argc, char **argv)
     curl_easy_setopt(e, CURLOPT_PRIVATE, &conns[i]);
 
     /* add the easy to the multi */
-    curl_multi_add_handle(multi_handle, e);
+    if(CURLM_OK != curl_multi_add_handle(multi_handle, e)) {
+      printf("curl_multi_add_handle() returned error for %d\n", i);
+      return 3;
+    }
   }
 
     /* we start some action by calling perform right away */
@@ -298,27 +315,32 @@ int main(int argc, char **argv)
     struct timeval timeout;
     int rc; /* select() return code */
 
-    fd_set fdread;
-    fd_set fdwrite;
-    fd_set fdexcep;
+    fd2_set fdread;
+    fd2_set fdwrite;
+    fd2_set fdexcep;
     int maxfd;
 
-    FD_ZERO(&fdread);
-    FD_ZERO(&fdwrite);
-    FD_ZERO(&fdexcep);
+    FD2_ZERO(&fdread);
+    FD2_ZERO(&fdwrite);
+    FD2_ZERO(&fdexcep);
 
     /* set a suitable timeout to play around with */
     timeout.tv_sec = 0;
     timeout.tv_usec = 50000;
 
     /* get file descriptors from the transfers */
-    curl_multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
-    printf("maxfd: %d\n", maxfd);
+    curl_multi_fdset(multi_handle,
+                     (fd_set *)&fdread,
+                     (fd_set *)&fdwrite,
+                     (fd_set *)&fdexcep, &maxfd);
 
     timer_pause();
     selects++;
     selectsalive += still_running;
-    rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+    rc = select(maxfd+1,
+                (fd_set *)&fdread,
+                (fd_set *)&fdwrite,
+                (fd_set *)&fdexcep, &timeout);
 
 #if 0
     /* Output this here to make it outside the timer */
@@ -366,11 +388,9 @@ int main(int argc, char **argv)
     struct connection *cptr;
     while ((msg = curl_multi_info_read(multi_handle, &msgs_left))) {
       if (msg->msg == CURLMSG_DONE) {
-        printf("Handle %p returned %d\n", msg->easy_handle, msg->data.result);
-
         curl_easy_getinfo(msg->easy_handle, CURLINFO_PRIVATE, &cptr);
 
-        printf("   Error message: %s\n", cptr->error);
+        printf("%d => (%d) %s", cptr->id, msg->data.result, cptr->error);
       }
     }
 
@@ -379,7 +399,7 @@ int main(int argc, char **argv)
   curl_multi_cleanup(multi_handle);
 
   /* cleanup all the easy handles */
-  for(i=0; i< NCONNECTIONS; i++)
+  for(i=0; i< num_total; i++)
     curl_easy_cleanup(conns[i].e);
 
   report();
