@@ -43,6 +43,16 @@ TODO
  * Add option that changes the interval in which the progress callback is
    called at most.
 
+ * Make libcurl built with c-ares use c-ares' IPv6 abilities. They weren't
+   present when we first added c-ares support but they have been added since!
+   When this is done and works, we can actually start considering making c-ares
+   powered libcurl the default build (which of course would require that we'd
+   bundle the c-ares source code in the libcurl source code releases).
+
+ * Support CONNECT 407 responses that kill the connection and expect the
+   client to reconnect to complete the authentication. Currently libcurl
+   assumes that a proxy connection will be kept alive.
+
  LIBCURL - multi interface
 
  * Add a curl_multi_fdset() alternative. this allows apps to avoid the
