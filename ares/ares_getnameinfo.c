@@ -70,7 +70,8 @@ struct nameinfo_query {
 #endif
 
 static void nameinfo_callback(void *arg, int status, struct hostent *host);
-static char *lookup_service(unsigned short port, int flags, char *buf);
+static char *lookup_service(unsigned short port, int flags,
+                            char *buf, size_t buflen);
 #ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
 static void append_scopeid(struct sockaddr_in6 *addr6, unsigned int scopeid,
                            char *buf, size_t buflen);
@@ -109,7 +110,7 @@ void ares_getnameinfo(ares_channel channel, const struct sockaddr *sa, socklen_t
         port = addr->sin_port;
       else
         port = addr6->sin6_port;
-      service = lookup_service(port, flags, buf);
+      service = lookup_service(port, flags, buf, sizeof(buf));
       callback(arg, ARES_SUCCESS, NULL, service);
       return;
     }
@@ -122,7 +123,7 @@ void ares_getnameinfo(ares_channel channel, const struct sockaddr *sa, socklen_t
       {
         unsigned int port = 0;
         char ipbuf[IPBUFSIZ];
-        char srvbuf[32];
+        char srvbuf[33];
         char *service = NULL;
         ipbuf[0] = 0;
 
@@ -150,7 +151,7 @@ void ares_getnameinfo(ares_channel channel, const struct sockaddr *sa, socklen_t
           }
         /* They also want a service */
         if (flags & ARES_NI_LOOKUPSERVICE)
-          service = lookup_service(port, flags, srvbuf);
+          service = lookup_service(port, flags, srvbuf, sizeof(srvbuf));
         callback(arg, ARES_SUCCESS, ipbuf, service);
         return;
       }
@@ -198,10 +199,10 @@ static void nameinfo_callback(void *arg, int status, struct hostent *host)
         {
           if (niquery->family == AF_INET)
             service = lookup_service(niquery->addr.addr4.sin_port,
-                                     niquery->flags, srvbuf);
+                                     niquery->flags, srvbuf, sizeof(srvbuf));
           else
             service = lookup_service(niquery->addr.addr6.sin6_port,
-                                     niquery->flags, srvbuf);
+                                     niquery->flags, srvbuf, sizeof(srvbuf));
         }
       /* NOFQDN means we have to strip off the domain name portion.
          We do this by determining our own domain name, then searching the string
@@ -240,10 +241,10 @@ static void nameinfo_callback(void *arg, int status, struct hostent *host)
         {
           if (niquery->family == AF_INET)
             service = lookup_service(niquery->addr.addr4.sin_port,
-                                     niquery->flags, srvbuf);
+                                     niquery->flags, srvbuf, sizeof(srvbuf));
           else
             service = lookup_service(niquery->addr.addr6.sin6_port,
-                                     niquery->flags, srvbuf);
+                                     niquery->flags, srvbuf, sizeof(srvbuf));
         }
       niquery->callback(niquery->arg, ARES_SUCCESS, ipbuf, service);
       return;
@@ -253,31 +254,21 @@ static void nameinfo_callback(void *arg, int status, struct hostent *host)
 }
 
 static char *lookup_service(unsigned short port, int flags,
-                            char *buf) /* 33 bytes buffer */
+                            char *buf, size_t buflen)
 {
-  if (port)
-    {
-      /* Just return the port as a string */
-      if (flags & ARES_NI_NUMERICSERV)
-        sprintf(buf, "%u", ntohs(port));
-      else
-        {
-          struct servent *se;
-          const char *proto;
+  const char *proto;
+  struct servent *sep;
 #ifdef HAVE_GETSERVBYPORT_R
-#if GETSERVBYPORT_R_ARGS == 6
-          struct servent ret;
-          char buf[4096];
-          int len = 4096;
-#elif GETSERVBYPORT_R_ARGS == 5
-          struct servent ret;
-          char buf[4096];
-          int len = 4096;
-#elif GETSERVBYPORT_R_ARGS == 4
-          struct servent ret;
-          struct servent_data sed;
+  struct servent se;
 #endif
-#endif /* HAVE_GETSERVBYPORT_R */
+  char tmpbuf[4096];
+
+  if (port)
+    { 
+      if (flags & ARES_NI_NUMERICSERV)
+        sep = NULL;
+      else
+        { 
           if (flags & ARES_NI_UDP)
             proto = "udp";
           else if (flags & ARES_NI_SCTP)
@@ -287,39 +278,40 @@ static char *lookup_service(unsigned short port, int flags,
           else
             proto = "tcp";
 #ifdef HAVE_GETSERVBYPORT_R
+          sep = &se;
+          memset(tmpbuf, 0, sizeof(tmpbuf));
 #if GETSERVBYPORT_R_ARGS == 6
-          se = &ret;
-          if (getservbyport_r(port, proto, se, buf, len, &ret))
-            se = NULL;
+          if (getservbyport_r(port, proto, &se, (void *)tmpbuf, sizeof(tmpbuf), &sep) != 0)
+            sep = NULL;
 #elif GETSERVBYPORT_R_ARGS == 5
-          se = &ret;
-          se = getservbyport_r(port, proto, se, buf, len);
+          sep = getservbyport_r(port, proto, &se, (void *)tmpbuf, sizeof(tmpbuf));
 #elif GETSERVBYPORT_R_ARGS == 4
-          se = &ret;
-          if (getservbyport_r(port, proto, se, &sed) == -1)
-            se = NULL;
-#else
+          if (getservbyport_r(port, proto, &se, (void *)tmpbuf) != 0)
+            sep = NULL;
+#else     
           /* Lets just hope the OS uses TLS! */
-          se = getservbyport(port, proto);
-#endif
-#else
+          sep = getservbyport(port, proto);
+#endif    
+#else     
           /* Lets just hope the OS uses TLS! */
-          se = getservbyport(port, proto);
-#endif
-          if (se && se->s_name) {
-            size_t len = strlen(se->s_name);
-            if(len < 33) {
-              strcpy(buf, se->s_name);
-            }
-            else
-              /* too big name to fit the buffer */
-              buf[0]=0;
-          }
-          else
-            sprintf(buf, "%u", ntohs(port));
-        }
+          sep = getservbyport(port, proto);
+#endif    
+        } 
+      if (sep && sep->s_name)
+        /* get service name */
+        strcpy(tmpbuf, sep->s_name);
+      else
+        /* get port as a string */
+        sprintf(tmpbuf, "%u", ntohs(port));
+      if (strlen(tmpbuf) < buflen)
+        /* return it if buffer big enough */
+        strcpy(buf, tmpbuf);
+      else
+        /* avoid reusing previous one */
+        buf[0] = '\0';
       return buf;
     }
+  buf[0] = '\0';
   return NULL;
 }
 
