@@ -24,6 +24,7 @@
  ***************************************************************************/
 
 #ifdef HTTP_ONLY
+#define CURL_DISABLE_TFTP
 #define CURL_DISABLE_FTP
 #define CURL_DISABLE_LDAP
 #define CURL_DISABLE_TELNET
