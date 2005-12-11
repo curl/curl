@@ -138,12 +138,12 @@ int curl_dogetaddrinfo(char *hostname, char *service,
   return res;
 }
 
-int curl_dogetnameinfo(const struct sockaddr *sa, socklen_t salen,
+int curl_dogetnameinfo(const struct sockaddr *sa, size_t salen,
                        char *host, size_t hostlen,
                        char *serv, size_t servlen, int flags,
                        int line, const char *source)
 {
-  int res = (int)(getnameinfo)(sa, salen, host, hostlen, serv, servlen, flags);
+  int res = (getnameinfo)(sa, salen, host, hostlen, serv, servlen, flags);
   if(0 == res) {
     /* success */
     if(logfile)
