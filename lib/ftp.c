@@ -812,7 +812,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
       return CURLE_FTP_PORT_FAILED;
     }
 
-    rc = getnameinfo((struct sockaddr *)&ss, (size_t)sslen, hbuf, sizeof(hbuf), NULL,
+    rc = getnameinfo((struct sockaddr *)&ss, sslen, hbuf, sizeof(hbuf), NULL,
                      0, NIFLAGS);
     if(rc) {
       failf(data, "getnameinfo() returned %d\n", rc);
@@ -921,7 +921,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     if (EPRT == fcmd) {
       if (eprtaf < 0)
         continue;
-      if (getnameinfo((struct sockaddr *)&ss, (size_t)sslen,
+      if (getnameinfo((struct sockaddr *)&ss, sslen,
                       portmsgbuf, sizeof(portmsgbuf), tmp, sizeof(tmp),
                       NIFLAGS))
         continue;
