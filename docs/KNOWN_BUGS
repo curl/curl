@@ -3,6 +3,18 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+30. You need to use -g to the command line tool in order to use RFC2732-style
+  IPv6 numerical addresses in URLs.
+
+29. IPv6 URLs with zone ID is not supported.
+  http://www.ietf.org/internet-drafts/draft-fenner-literal-zone-02.txt
+  specifies the use of a plus sign instead of a percent when specifying zone
+  IDs in URLs to get around the problem of percent signs being
+  special. According to the reporter, Firefox deals with the URL _with_ a
+  percent letter (which seems like a blatant URL spec violation).
+
+   See http://curl.haxx.se/bug/view.cgi?id=1371118
+
 28. The TFTP code is not portable and will fail on some architectures.
 
 26. NTLM authentication using SSPI (on Windows) when (lib)curl is running in
