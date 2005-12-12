@@ -143,7 +143,9 @@ int curl_dogetnameinfo(const struct sockaddr *sa, socklen_t salen,
                        char *serv, size_t servlen, int flags,
                        int line, const char *source)
 {
-  int res=(getnameinfo)(sa, salen, host, hostlen, serv, servlen, flags);
+  int res = (getnameinfo)(sa, (size_t)salen, 
+                          host, hostlen, serv, servlen, 
+                          (unsigned int)flags);
   if(0 == res) {
     /* success */
     if(logfile)
