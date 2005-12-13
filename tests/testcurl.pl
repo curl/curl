@@ -264,6 +264,7 @@ logit "NAME = $name";
 logit "EMAIL = $email";
 logit "DESC = $desc";
 logit "CONFOPTS = $confopts";
+logit "CPPFLAGS = ".$ENV{CPPFLAGS};
 logit "CFLAGS = ".$ENV{CFLAGS};
 logit "LDFLAGS = ".$ENV{LDFLAGS};
 logit "CC = ".$ENV{CC};
