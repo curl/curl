@@ -808,6 +808,7 @@ static int hostmatch(const char *hostname, const char *pattern)
     if (toupper(c) != toupper(*hostname++))
       return HOST_NOMATCH;
   }
+  /* we never reach this point */
 }
 
 static int

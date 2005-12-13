@@ -368,6 +368,7 @@ static int synchnet(curl_socket_t f /* socket to flush */)
     else
       return j;
   }
+  /* we never reach this point */
 }
 
 /*

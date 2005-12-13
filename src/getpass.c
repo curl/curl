@@ -203,7 +203,7 @@ char *getpass_r(const char *prompt, /* prompt to display */
   if(disabled) {
     /* if echo actually was disabled, add a newline */
     fputs("\n", stderr);
-    ttyecho(TRUE, fd); /* enable echo */
+    (void)ttyecho(TRUE, fd); /* enable echo */
   }
 
   if(1 != fd)

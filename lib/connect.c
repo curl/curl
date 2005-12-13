@@ -216,7 +216,7 @@ int waitconnect(curl_socket_t sockfd, /* socket */
   /* Call this function once now, and ignore the results. We do this to
      "clear" the error state on the socket so that we can later read it
      reliably. This is reported necessary on the MPE/iX operating system. */
-  verifyconnect(sockfd, NULL);
+  (void)verifyconnect(sockfd, NULL);
 #endif
 
   /* now select() until we get connect or timeout */
@@ -563,7 +563,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 
     /* nope, not connected  */
     if (WAITCONN_FDSET_ERROR == rc) {
-      verifyconnect(sockfd, &error);
+      (void)verifyconnect(sockfd, &error);
       data->state.os_errno = error;
       infof(data, "%s\n",Curl_strerror(conn,error));
     }
@@ -632,7 +632,7 @@ singleipconnect(struct connectdata *conn,
   char addr_buf[128];
   int rc;
   int error;
-  bool conected;
+  bool isconnected;
   struct SessionHandle *data = conn->data;
   curl_socket_t sockfd;
 
@@ -702,9 +702,9 @@ singleipconnect(struct connectdata *conn,
     return sockfd;
   }
 
-  conected = verifyconnect(sockfd, &error);
+  isconnected = verifyconnect(sockfd, &error);
 
-  if(!rc && conected) {
+  if(!rc && isconnected) {
     /* we are connected, awesome! */
     *connected = TRUE; /* this is a true connect */
     infof(data, "connected\n");
