@@ -687,6 +687,84 @@ if test "$ac_cv_func_gethostbyname_r" = "yes"; then
 fi
 ])
 
+
+dnl CURL_FUNC_GETNAMEINFO_ARGTYPES
+dnl ------------------------------
+dnl This function is experimental and its results shall
+dnl not be trusted while this notice is in place ------
+
+AC_DEFUN([CURL_FUNC_GETNAMEINFO_ARGTYPES], [
+  AC_REQUIRE([TYPE_SOCKLEN_T])dnl
+  AC_CHECK_HEADERS(sys/types.h sys/socket.h netdb.h)
+  AC_CACHE_CHECK([types of arguments for getnameinfo],
+    [curl_cv_func_getnameinfo_args], [
+      for gni_arg2 in 'socklen_t' 'size_t' 'int'; do
+        for gni_arg46 in 'size_t' 'int' 'socklen_t'; do
+          for gni_arg7 in 'int' 'unsigned int'; do
+            AC_COMPILE_IFELSE([
+              AC_LANG_PROGRAM([
+
+                #ifdef HAVE_SYS_TYPES_H
+                #include <sys/types.h>
+                #endif
+                #ifdef HAVE_SYS_SOCKET_H
+                #include <sys/socket.h>
+                #endif
+                #ifdef HAVE_NETDB_H
+                #include <netdb.h>
+                #endif
+
+                extern int getnameinfo(const struct sockaddr *,
+                                       $gni_arg2,
+                                       char *,
+                                       $gni_arg46,
+                                       char *,
+                                       $gni_arg46,
+                                       $gni_arg7);
+
+              ],[
+
+                int res;
+                struct sockaddr *sa=NULL;
+                $gni_arg2 salen=0;
+                char *host=NULL;
+                $gni_arg46 hostlen=0;
+                char *serv=NULL;
+                $gni_arg46 servlen=0;
+                $gni_arg7 flags=0;
+
+                res = getnameinfo(sa,
+                                  salen,
+                                  host,
+                                  hostlen,
+                                  serv,
+                                  servlen,
+                                  flags);
+
+              ])
+            ],[
+               curl_cv_func_getnameinfo_args="$gni_arg2,$gni_arg46,$gni_arg7"
+               break 3
+            ])
+          done
+        done
+      done
+      # Provide widely used default values.
+      : ${curl_cv_func_getnameinfo_args='socklen_t,size_t,int'}
+  ])
+  gni_prev_IFS=$IFS; IFS=','
+  set dummy `echo "$curl_cv_func_getnameinfo_args" | sed 's/\*/\*/g'`
+  IFS=$gni_prev_IFS
+  shift
+  AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG2, $[1],
+    [Define to the type of arg 2 for `getnameinfo'.])
+  AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG46, ($[2]),
+    [Define to the type of args 4 and 6 for `getnameinfo'.])
+  AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG7, ($[3]),
+    [Define to the type of arg 7 for `getnameinfo'.])
+])
+
+
 dnl We create a function for detecting which compiler we use and then set as
 dnl pendantic compiler options as possible for that particular compiler. The
 dnl options are only used for debug-builds.
