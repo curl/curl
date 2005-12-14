@@ -1500,8 +1500,6 @@ TYPE_SOCKADDR_STORAGE
 
 AC_FUNC_SELECT_ARGTYPES
 
-CURL_FUNC_GETNAMEINFO_ARGTYPES
-
 dnl Checks for library functions.
 dnl AC_PROG_GCC_TRADITIONAL
 AC_TYPE_SIGNAL
@@ -1524,6 +1522,7 @@ AC_CHECK_FUNCS( strtoll \
                 stricmp \
                 strcmpi \
                 gethostbyaddr \
+                getnameinfo \
                 gettimeofday \
                 inet_addr \
                 inet_ntoa \
@@ -1614,6 +1613,21 @@ AC_CHECK_DECL(inet_pton, ,
 #endif
 ]
 )
+
+if test "$ac_cv_func_getnameinfo" = "yes"; then
+  AC_CHECK_DECL(getnameinfo, ,
+                AC_DEFINE(HAVE_NO_GETNAMEINFO_PROTO, 1,
+                          [Defined if no getnameinfo() prototype available]),
+    [
+    #ifdef HAVE_SYS_SOCKET_H
+    #include <sys/socket.h>
+    #endif
+    #ifdef HAVE_NETDB_H
+    #include <netdb.h>
+    #endif
+  ])
+  CURL_FUNC_GETNAMEINFO_ARGTYPES
+fi
 
 AC_MSG_CHECKING([if we are Mac OS X (to disable poll)])
 disable_poll=no
