@@ -704,15 +704,15 @@ AC_DEFUN([CURL_FUNC_GETNAMEINFO_ARGTYPES], [
             AC_COMPILE_IFELSE([
               AC_LANG_PROGRAM([
 
-                #ifdef HAVE_SYS_TYPES_H
-                #include <sys/types.h>
-                #endif
-                #ifdef HAVE_SYS_SOCKET_H
-                #include <sys/socket.h>
-                #endif
-                #ifdef HAVE_NETDB_H
-                #include <netdb.h>
-                #endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
 
                 extern int getnameinfo(const struct sockaddr *,
                                        $gni_arg2,
@@ -725,11 +725,11 @@ AC_DEFUN([CURL_FUNC_GETNAMEINFO_ARGTYPES], [
               ],[
 
                 int res;
-                struct sockaddr *sa=NULL;
+                struct sockaddr *sa=0;
                 $gni_arg2 salen=0;
-                char *host=NULL;
+                char *host=0;
                 $gni_arg46 hostlen=0;
-                char *serv=NULL;
+                char *serv=0;
                 $gni_arg46 servlen=0;
                 $gni_arg7 flags=0;
 
