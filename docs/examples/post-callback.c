@@ -78,7 +78,7 @@ int main(void)
       curl_slist *chunk = NULL;
 
       chunk = curl_slist_append(chunk, "Transfer-Encoding: chunked");
-      res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER);
+      res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
       /* use curl_slist_free_all() after the *perform() call to free this
          list again */
     }
@@ -101,7 +101,7 @@ int main(void)
       curl_slist *chunk = NULL;
 
       chunk = curl_slist_append(chunk, "Expect:");
-      res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER);
+      res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
       /* use curl_slist_free_all() after the *perform() call to free this
          list again */
     }
