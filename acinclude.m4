@@ -1,3 +1,116 @@
+
+
+dnl CURL_CHECK_HEADER_WINDOWS
+dnl -------------------------------------------------
+dnl Checks for compilable and valid windows.h header 
+
+AC_DEFUN([CURL_CHECK_HEADER_WINDOWS], [
+  AC_CACHE_CHECK([for windows.h], [ac_cv_header_windows_h], [
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+      ],[
+        int dummy=2*WINVER;
+      ])
+    ],[
+      ac_cv_header_windows_h="yes"
+    ],[
+      ac_cv_header_windows_h="no"
+    ])
+  ])
+  if test "x$ac_cv_header_windows_h" = "xyes"; then
+    AC_DEFINE_UNQUOTED(HAVE_WINDOWS_H, "1",
+      [Define to 1 if you have the windows.h header file.])
+  fi
+])
+
+
+dnl CURL_CHECK_HEADER_WINSOCK
+dnl -------------------------------------------------
+dnl Checks for compilable and valid winsock.h header 
+
+AC_DEFUN([CURL_CHECK_HEADER_WINSOCK], [
+  AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
+  AC_CACHE_CHECK([for winsock.h], [ac_cv_header_winsock_h], [
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <winsock.h>
+      ],[
+        int dummy=WSACleanup();
+      ])
+    ],[
+      ac_cv_header_winsock_h="yes"
+    ],[
+      ac_cv_header_winsock_h="no"
+    ])
+  ])
+  if test "x$ac_cv_header_winsock_h" = "xyes"; then
+    AC_DEFINE_UNQUOTED(HAVE_WINSOCK_H, "1",
+      [Define to 1 if you have the winsock.h header file.])
+  fi
+])
+
+
+dnl CURL_CHECK_HEADER_WINSOCK2
+dnl -------------------------------------------------
+dnl Checks for compilable and valid winsock2.h header 
+
+AC_DEFUN([CURL_CHECK_HEADER_WINSOCK2], [
+  AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
+  AC_CACHE_CHECK([for winsock2.h], [ac_cv_header_winsock2_h], [
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <winsock2.h>
+      ],[
+        int dummy=2*IPPROTO_ESP;
+      ])
+    ],[
+      ac_cv_header_winsock2_h="yes"
+    ],[
+      ac_cv_header_winsock2_h="no"
+    ])
+  ])
+  if test "x$ac_cv_header_winsock2_h" = "xyes"; then
+    AC_DEFINE_UNQUOTED(HAVE_WINSOCK2_H, "1",
+      [Define to 1 if you have the winsock2.h header file.])
+  fi
+])
+
+
+dnl CURL_CHECK_HEADER_WS2TCPIP
+dnl -------------------------------------------------
+dnl Checks for compilable and valid ws2tcpip.h header
+
+AC_DEFUN([CURL_CHECK_HEADER_WS2TCPIP], [
+  AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
+  AC_CACHE_CHECK([for ws2tcpip.h], [ac_cv_header_ws2tcpip_h], [
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+      ],[
+        int dummy=2*IP_PKTINFO;
+      ])
+    ],[
+      ac_cv_header_ws2tcpip_h="yes"
+    ],[
+      ac_cv_header_ws2tcpip_h="no"
+    ])
+  ])
+  if test "x$ac_cv_header_ws2tcpip_h" = "xyes"; then
+    AC_DEFINE_UNQUOTED(HAVE_WS2TCPIP_H, "1",
+      [Define to 1 if you have the ws2tcpip.h header file.])
+  fi
+])
+
+
 dnl Check for how to set a socket to non-blocking state. There seems to exist
 dnl four known different ways, with the one used almost everywhere being POSIX
 dnl and XPG3, while the other different ways for different systems (old BSD,
@@ -758,9 +871,9 @@ AC_DEFUN([CURL_FUNC_GETNAMEINFO_ARGTYPES], [
   shift
   AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG2, $[1],
     [Define to the type of arg 2 for `getnameinfo'.])
-  AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG46, ($[2]),
+  AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG46, $[2],
     [Define to the type of args 4 and 6 for `getnameinfo'.])
-  AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG7, ($[3]),
+  AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG7, $[3],
     [Define to the type of arg 7 for `getnameinfo'.])
 ])
 
