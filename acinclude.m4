@@ -2,7 +2,7 @@
 
 dnl CURL_CHECK_HEADER_WINDOWS
 dnl -------------------------------------------------
-dnl Checks for compilable and valid windows.h header 
+dnl Check for compilable and valid windows.h header 
 
 AC_DEFUN([CURL_CHECK_HEADER_WINDOWS], [
   AC_CACHE_CHECK([for windows.h], [ac_cv_header_windows_h], [
@@ -23,13 +23,15 @@ AC_DEFUN([CURL_CHECK_HEADER_WINDOWS], [
   if test "x$ac_cv_header_windows_h" = "xyes"; then
     AC_DEFINE_UNQUOTED(HAVE_WINDOWS_H, 1,
       [Define to 1 if you have the windows.h header file.])
+    AC_DEFINE_UNQUOTED(WIN32_LEAN_AND_MEAN, 1,
+      [Define to avoid automatic inclusion of winsock.h])
   fi
 ])
 
 
 dnl CURL_CHECK_HEADER_WINSOCK
 dnl -------------------------------------------------
-dnl Checks for compilable and valid winsock.h header 
+dnl Check for compilable and valid winsock.h header 
 
 AC_DEFUN([CURL_CHECK_HEADER_WINSOCK], [
   AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
@@ -58,7 +60,7 @@ AC_DEFUN([CURL_CHECK_HEADER_WINSOCK], [
 
 dnl CURL_CHECK_HEADER_WINSOCK2
 dnl -------------------------------------------------
-dnl Checks for compilable and valid winsock2.h header 
+dnl Check for compilable and valid winsock2.h header 
 
 AC_DEFUN([CURL_CHECK_HEADER_WINSOCK2], [
   AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
@@ -87,7 +89,7 @@ AC_DEFUN([CURL_CHECK_HEADER_WINSOCK2], [
 
 dnl CURL_CHECK_HEADER_WS2TCPIP
 dnl -------------------------------------------------
-dnl Checks for compilable and valid ws2tcpip.h header
+dnl Check for compilable and valid ws2tcpip.h header
 
 AC_DEFUN([CURL_CHECK_HEADER_WS2TCPIP], [
   AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
@@ -117,19 +119,17 @@ AC_DEFUN([CURL_CHECK_HEADER_WS2TCPIP], [
 
 dnl CURL_CHECK_TYPE_SOCKLEN_T
 dnl -------------------------------------------------
-dnl Checks for existing socklen_t type, and provides
-dnl an equivalent type if socklen_t is not available
-dnl This function is experimental and shall not be
-dnl used while this notice is in place --------------
+dnl Check for existing socklen_t type, and provide
+dnl an equivalent type if socklen_t not available
 
 AC_DEFUN([CURL_CHECK_TYPE_SOCKLEN_T], [
   AC_REQUIRE([CURL_CHECK_HEADER_WS2TCPIP])dnl
   AC_CHECK_TYPE([socklen_t], ,[
     AC_CACHE_CHECK([for socklen_t equivalent], 
       [curl_cv_socklen_t_equiv], [
-      curl_cv_socklen_t_equiv=
-      for arg2 in "struct sockaddr" void; do
-        for t in int size_t unsigned long "unsigned long"; do
+      curl_cv_socklen_t_equiv="unknown"
+      for arg2 in 'struct sockaddr' 'void'; do
+        for t in 'int' 'size_t' 'unsigned int' 'long' 'unsigned long'; do
           AC_COMPILE_IFELSE([
             AC_LANG_PROGRAM([
 #undef inline
@@ -153,13 +153,13 @@ AC_DEFUN([CURL_CHECK_TYPE_SOCKLEN_T], [
 #endif
               int getpeername (int, $arg2 *, $t *);
               int getsockname (int, $arg2 *, $t *);
-              int bind   (int, $arg2 *, $t *);
+              int bind   (int, $arg2 *, $t);
               int accept (int, $arg2 *, $t *);
             ],[
-              $t len;
+              $t len=0;
               getpeername(0,0,&len);
               getsockname(0,0,&len);
-              bind(0,0,&len);
+              bind(0,0,len);
               accept(0,0,&len);
             ])
           ],[
@@ -169,7 +169,7 @@ AC_DEFUN([CURL_CHECK_TYPE_SOCKLEN_T], [
         done
       done
     ])
-    if test "x$curl_cv_socklen_t_equiv" = "x"; then
+    if test "$curl_cv_socklen_t_equiv" = "unknown"; then
       AC_MSG_ERROR([Cannot find a type to use in place of socklen_t])
     else
       AC_DEFINE_UNQUOTED(socklen_t, $curl_cv_socklen_t_equiv,
