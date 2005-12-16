@@ -152,15 +152,9 @@ AC_DEFUN([CURL_CHECK_TYPE_SOCKLEN_T], [
 #endif
 #endif
               int getpeername (int, $arg2 *, $t *);
-              int getsockname (int, $arg2 *, $t *);
-              int bind   (int, $arg2 *, $t);
-              int accept (int, $arg2 *, $t *);
             ],[
               $t len=0;
               getpeername(0,0,&len);
-              getsockname(0,0,&len);
-              bind(0,0,len);
-              accept(0,0,&len);
             ])
           ],[
              curl_cv_socklen_t_equiv="$t"
