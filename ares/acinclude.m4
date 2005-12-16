@@ -1,3 +1,282 @@
+
+
+dnl CURL_CHECK_HEADER_WINDOWS
+dnl -------------------------------------------------
+dnl Check for compilable and valid windows.h header 
+
+AC_DEFUN([CURL_CHECK_HEADER_WINDOWS], [
+  AC_CACHE_CHECK([for windows.h], [ac_cv_header_windows_h], [
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([
+#undef inline
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+      ],[
+        int dummy=2*WINVER;
+      ])
+    ],[
+      ac_cv_header_windows_h="yes"
+    ],[
+      ac_cv_header_windows_h="no"
+    ])
+  ])
+  if test "x$ac_cv_header_windows_h" = "xyes"; then
+    AC_DEFINE_UNQUOTED(HAVE_WINDOWS_H, 1,
+      [Define to 1 if you have the windows.h header file.])
+    AC_DEFINE_UNQUOTED(WIN32_LEAN_AND_MEAN, 1,
+      [Define to avoid automatic inclusion of winsock.h])
+  fi
+])
+
+
+dnl CURL_CHECK_HEADER_WINSOCK
+dnl -------------------------------------------------
+dnl Check for compilable and valid winsock.h header 
+
+AC_DEFUN([CURL_CHECK_HEADER_WINSOCK], [
+  AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
+  AC_CACHE_CHECK([for winsock.h], [ac_cv_header_winsock_h], [
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([
+#undef inline
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <winsock.h>
+      ],[
+        int dummy=WSACleanup();
+      ])
+    ],[
+      ac_cv_header_winsock_h="yes"
+    ],[
+      ac_cv_header_winsock_h="no"
+    ])
+  ])
+  if test "x$ac_cv_header_winsock_h" = "xyes"; then
+    AC_DEFINE_UNQUOTED(HAVE_WINSOCK_H, 1,
+      [Define to 1 if you have the winsock.h header file.])
+  fi
+])
+
+
+dnl CURL_CHECK_HEADER_WINSOCK2
+dnl -------------------------------------------------
+dnl Check for compilable and valid winsock2.h header 
+
+AC_DEFUN([CURL_CHECK_HEADER_WINSOCK2], [
+  AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
+  AC_CACHE_CHECK([for winsock2.h], [ac_cv_header_winsock2_h], [
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([
+#undef inline
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <winsock2.h>
+      ],[
+        int dummy=2*IPPROTO_ESP;
+      ])
+    ],[
+      ac_cv_header_winsock2_h="yes"
+    ],[
+      ac_cv_header_winsock2_h="no"
+    ])
+  ])
+  if test "x$ac_cv_header_winsock2_h" = "xyes"; then
+    AC_DEFINE_UNQUOTED(HAVE_WINSOCK2_H, 1,
+      [Define to 1 if you have the winsock2.h header file.])
+  fi
+])
+
+
+dnl CURL_CHECK_HEADER_WS2TCPIP
+dnl -------------------------------------------------
+dnl Check for compilable and valid ws2tcpip.h header
+
+AC_DEFUN([CURL_CHECK_HEADER_WS2TCPIP], [
+  AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
+  AC_CACHE_CHECK([for ws2tcpip.h], [ac_cv_header_ws2tcpip_h], [
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([
+#undef inline
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+      ],[
+        int dummy=2*IP_PKTINFO;
+      ])
+    ],[
+      ac_cv_header_ws2tcpip_h="yes"
+    ],[
+      ac_cv_header_ws2tcpip_h="no"
+    ])
+  ])
+  if test "x$ac_cv_header_ws2tcpip_h" = "xyes"; then
+    AC_DEFINE_UNQUOTED(HAVE_WS2TCPIP_H, 1,
+      [Define to 1 if you have the ws2tcpip.h header file.])
+  fi
+])
+
+
+dnl CURL_CHECK_TYPE_SOCKLEN_T
+dnl -------------------------------------------------
+dnl Check for existing socklen_t type, and provide
+dnl an equivalent type if socklen_t not available
+
+AC_DEFUN([CURL_CHECK_TYPE_SOCKLEN_T], [
+  AC_REQUIRE([CURL_CHECK_HEADER_WS2TCPIP])dnl
+  AC_CHECK_TYPE([socklen_t], ,[
+    AC_CACHE_CHECK([for socklen_t equivalent], 
+      [curl_cv_socklen_t_equiv], [
+      curl_cv_socklen_t_equiv="unknown"
+      for arg2 in "struct sockaddr" void; do
+        for t in int size_t unsigned long "unsigned long"; do
+          AC_COMPILE_IFELSE([
+            AC_LANG_PROGRAM([
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#endif
+#else
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#endif
+              int getpeername (int, $arg2 *, $t *);
+              int getsockname (int, $arg2 *, $t *);
+              int bind   (int, $arg2 *, $t);
+              int accept (int, $arg2 *, $t *);
+            ],[
+              $t len=0;
+              getpeername(0,0,&len);
+              getsockname(0,0,&len);
+              bind(0,0,len);
+              accept(0,0,&len);
+            ])
+          ],[
+             curl_cv_socklen_t_equiv="$t"
+             break 2
+          ])
+        done
+      done
+    ])
+    if test "$curl_cv_socklen_t_equiv" = "unknown"; then
+      AC_MSG_ERROR([Cannot find a type to use in place of socklen_t])
+    else
+      AC_DEFINE_UNQUOTED(socklen_t, $curl_cv_socklen_t_equiv,
+        [type to use in place of socklen_t if not defined])
+    fi
+  ],[
+#ifdef HAVE_WINDOWS_H
+#ifdef HAVE_WS2TCPIP_H
+#include <ws2tcpip.h>
+#endif
+#else
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#endif
+  ])
+])
+
+
+dnl CURL_FUNC_GETNAMEINFO_ARGTYPES
+dnl -------------------------------------------------
+dnl Check the type to be passed to five of the arguments
+dnl of getnameinfo function, and define those types in  
+dnl GETNAMEINFO_TYPE_ARG1, GETNAMEINFO_TYPE_ARG2,
+dnl GETNAMEINFO_TYPE_ARG46 and GETNAMEINFO_TYPE_ARG7.
+dnl This function is experimental and its results shall
+dnl not be trusted while this notice is in place ------
+
+AC_DEFUN([CURL_FUNC_GETNAMEINFO_ARGTYPES], [
+  AC_REQUIRE([CURL_CHECK_HEADER_WS2TCPIP])dnl
+  AC_REQUIRE([CURL_CHECK_TYPE_SOCKLEN_T])dnl
+  AC_CHECK_HEADERS(sys/types.h sys/socket.h netdb.h)
+  AC_CACHE_CHECK([types of arguments for getnameinfo],
+    [curl_cv_func_getnameinfo_args], [
+    curl_cv_func_getnameinfo_args="unknown"
+    for gni_arg1 in 'struct sockaddr *' 'void *'; do
+      for gni_arg2 in 'socklen_t' 'size_t' 'int'; do
+        for gni_arg46 in 'size_t' 'int' 'socklen_t'; do
+          for gni_arg7 in 'int' 'unsigned int'; do
+            AC_COMPILE_IFELSE([
+              AC_LANG_PROGRAM([
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#endif
+#ifdef HAVE_WS2TCPIP_H
+#include <ws2tcpip.h>
+#endif
+#else
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
+#endif
+                extern int getnameinfo($gni_arg1, $gni_arg2,
+                                       char *, $gni_arg46,
+                                       char *, $gni_arg46,
+                                       $gni_arg7);
+              ],[
+                $gni_arg1 sa=0;
+                $gni_arg2 salen=0;
+                char *host=0;
+                $gni_arg46 hostlen=0;
+                char *serv=0;
+                $gni_arg46 servlen=0;
+                $gni_arg7 flags=0;
+                getnameinfo(sa, salen, host, hostlen, serv, servlen, flags);
+              ])
+            ],[
+               curl_cv_func_getnameinfo_args="$gni_arg1,$gni_arg2,$gni_arg46,$gni_arg7"
+               break 4
+            ])
+          done
+        done
+      done
+    done
+  ])
+  if test "$curl_cv_func_getnameinfo_args" = "unknown"; then
+    AC_MSG_ERROR([Cannot find proper types to use for getnameinfo args])
+  else
+    gni_prev_IFS=$IFS; IFS=','
+    set dummy `echo "$curl_cv_func_getnameinfo_args" | sed 's/\*/\*/g'`
+    IFS=$gni_prev_IFS
+    shift
+    AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG1, $[1],
+      [Define to the type of arg 1 for `getnameinfo'.])
+    AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG2, $[2],
+      [Define to the type of arg 2 for `getnameinfo'.])
+    AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG46, $[3],
+      [Define to the type of args 4 and 6 for `getnameinfo'.])
+    AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG7, $[4],
+      [Define to the type of arg 7 for `getnameinfo'.])
+  fi
+])
+
+
 dnl Check for how to set a socket to non-blocking state. There seems to exist
 dnl four known different ways, with the one used almost everywhere being POSIX
 dnl and XPG3, while the other different ways for different systems (old BSD,

@@ -59,6 +59,18 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
 
 AC_PROG_LIBTOOL
 
+dnl **********************************************************************
+dnl Make sure that our checks for headers windows.h winsock.h winsock2.h 
+dnl and ws2tcpip.h take precedence over any other further checks which 
+dnl could be done later using AC_CHECK_HEADER or AC_CHECK_HEADERS for
+dnl this specific header files.
+dnl **********************************************************************
+
+CURL_CHECK_HEADER_WINDOWS
+CURL_CHECK_HEADER_WINSOCK
+CURL_CHECK_HEADER_WINSOCK2
+CURL_CHECK_HEADER_WS2TCPIP
+
 dnl check for a few basic system headers we need
 AC_CHECK_HEADERS(
        sys/types.h \
@@ -67,8 +79,6 @@ AC_CHECK_HEADERS(
        sys/socket.h \
        sys/ioctl.h \
        netdb.h \
-       winsock2.h \
-       ws2tcpip.h \
        netinet/in.h \
        net/if.h \
        arpa/nameser.h \
@@ -95,19 +105,8 @@ dnl *Sigh* these are needed in order for net/if.h to get properly detected.
 ]
   )
 
-AC_CHECK_TYPE(socklen_t, ,
-   AC_DEFINE(socklen_t, int, [the length of a socket address]), 
-   [
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_WINSOCK2_H
-#include <winsock2.h>
-#endif
-   ])
+# Check for socklen_t or equivalent
+CURL_CHECK_TYPE_SOCKLEN_T
 
 dnl check for AF_INET6
 CARES_CHECK_CONSTANT(
@@ -227,6 +226,26 @@ AC_CHECK_MEMBER(struct addrinfo.ai_flags,
 #endif
   ]
 )
+
+
+AC_CHECK_FUNCS( getnameinfo \
+                bitncmp \
+                if_indextoname,
+dnl if found
+[],
+dnl if not found, $ac_func is the name we check for
+func="$ac_func"
+AC_MSG_CHECKING([deeper for $func])
+AC_TRY_LINK( [],
+             [ $func ();],
+             AC_MSG_RESULT(yes!)
+             eval "ac_cv_func_$func=yes"
+             def=`echo "HAVE_$func" | tr 'a-z' 'A-Z'`
+             AC_DEFINE_UNQUOTED($def, 1, [If you have $func]),
+             AC_MSG_RESULT(but still no)
+             )
+)
+
 
 dnl check for inet_pton
 AC_CHECK_FUNCS(inet_pton)
@@ -362,7 +381,13 @@ AC_CHECK_SIZEOF(struct in_addr, ,
 ]
 )
 
-AC_CHECK_FUNCS([bitncmp if_indextoname])
+if test "x$ac_cv_func_getnameinfo" = "x"; then
+  AC_MSG_ERROR([Checking availability of function getnameinfo must be done previously])
+else
+  if test "x$ac_cv_func_getnameinfo" = "xyes"; then
+    CURL_FUNC_GETNAMEINFO_ARGTYPES
+  fi
+fi
 
 dnl God bless non-standardized functions! We need to see which getservbyport_r variant is available
 CARES_CHECK_GETSERVBYPORT_R

@@ -1396,8 +1396,9 @@ AC_HEADER_STDC
 
 dnl **********************************************************************
 dnl Make sure that our checks for headers windows.h winsock.h winsock2.h 
-dnl and ws2tcpip.h take precedence over any other further check which 
-dnl could be done later using AC_CHECK_HEADER or AC_CHECK_HEADERS.
+dnl and ws2tcpip.h take precedence over any other further checks which 
+dnl could be done later using AC_CHECK_HEADER or AC_CHECK_HEADERS for
+dnl this specific header files.
 dnl **********************************************************************
 
 CURL_CHECK_HEADER_WINDOWS
@@ -1432,8 +1433,6 @@ AC_CHECK_HEADERS(
         fcntl.h \
         dlfcn.h \
         alloca.h \
-        winsock.h \
-        winsock2.h \
         time.h \
         io.h \
         pwd.h \
@@ -1503,10 +1502,8 @@ fi
 AC_CHECK_TYPE(ssize_t, ,
    AC_DEFINE(ssize_t, int, [the signed version of size_t]))
 
-# Experimental check
+# Check for socklen_t or equivalent
 CURL_CHECK_TYPE_SOCKLEN_T
-
-# TYPE_SOCKLEN_T
 
 TYPE_IN_ADDR_T
 
@@ -1628,19 +1625,12 @@ AC_CHECK_DECL(inet_pton, ,
 ]
 )
 
-if test "$ac_cv_func_getnameinfo" = "yes"; then
-  AC_CHECK_DECL(getnameinfo, ,
-                AC_DEFINE(HAVE_NO_GETNAMEINFO_PROTO, 1,
-                          [Defined if no getnameinfo() prototype available]),
-  [
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_NETDB_H
-#include <netdb.h>
-#endif
-  ])
-  CURL_FUNC_GETNAMEINFO_ARGTYPES
+if test "x$ac_cv_func_getnameinfo" = "x"; then
+  AC_MSG_ERROR([Checking availability of function getnameinfo must be done previously])
+else
+  if test "x$ac_cv_func_getnameinfo" = "xyes"; then
+    CURL_FUNC_GETNAMEINFO_ARGTYPES
+  fi
 fi
 
 AC_MSG_CHECKING([if we are Mac OS X (to disable poll)])

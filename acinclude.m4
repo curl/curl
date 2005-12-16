@@ -192,6 +192,91 @@ AC_DEFUN([CURL_CHECK_TYPE_SOCKLEN_T], [
 ])
 
 
+dnl CURL_FUNC_GETNAMEINFO_ARGTYPES
+dnl -------------------------------------------------
+dnl Check the type to be passed to five of the arguments
+dnl of getnameinfo function, and define those types in  
+dnl GETNAMEINFO_TYPE_ARG1, GETNAMEINFO_TYPE_ARG2,
+dnl GETNAMEINFO_TYPE_ARG46 and GETNAMEINFO_TYPE_ARG7.
+dnl This function is experimental and its results shall
+dnl not be trusted while this notice is in place ------
+
+AC_DEFUN([CURL_FUNC_GETNAMEINFO_ARGTYPES], [
+  AC_REQUIRE([CURL_CHECK_HEADER_WS2TCPIP])dnl
+  AC_REQUIRE([CURL_CHECK_TYPE_SOCKLEN_T])dnl
+  AC_CHECK_HEADERS(sys/types.h sys/socket.h netdb.h)
+  AC_CACHE_CHECK([types of arguments for getnameinfo],
+    [curl_cv_func_getnameinfo_args], [
+    curl_cv_func_getnameinfo_args="unknown"
+    for gni_arg1 in 'struct sockaddr *' 'void *'; do
+      for gni_arg2 in 'socklen_t' 'size_t' 'int'; do
+        for gni_arg46 in 'size_t' 'int' 'socklen_t'; do
+          for gni_arg7 in 'int' 'unsigned int'; do
+            AC_COMPILE_IFELSE([
+              AC_LANG_PROGRAM([
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#endif
+#ifdef HAVE_WS2TCPIP_H
+#include <ws2tcpip.h>
+#endif
+#else
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
+#endif
+                extern int getnameinfo($gni_arg1, $gni_arg2,
+                                       char *, $gni_arg46,
+                                       char *, $gni_arg46,
+                                       $gni_arg7);
+              ],[
+                $gni_arg1 sa=0;
+                $gni_arg2 salen=0;
+                char *host=0;
+                $gni_arg46 hostlen=0;
+                char *serv=0;
+                $gni_arg46 servlen=0;
+                $gni_arg7 flags=0;
+                getnameinfo(sa, salen, host, hostlen, serv, servlen, flags);
+              ])
+            ],[
+               curl_cv_func_getnameinfo_args="$gni_arg1,$gni_arg2,$gni_arg46,$gni_arg7"
+               break 4
+            ])
+          done
+        done
+      done
+    done
+  ])
+  if test "$curl_cv_func_getnameinfo_args" = "unknown"; then
+    AC_MSG_ERROR([Cannot find proper types to use for getnameinfo args])
+  else
+    gni_prev_IFS=$IFS; IFS=','
+    set dummy `echo "$curl_cv_func_getnameinfo_args" | sed 's/\*/\*/g'`
+    IFS=$gni_prev_IFS
+    shift
+    AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG1, $[1],
+      [Define to the type of arg 1 for `getnameinfo'.])
+    AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG2, $[2],
+      [Define to the type of arg 2 for `getnameinfo'.])
+    AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG46, $[3],
+      [Define to the type of args 4 and 6 for `getnameinfo'.])
+    AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG7, $[4],
+      [Define to the type of arg 7 for `getnameinfo'.])
+  fi
+])
+
+
 dnl Check for how to set a socket to non-blocking state. There seems to exist
 dnl four known different ways, with the one used almost everywhere being POSIX
 dnl and XPG3, while the other different ways for different systems (old BSD,
@@ -343,50 +428,6 @@ AC_DEFUN([TYPE_SOCKADDR_STORAGE],
 
 ])
 
-dnl Check for socklen_t: historically on BSD it is an int, and in
-dnl POSIX 1g it is a type of its own, but some platforms use different
-dnl types for the argument to getsockopt, getpeername, etc.  So we
-dnl have to test to find something that will work.
-AC_DEFUN([TYPE_SOCKLEN_T],
-[
-   AC_CHECK_TYPE([socklen_t], ,[
-      AC_MSG_CHECKING([for socklen_t equivalent])
-      AC_CACHE_VAL([curl_cv_socklen_t_equiv],
-      [
-         # Systems have either "struct sockaddr *" or
-         # "void *" as the second argument to getpeername
-         curl_cv_socklen_t_equiv=
-         for arg2 in "struct sockaddr" void; do
-            for t in int size_t unsigned long "unsigned long"; do
-               AC_TRY_COMPILE([
-                  #ifdef HAVE_SYS_TYPES_H
-                  #include <sys/types.h>
-                  #endif
-                  #ifdef HAVE_SYS_SOCKET_H
-                  #include <sys/socket.h>
-                  #endif
-
-                  int getpeername (int, $arg2 *, $t *);
-               ],[
-                  $t len;
-                  getpeername(0,0,&len);
-               ],[
-                  curl_cv_socklen_t_equiv="$t"
-                  break
-               ])
-            done
-         done
-
-         if test "x$curl_cv_socklen_t_equiv" = x; then
-            AC_MSG_ERROR([Cannot find a type to use in place of socklen_t])
-         fi
-      ])
-      AC_MSG_RESULT($curl_cv_socklen_t_equiv)
-      AC_DEFINE_UNQUOTED(socklen_t, $curl_cv_socklen_t_equiv,
-			[type to use in place of socklen_t if not defined])],
-      [#include <sys/types.h>
-#include <sys/socket.h>])
-])
 
 dnl Check for in_addr_t: it is used to receive the return code of inet_addr()
 dnl and a few other things.
@@ -879,83 +920,6 @@ if test "$ac_cv_func_gethostbyname_r" = "yes"; then
     AC_MSG_ERROR([couldn't figure out how to use gethostbyname_r()])
   fi
 fi
-])
-
-
-dnl CURL_FUNC_GETNAMEINFO_ARGTYPES
-dnl ------------------------------
-dnl This function is experimental and its results shall
-dnl not be trusted while this notice is in place ------
-
-AC_DEFUN([CURL_FUNC_GETNAMEINFO_ARGTYPES], [
-  AC_REQUIRE([TYPE_SOCKLEN_T])dnl
-  AC_CHECK_HEADERS(sys/types.h sys/socket.h netdb.h)
-  AC_CACHE_CHECK([types of arguments for getnameinfo],
-    [curl_cv_func_getnameinfo_args], [
-      for gni_arg2 in 'socklen_t' 'size_t' 'int'; do
-        for gni_arg46 in 'size_t' 'int' 'socklen_t'; do
-          for gni_arg7 in 'int' 'unsigned int'; do
-            AC_COMPILE_IFELSE([
-              AC_LANG_PROGRAM([
-
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_NETDB_H
-#include <netdb.h>
-#endif
-
-                extern int getnameinfo(const struct sockaddr *,
-                                       $gni_arg2,
-                                       char *,
-                                       $gni_arg46,
-                                       char *,
-                                       $gni_arg46,
-                                       $gni_arg7);
-
-              ],[
-
-                int res;
-                struct sockaddr *sa=0;
-                $gni_arg2 salen=0;
-                char *host=0;
-                $gni_arg46 hostlen=0;
-                char *serv=0;
-                $gni_arg46 servlen=0;
-                $gni_arg7 flags=0;
-
-                res = getnameinfo(sa,
-                                  salen,
-                                  host,
-                                  hostlen,
-                                  serv,
-                                  servlen,
-                                  flags);
-
-              ])
-            ],[
-               curl_cv_func_getnameinfo_args="$gni_arg2,$gni_arg46,$gni_arg7"
-               break 3
-            ])
-          done
-        done
-      done
-      # Provide widely used default values.
-      : ${curl_cv_func_getnameinfo_args='socklen_t,size_t,int'}
-  ])
-  gni_prev_IFS=$IFS; IFS=','
-  set dummy `echo "$curl_cv_func_getnameinfo_args" | sed 's/\*/\*/g'`
-  IFS=$gni_prev_IFS
-  shift
-  AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG2, $[1],
-    [Define to the type of arg 2 for `getnameinfo'.])
-  AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG46, $[2],
-    [Define to the type of args 4 and 6 for `getnameinfo'.])
-  AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG7, $[3],
-    [Define to the type of arg 7 for `getnameinfo'.])
 ])
 
 
