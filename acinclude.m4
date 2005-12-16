@@ -125,9 +125,9 @@ dnl used while this notice is in place --------------
 AC_DEFUN([CURL_CHECK_TYPE_SOCKLEN_T], [
   AC_REQUIRE([CURL_CHECK_HEADER_WS2TCPIP])dnl
   AC_CHECK_TYPE([socklen_t], ,[
-    AC_CACHE_CHECK([for socklen_t equivalent bis], 
-      [curl_cv_socklen_t_equiv_bis], [
-      curl_cv_socklen_t_equiv_bis=
+    AC_CACHE_CHECK([for socklen_t equivalent], 
+      [curl_cv_socklen_t_equiv], [
+      curl_cv_socklen_t_equiv=
       for arg2 in "struct sockaddr" void; do
         for t in int size_t unsigned long "unsigned long"; do
           AC_COMPILE_IFELSE([
@@ -163,16 +163,16 @@ AC_DEFUN([CURL_CHECK_TYPE_SOCKLEN_T], [
               accept(0,0,&len);
             ])
           ],[
-             curl_cv_socklen_t_equiv_bis="$t"
+             curl_cv_socklen_t_equiv="$t"
              break 2
           ])
         done
       done
     ])
-    if test "x$curl_cv_socklen_t_equiv_bis" = "x"; then
-      AC_MSG_ERROR([Cannot find a type to use in place of socklen_t bis])
+    if test "x$curl_cv_socklen_t_equiv" = "x"; then
+      AC_MSG_ERROR([Cannot find a type to use in place of socklen_t])
     else
-      AC_DEFINE_UNQUOTED(socklen_t_bis, $curl_cv_socklen_t_equiv_bis,
+      AC_DEFINE_UNQUOTED(socklen_t, $curl_cv_socklen_t_equiv,
         [type to use in place of socklen_t if not defined])
     fi
   ],[
