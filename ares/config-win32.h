@@ -16,6 +16,10 @@
 #ifndef __CONFIG_WIN32_H
 #define __CONFIG_WIN32_H
 
+#define HAVE_WINDOWS_H
+#define HAVE_WINSOCK2_H
+#define HAVE_WS2TCPIP_H
+
 #if defined(__MINGW32__)
 #define HAVE_GETOPT_H
 #endif

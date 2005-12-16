@@ -64,6 +64,34 @@
 #include "amigaos.h"
 #endif
 
+
+/* 
+ * Include header files for windows builds before redefining anything.
+ * Use this preproessor block only to include or exclude windows.h, 
+ * winsock2.h, ws2tcpip.h or winsock.h. Any other windows thing belongs 
+ * to any other further and independant block.
+ */
+
+#ifdef WIN32
+#  ifdef HAVE_WINDOWS_H
+#    ifndef WIN32_LEAN_AND_MEAN
+#      define WIN32_LEAN_AND_MEAN
+#    endif
+#    include <windows.h>
+#    ifdef HAVE_WINSOCK2_H
+#      include <winsock2.h>
+#      ifdef HAVE_WS2TCPIP_H
+#         include <ws2tcpip.h>
+#      endif
+#    else
+#      ifdef HAVE_WINSOCK_H
+#        include <winsock.h>
+#      endif
+#    endif
+#  endif
+#endif
+
+
 #ifndef TRUE
 #define TRUE 1
 #endif
@@ -160,20 +188,6 @@ typedef unsigned char bool;
    */
 
 #ifdef WIN32
-
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN  /* Prevent including <winsock*.h> in <windows.h> */
-#endif /* WIN32_LEAN_AND_MEAN */
-
-#ifdef HAVE_WINSOCK2_H
-#include <winsock2.h>        /* required by telnet.c */
-#endif
-
-#if defined(ENABLE_IPV6) || defined(USE_SSLEAY)
-#if !defined(_MSC_VER) || (_MSC_VER >= 1300)
-#include <ws2tcpip.h>
-#endif
-#endif
 
 #if !defined(__GNUC__) || defined(__MINGW32__)
 #define sclose(x) closesocket(x)

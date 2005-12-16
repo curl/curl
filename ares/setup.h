@@ -22,6 +22,34 @@
 #include "config-win32.h"
 #endif
 
+
+/* 
+ * Include header files for windows builds before redefining anything.
+ * Use this preproessor block only to include or exclude windows.h, 
+ * winsock2.h, ws2tcpip.h or winsock.h. Any other windows thing belongs 
+ * to any other further and independant block.
+ */
+
+#ifdef WIN32
+#  ifdef HAVE_WINDOWS_H
+#    ifndef WIN32_LEAN_AND_MEAN
+#      define WIN32_LEAN_AND_MEAN
+#    endif
+#    include <windows.h>
+#    ifdef HAVE_WINSOCK2_H
+#      include <winsock2.h>
+#      ifdef HAVE_WS2TCPIP_H
+#         include <ws2tcpip.h>
+#      endif
+#    else
+#      ifdef HAVE_WINSOCK_H
+#        include <winsock.h>
+#      endif
+#    endif
+#  endif
+#endif
+
+
 /* simple work-around for now, for systems without configure support */
 #ifndef __DJGPP__
 #define ssize_t int
@@ -44,8 +72,6 @@
 
 /* now typedef our socket type */
 #if defined(WIN32) && !defined(WATT32)
-#include <winsock2.h>
-#include <ws2tcpip.h>
 typedef SOCKET ares_socket_t;
 #define ARES_SOCKET_BAD INVALID_SOCKET
 #else

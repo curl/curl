@@ -205,6 +205,9 @@
 /* Define if you have the <time.h> header file.  */
 #define HAVE_TIME_H 1
 
+/* Define if you have the <windows.h> header file.  */
+#define HAVE_WINDOWS_H 1
+
 /* Define if you have the <winsock.h> header file.  */
 #define HAVE_WINSOCK_H 1
 
