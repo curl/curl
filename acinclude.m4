@@ -128,8 +128,8 @@ AC_DEFUN([CURL_CHECK_TYPE_SOCKLEN_T], [
     AC_CACHE_CHECK([for socklen_t equivalent], 
       [curl_cv_socklen_t_equiv], [
       curl_cv_socklen_t_equiv="unknown"
-      for arg2 in 'struct sockaddr' 'void'; do
-        for t in 'int' 'size_t' 'unsigned int' 'long' 'unsigned long'; do
+      for arg2 in "struct sockaddr" void; do
+        for t in int size_t unsigned long "unsigned long"; do
           AC_COMPILE_IFELSE([
             AC_LANG_PROGRAM([
 #undef inline
