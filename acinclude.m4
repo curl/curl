@@ -21,7 +21,7 @@ AC_DEFUN([CURL_CHECK_HEADER_WINDOWS], [
     ])
   ])
   if test "x$ac_cv_header_windows_h" = "xyes"; then
-    AC_DEFINE_UNQUOTED(HAVE_WINDOWS_H, "1",
+    AC_DEFINE_UNQUOTED(HAVE_WINDOWS_H, 1,
       [Define to 1 if you have the windows.h header file.])
   fi
 ])
@@ -50,7 +50,7 @@ AC_DEFUN([CURL_CHECK_HEADER_WINSOCK], [
     ])
   ])
   if test "x$ac_cv_header_winsock_h" = "xyes"; then
-    AC_DEFINE_UNQUOTED(HAVE_WINSOCK_H, "1",
+    AC_DEFINE_UNQUOTED(HAVE_WINSOCK_H, 1,
       [Define to 1 if you have the winsock.h header file.])
   fi
 ])
@@ -79,7 +79,7 @@ AC_DEFUN([CURL_CHECK_HEADER_WINSOCK2], [
     ])
   ])
   if test "x$ac_cv_header_winsock2_h" = "xyes"; then
-    AC_DEFINE_UNQUOTED(HAVE_WINSOCK2_H, "1",
+    AC_DEFINE_UNQUOTED(HAVE_WINSOCK2_H, 1,
       [Define to 1 if you have the winsock2.h header file.])
   fi
 ])
@@ -109,7 +109,7 @@ AC_DEFUN([CURL_CHECK_HEADER_WS2TCPIP], [
     ])
   ])
   if test "x$ac_cv_header_ws2tcpip_h" = "xyes"; then
-    AC_DEFINE_UNQUOTED(HAVE_WS2TCPIP_H, "1",
+    AC_DEFINE_UNQUOTED(HAVE_WS2TCPIP_H, 1,
       [Define to 1 if you have the ws2tcpip.h header file.])
   fi
 ])
