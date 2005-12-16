@@ -3166,12 +3166,13 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
         if(*userpass != ':') {
           /* the name is given, get user+password */
-          sscanf(userpass, "%127[^:@]:%127[^@]",
+          sscanf(userpass, "%" MAX_CURL_USER_LENGTH_TXT "[^:@]:"
+                 "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^@]",
                  user, passwd);
         }
         else
           /* no name given, get the password only */
-          sscanf(userpass, ":%127[^@]", passwd);
+          sscanf(userpass, ":%" MAX_CURL_PASSWORD_LENGTH_TXT "[^@]", passwd);
 
         if(user[0]) {
           char *newname=curl_unescape(user, 0);

@@ -15,14 +15,16 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o 
+ o supports name and passwords up to 255 bytes long, embedded in URLs
+ o the HTTP_ONLY define disables the TFTP support
 
 Other curl-related news since the previous public release:
 
- o 
+ o http://curl.hkmirror.org/ is a new curl web mirror in Hong Kong
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
+ Dov Murik, Jean Jacques Drouin
  
         Thanks! (and sorry if I forgot to mention someone)
