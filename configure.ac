@@ -290,23 +290,6 @@ dnl The actual use of the USE_MANUAL variable is done much later in this
 dnl script to allow other actions to disable it as well.
 
 dnl **********************************************************************
-dnl Make sure that our checks for headers windows.h winsock.h winsock2.h 
-dnl and ws2tcpip.h take precedence over any other further check done later.
-dnl **********************************************************************
-
-dnl Do we have a compilable and valid windows.h header ?
-CURL_CHECK_HEADER_WINDOWS
-
-dnl Do we have a compilable and valid winsock.h header ?
-CURL_CHECK_HEADER_WINSOCK
-
-dnl Do we have a compilable and valid winsock2.h header ?
-CURL_CHECK_HEADER_WINSOCK2
-
-dnl Do we have a compilable and valid ws2tcpip.h header ?
-CURL_CHECK_HEADER_WS2TCPIP
-
-dnl **********************************************************************
 dnl Checks for libraries.
 dnl **********************************************************************
 
@@ -1411,7 +1394,18 @@ dnl **********************************************************************
 dnl Checks for header files.
 AC_HEADER_STDC
 
-dnl First check for the very most basic headers. Then we can use these
+dnl **********************************************************************
+dnl Make sure that our checks for headers windows.h winsock.h winsock2.h 
+dnl and ws2tcpip.h take precedence over any other further check which 
+dnl could be done later using AC_CHECK_HEADER or AC_CHECK_HEADERS.
+dnl **********************************************************************
+
+CURL_CHECK_HEADER_WINDOWS
+CURL_CHECK_HEADER_WINSOCK
+CURL_CHECK_HEADER_WINSOCK2
+CURL_CHECK_HEADER_WS2TCPIP
+
+dnl Now check for the very most basic headers. Then we can use these
 dnl ones as default-headers when checking for the rest!
 AC_CHECK_HEADERS(
         sys/types.h \
@@ -1508,6 +1502,9 @@ fi
 # check for ssize_t
 AC_CHECK_TYPE(ssize_t, ,
    AC_DEFINE(ssize_t, int, [the signed version of size_t]))
+
+# Experimental check
+CURL_CHECK_TYPE_SOCKLEN_T
 
 TYPE_SOCKLEN_T
 TYPE_IN_ADDR_T

@@ -8,6 +8,7 @@ AC_DEFUN([CURL_CHECK_HEADER_WINDOWS], [
   AC_CACHE_CHECK([for windows.h], [ac_cv_header_windows_h], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([
+#undef inline
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
       ],[
@@ -35,6 +36,7 @@ AC_DEFUN([CURL_CHECK_HEADER_WINSOCK], [
   AC_CACHE_CHECK([for winsock.h], [ac_cv_header_winsock_h], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([
+#undef inline
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <winsock.h>
@@ -63,6 +65,7 @@ AC_DEFUN([CURL_CHECK_HEADER_WINSOCK2], [
   AC_CACHE_CHECK([for winsock2.h], [ac_cv_header_winsock2_h], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([
+#undef inline
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <winsock2.h>
@@ -91,6 +94,7 @@ AC_DEFUN([CURL_CHECK_HEADER_WS2TCPIP], [
   AC_CACHE_CHECK([for ws2tcpip.h], [ac_cv_header_ws2tcpip_h], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([
+#undef inline
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <winsock2.h>
@@ -108,6 +112,83 @@ AC_DEFUN([CURL_CHECK_HEADER_WS2TCPIP], [
     AC_DEFINE_UNQUOTED(HAVE_WS2TCPIP_H, "1",
       [Define to 1 if you have the ws2tcpip.h header file.])
   fi
+])
+
+
+dnl CURL_CHECK_TYPE_SOCKLEN_T
+dnl -------------------------------------------------
+dnl Checks for existing socklen_t type, and provides
+dnl an equivalent type if socklen_t is not available
+dnl This function is experimental and shall not be
+dnl used while this notice is in place --------------
+
+AC_DEFUN([CURL_CHECK_TYPE_SOCKLEN_T], [
+  AC_REQUIRE([CURL_CHECK_HEADER_WS2TCPIP])dnl
+  AC_CHECK_TYPE([socklen_t], ,[
+    AC_CACHE_CHECK([for socklen_t equivalent bis], 
+      [curl_cv_socklen_t_equiv_bis], [
+      curl_cv_socklen_t_equiv_bis=
+      for arg2 in "struct sockaddr" void; do
+        for t in int size_t unsigned long "unsigned long"; do
+          AC_COMPILE_IFELSE([
+            AC_LANG_PROGRAM([
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#endif
+#else
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#endif
+              int getpeername (int, $arg2 *, $t *);
+              int getsockname (int, $arg2 *, $t *);
+              int bind   (int, $arg2 *, $t *);
+              int accept (int, $arg2 *, $t *);
+            ],[
+              $t len;
+              getpeername(0,0,&len);
+              getsockname(0,0,&len);
+              bind(0,0,&len);
+              accept(0,0,&len);
+            ])
+          ],[
+             curl_cv_socklen_t_equiv_bis="$t"
+             break 2
+          ])
+        done
+      done
+    ])
+    if test "x$curl_cv_socklen_t_equiv_bis" = "x"; then
+      AC_MSG_ERROR([Cannot find a type to use in place of socklen_t bis])
+    else
+      AC_DEFINE_UNQUOTED(socklen_t_bis, $curl_cv_socklen_t_equiv_bis,
+        [type to use in place of socklen_t if not defined])
+    fi
+  ],[
+#ifdef HAVE_WINDOWS_H
+#ifdef HAVE_WS2TCPIP_H
+#include <ws2tcpip.h>
+#endif
+#else
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#endif
+  ])
 ])
 
 
