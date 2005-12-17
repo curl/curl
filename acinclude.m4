@@ -229,7 +229,7 @@ AC_DEFUN([CURL_FUNC_GETNAMEINFO_ARGTYPES], [
 #include <netdb.h>
 #endif
 #endif
-                extern int getnameinfo($gni_arg1, $gni_arg2,
+                extern int getnameinfo(const $gni_arg1, $gni_arg2,
                                        char *, $gni_arg46,
                                        char *, $gni_arg46,
                                        $gni_arg7);
@@ -241,7 +241,7 @@ AC_DEFUN([CURL_FUNC_GETNAMEINFO_ARGTYPES], [
                 char *serv=0;
                 $gni_arg46 servlen=0;
                 $gni_arg7 flags=0;
-                getnameinfo(sa, salen, host, hostlen, serv, servlen, flags);
+                int res = getnameinfo(sa, salen, host, hostlen, serv, servlen, flags);
               ])
             ],[
                curl_cv_func_getnameinfo_args="$gni_arg1,$gni_arg2,$gni_arg46,$gni_arg7"
