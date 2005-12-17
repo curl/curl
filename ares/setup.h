@@ -63,7 +63,7 @@
 #  endif
 #endif
 
-/+
+/*
  * Work-arounds for systems without configure support 
  */
 
