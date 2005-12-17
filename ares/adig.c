@@ -227,7 +227,7 @@ int main(int argc, char **argv)
           /* Set the TCP port number. */
           if (!isdigit((unsigned char)*optarg))
             usage();
-          options.tcp_port = strtol(optarg, NULL, 0);
+          options.tcp_port = (unsigned short)strtol(optarg, NULL, 0);
           optmask |= ARES_OPT_TCP_PORT;
           break;
 
@@ -235,7 +235,7 @@ int main(int argc, char **argv)
           /* Set the UDP port number. */
           if (!isdigit((unsigned char)*optarg))
             usage();
-          options.udp_port = strtol(optarg, NULL, 0);
+          options.udp_port = (unsigned short)strtol(optarg, NULL, 0);
           optmask |= ARES_OPT_UDP_PORT;
           break;
         }
