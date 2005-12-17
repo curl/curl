@@ -1,5 +1,5 @@
-#ifndef __SETUP_H
-#define __SETUP_H
+#ifndef __LIB_CURL_SETUP_H
+#define __LIB_CURL_SETUP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -347,4 +347,4 @@ typedef int curl_socket_t;
 #define DEBUGF(x)
 #endif
 
-#endif /* __SETUP_H */
+#endif /* __LIB_CURL_SETUP_H */
