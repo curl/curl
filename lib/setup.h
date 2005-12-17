@@ -34,36 +34,41 @@
 #endif /* HTTP_ONLY */
 
 #if !defined(WIN32) && defined(__WIN32__)
-/* This should be a good Borland fix. */
-#define WIN32
-#endif
-#if !defined(WIN32) && defined(_WIN32)
-/* This works for VS2005 on x64 */
+/* Borland fix */
 #define WIN32
 #endif
 
+#if !defined(WIN32) && defined(_WIN32)
+/* VS2005 on x64 fix */
+#define WIN32
+#endif
+
+/*
+ * Include configuration script results or hand-crafted
+ * configuration file for platforms which lack config tool.
+ */
+
 #ifdef HAVE_CONFIG_H
-#include "config.h" /* the configure script results */
+#include "config.h"
 #else
+
 #ifdef _WIN32_WCE
 #include "config-win32ce.h"
 #else
 #ifdef WIN32
-/* hand-modified win32 config.h! */
 #include "config-win32.h"
-#endif /* WIN32 */
-#endif /* WIN32_WCE */
-#endif /* HAVE_CONFIG_H */
+#endif
+#endif
 
 #ifdef macintosh
-/* hand-modified MacOS config.h! */
 #include "config-mac.h"
 #endif
+
 #ifdef AMIGA
-/* hand-modified AmigaOS config.h! */
 #include "amigaos.h"
 #endif
 
+#endif /* HAVE_CONFIG_H */
 
 /* 
  * Include header files for windows builds before redefining anything.
@@ -72,21 +77,19 @@
  * to any other further and independant block.
  */
 
-#ifdef WIN32
-#  ifdef HAVE_WINDOWS_H
-#    ifndef WIN32_LEAN_AND_MEAN
-#      define WIN32_LEAN_AND_MEAN
+#ifdef HAVE_WINDOWS_H
+#  ifndef WIN32_LEAN_AND_MEAN
+#    define WIN32_LEAN_AND_MEAN
+#  endif
+#  include <windows.h>
+#  ifdef HAVE_WINSOCK2_H
+#    include <winsock2.h>
+#    ifdef HAVE_WS2TCPIP_H
+#       include <ws2tcpip.h>
 #    endif
-#    include <windows.h>
-#    ifdef HAVE_WINSOCK2_H
-#      include <winsock2.h>
-#      ifdef HAVE_WS2TCPIP_H
-#         include <ws2tcpip.h>
-#      endif
-#    else
-#      ifdef HAVE_WINSOCK_H
-#        include <winsock.h>
-#      endif
+#  else
+#    ifdef HAVE_WINSOCK_H
+#      include <winsock.h>
 #    endif
 #  endif
 #endif

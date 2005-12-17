@@ -1,5 +1,5 @@
-#ifndef __CLIENT_SETUP_H
-#define __CLIENT_SETUP_H
+#ifndef __SRC_CURL_SETUP_H
+#define __SRC_CURL_SETUP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -29,29 +29,38 @@
 /* Borland fix */
 #define WIN32
 #endif
+
 #if !defined(WIN32) && defined(_WIN32)
-/* This works for VS2005 on x64 */
+/* VS2005 on x64 fix */
 #define WIN32
 #endif
 
+/*
+ * Include configuration script results or hand-crafted
+ * configuration file for platforms which lack config tool.
+ */
+
 #ifdef HAVE_CONFIG_H
-#include "config.h" /* the configure script results */
+#include "config.h"
 #else
+
 #ifdef WIN32
-/* include the hand-modified win32 adjusted config.h! */
 #include "config-win32.h"
 #endif
+
 #ifdef macintosh
-/* this is not the same as Mac OS X */
 #include "config-mac.h"
 #endif
+
 #ifdef __riscos__
 #include "config-riscos.h"
 #endif
+
 #ifdef __amigaos__
 #include "config-amigaos.h"
 #endif
-#endif
+
+#endif /* HAVE_CONFIG_H */
 
 #if defined(CURLDEBUG) && defined(CURLTOOLDEBUG)
 /* This is an ugly hack for CURLDEBUG conditions only. We need to include
@@ -60,7 +69,6 @@
 #include "../lib/setup.h"
 #endif
 
-
 /* 
  * Include header files for windows builds before redefining anything.
  * Use this preproessor block only to include or exclude windows.h, 
@@ -68,25 +76,22 @@
  * to any other further and independant block.
  */
 
-#ifdef WIN32
-#  ifdef HAVE_WINDOWS_H
-#    ifndef WIN32_LEAN_AND_MEAN
-#      define WIN32_LEAN_AND_MEAN
+#ifdef HAVE_WINDOWS_H
+#  ifndef WIN32_LEAN_AND_MEAN
+#    define WIN32_LEAN_AND_MEAN
+#  endif
+#  include <windows.h>
+#  ifdef HAVE_WINSOCK2_H
+#    include <winsock2.h>
+#    ifdef HAVE_WS2TCPIP_H
+#       include <ws2tcpip.h>
 #    endif
-#    include <windows.h>
-#    ifdef HAVE_WINSOCK2_H
-#      include <winsock2.h>
-#      ifdef HAVE_WS2TCPIP_H
-#         include <ws2tcpip.h>
-#      endif
-#    else
-#      ifdef HAVE_WINSOCK_H
-#        include <winsock.h>
-#      endif
+#  else
+#    ifdef HAVE_WINSOCK_H
+#      include <winsock.h>
 #    endif
 #  endif
 #endif
-
 
 #include <stdio.h>
 
@@ -102,7 +107,7 @@
 #endif
 
 #if !defined(__cplusplus) && !defined(__BEOS__) && !defined(typedef_bool)
-typedef char bool;
+typedef unsigned char bool;
 #define typedef_bool
 #endif
 
@@ -157,4 +162,4 @@ int fileno( FILE *stream);
 #define SIZEOF_CURL_OFF_T sizeof(curl_off_t)
 #endif
 
-#endif /* __SETUP_H */
+#endif /* __SRC_CURL_SETUP_H */
