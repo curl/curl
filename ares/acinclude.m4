@@ -253,7 +253,7 @@ AC_DEFUN([CURL_FUNC_GETNAMEINFO_ARGTYPES], [
     done
   ])
   if test "$curl_cv_func_getnameinfo_args" = "unknown"; then
-    AC_MSG_ERROR([Cannot find proper types to use for getnameinfo args])
+    AC_MSG_WARN([Cannot find proper types to use for getnameinfo args])
   else
     gni_prev_IFS=$IFS; IFS=','
     set dummy `echo "$curl_cv_func_getnameinfo_args" | sed 's/\*/\*/g'`
