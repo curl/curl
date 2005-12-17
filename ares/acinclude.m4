@@ -202,7 +202,7 @@ AC_DEFUN([CURL_FUNC_GETNAMEINFO_ARGTYPES], [
   AC_CACHE_CHECK([types of arguments for getnameinfo],
     [curl_cv_func_getnameinfo_args], [
     curl_cv_func_getnameinfo_args="unknown"
-    for gni_arg1 in 'struct sockaddr *' 'void *'; do
+    for gni_arg1 in 'const struct sockaddr *' 'struct sockaddr *' 'void *' 'char *'; do
       for gni_arg2 in 'socklen_t' 'size_t' 'int'; do
         for gni_arg46 in 'size_t' 'int' 'socklen_t'; do
           for gni_arg7 in 'int' 'unsigned int'; do
@@ -229,19 +229,16 @@ AC_DEFUN([CURL_FUNC_GETNAMEINFO_ARGTYPES], [
 #include <netdb.h>
 #endif
 #endif
-                extern int getnameinfo(const $gni_arg1, $gni_arg2,
+                extern int getnameinfo($gni_arg1, $gni_arg2,
                                        char *, $gni_arg46,
                                        char *, $gni_arg46,
                                        $gni_arg7);
               ],[
-                $gni_arg1 sa=0;
                 $gni_arg2 salen=0;
-                char *host=0;
                 $gni_arg46 hostlen=0;
-                char *serv=0;
                 $gni_arg46 servlen=0;
                 $gni_arg7 flags=0;
-                int res = getnameinfo(sa, salen, host, hostlen, serv, servlen, flags);
+                int res = getnameinfo(0, salen, 0, hostlen, 0, servlen, flags);
               ])
             ],[
                curl_cv_func_getnameinfo_args="$gni_arg1,$gni_arg2,$gni_arg46,$gni_arg7"
