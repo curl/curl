@@ -1,3 +1,6 @@
+#ifndef __ARES_CONFIG_WIN32_H
+#define __ARES_CONFIG_WIN32_H
+
 /* $Id$ */
 
 /* Copyright (C) 2004 - 2005 by Daniel Stenberg et al
@@ -12,9 +15,6 @@
  * suitability of this software for any purpose.  It is provided "as is"
  * without express or implied warranty.
  */
-
-#ifndef __CONFIG_WIN32_H
-#define __CONFIG_WIN32_H
 
 #define HAVE_WINDOWS_H
 #define HAVE_WINSOCK2_H
@@ -36,4 +36,4 @@
 #define HAVE_STRUCT_ADDRINFO
 #define HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
 
-#endif  /* __CONFIG_WIN32_H */
+#endif  /* __ARES_CONFIG_WIN32_H */
