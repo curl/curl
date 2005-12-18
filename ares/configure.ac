@@ -247,6 +247,35 @@ AC_TRY_LINK( [],
 )
 
 
+dnl Msys/Mingw does not detect getnameinfo() in AC_CHECK_FUNCS.
+dnl
+if test "$ac_cv_func_getnameinfo" = "no"; then
+  AC_MSG_CHECKING([deeper and deeper for getnameinfo])
+  AC_TRY_LINK([
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#endif
+    ],[
+      getnameinfo(0, 0, 0, 0, 0, 0, 0);
+    ],[ 
+      AC_MSG_RESULT([yes])
+      ac_cv_func_getnameinfo="yes"
+      AC_DEFINE_UNQUOTED(HAVE_GETNAMEINFO, 1,
+        [Define to 1 if you have the getnameinfo function.])
+    ],[
+      AC_MSG_RESULT([no])
+  ])
+fi
+
+
 dnl check for inet_pton
 AC_CHECK_FUNCS(inet_pton)
 dnl Some systems have it, but not IPv6
