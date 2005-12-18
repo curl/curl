@@ -26,7 +26,6 @@
 #ifndef HAVE_GETTIMEOFDAY
 
 #ifdef WIN32
-#include <windows.h>
 #include <mmsystem.h>
 
 static int gettimeofday(struct timeval *tp, void *nothing)

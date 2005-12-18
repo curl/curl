@@ -31,10 +31,7 @@
   #include <netinet/in.h>
   #include <sys/socket.h>
   #include <tcp.h>
-#elif defined(WIN32)
-  #include <winsock2.h>
-  #include <windows.h>
-#else
+#elif !defined(WIN32)
   #include <netinet/in.h>
   #include <sys/socket.h>
 #endif

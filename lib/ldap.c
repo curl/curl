@@ -39,7 +39,6 @@
 #include <errno.h>
 
 #if defined(WIN32)
-# include <windows.h>
 # include <malloc.h>
 # include <winldap.h>
 #endif

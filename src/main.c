@@ -47,10 +47,6 @@
 
 #define CURLseparator   "--_curl_--"
 
-#if defined(WIN32)&&!defined(__CYGWIN32__)
-#include <winsock2.h>
-#endif
-
 #ifdef __NOVELL_LIBC__
 #include <screen.h>
 #endif
@@ -2380,7 +2376,7 @@ static void parseconfig(const char *filename,
         }
         else {
           /* Get the filename of our executable. GetModuleFileName is
-           * defined in windows.h, which is #included into libcurl.
+           * already declared via inclusions done in setup header file.
            * We assume that we are using the ASCII version here.
            */
           int n = GetModuleFileName(0, filebuffer, sizeof(filebuffer));
@@ -3114,7 +3110,7 @@ static void free_config_fields(struct Configurable *config)
 #if defined(WIN32) && !defined(__CYGWIN32__)
 
 /* Function to find CACert bundle on a Win32 platform using SearchPath.
- * (SearchPath is defined in windows.h, which is #included into libcurl)
+ * (SearchPath is already declared via inclusions done in setup header file)
  * (Use the ASCII version instead of the unicode one!)
  * The order of the directories it searches is:
  *  1. application's directory

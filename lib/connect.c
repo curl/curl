@@ -83,7 +83,6 @@
 #endif
 
 #ifdef WIN32
-#include <windows.h>
 #define EINPROGRESS WSAEINPROGRESS
 #define EWOULDBLOCK WSAEWOULDBLOCK
 #define EISCONN     WSAEISCONN

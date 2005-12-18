@@ -39,8 +39,6 @@ void logmsg(const char *msg, ...);
 extern const char *path;
 
 #if defined(WIN32) && !defined(__CYGWIN__)
-#include <windows.h>
-#include <winsock2.h>
 #include <process.h>
 
 #define sleep(sec)   Sleep ((sec)*1000)

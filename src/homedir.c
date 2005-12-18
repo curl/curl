@@ -27,9 +27,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef WIN32
-#include <windows.h>
-#endif
 #ifdef HAVE_PWD_H
 #include <pwd.h>
 #endif

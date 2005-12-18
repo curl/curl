@@ -27,10 +27,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef WIN32
-#include <windows.h>
-#endif
-
 #ifdef VMS
 #include <unixlib.h>
 #endif
@@ -47,7 +43,6 @@ char *GetEnv(const char *variable)
   return NULL;
 #else
 #ifdef WIN32
-  /* This shit requires windows.h (HUGE) to be included */
   char env[MAX_PATH]; /* MAX_PATH is from windef.h */
   char *temp = getenv(variable);
   env[0] = '\0';
