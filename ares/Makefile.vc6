@@ -19,8 +19,8 @@ USE_WATT32  = 0
 
 CC = cl
 
-CFLAGS  = -nologo -$(CFG_MODEL)$(DEBUG_MODEL) -W2 -Yd -Zi
-LDFLAGS = -machine:i386 -map -warn:2
+CFLAGS  = -nologo -$(CFG_MODEL)$(DEBUG_MODEL) -W3 -Yd -Zi
+LDFLAGS = -machine:i386 -map 
 
 OBJ_DIR  = VC6_obj
 DEF_FILE = cares.def
@@ -36,7 +36,7 @@ EX_LIBS = advapi32.lib ws2_32.lib
 
 !if "$(DEBUG_MODEL)" == "d"
 CFLAGS  = $(CFLAGS) -D_DEBUG -GZ
-LDFLAGS = $(LDFLAGS) -debug -debugtype:coff -fixed:no
+LDFLAGS = $(LDFLAGS) -debug -fixed:no
 
 !else
 CFLAGS  = $(CFLAGS) -O2 -Og
@@ -78,10 +78,10 @@ all: $(OBJ_DIR) cares.lib cares.dll cares_imp.lib ahost.exe adig.exe
 $(OBJ_DIR):
        mkdir $(OBJ_DIR)
 
-cares.lib: $(OBJECTS)
+cares.lib: $(OBJ_DIR) $(OBJECTS)
        lib -nologo -out:$@ $(OBJECTS)
 
-cares_imp.lib cares.dll: $(DEF_FILE) $(OBJECTS)
+cares_imp.lib cares.dll: $(OBJ_DIR) $(DEF_FILE) $(OBJECTS)
        link $(LDFLAGS) -dll -implib:cares_imp.lib -out:cares.dll \
             -def:$(DEF_FILE) $(OBJECTS) $(EX_LIBS)
 
@@ -119,10 +119,10 @@ $(DEF_FILE): $(OBJECTS) Makefile.VC6
        @echo   ares_gettimeofday      >> $@
        @echo   ares_parse_aaaa_reply  >> $@
 
-ahost.exe: $(OBJ_DIR)\ahost.obj cares_imp.lib
+ahost.exe: $(OBJ_DIR) $(OBJ_DIR)\ahost.obj cares_imp.lib
        link $(LDFLAGS) -out:$@ $(OBJ_DIR)\ahost.obj cares_imp.lib $(EX_LIBS)
 
-adig.exe: $(OBJ_DIR)\adig.obj $(OBJ_DIR)\getopt.obj cares_imp.lib
+adig.exe: $(OBJ_DIR) $(OBJ_DIR)\adig.obj $(OBJ_DIR)\getopt.obj cares_imp.lib
        link $(LDFLAGS) -out:$@ $(OBJ_DIR)\adig.obj $(OBJ_DIR)\getopt.obj cares_imp.lib $(EX_LIBS)
 
 clean:
