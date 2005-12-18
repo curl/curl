@@ -202,7 +202,7 @@ AC_DEFUN([CURL_FUNC_GETNAMEINFO_ARGTYPES], [
   AC_CACHE_CHECK([types of arguments for getnameinfo],
     [curl_cv_func_getnameinfo_args], [
     curl_cv_func_getnameinfo_args="unknown"
-    for gni_arg1 in 'const struct sockaddr *' 'struct sockaddr *' 'void *' 'char *'; do
+    for gni_arg1 in 'struct sockaddr *' 'const struct sockaddr *' 'void *'; do
       for gni_arg2 in 'socklen_t' 'size_t' 'int'; do
         for gni_arg46 in 'size_t' 'int' 'socklen_t'; do
           for gni_arg7 in 'int' 'unsigned int'; do
