@@ -211,6 +211,10 @@ AC_DEFUN([CURL_FUNC_GETNAMEINFO_ARGTYPES], [
 #undef inline
 #ifdef HAVE_WINDOWS_H
 #define WIN32_LEAN_AND_MEAN
+#if defined(__MINGW32__) && (_WIN32_WINNT < 0x0501)
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0x0501
+#endif
 #include <windows.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
