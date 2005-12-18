@@ -19,19 +19,19 @@
 /* #define HAVE_ASSERT_H 1 */
 
 /* Define if you have the <crypto.h> header file.  */
-/* #undef HAVE_CRYPTO_H */
+/* #define HAVE_CRYPTO_H 1 */
 
 /* Define if you have the <dlfcn.h> header file.  */
 /* #define HAVE_DLFCN_H 1 */
 
 /* Define if you have the <err.h> header file.  */
-/* #undef HAVE_ERR_H */
+/* #define HAVE_ERR_H 1 */
 
 /* Define if you have the <fcntl.h> header file.  */
 #define HAVE_FCNTL_H 1
 
 /* Define if you have the <getopt.h> header file.  */
-/* #undef HAVE_GETOPT_H */
+/* #define HAVE_GETOPT_H 1 */
 
 /* Define if you have the <io.h> header file.  */
 #define HAVE_IO_H 1
@@ -43,25 +43,25 @@
 /* #define HAVE_NETDB_H 1 */
 
 /* Define if you have the <netinet/in.h> header file.  */
-/* #define HAVE_NETINET_IN_H 1*/
+/* #define HAVE_NETINET_IN_H 1 */
 
 /* Define if you have the <sgtty.h> header file.  */
-/* #define HAVE_SGTTY_H 1*/
+/* #define HAVE_SGTTY_H 1 */
 
 /* Define if you have the <ssl.h> header file.  */
-/* #undef HAVE_SSL_H */
+/* #define HAVE_SSL_H 1 */
 
 /* Define if you have the <stdlib.h> header file.  */
 #define HAVE_STDLIB_H 1
 
 /* Define if you have the <sys/param.h> header file.  */
-/* #define HAVE_SYS_PARAM_H 1*/
+/* #define HAVE_SYS_PARAM_H 1 */
 
 /* Define if you have the <sys/select.h> header file.  */
 /* #define HAVE_SYS_SELECT_H 1 */
 
 /* Define if you have the <sys/socket.h> header file.  */
-/* #define HAVE_SYS_SOCKET_H 1*/
+/* #define HAVE_SYS_SOCKET_H 1 */
 
 /* Define if you have the <sys/sockio.h> header file.  */
 /* #define HAVE_SYS_SOCKIO_H 1 */
@@ -119,7 +119,7 @@
 #define HAVE_CLOSESOCKET 1
 
 /* Define if you don't have vprintf but do have _doprnt.  */
-/* #undef HAVE_DOPRNT */
+/* #define HAVE_DOPRNT 1 */
 
 /* Define if you have the gethostbyaddr function.  */
 #define HAVE_GETHOSTBYADDR 1
@@ -143,7 +143,7 @@
 #define HAVE_INET_NTOA 1
 
 /* Define if you have the ioctlsocket function.  */
-#define HAVE_IOCTLSOCKET
+#define HAVE_IOCTLSOCKET 1
 
 /* Define if you have the perror function.  */
 #define HAVE_PERROR 1
@@ -179,7 +179,7 @@
 #define HAVE_STRSTR 1
 
 /* Define if you have the strtoll function.  */
-#ifdef __MINGW32__ 
+#if defined(__MINGW32__) || defined(__WATCOMC__)
 #define HAVE_STRTOLL 1
 #endif
 
@@ -242,7 +242,7 @@
 /* ---------------------------------------------------------------- */
 
 /* Define this if you have struct sockaddr_storage */
-/* #define HAVE_STRUCT_SOCKADDR_STORAGE */
+/* #define HAVE_STRUCT_SOCKADDR_STORAGE 1 */
 
 /* ---------------------------------------------------------------- */
 /*                        COMPILER SPECIFIC                         */
@@ -256,7 +256,7 @@
 /* ---------------------------------------------------------------- */
 
 /* lber dynamic library file */
-/* #undef DL_LBER_FILE */
+/* #define DL_LBER_FILE */
 
 /* ldap dynamic library file */
 /* #define DL_LDAP_FILE "wldap32.dll" */
@@ -266,8 +266,8 @@
 /* ---------------------------------------------------------------- */
 
 /* Defines set for VS2005 to _not_ deprecate a few functions we use. */
-#define _CRT_SECURE_NO_DEPRECATE
-#define _CRT_NONSTDC_NO_DEPRECATE
+#define _CRT_SECURE_NO_DEPRECATE 1
+#define _CRT_NONSTDC_NO_DEPRECATE 1
 
 /* Define cpu-machine-OS */
 #undef OS
@@ -280,10 +280,10 @@
 /*                       WinCE                     */
 /* ---------------------------------------------------------------- */
 
-#define CURL_DISABLE_FILE
-#define CURL_DISABLE_TELNET
-#define CURL_DISABLE_LDAP
-#define WITHOUT_MM_LIB
+#define CURL_DISABLE_FILE 1
+#define CURL_DISABLE_TELNET 1
+#define CURL_DISABLE_LDAP 1
+#define WITHOUT_MM_LIB 1
 
 #ifdef HAVE_WINDOWS_H
 #  ifndef WIN32_LEAN_AND_MEAN

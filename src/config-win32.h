@@ -69,8 +69,8 @@
 /* ---------------------------------------------------------------- */
 
 /* Defines set for VS2005 to _not_ deprecate a few functions we use. */
-#define _CRT_SECURE_NO_DEPRECATE
-#define _CRT_NONSTDC_NO_DEPRECATE
+#define _CRT_SECURE_NO_DEPRECATE 1
+#define _CRT_NONSTDC_NO_DEPRECATE 1
 
 /* Define cpu-machine-OS */
 #ifndef OS
