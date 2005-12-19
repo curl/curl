@@ -1,3 +1,4 @@
+
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(ares_init.c)
 AM_CONFIG_HEADER(config.h)
@@ -13,12 +14,14 @@ solaris*)
 	;;
 esac
 
-# check for ssize_t
-AC_CHECK_TYPE(ssize_t, ,
-   AC_DEFINE(ssize_t, int, [the signed version of size_t]))
-
 AC_SEARCH_LIBS(gethostbyname, nsl)
 AC_SEARCH_LIBS(socket, socket)
+
+dnl check for cygwin stuff
+AC_LIBTOOL_WIN32_DLL
+
+dnl libtool setup
+AC_PROG_LIBTOOL
 
 dnl ************************************************************
 dnl Option to switch on debug options. This makes an assumption that
@@ -38,9 +41,6 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
     dnl when doing the debug stuff, use static library only
     AC_DISABLE_SHARED
 
-    dnl Checks for standard header files, to make memdebug.h inclusions bettter
-    AC_HEADER_STDC
-
     dnl the entire --enable-debug is a hack that lives and runs on top of
     dnl libcurl stuff so this BUILDING_LIBCURL is not THAT much uglier
     AC_DEFINE(BUILDING_LIBCURL, 1, [when building as static part of libcurl])
@@ -57,7 +57,8 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
        AC_MSG_RESULT(no)
 )
 
-AC_PROG_LIBTOOL
+dnl Checks for header files.
+AC_HEADER_STDC
 
 dnl **********************************************************************
 dnl Make sure that our checks for headers windows.h winsock.h winsock2.h 
@@ -83,10 +84,18 @@ AC_CHECK_HEADERS(
        net/if.h \
        arpa/nameser.h \
        arpa/nameser_compat.h \
-       arpa/inet.h, , ,
+       arpa/inet.h,
+dnl to do if not found
+[],
+dnl to do if found
+[],
+dnl default includes
 [
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
 #endif
 dnl We do this default-include simply to make sure that the nameser_compat.h
 dnl header *REALLY* can be include after the new nameser.h. It seems AIX 5.1
@@ -99,28 +108,72 @@ dnl *Sigh* these are needed in order for net/if.h to get properly detected.
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_WINSOCK2_H
-#include <winsock2.h>
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
 #endif
 ]
+)
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_TYPE_SIZE_T
+AC_HEADER_TIME
+
+AC_CHECK_SIZEOF(curl_off_t, ,[
+#include <stdio.h>
+#include "$srcdir/include/curl/curl.h"
+])
+AC_CHECK_SIZEOF(size_t)
+AC_CHECK_SIZEOF(long)
+AC_CHECK_SIZEOF(time_t)
+
+AC_CHECK_TYPE(long long,
+   [AC_DEFINE(HAVE_LONGLONG, 1, [if your compiler supports long long])]
+   longlong="yes"  
+)
+
+if test "xyes" = "x$longlong"; then
+  AC_MSG_CHECKING([if numberLL works])
+  AC_COMPILE_IFELSE([long long val = 1000LL;],
+   [AC_DEFINE(HAVE_LL, 1, [if your compiler supports LL])]
+   AC_MSG_RESULT(yes),
+   AC_MSG_RESULT(no)
   )
+fi
+
+
+# check for ssize_t
+AC_CHECK_TYPE(ssize_t, ,
+   AC_DEFINE(ssize_t, int, [the signed version of size_t]))
 
 # Check for socklen_t or equivalent
 CURL_CHECK_TYPE_SOCKLEN_T
 
+TYPE_IN_ADDR_T
+
+TYPE_SOCKADDR_STORAGE
+
+
 dnl check for AF_INET6
 CARES_CHECK_CONSTANT(
   [
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#endif
+#else
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_WINSOCK2_H
-#include <winsock2.h>
 #endif
-
   ], [PF_INET6], 
      AC_DEFINE_UNQUOTED(HAVE_PF_INET6,1,[Define to 1 if you have PF_INET6.])
 )
@@ -128,16 +181,23 @@ CARES_CHECK_CONSTANT(
 dnl check for PF_INET6
 CARES_CHECK_CONSTANT(
   [
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#endif
+#else
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_WINSOCK2_H
-#include <winsock2.h>
 #endif
-
   ], [AF_INET6], 
      AC_DEFINE_UNQUOTED(HAVE_AF_INET6,1,[Define to 1 if you have AF_INET6.])
 )
@@ -146,17 +206,25 @@ CARES_CHECK_CONSTANT(
 dnl check for the in6_addr structure
 CARES_CHECK_STRUCT(
   [
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
 #endif
+#include <windows.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
-#endif
 #ifdef HAVE_WS2TCPIP_H
 #include <ws2tcpip.h>
 #endif
+#endif
+#else
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 #endif
   ], [in6_addr], 
      AC_DEFINE_UNQUOTED(HAVE_STRUCT_IN6_ADDR,1,[Define to 1 if you have struct in6_addr.])
@@ -165,17 +233,25 @@ CARES_CHECK_STRUCT(
 dnl check for the sockaddr_in6 structure
 CARES_CHECK_STRUCT(
   [
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
 #endif
+#include <windows.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
-#endif
 #ifdef HAVE_WS2TCPIP_H
 #include <ws2tcpip.h>
 #endif
+#endif
+#else
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 #endif
   ], [sockaddr_in6], 
      AC_DEFINE_UNQUOTED(HAVE_STRUCT_SOCKADDR_IN6,1,
@@ -187,17 +263,25 @@ AC_CHECK_MEMBER(struct sockaddr_in6.sin6_scope_id,
       [Define to 1 if your struct sockaddr_in6 has sin6_scope_id.])
    , ,
   [
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
 #endif
+#include <windows.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
-#endif
 #ifdef HAVE_WS2TCPIP_H
 #include <ws2tcpip.h>
 #endif
+#endif
+#else
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 #endif
   ])
 
@@ -206,14 +290,21 @@ AC_CHECK_MEMBER(struct addrinfo.ai_flags,
      AC_DEFINE_UNQUOTED(HAVE_STRUCT_ADDRINFO,1,
        [Define to 1 if you have struct addrinfo.]),,
   [
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
 #endif
-#ifdef HAVE_WINSOCaK2_H
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
-#endif
 #ifdef HAVE_WS2TCPIP_H
 #include <ws2tcpip.h>
+#endif
+#endif
+#else
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
 #endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -223,6 +314,7 @@ AC_CHECK_MEMBER(struct addrinfo.ai_flags,
 #endif
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
+#endif
 #endif
   ]
 )
@@ -254,14 +346,26 @@ if test "$ac_cv_func_getnameinfo" = "no"; then
   AC_TRY_LINK([
 #undef inline
 #ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
 #include <windows.h>
+#ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
+#ifdef HAVE_WS2TCPIP_H
 #include <ws2tcpip.h>
+#endif
+#endif
 #else
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
+#endif
 #endif
     ],[
       getnameinfo(0, 0, 0, 0, 0, 0, 0);
@@ -288,9 +392,6 @@ AC_TRY_RUN(
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif
-#ifdef HAVE_WINSOCK_H
-#include <winsock.h>
 #endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -320,9 +421,6 @@ AC_TRY_RUN(
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif
-#ifdef HAVE_WINSOCK_H
-#include <winsock.h>
 #endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -355,9 +453,6 @@ AC_TRY_RUN(
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -379,33 +474,56 @@ fi
 
 AC_CHECK_SIZEOF(struct in6_addr, ,
 [
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#ifdef HAVE_WS2TCPIP_H
+#include <ws2tcpip.h>
+#endif
+#endif
+#else
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 #endif
 ]
 )
+
 AC_CHECK_SIZEOF(struct in_addr, ,
 [
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#ifdef HAVE_WS2TCPIP_H
+#include <ws2tcpip.h>
+#endif
+#endif
+#else
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 #endif
 ]
 )

@@ -9,7 +9,9 @@ AC_DEFUN([CURL_CHECK_HEADER_WINDOWS], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([
 #undef inline
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
 #include <windows.h>
       ],[
         int dummy=2*WINVER;
@@ -39,7 +41,9 @@ AC_DEFUN([CURL_CHECK_HEADER_WINSOCK], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([
 #undef inline
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
 #include <windows.h>
 #include <winsock.h>
       ],[
@@ -68,7 +72,9 @@ AC_DEFUN([CURL_CHECK_HEADER_WINSOCK2], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([
 #undef inline
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
 #include <windows.h>
 #include <winsock2.h>
       ],[
@@ -97,7 +103,9 @@ AC_DEFUN([CURL_CHECK_HEADER_WS2TCPIP], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([
 #undef inline
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
 #include <windows.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -134,7 +142,9 @@ AC_DEFUN([CURL_CHECK_TYPE_SOCKLEN_T], [
             AC_LANG_PROGRAM([
 #undef inline
 #ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
 #include <windows.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
@@ -170,9 +180,17 @@ AC_DEFUN([CURL_CHECK_TYPE_SOCKLEN_T], [
         [type to use in place of socklen_t if not defined])
     fi
   ],[
+#undef inline
 #ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
 #ifdef HAVE_WS2TCPIP_H
 #include <ws2tcpip.h>
+#endif
 #endif
 #else
 #ifdef HAVE_SYS_TYPES_H
@@ -210,17 +228,15 @@ AC_DEFUN([CURL_FUNC_GETNAMEINFO_ARGTYPES], [
               AC_LANG_PROGRAM([
 #undef inline
 #ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
-#if defined(__MINGW32__) && ( (!defined(_WIN32_WINNT)) || (_WIN32_WINNT < 0x0501) )
-#undef _WIN32_WINNT
-#define _WIN32_WINNT 0x0501
 #endif
 #include <windows.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
-#endif
 #ifdef HAVE_WS2TCPIP_H
 #include <ws2tcpip.h>
+#endif
 #endif
 #else
 #ifdef HAVE_SYS_TYPES_H
@@ -272,6 +288,8 @@ AC_DEFUN([CURL_FUNC_GETNAMEINFO_ARGTYPES], [
 ])
 
 
+dnl CURL_CHECK_NONBLOCKING_SOCKET
+dnl -------------------------------------------------
 dnl Check for how to set a socket to non-blocking state. There seems to exist
 dnl four known different ways, with the one used almost everywhere being POSIX
 dnl and XPG3, while the other different ways for different systems (old BSD,
@@ -333,8 +351,21 @@ dnl FIONBIO test was also bad
 dnl the code was bad, try a different program now, test 3
 
   AC_TRY_COMPILE([
-/* headers for ioctlsocket test (cygwin?) */
+/* headers for ioctlsocket test (Windows) */
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
 #include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#endif
+#endif
 ],[
 /* ioctlsocket source code */
  int socket;
@@ -395,6 +426,124 @@ dnl end of non-blocking try-compile test
     AC_MSG_WARN([non-block sockets disabled])
   fi
 ])
+
+
+dnl TYPE_SOCKADDR_STORAGE
+dnl -------------------------------------------------
+dnl Check for struct sockaddr_storage. Most IPv6-enabled hosts have it, but
+dnl AIX 4.3 is one known exception.
+AC_DEFUN([TYPE_SOCKADDR_STORAGE],
+[
+   AC_CHECK_TYPE([struct sockaddr_storage],
+        AC_DEFINE(HAVE_STRUCT_SOCKADDR_STORAGE, 1,
+                  [if struct sockaddr_storage is defined]), ,
+   [
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#endif
+#else
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+#endif
+   ])
+])
+
+
+dnl TYPE_IN_ADDR_T
+dnl -------------------------------------------------
+dnl Check for in_addr_t: it is used to receive the return code of inet_addr()
+dnl and a few other things.
+AC_DEFUN([TYPE_IN_ADDR_T],
+[
+   AC_CHECK_TYPE([in_addr_t], ,[
+      AC_MSG_CHECKING([for in_addr_t equivalent])
+      AC_CACHE_VAL([curl_cv_in_addr_t_equiv],
+      [
+         curl_cv_in_addr_t_equiv=
+         for t in "unsigned long" int size_t unsigned long; do
+            AC_TRY_COMPILE([
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#endif
+#else
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#endif
+            ],[
+               $t data = inet_addr ("1.2.3.4");
+            ],[
+               curl_cv_in_addr_t_equiv="$t"
+               break
+            ])
+         done
+
+         if test "x$curl_cv_in_addr_t_equiv" = x; then
+            AC_MSG_ERROR([Cannot find a type to use in place of in_addr_t])
+         fi
+      ])
+      AC_MSG_RESULT($curl_cv_in_addr_t_equiv)
+      AC_DEFINE_UNQUOTED(in_addr_t, $curl_cv_in_addr_t_equiv,
+			[type to use in place of in_addr_t if not defined])],
+      [
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#endif
+#else
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#endif
+])
+
 
 dnl We create a function for detecting which compiler we use and then set as
 dnl pendantic compiler options as possible for that particular compiler. The

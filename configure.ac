@@ -1579,7 +1579,22 @@ dnl For some reason, the check above doesn't properly detect select() with
 dnl Msys/Mingw
 if test "$ac_cv_func_select" != "yes"; then
   AC_MSG_CHECKING([for select in ws2_32])
-  AC_TRY_LINK([#include <winsock2.h>],
+  AC_TRY_LINK([
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#endif
+#endif
+              ],
                [select(0,(fd_set *)NULL,(fd_set *)NULL,(fd_set *)NULL,(struct timeval *)NULL);],
                [ dnl worked!
                AC_MSG_RESULT([yes])
@@ -1596,14 +1611,26 @@ if test "$ac_cv_func_getnameinfo" = "no"; then
   AC_TRY_LINK([
 #undef inline
 #ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
 #include <windows.h>
+#ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
+#ifdef HAVE_WS2TCPIP_H
 #include <ws2tcpip.h>
+#endif
+#endif
 #else
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
+#endif
 #endif
     ],[
       getnameinfo(0, 0, 0, 0, 0, 0, 0);
