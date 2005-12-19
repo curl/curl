@@ -2950,7 +2950,7 @@ int my_trace(CURL *handle, curl_infotype type,
   (void)handle; /* prevent compiler warning */
 
   tv = curlx_tvnow();
-  now = localtime(&tv.tv_sec);  /* not multithread safe but we don't care */
+  now = localtime((time_t *)&tv.tv_sec);  /* not multithread safe but we don't care */
   if(config->tracetime)
     snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06d ",
              now->tm_hour, now->tm_min, now->tm_sec, tv.tv_usec);
