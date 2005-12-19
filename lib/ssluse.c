@@ -802,13 +802,13 @@ static int hostmatch(const char *hostname, const char *pattern)
         if (hostmatch(hostname++,pattern) == HOST_MATCH)
           return HOST_MATCH;
       }
-      return HOST_NOMATCH;
+      break;
     }
 
     if (toupper(c) != toupper(*hostname++))
-      return HOST_NOMATCH;
+      break;
   }
-  /* we never reach this point */
+  return HOST_NOMATCH;
 }
 
 static int

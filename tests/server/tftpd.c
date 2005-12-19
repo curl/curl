@@ -366,9 +366,9 @@ static int synchnet(curl_socket_t f /* socket to flush */)
                       (struct sockaddr *)&from, &fromlen);
     }
     else
-      return j;
+      break;
   }
-  /* we never reach this point */
+  return j;
 }
 
 /*
