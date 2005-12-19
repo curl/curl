@@ -231,6 +231,10 @@ AC_DEFUN([CURL_FUNC_GETNAMEINFO_ARGTYPES], [
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
+#if defined(__MINGW32__) && ( (!defined(_WIN32_WINNT)) || (_WIN32_WINNT < 0x0501) )
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0x0501
+#endif
 #include <windows.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
@@ -501,6 +505,9 @@ AC_DEFUN([TYPE_IN_ADDR_T],
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 #endif
             ],[
                $t data = inet_addr ("1.2.3.4");
@@ -540,6 +547,9 @@ AC_DEFUN([TYPE_IN_ADDR_T],
 #endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
 #endif
 #endif
 ])
