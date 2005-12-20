@@ -393,8 +393,10 @@ dnl the code was bad, try a different program now, test 3
 #endif
 ],[
 /* ioctlsocket source code */
- SOCKET socket;
- unsigned long flags = ioctlsocket(socket, FIONBIO, &flags);
+ SOCKET sd;
+ unsigned long flags = 0;
+ sd = socket(0, 0, 0);
+ ioctlsocket(sd, FIONBIO, &flags);
 ],[
 dnl ioctlsocket test was good
 nonblock="ioctlsocket"
