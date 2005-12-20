@@ -552,7 +552,8 @@ AC_DEFUN([TYPE_IN_ADDR_T],
 #include <arpa/inet.h>
 #endif
 #endif
-])
+  ]) dnl AC_CHECK_TYPE
+]) dnl AC_DEFUN
 
 dnl ************************************************************
 dnl check for "localhost", if it doesn't exist, we can't do the

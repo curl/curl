@@ -553,7 +553,8 @@ AC_DEFUN([TYPE_IN_ADDR_T],
 #endif
 
 #endif
-])
+  ]) dnl AC_CHECK_TYPE
+]) dnl AC_DEFUN
 
 
 dnl We create a function for detecting which compiler we use and then set as
