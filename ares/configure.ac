@@ -20,9 +20,6 @@ AC_SEARCH_LIBS(socket, socket)
 dnl check for cygwin stuff
 AC_LIBTOOL_WIN32_DLL
 
-dnl libtool setup
-AC_PROG_LIBTOOL
-
 dnl ************************************************************
 dnl Option to switch on debug options. This makes an assumption that
 dnl this is built as an 'ares' subdir in the curl source tree. Subject for
@@ -56,6 +53,9 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
   esac ],
        AC_MSG_RESULT(no)
 )
+
+dnl libtool setup
+AC_PROG_LIBTOOL
 
 dnl Checks for header files.
 AC_HEADER_STDC
