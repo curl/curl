@@ -161,6 +161,19 @@ dnl The install stuff has already been taken care of by the automake stuff
 dnl AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
+dnl **********************************************************************
+dnl Make sure that our checks for headers windows.h winsock.h winsock2.h 
+dnl and ws2tcpip.h take precedence over any other further checks which 
+dnl could be done later using AC_CHECK_HEADER or AC_CHECK_HEADERS for
+dnl this specific header files. And do them before its results are used.
+dnl **********************************************************************
+
+CURL_CHECK_HEADER_WINDOWS
+CURL_CHECK_HEADER_WINSOCK
+CURL_CHECK_HEADER_WINSOCK2
+CURL_CHECK_HEADER_WS2TCPIP
+
+
 dnl ************************************************************
 dnl switch off particular protocols
 dnl
@@ -1415,17 +1428,6 @@ dnl **********************************************************************
 dnl Checks for header files.
 AC_HEADER_STDC
 
-dnl **********************************************************************
-dnl Make sure that our checks for headers windows.h winsock.h winsock2.h 
-dnl and ws2tcpip.h take precedence over any other further checks which 
-dnl could be done later using AC_CHECK_HEADER or AC_CHECK_HEADERS for
-dnl this specific header files.
-dnl **********************************************************************
-
-CURL_CHECK_HEADER_WINDOWS
-CURL_CHECK_HEADER_WINSOCK
-CURL_CHECK_HEADER_WINSOCK2
-CURL_CHECK_HEADER_WS2TCPIP
 
 dnl Now check for the very most basic headers. Then we can use these
 dnl ones as default-headers when checking for the rest!
