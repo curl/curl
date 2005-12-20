@@ -243,26 +243,27 @@ AC_DEFUN([CURL_FUNC_GETNAMEINFO_ARGTYPES], [
     curl_cv_func_getnameinfo_args="unknown"
     for gni_arg1 in 'struct sockaddr *' 'const struct sockaddr *' 'void *'; do
       for gni_arg2 in 'socklen_t' 'size_t' 'int'; do
-        for gni_arg46 in 'size_t' 'int' 'socklen_t' 'unsigned int' 'DWORD'; do
+        for gni_arg46 in 'size_t' 'int' 'socklen_t' 'unsigned int'; do
           for gni_arg7 in 'int' 'unsigned int'; do
             AC_COMPILE_IFELSE([
               AC_LANG_PROGRAM([
-#undef inline
+#undef inline 
 #ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#if defined(__MINGW32__) && ( (!defined(_WIN32_WINNT)) || (_WIN32_WINNT < 0x0501) )
+#if (!defined(_WIN32_WINNT)) || (_WIN32_WINNT < 0x0501)
 #undef _WIN32_WINNT
 #define _WIN32_WINNT 0x0501
 #endif
 #include <windows.h>
 #ifdef HAVE_WINSOCK2_H
-#include <winsock2.h>
+#include <winsock2.h> 
 #ifdef HAVE_WS2TCPIP_H
 #include <ws2tcpip.h>
 #endif
 #endif
+#define GNICALLCONV WSAAPI
 #else
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -273,8 +274,9 @@ AC_DEFUN([CURL_FUNC_GETNAMEINFO_ARGTYPES], [
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
+#define GNICALLCONV
 #endif
-                extern int getnameinfo($gni_arg1, $gni_arg2,
+                extern int GNICALLCONV getnameinfo($gni_arg1, $gni_arg2,
                                        char *, $gni_arg46,
                                        char *, $gni_arg46,
                                        $gni_arg7);
