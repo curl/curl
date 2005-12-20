@@ -70,10 +70,10 @@
 
 #endif /* HAVE_CONFIG_H */
 
-/* 
+/*
  * Include header files for windows builds before redefining anything.
- * Use this preproessor block only to include or exclude windows.h, 
- * winsock2.h, ws2tcpip.h or winsock.h. Any other windows thing belongs 
+ * Use this preproessor block only to include or exclude windows.h,
+ * winsock2.h, ws2tcpip.h or winsock.h. Any other windows thing belongs
  * to any other further and independant block.
  */
 
@@ -153,6 +153,21 @@ typedef unsigned char bool;
 #include <curl/stdcheaders.h>
 #endif
 
+/*
+ * PellesC cludge section (yikes);
+ *  - It has 'ssize_t', but it is in <unistd.h>. The way the headers
+ *    on Win32 are included, forces me to include this header here.
+ *  - sys_nerr, EINTR is missing in v4.0 or older.
+ */
+#ifdef __POCC__
+  #include <sys/types.h>
+  #include <unistd.h>
+  #if (__POCC__ <= 400)
+  #define sys_nerr EILSEQ  /* for strerror.c */
+  #define EINTR    -1      /* for select.c */
+  #endif
+#endif
+
 #if defined(CURLDEBUG) && defined(HAVE_ASSERT_H)
 #define curlassert(x) assert(x)
 #else
@@ -180,6 +195,7 @@ typedef unsigned char bool;
 #else
 #define struct_stat struct stat
 #endif /* Win32 with large file support */
+
 
 /* Below we define four functions. They should
    1. close a socket
@@ -287,7 +303,7 @@ typedef int curl_socket_t;
 
 /* "cl -ML" or "cl -MLd" implies a single-threaded runtime library where
    _beginthreadex() is not available */
-#if defined(_MSC_VER) && !defined(_MT) && !defined(USE_ARES)
+#if (defined(_MSC_VER) && !defined(__POCC__)) && !defined(_MT) && !defined(USE_ARES)
 #undef USE_THREADING_GETADDRINFO
 #undef USE_THREADING_GETHOSTBYNAME
 #define CURL_NO__BEGINTHREADEX

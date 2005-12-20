@@ -87,7 +87,8 @@
 #define HAVE_TIME_H 1
 
 /* Define if you have the <unistd.h> header file.  */
-#if defined(__MINGW32__) || defined(__WATCOMC__) || defined(__LCC__)
+#if defined(__MINGW32__) || defined(__WATCOMC__) || defined(__LCC__) || \
+    defined(__POCC__)
 #define HAVE_UNISTD_H 1
 #endif
 
@@ -181,7 +182,7 @@
 #define HAVE_STRSTR 1
 
 /* Define if you have the strtoll function.  */
-#if defined(__MINGW32__) || defined(__WATCOMC__)
+#if defined(__MINGW32__) || defined(__WATCOMC__) || defined(__POCC__)
 #define HAVE_STRTOLL 1
 #endif
 
@@ -216,7 +217,7 @@
 /* #define size_t unsigned */
 
 /* Define to 'int' if ssize_t is not an available 'typedefed' type */
-#if defined(__WATCOMC__) && (__WATCOMC__ >= 1240)
+#if (defined(__WATCOMC__) && (__WATCOMC__ >= 1240)) || defined(__POCC__)
 #else
 #define ssize_t int
 #endif
@@ -242,8 +243,8 @@
 #endif
 
 /* Define SIZEOF_CURL_OFF_T as computed by sizeof(curl_off_t) */
-/* Borland lacks _lseeki64(), so we don't support >2GB files. */
-#ifdef __BORLANDC__
+/* Borland/PellesC lacks _lseeki64(), so we don't support >2GB files. */
+#if defined(__BORLANDC__) || defined(__POCC__)
 #define SIZEOF_CURL_OFF_T 4
 #else
 #define SIZEOF_CURL_OFF_T 8
