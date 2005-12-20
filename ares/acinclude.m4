@@ -372,7 +372,7 @@ dnl the code was bad, try a different program now, test 3
 #endif
 ],[
 /* ioctlsocket source code */
- int socket;
+ SOCKET socket;
  unsigned long flags = ioctlsocket(socket, FIONBIO, &flags);
 ],[
 dnl ioctlsocket test was good
