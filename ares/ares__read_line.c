@@ -50,7 +50,7 @@ int ares__read_line(FILE *fp, char **buf, int *bufsize)
       if ((*buf)[len - 1] == '\n')
         {
           (*buf)[len - 1] = 0;
-          return ARES_SUCCESS;
+          break;
         }
       offset = len;
 
@@ -61,4 +61,5 @@ int ares__read_line(FILE *fp, char **buf, int *bufsize)
       *buf = newbuf;
       *bufsize *= 2;
     }
+  return ARES_SUCCESS;
 }
