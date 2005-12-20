@@ -192,6 +192,11 @@ static void report(void)
 
   printf("%ld select() timeouts\n", timeouts);
 
+  printf("Downloaded %ld bytes in %ld bytes/sec, %ld usec/byte\n",
+         info.dlcounter,
+         info.dlcounter/(total/1000000),
+         total/info.dlcounter);
+
 #if 0
   for(i=1; i< num_total; i++) {
     if(timecount[i].laps) {
