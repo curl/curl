@@ -281,13 +281,13 @@ AC_DEFUN([CURL_FUNC_GETNAMEINFO_ARGTYPES], [
     IFS=$gni_prev_IFS
     shift
     AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG1, $[1],
-      [Define to the type of arg 1 for `getnameinfo'.])
+      [Define to the type of arg 1 for getnameinfo.])
     AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG2, $[2],
-      [Define to the type of arg 2 for `getnameinfo'.])
+      [Define to the type of arg 2 for getnameinfo.])
     AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG46, $[3],
-      [Define to the type of args 4 and 6 for `getnameinfo'.])
+      [Define to the type of args 4 and 6 for getnameinfo.])
     AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG7, $[4],
-      [Define to the type of arg 7 for `getnameinfo'.])
+      [Define to the type of arg 7 for getnameinfo.])
   fi
 ])
 

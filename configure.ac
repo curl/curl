@@ -1287,8 +1287,8 @@ AC_HELP_STRING([--enable-thread],[look for thread-safe functions]),
 
 if test X"$OPT_THREAD" = Xoff
 then
-  AC_DEFINE(DISABLED_THREADSAFE, 1, \
-Set to explicitly specify we don't want to use thread-safe functions)
+  AC_DEFINE(DISABLED_THREADSAFE, 1,
+    [Set to explicitly specify we don't want to use thread-safe functions])
 else
   if test "$ipv6" != "yes"; then
     dnl dig around for gethostbyname_r()
@@ -1602,7 +1602,7 @@ if test "$ac_cv_func_select" = "no"; then
       AC_DEFINE_UNQUOTED(HAVE_SELECT, 1,
         [Define to 1 if you have the select function.])
     ],[
-      AC_MSG_ERROR(You can't compile without a select)
+      AC_MSG_ERROR([You can't compile without a select])
   ])
 fi
 
