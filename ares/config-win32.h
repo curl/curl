@@ -30,7 +30,8 @@
 #endif
 
 /* Define if you have the <unistd.h> header file.  */
-#if defined(__MINGW32__) || defined(__WATCOMC__) || defined(__LCC__)
+#if defined(__MINGW32__) || defined(__WATCOMC__) || defined(__LCC__) || \
+    defined(__POCC__)
 #define HAVE_UNISTD_H 1
 #endif
 

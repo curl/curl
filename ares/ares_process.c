@@ -30,6 +30,8 @@
 #ifdef HAVE_ARPA_NAMESER_COMPAT_H
 #include <arpa/nameser_compat.h>
 #endif
+#endif /* WIN32 && !WATT32 */
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -38,7 +40,6 @@
 #endif
 #ifdef NETWARE
 #include <sys/filio.h>
-#endif
 #endif
 
 #include <string.h>

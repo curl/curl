@@ -39,10 +39,10 @@
 
 #endif /* HAVE_CONFIG_H */
 
-/* 
+/*
  * Include header files for windows builds before redefining anything.
- * Use this preproessor block only to include or exclude windows.h, 
- * winsock2.h, ws2tcpip.h or winsock.h. Any other windows thing belongs 
+ * Use this preproessor block only to include or exclude windows.h,
+ * winsock2.h, ws2tcpip.h or winsock.h. Any other windows thing belongs
  * to any other further and independant block.
  */
 
@@ -64,12 +64,13 @@
 #endif
 
 /*
- * Work-arounds for systems without configure support 
+ * Work-arounds for systems without configure support
  */
 
 #ifndef HAVE_CONFIG_H
 
-#if defined(__DJGPP__) || (defined(__WATCOMC__) && (__WATCOMC__ >= 1240))
+#if defined(__DJGPP__) || (defined(__WATCOMC__) && (__WATCOMC__ >= 1240)) || \
+    defined(__POCC__)
 #else
 #define ssize_t int
 #endif
@@ -80,8 +81,8 @@
 
 #endif /* HAVE_CONFIG_H */
 
-/* 
- * Recent autoconf versions define these symbols in config.h. We don't 
+/*
+ * Recent autoconf versions define these symbols in config.h. We don't
  * want them (since they collide with the libcurl ones when we build
  *  --enable-debug) so we undef them again here.
  */
@@ -94,8 +95,8 @@
 #undef VERSION
 #undef PACKAGE
 
-/* 
- * Typedef our socket type 
+/*
+ * Typedef our socket type
  */
 
 #if defined(WIN32) && !defined(WATT32)
@@ -106,7 +107,7 @@ typedef int ares_socket_t;
 #define ARES_SOCKET_BAD -1
 #endif
 
-/* 
+/*
  * Assume a few thing unless they're set by configure
  */
 
