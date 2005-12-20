@@ -2174,7 +2174,7 @@ CURLcode Curl_protocol_connect(struct connectdata *conn, bool *protocol_done)
  * Helpers for IDNA convertions.
  */
 #ifdef USE_LIBIDN
-static bool is_ASCII_name (const char *hostname)
+static bool is_ASCII_name(const char *hostname)
 {
   const unsigned char *ch = (const unsigned char*)hostname;
 
@@ -2188,8 +2188,8 @@ static bool is_ASCII_name (const char *hostname)
 /*
  * Check if characters in hostname is allowed in Top Level Domain.
  */
-static bool tld_check_name (struct SessionHandle *data,
-                            const char *ace_hostname)
+static bool tld_check_name(struct SessionHandle *data,
+                           const char *ace_hostname)
 {
   size_t err_pos;
   char *uc_name = NULL;
@@ -2245,7 +2245,9 @@ static void fix_hostname(struct connectdata *conn, struct hostname *host)
       infof(data, "Failed to convert %s to ACE; %s\n",
             host->name, Curl_idn_strerror(conn,rc));
     else {
-      tld_check_name(data, ace_hostname);
+      /* tld_check_name() displays a warning if the host name contains
+         "illegal" characters for this TLD */
+      (void)tld_check_name(data, ace_hostname);
 
       host->encalloc = ace_hostname;
       /* change the name pointer to point to the encoded hostname */
