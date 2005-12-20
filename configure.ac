@@ -1577,7 +1577,7 @@ fi
 
 dnl For some reason, the check above doesn't properly detect select() with
 dnl Msys/Mingw
-if test "$ac_cv_func_select" != "yes"; then
+if test "$ac_cv_func_select" = "no"; then
   AC_MSG_CHECKING([for select in ws2_32])
   AC_TRY_LINK([
 #undef inline
@@ -1594,14 +1594,16 @@ if test "$ac_cv_func_select" != "yes"; then
 #endif
 #endif
 #endif
-              ],
-               [select(0,(fd_set *)NULL,(fd_set *)NULL,(fd_set *)NULL,(struct timeval *)NULL);],
-               [ dnl worked!
-               AC_MSG_RESULT([yes])
-               HAVE_SELECT="1"
-               AC_DEFINE_UNQUOTED(HAVE_SELECT,1)],
-               [AC_MSG_ERROR(You can't compile without a select)]
-             )
+    ],[
+      select(0,(fd_set *)NULL,(fd_set *)NULL,(fd_set *)NULL,(struct timeval *)NULL);
+    ],[ 
+      AC_MSG_RESULT([yes])
+      HAVE_SELECT="1"
+      AC_DEFINE_UNQUOTED(HAVE_SELECT, 1,
+        [Define to 1 if you have the select function.])
+    ],[
+      AC_MSG_ERROR(You can't compile without a select)
+  ])
 fi
 
 dnl Msys/Mingw does not detect getnameinfo() in AC_CHECK_FUNCS.
