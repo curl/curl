@@ -299,7 +299,7 @@ AC_DEFUN([CURL_FUNC_GETNAMEINFO_ARGTYPES], [
   if test "$curl_cv_func_getnameinfo_args" = "unknown"; then
     AC_MSG_WARN([Cannot find proper types to use for getnameinfo args])
     AC_MSG_WARN([Undefining HAVE_GETNAMEINFO])
-    undefine([HAVE_GETNAMEINFO])dnl
+#undef HAVE_GETNAMEINFO
     ac_cv_func_getnameinfo="no"
   else
     gni_prev_IFS=$IFS; IFS=','
