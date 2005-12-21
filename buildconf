@@ -85,8 +85,7 @@ fi
 
 echo "buildconf: automake version $am_version (ok)"
 
-ac=`findtool aclocal`
-
+ac=`findtool ${ACLOCAL:-aclocal}`
 if test -z "$ac"; then
   echo "buildconf: aclocal not found. Weird automake installation!"
   exit 1
