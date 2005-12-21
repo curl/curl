@@ -225,28 +225,94 @@ AC_DEFUN([CURL_CHECK_TYPE_SOCKLEN_T], [
 ])
 
 
-dnl CURL_FUNC_GETNAMEINFO_ARGTYPES
+dnl CURL_CHECK_FUNC_GETNAMEINFO
 dnl -------------------------------------------------
-dnl Check the type to be passed to five of the arguments
-dnl of getnameinfo function, and define those types in  
+dnl Test if the getnameinfo function is available, 
+dnl and check the types of five of its arguments.
+dnl If the function succeeds HAVE_GETNAMEINFO will be
+dnl defined, defining the types of the arguments in
 dnl GETNAMEINFO_TYPE_ARG1, GETNAMEINFO_TYPE_ARG2,
 dnl GETNAMEINFO_TYPE_ARG46 and GETNAMEINFO_TYPE_ARG7.
 dnl This function is experimental and its results shall
 dnl not be trusted while this notice is in place ------
 
-AC_DEFUN([CURL_FUNC_GETNAMEINFO_ARGTYPES], [
+AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
   AC_REQUIRE([CURL_CHECK_HEADER_WS2TCPIP])dnl
   AC_REQUIRE([CURL_CHECK_TYPE_SOCKLEN_T])dnl
   AC_CHECK_HEADERS(sys/types.h sys/socket.h netdb.h)
-  AC_CACHE_CHECK([types of arguments for getnameinfo],
-    [curl_cv_func_getnameinfo_args], [
-    curl_cv_func_getnameinfo_args="unknown"
-    for gni_arg1 in 'struct sockaddr *' 'const struct sockaddr *' 'void *'; do
-      for gni_arg2 in 'socklen_t' 'size_t' 'int'; do
-        for gni_arg46 in 'size_t' 'int' 'socklen_t' 'unsigned int'; do
-          for gni_arg7 in 'int' 'unsigned int'; do
-            AC_COMPILE_IFELSE([
-              AC_LANG_PROGRAM([
+  #
+  AC_MSG_CHECKING([for getnameinfo])
+  AC_LINK_IFELSE([
+      AC_LANG_FUNC_LINK_TRY([getnameinfo])
+    ],[
+      AC_MSG_RESULT([yes])
+      curl_cv_getnameinfo="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      curl_cv_getnameinfo="no"
+  ])
+  #
+  if test "$curl_cv_getnameinfo" != "yes"; then
+    AC_MSG_CHECKING([deeper for getnameinfo])
+    AC_TRY_LINK([
+      ],[
+        getnameinfo();
+      ],[
+        AC_MSG_RESULT([yes])
+        curl_cv_getnameinfo="yes"
+      ],[
+        AC_MSG_RESULT([but still no])
+        curl_cv_getnameinfo="no"
+    ])
+  fi
+  #
+  if test "$curl_cv_getnameinfo" != "yes"; then
+    AC_MSG_CHECKING([deeper and deeper for getnameinfo])
+    AC_TRY_LINK([
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#ifdef HAVE_WS2TCPIP_H
+#include <ws2tcpip.h>
+#endif
+#endif
+#else
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
+#endif
+      ],[
+        getnameinfo(0, 0, 0, 0, 0, 0, 0);
+      ],[ 
+        AC_MSG_RESULT([yes])
+        curl_cv_getnameinfo="yes"
+      ],[
+        AC_MSG_RESULT([but still no])
+        curl_cv_getnameinfo="no"
+    ])
+  fi
+  #
+  if test "$curl_cv_getnameinfo" = "yes"; then
+    AC_CACHE_CHECK([types of arguments for getnameinfo],
+      [curl_cv_func_getnameinfo_args], [
+      curl_cv_func_getnameinfo_args="unknown"
+      for gni_arg1 in 'struct sockaddr *' 'const struct sockaddr *' 'void *'; do
+        for gni_arg2 in 'socklen_t' 'size_t' 'int'; do
+          for gni_arg46 in 'size_t' 'int' 'socklen_t' 'unsigned int' 'DWORD'; do
+            for gni_arg7 in 'int' 'unsigned int'; do
+              AC_COMPILE_IFELSE([
+                AC_LANG_PROGRAM([
 #undef inline 
 #ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
@@ -276,46 +342,48 @@ AC_DEFUN([CURL_FUNC_GETNAMEINFO_ARGTYPES], [
 #endif
 #define GNICALLCONV
 #endif
-                extern int GNICALLCONV getnameinfo($gni_arg1, $gni_arg2,
-                                       char *, $gni_arg46,
-                                       char *, $gni_arg46,
-                                       $gni_arg7);
+                  extern int GNICALLCONV getnameinfo($gni_arg1, $gni_arg2,
+                                         char *, $gni_arg46,
+                                         char *, $gni_arg46,
+                                         $gni_arg7);
+                ],[
+                  $gni_arg2 salen=0;
+                  $gni_arg46 hostlen=0;
+                  $gni_arg46 servlen=0;
+                  $gni_arg7 flags=0;
+                  int res = getnameinfo(0, salen, 0, hostlen, 0, servlen, flags);
+                ])
               ],[
-                $gni_arg2 salen=0;
-                $gni_arg46 hostlen=0;
-                $gni_arg46 servlen=0;
-                $gni_arg7 flags=0;
-                int res = getnameinfo(0, salen, 0, hostlen, 0, servlen, flags);
+                 curl_cv_func_getnameinfo_args="$gni_arg1,$gni_arg2,$gni_arg46,$gni_arg7"
+                 break 4
               ])
-            ],[
-               curl_cv_func_getnameinfo_args="$gni_arg1,$gni_arg2,$gni_arg46,$gni_arg7"
-               break 4
-            ])
+            done
           done
         done
       done
-    done
-  ])
-  if test "$curl_cv_func_getnameinfo_args" = "unknown"; then
-    AC_MSG_WARN([Cannot find proper types to use for getnameinfo args])
-    AC_MSG_WARN([Undefining HAVE_GETNAMEINFO])
-#undef HAVE_GETNAMEINFO
-    ac_cv_func_getnameinfo="no"
-  else
-    gni_prev_IFS=$IFS; IFS=','
-    set dummy `echo "$curl_cv_func_getnameinfo_args" | sed 's/\*/\*/g'`
-    IFS=$gni_prev_IFS
-    shift
-    AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG1, $[1],
-      [Define to the type of arg 1 for getnameinfo.])
-    AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG2, $[2],
-      [Define to the type of arg 2 for getnameinfo.])
-    AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG46, $[3],
-      [Define to the type of args 4 and 6 for getnameinfo.])
-    AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG7, $[4],
-      [Define to the type of arg 7 for getnameinfo.])
+    ]) # AC_CACHE_CHECK
+    if test "$curl_cv_func_getnameinfo_args" = "unknown"; then
+      AC_MSG_WARN([Cannot find proper types to use for getnameinfo args])
+      AC_MSG_WARN([HAVE_GETNAMEINFO will not be defined])
+    else
+      gni_prev_IFS=$IFS; IFS=','
+      set dummy `echo "$curl_cv_func_getnameinfo_args" | sed 's/\*/\*/g'`
+      IFS=$gni_prev_IFS
+      shift
+      AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG1, $[1],
+        [Define to the type of arg 1 for getnameinfo.])
+      AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG2, $[2],
+        [Define to the type of arg 2 for getnameinfo.])
+      AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG46, $[3],
+        [Define to the type of args 4 and 6 for getnameinfo.])
+      AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG7, $[4],
+        [Define to the type of arg 7 for getnameinfo.])
+      AC_DEFINE_UNQUOTED(HAVE_GETNAMEINFO, 1,
+        [Define to 1 if you have the getnameinfo function.])
+      ac_cv_func_getnameinfo="yes"
+    fi
   fi
-])
+]) # AC_DEFUN
 
 
 dnl CURL_CHECK_NONBLOCKING_SOCKET

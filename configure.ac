@@ -1556,7 +1556,6 @@ AC_CHECK_FUNCS( strtoll \
                 stricmp \
                 strcmpi \
                 gethostbyaddr \
-                getnameinfo \
                 gettimeofday \
                 inet_addr \
                 inet_ntoa \
@@ -1629,46 +1628,6 @@ if test "$ac_cv_func_select" = "no"; then
   ])
 fi
 
-dnl Msys/Mingw does not detect getnameinfo() in AC_CHECK_FUNCS.
-dnl
-if test "$ac_cv_func_getnameinfo" = "no"; then
-  AC_MSG_CHECKING([deeper and deeper for getnameinfo])
-  AC_TRY_LINK([
-#undef inline
-#ifdef HAVE_WINDOWS_H
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#ifdef HAVE_WINSOCK2_H
-#include <winsock2.h>
-#ifdef HAVE_WS2TCPIP_H
-#include <ws2tcpip.h>
-#endif
-#endif
-#else
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_NETDB_H
-#include <netdb.h>
-#endif
-#endif
-    ],[
-      getnameinfo(0, 0, 0, 0, 0, 0, 0);
-    ],[ 
-      AC_MSG_RESULT([yes])
-      ac_cv_func_getnameinfo="yes"
-      AC_DEFINE_UNQUOTED(HAVE_GETNAMEINFO, 1,
-        [Define to 1 if you have the getnameinfo function.])
-    ],[
-      AC_MSG_RESULT([no])
-  ])
-fi
-
 dnl sigsetjmp() might be a macro and no function so if it isn't found already
 dnl we make an extra check here!
 if test "$ac_cv_func_sigsetjmp" != "yes"; then
@@ -1705,13 +1664,9 @@ AC_CHECK_DECL(inet_pton, ,
 ]
 )
 
-if test "x$ac_cv_func_getnameinfo" = "x"; then
-  AC_MSG_ERROR([Checking availability of function getnameinfo must be done previously])
-else
-  if test "x$ac_cv_func_getnameinfo" = "xyes"; then
-    CURL_FUNC_GETNAMEINFO_ARGTYPES
-  fi
-fi
+dnl Check if the getnameinfo function is available
+dnl and get the types of five of its arguments.
+CURL_CHECK_FUNC_GETNAMEINFO
 
 AC_MSG_CHECKING([if we are Mac OS X (to disable poll)])
 disable_poll=no
