@@ -13,6 +13,7 @@ findtool(){
   IFS=":"
   for path in $PATH
   do
+    # echo "checks for $file in $path" >&2
     if test -f "$path/$file"; then
       echo "$path/$file"
       return
@@ -106,11 +107,16 @@ LIBTOOL_WANTED_VERSION=1.4.2
 # glibtool, with 'libtool' being something completely different.
 libtool=`findtool glibtool 2>/dev/null`
 if test ! -x "$libtool"; then
-  libtool=`findtool libtool`
+  libtool=`findtool ${LIBTOOL:-libtool}`
 fi
 
-# set the LIBTOOLIZE here so that glibtoolize is used if glibtool was found
-LIBTOOLIZE="${libtool}ize"
+if test -z "$LIBTOOLIZE"; then
+  # set the LIBTOOLIZE here so that glibtoolize is used if glibtool was found
+  # $libtool is already the full path
+  libtoolize="${libtool}ize"
+else
+  libtoolize=`findtool $LIBTOOLIZE`
+fi
 
 lt_pversion=`$libtool --version 2>/dev/null|head -n 1|sed -e 's/^[^0-9]*//g' -e 's/[- ].*//'`
 if test -z "$lt_pversion"; then
@@ -149,7 +155,7 @@ fi
 
 echo "buildconf: libtool version $lt_version (ok)"
 
-if test -f "$LIBTOOLIZE"; then
+if test -f "$libtoolize"; then
   echo "buildconf: libtoolize found"
 else
   echo "buildconf: libtoolize not found. Weird libtool installation!"
@@ -172,14 +178,14 @@ fi
 #--------------------------------------------------------------------------
 # perl check
 #
-PERL=`findtool perl`
+PERL=`findtool ${PERL:-perl}`
 
 # ------------------------------------------------------------
 
 # run the correct scripts now
 
 echo "buildconf: running libtoolize"
-${LIBTOOLIZE:-libtoolize} --copy --automake --force || die "The libtool command failed"
+$libtoolize --copy --automake --force || die "The libtoolize command failed"
 echo "buildconf: running aclocal"
 ${ACLOCAL:-aclocal} $ACLOCAL_FLAGS || die "The aclocal command line failed"
 if test -n "$PERL"; then
@@ -199,7 +205,7 @@ ${AUTOCONF:-autoconf}     || die "The autoconf command failed"
 if test -d ares; then
   cd ares
   echo "buildconf: running ares/libtoolize"
-${LIBTOOLIZE:-libtoolize} --copy --automake --force || die "The libtool command failed"
+$libtoolize --copy --automake --force || die "The libtoolize command failed"
   echo "buildconf: running ares/aclocal"
   ${ACLOCAL:-aclocal} $ACLOCAL_FLAGS || die "The ares aclocal command failed"
   echo "buildconf: running ares/autoconf"
