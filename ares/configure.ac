@@ -1,6 +1,8 @@
 
 dnl Process this file with autoconf to produce a configure script.
+AC_PREREQ(2.57)
 AC_INIT(ares_init.c)
+AC_CONFIG_SRCDIR([ares_ipv6.h])
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 AM_INIT_AUTOMAKE(c-ares, CVS)
