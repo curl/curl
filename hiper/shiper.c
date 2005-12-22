@@ -35,10 +35,18 @@
 
 #include <event.h> /* for libevent */
 
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+#ifndef TRUE
+#define TRUE 1
+#endif
+
 #define MICROSEC 1000000 /* number of microseconds in one second */
 
 /* The maximum time (in microseconds) we run the test */
-#define RUN_FOR_THIS_LONG (20*MICROSEC)
+#define RUN_FOR_THIS_LONG (5*MICROSEC)
 
 /* Number of loops (seconds) we allow the total download amount and alive
    connections to remain the same until we bail out. Set this slightly higher
@@ -51,7 +59,7 @@ struct ourfdset {
      FD_SET() macro usage but it would hardly be portable */
   char __fds_bits[NCONNECTIONS/8];
 };
-#define FD2_ZERO(x) FD_ZERO((fd_set *)x)
+#define FD2_ZERO(x) memset(x, 0, sizeof(struct ourfdset))
 
 typedef struct ourfdset fd2_set;
 
@@ -115,15 +123,20 @@ static void remsock(curl_socket_t s)
     allsocks = NULL;
 }
 
+static void setsock(struct fdinfo *fdp, curl_socket_t s, CURL *easy,
+                    int action, long timeout)
+{
+  fdp->sockfd = s;
+  fdp->action = action;
+  fdp->timeout = timeout;
+  fdp->easy = easy;
+}
 
 static void addsock(curl_socket_t s, CURL *easy, int action, long timeout)
 {
   struct fdinfo *fdp = calloc(sizeof(struct fdinfo), 1);
 
-  fdp->sockfd = s;
-  fdp->action = action;
-  fdp->timeout = timeout;
-  fdp->easy = easy;
+  setsock(fdp, s, easy, action, timeout);
 
   if(allsocks) {
     fdp->next = allsocks;
@@ -139,17 +152,42 @@ static void addsock(curl_socket_t s, CURL *easy, int action, long timeout)
 static void fdinfo2fdset(fd2_set *fdread, fd2_set *fdwrite, int *maxfd)
 {
   struct fdinfo *fdp = allsocks;
+  int writable=0;
+
+  FD2_ZERO(fdread);
+  FD2_ZERO(fdwrite);
+
+  *maxfd = 0;
+
+#if 0
+  printf("Wait for: ");
+#endif
+
   while(fdp) {
-    if(fdp->action & CURL_POLL_IN)
+    if(fdp->action & CURL_POLL_IN) {
       FD_SET(fdp->sockfd, (fd_set *)fdread);
-    if(fdp->action & CURL_POLL_OUT)
+    }
+    if(fdp->action & CURL_POLL_OUT) {
       FD_SET(fdp->sockfd, (fd_set *)fdwrite);
+      writable++;
+    }
+
+#if 0
+    printf("%d (%s%s) ",
+           fdp->sockfd,
+           (fdp->action & CURL_POLL_IN)?"r":"",
+           (fdp->action & CURL_POLL_OUT)?"w":"");
+#endif
 
     if(fdp->sockfd > *maxfd)
       *maxfd = fdp->sockfd;
 
     fdp = fdp->next;
   }
+#if 0
+  if(writable)
+    printf("Check for %d writable sockets\n", writable);
+#endif
 }
 
 /* on port 8999 we run a modified (fork-) sws that supports pure idle and full
@@ -168,13 +206,24 @@ static int socket_callback(CURL *easy,      /* easy handle */
                            long ms,         /* timeout for wait */
                            void *userp)     /* "private" pointer */
 {
+  struct fdinfo *fdp;
   printf("socket %d easy %p what %d timeout %ld\n", s, easy, what, ms);
 
   if(what == CURL_POLL_REMOVE)
     remsock(s);
-  else if(!findsock(s))
-    addsock(s, easy, what, ms);
+  else {
+    fdp = findsock(s);
 
+    if(!fdp) {
+      addsock(s, easy, what, ms);
+    }
+    else {
+      /* we already know about it, just change action/timeout */
+      printf("Changing info for socket %d from %d to %d\n",
+             s, fdp->action, what);
+      setsock(fdp, s, easy, what, ms);
+    }
+  }
   return 0; /* return code meaning? */
 }
 
@@ -265,9 +314,9 @@ struct globalinfo info;
 struct connection *conns;
 
 long selects;
-long selectsalive;
 long timeouts;
 
+long multi_socket;
 long performalive;
 long performselect;
 long topselect;
@@ -291,18 +340,22 @@ static void report(void)
          num_total, num_active);
   printf("%d out of %d connections provided data\n", numdl, num_total);
 
-  printf("Total time: %ldus select(): %ldus curl_multi_perform(): %ldus\n",
+  printf("Total time: %ldus paused: %ldus curl_multi_socket(): %ldus\n",
          total, paused, active);
 
-  printf("%d calls to select(), average %d alive "
+  printf("%d calls to select() "
          "Average time: %dus\n",
-         selects, selectsalive/selects,
-         paused/selects);
+         selects, paused/selects);
   printf(" Average number of readable connections per select() return: %d\n",
          performselect/selects);
+
   printf(" Max number of readable connections for a single select() "
          "return: %d\n",
          topselect);
+
+  printf("%ld calls to multi_socket(), "
+         "Average time: %ldus\n",
+         multi_socket, active/multi_socket);
 
   printf("%ld select() timeouts\n", timeouts);
 
@@ -321,12 +374,10 @@ int main(int argc, char **argv)
   CURLMcode mcode = CURLM_OK;
   int rc;
   int i;
-
-  int prevalive=-1;
-  int prevsamecounter=0;
-  int prevtotal = -1;
   fd2_set fdsizecheck;
   int selectmaxamount;
+  struct fdinfo *fdp;
+  char act;
 
   memset(&info, 0, sizeof(struct globalinfo));
 
@@ -408,6 +459,7 @@ int main(int argc, char **argv)
 
   printf("Starting timer, expects to run for %ldus\n", RUN_FOR_THIS_LONG);
   timer_start();
+  timer_pause();
 
   while(1) {
     struct timeval timeout;
@@ -417,9 +469,6 @@ int main(int argc, char **argv)
     fd2_set fdwrite;
     int maxfd;
 
-    FD2_ZERO(&fdread);
-    FD2_ZERO(&fdwrite);
-
     /* set a suitable timeout to play around with */
     timeout.tv_sec = 1;
     timeout.tv_usec = 0;
@@ -427,16 +476,11 @@ int main(int argc, char **argv)
     /* convert file descriptors from the transfers to fd_sets */
     fdinfo2fdset(&fdread, &fdwrite, &maxfd);
 
-    timer_pause();
     selects++;
-    selectsalive += still_running;
     rc = select(maxfd+1,
                 (fd_set *)&fdread,
                 (fd_set *)&fdwrite,
                 NULL, &timeout);
-
-    timer_continue();
-
     switch(rc) {
     case -1:
       /* select error */
@@ -445,11 +489,40 @@ int main(int argc, char **argv)
       timeouts++;
     default:
       /* timeout or readable/writable sockets */
+
+      for(i=0, fdp = allsocks; fdp; fdp = fdp->next) {
+        act = 0;
+        if((fdp->action & CURL_POLL_IN) &&
+           FD_ISSET(fdp->sockfd, &fdread)) {
+          act |= CURL_POLL_IN;
+          i++;
+        }
+        if((fdp->action & CURL_POLL_OUT) &&
+           FD_ISSET(fdp->sockfd, &fdwrite)) {
+          act |= CURL_POLL_OUT;
+          i++;
+        }
+
+        if(act) {
+          multi_socket++;
 #if 0
-      curl_multi_socket(multi_handle, CURL_SOCKET_BAD, conns[0].e,
-                        socket_callback, NULL);
+          printf("multi_socket for %p socket %d (%d)\n",
+                 fdp, fdp->sockfd, act);
 #endif
+          timer_continue();
+          if(act & CURL_POLL_OUT)
+            act--;
+          curl_multi_socket(multi_handle,
+                            CURL_SOCKET_BAD,
+                            fdp->easy,
+                            socket_callback, NULL);
+          timer_pause();
+        }
+      }
+
+#if 0
       curl_multi_socket_all(multi_handle, socket_callback, NULL);
+#endif
 
       performselect += rc;
       if(rc > topselect)
@@ -457,17 +530,12 @@ int main(int argc, char **argv)
       break;
     }
 
+    timer_total(); /* calculate the total time spent so far */
+
     if(total > RUN_FOR_THIS_LONG) {
       printf("Stopped after %ldus\n", total);
       break;
     }
-
-    if(prevalive != still_running) {
-      printf("%d connections alive\n", still_running);
-    }
-    prevalive = still_running;
-
-    timer_total(); /* calculate the total time spent so far */
   }
 
   if(still_running != num_total) {
