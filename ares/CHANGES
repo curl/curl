@@ -1,5 +1,11 @@
   Changelog for the c-ares project
 
+* December 22
+
+- Daniel Stenberg added ares_getsock() that extracts the set of sockets to
+  wait for action on. Similar to ares_fds() but not restricted to using
+  select() for the waiting.
+
 * November 25
 
 - Yang Tse fixed some send() / recv() compiler warnings
