@@ -70,8 +70,8 @@ extern "C" {
 #define ARES_EBADFLAGS          18
 
 /* ares_getaddrinfo error codes */
-#define ARES_ENONAME		19
-#define ARES_EBADHINTS		20
+#define ARES_ENONAME            19
+#define ARES_EBADHINTS          20
 
 /* Flag values */
 #define ARES_FLAG_USEVC         (1 << 0)
@@ -108,27 +108,32 @@ extern "C" {
 #define ARES_NI_LOOKUPHOST              (1 << 8)
 #define ARES_NI_LOOKUPSERVICE           (1 << 9)
 /* Reserved for future use */
-#define ARES_NI_IDN			(1 << 10)
-#define ARES_NI_IDN_ALLOW_UNASSIGNED	(1 << 11)
+#define ARES_NI_IDN                     (1 << 10)
+#define ARES_NI_IDN_ALLOW_UNASSIGNED    (1 << 11)
 #define ARES_NI_IDN_USE_STD3_ASCII_RULES (1 << 12)
 
 /* Addrinfo flag values */
-#define ARES_AI_CANONNAME		(1 << 0)
-#define ARES_AI_NUMERICHOST		(1 << 1)
-#define ARES_AI_PASSIVE			(1 << 2)
-#define ARES_AI_NUMERICSERV		(1 << 3)
-#define ARES_AI_V4MAPPED		(1 << 4)
-#define ARES_AI_ALL			(1 << 5)
-#define ARES_AI_ADDRCONFIG		(1 << 6)
+#define ARES_AI_CANONNAME               (1 << 0)
+#define ARES_AI_NUMERICHOST             (1 << 1)
+#define ARES_AI_PASSIVE                 (1 << 2)
+#define ARES_AI_NUMERICSERV             (1 << 3)
+#define ARES_AI_V4MAPPED                (1 << 4)
+#define ARES_AI_ALL                     (1 << 5)
+#define ARES_AI_ADDRCONFIG              (1 << 6)
 /* Reserved for future use */
-#define ARES_AI_IDN			(1 << 10)
-#define ARES_AI_IDN_ALLOW_UNASSIGNED	(1 << 11)
+#define ARES_AI_IDN                     (1 << 10)
+#define ARES_AI_IDN_ALLOW_UNASSIGNED    (1 << 11)
 #define ARES_AI_IDN_USE_STD3_ASCII_RULES (1 << 12)
-#define ARES_AI_CANONIDN		(1 << 13)
+#define ARES_AI_CANONIDN                (1 << 13)
 
-#define ARES_AI_MASK			(ARES_AI_CANONNAME|ARES_AI_NUMERICHOST|ARES_AI_PASSIVE| \
-				 	 ARES_AI_NUMERICSERV|ARES_AI_V4MAPPED|ARES_AI_ALL| \
-					 ARES_AI_ADDRCONFIG)
+#define ARES_AI_MASK (ARES_AI_CANONNAME|ARES_AI_NUMERICHOST|ARES_AI_PASSIVE| \
+                      ARES_AI_NUMERICSERV|ARES_AI_V4MAPPED|ARES_AI_ALL| \
+                      ARES_AI_ADDRCONFIG)
+#define ARES_GETSOCK_MAXNUM 16 /* ares_getsock() can return info about this
+                                  many sockets */
+#define ARES_GETSOCK_READABLE(bits,num) (bits & (1<< (num)))
+#define ARES_GETSOCK_WRITABLE(bits,num) (bits & (1 << ((num) + \
+                                         ARES_GETSOCK_MAXNUM)))
 
 struct ares_options {
   int flags;
@@ -172,9 +177,11 @@ void ares_gethostbyname(ares_channel channel, const char *name, int family,
 void ares_gethostbyaddr(ares_channel channel, const void *addr, int addrlen,
                         int family, ares_host_callback callback, void *arg);
 void ares_getnameinfo(ares_channel channel, const struct sockaddr *sa,
-                      socklen_t salen, int flags, ares_nameinfo_callback callback,
+                      socklen_t salen, int flags,
+                      ares_nameinfo_callback callback,
                       void *arg);
 int ares_fds(ares_channel channel, fd_set *read_fds, fd_set *write_fds);
+int ares_getsock(ares_channel channel, int *socks, int numsocks);
 struct timeval *ares_timeout(ares_channel channel, struct timeval *maxtv,
                              struct timeval *tv);
 void ares_process(ares_channel channel, fd_set *read_fds, fd_set *write_fds);
