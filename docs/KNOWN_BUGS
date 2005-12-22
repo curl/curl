@@ -3,6 +3,12 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+31. "curl-config --libs" will include details set in LDFLAGS when configure is
+  run that might be needed only for building libcurl. Similarly, it might
+  include options that perhaps aren't suitable both for static and dynamic
+  linking. Further, curl-config --cflags suffers from the same effects with
+  CFLAGS/CPPFLAGS.
+
 30. You need to use -g to the command line tool in order to use RFC2732-style
   IPv6 numerical addresses in URLs.
 
