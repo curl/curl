@@ -1,0 +1,82 @@
+.\" $Id$
+.\"
+.TH curl_multi_socket 3 "21 Dec 2005" "libcurl 7.16.0" "libcurl Manual"
+.SH NAME
+curl_multi_socket - reads/writes available data
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLMcode curl_multi_socket(CURLM * multi_handle,
+                            curl_socket_t sockfd,
+                            CURL *easy,
+                            curl_socket_callback callback,
+                            void *userp);
+
+CURLMcode curl_multi_socket_all(CURLM *multi_handle,
+                                curl_socket_callback callback,
+                                void *userp);
+.SH DESCRIPTION
+Alternative versions of \fIcurl_multi_perform()\fP that allows the application
+to pass in one of the file descriptors/sockets that have been detected to have
+\&"action" on them and let libcurl perform. This allows libcurl to not have to
+scan through all possible file descriptors to check for action. The
+application is recommended to pass in the \fBeasy\fP argument (or set it to
+CURL_EASY_NONE) to make libcurl figure out the internal structure even faster
+and easier.  If the easy argument is set to something else than
+CURL_EASY_NONE, the \fBsockfd\fP argument will be ignored by libcurl.
+
+These functions inform the application about updates in the socket (file
+descriptor) status by doing none, one or multiple calls to the
+curl_socket_callback given in the \fBcallback\fP argument. They update the
+status with changes since the previous time this function was used. If
+\fBcallback\fP is NULL, no callback will be called. A status change may also
+be a new timeout only, having the same IN/OUT status as before.
+
+If a previous wait for socket action(s) timed out, you should call this
+function with the socket argument set to CURL_SOCKET_TIMEOUT. If you want to
+force libcurl to (re-)check all its internal sockets, and call the callback
+with status for all sockets no matter what the previous state is, you call
+curl_multi_socket_all() instead.
+
+curl_multi_perform() is the equivalent of calling
+curl_multi_socket_all(handle, NULL, NULL);
+
+Regarding the timeout argument in the callback: it is the timeout (in
+milliseconds) for waiting on action on this socket (and the given time period
+starts when the callback is called) until you should call curl_multi_socket()
+with the timeout stuff mentioned above. If "actions" happens on the socket
+before the timeout happens, remember that the timout timer keeps ticking until
+told otherwise.
+
+The "what" argument has one of five values:
+.RS
+.IP "CURL_POLL_NONE (0)"
+register, not interested in readiness (yet)
+.IP "CURL_POLL_IN (1)"
+register, interested in read readiness
+.IP "CURL_POLL_OUT (2)"
+register, interested in write readiness
+.IP "CURL_POLL_INOUT (3)"
+register, interested in both read and write readiness
+.IP "CURL_POLL_REMOVE (4)"
+deregister
+.RE
+.SH "RETURN VALUE"
+CURLMcode type, general libcurl multi interface error code.
+
+If you receive \fICURLM_CALL_MULTI_PERFORM\fP, this basically means that you
+should call \fIcurl_multi_perform\fP again, before you select() on more
+actions. You don't have to do it immediately, but the return code means that
+libcurl may have more data available to return or that there may be more data
+to send off before it is "satisfied".
+
+NOTE that this only returns errors etc regarding the whole multi stack. There
+might still have occurred problems on individual transfers even when this
+function returns OK.
+.SH "TYPICAL USAGE"
+Call curl_multi_socket_all() first. Setup a "collection" of sockets to
+supervise, then when action happens call curl_multi_socket() for the easy
+handle that got the action.
+.SH "SEE ALSO"
+.BR curl_multi_cleanup "(3), " curl_multi_init "(3), "
+.BR curl_multi_fdset "(3), " curl_multi_info_read "(3)"
