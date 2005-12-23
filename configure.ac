@@ -828,7 +828,7 @@ OPT_SSL=off
 dnl Default to no CA bundle
 ca="no"
 AC_ARG_WITH(ssl,dnl
-AC_HELP_STRING([--with-ssl=PATH],[where to look for SSL, PATH points to the SSL installation (default: /usr/local/ssl)])
+AC_HELP_STRING([--with-ssl=PATH],[Where to look for OpenSSL, PATH points to the SSL installation (default: /usr/local/ssl); when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
 AC_HELP_STRING([--without-ssl], [disable SSL]),
   OPT_SSL=$withval)
 
