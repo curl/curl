@@ -14,6 +14,12 @@ handle that you must use as input to other easy-functions. curl_easy_init
 initializes curl and this call \fBMUST\fP have a corresponding call to
 \fIcurl_easy_cleanup(3)\fP when the operation is complete.
 
+If you did not already call \fIcurl_global_init(3)\fP, it will be done
+automatically with a default setup when you call \fIcurl_easy_init(3)\fP.
+This may be lethal in multi-threaded cases, since \fIcurl_global_init(3)\fP is
+not thread-safe and must not be called more than once (or from more than one
+thread). You are strongly adviced to not rely on this automatic behaviour, but
+call \fIcurl_global_init(3)\fP yourself properly.
 .SH RETURN VALUE
 If this function returns NULL, something went wrong and you cannot use the
 other curl functions.

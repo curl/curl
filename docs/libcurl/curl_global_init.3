@@ -15,7 +15,8 @@ This function should only be called once (no matter how many threads or
 libcurl sessions that'll be used) by every application that uses libcurl.
 
 If this function hasn't been invoked when \fIcurl_easy_init(3)\fP is called,
-it will be done automatically by libcurl.
+it will be done automatically by libcurl. It is adviced that you do not rely
+on this automatic call, but instead call \fIcurl_global_init(3)\fP properly.
 
 The flags option is a bit pattern that tells libcurl exact what features to
 init, as described below. Set the desired bits by ORing the values together.
@@ -23,8 +24,9 @@ init, as described below. Set the desired bits by ORing the values together.
 You must however \fBalways\fP use the \fIcurl_global_cleanup(3)\fP function,
 as that cannot be called automatically for you by libcurl.
 
-Calling this function more than once will cause unpredictable results.
-
+Calling this function more than once will cause unpredictable results. If that
+is not enough, calling this function from more than one thread may also cause
+unpredictable results.
 .SH FLAGS
 .TP 5
 .B CURL_GLOBAL_ALL
@@ -44,3 +46,4 @@ other curl functions.
 .SH "SEE ALSO"
 .BR curl_global_init_mem "(3), "
 .BR curl_global_cleanup "(3), "
+.BR curl_easy_init "(3) "
