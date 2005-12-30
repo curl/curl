@@ -230,7 +230,7 @@ static CURLcode file_upload(struct connectdata *conn)
     if(res)
       break;
 
-    if (readcount <= 0)
+    if (readcount <= 0)  /* fix questionable compare error. curlvms */
       break;
 
     nread = (size_t)readcount;
