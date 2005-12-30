@@ -390,7 +390,7 @@ static time_t Curl_parsedate(const char *date)
   */
   t = mktime(&tm);
 
-  /* time zone adjust */
+  /* time zone adjust (cast t to int to compare to negative one) */
   if(-1 != (int)t) {
     struct tm *gmt;
     long delta;
