@@ -91,6 +91,13 @@ FTP_SSL_FAILED		<requested FTP SSL level failed>
 SEND_FAIL_REWIND	<sending data requires a rewind that failed>
 SSL_ENGINE_INITFAILED	<failed to initialise ENGINE>
 LOGIN_DENIED		<user or password not accepted. failed to login>
+TFTP_NOTFOUND		<file not found on server>
+TFTP_PERM		<permission problem on server>
+TFTP_DISKFULL		<out of disk space on server>
+TFTP_ILLEGAL		<illegal TFTP operation>
+TFTP_UNKNOWNID		<unknown transfer ID>
+TFTP_EXISTS		<file already exists>
+TFTP_NOSUCHUSER		<no such user>
 CURL_LAST		<CURLMSG.MSG is out of sync with the source code>
 
 .END

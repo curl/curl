@@ -93,5 +93,12 @@ long vms_cond[] =
         CURL_SEND_FAIL_REWIND,
         CURL_SSL_ENGINE_INITFAILED,
         CURL_LOGIN_DENIED,
+        CURL_TFTP_NOTFOUND,
+        CURL_TFTP_PERM,
+        CURL_TFTP_DISKFULL,
+        CURL_TFTP_ILLEGAL,
+        CURL_TFTP_UNKNOWNID,
+        CURL_TFTP_EXISTS,
+        CURL_TFTP_NOSUCHUSER,
         CURL_CURL_LAST
         };
