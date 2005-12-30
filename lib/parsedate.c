@@ -391,7 +391,7 @@ static time_t Curl_parsedate(const char *date)
   t = mktime(&tm);
 
   /* time zone adjust */
-  if(-1 != t) {
+  if(-1 != (int)t) {
     struct tm *gmt;
     long delta;
     time_t t2;

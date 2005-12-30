@@ -230,10 +230,10 @@ static CURLcode file_upload(struct connectdata *conn)
     if(res)
       break;
 
-    nread = (size_t)readcount;
-
-    if (nread <= 0)
+    if (readcount <= 0)
       break;
+
+    nread = (size_t)readcount;
 
     /* write the data to the target */
     nwrite = fwrite(buf, 1, nread, fp);
