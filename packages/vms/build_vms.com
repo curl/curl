@@ -25,7 +25,7 @@ $!      DEBUG will compile and link with debug
 $!
 $! Revisions:
 $!
-$!  2-DEC-2003, MSK, the "original" version. <marty@barra.com>
+$!  2-DEC-2003, MSK, the "original" version.
 $!                   It works for me.  Your mileage may vary.
 $! 13-JAN-2004, MSK, moved this procedure to the [.packages.vms] directory
 $!                   and updated it to do hardware dependant builds.
