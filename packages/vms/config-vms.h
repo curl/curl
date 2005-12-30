@@ -6,6 +6,7 @@
 /* MSK, 02/02/05, Changed HAVE_TERMIOS_H to an undef since the change in   */
 /*                getpass.c no longer undef'd it during compile.           */
 /* MSK, 02/08/05, turned two config-vms files into one by using USE_SSLEAY */
+/* MPZ, 12/28/05, changed HAVE_STRTOK_R define to use CRTL_VER             */
 
 /* Define cpu-machine-OS */
 #ifdef __ALPHA
@@ -230,11 +231,9 @@
 /* Define if you have the <string.h> header file. */
 #define HAVE_STRING_H 1
 
-/* Define if you have the `strtok_r' function.       */
-/* Seems VAX V7.3 with DEC C 6.4 doesn't define this */
-#ifdef __VAX
-#undef HAVE_STRTOK_R
-#else
+/* Define if you have the `strtok_r' function.  */
+/* Condition lifted from <string.h>             */
+#if __CRTL_VER >= 70301000
 #define HAVE_STRTOK_R 1
 #endif
 
