@@ -250,50 +250,8 @@ CURL_EXTERN const char *curl_multi_strerror(CURLMcode);
  *
  * Desc:    An alternative version of curl_multi_perform() that allows the
  *          application to pass in one of the file descriptors that have been
- *          detected to have "action" on them and let libcurl perform. This
- *          allows libcurl to not have to scan through all possible file
- *          descriptors to check for this. The app is recommended to pass in
- *          the 'easy' argument (or set it to CURL_EASY_NONE) to make libcurl
- *          figure out the internal structure even faster and easier.  If the
- *          easy argument is set to something else than CURL_EASY_NONE, the
- *          's' (socket) argument will be ignored by libcurl.
- *
- *          It also informs the application about updates in the socket (file
- *          descriptor) status by doing none, one or multiple calls to the
- *          curl_socket_callback. It thus updates the status with changes
- *          since the previous time this function was used. If 'callback' is
- *          NULL, no callback will be called. A status change may also be a
- *          new timeout only, having the same IN/OUT status as before.
- *
- *          If a previous wait for socket action(s) timed out, you should call
- *          this function with the socket argument set to
- *          CURL_SOCKET_TIMEOUT. If you want to force libcurl to (re-)check
- *          all its internal sockets, and call the callback with status for
- *          all sockets no matter what the previous state is, you call
- *          curl_multi_socket_all() instead.
- *
- *          curl_multi_perform() is thus the equivalent of calling
- *          curl_multi_socket_all(handle, NULL, NULL);
- *
- *          IMPLEMENTATION: libcurl will need an internal hash table to map
- *          socket numbers to internal easy handles for the cases when 'easy'
- *          is set to CURL_EASY_NONE.
- *
- *          Regarding the timeout argument in the callback: it is the timeout
- *          (in milliseconds) for waiting on action on this socket (and the
- *          given time period starts when the callback is called) until you
- *          should call curl_multi_socket() with the timeout stuff mentioned
- *          above. If "actions" happens on the socket before the timeout
- *          happens, remember that the timout timer keeps ticking until told
- *          otherwise.
- *
- *          The "what" argument has one of five values:
- *
- *            0 CURL_POLL_NONE (0)   - register, not interested in readiness
- *            1 CURL_POLL_IN         - register, interested in read readiness
- *            2 CURL_POLL_OUT        - register, interested in write readiness
- *            3 CURL_POLL_INOUT      - register, interested in both
- *            4 CURL_POLL_REMOVE     - deregister
+ *          detected to have "action" on them and let libcurl perform.
+ *          See man page for details.
  */
 #define CURL_POLL_NONE   0
 #define CURL_POLL_IN     1
@@ -308,7 +266,6 @@ CURL_EXTERN const char *curl_multi_strerror(CURLMcode);
 typedef int (*curl_socket_callback)(CURL *easy,      /* easy handle */
                                     curl_socket_t s, /* socket */
                                     int what,        /* see above */
-                                    long ms,         /* timeout for wait */
                                     void *userp);    /* "private" pointer */
 
 CURLMcode curl_multi_socket(CURLM *multi_handle,
