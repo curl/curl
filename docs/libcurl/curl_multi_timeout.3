@@ -1,0 +1,35 @@
+.\" $Id$
+.\"
+.TH curl_multi_timeout 3 "2 Jan 2006" "libcurl 7.16.0" "libcurl Manual"
+.SH NAME
+curl_multi_timeout \- how long to wait for action before proceeding
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+long curl_multi_timeout(CURLM *multi_handle);
+.SH DESCRIPTION
+
+An application using the libcurl multi interface should call
+\fBcurl_multi_timeout(3)\fP to figure out how long it should wait for socket
+actions \- at most \- before proceeding.
+
+Proceeding means either doing the socket-style timeout action: call the
+\fBcurl_multi_socket(3)\fP function with the \fBsockfd\fP argument set to
+CURL_SOCKET_TIMEOUT and the \fBeasy\fP argument set to CURL_EASY_TIMEOUT, or
+simply calling \fBcurl_multi_perform(3)\fP if you're using the simpler and
+older multi interface approach.
+
+.SH "RETURN VALUE"
+The timeout value in number of milliseconds. If 0, it means you should proceed
+immediately without waiting for anything.
+.SH "TYPICAL USAGE"
+Call \fBcurl_multi_timeout(3)\fP, then wait for action on the sockets. You
+figure out which sockets to wait for by calling \fBcurl_multi_fdset(3)\fP or
+by a previous call to \fBcurl_multi_socket(3)\fP.
+.SH AVAILABILITY
+This function was added in libcurl 7.16.0
+.SH "SEE ALSO"
+.BR curl_multi_cleanup "(3), " curl_multi_init "(3), "
+.BR curl_multi_fdset "(3), " curl_multi_info_read "(3), "
+.BR curl_multi_socket "(3) "
+
