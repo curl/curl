@@ -230,6 +230,7 @@ typedef unsigned char bool;
 #else /* WIN32 */
 
 #ifdef DJGPP
+#include <sys/ioctl.h>
 #define sclose(x)         close_s(x)
 #define sread(x,y,z)      read_s(x,y,z)
 #define swrite(x,y,z)     write_s(x,y,z)
