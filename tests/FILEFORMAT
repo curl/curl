@@ -83,9 +83,11 @@ NOSAVE
 SLOWDOWN
 PASVBADIP  - makes PASV send back an illegal IP in its 227 response
 
-For HTTP, one specified command is supported:
- "auth_required" - if this is set and a POST/PUT is made without auth, the
- server will NOT wait for the full request body to get sent
+For HTTP:
+auth_required - if this is set and a POST/PUT is made without auth, the
+                server will NOT wait for the full request body to get sent
+idle -          do nothing after receiving the request, just "sit idle"
+stream -        continuously send data to the client, never-ending
 </servercmd>
 </reply>
 

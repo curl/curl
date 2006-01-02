@@ -66,6 +66,13 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
+/*
+ * The normal sws build for the plain standard curl test suite has no use for
+ * fork(), but if you feel wild and crazy and want to setup some more exotic
+ * tests. Define this and run...
+ */
+/*#define CURL_SWS_FORK_ENABLED 1 */
+
 #define REQBUFSIZ 150000
 #define REQBUFSIZ_TXT "149999"
 
@@ -74,6 +81,10 @@ long prevpartno=-1; /* previous part number we served */
 bool prevbounce;    /* instructs the server to increase the part number for
                        a test in case the identical testno+partno request
                        shows up again */
+
+#define RCMD_NORMALREQ 0 /* default request, use the tests file normally */
+#define RCMD_IDLE      1 /* told to sit idle */
+#define RCMD_STREAM    2 /* told to stream */
 
 struct httprequest {
   char reqbuf[REQBUFSIZ]; /* buffer area for the incoming request */
@@ -87,6 +98,8 @@ struct httprequest {
   size_t cl;      /* Content-Length of the incoming request */
   bool digest;    /* Authorization digest header found */
   bool ntlm;      /* Authorization ntlm header found */
+
+  int rcmd;       /* doing a special command, see defines above */
 };
 
 int ProcessRequest(struct httprequest *req);
@@ -112,6 +125,13 @@ const char *serverlogfile = DEFAULT_LOGFILE;
 #define REQUEST_KEYWORD_SIZE 256
 
 #define CMD_AUTH_REQUIRED "auth_required"
+
+/* 'idle' means that it will accept the request fine but never respond
+   any data. Just keep the connection alive. */
+#define CMD_IDLE "idle"
+
+/* 'stream' means to send a never-ending stream of data */
+#define CMD_STREAM "stream"
 
 #define END_OF_HEADERS "\r\n\r\n"
 
@@ -256,6 +276,15 @@ int ProcessRequest(struct httprequest *req)
             logmsg("instructed to require authorization header");
             req->auth_req = TRUE;
           }
+          else if(!strncmp(CMD_IDLE, cmd, strlen(CMD_IDLE))) {
+            logmsg("instructed to idle");
+            req->rcmd = RCMD_IDLE;
+            req->open = TRUE;
+          }
+          else if(!strncmp(CMD_STREAM, cmd, strlen(CMD_STREAM))) {
+            logmsg("instructed to stream");
+            req->rcmd = RCMD_STREAM;
+          }
           free(cmd);
         }
       }
@@ -356,7 +385,7 @@ int ProcessRequest(struct httprequest *req)
     /* If the client is passing this type-3 NTLM header */
     req->partno += 1002;
     req->ntlm = TRUE; /* NTLM found */
-    logmsg("Received NTLM type-3, xxxxxxxxxxxxx sending back data %d", req->partno);
+    logmsg("Received NTLM type-3, sending back data %d", req->partno);
     if(req->cl) {
       logmsg("  Expecting %d POSTed bytes", req->cl);
     }
@@ -478,9 +507,29 @@ static int send_doc(int sock, struct httprequest *req)
 
   char partbuf[80]="data";
 
-  req->open = FALSE;
-
   logmsg("Send response number %d part %d", req->testno, req->partno);
+
+  switch(req->rcmd) {
+  default:
+  case RCMD_NORMALREQ:
+    break; /* continue with business as usual */
+  case RCMD_STREAM:
+#define STREAMTHIS "a string to stream 01234567890\n"
+    count = strlen(STREAMTHIS);
+    while(1) {
+      written = swrite(sock, STREAMTHIS, count);
+      if(written != (int)count) {
+        logmsg("Stopped streaming");
+        return -1;
+      }
+    }
+    break;
+  case RCMD_IDLE:
+    /* Do nothing. Sit idle. Pretend it rains. */
+    return 0;
+  }
+
+  req->open = FALSE;
 
   if(req->testno < 0) {
     switch(req->testno) {
@@ -752,9 +801,24 @@ int main(int argc, char *argv[])
   while (1) {
     msgsock = accept(sock, NULL, NULL);
 
-    if (msgsock == -1)
-      continue;
+    if (msgsock == -1) {
+      printf("MAJOR ERROR: accept() failed!\n");
+      break;
+    }
 
+#ifdef CURL_SWS_FORK_ENABLED
+    /* The fork enabled version just forks off the child and don't care
+       about it anymore, so don't assume otherwise. Beware and don't do
+       this at home. */
+    rc = fork();
+    if(-1 == rc) {
+      printf("MAJOR ERROR: fork() failed!\n");
+      break;
+    }
+
+    /* 0 is returned to the child */
+    if(0 == rc) {
+#endif
     logmsg("====> Client connect");
 
     do {
@@ -792,6 +856,9 @@ int main(int argc, char *argv[])
 
     if (req.testno == DOCNUMBER_QUIT)
       break;
+#ifdef CURL_SWS_FORK_ENABLED
+    }
+#endif
   }
 
   sclose(sock);
