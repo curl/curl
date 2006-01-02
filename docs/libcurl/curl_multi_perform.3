@@ -36,9 +36,9 @@ NOTE that this only returns errors etc regarding the whole multi stack. There
 might still have occurred problems on individual transfers even when this
 function returns OK.
 .SH "TYPICAL USAGE"
-Most application will use \fIcurl_multi_fdset(3)\fP to get the multi_handle's
-file descriptors, then it'll wait for action on them using select() and as
-soon as one or more of them are ready, \fIcurl_multi_perform(3)\fP gets
+Most applications will use \fIcurl_multi_fdset(3)\fP to get the multi_handle's
+file descriptors, then it'll wait for action on them using \fBselect(3)\fP and
+as soon as one or more of them are ready, \fIcurl_multi_perform(3)\fP gets
 called.
 .SH "SEE ALSO"
 .BR curl_multi_cleanup "(3), " curl_multi_init "(3), "

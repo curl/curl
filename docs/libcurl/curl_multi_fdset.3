@@ -1,6 +1,6 @@
 .\" $Id$
 .\"
-.TH curl_multi_fdset 3 "25 Apr 2005" "libcurl 7.9.5" "libcurl Manual"
+.TH curl_multi_fdset 3 "2 Jan 2006" "libcurl 7.16.0" "libcurl Manual"
 .SH NAME
 curl_multi_fdset - extracts file descriptor information from a multi handle
 .SH SYNOPSIS
@@ -30,8 +30,12 @@ rather small (single-digit number of seconds) timeout and call
 \fIcurl_multi_perform\fP regularly - even if no activity has been seen on the
 fd_sets - as otherwise libcurl-internal retries and timeouts may not work as
 you'd think and want.
+
+Starting with libcurl 7.16.0, you should use \fBcurl_multi_timeout\fP to
+figure out how long to wait for action.
 .SH RETURN VALUE
 CURLMcode type, general libcurl multi interface error code. See
 \fIlibcurl-errors(3)\fP
 .SH "SEE ALSO"
-.BR curl_multi_cleanup "(3)," curl_multi_init "(3)"
+.BR curl_multi_cleanup "(3)," curl_multi_init "(3), "
+.BR curl_multi_timeout "(3) "
