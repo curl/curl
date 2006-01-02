@@ -2,7 +2,7 @@
 .\"
 .TH curl_multi_socket 3 "21 Dec 2005" "libcurl 7.16.0" "libcurl Manual"
 .SH NAME
-curl_multi_socket - reads/writes available data
+curl_multi_socket \- reads/writes available data
 .SH SYNOPSIS
 #include <curl/curl.h>
 
@@ -32,23 +32,31 @@ status with changes since the previous time this function was used. If
 \fBcallback\fP is NULL, no callback will be called. A status change may also
 be a new timeout only, having the same IN/OUT status as before.
 
-If a previous wait for socket action(s) timed out, you should call this
-function with the socket argument set to CURL_SOCKET_TIMEOUT. If you want to
-force libcurl to (re-)check all its internal sockets, and call the callback
-with status for all sockets no matter what the previous state is, you call
-curl_multi_socket_all() instead.
+If you want to force libcurl to (re-)check all its internal sockets and
+transfers instead of just a single one, you call
+\fBcurl_multi_socket_all(3)\fP instead.
 
-curl_multi_perform() is the equivalent of calling
-curl_multi_socket_all(handle, NULL, NULL);
+An application should call \fBcurl_multi_timeout(3)\fP to figure out how long
+it should wait for socket actions \- at most \- before doing the timeout
+action: call the \fBcurl_multi_socket(3)\fP function with the \fBsockfd\fP
+argument set to CURL_SOCKET_TIMEOUT and the \fBeasy\fP argument set to
+CURL_EASY_TIMEOUT.
 
-Regarding the timeout argument in the callback: it is the timeout (in
-milliseconds) for waiting on action on this socket (and the given time period
-starts when the callback is called) until you should call curl_multi_socket()
-with the timeout stuff mentioned above. If "actions" happens on the socket
-before the timeout happens, remember that the timout timer keeps ticking until
-told otherwise.
+\fBcurl_multi_perform(3)\fP is the exact equivalent of calling
+\fBcurl_multi_socket_all\fP(handle, NULL, NULL);
 
-The "what" argument has one of five values:
+The socket \fBcallback\fP function uses a prototype like this
+.nf
+
+     int curl_socket_callback(CURL *easy,      /* easy handle */
+                              curl_socket_t s, /* socket */
+                              int action,      /* see values below */
+                              void *userp);    /* "private" pointer */
+
+.fi
+The callback MUST return 0.
+
+The \fIaction\fP (third) argument to the callback has one of five values:
 .RS
 .IP "CURL_POLL_NONE (0)"
 register, not interested in readiness (yet)
@@ -77,6 +85,8 @@ function returns OK.
 Call curl_multi_socket_all() first. Setup a "collection" of sockets to
 supervise, then when action happens call curl_multi_socket() for the easy
 handle that got the action.
+.SH AVAILABILITY
+This function was added in libcurl 7.16.0
 .SH "SEE ALSO"
 .BR curl_multi_cleanup "(3), " curl_multi_init "(3), "
 .BR curl_multi_fdset "(3), " curl_multi_info_read "(3)"
