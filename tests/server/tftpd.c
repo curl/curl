@@ -369,7 +369,7 @@ static int synchnet(curl_socket_t f /* socket to flush */)
   while (1) {
 #if defined(HAVE_IOCTLSOCKET)
     (void) ioctlsocket(f, FIONREAD, &i);
-#else	
+#else
     (void) ioctl(f, FIONREAD, &i);
 #endif
     if (i) {
@@ -753,7 +753,7 @@ static void sendtftp(struct testcase *test, struct formats *pf)
     dp->th_opcode = htons((u_short)DATA);
     dp->th_block = htons((u_short)block);
     timeout = 0;
-#ifdef HAVE_SIGSETJMP	
+#ifdef HAVE_SIGSETJMP
     (void) sigsetjmp(timeoutbuf, 1);
 #endif
     send_data:
@@ -763,13 +763,13 @@ static void sendtftp(struct testcase *test, struct formats *pf)
     }
     read_ahead(test, pf->f_convert);
     for ( ; ; ) {
-#ifdef HAVE_ALARM	
+#ifdef HAVE_ALARM
       alarm(rexmtval);        /* read the ack */
 #endif
       n = recv(peer, ackbuf, sizeof (ackbuf), 0);
-#ifdef HAVE_ALARM	  
+#ifdef HAVE_ALARM
       alarm(0);
-#endif	  
+#endif
       if (n < 0) {
         logmsg("read: fail\n");
         return;
@@ -834,11 +834,11 @@ send_ack:
     }
     write_behind(test, pf->f_convert);
     for ( ; ; ) {
-#ifdef HAVE_ALARM	
+#ifdef HAVE_ALARM
       alarm(rexmtval);
-#endif	  
+#endif
       n = recv(peer, dp, PKTSIZE, 0);
-#ifdef HAVE_ALARM	  
+#ifdef HAVE_ALARM
       alarm(0);
 #endif
       if (n < 0) {                       /* really? */
@@ -877,11 +877,11 @@ send_ack:
 #if defined(HAVE_ALARM) && defined(SIGALRM)
   mysignal(SIGALRM, justquit);           /* just quit on timeout */
   alarm(rexmtval);
-#endif  
+#endif
   n = recv(peer, buf, sizeof (buf), 0);  /* normally times out and quits */
-#ifdef HAVE_ALARM  
+#ifdef HAVE_ALARM
   alarm(0);
-#endif  
+#endif
   if (n >= 4 &&                          /* if read some data */
       dp->th_opcode == DATA &&           /* and got a data block */
       block == dp->th_block) {           /* then my last ack was lost */
