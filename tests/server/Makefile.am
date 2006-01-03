@@ -36,7 +36,7 @@ sws_SOURCES= sws.c util.c util.h $(useful)
 sockfilt_SOURCES = sockfilt.c util.c util.h $(useful)	\
  $(top_srcdir)/lib/inet_pton.c
 getpart_SOURCES= testpart.c $(useful)
-tftpd_SOURCES = tftpd.c util.c util.h $(useful)
+tftpd_SOURCES = tftpd.c util.c util.h $(useful) tftp.h
 
 extra_DIST = base64.pl
 
