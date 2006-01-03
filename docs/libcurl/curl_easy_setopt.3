@@ -169,11 +169,16 @@ added in 7.12.3)
 .IP CURLOPT_PROGRESSFUNCTION
 Function pointer that should match the \fIcurl_progress_callback\fP prototype
 found in \fI<curl/curl.h>\fP. This function gets called by libcurl instead of
-its internal equivalent with a frequent interval during data transfer.
-Unknown/unused argument values will be set to zero (like if you only download
-data, the upload size will remain 0). Returning a non-zero value from this
-callback will cause libcurl to abort the transfer and return
-\fICURLE_ABORTED_BY_CALLBACK\fP.
+its internal equivalent with a frequent interval during data transfer (roughly
+once per second).  Unknown/unused argument values pass to the callback will be
+set to zero (like if you only download data, the upload size will remain
+0). Returning a non-zero value from this callback will cause libcurl to abort
+the transfer and return \fICURLE_ABORTED_BY_CALLBACK\fP.
+
+If you transfer data with the multi interface, this function will not be
+called during periods of idleness unless you call the appropriate libcurl
+function that performs transfers. Usage of the \fBCURLOPT_PROGRESSFUNCTION\fP
+callback is not recommended when using the multi interface.
 
 \fICURLOPT_NOPROGRESS\fP must be set to FALSE to make this function actually
 get called.
