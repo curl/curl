@@ -6,7 +6,7 @@ curl_multi_timeout \- how long to wait for action before proceeding
 .SH SYNOPSIS
 #include <curl/curl.h>
 
-long curl_multi_timeout(CURLM *multi_handle);
+CURLMcode curl_multi_timeout(CURLM *multi_handle, long *timeout);
 .SH DESCRIPTION
 
 An application using the libcurl multi interface should call
@@ -19,9 +19,12 @@ CURL_SOCKET_TIMEOUT and the \fBeasy\fP argument set to CURL_EASY_TIMEOUT, or
 simply calling \fBcurl_multi_perform(3)\fP if you're using the simpler and
 older multi interface approach.
 
+The timeout value returned in the long \fBtimeout\fP points to, is in number
+of milliseconds at this very moment. If 0, it means you should proceed
+immediately without waiting for anything. If it returns -1, there's no timeout
+at all set.
 .SH "RETURN VALUE"
-The timeout value in number of milliseconds. If 0, it means you should proceed
-immediately without waiting for anything.
+The standard CURLMcode for multi interface error codes.
 .SH "TYPICAL USAGE"
 Call \fBcurl_multi_timeout(3)\fP, then wait for action on the sockets. You
 figure out which sockets to wait for by calling \fBcurl_multi_fdset(3)\fP or
