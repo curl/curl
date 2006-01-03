@@ -520,10 +520,10 @@ static int send_doc(int sock, struct httprequest *req)
       written = swrite(sock, STREAMTHIS, count);
       if(written != (int)count) {
         logmsg("Stopped streaming");
-        return -1;
+        break;
       }
     }
-    break;
+    return -1;
   case RCMD_IDLE:
     /* Do nothing. Sit idle. Pretend it rains. */
     return 0;
