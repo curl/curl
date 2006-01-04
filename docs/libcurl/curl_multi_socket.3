@@ -8,7 +8,6 @@ curl_multi_socket \- reads/writes available data
 
 CURLMcode curl_multi_socket(CURLM * multi_handle,
                             curl_socket_t sockfd,
-                            CURL *easy,
                             curl_socket_callback callback,
                             void *userp);
 
@@ -19,11 +18,10 @@ CURLMcode curl_multi_socket_all(CURLM *multi_handle,
 Alternative versions of \fIcurl_multi_perform()\fP that allows the application
 to pass in one of the file descriptors/sockets that have been detected to have
 \&"action" on them and let libcurl perform. This allows libcurl to not have to
-scan through all possible file descriptors to check for action. The
-application is recommended to pass in the \fBeasy\fP argument (or set it to
-CURL_EASY_NONE) to make libcurl figure out the internal structure even faster
-and easier.  If the easy argument is set to something else than
-CURL_EASY_NONE, the \fBsockfd\fP argument will be ignored by libcurl.
+scan through all possible file descriptors to check for action. When the
+application has detected on a socket handled by libcurl, call
+\fIcurl_multi_perform()\fP with the \fBsockfd\fP argument set to the socket
+with the action.
 
 These functions inform the application about updates in the socket (file
 descriptor) status by doing none, one or multiple calls to the
@@ -39,8 +37,7 @@ transfers instead of just a single one, you call
 An application should call \fBcurl_multi_timeout(3)\fP to figure out how long
 it should wait for socket actions \- at most \- before doing the timeout
 action: call the \fBcurl_multi_socket(3)\fP function with the \fBsockfd\fP
-argument set to CURL_SOCKET_TIMEOUT and the \fBeasy\fP argument set to
-CURL_EASY_TIMEOUT.
+argument set to CURL_SOCKET_TIMEOUT.
 
 \fBcurl_multi_perform(3)\fP is the exact equivalent of calling
 \fBcurl_multi_socket_all\fP(handle, NULL, NULL);
