@@ -296,7 +296,7 @@ int main(int argc, char **argv)
     curl_easy_setopt(e, CURLOPT_URL, conns[i].url);
     curl_easy_setopt(e, CURLOPT_WRITEFUNCTION, writecallback);
     curl_easy_setopt(e, CURLOPT_WRITEDATA, &conns[i]);
-#if 0
+#if 1
     curl_easy_setopt(e, CURLOPT_VERBOSE, 1);
 #endif
     curl_easy_setopt(e, CURLOPT_ERRORBUFFER, conns[i].error);
@@ -319,6 +319,7 @@ int main(int argc, char **argv)
   while(still_running == num_total) {
     struct timeval timeout;
     int rc; /* select() return code */
+    long timeout_ms;
 
     fd2_set fdread;
     fd2_set fdwrite;
@@ -329,9 +330,11 @@ int main(int argc, char **argv)
     FD2_ZERO(&fdwrite);
     FD2_ZERO(&fdexcep);
 
-    /* set a suitable timeout to play around with */
-    timeout.tv_sec = 0;
-    timeout.tv_usec = 50000;
+    curl_multi_timeout(multi_handle, &timeout_ms);
+
+    /* set timeout to wait */
+    timeout.tv_sec = timeout_ms/1000;
+    timeout.tv_usec = (timeout_ms%1000)*1000;
 
     /* get file descriptors from the transfers */
     curl_multi_fdset(multi_handle,

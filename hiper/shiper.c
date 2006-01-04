@@ -124,19 +124,18 @@ static void remsock(curl_socket_t s)
 }
 
 static void setsock(struct fdinfo *fdp, curl_socket_t s, CURL *easy,
-                    int action, long timeout)
+                    int action)
 {
   fdp->sockfd = s;
   fdp->action = action;
-  fdp->timeout = timeout;
   fdp->easy = easy;
 }
 
-static void addsock(curl_socket_t s, CURL *easy, int action, long timeout)
+static void addsock(curl_socket_t s, CURL *easy, int action)
 {
   struct fdinfo *fdp = calloc(sizeof(struct fdinfo), 1);
 
-  setsock(fdp, s, easy, action, timeout);
+  setsock(fdp, s, easy, action);
 
   if(allsocks) {
     fdp->next = allsocks;
@@ -190,8 +189,7 @@ static void fdinfo2fdset(fd2_set *fdread, fd2_set *fdwrite, int *maxfd)
 #endif
 }
 
-/* on port 8999 we run a modified (fork-) sws that supports pure idle and full
-   stream mode */
+/* on port 8999 we run a fork enabled sws that supports 'idle' and 'stream' */
 #define PORT "8999"
 
 #define HOST "192.168.1.13"
@@ -203,11 +201,10 @@ static void fdinfo2fdset(fd2_set *fdread, fd2_set *fdwrite, int *maxfd)
 static int socket_callback(CURL *easy,      /* easy handle */
                            curl_socket_t s, /* socket */
                            int what,        /* see above */
-                           long ms,         /* timeout for wait */
                            void *userp)     /* "private" pointer */
 {
   struct fdinfo *fdp;
-  printf("socket %d easy %p what %d timeout %ld\n", s, easy, what, ms);
+  printf("socket %d easy %p what %d\n", s, easy, what);
 
   if(what == CURL_POLL_REMOVE)
     remsock(s);
@@ -215,13 +212,13 @@ static int socket_callback(CURL *easy,      /* easy handle */
     fdp = findsock(s);
 
     if(!fdp) {
-      addsock(s, easy, what, ms);
+      addsock(s, easy, what);
     }
     else {
       /* we already know about it, just change action/timeout */
       printf("Changing info for socket %d from %d to %d\n",
              s, fdp->action, what);
-      setsock(fdp, s, easy, what, ms);
+      setsock(fdp, s, easy, what);
     }
   }
   return 0; /* return code meaning? */
@@ -440,9 +437,7 @@ int main(int argc, char **argv)
     curl_easy_setopt(e, CURLOPT_URL, conns[i].url);
     curl_easy_setopt(e, CURLOPT_WRITEFUNCTION, writecallback);
     curl_easy_setopt(e, CURLOPT_WRITEDATA, &conns[i]);
-#if 0
     curl_easy_setopt(e, CURLOPT_VERBOSE, 1);
-#endif
     curl_easy_setopt(e, CURLOPT_ERRORBUFFER, conns[i].error);
     curl_easy_setopt(e, CURLOPT_PRIVATE, &conns[i]);
 
@@ -464,14 +459,17 @@ int main(int argc, char **argv)
   while(1) {
     struct timeval timeout;
     int rc; /* select() return code */
+    long timeout_ms;
 
     fd2_set fdread;
     fd2_set fdwrite;
     int maxfd;
 
-    /* set a suitable timeout to play around with */
-    timeout.tv_sec = 1;
-    timeout.tv_usec = 0;
+    curl_multi_timeout(multi_handle, &timeout_ms);
+
+    /* set timeout to wait */
+    timeout.tv_sec = timeout_ms/1000;
+    timeout.tv_usec = (timeout_ms%1000)*1000;
 
     /* convert file descriptors from the transfers to fd_sets */
     fdinfo2fdset(&fdread, &fdwrite, &maxfd);
@@ -487,6 +485,10 @@ int main(int argc, char **argv)
       break;
     case 0:
       timeouts++;
+      curl_multi_socket(multi_handle, CURL_SOCKET_TIMEOUT, socket_callback,
+                        NULL);
+      break;
+
     default:
       /* timeout or readable/writable sockets */
 
@@ -505,24 +507,13 @@ int main(int argc, char **argv)
 
         if(act) {
           multi_socket++;
-#if 0
-          printf("multi_socket for %p socket %d (%d)\n",
-                 fdp, fdp->sockfd, act);
-#endif
           timer_continue();
           if(act & CURL_POLL_OUT)
             act--;
-          curl_multi_socket(multi_handle,
-                            CURL_SOCKET_BAD,
-                            fdp->easy,
-                            socket_callback, NULL);
+          curl_multi_socket(multi_handle, fdp->sockfd, socket_callback, NULL);
           timer_pause();
         }
       }
-
-#if 0
-      curl_multi_socket_all(multi_handle, socket_callback, NULL);
-#endif
 
       performselect += rc;
       if(rc > topselect)
