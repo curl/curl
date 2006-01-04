@@ -20,7 +20,7 @@ USE_WATT32  = 0
 CC = cl
 
 CFLAGS  = -nologo -$(CFG_MODEL)$(DEBUG_MODEL) -W3 -Yd -Zi
-LDFLAGS = -machine:i386 -map 
+LDFLAGS = -machine:i386 -map
 
 OBJ_DIR  = VC6_obj
 DEF_FILE = cares.def
@@ -52,6 +52,7 @@ OBJECTS = $(OBJ_DIR)\ares_fds.obj              \
           $(OBJ_DIR)\ares_search.obj           \
           $(OBJ_DIR)\ares__get_hostent.obj     \
           $(OBJ_DIR)\ares_gethostbyaddr.obj    \
+          $(OBJ_DIR)\ares_getsock.obj          \
           $(OBJ_DIR)\ares_send.obj             \
           $(OBJ_DIR)\ares__read_line.obj       \
           $(OBJ_DIR)\ares_gethostbyname.obj    \
@@ -98,6 +99,7 @@ $(DEF_FILE): $(OBJECTS) Makefile.VC6
        @echo   ares_free_string       >> $@
        @echo   ares_gethostbyaddr     >> $@
        @echo   ares_gethostbyname     >> $@
+       @echo   ares_getsock           >> $@
        @echo   ares_init              >> $@
        @echo   ares_init_options      >> $@
        @echo   ares_mkquery           >> $@
