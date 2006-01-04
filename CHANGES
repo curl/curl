@@ -8,6 +8,9 @@
 
 
 
+Daniel (3 January 2006)
+- Andres Garcia made the TFTP test server build with mingw.
+
 Daniel (16 December 2005)
 - Jean Jacques Drouin pointed out that you could only have a user name or
   password of 127 bytes or less embedded in a URL, where actually the code
