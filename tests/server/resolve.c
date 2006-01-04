@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
   }
 #endif
   if(rc)
-    printf("Resolving '%s' FAILED\n", host);
+    printf("Resolving '%s' didn't work\n", host);
 
   return !rc?0:1;
 }
