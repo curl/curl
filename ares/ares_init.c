@@ -504,7 +504,7 @@ DhcpNameServer
   if (status == ARES_SUCCESS)
     status = ARES_EOF;
 
-#elif defined(riscos)
+#elif defined(__riscos__)
 
   /* Under RISC OS, name servers are listed in the
      system variable Inet$Resolvers, space separated. */

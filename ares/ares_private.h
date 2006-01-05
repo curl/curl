@@ -62,6 +62,10 @@
 #define PATH_RESOLV_CONF "sys:/etc/resolv.cfg"
 #define PATH_HOSTS              "sys:/etc/hosts"
 
+#elif defined(__riscos__)
+
+#define PATH_HOSTS             "InetDBase:Hosts"
+
 #else
 
 #define PATH_RESOLV_CONF        "/etc/resolv.conf"

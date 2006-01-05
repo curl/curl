@@ -1,5 +1,10 @@
   Changelog for the c-ares project
 
+* January 5, 2006
+
+- James Bursa fixed c-ares to find the hosts file on RISC OS, and made it
+  build with newer gcc versions that no longer defines "riscos".
+
 * December 22
 
 - Daniel Stenberg added ares_getsock() that extracts the set of sockets to
