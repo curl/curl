@@ -8,6 +8,11 @@
 
 
 
+Daniel (6 January 2006)
+- Alexander Lazic made the buildconf run the buildconf in the ares dir if that
+  is present instead of trying to mimic that script in curl's buildconf
+  script.
+
 Daniel (3 January 2006)
 - Andres Garcia made the TFTP test server build with mingw.
 
