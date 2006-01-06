@@ -226,12 +226,8 @@ ${AUTOCONF:-autoconf}     || die "The autoconf command failed"
 
 if test -d ares; then
   cd ares
-  echo "buildconf: running ares/libtoolize"
-$libtoolize --copy --automake --force || die "The libtoolize command failed"
-  echo "buildconf: running ares/aclocal"
-  ${ACLOCAL:-aclocal} $ACLOCAL_FLAGS || die "The ares aclocal command failed"
-  echo "buildconf: running ares/autoconf"
-  ${AUTOCONF:-autoconf}     || die "The ares autoconf command failed"
+  echo "buildconf: running in ares"
+  ./buildconf
   cd ..
 fi
 
