@@ -8,6 +8,11 @@
 
 
 
+Daniel (7 January 2006)
+- Mike Jean fixed so that the second CONNECT when doing FTP over a HTTP proxy
+  actually used a new connection and not sent the second request on the first
+  socket!
+
 Daniel (6 January 2006)
 - Alexander Lazic made the buildconf run the buildconf in the ares dir if that
   is present instead of trying to mimic that script in curl's buildconf

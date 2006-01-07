@@ -845,8 +845,9 @@ send_buffer *add_buffer_init(void)
 static
 CURLcode add_buffer_send(send_buffer *in,
                          struct connectdata *conn,
-                         long *bytes_written) /* add the number of sent
+                         long *bytes_written, /* add the number of sent
                                                  bytes to this counter */
+                         int socketindex)
 {
   ssize_t amount;
   CURLcode res;
@@ -854,7 +855,11 @@ CURLcode add_buffer_send(send_buffer *in,
   size_t size;
   struct HTTP *http = conn->proto.http;
   size_t sendsize;
-  curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
+  curl_socket_t sockfd;
+
+  curlassert(socketindex <= SECONDARYSOCKET);
+
+  sockfd = conn->sock[socketindex];
 
   /* The looping below is required since we use non-blocking sockets, but due
      to the circumstances we will just loop and try again and again etc */
@@ -1166,7 +1171,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
         if(CURLE_OK == result)
           /* Now send off the request */
           result = add_buffer_send(req_buffer, conn,
-                                   &data->info.request_size);
+                                   &data->info.request_size, sockindex);
       }
       if(result)
         failf(data, "Failed sending CONNECT to proxy");
@@ -2032,7 +2037,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           return result;
 
         result = add_buffer_send(req_buffer, conn,
-                                 &data->info.request_size);
+                                 &data->info.request_size, FIRSTSOCKET);
         if(result)
           failf(data, "Failed sending POST request");
         else
@@ -2097,7 +2102,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
       /* fire away the whole request to the server */
       result = add_buffer_send(req_buffer, conn,
-                               &data->info.request_size);
+                               &data->info.request_size, FIRSTSOCKET);
       if(result)
         failf(data, "Failed sending POST request");
       else
@@ -2141,7 +2146,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
       /* this sends the buffer and frees all the buffer resources */
       result = add_buffer_send(req_buffer, conn,
-                               &data->info.request_size);
+                               &data->info.request_size, FIRSTSOCKET);
       if(result)
         failf(data, "Failed sending PUT request");
       else
@@ -2263,7 +2268,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       }
       /* issue the request */
       result = add_buffer_send(req_buffer, conn,
-                               &data->info.request_size);
+                               &data->info.request_size, FIRSTSOCKET);
 
       if(result)
         failf(data, "Failed sending HTTP POST request");
@@ -2280,7 +2285,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
       /* issue the request */
       result = add_buffer_send(req_buffer, conn,
-                               &data->info.request_size);
+                               &data->info.request_size, FIRSTSOCKET);
 
       if(result)
         failf(data, "Failed sending HTTP request");

@@ -15,6 +15,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o FTP over HTTP proxy now sends the second CONNECT properly
  o numerous compiler warnings and build quirks for various compilers have
    been addressed
  o supports name and passwords up to 255 bytes long, embedded in URLs
@@ -29,6 +30,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Dov Murik, Jean Jacques Drouin, Andres Garcia, Yang Tse, Gisle Vanem, Dan
- Fandrich, Alexander Lazic
+ Fandrich, Alexander Lazic, Mike Jean
  
         Thanks! (and sorry if I forgot to mention someone)
