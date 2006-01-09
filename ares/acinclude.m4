@@ -782,7 +782,7 @@ AC_DEFUN([CARES_CHECK_CONSTANT], [
 dnl This macro determines how many parameters getservbyport_r takes
 AC_DEFUN([CARES_CHECK_GETSERVBYPORT_R], [
   AC_MSG_CHECKING([how many arguments getservbyport_r takes])
-  AC_TRY_COMPILE(
+  AC_TRY_LINK(
     [#include <netdb.h>],
     [
       int p1, p5;
@@ -790,7 +790,7 @@ AC_DEFUN([CARES_CHECK_GETSERVBYPORT_R], [
       struct servent *p3, *p6;
       getservbyport_r(p1, p2, p3, p4, p5, &p6);
     ], ac_func_getservbyport_r=6,
-    [AC_TRY_COMPILE(
+    [AC_TRY_LINK(
       [#include <netdb.h>],
       [
         int p1, p5;
@@ -798,7 +798,7 @@ AC_DEFUN([CARES_CHECK_GETSERVBYPORT_R], [
         struct servent *p3;
         getservbyport_r(p1, p2, p3, p4, p5);
       ], ac_func_getservbyport_r=5,
-      [AC_TRY_COMPILE(
+      [AC_TRY_LINK(
         [#include <netdb.h>],
         [
           int p1;

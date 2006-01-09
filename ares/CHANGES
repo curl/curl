@@ -1,5 +1,9 @@
   Changelog for the c-ares project
 
+* January 9, 2006
+
+- Alexander Lazic improved the getservbyport_r() configure check.
+
 * January 6, 2006
 
 - Alexander Lazic pointed out that the buildconf should use the ACLOCAL_FLAGS
