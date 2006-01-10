@@ -6,7 +6,52 @@
 
                                   Changelog
 
+Daniel (11 January 2006)
+- I decided to document the "secret option" here now, as I've received *NO*
+  feedback at all on my mailing list requests from November 2005:
 
+  I'm looking for feedback and comments. I added some experimental code the
+  other day, that allows a libcurl user to select what method libcurl should
+  use to reach a file on a FTP(S) server.
+
+  This functionality is available in CVS code and in recent daily snapshots.
+
+  Let me explain...
+
+  The current name for the option is CURLOPT_FTP_FILEMETHOD (--ftp-method for
+  the command line tool) and you set it to a long (there are currenly no
+  defines for the argument values, just plain numericals). You can set three
+  different "methods" that do this:
+
+  1 multicwd - like today, curl will do a single CWD operation for each path
+           part in the given URL. For deep hierarchies this means very many
+           commands. This is how RFC1738 says it should be done. This is the
+           default.
+
+  2 nocwd - no CWD at all is done, curl will do SIZE, RETR, STOR etc and give
+           a full path to the server.
+
+  3 singlecwd - make one CWD with the full target directory and then operate
+            on the file "normally".
+
+  (With the command line tool you do --ftp-method [METHOD], where [METHOD] is
+  one of "multicwd", "nocwd" or "singlecwd".)
+
+  What feedback I'm interested in:
+
+  1 - Do they work at all? Do you find servers where one of these don't work?
+
+  2 - What would proper names for the option and its arguments be, if we
+      consider this feature good enough to get included and documented in
+      upcoming releases?
+
+  3 - Should we make libcurl able to "walk through" these options in case of
+      (path related) failures, or should it fail and let the user redo any
+      possible retries?
+
+  (This option is not documented in any man page just yet since I'm not sure
+  these names will be used or if the functionality will end up exactly like
+  this.  And for the same reasons we have no test cases for these yet.)
 
 Daniel (10 January 2006)
 - When using a bad path over FTP, as in when libcurl couldn't CWD into all
