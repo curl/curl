@@ -15,6 +15,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o Doing a second request with FTP on the same bath path, would make libcurl
+   confuse what current working directory it had
  o FTP over HTTP proxy now sends the second CONNECT properly
  o numerous compiler warnings and build quirks for various compilers have
    been addressed
@@ -31,6 +33,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Dov Murik, Jean Jacques Drouin, Andres Garcia, Yang Tse, Gisle Vanem, Dan
- Fandrich, Alexander Lazic, Mike Jean
+ Fandrich, Alexander Lazic, Michael Jahn
  
         Thanks! (and sorry if I forgot to mention someone)

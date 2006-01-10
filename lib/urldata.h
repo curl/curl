@@ -343,6 +343,8 @@ struct FTP {
                        should be FALSE when it gets to Curl_ftp_quit() */
   bool cwddone;     /* if it has been determined that the proper CWD combo
                        already has been done */
+  bool cwdfail;     /* set TRUE if a CWD command fails, as then we must prevent
+                       caching the current directory */
   char *prevpath;   /* conn->path from the previous transfer */
 
   size_t nread_resp; /* number of bytes currently read of a server response */

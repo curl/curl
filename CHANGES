@@ -8,10 +8,20 @@
 
 
 
+Daniel (10 January 2006)
+- When using a bad path over FTP, as in when libcurl couldn't CWD into all
+  given subdirs, libcurl would still "remember" the full path as if it is the
+  current directory libcurl is in so that the next curl_easy_perform() would
+  get really confused if it tried the same path again - as it would not issue
+  any CWD commands at all, assuming it is already in the "proper" dir.
+
+  Starting now, a failed CWD command sets a flag that prevents the path to be
+  "remembered" after returning.
+
 Daniel (7 January 2006)
-- Mike Jean fixed so that the second CONNECT when doing FTP over a HTTP proxy
-  actually used a new connection and not sent the second request on the first
-  socket!
+- Michael Jahn fixed so that the second CONNECT when doing FTP over a HTTP
+  proxy actually used a new connection and not sent the second request on the
+  first socket!
 
 Daniel (6 January 2006)
 - Alexander Lazic made the buildconf run the buildconf in the ares dir if that

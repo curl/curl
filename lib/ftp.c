@@ -2529,6 +2529,8 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
         else {
           /* return failure */
           failf(data, "Server denied you to change to the given directory");
+          ftp->cwdfail = TRUE; /* don't remember this path as we failed
+                                  to enter it */
           return CURLE_FTP_ACCESS_DENIED;
         }
       }
@@ -2815,7 +2817,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status)
 
   flen = ftp->file?strlen(ftp->file):0; /* file is "raw" already */
   dlen = strlen(path)-flen;
-  if(dlen) {
+  if(dlen && !ftp->cwdfail) {
     ftp->prevpath = path;
     if(flen)
       /* if 'path' is not the whole string */
@@ -3664,6 +3666,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
   /* the ftp struct is already inited in ftp_connect() */
   ftp = conn->proto.ftp;
   ftp->ctl_valid = FALSE;
+  ftp->cwdfail = FALSE;
 
   switch(data->set.ftp_filemethod) {
   case FTPFILE_NOCWD:
