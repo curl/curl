@@ -15,6 +15,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o FTP_SKIP_PASV_IP and FTP_USE_EPSV when doing FTP over HTTP proxy
  o Doing a second request with FTP on the same bath path, would make libcurl
    confuse what current working directory it had
  o FTP over HTTP proxy now sends the second CONNECT properly
@@ -28,6 +29,8 @@ Other curl-related news since the previous public release:
  o http://curl.hkmirror.org/ is a new curl web mirror in Hong Kong
  o http://curl.storemypix.com/ is a new curl web mirror in Germany
  o http://curl.s-lines.net/ is a new curl web mirror in Japan
+ o TclCurl 0.15.1 was released:
+   http://personal1.iddeo.es/andresgarci/tclcurl/english/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:

@@ -7,9 +7,13 @@
                                   Changelog
 
 Daniel (12 January 2006)
-- Michael Jahn fixed PROXYTUNNEL to work fine when you do ftp through a proxy.
-  It would previously overwrite internal memory and cause unpredicted
-  behaviour!
+- Michael Jahn:
+
+  Fixed FTP_SKIP_PASV_IP and FTP_USE_EPSV to "do right" when used on FTP thru
+  HTTP proxy.
+
+  Fixed PROXYTUNNEL to work fine when you do ftp through a proxy.  It would
+  previously overwrite internal memory and cause unpredicted behaviour!
 
 Daniel (11 January 2006)
 - I decided to document the "secret option" here now, as I've received *NO*
