@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (12 January 2006)
+- Michael Jahn fixed PROXYTUNNEL to work fine when you do ftp through a proxy.
+  It would previously overwrite internal memory and cause unpredicted
+  behaviour!
+
 Daniel (11 January 2006)
 - I decided to document the "secret option" here now, as I've received *NO*
   feedback at all on my mailing list requests from November 2005:

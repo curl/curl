@@ -1675,7 +1675,22 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
 
     /* BLOCKING */
     /* We want "seamless" FTP operations through HTTP proxy tunnel */
+
+    /* Curl_proxyCONNECT is based on a pointer to a struct HTTP at the member
+     * conn->proto.http; we want FTP through HTTP and we have to change the
+     * member temporarily for connecting to the HTTP proxy. After
+     * Curl_proxyCONNECT we have to set back the member to the original struct
+     * FTP pointer
+     */
+    struct HTTP http_proxy;
+    struct FTP *ftp_save = conn->proto.ftp;
+    memset(&http_proxy, 0, sizeof(http_proxy));
+    conn->proto.http = &http_proxy;
+
     result = Curl_proxyCONNECT(conn, SECONDARYSOCKET, newhost, newport);
+
+    conn->proto.ftp = ftp_save;
+
     if(CURLE_OK != result)
       return result;
   }
@@ -2726,6 +2741,11 @@ CURLcode Curl_ftp_connect(struct connectdata *conn,
 {
   struct FTP *ftp;
   CURLcode result;
+#ifndef CURL_DISABLE_HTTP
+  /* for FTP over HTTP proxy */
+  struct HTTP http_proxy;
+  struct FTP *ftp_save;
+#endif   /* CURL_DISABLE_HTTP */
 
   *done = FALSE; /* default to not done yet */
 
@@ -2753,8 +2773,22 @@ CURLcode Curl_ftp_connect(struct connectdata *conn,
   if (conn->bits.tunnel_proxy) {
     /* BLOCKING */
     /* We want "seamless" FTP operations through HTTP proxy tunnel */
+
+    /* Curl_proxyCONNECT is based on a pointer to a struct HTTP at the member
+     * conn->proto.http; we want FTP through HTTP and we have to change the
+     * member temporarily for connecting to the HTTP proxy. After
+     * Curl_proxyCONNECT we have to set back the member to the original struct
+     * FTP pointer
+     */
+    ftp_save = conn->proto.ftp;
+    memset(&http_proxy, 0, sizeof(http_proxy));
+    conn->proto.http = &http_proxy;
+
     result = Curl_proxyCONNECT(conn, FIRSTSOCKET,
                                conn->host.name, conn->remote_port);
+
+    conn->proto.ftp = ftp_save;
+
     if(CURLE_OK != result)
       return result;
   }
