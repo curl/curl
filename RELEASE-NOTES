@@ -15,6 +15,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o test suite kill race condition
  o FTP_SKIP_PASV_IP and FTP_USE_EPSV when doing FTP over HTTP proxy
  o Doing a second request with FTP on the same bath path, would make libcurl
    confuse what current working directory it had
@@ -36,6 +37,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Dov Murik, Jean Jacques Drouin, Andres Garcia, Yang Tse, Gisle Vanem, Dan
- Fandrich, Alexander Lazic, Michael Jahn
+ Fandrich, Alexander Lazic, Michael Jahn, Andrew Benham
  
         Thanks! (and sorry if I forgot to mention someone)

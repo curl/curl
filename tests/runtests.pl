@@ -249,9 +249,10 @@ sub startnew {
             open(PID, "<$pidfile");
             $pid2 = 0 + <PID>;
             close(PID);
-            if(kill(0, $pid2)) {
-                # make sure this pid is alive, as otherwise it is just likely
-                # to be the _previous_ pidfile or similar!
+            if($pid2 && kill(0, $pid2)) {
+                # if $pid2 is valid, then make sure this pid is alive, as
+                # otherwise it is just likely to be the _previous_ pidfile or
+                # similar!
                 last;
             }
         }
