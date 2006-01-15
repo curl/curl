@@ -104,7 +104,8 @@ static struct fdinfo *findsock(curl_socket_t s)
 
 static void remsock(curl_socket_t s)
 {
-  struct fdinfo *fdp;
+  struct fdinfo *fdp = allsocks;
+
   while(fdp) {
     if(fdp->sockfd == s)
       break;
@@ -437,7 +438,7 @@ int main(int argc, char **argv)
     curl_easy_setopt(e, CURLOPT_URL, conns[i].url);
     curl_easy_setopt(e, CURLOPT_WRITEFUNCTION, writecallback);
     curl_easy_setopt(e, CURLOPT_WRITEDATA, &conns[i]);
-    curl_easy_setopt(e, CURLOPT_VERBOSE, 1);
+    curl_easy_setopt(e, CURLOPT_VERBOSE, 0);
     curl_easy_setopt(e, CURLOPT_ERRORBUFFER, conns[i].error);
     curl_easy_setopt(e, CURLOPT_PRIVATE, &conns[i]);
 
@@ -448,9 +449,11 @@ int main(int argc, char **argv)
     }
   }
 
+  curl_multi_setopt(multi_handle, CURLMOPT_SOCKETFUNCTION, socket_callback);
+  curl_multi_setopt(multi_handle, CURLMOPT_SOCKETDATA, NULL);
+
   /* we start the action by calling *socket() right away */
-  while(CURLM_CALL_MULTI_PERFORM ==
-        curl_multi_socket_all(multi_handle, socket_callback, NULL));
+  while(CURLM_CALL_MULTI_PERFORM == curl_multi_socket_all(multi_handle));
 
   printf("Starting timer, expects to run for %ldus\n", RUN_FOR_THIS_LONG);
   timer_start();
@@ -485,8 +488,7 @@ int main(int argc, char **argv)
       break;
     case 0:
       timeouts++;
-      curl_multi_socket(multi_handle, CURL_SOCKET_TIMEOUT, socket_callback,
-                        NULL);
+      curl_multi_socket(multi_handle, CURL_SOCKET_TIMEOUT);
       break;
 
     default:
@@ -510,7 +512,7 @@ int main(int argc, char **argv)
           timer_continue();
           if(act & CURL_POLL_OUT)
             act--;
-          curl_multi_socket(multi_handle, fdp->sockfd, socket_callback, NULL);
+          curl_multi_socket(multi_handle, fdp->sockfd);
           timer_pause();
         }
       }
