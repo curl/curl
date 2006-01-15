@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel (16 January 2006)
+- Bryan Henderson turned the 'initialized' variable for curl_global_init()
+  into a counter, and thus you can now do multiple curl_global_init() and you
+  are then supposed to do the same amount of calls to curl_global_cleanup().
+  Bryan has also updated the docs accordingly.
+
 Daniel (13 January 2006)
 - Andrew Benham fixed a race condition in the test suite that could cause the
   test script to kill all processes in the current process group!

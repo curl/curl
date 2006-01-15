@@ -13,10 +13,11 @@ in-depth understanding on how to program with libcurl.
 There are more than a twenty custom bindings available that bring libcurl
 access to your favourite language. Look elsewhere for documentation on those.
 
-All applications that use libcurl should call \fIcurl_global_init(3)\fP
-exactly once before any libcurl function can be used. After all usage of
-libcurl is complete, it \fBmust\fP call \fIcurl_global_cleanup(3)\fP. In
-between those two calls, you can use libcurl as described below.
+libcurl has a global constant environment that you must set up and
+maintain while using libcurl.  This essentially means you call
+\fIcurl_global_init(3)\fP at the start of your program and
+\fIcurl_global_cleanup(3)\fP at the end.  See GLOBAL CONSTANTS below
+for details.
 
 To transfer files, you always set up an "easy handle" using
 \fIcurl_easy_init(3)\fP, but when you want the file(s) transferred you have
@@ -86,6 +87,10 @@ Never ever call curl-functions simultaneously using the same handle from
 several threads. libcurl is thread-safe and can be used in any number of
 threads, but you must use separate curl handles if you want to use libcurl in
 more than one thread simultaneously.
+
+The global environment functions are not thread-safe.  See GLOBAL CONSTANTS
+below for details.
+
 .SH "PERSISTENT CONNECTIONS"
 Persistent connections means that libcurl can re-use the same connection for
 several transfers, if the conditions are right.
@@ -103,3 +108,96 @@ libcurl will be closed and forgotten.
 
 Note that the options set with \fIcurl_easy_setopt(3)\fP will be used in on
 every repeated \fIcurl_easy_perform(3)\fP call.
+
+.SH "GLOBAL CONSTANTS"
+There are a variety of constants that libcurl uses, mainly through its
+internal use of other libraries, which are too complicated for the
+library loader to set up.  Therefore, a program must call a library
+function after the program is loaded and running to finish setting up
+the library code.  For example, when libcurl is built for SSL
+capability via the GNU TLS library, there is an elaborate tree inside
+that library that describes the SSL protocol.
+
+\fIcurl_global_init()\fP is the function that you must call.  This may
+allocate resources (e.g. the memory for the GNU TLS tree mentioned
+above), so the companion function \fIcurl_global_cleanup()\fP releases
+them.
+
+The basic rule for constructing a program that uses libcurl is this:
+Call \fIcurl_global_init()\fP, with a \fICURL_GLOBAL_ALL\fP argument,
+immediately after the program starts, while it is still only one
+thread and before it uses libcurl at all.  Call
+\fIcurl_global_cleanup()\fP immediately before the program exits, when
+the program is again only one thread and after its last use of
+libcurl.
+
+You can call both of these multiple times, as long as all calls meet
+these requirements and the number of calls to each is the same.
+
+It isn't actually required that the functions be called at the beginning
+and end of the program -- that's just usually the easiest way to do it.
+It \fIis\fP required that the functions be called when no other thread
+in the program is running.
+
+These global constant functions are \fInot thread safe\fP, so you must
+not call them when any other thread in the program is running.  It
+isn't good enough that no other thread is using libcurl at the time,
+because these functions internally call similar functions of other
+libraries, and those functions are similarly thread-unsafe.  You can't
+generally know what these libraries are, or whether other threads are
+using them.
+
+The global constant situation merits special consideration when the
+code you are writing to use libcurl is not the main program, but rather
+a modular piece of a program, e.g. another library.  As a module,
+your code doesn't know about other parts of the program -- it doesn't
+know whether they use libcurl or not.  And its code doesn't necessarily
+run at the start and end of the whole program.
+
+A module like this must have global constant functions of its own,
+just like \fIcurl_global_init()\fP and \fIcurl_global_cleanup()\fP.
+The module thus has control at the beginning and end of the program
+and has a place to call the libcurl functions.  Note that if multiple
+modules in the program use libcurl, they all will separately call the
+libcurl functions, and that's OK because only the first
+\fIcurl_global_init()\fP and the last \fIcurl_global_cleanup()\fP in a
+program changes anything.  (libcurl uses a reference count in static
+memory).
+
+In a C++ module, it is common to deal with the global constant
+situation by defining a special class that represents the global
+constant environment of the module.  A program always has exactly one
+object of the class, in static storage.  That way, the program
+automatically calls the constructor of the object as the program
+starts up and the destructor as it terminates.  As the author of this
+libcurl-using module, you can make the constructor call
+\fIcurl_global_init()\fP and the destructor call
+\fIcurl_global_cleanup()\fP and satisfy libcurl's requirements without
+your user having to think about it.
+
+\fIcurl_global_init()\fP has an argument that tells what particular
+parts of the global constant environment to set up.  In order to
+successfully use any value except \fICURL_GLOBAL_ALL\fP (which says to
+set up the whole thing), you must have specific knowledge of internal
+workings of libcurl and all other parts of the program of which it is
+part.
+
+A special part of the global constant environment is the identity of
+the memory allocator.  \fIcurl_global_init()\fP selects the system
+default memory allocator, but you can use \fIcurl_global_init_mem()\fP
+to supply one of your own.  However, there is no way to use
+\fIcurl_global_init_mem()\fP in a modular program -- all modules in
+the program that might use libcurl would have to agree on one
+allocator.
+
+There is a failsafe in libcurl that makes it usable in simple
+situations without you having to worry about the global constant
+environment at all: \fIcurl_easy_init()\fP sets up the environment
+itself if it hasn't been done yet.  The resources it acquires to do so
+get released by the operating system automatically when the program
+exits.
+
+This failsafe feature exists mainly for backward compatibility because
+there was a time when the global functions didn't exist.  Because it
+is sufficient only in the simplest of programs, it is not recommended
+for any program to rely on it.

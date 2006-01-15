@@ -190,7 +190,7 @@ curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
  */
 CURLcode curl_global_init(long flags)
 {
-  if (initialized)
+  if (initialized++)
     return CURLE_OK;
 
   /* Setup the default memory functions here (again) */
@@ -217,7 +217,6 @@ CURLcode curl_global_init(long flags)
   idna_init();
 #endif
 
-  initialized = 1;
   init_flags  = flags;
 
   return CURLE_OK;
@@ -263,6 +262,9 @@ void curl_global_cleanup(void)
   if (!initialized)
     return;
 
+  if (--initialized)
+    return;
+
   Curl_global_host_cache_dtor();
 
   if (init_flags & CURL_GLOBAL_SSL)
@@ -275,7 +277,6 @@ void curl_global_cleanup(void)
   amiga_cleanup();
 #endif
 
-  initialized = 0;
   init_flags  = 0;
 }
 
