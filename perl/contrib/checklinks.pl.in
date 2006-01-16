@@ -269,7 +269,7 @@ for(@links) {
 
     if($url =~ /^([^:]+):/) {
 	$prot = $1;
-#	if($prot !~ /(http|ftp|gopher)/i) {
+#	if($prot !~ /(http|ftp)/i) {
 	if($prot !~ /http/i) {
 	    # this is an unsupported protocol, we ignore this
 	    next linkloop;

@@ -23,10 +23,6 @@ SIMPLE USAGE
 
         curl ftp://cool.haxx.se/
 
-  Get a gopher document from funet's gopher server:
-
-        curl gopher://gopher.funet.fi
-
   Get the definition of curl from a dictionary:
 
         curl dict://dict.org/m:curl
@@ -93,10 +89,6 @@ USING PASSWORDS
  HTTPS
 
    Probably most commonly used with private certificates, as explained below.
-
- GOPHER
-
-   Curl features no password support for gopher.
 
 PROXY
 
@@ -748,7 +740,7 @@ ENVIRONMENT VARIABLES
 
   Curl reads and understands the following environment variables:
 
-        http_proxy, HTTPS_PROXY, FTP_PROXY, GOPHER_PROXY
+        http_proxy, HTTPS_PROXY, FTP_PROXY
 
   They should be set for protocol-specific proxies. General proxy should be
   set with

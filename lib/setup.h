@@ -30,7 +30,6 @@
 #define CURL_DISABLE_TELNET
 #define CURL_DISABLE_DICT
 #define CURL_DISABLE_FILE
-#define CURL_DISABLE_GOPHER
 #endif /* HTTP_ONLY */
 
 #if !defined(WIN32) && defined(__WIN32__)
@@ -355,10 +354,6 @@ typedef int curl_socket_t;
 #if defined(USE_SSLEAY) || defined(USE_WINDOWS_SSPI)
 #define USE_NTLM
 #endif
-#endif
-
-#if defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_GOPHER)
-#define CURL_DISABLE_GOPHER
 #endif
 
 #ifdef CURLDEBUG

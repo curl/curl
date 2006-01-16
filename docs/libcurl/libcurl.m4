@@ -46,7 +46,6 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
   AH_TEMPLATE([LIBCURL_PROTOCOL_HTTPS],[Defined if libcurl supports HTTPS])
   AH_TEMPLATE([LIBCURL_PROTOCOL_FTP],[Defined if libcurl supports FTP])
   AH_TEMPLATE([LIBCURL_PROTOCOL_FTPS],[Defined if libcurl supports FTPS])
-  AH_TEMPLATE([LIBCURL_PROTOCOL_GOPHER],[Defined if libcurl supports GOPHER])
   AH_TEMPLATE([LIBCURL_PROTOCOL_FILE],[Defined if libcurl supports FILE])
   AH_TEMPLATE([LIBCURL_PROTOCOL_TELNET],[Defined if libcurl supports TELNET])
   AH_TEMPLATE([LIBCURL_PROTOCOL_LDAP],[Defined if libcurl supports LDAP])
@@ -188,7 +187,7 @@ x=CURLOPT_VERBOSE;
 
 	      # We don't have --protocols, so just assume that all
 	      # protocols are available
-	      _libcurl_protocols="HTTP FTP GOPHER FILE TELNET LDAP DICT"
+	      _libcurl_protocols="HTTP FTP FILE TELNET LDAP DICT"
 
 	      if test x$libcurl_feature_SSL = xyes ; then
 	         _libcurl_protocols="$_libcurl_protocols HTTPS"

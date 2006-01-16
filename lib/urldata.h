@@ -30,7 +30,6 @@
 #define PORT_FTP 21
 #define PORT_FTPS 990
 #define PORT_TELNET 23
-#define PORT_GOPHER 70
 #define PORT_HTTP 80
 #define PORT_HTTPS 443
 #define PORT_DICT 2628
@@ -541,7 +540,6 @@ struct connectdata {
 
   long protocol; /* PROT_* flags concerning the protocol set */
 #define PROT_MISSING (1<<0)
-#define PROT_GOPHER  (1<<1)
 #define PROT_HTTP    (1<<2)
 #define PROT_HTTPS   (1<<3)
 #define PROT_FTP     (1<<4)
@@ -703,7 +701,6 @@ struct connectdata {
   /* previously this was in the urldata struct */
   union {
     struct HTTP *http;
-    struct HTTP *gopher; /* alias, just for the sake of being more readable */
     struct HTTP *https;  /* alias, just for the sake of being more readable */
     struct FTP *ftp;
     void *tftp;        /* private for tftp.c-eyes only */

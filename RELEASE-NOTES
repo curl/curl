@@ -11,6 +11,7 @@ Curl and libcurl 7.15.2
 
 This release includes the following changes:
 
+ o Gopher is now officially abandoned as a protocol (lib)curl tries to support.
  o curl_global_init() and curl_global_cleanup() are now using a refcount so
    that it is now legal to call them multiple times. See updated info for
    details.
@@ -39,6 +40,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Dov Murik, Jean Jacques Drouin, Andres Garcia, Yang Tse, Gisle Vanem, Dan
- Fandrich, Alexander Lazic, Michael Jahn, Andrew Benham, Bryan Henderson
+ Fandrich, Alexander Lazic, Michael Jahn, Andrew Benham, Bryan Henderson,
+ David Shaw
  
         Thanks! (and sorry if I forgot to mention someone)

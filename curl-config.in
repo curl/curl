@@ -101,9 +101,6 @@ while test $# -gt 0; do
             echo "FTPS"
           fi
         fi
-	if test "@CURL_DISABLE_GOPHER@" != "1"; then
-          echo "GOPHER"
-        fi
 	if test "@CURL_DISABLE_FILE@" != "1"; then
           echo "FILE"
         fi

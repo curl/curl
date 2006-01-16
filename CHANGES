@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel (16 January 2006)
+- David Shaw finally removed all traces of Gopher and we are now officially
+  not supporting it. It hasn't been functioning for years anyway, so this is
+  just finally stating what already was true. And a cleanup at the same time.
+
 - Bryan Henderson turned the 'initialized' variable for curl_global_init()
   into a counter, and thus you can now do multiple curl_global_init() and you
   are then supposed to do the same amount of calls to curl_global_cleanup().

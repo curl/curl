@@ -5,7 +5,7 @@
 
 %define builddir $RPM_BUILD_DIR/%{name}-%{version}
 
-Summary: get a file from a FTP, GOPHER or HTTP server.
+Summary: get a file from an FTP or HTTP server.
 Name: %{name}
 Version: %{version}
 Release: %{release}

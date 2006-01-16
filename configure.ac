@@ -185,10 +185,8 @@ AC_HELP_STRING([--disable-http],[Disable HTTP support]),
   no)
        AC_MSG_RESULT(no)
        AC_DEFINE(CURL_DISABLE_HTTP, 1, [to disable HTTP])
-       AC_MSG_WARN([disable HTTP disables FTP over proxy and GOPHER too])
-       AC_DEFINE(CURL_DISABLE_GOPHER, 1, [to disable GOPHER])
+       AC_MSG_WARN([disable HTTP disables FTP over proxy])
        AC_SUBST(CURL_DISABLE_HTTP, [1])
-       AC_SUBST(CURL_DISABLE_GOPHER, [1])
        ;;
   *)   AC_MSG_RESULT(yes)
        ;;
@@ -204,21 +202,6 @@ AC_HELP_STRING([--disable-ftp],[Disable FTP support]),
        AC_MSG_RESULT(no)
        AC_DEFINE(CURL_DISABLE_FTP, 1, [to disable FTP])
        AC_SUBST(CURL_DISABLE_FTP, [1])
-       ;;
-  *)   AC_MSG_RESULT(yes)
-       ;;
-  esac ],
-       AC_MSG_RESULT(yes)
-)
-AC_MSG_CHECKING([whether to support gopher])
-AC_ARG_ENABLE(gopher,
-AC_HELP_STRING([--enable-gopher],[Enable GOPHER support])
-AC_HELP_STRING([--disable-gopher],[Disable GOPHER support]),
-[ case "$enableval" in
-  no)
-       AC_MSG_RESULT(no)
-       AC_DEFINE(CURL_DISABLE_GOPHER, 1, [to disable GOPHER])
-       AC_SUBST(CURL_DISABLE_GOPHER, [1])
        ;;
   *)   AC_MSG_RESULT(yes)
        ;;

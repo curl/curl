@@ -87,9 +87,6 @@ static const char * const protocols[] = {
 #ifndef CURL_DISABLE_FTP
   "ftp",
 #endif
-#ifndef CURL_DISABLE_GOPHER
-  "gopher",
-#endif
 #ifndef CURL_DISABLE_TELNET
   "telnet",
 #endif

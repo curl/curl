@@ -1,5 +1,5 @@
 Curl is a tool for transferring files with URL syntax, supporting 
-  FTP, FTPS, HTTP, HTTPS, GOPHER, TELNET, DICT, FILE and LDAP.
+  FTP, FTPS, HTTP, HTTPS, TELNET, DICT, FILE and LDAP.
   Curl supports HTTPS certificates, HTTP POST, HTTP PUT, 
   FTP uploading, kerberos, HTTP form based upload, proxies, 
   cookies, user+password authentication, file transfer resume,
@@ -91,7 +91,7 @@ Packaging Instructions:
   @ curl
   sdesc: "a client that groks URLs"
   ldesc: "Curl is a tool for transferring files with URL syntax,
-  supporting FTP, FTPS, HTTP, HTTPS, GOPHER, TELNET, DICT, FILE 
+  supporting FTP, FTPS, HTTP, HTTPS, TELNET, DICT, FILE 
   and LDAP. Curl supports HTTPS certificates, HTTP POST, HTTP PUT, 
   FTP uploading, kerberos, HTTP form based upload, proxies, 
   cookies, user+password authentication, file transfer resume,

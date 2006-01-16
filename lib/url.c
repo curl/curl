@@ -2485,14 +2485,12 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       /* Note: if you add a new protocol, please update the list in
        * lib/version.c too! */
 
-      if(checkprefix("GOPHER.", conn->host.name))
-        strcpy(conn->protostr, "gopher");
+      if(checkprefix("FTP.", conn->host.name))
+        strcpy(conn->protostr, "ftp");
 #ifdef USE_SSL
       else if(checkprefix("FTPS", conn->host.name))
         strcpy(conn->protostr, "ftps");
 #endif /* USE_SSL */
-      else if(checkprefix("FTP.", conn->host.name))
-        strcpy(conn->protostr, "ftp");
       else if(checkprefix("TELNET.", conn->host.name))
         strcpy(conn->protostr, "telnet");
       else if (checkprefix("DICT.", conn->host.name))
@@ -2596,7 +2594,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      * http_proxy=http://some.server.dom:port/
      * https_proxy=http://some.server.dom:port/
      * ftp_proxy=http://some.server.dom:port/
-     * gopher_proxy=http://some.server.dom:port/
      * no_proxy=domain1.dom,host.domain2.dom
      *   (a comma-separated list of hosts which should
      *   not be proxied, or an asterisk to override
@@ -2778,25 +2775,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
           " was built with SSL disabled, https: not supported!");
     return CURLE_UNSUPPORTED_PROTOCOL;
 #endif /* !USE_SSL */
-  }
-  else if (strequal(conn->protostr, "GOPHER")) {
-#ifndef CURL_DISABLE_GOPHER
-    conn->port = PORT_GOPHER;
-    conn->remote_port = PORT_GOPHER;
-    /* Skip /<item-type>/ in path if present */
-    if (isdigit((int)conn->path[1])) {
-      conn->path = strchr(&conn->path[1], '/');
-      if (conn->path == NULL)
-        conn->path = conn->pathbuffer;
-    }
-    conn->protocol |= PROT_GOPHER;
-    conn->curl_do = Curl_http;
-    conn->curl_do_more = NULL;
-    conn->curl_done = Curl_http_done;
-#else
-    failf(data, LIBCURL_NAME
-          " was built with GOPHER disabled, gopher: not supported!");
-#endif
   }
   else if(strequal(conn->protostr, "FTP") ||
           strequal(conn->protostr, "FTPS")) {

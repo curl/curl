@@ -109,10 +109,6 @@ LDAP (*2)
 DICT
  - extended DICT URL support
 
-GOPHER
- - GET
- - via http-proxy
-
 FILE
  - URL support
  - "uploads"

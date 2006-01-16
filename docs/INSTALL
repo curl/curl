@@ -260,7 +260,6 @@ Win32
    CURL_DISABLE_TELNET   disables TELNET
    CURL_DISABLE_DICT     disables DICT
    CURL_DISABLE_FILE     disables FILE
-   CURL_DISABLE_GOPHER   disables GOPHER
 
    If you want to set any of these defines you have the following
    possibilities:

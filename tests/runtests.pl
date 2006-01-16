@@ -204,7 +204,7 @@ $SIG{KILL} = \&catch_zap;
 # to prevent them to interfere with our testing!
 
 my $protocol;
-foreach $protocol (('ftp', 'http', 'ftps', 'https', 'gopher', 'no')) {
+foreach $protocol (('ftp', 'http', 'ftps', 'https', 'no')) {
     my $proxy = "${protocol}_proxy";
     # clear lowercase version
     $ENV{$proxy}=undef;
