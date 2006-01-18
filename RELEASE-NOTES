@@ -18,6 +18,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o libcurl.m4 was updated
  o configure no longer warns if the current path contains a space
  o test suite kill race condition
  o FTP_SKIP_PASV_IP and FTP_USE_EPSV when doing FTP over HTTP proxy

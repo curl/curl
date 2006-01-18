@@ -18,6 +18,12 @@ Daniel (18 January 2006)
   automake version that is used and that is gonna be painful and I don't even
   want to think about that now...!
 
+Daniel (17 January 2006)
+- David Shaw: Here is the latest libcurl.m4 autoconf tests. It is updated with
+  the latest features and protocols that libcurl supports and has a minor fix
+  to better deal with the obscure case where someone has more than one libcurl
+  installed at the same time.
+
 Daniel (16 January 2006)
 - David Shaw finally removed all traces of Gopher and we are now officially
   not supporting it. It hasn't been functioning for years anyway, so this is
