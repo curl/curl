@@ -6,6 +6,18 @@
 
                                   Changelog
 
+Daniel (18 January 2006)
+- As reported in bug #1408742 (http://curl.haxx.se/bug/view.cgi?id=1408742),
+  the configure script complained about a missing "missing" script if you ran
+  configure within a path whose name included one or more spaces. This is due
+  to a flaw in automake (1.9.6 and earlier). I've now worked around it by
+  including an "overloaded" version of the AM_MISSING_HAS_RUN script that'll
+  be used instead of the one automake ships with. This kludge needs to be
+  removed once we get an automake version with this problem corrected.
+  Possibly we'll then need to convert this into a kludge depending on what
+  automake version that is used and that is gonna be painful and I don't even
+  want to think about that now...!
+
 Daniel (16 January 2006)
 - David Shaw finally removed all traces of Gopher and we are now officially
   not supporting it. It hasn't been functioning for years anyway, so this is

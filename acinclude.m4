@@ -1302,3 +1302,19 @@ else
   AC_MSG_RESULT($DLFOUNDFILE)
 fi
 ])
+
+# This is only a temporary fix. This macro is here to replace the broken one
+# delivered by the automake project (including the 1.9.6 release). As soon as
+# they ship a working version we SHOULD remove this work-around.
+
+AC_DEFUN([AM_MISSING_HAS_RUN],
+[AC_REQUIRE([AM_AUX_DIR_EXPAND])dnl
+test x"${MISSING+set}" = xset || MISSING="\${SHELL} \"$am_aux_dir/missing\""
+# Use eval to expand $SHELL
+if eval "$MISSING --run true"; then
+  am_missing_run="$MISSING --run "
+else
+  am_missing_run=
+  AC_MSG_WARN([`missing' script is too old or missing])
+fi
+])
