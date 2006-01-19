@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -426,9 +426,6 @@ struct ConnectBits {
 
   bool ftp_use_eprt;  /* As set with CURLOPT_FTP_USE_EPRT, but if we find out
                          EPRT doesn't work we disable it for the forthcoming
-                         requests */
-  bool ftp_use_lprt;  /* As set with CURLOPT_FTP_USE_EPRT, but if we find out
-                         LPRT doesn't work we disable it for the forthcoming
                          requests */
   bool netrc;         /* name+password provided by netrc */
 
@@ -1075,7 +1072,6 @@ struct UserDefined {
   bool expect100header;  /* TRUE if we added Expect: 100-continue */
   bool ftp_use_epsv;     /* if EPSV is to be attempted or not */
   bool ftp_use_eprt;     /* if EPRT is to be attempted or not */
-  bool ftp_use_lprt;     /* if LPRT is to be attempted or not */
   curl_ftpssl ftp_ssl;   /* if AUTH TLS is to be attempted etc */
   curl_ftpauth ftpsslauth; /* what AUTH XXX to be attempted */
   bool no_signal;        /* do not use any signal/alarm handler */

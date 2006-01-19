@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -763,7 +763,11 @@ static CURLcode ftp_state_cwd(struct connectdata *conn)
   return result;
 }
 
-typedef enum { EPRT, LPRT, PORT, DONE } ftpport;
+typedef enum {
+  EPRT,
+  PORT,
+  DONE
+} ftpport;
 
 static CURLcode ftp_state_use_port(struct connectdata *conn,
                                    ftpport fcmd) /* start with this */
@@ -773,6 +777,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   struct FTP *ftp = conn->proto.ftp;
   struct SessionHandle *data=conn->data;
   curl_socket_t portsock= CURL_SOCKET_BAD;
+  char myhost[256] = "";
 
 #ifdef ENABLE_IPV6
   /******************************************************************
@@ -783,14 +788,15 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   socklen_t sslen;
   char hbuf[NI_MAXHOST];
   struct sockaddr *sa=(struct sockaddr *)&ss;
-  unsigned char *ap;
-  unsigned char *pp;
-  char portmsgbuf[1024], tmp[1024];
-  const char *mode[] = { "EPRT", "LPRT", "PORT", NULL };
+  char tmp[1024];
+  const char *mode[] = { "EPRT", "PORT", NULL };
   int rc;
   int error;
   char *host=NULL;
   struct Curl_dns_entry *h=NULL;
+  unsigned short port;
+
+  /* Step 1, figure out what address that is requested */
 
   if(data->set.ftpport && (strlen(data->set.ftpport) > 1)) {
     /* attempt to get the address of the given interface name */
@@ -833,6 +839,9 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   else
     res = NULL; /* failure! */
 
+
+  /* step 2, create a socket for the requested address */
+
   portsock = CURL_SOCKET_BAD;
   error = 0;
   for (ai = res; ai; ai = ai->ai_next) {
@@ -847,34 +856,64 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
       error = Curl_ourerrno();
       continue;
     }
-
-    if (bind(portsock, ai->ai_addr, ai->ai_addrlen) < 0) {
-      error = Curl_ourerrno();
-      sclose(portsock);
-      portsock = CURL_SOCKET_BAD;
-      continue;
-    }
-
-    if (listen(portsock, 1) < 0) {
-      error = Curl_ourerrno();
-      sclose(portsock);
-      portsock = CURL_SOCKET_BAD;
-      continue;
-    }
-
     break;
   }
-
-  if (portsock == CURL_SOCKET_BAD) {
-    failf(data, "socket failure: %s", Curl_strerror(conn,error));
+  if(!ai) {
+    failf(data, "socket failure: %s", Curl_strerror(conn, error));
     return CURLE_FTP_PORT_FAILED;
   }
 
+  /* step 3, bind to a suitable local address */
+
+  /* Try binding the given address. */
+  if (bind(portsock, ai->ai_addr, ai->ai_addrlen) < 0) {
+
+    /* It failed. Bind the address used for the control connection instead */
+    sslen = sizeof(ss);
+
+    if (getsockname(conn->sock[FIRSTSOCKET],
+                    (struct sockaddr *)sa, &sslen) < 0) {
+      failf(data, "getsockname() failed");
+      sclose(portsock);
+      return CURLE_FTP_PORT_FAILED;
+    }
+
+    /* set port number to zero to make bind() pick "any" */
+    if(((struct sockaddr *)sa)->sa_family == AF_INET)
+      ((struct sockaddr_in *)sa)->sin_port=0;
+    else
+      ((struct sockaddr_in6 *)sa)->sin6_port =0;
+
+    if(bind(portsock, (struct sockaddr *)sa, sslen) < 0) {
+      failf(data, "bind failed: %s", Curl_strerror(conn, Curl_ourerrno()));
+      sclose(portsock);
+      return CURLE_FTP_PORT_FAILED;
+    }
+  }
+
+  /* get the name again after the bind() so that we can extract the
+     port number it uses now */
   sslen = sizeof(ss);
-  if (getsockname(portsock, sa, &sslen) < 0) {
-    failf(data, "getsockname(): %s", Curl_strerror(conn,Curl_ourerrno()));
+  if(getsockname(portsock, (struct sockaddr *)sa, &sslen)<0) {
+    failf(data, "getsockname() failed: %s",
+          Curl_strerror(conn, Curl_ourerrno()) );
     return CURLE_FTP_PORT_FAILED;
   }
+
+  /* step 4, listen on the socket */
+
+  if (listen(portsock, 1) < 0) {
+    error = Curl_ourerrno();
+    sclose(portsock);
+    failf(data, "socket failure: %s", Curl_strerror(conn, error));
+    return CURLE_FTP_PORT_FAILED;
+  }
+
+  /* step 5, send the proper FTP command */
+
+  /* get a plain printable version of the numerical address to work with
+     below */
+  Curl_printable_address(ai, myhost, sizeof(myhost));
 
 #ifdef PF_INET6
   if(!conn->bits.ftp_use_eprt && conn->bits.ipv6)
@@ -884,107 +923,58 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
 #endif
 
   for (; fcmd != DONE; fcmd++) {
-    int lprtaf, eprtaf;
-    int alen=0, plen=0;
 
     if(!conn->bits.ftp_use_eprt && (EPRT == fcmd))
       /* if disabled, goto next */
       continue;
 
-    if(!conn->bits.ftp_use_lprt && (LPRT == fcmd))
-      /* if disabled, goto next */
-      continue;
-
     switch (sa->sa_family) {
     case AF_INET:
-      ap = (unsigned char *)&((struct sockaddr_in *)&ss)->sin_addr;
-      alen = sizeof(((struct sockaddr_in *)&ss)->sin_addr);
-      pp = (unsigned char *)&((struct sockaddr_in *)&ss)->sin_port;
-      plen = sizeof(((struct sockaddr_in *)&ss)->sin_port);
-      lprtaf = 4;
-      eprtaf = 1;
+      port = ntohs(((struct sockaddr_in *)sa)->sin_port);
       break;
     case AF_INET6:
-      ap = (unsigned char *)&((struct sockaddr_in6 *)&ss)->sin6_addr;
-      alen = sizeof(((struct sockaddr_in6 *)&ss)->sin6_addr);
-      pp = (unsigned char *)&((struct sockaddr_in6 *)&ss)->sin6_port;
-      plen = sizeof(((struct sockaddr_in6 *)&ss)->sin6_port);
-      lprtaf = 6;
-      eprtaf = 2;
+      port = ntohs(((struct sockaddr_in6 *)sa)->sin6_port);
       break;
     default:
-      ap = pp = NULL;
-      lprtaf = eprtaf = -1;
       break;
     }
 
     if (EPRT == fcmd) {
-      if (eprtaf < 0)
-        continue;
-      if (getnameinfo((struct sockaddr *)&ss, sslen,
-                      portmsgbuf, sizeof(portmsgbuf), tmp, sizeof(tmp),
-                      NIFLAGS))
-        continue;
+      /*
+       * Two fine examples from RFC2428;
+       *
+       * EPRT |1|132.235.1.2|6275|
+       *
+       * EPRT |2|1080::8:800:200C:417A|5282|
+       */
 
-      /* do not transmit IPv6 scope identifier to the wire */
-      if (sa->sa_family == AF_INET6) {
-        char *q = strchr(portmsgbuf, '%');
-        if (q)
-          *q = '\0';
-      }
-
-      result = Curl_nbftpsendf(conn, "%s |%d|%s|%s|", mode[fcmd], eprtaf,
-                               portmsgbuf, tmp);
+      result = Curl_nbftpsendf(conn, "%s |%d|%s|%d|", mode[fcmd],
+                               ai->ai_family == AF_INET?1:2,
+                               myhost, port);
       if(result)
         return result;
       break;
     }
-    else if ((LPRT == fcmd) || (PORT == fcmd)) {
-      int i;
+    else if (PORT == fcmd) {
+      char *source = myhost;
+      char *dest = tmp;
 
-      if ((LPRT == fcmd) && lprtaf < 0)
+      if ((PORT == fcmd) && ai->ai_family != AF_INET)
         continue;
-      if ((PORT == fcmd) && sa->sa_family != AF_INET)
-        continue;
 
-      portmsgbuf[0] = '\0';
-      if (LPRT == fcmd) {
-        snprintf(tmp, sizeof(tmp), "%d,%d", lprtaf, alen);
-        if (strlcat(portmsgbuf, tmp, sizeof(portmsgbuf)) >=
-            sizeof(portmsgbuf)) {
-          continue;
-        }
-      }
-
-      for (i = 0; i < alen; i++) {
-        if (portmsgbuf[0])
-          snprintf(tmp, sizeof(tmp), ",%u", ap[i]);
+      /* translate x.x.x.x to x,x,x,x */
+      while(source && *source) {
+        if(*source == '.')
+          *dest=',';
         else
-          snprintf(tmp, sizeof(tmp), "%u", ap[i]);
-
-        if (strlcat(portmsgbuf, tmp, sizeof(portmsgbuf)) >=
-            sizeof(portmsgbuf)) {
-          continue;
-        }
+          *dest = *source;
+        dest++;
+        source++;
       }
+      *dest = 0;
+      snprintf(dest, 20, ",%d,%d", port>>8, port&0xff);
 
-      if (LPRT == fcmd) {
-        snprintf(tmp, sizeof(tmp), ",%d", plen);
-
-        if (strlcat(portmsgbuf, tmp, sizeof(portmsgbuf)) >= sizeof(portmsgbuf))
-          continue;
-      }
-
-      for (i = 0; i < plen; i++) {
-        snprintf(tmp, sizeof(tmp), ",%u", pp[i]);
-
-        if (strlcat(portmsgbuf, tmp, sizeof(portmsgbuf)) >=
-            sizeof(portmsgbuf)) {
-          continue;
-        }
-      }
-
-      result = Curl_nbftpsendf(conn, "%s %s", mode[fcmd], portmsgbuf);
+      result = Curl_nbftpsendf(conn, "%s %s", mode[fcmd], tmp);
       if(result)
         return result;
       break;
@@ -1007,7 +997,6 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
    */
   struct sockaddr_in sa;
   unsigned short porttouse;
-  char myhost[256] = "";
   bool sa_filled_in = FALSE;
   Curl_addrinfo *addr = NULL;
   unsigned short ip[4];
@@ -1734,10 +1723,6 @@ static CURLcode ftp_state_port_resp(struct connectdata *conn,
     if (EPRT == fcmd) {
       infof(data, "disabling EPRT usage\n");
       conn->bits.ftp_use_eprt = FALSE;
-    }
-    else if (LPRT == fcmd) {
-      infof(data, "disabling LPRT usage\n");
-      conn->bits.ftp_use_lprt = FALSE;
     }
     fcmd++;
 

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -326,7 +326,6 @@ CURLcode Curl_open(struct SessionHandle **curl)
     data->set.httpreq = HTTPREQ_GET; /* Default HTTP request */
     data->set.ftp_use_epsv = TRUE;   /* FTP defaults to EPSV operations */
     data->set.ftp_use_eprt = TRUE;   /* FTP defaults to EPRT operations */
-    data->set.ftp_use_lprt = TRUE;   /* FTP defaults to EPRT operations */
     data->set.ftp_filemethod = FTPFILE_MULTICWD;
     data->set.dns_cache_timeout = 60; /* Timeout every 60 seconds by default */
 
@@ -964,7 +963,6 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 
   case CURLOPT_FTP_USE_EPRT:
     data->set.ftp_use_eprt = va_arg(param, long)?TRUE:FALSE;
-    data->set.ftp_use_lprt = data->set.ftp_use_eprt;
     break;
 
   case CURLOPT_FTP_USE_EPSV:
@@ -2365,7 +2363,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   conn->bits.tunnel_proxy = data->set.tunnel_thru_httpproxy;
   conn->bits.ftp_use_epsv = data->set.ftp_use_epsv;
   conn->bits.ftp_use_eprt = data->set.ftp_use_eprt;
-  conn->bits.ftp_use_lprt = data->set.ftp_use_lprt;
 
   /* This initing continues below, see the comment "Continue connectdata
    * initialization here" */

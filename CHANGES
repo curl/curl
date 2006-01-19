@@ -6,9 +6,19 @@
 
                                   Changelog
 
+Daniel (20 January 2006)
+- Duane Cathey was one of our friends who reported that curl -P [IP]
+  (CURLOPT_FTPPORT) didn't work for ipv6-enabed curls if the IP wasn't a
+  "native" IP while it works fine for ipv6-disabled builds!
+
+  In the process of fixing this, I removed the support for LPRT since I can't
+  think of many reasons to keep doing it and asking on the mailing list didn't
+  reveal anyone else that could either. The code that sends EPRT and PORT is
+  now also a lot simpler than before (IMHO).
+
 Daniel (19 January 2006)
-- Jon Turner pointed out that doing -P [hostname] with curl (built ipv4-only)
-  didn't work.
+- Jon Turner pointed out that doing -P [hostname] (CURLOPT_FTPPORT) with curl
+  (built ipv4-only) didn't work.
 
 Daniel (18 January 2006)
 - As reported in bug #1408742 (http://curl.haxx.se/bug/view.cgi?id=1408742),

@@ -15,14 +15,13 @@ ipv6
 ftp
 </server>
  <name>
-Get two FTP files with no remote EPRT or LPRT support
+Get two FTP files with no remote EPRT support
  </name>
  <command>
 ftp://%HOSTIP:%FTPPORT/a/path/212 ftp://%HOSTIP:%FTPPORT/a/path/212 -P -
 </command>
 <file name="log/ftpserver.cmd">
 REPLY EPRT 500 no such command
-REPLY LPRT 500 no such command
 </file>
 <stdout>
 data blobb
@@ -34,7 +33,6 @@ data blobb
 <verify>
 <strippart>
 s/^(EPRT \|1\|127.0.0.1).*/$1/
-s/^(LPRT 4,4,127,0,0,1,).*/$1/
 s/^(PORT 127,0,0,1,).*/$1/
 </strippart>
 <protocol>
@@ -44,7 +42,6 @@ PWD
 CWD a
 CWD path
 EPRT |1|127.0.0.1
-LPRT 4,4,127,0,0,1,
 PORT 127,0,0,1,
 TYPE I
 SIZE 212
