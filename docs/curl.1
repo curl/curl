@@ -741,7 +741,8 @@ i.e "192.168.10.1" to specify exact IP number
 .IP "host name"
 i.e "my.host.domain" to specify machine
 .IP "-"
-(any single-letter string) to make it pick the machine's default
+make curl pick the same IP address that is already used for the control
+connection
 .RE
 
 If this option is used several times, the last one will be used. Disable the
