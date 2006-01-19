@@ -56,9 +56,9 @@ krb4
 
         While nothing in particular says that a Kerberos4 library must use any
         particular license, the one I've tried and used successfully so far
-        (kth-krb4) is Original BSD-licensed with the announcement clause. Some
-        of the code in libcurl that is written to deal with Kerberos4 likewise
-        have such a license.
+        (kth-krb4) is partly Original BSD-licensed with the announcement
+        clause. Some of the code in libcurl that is written to deal with
+        Kerberos4 is Modified BSD-licensed.
 
 MIT Kerberos http://web.mit.edu/kerberos/www/dist/
 
