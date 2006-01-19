@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (19 January 2006)
+- Jon Turner pointed out that doing -P [hostname] with curl (built ipv4-only)
+  didn't work.
+
 Daniel (18 January 2006)
 - As reported in bug #1408742 (http://curl.haxx.se/bug/view.cgi?id=1408742),
   the configure script complained about a missing "missing" script if you ran

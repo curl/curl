@@ -1011,6 +1011,8 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   bool sa_filled_in = FALSE;
   Curl_addrinfo *addr = NULL;
   unsigned short ip[4];
+  bool freeaddr = TRUE;
+
   (void)fcmd; /* not used in the IPv4 code */
   if(data->set.ftpport) {
     in_addr_t in;
@@ -1030,7 +1032,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
       else if(strlen(data->set.ftpport)> 1) {
         /* might be a host name! */
         struct Curl_dns_entry *h=NULL;
-        int rc = Curl_resolv(conn, myhost, 0, &h);
+        int rc = Curl_resolv(conn, data->set.ftpport, 0, &h);
         if(rc == CURLRESOLV_PENDING)
           /* BLOCKING */
           rc = Curl_wait_for_resolv(conn, &h);
@@ -1039,7 +1041,13 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
           /* when we return from this function, we can forget about this entry
              so we can unlock it now already */
           Curl_resolv_unlock(data, h);
+
+          freeaddr = FALSE; /* make sure we don't free 'addr' in this function
+                               since it points to a DNS cache entry! */
         } /* (h) */
+        else {
+          infof(data, "Failed to resolve host name %s\n", data->set.ftpport);
+        }
       } /* strlen */
     } /* CURL_INADDR_NONE */
   } /* data->set.ftpport */
@@ -1132,7 +1140,8 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   else
     return CURLE_FTP_PORT_FAILED;
 
-  Curl_freeaddrinfo(addr);
+  if(freeaddr)
+    Curl_freeaddrinfo(addr);
 
   ftp->count1 = PORT;
 
