@@ -198,7 +198,8 @@ To create remote directories when using FTP, try \fI--ftp-create-dirs\fP.
 .IP "--crlf"
 (FTP) Convert LF to CRLF in upload. Useful for MVS (OS/390).
 
-If this option is used twice, the second will again disable crlf converting.
+If this option is used several times, the following occurrences make no
+difference.
 .IP "-d/--data <data>"
 (HTTP) Sends the specified data in a POST request to the HTTP server, in a way
 that can emulate as if a user has filled in a HTML form and pressed the submit
@@ -276,9 +277,9 @@ If this option is used several times, the last one will be used.
 .IP "-e/--referer <URL>"
 (HTTP) Sends the "Referer Page" information to the HTTP server. This can also
 be set with the \fI-H/--header\fP flag of course.  When used with
-\fI-L/--location\fP you can append ";auto" to the referer URL to make curl
+\fI-L/--location\fP you can append ";auto" to the --referer URL to make curl
 automatically set the previous URL when it follows a Location: header. The
-\&";auto" string can be used alone, even if you don't set an initial referer.
+\&";auto" string can be used alone, even if you don't set an initial --referer.
 
 If this option is used several times, the last one will be used.
 .IP "--engine <name>"
@@ -352,13 +353,15 @@ If this option is used twice, the second will override the previous use.
 the server, the standard behavior of curl is to fail. Using this option, curl
 will instead attempt to create missing directories. (Added in 7.10.7)
 
-If this option is used twice, the second will again disable silent failure.
+If this option is used twice, the second will again disable directory creation.
 .IP "--ftp-pasv"
 (FTP) Use PASV when transferring. PASV is the internal default behavior, but
 using this option can be used to override a previous --ftp-port option. (Added
 in 7.11.0)
 
-If this option is used twice, the second will again disable silent failure.
+If this option is used several times, the following occurrences make no
+difference.
+
 .IP "--ftp-skip-pasv-ip"
 (FTP) Tell curl to not use the IP address the server suggests in its response
 to curl's PASV command when curl connects the data connection. Instead curl
@@ -367,7 +370,8 @@ connection. (Added in 7.14.2)
 
 This option has no effect if PORT, EPRT or EPSV is used instead of PASV.
 
-If this option is used twice, the second will again disable silent failure.
+If this option is used twice, the second will again use the server's suggested
+address.
 .IP "--ftp-ssl"
 (FTP) Make the FTP connection switch to use SSL/TLS. (Added in 7.11.0)
 
@@ -428,7 +432,8 @@ with a '?'  separator.
 If used in combination with -I, the POST data will instead be appended to the
 URL with a HEAD request.
 
-If used multiple times, nothing special happens.
+If this option is used several times, the following occurrences make no
+difference.
 .IP "-h/--help"
 Usage help.
 .IP "-H/--header <header>"
@@ -514,7 +519,7 @@ Specify which config file to read curl arguments from. The config file is a
 text file in which command line arguments can be written which then will be
 used as if they were written on the actual command line. Options and their
 parameters must be specified on the same config file line. If the parameter is
-to contain white spaces, the parameter must be inclosed within quotes.  If the
+to contain white spaces, the parameter must be enclosed within quotes.  If the
 first column of a config line is a '#' character, the rest of the line will be
 treated as a comment.
 
@@ -823,7 +828,7 @@ for all forthcoming retries it will double the waiting time until it reaches
 10 minutes which then will be the delay between the rest of the retries.  By
 using \fI--retry-delay\fP you disable this exponential backoff algorithm. See
 also \fI--retry-max-time\fP to limit the total time allowed for
-retries. (Option added in 7.12.3)
+retries. (Added in 7.12.3)
 
 If this option is used multiple times, the last occurrence decide the amount.
 .IP "--retry-delay <seconds>"
@@ -831,7 +836,7 @@ Make curl sleep this amount of time between each retry when a transfer has
 failed with a transient error (it changes the default backoff time algorithm
 between retries). This option is only interesting if \fI--retry\fP is also
 used. Setting this delay to zero will make curl use the default backoff time.
-(Option added in 7.12.3)
+(Added in 7.12.3)
 
 If this option is used multiple times, the last occurrence decide the amount.
 .IP "--retry-max-time <seconds>"
@@ -840,21 +845,21 @@ done as usual (see \fI--retry\fP) as long as the timer hasn't reached this
 given limit. Notice that if the timer hasn't reached the limit, the request
 will be made and while performing, it may take longer than this given time
 period. To limit a single request\'s maximum time, use \fI-m/--max-time\fP.
-Set this option to zero to not timeout retries. (Option added in 7.12.3)
+Set this option to zero to not timeout retries. (Added in 7.12.3)
 
 If this option is used multiple times, the last occurrence decide the amount.
 .IP "-s/--silent"
 Silent mode. Don't show progress meter or error messages.  Makes
 Curl mute.
 
-If this option is used twice, the second will again disable mute.
+If this option is used twice, the second will again disable silent mode.
 .IP "-S/--show-error"
 When used with -s it makes curl show error message if it fails.
 
 If this option is used twice, the second will again disable show error.
 .IP "--socks <host[:port]>"
 Use the specified SOCKS5 proxy. If the port number is not specified, it is
-assumed at port 1080. (Option added in 7.11.1)
+assumed at port 1080. (Added in 7.11.1)
 
 This option overrides any previous use of \fI-x/--proxy\fP, as they are
 mutually exclusive.
@@ -906,9 +911,9 @@ curl -T "img[1-1000].png" ftp://ftp.picturemania.com/upload/
 Enables a full trace dump of all incoming and outgoing data, including
 descriptive information, to the given output file. Use "-" as filename to have
 the output sent to stdout.
+(Added in 7.9.7)
 
-If this option is used several times, the last one will be used. (Added in
-7.9.7)
+If this option is used several times, the last one will be used.
 .IP "--trace-ascii <file>"
 Enables a full trace dump of all incoming and outgoing data, including
 descriptive information, to the given output file. Use "-" as filename to have
@@ -917,14 +922,14 @@ the output sent to stdout.
 This is very similar to \fI--trace\fP, but leaves out the hex part and only
 shows the ASCII part of the dump. It makes smaller output that might be easier
 to read for untrained humans.
+(Added in 7.9.7)
 
-If this option is used several times, the last one will be used. (Added in
-7.9.7)
+If this option is used several times, the last one will be used.
 .IP "--trace-time"
 Prepends a time stamp to each trace or verbose line that curl displays.
+(Added in 7.14.0)
 
 If this option is used several times, each occurrence will toggle it on/off.
-(Added in 7.14.0        )
 .IP "-u/--user <user:password>"
 Specify user and password to use for server authentication. Overrides
 \fI-n/--netrc\fP and \fI--netrc-optional\fP.
