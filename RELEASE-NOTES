@@ -18,6 +18,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o Try PASV after failing to connect to the port the EPSV response contained
  o -P [IP] with ipv6-enabled curl
  o -P [hostname] with ipv6-disabled curl
  o libcurl.m4 was updated
@@ -45,6 +46,6 @@ advice from friends like these:
 
  Dov Murik, Jean Jacques Drouin, Andres Garcia, Yang Tse, Gisle Vanem, Dan
  Fandrich, Alexander Lazic, Michael Jahn, Andrew Benham, Bryan Henderson,
- David Shaw, Jon Turner, Duane Cathey
+ David Shaw, Jon Turner, Duane Cathey, Michal Marek
  
         Thanks! (and sorry if I forgot to mention someone)

@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel (24 January 2006)
+- Michal Marek provided a patch for FTP that makes libcurl continue to try
+  PASV even after EPSV returned a positive response code, if libcurl failed to
+  connect to the port number the EPSV response said. Obviously some people are
+  going through protocol-sensitive firewalls (or similar) that don't
+  understand EPSV and then they don't allow the second connection unless PASV
+  was used. This also called for a minor fix of test case 238.
+
 Daniel (20 January 2006)
 - Duane Cathey was one of our friends who reported that curl -P [IP]
   (CURLOPT_FTPPORT) didn't work for ipv6-enabed curls if the IP wasn't a

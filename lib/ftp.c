@@ -1661,6 +1661,18 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
 
   Curl_resolv_unlock(data, addr); /* we're done using this address */
 
+  if (result && ftp->count1 == 0 && ftpcode == 229) {
+    infof(data, "got positive EPSV response, but can't connect. "
+          "Disabling EPSV\n");
+    /* disable it for next transfer */
+    conn->bits.ftp_use_epsv = FALSE;
+    data->state.errorbuf = FALSE; /* allow error message to get rewritten */
+    NBFTPSENDF(conn, "PASV", NULL);
+    ftp->count1++;
+    /* remain in the FTP_PASV state */
+    return result;
+ }
+
   if(result)
     return result;
 
