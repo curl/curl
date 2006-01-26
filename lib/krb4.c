@@ -1,14 +1,13 @@
 /* This source code was modified by Martin Hedenfalk <mhe@stacken.kth.se> for
- * use in Curl. His latest changes were done 2000-09-18.
+ * use in Curl. Martin's latest changes were done 2000-09-18.
  *
- * It has since been patched away like a madman by Daniel Stenberg
- * <daniel@haxx.se> to make it better applied to curl conditions, and to make
- * it not use globals, pollute name space and more. This source code awaits a
- * rewrite to work around the paragraph 2 in the BSD licenses as explained
- * below.
+ * It has since been patched away like a madman by Daniel Stenberg to make it
+ * better applied to curl conditions, and to make it not use globals, pollute
+ * name space and more.
  *
  * Copyright (c) 1995, 1996, 1997, 1998, 1999 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
+ * Copyright (c) 2004 - 2006 Daniel Stenberg
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +35,10 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.  */
+ * SUCH DAMAGE.
+ *
+ * $Id$
+ */
 
 #include "setup.h"
 
