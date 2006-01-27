@@ -620,15 +620,17 @@ list. If you add a header that is otherwise generated and used by libcurl
 internally, your added one will be used instead. If you add a header with no
 contents as in 'Accept:' (no data on the right side of the colon), the
 internally used header will get disabled. Thus, using this option you can add
-new headers, replace internal headers and remove internal headers. The
-headers included in the linked list must not be CRLF-terminated, because
-curl adds CRLF after each header item. Failure to comply with this will
-result in strange bugs because the server will most likely ignore part
-of the headers you specified.
+new headers, replace internal headers and remove internal headers. To add a
+header with no contents, make the contents be two quotes: \&"". The headers
+included in the linked list must not be CRLF-terminated, because curl adds
+CRLF after each header item. Failure to comply with this will result in
+strange bugs because the server will most likely ignore part of the headers
+you specified.
 
-The first line in a request (usually containing a GET or POST) is not a header
-and cannot be replaced using this option. Only the lines following the
-request-line are headers.
+The first line in a request (containing the method, usually a GET or POST) is
+not a header and cannot be replaced using this option. Only the lines
+following the request-line are headers. Adding this method line in this list
+of headers will only cause your request to send an invalid header.
 
 Pass a NULL to this to reset back to no custom headers.
 
