@@ -53,6 +53,15 @@ TODO
    client to reconnect to complete the authentication. Currently libcurl
    assumes that a proxy connection will be kept alive.
 
+ * Make the curl/*.h headers include the proper system includes based on what
+   was present at the time when configure was run. Currently, the sys/select.h
+   header is for example included by curl/multi.h only on specific platforms
+   we know MUST have it. This is error-prone. We therefore want the header
+   files to adapt to configure results. Those results must be stored in a new
+   header and they must use a curl name space, i.e not be HAVE_* prefix (as
+   that would risk collide with other apps that use libcurl and that runs
+   configure).
+
  LIBCURL - multi interface
 
  * Add a curl_multi_fdset() alternative. this allows apps to avoid the
