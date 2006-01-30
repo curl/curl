@@ -374,7 +374,7 @@ static CURLcode bindlocal(struct connectdata *conn,
     if( bind(sockfd, sock, socksize) >= 0) {
       /* we succeeded to bind */
       struct Curl_sockaddr_storage add;
-      unsigned short port;
+      unsigned short port = 0;
       size_t size;
 
       size = sizeof(add);
