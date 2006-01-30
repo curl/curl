@@ -18,6 +18,9 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o re-creating a dead connection is no longer counted internally as a followed
+   redirect and thus prevents a weird error that would occur if a FTP
+   connection died on an attempted re-use
  o Try PASV after failing to connect to the port the EPSV response contained
  o -P [IP] with ipv6-enabled curl
  o -P [hostname] with ipv6-disabled curl
@@ -51,6 +54,6 @@ advice from friends like these:
 
  Dov Murik, Jean Jacques Drouin, Andres Garcia, Yang Tse, Gisle Vanem, Dan
  Fandrich, Alexander Lazic, Michael Jahn, Andrew Benham, Bryan Henderson,
- David Shaw, Jon Turner, Duane Cathey, Michal Marek
+ David Shaw, Jon Turner, Duane Cathey, Michal Marek, Philippe Vaucher
  
         Thanks! (and sorry if I forgot to mention someone)

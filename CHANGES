@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel (30 January 2006)
+- Based on an error report by Philippe Vaucher, we no longer count a retried
+  connection setup as a follow-redirect. It turns out 1) this fails when a FTP
+  connection is re-setup and 2) it does make the max-redirs counter behave
+  wrong. This fix was not verified since the reporter vanished, but I believe
+  this is the right fix nonetheless.
+
 Daniel (24 January 2006)
 - Michal Marek provided a patch for FTP that makes libcurl continue to try
   PASV even after EPSV returned a positive response code, if libcurl failed to
