@@ -970,7 +970,10 @@ struct UserDefined {
                                of strlen(), and then the data *may* be binary
                                (contain zero bytes) */
   char *ftpport;     /* port to send with the FTP PORT command */
-  char *device;      /* network interface to use */
+  char *device;      /* local network interface/address to use */
+  unsigned short localport; /* local port number to bind to */
+  int localportrange; /* number of additional port numbers to test in case the
+                         'localport' one can't be bind()ed */
   curl_write_callback fwrite;        /* function that stores the output */
   curl_write_callback fwrite_header; /* function that stores headers */
   curl_read_callback fread;          /* function that reads the input */

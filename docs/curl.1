@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -100,7 +100,7 @@ most secure one the remote site claims it supports. This is done by first
 doing a request and checking the response-headers, thus inducing an extra
 network round-trip. This is used instead of setting a specific authentication
 method, which you can do with \fI--basic\fP, \fI--digest\fP, \fI--ntlm\fP, and
-\fI--negotiate\fP. (Added in 7.10.6)
+\fI--negotiate\fP.
 
 Note that using --anyauth is not recommended if you do uploads from stdin,
 since it may require data to be sent twice and then the client must be able to
@@ -140,7 +140,7 @@ If this option is used twice, the second one will disable ASCII usage.
 (HTTP) Tells curl to use HTTP Basic authentication. This is the default and
 this option is usually pointless, unless you use it to override a previously
 set option that sets a different authentication method (such as \fI--ntlm\fP,
-\fI--digest\fP and \fI--negotiate\fP). (Added in 7.10.6)
+\fI--digest\fP and \fI--negotiate\fP).
 
 If this option is used several times, the following occurrences make no
 difference.
@@ -243,7 +243,7 @@ append data.
 prevents the password from being sent over the wire in clear text. Use this in
 combination with the normal \fI-u/--user\fP option to set user name and
 password. See also \fI--ntlm\fP, \fI--negotiate\fP and \fI--anyauth\fP for
-related options. (Added in curl 7.10.6)
+related options.
 
 If this option is used several times, the following occurrences make no
 difference.
@@ -253,7 +253,7 @@ active FTP transfers. Curl will normally always first attempt to use EPRT,
 then LPRT before using PORT, but with this option, it will use PORT right
 away. EPRT and LPRT are extensions to the original FTP protocol, may not work
 on all servers but enable more functionality in a better way than the
-traditional PORT command. (Added in 7.10.5)
+traditional PORT command.
 
 If this option is used several times, each occurrence will toggle this on/off.
 .IP "--disable-epsv"
@@ -351,7 +351,7 @@ If this option is used twice, the second will override the previous use.
 .IP "--ftp-create-dirs"
 (FTP) When an FTP URL/operation uses a path that doesn't currently exist on
 the server, the standard behavior of curl is to fail. Using this option, curl
-will instead attempt to create missing directories. (Added in 7.10.7)
+will instead attempt to create missing directories.
 
 If this option is used twice, the second will again disable directory creation.
 .IP "--ftp-pasv"
@@ -484,15 +484,14 @@ If this option is used twice, the second will again disable header only.
 (HTTP) When curl is told to read cookies from a given file, this option will
 make it discard all "session cookies". This will basically have the same effect
 as if a new session is started. Typical browsers always discard session
-cookies when they're closed down. (Added in 7.9.7)
+cookies when they're closed down.
 
 If this option is used several times, each occurrence will toggle this on/off.
 .IP "-k/--insecure"
 (SSL) This option explicitly allows curl to perform "insecure" SSL connections
-and transfers. Starting with curl 7.10, all SSL connections will be attempted
-to be made secure by using the CA certificate bundle installed by
-default. This makes all connections considered "insecure" to fail unless
-\fI-k/--insecure\fP is used.
+and transfers. All SSL connections are attempted to be made secure by using
+the CA certificate bundle installed by default. This makes all connections
+considered "insecure" to fail unless \fI-k/--insecure\fP is used.
 
 If this option is used twice, the second time will again disable it.
 .IP "--key <key>"
@@ -559,8 +558,6 @@ If you are also using the \fI-Y/--speed-limit\fP option, that option will take
 precedence and might cripple the rate-limiting slightly, to help keeping the
 speed-limit logic working.
 
-This option was introduced in curl 7.10.
-
 If this option is used several times, the last one will be used.
 .IP "-l/--list-only"
 (FTP)
@@ -574,6 +571,11 @@ list only files in their response to NLST; they do not include
 subdirectories and symbolic links.
 
 If this option is used twice, the second will again disable list only.
+.IP "--local-port <num>[-num]"
+Set a prefered number or range of local port numbers to use for the
+connection(s).  Note that port numbers by nature is a scarce resource that
+will be busy at times so setting this range to something too narrow might
+cause unnecessary connection setup failures. (Added in 7.15.2)
 .IP "-L/--location"
 (HTTP/HTTPS) If the server reports that the requested page has moved to a
 different location (indicated with a Location: header and a 3XX response code)
@@ -637,7 +639,7 @@ Very similar to \fI--netrc\fP, but this option makes the .netrc usage
 designed by Microsoft and is used in their web applications. It is primarily
 meant as a support for Kerberos5 authentication but may be also used along
 with another authentication methods. For more information see IETF draft
-draft-brezak-spnego-http-04.txt. (Added in 7.10.6)
+draft-brezak-spnego-http-04.txt.
 
 This option requires that the library was built with GSSAPI support. This is
 not very common. Use \fI-V/--version\fP to see if your version supports
@@ -662,7 +664,7 @@ designed by Microsoft and is used by IIS web servers. It is a proprietary
 protocol, reversed engineered by clever people and implemented in curl based
 on their efforts. This kind of behavior should not be endorsed, you should
 encourage everyone who uses NTLM to switch to a public and documented
-authentication method instead. Such as Digest. (Added in 7.10.6)
+authentication method instead. Such as Digest.
 
 If you want to enable NTLM for your proxy authentication, then use
 \fI--proxy-ntlm\fP.
@@ -702,8 +704,8 @@ You may use this option as many times as you have number of URLs.
 If this option is used several times, the last one will be used.
 .IP "--proxy-anyauth"
 Tells curl to pick a suitable authentication method when communicating with
-the given proxy. This will cause an extra request/response round-trip. Added
-in curl 7.13.2.
+the given proxy. This will cause an extra request/response round-trip. (Added
+in 7.13.2)
 
 If this option is used twice, the second will again disable the proxy use-any
 authentication.
@@ -894,13 +896,10 @@ this is used on a http(s) server, the PUT command will be used.
 
 Use the file name "-" (a single dash) to use stdin instead of a given file.
 
-Before 7.10.8, when this option was used several times, the last one was used.
-
-In curl 7.10.8 and later, you can specify one -T for each URL on the command
-line. Each -T + URL pair specifies what to upload and to where. curl also
-supports "globbing" of the -T argument, meaning that you can upload multiple
-files to a single URL by using the same URL globbing style supported in the
-URL, like this:
+You can specify one -T for each URL on the command line. Each -T + URL pair
+specifies what to upload and to where. curl also supports "globbing" of the -T
+argument, meaning that you can upload multiple files to a single URL by using
+the same URL globbing style supported in the URL, like this:
 
 curl -T "{file1,file2}" http://www.uploadtothissite.com
 
@@ -911,7 +910,6 @@ curl -T "img[1-1000].png" ftp://ftp.picturemania.com/upload/
 Enables a full trace dump of all incoming and outgoing data, including
 descriptive information, to the given output file. Use "-" as filename to have
 the output sent to stdout.
-(Added in 7.9.7)
 
 If this option is used several times, the last one will be used.
 .IP "--trace-ascii <file>"
@@ -922,7 +920,6 @@ the output sent to stdout.
 This is very similar to \fI--trace\fP, but leaves out the hex part and only
 shows the ASCII part of the dump. It makes smaller output that might be easier
 to read for untrained humans.
-(Added in 7.9.7)
 
 If this option is used several times, the last one will be used.
 .IP "--trace-time"
@@ -1083,7 +1080,7 @@ The average download speed that curl measured for the complete download.
 The average upload speed that curl measured for the complete upload.
 .TP
 .B content_type
-The Content-Type of the requested document, if there was any. (Added in 7.9.5)
+The Content-Type of the requested document, if there was any.
 .TP
 .B num_connects
 Number of new connects made in the recent transfer. (Added in 7.12.3)
@@ -1182,11 +1179,11 @@ Note that not all FTP server allow 3rd party transfers. (Added in 7.13.0)
 .IP "-4/--ipv4"
 If libcurl is capable of resolving an address to multiple IP versions (which
 it is if it is ipv6-capable), this option tells libcurl to resolve names to
-IPv4 addresses only. (Added in 7.10.8)
+IPv4 addresses only.
 .IP "-6/--ipv6"
 If libcurl is capable of resolving an address to multiple IP versions (which
 it is if it is ipv6-capable), this option tells libcurl to resolve names to
-IPv6 addresses only. (Added in 7.10.8)
+IPv6 addresses only.
 .IP "-#/--progress-bar"
 Make curl display progress information as a progress bar instead of the
 default statistics.

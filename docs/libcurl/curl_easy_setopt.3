@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_easy_setopt 3 "27 Oct 2005" "libcurl 7.14.2" "libcurl Manual"
+.TH curl_easy_setopt 3 "28 Jan 2006" "libcurl 7.15.2" "libcurl Manual"
 .SH NAME
 curl_easy_setopt \- set options for a curl easy handle
 .SH SYNOPSIS
@@ -335,6 +335,19 @@ don't want this tunneling option.
 Pass a char * as parameter. This set the interface name to use as outgoing
 network interface. The name can be an interface name, an IP address or a host
 name.
+.IP CURLOPT_LOCALPORT
+Pass a long. This sets the local port number of the socket used for
+connection. This can be used in combination with \fICURLOPT_INTERFACE\fP and
+you are recommended to use \fICURLOPT_LOCALPORTRANGE\fP as well when this is
+set. Note that port numbers are only valid 1 - 65535. (Added in 7.15.2)
+.IP CURLOPT_LOCALPORTRANGE
+Pass a long. This is the number of attempts libcurl should do to find a
+working local port number. It starts with the given \fICURLOPT_LOCALPORT\fP
+and adds one to the number for each retry. Setting this value to 1 or below
+will make libcurl do only one try for exact port number. Note that port
+numbers by nature is a scarce resource that will be busy at times so setting
+this value to something too low might cause unnecessary connection setup
+failures. (Added in 7.15.2)
 .IP CURLOPT_DNS_CACHE_TIMEOUT
 Pass a long, this sets the timeout in seconds. Name resolves will be kept in
 memory for this number of seconds. Set to zero (0) to completely disable

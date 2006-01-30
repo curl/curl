@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -271,6 +271,8 @@ struct Configurable {
   char *headerfile;
   char *ftpport;
   char *iface;
+  int localport;
+  int localportrange;
   unsigned short porttouse;
   char *range;
   long low_speed_limit;
@@ -519,12 +521,13 @@ static void help(void)
     " -i/--include       Include protocol headers in the output (H/F)",
     " -I/--head          Show document info only",
     " -j/--junk-session-cookies Ignore session cookies read from file (H)",
-    "    --interface <interface> Specify network interface to use",
+    "    --interface <interface> Specify network interface/address to use",
     "    --krb4 <level>  Enable krb4 with specified security level (F)",
     " -k/--insecure      Allow connections to SSL sites without certs (H)",
     " -K/--config        Specify which config file to read",
     " -l/--list-only     List only names of an FTP directory (F)",
     "    --limit-rate <rate> Limit transfer speed to this rate",
+    "    --local-port <num>[-num] Force use of these local port numbers\n",
     " -L/--location      Follow Location: hints (H)",
     "    --location-trusted Follow Location: and send authentication even ",
     "                    to other hostnames (H)",
@@ -1261,7 +1264,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 {
   char letter;
   char subletter=0; /* subletters can only occur on long options */
-
+  int rc; /* generic return code variable */
   const char *parse=NULL;
   unsigned int j;
   time_t now;
@@ -1326,6 +1329,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$p", "ignore-content-length", FALSE},
     {"$q", "ftp-skip-pasv-ip", FALSE},
     {"$r", "ftp-method", TRUE},
+    {"$s", "local-port", TRUE},
 
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
@@ -1738,6 +1742,22 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'r': /* --ftp-method (undocumented at this point) */
         config->ftp_filemethod = ftpfilemethod(config, nextarg);
+        break;
+      case 's': /* --local-port */
+        rc = sscanf(nextarg, "%d - %d",
+                    &config->localport,
+                    &config->localportrange);
+        if(!rc)
+          return PARAM_BAD_USE;
+        else if(rc == 1)
+          config->localportrange = 1; /* default number of ports to try */
+        else {
+          config->localportrange -= config->localport;
+          if(config->localportrange < 1) {
+            warnf(config, "bad range input\n");
+            return PARAM_BAD_USE;
+          }
+        }
         break;
       }
       break;
@@ -3971,6 +3991,12 @@ operate(struct Configurable *config, int argc, char *argv[])
 
         /* curl 7.15.1 */
         curl_easy_setopt(curl, CURLOPT_FTP_FILEMETHOD, config->ftp_filemethod);
+
+        /* curl 7.15.2 */
+        if(config->localport) {
+          curl_easy_setopt(curl, CURLOPT_LOCALPORT, config->localport);
+          curl_easy_setopt(curl, CURLOPT_LOCALPORTRANGE, config->localportrange);
+        }
 
         retry_numretries = config->req_retry;
 

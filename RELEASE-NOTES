@@ -5,12 +5,14 @@ Curl and libcurl 7.15.2
  Available command line options:           109
  Available curl_easy_setopt() options:     125
  Number of public functions in libcurl:    46
- Amount of public web site mirrors:        28
+ Amount of public web site mirrors:        30
  Number of known libcurl bindings:         32
  Number of contributors:                   474
 
 This release includes the following changes:
 
+ o CURLOPT_LOCALPORT and CURLOPT_LOCALPORTRANGE (--local-port) added
+ o Dropped support for the LPRT ftp command
  o Gopher is now officially abandoned as a protocol (lib)curl tries to support.
  o curl_global_init() and curl_global_cleanup() are now using a refcount so
    that it is now legal to call them multiple times. See updated info for
@@ -22,7 +24,7 @@ This release includes the following bugfixes:
    redirect and thus prevents a weird error that would occur if a FTP
    connection died on an attempted re-use
  o Try PASV after failing to connect to the port the EPSV response contained
- o -P [IP] with ipv6-enabled curl
+ o -P [IP] with non-local address with ipv6-enabled curl
  o -P [hostname] with ipv6-disabled curl
  o libcurl.m4 was updated
  o configure no longer warns if the current path contains a space

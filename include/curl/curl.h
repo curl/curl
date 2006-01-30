@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -914,6 +914,14 @@ typedef enum {
 
   /* Select "file method" to use when doing FTP */
   CINIT(FTP_FILEMETHOD, LONG, 138),
+
+  /* Local port number to bind the socket to */
+  CINIT(LOCALPORT, LONG, 139),
+
+  /* Number of ports to try, including the first one set with LOCALPORT.
+     Thus, setting it to 1 will make no additional attempts but the first.
+  */
+  CINIT(LOCALPORTRANGE, LONG, 140),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel (30 January 2006)
+- Added CURLOPT_LOCALPORT and CURLOPT_LOCALPORTRANGE to libcurl. Set with the
+  curl tool with --local-port. Plain and simply set the range of ports to bind
+  the local end of connections to. Implemented on to popular demand.
+
 - Based on an error report by Philippe Vaucher, we no longer count a retried
   connection setup as a follow-redirect. It turns out 1) this fails when a FTP
   connection is re-setup and 2) it does make the max-redirs counter behave

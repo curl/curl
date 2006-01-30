@@ -1222,12 +1222,25 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      */
     data->set.crlf = va_arg(param, long)?TRUE:FALSE;
     break;
+
   case CURLOPT_INTERFACE:
     /*
-     * Set what interface to bind to when performing an operation and thus
-     * what from-IP your connection will use.
+     * Set what interface or address/hostname to bind the socket to when
+     * performing an operation and thus what from-IP your connection will use.
      */
     data->set.device = va_arg(param, char *);
+    break;
+  case CURLOPT_LOCALPORT:
+    /*
+     * Set what local port to bind the socket to when performing an operation.
+     */
+    data->set.localport = (unsigned short) va_arg(param, long);
+    break;
+  case CURLOPT_LOCALPORTRANGE:
+    /*
+     * Set number of local ports to try, starting with CURLOPT_LOCALPORT.
+     */
+    data->set.localportrange = (int) va_arg(param, long);
     break;
   case CURLOPT_KRB4LEVEL:
     /*
