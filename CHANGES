@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (2 February 2006)
+- Make --limit-rate [num] mean bytes. It used to be that but it broke in my
+  change done in November 2005.
+
 Daniel (30 January 2006)
 - Added CURLOPT_LOCALPORT and CURLOPT_LOCALPORTRANGE to libcurl. Set with the
   curl tool with --local-port. Plain and simply set the range of ports to bind

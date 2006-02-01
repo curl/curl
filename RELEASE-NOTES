@@ -20,6 +20,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o plain --limit-rate [num] means bytes
  o re-creating a dead connection is no longer counted internally as a followed
    redirect and thus prevents a weird error that would occur if a FTP
    connection died on an attempted re-use

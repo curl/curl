@@ -1513,7 +1513,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           curl_off_t value = curlx_strtoofft(nextarg, &unit, 0);
 
           if(!*unit)
-            unit="b";
+            unit=(char *)"b";
           else if(strlen(unit) > 1)
             unit=(char *)"w"; /* unsupported */
 
