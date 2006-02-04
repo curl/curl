@@ -33,6 +33,8 @@ we expect you to actually torture our web site with your tests! Thanks.
 EXAMPLES
 
 anyauthput.c   - HTTP PUT using "any" authentication method
+cacertinmem.c  - Use a built-in PEM certificate to retrieve a https page
+cookie_interface.c - shows usage of simple cookie interface
 curlgtk.c      - download using a GTK progress bar
 curlx.c        - getting file info from the remote cert data
 debug.c        - showing how to use the debug callback
@@ -55,6 +57,7 @@ multi-double.c - a multi-interface app doing two simultaneous transfers
 multi-post.c   - a multi-interface app doing a multipart formpost
 multi-single.c - a multi-interface app getting a single file
 multithread.c  - an example using multi-treading transfering multiple files
+opensslthreadlock.c - show how to do locking when using OpenSSL multi-threaded
 persistant.c   - request two URLs with a persistant connection
 post-callback.c - send a HTTP POST using a callback
 postit2.c      - send a HTTP multipart formpost
@@ -62,3 +65,4 @@ sepheaders.c   - download headers to a separate file
 simple.c       - the most simple download a URL source
 simplepost.c   - HTTP POST
 simplessl.c    - HTTPS example with certificates many options set
+synctime.c     - Sync local time by extracing date from remote HTTP servers
