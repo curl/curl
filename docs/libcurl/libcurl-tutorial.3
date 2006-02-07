@@ -887,12 +887,12 @@ data size is unknown.
 
 There's only one aspect left in the HTTP requests that we haven't yet
 mentioned how to modify: the version field. All HTTP requests includes the
-version number to tell the server which version we support. libcurl speak
-HTTP 1.1 by default. Some very old servers don't like getting 1.1-requests
-and when dealing with stubborn old things like that, you can tell libcurl
-to use 1.0 instead by doing something like this:
+version number to tell the server which version we support. libcurl speak HTTP
+1.1 by default. Some very old servers don't like getting 1.1-requests and when
+dealing with stubborn old things like that, you can tell libcurl to use 1.0
+instead by doing something like this:
 
- curl_easy_setopt(easyhandle, CURLOPT_HTTP_VERSION, CURLHTTP_VERSION_1_0);
+ curl_easy_setopt(easyhandle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
 
 .IP "FTP Custom Commands"
 
