@@ -4216,8 +4216,10 @@ show_error:
 
     } /* loop to the next globbed upload file */
 
-    if(inglob)
+    if(inglob) {
       glob_cleanup(inglob);
+      inglob = NULL;
+    }
 
     if(outfiles)
       free(outfiles);
