@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -2100,11 +2100,12 @@ bool Curl_retry_request(struct connectdata *conn,
   bool retry = FALSE;
 
   if((conn->keep.bytecount+conn->headerbytecount == 0) &&
-     conn->bits.reuse) {
-    /* We got no data and we attempted to re-use a connection. This might
-       happen if the connection was left alive when we were done using it
-       before, but that was closed when we wanted to read from it again. Bad
-       luck. Retry the same request on a fresh connect! */
+     conn->bits.reuse &&
+     !conn->bits.no_body) {
+    /* We got no data, we attempted to re-use a connection and yet we want a
+       "body". This might happen if the connection was left alive when we were
+       done using it before, but that was closed when we wanted to read from
+       it again. Bad luck. Retry the same request on a fresh connect! */
     infof(conn->data, "Connection died, retrying a fresh connect\n");
     *url = strdup(conn->data->change.url);
 

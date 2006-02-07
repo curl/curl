@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel (8 February 2006)
+- Philippe Vaucher provided a brilliant piece of test code that show a problem
+  with re-used FTP connections. If the second request on the same connection
+  was set not to fetch a "body", libcurl could get confused and consider it an
+  attempt to use a dead connection and would go acting mighty strange.
+
 Daniel (2 February 2006)
 - Make --limit-rate [num] mean bytes. It used to be that but it broke in my
   change done in November 2005.
@@ -18,8 +24,7 @@ Daniel (30 January 2006)
 - Based on an error report by Philippe Vaucher, we no longer count a retried
   connection setup as a follow-redirect. It turns out 1) this fails when a FTP
   connection is re-setup and 2) it does make the max-redirs counter behave
-  wrong. This fix was not verified since the reporter vanished, but I believe
-  this is the right fix nonetheless.
+  wrong.
 
 Daniel (24 January 2006)
 - Michal Marek provided a patch for FTP that makes libcurl continue to try

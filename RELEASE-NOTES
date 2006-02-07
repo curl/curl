@@ -20,6 +20,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o re-used FTP connections when the second request didn't do a transfer
  o plain --limit-rate [num] means bytes
  o re-creating a dead connection is no longer counted internally as a followed
    redirect and thus prevents a weird error that would occur if a FTP
@@ -49,6 +50,7 @@ Other curl-related news since the previous public release:
  o http://curl.s-lines.net/ is a new curl web mirror in Japan
  o http://curl.oss-mirror.org/ is a new curl web mirror in Ireland
  o http://curl.linux-mirror.org/ is a new curl web mirror in Germany
+ o pycurl 7.15.1 was released: http://pycurl.sf.net/
  o TclCurl 0.15.1 was released:
    http://personal1.iddeo.es/andresgarci/tclcurl/english/
 
