@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -267,11 +267,13 @@ GnuTLS
 
  http://www.gnu.org/software/gnutls/manual/html_node/Multi_002dthreaded-applications.html
 
-When using multiple threads you should set the CURLOPT_NOSIGNAL option to
-TRUE for all handles. Everything will work fine except that timeouts are not
-honored during the DNS lookup - which you can work around by building libcurl
-with c-ares support. c-ares is a library that provides asynchronous name
-resolves. Unfortunately, c-ares does not yet support IPv6.
+When using multiple threads you should set the CURLOPT_NOSIGNAL option to TRUE
+for all handles. Everything will or might work fine except that timeouts are
+not honored during the DNS lookup - which you can work around by building
+libcurl with c-ares support. c-ares is a library that provides asynchronous
+name resolves. Unfortunately, c-ares does not yet fully support IPv6. On some
+platforms, libcurl simply will not function properly multi-threaded unless
+this option is set.
 
 Also, note that CURLOPT_DNS_USE_GLOBAL_CACHE is not thread-safe.
 
