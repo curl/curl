@@ -146,7 +146,8 @@ Pass a pointer to a long to receive the last socket used by this curl
 session. If the socket is no longer valid, -1 is returned. When you finish
 working with the socket, you must call curl_easy_cleanup() as usual and let
 libcurl close the socket and cleanup other resources associated with the
-handle. (Added in 7.15.2)
+handle. This is typically used in combination with \fICURLOPT_CONNECT_ONLY\fP.
+(Added in 7.15.2)
 .SH TIMES
 .NF
 An overview of the six time values available from curl_easy_getinfo()
