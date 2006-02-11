@@ -20,6 +20,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o improved GnuTLS check in configure
  o re-used FTP connections when the second request didn't do a transfer
  o plain --limit-rate [num] means bytes
  o re-creating a dead connection is no longer counted internally as a followed
@@ -59,6 +60,7 @@ advice from friends like these:
 
  Dov Murik, Jean Jacques Drouin, Andres Garcia, Yang Tse, Gisle Vanem, Dan
  Fandrich, Alexander Lazic, Michael Jahn, Andrew Benham, Bryan Henderson,
- David Shaw, Jon Turner, Duane Cathey, Michal Marek, Philippe Vaucher
+ David Shaw, Jon Turner, Duane Cathey, Michal Marek, Philippe Vaucher,
+ Kent Boortz
  
         Thanks! (and sorry if I forgot to mention someone)

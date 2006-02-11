@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (11 February 2006)
+- Kent Boortz improved the configure check for GnuTLS to properly set LIBS
+  instead of LDFLAGS.
+
 Daniel (8 February 2006)
 - Philippe Vaucher provided a brilliant piece of test code that show a problem
   with re-used FTP connections. If the second request on the same connection
