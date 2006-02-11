@@ -1689,7 +1689,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     ftp_pasv_verbose(conn, conninfo, newhost, connectport);
 
 #ifndef CURL_DISABLE_HTTP
-  if(conn->bits.tunnel_proxy) {
+  if(conn->bits.tunnel_proxy && conn->bits.httpproxy) {
     /* FIX: this MUST wait for a proper connect first if 'connected' is
      * FALSE */
 
@@ -2786,7 +2786,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn,
   ftp->response_time = 3600; /* set default response time-out */
 
 #ifndef CURL_DISABLE_HTTP
-  if (conn->bits.tunnel_proxy) {
+  if (conn->bits.tunnel_proxy && conn->bits.httpproxy) {
     /* BLOCKING */
     /* We want "seamless" FTP operations through HTTP proxy tunnel */
 

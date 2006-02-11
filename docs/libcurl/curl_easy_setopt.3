@@ -1044,6 +1044,14 @@ Resolve to ipv4 addresses.
 .IP CURL_IPRESOLVE_V6
 Resolve to ipv6 addresses.
 .RE
+.SH CURLOPT_CONNECT_ONLY
+Pass a long. A non-zero parameter tells the library to perform any required
+proxy authentication and connection setup, but no data transfer.
+
+This option is useful with the \fICURLINFO_LASTSOCKET\fP option to
+\fIcurl_easy_getinfo(3)\fP. The library can set up the connection and then the
+application can obtain the most recently used socket for special data
+transfers. (Added in 7.15.2)
 .SH SSL and SECURITY OPTIONS
 .IP CURLOPT_SSLCERT
 Pass a pointer to a zero terminated string as parameter. The string should be

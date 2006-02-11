@@ -141,6 +141,12 @@ cookies cURL knows (expired ones, too). Don't forget to
 cookies (cookies for the handle have not been enabled or simply none have been
 received) 'struct curl_slist *' will be set to point to NULL. (Added in
 7.14.1)
+.IP CURLINFO_LASTSOCKET
+Pass a pointer to a long to receive the last socket used by this curl
+session. If the socket is no longer valid, -1 is returned. When you finish
+working with the socket, you must call curl_easy_cleanup() as usual and let
+libcurl close the socket and cleanup other resources associated with the
+handle. (Added in 7.15.2)
 .SH TIMES
 .NF
 An overview of the six time values available from curl_easy_getinfo()

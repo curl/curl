@@ -1361,7 +1361,7 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
    * after the connect has occured, can we start talking SSL
    */
 
-  if(conn->bits.tunnel_proxy) {
+  if(conn->bits.tunnel_proxy && conn->bits.httpproxy) {
 
     /* either SSL over proxy, or explicitly asked for */
     result = Curl_proxyCONNECT(conn, FIRSTSOCKET,

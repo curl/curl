@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -186,6 +186,14 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
     break;
   case CURLINFO_COOKIELIST:
     *param_slistp = Curl_cookie_list(data);
+    break;
+  case CURLINFO_LASTSOCKET:
+    if((data->state.lastconnect != -1) &&
+       (data->state.connects[data->state.lastconnect] != NULL))
+      *param_longp = data->state.connects[data->state.lastconnect]->
+        sock[FIRSTSOCKET];
+    else
+      *param_longp = -1;
     break;
   default:
     return CURLE_BAD_FUNCTION_ARGUMENT;

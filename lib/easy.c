@@ -527,6 +527,8 @@ CURL *curl_easy_duphandle(CURL *incurl)
     memset(outcurl->state.connects, 0,
            sizeof(struct connectdata *)*outcurl->state.numconnects);
 
+    outcurl->state.lastconnect = -1;
+
     outcurl->progress.flags    = data->progress.flags;
     outcurl->progress.callback = data->progress.callback;
 

@@ -2159,6 +2159,12 @@ CURLcode Curl_perform(struct SessionHandle *data)
 
     if(res == CURLE_OK) {
       bool do_done;
+      if(data->set.connect_only) {
+        /* keep connection open for application to use the socket */
+        conn->bits.close = FALSE;
+        res = Curl_done(&conn, CURLE_OK);
+        break;
+      }
       res = Curl_do(&conn, &do_done);
 
       /* for non 3rd party transfer only */

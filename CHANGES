@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel (11 February 2006)
+- Karl M added the CURLOPT_CONNECT_ONLY and CURLINFO_LASTSOCKET options that
+  an app can use to let libcurl only connect to a remote host and then extract
+  the socket from libcurl. libcurl will then not attempt to do any transfer at
+  all after the connect is done.
+
 - Kent Boortz improved the configure check for GnuTLS to properly set LIBS
   instead of LDFLAGS.
 

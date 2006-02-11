@@ -2,21 +2,22 @@ Curl and libcurl 7.15.2
 
  Public curl release number:               92
  Releases counted from the very beginning: 119
- Available command line options:           109
- Available curl_easy_setopt() options:     125
+ Available command line options:           111
+ Available curl_easy_setopt() options:     129
  Number of public functions in libcurl:    46
- Amount of public web site mirrors:        30
+ Amount of public web site mirrors:        31
  Number of known libcurl bindings:         32
  Number of contributors:                   474
 
 This release includes the following changes:
 
+ o CURLOPT_CONNECT_ONLY and CURLINFO_LASTSOCKET added
  o CURLOPT_LOCALPORT and CURLOPT_LOCALPORTRANGE (--local-port) added
  o Dropped support for the LPRT ftp command
- o Gopher is now officially abandoned as a protocol (lib)curl tries to support.
+ o Gopher is now officially abandoned as a protocol (lib)curl tries to support
  o curl_global_init() and curl_global_cleanup() are now using a refcount so
    that it is now legal to call them multiple times. See updated info for
-   details.
+   details
 
 This release includes the following bugfixes:
 
@@ -60,7 +61,7 @@ advice from friends like these:
 
  Dov Murik, Jean Jacques Drouin, Andres Garcia, Yang Tse, Gisle Vanem, Dan
  Fandrich, Alexander Lazic, Michael Jahn, Andrew Benham, Bryan Henderson,
- David Shaw, Jon Turner, Duane Cathey, Michal Marek, Philippe Vaucher,
- Kent Boortz
+ David Shaw, Jon Turner, Duane Cathey, Michal Marek, Philippe Vaucher, Kent
+ Boortz, Karl M
  
         Thanks! (and sorry if I forgot to mention someone)

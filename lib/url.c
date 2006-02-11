@@ -352,6 +352,9 @@ CURLcode Curl_open(struct SessionHandle **curl)
       memset(data->state.connects, 0,
              sizeof(struct connectdata *)*data->state.numconnects);
 
+    /* most recent connection is not yet defined */
+    data->state.lastconnect = -1;
+
     /*
      * libcurl 7.10 introduced SSL verification *by default*! This needs to be
      * switched off unless wanted.
@@ -432,6 +435,10 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
            are being removed! */
         for(i=newconnects; i< data->state.numconnects; i++)
           Curl_disconnect(data->state.connects[i]);
+
+        /* If the most recent connection is no longer valid, mark it invalid. */
+        if(data->state.lastconnect <= newconnects)
+          data->state.lastconnect = -1;
       }
       if(newconnects) {
         newptr= (struct connectdata **)
@@ -453,8 +460,9 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
         /* zero makes NO cache at all */
         if(data->state.connects)
           free(data->state.connects);
-        data->state.connects=NULL;
-        data->state.numconnects=0;
+        data->state.connects = NULL;
+        data->state.numconnects = 0;
+        data->state.lastconnect = -1;
       }
     }
     break;
@@ -1469,6 +1477,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 
   case CURLOPT_IGNORE_CONTENT_LENGTH:
     data->set.ignorecl = va_arg(param, long)?TRUE:FALSE;
+    break;
+
+  case CURLOPT_CONNECT_ONLY:
+    /*
+     * No data transfer, set up connection and let application use the socket
+     */
+    data->set.connect_only = va_arg(param, long)?TRUE:FALSE;
     break;
 
   default:
@@ -3811,10 +3826,14 @@ CURLcode Curl_done(struct connectdata **connp,
     if(!result && res2)
       result = res2;
   }
-  else
+  else {
+    /* remember the most recently used connection */
+    data->state.lastconnect = conn->connectindex;
+
     infof(data, "Connection #%ld to host %s left intact\n",
           conn->connectindex,
           conn->bits.httpproxy?conn->proxy.dispname:conn->host.dispname);
+  }
 
   return result;
 }
