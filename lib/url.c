@@ -2296,7 +2296,8 @@ static void fix_hostname(struct connectdata *conn, struct hostname *host)
  *
  * @param data The sessionhandle pointer
  * @param in_connect is set to the next connection data pointer
- * @param addr is set to the new dns entry for this connection
+ * @param addr is set to the new dns entry for this connection. If this
+ *        connection is re-used it will be NULL.
  * @param async is set TRUE/FALSE depending on the nature of this lookup
  * @return CURLcode
  * @see SetupConnection()
@@ -3630,8 +3631,11 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   return result;
 }
 
-/* SetupConnection() should be called after the name resolve initiated in
+/* SetupConnection() is called after the name resolve initiated in
  * CreateConnection() is all done.
+ *
+ * NOTE: the argument 'hostaddr' is NULL when this function is called for a
+ * re-used connection.
  */
 
 static CURLcode SetupConnection(struct connectdata *conn,
@@ -3730,8 +3734,8 @@ CURLcode Curl_connect(struct SessionHandle *data,
     /* no error */
     if(dns || !*asyncp)
       /* If an address is available it means that we already have the name
-         resolved, OR it isn't async.
-         If so => continue connecting from here */
+         resolved, OR it isn't async. if this is a re-used connection 'dns'
+         will be NULL here. Continue connecting from here */
       code = SetupConnection(*in_connect, dns, protocol_done);
     /* else
          response will be received and treated async wise */
