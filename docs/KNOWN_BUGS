@@ -128,8 +128,6 @@ may have been fixed since this was written!
   libcurl thinks of it as the *compressed* length. Some explanations are here:
   http://curl.haxx.se/mail/lib-2003-06/0146.html
 
-3. GOPHER transfers seem broken
-
 2. If a HTTP server responds to a HEAD request and includes a body (thus
   violating the RFC2616), curl won't wait to read the response but just stop
   reading and return back. If a second request (let's assume a GET) is then
