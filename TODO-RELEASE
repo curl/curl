@@ -1,7 +1,8 @@
-To get fixed in 7.15.0 (planned release: November 2005)
+To get fixed in 7.15.2 (planned release: Febrary 2006)
 ======================
 
-60 - CONNECT 407 responses that kills the connection (not very likely though)
+63 - bug #1431750 
 
-63 - 
+64 - DNS caching set to 0, prune sooner
 
+65 - 
