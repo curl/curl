@@ -3,6 +3,4 @@ To get fixed in 7.15.2 (planned release: Febrary 2006)
 
 63 - bug #1431750 
 
-64 - DNS caching set to 0, prune sooner
-
 65 - 

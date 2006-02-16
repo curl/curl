@@ -6,11 +6,16 @@
 
                                   Changelog
 
+Daniel (17 February 2006)
+- Shmulik Regev provided a fix for the DNS cache when using short life times,
+  as previously it could be holding on to old cached entries longer than
+  requested.
+
 Daniel (11 February 2006)
-- Karl M added the CURLOPT_CONNECT_ONLY and CURLINFO_LASTSOCKET options that
-  an app can use to let libcurl only connect to a remote host and then extract
-  the socket from libcurl. libcurl will then not attempt to do any transfer at
-  all after the connect is done.
+- Karl Moerder added the CURLOPT_CONNECT_ONLY and CURLINFO_LASTSOCKET options
+  that an app can use to let libcurl only connect to a remote host and then
+  extract the socket from libcurl. libcurl will then not attempt to do any
+  transfer at all after the connect is done.
 
 - Kent Boortz improved the configure check for GnuTLS to properly set LIBS
   instead of LDFLAGS.

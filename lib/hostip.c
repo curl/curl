@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -276,6 +276,39 @@ void Curl_hostcache_prune(struct SessionHandle *data)
     Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 }
 
+static int
+remove_entry_if_stale(struct SessionHandle *data, struct Curl_dns_entry *dns)
+{
+  struct hostcache_prune_data user;
+
+  if( !dns || (data->set.dns_cache_timeout == -1) || !data->hostcache)
+    /* cache forever means never prune, and NULL hostcache means
+       we can't do it */
+    return 0;
+
+  time(&user.now);
+  user.cache_timeout = data->set.dns_cache_timeout;
+
+  if ( !hostcache_timestamp_remove(&user,dns) )
+    return 0;
+
+  /* ok, we do need to clear the cache. although we need to remove just a
+     single entry we clean the entire hash, as no explicit delete function
+     is provided */
+  if(data->share)
+    Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
+
+  Curl_hash_clean_with_criterium(data->hostcache,
+                                 (void *) &user,
+                                 hostcache_timestamp_remove);
+
+  if(data->share)
+    Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
+
+  return 1;
+}
+
+
 #ifdef HAVE_SIGSETJMP
 /* Beware this is a global and unique instance. This is used to store the
    return address that we can jump back to from inside a signal handler. This
@@ -404,6 +437,11 @@ int Curl_resolv(struct connectdata *conn,
 
   /* free the allocated entry_id again */
   free(entry_id);
+
+  /* See whether the returned entry is stale. Deliberately done after the
+     locked block */
+  if ( remove_entry_if_stale(data,dns) )
+    dns = NULL; /* the memory deallocation is being handled by the hash */
 
   rc = CURLRESOLV_ERROR; /* default to failure */
 
