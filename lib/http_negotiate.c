@@ -111,7 +111,7 @@ log_gss_error(struct connectdata *conn, OM_uint32 error_status, char *prefix)
     gss_release_buffer(&min_stat, &status_string);
   } while (!GSS_ERROR(maj_stat) && msg_ctx != 0);
 
-  infof(conn->data, buf);
+  infof(conn->data, "%s", buf);
 }
 
 int Curl_input_negotiate(struct connectdata *conn, char *header)

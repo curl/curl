@@ -219,7 +219,7 @@ int ProcessRequest(struct httprequest *req)
       else
         sprintf(logbuf, "Got a *HUGE* request HTTP/%d.%d",
                 prot_major, prot_minor);
-      logmsg(logbuf);
+      logmsg("%s", logbuf);
 
       if(!strncmp("/verifiedserver", ptr, 15)) {
         logmsg("Are-we-friendly question received");
@@ -251,7 +251,7 @@ int ProcessRequest(struct httprequest *req)
       sprintf(logbuf, "Requested test number %ld part %ld",
               req->testno, req->partno);
 
-      logmsg(logbuf);
+      logmsg("%s", logbuf);
 
       filename = test2file(req->testno);
 
@@ -294,7 +294,7 @@ int ProcessRequest(struct httprequest *req)
                 doc, &prot_major, &prot_minor) == 3) {
         sprintf(logbuf, "Receiced a CONNECT %s HTTP/%d.%d request",
                 doc, prot_major, prot_minor);
-        logmsg(logbuf);
+        logmsg("%s", logbuf);
 
         if(prot_major*10+prot_minor == 10)
           req->open = FALSE; /* HTTP 1.0 closes connection by default */

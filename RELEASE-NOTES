@@ -21,6 +21,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o minor format string mistake in the GSS/Negotiate code
  o cached DNS entries could remain in the cache too long
  o improved GnuTLS check in configure
  o re-used FTP connections when the second request didn't do a transfer
@@ -63,6 +64,6 @@ advice from friends like these:
  Dov Murik, Jean Jacques Drouin, Andres Garcia, Yang Tse, Gisle Vanem, Dan
  Fandrich, Alexander Lazic, Michael Jahn, Andrew Benham, Bryan Henderson,
  David Shaw, Jon Turner, Duane Cathey, Michal Marek, Philippe Vaucher, Kent
- Boortz, Karl Moerder, Shmulik Regev
+ Boortz, Karl Moerder, Shmulik Regev, Ulf Härnhammar
  
         Thanks! (and sorry if I forgot to mention someone)

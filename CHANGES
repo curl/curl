@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (18 February 2006)
+- Ulf Härnhammar fixed a format string (printf style) problem in the Negotiate
+  code. It should however not be the cause of any troubles. He also fixed a
+  few similar problems in the HTTP test server code.
+
 Daniel (17 February 2006)
 - Shmulik Regev provided a fix for the DNS cache when using short life times,
   as previously it could be holding on to old cached entries longer than
