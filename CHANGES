@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (20 February 2006)
+- Shmulik Regev fixed an issue with multi-pass authentication and compressed
+  content when libcurl didn't honor the internal ignorebody flag.
+
 Daniel (18 February 2006)
 - Ulf Härnhammar fixed a format string (printf style) problem in the Negotiate
   code. It should however not be the cause of any troubles. He also fixed a

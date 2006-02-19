@@ -21,6 +21,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o multi-pass authentication and compressed content
  o minor format string mistake in the GSS/Negotiate code
  o cached DNS entries could remain in the cache too long
  o improved GnuTLS check in configure
@@ -64,6 +65,6 @@ advice from friends like these:
  Dov Murik, Jean Jacques Drouin, Andres Garcia, Yang Tse, Gisle Vanem, Dan
  Fandrich, Alexander Lazic, Michael Jahn, Andrew Benham, Bryan Henderson,
  David Shaw, Jon Turner, Duane Cathey, Michal Marek, Philippe Vaucher, Kent
- Boortz, Karl Moerder, Shmulik Regev, Ulf Härnhammar
+ Boortz, Karl Moerder, Shmulik Regev, Ulf Härnhammar, Shmulik Regev
  
         Thanks! (and sorry if I forgot to mention someone)

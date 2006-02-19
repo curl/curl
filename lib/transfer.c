@@ -1158,12 +1158,14 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
               case DEFLATE:
                 /* Assume CLIENTWRITE_BODY; headers are not encoded. */
-                result = Curl_unencode_deflate_write(data, k, nread);
+                if(!k->ignorebody)
+                  result = Curl_unencode_deflate_write(data, k, nread);
                 break;
 
               case GZIP:
                 /* Assume CLIENTWRITE_BODY; headers are not encoded. */
-                result = Curl_unencode_gzip_write(data, k, nread);
+                if(!k->ignorebody)
+                  result = Curl_unencode_gzip_write(data, k, nread);
                 break;
 
               case COMPRESS:
