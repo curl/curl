@@ -1685,7 +1685,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         GetStr(&config->socksproxy, nextarg);
         config->socksver = CURLPROXY_SOCKS5;
         break;
-      case 't': /* --socks4 specifies a socks5 proxy to use */
+      case 't': /* --socks4 specifies a socks4 proxy to use */
         GetStr(&config->socksproxy, nextarg);
         config->socksver = CURLPROXY_SOCKS4;
         break;
@@ -4186,7 +4186,7 @@ show_error:
         /* Important that we set the time _after_ the file has been
            closed, as is done above here */
         if(config->remote_time && outs.filename) {
-          /* as libcurl if we got a time. Pretty please */
+          /* ask libcurl if we got a time. Pretty please */
           long filetime;
           curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
           if(filetime >= 0) {
