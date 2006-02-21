@@ -2,7 +2,7 @@ Curl and libcurl 7.15.2
 
  Public curl release number:               92
  Releases counted from the very beginning: 119
- Available command line options:           111
+ Available command line options:           112
  Available curl_easy_setopt() options:     129
  Number of public functions in libcurl:    46
  Amount of public web site mirrors:        31
@@ -11,6 +11,7 @@ Curl and libcurl 7.15.2
 
 This release includes the following changes:
 
+ o Support for SOCKS4 proxies (added --socks4)
  o CURLOPT_CONNECT_ONLY and CURLINFO_LASTSOCKET added
  o CURLOPT_LOCALPORT and CURLOPT_LOCALPORTRANGE (--local-port) added
  o Dropped support for the LPRT ftp command
@@ -65,6 +66,6 @@ advice from friends like these:
  Dov Murik, Jean Jacques Drouin, Andres Garcia, Yang Tse, Gisle Vanem, Dan
  Fandrich, Alexander Lazic, Michael Jahn, Andrew Benham, Bryan Henderson,
  David Shaw, Jon Turner, Duane Cathey, Michal Marek, Philippe Vaucher, Kent
- Boortz, Karl Moerder, Shmulik Regev, Ulf Härnhammar, Shmulik Regev
+ Boortz, Karl Moerder, Shmulik Regev, Ulf Härnhammar, Peter Su
  
         Thanks! (and sorry if I forgot to mention someone)

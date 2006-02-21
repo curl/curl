@@ -343,7 +343,10 @@ struct Configurable {
   struct timeval lastrecvtime;
   size_t lastrecvsize;
   bool ftp_ssl;
-  char *socks5proxy;
+
+  char *socksproxy; /* set to server string */
+  int socksver;     /* set to CURLPROXY_SOCKS* define */
+
   bool tcp_nodelay;
   long req_retry;   /* number of retries */
   long retry_delay; /* delay between retries (in seconds) */
@@ -557,7 +560,8 @@ static void help(void)
     "    --retry-max-time <seconds> Retry only within this period",
     " -s/--silent        Silent mode. Don't output anything",
     " -S/--show-error    Show error. With -s, make curl show errors when they occur",
-    "    --socks <host[:port]> Use SOCKS5 proxy on given host + port",
+    "    --socks4 <host[:port]> Use SOCKS4 proxy on given host + port",
+    "    --socks5 <host[:port]> Use SOCKS5 proxy on given host + port",
     "    --stderr <file> Where to redirect stderr. - means stdout",
     " -t/--telnet-option <OPT=val> Set telnet option",
     "    --trace <file>  Write a debug trace to the given file",
@@ -1314,6 +1318,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$a", "ftp-ssl",    FALSE},
     {"$b", "ftp-pasv",   FALSE},
     {"$c", "socks5",     TRUE},
+    {"$c", "socks",      TRUE}, /* this is how the option was documented but
+                                   we prefer the --socks5 version for explicit
+                                   version */
     {"$d", "tcp-nodelay",FALSE},
     {"$e", "proxy-digest", FALSE},
     {"$f", "proxy-basic", FALSE},
@@ -1330,6 +1337,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$q", "ftp-skip-pasv-ip", FALSE},
     {"$r", "ftp-method", TRUE},
     {"$s", "local-port", TRUE},
+    {"$t", "socks4",     TRUE},
 
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
@@ -1673,8 +1681,13 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           free(config->ftpport);
         config->ftpport = NULL;
         break;
-      case 'c': /* --socks specifies a socks5 proxy to use */
-        GetStr(&config->socks5proxy, nextarg);
+      case 'c': /* --socks5 specifies a socks5 proxy to use */
+        GetStr(&config->socksproxy, nextarg);
+        config->socksver = CURLPROXY_SOCKS5;
+        break;
+      case 't': /* --socks4 specifies a socks5 proxy to use */
+        GetStr(&config->socksproxy, nextarg);
+        config->socksver = CURLPROXY_SOCKS4;
         break;
       case 'd': /* --tcp-nodelay option */
         config->tcp_nodelay ^= TRUE;
@@ -3972,10 +3985,10 @@ operate(struct Configurable *config, int argc, char *argv[])
         if(config->ftp_ssl)
           curl_easy_setopt(curl, CURLOPT_FTP_SSL, CURLFTPSSL_TRY);
 
-        /* new in curl 7.11.1 */
-        if(config->socks5proxy) {
-          curl_easy_setopt(curl, CURLOPT_PROXY, config->socks5proxy);
-          curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
+        /* new in curl 7.11.1, modified in 7.15.2 */
+        if(config->socksproxy) {
+          curl_easy_setopt(curl, CURLOPT_PROXY, config->socksproxy);
+          curl_easy_setopt(curl, CURLOPT_PROXYTYPE, config->socksver);
         }
 
         /* curl 7.13.0 */

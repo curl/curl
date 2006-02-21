@@ -1810,6 +1810,191 @@ ConnectionStore(struct SessionHandle *data,
 }
 
 /*
+* This function logs in to a SOCKS4 proxy and sends the specifies the final
+* desitination server.
+*
+* Reference :
+*   http://socks.permeo.com/protocol/socks4.protocol
+*
+* Note :
+*   Nonsupport "SOCKS 4A (Simple Extension to SOCKS 4 Protocol)"
+*   Nonsupport "Identification Protocol (RFC1413)"
+*/
+static int handleSock4Proxy(struct connectdata *conn)
+{
+  unsigned char socksreq[600]; /* room for large user/pw (255 max each) */
+  int result;
+  CURLcode code;
+  curl_socket_t sock = conn->sock[FIRSTSOCKET];
+  struct SessionHandle *data = conn->data;
+
+  Curl_nonblock(sock, FALSE);
+
+  /*
+  * Compose socks4 request
+  *
+  * Request format
+  *
+  *     +----+----+----+----+----+----+----+----+----+----+....+----+
+  *     | VN | CD | DSTPORT |      DSTIP        | USERID       |NULL|
+  *     +----+----+----+----+----+----+----+----+----+----+....+----+
+  * # of bytes:  1    1      2              4           variable       1
+  */
+
+  socksreq[0] = 4; /* version (SOCKS4) */
+  socksreq[1] = 1; /* connect */
+  *((unsigned short*)&socksreq[2]) = htons(conn->remote_port);
+
+  /* DNS resolve */
+  {
+    struct Curl_dns_entry *dns;
+    Curl_addrinfo *hp=NULL;
+    int rc;
+
+    rc = Curl_resolv(conn, conn->host.name, (int)conn->remote_port, &dns);
+
+    if(rc == CURLRESOLV_ERROR)
+      return 1;
+
+    if(rc == CURLRESOLV_PENDING)
+      /* this requires that we're in "wait for resolve" state */
+      rc = Curl_wait_for_resolv(conn, &dns);
+
+    /*
+    * We cannot use 'hostent' as a struct that Curl_resolv() returns.  It
+    * returns a Curl_addrinfo pointer that may not always look the same.
+    */
+    if(dns)
+      hp=dns->addr;
+    if (hp) {
+      char buf[64];
+      unsigned short ip[4];
+      Curl_printable_address(hp, buf, sizeof(buf));
+
+      if(4 == sscanf( buf, "%hu.%hu.%hu.%hu",
+        &ip[0], &ip[1], &ip[2], &ip[3])) {
+          /* Set DSTIP */
+          socksreq[4] = (unsigned char)ip[0];
+          socksreq[5] = (unsigned char)ip[1];
+          socksreq[6] = (unsigned char)ip[2];
+          socksreq[7] = (unsigned char)ip[3];
+        }
+      else
+        hp = NULL; /* fail! */
+
+      Curl_resolv_unlock(conn->data, dns); /* not used anymore from now on */
+
+    }
+    if(!hp) {
+      failf(conn->data, "Failed to resolve \"%s\" for SOCKS4 connect.\n",
+        conn->host.name);
+      return 1;
+    }
+  }
+
+  /*
+  * Make connection
+  */
+  {
+    ssize_t actualread;
+    ssize_t written;
+    int packetsize = 9; /* request data size (include NULL) */
+
+    /* Send request */
+    code = Curl_write(conn, sock, (char *)socksreq, packetsize, &written);
+    if ((code != CURLE_OK) || (written != packetsize)) {
+      failf(conn->data, "Failed to send SOCKS4 connect request.\n");
+      return 1;
+    }
+
+    packetsize = 8; /* receive data size */
+
+    /* Receive response */
+    result = Curl_read(conn, sock, (char *)socksreq, packetsize, &actualread);
+    if ((result != CURLE_OK) || (actualread != packetsize)) {
+      failf(conn->data, "Failed to receive SOCKS4 connect request ack.\n");
+      return 1;
+    }
+
+    /*
+    * Response format
+    *
+    *     +----+----+----+----+----+----+----+----+
+    *     | VN | CD | DSTPORT |      DSTIP        |
+    *     +----+----+----+----+----+----+----+----+
+    * # of bytes:  1    1      2              4
+    *
+    * VN is the version of the reply code and should be 0. CD is the result
+    * code with one of the following values:
+    *
+    * 90: request granted
+    * 91: request rejected or failed
+    * 92: request rejected becasue SOCKS server cannot connect to
+    *     identd on the client
+    * 93: request rejected because the client program and identd
+    *     report different user-ids
+    */
+
+    /* wrong version ? */
+    if (socksreq[0] != 0) {
+      failf(conn->data,
+        "SOCKS4 reply has wrong version, version should be 4.\n");
+      return 1;
+    }
+
+    /* Result */
+    switch(socksreq[1])
+    {
+      case 90:
+        infof(data, "SOCKS4 request granted.\n");
+        break;
+      case 91:
+        failf(conn->data,
+          "Can't complete SOCKS4 connection to %d.%d.%d.%d:%d. (%d)"
+          ", request rejected or failed.\n",
+          (unsigned char)socksreq[4], (unsigned char)socksreq[5],
+          (unsigned char)socksreq[6], (unsigned char)socksreq[7],
+          (unsigned int)ntohs(*(unsigned short*)(&socksreq[8])),
+          socksreq[1]);
+        return 1;
+      case 92:
+        failf(conn->data,
+          "Can't complete SOCKS4 connection to %d.%d.%d.%d:%d. (%d)"
+          ", request rejected becasue SOCKS server cannot connect to "
+          "identd on the client.\n",
+          (unsigned char)socksreq[4], (unsigned char)socksreq[5],
+          (unsigned char)socksreq[6], (unsigned char)socksreq[7],
+          (unsigned int)ntohs(*(unsigned short*)(&socksreq[8])),
+          socksreq[1]);
+        return 1;
+      case 93:
+        failf(conn->data,
+          "Can't complete SOCKS4 connection to %d.%d.%d.%d:%d. (%d)"
+          ", request rejected because the client program and identd "
+          "report different user-ids.\n",
+          (unsigned char)socksreq[4], (unsigned char)socksreq[5],
+          (unsigned char)socksreq[6], (unsigned char)socksreq[7],
+          (unsigned int)ntohs(*(unsigned short*)(&socksreq[8])),
+          socksreq[1]);
+        return 1;
+      default :
+        failf(conn->data,
+          "Can't complete SOCKS4 connection to %d.%d.%d.%d:%d. (%d)"
+          ", Unknown.\n",
+          (unsigned char)socksreq[4], (unsigned char)socksreq[5],
+          (unsigned char)socksreq[6], (unsigned char)socksreq[7],
+          (unsigned int)ntohs(*(unsigned short*)(&socksreq[8])),
+          socksreq[1]);
+        return 1;
+    }
+  }
+
+  Curl_nonblock(sock, TRUE);
+
+  return 0; /* Proxy was successful! */
+}
+
+/*
  * This function logs in to a SOCKS5 proxy and sends the specifies the final
  * desitination server.
  */
@@ -2052,16 +2237,18 @@ static CURLcode ConnectPlease(struct connectdata *conn,
 
     Curl_store_ip_addr(conn);
 
-    if (conn->data->set.proxytype == CURLPROXY_SOCKS5) {
+    switch(conn->data->set.proxytype) {
+    case CURLPROXY_SOCKS5:
       return handleSock5Proxy(conn->proxyuser,
                               conn->proxypasswd,
                               conn) ?
         CURLE_COULDNT_CONNECT : CURLE_OK;
-    }
-    else if (conn->data->set.proxytype == CURLPROXY_HTTP) {
+    case CURLPROXY_HTTP:
       /* do nothing here. handled later. */
-    }
-    else {
+      break;
+    case CURLPROXY_SOCKS4:
+      return handleSock4Proxy(conn) ? CURLE_COULDNT_CONNECT : CURLE_OK;
+    default:
       failf(conn->data, "unknown proxytype option given");
       return CURLE_COULDNT_CONNECT;
     }

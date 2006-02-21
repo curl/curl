@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl 1 "24 Nov 2005" "Curl 7.15.1" "Curl Manual"
+.TH curl 1 "21 Feb 2006" "Curl 7.15.2" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -859,14 +859,24 @@ If this option is used twice, the second will again disable silent mode.
 When used with -s it makes curl show error message if it fails.
 
 If this option is used twice, the second will again disable show error.
-.IP "--socks <host[:port]>"
+.IP "--socks4 <host[:port]>"
+Use the specified SOCKS4 proxy. If the port number is not specified, it is
+assumed at port 1080. (Added in 7.15.2)
+
+This option overrides any previous use of \fI-x/--proxy\fP, as they are
+mutually exclusive.
+
+If this option is used several times, the last one will be used.
+.IP "--socks5 <host[:port]>"
 Use the specified SOCKS5 proxy. If the port number is not specified, it is
 assumed at port 1080. (Added in 7.11.1)
 
 This option overrides any previous use of \fI-x/--proxy\fP, as they are
 mutually exclusive.
 
-If this option is used several times, the last one will be used.
+If this option is used several times, the last one will be used. (This option
+was previously wrongly documented and used as --socks without the number
+appended.)
 .IP "--stderr <file>"
 Redirect all writes to stderr to the specified file instead. If the file name
 is a plain '-', it is instead written to stdout. This option has no point when

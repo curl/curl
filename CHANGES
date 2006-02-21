@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel (21 February 2006)
+- Peter Su added support for SOCKS4 proxies. Enable this by setting the proxy
+  type to the already provided type CURLPROXY_SOCKS4.
+
+  I added a --socks4 option that works like the current --socks5 option but
+  instead use the socks4 protocol.
+
 Daniel (20 February 2006)
 - Shmulik Regev fixed an issue with multi-pass authentication and compressed
   content when libcurl didn't honor the internal ignorebody flag.
