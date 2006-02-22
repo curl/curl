@@ -362,7 +362,7 @@ CURLcode Curl_open(struct SessionHandle **curl)
     data->set.ssl.verifypeer = TRUE;
     data->set.ssl.verifyhost = 2;
 #ifdef CURL_CA_BUNDLE
-    /* This is our prefered CA cert bundle since install time */
+    /* This is our preferred CA cert bundle since install time */
     data->set.ssl.CAfile = (char *)CURL_CA_BUNDLE;
 #endif
   }
@@ -1810,8 +1810,8 @@ ConnectionStore(struct SessionHandle *data,
 }
 
 /*
-* This function logs in to a SOCKS4 proxy and sends the specifies the final
-* desitination server.
+* This function logs in to a SOCKS4 proxy and sends the specifics to the final
+* destination server.
 *
 * Reference :
 *   http://socks.permeo.com/protocol/socks4.protocol
@@ -1886,7 +1886,7 @@ static int handleSock4Proxy(struct connectdata *conn)
 
     }
     if(!hp) {
-      failf(conn->data, "Failed to resolve \"%s\" for SOCKS4 connect.\n",
+      failf(conn->data, "Failed to resolve \"%s\" for SOCKS4 connect.",
         conn->host.name);
       return 1;
     }
@@ -1903,7 +1903,7 @@ static int handleSock4Proxy(struct connectdata *conn)
     /* Send request */
     code = Curl_write(conn, sock, (char *)socksreq, packetsize, &written);
     if ((code != CURLE_OK) || (written != packetsize)) {
-      failf(conn->data, "Failed to send SOCKS4 connect request.\n");
+      failf(conn->data, "Failed to send SOCKS4 connect request.");
       return 1;
     }
 
@@ -1912,7 +1912,7 @@ static int handleSock4Proxy(struct connectdata *conn)
     /* Receive response */
     result = Curl_read(conn, sock, (char *)socksreq, packetsize, &actualread);
     if ((result != CURLE_OK) || (actualread != packetsize)) {
-      failf(conn->data, "Failed to receive SOCKS4 connect request ack.\n");
+      failf(conn->data, "Failed to receive SOCKS4 connect request ack.");
       return 1;
     }
 
@@ -1929,7 +1929,7 @@ static int handleSock4Proxy(struct connectdata *conn)
     *
     * 90: request granted
     * 91: request rejected or failed
-    * 92: request rejected becasue SOCKS server cannot connect to
+    * 92: request rejected because SOCKS server cannot connect to
     *     identd on the client
     * 93: request rejected because the client program and identd
     *     report different user-ids
@@ -1938,7 +1938,7 @@ static int handleSock4Proxy(struct connectdata *conn)
     /* wrong version ? */
     if (socksreq[0] != 0) {
       failf(conn->data,
-        "SOCKS4 reply has wrong version, version should be 4.\n");
+        "SOCKS4 reply has wrong version, version should be 4.");
       return 1;
     }
 
@@ -1951,7 +1951,7 @@ static int handleSock4Proxy(struct connectdata *conn)
       case 91:
         failf(conn->data,
           "Can't complete SOCKS4 connection to %d.%d.%d.%d:%d. (%d)"
-          ", request rejected or failed.\n",
+          ", request rejected or failed.",
           (unsigned char)socksreq[4], (unsigned char)socksreq[5],
           (unsigned char)socksreq[6], (unsigned char)socksreq[7],
           (unsigned int)ntohs(*(unsigned short*)(&socksreq[8])),
@@ -1960,8 +1960,8 @@ static int handleSock4Proxy(struct connectdata *conn)
       case 92:
         failf(conn->data,
           "Can't complete SOCKS4 connection to %d.%d.%d.%d:%d. (%d)"
-          ", request rejected becasue SOCKS server cannot connect to "
-          "identd on the client.\n",
+          ", request rejected because SOCKS server cannot connect to "
+          "identd on the client.",
           (unsigned char)socksreq[4], (unsigned char)socksreq[5],
           (unsigned char)socksreq[6], (unsigned char)socksreq[7],
           (unsigned int)ntohs(*(unsigned short*)(&socksreq[8])),
@@ -1971,7 +1971,7 @@ static int handleSock4Proxy(struct connectdata *conn)
         failf(conn->data,
           "Can't complete SOCKS4 connection to %d.%d.%d.%d:%d. (%d)"
           ", request rejected because the client program and identd "
-          "report different user-ids.\n",
+          "report different user-ids.",
           (unsigned char)socksreq[4], (unsigned char)socksreq[5],
           (unsigned char)socksreq[6], (unsigned char)socksreq[7],
           (unsigned int)ntohs(*(unsigned short*)(&socksreq[8])),
@@ -1980,7 +1980,7 @@ static int handleSock4Proxy(struct connectdata *conn)
       default :
         failf(conn->data,
           "Can't complete SOCKS4 connection to %d.%d.%d.%d:%d. (%d)"
-          ", Unknown.\n",
+          ", Unknown.",
           (unsigned char)socksreq[4], (unsigned char)socksreq[5],
           (unsigned char)socksreq[6], (unsigned char)socksreq[7],
           (unsigned int)ntohs(*(unsigned short*)(&socksreq[8])),
@@ -1995,8 +1995,8 @@ static int handleSock4Proxy(struct connectdata *conn)
 }
 
 /*
- * This function logs in to a SOCKS5 proxy and sends the specifies the final
- * desitination server.
+ * This function logs in to a SOCKS5 proxy and sends the specifics to the final
+ * destination server.
  */
 static int handleSock5Proxy(const char *proxy_name,
                             const char *proxy_password,
@@ -2558,7 +2558,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
                           (data->set.proxytype == CURLPROXY_HTTP))?
     TRUE:FALSE; /* http proxy or not */
 
-  /* Default protocol-independent behavior doesn't support persistant
+  /* Default protocol-independent behavior doesn't support persistent
      connections, so we set this to force-close. Protocols that support
      this need to set this to FALSE in their "curl_do" functions. */
   conn->bits.close = TRUE;
@@ -2571,7 +2571,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
   conn->bits.use_range = data->set.set_range?TRUE:FALSE; /* range status */
   conn->range = data->set.set_range;              /* clone the range setting */
-  conn->resume_from = data->set.set_resume_from;   /* inherite resume_from */
+  conn->resume_from = data->set.set_resume_from;   /* inherit resume_from */
 
   conn->bits.user_passwd = data->set.userpwd?1:0;
   conn->bits.proxy_user_passwd = data->set.proxyuserpwd?1:0;
@@ -3470,7 +3470,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    * so scribble it over the top.
    * User-supplied passwords are assumed not to need unescaping.
    *
-   * user_password is set in "inherite initial knowledge' above,
+   * user_password is set in "inherit initial knowledge' above,
    * so it doesn't have to be set in this block
    */
   if (data->set.userpwd != NULL) {
@@ -3654,7 +3654,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   /* Continue connectdata initialization here.
    *
    * Inherit the proper values from the urldata struct AFTER we have arranged
-   * the persistant conncetion stuff */
+   * the persistent conncetion stuff */
   conn->fread = data->set.fread;
   conn->fread_in = data->set.in;
 
