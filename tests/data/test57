@@ -7,7 +7,7 @@ HTTP GET
 </info>
 # Server-side
 <reply>
-<data>
+<data nocheck=1>
 HTTP/1.1 200 OK swsclose
 Funny-head: yesyes
 Content-Type: text/html; charset=ISO-8859-4   
@@ -24,15 +24,15 @@ http
 HTTP content-type with spaces in
  </name>
  <command>
--w '%{content_type}\n' %HOSTIP:%HTTPPORT/57 -o log/out57
+-w '%{content_type}\n' http://%HOSTIP:%HTTPPORT/57 -o log/out57
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>
-<file name="log/out57">
+<stdout mode=text>
 text/html; charset=ISO-8859-4
-</file>
+</stdout>
 <strip>
 ^User-Agent:.*
 </strip>

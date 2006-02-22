@@ -72,9 +72,6 @@ may have been fixed since this was written!
 19. FTP 3rd party transfers with the multi interface doesn't work. Test:
   define CURL_MULTIEASY, rebuild curl, run test case 230 - 232.
 
-18. test case 57 has </test> that should be </client> but when corrected, the
-  test case fails!
-
 16. FTP URLs passed to curl may contain NUL (0x00) in the RFC 1738 <user>,
   <password>, and <fpath> components, encoded as "%00".  The problem is that
   curl_unescape does not detect this, but instead returns a shortened C
