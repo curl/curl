@@ -92,10 +92,10 @@ struct Curl_one_easy {
   int msg_num; /* number of messages left in 'msg' to return */
 };
 
-
 #define CURL_MULTI_HANDLE 0x000bab1e
 
-#define GOOD_MULTI_HANDLE(x) ((x)&&(((struct Curl_multi *)x)->type == CURL_MULTI_HANDLE))
+#define GOOD_MULTI_HANDLE(x) \
+  ((x)&&(((struct Curl_multi *)x)->type == CURL_MULTI_HANDLE))
 #define GOOD_EASY_HANDLE(x) (x)
 
 /* This is the struct known as CURLM on the outside */
@@ -244,6 +244,8 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
     easy->easy_handle->hostcache = NULL;
     Curl_easy_addmulti(easy->easy_handle, NULL); /* clear the association
                                                     to this multi handle */
+
+    Curl_done(&easy->easy_conn, easy->result);
 
     /* make the previous node point to our next */
     if(easy->prev)

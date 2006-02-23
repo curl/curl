@@ -6,6 +6,25 @@
 
                                   Changelog
 
+Daniel (22 February 2006)
+- Lots of work and analysis by "xbx___" in bug #1431750
+  (http://curl.haxx.se/bug/view.cgi?id=1431750) helped me identify and fix two
+  different but related bugs:
+
+  1) Removing an easy handle from a multi handle before the transfer is done
+     could leave a connection in the connection cache for that handle that is
+     in a state that isn't suitable for re-use. A subsequent re-use could then
+     read from a NULL pointer and segfault.
+
+  2) When an easy handle was removed from the multi handle, there could be an
+     outstanding c-ares DNS name resolve request. When the response arrived,
+     it caused havoc since the connection struct it "belonged" to could've
+     been freed already.
+
+  Now Curl_done() is called when an easy handle is removed from a multi handle
+  pre-maturely (that is, before the transfer was complteted). Curl_done() also
+  makes sure to cancel all (if any) outstanding c-ares requests.
+
 Daniel (21 February 2006)
 - Peter Su added support for SOCKS4 proxies. Enable this by setting the proxy
   type to the already provided type CURLPROXY_SOCKS4.

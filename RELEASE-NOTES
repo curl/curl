@@ -22,6 +22,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o two bugs concerning using curl_multi_remove_handle() before the transfer
+   was complete
  o multi-pass authentication and compressed content
  o minor format string mistake in the GSS/Negotiate code
  o cached DNS entries could remain in the cache too long
