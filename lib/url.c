@@ -1226,7 +1226,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
   case CURLOPT_CRLF:
     /*
-     * Kludgy option to enable CRLF convertions. Subject for removal.
+     * Kludgy option to enable CRLF conversions. Subject for removal.
      */
     data->set.crlf = va_arg(param, long)?TRUE:FALSE;
     break;
@@ -2656,7 +2656,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
            host (or port) and the url-path is NOT part of the url-path.
 
            As most agents use file://localhost/foo to get '/foo' although the
-           slash preceeding foo is a separator and not a slash for the path,
+           slash preceding foo is a separator and not a slash for the path,
            a URL as file://localhost//foo must be valid as well, to refer to
            the same file with an absolute path.
         */
