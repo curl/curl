@@ -1822,7 +1822,7 @@ ConnectionStore(struct SessionHandle *data,
 */
 static int handleSock4Proxy(struct connectdata *conn)
 {
-  unsigned char socksreq[600]; /* room for large user/pw (255 max each) */
+  unsigned char socksreq[9]; /* room for SOCKS4 request */
   int result;
   CURLcode code;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
@@ -1893,8 +1893,13 @@ static int handleSock4Proxy(struct connectdata *conn)
   }
 
   /*
-  * Make connection
-  */
+   * This is currently not supporting "Identification Protocol (RFC1413)".
+   */
+  socksreq[8] = 0; /* NUL ending the nonexistent userid */
+
+  /*
+   * Make connection
+   */
   {
     ssize_t actualread;
     ssize_t written;
