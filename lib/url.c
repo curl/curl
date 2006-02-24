@@ -1820,9 +1820,9 @@ ConnectionStore(struct SessionHandle *data,
 *   Nonsupport "SOCKS 4A (Simple Extension to SOCKS 4 Protocol)"
 *   Nonsupport "Identification Protocol (RFC1413)"
 */
-static int handleSock4Proxy(struct connectdata *conn)
+static int handleSock4Proxy(const char *proxy_name, struct connectdata *conn)
 {
-  unsigned char socksreq[9]; /* room for SOCKS4 request */
+  unsigned char socksreq[262]; /* room for SOCKS4 request incl. user id */
   int result;
   CURLcode code;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
@@ -1895,7 +1895,9 @@ static int handleSock4Proxy(struct connectdata *conn)
   /*
    * This is currently not supporting "Identification Protocol (RFC1413)".
    */
-  socksreq[8] = 0; /* NUL ending the nonexistent userid */
+  socksreq[8] = 0; /* ensure empty userid is NUL-terminated */
+  if (proxy_name)
+    strlcat((char*)socksreq + 8, proxy_name, sizeof(socksreq) - 8);
 
   /*
    * Make connection
@@ -1903,7 +1905,7 @@ static int handleSock4Proxy(struct connectdata *conn)
   {
     ssize_t actualread;
     ssize_t written;
-    int packetsize = 9; /* request data size (include NULL) */
+    int packetsize = 9 + strlen((char*)socksreq + 8); /* size including NUL */
 
     /* Send request */
     code = Curl_write(conn, sock, (char *)socksreq, packetsize, &written);
@@ -2252,7 +2254,8 @@ static CURLcode ConnectPlease(struct connectdata *conn,
       /* do nothing here. handled later. */
       break;
     case CURLPROXY_SOCKS4:
-      return handleSock4Proxy(conn) ? CURLE_COULDNT_CONNECT : CURLE_OK;
+      return handleSock4Proxy(conn->proxyuser, conn) ?
+      	CURLE_COULDNT_CONNECT : CURLE_OK;
     default:
       failf(conn->data, "unknown proxytype option given");
       return CURLE_COULDNT_CONNECT;
