@@ -624,7 +624,7 @@ static void tcpnodelay(struct connectdata *conn,
 #ifdef HAVE_GETPROTOBYNAME
   struct protoent *pe = getprotobyname("tcp");
   if (pe)
-    proto = p->p_proto;
+    proto = pe->p_proto;
 #endif
 
   if(setsockopt(sockfd, proto, TCP_NODELAY, (void *)&onoff,
