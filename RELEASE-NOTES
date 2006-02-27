@@ -1,7 +1,7 @@
-Curl and libcurl 7.15.2
+Curl and libcurl 7.15.3
 
- Public curl release number:               92
- Releases counted from the very beginning: 119
+ Public curl release number:               93
+ Releases counted from the very beginning: 120
  Available command line options:           112
  Available curl_easy_setopt() options:     129
  Number of public functions in libcurl:    46
@@ -11,63 +11,18 @@ Curl and libcurl 7.15.2
 
 This release includes the following changes:
 
- o Support for SOCKS4 proxies (added --socks4)
- o CURLOPT_CONNECT_ONLY and CURLINFO_LASTSOCKET added
- o CURLOPT_LOCALPORT and CURLOPT_LOCALPORTRANGE (--local-port) added
- o Dropped support for the LPRT ftp command
- o Gopher is now officially abandoned as a protocol (lib)curl tries to support
- o curl_global_init() and curl_global_cleanup() are now using a refcount so
-   that it is now legal to call them multiple times. See updated info for
-   details
+ o 
 
 This release includes the following bugfixes:
 
- o two bugs concerning using curl_multi_remove_handle() before the transfer
-   was complete
- o multi-pass authentication and compressed content
- o minor format string mistake in the GSS/Negotiate code
- o cached DNS entries could remain in the cache too long
- o improved GnuTLS check in configure
- o re-used FTP connections when the second request didn't do a transfer
- o plain --limit-rate [num] means bytes
- o re-creating a dead connection is no longer counted internally as a followed
-   redirect and thus prevents a weird error that would occur if a FTP
-   connection died on an attempted re-use
- o Try PASV after failing to connect to the port the EPSV response contained
- o -P [IP] with non-local address with ipv6-enabled curl
- o -P [hostname] with ipv6-disabled curl
- o libcurl.m4 was updated
- o configure no longer warns if the current path contains a space
- o test suite kill race condition
- o FTP_SKIP_PASV_IP and FTP_USE_EPSV when doing FTP over HTTP proxy
- o Doing a second request with FTP on the same bath path, would make libcurl
-   confuse what current working directory it had
- o FTP over HTTP proxy now sends the second CONNECT properly
- o numerous compiler warnings and build quirks for various compilers have
-   been addressed
- o supports name and passwords up to 255 bytes long, embedded in URLs
- o the HTTP_ONLY define disables the TFTP support
+ o 
 
 Other curl-related news since the previous public release:
 
- o http://curlm.haxx.se/ is new service that automatically redirects you to a
-   curl web mirror that is close to you!
-
- o http://curl.hkmirror.org/ is a new curl web mirror in Hong Kong
- o http://curl.storemypix.com/ is a new curl web mirror in Germany
- o http://curl.s-lines.net/ is a new curl web mirror in Japan
- o http://curl.oss-mirror.org/ is a new curl web mirror in Ireland
- o http://curl.linux-mirror.org/ is a new curl web mirror in Germany
- o pycurl 7.15.1 was released: http://pycurl.sf.net/
- o TclCurl 0.15.1 was released:
-   http://personal1.iddeo.es/andresgarci/tclcurl/english/
+ o 
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dov Murik, Jean Jacques Drouin, Andres Garcia, Yang Tse, Gisle Vanem, Dan
- Fandrich, Alexander Lazic, Michael Jahn, Andrew Benham, Bryan Henderson,
- David Shaw, Jon Turner, Duane Cathey, Michal Marek, Philippe Vaucher, Kent
- Boortz, Karl Moerder, Shmulik Regev, Ulf Härnhammar, Peter Su
  
         Thanks! (and sorry if I forgot to mention someone)
