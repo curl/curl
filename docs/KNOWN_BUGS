@@ -42,12 +42,6 @@ may have been fixed since this was written!
   --proxy-anyauth. There's work in progress on this problem, and a recent
   patch was posted here: http://curl.haxx.se/mail/lib-2005-08/0074.html
 
-24. Harshal Pradhan's Use-after-free with libcurl+ares. This probably occurs
-  because there is a pending ares callback that gets called after the
-  connection struct has been freed in libcurl:
-        http://curl.haxx.se/mail/lib-2005-08/0022.html
-  Fixing this properly most likely requires a new c-ares function.
-
 23. We don't support SOCKS for IPv6. We don't support FTPS over a SOCKS proxy.
   We don't have any test cases for SOCKS proxy. We probably have even more
   bugs and lack of features when a SOCKS proxy is used. And there seem to be a
