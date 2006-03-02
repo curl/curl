@@ -1142,6 +1142,9 @@ certificates to verify the peer with.  This makes sense only when used in
 combination with the \fICURLOPT_SSL_VERIFYPEER\fP option.  If
 \fICURLOPT_SSL_VERIFYPEER\fP is zero, \fICURLOPT_CAINFO\fP need not
 even indicate an accessible file.
+
+Note that option is by default set to the system path where libcurl's cacert
+bundle is assumed to be stored, as established at build time.
 .IP CURLOPT_CAPATH
 Pass a char * to a zero terminated string naming a directory holding
 multiple CA certificates to verify the peer with. The certificate
