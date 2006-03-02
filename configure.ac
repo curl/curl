@@ -1560,6 +1560,7 @@ AC_CHECK_FUNCS( strtoll \
                 ftruncate \
                 pipe \
                 poll \
+                getprotobyname \
                 getrlimit \
                 setrlimit,
 dnl if found
