@@ -80,6 +80,24 @@ getting many files from the same server will not do multiple connects /
 handshakes. This improves speed. Of course this is only done on files
 specified on a single command line and cannot be used between separate curl
 invokes.
+.SH "PROGRESS METER"
+curl normally displays a progress meter during operations, indicating amount
+of transfered data, transfer speeds and estimated time left etc.
+
+However, since curl displays data to the terminal by default, if you invoke
+curl to do an operation and it is about to write data to the terminal, it
+\fIdisables\fP the progress meter as otherwise it would mess up the output
+mixing progress meter and response data.
+
+If you want a progress meter for HTTP POST or PUT requests, you need to
+redirect the response output to a file, using shell redirect (>), -o [file] or
+similar.
+
+It is not the same case for FTP upload as that operation is not spitting out
+any response data to the terminal.
+
+If you prefer a progress "bar" instead of the regular meter, \fI-#\fP is your
+friend.
 .SH OPTIONS
 .IP "-a/--append"
 (FTP) When used in an FTP upload, this will tell curl to append to the target
