@@ -10,6 +10,11 @@ Daniel (2 March 2006)
 - Added a check for getprotobyname in configure so that it'll be used, thanks
   to Gisle Vanem's change the other day.
 
+Daniel (28 February 2006)
+- Dan Fandrich prevented curl from getting stuck in an endless loop in case we
+  are out of file handles very early in curl's code where it makes sure that
+  0, 1 and 2 aren't gonna be used by the lib for transfers.
+
 Version 7.15.2 (27 February 2006)
 
 Daniel (22 February 2006)
