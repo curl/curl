@@ -3816,6 +3816,13 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
     ftp->file=NULL; /* instead of point to a zero byte, we make it a NULL
                        pointer */
 
+  if(data->set.upload && !ftp->file &&
+     (!ftp->no_transfer || conn->bits.no_body)) {
+    /* We need a file name when uploading. Return error! */
+    failf(data, "Uploading to a URL without a file name!");
+    return CURLE_URL_MALFORMAT;
+  }
+
   ftp->cwddone = FALSE; /* default to not done */
 
   if(ftp->prevpath) {

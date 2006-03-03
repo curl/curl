@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -40,7 +40,7 @@ SUPPORTFILES = first.c test.h
 # These are all libcurl test programs
 noinst_PROGRAMS = lib500 lib501 lib502 lib503 lib504 lib505 lib506 lib507 \
   lib508 lib509 lib510 lib511 lib512 lib513 lib514 lib515 lib516 lib517 \
-  lib518 lib519 lib520 lib521 lib523
+  lib518 lib519 lib520 lib521 lib523 lib524
 
 lib500_SOURCES = lib500.c $(SUPPORTFILES)
 lib500_LDADD = $(LIBDIR)/libcurl.la
@@ -133,3 +133,7 @@ lib521_DEPENDENCIES = $(LIBDIR)/libcurl.la
 lib523_SOURCES = lib523.c $(SUPPORTFILES)
 lib523_LDADD = $(LIBDIR)/libcurl.la
 lib523_DEPENDENCIES = $(LIBDIR)/libcurl.la
+
+lib524_SOURCES = lib524.c $(SUPPORTFILES)
+lib524_LDADD = $(LIBDIR)/libcurl.la
+lib524_DEPENDENCIES = $(LIBDIR)/libcurl.la

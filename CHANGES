@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel (2 March 2006)
+- FTP upload without a file name part in the URL now causes
+  curl_easy_perform() to return CURLE_URL_MALFORMAT. Previously it allowed the
+  upload but named the file "(nil)" (without the quotes). Test case 524
+  verifies.
+
 - Added a check for getprotobyname in configure so that it'll be used, thanks
   to Gisle Vanem's change the other day.
 
@@ -14,6 +19,10 @@ Daniel (28 February 2006)
 - Dan Fandrich prevented curl from getting stuck in an endless loop in case we
   are out of file handles very early in curl's code where it makes sure that
   0, 1 and 2 aren't gonna be used by the lib for transfers.
+
+Daniel (27 February 2006)
+- Marty Kuhrt pointed out that there were two VMS-specific files missing in
+  the release archive.
 
 Version 7.15.2 (27 February 2006)
 
