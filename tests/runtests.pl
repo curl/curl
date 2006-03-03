@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -85,6 +85,7 @@ my $perl="perl -I$srcdir";
 
 # this gets set if curl is compiled with debugging:
 my $curl_debug=0;
+my $libtool;
 
 # name of the file that the memory debugging creates:
 my $memdump="$LOGDIR/memdump";
@@ -1066,6 +1067,7 @@ sub checksystem {
 
     $has_textaware = ($^O eq 'MSWin32') || ($^O eq 'msys');
 
+    logmsg sprintf("* Libtool lib:    %s\n", $libtool?"ON":"OFF");
     logmsg "***************************************** \n";
 }
 
@@ -1413,10 +1415,10 @@ sub singletest {
     # run the command line we built
     if ($torture) {
         return torture($CMDLINE,
-                       "gdb --directory libtest $DBGCURL -x log/gdbcmd");
+                       "$gdb --directory libtest $DBGCURL -x log/gdbcmd");
     }
     elsif($gdbthis) {
-        system("gdb --directory libtest $DBGCURL -x log/gdbcmd");
+        system("$gdb --directory libtest $DBGCURL -x log/gdbcmd");
         $cmdres=0; # makes it always continue after a debugged run
     }
     else {
@@ -1445,7 +1447,7 @@ sub singletest {
             open(GDBCMD, ">log/gdbcmd2");
             print GDBCMD "bt\n";
             close(GDBCMD);
-            system("gdb --directory libtest -x log/gdbcmd2 -batch $DBGCURL core ");
+            system("$gdb --directory libtest -x log/gdbcmd2 -batch $DBGCURL core ");
      #       unlink("log/gdbcmd2");
         }
     }
@@ -2044,6 +2046,17 @@ if($valgrind) {
         #logmsg "Valgrind failure, disable it\n";
         undef $valgrind;
     }
+}
+
+# open the executable curl and read the first 4 bytes of it
+open(CHECK, "<$CURL");
+my $c;
+sysread CHECK, $c, 4;
+close(CHECK);
+if($c eq "#! /") {
+    # A shell script. This is typically when built with libtool,
+    $libtool = 1;
+    $gdb = "libtool --mode=execute gdb";
 }
 
 $HTTPPORT =  $base + 0; # HTTP server port
