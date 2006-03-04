@@ -15,6 +15,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o Interix build fix
  o fixed "hang" when out of file handles at start
 
 Other curl-related news since the previous public release:
@@ -24,6 +25,6 @@ Other curl-related news since the previous public release:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Gisle Vanem, Dan Fandrich
+ Gisle Vanem, Dan Fandrich, Thomas Klausner, Todd Vierling
 
         Thanks! (and sorry if I forgot to mention someone)

@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (4 March 2006)
+- Thomas Klausner provided a patch written by Todd Vierling in bug report
+  #1442471 that fixes a build problem on Interix.
+
 Daniel (2 March 2006)
 - FTP upload without a file name part in the URL now causes
   curl_easy_perform() to return CURLE_URL_MALFORMAT. Previously it allowed the
