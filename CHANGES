@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel (6 March 2006)
+- Lots of users on Windows have reported getting the "SSL: couldn't set
+  callback" error message so I've now made the setting of that callback not be
+  as critical as before. The function is only used for additional loggging/
+  trace anyway so a failure just means slightly less data. It should still be
+  able to proceed and connect fine to the server.
+
 Daniel (4 March 2006)
 - Thomas Klausner provided a patch written by Todd Vierling in bug report
   #1442471 that fixes a build problem on Interix.

@@ -15,12 +15,14 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o "SSL: couldn't set callback" is now a less serious problem
  o Interix build fix
  o fixed "hang" when out of file handles at start
+ o prevent FTP uploads to URLs with trailing slash
 
 Other curl-related news since the previous public release:
 
- o 
+ o pycurl-7.15.2 has been released: http://pycurl.sf.net
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
