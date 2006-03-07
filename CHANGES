@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (7 March 2006)
+- Peter Heuchert made sure the CURLFTPSSL_CONTROL setting for CURLOPT_FTP_SSL
+  is used properly.
+
 Daniel (6 March 2006)
 - Lots of users on Windows have reported getting the "SSL: couldn't set
   callback" error message so I've now made the setting of that callback not be
