@@ -7,6 +7,12 @@
                                   Changelog
 
 Daniel (7 March 2006)
+- Markus Koetter filed debian bug report #355715 which identified a problem
+  with the multi interface and multi-part formposts. The fix from February
+  22nd could make the Curl_done() function get called twice on the same
+  connection and it was not designed for that and thus tried to call free() on
+  an already freed memory area!
+
 - Peter Heuchert made sure the CURLFTPSSL_CONTROL setting for CURLOPT_FTP_SSL
   is used properly.
 

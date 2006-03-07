@@ -432,6 +432,10 @@ struct ConnectBits {
   bool trailerHdrPresent; /* Set when Trailer: header found in HTTP response.
                              Required to determine whether to look for trailers
                              in case of Transfer-Encoding: chunking */
+  bool done;          /* set to FALSE when Curl_do() is called and set to TRUE
+                         when Curl_done() is called, to prevent Curl_done() to
+                         get invoked twice when the multi interface is
+                         used. */
 };
 
 struct hostname {

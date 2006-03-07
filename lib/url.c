@@ -3982,6 +3982,11 @@ CURLcode Curl_done(struct connectdata **connp,
   struct connectdata *conn = *connp;
   struct SessionHandle *data=conn->data;
 
+  if(conn->bits.done)
+    return CURLE_OK; /* Curl_done() has already been called */
+
+  conn->bits.done = TRUE; /* called just now! */
+
   /* cleanups done even if the connection is re-used */
   if(conn->bits.rangestringalloc) {
     free(conn->range);
@@ -4047,6 +4052,7 @@ CURLcode Curl_do(struct connectdata **connp, bool *done)
   struct connectdata *conn = *connp;
   struct SessionHandle *data=conn->data;
 
+  conn->bits.done = FALSE; /* Curl_done() is not called yet */
   conn->bits.do_more = FALSE; /* by default there's no curl_do_more() to use */
 
   if(conn->curl_do) {
