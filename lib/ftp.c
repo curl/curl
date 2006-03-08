@@ -2472,7 +2472,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
       if(ftpcode/100 == 2)
         /* We have enabled SSL for the data connection! */
         conn->ssl[SECONDARYSOCKET].use =
-          data->set.ftp_ssl > CURLFTPSSL_CONTROL;
+          data->set.ftp_ssl != CURLFTPSSL_CONTROL;
       /* FTP servers typically responds with 500 if they decide to reject
          our 'P' request */
       else if(data->set.ftp_ssl> CURLFTPSSL_CONTROL)
