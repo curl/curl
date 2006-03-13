@@ -1521,7 +1521,7 @@ Curl_ossl_connect(struct connectdata *conn,
       else
         infof(data, "SSL certificate verify result: %s (%ld),"
               " continuing anyway.\n",
-              X509_verify_cert_error_string(err), lerr);
+              X509_verify_cert_error_string(lerr), lerr);
     }
     else
       infof(data, "SSL certificate verify ok.\n");
