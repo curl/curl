@@ -2398,7 +2398,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
         state(conn, FTP_AUTH);
       }
       else {
-        ftp_state_user(conn);
+        result = ftp_state_user(conn);
         if(result)
           return result;
       }
