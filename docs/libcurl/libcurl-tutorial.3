@@ -133,10 +133,11 @@ Repeated calls to \fIcurl_global_init(3)\fP and \fIcurl_global_cleanup(3)\fP
 should be avoided. They should only be called once each.
 
 .SH "Features libcurl Provides"
-It is considered best-practice to determine libcurl features run-time rather
-than build-time (if possible of course). By calling curl_version_info() and
-checking tout he details of the returned struct, your program can figure out
-exactly what the currently running libcurl supports.
+It is considered best-practice to determine libcurl features at run-time
+rather than at build-time (if possible of course). By calling
+\fIcurl_version_info(3)\fP and checking out the details of the returned
+struct, your program can figure out exactly what the currently running libcurl
+supports.
 
 .SH "Handle the Easy libcurl"
 libcurl first introduced the so called easy interface. All operations in the
