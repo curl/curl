@@ -1251,13 +1251,13 @@ static ParameterError add2list(struct curl_slist **list,
 static int ftpfilemethod(struct Configurable *config, char *str)
 {
   if(strequal("singlecwd", str))
-    return 3;
+    return CURLFTPMETHOD_SINGLECWD;
   if(strequal("nocwd", str))
-    return 2;
+    return CURLFTPMETHOD_NOCWD;
   if(strequal("multicwd", str))
-    return 1;
+    return CURLFTPMETHOD_MULTICWD;
   warnf(config, "unrecognized ftp file method '%s', using default\n", str);
-  return 1;
+  return CURLFTPMETHOD_MULTICWD;
 }
 
 static ParameterError getparameter(char *flag, /* f or -long-flag */
