@@ -858,6 +858,23 @@ Exactly like \fICURLOPT_POSTQUOTE\fP, but for the source host.
 Pass a pointer to a zero-terminated string (or NULL to disable). When an FTP
 server asks for "account data" after user name and password has been provided,
 this data is sent off using the ACCT command. (Added in 7.13.0)
+.IP CURLOPT_FTP_FILEMETHOD
+Pass a long that should have one of the following values. This option controls
+what method libcurl should use to reach a file on a FTP(S) server. The
+argument should be one of the following alternatives:
+.RS
+.IP CURLFTPMETHOD_MULTICWD
+libcurl does a single CWD operation for each path part in the given URL. For
+deep hierarchies this means very many commands. This is how RFC1738 says it
+should be done. This is the default but the slowest behavior.
+.IP CURLFTPMETHOD_NOCWD
+libcurl does no CWD at all. libcurl will do SIZE, RETR, STOR etc and give a
+full path to the server for all these commands. This is the fastest behavior.
+.IP CURLFTPMETHOD_SINGLECWD
+libcurl does one CWD with the full target directory and then operates on the
+file \&"normally" (like in the multicwd case). This is somewhat more standards
+compliant than 'nocwd' but without the full penalty of 'multicwd'.
+.RE
 .SH PROTOCOL OPTIONS
 .IP CURLOPT_TRANSFERTEXT
 A non-zero parameter tells the library to use ASCII mode for ftp transfers,

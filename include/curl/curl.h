@@ -381,6 +381,15 @@ typedef enum {
   CURLFTPAUTH_LAST /* not an option, never use */
 } curl_ftpauth;
 
+/* parameter for the CURLOPT_FTP_FILEMETHOD option */
+typedef enum {
+  CURLFTPMETHOD_DEFAULT,   /* let libcurl pick */
+  CURLFTPMETHOD_MULTICWD,  /* single CWD operation for each path part */
+  CURLFTPMETHOD_NOCWD,     /* no CWD at all */
+  CURLFTPMETHOD_SINGLECWD, /* one CWD to full dir, then work on file */
+  CURLFTPMETHOD_LAST       /* not an option, never use */
+} curl_ftpmethod;
+
 /* long may be 32 or 64 bits, but we should never depend on anything else
    but 32 */
 #define CURLOPTTYPE_LONG          0
@@ -912,7 +921,8 @@ typedef enum {
      control connection. */
   CINIT(FTP_SKIP_PASV_IP, LONG, 137),
 
-  /* Select "file method" to use when doing FTP */
+  /* Select "file method" to use when doing FTP, see the curl_ftpmethod
+     above. */
   CINIT(FTP_FILEMETHOD, LONG, 138),
 
   /* Local port number to bind the socket to */
