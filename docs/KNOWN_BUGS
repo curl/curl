@@ -3,10 +3,6 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
-33. Doing FTP upload and specifying a URL that ends with a slash will cause
-  a filed named "(nil)" get created. The proper fix should most likely be to
-  reject the upload early since there's no target file name specified.
-
 32. (At least on Windows) If libcurl is built with c-ares and there's no DNS
   server configured in the system, the ares_init() call fails and thus
   curl_easy_init() fails as well. This causes weird effects for people who use
