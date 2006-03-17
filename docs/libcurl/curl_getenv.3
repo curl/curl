@@ -18,10 +18,9 @@ will instead be made "available" by source code access only, and then as
 curlx_getenv().
 .SH RETURN VALUE
 If successful, curl_getenv() returns a pointer to the value of the specified
-environment. The memory it refers to is malloc()ed why the application must
-free() this when the data has completed to serve its purpose. When
-.I curl_getenv(3)
-fails to find the specified name, it returns a null pointer.
+environment. The memory it refers to is malloc()ed so the application must
+free() this when the data is no longer needed. When \fIcurl_getenv(3)\fP fails
+to find the specified name, it returns a null pointer.
 .SH NOTE
 Under unix operating systems, there isn't any point in returning an allocated
 memory, although other systems won't work properly if this isn't done. The
