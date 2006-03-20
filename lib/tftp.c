@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -271,8 +271,9 @@ static void tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
       /* If we are downloading, send an RRQ */
       state->spacket.event = htons(TFTP_EVENT_RRQ);
     }
-    sprintf((char *)state->spacket.u.request.data, "%s%c%s%c",
-            filename, '\0',  mode, '\0');
+    snprintf((char *)state->spacket.u.request.data,
+             sizeof(state->spacket.u.request.data),
+             "%s%c%s%c", filename, '\0',  mode, '\0');
     sbytes = 4 + (int)strlen(filename) + (int)strlen(mode);
     sbytes = sendto(state->sockfd, (void *)&state->spacket,
                     sbytes, 0,
@@ -533,7 +534,7 @@ CURLcode Curl_tftp_connect(struct connectdata *conn, bool *done)
    * The TFTP code is not portable because it sends C structs directly over
    * the wire.  Since C gives compiler writers a wide latitude in padding and
    * aligning structs, this fails on many architectures (e.g. ARM).
-   * 
+   *
    * The only portable way to fix this is to copy each struct item into a
    * flat buffer and send the flat buffer instead of the struct.  The
    * alternative, trying to get the compiler to eliminate padding bytes

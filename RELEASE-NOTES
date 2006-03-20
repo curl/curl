@@ -11,25 +11,30 @@ Curl and libcurl 7.15.3
 
 This release includes the following changes:
 
- o 
+ o added docs for --ftp-method and CURLOPT_FTP_FILEMETHOD
 
 This release includes the following bugfixes:
 
+ o TFTP Packet Buffer Overflow Vulnerability:
+   http://curl.haxx.se/docs/adv_20060320.html
+ o properly detecting problems with sending the FTP command USER
+ o wrong error message shown when certificate verification failed
  o multi-part formpost with multi interface crash
  o the CURLFTPSSL_CONTROL setting for CURLOPT_FTP_SSL is acknowledged
- o "SSL: couldn't set callback" is now a less serious problem
+ o "SSL: couldn't set callback" is now treated as a less serious problem
  o Interix build fix
- o fixed "hang" when out of file handles at start
+ o fixed curl "hang" when out of file handles at start
  o prevent FTP uploads to URLs with trailing slash
 
 Other curl-related news since the previous public release:
 
  o pycurl-7.15.2 has been released: http://pycurl.sf.net
+ o http://curl.download.nextag.com/ is a new US curl web mirror!
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Gisle Vanem, Dan Fandrich, Thomas Klausner, Todd Vierling, Peter Heuchert,
- Markus Koetter
+ Markus Koetter, David McCreedy, Tor Arntsen
 
         Thanks! (and sorry if I forgot to mention someone)

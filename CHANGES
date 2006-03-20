@@ -6,6 +6,17 @@
 
                                   Changelog
 
+Daniel (16 March 2006)
+- Tor Arntsen provided a RPM spec file for AIX Toolbox, that now is included
+  in the release archive.
+
+Daniel (14 March 2006)
+- David McCreedy fixed:
+
+  a bad SSL error message when OpenSSL certificates are verified fine.
+
+  a missing return code assignment in the FTP code
+
 Daniel (7 March 2006)
 - Markus Koetter filed debian bug report #355715 which identified a problem
   with the multi interface and multi-part formposts. The fix from February
