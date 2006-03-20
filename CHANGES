@@ -6,6 +6,8 @@
 
                                   Changelog
 
+Version 7.15.3 (20 March 2006)
+
 Daniel (16 March 2006)
 - Tor Arntsen provided a RPM spec file for AIX Toolbox, that now is included
   in the release archive.
