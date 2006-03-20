@@ -656,30 +656,40 @@ CURLcode Curl_tftp(struct connectdata *conn, bool *done)
         state->remote_addrlen = fromlen;
       }
 
-      /* The event is given by the TFTP packet time */
-      event = (tftp_event_t)ntohs(state->rpacket.event);
+      /* Sanity check packet length */
+      if (state->rbytes < 4)
+      {
+        failf(conn->data, "Received too short packet\n");
+        /* Not a timeout, but how best to handle it? */
+        event = TFTP_EVENT_TIMEOUT;
+      } else {
 
-      switch(event) {
-      case TFTP_EVENT_DATA:
-        Curl_client_write(data, CLIENTWRITE_BODY,
-                          (char *)state->rpacket.u.data.data, state->rbytes-4);
-        break;
-      case TFTP_EVENT_ERROR:
-        state->error = (tftp_error_t)ntohs(state->rpacket.u.error.code);
-        infof(conn->data, "%s\n", (char *)state->rpacket.u.error.data);
-        break;
-      case TFTP_EVENT_ACK:
-        break;
-      case TFTP_EVENT_RRQ:
-      case TFTP_EVENT_WRQ:
-      default:
-        failf(conn->data, "%s\n", "Internal error: Unexpected packet");
-        break;
+	/* The event is given by the TFTP packet time */
+	event = (tftp_event_t)ntohs(state->rpacket.event);
+
+	switch(event) {
+	case TFTP_EVENT_DATA:
+	  if (state->rbytes > 4)
+	    Curl_client_write(data, CLIENTWRITE_BODY,
+			  (char *)state->rpacket.u.data.data, state->rbytes-4);
+	  break;
+	case TFTP_EVENT_ERROR:
+	  state->error = (tftp_error_t)ntohs(state->rpacket.u.error.code);
+	  infof(conn->data, "%s\n", (char *)state->rpacket.u.error.data);
+	  break;
+	case TFTP_EVENT_ACK:
+	  break;
+	case TFTP_EVENT_RRQ:
+	case TFTP_EVENT_WRQ:
+	default:
+	  failf(conn->data, "%s\n", "Internal error: Unexpected packet");
+	  break;
+	}
+
+	/* Update the progress meter */
+	Curl_pgrsUpdate(conn);
+
       }
-
-      /* Update the progress meter */
-      Curl_pgrsUpdate(conn);
-
     }
 
     /* Check for transfer timeout every 10 blocks, or after timeout */
