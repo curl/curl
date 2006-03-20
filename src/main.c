@@ -3738,7 +3738,7 @@ operate(struct Configurable *config, int argc, char *argv[])
           /*
            * Then append ? followed by the get fields to the url.
            */
-          urlbuffer=(char *)malloc(strlen(url) + strlen(httpgetfields) + 2);
+          urlbuffer=(char *)malloc(strlen(url) + strlen(httpgetfields) + 3);
           if(!urlbuffer) {
             helpf("out of memory\n");
             return CURLE_OUT_OF_MEMORY;
