@@ -7,7 +7,7 @@ Curl and libcurl 7.15.4
  Number of public functions in libcurl:    46
  Amount of public web site mirrors:        31
  Number of known libcurl bindings:         32
- Number of contributors:                   487
+ Number of contributors:                   492
 
 This release includes the following changes:
 
@@ -15,7 +15,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o 
+ o TFTP transfers could trash data
+ o -d + -G combo crash
 
 Other curl-related news since the previous public release:
 
@@ -24,6 +25,6 @@ Other curl-related news since the previous public release:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- 
+ Dan Fandrich, Ilja van Sprundel
 
         Thanks! (and sorry if I forgot to mention someone)
