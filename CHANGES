@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel (20 March 2006)
+- David McCreedy fixed libcurl to no longer ignore AUTH failures and now it
+  reacts properly according to the CURLOPT_FTP_SSL setting.
+
 - Dan Fandrich fixed two TFTP problems: Fixed a bug whereby a received file
   whose length was a multiple of 512 bytes could have random garbage
   appended. Also, stop processing TFTP packets which are too short to be

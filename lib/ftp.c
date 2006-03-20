@@ -2430,8 +2430,14 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
         result = Curl_nbftpsendf(conn, "AUTH %s", ftpauth[ftp->count1]);
         /* remain in this same state */
       }
-      else
-        result = ftp_state_user(conn);
+      else {
+        if(data->set.ftp_ssl > CURLFTPSSL_TRY)
+          /* we failed and CURLFTPSSL_CONTROL or CURLFTPSSL_ALL is set */
+          result = CURLE_FTP_SSL_FAILED;
+        else
+          /* ignore the failure and continue */
+          result = ftp_state_user(conn);
+      }
 
       if(result)
         return result;
