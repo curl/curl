@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -213,6 +213,23 @@ Curl_ssl_connect(struct connectdata *conn, int sockindex)
   (void)sockindex;
   return CURLE_OK;
 #endif /* USE_SSL */
+}
+
+CURLcode
+Curl_ssl_connect_nonblocking(struct connectdata *conn, int sockindex,
+                             bool *done)
+{
+#if defined(USE_SSL) && defined(USE_SSLEAY)
+  /* mark this is being ssl enabled from here on. */
+  conn->ssl[sockindex].use = TRUE;
+  return Curl_ossl_connect_nonblocking(conn, sockindex, done);
+
+#else
+  /* not implemented!
+     fallback to BLOCKING call. */
+  *done = TRUE;
+  return Curl_ssl_connect(conn, sockindex);
+#endif
 }
 
 #ifdef USE_SSL

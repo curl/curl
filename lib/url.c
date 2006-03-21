@@ -2990,6 +2990,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->curl_do_more = NULL;
     conn->curl_done = Curl_http_done;
     conn->curl_connect = Curl_http_connect;
+    conn->curl_connecting = Curl_https_connecting;
+    conn->curl_proto_fdset = Curl_https_proto_fdset;
 
 #else /* USE_SS */
     failf(data, LIBCURL_NAME

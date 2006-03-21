@@ -32,6 +32,9 @@ void Curl_free_ssl_config(struct ssl_config_data* sslc);
 int Curl_ssl_init(void);
 void Curl_ssl_cleanup(void);
 CURLcode Curl_ssl_connect(struct connectdata *conn, int sockindex);
+CURLcode Curl_ssl_connect_nonblocking(struct connectdata *conn, 
+                                      int sockindex,
+                                      bool *done);
 void Curl_ssl_close(struct connectdata *conn);
 /* tell the SSL stuff to close down all open information regarding
    connections (and thus session ID caching etc) */

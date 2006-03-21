@@ -11,7 +11,7 @@ Curl and libcurl 7.15.4
 
 This release includes the following changes:
 
- o 
+ o less blocking for the multi interface during SSL connect negotiation 
 
 This release includes the following bugfixes:
 
@@ -27,6 +27,6 @@ Other curl-related news since the previous public release:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dan Fandrich, Ilja van Sprundel, David McCreedy, Tor Arntsen
+ Dan Fandrich, Ilja van Sprundel, David McCreedy, Tor Arntsen, Xavier Bouchoux
 
         Thanks! (and sorry if I forgot to mention someone)

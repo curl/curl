@@ -37,6 +37,11 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 CURLcode Curl_http(struct connectdata *conn, bool *done);
 CURLcode Curl_http_done(struct connectdata *, CURLcode);
 CURLcode Curl_http_connect(struct connectdata *conn, bool *done);
+CURLcode Curl_https_connecting(struct connectdata *conn, bool *done);
+CURLcode Curl_https_proto_fdset(struct connectdata *conn,
+                                fd_set *read_fd_set,
+                                fd_set *write_fd_set,
+                                int *max_fdp);
 
 /* The following functions are defined in http_chunks.c */
 void Curl_httpchunk_init(struct connectdata *conn);

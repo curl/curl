@@ -128,12 +128,22 @@ struct krb4buffer {
   int eof_flag;
 };
 enum protection_level {
-    prot_clear,
-    prot_safe,
-    prot_confidential,
-    prot_private
+  prot_clear,
+  prot_safe,
+  prot_confidential,
+  prot_private
 };
 #endif
+
+/* enum for the nonblocking SSL connection state machine */
+typedef enum {
+  ssl_connect_1,
+  ssl_connect_2,
+  ssl_connect_2_reading,
+  ssl_connect_2_writing,
+  ssl_connect_3,
+  ssl_connect_done
+} ssl_connect_state;
 
 /* struct for data related to each SSL connection */
 struct ssl_connect_data {
@@ -143,6 +153,7 @@ struct ssl_connect_data {
   SSL_CTX* ctx;
   SSL*     handle;
   X509*    server_cert;
+  ssl_connect_state connecting_state;
 #endif /* USE_SSLEAY */
 #ifdef USE_GNUTLS
   gnutls_session session;

@@ -29,6 +29,9 @@
 
 #include "urldata.h"
 CURLcode Curl_ossl_connect(struct connectdata *conn, int sockindex);
+CURLcode Curl_ossl_connect_nonblocking(struct connectdata *conn, 
+                                       int sockindex, 
+                                       bool *done);
 void Curl_ossl_close(struct connectdata *conn); /* close a SSL connection */
 /* tell OpenSSL to close down all open information regarding connections (and
    thus session ID caching etc) */

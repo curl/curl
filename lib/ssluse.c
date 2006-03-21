@@ -1116,22 +1116,20 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
 
 #ifdef USE_SSLEAY
 /* ====================================================== */
-CURLcode
-Curl_ossl_connect(struct connectdata *conn,
+
+static CURLcode
+Curl_ossl_connect_step1(struct connectdata *conn,
                   int sockindex)
 {
   CURLcode retcode = CURLE_OK;
 
   struct SessionHandle *data = conn->data;
-  int err;
-  long lerr;
-  int what;
-  char * str;
   SSL_METHOD_QUAL SSL_METHOD *req_method=NULL;
   void *ssl_sessionid=NULL;
-  ASN1_TIME *certdate;
   curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+
+  curlassert(ssl_connect_1 == connssl->connecting_state);
 
   if(!ssl_seeded || data->set.ssl.random_file || data->set.ssl.egdsocket) {
     /* Make funny stuff to get random input */
@@ -1297,134 +1295,150 @@ Curl_ossl_connect(struct connectdata *conn,
      return CURLE_SSL_CONNECT_ERROR;
   }
 
-  while(1) {
-    int writefd;
-    int readfd;
-    long timeout_ms;
-    long has_passed;
+  connssl->connecting_state = ssl_connect_2;
+  return CURLE_OK;
+}
 
-    /* Find out if any timeout is set. If not, use 300 seconds.
-       Otherwise, figure out the most strict timeout of the two possible one
-       and then how much time that has elapsed to know how much time we
-       allow for the connect call */
-    if(data->set.timeout || data->set.connecttimeout) {
+static CURLcode
+Curl_ossl_connect_step2(struct connectdata *conn,
+                  int sockindex, long* timeout_ms)
+{
+  struct SessionHandle *data = conn->data;
+  int err;
+  long has_passed;
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
-      /* get the most strict timeout of the ones converted to milliseconds */
-      if(data->set.timeout &&
-         (data->set.timeout>data->set.connecttimeout))
-        timeout_ms = data->set.timeout*1000;
-      else
-        timeout_ms = data->set.connecttimeout*1000;
-    }
+  curlassert(ssl_connect_2 == connssl->connecting_state
+             || ssl_connect_2_reading == connssl->connecting_state
+             || ssl_connect_2_writing == connssl->connecting_state);
+
+  /* Find out if any timeout is set. If not, use 300 seconds.
+     Otherwise, figure out the most strict timeout of the two possible one
+     and then how much time that has elapsed to know how much time we
+     allow for the connect call */
+  if(data->set.timeout || data->set.connecttimeout) {
+
+    /* get the most strict timeout of the ones converted to milliseconds */
+    if(data->set.timeout &&
+       (data->set.timeout>data->set.connecttimeout))
+      *timeout_ms = data->set.timeout*1000;
     else
-      /* no particular time-out has been set */
-      timeout_ms= DEFAULT_CONNECT_TIMEOUT;
+      *timeout_ms = data->set.connecttimeout*1000;
+  }
+  else
+    /* no particular time-out has been set */
+    *timeout_ms= DEFAULT_CONNECT_TIMEOUT;
 
-    /* Evaluate in milliseconds how much time that has passed */
-    has_passed = Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle);
+  /* Evaluate in milliseconds how much time that has passed */
+  has_passed = Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle);
 
-    /* subtract the passed time */
-    timeout_ms -= has_passed;
+  /* subtract the passed time */
+  *timeout_ms -= has_passed;
 
-    if(timeout_ms < 0) {
-      /* a precaution, no need to continue if time already is up */
-      failf(data, "SSL connection timeout");
-      return CURLE_OPERATION_TIMEOUTED;
+  if(*timeout_ms < 0) {
+    /* a precaution, no need to continue if time already is up */
+    failf(data, "SSL connection timeout");
+    return CURLE_OPERATION_TIMEOUTED;
+  }
+
+  err = SSL_connect(connssl->handle);
+
+  /* 1  is fine
+     0  is "not successful but was shut down controlled"
+     <0 is "handshake was not successful, because a fatal error occurred" */
+  if(1 != err) {
+    int detail = SSL_get_error(connssl->handle, err);
+
+    if(SSL_ERROR_WANT_READ == detail) {
+      connssl->connecting_state = ssl_connect_2_reading;
+      return CURLE_OK;
     }
+    else if(SSL_ERROR_WANT_WRITE == detail) {
+      connssl->connecting_state = ssl_connect_2_writing;
+      return CURLE_OK;
+    }
+    else {
+      /* untreated error */
+      unsigned long errdetail;
+      char error_buffer[120]; /* OpenSSL documents that this must be at least
+                                 120 bytes long. */
+      CURLcode rc;
+      const char *cert_problem = NULL;
 
-    readfd = CURL_SOCKET_BAD;
-    writefd = CURL_SOCKET_BAD;
+      connssl->connecting_state = ssl_connect_2; /* the connection failed,
+                                                    we're not waiting for
+                                                    anything else. */
 
-    err = SSL_connect(connssl->handle);
+      errdetail = ERR_get_error(); /* Gets the earliest error code from the
+                                      thread's error queue and removes the
+                                      entry. */
 
-    /* 1  is fine
-       0  is "not successful but was shut down controlled"
-       <0 is "handshake was not successful, because a fatal error occurred" */
-    if(1 != err) {
-      int detail = SSL_get_error(connssl->handle, err);
+      switch(errdetail) {
+      case 0x1407E086:
+        /* 1407E086:
+           SSL routines:
+           SSL2_SET_CERTIFICATE:
+           certificate verify failed */
+        /* fall-through */
+      case 0x14090086:
+        /* 14090086:
+           SSL routines:
+           SSL3_GET_SERVER_CERTIFICATE:
+           certificate verify failed */
+        cert_problem = "SSL certificate problem, verify that the CA cert is"
+          " OK. Details:\n";
+        rc = CURLE_SSL_CACERT;
+        break;
+      default:
+        rc = CURLE_SSL_CONNECT_ERROR;
+        break;
+      }
 
-      if(SSL_ERROR_WANT_READ == detail)
-        readfd = sockfd;
-      else if(SSL_ERROR_WANT_WRITE == detail)
-        writefd = sockfd;
-      else {
-        /* untreated error */
-        unsigned long errdetail;
-        char error_buffer[120]; /* OpenSSL documents that this must be at least
-                                   120 bytes long. */
-        CURLcode rc;
-        const char *cert_problem = NULL;
+      /* detail is already set to the SSL error above */
 
-        errdetail = ERR_get_error(); /* Gets the earliest error code from the
-                                        thread's error queue and removes the
-                                        entry. */
-
-        switch(errdetail) {
-        case 0x1407E086:
-          /* 1407E086:
-             SSL routines:
-             SSL2_SET_CERTIFICATE:
-             certificate verify failed */
-          /* fall-through */
-        case 0x14090086:
-          /* 14090086:
-             SSL routines:
-             SSL3_GET_SERVER_CERTIFICATE:
-             certificate verify failed */
-          cert_problem = "SSL certificate problem, verify that the CA cert is"
-                         " OK. Details:\n";
-          rc = CURLE_SSL_CACERT;
-          break;
-        default:
-          rc = CURLE_SSL_CONNECT_ERROR;
-          break;
-        }
-
-          /* detail is already set to the SSL error above */
-
-        /* If we e.g. use SSLv2 request-method and the server doesn't like us
-         * (RST connection etc.), OpenSSL gives no explanation whatsoever and
-         * the SO_ERROR is also lost.
-         */
-        if (CURLE_SSL_CONNECT_ERROR == rc && errdetail == 0) {
-          failf(data, "Unknown SSL protocol error in connection to %s:%d ",
-                conn->host.name, conn->port);
-          return rc;
-        }
-        /* Could be a CERT problem */
-
-        SSL_strerror(errdetail, error_buffer, sizeof(error_buffer));
-        failf(data, "%s%s", cert_problem ? cert_problem : "", error_buffer);
+      /* If we e.g. use SSLv2 request-method and the server doesn't like us
+       * (RST connection etc.), OpenSSL gives no explanation whatsoever and
+       * the SO_ERROR is also lost.
+       */
+      if (CURLE_SSL_CONNECT_ERROR == rc && errdetail == 0) {
+        failf(data, "Unknown SSL protocol error in connection to %s:%d ",
+              conn->host.name, conn->port);
         return rc;
       }
+      /* Could be a CERT problem */
+
+      SSL_strerror(errdetail, error_buffer, sizeof(error_buffer));
+      failf(data, "%s%s", cert_problem ? cert_problem : "", error_buffer);
+      return rc;
     }
-    else
-      /* we have been connected fine, get out of the connect loop */
-      break;
+  }
+  else {
+    /* we have been connected fine, we're not waiting for anything else. */
+    connssl->connecting_state = ssl_connect_3;
 
-    while(1) {
-      what = Curl_select(readfd, writefd, (int)timeout_ms);
-      if(what > 0)
-        /* reabable or writable, go loop in the outer loop */
-        break;
-      else if(0 == what) {
-        /* timeout */
-        failf(data, "SSL connection timeout");
-        return CURLE_OPERATION_TIMEDOUT;
-      }
-      else {
-        /* anything that gets here is fatally bad */
-        failf(data, "select on SSL socket, errno: %d", Curl_ourerrno());
-        return CURLE_SSL_CONNECT_ERROR;
-      }
-    } /* while()-loop for the select() */
-  } /* while()-loop for the SSL_connect() */
+    /* Informational message */
+    infof (data, "SSL connection using %s\n",
+           SSL_get_cipher(connssl->handle));
 
-  /* Informational message */
-  infof (data, "SSL connection using %s\n",
-         SSL_get_cipher(connssl->handle));
+    return CURLE_OK;
+  }
+}
 
-  if(!ssl_sessionid) {
+static CURLcode
+Curl_ossl_connect_step3(struct connectdata *conn,
+                  int sockindex)
+{
+  CURLcode retcode = CURLE_OK;
+  char * str;
+  long lerr;
+  ASN1_TIME *certdate;
+  void *ssl_sessionid=NULL;
+  struct SessionHandle *data = conn->data;
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+
+  curlassert(ssl_connect_3 == connssl->connecting_state);
+
+  if(Curl_ssl_getsessionid(conn, &ssl_sessionid, NULL)) {
     /* Since this is not a cached session ID, then we want to stach this one
        in the cache! */
     SSL_SESSION *ssl_sessionid;
@@ -1529,7 +1543,112 @@ Curl_ossl_connect(struct connectdata *conn,
 
   X509_free(connssl->server_cert);
   connssl->server_cert = NULL;
+  connssl->connecting_state = ssl_connect_done;
   return retcode;
+}
+
+static CURLcode
+Curl_ossl_connect_common(struct connectdata *conn,
+                         int sockindex,
+                         bool nonblocking,
+                         bool *done)
+{
+  CURLcode retcode;
+  struct SessionHandle *data = conn->data;
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  curl_socket_t sockfd = conn->sock[sockindex];
+  long timeout_ms;
+
+  if (ssl_connect_1==connssl->connecting_state) {
+    retcode = Curl_ossl_connect_step1(conn, sockindex);
+    if (retcode)
+      return retcode;
+  }
+
+  timeout_ms = 0;
+  while (ssl_connect_2 == connssl->connecting_state ||
+         ssl_connect_2_reading == connssl->connecting_state ||
+         ssl_connect_2_writing == connssl->connecting_state) {
+
+    /* if ssl is expecting something, check if it's available. */
+    if (connssl->connecting_state == ssl_connect_2_reading
+        || connssl->connecting_state == ssl_connect_2_writing) {
+
+      int writefd = ssl_connect_2_writing==
+        connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
+      int readfd = ssl_connect_2_reading==
+        connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
+
+      while(1) {
+        int what = Curl_select(readfd, writefd, nonblocking?0:(int)timeout_ms);
+        if(what > 0)
+          /* reabable or writable, go loop in the outer loop */
+          break;
+        else if(0 == what) {
+          if (nonblocking) {
+            *done = FALSE;
+            return CURLE_OK;
+          }
+          else {
+            /* timeout */
+            failf(data, "SSL connection timeout");
+            return CURLE_OPERATION_TIMEDOUT;
+          }
+        }
+        else {
+          /* anything that gets here is fatally bad */
+          failf(data, "select on SSL socket, errno: %d", Curl_ourerrno());
+          return CURLE_SSL_CONNECT_ERROR;
+        }
+      } /* while()-loop for the select() */
+    }
+
+    /* get the timeout from step2 to avoid computing it twice. */
+    retcode = Curl_ossl_connect_step2(conn, sockindex, &timeout_ms);
+    if (retcode)
+      return retcode;
+
+  } /* repeat step2 until all transactions are done. */
+
+
+  if (ssl_connect_3==connssl->connecting_state) {
+    retcode = Curl_ossl_connect_step3(conn, sockindex);
+    if (retcode)
+      return retcode;
+  }
+
+  if (ssl_connect_done==connssl->connecting_state) {
+    *done = TRUE;
+  }
+  else {
+    *done = FALSE;
+  }
+
+  return CURLE_OK;
+}
+
+CURLcode
+Curl_ossl_connect_nonblocking(struct connectdata *conn,
+                              int sockindex,
+                              bool *done)
+{
+  return Curl_ossl_connect_common(conn, sockindex, TRUE, done);
+}
+
+CURLcode
+Curl_ossl_connect(struct connectdata *conn,
+                  int sockindex)
+{
+  CURLcode retcode;
+  bool done = FALSE;
+
+  retcode = Curl_ossl_connect_common(conn, sockindex, FALSE, &done);
+  if (retcode)
+    return retcode;
+
+  curlassert(done);
+
+  return CURLE_OK;
 }
 
 /* return number of sent (non-SSL) bytes */

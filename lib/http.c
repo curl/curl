@@ -1371,13 +1371,6 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
       return result;
   }
 
-  if(conn->protocol & PROT_HTTPS) {
-    /* perform SSL initialization for this socket */
-    result = Curl_ssl_connect(conn, FIRSTSOCKET);
-    if(result)
-      return result;
-  }
-
   if(!data->state.this_is_a_follow) {
     /* this is not a followed location, get the original host name */
     if (data->state.first_host)
@@ -1387,10 +1380,67 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
     data->state.first_host = strdup(conn->host.name);
   }
 
-  *done = TRUE;
+  if(conn->protocol & PROT_HTTPS) {
+    /* perform SSL initialization */
+    if(data->state.used_interface == Curl_if_multi) {
+      result = Curl_https_connecting(conn, done);
+      if(result)
+        return result;
+    }
+    else {
+      /* BLOCKING */
+      result = Curl_ssl_connect(conn, FIRSTSOCKET);
+      if(result)
+        return result;
+      *done = TRUE;
+    }
+  }
+  else {
+    *done = TRUE;
+  }
 
   return CURLE_OK;
 }
+
+CURLcode Curl_https_connecting(struct connectdata *conn, bool *done)
+{
+  CURLcode result;
+  curlassert(conn->protocol & PROT_HTTPS);
+
+  /* perform SSL initialization for this socket */
+  result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, done);
+  if(result)
+    return result;
+
+  return CURLE_OK;
+}
+
+#ifdef USE_SSLEAY
+CURLcode Curl_https_proto_fdset(struct connectdata *conn,
+                                fd_set *read_fd_set,
+                                fd_set *write_fd_set,
+                                int *max_fdp)
+{
+  if (conn->protocol & PROT_HTTPS) {
+    struct ssl_connect_data *connssl = &conn->ssl[FIRSTSOCKET];
+    curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
+
+    if (connssl->connecting_state == ssl_connect_2_writing) {
+      /* write mode */
+      FD_SET(sockfd, write_fd_set);
+      if((int)sockfd > *max_fdp)
+        *max_fdp = (int)sockfd;
+    }
+    else if (connssl->connecting_state == ssl_connect_2_reading) {
+      /* read mode */
+      FD_SET(sockfd, read_fd_set);
+      if((int)sockfd > *max_fdp)
+        *max_fdp = (int)sockfd;
+    }
+  }
+  return CURLE_OK;
+}
+#endif
 
 /*
  * Curl_http_done() gets called from Curl_done() after a single HTTP request

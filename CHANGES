@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel (21 March 2006)
+- Xavier Bouchoux made the SSL connection non-blocking for the multi interface
+  (when using OpenSSL).
+
 - Tor Arntsen fixed the AIX Toolbox RPM spec
 
 Daniel (20 March 2006)
