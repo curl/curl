@@ -11,6 +11,7 @@ Curl and libcurl 7.15.4
 
 This release includes the following changes:
 
+ o added CURLINFO_FTP_ENTRY_PATH
  o less blocking for the multi interface during SSL connect negotiation 
 
 This release includes the following bugfixes:

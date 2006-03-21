@@ -833,7 +833,7 @@ typedef enum {
 
 /*
  * Values that are generated, temporary or calculated internally for a
- * "session handle" must be defined within the 'struct urlstate'.  This struct
+ * "session handle" must be defined within the 'struct UrlState'.  This struct
  * will be used within the SessionHandle struct. When the 'SessionHandle'
  * struct is cloned, this data MUST NOT be copied.
  *
@@ -921,6 +921,10 @@ struct UrlState {
 #if defined(USE_SSLEAY) && defined(HAVE_OPENSSL_ENGINE_H)
   ENGINE *engine;
 #endif /* USE_SSLEAY */
+
+  /* a place to store the most recenlty set FTP entrypath */
+  char *most_recent_ftp_entrypath;
+
 };
 
 
@@ -950,7 +954,7 @@ struct DynamicStatic {
  * This 'UserDefined' struct must only contain data that is set once to go
  * for many (perhaps) independent connections. Values that are generated or
  * calculated internally for the "session handle" MUST be defined within the
- * 'struct urlstate' instead. The only exceptions MUST note the changes in
+ * 'struct UrlState' instead. The only exceptions MUST note the changes in
  * the 'DynamicStatic' struct.
  */
 
@@ -964,7 +968,7 @@ struct UserDefined {
                      this. */
   void *out;         /* the fetched file goes here */
   void *in;          /* the uploaded file is read from here */
-  void *writeheader; /* write the header to this is non-NULL */
+  void *writeheader; /* write the header to this if non-NULL */
   char *set_url;     /* what original URL to work on */
   char *set_proxy;   /* proxy to use */
   long use_port;     /* which port to use (when not using default) */
@@ -1111,7 +1115,7 @@ struct UserDefined {
  * From now on, the 'SessionHandle' must only contain data that is set once to
  * go for many (perhaps) independent connections. Values that are generated or
  * calculated internally for the "session handle" must be defined within the
- * 'struct urlstate' instead.  */
+ * 'struct UrlState' instead.  */
 
 struct SessionHandle {
   struct curl_hash *hostcache;

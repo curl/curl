@@ -187,6 +187,14 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
   case CURLINFO_COOKIELIST:
     *param_slistp = Curl_cookie_list(data);
     break;
+  case CURLINFO_FTP_ENTRY_PATH:
+    /* Return the entrypath string from the most recent connection.
+       This pointer was copied from the connectdata structure by FTP.
+       The actual string may be free()ed by subsequent libcurl calls so
+       it must be copied to a safer area before the next libcurl call.
+       Callers must never free it themselves. */
+    *param_charp = data->state.most_recent_ftp_entrypath;
+    break;
   case CURLINFO_LASTSOCKET:
     if((data->state.lastconnect != -1) &&
        (data->state.connects[data->state.lastconnect] != NULL))

@@ -7,6 +7,8 @@
                                   Changelog
 
 Daniel (21 March 2006)
+- David McCreedy added CURLINFO_FTP_ENTRY_PATH.
+
 - Xavier Bouchoux made the SSL connection non-blocking for the multi interface
   (when using OpenSSL).
 

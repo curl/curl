@@ -60,6 +60,7 @@ typedef enum {
   VAR_NUM_CONNECTS,
   VAR_REDIRECT_TIME,
   VAR_REDIRECT_COUNT,
+  VAR_FTP_ENTRY_PATH,
   VAR_NUM_OF_VARS /* must be the last */
 } replaceid;
 
@@ -88,6 +89,7 @@ static const struct variable replacements[]={
   {"num_connects", VAR_NUM_CONNECTS},
   {"time_redirect", VAR_REDIRECT_TIME},
   {"num_redirects", VAR_REDIRECT_COUNT},
+  {"ftp_entry_path", VAR_FTP_ENTRY_PATH},
   {NULL, VAR_NONE}
 };
 
@@ -213,6 +215,13 @@ void ourWriteOut(CURL *curl, char *writeinfo)
                     curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &stringp))
                    && stringp)
                   fputs(stringp, stream);
+                break;
+              case VAR_FTP_ENTRY_PATH:
+                if((CURLE_OK ==
+                    curl_easy_getinfo(curl, CURLINFO_FTP_ENTRY_PATH, &stringp))
+                   && stringp)
+                  fputs(stringp, stream);
+                break;
               default:
                 break;
               }

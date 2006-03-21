@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl 1 "21 Feb 2006" "Curl 7.15.2" "Curl Manual"
+.TH curl 1 "21 Mar 2006" "Curl 7.15.4" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -1131,6 +1131,10 @@ Number of new connects made in the recent transfer. (Added in 7.12.3)
 .TP
 .B num_redirects
 Number of redirects that were followed in the request. (Added in 7.12.3)
+.TP
+.B ftp_entry_path
+The initial path libcurl ended up in when logging on to the remote FTP
+server. (Added in 7.15.4)
 .RE
 
 If this option is used several times, the last one will be used.
