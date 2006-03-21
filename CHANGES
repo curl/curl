@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel (21 March 2006)
+- Tor Arntsen fixed the AIX Toolbox RPM spec
+
 Daniel (20 March 2006)
 - David McCreedy fixed libcurl to no longer ignore AUTH failures and now it
   reacts properly according to the CURLOPT_FTP_SSL setting.

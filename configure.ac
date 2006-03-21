@@ -1956,6 +1956,7 @@ AC_CONFIG_FILES([Makefile \
            packages/vms/Makefile \
            packages/AIX/Makefile \
            packages/AIX/RPM/Makefile \
+           packages/AIX/RPM/curl.spec \
            curl-config \
            libcurl.pc
 ])
