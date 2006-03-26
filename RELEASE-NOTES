@@ -16,6 +16,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o TFTP works on more systems
  o generates a fine AIX Toolbox RPM spec
  o treat FTP AUTH failures properly
  o TFTP transfers could trash data

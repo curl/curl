@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (26 March 2006)
+- Tor Arntsen figured out that TFTP was broken on a lot of systems since we
+  called bind() with a too big argument in the 3rd parameter and at least
+  Tru64, AIX and IRIX seem to be very picky about it.
+
 Daniel (21 March 2006)
 - David McCreedy added CURLINFO_FTP_ENTRY_PATH.
 
