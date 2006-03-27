@@ -1892,7 +1892,11 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           /* we already have a string, we append this one
              with a separating &-letter */
           char *oldpost=config->postfields;
-          config->postfields=aprintf("%s&%s", oldpost, postdata);
+          size_t newlen = strlen(oldpost) + strlen(postdata) + 2;
+          config->postfields=malloc(newlen);
+          if(!config->postfields)
+            return PARAM_NO_MEM;
+          snprintf(config->postfields, newlen, "%s&%s", oldpost, postdata);
           free(oldpost);
           free(postdata);
         }

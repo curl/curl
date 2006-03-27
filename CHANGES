@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel (27 March 2006)
+- David Byron found a problem multiple -d options when libcurl was built with
+  --enable-debug, as then curl used free() on memory allocated both with
+  normal malloc() and with libcurl-provided functions, when the latter MUST be
+  freed with curl_free() in debug builds.
+
 Daniel (26 March 2006)
 - Tor Arntsen figured out that TFTP was broken on a lot of systems since we
   called bind() with a too big argument in the 3rd parameter and at least

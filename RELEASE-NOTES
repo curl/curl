@@ -16,6 +16,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o fixed debug build crash with -d
  o TFTP works on more systems
  o generates a fine AIX Toolbox RPM spec
  o treat FTP AUTH failures properly
@@ -29,6 +30,7 @@ Other curl-related news since the previous public release:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dan Fandrich, Ilja van Sprundel, David McCreedy, Tor Arntsen, Xavier Bouchoux
+ Dan Fandrich, Ilja van Sprundel, David McCreedy, Tor Arntsen, Xavier Bouchoux,
+ David Byron
 
         Thanks! (and sorry if I forgot to mention someone)
