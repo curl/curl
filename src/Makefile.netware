@@ -19,7 +19,7 @@ endif
 
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8
+OPENSSL_PATH = ../../openssl-0.9.8a
 endif
 
 ifndef INSTDIR
@@ -29,7 +29,7 @@ endif
 # Edit the vars below to change NLM target settings.
 TARGET  = curl
 VERSION	= $(LIBCURL_VERSION)
-COPYR	= Copyright (C) 1996 - 2005, Daniel Stenberg, <daniel@haxx.se>
+COPYR	= Copyright (C) 1996 - 2006, Daniel Stenberg, <daniel@haxx.se>
 DESCR	= cURL $(LIBCURL_VERSION_STR) - http://curl.haxx.se
 MTSAFE	= YES
 STACK	= 64000
@@ -182,10 +182,14 @@ dist: all
 	-$(RM) $(OBJDIR)/$(TARGET).def $(OBJDIR)/version.inc $(XDCDATA)
 
 install: $(INSTDIR) all
+	@$(CP) ../docs/$(TARGET).pdf $(INSTDIR)
 	@$(CP) $(TARGET).nlm $(INSTDIR)
 
 clean:
-	-$(RM) config.h hugehelp.c
+ifeq "$(wildcard hugehelp.c.cvs)" "hugehelp.c.cvs"
+	-$(RM) hugehelp.c
+endif
+	-$(RM) config.h
 	-$(RM) -r $(OBJDIR)
 
 $(INSTDIR):
