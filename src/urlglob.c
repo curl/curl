@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -397,6 +397,8 @@ char *glob_next_url(URLGlob *glob)
   char *lit;
   size_t i;
   size_t j;
+  size_t buflen = glob->urllen+1;
+  size_t len;
 
   if (!glob->beenhere)
     glob->beenhere = 1;
@@ -441,23 +443,29 @@ char *glob_next_url(URLGlob *glob)
   for (j = 0; j < glob->size; ++j) {
     if (!(j&1)) {              /* every other term (j even) is a literal */
       lit = glob->literal[j/2];
-      strcpy(buf, lit);
-      buf += strlen(lit);
+      len = snprintf(buf, buflen, "%s", lit);
+      buf += len;
+      buflen -= len;
     }
     else {                              /* the rest (i odd) are patterns */
       pat = &glob->pattern[j/2];
       switch(pat->type) {
       case UPTSet:
-        strcpy(buf, pat->content.Set.elements[pat->content.Set.ptr_s]);
-        buf += strlen(pat->content.Set.elements[pat->content.Set.ptr_s]);
+        len = strlen(pat->content.Set.elements[pat->content.Set.ptr_s]);
+        snprintf(buf, buflen, "%s",
+                 pat->content.Set.elements[pat->content.Set.ptr_s]);
+        buf += len;
+        buflen -= len;
         break;
       case UPTCharRange:
         *buf++ = pat->content.CharRange.ptr_c;
         break;
       case UPTNumRange:
-        sprintf(buf, "%0*d",
-                pat->content.NumRange.padlength, pat->content.NumRange.ptr_n);
-        buf += strlen(buf); /* make no sprint() return code assumptions */
+        len = snprintf(buf, buflen, "%0*d",
+                       pat->content.NumRange.padlength,
+                       pat->content.NumRange.ptr_n);
+        buf += len;
+        buflen -= len;
         break;
       default:
         printf("internal error: invalid pattern type (%d)\n", (int)pat->type);
@@ -508,9 +516,9 @@ char *glob_match_url(char *filename, URLGlob *glob)
           appendlen=1;
           break;
         case UPTNumRange:
-          sprintf(numbuf, "%0*d",
-                  pat.content.NumRange.padlength,
-                  pat.content.NumRange.ptr_n);
+          snprintf(numbuf, sizeof(numbuf), "%0*d",
+                   pat.content.NumRange.padlength,
+                   pat.content.NumRange.ptr_n);
           appendthis = numbuf;
           appendlen = strlen(numbuf);
           break;
