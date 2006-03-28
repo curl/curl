@@ -1827,7 +1827,7 @@ CURLcode Curl_follow(struct SessionHandle *data,
 
       /* First we need to find out if there's a ?-letter in the URL,
          and cut it and the right-side of that off */
-      pathsep = strrchr(protsep, '?');
+      pathsep = strchr(protsep, '?');
       if(pathsep)
         *pathsep=0;
 

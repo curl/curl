@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (28 March 2006)
+- #1451929 (http://curl.haxx.se/bug/view.cgi?id=1451929) detailed a bug that
+  occurred when asking libcurl to follow HTTP redirects and the original URL
+  had more than one question mark (?). Added test case 276 to verify.
+
 Daniel (27 March 2006)
 - David Byron found a problem multiple -d options when libcurl was built with
   --enable-debug, as then curl used free() on memory allocated both with
