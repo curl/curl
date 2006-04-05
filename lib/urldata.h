@@ -231,6 +231,7 @@ struct ntlmdata {
   void *type_2;
   int n_type_2;
 #else
+  unsigned int flags;
   unsigned char nonce[8];
 #endif
 };

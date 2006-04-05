@@ -81,15 +81,20 @@ http://test.remote.server.com:265/path/2650002 --proxy http://%HOSTIP:%HTTPPORT 
 <strip>
 ^User-Agent: curl/.*
 </strip>
+# We strip off a large chunk of the type-2 NTLM message since it depends on
+# the local host name and thus differs on different machines!
+<strippart>
+s/^(Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA).*/$1/
+</strippart)
 <protocol nonewline=yes>
 CONNECT test.remote.server.com:265 HTTP/1.0
 Host: test.remote.server.com:265
-Proxy-Authorization: NTLM TlRMTVNTUAABAAAAAgIAAAAAAAAgAAAAAAAAACAAAAA=
+Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIAAAAAAAAAAAAAAAAAAAAAAAA=
 Proxy-Connection: Keep-Alive
 
 CONNECT test.remote.server.com:265 HTTP/1.0
 Host: test.remote.server.com:265
-Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEUAAAAYABgAXQAAAAAAAABAAAAABQAFAEAAAAAAAAAARQAAAAAAAAB1AAAAAYIAAHNpbGx5oB5CPMq0JDu5tbxLow3sHn3jfoYDE+7QJVE7DA0GyDEwvj2BxsBctP9tT4fnCtL1
+Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA
 Proxy-Connection: Keep-Alive
 
 POST /path/2650002 HTTP/1.1

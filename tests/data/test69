@@ -84,6 +84,11 @@ http://%HOSTIP:%HTTPPORT/69 -u testuser:testpass --anyauth
 <strip>
 ^User-Agent:.*
 </strip>
+# We strip off a large chunk of the type-2 NTLM message since it depends on
+# the local host name and thus differs on different machines!
+<strippart>
+s/^(Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAEAA).*/$1/
+</strippart)
 <protocol>
 GET /69 HTTP/1.1
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
@@ -91,13 +96,13 @@ Host: 127.0.0.1:%HTTPPORT
 Accept: */*
 
 GET /69 HTTP/1.1
-Authorization: NTLM TlRMTVNTUAABAAAAAgIAAAAAAAAgAAAAAAAAACAAAAA=
+Authorization: NTLM TlRMTVNTUAABAAAABoIAAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Host: 127.0.0.1:%HTTPPORT
 Accept: */*
 
 GET /69 HTTP/1.1
-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEgAAAAYABgAYAAAAAAAAABAAAAACAAIAEAAAAAAAAAASAAAAAAAAAB4AAAAAYIAAHRlc3R1c2VyWmRDApEJkUyGOPS3DjvASModEeW/N/FBqYVyF4y6/y/7F6qmEQ7lXjXFF3tH1145
+Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAEAA
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Host: 127.0.0.1:%HTTPPORT
 Accept: */*

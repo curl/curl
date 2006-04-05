@@ -6,6 +6,17 @@
 
                                   Changelog
 
+Daniel (5 April 2006)
+- Michele Bini modified the NTLM code to work for his "weird IIS case"
+  (http://curl.haxx.se/mail/lib-2006-02/0154.html) by adding the NTLM hash
+  function in addition to the LM one and making some other adjustments in the
+  order the different parts of the data block are sent in the Type-2 reply.
+  Inspiration for this work was taken from the Firefox NTLM implementation.
+
+  I edited the existing 21(!) NTLM test cases to run fine with these news. Due
+  to the fact that we now properly include the host name in the Type-2 message
+  the test cases now only compare parts of that chunk.
+
 Daniel (28 March 2006)
 - #1451929 (http://curl.haxx.se/bug/view.cgi?id=1451929) detailed a bug that
   occurred when asking libcurl to follow HTTP redirects and the original URL

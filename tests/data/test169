@@ -80,9 +80,14 @@ http://data.from.server.requiring.digest.hohoho.com/169 --proxy http://%HOSTIP:%
 <strip>
 ^User-Agent: curl/.*
 </strip>
+# We strip off a large chunk of the type-2 NTLM message since it depends on
+# the local host name and thus differs on different machines!
+<strippart>
+s/^(Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAAAwADAHAAAAAEAA).*/$1/
+</strippart)
 <protocol>
 GET http://data.from.server.requiring.digest.hohoho.com/169 HTTP/1.1
-Proxy-Authorization: NTLM TlRMTVNTUAABAAAAAgIAAAAAAAAgAAAAAAAAACAAAAA=
+Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIAAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS libidn/0.4.3
 Host: data.from.server.requiring.digest.hohoho.com
 Pragma: no-cache
@@ -90,7 +95,7 @@ Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://data.from.server.requiring.digest.hohoho.com/169 HTTP/1.1
-Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEMAAAAYABgAWwAAAAAAAABAAAAAAwADAEAAAAAAAAAAQwAAAAAAAABzAAAAAYIAAGZvb4P6B+XVQ6vQsx3DfDXUVhd9436GAxPu0IYcl2Z7LxHmNeOAWQ+vxUmhuCFJBUgXCQ==
+Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAAAwADAHAAAAAEAA
 User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS libidn/0.4.3
 Host: data.from.server.requiring.digest.hohoho.com
 Pragma: no-cache

@@ -67,9 +67,14 @@ http://%HOSTIP:%HTTPPORT/81 --proxy-user testuser:testpass -x http://%HOSTIP:%HT
 <strip>
 ^User-Agent:.*
 </strip>
+# We strip off a large chunk of the type-2 NTLM message since it depends on
+# the local host name and thus differs on different machines!
+<strippart>
+s/(Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAEAA).*/$1/
+</strippart)
 <protocol>
 GET http://127.0.0.1:%HTTPPORT/81 HTTP/1.1
-Proxy-Authorization: NTLM TlRMTVNTUAABAAAAAgIAAAAAAAAgAAAAAAAAACAAAAA=
+Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIAAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
@@ -77,7 +82,7 @@ Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://127.0.0.1:%HTTPPORT/81 HTTP/1.1
-Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEgAAAAYABgAYAAAAAAAAABAAAAACAAIAEAAAAAAAAAASAAAAAAAAAB4AAAAAYIAAHRlc3R1c2VyWmRDApEJkUyGOPS3DjvASModEeW/N/FBqYVyF4y6/y/7F6qmEQ7lXjXFF3tH1145
+Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAEAA
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache

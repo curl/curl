@@ -56,9 +56,14 @@ http://%HOSTIP:%HTTPPORT/239 --proxy http://%HOSTIP:%HTTPPORT --proxy-user silly
 <strip>
 ^User-Agent: curl/.*
 </strip>
+# We strip off a large chunk of the type-2 NTLM message since it depends on
+# the local host name and thus differs on different machines!
+<strippart>
+s/^(Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA).*/$1/
+</strippart)
 <protocol nonewline=yes>
 POST http://%HOSTIP:%HTTPPORT/239 HTTP/1.1
-Proxy-Authorization: NTLM TlRMTVNTUAABAAAAAgIAAAAAAAAgAAAAAAAAACAAAAA=
+Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIAAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
 Host: %HOSTIP:%HTTPPORT
 Pragma: no-cache
@@ -68,7 +73,7 @@ Content-Length: 0
 Content-Type: application/x-www-form-urlencoded
 
 POST http://127.0.0.1:8990/239 HTTP/1.1
-Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEUAAAAYABgAXQAAAAAAAABAAAAABQAFAEAAAAAAAAAARQAAAAAAAAB1AAAAAYIAAHNpbGx5oB5CPMq0JDu5tbxLow3sHn3jfoYDE+7QJVE7DA0GyDEwvj2BxsBctP9tT4fnCtL1
+Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA
 User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
 Host: 127.0.0.1:8990
 Pragma: no-cache
