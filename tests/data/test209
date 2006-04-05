@@ -81,7 +81,7 @@ http://test.remote.server.com:209/path/2090002 --proxy http://%HOSTIP:%HTTPPORT 
 # We strip off a large chunk of the type-2 NTLM message since it depends on
 # the local host name and thus differs on different machines!
 <strippart>
-s/^(Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAAEAA).*/$1/
+s/^(Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA).*/$1/
 </strippart)
 <protocol>
 CONNECT test.remote.server.com:209 HTTP/1.0
@@ -91,7 +91,7 @@ Proxy-Connection: Keep-Alive
 
 CONNECT test.remote.server.com:209 HTTP/1.0
 Host: test.remote.server.com:209
-Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAAEAA
+Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA
 Proxy-Connection: Keep-Alive
 
 GET /path/2090002 HTTP/1.1

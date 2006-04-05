@@ -70,7 +70,7 @@ http://%HOSTIP:%HTTPPORT/81 --proxy-user testuser:testpass -x http://%HOSTIP:%HT
 # We strip off a large chunk of the type-2 NTLM message since it depends on
 # the local host name and thus differs on different machines!
 <strippart>
-s/(Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAEAA).*/$1/
+s/(Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAA).*/$1/
 </strippart)
 <protocol>
 GET http://127.0.0.1:%HTTPPORT/81 HTTP/1.1
@@ -82,7 +82,7 @@ Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://127.0.0.1:%HTTPPORT/81 HTTP/1.1
-Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAEAA
+Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAA
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache

@@ -72,7 +72,7 @@ http://%HOSTIP:%HTTPPORT/67 -u testuser:testpass --ntlm
 # We strip off a large chunk of the type-2 NTLM message since it depends on
 # the local host name and thus differs on different machines!
 <strippart>
-s/^(Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAEAA).*/$1/
+s/^(Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAA).*/$1/
 </strippart)
 <protocol>
 GET /67 HTTP/1.1
@@ -82,7 +82,7 @@ Host: 127.0.0.1:%HTTPPORT
 Accept: */*
 
 GET /67 HTTP/1.1
-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAEAA
+Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAA
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Host: 127.0.0.1:%HTTPPORT
 Accept: */*
