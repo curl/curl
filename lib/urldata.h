@@ -541,6 +541,12 @@ struct Curl_async {
 #define FIRSTSOCKET     0
 #define SECONDARYSOCKET 1
 
+/* These function pointer types are here only to allow easier typecasting
+   within the source when we need to cast between data pointers (such as NULL)
+   and function pointers. */
+typedef CURLcode (*Curl_do_more_func)(struct connectdata *);
+typedef CURLcode (*Curl_done_func)(struct connectdata *, CURLcode);
+
 /*
  * The connectdata struct contains all fields and variables that should be
  * unique for an entire connection.
@@ -625,13 +631,13 @@ struct connectdata {
   /* These two functions MUST be set by the curl_connect() function to be
      be protocol dependent */
   CURLcode (*curl_do)(struct connectdata *, bool *done);
-  CURLcode (*curl_done)(struct connectdata *, CURLcode);
+  Curl_done_func curl_done;
 
   /* If the curl_do() function is better made in two halves, this
    * curl_do_more() function will be called afterwards, if set. For example
    * for doing the FTP stuff after the PASV/PORT command.
    */
-  CURLcode (*curl_do_more)(struct connectdata *);
+  Curl_do_more_func curl_do_more;
 
   /* This function *MAY* be set to a protocol-dependent function that is run
    * after the connect() and everything is done, as a step in the connection.
