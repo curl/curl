@@ -60,6 +60,14 @@
 #include "config-amigaos.h"
 #endif
 
+#ifdef TPF
+#include "config-tpf.h"
+/* change which select is used for the curl command line tool */
+#define select(a,b,c,d,e) tpf_select_bsd(a,b,c,d,e)
+/* and turn off the progress meter */
+#define CONF_DEFAULT (0|CONF_NOPROGRESS)
+#endif
+
 #endif /* HAVE_CONFIG_H */
 
 #if defined(CURLDEBUG) && defined(CURLTOOLDEBUG)
@@ -160,6 +168,11 @@ int fileno( FILE *stream);
 
 #ifndef SIZEOF_CURL_OFF_T
 #define SIZEOF_CURL_OFF_T sizeof(curl_off_t)
+#endif
+
+#ifndef UNPRINTABLE_CHAR
+/* define what to use for unprintable characters */
+#define UNPRINTABLE_CHAR '.'
 #endif
 
 #endif /* __SRC_CURL_SETUP_H */

@@ -104,6 +104,14 @@
    versions instead */
 #include <curlx.h> /* header from the libcurl directory */
 
+#if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
+#include <iconv.h>
+/* set default codesets for iconv */
+#ifndef CURL_ICONV_CODESET_OF_NETWORK
+#define CURL_ICONV_CODESET_OF_NETWORK "ISO8859-1"
+#endif
+#endif /* CURL_DOES_CONVERSIONS && HAVE_ICONV */
+
 /* The last #include file should be: */
 #ifdef CURLDEBUG
 #ifndef CURLTOOLDEBUG
@@ -153,7 +161,9 @@ typedef enum {
 } HttpReq;
 
 /* Just a set of bits */
+#ifndef CONF_DEFAULT
 #define CONF_DEFAULT  0
+#endif
 
 #define CONF_AUTO_REFERER (1<<4) /* the automatic referer-system please! */
 #define CONF_HEADER   (1<<8) /* throw the header out too */
@@ -210,6 +220,10 @@ char *strdup(char *str)
 #else
 #define struct_stat struct stat
 #endif
+
+#if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
+iconv_t inbound_cd  = (iconv_t)-1;
+#endif /* CURL_DOES_CONVERSIONS && HAVE_ICONV */
 
 #ifdef WIN32
 /*
@@ -420,6 +434,12 @@ static CURLcode main_init(void)
 static void main_free(void)
 {
   curl_global_cleanup();
+#if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
+  /* close iconv conversion descriptor */
+  if (inbound_cd != (iconv_t)-1) {
+     iconv_close(inbound_cd);
+  }
+#endif /* CURL_DOES_CONVERSIONS && HAVE_ICONV */
 }
 
 static int SetHTTPrequest(struct Configurable *config,
@@ -2924,10 +2944,77 @@ void progressbarinit(struct ProgressData *bar,
   bar->out = config->errors;
 }
 
+#if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
+/*
+ * convert_from_network() is an internal function
+ * for performing ASCII conversions on non-ASCII platforms.
+ */
+CURLcode
+convert_from_network(char *buffer, size_t length)
+{
+  CURLcode rc;
+
+  /* translate from the network encoding to the host encoding */
+  char *input_ptr, *output_ptr;
+  size_t in_bytes, out_bytes;
+
+  /* open an iconv conversion descriptor if necessary */
+  if(inbound_cd == (iconv_t)-1) {
+    inbound_cd = iconv_open(CURL_ICONV_CODESET_OF_HOST,
+                            CURL_ICONV_CODESET_OF_NETWORK);
+    if(inbound_cd == (iconv_t)-1) {
+      return CURLE_CONV_FAILED;
+    }
+  }
+  /* call iconv */
+  input_ptr = output_ptr = buffer;
+  in_bytes = out_bytes = length;
+  rc = iconv(inbound_cd, &input_ptr,  &in_bytes,
+                         &output_ptr, &out_bytes);
+  if ((rc == -1) || (in_bytes != 0)) {
+    return CURLE_CONV_FAILED;
+  }
+
+  return CURLE_OK;
+}
+
+static
+char convert_char(curl_infotype infotype, char this_char) {
+/* determine how this specific character should be displayed */
+  switch(infotype) {
+  case CURLINFO_DATA_IN:
+  case CURLINFO_DATA_OUT:
+  case CURLINFO_SSL_DATA_IN:
+  case CURLINFO_SSL_DATA_OUT:
+    /* data, treat as ASCII */
+    if ((this_char >= 0x20) && (this_char < 0x7f)) {
+      /* printable ASCII hex value: convert to host encoding */
+      convert_from_network(&this_char, 1);
+    } else {
+      /* non-printable ASCII, use a replacement character */
+      return(UNPRINTABLE_CHAR);
+    }
+    /* fall through to default */
+  default:
+    /* treat as host encoding */
+    if (isprint(this_char)
+    &&  (this_char != '\t')
+    &&  (this_char != '\r')
+    &&  (this_char != '\n')) {
+      /* printable characters excluding tabs and line end characters */
+      return(this_char);
+    }
+    break;
+  }
+  /* non-printable, use a replacement character  */
+  return(UNPRINTABLE_CHAR);
+}
+#endif /* CURL_DOES_CONVERSIONS */
+
 static
 void dump(char *timebuf, const char *text,
           FILE *stream, unsigned char *ptr, size_t size,
-          trace tracetype)
+          trace tracetype, curl_infotype infotype)
 {
   size_t i;
   size_t c;
@@ -2960,8 +3047,14 @@ void dump(char *timebuf, const char *text,
         i+=(c+2-width);
         break;
       }
+#if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
+      /* convert to host encoding and print this character */
+      fprintf(stream, "%c", convert_char(infotype, ptr[i+c]));
+#else
+      (void)infotype;
       fprintf(stream, "%c",
-              (ptr[i+c]>=0x20) && (ptr[i+c]<0x80)?ptr[i+c]:'.');
+              (ptr[i+c]>=0x20) && (ptr[i+c]<0x80)?ptr[i+c]:UNPRINTABLE_CHAR);
+#endif /* CURL_DOES_CONVERSIONS && HAVE_ICONV */
       /* check again for 0D0A, to avoid an extra \n if it's at width */
       if ((tracetype == TRACE_ASCII) &&
           (i+c+2 < size) && ptr[i+c+1]==0x0D && ptr[i+c+2]==0x0A) {
@@ -3084,7 +3177,7 @@ int my_trace(CURL *handle, curl_infotype type,
     break;
   }
 
-  dump(timebuf, text, output, data, size, config->tracetype);
+  dump(timebuf, text, output, data, size, config->tracetype, type);
   return 0;
 }
 
@@ -3652,7 +3745,7 @@ operate(struct Configurable *config, int argc, char *argv[])
               filep = uploadfile;
 
             /* URL encode the file name */
-            filep = curl_escape(filep, 0 /* use strlen */);
+            filep = curl_easy_escape(curl, filep, 0 /* use strlen */);
 
             if(filep) {
 

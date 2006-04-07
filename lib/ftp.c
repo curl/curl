@@ -72,6 +72,7 @@
 #include <curl/curl.h>
 #include "urldata.h"
 #include "sendf.h"
+#include "easyif.h" /* for Curl_convert_... prototypes */
 
 #include "if2ip.h"
 #include "hostip.h"
@@ -159,12 +160,15 @@ static void freedirs(struct FTP *ftp)
   }
 }
 
-/* Returns non-zero iff the given string contains CR (0x0D) or LF (0x0A), which
-   are not allowed within RFC 959 <string>.
- */
+/* Returns non-zero if the given string contains CR (\r) or LF (\n),
+   which are not allowed within RFC 959 <string>.
+   Note: The input string is in the client's encoding which might
+   not be ASCII, so escape sequences \r & \n must be used instead
+   of hex values 0x0d & 0x0a.
+*/
 static bool isBadFtpString(const char *string)
 {
-  return strchr(string, 0x0D) != NULL || strchr(string, 0x0A) != NULL;
+  return strchr(string, '\r') != NULL || strchr(string, '\n') != NULL;
 }
 
 /***********************************************************************
@@ -294,6 +298,14 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
       if(res < 0)
         /* EWOULDBLOCK */
         return CURLE_OK; /* return */
+
+#ifdef CURL_DOES_CONVERSIONS
+      if((res == CURLE_OK) && (gotbytes > 0)) {
+        /* convert from the network encoding */
+        result = res = Curl_convert_from_network(data, ptr, gotbytes);
+        /* Curl_convert_from_network calls failf if unsuccessful */
+      }
+#endif /* CURL_DOES_CONVERSIONS */
 
       if(CURLE_OK != res)
         keepon = FALSE;
@@ -517,6 +529,14 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
         if(res < 0)
           /* EWOULDBLOCK */
           continue; /* go looping again */
+
+#ifdef CURL_DOES_CONVERSIONS
+        if((res == CURLE_OK) && (gotbytes > 0)) {
+          /* convert from the network encoding */
+          result = res = Curl_convert_from_network(data, ptr, gotbytes);
+          /* Curl_convert_from_network calls failf if unsuccessful */
+        }
+#endif /* CURL_DOES_CONVERSIONS */
 
         if(CURLE_OK != res)
           keepon = FALSE;
@@ -1309,6 +1329,8 @@ static CURLcode ftp_state_post_mdtm(struct connectdata *conn)
     NBFTPSENDF(conn, "TYPE %c",
                data->set.ftp_ascii?'A':'I');
     state(conn, FTP_TYPE);
+    /* keep track of our current transfer type */
+    data->ftp_in_ascii_mode = data->set.ftp_ascii;
   }
   else
     result = ftp_state_post_type(conn);
@@ -2871,7 +2893,8 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status)
   if(ftp->prevpath)
     free(ftp->prevpath);
 
-  path = curl_unescape(conn->path, 0); /* get the "raw" path */
+  /* get the "raw" path */
+  path = curl_easy_unescape(conn->data, conn->path, 0, NULL);
   if(!path)
     return CURLE_OUT_OF_MEMORY;
 
@@ -3067,6 +3090,8 @@ static CURLcode ftp_transfertype(struct connectdata *conn,
           ascii?"ASCII":"binary");
     return ascii? CURLE_FTP_COULDNT_SET_ASCII:CURLE_FTP_COULDNT_SET_BINARY;
   }
+  /* keep track of our current transfer type */
+  data->ftp_in_ascii_mode = ascii;
 
   return CURLE_OK;
 }
@@ -3168,6 +3193,8 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
     if(data->set.upload) {
       NBFTPSENDF(conn, "TYPE %c", data->set.ftp_ascii?'A':'I');
       state(conn, FTP_STOR_TYPE);
+      /* keep track of our current transfer type */
+      data->ftp_in_ascii_mode = data->set.ftp_ascii;
     }
     else {
       /* download */
@@ -3182,10 +3209,14 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
            need to set ASCII transfer mode. */
         NBFTPSENDF(conn, "TYPE A", NULL);
         state(conn, FTP_LIST_TYPE);
+        /* keep track of our current transfer type */
+        data->ftp_in_ascii_mode = 1;
       }
       else {
         NBFTPSENDF(conn, "TYPE %c", data->set.ftp_ascii?'A':'I');
         state(conn, FTP_RETR_TYPE);
+        /* keep track of our current transfer type */
+        data->ftp_in_ascii_mode = data->set.ftp_ascii;
       }
     }
     result = ftp_easy_statemach(conn);
@@ -3308,6 +3339,14 @@ CURLcode Curl_nbftpsendf(struct connectdata *conn,
 
   ftp_respinit(conn);
 
+#ifdef CURL_DOES_CONVERSIONS
+  res = Curl_convert_to_network(data, s, write_len);
+  /* Curl_convert_to_network calls failf if unsuccessful */
+  if(res != CURLE_OK) {
+    return res;
+  }
+#endif /* CURL_DOES_CONVERSIONS */
+
   res = Curl_write(conn, conn->sock[FIRSTSOCKET], sptr, write_len,
                    &bytes_written);
 
@@ -3356,6 +3395,14 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
 
   bytes_written=0;
   write_len = strlen(s);
+
+#ifdef CURL_DOES_CONVERSIONS
+  res = Curl_convert_to_network(conn->data, s, write_len);
+  /* Curl_convert_to_network calls failf if unsuccessful */
+  if(res != CURLE_OK) {
+    return(res);
+  }
+#endif /* CURL_DOES_CONVERSIONS */
 
   while(1) {
     res = Curl_write(conn, conn->sock[FIRSTSOCKET], sptr, write_len,
@@ -3747,7 +3794,8 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
       if(!ftp->dirs)
         return CURLE_OUT_OF_MEMORY;
 
-      ftp->dirs[0] = curl_unescape(cur_pos, (int)(slash_pos-cur_pos));
+      ftp->dirs[0] = curl_easy_unescape(conn->data, cur_pos,
+                                        (int)(slash_pos-cur_pos), NULL);
       if(!ftp->dirs[0]) {
         free(ftp->dirs);
         return CURLE_OUT_OF_MEMORY;
@@ -3777,8 +3825,9 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
            requires a parameter and a non-existant parameter a) doesn't work on
            many servers and b) has no effect on the others. */
         int len = (int)(slash_pos - cur_pos + absolute_dir);
-        ftp->dirs[ftp->dirdepth] = curl_unescape(cur_pos - absolute_dir, len);
-
+        ftp->dirs[ftp->dirdepth] = curl_easy_unescape(conn->data,
+                                                      cur_pos - absolute_dir,
+                                                      len, NULL);
         if (!ftp->dirs[ftp->dirdepth]) { /* run out of memory ... */
           failf(data, "no memory");
           freedirs(ftp);
@@ -3815,7 +3864,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
   }
 
   if(*ftp->file) {
-    ftp->file = curl_unescape(ftp->file, 0);
+    ftp->file = curl_easy_unescape(conn->data, ftp->file, 0, NULL);
     if(NULL == ftp->file) {
       freedirs(ftp);
       failf(data, "no memory");
@@ -3842,7 +3891,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
   if(ftp->prevpath) {
     /* prevpath is "raw" so we convert the input path before we compare the
        strings */
-    char *path = curl_unescape(conn->path, 0);
+    char *path = curl_easy_unescape(conn->data, conn->path, 0, NULL);
     if(!path)
       return CURLE_OUT_OF_MEMORY;
 

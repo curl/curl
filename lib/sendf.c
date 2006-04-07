@@ -59,6 +59,7 @@
 #include <string.h>
 #include "memory.h"
 #include "strerror.h"
+#include "easyif.h" /* for the Curl_convert_from_network prototype */
 /* The last #include file should be: */
 #include "memdebug.h"
 
@@ -293,6 +294,28 @@ CURLcode Curl_client_write(struct SessionHandle *data,
   if(0 == len)
     len = strlen(ptr);
 
+#ifdef CURL_DOES_CONVERSIONS
+  if(type & CLIENTWRITE_BODY) {
+    if(data->ftp_in_ascii_mode) {
+      /* convert from the network encoding */
+      size_t rc;
+      rc = Curl_convert_from_network(data, ptr, len);
+      /* Curl_convert_from_network calls failf if unsuccessful */
+      if(rc != CURLE_OK) {
+        return(rc);
+      }
+    }
+    if (len) {
+      wrote = data->set.fwrite(ptr, 1, len, data->set.out);
+    } else {
+      wrote = len;
+    }
+    if(wrote != len) {
+      failf (data, "Failed writing body");
+      return CURLE_WRITE_ERROR;
+    }
+  }
+#else
   if(type & CLIENTWRITE_BODY) {
     wrote = data->set.fwrite(ptr, 1, len, data->set.out);
     if(wrote != len) {
@@ -300,6 +323,8 @@ CURLcode Curl_client_write(struct SessionHandle *data,
       return CURLE_WRITE_ERROR;
     }
   }
+#endif /* CURL_DOES_CONVERSIONS */
+
   if((type & CLIENTWRITE_HEADER) &&
      (data->set.fwrite_header || data->set.writeheader) ) {
     /*
@@ -308,6 +333,9 @@ CURLcode Curl_client_write(struct SessionHandle *data,
      */
     curl_write_callback writeit=
       data->set.fwrite_header?data->set.fwrite_header:data->set.fwrite;
+
+    /* Note: The header is in the host encoding
+       regardless of the ftp transfer mode (ASCII/Image) */
 
     wrote = writeit(ptr, 1, len, data->set.writeheader);
     if(wrote != len) {
@@ -374,6 +402,29 @@ static int showit(struct SessionHandle *data, curl_infotype type,
 {
   static const char * const s_infotype[CURLINFO_END] = {
     "* ", "< ", "> ", "{ ", "} ", "{ ", "} " };
+
+#ifdef CURL_DOES_CONVERSIONS
+  char buf[BUFSIZE+1];
+
+  switch(type) {
+  case CURLINFO_HEADER_OUT:
+    /* assume output headers are ASCII */
+    /* copy the data into my buffer so the original is unchanged */
+    if (size > BUFSIZE) {
+      size = BUFSIZE; /* truncate if necessary */
+      buf[BUFSIZE] = '\0';
+    }
+    memcpy(buf, ptr, size);
+    Curl_convert_from_network(data, buf, size);
+    /* Curl_convert_from_network calls failf if unsuccessful */
+    /* we might as well continue even if it fails...   */
+    ptr = buf; /* switch pointer to use my buffer instead */
+    break;
+  default:
+    /* leave everything else as-is */
+    break;
+  }
+#endif /* CURL_DOES_CONVERSIONS */
 
   if(data->set.fdebug)
     return (*data->set.fdebug)(data, type, ptr, size,

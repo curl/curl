@@ -132,7 +132,11 @@ curl_easy_strerror(CURLcode error)
     return "failed to open/read local data from file/application";
 
   case CURLE_OUT_OF_MEMORY:
+#ifdef CURL_DOES_CONVERSIONS
+    return "conversion failed -or- out of memory";
+#else
     return "out of memory";
+#endif /* CURL_DOES_CONVERSIONS */
 
   case CURLE_OPERATION_TIMEOUTED:
     return "a timeout was reached";
@@ -265,6 +269,12 @@ curl_easy_strerror(CURLcode error)
 
   case CURLE_TFTP_NOSUCHUSER:
     return "TFTP: No such user";;
+
+  case CURLE_CONV_FAILED:
+    return "conversion failed";
+
+  case CURLE_CONV_REQD:
+    return "caller must register CURLOPT_CONV_ callback options";
 
   case CURLE_URL_MALFORMAT_USER: /* not used by current libcurl */
   case CURLE_MALFORMAT_USER:     /* not used by current libcurl */

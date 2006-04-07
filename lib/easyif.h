@@ -28,4 +28,11 @@
  */
 void Curl_easy_addmulti(struct SessionHandle *data, void *multi);
 
+CURLcode Curl_convert_to_network(struct SessionHandle *data,
+                                 char *buffer, size_t length);
+CURLcode Curl_convert_from_network(struct SessionHandle *data,
+                                 char *buffer, size_t length);
+CURLcode Curl_convert_from_utf8(struct SessionHandle *data,
+                                 char *buffer, size_t length);
+
 #endif /* __EASYIF_H */

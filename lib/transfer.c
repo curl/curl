@@ -101,6 +101,7 @@
 #include "share.h"
 #include "memory.h"
 #include "select.h"
+#include "easyif.h" /* for Curl_convert_to_network prototype */
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -166,6 +167,17 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
   }
 
   *nreadp = nread;
+
+#ifdef CURL_DOES_CONVERSIONS
+  if(data->ftp_in_ascii_mode) {
+    CURLcode res;
+    res = Curl_convert_to_network(data, conn->upload_fromhere, nread);
+    /* Curl_convert_to_network calls failf if unsuccessful */
+    if(res != CURLE_OK) {
+      return(res);
+    }
+  }
+#endif /* CURL_DOES_CONVERSIONS */
 
   return CURLE_OK;
 }

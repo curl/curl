@@ -265,6 +265,19 @@ CURLcode Curl_close(struct SessionHandle *data)
   ares_destroy(data->state.areschannel);
 #endif
 
+#if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
+  /* close iconv conversion descriptors */
+  if (data->inbound_cd != (iconv_t)-1) {
+     iconv_close(data->inbound_cd);
+  }
+  if (data->outbound_cd != (iconv_t)-1) {
+     iconv_close(data->outbound_cd);
+  }
+  if (data->utf8_cd != (iconv_t)-1) {
+     iconv_close(data->utf8_cd);
+  }
+#endif /* CURL_DOES_CONVERSIONS && HAVE_ICONV */
+
   /* No longer a dirty share, if it exists */
   if (data->share)
     data->share->dirty--;
@@ -317,6 +330,18 @@ CURLcode Curl_open(struct SessionHandle **curl)
 
     /* use fread as default function to read input */
     data->set.fread = (curl_read_callback)fread;
+
+    /* conversion callbacks for non-ASCII hosts */
+    data->set.convfromnetwork = (curl_conv_callback)NULL;
+    data->set.convtonetwork   = (curl_conv_callback)NULL;
+    data->set.convfromutf8    = (curl_conv_callback)NULL;
+
+#if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
+    /* conversion descriptors for iconv calls */
+    data->outbound_cd = (iconv_t)-1;
+    data->inbound_cd  = (iconv_t)-1;
+    data->utf8_cd     = (iconv_t)-1;
+#endif /* CURL_DOES_CONVERSIONS && HAVE_ICONV */
 
     data->set.infilesize = -1; /* we don't know any size */
     data->set.postfieldsize = -1;
@@ -1166,6 +1191,24 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     if(!data->set.fread)
       /* When set to NULL, reset to our internal default function */
       data->set.fread = (curl_read_callback)fread;
+    break;
+  case CURLOPT_CONV_FROM_NETWORK_FUNCTION:
+    /*
+     * "Convert from network encoding" callback
+     */
+    data->set.convfromnetwork = va_arg(param, curl_conv_callback);
+    break;
+  case CURLOPT_CONV_TO_NETWORK_FUNCTION:
+    /*
+     * "Convert to network encoding" callback
+     */
+    data->set.convtonetwork = va_arg(param, curl_conv_callback);
+    break;
+  case CURLOPT_CONV_FROM_UTF8_FUNCTION:
+    /*
+     * "Convert from UTF-8 encoding" callback
+     */
+    data->set.convfromutf8 = va_arg(param, curl_conv_callback);
     break;
   case CURLOPT_IOCTLFUNCTION:
     /*
@@ -2795,11 +2838,11 @@ static CURLcode CreateConnection(struct SessionHandle *data,
            "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^\n]",
            proxyuser, proxypasswd);
 
-    conn->proxyuser = curl_unescape(proxyuser,0);
+    conn->proxyuser = curl_easy_unescape(data, proxyuser, 0, NULL);
     if(!conn->proxyuser)
       return CURLE_OUT_OF_MEMORY;
 
-    conn->proxypasswd = curl_unescape(proxypasswd,0);
+    conn->proxypasswd = curl_easy_unescape(data, proxypasswd, 0, NULL);
     if(!conn->proxypasswd)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -3236,13 +3279,13 @@ static CURLcode CreateConnection(struct SessionHandle *data,
            username or password with reserved characters like ':' in
            them. */
         Curl_safefree(conn->proxyuser);
-        conn->proxyuser = curl_unescape(proxyuser,0);
+        conn->proxyuser = curl_easy_unescape(data, proxyuser, 0, NULL);
 
         if(!conn->proxyuser)
           res = CURLE_OUT_OF_MEMORY;
         else {
           Curl_safefree(conn->proxypasswd);
-          conn->proxypasswd = curl_unescape(proxypasswd,0);
+          conn->proxypasswd = curl_easy_unescape(data, proxypasswd, 0, NULL);
 
           if(!conn->proxypasswd)
             res = CURLE_OUT_OF_MEMORY;
@@ -3378,7 +3421,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
           sscanf(userpass, ":%" MAX_CURL_PASSWORD_LENGTH_TXT "[^@]", passwd);
 
         if(user[0]) {
-          char *newname=curl_unescape(user, 0);
+          char *newname=curl_easy_unescape(data, user, 0, NULL);
           if(!newname)
             return CURLE_OUT_OF_MEMORY;
           if(strlen(newname) < sizeof(user))
@@ -3390,7 +3433,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
         }
         if (passwd[0]) {
           /* we have a password found in the URL, decode it! */
-          char *newpasswd=curl_unescape(passwd, 0);
+          char *newpasswd=curl_easy_unescape(data, passwd, 0, NULL);
           if(!newpasswd)
             return CURLE_OUT_OF_MEMORY;
           if(strlen(newpasswd) < sizeof(passwd))

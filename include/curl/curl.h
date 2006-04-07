@@ -268,6 +268,10 @@ typedef enum {
   CURLE_FTP_COULDNT_STOR_FILE,   /* 25 - failed FTP upload */
   CURLE_READ_ERROR,              /* 26 - could open/read from file */
   CURLE_OUT_OF_MEMORY,           /* 27 */
+  /* Note: CURLE_OUT_OF_MEMORY may sometimes indicate a conversion error
+           instead of a memory allocation error if CURL_DOES_CONVERSIONS
+           is defined
+  */
   CURLE_OPERATION_TIMEOUTED,     /* 28 - the timeout time was reached */
   CURLE_FTP_COULDNT_SET_ASCII,   /* 29 - TYPE A failed */
   CURLE_FTP_PORT_FAILED,         /* 30 - FTP PORT operation failed */
@@ -318,8 +322,17 @@ typedef enum {
   CURLE_TFTP_UNKNOWNID,          /* 72 - Unknown transfer ID */
   CURLE_TFTP_EXISTS,             /* 73 - File already exists */
   CURLE_TFTP_NOSUCHUSER,         /* 74 - No such user */
+  CURLE_CONV_FAILED,             /* 75 - conversion failed */
+  CURLE_CONV_REQD,               /* 76 - caller must register conversion
+                                    callbacks using curl_easy_setopt options
+                                    CURLOPT_CONV_FROM_NETWORK_FUNCTION,
+                                    CURLOPT_CONV_TO_NETWORK_FUNCTION, and
+                                    CURLOPT_CONV_FROM_UTF8_FUNCTION */
   CURL_LAST /* never use! */
 } CURLcode;
+
+/* This prototype applies to all conversion callbacks */
+typedef CURLcode (*curl_conv_callback)(char *buffer, size_t length);
 
 typedef CURLcode (*curl_ssl_ctx_callback)(CURL *curl,    /* easy handle */
                                           void *ssl_ctx, /* actually an
@@ -937,6 +950,19 @@ typedef enum {
      extracting it with CURLINFO_LASTSOCKET */
   CINIT(CONNECT_ONLY, LONG, 141),
 
+  /* Function that will be called to convert from the
+     network encoding (instead of using the iconv calls in libcurl) */
+  CINIT(CONV_FROM_NETWORK_FUNCTION, FUNCTIONPOINT, 142),
+
+  /* Function that will be called to convert to the
+     network encoding (instead of using the iconv calls in libcurl) */
+  CINIT(CONV_TO_NETWORK_FUNCTION, FUNCTIONPOINT, 143),
+
+  /* Function that will be called to convert from UTF8
+     (instead of using the iconv calls in libcurl)
+     Note that this is used only for SSL certificate processing */
+  CINIT(CONV_FROM_UTF8_FUNCTION, FUNCTIONPOINT, 144),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -1146,7 +1172,7 @@ CURL_EXTERN char *curl_getenv(const char *variable);
 CURL_EXTERN char *curl_version(void);
 
 /*
- * NAME curl_escape()
+ * NAME curl_easy_escape()
  *
  * DESCRIPTION
  *
@@ -1154,18 +1180,34 @@ CURL_EXTERN char *curl_version(void);
  * %XX versions). This function returns a new allocated string or NULL if an
  * error occurred.
  */
-CURL_EXTERN char *curl_escape(const char *string, int length);
+CURL_EXTERN char *curl_easy_escape(CURL *handle,
+                                   const char *string,
+                                   int length);
+
+/* the previous version: */
+CURL_EXTERN char *curl_escape(const char *string,
+                              int length);
+
 
 /*
- * NAME curl_unescape()
+ * NAME curl_easy_unescape()
  *
  * DESCRIPTION
  *
  * Unescapes URL encoding in strings (converts all %XX codes to their 8bit
  * versions). This function returns a new allocated string or NULL if an error
  * occurred.
+ * Conversion Note: On non-ASCII platforms the ASCII %XX codes are
+ * converted into the host encoding.
  */
-CURL_EXTERN char *curl_unescape(const char *string, int length);
+CURL_EXTERN char *curl_easy_unescape(CURL *handle,
+                                     const char *string,
+                                     int length,
+                                     int *outlength);
+
+/* the previous version */
+CURL_EXTERN char *curl_unescape(const char *string,
+                                int length);
 
 /*
  * NAME curl_free()

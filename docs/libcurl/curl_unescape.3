@@ -11,6 +11,8 @@ curl_unescape - URL decodes the given string
 .BI "char *curl_unescape( char *" url ", int "length " );"
 .ad
 .SH DESCRIPTION
+Obsolete function. Use \fIcurl_easy_unescape(3)\fP instead!
+
 This function will convert the given URL encoded input string to a "plain
 string" and return that as a new allocated string. All input characters that
 are URL encoded (%XX where XX is a two-digit hexadecimal number) will be
@@ -20,7 +22,10 @@ If the 'length' argument is set to 0, curl_unescape() will use strlen() on the
 input 'url' string to find out the size.
 
 You must curl_free() the returned string when you're done with it.
+.SH AVAILABILITY
+Since 7.15.4, \fIcurl_easy_unescape(3)\fP should be used. This function will
+be removed in a future release.
 .SH RETURN VALUE
 A pointer to a zero terminated string or NULL if it failed.
 .SH "SEE ALSO"
-.I curl_escape(3), curl_free(3), RFC 2396
+.I curl_easy_escape(3), curl_easy_unescape(3), curl_free(3), RFC 2396

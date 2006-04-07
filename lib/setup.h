@@ -67,6 +67,12 @@
 #include "amigaos.h"
 #endif
 
+#ifdef TPF
+#include "config-tpf.h" /* hand-modified TPF config.h */
+/* change which select is used for libcurl */
+#define select(a,b,c,d,e) tpf_select_libcurl(a,b,c,d,e)
+#endif
+
 #endif /* HAVE_CONFIG_H */
 
 /*
