@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -163,8 +163,8 @@ struct TELNET {
   struct curl_slist *telnet_vars; /* Environment variables */
 
   /* suboptions */
-  char subbuffer[SUBBUFSIZE];
-  char *subpointer, *subend;      /* buffer for sub-options */
+  unsigned char subbuffer[SUBBUFSIZE];
+  unsigned char *subpointer, *subend;      /* buffer for sub-options */
 
   TelnetReceive telrcv_state;
 };
@@ -1014,18 +1014,15 @@ void telrcv(struct connectdata *conn,
           if (c != CURL_IAC)
           {
             /*
-             * This is an error.  We only expect to get
-             * "IAC IAC" or "IAC SE".  Several things may
-             * have happend.  An IAC was not doubled, the
-             * IAC SE was left off, or another option got
-             * inserted into the suboption are all possibilities.
-             * If we assume that the IAC was not doubled,
-             * and really the IAC SE was left off, we could
-             * get into an infinate loop here.  So, instead,
-             * we terminate the suboption, and process the
-             * partial suboption if we can.
+             * This is an error.  We only expect to get "IAC IAC" or "IAC SE".
+             * Several things may have happend.  An IAC was not doubled, the
+             * IAC SE was left off, or another option got inserted into the
+             * suboption are all possibilities.  If we assume that the IAC was
+             * not doubled, and really the IAC SE was left off, we could get
+             * into an infinate loop here.  So, instead, we terminate the
+             * suboption, and process the partial suboption if we can.
              */
-            CURL_SB_ACCUM(tn, (unsigned char)CURL_IAC);
+            CURL_SB_ACCUM(tn, CURL_IAC);
             CURL_SB_ACCUM(tn, c);
             tn->subpointer -= 2;
             CURL_SB_TERM(tn);
@@ -1040,8 +1037,8 @@ void telrcv(struct connectdata *conn,
         }
         else
         {
-          CURL_SB_ACCUM(tn, (unsigned char)CURL_IAC);
-          CURL_SB_ACCUM(tn, (unsigned char)CURL_SE);
+          CURL_SB_ACCUM(tn, CURL_IAC);
+          CURL_SB_ACCUM(tn, CURL_SE);
           tn->subpointer -= 2;
           CURL_SB_TERM(tn);
           suboption(conn);   /* handle sub-option */
