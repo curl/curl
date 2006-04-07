@@ -61,6 +61,7 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
   /* processes a set expression with the point behind the opening '{'
      ','-separated elements are collected until the next closing '}'
   */
+  bool done = FALSE;
   char* buf = glob->glob_buffer;
   URLPattern *pat;
 
@@ -72,7 +73,7 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
   pat->content.Set.elements = (char**)malloc(0);
   ++glob->size;
 
-  while (1) {
+  while (!done) {
     bool skip;
 
     switch (*pattern) {
@@ -110,7 +111,8 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
           wordamount=1;
         *amount = pat->content.Set.size * wordamount;
 
-        return GLOB_OK;
+        done = TRUE;
+        continue;
       }
 
       buf = glob->glob_buffer;
@@ -151,7 +153,7 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
       ++pos;
     }
   }
-  /* we never reach this point */
+  return GLOB_OK;
 }
 
 static GlobCode glob_range(URLGlob *glob, char *pattern,
