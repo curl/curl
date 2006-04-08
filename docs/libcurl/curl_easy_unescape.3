@@ -39,6 +39,10 @@ their binary versions.
 If the \fBlength\fP argument is set to 0 (zero), curl_easy_unescape() will use
 strlen() on the input \fIurl\fP string to find out the size.
 
+If \fBoutlength\fP is non-NULL, the function will write the length of the
+returned string in the integer it points to. This allows an escaped string
+containing %00 to still get used properly after unescaping.
+
 You must \fIcurl_free(3)\fP the returned string when you're done with it.
 .SH AVAILABILITY
 Added in 7.15.4 and replaces the old curl_unescape() function.
