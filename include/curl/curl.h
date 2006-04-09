@@ -242,7 +242,7 @@ typedef enum {
   CURLE_UNSUPPORTED_PROTOCOL,    /* 1 */
   CURLE_FAILED_INIT,             /* 2 */
   CURLE_URL_MALFORMAT,           /* 3 */
-  CURLE_URL_MALFORMAT_USER,      /* 4 (NOT USED) */
+  CURLE_URL_MALFORMAT_USER,      /* 4 - NOT USED */
   CURLE_COULDNT_RESOLVE_PROXY,   /* 5 */
   CURLE_COULDNT_RESOLVE_HOST,    /* 6 */
   CURLE_COULDNT_CONNECT,         /* 7 */
@@ -250,7 +250,7 @@ typedef enum {
   CURLE_FTP_ACCESS_DENIED,       /* 9 a service was denied by the FTP server
                                     due to lack of access - when login fails
                                     this is not returned. */
-  CURLE_FTP_USER_PASSWORD_INCORRECT, /* 10 */
+  CURLE_FTP_USER_PASSWORD_INCORRECT, /* 10 - NOT USED */
   CURLE_FTP_WEIRD_PASS_REPLY,    /* 11 */
   CURLE_FTP_WEIRD_USER_REPLY,    /* 12 */
   CURLE_FTP_WEIRD_PASV_REPLY,    /* 13 */

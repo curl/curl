@@ -30,7 +30,7 @@ or problem.
 .IP "CURLE_URL_MALFORMAT (3)"
 The URL was not properly formatted.
 .IP "CURLE_URL_MALFORMAT_USER (4)"
-URL user malformatted. The user-part of the URL syntax was not correct.
+This is never returned by current libcurl.
 .IP "CURLE_COULDNT_RESOLVE_PROXY (5)"
 Couldn't resolve proxy. The given proxy host could not be resolved.
 .IP "CURLE_COULDNT_RESOLVE_HOST (6)"
@@ -45,9 +45,7 @@ remote server is probably not an OK FTP server.
 We were denied access when trying to login to an FTP server or when trying to
 change working directory to the one given in the URL.
 .IP "CURLE_FTP_USER_PASSWORD_INCORRECT (10)"
-The FTP server rejected access to the server after the password was sent to
-it. It might be because the username and/or the password were incorrect or
-just that the server is not allowing you access for the moment etc.
+This is never returned by current libcurl.
 .IP "CURLE_FTP_WEIRD_PASS_REPLY (11)"
 After having sent the FTP password to the server, libcurl expects a proper
 reply. This error code indicates that an unexpected code was returned.
@@ -87,7 +85,7 @@ returns an error code that is >= 400.
 An error occurred when writing received data to a local file, or an error was
 returned to libcurl from a write callback.
 .IP "CURLE_MALFORMAT_USER (24)"
-Malformat user. User name badly specified. *Not currently used*
+This is never returned by current libcurl.
 .IP "CURLE_FTP_COULDNT_STOR_FILE (25)"
 FTP couldn't STOR file. The server denied the STOR operation. The error buffer
 usually contains the server's explanation to this.
@@ -138,15 +136,13 @@ Aborted by callback. A callback returned "abort" to libcurl.
 .IP "CURLE_BAD_FUNCTION_ARGUMENT (43)"
 Internal error. A function was called with a bad parameter.
 .IP "CURLE_BAD_CALLING_ORDER (44)"
-Internal error. A function was called in a bad order.
+This is never returned by current libcurl.
 .IP "CURLE_HTTP_PORT_FAILED (45)"
 Interface error. A specified outgoing interface could not be used. Set which
 interface to use for outgoing connections' source IP address with
 CURLOPT_INTERFACE.
 .IP "CURLE_BAD_PASSWORD_ENTERED (46)"
-Bad password entered. An error was signaled when the password was
-entered. This can also be the result of a "bad password" returned from a
-specified password callback.
+This is never returned by current libcurl.
 .IP "CURLE_TOO_MANY_REDIRECTS (47)"
 Too many redirects. When following redirects, libcurl hit the maximum amount.
 Set your limit with CURLOPT_MAXREDIRS.

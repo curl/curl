@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2004, 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -82,9 +82,6 @@ curl_easy_strerror(CURLcode error)
 
   case CURLE_FTP_ACCESS_DENIED:
     return "FTP: access denied";
-
-  case CURLE_FTP_USER_PASSWORD_INCORRECT:
-    return "FTP: user and/or password incorrect";
 
   case CURLE_FTP_WEIRD_PASS_REPLY:
     return "FTP: unknown PASS reply";
@@ -276,11 +273,13 @@ curl_easy_strerror(CURLcode error)
   case CURLE_CONV_REQD:
     return "caller must register CURLOPT_CONV_ callback options";
 
-  case CURLE_URL_MALFORMAT_USER: /* not used by current libcurl */
-  case CURLE_MALFORMAT_USER:     /* not used by current libcurl */
-  case CURLE_BAD_CALLING_ORDER:  /* not used by current libcurl */
-  case CURLE_BAD_PASSWORD_ENTERED:/* not used by current libcurl */
-  case CURLE_OBSOLETE:           /* not used by current libcurl */
+    /* error codes not used by current libcurl */
+  case CURLE_URL_MALFORMAT_USER:
+  case CURLE_FTP_USER_PASSWORD_INCORRECT:
+  case CURLE_MALFORMAT_USER:
+  case CURLE_BAD_CALLING_ORDER:
+  case CURLE_BAD_PASSWORD_ENTERED:
+  case CURLE_OBSOLETE:
   case CURL_LAST:
     break;
   }

@@ -4162,8 +4162,7 @@ operate(struct Configurable *config, int argc, char *argv[])
                 }
               }
             } /* if CURLE_OK */
-            else if((CURLE_FTP_USER_PASSWORD_INCORRECT == res) ||
-                    (CURLE_LOGIN_DENIED == res)) {
+            else if(CURLE_LOGIN_DENIED == res) {
               curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
 
               if(response/100 == 5)
