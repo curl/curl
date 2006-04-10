@@ -33,7 +33,7 @@ This is not the real page either!
 HTTP/1.1 401 You now need to authenticate with the host
 Server: Microsoft-IIS/5.0
 WWW-Authenticate: Digest realm="r e a l m", nonce="abcdef"
-Content-Length: 40
+Content-Length: 46
 Content-Type: text/html; charset=iso-8859-1
 
 We have not authenticated with the server yet
@@ -49,7 +49,7 @@ Proxy-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAAAGgoEAc51AYVDgyNcAAAAAAAAAAG4
 HTTP/1.1 401 You now need to authenticate with the host
 Server: Microsoft-IIS/5.0
 WWW-Authenticate: Digest realm="r e a l m", nonce="abcdef"
-Content-Length: 40
+Content-Length: 46
 Content-Type: text/html; charset=iso-8859-1
 
 HTTP/1.1 200 Authorizated fine
