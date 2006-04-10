@@ -285,6 +285,7 @@ int fileno( FILE *stream);
 
 #endif /* WIN32 */
 
+#ifndef curl_socket_typedef
 /* now typedef our socket type */
 #ifdef WIN32
 typedef SOCKET curl_socket_t;
@@ -293,6 +294,9 @@ typedef SOCKET curl_socket_t;
 typedef int curl_socket_t;
 #define CURL_SOCKET_BAD -1
 #endif
+#define curl_socket_typedef
+#endif /* curl_socket_typedef */
+
 
 #if defined(ENABLE_IPV6) && defined(USE_ARES)
 #error "ares does not yet support IPv6. Disable IPv6 or ares and rebuild"
