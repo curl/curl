@@ -1,4 +1,6 @@
-To get fixed in 7.15.2 (planned release: Febrary 2006)
+To get fixed in 7.15.4 (planned release: June 2006)
 ======================
 
-65 - 
+65 - curl_multi_socket() added but not extensively tested nor particularly
+     documented or pushed for.
+
