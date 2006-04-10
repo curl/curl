@@ -1,0 +1,115 @@
+Implementation of the curl_multi_socket API
+
+  Most of the design decisions and debates about this new API have already
+  been held on the curl-library mailing list a long time ago so I had a basic
+  idea on what approach to use. The main ideas of the new API are simply:
+
+   1 - The application can use whatever event system it likes as it gets info
+       from libcurl about what file descriptors libcurl waits for what action
+       on. (The previous API returns fd_sets which is very select()-centric).
+
+   2 - When the application discovers action on a single socket, it calls
+       libcurl and informs that there was action on this particular socket and
+       libcurl can then act on that socket/transfer only and not care about
+       any other transfers. (The previous API always had to scan through all
+       the existing transfers.)
+
+  The idea is that curl_multi_socket() calls a given callback with information
+  about what socket to wait for what action on, and the callback only gets
+  called if the status of that socket has changed.
+
+  In the API draft from before, we have a timeout argument on a per socket
+  basis and we also allowed curl_multi_socket() to pass in an 'easy handle'
+  instead of socket to allow libcurl to shortcut a lookup and work on the
+  affected easy handle right away. Both these turned out to be bad ideas.
+
+  The timeout argument was removed from the socket callback since after much
+  thinking I came to the conclusion that we really don't want to handle
+  timeouts on a per socket basis. We need it on a per transfer (easy handle)
+  basis and thus we can't provide it in the callbacks in a nice way. Instead,
+  we have to offer a curl_multi_timeout() that returns the largest amount of
+  time we should wait before we call the "timeout action" of libcurl, to
+  trigger the proper internal timeout action on the affected transfer. To get
+  this to work, I added a struct to each easy handle in which we store an
+  "expire time" (if any). The structs are then "splay sorted" so that we can
+  add and remove times from the linked list and yet somewhat swiftly figure
+  out 1 - how long time there is until the next timer expires and 2 - which
+  timer (handle) should we take care of now. Of course, the upside of all this
+  is that we get a curl_multi_timeout() that should also work with old-style
+  applications that use curl_multi_perform().
+
+  The easy handle argument was removed fom the curl_multi_socket() function
+  because having it there would require the application to do a socket to easy
+  handle conversion on its own. I find it very unlikely that applications
+  would want to do that and since libcurl would need such a lookup on its own
+  anyway since we didn't want to force applications to do that translation
+  code (it would be optional), it seemed like an unnecessary option. I also
+  realized that when we use underlying libraries such as c-ares (for DNS
+  asynch resolving) there might in fact be more than one transfer waiting for
+  action on the same socket and thus it makes the lookup even tricker and even
+  less likely to ever get done by applications. Instead I created an internal
+  "socket to easy handles" hash table that given a socket (file descriptor)
+  returns a list of easy handles that waits for some action on that socket.
+  This hash is made using the already existing hash code (previously only used
+  for the DNS cache).
+
+  To make libcurl be able to report plain sockets in the socket callback, I
+  had to re-organize the internals of the curl_multi_fdset() etc so that the
+  conversion from sockets to fd_sets for that function is only done in the
+  last step before the data is returned. I also had to extend c-ares to get a
+  function that can return plain sockets, as that library too returned only
+  fd_sets and that is no longer good enough. The changes done to c-ares have
+  been committed and are available in the c-ares CVS repository destined to be
+  included in the upcoming c-ares 1.3.1 release.
+
+  The 'shiper' tool is the test application I wrote that uses the new
+  curl_multi_socket() in its current state. It seems to be working and it uses
+  the API as it is documented and supposed to work. It is still using
+  select(), because I needed that during development (like until I had the
+  socket hash implemented etc) and because I haven't yet learned how to use
+  libevent or similar.
+
+  The hiper/shiper tools are very simple and initiates lots of connections and
+  have them running for the test period and then kills them all.
+
+  Since I wasn't done with the implementation until early January I haven't
+  had time to run very many measurements and checks, but I have done a few
+  runs with up to a few hundred connections (with a single active one). The
+  curl_multi_socket() invoke then takes 3-6 microseconds in average (using the
+  read-only-1-byte-at-a-time hack). If this number does increase a lot when we
+  add connections, it certainly matches my in my opinion very ambitious goal.
+  We are now below the 60 microseconds "per socket action" goal. It is
+  destined to be somewhat higher the more connections we have since the hash
+  table gets more populated and the splay tree will grow etc.
+
+  Some tests at 7000 and 9000 connections showed that the socket hash lookup
+  is somewhat of a bottle neck. Its current implementation may be a bit too
+  limiting. It simply has a fixed-size array, and on each entry in the array
+  it has a linked list with entries. So the hash only checks which list to
+  scan through. The code I had used so for used a list with merely 7 slots (as
+  that is what the DNS hash uses) but with 7000 connections that would make an
+  average of 1000 nodes in each list to run through. I upped that to 97 slots
+  (I believe a prime is suitable) and noticed a significant speed increase.  I
+  need to reconsider the hash implementation or use a rather large default
+  value like this. At 9000 connections I was still below 10us per call.
+
+Status Right Now
+
+  The curl_multi_socket() API is implemented according to how it is
+  documented.
+
+    http://curl.haxx.se/libcurl/c/curl_multi_socket.html
+    http://curl.haxx.se/libcurl/c/curl_multi_timeout.html
+    http://curl.haxx.se/libcurl/c/curl_multi_setopt.html
+
+What is Left for the curl_multi_socket API
+
+  1 - More measuring with more extreme number of connections
+
+  2 - More testing with actual URLs and complete from start to end transfers.
+
+  I'm quite sure we don't set expire times all over in the code properly, so
+  there is bound to be some timeout bugs left.
+
+  What it really takes is for me to commit the code and to make an official
+  release with it so that we get people "out there" to help out testing it.
