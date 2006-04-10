@@ -3,19 +3,22 @@ Curl and libcurl 7.15.4
  Public curl release number:               94
  Releases counted from the very beginning: 121
  Available command line options:           112
- Available curl_easy_setopt() options:     129
- Number of public functions in libcurl:    46
- Amount of public web site mirrors:        31
+ Available curl_easy_setopt() options:     132
+ Number of public functions in libcurl:    49
+ Amount of public web site mirrors:        29
  Number of known libcurl bindings:         32
  Number of contributors:                   492
 
 This release includes the following changes:
 
+ o curl_multi_socket() API added (still mostly untested)
+ o conversion callback options for EBCDIC <=> ASCII conversions
  o added CURLINFO_FTP_ENTRY_PATH
  o less blocking for the multi interface during SSL connect negotiation 
 
 This release includes the following bugfixes:
 
+ o SSL connect time-out
  o Improved NTLM functionality
  o following redirects with more than one question mark in source URL
  o fixed debug build crash with -d
@@ -33,6 +36,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Dan Fandrich, Ilja van Sprundel, David McCreedy, Tor Arntsen, Xavier Bouchoux,
- David Byron, Michele Bini
+ David Byron, Michele Bini, Ates Goral
 
         Thanks! (and sorry if I forgot to mention someone)

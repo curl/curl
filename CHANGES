@@ -6,6 +6,25 @@
 
                                   Changelog
 
+Daniel (10 April 2006)
+- Ates Goral found out that if you specified both CURLOPT_CONNECTTIMEOUT and
+  CURLOPT_TIMEOUT, the _longer_ time would wrongly be used for the SSL
+  connection time-out!
+
+- I merged my hiper patch (http://curl.haxx.se/libcurl/hiper/) into the main
+  sources. See the lib/README.multi_socket for implementation story with
+  details. Don't expect it to work fully yet. I don't intend to blow any
+  whistles or ring any bells about it until I'm more convinced it works at
+  least somewhat reliably.
+
+Daniel (7 April 2006)
+- David McCreedy's EBCDIC and TPF changes. Three new curl_easy_setopt()
+  options (callbacks) were added:
+
+  CONV_FROM_NETWORK_FUNCTION
+  CONV_TO_NETWORK_FUNCTION
+  CONV_FROM_UTF8_FUNCTION 
+
 Daniel (5 April 2006)
 - Michele Bini modified the NTLM code to work for his "weird IIS case"
   (http://curl.haxx.se/mail/lib-2006-02/0154.html) by adding the NTLM hash
