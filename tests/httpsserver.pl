@@ -82,6 +82,13 @@ if($verbose) {
     print "HTTPS server: $cmd\n";
 }
 
-system($cmd);
+my $rc = system($cmd);
+
+$rc >>= 8;
+if($rc) {
+    print STDERR "stunnel exited with $rc!\n";
+}
 
 unlink $conffile;
+
+exit $rc;
