@@ -93,10 +93,11 @@ my $memdump="$LOGDIR/memdump";
 # the path to the script that analyzes the memory debug output file:
 my $memanalyze="./memanalyze.pl";
 
-my $stunnel = checkcmd("stunnel");
+my $stunnel = checkcmd("stunnel4") || checkcmd("stunnel");
 my $valgrind = checkcmd("valgrind");
 my $valgrind_logfile="--logfile";
 my $start;
+my $forkserver=0;
 
 my $valgrind_tool;
 if($valgrind) {
@@ -531,6 +532,7 @@ sub runhttpserver {
     my $port = $HTTPPORT;
     my $ip = $HOSTIP;
     my $nameext;
+    my $fork = $forkserver?"--fork":"";
 
     if($ipv6) {
         # if IPv6, use a different setup
@@ -552,7 +554,7 @@ sub runhttpserver {
         $flag .= "-d \"$dir\" ";
     }
 
-    my $cmd="$perl $srcdir/httpserver.pl -p $pidfile $flag $port $ipv6";
+    my $cmd="$perl $srcdir/httpserver.pl -p $pidfile $fork$flag $port $ipv6";
     my ($httppid, $pid2) =
         startnew($cmd, $pidfile); # start the server in a new process
 
@@ -1901,6 +1903,7 @@ sub startservers {
         }
         else {
             warn "we don't support a server for $what";
+            return "no server for $what";
         }
     }
     return 0;
@@ -1956,6 +1959,12 @@ do {
     elsif ($ARGV[0] eq "-d") {
         # have the servers display protocol output
         $debugprotocol=1;
+    }
+    elsif ($ARGV[0] eq "-f") {
+        # run fork-servers, which makes the server fork for all new
+        # connections This is NOT what you wanna do without knowing exactly
+        # why and for what
+        $forkserver=1;
     }
     elsif ($ARGV[0] eq "-g") {
         # run this test with gdb
