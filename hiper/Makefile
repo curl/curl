@@ -5,7 +5,7 @@
 
 LDFLAGS = -lcrypt -lidn -lssl -lcrypto -ldl -lz -lresolv -L../ares/.libs -lcares
 LIBCURL = -L../lib/.libs/ -lcurl
-CFLAGS = -I../include -g -DHAVE_CURL_MULTI_SOCKET
+CFLAGS = -I../include -g
 
 all: shiper hiper ulimiter
 
