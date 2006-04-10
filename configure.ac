@@ -1562,7 +1562,8 @@ AC_CHECK_FUNCS( strtoll \
                 poll \
                 getprotobyname \
                 getrlimit \
-                setrlimit,
+                setrlimit \
+                fork,
 dnl if found
 [],
 dnl if not found, $ac_func is the name we check for
