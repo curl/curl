@@ -160,6 +160,14 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
 CURLcode Curl_wait_for_resolv(struct connectdata *conn,
                               struct Curl_dns_entry **dnsentry);
 
+
+/* Curl_resolv_getsock() is a generic function that exists in multiple versions
+   depending on what name resolve technology we've built to use. The function
+   is called from the multi_getsock() function */
+int Curl_resolv_getsock(struct connectdata *conn,
+                        curl_socket_t *sock,
+                        int numsocks);
+#if 0
 /* Curl_resolv_fdset() is a generic function that exists in multiple versions
    depending on what name resolve technology we've built to use. The function
    is called from the curl_multi_fdset() function */
@@ -167,8 +175,11 @@ CURLcode Curl_resolv_fdset(struct connectdata *conn,
                            fd_set *read_fd_set,
                            fd_set *write_fd_set,
                            int *max_fdp);
+#endif
+
 /* unlock a previously resolved dns entry */
-void Curl_resolv_unlock(struct SessionHandle *data, struct Curl_dns_entry *dns);
+void Curl_resolv_unlock(struct SessionHandle *data,
+                        struct Curl_dns_entry *dns);
 
 /* for debugging purposes only: */
 void Curl_scan_cache_used(void *user, void *ptr);

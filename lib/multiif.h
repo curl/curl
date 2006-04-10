@@ -26,5 +26,19 @@
 /*
  * Prototypes for library-wide functions provided by multi.c
  */
+void Curl_expire(struct SessionHandle *data, long milli);
+
 void Curl_multi_rmeasy(void *multi, CURL *data);
+
+/* the write bits start at bit 16 for the *getsock() bitmap */
+#define GETSOCK_WRITEBITSTART 16
+
+#define GETSOCK_BLANK 0 /* no bits set */
+
+/* set the bit for the given sock number to make the bitmap for writable */
+#define GETSOCK_WRITESOCK(x) (1 << (GETSOCK_WRITEBITSTART + (x)))
+
+/* set the bit for the given sock number to make the bitmap for readable */
+#define GETSOCK_READSOCK(x) (1 << (x))
+
 #endif /* __MULTIIF_H */

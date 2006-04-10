@@ -1552,6 +1552,7 @@ CURLcode Curl_disconnect(struct connectdata *conn)
                   NULL, Curl_scan_cache_used);
 #endif
 
+  Curl_expire(data, 0); /* shut off timers */
   Curl_hostcache_prune(data); /* kill old DNS cache entries */
 
   /*
@@ -2318,26 +2319,22 @@ static void verboseconnect(struct connectdata *conn)
         conn->ip_addr_str, conn->port);
 }
 
-CURLcode Curl_protocol_fdset(struct connectdata *conn,
-                             fd_set *read_fd_set,
-                             fd_set *write_fd_set,
-                             int *max_fdp)
+int Curl_protocol_getsock(struct connectdata *conn,
+                          curl_socket_t *socks,
+                          int numsocks)
 {
-  CURLcode res = CURLE_OK;
-  if(conn->curl_proto_fdset)
-    res = conn->curl_proto_fdset(conn, read_fd_set, write_fd_set, max_fdp);
-  return res;
+  if(conn->curl_proto_getsock)
+    return conn->curl_proto_getsock(conn, socks, numsocks);
+  return GETSOCK_BLANK;
 }
 
-CURLcode Curl_doing_fdset(struct connectdata *conn,
-                          fd_set *read_fd_set,
-                          fd_set *write_fd_set,
-                          int *max_fdp)
+int Curl_doing_getsock(struct connectdata *conn,
+                       curl_socket_t *socks,
+                       int numsocks)
 {
-  CURLcode res = CURLE_OK;
-  if(conn && conn->curl_doing_fdset)
-    res = conn->curl_doing_fdset(conn, read_fd_set, write_fd_set, max_fdp);
-  return res;
+  if(conn && conn->curl_doing_getsock)
+    return conn->curl_doing_getsock(conn, socks, numsocks);
+  return GETSOCK_BLANK;
 }
 
 /*
@@ -3034,7 +3031,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->curl_done = Curl_http_done;
     conn->curl_connect = Curl_http_connect;
     conn->curl_connecting = Curl_https_connecting;
-    conn->curl_proto_fdset = Curl_https_proto_fdset;
+    conn->curl_proto_getsock = Curl_https_getsock;
 
 #else /* USE_SS */
     failf(data, LIBCURL_NAME
@@ -3086,8 +3083,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       conn->curl_connect = Curl_ftp_connect;
       conn->curl_connecting = Curl_ftp_multi_statemach;
       conn->curl_doing = Curl_ftp_doing;
-      conn->curl_proto_fdset = Curl_ftp_fdset;
-      conn->curl_doing_fdset = Curl_ftp_fdset;
+      conn->curl_proto_getsock = Curl_ftp_getsock;
+      conn->curl_doing_getsock = Curl_ftp_getsock;
       conn->curl_disconnect = Curl_ftp_disconnect;
     }
 
@@ -4026,6 +4023,8 @@ CURLcode Curl_done(struct connectdata **connp,
   CURLcode result;
   struct connectdata *conn = *connp;
   struct SessionHandle *data=conn->data;
+
+  Curl_expire(data, 0); /* stop timer */
 
   if(conn->bits.done)
     return CURLE_OK; /* Curl_done() has already been called */

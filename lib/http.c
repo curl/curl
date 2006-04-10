@@ -97,6 +97,7 @@
 #include "select.h"
 #include "parsedate.h" /* for the week day and month names */
 #include "strtoofft.h"
+#include "multiif.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -1416,26 +1417,25 @@ CURLcode Curl_https_connecting(struct connectdata *conn, bool *done)
 }
 
 #ifdef USE_SSLEAY
-CURLcode Curl_https_proto_fdset(struct connectdata *conn,
-                                fd_set *read_fd_set,
-                                fd_set *write_fd_set,
-                                int *max_fdp)
+int Curl_https_getsock(struct connectdata *conn,
+                       curl_socket_t *socks,
+                       int numsocks)
 {
   if (conn->protocol & PROT_HTTPS) {
     struct ssl_connect_data *connssl = &conn->ssl[FIRSTSOCKET];
-    curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
+
+    if(!numsocks)
+      return GETSOCK_BLANK;
 
     if (connssl->connecting_state == ssl_connect_2_writing) {
       /* write mode */
-      FD_SET(sockfd, write_fd_set);
-      if((int)sockfd > *max_fdp)
-        *max_fdp = (int)sockfd;
+      socks[0] = conn->sock[FIRSTSOCKET];
+      return GETSOCK_WRITESOCK(0);
     }
     else if (connssl->connecting_state == ssl_connect_2_reading) {
       /* read mode */
-      FD_SET(sockfd, read_fd_set);
-      if((int)sockfd > *max_fdp)
-        *max_fdp = (int)sockfd;
+      socks[0] = conn->sock[FIRSTSOCKET];
+      return GETSOCK_READSOCK(0);
     }
   }
   return CURLE_OK;

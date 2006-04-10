@@ -96,6 +96,7 @@
 #include "select.h"
 #include "parsedate.h" /* for the week day and month names */
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
+#include "multiif.h"
 
 #if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)
 #include "inet_ntoa_r.h"
@@ -718,27 +719,24 @@ static CURLcode ftp_state_pwd(struct connectdata *conn)
 }
 
 /* For the FTP "protocol connect" and "doing" phases only */
-CURLcode Curl_ftp_fdset(struct connectdata *conn,
-                        fd_set *read_fd_set,
-                        fd_set *write_fd_set,
-                        int *max_fdp)
+int Curl_ftp_getsock(struct connectdata *conn,
+                     curl_socket_t *socks,
+                     int numsocks)
 {
   struct FTP *ftp = conn->proto.ftp;
-  curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
+
+  if(!numsocks)
+    return GETSOCK_BLANK;
+
+  socks[0] = conn->sock[FIRSTSOCKET];
 
   if(ftp->sendleft) {
     /* write mode */
-    FD_SET(sockfd, write_fd_set);
-  }
-  else {
-    /* read mode */
-    FD_SET(sockfd, read_fd_set);
+    return GETSOCK_WRITESOCK(0);
   }
 
-  if((int)sockfd > *max_fdp)
-    *max_fdp = (int)sockfd;
-
-  return CURLE_OK;
+  /* read mode */
+  return GETSOCK_READSOCK(0);
 }
 
 /* This is called after the FTP_QUOTE state is passed.

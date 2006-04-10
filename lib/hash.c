@@ -124,8 +124,11 @@ mk_hash_element(char *key, size_t key_len, const void *p)
     (struct curl_hash_element *) malloc(sizeof(struct curl_hash_element));
 
   if(he) {
-    char *dup = strdup(key);
+    char *dup = malloc(key_len);
     if(dup) {
+      /* copy the key */
+      memcpy(dup, key, key_len);
+
       he->key = dup;
       he->key_len = key_len;
       he->ptr = (void *) p;
@@ -179,6 +182,23 @@ Curl_hash_add(struct curl_hash *h, char *key, size_t key_len, void *p)
   return NULL; /* failure */
 }
 
+/* remove the identified hash entry, returns non-zero on failure */
+int Curl_hash_delete(struct curl_hash *h, char *key, size_t key_len)
+{
+  struct curl_llist_element *le;
+  struct curl_hash_element  *he;
+  struct curl_llist *l = FETCH_LIST(h, key, key_len);
+
+  for (le = l->head; le; le = le->next) {
+    he = le->ptr;
+    if (hash_key_compare(he->key, he->key_len, key, key_len)) {
+      Curl_llist_remove(l, le, (void *) h);
+      return 0;
+    }
+  }
+  return 1;
+}
+
 void *
 Curl_hash_pick(struct curl_hash *h, char *key, size_t key_len)
 {
@@ -186,9 +206,7 @@ Curl_hash_pick(struct curl_hash *h, char *key, size_t key_len)
   struct curl_hash_element  *he;
   struct curl_llist *l = FETCH_LIST(h, key, key_len);
 
-  for (le = l->head;
-       le;
-       le = le->next) {
+  for (le = l->head; le; le = le->next) {
     he = le->ptr;
     if (hash_key_compare(he->key, he->key_len, key, key_len)) {
       return he->ptr;

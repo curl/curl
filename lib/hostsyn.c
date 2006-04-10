@@ -126,17 +126,15 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
  * It is present here to keep #ifdefs out from multi.c
  */
 
-CURLcode Curl_resolv_fdset(struct connectdata *conn,
-                           fd_set *read_fd_set,
-                           fd_set *write_fd_set,
-                           int *max_fdp)
+int Curl_resolv_getsock(struct connectdata *conn,
+                        curl_socket_t *sock,
+                        int numsocks)
 {
   (void)conn;
-  (void)read_fd_set;
-  (void)write_fd_set;
-  (void)max_fdp;
+  (void)sock;
+  (void)numsocks;
 
-  return CURLE_OK;
+  return 0; /* no bits since we don't use any socks */
 }
 
 #endif /* truly sync */

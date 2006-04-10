@@ -105,17 +105,15 @@
  * Returns: CURLE_OK always!
  */
 
-CURLcode Curl_resolv_fdset(struct connectdata *conn,
-                           fd_set *read_fd_set,
-                           fd_set *write_fd_set,
-                           int *max_fdp)
+int Curl_resolv_getsock(struct connectdata *conn,
+                        curl_socket_t *socks,
+                        int numsocks)
 
 {
-  int max = ares_fds(conn->data->state.areschannel,
-                     read_fd_set, write_fd_set);
-  *max_fdp = max;
+  int max = ares_getsock(conn->data->state.areschannel,
+                         (int *)socks, numsocks);
 
-  return CURLE_OK;
+  return max;
 }
 
 /*

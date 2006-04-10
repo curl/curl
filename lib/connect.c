@@ -98,6 +98,7 @@
 #include "memory.h"
 #include "select.h"
 #include "url.h" /* for Curl_safefree() */
+#include "multiif.h"
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
 
 /* The last #include file should be: */
@@ -534,6 +535,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   CURLcode code = CURLE_OK;
   curl_socket_t sockfd = conn->sock[sockindex];
   long allow = DEFAULT_CONNECT_TIMEOUT;
+  long allow_total = 0;
   long has_passed;
 
   curlassert(sockindex >= FIRSTSOCKET && sockindex <= SECONDARYSOCKET);
@@ -546,12 +548,12 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   /* subtract the most strict timeout of the ones */
   if(data->set.timeout && data->set.connecttimeout) {
     if (data->set.timeout < data->set.connecttimeout)
-      allow = data->set.timeout*1000;
+      allow_total = allow = data->set.timeout*1000;
     else
       allow = data->set.connecttimeout*1000;
   }
   else if(data->set.timeout) {
-    allow = data->set.timeout*1000;
+    allow_total = allow = data->set.timeout*1000;
   }
   else if(data->set.connecttimeout) {
     allow = data->set.connecttimeout*1000;
@@ -564,9 +566,12 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   }
   if(conn->bits.tcpconnect) {
     /* we are connected already! */
+    Curl_expire(data, allow_total);
     *connected = TRUE;
     return CURLE_OK;
   }
+
+  Curl_expire(data, allow);
 
   /* check for connect without timeout as we want to return immediately */
   rc = waitconnect(sockfd, 0);
@@ -818,6 +823,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
       return CURLE_OPERATION_TIMEOUTED;
     }
   }
+  Curl_expire(data, timeout_ms);
 
   /* Max time for each address */
   num_addr = Curl_num_addresses(remotehost->addr);

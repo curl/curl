@@ -101,6 +101,7 @@
 #include "share.h"
 #include "memory.h"
 #include "select.h"
+#include "multiif.h"
 #include "easyif.h" /* for Curl_convert_to_network prototype */
 
 #define _MPRINTF_REPLACE /* use our functions only */
@@ -1522,34 +1523,42 @@ CURLcode Curl_readwrite_init(struct connectdata *conn)
 }
 
 /*
- * Curl_single_fdset() gets called by the multi interface code when the app
- * has requested to get the fd_sets for the current connection. This function
+ * Curl_single_getsock() gets called by the multi interface code when the app
+ * has requested to get the sockets for the current connection. This function
  * will then be called once for every connection that the multi interface
  * keeps track of. This function will only be called for connections that are
  * in the proper state to have this information available.
  */
-void Curl_single_fdset(struct connectdata *conn,
-                       fd_set *read_fd_set,
-                       fd_set *write_fd_set,
-                       fd_set *exc_fd_set,
-                       int *max_fd)
+int Curl_single_getsock(struct connectdata *conn,
+                        curl_socket_t *sock, /* points to numsocks number
+                                                of sockets */
+                        int numsocks)
 {
-  *max_fd = -1; /* init */
+  int bitmap = GETSOCK_BLANK;
+  int index = 0;
+
+  if(numsocks < 2)
+    /* simple check but we might need two slots */
+    return GETSOCK_BLANK;
+
   if(conn->keep.keepon & KEEP_READ) {
-    FD_SET(conn->sockfd, read_fd_set);
-    *max_fd = (int)conn->sockfd;
+    bitmap |= GETSOCK_READSOCK(index);
+    sock[index] = conn->sockfd;
   }
   if(conn->keep.keepon & KEEP_WRITE) {
-    FD_SET(conn->writesockfd, write_fd_set);
 
-    /* since sockets are curl_socket_t nowadays, we typecast it to int here
-       to compare it nicely */
-    if((int)conn->writesockfd > *max_fd)
-      *max_fd = (int)conn->writesockfd;
+    if((conn->sockfd != conn->writesockfd) &&
+       (conn->keep.keepon & KEEP_READ)) {
+      /* only if they are not the same socket and we had a readable one,
+         we increase index */
+      index++;
+      sock[index] = conn->writesockfd;
+    }
+
+    bitmap |= GETSOCK_WRITESOCK(index);
   }
-  /* we don't use exceptions, only touch that one to prevent compiler
-     warnings! */
-  *exc_fd_set = *exc_fd_set;
+
+  return bitmap;
 }
 
 

@@ -45,6 +45,16 @@ CURLcode Curl_protocol_connect(struct connectdata *conn, bool *done);
 CURLcode Curl_protocol_connecting(struct connectdata *conn, bool *done);
 CURLcode Curl_protocol_doing(struct connectdata *conn, bool *done);
 void Curl_safefree(void *ptr);
+
+
+int Curl_protocol_getsock(struct connectdata *conn,
+                          curl_socket_t *socks,
+                          int numsocks);
+int Curl_doing_getsock(struct connectdata *conn,
+                       curl_socket_t *socks,
+                       int numsocks);
+
+#if 0
 CURLcode Curl_protocol_fdset(struct connectdata *conn,
                              fd_set *read_fd_set,
                              fd_set *write_fd_set,
@@ -53,4 +63,6 @@ CURLcode Curl_doing_fdset(struct connectdata *conn,
                           fd_set *read_fd_set,
                           fd_set *write_fd_set,
                           int *max_fdp);
+#endif
+
 #endif

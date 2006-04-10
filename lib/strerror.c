@@ -329,6 +329,12 @@ curl_multi_strerror(CURLMcode error)
   case CURLM_INTERNAL_ERROR:
     return "internal error";
 
+  case CURLM_BAD_SOCKET:
+    return "invalid socket argument";
+
+  case CURLM_UNKNOWN_OPTION:
+    return "unknown option";
+
   case CURLM_LAST:
     break;
   }

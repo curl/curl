@@ -96,6 +96,7 @@
 #include "http_chunks.h" /* for the structs and enum stuff */
 #include "hostip.h"
 #include "hash.h"
+#include "splay.h"
 
 #ifdef HAVE_GSSAPI
 # ifdef HAVE_GSSGNU
@@ -657,17 +658,15 @@ struct connectdata {
 
   /* Called from the multi interface during the PROTOCONNECT phase, and it
      should then return a proper fd set */
-  CURLcode (*curl_proto_fdset)(struct connectdata *conn,
-                               fd_set *read_fd_set,
-                               fd_set *write_fd_set,
-                               int *max_fdp);
+  int (*curl_proto_getsock)(struct connectdata *conn,
+                            curl_socket_t *socks,
+                            int numsocks);
 
   /* Called from the multi interface during the DOING phase, and it should
      then return a proper fd set */
-  CURLcode (*curl_doing_fdset)(struct connectdata *conn,
-                               fd_set *read_fd_set,
-                               fd_set *write_fd_set,
-                               int *max_fdp);
+  int (*curl_doing_getsock)(struct connectdata *conn,
+                            curl_socket_t *socks,
+                            int numsocks);
 
   /* This function *MAY* be set to a protocol-dependent function that is run
    * by the curl_disconnect(), as a step in the disconnection.
@@ -932,10 +931,11 @@ struct UrlState {
 #if defined(USE_SSLEAY) && defined(HAVE_OPENSSL_ENGINE_H)
   ENGINE *engine;
 #endif /* USE_SSLEAY */
+  struct timeval expiretime; /* set this with Curl_expire() only */
+  struct Curl_tree timenode; /* for the splay stuff */
 
   /* a place to store the most recenlty set FTP entrypath */
   char *most_recent_ftp_entrypath;
-
 };
 
 
@@ -968,6 +968,8 @@ struct DynamicStatic {
  * 'struct UrlState' instead. The only exceptions MUST note the changes in
  * the 'DynamicStatic' struct.
  */
+struct Curl_one_easy; /* declared and used only in multi.c */
+struct Curl_multi;    /* declared and used only in multi.c */
 
 struct UserDefined {
   FILE *err;         /* the stderr user data goes here */
@@ -1071,6 +1073,12 @@ struct UserDefined {
 
   char *private_data; /* Private data */
 
+  struct Curl_one_easy *one_easy; /* When adding an easy handle to a multi
+                                     handle, an internal 'Curl_one_easy'
+                                     struct is created and this is a pointer
+                                     to the particular struct associated with
+                                     this SessionHandle */
+
   struct curl_slist *http200aliases; /* linked list of aliases for http200 */
 
   long ip_version;
@@ -1139,7 +1147,7 @@ struct UserDefined {
 
 struct SessionHandle {
   struct curl_hash *hostcache;
-  void *multi;                 /* if non-NULL, points to the multi handle
+  struct Curl_multi *multi;    /* if non-NULL, points to the multi handle
                                   struct of which this "belongs" */
   struct Curl_share *share;    /* Share, handles global variable mutexing */
   struct UserDefined set;      /* values set by the libcurl user */

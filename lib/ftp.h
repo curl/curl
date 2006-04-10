@@ -34,10 +34,9 @@ CURLcode Curl_GetFTPResponse(ssize_t *nread, struct connectdata *conn,
                              int *ftpcode);
 CURLcode Curl_ftp_nextconnect(struct connectdata *conn);
 CURLcode Curl_ftp_multi_statemach(struct connectdata *conn, bool *done);
-CURLcode Curl_ftp_fdset(struct connectdata *conn,
-                        fd_set *read_fd_set,
-                        fd_set *write_fd_set,
-                        int *max_fdp);
+int Curl_ftp_getsock(struct connectdata *conn,
+                     curl_socket_t *socks,
+                     int numsocks);
 CURLcode Curl_ftp_doing(struct connectdata *conn,
                         bool *dophase_done);
 #endif /* CURL_DISABLE_FTP */
