@@ -53,12 +53,6 @@ installed:
    give you an older version of the file that isn't up-to-date. That file was
    checked in once and won't be updated very regularly.
 
- o yacc/bison 
-
-   If you don't have yacc or bison, you must rename the lib/getdate.c.cvs file
-   to lib/getdate.c to be able to build libcurl. yacc/bison is normally used
-   to generate the lib/getdate.c file from the lib/getdate.y source file.
-
 MAC OS X
 
  With Mac OS X 10.2 and the associated Developer Tools, the installed versions
