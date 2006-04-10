@@ -66,12 +66,14 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
+#if !defined(CURL_SWS_FORK_ENABLED) && defined(HAVE_FORK)
 /*
  * The normal sws build for the plain standard curl test suite has no use for
  * fork(), but if you feel wild and crazy and want to setup some more exotic
  * tests. Define this and run...
  */
-/*#define CURL_SWS_FORK_ENABLED 1 */
+#define CURL_SWS_FORK_ENABLED
+#endif
 
 #define REQBUFSIZ 150000
 #define REQBUFSIZ_TXT "149999"
@@ -455,8 +457,7 @@ static int get_request(int sock, struct httprequest *req)
     int got = sread(sock, reqbuf + req->offset, REQBUFSIZ - req->offset);
     if (got <= 0) {
       if (got < 0) {
-        perror("recv");
-        logmsg("recv() returned error");
+        logmsg("recv() returned error: %d", errno);
         return DOCNUMBER_INTERNAL;
       }
       logmsg("Connection closed by client");
@@ -686,10 +687,18 @@ int main(int argc, char *argv[])
   struct httprequest req;
   int rc;
   int arg=1;
+#ifdef CURL_SWS_FORK_ENABLED
+  bool use_fork = FALSE;
+#endif
 
   while(argc>arg) {
     if(!strcmp("--version", argv[arg])) {
-      printf("sws IPv4%s\n",
+      printf("sws IPv4%s"
+#ifdef CURL_SWS_FORK_ENABLED
+             " FORK"
+#endif
+             "\n"
+             ,
 #ifdef ENABLE_IPV6
              "/IPv6"
 #else
@@ -709,6 +718,12 @@ int main(int argc, char *argv[])
 #endif
       arg++;
     }
+#ifdef CURL_SWS_FORK_ENABLED
+    else if(!strcmp("--fork", argv[arg])) {
+      use_fork=TRUE;
+      arg++;
+    }
+#endif
     else if(argc>arg) {
 
       if(atoi(argv[arg]))
@@ -744,8 +759,7 @@ int main(int argc, char *argv[])
 #endif
 
   if (sock < 0) {
-    perror("opening stream socket");
-    logmsg("Error opening socket");
+    logmsg("Error opening socket: %d", errno);
     exit(1);
   }
 
@@ -753,7 +767,7 @@ int main(int argc, char *argv[])
   if (setsockopt
       (sock, SOL_SOCKET, SO_REUSEADDR, (const void *) &flag,
        sizeof(int)) < 0) {
-    perror("setsockopt(SO_REUSEADDR)");
+    logmsg("setsockopt(SO_REUSEADDR) failed");
   }
 
 #ifdef ENABLE_IPV6
@@ -774,8 +788,7 @@ int main(int argc, char *argv[])
   }
 #endif /* ENABLE_IPV6 */
   if(rc < 0) {
-    perror("binding stream socket");
-    logmsg("Error binding socket");
+    logmsg("Error binding socket: %d", errno);
     exit(1);
   }
 
@@ -807,15 +820,19 @@ int main(int argc, char *argv[])
     }
 
 #ifdef CURL_SWS_FORK_ENABLED
-    /* The fork enabled version just forks off the child and don't care
-       about it anymore, so don't assume otherwise. Beware and don't do
-       this at home. */
-    rc = fork();
-    if(-1 == rc) {
-      printf("MAJOR ERROR: fork() failed!\n");
-      break;
+    if(use_fork) {
+      /* The fork enabled version just forks off the child and don't care
+         about it anymore, so don't assume otherwise. Beware and don't do
+         this at home. */
+      rc = fork();
+      if(-1 == rc) {
+        printf("MAJOR ERROR: fork() failed!\n");
+        break;
+      }
     }
-
+    else
+      /* not a fork, just set rc so the following proceeds nicely */
+      rc = 0;
     /* 0 is returned to the child */
     if(0 == rc) {
 #endif
