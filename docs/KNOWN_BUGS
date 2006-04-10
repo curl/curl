@@ -3,6 +3,13 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+33. Doing multi-pass HTTP authentication on a non-default port does not work.
+  This happens because the multi-pass code abuses the redirect following code
+  for doing multiple requests, and when we following redirects to an absolute
+  URL we must use the newly specified port and not the one specified in the
+  original URL. A proper fix to this would need to separate the negotiation
+  "redirect" from an actual redirect.
+
 32. (At least on Windows) If libcurl is built with c-ares and there's no DNS
   server configured in the system, the ares_init() call fails and thus
   curl_easy_init() fails as well. This causes weird effects for people who use
