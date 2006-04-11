@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -715,20 +715,22 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
   return CURLE_OK;
 }
 
-CURLcode Curl_resolv_fdset(struct connectdata *conn,
-                           fd_set *read_fd_set,
-                           fd_set *write_fd_set,
-                           int *max_fdp)
+int Curl_resolv_getsock(struct connectdata *conn,
+                        curl_socket_t *socks,
+                        int numsocks)
 {
   const struct thread_data *td =
     (const struct thread_data *) conn->async.os_specific;
 
   if (td && td->dummy_sock != CURL_SOCKET_BAD) {
-    FD_SET(td->dummy_sock,write_fd_set);
-    *max_fdp = (int)td->dummy_sock;
+    if(numsocks) {
+      /* return one socket waiting for writable, even though this is just
+         a dummy */
+      socks[0] = td->dummy_sock;
+      return GETSOCK_WRITESOCK(0);
+    }
   }
-  (void) read_fd_set;
-  return CURLE_OK;
+  return 0;
 }
 
 #ifdef CURLRES_IPV4
