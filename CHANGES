@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (11 April 2006)
+- #1468330 (http://curl.haxx.se/bug/view.cgi?id=1468330) pointed out a bad
+  typecast in the curl tool leading to a crash with (64bit?) VS2005 (at least)
+  since the struct timeval field tv_sec is an int while time_t is 64bit.
+
 Daniel (10 April 2006)
 - Ates Goral found out that if you specified both CURLOPT_CONNECTTIMEOUT and
   CURLOPT_TIMEOUT, the _longer_ time would wrongly be used for the SSL

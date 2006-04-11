@@ -18,6 +18,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o curl --trace crash when built with VS2005
  o SSL connect time-out
  o Improved NTLM functionality
  o following redirects with more than one question mark in source URL
