@@ -480,6 +480,7 @@ X_OBJS= \
 	$(DIROBJ)\select.obj \
 	$(DIROBJ)\content_encoding.obj \
 	$(DIROBJ)\tftp.obj \
+	$(DIROBJ)\splay.obj \
 	$(RESOURCE)
 
 all : $(TARGET)
