@@ -78,6 +78,7 @@
 #include "share.h"
 #include "strerror.h"
 #include "url.h"
+#include "multiif.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
