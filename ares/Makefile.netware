@@ -20,7 +20,7 @@ endif
 TARGETS = adig.nlm ahost.nlm
 LTARGET = libcares.lib
 VERSION	= $(LIBCARES_VERSION)
-COPYR	= Copyright (C) 1996 - 2005, Daniel Stenberg, <daniel@haxx.se>
+COPYR	= Copyright (C) 1996 - 2006, Daniel Stenberg, <daniel@haxx.se>
 DESCR	= cURL $(subst .def,,$(notdir $@)) $(LIBCARES_VERSION_STR) - http://curl.haxx.se
 MTSAFE	= YES
 STACK	= 64000
@@ -256,8 +256,8 @@ config.h: Makefile.netware
 	@echo $(DL)** All your changes will be lost!!$(DL) >> $@
 	@echo $(DL)*/$(DL) >> $@
 	@echo $(DL)#define OS "i586-pc-NetWare"$(DL) >> $@
-	@echo $(DL)#define VERSION "$(LIBCURL_VERSION_STR)"$(DL) >> $@
-	@echo $(DL)#define PACKAGE_BUGREPORT "curl-bug@haxx.se"$(DL) >> $@
+	@echo $(DL)#define VERSION "$(LIBCARES_VERSION_STR)"$(DL) >> $@
+	@echo $(DL)#define PACKAGE_BUGREPORT "a suitable curl mailing list => http://curl.haxx.se/mail/"$(DL) >> $@
 	@echo $(DL)#define HAVE_ARPA_INET_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_ARPA_NAMESER_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_ASSERT_H 1$(DL) >> $@
