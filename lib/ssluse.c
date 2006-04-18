@@ -1313,7 +1313,7 @@ Curl_ossl_connect_step1(struct connectdata *conn,
 
 static CURLcode
 Curl_ossl_connect_step2(struct connectdata *conn,
-                  int sockindex, long* timeout_ms)
+                        int sockindex, long *timeout_ms)
 {
   struct SessionHandle *data = conn->data;
   int err;
@@ -1328,15 +1328,17 @@ Curl_ossl_connect_step2(struct connectdata *conn,
      Otherwise, figure out the most strict timeout of the two possible one
      and then how much time that has elapsed to know how much time we
      allow for the connect call */
-  if(data->set.timeout || data->set.connecttimeout) {
-
+  if(data->set.timeout && data->set.connecttimeout) {
     /* get the most strict timeout of the ones converted to milliseconds */
-    if(data->set.timeout &&
-       (data->set.timeout<data->set.connecttimeout))
+    if(data->set.timeout<data->set.connecttimeout)
       *timeout_ms = data->set.timeout*1000;
     else
       *timeout_ms = data->set.connecttimeout*1000;
   }
+  else if(data->set.timeout)
+    *timeout_ms = data->set.timeout*1000;
+  else if(data->set.connecttimeout)
+    *timeout_ms = data->set.connecttimeout*1000;
   else
     /* no particular time-out has been set */
     *timeout_ms= DEFAULT_CONNECT_TIMEOUT;
