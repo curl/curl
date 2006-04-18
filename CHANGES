@@ -14,7 +14,7 @@ Daniel (11 April 2006)
 Daniel (10 April 2006)
 - Ates Goral found out that if you specified both CURLOPT_CONNECTTIMEOUT and
   CURLOPT_TIMEOUT, the _longer_ time would wrongly be used for the SSL
-  connection time-out!
+  connection time-out! Katie Wang provided a fine patch.
 
 - I merged my hiper patch (http://curl.haxx.se/libcurl/hiper/) into the main
   sources. See the lib/README.multi_socket for implementation story with
