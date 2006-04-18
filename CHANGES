@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel (19 April 2006)
+- Robson Braga Araujo provided a patch that makes libcurl less eager to close
+  the control connection when using FTP, for example when you remove an easy
+  handle from a multi stack.
+
+- Applied a patch by Ates Goral and Katie Wang that corrected my bad fix
+  attempt from April 10.
+
 Daniel (11 April 2006)
 - #1468330 (http://curl.haxx.se/bug/view.cgi?id=1468330) pointed out a bad
   typecast in the curl tool leading to a crash with (64bit?) VS2005 (at least)
@@ -14,7 +22,7 @@ Daniel (11 April 2006)
 Daniel (10 April 2006)
 - Ates Goral found out that if you specified both CURLOPT_CONNECTTIMEOUT and
   CURLOPT_TIMEOUT, the _longer_ time would wrongly be used for the SSL
-  connection time-out! Katie Wang provided a fine patch.
+  connection time-out!
 
 - I merged my hiper patch (http://curl.haxx.se/libcurl/hiper/) into the main
   sources. See the lib/README.multi_socket for implementation story with

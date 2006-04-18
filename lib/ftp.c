@@ -2912,42 +2912,6 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status)
   /* free the dir tree and file parts */
   freedirs(ftp);
 
-  ftp->ctl_valid = FALSE;
-
-  if(data->set.upload) {
-    if((-1 != data->set.infilesize) &&
-       (data->set.infilesize != *ftp->bytecountp) &&
-       !data->set.crlf &&
-       !ftp->no_transfer) {
-      failf(data, "Uploaded unaligned file size (%" FORMAT_OFF_T
-            " out of %" FORMAT_OFF_T " bytes)",
-            *ftp->bytecountp, data->set.infilesize);
-      conn->bits.close = TRUE; /* close this connection since we don't
-                                  know what state this error leaves us in */
-      return CURLE_PARTIAL_FILE;
-    }
-  }
-  else {
-    if((-1 != conn->size) && (conn->size != *ftp->bytecountp) &&
-       (conn->maxdownload != *ftp->bytecountp)) {
-      failf(data, "Received only partial file: %" FORMAT_OFF_T " bytes",
-            *ftp->bytecountp);
-      conn->bits.close = TRUE; /* close this connection since we don't
-                                  know what state this error leaves us in */
-      return CURLE_PARTIAL_FILE;
-    }
-    else if(!ftp->dont_check &&
-            !*ftp->bytecountp &&
-            (conn->size>0)) {
-      /* We consider this an error, but there's no true FTP error received
-         why we need to continue to "read out" the server response too.
-         We don't want to leave a "waiting" server reply if we'll get told
-         to make a second request on this same connection! */
-      failf(data, "No data was received!");
-      result = CURLE_FTP_COULDNT_RETR_FILE;
-    }
-  }
-
   switch(status) {
   case CURLE_BAD_DOWNLOAD_RESUME:
   case CURLE_FTP_WEIRD_PASV_REPLY:
@@ -2981,19 +2945,23 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status)
   conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD;
 
   if(!ftp->no_transfer && !status) {
-    /* Let's see what the server says about the transfer we just performed,
+    /*
+     * Let's see what the server says about the transfer we just performed,
      * but lower the timeout as sometimes this connection has died while the
      * data has been transfered. This happens when doing through NATs etc that
      * abandon old silent connections.
      */
+    long old_time = ftp->response_time;
+
     ftp->response_time = 60; /* give it only a minute for now */
 
     result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
 
-    ftp->response_time = 3600; /* set this back to one hour waits */
+    ftp->response_time = old_time; /* set this back to previous value */
 
     if(!nread && (CURLE_OPERATION_TIMEDOUT == result)) {
       failf(data, "control connection looks dead");
+      ftp->ctl_valid = FALSE; /* mark control connection as bad */
       return result;
     }
 
@@ -3004,8 +2972,38 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status)
       /* 226 Transfer complete, 250 Requested file action okay, completed. */
       if((ftpcode != 226) && (ftpcode != 250)) {
         failf(data, "server did not report OK, got %d", ftpcode);
-        return CURLE_FTP_WRITE_ERROR;
+        result = CURLE_PARTIAL_FILE;
       }
+    }
+  }
+
+  if(result)
+    /* the response code from the transfer showed an error already so no
+       use checking further */
+    ;
+  else if(data->set.upload) {
+    if((-1 != data->set.infilesize) &&
+       (data->set.infilesize != *ftp->bytecountp) &&
+       !data->set.crlf &&
+       !ftp->no_transfer) {
+      failf(data, "Uploaded unaligned file size (%" FORMAT_OFF_T
+            " out of %" FORMAT_OFF_T " bytes)",
+            *ftp->bytecountp, data->set.infilesize);
+      result = CURLE_PARTIAL_FILE;
+    }
+  }
+  else {
+    if((-1 != conn->size) && (conn->size != *ftp->bytecountp) &&
+       (conn->maxdownload != *ftp->bytecountp)) {
+      failf(data, "Received only partial file: %" FORMAT_OFF_T " bytes",
+            *ftp->bytecountp);
+      result = CURLE_PARTIAL_FILE;
+    }
+    else if(!ftp->dont_check &&
+            !*ftp->bytecountp &&
+            (conn->size>0)) {
+      failf(data, "No data was received!");
+      result = CURLE_FTP_COULDNT_RETR_FILE;
     }
   }
 

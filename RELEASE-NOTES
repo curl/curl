@@ -18,6 +18,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o closed control connection with FTP when easy handle was removed from multi
  o curl --trace crash when built with VS2005
  o SSL connect time-out
  o Improved NTLM functionality
@@ -31,12 +32,13 @@ This release includes the following bugfixes:
 
 Other curl-related news since the previous public release:
 
- o 
+ o tclcurl 0.15.3 was released:
+   http://personal1.iddeo.es/andresgarci/tclcurl/english/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Dan Fandrich, Ilja van Sprundel, David McCreedy, Tor Arntsen, Xavier Bouchoux,
- David Byron, Michele Bini, Ates Goral, Katie Wang
+ David Byron, Michele Bini, Ates Goral, Katie Wang, Robson Braga Araujo
 
         Thanks! (and sorry if I forgot to mention someone)
