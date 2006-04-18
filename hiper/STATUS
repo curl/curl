@@ -238,3 +238,23 @@ Roadmap Ahead
   I plan and hope to return to full-time hiper work later on this spring or
   possibly summer to continue where I pause now. Of course some spare time
   might also be spent until then to get us moving forward.
+
+---------------------------------------------------------------------------
+
+April 11, 2006
+
+ While sitting staring on my screen trying to write up a *nice* sample script
+ using libevent, it strikes me that since libevent is pretty much based around
+ its structs that you setup for each event/file descriptor, my application
+ wants to figure out the correct struct that is associted with the file
+ descriptor that libcurl provides in the socket callback.
+
+ This feels like an operation most applications will need when using the
+ multi_socket API, so it feels like I should better try to figure out a decent
+ way to offer this basic functionality already in libcurl - and the fact that
+ we already have the file descriptors in a hash we can probably just as well
+ extend it somewhat and store some custom pointers as well.
+
+ We need to offer the app a way to set a private pointer to be associated with
+ the particular file descriptor, and then be able to provide that pointer on
+ subsequent callback calls.
