@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -152,6 +152,9 @@ static curl_version_info_data version_info = {
 #endif
 #if defined(ENABLE_64BIT) && (SIZEOF_CURL_OFF_T > 4)
   | CURL_VERSION_LARGEFILE
+#endif
+#if defined(CURL_DOES_CONVERSIONS)
+  | CURL_VERSION_CONV
 #endif
   ,
   NULL, /* ssl_version */
