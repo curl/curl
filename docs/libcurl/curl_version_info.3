@@ -1,6 +1,27 @@
-.\" $Id$
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" * $Id$
+.\" **************************************************************************
 .\"
-.TH curl_version_info 3 "11 Mar 2005" "libcurl 7.13.2" "libcurl Manual"
+.TH curl_version_info 3 "19 Apr 2006" "libcurl 7.15.4" "libcurl Manual"
 .SH NAME
 curl_version_info - returns run-time libcurl version info
 .SH SYNOPSIS
@@ -98,6 +119,9 @@ libcurl was built with support for SSPI. This is only available on Windows and
 makes libcurl use Windows-provided functions for NTLM authentication. It also
 allows libcurl to use the current user and the current user's password without
 the app having to pass them on. (Added in 7.13.2)
+.IP CURL_VERSION_CONV
+libcurl was built with support for character conversions, as provided by the
+CUURLOPT_CONV_* callbacks. (Added in 7.15.4)
 .RE
 \fIssl_version\fP is an ascii string for the OpenSSL version used. If libcurl
 has no SSL support, this is NULL.
