@@ -307,6 +307,13 @@ dnl The actual use of the USE_MANUAL variable is done much later in this
 dnl script to allow other actions to disable it as well.
 
 dnl **********************************************************************
+dnl check if this is the Intel ICC compiler, and if so make it stricter
+dnl (convert warning 147 into an error) so that it properly can detect the
+dnl gethostbyname_r() version
+dnl **********************************************************************
+CURL_DETECT_ICC([CFLAGS="$CFLAGS -we 147"])
+
+dnl **********************************************************************
 dnl Checks for libraries.
 dnl **********************************************************************
 

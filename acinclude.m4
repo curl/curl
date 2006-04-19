@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -1105,12 +1105,44 @@ fi
 ])
 
 
+dnl **********************************************************************
+dnl CURL_DETECT_ICC ([ACTION-IF-YES])
+dnl
+dnl check if this is the Intel ICC compiler, and if so run the ACTION-IF-YES
+dnl sets the $ICC variable to "yes" or "no"
+dnl **********************************************************************
+AC_DEFUN([CURL_DETECT_ICC],
+[
+    ICC="no"
+    AC_MSG_CHECKING([for icc in use])
+    if test "$GCC" = "yes"; then
+       dnl check if this is icc acting as gcc in disguise
+       AC_EGREP_CPP([^__INTEL_COMPILER], [__INTEL_COMPILER],
+         dnl action if the text is found, this it has not been replaced by the
+         dnl cpp
+         ICC="no",
+         dnl the text was not found, it was replaced by the cpp
+         ICC="yes"
+         AC_MSG_RESULT([yes])
+         [$1]
+       )
+    fi
+    if test "$ICC" = "no"; then
+        # this is not ICC
+        AC_MSG_RESULT([no])
+    fi
+])
+
 dnl We create a function for detecting which compiler we use and then set as
 dnl pendantic compiler options as possible for that particular compiler. The
 dnl options are only used for debug-builds.
 
 AC_DEFUN([CURL_CC_DEBUG_OPTS],
 [
+    if test "z$ICC" = "z"; then
+      CURL_DETECT_ICC
+    fi
+
     if test "$GCC" = "yes"; then
 
        dnl figure out gcc version!
@@ -1120,17 +1152,6 @@ AC_DEFUN([CURL_CC_DEBUG_OPTS],
        num2=`echo $gccver | cut -d . -f2`
        gccnum=`(expr $num1 "*" 100 + $num2) 2>/dev/null`
        AC_MSG_RESULT($gccver)
-
-       AC_MSG_CHECKING([if this is icc in disguise])
-       AC_EGREP_CPP([^__INTEL_COMPILER], [__INTEL_COMPILER],
-         dnl action if the text is found, this it has not been replaced by the
-         dnl cpp
-         ICC="no"
-         AC_MSG_RESULT([no]),
-         dnl the text was not found, it was replaced by the cpp
-         ICC="yes"
-         AC_MSG_RESULT([yes])
-       )
 
        if test "$ICC" = "yes"; then
          dnl this is icc, not gcc.
