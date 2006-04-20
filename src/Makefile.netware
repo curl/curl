@@ -90,7 +90,7 @@ endif
 else
 LD	= nlmconv
 LDFLAGS	= -T
-CFLAGS	+= -fno-builtin -fpack-struct -fpcc-struct-return -fno-strict-aliasing
+CFLAGS	+= -fno-builtin -fpcc-struct-return -fno-strict-aliasing
 CFLAGS	+= -Wall # -pedantic
 ifeq ($(LIBARCH),LIBC)
 	PRELUDE = $(SDK_LIBC)/imports/libcpre.gcc.o
