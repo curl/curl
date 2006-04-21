@@ -100,6 +100,7 @@
 #include "url.h" /* for Curl_safefree() */
 #include "multiif.h"
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
+#include "inet_ntop.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -288,8 +289,14 @@ static CURLcode bindlocal(struct connectdata *conn,
         (void)Curl_wait_for_resolv(conn, &h);
 
       if(h) {
-        /* we know data->set.device is shorter than the myhost array */
-        strcpy(myhost, data->set.device);
+        if(in == CURL_INADDR_NONE)
+          /* convert the resolved address, sizeof myhost >= INET_ADDRSTRLEN */
+          Curl_inet_ntop(h->addr->ai_addr->sa_family,
+                         &((struct sockaddr_in*)h->addr->ai_addr)->sin_addr,
+                         myhost, sizeof myhost);
+        else
+          /* we know data->set.device is shorter than the myhost array */
+          strcpy(myhost, data->set.device);
         Curl_resolv_unlock(data, h);
       }
     }

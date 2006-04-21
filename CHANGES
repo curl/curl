@@ -6,7 +6,14 @@
 
                                   Changelog
 
+Daniel (21 April 2006)
+- Ale Vesely fixed CURLOPT_INTERFACE when using a hostname.
+
 Daniel (19 April 2006)
+- Based on previous info from Tor Arntsen, I made configure detect the Intel
+  ICC compiler to add a compiler option for it, in order for configure to
+  properly be able to detect function prototypes.
+
 - Robson Braga Araujo provided a patch that makes libcurl less eager to close
   the control connection when using FTP, for example when you remove an easy
   handle from a multi stack.

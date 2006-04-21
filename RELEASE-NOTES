@@ -18,10 +18,12 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CURLOPT_INTERFACE works with hostname
+ o configure runs fine with ICC
  o closed control connection with FTP when easy handle was removed from multi
  o curl --trace crash when built with VS2005
  o SSL connect time-out
- o Improved NTLM functionality
+ o improved NTLM functionality
  o following redirects with more than one question mark in source URL
  o fixed debug build crash with -d
  o TFTP works on more systems
@@ -39,6 +41,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Dan Fandrich, Ilja van Sprundel, David McCreedy, Tor Arntsen, Xavier Bouchoux,
- David Byron, Michele Bini, Ates Goral, Katie Wang, Robson Braga Araujo
+ David Byron, Michele Bini, Ates Goral, Katie Wang, Robson Braga Araujo,
+ Ale Vesely
 
         Thanks! (and sorry if I forgot to mention someone)
