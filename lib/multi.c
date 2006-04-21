@@ -83,7 +83,6 @@ typedef enum {
 struct socketstate {
   curl_socket_t socks[MAX_SOCKSPEREASYHANDLE];
   long action; /* socket action bitmap */
-  long timeout[MAX_SOCKSPEREASYHANDLE];
 };
 
 struct Curl_one_easy {
@@ -173,19 +172,20 @@ static void multistate(struct Curl_one_easy *easy, CURLMstate state)
 }
 
 /*
- * We add one of these structs to the sockhash, and then if we add more easy
- * handles for the same socket we just link them with the next/prev pointers
- * from the node added to the hash. We only remove the node from the hash when
- * the final easy handle/socket associated with the node is removed.
+ * We add one of these structs to the sockhash for a particular socket
  */
 
 struct Curl_sh_entry {
-  struct Curl_sh_entry *next;
-  struct Curl_sh_entry *prev;
   struct SessionHandle *easy;
   time_t timestamp;
   long inuse;
+  int action;  /* what action READ/WRITE this socket waits for */
+  void *userp; /* settable by users (not yet decided exactly how) */
 };
+/* bits for 'action' having no bits means this socket is not expecting any
+   action */
+#define SH_READ  1
+#define SG_WRITE 2
 
 /* make sure this socket is present in the hash for this handle */
 static int sh_addentry(struct curl_hash *sh,
@@ -196,16 +196,9 @@ static int sh_addentry(struct curl_hash *sh,
     Curl_hash_pick(sh, (char *)&s, sizeof(curl_socket_t));
   struct Curl_sh_entry *check;
 
-  if(there) {
-    /* verify that this particular handle is in here */
-    check = there;
-    while(check) {
-      if(check->easy == data)
-        /* it is, return fine */
-        return 0;
-      check = check->next;
-    }
-  }
+  if(there)
+    /* it is present, return fine */
+    return 0;
 
   /* not present, add it */
   check = calloc(sizeof(struct Curl_sh_entry), 1);
@@ -213,57 +206,25 @@ static int sh_addentry(struct curl_hash *sh,
     return 1; /* major failure */
   check->easy = data;
 
-  if(there) {
-    /* the node for this socket is already here, now link in the struct for
-       the new handle */
+  /* make/add new hash entry */
+  if(NULL == Curl_hash_add(sh, (char *)&s, sizeof(curl_socket_t), check))
+    return 1; /* major failure */
 
-    check->next = there->next; /* get the previous next to point to */
-    there->next = check;       /* make the new next point to the new entry */
-
-    check->next->prev = check; /* make sure the next one points back to the
-                                  new one */
-    /* check->prev = NULL;        is already cleared and we have no previous
-                                  node */
-  }
-  else {
-    /* make/add new hash entry */
-    if(NULL == Curl_hash_add(sh, (char *)&s, sizeof(curl_socket_t), check))
-      return 1; /* major failure */
-  }
   return 0; /* things are good in sockhash land */
 }
 
 
 /* delete the given socket + handle from the hash */
-static void sh_delentry(struct curl_hash *sh,
-                        curl_socket_t s,
-                        struct SessionHandle *data)
+static void sh_delentry(struct curl_hash *sh, curl_socket_t s)
 {
   struct Curl_sh_entry *there =
     Curl_hash_pick(sh, (char *)&s, sizeof(curl_socket_t));
 
-  while(there) {
-    /* this socket is in the hash, now scan the list at this point and see if
-       the given easy handle is in there and if so remote that singe entry */
-    if(there->easy == data) {
-      /* match! */
-      if(there->next || there->prev) {
-        /* it is not the only handle for this socket, so only unlink this
-           particular easy handle and leave the actional hash entry */
-
-        /* unlink */
-        there->next->prev = there->prev;
-        there->prev->next = there->next;
-        free(there);
-      }
-      else {
-        /* This is the only easy handle for this socket, we must remove the
-           hash entry. (This'll end up in a call to sh_freeentry().) */
-        Curl_hash_delete(sh, (char *)&s, sizeof(curl_socket_t));
-      }
-      break;
-    }
-    there = there->next;
+  if(there) {
+    /* this socket is in the hash */
+    /* We remove the hash entry. (This'll end up in a call to
+       sh_freeentry().) */
+    Curl_hash_delete(sh, (char *)&s, sizeof(curl_socket_t));
   }
 }
 
@@ -273,14 +234,6 @@ static void sh_delentry(struct curl_hash *sh,
 static void sh_freeentry(void *freethis)
 {
   struct Curl_sh_entry *p = (struct Curl_sh_entry *) freethis;
-  struct Curl_sh_entry *more = p->next;
-
-  /* if there's a chain of more handles, remove that chain first */
-  while(more) {
-    struct Curl_sh_entry *next = more->next;
-    free(more);
-    more = next;
-  }
 
   free(p);
 }
@@ -1034,8 +987,9 @@ CURLMsg *curl_multi_info_read(CURLM *multi_handle, int *msgs_in_queue)
 }
 
 /*
- * Check what sockets we deal with and their "action state" and if we have a
- * difference from last time we call the callback accordingly.
+ * singlesocket() checks what sockets we deal with and their "action state"
+ * and if we have a different state in any of those sockets from last time we
+ * call the callback accordingly.
  */
 static void singlesocket(struct Curl_multi *multi,
                          struct Curl_one_easy *easy)
@@ -1050,9 +1004,11 @@ static void singlesocket(struct Curl_multi *multi,
   /* first fill in the 'current' struct with the state as it is now */
   current.action = multi_getsock(easy, current.socks, MAX_SOCKSPEREASYHANDLE);
 
-  /* when filled in, we compare with the previous round's state */
+  /* when filled in, we compare with the previous round's state in a first
+     quick memory compare check */
   if(memcmp(&current, &easy->sockstate, sizeof(struct socketstate))) {
-    /* difference, call the callback once for every socket change ! */
+
+    /* there is difference, call the callback once for every socket change ! */
     for(i=0; i< MAX_SOCKSPEREASYHANDLE; i++) {
       int action;
       curl_socket_t s = current.socks[i];
@@ -1103,7 +1059,7 @@ static void singlesocket(struct Curl_multi *multi,
       /* Update the sockhash accordingly */
       if(action == CURL_POLL_REMOVE)
         /* remove from hash for this easy handle */
-        sh_delentry(multi->sockhash, s, easy->easy_handle);
+        sh_delentry(multi->sockhash, s);
       else
         /* make sure this socket is present in the hash for this handle */
         sh_addentry(multi->sockhash, s, easy->easy_handle);
@@ -1138,6 +1094,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
       easyp = easyp->next;
     }
 
+    /* or should we fall-through and do the timer-based stuff? */
     return result;
   }
   else if (s != CURL_SOCKET_TIMEOUT) {
@@ -1152,20 +1109,16 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     /* Now, there is potentially a chain of easy handles in this hash
        entry struct and we need to deal with all of them */
 
-    do {
-      data = entry->easy;
+    data = entry->easy;
 
-      result = multi_runsingle(multi, data->set.one_easy, &running_handles);
+    result = multi_runsingle(multi, data->set.one_easy, &running_handles);
 
-      if(result == CURLM_OK)
-        /* get the socket(s) and check if the state has been changed since
-           last */
-        singlesocket(multi, data->set.one_easy);
+    if(result == CURLM_OK)
+      /* get the socket(s) and check if the state has been changed since
+         last */
+      singlesocket(multi, data->set.one_easy);
 
-      entry = entry->next;
-
-    } while(entry);
-
+    /* or should we fall-through and do the timer-based stuff? */
     return result;
   }
 

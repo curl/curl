@@ -43,15 +43,12 @@ Implementation of the curl_multi_socket API
   handle conversion on its own. I find it very unlikely that applications
   would want to do that and since libcurl would need such a lookup on its own
   anyway since we didn't want to force applications to do that translation
-  code (it would be optional), it seemed like an unnecessary option. I also
-  realized that when we use underlying libraries such as c-ares (for DNS
-  asynch resolving) there might in fact be more than one transfer waiting for
-  action on the same socket and thus it makes the lookup even tricker and even
-  less likely to ever get done by applications. Instead I created an internal
-  "socket to easy handles" hash table that given a socket (file descriptor)
-  returns a list of easy handles that waits for some action on that socket.
-  This hash is made using the already existing hash code (previously only used
-  for the DNS cache).
+  code (it would be optional), it seemed like an unnecessary option.
+
+  Instead I created an internal "socket to easy handles" hash table that given
+  a socket (file descriptor) return the easy handle that waits for action on
+  that socket.  This hash is made using the already existing hash code
+  (previously only used for the DNS cache).
 
   To make libcurl be able to report plain sockets in the socket callback, I
   had to re-organize the internals of the curl_multi_fdset() etc so that the
