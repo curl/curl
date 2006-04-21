@@ -155,6 +155,11 @@ S-Lang
   S-Lang binding written by John E Davis
   http://www.jedsoft.org/slang/modules/curl.html
 
+SPL
+
+  SPL binding written by Clifford Wolf
+  http://www.clifford.at/spl/
+
 Tcl
 
   Tclcurl is written by Andrés García
@@ -173,3 +178,8 @@ wxWidgets
 
   Written by Casey O'Donnell
   http://homepage.mac.com/codonnell/wxcurldav/
+
+XBLite
+
+  Written by David Szafranski
+  http://perso.wanadoo.fr/xblite/libraries.html
