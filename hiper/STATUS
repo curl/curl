@@ -258,3 +258,12 @@ April 11, 2006
  We need to offer the app a way to set a private pointer to be associated with
  the particular file descriptor, and then be able to provide that pointer on
  subsequent callback calls.
+
+---------------------------------------------------------------------------
+
+April 20, 2006
+
+ I was wrong when I previously claimed we could have more than one easy handle
+ using the same socket. I've cleaned up and simplified code now to adjust to
+ this.
+
