@@ -16,7 +16,8 @@
  * The same is hiper.c but instead using the new *socket() API instead of the
  * "old" *perform() call.
  *
- * Uses libevent.
+ * Uses a select() approach but only for keeping the code simple and
+ * stand-alone. See hipev.c for a libevent-based example.
  *
  */
 
@@ -32,8 +33,6 @@
 #include <sys/poll.h>
 
 #include <curl/curl.h>
-
-#include <event.h> /* for libevent */
 
 #ifndef FALSE
 #define FALSE 0
@@ -84,7 +83,6 @@ struct fdinfo {
   CURL *easy;
   int action; /* as set by libcurl */
   long timeout; /* as set by libcurl */
-  struct event ev;
 };
 
 static struct fdinfo *allsocks;
