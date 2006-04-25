@@ -531,6 +531,7 @@ static void help(void)
     "    --crlf          Convert LF to CRLF in upload",
     " -f/--fail          Fail silently (no output at all) on HTTP errors (H)",
     "    --ftp-create-dirs Create the remote dirs if not present (F)",
+    "    --ftp-method [multicwd/nocwd/singlecwd] Control CWD usage (F)",
     "    --ftp-pasv      Use PASV/EPSV instead of PORT (F)",
     "    --ftp-skip-pasv-ip Skip the IP address for PASV (F)\n"
     "    --ftp-ssl       Enable SSL/TLS for the ftp transfer (F)",
