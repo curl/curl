@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -87,7 +87,10 @@ static CURLcode
 inflate_stream(struct SessionHandle *data,
                struct Curl_transfer_keeper *k)
 {
+  int allow_restart = 1;
   z_stream *z = &k->z;          /* zlib state structure */
+  uInt nread = z->avail_in;
+  Bytef *orig_in = z->next_in;
   int status;                   /* zlib status */
   CURLcode result = CURLE_OK;   /* Curl_client_write status */
   char *decomp;                 /* Put the decompressed data here. */
@@ -108,6 +111,7 @@ inflate_stream(struct SessionHandle *data,
 
     status = inflate(z, Z_SYNC_FLUSH);
     if (status == Z_OK || status == Z_STREAM_END) {
+      allow_restart = 0;
       if(DSIZ - z->avail_out) {
         result = Curl_client_write(data, CLIENTWRITE_BODY, decomp,
                                    DSIZ - z->avail_out);
@@ -132,6 +136,19 @@ inflate_stream(struct SessionHandle *data,
         free(decomp);
         return result;
       }
+    }
+    else if (allow_restart && status == Z_DATA_ERROR) {
+      /* some servers seem to not generate zlib headers, so this is an attempt
+         to fix and continue anyway */
+
+      inflateReset(z);
+      if (inflateInit2(z, -MAX_WBITS) != Z_OK) {
+        return process_zlib_error(data, z);
+      }
+      z->next_in = orig_in;
+      z->avail_in = nread;
+      allow_restart = 0;
+      continue;
     }
     else {                      /* Error; exit loop, handle below */
       free(decomp);

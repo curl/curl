@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (25 April 2006)
+- Paul Querna fixed libcurl to better deal with deflate content encoding
+  when the stream (wrongly) lacks a proper zlib header. This seems to be the
+  case on too many actual server implementations.
+
 Daniel (21 April 2006)
 - Ale Vesely fixed CURLOPT_INTERFACE when using a hostname.
 
