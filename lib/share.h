@@ -28,10 +28,18 @@
 #include <curl/curl.h>
 #include "cookie.h"
 
+/* SalfordC says "A structure member may not be volatile". Hence:
+ */
+#ifdef __SALFORDC__
+#define CURL_VOLATILE
+#else
+#define CURL_VOLATILE volatile
+#endif
+
 /* this struct is libcurl-private, don't export details */
 struct Curl_share {
   unsigned int specifier;
-  volatile unsigned int dirty;
+  CURL_VOLATILE unsigned int dirty;
 
   curl_lock_function lockfunc;
   curl_unlock_function unlockfunc;

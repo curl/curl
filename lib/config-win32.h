@@ -37,13 +37,20 @@
 #define HAVE_IO_H 1
 
 /* Define if you have the <malloc.h> header file.  */
+#ifndef __SALFORDC__
 #define HAVE_MALLOC_H 1
+#endif
 
 /* Define if you have the <netdb.h> header file.  */
 /* #define HAVE_NETDB_H 1 */
 
 /* Define if you have the <netinet/in.h> header file.  */
 /* #define HAVE_NETINET_IN_H 1 */
+
+/* Define if you have the <process.h> header file.  */
+#ifndef __SALFORDC__
+#define HAVE_PROCESS_H 1
+#endif
 
 /* Define if you have the <sgtty.h> header file.  */
 /* #define HAVE_SGTTY_H 1 */
@@ -98,11 +105,13 @@
 /* Define if you have the <winsock.h> header file.  */
 #define HAVE_WINSOCK_H 1
 
+#ifndef __SALFORDC__
 /* Define if you have the <winsock2.h> header file.  */
 #define HAVE_WINSOCK2_H 1
 
 /* Define if you have the <ws2tcpip.h> header file.  */
 #define HAVE_WS2TCPIP_H 1
+#endif
 
 /* ---------------------------------------------------------------- */
 /*                        OTHER HEADER INFO                         */
@@ -246,8 +255,10 @@
 #endif
 
 /* Define SIZEOF_CURL_OFF_T as computed by sizeof(curl_off_t) */
-/* Borland/PellesC lacks _lseeki64(), so we don't support >2GB files. */
-#if defined(__BORLANDC__) || defined(__POCC__)
+/* Borland/PellesC/SalfordC lacks _lseeki64(), so we don't support
+ * >2GB files.
+ */
+#if defined(__BORLANDC__) || defined(__POCC__) || defined(__SALFORDC__)
 #define SIZEOF_CURL_OFF_T 4
 #else
 #define SIZEOF_CURL_OFF_T 8
@@ -258,7 +269,9 @@
 /* ---------------------------------------------------------------- */
 
 /* Define this if you have struct sockaddr_storage */
+#ifndef __SALFORDC__
 #define HAVE_STRUCT_SOCKADDR_STORAGE 1
+#endif
 
 /* ---------------------------------------------------------------- */
 /*                        COMPILER SPECIFIC                         */
