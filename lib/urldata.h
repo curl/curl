@@ -943,7 +943,7 @@ struct UrlState {
   /* for FTP downloads: track CRLF sequences that span blocks */
   bool prev_block_had_trailing_cr;
   /* for FTP downloads: how many CRLFs did we converted to LFs? */
-  size_t crlf_conversions;
+  curl_off_t crlf_conversions;
 #endif
 };
 
