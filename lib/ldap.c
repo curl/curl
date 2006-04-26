@@ -36,10 +36,12 @@
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif
 #include <errno.h>
 
 #if defined(WIN32)
-# include <malloc.h>
 # include <winldap.h>
 #endif
 
