@@ -6,6 +6,17 @@
 
                                   Changelog
 
+Daniel (26 April 2006)
+- David McCreedy brought initial line end conversions when doing FTP ASCII
+  transfers. They are done on non-windows systems and translate CRLF to LF.
+
+  I modified the 15 LIST-using test cases accordingly. The downside is that now
+  we'll have even more trouble to get the tests to run on Windows since they
+  should get CRLF newlines left intact which the *nix versions don't. I figure
+  the only sane thing to do is to add some kind of [newline] macro for the test
+  case files and have them expanded to the proper native line ending when the
+  test cases are run. This is however left to implement.
+
 Daniel (25 April 2006)
 - Paul Querna fixed libcurl to better deal with deflate content encoding
   when the stream (wrongly) lacks a proper zlib header. This seems to be the

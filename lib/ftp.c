@@ -2994,6 +2994,13 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status)
   }
   else {
     if((-1 != conn->size) && (conn->size != *ftp->bytecountp) &&
+#ifdef CURL_DO_LINEEND_CONV
+       /* Most FTP servers don't adjust their file SIZE response for CRLFs, so
+        * we'll check to see if the discrepancy can be explained by the number
+        * of CRLFs we've changed to LFs.
+        */
+       ((conn->size + data->state.crlf_conversions) != *ftp->bytecountp) &&
+#endif /* CURL_DO_LINEEND_CONV */
        (conn->maxdownload != *ftp->bytecountp)) {
       failf(data, "Received only partial file: %" FORMAT_OFF_T " bytes",
             *ftp->bytecountp);

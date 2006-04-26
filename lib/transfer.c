@@ -1281,17 +1281,33 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           conn->upload_present = nread;
 
           /* convert LF to CRLF if so asked */
+#ifdef CURL_DO_LINEEND_CONV
+          /* always convert if we're FTPing in ASCII mode */
+          if ((data->set.crlf) || (data->ftp_in_ascii_mode)) {
+#else
           if (data->set.crlf) {
+#endif /* CURL_DO_LINEEND_CONV */
               if(data->state.scratch == NULL)
                 data->state.scratch = malloc(2*BUFSIZE);
               if(data->state.scratch == NULL) {
                 failf (data, "Failed to alloc scratch buffer!");
                 return CURLE_OUT_OF_MEMORY;
               }
+              /*
+               * ASCII/EBCDIC Note: This is presumably a text (not binary)
+               * transfer so the data should already be in ASCII.
+               * That means the hex values for ASCII CR (0x0d) & LF (0x0a)
+               * must be used instead of the escape sequences \r & \n.
+               */
             for(i = 0, si = 0; i < nread; i++, si++) {
               if (conn->upload_fromhere[i] == 0x0a) {
                 data->state.scratch[si++] = 0x0d;
                 data->state.scratch[si] = 0x0a;
+                if (!data->set.crlf) {
+                  /* we're here only because FTP is in ASCII mode...
+                     bump infilesize for the LF we just added */
+                  data->set.infilesize++;
+                }
               }
               else
                 data->state.scratch[si] = conn->upload_fromhere[i];
@@ -1417,6 +1433,13 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
     if(!(conn->bits.no_body) && (conn->size != -1) &&
        (k->bytecount != conn->size) &&
+#ifdef CURL_DO_LINEEND_CONV
+       /* Most FTP servers don't adjust their file SIZE response for CRLFs,
+          so we'll check to see if the discrepancy can be explained
+          by the number of CRLFs we've changed to LFs.
+        */
+       (k->bytecount != (conn->size + data->state.crlf_conversions)) &&
+#endif /* CURL_DO_LINEEND_CONV */
        !conn->newurl) {
       failf(data, "transfer closed with %" FORMAT_OFF_T
             " bytes remaining to read",

@@ -11,6 +11,7 @@ Curl and libcurl 7.15.4
 
 This release includes the following changes:
 
+ o line end conversions for FTP ASCII transfers
  o curl_multi_socket() API added (still mostly untested)
  o conversion callback options for EBCDIC <=> ASCII conversions
  o added CURLINFO_FTP_ENTRY_PATH
@@ -37,6 +38,7 @@ Other curl-related news since the previous public release:
 
  o tclcurl 0.15.3 was released:
    http://personal1.iddeo.es/andresgarci/tclcurl/english/
+ o http://curl.usphp.com/ is a new mirror in Florida, US
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:

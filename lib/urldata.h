@@ -936,6 +936,15 @@ struct UrlState {
 
   /* a place to store the most recenlty set FTP entrypath */
   char *most_recent_ftp_entrypath;
+
+#ifndef WIN32
+/* do FTP line-end conversions on most platforms */
+#define CURL_DO_LINEEND_CONV
+  /* for FTP downloads: track CRLF sequences that span blocks */
+  bool prev_block_had_trailing_cr;
+  /* for FTP downloads: how many CRLFs did we converted to LFs? */
+  size_t crlf_conversions;
+#endif
 };
 
 

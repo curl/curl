@@ -66,6 +66,8 @@ may have been fixed since this was written!
      specification).  The receiver will convert the data from the standard
      form to his own internal form.
 
+   Since 7.15.4 at least line endings are converted.
+
 19. FTP 3rd party transfers with the multi interface doesn't work. Test:
   define CURL_MULTIEASY, rebuild curl, run test case 230 - 232.
 
