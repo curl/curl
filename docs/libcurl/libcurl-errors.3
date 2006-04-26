@@ -190,6 +190,24 @@ rewinding operation failed
 Initiating the SSL Engine failed
 .IP "CURLE_LOGIN_DENIED (67)"
 The remote server denied curl to login (Added in 7.13.1)
+.IP "CURLE_TFTP_NOTFOUND (68)"
+File not found on TFTP server
+.IP "CURLE_TFTP_PERM (69"
+Permission problem on TFTP server
+.IP "CURLE_TFTP_DISKFULL (70)"
+Out of disk space on TFTP server
+.IP "CURLE_TFTP_ILLEGAL (71)"
+Illegal TFTP operation
+.IP "CURLE_TFTP_UNKNOWNID (72)"
+Unknown TFTP transfer ID
+.IP "CURLE_TFTP_EXISTS (73)"
+TFTP File already exists
+.IP "CURLE_TFTP_NOSUCHUSER (74)"
+No such TFTP user
+.IP "CURLE_CONV_FAILED (75)"
+Character conversion failed
+.IP "CURLE_CONV_REQD (76)"
+Caller must register conversion callbacks
 .SH "CURLMcode"
 This is the generic return code used by functions in the libcurl multi
 interface. Also consider \fIcurl_multi_strerror(3)\fP.
