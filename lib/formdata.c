@@ -1279,7 +1279,7 @@ static size_t readfromfile(struct Form *form, char *buffer, size_t size)
     /* this file hasn't yet been opened */
     form->fp = fopen(form->data->line, "rb"); /* b is for binary */
     if(!form->fp)
-      return -1; /* failure */
+      return (size_t)-1; /* failure */
   }
   nread = fread(buffer, 1, size, form->fp);
 

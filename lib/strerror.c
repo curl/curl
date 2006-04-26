@@ -519,10 +519,11 @@ get_winsock_error (int err, char *buf, size_t len)
   case WSAEREMOTE:
     p = "Remote error";
     break;
+#ifdef WSAEDISCON  /* missing in SalfordC! */
   case WSAEDISCON:
     p = "Disconnected";
     break;
-
+#endif
     /* Extended Winsock errors */
   case WSASYSNOTREADY:
     p = "Winsock library is not ready";

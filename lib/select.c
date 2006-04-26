@@ -131,7 +131,7 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
   timeout.tv_usec = (timeout_ms % 1000) * 1000;
 
   FD_ZERO(&fds_err);
-  maxfd = -1;
+  maxfd = (curl_socket_t)-1;
 
   FD_ZERO(&fds_read);
   if (readfd != CURL_SOCKET_BAD) {
@@ -206,7 +206,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
   FD_ZERO(&fds_read);
   FD_ZERO(&fds_write);
   FD_ZERO(&fds_err);
-  maxfd = -1;
+  maxfd = (curl_socket_t)-1;
 
   for (i = 0; i < nfds; i++) {
     if (ufds[i].fd == CURL_SOCKET_BAD)

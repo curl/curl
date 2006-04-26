@@ -780,7 +780,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           /* if we failed anywhere, we must clean up the secondary socket if
              it was used */
           sclose(easy->easy_conn->sock[SECONDARYSOCKET]);
-          easy->easy_conn->sock[SECONDARYSOCKET]=-1;
+          easy->easy_conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD;
         }
         Curl_posttransfer(easy->easy_handle);
         Curl_done(&easy->easy_conn, easy->result);
