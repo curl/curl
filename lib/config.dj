@@ -36,6 +36,7 @@
 #define HAVE_NETINET_IN_H      1
 #define HAVE_NETINET_TCP_H     1
 #define HAVE_NET_IF_H          1
+#define HAVE_PROCESS_H         1
 #define HAVE_PERROR            1
 #define HAVE_SELECT            1
 #define HAVE_SETJMP_H          1
