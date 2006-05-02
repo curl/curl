@@ -11,6 +11,7 @@ Curl and libcurl 7.15.4
 
 This release includes the following changes:
 
+ o curl-config got a --checkfor option to compare version numbers
  o line end conversions for FTP ASCII transfers
  o curl_multi_socket() API added (still mostly untested)
  o conversion callback options for EBCDIC <=> ASCII conversions
@@ -45,6 +46,6 @@ advice from friends like these:
 
  Dan Fandrich, Ilja van Sprundel, David McCreedy, Tor Arntsen, Xavier Bouchoux,
  David Byron, Michele Bini, Ates Goral, Katie Wang, Robson Braga Araujo,
- Ale Vesely, Paul Querna
+ Ale Vesely, Paul Querna, Gisle Vanem
 
         Thanks! (and sorry if I forgot to mention someone)

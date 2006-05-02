@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel (2 May 2006)
+- Added a --checkfor option to curl-config to allow users to easier 
+  write for example shell scripts that test for the presence of a 
+  new-enough libcurl version. If --checkfor is given a version string 
+  newer than what is currently installed, curl-config will return a 
+  non-zero exit code and output a string about the unfulfilled 
+  requirement.
+
 Daniel (26 April 2006)
 - David McCreedy brought initial line end conversions when doing FTP ASCII
   transfers. They are done on non-windows systems and translate CRLF to LF.

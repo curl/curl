@@ -1,9 +1,29 @@
 #! /bin/sh
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 2001 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at http://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+# $Id$
+###########################################################################
 #
 # The idea to this kind of setup info script was stolen from numerous
 # other packages, such as neon, libxml and gnome.
-#
-# $Id$
 #
 prefix=@prefix@
 exec_prefix=@exec_prefix@
@@ -19,6 +39,7 @@ Available values for OPTION include:
   --ca        ca bundle install path
   --cc        compiler
   --cflags    pre-processor and compiler flags
+  --checkfor [version] check for (lib)curl of the specified version
   --features  newline separated list of enabled features
   --protocols newline separated list of enabled protocols
   --help      display this help and exit
@@ -120,6 +141,26 @@ while test $# -gt 0; do
     --version)
 	echo libcurl @VERSION@
 	exit 0
+	;;
+
+    --checkfor)
+        checkfor=$2
+        cmajor=`echo $checkfor | cut -d. -f1`
+        cminor=`echo $checkfor | cut -d. -f2`
+        # when extracting the patch part we strip off everything after a
+	# dash as that's used for things like version 1.2.3-CVS
+	cpatch=`echo $checkfor | cut -d. -f3 | cut -d- -f1`
+        checknum=`echo "$cmajor*256*256 + $cminor*256 + ${cpatch:-0}" | bc`
+        numuppercase=`echo @VERSIONNUM@ | tr 'a-f' 'A-F'`
+        nownum=`echo "obase=10; ibase=16; $numuppercase" | bc`
+
+	if test "$nownum" -ge "$checknum"; then
+	  # silent success
+	  exit 0
+	else
+	  echo "requested version $checkfor is newer than existing @VERSION@"
+	  exit 1
+	fi
 	;;
 
     --vernum)

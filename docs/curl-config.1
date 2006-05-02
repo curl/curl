@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl-config 1 "25 Jan 2004" "Curl 7.13.0" "curl-config manual"
+.TH curl-config 1 "25 Jan 2004" "Curl 7.15.4" "curl-config manual"
 .SH NAME
 curl-config \- Get information about a libcurl installation
 .SH SYNOPSIS
@@ -37,6 +37,11 @@ Displays the compiler used to build libcurl.
 .IP "--cflags"
 Set of compiler options (CFLAGS) to use when compiling files that use
 libcurl. Currently that is only thw include path to the curl include files.
+.IP "--checkfor [version]"
+Specify the oldest possible libcurl version string you want, and this 
+script will return 0 if the current installation is new enough or it 
+returns 1 and outputs a text saying that the current version is not new 
+enough. (Added in 7.15.4)
 .IP "--feature"
 Lists what particular main features the installed libcurl was built with. At
 the time of writing, this list may include SSL, KRB4 or IPv6. Do not assume
