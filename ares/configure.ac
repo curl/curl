@@ -47,6 +47,15 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
     CPPFLAGS="$CPPFLAGS -DCURLDEBUG -I$srcdir/../include"
     CFLAGS="$CFLAGS -g" 
 
+    dnl check for how to do large files, needed to get the curl_off_t check
+    dnl done right
+    AC_SYS_LARGEFILE
+
+    AC_CHECK_SIZEOF(curl_off_t, ,[
+#include <stdio.h>
+#include "$srcdir/../include/curl/curl.h"
+    ])
+
     dnl set compiler "debug" options to become more picky, and remove
     dnl optimize options from CFLAGS
     CURL_CC_DEBUG_OPTS
@@ -121,10 +130,6 @@ AC_C_CONST
 AC_TYPE_SIZE_T
 AC_HEADER_TIME
 
-AC_CHECK_SIZEOF(curl_off_t, ,[
-#include <stdio.h>
-#include "$srcdir/include/curl/curl.h"
-])
 AC_CHECK_SIZEOF(size_t)
 AC_CHECK_SIZEOF(long)
 AC_CHECK_SIZEOF(time_t)
