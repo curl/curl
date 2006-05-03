@@ -176,12 +176,21 @@ struct ares_channeldata {
 
   /* Active queries */
   struct query *queries;
+
+  ares_sock_state_cb sock_state_cb;
+  void *sock_state_cb_data;
 };
 
 void ares__send_query(ares_channel channel, struct query *query, time_t now);
-void ares__close_sockets(struct server_state *server);
+void ares__close_sockets(ares_channel channel, struct server_state *server);
 int ares__get_hostent(FILE *fp, int family, struct hostent **host);
 int ares__read_line(FILE *fp, char **buf, int *bufsize);
+
+#define SOCK_STATE_CALLBACK(c, s, r, w)                                 \
+  do {                                                                  \
+    if ((c)->sock_state_cb)                                             \
+      (c)->sock_state_cb((c)->sock_state_cb_data, (s), (r), (w));       \
+  } while (0)
 
 #ifdef CURLDEBUG
 /* This is low-level hard-hacking memory leak tracking and similar. Using the

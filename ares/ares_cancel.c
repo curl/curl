@@ -38,6 +38,6 @@ void ares_cancel(ares_channel channel)
   if (!(channel->flags & ARES_FLAG_STAYOPEN))
   {
     for (i = 0; i < channel->nservers; i++)
-      ares__close_sockets(&channel->servers[i]);
+      ares__close_sockets(channel, &channel->servers[i]);
   }
 }

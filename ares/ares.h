@@ -93,6 +93,7 @@ extern "C" {
 #define ARES_OPT_SERVERS        (1 << 6)
 #define ARES_OPT_DOMAINS        (1 << 7)
 #define ARES_OPT_LOOKUPS        (1 << 8)
+#define ARES_OPT_SOCK_STATE_CB  (1 << 9)
 
 /* Nameinfo flag values */
 #define ARES_NI_NOFQDN                  (1 << 0)
@@ -135,6 +136,18 @@ extern "C" {
 #define ARES_GETSOCK_WRITABLE(bits,num) (bits & (1 << ((num) + \
                                          ARES_GETSOCK_MAXNUM)))
 
+#ifdef WIN32
+typedef void (*ares_sock_state_cb)(void *data,
+                                   SOCKET socket,
+                                   int readable,
+                                   int writable);
+#else
+typedef void (*ares_sock_state_cb)(void *data,
+                                   int socket,
+                                   int readable,
+                                   int writable);
+#endif
+
 struct ares_options {
   int flags;
   int timeout;
@@ -147,6 +160,8 @@ struct ares_options {
   char **domains;
   int ndomains;
   char *lookups;
+  ares_sock_state_cb sock_state_cb;
+  void *sock_state_cb_data;
 };
 
 struct hostent;

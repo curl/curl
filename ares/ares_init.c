@@ -113,6 +113,7 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
   channel->queries = NULL;
   channel->domains = NULL;
   channel->sortlist = NULL;
+  channel->sock_state_cb = NULL;
 
   /* Initialize configuration by each of the four sources, from highest
    * precedence to lowest.
@@ -192,6 +193,11 @@ static int init_by_options(ares_channel channel, struct ares_options *options,
     channel->udp_port = options->udp_port;
   if ((optmask & ARES_OPT_TCP_PORT) && channel->tcp_port == -1)
     channel->tcp_port = options->tcp_port;
+  if ((optmask & ARES_OPT_SOCK_STATE_CB) && channel->sock_state_cb == NULL)
+    {
+      channel->sock_state_cb = options->sock_state_cb;
+      channel->sock_state_cb_data = options->sock_state_cb_data;
+    }
 
   /* Copy the servers, if given. */
   if ((optmask & ARES_OPT_SERVERS) && channel->nservers == -1)

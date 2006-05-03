@@ -1,5 +1,11 @@
   Changelog for the c-ares project
 
+* May 3, 2006
+
+- Nick Mathewson added the ARES_OPT_SOCK_STATE_CB option that when set makes
+  c-ares call a callback on socket state changes. A better way than the
+  ares_getsock() to get full control over the socket state.
+
 * January 9, 2006
 
 - Alexander Lazic improved the getservbyport_r() configure check.
@@ -28,8 +34,8 @@
 
 - Added constants that will be used by ares_getaddrinfo
 
-- Made ares_getnameinfo use the reentrant getservbyport (getservbyport_r) if it is
-  available to ensure it works properly in a threaded environment.
+- Made ares_getnameinfo use the reentrant getservbyport (getservbyport_r) if it
+  is available to ensure it works properly in a threaded environment.
 
 * September 10
 

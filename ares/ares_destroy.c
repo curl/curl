@@ -24,7 +24,7 @@ void ares_destroy(ares_channel channel)
   struct query *query;
 
   for (i = 0; i < channel->nservers; i++)
-    ares__close_sockets(&channel->servers[i]);
+    ares__close_sockets(channel, &channel->servers[i]);
   free(channel->servers);
   for (i = 0; i < channel->ndomains; i++)
     free(channel->domains[i]);

@@ -149,7 +149,10 @@ static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
                   wcount -= sendreq->len;
                   server->qhead = sendreq->next;
                   if (server->qhead == NULL)
-                    server->qtail = NULL;
+                    {
+                      SOCK_STATE_CALLBACK(channel, server->tcp_socket, 1, 0);
+                      server->qtail = NULL;
+                    }
                   free(sendreq);
                 }
               else
@@ -179,7 +182,10 @@ static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
             {
               server->qhead = sendreq->next;
               if (server->qhead == NULL)
-                server->qtail = NULL;
+                {
+                  SOCK_STATE_CALLBACK(channel, server->tcp_socket, 1, 0);
+                  server->qtail = NULL;
+                }
               free(sendreq);
             }
           else
@@ -380,7 +386,7 @@ static void handle_error(ares_channel channel, int whichserver, time_t now)
   struct query *query, *next;
 
   /* Reset communications with this server. */
-  ares__close_sockets(&channel->servers[whichserver]);
+  ares__close_sockets(channel, &channel->servers[whichserver]);
 
   /* Tell all queries talking to this server to move on and not try
    * this server again.
@@ -452,7 +458,10 @@ void ares__send_query(ares_channel channel, struct query *query, time_t now)
       if (server->qtail)
         server->qtail->next = sendreq;
       else
-        server->qhead = sendreq;
+        {
+          SOCK_STATE_CALLBACK(channel, server->tcp_socket, 1, 1);
+          server->qhead = sendreq;
+        }
       server->qtail = sendreq;
       query->timeout = 0;
     }
@@ -575,6 +584,7 @@ static int open_tcp_socket(ares_channel channel, struct server_state *server)
     }
   }
 
+  SOCK_STATE_CALLBACK(channel, s, 1, 0);
   server->tcp_buffer_pos = 0;
   server->tcp_socket = s;
   return 0;
@@ -603,6 +613,8 @@ static int open_udp_socket(ares_channel channel, struct server_state *server)
       closesocket(s);
       return -1;
     }
+
+  SOCK_STATE_CALLBACK(channel, s, 1, 0);
 
   server->udp_socket = s;
   return 0;
@@ -714,7 +726,7 @@ static struct query *end_query (ares_channel channel, struct query *query, int s
   if (!channel->queries && !(channel->flags & ARES_FLAG_STAYOPEN))
     {
       for (i = 0; i < channel->nservers; i++)
-        ares__close_sockets(&channel->servers[i]);
+        ares__close_sockets(channel, &channel->servers[i]);
     }
   return (next);
 }

@@ -23,7 +23,7 @@
 #include "ares.h"
 #include "ares_private.h"
 
-void ares__close_sockets(struct server_state *server)
+void ares__close_sockets(ares_channel channel, struct server_state *server)
 {
   struct send_request *sendreq;
 
@@ -46,11 +46,13 @@ void ares__close_sockets(struct server_state *server)
   /* Close the TCP and UDP sockets. */
   if (server->tcp_socket != ARES_SOCKET_BAD)
     {
+      SOCK_STATE_CALLBACK(channel, server->tcp_socket, 0, 0);
       closesocket(server->tcp_socket);
       server->tcp_socket = ARES_SOCKET_BAD;
     }
   if (server->udp_socket != ARES_SOCKET_BAD)
     {
+      SOCK_STATE_CALLBACK(channel, server->udp_socket, 0, 0);
       closesocket(server->udp_socket);
       server->udp_socket = ARES_SOCKET_BAD;
     }
