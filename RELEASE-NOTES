@@ -20,6 +20,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o GnuTLS non-block case that could cause data trashing
  o deflate code survives lack of zlib header
  o CURLOPT_INTERFACE works with hostname
  o configure runs fine with ICC
@@ -46,6 +47,6 @@ advice from friends like these:
 
  Dan Fandrich, Ilja van Sprundel, David McCreedy, Tor Arntsen, Xavier Bouchoux,
  David Byron, Michele Bini, Ates Goral, Katie Wang, Robson Braga Araujo,
- Ale Vesely, Paul Querna, Gisle Vanem
+ Ale Vesely, Paul Querna, Gisle Vanem, Mark Eichin
 
         Thanks! (and sorry if I forgot to mention someone)

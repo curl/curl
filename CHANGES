@@ -6,6 +6,18 @@
 
                                   Changelog
 
+Daniel (4 May 2006)
+- Mark Eichin submitted bug report #1480821
+  (http://curl.haxx.se/bug/view.cgi?id=1480821) He found and identified a
+  problem with how libcurl dealt with GnuTLS and a case where gnutls returned
+  GNUTLS_E_AGAIN indicating it would block. It would then return an unexpected
+  return code, making Curl_ssl_send() confuse the upper layer - causing random
+  28 bytes trash data to get inserted in the transfered stream.
+
+  The proper fix was to make the Curl_gtls_send() function return the proper
+  return codes that the callers would expect. The Curl_ossl_send() function
+  already did this.
+
 Daniel (2 May 2006)
 - Added a --checkfor option to curl-config to allow users to easier 
   write for example shell scripts that test for the presence of a 
