@@ -335,7 +335,7 @@ CURLcode Curl_write(struct connectdata *conn,
       bytes_written = (ssize_t)swrite(sockfd, mem, len);
 
     if(-1 == bytes_written) {
-      int err = Curl_ourerrno();
+      int err = Curl_sockerrno();
 
       if(
 #ifdef WSAEWOULDBLOCK
@@ -466,7 +466,7 @@ int Curl_read(struct connectdata *conn, /* connection data */
       nread = sread(sockfd, buf, buffersize);
 
     if(-1 == nread) {
-      int err = Curl_ourerrno();
+      int err = Curl_sockerrno();
 #ifdef WIN32
       if(WSAEWOULDBLOCK == err)
 #else

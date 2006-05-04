@@ -1611,7 +1611,7 @@ Curl_ossl_connect_common(struct connectdata *conn,
         }
         else {
           /* anything that gets here is fatally bad */
-          failf(data, "select on SSL socket, errno: %d", Curl_ourerrno());
+          failf(data, "select on SSL socket, errno: %d", Curl_sockerrno());
           return CURLE_SSL_CONNECT_ERROR;
         }
       } /* while()-loop for the select() */
@@ -1691,7 +1691,7 @@ int Curl_ossl_send(struct connectdata *conn,
       return 0;
     case SSL_ERROR_SYSCALL:
       failf(conn->data, "SSL_write() returned SYSCALL, errno = %d\n",
-            Curl_ourerrno());
+            Curl_sockerrno());
       return -1;
     case SSL_ERROR_SSL:
       /*  A failure in the SSL library occurred, usually a protocol error.
@@ -1743,7 +1743,7 @@ ssize_t Curl_ossl_recv(struct connectdata *conn, /* connection data */
       sslerror = ERR_get_error();
       failf(conn->data, "SSL read: %s, errno %d",
             ERR_error_string(sslerror, error_buffer),
-            Curl_ourerrno() );
+            Curl_sockerrno() );
       return -1;
     }
   }

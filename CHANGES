@@ -6,6 +6,17 @@
 
                                   Changelog
 
+Daniel (5 May 2006)
+- Roland Blom filed bug report #1481217
+  (http://curl.haxx.se/bug/view.cgi?id=1481217), with follow-ups by Michele
+  Bini and David Byron. libcurl previously wrongly used GetLastError() on
+  windows to get error details after socket-related function calls, when it
+  really should use WSAGetLastError() instead.
+
+  When changing to this, the former function Curl_ourerrno() is now instead
+  called Curl_sockerrno() as it is necessary to only use it to get errno from
+  socket-related functions as otherwise it won't work as intended on Windows.
+
 Daniel (4 May 2006)
 - Mark Eichin submitted bug report #1480821
   (http://curl.haxx.se/bug/view.cgi?id=1480821) He found and identified a

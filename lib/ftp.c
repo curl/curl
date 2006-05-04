@@ -29,7 +29,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <ctype.h>
-#include <errno.h>
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -58,10 +57,6 @@
 #include <in.h>
 #include <inet.h>
 #endif
-#endif
-
-#if defined(WIN32) && defined(__GNUC__) || defined(__MINGW32__)
-#include <errno.h>
 #endif
 
 #if (defined(NETWARE) && defined(__NOVELL_LIBC__))
@@ -492,7 +487,8 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
       switch (Curl_select(sockfd, CURL_SOCKET_BAD, interval_ms)) {
       case -1: /* select() error, stop reading */
         result = CURLE_RECV_ERROR;
-        failf(data, "FTP response aborted due to select() error: %d", errno);
+        failf(data, "FTP response aborted due to select() error: %d",
+              Curl_sockerrno());
         break;
       case 0: /* timeout */
         if(Curl_pgrsUpdate(conn))
@@ -871,7 +867,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
 
     portsock = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
     if (portsock == CURL_SOCKET_BAD) {
-      error = Curl_ourerrno();
+      error = Curl_sockerrno();
       continue;
     }
     break;
@@ -903,7 +899,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
       ((struct sockaddr_in6 *)sa)->sin6_port =0;
 
     if(bind(portsock, (struct sockaddr *)sa, sslen) < 0) {
-      failf(data, "bind failed: %s", Curl_strerror(conn, Curl_ourerrno()));
+      failf(data, "bind failed: %s", Curl_strerror(conn, Curl_sockerrno()));
       sclose(portsock);
       return CURLE_FTP_PORT_FAILED;
     }
@@ -914,14 +910,14 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   sslen = sizeof(ss);
   if(getsockname(portsock, (struct sockaddr *)sa, &sslen)<0) {
     failf(data, "getsockname() failed: %s",
-          Curl_strerror(conn, Curl_ourerrno()) );
+          Curl_strerror(conn, Curl_sockerrno()) );
     return CURLE_FTP_PORT_FAILED;
   }
 
   /* step 4, listen on the socket */
 
   if (listen(portsock, 1) < 0) {
-    error = Curl_ourerrno();
+    error = Curl_sockerrno();
     sclose(portsock);
     failf(data, "socket failure: %s", Curl_strerror(conn, error));
     return CURLE_FTP_PORT_FAILED;

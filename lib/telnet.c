@@ -36,7 +36,6 @@
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
-#include <errno.h>
 
 #if defined(WIN32)
 #include <time.h>

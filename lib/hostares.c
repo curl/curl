@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,7 +24,6 @@
 #include "setup.h"
 
 #include <string.h>
-#include <errno.h>
 
 #ifdef HAVE_MALLOC_H  /* Win32 */
 #include <malloc.h>
@@ -208,7 +207,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
       break;
     tvp = ares_timeout(data->state.areschannel, &store, &tv);
     count = select(nfds, &read_fds, &write_fds, NULL, tvp);
-    if (count < 0 && errno != EINVAL)
+    if (count < 0 && Curl_sockerrno() != EINVAL)
       break;
 
     ares_process(data->state.areschannel, &read_fds, &write_fds);

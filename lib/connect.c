@@ -114,13 +114,13 @@ singleipconnect(struct connectdata *conn,
                 bool *connected);
 
 /*
- * Curl_ourerrno() returns the errno (or equivalent) on this platform to
- * hide platform specific for the function that calls this.
+ * Curl_sockerrno() returns the *socket-related* errno (or equivalent) on this
+ * platform to hide platform specific for the function that calls this.
  */
-int Curl_ourerrno(void)
+int Curl_sockerrno(void)
 {
 #ifdef WIN32
-  return (int)GetLastError();
+  return (int)WSAGetLastError();
 #else
   return errno;
 #endif
@@ -330,7 +330,7 @@ static CURLcode bindlocal(struct connectdata *conn,
       if (setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
                      data->set.device, strlen(data->set.device)+1) != 0) {
         /* printf("Failed to BINDTODEVICE, socket: %d  device: %s error: %s\n",
-           sockfd, data->set.device, Curl_strerror(Curl_ourerrno())); */
+           sockfd, data->set.device, Curl_strerror(Curl_sockerrno())); */
         infof(data, "SO_BINDTODEVICE %s failed\n",
               data->set.device);
         /* This is typically "errno 1, error: Operation not permitted" if
@@ -408,7 +408,7 @@ static CURLcode bindlocal(struct connectdata *conn,
       break;
   } while(1);
 
-  data->state.os_errno = Curl_ourerrno();
+  data->state.os_errno = Curl_sockerrno();
   failf(data, "bind failure: %s",
         Curl_strerror(conn, data->state.os_errno));
   return CURLE_HTTP_PORT_FAILED;
@@ -452,7 +452,7 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
 
   if( -1 == getsockopt(sockfd, SOL_SOCKET, SO_ERROR,
                        (void *)&err, &errSize))
-    err = Curl_ourerrno();
+    err = Curl_sockerrno();
 
 #ifdef _WIN32_WCE
   /* Always returns this error, bug in CE? */
@@ -471,7 +471,7 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
 #else
   (void)sockfd;
   if (error)
-    *error = Curl_ourerrno();
+    *error = Curl_sockerrno();
 #endif
   return rc;
 }
@@ -610,7 +610,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
       infof(data, "Connection failed\n");
 
     if(trynextip(conn, sockindex, connected)) {
-      error = Curl_ourerrno();
+      error = Curl_sockerrno();
       data->state.os_errno = error;
       failf(data, "Failed connect to %s:%d; %s",
             conn->host.name, conn->port, Curl_strerror(conn,error));
@@ -642,7 +642,7 @@ static void tcpnodelay(struct connectdata *conn,
   if(setsockopt(sockfd, proto, TCP_NODELAY, (void *)&onoff,
                 sizeof(onoff)) < 0)
     infof(data, "Could not set TCP_NODELAY: %s\n",
-          Curl_strerror(conn, Curl_ourerrno()));
+          Curl_strerror(conn, Curl_sockerrno()));
   else
     infof(data,"TCP_NODELAY set\n");
 #else
@@ -664,7 +664,7 @@ static void nosigpipe(struct connectdata *conn,
   if(setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE, (void *)&onoff,
                 sizeof(onoff)) < 0)
     infof(data, "Could not set SO_NOSIGPIPE: %s\n",
-          Curl_strerror(conn, Curl_ourerrno()));
+          Curl_strerror(conn, Curl_sockerrno()));
 }
 #else
 #define nosigpipe(x,y)
@@ -717,7 +717,7 @@ singleipconnect(struct connectdata *conn,
     rc = 0;
 
   if(-1 == rc) {
-    error = Curl_ourerrno();
+    error = Curl_sockerrno();
 
     switch (error) {
     case EINPROGRESS:

@@ -37,8 +37,6 @@
 #include <sys/stat.h>
 #endif
 
-#include <errno.h>
-
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
 #include <time.h>
 #include <io.h>

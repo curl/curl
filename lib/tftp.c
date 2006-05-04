@@ -582,7 +582,7 @@ CURLcode Curl_tftp_connect(struct connectdata *conn, bool *done)
             conn->ip_addr->ai_addrlen);
   if(rc) {
     failf(conn->data, "bind() failed; %s\n",
-          Curl_strerror(conn,Curl_ourerrno()));
+          Curl_strerror(conn, Curl_sockerrno()));
     return CURLE_COULDNT_CONNECT;
   }
 
@@ -645,7 +645,7 @@ CURLcode Curl_tftp(struct connectdata *conn, bool *done)
 
     if(rc == -1) {
       /* bail out */
-      int error = Curl_ourerrno();
+      int error = Curl_sockerrno();
       failf(data, "%s\n", Curl_strerror(conn, error));
       event = TFTP_EVENT_ERROR;
     }
