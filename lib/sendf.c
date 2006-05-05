@@ -43,7 +43,7 @@
 #include <curl/curl.h>
 #include "urldata.h"
 #include "sendf.h"
-#include "connect.h" /* for the Curl_ourerrno() proto */
+#include "connect.h" /* for the Curl_sockerrno() proto */
 #include "sslgen.h"
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */

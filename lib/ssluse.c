@@ -49,7 +49,7 @@
 #include "url.h" /* for the ssl config check function */
 #include "inet_pton.h"
 #include "ssluse.h"
-#include "connect.h" /* Curl_ourerrno() proto */
+#include "connect.h" /* Curl_sockerrno() proto */
 #include "strequal.h"
 #include "select.h"
 #include "sslgen.h"

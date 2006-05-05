@@ -201,7 +201,7 @@ static void dump_addrinfo(struct connectdata *conn, const struct addrinfo *ai)
     if (Curl_printable_address(ai, buf, sizeof(buf)))
       printf("%s\n", buf);
     else
-      printf("failed; %s\n", Curl_strerror(conn, Curl_ourerrno()));
+      printf("failed; %s\n", Curl_strerror(conn, Curl_sockerrno()));
   }
 }
 #else

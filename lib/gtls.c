@@ -159,7 +159,7 @@ static CURLcode handshake(struct connectdata *conn,
       }
       else {
         /* anything that gets here is fatally bad */
-        failf(data, "select on SSL socket, errno: %d", Curl_ourerrno());
+        failf(data, "select on SSL socket, errno: %d", Curl_sockerrno());
         return CURLE_SSL_CONNECT_ERROR;
       }
     }
