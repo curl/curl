@@ -75,6 +75,7 @@
 #include "share.h"
 #include "strerror.h"
 #include "url.h"
+#include "connect.h" /* for the Curl_sockerrno() proto */
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
