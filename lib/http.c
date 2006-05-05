@@ -1415,6 +1415,8 @@ CURLcode Curl_https_connecting(struct connectdata *conn, bool *done)
 }
 
 #ifdef USE_SSLEAY
+/* This function is OpenSSL-specific. It should be made to query the generic
+   SSL layer instead. */
 int Curl_https_getsock(struct connectdata *conn,
                        curl_socket_t *socks,
                        int numsocks)
@@ -1438,6 +1440,18 @@ int Curl_https_getsock(struct connectdata *conn,
   }
   return CURLE_OK;
 }
+#else
+#ifdef USE_GNUTLS
+int Curl_https_getsock(struct connectdata *conn,
+                       curl_socket_t *socks,
+                       int numsocks)
+{
+  (void)conn;
+  (void)socks;
+  (void)numsocks;
+  return GETSOCK_BLANK;
+}
+#endif
 #endif
 
 /*
