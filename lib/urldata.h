@@ -158,7 +158,7 @@ struct ssl_connect_data {
 #endif /* USE_SSLEAY */
 #ifdef USE_GNUTLS
   gnutls_session session;
-  gnutls_anon_client_credentials cred;
+  gnutls_certificate_credentials cred;
 #endif /* USE_GNUTLS */
 };
 
