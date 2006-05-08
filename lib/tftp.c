@@ -36,7 +36,6 @@
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
-#include <errno.h>
 
 #if defined(WIN32)
 #include <time.h>
@@ -294,7 +293,7 @@ static void tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
                     state->conn->ip_addr->ai_addr,
                     state->conn->ip_addr->ai_addrlen);
     if(sbytes < 0) {
-      failf(data, "%s\n", Curl_strerror(state->conn, errno));
+      failf(data, "%s\n", Curl_strerror(state->conn, Curl_sockerrno()));
     }
     break;
 
@@ -362,7 +361,7 @@ static void tftp_rx(tftp_state_data_t *state, tftp_event_t event)
                     (struct sockaddr *)&state->remote_addr,
                     state->remote_addrlen);
     if(sbytes < 0) {
-      failf(data, "%s\n", Curl_strerror(state->conn, errno));
+      failf(data, "%s\n", Curl_strerror(state->conn, Curl_sockerrno()));
     }
 
     /* Check if completed (That is, a less than full packet is received) */
@@ -390,7 +389,7 @@ static void tftp_rx(tftp_state_data_t *state, tftp_event_t event)
                       state->remote_addrlen);
       /* Check all sbytes were sent */
       if(sbytes<0) {
-        failf(data, "%s\n", Curl_strerror(state->conn, errno));
+        failf(data, "%s\n", Curl_strerror(state->conn, Curl_sockerrno()));
       }
     }
     break;
@@ -437,15 +436,15 @@ static void tftp_tx(tftp_state_data_t *state, tftp_event_t event)
               "tftp_tx: giving up waiting for block %d ack",
               state->block);
       } else {
-	/* Re-send the data packet */
-	sbytes = sendto(state->sockfd, (void *)&state->spacket,
-			4+state->sbytes, SEND_4TH_ARG,
-			(struct sockaddr *)&state->remote_addr,
-			state->remote_addrlen);
-	/* Check all sbytes were sent */
-	if(sbytes<0) {
-	  failf(data, "%s\n", Curl_strerror(state->conn, errno));
-	}
+        /* Re-send the data packet */
+        sbytes = sendto(state->sockfd, (void *)&state->spacket,
+                        4+state->sbytes, SEND_4TH_ARG,
+                        (struct sockaddr *)&state->remote_addr,
+                        state->remote_addrlen);
+        /* Check all sbytes were sent */
+        if(sbytes<0) {
+          failf(data, "%s\n", Curl_strerror(state->conn, Curl_sockerrno()));
+        }
       }
       return;
     }
@@ -466,7 +465,7 @@ static void tftp_tx(tftp_state_data_t *state, tftp_event_t event)
                     state->remote_addrlen);
     /* Check all sbytes were sent */
     if(sbytes<0) {
-      failf(data, "%s\n", Curl_strerror(state->conn, errno));
+      failf(data, "%s\n", Curl_strerror(state->conn, Curl_sockerrno()));
     }
     break;
 
@@ -487,7 +486,7 @@ static void tftp_tx(tftp_state_data_t *state, tftp_event_t event)
                       state->remote_addrlen);
       /* Check all sbytes were sent */
       if(sbytes<0) {
-        failf(data, "%s\n", Curl_strerror(state->conn, errno));
+        failf(data, "%s\n", Curl_strerror(state->conn, Curl_sockerrno()));
       }
     }
     break;
@@ -676,40 +675,43 @@ CURLcode Curl_tftp(struct connectdata *conn, bool *done)
       }
 
       /* Sanity check packet length */
-      if (state->rbytes < 4)
-      {
+      if (state->rbytes < 4) {
         failf(conn->data, "Received too short packet\n");
         /* Not a timeout, but how best to handle it? */
         event = TFTP_EVENT_TIMEOUT;
-      } else {
+      }
+      else {
 
-	/* The event is given by the TFTP packet time */
-	event = (tftp_event_t)getrpacketevent(&state->rpacket);
+        /* The event is given by the TFTP packet time */
+        event = (tftp_event_t)getrpacketevent(&state->rpacket);
 
-	switch(event) {
-	case TFTP_EVENT_DATA:
-	  /* Don't pass to the client empty or retransmitted packets */
-	  if (state->rbytes > 4 && 
-	      ((state->block+1) == getrpacketblock(&state->rpacket))) {
-	    Curl_client_write(data, CLIENTWRITE_BODY,
-			  (char *)&state->rpacket.data[4], state->rbytes-4);
-	  }
-	  break;
-	case TFTP_EVENT_ERROR:
-	  state->error = (tftp_error_t)getrpacketblock(&state->rpacket);
-	  infof(conn->data, "%s\n", (char *)&state->rpacket.data[4]);
-	  break;
-	case TFTP_EVENT_ACK:
-	  break;
-	case TFTP_EVENT_RRQ:
-	case TFTP_EVENT_WRQ:
-	default:
-	  failf(conn->data, "%s\n", "Internal error: Unexpected packet");
-	  break;
-	}
+        switch(event) {
+        case TFTP_EVENT_DATA:
+          /* Don't pass to the client empty or retransmitted packets */
+          if (state->rbytes > 4 &&
+              ((state->block+1) == getrpacketblock(&state->rpacket))) {
+            code = Curl_client_write(data, CLIENTWRITE_BODY,
+                                     (char *)&state->rpacket.data[4],
+                                     state->rbytes-4);
+            if(code)
+              return code;
+          }
+          break;
+        case TFTP_EVENT_ERROR:
+          state->error = (tftp_error_t)getrpacketblock(&state->rpacket);
+          infof(conn->data, "%s\n", (char *)&state->rpacket.data[4]);
+          break;
+        case TFTP_EVENT_ACK:
+          break;
+        case TFTP_EVENT_RRQ:
+        case TFTP_EVENT_WRQ:
+        default:
+          failf(conn->data, "%s\n", "Internal error: Unexpected packet");
+          break;
+        }
 
-	/* Update the progress meter */
-	Curl_pgrsUpdate(conn);
+        /* Update the progress meter */
+        Curl_pgrsUpdate(conn);
 
       }
     }
