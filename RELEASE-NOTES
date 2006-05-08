@@ -20,6 +20,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o TFTP works in a more portable fashion (== on more platforms)
  o WSAGetLastError() is now used (better) on Windows
  o GnuTLS non-block case that could cause data trashing
  o deflate code survives lack of zlib header

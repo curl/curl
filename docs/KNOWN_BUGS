@@ -33,8 +33,6 @@ may have been fixed since this was written!
 
    See http://curl.haxx.se/bug/view.cgi?id=1371118
 
-28. The TFTP code is not portable and will fail on some architectures.
-
 26. NTLM authentication using SSPI (on Windows) when (lib)curl is running in
   "system context" will make it use wrong(?) user name - at least when compared
   to what winhttp does. See http://curl.haxx.se/bug/view.cgi?id=1281867

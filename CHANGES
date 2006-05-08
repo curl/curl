@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (8 May 2006)
+- Fixed known bug #28. The TFTP code no longer assumes a packed struct and
+  thus works reliably on more platforms.
+
 Daniel (5 May 2006)
 - Roland Blom filed bug report #1481217
   (http://curl.haxx.se/bug/view.cgi?id=1481217), with follow-ups by Michele

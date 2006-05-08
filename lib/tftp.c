@@ -122,23 +122,7 @@ typedef enum {
 } tftp_error_t;
 
 typedef struct tftp_packet {
-  unsigned short  event;
-  union {
-    struct {
-      unsigned char   data[512];
-    } request;
-    struct {
-      unsigned short  block;
-      unsigned char   data[512];
-    } data;
-    struct {
-      unsigned short  block;
-    } ack;
-    struct {
-      unsigned short  code;
-      unsigned char   data[512];
-    } error;
-  } u;
+  unsigned char data[516];
 } tftp_packet_t;
 
 typedef struct tftp_state_data {
@@ -199,7 +183,8 @@ void tftp_set_timeouts(tftp_state_data_t *state)
 
     /* Compute the re-start interval to suit the timeout */
     state->retry_time = timeout/state->retry_max;
-    if(state->retry_time<1) state->retry_time=1;
+    if(state->retry_time<1)
+      state->retry_time=1;
 
   }
   else {
@@ -215,12 +200,16 @@ void tftp_set_timeouts(tftp_state_data_t *state)
     state->retry_max = timeout/15;
   }
   /* But bound the total number  */
-  if(state->retry_max<3) state->retry_max=3;
-  if(state->retry_max>50) state->retry_max=50;
+  if(state->retry_max<3)
+    state->retry_max=3;
+
+  if(state->retry_max>50)
+    state->retry_max=50;
 
   /* Compute the re-ACK interval to suit the timeout */
   state->retry_time = timeout/state->retry_max;
-  if(state->retry_time<1) state->retry_time=1;
+  if(state->retry_time<1)
+    state->retry_time=1;
 
   infof(data, "set timeouts for state %d; Total %d, retry %d maxtry %d\n",
         state->state, (state->max_time-state->start_time),
@@ -234,6 +223,29 @@ void tftp_set_timeouts(tftp_state_data_t *state)
  * Event handler for the START state
  *
  **********************************************************/
+
+static void setpacketevent(tftp_packet_t *packet, unsigned short num)
+{
+  packet->data[0] = (num >> 8);
+  packet->data[1] = (num & 0xff);
+}
+
+
+static void setpacketblock(tftp_packet_t *packet, unsigned short num)
+{
+  packet->data[2] = (num >> 8);
+  packet->data[3] = (num & 0xff);
+}
+
+static unsigned short getrpacketevent(tftp_packet_t *packet)
+{
+  return (packet->data[0] << 8) | packet->data[1];
+}
+
+static unsigned short getrpacketblock(tftp_packet_t *packet)
+{
+  return (packet->data[2] << 8) | packet->data[3];
+}
 
 static void tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
 {
@@ -260,18 +272,18 @@ static void tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
 
     if(data->set.upload) {
       /* If we are uploading, send an WRQ */
-      state->spacket.event = htons(TFTP_EVENT_WRQ);
+      setpacketevent(&state->spacket, TFTP_EVENT_WRQ);
       filename = curl_easy_unescape(data, filename, 0, NULL);
-      state->conn->upload_fromhere = (char *)state->spacket.u.data.data;
+      state->conn->upload_fromhere = (char *)&state->spacket.data[2];
       if(data->set.infilesize != -1)
         Curl_pgrsSetUploadSize(data, data->set.infilesize);
     }
     else {
       /* If we are downloading, send an RRQ */
-      state->spacket.event = htons(TFTP_EVENT_RRQ);
+      setpacketevent(&state->spacket, TFTP_EVENT_RRQ);
     }
-    snprintf((char *)state->spacket.u.request.data,
-             sizeof(state->spacket.u.request.data),
+    snprintf((char *)&state->spacket.data[2],
+             512,
              "%s%c%s%c", filename, '\0',  mode, '\0');
     sbytes = 4 + (int)strlen(filename) + (int)strlen(mode);
     sbytes = sendto(state->sockfd, (void *)&state->spacket,
@@ -325,7 +337,7 @@ static void tftp_rx(tftp_state_data_t *state, tftp_event_t event)
   case TFTP_EVENT_DATA:
 
     /* Is this the block we expect? */
-    rblock = ntohs(state->rpacket.u.data.block);
+    rblock = getrpacketblock(&state->rpacket);
     if ((state->block+1) != rblock) {
       /* No, log it, up the retry count and fail if over the limit */
       infof(data,
@@ -340,9 +352,9 @@ static void tftp_rx(tftp_state_data_t *state, tftp_event_t event)
     /* This is the expected block.  Reset counters and ACK it. */
     state->block = rblock;
     state->retries = 0;
-    state->spacket.event = htons(TFTP_EVENT_ACK);
-    state->spacket.u.ack.block = htons(state->block);
-    sbytes = sendto(state->sockfd, (void *)&state->spacket,
+    setpacketevent(&state->spacket, TFTP_EVENT_ACK);
+    setpacketblock(&state->spacket, state->block);
+    sbytes = sendto(state->sockfd, (void *)state->spacket.data,
                     4, SEND_4TH_ARG,
                     (struct sockaddr *)&state->remote_addr,
                     state->remote_addrlen);
@@ -409,7 +421,7 @@ static void tftp_tx(tftp_state_data_t *state, tftp_event_t event)
 
   case TFTP_EVENT_ACK:
     /* Ack the packet */
-    rblock = ntohs(state->rpacket.u.data.block);
+    rblock = getrpacketblock(&state->rpacket);
 
     if(rblock != state->block) {
       /* This isn't the expected block.  Log it and up the retry counter */
@@ -428,14 +440,14 @@ static void tftp_tx(tftp_state_data_t *state, tftp_event_t event)
        block */
     state->block++;
     state->retries = 0;
-    state->spacket.event = htons(TFTP_EVENT_DATA);
-    state->spacket.u.ack.block = htons(state->block);
+    setpacketevent(&state->spacket, TFTP_EVENT_DATA);
+    setpacketblock(&state->spacket, state->block);
     if(state->block > 1 && state->sbytes < 512) {
       state->state = TFTP_STATE_FIN;
       return;
     }
     Curl_fillreadbuffer(state->conn, 512, &state->sbytes);
-    sbytes = sendto(state->sockfd, (void *)&state->spacket,
+    sbytes = sendto(state->sockfd, (void *)state->spacket.data,
                     4+state->sbytes, SEND_4TH_ARG,
                     (struct sockaddr *)&state->remote_addr,
                     state->remote_addrlen);
@@ -529,28 +541,9 @@ CURLcode Curl_tftp_connect(struct connectdata *conn, bool *done)
   tftp_state_data_t     *state;
   int rc;
 
-  /*
-   * The TFTP code is not portable because it sends C structs directly over
-   * the wire.  Since C gives compiler writers a wide latitude in padding and
-   * aligning structs, this fails on many architectures (e.g. ARM).
-   *
-   * The only portable way to fix this is to copy each struct item into a
-   * flat buffer and send the flat buffer instead of the struct.  The
-   * alternative, trying to get the compiler to eliminate padding bytes
-   * within the struct, is a nightmare to maintain (each compiler does it
-   * differently), and is still not guaranteed to work because some
-   * architectures can't handle the resulting alignment.
-   *
-   * This check can be removed once the code has been fixed.
-   */
-  if(sizeof(struct tftp_packet) != 516) {
-    failf(conn->data, "tftp not supported on this architecture");
-    return CURLE_FAILED_INIT;
-  }
-
-  if((state = conn->proto.tftp = calloc(sizeof(tftp_state_data_t), 1))==NULL) {
+  state = conn->proto.tftp = calloc(sizeof(tftp_state_data_t), 1);
+  if(!state)
     return CURLE_OUT_OF_MEMORY;
-  }
 
   state->conn = conn;
   state->sockfd = state->conn->sock[FIRSTSOCKET];
@@ -678,17 +671,17 @@ CURLcode Curl_tftp(struct connectdata *conn, bool *done)
       } else {
 
 	/* The event is given by the TFTP packet time */
-	event = (tftp_event_t)ntohs(state->rpacket.event);
+	event = (tftp_event_t)getrpacketevent(&state->rpacket);
 
 	switch(event) {
 	case TFTP_EVENT_DATA:
 	  if (state->rbytes > 4)
 	    Curl_client_write(data, CLIENTWRITE_BODY,
-			  (char *)state->rpacket.u.data.data, state->rbytes-4);
+			  (char *)&state->rpacket.data[4], state->rbytes-4);
 	  break;
 	case TFTP_EVENT_ERROR:
-	  state->error = (tftp_error_t)ntohs(state->rpacket.u.error.code);
-	  infof(conn->data, "%s\n", (char *)state->rpacket.u.error.data);
+	  state->error = (tftp_error_t)getrpacketblock(&state->rpacket);
+	  infof(conn->data, "%s\n", (char *)&state->rpacket.data[4]);
 	  break;
 	case TFTP_EVENT_ACK:
 	  break;
