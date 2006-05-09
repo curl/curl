@@ -16,10 +16,11 @@ This release includes the following changes:
  o curl_multi_socket() API added (still mostly untested)
  o conversion callback options for EBCDIC <=> ASCII conversions
  o added CURLINFO_FTP_ENTRY_PATH
- o less blocking for the multi interface during SSL connect negotiation 
+ o less blocking for the multi interface during (Open)SSL connect negotiation
 
 This release includes the following bugfixes:
 
+ o numerous bugs fixed in the TFTP code
  o possible memory leak when adding easy handles to multi stack
  o TFTP works in a more portable fashion (== on more platforms)
  o WSAGetLastError() is now used (better) on Windows
