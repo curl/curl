@@ -1,7 +1,7 @@
 # LIBCURL_CHECK_CONFIG ([DEFAULT-ACTION], [MINIMUM-VERSION],
 #                       [ACTION-IF-YES], [ACTION-IF-NO])
 # ----------------------------------------------------------
-#      David Shaw <dshaw@jabberwocky.com>   Jan-17-2006
+#      David Shaw <dshaw@jabberwocky.com>   May-09-2006
 #
 # Checks for libcurl.  DEFAULT-ACTION is the string yes or no to
 # specify whether to default to --with-libcurl or --without-libcurl.
@@ -210,6 +210,9 @@ x=CURLOPT_VERBOSE;
 	      AC_DEFINE_UNQUOTED(AS_TR_CPP(libcurl_protocol_$_libcurl_protocol),[1])
 	      eval AS_TR_SH(libcurl_protocol_$_libcurl_protocol)=yes
            done
+	else
+	   unset LIBCURL
+	   unset LIBCURL_CPPFLAGS
         fi
      fi
 

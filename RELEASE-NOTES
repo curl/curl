@@ -20,6 +20,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o libcurl.m4 when default=yes but no libcurl was found
  o numerous bugs fixed in the TFTP code
  o possible memory leak when adding easy handles to multi stack
  o TFTP works in a more portable fashion (== on more platforms)
@@ -51,6 +52,7 @@ advice from friends like these:
 
  Dan Fandrich, Ilja van Sprundel, David McCreedy, Tor Arntsen, Xavier Bouchoux,
  David Byron, Michele Bini, Ates Goral, Katie Wang, Robson Braga Araujo,
- Ale Vesely, Paul Querna, Gisle Vanem, Mark Eichin, Roland Blom
+ Ale Vesely, Paul Querna, Gisle Vanem, Mark Eichin, Roland Blom, Andreas
+ Ntaflos, David Shaw
 
         Thanks! (and sorry if I forgot to mention someone)

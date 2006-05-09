@@ -7,6 +7,15 @@
                                   Changelog
 
 Daniel (9 May 2006)
+- Andreas Ntaflos reported a bug in libcurl.m4: When configuring my GNU
+  autotools project, which optionally (default=yes) uses libcurl on a system
+  without a (usable) libcurl installation, but not specifying
+  `--without-libcurl', configure determines correctly that no libcurl is
+  available, however, the LIBCURL variable gets expanded to `LIBCURL = -lcurl'
+  in the resulting Makefiles.
+
+  David Shaw fixed the flaw.
+
 - Robson Braga Araujo fixed two problems in the recently added non-blocking SSL
   connects. The state machine was not reset properly so that subsequent
   connects using the same handle would fail, and there were two memory leaks.
