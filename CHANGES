@@ -7,12 +7,41 @@
                                   Changelog
 
 Daniel (9 May 2006)
+- Robson Braga Araujo fixed two problems in the recently added non-blocking SSL
+  connects. The state machine was not reset properly so that subsequent
+  connects using the same handle would fail, and there were two memory leaks.
+
 - Robson Braga Araujo fixed a memory leak when you added an easy handle to a
   multi stack and that easy handle had already been used to do one or more
   easy interface transfers, as then the code threw away the previously used
   DNS cache without properly freeing it.
 
 Daniel (8 May 2006)
+- Dan Fandrich went over the TFTP code and he pointed out and fixed numerous
+  problems:
+
+  * The received file is corrupted when a packet is lost and retransmitted
+    (this is a serious problem!)
+
+  * Transmitting a file aborts if a block is lost and retransmitted
+
+  * Data is stored in the wrong location in the buffer for uploads, so uploads
+    always fail (I don't see how it could have ever worked, but it did on x86
+    at least)
+
+  * A number of calls are made to strerror instead of Curl_strerror, making
+    the code not thread safe
+
+  * There are references to errno instead of Curl_sockerrno(), causing
+    incorrect error messages on Windows
+
+  * The file name includes a leading / which violates RFC3617. Doing something
+    similar to ftp, where two slashes after the host name means an absolute
+    reference seems a reasonable extension to fix this.
+
+  * Failures in EBCDIC conversion are not propagated up to the caller but are
+    silently ignored
+
 - Fixed known bug #28. The TFTP code no longer assumes a packed struct and
   thus works reliably on more platforms.
 

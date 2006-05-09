@@ -1131,7 +1131,7 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
 
 static CURLcode
 Curl_ossl_connect_step1(struct connectdata *conn,
-                  int sockindex)
+                        int sockindex)
 {
   CURLcode retcode = CURLE_OK;
 
@@ -1168,6 +1168,8 @@ Curl_ossl_connect_step1(struct connectdata *conn,
     break;
   }
 
+  if (connssl->ctx)
+    SSL_CTX_free(connssl->ctx);
   connssl->ctx = SSL_CTX_new(req_method);
 
   if(!connssl->ctx) {
@@ -1193,7 +1195,7 @@ Curl_ossl_connect_step1(struct connectdata *conn,
   /* OpenSSL contains code to work-around lots of bugs and flaws in various
      SSL-implementations. SSL_CTX_set_options() is used to enabled those
      work-arounds. The man page for this option states that SSL_OP_ALL enables
-     ll the work-arounds and that "It is usually safe to use SSL_OP_ALL to
+     all the work-arounds and that "It is usually safe to use SSL_OP_ALL to
      enable the bug workaround options if compatibility with somewhat broken
      implementations is desired."
 
@@ -1279,6 +1281,8 @@ Curl_ossl_connect_step1(struct connectdata *conn,
   }
 
   /* Lets make an SSL structure */
+  if (connssl->handle)
+    SSL_free(connssl->handle);
   connssl->handle = SSL_new(connssl->ctx);
   if (!connssl->handle) {
     failf(data, "SSL: couldn't create a context (handle)!");
@@ -1637,6 +1641,9 @@ Curl_ossl_connect_common(struct connectdata *conn,
   else {
     *done = FALSE;
   }
+
+  /* Reset our connect state machine */
+  connssl->connecting_state = ssl_connect_1;
 
   return CURLE_OK;
 }
