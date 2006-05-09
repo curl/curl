@@ -315,7 +315,12 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   easy->easy_handle = easy_handle;
   multistate(easy, CURLM_STATE_INIT);
 
-  /* for multi interface connections, we share DNS cache automaticly */
+  /* for multi interface connections, we share DNS cache automaticly.
+     First kill the existing one if there is any. */
+  if (easy->easy_handle->hostcache &&
+      easy->easy_handle->hostcache != multi->hostcache)
+    Curl_hash_destroy(easy->easy_handle->hostcache);
+
   easy->easy_handle->hostcache = multi->hostcache;
 
   /* We add this new entry first in the list. We make our 'next' point to the

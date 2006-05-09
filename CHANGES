@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel (9 May 2006)
+- Robson Braga Araujo fixed a memory leak when you added an easy handle to a
+  multi stack and that easy handle had already been used to do one or more
+  easy interface transfers, as then the code threw away the previously used
+  DNS cache without properly freeing it.
+
 Daniel (8 May 2006)
 - Fixed known bug #28. The TFTP code no longer assumes a packed struct and
   thus works reliably on more platforms.
