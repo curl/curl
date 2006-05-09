@@ -258,7 +258,7 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
      name so we skip the always-present first letter of the path string. */
   char *filename = &state->conn->path[1];
   struct SessionHandle *data = state->conn->data;
-  CURLcode res;
+  CURLcode res = CURLE_OK;
 
   /* Set ascii mode if -B flag was used */
   if(data->set.ftp_ascii)
