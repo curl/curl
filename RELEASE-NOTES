@@ -20,6 +20,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o dict with letters such as space in a word
+ o dict with url-encoded words in the URL
  o libcurl.m4 when default=yes but no libcurl was found
  o numerous bugs fixed in the TFTP code
  o possible memory leak when adding easy handles to multi stack

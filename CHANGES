@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel (10 May 2006)
+- Fixed DICT in two aspects:
+
+  1 - allow properly URL-escaped words, like using %20 for spaces
+
+  2 - properly escape certain letters within a word to comply to the RFC2229
+
 Daniel (9 May 2006)
 - Andreas Ntaflos reported a bug in libcurl.m4: When configuring my GNU
   autotools project, which optionally (default=yes) uses libcurl on a system

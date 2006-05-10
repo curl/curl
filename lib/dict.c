@@ -83,9 +83,46 @@
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
+/* The last #include file should be: */
+#include "memdebug.h"
+
+static char *unescape_word(struct SessionHandle *data, char *inp)
+{
+  char *newp;
+  char *dictp;
+  char *ptr;
+  int len;
+  unsigned char byte;
+  int olen=0;
+
+  newp = curl_easy_unescape(data, inp, 0, &len);
+  if(!newp)
+    return NULL;
+
+  dictp = malloc(len*2 + 1); /* add one for terminating zero */
+  if(dictp) {
+    /* According to RFC2229 section 2.2, these letters need to be escaped with
+       \[letter] */
+    for(ptr = newp;
+        (byte = (unsigned char)*ptr);
+        ptr++) {
+      if ((byte <= 32) || (byte == 127) ||
+          (byte == '\'') || (byte == '\"') || (byte == '\\')) {
+        dictp[olen++] = '\\';
+      }
+      dictp[olen++] = byte;
+    }
+    dictp[olen]=0;
+
+    free(newp);
+  }
+  return dictp;
+}
+
 CURLcode Curl_dict(struct connectdata *conn, bool *done)
 {
   char *word;
+  char *eword;
   char *ppath;
   char *database = NULL;
   char *strategy = NULL;
@@ -135,6 +172,10 @@ CURLcode Curl_dict(struct connectdata *conn, bool *done)
       strategy = (char *)".";
     }
 
+    eword = unescape_word(data, word);
+    if(!eword)
+      return CURLE_OUT_OF_MEMORY;
+
     result = Curl_sendf(sockfd, conn,
                         "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\r\n"
                         "MATCH "
@@ -145,8 +186,11 @@ CURLcode Curl_dict(struct connectdata *conn, bool *done)
 
                         database,
                         strategy,
-                        word
+                        eword
                         );
+
+    free(eword);
+
     if(result)
       failf(data, "Failed sending DICT request");
     else
@@ -179,6 +223,10 @@ CURLcode Curl_dict(struct connectdata *conn, bool *done)
       database = (char *)"!";
     }
 
+    eword = unescape_word(data, word);
+    if(!eword)
+      return CURLE_OUT_OF_MEMORY;
+
     result = Curl_sendf(sockfd, conn,
                         "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\r\n"
                         "DEFINE "
@@ -186,7 +234,10 @@ CURLcode Curl_dict(struct connectdata *conn, bool *done)
                         "%s\r\n"  /* word */
                         "QUIT\r\n",
                         database,
-                        word);
+                        eword);
+
+    free(eword);
+
     if(result)
       failf(data, "Failed sending DICT request");
     else
