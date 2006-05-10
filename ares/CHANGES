@@ -1,5 +1,12 @@
   Changelog for the c-ares project
 
+* May 10, 2006
+
+- Bram Matthys brought my attention to a libtool peculiarity where detecting
+  things such as C++ compiler actually is a bad thing and since we don't need
+  that detection I added a work-around, much inspired by a previous patch by
+  Paolo Bonzini. This also shortens the configure script quite a lot.
+
 * May 3, 2006
 
 - Nick Mathewson added the ARES_OPT_SOCK_STATE_CB option that when set makes

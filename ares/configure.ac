@@ -66,6 +66,7 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
 )
 
 dnl libtool setup
+CARES_CLEAR_LIBTOOL_TAGS
 AC_PROG_LIBTOOL
 
 dnl Checks for header files.
@@ -433,7 +434,8 @@ int main()
   }
   ], [
        AC_MSG_RESULT(yes)
-       AC_DEFINE_UNQUOTED(HAVE_INET_NTOP_IPV6,1,[Define to 1 if inet_ntop supports IPv6.])
+       AC_DEFINE_UNQUOTED(HAVE_INET_NTOP_IPV6,1,
+          [Define to 1 if inet_ntop supports IPv6.])
      ], AC_MSG_RESULT(no),AC_MSG_RESULT(no))
 fi
 
@@ -499,13 +501,15 @@ dnl and get the types of five of its arguments.
 CURL_CHECK_FUNC_GETNAMEINFO
 
 
-dnl God bless non-standardized functions! We need to see which getservbyport_r variant is available
+dnl God bless non-standardized functions! We need to see which getservbyport_r
+dnl variant is available
 CARES_CHECK_GETSERVBYPORT_R
 
 CURL_CHECK_NONBLOCKING_SOCKET
 
 AC_C_BIGENDIAN(
-    [AC_DEFINE(ARES_BIG_ENDIAN, 1, [define this if ares is built for a big endian system])],
+    [AC_DEFINE(ARES_BIG_ENDIAN, 1,
+      [define this if ares is built for a big endian system])],
     ,
     [AC_MSG_WARN([couldn't figure out endianess, assuming little endian!])]
 )
