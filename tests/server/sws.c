@@ -307,9 +307,9 @@ int ProcessRequest(struct httprequest *req)
         else if(!strncmp(doc, "test", 4)) {
           /* if the host name starts with test, the port number used in the
              CONNECT line will be used as test number! */
-          char *ptr = strchr(doc, ':');
-          if(ptr)
-            req->testno = atoi(ptr+1);
+          char *portp = strchr(doc, ':');
+          if(portp)
+            req->testno = atoi(portp+1);
           else
             req->testno = DOCNUMBER_CONNECT;
         }
@@ -643,7 +643,7 @@ static int send_doc(int sock, struct httprequest *req)
   if(cmdsize > 0 ) {
     char command[32];
     int num;
-    char *ptr=cmd;
+    ptr=cmd;
     do {
       if(2 == sscanf(ptr, "%31s %d", command, &num)) {
         if(!strcmp("wait", command)) {
