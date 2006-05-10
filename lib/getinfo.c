@@ -75,6 +75,8 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
   double *param_doublep=NULL;
   char **param_charp=NULL;
   struct curl_slist **param_slistp=NULL;
+  char buf;
+
   va_start(arg, info);
 
   switch(info&CURLINFO_TYPEMASK) {
@@ -197,9 +199,23 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
     break;
   case CURLINFO_LASTSOCKET:
     if((data->state.lastconnect != -1) &&
-       (data->state.connects[data->state.lastconnect] != NULL))
+       (data->state.connects[data->state.lastconnect] != NULL)) {
       *param_longp = data->state.connects[data->state.lastconnect]->
         sock[FIRSTSOCKET];
+      /* we have a socket connected, let's determine if the server shut down */
+      /* determine if ssl */
+      if(data->state.connects[data->state.lastconnect]->protocol & PROT_SSL) {
+        /* use the SSL context */
+        if (!Curl_ssl_check_cxn(data->state.connects[data->state.lastconnect]))
+          *param_longp = -1;   /* FIN received */
+      }
+      else {
+        /* use the socket */
+        if(recv((int)data->state.connects[data->state.lastconnect]->
+                sock[FIRSTSOCKET], (void*)&buf, 1, MSG_PEEK) == 0)
+          *param_longp = -1;   /* FIN received */
+      }
+    }
     else
       *param_longp = -1;
     break;

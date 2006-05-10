@@ -554,3 +554,21 @@ size_t Curl_ssl_version(char *buffer, size_t size)
 #endif /* USE_SSLEAY */
 }
 
+
+/*
+ * This function tries to determine connection status.
+ *
+ * Return codes:
+ *     1 means the connection is still in place
+ *     0 means the connection has been closed
+ *    -1 means the connection status is unknown
+ */
+int Curl_ssl_check_cxn(struct connectdata *conn)
+{
+#ifdef USE_SSLEAY
+  return Curl_ossl_check_cxn(conn);
+#else
+  /* TODO: we lack implementation of this for GnuTLS */
+  return -1; /* connection status unknown */
+#endif /* USE_SSLEAY */
+}

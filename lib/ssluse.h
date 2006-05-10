@@ -64,4 +64,6 @@ ssize_t Curl_ossl_recv(struct connectdata *conn, /* connection data */
 
 size_t Curl_ossl_version(char *buffer, size_t size);
 
+int Curl_ossl_check_cxn(struct connectdata *cxn);
+
 #endif

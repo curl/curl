@@ -11,6 +11,7 @@ Curl and libcurl 7.15.4
 
 This release includes the following changes:
 
+ o CURLINFO_LASTSOCKET returned sockets are now checked more before returned
  o curl-config got a --checkfor option to compare version numbers
  o line end conversions for FTP ASCII transfers
  o curl_multi_socket() API added (still mostly untested)

@@ -67,6 +67,8 @@ struct curl_slist *Curl_ssl_engines_list(struct SessionHandle *data);
 
 size_t Curl_ssl_version(char *buffer, size_t size);
 
+int Curl_ssl_check_cxn(struct connectdata *conn);
+
 #if !defined(USE_SSL) && !defined(SSLGEN_C)
 /* set up blank macros for none-SSL builds */
 #define Curl_ssl_close_all(x)
