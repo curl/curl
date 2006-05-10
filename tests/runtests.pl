@@ -82,6 +82,7 @@ my $TFTP6PIDFILE=".tftp6.pid";
 
 # invoke perl like this:
 my $perl="perl -I$srcdir";
+my $server_response_maxtime=8;
 
 # this gets set if curl is compiled with debugging:
 my $curl_debug=0;
@@ -415,7 +416,7 @@ sub stopserver {
 
 sub verifyhttp {
     my ($proto, $ip, $port) = @_;
-    my $cmd = "$CURL -m4 -o log/verifiedserver -ksvg \"$proto://$ip:$port/verifiedserver\" 2>log/verifyhttp";
+    my $cmd = "$CURL -m$server_response_maxtime -o log/verifiedserver -ksvg \"$proto://$ip:$port/verifiedserver\" 2>log/verifyhttp";
     my $pid;
 
     # verify if our/any server is running on this port
@@ -466,7 +467,7 @@ sub verifyftp {
     my ($proto, $ip, $port) = @_;
     my $pid;
     my $time=time();
-    my $cmd="$CURL -m4 --silent -vg \"$proto://$ip:$port/verifiedserver\" 2>log/verifyftp";
+    my $cmd="$CURL -m$server_response_maxtime --silent -vg \"$proto://$ip:$port/verifiedserver\" 2>log/verifyftp";
     # check if this is our server running on this port:
     my @data=`$cmd`;
     logmsg "RUN: $cmd\n" if($verbose);
