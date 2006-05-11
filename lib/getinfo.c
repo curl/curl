@@ -204,7 +204,7 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
         sock[FIRSTSOCKET];
       /* we have a socket connected, let's determine if the server shut down */
       /* determine if ssl */
-      if(data->state.connects[data->state.lastconnect]->protocol & PROT_SSL) {
+      if(data->state.connects[data->state.lastconnect]->ssl[FIRSTSOCKET].use) {
         /* use the SSL context */
         if (!Curl_ssl_check_cxn(data->state.connects[data->state.lastconnect]))
           *param_longp = -1;   /* FIN received */
