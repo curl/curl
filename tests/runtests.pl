@@ -82,7 +82,7 @@ my $TFTP6PIDFILE=".tftp6.pid";
 
 # invoke perl like this:
 my $perl="perl -I$srcdir";
-my $server_response_maxtime=8;
+my $server_response_maxtime=13;
 
 # this gets set if curl is compiled with debugging:
 my $curl_debug=0;
@@ -99,6 +99,7 @@ my $valgrind = checkcmd("valgrind");
 my $valgrind_logfile="--logfile";
 my $start;
 my $forkserver=0;
+my $ftpchecktime; # time it took to verify our test FTP server
 
 my $valgrind_tool;
 if($valgrind) {
@@ -473,9 +474,6 @@ sub verifyftp {
     logmsg "RUN: $cmd\n" if($verbose);
     my $line;
 
-    # if this took more than 2 secs, we assume it "hung" on a weird server
-    my $took = time()-$time;
-
     foreach $line (@data) {
         if ( $line =~ /WE ROOLZ: (\d+)/ ) {
             # this is our test server with a known pid!
@@ -488,6 +486,15 @@ sub verifyftp {
         logmsg "RUN: Unknown server on our FTP port: $port\n";
         return 0;
     }
+    # we can/should use the time it took to verify the FTP server as a measure
+    # on how fast/slow this host/FTP is.
+    my $took = time()-$time;
+
+    if($verbose) {
+        logmsg "RUN: Verifying our test FTP server took $took seconds!\n";
+    }
+    $ftpchecktime = $took?$took:1; # make sure it never is zero
+
     return $pid;
 }
 
@@ -1093,6 +1100,17 @@ sub subVariables {
   $$thing =~ s/%PWD/$pwd/g;
   $$thing =~ s/%TFTPPORT/$TFTPPORT/g;
   $$thing =~ s/%TFTP6PORT/$TFTP6PORT/g;
+
+  # The purpose of FTPTIME2 and FTPTIME3 is to provide times that can be
+  # used for time-out tests and that whould work on most hosts as these
+  # adjust for the startup/check time for this particular host. We needed
+  # to do this to make the test suite run better on very slow hosts.
+
+  my $ftp2 = $ftpchecktime * 2;
+  my $ftp3 = $ftpchecktime * 3;
+
+  $$thing =~ s/%FTPTIME2/$ftp2/g;
+  $$thing =~ s/%FTPTIME3/$ftp3/g;
 }
 
 sub fixarray {
