@@ -568,6 +568,7 @@ int Curl_ssl_check_cxn(struct connectdata *conn)
 #ifdef USE_SSLEAY
   return Curl_ossl_check_cxn(conn);
 #else
+  (void)conn;
   /* TODO: we lack implementation of this for GnuTLS */
   return -1; /* connection status unknown */
 #endif /* USE_SSLEAY */
