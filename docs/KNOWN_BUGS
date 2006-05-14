@@ -3,6 +3,8 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+34. The SOCKS connection codes don't properly acknowledge (connect) timeouts.
+
 33. Doing multi-pass HTTP authentication on a non-default port does not work.
   This happens because the multi-pass code abuses the redirect following code
   for doing multiple requests, and when we following redirects to an absolute
