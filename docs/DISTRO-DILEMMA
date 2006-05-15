@@ -1,12 +1,12 @@
-  Date: October 27, 2005
+  Date: May 15, 2006
   Author: Daniel Stenberg <daniel@haxx.se>
   URL: http://curl.haxx.se/legal/distro-dilemma.html
 
 Condition
 
  This document is written to describe the situation as it is right
- now. libcurl 7.15.0 is currently the latest version available. Things may (or
- perhaps will) of course change in the future.
+ now. libcurl 7.15.3 is currently the latest version available. Things may of
+ course change in the future.
 
  This document reflects my view and understanding of these things. Please tell
  me where and how you think I'm wrong, and I'll try to correct my mistakes.
@@ -16,11 +16,10 @@ Background
  The Free Software Foundation has deemed the Original BSD license[1] to be
  "incompatible"[2] with GPL[3]. I'd rather say it is the other way around, but
  the point is the same: if you distribute a binary version of a GPL program,
- it MUST NOT be linked with any Original BSD-licensed parts or
- libraries. Doing so will violate the GPL license. For a long time, very many
- GPL licensed programs have avoided this license mess by adding an
- exception[8] to their license. And many others have just closed their eyes
- for this problem.
+ it MUST NOT be linked with any Original BSD-licensed parts or libraries.
+ Doing so will violate the GPL license. For a long time, very many GPL
+ licensed programs have avoided this license mess by adding an exception[8] to
+ their license. And many others have just closed their eyes for this problem.
 
  libcurl is MIT-style[4] licensed - how on earth did this dilemma fall onto
  our plates?
@@ -49,25 +48,13 @@ Part of the Operating System
  Debian does however not take this stance and has officially(?) claimed that
  OpenSSL is not a required part of the Debian operating system
 
-Debian-legal
-
- In August 2004 I figured I should start pulling people's attention to this to
- see if anyone has any bright ideas or if they would dismiss my worries based
- on some elegant writing I had missed somewhere:
-
- My post to debian-legal on August 12 2004:
-
-        http://lists.debian.org/debian-legal/2004/08/msg00279.html
-
- Several people agreed then that this is a known and rather big problem, but
- the following discussion didn't result in much.
-
 GnuTLS
 
- With the release of libcurl 7.14.0 (May 2005), it can now get built to use
- GnuTLS instead of OpenSSL. GnuTLS is a LGPL[7] licensed library that offers a
- matching set of features as OpenSSL does. Now, you can build and distribute
- an SSL capable libcurl without including any Original BSD licensed code.
+ With the release of libcurl 7.14.0 (May 2005), libcurl can now get built to
+ use GnuTLS instead of OpenSSL. GnuTLS is an LGPL[7] licensed library that
+ offers a matching set of features as OpenSSL does. Now, you can build and
+ distribute an TLS/SSL capable libcurl without including any Original BSD
+ licensed code.
 
  I believe Debian is the first distro to provide libcurl/GnutTLS packages.
 
@@ -80,23 +67,20 @@ GnuTLS vs OpenSSL
  and it has not been tested nor used very extensively, while the OpenSSL
  equivalent code has been used and thus matured for more than seven (7) years.
 
- In August 2005, the debian-devel mailing list discovered the license issue as
- a GPL licensed application wanted SSL capabilities from libcurl and thus was
- forced to use the GnuTLS powered libcurl. For a reason that is unknown to me,
- the application authors didn't want to or was unable to add an exception to
- their GPL license. Alas, the license problem hit the fan again.
-
  GnuTLS
    - LGPL licensened
    - supports SRP
    - lacks SSLv2 support
    - lacks MD2 support (used by at least some CA certs)
+   - lacks the crypto functions libcurl uses for NTLM
 
  OpenSSL
    - Original BSD licensened
    - lacks SRP
    - supports SSLv2
    - older and more widely used
+   - provides crypto functions libcurl uses for NTLM
+   - libcurl can do non-blocking connects with it in 7.15.4 and later
 
 The Better License, Original BSD or LGPL?
 
@@ -124,20 +108,21 @@ More SSL Libraries
 Application Angle of this Problem
 
  libcurl is built to use one SSL/TLS library. It uses a single fixed name (by
- default), and applications are built/linked to use that single lib. Replacing
- one libcurl instance with another one that uses the other SSL/TLS library
- might break one or more applications (due to ABI differences and/or different
- feature set). You want your application to use the libcurl it was built for.
+ default) on the built/created lib file, and applications are built/linked to
+ use that single lib. Replacing one libcurl instance with another one that
+ uses the other SSL/TLS library might break one or more applications (due to
+ ABI differences and/or different feature set). You want your application to
+ use the libcurl it was built for.
 
 Project cURL Angle of this Problem
 
- We distribute libcurl and everyone may build libcurl with either library. At
+ We distribute libcurl and everyone may build libcurl with either library at
  their choice. This problem is not directly a problem of ours. It merely
  affects users - GPL application authors only - of our lib as it comes
  included and delivered on some distros.
 
  libcurl has different ABI when built with different SSL/TLS libraries due to
- two reasons:
+ these reasons:
 
  1. No one has worked on fixing this. The mutex/lock callbacks should be set
     with a generic libcurl function that should use the proper underlying
@@ -146,24 +131,24 @@ Project cURL Angle of this Problem
  2. The CURLOPT_SSL_CTX_FUNCTION option is not possible to "emulate" on GnuTLS
     but simply requires OpenSSL.
 
+ 3. There might be some other subtle differences just because nobody has yet
+    tried to make a fixed ABI like this.
+
 Distro Angle of this Problem
 
- A distro can provide separate libcurls built with different SSL/TLS libraries
- to work around this, but at least Debian seems to be very hostile against
- such an approach, probably since it makes things like devel packages for the
- different libs collide since they would provide the same include files and
- man pages etc.
+ To my knowledge there is only one distro that ships libcurl built with either
+ one of the SSL libs supported.
+
+ Debian Linux is now (since mid September 2005) providing two different
+ libcurl packages, one for libcurl built with OpenSSL and one built with
+ GnuTLS. They use different .so names and can this both be installed in a
+ single system simultaneously. This has been said to be a transitional system
+ not desired to keep in the long run.
 
 Fixing the Only Problem
 
  The only problem is thus for distributions that want to offer libcurl
  versions built with more than one SSL/TLS library.
-
- Debian is now (since mid September 2005) providing two different devel
- packages, one for libcurl built with OpenSSL and one built with GnuTLS. They
- use different .so names and can this both be installed in a single system
- simultaneously. This has previously been said as a transitional system not
- desired to keep in the long run.
 
  Since multiple libcurl binaries using different names are ruled out, we need
  to come up with a way to have one single libcurl that someone uses different
@@ -194,9 +179,9 @@ Fixing the Only Problem
 
 When Will This Happen
 
- Note again that this is not a problem in curl, it doesn't solve any actual
- technical problems in our project. Don't hold your breath for this to happen
- very soon (if at all) unless you step forward and contribute.
+ This is not a problem in curl, it doesn't solve any actual technical problems
+ in our project. Don't hold your breath for this to happen very soon (if at
+ all) unless you step forward and contribute.
 
  The suggestion that is outlined above is still only a suggestion. Feel free
  to bring a better idea!
@@ -206,7 +191,7 @@ When Will This Happen
  code like today (without the use of lib2), should you decide to ignore the
  problems outlined in this document.
 
- Update: Work on this has been initiated by Richard Atterer:
+ Work on this was suggested by Richard Atterer:
 
         http://curl.haxx.se/mail/lib-2005-09/0066.html
 
