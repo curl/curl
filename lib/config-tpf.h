@@ -9,6 +9,8 @@
 /*            FEATURES, FUNCTIONS, and DEFINITIONS                  */
 /* ---------------------------------------------------------------- */
 
+/* NOTE: Refer also to the .mak file for some of the flags below */
+
 /* when building libcurl itself */
 /* #undef BUILDING_LIBCURL */
 
@@ -19,25 +21,25 @@
 /* #undef CURL_DISABLE_CRYPTO_AUTH */
 
 /* to disable DICT */
-#define CURL_DISABLE_DICT 1
+/* #undef CURL_DISABLE_DICT */
 
 /* to disable FILE */
-#define CURL_DISABLE_FILE 1
+/* #undef CURL_DISABLE_FILE */
 
 /* to disable FTP */
 /* #undef CURL_DISABLE_FTP */
 
 /* to disable HTTP */
-#define CURL_DISABLE_HTTP 1
+/* #undef CURL_DISABLE_HTTP */
 
 /* to disable LDAP */
-#define CURL_DISABLE_LDAP 1
+/* #undef CURL_DISABLE_LDAP */
 
 /* to disable TELNET */
-#define CURL_DISABLE_TELNET 1
+/* #undef CURL_DISABLE_TELNET */
 
 /* to disable TFTP */
-#define CURL_DISABLE_TFTP 1
+/* #undef CURL_DISABLE_TFTP */
 
 /* to disable verbose strings */
 /* #undef CURL_DISABLE_VERBOSE_STRINGS */
@@ -47,7 +49,6 @@
 
 /* Set to explicitly specify we don't want to use thread-safe functions */
 /* #undef DISABLED_THREADSAFE */
-#define DISABLED_THREADSAFE 1
 
 /* lber dynamic library file */
 /* #undef DL_LBER_FILE */
@@ -61,11 +62,26 @@
 /* Define if you want to enable IPv6 support */
 /* #undef ENABLE_IPV6 */
 
+/* Define to the type of arg 1 for getnameinfo. */
+/* #undef GETNAMEINFO_TYPE_ARG1 */
+
+/* Define to the type of arg 2 for getnameinfo. */
+/* #undef GETNAMEINFO_TYPE_ARG2 */
+
+/* Define to the type of args 4 and 6 for getnameinfo. */
+/* #undef GETNAMEINFO_TYPE_ARG46 */
+
+/* Define to the type of arg 7 for getnameinfo. */
+/* #undef GETNAMEINFO_TYPE_ARG7 */
+
 /* Define to 1 if you have the <alloca.h> header file. */
 #define HAVE_ALLOCA_H 1
 
 /* Define to 1 if you have the <arpa/inet.h> header file. */
 #define HAVE_ARPA_INET_H 1
+
+/* Define to 1 if you have the <arpa/tftp.h> header file. */
+/* #undef HAVE_ARPA_TFTP_H */
 
 /* Define to 1 if you have the <assert.h> header file. */
 #define HAVE_ASSERT_H 1
@@ -115,6 +131,10 @@
 /* #undef HAVE_FIONBIO */
 #define HAVE_FIONBIO 1
 
+/* Define to 1 if you have the `fork' function. */
+/* #undef HAVE_FORK */
+#define HAVE_FORK 1
+
 /* Define to 1 if you have the `ftruncate' function. */
 #define HAVE_FTRUNCATE 1
 
@@ -140,28 +160,38 @@
 /* #undef HAVE_GETHOSTBYNAME_R_5 */
 
 /* gethostbyname_r() takes 6 args */
-/* #define HAVE_GETHOSTBYNAME_R_6 1 */
+/* #undef HAVE_GETHOSTBYNAME_R_6 1 */
+
+/* Define to 1 if you have the getnameinfo function. */
+/* #undef HAVE_GETNAMEINFO */
 
 /* Define to 1 if you have the `getpass_r' function. */
 /* #undef HAVE_GETPASS_R */
+
+/* Define to 1 if you have the `getprotobyname' function. */
+/* #undef HAVE_GETPROTOBYNAME */
 
 /* Define to 1 if you have the `getpwuid' function. */
 #define HAVE_GETPWUID 1
 
 /* Define to 1 if you have the `getrlimit' function. */
-#define HAVE_GETRLIMIT 1
+/* #undef HAVE_GETRLIMIT */
 
 /* Define to 1 if you have the `gettimeofday' function. */
 #define HAVE_GETTIMEOFDAY 1
 
 /* we have a glibc-style strerror_r() */
 /* #undef HAVE_GLIBC_STRERROR_R */
+#define HAVE_GLIBC_STRERROR_R 1
 
 /* Define to 1 if you have the `gmtime_r' function. */
 #define HAVE_GMTIME_R 1
 
 /* if you have the gssapi libraries */
 /* #undef HAVE_GSSAPI */
+
+/* if you have the GNU gssapi libraries */
+/* #undef HAVE_GSSGNU */
 
 /* if you have the Heimdal gssapi libraries */
 /* #undef HAVE_GSSHEIMDAL */
@@ -170,7 +200,7 @@
 /* #undef HAVE_GSSMIT */
 
 /* Define to 1 if you have the `iconv' functions. */
-#define HAVE_ICONV
+#define HAVE_ICONV 1
 
 /* Define to 1 if you have the `idna_strerror' function. */
 /* #undef HAVE_IDNA_STRERROR */
@@ -221,7 +251,7 @@
 #define HAVE_LIBDL 1
 
 /* Define to 1 if you have the <libgen.h> header file. */
-/* #define HAVE_LIBGEN_H 1 */
+/* #undef HAVE_LIBGEN_H 1 */
 
 /* Define to 1 if you have the `idn' library (-lidn). */
 /* #undef HAVE_LIBIDN */
@@ -237,7 +267,7 @@
 
 /* Define to 1 if you have the `ssl' library (-lssl). */
 /* #undef HAVE_LIBSSL */
-#define HAVE_LIBSSL
+#define HAVE_LIBSSL 1
 
 /* if zlib is available */
 /* #undef HAVE_LIBZ */
@@ -258,7 +288,7 @@
 #define HAVE_LONGLONG 1
 
 /* Define to 1 if you have the <malloc.h> header file. */
-#define HAVE_MALLOC_H 1
+/* #undef HAVE_MALLOC_H */
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
@@ -277,6 +307,9 @@
 
 /* Define if NI_WITHSCOPEID exists and works */
 /* #undef HAVE_NI_WITHSCOPEID */
+
+/* Defined if no inet_pton() prototype available */
+/* #undef HAVE_NO_INET_PTON_PROTO */
 
 /* we have no strerror_r() proto */
 /* #undef HAVE_NO_STRERROR_R_DECL */
@@ -334,7 +367,6 @@
 
 /* we have a POSIX-style strerror_r() */
 /* #undef HAVE_POSIX_STRERROR_R */
-/* #define HAVE_POSIX_STRERROR_R 1 */
 
 /* Define to 1 if you have the <pwd.h> header file. */
 #define HAVE_PWD_H 1
@@ -414,7 +446,7 @@
 
 /* Define to 1 if you have the `stricmp' function. */
 /* #undef HAVE_STRICMP */
-#define HAVE_STRICMP
+#define HAVE_STRICMP 1
 
 /* Define to 1 if you have the <strings.h> header file. */
 #define HAVE_STRINGS_H 1
@@ -438,7 +470,10 @@
 #define HAVE_STRTOLL 1
 
 /* if struct sockaddr_storage is defined */
-/* undef HAVE_STRUCT_SOCKADDR_STORAGE */
+/* #undef HAVE_STRUCT_SOCKADDR_STORAGE */
+
+/* Define to 1 if you have the <sys/filio.h> header file. */
+#define HAVE_SYS_FILIO_H 1
 
 /* Define to 1 if you have the <sys/ioctl.h> header file. */
 #define HAVE_SYS_IOCTL_H 1
@@ -510,9 +545,11 @@
 /* Define this symbol if your OS supports changing the contents of argv */
 /* #undef HAVE_WRITABLE_ARGV */
 
+/* Define to 1 if you have the ws2tcpip.h header file. */
+/* #undef HAVE_WS2TCPIP_H */
+
 /* Define to 1 if you have the <x509.h> header file. */
 /* #undef HAVE_X509_H */
-#define undef HAVE_X509_H 1
 
 /* if you have the zlib.h header file */
 /* #undef HAVE_ZLIB_H */
@@ -522,8 +559,6 @@
 
 /* need REENTRANT defined */
 /* #undef NEED_REENTRANT */
-
-#define HAVE_GLIBC_STRERROR_R
 
 /* cpu-machine-OS */
 #define OS "s390x-ibm-tpf"
@@ -590,17 +625,18 @@
 
 /* if OpenSSL is in use */
 /* #undef USE_OPENSSL */
-#define USE_OPENSSL
 
 /* if SSL is enabled */
 /* #undef USE_SSLEAY */
-#define USE_SSLEAY
 
 /* to enable SSPI support */
 /* #undef USE_WINDOWS_SSPI */
 
 /* Version number of package */
 #define VERSION "not-used"
+
+/* Define to avoid automatic inclusion of winsock.h */
+/* #undef WIN32_LEAN_AND_MEAN */
 
 /* Define to 1 if on AIX 3.
    System headers sometimes define this.
