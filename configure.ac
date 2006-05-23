@@ -1412,7 +1412,8 @@ if test x$cross_compiling != xyes; then
      AC_MSG_RESULT(no)
     ,
     dnl not invoked when crosscompiling)
-    ])
+     echo "hej"
+    )
   fi
 else
   dnl and for crosscompilings
