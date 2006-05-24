@@ -11,6 +11,7 @@ Curl and libcurl 7.15.4
 
 This release includes the following changes:
 
+ o CURLOPT_COOKIELIST set to "SESS" clears all session cookies
  o CURLINFO_LASTSOCKET returned sockets are now checked more before returned
  o curl-config got a --checkfor option to compare version numbers
  o line end conversions for FTP ASCII transfers
@@ -56,6 +57,6 @@ advice from friends like these:
  Dan Fandrich, Ilja van Sprundel, David McCreedy, Tor Arntsen, Xavier Bouchoux,
  David Byron, Michele Bini, Ates Goral, Katie Wang, Robson Braga Araujo,
  Ale Vesely, Paul Querna, Gisle Vanem, Mark Eichin, Roland Blom, Andreas
- Ntaflos, David Shaw
+ Ntaflos, David Shaw, Michael Wallner
 
         Thanks! (and sorry if I forgot to mention someone)

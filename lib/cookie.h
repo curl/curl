@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -89,6 +89,8 @@ struct CookieInfo *Curl_cookie_init(struct SessionHandle *data,
                                     char *, struct CookieInfo *, bool);
 struct Cookie *Curl_cookie_getlist(struct CookieInfo *, char *, char *, bool);
 void Curl_cookie_freelist(struct Cookie *);
+void Curl_cookie_clearall(struct CookieInfo *cookies);
+void Curl_cookie_clearsess(struct CookieInfo *cookies);
 void Curl_cookie_cleanup(struct CookieInfo *);
 int Curl_cookie_output(struct CookieInfo *, char *);
 

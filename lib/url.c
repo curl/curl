@@ -829,12 +829,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       break;
 
     if(strequal(argptr, "ALL")) {
-      if(data->cookies) {
-        /* clear all cookies */
-        Curl_cookie_freelist(data->cookies->cookies);
-        data->cookies->cookies = NULL;
-        data->cookies->numcookies = 0;
-      }
+      /* clear all cookies */
+      Curl_cookie_clearall(data->cookies);
+      break;
+    }
+    else if(strequal(argptr, "SESS")) {
+      /* clear session cookies */
+      Curl_cookie_clearsess(data->cookies);
       break;
     }
 
@@ -2299,7 +2300,7 @@ static CURLcode ConnectPlease(struct connectdata *conn,
       break;
     case CURLPROXY_SOCKS4:
       return handleSock4Proxy(conn->proxyuser, conn) ?
-      	CURLE_COULDNT_CONNECT : CURLE_OK;
+        CURLE_COULDNT_CONNECT : CURLE_OK;
     default:
       failf(conn->data, "unknown proxytype option given");
       return CURLE_COULDNT_CONNECT;
