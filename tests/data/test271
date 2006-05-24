@@ -26,7 +26,7 @@ tftp
 TFTP retrieve
  </name>
  <command>
-tftp://%HOSTIP:%TFTPPORT/271 --trace-ascii log/traceit
+tftp://%HOSTIP:%TFTPPORT//271 --trace-ascii log/traceit
 </command>
 </client>
 
