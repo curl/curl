@@ -143,6 +143,8 @@ struct Curl_tree *Curl_splayremove(int i, struct Curl_tree *t,
 {
   struct Curl_tree *x;
 
+  *removed = NULL; /* default to no removed */
+
   if (t==NULL)
     return NULL;
 
@@ -174,10 +176,8 @@ struct Curl_tree *Curl_splayremove(int i, struct Curl_tree *t,
 
     return x;
   }
-  else {
-    *removed = NULL; /* no match */
+  else
     return t;                         /* It wasn't there */
-  }
 }
 
 /* Finds and deletes the best-fit node from the tree. Return a pointer to the
