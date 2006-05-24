@@ -43,7 +43,13 @@ VER=-version-info 1:0:0
 # set age to 0. (c:r:a=0)
 #
 
-libcares_la_LDFLAGS = $(VER)
+if NO_UNDEFINED
+# The -no-undefined flag is crucial for this to build fine on some platforms
+UNDEF = -no-undefined
+endif
+
+
+libcares_la_LDFLAGS = $(UNDEF) $(VER)
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc

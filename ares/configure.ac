@@ -69,6 +69,18 @@ dnl libtool setup
 CARES_CLEAR_LIBTOOL_TAGS
 AC_PROG_LIBTOOL
 
+AC_MSG_CHECKING([if we need -no-undefined])
+case $host in
+  *-*-cygwin | *-*-mingw* | *-*-pw32*)
+    need_no_undefined=yes
+    ;;
+  *)
+    need_no_undefined=no
+    ;;
+esac
+AC_MSG_RESULT($need_no_undefined)
+AM_CONDITIONAL(NO_UNDEFINED, test x$need_no_undefined = xyes)
+
 dnl Checks for header files.
 AC_HEADER_STDC
 
