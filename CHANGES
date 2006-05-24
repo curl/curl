@@ -10,7 +10,24 @@ Daniel (25 May 2006)
 - Michael Wallner provided a patch that allows "SESS" to be set with
   CURLOPT_COOKIELIST, which then makes all session cookies get cleared.
 
+Daniel (24 May 2006)
+- Tor Arntsen made test 271 run fine again since the TFTP path fix.
+
+Daniel (23 May 2006)
+- Martin Michlmayr filed debian bug report #367954, but the same error also
+  showed up in the autobuilds. It seems a rather long-since introduced shell
+  script flaw in the configure script suddenly was detected by the bash
+  version in Debian Unstable. It had previously passed undetected by all
+  shells used so far...
+
+- David McCreedy updated lib/config-tpf.h
+
 Daniel (11 May 2006)
+- Fixed the configure's check for old-style SSLeay headers since I fell over a
+  case with a duplicate file name (a krb4 implementation with an err.h
+  file). I converted the check to manually make sure three of the headers are
+  present before considering them fine.
+
 - David McCreedy provided a fix for CURLINFO_LASTSOCKET that does extended
   checks on the to-be-returned socket to make sure it truly seems to be alive
   and well. For SSL connection it (only) uses OpenSSL functions.
