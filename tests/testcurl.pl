@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -496,7 +496,7 @@ if (grepfile("define USE_ARES", "lib/config$confsuffix.h")) {
   }
   close(F);
 
-  if (-f "libcares$libext") {
+  if (-f "libcares$libext" || -f ".libs/libcares$libext") {
     logit "ares is now built successfully (libcares$libext)";
   } else {
     logit "ares build failed (libares$libext)";
@@ -535,18 +535,18 @@ else {
   close(F);
 }
 
-if (-f "lib/libcurl$libext") {
-  logit "lib/libcurl was created fine (libcurl$libext)";
+if (-f "lib/libcurl$libext" || -f "lib/.libs/libcurl$libext") {
+  logit "libcurl was created fine (libcurl$libext)";
 }
 else {
-  logit "lib/libcurl was not created (libcurl$libext)";
+  mydie "libcurl was not created (libcurl$libext)";
 }
 
 if (-f "src/curl$binext") {
-  logit "src/curl was created fine (curl$binext)";
+  logit "curl was created fine (curl$binext)";
 }
 else {
-  mydie "src/curl was not created (curl$binext)";
+  mydie "curl was not created (curl$binext)";
 }
 
 if ($targetos =~ /netware/) {
