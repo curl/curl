@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (26 May 2006)
+- Olaf Stüben fixed a bug that caused Digest authentication with md5-sess to
+  fail. When using the md5-sess, the result was not Md5 encoded and Base64
+  transformed.
+
 Daniel (25 May 2006)
 - Michael Wallner provided a patch that allows "SESS" to be set with
   CURLOPT_COOKIELIST, which then makes all session cookies get cleared.

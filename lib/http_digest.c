@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -303,10 +303,11 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   if(d->algo == CURLDIGESTALGO_MD5SESS) {
     /* nonce and cnonce are OUTSIDE the hash */
     tmp = aprintf("%s:%s:%s", ha1, d->nonce, d->cnonce);
-    free(ha1);
     if(!tmp)
       return CURLE_OUT_OF_MEMORY;
-    ha1 = (unsigned char *)tmp;
+    Curl_md5it(md5buf, (unsigned char *)tmp);
+    free(tmp); /* free this again */
+    md5_to_ascii(md5buf, ha1);
   }
 
   /*
