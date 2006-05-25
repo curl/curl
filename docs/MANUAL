@@ -726,7 +726,7 @@ LDAP
   Working with LDAP URLs":
   http://developer.netscape.com/docs/manuals/dirsdk/csdk30/url.htm
 
-  RFC 2255, "The LDAP URL Format" http://www.rfc-editor.org/rfc/rfc2255.txt
+  RFC 2255, "The LDAP URL Format" http://curl.haxx.se/rfc/rfc2255.txt
 
   To show you an example, this is now I can get all people from my local LDAP
   server that has a certain sub-domain in their email address:
