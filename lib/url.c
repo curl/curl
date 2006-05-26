@@ -1950,7 +1950,8 @@ static int handleSock4Proxy(const char *proxy_name, struct connectdata *conn)
   {
     ssize_t actualread;
     ssize_t written;
-    int packetsize = 9 + strlen((char*)socksreq + 8); /* size including NUL */
+    int packetsize = 9 +
+      (int)strlen((char*)socksreq + 8); /* size including NUL */
 
     /* Send request */
     code = Curl_write(conn, sock, (char *)socksreq, packetsize, &written);

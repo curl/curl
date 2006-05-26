@@ -881,7 +881,7 @@ struct UrlState {
      set, it holds an allocated connection. */
   struct connectdata **connects;
   long numconnects; /* size of the 'connects' array */
-  int lastconnect;  /* index of most recent connect or -1 if undefined */
+  long lastconnect;  /* index of most recent connect or -1 if undefined */
 
   char *headerbuff; /* allocated buffer to store headers in */
   size_t headersize;   /* size of the allocation */
