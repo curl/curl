@@ -1239,6 +1239,7 @@ void Curl_expire(struct SessionHandle *data, long milli)
 {
   struct Curl_multi *multi = data->multi;
   struct timeval *nowp = &data->state.expiretime;
+  int rc;
 
   /* this is only interesting for multi-interface using libcurl, and only
      while there is still a multi interface struct remaining! */
@@ -1250,11 +1251,14 @@ void Curl_expire(struct SessionHandle *data, long milli)
     if(nowp->tv_sec) {
       /* Since this is an cleared time, we must remove the previous entry from
          the splay tree */
-      multi->timetree = Curl_splayremovebyaddr(multi->timetree,
-                                               &data->state.timenode);
+      rc = Curl_splayremovebyaddr(multi->timetree,
+                                  &data->state.timenode,
+                                  &multi->timetree);
+      if(rc)
+        infof(data, "Internal error clearing splay node = %d\n", rc);
       infof(data, "Expire cleared\n");
+      nowp->tv_sec = nowp->tv_usec = 0;
     }
-    nowp->tv_sec = nowp->tv_usec = 0;
   }
   else {
     struct timeval set;
@@ -1272,7 +1276,9 @@ void Curl_expire(struct SessionHandle *data, long milli)
     }
 
     if(nowp->tv_sec) {
-      /* compare if the new time is earlier, and only set it if so */
+      /* This means that the struct is added as a node in the splay tree.
+         Compare if the new time is earlier, and only remove-old/add-new if it
+         is. */
       long diff = curlx_tvdiff(set, *nowp);
       if(diff > 0)
         /* the new expire time was later so we don't change this */
@@ -1280,8 +1286,11 @@ void Curl_expire(struct SessionHandle *data, long milli)
 
       /* Since this is an updated time, we must remove the previous entry from
          the splay tree first and then re-add the new value */
-      multi->timetree = Curl_splayremovebyaddr(multi->timetree,
-                                               &data->state.timenode);
+      rc = Curl_splayremovebyaddr(multi->timetree,
+                                  &data->state.timenode,
+                                  &multi->timetree);
+      if(rc)
+        infof(data, "Internal error removing splay node = %d\n", rc);
     }
 
     *nowp = set;
