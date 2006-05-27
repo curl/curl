@@ -77,9 +77,8 @@ struct Curl_tree *Curl_splay(int i, struct Curl_tree *t)
       l = t;
       t = t->larger;
     }
-    else {
+    else
       break;
-    }
   }
   l->larger = r->smaller = NULL;
 
@@ -93,51 +92,61 @@ struct Curl_tree *Curl_splay(int i, struct Curl_tree *t)
 
 /* Insert key i into the tree t.  Return a pointer to the resulting tree or
    NULL if something went wrong. */
-struct Curl_tree *Curl_splayinsert(int i, struct Curl_tree *t,
-                                   struct Curl_tree *area)
+struct Curl_tree *Curl_splayinsert(int i,
+                                   struct Curl_tree *t,
+                                   struct Curl_tree *node)
 {
-  if (area == NULL)
+  if (node == NULL)
     return t;
 
   if (t != NULL) {
     t = Curl_splay(i,t);
     if (compare(i, t->key)==0) {
-      /* it already exists one of this size */
+      /* There already exists a node in the tree with the very same key. Build
+         a linked list of nodes. We make the new 'node' struct the new master
+         node and make the previous node the first one in the 'same' list. */
 
-      area->same = t;
-      area->key = i;
-      area->smaller = t->smaller;
-      area->larger = t->larger;
+      node->same = t;
+      node->key = i;
+      node->smaller = t->smaller;
+      node->larger = t->larger;
 
-      t->smaller = area;
-      t->key = KEY_NOTUSED;
+      t->smaller = node; /* in the sub node for this same key, we use the
+                            smaller pointer to point back to the master
+                            node */
+      t->key = KEY_NOTUSED; /* and we set the key in the sub node to NOTUSED
+                               to quickly identify this node as a subnode */
 
-      return area; /* new root node */
+      return node; /* new root node */
     }
   }
 
   if (t == NULL) {
-    area->smaller = area->larger = NULL;
+    node->smaller = node->larger = NULL;
   }
   else if (compare(i, t->key) < 0) {
-    area->smaller = t->smaller;
-    area->larger = t;
+    node->smaller = t->smaller;
+    node->larger = t;
     t->smaller = NULL;
 
   }
   else {
-    area->larger = t->larger;
-    area->smaller = t;
+    node->larger = t->larger;
+    node->smaller = t;
     t->larger = NULL;
   }
-  area->key = i;
+  node->key = i;
 
-  area->same = NULL; /* no identical node (yet) */
-  return area;
+  node->same = NULL; /* no identical node (yet) */
+  return node;
 }
 
+#if 0
 /* Deletes 'i' from the tree if it's there (with an exact match). Returns a
-   pointer to the resulting tree.  */
+   pointer to the resulting tree.
+
+   Function not used in libcurl.
+*/
 struct Curl_tree *Curl_splayremove(int i, struct Curl_tree *t,
                                    struct Curl_tree **removed)
 {
@@ -179,6 +188,7 @@ struct Curl_tree *Curl_splayremove(int i, struct Curl_tree *t,
   else
     return t;                         /* It wasn't there */
 }
+#endif
 
 /* Finds and deletes the best-fit node from the tree. Return a pointer to the
    resulting tree.  best-fit means the node with the given or lower number */
@@ -238,61 +248,81 @@ struct Curl_tree *Curl_splaygetbest(int i, struct Curl_tree *t,
 }
 
 
-/* Deletes the node we point out from the tree if it's there. Return a pointer
-   to the resulting tree.  */
-struct Curl_tree *Curl_splayremovebyaddr(struct Curl_tree *t,
-                                         struct Curl_tree *remove)
+/* Deletes the very node we point out from the tree if it's there. Stores a
+   pointer to the new resulting tree in 'newroot'.
+
+   Returns zero on success and non-zero on errors! TODO: document error codes.
+   When returning error, it does not touch the 'newroot' pointer.
+
+   NOTE: when the last node of the tree is removed, there's no tree left so
+   'newroot' will be made to point to NULL.
+*/
+int Curl_splayremovebyaddr(struct Curl_tree *t,
+                           struct Curl_tree *remove,
+                           struct Curl_tree **newroot)
 {
   struct Curl_tree *x;
 
   if (!t || !remove)
-    return NULL;
+    return 1;
 
   if(KEY_NOTUSED == remove->key) {
-    /* just unlink ourselves nice and quickly: */
+    /* Key set to NOTUSED means it is a subnode within a 'same' linked list
+       and thus we can unlink it easily. The 'smaller' link of a subnode
+       links to the parent node. */
     remove->smaller->same = remove->same;
     if(remove->same)
       remove->same->smaller = remove->smaller;
     /* voila, we're done! */
-    return t;
+    *newroot = t; /* return the same root */
+    return 0;
   }
 
   t = Curl_splay(remove->key, t);
 
-  /* Check if there is a list with identical sizes */
+  /* First make sure that we got a root node witht he same key as the one we
+     want to remove, as otherwise we might be trying to remove a node that
+     isn't actually in the tree. */
+  if(t->key != remove->key)
+    return 2;
 
+  /* Check if there is a list with identical sizes, as then we're trying to
+     remove the root node of a list of nodes with identical keys. */
   x = t->same;
   if(x) {
-    /* 'x' is the new root node */
+    /* 'x' is the new root node, we just make it use the root node's
+       smaller/larger links */
 
     x->key = t->key;
     x->larger = t->larger;
     x->smaller = t->smaller;
-
-    return x; /* new root */
   }
-
-  /* Remove the actualy root node: */
-  if (t->smaller == NULL)
-    x = t->larger;
   else {
-    x = Curl_splay(remove->key, t->smaller);
-    x->larger = t->larger;
+    /* Remove the root node */
+    if (t->smaller == NULL)
+      x = t->larger;
+    else {
+      x = Curl_splay(remove->key, t->smaller);
+      x->larger = t->larger;
+    }
   }
 
-  return x;
+  *newroot = x; /* store new root pointer */
+
+  return 0;
 }
 
 #ifdef CURLDEBUG
 
-int Curl_splayprint(struct Curl_tree * t, int d, char output)
+void Curl_splayprint(struct Curl_tree * t, int d, char output)
 {
-  int distance=0;
   struct Curl_tree *node;
   int i;
+  int count;
   if (t == NULL)
-    return 0;
-  distance += Curl_splayprint(t->larger, d+1, output);
+    return;
+
+  Curl_splayprint(t->larger, d+1, output);
   for (i=0; i<d; i++)
     if(output)
       printf("  ");
@@ -301,20 +331,17 @@ int Curl_splayprint(struct Curl_tree * t, int d, char output)
     printf("%d[%d]", t->key, i);
   }
 
-  for(node = t->same; node; node = node->same) {
-    distance += i; /* this has the same "virtual" distance */
+  for(count=0, node = t->same; node; node = node->same, count++)
+    ;
 
-    if(output)
-      printf(" [+]");
+  if(output) {
+    if(count)
+      printf(" [%d more]\n", count);
+    else
+      printf("\n");
   }
-  if(output)
-    puts("");
 
-  distance += i;
-
-  distance += Curl_splayprint(t->smaller, d+1, output);
-
-  return distance;
+  Curl_splayprint(t->smaller, d+1, output);
 }
 #endif
 
@@ -322,7 +349,7 @@ int Curl_splayprint(struct Curl_tree * t, int d, char output)
 
 /*#define TEST2 */
 #define MAX 50
-#define OUTPUT 0 /* 1 enables, 0 disables */
+#define TEST2
 
 /* A sample use of these functions.  Start with the empty tree, insert some
    stuff into it, and then delete it */
@@ -330,6 +357,8 @@ int main(int argc, char **argv)
 {
   struct Curl_tree *root, *t;
   void *ptrs[MAX];
+  int adds=0;
+  int rc;
 
   long sizes[]={
     50, 60, 50, 100, 60, 200, 120, 300, 400, 200, 256, 122, 60, 120, 200, 300,
@@ -340,66 +369,45 @@ int main(int argc, char **argv)
   root = NULL;              /* the empty tree */
 
   for (i = 0; i < MAX; i++) {
+    int key;
     ptrs[i] = t = (struct Curl_tree *)malloc(sizeof(struct Curl_tree));
+
+#ifdef TEST2
+    key = sizes[i];
+#elif defined(TEST1)
+    key = (541*i)%1023;
+#elif defined(TEST3)
+    key = 100;
+#endif
+
+    t->payload = (void *)key; /* for simplicity */
     if(!t) {
       puts("out of memory!");
       return 0;
     }
-#ifdef TEST2
-    root = Curl_splayinsert(sizes[i], root, t);
-#else
-    root = Curl_splayinsert((541*i)&1023, root, t);
-#endif
+    root = Curl_splayinsert(key, root, t);
   }
 
 #if 0
   puts("Result:");
-  printtree(root, 0, 1);
+  Curl_splayprint(root, 0, 1);
 #endif
 
 #if 1
-  for (i=0; root; i+=30) {
-    Curl_splayprint(root, 0, 1);
-    do {
-      root = Curl_splaygetbest(i, root, &t);
-      if(t)
-        printf("bestfit %d became %d\n", i, t->key);
-      else
-        printf("bestfit %d failed!\n", i);
-    } while(t && root);
-  }
-#endif
-#if 0
   for (i = 0; i < MAX; i++) {
-    printf("remove pointer %d size %d\n", i, sizes[i]);
-    root = removebyaddr(root, (struct Curl_tree *)ptrs[i]);
+    int rem = (i+7)%MAX;
+    struct Curl_tree *r;
+    printf("Tree look:\n");
     Curl_splayprint(root, 0, 1);
+    printf("remove pointer %d, payload %d\n", rem,
+           (int)((struct Curl_tree *)ptrs[rem])->payload);
+    rc = Curl_splayremovebyaddr(root, (struct Curl_tree *)ptrs[rem], &root);
+    if(rc)
+      /* failed! */
+      printf("remove %d failed!\n", rem);
   }
 #endif
 
-#if 0
-#ifdef WEIGHT
-  for (i = -1; i<=root->weight; i++) {
-    t = find_rank(i, root);
-    if (t == NULL) {
-      printf("could not find a node of rank %d.\n", i);
-    } else {
-      printf("%d is of rank %d\n", t->key, i);
-    }
-  }
-#endif
-#endif
-
-#if 0
-#ifdef TEST2
-  for (i = 0; i < MAX; i++) {
-    printf("remove size %d\n", sizes[i]);
-    root = Curl_splayremove(sizes[i], root, &t);
-    free(t);
-    Curl_splayprint(root, 0, 1);
-  }
-#endif
-#endif
   return 0;
 }
 
