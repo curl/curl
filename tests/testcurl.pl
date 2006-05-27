@@ -129,10 +129,9 @@ if ($^O eq 'MSWin32' || $targetos) {
     # If no target defined on Win32 lets assume vc
     $targetos = 'vc';
   }
-  if ($targetos =~ /vc/ || $targetos =~ /mingw32/ || $targetos =~ /borland/) {
+  if ($targetos =~ /vc/ || $targetos =~ /borland/) {
     $binext = '.exe';
-    $libext = '.lib' if ($targetos =~ /vc/ || $targetos =~ /borland/);
-    $libext = '.a' if ($targetos =~ /mingw32/);
+    $libext = '.lib';
   }
   elsif ($targetos =~ /netware/) {
     $configurebuild = 0;
@@ -141,7 +140,8 @@ if ($^O eq 'MSWin32' || $targetos) {
   }
 }
 
-if (($^O eq 'MSWin32') && ($targetos =~ /vc/ || $targetos =~ /mingw32/ || $targetos =~ /borland/)) {
+if (($^O eq 'MSWin32') &&
+    ($targetos =~ /vc/ || $targetos =~ /mingw32/ || $targetos =~ /borland/)) {
 
   # Set these things only when building ON Windows and for Win32 platform.
   # FOR Windows since we might be cross-compiling on another system. Non-
@@ -496,7 +496,7 @@ if (grepfile("define USE_ARES", "lib/config$confsuffix.h")) {
   }
   close(F);
 
-  if (-f "libcares$libext" || -f ".libs/libcares$libext") {
+  if (-f "libcares$libext") {
     logit "ares is now built successfully (libcares$libext)";
   } else {
     logit "ares build failed (libares$libext)";
@@ -535,7 +535,7 @@ else {
   close(F);
 }
 
-if (-f "lib/libcurl$libext" || -f "lib/.libs/libcurl$libext") {
+if (-f "lib/libcurl$libext") {
   logit "libcurl was created fine (libcurl$libext)";
 }
 else {
