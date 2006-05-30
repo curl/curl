@@ -14,12 +14,6 @@ TODO
 
  LIBCURL
 
- * Introduce an interface to libcurl that allows applications to easier get to
-   know what cookies that are received. CURLINFO_COOKIELIST to get a
-   curl_slist with cookies (netscape/mozilla cookie file formatted), and
-   CURLOPT_COOKIELIST to set a list of cookies (using the same format).
-   http://curl.haxx.se/mail/lib-2004-12/0195.html
-
  * Introduce another callback interface for upload/download that makes one
    less copy of data and thus a faster operation.
    [http://curl.haxx.se/dev/no_copy_callbacks.txt]
@@ -64,13 +58,8 @@ TODO
 
  LIBCURL - multi interface
 
- * Add a curl_multi_fdset() alternative. this allows apps to avoid the
-   FD_SETSIZE problem with select().
-
- * Add curl_multi_timeout() to make libcurl's ares-functionality better.
-
  * Make sure we don't ever loop because of non-blocking sockets return
-   EWOULDBLOCK or similar. This FTP command sending, the SSL connection etc.
+   EWOULDBLOCK or similar. The GnuTLS connection etc.
 
  * Make transfers treated more carefully. We need a way to tell libcurl we
    have data to write, as the current system expects us to upload data each
@@ -79,10 +68,6 @@ TODO
    opposite situation should be possible as well, that we tell libcurl we're
    ready to accept read data. Today libcurl feeds the data as soon as it is
    available for reading, no matter what.
-
- * Add curl_multi_socket() and family to the multi interface that gets file
-   descriptors, as an alternative to the curl_multi_fdset(). This is necessary
-   to allow apps to properly avoid the FD_SETSIZE problem.
 
  * Make curl_easy_perform() a wrapper-function that simply creates a multi
    handle, adds the easy handle to it, runs curl_multi_perform() until the
@@ -201,6 +186,11 @@ TODO
  * Work out a common method with Peter Sylvester's OpenSSL-patch for SRP
    on the TLS to provide name and password
 
+ * Fix the connection phase to be non-blocking when multi interface is used
+
+ * Add a way to check if the connection seems to be alive, to corrspond to the
+   SSL_peak() way we use with OpenSSL.
+
  LDAP
 
  * Look over the implementation. The looping will have to "go away" from the
@@ -212,7 +202,8 @@ TODO
  * RTSP - RFC2326 (protocol - very HTTP-like, also contains URL description)
 
  * SFTP/SCP/SSH (no RFCs for protocol nor URI/URL format). An implementation
-   should most probably use an existing ssh library, such as OpenSSH.
+   should most probably use an existing ssh library, such as OpenSSH. or
+   libssh2.org
 
  * RSYNC (no RFCs for protocol nor URI/URL format).  An implementation should
    most probably use an existing rsync library, such as librsync.
