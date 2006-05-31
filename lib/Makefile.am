@@ -31,7 +31,7 @@ EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 Makefile.riscos $(DSP)    \
  libcurl.plist libcurl.rc config-amigaos.h amigaos.c amigaos.h makefile.amiga \
  Makefile.netware nwlib.c libcurl.imp msvcproj.head msvcproj.foot	      \
  config-win32ce.h README.httpauth Makefile.Watcom README.hostip		      \
- README.multi_socket
+ README.multi_socket config-tpf.h
 
 CLEANFILES = $(DSP)
 
