@@ -169,8 +169,7 @@ static bool rand_enough(int nread)
 }
 #endif
 
-static
-int random_the_seed(struct SessionHandle *data)
+static int ossl_seed(struct SessionHandle *data)
 {
   char *buf = data->state.buffer; /* point to the big buffer */
   int nread=0;
@@ -258,6 +257,20 @@ int random_the_seed(struct SessionHandle *data)
   infof(data, "libcurl is now using a weak random seed!\n");
   return nread;
 }
+
+int Curl_ossl_seed(struct SessionHandle *data)
+{
+  /* we have the "SSL is seeded" boolean static to prevent multiple
+     time-consuming seedings in vain */
+  static bool ssl_seeded = FALSE;
+
+  if(!ssl_seeded || data->set.ssl.random_file || data->set.ssl.egdsocket) {
+    ossl_seed(data);
+    ssl_seeded = TRUE;
+  }
+  return 0;
+}
+
 
 #ifndef SSL_FILETYPE_ENGINE
 #define SSL_FILETYPE_ENGINE 42
@@ -531,9 +544,6 @@ static char *SSL_strerror(unsigned long error, char *buf, size_t size)
   return (buf);
 }
 
-/* we have the "SSL is seeded" boolean global for the application to
-   prevent multiple time-consuming seedings in vain */
-static bool ssl_seeded = FALSE;
 #endif /* USE_SSLEAY */
 
 #ifdef USE_SSLEAY
@@ -1166,12 +1176,8 @@ Curl_ossl_connect_step1(struct connectdata *conn,
 
   curlassert(ssl_connect_1 == connssl->connecting_state);
 
-  if(!ssl_seeded || data->set.ssl.random_file || data->set.ssl.egdsocket) {
-    /* Make funny stuff to get random input */
-    random_the_seed(data);
-
-    ssl_seeded = TRUE;
-  }
+  /* Make funny stuff to get random input */
+  Curl_ossl_seed(data);
 
   /* check to see if we've been told to use an explicit SSL/TLS version */
   switch(data->set.ssl.version) {

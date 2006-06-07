@@ -5,12 +5,13 @@ Curl and libcurl 7.15.4
  Available command line options:           112
  Available curl_easy_setopt() options:     132
  Number of public functions in libcurl:    49
- Amount of public web site mirrors:        32
+ Amount of public web site mirrors:        33
  Number of known libcurl bindings:         32
  Number of contributors:                   492
 
 This release includes the following changes:
 
+ o NTLM2 session response support
  o CURLOPT_COOKIELIST set to "SESS" clears all session cookies
  o CURLINFO_LASTSOCKET returned sockets are now checked more before returned
  o curl-config got a --checkfor option to compare version numbers
@@ -46,13 +47,17 @@ This release includes the following bugfixes:
  o TFTP transfers could trash data
  o -d + -G combo crash
 
-Other curl-related news since the previous public release:
+Other curl-related news:
 
- o http://curl.de-mirror.de/ is a new mirror in Aachen, Germany
- o http://curl.osmirror.nl/ is a new mirror in Amsterdam, the Netherlands
  o tclcurl 0.15.3 was released:
    http://personal1.iddeo.es/andresgarci/tclcurl/english/
- o http://curl.usphp.com/ is a new mirror in Florida, US
+
+New curl mirrors:
+
+ o http://curl.webdesign-zdg.de/ in Frankfurt, Germany
+ o http://curl.de-mirror.de/ in Aachen, Germany
+ o http://curl.osmirror.nl/ in Amsterdam, the Netherlands
+ o http://curl.usphp.com/ in Florida, US
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
@@ -60,6 +65,6 @@ advice from friends like these:
  Dan Fandrich, Ilja van Sprundel, David McCreedy, Tor Arntsen, Xavier Bouchoux,
  David Byron, Michele Bini, Ates Goral, Katie Wang, Robson Braga Araujo,
  Ale Vesely, Paul Querna, Gisle Vanem, Mark Eichin, Roland Blom, Andreas
- Ntaflos, David Shaw, Michael Wallner, Olaf Stüben
+ Ntaflos, David Shaw, Michael Wallner, Olaf Stüben, Mikael Sennerholm
 
         Thanks! (and sorry if I forgot to mention someone)

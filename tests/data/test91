@@ -99,7 +99,7 @@ Host: 127.0.0.1:%HTTPPORT
 Accept: */*
 
 GET /91 HTTP/1.1
-Authorization: NTLM TlRMTVNTUAABAAAABoIAAAAAAAAAAAAAAAAAAAAAAAA=
+Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Host: 127.0.0.1:%HTTPPORT
 Accept: */*

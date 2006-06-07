@@ -87,7 +87,7 @@ s/^(Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAAAw
 </strippart)
 <protocol>
 GET http://data.from.server.requiring.digest.hohoho.com/169 HTTP/1.1
-Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIAAAAAAAAAAAAAAAAAAAAAAAA=
+Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS libidn/0.4.3
 Host: data.from.server.requiring.digest.hohoho.com
 Pragma: no-cache

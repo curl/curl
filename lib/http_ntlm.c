@@ -51,6 +51,7 @@
 #include "http_ntlm.h"
 #include "url.h"
 #include "memory.h"
+#include "ssluse.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -59,7 +60,9 @@
 
 #include <openssl/des.h>
 #include <openssl/md4.h>
+#include <openssl/md5.h>
 #include <openssl/ssl.h>
+#include <openssl/rand.h>
 
 #if OPENSSL_VERSION_NUMBER < 0x00907001L
 #define DES_key_schedule des_key_schedule
@@ -93,6 +96,10 @@ static PSecurityFunctionTable s_pSecFn = NULL;
 
 /* Define this to make the type-3 message include the NT response message */
 #define USE_NTRESPONSES 1
+
+/* Define this to make the type-3 message include the NTLM2Session response
+   message, requires USE_NTRESPONSES. */
+#define USE_NTLM2SESSION 1
 
 #ifndef USE_WINDOWS_SSPI
 /* this function converts from the little endian format used in the incoming
@@ -630,7 +637,11 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     32    start of data block
 
     */
-
+#if USE_NTLM2SESSION
+#define NTLM2FLAG NTLMFLAG_NEGOTIATE_NTLM2_KEY
+#else
+#define NTLM2FLAG 0
+#endif
     snprintf((char *)ntlmbuf, sizeof(ntlmbuf), "NTLMSSP%c"
              "\x01%c%c%c" /* 32-bit type = 1 */
              "%c%c%c%c"   /* 32-bit NTLM flag field */
@@ -651,6 +662,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
                NTLMFLAG_NEGOTIATE_OEM|
                NTLMFLAG_REQUEST_TARGET|
                NTLMFLAG_NEGOTIATE_NTLM_KEY|
+               NTLM2FLAG|
                NTLMFLAG_NEGOTIATE_ALWAYS_SIGN
                ),
              SHORTPAIR(domlen),
@@ -672,15 +684,18 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
               LONGQUARTET(NTLMFLAG_NEGOTIATE_OEM|
                           NTLMFLAG_REQUEST_TARGET|
                           NTLMFLAG_NEGOTIATE_NTLM_KEY|
+                          NTLM2FLAG|
                           NTLMFLAG_NEGOTIATE_ALWAYS_SIGN),
               NTLMFLAG_NEGOTIATE_OEM|
               NTLMFLAG_REQUEST_TARGET|
               NTLMFLAG_NEGOTIATE_NTLM_KEY|
+              NTLM2FLAG|
               NTLMFLAG_NEGOTIATE_ALWAYS_SIGN);
       print_flags(stderr,
                   NTLMFLAG_NEGOTIATE_OEM|
                   NTLMFLAG_REQUEST_TARGET|
                   NTLMFLAG_NEGOTIATE_NTLM_KEY|
+                  NTLM2FLAG|
                   NTLMFLAG_NEGOTIATE_ALWAYS_SIGN);
       fprintf(stderr, "\n****\n");
     });
@@ -786,7 +801,41 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       hostlen = strlen(host);
     }
 
-    {
+#if USE_NTLM2SESSION
+    /* We don't support NTLM2 if we don't have USE_NTRESPONSES */
+    if (ntlm->flags & NTLMFLAG_NEGOTIATE_NTLM2_KEY) {
+      unsigned char ntbuffer[0x18];
+      unsigned char tmp[0x18];
+      unsigned char md5sum[MD5_DIGEST_LENGTH];
+      MD5_CTX MD5;
+      unsigned char random[8];
+
+      /* Need to create 8 bytes random data */
+      Curl_ossl_seed(conn->data); /* Initiate the seed if not already done */
+      RAND_bytes(random,8);
+
+      /* 8 bytes random data as challenge in lmresp */
+      memcpy(lmresp,random,8);
+      /* Pad with zeros */
+      memset(lmresp+8,0,0x10);
+
+      /* Fill tmp with challenge(nonce?) + random */
+      memcpy(tmp,&ntlm->nonce[0],8);
+      memcpy(tmp+8,random,8);
+
+      MD5_Init(&MD5);
+      MD5_Update(&MD5, tmp, 16);
+      MD5_Final(md5sum, &MD5);
+      /* We shall only use the first 8 bytes of md5sum,
+         but the des code in lm_resp only encrypt the first 8 bytes */
+      mk_nt_hash(passwdp, ntbuffer);
+      lm_resp(ntbuffer, md5sum, ntresp);
+
+      /* End of NTLM2 Session code */
+    }
+    else {
+#endif
+
 #if USE_NTRESPONSES
       unsigned char ntbuffer[0x18];
 #endif

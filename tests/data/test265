@@ -89,7 +89,7 @@ s/^(Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQ
 <protocol nonewline=yes>
 CONNECT test.remote.server.com:265 HTTP/1.0
 Host: test.remote.server.com:265
-Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIAAAAAAAAAAAAAAAAAAAAAAAA=
+Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 Proxy-Connection: Keep-Alive
 
 CONNECT test.remote.server.com:265 HTTP/1.0

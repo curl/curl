@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (7 June 2006)
+- Mikael Sennerholm provided a patch that added NTLM2 session response support
+  to libcurl. The 21 NTLM test cases were again modified to comply...
+
 Daniel (27 May 2006)
 - Óscar Morales Vivó updated the libcurl.framework.make file.
 
