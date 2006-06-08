@@ -3242,7 +3242,7 @@ static void free_config_fields(struct Configurable *config)
   curl_slist_free_all(config->headers);
 }
 
-#if defined(WIN32) && !defined(__CYGWIN32__)
+#if defined(WIN32) && !defined(__CYGWIN__)
 
 /* Function to find CACert bundle on a Win32 platform using SearchPath.
  * (SearchPath is already declared via inclusions done in setup header file)
@@ -3485,7 +3485,7 @@ operate(struct Configurable *config, int argc, char *argv[])
 
     if(env)
       curl_free(env);
-#if defined(WIN32) && !defined(__CYGWIN32__)
+#if defined(WIN32) && !defined(__CYGWIN__)
     else
       FindWin32CACert(config, "curl-ca-bundle.crt");
 #endif

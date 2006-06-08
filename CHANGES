@@ -6,6 +6,29 @@
 
                                   Changelog
 
+Daniel (8 June 2006)
+- Brian Dessent fixed the code for cygwin in three distinct ways:
+
+  The first modifies {lib,src}/setup.h to not include the winsock headers
+  under Cygwin.  This fixes the reported build problem.  Cygwin attempts as
+  much as possible to emulate a posix environment under Windows.  This means
+  that WIN32 is *not* #defined and (to the extent possible) everything is done
+  as it would be on a *ix type system.  Thus <sys/socket.h> is the proper
+  include, and even though winsock2.h is present, including it just introduces
+  a whole bunch of incompatible socket API stuff.
+
+  The second is a patch I've included in the Cygwin binary packages for a
+  while.  It skips two unnecessary library checks (-lwinmm and -lgdi32).  The
+  checks are innocuous and they do succeed, but they pollute LIBS with
+  unnecessary stuff which gets recorded as such in the libcurl.la file, which
+  brings them into the build of any libcurl-downstream.  As far as I know
+  these libs are really only necessary for mingw, so alternatively they could
+  be designed to only run if $host matches *-*-mingw* but I took the safer
+  route of skipping them for *-*-cygwin*.
+
+  The third patch replaces all uses of the ancient and obsolete __CYGWIN32__
+  with __CYGWIN__. Ref: <http://cygwin.com/ml/cygwin/2003-09/msg01520.html>.
+
 Daniel (7 June 2006)
 - Mikael Sennerholm provided a patch that added NTLM2 session response support
   to libcurl. The 21 NTLM test cases were again modified to comply...

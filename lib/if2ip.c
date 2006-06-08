@@ -33,7 +33,7 @@
 
 #include "if2ip.h"
 
-#if !defined(WIN32) && !defined(__BEOS__) && !defined(__CYGWIN32__) && \
+#if !defined(WIN32) && !defined(__BEOS__) && !defined(__CYGWIN__) && \
     !defined(__riscos__) && !defined(__INTERIX) && !defined(NETWARE) && \
     !defined(_AMIGASF)
 

@@ -472,20 +472,31 @@ dnl **********************************************************************
 dnl Check for the presence of the winmm library.
 dnl **********************************************************************
 
-AC_MSG_CHECKING([for timeGetTime in winmm])
-my_ac_save_LIBS=$LIBS
-LIBS="-lwinmm $LIBS"
-AC_TRY_LINK([#include <windef.h>
-             #include <mmsystem.h>
-             ],
-             [timeGetTime();],
-             [ dnl worked!
-             AC_MSG_RESULT([yes])
-             ],
-             [ dnl failed, restore LIBS
-             LIBS=$my_ac_save_LIBS
-             AC_MSG_RESULT(no)]
-           )
+case $host in
+  *-*-cygwin*)
+    dnl Under Cygwin, winmm exists but is not needed as WIN32 is not #defined
+    dnl and gettimeofday() will be used regardless of the outcome of this test.
+    dnl Skip this test, otherwise -lwinmm will be needlessly added to LIBS
+    dnl (and recorded as such in the .la file, potentially affecting downstream
+    dnl clients of the library.)
+    ;;
+  *)
+    AC_MSG_CHECKING([for timeGetTime in winmm])
+    my_ac_save_LIBS=$LIBS
+    LIBS="-lwinmm $LIBS"
+    AC_TRY_LINK([#include <windef.h>
+                 #include <mmsystem.h>
+                 ],
+                 [timeGetTime();],
+                 [ dnl worked!
+                 AC_MSG_RESULT([yes])
+                 ],
+                 [ dnl failed, restore LIBS
+                 LIBS=$my_ac_save_LIBS
+                 AC_MSG_RESULT(no)]
+               )
+    ;;
+esac
 
 dnl **********************************************************************
 dnl Checks for IPv6
@@ -888,18 +899,26 @@ if test X"$OPT_SSL" != Xno; then
   fi
 
   dnl This is for Msys/Mingw
-  AC_MSG_CHECKING([for gdi32])
-  my_ac_save_LIBS=$LIBS
-  LIBS="-lgdi32 $LIBS"
-  AC_TRY_LINK([#include <windef.h>
-               #include <wingdi.h>],
-               [GdiFlush();],
-               [ dnl worked!
-               AC_MSG_RESULT([yes])],
-               [ dnl failed, restore LIBS
-               LIBS=$my_ac_save_LIBS
-               AC_MSG_RESULT(no)]
-              )
+  case $host in    
+    *-*-cygwin*)
+      dnl Under Cygwin this is extraneous and causes an unnecessary -lgdi32
+      dnl to be added to LIBS and recorded in the .la file.
+      ;;
+    *)
+      AC_MSG_CHECKING([for gdi32])
+      my_ac_save_LIBS=$LIBS
+      LIBS="-lgdi32 $LIBS"
+      AC_TRY_LINK([#include <windef.h>
+                   #include <wingdi.h>],
+                   [GdiFlush();],
+                   [ dnl worked!
+                   AC_MSG_RESULT([yes])],
+                   [ dnl failed, restore LIBS
+                   LIBS=$my_ac_save_LIBS
+                   AC_MSG_RESULT(no)]
+                  )
+      ;;
+  esac
 
   AC_CHECK_LIB(crypto, CRYPTO_lock,[
      HAVECRYPTO="yes"

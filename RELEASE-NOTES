@@ -23,6 +23,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o builds fine on cygwin
  o md5-sess with Digest authentication
  o dict with letters such as space in a word
  o dict with url-encoded words in the URL
@@ -41,7 +42,6 @@ This release includes the following bugfixes:
  o improved NTLM functionality
  o following redirects with more than one question mark in source URL
  o fixed debug build crash with -d
- o TFTP works on more systems
  o generates a fine AIX Toolbox RPM spec
  o treat FTP AUTH failures properly
  o TFTP transfers could trash data
@@ -65,6 +65,7 @@ advice from friends like these:
  Dan Fandrich, Ilja van Sprundel, David McCreedy, Tor Arntsen, Xavier Bouchoux,
  David Byron, Michele Bini, Ates Goral, Katie Wang, Robson Braga Araujo,
  Ale Vesely, Paul Querna, Gisle Vanem, Mark Eichin, Roland Blom, Andreas
- Ntaflos, David Shaw, Michael Wallner, Olaf Stüben, Mikael Sennerholm
+ Ntaflos, David Shaw, Michael Wallner, Olaf Stüben, Mikael Sennerholm,
+ Brian Dessent
 
         Thanks! (and sorry if I forgot to mention someone)
