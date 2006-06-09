@@ -16,7 +16,7 @@
 
 int test(char *URL)
 {
-  CURLMcode res = CURLE_OK;
+  int res = 0;
   CURL *curl;
   FILE *hd_src ;
   int hd ;
@@ -73,7 +73,7 @@ int test(char *URL)
 
   m = curl_multi_init();
 
-  res = curl_multi_add_handle(m, curl);
+  res = (int)curl_multi_add_handle(m, curl);
 
   while(!done) {
     fd_set rd, wr, exc;
@@ -84,7 +84,7 @@ int test(char *URL)
     interval.tv_usec = 0;
 
     while (res == CURLM_CALL_MULTI_PERFORM) {
-      res = curl_multi_perform(m, &running);
+      res = (int)curl_multi_perform(m, &running);
       if (running <= 0) {
         done = TRUE;
         break;
@@ -125,5 +125,5 @@ int test(char *URL)
   fclose(hd_src); /* close the local file */
 
   curl_global_cleanup();
-  return (int)res;
+  return res;
 }
