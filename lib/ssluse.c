@@ -1212,11 +1212,11 @@ Curl_ossl_connect_step1(struct connectdata *conn,
        inform about failures of setting it */
     if (!SSL_CTX_callback_ctrl(connssl->ctx, SSL_CTRL_SET_MSG_CALLBACK,
                                (void (*)(void))ssl_tls_trace)) {
-      infof(data, "SSL: couldn't set callback!");
+      infof(data, "SSL: couldn't set callback!\n");
     }
     else if (!SSL_CTX_ctrl(connssl->ctx, SSL_CTRL_SET_MSG_CALLBACK_ARG, 0,
                            conn)) {
-      infof(data, "SSL: couldn't set callback argument!");
+      infof(data, "SSL: couldn't set callback argument!\n");
     }
   }
 #endif
