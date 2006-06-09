@@ -1570,11 +1570,12 @@ int Curl_single_getsock(struct connectdata *conn,
   }
   if(conn->keep.keepon & KEEP_WRITE) {
 
-    if((conn->sockfd != conn->writesockfd) &&
-       (conn->keep.keepon & KEEP_READ)) {
-      /* only if they are not the same socket and we had a readable one,
-         we increase index */
-      index++;
+    if((conn->sockfd != conn->writesockfd) ||
+       !(conn->keep.keepon & KEEP_READ)) {
+      /* only if they are not the same socket or we didn't have a readable
+         one, we increase index */
+      if(conn->keep.keepon & KEEP_READ)
+        index++; /* increase index if we need two entries */
       sock[index] = conn->writesockfd;
     }
 
