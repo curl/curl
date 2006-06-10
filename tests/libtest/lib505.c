@@ -38,7 +38,7 @@
 int test(char *URL)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode res = CURLE_OK;
   FILE *hd_src ;
   int hd ;
   struct_stat file_info;

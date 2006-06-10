@@ -5,7 +5,7 @@ int test(char *URL)
   CURL* curls;
   CURLM* multi;
   int still_running;
-  int i;
+  int i = -1;
   CURLMsg *msg;
 
   multi = curl_multi_init();
