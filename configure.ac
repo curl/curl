@@ -1954,6 +1954,29 @@ AC_HELP_STRING([--disable-cookies],[Disable cookies support]),
        AC_MSG_RESULT(yes)
 )
 
+dnl ************************************************************
+dnl Enable hiding of internal symbols in library to reduce its size and
+dnl speed dynamic linking of applications.  This currently is only supported
+dnl on gcc >= 4.0
+dnl
+AC_MSG_CHECKING([whether to enable hidden symbols in the library])
+AC_ARG_ENABLE(hidden-symbols,
+AC_HELP_STRING([--enable-hidden-symbols],[Hide internal symbols in library (gcc>=4)])
+AC_HELP_STRING([--disable-hidden-symbols],[Leave all symbols with default visibility in library]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       AC_DEFINE(CURL_HIDDEN_SYMBOLS, 1, [to enable hidden symbols])
+       AC_SUBST(CURL_HIDDEN_SYMBOLS)
+       CFLAGS="$CFLAGS -fvisibility=hidden"
+       ;;
+  esac ],
+       AC_MSG_RESULT(no)
+)
+
+dnl ************************************************************
 if test "x$ws2" = "xyes"; then
 
   dnl If ws2_32 is wanted, make sure it is the _last_ lib in LIBS (makes

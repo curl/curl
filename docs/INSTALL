@@ -506,13 +506,17 @@ CROSS COMPILE
 
        ./configure --host=ARCH-OS
 
+REDUCING SIZE
+=============
+
    There are a number of configure options that can be used to reduce the
    size of libcurl for embedded applications where binary size is an
-   important factor.  First, be sure to set the CFLAGS environment variable
-   when configuring with any compiler optimization flags to reduce the
-   size of the binary.  For gcc, this would mean at minimum:
+   important factor.  First, be sure to set the CFLAGS variable when
+   configuring with any relevant compiler optimization flags to reduce the
+   size of the binary.  For gcc, this would mean at minimum the -Os option
+   and probably the -march=X option as well, e.g.:
 
-      env CFLAGS='-Os' ./configure ...
+      ./configure CFLAGS='-Os' ...
 
    Be sure to specify as many --disable- and --without- flags on the configure
    command-line as you can to disable all the libcurl features that you
@@ -526,9 +530,23 @@ CROSS COMPILE
      --disable-crypto-auth (disables HTTP cryptographic authentication)
      --disable-ipv6 (disables support for IPv6)
      --disable-verbose (eliminates debugging strings and error code strings)
+     --enable-hidden-symbols (eliminates unneeded symbols in library)
      --without-libidn (disables support for the libidn DNS library)
      --without-ssl (disables support for SSL/TLS)
      --without-zlib (disables support for on-the-fly decompression)
+
+   The GNU linker has a number of options to reduce the size of the libcurl
+   dynamic libraries on some platforms even further. Specify them by giving
+   the options -Wl,-Bsymbolic and -Wl,-s on the gcc command-line.  
+   Be sure also to strip debugging symbols from your binaries after
+   compiling using 'strip' (or the appropriate variant if cross-compiling).
+   If space is really tight, you may be able to remove some unneeded
+   sections of the library using the -R option to objcopy (e.g. the
+   .comment section).
+
+   Using these techniques it is possible to create an HTTP-only shared
+   libcurl library for i386 Linux platforms that is less than 90 KB in
+   size (as of version 7.15.4).
 
    You may find that statically linking libcurl to your application will
    result in a lower total size.
