@@ -1,7 +1,7 @@
-Curl and libcurl 7.15.4
+Curl and libcurl 7.15.5
 
- Public curl release number:               94
- Releases counted from the very beginning: 121
+ Public curl release number:               95
+ Releases counted from the very beginning: 122
  Available command line options:           112
  Available curl_easy_setopt() options:     132
  Number of public functions in libcurl:    49
@@ -11,62 +11,23 @@ Curl and libcurl 7.15.4
 
 This release includes the following changes:
 
- o NTLM2 session response support
- o CURLOPT_COOKIELIST set to "SESS" clears all session cookies
- o CURLINFO_LASTSOCKET returned sockets are now checked more before returned
- o curl-config got a --checkfor option to compare version numbers
- o line end conversions for FTP ASCII transfers
- o curl_multi_socket() API added (still mostly untested)
- o conversion callback options for EBCDIC <=> ASCII conversions
- o added CURLINFO_FTP_ENTRY_PATH
- o less blocking for the multi interface during (Open)SSL connect negotiation
+ o 
 
 This release includes the following bugfixes:
 
- o builds fine on cygwin
- o md5-sess with Digest authentication
- o dict with letters such as space in a word
- o dict with url-encoded words in the URL
- o libcurl.m4 when default=yes but no libcurl was found
- o numerous bugs fixed in the TFTP code
- o possible memory leak when adding easy handles to multi stack
- o TFTP works in a more portable fashion (== on more platforms)
- o WSAGetLastError() is now used (better) on Windows
- o GnuTLS non-block case that could cause data trashing
- o deflate code survives lack of zlib header
- o CURLOPT_INTERFACE works with hostname
- o configure runs fine with ICC
- o closed control connection with FTP when easy handle was removed from multi
- o curl --trace crash when built with VS2005
- o SSL connect time-out
- o improved NTLM functionality
- o following redirects with more than one question mark in source URL
- o fixed debug build crash with -d
- o generates a fine AIX Toolbox RPM spec
- o treat FTP AUTH failures properly
- o TFTP transfers could trash data
- o -d + -G combo crash
+ o 
 
 Other curl-related news:
 
- o tclcurl 0.15.3 was released:
-   http://personal1.iddeo.es/andresgarci/tclcurl/english/
+ o 
 
 New curl mirrors:
 
- o http://curl.webdesign-zdg.de/ in Frankfurt, Germany
- o http://curl.de-mirror.de/ in Aachen, Germany
- o http://curl.osmirror.nl/ in Amsterdam, the Netherlands
- o http://curl.usphp.com/ in Florida, US
- o http://curl.oslevel.de/ in Karlsruhe, Germany
+ o 
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dan Fandrich, Ilja van Sprundel, David McCreedy, Tor Arntsen, Xavier Bouchoux,
- David Byron, Michele Bini, Ates Goral, Katie Wang, Robson Braga Araujo,
- Ale Vesely, Paul Querna, Gisle Vanem, Mark Eichin, Roland Blom, Andreas
- Ntaflos, David Shaw, Michael Wallner, Olaf Stüben, Mikael Sennerholm,
- Brian Dessent
+ 
 
         Thanks! (and sorry if I forgot to mention someone)
