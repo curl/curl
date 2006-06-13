@@ -1967,10 +1967,20 @@ AC_HELP_STRING([--disable-hidden-symbols],[Leave all symbols with default visibi
   no)
        AC_MSG_RESULT(no)
        ;;
-  *)   AC_MSG_RESULT(yes)
-       AC_DEFINE(CURL_HIDDEN_SYMBOLS, 1, [to enable hidden symbols])
-       AC_SUBST(CURL_HIDDEN_SYMBOLS)
-       CFLAGS="$CFLAGS -fvisibility=hidden"
+  *)   
+       if test "$GCC" = yes ; then
+         AC_MSG_CHECKING([whether $CC supports it])
+         if $CC --help --verbose 2>&1 | grep fvisibility= > /dev/null ; then
+	   AC_MSG_RESULT(yes)
+	   AC_DEFINE(CURL_HIDDEN_SYMBOLS, 1, [to enable hidden symbols])
+	   AC_SUBST(CURL_HIDDEN_SYMBOLS)
+	   CFLAGS="$CFLAGS -fvisibility=hidden"
+         else
+            AC_MSG_RESULT(no)
+          fi
+       else
+          AC_MSG_RESULT([no (not gcc)])
+       fi
        ;;
   esac ],
        AC_MSG_RESULT(no)
