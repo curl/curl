@@ -285,7 +285,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
   curl_socket_t fd_read;
   curl_socket_t fd_write;
-  curl_socket_t select_res;
+  int select_res;
 
   curl_off_t contentlength;
 
