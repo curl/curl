@@ -6,6 +6,15 @@
 
                                   Changelog
 
+Daniel (19 June 2006)
+- Made -K on a file that couldn't be read cause a warning to be displayed.
+
+Daniel (13 June 2006)
+- Dan Fandrich implemented --enable-hidden-symbols configure option to enable
+  -fvisibility=hidden on gcc >= 4.0.  This reduces the size of the libcurl
+  binary and speeds up dynamic linking by hiding all the internal symbols from
+  the symbol table.
+
 Version 7.15.4 (12 June 2006)
 
 Daniel (8 June 2006)

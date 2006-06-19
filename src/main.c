@@ -633,8 +633,8 @@ struct LongShort {
 /* global variable to hold info about libcurl */
 static curl_version_info_data *curlinfo;
 
-static void parseconfig(const char *filename,
-                        struct Configurable *config);
+static int parseconfig(const char *filename,
+                       struct Configurable *config);
 static char *my_get_line(FILE *fp);
 static int create_dir_hierarchy(char *outfile);
 
@@ -2069,7 +2069,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       config->insecure_ok ^= TRUE;
       break;
     case 'K': /* parse config file */
-      parseconfig(nextarg, config);
+      if(parseconfig(nextarg, config))
+        warnf(config, "error trying read config from the '%s' file\n",
+              nextarg);
       break;
     case 'l':
       config->conf ^= CONF_FTPLISTONLY; /* only list the names of the FTP dir */
@@ -2402,9 +2404,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
   return PARAM_OK;
 }
 
-
-static void parseconfig(const char *filename,
-                        struct Configurable *config)
+/* return 0 on everything-is-fine, and non-zero otherwise */
+static int parseconfig(const char *filename,
+                       struct Configurable *config)
 {
   int res;
   FILE *file;
@@ -2613,6 +2615,9 @@ static void parseconfig(const char *filename,
     if(file != stdin)
       fclose(file);
   }
+  else
+    return 1; /* couldn't open the file */
+  return 0;
 }
 
 static void go_sleep(long ms)
@@ -3392,7 +3397,7 @@ operate(struct Configurable *config, int argc, char *argv[])
     ;
   }
   else {
-    parseconfig(NULL, config);
+    parseconfig(NULL, config); /* ignore possible failure */
   }
 
   if ((argc < 2)  && !config->url_list) {

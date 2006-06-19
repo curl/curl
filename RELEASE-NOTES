@@ -7,19 +7,19 @@ Curl and libcurl 7.15.5
  Number of public functions in libcurl:    49
  Amount of public web site mirrors:        33
  Number of known libcurl bindings:         32
- Number of contributors:                   492
+ Number of contributors:                   506
 
 This release includes the following changes:
 
- o 
+ o configure --enable-hidden-symbols
 
 This release includes the following bugfixes:
 
- o 
+ o Made -K on a file that couldn't be read cause a warning to be displayed.
 
 Other curl-related news:
 
- o 
+ o pycurl-7.15.4 was released: http://pycurl.sf.net
 
 New curl mirrors:
 
@@ -28,6 +28,6 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- 
+ Dan Fandrich
 
         Thanks! (and sorry if I forgot to mention someone)
