@@ -1,5 +1,13 @@
   Changelog for the c-ares project
 
+* June 18, 2006
+
+- William Ahern handles EAGAIN/EWOULDBLOCK errors in most of the I/O calls
+  from area_process.c.
+
+  TODO: Handle one last EAGAIN for a UDP socket send(2) in
+  ares__send_query().
+
 * May 10, 2006
 
 - Bram Matthys brought my attention to a libtool peculiarity where detecting

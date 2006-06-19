@@ -63,6 +63,7 @@
 #define GET_ERRNO()  errno
 #endif
 
+static int try_again(int errnum);
 static void write_tcp_data(ares_channel channel, fd_set *write_fds,
                            time_t now);
 static void read_tcp_data(ares_channel channel, fd_set *read_fds, time_t now);
@@ -92,6 +93,31 @@ void ares_process(ares_channel channel, fd_set *read_fds, fd_set *write_fds)
   read_tcp_data(channel, read_fds, now);
   read_udp_packets(channel, read_fds, now);
   process_timeouts(channel, now);
+}
+
+/* Return 1 if the specified errno describes a readiness error, or 0
+ * otherwise. This is mostly for HP-UX, which could return EAGAIN or
+ * EWOULDBLOCK. See this man page
+ *
+ * 	http://devrsrc1.external.hp.com/STKS/cgi-bin/man2html?manpage=/usr/share/man/man2.Z/send.2
+ */
+static int try_again(int errnum)
+{
+#if !defined EWOULDBLOCK && !defined EAGAIN
+#error "Neither EWOULDBLOCK nor EAGAIN defined"
+#endif
+  switch (errnum)
+    {
+#ifdef EWOULDBLOCK
+    case EWOULDBLOCK:
+      return 1;
+#endif
+#if defined EAGAIN && EAGAIN != EWOULDBLOCK
+    case EAGAIN:
+      return 1;
+#endif
+    }
+  return 0;
 }
 
 /* If any TCP sockets select true for writing, write out queued data
@@ -136,7 +162,8 @@ static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
           free(vec);
           if (wcount < 0)
             {
-              handle_error(channel, i, now);
+              if (!try_again(GET_ERRNO()))
+                  handle_error(channel, i, now);
               continue;
             }
 
@@ -173,7 +200,8 @@ static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
 
           if (scount < 0)
             {
-              handle_error(channel, i, now);
+              if (!try_again(GET_ERRNO()))
+                  handle_error(channel, i, now);
               continue;
             }
 
@@ -224,7 +252,8 @@ static void read_tcp_data(ares_channel channel, fd_set *read_fds, time_t now)
                        2 - server->tcp_lenbuf_pos, 0);
           if (count <= 0)
             {
-              handle_error(channel, i, now);
+              if (!(count == -1 && try_again(GET_ERRNO())))
+                  handle_error(channel, i, now);
               continue;
             }
 
@@ -250,7 +279,8 @@ static void read_tcp_data(ares_channel channel, fd_set *read_fds, time_t now)
                        server->tcp_length - server->tcp_buffer_pos, 0);
           if (count <= 0)
             {
-              handle_error(channel, i, now);
+              if (!(count == -1 && try_again(GET_ERRNO())))
+                  handle_error(channel, i, now);
               continue;
             }
 
@@ -289,7 +319,9 @@ static void read_udp_packets(ares_channel channel, fd_set *read_fds,
         continue;
 
       count = recv(server->udp_socket, (void *)buf, sizeof(buf), 0);
-      if (count <= 0)
+      if (count == -1 && try_again(GET_ERRNO()))
+        continue;
+      else if (count <= 0)
         handle_error(channel, i, now);
 
       process_answer(channel, buf, count, i, 0, now);
@@ -479,6 +511,7 @@ void ares__send_query(ares_channel channel, struct query *query, time_t now)
       if (send(server->udp_socket, (void *)query->qbuf,
                query->qlen, 0) == -1)
         {
+          /* FIXME: Handle EAGAIN here since it likely can happen. */
           query->skip_server[query->server] = 1;
           next_server(channel, query, now);
           return;
