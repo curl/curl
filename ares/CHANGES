@@ -1,5 +1,13 @@
   Changelog for the c-ares project
 
+* June 19, 2006
+
+- (wahern) Removed "big endian" DNS section and RR data integer parser
+  macros from ares_dns.h, which break c-ares on my Sparc64. Bit-wise
+  operations in C operate on logical values. And in any event the octets are
+  already in big-endian (aka network) byte order so they're being reversed
+  (thus the source of the breakage).
+
 * June 18, 2006
 
 - William Ahern handles EAGAIN/EWOULDBLOCK errors in most of the I/O calls
