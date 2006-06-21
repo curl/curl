@@ -212,7 +212,7 @@ opened for writing with the \fICURLOPT_WRITEDATA\fP option.
 Now, we need to take a step back and have a deep breath. Here's one of those
 rare platform-dependent nitpicks. Did you spot it? On some platforms[2],
 libcurl won't be able to operate on files opened by the program. Thus, if you
-use the default callback and pass in a an open file with
+use the default callback and pass in an open file with
 \fICURLOPT_WRITEDATA\fP, it will crash. You should therefore avoid this to
 make your program run fine virtually everywhere.
 
