@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel (20 June 2006)
+- Peter Silva introduced CURLOPT_MAX_SEND_SPEED_LARGE and
+  CURLOPT_MAX_RECV_SPEED_LARGE that limit tha maximum rate libcurl is allowed
+  to send or receive data. This kind of adds the the command line tool's
+  option --limit-rate to the library.
+
+  The rate limiting logic in the curl app is now removed and is instead
+  provided by libcurl itself. Transfer rate limiting will now also work for -d
+  and -F, which it didn't before.
+
 Daniel (19 June 2006)
 - Made -K on a file that couldn't be read cause a warning to be displayed.
 

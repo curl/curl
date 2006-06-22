@@ -103,10 +103,6 @@ may have been fixed since this was written!
   http://curl.haxx.se/bug/view.cgi?id=1004841. How?
   http://curl.haxx.se/mail/lib-2004-08/0182.html
 
-9. --limit-rate using -d or -F does not work. This is because the limit logic
-  is provided by the curl app in its read/write callbacks, and when doing
-  -d/-F the callbacks aren't used! http://curl.haxx.se/bug/view.cgi?id=921395
-
 8. Doing resumed upload over HTTP does not work with '-C -', because curl
   doesn't do a HEAD first to get the initial size. This needs to be done
   manually for HTTP PUT resume to work, and then '-C [index]'.

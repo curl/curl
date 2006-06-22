@@ -973,6 +973,11 @@ typedef enum {
      Note that this is used only for SSL certificate processing */
   CINIT(CONV_FROM_UTF8_FUNCTION, FUNCTIONPOINT, 144),
 
+  /* if the connection proceeds too quickly then need to slow it down */
+  /* limit-rate: maximum number of bytes per second to send or receive */
+  CINIT(MAX_SEND_SPEED_LARGE, OFF_T, 145),
+  CINIT(MAX_RECV_SPEED_LARGE, OFF_T, 146),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

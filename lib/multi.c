@@ -68,6 +68,7 @@ typedef enum {
   CURLM_STATE_DOING,       /* sending off the request (part 1) */
   CURLM_STATE_DO_MORE,     /* send off the request (part 2) */
   CURLM_STATE_PERFORM,     /* transfer data */
+  CURLM_STATE_TOOFAST,     /* wait because limit-rate exceeded */
   CURLM_STATE_DONE,        /* post data transfer operation */
   CURLM_STATE_COMPLETED,   /* operation complete */
 
@@ -156,6 +157,7 @@ static void multistate(struct Curl_one_easy *easy, CURLMstate state)
     "DOING",
     "DO_MORE",
     "PERFORM",
+    "TOOFAST",
     "DONE",
     "COMPLETED",
   };
@@ -440,6 +442,7 @@ static int multi_getsock(struct Curl_one_easy *easy,
                          int numsocks)
 {
   switch(easy->state) {
+  case CURLM_STATE_TOOFAST:  /* returns 0, so will not select. */
   default:
     return 0;
 
@@ -771,7 +774,37 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
       break;
 
+    case CURLM_STATE_TOOFAST: /* limit-rate exceeded in either direction */
+      /* if both rates are within spec, resume transfer */
+      Curl_pgrsUpdate(easy->easy_conn);
+      if ( ( ( easy->easy_handle->set.max_send_speed == 0 ) ||
+             ( easy->easy_handle->progress.ulspeed <
+               easy->easy_handle->set.max_send_speed ) )  &&
+           ( ( easy->easy_handle->set.max_recv_speed == 0 ) ||
+             ( easy->easy_handle->progress.dlspeed <
+               easy->easy_handle->set.max_recv_speed ) )
+        )
+        multistate(easy, CURLM_STATE_PERFORM);
+
+      break;
+
     case CURLM_STATE_PERFORM:
+
+      /* check if over speed */
+      if ( (  ( easy->easy_handle->set.max_send_speed > 0 ) &&
+              ( easy->easy_handle->progress.ulspeed >
+                easy->easy_handle->set.max_send_speed ) )  ||
+           (  ( easy->easy_handle->set.max_recv_speed > 0 ) &&
+              ( easy->easy_handle->progress.dlspeed >
+                easy->easy_handle->set.max_recv_speed ) )
+        ) {
+        /* Transfer is over the speed limit. Change state.  TODO: Call
+         * Curl_expire() with the time left until we're targeted to be below
+         * the speed limit again. */
+        multistate(easy, CURLM_STATE_TOOFAST );
+        break;
+      }
+
       /* read/write data if it is ready to do so */
       easy->result = Curl_readwrite(easy->easy_conn, &done);
 
@@ -825,6 +858,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         }
       }
       break;
+
     case CURLM_STATE_DONE:
       /* post-transfer command */
       easy->result = Curl_done(&easy->easy_conn, CURLE_OK);

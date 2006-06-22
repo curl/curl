@@ -2660,9 +2660,7 @@ static size_t my_fwrite(void *buffer, size_t sz, size_t nmemb, void *stream)
   size_t rc;
   struct OutStruct *out=(struct OutStruct *)stream;
   struct Configurable *config = out->config;
-  curl_off_t size = (curl_off_t)(sz * nmemb); /* typecast to prevent
-                                                 warnings when converting from
-                                                 unsigned to signed */
+
   if(out && !out->stream) {
     /* open file for writing */
     out->stream=fopen(out->filename, "wb");
@@ -2676,55 +2674,6 @@ static size_t my_fwrite(void *buffer, size_t sz, size_t nmemb, void *stream)
        */
       rc = (0 == (sz * nmemb)) ? 1 : 0;
       return rc; /* failure */
-    }
-  }
-
-  if(config->recvpersecond) {
-    /*
-     * We know when we received data the previous time. We know how much data
-     * we get now. Make sure that this is not faster than we are told to run.
-     * If we're faster, sleep a while *before* doing the fwrite() here.
-     */
-
-    struct timeval now;
-    long timediff;
-    long sleep_time;
-
-    static curl_off_t addit = 0;
-
-    now = curlx_tvnow();
-    timediff = curlx_tvdiff(now, config->lastrecvtime); /* milliseconds */
-
-    if((config->recvpersecond > CURL_MAX_WRITE_SIZE) && (timediff < 100) ) {
-      /* If we allow a rather speedy transfer, add this amount for later
-       * checking. Also, do not modify the lastrecvtime as we will use a
-       * longer scope due to this addition.  We wait for at least 100 ms to
-       * pass to get better values to do better math for the sleep. */
-      addit += size;
-    }
-    else {
-      size += addit; /* add up the possibly added bonus rounds from the
-                        zero timediff calls */
-      addit = 0; /* clear the addition pool */
-
-      if( size*1000 > config->recvpersecond*timediff) {
-        /* figure out how many milliseconds to rest */
-        sleep_time = (long)(size*1000/config->recvpersecond - timediff);
-
-        /*
-         * Make sure we don't sleep for so long that we trigger the speed
-         * limit.  This won't limit the bandwidth quite the way we've been
-         * asked to, but at least the transfer has a chance.
-         */
-        if (config->low_speed_time > 0)
-          sleep_time = MIN(sleep_time,(config->low_speed_time * 1000) / 2);
-
-        if(sleep_time > 0) {
-          go_sleep(sleep_time);
-          now = curlx_tvnow();
-        }
-      }
-      config->lastrecvtime = now;
     }
   }
 
@@ -2772,62 +2721,6 @@ static size_t my_fread(void *buffer, size_t sz, size_t nmemb, void *userp)
 {
   size_t rc;
   struct InStruct *in=(struct InStruct *)userp;
-  struct Configurable *config = in->config;
-  curl_off_t size = (curl_off_t)(sz * nmemb);  /* typecast to prevent warnings
-                                                  when converting from
-                                                  unsigned to signed */
-
-  if(config->sendpersecond) {
-    /*
-     * We know when we sent data the previous time. We know how much data
-     * we sent. Make sure that this was not faster than we are told to run.
-     * If we're faster, sleep a while *before* doing the fread() here.
-     * Also, make no larger fread() than should be sent this second!
-     */
-
-    struct timeval now;
-    long timediff;
-    long sleep_time;
-
-    static curl_off_t addit = 0;
-
-    now = curlx_tvnow();
-    timediff = curlx_tvdiff(now, config->lastsendtime); /* milliseconds */
-
-    if((config->sendpersecond > CURL_MAX_WRITE_SIZE) &&
-       (timediff < 100)) {
-      /*
-       * We allow very fast transfers, then allow at least 100 ms between
-       * each sleeping mile-stone to create more accurate long-term rates.
-       */
-      addit += size;
-    }
-    else {
-      /* If 'addit' is non-zero, it contains the total amount of bytes
-         uploaded during the last 'timediff' milliseconds. If it is zero,
-         we use the stored previous size. */
-      curl_off_t xfered = addit?addit:(curl_off_t)config->lastsendsize;
-      addit = 0; /* clear it for the next round */
-
-      if( xfered*1000 > config->sendpersecond*timediff) {
-        /* figure out how many milliseconds to rest */
-        sleep_time = (long)(xfered*1000/config->sendpersecond - timediff);
-        if(sleep_time > 0) {
-          go_sleep (sleep_time);
-          now = curlx_tvnow();
-        }
-      }
-      config->lastsendtime = now;
-
-      if(size > config->sendpersecond) {
-        /* lower the size to actually read */
-        nmemb = (size_t)config->sendpersecond;
-        sz = 1;
-      }
-    }
-
-    config->lastsendsize = sz*nmemb;
-  }
 
   rc = fread(buffer, sz, nmemb, in->stream);
 #if 0
@@ -3890,11 +3783,10 @@ operate(struct Configurable *config, int argc, char *argv[])
         curl_easy_setopt(curl, CURLOPT_IOCTLDATA, &input);
         curl_easy_setopt(curl, CURLOPT_IOCTLFUNCTION, my_ioctl);
 
-        if(config->recvpersecond) {
+        if(config->recvpersecond)
           /* tell libcurl to use a smaller sized buffer as it allows us to
              make better sleeps! 7.9.9 stuff! */
           curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, config->recvpersecond);
-        }
 
         /* size of uploaded file: */
         curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, uploadfilesize);
@@ -3944,8 +3836,14 @@ operate(struct Configurable *config, int argc, char *argv[])
                          config->conf&CONF_AUTO_REFERER);
         curl_easy_setopt(curl, CURLOPT_USERAGENT, config->useragent);
         curl_easy_setopt(curl, CURLOPT_FTPPORT, config->ftpport);
-        curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, config->low_speed_limit);
+        curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT,
+                         config->low_speed_limit);
         curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, config->low_speed_time);
+        curl_easy_setopt(curl, CURLOPT_MAX_SEND_SPEED_LARGE,
+                         config->sendpersecond);
+        curl_easy_setopt(curl, CURLOPT_MAX_RECV_SPEED_LARGE,
+                         config->recvpersecond);
+
         curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE,
                          config->use_resume?config->resume_from:0);
         curl_easy_setopt(curl, CURLOPT_COOKIE, config->cookie);

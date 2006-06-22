@@ -11,6 +11,7 @@ Curl and libcurl 7.15.5
 
 This release includes the following changes:
 
+ o added CURLOPT_MAX_SEND_SPEED_LARGE and CURLOPT_MAX_RECV_SPEED_LARGE
  o configure --enable-hidden-symbols
 
 This release includes the following bugfixes:
@@ -19,6 +20,7 @@ This release includes the following bugfixes:
 
 Other curl-related news:
 
+ o cURLpp 0.6.0 was released: http://rrette.com/curlpp.html
  o pycurl-7.15.4 was released: http://pycurl.sf.net
 
 New curl mirrors:
@@ -28,6 +30,6 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dan Fandrich
+ Dan Fandrich, Peter Silva
 
         Thanks! (and sorry if I forgot to mention someone)

@@ -1039,6 +1039,8 @@ struct UserDefined {
   curl_off_t infilesize;      /* size of file to upload, -1 means unknown */
   long low_speed_limit; /* bytes/second */
   long low_speed_time;  /* number of seconds */
+  curl_off_t max_send_speed; /* high speed limit in bytes/second for upload */
+  curl_off_t max_recv_speed; /* high speed limit in bytes/second for download */
   curl_off_t set_resume_from;  /* continue [ftp] transfer from here */
   char *cookie;         /* HTTP cookie string to send */
   struct curl_slist *headers; /* linked list of extra headers */
