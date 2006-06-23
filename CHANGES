@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (23 June 2006)
+- Arve Knudsen found a flaw in curl_multi_fdset() for systems where
+  curl_socket_t is unsigned (like Windows) that could cause it to wrongly
+  return a max fd of -1.
+
 Daniel (20 June 2006)
 - Peter Silva introduced CURLOPT_MAX_SEND_SPEED_LARGE and
   CURLOPT_MAX_RECV_SPEED_LARGE that limit tha maximum rate libcurl is allowed

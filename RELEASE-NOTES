@@ -16,6 +16,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o curl_multi_fdset() could return a crazy max_fd value
  o Made -K on a file that couldn't be read cause a warning to be displayed.
 
 Other curl-related news:
@@ -30,6 +31,6 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dan Fandrich, Peter Silva
+ Dan Fandrich, Peter Silva, Arve Knudsen
 
         Thanks! (and sorry if I forgot to mention someone)

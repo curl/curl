@@ -504,7 +504,7 @@ CURLMcode curl_multi_fdset(CURLM *multi_handle,
         /* this socket is unused, break out of loop */
         break;
       else {
-        if(s > (curl_socket_t)this_max_fd)
+        if((int)s > this_max_fd)
           this_max_fd = (int)s;
       }
     }
