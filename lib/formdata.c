@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -136,6 +136,8 @@ Content-Disposition: form-data; name="FILECONTENT"
 /* This system has a basename() but no prototype for it! */
 char *basename(char *path);
 #endif
+
+static size_t readfromfile(struct Form *form, char *buffer, size_t size);
 
 /* What kind of Content-Type to use on un-specified files with unrecognized
    extensions. */
@@ -886,6 +888,51 @@ void Curl_formclean(struct FormData *form)
 }
 
 /*
+ * curl_formget()
+ * Serialize a curl_httppost struct.
+ * Returns 0 on success.
+ */
+int curl_formget(struct curl_httppost *form, void *arg,
+                 curl_formget_callback append)
+{
+  CURLFORMcode rc;
+  curl_off_t size;
+  struct FormData *data, *ptr;
+
+  if ((rc = Curl_getFormData(&data, form, &size))) {
+    return (int)rc;
+  }
+
+  for (ptr = data; ptr; ptr = ptr->next) {
+    if (ptr->type == FORM_FILE) {
+      char buffer[8192];
+      size_t read;
+      struct Form temp;
+
+      Curl_FormInit(&temp, ptr);
+
+      do {
+        read = readfromfile(&temp, buffer, sizeof(buffer));
+        if ((read == (size_t) -1) || (read != append(arg, buffer, read))) {
+          if (temp.fp) {
+            fclose(temp.fp);
+          }
+          Curl_formclean(data);
+          return -1;
+        }
+      } while (read == sizeof(buffer));
+    } else {
+      if (ptr->length != append(arg, ptr->line, ptr->length)) {
+        Curl_formclean(data);
+        return -1;
+      }
+    }
+  }
+  Curl_formclean(data);
+  return 0;
+}
+
+/*
  * curl_formfree() is an external function to free up a whole form post
  * chain
  */
@@ -1284,7 +1331,7 @@ static size_t readfromfile(struct Form *form, char *buffer, size_t size)
   nread = fread(buffer, 1, size, form->fp);
 
   if(nread != size) {
-    /* this is the last chunk form the file, move on */
+    /* this is the last chunk from the file, move on */
     fclose(form->fp);
     form->fp = NULL;
     form->data = form->data->next;
@@ -1524,6 +1571,15 @@ CURLFORMcode curl_formadd(struct curl_httppost **httppost,
 {
   (void)httppost;
   (void)last_post;
+  return CURL_FORMADD_DISABLED;
+}
+
+CURLFORMCode curl_formget(struct curl_httppost *post, void *arg,
+                          curl_formget_callback append)
+{
+  (void) post;
+  (void) arg;
+  (void) append;
   return CURL_FORMADD_DISABLED;
 }
 

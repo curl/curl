@@ -1159,6 +1159,26 @@ CURL_EXTERN CURLFORMcode curl_formadd(struct curl_httppost **httppost,
                                       ...);
 
 /*
+ * callback function for curl_formget()
+ * The void *arg pointer will be the one passed as second argument to curl_formget().
+ * The character buffer passed to it must not be freed.
+ * Should return the buffer length passed to it as the argument "len" on success.
+ */
+typedef size_t (*curl_formget_callback)(void *arg, const char *buf, size_t len);
+
+/*
+ * NAME curl_formget()
+ *
+ * DESCRIPTION
+ *
+ * Serialize a curl_httppost struct built with curl_formadd().
+ * Accepts a void pointer as second argument which will be passed to
+ * the curl_formget_callback function.
+ * Returns 0 on success.
+ */
+CURL_EXTERN int curl_formget(struct curl_httppost *form, void *arg,
+                             curl_formget_callback append);
+/*
  * NAME curl_formfree()
  *
  * DESCRIPTION

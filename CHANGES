@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (24 June 2006)
+- Michael Wallner added curl_formget(), which allows an application to extract
+  (serialise) a previously built formpost (as with curl_formadd()).
+
 Daniel (23 June 2006)
 - Arve Knudsen found a flaw in curl_multi_fdset() for systems where
   curl_socket_t is unsigned (like Windows) that could cause it to wrongly
