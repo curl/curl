@@ -135,6 +135,10 @@ TODO
 
  SSL
 
+ * Provide a libcurl API for setting mutex callbacks in the underlying SSL
+   library, so that the same application code can use mutex-locking
+   independently of OpenSSL or GnutTLS being used.
+
  * Anton Fedorov's "dumpcert" patch:
    http://curl.haxx.se/mail/lib-2004-03/0088.html
 
