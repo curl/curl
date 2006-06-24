@@ -24,14 +24,16 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 
 DSP = curllib.dsp
 
-EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 Makefile.riscos $(DSP)    \
- curllib.dsw config-win32.h config-win32ce.h config-riscos.h		      \
- config-mac.h config.h.in ca-bundle.crt README.encoding README.memoryleak     \
- README.ares README.curlx makefile.dj config.dj libcurl.framework.make	      \
- libcurl.plist libcurl.rc config-amigaos.h amigaos.c amigaos.h makefile.amiga \
- Makefile.netware nwlib.c libcurl.imp msvcproj.head msvcproj.foot	      \
- config-win32ce.h README.httpauth Makefile.Watcom README.hostip		      \
- README.multi_socket config-tpf.h
+DOCS = README.encoding README.memoryleak README.ares README.curlx	\
+ README.hostip README.multi_socket README.httpauth README.pipelining
+
+EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 Makefile.riscos	\
+ $(DSP) curllib.dsw config-win32.h config-win32ce.h config-riscos.h	\
+ config-mac.h config.h.in ca-bundle.crt makefile.dj config.dj		\
+ libcurl.framework.make libcurl.plist libcurl.rc config-amigaos.h	\
+ amigaos.c amigaos.h makefile.amiga Makefile.netware nwlib.c		\
+ libcurl.imp msvcproj.head msvcproj.foot config-win32ce.h		\
+ Makefile.Watcom config-tpf.h $(DOCS)
 
 CLEANFILES = $(DSP)
 
