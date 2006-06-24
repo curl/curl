@@ -1,0 +1,55 @@
+Doing HTTP Pipelining with libcurl
+==================================
+
+Background
+
+Since pipelining implies that one or more requests are sent to a server before
+the previous response(s) have been received, it cannot be implemented easily
+into libcurl's easy interface due to its synchronous nature. We therefore only
+aim on adding it for multi interface use.
+
+Considerations
+
+When using the multi interface, you create one easy handle for each transfer.
+Bascially any number of handles can be created, added and used with the multi
+interface - simultaneously. It is an interface designed to allow many
+simultaneous transfers while still using a single thread.
+
+Pipelining however, will force us to allow apps to somehow "connect" two (or
+more) easy handles that are added to a multi handle. The first one sends a
+request and receives a response, just as normal, while the second (and
+subsequent) ones need to be attached to the first handle so that it can send
+its request on the same connection and then sit and wait until its response
+comes.
+
+To ponder about:
+
+- Explicitly ask for pipelining handle X and handle Y ? It isn't always that
+  easy for an app to do this association. The lib should probably still resolve
+  the second one properly to make sure that they actually _can_ be considered
+  for pipelining. Also, asking for explicit pipelining on handle X may be
+  tricky when handle X get a closed connection.
+
+- Have an option like "attempt pipelining" and then it _may_ use that if an
+  existing connection is already present against our target HTTP server? May
+  cause funny effects if the first transfer is a slow big file and the second
+  is a very small one... Also probably requires some kind of notification
+  support so that the app can get to know that the handle is put "in line" for
+  pipelining.
+
+- We need options to control max pipeline length, and probably how to behave
+  if we reach that limit.
+
+- When a pipeline is in use, we must take precautions so that we either don't
+  allow the used handles (i.e those who still wait for a response) to be
+  removed, or we allow removal but still deal with the outstanding response
+  somehow.
+
+- Currently (before pipelining) we do not have any code or concept that lets
+  multiple handles share the same physical connection. We need a lock concept
+  and carefully make sure that each handle knows exactly what they can do and
+  when, on the shared connection.
+
+- We need to keep a linked list of each handle that is part of a single pipe
+  so that if it breaks, we know which handles that need to resend their
+  requests.
