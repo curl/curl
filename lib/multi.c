@@ -1083,8 +1083,11 @@ static void singlesocket(struct Curl_multi *multi,
             continue;
         }
 
-        action = ((current.action & GETSOCK_READSOCK(i))?CURL_POLL_IN:0) +
-          ((current.action & GETSOCK_WRITESOCK(i))?CURL_POLL_OUT:0);
+        action = CURL_POLL_NONE;
+        if(current.action & GETSOCK_READSOCK(i))
+          action |= CURL_POLL_IN;
+        if(current.action & GETSOCK_WRITESOCK(i))
+          action |= CURL_POLL_OUT;
       }
 
       /* call the callback with this new info */
