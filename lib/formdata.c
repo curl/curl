@@ -895,11 +895,11 @@ void Curl_formclean(struct FormData *form)
 int curl_formget(struct curl_httppost *form, void *arg,
                  curl_formget_callback append)
 {
-  CURLFORMcode rc;
+  CURLcode rc;
   curl_off_t size;
   struct FormData *data, *ptr;
 
-  if ((rc = Curl_getFormData(&data, form, &size))) {
+  if ((rc = Curl_getFormData(&data, form, &size)) != CURLE_OK) {
     return (int)rc;
   }
 
