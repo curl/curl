@@ -1788,6 +1788,12 @@ ssize_t Curl_ossl_recv(struct connectdata *conn, /* connection data */
 
 size_t Curl_ossl_version(char *buffer, size_t size)
 {
+#ifdef YASSL_VERSION
+  /* yassl provides an OpenSSL API compatiblity layer so it looks identical
+     to OpenSSL in all other aspects */
+  return snprintf(buffer, size, " yassl/%s", YASSL_VERSION);
+#else /* YASSL_VERSION */
+
 #if (SSLEAY_VERSION_NUMBER >= 0x905000)
   {
     char sub[2];
@@ -1838,5 +1844,7 @@ size_t Curl_ossl_version(char *buffer, size_t size)
   }
 #endif /* (SSLEAY_VERSION_NUMBER >= 0x900000) */
 #endif /* SSLEAY_VERSION_NUMBER is less than 0.9.5 */
+
+#endif /* YASSL_VERSION */
 }
 #endif /* USE_SSLEAY */
