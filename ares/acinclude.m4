@@ -355,6 +355,18 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
         [Define to the type of args 4 and 6 for getnameinfo.])
       AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG7, $[4],
         [Define to the type of arg 7 for getnameinfo.])
+      #
+      case "$[1]" in
+        const*)
+          AC_DEFINE_UNQUOTED(GETNAMEINFO_QUAL_ARG1, "const",
+            [Define to the type qualifier of arg 1 for getnameinfo.])
+        ;;
+        *)
+          AC_DEFINE_UNQUOTED(GETNAMEINFO_QUAL_ARG1, "",
+            [Define to the type qualifier of arg 1 for getnameinfo.])
+        ;;
+      esac
+      #
       AC_DEFINE_UNQUOTED(HAVE_GETNAMEINFO, 1,
         [Define to 1 if you have the getnameinfo function.])
       ac_cv_func_getnameinfo="yes"
