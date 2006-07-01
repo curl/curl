@@ -378,16 +378,31 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
         [Define to the type of arg 7 for getnameinfo.])
       #
       AC_MSG_WARN([Debug output - START])
-      AC_MSG_WARN(A1 $1)
-      AC_MSG_WARN(A2 $[1])
-      AC_MSG_WARN(A2 ${1})
       gni_qual_type_arg1=$[1]
-      AC_MSG_WARN(B1 $gni_qual_type_arg1)
-      AC_MSG_WARN(B2 $[gni_qual_type_arg1])
-      AC_MSG_WARN(B3 ${gni_qual_type_arg1})
+      AC_MSG_WARN(D1 $gni_qual_type_arg1)
       #
       case "$gni_qual_type_arg1" in
         const*)
+          AC_MSG_WARN(D2 $gni_qual_type_arg1)
+          gni_e1=`echo $gni_qual_type_arg1`
+          gni_e2=`echo $gni_qual_type_arg1 | sed 's/\*/\*/g'`
+          gni_e3=`echo $gni_qual_type_arg1 | sed 's/\*/\\*/g'`
+          AC_MSG_WARN(E1 $gni_e1)
+          AC_MSG_WARN(E1 $gni_e2)
+          AC_MSG_WARN(E1 $gni_e3)
+          gni_f1=`echo "$gni_qual_type_arg1"`
+          gni_f2=`echo "$gni_qual_type_arg1" | sed 's/\*/\*/g'`
+          gni_f3=`echo "$gni_qual_type_arg1" | sed 's/\*/\\*/g'`
+          AC_MSG_WARN(F1 $gni_f1)
+          AC_MSG_WARN(F1 $gni_f2)
+          AC_MSG_WARN(F1 $gni_f3)
+          gni_g1=`echo "${gni_qual_type_arg1}"`
+          gni_g2=`echo "${gni_qual_type_arg1}" | sed 's/\*/\*/g'`
+          gni_g3=`echo "${gni_qual_type_arg1}" | sed 's/\*/\\*/g'`
+          AC_MSG_WARN(G1 $gni_g1)
+          AC_MSG_WARN(G1 $gni_g2)
+          AC_MSG_WARN(G1 $gni_g3)
+          #
           gni_qual_arg1=const
           gni_type_arg1=`echo $gni_qual_type_arg1 | sed 's/^const //' | sed 's/\*/\*/g'`
         ;;
@@ -396,9 +411,9 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
           gni_type_arg1=`echo $gni_qual_type_arg1 | sed 's/\*/\*/g'`
         ;;
       esac
-      AC_MSG_WARN(C1 $gni_type_arg1)
-      AC_MSG_WARN(C2 $[gni_type_arg1])
-      AC_MSG_WARN(C3 ${gni_type_arg1})
+      AC_MSG_WARN(Z1 $gni_type_arg1)
+      AC_MSG_WARN(Z2 $[gni_type_arg1])
+      AC_MSG_WARN(Z3 ${gni_type_arg1})
       AC_MSG_WARN([Debug output - END])
       #
       AC_DEFINE_UNQUOTED(GETNAMEINFO_QUAL_ARG1, $gni_qual_arg1,
