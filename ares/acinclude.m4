@@ -211,7 +211,9 @@ dnl and check the types of five of its arguments.
 dnl If the function succeeds HAVE_GETNAMEINFO will be
 dnl defined, defining the types of the arguments in
 dnl GETNAMEINFO_TYPE_ARG1, GETNAMEINFO_TYPE_ARG2,
-dnl GETNAMEINFO_TYPE_ARG46 and GETNAMEINFO_TYPE_ARG7.
+dnl GETNAMEINFO_TYPE_ARG46 and GETNAMEINFO_TYPE_ARG7,
+dnl and also defining the type qualifier of first 
+dnl argument in GETNAMEINFO_QUAL_ARG1.
 
 AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
   AC_REQUIRE([CURL_CHECK_HEADER_WS2TCPIP])dnl
@@ -347,8 +349,6 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
       set dummy `echo "$curl_cv_func_getnameinfo_args" | sed 's/\*/\*/g'`
       IFS=$gni_prev_IFS
       shift
-      AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG1, $[1],
-        [Define to the type of arg 1 for getnameinfo.])
       AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG2, $[2],
         [Define to the type of arg 2 for getnameinfo.])
       AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG46, $[3],
@@ -356,16 +356,23 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
       AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG7, $[4],
         [Define to the type of arg 7 for getnameinfo.])
       #
-      case "$[1]" in
+      gni_qual_type_arg1=$[1]
+      #
+      case "$gni_qual_type_arg1" in
         const*)
-          AC_DEFINE_UNQUOTED(GETNAMEINFO_QUAL_ARG1, "const",
-            [Define to the type qualifier of arg 1 for getnameinfo.])
+          gni_qual_arg1=const
+          gni_type_arg1=`echo $gni_qual_type_arg1 | sed 's/^const //'`
         ;;
         *)
-          AC_DEFINE_UNQUOTED(GETNAMEINFO_QUAL_ARG1, "",
-            [Define to the type qualifier of arg 1 for getnameinfo.])
+          gni_qual_arg1=
+          gni_type_arg1=$gni_qual_type_arg1
         ;;
       esac
+      #
+      AC_DEFINE_UNQUOTED(GETNAMEINFO_QUAL_ARG1, $gni_qual_arg1,
+        [Define to the type qualifier of arg 1 for getnameinfo.])
+      AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG1, $gni_type_arg1,
+        [Define to the type of arg 1 for getnameinfo.])
       #
       AC_DEFINE_UNQUOTED(HAVE_GETNAMEINFO, 1,
         [Define to 1 if you have the getnameinfo function.])
