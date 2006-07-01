@@ -377,7 +377,14 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
       AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG7, $[4],
         [Define to the type of arg 7 for getnameinfo.])
       #
+      AC_MSG_WARN([Debug output - START])
+      AC_MSG_WARN(A1 $1)
+      AC_MSG_WARN(A2 $[1])
+      AC_MSG_WARN(A2 ${1})
       gni_qual_type_arg1=$[1]
+      AC_MSG_WARN(B1 $gni_qual_type_arg1)
+      AC_MSG_WARN(B2 $[gni_qual_type_arg1])
+      AC_MSG_WARN(B3 ${gni_qual_type_arg1})
       #
       case "$gni_qual_type_arg1" in
         const*)
@@ -389,6 +396,10 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
           gni_type_arg1=`echo $gni_qual_type_arg1 | sed 's/\*/\*/g'`
         ;;
       esac
+      AC_MSG_WARN(C1 $gni_type_arg1)
+      AC_MSG_WARN(C2 $[gni_type_arg1])
+      AC_MSG_WARN(C3 ${gni_type_arg1})
+      AC_MSG_WARN([Debug output - END])
       #
       AC_DEFINE_UNQUOTED(GETNAMEINFO_QUAL_ARG1, $gni_qual_arg1,
         [Define to the type qualifier of arg 1 for getnameinfo.])
