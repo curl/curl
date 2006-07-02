@@ -370,6 +370,9 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
       set dummy `echo "$curl_cv_func_getnameinfo_args" | sed 's/\*/\*/g'`
       IFS=$gni_prev_IFS
       shift
+      #
+      gni_qual_type_arg1=$[1]
+      #
       AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG2, $[2],
         [Define to the type of arg 2 for getnameinfo.])
       AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG46, $[3],
@@ -377,49 +380,41 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
       AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG7, $[4],
         [Define to the type of arg 7 for getnameinfo.])
       #
-      AC_MSG_WARN([Debug output - START])
-      gni_qual_type_arg1=$[1]
-      AC_MSG_WARN(D1 $gni_qual_type_arg1)
+      gni_opts=$-
+      #
+      case $gni_opts in
+      esac
+        *f*)
+          ;;
+        *)
+          set -f
+          ;;
+      esac
       #
       case "$gni_qual_type_arg1" in
         const*)
-          AC_MSG_WARN(D2 $gni_qual_type_arg1)
-          gni_e1=`echo $gni_qual_type_arg1`
-          gni_e2=`echo $gni_qual_type_arg1 | sed 's/\*/\*/g'`
-          gni_e3=`echo $gni_qual_type_arg1 | sed 's/\*/\\*/g'`
-          AC_MSG_WARN(E1 $gni_e1)
-          AC_MSG_WARN(E1 $gni_e2)
-          AC_MSG_WARN(E1 $gni_e3)
-          gni_f1=`echo "$gni_qual_type_arg1"`
-          gni_f2=`echo "$gni_qual_type_arg1" | sed 's/\*/\*/g'`
-          gni_f3=`echo "$gni_qual_type_arg1" | sed 's/\*/\\*/g'`
-          AC_MSG_WARN(F1 $gni_f1)
-          AC_MSG_WARN(F1 $gni_f2)
-          AC_MSG_WARN(F1 $gni_f3)
-          gni_g1=`echo "${gni_qual_type_arg1}"`
-          gni_g2=`echo "${gni_qual_type_arg1}" | sed 's/\*/\*/g'`
-          gni_g3=`echo "${gni_qual_type_arg1}" | sed 's/\*/\\*/g'`
-          AC_MSG_WARN(G1 $gni_g1)
-          AC_MSG_WARN(G1 $gni_g2)
-          AC_MSG_WARN(G1 $gni_g3)
-          #
           gni_qual_arg1=const
-          gni_type_arg1=`echo $gni_qual_type_arg1 | sed 's/^const //' | sed 's/\*/\*/g'`
+          gni_type_arg1=`echo $gni_qual_type_arg1 | sed 's/^const //'`
         ;;
         *)
           gni_qual_arg1=
-          gni_type_arg1=`echo $gni_qual_type_arg1 | sed 's/\*/\*/g'`
+          gni_type_arg1=$gni_qual_type_arg1
         ;;
       esac
-      AC_MSG_WARN(Z1 $gni_type_arg1)
-      AC_MSG_WARN(Z2 $[gni_type_arg1])
-      AC_MSG_WARN(Z3 ${gni_type_arg1})
-      AC_MSG_WARN([Debug output - END])
       #
       AC_DEFINE_UNQUOTED(GETNAMEINFO_QUAL_ARG1, $gni_qual_arg1,
         [Define to the type qualifier of arg 1 for getnameinfo.])
       AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG1, $gni_type_arg1,
         [Define to the type of arg 1 for getnameinfo.])
+      #
+      case $gni_opts in
+      esac
+        *f*)
+          ;;
+        *)
+          set +f
+          ;;
+      esac
       #
       AC_DEFINE_UNQUOTED(HAVE_GETNAMEINFO, 1,
         [Define to 1 if you have the getnameinfo function.])

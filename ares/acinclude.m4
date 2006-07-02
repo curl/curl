@@ -362,7 +362,6 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
       gni_opts=$-
       #
       case $gni_opts in
-      esac
         *f*)
           ;;
         *)
@@ -387,7 +386,6 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
         [Define to the type of arg 1 for getnameinfo.])
       #
       case $gni_opts in
-      esac
         *f*)
           ;;
         *)
