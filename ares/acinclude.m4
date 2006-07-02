@@ -401,6 +401,79 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
 ]) # AC_DEFUN
 
 
+dnl CURL_CHECK_NI_WITHSCOPEID
+dnl -------------------------------------------------
+dnl Check for working NI_WITHSCOPEID in getnameinfo()
+
+AC_DEFUN([CURL_CHECK_NI_WITHSCOPEID], [
+  AC_CACHE_CHECK([for working NI_WITHSCOPEID], 
+    [ac_cv_working_ni_withscopeid], [
+    AC_RUN_IFELSE([
+      AC_LANG_PROGRAM([
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+      ],[
+#ifdef NI_WITHSCOPEID
+        struct sockaddr_storage ss;
+        int sslen = sizeof(ss);
+        int rc;
+        char hbuf[NI_MAXHOST];
+        int fd = socket(AF_INET6, SOCK_STREAM, 0);
+        if(fd < 0) {
+          perror("socket()");
+          return 1; /* Error creating socket */
+        }
+        rc = getsockname(fd, (struct sockaddr *)&ss, &sslen);
+        if(rc) {
+          perror("getsockname()");
+          return 2; /* Error retrieving socket name */
+        }
+        rc = getnameinfo((struct sockaddr *)&ss, sslen, hbuf, sizeof(hbuf),
+               NULL, 0,
+               NI_NUMERICHOST | NI_NUMERICSERV | NI_WITHSCOPEID);
+        if(rc) {
+          printf("rc = %s\n", gai_strerror(rc));
+          return 3; /* Error translating socket address */
+        }
+        return 0; /* Ok, NI_WITHSCOPEID works */
+#else
+        return 4; /* Error, NI_WITHSCOPEID not defined */
+#endif
+      ]) # AC_LANG_PROGRAM
+    ],[
+      # Exit code == 0. Program worked.
+      ac_cv_working_ni_withscopeid="yes"
+    ],[
+      # Exit code != 0. Program failed.
+      ac_cv_working_ni_withscopeid="no"
+    ],[
+      # Program is not run when cross-compiling. So we assume
+      # NI_WITHSCOPEID will work if we are able to compile it.
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+        ],[
+          unsigned int dummy= NI_NUMERICHOST | NI_NUMERICSERV | NI_WITHSCOPEID;
+        ])
+      ],[
+        ac_cv_working_ni_withscopeid="yes"
+      ],[
+        ac_cv_working_ni_withscopeid="no"
+      ]) # AC_COMPILE_IFELSE
+    ]) # AC_RUN_IFELSE
+  ]) # AC_CACHE_CHECK
+  if test "x$ac_cv_working_ni_withscopeid" = "xyes"; then
+    AC_DEFINE(HAVE_NI_WITHSCOPEID, 1,
+      [Define to 1 if NI_WITHSCOPEID exists and works.])
+  fi
+]) # AC_DEFUN
+
+
 dnl CURL_CHECK_NONBLOCKING_SOCKET
 dnl -------------------------------------------------
 dnl Check for how to set a socket to non-blocking state. There seems to exist
