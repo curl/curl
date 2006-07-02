@@ -349,6 +349,9 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
       set dummy `echo "$curl_cv_func_getnameinfo_args" | sed 's/\*/\*/g'`
       IFS=$gni_prev_IFS
       shift
+      #
+      gni_qual_type_arg1=$[1]
+      #
       AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG2, $[2],
         [Define to the type of arg 2 for getnameinfo.])
       AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG46, $[3],
@@ -356,7 +359,16 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
       AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG7, $[4],
         [Define to the type of arg 7 for getnameinfo.])
       #
-      gni_qual_type_arg1=$[1]
+      gni_opts=$-
+      #
+      case $gni_opts in
+      esac
+        *f*)
+          ;;
+        *)
+          set -f
+          ;;
+      esac
       #
       case "$gni_qual_type_arg1" in
         const*)
@@ -373,6 +385,15 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
         [Define to the type qualifier of arg 1 for getnameinfo.])
       AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG1, $gni_type_arg1,
         [Define to the type of arg 1 for getnameinfo.])
+      #
+      case $gni_opts in
+      esac
+        *f*)
+          ;;
+        *)
+          set +f
+          ;;
+      esac
       #
       AC_DEFINE_UNQUOTED(HAVE_GETNAMEINFO, 1,
         [Define to 1 if you have the getnameinfo function.])
