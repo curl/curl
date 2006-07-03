@@ -196,9 +196,11 @@ int curl_dogetaddrinfo(char *hostname, char *service,
                        struct addrinfo *hints,
                        struct addrinfo **result,
                        int line, const char *source);
-int curl_dogetnameinfo(const struct sockaddr *sa, socklen_t salen,
-                       char *host, size_t hostlen,
-                       char *serv, size_t servlen, int flags,
+int curl_dogetnameinfo(GETNAMEINFO_QUAL_ARG1 GETNAMEINFO_TYPE_ARG1 sa,
+                       GETNAMEINFO_TYPE_ARG2 salen,
+                       char *host, GETNAMEINFO_TYPE_ARG46 hostlen,
+                       char *serv, GETNAMEINFO_TYPE_ARG46 servlen,
+                       GETNAMEINFO_TYPE_ARG7 flags,
                        int line, const char *source);
 #endif
 
