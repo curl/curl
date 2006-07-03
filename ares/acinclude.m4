@@ -401,45 +401,106 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
 ]) # AC_DEFUN
 
 
+dnl TYPE_SOCKADDR_STORAGE
+dnl -------------------------------------------------
+dnl Check for struct sockaddr_storage. Most IPv6-enabled 
+dnl hosts have it, but AIX 4.3 is one known exception.
+
+AC_DEFUN([TYPE_SOCKADDR_STORAGE],
+[
+   AC_CHECK_TYPE([struct sockaddr_storage],
+        AC_DEFINE(HAVE_STRUCT_SOCKADDR_STORAGE, 1,
+                  [if struct sockaddr_storage is defined]), ,
+   [
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#endif
+#else
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+#endif
+   ])
+])
+
+
 dnl CURL_CHECK_NI_WITHSCOPEID
 dnl -------------------------------------------------
 dnl Check for working NI_WITHSCOPEID in getnameinfo()
 
 AC_DEFUN([CURL_CHECK_NI_WITHSCOPEID], [
+  AC_REQUIRE([CURL_CHECK_FUNC_GETNAMEINFO])dnl
+  AC_REQUIRE([TYPE_SOCKADDR_STORAGE])dnl
+  AC_CHECK_HEADERS(stdio.h sys/types.h sys/socket.h \
+                   netdb.h netinet/in.h arpa/inet.h)
+  #
   AC_CACHE_CHECK([for working NI_WITHSCOPEID], 
     [ac_cv_working_ni_withscopeid], [
     AC_RUN_IFELSE([
       AC_LANG_PROGRAM([
+#ifdef HAVE_STDIO_H
 #include <stdio.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
       ],[
-#ifdef NI_WITHSCOPEID
-        struct sockaddr_storage ss;
-        int sslen = sizeof(ss);
+#if defined(NI_WITHSCOPEID) && defined(HAVE_GETNAMEINFO)
+#ifdef HAVE_STRUCT_SOCKADDR_STORAGE
+        struct sockaddr_storage sa;
+#else
+        unsigned char sa[256];
+#endif
+        char hostbuf[NI_MAXHOST];
         int rc;
-        char hbuf[NI_MAXHOST];
+        GETNAMEINFO_TYPE_ARG2 salen = (GETNAMEINFO_TYPE_ARG2)sizeof(sa);
+        GETNAMEINFO_TYPE_ARG46 hostlen = (GETNAMEINFO_TYPE_ARG46)sizeof(hostbuf);
+        GETNAMEINFO_TYPE_ARG7 flags = NI_NUMERICHOST | NI_NUMERICSERV | NI_WITHSCOPEID;
         int fd = socket(AF_INET6, SOCK_STREAM, 0);
         if(fd < 0) {
           perror("socket()");
           return 1; /* Error creating socket */
         }
-        rc = getsockname(fd, (struct sockaddr *)&ss, &sslen);
+        rc = getsockname(fd, (GETNAMEINFO_TYPE_ARG1)&sa, &salen);
         if(rc) {
           perror("getsockname()");
           return 2; /* Error retrieving socket name */
         }
-        rc = getnameinfo((struct sockaddr *)&ss, sslen, hbuf, sizeof(hbuf),
-               NULL, 0,
-               NI_NUMERICHOST | NI_NUMERICSERV | NI_WITHSCOPEID);
+        rc = getnameinfo((GETNAMEINFO_TYPE_ARG1)&sa, salen, hostbuf, hostlen, NULL, 0, flags);
         if(rc) {
           printf("rc = %s\n", gai_strerror(rc));
           return 3; /* Error translating socket address */
         }
         return 0; /* Ok, NI_WITHSCOPEID works */
 #else
-        return 4; /* Error, NI_WITHSCOPEID not defined */
+        return 4; /* Error, NI_WITHSCOPEID not defined or no getnameinfo() */
 #endif
       ]) # AC_LANG_PROGRAM
     ],[
@@ -453,7 +514,6 @@ AC_DEFUN([CURL_CHECK_NI_WITHSCOPEID], [
       # NI_WITHSCOPEID will work if we are able to compile it.
       AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([
-#include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>

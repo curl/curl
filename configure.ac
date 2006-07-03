@@ -537,10 +537,6 @@ main()
 
 if test "$ipv6" = "yes"; then
   curl_ipv6_msg="enabled"
-
-  CURL_CHECK_WORKING_GETADDRINFO
-
-  CURL_CHECK_NI_WITHSCOPEID
 fi
 
 dnl **********************************************************************
@@ -1688,6 +1684,11 @@ AC_CHECK_DECL(inet_pton, ,
 dnl Check if the getnameinfo function is available
 dnl and get the types of five of its arguments.
 CURL_CHECK_FUNC_GETNAMEINFO
+
+if test "$ipv6" = "yes"; then
+  CURL_CHECK_WORKING_GETADDRINFO
+  CURL_CHECK_NI_WITHSCOPEID
+fi
 
 AC_MSG_CHECKING([if we are Mac OS X (to disable poll)])
 disable_poll=no
