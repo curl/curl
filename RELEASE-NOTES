@@ -18,6 +18,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o couldn't override the Proxy-Connection: header for non-CONNECT requests
  o curl_multi_fdset() could wrongly return -1 as max_fd value
 
 Other curl-related news:
@@ -32,6 +33,6 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dan Fandrich, Peter Silva, Arve Knudsen, Michael Wallner
+ Dan Fandrich, Peter Silva, Arve Knudsen, Michael Wallner, Toshiyuki Maezawa
 
         Thanks! (and sorry if I forgot to mention someone)

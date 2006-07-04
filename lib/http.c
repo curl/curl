@@ -1970,7 +1970,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                 (data->set.encoding && *data->set.encoding && conn->allocptr.accept_encoding)?
                 conn->allocptr.accept_encoding:"",
                 (data->change.referer && conn->allocptr.ref)?conn->allocptr.ref:"" /* Referer: <data> */,
-                (conn->bits.httpproxy && !conn->bits.tunnel_proxy)?
+                (conn->bits.httpproxy &&
+                 !conn->bits.tunnel_proxy &&
+                 !checkheaders(data, "Proxy-Connection:"))?
                   "Proxy-Connection: Keep-Alive\r\n":"",
                 te
                 );

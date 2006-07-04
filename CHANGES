@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (4 July 2006)
+- Toshiyuki Maezawa fixed a problem where you couldn't override the
+  Proxy-Connection: header when using a proxy and not doing CONNECT.
+  
 Daniel (24 June 2006)
 - Michael Wallner added curl_formget(), which allows an application to extract
   (serialise) a previously built formpost (as with curl_formadd()).
