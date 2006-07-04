@@ -572,7 +572,7 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
       curl_cv_func_recv_args="unknown"
       for recv_retv in 'int' 'ssize_t'; do
         for recv_arg1 in 'int' 'ssize_t'; do
-          for recv_arg2 in 'void *' 'char *'; do
+          for recv_arg2 in 'char *' 'void *'; do
             for recv_arg3 in 'size_t' 'int' 'socklen_t' 'unsigned int' 'DWORD'; do
               for recv_arg4 in 'int' 'unsigned int'; do
                 AC_COMPILE_IFELSE([
@@ -638,7 +638,8 @@ dnl arguments. If the function succeeds HAVE_SEND
 dnl will be defined, defining the types of the arguments 
 dnl in SEND_TYPE_ARG1, SEND_TYPE_ARG2, SEND_TYPE_ARG3 
 dnl and SEND_TYPE_ARG4, defining the type of the function
-dnl return value in SEND_TYPE_RETV.
+dnl return value in SEND_TYPE_RETV, and also defining the 
+dnl type qualifier of second argument in SEND_QUAL_ARG2.
 
 AC_DEFUN([CURL_CHECK_FUNC_SEND], [
   AC_CHECK_HEADERS(sys/types.h sys/socket.h)
@@ -668,7 +669,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
       curl_cv_func_send_args="unknown"
       for send_retv in 'int' 'ssize_t'; do
         for send_arg1 in 'int' 'ssize_t'; do
-          for send_arg2 in 'void *' 'char *'; do
+          for send_arg2 in 'char *' 'void *' 'const char *' 'const void *'; do
             for send_arg3 in 'size_t' 'int' 'socklen_t' 'unsigned int' 'DWORD'; do
               for send_arg4 in 'int' 'unsigned int'; do
                 AC_COMPILE_IFELSE([
@@ -683,10 +684,9 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
                     extern $send_retv send($send_arg1, $send_arg2, $send_arg3, $send_arg4);
                   ],[
                     $send_arg1 s=0;
-                    $send_arg2 buf=0;
                     $send_arg3 len=0;
                     $send_arg4 flags=0;
-                    $send_retv res = send(s, buf, len, flags);
+                    $send_retv res = send(s, 0, len, flags);
                   ])
                 ],[
                    curl_cv_func_send_args="$send_arg1,$send_arg2,$send_arg3,$send_arg4,$send_retv"
@@ -707,16 +707,50 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
       IFS=$send_prev_IFS
       shift
       #
+      send_qual_type_arg2=$[2]
+      #
       AC_DEFINE_UNQUOTED(SEND_TYPE_ARG1, $[1],
         [Define to the type of arg 1 for send.])
-      AC_DEFINE_UNQUOTED(SEND_TYPE_ARG2, $[2],
-        [Define to the type of arg 2 for send.])
       AC_DEFINE_UNQUOTED(SEND_TYPE_ARG3, $[3],
         [Define to the type of arg 3 for send.])
       AC_DEFINE_UNQUOTED(SEND_TYPE_ARG4, $[4],
         [Define to the type of arg 4 for send.])
       AC_DEFINE_UNQUOTED(SEND_TYPE_RETV, $[5],
         [Define to the function return type for send.])
+      #
+      gni_opts=$-
+      #
+      case $gni_opts in
+        *f*)
+          ;;
+        *)
+          set -f
+          ;;
+      esac
+      #
+      case "$send_qual_type_arg2" in
+        const*)
+          send_qual_arg2=const
+          send_type_arg2=`echo $send_qual_type_arg2 | sed 's/^const //'`
+        ;;
+        *)
+          send_qual_arg2=
+          send_type_arg2=$send_qual_type_arg2
+        ;;
+      esac
+      #
+      AC_DEFINE_UNQUOTED(SEND_QUAL_ARG2, $send_qual_arg2,
+        [Define to the type qualifier of arg 2 for send.])
+      AC_DEFINE_UNQUOTED(SEND_TYPE_ARG2, $send_type_arg2,
+        [Define to the type of arg 2 for send.])
+      #
+      case $gni_opts in
+        *f*)
+          ;;
+        *)
+          set +f
+          ;;
+      esac
       #
       AC_DEFINE_UNQUOTED(HAVE_SEND, 1,
         [Define to 1 if you have the send function.])

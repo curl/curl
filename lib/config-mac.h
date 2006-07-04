@@ -59,6 +59,7 @@
 
 #define HAVE_SEND 1
 #define SEND_TYPE_ARG1 int
+#define SEND_QUAL_ARG2 const
 #define SEND_TYPE_ARG2 void *
 #define SEND_TYPE_ARG3 size_T
 #define SEND_TYPE_ARG4 int

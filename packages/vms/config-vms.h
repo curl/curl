@@ -319,6 +319,9 @@
 /* Define to the type of arg 1 for send. */
 #define SEND_TYPE_ARG1 int
 
+/* Define to the type qualifier of arg 2 for send. */
+#define SEND_QUAL_ARG2 const
+
 /* Define to the type of arg 2 for send. */
 #define SEND_TYPE_ARG2 void *
 
