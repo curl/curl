@@ -136,6 +136,7 @@ int curl_dogetaddrinfo(char *hostname, char *service,
   return res;
 }
 
+#ifdef HAVE_GETNAMEINFO
 int curl_dogetnameinfo(GETNAMEINFO_QUAL_ARG1 GETNAMEINFO_TYPE_ARG1 sa,
                        GETNAMEINFO_TYPE_ARG2 salen,
                        char *host, GETNAMEINFO_TYPE_ARG46 hostlen,
@@ -160,6 +161,7 @@ int curl_dogetnameinfo(GETNAMEINFO_QUAL_ARG1 GETNAMEINFO_TYPE_ARG1 sa,
   }
   return res;
 }
+#endif
 
 void curl_dofreeaddrinfo(struct addrinfo *freethis,
                          int line, const char *source)

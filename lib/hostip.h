@@ -196,12 +196,14 @@ int curl_dogetaddrinfo(char *hostname, char *service,
                        struct addrinfo *hints,
                        struct addrinfo **result,
                        int line, const char *source);
+#ifdef HAVE_GETNAMEINFO
 int curl_dogetnameinfo(GETNAMEINFO_QUAL_ARG1 GETNAMEINFO_TYPE_ARG1 sa,
                        GETNAMEINFO_TYPE_ARG2 salen,
                        char *host, GETNAMEINFO_TYPE_ARG46 hostlen,
                        char *serv, GETNAMEINFO_TYPE_ARG46 servlen,
                        GETNAMEINFO_TYPE_ARG7 flags,
                        int line, const char *source);
+#endif
 #endif
 
 /* This is the callback function that is used when we build with asynch

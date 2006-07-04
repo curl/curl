@@ -96,10 +96,14 @@ CURL_EXTERN int curl_fclose(FILE *file, int line, const char *source);
 #define getaddrinfo(host,serv,hint,res) \
   curl_dogetaddrinfo(host,serv,hint,res,__LINE__,__FILE__)
 #endif
+
+#ifdef HAVE_GETNAMEINFO
 #undef getnameinfo
 #define getnameinfo(sa,salen,host,hostlen,serv,servlen,flags) \
   curl_dogetnameinfo(sa,salen,host,hostlen,serv,servlen,flags, __LINE__, \
   __FILE__)
+#endif
+
 #undef freeaddrinfo
 #define freeaddrinfo(data) \
   curl_dofreeaddrinfo(data,__LINE__,__FILE__)
