@@ -359,9 +359,9 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
       AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG7, $[4],
         [Define to the type of arg 7 for getnameinfo.])
       #
-      gni_opts=$-
+      prev_sh_opts=$-
       #
-      case $gni_opts in
+      case $prev_sh_opts in
         *f*)
           ;;
         *)
@@ -385,7 +385,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
       AC_DEFINE_UNQUOTED(GETNAMEINFO_TYPE_ARG1, $gni_type_arg1,
         [Define to the type of arg 1 for getnameinfo.])
       #
-      case $gni_opts in
+      case $prev_sh_opts in
         *f*)
           ;;
         *)
@@ -718,9 +718,9 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
       AC_DEFINE_UNQUOTED(SEND_TYPE_RETV, $[5],
         [Define to the function return type for send.])
       #
-      gni_opts=$-
+      prev_sh_opts=$-
       #
-      case $gni_opts in
+      case $prev_sh_opts in
         *f*)
           ;;
         *)
@@ -744,7 +744,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
       AC_DEFINE_UNQUOTED(SEND_TYPE_ARG2, $send_type_arg2,
         [Define to the type of arg 2 for send.])
       #
-      case $gni_opts in
+      case $prev_sh_opts in
         *f*)
           ;;
         *)
