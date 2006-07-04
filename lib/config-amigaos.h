@@ -89,4 +89,25 @@
 # define O_RDONLY 0x0000
 #endif
 
+#define HAVE_GETNAMEINFO 1
+#define GETNAMEINFO_QUAL_ARG1 const
+#define GETNAMEINFO_TYPE_ARG1 struct sockaddr *
+#define GETNAMEINFO_TYPE_ARG2 socklen_t
+#define GETNAMEINFO_TYPE_ARG46 size_t
+#define GETNAMEINFO_TYPE_ARG7 int
+
+#define HAVE_RECV 1
+#define RECV_TYPE_ARG1 long
+#define RECV_TYPE_ARG2 char *
+#define RECV_TYPE_ARG3 long
+#define RECV_TYPE_ARG4 long
+#define RECV_TYPE_RETV long
+
+#define HAVE_SEND 1
+#define SEND_TYPE_ARG1 int
+#define SEND_TYPE_ARG2 char *
+#define SEND_TYPE_ARG3 int
+#define SEND_TYPE_ARG4 int
+#define SEND_TYPE_RETV int
+
 #endif /* LIBCURL_CONFIG_AMIGAOS_H */

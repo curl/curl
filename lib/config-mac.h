@@ -43,5 +43,26 @@
 
 #define HAVE_FIONBIO            1
 
+#define HAVE_GETNAMEINFO 1
+#define GETNAMEINFO_QUAL_ARG1 const
+#define GETNAMEINFO_TYPE_ARG1 struct sockaddr *
+#define GETNAMEINFO_TYPE_ARG2 socklen_t
+#define GETNAMEINFO_TYPE_ARG46 size_t
+#define GETNAMEINFO_TYPE_ARG7 int
+
+#define HAVE_RECV 1
+#define RECV_TYPE_ARG1 int
+#define RECV_TYPE_ARG2 void *
+#define RECV_TYPE_ARG3 size_t
+#define RECV_TYPE_ARG4 int
+#define RECV_TYPE_RETV ssize_t
+
+#define HAVE_SEND 1
+#define SEND_TYPE_ARG1 int
+#define SEND_TYPE_ARG2 void *
+#define SEND_TYPE_ARG3 size_T
+#define SEND_TYPE_ARG4 int
+#define SEND_TYPE_RETV ssize_t
+
 #include <extra/stricmp.h>
 #include <extra/strdup.h>

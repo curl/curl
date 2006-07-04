@@ -215,6 +215,60 @@
 /* Define if you have the vprintf function.  */
 #define HAVE_VPRINTF 1
 
+/* Define if you have the getnameinfo function. */
+#define HAVE_GETNAMEINFO 1
+
+/* Define to the type qualifier of arg 1 for getnameinfo. */
+#define GETNAMEINFO_QUAL_ARG1 const
+
+/* Define to the type of arg 1 for getnameinfo. */
+#define GETNAMEINFO_TYPE_ARG1 struct sockaddr *
+
+/* Define to the type of arg 2 for getnameinfo. */
+#define GETNAMEINFO_TYPE_ARG2 socklen_t
+
+/* Define to the type of args 4 and 6 for getnameinfo. */
+#define GETNAMEINFO_TYPE_ARG46 DWORD
+
+/* Define to the type of arg 7 for getnameinfo. */
+#define GETNAMEINFO_TYPE_ARG7 int
+
+/* Define if you have the recv function. */
+#define HAVE_RECV 1
+
+/* Define to the type of arg 1 for recv. */
+#define RECV_TYPE_ARG1 SOCKET
+
+/* Define to the type of arg 2 for recv. */
+#define RECV_TYPE_ARG2 char *
+
+/* Define to the type of arg 3 for recv. */
+#define RECV_TYPE_ARG3 int
+
+/* Define to the type of arg 4 for recv. */
+#define RECV_TYPE_ARG4 int
+
+/* Define to the function return type for recv. */
+#define RECV_TYPE_RETV int
+
+/* Define if you have the send function. */
+#define HAVE_SEND 1
+
+/* Define to the type of arg 1 for send. */
+#define SEND_TYPE_ARG1 SOCKET
+
+/* Define to the type of arg 2 for send. */
+#define SEND_TYPE_ARG2 char *
+
+/* Define to the type of arg 3 for send. */
+#define SEND_TYPE_ARG3 int
+
+/* Define to the type of arg 4 for send. */
+#define SEND_TYPE_ARG4 int
+
+/* Define to the function return type for send. */
+#define SEND_TYPE_RETV int
+
 /* ---------------------------------------------------------------- */
 /*                       TYPEDEF REPLACEMENTS                       */
 /* ---------------------------------------------------------------- */
