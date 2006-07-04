@@ -534,6 +534,198 @@ AC_DEFUN([CURL_CHECK_NI_WITHSCOPEID], [
 ]) # AC_DEFUN
 
 
+dnl CURL_CHECK_FUNC_RECV
+dnl -------------------------------------------------
+dnl Test if the socket recv() function is available, 
+dnl and check its return type and the types of its 
+dnl arguments. If the function succeeds HAVE_RECV 
+dnl will be defined, defining the types of the arguments 
+dnl in RECV_TYPE_ARG1, RECV_TYPE_ARG2, RECV_TYPE_ARG3 
+dnl and RECV_TYPE_ARG4, defining the type of the function
+dnl return value in RECV_TYPE_RETV.
+
+AC_DEFUN([CURL_CHECK_FUNC_RECV], [
+  AC_CHECK_HEADERS(sys/types.h sys/socket.h)
+  #
+  AC_MSG_CHECKING([for recv])
+  AC_TRY_LINK([
+#undef inline
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+    ],[
+      recv(0, 0, 0, 0);
+    ],[ 
+      AC_MSG_RESULT([yes])
+      curl_cv_recv="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      curl_cv_recv="no"
+  ])
+  #
+  if test "$curl_cv_recv" = "yes"; then
+    AC_CACHE_CHECK([types of arguments and return type for recv],
+      [curl_cv_func_recv_args], [
+      curl_cv_func_recv_args="unknown"
+      for recv_retv in 'int' 'ssize_t'; do
+        for recv_arg1 in 'int' 'ssize_t'; do
+          for recv_arg2 in 'void *' 'char *'; do
+            for recv_arg3 in 'size_t' 'int' 'socklen_t' 'unsigned int' 'DWORD'; do
+              for recv_arg4 in 'int' 'unsigned int'; do
+                AC_COMPILE_IFELSE([
+                  AC_LANG_PROGRAM([
+#undef inline 
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+                    extern $recv_retv recv($recv_arg1, $recv_arg2, $recv_arg3, $recv_arg4);
+                  ],[
+                    $recv_arg1 s=0;
+                    $recv_arg2 buf=0;
+                    $recv_arg3 len=0;
+                    $recv_arg4 flags=0;
+                    $recv_retv res = recv(s, buf, len, flags);
+                  ])
+                ],[
+                   curl_cv_func_recv_args="$recv_arg1,$recv_arg2,$recv_arg3,$recv_arg4,$recv_retv"
+                   break 5
+                ])
+              done
+            done
+          done
+        done
+      done
+    ]) # AC_CACHE_CHECK
+    if test "$curl_cv_func_recv_args" = "unknown"; then
+      AC_MSG_WARN([Cannot find proper types to use for recv args])
+      AC_MSG_WARN([HAVE_RECV will not be defined])
+    else
+      recv_prev_IFS=$IFS; IFS=','
+      set dummy `echo "$curl_cv_func_recv_args" | sed 's/\*/\*/g'`
+      IFS=$recv_prev_IFS
+      shift
+      #
+      AC_DEFINE_UNQUOTED(RECV_TYPE_ARG1, $[1],
+        [Define to the type of arg 1 for recv.])
+      AC_DEFINE_UNQUOTED(RECV_TYPE_ARG2, $[2],
+        [Define to the type of arg 2 for recv.])
+      AC_DEFINE_UNQUOTED(RECV_TYPE_ARG3, $[3],
+        [Define to the type of arg 3 for recv.])
+      AC_DEFINE_UNQUOTED(RECV_TYPE_ARG4, $[4],
+        [Define to the type of arg 4 for recv.])
+      AC_DEFINE_UNQUOTED(RECV_TYPE_RETV, $[5],
+        [Define to the function return type for recv.])
+      #
+      AC_DEFINE_UNQUOTED(HAVE_RECV, 1,
+        [Define to 1 if you have the recv function.])
+      ac_cv_func_recv="yes"
+    fi
+  fi
+]) # AC_DEFUN
+
+
+dnl CURL_CHECK_FUNC_SEND
+dnl -------------------------------------------------
+dnl Test if the socket send() function is available, 
+dnl and check its return type and the types of its 
+dnl arguments. If the function succeeds HAVE_SEND 
+dnl will be defined, defining the types of the arguments 
+dnl in SEND_TYPE_ARG1, SEND_TYPE_ARG2, SEND_TYPE_ARG3 
+dnl and SEND_TYPE_ARG4, defining the type of the function
+dnl return value in SEND_TYPE_RETV.
+
+AC_DEFUN([CURL_CHECK_FUNC_SEND], [
+  AC_CHECK_HEADERS(sys/types.h sys/socket.h)
+  #
+  AC_MSG_CHECKING([for send])
+  AC_TRY_LINK([
+#undef inline
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+    ],[
+      send(0, 0, 0, 0);
+    ],[ 
+      AC_MSG_RESULT([yes])
+      curl_cv_send="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      curl_cv_send="no"
+  ])
+  #
+  if test "$curl_cv_send" = "yes"; then
+    AC_CACHE_CHECK([types of arguments and return type for send],
+      [curl_cv_func_send_args], [
+      curl_cv_func_send_args="unknown"
+      for send_retv in 'int' 'ssize_t'; do
+        for send_arg1 in 'int' 'ssize_t'; do
+          for send_arg2 in 'void *' 'char *'; do
+            for send_arg3 in 'size_t' 'int' 'socklen_t' 'unsigned int' 'DWORD'; do
+              for send_arg4 in 'int' 'unsigned int'; do
+                AC_COMPILE_IFELSE([
+                  AC_LANG_PROGRAM([
+#undef inline 
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+                    extern $send_retv send($send_arg1, $send_arg2, $send_arg3, $send_arg4);
+                  ],[
+                    $send_arg1 s=0;
+                    $send_arg2 buf=0;
+                    $send_arg3 len=0;
+                    $send_arg4 flags=0;
+                    $send_retv res = send(s, buf, len, flags);
+                  ])
+                ],[
+                   curl_cv_func_send_args="$send_arg1,$send_arg2,$send_arg3,$send_arg4,$send_retv"
+                   break 5
+                ])
+              done
+            done
+          done
+        done
+      done
+    ]) # AC_CACHE_CHECK
+    if test "$curl_cv_func_send_args" = "unknown"; then
+      AC_MSG_WARN([Cannot find proper types to use for send args])
+      AC_MSG_WARN([HAVE_SEND will not be defined])
+    else
+      send_prev_IFS=$IFS; IFS=','
+      set dummy `echo "$curl_cv_func_send_args" | sed 's/\*/\*/g'`
+      IFS=$send_prev_IFS
+      shift
+      #
+      AC_DEFINE_UNQUOTED(SEND_TYPE_ARG1, $[1],
+        [Define to the type of arg 1 for send.])
+      AC_DEFINE_UNQUOTED(SEND_TYPE_ARG2, $[2],
+        [Define to the type of arg 2 for send.])
+      AC_DEFINE_UNQUOTED(SEND_TYPE_ARG3, $[3],
+        [Define to the type of arg 3 for send.])
+      AC_DEFINE_UNQUOTED(SEND_TYPE_ARG4, $[4],
+        [Define to the type of arg 4 for send.])
+      AC_DEFINE_UNQUOTED(SEND_TYPE_RETV, $[5],
+        [Define to the function return type for send.])
+      #
+      AC_DEFINE_UNQUOTED(HAVE_SEND, 1,
+        [Define to 1 if you have the send function.])
+      ac_cv_func_send="yes"
+    fi
+  fi
+]) # AC_DEFUN
+
+
 dnl CURL_CHECK_NONBLOCKING_SOCKET
 dnl -------------------------------------------------
 dnl Check for how to set a socket to non-blocking state. There seems to exist
