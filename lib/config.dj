@@ -18,6 +18,7 @@
 #define HAVE_FIONBIO           1
 #define HAVE_GETHOSTBYADDR     1
 #define HAVE_GETHOSTNAME       1
+#define HAVE_GETNAMEINFO       1
 #define HAVE_GETPASS           1
 #define HAVE_GETSERVBYNAME     1
 #define HAVE_GETPROTOBYNAME    1
@@ -112,11 +113,33 @@
 #define ssize_t    int
 #endif
 
+/* Types and qualifies for getnameinfo(), recv() and send()
+ */
+#define GETNAMEINFO_TYPE_ARG1   struct sockaddr *
+#define GETNAMEINFO_QUAL_ARG1   const
+#define GETNAMEINFO_TYPE_ARG2   socklen_t
+#define GETNAMEINFO_TYPE_ARG46  int
+#define GETNAMEINFO_TYPE_ARG7   int
+
+#define RECV_TYPE_ARG1          int
+#define RECV_TYPE_ARG2          void *
+#define RECV_TYPE_ARG3          int
+#define RECV_TYPE_ARG4          int
+#define RECV_TYPE_RETV          int
+
+#define SEND_TYPE_ARG1          int
+#define SEND_QUAL_ARG2          const
+#define SEND_TYPE_ARG2          void *
+#define SEND_TYPE_ARG3          int
+#define SEND_TYPE_ARG4          int
+#define SEND_TYPE_RETV          int
+
 #include <stdlib.h>
 #include <string.h>
 #include <tcp.h>    /* Watt-32 API */
 
 #undef word
+#undef byte
 
 #endif  /* _CURL_CONFIG_DJGPP_H */
 
