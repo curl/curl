@@ -38,6 +38,10 @@
 #include <ctype.h>
 #include <string.h>
 
+#if defined(DJGPP) && (DJGPP_MINOR < 4)
+#undef CURLDEBUG  /* don't use x_was_used() here */
+#endif
+
 #include <curl/mprintf.h>
 
 #ifndef SIZEOF_LONG_DOUBLE
