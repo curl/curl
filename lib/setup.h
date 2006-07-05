@@ -81,7 +81,7 @@
  * winsock2.h, ws2tcpip.h or winsock.h. Any other windows thing belongs
  * to any other further and independant block.  Under Cygwin things work
  * just as under linux (e.g. <sys/socket.h>) and the winsock headers should
- * never be included.
+ * never be included when __CYGWIN__ is defined.
  */
 
 #if defined(HAVE_WINDOWS_H) && !defined(__CYGWIN__)

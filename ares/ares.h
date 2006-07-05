@@ -31,7 +31,7 @@
   #include <netinet/in.h>
   #include <sys/socket.h>
   #include <tcp.h>
-#elif defined(WIN32)
+#elif defined(WIN32) && !defined(__CYGWIN__)
   #include <winsock2.h>
   #include <windows.h>
 #else

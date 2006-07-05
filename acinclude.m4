@@ -21,6 +21,26 @@
 # $Id$
 ###########################################################################
 
+
+dnl CURL_CHECK_HEADERS_ONCE
+dnl -------------------------------------------------
+dnl Check for headers if check not already done.
+
+AC_DEFUN(CURL_CHECK_HEADERS_ONCE, [
+  for i in $1; do
+    eval prev_check_res=\$ac_cv_header_$i
+    case "$prev_check_res" in
+      yes | no)
+        ;;
+      *)
+        AC_CHECK_HEADERS($i)
+        ;;
+    esac
+
+  done
+])
+
+
 dnl CURL_CHECK_HEADER_WINDOWS
 dnl -------------------------------------------------
 dnl Check for compilable and valid windows.h header 
@@ -35,7 +55,11 @@ AC_DEFUN([CURL_CHECK_HEADER_WINDOWS], [
 #endif
 #include <windows.h>
       ],[
+#ifdef __CYGWIN__
+        HAVE_WINDOWS_H shall not be defined.
+#else
         int dummy=2*WINVER;
+#endif
       ])
     ],[
       ac_cv_header_windows_h="yes"
@@ -68,7 +92,11 @@ AC_DEFUN([CURL_CHECK_HEADER_WINSOCK], [
 #include <windows.h>
 #include <winsock.h>
       ],[
+#ifdef __CYGWIN__
+        HAVE_WINSOCK_H shall not be defined.
+#else
         int dummy=WSACleanup();
+#endif
       ])
     ],[
       ac_cv_header_winsock_h="yes"
@@ -99,7 +127,11 @@ AC_DEFUN([CURL_CHECK_HEADER_WINSOCK2], [
 #include <windows.h>
 #include <winsock2.h>
       ],[
+#ifdef __CYGWIN__
+        HAVE_WINSOCK2_H shall not be defined.
+#else
         int dummy=2*IPPROTO_ESP;
+#endif
       ])
     ],[
       ac_cv_header_winsock2_h="yes"
@@ -131,7 +163,11 @@ AC_DEFUN([CURL_CHECK_HEADER_WS2TCPIP], [
 #include <winsock2.h>
 #include <ws2tcpip.h>
       ],[
+#ifdef __CYGWIN__
+        HAVE_WS2TCPIP_H shall not be defined.
+#else
         int dummy=2*IP_PKTINFO;
+#endif
       ])
     ],[
       ac_cv_header_ws2tcpip_h="yes"
@@ -566,16 +602,32 @@ dnl and RECV_TYPE_ARG4, defining the type of the function
 dnl return value in RECV_TYPE_RETV.
 
 AC_DEFUN([CURL_CHECK_FUNC_RECV], [
+  AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK])dnl
+  AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
   AC_CHECK_HEADERS(sys/types.h sys/socket.h)
   #
   AC_MSG_CHECKING([for recv])
   AC_TRY_LINK([
-#undef inline
+#undef inline 
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#endif
+#else
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
 #endif
     ],[
       recv(0, 0, 0, 0);
@@ -599,11 +651,25 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
                 AC_COMPILE_IFELSE([
                   AC_LANG_PROGRAM([
 #undef inline 
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#endif
+#else
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
 #endif
                     extern $recv_retv recv($recv_arg1, $recv_arg2, $recv_arg3, $recv_arg4);
                   ],[
@@ -663,16 +729,32 @@ dnl return value in SEND_TYPE_RETV, and also defining the
 dnl type qualifier of second argument in SEND_QUAL_ARG2.
 
 AC_DEFUN([CURL_CHECK_FUNC_SEND], [
+  AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK])dnl
+  AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
   AC_CHECK_HEADERS(sys/types.h sys/socket.h)
   #
   AC_MSG_CHECKING([for send])
   AC_TRY_LINK([
-#undef inline
+#undef inline 
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#endif
+#else
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
 #endif
     ],[
       send(0, 0, 0, 0);
@@ -696,11 +778,25 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
                 AC_COMPILE_IFELSE([
                   AC_LANG_PROGRAM([
 #undef inline 
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#endif
+#else
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
 #endif
                     extern $send_retv send($send_arg1, $send_arg2, $send_arg3, $send_arg4);
                   ],[

@@ -59,7 +59,9 @@
 
 #include <stdio.h>
 #include <time.h>
+#ifndef __CYGWIN__
 #include <windows.h>
+#endif
 #include <curl/curl.h>
 
 
