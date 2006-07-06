@@ -275,7 +275,7 @@ dnl argument in GETNAMEINFO_QUAL_ARG1.
 AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
   AC_REQUIRE([CURL_CHECK_HEADER_WS2TCPIP])dnl
   AC_REQUIRE([CURL_CHECK_TYPE_SOCKLEN_T])dnl
-  AC_CHECK_HEADERS(sys/types.h sys/socket.h netdb.h)
+  CURL_CHECK_HEADERS_ONCE(sys/types.h sys/socket.h netdb.h)
   #
   AC_MSG_CHECKING([for getnameinfo])
   AC_LINK_IFELSE([
@@ -503,7 +503,7 @@ dnl Check for working NI_WITHSCOPEID in getnameinfo()
 AC_DEFUN([CURL_CHECK_NI_WITHSCOPEID], [
   AC_REQUIRE([CURL_CHECK_FUNC_GETNAMEINFO])dnl
   AC_REQUIRE([TYPE_SOCKADDR_STORAGE])dnl
-  AC_CHECK_HEADERS(stdio.h sys/types.h sys/socket.h \
+  CURL_CHECK_HEADERS_ONCE(stdio.h sys/types.h sys/socket.h \
                    netdb.h netinet/in.h arpa/inet.h)
   #
   AC_CACHE_CHECK([for working NI_WITHSCOPEID], 
@@ -604,7 +604,7 @@ dnl return value in RECV_TYPE_RETV.
 AC_DEFUN([CURL_CHECK_FUNC_RECV], [
   AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK])dnl
   AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
-  AC_CHECK_HEADERS(sys/types.h sys/socket.h)
+  CURL_CHECK_HEADERS_ONCE(sys/types.h sys/socket.h)
   #
   AC_MSG_CHECKING([for recv])
   AC_TRY_LINK([
@@ -644,9 +644,9 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
       [curl_cv_func_recv_args], [
       curl_cv_func_recv_args="unknown"
       for recv_retv in 'int' 'ssize_t'; do
-        for recv_arg1 in 'int' 'ssize_t'; do
+        for recv_arg1 in 'int' 'ssize_t' 'SOCKET'; do
           for recv_arg2 in 'char *' 'void *'; do
-            for recv_arg3 in 'size_t' 'int' 'socklen_t' 'unsigned int' 'DWORD'; do
+            for recv_arg3 in 'size_t' 'int' 'socklen_t' 'unsigned int'; do
               for recv_arg4 in 'int' 'unsigned int'; do
                 AC_COMPILE_IFELSE([
                   AC_LANG_PROGRAM([
@@ -663,6 +663,7 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
 #include <winsock.h>
 #endif
 #endif
+#define RECVCALLCONV PASCAL
 #else
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -670,8 +671,9 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+#define RECVCALLCONV
 #endif
-                    extern $recv_retv recv($recv_arg1, $recv_arg2, $recv_arg3, $recv_arg4);
+                    extern $recv_retv RECVCALLCONV recv($recv_arg1, $recv_arg2, $recv_arg3, $recv_arg4);
                   ],[
                     $recv_arg1 s=0;
                     $recv_arg2 buf=0;
@@ -731,7 +733,7 @@ dnl type qualifier of second argument in SEND_QUAL_ARG2.
 AC_DEFUN([CURL_CHECK_FUNC_SEND], [
   AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK])dnl
   AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
-  AC_CHECK_HEADERS(sys/types.h sys/socket.h)
+  CURL_CHECK_HEADERS_ONCE(sys/types.h sys/socket.h)
   #
   AC_MSG_CHECKING([for send])
   AC_TRY_LINK([
@@ -771,9 +773,9 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
       [curl_cv_func_send_args], [
       curl_cv_func_send_args="unknown"
       for send_retv in 'int' 'ssize_t'; do
-        for send_arg1 in 'int' 'ssize_t'; do
+        for send_arg1 in 'int' 'ssize_t' 'SOCKET'; do
           for send_arg2 in 'char *' 'void *' 'const char *' 'const void *'; do
-            for send_arg3 in 'size_t' 'int' 'socklen_t' 'unsigned int' 'DWORD'; do
+            for send_arg3 in 'size_t' 'int' 'socklen_t' 'unsigned int'; do
               for send_arg4 in 'int' 'unsigned int'; do
                 AC_COMPILE_IFELSE([
                   AC_LANG_PROGRAM([
@@ -790,6 +792,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
 #include <winsock.h>
 #endif
 #endif
+#define SENDCALLCONV PASCAL
 #else
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -797,8 +800,9 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+#define SENDCALLCONV
 #endif
-                    extern $send_retv send($send_arg1, $send_arg2, $send_arg3, $send_arg4);
+                    extern $send_retv SENDCALLCONV send($send_arg1, $send_arg2, $send_arg3, $send_arg4);
                   ],[
                     $send_arg1 s=0;
                     $send_arg3 len=0;
