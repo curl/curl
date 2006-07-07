@@ -15,6 +15,11 @@ this \fImulti_handle\fP control the specified \fIeasy_handle\fP.
 When an easy handle has been added to a multi stack, you can not and you must
 not use \fIcurl_easy_perform(3)\fP on that handle!
 
+If the easy handle is not set to use a shared (CURLOPT_SHARE) or global DNS
+cache (CURLOPT_DNS_USE_GLOBAL_CACHE), it will be made to use the DNS cache
+that is shared between all easy handles within the multi handle when
+\fIcurl_multi_add_handle(3)\fP is called.
+
 The easy handle will remain added until you remove it again with
 \fIcurl_multi_remove_handle(3)\fP. You should remove the easy handle from the
 multi stack before you terminate first the easy handle and then the multi
