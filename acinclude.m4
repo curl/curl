@@ -22,26 +22,6 @@
 ###########################################################################
 
 
-dnl CURL_CHECK_HEADERS_ONCE
-dnl -------------------------------------------------
-dnl Check for headers if check not already done.
-
-AC_DEFUN([CURL_CHECK_HEADERS_ONCE], [
-  for f_hdr in $1
-  do
-    u_hdr=`echo "$f_hdr" | sed 's/[-|\.|\/]/_/g'`
-    eval prev_check_res=\$ac_cv_header_$u_hdr
-    case "$prev_check_res" in
-      yes | no)
-        ;;
-      *)
-        AC_CHECK_HEADERS($f_hdr)
-        ;;
-    esac
-  done
-])
-
-
 dnl CURL_CHECK_HEADER_WINDOWS
 dnl -------------------------------------------------
 dnl Check for compilable and valid windows.h header 
@@ -68,12 +48,14 @@ AC_DEFUN([CURL_CHECK_HEADER_WINDOWS], [
       ac_cv_header_windows_h="no"
     ])
   ])
-  if test "x$ac_cv_header_windows_h" = "xyes"; then
-    AC_DEFINE_UNQUOTED(HAVE_WINDOWS_H, 1,
-      [Define to 1 if you have the windows.h header file.])
-    AC_DEFINE_UNQUOTED(WIN32_LEAN_AND_MEAN, 1,
-      [Define to avoid automatic inclusion of winsock.h])
-  fi
+  case "$ac_cv_header_windows_h" in
+    yes)
+      AC_DEFINE_UNQUOTED(HAVE_WINDOWS_H, 1,
+        [Define to 1 if you have the windows.h header file.])
+      AC_DEFINE_UNQUOTED(WIN32_LEAN_AND_MEAN, 1,
+        [Define to avoid automatic inclusion of winsock.h])
+      ;;
+  esac
 ])
 
 
@@ -105,10 +87,12 @@ AC_DEFUN([CURL_CHECK_HEADER_WINSOCK], [
       ac_cv_header_winsock_h="no"
     ])
   ])
-  if test "x$ac_cv_header_winsock_h" = "xyes"; then
-    AC_DEFINE_UNQUOTED(HAVE_WINSOCK_H, 1,
-      [Define to 1 if you have the winsock.h header file.])
-  fi
+  case "$ac_cv_header_winsock_h" in
+    yes)
+      AC_DEFINE_UNQUOTED(HAVE_WINSOCK_H, 1,
+        [Define to 1 if you have the winsock.h header file.])
+      ;;
+  esac
 ])
 
 
@@ -140,10 +124,12 @@ AC_DEFUN([CURL_CHECK_HEADER_WINSOCK2], [
       ac_cv_header_winsock2_h="no"
     ])
   ])
-  if test "x$ac_cv_header_winsock2_h" = "xyes"; then
-    AC_DEFINE_UNQUOTED(HAVE_WINSOCK2_H, 1,
-      [Define to 1 if you have the winsock2.h header file.])
-  fi
+  case "$ac_cv_header_winsock2_h" in
+    yes)
+      AC_DEFINE_UNQUOTED(HAVE_WINSOCK2_H, 1,
+        [Define to 1 if you have the winsock2.h header file.])
+      ;;
+  esac
 ])
 
 
@@ -176,10 +162,12 @@ AC_DEFUN([CURL_CHECK_HEADER_WS2TCPIP], [
       ac_cv_header_ws2tcpip_h="no"
     ])
   ])
-  if test "x$ac_cv_header_ws2tcpip_h" = "xyes"; then
-    AC_DEFINE_UNQUOTED(HAVE_WS2TCPIP_H, 1,
-      [Define to 1 if you have the ws2tcpip.h header file.])
-  fi
+  case "$ac_cv_header_ws2tcpip_h" in
+    yes)
+      AC_DEFINE_UNQUOTED(HAVE_WS2TCPIP_H, 1,
+        [Define to 1 if you have the ws2tcpip.h header file.])
+      ;;
+  esac
 ])
 
 
@@ -231,12 +219,15 @@ AC_DEFUN([CURL_CHECK_TYPE_SOCKLEN_T], [
         done
       done
     ])
-    if test "$curl_cv_socklen_t_equiv" = "unknown"; then
-      AC_MSG_ERROR([Cannot find a type to use in place of socklen_t])
-    else
-      AC_DEFINE_UNQUOTED(socklen_t, $curl_cv_socklen_t_equiv,
-        [type to use in place of socklen_t if not defined])
-    fi
+    case "$curl_cv_socklen_t_equiv" in
+      unknown)
+        AC_MSG_ERROR([Cannot find a type to use in place of socklen_t])
+        ;;
+      *)
+        AC_DEFINE_UNQUOTED(socklen_t, $curl_cv_socklen_t_equiv,
+          [type to use in place of socklen_t if not defined])
+        ;;
+    esac
   ],[
 #undef inline
 #ifdef HAVE_WINDOWS_H
@@ -276,7 +267,7 @@ dnl argument in GETNAMEINFO_QUAL_ARG1.
 AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
   AC_REQUIRE([CURL_CHECK_HEADER_WS2TCPIP])dnl
   AC_REQUIRE([CURL_CHECK_TYPE_SOCKLEN_T])dnl
-  CURL_CHECK_HEADERS_ONCE(sys/types.h sys/socket.h netdb.h)
+  AC_CHECK_HEADERS(sys/types.h sys/socket.h netdb.h)
   #
   AC_MSG_CHECKING([for getnameinfo])
   AC_LINK_IFELSE([
@@ -504,7 +495,7 @@ dnl Check for working NI_WITHSCOPEID in getnameinfo()
 AC_DEFUN([CURL_CHECK_NI_WITHSCOPEID], [
   AC_REQUIRE([CURL_CHECK_FUNC_GETNAMEINFO])dnl
   AC_REQUIRE([TYPE_SOCKADDR_STORAGE])dnl
-  CURL_CHECK_HEADERS_ONCE(stdio.h sys/types.h sys/socket.h \
+  AC_CHECK_HEADERS(stdio.h sys/types.h sys/socket.h \
                    netdb.h netinet/in.h arpa/inet.h)
   #
   AC_CACHE_CHECK([for working NI_WITHSCOPEID], 
@@ -585,10 +576,12 @@ AC_DEFUN([CURL_CHECK_NI_WITHSCOPEID], [
       ]) # AC_COMPILE_IFELSE
     ]) # AC_RUN_IFELSE
   ]) # AC_CACHE_CHECK
-  if test "x$ac_cv_working_ni_withscopeid" = "xyes"; then
-    AC_DEFINE(HAVE_NI_WITHSCOPEID, 1,
-      [Define to 1 if NI_WITHSCOPEID exists and works.])
-  fi
+  case "$ac_cv_working_ni_withscopeid" in
+    yes)
+      AC_DEFINE(HAVE_NI_WITHSCOPEID, 1,
+        [Define to 1 if NI_WITHSCOPEID exists and works.])
+      ;;
+  esac
 ]) # AC_DEFUN
 
 
@@ -605,7 +598,7 @@ dnl return value in RECV_TYPE_RETV.
 AC_DEFUN([CURL_CHECK_FUNC_RECV], [
   AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK])dnl
   AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
-  CURL_CHECK_HEADERS_ONCE(sys/types.h sys/socket.h)
+  AC_CHECK_HEADERS(sys/types.h sys/socket.h)
   #
   AC_MSG_CHECKING([for recv])
   AC_TRY_LINK([
@@ -734,7 +727,7 @@ dnl type qualifier of second argument in SEND_QUAL_ARG2.
 AC_DEFUN([CURL_CHECK_FUNC_SEND], [
   AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK])dnl
   AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
-  CURL_CHECK_HEADERS_ONCE(sys/types.h sys/socket.h)
+  AC_CHECK_HEADERS(sys/types.h sys/socket.h)
   #
   AC_MSG_CHECKING([for send])
   AC_TRY_LINK([
