@@ -38,6 +38,8 @@ Decisions Already Made
   plain 'pipelining' to possibly one day support it for other protocols as
   well.
 
+- HTTP Pipelining is for GET and HEAD requests only.
+
 - When a pipeline is in use, we must take precautions so that when used easy
   handles (i.e those who still wait for a response) are removed from the multi
   handle, we must deal with the outstanding response nicely.
