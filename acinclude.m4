@@ -29,7 +29,7 @@ dnl Check for headers if check not already done.
 AC_DEFUN([CURL_CHECK_HEADERS_ONCE], [
   for f_hdr in $1
   do
-    u_hdr=`echo "$f_hdr" | sed 'y/\.\/-/___/'`
+    u_hdr=`echo "$f_hdr" | sed 'y/.\/-/___/'`
     eval prev_check_res=\$ac_cv_header_$u_hdr
     case "$prev_check_res" in
       yes | no)
