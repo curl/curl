@@ -18,6 +18,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o an easy handle with shared DNS cache added to a multi handle caused a crash
  o couldn't override the Proxy-Connection: header for non-CONNECT requests
  o curl_multi_fdset() could wrongly return -1 as max_fd value
 
@@ -35,6 +36,7 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dan Fandrich, Peter Silva, Arve Knudsen, Michael Wallner, Toshiyuki Maezawa
+ Dan Fandrich, Peter Silva, Arve Knudsen, Michael Wallner, Toshiyuki Maezawa,
+ Ingmar Runge
 
         Thanks! (and sorry if I forgot to mention someone)

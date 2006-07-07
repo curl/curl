@@ -205,7 +205,7 @@ CURLcode Curl_close(struct SessionHandle *data)
 
   if ( ! (data->share && data->share->hostcache) ) {
     if ( !Curl_global_host_cache_use(data)) {
-      Curl_hash_destroy(data->hostcache);
+      Curl_hash_destroy(data->dns.hostcache);
     }
   }
 
@@ -1392,8 +1392,10 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       if(data->share) {
         Curl_share_lock(data, CURL_LOCK_DATA_SHARE, CURL_LOCK_ACCESS_SINGLE);
 
-        if(data->share->hostcache == data->hostcache)
-          data->hostcache = NULL;
+        if(data->dns.hostcachetype == HCACHE_SHARED) {
+          data->dns.hostcache = NULL;
+          data->dns.hostcachetype = HCACHE_NONE;
+        }
 
         if(data->share->cookies == data->cookies)
           data->cookies = NULL;
@@ -1413,11 +1415,12 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
         data->share->dirty++;
 
         if(data->share->hostcache) {
-          /* use shared host cache, first free own one if any */
-          if(data->hostcache)
-            Curl_hash_destroy(data->hostcache);
+          /* use shared host cache, first free the private one if any */
+          if(data->dns.hostcachetype == HCACHE_PRIVATE)
+            Curl_hash_destroy(data->dns.hostcache);
 
-          data->hostcache = data->share->hostcache;
+          data->dns.hostcache = data->share->hostcache;
+          data->dns.hostcachetype = HCACHE_SHARED;
         }
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
         if(data->share->cookies) {

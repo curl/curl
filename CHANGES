@@ -6,6 +6,18 @@
 
                                   Changelog
 
+Daniel (8 July 2006)
+- Ingmar Runge provided a source snippet that caused a crash. The reason for
+  the crash was that libcurl internally was a bit confused about who owned the
+  DNS cache at all times so if you created an easy handle that uses a shared
+  DNS cache and added that to a multi handle it would crash. Now we keep more
+  careful internal track of exactly what kind of DNS cache each easy handle
+  uses: None, Private (allocated for and used only by this single handle),
+  Shared (points to a cache held by a shared object), Global (points to the
+  global cache) or Multi (points to the cache within the multi handle that is
+  automatically shared between all easy handles that are added with private
+  caches).
+
 Daniel (4 July 2006)
 - Toshiyuki Maezawa fixed a problem where you couldn't override the
   Proxy-Connection: header when using a proxy and not doing CONNECT.

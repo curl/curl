@@ -255,7 +255,7 @@ void Curl_hostcache_prune(struct SessionHandle *data)
 {
   time_t now;
 
-  if((data->set.dns_cache_timeout == -1) || !data->hostcache)
+  if((data->set.dns_cache_timeout == -1) || !data->dns.hostcache)
     /* cache forever means never prune, and NULL hostcache means
        we can't do it */
     return;
@@ -266,7 +266,7 @@ void Curl_hostcache_prune(struct SessionHandle *data)
   time(&now);
 
   /* Remove outdated and unused entries from the hostcache */
-  hostcache_prune(data->hostcache,
+  hostcache_prune(data->dns.hostcache,
                   data->set.dns_cache_timeout,
                   now);
 
@@ -279,7 +279,7 @@ remove_entry_if_stale(struct SessionHandle *data, struct Curl_dns_entry *dns)
 {
   struct hostcache_prune_data user;
 
-  if( !dns || (data->set.dns_cache_timeout == -1) || !data->hostcache)
+  if( !dns || (data->set.dns_cache_timeout == -1) || !data->dns.hostcache)
     /* cache forever means never prune, and NULL hostcache means
        we can't do it */
     return 0;
@@ -296,7 +296,7 @@ remove_entry_if_stale(struct SessionHandle *data, struct Curl_dns_entry *dns)
   if(data->share)
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
-  Curl_hash_clean_with_criterium(data->hostcache,
+  Curl_hash_clean_with_criterium(data->dns.hostcache,
                                  (void *) &user,
                                  hostcache_timestamp_remove);
 
@@ -356,7 +356,8 @@ Curl_cache_addr(struct SessionHandle *data,
   /* Store the resolved data in our DNS cache. This function may return a
      pointer to an existing struct already present in the hash, and it may
      return the same argument we pass in. Make no assumptions. */
-  dns2 = Curl_hash_add(data->hostcache, entry_id, entry_len+1, (void *)dns);
+  dns2 = Curl_hash_add(data->dns.hostcache, entry_id, entry_len+1,
+                       (void *)dns);
   if(!dns2) {
     /* Major badness, run away. */
     free(dns);
@@ -428,7 +429,7 @@ int Curl_resolv(struct connectdata *conn,
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
   /* See if its already in our dns cache */
-  dns = Curl_hash_pick(data->hostcache, entry_id, entry_len+1);
+  dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len+1);
 
   if(data->share)
     Curl_share_unlock(data, CURL_LOCK_DATA_DNS);

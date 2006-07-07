@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -436,16 +436,18 @@ CURLcode curl_easy_perform(CURL *curl)
   if ( ! (data->share && data->share->hostcache) ) {
 
     if (Curl_global_host_cache_use(data) &&
-        data->hostcache != Curl_global_host_cache_get()) {
-      if (data->hostcache)
-        Curl_hash_destroy(data->hostcache);
-      data->hostcache = Curl_global_host_cache_get();
+        (data->dns.hostcachetype != HCACHE_GLOBAL)) {
+      if (data->dns.hostcachetype == HCACHE_PRIVATE)
+        Curl_hash_destroy(data->dns.hostcache);
+      data->dns.hostcache = Curl_global_host_cache_get();
+      data->dns.hostcachetype = HCACHE_GLOBAL;
     }
 
-    if (!data->hostcache) {
-      data->hostcache = Curl_mk_dnscache();
+    if (!data->dns.hostcache) {
+      data->dns.hostcachetype = HCACHE_PRIVATE;
+      data->dns.hostcache = Curl_mk_dnscache();
 
-      if(!data->hostcache)
+      if(!data->dns.hostcache)
         /* While we possibly could survive and do good without a host cache,
            the fact that creating it failed indicates that things are truly
            screwed up and we should bail out! */

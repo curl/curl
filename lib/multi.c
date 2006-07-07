@@ -317,13 +317,14 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   easy->easy_handle = easy_handle;
   multistate(easy, CURLM_STATE_INIT);
 
-  /* for multi interface connections, we share DNS cache automaticly.
-     First kill the existing one if there is any. */
-  if (easy->easy_handle->hostcache &&
-      easy->easy_handle->hostcache != multi->hostcache)
-    Curl_hash_destroy(easy->easy_handle->hostcache);
-
-  easy->easy_handle->hostcache = multi->hostcache;
+  /* for multi interface connections, we share DNS cache automaticly if the
+     easy handle's one is currently private. */
+  if (easy->easy_handle->dns.hostcache &&
+      (easy->easy_handle->dns.hostcachetype == HCACHE_PRIVATE)) {
+    Curl_hash_destroy(easy->easy_handle->dns.hostcache);
+    easy->easy_handle->dns.hostcache = multi->hostcache;
+    easy->easy_handle->dns.hostcachetype = HCACHE_MULTI;
+  }
 
   /* We add this new entry first in the list. We make our 'next' point to the
      previous next and our 'prev' point back to the 'first' struct */
@@ -374,8 +375,12 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
     /* If the 'state' is not INIT or COMPLETED, we might need to do something
        nice to put the easy_handle in a good known state when this returns. */
 
-    /* clear out the usage of the shared DNS cache */
-    easy->easy_handle->hostcache = NULL;
+    if(easy->easy_handle->dns.hostcachetype == HCACHE_MULTI) {
+      /* clear out the usage of the shared DNS cache */
+      easy->easy_handle->dns.hostcache = NULL;
+      easy->easy_handle->dns.hostcachetype = HCACHE_NONE;
+    }
+
     Curl_easy_addmulti(easy->easy_handle, NULL); /* clear the association
                                                     to this multi handle */
 
@@ -893,8 +898,11 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   } while (easy->easy_handle->change.url_changed);
 
   if ((CURLM_STATE_COMPLETED == easy->state) && !easy->msg) {
-    /* clear out the usage of the shared DNS cache */
-    easy->easy_handle->hostcache = NULL;
+    if(easy->easy_handle->dns.hostcachetype == HCACHE_MULTI) {
+      /* clear out the usage of the shared DNS cache */
+      easy->easy_handle->dns.hostcache = NULL;
+      easy->easy_handle->dns.hostcachetype = HCACHE_NONE;
+    }
 
     /* now add a node to the Curl_message linked list with this info */
     msg = (struct Curl_message *)malloc(sizeof(struct Curl_message));
@@ -975,8 +983,11 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
     easy = multi->easy.next;
     while(easy) {
       nexteasy=easy->next;
-      /* clear out the usage of the shared DNS cache */
-      easy->easy_handle->hostcache = NULL;
+      if(easy->easy_handle->dns.hostcachetype == HCACHE_MULTI) {
+        /* clear out the usage of the shared DNS cache */
+        easy->easy_handle->dns.hostcache = NULL;
+        easy->easy_handle->dns.hostcachetype = HCACHE_NONE;
+      }
       Curl_easy_addmulti(easy->easy_handle, NULL); /* clear the association */
 
       if (easy->msg)

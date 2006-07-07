@@ -1145,19 +1145,29 @@ struct UserDefined {
   bool connect_only;     /* make connection, let application use the socket */
 };
 
+struct Names {
+  struct curl_hash *hostcache;
+  enum {
+    HCACHE_NONE,    /* not pointing to anything */
+    HCACHE_PRIVATE, /* points to our own */
+    HCACHE_GLOBAL,  /* points to the (shrug) global one */
+    HCACHE_MULTI,   /* points to a shared one in the multi handle */
+    HCACHE_SHARED   /* points to a shared one in a shared object */
+  } hostcachetype;
+};
+
 /*
- * In August 2001, this struct was redesigned and is since stricter than
- * before. The 'connectdata' struct MUST have all the connection oriented
- * stuff as we may now have several simultaneous connections and connection
- * structs in memory.
+ * The 'connectdata' struct MUST have all the connection oriented stuff as we
+ * may have several simultaneous connections and connection structs in memory.
  *
- * From now on, the 'SessionHandle' must only contain data that is set once to
- * go for many (perhaps) independent connections. Values that are generated or
+ * The 'struct UserDefined' must only contain data that is set once to go for
+ * many (perhaps) independent connections. Values that are generated or
  * calculated internally for the "session handle" must be defined within the
- * 'struct UrlState' instead.  */
+ * 'struct UrlState' instead.
+ */
 
 struct SessionHandle {
-  struct curl_hash *hostcache;
+  struct Names dns;
   struct Curl_multi *multi;    /* if non-NULL, points to the multi handle
                                   struct of which this "belongs" */
   struct Curl_share *share;    /* Share, handles global variable mutexing */
