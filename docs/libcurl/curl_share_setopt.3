@@ -42,7 +42,9 @@ be set to one of the values described below.
 Cookie data will be shared across the easy handles using this shared object.
 .IP CURL_LOCK_DATA_DNS
 Cached DNS hosts will be shared across the easy handles using this shared
-object.
+object. Note that when you use the multi interface, all easy handles added to
+the same multi handle will share DNS cache by default without this having to
+be used!
 .RE
 .IP CURLSHOPT_UNSHARE
 This option does the opposite of \fICURLSHOPT_SHARE\fP. It specifies that
