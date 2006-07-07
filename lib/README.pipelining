@@ -22,34 +22,48 @@ subsequent) ones need to be attached to the first handle so that it can send
 its request on the same connection and then sit and wait until its response
 comes.
 
-To ponder about:
+API
 
-- Explicitly ask for pipelining handle X and handle Y ? It isn't always that
-  easy for an app to do this association. The lib should probably still resolve
-  the second one properly to make sure that they actually _can_ be considered
-  for pipelining. Also, asking for explicit pipelining on handle X may be
-  tricky when handle X get a closed connection.
+We add a new option to curl_multi_setopt() called CURLMOPT_PIPELINING that
+enables "attempted pipelining" and then all easy handles used on that handle
+will attempt to use an existing pipeline.
 
-- Have an option like "attempt pipelining" and then it _may_ use that if an
-  existing connection is already present against our target HTTP server? May
-  cause funny effects if the first transfer is a slow big file and the second
-  is a very small one... Also probably requires some kind of notification
-  support so that the app can get to know that the handle is put "in line" for
-  pipelining.
+Decisions Already Made
+
+- A pipeline is only created if a previous connection exists to the same IP
+  address that the new request is being made to use.
+
+- Pipelines are only supported for HTTP(S) as no other currently supported
+  protocol has features resemembling this, but we still name this feature
+  plain 'pipelining' to possibly one day support it for other protocols as
+  well.
+
+- When a pipeline is in use, we must take precautions so that when used easy
+  handles (i.e those who still wait for a response) are removed from the multi
+  handle, we must deal with the outstanding response nicely.
+
+- Explicitly asking for pipelining handle X and handle Y won't be supported.
+  It isn't easy for an app to do this association. The lib should probably
+  still resolve the second one properly to make sure that they actually _can_
+  be considered for pipelining. Also, asking for explicit pipelining on handle
+  X may be tricky when handle X get a closed connection.
+
+To Ponder About
 
 - We need options to control max pipeline length, and probably how to behave
-  if we reach that limit.
-
-- When a pipeline is in use, we must take precautions so that we either don't
-  allow the used handles (i.e those who still wait for a response) to be
-  removed, or we allow removal but still deal with the outstanding response
-  somehow.
+  if we reach that limit. As was discussed on the list, it can probably be
+  made very complicated, so perhaps we can think of a way to pass all
+  variables involved to a callback and let the application decide how to act
+  in specific situations. Either way, these fancy options are only interesting
+  to work on when everything is working and we have working apps to test with.
 
 - Currently (before pipelining) we do not have any code or concept that lets
-  multiple handles share the same physical connection. We need a lock concept
-  and carefully make sure that each handle knows exactly what they can do and
-  when, on the shared connection.
+  multiple handles share the same physical connection. We need to carefully
+  make sure that each easy handle knows exactly what they can do and when, on
+  the shared connection.
 
 - We need to keep a linked list of each handle that is part of a single pipe
   so that if it breaks, we know which handles that need to resend their
-  requests.
+  requests. The pipe linked-lists could very well be "held" in the multi
+  handle struct so that they won't "belong" to a particular easy handle that
+  happens to be part of the pipeline during a certain period.
