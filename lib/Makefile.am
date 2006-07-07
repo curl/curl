@@ -124,7 +124,7 @@ DSPOUT = | awk '{printf("%s\r\n", $$0)}' >> $(DSP)
 
 $(DSP): msvcproj.head msvcproj.foot Makefile.am
 	echo "creating $(DSP)"
-	@(cp msvcproj.head $(DSP); \
+	@(cp $(srcdir)/msvcproj.head $(DSP); \
 	echo "# Begin Group \"Source Files\"" $(DSPOUT); \
 	for file in $(WIN32SOURCES); do \
 	echo "# Begin Source File" $(DSPOUT); \
@@ -141,4 +141,4 @@ $(DSP): msvcproj.head msvcproj.foot Makefile.am
 	echo "# End Source File" $(DSPOUT); \
 	done; \
 	echo "# End Group" $(DSPOUT); \
-	cat msvcproj.foot $(DSPOUT) )
+	cat $(srcdir)/msvcproj.foot $(DSPOUT) )
