@@ -542,10 +542,12 @@ static bool init_resolve_thread (struct connectdata *conn,
 #endif
 
   if (!td->thread_hnd) {
-#ifndef _WIN32_WCE
+#ifdef _WIN32_WCE
+     TRACE(("CreateThread() failed; %s\n", Curl_strerror(conn,GetLastError())));
+#else
      SetLastError(errno);
-#endif
      TRACE(("_beginthreadex() failed; %s\n", Curl_strerror(conn,errno)));
+#endif
      Curl_destroy_thread_data(&conn->async);
      return FALSE;
   }
