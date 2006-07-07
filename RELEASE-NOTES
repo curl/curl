@@ -23,6 +23,8 @@ This release includes the following bugfixes:
 
 Other curl-related news:
 
+ o yassl 1.3.7 can now be used with libcurl as an optional TLS library for
+   HTTPS/FTPS support
  o cURLpp 0.6.0 was released: http://rrette.com/curlpp.html
  o pycurl-7.15.4 was released: http://pycurl.sf.net
 

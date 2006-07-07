@@ -32,7 +32,8 @@ OpenSSL http://www.openssl.org/source/license.html
         are not allowed to ship binaries that link with OpenSSL that includes
         GPL code (unless that specific GPL code includes an exception for
         OpenSSL - a habit that is growing more and more common). If OpenSSL's
-        licensing is a problem for you, consider using GnuTLS instead.
+        licensing is a problem for you, consider using GnuTLS or yassl
+        instead.
 
 GnuTLS  http://www.gnutls.org/
 
@@ -40,6 +41,11 @@ GnuTLS  http://www.gnutls.org/
         a problem for you, consider using OpenSSL instead. Also note that
         GnuTLS itself depends on and uses other libs (libgcrypt and
         libgpg-error) and they too are LGPL- or GPL-licensed.
+
+yassl   http://www.yassl.com/
+
+        (May be used for SSL/TLS support) Uses the GPL[1] license. If this is
+        a problem for you, consider using OpenSSL or GnuTLS instead.
 
 c-ares  http://daniel.haxx.se/projects/c-ares/license.html
 
