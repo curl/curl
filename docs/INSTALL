@@ -129,6 +129,18 @@ UNIX
      If you're a curl developer and use gcc, you might want to enable more
      debug options with the --enable-debug option.
 
+     curl can be built to use a whole range of libraries to provide various
+     useful services, and configure will try to auto-detect a decent
+     default. But if you want to alter it, you can select how to deal with
+     each individual library.
+
+     To build with GnuTLS support instead of OpenSSL for SSL/TLS, note that
+     you need to use both --without-ssl and --with-gnutls.
+
+     To build with yassl support instead of OpenSSL or GunTLS, you must build
+     yassl with its OpenSSL emulation enabled and point to that directory root
+     with configure --with-ssl.
+
 Win32
 =====
 
