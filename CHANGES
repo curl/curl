@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel (8 July 2006)
+- Ates Goral pointed out that libcurl's cookie parser did case insensitive
+  string comparisons on the path which is incorrect and provided a patch that
+  fixes this. I edited test case 8 to include details that test for this.
+
 - Ingmar Runge provided a source snippet that caused a crash. The reason for
   the crash was that libcurl internally was a bit confused about who owned the
   DNS cache at all times so if you created an easy handle that uses a shared

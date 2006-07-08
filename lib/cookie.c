@@ -760,7 +760,9 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
         /* now check the left part of the path with the cookies path
            requirement */
         if(!co->path ||
-           checkprefix(co->path, path) ) {
+           /* not using checkprefix() because matching should be
+              case-sensitive */
+           !strncmp(co->path, path, strlen(co->path)) ) {
 
           /* and now, we know this is a match and we should create an
              entry for the return-linked-list */

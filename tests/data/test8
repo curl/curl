@@ -37,6 +37,8 @@ Funny-head: yesyes
 Set-Cookie: foobar=name; domain=127.0.0.1; path=/;
 Set-Cookie: mismatch=this; domain=127.0.0.1; path="/silly/";
 Set-Cookie: partmatch=present; domain=.0.0.1; path=/;
+Set-Cookie: cookie=yes; path=/we;
+Set-Cookie: nocookie=yes; path=/WE;
 
 </file>
 </client>
@@ -50,7 +52,7 @@ Set-Cookie: partmatch=present; domain=.0.0.1; path=/;
 GET /we/want/8 HTTP/1.1
 Host: 127.0.0.1:%HTTPPORT
 Accept: */*
-Cookie: partmatch=present; foobar=name
+Cookie: cookie=yes; partmatch=present; foobar=name
 
 </protocol>
 </verify>
