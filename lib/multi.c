@@ -322,6 +322,12 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   if (easy->easy_handle->dns.hostcache &&
       (easy->easy_handle->dns.hostcachetype == HCACHE_PRIVATE)) {
     Curl_hash_destroy(easy->easy_handle->dns.hostcache);
+    easy->easy_handle->dns.hostcache = NULL;
+    easy->easy_handle->dns.hostcachetype = HCACHE_NONE;
+  }
+
+  if (!easy->easy_handle->dns.hostcache ||
+      (easy->easy_handle->dns.hostcachetype == HCACHE_NONE)) {
     easy->easy_handle->dns.hostcache = multi->hostcache;
     easy->easy_handle->dns.hostcachetype = HCACHE_MULTI;
   }
