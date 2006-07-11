@@ -2,7 +2,8 @@
  
 # libcurl has sources that provide functions named curlx_* that aren't part of
 # the official API, but we re-use the code here to avoid duplication.
-CURLX_ONES =  $(top_srcdir)/lib/strtoofft.c $(top_srcdir)/lib/timeval.c
+CURLX_ONES =  $(top_srcdir)/lib/strtoofft.c $(top_srcdir)/lib/timeval.c \
+	$(top_srcdir)/lib/strdup.c 
 
 CURL_SOURCES = main.c hugehelp.c urlglob.c writeout.c writeenv.c \
 	getpass.c homedir.c

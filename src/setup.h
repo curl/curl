@@ -177,4 +177,9 @@ int fileno( FILE *stream);
 #define UNPRINTABLE_CHAR '.'
 #endif
 
+#ifndef HAVE_STRDUP
+#include "strdup.h"
+#define strdup(ptr) curlx_strdup(ptr)
+#endif
+
 #endif /* __SRC_CURL_SETUP_H */

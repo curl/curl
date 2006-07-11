@@ -183,25 +183,6 @@ typedef enum {
 /* Send authentication (user+password) when following
  * locations, even when hostname changed */
 
-#ifndef HAVE_STRDUP
-/* Ultrix doesn't have strdup(), so make a quick clone: */
-char *strdup(char *str)
-{
-  int len;
-  char *newstr;
-
-  len = strlen(str);
-  newstr = (char *) malloc((len+1)*sizeof(char));
-  if (!newstr)
-    return (char *)NULL;
-
-  strcpy(newstr,str);
-
-  return newstr;
-
-}
-#endif
-
 #ifdef WIN32
 #include <direct.h>
 #define F_OK 0
@@ -1271,11 +1252,11 @@ static ParameterError add2list(struct curl_slist **list,
 
 static int ftpfilemethod(struct Configurable *config, char *str)
 {
-  if(strequal("singlecwd", str))
+  if(curlx_strequal("singlecwd", str))
     return CURLFTPMETHOD_SINGLECWD;
-  if(strequal("nocwd", str))
+  if(curlx_strequal("nocwd", str))
     return CURLFTPMETHOD_NOCWD;
-  if(strequal("multicwd", str))
+  if(curlx_strequal("multicwd", str))
     return CURLFTPMETHOD_MULTICWD;
   warnf(config, "unrecognized ftp file method '%s', using default\n", str);
   return CURLFTPMETHOD_MULTICWD;
