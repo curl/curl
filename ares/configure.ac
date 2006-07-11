@@ -96,6 +96,8 @@ CURL_CHECK_HEADER_WINSOCK
 CURL_CHECK_HEADER_WINSOCK2
 CURL_CHECK_HEADER_WS2TCPIP
 
+CURL_CHECK_HEADER_MALLOC
+
 dnl check for a few basic system headers we need
 AC_CHECK_HEADERS(
        sys/types.h \

@@ -1443,6 +1443,7 @@ dnl **********************************************************************
 dnl Checks for header files.
 AC_HEADER_STDC
 
+CURL_CHECK_HEADER_MALLOC
 
 dnl Now check for the very most basic headers. Then we can use these
 dnl ones as default-headers when checking for the rest!
@@ -1454,7 +1455,6 @@ AC_CHECK_HEADERS(
         sys/ioctl.h \
         assert.h \
         unistd.h \
-        malloc.h \
         stdlib.h \
         limits.h \
         arpa/inet.h \
