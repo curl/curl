@@ -41,6 +41,11 @@
 #define HAVE_MALLOC_H 1
 #endif
 
+/* Define if you need the malloc.h header file. */
+#ifndef __SALFORDC__
+#define NEED_MALLOC_H 1
+#endif
+
 /* Define if you have the <netdb.h> header file.  */
 /* #define HAVE_NETDB_H 1 */
 

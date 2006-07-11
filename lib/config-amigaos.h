@@ -56,6 +56,8 @@
 #define HAVE_ZLIB_H 1
 #define HAVE_SYS_IOCTL_H 1
 
+#define NEED_MALLOC_H 1
+
 #define USE_OPENSSL 1
 #define USE_SSLEAY 1
 #define CURL_DISABLE_LDAP 1

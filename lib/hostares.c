@@ -25,7 +25,7 @@
 
 #include <string.h>
 
-#ifdef HAVE_MALLOC_H  /* Win32 */
+#if defined(HAVE_MALLOC_H) && defined(NEED_MALLOC_H)
 #include <malloc.h>
 #endif
 #ifdef HAVE_SYS_TYPES_H

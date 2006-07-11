@@ -70,6 +70,8 @@
 #define HAVE_UNISTD_H          1
 #define HAVE_VPRINTF           1
 
+#define NEED_MALLOC_H          1
+
 #if (DJGPP_MINOR >= 4)
 #define HAVE_STRLCAT           1
 #endif
