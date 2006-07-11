@@ -509,6 +509,7 @@ static bool trynextip(struct connectdata *conn,
 
   /* first close the failed socket */
   sclose(conn->sock[sockindex]);
+  conn->sock[sockindex] = CURL_SOCKET_BAD;
 
   /* try the next address */
   ai = conn->ip_addr->ai_next;
