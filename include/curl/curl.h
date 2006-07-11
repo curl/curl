@@ -61,11 +61,12 @@ extern "C" {
 
 #ifdef CURL_HIDDEN_SYMBOLS
 /*
- * On gcc >= 4 if -fvisibility=hidden is given then this is used to cause
- * external definitions to be put into the shared library.  It makes no
- * difference to applications whether this is set or not, only the library.
+ * This definition is used to make external definitions visibile in the 
+ * shared library when symbols are hidden by default.  It makes no
+ * difference when compiling applications whether this is set or not,
+ * only when compiling the library.
  */
-#define CURL_EXTERN __attribute__ ((visibility ("default")))
+#define CURL_EXTERN CURL_EXTERN_SYMBOL
 #else
 #define CURL_EXTERN 
 #endif
