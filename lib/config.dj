@@ -1,6 +1,10 @@
 #ifndef _CURL_CONFIG_DJGPP_H
 #define _CURL_CONFIG_DJGPP_H
 
+/* lib/config.dj - Hand crafted config file for DJGPP.
+ *
+ * $Id$
+ */
 #define OS       "MSDOS/djgpp"
 #define PACKAGE  "curl"
 
