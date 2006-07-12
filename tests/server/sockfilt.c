@@ -170,6 +170,7 @@ static int juggle(curl_socket_t *sockfdp,
   fd_set fds_err;
   curl_socket_t maxfd;
   ssize_t r;
+  int err;
   unsigned char buffer[256]; /* FIX: bigger buffer */
   char data[256];
   curl_socket_t sockfd;
@@ -300,9 +301,14 @@ static int juggle(curl_socket_t *sockfdp,
           logmsg("*** We are disconnected!");
           write(fileno(stdout), "DISC\n", 5);
         }
-        else
+        else {
           /* send away on the socket */
           bytes_written = swrite(sockfd, buffer, len);
+          if(bytes_written != (ssize_t)len) {
+            logmsg("====> Not all data was sent. Bytes to send: %d Bytes sent: %d", 
+                   len, bytes_written);
+          }
+        }
       }
       else if(!memcmp("DISC", buffer, 4)) {
         /* disconnect! */
