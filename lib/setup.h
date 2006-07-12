@@ -246,11 +246,11 @@ typedef unsigned char bool;
   Error: Missing definition of return and arguments types of recv().
   /* */
 #else
-#define sread(x,y,z) (ssize_t)recv((RECV_TYPE_ARG1)x, (RECV_TYPE_ARG2)y, (RECV_TYPE_ARG3)z, (RECV_TYPE_ARG4)SEND_4TH_ARG)
+#define sread(x,y,z) (ssize_t)recv((RECV_TYPE_ARG1)(x), (RECV_TYPE_ARG2)(y), (RECV_TYPE_ARG3)(z), (RECV_TYPE_ARG4)(SEND_4TH_ARG))
 #endif
 #else /* HAVE_RECV */
 #ifdef DJGPP
-#define sread(x,y,z) (ssize_t)read_s((int)x, (char *)y, (int)z)
+#define sread(x,y,z) (ssize_t)read_s((int)(x), (char *)(y), (int)(z))
 #endif 
 #endif /* HAVE_RECV */
 
@@ -265,11 +265,11 @@ typedef unsigned char bool;
   Error: Missing definition of return and arguments types of send().
   /* */
 #else
-#define swrite(x,y,z) (ssize_t)send((SEND_TYPE_ARG1)x, (SEND_TYPE_ARG2)y, (SEND_TYPE_ARG3)z, (SEND_TYPE_ARG4)SEND_4TH_ARG)
+#define swrite(x,y,z) (ssize_t)send((SEND_TYPE_ARG1)(x), (SEND_TYPE_ARG2)(y), (SEND_TYPE_ARG3)(z), (SEND_TYPE_ARG4)(SEND_4TH_ARG))
 #endif
 #else /* HAVE_SEND */
 #ifdef DJGPP
-#define swrite(x,y,z) (ssize_t)write_s((int)x, (char *)y, (int)z)
+#define swrite(x,y,z) (ssize_t)write_s((int)(x), (char *)(y), (int)(z))
 #endif 
 #endif /* HAVE_SEND */
 
