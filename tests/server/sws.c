@@ -454,7 +454,7 @@ static int get_request(int sock, struct httprequest *req)
   /*** end of httprequest init ***/
 
   while (req->offset < REQBUFSIZ) {
-    int got = sread(sock, reqbuf + req->offset, REQBUFSIZ - req->offset);
+    ssize_t got = sread(sock, reqbuf + req->offset, REQBUFSIZ - req->offset);
     if (got <= 0) {
       if (got < 0) {
         logmsg("recv() returned error: %d", errno);
