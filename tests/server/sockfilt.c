@@ -173,6 +173,7 @@ static int juggle(curl_socket_t *sockfdp,
   unsigned char buffer[256]; /* FIX: bigger buffer */
   char data[256];
   curl_socket_t sockfd;
+  ssize_t bytes_written;
 
   timeout.tv_sec = 120;
   timeout.tv_usec = 0;
@@ -301,7 +302,7 @@ static int juggle(curl_socket_t *sockfdp,
         }
         else
           /* send away on the socket */
-          swrite(sockfd, buffer, len);
+          bytes_written = swrite(sockfd, buffer, len);
       }
       else if(!memcmp("DISC", buffer, 4)) {
         /* disconnect! */

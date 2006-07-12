@@ -332,7 +332,7 @@ CURLcode Curl_write(struct connectdata *conn,
       /* only TRUE if krb4 enabled */
       bytes_written = Curl_sec_write(conn, sockfd, mem, len);
     else
-      bytes_written = (ssize_t)swrite(sockfd, mem, len);
+      bytes_written = swrite(sockfd, mem, len);
 
     if(-1 == bytes_written) {
       int err = Curl_sockerrno();

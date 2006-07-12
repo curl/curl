@@ -214,6 +214,65 @@ typedef unsigned char bool;
 #define struct_stat struct stat
 #endif /* Win32 with large file support */
 
+/*
+ * The definitions for the return type and arguments types
+ * of functions recv() and send() belong and come from the 
+ * configuration file. Do not define them in any other place.
+ *
+ * HAVE_RECV is defined if you have a function named recv()
+ * which is used to read incoming data from sockets. If your
+ * function has another name then don't define HAVE_RECV.
+ *
+ * If HAVE_RECV is defined then RECV_TYPE_ARG1, RECV_TYPE_ARG2,
+ * RECV_TYPE_ARG3, RECV_TYPE_ARG4 and RECV_TYPE_RETV must also
+ * be defined.
+ *
+ * HAVE_SEND is defined if you have a function named send()
+ * which is used to write outgoing data on a connected socket.
+ * If yours has another name then don't define HAVE_SEND.
+ *
+ * If HAVE_SEND is defined then SEND_TYPE_ARG1, SEND_QUAL_ARG2,
+ * SEND_TYPE_ARG2, SEND_TYPE_ARG3, SEND_TYPE_ARG4 and 
+ * SEND_TYPE_RETV must also be defined.
+ */
+
+#ifdef HAVE_RECV
+#if !defined(RECV_TYPE_ARG1) || \
+    !defined(RECV_TYPE_ARG2) || \
+    !defined(RECV_TYPE_ARG3) || \
+    !defined(RECV_TYPE_ARG4) || \
+    !defined(RECV_TYPE_RETV)
+  /* */
+  Error: Missing definition of return and arguments types of recv().
+  /* */
+#else
+#define sread(x,y,z) (ssize_t)recv((RECV_TYPE_ARG1)x, (RECV_TYPE_ARG2)y, (RECV_TYPE_ARG3)z, (RECV_TYPE_ARG4)SEND_4TH_ARG)
+#endif
+#else /* HAVE_RECV */
+#ifdef DJGPP
+#define sread(x,y,z) (ssize_t)read_s((int)x, (char *)y, (int)z)
+#endif 
+#endif /* HAVE_RECV */
+
+#ifdef HAVE_SEND
+#if !defined(SEND_TYPE_ARG1) || \
+    !defined(SEND_QUAL_ARG2) || \
+    !defined(SEND_TYPE_ARG2) || \
+    !defined(SEND_TYPE_ARG3) || \
+    !defined(SEND_TYPE_ARG4) || \
+    !defined(SEND_TYPE_RETV)
+  /* */
+  Error: Missing definition of return and arguments types of send().
+  /* */
+#else
+#define swrite(x,y,z) (ssize_t)send((SEND_TYPE_ARG1)x, (SEND_TYPE_ARG2)y, (SEND_TYPE_ARG3)z, (SEND_TYPE_ARG4)SEND_4TH_ARG)
+#endif
+#else /* HAVE_SEND */
+#ifdef DJGPP
+#define swrite(x,y,z) (ssize_t)write_s((int)x, (char *)y, (int)z)
+#endif 
+#endif /* HAVE_SEND */
+
 
 /* Below we define four functions. They should
    1. close a socket
@@ -229,16 +288,10 @@ typedef unsigned char bool;
 #if !defined(__GNUC__) || defined(__MINGW32__)
 #define sclose(x) closesocket(x)
 
-/* Since Windows doesn't have/use the POSIX prototype for send() and recv(),
-   we typecast the third argument in the macros to avoid compiler warnings. */
-#define sread(x,y,z) recv(x,y,(int)(z), SEND_4TH_ARG)
-#define swrite(x,y,z) (size_t)send(x,y, (int)(z), SEND_4TH_ARG)
 #undef HAVE_ALARM
 #else
      /* gcc-for-win is still good :) */
 #define sclose(x) close(x)
-#define sread(x,y,z) recv(x,y,z, SEND_4TH_ARG)
-#define swrite(x,y,z) send(x,y,z, SEND_4TH_ARG)
 #define HAVE_ALARM
 #endif /* !GNU or mingw */
 
@@ -250,8 +303,6 @@ typedef unsigned char bool;
 #ifdef DJGPP
 #include <sys/ioctl.h>
 #define sclose(x)         close_s(x)
-#define sread(x,y,z)      read_s(x,y,z)
-#define swrite(x,y,z)     write_s(x,y,z)
 #define select(n,r,w,x,t) select_s(n,r,w,x,t)
 #define ioctl(x,y,z) ioctlsocket(x,y,(char *)(z))
 #define IOCTL_3_ARGS
@@ -264,12 +315,8 @@ typedef unsigned char bool;
 
 #ifdef __BEOS__
 #define sclose(x) closesocket(x)
-#define sread(x,y,z) (ssize_t)recv(x,y,z, SEND_4TH_ARG)
-#define swrite(x,y,z) (ssize_t)send(x,y,z, SEND_4TH_ARG)
 #else /* __BEOS__ */
 #define sclose(x) close(x)
-#define sread(x,y,z) recv(x,y,z, SEND_4TH_ARG)
-#define swrite(x,y,z) send(x,y,z, SEND_4TH_ARG)
 #endif /* __BEOS__ */
 
 #define HAVE_ALARM
