@@ -169,7 +169,7 @@ static int juggle(curl_socket_t *sockfdp,
   fd_set fds_write;
   fd_set fds_err;
   curl_socket_t maxfd;
-  int r;
+  ssize_t r;
   unsigned char buffer[256]; /* FIX: bigger buffer */
   char data[256];
   curl_socket_t sockfd;
