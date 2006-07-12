@@ -71,6 +71,7 @@
 #include "transfer.h"
 #include "sendf.h"
 #include "telnet.h"
+#include "connect.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -290,12 +291,18 @@ static void send_negotiation(struct connectdata *conn, int cmd, int option)
 {
    unsigned char buf[3];
    ssize_t bytes_written;
+   int err;
+   struct SessionHandle *data = conn->data;
 
    buf[0] = CURL_IAC;
    buf[1] = cmd;
    buf[2] = option;
 
    bytes_written = swrite(conn->sock[FIRSTSOCKET], buf, 3);
+   if(bytes_written < 0) {
+     err = Curl_sockerrno();
+     failf(data,"Sending data failed (%d)",err);
+   }
 
    printoption(conn->data, "SENT", cmd, option);
 }
@@ -847,6 +854,7 @@ static void suboption(struct connectdata *conn)
   ssize_t bytes_written;
   size_t len;
   size_t tmplen;
+  int err;
   char varname[128];
   char varval[128];
   struct SessionHandle *data = conn->data;
@@ -860,6 +868,10 @@ static void suboption(struct connectdata *conn)
                "%c%c%c%c%s%c%c", CURL_IAC, CURL_SB, CURL_TELOPT_TTYPE,
                CURL_TELQUAL_IS, tn->subopt_ttype, CURL_IAC, CURL_SE);
       bytes_written = swrite(conn->sock[FIRSTSOCKET], temp, len);
+      if(bytes_written < 0) {
+        err = Curl_sockerrno();
+        failf(data,"Sending data failed (%d)",err);
+      }
       printsub(data, '>', &temp[2], len-2);
       break;
     case CURL_TELOPT_XDISPLOC:
@@ -868,6 +880,10 @@ static void suboption(struct connectdata *conn)
                "%c%c%c%c%s%c%c", CURL_IAC, CURL_SB, CURL_TELOPT_XDISPLOC,
                CURL_TELQUAL_IS, tn->subopt_xdisploc, CURL_IAC, CURL_SE);
       bytes_written = swrite(conn->sock[FIRSTSOCKET], temp, len);
+      if(bytes_written < 0) {
+        err = Curl_sockerrno();
+        failf(data,"Sending data failed (%d)",err);
+      }
       printsub(data, '>', &temp[2], len-2);
       break;
     case CURL_TELOPT_NEW_ENVIRON:
@@ -891,6 +907,10 @@ static void suboption(struct connectdata *conn)
                "%c%c", CURL_IAC, CURL_SE);
       len += 2;
       bytes_written = swrite(conn->sock[FIRSTSOCKET], temp, len);
+      if(bytes_written < 0) {
+        err = Curl_sockerrno();
+        failf(data,"Sending data failed (%d)",err);
+      }
       printsub(data, '>', &temp[2], len-2);
       break;
   }
