@@ -118,32 +118,6 @@
 #define ssize_t    int
 #endif
 
-/* Types and qualifies for getnameinfo(), recv() and send() 
- * should not be defined. See lib/setup.h for explanation.  
- */
-
-#undef HAVE_GETNAMEINFO
-#undef GETNAMEINFO_TYPE_ARG1
-#undef GETNAMEINFO_QUAL_ARG1
-#undef GETNAMEINFO_TYPE_ARG2
-#undef GETNAMEINFO_TYPE_ARG46
-#undef GETNAMEINFO_TYPE_ARG7
-
-#undef HAVE_RECV
-#undef RECV_TYPE_ARG1
-#undef RECV_TYPE_ARG2
-#undef RECV_TYPE_ARG3
-#undef RECV_TYPE_ARG4
-#undef RECV_TYPE_RETV
-
-#undef HAVE_SEND
-#undef SEND_TYPE_ARG1
-#undef SEND_QUAL_ARG2
-#undef SEND_TYPE_ARG2
-#undef SEND_TYPE_ARG3
-#undef SEND_TYPE_ARG4
-#undef SEND_TYPE_RETV
-
 #include <stdlib.h>
 #include <string.h>
 #include <tcp.h>    /* Watt-32 API */
