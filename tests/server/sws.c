@@ -519,7 +519,7 @@ static int send_doc(int sock, struct httprequest *req)
     count = strlen(STREAMTHIS);
     while(1) {
       written = swrite(sock, STREAMTHIS, count);
-      if(written != count) {
+      if(written != (ssize_t)count) {
         logmsg("Stopped streaming");
         break;
       }
