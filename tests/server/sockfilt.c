@@ -98,13 +98,13 @@ static volatile int sigpipe;  /* Why? It's not used */
 
 const char *serverlogfile = (char *)DEFAULT_LOGFILE;
 
-static void lograw(unsigned char *buffer, int len)
+static void lograw(unsigned char *buffer, ssize_t len)
 {
   char data[120];
-  int i;
+  ssize_t i;
   unsigned char *ptr = buffer;
   char *optr = data;
-  int width=0;
+  ssize_t width=0;
 
   for(i=0; i<len; i++) {
     switch(ptr[i]) {
@@ -169,11 +169,15 @@ static int juggle(curl_socket_t *sockfdp,
   fd_set fds_write;
   fd_set fds_err;
   curl_socket_t maxfd;
-  ssize_t r;
+  ssize_t rc;
+  ssize_t len;
+  ssize_t nread;
+  ssize_t bytes_written;
+  ssize_t bytes_read;
+  ssize_t port_strlen;
   unsigned char buffer[256]; /* FIX: bigger buffer */
   char data[256];
   curl_socket_t sockfd;
-  ssize_t bytes_written;
 
   timeout.tv_sec = 120;
   timeout.tv_usec = 0;
@@ -229,10 +233,10 @@ static int juggle(curl_socket_t *sockfdp,
   }
 
   do {
-    r = select(maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
-  } while((r == -1) && (ourerrno() == EINTR));
+    rc = select(maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
+  } while((rc == -1) && (ourerrno() == EINTR));
 
-  switch(r) {
+  switch(rc) {
   case -1:
     return FALSE;
 
@@ -242,7 +246,6 @@ static int juggle(curl_socket_t *sockfdp,
 
 
   if(FD_ISSET(fileno(stdin), &fds_read)) {
-    ssize_t nread;
     /* read from stdin, commands/data to be dealt with and possibly passed on
        to the socket
 
@@ -272,10 +275,10 @@ static int juggle(curl_socket_t *sockfdp,
         /* question asking us what PORT number we are listening to.
            Replies with PORT with "IPv[num]/[port]" */
         sprintf((char *)buffer, "IPv%d/%d\n", use_ipv6?6:4, port);
-        r = (int)strlen((char *)buffer);
-        sprintf(data, "PORT\n%04x\n", r);
+        port_strlen = (ssize_t)strlen((char *)buffer);
+        sprintf(data, "PORT\n%04x\n", port_strlen);
         write(fileno(stdout), data, 10);
-        write(fileno(stdout), buffer, r);
+        write(fileno(stdout), buffer, port_strlen);
       }
       else if(!memcmp("QUIT", buffer, 4)) {
         /* just die */
@@ -284,17 +287,16 @@ static int juggle(curl_socket_t *sockfdp,
       }
       else if(!memcmp("DATA", buffer, 4)) {
         /* data IN => data OUT */
-        long len;
 
         if(5 != read(fileno(stdin), buffer, 5))
           return FALSE;
 
-        len = strtol((char *)buffer, NULL, 16);
+        len = (ssize_t)strtol((char *)buffer, NULL, 16);
         if(len != read(fileno(stdin), buffer, len))
           return FALSE;
 
         logmsg("> %d bytes data, server => client", len);
-        lograw(buffer, (int)len);
+        lograw(buffer, len);
 
         if(*mode == PASSIVE_LISTEN) {
           logmsg("*** We are disconnected!");
@@ -303,8 +305,8 @@ static int juggle(curl_socket_t *sockfdp,
         else {
           /* send away on the socket */
           bytes_written = swrite(sockfd, buffer, len);
-          if(bytes_written != (ssize_t)len) {
-            logmsg("====> Not all data was sent. Bytes to send: %d Bytes sent: %d", 
+          if(bytes_written != len) {
+            logmsg("Not all data was sent. Bytes to send: %d sent: %d", 
                    len, bytes_written);
           }
         }
@@ -327,7 +329,7 @@ static int juggle(curl_socket_t *sockfdp,
       }
     }
     else if(nread == -1){
-      logmsg("read %d from stdin, exiting", (int)nread);
+      logmsg("read %d from stdin, exiting", nread);
       return FALSE;
     }
   }
@@ -350,9 +352,9 @@ static int juggle(curl_socket_t *sockfdp,
     }
 
     /* read from socket, pass on data to stdout */
-    r = sread(sockfd, buffer, sizeof(buffer));
+    bytes_read = sread(sockfd, buffer, sizeof(buffer));
 
-    if(r <= 0) {
+    if(bytes_read <= 0) {
       logmsg("====> Client disconnect");
       write(fileno(stdout), "DISC\n", 5);
       sclose(sockfd);
@@ -364,12 +366,12 @@ static int juggle(curl_socket_t *sockfdp,
       return TRUE;
     }
 
-    sprintf(data, "DATA\n%04x\n", r);
+    sprintf(data, "DATA\n%04x\n", bytes_read);
     write(fileno(stdout), data, 10);
-    write(fileno(stdout), buffer, r);
+    write(fileno(stdout), buffer, bytes_read);
 
-    logmsg("< %d bytes data, client => server", r);
-    lograw(buffer, r);
+    logmsg("< %d bytes data, client => server", bytes_read);
+    lograw(buffer, bytes_read);
   }
 
   return TRUE;
