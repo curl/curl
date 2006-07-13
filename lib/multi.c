@@ -1311,7 +1311,8 @@ void Curl_expire(struct SessionHandle *data, long milli)
       if(rc)
         infof(data, "Internal error clearing splay node = %d\n", rc);
       infof(data, "Expire cleared\n");
-      nowp->tv_sec = nowp->tv_usec = 0;
+      nowp->tv_sec = 0;
+      nowp->tv_sec = 0;
     }
   }
   else {
