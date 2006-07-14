@@ -290,6 +290,7 @@ static int juggle(curl_socket_t *sockfdp,
 
         if(5 != read(fileno(stdin), buffer, 5))
           return FALSE;
+        buffer[4] = '\0';
 
         len = (ssize_t)strtol((char *)buffer, NULL, 16);
         if(len != read(fileno(stdin), buffer, len))
