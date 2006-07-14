@@ -713,7 +713,7 @@ singleipconnect(struct connectdata *conn,
 
   /* Connect TCP sockets, bind UDP */
   if(conn->socktype == SOCK_STREAM)
-    rc = connect(sockfd, ai->ai_addr, (socklen_t)ai->ai_addrlen);
+    rc = connect(sockfd, ai->ai_addr, ai->ai_addrlen);
   else
     rc = 0;
 

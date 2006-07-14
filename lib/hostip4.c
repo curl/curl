@@ -370,28 +370,34 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
  * Curl_he2ai() translates from a hostent struct to a Curl_addrinfo struct.
  * The Curl_addrinfo is meant to work like the addrinfo struct does for IPv6
  * stacks, but for all hosts and environments.
-
-struct Curl_addrinfo {
-  int     ai_flags;
-  int     ai_family;
-  int     ai_socktype;
-  int     ai_protocol;
-  size_t  ai_addrlen;
-  struct sockaddr *ai_addr;
-  char   *ai_canonname;
-  struct addrinfo *ai_next;
-};
-
-struct hostent {
-  char    *h_name;        * official name of host *
-  char    **h_aliases;    * alias list *
-  int     h_addrtype;     * host address type *
-  int     h_length;       * length of address *
-  char    **h_addr_list;  * list of addresses *
-}
-#define h_addr  h_addr_list[0]  * for backward compatibility *
-
-*/
+ *      
+ *   Curl_addrinfo defined in "lib/hostip.h"
+ *      
+ *     struct Curl_addrinfo {
+ *       int                   ai_flags;
+ *       int                   ai_family;
+ *       int                   ai_socktype;
+ *       int                   ai_protocol;
+ *       socklen_t             ai_addrlen;   * Follow rfc3493 struct addrinfo *
+ *       char                 *ai_canonname;
+ *       struct sockaddr      *ai_addr;
+ *       struct Curl_addrinfo *ai_next;
+ *     };
+ *      
+ *   hostent defined in <netdb.h>
+ *      
+ *     struct hostent {
+ *       char    *h_name;
+ *       char    **h_aliases;
+ *       int     h_addrtype;
+ *       int     h_length;
+ *       char    **h_addr_list;
+ *     };
+ *      
+ *   for backward compatibility:
+ *      
+ *     #define h_addr  h_addr_list[0]
+ */
 
 Curl_addrinfo *Curl_he2ai(struct hostent *he, int port)
 {

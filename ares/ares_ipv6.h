@@ -40,14 +40,14 @@ struct sockaddr_in6
 #endif
 
 #ifndef HAVE_STRUCT_ADDRINFO
-struct addrinfo
+struct addrinfo 
 {
-  int ai_flags;
-  int ai_family;
-  int ai_socktype;
-  int ai_protocol;
-  size_t ai_addrlen;
-  char *ai_cannonname;
+  int              ai_flags;
+  int              ai_family;
+  int              ai_socktype;
+  int              ai_protocol;
+  socklen_t        ai_addrlen;   /* Follow rfc3493 struct addrinfo */
+  char            *ai_canonname;
   struct sockaddr *ai_addr;
   struct addrinfo *ai_next;
 };
