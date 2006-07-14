@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (14 July 2006)
+- David McCreedy fixed a flaw where the CRLF counter wasn't properly cleared
+  for FTP ASCII transfers.
+
 Daniel (8 July 2006)
 - Ates Goral pointed out that libcurl's cookie parser did case insensitive
   string comparisons on the path which is incorrect and provided a patch that

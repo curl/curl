@@ -3930,6 +3930,9 @@ static CURLcode SetupConnection(struct connectdata *conn,
 
   conn->bytecount = 0;
   conn->headerbytecount = 0;
+#ifdef CURL_DO_LINEEND_CONV
+  data->state.crlf_conversions = 0; /* reset CRLF conversion counter */
+#endif /* CURL_DO_LINEEND_CONV */
 
   if(CURL_SOCKET_BAD == conn->sock[FIRSTSOCKET]) {
     bool connected = FALSE;

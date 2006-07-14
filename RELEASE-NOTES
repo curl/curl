@@ -18,6 +18,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o FTP ASCII CRLF counter reset
  o cookie parser now compares paths case sensitive
  o an easy handle with shared DNS cache added to a multi handle caused a crash
  o couldn't override the Proxy-Connection: header for non-CONNECT requests
@@ -38,6 +39,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Dan Fandrich, Peter Silva, Arve Knudsen, Michael Wallner, Toshiyuki Maezawa,
- Ingmar Runge, Ates Goral
+ Ingmar Runge, Ates Goral, David McCreedy
 
         Thanks! (and sorry if I forgot to mention someone)
