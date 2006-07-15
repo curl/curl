@@ -33,7 +33,7 @@ struct Curl_tree {
 
 struct Curl_tree *Curl_splay(int i, struct Curl_tree *t);
 struct Curl_tree *Curl_splayinsert(int key, struct Curl_tree *t,
-                                   struct Curl_tree *new);
+                                   struct Curl_tree *newnode);
 #if 0
 struct Curl_tree *Curl_splayremove(int key, struct Curl_tree *t,
                                    struct Curl_tree **removed);
