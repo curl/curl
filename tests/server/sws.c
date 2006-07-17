@@ -438,7 +438,7 @@ void storerequest(char *reqbuf)
 }
 
 /* return 0 on success, non-zero on failure */
-static int get_request(int sock, struct httprequest *req)
+static int get_request(curl_socket_t sock, struct httprequest *req)
 {
   int fail= FALSE;
   char *reqbuf = req->reqbuf;
@@ -491,7 +491,7 @@ static int get_request(int sock, struct httprequest *req)
 }
 
 /* returns -1 on failure */
-static int send_doc(int sock, struct httprequest *req)
+static int send_doc(curl_socket_t sock, struct httprequest *req)
 {
   ssize_t written;
   size_t count;
@@ -758,21 +758,23 @@ int main(int argc, char *argv[])
     sock = socket(AF_INET6, SOCK_STREAM, 0);
 #endif
 
-  if (sock < 0) {
+  if (CURL_SOCKET_BAD == sock) {
     logmsg("Error opening socket: %d", errno);
     exit(1);
   }
 
   flag = 1;
-  if (setsockopt
-      (sock, SOL_SOCKET, SO_REUSEADDR, (const void *) &flag,
-       sizeof(int)) < 0) {
-    logmsg("setsockopt(SO_REUSEADDR) failed");
+  if (0 != setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, 
+            (void *) &flag, sizeof(flag))) {
+    logmsg("setsockopt(SO_REUSEADDR) failed: %d", errno);
+    sclose(sock);
+    exit(1);
   }
 
 #ifdef ENABLE_IPV6
   if(!use_ipv6) {
 #endif
+    memset(&me, 0, sizeof(me));
     me.sin_family = AF_INET;
     me.sin_addr.s_addr = INADDR_ANY;
     me.sin_port = htons(port);
@@ -780,15 +782,16 @@ int main(int argc, char *argv[])
 #ifdef ENABLE_IPV6
   }
   else {
-    memset(&me6, 0, sizeof(struct sockaddr_in6));
+    memset(&me6, 0, sizeof(me6));
     me6.sin6_family = AF_INET6;
     me6.sin6_addr = in6addr_any;
     me6.sin6_port = htons(port);
     rc = bind(sock, (struct sockaddr *) &me6, sizeof(me6));
   }
 #endif /* ENABLE_IPV6 */
-  if(rc < 0) {
+  if(0 != rc) {
     logmsg("Error binding socket: %d", errno);
+    sclose(sock);
     exit(1);
   }
 
@@ -797,8 +800,9 @@ int main(int argc, char *argv[])
     fprintf(pidfile, "%d\n", (int)getpid());
     fclose(pidfile);
   }
-  else
+  else {
     fprintf(stderr, "Couldn't write pid file\n");
+  }
 
   logmsg("Running IPv%d version on port %d",
 #ifdef ENABLE_IPV6
@@ -809,13 +813,18 @@ int main(int argc, char *argv[])
          , port );
 
   /* start accepting connections */
-  listen(sock, 5);
+  rc = listen(sock, 5);
+  if(0 != rc) {
+    logmsg("listen() failed with error: %d", errno);
+    sclose(sock);
+    exit(1);
+  }
 
   while (1) {
     msgsock = accept(sock, NULL, NULL);
 
-    if (msgsock == -1) {
-      printf("MAJOR ERROR: accept() failed!\n");
+    if (CURL_SOCKET_BAD == msgsock) {
+      printf("MAJOR ERROR: accept() failed with error: &d\n", errno);
       break;
     }
 
