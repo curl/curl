@@ -168,16 +168,15 @@ static int juggle(curl_socket_t *sockfdp,
   fd_set fds_read;
   fd_set fds_write;
   fd_set fds_err;
+  curl_socket_t sockfd;
   curl_socket_t maxfd;
   ssize_t rc;
-  ssize_t len;
-  ssize_t nread;
+  ssize_t nread_stdin;
+  ssize_t nread_socket;
   ssize_t bytes_written;
-  ssize_t bytes_read;
-  ssize_t port_strlen;
+  ssize_t buffer_len;
   unsigned char buffer[256]; /* FIX: bigger buffer */
   char data[256];
-  curl_socket_t sockfd;
 
   timeout.tv_sec = 120;
   timeout.tv_usec = 0;
@@ -189,7 +188,9 @@ static int juggle(curl_socket_t *sockfdp,
   FD_SET(fileno(stdin), &fds_read);
 
   switch(*mode) {
+
   case PASSIVE_LISTEN:
+
     /* server mode */
     sockfd = listenfd;
     /* there's always a socket to wait for */
@@ -198,8 +199,9 @@ static int juggle(curl_socket_t *sockfdp,
     break;
 
   case PASSIVE_CONNECT:
+
     sockfd = *sockfdp;
-    if(-1 == sockfd) {
+    if(CURL_SOCKET_BAD == sockfd) {
       /* eeek, we are supposedly connected and then this cannot be -1 ! */
       logmsg("socket is -1! on %s:%d", __FILE__, __LINE__);
       maxfd = 0; /* stdin */
@@ -212,10 +214,10 @@ static int juggle(curl_socket_t *sockfdp,
     break;
 
   case ACTIVE:
-    sockfd = *sockfdp;
 
+    sockfd = *sockfdp;
     /* sockfd turns CURL_SOCKET_BAD when our connection has been closed */
-    if(sockfd != CURL_SOCKET_BAD) {
+    if(CURL_SOCKET_BAD != sockfd) {
       FD_SET(sockfd, &fds_read);
       maxfd = sockfd;
     }
@@ -226,11 +228,13 @@ static int juggle(curl_socket_t *sockfdp,
     break;
 
   case ACTIVE_DISCONNECT:
+
     logmsg("disconnected, no socket to read on");
     maxfd = 0;
     sockfd = CURL_SOCKET_BAD;
     break;
-  }
+
+  } /* switch(*mode) */
 
   do {
     rc = select(maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
@@ -260,8 +264,8 @@ static int juggle(curl_socket_t *sockfdp,
 
        DATA - plain pass-thru data
     */
-    nread = read(fileno(stdin), buffer, 5);
-    if(5 == nread) {
+    nread_stdin = read(fileno(stdin), buffer, 5);
+    if(5 == nread_stdin) {
 
       logmsg("Received %c%c%c%c (on stdin)",
              buffer[0], buffer[1], buffer[2], buffer[3] );
@@ -272,13 +276,13 @@ static int juggle(curl_socket_t *sockfdp,
       }
 
       else if(!memcmp("PORT", buffer, 4)) {
-        /* question asking us what PORT number we are listening to.
-           Replies with PORT with "IPv[num]/[port]" */
-        sprintf((char *)buffer, "IPv%d/%d\n", use_ipv6?6:4, port);
-        port_strlen = (ssize_t)strlen((char *)buffer);
-        sprintf(data, "PORT\n%04x\n", port_strlen);
+        /* Question asking us what PORT number we are listening to.
+           Replies to PORT with "IPv[num]/[port]" */
+        sprintf((char *)buffer, "IPv%d/%d\n", use_ipv6?6:4, (int)port);
+        buffer_len = (ssize_t)strlen((char *)buffer);
+        sprintf(data, "PORT\n%04x\n", buffer_len);
         write(fileno(stdout), data, 10);
-        write(fileno(stdout), buffer, port_strlen);
+        write(fileno(stdout), buffer, buffer_len);
       }
       else if(!memcmp("QUIT", buffer, 4)) {
         /* just die */
@@ -290,14 +294,20 @@ static int juggle(curl_socket_t *sockfdp,
 
         if(5 != read(fileno(stdin), buffer, 5))
           return FALSE;
-        buffer[4] = '\0';
+        buffer[5] = '\0';
 
-        len = (ssize_t)strtol((char *)buffer, NULL, 16);
-        if(len != read(fileno(stdin), buffer, len))
+        buffer_len = (ssize_t)strtol((char *)buffer, NULL, 16);
+        if (buffer_len > (ssize_t)sizeof(buffer)) {
+          logmsg("Buffer size %d too small for data size %d", 
+                   (int)sizeof(buffer), buffer_len);
+          return FALSE;
+        }
+        nread_stdin = read(fileno(stdin), buffer, buffer_len);
+        if(nread_stdin != buffer_len)
           return FALSE;
 
-        logmsg("> %d bytes data, server => client", len);
-        lograw(buffer, len);
+        logmsg("> %d bytes data, server => client", buffer_len);
+        lograw(buffer, buffer_len);
 
         if(*mode == PASSIVE_LISTEN) {
           logmsg("*** We are disconnected!");
@@ -305,10 +315,10 @@ static int juggle(curl_socket_t *sockfdp,
         }
         else {
           /* send away on the socket */
-          bytes_written = swrite(sockfd, buffer, len);
-          if(bytes_written != len) {
+          bytes_written = swrite(sockfd, buffer, buffer_len);
+          if(bytes_written != buffer_len) {
             logmsg("Not all data was sent. Bytes to send: %d sent: %d", 
-                   len, bytes_written);
+                   buffer_len, bytes_written);
           }
         }
       }
@@ -329,11 +339,12 @@ static int juggle(curl_socket_t *sockfdp,
         return TRUE;
       }
     }
-    else if(nread == -1){
-      logmsg("read %d from stdin, exiting", nread);
+    else if(-1 == nread_stdin) {
+      logmsg("read %d from stdin, exiting", nread_stdin);
       return FALSE;
     }
   }
+
 
   if((sockfd != CURL_SOCKET_BAD) && (FD_ISSET(sockfd, &fds_read)) ) {
 
@@ -341,7 +352,7 @@ static int juggle(curl_socket_t *sockfdp,
       /* there's no stream set up yet, this is an indication that there's a
          client connecting. */
       sockfd = accept(sockfd, NULL, NULL);
-      if(-1 == sockfd)
+      if(CURL_SOCKET_BAD == sockfd)
         logmsg("accept() failed\n");
       else {
         logmsg("====> Client connect");
@@ -353,9 +364,9 @@ static int juggle(curl_socket_t *sockfdp,
     }
 
     /* read from socket, pass on data to stdout */
-    bytes_read = sread(sockfd, buffer, sizeof(buffer));
+    nread_socket = sread(sockfd, buffer, sizeof(buffer));
 
-    if(bytes_read <= 0) {
+    if(nread_socket <= 0) {
       logmsg("====> Client disconnect");
       write(fileno(stdout), "DISC\n", 5);
       sclose(sockfd);
@@ -367,12 +378,12 @@ static int juggle(curl_socket_t *sockfdp,
       return TRUE;
     }
 
-    sprintf(data, "DATA\n%04x\n", bytes_read);
+    sprintf(data, "DATA\n%04x\n", nread_socket);
     write(fileno(stdout), data, 10);
-    write(fileno(stdout), buffer, bytes_read);
+    write(fileno(stdout), buffer, nread_socket);
 
-    logmsg("< %d bytes data, client => server", bytes_read);
-    lograw(buffer, bytes_read);
+    logmsg("< %d bytes data, client => server", nread_socket);
+    lograw(buffer, nread_socket);
   }
 
   return TRUE;
@@ -390,8 +401,8 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
   int rc;
 
   if (setsockopt
-      (sock, SOL_SOCKET, SO_REUSEADDR, (const void *) &flag,
-       sizeof(int)) < 0) {
+      (sock, SOL_SOCKET, SO_REUSEADDR, (void *)&flag,
+       sizeof(flag)) < 0) {
     perror("setsockopt(SO_REUSEADDR)");
   }
 
