@@ -30,6 +30,9 @@ char *curlx_strdup(const char *str)
   int len;
   char *newstr;
 
+  if (!str)
+    return (char *)NULL;
+
   len = strlen(str);
   newstr = (char *) malloc((len+1)*sizeof(char));
   if (!newstr)
