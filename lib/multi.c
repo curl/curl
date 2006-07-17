@@ -381,6 +381,11 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
     /* If the 'state' is not INIT or COMPLETED, we might need to do something
        nice to put the easy_handle in a good known state when this returns. */
 
+    /* The timer must be shut down before easy->multi is set to NULL,
+       else the timenode will remain in the splay tree after
+       curl_easy_cleanup is called. */
+    Curl_expire(easy->easy_handle, 0);
+
     if(easy->easy_handle->dns.hostcachetype == HCACHE_MULTI) {
       /* clear out the usage of the shared DNS cache */
       easy->easy_handle->dns.hostcache = NULL;
@@ -962,6 +967,17 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
     int key = now.tv_sec; /* drop the usec part */
 
     multi->timetree = Curl_splaygetbest(key, multi->timetree, &t);
+
+    if (t) {
+      struct SessionHandle *d = t->payload;
+      struct timeval* tv = &d->state.expiretime;
+
+      /* clear the expire times within the handles that we remove from the
+         splay tree */
+      tv->tv_sec = 0;
+      tv->tv_usec = 0;
+    }
+
   } while(t);
 
   return returncode;
@@ -1207,8 +1223,15 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     key = now.tv_sec; /* drop the usec part */
 
     multi->timetree = Curl_splaygetbest(key, multi->timetree, &t);
-    if(t)
+    if(t) {
+      /* assign 'data' to be the easy handle we just removed from the splay
+         tree */
       data = t->payload;
+      /* clear the expire time within the handle we removed from the
+         splay tree */
+      data->state.expiretime.tv_sec = 0;
+      data->state.expiretime.tv_usec = 0;
+    }
 
   } while(t);
 

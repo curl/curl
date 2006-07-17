@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel (17 July 2006)
+- Jari Sundell did some excellent research and bug tracking, figured out that
+  we did wrong and patched it: When nodes were removed from the splay tree,
+  and we didn't properly remove it from the splay tree when an easy handle was
+  removed from a multi stack and thus we could wrongly leave a node in the
+  splay tree pointing to (bad) memory.
+
 Daniel (14 July 2006)
 - David McCreedy fixed a flaw where the CRLF counter wasn't properly cleared
   for FTP ASCII transfers.

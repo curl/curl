@@ -18,6 +18,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o splay-tree related problems for internal expire time handling
  o FTP ASCII CRLF counter reset
  o cookie parser now compares paths case sensitive
  o an easy handle with shared DNS cache added to a multi handle caused a crash
@@ -39,6 +40,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Dan Fandrich, Peter Silva, Arve Knudsen, Michael Wallner, Toshiyuki Maezawa,
- Ingmar Runge, Ates Goral, David McCreedy
+ Ingmar Runge, Ates Goral, David McCreedy, Jari Sundell
 
         Thanks! (and sorry if I forgot to mention someone)
