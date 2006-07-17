@@ -1407,8 +1407,8 @@ Curl_ossl_connect_step2(struct connectdata *conn,
     else {
       /* untreated error */
       unsigned long errdetail;
-      char error_buffer[120]; /* OpenSSL documents that this must be at least
-                                 120 bytes long. */
+      char error_buffer[256]; /* OpenSSL documents that this must be at least
+                                 256 bytes long. */
       CURLcode rc;
       const char *cert_problem = NULL;
 
