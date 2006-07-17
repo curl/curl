@@ -130,7 +130,7 @@ char *suburl(char *base, int i)
 int test(char *URL)
 {
   int res;
-  CURLSHcode scode;
+  CURLSHcode scode = CURLSHE_OK;
   char *url;
   struct Tdata tdata;
   CURL *curl;
@@ -148,15 +148,29 @@ int test(char *URL)
   /* prepare share */
   printf( "SHARE_INIT\n" );
   share = curl_share_init();
-  scode = curl_share_setopt( share, CURLSHOPT_LOCKFUNC, lock);
-  scode += curl_share_setopt( share, CURLSHOPT_UNLOCKFUNC, unlock);
-  scode += curl_share_setopt( share, CURLSHOPT_USERDATA, &user);
-  printf( "CURL_LOCK_DATA_COOKIE\n" );
-  scode += curl_share_setopt( share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
-  printf( "CURL_LOCK_DATA_DNS\n" );
-  scode += curl_share_setopt( share, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
 
-  if(scode) {
+  if ( CURLSHE_OK == scode ) {
+    printf( "CURLSHOPT_LOCKFUNC\n" );
+    scode = curl_share_setopt( share, CURLSHOPT_LOCKFUNC, lock);
+  }
+  if ( CURLSHE_OK == scode ) {
+    printf( "CURLSHOPT_UNLOCKFUNC\n" );
+    scode = curl_share_setopt( share, CURLSHOPT_UNLOCKFUNC, unlock);
+  }
+  if ( CURLSHE_OK == scode ) {
+    printf( "CURLSHOPT_USERDATA\n" );
+    scode = curl_share_setopt( share, CURLSHOPT_USERDATA, &user);
+  }
+  if ( CURLSHE_OK == scode ) {
+    printf( "CURL_LOCK_DATA_COOKIE\n" );
+    scode = curl_share_setopt( share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
+  }
+  if ( CURLSHE_OK == scode ) {
+    printf( "CURL_LOCK_DATA_DNS\n" );
+    scode = curl_share_setopt( share, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
+  }
+
+  if ( CURLSHE_OK != scode ) {
     curl_share_cleanup(share);
     return 2;
   }
