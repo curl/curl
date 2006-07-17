@@ -504,12 +504,13 @@ static bool trynextip(struct connectdata *conn,
   curl_socket_t sockfd;
   Curl_addrinfo *ai;
 
-  if(sockindex != FIRSTSOCKET)
-    return TRUE; /* no next */
-
   /* first close the failed socket */
   sclose(conn->sock[sockindex]);
   conn->sock[sockindex] = CURL_SOCKET_BAD;
+  *connected = FALSE;
+
+  if(sockindex != FIRSTSOCKET)
+    return TRUE; /* no next */
 
   /* try the next address */
   ai = conn->ip_addr->ai_next;
