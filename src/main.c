@@ -4022,10 +4022,10 @@ operate(struct Configurable *config, int argc, char *argv[])
               retry = RETRY_TIMEOUT;
             else if(CURLE_OK == res) {
               /* Check for HTTP transient errors */
-              char *url=NULL;
-              curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &url);
-              if(url &&
-                 curlx_strnequal(url, "http", 4)) {
+              char *this_url=NULL;
+              curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &this_url);
+              if(this_url &&
+                 curlx_strnequal(this_url, "http", 4)) {
                 /* This was HTTP(S) */
                 curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
 
