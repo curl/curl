@@ -228,25 +228,25 @@ void tftp_set_timeouts(tftp_state_data_t *state)
 
 static void setpacketevent(tftp_packet_t *packet, unsigned short num)
 {
-  packet->data[0] = (num >> 8);
-  packet->data[1] = (num & 0xff);
+  packet->data[0] = (unsigned char)(num >> 8);
+  packet->data[1] = (unsigned char)(num & 0xff);
 }
 
 
 static void setpacketblock(tftp_packet_t *packet, unsigned short num)
 {
-  packet->data[2] = (num >> 8);
-  packet->data[3] = (num & 0xff);
+  packet->data[2] = (unsigned char)(num >> 8);
+  packet->data[3] = (unsigned char)(num & 0xff);
 }
 
 static unsigned short getrpacketevent(tftp_packet_t *packet)
 {
-  return (packet->data[0] << 8) | packet->data[1];
+  return (unsigned short)((packet->data[0] << 8) | packet->data[1]);
 }
 
 static unsigned short getrpacketblock(tftp_packet_t *packet)
 {
-  return (packet->data[2] << 8) | packet->data[3];
+  return (unsigned short)((packet->data[2] << 8) | packet->data[3]);
 }
 
 static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
@@ -355,7 +355,7 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
       }
     }
     /* This is the expected block.  Reset counters and ACK it. */
-    state->block = rblock;
+    state->block = (unsigned short)rblock;
     state->retries = 0;
     setpacketevent(&state->spacket, TFTP_EVENT_ACK);
     setpacketblock(&state->spacket, state->block);

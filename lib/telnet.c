@@ -295,8 +295,8 @@ static void send_negotiation(struct connectdata *conn, int cmd, int option)
    struct SessionHandle *data = conn->data;
 
    buf[0] = CURL_IAC;
-   buf[1] = cmd;
-   buf[2] = option;
+   buf[1] = (unsigned char)cmd;
+   buf[2] = (unsigned char)option;
 
    bytes_written = swrite(conn->sock[FIRSTSOCKET], buf, 3);
    if(bytes_written < 0) {
