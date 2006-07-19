@@ -445,7 +445,12 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
   }
 
   /* start accepting connections */
-  listen(sock, 4);
+  rc = listen(sock, 4);
+  if(0 != rc) {
+    logmsg("listen() failed with error: %d", errno);
+    sclose(sock);
+    return CURL_SOCKET_BAD;
+  }
 
   return sock;
 }
@@ -464,10 +469,9 @@ static curl_socket_t mksock(bool use_ipv6)
     sock = socket(AF_INET6, SOCK_STREAM, 0);
 #endif
 
-  if (sock < 0) {
+  if (CURL_SOCKET_BAD == sock) {
     perror("opening stream socket");
     logmsg("Error opening socket");
-    return CURL_SOCKET_BAD;
   }
 
   return sock;
@@ -565,6 +569,10 @@ int main(int argc, char *argv[])
 
 
   sock = mksock(use_ipv6);
+  if (CURL_SOCKET_BAD == sock) {
+    logmsg("Error opening socket: %d", errno);
+    return 1;
+  }
 
   if(connectport) {
     /* Active mode, we should connect to the given port number */
@@ -593,6 +601,7 @@ int main(int argc, char *argv[])
     if(rc) {
       perror("connecting stream socket");
       logmsg("Error connecting to port %d", port);
+      sclose(sock);
       return 1;
     }
     logmsg("====> Client connect");
@@ -621,8 +630,11 @@ int main(int argc, char *argv[])
     fclose(pidfile);
     logmsg("Wrote pid %d to %s", pid, pidname);
   }
-  else
+  else {
     fprintf(stderr, "Couldn't write pid file\n");
+    sclose(sock);
+    return 1;
+  }
 
   while(juggle(&msgsock, sock, &mode));
 
