@@ -1128,17 +1128,15 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
     if(CURLE_OK == result) {
       char *host=(char *)"";
       const char *proxyconn="";
-      char *ptr;
 
-      ptr = checkheaders(data, "Host:");
-      if(!ptr) {
+      if(!checkheaders(data, "Host:")) {
         host = aprintf("Host: %s\r\n", host_port);
         if(!host)
           result = CURLE_OUT_OF_MEMORY;
       }
-      ptr = checkheaders(data, "Proxy-Connection:");
-      if(!ptr)
+      if(!checkheaders(data, "Proxy-Connection:")) {
         proxyconn = "Proxy-Connection: Keep-Alive\r\n";
+      }
 
       if(CURLE_OK == result) {
         /* Send the connect request to the proxy */
