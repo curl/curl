@@ -1771,7 +1771,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
        uses the encoded host name! */
     if(conn->host.dispname != conn->host.name) {
       char *url = data->change.url;
-      char *ptr = strstr(url, conn->host.dispname);
+      ptr = strstr(url, conn->host.dispname);
       if(ptr) {
         /* This is where the display name starts in the URL, now replace this
            part with the encoded name. TODO: This method of replacing the host
