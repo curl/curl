@@ -375,6 +375,21 @@ fi
 
 if test "$HAVE_GETHOSTBYNAME" != "1"
 then
+  dnl This is for eCos with a stubbed DNS implementation
+  AC_MSG_CHECKING([for gethostbyname for eCos])
+  AC_TRY_LINK([
+#include <stdio.h>
+#include <netdb.h>],
+               [gethostbyname("www.dummysite.com");],
+               [ dnl worked!
+               AC_MSG_RESULT([yes])
+               HAVE_GETHOSTBYNAME="1"],
+               AC_MSG_RESULT(no)
+             )
+fi
+
+if test "$HAVE_GETHOSTBYNAME" != "1"
+then
   dnl gethostbyname in the net lib - for BeOS
   AC_CHECK_LIB(net, gethostbyname,
                [HAVE_GETHOSTBYNAME="1"
