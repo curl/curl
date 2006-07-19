@@ -802,6 +802,8 @@ int main(int argc, char *argv[])
   }
   else {
     fprintf(stderr, "Couldn't write pid file\n");
+    sclose(sock);
+    exit(1);
   }
 
   logmsg("Running IPv%d version on port %d",
