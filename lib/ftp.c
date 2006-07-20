@@ -808,7 +808,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   int error;
   char *host=NULL;
   struct Curl_dns_entry *h=NULL;
-  unsigned short port;
+  unsigned short port = 0;
 
   /* Step 1, figure out what address that is requested */
 
