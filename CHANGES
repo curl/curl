@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (20 July 2006)
+- David McCreedy fixed a build error when building libcurl with HTTP disabled,
+  problem added with the curl_formget() patch.
+
 Daniel (17 July 2006)
 - Jari Sundell did some excellent research and bug tracking, figured out that
   we did wrong and patched it: When nodes were removed from the splay tree,

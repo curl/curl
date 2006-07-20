@@ -1574,10 +1574,10 @@ CURLFORMcode curl_formadd(struct curl_httppost **httppost,
   return CURL_FORMADD_DISABLED;
 }
 
-CURLFORMCode curl_formget(struct curl_httppost *post, void *arg,
-                          curl_formget_callback append)
+int curl_formget(struct curl_httppost *form, void *arg,
+                 curl_formget_callback append)
 {
-  (void) post;
+  (void) form;
   (void) arg;
   (void) append;
   return CURL_FORMADD_DISABLED;
