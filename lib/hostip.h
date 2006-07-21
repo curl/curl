@@ -135,7 +135,7 @@ struct Curl_dns_entry {
 #define CURLRESOLV_ERROR    -1
 #define CURLRESOLV_RESOLVED  0
 #define CURLRESOLV_PENDING   1
-int Curl_resolv(struct connectdata *conn, char *hostname,
+int Curl_resolv(struct connectdata *conn, const char *hostname,
                 int port, struct Curl_dns_entry **dnsentry);
 
 /*
@@ -151,7 +151,7 @@ bool Curl_ipvalid(struct SessionHandle *data);
  * of arguments
  */
 Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
-                                char *hostname,
+                                const char *hostname,
                                 int port,
                                 int *waitp);
 
@@ -192,7 +192,7 @@ int Curl_num_addresses (const Curl_addrinfo *addr);
 #ifdef CURLDEBUG
 void curl_dofreeaddrinfo(struct addrinfo *freethis,
                          int line, const char *source);
-int curl_dogetaddrinfo(char *hostname, char *service,
+int curl_dogetaddrinfo(const char *hostname, const char *service,
                        struct addrinfo *hints,
                        struct addrinfo **result,
                        int line, const char *source);
@@ -220,7 +220,7 @@ CURLcode Curl_addrinfo6_callback(void *arg,
 
 /* [ipv4 only] Creates a Curl_addrinfo struct from a numerical-only IP
    address */
-Curl_addrinfo *Curl_ip2addr(in_addr_t num, char *hostname, int port);
+Curl_addrinfo *Curl_ip2addr(in_addr_t num, const char *hostname, int port);
 
 /* [ipv4 only] Curl_he2ai() converts a struct hostent to a Curl_addrinfo chain
    and returns it */
@@ -247,7 +247,7 @@ const char *Curl_printable_address(const Curl_addrinfo *ip,
  */
 struct Curl_dns_entry *
 Curl_cache_addr(struct SessionHandle *data, Curl_addrinfo *addr,
-                char *hostname, int port);
+                const char *hostname, int port);
 
 /*
  * Curl_destroy_thread_data() cleans up async resolver data.

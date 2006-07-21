@@ -196,7 +196,7 @@ const char *Curl_printable_address(const Curl_addrinfo *ip,
  * the DNS caching.
  */
 static char *
-create_hostcache_id(char *server, int port)
+create_hostcache_id(const char *server, int port)
 {
   /* create and return the new allocated entry */
   return aprintf("%s:%d", server, port);
@@ -327,7 +327,7 @@ sigjmp_buf curl_jmpenv;
 struct Curl_dns_entry *
 Curl_cache_addr(struct SessionHandle *data,
                 Curl_addrinfo *addr,
-                char *hostname,
+                const char *hostname,
                 int port)
 {
   char *entry_id;
@@ -344,7 +344,7 @@ Curl_cache_addr(struct SessionHandle *data,
   entry_len = strlen(entry_id);
 
   /* Create a new cache entry */
-  dns = (struct Curl_dns_entry *) malloc(sizeof(struct Curl_dns_entry));
+  dns = (struct Curl_dns_entry *) calloc(sizeof(struct Curl_dns_entry), 1);
   if (!dns) {
     free(entry_id);
     return NULL;
@@ -394,7 +394,7 @@ Curl_cache_addr(struct SessionHandle *data,
  */
 
 int Curl_resolv(struct connectdata *conn,
-                char *hostname,
+                const char *hostname,
                 int port,
                 struct Curl_dns_entry **entry)
 {
