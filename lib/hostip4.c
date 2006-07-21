@@ -400,7 +400,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
  *     #define h_addr  h_addr_list[0]
  */
 
-Curl_addrinfo *Curl_he2ai(struct hostent *he, int port)
+Curl_addrinfo *Curl_he2ai(const struct hostent *he, int port)
 {
   Curl_addrinfo *ai;
   Curl_addrinfo *prevai = NULL;

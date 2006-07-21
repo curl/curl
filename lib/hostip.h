@@ -224,13 +224,13 @@ Curl_addrinfo *Curl_ip2addr(in_addr_t num, const char *hostname, int port);
 
 /* [ipv4 only] Curl_he2ai() converts a struct hostent to a Curl_addrinfo chain
    and returns it */
-Curl_addrinfo *Curl_he2ai(struct hostent *, int port);
+Curl_addrinfo *Curl_he2ai(const struct hostent *, int port);
 
 /* relocate a hostent struct */
 void Curl_hostent_relocate(struct hostent *h, long offset);
 
 /* Clone a Curl_addrinfo struct, works protocol independently */
-Curl_addrinfo *Curl_addrinfo_copy(void *orig, int port);
+Curl_addrinfo *Curl_addrinfo_copy(const void *orig, int port);
 
 /*
  * Curl_printable_address() returns a printable version of the 1st address
