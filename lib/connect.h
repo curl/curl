@@ -31,7 +31,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
                            bool *connected);
 
 CURLcode Curl_connecthost(struct connectdata *conn,
-                          struct Curl_dns_entry *host, /* connect to this */
+                          const struct Curl_dns_entry *host, /* connect to this */
                           curl_socket_t *sockconn, /* not set if error */
                           Curl_addrinfo **addr, /* the one we used */
                           bool *connected /* truly connected? */
