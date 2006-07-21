@@ -216,7 +216,7 @@ typedef unsigned char bool;
 
 /*
  * The definitions for the return type and arguments types
- * of functions recv() and send() belong and come from the 
+ * of functions recv() and send() belong and come from the
  * configuration file. Do not define them in any other place.
  *
  * HAVE_RECV is defined if you have a function named recv()
@@ -232,7 +232,7 @@ typedef unsigned char bool;
  * If yours has another name then don't define HAVE_SEND.
  *
  * If HAVE_SEND is defined then SEND_TYPE_ARG1, SEND_QUAL_ARG2,
- * SEND_TYPE_ARG2, SEND_TYPE_ARG3, SEND_TYPE_ARG4 and 
+ * SEND_TYPE_ARG2, SEND_TYPE_ARG3, SEND_TYPE_ARG4 and
  * SEND_TYPE_RETV must also be defined.
  */
 
@@ -251,7 +251,7 @@ typedef unsigned char bool;
 #else /* HAVE_RECV */
 #ifdef DJGPP
 #define sread(x,y,z) (ssize_t)read_s((int)(x), (char *)(y), (int)(z))
-#endif 
+#endif
 #endif /* HAVE_RECV */
 
 #ifdef HAVE_SEND
@@ -270,7 +270,7 @@ typedef unsigned char bool;
 #else /* HAVE_SEND */
 #ifdef DJGPP
 #define swrite(x,y,z) (ssize_t)write_s((int)(x), (char *)(y), (int)(z))
-#endif 
+#endif
 #endif /* HAVE_SEND */
 
 
@@ -357,10 +357,6 @@ typedef int curl_socket_t;
 #define curl_socket_typedef
 #endif /* curl_socket_typedef */
 
-
-#if defined(ENABLE_IPV6) && defined(USE_ARES)
-#error "ares does not yet support IPv6. Disable IPv6 or ares and rebuild"
-#endif
 
 #if defined(WIN32) && !defined(__CYGWIN__) && !defined(USE_ARES) && \
     !defined(__LCC__)  /* lcc-win32 doesn't have _beginthreadex() */

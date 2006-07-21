@@ -191,7 +191,7 @@ bool Curl_ipvalid(struct SessionHandle *data)
   return TRUE;
 }
 
-#ifndef USE_THREADING_GETADDRINFO
+#if !defined(USE_THREADING_GETADDRINFO) && !defined(USE_ARES)
 
 #ifdef DEBUG_ADDRINFO
 static void dump_addrinfo(struct connectdata *conn, const struct addrinfo *ai)
@@ -213,7 +213,8 @@ static void dump_addrinfo(struct connectdata *conn, const struct addrinfo *ai)
 #endif
 
 /*
- * Curl_getaddrinfo() when built ipv6-enabled (non-threading version).
+ * Curl_getaddrinfo() when built ipv6-enabled (non-threading and
+ * non-ares version).
  *
  * Returns name information about the given hostname and port number. If
  * successful, the 'addrinfo' is returned and the forth argument will point to
@@ -295,6 +296,6 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 
   return res;
 }
-#endif /* USE_THREADING_GETADDRINFO */
+#endif /* !USE_THREADING_GETADDRINFO && !USE_ARES */
 #endif /* ipv6 */
 

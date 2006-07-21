@@ -365,14 +365,15 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 }
 
 #endif /* CURLRES_SYNCH */
+#endif /* CURLRES_IPV4 */
 
 /*
  * Curl_he2ai() translates from a hostent struct to a Curl_addrinfo struct.
  * The Curl_addrinfo is meant to work like the addrinfo struct does for IPv6
  * stacks, but for all hosts and environments.
- *      
+ *
  *   Curl_addrinfo defined in "lib/hostip.h"
- *      
+ *
  *     struct Curl_addrinfo {
  *       int                   ai_flags;
  *       int                   ai_family;
@@ -383,9 +384,9 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
  *       struct sockaddr      *ai_addr;
  *       struct Curl_addrinfo *ai_next;
  *     };
- *      
+ *
  *   hostent defined in <netdb.h>
- *      
+ *
  *     struct hostent {
  *       char    *h_name;
  *       char    **h_aliases;
@@ -393,9 +394,9 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
  *       int     h_length;
  *       char    **h_addr_list;
  *     };
- *      
+ *
  *   for backward compatibility:
- *      
+ *
  *     #define h_addr  h_addr_list[0]
  */
 
@@ -451,4 +452,3 @@ Curl_addrinfo *Curl_he2ai(struct hostent *he, int port)
   return firstai;
 }
 
-#endif /* CURLRES_IPV4 */
