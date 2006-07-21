@@ -369,13 +369,10 @@ CURLcode Curl_open(struct SessionHandle **curl)
     /* create an array with connection data struct pointers */
     data->state.numconnects = 5; /* hard-coded right now */
     data->state.connects = (struct connectdata **)
-      malloc(sizeof(struct connectdata *) * data->state.numconnects);
+      calloc(sizeof(struct connectdata *) * data->state.numconnects, 1);
 
     if(!data->state.connects)
       res = CURLE_OUT_OF_MEMORY;
-    else
-      memset(data->state.connects, 0,
-             sizeof(struct connectdata *)*data->state.numconnects);
 
     /* most recent connection is not yet defined */
     data->state.lastconnect = -1;
