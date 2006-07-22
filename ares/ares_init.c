@@ -93,6 +93,16 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
   struct server_state *server;
   struct timeval tv;
 
+#ifdef CURLDEBUG
+  const char *env = getenv("CARES_MEMDEBUG");
+
+  if (env)
+    curl_memdebug(env);
+  env = getenv("CARES_MEMLIMIT");
+  if (env)
+    curl_memlimit(atoi(env));
+#endif
+
   channel = malloc(sizeof(struct ares_channeldata));
   if (!channel)
     return ARES_ENOMEM;
