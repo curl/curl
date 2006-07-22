@@ -1,6 +1,6 @@
 #include "setup.h"
 
-/* $Id: */
+/* $Id$ */
 
 /* only do the following on windows
  */
