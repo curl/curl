@@ -396,7 +396,7 @@ static const unsigned char *display_question(const unsigned char *aptr,
    */
   if (aptr + QFIXEDSZ > abuf + alen)
     {
-      free(name);
+      ares_free_string(name);
       return NULL;
     }
 
@@ -412,7 +412,7 @@ static const unsigned char *display_question(const unsigned char *aptr,
   if (dnsclass != C_IN)
     printf("\t%s", class_name(dnsclass));
   printf("\t%s\n", type_name(type));
-  free(name);
+  ares_free_string(name);
   return aptr;
 }
 
@@ -436,7 +436,7 @@ static const unsigned char *display_rr(const unsigned char *aptr,
    */
   if (aptr + RRFIXEDSZ > abuf + alen)
     {
-      free(name);
+      ares_free_string(name);
       return NULL;
     }
 
@@ -449,7 +449,7 @@ static const unsigned char *display_rr(const unsigned char *aptr,
   aptr += RRFIXEDSZ;
   if (aptr + dlen > abuf + alen)
     {
-      free(name);
+      ares_free_string(name);
       return NULL;
     }
 
@@ -458,7 +458,7 @@ static const unsigned char *display_rr(const unsigned char *aptr,
   if (dnsclass != C_IN)
     printf("\t%s", class_name(dnsclass));
   printf("\t%s", type_name(type));
-  free(name);
+  ares_free_string(name);
 
   /* Display the RR data.  Don't touch aptr. */
   switch (type)
@@ -476,7 +476,7 @@ static const unsigned char *display_rr(const unsigned char *aptr,
       if (status != ARES_SUCCESS)
         return NULL;
       printf("\t%s.", name);
-      free(name);
+      ares_free_string(name);
       break;
 
     case T_HINFO:
@@ -500,13 +500,13 @@ static const unsigned char *display_rr(const unsigned char *aptr,
       if (status != ARES_SUCCESS)
         return NULL;
       printf("\t%s.", name);
-      free(name);
+      ares_free_string(name);
       p += len;
       status = ares_expand_name(p, abuf, alen, &name, &len);
       if (status != ARES_SUCCESS)
         return NULL;
       printf("\t%s.", name);
-      free(name);
+      ares_free_string(name);
       break;
 
     case T_MX:
@@ -520,7 +520,7 @@ static const unsigned char *display_rr(const unsigned char *aptr,
       if (status != ARES_SUCCESS)
         return NULL;
       printf("\t%s.", name);
-      free(name);
+      ares_free_string(name);
       break;
 
     case T_SOA:
@@ -532,13 +532,13 @@ static const unsigned char *display_rr(const unsigned char *aptr,
       if (status != ARES_SUCCESS)
         return NULL;
       printf("\t%s.\n", name);
-      free(name);
+      ares_free_string(name);
       p += len;
       status = ares_expand_name(p, abuf, alen, &name, &len);
       if (status != ARES_SUCCESS)
         return NULL;
       printf("\t\t\t\t\t\t%s.\n", name);
-      free(name);
+      ares_free_string(name);
       p += len;
       if (p + 20 > aptr + dlen)
         return NULL;
@@ -592,7 +592,7 @@ static const unsigned char *display_rr(const unsigned char *aptr,
       if (status != ARES_SUCCESS)
         return NULL;
       printf("\t%s.", name);
-      free(name);
+      ares_free_string(name);
       break;
 
     default:
