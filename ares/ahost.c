@@ -1,5 +1,7 @@
 /* Copyright 1998 by the Massachusetts Institute of Technology.
  *
+ * $Id$
+ *
  * Permission to use, copy, modify, and distribute this
  * software and its documentation for any purpose and without
  * fee is hereby granted, provided that the above copyright
@@ -30,6 +32,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
+
 #include "ares.h"
 #include "ares_dns.h"
 #include "inet_ntop.h"
@@ -52,7 +58,7 @@ static void usage(void);
 int main(int argc, char **argv)
 {
   ares_channel channel;
-  int status, nfds;
+  int status, nfds, c, addr_family = AF_INET;
   fd_set read_fds, write_fds;
   struct timeval *tvp, tv;
   struct in_addr addr4;
@@ -64,7 +70,28 @@ int main(int argc, char **argv)
   WSAStartup(wVersionRequested, &wsaData);
 #endif
 
-  if (argc <= 1)
+  while ((c = getopt(argc,argv,"t:h")) != -1)
+    {
+      switch (c)
+        {
+        case 't':
+          if (!strcasecmp(optarg,"a"))
+            addr_family = AF_INET;
+          else if (!strcasecmp(optarg,"aaaa"))
+            addr_family = AF_INET6;
+          else
+            usage();
+          break;
+        case 'h':
+        default:
+          usage();
+          break;
+        }
+    }
+
+  argc -= optind;
+  argv += optind;
+  if (argc < 1)
     usage();
 
   status = ares_init(&channel);
@@ -75,7 +102,7 @@ int main(int argc, char **argv)
     }
 
   /* Initiate the queries, one per command-line argument. */
-  for (argv++; *argv; argv++)
+  for ( ; *argv; argv++)
     {
       if (ares_inet_pton(AF_INET, *argv, &addr4) == 1)
         {
@@ -89,8 +116,7 @@ int main(int argc, char **argv)
         }
       else
         {
-          /* assume user wants A-records */
-          ares_gethostbyname(channel, *argv, AF_INET, callback, *argv);
+          ares_gethostbyname(channel, *argv, addr_family, callback, *argv);
         }
     }
 
@@ -132,8 +158,8 @@ static void callback(void *arg, int status, struct hostent *host)
         {
            int i;
 
-	   printf (", Aliases: ");
-	   for (i = 0; host->h_aliases[i]; i++)
+           printf (", Aliases: ");
+           for (i = 0; host->h_aliases[i]; i++)
                printf("%s ", host->h_aliases[i]);
         }
 #endif
@@ -143,6 +169,6 @@ static void callback(void *arg, int status, struct hostent *host)
 
 static void usage(void)
 {
-  fprintf(stderr, "usage: ahost {host|addr} ...\n");
+  fprintf(stderr, "usage: ahost [-t {a|aaaa}] {host|addr} ...\n");
   exit(1);
 }
