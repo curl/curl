@@ -1,7 +1,7 @@
 #ifndef __ARES_SETUP_H
 #define __ARES_SETUP_H
 
-/* $Id: */
+/* $Id$ */
 
 /* Copyright (C) 2004 - 2005 by Daniel Stenberg et al
  *
