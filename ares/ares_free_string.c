@@ -1,3 +1,5 @@
+/* $Id: */
+
 /* Copyright 2000 by the Massachusetts Institute of Technology.
  *
  * Permission to use, copy, modify, and distribute this
@@ -16,6 +18,7 @@
 #include "setup.h"
 #include <stdlib.h>
 #include "ares.h"
+#include "ares_private.h"
 
 void ares_free_string(void *str)
 {

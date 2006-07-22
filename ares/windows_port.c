@@ -1,5 +1,7 @@
 #include "setup.h"
 
+/* $Id: */
+
 /* only do the following on windows
  */
 #if (defined(WIN32) || defined(WATT32)) && !defined(MSDOS)

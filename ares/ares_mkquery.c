@@ -1,3 +1,5 @@
+/* $Id: */
+
 /* Copyright 1998 by the Massachusetts Institute of Technology.
  *
  * Permission to use, copy, modify, and distribute this
@@ -30,6 +32,7 @@
 #include <string.h>
 #include "ares.h"
 #include "ares_dns.h"
+#include "ares_private.h"
 
 /* Header format, from RFC 1035:
  *                                  1  1  1  1  1  1

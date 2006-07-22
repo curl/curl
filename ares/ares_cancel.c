@@ -1,3 +1,5 @@
+/* $Id: */
+
 /* Copyright (C) 2004 by Daniel Stenberg et al
  *
  * Permission to use, copy, modify, and distribute this software and its

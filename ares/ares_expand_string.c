@@ -1,3 +1,5 @@
+/* $Id: */
+
 /* Copyright 1998 by the Massachusetts Institute of Technology.
  *
  * Permission to use, copy, modify, and distribute this
@@ -53,13 +55,13 @@ int ares_expand_string(const unsigned char *encoded,
   *s = malloc(len+1);
   if (*s == NULL)
     return ARES_ENOMEM;
-  q = *s; 
+  q = *s;
   strncpy((char *)q, (char *)encoded, len);
   q[len] = '\0';
 
   *s = q;
 
-  *enclen = len+1; 
+  *enclen = len+1;
 
   return ARES_SUCCESS;
 }

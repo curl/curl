@@ -1,6 +1,8 @@
 #ifndef __ARES_SETUP_H
 #define __ARES_SETUP_H
 
+/* $Id: */
+
 /* Copyright (C) 2004 - 2005 by Daniel Stenberg et al
  *
  * Permission to use, copy, modify, and distribute this software and its

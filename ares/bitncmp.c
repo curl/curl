@@ -1,3 +1,5 @@
+/* $Id: */
+
 /*
  * Copyright (c) 2004 by Internet Systems Consortium, Inc. ("ISC")
  * Copyright (c) 1996,1999 by Internet Software Consortium.

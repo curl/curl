@@ -1,3 +1,5 @@
+/* $Id: */
+
 /* Copyright 1998 by the Massachusetts Institute of Technology.
  *
  * Permission to use, copy, modify, and distribute this
