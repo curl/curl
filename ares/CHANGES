@@ -2,6 +2,11 @@
 
 Version 1.3.1 (June 24, 2006)
 
+* July 23, 2006
+
+- Gisle Vanem added getopt() to the ahost program. Currently accepts
+  only [-t {a|aaaa}] to specify address family in ares_gethostbyname().
+
 * June 19, 2006
 
 - (wahern) Removed "big endian" DNS section and RR data integer parser
