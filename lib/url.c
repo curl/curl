@@ -3808,7 +3808,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
        * there, thus overriding any defaults that might have been set above. */
       conn->port =  conn->remote_port; /* it is the same port */
 
-      /* Resolve target host right on */
+      /* Resolve target host right now */
       rc = Curl_resolv(conn, conn->host.name, (int)conn->port, &hostaddr);
       if(rc == CURLRESOLV_PENDING)
         *async = TRUE;
