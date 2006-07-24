@@ -88,6 +88,7 @@
  * Only for ipv6-enabled builds
  **********************************************************************/
 #ifdef CURLRES_IPV6
+#ifndef CURLRES_ARES
 /*
  * This is a wrapper function for freeing name information in a protocol
  * independent way. This takes care of using the appropriate underlaying
@@ -109,7 +110,8 @@ Curl_addrinfo *Curl_addrinfo_copy(const void *orig, int port)
   (void) port;
   return (Curl_addrinfo*)orig;
 }
-#endif
+#endif  /* CURLRES_ASYNCH */
+#endif  /* CURLRES_ARES */
 
 #ifdef CURLDEBUG
 /* These are strictly for memory tracing and are using the same style as the
@@ -136,6 +138,10 @@ int curl_dogetaddrinfo(const char *hostname, const char *service,
   return res;
 }
 
+/*
+ * For CURLRES_ARS, this should be written using ares_gethostbyaddr()
+ * (ignoring the fact c-ares doesn't return 'serv').
+ */
 #ifdef HAVE_GETNAMEINFO
 int curl_dogetnameinfo(GETNAMEINFO_QUAL_ARG1 GETNAMEINFO_TYPE_ARG1 sa,
                        GETNAMEINFO_TYPE_ARG2 salen,
@@ -171,8 +177,7 @@ void curl_dofreeaddrinfo(struct addrinfo *freethis,
     fprintf(logfile, "ADDR %s:%d freeaddrinfo(%p)\n",
             source, line, (void *)freethis);
 }
-
-#endif
+#endif  /* CURLDEBUG */
 
 /*
  * Curl_ipvalid() checks what CURL_IPRESOLVE_* requirements that might've
@@ -191,7 +196,7 @@ bool Curl_ipvalid(struct SessionHandle *data)
   return TRUE;
 }
 
-#if !defined(USE_THREADING_GETADDRINFO) && !defined(USE_ARES)
+#if !defined(USE_THREADING_GETADDRINFO) && !defined(CURLRES_ARES)
 
 #ifdef DEBUG_ADDRINFO
 static void dump_addrinfo(struct connectdata *conn, const struct addrinfo *ai)
@@ -296,6 +301,6 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 
   return res;
 }
-#endif /* !USE_THREADING_GETADDRINFO && !USE_ARES */
+#endif /* !USE_THREADING_GETADDRINFO && !CURLRES_ARES */
 #endif /* ipv6 */
 
