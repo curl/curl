@@ -51,14 +51,14 @@
 #define CURLRES_IPV4
 #endif
 
-#ifdef CURLRES_IPV4
+#if defined(CURLRES_IPV4) || defined(CURLRES_ARES)
 #if !defined(HAVE_GETHOSTBYNAME_R) || defined(CURLRES_ASYNCH)
 /* If built for ipv4 and missing gethostbyname_r(), or if using async name
    resolve, we need the Curl_addrinfo_copy() function (which itself needs the
-   Curl_hostent_relocate() function)) */
+   Curl_he2ai() function)) */
 #define CURLRES_ADDRINFO_COPY
 #endif
-#endif /* IPv4-only */
+#endif /* IPv4/ares-only */
 
 #ifndef CURLRES_ASYNCH
 #define CURLRES_SYNCH
@@ -218,16 +218,13 @@ CURLcode Curl_addrinfo6_callback(void *arg,
                                  struct addrinfo *ai);
 
 
-/* [ipv4 only] Creates a Curl_addrinfo struct from a numerical-only IP
+/* [ipv4/ares only] Creates a Curl_addrinfo struct from a numerical-only IP
    address */
 Curl_addrinfo *Curl_ip2addr(in_addr_t num, const char *hostname, int port);
 
-/* [ipv4 only] Curl_he2ai() converts a struct hostent to a Curl_addrinfo chain
+/* [ipv4/ares only] Curl_he2ai() converts a struct hostent to a Curl_addrinfo chain
    and returns it */
 Curl_addrinfo *Curl_he2ai(const struct hostent *, int port);
-
-/* relocate a hostent struct */
-void Curl_hostent_relocate(struct hostent *h, long offset);
 
 /* Clone a Curl_addrinfo struct, works protocol independently */
 Curl_addrinfo *Curl_addrinfo_copy(const void *orig, int port);
