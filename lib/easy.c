@@ -98,6 +98,7 @@
 #ifndef CURL_ICONV_CODESET_FOR_UTF8
 #define CURL_ICONV_CODESET_FOR_UTF8   "UTF-8"
 #endif
+#define ICONV_ERROR  (size_t)-1
 #endif /* CURL_DOES_CONVERSIONS && HAVE_ICONV */
 
 /* The last #include file should be: */
@@ -722,9 +723,9 @@ CURLcode Curl_convert_to_network(struct SessionHandle *data,
     /* call iconv */
     input_ptr = output_ptr = buffer;
     in_bytes = out_bytes = length;
-    rc = iconv(data->outbound_cd, &input_ptr, &in_bytes,
+    rc = iconv(data->outbound_cd, (const char**)&input_ptr, &in_bytes,
                &output_ptr, &out_bytes);
-    if ((rc == -1) || (in_bytes != 0)) {
+    if ((rc == ICONV_ERROR) || (in_bytes != 0)) {
       failf(data,
         "The Curl_convert_to_network iconv call failed with errno %i: %s",
              errno, strerror(errno));
@@ -779,9 +780,9 @@ CURLcode Curl_convert_from_network(struct SessionHandle *data,
     /* call iconv */
     input_ptr = output_ptr = buffer;
     in_bytes = out_bytes = length;
-    rc = iconv(data->inbound_cd, &input_ptr, &in_bytes,
+    rc = iconv(data->inbound_cd, (const char **)&input_ptr, &in_bytes,
                &output_ptr, &out_bytes);
-    if ((rc == -1) || (in_bytes != 0)) {
+    if ((rc == ICONV_ERROR) || (in_bytes != 0)) {
       failf(data,
         "The Curl_convert_from_network iconv call failed with errno %i: %s",
              errno, strerror(errno));
@@ -836,8 +837,9 @@ CURLcode Curl_convert_from_utf8(struct SessionHandle *data,
     /* call iconv */
     input_ptr = output_ptr = buffer;
     in_bytes = out_bytes = length;
-    rc = iconv(data->utf8_cd, &input_ptr, &in_bytes, &output_ptr, &out_bytes);
-    if ((rc == -1) || (in_bytes != 0)) {
+    rc = iconv(data->utf8_cd, (const char**)&input_ptr, &in_bytes,
+               &output_ptr, &out_bytes);
+    if ((rc == ICONV_ERROR) || (in_bytes != 0)) {
       failf(data,
         "The Curl_convert_from_utf8 iconv call failed with errno %i: %s",
              errno, strerror(errno));
