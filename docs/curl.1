@@ -396,6 +396,11 @@ in 7.11.0)
 If this option is used several times, the following occurrences make no
 difference.
 
+.IP "--ftp-alternative-to-user <command>"
+(FTP) If authenticating with the USER and PASS commands fails, send this
+command.  When connecting to Tumbleweed's Secure Transport server over FTPS
+using a client certificate, using "SITE AUTH" will tell the server to retrieve
+the username from the certificate. (Added in 7.15.5)
 .IP "--ftp-skip-pasv-ip"
 (FTP) Tell curl to not use the IP address the server suggests in its response
 to curl's PASV command when curl connects the data connection. Instead curl

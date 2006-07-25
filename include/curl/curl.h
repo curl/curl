@@ -61,14 +61,14 @@ extern "C" {
 
 #ifdef CURL_HIDDEN_SYMBOLS
 /*
- * This definition is used to make external definitions visibile in the 
+ * This definition is used to make external definitions visibile in the
  * shared library when symbols are hidden by default.  It makes no
  * difference when compiling applications whether this is set or not,
  * only when compiling the library.
  */
 #define CURL_EXTERN CURL_EXTERN_SYMBOL
 #else
-#define CURL_EXTERN 
+#define CURL_EXTERN
 #endif
 #endif
 
@@ -978,6 +978,9 @@ typedef enum {
   /* limit-rate: maximum number of bytes per second to send or receive */
   CINIT(MAX_SEND_SPEED_LARGE, OFF_T, 145),
   CINIT(MAX_RECV_SPEED_LARGE, OFF_T, 146),
+
+  /* Pointer to command string to send if USER/PASS fails. */
+  CINIT(FTP_ALTERNATIVE_TO_USER, OBJECTPOINT, 147),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

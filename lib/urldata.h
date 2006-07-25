@@ -937,6 +937,9 @@ struct UrlState {
   /* a place to store the most recenlty set FTP entrypath */
   char *most_recent_ftp_entrypath;
 
+  /* set after initial USER failure, to prevent an authentication loop */
+  bool ftp_trying_alternative;
+
 #ifndef WIN32
 /* do FTP line-end conversions on most platforms */
 #define CURL_DO_LINEEND_CONV
@@ -1054,6 +1057,7 @@ struct UserDefined {
   bool cookiesession;   /* new cookie session? */
   bool crlf;            /* convert crlf on ftp upload(?) */
   char *ftp_account;    /* ftp account data */
+  char *ftp_alternative_to_user;   /* command to send if USER/PASS fails */
   struct curl_slist *quote;     /* after connection is established */
   struct curl_slist *postquote; /* after the transfer */
   struct curl_slist *prequote; /* before the transfer, after type */

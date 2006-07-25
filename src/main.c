@@ -353,6 +353,7 @@ struct Configurable {
   struct curl_slist *tp_postquote;
   struct curl_slist *tp_prequote;
   char *ftp_account; /* for ACCT */
+  char *ftp_alternative_to_user; /* send command if USER/PASS fails */
   int ftp_filemethod;
 
   bool ignorecl; /* --ignore-content-length */
@@ -1340,6 +1341,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$r", "ftp-method", TRUE},
     {"$s", "local-port", TRUE},
     {"$t", "socks4",     TRUE},
+    {"$u", "ftp-alternative-to-user", TRUE},
 
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
@@ -1775,6 +1777,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
             return PARAM_BAD_USE;
           }
         }
+        break;
+      case 'u': /* --ftp-alternative-to-user */
+        GetStr(&config->ftp_alternative_to_user, nextarg);
         break;
       }
       break;
@@ -3997,6 +4002,9 @@ operate(struct Configurable *config, int argc, char *argv[])
           curl_easy_setopt(curl, CURLOPT_LOCALPORT, config->localport);
           curl_easy_setopt(curl, CURLOPT_LOCALPORTRANGE, config->localportrange);
         }
+
+        /* curl x.xx.x */
+        curl_easy_setopt(curl, CURLOPT_FTP_ALTERNATIVE_TO_USER, config->ftp_alternative_to_user);
 
         retry_numretries = config->req_retry;
 

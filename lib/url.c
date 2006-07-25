@@ -1546,6 +1546,10 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.connect_only = va_arg(param, long)?TRUE:FALSE;
     break;
 
+  case CURLOPT_FTP_ALTERNATIVE_TO_USER:
+    data->set.ftp_alternative_to_user = va_arg(param, char *);
+    break;
+
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_FAILED_INIT; /* correct this */

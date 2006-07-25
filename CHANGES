@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel (26 July 2006)
+- Dan Nelson added the CURLOPT_FTP_ALTERNATIVE_TO_USER libcurl option and curl
+  tool option named --ftp-alternative-to-user. It provides a mean to send a
+  particular command if the normal USER/PASS approach fails.
+
 - Michael Jerris added magic that builds lib/curllib.vcproj automatically for
   newer MSVC.
 

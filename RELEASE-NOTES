@@ -2,8 +2,8 @@ Curl and libcurl 7.15.5
 
  Public curl release number:               95
  Releases counted from the very beginning: 122
- Available command line options:           112
- Available curl_easy_setopt() options:     132
+ Available command line options:           113
+ Available curl_easy_setopt() options:     133
  Number of public functions in libcurl:    49
  Amount of public web site mirrors:        33
  Number of known libcurl bindings:         32
@@ -11,6 +11,8 @@ Curl and libcurl 7.15.5
 
 This release includes the following changes:
 
+ o added CURLOPT_FTP_ALTERNATIVE_TO_USER and --ftp-alternative-to-user
+ o now includes a vcproj file for building libcurl
  o added curl_formget()
  o added CURLOPT_MAX_SEND_SPEED_LARGE and CURLOPT_MAX_RECV_SPEED_LARGE
  o configure --enable-hidden-symbols
@@ -41,6 +43,6 @@ advice from friends like these:
 
  Dan Fandrich, Peter Silva, Arve Knudsen, Michael Wallner, Toshiyuki Maezawa,
  Ingmar Runge, Ates Goral, David McCreedy, Jari Sundell, Georg Horn,
- Gisle Vanem, Yang Tse
+ Gisle Vanem, Yang Tse, Michael Jerris, Dan Nelson
 
         Thanks! (and sorry if I forgot to mention someone)

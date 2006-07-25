@@ -699,6 +699,7 @@ static CURLcode ftp_state_user(struct connectdata *conn)
   NBFTPSENDF(conn, "USER %s", ftp->user?ftp->user:"");
 
   state(conn, FTP_USER);
+  conn->data->state.ftp_trying_alternative = FALSE;
 
   return CURLE_OK;
 }
@@ -2302,8 +2303,19 @@ static CURLcode ftp_state_user_resp(struct connectdata *conn,
 
     530 User ... access denied
     (the server denies to log the specified user) */
-    failf(data, "Access denied: %03d", ftpcode);
-    result = CURLE_LOGIN_DENIED;
+
+    if (conn->data->set.ftp_alternative_to_user &&
+        !conn->data->state.ftp_trying_alternative) {
+      /* Ok, USER failed.  Let's try the supplied command. */
+      NBFTPSENDF(conn, "%s", conn->data->set.ftp_alternative_to_user);
+      conn->data->state.ftp_trying_alternative = TRUE;
+      state(conn, FTP_USER);
+      result = CURLE_OK;
+    }
+    else {
+      failf(data, "Access denied: %03d", ftpcode);
+      result = CURLE_LOGIN_DENIED;
+    }
   }
   return result;
 }
