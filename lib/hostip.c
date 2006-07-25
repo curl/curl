@@ -96,8 +96,7 @@
  * defined.
  *
  * CURLRES_ARES - is defined if libcurl is built to use c-ares for
- * asynchronous name resolves. It cannot have ENABLE_IPV6 defined at the same
- * time, as c-ares has no ipv6 support. This can be Windows or *nix.
+ * asynchronous name resolves. This can be Windows or *nix.
  *
  * CURLRES_THREADED - is defined if libcurl is built to run under (native)
  * Windows, and then the name resolve will be done in a new thread, and the
