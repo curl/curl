@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (26 July 2006)
+- Michael Jerris added magic that builds lib/curllib.vcproj automatically for
+  newer MSVC.
+
 Daniel (25 July 2006)
 - Georg Horn made the transfer timeout error message include more details.
 

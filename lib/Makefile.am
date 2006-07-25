@@ -23,6 +23,7 @@
 AUTOMAKE_OPTIONS = foreign nostdinc
 
 DSP = curllib.dsp
+VCPROJ = curllib.vcproj
 
 DOCS = README.encoding README.memoryleak README.ares README.curlx	\
  README.hostip README.multi_socket README.httpauth README.pipelining
@@ -33,9 +34,9 @@ EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 Makefile.riscos	\
  libcurl.framework.make libcurl.plist libcurl.rc config-amigaos.h	\
  amigaos.c amigaos.h makefile.amiga Makefile.netware nwlib.c		\
  libcurl.imp msvcproj.head msvcproj.foot config-win32ce.h		\
- Makefile.Watcom config-tpf.h $(DOCS)
+ Makefile.Watcom config-tpf.h $(DOCS) $(VCPROJ)
 
-CLEANFILES = $(DSP)
+CLEANFILES = $(DSP) $(VCPROJ)
 
 lib_LTLIBRARIES = libcurl.la
 
@@ -121,6 +122,7 @@ dist-hook:
 	echo "/* ca bundle path set in here*/" > $(distdir)/ca-bundle.h
 
 DSPOUT = | awk '{printf("%s\r\n", $$0)}' >> $(DSP)
+VCPROJOUT = | awk '{printf("%s\r\n", $$0)}' >> $(VCPROJ)
 
 $(DSP): msvcproj.head msvcproj.foot Makefile.am
 	echo "creating $(DSP)"
@@ -142,3 +144,15 @@ $(DSP): msvcproj.head msvcproj.foot Makefile.am
 	done; \
 	echo "# End Group" $(DSPOUT); \
 	cat $(srcdir)/msvcproj.foot $(DSPOUT) )
+
+$(VCPROJ): vc8proj.head vc8proj.foot Makefile.am
+	echo "creating $(VCPROJ)"
+	@(cp $(srcdir)/vc8proj.head $(VCPROJ); \
+	for file in $(WIN32SOURCES); do \
+	echo "<File RelativePath=\""$$file"\"></File>" $(VCPROJOUT); \
+	done; \
+	echo "</Filter><Filter	Name=\"Header Files\">" $(VCPROJOUT); \
+	for file in $(WIN32HEADERS); do \
+	echo "<File RelativePath=\""$$file"\"></File>" $(VCPROJOUT); \
+	done; \
+	cat $(srcdir)/vc8proj.foot $(VCPROJOUT) )
