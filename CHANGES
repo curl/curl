@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel (25 July 2006)
+- Georg Horn made the transfer timeout error message include more details.
+
 Daniel (20 July 2006)
 - David McCreedy fixed a build error when building libcurl with HTTP disabled,
   problem added with the curl_formget() patch.
