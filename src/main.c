@@ -2284,7 +2284,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           {"SSL",  CURL_VERSION_SSL},
           {"SSPI",  CURL_VERSION_SSPI},
           {"krb4", CURL_VERSION_KERBEROS4},
-          {"libz", CURL_VERSION_LIBZ}
+          {"libz", CURL_VERSION_LIBZ},
+          {"CharConv", CURL_VERSION_CONV}
         };
         printf("Features: ");
         for(i=0; i<sizeof(feats)/sizeof(feats[0]); i++) {
