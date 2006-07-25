@@ -41,7 +41,7 @@
 #define HAVE_MALLOC_H 1
 #endif
 
-/* Define if you need the malloc.h header file. */
+/* Define if you need the malloc.h header file even with stdlib.h  */
 #ifndef __SALFORDC__
 #define NEED_MALLOC_H 1
 #endif

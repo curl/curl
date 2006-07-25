@@ -36,7 +36,7 @@
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
-#if defined(HAVE_MALLOC_H) && defined(NEED_MALLOC_H)
+#ifdef NEED_MALLOC_H
 #include <malloc.h>
 #endif
 #include <errno.h>

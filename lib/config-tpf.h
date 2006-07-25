@@ -290,7 +290,7 @@
 /* Define to 1 if you have the <malloc.h> header file. */
 /* #undef HAVE_MALLOC_H */
 
-/* Define to 1 if you need the malloc.h header file. */
+/* Define to 1 if you need the malloc.h header file even with stdlib.h  */
 /* #undef NEED_MALLOC_H */
 
 /* Define to 1 if you have the <memory.h> header file. */

@@ -215,7 +215,7 @@ AC_DEFUN([CURL_CHECK_HEADER_MALLOC], [
     case "$curl_cv_need_header_malloc_h" in
       yes)
         AC_DEFINE_UNQUOTED(NEED_MALLOC_H, 1,
-          [Define to 1 if you need the malloc.h header file.])
+          [Define to 1 if you need the malloc.h header file even with stdlib.h])
         ;;
     esac
   fi

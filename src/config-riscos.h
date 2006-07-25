@@ -176,7 +176,7 @@
 /* Define if you have the <malloc.h> header file. */
 #define HAVE_MALLOC_H
 
-/* Define to 1 if you need the malloc.h header file. */
+/* Define to 1 if you need the malloc.h header file even with stdlib.h */
 /* #define NEED_MALLOC_H 1 */
 
 /* Define if you have the <memory.h> header file. */
