@@ -623,3 +623,5 @@ Curl_addrinfo *Curl_ip2addr(in_addr_t num, const char *hostname, int port)
   return ai;
 }
 #endif
+
+
