@@ -412,7 +412,15 @@ This option has no effect if PORT, EPRT or EPSV is used instead of PASV.
 If this option is used twice, the second will again use the server's suggested
 address.
 .IP "--ftp-ssl"
-(FTP) Make the FTP connection switch to use SSL/TLS. (Added in 7.11.0)
+(FTP) Try to use SSL/TLS for the FTP connection.
+Reverts to a non-secure connection if the server doesn't support SSL/TLS.
+(Added in 7.11.0)
+
+If this option is used twice, the second will again disable this.
+.IP "--ftp-ssl-reqd"
+(FTP) Require SSL/TLS for the FTP connection.
+Terminates the connection if the server doesn't support SSL/TLS.
+(Added in 7.15.5)
 
 If this option is used twice, the second will again disable this.
 .IP "-F/--form <name=content>"

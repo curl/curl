@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel (27 July 2006)
+- David McCreedy added --ftp-ssl-reqd which makes curl *require* SSL for both
+  control and data connection, as the existing --ftp-ssl option only requests
+  it.
+
 - [Hiper-related work] Added a function called curl_multi_assign() that will
   set a private pointer added to the internal libcurl hash table for the
   particular socket passed in to this function:

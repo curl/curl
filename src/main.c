@@ -338,6 +338,7 @@ struct Configurable {
   struct timeval lastrecvtime;
   size_t lastrecvsize;
   bool ftp_ssl;
+  bool ftp_ssl_reqd;
 
   char *socksproxy; /* set to server string */
   int socksver;     /* set to CURLPROXY_SOCKS* define */
@@ -516,7 +517,8 @@ static void help(void)
     "    --ftp-method [multicwd/nocwd/singlecwd] Control CWD usage (F)",
     "    --ftp-pasv      Use PASV/EPSV instead of PORT (F)",
     "    --ftp-skip-pasv-ip Skip the IP address for PASV (F)\n"
-    "    --ftp-ssl       Enable SSL/TLS for the ftp transfer (F)",
+    "    --ftp-ssl       Try SSL/TLS for the ftp transfer (F)",
+    "    --ftp-ssl-reqd  Require SSL/TLS for the ftp transfer (F)",
     " -F/--form <name=content> Specify HTTP multipart POST data (H)",
     "    --form-string <name=string> Specify HTTP multipart POST data (H)",
     " -g/--globoff       Disable URL sequences and ranges using {} and []",
@@ -1342,6 +1344,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$s", "local-port", TRUE},
     {"$t", "socks4",     TRUE},
     {"$u", "ftp-alternative-to-user", TRUE},
+    {"$v", "ftp-ssl-reqd", FALSE},
 
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
@@ -1780,6 +1783,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'u': /* --ftp-alternative-to-user */
         GetStr(&config->ftp_alternative_to_user, nextarg);
+        break;
+      case 'v': /* --ftp-ssl-reqd */
+        config->ftp_ssl_reqd ^= TRUE;
         break;
       }
       break;
@@ -3974,6 +3980,10 @@ operate(struct Configurable *config, int argc, char *argv[])
         /* new in curl 7.11.0 */
         if(config->ftp_ssl)
           curl_easy_setopt(curl, CURLOPT_FTP_SSL, CURLFTPSSL_TRY);
+
+        /* new in curl 7.15.5 */
+        if(config->ftp_ssl_reqd)
+          curl_easy_setopt(curl, CURLOPT_FTP_SSL, CURLFTPSSL_ALL);
 
         /* new in curl 7.11.1, modified in 7.15.2 */
         if(config->socksproxy) {
