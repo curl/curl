@@ -1,3 +1,6 @@
+#ifndef __ARES_PRIVATE_H
+#define __ARES_PRIVATE_H
+
 /* $Id$ */
 
 /* Copyright 1998 by the Massachusetts Institute of Technology.
@@ -199,3 +202,6 @@ int ares__read_line(FILE *fp, char **buf, int *bufsize);
    this anyway for convenience. */
 #include "../lib/memdebug.h"
 #endif
+
+#endif /* __ARES_PRIVATE_H */
+
