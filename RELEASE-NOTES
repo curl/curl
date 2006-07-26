@@ -4,13 +4,16 @@ Curl and libcurl 7.15.5
  Releases counted from the very beginning: 122
  Available command line options:           113
  Available curl_easy_setopt() options:     133
- Number of public functions in libcurl:    49
+ Number of public functions in libcurl:    54
  Amount of public web site mirrors:        33
  Number of known libcurl bindings:         32
  Number of contributors:                   506
 
 This release includes the following changes:
 
+ o modified the prototype for the socket callback set with
+   CURLMOPT_SOCKETFUNCTION
+ o added curl_multi_assign()
  o added CURLOPT_FTP_ALTERNATIVE_TO_USER and --ftp-alternative-to-user
  o now includes a vcproj file for building libcurl
  o added curl_formget()
@@ -20,6 +23,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o added CURL_EXTERN to a few recent multi functions that lacked them
  o splay-tree related problems for internal expire time handling
  o FTP ASCII CRLF counter reset
  o cookie parser now compares paths case sensitive
