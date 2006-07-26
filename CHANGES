@@ -6,6 +6,22 @@
 
                                   Changelog
 
+Daniel (27 July 2006)
+- [Hiper-related work] Added a function called curl_multi_assign() that will
+  set a private pointer added to the internal libcurl hash table for the
+  particular socket passed in to this function:
+
+  CURLMcode curl_multi_assign(CURLM *multi_handle,
+                              curl_socket_t sockfd,
+                              void *sockp);
+
+  'sockp' being a custom pointer set by the application to be associated with
+  this socket. The socket has to be already existing and in-use by libcurl,
+  like having already called the callback telling about its existance.
+
+  The set hashp pointer will then be passed on to the callback in upcoming
+  calls when this same socket is used (in the brand new 'socketp' argument).
+
 Daniel (26 July 2006)
 - Dan Nelson added the CURLOPT_FTP_ALTERNATIVE_TO_USER libcurl option and curl
   tool option named --ftp-alternative-to-user. It provides a mean to send a

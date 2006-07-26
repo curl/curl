@@ -25,8 +25,9 @@ the socket (file descriptor) status by doing none, one or multiple calls to
 the curl_socket_callback given in the \fBparam\fP argument. They update the
 status with changes since the previous time a \fIcurl_multi_socket(3)\fP
 function was called. If the given callback pointer is NULL, no callback will
-be called. Set the callback's fourth argument with \fICURLMOPT_SOCKETDATA\fP.
-See \fIcurl_multi_socket(3)\fP for more callback details.
+be called. Set the callback's \fBuserp\fP argument with
+\fICURLMOPT_SOCKETDATA\fP.  See \fIcurl_multi_socket(3)\fP for more callback
+details.
 .IP CURLMOPT_SOCKETDATA
 Pass a pointer to whatever you want passed to the curl_socket_callback's forth
 argument, the userp pointer. This is not used by libcurl but only passed-thru

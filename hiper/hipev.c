@@ -88,36 +88,16 @@ struct fdinfo {
 
 static struct fdinfo *allsocks;
 
-static struct fdinfo *findsock(curl_socket_t s)
+static void remsock(struct fdinfo *f)
 {
-  /* return the struct for the given socket */
-  struct fdinfo *fdp = allsocks;
-
-  while(fdp) {
-    if(fdp->sockfd == s)
-      break;
-    fdp = fdp->next;
-  }
-  return fdp; /* a struct pointer or NULL */
-}
-
-static void remsock(curl_socket_t s)
-{
-  struct fdinfo *fdp = allsocks;
-
-  while(fdp) {
-    if(fdp->sockfd == s)
-      break;
-    fdp = fdp->next;
-  }
-  if(!fdp)
+  if(!f)
     /* did not find socket to remove! */
     return;
 
-  if(fdp->prev)
-    fdp->prev->next = fdp->next;
-  if(fdp->next)
-    fdp->next->prev = fdp->prev;
+  if(f->prev)
+    f->prev->next = f->next;
+  if(f->next)
+    f->next->prev = f->prev;
   else
     /* this was the last entry */
     allsocks = NULL;
@@ -131,7 +111,7 @@ static void setsock(struct fdinfo *fdp, curl_socket_t s, CURL *easy,
   fdp->easy = easy;
 }
 
-static void addsock(curl_socket_t s, CURL *easy, int action)
+static void addsock(curl_socket_t s, CURL *easy, int action, CURLM *multi)
 {
   struct fdinfo *fdp = calloc(sizeof(struct fdinfo), 1);
 
@@ -146,6 +126,9 @@ static void addsock(curl_socket_t s, CURL *easy, int action)
   }
   else
     allsocks = fdp;
+
+  /* Set this association in libcurl */
+  curl_multi_assign(multi, s, fdp);
 }
 
 static void fdinfo2fdset(fd2_set *fdread, fd2_set *fdwrite, int *maxfd)
@@ -201,18 +184,20 @@ static void fdinfo2fdset(fd2_set *fdread, fd2_set *fdwrite, int *maxfd)
 static int socket_callback(CURL *easy,      /* easy handle */
                            curl_socket_t s, /* socket */
                            int what,        /* see above */
-                           void *userp)     /* "private" pointer */
+                           void *cbp,       /* callback pointer */
+                           void *socketp)   /* socket pointer */
 {
-  struct fdinfo *fdp;
+  struct fdinfo *fdp = (struct fdinfo *)socketp;
+
   printf("socket %d easy %p what %d\n", s, easy, what);
 
   if(what == CURL_POLL_REMOVE)
-    remsock(s);
+    remsock(fdp);
   else {
-    fdp = findsock(s);
-
     if(!fdp) {
-      addsock(s, easy, what);
+      /* not previously known, add it and set association */
+      printf("Add info for socket %d (%d)\n", s, what);
+      addsock(s, easy, what, cbp);
     }
     else {
       /* we already know about it, just change action/timeout */
@@ -443,7 +428,7 @@ int main(int argc, char **argv)
   }
 
   curl_multi_setopt(multi_handle, CURLMOPT_SOCKETFUNCTION, socket_callback);
-  curl_multi_setopt(multi_handle, CURLMOPT_SOCKETDATA, NULL);
+  curl_multi_setopt(multi_handle, CURLMOPT_SOCKETDATA, multi_handle);
 
   /* we start the action by calling *socket() right away */
   while(CURLM_CALL_MULTI_PERFORM == curl_multi_socket_all(multi_handle));

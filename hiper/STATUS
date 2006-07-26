@@ -267,3 +267,25 @@ April 20, 2006
  using the same socket. I've cleaned up and simplified code now to adjust to
  this.
 
+---------------------------------------------------------------------------
+
+July 9, 2006
+
+ TODO: We need to alter how we use c-ares for getting info about its sockets,
+ as c-ares now provides a callback approach very similar to how libcurl is
+ about to work.
+
+ I'm adding a function called curl_multi_assign() that will set a private
+ pointer added to the internal libcurl hash table for the particular socket
+ passed in to this function:
+
+ CURLMcode curl_multi_assign(CURLM *multi_handle,
+                             curl_socket_t sockfd,
+                             void *sockp);
+
+ 'sockp' being a custom pointer set by the application to be associated with
+ this socket. The socket has to be already existing and in-use by libcurl,
+ like having already called the callback telling about its existance.
+
+ The set hashp pointer will then be passed on to the callback in upcoming
+ calls when this same socket is used (in the brand new 'socketp' argument).

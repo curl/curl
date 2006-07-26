@@ -261,11 +261,14 @@ CURL_EXTERN const char *curl_multi_strerror(CURLMcode);
 typedef int (*curl_socket_callback)(CURL *easy,      /* easy handle */
                                     curl_socket_t s, /* socket */
                                     int what,        /* see above */
-                                    void *userp);    /* "private" pointer */
+                                    void *userp,     /* private callback
+                                                        pointer */
+                                    void *socketp);  /* private socket
+                                                        pointer */
 
-CURLMcode curl_multi_socket(CURLM *multi_handle, curl_socket_t s);
+CURL_EXTERN CURLMcode curl_multi_socket(CURLM *multi_handle, curl_socket_t s);
 
-CURLMcode curl_multi_socket_all(CURLM *multi_handle);
+CURL_EXTERN CURLMcode curl_multi_socket_all(CURLM *multi_handle);
 
 /*
  * Name:    curl_multi_timeout()
@@ -276,7 +279,8 @@ CURLMcode curl_multi_socket_all(CURLM *multi_handle);
  *
  * Returns: CURLM error code.
  */
-CURLMcode curl_multi_timeout(CURLM *multi_handle, long *milliseconds);
+CURL_EXTERN CURLMcode curl_multi_timeout(CURLM *multi_handle,
+                                         long *milliseconds);
 
 #undef CINIT /* re-using the same name as in curl.h */
 
@@ -309,8 +313,21 @@ typedef enum {
  *
  * Returns: CURLM error code.
  */
-CURLMcode curl_multi_setopt(CURLM *multi_handle,
-                            CURLMoption option, ...);
+CURL_EXTERN CURLMcode curl_multi_setopt(CURLM *multi_handle,
+                                        CURLMoption option, ...);
+
+
+/*
+ * Name:    curl_multi_assign()
+ *
+ * Desc:    This function sets an association in the multi handle between the
+ *          given socket and a private pointer of the application. This is
+ *          (only) useful for curl_multi_socket uses.
+ *
+ * Returns: CURLM error code.
+ */
+CURL_EXTERN CURLMcode curl_multi_assign(CURLM *multi_handle,
+                                        curl_socket_t sockfd, void *sockp);
 
 #ifdef __cplusplus
 } /* end of extern "C" */

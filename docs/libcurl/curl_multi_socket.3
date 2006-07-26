@@ -1,6 +1,6 @@
 .\" $Id$
 .\"
-.TH curl_multi_socket 3 "21 Dec 2005" "libcurl 7.16.0" "libcurl Manual"
+.TH curl_multi_socket 3 "9 Jul 2006" "libcurl 7.16.0" "libcurl Manual"
 .SH NAME
 curl_multi_socket \- reads/writes available data
 .SH SYNOPSIS
@@ -19,32 +19,41 @@ application has detected action on a socket handled by libcurl, it should call
 with the action.
 
 These functions inform the application about updates in the socket (file
-descriptor) status by doing none, one or multiple calls to the
-curl_socket_callback given with the CURLMOPT_SOCKETFUNCTION option to
+descriptor) status by doing none, one or multiple calls to the callback
+function set with the CURLMOPT_SOCKETFUNCTION option to
 \fIcurl_multi_setopt(3)\fP. They update the status with changes since the
 previous time this function was called.
 
-If you want to force libcurl to (re-)check all its internal sockets and
-transfers instead of just a single one, you call
-\fBcurl_multi_socket_all(3)\fP instead.
+To force libcurl to (re-)check all its internal sockets and transfers instead
+of just a single one, you call \fBcurl_multi_socket_all(3)\fP.
 
-An application should call \fBcurl_multi_timeout(3)\fP to figure out how long
-it should wait for socket actions \- at most \- before doing the timeout
-action: call the \fBcurl_multi_socket(3)\fP function with the \fBsockfd\fP
-argument set to CURL_SOCKET_TIMEOUT.
+Applications should call \fBcurl_multi_timeout(3)\fP to figure out how long to
+wait for socket actions \- at most \- before doing the timeout action: call
+the \fBcurl_multi_socket(3)\fP function with the \fBsockfd\fP argument set to
+CURL_SOCKET_TIMEOUT.
+
+.SH "CALLBACK DETAILS"
 
 The socket \fBcallback\fP function uses a prototype like this
 .nf
 
-     int curl_socket_callback(CURL *easy,      /* easy handle */
-                              curl_socket_t s, /* socket */
-                              int action,      /* see values below */
-                              void *userp);    /* "private" pointer */
+  int curl_socket_callback(CURL *easy,      /* easy handle */
+                           curl_socket_t s, /* socket */
+                           int action,      /* see values below */
+                           void *userp,    /* private callback pointer */
+                           void *socketp); /* private socket pointer */
 
 .fi
 The callback MUST return 0.
 
-The \fIaction\fP (third) argument to the callback has one of five values:
+The \fIeasy\fP argument is a pointer to the easy handle that deals with this
+particular socket. Note that a single handle may work with several sockets
+simultaneously.
+
+The \fIs\fP argument is the actual socket value as you use it within your
+system.
+
+The \fIaction\fP argument to the callback has one of five values:
 .RS
 .IP "CURL_POLL_NONE (0)"
 register, not interested in readiness (yet)
@@ -57,6 +66,15 @@ register, interested in both read and write readiness
 .IP "CURL_POLL_REMOVE (4)"
 deregister
 .RE
+
+The \fIsocketp\fP argument is a private pointer you have previously set with
+\fIcurl_multi_assign(3)\fP to be associated with the \fIs\fP socket. If no
+pointer has been set, socketp will be NULL. This argument is of course a
+service to applications that want to keep certain data or structs that are
+strictly associated to the given socket.
+
+The \fIuserp\fP argument is a private pointer you have previously set with
+\fIcurl_multi_setopt(3)\fP and the CURLMOPT_SOCKETDATA option.
 .SH "RETURN VALUE"
 CURLMcode type, general libcurl multi interface error code.
 

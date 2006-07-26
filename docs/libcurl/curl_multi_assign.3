@@ -1,0 +1,44 @@
+.\" $Id$
+.\"
+.TH curl_multi_assign 3 "9 Jul 2006" "libcurl 7.16.0" "libcurl Manual"
+.SH NAME
+curl_multi_assign \- set data to associated with an internal socket
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLMcode curl_multi_assign(CURLM *multi_handle, curl_socket_t sockfd,
+                            void *sockptr);
+.SH DESCRIPTION
+This function assigns an association in the multi handle between the given
+socket and a private pointer of the application. This is (only) useful for
+\fIcurl_multi_socket(3)\fP uses.
+
+When set, the \fIsockptr\fP pointer will be passed to all future socket
+callbacks for the specific \fIsockfd\fP socket.
+
+If the given \fIsockfd\fP isn't already in use by libcurl, this function will
+return an error.
+
+libcurl only keeps one single pointer associated with a socket, so calling
+this function several times for the same socket will make the last set pointer
+get used.
+
+The idea here being that this association (socket to private pointer) is
+something that just about every application that uses this API will need and
+then libcurl can just as well do it since it already has an internal hash
+table lookup for this.
+.SH "RETURN VALUE"
+The standard CURLMcode for multi interface error codes.
+.SH "TYPICAL USAGE"
+In a typical application you allocate a struct or at least use some kind of
+semi-dynamic data for each socket that we must wait for action on when using
+the \fIcurl_multi_socket(3)\fP approach.
+
+When our socket-callback get called by libcurl and we get to know about yet
+another socket to wait for, we can use \fIcurl_multi_assign(3)\fP to point out
+the particular data so that when we get updates about this same socket again,
+we don't have to find the struct associated with this socket by ourselves.
+.SH AVAILABILITY
+This function was added in libcurl 7.15.5, although not deemed stable yet.
+.SH "SEE ALSO"
+.BR curl_multi_setopt "(3), " curl_multi_socket "(3) "
