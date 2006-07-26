@@ -1,3 +1,6 @@
+#ifndef __ARES_INET_NTOP_H
+#define __ARES_INET_NTOP_H
+
 /* $Id$ */
 
 /*
@@ -14,13 +17,10 @@
  * without express or implied warranty.
  */
 
-#ifndef INET_NTOP_H
-#define INET_NTOP_H
-
-#ifdef HAVE_INET_NTOP
+#if defined(HAVE_INET_NTOP) && defined(HAVE_INET_NTOP_IPV6)
 #define ares_inet_ntop(w,x,y,z) inet_ntop(w,x,y,z)
 #else
 const char *ares_inet_ntop(int af, const void *src, char *dst, size_t size);
 #endif
 
-#endif /* INET_NET_NTOP_H */
+#endif /* __ARES_INET_NTOP_H */
