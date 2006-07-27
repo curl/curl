@@ -24,6 +24,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o changing Content-Type when doing formposts
  o added CURL_EXTERN to a few recent multi functions that lacked them
  o splay-tree related problems for internal expire time handling
  o FTP ASCII CRLF counter reset
@@ -48,6 +49,6 @@ advice from friends like these:
 
  Dan Fandrich, Peter Silva, Arve Knudsen, Michael Wallner, Toshiyuki Maezawa,
  Ingmar Runge, Ates Goral, David McCreedy, Jari Sundell, Georg Horn,
- Gisle Vanem, Yang Tse, Michael Jerris, Dan Nelson
+ Gisle Vanem, Yang Tse, Michael Jerris, Dan Nelson, Yves Lejeune
 
         Thanks! (and sorry if I forgot to mention someone)

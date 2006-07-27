@@ -899,9 +899,9 @@ int curl_formget(struct curl_httppost *form, void *arg,
   curl_off_t size;
   struct FormData *data, *ptr;
 
-  if ((rc = Curl_getFormData(&data, form, &size)) != CURLE_OK) {
+  rc = Curl_getFormData(&data, form, NULL, &size);
+  if (rc != CURLE_OK)
     return (int)rc;
-  }
 
   for (ptr = data; ptr; ptr = ptr->next) {
     if (ptr->type == FORM_FILE) {
@@ -1031,10 +1031,13 @@ static char *strippath(char *fullfile)
  * (possibly huge) multipart formdata. The input list is in 'post', while the
  * output resulting linked lists gets stored in '*finalform'. *sizep will get
  * the total size of the whole POST.
+ * A multipart/form_data content-type is built, unless a custom content-type
+ * is passed in 'custom_content_type'.
  */
 
 CURLcode Curl_getFormData(struct FormData **finalform,
                           struct curl_httppost *post,
+                          const char *custom_content_type,
                           curl_off_t *sizep)
 {
   struct FormData *form = NULL;
@@ -1058,9 +1061,11 @@ CURLcode Curl_getFormData(struct FormData **finalform,
 
   /* Make the first line of the output */
   result = AddFormDataf(&form, NULL,
-                        "Content-Type: multipart/form-data;"
-                        " boundary=%s\r\n",
+                        "%s; boundary=%s\r\n",
+                        custom_content_type?custom_content_type:
+                        "Content-Type: multipart/form-data",
                         boundary);
+
   if (result) {
     free(boundary);
     return result;
@@ -1083,6 +1088,10 @@ CURLcode Curl_getFormData(struct FormData **finalform,
     if (result)
       break;
 
+    /* Maybe later this should be disabled when a custom_content_type is
+       passed, since Content-Disposition is not meaningful for all multipart
+       types.
+    */
     result = AddFormDataf(&form, &size,
                           "Content-Disposition: form-data; name=\"");
     if (result)

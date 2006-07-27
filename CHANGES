@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (28 July 2006)
+- Yves Lejeune fixed so that replacing Content-Type: when doing multipart
+  formposts work exactly the way you want it (and the way you'd assume it
+  works).
+
 Daniel (27 July 2006)
 - David McCreedy added --ftp-ssl-reqd which makes curl *require* SSL for both
   control and data connection, as the existing --ftp-ssl option only requests

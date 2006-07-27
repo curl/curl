@@ -1554,8 +1554,12 @@ static CURLcode add_custom_headers(struct connectdata *conn,
               header as that will produce *two* in the same request! */
            curl_strnequal("Host:", headers->data, 5))
           ;
+        else if(conn->data->set.httpreq == HTTPREQ_POST_FORM &&
+                /* this header (extended by formdata.c) is sent later */
+                curl_strnequal("Content-Type:", headers->data,
+                               strlen("Content-Type:")))
+          ;
         else {
-
           result = add_bufferf(req_buffer, "%s\r\n", headers->data);
           if(result)
             return result;
@@ -1809,6 +1813,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     /* we must build the whole darned post sequence first, so that we have
        a size of the whole shebang before we start to send it */
      result = Curl_getFormData(&http->sendit, data->set.httppost,
+                               checkheaders(data, "Content-Type:"),
                                &http->postsize);
      if(CURLE_OK != result) {
        /* Curl_getFormData() doesn't use failf() */
@@ -2134,12 +2139,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       if(result)
         return result;
 
-      if(!checkheaders(data, "Content-Type:")) {
-        /* Get Content-Type: line from Curl_formpostheader.
+      {
 
-           The Content-Type header line also contains the MIME boundary
-           string etc why disabling this header is likely to not make things
-           work, but we support disabling it anyway.
+        /* Get Content-Type: line from Curl_formpostheader.
         */
         char *contentType;
         size_t linelength=0;
@@ -2149,6 +2151,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           failf(data, "Could not get Content-Type header line!");
           return CURLE_HTTP_POST_ERROR;
         }
+
         result = add_buffer(req_buffer, contentType, linelength);
         if(result)
           return result;
