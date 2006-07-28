@@ -738,7 +738,8 @@ static void sendtftp(struct testcase *test, struct formats *pf)
   struct tftphdr *dp;
   struct tftphdr *ap;    /* ack packet */
   unsigned short block = 1;
-  int size, n;
+  int size;
+  ssize_t n;
 #if defined(HAVE_ALARM) && defined(SIGALRM)
   mysignal(SIGALRM, timer);
 #endif
@@ -757,7 +758,7 @@ static void sendtftp(struct testcase *test, struct formats *pf)
     (void) sigsetjmp(timeoutbuf, 1);
 #endif
     send_data:
-    if (send(peer, dp, size + 4, 0) != size + 4) {
+    if (swrite(peer, dp, size + 4) != size + 4) {
       logmsg("write\n");
       return;
     }
@@ -766,7 +767,7 @@ static void sendtftp(struct testcase *test, struct formats *pf)
 #ifdef HAVE_ALARM
       alarm(rexmtval);        /* read the ack */
 #endif
-      n = recv(peer, ackbuf, sizeof (ackbuf), 0);
+      n = sread(peer, ackbuf, sizeof (ackbuf));
 #ifdef HAVE_ALARM
       alarm(0);
 #endif
@@ -828,7 +829,7 @@ static void recvtftp(struct testcase *test, struct formats *pf)
     (void) sigsetjmp(timeoutbuf, 1);
 #endif
 send_ack:
-    if (send(peer, ackbuf, 4, 0) != 4) {
+    if (swrite(peer, ackbuf, 4) != 4) {
       logmsg("write: fail\n");
       goto abort;
     }
@@ -837,7 +838,7 @@ send_ack:
 #ifdef HAVE_ALARM
       alarm(rexmtval);
 #endif
-      n = recv(peer, dp, PKTSIZE, 0);
+      n = sread(peer, dp, PKTSIZE);
 #ifdef HAVE_ALARM
       alarm(0);
 #endif
@@ -873,19 +874,19 @@ send_ack:
 
   ap->th_opcode = htons((u_short)ACK);   /* send the "final" ack */
   ap->th_block = htons((u_short)(block));
-  (void) send(peer, ackbuf, 4, 0);
+  (void) swrite(peer, ackbuf, 4);
 #if defined(HAVE_ALARM) && defined(SIGALRM)
   mysignal(SIGALRM, justquit);           /* just quit on timeout */
   alarm(rexmtval);
 #endif
-  n = recv(peer, buf, sizeof (buf), 0);  /* normally times out and quits */
+  n = sread(peer, buf, sizeof(buf));     /* normally times out and quits */
 #ifdef HAVE_ALARM
   alarm(0);
 #endif
   if (n >= 4 &&                          /* if read some data */
       dp->th_opcode == DATA &&           /* and got a data block */
       block == dp->th_block) {           /* then my last ack was lost */
-    (void) send(peer, ackbuf, 4, 0);     /* resend final ack */
+    (void) swrite(peer, ackbuf, 4);      /* resend final ack */
   }
 abort:
   return;
@@ -930,6 +931,6 @@ static void nak(int error)
   length = (int)strlen(pe->e_msg);
   tp->th_msg[length] = '\0';
   length += 5;
-  if (send(peer, buf, length, 0) != length)
+  if (swrite(peer, buf, length) != length)
     logmsg("nak: fail\n");
 }
