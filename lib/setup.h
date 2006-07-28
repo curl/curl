@@ -193,14 +193,6 @@ typedef unsigned char bool;
 #define curlassert(x)
 #endif
 
-#ifdef MSG_NOSIGNAL
-/* If we have the MSG_NOSIGNAL define, we make sure to use that in the forth
-   argument to send() and recv() */
-#define SEND_4TH_ARG MSG_NOSIGNAL
-#define HAVE_MSG_NOSIGNAL 1 /* we have MSG_NOSIGNAL */
-#else
-#define SEND_4TH_ARG 0
-#endif /* MSG_NOSIGNAL */
 
 /* To make large file support transparent even on Windows */
 #if defined(WIN32) && (SIZEOF_CURL_OFF_T > 4)
@@ -214,70 +206,9 @@ typedef unsigned char bool;
 #define struct_stat struct stat
 #endif /* Win32 with large file support */
 
-/*
- * The definitions for the return type and arguments types
- * of functions recv() and send() belong and come from the
- * configuration file. Do not define them in any other place.
- *
- * HAVE_RECV is defined if you have a function named recv()
- * which is used to read incoming data from sockets. If your
- * function has another name then don't define HAVE_RECV.
- *
- * If HAVE_RECV is defined then RECV_TYPE_ARG1, RECV_TYPE_ARG2,
- * RECV_TYPE_ARG3, RECV_TYPE_ARG4 and RECV_TYPE_RETV must also
- * be defined.
- *
- * HAVE_SEND is defined if you have a function named send()
- * which is used to write outgoing data on a connected socket.
- * If yours has another name then don't define HAVE_SEND.
- *
- * If HAVE_SEND is defined then SEND_TYPE_ARG1, SEND_QUAL_ARG2,
- * SEND_TYPE_ARG2, SEND_TYPE_ARG3, SEND_TYPE_ARG4 and
- * SEND_TYPE_RETV must also be defined.
- */
 
-#ifdef HAVE_RECV
-#if !defined(RECV_TYPE_ARG1) || \
-    !defined(RECV_TYPE_ARG2) || \
-    !defined(RECV_TYPE_ARG3) || \
-    !defined(RECV_TYPE_ARG4) || \
-    !defined(RECV_TYPE_RETV)
-  /* */
-  Error: Missing definition of return and arguments types of recv().
-  /* */
-#else
-#define sread(x,y,z) (ssize_t)recv((RECV_TYPE_ARG1)(x), (RECV_TYPE_ARG2)(y), (RECV_TYPE_ARG3)(z), (RECV_TYPE_ARG4)(SEND_4TH_ARG))
-#endif
-#else /* HAVE_RECV */
-#ifdef DJGPP
-#define sread(x,y,z) (ssize_t)read_s((int)(x), (char *)(y), (int)(z))
-#endif
-#endif /* HAVE_RECV */
-
-#ifdef HAVE_SEND
-#if !defined(SEND_TYPE_ARG1) || \
-    !defined(SEND_QUAL_ARG2) || \
-    !defined(SEND_TYPE_ARG2) || \
-    !defined(SEND_TYPE_ARG3) || \
-    !defined(SEND_TYPE_ARG4) || \
-    !defined(SEND_TYPE_RETV)
-  /* */
-  Error: Missing definition of return and arguments types of send().
-  /* */
-#else
-#define swrite(x,y,z) (ssize_t)send((SEND_TYPE_ARG1)(x), (SEND_TYPE_ARG2)(y), (SEND_TYPE_ARG3)(z), (SEND_TYPE_ARG4)(SEND_4TH_ARG))
-#endif
-#else /* HAVE_SEND */
-#ifdef DJGPP
-#define swrite(x,y,z) (ssize_t)write_s((int)(x), (char *)(y), (int)(z))
-#endif
-#endif /* HAVE_SEND */
-
-
-/* Below we define four functions. They should
+/* Below we define some functions. They should
    1. close a socket
-   2. read from a socket
-   3. write to a socket
 
    4. set the SIGALRM signal timeout
    5. set dir/file naming defines
@@ -426,6 +357,14 @@ typedef int curl_socket_t;
 #define DEBUGF(x) x
 #else
 #define DEBUGF(x)
+#endif
+
+/*
+ * Include macros and defines that should only be processed once.
+ */
+
+#ifndef __SETUP_ONCE_H
+#include "setup_once.h"
 #endif
 
 #endif /* __LIB_CURL_SETUP_H */

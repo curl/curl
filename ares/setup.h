@@ -149,4 +149,12 @@ int ares_strcasecmp(const char *s1, const char *s2);
 #endif
 #endif
 
+/*
+ * Include macros and defines that should only be processed once.
+ */
+
+#ifndef __SETUP_ONCE_H
+#include "setup_once.h"
+#endif
+
 #endif /* __ARES_SETUP_H */

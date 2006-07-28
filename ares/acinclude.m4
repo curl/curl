@@ -904,6 +904,39 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
 ]) # AC_DEFUN
 
 
+dnl CURL_CHECK_MSG_NOSIGNAL
+dnl -------------------------------------------------
+dnl Check for MSG_NOSIGNAL
+
+AC_DEFUN([CURL_CHECK_MSG_NOSIGNAL], [
+  AC_CHECK_HEADERS(sys/types.h sys/socket.h)
+  AC_CACHE_CHECK([for MSG_NOSIGNAL], [ac_cv_msg_nosignal], [
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+      ],[
+        int flag=MSG_NOSIGNAL;
+      ])
+    ],[
+      ac_cv_msg_nosignal="yes"
+    ],[
+      ac_cv_msg_nosignal="no"
+    ])
+  ])
+  case "$ac_cv_msg_nosignal" in
+    yes)
+      AC_DEFINE_UNQUOTED(HAVE_MSG_NOSIGNAL, 1,
+        [Define to 1 if you have the MSG_NOSIGNAL flag.])
+      ;;
+  esac
+]) # AC_DEFUN
+
+
 dnl CURL_CHECK_NONBLOCKING_SOCKET
 dnl -------------------------------------------------
 dnl Check for how to set a socket to non-blocking state. There seems to exist
