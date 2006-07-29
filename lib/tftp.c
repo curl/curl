@@ -575,13 +575,8 @@ CURLcode Curl_tftp_connect(struct connectdata *conn, bool *done)
   state->sockfd = state->conn->sock[FIRSTSOCKET];
   state->state = TFTP_STATE_START;
 
-#ifdef WIN32
-  /* AF_UNSPEC == 0 (from above calloc) doesn't work on Winsock */
-
-  /* NOTE: this blatantly assumes IPv4. This should be fixed! */
-  ((struct sockaddr_in*)&state->local_addr)->sin_family =
+  ((struct sockaddr *)&state->local_addr)->sa_family =
     conn->ip_addr->ai_family;
-#endif
 
   tftp_set_timeouts(state);
 
