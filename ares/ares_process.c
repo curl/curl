@@ -232,7 +232,8 @@ static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
 static void read_tcp_data(ares_channel channel, fd_set *read_fds, time_t now)
 {
   struct server_state *server;
-  int i, count;
+  int i;
+  ssize_t count;
 
   for (i = 0; i < channel->nservers; i++)
     {
@@ -257,7 +258,7 @@ static void read_tcp_data(ares_channel channel, fd_set *read_fds, time_t now)
               continue;
             }
 
-          server->tcp_lenbuf_pos += count;
+          server->tcp_lenbuf_pos += (int)count;
           if (server->tcp_lenbuf_pos == 2)
             {
               /* We finished reading the length word.  Decode the
@@ -284,7 +285,7 @@ static void read_tcp_data(ares_channel channel, fd_set *read_fds, time_t now)
               continue;
             }
 
-          server->tcp_buffer_pos += count;
+          server->tcp_buffer_pos += (int)count;
           if (server->tcp_buffer_pos == server->tcp_length)
             {
               /* We finished reading this answer; process it and
@@ -306,7 +307,8 @@ static void read_udp_packets(ares_channel channel, fd_set *read_fds,
                              time_t now)
 {
   struct server_state *server;
-  int i, count;
+  int i;
+  ssize_t count;
   unsigned char buf[PACKETSZ + 1];
 
   for (i = 0; i < channel->nservers; i++)
@@ -324,7 +326,7 @@ static void read_udp_packets(ares_channel channel, fd_set *read_fds,
       else if (count <= 0)
         handle_error(channel, i, now);
 
-      process_answer(channel, buf, count, i, 0, now);
+      process_answer(channel, buf, (int)count, i, 0, now);
     }
 }
 
