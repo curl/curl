@@ -374,6 +374,7 @@ int main(int argc, char **argv)
   int selectmaxamount;
   struct fdinfo *fdp;
   char act;
+  int running_handles;
 
   memset(&info, 0, sizeof(struct globalinfo));
 
@@ -451,7 +452,8 @@ int main(int argc, char **argv)
   curl_multi_setopt(multi_handle, CURLMOPT_SOCKETDATA, NULL);
 
   /* we start the action by calling *socket() right away */
-  while(CURLM_CALL_MULTI_PERFORM == curl_multi_socket_all(multi_handle));
+  while(CURLM_CALL_MULTI_PERFORM == curl_multi_socket_all(multi_handle,
+                                                          &running_handles));
 
   printf("Starting timer, expects to run for %ldus\n", RUN_FOR_THIS_LONG);
   timer_start();
@@ -486,7 +488,7 @@ int main(int argc, char **argv)
       break;
     case 0:
       timeouts++;
-      curl_multi_socket(multi_handle, CURL_SOCKET_TIMEOUT);
+      curl_multi_socket(multi_handle, CURL_SOCKET_TIMEOUT, &running_handles);
       break;
 
     default:
@@ -510,7 +512,7 @@ int main(int argc, char **argv)
           timer_continue();
           if(act & CURL_POLL_OUT)
             act--;
-          curl_multi_socket(multi_handle, fdp->sockfd);
+          curl_multi_socket(multi_handle, fdp->sockfd, &running_handles);
           timer_pause();
         }
       }
