@@ -71,9 +71,6 @@ struct connection {
   size_t dlcounter;
   struct globalinfo *global;
   char error[CURL_ERROR_SIZE];
-  struct event ev[3]; /* maximum 3 events per handle NOTE: should this rather
-                         be a define in a public curl header file or possibly
-                         just documented somewhere or... ? */
 };
 
 struct fdinfo {
@@ -84,9 +81,26 @@ struct fdinfo {
   CURL *easy;
   int action; /* as set by libcurl */
   long timeout; /* as set by libcurl */
+  struct event ev; /* */
+  int evset; /* true if the 'ev' struct has been used in a event_set() call */
+  CURLMcode *multi; /* pointer to the multi handle */
+  int *running_handles; /* pointer to the running_handles counter */
 };
 
 static struct fdinfo *allsocks;
+
+static int running_handles;
+
+/* called from libevent on action on a particular socket ("event") */
+static void eventcallback(int fd, short type, void *userp)
+{
+  struct fdinfo *fdp = (struct fdinfo *)userp;
+
+  fprintf(stderr, "EVENT callback\n");
+
+  /* tell libcurl to deal with the transfer associated with this socket */
+  curl_multi_socket(fdp->multi, fd, fdp->running_handles);
+}
 
 static void remsock(struct fdinfo *f)
 {
@@ -109,12 +123,29 @@ static void setsock(struct fdinfo *fdp, curl_socket_t s, CURL *easy,
   fdp->sockfd = s;
   fdp->action = action;
   fdp->easy = easy;
+
+  if(fdp->evset)
+    /* first remove the existing event if the old setup was used */
+    event_del(&fdp->ev);
+
+  /* now use and add the current socket setup */
+  event_set(&fdp->ev, fdp->sockfd,
+            (action&CURL_POLL_IN?EV_READ:0)|
+            (action&CURL_POLL_OUT?EV_WRITE:0),
+            eventcallback, fdp);
+
+  fdp->evset=1;
+
+  fprintf(stderr, "event_add() for fd %d\n", s);
+  event_add(&fdp->ev, NULL); /* no timeout */
 }
 
 static void addsock(curl_socket_t s, CURL *easy, int action, CURLM *multi)
 {
   struct fdinfo *fdp = calloc(sizeof(struct fdinfo), 1);
 
+  fdp->multi = multi;
+  fdp->running_handles = &running_handles;
   setsock(fdp, s, easy, action);
 
   if(allsocks) {
@@ -189,7 +220,7 @@ static int socket_callback(CURL *easy,      /* easy handle */
 {
   struct fdinfo *fdp = (struct fdinfo *)socketp;
 
-  printf("socket %d easy %p what %d\n", s, easy, what);
+  fprintf(stderr, "socket %d easy %p what %d\n", s, easy, what);
 
   if(what == CURL_POLL_REMOVE)
     remsock(fdp);
@@ -219,7 +250,7 @@ writecallback(void *ptr, size_t size, size_t nmemb, void *data)
   c->dlcounter += realsize;
   c->global->dlcounter += realsize;
 
-#if 0
+#if 1
   printf("%02d: %d, total %d\n",
          c->id, c->dlcounter, c->global->dlcounter);
 #endif
@@ -360,6 +391,7 @@ int main(int argc, char **argv)
   int selectmaxamount;
   struct fdinfo *fdp;
   char act;
+  long timeout_ms;
 
   memset(&info, 0, sizeof(struct globalinfo));
 
@@ -431,81 +463,40 @@ int main(int argc, char **argv)
   curl_multi_setopt(multi_handle, CURLMOPT_SOCKETDATA, multi_handle);
 
   /* we start the action by calling *socket() right away */
-  while(CURLM_CALL_MULTI_PERFORM == curl_multi_socket_all(multi_handle));
+  while(CURLM_CALL_MULTI_PERFORM == curl_multi_socket_all(multi_handle,
+                                                          &running_handles));
 
-  printf("Starting timer, expects to run for %ldus\n", RUN_FOR_THIS_LONG);
-  timer_start();
-  timer_pause();
+  /* event_dispatch() isn't good enough for us, since we need a global timeout
+     to occur after a given time of inactivity
+   */
 
-  while(1) {
+  /* get the timeout value from libcurl */
+  curl_multi_timeout(multi_handle, &timeout_ms);
+
+  while(running_handles) {
     struct timeval timeout;
-    int rc; /* select() return code */
-    long timeout_ms;
 
-    fd2_set fdread;
-    fd2_set fdwrite;
-    int maxfd;
-
-    curl_multi_timeout(multi_handle, &timeout_ms);
-
-    /* set timeout to wait */
+    /* convert ms to timeval */
     timeout.tv_sec = timeout_ms/1000;
     timeout.tv_usec = (timeout_ms%1000)*1000;
 
-    /* convert file descriptors from the transfers to fd_sets */
-    fdinfo2fdset(&fdread, &fdwrite, &maxfd);
+    event_loopexit(&timeout);
 
-    selects++;
-    rc = select(maxfd+1,
-                (fd_set *)&fdread,
-                (fd_set *)&fdwrite,
-                NULL, &timeout);
-    switch(rc) {
-    case -1:
-      /* select error */
-      break;
-    case 0:
-      timeouts++;
-      curl_multi_socket(multi_handle, CURL_SOCKET_TIMEOUT);
-      break;
+    /* The event_loopexit() function may have taken a while and it may or may
+       not have invoked libcurl calls during that time. During those calls,
+       the timeout situation might very well have changed, so we check the
+       timeout time again to see if we really need to call curl_multi_socket()
+       at this point! */
 
-    default:
-      /* timeout or readable/writable sockets */
+    /* get the timeout value from libcurl */
+    curl_multi_timeout(multi_handle, &timeout_ms);
 
-      for(i=0, fdp = allsocks; fdp; fdp = fdp->next) {
-        act = 0;
-        if((fdp->action & CURL_POLL_IN) &&
-           FD_ISSET(fdp->sockfd, &fdread)) {
-          act |= CURL_POLL_IN;
-          i++;
-        }
-        if((fdp->action & CURL_POLL_OUT) &&
-           FD_ISSET(fdp->sockfd, &fdwrite)) {
-          act |= CURL_POLL_OUT;
-          i++;
-        }
+    if(timeout_ms <= 0) {
+      /* no time left */
+      curl_multi_socket(multi_handle, CURL_SOCKET_TIMEOUT, &running_handles);
 
-        if(act) {
-          multi_socket++;
-          timer_continue();
-          if(act & CURL_POLL_OUT)
-            act--;
-          curl_multi_socket(multi_handle, fdp->sockfd);
-          timer_pause();
-        }
-      }
-
-      performselect += rc;
-      if(rc > topselect)
-        topselect = rc;
-      break;
-    }
-
-    timer_total(); /* calculate the total time spent so far */
-
-    if(total > RUN_FOR_THIS_LONG) {
-      printf("Stopped after %ldus\n", total);
-      break;
+      /* and get the new timeout value again */
+      curl_multi_timeout(multi_handle, &timeout_ms);
     }
   }
 

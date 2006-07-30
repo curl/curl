@@ -1123,6 +1123,15 @@ static void singlesocket(struct Curl_multi *multi,
           action |= CURL_POLL_OUT;
       }
 
+      /* Update the sockhash accordingly BEFORE the callback of not a removal,
+         in case the callback wants to use curl_multi_assign(), but do the
+         removal AFTER the callback for the very same reason (but then to be
+         able to pass the correct entry->socketp) */
+
+      if(action != CURL_POLL_REMOVE)
+        /* make sure this socket is present in the hash for this handle */
+        sh_addentry(multi->sockhash, s, easy->easy_handle);
+
       /* call the callback with this new info */
       if(multi->socket_cb) {
         struct Curl_sh_entry *entry =
@@ -1132,16 +1141,13 @@ static void singlesocket(struct Curl_multi *multi,
                          s,
                          action,
                          multi->socket_userp,
-                         entry->socketp);
+                         entry ? entry->socketp : NULL);
       }
 
-      /* Update the sockhash accordingly */
       if(action == CURL_POLL_REMOVE)
         /* remove from hash for this easy handle */
         sh_delentry(multi->sockhash, s);
-      else
-        /* make sure this socket is present in the hash for this handle */
-        sh_addentry(multi->sockhash, s, easy->easy_handle);
+
     }
     /* copy the current state to the storage area */
     memcpy(&easy->sockstate, &current, sizeof(struct socketstate));
@@ -1154,16 +1160,16 @@ static void singlesocket(struct Curl_multi *multi,
 
 static CURLMcode multi_socket(struct Curl_multi *multi,
                               bool checkall,
-                              curl_socket_t s)
+                              curl_socket_t s,
+                              int *running_handles)
 {
   CURLMcode result = CURLM_OK;
-  int running_handles;
   struct SessionHandle *data = NULL;
   struct Curl_tree *t;
 
   if(checkall) {
     struct Curl_one_easy *easyp;
-    result = curl_multi_perform(multi, &running_handles);
+    result = curl_multi_perform(multi, running_handles);
 
     /* walk through each easy handle and do the socket state change magic
        and callbacks */
@@ -1190,7 +1196,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
 
     data = entry->easy;
 
-    result = multi_runsingle(multi, data->set.one_easy, &running_handles);
+    result = multi_runsingle(multi, data->set.one_easy, running_handles);
 
     if(result == CURLM_OK)
       /* get the socket(s) and check if the state has been changed since
@@ -1212,7 +1218,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
 
     /* the first loop lap 'data' can be NULL */
     if(data) {
-      result = multi_runsingle(multi, data->set.one_easy, &running_handles);
+      result = multi_runsingle(multi, data->set.one_easy, running_handles);
 
       if(result == CURLM_OK)
         /* get the socket(s) and check if the state has been changed since
@@ -1269,20 +1275,18 @@ CURLMcode curl_multi_setopt(CURLM *multi_handle,
 }
 
 
-CURLMcode curl_multi_socket(CURLM *multi_handle, curl_socket_t s)
+CURLMcode curl_multi_socket(CURLM *multi_handle, curl_socket_t s,
+                            int *running_handles)
 {
-#if 0
-  printf("multi_socket(%d)\n", (int)s);
-#endif
-
-  return multi_socket((struct Curl_multi *)multi_handle, FALSE, s);
+  return multi_socket((struct Curl_multi *)multi_handle, FALSE, s,
+                      running_handles);
 }
 
-CURLMcode curl_multi_socket_all(CURLM *multi_handle)
+CURLMcode curl_multi_socket_all(CURLM *multi_handle, int *running_handles)
 
 {
   return multi_socket((struct Curl_multi *)multi_handle,
-                      TRUE, CURL_SOCKET_BAD);
+                      TRUE, CURL_SOCKET_BAD, running_handles);
 }
 
 CURLMcode curl_multi_timeout(CURLM *multi_handle,

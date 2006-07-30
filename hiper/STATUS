@@ -289,3 +289,12 @@ July 9, 2006
 
  The set hashp pointer will then be passed on to the callback in upcoming
  calls when this same socket is used (in the brand new 'socketp' argument).
+
+---------------------------------------------------------------------------
+
+July 30, 2006
+
+ Shockingly stupid (of me not having realized this before), but we really need
+ to add a 'running_handles' argument to the curl_multi_socket() and
+ curl_multi_socket_all() prototypes so that the caller can get to know when
+ all the transfers are actually done!

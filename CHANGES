@@ -6,6 +6,17 @@
 
                                   Changelog
 
+Daniel (31 July 2006)
+- *ARLERT* curl_multi_socket() and curl_multi_socket_all() got modified
+  prototypes: they both now provide the number of running handles back to the
+  calling function. It makes the functions resemble the good old
+  curl_multi_perform() more and provides a nice way to know when the multi
+  handle goes empty.
+
+  ALERT2: don't use the curl_multi_socket*() functionality in anything
+  production-like until I say it's somewhat settled, as I suspect there might
+  be some further API changes before I'm done...
+
 Daniel (28 July 2006)
 - Yves Lejeune fixed so that replacing Content-Type: when doing multipart
   formposts work exactly the way you want it (and the way you'd assume it

@@ -266,9 +266,11 @@ typedef int (*curl_socket_callback)(CURL *easy,      /* easy handle */
                                     void *socketp);  /* private socket
                                                         pointer */
 
-CURL_EXTERN CURLMcode curl_multi_socket(CURLM *multi_handle, curl_socket_t s);
+CURL_EXTERN CURLMcode curl_multi_socket(CURLM *multi_handle, curl_socket_t s,
+                                        int *running_handles);
 
-CURL_EXTERN CURLMcode curl_multi_socket_all(CURLM *multi_handle);
+CURL_EXTERN CURLMcode curl_multi_socket_all(CURLM *multi_handle,
+                                            int *running_handles);
 
 /*
  * Name:    curl_multi_timeout()
