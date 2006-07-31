@@ -70,6 +70,11 @@
 #ifdef DJGPP
 #define sread(x,y,z) (ssize_t)read_s((int)(x), (char *)(y), (int)(z))
 #endif
+#ifndef sread
+  /* */
+  Error Missing_definition_of_macro_sread
+  /* */
+#endif
 #endif /* HAVE_RECV */
 
 #ifdef HAVE_SEND
@@ -91,6 +96,11 @@
 #else /* HAVE_SEND */
 #ifdef DJGPP
 #define swrite(x,y,z) (ssize_t)write_s((int)(x), (char *)(y), (int)(z))
+#endif
+#ifndef swrite
+  /* */
+  Error Missing_definition_of_macro_swrite
+  /* */
 #endif
 #endif /* HAVE_SEND */
 
