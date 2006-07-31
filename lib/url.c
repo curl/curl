@@ -228,10 +228,11 @@ CURLcode Curl_close(struct SessionHandle *data)
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
   Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
   if(data->set.cookiejar) {
-    if(data->change.cookielist)
+    if(data->change.cookielist) {
       /* If there is a list of cookie files to read, do it first so that
          we have all the told files read before we write the new jar */
       Curl_cookie_loadfiles(data);
+    }
 
     /* we have a "destination" for all the cookies to get dumped to */
     if(Curl_cookie_output(data->cookies, data->set.cookiejar))

@@ -96,7 +96,7 @@ int Curl_cookie_output(struct CookieInfo *, char *);
 
 #if defined(CURL_DISABLE_HTTP) || defined(CURL_DISABLE_COOKIES)
 #define Curl_cookie_list(x) NULL
-#define Curl_cookie_loadfiles(x)
+#define Curl_cookie_loadfiles(x) do { } while (0)
 #else
 struct curl_slist *Curl_cookie_list(struct SessionHandle *data);
 void Curl_cookie_loadfiles(struct SessionHandle *data);
