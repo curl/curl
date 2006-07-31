@@ -276,7 +276,9 @@ config.h: Makefile.netware
 	@echo $(DL)#define HAVE_LONGLONG 1$(DL) >> $@
 	@echo $(DL)#define HAVE_MALLOC_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_NETINET_IN_H 1$(DL) >> $@
+	@echo $(DL)#define HAVE_RECV 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SELECT 1$(DL) >> $@
+	@echo $(DL)#define HAVE_SEND 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SETJMP_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SIGNAL 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SOCKET 1$(DL) >> $@
@@ -297,7 +299,18 @@ config.h: Makefile.netware
 	@echo $(DL)#define HAVE_TIME_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_UNAME 1$(DL) >> $@
 	@echo $(DL)#define HAVE_UNISTD_H 1$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_ARG1 int$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_ARG2 char *$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_ARG3 int$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_ARG4 int$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_RETV int$(DL) >> $@
 	@echo $(DL)#define RETSIGTYPE void$(DL) >> $@
+	@echo $(DL)#define SEND_QUAL_ARG2$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_ARG1 int$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_ARG2 char *$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_ARG3 int$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_ARG4 int$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_RETV int$(DL) >> $@
 	@echo $(DL)#define SIZEOF_CURL_OFF_T 4$(DL) >> $@
 	@echo $(DL)#define STDC_HEADERS 1$(DL) >> $@
 	@echo $(DL)#define TIME_WITH_SYS_TIME 1$(DL) >> $@
