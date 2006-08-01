@@ -1123,7 +1123,7 @@ static void singlesocket(struct Curl_multi *multi,
           action |= CURL_POLL_OUT;
       }
 
-      /* Update the sockhash accordingly BEFORE the callback of not a removal,
+      /* Update the sockhash accordingly BEFORE the callback if not a removal,
          in case the callback wants to use curl_multi_assign(), but do the
          removal AFTER the callback for the very same reason (but then to be
          able to pass the correct entry->socketp) */
