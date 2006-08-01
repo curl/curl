@@ -6,8 +6,13 @@
 
                                   Changelog
 
+Daniel (1 August 2006)
+- Maciej Karpiuk fixed a crash that would occur if we passed Curl_strerror()
+  an unknown error number on glibc systems.
+  http://curl.haxx.se/bug/view.cgi?id=1532289
+
 Daniel (31 July 2006)
-- *ARLERT* curl_multi_socket() and curl_multi_socket_all() got modified
+- *ALERT* curl_multi_socket() and curl_multi_socket_all() got modified
   prototypes: they both now provide the number of running handles back to the
   calling function. It makes the functions resemble the good old
   curl_multi_perform() more and provides a nice way to know when the multi

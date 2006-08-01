@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2004, 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2004 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -637,8 +637,11 @@ const char *Curl_strerror(struct connectdata *conn, int err)
     char *msg = strerror_r(err, buffer, sizeof(buffer));
     /* this version of strerror_r() only *might* use the buffer we pass to
        the function, but it always returns the error message as a pointer,
-       so we must copy that string unconditionally */
-    strncpy(buf, msg, max);
+       so we must copy that string unconditionally (if non-NULL) */
+    if(msg)
+      strncpy(buf, msg, max);
+    else
+      snprintf(buf, max, "Unknown error %d", err);
   }
 #endif /* end of HAVE_GLIBC_STRERROR_R */
 #else /* HAVE_STRERROR_R */
