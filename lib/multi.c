@@ -121,10 +121,11 @@ struct Curl_multi {
 
   /* We have a linked list with easy handles */
   struct Curl_one_easy easy;
-  /* This is the amount of entries in the linked list above. */
-  int num_easy;
 
-  int num_msgs; /* total amount of messages in the easy handles */
+  int num_easy; /* amount of entries in the linked list above. */
+  int num_msgs; /* amount of messages in the easy handles */
+  int num_alive; /* amount of easy handles that are added but have not yet
+                    reached COMPLETE state */
 
   /* callback function and user data pointer for the *socket() API */
   curl_socket_callback socket_cb;
@@ -171,6 +172,9 @@ static void multistate(struct Curl_one_easy *easy, CURLMstate state)
         "STATE: %s => %s handle %p: \n",
         statename[oldstate], statename[easy->state], (char *)easy);
 #endif
+  if(state == CURLM_STATE_COMPLETED)
+    /* changing to COMPLETED means there's one less easy handle 'alive' */
+    easy->easy_handle->multi->num_alive--;
 }
 
 /*
@@ -352,6 +356,8 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
 
   /* increase the node-counter */
   multi->num_easy++;
+  /* increase the alive-counter */
+  multi->num_alive++;
 
   return CURLM_OK;
 }
@@ -901,9 +907,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
          * then we go to completed and consider this transfer aborted.  */
         multistate(easy, CURLM_STATE_COMPLETED);
       }
-      else
-        /* this one still lives! */
-        (*running_handles)++;
     }
 
   } while (easy->easy_handle->change.url_changed);
@@ -943,8 +946,6 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
   CURLMcode returncode=CURLM_OK;
   struct Curl_tree *t;
 
-  *running_handles = 0; /* bump this once for every living handle */
-
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
 
@@ -979,6 +980,8 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
     }
 
   } while(t);
+
+  *running_handles = multi->num_alive;
 
   return returncode;
 }
@@ -1169,6 +1172,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
 
   if(checkall) {
     struct Curl_one_easy *easyp;
+    /* *perform() deals with running_handles on its own */
     result = curl_multi_perform(multi, running_handles);
 
     /* walk through each easy handle and do the socket state change magic
@@ -1191,9 +1195,6 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
       /* unmatched socket, major problemo! */
       return CURLM_BAD_SOCKET; /* better return code? */
 
-    /* Now, there is potentially a chain of easy handles in this hash
-       entry struct and we need to deal with all of them */
-
     data = entry->easy;
 
     result = multi_runsingle(multi, data->set.one_easy, running_handles);
@@ -1202,6 +1203,8 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
       /* get the socket(s) and check if the state has been changed since
          last */
       singlesocket(multi, data->set.one_easy);
+
+    *running_handles = multi->num_alive;
 
     /* or should we fall-through and do the timer-based stuff? */
     return result;
@@ -1245,6 +1248,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
 
   } while(t);
 
+  *running_handles = multi->num_alive;
   return result;
 }
 
