@@ -24,6 +24,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o chunked encoding when custom header "Transfer-Encoding: chunked" is set
  o Curl_strerror() crash on unknown errors
  o changing Content-Type when doing formposts
  o added CURL_EXTERN to a few recent multi functions that lacked them
@@ -51,6 +52,6 @@ advice from friends like these:
  Dan Fandrich, Peter Silva, Arve Knudsen, Michael Wallner, Toshiyuki Maezawa,
  Ingmar Runge, Ates Goral, David McCreedy, Jari Sundell, Georg Horn,
  Gisle Vanem, Yang Tse, Michael Jerris, Dan Nelson, Yves Lejeune,
- Maciej Karpiuk
+ Maciej Karpiuk, Mark Lentczner
 
         Thanks! (and sorry if I forgot to mention someone)

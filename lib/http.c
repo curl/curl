@@ -1684,30 +1684,17 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       return CURLE_OUT_OF_MEMORY;
   }
 
-  if(!conn->bits.upload_chunky && (httpreq != HTTPREQ_GET)) {
-    /* not a chunky transfer yet, but data is to be sent */
-    ptr = checkheaders(data, "Transfer-Encoding:");
-    if(ptr) {
-      /* Some kind of TE is requested, check if 'chunked' is chosen */
-      conn->bits.upload_chunky =
-        Curl_compareheader(ptr, "Transfer-Encoding:", "chunked");
-      te = "";
-    }
+  ptr = checkheaders(data, "Transfer-Encoding:");
+  if(ptr) {
+    /* Some kind of TE is requested, check if 'chunked' is chosen */
+    conn->bits.upload_chunky =
+      Curl_compareheader(ptr, "Transfer-Encoding:", "chunked");
   }
-  else if(conn->bits.upload_chunky) {
-    /* RFC2616 section 4.4:
-       Messages MUST NOT include both a Content-Length header field and a
-       non-identity transfer-coding. If the message does include a non-
-       identity transfer-coding, the Content-Length MUST be ignored. */
-
-    if(!checkheaders(data, "Transfer-Encoding:")) {
+  else {
+    if (httpreq == HTTPREQ_GET)
+      conn->bits.upload_chunky = FALSE;
+    if(conn->bits.upload_chunky)
       te = "Transfer-Encoding: chunked\r\n";
-    }
-    else {
-      te = "";
-      conn->bits.upload_chunky = FALSE; /* transfer-encoding was disabled,
-                                           so don't chunkify this! */
-    }
   }
 
   Curl_safefree(conn->allocptr.host);

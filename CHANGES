@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (2 August 2006)
+- Mark Lentczner fixed how libcurl was not properly doing chunked encoding
+  if the header "Transfer-Encoding: chunked" was set by the application.
+  http://curl.haxx.se/bug/view.cgi?id=1531838
+
 Daniel (1 August 2006)
 - Maciej Karpiuk fixed a crash that would occur if we passed Curl_strerror()
   an unknown error number on glibc systems.
