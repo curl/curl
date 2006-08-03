@@ -1,5 +1,10 @@
   Changelog for the c-ares project
 
+* August 3 2006
+
+- Ravi Pratap fixed ares_getsock() to actually return the proper bitmap and
+  not always zero!
+
 Version 1.3.1 (June 24, 2006)
 
 * July 23, 2006
