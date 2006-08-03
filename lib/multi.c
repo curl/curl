@@ -540,8 +540,7 @@ CURLMcode curl_multi_fdset(CURLM *multi_handle,
 }
 
 static CURLMcode multi_runsingle(struct Curl_multi *multi,
-                                 struct Curl_one_easy *easy,
-                                 int *running_handles)
+                                 struct Curl_one_easy *easy)
 {
   struct Curl_message *msg = NULL;
   bool connected;
@@ -935,7 +934,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     multi->num_msgs++; /* increase message counter */
   }
 
-  *running_handles = multi->num_alive;
   return result;
 }
 
@@ -952,7 +950,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
 
   easy=multi->easy.next;
   while(easy) {
-    CURLMcode result = multi_runsingle(multi, easy, running_handles);
+    CURLMcode result = multi_runsingle(multi, easy);
     if(result)
       returncode = result;
 
@@ -1198,7 +1196,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
 
     data = entry->easy;
 
-    result = multi_runsingle(multi, data->set.one_easy, running_handles);
+    result = multi_runsingle(multi, data->set.one_easy);
 
     if(result == CURLM_OK)
       /* get the socket(s) and check if the state has been changed since
@@ -1222,7 +1220,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
 
     /* the first loop lap 'data' can be NULL */
     if(data) {
-      result = multi_runsingle(multi, data->set.one_easy, running_handles);
+      result = multi_runsingle(multi, data->set.one_easy);
 
       if(result == CURLM_OK)
         /* get the socket(s) and check if the state has been changed since
