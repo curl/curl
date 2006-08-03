@@ -81,6 +81,18 @@ esac
 AC_MSG_RESULT($need_no_undefined)
 AM_CONDITIONAL(NO_UNDEFINED, test x$need_no_undefined = xyes)
 
+AC_MSG_CHECKING([if we need ws2_32 lib])
+case $host in
+  *-*-mingw* | *-*-pw32*)
+    need_lib_ws2_32=yes
+    LIBS="$LIBS -lws2_32"
+    ;;
+  *)
+    need_lib_ws2_32=no
+    ;;
+esac
+AC_MSG_RESULT($need_lib_ws2_32)
+
 dnl Checks for header files.
 AC_HEADER_STDC
 
