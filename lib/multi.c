@@ -935,6 +935,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     multi->num_msgs++; /* increase message counter */
   }
 
+  *running_handles = multi->num_alive;
   return result;
 }
 
