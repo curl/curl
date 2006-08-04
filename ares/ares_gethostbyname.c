@@ -172,7 +172,7 @@ static void host_callback(void *arg, int status, unsigned char *abuf, int alen)
     }
   else if (status == ARES_ENODATA && hquery->family == AF_INET6)
     {
-      /* There was no AAAA now lookup an A */
+      /* There was no AAAA. Now lookup an A */
       hquery->family = AF_INET;
       ares_search(hquery->channel, hquery->name, C_IN, T_A, host_callback,
                   hquery);
