@@ -1203,10 +1203,9 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
          last */
       singlesocket(multi, data->set.one_easy);
 
-    *running_handles = multi->num_alive;
-
-    /* or should we fall-through and do the timer-based stuff? */
-    return result;
+    /* Now we fall-through and do the timer-based stuff, since we don't want
+       to force the user to have to deal with timeouts as long as at least one
+       connection in fact has traffic. */
   }
 
   /*
