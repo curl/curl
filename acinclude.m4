@@ -737,8 +737,7 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
       done
     ]) # AC_CACHE_CHECK
     if test "$curl_cv_func_recv_args" = "unknown"; then
-      AC_MSG_WARN([Cannot find proper types to use for recv args])
-      AC_MSG_WARN([HAVE_RECV will not be defined])
+      AC_MSG_ERROR([Cannot find proper types to use for recv args])
     else
       recv_prev_IFS=$IFS; IFS=','
       set dummy `echo "$curl_cv_func_recv_args" | sed 's/\*/\*/g'`
@@ -760,6 +759,8 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
         [Define to 1 if you have the recv function.])
       ac_cv_func_recv="yes"
     fi
+  else
+    AC_MSG_ERROR([Unable to link function recv])
   fi
 ]) # AC_DEFUN
 
@@ -865,8 +866,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
       done
     ]) # AC_CACHE_CHECK
     if test "$curl_cv_func_send_args" = "unknown"; then
-      AC_MSG_WARN([Cannot find proper types to use for send args])
-      AC_MSG_WARN([HAVE_SEND will not be defined])
+      AC_MSG_ERROR([Cannot find proper types to use for send args])
     else
       send_prev_IFS=$IFS; IFS=','
       set dummy `echo "$curl_cv_func_send_args" | sed 's/\*/\*/g'`
@@ -922,6 +922,8 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
         [Define to 1 if you have the send function.])
       ac_cv_func_send="yes"
     fi
+  else
+    AC_MSG_ERROR([Unable to link function send])
   fi
 ]) # AC_DEFUN
 
