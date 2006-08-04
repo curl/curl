@@ -1497,7 +1497,7 @@ typedef struct {
   const char *ares;
   int ares_num;
 
-  /* This field was aded in CURLVERSION_THIRD */
+  /* This field was added in CURLVERSION_THIRD */
   const char *libidn;
 } curl_version_info_data;
 
