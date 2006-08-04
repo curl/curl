@@ -1206,6 +1206,9 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     /* Now we fall-through and do the timer-based stuff, since we don't want
        to force the user to have to deal with timeouts as long as at least one
        connection in fact has traffic. */
+
+    data = NULL; /* set data to NULL again to avoid calling multi_runsingle()
+                    in case there's no need to */
   }
 
   /*
