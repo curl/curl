@@ -135,7 +135,7 @@ inet_ntop6(const unsigned char *src, char *dst, size_t size)
     long base;
     long len;
   } best, cur;
-  unsigned int words[NS_IN6ADDRSZ / NS_INT16SZ];
+  unsigned long words[NS_IN6ADDRSZ / NS_INT16SZ];
   int i;
 
   /*
@@ -143,7 +143,7 @@ inet_ntop6(const unsigned char *src, char *dst, size_t size)
    *  Copy the input (bytewise) array into a wordwise array.
    *  Find the longest run of 0x00's in src[] for :: shorthanding.
    */
-  memset(words, '\0', sizeof words);
+  memset(words, '\0', sizeof(words));
   for (i = 0; i < NS_IN6ADDRSZ; i++)
       words[i / 2] |= (src[i] << ((1 - (i % 2)) << 3));
 
@@ -200,12 +200,12 @@ inet_ntop6(const unsigned char *src, char *dst, size_t size)
       if (i == 6 && best.base == 0 &&
           (best.len == 6 || (best.len == 5 && words[5] == 0xffff)))
         {
-          if (!inet_ntop4(src+12, tp, sizeof tmp - (tp - tmp)))
+          if (!inet_ntop4(src+12, tp, sizeof(tmp) - (tp - tmp)))
             return (NULL);
           tp += strlen(tp);
           break;
         }
-        tp += SPRINTF((tp, "%x", words[i]));
+        tp += SPRINTF((tp, "%lx", words[i]));
     }
 
   /* Was it a trailing run of 0x00's? */
