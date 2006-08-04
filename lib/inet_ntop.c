@@ -106,14 +106,14 @@ static char *inet_ntop6 (const unsigned char *src, char *dst, size_t size)
    * Keep this in mind if you think this function should have been coded
    * to use pointer overlays.  All the world's not a VAX.
    */
-  char  tmp [sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255")];
+  char tmp[sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255")];
   char *tp;
   struct {
     long base;
     long len;
   } best, cur;
-  u_long words [IN6ADDRSZ / INT16SZ];
-  int    i;
+  unsigned long words[IN6ADDRSZ / INT16SZ];
+  int i;
 
   /* Preprocess:
    *  Copy the input (bytewise) array into a wordwise array.
@@ -125,6 +125,9 @@ static char *inet_ntop6 (const unsigned char *src, char *dst, size_t size)
 
   best.base = -1;
   cur.base  = -1;
+  best.len = 0;
+  cur.len = 0;
+
   for (i = 0; i < (IN6ADDRSZ / INT16SZ); i++)
   {
     if (words[i] == 0)
