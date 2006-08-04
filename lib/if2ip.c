@@ -33,9 +33,13 @@
 
 #include "if2ip.h"
 
+/*
+ * This test can probably be simplified to #if defined(SIOCGIFADDR) and
+ * moved after the following includes.
+ */
 #if !defined(WIN32) && !defined(__BEOS__) && !defined(__CYGWIN__) && \
     !defined(__riscos__) && !defined(__INTERIX) && !defined(NETWARE) && \
-    !defined(_AMIGASF)
+    !defined(_AMIGASF) && !defined(_MINIX)
 
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
