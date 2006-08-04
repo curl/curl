@@ -81,10 +81,12 @@
  * winsock2.h, ws2tcpip.h or winsock.h. Any other windows thing belongs
  * to any other further and independant block.  Under Cygwin things work
  * just as under linux (e.g. <sys/socket.h>) and the winsock headers should
- * never be included when __CYGWIN__ is defined.
+ * never be included when __CYGWIN__ is defined.  configure script takes
+ * care of this, not defining HAVE_WINDOWS_H, HAVE_WINSOCK_H, HAVE_WINSOCK2_H,
+ * neither HAVE_WS2TCPIP_H when __CYGWIN__ is defined.
  */
 
-#if defined(HAVE_WINDOWS_H) && !defined(__CYGWIN__)
+#ifdef HAVE_WINDOWS_H
 #  ifndef WIN32_LEAN_AND_MEAN
 #    define WIN32_LEAN_AND_MEAN
 #  endif
