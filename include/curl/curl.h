@@ -1499,6 +1499,9 @@ typedef struct {
 
   /* This field was added in CURLVERSION_THIRD */
   const char *libidn;
+
+  /* Same as '_libiconv_version' if built with HAVE_ICONV */
+  int iconv_ver_num;
 } curl_version_info_data;
 
 #define CURL_VERSION_IPV6      (1<<0)  /* IPv6-enabled */
