@@ -370,3 +370,5 @@ $(OBJ_DIR)\tftp.obj: tftp.c setup.h config-win32.h urldata.h cookie.h &
   ..\include\curl\multi.h formdata.h http_chunks.h hostip.h hash.h llist.h &
   transfer.h sendf.h tftp.h progress.h ..\include\curl\mprintf.h memory.h &
   select.h memdebug.h
+
+$(OBJ_DIR)\splay.obj: splay.c splay.h
