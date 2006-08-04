@@ -41,6 +41,9 @@
 #include <stringprep.h>
 #endif
 
+#if defined(HAVE_ICONV) && defined(CURL_DOES_CONVERSIONS)
+#include <iconv.h>
+#endif
 
 char *curl_version(void)
 {
@@ -73,6 +76,12 @@ char *curl_version(void)
     left -= len;
     ptr += len;
   }
+#endif
+#if defined(HAVE_ICONV) && defined(CURL_DOES_CONVERSIONS)
+  len = snprintf(ptr, left, " iconv/%d.%d",
+                 _libiconv_version >> 8, _libiconv_version & 255);
+  left -= len;
+  ptr += len;
 #endif
 
   return version;
@@ -164,6 +173,7 @@ static curl_version_info_data version_info = {
   NULL, /* c-ares version */
   0,    /* c-ares version numerical */
   NULL, /* libidn version */
+  0,    /* iconv version */
 };
 
 curl_version_info_data *curl_version_info(CURLversion stamp)
@@ -192,6 +202,11 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
   if(version_info.libidn)
     version_info.features |= CURL_VERSION_IDN;
 #endif
+
+#if defined(HAVE_ICONV) && defined(CURL_DOES_CONVERSIONS)
+  version_info.iconv_ver_num = _libiconv_version;
+#endif
+
   (void)stamp; /* avoid compiler warnings, we don't use this */
 
   return &version_info;
