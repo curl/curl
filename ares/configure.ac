@@ -16,10 +16,6 @@ solaris*)
 	;;
 esac
 
-AC_SEARCH_LIBS(gethostbyname, nsl)
-AC_SEARCH_LIBS(socket, socket)
-
-dnl check for cygwin stuff
 AC_LIBTOOL_WIN32_DLL
 
 dnl ************************************************************
@@ -81,17 +77,114 @@ esac
 AC_MSG_RESULT($need_no_undefined)
 AM_CONDITIONAL(NO_UNDEFINED, test x$need_no_undefined = xyes)
 
-AC_MSG_CHECKING([if we need ws2_32 lib])
-case $host in
-  *-*-mingw* | *-*-pw32*)
-    need_lib_ws2_32=yes
-    LIBS="$LIBS -lws2_32"
-    ;;
-  *)
-    need_lib_ws2_32=no
-    ;;
-esac
-AC_MSG_RESULT($need_lib_ws2_32)
+dnl **********************************************************************
+dnl Checks for libraries.
+dnl **********************************************************************
+
+dnl gethostbyname without lib or in the nsl lib?
+AC_CHECK_FUNC(gethostbyname,
+              [HAVE_GETHOSTBYNAME="1"
+              ],
+              [ AC_CHECK_LIB(nsl, gethostbyname,
+                             [HAVE_GETHOSTBYNAME="1"
+                             LIBS="$LIBS -lnsl"
+                             ])
+              ])
+
+if test "$HAVE_GETHOSTBYNAME" != "1"
+then
+  dnl gethostbyname in the socket lib?
+  AC_CHECK_LIB(socket, gethostbyname,
+               [HAVE_GETHOSTBYNAME="1"
+               LIBS="$LIBS -lsocket"
+               ])
+fi
+
+dnl At least one system has been identified to require BOTH nsl and socket
+dnl libs at the same time to link properly.
+if test "$HAVE_GETHOSTBYNAME" != "1"
+then
+  AC_MSG_CHECKING([for gethostbyname with both nsl and socket libs])
+  my_ac_save_LIBS=$LIBS
+  LIBS="-lnsl -lsocket $LIBS"
+  AC_TRY_LINK( ,
+             [gethostbyname();],
+             [ dnl found it!
+             HAVE_GETHOSTBYNAME="1"
+             AC_MSG_RESULT([yes])],
+             [ dnl failed!
+             AC_MSG_RESULT([no])
+             dnl restore LIBS
+             LIBS=$my_ac_save_LIBS]
+             )
+fi
+
+if test "$HAVE_GETHOSTBYNAME" != "1"
+then
+  dnl This is for Msys/Mingw
+  AC_MSG_CHECKING([for gethostbyname in ws2_32])
+  my_ac_save_LIBS=$LIBS
+  LIBS="-lws2_32 $LIBS"
+  AC_TRY_LINK([#include <winsock2.h>],
+               [gethostbyname("www.dummysite.com");],
+               [ dnl worked!
+               ws2="yes"
+               AC_MSG_RESULT([yes])
+               HAVE_GETHOSTBYNAME="1"],
+               [ dnl failed, restore LIBS
+               LIBS=$my_ac_save_LIBS
+               AC_MSG_RESULT(no)]
+             )
+fi
+
+if test "$HAVE_GETHOSTBYNAME" != "1"
+then
+  dnl This is for eCos with a stubbed DNS implementation
+  AC_MSG_CHECKING([for gethostbyname for eCos])
+  AC_TRY_LINK([
+#include <stdio.h>
+#include <netdb.h>],
+               [gethostbyname("www.dummysite.com");],
+               [ dnl worked!
+               AC_MSG_RESULT([yes])
+               HAVE_GETHOSTBYNAME="1"],
+               AC_MSG_RESULT(no)
+             )
+fi
+
+if test "$HAVE_GETHOSTBYNAME" != "1"
+then
+  dnl gethostbyname in the net lib - for BeOS
+  AC_CHECK_LIB(net, gethostbyname,
+               [HAVE_GETHOSTBYNAME="1"
+               LIBS="$LIBS -lnet"
+               ])
+fi
+
+
+if test "$HAVE_GETHOSTBYNAME" = "1"; then
+  AC_DEFINE(HAVE_GETHOSTBYNAME, 1, [If you have gethostbyname])
+else
+  AC_MSG_ERROR([couldn't find libraries for gethostbyname()])
+fi
+
+AC_MSG_CHECKING([whether to use libgcc])
+AC_ARG_ENABLE(libgcc,
+AC_HELP_STRING([--enable-libgcc],[use libgcc when linking]),
+[ case "$enableval" in
+  yes)
+        LIBS="$LIBS -lgcc"
+       AC_MSG_RESULT(yes)
+       ;;
+  *)   AC_MSG_RESULT(no)
+       ;;
+  esac ],
+       AC_MSG_RESULT(no)
+)
+
+dnl **********************************************************************
+dnl Back to "normal" configuring
+dnl **********************************************************************
 
 dnl Checks for header files.
 AC_HEADER_STDC
