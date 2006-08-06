@@ -168,6 +168,22 @@ else
   AC_MSG_ERROR([couldn't find libraries for gethostbyname()])
 fi
 
+dnl resolve lib?
+AC_CHECK_FUNC(strcasecmp, , [ AC_CHECK_LIB(resolve, strcasecmp) ])
+
+if test "$ac_cv_lib_resolve_strcasecmp" = "$ac_cv_func_strcasecmp"; then
+  AC_CHECK_LIB(resolve, strcasecmp,
+              [LIBS="-lresolve $LIBS"],
+               ,
+               -lnsl)
+fi
+
+dnl socket lib?
+AC_CHECK_FUNC(connect, , [ AC_CHECK_LIB(socket, connect) ])
+
+dnl dl lib?
+AC_CHECK_FUNC(dlclose, , [ AC_CHECK_LIB(dl, dlopen) ])
+
 AC_MSG_CHECKING([whether to use libgcc])
 AC_ARG_ENABLE(libgcc,
 AC_HELP_STRING([--enable-libgcc],[use libgcc when linking]),
