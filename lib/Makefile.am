@@ -43,7 +43,10 @@ lib_LTLIBRARIES = libcurl.la
 # we use srcdir/include for the static global include files
 # we use builddir/lib for the generated lib/config.h file to get found
 # we use srcdir/lib for the lib-private header files
-INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/lib -I$(top_srcdir)/lib
+
+INCLUDES = -I$(top_srcdir)/include \
+           -I$(top_builddir)/lib   \
+           -I$(top_srcdir)/lib 
 
 VERSION=-version-info 3:0:0
 

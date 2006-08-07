@@ -21,9 +21,13 @@
 # $Id$
 ###########################################################################
 
+
+
 AUTOMAKE_OPTIONS = foreign
 
-INCLUDES = -I$(top_srcdir)/lib -I$(top_srcdir)/include
+INCLUDES = -I$(top_srcdir)/include \
+           -I$(top_builddir)/lib   \
+           -I$(top_srcdir)/lib 
 
 noinst_PROGRAMS = sws getpart sockfilt resolve tftpd
 

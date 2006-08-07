@@ -28,9 +28,10 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # -I$(top_srcdir)/lib is for the setup.h file, included by test.h
 # -I$(top_builddir)/lib is for the config.h file, possibly included by the
 # setup.h file
+
 INCLUDES = -I$(top_srcdir)/include/curl \
-           -I$(top_srcdir)/lib \
-           -I$(top_builddir)/lib
+           -I$(top_builddir)/lib   \
+           -I$(top_srcdir)/lib 
 
 LIBDIR = $(top_builddir)/lib
 
