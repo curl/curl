@@ -6,6 +6,8 @@
 
                                   Changelog
 
+Version 7.15.5 (7 August 2006)
+
 Daniel (2 August 2006)
 - Mark Lentczner fixed how libcurl was not properly doing chunked encoding
   if the header "Transfer-Encoding: chunked" was set by the application.
