@@ -74,7 +74,7 @@ struct fdinfo {
   long timeout; /* as set by libcurl */
   struct event ev; /* */
   int evset; /* true if the 'ev' struct has been used in a event_set() call */
-  CURLMcode *multi; /* pointer to the multi handle */
+  CURLM *multi; /* pointer to the multi handle */
   int *running_handles; /* pointer to the running_handles counter */
 };
 
