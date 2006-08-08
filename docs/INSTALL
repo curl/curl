@@ -446,12 +446,12 @@ NetWare
    - either any gcc / nlmconv, or CodeWarrior 7 PDK 4 or later.
    - gnu make and awk running on the platform you compile on;
      native Win32 versions can be downloaded from:
-     http://www.gknw.com/development/prgtools/
+     http://www.gknw.net/development/prgtools/
    - recent Novell LibC SDK available from:
      http://developer.novell.com/ndk/libc.htm
    - optional zlib sources (at the moment only dynamic linking with zlib.imp);
      sources with NetWare Makefile can be obtained from:
-     http://www.gknw.com/mirror/zlib/
+     http://www.gknw.net/mirror/zlib/
    - optional OpenSSL sources (version 0.9.8 or later which builds with BSD);
 
    Set a search path to your compiler, linker and tools; on Linux make
@@ -465,7 +465,7 @@ NetWare
    with 'OSTYPE=linux-rh9-gnu' and the detection in the Makefile worked...
    Any help in testing appreciated!
    Builds automatically created 8 times a day from current CVS are here:
-   http://www.gknw.com/mirror/curl/autobuilds/
+   http://www.gknw.net/mirror/curl/autobuilds/
    the status of these builds can be viewed at the autobuild table:
    http://curl.haxx.se/auto/
 
