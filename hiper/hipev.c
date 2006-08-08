@@ -86,6 +86,8 @@ static int running_handles;
    done, we can remove the timerevent as well */
 static struct event timerevent;
 
+static void update_timeout(CURLM *multi_handle);
+
 /* called from libevent on action on a particular socket ("event") */
 static void eventcallback(int fd, short type, void *userp)
 {
@@ -110,6 +112,8 @@ static void eventcallback(int fd, short type, void *userp)
     if(evtimer_pending(&timerevent, NULL))
       evtimer_del(&timerevent);
   }
+  else
+    update_timeout(fdp->multi);
 }
 
 /* called from libevent when our timer event expires */
@@ -118,8 +122,6 @@ static void timercallback(int fd, short type, void *userp)
   (void)fd; /* not used for this */
   (void)type; /* ignored in here */
   CURLM *multi_handle = (CURLM *)userp;
-  long timeout_ms;
-  struct timeval timeout;
   int running_handles;
   CURLMcode rc;
 
@@ -131,15 +133,9 @@ static void timercallback(int fd, short type, void *userp)
                            &running_handles);
   } while (rc == CURLM_CALL_MULTI_PERFORM);
 
-  if(running_handles) {
+  if(running_handles)
     /* Get the current timeout value from libcurl and set a new timeout */
-    curl_multi_timeout(multi_handle, &timeout_ms);
-
-    /* convert ms to timeval */
-    timeout.tv_sec = timeout_ms/1000;
-    timeout.tv_usec = (timeout_ms%1000)*1000;
-    evtimer_add(&timerevent, &timeout);
-  }
+    update_timeout(multi_handle);
 }
 
 static void remsock(struct fdinfo *f)
@@ -266,6 +262,7 @@ writecallback(void *ptr, size_t size, size_t nmemb, void *data)
 {
   size_t realsize = size * nmemb;
   struct connection *c = (struct connection *)data;
+  (void)ptr;
 
   c->dlcounter += realsize;
   c->global->dlcounter += realsize;
@@ -283,19 +280,28 @@ int num_total;
 int num_idle;
 int num_active;
 
+static void update_timeout(CURLM *multi_handle)
+{
+  long timeout_ms;
+  struct timeval timeout;
+
+  /* Since we need a global timeout to occur after a given time of inactivity,
+     we use a single timeout-event. Get the timeout value from libcurl, and
+     update it after every call to libcurl. */
+  curl_multi_timeout(multi_handle, &timeout_ms);
+
+  /* convert ms to timeval */
+  timeout.tv_sec = timeout_ms/1000;
+  timeout.tv_usec = (timeout_ms%1000)*1000;
+  evtimer_add(&timerevent, &timeout);
+}
+
 int main(int argc, char **argv)
 {
   CURLM *multi_handle;
   CURLMsg *msg;
   CURLcode code = CURLE_OK;
-  CURLMcode mcode = CURLM_OK;
-  int rc;
   int i;
-  int selectmaxamount;
-  struct fdinfo *fdp;
-  char act;
-  long timeout_ms;
-  struct timeval timeout;
 
   memset(&info, 0, sizeof(struct globalinfo));
 
@@ -324,12 +330,14 @@ int main(int argc, char **argv)
 
   printf("About to do %d connections\n", num_total);
 
+  /* initialize the timeout event */
+  evtimer_set(&timerevent, timercallback, multi_handle);
+
   /* init the multi stack */
   multi_handle = curl_multi_init();
 
   for(i=0; i< num_total; i++) {
     CURL *e;
-    char *nl;
 
     memset(&conns[i], 0, sizeof(struct connection));
 
@@ -370,14 +378,8 @@ int main(int argc, char **argv)
   while(CURLM_CALL_MULTI_PERFORM == curl_multi_socket_all(multi_handle,
                                                           &running_handles));
 
-  /* Since we need a global timeout to occur after a given time of inactivity,
-     we add a single timeout-event. Get the timeout value from libcurl */
-  curl_multi_timeout(multi_handle, &timeout_ms);
-  /* convert ms to timeval */
-  timeout.tv_sec = timeout_ms/1000;
-  timeout.tv_usec = (timeout_ms%1000)*1000;
-  evtimer_set(&timerevent, timercallback, multi_handle);
-  evtimer_add(&timerevent, &timeout);
+  /* update timeout */
+  update_timeout(multi_handle);
 
   /* event_dispatch() runs the event main loop. It ends when no events are
      left to wait for. */
