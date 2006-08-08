@@ -209,12 +209,15 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
         if (!Curl_ssl_check_cxn(data->state.connects[data->state.lastconnect]))
           *param_longp = -1;   /* FIN received */
       }
+/* Minix 3.1 doesn't support any flags on recv; just assume socket is OK */
+#ifdef MSG_PEEK
       else {
         /* use the socket */
         if(recv((int)data->state.connects[data->state.lastconnect]->
                 sock[FIRSTSOCKET], (void*)&buf, 1, MSG_PEEK) == 0)
           *param_longp = -1;   /* FIN received */
       }
+#endif
     }
     else
       *param_longp = -1;
