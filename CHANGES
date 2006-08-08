@@ -6,6 +6,17 @@
 
                                   Changelog
 
+Daniel (8 August 2006)
+- Fixed a flaw in the "Expect: 100-continue" treatment. If you did two POSTs
+  on a persistent connection and allowed the first to use that header, you
+  could not disable it for the second request.
+
+Daniel (7 August 2006)
+- Domenico Andreolfound a quick build error which happened because
+  src/config.h.in was not a proper duplcate of lib/config.h.in which it
+  should've been and this was due to the maketgz script not doing the cp
+  properly.
+
 Version 7.15.5 (7 August 2006)
 
 Daniel (2 August 2006)

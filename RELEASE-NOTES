@@ -9,28 +9,14 @@ Curl and libcurl 7.15.6
  Number of known libcurl bindings:         32
  Number of contributors:                   515
 
-This release includes the following changes:
-
- o 
-
 This release includes the following bugfixes:
 
- o 
-
-Other curl-related news:
-
- o 
-
-New curl mirrors:
-
- o 
+ o "Expect: 100-continue" disable on second POST on re-used connection
+ o src/config.h.in is fixed
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dan Fandrich, Peter Silva, Arve Knudsen, Michael Wallner, Toshiyuki Maezawa,
- Ingmar Runge, Ates Goral, David McCreedy, Jari Sundell, Georg Horn,
- Gisle Vanem, Yang Tse, Michael Jerris, Dan Nelson, Yves Lejeune,
- Maciej Karpiuk, Mark Lentczner
+ Domenico Andreoli
 
         Thanks! (and sorry if I forgot to mention someone)

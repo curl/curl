@@ -1532,14 +1532,14 @@ CURLcode Curl_readwrite_init(struct connectdata *conn)
          Thus, we must check if the request has been sent before we set the
          state info where we wait for the 100-return code
       */
-      if (data->set.expect100header &&
+      if (data->state.expect100header &&
           (conn->proto.http->sending == HTTPSEND_BODY)) {
         /* wait with write until we either got 100-continue or a timeout */
         k->write_after_100_header = TRUE;
         k->start100 = k->start;
       }
       else {
-        if(data->set.expect100header)
+        if(data->state.expect100header)
           /* when we've sent off the rest of the headers, we must await a
              100-continue */
           k->wait100_after_headers = TRUE;
