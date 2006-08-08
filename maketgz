@@ -57,6 +57,9 @@ findprog()
   return 0
 }
 
+echo "maketgz: cp lib/config.h.in src/config.h.in"
+cp lib/config.h.in src/config.h.in
+
 ############################################################################
 #
 # Enforce a rerun of configure (updates the VERSION)
