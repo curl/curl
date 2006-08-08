@@ -6,8 +6,14 @@
 
                                   Changelog
 
+Daniel (9 August 2006)
+- Armel Asselin made the CURLOPT_PREQUOTE option work fine even when
+  CURLOPT_NOBODY is set true. PREQUOTE is then run roughly at the same place
+  in the command sequence as it would have run if there would've been a
+  transfer.
+
 Daniel (8 August 2006)
-- Fixed a flaw in the "Expect: 100-continue" treatment. If you did two POSTs
+- - Fixed a flaw in the "Expect: 100-continue" treatment. If you did two POSTs
   on a persistent connection and allowed the first to use that header, you
   could not disable it for the second request.
 

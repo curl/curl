@@ -9,6 +9,10 @@ Curl and libcurl 7.15.6
  Number of known libcurl bindings:         32
  Number of contributors:                   515
 
+This release includes the following changes:
+
+ o CURLOPT_PREQUOTE works even when CURLOPT_NOBODY is set true
+
 This release includes the following bugfixes:
 
  o "Expect: 100-continue" disable on second POST on re-used connection
@@ -17,6 +21,6 @@ This release includes the following bugfixes:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Domenico Andreoli
+ Domenico Andreoli, Armel Asselin, Gisle Vanem, Yang Tse
 
         Thanks! (and sorry if I forgot to mention someone)

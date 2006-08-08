@@ -1206,11 +1206,12 @@ static CURLcode ftp_state_post_rest(struct connectdata *conn)
   struct SessionHandle *data = conn->data;
 
   if(ftp->no_transfer || conn->bits.no_body) {
-    /* then we're done with a "head"-like request, goto STOP */
-    state(conn, FTP_STOP);
-
     /* doesn't transfer any data */
     ftp->no_transfer = TRUE;
+
+    /* still possibly do PRE QUOTE jobs */
+    state(conn, FTP_RETR_PREQUOTE);
+    result = ftp_state_quote(conn, TRUE, FTP_RETR_PREQUOTE);
   }
   else if(data->set.ftp_use_port) {
     /* We have chosen to use the PORT (or similar) command */
@@ -1497,8 +1498,12 @@ static CURLcode ftp_state_quote(struct connectdata *conn,
       result = ftp_state_cwd(conn);
       break;
     case FTP_RETR_PREQUOTE:
-      NBFTPSENDF(conn, "SIZE %s", ftp->file);
-      state(conn, FTP_RETR_SIZE);
+      if (ftp->no_transfer)
+        state(conn, FTP_STOP);
+      else {
+        NBFTPSENDF(conn, "SIZE %s", ftp->file);
+        state(conn, FTP_RETR_SIZE);
+      }
       break;
     case FTP_STOR_PREQUOTE:
       result = ftp_state_ul_setup(conn, FALSE);

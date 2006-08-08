@@ -821,7 +821,8 @@ Pass a pointer to a linked list of FTP commands to pass to the server after
 the transfer type is set. The linked list should be a fully valid list of
 struct curl_slist structs properly filled in as described for
 \fICURLOPT_QUOTE\fP. Disable this operation again by setting a NULL to this
-option.
+option. Before version 7.15.6, if you also set \fICURLOPT_NOBODY\fP non-zero,
+this option didn't work.
 .IP CURLOPT_FTPLISTONLY
 A non-zero parameter tells the library to just list the names of an ftp
 directory, instead of doing a full directory listing that would include file
