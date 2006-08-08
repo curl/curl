@@ -26,6 +26,11 @@
 #include "setup.h"
 #include "hash.h"
 
+#if (defined(NETWARE) && defined(__NOVELL_LIBC__))
+#undef in_addr_t
+#define in_addr_t uint32_t
+#endif
+
 /*
  * Setup comfortable CURLRES_* defines to use in the host*.c sources.
  */
