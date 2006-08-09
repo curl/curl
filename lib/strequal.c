@@ -28,7 +28,7 @@
 
 #include "strequal.h"
 
-#ifdef HAVE_STRCASECMP
+#if defined(HAVE_STRCASECMP) && defined(__STRICT_ANSI__)
 /* this is for "-ansi -Wall -pedantic" to stop complaining! */
 extern int (strcasecmp)(const char *s1, const char *s2);
 extern int (strncasecmp)(const char *s1, const char *s2, size_t n);
