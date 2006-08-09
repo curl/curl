@@ -3,7 +3,7 @@
 ## Makefile for building curl.nlm (NetWare version - gnu make)
 ## Use: make -f Makefile.netware
 ##
-## Comments to: Guenter Knauf <eflash@gmx.net>
+## Comments to: Guenter Knauf http://www.gknw.de/phpbb
 #
 #################################################################
 
@@ -19,7 +19,7 @@ endif
 
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8a
+OPENSSL_PATH = ../../openssl-0.9.8b
 endif
 
 ifndef INSTDIR
@@ -67,7 +67,7 @@ CP	= cp -afv
 # RM	= rm -f
 # if you want to mark the target as MTSAFE you will need a tool for
 # generating the xdc data for the linker; here's a minimal tool:
-# http://www.gknw.com/development/prgtools/mkxdc.zip
+# http://www.gknw.net/development/prgtools/mkxdc.zip
 MPKXDC	= mkxdc
 
 # Global flags for all compilers
