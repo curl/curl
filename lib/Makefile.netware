@@ -414,6 +414,31 @@ ca-bundle.h: Makefile.netware
 
 url.c: ca-bundle.h
 
+info: $(OBJDIR)/version.inc
+	@echo Configured to build $(TARGET) with these options:
+	@echo curl version:    $(LIBCURL_VERSION_STR)
+	@echo compiler/linker: $(CC) / $(LD)
+ifdef WITH_SSL
+	@echo SSL support:     enabled (OpenSSL)
+else
+	@echo SSL support:     no
+endif
+ifdef WITH_ZLIB
+	@echo zlib support:    enabled
+else
+	@echo zlib support:    no
+endif
+ifdef WITH_ARES
+	@echo c-ares support:  enabled
+else
+	@echo c-ares support:  no
+endif
+ifdef ENABLE_IPV6
+	@echo ipv6 support:    enabled
+else
+	@echo ipv6 support:    no
+endif
+
 $(LIBCARES):
 	$(MAKE) -C ../ares -f Makefile.netware lib
 
