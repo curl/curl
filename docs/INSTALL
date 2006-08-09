@@ -16,7 +16,6 @@ Installing Binary Packages
 
 UNIX
 ====
-
    A normal unix installation is made in three or four steps (after you've
    unpacked the source archive):
 
@@ -140,6 +139,7 @@ UNIX
      To build with yassl support instead of OpenSSL or GunTLS, you must build
      yassl with its OpenSSL emulation enabled and point to that directory root
      with configure --with-ssl.
+
 
 Win32
 =====
@@ -292,7 +292,6 @@ Win32
 
 IBM OS/2
 ========
-
    Building under OS/2 is not much different from building under unix.
    You need:
 
@@ -319,6 +318,7 @@ IBM OS/2
 
    If you're getting huge binaries, probably your makefiles have the -g in
    CFLAGS.
+
 
 VMS
 ===
@@ -390,6 +390,7 @@ VMS
    13-jul-2001
    N. Baggus
 
+
 QNX
 ===
    (This section was graciously brought to us by David Bentham)
@@ -441,7 +442,6 @@ AmigaOS
 
 NetWare
 =======
-
    To compile curl.nlm / libcurl.nlm you need:
    - either any gcc / nlmconv, or CodeWarrior 7 PDK 4 or later.
    - gnu make and awk running on the platform you compile on;
@@ -470,9 +470,96 @@ NetWare
    http://curl.haxx.se/auto/
 
 
+eCos
+====
+   curl does not use the eCos build system, so you must first build eCos
+   separately, then link curl to the resulting eCos library.  Here's a sample
+   configure line to do so on an x86 Linux box targeting x86:
+
+   GCCLIB=`gcc -print-libgcc-file-name` && \
+   CFLAGS="-D__ECOS=1 -nostdinc -I$ECOS_INSTALL/include \
+    -I`dirname $GCCLIB`/include" \
+   LDFLAGS="-nostdlib -Wl,--gc-sections -Wl,-static \
+    -L$ECOS_INSTALL/lib -Ttarget.ld -ltarget" \
+   ./configure --host=i386 --disable-shared \
+    --without-ssl --without-zlib --disable-manual --disable-ldap
+
+   In most cases, eCos users will be using libcurl from within a custom
+   embedded application.  Using the standard 'curl' executable from
+   within eCos means facing the limitation of the standard eCos C
+   startup code which does not allow passing arguments in main().  To
+   run 'curl' from eCos and have it do something useful, you will need
+   to either modify the eCos startup code to pass in some arguments, or
+   modify the curl application itself to retrieve its arguments from
+   some location set by the bootloader or hard-code them.
+
+   Something like the following patch could be used to hard-code some
+   arguments.  The MTAB_ENTRY line mounts a RAM disk as the root filesystem
+   (without mounting some kind of filesystem, eCos errors out all file
+   operations which curl does not take to well).  The next section synthesizes
+   some command-line arguments for curl to use, in this case to direct curl
+   to read further arguments from a file.  It then creates that file on the
+   RAM disk and places within it a URL to download: a file: URL that
+   just happens to point to the configuration file itself.  The results
+   of running curl in this way is the contents of the configuration file
+   printed to the console.
+
+--- src/main.c	19 Jul 2006 19:09:56 -0000	1.363
++++ src/main.c	24 Jul 2006 21:37:23 -0000
+@@ -4286,11 +4286,31 @@
+ }
+ 
+ 
++#ifdef __ECOS
++#include <cyg/fileio/fileio.h>
++MTAB_ENTRY( testfs_mte1,
++                   "/",
++                   "ramfs",
++                   "",
++                   0);
++#endif
+ 
+ int main(int argc, char *argv[])
+ {
+   int res;
+   struct Configurable config;
++#ifdef __ECOS
++  char *args[] = {"ecos-curl", "-K", "curlconf.txt"};
++  FILE *f;
++  argc = sizeof(args)/sizeof(args[0]);
++  argv = args;
++
++  f = fopen("curlconf.txt", "w");
++  if (f) {
++    fprintf(f, "--url file:curlconf.txt");
++    fclose(f);
++  }
++#endif
+   memset(&config, 0, sizeof(struct Configurable));
+ 
+   config.errors = stderr; /* default errors to stderr */
+
+
+Minix
+=====
+   curl can be compiled on Minix 3 using gcc (ACK has a few problems due
+   to mismatched headers and libraries as of ver. 3.1.2).  The gcc and bash
+   packages must be installed first.  The default heap size allocated to
+   bash is inadequate for running configure and will result in out of memory
+   errors.  Increase it with the command:
+
+     chmem =2048000 /usr/local/bin/bash
+
+   Make sure gcc and bash are in the PATH then configure curl with a
+   command like this:
+
+     ./configure GREP=/usr/bin/grep AR=/usr/gnu/bin/gar --disable-ldap
+
+   Then simply run 'make'.
+
+
 CROSS COMPILE
 =============
-
    (This section was graciously brought to us by Jim Duey, with additions by
    Dan Fandrich)
 
@@ -518,9 +605,9 @@ CROSS COMPILE
 
        ./configure --host=ARCH-OS
 
+
 REDUCING SIZE
 =============
-
    There are a number of configure options that can be used to reduce the
    size of libcurl for embedded applications where binary size is an
    important factor.  First, be sure to set the CFLAGS variable when
@@ -542,7 +629,7 @@ REDUCING SIZE
      --disable-crypto-auth (disables HTTP cryptographic authentication)
      --disable-ipv6 (disables support for IPv6)
      --disable-verbose (eliminates debugging strings and error code strings)
-     --enable-hidden-symbols (eliminates unneeded symbols in library)
+     --enable-hidden-symbols (eliminates unneeded symbols in the shared library)
      --without-libidn (disables support for the libidn DNS library)
      --without-ssl (disables support for SSL/TLS)
      --without-zlib (disables support for on-the-fly decompression)
@@ -553,7 +640,7 @@ REDUCING SIZE
    Be sure also to strip debugging symbols from your binaries after
    compiling using 'strip' (or the appropriate variant if cross-compiling).
    If space is really tight, you may be able to remove some unneeded
-   sections of the library using the -R option to objcopy (e.g. the
+   sections of the shared library using the -R option to objcopy (e.g. the
    .comment section).
 
    Using these techniques it is possible to create an HTTP-only shared
@@ -599,10 +686,12 @@ PORTS
         - Ultrix 4.3a
         - i386 BeOS
         - i386 DOS
+        - i386 eCos 1.3.1
         - i386 Esix 4.1
         - i386 FreeBSD
         - i386 HURD
         - i386 Linux 1.3, 2.0, 2.2, 2.3, 2.4, 2.6
+        - i386 MINIX 3.1.2
         - i386 NetBSD
         - i386 Novell NetWare
         - i386 OS/2
