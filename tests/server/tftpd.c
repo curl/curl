@@ -475,7 +475,7 @@ int main(int argc, char **argv)
   if (sock < 0) {
     perror("opening stream socket");
     logmsg("Error opening socket");
-    exit(1);
+    return 1;
   }
 
   flag = 1;
@@ -505,7 +505,7 @@ int main(int argc, char **argv)
   if(rc < 0) {
     perror("binding stream socket");
     logmsg("Error binding socket");
-    exit(1);
+    return 1;
   }
 
   pidfile = fopen(pidname, "w");

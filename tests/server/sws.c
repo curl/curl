@@ -760,7 +760,7 @@ int main(int argc, char *argv[])
 
   if (CURL_SOCKET_BAD == sock) {
     logmsg("Error opening socket: %d", errno);
-    exit(1);
+    return 1;
   }
 
   flag = 1;
@@ -768,7 +768,7 @@ int main(int argc, char *argv[])
             (void *) &flag, sizeof(flag))) {
     logmsg("setsockopt(SO_REUSEADDR) failed: %d", errno);
     sclose(sock);
-    exit(1);
+    return 1;
   }
 
 #ifdef ENABLE_IPV6
@@ -792,7 +792,7 @@ int main(int argc, char *argv[])
   if(0 != rc) {
     logmsg("Error binding socket: %d", errno);
     sclose(sock);
-    exit(1);
+    return 1;
   }
 
   pidfile = fopen(pidname, "w");
@@ -803,7 +803,7 @@ int main(int argc, char *argv[])
   else {
     fprintf(stderr, "Couldn't write pid file\n");
     sclose(sock);
-    exit(1);
+    return 1;
   }
 
   logmsg("Running IPv%d version on port %d",
@@ -819,7 +819,7 @@ int main(int argc, char *argv[])
   if(0 != rc) {
     logmsg("listen() failed with error: %d", errno);
     sclose(sock);
-    exit(1);
+    return 1;
   }
 
   while (1) {
