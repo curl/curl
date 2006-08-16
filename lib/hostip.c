@@ -409,10 +409,12 @@ int Curl_resolv(struct connectdata *conn,
 #ifdef HAVE_SIGSETJMP
   /* this allows us to time-out from the name resolver, as the timeout
      will generate a signal and we will siglongjmp() from that here */
-  if(!data->set.no_signal && sigsetjmp(curl_jmpenv, 1)) {
-    /* this is coming from a siglongjmp() */
-    failf(data, "name lookup timed out");
-    return CURLRESOLV_ERROR;
+  if(!data->set.no_signal) {
+    if (sigsetjmp(curl_jmpenv, 1)) {
+      /* this is coming from a siglongjmp() */
+      failf(data, "name lookup timed out");
+      return CURLRESOLV_ERROR;
+    }
   }
 #endif
 

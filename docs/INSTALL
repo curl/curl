@@ -684,6 +684,7 @@ PORTS
         - StrongARM/ARM7/ARM9 Linux 2.4, 2.6
         - StrongARM NetBSD 1.4.1
         - Ultrix 4.3a
+        - UNICOS 9.0
         - i386 BeOS
         - i386 DOS
         - i386 eCos 1.3.1

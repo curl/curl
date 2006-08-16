@@ -1180,9 +1180,12 @@ static int str2offset(curl_off_t *val, char *str)
    * definitions for LLONG_{MIN,MAX} or LONG_LONG_{MIN,MAX}.
    */
 #ifndef LLONG_MAX
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
 #define LLONG_MAX (curl_off_t)0x7FFFFFFFFFFFFFFFi64
 #define LLONG_MIN (curl_off_t)0x8000000000000000i64
+#elif defined(_CRAYC)
+#define LLONG_MAX (curl_off_t)0x7FFFFFFFFFFFFFFF
+#define LLONG_MIN (curl_off_t)0x8000000000000000
 #else
 #define LLONG_MAX (curl_off_t)0x7FFFFFFFFFFFFFFFLL
 #define LLONG_MIN (curl_off_t)0x8000000000000000LL
