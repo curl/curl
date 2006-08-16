@@ -18,6 +18,14 @@ This release includes the following bugfixes:
  o "Expect: 100-continue" disable on second POST on re-used connection
  o src/config.h.in is fixed
 
+Other curl-related news:
+
+ o pycurl-7.15.5 was released: http://pycurl.sf.net
+
+New curl mirrors:
+
+ o http://curl.gfiles.org/ is a new Russian mirror
+
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
