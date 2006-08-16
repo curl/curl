@@ -168,8 +168,7 @@ static CURLcode handshake(struct connectdata *conn,
   } while(1);
 
   if (rc < 0) {
-    failf(data, "gnutls_handshake() failed: %d", rc);
-    /* gnutls_perror(ret); */
+    failf(data, "gnutls_handshake() failed: %s", gnutls_strerror(rc));
     return CURLE_SSL_CONNECT_ERROR;
   }
 
