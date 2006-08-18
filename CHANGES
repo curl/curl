@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel (19 August 2006)
+- Andrew Biggs pointed out a "Expect: 100-continue" flaw where libcurl didn't
+  send the whole request at once, even though the Expect: header was disabled
+  by the application. An effect of this change is also that small (< 1024
+  bytes) POSTs are now always sent without Expect: header since we deem it
+  more costly to bother about that than the risk that we send the data in
+  vain.
+
 Daniel (9 August 2006)
 - Armel Asselin made the CURLOPT_PREQUOTE option work fine even when
   CURLOPT_NOBODY is set true. PREQUOTE is then run roughly at the same place
@@ -13,7 +21,7 @@ Daniel (9 August 2006)
   transfer.
 
 Daniel (8 August 2006)
-- - Fixed a flaw in the "Expect: 100-continue" treatment. If you did two POSTs
+- Fixed a flaw in the "Expect: 100-continue" treatment. If you did two POSTs
   on a persistent connection and allowed the first to use that header, you
   could not disable it for the second request.
 

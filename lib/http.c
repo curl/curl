@@ -2249,16 +2249,24 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
       if(data->set.postfields) {
 
-        if((data->state.authhost.done || data->state.authproxy.done )
-           && (postsize < MAX_INITIAL_POST_SIZE)) {
-          /* If we're not done with the authentication phase, we don't expect
-             to actually send off any data yet. Hence, we delay the sending of
-             the body until we receive that friendly 100-continue response */
+        /* for really small posts we don't use Expect: headers at all, and for
+           the somewhat bigger ones we allow the app to disable it */
+        if(postsize > TINY_INITIAL_POST_SIZE) {
+          result = expect100(data, req_buffer);
+          if(result)
+            return result;
+        }
+        else
+          data->state.expect100header = FALSE;
 
-          /* The post data is less than MAX_INITIAL_PORT_SIZE, then append it
-             to the header. This limit is no magic limit but only set to
-             prevent really huge POSTs to get the data duplicated with
-             malloc() and family. */
+        if(!data->state.expect100header &&
+           (postsize < MAX_INITIAL_POST_SIZE))  {
+          /* if we don't use expect:-100  AND
+             postsize is less than MAX_INITIAL_POST_SIZE
+
+             then append the post data to the HTTP request header. This limit
+             is no magic limit but only set to prevent really huge POSTs to
+             get the data duplicated with malloc() and family. */
 
           result = add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
           if(result)
@@ -2297,18 +2305,10 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           /* set the upload size to the progress meter */
           Curl_pgrsSetUploadSize(data, http->postsize);
 
-          result = expect100(data, req_buffer);
-          if(result)
-            return result;
-
           add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
         }
       }
       else {
-        result = expect100(data, req_buffer);
-        if(result)
-          return result;
-
         add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
 
         if(data->set.postfieldsize) {

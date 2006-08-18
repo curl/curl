@@ -39,7 +39,6 @@ Host: 127.0.0.1:%HTTPPORT
 Accept: */*
 Content-Length: 45
 Content-Type: application/x-www-form-urlencoded
-Expect: 100-continue
 
 this is what we post to the silly web server
 </protocol>

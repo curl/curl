@@ -74,7 +74,11 @@ int Curl_http_should_fail(struct connectdata *conn);
    It must not be greater than 64K to work on VMS.
 */
 #ifndef MAX_INITIAL_POST_SIZE
-#define MAX_INITIAL_POST_SIZE 1024
+#define MAX_INITIAL_POST_SIZE (64*1024)
+#endif
+
+#ifndef TINY_INITIAL_POST_SIZE
+#define TINY_INITIAL_POST_SIZE 1024
 #endif
 
 #endif
