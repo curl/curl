@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel (19 August 2006)
+- Armel Asselin fixed a crash in the FTP code when using SINGLECWD mode and
+  files in the root directory.
+
 - Andrew Biggs pointed out a "Expect: 100-continue" flaw where libcurl didn't
   send the whole request at once, even though the Expect: header was disabled
   by the application. An effect of this change is also that small (< 1024

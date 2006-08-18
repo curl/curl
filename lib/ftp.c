@@ -3804,19 +3804,20 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
   case FTPFILE_SINGLECWD:
     /* get the last slash */
     slash_pos=strrchr(cur_pos, '/');
-    if(slash_pos) {
+    if(slash_pos || !cur_pos || !*cur_pos) {
       ftp->dirdepth = 1; /* we consider it to be a single dir */
       ftp->dirs = (char **)calloc(1, sizeof(ftp->dirs[0]));
       if(!ftp->dirs)
         return CURLE_OUT_OF_MEMORY;
 
-      ftp->dirs[0] = curl_easy_unescape(conn->data, cur_pos,
-                                        (int)(slash_pos-cur_pos), NULL);
+      ftp->dirs[0] = curl_easy_unescape(conn->data, slash_pos ? cur_pos : "/",
+                                        slash_pos?(int)(slash_pos-cur_pos):1,
+                                        NULL);
       if(!ftp->dirs[0]) {
         free(ftp->dirs);
         return CURLE_OUT_OF_MEMORY;
       }
-      ftp->file = slash_pos+1;  /* the rest is the file name */
+      ftp->file = slash_pos ? slash_pos+1 : cur_pos; /* rest is file name */
     }
     else
       ftp->file = cur_pos;  /* this is a file name only */
