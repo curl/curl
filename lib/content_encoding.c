@@ -62,9 +62,9 @@ enum zlibState {
 };
 
 static CURLcode
-process_zlib_error(struct SessionHandle *data,
- z_stream *z)
+process_zlib_error(struct connectdata *conn, z_stream *z)
 {
+  struct SessionHandle *data = conn->data;
   if (z->msg)
     failf (data, "Error while processing content unencoding: %s",
            z->msg);
@@ -84,7 +84,7 @@ exit_zlib(z_stream *z, bool *zlib_init, CURLcode result)
 }
 
 static CURLcode
-inflate_stream(struct SessionHandle *data,
+inflate_stream(struct connectdata *conn,
                struct Curl_transfer_keeper *k)
 {
   int allow_restart = 1;
@@ -113,7 +113,7 @@ inflate_stream(struct SessionHandle *data,
     if (status == Z_OK || status == Z_STREAM_END) {
       allow_restart = 0;
       if(DSIZ - z->avail_out) {
-        result = Curl_client_write(data, CLIENTWRITE_BODY, decomp,
+        result = Curl_client_write(conn, CLIENTWRITE_BODY, decomp,
                                    DSIZ - z->avail_out);
         /* if !CURLE_OK, clean up, return */
         if (result) {
@@ -128,7 +128,7 @@ inflate_stream(struct SessionHandle *data,
         if (inflateEnd(z) == Z_OK)
           return exit_zlib(z, &k->zlib_init, result);
         else
-          return exit_zlib(z, &k->zlib_init, process_zlib_error(data, z));
+          return exit_zlib(z, &k->zlib_init, process_zlib_error(conn, z));
       }
 
       /* Done with these bytes, exit */
@@ -143,7 +143,7 @@ inflate_stream(struct SessionHandle *data,
 
       inflateReset(z);
       if (inflateInit2(z, -MAX_WBITS) != Z_OK) {
-        return process_zlib_error(data, z);
+        return process_zlib_error(conn, z);
       }
       z->next_in = orig_in;
       z->avail_in = nread;
@@ -152,14 +152,14 @@ inflate_stream(struct SessionHandle *data,
     }
     else {                      /* Error; exit loop, handle below */
       free(decomp);
-      return exit_zlib(z, &k->zlib_init, process_zlib_error(data, z));
+      return exit_zlib(z, &k->zlib_init, process_zlib_error(conn, z));
     }
   }
   /* Will never get here */
 }
 
 CURLcode
-Curl_unencode_deflate_write(struct SessionHandle *data,
+Curl_unencode_deflate_write(struct connectdata *conn,
                             struct Curl_transfer_keeper *k,
                             ssize_t nread)
 {
@@ -173,7 +173,7 @@ Curl_unencode_deflate_write(struct SessionHandle *data,
     z->next_in = NULL;
     z->avail_in = 0;
     if (inflateInit(z) != Z_OK)
-      return process_zlib_error(data, z);
+      return process_zlib_error(conn, z);
     k->zlib_init = ZLIB_INIT;
   }
 
@@ -182,7 +182,7 @@ Curl_unencode_deflate_write(struct SessionHandle *data,
   z->avail_in = (uInt)nread;
 
   /* Now uncompress the data */
-  return inflate_stream(data, k);
+  return inflate_stream(conn, k);
 }
 
 #ifdef OLD_ZLIB_SUPPORT
@@ -272,7 +272,7 @@ static enum {
 #endif
 
 CURLcode
-Curl_unencode_gzip_write(struct SessionHandle *data,
+Curl_unencode_gzip_write(struct connectdata *conn,
                          struct Curl_transfer_keeper *k,
                          ssize_t nread)
 {
@@ -289,14 +289,14 @@ Curl_unencode_gzip_write(struct SessionHandle *data,
     if (strcmp(zlibVersion(), "1.2.0.4") >= 0) {
         /* zlib ver. >= 1.2.0.4 supports transparent gzip decompressing */
         if (inflateInit2(z, MAX_WBITS+32) != Z_OK) {
-          return process_zlib_error(data, z);
+          return process_zlib_error(conn, z);
         }
         k->zlib_init = ZLIB_INIT_GZIP; /* Transparent gzip decompress state */
 
     } else {
         /* we must parse the gzip header ourselves */
         if (inflateInit2(z, -MAX_WBITS) != Z_OK) {
-          return process_zlib_error(data, z);
+          return process_zlib_error(conn, z);
         }
         k->zlib_init = ZLIB_INIT;   /* Initial call state */
     }
@@ -307,7 +307,7 @@ Curl_unencode_gzip_write(struct SessionHandle *data,
      z->next_in = (Bytef *)k->str;
      z->avail_in = (uInt)nread;
      /* Now uncompress the data */
-     return inflate_stream(data, k);
+     return inflate_stream(conn, k);
   }
 
 #ifndef OLD_ZLIB_SUPPORT
@@ -360,7 +360,7 @@ Curl_unencode_gzip_write(struct SessionHandle *data,
 
     case GZIP_BAD:
     default:
-      return exit_zlib(z, &k->zlib_init, process_zlib_error(data, z));
+      return exit_zlib(z, &k->zlib_init, process_zlib_error(conn, z));
     }
 
   }
@@ -398,7 +398,7 @@ Curl_unencode_gzip_write(struct SessionHandle *data,
     case GZIP_BAD:
     default:
       free(z->next_in);
-      return exit_zlib(z, &k->zlib_init, process_zlib_error(data, z));
+      return exit_zlib(z, &k->zlib_init, process_zlib_error(conn, z));
     }
 
   }
@@ -418,7 +418,7 @@ Curl_unencode_gzip_write(struct SessionHandle *data,
   }
 
   /* We've parsed the header, now uncompress the data */
-  return inflate_stream(data, k);
+  return inflate_stream(conn, k);
 #endif
 }
 #endif /* HAVE_LIBZ */

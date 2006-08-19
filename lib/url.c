@@ -612,7 +612,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      *
      * Transfer using ASCII (instead of BINARY).
      */
-    data->set.ftp_ascii = va_arg(param, long)?TRUE:FALSE;
+    data->set.prefer_ascii = va_arg(param, long)?TRUE:FALSE;
     break;
   case CURLOPT_TIMECONDITION:
     /*
@@ -3125,15 +3125,15 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       command = (char)toupper((int)type[6]);
       switch(command) {
       case 'A': /* ASCII mode */
-        data->set.ftp_ascii = 1;
+        data->set.prefer_ascii = TRUE;
         break;
       case 'D': /* directory mode */
-        data->set.ftp_list_only = 1;
+        data->set.ftp_list_only = TRUE;
         break;
       case 'I': /* binary mode */
       default:
         /* switch off ASCII */
-        data->set.ftp_ascii = 0;
+        data->set.prefer_ascii = FALSE;
         break;
       }
     }
@@ -3228,13 +3228,13 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       switch(command) {
       case 'A': /* ASCII mode */
       case 'N': /* NETASCII mode */
-        data->set.ftp_ascii = 1;
+        data->set.prefer_ascii = TRUE;
         break;
       case 'O': /* octet mode */
       case 'I': /* binary mode */
       default:
         /* switch off ASCII */
-        data->set.ftp_ascii = 0;
+        data->set.prefer_ascii = FALSE;
         break;
       }
     }

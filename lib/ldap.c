@@ -372,9 +372,9 @@ CURLcode Curl_ldap(struct connectdata *conn, bool *done)
     char  *dn = (*ldap_get_dn)(server, entryIterator);
     int i;
 
-    Curl_client_write(data, CLIENTWRITE_BODY, (char *)"DN: ", 4);
-    Curl_client_write(data, CLIENTWRITE_BODY, (char *)dn, 0);
-    Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
+    Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"DN: ", 4);
+    Curl_client_write(conn, CLIENTWRITE_BODY, (char *)dn, 0);
+    Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 1);
 
     for (attribute = (*ldap_first_attribute)(server, entryIterator, &ber);
          attribute;
@@ -387,9 +387,9 @@ CURLcode Curl_ldap(struct connectdata *conn, bool *done)
       {
         for (i = 0; (vals[i] != NULL); i++)
         {
-          Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\t", 1);
-          Curl_client_write(data, CLIENTWRITE_BODY, (char *) attribute, 0);
-          Curl_client_write(data, CLIENTWRITE_BODY, (char *)": ", 2);
+          Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\t", 1);
+          Curl_client_write(conn, CLIENTWRITE_BODY, (char *) attribute, 0);
+          Curl_client_write(conn, CLIENTWRITE_BODY, (char *)": ", 2);
           if ((strlen(attribute) > 7) &&
               (strcmp(";binary",
                       (char *)attribute +
@@ -398,19 +398,19 @@ CURLcode Curl_ldap(struct connectdata *conn, bool *done)
             val_b64_sz = Curl_base64_encode(vals[i]->bv_val, vals[i]->bv_len,
                                             &val_b64);
             if (val_b64_sz > 0) {
-              Curl_client_write(data, CLIENTWRITE_BODY, val_b64, val_b64_sz);
+              Curl_client_write(conn, CLIENTWRITE_BODY, val_b64, val_b64_sz);
               free(val_b64);
             }
           } else
-            Curl_client_write(data, CLIENTWRITE_BODY, vals[i]->bv_val,
+            Curl_client_write(conn, CLIENTWRITE_BODY, vals[i]->bv_val,
                               vals[i]->bv_len);
-          Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 0);
+          Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 0);
         }
 
         /* Free memory used to store values */
         (*ldap_value_free_len)((void **)vals);
       }
-      Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
+      Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 1);
 
       (*ldap_memfree)(attribute);
     }

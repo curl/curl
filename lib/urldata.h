@@ -362,6 +362,8 @@ struct FTP {
   bool cwdfail;     /* set TRUE if a CWD command fails, as then we must prevent
                        caching the current directory */
   char *prevpath;   /* conn->path from the previous transfer */
+  char transfertype; /* set by ftp_transfertype for use by Curl_client_write()a
+                        and others (A/I or zero) */
 
   size_t nread_resp; /* number of bytes currently read of a server response */
   char *linestart_resp; /* line start pointer for the FTP server response
@@ -1114,8 +1116,8 @@ struct UserDefined {
   bool printhost;       /* printing host name in debug info */
   bool get_filetime;
   bool tunnel_thru_httpproxy;
+  bool prefer_ascii;    /* ASCII rather than binary */
   bool ftp_append;
-  bool ftp_ascii;
   bool ftp_list_only;
   bool ftp_create_missing_dirs;
   bool ftp_use_port;
@@ -1184,8 +1186,6 @@ struct SessionHandle {
   struct UrlState state;       /* struct for fields used for state info and
                                   other dynamic purposes */
   struct PureInfo info;        /* stats, reports and info data */
-  /* set by ftp_transfertype for use by Curl_client_write and others */
-  bool ftp_in_ascii_mode;
 #if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
   iconv_t outbound_cd;         /* for translating to the network encoding */
   iconv_t inbound_cd;          /* for translating from the network encoding */

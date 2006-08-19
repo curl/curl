@@ -367,18 +367,19 @@ CURLcode Curl_write(struct connectdata *conn,
    The bit pattern defines to what "streams" to write to. Body and/or header.
    The defines are in sendf.h of course.
  */
-CURLcode Curl_client_write(struct SessionHandle *data,
+CURLcode Curl_client_write(struct connectdata *conn,
                            int type,
                            char *ptr,
                            size_t len)
 {
+  struct SessionHandle *data = conn->data;
   size_t wrote;
 
   if(0 == len)
     len = strlen(ptr);
 
   if(type & CLIENTWRITE_BODY) {
-    if(data->ftp_in_ascii_mode) {
+    if((conn->protocol&PROT_FTP) && conn->proto.ftp->transfertype == 'A') {
 #ifdef CURL_DOES_CONVERSIONS
       /* convert from the network encoding */
       size_t rc;

@@ -11,6 +11,7 @@ Curl and libcurl 7.15.6
 
 This release includes the following changes:
 
+ o (FTP) libcurl avoids sending TYPE if the desired type was already set
  o CURLOPT_PREQUOTE works even when CURLOPT_NOBODY is set true
 
 This release includes the following bugfixes:

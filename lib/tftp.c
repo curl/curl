@@ -261,7 +261,7 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
   CURLcode res = CURLE_OK;
 
   /* Set ascii mode if -B flag was used */
-  if(data->set.ftp_ascii)
+  if(data->set.prefer_ascii)
     mode = "netascii";
 
   switch(event) {
@@ -699,7 +699,7 @@ CURLcode Curl_tftp(struct connectdata *conn, bool *done)
           /* Don't pass to the client empty or retransmitted packets */
           if (state->rbytes > 4 &&
               ((state->block+1) == getrpacketblock(&state->rpacket))) {
-            code = Curl_client_write(data, CLIENTWRITE_BODY,
+            code = Curl_client_write(conn, CLIENTWRITE_BODY,
                                      (char *)&state->rpacket.data[4],
                                      state->rbytes-4);
             if(code)

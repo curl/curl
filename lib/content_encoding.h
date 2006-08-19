@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,11 +31,11 @@
 #define ALL_CONTENT_ENCODINGS "identity"
 #endif
 
-CURLcode Curl_unencode_deflate_write(struct SessionHandle *data,
+CURLcode Curl_unencode_deflate_write(struct connectdata *conn,
                                      struct Curl_transfer_keeper *k,
                                      ssize_t nread);
 
 CURLcode
-Curl_unencode_gzip_write(struct SessionHandle *data,
+Curl_unencode_gzip_write(struct connectdata *conn,
                          struct Curl_transfer_keeper *k,
                          ssize_t nread);

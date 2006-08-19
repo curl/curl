@@ -531,7 +531,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
               headerlen = k->p - data->state.headerbuff;
 
-              result = Curl_client_write(data, writetype,
+              result = Curl_client_write(conn, writetype,
                                          data->state.headerbuff,
                                          headerlen);
               if(result)
@@ -990,7 +990,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               Curl_debug(data, CURLINFO_HEADER_IN,
                          k->p, k->hbuflen, conn);
 
-            result = Curl_client_write(data, writetype, k->p, k->hbuflen);
+            result = Curl_client_write(conn, writetype, k->p, k->hbuflen);
             if(result)
               return result;
 
@@ -1144,7 +1144,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             if(k->badheader && !k->ignorebody) {
               /* we parsed a piece of data wrongly assuming it was a header
                  and now we output it as body instead */
-              result = Curl_client_write(data, CLIENTWRITE_BODY,
+              result = Curl_client_write(conn, CLIENTWRITE_BODY,
                                          data->state.headerbuff,
                                          k->hbuflen);
               if(result)
@@ -1164,7 +1164,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                    Content-Encoding header. See Curl_readwrite_init; the
                    memset() call initializes k->content_encoding to zero. */
                 if(!k->ignorebody)
-                  result = Curl_client_write(data, CLIENTWRITE_BODY, k->str,
+                  result = Curl_client_write(conn, CLIENTWRITE_BODY, k->str,
                                              nread);
 #ifdef HAVE_LIBZ
                 break;
@@ -1172,13 +1172,13 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               case DEFLATE:
                 /* Assume CLIENTWRITE_BODY; headers are not encoded. */
                 if(!k->ignorebody)
-                  result = Curl_unencode_deflate_write(data, k, nread);
+                  result = Curl_unencode_deflate_write(conn, k, nread);
                 break;
 
               case GZIP:
                 /* Assume CLIENTWRITE_BODY; headers are not encoded. */
                 if(!k->ignorebody)
-                  result = Curl_unencode_gzip_write(data, k, nread);
+                  result = Curl_unencode_gzip_write(conn, k, nread);
                 break;
 
               case COMPRESS:
@@ -1283,7 +1283,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           /* convert LF to CRLF if so asked */
 #ifdef CURL_DO_LINEEND_CONV
           /* always convert if we're FTPing in ASCII mode */
-          if ((data->set.crlf) || (data->ftp_in_ascii_mode)) {
+          if ((data->set.crlf) || (data->set.prefer_ascii)) {
 #else
           if (data->set.crlf) {
 #endif /* CURL_DO_LINEEND_CONV */

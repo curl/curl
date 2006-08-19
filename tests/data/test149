@@ -37,7 +37,6 @@ STOR 148
 CWD /nowhere/anywhere
 CWD dir2
 EPSV
-TYPE I
 STOR 148
 QUIT
 </protocol>

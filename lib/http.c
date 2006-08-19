@@ -1251,7 +1251,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
               if(data->set.include_header)
                 writetype |= CLIENTWRITE_BODY;
 
-              result = Curl_client_write(data, writetype, line_start, perline);
+              result = Curl_client_write(conn, writetype, line_start, perline);
               if(result)
                 return result;
 

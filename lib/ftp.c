@@ -132,6 +132,10 @@ static CURLcode ftp_state_post_rest(struct connectdata *conn);
 static CURLcode ftp_state_post_cwd(struct connectdata *conn);
 static CURLcode ftp_state_quote(struct connectdata *conn,
                                 bool init, ftpstate instate);
+static CURLcode ftp_nb_type(struct connectdata *conn,
+                                       bool ascii, ftpstate state);
+static int ftp_need_type(struct connectdata *conn,
+                                        bool ascii);
 
 /* easy-to-use macro: */
 #define FTPSENDF(x,y,z) if((result = Curl_ftpsendf(x,y,z))) return result
@@ -339,7 +343,7 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
            * for "headers". The response lines can be seen as a kind of
            * headers.
            */
-          result = Curl_client_write(data, CLIENTWRITE_HEADER,
+          result = Curl_client_write(conn, CLIENTWRITE_HEADER,
                                      ftp->linestart_resp, perline);
           if(result)
             return result;
@@ -570,7 +574,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
              * for "headers". The response lines can be seen as a kind of
              * headers.
              */
-            result = Curl_client_write(data, CLIENTWRITE_HEADER,
+            result = Curl_client_write(conn, CLIENTWRITE_HEADER,
                                        line_start, perline);
             if(result)
               return result;
@@ -1313,7 +1317,8 @@ static CURLcode ftp_state_post_mdtm(struct connectdata *conn)
   /* If we have selected NOBODY and HEADER, it means that we only want file
      information. Which in FTP can't be much more than the file size and
      date. */
-  if(conn->bits.no_body && data->set.include_header && ftp->file) {
+  if(conn->bits.no_body && data->set.include_header && ftp->file &&
+     ftp_need_type(conn, data->set.prefer_ascii)) {
     /* The SIZE command is _not_ RFC 959 specified, and therefor many servers
        may not support it! It is however the only way we have to get a file's
        size! */
@@ -1322,11 +1327,9 @@ static CURLcode ftp_state_post_mdtm(struct connectdata *conn)
 
     /* Some servers return different sizes for different modes, and thus we
        must set the proper type before we check the size */
-    NBFTPSENDF(conn, "TYPE %c",
-               data->set.ftp_ascii?'A':'I');
-    state(conn, FTP_TYPE);
-    /* keep track of our current transfer type */
-    data->ftp_in_ascii_mode = data->set.ftp_ascii;
+    result = ftp_nb_type(conn, data->set.prefer_ascii, FTP_TYPE);
+    if (result)
+      return result;
   }
   else
     result = ftp_state_post_type(conn);
@@ -1828,7 +1831,7 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
                  tm->tm_hour,
                  tm->tm_min,
                  tm->tm_sec);
-        result = Curl_client_write(data, CLIENTWRITE_BOTH, buf, 0);
+        result = Curl_client_write(conn, CLIENTWRITE_BOTH, buf, 0);
         if(result)
           return result;
       } /* end of a ridiculous amount of conditionals */
@@ -2003,7 +2006,7 @@ static CURLcode ftp_state_size_resp(struct connectdata *conn,
     if(-1 != filesize) {
       snprintf(buf, sizeof(data->state.buffer),
                "Content-Length: %" FORMAT_OFF_T "\r\n", filesize);
-      result = Curl_client_write(data, CLIENTWRITE_BOTH, buf, 0);
+      result = Curl_client_write(conn, CLIENTWRITE_BOTH, buf, 0);
       if(result)
         return result;
     }
@@ -2030,7 +2033,7 @@ static CURLcode ftp_state_rest_resp(struct connectdata *conn,
   case FTP_REST:
   default:
     if (ftpcode == 350) {
-      result = Curl_client_write(conn->data, CLIENTWRITE_BOTH,
+      result = Curl_client_write(conn, CLIENTWRITE_BOTH,
                                (char *)"Accept-ranges: bytes\r\n", 0);
       if(result)
         return result;
@@ -2141,7 +2144,7 @@ static CURLcode ftp_state_get_resp(struct connectdata *conn,
      */
 
     if((instate != FTP_LIST) &&
-       !data->set.ftp_ascii &&
+       !data->set.prefer_ascii &&
        (ftp->downloadsize < 1)) {
       /*
        * It seems directory listings either don't show the size or very
@@ -3095,7 +3098,7 @@ static CURLcode ftp_transfertype(struct connectdata *conn,
   ssize_t nread;
   CURLcode result;
 
-  FTPSENDF(conn, "TYPE %s", ascii?"A":"I");
+  FTPSENDF(conn, "TYPE %c", ascii?'A':'I');
 
   result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
   if(result)
@@ -3107,8 +3110,49 @@ static CURLcode ftp_transfertype(struct connectdata *conn,
     return ascii? CURLE_FTP_COULDNT_SET_ASCII:CURLE_FTP_COULDNT_SET_BINARY;
   }
   /* keep track of our current transfer type */
-  data->ftp_in_ascii_mode = ascii;
+  conn->proto.ftp->transfertype = ascii?'A':'I';
 
+  return CURLE_OK;
+}
+
+
+/***********************************************************************
+ *
+ * ftp_need_type()
+ *
+ * Returns TRUE if we in the current situation should send TYPE
+ */
+static int ftp_need_type(struct connectdata *conn,
+                         bool ascii_wanted)
+{
+  return conn->proto.ftp->transfertype != (ascii_wanted?'A':'I');
+}
+
+/***********************************************************************
+ *
+ * ftp_nb_type()
+ *
+ * Set TYPE. We only deal with ASCII or BINARY so this function
+ * sets one of them.
+ * If the transfer type is not sent, simulate on OK response in newstate
+ */
+static CURLcode ftp_nb_type(struct connectdata *conn,
+                            bool ascii, ftpstate newstate)
+{
+  struct FTP *ftp = conn->proto.ftp;
+  CURLcode result;
+  int want = ascii?'A':'I';
+
+  if (ftp->transfertype == want) {
+    state(conn, newstate);
+    return ftp_state_type_resp(conn, 200, newstate);
+  }
+
+  NBFTPSENDF(conn, "TYPE %c", want);
+  state(conn, newstate);
+
+  /* keep track of our current transfer type */
+  ftp->transfertype = want;
   return CURLE_OK;
 }
 
@@ -3207,10 +3251,10 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
     /* a transfer is about to take place */
 
     if(data->set.upload) {
-      NBFTPSENDF(conn, "TYPE %c", data->set.ftp_ascii?'A':'I');
-      state(conn, FTP_STOR_TYPE);
-      /* keep track of our current transfer type */
-      data->ftp_in_ascii_mode = data->set.ftp_ascii;
+      result = ftp_nb_type(conn, data->set.prefer_ascii,
+                                      FTP_STOR_TYPE);
+      if (result)
+        return result;
     }
     else {
       /* download */
@@ -3223,16 +3267,14 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
         /* The specified path ends with a slash, and therefore we think this
            is a directory that is requested, use LIST. But before that we
            need to set ASCII transfer mode. */
-        NBFTPSENDF(conn, "TYPE A", NULL);
-        state(conn, FTP_LIST_TYPE);
-        /* keep track of our current transfer type */
-        data->ftp_in_ascii_mode = 1;
+        result = ftp_nb_type(conn, 1, FTP_LIST_TYPE);
+        if (result)
+          return result;
       }
       else {
-        NBFTPSENDF(conn, "TYPE %c", data->set.ftp_ascii?'A':'I');
-        state(conn, FTP_RETR_TYPE);
-        /* keep track of our current transfer type */
-        data->ftp_in_ascii_mode = data->set.ftp_ascii;
+        result = ftp_nb_type(conn, data->set.prefer_ascii, FTP_RETR_TYPE);
+        if (result)
+          return result;
       }
     }
     result = ftp_easy_statemach(conn);
@@ -3621,11 +3663,11 @@ static CURLcode ftp_3rdparty_pretransfer(struct connectdata *conn)
   sec_conn->xfertype = SOURCE3RD;
 
   /* sets transfer type */
-  result = ftp_transfertype(conn, data->set.ftp_ascii);
+  result = ftp_transfertype(conn, data->set.prefer_ascii);
   if (result)
     return result;
 
-  result = ftp_transfertype(sec_conn, data->set.ftp_ascii);
+  result = ftp_transfertype(sec_conn, data->set.prefer_ascii);
   if (result)
     return result;
 

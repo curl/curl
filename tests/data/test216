@@ -31,7 +31,6 @@ EPSV
 TYPE I
 STOR upload.216
 EPSV
-TYPE I
 STOR ..anotherup
 QUIT
 </protocol>

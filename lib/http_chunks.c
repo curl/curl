@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -190,7 +190,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         case IDENTITY:
 #endif
           if(!k->ignorebody)
-            result = Curl_client_write(conn->data, CLIENTWRITE_BODY, datap,
+            result = Curl_client_write(conn, CLIENTWRITE_BODY, datap,
                                        piece);
 #ifdef HAVE_LIBZ
           break;
@@ -198,14 +198,14 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         case DEFLATE:
           /* update conn->keep.str to point to the chunk data. */
           conn->keep.str = datap;
-          result = Curl_unencode_deflate_write(conn->data, &conn->keep,
+          result = Curl_unencode_deflate_write(conn, &conn->keep,
                                                (ssize_t)piece);
           break;
 
         case GZIP:
           /* update conn->keep.str to point to the chunk data. */
           conn->keep.str = datap;
-          result = Curl_unencode_gzip_write(conn->data, &conn->keep,
+          result = Curl_unencode_gzip_write(conn, &conn->keep,
                                             (ssize_t)piece);
           break;
 
@@ -303,7 +303,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
           return CHUNKE_STOP;
         }
         else {
-          Curl_client_write(conn->data, CLIENTWRITE_HEADER,
+          Curl_client_write(conn, CLIENTWRITE_HEADER,
                             conn->trailer, conn->trlPos);
         }
         ch->state = CHUNK_TRAILER;

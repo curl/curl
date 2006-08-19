@@ -44,7 +44,6 @@ EPSV
 TYPE A
 LIST
 EPSV
-TYPE A
 LIST
 QUIT
 </protocol>

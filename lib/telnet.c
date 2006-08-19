@@ -940,7 +940,7 @@ void telrcv(struct connectdata *conn,
           break;   /* Ignore \0 after CR */
         }
 
-        Curl_client_write(data, CLIENTWRITE_BODY, (char *)&c, 1);
+        Curl_client_write(conn, CLIENTWRITE_BODY, (char *)&c, 1);
         continue;
 
       case CURL_TS_DATA:
@@ -954,7 +954,7 @@ void telrcv(struct connectdata *conn,
           tn->telrcv_state = CURL_TS_CR;
         }
 
-        Curl_client_write(data, CLIENTWRITE_BODY, (char *)&c, 1);
+        Curl_client_write(conn, CLIENTWRITE_BODY, (char *)&c, 1);
         continue;
 
       case CURL_TS_IAC:
@@ -978,7 +978,7 @@ void telrcv(struct connectdata *conn,
           tn->telrcv_state = CURL_TS_SB;
           continue;
         case CURL_IAC:
-          Curl_client_write(data, CLIENTWRITE_BODY, (char *)&c, 1);
+          Curl_client_write(conn, CLIENTWRITE_BODY, (char *)&c, 1);
           break;
         case CURL_DM:
         case CURL_NOP:

@@ -47,7 +47,7 @@ void Curl_failf(struct SessionHandle *, const char *fmt, ...);
 #define CLIENTWRITE_HEADER 2
 #define CLIENTWRITE_BOTH   (CLIENTWRITE_BODY|CLIENTWRITE_HEADER)
 
-CURLcode Curl_client_write(struct SessionHandle *data, int type, char *ptr,
+CURLcode Curl_client_write(struct connectdata *conn, int type, char *ptr,
                            size_t len);
 
 /* internal read-function, does plain socket, SSL and krb4 */

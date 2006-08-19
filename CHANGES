@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel (19 August 2006)
+- Based on a patch by Armel Asselin, the FTP code no longer re-issues the TYPE
+  command on subsequent requests on a re-used connection unless it has to.
+
 - Armel Asselin fixed a crash in the FTP code when using SINGLECWD mode and
   files in the root directory.
 
