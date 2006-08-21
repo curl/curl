@@ -12,13 +12,13 @@ Curl and libcurl 7.15.6
 This release includes the following changes:
 
  o (FTP) libcurl avoids sending TYPE if the desired type was already set
- o CURLOPT_PREQUOTE works even when CURLOPT_NOBODY is set true
+ o (FTP) CURLOPT_PREQUOTE works even when CURLOPT_NOBODY is set true
 
 This release includes the following bugfixes:
 
- o SINGLECWD mode and using files in the root dir
- o Expect: header disabling work better
- o "Expect: 100-continue" disable on second POST on re-used connection
+ o (FTP) SINGLECWD mode and using files in the root dir
+ o (HTTP) Expect: header disabling work better
+ o (HTTP) "Expect: 100-continue" disable on second POST on re-used connection
  o src/config.h.in is fixed
 
 Other curl-related news:
