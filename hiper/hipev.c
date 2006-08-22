@@ -330,11 +330,11 @@ int main(int argc, char **argv)
 
   printf("About to do %d connections\n", num_total);
 
-  /* initialize the timeout event */
-  evtimer_set(&timerevent, timercallback, multi_handle);
-
   /* init the multi stack */
   multi_handle = curl_multi_init();
+
+  /* initialize the timeout event */
+  evtimer_set(&timerevent, timercallback, multi_handle);
 
   for(i=0; i< num_total; i++) {
     CURL *e;
