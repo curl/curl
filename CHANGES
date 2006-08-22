@@ -7,6 +7,8 @@
                                   Changelog
 
 Daniel (22 August 2006)
+- David McCreedy fixed a remaining mistake from the August 19 TYPE change.
+
 - Peter Sylvester pointed out a flaw in the AllowServerConnect() in the FTP
   code when doing pure ipv6 EPRT connections.
 
