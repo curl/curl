@@ -16,6 +16,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ p (FTP) EPRT transfers with IPv6 didn't work properly
  o (FTP) SINGLECWD mode and using files in the root dir
  o (HTTP) Expect: header disabling work better
  o (HTTP) "Expect: 100-continue" disable on second POST on re-used connection
@@ -32,6 +33,7 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Domenico Andreoli, Armel Asselin, Gisle Vanem, Yang Tse, Andrew Biggs
+ Domenico Andreoli, Armel Asselin, Gisle Vanem, Yang Tse, Andrew Biggs,
+ Peter Sylvester
 
         Thanks! (and sorry if I forgot to mention someone)
