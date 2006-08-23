@@ -365,9 +365,10 @@ libcurl respects the environment variables \fBhttp_proxy\fP, \fBftp_proxy\fP,
 \fBall_proxy\fP etc, if any of those is set. The \fICURLOPT_PROXY\fP option
 does however override any possibly set environment variables.
 
-Starting with 7.14.1, the proxy host string can be specified the exact same
-way as the proxy environment variables, include protocol prefix (http://) and
-embedded user + password.
+Starting with 7.14.1, the proxy host string given in environment variables can
+be specified the exact same way as the proxy can be set with
+\fICURLOPT_PROXY\fP, include protocol prefix (http://) and embedded user +
+password.
 .IP CURLOPT_PROXYPORT
 Pass a long with this option to set the proxy port to connect to unless it is
 specified in the proxy string \fICURLOPT_PROXY\fP.
