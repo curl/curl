@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #
 # $Id$
 # This is the HTTPS server designed for the curl test suite.
