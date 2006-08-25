@@ -386,6 +386,10 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
   if(easy) {
     /* If the 'state' is not INIT or COMPLETED, we might need to do something
        nice to put the easy_handle in a good known state when this returns. */
+    if(easy->state != CURLM_STATE_COMPLETED)
+      /* this handle is "alive" so we need to count down the total number of
+         alive connections when this is removed */
+      multi->num_alive--;
 
     /* The timer must be shut down before easy->multi is set to NULL,
        else the timenode will remain in the splay tree after

@@ -16,7 +16,9 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- p (FTP) EPRT transfers with IPv6 didn't work properly
+ o running_handles' counter wasn't always updated properly when
+   curl_multi_remove_handle() was used
+ o (FTP) EPRT transfers with IPv6 didn't work properly
  o (FTP) SINGLECWD mode and using files in the root dir
  o (HTTP) Expect: header disabling work better
  o (HTTP) "Expect: 100-continue" disable on second POST on re-used connection
