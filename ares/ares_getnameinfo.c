@@ -81,8 +81,8 @@ static char *ares_striendstr(const char *s1, const char *s2);
 void ares_getnameinfo(ares_channel channel, const struct sockaddr *sa, socklen_t salen,
                       int flags, ares_nameinfo_callback callback, void *arg)
 {
-  struct sockaddr_in *addr = NULL;
-  struct sockaddr_in6 *addr6 = NULL;
+  struct sockaddr_in *addr;
+  struct sockaddr_in6 *addr6;
   struct nameinfo_query *niquery;
 
   /* Verify the buffer size */

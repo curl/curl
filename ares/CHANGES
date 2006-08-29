@@ -1,5 +1,13 @@
   Changelog for the c-ares project
 
+* August 29 2006
+
+- Brad Spencer did
+
+  o made ares_version.h use extern "C" for c++ compilers
+  o fixed compiler warnings in ares_getnameinfo.c
+  o fixed a buffer position init for TCP reads
+
 * August 3 2006
 
 - Ravi Pratap fixed ares_getsock() to actually return the proper bitmap and

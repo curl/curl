@@ -297,6 +297,7 @@ static void read_tcp_data(ares_channel channel, fd_set *read_fds, time_t now)
                         free(server->tcp_buffer);
               server->tcp_buffer = NULL;
               server->tcp_lenbuf_pos = 0;
+              server->tcp_buffer_pos = 0;
             }
         }
     }

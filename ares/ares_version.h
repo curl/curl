@@ -11,7 +11,15 @@
                        (ARES_VERSION_PATCH))
 #define ARES_VERSION_STR "1.3.1"
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 const char *ares_version(int *version);
+
+#ifdef  __cplusplus
+}
+#endif
 
 #endif
 
