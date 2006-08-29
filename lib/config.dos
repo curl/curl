@@ -9,6 +9,8 @@
   #define OS  "MSDOS/djgpp"
 #elif defined(__HIGHC__)
   #define OS  "MSDOS/HighC"
+#elif defined(__WATCOMC__)
+  #define OS  "MSDOS/Watcom"
 #else
   #define OS  "MSDOS/?"
 #endif
@@ -106,7 +108,7 @@
 #define ssize_t    int
 #endif
 
-/* Djgpp only section
+/* Target HAVE_x section
  */
 #if defined(DJGPP)
   #define CURL_CA_BUNDLE  "/dev/env/CURL_CA_BUNDLE"
@@ -125,6 +127,10 @@
   #endif
 #else
   #define CURL_CA_BUNDLE  getenv("CURL_CA_BUNDLE")
+#endif
+
+#if defined(__WATCOMC__)
+  #define HAVE_STRCASECMP 1
 #endif
 
 #include <stdlib.h>
