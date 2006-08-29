@@ -47,7 +47,9 @@
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#ifndef __WATCOMC__
 #include <sys/time.h>
+#endif
 
 #ifdef HAVE_TIME_H
 #ifdef TIME_WITH_SYS_TIME

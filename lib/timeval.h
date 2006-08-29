@@ -33,7 +33,9 @@
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
 #include <time.h>
 #else
+#ifndef __WATCOMC__     /* todo: Add HAVE_SYS_TIME_H */
 #include <sys/time.h>
+#endif
 #endif
 
 #ifndef HAVE_GETTIMEOFDAY

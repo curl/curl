@@ -24,7 +24,7 @@
  ***************************************************************************/
 
 #include <stdio.h>
-#ifdef WIN32
+#if defined(WIN32) || defined(__WATCOMC__)
 #include <time.h>
 #else
 #include <sys/time.h>

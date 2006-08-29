@@ -46,7 +46,9 @@
 #include <sys/socket.h>
 #endif
 #include <netinet/in.h>
+#ifndef __WATCOMC__
 #include <sys/time.h>
+#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif

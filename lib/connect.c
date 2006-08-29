@@ -25,7 +25,9 @@
 
 #ifndef WIN32
 /* headers for non-win32 */
+#ifndef __WATCOMC__
 #include <sys/time.h>
+#endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
