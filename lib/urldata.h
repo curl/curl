@@ -110,6 +110,7 @@
 #endif
 
 /* Download buffer size, keep it fairly big for speed reasons */
+#undef BUFSIZE
 #define BUFSIZE CURL_MAX_WRITE_SIZE
 
 /* Initial size of the buffer to store headers in, it'll be enlarged in case
