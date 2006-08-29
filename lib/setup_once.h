@@ -33,7 +33,7 @@
 #define SEND_4TH_ARG MSG_NOSIGNAL
 #else
 #define SEND_4TH_ARG 0
-#endif 
+#endif
 
 
 /*
@@ -74,7 +74,7 @@
                                    (RECV_TYPE_ARG4)(SEND_4TH_ARG))
 #endif
 #else /* HAVE_RECV */
-#ifdef DJGPP
+#ifdef MSDOS
 #define sread(x,y,z) (ssize_t)read_s((int)(x), (char *)(y), (int)(z))
 #endif
 #ifndef sread
@@ -101,7 +101,7 @@
                                     (SEND_TYPE_ARG4)(SEND_4TH_ARG))
 #endif
 #else /* HAVE_SEND */
-#ifdef DJGPP
+#ifdef MSDOS
 #define swrite(x,y,z) (ssize_t)write_s((int)(x), (char *)(y), (int)(z))
 #endif
 #ifndef swrite

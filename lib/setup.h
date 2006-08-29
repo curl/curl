@@ -233,7 +233,7 @@ typedef unsigned char bool;
 
 #else /* WIN32 */
 
-#ifdef DJGPP
+#ifdef MSDOS  /* Watt-32 */
 #include <sys/ioctl.h>
 #define sclose(x)         close_s(x)
 #define select(n,r,w,x,t) select_s(n,r,w,x,t)
@@ -244,7 +244,7 @@ typedef unsigned char bool;
 #undef word
 #endif
 
-#else /* DJGPP */
+#else /* MSDOS */
 
 #ifdef __BEOS__
 #define sclose(x) closesocket(x)
@@ -254,7 +254,7 @@ typedef unsigned char bool;
 
 #define HAVE_ALARM
 
-#endif /* DJGPP */
+#endif /* MSDOS */
 
 #ifdef _AMIGASF
 #undef HAVE_ALARM
@@ -267,7 +267,7 @@ typedef unsigned char bool;
 #define DOT_CHAR      "."
 #endif
 
-#ifdef DJGPP
+#ifdef MSDOS
 #undef DOT_CHAR
 #define DOT_CHAR      "_"
 #endif
