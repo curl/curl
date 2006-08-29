@@ -30,7 +30,7 @@ DOCS = README.encoding README.memoryleak README.ares README.curlx	\
 
 EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 Makefile.riscos	\
  $(DSP) curllib.dsw config-win32.h config-win32ce.h config-riscos.h	\
- config-mac.h config.h.in ca-bundle.crt makefile.dj config.dj		\
+ config-mac.h config.h.in ca-bundle.crt makefile.dj config.dos		\
  libcurl.framework.make libcurl.plist libcurl.rc config-amigaos.h	\
  amigaos.c amigaos.h makefile.amiga Makefile.netware nwlib.c		\
  libcurl.imp msvcproj.head msvcproj.foot config-win32ce.h		\
@@ -46,7 +46,7 @@ lib_LTLIBRARIES = libcurl.la
 
 INCLUDES = -I$(top_srcdir)/include \
            -I$(top_builddir)/lib   \
-           -I$(top_srcdir)/lib 
+           -I$(top_srcdir)/lib
 
 VERSION=-version-info 3:0:0
 
