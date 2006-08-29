@@ -348,7 +348,7 @@ Curl_addrinfo *Curl_he2ai(const struct hostent *he, int port)
     /* no input == no output! */
     return NULL;
 
-  for(i=0; (curr = (struct in_addr *)he->h_addr_list[i]); i++) {
+  for(i=0; (curr = (struct in_addr *)he->h_addr_list[i]) != NULL; i++) {
 
     ai = calloc(1, sizeof(Curl_addrinfo) + sizeof(struct sockaddr_in));
 

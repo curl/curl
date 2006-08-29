@@ -528,8 +528,8 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         if (current_form->value) {
           if (current_form->flags & HTTPPOST_FILENAME) {
             if (filename) {
-              if (!(current_form = AddFormInfo(strdup(filename),
-                                               NULL, current_form)))
+              if ((current_form = AddFormInfo(strdup(filename),
+                                              NULL, current_form)) == NULL)
                 return_value = CURL_FORMADD_MEMORY;
             }
             else
@@ -562,8 +562,8 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         if (current_form->value) {
           if (current_form->flags & HTTPPOST_BUFFER) {
             if (filename) {
-              if (!(current_form = AddFormInfo(strdup(filename),
-                                               NULL, current_form)))
+              if ((current_form = AddFormInfo(strdup(filename),
+                                              NULL, current_form)) == NULL)
                 return_value = CURL_FORMADD_MEMORY;
             }
             else
@@ -614,9 +614,9 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         if (current_form->contenttype) {
           if (current_form->flags & HTTPPOST_FILENAME) {
             if (contenttype) {
-              if (!(current_form = AddFormInfo(NULL,
-                                               strdup(contenttype),
-                                               current_form)))
+              if ((current_form = AddFormInfo(NULL,
+                                              strdup(contenttype),
+                                              current_form)) == NULL)
                 return_value = CURL_FORMADD_MEMORY;
             }
             else
@@ -884,7 +884,7 @@ void Curl_formclean(struct FormData *form)
     free(form->line); /* free the line */
     free(form);       /* free the struct */
 
-  } while((form=next)); /* continue */
+  } while ((form = next) != NULL); /* continue */
 }
 
 /*
@@ -961,7 +961,7 @@ void curl_formfree(struct curl_httppost *form)
       free(form->showfilename); /* free the faked file name */
     free(form);       /* free the struct */
 
-  } while((form=next)); /* continue */
+  } while ((form = next) != NULL); /* continue */
 }
 
 #ifndef HAVE_BASENAME
@@ -1231,7 +1231,7 @@ CURLcode Curl_getFormData(struct FormData **finalform,
              */
             size_t nread;
             char buffer[512];
-            while((nread = fread(buffer, 1, sizeof(buffer), fileread))) {
+            while ((nread = fread(buffer, 1, sizeof(buffer), fileread)) != 0) {
               result = AddFormData(&form, FORM_DATA, buffer, nread, &size);
               if (result)
                 break;
@@ -1268,7 +1268,7 @@ CURLcode Curl_getFormData(struct FormData **finalform,
         if (result)
           break;
       }
-    } while((file = file->more)); /* for each specified file for this field */
+    } while ((file = file->more) != NULL); /* for each specified file for this field */
     if (result) {
       Curl_formclean(firstform);
       free(boundary);
@@ -1286,7 +1286,7 @@ CURLcode Curl_getFormData(struct FormData **finalform,
         break;
     }
 
-  } while((post=post->next)); /* for each field */
+  } while ((post = post->next) != NULL); /* for each field */
   if (result) {
     Curl_formclean(firstform);
     free(boundary);
