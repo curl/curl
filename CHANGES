@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (29 August 2006)
+- David McCreedy added CURLOPT_SOCKOPTFUNCTION and CURLOPT_SOCKOPTDATA to
+  allow applications to set their own socket options.
+
 Daniel (25 August 2006)
 - Armel Asselin reported that the 'running_handles' counter wasn't updated
   properly if you removed a "live" handle from a multi handle with

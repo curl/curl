@@ -702,6 +702,17 @@ singleipconnect(struct connectdata *conn,
 
   nosigpipe(conn, sockfd);
 
+  if(data->set.fsockopt) {
+    /* activate callback for setting socket options */
+    error = data->set.fsockopt(data->set.sockopt_client,
+                               sockfd,
+                               CURLSOCKTYPE_IPCXN);
+    if (error) {
+      sclose(sockfd); /* close the socket and bail out */
+      return CURL_SOCKET_BAD;
+    }
+  }
+
   /* possibly bind the local end to an IP, interface or port */
   res = bindlocal(conn, sockfd);
   if(res) {

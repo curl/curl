@@ -3,7 +3,7 @@ Curl and libcurl 7.15.6
  Public curl release number:               96
  Releases counted from the very beginning: 123
  Available command line options:           114
- Available curl_easy_setopt() options:     133
+ Available curl_easy_setopt() options:     135
  Number of public functions in libcurl:    54
  Amount of public web site mirrors:        33
  Number of known libcurl bindings:         32
@@ -11,12 +11,13 @@ Curl and libcurl 7.15.6
 
 This release includes the following changes:
 
+ o CURLOPT_SOCKOPTFUNCTION and CURLOPT_SOCKOPTDATA were added
  o (FTP) libcurl avoids sending TYPE if the desired type was already set
  o (FTP) CURLOPT_PREQUOTE works even when CURLOPT_NOBODY is set true
 
 This release includes the following bugfixes:
 
- o running_handles' counter wasn't always updated properly when
+ o the 'running_handles' counter wasn't always updated properly when
    curl_multi_remove_handle() was used
  o (FTP) EPRT transfers with IPv6 didn't work properly
  o (FTP) SINGLECWD mode and using files in the root dir

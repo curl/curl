@@ -278,19 +278,6 @@ int fileno( FILE *stream);
 
 #endif /* WIN32 */
 
-#ifndef curl_socket_typedef
-/* now typedef our socket type */
-#ifdef WIN32
-typedef SOCKET curl_socket_t;
-#define CURL_SOCKET_BAD INVALID_SOCKET
-#else
-typedef int curl_socket_t;
-#define CURL_SOCKET_BAD -1
-#endif
-#define curl_socket_typedef
-#endif /* curl_socket_typedef */
-
-
 #if defined(WIN32) && !defined(__CYGWIN__) && !defined(USE_ARES) && \
     !defined(__LCC__)  /* lcc-win32 doesn't have _beginthreadex() */
 #ifdef ENABLE_IPV6
