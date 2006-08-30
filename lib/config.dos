@@ -116,6 +116,7 @@
   #define HAVE_STRCASECMP 1
   #define HAVE_SIGACTION  1
   #define HAVE_SIGSETJMP  1
+  #define HAVE_SYS_TIME_H 1
 
   #if (DJGPP_MINOR >= 4)
     #define HAVE_STRLCAT  1
@@ -131,6 +132,10 @@
 
 #if defined(__WATCOMC__)
   #define HAVE_STRCASECMP 1
+#endif
+
+#if defined(__HIGHC__)
+  #define HAVE_SYS_TIME_H 1
 #endif
 
 #include <stdlib.h>
