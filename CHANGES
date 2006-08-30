@@ -6,6 +6,13 @@
 
                                   Changelog
 
+
+Gisle (29 August 2006)
+- Added support for other MS-DOS compilers (desides djgpp). All MS-DOS
+  compiler now uses the same config.dos file (renamed to config.h by
+  make). libcurl now builds fine using Watcom and Metaware's High-C
+  using the Watt-32 tcp/ip-stack.
+
 Daniel (29 August 2006)
 - David McCreedy added CURLOPT_SOCKOPTFUNCTION and CURLOPT_SOCKOPTDATA to
   allow applications to set their own socket options.
@@ -145,7 +152,7 @@ Daniel (8 July 2006)
 Daniel (4 July 2006)
 - Toshiyuki Maezawa fixed a problem where you couldn't override the
   Proxy-Connection: header when using a proxy and not doing CONNECT.
-  
+
 Daniel (24 June 2006)
 - Michael Wallner added curl_formget(), which allows an application to extract
   (serialise) a previously built formpost (as with curl_formadd()).
@@ -316,11 +323,11 @@ Daniel (4 May 2006)
   already did this.
 
 Daniel (2 May 2006)
-- Added a --checkfor option to curl-config to allow users to easier 
-  write for example shell scripts that test for the presence of a 
-  new-enough libcurl version. If --checkfor is given a version string 
-  newer than what is currently installed, curl-config will return a 
-  non-zero exit code and output a string about the unfulfilled 
+- Added a --checkfor option to curl-config to allow users to easier
+  write for example shell scripts that test for the presence of a
+  new-enough libcurl version. If --checkfor is given a version string
+  newer than what is currently installed, curl-config will return a
+  non-zero exit code and output a string about the unfulfilled
   requirement.
 
 Daniel (26 April 2006)
@@ -376,7 +383,7 @@ Daniel (7 April 2006)
 
   CONV_FROM_NETWORK_FUNCTION
   CONV_TO_NETWORK_FUNCTION
-  CONV_FROM_UTF8_FUNCTION 
+  CONV_FROM_UTF8_FUNCTION
 
 Daniel (5 April 2006)
 - Michele Bini modified the NTLM code to work for his "weird IIS case"
