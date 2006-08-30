@@ -24,10 +24,12 @@
  ***************************************************************************/
 
 #include <stdio.h>
-#if defined(WIN32) || defined(__WATCOMC__)
+#if defined(WIN32)
 #include <time.h>
 #else
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
 #endif
 
 #include <curl/curl.h>
