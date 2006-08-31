@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel (31 August 2006)
+- Dmitriy Sergeyev found and fixed a multi interface flaw when using asynch
+  name resolves. It could get stuck in the wrong state.
+
 Gisle (29 August 2006)
 - Added support for other MS-DOS compilers (desides djgpp). All MS-DOS
   compiler now uses the same config.dos file (renamed to config.h by

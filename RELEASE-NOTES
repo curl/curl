@@ -11,12 +11,14 @@ Curl and libcurl 7.15.6
 
 This release includes the following changes:
 
+ o Added support for other MS-DOS compilers (desides djgpp)
  o CURLOPT_SOCKOPTFUNCTION and CURLOPT_SOCKOPTDATA were added
  o (FTP) libcurl avoids sending TYPE if the desired type was already set
  o (FTP) CURLOPT_PREQUOTE works even when CURLOPT_NOBODY is set true
 
 This release includes the following bugfixes:
 
+ o multi interface using asynch resolves could get stuck in wrong state
  o the 'running_handles' counter wasn't always updated properly when
    curl_multi_remove_handle() was used
  o (FTP) EPRT transfers with IPv6 didn't work properly
@@ -31,12 +33,13 @@ Other curl-related news:
 
 New curl mirrors:
 
+ o http://curl.geosdreams.info/ is a new Polish mirror
  o http://curl.gfiles.org/ is a new Russian mirror
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Domenico Andreoli, Armel Asselin, Gisle Vanem, Yang Tse, Andrew Biggs,
- Peter Sylvester, David McCreedy
+ Peter Sylvester, David McCreedy, Dmitriy Sergeyev
 
         Thanks! (and sorry if I forgot to mention someone)
