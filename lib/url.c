@@ -2115,13 +2115,48 @@ static int handleSock5Proxy(const char *proxy_name,
   int result;
   CURLcode code;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
+  struct SessionHandle *data = conn->data;
+  long timeout;
 
-  Curl_nonblock(sock, FALSE);
+  /* get timeout */
+  if(data->set.timeout && data->set.connecttimeout) {
+    if (data->set.timeout < data->set.connecttimeout)
+      timeout = data->set.timeout*1000;
+    else
+      timeout = data->set.connecttimeout*1000;
+  }
+  else if(data->set.timeout)
+    timeout = data->set.timeout*1000;
+  else if(data->set.connecttimeout)
+    timeout = data->set.connecttimeout*1000;
+  else
+    timeout = DEFAULT_CONNECT_TIMEOUT;
+
+  Curl_nonblock(sock, TRUE);
+
+  /* wait until socket gets connected */
+  result = Curl_select(CURL_SOCKET_BAD, sock, timeout);
+
+  if(-1 == result) {
+    failf(conn->data, "SOCKS5: no connection here");
+    return 1;
+  }
+  else if(0 == result) {
+    failf(conn->data, "SOCKS5: connection timeout");
+    return 1;
+  }
+
+  if(result & CSELECT_ERR) {
+    failf(conn->data, "SOCKS5: error occured during connection");
+    return 1;
+  }
 
   socksreq[0] = 5; /* version */
   socksreq[1] = (char)(proxy_name ? 2 : 1); /* number of methods (below) */
   socksreq[2] = 0; /* no authentication */
   socksreq[3] = 2; /* username/password */
+
+  Curl_nonblock(sock, FALSE);
 
   code = Curl_write(conn, sock, (char *)socksreq, (2 + (int)socksreq[1]),
                       &written);
@@ -2129,6 +2164,26 @@ static int handleSock5Proxy(const char *proxy_name,
     failf(conn->data, "Unable to send initial SOCKS5 request.");
     return 1;
   }
+
+  Curl_nonblock(sock, TRUE);
+
+  result = Curl_select(sock, CURL_SOCKET_BAD, timeout);
+
+  if(-1 == result) {
+    failf(conn->data, "SOCKS5 nothing to read");
+    return 1;
+  }
+  else if(0 == result) {
+    failf(conn->data, "SOCKS5 read timeout");
+    return 1;
+  }
+
+  if(result & CSELECT_ERR) {
+    failf(conn->data, "SOCKS5 read error occured");
+    return 1;
+  }
+
+  Curl_nonblock(sock, FALSE);
 
   result=Curl_read(conn, sock, (char *)socksreq, 2, &actualread);
   if ((result != CURLE_OK) || (actualread != 2)) {
@@ -2146,10 +2201,16 @@ static int handleSock5Proxy(const char *proxy_name,
   }
   else if (socksreq[1] == 2) {
     /* Needs user name and password */
-    int userlen, pwlen, len;
-
-    userlen = (int)strlen(proxy_name);
-    pwlen = proxy_password?(int)strlen(proxy_password):0;
+    size_t userlen, pwlen;
+    int len;
+    if(proxy_name && proxy_password) {
+      userlen = strlen(proxy_name);
+      pwlen = proxy_password?strlen(proxy_password):0;
+    }
+    else {
+      userlen = 0;
+      pwlen = 0;
+    }
 
     /*   username/password request looks like
      * +----+------+----------+------+----------+
@@ -4209,4 +4270,3 @@ CURLcode Curl_do_more(struct connectdata *conn)
 
   return result;
 }
-

@@ -7,6 +7,13 @@
                                   Changelog
 
 
+Daniel (4 September 2006)
+- "Dortik" (http://curl.haxx.se/bug/view.cgi?id=1551412) provided a patch that
+  while not fixing things very nicely, it does make the SOCKS5 proxy
+  connection slightly better as it now acknowledges the timeout for connection
+  and it no longer segfaults in the case when SOCKS requires authentication
+  and you did not specify username:password.
+
 Daniel (31 August 2006)
 - Dmitriy Sergeyev found and fixed a multi interface flaw when using asynch
   name resolves. It could get stuck in the wrong state.
