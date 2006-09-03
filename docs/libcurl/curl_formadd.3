@@ -23,88 +23,96 @@ After the \fIlastitem\fP pointer follow the real arguments.
 
 The pointers \fI*firstitem\fP and \fI*lastitem\fP should both be pointing to
 NULL in the first call to this function. All list-data will be allocated by
-the function itself. You must call \fIcurl_formfree\fP after the form post has
-been done to free the resources again.
+the function itself. You must call \fIcurl_formfree(3)\fP after the form post
+has been done to free the resources.
 
 Using POST with HTTP 1.1 implies the use of a "Expect: 100-continue" header.
 You can disable this header with \fICURLOPT_HTTPHEADER\fP as usual.
 
 First, there are some basics you need to understand about multipart/formdata
 posts. Each part consists of at least a NAME and a CONTENTS part. If the part
-is made for file upload, there are also a stored CONTENT-TYPE and a
-FILENAME. Below here, we'll discuss on what options you use to set these
-properties in the parts you want to add to your post.
+is made for file upload, there are also a stored CONTENT-TYPE and a FILENAME.
+Below, we'll discuss what options you use to set these properties in the
+parts you want to add to your post.
+
+The options listed first are for making normal parts. The options from
+\fICURLFORM_FILE\fP through \fICURLFORM_BUFFERLENGTH\fP are for file upload
+parts.
+
 .SH OPTIONS
+
 .IP CURLFORM_COPYNAME
-followed by string is used to set the name of this part. libcurl copies the
-given data, so your application doesn't need to keep it around after this
-function call. If the name isn't zero terminated properly, or if you'd like it
-to contain zero bytes, you need to set the length of the name with
-\fBCURLFORM_NAMELENGTH\fP.
+followed by a string which provides the \fIname\fP of this part. libcurl
+copies the string so your application doesn't need to keep it around after
+this function call. If the name isn't null terminated, or if you'd
+like it to contain zero bytes, you must set its length with
+\fBCURLFORM_NAMELENGTH\fP. The copied data will be freed by
+\fIcurl_formfree(3)\fP.
 
 .IP CURLFORM_PTRNAME
-followed by a string is used for the name of this part. libcurl will use the
-pointer and refer to the data in your application, you must make sure it
-remains until curl no longer needs it. If the name isn't zero terminated
-properly, or if you'd like it to contain zero bytes, you need to set the
-length of the name with \fBCURLFORM_NAMELENGTH\fP.
+followed by a string which provides the \fIname\fP of this part. libcurl
+will use the pointer and refer to the data in your application, so you
+must make sure it remains until curl no longer needs it. If the name
+isn't null terminated, or if you'd like it to contain zero
+bytes, you must set its length with \fBCURLFORM_NAMELENGTH\fP.
 
 .IP CURLFORM_COPYCONTENTS
-followed by a string is used for the contents of this part, the actual data to
-send away. libcurl copies the given data, so your application doesn't need to
-keep it around after this function call. If the data isn't zero terminated
-properly, or if you'd like it to contain zero bytes, you need to set the
-length of the name with \fBCURLFORM_CONTENTSLENGTH\fP.
+followed by a pointer to the contents of this part, the actual data
+to send away. libcurl copies the provided data, so your application doesn't
+need to keep it around after this function call. If the data isn't null
+terminated, or if you'd like it to contain zero bytes, you must
+set the length of the name with \fBCURLFORM_CONTENTSLENGTH\fP. The copied
+data will be freed by \fIcurl_formfree(3)\fP.
 
 .IP CURLFORM_PTRCONTENTS
-followed by a string is used for the contents of this part, the actual data to
-send away. libcurl will use the pointer and refer to the data in your
-application, you must make sure it remains until curl no longer needs it. If
-the data isn't zero terminated properly, or if you'd like it to contain zero
-bytes, you need to set the length of the name with
-\fBCURLFORM_CONTENTSLENGTH\fP.
+followed by a pointer to the contents of this part, the actual data
+to send away. libcurl will use the pointer and refer to the data in your
+application, so you must make sure it remains until curl no longer needs it.
+If the data isn't null terminated, or if you'd like it to contain zero bytes,
+you must set its length  with \fBCURLFORM_CONTENTSLENGTH\fP.
 
 .IP CURLFORM_CONTENTSLENGTH
-followed by a long setting the length of the contents.
+followed by a long giving the length of the contents.
 
 .IP CURLFORM_FILECONTENT
-followed by a file name, makes that file read and the contents will be used in
-as data in this part.
+followed by a filename, causes that file to be read and its contents used
+as data in this part. This part does \fInot\fP automatically become a file
+upload part simply because its data was read from a file.
 
 .IP CURLFORM_FILE
-followed by a file name, makes this part a file upload part. It sets the file
-name field to the actual file name used here, it gets the contents of the file
-and passes as data and sets the content-type if the given file match one of
-the new internally known file extension.  For \fBCURLFORM_FILE\fP the user may
-send one or more files in one part by providing multiple \fBCURLFORM_FILE\fP
-arguments each followed by the filename (and each CURLFORM_FILE is allowed to
-have a CURLFORM_CONTENTTYPE).
+followed by a filename, makes this part a file upload part. It sets the
+\fIfilename\fP field to the basename of the provided filename, it reads the
+contents of the file and passes them as data and sets the content-type if the
+given file match one of the internally known file extensions.  For
+\fBCURLFORM_FILE\fP the user may send one or more files in one part by
+providing multiple \fBCURLFORM_FILE\fP arguments each followed by the
+filename (and each CURLFORM_FILE is allowed to have a CURLFORM_CONTENTTYPE).
 
 .IP CURLFORM_CONTENTTYPE
-followed by a pointer to a string with a content-type will make curl use this
-given content-type for this file upload part, possibly instead of an
+is used in combination with \fICURLFORM_FILE\fP. Followed by a pointer to a
+string which provides the content-type for this part, possibly instead of an
 internally chosen one.
 
 .IP CURLFORM_FILENAME
-followed by a pointer to a string to a name, will make libcurl use the given
-name in the file upload part, instead of the actual file name given to
-\fICURLFORM_FILE\fP.
+is used in combination with \fICURLFORM_FILE\fP. Followed by a pointer to a
+string, it tells libcurl to use the given string as the \fIfilename\fP in the
+file upload part instead of the actual file name.
 
 .IP CURLFORM_BUFFER
-followed by a string, tells libcurl that a buffer is to be used to upload data
-instead of using a file. The given string is used as the value of the file
-name field in the content header.
+is used for custom file upload parts without use of \fICURLFORM_FILE\fP.  It
+tells libcurl that the file contents are already present in a buffer.  The
+parameter is a string which provides the \fIfilename\fP field in the content
+header.
 
 .IP CURLFORM_BUFFERPTR
-followed by a pointer to a data area, tells libcurl the address of the buffer
-containing data to upload (as indicated with \fICURLFORM_BUFFER\fP). The
-buffer containing this data must not be freed until after
+is used in combination with \fICURLFORM_BUFFER\fP. The parameter is a pointer
+to the buffer to be uploaded. This buffer must not be freed until after
 \fIcurl_easy_cleanup(3)\fP is called. You must also use
-\fICURLFORM_BUFFERLENGTH\fP to set the length of the given buffer area.
+\fICURLFORM_BUFFERLENGTH\fP to set the number of bytes in the buffer.
 
 .IP CURLFORM_BUFFERLENGTH
-followed by a long with the size of the \fICURLFORM_BUFFERPTR\fP data area,
-tells libcurl the length of the buffer to upload.
+is used in combination with \fICURLFORM_BUFFER\fP. The parameter is a
+long which gives the length of the buffer.
 
 .IP CURLFORM_ARRAY
 Another possibility to send options to curl_formadd() is the
