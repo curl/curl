@@ -38,7 +38,7 @@
 #endif
 #include <errno.h>
 
-#if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+#if defined(WIN32) && !defined(__CYGWIN__)
 #include <time.h>
 #include <io.h>
 #else
@@ -78,8 +78,8 @@
 #ifndef HAVE_SOCKET
 #error "We can't compile without socket() support!"
 #endif
-
 #endif
+
 #ifdef USE_LIBIDN
 #include <idna.h>
 #include <tld.h>
@@ -95,7 +95,7 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
    instead */
 #define idn_free(x) (free)(x)
 #endif
-#endif
+#endif  /* USE_LIBIDN */
 
 #include "urldata.h"
 #include "netrc.h"

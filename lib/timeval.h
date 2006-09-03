@@ -30,7 +30,7 @@
 
 #include "setup.h"
 
-#if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+#if defined(WIN32) && !defined(__CYGWIN__)
 #include <time.h>
 #else
 #ifdef HAVE_SYS_TIME_H

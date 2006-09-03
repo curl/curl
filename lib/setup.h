@@ -218,7 +218,7 @@ typedef unsigned char bool;
 
 #ifdef WIN32
 
-#if !defined(__GNUC__) || defined(__MINGW32__)
+#if !defined(__CYGWIN__)
 #define sclose(x) closesocket(x)
 
 #undef HAVE_ALARM
