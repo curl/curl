@@ -28,13 +28,13 @@
 
 /* This is the version number of the libcurl package from which this header
    file origins: */
-#define LIBCURL_VERSION "7.15.5-CVS"
+#define LIBCURL_VERSION "7.15.6-CVS"
 
 /* The numeric version number is also available "in parts" by using these
    defines: */
 #define LIBCURL_VERSION_MAJOR 7
 #define LIBCURL_VERSION_MINOR 15
-#define LIBCURL_VERSION_PATCH 5
+#define LIBCURL_VERSION_PATCH 6
 
 /* This is the numeric version of the libcurl version number, meant for easier
    parsing and comparions by programs. The LIBCURL_VERSION_NUM define will
@@ -51,6 +51,6 @@
    and it is always a greater number in a more recent release. It makes
    comparisons with greater than and less than work.
 */
-#define LIBCURL_VERSION_NUM 0x070f05
+#define LIBCURL_VERSION_NUM 0x070f06
 
 #endif /* __CURL_CURLVER_H */
