@@ -140,7 +140,7 @@ else
   libtoolize=`findtool $LIBTOOLIZE`
 fi
 
-lt_pversion=`$libtool --version 2>/dev/null|head -n 1|sed -e 's/^[^0-9]*//g' -e 's/[- ].*//'`
+lt_pversion=`$libtool --version 2>/dev/null|head -n 2|sed -e 's/^[^0-9]*//g' -e 's/[- ].*//'`
 if test -z "$lt_pversion"; then
   echo "buildconf: libtool not found."
   echo "            You need libtool version $LIBTOOL_WANTED_VERSION or newer installed"
