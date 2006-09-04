@@ -11,7 +11,7 @@ Curl and libcurl 7.15.6
 
 This release includes the following changes:
 
- o Added support for other MS-DOS compilers (desides djgpp)
+ o Added support for other MS-DOS compilers (besides djgpp)
  o CURLOPT_SOCKOPTFUNCTION and CURLOPT_SOCKOPTDATA were added
  o (FTP) libcurl avoids sending TYPE if the desired type was already set
  o (FTP) CURLOPT_PREQUOTE works even when CURLOPT_NOBODY is set true
@@ -42,6 +42,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Domenico Andreoli, Armel Asselin, Gisle Vanem, Yang Tse, Andrew Biggs,
- Peter Sylvester, David McCreedy, Dmitriy Sergeyev, Dmitry Rechkin
+ Peter Sylvester, David McCreedy, Dmitriy Sergeyev, Dmitry Rechkin,
+ Jari Sundell
 
         Thanks! (and sorry if I forgot to mention someone)
