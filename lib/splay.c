@@ -80,7 +80,6 @@ struct Curl_tree *Curl_splay(int i, struct Curl_tree *t)
     else
       break;
   }
-  l->larger = r->smaller = NULL;
 
   l->larger = t->smaller;                                /* assemble */
   r->smaller = t->larger;
@@ -114,6 +113,7 @@ struct Curl_tree *Curl_splayinsert(int i,
       t->smaller = node; /* in the sub node for this same key, we use the
                             smaller pointer to point back to the master
                             node */
+
       t->key = KEY_NOTUSED; /* and we set the key in the sub node to NOTUSED
                                to quickly identify this node as a subnode */
 
@@ -270,9 +270,16 @@ int Curl_splayremovebyaddr(struct Curl_tree *t,
     /* Key set to NOTUSED means it is a subnode within a 'same' linked list
        and thus we can unlink it easily. The 'smaller' link of a subnode
        links to the parent node. */
+    if (remove->smaller == NULL)
+      return 3;
+
     remove->smaller->same = remove->same;
     if(remove->same)
       remove->same->smaller = remove->smaller;
+
+    /* Ensures that double-remove gets caught. */
+    remove->smaller = NULL;
+
     /* voila, we're done! */
     *newroot = t; /* return the same root */
     return 0;
@@ -280,10 +287,14 @@ int Curl_splayremovebyaddr(struct Curl_tree *t,
 
   t = Curl_splay(remove->key, t);
 
-  /* First make sure that we got a root node witht he same key as the one we
-     want to remove, as otherwise we might be trying to remove a node that
-     isn't actually in the tree. */
-  if(t->key != remove->key)
+  /* First make sure that we got the same root node as the one we want
+     to remove, as otherwise we might be trying to remove a node that
+     isn't actually in the tree.
+
+     We cannot just compare the keys here as a double remove in quick
+     succession of a node with key != KEY_NOTUSED && same != NULL
+     could return the same key but a different node. */
+  if(t != remove)
     return 2;
 
   /* Check if there is a list with identical sizes, as then we're trying to
