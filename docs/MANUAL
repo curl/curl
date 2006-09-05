@@ -31,6 +31,15 @@ SIMPLE USAGE
 
         curl ftp://cool.haxx.se/ http://www.weirdserver.com:8000/
 
+  Get a file off an FTPS server:
+
+        curl ftps://files.are.secure.com/secrets.txt
+
+  or use the more appropriate FTPS way to get the same file:
+
+        curl --ftp-ssl ftp://files.are.secure.com/secrets.txt
+
+
 DOWNLOAD TO A FILE
 
   Get a web page and store in a local file:
@@ -63,6 +72,10 @@ USING PASSWORDS
 
    It is just like for FTP, but you may also want to specify and use
    SSL-specific options for certificates etc.
+
+   Note that using FTPS:// as prefix is the "implicit" way as described in the
+   standards while the recommended "explicit" way is done by using FTP:// and
+   the --ftp-ssl option.
 
  HTTP
 
@@ -104,6 +117,8 @@ PROXY
  Some proxies require special authentication. Specify by using -U as above:
 
         curl -U user:passwd -x my-proxy:888 http://www.get.this/
+
+ curl also supports SOCKS4 and SOCKS5 proxies with --socks4 and --socks5.
 
  See also the environment variables Curl support that offer further proxy
  control.
@@ -845,6 +860,22 @@ PERSISTENT CONNECTIONS
   same command line if they are using the same host, as that'll make the
   transfers faster. If you use a http proxy for file transfers, practically
   all transfers will be persistent.
+
+MULTIPLE TRANSFERS WITH A SINGLE COMMAND LINE
+
+  As is mentioned above, you can download multiple files with one command line
+  by simply adding more URLs. If you want those to get saved to a local file
+  instead of just printed to stdout, you need to add one save option for each
+  URL you specify. Note that this also goes for the -O option.
+
+  For example: get two files and use -O for the first and a custom file
+  name for the second:
+
+    curl -O http://url.com/file.txt ftp://ftp.com/moo.exe -o moo.jpg
+
+  You can also upload multiple files in a similar fashion:
+
+    curl -T local1 ftp://ftp.com/moo.exe -T local2 ftp://ftp.com/moo2.txt
 
 MAILING LISTS
 
