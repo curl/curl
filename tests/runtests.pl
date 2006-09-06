@@ -92,7 +92,7 @@ my $libtool;
 my $memdump="$LOGDIR/memdump";
 
 # the path to the script that analyzes the memory debug output file:
-my $memanalyze="./memanalyze.pl";
+my $memanalyze="$perl $srcdir/memanalyze.pl";
 
 my $stunnel = checkcmd("stunnel4") || checkcmd("stunnel");
 my $valgrind = checkcmd("valgrind");
@@ -990,7 +990,7 @@ sub checksystem {
             logmsg "$versnoexec \n";
         }
         elsif ($versretval & 127) {
-            logmsg sprintf("command died with signal %d, and %s coredump. \n", 
+            logmsg sprintf("command died with signal %d, and %s coredump.\n",
                            ($versretval & 127), ($versretval & 128)?"a":"no");
         }
         else {
@@ -1069,7 +1069,7 @@ sub checksystem {
     if($tftp_ipv6) {
         logmsg sprintf("* TFTP IPv6 port: %d\n", $TFTP6PORT);
     }
-    
+
     if($ssl_version) {
         logmsg sprintf("* SSL library:    %s\n",
                $has_gnutls?"GnuTLS":($has_openssl?"OpenSSL":"<unknown>"));
@@ -1620,7 +1620,7 @@ sub singletest {
 
         # what parts to cut off from the file
         my @stripfile = getpart("verify", "stripfile");
-        
+
         my $filemode=$hash{'mode'};
         if(($filemode eq "text") && $has_textaware) {
             # text mode when running on windows means adding an extra
@@ -1675,8 +1675,8 @@ sub singletest {
         chomp $serv;
         if($serv =~ /^ftp(\d*)(-ipv6|)/) {
             my ($id, $ext) = ($1, $2);
-            print STDERR "SERV $serv $id $ext\n";
-            ftpkillslave($id, $ext, 1);
+            #print STDERR "SERV $serv $id $ext\n";
+            ftpkillslave($id, $ext, $verbose);
         }
         if($run{$serv}) {
             stopserver($run{$serv}); # the pid file is in the hash table
