@@ -130,3 +130,9 @@ Curl_llist_destroy(struct curl_llist *list, void *user)
     free(list);
   }
 }
+
+size_t
+Curl_llist_count(struct curl_llist *list)
+{
+  return list->size;
+}

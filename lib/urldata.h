@@ -333,25 +333,33 @@ typedef enum {
   FTPFILE_SINGLECWD = 3  /* make one CWD, then SIZE / RETR / STOR on the file */
 } curl_ftpfile;
 
+/* This FTP struct is used in the SessionHandle. All FTP data that is
+   connection-oriented must be in FTP_conn to properly deal with the fact that
+   perhaps the SessionHandle is changed between the times the connection is
+   used. */
 struct FTP {
   curl_off_t *bytecountp;
   char *user;    /* user name string */
   char *passwd;  /* password string */
   char *urlpath; /* the originally given path part of the URL */
+  char *file;    /* decoded file */
+  bool no_transfer; /* nothing was transfered, (possibly because a resumed
+                       transfer already was complete) */
+  curl_off_t downloadsize;
+};
+
+/* ftp_conn is used for striuct connection-oriented data in the connectdata
+   struct */
+struct ftp_conn {
+  char *entrypath; /* the PWD reply when we logged on */
   char **dirs;   /* realloc()ed array for path components */
   int dirdepth;  /* number of entries used in the 'dirs' array */
   int diralloc;  /* number of entries allocated for the 'dirs' array */
-  char *file;    /* decoded file */
-
-  char *entrypath; /* the PWD reply when we logged on */
-
   char *cache;       /* data cache between getresponse()-calls */
   curl_off_t cache_size; /* size of cache in bytes */
   bool dont_check;  /* Set to TRUE to prevent the final (post-transfer)
                        file size and 226/250 status check. It should still
                        read the line, just ignore the result. */
-  bool no_transfer; /* nothing was transfered, (possibly because a resumed
-                       transfer already was complete) */
   long response_time; /* When no timeout is given, this is the amount of
                          seconds we await for an FTP response. Initialized
                          in Curl_ftp_connect() */
@@ -365,7 +373,6 @@ struct FTP {
   char *prevpath;   /* conn->path from the previous transfer */
   char transfertype; /* set by ftp_transfertype for use by Curl_client_write()a
                         and others (A/I or zero) */
-
   size_t nread_resp; /* number of bytes currently read of a server response */
   char *linestart_resp; /* line start pointer for the FTP server response
                            reader function */
@@ -380,7 +387,6 @@ struct FTP {
   struct timeval response; /* set to Curl_tvnow() when a command has been sent
                               off, used to time-out response reading */
   ftpstate state; /* always use ftp.c:state() to change state! */
-  curl_off_t downloadsize;
 };
 
 /****************************************************************************
@@ -406,8 +412,6 @@ struct ConnectBits {
   bool ipv6_ip; /* we communicate with a remote site specified with pure IPv6
                    IP address */
   bool ipv6;    /* we communicate with a site using an IPv6 address */
-  bool use_range;
-  bool rangestringalloc; /* the range string is malloc()'ed */
 
   bool do_more; /* this is set TRUE if the ->curl_do_more() function is
                    supposed to be called, after ->curl_do() */
@@ -456,6 +460,8 @@ struct ConnectBits {
                          when Curl_done() is called, to prevent Curl_done() to
                          get invoked twice when the multi interface is
                          used. */
+  bool stream_was_rewound; /* Indicates that the stream was rewound after a request
+                              read past the end of its response byte boundary */
 };
 
 struct hostname {
@@ -466,14 +472,44 @@ struct hostname {
 };
 
 /*
+ * Flags on the keepon member of the Curl_transfer_keeper
+ */
+enum {
+  KEEP_NONE,
+  KEEP_READ,
+  KEEP_WRITE
+};
+
+
+/*
  * This struct is all the previously local variables from Curl_perform() moved
  * to struct to allow the function to return and get re-invoked better without
  * losing state.
  */
 
 struct Curl_transfer_keeper {
+
+  /** Values copied over from the HandleData struct each time on init **/
+
+  curl_off_t size;        /* -1 if unknown at this point */
+  curl_off_t *bytecountp; /* return number of bytes read or NULL */
+
+  curl_off_t maxdownload; /* in bytes, the maximum amount of data to fetch, 0
+                             means unlimited */
+  curl_off_t *writebytecountp; /* return number of bytes written or NULL */
+
+  /** End of HandleData struct copies **/
+
   curl_off_t bytecount;         /* total number of bytes read */
   curl_off_t writebytecount;    /* number of bytes written */
+
+  long headerbytecount;  /* only count received headers */
+  long deductheadercount; /* this amount of bytes doesn't count when we check
+                             if anything has been transfered at the end of
+                             a connection. We use this counter to make only
+                             a 100 reply (without a following second response
+                             code) result in a CURLE_GOT_NOTHING error code */
+
   struct timeval start;         /* transfer started at this time */
   struct timeval now;           /* current time */
   bool header;                  /* incoming data has HTTP header */
@@ -555,18 +591,83 @@ struct Curl_async {
 typedef CURLcode (*Curl_do_more_func)(struct connectdata *);
 typedef CURLcode (*Curl_done_func)(struct connectdata *, CURLcode);
 
+
+/*
+ * Store's request specific data in the easy handle (SessionHandle).
+ * Previously, these members were on the connectdata struct but since
+ * a conn struct may now be shared between different SessionHandles,
+ * we store connection-specifc data here.
+ *
+ */
+struct HandleData {
+  char *pathbuffer;/* allocated buffer to store the URL's path part in */
+  char *path;      /* path to use, points to somewhere within the pathbuffer
+                      area */
+
+  char *newurl; /* This can only be set if a Location: was in the
+                   document headers */
+
+  /* This struct is inited when needed */
+  struct Curl_transfer_keeper keep;
+
+  /* 'upload_present' is used to keep a byte counter of how much data there is
+     still left in the buffer, aimed for upload. */
+  ssize_t upload_present;
+
+   /* 'upload_fromhere' is used as a read-pointer when we uploaded parts of a
+      buffer, so the next read should read from where this pointer points to,
+      and the 'upload_present' contains the number of bytes available at this
+      position */
+  char *upload_fromhere;
+
+  curl_off_t size;        /* -1 if unknown at this point */
+  curl_off_t *bytecountp; /* return number of bytes read or NULL */
+
+  curl_off_t maxdownload; /* in bytes, the maximum amount of data to fetch, 0
+                             means unlimited */
+  curl_off_t *writebytecountp; /* return number of bytes written or NULL */
+
+  bool use_range;
+  bool rangestringalloc; /* the range string is malloc()'ed */
+
+  char *range; /* range, if used. See README for detailed specification on
+                  this syntax. */
+  curl_off_t resume_from; /* continue [ftp] transfer from here */
+
+  /* Protocol specific data */
+
+  union {
+    struct HTTP *http;
+    struct HTTP *https;  /* alias, just for the sake of being more readable */
+    struct FTP *ftp;
+    void *tftp;        /* private for tftp.c-eyes only */
+    struct FILEPROTO *file;
+    void *telnet;        /* private for telnet.c-eyes only */
+    void *generic;
+  } proto;
+};
+
 /*
  * The connectdata struct contains all fields and variables that should be
  * unique for an entire connection.
  */
 struct connectdata {
-  /**** Fields set when inited and not modified again */
-  struct SessionHandle *data; /* link to the root CURL struct */
-  long connectindex; /* what index in the connects index this particular
-                       struct has */
+  /* 'data' is the CURRENT SessionHandle using this connection -- take great
+     caution that this might very well vary between different times this
+     connection is used! */
+  struct SessionHandle *data;
 
+  bool inuse; /* This is a marker for the connection cache logic. If this is
+                 TRUE this handle is being used by an easy handle and cannot
+                 be used by any other easy handle without careful
+                 consideration (== only for pipelining). */
+
+  /**** Fields set when inited and not modified again */
+  long connectindex; /* what index in the connection cache connects index this
+                        particular struct has */
   long protocol; /* PROT_* flags concerning the protocol set */
 #define PROT_MISSING (1<<0)
+#define PROT_CLOSEACTION (1<<1) /* needs action before socket close */
 #define PROT_HTTP    (1<<2)
 #define PROT_HTTPS   (1<<3)
 #define PROT_FTP     (1<<4)
@@ -574,9 +675,9 @@ struct connectdata {
 #define PROT_DICT    (1<<6)
 #define PROT_LDAP    (1<<7)
 #define PROT_FILE    (1<<8)
-#define PROT_TFTP    (1<<11)
 #define PROT_FTPS    (1<<9)
 #define PROT_SSL     (1<<10) /* protocol requires SSL */
+#define PROT_TFTP    (1<<11)
 
   /* 'dns_entry' is the particular host we use. This points to an entry in the
      DNS cache and it will not get pruned while locked. It gets unlocked in
@@ -600,23 +701,9 @@ struct connectdata {
   struct hostname host;
   struct hostname proxy;
 
-  char *pathbuffer;/* allocated buffer to store the URL's path part in */
-  char *path;      /* path to use, points to somewhere within the pathbuffer
-                      area */
   long port;       /* which port to use locally */
   unsigned short remote_port; /* what remote port to connect to,
                                  not the proxy port! */
-  curl_off_t bytecount;
-  long headerbytecount;  /* only count received headers */
-  long deductheadercount; /* this amount of bytes doesn't count when we check
-                             if anything has been transfered at the end of
-                             a connection. We use this counter to make only
-                             a 100 reply (without a following second response
-                             code) result in a CURLE_GOT_NOTHING error code */
-
-  char *range; /* range, if used. See README for detailed specification on
-                  this syntax. */
-  curl_off_t resume_from; /* continue [ftp] transfer from here */
 
   char *user;    /* user name string, allocated */
   char *passwd;  /* password string, allocated */
@@ -628,8 +715,6 @@ struct connectdata {
   struct timeval created; /* creation time */
   curl_socket_t sock[2]; /* two sockets, the second is used for the data
                             transfer when doing FTP */
-  curl_off_t maxdownload; /* in bytes, the maximum amount of data to fetch, 0
-                             means unlimited */
 
   struct ssl_connect_data ssl[2]; /* this is for ssl-stuff */
   struct ssl_config_data ssl_config;
@@ -683,16 +768,10 @@ struct connectdata {
 
   /**** curl_get() phase fields */
 
-  /* READ stuff */
   curl_socket_t sockfd;   /* socket to read from or CURL_SOCKET_BAD */
-  curl_off_t size;        /* -1 if unknown at this point */
-  curl_off_t *bytecountp; /* return number of bytes read or NULL */
-
-  /* WRITE stuff */
   curl_socket_t writesockfd; /* socket to write to, it may very
                                 well be the same we read from.
                                 CURL_SOCKET_BAD disables */
-  curl_off_t *writebytecountp; /* return number of bytes written or NULL */
 
   /** Dynamicly allocated strings, may need to be freed before this **/
   /** struct is killed.                                             **/
@@ -707,9 +786,6 @@ struct connectdata {
     char *cookiehost; /* free later if not NULL */
   } allocptr;
 
-  char *newurl; /* This can only be set if a Location: was in the
-                   document headers */
-
   int sec_complete; /* if krb4 is enabled for this connection */
 #ifdef HAVE_KRB4
   enum protection_level command_prot;
@@ -722,31 +798,23 @@ struct connectdata {
   struct sockaddr_in local_addr;
 #endif
 
+  bool readchannel_inuse;  /* whether the read channel is in use by an easy handle */
+  bool writechannel_inuse; /* whether the write channel is in use by an easy handle */
+  bool is_in_pipeline;     /* TRUE if this connection is in a pipeline */
+
+  struct curl_llist *send_pipe; /* List of handles waiting to
+                                   send on this pipeline */
+  struct curl_llist *recv_pipe; /* List of handles waiting to read
+                                   their responses on this pipeline */
+
+  char master_buffer[BUFSIZE]; /* The master buffer for this connection. */
+  size_t read_pos;
+  size_t buf_len;
+
+
   /*************** Request - specific items ************/
+
   /* previously this was in the urldata struct */
-  union {
-    struct HTTP *http;
-    struct HTTP *https;  /* alias, just for the sake of being more readable */
-    struct FTP *ftp;
-    void *tftp;        /* private for tftp.c-eyes only */
-    struct FILEPROTO *file;
-    void *telnet;        /* private for telnet.c-eyes only */
-    void *generic;
-  } proto;
-
-  /* This struct is inited when needed */
-  struct Curl_transfer_keeper keep;
-
-  /* 'upload_present' is used to keep a byte counter of how much data there is
-     still left in the buffer, aimed for upload. */
-  ssize_t upload_present;
-
-   /* 'upload_fromhere' is used as a read-pointer when we uploaded parts of a
-      buffer, so the next read should read from where this pointer points to,
-      and the 'upload_present' contains the number of bytes available at this
-      position */
-  char *upload_fromhere;
-
   curl_read_callback fread; /* function that reads the input */
   void *fread_in;           /* pointer to pass to the fread() above */
 
@@ -762,8 +830,11 @@ struct connectdata {
   /* data used for the asynch name resolve callback */
   struct Curl_async async;
 #endif
+
   struct connectdata *sec_conn;   /* secondary connection for 3rd party
                                      transfer */
+  char *sec_path;            /* The source path for FTP 3rd party */
+  char *sec_pathbuffer;
 
   enum { NORMAL, SOURCE3RD, TARGET3RD } xfertype;
 
@@ -772,6 +843,9 @@ struct connectdata {
   int trlMax;    /* allocated buffer size */
   int trlPos;    /* index of where to store data */
 
+  union {
+    struct ftp_conn ftpc;
+  } proto;
 };
 
 /* The end of connectdata. */
@@ -870,6 +944,18 @@ struct auth {
 
 };
 
+struct conncache {
+  /* 'connects' will be an allocated array with pointers. If the pointer is
+     set, it holds an allocated connection. */
+  struct connectdata **connects;
+  long num;           /* size of the 'connects' array */
+  enum {
+    CONNCACHE_PRIVATE, /* used for an easy handle alone */
+    CONNCACHE_MULTI    /* shared within a multi handle */
+  } type;
+};
+
+
 struct UrlState {
   enum {
     Curl_if_none,
@@ -877,13 +963,12 @@ struct UrlState {
     Curl_if_multi
   } used_interface;
 
+  struct conncache *connc; /* points to the connection cache this handle
+                              uses */
+
   /* buffers to store authentication data in, as parsed from input options */
   struct timeval keeps_speed; /* for the progress meter really */
 
-  /* 'connects' will be an allocated array with pointers. If the pointer is
-     set, it holds an allocated connection. */
-  struct connectdata **connects;
-  long numconnects; /* size of the 'connects' array */
   long lastconnect;  /* index of most recent connect or -1 if undefined */
 
   char *headerbuff; /* allocated buffer to store headers in */
@@ -894,6 +979,8 @@ struct UrlState {
   curl_off_t current_speed;  /* the ProgressShow() funcion sets this,
                                 bytes / second */
   bool this_is_a_follow; /* this is a followed Location: request */
+
+  bool is_in_pipeline; /* Indicates whether this handle is part of a pipeline */
 
   char *first_host; /* if set, this should be the host name that we will
                        sent authorization to, no else. Used to make Location:
@@ -927,6 +1014,7 @@ struct UrlState {
   struct auth authproxy;
 
   bool authproblem; /* TRUE if there's some problem authenticating */
+
 #ifdef USE_ARES
   ares_channel areschannel; /* for name resolves */
 #endif
@@ -945,6 +1033,10 @@ struct UrlState {
 
   bool expect100header;  /* TRUE if we added Expect: 100-continue */
 
+  bool pipe_broke; /* TRUE if the connection we were pipelined on broke
+                      and we need to restart from the beginning */
+  bool cancelled; /* TRUE if the request was cancelled */
+
 #ifndef WIN32
 /* do FTP line-end conversions on most platforms */
 #define CURL_DO_LINEEND_CONV
@@ -953,6 +1045,11 @@ struct UrlState {
   /* for FTP downloads: how many CRLFs did we converted to LFs? */
   curl_off_t crlf_conversions;
 #endif
+  /* If set to non-NULL, there's a connection in a shared connection cache
+     that uses this handle so we can't kill this SessionHandle just yet but
+     must keep it around and add it to the list of handles to kill once all
+     its connections are gone */
+  void *shared_conn;
 };
 
 
@@ -1179,8 +1276,9 @@ struct Names {
 struct SessionHandle {
   struct Names dns;
   struct Curl_multi *multi;    /* if non-NULL, points to the multi handle
-                                  struct of which this "belongs" */
+                                  struct to which this "belongs" */
   struct Curl_share *share;    /* Share, handles global variable mutexing */
+  struct HandleData reqdata;   /* Request-specific data */
   struct UserDefined set;      /* values set by the libcurl user */
   struct DynamicStatic change; /* possibly modified userdefined data */
 

@@ -35,9 +35,10 @@ CURLcode Curl_readwrite_init(struct connectdata *conn);
 CURLcode Curl_readrewind(struct connectdata *conn);
 CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp);
 bool Curl_retry_request(struct connectdata *conn, char **url);
+
 /* This sets up a forthcoming transfer */
 CURLcode
-Curl_Transfer (struct connectdata *data,
+Curl_setup_transfer (struct connectdata *data,
                int sockindex,           /* socket index to read from or -1 */
                curl_off_t size,         /* -1 if unknown at this point */
                bool getheader,          /* TRUE if header parsing is wanted */

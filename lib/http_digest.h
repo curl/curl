@@ -1,18 +1,18 @@
 #ifndef __HTTP_DIGEST_H
 #define __HTTP_DIGEST_H
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -47,7 +47,12 @@ CURLcode Curl_output_digest(struct connectdata *conn,
                             bool proxy,
                             unsigned char *request,
                             unsigned char *uripath);
-void Curl_digest_cleanup(struct SessionHandle *data);
 void Curl_digest_cleanup_one(struct digestdata *dig);
+
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH)
+void Curl_digest_cleanup(struct SessionHandle *data);
+#else
+#define Curl_digest_cleanup(x) do {} while(0)
+#endif
 
 #endif

@@ -134,8 +134,8 @@ CURLcode Curl_dict(struct connectdata *conn, bool *done)
   struct SessionHandle *data=conn->data;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
 
-  char *path = conn->path;
-  curl_off_t *bytecount = &conn->bytecount;
+  char *path = data->reqdata.path;
+  curl_off_t *bytecount = &data->reqdata.keep.bytecount;
 
   *done = TRUE; /* unconditionally */
 
@@ -196,8 +196,8 @@ CURLcode Curl_dict(struct connectdata *conn, bool *done)
     if(result)
       failf(data, "Failed sending DICT request");
     else
-      result = Curl_Transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount,
-                             -1, NULL); /* no upload */
+      result = Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount,
+                                   -1, NULL); /* no upload */
     if(result)
       return result;
   }
@@ -243,8 +243,8 @@ CURLcode Curl_dict(struct connectdata *conn, bool *done)
     if(result)
       failf(data, "Failed sending DICT request");
     else
-      result = Curl_Transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount,
-                             -1, NULL); /* no upload */
+      result = Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount,
+                                   -1, NULL); /* no upload */
 
     if(result)
       return result;
@@ -268,8 +268,8 @@ CURLcode Curl_dict(struct connectdata *conn, bool *done)
       if(result)
         failf(data, "Failed sending DICT request");
       else
-        result = Curl_Transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount,
-                               -1, NULL);
+        result = Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount,
+                                     -1, NULL);
       if(result)
         return result;
     }

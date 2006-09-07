@@ -469,6 +469,13 @@ CURLcode curl_easy_perform(CURL *curl)
 
   }
 
+  if(!data->state.connc) {
+    /* oops, no connection cache, make one up */
+    data->state.connc = Curl_mk_connc(CONNCACHE_PRIVATE);
+    if(!data->state.connc)
+      return CURLE_OUT_OF_MEMORY;
+  }
+
   return Curl_perform(data);
 }
 #endif
@@ -494,6 +501,13 @@ void Curl_easy_addmulti(struct SessionHandle *data,
                         void *multi)
 {
   data->multi = multi;
+}
+
+void Curl_easy_initHandleData(struct SessionHandle *data)
+{
+    memset(&data->reqdata, 0, sizeof(struct HandleData));
+
+    data->reqdata.maxdownload = -1;
 }
 
 /*
@@ -543,16 +557,14 @@ CURL *curl_easy_duphandle(CURL *incurl)
 
     /* copy all userdefined values */
     outcurl->set = data->set;
-    outcurl->state.numconnects = data->state.numconnects;
-    outcurl->state.connects = (struct connectdata **)
-      malloc(sizeof(struct connectdata *) * outcurl->state.numconnects);
 
-    if(!outcurl->state.connects) {
+    if(data->state.used_interface == Curl_if_multi)
+      outcurl->state.connc = data->state.connc;
+    else
+      outcurl->state.connc = Curl_mk_connc(CONNCACHE_PRIVATE);
+
+    if(!outcurl->state.connc)
       break;
-    }
-
-    memset(outcurl->state.connects, 0,
-           sizeof(struct connectdata *)*outcurl->state.numconnects);
 
     outcurl->state.lastconnect = -1;
 
@@ -574,6 +586,7 @@ CURL *curl_easy_duphandle(CURL *incurl)
 #endif   /* CURL_DISABLE_HTTP */
 
     /* duplicate all values in 'change' */
+
     if(data->change.url) {
       outcurl->change.url = strdup(data->change.url);
       if(!outcurl->change.url)
@@ -599,14 +612,16 @@ CURL *curl_easy_duphandle(CURL *incurl)
       break;
 #endif
 
+    Curl_easy_initHandleData(outcurl);
+
     fail = FALSE; /* we reach this point and thus we are OK */
 
   } while(0);
 
   if(fail) {
     if(outcurl) {
-      if(outcurl->state.connects)
-        free(outcurl->state.connects);
+      if(outcurl->state.connc->type == CONNCACHE_PRIVATE)
+        Curl_rm_connc(outcurl->state.connc);
       if(outcurl->state.headerbuff)
         free(outcurl->state.headerbuff);
       if(outcurl->change.proxy)
@@ -636,6 +651,9 @@ void curl_easy_reset(CURL *curl)
 
   /* zero out Progress data: */
   memset(&data->progress, 0, sizeof(struct Progress));
+
+  /* init Handle data */
+  Curl_easy_initHandleData(data);
 
   /* The remainder of these calls have been taken from Curl_open() */
 

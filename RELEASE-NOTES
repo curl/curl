@@ -1,4 +1,4 @@
-Curl and libcurl 7.15.6
+Curl and libcurl 7.16.0
 
  Public curl release number:               96
  Releases counted from the very beginning: 123
@@ -11,6 +11,7 @@ Curl and libcurl 7.15.6
 
 This release includes the following changes:
 
+ o CURLMOPT_PIPELINING added for enabling pipelined transfers
  o Added support for other MS-DOS compilers (besides djgpp)
  o CURLOPT_SOCKOPTFUNCTION and CURLOPT_SOCKOPTDATA were added
  o (FTP) libcurl avoids sending TYPE if the desired type was already set
@@ -43,6 +44,6 @@ advice from friends like these:
 
  Domenico Andreoli, Armel Asselin, Gisle Vanem, Yang Tse, Andrew Biggs,
  Peter Sylvester, David McCreedy, Dmitriy Sergeyev, Dmitry Rechkin,
- Jari Sundell
+ Jari Sundell, Ravi Pratap
 
         Thanks! (and sorry if I forgot to mention someone)

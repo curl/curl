@@ -375,11 +375,16 @@ CURLcode Curl_client_write(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   size_t wrote;
 
+  if (data->state.cancelled) {
+      /* We just suck everything into a black hole */
+      return CURLE_OK;
+  }
+
   if(0 == len)
     len = strlen(ptr);
 
   if(type & CLIENTWRITE_BODY) {
-    if((conn->protocol&PROT_FTP) && conn->proto.ftp->transfertype == 'A') {
+    if((conn->protocol&PROT_FTP) && conn->proto.ftpc.transfertype == 'A') {
 #ifdef CURL_DOES_CONVERSIONS
       /* convert from the network encoding */
       size_t rc;
@@ -431,6 +436,15 @@ CURLcode Curl_client_write(struct connectdata *conn,
   return CURLE_OK;
 }
 
+void Curl_read_rewind(struct connectdata *conn,
+                      size_t extraBytesRead)
+{
+    conn->read_pos -= extraBytesRead;
+    conn->bits.stream_was_rewound = TRUE;
+}
+
+#define MIN(a,b) (a < b ? a : b)
+
 /*
  * Internal read-from-socket function. This is meant to deal with plain
  * sockets, SSL sockets and kerberos sockets.
@@ -445,6 +459,8 @@ int Curl_read(struct connectdata *conn, /* connection data */
               ssize_t *n)               /* amount bytes read */
 {
   ssize_t nread;
+  size_t bytestocopy = MIN(conn->buf_len - conn->read_pos, buffersize);
+  size_t bytesremaining = buffersize - bytestocopy;
 
   /* Set 'num' to 0 or 1, depending on which socket that has been sent here.
      If it is the second socket, we set num to 1. Otherwise to 0. This lets
@@ -453,20 +469,34 @@ int Curl_read(struct connectdata *conn, /* connection data */
 
   *n=0; /* reset amount to zero */
 
-  if(conn->ssl[num].use) {
-    nread = Curl_ssl_recv(conn, num, buf, buffersize);
+  bytesremaining = MIN(bytesremaining, sizeof(conn->master_buffer));
 
-    if(nread == -1)
-      return -1; /* -1 from Curl_ssl_recv() means EWOULDBLOCK */
+  /* Copy from our master buffer first */
+  memcpy(buf, conn->master_buffer + conn->read_pos, bytestocopy);
+  conn->read_pos += bytestocopy;
+
+  conn->bits.stream_was_rewound = FALSE;
+
+  *n = bytestocopy;
+
+  if (bytesremaining == 0) {
+      return CURLE_OK;
   }
-  else {
-    *n=0; /* reset amount to zero */
-    if(conn->sec_complete)
-      nread = Curl_sec_read(conn, sockfd, buf, buffersize);
-    else
-      nread = sread(sockfd, buf, buffersize);
 
-    if(-1 == nread) {
+  if(conn->ssl[num].use) {
+    nread = Curl_ssl_recv(conn, num, conn->master_buffer, bytesremaining);
+
+    if(nread == -1 && bytestocopy == 0) {
+      return -1; /* -1 from Curl_ssl_recv() means EWOULDBLOCK */
+    }
+
+  } else {
+    if(conn->sec_complete)
+      nread = Curl_sec_read(conn, sockfd, conn->master_buffer, bytesremaining);
+    else
+      nread = sread(sockfd, conn->master_buffer, bytesremaining);
+
+    if(-1 == nread && bytestocopy == 0) {
       int err = Curl_sockerrno();
 #ifdef WIN32
       if(WSAEWOULDBLOCK == err)
@@ -476,7 +506,15 @@ int Curl_read(struct connectdata *conn, /* connection data */
         return -1;
     }
   }
-  *n = nread;
+
+  if (nread > 0) {
+      memcpy(buf, conn->master_buffer, nread);
+
+      conn->buf_len = nread;
+      conn->read_pos = nread;
+      *n += nread;
+  }
+
   return CURLE_OK;
 }
 

@@ -83,7 +83,7 @@
 
 void Curl_httpchunk_init(struct connectdata *conn)
 {
-  struct Curl_chunker *chunk = &conn->proto.http->chunk;
+  struct Curl_chunker *chunk = &conn->data->reqdata.proto.http->chunk;
   chunk->hexindex=0; /* start at 0 */
   chunk->dataleft=0; /* no data left yet! */
   chunk->state = CHUNK_HEX; /* we get hex first! */
@@ -103,8 +103,9 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
                               ssize_t *wrotep)
 {
   CURLcode result=CURLE_OK;
-  struct Curl_chunker *ch = &conn->proto.http->chunk;
-  struct Curl_transfer_keeper *k = &conn->keep;
+  struct SessionHandle *data = conn->data;
+  struct Curl_chunker *ch = &data->reqdata.proto.http->chunk;
+  struct Curl_transfer_keeper *k = &data->reqdata.keep;
   size_t piece;
   size_t length = (size_t)datalen;
   size_t *wrote = (size_t *)wrotep;
@@ -186,7 +187,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
 
       /* Write the data portion available */
 #ifdef HAVE_LIBZ
-      switch (conn->keep.content_encoding) {
+      switch (data->reqdata.keep.content_encoding) {
         case IDENTITY:
 #endif
           if(!k->ignorebody)
@@ -196,16 +197,16 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
           break;
 
         case DEFLATE:
-          /* update conn->keep.str to point to the chunk data. */
-          conn->keep.str = datap;
-          result = Curl_unencode_deflate_write(conn, &conn->keep,
+          /* update data->reqdata.keep.str to point to the chunk data. */
+          data->reqdata.keep.str = datap;
+          result = Curl_unencode_deflate_write(conn, &data->reqdata.keep,
                                                (ssize_t)piece);
           break;
 
         case GZIP:
-          /* update conn->keep.str to point to the chunk data. */
-          conn->keep.str = datap;
-          result = Curl_unencode_gzip_write(conn, &conn->keep,
+          /* update data->reqdata.keep.str to point to the chunk data. */
+          data->reqdata.keep.str = datap;
+          result = Curl_unencode_gzip_write(conn, &data->reqdata.keep,
                                             (ssize_t)piece);
           break;
 

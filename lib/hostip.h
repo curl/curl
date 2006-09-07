@@ -87,7 +87,8 @@
 #define CURL_ASYNC_SUCCESS ARES_SUCCESS
 #else
 #define CURL_ASYNC_SUCCESS CURLE_OK
-#define ares_cancel(x)
+#define ares_cancel(x) do {} while(0)
+#define ares_destroy(x) do {} while (0);
 #endif
 
 /*

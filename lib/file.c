@@ -102,7 +102,7 @@
  */
 CURLcode Curl_file_connect(struct connectdata *conn)
 {
-  char *real_path = curl_easy_unescape(conn->data, conn->path, 0, NULL);
+  char *real_path = curl_easy_unescape(conn->data, conn->data->reqdata.path, 0, NULL);
   struct FILEPROTO *file;
   int fd;
 #if defined(WIN32) || defined(MSDOS) || defined(__EMX__)
@@ -119,7 +119,11 @@ CURLcode Curl_file_connect(struct connectdata *conn)
     return CURLE_OUT_OF_MEMORY;
   }
 
-  conn->proto.file = file;
+  if (conn->data->reqdata.proto.file) {
+    free(conn->data->reqdata.proto.file);
+  }
+
+  conn->data->reqdata.proto.file = file;
 
 #if defined(WIN32) || defined(MSDOS) || defined(__EMX__)
   /* If the first character is a slash, and there's
@@ -160,7 +164,7 @@ CURLcode Curl_file_connect(struct connectdata *conn)
 
   file->fd = fd;
   if(!conn->data->set.upload && (fd == -1)) {
-    failf(conn->data, "Couldn't open file %s", conn->path);
+    failf(conn->data, "Couldn't open file %s", conn->data->reqdata.path);
     Curl_file_done(conn, CURLE_FILE_COULDNT_READ_FILE);
     return CURLE_FILE_COULDNT_READ_FILE;
   }
@@ -171,7 +175,7 @@ CURLcode Curl_file_connect(struct connectdata *conn)
 CURLcode Curl_file_done(struct connectdata *conn,
                         CURLcode status)
 {
-  struct FILEPROTO *file = conn->proto.file;
+  struct FILEPROTO *file = conn->data->reqdata.proto.file;
   (void)status; /* not used */
   Curl_safefree(file->freepath);
 
@@ -189,7 +193,7 @@ CURLcode Curl_file_done(struct connectdata *conn,
 
 static CURLcode file_upload(struct connectdata *conn)
 {
-  struct FILEPROTO *file = conn->proto.file;
+  struct FILEPROTO *file = conn->data->reqdata.proto.file;
   char *dir = strchr(file->path, DIRSEP);
   FILE *fp;
   CURLcode res=CURLE_OK;
@@ -206,7 +210,7 @@ static CURLcode file_upload(struct connectdata *conn)
    */
   conn->fread = data->set.fread;
   conn->fread_in = data->set.in;
-  conn->upload_fromhere = buf;
+  conn->data->reqdata.upload_fromhere = buf;
 
   if(!dir)
     return CURLE_FILE_COULDNT_READ_FILE; /* fix: better error code */
@@ -297,7 +301,7 @@ CURLcode Curl_file(struct connectdata *conn, bool *done)
     return file_upload(conn);
 
   /* get the fd from the connection phase */
-  fd = conn->proto.file->fd;
+  fd = conn->data->reqdata.proto.file->fd;
 
   /* VMS: This only works reliable for STREAMLF files */
   if( -1 != fstat(fd, &statbuf)) {
@@ -346,8 +350,8 @@ CURLcode Curl_file(struct connectdata *conn, bool *done)
     return result;
   }
 
-  if (conn->resume_from <= expected_size)
-    expected_size -= conn->resume_from;
+  if (data->reqdata.resume_from <= expected_size)
+    expected_size -= data->reqdata.resume_from;
   else {
     failf(data, "failed to resume file:// transfer");
     return CURLE_BAD_DOWNLOAD_RESUME;
@@ -363,8 +367,8 @@ CURLcode Curl_file(struct connectdata *conn, bool *done)
   if(fstated)
     Curl_pgrsSetDownloadSize(data, expected_size);
 
-  if(conn->resume_from)
-    lseek(fd, conn->resume_from, SEEK_SET);
+  if(data->reqdata.resume_from)
+    lseek(fd, data->reqdata.resume_from, SEEK_SET);
 
   Curl_pgrsTime(data, TIMER_STARTTRANSFER);
 

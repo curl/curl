@@ -431,7 +431,7 @@ quit:
   DynaClose();
 
   /* no data to transfer */
-  Curl_Transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+  Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
   conn->bits.close = TRUE;
 
   return status;

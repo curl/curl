@@ -270,6 +270,9 @@ typedef enum {
   /* This is the argument passed to the socket callback */
   CINIT(SOCKETDATA, OBJECTPOINT, 2),
 
+    /* set to 1 to enable pipelining for this multi handle */
+  CINIT(PIPELINING, LONG, 3),
+
   CURLMOPT_LASTENTRY /* the last unused */
 } CURLMoption;
 

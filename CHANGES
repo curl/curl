@@ -6,7 +6,26 @@
 
                                   Changelog
 
+Daniel (6 September 2006)
+- Ravi Pratap and I have implemented HTTP Pipelining support. Enable it for a
+  multi handle using CURLMOPT_PIPELINING and all HTTP connections done on that
+  handle will be attempted to get pipelined instead of done in parallell as
+  they are performed otherwise.
 
+  As a side-effect from this work, connections are now shared between all easy
+  handles within a multi handle, so if you use N easy handles for transfers,
+  each of them can pick up and re-use a connection that was previously used by
+  any of the handles, be it the same or one of the others.
+
+  This separation of the tight relationship between connections and easy
+  handles is most noticable when you close easy handles that have been used in
+  a multi handle and check amount of used memory or watch the debug output, as
+  there are times when libcurl will keep the easy handle around for a while
+  longer to be able to close it properly. Like for sending QUIT to close down
+  an FTP connection.
+
+  This is a major change.
+  
 Daniel (4 September 2006)
 - Dmitry Rechkin (http://curl.haxx.se/bug/view.cgi?id=1551412) provided a
   patch that while not fixing things very nicely, it does make the SOCKS5

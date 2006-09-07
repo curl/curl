@@ -258,7 +258,7 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
 
   /* As RFC3617 describes the separator slash is not actually part of the file
      name so we skip the always-present first letter of the path string. */
-  char *filename = &state->conn->path[1];
+  char *filename = &state->conn->data->reqdata.path[1];
   struct SessionHandle *data = state->conn->data;
   CURLcode res = CURLE_OK;
 
@@ -282,7 +282,7 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
       /* If we are uploading, send an WRQ */
       setpacketevent(&state->spacket, TFTP_EVENT_WRQ);
       filename = curl_easy_unescape(data, filename, 0, NULL);
-      state->conn->upload_fromhere = (char *)&state->spacket.data[4];
+      state->conn->data->reqdata.upload_fromhere = (char *)&state->spacket.data[4];
       if(data->set.infilesize != -1)
         Curl_pgrsSetUploadSize(data, data->set.infilesize);
     }
@@ -569,7 +569,7 @@ CURLcode Curl_tftp_connect(struct connectdata *conn, bool *done)
   tftp_state_data_t     *state;
   int rc;
 
-  state = conn->proto.tftp = calloc(sizeof(tftp_state_data_t), 1);
+  state = conn->data->reqdata.proto.tftp = calloc(sizeof(tftp_state_data_t), 1);
   if(!state)
     return CURLE_OUT_OF_MEMORY;
 
@@ -620,8 +620,8 @@ CURLcode Curl_tftp_done(struct connectdata *conn, CURLcode status)
 {
   (void)status; /* unused */
 
-  free(conn->proto.tftp);
-  conn->proto.tftp = NULL;
+  free(conn->data->reqdata.proto.tftp);
+  conn->data->reqdata.proto.tftp = NULL;
   Curl_pgrsDone(conn);
 
   return CURLE_OK;
@@ -641,7 +641,7 @@ CURLcode Curl_tftp_done(struct connectdata *conn, CURLcode status)
 CURLcode Curl_tftp(struct connectdata *conn, bool *done)
 {
   struct SessionHandle  *data = conn->data;
-  tftp_state_data_t     *state = (tftp_state_data_t *)(conn->proto.tftp);
+  tftp_state_data_t     *state = (tftp_state_data_t *)(conn->data->reqdata.proto.tftp);
   tftp_event_t          event;
   CURLcode              code;
   int                   rc;
@@ -742,7 +742,7 @@ CURLcode Curl_tftp(struct connectdata *conn, bool *done)
   }
 
   /* Tell curl we're done */
-  code = Curl_Transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+  code = Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
   if(code)
     return code;
 

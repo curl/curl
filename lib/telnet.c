@@ -219,7 +219,7 @@ CURLcode init_telnet(struct connectdata *conn)
   if(!tn)
     return CURLE_OUT_OF_MEMORY;
 
-  conn->proto.telnet = (void *)tn; /* make us known */
+  conn->data->reqdata.proto.telnet = (void *)tn; /* make us known */
 
   tn->telrcv_state = CURL_TS_DATA;
 
@@ -238,7 +238,7 @@ CURLcode init_telnet(struct connectdata *conn)
 static void negotiate(struct connectdata *conn)
 {
   int i;
-  struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
+  struct TELNET *tn = (struct TELNET *) conn->data->reqdata.proto.telnet;
 
   for(i = 0;i < CURL_NTELOPTS;i++)
   {
@@ -312,7 +312,7 @@ static void send_negotiation(struct connectdata *conn, int cmd, int option)
 static
 void set_remote_option(struct connectdata *conn, int option, int newstate)
 {
-  struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
+  struct TELNET *tn = (struct TELNET *)conn->data->reqdata.proto.telnet;
   if(newstate == CURL_YES)
   {
     switch(tn->him[option])
@@ -394,7 +394,7 @@ void set_remote_option(struct connectdata *conn, int option, int newstate)
 static
 void rec_will(struct connectdata *conn, int option)
 {
-  struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
+  struct TELNET *tn = (struct TELNET *)conn->data->reqdata.proto.telnet;
   switch(tn->him[option])
   {
     case CURL_NO:
@@ -447,7 +447,7 @@ void rec_will(struct connectdata *conn, int option)
 static
 void rec_wont(struct connectdata *conn, int option)
 {
-  struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
+  struct TELNET *tn = (struct TELNET *)conn->data->reqdata.proto.telnet;
   switch(tn->him[option])
   {
     case CURL_NO:
@@ -492,7 +492,7 @@ void rec_wont(struct connectdata *conn, int option)
 static void
 set_local_option(struct connectdata *conn, int option, int newstate)
 {
-  struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
+  struct TELNET *tn = (struct TELNET *)conn->data->reqdata.proto.telnet;
   if(newstate == CURL_YES)
   {
     switch(tn->us[option])
@@ -574,7 +574,7 @@ set_local_option(struct connectdata *conn, int option, int newstate)
 static
 void rec_do(struct connectdata *conn, int option)
 {
-  struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
+  struct TELNET *tn = (struct TELNET *)conn->data->reqdata.proto.telnet;
   switch(tn->us[option])
   {
     case CURL_NO:
@@ -627,7 +627,7 @@ void rec_do(struct connectdata *conn, int option)
 static
 void rec_dont(struct connectdata *conn, int option)
 {
-  struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
+  struct TELNET *tn = (struct TELNET *)conn->data->reqdata.proto.telnet;
   switch(tn->us[option])
   {
     case CURL_NO:
@@ -789,7 +789,7 @@ static CURLcode check_telnet_options(struct connectdata *conn)
   char option_arg[256];
   char *buf;
   struct SessionHandle *data = conn->data;
-  struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
+  struct TELNET *tn = (struct TELNET *)conn->data->reqdata.proto.telnet;
 
   /* Add the user name as an environment variable if it
      was given on the command line */
@@ -860,7 +860,7 @@ static void suboption(struct connectdata *conn)
   char varname[128];
   char varval[128];
   struct SessionHandle *data = conn->data;
-  struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
+  struct TELNET *tn = (struct TELNET *)data->reqdata.proto.telnet;
 
   printsub(data, '<', (unsigned char *)tn->subbuffer, CURL_SB_LEN(tn)+2);
   switch (CURL_SB_GET(tn)) {
@@ -927,7 +927,7 @@ void telrcv(struct connectdata *conn,
   unsigned char c;
   int in = 0;
   struct SessionHandle *data = conn->data;
-  struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
+  struct TELNET *tn = (struct TELNET *)data->reqdata.proto.telnet;
 
   while(count--)
   {
@@ -1074,13 +1074,13 @@ void telrcv(struct connectdata *conn,
 
 CURLcode Curl_telnet_done(struct connectdata *conn, CURLcode status)
 {
-  struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
+  struct TELNET *tn = (struct TELNET *)conn->data->reqdata.proto.telnet;
   (void)status; /* unused */
 
   curl_slist_free_all(tn->telnet_vars);
 
-  free(conn->proto.telnet);
-  conn->proto.telnet = NULL;
+  free(conn->data->reqdata.proto.telnet);
+  conn->data->reqdata.proto.telnet = NULL;
 
   return CURLE_OK;
 }
@@ -1119,7 +1119,7 @@ CURLcode Curl_telnet(struct connectdata *conn, bool *done)
   if(code)
     return code;
 
-  tn = (struct TELNET *)conn->proto.telnet;
+  tn = (struct TELNET *)data->reqdata.proto.telnet;
 
   code = check_telnet_options(conn);
   if(code)
@@ -1394,7 +1394,7 @@ CURLcode Curl_telnet(struct connectdata *conn, bool *done)
   }
 #endif
   /* mark this as "no further transfer wanted" */
-  Curl_Transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+  Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
 
   return code;
 }

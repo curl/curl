@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -29,6 +29,11 @@
 void Curl_expire(struct SessionHandle *data, long milli);
 
 void Curl_multi_rmeasy(void *multi, CURL *data);
+
+bool Curl_multi_canPipeline(struct Curl_multi* multi);
+
+void Curl_multi_add_closure(struct Curl_multi *multi,
+                            struct SessionHandle *data);
 
 /* the write bits start at bit 16 for the *getsock() bitmap */
 #define GETSOCK_WRITEBITSTART 16
