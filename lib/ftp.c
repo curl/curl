@@ -1162,7 +1162,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   if(freeaddr)
     Curl_freeaddrinfo(addr);
 
-  ftp->count1 = PORT;
+  ftpc->count1 = PORT;
 
 #endif /* end of ipv4-specific code */
 

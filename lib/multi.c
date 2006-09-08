@@ -193,11 +193,11 @@ static void multistate(struct Curl_one_easy *easy, CURLMstate state)
 
   easy->state = state;
 
+#ifdef CURLDEBUG
   if(easy->state > CURLM_STATE_CONNECT &&
      easy->state < CURLM_STATE_COMPLETED)
     index = easy->easy_conn->connectindex;
 
-#ifdef CURLDEBUG
   infof(easy->easy_handle,
         "STATE: %s => %s handle %p; (connection #%d) \n",
         statename[oldstate], statename[easy->state],
