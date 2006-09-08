@@ -227,9 +227,11 @@ static CURLcode AllowServerConnect(struct connectdata *conn)
 #endif
       socklen_t size = (socklen_t) sizeof(add);
 
-      if(0 == getsockname(sock, (struct sockaddr *) &add, &size))
-        s=accept(sock, (struct sockaddr *) &add, &size);
+      if(0 == getsockname(sock, (struct sockaddr *) &add, &size)) {
+	size = sizeof(add);
 
+        s=accept(sock, (struct sockaddr *) &add, &size);
+      }
       sclose(sock); /* close the first socket */
 
       if (CURL_SOCKET_BAD == s) {
@@ -842,16 +844,18 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
        the IP from the control connection */
 
     sslen = sizeof(ss);
-    rc = getsockname(conn->sock[FIRSTSOCKET], (struct sockaddr *)&ss, &sslen);
-    if(rc < 0) {
-      failf(data, "getsockname() returned %d\n", rc);
+    if (getsockname(conn->sock[FIRSTSOCKET], (struct sockaddr *)&ss, &sslen)) {
+      failf(data, "getsockname() failed: %s",
+          Curl_strerror(conn, Curl_sockerrno()) );
       return CURLE_FTP_PORT_FAILED;
     }
 
+    if (sslen > sizeof(ss))
+      sslen = sizeof(ss);
     rc = getnameinfo((struct sockaddr *)&ss, sslen, hbuf, sizeof(hbuf), NULL,
                      0, NIFLAGS);
     if(rc) {
-      failf(data, "getnameinfo() returned %d\n", rc);
+      failf(data, "getnameinfo() returned %d \n", rc);
       return CURLE_FTP_PORT_FAILED;
     }
     host = hbuf; /* use this host name */
@@ -896,14 +900,14 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   /* step 3, bind to a suitable local address */
 
   /* Try binding the given address. */
-  if (bind(portsock, ai->ai_addr, ai->ai_addrlen) < 0) {
+  if (bind(portsock, ai->ai_addr, ai->ai_addrlen)) {
 
     /* It failed. Bind the address used for the control connection instead */
     sslen = sizeof(ss);
-
     if (getsockname(conn->sock[FIRSTSOCKET],
-                    (struct sockaddr *)sa, &sslen) < 0) {
-      failf(data, "getsockname() failed");
+                    (struct sockaddr *)sa, &sslen)) {
+      failf(data, "getsockname() failed: %s",
+          Curl_strerror(conn, Curl_sockerrno()) );
       sclose(portsock);
       return CURLE_FTP_PORT_FAILED;
     }
@@ -914,7 +918,10 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     else
       ((struct sockaddr_in6 *)sa)->sin6_port =0;
 
-    if(bind(portsock, (struct sockaddr *)sa, sslen) < 0) {
+    if (sslen > sizeof(ss))
+      sslen = sizeof(ss);
+
+    if(bind(portsock, (struct sockaddr *)sa, sslen)) {
       failf(data, "bind failed: %s", Curl_strerror(conn, Curl_sockerrno()));
       sclose(portsock);
       return CURLE_FTP_PORT_FAILED;
@@ -924,18 +931,18 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   /* get the name again after the bind() so that we can extract the
      port number it uses now */
   sslen = sizeof(ss);
-  if(getsockname(portsock, (struct sockaddr *)sa, &sslen)<0) {
+  if(getsockname(portsock, (struct sockaddr *)sa, &sslen)) {
     failf(data, "getsockname() failed: %s",
           Curl_strerror(conn, Curl_sockerrno()) );
+    sclose(portsock);
     return CURLE_FTP_PORT_FAILED;
   }
 
   /* step 4, listen on the socket */
 
-  if (listen(portsock, 1) < 0) {
-    error = Curl_sockerrno();
+  if (listen(portsock, 1)) {
+    failf(data, "socket failure: %s", Curl_strerror(conn, Curl_sockerrno()));
     sclose(portsock);
-    failf(data, "socket failure: %s", Curl_strerror(conn, error));
     return CURLE_FTP_PORT_FAILED;
   }
 
@@ -1031,6 +1038,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   Curl_addrinfo *addr = NULL;
   unsigned short ip[4];
   bool freeaddr = TRUE;
+  socklen_t sslen = sizeof(sa);
 
   (void)fcmd; /* not used in the IPv4 code */
   if(data->set.ftpport) {
@@ -1074,14 +1082,15 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   if(!addr) {
     /* pick a suitable default here */
 
-    socklen_t sslen;
-
-    sslen = sizeof(sa);
+ 
     if (getsockname(conn->sock[FIRSTSOCKET],
-                    (struct sockaddr *)&sa, &sslen) < 0) {
-      failf(data, "getsockname() failed");
+                    (struct sockaddr *)&sa, &sslen)) {
+      failf(data, "getsockname() failed: %s",
+          Curl_strerror(conn, Curl_sockerrno()) );
       return CURLE_FTP_PORT_FAILED;
     }
+    if (sslen>sizeof(sa))
+      sslen = sizeof(sa);
 
     sa_filled_in = TRUE; /* the sa struct is filled in */
   }
@@ -1089,7 +1098,6 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   if (addr || sa_filled_in) {
     portsock = socket(AF_INET, SOCK_STREAM, 0);
     if(CURL_SOCKET_BAD != portsock) {
-      socklen_t size;
 
       /* we set the secondary socket variable to this for now, it
          is only so that the cleanup function will close it in case
@@ -1099,21 +1107,22 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
       conn->sock[SECONDARYSOCKET] = portsock;
 
       if(!sa_filled_in) {
-        memcpy(&sa, addr->ai_addr, sizeof(sa));
+        memcpy(&sa, addr->ai_addr, sslen);
         sa.sin_addr.s_addr = INADDR_ANY;
       }
 
       sa.sin_port = 0;
-      size = sizeof(sa);
+      sslen = sizeof(sa);
 
-      if(bind(portsock, (struct sockaddr *)&sa, size) >= 0) {
+      if(bind(portsock, (struct sockaddr *)&sa, sslen) == 0) {
         /* we succeeded to bind */
         struct sockaddr_in add;
         socklen_t socksize = sizeof(add);
 
         if(getsockname(portsock, (struct sockaddr *) &add,
-                       &socksize)<0) {
-          failf(data, "getsockname() failed");
+                       &socksize)) {
+          failf(data, "getsockname() failed: %s",
+            Curl_strerror(conn, Curl_sockerrno()) );
           return CURLE_FTP_PORT_FAILED;
         }
         porttouse = ntohs(add.sin_port);

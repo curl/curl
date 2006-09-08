@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (9 September 2006)
+- Peter Sylvester cleaned up and fixed the getsockname() uses in ftp.c. Some
+  of them can be completetly removed though...
+
 Daniel (6 September 2006)
 - Ravi Pratap and I have implemented HTTP Pipelining support. Enable it for a
   multi handle using CURLMOPT_PIPELINING and all HTTP connections done on that

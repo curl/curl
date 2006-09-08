@@ -19,6 +19,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o getsockname usage fixes
  o SOCKS5 proxy connects can now time-out
  o SOCKS5 connects that require auth no longer segfaults when auth not given
  o multi interface using asynch resolves could get stuck in wrong state
