@@ -541,8 +541,10 @@ static bool unescape_elements (void *data, LDAPURLDesc *ludp)
  *
  * <hostname> already known from 'conn->host.name'.
  * <port>     already known from 'conn->remote_port'.
- * extract the rest from 'conn->path+1'. All fields are optional. e.g.
- *   ldap://<hostname>:<port>/?<attributes>?<scope>?<filter> yields ludp->lud_dn = "".
+ * extract the rest from 'conn->data->reqdata.path+1'. All fields are optional.
+ * e.g.
+ *   ldap://<hostname>:<port>/?<attributes>?<scope>?<filter>
+ * yields ludp->lud_dn = "".
  *
  * Ref. http://developer.netscape.com/docs/manuals/dirsdk/csdk30/url.htm#2831915
  */
