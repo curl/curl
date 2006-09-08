@@ -88,6 +88,8 @@ auth_required - if this is set and a POST/PUT is made without auth, the
                 server will NOT wait for the full request body to get sent
 idle -          do nothing after receiving the request, just "sit idle"
 stream -        continuously send data to the client, never-ending
+pipe: [num] -   tell the server to expect this many HTTP requests before
+                sending back anything, to allow pipelining tests
 </servercmd>
 </reply>
 

@@ -90,6 +90,7 @@ bool prevbounce;    /* instructs the server to increase the part number for
 
 struct httprequest {
   char reqbuf[REQBUFSIZ]; /* buffer area for the incoming request */
+  int checkindex; /* where to start checking of the request */
   int offset;     /* size of the incoming request */
   long testno;     /* test number found in the request */
   long partno;     /* part number found in the request */
@@ -100,7 +101,8 @@ struct httprequest {
   size_t cl;      /* Content-Length of the incoming request */
   bool digest;    /* Authorization digest header found */
   bool ntlm;      /* Authorization ntlm header found */
-
+  int pipe;       /* if non-zero, expect this many requests to do a "piped"
+                     request/response */
   int rcmd;       /* doing a special command, see defines above */
 };
 
@@ -188,14 +190,16 @@ static void sigpipe_handler(int sig)
 
 int ProcessRequest(struct httprequest *req)
 {
-  char *line=req->reqbuf;
+  char *line=&req->reqbuf[req->checkindex];
   char chunked=FALSE;
   static char request[REQUEST_KEYWORD_SIZE];
   static char doc[MAXDOCNAMELEN];
   char logbuf[256];
   int prot_major, prot_minor;
   char *end;
-  end = strstr(req->reqbuf, END_OF_HEADERS);
+  end = strstr(line, END_OF_HEADERS);
+
+  logmsg("ProcessRequest() called");
 
   /* try to figure out the request characteristics as soon as possible, but
      only once! */
@@ -266,6 +270,7 @@ int ProcessRequest(struct httprequest *req)
       else {
         char *cmd = NULL;
         size_t cmdsize = 0;
+        int num=0;
 
         /* get the custom server control "commands" */
         cmd = (char *)spitout(stream, "reply", "servercmd", &cmdsize);
@@ -286,6 +291,11 @@ int ProcessRequest(struct httprequest *req)
           else if(!strncmp(CMD_STREAM, cmd, strlen(CMD_STREAM))) {
             logmsg("instructed to stream");
             req->rcmd = RCMD_STREAM;
+          }
+          else if(1 == sscanf(cmd, "pipe: %d", &num)) {
+            logmsg("instructed to allow a pipe size %d", num);
+            req->pipe = num-1; /* decrease by one since we don't count the
+                                  first request in this number */
           }
           free(cmd);
         }
@@ -323,9 +333,17 @@ int ProcessRequest(struct httprequest *req)
     }
   }
 
-  if(!end)
+  if(!end) {
     /* we don't have a complete request yet! */
+    logmsg("ProcessRequest returned without a complete request");
     return 0;
+  }
+  logmsg("ProcessRequest found a complete request");
+
+  if(req->pipe)
+    /* we do have a full set, advance the checkindex to after the end of the
+       headers, for the pipelining case mostly */
+    req->checkindex += (end - line) + strlen(END_OF_HEADERS);
 
   /* **** Persistancy ****
    *
@@ -402,6 +420,17 @@ int ProcessRequest(struct httprequest *req)
   if(strstr(req->reqbuf, "Connection: close"))
     req->open = FALSE; /* close connection after this request */
 
+  while(req->pipe) {
+    /* scan for more header ends within this chunk */
+    line = &req->reqbuf[req->checkindex];
+    end = strstr(line, END_OF_HEADERS);
+    if(!end)
+      break;
+    req->checkindex += (end - line) + strlen(END_OF_HEADERS);
+    req->pipe--;
+  }
+
+
   /* If authentication is required and no auth was provided, end now. This
      makes the server NOT wait for PUT/POST data and you can then make the
      test case send a rejection before any such data has been sent. Test case
@@ -415,6 +444,7 @@ int ProcessRequest(struct httprequest *req)
     else
       return 0; /* not complete yet */
   }
+
   return 1; /* done */
 }
 
@@ -450,6 +480,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
   req->testno = DOCNUMBER_NOTHING; /* safe default */
   req->open = TRUE; /* connection should remain open and wait for more
                        commands */
+  req->pipe = 0;
 
   /*** end of httprequest init ***/
 
@@ -467,12 +498,20 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
       storerequest(reqbuf);
       return DOCNUMBER_INTERNAL;
     }
+
+    logmsg("Read %d bytes", got);
+
     req->offset += got;
 
     reqbuf[req->offset] = 0;
 
-    if(ProcessRequest(req))
+    if(ProcessRequest(req)) {
+      if(req->pipe--) {
+        logmsg("Waiting for another piped request");
+        continue;
+      }
       break;
+    }
   }
 
   if (req->offset >= REQBUFSIZ) {
@@ -764,7 +803,7 @@ int main(int argc, char *argv[])
   }
 
   flag = 1;
-  if (0 != setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, 
+  if (0 != setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
             (void *) &flag, sizeof(flag))) {
     logmsg("setsockopt(SO_REUSEADDR) failed: %d", errno);
     sclose(sock);
