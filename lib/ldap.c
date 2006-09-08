@@ -551,10 +551,9 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
   char *p, *q;
   int i;
 
-  if (!conn->data || 
-      !conn->data->reqdata ||
-      !conn->data->reqdata->path || 
-       conn->data->reqdata->path[0] != '/' ||
+  if (!conn->data ||
+      !conn->data->reqdata.path ||
+       conn->data->reqdata.path[0] != '/' ||
       !checkprefix(conn->protostr, conn->data->change.url))
      return LDAP_INVALID_SYNTAX;
 
@@ -564,7 +563,7 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
 
   /* parse DN (Distinguished Name).
    */
-  ludp->lud_dn = strdup(conn->path+1);
+  ludp->lud_dn = strdup(conn->data->reqdata.path+1);
   if (!ludp->lud_dn)
      return LDAP_NO_MEMORY;
 
