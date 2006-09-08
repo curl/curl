@@ -3054,7 +3054,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   bool keep_copysig=FALSE;        /* did copy it? */
 #else
 #ifdef HAVE_SIGNAL
-  void *keep_sigact;              /* store the old handler here */
+  void (*keep_sigact)(int);       /* store the old handler here */
 #endif /* HAVE_SIGNAL */
 #endif /* HAVE_SIGACTION */
 #endif /* SIGALRM */
