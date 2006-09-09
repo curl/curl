@@ -173,7 +173,7 @@ static void conn_free(struct connectdata *conn);
 extern sigjmp_buf curl_jmpenv;
 #endif
 
-#ifdef SIGALARM
+#ifdef SIGALRM
 static
 RETSIGTYPE alarmfunc(int sig)
 {
