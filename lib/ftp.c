@@ -228,7 +228,7 @@ static CURLcode AllowServerConnect(struct connectdata *conn)
       socklen_t size = (socklen_t) sizeof(add);
 
       if(0 == getsockname(sock, (struct sockaddr *) &add, &size)) {
-	size = sizeof(add);
+        size = sizeof(add);
 
         s=accept(sock, (struct sockaddr *) &add, &size);
       }
@@ -1082,7 +1082,6 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   if(!addr) {
     /* pick a suitable default here */
 
- 
     if (getsockname(conn->sock[FIRSTSOCKET],
                     (struct sockaddr *)&sa, &sslen)) {
       failf(data, "getsockname() failed: %s",
