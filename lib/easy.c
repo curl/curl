@@ -613,9 +613,12 @@ CURL *curl_easy_duphandle(CURL *incurl)
 #endif
 
 #if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
-  outcurl->outbound_cd = data->outbound_cd;
-  outcurl->inbound_cd  = data->inbound_cd;
-  outcurl->utf8_cd     = data->utf8_cd;
+    outcurl->inbound_cd = iconv_open(CURL_ICONV_CODESET_OF_HOST,
+                                     CURL_ICONV_CODESET_OF_NETWORK);
+    outcurl->outbound_cd = iconv_open(CURL_ICONV_CODESET_OF_NETWORK,
+                                      CURL_ICONV_CODESET_OF_HOST);
+    outcurl->utf8_cd = iconv_open(CURL_ICONV_CODESET_OF_HOST,
+                                  CURL_ICONV_CODESET_FOR_UTF8);
 #endif
 
     Curl_easy_initHandleData(outcurl);
