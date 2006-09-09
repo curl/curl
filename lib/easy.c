@@ -612,6 +612,12 @@ CURL *curl_easy_duphandle(CURL *incurl)
       break;
 #endif
 
+#if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
+  outcurl->outbound_cd = data->outbound_cd;
+  outcurl->inbound_cd  = data->inbound_cd;
+  outcurl->utf8_cd     = data->utf8_cd;
+#endif
+
     Curl_easy_initHandleData(outcurl);
 
     fail = FALSE; /* we reach this point and thus we are OK */
