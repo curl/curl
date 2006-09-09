@@ -25,6 +25,11 @@ int test(char *URL)
   char done=FALSE;
   CURLM *m;
 
+  if (!arg2) {
+    fprintf(stderr, "Usage: lib525 [url] [uploadfile]\n");
+    return -1;
+  }
+
   /* get the file size of the local file */
   hd = open(arg2, O_RDONLY) ;
   fstat(hd, &file_info);
