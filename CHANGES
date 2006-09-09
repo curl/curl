@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel (9 September 2006)
+- Michele Bini fixed how the hostname is put in NTLM packages. As servers
+  don't expect fully qualified names we need to cut them off at the first dot.
+
 - Peter Sylvester cleaned up and fixed the getsockname() uses in ftp.c. Some
   of them can be completetly removed though...
 

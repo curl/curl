@@ -277,6 +277,7 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
         fprintf(stderr, "\n                  nonce=");
         print_hex(stderr, ntlm->nonce, 8);
         fprintf(stderr, "\n****\n");
+        fprintf(stderr, "**** Header %s\n ", header);
       });
 
       free(buffer);
@@ -708,6 +709,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       *allocuserpwd = aprintf("%sAuthorization: NTLM %s\r\n",
                               proxy?"Proxy-":"",
                               base64);
+      DEBUG_OUT(fprintf(stderr, "**** Header %s\n ", *allocuserpwd));
       free(base64);
     }
     else
@@ -798,6 +800,13 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       hostlen = 0;
     }
     else {
+      /* If the workstation if configured with a full DNS name (i.e.
+       * workstation.somewhere.net) gethostname() returns the fully qualified
+       * name, which NTLM doesn't like.
+       */
+      char *dot = strchr(host, '.');
+      if (dot)
+        *dot = '\0';
       hostlen = strlen(host);
     }
 
@@ -1011,6 +1020,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       *allocuserpwd = aprintf("%sAuthorization: NTLM %s\r\n",
                               proxy?"Proxy-":"",
                               base64);
+      DEBUG_OUT(fprintf(stderr, "**** %s\n ", *allocuserpwd));
       free(base64);
     }
     else

@@ -19,6 +19,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o (HTTP) NTLM hostname fix
  o getsockname usage fixes
  o SOCKS5 proxy connects can now time-out
  o SOCKS5 connects that require auth no longer segfaults when auth not given
@@ -45,6 +46,6 @@ advice from friends like these:
 
  Domenico Andreoli, Armel Asselin, Gisle Vanem, Yang Tse, Andrew Biggs,
  Peter Sylvester, David McCreedy, Dmitriy Sergeyev, Dmitry Rechkin,
- Jari Sundell, Ravi Pratap
+ Jari Sundell, Ravi Pratap, Michele Bini
 
         Thanks! (and sorry if I forgot to mention someone)
