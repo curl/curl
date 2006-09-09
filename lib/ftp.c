@@ -850,7 +850,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
       return CURLE_FTP_PORT_FAILED;
     }
 
-    if (sslen > sizeof(ss))
+    if (sslen > (socklen_t)sizeof(ss))
       sslen = sizeof(ss);
     rc = getnameinfo((struct sockaddr *)&ss, sslen, hbuf, sizeof(hbuf), NULL,
                      0, NIFLAGS);
@@ -918,7 +918,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     else
       ((struct sockaddr_in6 *)sa)->sin6_port =0;
 
-    if (sslen > sizeof(ss))
+    if (sslen > (socklen_t)sizeof(ss))
       sslen = sizeof(ss);
 
     if(bind(portsock, (struct sockaddr *)sa, sslen)) {
@@ -1088,7 +1088,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
           Curl_strerror(conn, Curl_sockerrno()) );
       return CURLE_FTP_PORT_FAILED;
     }
-    if (sslen>sizeof(sa))
+    if (sslen > (socklen_t)sizeof(sa))
       sslen = sizeof(sa);
 
     sa_filled_in = TRUE; /* the sa struct is filled in */

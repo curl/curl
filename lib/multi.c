@@ -188,7 +188,7 @@ static void multistate(struct Curl_one_easy *easy, CURLMstate state)
     "CANCELLED"
   };
   CURLMstate oldstate = easy->state;
-  int index = -1;
+  long index = -1;
 #endif
 
   easy->state = state;
@@ -199,7 +199,7 @@ static void multistate(struct Curl_one_easy *easy, CURLMstate state)
     index = easy->easy_conn->connectindex;
 
   infof(easy->easy_handle,
-        "STATE: %s => %s handle %p; (connection #%d) \n",
+        "STATE: %s => %s handle %p; (connection #%ld) \n",
         statename[oldstate], statename[easy->state],
         (char *)easy, index);
 #endif
@@ -1554,7 +1554,7 @@ CURLMcode curl_multi_setopt(CURLM *multi_handle,
     multi->socket_userp = va_arg(param, void *);
     break;
   case CURLMOPT_PIPELINING:
-    multi->pipelining_enabled = va_arg(param, long);
+    multi->pipelining_enabled = (bool)(0 != va_arg(param, long));
     break;
   default:
     res = CURLM_UNKNOWN_OPTION;
