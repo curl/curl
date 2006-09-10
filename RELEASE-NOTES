@@ -19,6 +19,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o fixed a socket state problem with *multi_socket()
  o (HTTP) NTLM hostname fix
  o getsockname usage fixes
  o SOCKS5 proxy connects can now time-out
@@ -46,6 +47,6 @@ advice from friends like these:
 
  Domenico Andreoli, Armel Asselin, Gisle Vanem, Yang Tse, Andrew Biggs,
  Peter Sylvester, David McCreedy, Dmitriy Sergeyev, Dmitry Rechkin,
- Jari Sundell, Ravi Pratap, Michele Bini
+ Jari Sundell, Ravi Pratap, Michele Bini, Jeff Pohlmeyer
 
         Thanks! (and sorry if I forgot to mention someone)

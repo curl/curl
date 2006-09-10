@@ -6,6 +6,22 @@
 
                                   Changelog
 
+Daniel (11 September 2006)
+- Jeff Pohlmeyer presented a *multi_socket()-using program that exposed a
+  problem with it (SIGSEGV-style). It clearly showed that the existing
+  socket-state and state-difference function wasn't good enough so I rewrote
+  it and could then re-run Jeff's program without any crash. The previous
+  version clearly could miss to tell the application when a handle changed
+  from using one socket to using another.
+
+  While I was at it (as I could use this as a means to track this problem
+  down), I've now added a 'magic' number to the easy handle struct that is
+  inited at curl_easy_init() time and cleared at curl_easy_cleanup() time that
+  we can use internally to detect that an easy handle seems to be fine, or at
+  least not closed or freed (freeing in debug builds fill the area with 0x13
+  bytes but in normal builds we can of course not assume any particular data
+  in the freed areas).
+
 Daniel (9 September 2006)
 - Michele Bini fixed how the hostname is put in NTLM packages. As servers
   don't expect fully qualified names we need to cut them off at the first dot.
