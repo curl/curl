@@ -106,7 +106,7 @@ int test(char *URL)
       break;
     }
 
-    if (select(max_fd+1, &rd, &wr, &exc, &interval) == -1) {
+    if (select_test(max_fd+1, &rd, &wr, &exc, &interval) == -1) {
       fprintf(stderr, "bad select??\n");
       res = 195;
       break;

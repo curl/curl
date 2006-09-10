@@ -77,7 +77,7 @@ int test(char *URL)
         ret = 3;
         break;
       }
-      rc = select(max_fd+1, &rd, &wr, &exc, &interval);
+      rc = select_test(max_fd+1, &rd, &wr, &exc, &interval);
       fprintf(stderr, "select returned %d\n", rc);
 
       /* we only allow a certain number of loops to avoid hanging here

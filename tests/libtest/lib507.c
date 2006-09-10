@@ -28,7 +28,7 @@ int test(char *URL)
     timeout.tv_sec = 1;
     timeout.tv_usec = 0;
     curl_multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
-    rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+    rc = select_test(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
     switch(rc) {
       case -1:
         break;

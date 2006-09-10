@@ -32,5 +32,9 @@
 #endif
 
 extern char *arg2; /* set by first.c to the argv[2] or NULL */
+
+int select_test (int num_fds, fd_set *rd, fd_set *wr, fd_set *exc,
+                 struct timeval *tv);
+
 int test(char *URL); /* the actual test function provided by each individual
                         libXXX.c file */

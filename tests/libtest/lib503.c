@@ -67,7 +67,7 @@ int test(char *URL)
         return 89;
       }
 
-      if (select(max_fd+1, &rd, &wr, &exc, &interval) == -1) {
+      if (select_test(max_fd+1, &rd, &wr, &exc, &interval) == -1) {
         fprintf(stderr, "bad select??\n");
         return 95;
       }
