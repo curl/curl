@@ -490,7 +490,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
         Curl_global_host_cache_init();
       }
 
-      data->set.global_dns_cache = use_cache;
+      data->set.global_dns_cache = (bool)(0 != use_cache);
     }
     break;
   case CURLOPT_SSL_CIPHER_LIST:
@@ -561,33 +561,33 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * When this transfer is done, it must not be left to be reused by a
      * subsequent transfer but shall be closed immediately.
      */
-    data->set.reuse_forbid = va_arg(param, long)?TRUE:FALSE;
+    data->set.reuse_forbid = (bool)(0 != va_arg(param, long));
     break;
   case CURLOPT_FRESH_CONNECT:
     /*
      * This transfer shall not use a previously cached connection but
      * should be made with a fresh new connect!
      */
-    data->set.reuse_fresh = va_arg(param, long)?TRUE:FALSE;
+    data->set.reuse_fresh = (bool)(0 != va_arg(param, long));
     break;
   case CURLOPT_VERBOSE:
     /*
      * Verbose means infof() calls that give a lot of information about
      * the connection and transfer procedures as well as internal choices.
      */
-    data->set.verbose = va_arg(param, long)?TRUE:FALSE;
+    data->set.verbose = = (bool)(0 != va_arg(param, long));
     break;
   case CURLOPT_HEADER:
     /*
      * Set to include the header in the general data output stream.
      */
-    data->set.include_header = va_arg(param, long)?TRUE:FALSE;
+    data->set.include_header = (bool)(0 != va_arg(param, long));
     break;
   case CURLOPT_NOPROGRESS:
     /*
      * Shut off the internal supported progress meter
      */
-    data->set.hide_progress = va_arg(param, long)?TRUE:FALSE;
+    data->set.hide_progress = (bool)(0 != va_arg(param, long));
     if(data->set.hide_progress)
       data->progress.flags |= PGRS_HIDE;
     else
@@ -597,7 +597,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Do not include the body part in the output data stream.
      */
-    data->set.opt_no_body = va_arg(param, long)?TRUE:FALSE;
+    data->set.opt_no_body = (bool)(0 != va_arg(param, long));
     if(data->set.opt_no_body)
       /* in HTTP lingo, this means using the HEAD request */
       data->set.httpreq = HTTPREQ_HEAD;
@@ -607,7 +607,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * Don't output the >=300 error code HTML-page, but instead only
      * return error.
      */
-    data->set.http_fail_on_error = va_arg(param, long)?TRUE:FALSE;
+    data->set.http_fail_on_error = (bool)(0 != va_arg(param, long));
     break;
   case CURLOPT_UPLOAD:
   case CURLOPT_PUT:
@@ -615,7 +615,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * We want to sent data to the remote host. If this is HTTP, that equals
      * using the PUT request.
      */
-    data->set.upload = va_arg(param, long)?TRUE:FALSE;
+    data->set.upload = (bool)(0 != va_arg(param, long));
     if(data->set.upload)
       /* If this is HTTP, PUT is what's needed to "upload" */
       data->set.httpreq = HTTPREQ_PUT;
@@ -625,14 +625,14 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * Try to get the file time of the remote document. The time will
      * later (possibly) become available using curl_easy_getinfo().
      */
-    data->set.get_filetime = va_arg(param, long)?TRUE:FALSE;
+    data->set.get_filetime = (bool)(0 != va_arg(param, long));
     break;
   case CURLOPT_FTP_CREATE_MISSING_DIRS:
     /*
      * An FTP option that modifies an upload to create missing directories on
      * the server.
      */
-    data->set.ftp_create_missing_dirs = va_arg( param , long )?TRUE:FALSE;
+    data->set.ftp_create_missing_dirs = (bool)(0 != va_arg(param, long));
     break;
   case CURLOPT_FTP_RESPONSE_TIMEOUT:
     /*
@@ -646,13 +646,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * An FTP option that changes the command to one that asks for a list
      * only, no file info details.
      */
-    data->set.ftp_list_only = va_arg(param, long)?TRUE:FALSE;
+    data->set.ftp_list_only = (bool)(0 != va_arg(param, long));
     break;
   case CURLOPT_FTPAPPEND:
     /*
      * We want to upload and append to an existing (FTP) file.
      */
-    data->set.ftp_append = va_arg(param, long)?TRUE:FALSE;
+    data->set.ftp_append = (bool)(0 != va_arg(param, long));
     break;
   case CURLOPT_FTP_FILEMETHOD:
     /*
@@ -679,7 +679,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      *
      * Transfer using ASCII (instead of BINARY).
      */
-    data->set.prefer_ascii = va_arg(param, long)?TRUE:FALSE;
+    data->set.prefer_ascii = (bool)(0 != va_arg(param, long));
     break;
   case CURLOPT_TIMECONDITION:
     /*
@@ -708,7 +708,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Switch on automatic referer that gets set if curl follows locations.
      */
-    data->set.http_auto_referer = va_arg(param, long)?1:0;
+    data->set.http_auto_referer = (bool)(0 != va_arg(param, long));
     break;
 
   case CURLOPT_ENCODING:
@@ -730,7 +730,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Follow Location: header hints on a HTTP-server.
      */
-    data->set.http_follow_location = va_arg(param, long)?TRUE:FALSE;
+    data->set.http_follow_location = (bool)(0 != va_arg(param, long));
     break;
 
   case CURLOPT_UNRESTRICTED_AUTH:
@@ -739,7 +739,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * hostname changed.
      */
     data->set.http_disable_hostname_check_before_authentication =
-      va_arg(param, long)?TRUE:FALSE;
+      (bool)(0 != va_arg(param, long));
     break;
 
   case CURLOPT_MAXREDIRS:
@@ -884,7 +884,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * We run mostly with the original cookie spec, as hardly anyone implements
      * anything else.
      */
-    data->set.cookiesession = (bool)va_arg(param, long);
+    data->set.cookiesession = (bool)(0 != va_arg(param, long));
     break;
 
   case CURLOPT_COOKIELIST:
@@ -949,7 +949,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Tunnel operations through the proxy instead of normal proxy use
      */
-    data->set.tunnel_thru_httpproxy = va_arg(param, long)?TRUE:FALSE;
+    data->set.tunnel_thru_httpproxy = (bool)(0 != va_arg(param, long));
     break;
 
   case CURLOPT_CUSTOMREQUEST:
@@ -1061,11 +1061,11 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
 
   case CURLOPT_FTP_USE_EPRT:
-    data->set.ftp_use_eprt = va_arg(param, long)?TRUE:FALSE;
+    data->set.ftp_use_eprt = (bool)(0 != va_arg(param, long));
     break;
 
   case CURLOPT_FTP_USE_EPSV:
-    data->set.ftp_use_epsv = va_arg(param, long)?TRUE:FALSE;
+    data->set.ftp_use_epsv = (bool)(0 != va_arg(param, long));
     break;
 
   case CURLOPT_FTP_SKIP_PASV_IP:
@@ -1073,7 +1073,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * Enable or disable FTP_SKIP_PASV_IP, which will disable/enable the
      * bypass of the IP address in PASV responses.
      */
-    data->set.ftp_skip_ip = (bool)va_arg(param, long);
+    data->set.ftp_skip_ip = (bool)(0 != va_arg(param, long));
     break;
 
   case CURLOPT_INFILE:
@@ -1353,7 +1353,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Kludgy option to enable CRLF conversions. Subject for removal.
      */
-    data->set.crlf = va_arg(param, long)?TRUE:FALSE;
+    data->set.crlf = (bool)(0 != va_arg(param, long));
     break;
 
   case CURLOPT_INTERFACE:
@@ -1445,7 +1445,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * The application asks not to set any signal() or alarm() handlers,
      * even when using a timeout.
      */
-    data->set.no_signal = va_arg(param, long) ? TRUE : FALSE;
+    data->set.no_signal = (bool)(0 != va_arg(param, long));
     break;
 
   case CURLOPT_SHARE:
@@ -1559,7 +1559,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * Enable or disable TCP_NODELAY, which will disable/enable the Nagle
      * algorithm
      */
-    data->set.tcp_nodelay = (bool)va_arg(param, long);
+    data->set.tcp_nodelay = (bool)(0 != va_arg(param, long));
     break;
 
   /*********** 3rd party transfer options ***********/
@@ -1604,14 +1604,14 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
 
   case CURLOPT_IGNORE_CONTENT_LENGTH:
-    data->set.ignorecl = va_arg(param, long)?TRUE:FALSE;
+    data->set.ignorecl = (bool)(0 != va_arg(param, long));
     break;
 
   case CURLOPT_CONNECT_ONLY:
     /*
      * No data transfer, set up connection and let application use the socket
      */
-    data->set.connect_only = va_arg(param, long)?TRUE:FALSE;
+    data->set.connect_only = (bool)(0 != va_arg(param, long));
     break;
 
   case CURLOPT_FTP_ALTERNATIVE_TO_USER:
@@ -2788,7 +2788,7 @@ static bool tld_check_name(struct SessionHandle *data,
          );
   if (uc_name)
      idn_free(uc_name);
-  return (rc == TLD_SUCCESS);
+  return (bool)(rc == TLD_SUCCESS);
 }
 #endif
 

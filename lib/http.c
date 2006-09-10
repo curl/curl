@@ -775,7 +775,7 @@ static size_t readmoredata(char *buffer,
     return 0;
 
   /* make sure that a HTTP request is never sent away chunked! */
-  conn->bits.forbidchunk= (http->sending == HTTPSEND_REQUEST)?TRUE:FALSE;
+  conn->bits.forbidchunk = (bool)(http->sending == HTTPSEND_REQUEST);
 
   if(http->postsize <= (curl_off_t)fullsize) {
     memcpy(buffer, http->postdata, (size_t)http->postsize);

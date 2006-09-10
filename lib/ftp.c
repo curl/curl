@@ -2537,7 +2537,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
       if(ftpcode/100 == 2)
         /* We have enabled SSL for the data connection! */
         conn->ssl[SECONDARYSOCKET].use =
-          data->set.ftp_ssl != CURLFTPSSL_CONTROL;
+          (bool)(data->set.ftp_ssl != CURLFTPSSL_CONTROL);
       /* FTP servers typically responds with 500 if they decide to reject
          our 'P' request */
       else if(data->set.ftp_ssl> CURLFTPSSL_CONTROL)
@@ -2768,7 +2768,7 @@ CURLcode Curl_ftp_multi_statemach(struct connectdata *conn,
   }
   else if(rc != 0) {
     result = ftp_statemach_act(conn);
-    *done = (ftpc->state == FTP_STOP);
+    *done = (bool)(ftpc->state == FTP_STOP);
   }
   /* if rc == 0, then select() timed out */
 
@@ -3955,8 +3955,8 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
     /* parse the URL path into separate path components */
     while ((slash_pos = strchr(cur_pos, '/')) != NULL) {
       /* 1 or 0 to indicate absolute directory */
-      bool absolute_dir = (cur_pos - data->reqdata.path > 0) &&
-        (ftpc->dirdepth == 0);
+      bool absolute_dir = (bool)((cur_pos - data->reqdata.path > 0) &&
+        (ftpc->dirdepth == 0));
 
       /* seek out the next path component */
       if (slash_pos-cur_pos) {

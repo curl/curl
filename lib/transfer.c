@@ -343,7 +343,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
         didwhat |= KEEP_READ;
         /* indicates data of zero size, i.e. empty file */
-        is_empty_data = (nread == 0 && k->bodywrites == 0);
+        is_empty_data = (bool)((nread == 0) && (k->bodywrites == 0));
 
         /* NULL terminate, allowing string ops to be used */
         if (0 < nread || is_empty_data) {
@@ -1484,7 +1484,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   }
 
   /* Now update the "done" boolean we return */
-  *done = !k->keepon;
+  *done = (bool)(0 == k->keepon);
 
   return CURLE_OK;
 }
