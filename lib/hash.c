@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -282,3 +282,34 @@ Curl_hash_destroy(struct curl_hash *h)
   free(h);
 }
 
+#if 0 /* useful function for debugging hashes and their contents */
+void Curl_hash_print(struct curl_hash *h,
+                     void (*func)(void *))
+{
+  int i;
+  struct curl_llist_element *le;
+  struct curl_llist *list;
+  struct curl_hash_element  *he;
+  if (!h)
+    return;
+
+  fprintf(stderr, "=Hash dump=\n");
+
+  for (i = 0; i < h->slots; i++) {
+    list = h->table[i];
+    le = list->head; /* get first list entry */
+    if(le) {
+      fprintf(stderr, "index %d:", i);
+      while(le) {
+        he = le->ptr;
+        if(func)
+          func(he->ptr);
+        else
+          fprintf(stderr, " [%p]", he->ptr);
+        le = le->next;
+      }
+      fprintf(stderr, "\n");
+    }
+  }
+}
+#endif
