@@ -79,9 +79,9 @@ typedef enum {
   CURLM_STATE_LAST /* not a true state, never use this */
 } CURLMstate;
 
-/* we support 16 sockets per easy handle. Set the corresponding bit to what
+/* we support N sockets per easy handle. Set the corresponding bit to what
    action we should wait for */
-#define MAX_SOCKSPEREASYHANDLE 16
+#define MAX_SOCKSPEREASYHANDLE 5
 #define GETSOCK_READABLE (0x00ff)
 #define GETSOCK_WRITABLE (0xff00)
 
@@ -113,14 +113,20 @@ struct Curl_one_easy {
                                from the multi-handle */
   int msg_num; /* number of messages left in 'msg' to return */
 
-  struct socketstate sockstate; /* for the socket API magic */
+  /* Array with the plain socket numbers this handle takes care of, in no
+     particular order. Note that all sockets are added to the sockhash, where
+     the state etc are also kept. This array is mostly used to detect when a
+     socket is to be removed from the hash. See singlesocket(). */
+  curl_socket_t sockets[MAX_SOCKSPEREASYHANDLE];
+  int numsocks;
 };
 
 #define CURL_MULTI_HANDLE 0x000bab1e
 
 #define GOOD_MULTI_HANDLE(x) \
   ((x)&&(((struct Curl_multi *)x)->type == CURL_MULTI_HANDLE))
-#define GOOD_EASY_HANDLE(x) (x)
+#define GOOD_EASY_HANDLE(x) \
+ (((struct SessionHandle *)x)->magic == CURLEASY_MAGIC_NUMBER)
 
 /* This is the struct known as CURLM on the outside */
 struct Curl_multi {
@@ -164,6 +170,8 @@ struct Curl_multi {
 
 static bool multi_conn_using(struct Curl_multi *multi,
                              struct SessionHandle *data);
+static void singlesocket(struct Curl_multi *multi,
+                         struct Curl_one_easy *easy);
 
 /* always use this function to change state, to make debugging easier */
 static void multistate(struct Curl_one_easy *easy, CURLMstate state)
@@ -217,6 +225,7 @@ struct Curl_sh_entry {
   time_t timestamp;
   long inuse;
   int action;  /* what action READ/WRITE this socket waits for */
+  curl_socket_t socket; /* mainly to ease debugging */
   void *socketp; /* settable by users with curl_multi_assign() */
 };
 /* bits for 'action' having no bits means this socket is not expecting any
@@ -225,9 +234,9 @@ struct Curl_sh_entry {
 #define SH_WRITE 2
 
 /* make sure this socket is present in the hash for this handle */
-static int sh_addentry(struct curl_hash *sh,
-                       curl_socket_t s,
-                       struct SessionHandle *data)
+static struct Curl_sh_entry *sh_addentry(struct curl_hash *sh,
+                                         curl_socket_t s,
+                                         struct SessionHandle *data)
 {
   struct Curl_sh_entry *there =
     Curl_hash_pick(sh, (char *)&s, sizeof(curl_socket_t));
@@ -235,19 +244,22 @@ static int sh_addentry(struct curl_hash *sh,
 
   if(there)
     /* it is present, return fine */
-    return 0;
+    return there;
 
   /* not present, add it */
   check = calloc(sizeof(struct Curl_sh_entry), 1);
   if(!check)
-    return 1; /* major failure */
+    return NULL; /* major failure */
   check->easy = data;
+  check->socket = s;
 
   /* make/add new hash entry */
-  if(NULL == Curl_hash_add(sh, (char *)&s, sizeof(curl_socket_t), check))
-    return 1; /* major failure */
+  if(NULL == Curl_hash_add(sh, (char *)&s, sizeof(curl_socket_t), check)) {
+    free(check);
+    return NULL; /* major failure */
+  }
 
-  return 0; /* things are good in sockhash land */
+  return check; /* things are good in sockhash land */
 }
 
 
@@ -337,7 +349,6 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
 {
   struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
   struct Curl_one_easy *easy;
-  int i;
 
   /* First, make some basic checks that the CURLM handle is a good handle */
   if(!GOOD_MULTI_HANDLE(multi))
@@ -355,8 +366,7 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   if(!easy)
     return CURLM_OUT_OF_MEMORY;
 
-  for(i=0; i< MAX_SOCKSPEREASYHANDLE; i++)
-    easy->sockstate.socks[i] = CURL_SOCKET_BAD;
+  easy->numsocks=0;
 
   /* set the easy handle */
   easy->easy_handle = easy_handle;
@@ -393,7 +403,6 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   /* Make sure the type is setup correctly */
   easy->easy_handle->state.connc->type = CONNCACHE_MULTI;
 
-
   /* We add this new entry first in the list. We make our 'next' point to the
      previous next and our 'prev' point back to the 'first' struct */
   easy->next = multi->easy.next;
@@ -419,6 +428,22 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
 
   return CURLM_OK;
 }
+
+#if 0
+/* Debug-function, used like this:
+ *
+ * Curl_hash_print(multi->sockhash, debug_print_sock_hash);
+ *
+ * Enable the hash print function first by editing hash.c
+ */
+static void debug_print_sock_hash(void *p)
+{
+  struct Curl_sh_entry *sh = (struct Curl_sh_entry *)p;
+
+  fprintf(stderr, " [easy %p/magic %x/socket %d]",
+          (void *)sh->easy, sh->easy->magic, sh->socket);
+}
+#endif
 
 CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
                                    CURL *curl_handle)
@@ -506,6 +531,12 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
            to that */
         easy->easy_handle->state.connc = NULL;
 
+    /* change state without using multistate(), only to make singlesocket() do
+       what we want */
+    easy->state = CURLM_STATE_COMPLETED;
+    singlesocket(multi, easy); /* to let the application know what sockets
+                                  that vanish with this handle */
+
     Curl_easy_addmulti(easy->easy_handle, NULL); /* clear the association
                                                     to this multi handle */
 
@@ -584,6 +615,8 @@ static int multi_getsock(struct Curl_one_easy *easy,
   switch(easy->state) {
   case CURLM_STATE_TOOFAST:  /* returns 0, so will not select. */
   default:
+    /* this will get called with CURLM_STATE_COMPLETED when a handle is
+       removed */
     return 0;
 
   case CURLM_STATE_WAITRESOLVE:
@@ -1351,94 +1384,96 @@ static void singlesocket(struct Curl_multi *multi,
 {
   struct socketstate current;
   int i;
+  struct Curl_sh_entry *entry;
+  curl_socket_t s;
+  int num;
 
   memset(&current, 0, sizeof(current));
   for(i=0; i< MAX_SOCKSPEREASYHANDLE; i++)
     current.socks[i] = CURL_SOCKET_BAD;
 
-  /* first fill in the 'current' struct with the state as it is now */
+  /* Fill in the 'current' struct with the state as it is now: what sockets to
+     supervise and for what actions */
   current.action = multi_getsock(easy, current.socks, MAX_SOCKSPEREASYHANDLE);
 
-  /* when filled in, we compare with the previous round's state in a first
-     quick memory compare check */
-  if(memcmp(&current, &easy->sockstate, sizeof(struct socketstate))) {
+  /* We have 0 .. N sockets already and we get to know about the 0 .. M
+     sockets we should have from now on. Detect the differences, remove no
+     longer supervised ones and add new ones */
 
-    /* there is difference, call the callback once for every socket change ! */
-    for(i=0; i< MAX_SOCKSPEREASYHANDLE; i++) {
-      int action;
-      curl_socket_t s = current.socks[i];
+  /* walk over the sockets we got right now */
+  for(i=0; (i< MAX_SOCKSPEREASYHANDLE) &&
+        (current.action & (GETSOCK_READSOCK(i) | GETSOCK_WRITESOCK(i)));
+      i++) {
+    int action = CURL_POLL_NONE;
 
-      /* Ok, this approach is probably too naive and simple-minded but
-         it might work for a start */
+    s = current.socks[i];
 
-      if((easy->sockstate.socks[i] == CURL_SOCKET_BAD) &&
-         (s == CURL_SOCKET_BAD)) {
-        /* no socket now and there was no socket before */
+    /* get it from the hash */
+    entry = Curl_hash_pick(multi->sockhash, (char *)&s, sizeof(s));
+
+    if(current.action & GETSOCK_READSOCK(i))
+      action |= CURL_POLL_IN;
+    if(current.action & GETSOCK_WRITESOCK(i))
+      action |= CURL_POLL_OUT;
+
+    if(entry) {
+      /* yeps, already present so check if it has the same action set */
+      if(entry->action == action)
+        /* same, continue */
+        continue;
+    }
+    else {
+      /* this is a socket we didn't have before, add it! */
+      entry = sh_addentry(multi->sockhash, s, easy->easy_handle);
+      if(!entry)
+        /* fatal */
+        return;
+    }
+
+    multi->socket_cb(easy->easy_handle,
+                     s,
+                     action,
+                     multi->socket_userp,
+                     entry ? entry->socketp : NULL);
+
+    entry->action = action; /* store the current action state */
+  }
+
+  num = i; /* number of sockets */
+
+  /* when we've walked over all the sockets we should have right now, we must
+     make sure to detect sockets that are removed */
+  for(i=0; i< easy->numsocks; i++) {
+    int j;
+    s = easy->sockets[i];
+    for(j=0; j<num; j++) {
+      if(s == current.socks[j]) {
+        /* this is still supervised */
+        s = CURL_SOCKET_BAD;
         break;
       }
+    }
+    if(s != CURL_SOCKET_BAD) {
+      /* this socket has been removed. Remove it */
 
-      if(s == CURL_SOCKET_BAD) {
-        /* socket is removed */
-        action = CURL_POLL_REMOVE;
-        s = easy->sockstate.socks[i]; /* this is the removed socket */
-      }
-      else {
-        if(easy->sockstate.socks[i] == s) {
-          /* still the same socket, but are we waiting for the same actions? */
-          unsigned int curr;
-          unsigned int prev;
-
-          /* the current read/write bits for this particular socket */
-          curr = current.action & (GETSOCK_READSOCK(i) | GETSOCK_WRITESOCK(i));
-
-          /* the previous read/write bits for this particular socket */
-          prev = easy->sockstate.action &
-            (GETSOCK_READSOCK(i) | GETSOCK_WRITESOCK(i));
-
-          if(curr == prev)
-            continue;
-        }
-
-        action = CURL_POLL_NONE;
-        if(current.action & GETSOCK_READSOCK(i))
-          action |= CURL_POLL_IN;
-        if(current.action & GETSOCK_WRITESOCK(i))
-          action |= CURL_POLL_OUT;
-      }
-
-      /* Update the sockhash accordingly BEFORE the callback if not a removal,
-         in case the callback wants to use curl_multi_assign(), but do the
-         removal AFTER the callback for the very same reason (but then to be
-         able to pass the correct entry->socketp) */
-
-      if(action != CURL_POLL_REMOVE)
-        /* make sure this socket is present in the hash for this handle */
-        sh_addentry(multi->sockhash, s, easy->easy_handle);
-
-      /* call the callback with this new info */
-      if(multi->socket_cb) {
-        struct Curl_sh_entry *entry =
-          Curl_hash_pick(multi->sockhash, (char *)&s, sizeof(s));
-
+      entry = Curl_hash_pick(multi->sockhash, (char *)&s, sizeof(s));
+      if(entry) {
+        /* just a precaution, this socket really SHOULD be in the hash already
+           but in case it isn't, we don't have to tell the app to remove it
+           either since it never got to know about it */
         multi->socket_cb(easy->easy_handle,
                          s,
-                         action,
+                         CURL_POLL_REMOVE,
                          multi->socket_userp,
                          entry ? entry->socketp : NULL);
-      }
 
-      if(action == CURL_POLL_REMOVE)
-        /* remove from hash for this easy handle */
         sh_delentry(multi->sockhash, s);
-
+      }
     }
-    /* copy the current state to the storage area */
-    memcpy(&easy->sockstate, &current, sizeof(struct socketstate));
-  }
-  else {
-    /* identical, nothing new happened so we don't do any callbacks */
   }
 
+  memcpy(easy->sockets, current.socks, num*sizeof(curl_socket_t));
+  easy->numsocks = num;
 }
 
 static CURLMcode multi_socket(struct Curl_multi *multi,
@@ -1476,6 +1511,10 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
       return CURLM_BAD_SOCKET; /* better return code? */
 
     data = entry->easy;
+
+    if(data->magic != CURLEASY_MAGIC_NUMBER)
+      /* bad bad bad bad bad bad bad */
+      return CURLM_INTERNAL_ERROR;
 
     result = multi_runsingle(multi, data->set.one_easy);
 

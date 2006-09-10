@@ -117,6 +117,8 @@
    of need. */
 #define HEADERSIZE 256
 
+#define CURLEASY_MAGIC_NUMBER 0xc0dedbad
+
 /* Just a convenience macro to get the larger value out of two given.
    We prefix with CURL to prevent name collisions. */
 #define CURLMAX(x,y) ((x)>(y)?(x):(y))
@@ -1292,6 +1294,7 @@ struct SessionHandle {
   iconv_t inbound_cd;          /* for translating from the network encoding */
   iconv_t utf8_cd;             /* for translating to UTF8 */
 #endif /* CURL_DOES_CONVERSIONS && HAVE_ICONV */
+  unsigned int magic;          /* set to a CURLEASY_MAGIC_NUMBER */
 };
 
 #define LIBCURL_NAME "libcurl"
