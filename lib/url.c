@@ -1688,9 +1688,10 @@ static void conn_free(struct connectdata *conn)
 
 CURLcode Curl_disconnect(struct connectdata *conn)
 {
-  struct SessionHandle *data = conn->data;
+  struct SessionHandle *data;
   if(!conn)
     return CURLE_OK; /* this is closed and fine already */
+  data = conn->data;
 
 #if defined(CURLDEBUG) && defined(AGGRESIVE_TEST)
   /* scan for DNS cache entries still marked as in use */
