@@ -1,5 +1,15 @@
   Changelog for the c-ares project
 
+* September 11 2006
+
+- Guilherme Balena Versiani: I noted a strange BUG in Win32 port
+  (ares_init.c/get_iphlpapi_dns_info() function): when I disable the network
+  by hand or disconnect the network cable in Windows 2000 or Windows XP, my
+  application gets 127.0.0.1 as the only name server. The problem comes from
+  'GetNetworkParams' function, that returns the empty string "" as the only
+  name server in that case. Moreover, the Windows implementation of
+  inet_addr() returns INADDR_LOOPBACK instead of INADDR_NONE.
+
 * August 29 2006
 
 - Brad Spencer did

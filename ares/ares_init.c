@@ -373,7 +373,8 @@ static int get_iphlpapi_dns_info (char *ret_buf, size_t ret_size)
     printf ("DNS Servers:\n"
             "    %s (primary)\n", fi->DnsServerList.IpAddress.String);
   }
-  if (inet_addr(fi->DnsServerList.IpAddress.String) != INADDR_NONE &&
+  if (strlen(fi->DnsServerList.IpAddress.String) > 0 &&
+      inet_addr(fi->DnsServerList.IpAddress.String) != INADDR_NONE &&
       left > ip_size)
   {
     ret += sprintf (ret, "%s,", fi->DnsServerList.IpAddress.String);
