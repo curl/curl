@@ -246,6 +246,10 @@ int Curl_ssl_getsessionid(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   long i;
 
+  if(!conn->ssl_config.sessionid)
+    /* session ID re-use is disabled */
+    return TRUE;
+
   for(i=0; i< data->set.ssl.numsessions; i++) {
     check = &data->state.session[i];
     if(!check->sessionid)
@@ -310,6 +314,10 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
   struct curl_ssl_session *store = &data->state.session[0];
   long oldest_age=data->state.session[0].age; /* zero if unused */
   char *clone_host;
+
+  /* Even though session ID re-use might be disabled, that only disables USING
+     IT. We still store it here in case the re-using is again enabled for an
+     upcoming transfer */
 
   clone_host = strdup(conn->host.name);
   if(!clone_host)

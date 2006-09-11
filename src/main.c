@@ -358,6 +358,7 @@ struct Configurable {
   int ftp_filemethod;
 
   bool ignorecl; /* --ignore-content-length */
+  bool disable_sessionid;
 };
 
 #define WARN_PREFIX "Warning: "
@@ -547,6 +548,7 @@ static void help(void)
     "    --netrc-optional Use either .netrc or URL; overrides -n",
     "    --ntlm          Use HTTP NTLM authentication (H)",
     " -N/--no-buffer     Disable buffering of the output stream",
+    "    --no-sessionid  Disable SSL session-ID reusing (SSL)",
     " -o/--output <file> Write output to <file> instead of stdout",
     " -O/--remote-name   Write output to a file named as the remote file",
     " -p/--proxytunnel   Operate through a HTTP proxy tunnel (using CONNECT)",
@@ -1348,6 +1350,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$t", "socks4",     TRUE},
     {"$u", "ftp-alternative-to-user", TRUE},
     {"$v", "ftp-ssl-reqd", FALSE},
+    {"$w", "no-sessionid", FALSE},
 
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
@@ -1789,6 +1792,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'v': /* --ftp-ssl-reqd */
         config->ftp_ssl_reqd ^= TRUE;
+        break;
+      case 'w': /* --no-sessionid */
+        config->disable_sessionid ^= TRUE;
         break;
       }
       break;
@@ -4013,11 +4019,17 @@ operate(struct Configurable *config, int argc, char *argv[])
         /* curl 7.15.2 */
         if(config->localport) {
           curl_easy_setopt(curl, CURLOPT_LOCALPORT, config->localport);
-          curl_easy_setopt(curl, CURLOPT_LOCALPORTRANGE, config->localportrange);
+          curl_easy_setopt(curl, CURLOPT_LOCALPORTRANGE,
+                           config->localportrange);
         }
 
-        /* curl x.xx.x */
-        curl_easy_setopt(curl, CURLOPT_FTP_ALTERNATIVE_TO_USER, config->ftp_alternative_to_user);
+        /* curl 7.15.5 */
+        curl_easy_setopt(curl, CURLOPT_FTP_ALTERNATIVE_TO_USER,
+                         config->ftp_alternative_to_user);
+
+        /* curl 7.16.0 */
+        curl_easy_setopt(curl, CURLOPT_SSL_SESSIONID_CACHE,
+                         !config->disable_sessionid);
 
         retry_numretries = config->req_retry;
 

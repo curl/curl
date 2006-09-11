@@ -705,6 +705,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
   do {
 
+    if(!GOOD_EASY_HANDLE(easy->easy_handle))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+
     if (easy->easy_handle->state.pipe_broke) {
       infof(easy->easy_handle, "Pipe broke: handle 0x%x\n", easy);
       if(easy->easy_handle->state.is_in_pipeline) {
@@ -1231,8 +1234,9 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
     if (easy->easy_handle->state.cancelled &&
         easy->state == CURLM_STATE_CANCELLED) {
       /* Remove cancelled handles once it's safe to do so */
-      easy = easy->next;
       Curl_multi_rmeasy(multi_handle, easy->easy_handle);
+      easy->easy_handle = NULL;
+      easy = easy->next;
       continue;
     }
 

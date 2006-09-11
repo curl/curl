@@ -7,6 +7,14 @@
                                   Changelog
 
 Daniel (11 September 2006)
+- Fixed my breakage from earlier today so that doing curl_easy_cleanup() on a
+  handle that is part of a multi handle first removes the handle from the
+  stack.
+
+- Added CURLOPT_SSL_SESSIONID_CACHE and --no-sessionid to disable SSL
+  session-ID re-use on demand since there obviously are broken servers out
+  there that misbehave with session-IDs used.
+
 - Jeff Pohlmeyer presented a *multi_socket()-using program that exposed a
   problem with it (SIGSEGV-style). It clearly showed that the existing
   socket-state and state-difference function wasn't good enough so I rewrote

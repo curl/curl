@@ -11,6 +11,7 @@ Curl and libcurl 7.16.0
 
 This release includes the following changes:
 
+ o CURLOPT_SSL_SESSIONID_CACHE and --no-sessionid added
  o CURLMOPT_PIPELINING added for enabling pipelined transfers
  o Added support for other MS-DOS compilers (besides djgpp)
  o CURLOPT_SOCKOPTFUNCTION and CURLOPT_SOCKOPTDATA were added

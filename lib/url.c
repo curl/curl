@@ -214,12 +214,14 @@ CURLcode Curl_close(struct SessionHandle *data)
 {
   struct Curl_multi *m = data->multi;
 
-  data->magic = 0; /* force a clear */
-
   if(m)
     /* This handle is still part of a multi handle, take care of this first
        and detach this handle from there. */
     Curl_multi_rmeasy(data->multi, data);
+
+  data->magic = 0; /* force a clear AFTER the possibly enforced removal from
+                      the multi handle, since that function uses the magic
+                      field! */
 
   if(data->state.connc && (data->state.connc->type == CONNCACHE_PRIVATE)) {
     /* close all connections still alive that are in the private connection
@@ -455,6 +457,7 @@ CURLcode Curl_open(struct SessionHandle **curl)
      */
     data->set.ssl.verifypeer = TRUE;
     data->set.ssl.verifyhost = 2;
+    data->set.ssl.sessionid = TRUE; /* session ID caching enabled by default */
 #ifdef CURL_CA_BUNDLE
     /* This is our preferred CA cert bundle since install time */
     data->set.ssl.CAfile = (char *)CURL_CA_BUNDLE;
@@ -1630,6 +1633,10 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * socket callback data pointer. Might be NULL.
      */
     data->set.sockopt_client = va_arg(param, void *);
+    break;
+
+  case CURLOPT_SSL_SESSIONID_CACHE:
+    data->set.ssl.sessionid = va_arg(param, long)?TRUE:FALSE;
     break;
 
   default:

@@ -71,6 +71,9 @@ int test(char *URL)
       res = (int)curl_multi_perform(m, &running);
       if (running <= 0) {
 #ifdef LIB527
+        /* NOTE: this code does not remove the handle from the multi handle
+           here, which would be the nice, sane and documented way of working.
+           This however tests that the API survives this abuse gracefully. */
         curl_easy_cleanup(curl[current]);
 #endif
         if(++current < NUM_HANDLES) {

@@ -1302,6 +1302,12 @@ compile OpenSSL.
 
 You'll find more details about cipher lists on this URL:
 \fIhttp://www.openssl.org/docs/apps/ciphers.html\fP
+.IP CURLOPT_SSL_SESSIONID_CACHE
+Pass a long set to 0 to disable libcurl's use of SSL session-ID caching. Set
+this to 1 to enable it. By default all transfers are done using the
+cache. Note that while nothing ever should get hurt by attempting to reuse SSL
+session-IDs, there seem to be broken SSL implementations in the wild that may
+require you to disable this in order for you to succeed. (Added in 7.16.0)
 .IP CURLOPT_KRB4LEVEL
 Pass a char * as parameter. Set the krb4 security level, this also enables
 krb4 awareness.  This is a string, 'clear', 'safe', 'confidential' or

@@ -1037,6 +1037,10 @@ typedef enum {
   CINIT(SOCKOPTFUNCTION, FUNCTIONPOINT, 148),
   CINIT(SOCKOPTDATA, OBJECTPOINT, 149),
 
+  /* set to 0 to disable session ID re-use for this transfer, default is
+     enabled (== 1) */
+  CINIT(SSL_SESSIONID_CACHE, LONG, 150),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

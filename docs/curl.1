@@ -705,6 +705,15 @@ will output the data in chunks, not necessarily exactly when the data arrives.
 Using this option will disable that buffering.
 
 If this option is used twice, the second will again switch on buffering.
+.IP "--no-sessionid"
+(SSL) Disable curl's use of SSL session-ID caching.  By default all transfers
+are done using the cache. Note that while nothing ever should get hurt by
+attempting to reuse SSL session-IDs, there seem to be broken SSL
+implementations in the wild that may require you to disable this in order for
+you to succeed. (Added in 7.16.0)
+
+If this option is used twice, the second will again switch on use of the
+session cache.
 .IP "--ntlm"
 (HTTP) Enables NTLM authentication. The NTLM authentication method was
 designed by Microsoft and is used by IIS web servers. It is a proprietary

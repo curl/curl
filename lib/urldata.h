@@ -178,8 +178,9 @@ struct ssl_config_data {
   char *egdsocket;       /* path to file containing the EGD daemon socket */
   char *cipher_list;     /* list of ciphers to use */
   long numsessions;      /* SSL session id cache size */
-  curl_ssl_ctx_callback fsslctx;        /* function to initialize ssl ctx */
-  void *fsslctxp;       /*parameter for call back */
+  curl_ssl_ctx_callback fsslctx; /* function to initialize ssl ctx */
+  void *fsslctxp;        /* parameter for call back */
+  bool sessionid;        /* cache session IDs or not */
 };
 
 /* information stored about one single SSL session */
