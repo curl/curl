@@ -26,9 +26,9 @@ want you do reorganize them like:
   $ `curl-config --cc` -o example example.c `curl-config --cflags --libs`
 
 *PLEASE* do not use the curl.haxx.se site as a test target for your libcurl
-applications/experiments. Even if the examples in this directory use that site
-as an example URL at some places, it doesn't mean that the URLs work or that
-we expect you to actually torture our web site with your tests! Thanks.
+applications/experiments. Even if some of the examples use that site as a URL
+at some places, it doesn't mean that the URLs work or that we expect you to
+actually torture our web site with your tests!  Thanks.
 
 EXAMPLES
 
@@ -43,9 +43,11 @@ fopen.c        - fopen() layer that supports opening URLs and files
 ftp3rdparty.c  - FTP 3rd party transfer
 ftpget.c       - simple getting a file from FTP
 ftpgetresp.c   - get the response strings from the FTP server
-ftpupload.c    - upload a file to a FTP server
+ftpupload.c    - upload a file to an FTP server
+ftpuploadresume.c - resume an upload to an FTP server
 getinfo.c      - get the Content-Type from the recent transfer
 getinmemory.c  - download a file to memory only
+hiperfifo.c    - downloads all URLs written to the fifo
 htmltitle.cc   - download a HTML file and extract the <title> tag from a HTML
                  page using libxml
 http-post.c    - HTTP POST
@@ -61,8 +63,12 @@ opensslthreadlock.c - show how to do locking when using OpenSSL multi-threaded
 persistant.c   - request two URLs with a persistant connection
 post-callback.c - send a HTTP POST using a callback
 postit2.c      - send a HTTP multipart formpost
+sampleconv.c   - showing how a program on a non-ASCII platform would invoke
+                 callbacks to do its own codeset conversions instead of using
+                 the built-in iconv functions in libcurl
 sepheaders.c   - download headers to a separate file
 simple.c       - the most simple download a URL source
 simplepost.c   - HTTP POST
 simplessl.c    - HTTPS example with certificates many options set
 synctime.c     - Sync local time by extracing date from remote HTTP servers
+10-at-a-time.c - Download many files simultaneously, 10 at a time.
