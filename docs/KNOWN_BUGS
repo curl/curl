@@ -8,7 +8,7 @@ may have been fixed since this was written!
 
 34. The SOCKS4 connection codes don't properly acknowledge (connect) timeouts.
   Also see #12. According to bug #1556528, even the SOCKS5 connect code does
-  not do it right: http://curl.haxx.se/bug/view.cgi?id=#1556528,
+  not do it right: http://curl.haxx.se/bug/view.cgi?id=1556528,
 
 33. Doing multi-pass HTTP authentication on a non-default port does not work.
   This happens because the multi-pass code abuses the redirect following code
