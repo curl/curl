@@ -115,10 +115,6 @@ TODO
 
  HTTP
 
- * Pipelining. Sending multiple requests before the previous one(s) are done.
-   This could possibly be implemented using the multi interface to queue
-   requests and the response data.
-
  * When doing CONNECT to a HTTP proxy, libcurl always uses HTTP/1.0. This has
    never been reported as causing trouble to anyone, but should be considered
    to use the HTTP version the user has chosen.
