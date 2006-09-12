@@ -552,7 +552,7 @@ int main(int argc, char *argv[])
     }
   }
 
-#if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+#if defined(WIN32) && !defined(__CYGWIN__)
   win32_init();
   atexit(win32_cleanup);
 #else
