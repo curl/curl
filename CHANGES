@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (12 September 2006)
+- Added docs/examples/10-at-a-time.c by Michael Wallner
+
+- Added docs/examples/hiperfifo.c by Jeff Pohlmeyer
+
 Daniel (11 September 2006)
 - Fixed my breakage from earlier today so that doing curl_easy_cleanup() on a
   handle that is part of a multi handle first removes the handle from the

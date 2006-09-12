@@ -13,6 +13,7 @@ This release includes the following changes:
 
  o CURLOPT_SSL_SESSIONID_CACHE and --no-sessionid added
  o CURLMOPT_PIPELINING added for enabling pipelined transfers
+ o multi handles now have a shared connection cache
  o Added support for other MS-DOS compilers (besides djgpp)
  o CURLOPT_SOCKOPTFUNCTION and CURLOPT_SOCKOPTDATA were added
  o (FTP) libcurl avoids sending TYPE if the desired type was already set
@@ -48,6 +49,6 @@ advice from friends like these:
 
  Domenico Andreoli, Armel Asselin, Gisle Vanem, Yang Tse, Andrew Biggs,
  Peter Sylvester, David McCreedy, Dmitriy Sergeyev, Dmitry Rechkin,
- Jari Sundell, Ravi Pratap, Michele Bini, Jeff Pohlmeyer
+ Jari Sundell, Ravi Pratap, Michele Bini, Jeff Pohlmeyer, Michael Wallner
 
         Thanks! (and sorry if I forgot to mention someone)
