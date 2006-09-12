@@ -1060,7 +1060,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * Use FTP PORT, this also specifies which IP address to use
      */
     data->set.ftpport = va_arg(param, char *);
-    data->set.ftp_use_port = data->set.ftpport?1:0;
+    data->set.ftp_use_port = (bool)(NULL != data->set.ftpport);
     break;
 
   case CURLOPT_FTP_USE_EPRT:
@@ -1383,7 +1383,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * A string that defines the krb4 security level.
      */
     data->set.krb4_level = va_arg(param, char *);
-    data->set.krb4=data->set.krb4_level?TRUE:FALSE;
+    data->set.krb4 = (bool)(NULL != data->set.krb4_level);
     break;
   case CURLOPT_SSL_VERIFYPEER:
     /*
@@ -1571,7 +1571,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * SOURCE URL
      */
     data->set.source_url = va_arg(param, char *);
-    data->set.printhost = (data->set.source_url != NULL);
+    data->set.printhost = (bool)(NULL != data->set.source_url);
     break;
 
   case CURLOPT_SOURCE_USERPWD:
@@ -1636,7 +1636,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
 
   case CURLOPT_SSL_SESSIONID_CACHE:
-    data->set.ssl.sessionid = va_arg(param, long)?TRUE:FALSE;
+    data->set.ssl.sessionid = (bool)(0 != va_arg(param, long));
     break;
 
   default:
@@ -1842,7 +1842,7 @@ bool Curl_isHandleAtHead(struct SessionHandle *handle,
 {
   struct curl_llist_element *curr = pipe->head;
   if (curr) {
-    return curr->ptr == handle ? TRUE : FALSE;
+    return (bool)(curr->ptr == handle);
   }
 
   return FALSE;
@@ -3111,9 +3111,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   conn->sock[FIRSTSOCKET] = CURL_SOCKET_BAD;     /* no file descriptor */
   conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD; /* no file descriptor */
   conn->connectindex = -1;    /* no index */
-  conn->bits.httpproxy = (data->change.proxy && *data->change.proxy &&
-                          (data->set.proxytype == CURLPROXY_HTTP))?
-    TRUE:FALSE; /* http proxy or not */
+
+  conn->bits.httpproxy = (bool)(data->change.proxy  /* http proxy or not */
+                             && *data->change.proxy 
+                             && (data->set.proxytype == CURLPROXY_HTTP));
 
   /* Default protocol-independent behavior doesn't support persistent
      connections, so we set this to force-close. Protocols that support
@@ -3130,13 +3131,14 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   /* Store creation time to help future close decision making */
   conn->created = Curl_tvnow();
 
-  data->reqdata.use_range = data->set.set_range?TRUE:FALSE; /* range status */
+  /* range status */
+  data->reqdata.use_range = (bool)(NULL != data->set.set_range);
 
   data->reqdata.range = data->set.set_range; /* clone the range setting */
   data->reqdata.resume_from = data->set.set_resume_from;
 
-  conn->bits.user_passwd = data->set.userpwd?1:0;
-  conn->bits.proxy_user_passwd = data->set.proxyuserpwd?1:0;
+  conn->bits.user_passwd = (bool)(NULL != data->set.userpwd);
+  conn->bits.proxy_user_passwd = (bool)(NULL != data->set.proxyuserpwd);
   conn->bits.no_body = data->set.opt_no_body;
   conn->bits.tunnel_proxy = data->set.tunnel_thru_httpproxy;
   conn->bits.ftp_use_epsv = data->set.ftp_use_epsv;

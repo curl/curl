@@ -477,7 +477,7 @@ int Curl_read(struct connectdata *conn, /* connection data */
 
   conn->bits.stream_was_rewound = FALSE;
 
-  *n = bytestocopy;
+  *n = (ssize_t)bytestocopy;
 
   if (bytesremaining == 0) {
       return CURLE_OK;

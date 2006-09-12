@@ -455,7 +455,7 @@ Curl_http_output_auth(struct connectdata *conn,
       if(auth) {
         infof(data, "Proxy auth using %s with user '%s'\n",
               auth, conn->proxyuser?conn->proxyuser:"");
-        authproxy->multi = !authproxy->done;
+        authproxy->multi = (bool)(!authproxy->done);
       }
       else
         authproxy->multi = FALSE;
@@ -525,7 +525,7 @@ Curl_http_output_auth(struct connectdata *conn,
         infof(data, "Server auth using %s with user '%s'\n",
               auth, conn->user);
 
-        authhost->multi = !authhost->done;
+        authhost->multi = (bool)(!authhost->done);
       }
       else
         authhost->multi = FALSE;

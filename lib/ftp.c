@@ -173,7 +173,7 @@ static void freedirs(struct connectdata *conn)
 */
 static bool isBadFtpString(const char *string)
 {
-  return strchr(string, '\r') != NULL || strchr(string, '\n') != NULL;
+  return (bool)((NULL != strchr(string, '\r')) || (NULL != strchr(string, '\n')));
 }
 
 /***********************************************************************

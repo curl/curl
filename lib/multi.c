@@ -706,7 +706,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   do {
 
     if(!GOOD_EASY_HANDLE(easy->easy_handle))
-      return CURLE_BAD_FUNCTION_ARGUMENT;
+      return CURLM_BAD_EASY_HANDLE;
 
     if (easy->easy_handle->state.pipe_broke) {
       infof(easy->easy_handle, "Pipe broke: handle 0x%x\n", easy);
