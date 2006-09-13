@@ -1464,6 +1464,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     if(!longopt) {
       if(NULL != parse) {
         letter = (char)*parse;
+      }
       else {
         letter = '\0';
       }
