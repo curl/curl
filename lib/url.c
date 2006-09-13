@@ -4070,15 +4070,17 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   conn->fread = data->set.fread;
   conn->fread_in = data->set.in;
 
-  conn->bits.upload_chunky =
-    ((conn->protocol&PROT_HTTP) &&
-     data->set.upload &&
-     (data->set.infilesize == -1) &&
-     (data->set.httpversion != CURL_HTTP_VERSION_1_0))?
+  if ((conn->protocol&PROT_HTTP) &&
+      data->set.upload &&
+      (data->set.infilesize == -1) &&
+      (data->set.httpversion != CURL_HTTP_VERSION_1_0)) {
     /* HTTP, upload, unknown file size and not HTTP 1.0 */
-    TRUE:
-  /* else, no chunky upload */
-  FALSE;
+    conn->bits.upload_chunky = TRUE;
+  }
+  else {
+    /* else, no chunky upload */
+    conn->bits.upload_chunky = FALSE;
+  }
 
 #ifndef USE_ARES
   /*************************************************************
