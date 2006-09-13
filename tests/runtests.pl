@@ -2142,13 +2142,16 @@ if ( $TESTCASES eq "all") {
         $_ =~ s/[a-z\/\.]*//g;
     }
     # the the numbers from low to high
-    for(sort { $a <=> $b } @cmds) {
-        if($dis{$_}) {
+    foreach my $n (sort { $a <=> $b } @cmds) {
+        if($dis{$n}) {
             # skip disabled test cases
-            print STDERR "runtests.pl: disabling test $_\n";
+            my $why = "mentioned in DISABLED";
+            $skipped++;
+            $skipped{$why}++;
+            $teststat[$n]=$why; # store reason for this test case
             next;
         }
-        $TESTCASES .= " $_";
+        $TESTCASES .= " $n";
     }
 }
 
