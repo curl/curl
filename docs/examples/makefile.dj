@@ -15,13 +15,13 @@ endif
 
 LIBS += $(WATT32_ROOT)/lib/libwatt.a $(ZLIB_ROOT)/libz.a
 
-PROGRAMS  = fopen.exe ftpget.exe ftpgetresp.exe ftpupload.exe \
-            getinmemory.exe http-post.exe httpput.exe multi-app.exe \
-            multi-double.exe multi-post.exe multi-single.exe \
-            persistant.exe post-callback.exe postit2.exe \
-            sepheaders.exe simple.exe simplessl.exe https.exe \
-            ftp3rdparty.exe getinfo.exe anyauthput.exe \
-            cookie_interface.exe
+CSOURCES = fopen.c ftpget.c ftpgetresp.c ftpupload.c getinmemory.c \
+           http-post.c httpput.c multi-app.c multi-double.c multi-post.c \
+           multi-single.c persistant.c post-callback.c postit2.c \
+           sepheaders.c simple.c simplessl.c https.c ftp3rdparty.c \
+           getinfo.c anyauthput.c cookie_interface.c 10-at-a-time.c
+
+PROGRAMS = $(CSOURCES:.c=.exe)
 
 all: $(PROGRAMS)
 
@@ -31,4 +31,6 @@ all: $(PROGRAMS)
 
 clean:
 	rm -f $(PROGRAMS)
+
+# DO NOT DELETE THIS LINE
 
