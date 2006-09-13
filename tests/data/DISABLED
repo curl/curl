@@ -1,7 +1,8 @@
+# $Id$
 # This file can be used to specify test cases that should not run when all
 # test cases are run by runtests.pl. Just add the plain test case numbers, one
 # per line.
-# Comments starting with '#' letters are fine.
+# Lines starting with '#' letters are treated as comments.
 230
 231
 232
