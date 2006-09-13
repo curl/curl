@@ -2123,6 +2123,18 @@ if ( $TESTCASES eq "all") {
     my @cmds = grep { /^test([0-9]+)$/ && -f "$TESTDIR/$_" } readdir(DIR);
     closedir DIR;
 
+    my %dis;
+    open(D, "$TESTDIR/DISABLED");
+    while(<D>) {
+        if(/^ *\#/) {
+            # allow comments
+            next;
+        }
+        if($_ =~ /(\d+)/) {
+            $dis{$1}=$1; # disable this test number
+        }
+    }
+
     $TESTCASES=""; # start with no test cases
 
     # cut off everything but the digits
@@ -2131,6 +2143,11 @@ if ( $TESTCASES eq "all") {
     }
     # the the numbers from low to high
     for(sort { $a <=> $b } @cmds) {
+        if($dis{$_}) {
+            # skip disabled test cases
+            print STDERR "runtests.pl: disabling test $_\n";
+            next;
+        }
         $TESTCASES .= " $_";
     }
 }
