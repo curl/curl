@@ -40,6 +40,8 @@ extern const char *path;
 
 #if defined(WIN32) && !defined(__CYGWIN__)
 #include <process.h>
+#include <fcntl.h>
+#define REAL_WIN32
 
 #define sleep(sec)   Sleep ((sec)*1000)
 
@@ -49,20 +51,15 @@ extern const char *path;
 #define ENOTSOCK     WSAENOTSOCK
 #define ECONNREFUSED WSAECONNREFUSED
 
-#if defined(ENABLE_IPV6) && defined(__MINGW32__)
-const struct in6_addr in6addr_any = {{ IN6ADDR_ANY_INIT }};
-#endif
-#endif
-
-#endif
-
-#if defined(WIN32) && !defined(__CYGWIN__)
 #undef perror
 #define perror(m) win32_perror(m)
-#endif
+void win32_perror (const char *msg);
 
 void win32_init(void);
 void win32_cleanup(void);
+#endif  /* WIN32 && !__CYGWIN__ */
 
 /* returns the path name to the test case file */
 char *test2file(long testno);
+
+#endif  /* __SERVER_UTIL_H */
