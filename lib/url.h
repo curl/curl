@@ -64,7 +64,6 @@ void Curl_removeHandleFromPipeline(struct SessionHandle *handle,
                                    struct curl_llist *pipe);
 bool Curl_isHandleAtHead(struct SessionHandle *handle,
                          struct curl_llist *pipe);
-void Curl_signalPipeClose(struct curl_llist *pipe);
 
 void Curl_close_connections(struct SessionHandle *data);
 

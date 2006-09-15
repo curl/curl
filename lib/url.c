@@ -159,6 +159,8 @@ static long ConnectionStore(struct SessionHandle *data,
 static bool IsPipeliningPossible(struct SessionHandle *handle);
 static void conn_free(struct connectdata *conn);
 
+static void signalPipeClose(struct curl_llist *pipe);
+
 #define MAX_PIPELINE_LENGTH 5
 
 #ifndef USE_ARES
@@ -1761,8 +1763,8 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   Curl_ssl_close(conn);
 
   /* Indicate to all handles on the pipe that we're dead */
-  Curl_signalPipeClose(conn->send_pipe);
-  Curl_signalPipeClose(conn->recv_pipe);
+  signalPipeClose(conn->send_pipe);
+  signalPipeClose(conn->recv_pipe);
 
   conn_free(conn);
 
@@ -1848,7 +1850,7 @@ bool Curl_isHandleAtHead(struct SessionHandle *handle,
   return FALSE;
 }
 
-void Curl_signalPipeClose(struct curl_llist *pipe)
+static void signalPipeClose(struct curl_llist *pipe)
 {
   struct curl_llist_element *curr;
 
