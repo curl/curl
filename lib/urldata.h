@@ -951,7 +951,7 @@ struct conncache {
   /* 'connects' will be an allocated array with pointers. If the pointer is
      set, it holds an allocated connection. */
   struct connectdata **connects;
-  long num;           /* size of the 'connects' array */
+  long num;           /* number of entries of the 'connects' array */
   enum {
     CONNCACHE_PRIVATE, /* used for an easy handle alone */
     CONNCACHE_MULTI    /* shared within a multi handle */

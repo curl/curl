@@ -50,6 +50,10 @@ void Curl_safefree(void *ptr);
 struct conncache *Curl_mk_connc(int type);
 /* free a connection cache */
 void Curl_rm_connc(struct conncache *c);
+/* Change number of entries of a connection cache */
+CURLcode Curl_ch_connc(struct SessionHandle *data,
+                       struct conncache *c,
+                       long newamount);
 
 int Curl_protocol_getsock(struct connectdata *conn,
                           curl_socket_t *socks,

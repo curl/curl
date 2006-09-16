@@ -346,6 +346,49 @@ struct conncache *Curl_mk_connc(int type)
   return c;
 }
 
+/* Change number of entries of a connection cache */
+CURLcode Curl_ch_connc(struct SessionHandle *data,
+                       struct conncache *c,
+                       long newamount)
+{
+  int i;
+  struct connectdata **newptr;
+
+  if(newamount < c->num) {
+    /* Since this number is *decreased* from the existing number, we must
+       close the possibly open connections that live on the indexes that
+       are being removed!
+
+       NOTE: for conncache_multi cases we must make sure that we only
+       close handles not in use.
+    */
+    for(i=newamount; i< c->num; i++)
+      Curl_disconnect(c->connects[i]);
+
+    /* If the most recent connection is no longer valid, mark it
+       invalid. */
+    if(data->state.lastconnect <= newamount)
+      data->state.lastconnect = -1;
+  }
+  if(newamount > 0) {
+    newptr= (struct connectdata **)
+      realloc(c->connects, sizeof(struct connectdata *) * newamount);
+    if(!newptr)
+      /* we closed a few connections in vain, but so what? */
+      return CURLE_OUT_OF_MEMORY;
+
+    /* nullify the newly added pointers */
+    for(i=c->num; i<newamount; i++)
+      newptr[i] = NULL;
+
+    c->connects = newptr;
+    c->num = newamount;
+  }
+  /* we no longer support less than 1 as size for the connection cache, and
+     I'm not sure it ever worked to set it to zero */
+  return CURLE_OK;
+}
+
 /* Free a connection cache. This is called from Curl_close() and
    curl_multi_cleanup(). */
 void Curl_rm_connc(struct conncache *c)
@@ -521,45 +564,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * Set the absolute number of maximum simultaneous alive connection that
      * libcurl is allowed to have.
      */
-    {
-      long newconnects= va_arg(param, long);
-      struct connectdata **newptr;
-      long i;
-
-      if(newconnects < data->state.connc->num) {
-        /* Since this number is *decreased* from the existing number, we must
-           close the possibly open connections that live on the indexes that
-           are being removed!
-
-           NOTE: for conncache_multi cases we must make sure that we only
-           close handles not in use.
-        */
-        for(i=newconnects; i< data->state.connc->num; i++)
-          Curl_disconnect(data->state.connc->connects[i]);
-
-        /* If the most recent connection is no longer valid, mark it
-           invalid. */
-        if(data->state.lastconnect <= newconnects)
-          data->state.lastconnect = -1;
-      }
-      if(newconnects > 0) {
-        newptr= (struct connectdata **)
-          realloc(data->state.connc->connects,
-                  sizeof(struct connectdata *) * newconnects);
-        if(!newptr)
-          /* we closed a few connections in vain, but so what? */
-          return CURLE_OUT_OF_MEMORY;
-
-        /* nullify the newly added pointers */
-        for(i=data->state.connc->num; i<newconnects; i++)
-          newptr[i] = NULL;
-
-        data->state.connc->connects = newptr;
-        data->state.connc->num = newconnects;
-      }
-      /* we no longer support less than 1 as size for the connection cache,
-         and I'm not sure it ever worked to set it to zero */
-    }
+    result = Curl_ch_connc(data, data->state.connc, va_arg(param, long));
     break;
   case CURLOPT_FORBID_REUSE:
     /*
@@ -3115,7 +3120,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   conn->connectindex = -1;    /* no index */
 
   conn->bits.httpproxy = (bool)(data->change.proxy  /* http proxy or not */
-                             && *data->change.proxy 
+                             && *data->change.proxy
                              && (data->set.proxytype == CURLPROXY_HTTP));
 
   /* Default protocol-independent behavior doesn't support persistent

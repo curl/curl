@@ -423,6 +423,18 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
 
   /* increase the node-counter */
   multi->num_easy++;
+
+  if((multi->num_easy+5) > multi->connc->num) {
+    /* we want the connection cache to have room for all easy transfers, and
+       some more so we have a margin of 5 for now, but we add the new amount
+       plus 10 to not have to do it for every new handle added */
+    CURLcode res = Curl_ch_connc(easy_handle, multi->connc,
+                                 multi->num_easy + 10);
+    if(res)
+      /* TODO: we need to do some cleaning up here! */
+      return res;
+  }
+
   /* increase the alive-counter */
   multi->num_alive++;
 
