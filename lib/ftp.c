@@ -2954,6 +2954,15 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status)
   char *path_to_use = data->reqdata.path;
   struct Curl_transfer_keeper *k = &data->reqdata.keep;
 
+  if(!ftp)
+    /* When the easy handle is removed from the multi while libcurl is still
+     * trying to resolve the host name, it seems that the ftp struct is not
+     * yet initialized, but the removal action calls Curl_done() which calls
+     * this function. So we simply return success if no ftp pointer is set.
+     */
+    return CURLE_OK;
+
+
   if (conn->sec_path)
     path_to_use = conn->sec_path;
 
