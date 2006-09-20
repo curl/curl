@@ -312,11 +312,11 @@ run curl.
 
 If this option is used several times, each occurrence will toggle this on/off.
 .IP "--egd-file <file>"
-(HTTPS) Specify the path name to the Entropy Gathering Daemon socket. The
-socket is used to seed the random engine for SSL connections. See also the
+(SSL) Specify the path name to the Entropy Gathering Daemon socket. The socket
+is used to seed the random engine for SSL connections. See also the
 \fI--random-file\fP option.
 .IP "-E/--cert <certificate[:password]>"
-(HTTPS)
+(SSL)
 Tells curl to use the specified certificate file when getting a file
 with HTTPS. The certificate must be in PEM format.
 If the optional password isn't specified, it will be queried for on
@@ -330,7 +330,7 @@ DER and ENG are recognized types.  If not specified, PEM is assumed.
 
 If this option is used several times, the last one will be used.
 .IP "--cacert <CA certificate>"
-(HTTPS) Tells curl to use the specified certificate file to verify the
+(SSL) Tells curl to use the specified certificate file to verify the
 peer. The file may contain multiple CA certificates. The certificate(s) must
 be in PEM format.
 
@@ -344,7 +344,7 @@ Current Working Directory, or in any folder along your PATH.
 
 If this option is used several times, the last one will be used.
 .IP "--capath <CA certificate directory>"
-(HTTPS) Tells curl to use the specified certificate directory to verify the
+(SSL) Tells curl to use the specified certificate directory to verify the
 peer. The certificates must be in PEM format, and the directory must have been
 processed using the c_rehash utility supplied with openssl. Using
 \fI--capath\fP can allow curl to make https connections much more efficiently
@@ -828,7 +828,7 @@ must send syntactically correct FTP commands as RFC959 defines.
 
 This option can be used multiple times.
 .IP "--random-file <file>"
-(HTTPS) Specify the path name to file containing what will be considered as
+(SSL) Specify the path name to file containing what will be considered as
 random data. The data is used to seed the random engine for SSL connections.
 See also the \fI--egd-file\fP option.
 .IP "-r/--range <range>"
@@ -1228,13 +1228,13 @@ If this option is used several times, the last one will be used.
 (HTTP) Forces curl to issue its requests using HTTP 1.0 instead of using its
 internally preferred: HTTP 1.1.
 .IP "-1/--tlsv1"
-(HTTPS)
+(SSL)
 Forces curl to use TSL version 1 when negotiating with a remote TLS server.
 .IP "-2/--sslv2"
-(HTTPS)
+(SSL)
 Forces curl to use SSL version 2 when negotiating with a remote SSL server.
 .IP "-3/--sslv3"
-(HTTPS)
+(SSL)
 Forces curl to use SSL version 3 when negotiating with a remote SSL server.
 .IP "--3p-quote"
 (FTP) Specify arbitrary commands to send to the source server. See the
