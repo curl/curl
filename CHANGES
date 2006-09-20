@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (20 September 2006)
+- Armel Asselin fixed problems when you gave a proxy URL with user name and
+  empty password or no password at all. Test case 278 and 279 were added to
+  verify.
+
 Daniel (12 September 2006)
 - Added docs/examples/10-at-a-time.c by Michael Wallner
 

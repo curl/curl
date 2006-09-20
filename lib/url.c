@@ -3698,8 +3698,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     if(atsign) {
       char proxyuser[MAX_CURL_USER_LENGTH];
       char proxypasswd[MAX_CURL_PASSWORD_LENGTH];
+      proxypasswd[0] = 0;
 
-      if(2 == sscanf(proxyptr,
+      if(1 <= sscanf(proxyptr,
                      "%" MAX_CURL_USER_LENGTH_TXT"[^:]:"
                      "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^@]",
                      proxyuser, proxypasswd)) {
