@@ -216,6 +216,49 @@ CURLcode Curl_close(struct SessionHandle *data)
 {
   struct Curl_multi *m = data->multi;
 
+#ifdef CURLDEBUG
+  /* only for debugging, scan through all connections and see if there's a
+     pipe reference still identifying this handle */
+
+  if(data->state.is_in_pipeline)
+    fprintf(stderr, "CLOSED when in pipeline!\n");
+
+  if(data->state.connc && data->state.connc->type == CONNCACHE_MULTI) {
+    struct conncache *c = data->state.connc;
+    int i;
+    struct curl_llist *pipe;
+    struct curl_llist_element *curr;
+    struct connectdata *connptr;
+
+    for(i=0; i< c->num; i++) {
+      connptr = c->connects[i];
+      if(!connptr)
+        continue;
+
+      pipe = connptr->send_pipe;
+      if(pipe) {
+        for (curr = pipe->head; curr; curr=curr->next) {
+          if(data == (struct SessionHandle *) curr->ptr) {
+            fprintf(stderr,
+                    "MAJOR problem we %p are still in send pipe for %p done %d\n",
+                    data, connptr, connptr->bits.done);
+          }
+        }
+      }
+      pipe = connptr->recv_pipe;
+      if(pipe) {
+        for (curr = pipe->head; curr; curr=curr->next) {
+          if(data == (struct SessionHandle *) curr->ptr) {
+            fprintf(stderr,
+                    "MAJOR problem we %p are still in recv pipe for %p done %d\n",
+                    data, connptr, connptr->bits.done);
+          }
+        }
+      }
+    }
+  }
+#endif
+
   if(m)
     /* This handle is still part of a multi handle, take care of this first
        and detach this handle from there. */
@@ -1707,6 +1750,11 @@ CURLcode Curl_disconnect(struct connectdata *conn)
     return CURLE_OK; /* this is closed and fine already */
   data = conn->data;
 
+  if(!data) {
+    DEBUGF(infof(data, "DISCONNECT without easy handle, ignoring\n"));
+    return CURLE_OK;
+  }
+
 #if defined(CURLDEBUG) && defined(AGGRESIVE_TEST)
   /* scan for DNS cache entries still marked as in use */
   Curl_hash_apply(data->hostcache,
@@ -1805,12 +1853,17 @@ static bool IsPipeliningPossible(struct SessionHandle *handle)
   return FALSE;
 }
 
-void Curl_addHandleToPipeline(struct SessionHandle *handle,
+void Curl_addHandleToPipeline(struct SessionHandle *data,
                               struct curl_llist *pipe)
 {
-  Curl_llist_insert_next(pipe,
-                         pipe->tail,
-                         handle);
+#ifdef CURLDEBUG
+  if(!IsPipeliningPossible(data)) {
+    /* when not pipelined, there MUST be no handle in the list already */
+    if(pipe->head)
+      infof(data, "PIPE when no PIPE supposed!\n");
+  }
+#endif
+  Curl_llist_insert_next(pipe, pipe->tail, data);
 }
 
 
@@ -1864,7 +1917,14 @@ static void signalPipeClose(struct curl_llist *pipe)
     struct curl_llist_element *next = curr->next;
     struct SessionHandle *data = (struct SessionHandle *) curr->ptr;
 
-    data->state.pipe_broke = TRUE;
+#ifdef CURLDEBUG /* debug-only code */
+    if(data->magic != CURLEASY_MAGIC_NUMBER) {
+      /* MAJOR BADNESS */
+      fprintf(stderr, "signalPipeClose() found BAAD easy handle\n");
+    }
+    else
+#endif
+      data->state.pipe_broke = TRUE;
 
     Curl_llist_remove(pipe, curr, NULL);
     curr = next;
@@ -2062,7 +2122,7 @@ ConnectionDone(struct connectdata *conn)
 
   if (conn->send_pipe == 0 &&
       conn->recv_pipe == 0)
-      conn->is_in_pipeline = FALSE;
+    conn->is_in_pipeline = FALSE;
 }
 
 /*
@@ -2086,7 +2146,8 @@ ConnectionStore(struct SessionHandle *data,
     /* there was no room available, kill one */
     i = ConnectionKillOne(data);
     if(-1 != i)
-      infof(data, "Connection (#%d) was killed to make room\n", i);
+      infof(data, "Connection (#%d) was killed to make room (holds %d)\n",
+            i, data->state.connc->num);
     else
       infof(data, "This connection did not fit in the connection cache\n");
   }
@@ -3541,7 +3602,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
     /* Setup a "faked" transfer that'll do nothing */
     if(CURLE_OK == result) {
+      conn->data = data;
       conn->bits.tcpconnect = TRUE; /* we are "connected */
+      ConnectionStore(data, conn);
+
       result = Curl_setup_transfer(conn, -1, -1, FALSE, NULL, /* no download */
                                    -1, NULL); /* no upload */
     }
@@ -4438,6 +4502,8 @@ CURLcode Curl_done(struct connectdata **connp,
      cancelled before we proceed */
   ares_cancel(data->state.areschannel);
 
+  ConnectionDone(conn); /* the connection is no longer in use */
+
   /* if data->set.reuse_forbid is TRUE, it means the libcurl client has
      forced us to close this no matter what we think.
 
@@ -4463,8 +4529,6 @@ CURLcode Curl_done(struct connectdata **connp,
     infof(data, "Connection #%ld to host %s left intact\n",
           conn->connectindex,
           conn->bits.httpproxy?conn->proxy.dispname:conn->host.dispname);
-
-    ConnectionDone(conn); /* the connection is no longer in use */
   }
 
   return result;

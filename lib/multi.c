@@ -424,12 +424,12 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   /* increase the node-counter */
   multi->num_easy++;
 
-  if((multi->num_easy+5) > multi->connc->num) {
-    /* we want the connection cache to have room for all easy transfers, and
-       some more so we have a margin of 5 for now, but we add the new amount
-       plus 10 to not have to do it for every new handle added */
+  if((multi->num_easy * 4) > multi->connc->num) {
+    /* We want the connection cache to have plenty room. Before we supported
+       the shared cache every single easy handle had 5 entries in their cache
+       by default. */
     CURLcode res = Curl_ch_connc(easy_handle, multi->connc,
-                                 multi->num_easy + 10);
+                                 multi->connc->num*4);
     if(res)
       /* TODO: we need to do some cleaning up here! */
       return res;
@@ -1111,13 +1111,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         /* call this even if the readwrite function returned error */
         Curl_posttransfer(easy->easy_handle);
 
-        if (retry) {
-          Curl_removeHandleFromPipeline(easy->easy_handle,
-                                        easy->easy_conn->recv_pipe);
-        }
-
         /* When we follow redirects, must to go back to the CONNECT state */
         if(easy->easy_handle->reqdata.newurl || retry) {
+          Curl_removeHandleFromPipeline(easy->easy_handle,
+                                        easy->easy_conn->recv_pipe);
           if(!retry) {
             /* if the URL is a follow-location and not just a retried request
                then figure out the URL here */
