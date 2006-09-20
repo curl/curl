@@ -326,7 +326,7 @@ certificate concatenated!
 If this option is used several times, the last one will be used.
 .IP "--cert-type <type>"
 (SSL) Tells curl what certificate type the provided certificate is in. PEM,
-DER and ENG are recognized types.
+DER and ENG are recognized types.  If not specified, PEM is assumed.
 
 If this option is used several times, the last one will be used.
 .IP "--cacert <CA certificate>"
@@ -548,7 +548,8 @@ separate file.
 If this option is used several times, the last one will be used.
 .IP "--key-type <type>"
 (SSL) Private key file type. Specify which type your \fI--key\fP provided
-private key is. DER, PEM and ENG are supported.
+private key is. DER, PEM and ENG are supported. If not specified, PEM is
+assumed.
 
 If this option is used several times, the last one will be used.
 .IP "--krb4 <level>"
