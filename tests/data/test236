@@ -27,6 +27,7 @@ EPSV
 TYPE I
 SIZE 236
 STOR 236
+QUIT
 </protocol>
 
 #  (25) Failed FTP upload: 550
