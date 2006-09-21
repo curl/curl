@@ -30,11 +30,15 @@ If you receive \fICURLM_CALL_MULTI_PERFORM\fP, this basically means that you
 should call \fIcurl_multi_perform\fP again, before you select() on more
 actions. You don't have to do it immediately, but the return code means that
 libcurl may have more data available to return or that there may be more data
-to send off before it is "satisfied".
+to send off before it is "satisfied". Do note that \fIcurl_multi_perform(3)\fP
+will return \fICURLM_CALL_MULTI_PERFORM\fP only when it wants to be called
+again \fBimmediately\fP. When things are fine and there are nothing immediate
+it wants done, it'll return \fICURLM_OK\fP and you need to wait for \&"action"
+and then call this function again.
 
 NOTE that this only returns errors etc regarding the whole multi stack. There
 might still have occurred problems on individual transfers even when this
-function returns OK.
+function returns \fICURLM_OK\fP.
 .SH "TYPICAL USAGE"
 Most applications will use \fIcurl_multi_fdset(3)\fP to get the multi_handle's
 file descriptors, then it'll wait for action on them using \fBselect(3)\fP and
@@ -42,4 +46,5 @@ as soon as one or more of them are ready, \fIcurl_multi_perform(3)\fP gets
 called.
 .SH "SEE ALSO"
 .BR curl_multi_cleanup "(3), " curl_multi_init "(3), "
-.BR curl_multi_fdset "(3), " curl_multi_info_read "(3)"
+.BR curl_multi_fdset "(3), " curl_multi_info_read "(3), "
+.BR libcurl-errors "(3)"
