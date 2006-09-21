@@ -512,7 +512,15 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
     if(easy->easy_conn) {
       /* Set up the association right */
       easy->easy_conn->data = easy->easy_handle;
+
+      /* Curl_done() clears the conn->data field to lose the association
+         between the easy handle and the connection */
       Curl_done(&easy->easy_conn, easy->result);
+
+      if(easy->easy_conn)
+        /* the connection is still alive, set back the association to enable
+           the check below to trigger TRUE */
+        easy->easy_conn->data = easy->easy_handle;
     }
 
     /* If this easy_handle was the last one in charge for one or more
@@ -528,8 +536,8 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
 
        Thus, we need to check for all connections in the shared cache that
        points to this handle and are using PROT_CLOSEACTION. If there's any,
-       we need to add this handle to the list of "easy_handls kept around for
-       nice closure".
+       we need to add this handle to the list of "easy handles kept around for
+       nice connection closures".
      */
     if(multi_conn_using(multi, easy->easy_handle))
       /* There's at least one connection using this handle so we must keep
@@ -1011,6 +1019,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
         if(CURLE_OK == easy->result)
           easy->result = Curl_readwrite_init(easy->easy_conn);
+        else
+          /* Remove ourselves from the send pipeline */
+          Curl_removeHandleFromPipeline(easy->easy_handle,
+                                        easy->easy_conn->send_pipe);
 
         if(CURLE_OK == easy->result) {
           multistate(easy, CURLM_STATE_DO_DONE);
@@ -1167,10 +1179,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       break;
 
     case CURLM_STATE_COMPLETED:
-      if (easy->easy_handle->state.cancelled) {
+      if (easy->easy_handle->state.cancelled)
         /* Go into the CANCELLED state if we were cancelled */
         multistate(easy, CURLM_STATE_CANCELLED);
-      }
 
       /* this is a completed transfer, it is likely to still be connected */
 

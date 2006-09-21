@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel (21 September 2006)
+- Added test case 531 in an attempt to repeat bug report #1561470
+  (http://curl.haxx.se/bug/view.cgi?id=1561470) that is said to crash when an
+  FTP upload fails with the multi interface. It did not, but I made a failed
+  upload still assume the control connection to be fine.
+
 Daniel (20 September 2006)
 - Armel Asselin fixed problems when you gave a proxy URL with user name and
   empty password or no password at all. Test case 278 and 279 were added to

@@ -2997,6 +2997,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status)
   case CURLE_FTP_PORT_FAILED:
   case CURLE_FTP_COULDNT_SET_BINARY:
   case CURLE_FTP_COULDNT_RETR_FILE:
+  case CURLE_FTP_COULDNT_STOR_FILE:
   case CURLE_FTP_ACCESS_DENIED:
     /* the connection stays alive fine even though this happened */
     /* fall-through */
@@ -3351,7 +3352,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
     result=Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
 
   /* end of transfer */
-  DEBUGF(infof(data, "DO-MORE phase ends\n"));
+  DEBUGF(infof(data, "DO-MORE phase ends with %d\n", result));
 
   return result;
 }
