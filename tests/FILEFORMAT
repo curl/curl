@@ -74,14 +74,24 @@ reply is sent
 <servercmd>
 Special-commands for the server.
 For FTP, these are supported:
-REPLY
-COUNT
-DELAY
+REPLY [command] [return value] [response string]
+ - Changes how the server responds to the [command]
+COUNT [command] [num]
+ - Do the REPLY change for [command] only [num] times and then go back to the
+   built-in approach
+DELAY [command] [secs]
+ - Delay responding to this command for the given time
 RETRWEIRDO
+ - Enable the "weirdo" RETR case when multiple response lines appear at once
+   when a file is transfered
 RETRNOSIZE
+ - Make sure the RETR response doesn't contain the size of the file
 NOSAVE
+ - Don't actually save what is received
 SLOWDOWN
+ - Send FTP responses with 0.1 sec delay between each byte
 PASVBADIP  - makes PASV send back an illegal IP in its 227 response
+ - Send back a bad IP in the PASV response
 
 For HTTP:
 auth_required - if this is set and a POST/PUT is made without auth, the
