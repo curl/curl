@@ -481,6 +481,7 @@ X_OBJS= \
 	$(DIROBJ)\content_encoding.obj \
 	$(DIROBJ)\tftp.obj \
 	$(DIROBJ)\splay.obj \
+	$(DIROBJ)\socks.obj \
 	$(RESOURCE)
 
 all : $(TARGET)

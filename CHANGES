@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (23 September 2006)
+- Dmitriy Sergeyev provided a patch that made the SOCKS[45] code work better
+  as it now will read the full data sent from servers. The SOCKS-related code
+  was also moved to the new lib/socks.c source file.
+
 Daniel (21 September 2006)
 - Added test case 531 in an attempt to repeat bug report #1561470
   (http://curl.haxx.se/bug/view.cgi?id=1561470) that is said to crash when an

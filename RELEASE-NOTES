@@ -21,6 +21,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o SOCKS proxy connection fixes
  o (FTP) a failed upload does not invalidate the control connection
  o proxy URL with user name and empty password or no password at all now work
  o fixed a socket state problem with *multi_socket()
