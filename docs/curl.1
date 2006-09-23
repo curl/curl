@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl 1 "21 Mar 2006" "Curl 7.15.4" "Curl Manual"
+.TH curl 1 "23 Sep 2006" "Curl 7.16.0" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -34,9 +34,9 @@ protocols (HTTP, HTTPS, FTP, FTPS, TFTP, DICT, TELNET, LDAP or FILE).
 The command is designed to work without user interaction.
 
 curl offers a busload of useful tricks like proxy support, user
-authentication, ftp upload, HTTP post, SSL (https:) connections, cookies, file
-transfer resume and more. As you will see below, the amount of features will
-make your head spin!
+authentication, ftp upload, HTTP post, SSL connections, cookies, file transfer
+resume and more. As you will see below, the amount of features will make your
+head spin!
 
 curl is powered by libcurl for all transfer-related features. See
 .BR libcurl (3)
@@ -316,12 +316,12 @@ If this option is used several times, each occurrence will toggle this on/off.
 is used to seed the random engine for SSL connections. See also the
 \fI--random-file\fP option.
 .IP "-E/--cert <certificate[:password]>"
-(SSL)
-Tells curl to use the specified certificate file when getting a file
-with HTTPS. The certificate must be in PEM format.
-If the optional password isn't specified, it will be queried for on
-the terminal. Note that this certificate is the private key and the private
-certificate concatenated!
+(SSL) Tells curl to use the specified certificate file when getting a file
+with HTTPS or FTPS. The certificate must be in PEM format.  If the optional
+password isn't specified, it will be queried for on the terminal. Note that
+this option assumes a \&"certificate" file that is the private key and the
+private certificate concatenated! See \fI--cert\P and \fI--key\fP to specify
+them independently.
 
 If this option is used several times, the last one will be used.
 .IP "--cert-type <type>"
@@ -347,7 +347,7 @@ If this option is used several times, the last one will be used.
 (SSL) Tells curl to use the specified certificate directory to verify the
 peer. The certificates must be in PEM format, and the directory must have been
 processed using the c_rehash utility supplied with openssl. Using
-\fI--capath\fP can allow curl to make https connections much more efficiently
+\fI--capath\fP can allow curl to make SSL-connections much more efficiently
 than using \fI--cacert\fP if the \fI--cacert\fP file contains many CA
 certificates.
 
@@ -395,7 +395,6 @@ in 7.11.0)
 
 If this option is used several times, the following occurrences make no
 difference.
-
 .IP "--ftp-alternative-to-user <command>"
 (FTP) If authenticating with the USER and PASS commands fails, send this
 command.  When connecting to Tumbleweed's Secure Transport server over FTPS
