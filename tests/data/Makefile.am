@@ -35,5 +35,6 @@ EXTRA_DIST = test1 test108 test117 test127 test20 test27 test34 test46	   \
  test256 test257 test258 test259 test260 test261 test262 test263 test264   \
  test265 test266 test267 test268 test269 test270 test271 test272 test273   \
  test274 test275 test524 test525 test276 test277 test526 test527 test528   \
- test530 DISABLED test278 test279 test531
+ test530 DISABLED test278 test279 test531 test280
+
 
