@@ -339,6 +339,7 @@ struct Configurable {
   size_t lastrecvsize;
   bool ftp_ssl;
   bool ftp_ssl_reqd;
+  bool ftp_ssl_control;
 
   char *socksproxy; /* set to server string */
   int socksver;     /* set to CURLPROXY_SOCKS* define */
@@ -519,6 +520,7 @@ static void help(void)
     "    --ftp-pasv      Use PASV/EPSV instead of PORT (F)",
     "    --ftp-skip-pasv-ip Skip the IP address for PASV (F)\n"
     "    --ftp-ssl       Try SSL/TLS for the ftp transfer (F)",
+    "    --ftp-ssl-control Try SSL/TLS for the ftp login, clear for transfer (F)",
     "    --ftp-ssl-reqd  Require SSL/TLS for the ftp transfer (F)",
     " -F/--form <name=content> Specify HTTP multipart POST data (H)",
     "    --form-string <name=string> Specify HTTP multipart POST data (H)",
@@ -1351,6 +1353,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$u", "ftp-alternative-to-user", TRUE},
     {"$v", "ftp-ssl-reqd", FALSE},
     {"$w", "no-sessionid", FALSE},
+    {"$x", "ftp-ssl-control", FALSE},
 
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
@@ -1800,6 +1803,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'w': /* --no-sessionid */
         config->disable_sessionid ^= TRUE;
+        break;
+      case 'x': /* --ftp-ssl-control */
+        config->ftp_ssl_control ^= TRUE;
         break;
       }
       break;
@@ -3991,13 +3997,17 @@ operate(struct Configurable *config, int argc, char *argv[])
         else
           curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_WHATEVER);
 
-        /* new in curl 7.11.0 */
-        if(config->ftp_ssl)
-          curl_easy_setopt(curl, CURLOPT_FTP_SSL, CURLFTPSSL_TRY);
-
         /* new in curl 7.15.5 */
         if(config->ftp_ssl_reqd)
           curl_easy_setopt(curl, CURLOPT_FTP_SSL, CURLFTPSSL_ALL);
+
+        /* new in curl 7.11.0 */
+        else if(config->ftp_ssl)
+          curl_easy_setopt(curl, CURLOPT_FTP_SSL, CURLFTPSSL_TRY);
+
+        /* new in curl 7.16.0 */
+        else if(config->ftp_ssl_control)
+          curl_easy_setopt(curl, CURLOPT_FTP_SSL, CURLFTPSSL_CONTROL);
 
         /* new in curl 7.11.1, modified in 7.15.2 */
         if(config->socksproxy) {

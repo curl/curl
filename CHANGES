@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel (23 September 2006)
+- Mike Protts added --ftp-ssl-control to make curl use FTP-SSL, but only
+  encrypt the control connection and use the data connection "plain".
+
 - Dmitriy Sergeyev provided a patch that made the SOCKS[45] code work better
   as it now will read the full data sent from servers. The SOCKS-related code
   was also moved to the new lib/socks.c source file.

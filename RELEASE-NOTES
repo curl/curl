@@ -11,6 +11,7 @@ Curl and libcurl 7.16.0
 
 This release includes the following changes:
 
+ o (FTP) --ftp-ssl-control was added
  o CURLOPT_SSL_SESSIONID_CACHE and --no-sessionid added
  o CURLMOPT_PIPELINING added for enabling pipelined transfers
  o multi handles now have a shared connection cache
@@ -52,6 +53,7 @@ advice from friends like these:
 
  Domenico Andreoli, Armel Asselin, Gisle Vanem, Yang Tse, Andrew Biggs,
  Peter Sylvester, David McCreedy, Dmitriy Sergeyev, Dmitry Rechkin,
- Jari Sundell, Ravi Pratap, Michele Bini, Jeff Pohlmeyer, Michael Wallner
+ Jari Sundell, Ravi Pratap, Michele Bini, Jeff Pohlmeyer, Michael Wallner,
+ Mike Protts
 
         Thanks! (and sorry if I forgot to mention someone)
