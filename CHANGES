@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (24 September 2006)
+- Cory Nelson made libcurl use the WSAPoll() function if built for Windows
+  Vista (_WIN32_WINNT >= 0x0600)
+
 Daniel (23 September 2006)
 - Mike Protts added --ftp-ssl-control to make curl use FTP-SSL, but only
   encrypt the control connection and use the data connection "plain".

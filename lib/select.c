@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -74,7 +74,7 @@
  */
 int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
 {
-#ifdef HAVE_POLL_FINE
+#if defined(HAVE_POLL_FINE) || defined(CURL_HAVE_WSAPOLL)
   struct pollfd pfd[2];
   int num;
   int r;
@@ -92,9 +92,13 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
     num++;
   }
 
+#ifdef HAVE_POLL_FINE
   do {
     r = poll(pfd, num, timeout_ms);
   } while((r == -1) && (errno == EINTR));
+#else
+  r = WSAPoll(pfd, num, timeout_ms);
+#endif
 
   if (r < 0)
     return -1;
@@ -194,6 +198,8 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
   do {
     r = poll(ufds, nfds, timeout_ms);
   } while((r == -1) && (errno == EINTR));
+#elif defined(CURL_HAVE_WSAPOLL)
+  r = WSAPoll(ufds, nfds, timeout_ms);
 #else
   struct timeval timeout;
   struct timeval *ptimeout;

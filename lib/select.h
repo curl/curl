@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,6 +25,10 @@
 
 #ifdef HAVE_SYS_POLL_H
 #include <sys/poll.h>
+#elif defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0600)
+/* for Vista, use WSAPoll(). */
+#include <winsock2.h>
+#define CURL_HAVE_WSAPOLL
 #else
 
 #define POLLIN      0x01
