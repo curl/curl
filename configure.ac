@@ -747,7 +747,7 @@ AC_ARG_WITH(gssapi-includes,
 AC_ARG_WITH(gssapi-libs,
   AC_HELP_STRING([--with-gssapi-libs=DIR],
   		 [Specify location of GSSAPI libs]),
-  [ GSSAPI_LIBS="-L$withval"
+  [ GSSAPI_LIB_DIR="-L$withval"
     want_gss="yes" ]
 )
 

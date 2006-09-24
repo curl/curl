@@ -7,6 +7,8 @@
                                   Changelog
 
 Daniel (24 September 2006)
+- Bernard Leak fixed configure --with-gssapi-libs.
+
 - Cory Nelson made libcurl use the WSAPoll() function if built for Windows
   Vista (_WIN32_WINNT >= 0x0600)
 
