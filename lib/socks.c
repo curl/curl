@@ -23,6 +23,15 @@
 
 #include "setup.h"
 
+#include <string.h>
+
+#ifdef NEED_MALLOC_H
+#include <malloc.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
 #include "urldata.h"
 #include "sendf.h"
 #include "strequal.h"
@@ -541,7 +550,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     code = Curl_write(conn, sock, (char *)socksreq, packetsize, &written);
     if ((code != CURLE_OK) || (written != packetsize)) {
       failf(data, "Failed to send SOCKS5 connect request.");
-      return 1;
+      return CURLE_COULDNT_CONNECT;
     }
 
     result = blockread_all(conn, sock, (char *)socksreq, packetsize,
