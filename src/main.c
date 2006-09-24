@@ -520,9 +520,9 @@ static void help(void)
     "    --ftp-method [multicwd/nocwd/singlecwd] Control CWD usage (F)",
     "    --ftp-pasv      Use PASV/EPSV instead of PORT (F)",
     "    --ftp-skip-pasv-ip Skip the IP address for PASV (F)\n"
-    "    --ftp-ssl       Try SSL/TLS for the ftp transfer (F)",
-    "    --ftp-ssl-control Try SSL/TLS for the ftp login, clear for transfer (F)",
-    "    --ftp-ssl-reqd  Require SSL/TLS for the ftp transfer (F)",
+    "    --ftp-ssl       Try SSL/TLS for ftp transfer (F)",
+    "    --ftp-ssl-control Require SSL/TLS for ftp login, clear for transfer (F)",
+    "    --ftp-ssl-reqd  Require SSL/TLS for ftp transfer (F)",
     " -F/--form <name=content> Specify HTTP multipart POST data (H)",
     "    --form-string <name=string> Specify HTTP multipart POST data (H)",
     " -g/--globoff       Disable URL sequences and ranges using {} and []",
