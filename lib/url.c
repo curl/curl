@@ -395,7 +395,7 @@ CURLcode Curl_ch_connc(struct SessionHandle *data,
                        struct conncache *c,
                        long newamount)
 {
-  int i;
+  long i;
   struct connectdata **newptr;
 
   if(newamount < c->num) {
