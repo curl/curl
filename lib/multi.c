@@ -430,9 +430,9 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
        by default. */
     CURLcode res = Curl_ch_connc(easy_handle, multi->connc,
                                  multi->connc->num*4);
-    if(res)
+    if(res != CURLE_OK)
       /* TODO: we need to do some cleaning up here! */
-      return res;
+      return CURLM_OUT_OF_MEMORY;
   }
 
   /* increase the alive-counter */
