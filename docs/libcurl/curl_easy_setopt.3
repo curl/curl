@@ -973,7 +973,9 @@ techniques). Pass a NULL to this option to disable the use of ranges.
 .IP CURLOPT_RESUME_FROM
 Pass a long as parameter. It contains the offset in number of bytes that you
 want the transfer to start from. Set this option to 0 to make the transfer
-start from the beginning (effectively disabling resume).
+start from the beginning (effectively disabling resume). For FTP, set this
+option to -1 to make the transfer start from the end of the target file
+(useful to continue an interrupted upload).
 .IP CURLOPT_RESUME_FROM_LARGE
 Pass a curl_off_t as parameter. It contains the offset in number of bytes that
 you want the transfer to start from. (Added in 7.11.0)
