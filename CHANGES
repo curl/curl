@@ -6,6 +6,18 @@
 
                                   Changelog
 
+Daniel (28 September 2006)
+- Reported in #1561470 (http://curl.haxx.se/bug/view.cgi?id=1561470), libcurl
+  would crash if a bad function sequence was used when shutting down after
+  using the multi interface (i.e using easy_cleanup after multi_cleanup) so
+  precautions have been added to make sure it doesn't any more - test case 529
+  was added to verify.
+
+Daniel (27 September 2006)
+- The URL in the cookie jar file is now changed since it was giving a 404.
+  Reported by Timothy Stone. The new URL will take the visitor to a curl web
+  site mirror with the document.
+
 Daniel (24 September 2006)
 - Bernard Leak fixed configure --with-gssapi-libs.
 

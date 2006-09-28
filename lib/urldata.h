@@ -1053,6 +1053,9 @@ struct UrlState {
      must keep it around and add it to the list of handles to kill once all
      its connections are gone */
   void *shared_conn;
+  bool closed; /* set to TRUE when curl_easy_cleanup() has been called on this
+                  handle, but it is kept around as mentioned for
+                  shared_conn */
 };
 
 

@@ -172,6 +172,8 @@ static bool multi_conn_using(struct Curl_multi *multi,
                              struct SessionHandle *data);
 static void singlesocket(struct Curl_multi *multi,
                          struct Curl_one_easy *easy);
+static void add_closure(struct Curl_multi *multi,
+                        struct SessionHandle *data);
 
 /* always use this function to change state, to make debugging easier */
 static void multistate(struct Curl_one_easy *easy, CURLMstate state)
@@ -539,17 +541,28 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
        we need to add this handle to the list of "easy handles kept around for
        nice connection closures".
      */
-    if(multi_conn_using(multi, easy->easy_handle))
+    if(multi_conn_using(multi, easy->easy_handle)) {
       /* There's at least one connection using this handle so we must keep
          this handle around. We also keep the connection cache pointer
          pointing to the shared one since that will be used on close as
          well. */
       easy->easy_handle->state.shared_conn = multi;
-    else
-      if(easy->easy_handle->state.connc->type == CONNCACHE_MULTI)
-        /* if this was using the shared connection cache we clear the pointer
-           to that */
-        easy->easy_handle->state.connc = NULL;
+
+      /* this handle is still being used by a shared connection cache and
+         thus we leave it around for now */
+      add_closure(multi, easy->easy_handle);
+    }
+
+    if(easy->easy_handle->state.connc->type == CONNCACHE_MULTI) {
+      /* if this was using the shared connection cache we clear the pointer
+         to that since we're not part of that handle anymore */
+      easy->easy_handle->state.connc = NULL;
+
+      /* and modify the connectindex since this handle can't point to the
+         connection cache anymore */
+      if(easy->easy_conn)
+        easy->easy_conn->connectindex = -1;
+    }
 
     /* change state without using multistate(), only to make singlesocket() do
        what we want */
@@ -1320,15 +1333,20 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
     /* go over all connections that have close actions */
     for(i=0; i< multi->connc->num; i++) {
       if(multi->connc->connects[i] &&
-         multi->connc->connects[i]->protocol & PROT_CLOSEACTION)
+         multi->connc->connects[i]->protocol & PROT_CLOSEACTION) {
         Curl_disconnect(multi->connc->connects[i]);
+        multi->connc->connects[i] = NULL;
+      }
     }
     /* now walk through the list of handles we kept around only to be
        able to close connections "properly" */
     cl = multi->closure;
     while(cl) {
       cl->easy_handle->state.shared_conn = NULL; /* no more shared */
-      Curl_close(cl->easy_handle); /* close handle */
+      if(cl->easy_handle->state.closed)
+        /* close handle only if curl_easy_cleanup() already has been called
+           for this easy handle */
+        Curl_close(cl->easy_handle);
       n = cl->next;
       free(cl);
       cl= n;
@@ -1780,8 +1798,8 @@ static bool multi_conn_using(struct Curl_multi *multi,
 
 /* add the given data pointer to the list of 'closure handles' that are
    kept around only to be able to close some connections nicely */
-void Curl_multi_add_closure(struct Curl_multi *multi,
-                            struct SessionHandle *data)
+static void add_closure(struct Curl_multi *multi,
+                        struct SessionHandle *data)
 {
   int i;
   struct closure *cl = (struct closure *)calloc(sizeof(struct closure), 1);

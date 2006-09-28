@@ -1,0 +1,55 @@
+<info>
+<keywords>
+FTP
+PORT
+STOR
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+<tool>
+lib529
+</tool>
+ <name>
+FTP PORT upload using multi interface (weird cleanup function sequence)
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/path/529 log/upload529
+</command>
+<file name="log/upload529">
+Moooooooooooo
+ upload this
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^PORT .*
+^EPRT .*
+^LPRT .*
+</strip>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+CWD path
+PORT 127,0,0,1,5,109
+TYPE I
+STOR 529
+QUIT
+</protocol>
+<upload>
+Moooooooooooo
+ upload this
+</upload>
+</verify>

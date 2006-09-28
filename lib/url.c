@@ -269,27 +269,29 @@ CURLcode Curl_close(struct SessionHandle *data)
                       the multi handle, since that function uses the magic
                       field! */
 
-  if(data->state.connc && (data->state.connc->type == CONNCACHE_PRIVATE)) {
-    /* close all connections still alive that are in the private connection
-       cache, as we no longer have the pointer left to the shared one. */
-    close_connections(data);
+  if(data->state.connc) {
 
-    /* free the connection cache if allocated privately */
-    Curl_rm_connc(data->state.connc);
+    if(data->state.connc->type == CONNCACHE_PRIVATE) {
+      /* close all connections still alive that are in the private connection
+         cache, as we no longer have the pointer left to the shared one. */
+      close_connections(data);
+
+      /* free the connection cache if allocated privately */
+      Curl_rm_connc(data->state.connc);
+    }
+  }
+
+  if(data->state.shared_conn) {
+    /* marked to be used by a pending connection so we can't kill this handle
+       just yet */
+    data->state.closed = TRUE;
+    return CURLE_OK;
   }
 
   if ( ! (data->share && data->share->hostcache) ) {
     if ( !Curl_global_host_cache_use(data)) {
       Curl_hash_destroy(data->dns.hostcache);
     }
-  }
-
-  if(data->state.shared_conn) {
-    /* this handle is still being used by a shared connection cache and thus
-       we leave it around for now */
-    Curl_multi_add_closure(data->state.shared_conn, data);
-
-    return CURLE_OK;
   }
 
   /* Free the pathbuffer */

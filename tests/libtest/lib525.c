@@ -123,9 +123,17 @@ int test(char *URL)
     res = CURLM_CALL_MULTI_PERFORM;
   }
 
+#ifdef LIB529
+  /* test 529 */
+  curl_multi_remove_handle(m, curl);
+  curl_multi_cleanup(m);
+  curl_easy_cleanup(curl);
+#else
+  /* test 525 */
   curl_multi_remove_handle(m, curl);
   curl_easy_cleanup(curl);
   curl_multi_cleanup(m);
+#endif
 
   fclose(hd_src); /* close the local file */
 

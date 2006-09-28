@@ -11,10 +11,11 @@ Curl and libcurl 7.16.0
 
 This release includes the following changes:
 
+ o curl_multi_socket() and family are suitable to start using
  o uses WSAPoll() on Windows Vista
  o (FTP) --ftp-ssl-control was added
  o CURLOPT_SSL_SESSIONID_CACHE and --no-sessionid added
- o CURLMOPT_PIPELINING added for enabling pipelined transfers
+ o CURLMOPT_PIPELINING added for enabling HTTP pipelined transfers
  o multi handles now have a shared connection cache
  o Added support for other MS-DOS compilers (besides djgpp)
  o CURLOPT_SOCKOPTFUNCTION and CURLOPT_SOCKOPTDATA were added
@@ -23,6 +24,9 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o multi interface crash if bad function call order was used for cleanup
+ o put a new URL in saved cookie jar files
+ o configure --with-gssapi-libs
  o SOCKS proxy connection fixes
  o (FTP) a failed upload does not invalidate the control connection
  o proxy URL with user name and empty password or no password at all now work
@@ -55,6 +59,6 @@ advice from friends like these:
  Domenico Andreoli, Armel Asselin, Gisle Vanem, Yang Tse, Andrew Biggs,
  Peter Sylvester, David McCreedy, Dmitriy Sergeyev, Dmitry Rechkin,
  Jari Sundell, Ravi Pratap, Michele Bini, Jeff Pohlmeyer, Michael Wallner,
- Mike Protts, Cory Nelson
+ Mike Protts, Cory Nelson, Bernard Leak
 
         Thanks! (and sorry if I forgot to mention someone)
