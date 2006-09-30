@@ -349,11 +349,6 @@ struct Configurable {
   long retry_delay; /* delay between retries (in seconds) */
   long retry_maxtime; /* maximum time to keep retrying */
 
-  char *tp_url; /* third party URL */
-  char *tp_user; /* third party userpwd */
-  struct curl_slist *tp_quote;
-  struct curl_slist *tp_postquote;
-  struct curl_slist *tp_prequote;
   char *ftp_account; /* for ACCT */
   char *ftp_alternative_to_user; /* send command if USER/PASS fails */
   int ftp_filemethod;
@@ -596,9 +591,6 @@ static void help(void)
     " -1/--tlsv1         Use TLSv1 (SSL)",
     " -2/--sslv2         Use SSLv2 (SSL)",
     " -3/--sslv3         Use SSLv3 (SSL)",
-    "    --3p-quote      like -Q for the source URL for 3rd party transfer (F)",
-    "    --3p-url        source URL to activate 3rd party transfer (F)",
-    "    --3p-user       user and password for source 3rd party transfer (F)",
     " -4/--ipv4          Resolve name to IPv4 address",
     " -6/--ipv6          Resolve name to IPv6 address",
     " -#/--progress-bar  Display transfer progress as a progress bar",
@@ -1340,9 +1332,6 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$g", "retry",      TRUE},
     {"$h", "retry-delay", TRUE},
     {"$i", "retry-max-time", TRUE},
-    {"$j", "3p-url", TRUE},
-    {"$k", "3p-user", TRUE},
-    {"$l", "3p-quote", TRUE},
     {"$m", "ftp-account", TRUE},
     {"$n", "proxy-anyauth", FALSE},
     {"$o", "trace-time", FALSE},
@@ -1733,35 +1722,6 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           return PARAM_BAD_NUMERIC;
         break;
 
-      case 'j': /* --3p-url */
-        GetStr(&config->tp_url, nextarg);
-        break;
-      case 'k': /* --3p-user */
-        GetStr(&config->tp_user, nextarg);
-        break;
-      case 'l': /* --3p-quote */
-        /* QUOTE commands to send to source FTP server */
-        err = PARAM_OK;
-        switch(nextarg[0]) {
-        case '-':
-          /* prefixed with a dash makes it a POST TRANSFER one */
-          nextarg++;
-          err = add2list(&config->tp_postquote, nextarg);
-          break;
-        case '+':
-          /* prefixed with a plus makes it a just-before-transfer one */
-          nextarg++;
-          err = add2list(&config->tp_prequote, nextarg);
-          break;
-        default:
-          err = add2list(&config->tp_quote, nextarg);
-          break;
-        }
-        if(err)
-          return err;
-
-        break;
-        /* break */
       case 'm': /* --ftp-account */
         GetStr(&config->ftp_account, nextarg);
         break;
@@ -3138,19 +3098,12 @@ static void free_config_fields(struct Configurable *config)
     free(config->capath);
   if(config->cookiejar)
     free(config->cookiejar);
-  if(config->tp_url)
-    free(config->tp_url);
-  if(config->tp_user)
-    free(config->tp_user);
   if(config->ftp_account)
     free(config->ftp_account);
 
   curl_slist_free_all(config->quote); /* checks for config->quote == NULL */
   curl_slist_free_all(config->prequote);
   curl_slist_free_all(config->postquote);
-  curl_slist_free_all(config->tp_quote);
-  curl_slist_free_all(config->tp_prequote);
-  curl_slist_free_all(config->tp_postquote);
   curl_slist_free_all(config->headers);
 }
 
@@ -4017,11 +3970,6 @@ operate(struct Configurable *config, int argc, char *argv[])
         }
 
         /* curl 7.13.0 */
-        curl_easy_setopt(curl, CURLOPT_SOURCE_URL, config->tp_url);
-        curl_easy_setopt(curl, CURLOPT_SOURCE_USERPWD, config->tp_user);
-        curl_easy_setopt(curl, CURLOPT_SOURCE_PREQUOTE, config->tp_prequote);
-        curl_easy_setopt(curl, CURLOPT_SOURCE_POSTQUOTE, config->tp_postquote);
-        curl_easy_setopt(curl, CURLOPT_SOURCE_QUOTE, config->tp_quote);
         curl_easy_setopt(curl, CURLOPT_FTP_ACCOUNT, config->ftp_account);
 
         curl_easy_setopt(curl, CURLOPT_IGNORE_CONTENT_LENGTH, config->ignorecl);

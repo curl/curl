@@ -590,9 +590,7 @@ int Curl_debug(struct SessionHandle *data, curl_infotype type,
     }
 
     if(t) {
-      snprintf(buffer, sizeof(buffer), "[%s %s %s%s]", w, t,
-               conn->xfertype==NORMAL?"":
-               (conn->xfertype==SOURCE3RD?"source ":"target "),
+      snprintf(buffer, sizeof(buffer), "[%s %s %s]", w, t,
                conn->host.dispname);
       rc = showit(data, CURLINFO_TEXT, buffer, strlen(buffer));
       if(rc)

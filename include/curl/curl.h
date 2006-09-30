@@ -941,22 +941,12 @@ typedef enum {
   CINIT(TCP_NODELAY, LONG, 121),
 
   /* 122 OBSOLETE, used in 7.12.3. Gone in 7.13.0 */
-
-  /* When doing 3rd party transfer, set the source user and password with
-     this */
-  CINIT(SOURCE_USERPWD, OBJECTPOINT, 123),
-
+  /* 123 OBSOLETE. Gone in 7.16.0 */
   /* 124 OBSOLETE, used in 7.12.3. Gone in 7.13.0 */
   /* 125 OBSOLETE, used in 7.12.3. Gone in 7.13.0 */
   /* 126 OBSOLETE, used in 7.12.3. Gone in 7.13.0 */
-
-  /* When doing 3rd party transfer, set the source pre-quote linked list
-     of commands with this */
-  CINIT(SOURCE_PREQUOTE, OBJECTPOINT, 127),
-
-  /* When doing 3rd party transfer, set the source post-quote linked list
-     of commands with this */
-  CINIT(SOURCE_POSTQUOTE, OBJECTPOINT, 128),
+  /* 127 OBSOLETE. Gone in 7.16.0 */
+  /* 128 OBSOLETE. Gone in 7.16.0 */
 
   /* When FTP over SSL/TLS is selected (with CURLOPT_FTP_SSL), this option
      can be used to change libcurl's default action which is to first try
@@ -973,12 +963,8 @@ typedef enum {
   CINIT(IOCTLFUNCTION, FUNCTIONPOINT, 130),
   CINIT(IOCTLDATA, OBJECTPOINT, 131),
 
-  /* To make a 3rd party transfer, set the source URL with this */
-  CINIT(SOURCE_URL, OBJECTPOINT, 132),
-
-  /* When doing 3rd party transfer, set the source quote linked list of
-     commands with this */
-  CINIT(SOURCE_QUOTE, OBJECTPOINT, 133),
+  /* 132 OBSOLETE. Gone in 7.16.0 */
+  /* 133 OBSOLETE. Gone in 7.16.0 */
 
   /* zero terminated string for pass on to the FTP server when asked for
      "account" info */
@@ -1059,18 +1045,6 @@ typedef enum {
 
 #ifndef CURL_NO_OLDIES /* define this to test if your app builds with all
                           the obsolete stuff removed! */
-#define CURLOPT_HTTPREQUEST    -1
-#define CURLOPT_FTPASCII       CURLOPT_TRANSFERTEXT
-#define CURLOPT_MUTE           -2
-#define CURLOPT_PASSWDFUNCTION -3
-#define CURLOPT_PASSWDDATA     -4
-#define CURLOPT_CLOSEFUNCTION  -5
-
-#define CURLOPT_SOURCE_HOST    -6
-#define CURLOPT_SOURCE_PATH    -7
-#define CURLOPT_SOURCE_PORT    -8
-#define CURLOPT_PASV_HOST      -9
-
 #else
 /* This is set if CURL_NO_OLDIES is defined at compile-time */
 #undef CURLOPT_DNS_USE_GLOBAL_CACHE /* soon obsolete */

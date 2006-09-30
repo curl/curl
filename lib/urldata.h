@@ -834,13 +834,6 @@ struct connectdata {
   struct Curl_async async;
 #endif
 
-  struct connectdata *sec_conn;   /* secondary connection for 3rd party
-                                     transfer */
-  char *sec_path;            /* The source path for FTP 3rd party */
-  char *sec_pathbuffer;
-
-  enum { NORMAL, SOURCE3RD, TARGET3RD } xfertype;
-
   /* These three are used for chunked-encoding trailer support */
   char *trailer; /* allocated buffer to store trailer in */
   int trlMax;    /* allocated buffer size */

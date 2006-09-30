@@ -6,6 +6,27 @@
 
                                   Changelog
 
+Daniel (29 September 2006)
+- Removed a few other no-longer present options from the header file.
+
+- Support for FTP third party transfers was removed. Here's why:
+
+  o The recent multi interface changes broke it and the design of the 3rd party
+    transfers made it very hard to fix the problems
+  o It was still blocking and thus nasty for the multi interface
+  o It was a lot of extra code for a very rarely used feature
+  o It didn't use the same code as for "plain" FTP transfers, so it didn't work
+    fine for IPv6 and it didn't properly re-use connections and more
+  o There's nobody around who's willing to work on and improve the existing
+    code
+
+  This does not mean that third party transfers are banned forever, only that
+  they need to be done better if they are to be re-added in the future.
+
+  The CURLOPT_SOURCE_* options are removed from the lib and so are the --3p*
+  options from the command line tool. For this reason, I also bumped the
+  version info for the lib.
+
 Daniel (28 September 2006)
 - Reported in #1561470 (http://curl.haxx.se/bug/view.cgi?id=1561470), libcurl
   would crash if a bad function sequence was used when shutting down after

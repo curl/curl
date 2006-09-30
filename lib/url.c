@@ -1618,42 +1618,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.tcp_nodelay = (bool)(0 != va_arg(param, long));
     break;
 
-  /*********** 3rd party transfer options ***********/
-  case CURLOPT_SOURCE_URL:
     /*
-     * SOURCE URL
-     */
-    data->set.source_url = va_arg(param, char *);
-    data->set.printhost = (bool)(NULL != data->set.source_url);
-    break;
-
-  case CURLOPT_SOURCE_USERPWD:
-    /*
-     * Use SOURCE USER[:PASSWORD]
-     */
-    data->set.source_userpwd = va_arg(param, char *);
-    break;
-
-  case CURLOPT_SOURCE_QUOTE:
-    /*
-     * List of RAW FTP commands to use after a connect
-     */
-    data->set.source_quote = va_arg(param, struct curl_slist *);
-    break;
-
-  case CURLOPT_SOURCE_PREQUOTE:
-    /*
-     * List of RAW FTP commands to use before a transfer on the source host
-     */
-    data->set.source_prequote = va_arg(param, struct curl_slist *);
-    break;
-
-  case CURLOPT_SOURCE_POSTQUOTE:
-    /*
-     * List of RAW FTP commands to use after a transfer on the source host
-     */
-    data->set.source_postquote = va_arg(param, struct curl_slist *);
-    break;
+      case CURLOPT_SOURCE_URL:
+      case CURLOPT_SOURCE_USERPWD:
+      case CURLOPT_SOURCE_QUOTE:
+      case CURLOPT_SOURCE_PREQUOTE:
+      case CURLOPT_SOURCE_POSTQUOTE:
+      These former 3rd party transfer options are deprecated */
 
   case CURLOPT_FTP_ACCOUNT:
     data->set.ftp_account = va_arg(param, char *);
@@ -1726,7 +1697,6 @@ static void conn_free(struct connectdata *conn)
   Curl_safefree(conn->allocptr.cookiehost);
   Curl_safefree(conn->ip_addr_str);
   Curl_safefree(conn->trailer);
-  Curl_safefree(conn->sec_pathbuffer);
   Curl_safefree(conn->host.rawalloc); /* host name buffer */
   Curl_safefree(conn->proxy.rawalloc); /* proxy name buffer */
 

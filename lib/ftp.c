@@ -118,12 +118,9 @@ static CURLcode ftp_cwd(struct connectdata *conn, char *path);
 static CURLcode ftp_mkd(struct connectdata *conn, char *path);
 static CURLcode ftp_cwd_and_mkd(struct connectdata *conn, char *path);
 static CURLcode ftp_quit(struct connectdata *conn);
-static CURLcode ftp_3rdparty_pretransfer(struct connectdata *conn);
-static CURLcode ftp_3rdparty_transfer(struct connectdata *conn);
 static CURLcode ftp_parse_url_path(struct connectdata *conn);
 static CURLcode ftp_cwd_and_create_path(struct connectdata *conn);
 static CURLcode ftp_regular_transfer(struct connectdata *conn, bool *done);
-static CURLcode ftp_3rdparty(struct connectdata *conn);
 static void ftp_pasv_verbose(struct connectdata *conn,
                              Curl_addrinfo *ai,
                              char *newhost, /* ascii version */
@@ -2962,10 +2959,6 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status)
      */
     return CURLE_OK;
 
-
-  if (conn->sec_path)
-    path_to_use = conn->sec_path;
-
   /* now store a copy of the directory we are in */
   if(ftpc->prevpath)
     free(ftpc->prevpath);
@@ -3098,11 +3091,6 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status)
   ftp->no_transfer = FALSE;
   ftpc->dont_check = FALSE;
 
-  if (!result && conn->sec_conn) {   /* 3rd party transfer */
-    /* "done" with the secondary connection */
-    result = Curl_ftp_done(conn->sec_conn, status);
-  }
-
   /* Send any post-transfer QUOTE strings? */
   if(!status && !result && data->set.postquote)
     result = ftp_sendquote(conn, data->set.postquote);
@@ -3146,40 +3134,6 @@ CURLcode ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
 
   return CURLE_OK;
 }
-
-/***********************************************************************
- *
- * ftp_transfertype()
- *
- * Set transfer type. We only deal with ASCII or BINARY so this function
- * sets one of them.
- */
-static CURLcode ftp_transfertype(struct connectdata *conn,
-                                  bool ascii)
-{
-  struct SessionHandle *data = conn->data;
-  int ftpcode;
-  ssize_t nread;
-  CURLcode result;
-
-  FTPSENDF(conn, "TYPE %c", ascii?'A':'I');
-
-  result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
-  if(result)
-    return result;
-
-  if(ftpcode != 200) {
-    failf(data, "Couldn't set %s mode",
-          ascii?"ASCII":"binary");
-    return ascii? CURLE_FTP_COULDNT_SET_ASCII:CURLE_FTP_COULDNT_SET_BINARY;
-  }
-
-  /* keep track of our current transfer type */
-  conn->proto.ftpc.transfertype = ascii?'A':'I';
-
-  return CURLE_OK;
-}
-
 
 /***********************************************************************
  *
@@ -3428,13 +3382,7 @@ CURLcode Curl_ftp(struct connectdata *conn, bool *done)
   if (retcode)
     return retcode;
 
-  if (conn->sec_conn) {
-    /* 3rd party transfer */
-    *done = TRUE; /* BLOCKING */
-    retcode = ftp_3rdparty(conn);
-  }
-  else
-    retcode = ftp_regular_transfer(conn, done);
+  retcode = ftp_regular_transfer(conn, done);
 
   return retcode;
 }
@@ -3720,182 +3668,6 @@ static CURLcode ftp_cwd_and_mkd(struct connectdata *conn, char *path)
   return result;
 }
 
-
-
-/***********************************************************************
- *
- * ftp_3rdparty_pretransfer()
- *
- * Preparation for 3rd party transfer.
- *
- */
-static CURLcode ftp_3rdparty_pretransfer(struct connectdata *conn)
-{
-  CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
-  struct connectdata *sec_conn = conn->sec_conn;
-
-  conn->xfertype = TARGET3RD;
-  sec_conn->xfertype = SOURCE3RD;
-
-  /* sets transfer type */
-  result = ftp_transfertype(conn, data->set.prefer_ascii);
-  if (result)
-    return result;
-
-  result = ftp_transfertype(sec_conn, data->set.prefer_ascii);
-  if (result)
-    return result;
-
-  /* Send any PREQUOTE strings after transfer type is set? */
-  if (data->set.source_prequote) {
-    /* sends command(s) to source server before file transfer */
-    result = ftp_sendquote(sec_conn, data->set.source_prequote);
-  }
-  if (!result && data->set.prequote)
-    result = ftp_sendquote(conn, data->set.prequote);
-
-  return result;
-}
-
-
-
-/***********************************************************************
- *
- * ftp_3rdparty_transfer()
- *
- * Performs 3rd party transfer.
- *
- */
-static CURLcode ftp_3rdparty_transfer(struct connectdata *conn)
-{
-  CURLcode result = CURLE_OK;
-  ssize_t nread;
-  int ftpcode, ip[4], port[2];
-  struct SessionHandle *data = conn->data;
-  struct connectdata *sec_conn = conn->sec_conn;
-  char *buf = data->state.buffer;   /* this is our buffer */
-  char *str = buf;
-  char pasv_port[50];
-  const char *stor_cmd;
-  struct connectdata *pasv_conn;
-  struct connectdata *port_conn;
-
-  char *path = data->reqdata.path;
-
-  if (data->set.ftpport == NULL) {
-    pasv_conn = conn;
-    port_conn = sec_conn;
-  }
-  else {
-    pasv_conn = sec_conn;
-    port_conn = conn;
-  }
-
-  if (sec_conn->sec_path)
-    path = sec_conn->sec_path;
-
-  result = ftp_cwd_and_create_path(conn);
-  if (result)
-    return result;
-
-  /* sets the passive mode */
-  FTPSENDF(pasv_conn, "%s", "PASV");
-  result = Curl_GetFTPResponse(&nread, pasv_conn, &ftpcode);
-  if (result)
-    return result;
-
-  if (ftpcode != 227) {
-    failf(data, "Odd return code after PASV: %03d", ftpcode);
-    return CURLE_FTP_WEIRD_PASV_REPLY;
-  }
-
-  while (*str) {
-    if (6 == sscanf(str, "%d,%d,%d,%d,%d,%d",
-                    &ip[0], &ip[1], &ip[2], &ip[3], &port[0], &port[1]))
-      break;
-    str++;
-  }
-
-  if (!*str) {
-    failf(pasv_conn->data, "Couldn't interpret the 227-reply");
-    return CURLE_FTP_WEIRD_227_FORMAT;
-  }
-
-  snprintf(pasv_port, sizeof(pasv_port), "%d,%d,%d,%d,%d,%d", ip[0], ip[1],
-           ip[2], ip[3], port[0], port[1]);
-
-  /* sets data connection between remote hosts */
-  FTPSENDF(port_conn, "PORT %s", pasv_port);
-  result = Curl_GetFTPResponse(&nread, port_conn, &ftpcode);
-  if (result)
-    return result;
-
-  if (ftpcode != 200) {
-    failf(data, "PORT command attempts failed: %03d", ftpcode);
-    return CURLE_FTP_PORT_FAILED;
-  }
-
-  /* we might append onto the file instead of overwriting it */
-  stor_cmd = data->set.ftp_append?"APPE":"STOR";
-
-  /* transfers file between remote hosts */
-  /* FIX: this should send a series of CWD commands and then RETR only the
-     ftp->file file. The conn->data->reqdata.path "full path" is not
-     unescaped. Test case 230 tests this. */
-  FTPSENDF(sec_conn, "RETR %s", path);
-
-  if(!data->set.ftpport) {
-
-    result = Curl_GetFTPResponse(&nread, sec_conn, &ftpcode);
-    if (result)
-      return result;
-
-    if((ftpcode != 150) && (ftpcode != 125)) {
-      failf(data, "Failed RETR: %03d", ftpcode);
-      return CURLE_FTP_COULDNT_RETR_FILE;
-    }
-
-    result = Curl_ftpsendf(conn, "%s %s", stor_cmd,
-                           data->reqdata.proto.ftp->file);
-    if(CURLE_OK == result)
-      result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
-    if (result)
-      return result;
-
-    if (ftpcode >= 400) {
-      failf(data, "Failed FTP upload: %03d", ftpcode);
-      return CURLE_FTP_COULDNT_STOR_FILE;
-    }
-
-  }
-  else {
-
-    result = Curl_ftpsendf(conn, "%s %s", stor_cmd,
-                           data->reqdata.proto.ftp->file);
-    if(CURLE_OK == result)
-      result = Curl_GetFTPResponse(&nread, sec_conn, &ftpcode);
-    if (result)
-      return result;
-
-    if (ftpcode >= 400) {
-      failf(data, "Failed FTP upload: %03d", ftpcode);
-      return CURLE_FTP_COULDNT_STOR_FILE;
-    }
-
-    result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
-    if (result)
-      return result;
-
-    if((ftpcode != 150) && (ftpcode != 125)) {
-      failf(data, "Failed FTP upload: %03d", ftpcode);
-      return CURLE_FTP_COULDNT_STOR_FILE;
-    }
-  }
-
-  return CURLE_OK;
-}
-
 /***********************************************************************
  *
  * ftp_parse_url_path()
@@ -3915,10 +3687,6 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
   char *slash_pos;  /* position of the first '/' char in curpos */
   char *path_to_use = data->reqdata.path;
   char *cur_pos;
-
-  if (conn->sec_path) {
-    path_to_use = conn->sec_path;
-  }
 
   cur_pos = path_to_use; /* current position in path. point at the begin
                             of next path component */
@@ -4056,44 +3824,6 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
   return retcode;
 }
 
-
-
-/***********************************************************************
- *
- * ftp_cwd_and_create_path()
- *
- * Creates full path on remote target host.
- *
- */
-static
-CURLcode ftp_cwd_and_create_path(struct connectdata *conn)
-{
-  CURLcode result = CURLE_OK;
-  struct ftp_conn *ftpc = &conn->proto.ftpc;
-  int i;
-
-  if(ftpc->cwddone)
-    /* already done and fine */
-    return CURLE_OK;
-
-  /* This is a re-used connection. Since we change directory to where the
-     transfer is taking place, we must now get back to the original dir
-     where we ended up after login: */
-  if (conn->bits.reuse && ftpc->entrypath) {
-    if ((result = ftp_cwd_and_mkd(conn, ftpc->entrypath)) != CURLE_OK)
-      return result;
-  }
-
-  for (i=0; i < ftpc->dirdepth; i++) {
-    /* RFC 1738 says empty components should be respected too, but
-       that is plain stupid since CWD can't be used with an empty argument */
-    if ((result = ftp_cwd_and_mkd(conn, ftpc->dirs[i])) != CURLE_OK)
-      return result;
-  }
-
-  return result;
-}
-
 /* call this when the DO phase has completed */
 static CURLcode ftp_dophase_done(struct connectdata *conn,
                                  bool connected)
@@ -4184,32 +3914,6 @@ CURLcode ftp_regular_transfer(struct connectdata *conn,
   }
   else
     freedirs(conn);
-
-  return result;
-}
-
-
-
-/***********************************************************************
- *
- * ftp_3rdparty()
- *
- * The input argument is already checked for validity.
- * Performs a 3rd party transfer between two remote hosts.
- */
-static CURLcode ftp_3rdparty(struct connectdata *conn)
-{
-  struct Curl_transfer_keeper *k = &conn->data->reqdata.keep;
-  CURLcode result = CURLE_OK;
-
-  /* both control connections start out fine */
-  conn->proto.ftpc.ctl_valid = TRUE;
-  conn->sec_conn->proto.ftpc.ctl_valid = TRUE;
-  k->size = -1;
-
-  result = ftp_3rdparty_pretransfer(conn);
-  if (!result)
-    result = ftp_3rdparty_transfer(conn);
 
   return result;
 }

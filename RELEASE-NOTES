@@ -2,8 +2,8 @@ Curl and libcurl 7.16.0
 
  Public curl release number:               96
  Releases counted from the very beginning: 123
- Available command line options:           117
- Available curl_easy_setopt() options:     138
+ Available command line options:           112
+ Available curl_easy_setopt() options:     133
  Number of public functions in libcurl:    54
  Amount of public web site mirrors:        33
  Number of known libcurl bindings:         34
@@ -11,6 +11,8 @@ Curl and libcurl 7.16.0
 
 This release includes the following changes:
 
+ o The CURLOPT_SOURCE_* options are removed and so are the --3p* command line
+   options
  o curl_multi_socket() and family are suitable to start using
  o uses WSAPoll() on Windows Vista
  o (FTP) --ftp-ssl-control was added

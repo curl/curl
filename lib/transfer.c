@@ -2247,13 +2247,6 @@ CURLcode Curl_perform(struct SessionHandle *data)
     res = Curl_connect_host(data, &conn);   /* primary connection */
 
     if(res == CURLE_OK) {
-      if (data->set.source_url) /* 3rd party transfer */
-        res = Curl_second_connect(conn);
-      else
-        conn->sec_conn = NULL;
-    }
-
-    if(res == CURLE_OK) {
       bool do_done;
       if(data->set.connect_only) {
         /* keep connection open for application to use the socket */
@@ -2263,8 +2256,7 @@ CURLcode Curl_perform(struct SessionHandle *data)
       }
       res = Curl_do(&conn, &do_done);
 
-      /* for non 3rd party transfer only */
-      if(res == CURLE_OK && !data->set.source_url) {
+      if(res == CURLE_OK) {
         res = Transfer(conn); /* now fetch that URL please */
         if(res == CURLE_OK) {
           retry = Curl_retry_request(conn, &newurl);
@@ -2381,58 +2373,4 @@ Curl_setup_transfer(
   data->reqdata.writebytecountp = writecountp;
 
   return CURLE_OK;
-}
-
-/*
- * Curl_second_connect() makes the secondary connection (used for 3rd party
- * FTP transfers).
- */
-CURLcode Curl_second_connect(struct connectdata *conn)
-{
-  CURLcode status = CURLE_OK;
-  struct SessionHandle *data = conn->data;
-  struct connectdata *sec_conn = NULL;   /* secondary connection */
-  bool backup_reuse_fresh = data->set.reuse_fresh;
-  char *backup_userpwd = data->set.userpwd;
-  char *backup_path = data->reqdata.path;
-  char *backup_pathbuffer = data->reqdata.pathbuffer;
-
-  if(data->change.url_alloc)
-    free(data->change.url);
-
-  data->change.url_alloc = FALSE;
-  data->change.url = data->set.source_url;
-
-  /* We must never actually alter 'data->set' properties, so we restore the
-     backed up values afterwards! */
-
-#if 0
-  /* if both remote hosts are the same host - create new connection */
-  if (strequal(conn->host.dispname, data->set.source_host))
-#endif
-    data->set.reuse_fresh = TRUE;
-
-  data->set.userpwd = data->set.source_userpwd;
-
-  /* secondary connection */
-  status = Curl_connect_host(data, &sec_conn);
-  if(CURLE_OK == status) {
-    sec_conn->sec_conn = NULL;  /* important if re-using existing connection
-                                   to prevent loop */
-    sec_conn->data = data;
-    conn->sec_conn = sec_conn;
-  }
-
-  data->set.reuse_fresh = backup_reuse_fresh;
-  data->set.userpwd = backup_userpwd;
-
-  /* Copy the source path into a separate place */
-  sec_conn->sec_path = data->reqdata.path;
-  sec_conn->sec_pathbuffer = data->reqdata.pathbuffer;
-
-  /* Restore the original */
-  data->reqdata.path = backup_path;
-  data->reqdata.pathbuffer = backup_pathbuffer;
-
-  return status;
 }
