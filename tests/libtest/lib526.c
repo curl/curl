@@ -14,11 +14,17 @@
  * sharing within the multi handle all transfers are performed on the same
  * persistent connection.
  *
- * This source code is used for lib526 _and_ lib527 with only #ifdefs
- * controlling the small differences. lib526 closes all easy handles after
- * they all have transfered the file over the single connection, while lib527
- * closes each easy handle after each single transfer. 526 and 527 use FTP,
- * while 528 uses the lib526 tool but use HTTP.
+ * This source code is used for lib526, lib527 and lib532 with only #ifdefs
+ * controlling the small differences.
+ *
+ * - lib526 closes all easy handles after
+ *   they all have transfered the file over the single connection
+ * - lib527 closes each easy handle after each single transfer.
+ * - lib532 uses only a single easy handle that is removed, reset and then
+ *   re-added for each transfer
+ *
+ * Test case 526, 527 and 532 use FTP, while test 528 uses the lib526 tool but
+ * with HTTP.
  */
 
 #include "test.h"
@@ -78,7 +84,21 @@ int test(char *URL)
 #endif
         if(++current < NUM_HANDLES) {
           fprintf(stderr, "Advancing to URL %d\n", current);
+#ifdef LIB532
+          /* first remove the only handle we use */
+          curl_multi_remove_handle(m, curl[0]);
+
+          /* make us re-use the same handle all the time, and try resetting
+             the handle first too */
+          curl_easy_reset(curl[0]);
+          curl_easy_setopt(curl[0], CURLOPT_URL, URL);
+          curl_easy_setopt(curl[0], CURLOPT_VERBOSE, 1);
+
+          /* re-add it */
+          res = (int)curl_multi_add_handle(m, curl[0]);
+#else
           res = (int)curl_multi_add_handle(m, curl[current]);
+#endif
           if(res) {
             fprintf(stderr, "add handle failed: %d.\n", res);
             res = 243;
@@ -121,7 +141,9 @@ int test(char *URL)
 #ifndef LIB527
   /* get NUM_HANDLES easy handles */
   for(i=0; i < NUM_HANDLES; i++) {
+#ifdef LIB526
     curl_multi_remove_handle(m, curl[i]);
+#endif
     curl_easy_cleanup(curl[i]);
   }
 #endif

@@ -351,6 +351,8 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
 {
   struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
   struct Curl_one_easy *easy;
+  struct closure *cl;
+  struct closure *prev=NULL;
 
   /* First, make some basic checks that the CURLM handle is a good handle */
   if(!GOOD_MULTI_HANDLE(multi))
@@ -368,7 +370,21 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   if(!easy)
     return CURLM_OUT_OF_MEMORY;
 
-  easy->numsocks=0;
+  cl = multi->closure;
+  while(cl) {
+    struct closure *next = cl->next;
+    if(cl->easy_handle == easy_handle) {
+      /* remove this handle from the closure list */
+      free(cl);
+      if(prev)
+        prev->next = next;
+      else
+        multi->closure = next;
+      break; /* no need to continue since this handle can only be present once
+                in the list */
+    }
+    cl = next;
+  }
 
   /* set the easy handle */
   easy->easy_handle = easy_handle;
@@ -1796,8 +1812,10 @@ static bool multi_conn_using(struct Curl_multi *multi,
   return FALSE;
 }
 
-/* add the given data pointer to the list of 'closure handles' that are
-   kept around only to be able to close some connections nicely */
+/* Add the given data pointer to the list of 'closure handles' that are kept
+   around only to be able to close some connections nicely - just make sure
+   that this handle isn't already added, like for the cases when an easy
+   handle is removed, added and removed again... */
 static void add_closure(struct Curl_multi *multi,
                         struct SessionHandle *data)
 {

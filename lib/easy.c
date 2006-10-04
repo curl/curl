@@ -655,6 +655,12 @@ void curl_easy_reset(CURL *curl)
 {
   struct SessionHandle *data = (struct SessionHandle *)curl;
 
+  Curl_safefree(data->reqdata.pathbuffer);
+  data->reqdata.pathbuffer=NULL;
+
+  Curl_safefree(data->reqdata.proto.generic);
+  data->reqdata.proto.generic=NULL;
+
   /* zero out UserDefined data: */
   memset(&data->set, 0, sizeof(struct UserDefined));
 

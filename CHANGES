@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (4 October 2006)
+- Dmitriy Sergeyev provided an example source code that crashed CVS libcurl
+  but that worked nicely in 7.15.5. I converted it into test case 532 and
+  fixed the problem.
+
 Daniel (29 September 2006)
 - Removed a few other no-longer present options from the header file.
 
