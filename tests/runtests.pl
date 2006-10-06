@@ -1394,6 +1394,10 @@ sub singletest {
     }
     else {
         $CMDLINE="$LIBDIR/$tool";
+        if(! -f $CMDLINE) {
+            print "The tool set in the test case for this: '$tool' does not exist\n";
+            return -1;
+        }
         $DBGCURL=$CMDLINE;
     }
 
