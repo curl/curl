@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (6 October 2006)
+- Bogdan Nicula's hanging test case was converted to test case 533 and the test
+  now runs fine.
+
 Daniel (4 October 2006)
 - Dmitriy Sergeyev provided an example source code that crashed CVS libcurl
   but that worked nicely in 7.15.5. I converted it into test case 532 and

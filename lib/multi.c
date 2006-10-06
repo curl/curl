@@ -942,9 +942,14 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
     case CURLM_STATE_WAITDO:
       /* Wait for our turn to DO when we're pipelining requests */
-      infof(easy->easy_handle, "Connection #%d: send pipe size = %d\n",
+#ifdef CURLDEBUG
+      infof(easy->easy_handle, "Conn %d send pipe %d inuse %d athead %d\n",
             easy->easy_conn->connectindex,
-            easy->easy_conn->send_pipe->size);
+            easy->easy_conn->send_pipe->size,
+            easy->easy_conn->writechannel_inuse,
+            Curl_isHandleAtHead(easy->easy_handle,
+                                easy->easy_conn->send_pipe));
+#endif
       if (!easy->easy_conn->writechannel_inuse &&
           Curl_isHandleAtHead(easy->easy_handle,
                               easy->easy_conn->send_pipe)) {
@@ -1232,6 +1237,11 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
          * If an error was returned, and we aren't in completed state now,
          * then we go to completed and consider this transfer aborted.
          */
+        if(easy->easy_conn) {
+          /* if this has a connection, unsubscribe from the pipelines */
+          easy->easy_conn->writechannel_inuse = FALSE;
+          easy->easy_conn->readchannel_inuse = FALSE;
+        }
         multistate(easy, CURLM_STATE_COMPLETED);
       }
     }
@@ -1345,7 +1355,6 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
     Curl_hash_destroy(multi->hostcache);
     Curl_hash_destroy(multi->sockhash);
 
-#if 1
     /* go over all connections that have close actions */
     for(i=0; i< multi->connc->num; i++) {
       if(multi->connc->connects[i] &&
@@ -1367,7 +1376,6 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
       free(cl);
       cl= n;
     }
-#endif
 
     Curl_rm_connc(multi->connc);
 
