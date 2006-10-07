@@ -197,9 +197,13 @@ static void multistate(struct Curl_one_easy *easy, CURLMstate state)
     "COMPLETED",
     "CANCELLED"
   };
-  CURLMstate oldstate = easy->state;
   long index = -1;
 #endif
+  CURLMstate oldstate = easy->state;
+
+  if(oldstate == state)
+    /* don't bother when the new state is the same as the old state */
+    return;
 
   easy->state = state;
 
