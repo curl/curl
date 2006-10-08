@@ -521,10 +521,17 @@ sub STOR_command {
 sub PASV_command {
     my ($arg, $cmd)=@_;
     my $pasvport;
+    my $pidf=".sockdata$ftpdnum$ext.pid";
+
+    my $prev = checkserver($pidf);
+    if($prev > 0) {
+        print "kill existing server: $prev\n" if($verbose);
+        kill(9, $prev);
+    }
 
     # We fire up a new sockfilt to do the data tranfer for us.
     $slavepid = open2(\*DREAD, \*DWRITE,
-                      "./server/sockfilt --port 0 --logfile log/sockdata$ftpdnum$ext.log --pidfile .sockdata$ftpdnum$ext.pid $ipv6");
+                      "./server/sockfilt --port 0 --logfile log/sockdata$ftpdnum$ext.log --pidfile $pidf $ipv6");
 
     print DWRITE "PING\n";
     my $pong;
@@ -662,6 +669,7 @@ sub PORT_command {
         logmsg "Failed sockfilt for data connection\n";
         kill(9, $slavepid);
     }
+
     logmsg "====> Client DATA connect to port $port\n";
 
     return;
