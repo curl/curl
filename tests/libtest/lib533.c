@@ -8,6 +8,8 @@
  * $Id$
  */
 
+/* used for test case 533 and 534 */
+
 #include "test.h"
 
 #include <sys/types.h>
