@@ -98,6 +98,9 @@ static void update_timeout(GlobalInfo *g)
   struct timeval timeout;
 
   curl_multi_timeout(g->multi, &timeout_ms);
+  if(timeout_ms < 0)
+    return;
+
   timeout.tv_sec = timeout_ms/1000;
   timeout.tv_usec = (timeout_ms%1000)*1000;
   evtimer_add(&g->timer_event, &timeout);
@@ -152,6 +155,7 @@ static void check_run_count(GlobalInfo *g)
         if (msg->msg == CURLMSG_DONE) {
           easy=msg->easy_handle;
           res=msg->data.result;
+          break;
         }
       }
       if (easy) {
