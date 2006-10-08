@@ -28,7 +28,7 @@ lib533
 FTP RETR a non-existing file twice using the multi interface
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/path/533
+ftp://%HOSTIP:%FTPPORT/path/533 ftp://%HOSTIP:%FTPPORT/path/533
 </command>
 </client>
 
