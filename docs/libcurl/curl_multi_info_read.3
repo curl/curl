@@ -20,6 +20,11 @@ NULL is returned as a signal that there is no more to get at this point. The
 integer pointed to with \fImsgs_in_queue\fP will contain the number of
 remaining messages after this function was called.
 
+When you fetch a message using this function, it is removed from the internal
+queue so calling this function again will not return the same message
+again. It will instead return new messages at each new invoke until the queue
+is emptied.
+
 The data the returned pointer points to will not survive calling
 \fIcurl_multi_cleanup(3)\fP or \fIcurl_multi_remove_handle(3)\fP.
 
