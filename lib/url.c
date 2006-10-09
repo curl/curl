@@ -1840,7 +1840,7 @@ void Curl_addHandleToPipeline(struct SessionHandle *data,
 }
 
 
-void Curl_removeHandleFromPipeline(struct SessionHandle *handle,
+int Curl_removeHandleFromPipeline(struct SessionHandle *handle,
                                    struct curl_llist *pipe)
 {
   struct curl_llist_element *curr;
@@ -1849,10 +1849,11 @@ void Curl_removeHandleFromPipeline(struct SessionHandle *handle,
   while (curr) {
     if (curr->ptr == handle) {
       Curl_llist_remove(pipe, curr, NULL);
-      break;
+      return 1; /* we removed a handle */
     }
     curr = curr->next;
   }
+  return 0;
 }
 
 #if 0
@@ -3975,8 +3976,14 @@ CURLcode Curl_done(struct connectdata **connp,
 
   conn->bits.done = TRUE; /* called just now! */
 
-  /* cleanups done even if the connection is re-used */
+  if(Curl_removeHandleFromPipeline(data, conn->recv_pipe) &&
+     conn->readchannel_inuse)
+    conn->readchannel_inuse--;
+  if(Curl_removeHandleFromPipeline(data, conn->send_pipe) &&
+     conn->writechannel_inuse)
+    conn->writechannel_inuse--;
 
+  /* cleanups done even if the connection is re-used */
   if(data->reqdata.rangestringalloc) {
     free(data->reqdata.range);
     data->reqdata.rangestringalloc = FALSE;

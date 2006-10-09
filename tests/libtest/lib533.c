@@ -34,9 +34,8 @@ int test(char *URL)
     return 100 + i; /* major bad */
 
   curl_easy_setopt(curl, CURLOPT_URL, URL);
-
-  /* go verbose */
   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
+  curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
 
   m = curl_multi_init();
 
@@ -65,6 +64,7 @@ int test(char *URL)
           curl_easy_reset(curl);
           curl_easy_setopt(curl, CURLOPT_URL, arg2);
           curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
+          curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
 
           /* re-add it */
           res = (int)curl_multi_add_handle(m, curl);

@@ -6,9 +6,14 @@
 
                                   Changelog
 
+Daniel (9 October 2006)
+- Bogdan Nicula's second test case (posted Sun, 08 Oct 2006) converted to test
+  case 535 and it now runs fine. Again a problem with the pipelining code not
+  taking all possible (error) conditions into account.
+
 Daniel (6 October 2006)
-- Bogdan Nicula's hanging test case was converted to test case 533 and the test
-  now runs fine.
+- Bogdan Nicula's hanging test case (posted Wed, 04 Oct 2006) was converted to
+  test case 533 and the test now runs fine.
 
 Daniel (4 October 2006)
 - Dmitriy Sergeyev provided an example source code that crashed CVS libcurl
