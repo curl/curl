@@ -8,7 +8,7 @@
  * $Id$
  */
 
-/* used for test case 533 and 534 */
+/* used for test case 533, 534 and 535 */
 
 #include "test.h"
 
