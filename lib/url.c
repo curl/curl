@@ -3917,7 +3917,7 @@ CURLcode Curl_connect(struct SessionHandle *data,
          will be NULL here. Continue connecting from here */
       code = SetupConnection(*in_connect, dns, protocol_done);
     /* else
-         response will be received and treated async wise */
+       response will be received and treated async wise */
   }
 
   if(CURLE_OK != code) {
@@ -3927,9 +3927,10 @@ CURLcode Curl_connect(struct SessionHandle *data,
       Curl_disconnect(*in_connect); /* close the connection */
       *in_connect = NULL;           /* return a NULL */
     }
-  } else {
-      if ((*in_connect)->is_in_pipeline)
-          data->state.is_in_pipeline = TRUE;
+  }
+  else {
+    if ((*in_connect)->is_in_pipeline)
+      data->state.is_in_pipeline = TRUE;
   }
 
   return code;
