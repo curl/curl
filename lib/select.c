@@ -110,8 +110,15 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
   if (readfd != CURL_SOCKET_BAD) {
     if (pfd[num].revents & (POLLIN|POLLHUP))
       ret |= CSELECT_IN;
-    if (pfd[num].revents & POLLERR)
-      ret |= CSELECT_ERR;
+    if (pfd[num].revents & POLLERR) {
+#ifdef __CYGWIN__ 
+      /* Cygwin 1.5.21 needs this hack to pass test 160 */
+      if (errno == EINPROGRESS)
+        ret |= CSELECT_IN;
+      else
+#endif
+        ret |= CSELECT_ERR;
+    }
     num++;
   }
   if (writefd != CURL_SOCKET_BAD) {
