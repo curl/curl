@@ -24,14 +24,13 @@ int test(char *URL)
   char done=FALSE;
   CURLM *m;
   int current=0;
-  int i;
 
   /* In windows, this will init the winsock stuff */
   curl_global_init(CURL_GLOBAL_ALL);
 
   curl = curl_easy_init();
   if(!curl)
-    return 100 + i; /* major bad */
+    return 100; /* major bad */
 
   curl_easy_setopt(curl, CURLOPT_URL, URL);
   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);

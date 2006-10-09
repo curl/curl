@@ -377,7 +377,7 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   cl = multi->closure;
   while(cl) {
     struct closure *next = cl->next;
-    if(cl->easy_handle == easy_handle) {
+    if(cl->easy_handle == (struct SessionHandle *)easy_handle) {
       /* remove this handle from the closure list */
       free(cl);
       if(prev)
