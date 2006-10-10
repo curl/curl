@@ -41,9 +41,9 @@ static CURLMcode perform(CURLM * multi)
 		FD_ZERO(&fdexcep);
 		curl_multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
 		if (maxfd < 0)
-			return -1;
+			return (CURLMcode) ~CURLM_OK;
 		if (select(maxfd + 1, &fdread, &fdwrite, &fdexcep, 0) == -1)
-			return -1;
+			return (CURLMcode) ~CURLM_OK;
 	}
 }
 
