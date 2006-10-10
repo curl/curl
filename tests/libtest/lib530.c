@@ -32,8 +32,10 @@ int test(char *URL)
   /* get NUM_HANDLES easy handles */
   for(i=0; i < NUM_HANDLES; i++) {
     curl[i] = curl_easy_init();
-    if(!curl[i])
+    if(!curl[i]) {
+      curl_global_cleanup();
       return 100 + i; /* major bad */
+    }
     curl_easy_setopt(curl[i], CURLOPT_URL, URL);
 
     /* go verbose */

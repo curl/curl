@@ -29,8 +29,10 @@ int test(char *URL)
   curl_global_init(CURL_GLOBAL_ALL);
 
   curl = curl_easy_init();
-  if(!curl)
+  if(!curl) {
+    curl_global_cleanup();
     return 100; /* major bad */
+  }
 
   curl_easy_setopt(curl, CURLOPT_URL, URL);
   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);

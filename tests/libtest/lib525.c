@@ -45,9 +45,11 @@ int test(char *URL)
 
   /* get a curl handle */
   curl = curl_easy_init();
-  if(!curl)
+  if(!curl) {
+    fclose(hd_src);
+    curl_global_cleanup();
     return 100; /* major bad */
-
+  }
 
   /* enable uploading */
   curl_easy_setopt(curl, CURLOPT_UPLOAD, TRUE) ;
