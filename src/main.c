@@ -3107,7 +3107,7 @@ static void free_config_fields(struct Configurable *config)
   curl_slist_free_all(config->headers);
 }
 
-#if defined(WIN32) && !defined(__CYGWIN__)
+#ifdef WIN32
 
 /* Function to find CACert bundle on a Win32 platform using SearchPath.
  * (SearchPath is already declared via inclusions done in setup header file)
@@ -3322,7 +3322,7 @@ operate(struct Configurable *config, int argc, char *argv[])
   else
     allocuseragent = TRUE;
 
-  /* On WIN32 (non-cygwin), we can't set the path to curl-ca-bundle.crt
+  /* On WIN32 we can't set the path to curl-ca-bundle.crt
    * at compile time. So we look here for the file in two ways:
    * 1: look at the environment variable CURL_CA_BUNDLE for a path
    * 2: if #1 isn't found, use the windows API function SearchPath()
@@ -3350,7 +3350,7 @@ operate(struct Configurable *config, int argc, char *argv[])
 
     if(env)
       curl_free(env);
-#if defined(WIN32) && !defined(__CYGWIN__)
+#ifdef WIN32
     else
       FindWin32CACert(config, "curl-ca-bundle.crt");
 #endif

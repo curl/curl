@@ -12,7 +12,7 @@ int test(char *url);
 int select_test (int num_fds, fd_set *rd, fd_set *wr, fd_set *exc,
                  struct timeval *tv)
 {
-#if defined(WIN32) && !defined(__CYGWIN__)
+#ifdef WIN32
   /* Winsock doesn't like no socket set in 'rd', 'wr' or 'exc'. This is
    * case when 'num_fds <= 0. So sleep.
    */

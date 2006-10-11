@@ -382,7 +382,7 @@ curl_share_strerror(CURLSHcode error)
 #endif
 }
 
-#if defined(WIN32) && !defined(__CYGWIN__)
+#ifdef WIN32
 
 /* This function handles most / all (?) Winsock errors cURL is able to produce.
  */
@@ -570,7 +570,7 @@ get_winsock_error (int err, char *buf, size_t len)
   buf [len-1] = '\0';
   return buf;
 }
-#endif   /* WIN32 && !__CYGWIN__ */
+#endif   /* WIN32 */
 
 /*
  * Our thread-safe and smart strerror() replacement.
@@ -595,7 +595,7 @@ const char *Curl_strerror(struct connectdata *conn, int err)
   max = sizeof(conn->syserr_buf)-1;
   *buf = '\0';
 
-#if defined(WIN32) && !defined(__CYGWIN__)
+#ifdef WIN32
 
 #ifdef _WIN32_WCE
   buf[0]=0;

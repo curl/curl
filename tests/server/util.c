@@ -65,7 +65,7 @@ const struct in6_addr in6addr_any = {{ IN6ADDR_ANY_INIT }};
  */
 int ourerrno(void)
 {
-#if defined(WIN32) && !defined(__CYGWIN__)
+#ifdef WIN32
   return (int)GetLastError();
 #else
   return errno;
@@ -101,7 +101,7 @@ void logmsg(const char *msg, ...)
   }
 }
 
-#if defined(REAL_WIN32)
+#ifdef WIN32
 /* use instead of perror() on generic windows */
 void win32_perror (const char *msg)
 {
@@ -145,7 +145,7 @@ void win32_cleanup(void)
 {
   WSACleanup();
 }
-#endif  /* REAL_WIN32 */
+#endif  /* WIN32 */
 
 /* set by the main code to point to where the test dir is */
 const char *path=".";

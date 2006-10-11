@@ -38,7 +38,7 @@
 #endif
 #include <errno.h>
 
-#if defined(WIN32) && !defined(__CYGWIN__)
+#ifdef WIN32
 #include <time.h>
 #include <io.h>
 #else
@@ -165,9 +165,10 @@ static void signalPipeClose(struct curl_llist *pipe);
 #define MAX_PIPELINE_LENGTH 5
 
 #ifndef USE_ARES
-/* not for Win32, unless it is cygwin
-   not for ares builds */
-#if !defined(WIN32) || defined(__CYGWIN__)
+/* not for ares builds */
+
+#ifndef WIN32
+/* not for WIN32 builds */
 
 #ifndef RETSIGTYPE
 #define RETSIGTYPE void
@@ -187,8 +188,8 @@ RETSIGTYPE alarmfunc(int sig)
 #endif
   return;
 }
-#endif
 #endif /* SIGALRM */
+#endif /* WIN32 */
 #endif /* USE_ARES */
 
 void Curl_safefree(void *ptr)

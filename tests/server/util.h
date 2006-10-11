@@ -38,10 +38,9 @@ void logmsg(const char *msg, ...);
 /* global variable, where to find the 'data' dir */
 extern const char *path;
 
-#if defined(WIN32) && !defined(__CYGWIN__)
+#ifdef WIN32
 #include <process.h>
 #include <fcntl.h>
-#define REAL_WIN32
 
 #define sleep(sec)   Sleep ((sec)*1000)
 
@@ -57,7 +56,7 @@ void win32_perror (const char *msg);
 
 void win32_init(void);
 void win32_cleanup(void);
-#endif  /* WIN32 && !__CYGWIN__ */
+#endif  /* WIN32 */
 
 /* returns the path name to the test case file */
 char *test2file(long testno);
