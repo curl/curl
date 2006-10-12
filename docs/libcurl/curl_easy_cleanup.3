@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_cleanup 3 "13 Nov 2002" "libcurl 7.7" "libcurl Manual"
+.TH curl_easy_cleanup 3 "12 Oct 2006" "libcurl 7.7" "libcurl Manual"
 .SH NAME
 curl_easy_cleanup - End a libcurl easy session
 .SH SYNOPSIS
@@ -21,6 +21,9 @@ more files.
 
 When you've called this, you can safely remove all the strings you've
 previously told libcurl to use, as it won't use them anymore now.
+
+Any uses of the \fBhandle\fP after this function has been called are
+illegal. This kills the handle and all memory associated with it!
 .SH RETURN VALUE
 None
 .SH "SEE ALSO"
