@@ -3048,7 +3048,7 @@ int my_trace(CURL *handle, curl_infotype type,
     text = "<= Recv SSL data";
     break;
   case CURLINFO_SSL_DATA_OUT:
-    text = "<= Send SSL data";
+    text = "=> Send SSL data";
     break;
   }
 
