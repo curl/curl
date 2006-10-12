@@ -231,6 +231,20 @@ typedef int (*curl_socket_callback)(CURL *easy,      /* easy handle */
                                                         pointer */
                                     void *socketp);  /* private socket
                                                         pointer */
+/*
+ * Name:    curl_multi_timer_callback
+ *
+ * Desc:    Called by libcurl whenever the library detects a change in the
+ *          maximum number of milliseconds the app is allowed to wait before
+ *          curl_multi_socket() or curl_multi_perform() must be called
+ *          (to allow libcurl's timed events to take place).
+ *
+ * Returns: The callback should return zero.
+ */
+typedef int (*curl_multi_timer_callback)(CURLM *multi,    /* multi handle */
+                                         long timeout_ms, /* see above */
+                                         void *userp);    /* private callback
+                                                             pointer */
 
 CURL_EXTERN CURLMcode curl_multi_socket(CURLM *multi_handle, curl_socket_t s,
                                         int *running_handles);
@@ -272,6 +286,12 @@ typedef enum {
 
     /* set to 1 to enable pipelining for this multi handle */
   CINIT(PIPELINING, LONG, 3),
+
+   /* This is the timer callback function pointer */
+  CINIT(TIMERFUNCTION, FUNCTIONPOINT, 4),
+
+  /* This is the argument passed to the timer callback */
+  CINIT(TIMERDATA, OBJECTPOINT, 5),
 
   CURLMOPT_LASTENTRY /* the last unused */
 } CURLMoption;

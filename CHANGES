@@ -6,6 +6,20 @@
 
                                   Changelog
 
+Daniel (12 October 2006)
+- Jeff Pohlmeyer has been working with the hiperfifo.c example source code,
+  and while doing so it became apparent that the current timeout system for
+  the socket API really was a bit awkward since it become quite some work to
+  be sure we have the correct timeout set.
+
+  Jeff then provided the new CURLMOPT_TIMERFUNCTION that is yet another
+  callback the app can set to get to know when the general timeout time
+  changes and thus for an application like hiperfifo.c it makes everything a
+  lot easier and nicer. There's a CURLMOPT_TIMERDATA option too of course in
+  good old libcurl tradition.
+
+  Jeff has also updated the hiperfifo.c example code to use this news.
+
 Daniel (9 October 2006)
 - Bogdan Nicula's second test case (posted Sun, 08 Oct 2006) converted to test
   case 535 and it now runs fine. Again a problem with the pipelining code not

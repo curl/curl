@@ -1,8 +1,6 @@
 To get fixed in 7.16.0 (planned release: October 2006)
 ======================
 
-67 - Jeff Pohlmeyer's test case
-
-68 - Dmitriy Sergeyev's test02.c and test03.c
+67 - Jeff Pohlmeyer's crashing pipelining test case
 
 69 - 

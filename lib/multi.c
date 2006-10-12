@@ -166,6 +166,12 @@ struct Curl_multi {
 
   /* list of easy handles kept around for doing nice connection closures */
   struct closure *closure;
+
+  /* timer callback and user data pointer for the *socket() API */
+  curl_multi_timer_callback timer_cb;
+  void *timer_userp;
+  time_t timer_lastcall; /* the fixed time for the timeout for the previous
+                            callback */
 };
 
 static bool multi_conn_using(struct Curl_multi *multi,
@@ -174,6 +180,7 @@ static void singlesocket(struct Curl_multi *multi,
                          struct Curl_one_easy *easy);
 static void add_closure(struct Curl_multi *multi,
                         struct SessionHandle *data);
+static int update_timer(struct Curl_multi *multi);
 
 /* always use this function to change state, to make debugging easier */
 static void multistate(struct Curl_one_easy *easy, CURLMstate state)
@@ -460,6 +467,7 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   /* increase the alive-counter */
   multi->num_alive++;
 
+  update_timer(multi);
   return CURLM_OK;
 }
 
@@ -610,6 +618,7 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
 
     multi->num_easy--; /* one less to care about now */
 
+    update_timer(multi);
     return CURLM_OK;
   }
   else
@@ -1342,6 +1351,8 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
 
   *running_handles = multi->num_alive;
 
+  if ( CURLM_OK == returncode )
+    update_timer(multi);
   return returncode;
 }
 
@@ -1673,8 +1684,15 @@ CURLMcode curl_multi_setopt(CURLM *multi_handle,
   case CURLMOPT_PIPELINING:
     multi->pipelining_enabled = (bool)(0 != va_arg(param, long));
     break;
+  case CURLMOPT_TIMERFUNCTION:
+    multi->timer_cb = va_arg(param, curl_multi_timer_callback);
+    break;
+  case CURLMOPT_TIMERDATA:
+    multi->timer_userp = va_arg(param, void *);
+    break;
   default:
     res = CURLM_UNKNOWN_OPTION;
+    break;
   }
   va_end(param);
   return res;
@@ -1684,26 +1702,26 @@ CURLMcode curl_multi_setopt(CURLM *multi_handle,
 CURLMcode curl_multi_socket(CURLM *multi_handle, curl_socket_t s,
                             int *running_handles)
 {
-  return multi_socket((struct Curl_multi *)multi_handle, FALSE, s,
-                      running_handles);
+  CURLMcode result = multi_socket((struct Curl_multi *)multi_handle, FALSE, s,
+                                  running_handles);
+  if (CURLM_OK == result)
+    update_timer((struct Curl_multi *)multi_handle);
+  return result;
 }
 
 CURLMcode curl_multi_socket_all(CURLM *multi_handle, int *running_handles)
 
 {
-  return multi_socket((struct Curl_multi *)multi_handle,
-                      TRUE, CURL_SOCKET_BAD, running_handles);
+  CURLMcode result = multi_socket((struct Curl_multi *)multi_handle,
+                                  TRUE, CURL_SOCKET_BAD, running_handles);
+  if (CURLM_OK == result)
+    update_timer((struct Curl_multi *)multi_handle);
+  return result;
 }
 
-CURLMcode curl_multi_timeout(CURLM *multi_handle,
-                             long *timeout_ms)
+static CURLMcode multi_timeout(struct Curl_multi *multi,
+                               long *timeout_ms)
 {
-  struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
-
-  /* First, make some basic checks that the CURLM handle is a good handle */
-  if(!GOOD_MULTI_HANDLE(multi))
-    return CURLM_BAD_HANDLE;
-
   if(multi->timetree) {
     /* we have a tree of expire times */
     struct timeval now = Curl_tvnow();
@@ -1722,6 +1740,44 @@ CURLMcode curl_multi_timeout(CURLM *multi_handle,
     *timeout_ms = -1;
 
   return CURLM_OK;
+}
+
+CURLMcode curl_multi_timeout(CURLM *multi_handle,
+                             long *timeout_ms)
+{
+  struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
+
+  /* First, make some basic checks that the CURLM handle is a good handle */
+  if(!GOOD_MULTI_HANDLE(multi))
+    return CURLM_BAD_HANDLE;
+
+  return multi_timeout(multi, timeout_ms);
+}
+
+/*
+ * Tell the application it should update its timers, if it subscribes to the
+ * update timer callback.
+ */
+static int update_timer(struct Curl_multi *multi)
+{
+  long timeout_ms;
+  if (!multi->timer_cb)
+    return 0;
+  if ( multi_timeout(multi, &timeout_ms) != CURLM_OK )
+    return -1;
+  if ( timeout_ms < 0 )
+    return 0;
+
+  /* When multi_timeout() is done, multi->timetree points to the node with the
+   * timeout we got the (relative) time-out time for. We can thus easily check
+   * if this is the same (fixed) time as we got in a previous call and then
+   * avoid calling the callback again. */
+  if(multi->timetree->key == multi->timer_lastcall)
+    return 0;
+
+  multi->timer_lastcall = multi->timetree->key;
+
+  return multi->timer_cb((CURLM*)multi, timeout_ms, multi->timer_userp);
 }
 
 /* given a number of milliseconds from now to use to set the 'act before

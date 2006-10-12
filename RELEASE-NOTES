@@ -11,6 +11,7 @@ Curl and libcurl 7.16.0
 
 This release includes the following changes:
 
+ o Added CURLMOPT_TIMERFUNCTION
  o The CURLOPT_SOURCE_* options are removed and so are the --3p* command line
    options
  o curl_multi_socket() and family are suitable to start using
