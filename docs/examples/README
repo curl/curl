@@ -47,7 +47,9 @@ ftpupload.c    - upload a file to an FTP server
 ftpuploadresume.c - resume an upload to an FTP server
 getinfo.c      - get the Content-Type from the recent transfer
 getinmemory.c  - download a file to memory only
-hiperfifo.c    - downloads all URLs written to the fifo
+ghiper.c       - curl_multi_socket() using code with glib-2
+hiperfifo.c    - downloads all URLs written to the fifo, using
+                 curl_multi_socket() and libevent
 htmltitle.cc   - download a HTML file and extract the <title> tag from a HTML
                  page using libxml
 http-post.c    - HTTP POST

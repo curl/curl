@@ -90,11 +90,6 @@ typedef struct _SockInfo {
 
 
 
-static void update_timeout(GlobalInfo *g);
-
-
-
-
 /* Die if we get a bad CURLMcode somewhere */
 static void mcode_or_die(char *where, CURLMcode code) {
   if ( CURLM_OK != code ) {
@@ -175,22 +170,26 @@ static gboolean timer_cb(gpointer data)
   } while (rc == CURLM_CALL_MULTI_PERFORM);
   mcode_or_die("timer_cb: curl_multi_socket", rc);
   check_run_count(g);
-  if ( g->still_running ) { update_timeout(g); }
   return FALSE;
 }
 
 
 
-
 /* Update the event timer after curl_multi library calls */
-static void update_timeout(GlobalInfo *g)
+static int update_timeout_cb(CURLM *multi, long timeout_ms, void *userp)
 {
-  long timeout_ms;
-  curl_multi_timeout(g->multi, &timeout_ms);
-  if ( timeout_ms < 0 ) { return; }
-  /* MSG_OUT("update_timeout to %ld ms\n", timeout_ms); */
-  g->timer_event = g_timeout_add(timeout_ms, timer_cb,g);
+  struct timeval timeout;
+  GlobalInfo *g=(GlobalInfo *)userp;
+  timeout.tv_sec = timeout_ms/1000;
+  timeout.tv_usec = (timeout_ms%1000)*1000;
+
+  MSG_OUT("*** update_timeout_cb %ld => %ld:%ld ***\n",
+              timeout_ms, timeout.tv_sec, timeout.tv_usec);
+
+  g->timer_event = g_timeout_add(timeout_ms, timer_cb, g);
+  return 0;
 }
+
 
 
 
@@ -206,7 +205,6 @@ static gboolean event_cb(GIOChannel *ch, GIOCondition condition, gpointer data)
   mcode_or_die("event_cb: curl_multi_socket", rc);
   check_run_count(g);
   if(g->still_running) {
-    update_timeout(g);
     return TRUE;
   } else {
     MSG_OUT("last transfer done, kill timeout\n");
@@ -452,10 +450,11 @@ int main(int argc, char **argv)
   g->multi = curl_multi_init();
   curl_multi_setopt(g->multi, CURLMOPT_SOCKETFUNCTION, sock_cb);
   curl_multi_setopt(g->multi, CURLMOPT_SOCKETDATA, g);
+  curl_multi_setopt(g->multi, CURLMOPT_TIMERFUNCTION, update_timeout_cb);
+  curl_multi_setopt(g->multi, CURLMOPT_TIMERDATA, g);
   do {
     rc = curl_multi_socket_all(g->multi, &g->still_running);
   } while (CURLM_CALL_MULTI_PERFORM == rc);
-  update_timeout(g);
   g_main_loop_run(gmain);
   curl_multi_cleanup(g->multi);
   return 0;
