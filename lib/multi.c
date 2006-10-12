@@ -373,8 +373,10 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   if(!GOOD_EASY_HANDLE(easy_handle))
     return CURLM_BAD_EASY_HANDLE;
 
-  /* TODO: add some kind of code that prevents a user from being able to
-     add the same handle more than once! */
+  /* Prevent users to add the same handle more than once! */
+  if(((struct SessionHandle *)easy_handle)->multi)
+    /* possibly we should create a new unique error code for this condition */
+    return CURLM_BAD_EASY_HANDLE;
 
   /* Now, time to add an easy handle to the multi stack */
   easy = (struct Curl_one_easy *)calloc(sizeof(struct Curl_one_easy), 1);

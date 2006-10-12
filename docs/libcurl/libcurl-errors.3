@@ -219,7 +219,9 @@ Things are fine.
 .IP "CURLM_BAD_HANDLE (1)"
 The passed-in handle is not a valid CURLM handle.
 .IP "CURLM_BAD_EASY_HANDLE (2)"
-An easy handle was not good/valid.
+An easy handle was not good/valid. It could mean that it isn't an easy handle
+at all, or possibly that the handle already is in used by this or another
+multi handle.
 .IP "CURLM_OUT_OF_MEMORY (3)"
 You are doomed.
 .IP "CURLM_INTERNAL_ERROR (4)"

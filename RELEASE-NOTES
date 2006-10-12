@@ -27,6 +27,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o curl_multi_add_handle on an already added handle now fails gracefully
  o multi interface crash if bad function call order was used for cleanup
  o put a new URL in saved cookie jar files
  o configure --with-gssapi-libs

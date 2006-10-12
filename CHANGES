@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel (12 October 2006)
+- Starting now, adding an easy handle to a multi stack that was already added
+  to a multi stack will cause CURLM_BAD_EASY_HANDLE to get returned.
+
 - Jeff Pohlmeyer has been working with the hiperfifo.c example source code,
   and while doing so it became apparent that the current timeout system for
   the socket API really was a bit awkward since it become quite some work to
