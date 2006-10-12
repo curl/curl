@@ -87,7 +87,6 @@ FTP
  - via http-proxy
  - all operations can be tunneled through a http-proxy
  - customizable to retrieve file modification date
- - third party transfers
  - no dir depth limit
 
 FTPS (*1)
