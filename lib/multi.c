@@ -85,11 +85,6 @@ typedef enum {
 #define GETSOCK_READABLE (0x00ff)
 #define GETSOCK_WRITABLE (0xff00)
 
-struct socketstate {
-  curl_socket_t socks[MAX_SOCKSPEREASYHANDLE];
-  unsigned int action; /* socket action bitmap */
-};
-
 struct closure {
   struct closure *next; /* a simple one-way list of structs */
   struct SessionHandle *easy_handle;
@@ -182,28 +177,33 @@ static void add_closure(struct Curl_multi *multi,
                         struct SessionHandle *data);
 static int update_timer(struct Curl_multi *multi);
 
+#ifdef CURLDEBUG
+static const char *statename[]={
+  "INIT",
+  "CONNECT",
+  "WAITRESOLVE",
+  "WAITCONNECT",
+  "PROTOCONNECT",
+  "WAITDO",
+  "DO",
+  "DOING",
+  "DO_MORE",
+  "DO_DONE",
+  "WAITPERFORM",
+  "PERFORM",
+  "TOOFAST",
+  "DONE",
+  "COMPLETED",
+  "CANCELLED"
+};
+
+void curl_multi_dump(CURLM *multi_handle);
+#endif
+
 /* always use this function to change state, to make debugging easier */
 static void multistate(struct Curl_one_easy *easy, CURLMstate state)
 {
 #ifdef CURLDEBUG
-  const char *statename[]={
-    "INIT",
-    "CONNECT",
-    "WAITRESOLVE",
-    "WAITCONNECT",
-    "PROTOCONNECT",
-    "WAITDO",
-    "DO",
-    "DOING",
-    "DO_MORE",
-    "DO_DONE",
-    "WAITPERFORM",
-    "PERFORM",
-    "TOOFAST",
-    "DONE",
-    "COMPLETED",
-    "CANCELLED"
-  };
   long index = -1;
 #endif
   CURLMstate oldstate = easy->state;
@@ -1473,19 +1473,20 @@ CURLMsg *curl_multi_info_read(CURLM *multi_handle, int *msgs_in_queue)
 static void singlesocket(struct Curl_multi *multi,
                          struct Curl_one_easy *easy)
 {
-  struct socketstate current;
+  curl_socket_t socks[MAX_SOCKSPEREASYHANDLE];
   int i;
   struct Curl_sh_entry *entry;
   curl_socket_t s;
   int num;
+  unsigned int curraction;
 
-  memset(&current, 0, sizeof(current));
+  memset(&socks, 0, sizeof(socks));
   for(i=0; i< MAX_SOCKSPEREASYHANDLE; i++)
-    current.socks[i] = CURL_SOCKET_BAD;
+    socks[i] = CURL_SOCKET_BAD;
 
   /* Fill in the 'current' struct with the state as it is now: what sockets to
      supervise and for what actions */
-  current.action = multi_getsock(easy, current.socks, MAX_SOCKSPEREASYHANDLE);
+  curraction = multi_getsock(easy, socks, MAX_SOCKSPEREASYHANDLE);
 
   /* We have 0 .. N sockets already and we get to know about the 0 .. M
      sockets we should have from now on. Detect the differences, remove no
@@ -1493,18 +1494,18 @@ static void singlesocket(struct Curl_multi *multi,
 
   /* walk over the sockets we got right now */
   for(i=0; (i< MAX_SOCKSPEREASYHANDLE) &&
-        (current.action & (GETSOCK_READSOCK(i) | GETSOCK_WRITESOCK(i)));
+        (curraction & (GETSOCK_READSOCK(i) | GETSOCK_WRITESOCK(i)));
       i++) {
     int action = CURL_POLL_NONE;
 
-    s = current.socks[i];
+    s = socks[i];
 
     /* get it from the hash */
     entry = Curl_hash_pick(multi->sockhash, (char *)&s, sizeof(s));
 
-    if(current.action & GETSOCK_READSOCK(i))
+    if(curraction & GETSOCK_READSOCK(i))
       action |= CURL_POLL_IN;
-    if(current.action & GETSOCK_WRITESOCK(i))
+    if(curraction & GETSOCK_WRITESOCK(i))
       action |= CURL_POLL_OUT;
 
     if(entry) {
@@ -1538,7 +1539,7 @@ static void singlesocket(struct Curl_multi *multi,
     int j;
     s = easy->sockets[i];
     for(j=0; j<num; j++) {
-      if(s == current.socks[j]) {
+      if(s == socks[j]) {
         /* this is still supervised */
         s = CURL_SOCKET_BAD;
         break;
@@ -1563,7 +1564,7 @@ static void singlesocket(struct Curl_multi *multi,
     }
   }
 
-  memcpy(easy->sockets, current.socks, num*sizeof(curl_socket_t));
+  memcpy(easy->sockets, socks, num*sizeof(curl_socket_t));
   easy->numsocks = num;
 }
 
@@ -1946,3 +1947,37 @@ static void add_closure(struct Curl_multi *multi,
   }
 
 }
+
+#ifdef CURLDEBUG
+void curl_multi_dump(CURLM *multi_handle)
+{
+  struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
+  struct Curl_one_easy *easy;
+  int i;
+  fprintf(stderr, "* Multi status: %d handles, %d alive\n",
+          multi->num_easy, multi->num_alive);
+  for(easy=multi->easy.next; easy; easy = easy->next) {
+    if(easy->state != CURLM_STATE_COMPLETED) {
+      /* only display handles that are not completed */
+      fprintf(stderr, "handle %p, state %s, %d sockets\n",
+              (void *)easy, statename[easy->state], easy->numsocks);
+      for(i=0; i < easy->numsocks; i++) {
+        curl_socket_t s = easy->sockets[i];
+        struct Curl_sh_entry *entry =
+          Curl_hash_pick(multi->sockhash, (char *)&s, sizeof(s));
+
+        fprintf(stderr, "%d ", (int)s);
+        if(!entry) {
+          fprintf(stderr, "INTERNAL CONFUSION\n");
+          continue;
+        }
+        fprintf(stderr, "[%s %s] ",
+                entry->action&CURL_POLL_IN?"RECVING":"",
+                entry->action&CURL_POLL_OUT?"SENDING":"");
+      }
+      if(easy->numsocks)
+        fprintf(stderr, "\n");
+    }
+  }
+}
+#endif
