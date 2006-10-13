@@ -954,6 +954,65 @@ AC_DEFUN([CURL_CHECK_MSG_NOSIGNAL], [
 ]) # AC_DEFUN
 
 
+dnl CURL_CHECK_STRUCT_TIMEVAL
+dnl -------------------------------------------------
+dnl Check for timeval struct
+
+AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
+  AC_REQUIRE([AC_HEADER_TIME])dnl
+  AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK])dnl
+  AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
+  AC_CHECK_HEADERS(sys/types.h sys/time.h time.h)
+  AC_CACHE_CHECK([for struct timeval], [ac_cv_struct_timeval], [
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([
+#undef inline 
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#endif
+#endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#ifdef TIME_WITH_SYS_TIME
+#include <time.h>
+#endif
+#else
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
+#endif
+      ],[
+        struct timeval ts;
+        ts.tv_sec  = 0;
+        ts.tv_usec = 0;
+      ])
+    ],[
+      ac_cv_struct_timeval="yes"
+    ],[
+      ac_cv_struct_timeval="no"
+    ])
+  ])
+  case "$ac_cv_struct_timeval" in
+    yes)
+      AC_DEFINE_UNQUOTED(HAVE_STRUCT_TIMEVAL, 1,
+        [Define to 1 if you have the timeval struct.])
+      ;;
+  esac
+]) # AC_DEFUN
+
+
 dnl CURL_CHECK_NONBLOCKING_SOCKET
 dnl -------------------------------------------------
 dnl Check for how to set a socket to non-blocking state. There seems to exist

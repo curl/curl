@@ -41,6 +41,12 @@
 #endif
 #endif
 
+#ifndef HAVE_STRUCT_TIMEVAL
+
+/* TODO: define HAVE_STRUCT_TIMEVAL as appropriate in our config files for
+         platforms that lack autotools support. Afterwards remove or simplify
+         the following logic which will become redundant */
+
 #ifndef HAVE_GETTIMEOFDAY
 #if !defined(_WINSOCKAPI_) && !defined(__MINGW32__) && !defined(_AMIGASF) && \
     !defined(__LCC__) && !defined(__WATCOMC__) && !defined(__POCC__) && \
@@ -49,6 +55,7 @@ struct timeval {
  long tv_sec;
  long tv_usec;
 };
+#endif
 #endif
 #endif
 

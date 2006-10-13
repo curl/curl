@@ -265,6 +265,7 @@ dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_TYPE_SIZE_T
 AC_HEADER_TIME
+CURL_CHECK_STRUCT_TIMEVAL
 
 AC_CHECK_SIZEOF(size_t)
 AC_CHECK_SIZEOF(long)
