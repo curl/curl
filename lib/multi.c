@@ -1960,7 +1960,8 @@ void curl_multi_dump(CURLM *multi_handle)
     if(easy->state != CURLM_STATE_COMPLETED) {
       /* only display handles that are not completed */
       fprintf(stderr, "handle %p, state %s, %d sockets\n",
-              (void *)easy, statename[easy->state], easy->numsocks);
+              (void *)easy->easy_handle,
+              statename[easy->state], easy->numsocks);
       for(i=0; i < easy->numsocks; i++) {
         curl_socket_t s = easy->sockets[i];
         struct Curl_sh_entry *entry =
