@@ -573,11 +573,11 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
     start++;
 
   /*
-   * Here we check if we want the specific single authentiction (using ==) and
+   * Here we check if we want the specific single authentication (using ==) and
    * if we do, we initiate usage of it.
    *
    * If the provided authentication is wanted as one out of several accepted
-   * types (using &), we OR this authenticaion type to the authavail
+   * types (using &), we OR this authentication type to the authavail
    * variable.
    */
 
@@ -840,7 +840,8 @@ send_buffer *add_buffer_init(void)
 }
 
 /*
- * add_buffer_send() sends a buffer and frees all associated memory.
+ * add_buffer_send() sends a header buffer and frees all associated memory.
+ * Body data may be appended to the header data if desired.
  *
  * Returns CURLcode
  */
@@ -849,7 +850,10 @@ CURLcode add_buffer_send(send_buffer *in,
                          struct connectdata *conn,
                          long *bytes_written, /* add the number of sent
                                                  bytes to this counter */
+                         int included_body_bytes, /* how much of the buffer
+                                        contains body data (for log tracing) */
                          int socketindex)
+
 {
   ssize_t amount;
   CURLcode res;
@@ -894,9 +898,14 @@ CURLcode add_buffer_send(send_buffer *in,
 
   if(CURLE_OK == res) {
 
-    if(conn->data->set.verbose)
+    if(conn->data->set.verbose) {
       /* this data _may_ contain binary stuff */
-      Curl_debug(conn->data, CURLINFO_HEADER_OUT, ptr, amount, conn);
+      Curl_debug(conn->data, CURLINFO_HEADER_OUT, ptr,
+                 amount-included_body_bytes, conn);
+      if (included_body_bytes)
+        Curl_debug(conn->data, CURLINFO_DATA_OUT,
+                   ptr+amount-included_body_bytes, included_body_bytes, conn);
+    }
 
     *bytes_written += amount;
 
@@ -1173,7 +1182,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
         if(CURLE_OK == result)
           /* Now send off the request */
           result = add_buffer_send(req_buffer, conn,
-                                   &data->info.request_size, sockindex);
+                                   &data->info.request_size, 0, sockindex);
       }
       if(result)
         failf(data, "Failed sending CONNECT to proxy");
@@ -1360,7 +1369,7 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
   /* If we are not using a proxy and we want a secure connection, perform SSL
    * initialization & connection now.  If using a proxy with https, then we
    * must tell the proxy to CONNECT to the host we want to talk to.  Only
-   * after the connect has occured, can we start talking SSL
+   * after the connect has occurred, can we start talking SSL
    */
 
   if(conn->bits.tunnel_proxy && conn->bits.httpproxy) {
@@ -1594,6 +1603,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   char *request;
   Curl_HttpReq httpreq = data->set.httpreq;
   char *addcookies = NULL;
+  int included_body = 0;
 
   /* Always consider the DO phase done after this function call, even if there
      may be parts of the request that is not yet sent, since we can deal with
@@ -1612,7 +1622,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   else
     http = data->reqdata.proto.http;
 
-  /* We default to persistant connections */
+  /* We default to persistent connections */
   conn->bits.close = FALSE;
 
   if ( (conn->protocol&(PROT_HTTP|PROT_FTP)) &&
@@ -2096,7 +2106,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           return result;
 
         result = add_buffer_send(req_buffer, conn,
-                                 &data->info.request_size, FIRSTSOCKET);
+                                 &data->info.request_size, 0, FIRSTSOCKET);
         if(result)
           failf(data, "Failed sending POST request");
         else
@@ -2159,7 +2169,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
       /* fire away the whole request to the server */
       result = add_buffer_send(req_buffer, conn,
-                               &data->info.request_size, FIRSTSOCKET);
+                               &data->info.request_size, 0, FIRSTSOCKET);
       if(result)
         failf(data, "Failed sending POST request");
       else
@@ -2203,7 +2213,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
       /* this sends the buffer and frees all the buffer resources */
       result = add_buffer_send(req_buffer, conn,
-                               &data->info.request_size, FIRSTSOCKET);
+                               &data->info.request_size, 0, FIRSTSOCKET);
       if(result)
         failf(data, "Failed sending PUT request");
       else
@@ -2280,6 +2290,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                already now to reduce the number if send() calls */
             result = add_buffer(req_buffer, data->set.postfields,
                                 (size_t)postsize);
+            included_body = postsize;
           }
           else {
             /* Append the POST data chunky-style */
@@ -2291,6 +2302,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
               result = add_buffer(req_buffer,
                                   "\r\n0\r\n\r\n", 7); /* end of a chunked
                                                           transfer stream */
+            included_body = postsize + 7;
           }
           if(result)
             return result;
@@ -2324,8 +2336,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         }
       }
       /* issue the request */
-      result = add_buffer_send(req_buffer, conn,
-                               &data->info.request_size, FIRSTSOCKET);
+      result = add_buffer_send(req_buffer, conn, &data->info.request_size,
+                               included_body, FIRSTSOCKET);
 
       if(result)
         failf(data, "Failed sending HTTP POST request");
@@ -2342,7 +2354,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
       /* issue the request */
       result = add_buffer_send(req_buffer, conn,
-                               &data->info.request_size, FIRSTSOCKET);
+                               &data->info.request_size, 0, FIRSTSOCKET);
 
       if(result)
         failf(data, "Failed sending HTTP request");

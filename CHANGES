@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Dan F (13 October 2006)
+- The tagging of application/x-www-form-urlencoded POST body data sent
+  to the CURLOPT_DEBUGFUNCTION callback has been fixed (it was erroneously
+  included as part of the header).  A message was also added to the
+  command line tool to show when data is being sent, enabled when
+  --verbose is used.
+
 Daniel (12 October 2006)
 - Starting now, adding an easy handle to a multi stack that was already added
   to a multi stack will cause CURLM_BAD_EASY_HANDLE to get returned.
