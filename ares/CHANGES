@@ -1,5 +1,9 @@
   Changelog for the c-ares project
 
+* October 12 2006
+
+- Prevent ares_getsock() to overflow if more than 16 sockets are used.
+
 * September 11 2006
 
 - Guilherme Balena Versiani: I noted a strange BUG in Win32 port
