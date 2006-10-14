@@ -125,6 +125,9 @@
 /* Define if you have the `gettimeofday' function. */
 #define HAVE_GETTIMEOFDAY
 
+/* Define if you have the `timeval' struct. */
+#define HAVE_STRUCT_TIMEVAL
+
 /* Define if you have the `inet_addr' function. */
 #undef HAVE_INET_ADDR
 

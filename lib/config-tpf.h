@@ -475,6 +475,9 @@
 /* if struct sockaddr_storage is defined */
 /* #undef HAVE_STRUCT_SOCKADDR_STORAGE */
 
+/* Define this if you have struct timeval */
+#define HAVE_STRUCT_TIMEVAL 1
+
 /* Define to 1 if you have the <sys/filio.h> header file. */
 #define HAVE_SYS_FILIO_H 1
 

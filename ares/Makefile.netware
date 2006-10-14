@@ -316,9 +316,10 @@ config.h: Makefile.netware
 	@echo $(DL)#define TIME_WITH_SYS_TIME 1$(DL) >> $@
 	@echo $(DL)#define HAVE_AF_INET6 1$(DL) >> $@
 	@echo $(DL)#define HAVE_PF_INET6 1$(DL) >> $@
+	@echo $(DL)#define HAVE_STRUCT_ADDRINFO 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRUCT_IN6_ADDR 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRUCT_SOCKADDR_IN6 1$(DL) >> $@
-	@echo $(DL)#define HAVE_STRUCT_ADDRINFO 1$(DL) >> $@
+	@echo $(DL)#define HAVE_STRUCT_TIMEVAL 1$(DL) >> $@
 	@echo $(DL)#define SIZEOF_STRUCT_IN6_ADDR 16$(DL) >> $@
 	@echo $(DL)#define SIZEOF_STRUCT_IN_ADDR 4$(DL) >> $@
 ifdef NW_WINSOCK

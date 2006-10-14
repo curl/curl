@@ -29,6 +29,12 @@
 #define HAVE_GETOPT_H 1
 #endif
 
+/* Define if you have the <sys/time.h> header file */
+/* #define HAVE_SYS_TIME_H 1 */
+
+/* Define if you have the <time.h> header file.  */
+#define HAVE_TIME_H 1
+
 /* Define if you have the <unistd.h> header file.  */
 #if defined(__MINGW32__) || defined(__WATCOMC__) || defined(__LCC__) || \
     defined(__POCC__)
@@ -46,6 +52,16 @@
 
 /* Define if you have the <ws2tcpip.h> header file.  */
 #define HAVE_WS2TCPIP_H 1
+
+/* ---------------------------------------------------------------- */
+/*                        OTHER HEADER INFO                         */
+/* ---------------------------------------------------------------- */
+
+/* Define if you have the ANSI C header files.  */
+#define STDC_HEADERS 1
+
+/* Define if you can safely include both <sys/time.h> and <time.h>.  */
+/* #define TIME_WITH_SYS_TIME 1 */
 
 /* ---------------------------------------------------------------- */
 /*                             FUNCTIONS                            */
@@ -120,6 +136,9 @@
 
 /* Define this if you have struct sockaddr_storage */
 #define HAVE_STRUCT_SOCKADDR_STORAGE 1
+
+/* Define this if you have struct timeval */
+#define HAVE_STRUCT_TIMEVAL 1
 
 /* ---------------------------------------------------------------- */
 /*                         IPV6 COMPATIBILITY                       */

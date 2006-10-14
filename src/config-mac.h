@@ -10,6 +10,11 @@
 #define HAVE_UTIME              1
 #define HAVE_FTRUNCATE          1
 
+#define HAVE_TIME_H             1
+#define HAVE_SYS_TIME_H         1
+#define TIME_WITH_SYS_TIME      1
+#define HAVE_STRUCT_TIMEVAL     1
+
 #define main(x,y) curl_main(x,y)
 
 /* we provide our own strdup prototype */

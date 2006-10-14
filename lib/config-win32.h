@@ -81,6 +81,9 @@
 /* Define if you have the <sys/stat.h> header file.  */
 #define HAVE_SYS_STAT_H 1
 
+/* Define if you have the <sys/time.h> header file */
+/* #define HAVE_SYS_TIME_H 1 */
+
 /* Define if you have the <sys/types.h> header file.  */
 #define HAVE_SYS_TYPES_H 1
 
@@ -334,6 +337,9 @@
 #ifndef __SALFORDC__
 #define HAVE_STRUCT_SOCKADDR_STORAGE 1
 #endif
+
+/* Define this if you have struct timeval */
+#define HAVE_STRUCT_TIMEVAL 1
 
 /* ---------------------------------------------------------------- */
 /*                        COMPILER SPECIFIC                         */
