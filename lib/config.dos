@@ -109,10 +109,11 @@
 #define ssize_t    int
 #endif
 
+#define CURL_CA_BUNDLE  getenv("CURL_CA_BUNDLE")
+
 /* Target HAVE_x section
  */
 #if defined(DJGPP)
-  #define CURL_CA_BUNDLE  "/dev/env/CURL_CA_BUNDLE"
   #define HAVE_BASENAME   1
   #define HAVE_STRCASECMP 1
   #define HAVE_SIGACTION  1
@@ -127,15 +128,11 @@
   #if (DJGPP_MINOR < 4)
     #define _MPRINTF_REPLACE
   #endif
-#else
-  #define CURL_CA_BUNDLE  getenv("CURL_CA_BUNDLE")
-#endif
 
-#if defined(__WATCOMC__)
+#elif defined(__WATCOMC__)
   #define HAVE_STRCASECMP 1
-#endif
 
-#if defined(__HIGHC__)
+#elif defined(__HIGHC__)
   #define HAVE_SYS_TIME_H 1
 #endif
 
