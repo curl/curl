@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel (16 October 2006)
+- Added a check in configure that simply tries to run a program (not when
+  cross-compiling) in order to detect problems with run-time libraries that
+  otherwise would occur when the sizeof tests for curl_off_t would run and
+  thus be much more confusing to users. The check of course should run after
+  all lib-checks are done and before any other test is used that would run an
+  executable built for testing-purposes.
+
 Dan F (13 October 2006)
 - The tagging of application/x-www-form-urlencoded POST body data sent
   to the CURLOPT_DEBUGFUNCTION callback has been fixed (it was erroneously

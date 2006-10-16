@@ -1873,3 +1873,37 @@ else
   AC_MSG_WARN([`missing' script is too old or missing])
 fi
 ])
+
+
+dnl CURL_VERIFY_RUNTIMELIBS
+dnl -------------------------------------------------
+dnl Verify that the shared libs found so far can be used when running
+dnl programs, since otherwise the situation will create odd configure errors
+dnl that are misleading people.
+dnl
+dnl Make sure this test is run BEFORE the first test in the script that
+dnl runs anything, which at the time of this writing is the AC_CHECK_SIZEOF
+dnl macro. It must also run AFTER all lib-checking macros are complete.
+
+AC_DEFUN([CURL_VERIFY_RUNTIMELIBS], [
+
+  dnl this test is of course not sensible if we are cross-compiling!
+  if test "x$cross_compiling" != xyes; then
+
+    dnl just run a program to verify that the libs checked for previous to this
+    dnl point also is available run-time!
+    AC_MSG_CHECKING([run-time libs availability])
+    AC_TRY_RUN([
+main()
+{
+  return 0;
+}
+],
+    AC_MSG_RESULT([fine]),
+    AC_MSG_RESULT([failed])
+    AC_MSG_ERROR([one or more libs available at link-time are not available run-time. Libs used at link-time: $LIBS])
+    )
+
+    dnl if this test fails, configure has already stopped
+  fi
+])
