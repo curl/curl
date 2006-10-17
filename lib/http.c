@@ -277,8 +277,8 @@ static CURLcode perhapsrewind(struct connectdata *conn)
         /* this is already marked to get closed */
         return CURLE_OK;
 
-      infof(data, "NTLM send, close instead of sending %ld bytes\n",
-            expectsend - bytessent);
+      infof(data, "NTLM send, close instead of sending %" FORMAT_OFF_T
+            " bytes\n", (curl_off_t)(expectsend - bytessent));
     }
 
     /* This is not NTLM or NTLM with many bytes left to send: close
@@ -850,7 +850,7 @@ CURLcode add_buffer_send(send_buffer *in,
                          struct connectdata *conn,
                          long *bytes_written, /* add the number of sent
                                                  bytes to this counter */
-                         long included_body_bytes, /* how much of the buffer
+                         size_t included_body_bytes, /* how much of the buffer
                                         contains body data (for log tracing) */
                          int socketindex)
 
@@ -1603,7 +1603,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   char *request;
   Curl_HttpReq httpreq = data->set.httpreq;
   char *addcookies = NULL;
-  long included_body = 0;
+  curl_off_t included_body = 0;
 
   /* Always consider the DO phase done after this function call, even if there
      may be parts of the request that is not yet sent, since we can deal with
@@ -2337,7 +2337,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       }
       /* issue the request */
       result = add_buffer_send(req_buffer, conn, &data->info.request_size,
-                               included_body, FIRSTSOCKET);
+                               (size_t)included_body, FIRSTSOCKET);
 
       if(result)
         failf(data, "Failed sending HTTP POST request");
