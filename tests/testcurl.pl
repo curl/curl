@@ -380,22 +380,6 @@ if ($CVS) {
     else {
       mydie "buildconf was NOT successful";
     }
-
-    if($confopts =~ /--enable-ares/) {
-        logit "run buildconf for ares";
-        chdir "ares";
-        open(F, "./buildconf 2>&1 |") or die;
-        open(LOG, ">$buildlog") or die;
-        while (<F>) {
-            next if /warning: underquoted definition of/;
-            print;
-            print LOG;
-        }
-        close(F);
-        close(LOG);
-        chdir "..";
-    }
-
   }
   else {
     logit "buildconf was successful (dummy message)";
