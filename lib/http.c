@@ -901,10 +901,11 @@ CURLcode add_buffer_send(send_buffer *in,
     if(conn->data->set.verbose) {
       /* this data _may_ contain binary stuff */
       Curl_debug(conn->data, CURLINFO_HEADER_OUT, ptr,
-                 amount-included_body_bytes, conn);
+                 (size_t)(amount-included_body_bytes), conn);
       if (included_body_bytes)
-        Curl_debug(conn->data, CURLINFO_DATA_OUT,
-                   ptr+amount-included_body_bytes, included_body_bytes, conn);
+        Curl_debug(conn->data, CURLINFO_DATA_OUT, 
+                   ptr+amount-included_body_bytes, 
+                   (size_t)included_body_bytes, conn);
     }
 
     *bytes_written += amount;
@@ -1257,8 +1258,8 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 
               /* output debug if that is requested */
               if(data->set.verbose)
-                Curl_debug(data, CURLINFO_HEADER_IN, line_start, perline,
-                           conn);
+                Curl_debug(data, CURLINFO_HEADER_IN, 
+                           line_start, (size_t)perline, conn);
 
               /* send the header to the callback */
               writetype = CLIENTWRITE_HEADER;

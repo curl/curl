@@ -341,7 +341,7 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
           /* output debug output if that is requested */
           if(data->set.verbose)
             Curl_debug(data, CURLINFO_HEADER_IN,
-                       ftpc->linestart_resp, perline, conn);
+                       ftpc->linestart_resp, (size_t)perline, conn);
 
           /*
            * We pass all response-lines to the callback function registered
@@ -573,7 +573,8 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
 
             /* output debug output if that is requested */
             if(data->set.verbose)
-              Curl_debug(data, CURLINFO_HEADER_IN, line_start, perline, conn);
+              Curl_debug(data, CURLINFO_HEADER_IN, 
+                         line_start, (size_t)perline, conn);
 
             /*
              * We pass all response-lines to the callback function registered
@@ -3432,8 +3433,8 @@ CURLcode Curl_nbftpsendf(struct connectdata *conn,
     return res;
 
   if(conn->data->set.verbose)
-    Curl_debug(conn->data, CURLINFO_HEADER_OUT, sptr, bytes_written,
-               conn);
+    Curl_debug(conn->data, CURLINFO_HEADER_OUT, 
+               sptr, (size_t)bytes_written, conn);
 
   if(bytes_written != (ssize_t)write_len) {
     /* the whole chunk was not sent, store the rest of the data */
@@ -3490,7 +3491,8 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
       break;
 
     if(conn->data->set.verbose)
-      Curl_debug(conn->data, CURLINFO_HEADER_OUT, sptr, bytes_written, conn);
+      Curl_debug(conn->data, CURLINFO_HEADER_OUT, 
+                 sptr, (size_t)bytes_written, conn);
 
     if(bytes_written != (ssize_t)write_len) {
       write_len -= bytes_written;

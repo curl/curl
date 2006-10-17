@@ -992,7 +992,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
             if(data->set.verbose)
               Curl_debug(data, CURLINFO_HEADER_IN,
-                         k->p, k->hbuflen, conn);
+                         k->p, (size_t)k->hbuflen, conn);
 
             result = Curl_client_write(conn, writetype, k->p, k->hbuflen);
             if(result)
@@ -1089,12 +1089,14 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           if(data->set.verbose) {
             if(k->badheader) {
               Curl_debug(data, CURLINFO_DATA_IN, data->state.headerbuff,
-                         k->hbuflen, conn);
+                         (size_t)k->hbuflen, conn);
               if(k->badheader == HEADER_PARTHEADER)
-                Curl_debug(data, CURLINFO_DATA_IN, k->str, nread, conn);
+                Curl_debug(data, CURLINFO_DATA_IN, 
+                           k->str, (size_t)nread, conn);
             }
             else
-              Curl_debug(data, CURLINFO_DATA_IN, k->str, nread, conn);
+              Curl_debug(data, CURLINFO_DATA_IN, 
+                         k->str, (size_t)nread, conn);
           }
 
 #ifndef CURL_DISABLE_HTTP
@@ -1354,7 +1356,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         if(data->set.verbose)
           /* show the data before we change the pointer upload_fromhere */
           Curl_debug(data, CURLINFO_DATA_OUT, data->reqdata.upload_fromhere,
-                     bytes_written, conn);
+                     (size_t)bytes_written, conn);
 
         if(data->reqdata.upload_present != bytes_written) {
           /* we only wrote a part of the buffer (if anything), deal with it! */
