@@ -3668,17 +3668,11 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      * Set signal handler to catch SIGALRM
      * Store the old value to be able to set it back later!
      *************************************************************/
-    long shortest = data->set.timeout; /* default to this timeout value */
-
-    if(shortest && data->set.connecttimeout &&
-       (data->set.connecttimeout < shortest))
-      /* if both are set, pick the shortest */
-      shortest = data->set.connecttimeout;
-    else if(!shortest)
-      /* if timeout is not set, use the connect timeout */
-      shortest = data->set.connecttimeout;
 
 #ifdef SIGALRM
+#ifdef HAVE_ALARM
+    long shortest;
+#endif
 #ifdef HAVE_SIGACTION
     struct sigaction sigact;
     sigaction(SIGALRM, NULL, &sigact);
@@ -3704,6 +3698,15 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      * multi-threaded environments. */
 
 #ifdef HAVE_ALARM
+    shortest = data->set.timeout; /* default to this timeout value */
+    if(shortest && data->set.connecttimeout &&
+       (data->set.connecttimeout < shortest))
+      /* if both are set, pick the shortest */
+      shortest = data->set.connecttimeout;
+    else if(!shortest)
+      /* if timeout is not set, use the connect timeout */
+      shortest = data->set.connecttimeout;
+
     /* alarm() makes a signal get sent when the timeout fires off, and that
        will abort system calls */
     prev_alarm = alarm((unsigned int) shortest);
