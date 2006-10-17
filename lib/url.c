@@ -3676,7 +3676,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       shortest = data->set.connecttimeout;
     else if(!shortest)
       /* if timeout is not set, use the connect timeout */
-      shortest = data->set.connecttimeout
+      shortest = data->set.connecttimeout;
 
 #ifdef SIGALRM
 #ifdef HAVE_SIGACTION
