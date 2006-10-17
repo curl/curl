@@ -208,7 +208,7 @@ BOOL init_thread_sync_data(struct thread_data * td,
 {
   HANDLE curr_proc = GetCurrentProcess();
 
-  memset(tsd, 0, sizeof(tsd));
+  memset(tsd, 0, sizeof(*tsd));
   if (!DuplicateHandle(curr_proc, td->mutex_waiting,
                        curr_proc, &tsd->mutex_waiting, 0, FALSE,
                        DUPLICATE_SAME_ACCESS)) {
