@@ -116,10 +116,6 @@ char *curl_easy_escape(CURL *handle, const char *string, int inlength)
   return ns;
 }
 
-#define ishex(in) ((in >= 'a' && in <= 'f') || \
-                   (in >= 'A' && in <= 'F') || \
-                   (in >= '0' && in <= '9'))
-
 char *curl_easy_unescape(CURL *handle, const char *string, int length,
                          int *olen)
 {
@@ -138,7 +134,7 @@ char *curl_easy_unescape(CURL *handle, const char *string, int length,
 
   while(--alloc > 0) {
     in = *string;
-    if(('%' == in) && ishex(string[1]) && ishex(string[2])) {
+    if(('%' == in) && ISXDIGIT(string[1]) && ISXDIGIT(string[2])) {
       /* this is two hexadecimal digits following a '%' */
       char hexstr[3];
       char *ptr;

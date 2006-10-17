@@ -380,7 +380,7 @@ static void warnf(struct Configurable *config, const char *fmt, ...)
       if(len > (int)WARN_TEXTWIDTH) {
         int cut = WARN_TEXTWIDTH-1;
 
-        while(!isspace((int)ptr[cut]) && cut) {
+        while(!ISSPACE(ptr[cut]) && cut) {
           cut--;
         }
 
@@ -933,7 +933,7 @@ static int formparse(struct Configurable *config,
           while(ptr && (FORM_FILE_SEPARATOR!= *ptr)) {
 
             /* pass all white spaces */
-            while(isspace((int)*ptr))
+            while(ISSPACE(*ptr))
               ptr++;
 
             if(curlx_strnequal("type=", ptr, 5)) {
@@ -1155,7 +1155,7 @@ static void cleanarg(char *str)
 static int str2num(long *val, char *str)
 {
   int retcode = 0;
-  if(isdigit((int)*str))
+  if(ISDIGIT(*str))
     *val = atoi(str);
   else
     retcode = 1; /* badness */
@@ -1961,7 +1961,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           if(ptr &&
              (ptr == &nextarg[1]) &&
              (nextarg[2] == '\\' || nextarg[2] == '/') &&
-             (isalpha((int)nextarg[0])) )
+             (ISALPHA(nextarg[0])) )
              /* colon in the second column, followed by a backslash, and the
                 first character is an alphabetic letter:
 
@@ -2463,7 +2463,7 @@ static int parseconfig(const char *filename,
     int lineno=0;
     bool alloced_param;
 
-#define isseparator(x) (((x)=='=') || ((x) == ':'))
+#define ISSEP(x) (((x)=='=') || ((x) == ':'))
 
     while (NULL != (aline = my_get_line(file))) {
       lineno++;
@@ -2471,7 +2471,7 @@ static int parseconfig(const char *filename,
       alloced_param=FALSE;
 
       /* lines with # in the fist column is a comment! */
-      while(*line && isspace((int)*line))
+      while(*line && ISSPACE(*line))
         line++;
 
       switch(*line) {
@@ -2487,7 +2487,7 @@ static int parseconfig(const char *filename,
 
       /* the option keywords starts here */
       option = line;
-      while(*line && !isspace((int)*line) && !isseparator(*line))
+      while(*line && !ISSPACE(*line) && !ISSEP(*line))
         line++;
       /* ... and has ended here */
 
@@ -2499,7 +2499,7 @@ static int parseconfig(const char *filename,
 #endif
 
       /* pass spaces and separator(s) */
-      while(*line && (isspace((int)*line) || isseparator(*line)))
+      while(*line && (ISSPACE(*line) || ISSEP(*line)))
         line++;
 
       /* the parameter starts here (unless quoted) */
@@ -2544,7 +2544,7 @@ static int parseconfig(const char *filename,
       }
       else {
         param=line; /* parameter starts here */
-        while(*line && !isspace((int)*line))
+        while(*line && !ISSPACE(*line))
           line++;
         *line=0; /* zero terminate */
       }
@@ -2852,7 +2852,8 @@ convert_from_network(char *buffer, size_t length)
 }
 
 static
-char convert_char(curl_infotype infotype, char this_char) {
+char convert_char(curl_infotype infotype, char this_char)
+{
 /* determine how this specific character should be displayed */
   switch(infotype) {
   case CURLINFO_DATA_IN:
@@ -2863,24 +2864,25 @@ char convert_char(curl_infotype infotype, char this_char) {
     if ((this_char >= 0x20) && (this_char < 0x7f)) {
       /* printable ASCII hex value: convert to host encoding */
       convert_from_network(&this_char, 1);
-    } else {
+    }
+    else {
       /* non-printable ASCII, use a replacement character */
-      return(UNPRINTABLE_CHAR);
+      return UNPRINTABLE_CHAR;
     }
     /* fall through to default */
   default:
     /* treat as host encoding */
-    if (isprint(this_char)
-    &&  (this_char != '\t')
-    &&  (this_char != '\r')
-    &&  (this_char != '\n')) {
+    if (ISPRINT(this_char)
+        &&  (this_char != '\t')
+        &&  (this_char != '\r')
+        &&  (this_char != '\n')) {
       /* printable characters excluding tabs and line end characters */
-      return(this_char);
+      return this_char;
     }
     break;
   }
   /* non-printable, use a replacement character  */
-  return(UNPRINTABLE_CHAR);
+  return UNPRINTABLE_CHAR;
 }
 #endif /* CURL_DOES_CONVERSIONS */
 

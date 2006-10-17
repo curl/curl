@@ -218,13 +218,13 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
   ntlm = proxy?&conn->proxyntlm:&conn->ntlm;
 
   /* skip initial whitespaces */
-  while(*header && isspace((int)*header))
+  while(*header && ISSPACE(*header))
     header++;
 
   if(checkprefix("NTLM", header)) {
     header += strlen("NTLM");
 
-    while(*header && isspace((int)*header))
+    while(*header && ISSPACE(*header))
       header++;
 
     if(*header) {

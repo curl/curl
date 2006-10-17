@@ -75,7 +75,7 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
   }
 
   /* skip initial whitespaces */
-  while(*header && isspace((int)*header))
+  while(*header && ISSPACE(*header))
     header++;
 
   if(checkprefix("Digest", header)) {
@@ -93,7 +93,7 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
       char content[128];
       size_t totlen=0;
 
-      while(*header && isspace((int)*header))
+      while(*header && ISSPACE(*header))
         header++;
 
       /* how big can these strings be? */

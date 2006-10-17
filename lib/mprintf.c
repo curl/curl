@@ -171,7 +171,7 @@ int curl_msprintf(char *buffer, const char *format, ...);
 static long dprintf_DollarString(char *input, char **end)
 {
   int number=0;
-  while(isdigit((int)*input)) {
+  while(ISDIGIT(*input)) {
     number *= 10;
     number += *input-'0';
     input++;

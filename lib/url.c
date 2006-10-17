@@ -3252,7 +3252,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     /* detect and extract RFC2732-style IPv6-addresses */
     if(*proxyptr == '[') {
       char *ptr = ++proxyptr; /* advance beyond the initial bracket */
-      while(*ptr && (isxdigit((int)*ptr) || (*ptr == ':')))
+      while(*ptr && (ISXDIGIT(*ptr) || (*ptr == ':')))
         ptr++;
       if(*ptr == ']') {
         /* yeps, it ended nicely with a bracket as well */

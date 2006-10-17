@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -213,7 +213,7 @@ static int checktz(char *check)
 static void skip(const char **date)
 {
   /* skip everything that aren't letters or digits */
-  while(**date && !isalnum((int)**date))
+  while(**date && !ISALNUM(**date))
     (*date)++;
 }
 
@@ -256,7 +256,7 @@ static time_t Curl_parsedate(const char *date)
 
     skip(&date);
 
-    if(isalpha((int)*date)) {
+    if(ISALPHA(*date)) {
       /* a name coming up */
       char buf[32]="";
       size_t len;
@@ -286,7 +286,7 @@ static time_t Curl_parsedate(const char *date)
 
       date += len;
     }
-    else if(isdigit((int)*date)) {
+    else if(ISDIGIT(*date)) {
       /* a digit */
       int val;
       char *end;

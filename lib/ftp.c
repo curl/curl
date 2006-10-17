@@ -252,8 +252,8 @@ static void ftp_respinit(struct connectdata *conn)
 }
 
 /* macro to check for the last line in an FTP server response */
-#define lastline(line) (isdigit((int)line[0]) && isdigit((int)line[1]) && \
-                        isdigit((int)line[2]) && (' ' == line[3]))
+#define lastline(line) (ISDIGIT(line[0]) && ISDIGIT(line[1]) && \
+                        ISDIGIT(line[2]) && (' ' == line[3]))
 
 static CURLcode ftp_readresp(curl_socket_t sockfd,
                              struct connectdata *conn,
@@ -2177,7 +2177,7 @@ static CURLcode ftp_state_get_resp(struct connectdata *conn,
           if('(' == *bytes)
             break;
           /* skip only digits */
-          if(!isdigit((int)*bytes)) {
+          if(!ISDIGIT(*bytes)) {
             bytes=NULL;
             break;
           }
@@ -3208,7 +3208,7 @@ static CURLcode ftp_range(struct connectdata *conn)
 
   if(data->reqdata.use_range && data->reqdata.range) {
     from=curlx_strtoofft(data->reqdata.range, &ptr, 0);
-    while(ptr && *ptr && (isspace((int)*ptr) || (*ptr=='-')))
+    while(ptr && *ptr && (ISSPACE(*ptr) || (*ptr=='-')))
       ptr++;
     to=curlx_strtoofft(ptr, &ptr2, 0);
     if(ptr == ptr2) {

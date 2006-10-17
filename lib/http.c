@@ -569,7 +569,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
   }
 
   /* pass all white spaces */
-  while(*start && isspace((int)*start))
+  while(*start && ISSPACE(*start))
     start++;
 
   /*
@@ -1051,7 +1051,7 @@ Curl_compareheader(char *headerline,    /* line to check */
   start = &headerline[hlen];
 
   /* pass all white spaces */
-  while(*start && isspace((int)*start))
+  while(*start && ISSPACE(*start))
     start++;
 
   /* find the end of the header line */
@@ -1558,7 +1558,7 @@ static CURLcode add_custom_headers(struct connectdata *conn,
       /* we require a colon for this to be a true header */
 
       ptr++; /* pass the colon */
-      while(*ptr && isspace((int)*ptr))
+      while(*ptr && ISSPACE(*ptr))
         ptr++;
 
       if(*ptr) {
@@ -1725,12 +1725,12 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
        redirected request is being out on thin ice. Except if the host name
        is the same as the first one! */
     char *start = ptr+strlen("Host:");
-    while(*start && isspace((int)*start ))
+    while(*start && ISSPACE(*start ))
       start++;
     ptr = start; /* start host-scanning here */
 
     /* scan through the string to find the end (space or colon) */
-    while(*ptr && !isspace((int)*ptr) && !(':'==*ptr))
+    while(*ptr && !ISSPACE(*ptr) && !(':'==*ptr))
       ptr++;
 
     if(ptr != start) {

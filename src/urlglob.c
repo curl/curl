@@ -177,7 +177,7 @@ static GlobCode glob_range(URLGlob *glob, char *pattern,
   /* patterns 0,1,2,... correspond to size=1,3,5,... */
   ++glob->size;
 
-  if (isalpha((int)*pattern)) {         /* character range detected */
+  if (ISALPHA(*pattern)) {         /* character range detected */
     char min_c;
     char max_c;
 
@@ -205,7 +205,7 @@ static GlobCode glob_range(URLGlob *glob, char *pattern,
     pat->content.CharRange.ptr_c = pat->content.CharRange.min_c = min_c;
     pat->content.CharRange.max_c = max_c;
   }
-  else if (isdigit((int)*pattern)) { /* numeric range detected */
+  else if (ISDIGIT(*pattern)) { /* numeric range detected */
     int min_n;
     int max_n;
 
@@ -229,9 +229,11 @@ static GlobCode glob_range(URLGlob *glob, char *pattern,
 
     if (*pattern == '0') {              /* leading zero specified */
       c = pattern;
-      while (isdigit((int)*c++))
+      while (ISDIGIT(*c)) {
+        c++;
         ++pat->content.NumRange.padlength; /* padding length is set for all
                                               instances of this pattern */
+      }
     }
 
   }
@@ -498,7 +500,7 @@ char *glob_match_url(char *filename, URLGlob *glob)
     return NULL; /* major failure */
 
   while (*filename) {
-    if (*filename == '#' && isdigit((int)filename[1])) {
+    if (*filename == '#' && ISDIGIT(filename[1])) {
       unsigned long i;
       char *ptr = filename;
       unsigned long num = strtoul(&filename[1], &filename, 10);

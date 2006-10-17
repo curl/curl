@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -182,6 +182,18 @@ int fileno( FILE *stream);
 #ifndef HAVE_STRDUP
 #include "strdup.h"
 #define strdup(ptr) curlx_strdup(ptr)
+#endif
+
+#ifndef ISSPACE
+/* typecasting craze to avoid negative number inputs to these macros */
+/* copied from lib/setup.h */
+#define ISSPACE(x) (isspace((int)((unsigned char)x)))
+#define ISDIGIT(x) (isdigit((int)((unsigned char)x)))
+#define ISALNUM(x) (isalnum((int)((unsigned char)x)))
+#define ISXDIGIT(x) (isxdigit((int)((unsigned char)x)))
+#define ISGRAPH(x) (isgraph((int)((unsigned char)x)))
+#define ISALPHA(x) (isalpha((int)((unsigned char)x)))
+#define ISPRINT(x) (isprint((int)((unsigned char)x)))
 #endif
 
 #endif /* __SRC_CURL_SETUP_H */

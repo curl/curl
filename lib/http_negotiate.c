@@ -124,7 +124,7 @@ int Curl_input_negotiate(struct connectdata *conn, char *header)
   bool gss;
   const char* protocol;
 
-  while(*header && isspace((int)*header))
+  while(*header && ISSPACE(*header))
     header++;
   if(checkprefix("GSS-Negotiate", header)) {
     protocol = "GSS-Negotiate";
@@ -160,7 +160,7 @@ int Curl_input_negotiate(struct connectdata *conn, char *header)
     return ret;
 
   header += strlen(neg_ctx->protocol);
-  while(*header && isspace((int)*header))
+  while(*header && ISSPACE(*header))
     header++;
 
   len = strlen(header);

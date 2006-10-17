@@ -762,7 +762,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
               /* Find the first non-space letter */
               for(start=k->p+13;
-                  *start && isspace((int)*start);
+                  *start && ISSPACE(*start);
                   start++)
                 ;  /* empty loop */
 
@@ -772,7 +772,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
               if(end) {
                 /* skip all trailing space letters */
-                for(; isspace((int)*end) && (end > start); end--)
+                for(; ISSPACE(*end) && (end > start); end--)
                   ;  /* empty loop */
 
                 /* get length of the type */
@@ -877,7 +877,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
               /* Find the first non-space letter */
               for(start=k->p+17;
-                  *start && isspace((int)*start);
+                  *start && ISSPACE(*start);
                   start++)
                 ;  /* empty loop */
 
@@ -957,7 +957,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
                 /* Skip spaces and tabs. We do this to support multiple
                    white spaces after the "Location:" keyword. */
-                while(*start && isspace((int)*start ))
+                while(*start && ISSPACE(*start ))
                   start++;
 
                 /* Scan through the string from the end to find the last
@@ -966,7 +966,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                    there. This logic strips off trailing whitespace, but keeps
                    any embedded whitespace. */
                 ptr = k->end_ptr-1;
-                while((ptr>=start) && isspace((int)*ptr))
+                while((ptr>=start) && ISSPACE(*ptr))
                   ptr--;
                 ptr++;
 
