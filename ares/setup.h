@@ -70,6 +70,22 @@
 #endif
 
 /*
+ * Define USE_WINSOCK to 2 if we have and use WINSOCK2 API, else
+ * define USE_WINSOCK to 1 if we have and use WINSOCK  API, else
+ * undefine USE_WINSOCK.
+ */
+
+#undef USE_WINSOCK
+
+#ifdef HAVE_WINSOCK2_H
+#  define USE_WINSOCK 2
+#else
+#  ifdef HAVE_WINSOCK_H
+#    define USE_WINSOCK 1
+#  endif
+#endif
+
+/*
  * Work-arounds for systems without configure support
  */
 
