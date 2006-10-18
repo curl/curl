@@ -117,7 +117,7 @@
 
 /*
  * Uppercase macro versions of ANSI/ISO is*() functions/macros which 
- * avoid negative number inputs whith argument byte codes > 127.
+ * avoid negative number inputs with argument byte codes > 127.
  */
 
 #define ISSPACE(x)  (isspace((int)  ((unsigned char)x)))
