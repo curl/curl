@@ -17,6 +17,16 @@
  */
 
 
+/********************************************************************
+ *                              NOTICE                              *
+ *                             ========                             *
+ *                                                                  *
+ *  Content of header files lib/setup_once.h and ares/setup_once.h  *
+ *  must be kept in sync. Modify the other one if you change this.  *
+ *                                                                  *
+ ********************************************************************/
+
+
 /*
  * If we have the MSG_NOSIGNAL define, make sure we use
  * it as the fourth argument of send() and recv()
@@ -67,7 +77,7 @@
                                    (RECV_TYPE_ARG4)(SEND_4TH_ARG))
 #endif
 #else /* HAVE_RECV */
-#ifdef DJGPP
+#ifdef MSDOS
 #define sread(x,y,z) (ssize_t)read_s((int)(x), (char *)(y), (int)(z))
 #endif
 #ifndef sread
@@ -94,7 +104,7 @@
                                     (SEND_TYPE_ARG4)(SEND_4TH_ARG))
 #endif
 #else /* HAVE_SEND */
-#ifdef DJGPP
+#ifdef MSDOS
 #define swrite(x,y,z) (ssize_t)write_s((int)(x), (char *)(y), (int)(z))
 #endif
 #ifndef swrite
@@ -103,6 +113,19 @@
   /* */
 #endif
 #endif /* HAVE_SEND */
+
+
+/*
+ * Uppercase macro versions of ANSI/ISO is*() functions/macros which 
+ * avoid negative number inputs whith argument byte codes > 127.
+ */
+
+#define ISSPACE(x)  (isspace((int)  ((unsigned char)x)))
+#define ISDIGIT(x)  (isdigit((int)  ((unsigned char)x)))
+#define ISALNUM(x)  (isalnum((int)  ((unsigned char)x)))
+#define ISXDIGIT(x) (isxdigit((int) ((unsigned char)x)))
+#define ISGRAPH(x)  (isgraph((int)  ((unsigned char)x)))
+#define ISALPHA(x)  (isalpha((int)  ((unsigned char)x)))
 
 
 #endif /* __SETUP_ONCE_H */

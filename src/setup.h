@@ -184,16 +184,12 @@ int fileno( FILE *stream);
 #define strdup(ptr) curlx_strdup(ptr)
 #endif
 
-#ifndef ISSPACE
-/* typecasting craze to avoid negative number inputs to these macros */
-/* copied from lib/setup.h */
-#define ISSPACE(x) (isspace((int)((unsigned char)x)))
-#define ISDIGIT(x) (isdigit((int)((unsigned char)x)))
-#define ISALNUM(x) (isalnum((int)((unsigned char)x)))
-#define ISXDIGIT(x) (isxdigit((int)((unsigned char)x)))
-#define ISGRAPH(x) (isgraph((int)((unsigned char)x)))
-#define ISALPHA(x) (isalpha((int)((unsigned char)x)))
-#define ISPRINT(x) (isprint((int)((unsigned char)x)))
+/*
+ * Include macros and defines that should only be processed once.
+ */
+
+#ifndef __SETUP_ONCE_H
+#include "setup_once.h"
 #endif
 
 #endif /* __SRC_CURL_SETUP_H */
