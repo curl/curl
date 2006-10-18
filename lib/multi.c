@@ -1845,9 +1845,10 @@ void Curl_expire(struct SessionHandle *data, long milli)
     }
 
     *nowp = set;
+#if 0
     infof(data, "Expire at %ld / %ld (%ldms)\n",
           (long)nowp->tv_sec, (long)nowp->tv_usec, milli);
-
+#endif
     data->state.timenode.payload = data;
     multi->timetree = Curl_splayinsert((int)nowp->tv_sec,
                                        multi->timetree,
