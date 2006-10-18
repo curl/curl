@@ -126,6 +126,7 @@
 #define ISXDIGIT(x) (isxdigit((int) ((unsigned char)x)))
 #define ISGRAPH(x)  (isgraph((int)  ((unsigned char)x)))
 #define ISALPHA(x)  (isalpha((int)  ((unsigned char)x)))
+#define ISPRINT(x)  (isprint((int)  ((unsigned char)x)))
 
 
 #endif /* __SETUP_ONCE_H */
