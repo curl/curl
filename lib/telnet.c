@@ -102,7 +102,7 @@
 #define  CURL_SB_EOF(x) (x->subpointer >= x->subend)
 #define  CURL_SB_LEN(x) (x->subend - x->subpointer)
 
-#ifdef WIN32
+#ifdef USE_WINSOCK
 typedef FARPROC WSOCK2_FUNC;
 static CURLcode check_wsock2 ( struct SessionHandle *data );
 #endif
@@ -171,7 +171,7 @@ struct TELNET {
   TelnetReceive telrcv_state;
 };
 
-#ifdef WIN32
+#ifdef USE_WINSOCK
 static CURLcode
 check_wsock2 ( struct SessionHandle *data )
 {
@@ -210,6 +210,7 @@ check_wsock2 ( struct SessionHandle *data )
   return CURLE_OK;
 }
 #endif
+
 static
 CURLcode init_telnet(struct connectdata *conn)
 {
@@ -1090,7 +1091,7 @@ CURLcode Curl_telnet(struct connectdata *conn, bool *done)
   CURLcode code;
   struct SessionHandle *data = conn->data;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
-#ifdef WIN32
+#ifdef USE_WINSOCK
   HMODULE wsock2;
   WSOCK2_FUNC close_event_func;
   WSOCK2_FUNC create_event_func;
@@ -1125,7 +1126,7 @@ CURLcode Curl_telnet(struct connectdata *conn, bool *done)
   if(code)
     return code;
 
-#ifdef WIN32
+#ifdef USE_WINSOCK
   /*
   ** This functionality only works with WinSock >= 2.0.  So,
   ** make sure have it.

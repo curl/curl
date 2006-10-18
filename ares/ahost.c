@@ -64,8 +64,8 @@ int main(int argc, char **argv)
   struct in_addr addr4;
   struct in6_addr addr6;
 
-#ifdef WIN32
-  WORD wVersionRequested = MAKEWORD(1,1);
+#ifdef USE_WINSOCK
+  WORD wVersionRequested = MAKEWORD(USE_WINSOCK,USE_WINSOCK);
   WSADATA wsaData;
   WSAStartup(wVersionRequested, &wsaData);
 #endif

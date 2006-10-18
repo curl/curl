@@ -382,7 +382,7 @@ curl_share_strerror(CURLSHcode error)
 #endif
 }
 
-#ifdef WIN32
+#ifdef USE_WINSOCK
 
 /* This function handles most / all (?) Winsock errors cURL is able to produce.
  */
@@ -570,7 +570,7 @@ get_winsock_error (int err, char *buf, size_t len)
   buf [len-1] = '\0';
   return buf;
 }
-#endif   /* WIN32 */
+#endif   /* USE_WINSOCK */
 
 /*
  * Our thread-safe and smart strerror() replacement.
@@ -595,7 +595,7 @@ const char *Curl_strerror(struct connectdata *conn, int err)
   max = sizeof(conn->syserr_buf)-1;
   *buf = '\0';
 
-#ifdef WIN32
+#ifdef USE_WINSOCK
 
 #ifdef _WIN32_WCE
   buf[0]=0;
@@ -619,7 +619,7 @@ const char *Curl_strerror(struct connectdata *conn, int err)
       snprintf(buf, max, "Unknown error %d (%#x)", err, err);
   }
 #endif
-#else /* not native Windows coming up */
+#else /* not USE_WINSOCK coming up */
 
   /* These should be atomic and hopefully thread-safe */
 #ifdef HAVE_STRERROR_R
@@ -647,7 +647,7 @@ const char *Curl_strerror(struct connectdata *conn, int err)
 #else /* HAVE_STRERROR_R */
   strncpy(buf, strerror(err), max);
 #endif /* end of HAVE_STRERROR_R */
-#endif /* end of ! Windows */
+#endif /* end of ! USE_WINSOCK */
 
   buf[max] = '\0'; /* make sure the string is zero terminated */
 

@@ -60,13 +60,13 @@ const struct in6_addr in6addr_any = {{ IN6ADDR_ANY_INIT }};
 #endif
 
 /*
- * ourerrno() returns the errno (or equivalent) on this platform to
- * hide platform specific for the function that calls this.
+ * our_sockerrno() returns the *socket-related* errno (or equivalent) on this
+ * platform to hide platform specific for the function that calls this.
  */
-int ourerrno(void)
+int our_sockerrno(void)
 {
-#ifdef WIN32
-  return (int)GetLastError();
+#ifdef USE_WINSOCK
+  return (int)WSAGetLastError();
 #else
   return errno;
 #endif
@@ -115,13 +115,15 @@ void win32_perror (const char *msg)
      fprintf(stderr, "%s: ", msg);
   fprintf(stderr, "%s\n", buf);
 }
+#endif  /* WIN32 */
 
+#ifdef USE_WINSOCK
 void win32_init(void)
 {
   WORD wVersionRequested;
   WSADATA wsaData;
   int err;
-  wVersionRequested = MAKEWORD(2, 0);
+  wVersionRequested = MAKEWORD(USE_WINSOCK, USE_WINSOCK);
 
   err = WSAStartup(wVersionRequested, &wsaData);
 
@@ -131,8 +133,8 @@ void win32_init(void)
     exit(1);
   }
 
-  if ( LOBYTE( wsaData.wVersion ) != 2 ||
-       HIBYTE( wsaData.wVersion ) != 0 ) {
+  if ( LOBYTE( wsaData.wVersion ) != USE_WINSOCK ||
+       HIBYTE( wsaData.wVersion ) != USE_WINSOCK ) {
 
     WSACleanup();
     perror("Winsock init failed");
@@ -145,7 +147,7 @@ void win32_cleanup(void)
 {
   WSACleanup();
 }
-#endif  /* WIN32 */
+#endif  /* USE_WINSOCK */
 
 /* set by the main code to point to where the test dir is */
 const char *path=".";

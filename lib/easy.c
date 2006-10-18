@@ -106,7 +106,7 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-#if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+#ifdef USE_WINSOCK
 /* win32_cleanup() is for win32 socket cleanup functionality, the opposite
    of win32_init() */
 static void win32_cleanup(void)
@@ -122,11 +122,11 @@ static CURLcode win32_init(void)
   WSADATA wsaData;
   int err;
 
-#ifdef ENABLE_IPV6
-  wVersionRequested = MAKEWORD(2, 0);
-#else
-  wVersionRequested = MAKEWORD(1, 1);
+#if defined(ENABLE_IPV6) && (USE_WINSOCK < 2)
+  Error IPV6_requires_winsock2
 #endif
+
+  wVersionRequested = MAKEWORD(USE_WINSOCK, USE_WINSOCK);
 
   err = WSAStartup(wVersionRequested, &wsaData);
 

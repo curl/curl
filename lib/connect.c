@@ -84,7 +84,7 @@
 #define FALSE 0
 #endif
 
-#ifdef WIN32
+#ifdef USE_WINSOCK
 #define EINPROGRESS WSAEINPROGRESS
 #define EWOULDBLOCK WSAEWOULDBLOCK
 #define EISCONN     WSAEISCONN
@@ -121,7 +121,7 @@ singleipconnect(struct connectdata *conn,
  */
 int Curl_sockerrno(void)
 {
-#ifdef WIN32
+#ifdef USE_WINSOCK
   return (int)WSAGetLastError();
 #else
   return errno;

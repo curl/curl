@@ -44,7 +44,7 @@
 #define INADDRSZ         4
 #define INT16SZ          2
 
-#ifdef WIN32
+#ifdef USE_WINSOCK
 #define EAFNOSUPPORT    WSAEAFNOSUPPORT
 #endif
 

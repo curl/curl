@@ -23,7 +23,7 @@
  * $Id$
  ***************************************************************************/
 
-int ourerrno(void);
+int our_sockerrno(void);
 void logmsg(const char *msg, ...);
 
 #ifndef FALSE
@@ -44,19 +44,21 @@ extern const char *path;
 
 #define sleep(sec)   Sleep ((sec)*1000)
 
+#undef perror
+#define perror(m) win32_perror(m)
+void win32_perror (const char *msg);
+#endif  /* WIN32 */
+
+#ifdef USE_WINSOCK
 #define EINPROGRESS  WSAEINPROGRESS
 #define EWOULDBLOCK  WSAEWOULDBLOCK
 #define EISCONN      WSAEISCONN
 #define ENOTSOCK     WSAENOTSOCK
 #define ECONNREFUSED WSAECONNREFUSED
 
-#undef perror
-#define perror(m) win32_perror(m)
-void win32_perror (const char *msg);
-
 void win32_init(void);
 void win32_cleanup(void);
-#endif  /* WIN32 */
+#endif  /* USE_WINSOCK */
 
 /* returns the path name to the test case file */
 char *test2file(long testno);

@@ -121,7 +121,7 @@
  * Typedef our socket type
  */
 
-#if defined(WIN32) && !defined(WATT32)
+#ifdef USE_WINSOCK
 typedef SOCKET ares_socket_t;
 #define ARES_SOCKET_BAD INVALID_SOCKET
 #else

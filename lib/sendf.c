@@ -500,7 +500,7 @@ int Curl_read(struct connectdata *conn, /* connection data */
 
     if(-1 == nread && bytestocopy == 0) {
       int err = Curl_sockerrno();
-#ifdef WIN32
+#ifdef USE_WINSOCK
       if(WSAEWOULDBLOCK == err)
 #else
       if((EWOULDBLOCK == err) || (EAGAIN == err) || (EINTR == err))

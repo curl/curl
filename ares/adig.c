@@ -153,8 +153,8 @@ int main(int argc, char **argv)
   fd_set read_fds, write_fds;
   struct timeval *tvp, tv;
 
-#ifdef WIN32
-  WORD wVersionRequested = MAKEWORD(1,1);
+#ifdef USE_WINSOCK
+  WORD wVersionRequested = MAKEWORD(USE_WINSOCK,USE_WINSOCK);
   WSADATA wsaData;
   WSAStartup(wVersionRequested, &wsaData);
 #endif

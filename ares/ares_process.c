@@ -59,7 +59,7 @@
 #define TRUE 1
 #endif
 
-#if (defined(WIN32) || defined(WATT32)) && !defined(MSDOS)
+#ifdef USE_WINSOCK
 #define GET_ERRNO()  WSAGetLastError()
 #else
 #define GET_ERRNO()  errno

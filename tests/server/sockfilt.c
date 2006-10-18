@@ -238,7 +238,7 @@ static int juggle(curl_socket_t *sockfdp,
 
   do {
     rc = select(maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
-  } while((rc == -1) && (ourerrno() == EINTR));
+  } while((rc == -1) && (our_sockerrno() == EINTR));
 
   switch(rc) {
   case -1:
