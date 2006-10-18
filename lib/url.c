@@ -2511,12 +2511,6 @@ static CURLcode ParseURLAndFillConnection(struct SessionHandle *data,
 
       if(checkprefix("FTP.", conn->host.name))
         strcpy(conn->protostr, "ftp");
-#ifdef USE_SSL
-      else if(checkprefix("FTPS", conn->host.name))
-        strcpy(conn->protostr, "ftps");
-#endif /* USE_SSL */
-      else if(checkprefix("TELNET.", conn->host.name))
-        strcpy(conn->protostr, "telnet");
       else if (checkprefix("DICT.", conn->host.name))
         strcpy(conn->protostr, "DICT");
       else if (checkprefix("LDAP.", conn->host.name))
