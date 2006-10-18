@@ -3622,6 +3622,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     infof(data, "Re-using existing connection! (#%ld) with host %s\n",
           conn->connectindex,
           conn->bits.httpproxy?conn->proxy.dispname:conn->host.dispname);
+    if(!conn->dns_entry) {
+      infof(data, "... but it is not resolved yet!\n");
+      *async = TRUE;
+    }
   }
   else {
     /*
