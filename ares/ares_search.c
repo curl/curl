@@ -239,15 +239,15 @@ static int single_domain(ares_channel channel, const char *name, char **s)
                      == ARES_SUCCESS)
                 {
                   if (strncasecmp(line, name, len) != 0 ||
-                      !isspace((unsigned char)line[len]))
+                      !ISSPACE(line[len]))
                     continue;
                   p = line + len;
-                  while (isspace((unsigned char)*p))
+                  while (ISSPACE(*p))
                     p++;
                   if (*p)
                     {
                       q = p + 1;
-                      while (*q && !isspace((unsigned char)*q))
+                      while (*q && !ISSPACE(*q))
                         q++;
                       *s = malloc(q - p + 1);
                       if (*s)

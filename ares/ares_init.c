@@ -750,7 +750,7 @@ static int config_domain(ares_channel channel, char *str)
 
   /* Set a single search domain. */
   q = str;
-  while (*q && !isspace((unsigned char)*q))
+  while (*q && !ISSPACE(*q))
     q++;
   *q = 0;
   return set_search(channel, str);
@@ -774,9 +774,9 @@ static int config_lookup(ares_channel channel, const char *str,
         if (*p == *bindch) *l++ = 'b';
         else *l++ = 'f';
       }
-      while (*p && !isspace((unsigned char)*p) && (*p != ','))
+      while (*p && !ISSPACE(*p) && (*p != ','))
         p++;
-      while (*p && (isspace((unsigned char)*p) || (*p == ',')))
+      while (*p && (ISSPACE(*p) || (*p == ',')))
         p++;
     }
   *l = 0;
@@ -801,7 +801,7 @@ static int config_nameserver(struct server_state **servers, int *nservers,
   while (more)
   {
     more = 0;
-    while (*p && !isspace(*p) && *p != ',')
+    while (*p && !ISSPACE(*p) && *p != ',')
       p++;
 
     if (*p)
@@ -861,7 +861,7 @@ static int config_sortlist(struct apattern **sortlist, int *nsort,
       char ipbuf[16], ipbufpfx[32];
       /* Find just the IP */
       q = str;
-      while (*q && *q != '/' && *q != ';' && !isspace((unsigned char)*q))
+      while (*q && *q != '/' && *q != ';' && !ISSPACE(*q))
         q++;
       memcpy(ipbuf, str, (int)(q-str));
       ipbuf[(int)(q-str)] = 0;
@@ -869,7 +869,7 @@ static int config_sortlist(struct apattern **sortlist, int *nsort,
       if (*q == '/')
         {
           const char *str2 = q+1;
-          while (*q && *q != ';' && !isspace((unsigned char)*q))
+          while (*q && *q != ';' && !ISSPACE(*q))
             q++;
           memcpy(ipbufpfx, str, (int)(q-str));
           ipbufpfx[(int)(q-str)] = 0;
@@ -918,11 +918,11 @@ static int config_sortlist(struct apattern **sortlist, int *nsort,
         }
       else
         {
-          while (*q && *q != ';' && !isspace((unsigned char)*q))
+          while (*q && *q != ';' && !ISSPACE(*q))
             q++;
         }
       str = q;
-      while (isspace((unsigned char)*str))
+      while (ISSPACE(*str))
         str++;
     }
 
@@ -948,9 +948,9 @@ static int set_search(ares_channel channel, const char *str)
   p = str;
   while (*p)
     {
-      while (*p && !isspace((unsigned char)*p))
+      while (*p && !ISSPACE(*p))
         p++;
-      while (isspace((unsigned char)*p))
+      while (ISSPACE(*p))
         p++;
       n++;
     }
@@ -966,7 +966,7 @@ static int set_search(ares_channel channel, const char *str)
     {
       channel->ndomains = n;
       q = p;
-      while (*q && !isspace((unsigned char)*q))
+      while (*q && !ISSPACE(*q))
         q++;
       channel->domains[n] = malloc(q - p + 1);
       if (!channel->domains[n])
@@ -974,7 +974,7 @@ static int set_search(ares_channel channel, const char *str)
       memcpy(channel->domains[n], p, q - p);
       channel->domains[n][q - p] = 0;
       p = q;
-      while (isspace((unsigned char)*p))
+      while (ISSPACE(*p))
         p++;
       n++;
     }
@@ -991,7 +991,7 @@ static int set_options(ares_channel channel, const char *str)
   while (*p)
     {
       q = p;
-      while (*q && !isspace((unsigned char)*q))
+      while (*q && !ISSPACE(*q))
         q++;
       val = try_option(p, q, "ndots:");
       if (val && channel->ndots == -1)
@@ -1003,7 +1003,7 @@ static int set_options(ares_channel channel, const char *str)
       if (val && channel->tries == -1)
         channel->tries = atoi(val);
       p = q;
-      while (isspace((unsigned char)*p))
+      while (ISSPACE(*p))
         p++;
     }
 
@@ -1016,10 +1016,10 @@ static char *try_config(char *s, const char *opt)
   size_t len;
 
   len = strlen(opt);
-  if (strncmp(s, opt, len) != 0 || !isspace((unsigned char)s[len]))
+  if (strncmp(s, opt, len) != 0 || !ISSPACE(s[len]))
     return NULL;
   s += len;
-  while (isspace((unsigned char)*s))
+  while (ISSPACE(*s))
     s++;
   return s;
 }

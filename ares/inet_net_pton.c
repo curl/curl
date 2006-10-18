@@ -79,14 +79,13 @@ inet_net_pton_ipv4(const char *src, unsigned char *dst, size_t size)
 
   ch = *src++;
   if (ch == '0' && (src[0] == 'x' || src[0] == 'X')
-      && isascii((unsigned char)(src[1]))
-      && isxdigit((unsigned char)(src[1]))) {
+      && ISXDIGIT(src[1])) {
     /* Hexadecimal: Eat nybble string. */
     if (size <= 0U)
       goto emsgsize;
     dirty = 0;
     src++;  /* skip x or X. */
-    while ((ch = *src++) != '\0' && isascii(ch) && isxdigit(ch)) {
+    while ((ch = *src++) != '\0' && ISXDIGIT(ch)) {
       if (isupper(ch))
         ch = tolower(ch);
       n = (int)(strchr(xdigits, ch) - xdigits);
@@ -106,7 +105,7 @@ inet_net_pton_ipv4(const char *src, unsigned char *dst, size_t size)
         goto emsgsize;
       *dst++ = (unsigned char) (tmp << 4);
     }
-  } else if (isascii(ch) && isdigit(ch)) {
+  } else if (ISDIGIT(ch)) {
     /* Decimal: eat dotted digit string. */
     for (;;) {
       tmp = 0;
@@ -117,7 +116,7 @@ inet_net_pton_ipv4(const char *src, unsigned char *dst, size_t size)
         if (tmp > 255)
           goto enoent;
       } while ((ch = *src++) != '\0' &&
-               isascii(ch) && isdigit(ch));
+               ISDIGIT(ch));
       if (size-- <= 0U)
         goto emsgsize;
       *dst++ = (unsigned char) tmp;
@@ -126,15 +125,15 @@ inet_net_pton_ipv4(const char *src, unsigned char *dst, size_t size)
       if (ch != '.')
         goto enoent;
       ch = *src++;
-      if (!isascii(ch) || !isdigit(ch))
+      if (!ISDIGIT(ch))
         goto enoent;
     }
   } else
     goto enoent;
 
   bits = -1;
-  if (ch == '/' && isascii((unsigned char)(src[0])) &&
-      isdigit((unsigned char)(src[0])) && dst > odst) {
+  if (ch == '/' &&
+      ISDIGIT(src[0]) && dst > odst) {
     /* CIDR width specifier.  Nothing can follow it. */
     ch = *src++;    /* Skip over the /. */
     bits = 0;
@@ -142,7 +141,7 @@ inet_net_pton_ipv4(const char *src, unsigned char *dst, size_t size)
       n = (int)(strchr(digits, ch) - digits);
       bits *= 10;
       bits += n;
-    } while ((ch = *src++) != '\0' && isascii(ch) && isdigit(ch));
+    } while ((ch = *src++) != '\0' && ISDIGIT(ch));
     if (ch != '\0')
       goto enoent;
     if (bits > 32)

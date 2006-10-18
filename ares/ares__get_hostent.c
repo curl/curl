@@ -54,7 +54,7 @@ int ares__get_hostent(FILE *fp, int family, struct hostent **host)
 
       /* Get the address part. */
       p = line;
-      while (*p && !isspace((unsigned char)*p))
+      while (*p && !ISSPACE(*p))
         p++;
       if (!*p)
         continue;
@@ -76,12 +76,12 @@ int ares__get_hostent(FILE *fp, int family, struct hostent **host)
 
       /* Get the canonical hostname. */
       p++;
-      while (isspace((unsigned char)*p))
+      while (ISSPACE(*p))
         p++;
       if (!*p)
         continue;
       q = p;
-      while (*q && !isspace((unsigned char)*q))
+      while (*q && !ISSPACE(*q))
         q++;
       end_at_hostname = (*q == 0);
       *q = 0;
@@ -92,13 +92,13 @@ int ares__get_hostent(FILE *fp, int family, struct hostent **host)
         {
           /* Count the aliases. */
           p = q + 1;
-          while (isspace((unsigned char)*p))
+          while (ISSPACE(*p))
             p++;
           while (*p)
             {
-              while (*p && !isspace((unsigned char)*p))
+              while (*p && !ISSPACE(*p))
                 p++;
-              while (isspace((unsigned char)*p))
+              while (ISSPACE(*p))
                 p++;
               naliases++;
             }
@@ -128,12 +128,12 @@ int ares__get_hostent(FILE *fp, int family, struct hostent **host)
       if (!end_at_hostname)
         {
           p = canonical + strlen(canonical) + 1;
-          while (isspace((unsigned char)*p))
+          while (ISSPACE(*p))
             p++;
           while (*p)
             {
               q = p;
-              while (*q && !isspace((unsigned char)*q))
+              while (*q && !ISSPACE(*q))
                 q++;
               hostent->h_aliases[naliases] = malloc(q - p + 1);
               if (hostent->h_aliases[naliases] == NULL)
@@ -141,7 +141,7 @@ int ares__get_hostent(FILE *fp, int family, struct hostent **host)
               memcpy(hostent->h_aliases[naliases], p, q - p);
               hostent->h_aliases[naliases][q - p] = 0;
               p = q;
-              while (isspace((unsigned char)*p))
+              while (ISSPACE(*p))
                 p++;
               naliases++;
             }
