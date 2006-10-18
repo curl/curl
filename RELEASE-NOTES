@@ -27,6 +27,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o curl_multi_socket() and the LOW_SPEED options
+ o curl_multi_socket() expire timer during c-ares name resolves
  o curl_multi_add_handle on an already added handle now fails gracefully
  o multi interface crash if bad function call order was used for cleanup
  o put a new URL in saved cookie jar files

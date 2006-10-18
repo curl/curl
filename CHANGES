@@ -6,6 +6,25 @@
 
                                   Changelog
 
+Daniel (18 October 2006)
+- Removed the "protocol-guessing" for URLs with host names starting with FTPS
+  or TELNET since they are practically non-existant. This leaves us with only
+  three different prefixes that would assume the protocol is anything but
+  HTTP, and they are host names starting with "ftp.", "dict." or "ldap.".
+
+Daniel (17 October 2006)
+- Bug report #1579171 pointed out code flaws detected with "prefast", and they
+  were 1 - a too small memory clear with memset() in the threaded resolver and
+  2 - a range of potentially bad uses of the ctype family of is*() functions
+  such as isdigit(), isalnum(), isprint() and more. The latter made me switch
+  to using our own set of these functions/macros using uppercase letters, and
+  with some extra set of crazy typecasts to avoid mistakingly passing in
+  negative numbers to the underlying is*() functions.
+
+- With Jeff Pohlmeyer's help, I fixed the expire timer when using
+  curl_multi_socket() during name resolves with c-ares and the LOW_SPEED
+  options now work fine with curl_multi_socket() as well.
+
 Daniel (16 October 2006)
 - Added a check in configure that simply tries to run a program (not when
   cross-compiling) in order to detect problems with run-time libraries that
