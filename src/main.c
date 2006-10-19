@@ -165,6 +165,7 @@ typedef enum {
 #define CONF_DEFAULT  0
 #endif
 
+#define CONF_ISATTY (1<<0) /* output to tty! */
 #define CONF_AUTO_REFERER (1<<4) /* the automatic referer-system please! */
 #define CONF_HEADER   (1<<8) /* throw the header out too */
 #define CONF_NOPROGRESS (1<<10) /* shut off the progress meter */
@@ -239,6 +240,14 @@ typedef enum {
     TRACE_ASCII, /* like *BIN but without the hex output */
     TRACE_PLAIN  /* -v/--verbose type */
 } trace;
+
+struct OutStruct {
+  char *filename;
+  FILE *stream;
+  struct Configurable *config;
+  curl_off_t bytes; /* amount written so far */
+  curl_off_t init;  /* original size (non-zero when appending) */
+};
 
 struct Configurable {
   bool remote_time;
@@ -355,6 +364,8 @@ struct Configurable {
 
   bool ignorecl; /* --ignore-content-length */
   bool disable_sessionid;
+
+  struct OutStruct *outs;
 };
 
 #define WARN_PREFIX "Warning: "
@@ -2243,6 +2254,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       checkpasswd("proxy", &config->proxyuserpwd);
       break;
     case 'v':
+      /* the '%' thing here will cause the trace get sent to stderr */
       GetStr(&config->trace_dump, (char *)"%");
       config->tracetype = TRACE_PLAIN;
       break;
@@ -2620,14 +2632,6 @@ static void go_sleep(long ms)
 
 #endif
 }
-
-struct OutStruct {
-  char *filename;
-  FILE *stream;
-  struct Configurable *config;
-  curl_off_t bytes; /* amount written so far */
-  curl_off_t init;  /* original size (non-zero when appending) */
-};
 
 static size_t my_fwrite(void *buffer, size_t sz, size_t nmemb, void *stream)
 {
@@ -3027,11 +3031,19 @@ int my_trace(CURL *handle, curl_infotype type,
     case CURLINFO_SSL_DATA_IN:
     case CURLINFO_SSL_DATA_OUT:
       if(!traced_data) {
-	if(!newl)
-	  fprintf(config->trace_stream, "%s%s ", timebuf, s_infotype[type]);
-	fprintf(config->trace_stream, "[data not shown]\n");
-	newl = FALSE;
-        traced_data = TRUE;
+        /* if the data is output to a tty and we're sending this debug trace
+           to stderr or stdout, we don't display the alert about the data not
+           being shown as the data _is_ shown then just not via this
+           function */
+        if(!(config->conf&CONF_ISATTY) ||
+           ((config->trace_stream != stderr) &&
+            (config->trace_stream != stdout))) {
+          if(!newl)
+            fprintf(config->trace_stream, "%s%s ", timebuf, s_infotype[type]);
+          fprintf(config->trace_stream, "[data not shown]\n");
+          newl = FALSE;
+          traced_data = TRUE;
+        }
       }
       break;
     default: /* nada */
@@ -3240,6 +3252,8 @@ operate(struct Configurable *config, int argc, char *argv[])
 #endif
 
   memset(&outs,0,sizeof(outs));
+
+  config->outs = &outs;
 
   /* we get libcurl info right away */
   curlinfo = curl_version_info(CURLVERSION_NOW);
@@ -3691,7 +3705,7 @@ operate(struct Configurable *config, int argc, char *argv[])
            && outs.stream && isatty(fileno(outs.stream)))
           /* we send the output to a tty, therefore we switch off the progress
              meter */
-          config->conf |= CONF_NOPROGRESS;
+          config->conf |= CONF_NOPROGRESS|CONF_ISATTY;
 
         if (urlnum > 1 && !(config->conf&CONF_MUTE)) {
           fprintf(stderr, "\n[%d/%d]: %s --> %s\n",
@@ -4294,7 +4308,7 @@ static void checkfds(void)
          fd[1] == STDOUT_FILENO ||
          fd[1] == STDERR_FILENO )
     if (pipe(fd) < 0)
-      return;	/* Out of handles. This isn't really a big problem now, but
+      return;   /* Out of handles. This isn't really a big problem now, but
                    will be when we try to create a socket later. */
   close(fd[0]);
   close(fd[1]);
