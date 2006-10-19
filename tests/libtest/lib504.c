@@ -43,7 +43,7 @@ int test(char *URL)
 
       interval.tv_sec = 1;
       interval.tv_usec = 0;
-      int loop2 = 20;
+      loop2 = 20;
 
       fprintf(stderr, "curl_multi_perform()\n");
 
