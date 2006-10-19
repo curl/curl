@@ -7,6 +7,8 @@ int test(char *URL)
   int still_running;
   int i = -1;
   CURLMsg *msg;
+  int loop1 = 20;
+  int loop2 = 40;
 
   multi = curl_multi_init();
 
@@ -14,8 +16,10 @@ int test(char *URL)
   curl_easy_setopt(curls, CURLOPT_URL, URL);
   curl_multi_add_handle(multi, curls);
 
-  while ( CURLM_CALL_MULTI_PERFORM == curl_multi_perform(multi, &still_running) );
-  while(still_running) {
+  while ((--loop1>0) && (CURLM_CALL_MULTI_PERFORM == 
+         curl_multi_perform(multi, &still_running)));
+
+  while ((loop1>0) && (--loop2>0) && (still_running)) {
     struct timeval timeout;
     int rc;
     fd_set fdread;
@@ -34,15 +38,24 @@ int test(char *URL)
         break;
       case 0:
       default:
-        while (CURLM_CALL_MULTI_PERFORM == curl_multi_perform(multi, &still_running));
+        loop1 = 20;
+        while ((--loop1>0) && (CURLM_CALL_MULTI_PERFORM == 
+               curl_multi_perform(multi, &still_running)));
         break;
     }
   }
-  msg = curl_multi_info_read(multi, &still_running);
-  if(msg)
-    /* this should now contain a result code from the easy handle,
-       get it */
-    i = msg->data.result;
+  if ((loop1 <= 0) || (loop2 <= 0)) {
+    fprintf(stderr, "ABORTING TEST, since it seems "
+            "that it would have run forever.\n");
+    i = 77;
+  }
+  else {
+    msg = curl_multi_info_read(multi, &still_running);
+    if(msg)
+      /* this should now contain a result code from the easy handle,
+         get it */
+      i = msg->data.result;
+  }
 
   curl_multi_cleanup(multi);
   curl_easy_cleanup(curls);

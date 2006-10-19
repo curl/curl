@@ -21,8 +21,9 @@ static CURLMcode perform(CURLM * multi)
 	int handles, maxfd;
 	CURLMcode code;
 	fd_set fdread, fdwrite, fdexcep;
+	int loop;
 
-	for (;;) {
+	for (loop=40;loop>0;loop--) {
 		code = curl_multi_perform(multi, &handles);
 		if (handles <= 0)
 			return CURLM_OK;
@@ -44,6 +45,11 @@ static CURLMcode perform(CURLM * multi)
 			return (CURLMcode) ~CURLM_OK;
 		if (select(maxfd + 1, &fdread, &fdwrite, &fdexcep, 0) == -1)
 			return (CURLMcode) ~CURLM_OK;
+	}
+	if (loop <= 0) {
+		fprintf(stderr, "ABORTING TEST, since it seems "
+			"that it would have run forever.\n");
+		return (CURLMcode) ~CURLM_OK;
 	}
 }
 

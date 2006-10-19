@@ -20,7 +20,8 @@ int test(char *URL)
   int running;
   int max_fd;
   int rc;
-  int loop=10;
+  int loop1 = 10;
+  int loop2 = 20;
 
   curl_global_init(CURL_GLOBAL_ALL);
   c = curl_easy_init();
@@ -42,12 +43,15 @@ int test(char *URL)
 
       interval.tv_sec = 1;
       interval.tv_usec = 0;
+      int loop2 = 20;
 
       fprintf(stderr, "curl_multi_perform()\n");
 
       do {
         res = curl_multi_perform(m, &running);
-      } while (res == CURLM_CALL_MULTI_PERFORM);
+      } while ((--loop2>0) && (res == CURLM_CALL_MULTI_PERFORM));
+      if (loop2 <= 0)
+        break;
       if(!running) {
         /* This is where this code is expected to reach */
         int numleft;
@@ -82,7 +86,12 @@ int test(char *URL)
 
       /* we only allow a certain number of loops to avoid hanging here
          forever */
-    } while(--loop>0);
+    } while(--loop1>0);
+    if ((loop1 <= 0) || (loop2 <= 0)) {
+      fprintf(stderr, "ABORTING TEST, since it seems "
+              "that it would have run forever.\n");
+      ret = 77;
+    }
   }
 
   curl_multi_remove_handle(m, c);

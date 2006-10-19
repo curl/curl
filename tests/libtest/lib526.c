@@ -44,6 +44,8 @@ int test(char *URL)
   CURLM *m;
   int current=0;
   int i;
+  int loop1 = 40;
+  int loop2 = 20;
 
   /* In windows, this will init the winsock stuff */
   curl_global_init(CURL_GLOBAL_ALL);
@@ -67,15 +69,16 @@ int test(char *URL)
 
   fprintf(stderr, "Start at URL 0\n");
 
-  while(!done) {
+  while ((--loop1>0) && (loop2>0) && (!done)) {
     fd_set rd, wr, exc;
     int max_fd;
     struct timeval interval;
 
     interval.tv_sec = 1;
     interval.tv_usec = 0;
+    loop2 = 20;
 
-    while (res == CURLM_CALL_MULTI_PERFORM) {
+    while ((--loop2>0) && (res == CURLM_CALL_MULTI_PERFORM)) {
       res = (int)curl_multi_perform(m, &running);
       if (running <= 0) {
 #ifdef LIB527
@@ -112,7 +115,7 @@ int test(char *URL)
         break;
       }
     }
-    if(done)
+    if ((loop2 <= 0) || (done))
       break;
 
     if (res != CURLM_OK) {
@@ -138,6 +141,12 @@ int test(char *URL)
     }
 
     res = CURLM_CALL_MULTI_PERFORM;
+  }
+
+  if ((loop1 <= 0) || (loop2 <= 0)) {
+    fprintf(stderr, "ABORTING TEST, since it seems "
+            "that it would have run forever.\n");
+    res = 77;
   }
 
 #ifndef LIB527

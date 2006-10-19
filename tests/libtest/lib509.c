@@ -175,6 +175,9 @@ int test(char *URL)
   int i = 0;
   CURLMsg *msg;
 
+  int loop1 = 40;
+  int loop2 = 20;
+
   if(arg2) {
     portnum = atoi(arg2);
   }
@@ -205,15 +208,16 @@ int test(char *URL)
 
     res = curl_multi_add_handle(multi, p.curl);
 
-    while(!done) {
+    while ((--loop1>0) && (loop2>0) && (!done)) {
       fd_set rd, wr, exc;
       int max_fd;
       struct timeval interval;
 
       interval.tv_sec = 1;
       interval.tv_usec = 0;
+      loop2 = 20;
 
-      while (res == CURLM_CALL_MULTI_PERFORM) {
+      while ((--loop2>0) && (res == CURLM_CALL_MULTI_PERFORM)) {
         res = curl_multi_perform(multi, &running);
         fprintf(stderr, "running=%d res=%d\n",running,res);
         if (running <= 0) {
@@ -221,7 +225,7 @@ int test(char *URL)
           break;
         }
       }
-      if(done)
+      if ((loop2 <= 0) || (done))
         break;
 
       if (res != CURLM_OK) {
@@ -249,13 +253,23 @@ int test(char *URL)
 
       res = CURLM_CALL_MULTI_PERFORM;
     }
-    msg = curl_multi_info_read(multi, &running);
-    /* this should now contain a result code from the easy handle, get it */
-    if(msg)
-      i = msg->data.result;
+
+    if ((loop1 <= 0) || (loop2 <= 0)) {
+      fprintf(stderr, "ABORTING TEST, since it seems "
+              "that it would have run forever.\n");
+      i = 77;
+    }
+    else {
+      msg = curl_multi_info_read(multi, &running);
+      /* this should now contain a result code from the easy handle, get it */
+      if(msg)
+        i = msg->data.result;
+    }
   }
 
-  fprintf(stderr, "all done\n");
+  if ((loop1>0) && (loop2>0)) {
+    fprintf(stderr, "all done\n");
+  }
 
   curl_multi_remove_handle(multi, p.curl);
   curl_easy_cleanup(p.curl);
