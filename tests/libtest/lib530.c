@@ -24,7 +24,7 @@ int test(char *URL)
   CURLM *m;
   int i;
   int loop1 = 40;
-  int loop2 = 20;
+  int loop2 = 60;
 
   /* In windows, this will init the winsock stuff */
   curl_global_init(CURL_GLOBAL_ALL);
@@ -60,7 +60,7 @@ int test(char *URL)
 
     interval.tv_sec = 1;
     interval.tv_usec = 0;
-    loop2 = 20;
+    loop2 = 60;
 
     while ((--loop2>0) && (res == CURLM_CALL_MULTI_PERFORM)) {
       res = (int)curl_multi_perform(m, &running);
