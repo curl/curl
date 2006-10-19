@@ -144,6 +144,7 @@ int test(char *URL)
   }
 
   if ((loop1 <= 0) || (loop2 <= 0)) {
+    fprintf(stderr, "loop1: %d loop2: %d \n", loop1, loop2);
     fprintf(stderr, "ABORTING TEST, since it seems "
             "that it would have run forever.\n");
     res = 77;

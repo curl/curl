@@ -88,6 +88,7 @@ int test(char *URL)
          forever */
     } while(--loop1>0);
     if ((loop1 <= 0) || (loop2 <= 0)) {
+      fprintf(stderr, "loop1: %d loop2: %d \n", loop1, loop2);
       fprintf(stderr, "ABORTING TEST, since it seems "
               "that it would have run forever.\n");
       ret = 77;
