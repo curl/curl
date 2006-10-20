@@ -3623,7 +3623,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
           conn->connectindex,
           conn->bits.httpproxy?conn->proxy.dispname:conn->host.dispname);
 #ifdef CURLRES_ASYNCH
-    if(!conn->dns_entry) {
+    if(!conn->ip_addr_str) {
       infof(data, "... but it is not resolved yet!\n");
       *async = TRUE;
     }

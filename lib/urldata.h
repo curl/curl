@@ -684,7 +684,8 @@ struct connectdata {
 
   /* 'dns_entry' is the particular host we use. This points to an entry in the
      DNS cache and it will not get pruned while locked. It gets unlocked in
-     Curl_done() */
+     Curl_done(). This entry will be NULL if the connection is re-used as then
+     there is no name resolve done. */
   struct Curl_dns_entry *dns_entry;
 
   /* 'ip_addr' is the particular IP we connected to. It points to a struct
