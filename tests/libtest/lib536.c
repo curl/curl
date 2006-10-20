@@ -14,6 +14,11 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include "timeval.h"
+
+#define MAIN_LOOP_HANG_TIMEOUT     45 * 1000
+#define MULTI_PERFORM_HANG_TIMEOUT 30 * 1000
+
 static CURLMcode perform(CURLM * multi);
 
 static CURLMcode perform(CURLM * multi)
@@ -21,10 +26,19 @@ static CURLMcode perform(CURLM * multi)
   int handles, maxfd;
   CURLMcode code;
   fd_set fdread, fdwrite, fdexcep;
-  int loop;
+  struct timeval mp_start;
+  char mp_timedout = FALSE;
 
-  for (loop=40;loop>0;loop--) {
+  mp_timedout = FALSE;
+  mp_start = curlx_tvnow();
+
+  for (;;) {
     code = curl_multi_perform(multi, &handles);
+    if (curlx_tvdiff(curlx_tvnow(), mp_start) > 
+        MULTI_PERFORM_HANG_TIMEOUT) {
+      mp_timedout = TRUE;
+      break;
+    }
     if (handles <= 0)
       return CURLM_OK;
 
@@ -47,7 +61,8 @@ static CURLMcode perform(CURLM * multi)
       return (CURLMcode) ~CURLM_OK;
   }
 
-  /* We only reach this point if (loop <= 0) */
+  /* We only reach this point if (mp_timedout) */
+  fprintf(stderr, "mp_timedout\n");
   fprintf(stderr, "ABORTING TEST, since it seems "
           "that it would have run forever.\n");
   return (CURLMcode) ~CURLM_OK;

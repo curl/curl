@@ -3,6 +3,11 @@
 #include <sys/time.h>
 #include <sys/types.h>
 
+#include "timeval.h"
+
+#define MAIN_LOOP_HANG_TIMEOUT     45 * 1000
+#define MULTI_PERFORM_HANG_TIMEOUT 30 * 1000
+
 /*
  * Source code in here hugely as reported in bug report 651464 by
  * Christopher R. Palmer.
@@ -20,8 +25,10 @@ int test(char *URL)
   int running;
   int max_fd;
   int rc;
-  int loop1 = 10;
-  int loop2 = 20;
+  struct timeval ml_start;
+  struct timeval mp_start;
+  char ml_timedout = FALSE;
+  char mp_timedout = FALSE;
 
   curl_global_init(CURL_GLOBAL_ALL);
   c = curl_easy_init();
@@ -38,19 +45,36 @@ int test(char *URL)
   if(res && (res != CURLM_CALL_MULTI_PERFORM))
     ; /* major failure */
   else {
+
+    ml_timedout = FALSE;
+    ml_start = curlx_tvnow();
+
     do {
       struct timeval interval;
 
       interval.tv_sec = 1;
       interval.tv_usec = 0;
-      loop2 = 20;
+
+      if (curlx_tvdiff(curlx_tvnow(), ml_start) > 
+          MAIN_LOOP_HANG_TIMEOUT) {
+        ml_timedout = TRUE;
+        break;
+      }
 
       fprintf(stderr, "curl_multi_perform()\n");
 
+      mp_timedout = FALSE;
+      mp_start = curlx_tvnow();
+
       do {
         res = curl_multi_perform(m, &running);
-      } while ((--loop2>0) && (res == CURLM_CALL_MULTI_PERFORM));
-      if (loop2 <= 0)
+        if (curlx_tvdiff(curlx_tvnow(), mp_start) > 
+            MULTI_PERFORM_HANG_TIMEOUT) {
+          mp_timedout = TRUE;
+          break;
+        }
+      } while (res == CURLM_CALL_MULTI_PERFORM);
+      if (mp_timedout)
         break;
       if(!running) {
         /* This is where this code is expected to reach */
@@ -84,11 +108,10 @@ int test(char *URL)
       rc = select_test(max_fd+1, &rd, &wr, &exc, &interval);
       fprintf(stderr, "select returned %d\n", rc);
 
-      /* we only allow a certain number of loops to avoid hanging here
-         forever */
-    } while(--loop1>0);
-    if ((loop1 <= 0) || (loop2 <= 0)) {
-      fprintf(stderr, "loop1: %d loop2: %d \n", loop1, loop2);
+    } while(1);
+    if (ml_timedout || mp_timedout) {
+      if (ml_timedout) fprintf(stderr, "ml_timedout\n");
+      if (mp_timedout) fprintf(stderr, "mp_timedout\n");
       fprintf(stderr, "ABORTING TEST, since it seems "
               "that it would have run forever.\n");
       ret = 77;
