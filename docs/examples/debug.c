@@ -84,6 +84,9 @@ int my_trace(CURL *handle, curl_infotype type,
   case CURLINFO_DATA_OUT:
     text = "=> Send data";
     break;
+  case CURLINFO_SSL_DATA_OUT:
+    text = "=> Send SSL data";
+    break;
   case CURLINFO_HEADER_IN:
     text = "<= Recv header";
     break;
@@ -92,9 +95,6 @@ int my_trace(CURL *handle, curl_infotype type,
     break;
   case CURLINFO_SSL_DATA_IN:
     text = "<= Recv SSL data";
-    break;
-  case CURLINFO_SSL_DATA_OUT:
-    text = "<= Send SSL data";
     break;
   }
 
