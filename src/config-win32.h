@@ -83,6 +83,45 @@
 #define HAVE_UTIME 1
 #endif
 
+/* Define if you have the recv function. */
+#define HAVE_RECV 1
+
+/* Define to the type of arg 1 for recv. */
+#define RECV_TYPE_ARG1 SOCKET
+
+/* Define to the type of arg 2 for recv. */
+#define RECV_TYPE_ARG2 char *
+
+/* Define to the type of arg 3 for recv. */
+#define RECV_TYPE_ARG3 int
+
+/* Define to the type of arg 4 for recv. */
+#define RECV_TYPE_ARG4 int
+
+/* Define to the function return type for recv. */
+#define RECV_TYPE_RETV int
+
+/* Define if you have the send function. */
+#define HAVE_SEND 1
+
+/* Define to the type of arg 1 for send. */
+#define SEND_TYPE_ARG1 SOCKET
+
+/* Define to the type qualifier of arg 2 for send. */
+#define SEND_QUAL_ARG2 const
+
+/* Define to the type of arg 2 for send. */
+#define SEND_TYPE_ARG2 char *
+
+/* Define to the type of arg 3 for send. */
+#define SEND_TYPE_ARG3 int
+
+/* Define to the type of arg 4 for send. */
+#define SEND_TYPE_ARG4 int
+
+/* Define to the function return type for send. */
+#define SEND_TYPE_RETV int
+
 /* ---------------------------------------------------------------- */
 /*                          STRUCT RELATED                          */
 /* ---------------------------------------------------------------- */
