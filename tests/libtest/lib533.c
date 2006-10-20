@@ -18,8 +18,8 @@
 
 #include "timeval.h"
 
-#define MAIN_LOOP_HANG_TIMEOUT     45 * 1000
-#define MULTI_PERFORM_HANG_TIMEOUT 30 * 1000
+#define MAIN_LOOP_HANG_TIMEOUT     30 * 1000
+#define MULTI_PERFORM_HANG_TIMEOUT 20 * 1000
 
 int test(char *URL)
 {
