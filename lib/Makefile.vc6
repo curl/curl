@@ -132,8 +132,8 @@ CFGSET   = TRUE
 !IF "$(CFG)" == "release-dll"
 TARGET = $(LIB_NAME).dll
 DIROBJ = $(CFG)
-LNK    = $(LNKDLL) $(RTLIB) $(WINLIBS) /out:$(DIROBJ)\$(TARGET) /IMPLIB:$(DIROBJ)\$(IMPLIB_NAME).lib
-CC     = $(CCNODBG)
+LNK    = $(LNKDLL) $(WINLIBS) /out:$(DIROBJ)\$(TARGET) /IMPLIB:$(DIROBJ)\$(IMPLIB_NAME).lib
+CC     = $(CCNODBG) $(RTLIB)
 CFGSET = TRUE
 RESOURCE = $(DIROBJ)\libcurl.res
 !ENDIF
