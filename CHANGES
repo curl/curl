@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (21 October 2006)
+- Armel Asselin separated CA cert verification problems from problems with
+  reading the (local) CA cert file to let users easier pinpoint the actual
+  problem. CURLE_SSL_CACERT_BADFILE (77) is the new libcurl error code.
+
 Daniel (18 October 2006)
 - Removed the "protocol-guessing" for URLs with host names starting with FTPS
   or TELNET since they are practically non-existant. This leaves us with only

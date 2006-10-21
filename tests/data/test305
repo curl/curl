@@ -28,6 +28,6 @@ https://%HOSTIP:%HTTPSPORT/want/305 --cacert moooo
 <protocol>
 </protocol>
 <errorcode>
-60
+77
 </errorcode>
 </verify>

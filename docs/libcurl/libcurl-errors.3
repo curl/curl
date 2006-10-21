@@ -174,7 +174,7 @@ problem with the local client certificate
 .IP "CURLE_SSL_CIPHER (59)"
 couldn't use specified cipher
 .IP "CURLE_SSL_CACERT (60)"
-problem with the CA cert (path? access rights?) 
+peer certificate cannot be authenticated with known CA certificates
 .IP "CURLE_BAD_CONTENT_ENCODING (61)"
 Unrecognized transfer encoding
 .IP "CURLE_LDAP_INVALID_URL (62)"
@@ -208,6 +208,8 @@ No such TFTP user
 Character conversion failed
 .IP "CURLE_CONV_REQD (76)"
 Caller must register conversion callbacks
+.IP "CURLE_SSL_CACERT_BADFILE (77)"
+Problem with reading the SSL CA cert (path? access rights?)
 .SH "CURLMcode"
 This is the generic return code used by functions in the libcurl multi
 interface. Also consider \fIcurl_multi_strerror(3)\fP.

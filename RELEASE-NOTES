@@ -10,7 +10,8 @@ Curl and libcurl 7.16.0
  Number of contributors:                   515
 
 This release includes the following changes:
-
+ 
+ o Added CURLE_SSL_CACERT_BADFILE
  o Added CURLMOPT_TIMERFUNCTION
  o The CURLOPT_SOURCE_* options are removed and so are the --3p* command line
    options

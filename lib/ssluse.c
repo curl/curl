@@ -1272,7 +1272,7 @@ Curl_ossl_connect_step1(struct connectdata *conn,
               "  CAfile: %s\n  CApath: %s\n",
               data->set.ssl.CAfile ? data->set.ssl.CAfile : "none",
               data->set.ssl.CApath ? data->set.ssl.CApath : "none");
-        return CURLE_SSL_CACERT;
+        return CURLE_SSL_CACERT_BADFILE;
       }
       else {
         /* Just continue with a warning if no strict  certificate verification

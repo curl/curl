@@ -390,6 +390,8 @@ typedef enum {
                                     CURLOPT_CONV_FROM_NETWORK_FUNCTION,
                                     CURLOPT_CONV_TO_NETWORK_FUNCTION, and
                                     CURLOPT_CONV_FROM_UTF8_FUNCTION */
+  CURLE_SSL_CACERT_BADFILE,      /* 77 - could not load CACERT file, missing
+                                    or wrong format */
   CURL_LAST /* never use! */
 } CURLcode;
 
