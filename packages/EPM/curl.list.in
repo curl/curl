@@ -8,6 +8,7 @@ $mandir=@mandir@
 $libdir=@libdir@
 $srcdir=@top_srcdir@
 $includedir=@includedir@
+$datarootdir=@datarootdir@
 
 # Product information
 %product curl
