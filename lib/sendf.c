@@ -273,7 +273,7 @@ CURLcode Curl_sendf(curl_socket_t sockfd, struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   ssize_t bytes_written;
   size_t write_len;
-  CURLcode res;
+  CURLcode res = CURLE_OK;
   char *s;
   char *sptr;
   va_list ap;
