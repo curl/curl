@@ -1154,7 +1154,7 @@ CURLcode Curl_telnet(struct connectdata *conn, bool *done)
 
   /* And WSACloseEvent */
   close_event_func = GetProcAddress(wsock2,"WSACloseEvent");
-  if (create_event_func == NULL) {
+  if (close_event_func == NULL) {
     failf(data,"failed to find WSACloseEvent function (%d)",
           GetLastError());
     FreeLibrary(wsock2);
