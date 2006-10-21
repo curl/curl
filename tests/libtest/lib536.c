@@ -62,7 +62,7 @@ static CURLMcode perform(CURLM * multi)
   }
 
   /* We only reach this point if (mp_timedout) */
-  fprintf(stderr, "mp_timedout\n");
+  if (mp_timedout) fprintf(stderr, "mp_timedout\n");
   fprintf(stderr, "ABORTING TEST, since it seems "
           "that it would have run forever.\n");
   return (CURLMcode) ~CURLM_OK;
