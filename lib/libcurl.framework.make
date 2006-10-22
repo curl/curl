@@ -1,4 +1,5 @@
-# to build Mac OS X framework call the following line with the directory set properly to lib
+# to build Mac OS X framework call the following line with the directory set
+# properly to lib:
 # make build -e -f libcurl.framework.make
 TMP_DIR = ../lib/.lib
 LIB_DIR = ../lib
@@ -117,8 +118,7 @@ $(LIB_DIR)/libcurl.framework: $(OBJECTS) $(LIB_DIR)/libcurl.plist
 		-o $(LIB_DIR)/libcurl.framework/Versions/A/libcurl
 	cp $(LIB_DIR)/libcurl.plist $(LIB_DIR)/libcurl.framework/Versions/A/Resources/Info.plist
 	mkdir -p $(LIB_DIR)/libcurl.framework/Versions/A/Headers
-	cp $(LIB_DIR)/../include/curl/* $(LIB_DIR)/libcurl.framework/Versions/A/Headers
-	rm $(LIB_DIR)/libcurl.framework/Versions/A/Headers/Make*
+	cp $(LIB_DIR)/../include/curl/*.h $(LIB_DIR)/libcurl.framework/Versions/A/Headers
 	cd $(LIB_DIR)/libcurl.framework; \
 	ln -fs ./Versions/A/libcurl libcurl; \
 	ln -fs ./Versions/A/Resources Resources; \
