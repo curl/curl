@@ -99,7 +99,8 @@ OBJECTS = $(TMP_DIR)/base64.o \
 	$(TMP_DIR)/transfer.o \
 	$(TMP_DIR)/url.o \
 	$(TMP_DIR)/version.o \
-	$(TMP_DIR)/splay.o 
+	$(TMP_DIR)/splay.o \
+	$(TMP_DIR)/socks.o 
 
 build: $(TMP_DIR) $(LIB_DIR) $(LIB_DIR)/libcurl.framework
 
