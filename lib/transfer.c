@@ -743,8 +743,10 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 failf(data, "Maximum file size exceeded");
                 return CURLE_FILESIZE_EXCEEDED;
               }
-              if(contentlength >= 0)
+              if(contentlength >= 0) {
                 k->size = contentlength;
+                k->maxdownload = k->size;
+              }
               else {
                 /* Negative Content-Length is really odd, and we know it
                    happens for example when older Apache servers send large
@@ -1091,11 +1093,11 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               Curl_debug(data, CURLINFO_DATA_IN, data->state.headerbuff,
                          (size_t)k->hbuflen, conn);
               if(k->badheader == HEADER_PARTHEADER)
-                Curl_debug(data, CURLINFO_DATA_IN, 
+                Curl_debug(data, CURLINFO_DATA_IN,
                            k->str, (size_t)nread, conn);
             }
             else
-              Curl_debug(data, CURLINFO_DATA_IN, 
+              Curl_debug(data, CURLINFO_DATA_IN,
                          k->str, (size_t)nread, conn);
           }
 
@@ -1133,13 +1135,17 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
           if((-1 != k->maxdownload) &&
              (k->bytecount + nread >= k->maxdownload)) {
-            size_t excess = (size_t)(k->bytecount + 
-                             (curl_off_t)nread - k->maxdownload);
-
-            if (excess > 0) {
-                infof(data, "Rewinding stream by : %d bytes\n", excess);
-                Curl_read_rewind(conn, excess);
-                conn->bits.stream_was_rewound = TRUE;
+            curl_off_t excess = k->bytecount +
+              ((curl_off_t) nread) - k->maxdownload;
+            if (excess > 0 && !k->ignorebody) {
+              infof(data,
+                    "Rewinding stream by : %" FORMAT_OFF_T
+                    " bytes on url %s (size = %" FORMAT_OFF_T
+                    ", maxdownload = %" FORMAT_OFF_T
+                    ", bytecount = %" FORMAT_OFF_T ", nread = %d)\n",
+                    excess, conn->data->reqdata.path,
+                    k->size, k->maxdownload, k->bytecount, nread);
+              Curl_read_rewind(conn, excess);
             }
 
             nread = (ssize_t) (k->maxdownload - k->bytecount);

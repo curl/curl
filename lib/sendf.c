@@ -438,14 +438,25 @@ CURLcode Curl_client_write(struct connectdata *conn,
   return CURLE_OK;
 }
 
+#define MIN(a,b) (a < b ? a : b)
+
 void Curl_read_rewind(struct connectdata *conn,
                       size_t extraBytesRead)
 {
+    char buf[512 + 1];
+    size_t bytesToShow;
+
     conn->read_pos -= extraBytesRead;
     conn->bits.stream_was_rewound = TRUE;
-}
 
-#define MIN(a,b) (a < b ? a : b)
+    bytesToShow = MIN(conn->buf_len - conn->read_pos, sizeof(buf)-1);
+    memcpy(buf, conn->master_buffer + conn->read_pos, bytesToShow);
+    buf[bytesToShow] = '\0';
+
+    DEBUGF(infof(conn->data,
+                 "Buffer after stream rewind (read_pos = %d): [%s]",
+                 conn->read_pos, buf));
+}
 
 /*
  * Internal read-from-socket function. This is meant to deal with plain
@@ -457,12 +468,12 @@ void Curl_read_rewind(struct connectdata *conn,
 int Curl_read(struct connectdata *conn, /* connection data */
               curl_socket_t sockfd,     /* read from this socket */
               char *buf,                /* store read data here */
-              size_t buffersize,        /* max amount to read */
+              size_t sizerequested,     /* max amount to read */
               ssize_t *n)               /* amount bytes read */
 {
   ssize_t nread;
-  size_t bytestocopy = MIN(conn->buf_len - conn->read_pos, buffersize);
-  size_t bytesremaining = buffersize - bytestocopy;
+  size_t bytestocopy = MIN(conn->buf_len - conn->read_pos, sizerequested);
+  size_t bytesfromsocket = 0;
 
   /* Set 'num' to 0 or 1, depending on which socket that has been sent here.
      If it is the second socket, we set num to 1. Otherwise to 0. This lets
@@ -471,34 +482,34 @@ int Curl_read(struct connectdata *conn, /* connection data */
 
   *n=0; /* reset amount to zero */
 
-  bytesremaining = MIN(bytesremaining, sizeof(conn->master_buffer));
+  /* Copy from our master buffer first if we have some unread data there*/
+  if (bytestocopy > 0) {
+    memcpy(buf, conn->master_buffer + conn->read_pos, bytestocopy);
+    conn->read_pos += bytestocopy;
+    conn->bits.stream_was_rewound = FALSE;
 
-  /* Copy from our master buffer first */
-  memcpy(buf, conn->master_buffer + conn->read_pos, bytestocopy);
-  conn->read_pos += bytestocopy;
-
-  conn->bits.stream_was_rewound = FALSE;
-
-  *n = (ssize_t)bytestocopy;
-
-  if (bytesremaining == 0) {
-      return CURLE_OK;
+    *n = (ssize_t)bytestocopy;
+    return CURLE_OK;
   }
 
+  /* If we come here, it means that there is no data to read from the buffer,
+   * so we read from the socket */
+  bytesfromsocket = MIN(sizerequested, sizeof(conn->master_buffer));
+
   if(conn->ssl[num].use) {
-    nread = Curl_ssl_recv(conn, num, conn->master_buffer, bytesremaining);
+    nread = Curl_ssl_recv(conn, num, conn->master_buffer, bytesfromsocket);
 
-    if(nread == -1 && bytestocopy == 0) {
+    if(nread == -1)
       return -1; /* -1 from Curl_ssl_recv() means EWOULDBLOCK */
-    }
-
-  } else {
+  }
+  else {
     if(conn->sec_complete)
-      nread = Curl_sec_read(conn, sockfd, conn->master_buffer, bytesremaining);
+      nread = Curl_sec_read(conn, sockfd, conn->master_buffer,
+                            bytesfromsocket);
     else
-      nread = sread(sockfd, conn->master_buffer, bytesremaining);
+      nread = sread(sockfd, conn->master_buffer, bytesfromsocket);
 
-    if(-1 == nread && bytestocopy == 0) {
+    if(-1 == nread) {
       int err = Curl_sockerrno();
 #ifdef USE_WINSOCK
       if(WSAEWOULDBLOCK == err)
@@ -509,12 +520,12 @@ int Curl_read(struct connectdata *conn, /* connection data */
     }
   }
 
-  if (nread > 0) {
-      memcpy(buf, conn->master_buffer, nread);
+  if (nread >= 0) {
+    memcpy(buf, conn->master_buffer, nread);
 
-      conn->buf_len = nread;
-      conn->read_pos = nread;
-      *n += nread;
+    conn->buf_len = nread;
+    conn->read_pos = nread;
+    *n = nread;
   }
 
   return CURLE_OK;

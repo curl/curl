@@ -1854,6 +1854,7 @@ int Curl_removeHandleFromPipeline(struct SessionHandle *handle,
     }
     curr = curr->next;
   }
+
   return 0;
 }
 
@@ -1899,8 +1900,8 @@ static void signalPipeClose(struct curl_llist *pipe)
     }
     else
 #endif
-      data->state.pipe_broke = TRUE;
 
+    data->state.pipe_broke = TRUE;
     Curl_llist_remove(pipe, curr, NULL);
     curr = next;
   }
@@ -1936,12 +1937,19 @@ ConnectionExists(struct SessionHandle *data,
       /* NULL pointer means not filled-in entry */
       continue;
 
+#ifdef USE_ARES
+    /* ip_addr_str is NULL only if the resolving of the name hasn't completed
+       yet and until then we don't re-use this connection */
+    if (!check->ip_addr_str)
+        continue;
+#endif
+
     if(check->inuse && !canPipeline)
       /* can only happen within multi handles, and means that another easy
          handle is using this connection */
       continue;
 
-    if (check->send_pipe->size >= MAX_PIPELINE_LENGTH ||
+    if (check->send_pipe->size +
         check->recv_pipe->size >= MAX_PIPELINE_LENGTH)
       continue;
 
@@ -1994,14 +2002,28 @@ ConnectionExists(struct SessionHandle *data,
     }
 
     if(match) {
+
       bool dead = SocketIsDead(check->sock[FIRSTSOCKET]);
       if(dead) {
-        /*
-         */
-        check->data = data;
-        infof(data, "Connection %d seems to be dead!\n", i);
-        Curl_disconnect(check); /* disconnect resources */
-        data->state.connc->connects[i]=NULL; /* nothing here */
+        if (!check->is_in_pipeline) {
+          check->data = data;
+          infof(data, "Connection %d seems to be dead!\n", i);
+
+          Curl_disconnect(check); /* disconnect resources */
+          data->state.connc->connects[i]=NULL; /* nothing here */
+        }
+        else {
+          /* In the pipelining case, freeing the connection right away
+           * doesn't work. Instead, we mark the connection for close
+           * so that the handles will detect this automatically when
+           * they try to do something and deal with it there.
+           * Prematurely freeing this connection prevents handles that
+           * have already finished with their transfers to shut down
+           * cleanly.
+           */
+          infof(data, "Connection %d seems dead - marking for close\n", i);
+          check->bits.close = TRUE;
+        }
 
         /* There's no need to continue searching, because we only store
            one connection for each unique set of identifiers */
@@ -2012,10 +2034,13 @@ ConnectionExists(struct SessionHandle *data,
                               handle in a multi stack may nick it */
 
       if (canPipeline) {
-          /* Mark the connection as being in a pipeline */
-          check->is_in_pipeline = TRUE;
+        /* Mark the connection as being in a pipeline */
+        check->is_in_pipeline = TRUE;
       }
 
+      check->connectindex = i; /* Set this appropriately since it might have
+                                  been set to -1 when the easy was removed
+                                  from the multi */
       *usethis = check;
       return TRUE; /* yes, we found one to use! */
     }
@@ -2689,6 +2714,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
   conn->readchannel_inuse = FALSE;
   conn->writechannel_inuse = FALSE;
+
+  conn->read_pos = 0;
+  conn->buf_len = 0;
 
   /* Initialize the pipeline lists */
   conn->send_pipe = Curl_llist_alloc((curl_llist_dtor) llist_dtor);
@@ -3622,12 +3650,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     infof(data, "Re-using existing connection! (#%ld) with host %s\n",
           conn->connectindex,
           conn->bits.httpproxy?conn->proxy.dispname:conn->host.dispname);
-#ifdef CURLRES_ASYNCH
-    if(!conn->ip_addr_str) {
-      infof(data, "... but it is not resolved yet!\n");
-      *async = TRUE;
-    }
-#endif
   }
   else {
     /*
@@ -3990,10 +4012,10 @@ CURLcode Curl_done(struct connectdata **connp,
 
   if(Curl_removeHandleFromPipeline(data, conn->recv_pipe) &&
      conn->readchannel_inuse)
-    conn->readchannel_inuse--;
+    conn->readchannel_inuse = FALSE;
   if(Curl_removeHandleFromPipeline(data, conn->send_pipe) &&
      conn->writechannel_inuse)
-    conn->writechannel_inuse--;
+    conn->writechannel_inuse = FALSE;
 
   /* cleanups done even if the connection is re-used */
   if(data->reqdata.rangestringalloc) {

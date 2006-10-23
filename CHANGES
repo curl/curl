@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (23 October 2006)
+- Ravi Pratap provided a major update with pipelining fixes. We also no longer
+  re-use connections (for pipelining) before the name resolving is done.
+
 Daniel (21 October 2006)
 - Nir Soffer made the tests/libtest/Makefile.am use a proper variable for all
   the single test applications' link and dependences, so that you easier can

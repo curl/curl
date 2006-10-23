@@ -812,8 +812,8 @@ struct connectdata {
                                    their responses on this pipeline */
 
   char master_buffer[BUFSIZE]; /* The master buffer for this connection. */
-  size_t read_pos;
-  size_t buf_len;
+  size_t read_pos; /* Current read position in the master buffer */
+  size_t buf_len; /* Length of the buffer?? */
 
 
   /*************** Request - specific items ************/

@@ -773,7 +773,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       return CURLM_BAD_EASY_HANDLE;
 
     if (easy->easy_handle->state.pipe_broke) {
-      infof(easy->easy_handle, "Pipe broke: handle 0x%x\n", easy);
+      infof(easy->easy_handle, "Pipe broke: handle 0x%x, url = %s\n",
+            easy, easy->easy_handle->reqdata.path);
       if(easy->easy_handle->state.is_in_pipeline) {
         /* Head back to the CONNECT state */
         multistate(easy, CURLM_STATE_CONNECT);
