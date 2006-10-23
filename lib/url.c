@@ -1937,7 +1937,7 @@ ConnectionExists(struct SessionHandle *data,
       /* NULL pointer means not filled-in entry */
       continue;
 
-#ifdef USE_ARES
+#ifdef CURLRES_ASYNCH
     /* ip_addr_str is NULL only if the resolving of the name hasn't completed
        yet and until then we don't re-use this connection */
     if (!check->ip_addr_str)
