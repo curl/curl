@@ -233,7 +233,7 @@ int ProcessRequest(struct httprequest *req)
         return 1; /* done */
       }
 
-      if(!strncmp("/quit", ptr, 15)) {
+      if(!strncmp("/quit", ptr, 5)) {
         logmsg("Request-to-quit received");
         req->testno = DOCNUMBER_QUIT;
         return 1; /* done */
