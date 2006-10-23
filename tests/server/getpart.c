@@ -37,8 +37,9 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-#define EAT_SPACE(ptr) while( ptr && *ptr && isspace((int)*ptr) ) ptr++
-#define EAT_WORD(ptr) while( ptr && *ptr && !isspace((int)*ptr) && ('>' != *ptr)) ptr++
+#define EAT_SPACE(ptr) while( ptr && *ptr && ISSPACE(*ptr) ) ptr++
+#define EAT_WORD(ptr) while( ptr && *ptr && !ISSPACE(*ptr) && \
+                            ('>' != *ptr)) ptr++
 
 #ifdef DEBUG
 #define show(x) printf x

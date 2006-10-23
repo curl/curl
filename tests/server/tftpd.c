@@ -668,7 +668,7 @@ static int validate_access(struct testcase *test,
     ptr++; /* skip the slash */
 
     /* skip all non-numericals following the slash */
-    while(*ptr && !isdigit((int)*ptr))
+    while(*ptr && !ISDIGIT(*ptr))
       ptr++;
 
     /* get the number */

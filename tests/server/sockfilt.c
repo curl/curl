@@ -119,7 +119,7 @@ static void lograw(unsigned char *buffer, ssize_t len)
       optr += 2;
       break;
     default:
-      sprintf(optr, "%c", (isgraph(ptr[i]) || ptr[i]==0x20) ?ptr[i]:'.');
+      sprintf(optr, "%c", (ISGRAPH(ptr[i]) || ptr[i]==0x20) ?ptr[i]:'.');
       width++;
       optr++;
       break;

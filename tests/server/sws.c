@@ -242,7 +242,7 @@ int ProcessRequest(struct httprequest *req)
       ptr++; /* skip the slash */
 
       /* skip all non-numericals following the slash */
-      while(*ptr && !isdigit((int)*ptr))
+      while(*ptr && !ISDIGIT(*ptr))
         ptr++;
 
       req->testno = strtol(ptr, &ptr, 10);
