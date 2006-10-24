@@ -158,6 +158,7 @@ static bool ConnectionExists(struct SessionHandle *data,
 static long ConnectionStore(struct SessionHandle *data,
                             struct connectdata *conn);
 static bool IsPipeliningPossible(struct SessionHandle *handle);
+static bool IsPipeliningEnabled(struct SessionHandle *handle);
 static void conn_free(struct connectdata *conn);
 
 static void signalPipeClose(struct curl_llist *pipe);
@@ -1790,8 +1791,10 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   Curl_ssl_close(conn);
 
   /* Indicate to all handles on the pipe that we're dead */
-  signalPipeClose(conn->send_pipe);
-  signalPipeClose(conn->recv_pipe);
+  if (IsPipeliningEnabled(data)) {
+    signalPipeClose(conn->send_pipe);
+    signalPipeClose(conn->recv_pipe);
+  }
 
   conn_free(conn);
 
@@ -1822,6 +1825,14 @@ static bool IsPipeliningPossible(struct SessionHandle *handle)
       (handle->set.httpreq == HTTPREQ_GET ||
        handle->set.httpreq == HTTPREQ_HEAD) &&
       handle->set.httpversion != CURL_HTTP_VERSION_1_0)
+    return TRUE;
+
+  return FALSE;
+}
+
+static bool IsPipeliningEnabled(struct SessionHandle *handle)
+{
+  if (handle->multi && Curl_multi_canPipeline(handle->multi))
     return TRUE;
 
   return FALSE;
@@ -1937,21 +1948,44 @@ ConnectionExists(struct SessionHandle *data,
       /* NULL pointer means not filled-in entry */
       continue;
 
+    if (check->connectindex == -1) {
+      check->connectindex = i; /* Set this appropriately since it might have
+                                  been set to -1 when the easy was removed
+                                  from the multi */
+    }
+
+    infof(data, "Examining connection #%ld for reuse\n", check->connectindex);
+
+    if(check->inuse && !canPipeline) {
+      /* can only happen within multi handles, and means that another easy
+      handle is using this connection */
+      continue;
+    }
+
 #ifdef CURLRES_ASYNCH
     /* ip_addr_str is NULL only if the resolving of the name hasn't completed
        yet and until then we don't re-use this connection */
-    if (!check->ip_addr_str)
-        continue;
+    if (!check->ip_addr_str) {
+      infof(data,
+            "Connection #%ld has not finished name resolve, can't reuse\n",
+            check->connectindex);
+      continue;
+    }
 #endif
 
-    if(check->inuse && !canPipeline)
-      /* can only happen within multi handles, and means that another easy
-         handle is using this connection */
-      continue;
-
     if (check->send_pipe->size +
-        check->recv_pipe->size >= MAX_PIPELINE_LENGTH)
+        check->recv_pipe->size >= MAX_PIPELINE_LENGTH) {
+      infof(data, "Connection #%ld has its pipeline full, can't reuse\n",
+            check->connectindex);
       continue;
+    }
+
+    if (data->state.is_in_pipeline && check->bits.close) {
+        /* Don't pick a connection that is going to be closed */
+        infof(data, "Connection #%ld has been marked for close, can't reuse\n",
+              check->connectindex);
+        continue;
+    }
 
     if((needle->protocol&PROT_SSL) != (check->protocol&PROT_SSL))
       /* don't do mixed SSL and non-SSL connections */
@@ -2002,33 +2036,22 @@ ConnectionExists(struct SessionHandle *data,
     }
 
     if(match) {
-
-      bool dead = SocketIsDead(check->sock[FIRSTSOCKET]);
-      if(dead) {
-        if (!check->is_in_pipeline) {
+#if 1
+      if (!IsPipeliningEnabled(data)) {
+        /* The check for a dead socket makes sense only in the
+           non-pipelining case */
+        bool dead = SocketIsDead(check->sock[FIRSTSOCKET]);
+        if(dead) {
           check->data = data;
-          infof(data, "Connection %d seems to be dead!\n", i);
+          infof(data, "Connection #%d seems to be dead!\n", i);
 
           Curl_disconnect(check); /* disconnect resources */
           data->state.connc->connects[i]=NULL; /* nothing here */
-        }
-        else {
-          /* In the pipelining case, freeing the connection right away
-           * doesn't work. Instead, we mark the connection for close
-           * so that the handles will detect this automatically when
-           * they try to do something and deal with it there.
-           * Prematurely freeing this connection prevents handles that
-           * have already finished with their transfers to shut down
-           * cleanly.
-           */
-          infof(data, "Connection %d seems dead - marking for close\n", i);
-          check->bits.close = TRUE;
-        }
 
-        /* There's no need to continue searching, because we only store
-           one connection for each unique set of identifiers */
-        return FALSE;
+          return FALSE;
+        }
       }
+#endif
 
       check->inuse = TRUE; /* mark this as being in use so that no other
                               handle in a multi stack may nick it */
@@ -2045,8 +2068,10 @@ ConnectionExists(struct SessionHandle *data,
       return TRUE; /* yes, we found one to use! */
     }
   }
+
   return FALSE; /* no matching connecting exists */
 }
+
 
 
 /*
@@ -2182,9 +2207,9 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
   Curl_addrinfo *addr;
   char *hostname = data->change.proxy?conn->proxy.name:conn->host.name;
 
-  infof(data, "About to connect() to %s%s port %d\n",
+  infof(data, "About to connect() to %s%s port %d (#%d)\n",
         data->change.proxy?"proxy ":"",
-        hostname, conn->port);
+        hostname, conn->port, conn->connectindex);
 
   /*************************************************************
    * Connect to server/proxy
@@ -2226,9 +2251,9 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
  */
 static void verboseconnect(struct connectdata *conn)
 {
-  infof(conn->data, "Connected to %s (%s) port %d\n",
+  infof(conn->data, "Connected to %s (%s) port %d (#%d)\n",
         conn->bits.httpproxy ? conn->proxy.dispname : conn->host.dispname,
-        conn->ip_addr_str, conn->port);
+        conn->ip_addr_str, conn->port, conn->connectindex);
 }
 
 int Curl_protocol_getsock(struct connectdata *conn,
