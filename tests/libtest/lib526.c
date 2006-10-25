@@ -48,21 +48,28 @@ int test(char *URL)
   char done=FALSE;
   CURLM *m;
   int current=0;
-  int i;
+  int i, j;
   struct timeval ml_start;
   struct timeval mp_start;
   char ml_timedout = FALSE;
   char mp_timedout = FALSE;
 
-  /* In windows, this will init the winsock stuff */
-  curl_global_init(CURL_GLOBAL_ALL);
+  if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    fprintf(stderr, "curl_global_init() failed\n");
+    return TEST_ERR_MAJOR_BAD;
+  }
 
   /* get NUM_HANDLES easy handles */
   for(i=0; i < NUM_HANDLES; i++) {
     curl[i] = curl_easy_init();
     if(!curl[i]) {
+      fprintf(stderr, "curl_easy_init() failed "
+              "on handle #%d\n", i);
+      for (j=i-1; j >= 0; j--) {
+        curl_easy_cleanup(curl[j]);
+      }
       curl_global_cleanup();
-      return 100 + i; /* major bad */
+      return TEST_ERR_MAJOR_BAD + i;
     }
     curl_easy_setopt(curl[i], CURLOPT_URL, URL);
 
@@ -70,9 +77,25 @@ int test(char *URL)
     curl_easy_setopt(curl[i], CURLOPT_VERBOSE, 1);
   }
 
-  m = curl_multi_init();
+  if ((m = curl_multi_init()) == NULL) {
+    fprintf(stderr, "curl_multi_init() failed\n");
+    for(i=0; i < NUM_HANDLES; i++) {
+      curl_easy_cleanup(curl[i]);
+    }
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
+  }
 
-  res = (int)curl_multi_add_handle(m, curl[current]);
+  if ((res = (int)curl_multi_add_handle(m, curl[current])) != CURLM_OK) {
+    fprintf(stderr, "curl_multi_add_handle() failed, "
+            "with code %d\n", res);
+    curl_multi_cleanup(m);
+    for(i=0; i < NUM_HANDLES; i++) {
+      curl_easy_cleanup(curl[i]);
+    }
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
+  }
 
   ml_timedout = FALSE;
   ml_start = curlx_tvnow();
@@ -170,7 +193,7 @@ int test(char *URL)
     if (mp_timedout) fprintf(stderr, "mp_timedout\n");
     fprintf(stderr, "ABORTING TEST, since it seems "
             "that it would have run forever.\n");
-    res = 77;
+    res = TEST_ERR_RUNS_FOREVER;
   }
 
 #ifndef LIB527

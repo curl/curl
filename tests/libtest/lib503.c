@@ -28,8 +28,17 @@ int test(char *URL)
   char ml_timedout = FALSE;
   char mp_timedout = FALSE;
 
-  curl_global_init(CURL_GLOBAL_ALL);
-  c = curl_easy_init();
+  if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    fprintf(stderr, "curl_global_init() failed\n");
+    return TEST_ERR_MAJOR_BAD;
+  }
+
+  if ((c = curl_easy_init()) == NULL) {
+    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
+  }
+
   curl_easy_setopt(c, CURLOPT_PROXY, arg2); /* set in first.c */
   curl_easy_setopt(c, CURLOPT_URL, URL);
   curl_easy_setopt(c, CURLOPT_USERPWD, "test:ing");
@@ -37,10 +46,21 @@ int test(char *URL)
   curl_easy_setopt(c, CURLOPT_HTTPPROXYTUNNEL, 1);
   curl_easy_setopt(c, CURLOPT_HEADER, 1);
 
+  if ((m = curl_multi_init()) == NULL) {
+    fprintf(stderr, "curl_multi_init() failed\n");
+    curl_easy_cleanup(c);
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
+  }
 
-  m = curl_multi_init();
-
-  res = (int)curl_multi_add_handle(m, c);
+  if ((res = (int)curl_multi_add_handle(m, c)) != CURLM_OK) {
+    fprintf(stderr, "curl_multi_add_handle() failed, "
+            "with code %d\n", res);
+    curl_multi_cleanup(m);
+    curl_easy_cleanup(c);
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
+  }
 
   ml_timedout = FALSE;
   ml_start = curlx_tvnow();
@@ -106,14 +126,14 @@ int test(char *URL)
     if (mp_timedout) fprintf(stderr, "mp_timedout\n");
     fprintf(stderr, "ABORTING TEST, since it seems "
             "that it would have run forever.\n");
-    res = 77;
+    res = TEST_ERR_RUNS_FOREVER;
   }
 
   curl_multi_remove_handle(m, c);
   curl_easy_cleanup(c);
   curl_multi_cleanup(m);
-
   curl_global_cleanup();
+
   return res;
 }
 

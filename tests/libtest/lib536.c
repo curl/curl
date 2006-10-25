@@ -70,8 +70,26 @@ static CURLMcode perform(CURLM * multi)
 
 int test(char *URL)
 {
-  CURLM *multi = curl_multi_init();
-  CURL *easy = curl_easy_init();
+  CURLM *multi;
+  CURL *easy;
+
+  if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    fprintf(stderr, "curl_global_init() failed\n");
+    return TEST_ERR_MAJOR_BAD;
+  }
+
+  if ((multi = curl_multi_init()) == NULL) {
+    fprintf(stderr, "curl_multi_init() failed\n");
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
+  }
+
+  if ((easy = curl_easy_init()) == NULL) {
+    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_multi_cleanup(multi);
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
+  }
 
   curl_multi_setopt(multi, CURLMOPT_PIPELINING, 1);
 
@@ -96,6 +114,7 @@ int test(char *URL)
   curl_multi_remove_handle(multi, easy);
   curl_easy_cleanup(easy);
   curl_multi_cleanup(multi);
+  curl_global_cleanup();
 
   printf("Finished!\n");
 

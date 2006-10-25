@@ -42,6 +42,7 @@ int test(char *URL)
   FILE *hd_src ;
   int hd ;
   struct_stat file_info;
+  struct curl_slist *hl;
 
   struct curl_slist *headerlist=NULL;
   const char *buf_1 = "RNFR 505";
@@ -73,51 +74,69 @@ int test(char *URL)
     return -2; /* if this happens things are major weird */
   }
 
-  /* In windows, this will init the winsock stuff */
-  curl_global_init(CURL_GLOBAL_ALL);
+  if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    fprintf(stderr, "curl_global_init() failed\n");
+    fclose(hd_src);
+    return TEST_ERR_MAJOR_BAD;
+  }
 
   /* get a curl handle */
-  curl = curl_easy_init();
-  if(curl) {
-    struct curl_slist *hl;
-    /* build a list of commands to pass to libcurl */
-    hl = curl_slist_append(headerlist, buf_1);
-    if(hl) {
-      headerlist = curl_slist_append(hl, buf_2);
-      if(hl)
-        headerlist = hl;
-    }
-
-    /* enable uploading */
-    curl_easy_setopt(curl, CURLOPT_UPLOAD, TRUE) ;
-
-    /* enable verbose */
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, TRUE) ;
-
-    /* specify target */
-    curl_easy_setopt(curl,CURLOPT_URL, URL);
-
-    /* pass in that last of FTP commands to run after the transfer */
-    curl_easy_setopt(curl, CURLOPT_POSTQUOTE, headerlist);
-
-    /* now specify which file to upload */
-    curl_easy_setopt(curl, CURLOPT_INFILE, hd_src);
-
-    /* and give the size of the upload (optional) */
-    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE,
-                     (curl_off_t)file_info.st_size);
-
-    /* Now run off and do what you've been told! */
-    res = curl_easy_perform(curl);
-
-    /* clean up the FTP commands list */
-    curl_slist_free_all (headerlist);
-
-    /* always cleanup */
-    curl_easy_cleanup(curl);
+  if ((curl = curl_easy_init()) == NULL) {
+    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_global_cleanup();
+    fclose(hd_src);
+    return TEST_ERR_MAJOR_BAD;
   }
-  fclose(hd_src); /* close the local file */
 
+  /* build a list of commands to pass to libcurl */
+
+  if ((hl = curl_slist_append(headerlist, buf_1)) == NULL) {
+    fprintf(stderr, "curl_slist_append() failed\n");
+    curl_easy_cleanup(curl);
+    curl_global_cleanup();
+    fclose(hd_src);
+    return TEST_ERR_MAJOR_BAD;
+  }
+  if ((headerlist = curl_slist_append(hl, buf_2)) == NULL) {
+    fprintf(stderr, "curl_slist_append() failed\n");
+    curl_slist_free_all(hl);
+    curl_easy_cleanup(curl);
+    curl_global_cleanup();
+    fclose(hd_src);
+    return TEST_ERR_MAJOR_BAD;
+  }
+  headerlist = hl;
+
+  /* enable uploading */
+  curl_easy_setopt(curl, CURLOPT_UPLOAD, TRUE) ;
+
+  /* enable verbose */
+  curl_easy_setopt(curl, CURLOPT_VERBOSE, TRUE) ;
+
+  /* specify target */
+  curl_easy_setopt(curl,CURLOPT_URL, URL);
+
+  /* pass in that last of FTP commands to run after the transfer */
+  curl_easy_setopt(curl, CURLOPT_POSTQUOTE, headerlist);
+
+  /* now specify which file to upload */
+  curl_easy_setopt(curl, CURLOPT_INFILE, hd_src);
+
+  /* and give the size of the upload (optional) */
+  curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE,
+                   (curl_off_t)file_info.st_size);
+
+  /* Now run off and do what you've been told! */
+  res = curl_easy_perform(curl);
+
+  /* clean up the FTP commands list */
+  curl_slist_free_all(headerlist);
+
+  /* close the local file */
+  fclose(hd_src);
+
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
+
   return res;
 }

@@ -94,8 +94,13 @@ void *fire(void *ptr)
   CURLcode code;
   struct curl_slist *headers;
   struct Tdata *tdata = (struct Tdata*)ptr;
-  CURL *curl = curl_easy_init();
+  CURL *curl;
   int i=0;
+
+  if ((curl = curl_easy_init()) == NULL) {
+    fprintf(stderr, "curl_easy_init() failed\n");
+    return NULL;
+  }
 
   headers = sethost(NULL);
   curl_easy_setopt(curl, CURLOPT_VERBOSE,    1);
@@ -143,11 +148,18 @@ int test(char *URL)
   user.counter = 0;
   
   printf( "GLOBAL_INIT\n" );
-  curl_global_init( CURL_GLOBAL_ALL );
+  if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    fprintf(stderr, "curl_global_init() failed\n");
+    return TEST_ERR_MAJOR_BAD;
+  }
 
   /* prepare share */
   printf( "SHARE_INIT\n" );
-  share = curl_share_init();
+  if ((share = curl_share_init()) == NULL) {
+    fprintf(stderr, "curl_share_init() failed\n");
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
+  }
 
   if ( CURLSHE_OK == scode ) {
     printf( "CURLSHOPT_LOCKFUNC\n" );
@@ -171,8 +183,10 @@ int test(char *URL)
   }
 
   if ( CURLSHE_OK != scode ) {
+    fprintf(stderr, "curl_share_setopt() failed\n");
     curl_share_cleanup(share);
-    return 2;
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
   }
 
   
@@ -196,7 +210,12 @@ int test(char *URL)
 
   /* fetch a another one and save cookies */
   printf( "*** run %d\n", i );
-  curl = curl_easy_init();
+  if ((curl = curl_easy_init()) == NULL) {
+    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_share_cleanup(share);
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
+  }
 
   url = suburl( URL, i );
   headers = sethost( NULL );

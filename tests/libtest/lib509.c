@@ -176,7 +176,9 @@ int test(char *URL)
 {
   CURLM* multi;
   sslctxparm p;
-
+  CURLMcode res;
+  int running;
+  char done = FALSE;
   int i = 0;
   CURLMsg *msg;
 
@@ -189,9 +191,16 @@ int test(char *URL)
     portnum = atoi(arg2);
   }
 
-  curl_global_init(CURL_GLOBAL_ALL);
+  if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    fprintf(stderr, "curl_global_init() failed\n");
+    return TEST_ERR_MAJOR_BAD;
+  }
 
-  p.curl = curl_easy_init();
+  if ((p.curl = curl_easy_init()) == NULL) {
+    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
+  }
 
   p.accessinfoURL = (unsigned char *) strdup(URL);
   p.accesstype = OBJ_obj2nid(OBJ_txt2obj("AD_DVCS",0)) ;
@@ -204,94 +213,97 @@ int test(char *URL)
   curl_easy_setopt(p.curl, CURLOPT_SSL_VERIFYPEER, FALSE);
   curl_easy_setopt(p.curl, CURLOPT_SSL_VERIFYHOST, 1);
 
-  fprintf(stderr, "Going to perform %s\n", (char *)p.accessinfoURL);
-
-  {
-    CURLMcode res;
-    int running;
-    char done=FALSE;
-
-    multi = curl_multi_init();
-
-    res = curl_multi_add_handle(multi, p.curl);
-
-    ml_timedout = FALSE;
-    ml_start = curlx_tvnow();
-
-    while (!done) {
-      fd_set rd, wr, exc;
-      int max_fd;
-      struct timeval interval;
-
-      interval.tv_sec = 1;
-      interval.tv_usec = 0;
-
-      if (curlx_tvdiff(curlx_tvnow(), ml_start) > 
-          MAIN_LOOP_HANG_TIMEOUT) {
-        ml_timedout = TRUE;
-        break;
-      }
-      mp_timedout = FALSE;
-      mp_start = curlx_tvnow();
-
-      while (res == CURLM_CALL_MULTI_PERFORM) {
-        res = curl_multi_perform(multi, &running);
-        if (curlx_tvdiff(curlx_tvnow(), mp_start) > 
-            MULTI_PERFORM_HANG_TIMEOUT) {
-          mp_timedout = TRUE;
-          break;
-        }
-        fprintf(stderr, "running=%d res=%d\n",running,res);
-        if (running <= 0) {
-          done = TRUE;
-          break;
-        }
-      }
-      if (mp_timedout || done)
-        break;
-
-      if (res != CURLM_OK) {
-        fprintf(stderr, "not okay???\n");
-        i = 80;
-        break;
-      }
-
-      FD_ZERO(&rd);
-      FD_ZERO(&wr);
-      FD_ZERO(&exc);
-      max_fd = 0;
-
-      if (curl_multi_fdset(multi, &rd, &wr, &exc, &max_fd) != CURLM_OK) {
-        fprintf(stderr, "unexpected failured of fdset.\n");
-        i = 89;
-        break;
-      }
-
-      if (select_test(max_fd+1, &rd, &wr, &exc, &interval) == -1) {
-        fprintf(stderr, "bad select??\n");
-        i =95;
-        break;
-      }
-
-      res = CURLM_CALL_MULTI_PERFORM;
-    }
-
-    if (ml_timedout || mp_timedout) {
-      if (ml_timedout) fprintf(stderr, "ml_timedout\n");
-      if (mp_timedout) fprintf(stderr, "mp_timedout\n");
-      fprintf(stderr, "ABORTING TEST, since it seems "
-              "that it would have run forever.\n");
-      i = 77;
-    }
-    else {
-      msg = curl_multi_info_read(multi, &running);
-      /* this should now contain a result code from the easy handle, get it */
-      if(msg)
-        i = msg->data.result;
-    }
+  if ((multi = curl_multi_init()) == NULL) {
+    fprintf(stderr, "curl_multi_init() failed\n");
+    curl_easy_cleanup(p.curl);
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
   }
 
-  if ((!ml_timedout) && (!mp_timedout)) {
+  if ((res = curl_multi_add_handle(multi, p.curl)) != CURLM_OK) {
+    fprintf(stderr, "curl_multi_add_handle() failed, "
+            "with code %d\n", res);
+    curl_multi_cleanup(multi);
+    curl_easy_cleanup(p.curl);
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
+  }
+
+  fprintf(stderr, "Going to perform %s\n", (char *)p.accessinfoURL);
+
+  ml_timedout = FALSE;
+  ml_start = curlx_tvnow();
+
+  while (!done) {
+    fd_set rd, wr, exc;
+    int max_fd;
+    struct timeval interval;
+
+    interval.tv_sec = 1;
+    interval.tv_usec = 0;
+
+    if (curlx_tvdiff(curlx_tvnow(), ml_start) > 
+        MAIN_LOOP_HANG_TIMEOUT) {
+      ml_timedout = TRUE;
+      break;
+    }
+    mp_timedout = FALSE;
+    mp_start = curlx_tvnow();
+
+    while (res == CURLM_CALL_MULTI_PERFORM) {
+      res = curl_multi_perform(multi, &running);
+      if (curlx_tvdiff(curlx_tvnow(), mp_start) > 
+          MULTI_PERFORM_HANG_TIMEOUT) {
+        mp_timedout = TRUE;
+        break;
+      }
+      fprintf(stderr, "running=%d res=%d\n",running,res);
+      if (running <= 0) {
+        done = TRUE;
+        break;
+      }
+    }
+    if (mp_timedout || done)
+      break;
+
+    if (res != CURLM_OK) {
+      fprintf(stderr, "not okay???\n");
+      i = 80;
+      break;
+    }
+
+    FD_ZERO(&rd);
+    FD_ZERO(&wr);
+    FD_ZERO(&exc);
+    max_fd = 0;
+
+    if (curl_multi_fdset(multi, &rd, &wr, &exc, &max_fd) != CURLM_OK) {
+      fprintf(stderr, "unexpected failured of fdset.\n");
+      i = 89;
+      break;
+    }
+
+    if (select_test(max_fd+1, &rd, &wr, &exc, &interval) == -1) {
+      fprintf(stderr, "bad select??\n");
+      i =95;
+      break;
+    }
+
+    res = CURLM_CALL_MULTI_PERFORM;
+  }
+
+  if (ml_timedout || mp_timedout) {
+    if (ml_timedout) fprintf(stderr, "ml_timedout\n");
+    if (mp_timedout) fprintf(stderr, "mp_timedout\n");
+    fprintf(stderr, "ABORTING TEST, since it seems "
+            "that it would have run forever.\n");
+    i = TEST_ERR_RUNS_FOREVER;
+  }
+  else {
+    msg = curl_multi_info_read(multi, &running);
+    /* this should now contain a result code from the easy handle, get it */
+    if(msg)
+      i = msg->data.result;
     fprintf(stderr, "all done\n");
   }
 

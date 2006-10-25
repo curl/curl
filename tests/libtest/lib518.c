@@ -42,6 +42,20 @@
 
 static int fd[NUM_OPEN];
 
+/*
+ * our_errno() returns the NOT *socket-related* errno (or equivalent)
+ * on this platform to hide platform specific for the calling function.
+ */
+
+static int our_errno(void)
+{
+#ifdef WIN32
+  return (int)GetLastError();
+#else
+  return errno;
+#endif
+}
+
 static int rlimit(void)
 {
   int i;
@@ -75,7 +89,8 @@ static int rlimit(void)
   /* open a dummy descriptor */
   fd[0] = open(DEV_NULL, O_RDONLY);
   if (fd[0] == -1) {
-    fprintf(stderr, "open: failed to open %s\n", DEV_NULL);
+    fprintf(stderr, "open: failed to open %s "
+            "with errno %d\n", DEV_NULL, our_errno());
     return -4;
   }
 
@@ -83,7 +98,8 @@ static int rlimit(void)
   for (i = 1; i < NUM_OPEN; i++) {
     fd[i] = dup(fd[0]);
     if (fd[i] == -1) {
-      fprintf(stderr, "dup: attempt #%i failed\n", i);
+      fprintf(stderr, "dup: attempt #%d failed "
+              "with errno %d\n", i, our_errno());
       for (i--; i >= 0; i--)
         close(fd[i]);
       return -5;
@@ -111,11 +127,22 @@ int test(char *URL)
     /* failure */
     return 100;
 
-  curl = curl_easy_init();
+  if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    fprintf(stderr, "curl_global_init() failed\n");
+    return TEST_ERR_MAJOR_BAD;
+  }
+
+  if ((curl = curl_easy_init()) == NULL) {
+    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
+  }
+
   curl_easy_setopt(curl, CURLOPT_URL, URL);
   curl_easy_setopt(curl, CURLOPT_HEADER, TRUE);
   res = curl_easy_perform(curl);
   curl_easy_cleanup(curl);
+  curl_global_cleanup();
 
   /* we never close the file descriptors */
 

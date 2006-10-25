@@ -43,6 +43,8 @@ int test(char *URL)
     }
     else
       rc = 4;
+
+    curl_global_cleanup();
   }
   else
     rc = 5;
