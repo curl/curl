@@ -1,5 +1,7 @@
 /* Copyright 1998 by the Massachusetts Institute of Technology.
  *
+ * $Id$
+ *
  * Permission to use, copy, modify, and distribute this
  * software and its documentation for any purpose and without
  * fee is hereby granted, provided that the above copyright
@@ -162,10 +164,16 @@ int main(int argc, char **argv)
   options.flags = ARES_FLAG_NOCHECKRESP;
   options.servers = NULL;
   options.nservers = 0;
-  while ((c = getopt(argc, argv, "f:s:c:t:T:U:")) != -1)
+  while ((c = getopt(argc, argv, "df:s:c:t:T:U:")) != -1)
     {
       switch (c)
         {
+        case 'd':
+#ifdef WATT32
+          dbug_init();
+#endif
+          break;
+
         case 'f':
           /* Add a flag. */
           for (i = 0; i < nflags; i++)
