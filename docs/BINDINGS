@@ -155,6 +155,11 @@ S-Lang
   S-Lang binding written by John E Davis
   http://www.jedsoft.org/slang/modules/curl.html
 
+Smalltalk
+
+  Smalltalk binding written by Danil Osipchuk
+  http://www.squeaksource.com/CurlPlugin/
+
 SPL
 
   SPL binding written by Clifford Wolf
