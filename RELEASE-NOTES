@@ -12,9 +12,9 @@ Curl and libcurl 7.16.0
 This release includes the following changes:
  
  o Added CURLE_SSL_CACERT_BADFILE
- o Added CURLMOPT_TIMERFUNCTION
- o The CURLOPT_SOURCE_* options are removed and so are the --3p* command line
-   options
+ o Added CURLMOPT_TIMERFUNCTION and CURLMOPT_TIMERDATA
+ o (FTP) the CURLOPT_SOURCE_* options are removed and so are the --3p* command
+   line options
  o curl_multi_socket() and family are suitable to start using
  o uses WSAPoll() on Windows Vista
  o (FTP) --ftp-ssl-control was added
@@ -28,6 +28,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o (HTTP) CURLOPT_FAILONERROR (curl -f) covers a few more reponse cases
  o curl_multi_socket() and the LOW_SPEED options
  o curl_multi_socket() expire timer during c-ares name resolves
  o curl_multi_add_handle on an already added handle now fails gracefully

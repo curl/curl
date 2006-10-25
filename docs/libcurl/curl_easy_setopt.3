@@ -344,6 +344,14 @@ when showing the progress meter and displaying \fICURLOPT_VERBOSE\fP data.
 A non-zero parameter tells the library to fail silently if the HTTP code
 returned is equal to or larger than 400. The default action would be to return
 the page normally, ignoring that code.
+
+This method is not fail-safe and there are occasions where non-succesful
+response codes will slip through, especially when authentication is involved
+(response codes 401 and 407).
+
+You might get some amounts of headers transferred before this situation is
+detected, like for when a "100-continue" is received as a response to a
+POST/PUT and a 401 or 407 is received immediately afterwards.
 .SH NETWORK OPTIONS
 .IP CURLOPT_URL
 The actual URL to deal with. The parameter should be a char * to a zero

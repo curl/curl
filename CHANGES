@@ -6,6 +6,19 @@
 
                                   Changelog
 
+Daniel (25 October 2006)
+- Fixed CURLOPT_FAILONERROR to return CURLE_HTTP_RETURNED_ERROR even for the
+  case when 401 or 407 are returned, *IF* no auth credentials have been given.
+  The CURLOPT_FAILONERROR option is not possible to make fool-proof for 401
+  and 407 cases when auth credentials is given, but we've now covered this
+  somewhat more.
+
+  You might get some amounts of headers transferred before this situation is
+  detected, like for when a "100-continue" is received as a response to a
+  POST/PUT and a 401 or 407 is received immediately afterwards.
+
+  Added test 281 to verify this change.
+
 Daniel (23 October 2006)
 - Ravi Pratap provided a major update with pipelining fixes. We also no longer
   re-use connections (for pipelining) before the name resolving is done.
