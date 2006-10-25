@@ -160,7 +160,7 @@ static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
               vec[n].iov_len = sendreq->len;
               n++;
             }
-          wcount = (ssize_t)writev(server->tcp_socket, vec, n);
+          wcount = (ssize_t)writev(server->tcp_socket, vec, (int)n);
           free(vec);
           if (wcount < 0)
             {
