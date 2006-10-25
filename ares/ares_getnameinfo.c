@@ -81,8 +81,8 @@ static char *ares_striendstr(const char *s1, const char *s2);
 void ares_getnameinfo(ares_channel channel, const struct sockaddr *sa, socklen_t salen,
                       int flags, ares_nameinfo_callback callback, void *arg)
 {
-  struct sockaddr_in *addr;
-  struct sockaddr_in6 *addr6;
+  struct sockaddr_in *addr = NULL;
+  struct sockaddr_in6 *addr6 = NULL;
   struct nameinfo_query *niquery;
 
   /* Verify the buffer size */
@@ -264,11 +264,11 @@ static char *lookup_service(unsigned short port, int flags,
   char tmpbuf[4096];
 
   if (port)
-    { 
+    {
       if (flags & ARES_NI_NUMERICSERV)
         sep = NULL;
       else
-        { 
+        {
           if (flags & ARES_NI_UDP)
             proto = "udp";
           else if (flags & ARES_NI_SCTP)
@@ -288,15 +288,15 @@ static char *lookup_service(unsigned short port, int flags,
 #elif GETSERVBYPORT_R_ARGS == 4
           if (getservbyport_r(port, proto, &se, (void *)tmpbuf) != 0)
             sep = NULL;
-#else     
+#else
           /* Lets just hope the OS uses TLS! */
           sep = getservbyport(port, proto);
-#endif    
-#else     
+#endif
+#else
           /* Lets just hope the OS uses TLS! */
           sep = getservbyport(port, proto);
-#endif    
-        } 
+#endif
+        }
       if (sep && sep->s_name)
         /* get service name */
         strcpy(tmpbuf, sep->s_name);
