@@ -38,7 +38,7 @@ int test(char *URL)
 
   curl_easy_setopt(curls, CURLOPT_URL, URL);
 
-  if ((res = (int)curl_multi_add_handle(multi, curls)) != CURLM_OK) {
+  if ((res = curl_multi_add_handle(multi, curls)) != CURLM_OK) {
     fprintf(stderr, "curl_multi_add_handle() failed, "
             "with code %d\n", res);
     curl_easy_cleanup(curls);

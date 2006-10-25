@@ -55,7 +55,7 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if ((res = (int)curl_multi_add_handle(m, c)) != CURLM_OK) {
+  if ((res = curl_multi_add_handle(m, c)) != CURLM_OK) {
     fprintf(stderr, "curl_multi_add_handle() failed, "
             "with code %d\n", res);
     curl_multi_cleanup(m);
@@ -86,7 +86,7 @@ int test(char *URL)
     res = CURLM_CALL_MULTI_PERFORM;
 
     while (res == CURLM_CALL_MULTI_PERFORM) {
-      res = (int)curl_multi_perform(m, &running);
+      res = curl_multi_perform(m, &running);
       if (curlx_tvdiff(curlx_tvnow(), mp_start) > 
           MULTI_PERFORM_HANG_TIMEOUT) {
         mp_timedout = TRUE;
