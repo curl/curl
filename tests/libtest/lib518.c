@@ -66,54 +66,122 @@ static int our_errno(void)
 #endif
 }
 
-static int rlimit(void)
+static void close_file_descriptors(void)
+{
+  int i;
+
+  for (i = 0; i < NUM_OPEN; i++) {
+    close(fd[i]);
+    fd[i] = -1;
+  }
+}
+
+static int rlimit(int keep_open)
 {
   int i;
   struct rlimit rl;
+  char strbuff[81];
+  char fmt_d[] = "%d";
+  char fmt_ld[] = "%ld";
+  char fmt_lld[] = "%lld";
+  char *fmt;
+
+  if (sizeof(rl.rlim_max) < sizeof(long))
+    fmt = fmt_d;
+  else if (sizeof(rl.rlim_max) == sizeof(long))
+    fmt = fmt_ld;
+  else
+    fmt = fmt_lld;
 
   fprintf(stderr, "NUM_OPEN: %d\n", NUM_OPEN);
   fprintf(stderr, "NUM_NEEDED: %d\n", NUM_NEEDED);
 
   /* get open file limits */
-  if (getrlimit(RLIMIT_NOFILE, &rl) == -1) {
-    fprintf(stderr, "warning: getrlimit: failed to get RLIMIT_NOFILE\n");
+  if (getrlimit(RLIMIT_NOFILE, &rl) != 0) {
+    fprintf(stderr, "warning: getrlimit: failed to get RLIMIT_NOFILE "
+            "with errno %d\n", our_errno());
     return -1;
   }
 
   /* check that hard limit is high enough */
-  if (rl.rlim_max < NUM_NEEDED) {
-    fprintf(stderr, "warning: RLIMIT_NOFILE hard limit %d < %d\n",
-            (int)rl.rlim_max, NUM_NEEDED);
-    return -2;
-  }
+#ifdef RLIM_INFINITY
+  if (rl.rlim_max != RLIM_INFINITY) 
+#endif
+    if ((rl.rlim_max > 0) && (rl.rlim_max < NUM_NEEDED)) {
+      sprintf(strbuff, fmt, rl.rlim_max);
+      fprintf(stderr, "warning: RLIMIT_NOFILE hard limit %s < %d\n",
+              strbuff, NUM_NEEDED);
+      return -2;
+    }
 
   /* increase soft limit if needed */
-  if (rl.rlim_cur < NUM_NEEDED) {
-    rl.rlim_cur = NUM_NEEDED;
-    if (setrlimit(RLIMIT_NOFILE, &rl) == -1) {
-      fprintf(stderr, "warning: setrlimit: failed to set RLIMIT_NOFILE\n");
-      return -3;
+#ifdef RLIM_INFINITY
+  if (rl.rlim_cur != RLIM_INFINITY) 
+#endif
+    if ((rl.rlim_cur > 0) && (rl.rlim_cur < NUM_NEEDED)) {
+      rl.rlim_cur = NUM_NEEDED;
+      if (setrlimit(RLIMIT_NOFILE, &rl) != 0) {
+        fprintf(stderr, "warning: setrlimit: failed to set RLIMIT_NOFILE "
+                "with errno %d\n", our_errno());
+        return -3;
+      }
+      /* verify that it has been increased */
+      if (getrlimit(RLIMIT_NOFILE, &rl) != 0) {
+        fprintf(stderr, "warning: getrlimit: failed to get RLIMIT_NOFILE "
+                "with errno %d\n", our_errno());
+        return -4;
+      }
+      if ((rl.rlim_cur > 0) && (rl.rlim_cur < NUM_NEEDED)) {
+        sprintf(strbuff, fmt, rl.rlim_cur);
+        fprintf(stderr, "warning: RLIMIT_NOFILE soft limit %s < %d\n",
+                strbuff, NUM_NEEDED);
+        return -5;
+      }
     }
+
+#ifdef RLIM_INFINITY
+  if (rl.rlim_cur == RLIM_INFINITY)
+    fprintf(stderr, "SOFT_LIMIT: INFINITY\n");
+  else
+#endif
+  {
+    sprintf(strbuff, fmt, rl.rlim_cur);
+    fprintf(stderr, "SOFT_LIMIT: %s\n", strbuff);
+  }
+
+#ifdef RLIM_INFINITY
+  if (rl.rlim_max == RLIM_INFINITY)
+    fprintf(stderr, "HARD_LIMIT: INFINITY\n");
+  else
+#endif
+  {
+    sprintf(strbuff, fmt, rl.rlim_max);
+    fprintf(stderr, "HARD_LIMIT: %s\n", strbuff);
   }
 
   /* open a dummy descriptor */
   fd[0] = open(DEV_NULL, O_RDONLY);
-  if (fd[0] == -1) {
+  if (fd[0] < 0) {
     fprintf(stderr, "open: failed to open %s "
             "with errno %d\n", DEV_NULL, our_errno());
-    return -4;
+    return -6;
   }
 
   /* create a bunch of file descriptors */
   for (i = 1; i < NUM_OPEN; i++) {
     fd[i] = dup(fd[0]);
-    if (fd[i] == -1) {
+    if (fd[i] < 0) {
       fprintf(stderr, "dup: attempt #%d failed "
               "with errno %d\n", i, our_errno());
       for (i--; i >= 0; i--)
         close(fd[i]);
-      return -5;
+      return -7;
     }
+  }
+
+  /* close file descriptors unless instructed to keep them */
+  if (!keep_open) {
+    close_file_descriptors();
   }
 
   return 0;
@@ -126,35 +194,41 @@ int test(char *URL)
 
   if(!strcmp(URL, "check")) {
     /* used by the test script to ask if we can run this test or not */
-    if(rlimit()) {
+    if(rlimit(FALSE)) {
       printf("rlimit problems\n");
       return 1;
     }
     return 0; /* sure, run this! */
   }
 
-  if(rlimit())
+  if(rlimit(TRUE))
     /* failure */
     return 100;
 
+  /* now run the test with NUM_OPEN open file descriptors
+     and close them all once this test is over */
+
   if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
+    close_file_descriptors();
     return TEST_ERR_MAJOR_BAD;
   }
 
   if ((curl = curl_easy_init()) == NULL) {
     fprintf(stderr, "curl_easy_init() failed\n");
+    close_file_descriptors();
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl_easy_setopt(curl, CURLOPT_URL, URL);
   curl_easy_setopt(curl, CURLOPT_HEADER, TRUE);
+
   res = curl_easy_perform(curl);
+
+  close_file_descriptors();
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-
-  /* we never close the file descriptors */
 
   return (int)res;
 }
