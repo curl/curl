@@ -564,9 +564,10 @@ CURLcode Curl_open(struct SessionHandle **curl)
     free(data);
     data = NULL;
   }
+  else
+    *curl = data;
 
-  *curl = data;
-  return CURLE_OK;
+  return res;
 }
 
 CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
