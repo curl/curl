@@ -25,7 +25,7 @@ int test(char *URL)
   CURL *curl;
   FILE *hd_src ;
   int hd ;
-  struct stat file_info;
+  struct_stat file_info;
   int running;
   char done=FALSE;
   CURLM *m;
@@ -118,7 +118,7 @@ int test(char *URL)
     interval.tv_sec = 1;
     interval.tv_usec = 0;
 
-    if (curlx_tvdiff(curlx_tvnow(), ml_start) > 
+    if (curlx_tvdiff(curlx_tvnow(), ml_start) >
         MAIN_LOOP_HANG_TIMEOUT) {
       ml_timedout = TRUE;
       break;
@@ -128,7 +128,7 @@ int test(char *URL)
 
     while (res == CURLM_CALL_MULTI_PERFORM) {
       res = (int)curl_multi_perform(m, &running);
-      if (curlx_tvdiff(curlx_tvnow(), mp_start) > 
+      if (curlx_tvdiff(curlx_tvnow(), mp_start) >
           MULTI_PERFORM_HANG_TIMEOUT) {
         mp_timedout = TRUE;
         break;
