@@ -75,6 +75,11 @@
 #define STDC_HEADERS           1
 #define TIME_WITH_SYS_TIME     1
 
+#define RECV_TYPE_ARG1         int
+#define RECV_TYPE_ARG2         char *
+#define RECV_TYPE_ARG3         int
+#define RECV_TYPE_ARG4         int
+
 #define BSD
 
 /* #define MALLOCDEBUG */
