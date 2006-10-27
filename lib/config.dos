@@ -44,7 +44,9 @@
 #define HAVE_NET_IF_H          1
 #define HAVE_PROCESS_H         1
 #define HAVE_PERROR            1
+#define HAVE_RECV              1
 #define HAVE_SELECT            1
+#define HAVE_SEND              1
 #define HAVE_SETJMP_H          1
 #define HAVE_SETLOCALE         1
 #define HAVE_SETVBUF           1
@@ -75,10 +77,21 @@
 #define STDC_HEADERS           1
 #define TIME_WITH_SYS_TIME     1
 
+/* Qualifiers for send() and recv().
+ */
+#define SEND_TYPE_ARG1         int
+#define SEND_QUAL_ARG2         const
+#define SEND_TYPE_ARG2         char *
+#define SEND_TYPE_ARG3         int
+#define SEND_TYPE_ARG4         int
+#define SEND_TYPE_RETV         int
+
 #define RECV_TYPE_ARG1         int
 #define RECV_TYPE_ARG2         char *
 #define RECV_TYPE_ARG3         int
 #define RECV_TYPE_ARG4         int
+#define RECV_TYPE_RETV         int
+
 
 #define BSD
 
