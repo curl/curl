@@ -501,9 +501,9 @@ CURLcode Curl_open(struct SessionHandle **curl)
     data->set.fread = (curl_read_callback)fread;
 
     /* conversion callbacks for non-ASCII hosts */
-    data->set.convfromnetwork = (curl_conv_callback)NULL;
-    data->set.convtonetwork   = (curl_conv_callback)NULL;
-    data->set.convfromutf8    = (curl_conv_callback)NULL;
+    data->set.convfromnetwork = (CURLcode(*)(char *, size_t))NULL;
+    data->set.convtonetwork   = (CURLcode(*)(char *, size_t))NULL;
+    data->set.convfromutf8    = (CURLcode(*)(char *, size_t))NULL;
 
 #if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
     /* conversion descriptors for iconv calls */
@@ -2993,7 +2993,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->remote_port = PORT_HTTP;
     conn->protocol |= PROT_HTTP;
     conn->curl_do = Curl_http;
-    conn->curl_do_more = (Curl_do_more_func)NULL;
+    conn->curl_do_more = (CURLcode(*)(struct connectdata *)) NULL;
     conn->curl_done = Curl_http_done;
     conn->curl_connect = Curl_http_connect;
 #else
@@ -3010,7 +3010,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->protocol |= PROT_HTTP|PROT_HTTPS|PROT_SSL;
 
     conn->curl_do = Curl_http;
-    conn->curl_do_more = (Curl_do_more_func)NULL;
+    conn->curl_do_more = (CURLcode(*)(struct connectdata *))NULL;
     conn->curl_done = Curl_http_done;
     conn->curl_connect = Curl_http_connect;
     conn->curl_connecting = Curl_https_connecting;
@@ -3123,7 +3123,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->port = PORT_DICT;
     conn->remote_port = PORT_DICT;
     conn->curl_do = Curl_dict;
-    conn->curl_done = (Curl_done_func)NULL; /* no DICT-specific done */
+    /* no DICT-specific done */
+    conn->curl_done = (CURLcode(*)(struct connectdata *, CURLcode))NULL;
 #else
     failf(data, LIBCURL_NAME
           " was built with DICT disabled!");
@@ -3135,7 +3136,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->port = PORT_LDAP;
     conn->remote_port = PORT_LDAP;
     conn->curl_do = Curl_ldap;
-    conn->curl_done = (Curl_done_func)NULL; /* no LDAP-specific done */
+    /* no LDAP-specific done */
+    conn->curl_done = (CURLcode(*)(struct connectdata *, CURLcode))NULL;
 #else
     failf(data, LIBCURL_NAME
           " was built with LDAP disabled!");
