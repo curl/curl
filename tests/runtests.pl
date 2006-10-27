@@ -1838,7 +1838,7 @@ sub startservers {
             if(!$run{'ftp-ipv6'}) {
                 ($pid, $pid2) = runftpserver("", $verbose, "ipv6");
                 if($pid <= 0) {
-                    return "failed starting FTP-ipv6 server";
+                    return "failed starting FTP-IPv6 server";
                 }
                 logmsg sprintf("* pid ftp-ipv6 => %d %d\n", $pid,
                        $pid2) if($verbose);
@@ -1859,7 +1859,7 @@ sub startservers {
             if(!$run{'http-ipv6'}) {
                 ($pid, $pid2) = runhttpserver($verbose, "IPv6");
                 if($pid <= 0) {
-                    return "failed starting IPv6 HTTP server";
+                    return "failed starting HTTP-IPv6 server";
                 }
                 logmsg sprintf("* pid http-ipv6 => %d %d\n", $pid, $pid2)
                     if($verbose);
