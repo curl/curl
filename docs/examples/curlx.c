@@ -114,6 +114,13 @@ static char *curlx_usage[]={
 
 */
 
+/* 
+ * We use this ZERO_NULL to avoid picky compiler warnings,
+ * when assigning a NULL pointer to a function pointer var.
+ */
+
+#define ZERO_NULL 0
+
 /* This is a context that we pass to all callbacks */
 
 typedef struct sslctxparm_st {
@@ -236,7 +243,7 @@ static CURLcode sslctxfun(CURL * curl, void * sslctx, void * parm) {
 
   SSL_CTX_set_verify_depth(ctx,2);
 
-  SSL_CTX_set_verify(ctx,SSL_VERIFY_PEER,NULL);
+  SSL_CTX_set_verify(ctx,SSL_VERIFY_PEER,ZERO_NULL);
 
   SSL_CTX_set_cert_verify_callback(ctx, ssl_app_verify_callback, parm);
 
