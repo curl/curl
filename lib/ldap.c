@@ -3,7 +3,7 @@
  *  Project         ___| | | |  _ \| |
  *                 / __| | | | |_) | |
  *                | (__| |_| |  _ <| |___
- *                \___|\___/|_| \_\_____|
+ *                 \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
@@ -115,6 +115,13 @@
 #undef HAVE_LIBDL
 #endif
 
+/* 
+ * We use this ZERO_NULL to avoid picky compiler warnings,
+ * when assigning a NULL pointer to a function pointer var.
+ */
+
+#define ZERO_NULL 0
+
 typedef void * (*dynafunc)(void *input);
 
 /***********************************************************************
@@ -189,7 +196,7 @@ static void DynaClose(void)
 
 static dynafunc DynaGetFunction(const char *name)
 {
-  dynafunc func = (void *(*)(void *))0;
+  dynafunc func = (dynafunc)ZERO_NULL;
 
 #if defined(HAVE_DLOPEN) || defined(HAVE_LIBDL)
   if (libldap) {
