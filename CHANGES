@@ -6,6 +6,8 @@
 
                                   Changelog
 
+Version 7.16.0 (30 October 2006)
+
 Daniel (25 October 2006)
 - Fixed CURLOPT_FAILONERROR to return CURLE_HTTP_RETURNED_ERROR even for the
   case when 401 or 407 are returned, *IF* no auth credentials have been given.
