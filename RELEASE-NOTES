@@ -1,7 +1,7 @@
-Curl and libcurl 7.16.0
+Curl and libcurl 7.16.1
 
- Public curl release number:               96
- Releases counted from the very beginning: 123
+ Public curl release number:               97
+ Releases counted from the very beginning: 124
  Available command line options:           112
  Available curl_easy_setopt() options:     133
  Number of public functions in libcurl:    54
@@ -11,70 +11,23 @@ Curl and libcurl 7.16.0
 
 This release includes the following changes:
  
- o Added CURLE_SSL_CACERT_BADFILE
- o Added CURLMOPT_TIMERFUNCTION and CURLMOPT_TIMERDATA
- o (FTP) the CURLOPT_SOURCE_* options are removed and so are the --3p* command
-   line options
- o curl_multi_socket() and family are suitable to start using
- o uses WSAPoll() on Windows Vista
- o (FTP) --ftp-ssl-control was added
- o CURLOPT_SSL_SESSIONID_CACHE and --no-sessionid added
- o CURLMOPT_PIPELINING added for enabling HTTP pipelined transfers
- o multi handles now have a shared connection cache
- o Added support for other MS-DOS compilers (besides djgpp)
- o CURLOPT_SOCKOPTFUNCTION and CURLOPT_SOCKOPTDATA were added
- o (FTP) libcurl avoids sending TYPE if the desired type was already set
- o (FTP) CURLOPT_PREQUOTE works even when CURLOPT_NOBODY is set true
+ o 
 
 This release includes the following bugfixes:
 
- o (HTTP) CURLOPT_FAILONERROR (curl -f) covers a few more reponse cases
- o curl_multi_socket() and the LOW_SPEED options
- o curl_multi_socket() expire timer during c-ares name resolves
- o curl_multi_add_handle on an already added handle now fails gracefully
- o multi interface crash if bad function call order was used for cleanup
- o put a new URL in saved cookie jar files
- o configure --with-gssapi-libs
- o SOCKS proxy connection fixes
- o (FTP) a failed upload does not invalidate the control connection
- o proxy URL with user name and empty password or no password at all now work
- o fixed a socket state problem with *multi_socket()
- o (HTTP) NTLM hostname fix
- o getsockname usage fixes
- o SOCKS5 proxy connects can now time-out
- o SOCKS5 connects that require auth no longer segfaults when auth not given
- o multi interface using asynch resolves could get stuck in wrong state
- o the 'running_handles' counter wasn't always updated properly when
-   curl_multi_remove_handle() was used
- o (FTP) EPRT transfers with IPv6 didn't work properly
- o (FTP) SINGLECWD mode and using files in the root dir
- o (HTTP) Expect: header disabling work better
- o (HTTP) "Expect: 100-continue" disable on second POST on re-used connection
- o src/config.h.in is fixed
- o (HTTP) POST data logged to the debug callback function is now correctly
-   tagged as data, not header
+ o 
 
 Other curl-related news:
 
- o a Smalltalk binding: http://curl.haxx.se/libcurl/smalltalk/
- o pycurl-7.15.5 was released: http://pycurl.sf.net
+ o 
 
 New curl mirrors:
 
- o http://curl.geosdreams.info/ is a new Polish mirror
- o http://curl.gfiles.org/ is a new Russian mirror
- o http://curl.online-mirror.de/ is a new German mirror
- o http://curl.blogvoid.com/ is a new Canadian mirror
- o http://curl.internet.bs/ is a new United Kingdom mirror
- o http://curl2.haxx.se/ is a new Swedish mirror
+ o 
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Domenico Andreoli, Armel Asselin, Gisle Vanem, Yang Tse, Andrew Biggs,
- Peter Sylvester, David McCreedy, Dmitriy Sergeyev, Dmitry Rechkin,
- Jari Sundell, Ravi Pratap, Michele Bini, Jeff Pohlmeyer, Michael Wallner,
- Mike Protts, Cory Nelson, Bernard Leak, Bogdan Nicula, Dan Fandrich,
- Nir Soffer
+ 
 
         Thanks! (and sorry if I forgot to mention someone)
