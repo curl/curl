@@ -39,8 +39,9 @@
 #error "this test requires FD_SETSIZE"
 #endif
 
+#define SAFETY_MARGIN 16
 #define NUM_OPEN (FD_SETSIZE + 10)
-#define NUM_NEEDED (NUM_OPEN + 16)
+#define NUM_NEEDED (NUM_OPEN + SAFETY_MARGIN)
 
 #if defined(WIN32) || defined(_WIN32) || defined(MSDOS)
 #define DEV_NULL "NUL"
@@ -50,7 +51,8 @@
 
 #if defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
 
-static int fd[NUM_OPEN];
+static int *fd = NULL;
+static struct rlimit num_open;
 
 /*
  * our_errno() returns the NOT *socket-related* errno (or equivalent)
@@ -68,114 +70,185 @@ static int our_errno(void)
 
 static void close_file_descriptors(void)
 {
-  int i;
-
-  for (i = 0; i < NUM_OPEN; i++) {
-    close(fd[i]);
-    fd[i] = -1;
-  }
+  for (num_open.rlim_cur = 0;
+       num_open.rlim_cur < num_open.rlim_max;
+       num_open.rlim_cur++)
+    close(fd[num_open.rlim_cur]);
+  free(fd);
+  fd = NULL;
 }
 
 static int rlimit(int keep_open)
 {
-  int i;
+  char *fmt;
   struct rlimit rl;
   char strbuff[81];
-  char fmt_d[] = "%d";
-  char fmt_ld[] = "%ld";
-  char fmt_lld[] = "%lld";
-  char *fmt;
+  char fmt_u[] = "%u";
+  char fmt_lu[] = "%lu";
+#ifdef HAVE_LONGLONG
+  char fmt_llu[] = "%llu";
 
-  if (sizeof(rl.rlim_max) < sizeof(long))
-    fmt = fmt_d;
-  else if (sizeof(rl.rlim_max) == sizeof(long))
-    fmt = fmt_ld;
+  if (sizeof(rl.rlim_max) > sizeof(long))
+    fmt = fmt_llu;
   else
-    fmt = fmt_lld;
+#endif
+    fmt = (sizeof(rl.rlim_max) < sizeof(long))?fmt_u:fmt_lu;
 
-  fprintf(stderr, "NUM_OPEN: %d\n", NUM_OPEN);
-  fprintf(stderr, "NUM_NEEDED: %d\n", NUM_NEEDED);
+  /* get initial open file limits */
 
-  /* get open file limits */
   if (getrlimit(RLIMIT_NOFILE, &rl) != 0) {
     fprintf(stderr, "warning: getrlimit: failed to get RLIMIT_NOFILE "
             "with errno %d\n", our_errno());
     return -1;
   }
 
-  /* check that hard limit is high enough */
-#ifdef RLIM_INFINITY
-  if (rl.rlim_max != RLIM_INFINITY) 
-#endif
-    if ((rl.rlim_max > 0) && (rl.rlim_max < NUM_NEEDED)) {
-      sprintf(strbuff, fmt, rl.rlim_max);
-      fprintf(stderr, "warning: RLIMIT_NOFILE hard limit %s < %d\n",
-              strbuff, NUM_NEEDED);
-      return -2;
-    }
-
-  /* increase soft limit if needed */
-#ifdef RLIM_INFINITY
-  if (rl.rlim_cur != RLIM_INFINITY) 
-#endif
-    if ((rl.rlim_cur > 0) && (rl.rlim_cur < NUM_NEEDED)) {
-      rl.rlim_cur = NUM_NEEDED;
-      if (setrlimit(RLIMIT_NOFILE, &rl) != 0) {
-        fprintf(stderr, "warning: setrlimit: failed to set RLIMIT_NOFILE "
-                "with errno %d\n", our_errno());
-        return -3;
-      }
-      /* verify that it has been increased */
-      if (getrlimit(RLIMIT_NOFILE, &rl) != 0) {
-        fprintf(stderr, "warning: getrlimit: failed to get RLIMIT_NOFILE "
-                "with errno %d\n", our_errno());
-        return -4;
-      }
-      if ((rl.rlim_cur > 0) && (rl.rlim_cur < NUM_NEEDED)) {
-        sprintf(strbuff, fmt, rl.rlim_cur);
-        fprintf(stderr, "warning: RLIMIT_NOFILE soft limit %s < %d\n",
-                strbuff, NUM_NEEDED);
-        return -5;
-      }
-    }
+  /* show initial open file limits */
 
 #ifdef RLIM_INFINITY
   if (rl.rlim_cur == RLIM_INFINITY)
-    fprintf(stderr, "SOFT_LIMIT: INFINITY\n");
+    strcpy(strbuff, "INFINITY");
   else
 #endif
-  {
     sprintf(strbuff, fmt, rl.rlim_cur);
-    fprintf(stderr, "SOFT_LIMIT: %s\n", strbuff);
-  }
+  fprintf(stderr, "initial SOFT_LIMIT: %s\n", strbuff);
 
 #ifdef RLIM_INFINITY
   if (rl.rlim_max == RLIM_INFINITY)
-    fprintf(stderr, "HARD_LIMIT: INFINITY\n");
+    strcpy(strbuff, "INFINITY");
   else
 #endif
-  {
     sprintf(strbuff, fmt, rl.rlim_max);
-    fprintf(stderr, "HARD_LIMIT: %s\n", strbuff);
+  fprintf(stderr, "initial HARD_LIMIT: %s\n", strbuff);
+
+  /* show our constants */
+
+  fprintf(stderr, "test518 FD_SETSIZE: %d\n", FD_SETSIZE);
+  fprintf(stderr, "test518 NUM_OPEN  : %d\n", NUM_OPEN);
+  fprintf(stderr, "test518 NUM_NEEDED: %d\n", NUM_NEEDED);
+
+  /* increase soft limit up to hard limit if different */
+
+  if (rl.rlim_cur != rl.rlim_max) {
+    rl.rlim_cur = rl.rlim_max;
+    if (setrlimit(RLIMIT_NOFILE, &rl) != 0) {
+      fprintf(stderr, "warning: setrlimit: failed to set RLIMIT_NOFILE "
+              "with errno %d\n", our_errno());
+      return -2;
+    }
   }
+
+  /* get current open file limits */
+
+  if (getrlimit(RLIMIT_NOFILE, &rl) != 0) {
+    fprintf(stderr, "warning: getrlimit: failed to get RLIMIT_NOFILE "
+            "with errno %d\n", our_errno());
+    return -3;
+  }
+
+  /* if soft limit has not been increased all the way up to hard
+     limit, warn about it but continue since it may be high enough */
+
+  if (rl.rlim_cur != rl.rlim_max) {
+    fprintf(stderr, "warning: setrlimit: did not raise soft limit "
+            "up to hard limit\n");
+  }
+
+  /* show current open file limits */
+
+#ifdef RLIM_INFINITY
+  if (rl.rlim_cur == RLIM_INFINITY)
+    strcpy(strbuff, "INFINITY");
+  else
+#endif
+    sprintf(strbuff, fmt, rl.rlim_cur);
+  fprintf(stderr, "current SOFT_LIMIT: %s\n", strbuff);
+
+#ifdef RLIM_INFINITY
+  if (rl.rlim_max == RLIM_INFINITY)
+    strcpy(strbuff, "INFINITY");
+  else
+#endif
+    sprintf(strbuff, fmt, rl.rlim_max);
+  fprintf(stderr, "current HARD_LIMIT: %s\n", strbuff);
+
+  /* 
+  ** Our extreme test target is to open more than FD_SETSIZE files but
+  ** it could happen that it would exceed the limit of allowed open
+  ** files and we would not be able to test libcurl functionality. In 
+  ** this case we will open the maximum allowed minus our safety margin,
+  ** which will run the test under this stress condition.
+  */
+
+  num_open.rlim_cur = FD_SETSIZE;
+  num_open.rlim_max = NUM_OPEN;
+  if (num_open.rlim_cur > num_open.rlim_max)
+    num_open.rlim_max = num_open.rlim_cur;
+
+#ifdef RLIM_INFINITY
+  if ((rl.rlim_cur > 0) && (rl.rlim_cur != RLIM_INFINITY)) {
+#else
+  if (rl.rlim_cur > 0) {
+#endif
+    if (num_open.rlim_max > rl.rlim_cur - SAFETY_MARGIN) {
+      num_open.rlim_max = rl.rlim_cur - SAFETY_MARGIN;
+    }
+  }
+
+  sprintf(strbuff, fmt, num_open.rlim_max);
+  fprintf(stderr, "allocating array for %s file descriptors\n", strbuff);
+
+  /* verify that we won't overflow size_t in malloc() */
+
+  if (num_open.rlim_max > ((size_t)-1) / sizeof(*fd)) {
+    fprintf(stderr, "is not possible, we would overflow size_t in malloc()\n");
+    num_open.rlim_max = ((size_t)-1) / sizeof(*fd);
+    sprintf(strbuff, fmt, num_open.rlim_max);
+    fprintf(stderr, "allocating array for %s file descriptors\n", strbuff);
+  }
+
+  fd = malloc(sizeof(*fd) * (size_t)(num_open.rlim_max));
+  if (!fd) {
+    fprintf(stderr, "warning: memory allocation failed "
+            "with errno %d\n", our_errno());
+    return -4;
+  }
+
+  /* initialize fighting lazy allocation */
+
+  for (num_open.rlim_cur = 0;
+       num_open.rlim_cur < num_open.rlim_max;
+       num_open.rlim_cur++)
+    fd[num_open.rlim_cur] = -1;
+
+  sprintf(strbuff, fmt, num_open.rlim_max);
+  fprintf(stderr, "opening %s file descriptors\n", strbuff);
 
   /* open a dummy descriptor */
   fd[0] = open(DEV_NULL, O_RDONLY);
   if (fd[0] < 0) {
     fprintf(stderr, "open: failed to open %s "
             "with errno %d\n", DEV_NULL, our_errno());
-    return -6;
+    free(fd);
+    fd = NULL;
+    return -5;
   }
 
   /* create a bunch of file descriptors */
-  for (i = 1; i < NUM_OPEN; i++) {
-    fd[i] = dup(fd[0]);
-    if (fd[i] < 0) {
-      fprintf(stderr, "dup: attempt #%d failed "
-              "with errno %d\n", i, our_errno());
-      for (i--; i >= 0; i--)
-        close(fd[i]);
-      return -7;
+  for (num_open.rlim_cur = 1; 
+       num_open.rlim_cur < num_open.rlim_max; 
+       num_open.rlim_cur++) {
+    fd[num_open.rlim_cur] = dup(fd[0]);
+    if (fd[num_open.rlim_cur] < 0) {
+      sprintf(strbuff, fmt, num_open.rlim_cur);
+      fprintf(stderr, "dup: attempt #%s failed "
+              "with errno %d\n", strbuff, our_errno());
+      for (num_open.rlim_cur = 0;
+           fd[num_open.rlim_cur] >= 0;
+           num_open.rlim_cur++)
+        close(fd[num_open.rlim_cur]);
+      free(fd);
+      fd = NULL;
+      return -6;
     }
   }
 
@@ -195,15 +268,18 @@ int test(char *URL)
   if(!strcmp(URL, "check")) {
     /* used by the test script to ask if we can run this test or not */
     if(rlimit(FALSE)) {
+      fprintf(stderr, "Previous condition prevents running this test\n");
       printf("rlimit problems\n");
       return 1;
     }
     return 0; /* sure, run this! */
   }
 
-  if(rlimit(TRUE))
+  if (rlimit(TRUE)) {
     /* failure */
-    return 100;
+    fprintf(stderr, "Previous condition aborts this test\n");
+    return TEST_ERR_MAJOR_BAD;
+  }
 
   /* now run the test with NUM_OPEN open file descriptors
      and close them all once this test is over */
