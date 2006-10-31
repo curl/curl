@@ -70,12 +70,14 @@ static int our_errno(void)
 
 static void close_file_descriptors(void)
 {
+  fprintf(stderr, "closing file descriptors\n");
   for (num_open.rlim_cur = 0;
        num_open.rlim_cur < num_open.rlim_max;
        num_open.rlim_cur++)
     close(fd[num_open.rlim_cur]);
   free(fd);
   fd = NULL;
+  fprintf(stderr, "file descriptors closed\n");
 }
 
 static int rlimit(int keep_open)
@@ -252,6 +254,9 @@ static int rlimit(int keep_open)
     }
   }
 
+  sprintf(strbuff, fmt, num_open.rlim_max);
+  fprintf(stderr, "%s file descriptors open\n", strbuff);
+
   /* close file descriptors unless instructed to keep them */
   if (!keep_open) {
     close_file_descriptors();
@@ -281,8 +286,8 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  /* now run the test with NUM_OPEN open file descriptors
-     and close them all once this test is over */
+  /* run the test with more than FD_SETSIZE or max allowed open
+     file descriptors and close them all once the test is over */
 
   if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
