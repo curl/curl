@@ -70,24 +70,6 @@
 /* Define if you have the ioctlsocket function.  */
 #define HAVE_IOCTLSOCKET 1
 
-/* Define if you have the getnameinfo function. */
-#define HAVE_GETNAMEINFO 1
-
-/* Define to the type qualifier of arg 1 for getnameinfo. */
-#define GETNAMEINFO_QUAL_ARG1 const
-
-/* Define to the type of arg 1 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG1 struct sockaddr *
-
-/* Define to the type of arg 2 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG2 socklen_t
-
-/* Define to the type of args 4 and 6 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG46 DWORD
-
-/* Define to the type of arg 7 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG7 int
-
 /* Define if you have the recv function. */
 #define HAVE_RECV 1
 
