@@ -34,6 +34,7 @@
 #undef  closesocket
 #define closesocket(s)    close_s(s)
 #define writev(s,v,c)     writev_s(s,v,c)
+#define select(n,r,w,x,t) select_s(n,r,w,x,t)
 #endif
 
 #ifdef NETWARE
