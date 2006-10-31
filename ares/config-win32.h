@@ -3,7 +3,7 @@
 
 /* $Id$ */
 
-/* Copyright (C) 2004 - 2005 by Daniel Stenberg et al
+/* Copyright (C) 2004 - 2006 by Daniel Stenberg et al
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -17,7 +17,7 @@
  */
 
 /* ================================================================ */
-/*    ares/config-win32.h - Hand crafted config file for windows    */
+/*    ares/config-win32.h - Hand crafted config file for Windows    */
 /* ================================================================ */
 
 /* ---------------------------------------------------------------- */
