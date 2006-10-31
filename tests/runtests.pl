@@ -1216,13 +1216,25 @@ sub singletest {
         $cmd = $precheck[0];
         chomp $cmd;
         if($cmd) {
-            my @o = `$cmd 2>/dev/null`;
+            my @o;
+            if($testnum == 518) {
+                @o = `$cmd 2>"$LOGDIR/stderr$testnum"`;
+            }
+            else {
+                @o = `$cmd 2>/dev/null`;
+            }
             if($o[0]) {
                 $why = $o[0];
                 chomp $why;
             }
             logmsg "prechecked $cmd\n" if($verbose);
         }
+    }
+
+    if($testnum == 518) {
+        logmsg "== Start of file $LOGDIR/stderr$testnum\n";
+        displaylogcontent("$LOGDIR/stderr$testnum");
+        logmsg "== End of file $LOGDIR/stderr$testnum\n";
     }
 
     if($why) {
