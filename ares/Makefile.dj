@@ -62,137 +62,131 @@ vclean realclean: clean
 	- rmdir $(OBJ_DIR)
 
 # DO NOT DELETE THIS LINE
-$(OBJ_DIR)/ares_fds.o: ares_fds.c setup.h ../lib/config.h setup_once.h ares.h \
+$(OBJ_DIR)/ares_fds.o: ares_fds.c setup.h setup_once.h ares.h ares_private.h \
+  ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
+  ../include/curl/stdcheaders.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h ../include/curl/curl.h
+$(OBJ_DIR)/ares_getsock.o: ares_getsock.c setup.h setup_once.h ares.h ares_private.h \
+  ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
+  ../include/curl/stdcheaders.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h ../include/curl/curl.h
+$(OBJ_DIR)/ares_process.o: ares_process.c setup.h setup_once.h ares.h ares_dns.h \
   ares_private.h ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
-  ../lib/config.h ../include/curl/curl.h ../include/curl/curlver.h \
-  ../include/curl/easy.h ../include/curl/multi.h ../include/curl/curl.h \
-  ../lib/memory.h
-$(OBJ_DIR)/ares_getsock.o: ares_getsock.c setup.h ../lib/config.h setup_once.h \
-  ares.h ares_private.h ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
-  ../lib/config.h ../include/curl/curl.h ../include/curl/curlver.h \
-  ../include/curl/easy.h ../include/curl/multi.h ../include/curl/curl.h \
-  ../lib/memory.h
-$(OBJ_DIR)/ares_process.o: ares_process.c setup.h ../lib/config.h setup_once.h \
-  ares.h ares_dns.h ares_private.h ares_ipv6.h ../lib/memdebug.h \
-  ../lib/setup.h ../lib/config.h ../include/curl/curl.h \
+  ../include/curl/stdcheaders.h ../include/curl/curl.h \
   ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h ../include/curl/curl.h ../lib/memory.h
-$(OBJ_DIR)/ares_free_hostent.o: ares_free_hostent.c setup.h ../lib/config.h \
-  setup_once.h ares.h ares_private.h ares_ipv6.h ../lib/memdebug.h \
-  ../lib/setup.h ../lib/config.h ../include/curl/curl.h \
+  ../include/curl/multi.h ../include/curl/curl.h
+$(OBJ_DIR)/ares_free_hostent.o: ares_free_hostent.c setup.h setup_once.h ares.h \
+  ares_private.h ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
+  ../include/curl/stdcheaders.h ../include/curl/curl.h \
   ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h ../include/curl/curl.h ../lib/memory.h
-$(OBJ_DIR)/ares_query.o: ares_query.c setup.h ../lib/config.h setup_once.h ares.h \
+  ../include/curl/multi.h ../include/curl/curl.h
+$(OBJ_DIR)/ares_query.o: ares_query.c setup.h setup_once.h ares.h ares_dns.h \
+  ares_private.h ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
+  ../include/curl/stdcheaders.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h ../include/curl/curl.h
+$(OBJ_DIR)/ares__close_sockets.o: ares__close_sockets.c setup.h setup_once.h ares.h \
+  ares_private.h ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
+  ../include/curl/stdcheaders.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h ../include/curl/curl.h
+$(OBJ_DIR)/ares_free_string.o: ares_free_string.c setup.h setup_once.h ares.h \
+  ares_private.h ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
+  ../include/curl/stdcheaders.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h ../include/curl/curl.h
+$(OBJ_DIR)/ares_search.o: ares_search.c setup.h setup_once.h ares.h ares_private.h \
+  ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
+  ../include/curl/stdcheaders.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h ../include/curl/curl.h
+$(OBJ_DIR)/ares__get_hostent.o: ares__get_hostent.c setup.h setup_once.h ares.h \
+  ares_private.h ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
+  ../include/curl/stdcheaders.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h ../include/curl/curl.h inet_net_pton.h
+$(OBJ_DIR)/ares_gethostbyaddr.o: ares_gethostbyaddr.c setup.h setup_once.h ares.h \
+  ares_private.h ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
+  ../include/curl/stdcheaders.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h ../include/curl/curl.h inet_net_pton.h
+$(OBJ_DIR)/ares_send.o: ares_send.c setup.h setup_once.h ares.h ares_dns.h \
+  ares_private.h ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
+  ../include/curl/stdcheaders.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h ../include/curl/curl.h
+$(OBJ_DIR)/ares__read_line.o: ares__read_line.c setup.h setup_once.h ares.h \
+  ares_private.h ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
+  ../include/curl/stdcheaders.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h ../include/curl/curl.h
+$(OBJ_DIR)/ares_gethostbyname.o: ares_gethostbyname.c setup.h setup_once.h ares.h \
+  ares_private.h ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
+  ../include/curl/stdcheaders.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h ../include/curl/curl.h inet_net_pton.h \
+  bitncmp.h
+$(OBJ_DIR)/ares_strerror.o: ares_strerror.c setup.h setup_once.h ares.h
+$(OBJ_DIR)/ares_cancel.o: ares_cancel.c setup.h setup_once.h ares.h ares_private.h \
+  ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
+  ../include/curl/stdcheaders.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h ../include/curl/curl.h
+$(OBJ_DIR)/ares_init.o: ares_init.c setup.h setup_once.h ares.h ares_private.h \
+  ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
+  ../include/curl/stdcheaders.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h ../include/curl/curl.h inet_net_pton.h
+$(OBJ_DIR)/ares_timeout.o: ares_timeout.c setup.h setup_once.h ares.h ares_private.h \
+  ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
+  ../include/curl/stdcheaders.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h ../include/curl/curl.h
+$(OBJ_DIR)/ares_destroy.o: ares_destroy.c setup.h setup_once.h ares.h ares_private.h \
+  ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
+  ../include/curl/stdcheaders.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h ../include/curl/curl.h
+$(OBJ_DIR)/ares_mkquery.o: ares_mkquery.c setup.h setup_once.h ares.h ares_dns.h \
+  ares_private.h ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
+  ../include/curl/stdcheaders.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h ../include/curl/curl.h
+$(OBJ_DIR)/ares_version.o: ares_version.c setup.h setup_once.h ares_version.h
+$(OBJ_DIR)/ares_expand_name.o: ares_expand_name.c setup.h setup_once.h ares.h \
+  ares_private.h ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
+  ../include/curl/stdcheaders.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h ../include/curl/curl.h
+$(OBJ_DIR)/ares_parse_a_reply.o: ares_parse_a_reply.c setup.h setup_once.h ares.h \
   ares_dns.h ares_private.h ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
-  ../lib/config.h ../include/curl/curl.h ../include/curl/curlver.h \
-  ../include/curl/easy.h ../include/curl/multi.h ../include/curl/curl.h \
-  ../lib/memory.h
-$(OBJ_DIR)/ares__close_sockets.o: ares__close_sockets.c setup.h ../lib/config.h \
-  setup_once.h ares.h ares_private.h ares_ipv6.h ../lib/memdebug.h \
-  ../lib/setup.h ../lib/config.h ../include/curl/curl.h \
+  ../include/curl/stdcheaders.h ../include/curl/curl.h \
   ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h ../include/curl/curl.h ../lib/memory.h
-$(OBJ_DIR)/ares_free_string.o: ares_free_string.c setup.h ../lib/config.h \
-  setup_once.h ares.h ares_private.h ares_ipv6.h ../lib/memdebug.h \
-  ../lib/setup.h ../lib/config.h ../include/curl/curl.h \
-  ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h ../include/curl/curl.h ../lib/memory.h
-$(OBJ_DIR)/ares_search.o: ares_search.c setup.h ../lib/config.h setup_once.h ares.h \
+  ../include/curl/multi.h ../include/curl/curl.h
+$(OBJ_DIR)/windows_port.o: windows_port.c setup.h setup_once.h
+$(OBJ_DIR)/ares_expand_string.o: ares_expand_string.c setup.h setup_once.h ares.h \
   ares_private.h ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
-  ../lib/config.h ../include/curl/curl.h ../include/curl/curlver.h \
-  ../include/curl/easy.h ../include/curl/multi.h ../include/curl/curl.h \
-  ../lib/memory.h
-$(OBJ_DIR)/ares__get_hostent.o: ares__get_hostent.c setup.h ../lib/config.h \
-  setup_once.h ares.h ares_private.h ares_ipv6.h ../lib/memdebug.h \
-  ../lib/setup.h ../lib/config.h ../include/curl/curl.h \
+  ../include/curl/stdcheaders.h ../include/curl/curl.h \
   ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h ../include/curl/curl.h ../lib/memory.h \
-  inet_net_pton.h
-$(OBJ_DIR)/ares_gethostbyaddr.o: ares_gethostbyaddr.c setup.h ../lib/config.h \
-  setup_once.h ares.h ares_private.h ares_ipv6.h ../lib/memdebug.h \
-  ../lib/setup.h ../lib/config.h ../include/curl/curl.h \
-  ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h ../include/curl/curl.h ../lib/memory.h \
-  inet_net_pton.h
-$(OBJ_DIR)/ares_send.o: ares_send.c setup.h ../lib/config.h setup_once.h ares.h \
-  ares_dns.h ares_private.h ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
-  ../lib/config.h ../include/curl/curl.h ../include/curl/curlver.h \
-  ../include/curl/easy.h ../include/curl/multi.h ../include/curl/curl.h \
-  ../lib/memory.h
-$(OBJ_DIR)/ares__read_line.o: ares__read_line.c setup.h ../lib/config.h setup_once.h \
-  ares.h ares_private.h ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
-  ../lib/config.h ../include/curl/curl.h ../include/curl/curlver.h \
-  ../include/curl/easy.h ../include/curl/multi.h ../include/curl/curl.h \
-  ../lib/memory.h
-$(OBJ_DIR)/ares_gethostbyname.o: ares_gethostbyname.c setup.h ../lib/config.h \
-  setup_once.h ares.h ares_private.h ares_ipv6.h ../lib/memdebug.h \
-  ../lib/setup.h ../lib/config.h ../include/curl/curl.h \
-  ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h ../include/curl/curl.h ../lib/memory.h \
-  inet_net_pton.h bitncmp.h
-$(OBJ_DIR)/ares_strerror.o: ares_strerror.c setup.h ../lib/config.h setup_once.h \
-  ares.h
-$(OBJ_DIR)/ares_cancel.o: ares_cancel.c setup.h ../lib/config.h setup_once.h ares.h \
-  ares_private.h ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
-  ../lib/config.h ../include/curl/curl.h ../include/curl/curlver.h \
-  ../include/curl/easy.h ../include/curl/multi.h ../include/curl/curl.h \
-  ../lib/memory.h
-$(OBJ_DIR)/ares_init.o: ares_init.c setup.h ../lib/config.h setup_once.h ares.h \
-  ares_private.h ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
-  ../lib/config.h ../include/curl/curl.h ../include/curl/curlver.h \
-  ../include/curl/easy.h ../include/curl/multi.h ../include/curl/curl.h \
-  ../lib/memory.h inet_net_pton.h
-$(OBJ_DIR)/ares_timeout.o: ares_timeout.c setup.h ../lib/config.h setup_once.h \
-  ares.h ares_private.h ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
-  ../lib/config.h ../include/curl/curl.h ../include/curl/curlver.h \
-  ../include/curl/easy.h ../include/curl/multi.h ../include/curl/curl.h \
-  ../lib/memory.h
-$(OBJ_DIR)/ares_destroy.o: ares_destroy.c setup.h ../lib/config.h setup_once.h \
-  ares.h ares_private.h ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
-  ../lib/config.h ../include/curl/curl.h ../include/curl/curlver.h \
-  ../include/curl/easy.h ../include/curl/multi.h ../include/curl/curl.h \
-  ../lib/memory.h
-$(OBJ_DIR)/ares_mkquery.o: ares_mkquery.c setup.h ../lib/config.h setup_once.h \
+  ../include/curl/multi.h ../include/curl/curl.h
+$(OBJ_DIR)/ares_parse_ptr_reply.o: ares_parse_ptr_reply.c setup.h setup_once.h \
   ares.h ares_dns.h ares_private.h ares_ipv6.h ../lib/memdebug.h \
-  ../lib/setup.h ../lib/config.h ../include/curl/curl.h \
+  ../lib/setup.h ../include/curl/stdcheaders.h ../include/curl/curl.h \
   ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h ../include/curl/curl.h ../lib/memory.h
-$(OBJ_DIR)/ares_version.o: ares_version.c setup.h ../lib/config.h setup_once.h \
-  ares_version.h
-$(OBJ_DIR)/ares_expand_name.o: ares_expand_name.c setup.h ../lib/config.h \
-  setup_once.h ares.h ares_private.h ares_ipv6.h ../lib/memdebug.h \
-  ../lib/setup.h ../lib/config.h ../include/curl/curl.h \
-  ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h ../include/curl/curl.h ../lib/memory.h
-$(OBJ_DIR)/ares_parse_a_reply.o: ares_parse_a_reply.c setup.h ../lib/config.h \
-  setup_once.h ares.h ares_dns.h ares_private.h ares_ipv6.h \
-  ../lib/memdebug.h ../lib/setup.h ../lib/config.h ../include/curl/curl.h \
-  ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h ../include/curl/curl.h ../lib/memory.h
-$(OBJ_DIR)/windows_port.o: windows_port.c setup.h ../lib/config.h setup_once.h
-$(OBJ_DIR)/ares_expand_string.o: ares_expand_string.c setup.h ../lib/config.h \
-  setup_once.h ares.h ares_private.h ares_ipv6.h ../lib/memdebug.h \
-  ../lib/setup.h ../lib/config.h ../include/curl/curl.h \
-  ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h ../include/curl/curl.h ../lib/memory.h
-$(OBJ_DIR)/ares_parse_ptr_reply.o: ares_parse_ptr_reply.c setup.h ../lib/config.h \
-  setup_once.h ares.h ares_dns.h ares_private.h ares_ipv6.h \
-  ../lib/memdebug.h ../lib/setup.h ../lib/config.h ../include/curl/curl.h \
-  ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h ../include/curl/curl.h ../lib/memory.h
-$(OBJ_DIR)/ares_parse_aaaa_reply.o: ares_parse_aaaa_reply.c setup.h ../lib/config.h \
-  setup_once.h ares.h ares_dns.h inet_net_pton.h ares_private.h \
-  ares_ipv6.h ../lib/memdebug.h ../lib/setup.h ../lib/config.h \
+  ../include/curl/multi.h ../include/curl/curl.h
+$(OBJ_DIR)/ares_parse_aaaa_reply.o: ares_parse_aaaa_reply.c setup.h setup_once.h \
+  ares.h ares_dns.h inet_net_pton.h ares_private.h ares_ipv6.h \
+  ../lib/memdebug.h ../lib/setup.h ../include/curl/stdcheaders.h \
   ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h ../include/curl/curl.h ../lib/memory.h
-$(OBJ_DIR)/ares_getnameinfo.o: ares_getnameinfo.c setup.h ../lib/config.h \
-  setup_once.h ares.h ares_private.h ares_ipv6.h ../lib/memdebug.h \
-  ../lib/setup.h ../lib/config.h ../include/curl/curl.h \
+  ../include/curl/multi.h ../include/curl/curl.h
+$(OBJ_DIR)/ares_getnameinfo.o: ares_getnameinfo.c setup.h setup_once.h ares.h \
+  ares_private.h ares_ipv6.h ../lib/memdebug.h ../lib/setup.h \
+  ../include/curl/stdcheaders.h ../include/curl/curl.h \
   ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h ../include/curl/curl.h ../lib/memory.h \
-  inet_ntop.h
-$(OBJ_DIR)/inet_net_pton.o: inet_net_pton.c setup.h ../lib/config.h setup_once.h \
-  ares_ipv6.h inet_net_pton.h
+  ../include/curl/multi.h ../include/curl/curl.h inet_ntop.h
+$(OBJ_DIR)/inet_net_pton.o: inet_net_pton.c setup.h setup_once.h ares_ipv6.h \
+  inet_net_pton.h
 $(OBJ_DIR)/bitncmp.o: bitncmp.c bitncmp.h
-$(OBJ_DIR)/inet_ntop.o: inet_ntop.c setup.h ../lib/config.h setup_once.h ares_ipv6.h \
-  inet_ntop.h
+$(OBJ_DIR)/inet_ntop.o: inet_ntop.c setup.h setup_once.h ares_ipv6.h inet_ntop.h
