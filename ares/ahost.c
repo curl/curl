@@ -18,8 +18,7 @@
 #include "setup.h"
 #include <sys/types.h>
 
-#ifdef WIN32
-#else
+#if !defined(WIN32) || defined(WATT32)
 #include <sys/time.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
