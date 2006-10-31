@@ -127,6 +127,16 @@
 /* Define to the function return type for send. */
 #define SEND_TYPE_RETV int
 
+/* Specifics for the Watt-32 tcp/ip stack */
+#ifdef WATT32
+  #define SOCKET              int
+  #define NS_INADDRSZ         4
+  #define HAVE_ARPA_NAMESER_H 1
+  #undef HAVE_WINSOCK_H
+  #undef HAVE_WINSOCK2_H
+  #undef HAVE_WS2TCPIP_H
+#endif
+
 /* ---------------------------------------------------------------- */
 /*                          STRUCT RELATED                          */
 /* ---------------------------------------------------------------- */
