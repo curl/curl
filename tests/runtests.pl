@@ -1217,7 +1217,7 @@ sub singletest {
         chomp $cmd;
         if($cmd) {
             my @o;
-            if($testnum == 518) {
+            if(($testnum == 518) || ($testnum == 537)) {
                 @o = `$cmd 2>"$LOGDIR/stderr$testnum"`;
             }
             else {
@@ -1231,7 +1231,7 @@ sub singletest {
         }
     }
 
-    if($testnum == 518) {
+    if(($testnum == 518) || ($testnum == 537)) {
         logmsg "== Start of file $LOGDIR/stderr$testnum\n";
         displaylogcontent("$LOGDIR/stderr$testnum");
         logmsg "== End of file $LOGDIR/stderr$testnum\n";
