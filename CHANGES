@@ -10,6 +10,12 @@ Daniel (2 November 2006)
 - James Housley brought support for SCP transfers, based on the libssh2 library
   for the actual network protocol stuff.
 
+  Added these new curl_easy_setopt() options:
+
+    CURLOPT_SSH_AUTH_TYPES
+    CURLOPT_SSH_PUBLIC_KEYFILE
+    CURLOPT_SSH_PRIVATE_KEYFILE
+
 Version 7.16.0 (30 October 2006)
 
 Daniel (25 October 2006)

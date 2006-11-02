@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_easy_setopt 3 "19 Apr 2006" "libcurl 7.15.4" "libcurl Manual"
+.TH curl_easy_setopt 3 "2 Nov 2006" "libcurl 7.16.1" "libcurl Manual"
 .SH NAME
 curl_easy_setopt \- set options for a curl easy handle
 .SH SYNOPSIS
@@ -1312,6 +1312,17 @@ krb4 awareness.  This is a string, 'clear', 'safe', 'confidential' or
 \&'private'.  If the string is set but doesn't match one of these, 'private'
 will be used. Set the string to NULL to disable kerberos4. The kerberos
 support only works for FTP.
+.SH SSH OPTIONS
+.IP CURLOPT_SSH_AUTH_TYPES
+Pass a long set to a bitmask consisting of one or more of
+CURLSSH_AUTH_PUBLICKEY, CURLSSH_AUTH_PASSWORD, CURLSSH_AUTH_HOST,
+CURLSSH_AUTH_KEYBOARD. Set CURLSSH_AUTH_ANY to let libcurl pick one.
+.IP CURLOPT_SSH_PUBLIC_KEYFILE
+Pass a char * pointing to a file name for your public key. If not used,
+libcurl defaults to using \fB~/.ssh/id_dsa.pub\fP.
+.IP CURLOPT_SSH_PRIVATE_KEYFILE
+Pass a char * pointing to a file name for your private key. If not used,
+libcurl defaults to using \fB~/.ssh/id_dsa\fP.
 .SH OTHER OPTIONS
 .IP CURLOPT_PRIVATE
 Pass a char * as parameter, pointing to data that should be associated with
