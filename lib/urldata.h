@@ -35,6 +35,7 @@
 #define PORT_DICT 2628
 #define PORT_LDAP 389
 #define PORT_TFTP 69
+#define PORT_SSH 22
 
 #define DICT_MATCH "/MATCH:"
 #define DICT_MATCH2 "/M:"
@@ -108,6 +109,11 @@
 #  include <gssapi.h>
 # endif
 #endif
+
+#ifdef HAVE_LIBSSH2_H
+#include <libssh2.h>
+#include <libssh2_sftp.h>
+#endif /* HAVE_LIBSSH2_H */
 
 /* Download buffer size, keep it fairly big for speed reasons */
 #undef BUFSIZE
@@ -392,6 +398,22 @@ struct ftp_conn {
   ftpstate state; /* always use ftp.c:state() to change state! */
 };
 
+struct SCPPROTO {
+  curl_off_t *bytecountp;
+  char *user;
+  char *passwd;
+  char *path;                   /* the path we operate on */
+  char *freepath;               /* pointer to the allocated block we must
+                                   free, this might differ from the 'path'
+                                   pointer */
+  char *errorstr;
+#ifdef USE_LIBSSH2
+  LIBSSH2_SESSION *scpSession; /* Secure Shell session */
+  LIBSSH2_CHANNEL *scpChannel; /* SCP channel handle */
+#endif /* USE_LIBSSH2 */
+};
+
+
 /****************************************************************************
  * FILE unique setup
  ***************************************************************************/
@@ -647,6 +669,7 @@ struct HandleData {
     struct FILEPROTO *file;
     void *telnet;        /* private for telnet.c-eyes only */
     void *generic;
+    struct SCPPROTO *scp;
   } proto;
 };
 
@@ -681,6 +704,7 @@ struct connectdata {
 #define PROT_FTPS    (1<<9)
 #define PROT_SSL     (1<<10) /* protocol requires SSL */
 #define PROT_TFTP    (1<<11)
+#define PROT_SCP     (1<<12)
 
   /* 'dns_entry' is the particular host we use. This points to an entry in the
      DNS cache and it will not get pruned while locked. It gets unlocked in
@@ -1250,6 +1274,11 @@ struct UserDefined {
   bool ftp_skip_ip;      /* skip the IP address the FTP server passes on to
                             us */
   bool connect_only;     /* make connection, let application use the socket */
+  long ssh_auth_types;   /* allowed SSH auth types */
+  char *ssh_public_key;   /* the path to the public key file for
+                             authentication */
+  char *ssh_private_key;  /* the path to the private key file for
+                             authentication */
 };
 
 struct Names {

@@ -128,6 +128,7 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
 #include "http.h"
 #include "file.h"
 #include "ldap.h"
+#include "ssh.h"
 #include "url.h"
 #include "connect.h"
 #include "inet_ntop.h"
@@ -165,7 +166,7 @@ static void signalPipeClose(struct curl_llist *pipe);
 
 #define MAX_PIPELINE_LENGTH 5
 
-/* 
+/*
  * We use this ZERO_NULL to avoid picky compiler warnings,
  * when assigning a NULL pointer to a function pointer var.
  */
@@ -545,6 +546,9 @@ CURLcode Curl_open(struct SessionHandle **curl)
     /* This no longer creates a connection cache here. It is instead made on
        the first call to curl_easy_perform() or when the handle is added to a
        multi stack. */
+
+    data->set.ssh_auth_types = CURLSSH_AUTH_DEFAULT; /* defaults to any auth
+                                                        type */
 
     /* most recent connection is not yet defined */
     data->state.lastconnect = -1;
@@ -1671,6 +1675,24 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 
   case CURLOPT_SSL_SESSIONID_CACHE:
     data->set.ssl.sessionid = (bool)(0 != va_arg(param, long));
+    break;
+
+  case CURLOPT_SSH_AUTH_TYPES:
+    data->set.ssh_auth_types = va_arg(param, long);
+    break;
+
+  case CURLOPT_SSH_PUBLIC_KEYFILE:
+    /*
+     * Use this file instead of the $HOME/.ssh/id_dsa.pub file
+     */
+    data->set.ssh_public_key = va_arg(param, char *);
+    break;
+
+  case CURLOPT_SSH_PRIVATE_KEYFILE:
+    /*
+     * Use this file instead of the $HOME/.ssh/id_dsa file
+     */
+    data->set.ssh_private_key = va_arg(param, char *);
     break;
 
   default:
@@ -3023,7 +3045,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->curl_connecting = Curl_https_connecting;
     conn->curl_proto_getsock = Curl_https_getsock;
 
-#else /* USE_SS */
+#else /* USE_SSL */
     failf(data, LIBCURL_NAME
           " was built with SSL disabled, https: not supported!");
     return CURLE_UNSUPPORTED_PROTOCOL;
@@ -3215,6 +3237,21 @@ static CURLcode CreateConnection(struct SessionHandle *data,
           " was built with TFTP disabled!");
 #endif
   }
+  else if (strequal(conn->protostr, "SCP")) {
+#ifdef USE_LIBSSH2
+    conn->port = PORT_SSH;
+    conn->remote_port = PORT_SSH;
+    conn->protocol = PROT_SCP;
+    conn->curl_connect = Curl_scp_connect; /* ssh_connect? */
+    conn->curl_do = Curl_scp_do;
+    conn->curl_done = Curl_scp_done;
+    conn->curl_do_more = (Curl_do_more_func)NULL;
+#else
+    failf(data, LIBCURL_NAME
+          " was built without LIBSSH2, scp: not supported!");
+    return CURLE_UNSUPPORTED_PROTOCOL;
+#endif
+  }
   else {
     /* We fell through all checks and thus we don't support the specified
        protocol */
@@ -3381,7 +3418,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   user[0] =0;   /* to make everything well-defined */
   passwd[0]=0;
 
-  if (conn->protocol & (PROT_FTP|PROT_HTTP)) {
+  if (conn->protocol & (PROT_FTP|PROT_HTTP|PROT_SCP)) {
     /* This is a FTP or HTTP URL, we will now try to extract the possible
      * user+password pair in a string like:
      * ftp://user:password@ftp.my.site:8021/README */

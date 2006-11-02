@@ -392,6 +392,11 @@ typedef enum {
                                     CURLOPT_CONV_FROM_UTF8_FUNCTION */
   CURLE_SSL_CACERT_BADFILE,      /* 77 - could not load CACERT file, missing
                                     or wrong format */
+  CURLE_REMOTE_FILE_NOT_FOUND,   /* 78 - remote file not found */
+  CURLE_SSH,                     /* 79 - error from the SSH layer, somewhat
+                                    generic so the error message will be of
+                                    interest when this has happened */
+
   CURL_LAST /* never use! */
 } CURLcode;
 
@@ -426,6 +431,14 @@ typedef enum {
 #define CURLAUTH_NTLM         (1<<3)  /* NTLM */
 #define CURLAUTH_ANY ~0               /* all types set */
 #define CURLAUTH_ANYSAFE (~CURLAUTH_BASIC)
+
+#define CURLSSH_AUTH_ANY       ~0     /* all types supported by the server */
+#define CURLSSH_AUTH_NONE      0      /* none allowed, silly but complete */
+#define CURLSSH_AUTH_PUBLICKEY (1<<0) /* public/private key files */
+#define CURLSSH_AUTH_PASSWORD  (1<<1) /* password */
+#define CURLSSH_AUTH_HOST      (1<<2) /* host key files */
+#define CURLSSH_AUTH_KEYBOARD  (1<<3) /* keyboard interactive */
+#define CURLSSH_AUTH_DEFAULT CURLSSH_AUTH_ANY
 
 #ifndef CURL_NO_OLDIES /* define this to test if your app builds with all
                           the obsolete stuff removed! */
@@ -1029,6 +1042,13 @@ typedef enum {
      enabled (== 1) */
   CINIT(SSL_SESSIONID_CACHE, LONG, 150),
 
+  /* allowed SSH authentication methods */
+  CINIT(SSH_AUTH_TYPES, LONG, 151),
+
+  /* Used by scp/sftp to do public/private key authentication */
+  CINIT(SSH_PUBLIC_KEYFILE, OBJECTPOINT, 152),
+  CINIT(SSH_PRIVATE_KEYFILE, OBJECTPOINT, 153),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -1506,6 +1526,7 @@ typedef enum {
   CURLVERSION_FIRST,
   CURLVERSION_SECOND,
   CURLVERSION_THIRD,
+  CURLVERSION_FOURTH,
   CURLVERSION_LAST /* never actually use this */
 } CURLversion;
 
@@ -1514,7 +1535,7 @@ typedef enum {
    meant to be a built-in version number for what kind of struct the caller
    expects. If the struct ever changes, we redefine the NOW to another enum
    from above. */
-#define CURLVERSION_NOW CURLVERSION_THIRD
+#define CURLVERSION_NOW CURLVERSION_FOURTH
 
 typedef struct {
   CURLversion age;          /* age of the returned struct */
@@ -1535,8 +1556,13 @@ typedef struct {
   /* This field was added in CURLVERSION_THIRD */
   const char *libidn;
 
+  /* These field were added in CURLVERSION_FOURTH */
+
   /* Same as '_libiconv_version' if built with HAVE_ICONV */
   int iconv_ver_num;
+
+  const char *libssh_version; /* human readable string */
+
 } curl_version_info_data;
 
 #define CURL_VERSION_IPV6      (1<<0)  /* IPv6-enabled */

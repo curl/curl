@@ -45,6 +45,7 @@
 #include "sendf.h"
 #include "connect.h" /* for the Curl_sockerrno() proto */
 #include "sslgen.h"
+#include "ssh.h"
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */
 #include <curl/mprintf.h>
@@ -326,9 +327,15 @@ CURLcode Curl_write(struct connectdata *conn,
   CURLcode retcode;
   int num = (sockfd == conn->sock[SECONDARYSOCKET]);
 
-  if (conn->ssl[num].use)
+  if (conn->ssl[num].use) {
     /* only TRUE if SSL enabled */
     bytes_written = Curl_ssl_send(conn, num, mem, len);
+  }
+#ifdef USE_LIBSSH2
+  else if (conn->protocol & PROT_SCP) {
+    bytes_written = Curl_scp_send(conn, num, mem, len);
+  }
+#endif /* !USE_LIBSSH2 */
   else {
     if(conn->sec_complete)
       /* only TRUE if krb4 enabled */
@@ -499,9 +506,15 @@ int Curl_read(struct connectdata *conn, /* connection data */
   if(conn->ssl[num].use) {
     nread = Curl_ssl_recv(conn, num, conn->master_buffer, bytesfromsocket);
 
-    if(nread == -1)
+    if(nread == -1) {
       return -1; /* -1 from Curl_ssl_recv() means EWOULDBLOCK */
+    }
   }
+#ifdef USE_LIBSSH2
+  else if (conn->protocol & PROT_SCP) {
+    nread = Curl_scp_recv(conn, num, conn->master_buffer, bytesfromsocket);
+  }
+#endif /* !USE_LIBSSH2 */
   else {
     if(conn->sec_complete)
       nread = Curl_sec_read(conn, sockfd, conn->master_buffer,

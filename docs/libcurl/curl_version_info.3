@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_version_info 3 "19 Apr 2006" "libcurl 7.15.4" "libcurl Manual"
+.TH curl_version_info 3 "2 Nov 2006" "libcurl 7.16.1" "libcurl Manual"
 .SH NAME
 curl_version_info - returns run-time libcurl version info
 .SH SYNOPSIS
@@ -65,6 +65,11 @@ typedef struct {
 
   /* when 'age' is 2 or higher, the member below also exists: */
   const char *libidn;       /* human readable string */
+
+  /* when 'age' is 3 or higher, the members below also exist: */
+  int iconv_ver_num;       /* '_libiconv_version' if iconv support enabled */
+
+  const char *libssh_version; /* human readable string */
 
 } curl_version_info_data;
 .fi

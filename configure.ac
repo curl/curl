@@ -78,6 +78,7 @@ AC_SUBST(PKGADD_VENDOR)
 dnl
 dnl initialize all the info variables
     curl_ssl_msg="no      (--with-ssl / --with-gnutls)"
+    curl_ssh_msg="no      (--with-libssh2)"
    curl_zlib_msg="no      (--with-zlib)"
    curl_krb4_msg="no      (--with-krb4*)"
     curl_gss_msg="no      (--with-gssapi)"
@@ -1041,6 +1042,72 @@ if test X"$OPT_SSL" != Xno; then
     fi
   fi
 
+fi
+
+dnl **********************************************************************
+dnl Check for the presence of LIBSSH2 libraries and headers
+dnl **********************************************************************
+
+dnl Default to compiler & linker defaults for LIBSSH2 files & libraries.
+OPT_LIBSSH2=off
+AC_ARG_WITH(libssh2,dnl
+AC_HELP_STRING([--with-libssh2=PATH],[Where to look for libssh2, PATH points to the LIBSSH2 installation (default: /usr/local/lib); when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AC_HELP_STRING([--without-libssh2], [disable LIBSSH2]),
+  OPT_LIBSSH2=$withval)
+
+if test X"$OPT_LIBSSH2" != Xno; then
+  dnl backup the pre-libssh2 variables
+  CLEANLDFLAGS="$LDFLAGS"
+  CLEANCPPFLAGS="$CPPFLAGS"
+  CLEANLIBS="$LIBS"
+
+  case "$OPT_LIBSSH2" in
+  yes)
+    dnl --with-libssh2 (without path) used
+    PREFIX_LIBSSH2=/usr/local/lib
+    LIB_LIBSSH2="$PREFIX_LIBSSH2/lib$libsuff"
+    ;;
+  off)
+    dnl no --with-libssh2 option given, just check default places
+    PREFIX_LIBSSH2=
+    ;;
+  *)
+    dnl check the given --with-libssh2 spot
+    PREFIX_LIBSSH2=$OPT_LIBSSH2
+    LIB_LIBSSH2="$PREFIX_LIBSSH2/lib$libsuff"
+    LDFLAGS="$LDFLAGS -L$LIB_LIBSSH2"
+    CPPFLAGS="$CPPFLAGS -I$PREFIX_LIBSSH2/include/libssh2 -I$PREFIX_LIBSSH2/include"
+    ;;
+  esac
+
+  if test X"$HAVECRYPTO" = X"yes"; then
+    dnl This is only reasonable to do if crypto actually is there: check for
+    dnl LIBSSH2 libs NOTE: it is important to do this AFTER the crypto lib
+
+    AC_CHECK_LIB(ssh2, libssh2_channel_open_ex)
+    
+    AC_CHECK_HEADERS(libssh2.h,
+      curl_ssh_msg="enabled (libSSH2)"
+      LIBSSH2_ENABLED=1
+      AC_DEFINE(USE_LIBSSH2, 1, [if libSSH2 is in use]))
+
+    if test X"OPT_LIBSSH2" != Xoff &&
+       test "$LIBSSH2_ENABLED" != "1"; then
+      AC_MSG_ERROR([libSSH2 libs and/or directories were not found where specified!])
+    fi
+  fi
+
+  if test "$LIBSSH2_ENABLED" = "1"; then
+    if test -n "$LIB_LIBSSH2"; then
+       dnl when the libssh2 shared libs were found in a path that the run-time
+       dnl linker doesn't search through, we need to add it to LD_LIBRARY_PATH
+       dnl to prevent further configure tests to fail due to this
+
+       LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_LIBSSH2"
+       export LD_LIBRARY_PATH
+       AC_MSG_NOTICE([Added $LIB_LIBSSH2 to LD_LIBRARY_PATH])
+    fi
+  fi
 fi
 
 dnl **********************************************************************
@@ -2076,6 +2143,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   Install prefix:  ${prefix}
   Compiler:        ${CC}
   SSL support:     ${curl_ssl_msg}
+  SSH support:     ${curl_ssh_msg}
   zlib support:    ${curl_zlib_msg}
   krb4 support:    ${curl_krb4_msg}
   GSSAPI support:  ${curl_gss_msg}

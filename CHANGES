@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (2 November 2006)
+- James Housley brought support for SCP transfers, based on the libssh2 library
+  for the actual network protocol stuff.
+
 Version 7.16.0 (30 October 2006)
 
 Daniel (25 October 2006)

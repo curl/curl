@@ -715,6 +715,9 @@ void curl_easy_reset(CURL *curl)
   /* This is our prefered CA cert bundle since install time */
   data->set.ssl.CAfile = (char *)CURL_CA_BUNDLE;
 #endif
+
+  data->set.ssh_auth_types = CURLSSH_AUTH_DEFAULT; /* defaults to any auth
+                                                      type */
 }
 
 #ifdef CURL_DOES_CONVERSIONS
