@@ -32,6 +32,9 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <mprintf.h>
@@ -114,7 +117,9 @@ static int rlimit(int keep_open)
   struct rlimit rl;
   char strbuff[256];
   char strbuff1[81];
+#ifdef LIB518
   char strbuff2[81];
+#endif
   char fmt_u[] = "%u";
   char fmt_lu[] = "%lu";
 #ifdef HAVE_LONGLONG
@@ -170,6 +175,7 @@ static int rlimit(int keep_open)
    */
 
   if (rl.rlim_cur != rl.rlim_max) {
+
     fprintf(stderr, "raising soft limit up to hard limit\n");
     rl.rlim_cur = rl.rlim_max;
     if (setrlimit(RLIMIT_NOFILE, &rl) != 0) {
@@ -177,33 +183,34 @@ static int rlimit(int keep_open)
       fprintf(stderr, "%s\n", msgbuff);
       return -2;
     }
-  }
 
-  /* get current open file limits */
+    /* get current open file limits */
 
-  if (getrlimit(RLIMIT_NOFILE, &rl) != 0) {
-    store_errmsg("getrlimit() failed", our_errno());
-    fprintf(stderr, "%s\n", msgbuff);
-    return -3;
-  }
+    if (getrlimit(RLIMIT_NOFILE, &rl) != 0) {
+      store_errmsg("getrlimit() failed", our_errno());
+      fprintf(stderr, "%s\n", msgbuff);
+      return -3;
+    }
 
-  /* show current open file limits */
-
-#ifdef RLIM_INFINITY
-  if (rl.rlim_cur == RLIM_INFINITY)
-    strcpy(strbuff, "INFINITY");
-  else
-#endif
-    snprintf(strbuff, sizeof(strbuff), fmt, rl.rlim_cur);
-  fprintf(stderr, "current soft limit: %s\n", strbuff);
+    /* show current open file limits */
 
 #ifdef RLIM_INFINITY
-  if (rl.rlim_max == RLIM_INFINITY)
-    strcpy(strbuff, "INFINITY");
-  else
+    if (rl.rlim_cur == RLIM_INFINITY)
+      strcpy(strbuff, "INFINITY");
+    else
 #endif
-    snprintf(strbuff, sizeof(strbuff), fmt, rl.rlim_max);
-  fprintf(stderr, "current hard limit: %s\n", strbuff);
+      snprintf(strbuff, sizeof(strbuff), fmt, rl.rlim_cur);
+    fprintf(stderr, "current soft limit: %s\n", strbuff);
+
+#ifdef RLIM_INFINITY
+    if (rl.rlim_max == RLIM_INFINITY)
+      strcpy(strbuff, "INFINITY");
+    else
+#endif
+      snprintf(strbuff, sizeof(strbuff), fmt, rl.rlim_max);
+    fprintf(stderr, "current hard limit: %s\n", strbuff);
+
+  } /* (rl.rlim_cur != rl.rlim_max) */
 
   /*
    * test 518 is all about testing libcurl functionality
@@ -220,45 +227,6 @@ static int rlimit(int keep_open)
 
 #ifdef LIB518
 
-  /* verify that soft limit is higher than FD_SETSIZE */
-
-  num_open.rlim_cur = FD_SETSIZE;
-
-  if ((rl.rlim_cur > 0) &&
-#ifdef RLIM_INFINITY
-     (rl.rlim_cur != RLIM_INFINITY) &&
-#endif
-     (rl.rlim_cur <= num_open.rlim_cur)) {
-    snprintf(strbuff2, sizeof(strbuff2), fmt, rl.rlim_cur);
-    snprintf(strbuff1, sizeof(strbuff1), fmt, num_open.rlim_cur);
-    snprintf(strbuff, sizeof(strbuff), "system does not support opening %s "
-             "files, soft limit is %s", strbuff1, strbuff2);
-    store_errmsg(strbuff, 0);
-    fprintf(stderr, "%s\n", msgbuff);
-    return -4;
-  }
-
-  /*
-   * verify that soft limit is higher than NUM_OPEN,
-   * number of file descriptors we would try to open
-   */
-
-  num_open.rlim_cur = NUM_OPEN;
-
-  if ((rl.rlim_cur > 0) &&
-#ifdef RLIM_INFINITY
-     (rl.rlim_cur != RLIM_INFINITY) &&
-#endif
-     (rl.rlim_cur <= num_open.rlim_cur)) {
-    snprintf(strbuff2, sizeof(strbuff2), fmt, rl.rlim_cur);
-    snprintf(strbuff1, sizeof(strbuff1), fmt, num_open.rlim_cur);
-    snprintf(strbuff, sizeof(strbuff), "system does not support opening %s "
-             "files, soft limit is %s", strbuff1, strbuff2);
-    store_errmsg(strbuff, 0);
-    fprintf(stderr, "%s\n", msgbuff);
-    return -5;
-  }
-
   /*
    * verify that soft limit is higher than NUM_NEEDED,
    * number of file descriptors we would try to open
@@ -274,8 +242,8 @@ static int rlimit(int keep_open)
      (rl.rlim_cur <= num_open.rlim_cur)) {
     snprintf(strbuff2, sizeof(strbuff2), fmt, rl.rlim_cur);
     snprintf(strbuff1, sizeof(strbuff1), fmt, num_open.rlim_cur);
-    snprintf(strbuff, sizeof(strbuff), "system does not support opening %s "
-             "files, soft limit is %s", strbuff1, strbuff2);
+    snprintf(strbuff, sizeof(strbuff), "fd needed (%s) > "
+             "system limit (%s)", strbuff1, strbuff2);
     store_errmsg(strbuff, 0);
     fprintf(stderr, "%s\n", msgbuff);
     return -6;
@@ -322,7 +290,7 @@ static int rlimit(int keep_open)
   }
   else {
     /* biggest file descriptor array size */
-    num_open.rlim_max = ((size_t)-1) / sizeof(*fd);
+    num_open.rlim_max = INT_MAX;
   }
 #endif /* LIB537 */
 
@@ -386,9 +354,12 @@ static int rlimit(int keep_open)
 
       fd[num_open.rlim_cur] = -1;
 
+      num_open.rlim_max = NUM_NEEDED;
+      snprintf(strbuff2, sizeof(strbuff2), fmt, num_open.rlim_max);
       snprintf(strbuff1, sizeof(strbuff1), fmt, num_open.rlim_cur);
-      snprintf(strbuff, sizeof(strbuff), "dup() attempt %s failed", strbuff1);
-      store_errmsg(strbuff, our_errno());
+      snprintf(strbuff, sizeof(strbuff), "fd needed (%s) > "
+               "system limit (%s)", strbuff2, strbuff1);
+      store_errmsg(strbuff, 0);
       fprintf(stderr, "%s\n", msgbuff);
 
       fprintf(stderr, "closing file descriptors\n");
