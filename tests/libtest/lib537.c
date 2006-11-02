@@ -8,10 +8,6 @@
  * $Id$
  */
 
-/*
- * This source code is used for lib518 and lib537.
- */
-
 #include "test.h"
 
 #ifdef HAVE_SYS_TYPES_H
