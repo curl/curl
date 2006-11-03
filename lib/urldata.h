@@ -485,8 +485,12 @@ struct ConnectBits {
                          when Curl_done() is called, to prevent Curl_done() to
                          get invoked twice when the multi interface is
                          used. */
-  bool stream_was_rewound; /* Indicates that the stream was rewound after a request
-                              read past the end of its response byte boundary */
+  bool stream_was_rewound; /* Indicates that the stream was rewound after a
+                              request read past the end of its response byte
+                              boundary */
+  bool proxy_connect_closed; /* set true if a proxy disconnected the
+                                connection in a CONNECT request with auth, so
+                                that libcurl should reconnect and continue. */
 };
 
 struct hostname {

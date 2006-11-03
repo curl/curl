@@ -2394,7 +2394,8 @@ CURLcode Curl_protocol_connect(struct connectdata *conn,
 
     /* it has started, possibly even completed but that knowledge isn't stored
        in this bit! */
-    conn->bits.protoconnstart = TRUE;
+    if (!result)
+      conn->bits.protoconnstart = TRUE;
   }
 
   return result; /* pass back status */
@@ -3957,30 +3958,41 @@ static CURLcode SetupConnection(struct connectdata *conn,
   data->state.crlf_conversions = 0; /* reset CRLF conversion counter */
 #endif /* CURL_DO_LINEEND_CONV */
 
-  if(CURL_SOCKET_BAD == conn->sock[FIRSTSOCKET]) {
-    bool connected = FALSE;
+  for(;;) {
+    /* loop for CURL_SERVER_CLOSED_CONNECTION */
 
-    /* Connect only if not already connected! */
-    result = ConnectPlease(data, conn, hostaddr, &connected);
+    if(CURL_SOCKET_BAD == conn->sock[FIRSTSOCKET]) {
+      bool connected = FALSE;
 
-    if(connected) {
-      result = Curl_protocol_connect(conn, protocol_done);
-      if(CURLE_OK == result)
-        conn->bits.tcpconnect = TRUE;
+      /* Connect only if not already connected! */
+      result = ConnectPlease(data, conn, hostaddr, &connected);
+
+      if(connected) {
+        result = Curl_protocol_connect(conn, protocol_done);
+        if(CURLE_OK == result)
+          conn->bits.tcpconnect = TRUE;
+      }
+      else
+        conn->bits.tcpconnect = FALSE;
+
+      /* if the connection was closed by the server while exchanging
+         authentication informations, retry with the new set
+         authentication information */
+      if(conn->bits.proxy_connect_closed)
+        continue;
+
+      if(CURLE_OK != result)
+        return result;
     }
-    else
-      conn->bits.tcpconnect = FALSE;
-
-
-    if(CURLE_OK != result)
-      return result;
-  }
-  else {
-    Curl_pgrsTime(data, TIMER_CONNECT); /* we're connected already */
-    conn->bits.tcpconnect = TRUE;
-    *protocol_done = TRUE;
-    if(data->set.verbose)
-      verboseconnect(conn);
+    else {
+      Curl_pgrsTime(data, TIMER_CONNECT); /* we're connected already */
+      conn->bits.tcpconnect = TRUE;
+      *protocol_done = TRUE;
+      if(data->set.verbose)
+        verboseconnect(conn);
+    }
+    /* Stop the loop now */
+    break;
   }
 
   conn->now = Curl_tvnow(); /* time this *after* the connect is done, we

@@ -44,11 +44,6 @@ may have been fixed since this was written!
   "system context" will make it use wrong(?) user name - at least when compared
   to what winhttp does. See http://curl.haxx.se/bug/view.cgi?id=1281867
 
-25. When doing a CONNECT request with curl it doesn't properly handle if the
-  proxy closes the connection within the authentication "negotiation phase".
-  Like if you do HTTPS or similar over a proxy and you use perhaps
-  --proxy-anyauth.
-
 23. We don't support SOCKS for IPv6. We don't support FTPS over a SOCKS proxy.
   We don't have any test cases for SOCKS proxy. We probably have even more
   bugs and lack of features when a SOCKS proxy is used. And there seem to be a

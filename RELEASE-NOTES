@@ -15,7 +15,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o 
+ o proxy close during CONNECT authentication is now dealt with nicely
 
 Other curl-related news:
 

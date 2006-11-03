@@ -903,8 +903,8 @@ CURLcode add_buffer_send(send_buffer *in,
       Curl_debug(conn->data, CURLINFO_HEADER_OUT, ptr,
                  (size_t)(amount-included_body_bytes), conn);
       if (included_body_bytes)
-        Curl_debug(conn->data, CURLINFO_DATA_OUT, 
-                   ptr+amount-included_body_bytes, 
+        Curl_debug(conn->data, CURLINFO_DATA_OUT,
+                   ptr+amount-included_body_bytes,
                    (size_t)included_body_bytes, conn);
     }
 
@@ -1110,6 +1110,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
   curl_socket_t tunnelsocket = conn->sock[sockindex];
   send_buffer *req_buffer;
   curl_off_t cl=0;
+  bool closeConnection = FALSE;
 
 #define SELECT_OK      0
 #define SELECT_ERROR   1
@@ -1117,6 +1118,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
   int error = SELECT_OK;
 
   infof(data, "Establish HTTP proxy tunnel to %s:%d\n", hostname, remote_port);
+  conn->bits.proxy_connect_closed = FALSE;
 
   do {
     if(data->reqdata.newurl) {
@@ -1258,7 +1260,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 
               /* output debug if that is requested */
               if(data->set.verbose)
-                Curl_debug(data, CURLINFO_HEADER_IN, 
+                Curl_debug(data, CURLINFO_HEADER_IN,
                            line_start, (size_t)perline, conn);
 
               /* send the header to the callback */
@@ -1310,6 +1312,9 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                 cl = curlx_strtoofft(line_start + strlen("Content-Length:"),
                                      NULL, 10);
               }
+              else if(Curl_compareheader(line_start,
+                                         "Connection:", "close"))
+                closeConnection = TRUE;
               else if(2 == sscanf(line_start, "HTTP/1.%d %d",
                                   &subversion,
                                   &k->httpcode)) {
@@ -1336,11 +1341,21 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
          headers. 'newurl' is set to a new URL if we must loop. */
       Curl_http_auth_act(conn);
 
+    if (closeConnection && data->reqdata.newurl) {
+      /* Connection closed by server. Don't use it anymore */
+      sclose(conn->sock[sockindex]);
+      conn->sock[sockindex] = CURL_SOCKET_BAD;
+      break;
+    }
   } while(data->reqdata.newurl);
 
   if(200 != k->httpcode) {
     failf(data, "Received HTTP code %d from proxy after CONNECT",
           k->httpcode);
+
+    if (closeConnection && data->reqdata.newurl)
+      conn->bits.proxy_connect_closed = TRUE;
+
     return CURLE_RECV_ERROR;
   }
 

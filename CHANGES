@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel (3 November 2006)
+- Olaf Stueben provided a patch that I edited slightly. It fixes the notorious
+  KNOWN_BUGS #25, which happens when a proxy closes the connection when
+  libcurl has sent CONNECT, as part of an authentication negotiation. Starting
+  now, libcurl will re-connect accordingly and continue the authentication as
+  it should.
+
 Daniel (2 November 2006)
 - James Housley brought support for SCP transfers, based on the libssh2 library
   for the actual network protocol stuff.
