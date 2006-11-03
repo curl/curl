@@ -201,9 +201,8 @@ TODO
 
  * RTSP - RFC2326 (protocol - very HTTP-like, also contains URL description)
 
- * SFTP/SCP/SSH (no RFCs for protocol nor URI/URL format). An implementation
-   should most probably use an existing ssh library, such as OpenSSH. or
-   libssh2.org
+ * SFTP - SCP support is already added based on libssh2 and since the lib
+   supports SFTP too, it shouldn't be a lot of extra work...
 
  * RSYNC (no RFCs for protocol nor URI/URL format).  An implementation should
    most probably use an existing rsync library, such as librsync.
