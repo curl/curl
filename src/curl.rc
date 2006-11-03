@@ -52,7 +52,7 @@ BEGIN
       VALUE "OriginalFilename", "curl.exe\0"
       VALUE "ProductName",      "The cURL executable\0"
       VALUE "ProductVersion",   CURL_VERSION "\0"
-      VALUE "LegalCopyright",   "Copyright 1996-2005 by Daniel Stenberg. http://curl.haxx.se/docs/copyright.html\0"
+      VALUE "LegalCopyright",   "Copyright 1996-2006 by Daniel Stenberg. http://curl.haxx.se/docs/copyright.html\0"
     END
   END
 
