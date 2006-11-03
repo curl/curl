@@ -129,6 +129,10 @@ SOURCE=..\..\ares_gethostbyname.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\ares_getsock.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\ares_init.c
 # End Source File
 # Begin Source File
