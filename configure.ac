@@ -1091,7 +1091,7 @@ if test X"$OPT_LIBSSH2" != Xno; then
       LIBSSH2_ENABLED=1
       AC_DEFINE(USE_LIBSSH2, 1, [if libSSH2 is in use]))
 
-    if test X"OPT_LIBSSH2" != Xoff &&
+    if test X"$OPT_LIBSSH2" != Xoff &&
        test "$LIBSSH2_ENABLED" != "1"; then
       AC_MSG_ERROR([libSSH2 libs and/or directories were not found where specified!])
     fi
