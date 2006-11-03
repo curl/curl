@@ -202,7 +202,7 @@ static int rlimit(int keep_open)
      (rl.rlim_cur <= num_open.rlim_cur)) {
     sprintf(strbuff2, fmt, rl.rlim_cur);
     sprintf(strbuff1, fmt, num_open.rlim_cur);
-    sprintf(strbuff, "fd needed (%s) > system limit (%s)",
+    sprintf(strbuff, "fds needed %s > system limit %s",
             strbuff1, strbuff2);
     store_errmsg(strbuff, 0);
     fprintf(stderr, "%s\n", msgbuff);
@@ -218,11 +218,19 @@ static int rlimit(int keep_open)
    * that it becomes available to the test.
    */
 
-  nitems = INT_MAX / sizeof(*memchunk);
+  for (nitems = i = 1; nitems <= i; i *= 2)
+    nitems = i;
+  if (nitems > 0x7fff)
+    nitems = 0x40000;
   do {
+    num_open.rlim_max = sizeof(*memchunk) * (size_t)nitems;
+    sprintf(strbuff, fmt, num_open.rlim_max);
+    fprintf(stderr, "allocating memchunk %s byte array\n", strbuff);
     memchunk = malloc(sizeof(*memchunk) * (size_t)nitems);
-    if (!memchunk)
+    if (!memchunk) {
+      fprintf(stderr, "memchunk, malloc() failed\n");
       nitems /= 2;
+    }
   } while (nitems && !memchunk);
   if (!memchunk) {
     store_errmsg("memchunk, malloc() failed", our_errno());
@@ -231,6 +239,8 @@ static int rlimit(int keep_open)
   }
 
   /* initialize it to fight lazy allocation */
+
+  fprintf(stderr, "initializing memchunk array\n");
 
   for (i = 0; i < nitems; i++)
     memchunk[i] = -1;
@@ -265,6 +275,8 @@ static int rlimit(int keep_open)
   }
 
   /* initialize it to fight lazy allocation */
+
+  fprintf(stderr, "initializing fd array\n");
 
   for (num_open.rlim_cur = 0;
        num_open.rlim_cur < num_open.rlim_max;
@@ -302,7 +314,7 @@ static int rlimit(int keep_open)
       num_open.rlim_max = NUM_NEEDED;
       sprintf(strbuff2, fmt, num_open.rlim_max);
       sprintf(strbuff1, fmt, num_open.rlim_cur);
-      sprintf(strbuff, "fd needed (%s) > system limit (%s)",
+      sprintf(strbuff, "fds needed %s > system limit %s",
               strbuff2, strbuff1);
       store_errmsg(strbuff, 0);
       fprintf(stderr, "%s\n", msgbuff);

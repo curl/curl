@@ -185,11 +185,19 @@ static int rlimit(int keep_open)
    * that it becomes available to the test.
    */
 
-  nitems = INT_MAX / sizeof(*memchunk);
+  for (nitems = i = 1; nitems <= i; i *= 2)
+    nitems = i;
+  if (nitems > 0x7fff)
+    nitems = 0x40000;
   do {
+    num_open.rlim_max = sizeof(*memchunk) * (size_t)nitems;
+    sprintf(strbuff, fmt, num_open.rlim_max);
+    fprintf(stderr, "allocating memchunk %s byte array\n", strbuff);
     memchunk = malloc(sizeof(*memchunk) * (size_t)nitems);
-    if (!memchunk)
+    if (!memchunk) {
+      fprintf(stderr, "memchunk, malloc() failed\n");
       nitems /= 2;
+    }
   } while (nitems && !memchunk);
   if (!memchunk) {
     store_errmsg("memchunk, malloc() failed", our_errno());
@@ -198,6 +206,8 @@ static int rlimit(int keep_open)
   }
 
   /* initialize it to fight lazy allocation */
+
+  fprintf(stderr, "initializing memchunk array\n");
 
   for (i = 0; i < nitems; i++)
     memchunk[i] = -1;
@@ -214,7 +224,11 @@ static int rlimit(int keep_open)
   }
   else {
     /* a huge number of file descriptors */
-    num_open.rlim_max = INT_MAX / sizeof(*fd);
+    for (nitems = i = 1; nitems <= i; i *= 2)
+      nitems = i;
+    if (nitems > 0x7fff)
+      nitems = 0x40000;
+    num_open.rlim_max = nitems;
   }
 
   /* verify that we won't overflow size_t in malloc() */
@@ -248,6 +262,8 @@ static int rlimit(int keep_open)
   }
 
   /* initialize it to fight lazy allocation */
+
+  fprintf(stderr, "initializing fd array\n");
 
   for (num_open.rlim_cur = 0;
        num_open.rlim_cur < num_open.rlim_max;
