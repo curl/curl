@@ -169,8 +169,11 @@ static int rlimit(int keep_open)
   /*
    * test 537 is all about testing libcurl functionality
    * when the system has nearly exhausted the number of
-   * free file descriptors. Test 537 will try to run with 
-   * very few free file descriptors.
+   * available file descriptors. Test 537 will try to run 
+   * with a very small number of file descriptors available.
+   * This implies that any file descriptor which is open
+   * when the test runs will have a number in the high range
+   * of whatever the system supports.
    */
 
   /*
@@ -191,7 +194,7 @@ static int rlimit(int keep_open)
   if (!memchunk) {
     store_errmsg("memchunk, malloc() failed", our_errno());
     fprintf(stderr, "%s\n", msgbuff);
-    return -7;
+    return -4;
   }
 
   /* initialize it to fight lazy allocation */
@@ -210,7 +213,7 @@ static int rlimit(int keep_open)
     num_open.rlim_max = rl.rlim_cur - SAFETY_MARGIN;
   }
   else {
-    /* biggest file descriptor array size */
+    /* a huge number of file descriptors */
     num_open.rlim_max = INT_MAX / sizeof(*fd);
   }
 
@@ -223,7 +226,7 @@ static int rlimit(int keep_open)
     store_errmsg(strbuff, 0);
     fprintf(stderr, "%s\n", msgbuff);
     free(memchunk);
-    return -8;
+    return -5;
   }
 
   /* allocate array for file descriptors */
@@ -241,7 +244,7 @@ static int rlimit(int keep_open)
     store_errmsg("fd, malloc() failed", our_errno());
     fprintf(stderr, "%s\n", msgbuff);
     free(memchunk);
-    return -9;
+    return -6;
   }
 
   /* initialize it to fight lazy allocation */
@@ -264,7 +267,7 @@ static int rlimit(int keep_open)
     free(fd);
     fd = NULL;
     free(memchunk);
-    return -10;
+    return -7;
   }
 
   /* create a bunch of file descriptors */
@@ -283,16 +286,15 @@ static int rlimit(int keep_open)
       sprintf(strbuff, "dup() attempt %s failed", strbuff1);
       fprintf(stderr, "%s\n", strbuff);
 
-      sprintf(strbuff1, fmt, num_open.rlim_cur + 2);
-      sprintf(strbuff, "system does not support opening "
-              "more than %s files" , strbuff1);
+      sprintf(strbuff1, fmt, num_open.rlim_cur);
+      sprintf(strbuff, "fd system limit seems close to %s", strbuff1);
       fprintf(stderr, "%s\n", strbuff);
 
-      num_open.rlim_max = num_open.rlim_cur + 2 - SAFETY_MARGIN;
+      num_open.rlim_max = num_open.rlim_cur - SAFETY_MARGIN;
 
       num_open.rlim_cur -= num_open.rlim_max;
       sprintf(strbuff1, fmt, num_open.rlim_cur);
-      sprintf(strbuff, "closing %s files", strbuff1);
+      sprintf(strbuff, "closing %s file descriptors", strbuff1);
       fprintf(stderr, "%s\n", strbuff);
 
       for (num_open.rlim_cur = num_open.rlim_max;
@@ -305,16 +307,15 @@ static int rlimit(int keep_open)
       sprintf(strbuff, fmt, num_open.rlim_max);
       fprintf(stderr, "shrinking array for %s file descriptors\n", strbuff);
 
+      /* we don't care if we can't shrink it */
+
       tmpfd = realloc(fd, sizeof(*fd) * (size_t)(num_open.rlim_max));
-      if (!tmpfd) {
-        sprintf(strbuff, "fd, realloc() failed, "
-                "errno %d, %s", our_errno(), strerror(our_errno()));
-        fprintf(stderr, "%s\n", strbuff);
-      }
-      else {
+      if (tmpfd) {
         fd = tmpfd;
         tmpfd = NULL;
       }
+
+      break;
 
     }
 
@@ -329,6 +330,7 @@ static int rlimit(int keep_open)
   free(memchunk);
 
   /* close file descriptors unless instructed to keep them */
+
   if (!keep_open) {
     close_file_descriptors();
   }
