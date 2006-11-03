@@ -130,6 +130,14 @@
 #include "memdebug.h"
 #endif
 
+#ifndef S_IRGRP
+#define S_IRGRP  0
+#endif
+
+#ifndef S_IROTH
+#define S_IROTH 0
+#endif
+
 static LIBSSH2_ALLOC_FUNC(libssh2_malloc);
 static LIBSSH2_REALLOC_FUNC(libssh2_realloc);
 static LIBSSH2_FREE_FUNC(libssh2_free);
