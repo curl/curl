@@ -1,5 +1,11 @@
   Changelog for the c-ares project
 
+* November 6
+
+- Andreas Rieke fixed the line endings in the areslib.dsp file that I (Daniel)
+  broke in the 1.3.2 release. We should switch to a system where that file is
+  auto-generated. We could rip some code for that from curl...
+
 Version 1.3.2 (November 3, 2006)
 
 * October 12 2006
