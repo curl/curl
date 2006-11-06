@@ -125,7 +125,9 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
   channel->queries = NULL;
   channel->domains = NULL;
   channel->sortlist = NULL;
+  channel->servers = NULL;
   channel->sock_state_cb = NULL;
+  channel->sock_state_cb_data = NULL;
 
   /* Initialize configuration by each of the four sources, from highest
    * precedence to lowest.
@@ -140,7 +142,7 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
   if (status != ARES_SUCCESS)
     {
       /* Something failed; clean up memory we may have allocated. */
-      if (channel->nservers != -1)
+      if (channel->servers)
         free(channel->servers);
       if (channel->domains)
         {
@@ -214,12 +216,16 @@ static int init_by_options(ares_channel channel, struct ares_options *options,
   /* Copy the servers, if given. */
   if ((optmask & ARES_OPT_SERVERS) && channel->nservers == -1)
     {
-      channel->servers =
-        malloc(options->nservers * sizeof(struct server_state));
-      if (!channel->servers && options->nservers != 0)
-        return ARES_ENOMEM;
-      for (i = 0; i < options->nservers; i++)
-        channel->servers[i].addr = options->servers[i];
+      /* Avoid zero size allocations at any cost */
+      if (options->nservers > 0)
+        {
+          channel->servers =
+            malloc(options->nservers * sizeof(struct server_state));
+          if (!channel->servers)
+            return ARES_ENOMEM;
+          for (i = 0; i < options->nservers; i++)
+            channel->servers[i].addr = options->servers[i];
+        }
       channel->nservers = options->nservers;
     }
 
@@ -228,16 +234,20 @@ static int init_by_options(ares_channel channel, struct ares_options *options,
    */
   if ((optmask & ARES_OPT_DOMAINS) && channel->ndomains == -1)
     {
-      channel->domains = malloc(options->ndomains * sizeof(char *));
-      if (!channel->domains && options->ndomains != 0)
-        return ARES_ENOMEM;
-      for (i = 0; i < options->ndomains; i++)
-        {
-          channel->ndomains = i;
-          channel->domains[i] = strdup(options->domains[i]);
-          if (!channel->domains[i])
-            return ARES_ENOMEM;
-        }
+      /* Avoid zero size allocations at any cost */
+      if (options->ndomains > 0)
+      {
+        channel->domains = malloc(options->ndomains * sizeof(char *));
+        if (!channel->domains)
+          return ARES_ENOMEM;
+        for (i = 0; i < options->ndomains; i++)
+          {
+            channel->ndomains = i;
+            channel->domains[i] = strdup(options->domains[i]);
+            if (!channel->domains[i])
+              return ARES_ENOMEM;
+          }
+      }
       channel->ndomains = options->ndomains;
     }
 
@@ -711,7 +721,6 @@ static int init_by_defaults(ares_channel channel)
       if (gethostname(hostname, sizeof(hostname)) == -1
           || !strchr(hostname, '.'))
         {
-          channel->domains = malloc(0);
           channel->ndomains = 0;
         }
       else
@@ -940,6 +949,7 @@ static int set_search(ares_channel channel, const char *str)
     for(n=0; n < channel->ndomains; n++)
       free(channel->domains[n]);
     free(channel->domains);
+    channel->domains = NULL;
     channel->ndomains = -1;
   }
 
@@ -955,8 +965,14 @@ static int set_search(ares_channel channel, const char *str)
       n++;
     }
 
+  if (!n)
+    {
+      channel->ndomains = 0;
+      return ARES_SUCCESS;
+    }
+
   channel->domains = malloc(n * sizeof(char *));
-  if (!channel->domains && n)
+  if (!channel->domains)
     return ARES_ENOMEM;
 
   /* Now copy the domains. */
