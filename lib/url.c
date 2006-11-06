@@ -3246,7 +3246,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->curl_connect = Curl_scp_connect; /* ssh_connect? */
     conn->curl_do = Curl_scp_do;
     conn->curl_done = Curl_scp_done;
-    conn->curl_do_more = (Curl_do_more_func)NULL;
+    conn->curl_do_more = (Curl_do_more_func)ZERO_NULL;
 #else
     failf(data, LIBCURL_NAME
           " was built without LIBSSH2, scp: not supported!");
