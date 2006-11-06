@@ -51,7 +51,7 @@
 #include <sys/stat.h>
 #endif
 
-#if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+#ifdef WIN32
 
 #else /* probably some kind of unix */
 #ifdef HAVE_SYS_SOCKET_H
