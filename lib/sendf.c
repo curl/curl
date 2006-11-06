@@ -513,6 +513,8 @@ int Curl_read(struct connectdata *conn, /* connection data */
 #ifdef USE_LIBSSH2
   else if (conn->protocol & PROT_SCP) {
     nread = Curl_scp_recv(conn, num, conn->master_buffer, bytesfromsocket);
+    /* TODO: return CURLE_OK also for nread <= 0 
+             read failures and timeouts ? */
   }
 #endif /* !USE_LIBSSH2 */
   else {
