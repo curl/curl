@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (7 November 2006)
+- Olaf fixed a leftover problem with the CONNECT fix of his that would leave a
+  wrong error message in the error message buffer.
+
 Daniel (3 November 2006)
 - Olaf Stueben provided a patch that I edited slightly. It fixes the notorious
   KNOWN_BUGS #25, which happens when a proxy closes the connection when

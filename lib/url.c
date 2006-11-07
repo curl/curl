@@ -3978,8 +3978,13 @@ static CURLcode SetupConnection(struct connectdata *conn,
       /* if the connection was closed by the server while exchanging
          authentication informations, retry with the new set
          authentication information */
-      if(conn->bits.proxy_connect_closed)
+      if(conn->bits.proxy_connect_closed) {
+        /* reset the error buffer */
+        if (data->set.errorbuffer)
+          data->set.errorbuffer[0] = '\0';
+        data->state.errorbuf = FALSE;
         continue;
+      }
 
       if(CURLE_OK != result)
         return result;
