@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (8 November 2006)
+- Bradford Bruce reported that when setting CURLOPT_DEBUGFUNCTION without
+  CURLOPT_VERBOSE set to non-zero, you still got a few debug messages from the
+  SSL handshake. This is now stopped.
+
 Daniel (7 November 2006)
 - Olaf fixed a leftover problem with the CONNECT fix of his that would leave a
   wrong error message in the error message buffer.
