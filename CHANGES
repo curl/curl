@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (9 November 2006)
+- Ciprian Badescu found a SIGSEGV when doing multiple TFTP transfers using the
+  multi interface, but I could also repeat it doing multiple sequential ones
+  with the easy interface. Using Ciprian's test case, I could fix it.
+
 Daniel (8 November 2006)
 - Bradford Bruce reported that when setting CURLOPT_DEBUGFUNCTION without
   CURLOPT_VERBOSE set to non-zero, you still got a few debug messages from the

@@ -569,9 +569,12 @@ CURLcode Curl_tftp_connect(struct connectdata *conn, bool *done)
   tftp_state_data_t     *state;
   int rc;
 
-  state = conn->data->reqdata.proto.tftp = calloc(sizeof(tftp_state_data_t), 1);
+  state = conn->data->reqdata.proto.tftp = calloc(sizeof(tftp_state_data_t),
+                                                  1);
   if(!state)
     return CURLE_OUT_OF_MEMORY;
+
+  conn->bits.close = FALSE; /* keep it open if possible */
 
   state->conn = conn;
   state->sockfd = state->conn->sock[FIRSTSOCKET];
@@ -582,24 +585,27 @@ CURLcode Curl_tftp_connect(struct connectdata *conn, bool *done)
 
   tftp_set_timeouts(state);
 
-  /* Bind to any interface, random UDP port.
-   *
-   * We once used the size of the local_addr struct as the third argument for
-   * bind() to better work with IPv6 or whatever size the struct could have,
-   * but we learned that at least Tru64, AIX and IRIX *requires* the size of
-   * that argument to match the exact size of a 'sockaddr_in' struct when
-   * running IPv4-only.
-   *
-   * Therefore we use the size from the address we connected to, which we
-   * assume uses the same IP version and thus hopefully this works for both
-   * IPv4 and IPv6...
-   */
-  rc = bind(state->sockfd, (struct sockaddr *)&state->local_addr,
-            conn->ip_addr->ai_addrlen);
-  if(rc) {
-    failf(conn->data, "bind() failed; %s\n",
-          Curl_strerror(conn, Curl_sockerrno()));
-    return CURLE_COULDNT_CONNECT;
+  if(!conn->bits.reuse) {
+    /* If not reused, bind to any interface, random UDP port. If it is reused,
+     * this has already been done!
+     *
+     * We once used the size of the local_addr struct as the third argument for
+     * bind() to better work with IPv6 or whatever size the struct could have,
+     * but we learned that at least Tru64, AIX and IRIX *requires* the size of
+     * that argument to match the exact size of a 'sockaddr_in' struct when
+     * running IPv4-only.
+     *
+     * Therefore we use the size from the address we connected to, which we
+     * assume uses the same IP version and thus hopefully this works for both
+     * IPv4 and IPv6...
+     */
+    rc = bind(state->sockfd, (struct sockaddr *)&state->local_addr,
+              conn->ip_addr->ai_addrlen);
+    if(rc) {
+      failf(conn->data, "bind() failed; %s\n",
+            Curl_strerror(conn, Curl_sockerrno()));
+      return CURLE_COULDNT_CONNECT;
+    }
   }
 
   Curl_pgrsStartNow(conn->data);
@@ -620,8 +626,10 @@ CURLcode Curl_tftp_done(struct connectdata *conn, CURLcode status)
 {
   (void)status; /* unused */
 
+#if 0
   free(conn->data->reqdata.proto.tftp);
   conn->data->reqdata.proto.tftp = NULL;
+#endif
   Curl_pgrsDone(conn);
 
   return CURLE_OK;
@@ -641,7 +649,8 @@ CURLcode Curl_tftp_done(struct connectdata *conn, CURLcode status)
 CURLcode Curl_tftp(struct connectdata *conn, bool *done)
 {
   struct SessionHandle  *data = conn->data;
-  tftp_state_data_t     *state = (tftp_state_data_t *)(conn->data->reqdata.proto.tftp);
+  tftp_state_data_t     *state =
+    (tftp_state_data_t *) conn->data->reqdata.proto.tftp;
   tftp_event_t          event;
   CURLcode              code;
   int                   rc;
@@ -649,7 +658,20 @@ CURLcode Curl_tftp(struct connectdata *conn, bool *done)
   socklen_t             fromlen;
   int                   check_time = 0;
 
-  (void)done; /* prevent compiler warning */
+  *done = TRUE;
+
+  /*
+    Since connections can be re-used between SessionHandles, this might be a
+    connection already existing but on a fresh SessionHandle struct so we must
+    make sure we have a good 'struct TFTP' to play with. For new connections,
+    the struct TFTP is allocated and setup in the Curl_tftp_connect() function.
+  */
+  if(!state) {
+    code = Curl_tftp_connect(conn, done);
+    if(code)
+      return code;
+    state = (tftp_state_data_t *)conn->data->reqdata.proto.tftp;
+  }
 
   /* Run the TFTP State Machine */
   for(tftp_state_machine(state, TFTP_EVENT_INIT);

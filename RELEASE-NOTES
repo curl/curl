@@ -18,6 +18,8 @@ This release includes the following bugfixes:
  o proxy close during CONNECT authentication is now dealt with nicely
  o the CURLOPT_DEBUGFUNCTION was sometimes called even when CURLOPT_VERBOSE
    was not enabled
+ o multiple TFTP transfers on the same (easy or multi) handle could cause a
+   crash
 
 Other curl-related news:
 
@@ -30,6 +32,7 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- James Housley, Olaf Stueben, Yang Tse, Gisle Vanem, Bradford Bruce
+ James Housley, Olaf Stueben, Yang Tse, Gisle Vanem, Bradford Bruce,
+ Ciprian Badescu
 
         Thanks! (and sorry if I forgot to mention someone)
