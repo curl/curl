@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel (9 November 2006)
+- Nir Soffer updated libcurl.framework.make:
+  o fix symlinks, should link to Versions, not to ./Versions
+  o indentation improvments
+
 - Dmitriy Sergeyev found a SIGSEGV with his test04.c example posted on 7 Nov
   2006. It turned out we wrongly assumed that the connection cache was present
   when tearing down a connection.

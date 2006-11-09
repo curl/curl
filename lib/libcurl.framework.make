@@ -120,11 +120,11 @@ $(LIB_DIR)/libcurl.framework: $(OBJECTS) $(LIB_DIR)/libcurl.plist
 	mkdir -p $(LIB_DIR)/libcurl.framework/Versions/A/Headers
 	cp $(LIB_DIR)/../include/curl/*.h $(LIB_DIR)/libcurl.framework/Versions/A/Headers
 	cd $(LIB_DIR)/libcurl.framework; \
-	ln -fs ./Versions/A/libcurl libcurl; \
-	ln -fs ./Versions/A/Resources Resources; \
-	ln -fs ./Versions/A/Headers Headers
+	   ln -fs Versions/A/libcurl libcurl; \
+	   ln -fs Versions/A/Resources Resources; \
+	   ln -fs Versions/A/Headers Headers
 	cd $(LIB_DIR)/libcurl.framework/Versions; \
-	ln -fs ./A Current
+	   ln -fs A Current
 
 $(OBJECTS) : $(TMP_DIR)/%.o: $(LIB_DIR)/%.c 
 	$(CC) $(C_OPTIONS) -c $< -o $@
