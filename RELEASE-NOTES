@@ -20,6 +20,8 @@ This release includes the following bugfixes:
    was not enabled
  o multiple TFTP transfers on the same (easy or multi) handle could cause a
    crash
+ o SIGSEGV when disconnecting on a transfer on a re-used handle when the
+   host name didn't resolve
 
 Other curl-related news:
 
@@ -33,6 +35,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  James Housley, Olaf Stueben, Yang Tse, Gisle Vanem, Bradford Bruce,
- Ciprian Badescu
+ Ciprian Badescu, Dmitriy Sergeyev
 
         Thanks! (and sorry if I forgot to mention someone)

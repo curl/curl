@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel (9 November 2006)
+- Dmitriy Sergeyev found a SIGSEGV with his test04.c example posted on 7 Nov
+  2006. It turned out we wrongly assumed that the connection cache was present
+  when tearing down a connection.
+
 - Ciprian Badescu found a SIGSEGV when doing multiple TFTP transfers using the
   multi interface, but I could also repeat it doing multiple sequential ones
   with the easy interface. Using Ciprian's test case, I could fix it.

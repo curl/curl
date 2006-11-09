@@ -1804,7 +1804,10 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   if(-1 != conn->connectindex) {
     /* unlink ourselves! */
     infof(data, "Closing connection #%ld\n", conn->connectindex);
-    data->state.connc->connects[conn->connectindex] = NULL;
+    if(data->state.connc)
+      /* only clear the table entry if we still know in which cache we
+         used to be in */
+      data->state.connc->connects[conn->connectindex] = NULL;
   }
 
 #ifdef USE_LIBIDN
