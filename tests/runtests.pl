@@ -235,8 +235,13 @@ sub startnew {
     my $child = fork();
     my $pid2;
 
+    if(not defined $child) {
+        logmsg "fork() failure detected\n";
+        return (-1,-1);
+    }
+
     if(0 == $child) {
-        # a child, run the given command instead!
+        # Here we are the child. Run the given command.
 
         # Calling exec() within a pseudo-process actually spawns the requested
         # executable in a separate process and waits for it to complete before
@@ -244,7 +249,12 @@ sub startnew {
         # the process ID reported within the running executable will be
         # different from what the earlier Perl fork() might have returned.
 
-        exec($cmd);
+        # exec() should never return back here to this process. We protect
+        # ourselfs calling die() just in case something goes really bad.
+
+        exec($cmd) || die "Can't exec() $cmd: $!";
+
+        die "error: exec() has returned !!!";
     }
 
     my $count=5;
@@ -390,22 +400,23 @@ sub torture {
 sub stopserver {
     my ($pid) = @_;
 
-    if($pid <= 0) {
-        return; # this is not a good pid
+    if(not defined $pid) {
+        return; # whad'da'ya wanna'da with no pid ?
     }
 
-    if($pid =~ / /) {
-        # if it contains space, it might be more than one pid
-        my @pids = split(" ", $pid);
-        for (@pids) {
-            kill (9, $_); # die!
+    # it might be more than one pid
+
+    my @pids = split(/\s+/, $pid);
+    for (@pids) {
+        chomp($_);
+        if($_ =~ /^(\d+)$/) {
+            if(($1 > 0) && kill(0, $1)) {
+                if($verbose) {
+                    logmsg "RUN: Test server pid $1 signalled to die\n";
+                }
+                kill(9, $1); # die!
+            }
         }
-    }
-
-    my $res = kill (9, $pid); # die!
-
-    if($verbose) {
-        logmsg "RUN: Test server pid $pid signalled to die\n";
     }
 }
 
@@ -1216,25 +1227,13 @@ sub singletest {
         $cmd = $precheck[0];
         chomp $cmd;
         if($cmd) {
-            my @o;
-            if(($testnum == 518) || ($testnum == 537)) {
-                @o = `$cmd 2>"$LOGDIR/stderr$testnum"`;
-            }
-            else {
-                @o = `$cmd 2>/dev/null`;
-            }
+            my @o = `$cmd 2>/dev/null`;
             if($o[0]) {
                 $why = $o[0];
                 chomp $why;
             }
             logmsg "prechecked $cmd\n" if($verbose);
         }
-    }
-
-    if(($testnum == 518) || ($testnum == 537)) {
-        logmsg "== Start of file $LOGDIR/stderr$testnum\n";
-        displaylogcontent("$LOGDIR/stderr$testnum");
-        logmsg "== End of file $LOGDIR/stderr$testnum\n";
     }
 
     if($why) {
