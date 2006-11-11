@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -53,7 +53,8 @@ int Curl_sec_read_msg (struct connectdata *conn, char *, int);
 int Curl_sec_vfprintf(struct connectdata *, FILE *, const char *, va_list);
 int Curl_sec_fprintf2(struct connectdata *conn, FILE *f, const char *fmt, ...);
 int Curl_sec_vfprintf2(struct connectdata *conn, FILE *, const char *, va_list);
-int Curl_sec_write (struct connectdata *conn, int, char *, int);
+ssize_t Curl_sec_send(struct connectdata *conn, int, char *, int);
+int Curl_sec_write(struct connectdata *conn, int, char *, int);
 
 void Curl_sec_end (struct connectdata *);
 int Curl_sec_login (struct connectdata *);

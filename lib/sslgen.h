@@ -32,7 +32,7 @@ void Curl_free_ssl_config(struct ssl_config_data* sslc);
 int Curl_ssl_init(void);
 void Curl_ssl_cleanup(void);
 CURLcode Curl_ssl_connect(struct connectdata *conn, int sockindex);
-CURLcode Curl_ssl_connect_nonblocking(struct connectdata *conn, 
+CURLcode Curl_ssl_connect_nonblocking(struct connectdata *conn,
                                       int sockindex,
                                       bool *done);
 void Curl_ssl_close(struct connectdata *conn);
@@ -42,14 +42,14 @@ void Curl_ssl_close_all(struct SessionHandle *data);
 CURLcode Curl_ssl_set_engine(struct SessionHandle *data, const char *engine);
 /* Sets engine as default for all SSL operations */
 CURLcode Curl_ssl_set_engine_default(struct SessionHandle *data);
-int Curl_ssl_send(struct connectdata *conn,
-                  int sockindex,
-                  void *mem,
-                  size_t len);
-int Curl_ssl_recv(struct connectdata *conn, /* connection data */
-                  int sockindex,            /* socketindex */
-                  char *mem,                /* store read data here */
-                  size_t len);              /* max amount to read */
+ssize_t Curl_ssl_send(struct connectdata *conn,
+                      int sockindex,
+                      void *mem,
+                      size_t len);
+ssize_t Curl_ssl_recv(struct connectdata *conn, /* connection data */
+                      int sockindex,            /* socketindex */
+                      char *mem,                /* store read data here */
+                      size_t len);              /* max amount to read */
 
 /* init the SSL session ID cache */
 CURLcode Curl_ssl_initsessions(struct SessionHandle *, long);

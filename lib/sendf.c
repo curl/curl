@@ -53,7 +53,7 @@
 #ifdef HAVE_KRB4
 #include "krb4.h"
 #else
-#define Curl_sec_write(a,b,c,d) -1
+#define Curl_sec_send(a,b,c,d) -1
 #define Curl_sec_read(a,b,c,d) -1
 #endif
 
@@ -313,9 +313,40 @@ CURLcode Curl_sendf(curl_socket_t sockfd, struct connectdata *conn,
   return res;
 }
 
+static ssize_t Curl_plain_send(struct connectdata *conn,
+                               int num,
+                               void *mem,
+                               size_t len)
+{
+  curl_socket_t sockfd = conn->sock[num];
+  ssize_t bytes_written = swrite(sockfd, mem, len);
+
+  if(-1 == bytes_written) {
+    int err = Curl_sockerrno();
+
+    if(
+#ifdef WSAEWOULDBLOCK
+      /* This is how Windows does it */
+      (WSAEWOULDBLOCK == err)
+#else
+      /* errno may be EWOULDBLOCK or on some systems EAGAIN when it returned
+         due to its inability to send off data without blocking. We therefor
+         treat both error codes the same here */
+      (EWOULDBLOCK == err) || (EAGAIN == err) || (EINTR == err)
+#endif
+      )
+      /* this is just a case of EWOULDBLOCK */
+      bytes_written=0;
+    else
+      failf(conn->data, "Send failure: %s",
+            Curl_strerror(conn, err));
+  }
+  return bytes_written;
+}
+
 /*
- * Curl_write() is an internal write function that sends plain (binary) data
- * to the server. Works with plain sockets, SSL or kerberos.
+ * Curl_write() is an internal write function that sends data to the
+ * server. Works with plain sockets, SCP, SSL or kerberos.
  */
 CURLcode Curl_write(struct connectdata *conn,
                     curl_socket_t sockfd,
@@ -327,44 +358,19 @@ CURLcode Curl_write(struct connectdata *conn,
   CURLcode retcode;
   int num = (sockfd == conn->sock[SECONDARYSOCKET]);
 
-  if (conn->ssl[num].use) {
+  if (conn->ssl[num].use)
     /* only TRUE if SSL enabled */
     bytes_written = Curl_ssl_send(conn, num, mem, len);
-  }
 #ifdef USE_LIBSSH2
-  else if (conn->protocol & PROT_SCP) {
+  else if (conn->protocol & PROT_SCP)
     bytes_written = Curl_scp_send(conn, num, mem, len);
-  }
 #endif /* !USE_LIBSSH2 */
-  else {
-    if(conn->sec_complete)
-      /* only TRUE if krb4 enabled */
-      bytes_written = Curl_sec_write(conn, sockfd, mem, len);
-    else
-      bytes_written = swrite(sockfd, mem, len);
+  else if(conn->sec_complete)
+    /* only TRUE if krb4 enabled */
+    bytes_written = Curl_sec_send(conn, num, mem, len);
+  else
+    bytes_written = Curl_plain_send(conn, num, mem, len);
 
-    if(-1 == bytes_written) {
-      int err = Curl_sockerrno();
-
-      if(
-#ifdef WSAEWOULDBLOCK
-        /* This is how Windows does it */
-        (WSAEWOULDBLOCK == err)
-#else
-        /* As pointed out by Christophe Demory on March 11 2003, errno
-           may be EWOULDBLOCK or on some systems EAGAIN when it returned
-           due to its inability to send off data without blocking. We
-           therefor treat both error codes the same here */
-        (EWOULDBLOCK == err) || (EAGAIN == err) || (EINTR == err)
-#endif
-        )
-        /* this is just a case of EWOULDBLOCK */
-        bytes_written=0;
-      else
-        failf(conn->data, "Send failure: %s",
-              Curl_strerror(conn, err));
-    }
-  }
   *written = bytes_written;
   retcode = (-1 != bytes_written)?CURLE_OK:CURLE_SEND_ERROR;
 
@@ -513,7 +519,7 @@ int Curl_read(struct connectdata *conn, /* connection data */
 #ifdef USE_LIBSSH2
   else if (conn->protocol & PROT_SCP) {
     nread = Curl_scp_recv(conn, num, conn->master_buffer, bytesfromsocket);
-    /* TODO: return CURLE_OK also for nread <= 0 
+    /* TODO: return CURLE_OK also for nread <= 0
              read failures and timeouts ? */
   }
 #endif /* !USE_LIBSSH2 */
