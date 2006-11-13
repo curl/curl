@@ -22,6 +22,7 @@ This release includes the following bugfixes:
    crash
  o SIGSEGV when disconnecting on a transfer on a re-used handle when the
    host name didn't resolve
+ o stack overwrite on 64bit Windows in the chunked decoding department
 
 Other curl-related news:
 

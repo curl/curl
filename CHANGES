@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (13 November 2006)
+- Ron in bug #1595348 (http://curl.haxx.se/bug/view.cgi?id=1595348) pointed
+  out a stack overwrite (and the corresponding fix) on 64bit Windows when
+  dealing with HTTP chunked encoding.
+
 Daniel (9 November 2006)
 - Nir Soffer updated libcurl.framework.make:
   o fix symlinks, should link to Versions, not to ./Versions
