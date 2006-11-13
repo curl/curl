@@ -865,7 +865,7 @@ int main(int argc, char *argv[])
     msgsock = accept(sock, NULL, NULL);
 
     if (CURL_SOCKET_BAD == msgsock) {
-      printf("MAJOR ERROR: accept() failed with error: &d\n", errno);
+      printf("MAJOR ERROR: accept() failed with error: %d\n", errno);
       break;
     }
 
