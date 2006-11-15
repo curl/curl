@@ -303,6 +303,7 @@ CURLcode Curl_scp_connect(struct connectdata *conn, bool *done)
 
   if (libssh2_session_startup(scp->scpSession, sock)) {
     failf(data, "Failure establishing ssh session\n");
+    libssh2_session_free(scp->scpSession);
     Curl_safefree(scp->path);
     return CURLE_FAILED_INIT;
   }
@@ -395,6 +396,7 @@ CURLcode Curl_scp_connect(struct connectdata *conn, bool *done)
 
   if (!authed) {
     failf(data, "Authentication failure\n");
+    libssh2_session_free(scp->scpSession);
     Curl_safefree(scp->path);
     return CURLE_FAILED_INIT;
   }
