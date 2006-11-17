@@ -73,6 +73,7 @@ my $TESTCASES="all";
 my $HTTPPIDFILE=".http.pid";
 my $HTTP6PIDFILE=".http6.pid";
 my $HTTPSPIDFILE=".https.pid";
+my $HTTPS6PIDFILE=".https6.pid";
 my $FTPPIDFILE=".ftp.pid";
 my $FTP6PIDFILE=".ftp6.pid";
 my $FTP2PIDFILE=".ftp2.pid";
@@ -197,7 +198,7 @@ $ENV{'HOME'}=$pwd;
 sub catch_zap {
     my $signame = shift;
     logmsg "runtests.pl received SIG$signame, exiting\n";
-    stopservers(1);
+    stopalltestservers();
     die "Somebody sent me a SIG$signame";
 }
 $SIG{INT} = \&catch_zap;
@@ -225,18 +226,30 @@ $ENV{'CURL_CA_BUNDLE'}=undef;
 
 #######################################################################
 # Start a new thread/process and run the given command line in there.
+# If successfully started an entry is added to the running servers hash.
 # Return the pids (yes plural) of the new child process to the parent.
 #
 sub startnew {
-    my ($cmd, $pidfile)=@_;
+    my ($cmd, $pidfile, $serv)=@_;
+
+    if((not defined $cmd) || (not defined $pidfile) || (not defined $serv)) {
+        return (-1,-1);
+    }
 
     logmsg "startnew: $cmd\n" if ($verbose);
+
+    my $UCSERV = uc($serv);
+
+    if(stoptestserver($serv) == 0) {
+        logmsg "RUN: failed to stop previous $UCSERV server!\n";
+        return (-1,-1);
+    }
 
     my $child = fork();
     my $pid2;
 
     if(not defined $child) {
-        logmsg "fork() failure detected\n";
+        logmsg "RUN: fork() failure detected for $UCSERV server!\n";
         return (-1,-1);
     }
 
@@ -252,25 +265,33 @@ sub startnew {
         # exec() should never return back here to this process. We protect
         # ourselfs calling die() just in case something goes really bad.
 
-        exec($cmd) || die "Can't exec() $cmd: $!";
+        exec($cmd) || die "Can't exec() cmd: $cmd";
 
-        die "error: exec() has returned !!!";
+        die "error: exec() has returned";
     }
 
-    my $count=5;
-    while($count--) {
-        if(-f $pidfile) {
-            open(PID, "<$pidfile");
-            $pid2 = 0 + <PID>;
-            close(PID);
-            if($pid2 && kill(0, $pid2)) {
-                # if $pid2 is valid, then make sure this pid is alive, as
-                # otherwise it is just likely to be the _previous_ pidfile or
-                # similar!
-                last;
-            }
-        }
-        sleep(1);
+    my $timeoutstart = 90; # seconds
+
+    $pid2 = waitalivepidfile($pidfile, $timeoutstart);
+    if(0 == $pid2) {
+        logmsg sprintf("RUN: server start timed out (%d sec) - ",
+                       $timeoutstart);
+        logmsg sprintf("%s server failed to start\n",
+                       $UCSERV);
+        return (-1,-1);
+    }
+
+    # setup entry in the running servers hash
+
+    $run{$serv}{'pidfile'} = $pidfile;    # pidfile for the test server.
+
+    $run{$serv}{'pids'} = "$child $pid2"; # forked pid and test server pid.
+
+    if($serv =~ /^ftp(\d*)(-ipv6|)/) {    # ftp servers have slavepidfiles.
+        my ($id, $ext) = ($1, $2);
+        $ext =~ s/\-//g;
+        my $slavepidfiles = ".sockfilt$id$ext.pid .sockdata$id$ext.pid";
+        $run{$serv}{'slavepidfiles'} = $slavepidfiles;
     }
 
     return ($child, $pid2);
@@ -385,7 +406,7 @@ sub torture {
         if($fail) {
             logmsg " Failed on alloc number $limit in test.\n",
             " invoke with -t$limit to repeat this single case.\n";
-            stopservers($verbose);
+            stopalltestservers();
             exit 1;
         }
     }
@@ -395,29 +416,61 @@ sub torture {
 }
 
 #######################################################################
-# stop the given test server (pid)
+# Stop specific test server processes, including slave processes, of the
+# given test server. Wait for them to finish and unlink its pidfiles.
+# If they were not running or have been successfully stopped return 1.
+# If unable to stop any of them then return 0. The test server is removed
+# from the running servers hash in any case.
 #
-sub stopserver {
-    my ($pid) = @_;
+sub stoptestserver {
+    my ($serv)=@_;
 
-    if(not defined $pid) {
-        return; # whad'da'ya wanna'da with no pid ?
+    if(not defined $serv) {
+        return 0;
     }
 
-    # it might be more than one pid
+    my $ret = 1; # assume success stopping them
+    my $pid;
+    my $pidfile;
+    my $pidfiles = "";
+    my $pidsrunning = "";
 
-    my @pids = split(/\s+/, $pid);
-    for (@pids) {
-        chomp($_);
-        if($_ =~ /^(\d+)$/) {
-            if(($1 > 0) && kill(0, $1)) {
-                if($verbose) {
-                    logmsg "RUN: Test server pid $1 signalled to die\n";
+    if($run{$serv}) {
+        if($run{$serv}{'slavepidfiles'}) {
+            for $pidfile (split(" ", $run{$serv}{'slavepidfiles'})) {
+                $pidfiles .= " $pidfile";
+                $pid = checkalivepidfile($pidfile);
+                if($pid > 0) {
+                    $pidsrunning .= " $pid";
                 }
-                kill(9, $1); # die!
             }
+            delete $run{$serv}{'slavepidfiles'};
+        }
+        if($run{$serv}{'pidfile'}) {
+            $pidfile = $run{$serv}{'pidfile'};
+            $pidfiles .= " $pidfile";
+            $pid = checkalivepidfile($pidfile);
+            if($pid > 0) {
+                $pidsrunning .= " $pid";
+            }
+            delete $run{$serv}{'pidfile'};
+        }
+        if($run{$serv}{'pids'}) {
+            $pid = $run{$serv}{'pids'};
+            $pidsrunning .= " $pid";
+            delete $run{$serv}{'pids'};
+        }
+        if($run{$serv}) {
+            delete $run{$serv};
         }
     }
+    if($pidsrunning) {
+        $ret = stopprocess($pidsrunning);
+    }
+    if($pidfiles) {
+        unlinkpidfiles($pidfiles);
+    }
+    return $ret;
 }
 
 #######################################################################
@@ -545,12 +598,12 @@ sub verifyserver {
 #
 sub runhttpserver {
     my ($verbose, $ipv6) = @_;
-    my $RUNNING;
-    my $pid;
+
     my $pidfile = $HTTPPIDFILE;
     my $port = $HTTPPORT;
     my $ip = $HOSTIP;
     my $nameext;
+    my $serv = "http";
     my $fork = $forkserver?"--fork":"";
 
     if($ipv6) {
@@ -559,13 +612,10 @@ sub runhttpserver {
         $port = $HTTP6PORT;
         $ip = $HOST6IP;
         $nameext="-ipv6";
+        $serv = "http-ipv6";
     }
 
-    $pid = checkserver($pidfile);
-
-    if($pid > 0) {
-        stopserver($pid);
-    }
+    my $UCSERV = uc($serv);
 
     my $flag=$debugprotocol?"-v ":"";
     my $dir=$ENV{'srcdir'};
@@ -574,26 +624,25 @@ sub runhttpserver {
     }
 
     my $cmd="$perl $srcdir/httpserver.pl -p $pidfile $fork$flag $port $ipv6";
-    my ($httppid, $pid2) =
-        startnew($cmd, $pidfile); # start the server in a new process
 
-    if(!kill(0, $httppid)) {
+    my ($httppid, $pid2) = startnew($cmd, $pidfile, $serv);
+
+    if((checkalivepid($httppid) <= 0) || (checkalivepid($pid2) <= 0)) {
         # it is NOT alive
-        logmsg "RUN: failed to start the HTTP server!\n";
-        stopservers($verbose);
+        logmsg "RUN: failed to start the $UCSERV server!\n";
+        stopalltestservers();
         return (0,0);
     }
 
     # Server is up. Verify that we can speak to it.
     if(!verifyserver("http", $ip, $port)) {
-        logmsg "RUN: HTTP$nameext server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        stopserver("$httppid $pid2");
+        logmsg "RUN: $UCSERV server failed verification\n";
+        stopalltestservers();
         return (0,0);
     }
 
     if($verbose) {
-        logmsg "RUN: HTTP$nameext server is now running PID $httppid\n";
+        logmsg "RUN: $UCSERV server is now running PID $httppid\n";
     }
 
     sleep(1);
@@ -606,9 +655,10 @@ sub runhttpserver {
 #
 sub runhttpsserver {
     my ($verbose, $ipv6) = @_;
-    my $STATUS;
-    my $RUNNING;
+
+    my $pidfile = $HTTPSPIDFILE;
     my $ip = $HOSTIP;
+    my $serv = "https";
 
     if(!$stunnel) {
         return 0;
@@ -616,38 +666,34 @@ sub runhttpsserver {
 
     if($ipv6) {
         # not complete yet
+        $pidfile = $HTTPS6PIDFILE;
         $ip = $HOST6IP;
+        $serv = "https-ipv6";
     }
 
-    my $pid=checkserver($HTTPSPIDFILE);
-
-    if($pid > 0) {
-        # kill previous stunnel!
-        stopserver($pid);
-    }
+    my $UCSERV = uc($serv);
 
     my $flag=$debugprotocol?"-v ":"";
     my $cmd="$perl $srcdir/httpsserver.pl $flag -s \"$stunnel\" -d $srcdir -r $HTTPPORT $HTTPSPORT";
 
-    my ($httpspid, $pid2) = startnew($cmd, $HTTPSPIDFILE);
+    my ($httpspid, $pid2) = startnew($cmd, $pidfile, $serv);
 
-    if(!kill(0, $httpspid)) {
+    if((checkalivepid($httpspid) <= 0) || (checkalivepid($pid2) <= 0)) {
         # it is NOT alive
-        logmsg "RUN: failed to start the HTTPS server!\n";
-        stopservers($verbose);
-        return(0,0);
+        logmsg "RUN: failed to start the $UCSERV server!\n";
+        stopalltestservers();
+        return (0,0);
     }
 
     # Server is up. Verify that we can speak to it.
     if(!verifyserver("https", $ip, $HTTPSPORT)) {
-        logmsg "RUN: HTTPS server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        stopserver("$httpspid $pid2");
+        logmsg "RUN: $UCSERV server failed verification\n";
+        stopalltestservers();
         return (0,0);
     }
 
     if($verbose) {
-        logmsg "RUN: HTTPS server is now running PID $httpspid\n";
+        logmsg "RUN: $UCSERV server is now running PID $httpspid\n";
     }
 
     sleep(1);
@@ -660,13 +706,13 @@ sub runhttpsserver {
 #
 sub runftpserver {
     my ($id, $verbose, $ipv6) = @_;
-    my $STATUS;
-    my $RUNNING;
+
     my $port = $id?$FTP2PORT:$FTPPORT;
     # check for pidfile
     my $pidfile = $id?$FTP2PIDFILE:$FTPPIDFILE;
     my $ip=$HOSTIP;
     my $nameext;
+    my $serv = "ftp$id";
     my $cmd;
 
     if($ipv6) {
@@ -675,12 +721,10 @@ sub runftpserver {
         $port = $FTP6PORT;
         $ip = $HOST6IP;
         $nameext="-ipv6";
+        $serv = "ftp$id-ipv6";
     }
 
-    my $pid = checkserver($pidfile);
-    if($pid >= 0) {
-        stopserver($pid);
-    }
+    my $UCSERV = uc($serv);
 
     # start our server:
     my $flag=$debugprotocol?"-v ":"";
@@ -693,26 +737,24 @@ sub runftpserver {
     }
     $cmd="$perl $srcdir/ftpserver.pl --pidfile $pidfile $flag --port $port";
 
-    unlink($pidfile);
+    my ($ftppid, $pid2) = startnew($cmd, $pidfile, $serv);
 
-    my ($ftppid, $pid2) = startnew($cmd, $pidfile);
-
-    if(!$ftppid || !kill(0, $ftppid)) {
+    if((checkalivepid($ftppid) <= 0) || (checkalivepid($pid2) <= 0)) {
         # it is NOT alive
-        logmsg "RUN: failed to start the FTP$id$nameext server!\n";
-        return -1;
+        logmsg "RUN: failed to start the $UCSERV server!\n";
+        stopalltestservers();
+        return (0,0);
     }
 
     # Server is up. Verify that we can speak to it.
     if(!verifyserver("ftp", $ip, $port)) {
-        logmsg "RUN: FTP$id$nameext server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        stopserver("$ftppid $pid2");
+        logmsg "RUN: $UCSERV server failed verification\n";
+        stopalltestservers();
         return (0,0);
     }
 
     if($verbose) {
-        logmsg "RUN: FTP$id$nameext server is now running PID $ftppid\n";
+        logmsg "RUN: $UCSERV server is now running PID $ftppid\n";
     }
 
     sleep(1);
@@ -725,13 +767,13 @@ sub runftpserver {
 #
 sub runtftpserver {
     my ($id, $verbose, $ipv6) = @_;
-    my $STATUS;
-    my $RUNNING;
+
     my $port = $TFTPPORT;
     # check for pidfile
     my $pidfile = $TFTPPIDFILE;
     my $ip=$HOSTIP;
     my $nameext;
+    my $serv = "tftp$id";
     my $cmd;
 
     if($ipv6) {
@@ -740,12 +782,10 @@ sub runtftpserver {
         $port = $TFTP6PORT;
         $ip = $HOST6IP;
         $nameext="-ipv6";
+        $serv = "tftp$id-ipv6";
     }
 
-    my $pid = checkserver($pidfile);
-    if($pid >= 0) {
-        stopserver($pid);
-    }
+    my $UCSERV = uc($serv);
 
     # start our server:
     my $flag=$debugprotocol?"-v ":"";
@@ -758,26 +798,24 @@ sub runtftpserver {
     }
     $cmd="./server/tftpd --pidfile $pidfile $flag $port";
 
-    unlink($pidfile);
+    my ($tftppid, $pid2) = startnew($cmd, $pidfile, $serv);
 
-    my ($tftppid, $pid2) = startnew($cmd, $pidfile);
-
-    if(!$tftppid || !kill(0, $tftppid)) {
+    if((checkalivepid($tftppid) <= 0) || (checkalivepid($pid2) <= 0)) {
         # it is NOT alive
-        logmsg "RUN: failed to start the FTP$id$nameext server!\n";
-        return -1;
+        logmsg "RUN: failed to start the $UCSERV server!\n";
+        stopalltestservers();
+        return (0,0);
     }
 
     # Server is up. Verify that we can speak to it.
     if(!verifyserver("tftp", $ip, $port)) {
-        logmsg "RUN: TFTP$id$nameext server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        stopserver("$tftppid $pid2");
+        logmsg "RUN: $UCSERV server failed verification\n";
+        stopalltestservers();
         return (0,0);
     }
 
     if($verbose) {
-        logmsg "RUN: TFTP$id$nameext server is now running PID $tftppid\n";
+        logmsg "RUN: $UCSERV server is now running PID $tftppid\n";
     }
 
     sleep(1);
@@ -1437,7 +1475,7 @@ sub singletest {
         if($@) {
             logmsg "perl: $code\n";
             logmsg "precommand: $@";
-            stopservers($verbose);
+            stopalltestservers();
             return -1;
         }
     }
@@ -1628,7 +1666,7 @@ sub singletest {
         my $filename=$hash{'name'};
         if(!$filename) {
             logmsg "ERROR: section verify=>file has no name attribute!\n";
-            stopservers($verbose);
+            stopalltestservers();
             return -1;
         }
         my @generated=loadarray($filename);
@@ -1688,14 +1726,9 @@ sub singletest {
     for(@what) {
         my $serv = $_;
         chomp $serv;
-        if($serv =~ /^ftp(\d*)(-ipv6|)/) {
-            my ($id, $ext) = ($1, $2);
-            #print STDERR "SERV $serv $id $ext\n";
-            ftpkillslave($id, $ext, $verbose);
-        }
         if($run{$serv}) {
-            stopserver($run{$serv}); # the pid file is in the hash table
-            $run{$serv}=0; # clear pid
+            logmsg "RUN: Stopping the $serv server\n";
+            stoptestserver($serv);
         }
         else {
             logmsg "RUN: The $serv server is not running\n";
@@ -1792,26 +1825,58 @@ sub singletest {
 }
 
 #######################################################################
-# Stop all running test servers
-sub stopservers {
-    my ($verbose)=@_;
-    for(keys %run) {
-        my $server = $_;
-        my $pids=$run{$server};
-        my $pid;
-        my $prev;
+# Stop all processes, including slave processes, of all the running test
+# servers. Wait for them to finish and unlink its pidfiles. If they were
+# not running or have been successfully stopped return 1. If unable to
+# stop any of them then return 0. In any case the running servers hash
+# is completely cleared for all test servers.
+#
+sub stopalltestservers {
 
-        foreach $pid (split(" ", $pids)) {
-            if($pid != $prev) {
-                # no need to kill same pid twice!
-                logmsg sprintf("* kill pid for %s => %d\n",
-                               $server, $pid) if($verbose);
-                stopserver($pid);
+    my $ret = 1; # assume success stopping them
+    my $pid;
+    my $pidfile;
+    my $pidfiles = "";
+    my $pidsrunning = "";
+
+    for my $serv (keys %run) {
+        if($run{$serv}) {
+            if($run{$serv}{'slavepidfiles'}) {
+                for $pidfile (split(" ", $run{$serv}{'slavepidfiles'})) {
+                    $pidfiles .= " $pidfile";
+                    $pid = checkalivepidfile($pidfile);
+                    if($pid > 0) {
+                        $pidsrunning .= " $pid";
+                    }
+                }
+                delete $run{$serv}{'slavepidfiles'};
             }
-            $prev = $pid;
+            if($run{$serv}{'pidfile'}) {
+                $pidfile = $run{$serv}{'pidfile'};
+                $pidfiles .= " $pidfile";
+                $pid = checkalivepidfile($pidfile);
+                if($pid > 0) {
+                    $pidsrunning .= " $pid";
+                }
+                delete $run{$serv}{'pidfile'};
+            }
+            if($run{$serv}{'pids'}) {
+                $pid = $run{$serv}{'pids'};
+                $pidsrunning .= " $pid";
+                delete $run{$serv}{'pids'};
+            }
+            if($run{$serv}) {
+                delete $run{$serv};
+            }
         }
     }
-    ftpkillslaves($verbose);
+    if($pidsrunning) {
+        $ret = stopprocess($pidsrunning);
+    }
+    if($pidfiles) {
+        unlinkpidfiles($pidfiles);
+    }
+    return $ret;
 }
 
 #######################################################################
@@ -1832,7 +1897,6 @@ sub startservers {
                     return "failed starting FTP server";
                 }
                 printf ("* pid ftp => %d %d\n", $pid, $pid2) if($verbose);
-                $run{'ftp'}="$pid $pid2";
             }
         }
         elsif($what eq "ftp2") {
@@ -1842,7 +1906,6 @@ sub startservers {
                     return "failed starting FTP2 server";
                 }
                 printf ("* pid ftp2 => %d %d\n", $pid, $pid2) if($verbose);
-                $run{'ftp2'}="$pid $pid2";
             }
         }
         elsif($what eq "ftp-ipv6") {
@@ -1853,7 +1916,6 @@ sub startservers {
                 }
                 logmsg sprintf("* pid ftp-ipv6 => %d %d\n", $pid,
                        $pid2) if($verbose);
-                $run{'ftp-ipv6'}="$pid $pid2";
             }
         }
         elsif($what eq "http") {
@@ -1863,7 +1925,6 @@ sub startservers {
                     return "failed starting HTTP server";
                 }
                 printf ("* pid http => %d %d\n", $pid, $pid2) if($verbose);
-                $run{'http'}="$pid $pid2";
             }
         }
         elsif($what eq "http-ipv6") {
@@ -1874,7 +1935,6 @@ sub startservers {
                 }
                 logmsg sprintf("* pid http-ipv6 => %d %d\n", $pid, $pid2)
                     if($verbose);
-                $run{'http-ipv6'}="$pid $pid2";
             }
         }
         elsif($what eq "ftps") {
@@ -1900,7 +1960,6 @@ sub startservers {
                     return "failed starting HTTP server";
                 }
                 printf ("* pid http => %d %d\n", $pid, $pid2) if($verbose);
-                $run{'http'}="$pid $pid2";
             }
             if(!$run{'https'}) {
                 ($pid, $pid2) = runhttpsserver($verbose);
@@ -1909,7 +1968,6 @@ sub startservers {
                 }
                 logmsg sprintf("* pid https => %d %d\n", $pid, $pid2)
                     if($verbose);
-                $run{'https'}="$pid $pid2";
             }
         }
         elsif($what eq "tftp") {
@@ -1919,7 +1977,6 @@ sub startservers {
                     return "failed starting TFTP server";
                 }
                 printf ("* pid tftp => %d %d\n", $pid, $pid2) if($verbose);
-                $run{'tftp'}="$pid $pid2";
             }
         }
         elsif($what eq "tftp-ipv6") {
@@ -1929,7 +1986,6 @@ sub startservers {
                     return "failed starting TFTP-IPv6 server";
                 }
                 printf("* pid tftp-ipv6 => %d %d\n", $pid, $pid2) if($verbose);
-                $run{'tftp-ipv6'}="$pid $pid2";
             }
         }
         elsif($what eq "none") {
@@ -2263,7 +2319,7 @@ foreach $testnum (@at) {
 close(CMDLOG);
 
 # Tests done, stop the servers
-stopservers($verbose);
+stopalltestservers();
 
 my $all = $total + $skipped;
 
