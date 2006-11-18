@@ -26,7 +26,9 @@ This release includes the following bugfixes:
 
 Other curl-related news:
 
- o 
+ o TclCurl 7.16.0 was released:
+   http://personal1.iddeo.es/andresgarci/tclcurl/english/
+ o Curb - Libcurl bindings for Ruby: http://curb.rubyforge.org/
 
 New curl mirrors:
 
