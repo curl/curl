@@ -55,12 +55,14 @@ sub pidfromfile {
         if(open(PIDF, "<$pidfile")) {
             my $pidline = <PIDF>;
             close(PIDF);
-            chomp $pidline;
-            $pidline =~ s/^\s+//;
-            $pidline =~ s/\s+$//;
-            $pidline =~ s/^[+-]?0+//;
-            if($pidline =~ $pidpattern) {
-                $pid = $1;
+            if($pidline) {
+                chomp $pidline;
+                $pidline =~ s/^\s+//;
+                $pidline =~ s/\s+$//;
+                $pidline =~ s/^[+-]?0+//;
+                if($pidline =~ $pidpattern) {
+                    $pid = $1;
+                }
             }
         }
     }
@@ -148,6 +150,13 @@ sub signalpids {
     my ($signal, $pids)=@_;
 
     if((not defined $signal) || (not defined $pids)) {
+        return;
+    }
+    if($pids !~ /\s+/) {
+        # avoid sorting if only one pid
+        if(checkalivepid($pids) > 0) {
+            kill($signal, $pids);
+        }
         return;
     }
     my $prev = 0;
