@@ -283,11 +283,16 @@ sub startnew {
 
     # setup entry in the running servers hash
 
-    $run{$serv}{'pidfile'} = $pidfile;    # pidfile for the test server.
+    $run{$serv}{'pidfile'} = $pidfile; # pidfile for the test server.
 
-    $run{$serv}{'pids'} = "$child $pid2"; # forked pid and test server pid.
+    if($child == $pid2) {
+        $run{$serv}{'pids'} = "$pid2"; # test server pid.
+    }
+    else {
+        $run{$serv}{'pids'} = "$child $pid2"; # forked pid and test server pid.
+    }
 
-    if($serv =~ /^ftp(\d*)(-ipv6|)/) {    # ftp servers have slavepidfiles.
+    if($serv =~ /^ftp(\d*)(-ipv6|)/) { # ftp servers have slavepidfiles.
         my ($id, $ext) = ($1, $2);
         $ext =~ s/\-//g;
         my $slavepidfiles = ".sockfilt$id$ext.pid .sockdata$id$ext.pid";
