@@ -227,13 +227,13 @@ $ENV{'CURL_CA_BUNDLE'}=undef;
 #######################################################################
 # Start a new thread/process and run the given command line in there.
 # If successfully started an entry is added to the running servers hash.
-# Return the pids (yes plural) of the new child process to the parent.
+# On error return 0. On success return 1.
 #
 sub startnew {
     my ($cmd, $pidfile, $serv)=@_;
 
     if((not defined $cmd) || (not defined $pidfile) || (not defined $serv)) {
-        return (-1,-1);
+        return 0;
     }
 
     logmsg "startnew: $cmd\n" if ($verbose);
@@ -242,7 +242,7 @@ sub startnew {
 
     if(stoptestserver($serv) == 0) {
         logmsg "RUN: failed to stop previous $UCSERV server!\n";
-        return (-1,-1);
+        return 0;
     }
 
     my $child = fork();
@@ -250,7 +250,7 @@ sub startnew {
 
     if(not defined $child) {
         logmsg "RUN: fork() failure detected for $UCSERV server!\n";
-        return (-1,-1);
+        return 0;
     }
 
     if(0 == $child) {
@@ -274,11 +274,9 @@ sub startnew {
 
     $pid2 = waitalivepidfile($pidfile, $timeoutstart);
     if(0 == $pid2) {
-        logmsg sprintf("RUN: server start timed out (%d sec) - ",
-                       $timeoutstart);
-        logmsg sprintf("%s server failed to start\n",
-                       $UCSERV);
-        return (-1,-1);
+        logmsg sprintf("RUN: %s server start-up timed out (%d sec)\n",
+                       $UCSERV, $timeoutstart);
+        return 0;
     }
 
     # setup entry in the running servers hash
@@ -299,7 +297,7 @@ sub startnew {
         $run{$serv}{'slavepidfiles'} = $slavepidfiles;
     }
 
-    return ($child, $pid2);
+    return 1;
 }
 
 
@@ -600,6 +598,7 @@ sub verifyserver {
 
 #######################################################################
 # start the http server
+# On error return 0. On success return 1.
 #
 sub runhttpserver {
     my ($verbose, $ipv6) = @_;
@@ -630,33 +629,33 @@ sub runhttpserver {
 
     my $cmd="$perl $srcdir/httpserver.pl -p $pidfile $fork$flag $port $ipv6";
 
-    my ($httppid, $pid2) = startnew($cmd, $pidfile, $serv);
-
-    if((checkalivepid($httppid) <= 0) || (checkalivepid($pid2) <= 0)) {
+    if (!startnew($cmd, $pidfile, $serv)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $UCSERV server!\n";
         stopalltestservers();
-        return (0,0);
+        return 0;
     }
 
     # Server is up. Verify that we can speak to it.
     if(!verifyserver("http", $ip, $port)) {
         logmsg "RUN: $UCSERV server failed verification\n";
         stopalltestservers();
-        return (0,0);
+        return 0;
     }
 
     if($verbose) {
-        logmsg "RUN: $UCSERV server is now running PID $httppid\n";
+        logmsg sprintf("RUN: %s server is now running PID(s) %s\n",
+                       $UCSERV, $run{$serv}{'pids'});
     }
 
     sleep(1);
 
-    return ($httppid, $pid2);
+    return 1;
 }
 
 #######################################################################
 # start the https server (or rather, tunnel)
+# On error return 0. On success return 1.
 #
 sub runhttpsserver {
     my ($verbose, $ipv6) = @_;
@@ -681,33 +680,33 @@ sub runhttpsserver {
     my $flag=$debugprotocol?"-v ":"";
     my $cmd="$perl $srcdir/httpsserver.pl $flag -s \"$stunnel\" -d $srcdir -r $HTTPPORT $HTTPSPORT";
 
-    my ($httpspid, $pid2) = startnew($cmd, $pidfile, $serv);
-
-    if((checkalivepid($httpspid) <= 0) || (checkalivepid($pid2) <= 0)) {
+    if (!startnew($cmd, $pidfile, $serv)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $UCSERV server!\n";
         stopalltestservers();
-        return (0,0);
+        return 0;
     }
 
     # Server is up. Verify that we can speak to it.
     if(!verifyserver("https", $ip, $HTTPSPORT)) {
         logmsg "RUN: $UCSERV server failed verification\n";
         stopalltestservers();
-        return (0,0);
+        return 0;
     }
 
     if($verbose) {
-        logmsg "RUN: $UCSERV server is now running PID $httpspid\n";
+        logmsg sprintf("RUN: %s server is now running PID(s) %s\n",
+                       $UCSERV, $run{$serv}{'pids'});
     }
 
     sleep(1);
 
-    return ($httpspid, $pid2);
+    return 1;
 }
 
 #######################################################################
 # start the ftp server
+# On error return 0. On success return 1.
 #
 sub runftpserver {
     my ($id, $verbose, $ipv6) = @_;
@@ -742,33 +741,33 @@ sub runftpserver {
     }
     $cmd="$perl $srcdir/ftpserver.pl --pidfile $pidfile $flag --port $port";
 
-    my ($ftppid, $pid2) = startnew($cmd, $pidfile, $serv);
-
-    if((checkalivepid($ftppid) <= 0) || (checkalivepid($pid2) <= 0)) {
+    if (!startnew($cmd, $pidfile, $serv)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $UCSERV server!\n";
         stopalltestservers();
-        return (0,0);
+        return 0;
     }
 
     # Server is up. Verify that we can speak to it.
     if(!verifyserver("ftp", $ip, $port)) {
         logmsg "RUN: $UCSERV server failed verification\n";
         stopalltestservers();
-        return (0,0);
+        return 0;
     }
 
     if($verbose) {
-        logmsg "RUN: $UCSERV server is now running PID $ftppid\n";
+        logmsg sprintf("RUN: %s server is now running PID(s) %s\n",
+                       $UCSERV, $run{$serv}{'pids'});
     }
 
     sleep(1);
 
-    return ($pid2, $ftppid);
+    return 1;
 }
 
 #######################################################################
 # start the tftp server
+# On error return 0. On success return 1.
 #
 sub runtftpserver {
     my ($id, $verbose, $ipv6) = @_;
@@ -803,29 +802,28 @@ sub runtftpserver {
     }
     $cmd="./server/tftpd --pidfile $pidfile $flag $port";
 
-    my ($tftppid, $pid2) = startnew($cmd, $pidfile, $serv);
-
-    if((checkalivepid($tftppid) <= 0) || (checkalivepid($pid2) <= 0)) {
+    if (!startnew($cmd, $pidfile, $serv)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $UCSERV server!\n";
         stopalltestservers();
-        return (0,0);
+        return 0;
     }
 
     # Server is up. Verify that we can speak to it.
     if(!verifyserver("tftp", $ip, $port)) {
         logmsg "RUN: $UCSERV server failed verification\n";
         stopalltestservers();
-        return (0,0);
+        return 0;
     }
 
     if($verbose) {
-        logmsg "RUN: $UCSERV server is now running PID $tftppid\n";
+        logmsg sprintf("RUN: %s server is now running PID(s) %s\n",
+                       $UCSERV, $run{$serv}{'pids'});
     }
 
     sleep(1);
 
-    return ($pid2, $tftppid);
+    return 1;
 }
 
 
@@ -1732,11 +1730,11 @@ sub singletest {
         my $serv = $_;
         chomp $serv;
         if($run{$serv}) {
-            logmsg "RUN: Stopping the $serv server\n";
+            logmsg "RUN: Stopping the $serv server\n" if($verbose);
             stoptestserver($serv);
         }
         else {
-            logmsg "RUN: The $serv server is not running\n";
+            logmsg "RUN: The $serv server is not running\n" if($verbose);
         }
     }
 
@@ -1891,55 +1889,53 @@ sub stopalltestservers {
 
 sub startservers {
     my @what = @_;
-    my ($pid, $pid2);
+
     for(@what) {
         my $what = lc($_);
         $what =~ s/[^a-z0-9-]//g;
         if($what eq "ftp") {
             if(!$run{'ftp'}) {
-                ($pid, $pid2) = runftpserver("", $verbose);
-                if($pid <= 0) {
+                if(!runftpserver("", $verbose)) {
                     return "failed starting FTP server";
                 }
-                printf ("* pid ftp => %d %d\n", $pid, $pid2) if($verbose);
+                logmsg sprintf("* pid ftp => %s\n",
+                                $run{'ftp'}{'pids'}) if($verbose);
             }
         }
         elsif($what eq "ftp2") {
             if(!$run{'ftp2'}) {
-                ($pid, $pid2) = runftpserver("2", $verbose);
-                if($pid <= 0) {
+                if(!runftpserver("2", $verbose)) {
                     return "failed starting FTP2 server";
                 }
-                printf ("* pid ftp2 => %d %d\n", $pid, $pid2) if($verbose);
+                logmsg sprintf("* pid ftp2 => %s\n",
+                                $run{'ftp2'}{'pids'}) if($verbose);
             }
         }
         elsif($what eq "ftp-ipv6") {
             if(!$run{'ftp-ipv6'}) {
-                ($pid, $pid2) = runftpserver("", $verbose, "ipv6");
-                if($pid <= 0) {
+                if(!runftpserver("", $verbose, "ipv6")) {
                     return "failed starting FTP-IPv6 server";
                 }
-                logmsg sprintf("* pid ftp-ipv6 => %d %d\n", $pid,
-                       $pid2) if($verbose);
+                logmsg sprintf("* pid ftp-ipv6 => %s\n",
+                                $run{'ftp-ipv6'}{'pids'}) if($verbose);
             }
         }
         elsif($what eq "http") {
             if(!$run{'http'}) {
-                ($pid, $pid2) = runhttpserver($verbose);
-                if($pid <= 0) {
+                if(!runhttpserver($verbose)) {
                     return "failed starting HTTP server";
                 }
-                printf ("* pid http => %d %d\n", $pid, $pid2) if($verbose);
+                logmsg sprintf("* pid http => %s\n",
+                                $run{'http'}{'pids'}) if($verbose);
             }
         }
         elsif($what eq "http-ipv6") {
             if(!$run{'http-ipv6'}) {
-                ($pid, $pid2) = runhttpserver($verbose, "IPv6");
-                if($pid <= 0) {
+                if(!runhttpserver($verbose, "IPv6")) {
                     return "failed starting HTTP-IPv6 server";
                 }
-                logmsg sprintf("* pid http-ipv6 => %d %d\n", $pid, $pid2)
-                    if($verbose);
+                logmsg sprintf("* pid http-ipv6 => %s\n",
+                                $run{'http-ipv6'}{'pids'}) if($verbose);
             }
         }
         elsif($what eq "ftps") {
@@ -1960,37 +1956,36 @@ sub startservers {
             }
 
             if(!$run{'http'}) {
-                ($pid, $pid2) = runhttpserver($verbose);
-                if($pid <= 0) {
+                if(!runhttpserver($verbose)) {
                     return "failed starting HTTP server";
                 }
-                printf ("* pid http => %d %d\n", $pid, $pid2) if($verbose);
+                logmsg sprintf("* pid http => %s\n",
+                                $run{'http'}{'pids'}) if($verbose);
             }
             if(!$run{'https'}) {
-                ($pid, $pid2) = runhttpsserver($verbose);
-                if($pid <= 0) {
+                if(!runhttpsserver($verbose)) {
                     return "failed starting HTTPS server (stunnel)";
                 }
-                logmsg sprintf("* pid https => %d %d\n", $pid, $pid2)
-                    if($verbose);
+                logmsg sprintf("* pid https => %s\n",
+                                $run{'https'}{'pids'}) if($verbose);
             }
         }
         elsif($what eq "tftp") {
             if(!$run{'tftp'}) {
-                ($pid, $pid2) = runtftpserver("", $verbose);
-                if($pid <= 0) {
+                if(!runtftpserver("", $verbose)) {
                     return "failed starting TFTP server";
                 }
-                printf ("* pid tftp => %d %d\n", $pid, $pid2) if($verbose);
+                logmsg sprintf("* pid tftp => %s\n",
+                                $run{'tftp'}{'pids'}) if($verbose);
             }
         }
         elsif($what eq "tftp-ipv6") {
             if(!$run{'tftp-ipv6'}) {
-                ($pid, $pid2) = runtftpserver("", $verbose, "IPv6");
-                if($pid <= 0) {
+                if(!runtftpserver("", $verbose, "IPv6")) {
                     return "failed starting TFTP-IPv6 server";
                 }
-                printf("* pid tftp-ipv6 => %d %d\n", $pid, $pid2) if($verbose);
+                logmsg sprintf("* pid tftp-ipv6 => %s\n",
+                                $run{'tftp-ipv6'}{'pids'}) if($verbose);
             }
         }
         elsif($what eq "none") {
