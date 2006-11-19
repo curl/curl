@@ -22,7 +22,7 @@
 ###########################################################################
 
 use strict;
-use warnings;
+#use warnings; # requires perl 5.006 or later
 
 
 my $DEFAULT_TIMEOUT_START = 90; # default allowed time for a process to startup
