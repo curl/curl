@@ -9,6 +9,18 @@
  *
  * This example code only builds as-is on Windows.
  *
+ * While Unix/Linux user, you do not need this software.
+ * You can achieve the same result as synctime using curl, awk and date.
+ * Set proxy as according to your network, but beware of proxy Cache-Control.
+ *
+ * To set your system clock, root access is required.
+ * # date -s "`curl -sI http://nist.time.gov/timezone.cgi?UTC/s/0 \
+ *        | awk -F': ' '/Date: / {print $2}'`"
+ *
+ * To view remote webserver date and time.
+ * $ curl -sI http://nist.time.gov/timezone.cgi?UTC/s/0 \
+ *        | awk -F': ' '/Date: / {print $2}'
+ *
  * Synchronising your computer clock via Internet time server usually relies
  * on DAYTIME, TIME, or NTP protocols. These protocols provide good accurate
  * time synchronisation but it does not work very well through a
@@ -300,10 +312,11 @@ int main(int argc, char *argv[])
              MthStr[LOCALTime.wMonth-1], LOCALTime.wYear,
              LOCALTime.wHour, LOCALTime.wMinute, LOCALTime.wSecond,
              LOCALTime.wMilliseconds);
-    fprintf(stderr, "\nBefore HTTP. Date: %s%s\n\n", timeBuf, tzoneBuf);
+
+    fprintf(stderr, "Fetch: %s\n\n", conf->timeserver);
+    fprintf(stderr, "Before HTTP. Date: %s%s\n\n", timeBuf, tzoneBuf);
 
     /* HTTP HEAD command to the Webserver */
-    fprintf(stderr, "Fetch: %s\n", conf->timeserver);
     SyncTime_CURL_Fetch(curl, conf->timeserver, "index.htm",
                         HTTP_COMMAND_HEAD);
 
