@@ -835,6 +835,7 @@ while(1) {
         my $delay = $delayreply{$FTPCMD};
         if($delay) {
             # just go sleep this many seconds!
+            logmsg("Sleep for $delay seconds\n");
             sleep($delay);
         }
 
