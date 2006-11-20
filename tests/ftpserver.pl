@@ -114,7 +114,7 @@ do {
 sub catch_zap {
     my $signame = shift;
     print STDERR "ftpserver.pl received SIG$signame, exiting\n";
-    ftpkillslave($ftpdnum, $ext, 1);
+    ftpkillslaves(1);
     die "Somebody sent me a SIG$signame";
 }
 $SIG{INT} = \&catch_zap;
@@ -523,7 +523,7 @@ sub PASV_command {
     my $pasvport;
     my $pidf=".sockdata$ftpdnum$ext.pid";
 
-    my $prev = checkalivepidfile($pidf);
+    my $prev = checkserver($pidf);
     if($prev > 0) {
         print "kill existing server: $prev\n" if($verbose);
         kill(9, $prev);
