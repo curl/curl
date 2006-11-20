@@ -440,6 +440,7 @@ sub stoptestserver {
     my $serverpids = "";
 
     if($run{$serv}) {
+        logmsg ("RUN: Stopping the $serv server...\n");
         if($run{$serv}{'slavepidfiles'}) {
             for $pidfile (split(" ", $run{$serv}{'slavepidfiles'})) {
                 $pidfiles .= " $pidfile";
@@ -450,29 +451,41 @@ sub stoptestserver {
             }
             delete $run{$serv}{'slavepidfiles'};
         }
-        if($run{$serv}{'pidfile'}) {
-            $pidfile = $run{$serv}{'pidfile'};
-            $pidfiles .= " $pidfile";
-            $pid = checkalivepidfile($pidfile);
-            if($pid > 0) {
-                $serverpids .= " $pid";
-            }
-            delete $run{$serv}{'pidfile'};
-        }
         if($run{$serv}{'pids'}) {
             $pid = $run{$serv}{'pids'};
             $serverpids .= " $pid";
             delete $run{$serv}{'pids'};
+        }
+        if($run{$serv}{'pidfile'}) {
+            $pidfile = $run{$serv}{'pidfile'};
+            $pidfiles .= " $pidfile";
+            $pid = checkalivepidfile($pidfile);
+            if(($pid > 0) && ($serverpids !~ /\b$pid\b/)) {
+                $serverpids .= " $pid";
+            }
+            delete $run{$serv}{'pidfile'};
         }
         if($run{$serv}) {
             delete $run{$serv};
         }
     }
     if($slavepids) {
-        $ret = stopprocess($slavepids);
+        logmsg ("* slave pid(s) $slavepids\n");
     }
     if($serverpids) {
-        $ret = stopprocess($serverpids);
+        logmsg ("* server pid(s) $serverpids\n");
+    }
+    if($slavepids) {
+        $ret = stopprocess($slavepids, 1);
+        if($ret == 0) {
+            logmsg ("* slave process is still alive !!!\n");
+        }
+    }
+    if($serverpids) {
+        $ret = stopprocess($serverpids, 1);
+        if($ret == 0) {
+            logmsg ("* server process is still alive !!!\n");
+        }
     }
     if($pidfiles) {
         unlinkpidfiles($pidfiles);
@@ -1849,6 +1862,7 @@ sub stopalltestservers {
 
     for my $serv (keys %run) {
         if($run{$serv}) {
+            logmsg ("RUN: Stopping the $serv server...\n");
             if($run{$serv}{'slavepidfiles'}) {
                 for $pidfile (split(" ", $run{$serv}{'slavepidfiles'})) {
                     $pidfiles .= " $pidfile";
@@ -1859,19 +1873,19 @@ sub stopalltestservers {
                 }
                 delete $run{$serv}{'slavepidfiles'};
             }
-            if($run{$serv}{'pidfile'}) {
-                $pidfile = $run{$serv}{'pidfile'};
-                $pidfiles .= " $pidfile";
-                $pid = checkalivepidfile($pidfile);
-                if($pid > 0) {
-                    $serverpids .= " $pid";
-                }
-                delete $run{$serv}{'pidfile'};
-            }
             if($run{$serv}{'pids'}) {
                 $pid = $run{$serv}{'pids'};
                 $serverpids .= " $pid";
                 delete $run{$serv}{'pids'};
+            }
+            if($run{$serv}{'pidfile'}) {
+                $pidfile = $run{$serv}{'pidfile'};
+                $pidfiles .= " $pidfile";
+                $pid = checkalivepidfile($pidfile);
+                if(($pid > 0) && ($serverpids !~ /\b$pid\b/)) {
+                    $serverpids .= " $pid";
+                }
+                delete $run{$serv}{'pidfile'};
             }
             if($run{$serv}) {
                 delete $run{$serv};
@@ -1879,10 +1893,22 @@ sub stopalltestservers {
         }
     }
     if($slavepids) {
-        $ret = stopprocess($slavepids);
+        logmsg ("* slave pid(s) $slavepids\n");
     }
     if($serverpids) {
-        $ret = stopprocess($serverpids);
+        logmsg ("* server pid(s) $serverpids\n");
+    }
+    if($slavepids) {
+        $ret = stopprocess($slavepids, 1);
+        if($ret == 0) {
+            logmsg ("* slave process is still alive !!!\n");
+        }
+    }
+    if($serverpids) {
+        $ret = stopprocess($serverpids, 1);
+        if($ret == 0) {
+            logmsg ("* server process is still alive !!!\n");
+        }
     }
     if($pidfiles) {
         unlinkpidfiles($pidfiles);

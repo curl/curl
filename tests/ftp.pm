@@ -147,7 +147,7 @@ sub checkalivepidfile {
 # how many times a pid is repeated it will only be signalled once.
 #
 sub signalpids {
-    my ($signal, $pids)=@_;
+    my ($signal, $pids, $verbose)=@_;
 
     if((not defined $signal) || (not defined $pids)) {
         return;
@@ -155,6 +155,7 @@ sub signalpids {
     if($pids !~ /\s+/) {
         # avoid sorting if only one pid
         if(checkalivepid($pids) > 0) {
+            printf ("* pid $pids signalled ($signal)\n") if($verbose);
             kill($signal, $pids);
         }
         return;
@@ -166,6 +167,7 @@ sub signalpids {
             if($prev != $pid) {
                 $prev = $pid;
                 if(checkalivepid($pid) > 0) {
+                    printf ("* pid $pid signalled ($signal)\n") if($verbose);
                     kill($signal, $pid);
                 }
             }
@@ -180,11 +182,11 @@ sub signalpids {
 # with that pid is actually alive.
 #
 sub signalpidfile {
-    my ($signal, $pidfile)=@_;
+    my ($signal, $pidfile, $verbose)=@_;
 
     my $pid = pidfromfile($pidfile);
     if($pid > 0) {
-        signalpids($signal, $pid);
+        signalpids($signal, $pid, $verbose);
     }
 }
 
@@ -257,16 +259,16 @@ sub waitalivepidfile {
 # any of them in DEFAULT_TIMEOUT_STOP seconds then it returns 0.
 #
 sub stopprocess {
-    my ($pids)=@_;
+    my ($pids, $verbose)=@_;
 
     if(not defined $pids) {
         return 1;
     }
-    signalpids("KILL", $pids);
+    signalpids("KILL", $pids, $verbose);
     if(waitdeadpid($pids, $ONE_HALF_STOP_TIMEOUT) == 0) {
-        signalpids("KILL", $pids);
+        signalpids("KILL", $pids, $verbose);
         if(waitdeadpid($pids, $ONE_THIRD_STOP_TIMEOUT) == 0) {
-            signalpids("KILL", $pids);
+            signalpids("KILL", $pids, $verbose);
             if(waitdeadpid($pids, $ONE_SIXTH_STOP_TIMEOUT) == 0) {
                 return 0; # at least one pid is still alive !!!
             }
@@ -284,7 +286,7 @@ sub stopprocess {
 # returns 0.
 #
 sub stopprocesspidfile {
-    my ($pidfile)=@_;
+    my ($pidfile, $verbose)=@_;
 
     if(not defined $pidfile) {
         return 1;
@@ -292,7 +294,7 @@ sub stopprocesspidfile {
     my $ret = 1; # assume success stopping it
     my $pid = checkalivepidfile($pidfile);
     if($pid > 0) {
-        $ret = stopprocess($pid);
+        $ret = stopprocess($pid, $verbose);
     }
     unlinkpidfiles($pidfile);
     return $ret;
@@ -306,7 +308,7 @@ sub stopprocesspidfile {
 # to stop it in DEFAULT_TIMEOUT_STOP seconds then it returns 0.
 #
 sub ftpkillslave {
-    my ($id, $ext)=@_;
+    my ($id, $ext, $verbose)=@_;
 
     if(not defined $id) {
         $id = "";
@@ -326,7 +328,7 @@ sub ftpkillslave {
         }
     }
     if($pids) {
-        $ret = stopprocess($pids);
+        $ret = stopprocess($pids, $verbose);
     }
     if($pidfiles) {
         unlinkpidfiles($pidfiles);
@@ -342,6 +344,7 @@ sub ftpkillslave {
 # of them in DEFAULT_TIMEOUT_STOP seconds then returns 0.
 #
 sub ftpkillslaves {
+    my ($verbose)=@_;
 
     my $ret = 1; # assume success stopping them
     my $pids = "";
@@ -359,7 +362,7 @@ sub ftpkillslaves {
         }
     }
     if($pids) {
-        $ret = stopprocess($pids);
+        $ret = stopprocess($pids, $verbose);
     }
     if($pidfiles) {
         unlinkpidfiles($pidfiles);

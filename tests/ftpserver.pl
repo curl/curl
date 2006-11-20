@@ -114,7 +114,7 @@ do {
 sub catch_zap {
     my $signame = shift;
     print STDERR "ftpserver.pl received SIG$signame, exiting\n";
-    ftpkillslaves();
+    ftpkillslave($ftpdnum, $ext, 1);
     die "Somebody sent me a SIG$signame";
 }
 $SIG{INT} = \&catch_zap;
