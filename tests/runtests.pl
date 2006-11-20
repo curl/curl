@@ -436,7 +436,8 @@ sub stoptestserver {
     my $pid;
     my $pidfile;
     my $pidfiles = "";
-    my $pidsrunning = "";
+    my $slavepids = "";
+    my $serverpids = "";
 
     if($run{$serv}) {
         if($run{$serv}{'slavepidfiles'}) {
@@ -444,7 +445,7 @@ sub stoptestserver {
                 $pidfiles .= " $pidfile";
                 $pid = checkalivepidfile($pidfile);
                 if($pid > 0) {
-                    $pidsrunning .= " $pid";
+                    $slavepids .= " $pid";
                 }
             }
             delete $run{$serv}{'slavepidfiles'};
@@ -454,21 +455,24 @@ sub stoptestserver {
             $pidfiles .= " $pidfile";
             $pid = checkalivepidfile($pidfile);
             if($pid > 0) {
-                $pidsrunning .= " $pid";
+                $serverpids .= " $pid";
             }
             delete $run{$serv}{'pidfile'};
         }
         if($run{$serv}{'pids'}) {
             $pid = $run{$serv}{'pids'};
-            $pidsrunning .= " $pid";
+            $serverpids .= " $pid";
             delete $run{$serv}{'pids'};
         }
         if($run{$serv}) {
             delete $run{$serv};
         }
     }
-    if($pidsrunning) {
-        $ret = stopprocess($pidsrunning);
+    if($slavepids) {
+        $ret = stopprocess($slavepids);
+    }
+    if($serverpids) {
+        $ret = stopprocess($serverpids);
     }
     if($pidfiles) {
         unlinkpidfiles($pidfiles);
@@ -1840,7 +1844,8 @@ sub stopalltestservers {
     my $pid;
     my $pidfile;
     my $pidfiles = "";
-    my $pidsrunning = "";
+    my $slavepids = "";
+    my $serverpids = "";
 
     for my $serv (keys %run) {
         if($run{$serv}) {
@@ -1849,7 +1854,7 @@ sub stopalltestservers {
                     $pidfiles .= " $pidfile";
                     $pid = checkalivepidfile($pidfile);
                     if($pid > 0) {
-                        $pidsrunning .= " $pid";
+                        $slavepids .= " $pid";
                     }
                 }
                 delete $run{$serv}{'slavepidfiles'};
@@ -1859,13 +1864,13 @@ sub stopalltestservers {
                 $pidfiles .= " $pidfile";
                 $pid = checkalivepidfile($pidfile);
                 if($pid > 0) {
-                    $pidsrunning .= " $pid";
+                    $serverpids .= " $pid";
                 }
                 delete $run{$serv}{'pidfile'};
             }
             if($run{$serv}{'pids'}) {
                 $pid = $run{$serv}{'pids'};
-                $pidsrunning .= " $pid";
+                $serverpids .= " $pid";
                 delete $run{$serv}{'pids'};
             }
             if($run{$serv}) {
@@ -1873,8 +1878,11 @@ sub stopalltestservers {
             }
         }
     }
-    if($pidsrunning) {
-        $ret = stopprocess($pidsrunning);
+    if($slavepids) {
+        $ret = stopprocess($slavepids);
+    }
+    if($serverpids) {
+        $ret = stopprocess($serverpids);
     }
     if($pidfiles) {
         unlinkpidfiles($pidfiles);
