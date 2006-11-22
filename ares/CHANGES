@@ -1,5 +1,9 @@
   Changelog for the c-ares project
 
+* November 22
+
+- Install ares_dns.h too
+
 * November 6
 
 - Yang Tse removed a couple of potential zero size memory allocations.

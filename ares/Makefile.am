@@ -59,7 +59,7 @@ libcares_la_SOURCES = $(CSOURCES) $(HHEADERS)
 # where to install the c-ares headers
 libcares_ladir = $(includedir)
 # what headers to install on 'make install':
-libcares_la_HEADERS = ares.h ares_version.h
+libcares_la_HEADERS = ares.h ares_version.h ares_dns.h
 
 # Make files named *.dist replace the file without .dist extension
 dist-hook:
