@@ -130,5 +130,15 @@
 #define ISPRINT(x)  (isprint((int)  ((unsigned char)x)))
 
 
+/*
+ * Typedef to 'int' if sig_atomic_t is not an available 'typedefed' type.
+ */
+
+#ifndef HAVE_SIG_ATOMIC_T
+typedef int sig_atomic_t;
+#define HAVE_SIG_ATOMIC_T
+#endif
+
+
 #endif /* __SETUP_ONCE_H */
 
