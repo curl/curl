@@ -398,18 +398,18 @@ struct ftp_conn {
   ftpstate state; /* always use ftp.c:state() to change state! */
 };
 
-struct SCPPROTO {
+struct SSHPROTO {
   curl_off_t *bytecountp;
   char *user;
   char *passwd;
   char *path;                   /* the path we operate on */
-  char *freepath;               /* pointer to the allocated block we must
-                                   free, this might differ from the 'path'
-                                   pointer */
+  char *homedir;
   char *errorstr;
 #ifdef USE_LIBSSH2
-  LIBSSH2_SESSION *scpSession; /* Secure Shell session */
-  LIBSSH2_CHANNEL *scpChannel; /* SCP channel handle */
+  LIBSSH2_SESSION       *ssh_session;  /* Secure Shell session */
+  LIBSSH2_CHANNEL       *ssh_channel;  /* Secure Shell channel handle */
+  LIBSSH2_SFTP          *sftp_session; /* SFTP handle */
+  LIBSSH2_SFTP_HANDLE   *sftp_handle;
 #endif /* USE_LIBSSH2 */
 };
 
@@ -673,7 +673,7 @@ struct HandleData {
     struct FILEPROTO *file;
     void *telnet;        /* private for telnet.c-eyes only */
     void *generic;
-    struct SCPPROTO *scp;
+    struct SSHPROTO *ssh;
   } proto;
 };
 
@@ -709,6 +709,7 @@ struct connectdata {
 #define PROT_SSL     (1<<10) /* protocol requires SSL */
 #define PROT_TFTP    (1<<11)
 #define PROT_SCP     (1<<12)
+#define PROT_SFTP    (1<<13)
 
   /* 'dns_entry' is the particular host we use. This points to an entry in the
      DNS cache and it will not get pruned while locked. It gets unlocked in
@@ -830,8 +831,10 @@ struct connectdata {
   struct sockaddr_in local_addr;
 #endif
 
-  bool readchannel_inuse;  /* whether the read channel is in use by an easy handle */
-  bool writechannel_inuse; /* whether the write channel is in use by an easy handle */
+  bool readchannel_inuse;  /* whether the read channel is in use by an easy
+                              handle */
+  bool writechannel_inuse; /* whether the write channel is in use by an easy
+                              handle */
   bool is_in_pipeline;     /* TRUE if this connection is in a pipeline */
 
   struct curl_llist *send_pipe; /* List of handles waiting to

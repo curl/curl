@@ -3246,7 +3246,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->port = PORT_SSH;
     conn->remote_port = PORT_SSH;
     conn->protocol = PROT_SCP;
-    conn->curl_connect = Curl_scp_connect; /* ssh_connect? */
+    conn->curl_connect = Curl_ssh_connect; /* ssh_connect? */
     conn->curl_do = Curl_scp_do;
     conn->curl_done = Curl_scp_done;
     conn->curl_do_more = (Curl_do_more_func)ZERO_NULL;
@@ -3256,7 +3256,22 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     return CURLE_UNSUPPORTED_PROTOCOL;
 #endif
   }
-  else {
+  else if (strequal(conn->protostr, "SFTP")) {
+#ifdef USE_LIBSSH2
+    conn->port = PORT_SSH;
+    conn->remote_port = PORT_SSH;
+    conn->protocol = PROT_SFTP;
+    conn->curl_connect = Curl_ssh_connect; /* ssh_connect? */
+    conn->curl_do = Curl_sftp_do;
+    conn->curl_done = Curl_sftp_done;
+    conn->curl_do_more = (Curl_do_more_func)NULL;
+#else
+    failf(data, LIBCURL_NAME
+          " was built without LIBSSH2, scp: not supported!");
+    return CURLE_UNSUPPORTED_PROTOCOL;
+#endif
+}
+else {
     /* We fell through all checks and thus we don't support the specified
        protocol */
     failf(data, "Unsupported protocol: %s", conn->protostr);
@@ -3422,9 +3437,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   user[0] =0;   /* to make everything well-defined */
   passwd[0]=0;
 
-  if (conn->protocol & (PROT_FTP|PROT_HTTP|PROT_SCP)) {
-    /* This is a FTP or HTTP URL, we will now try to extract the possible
-     * user+password pair in a string like:
+  if (conn->protocol & (PROT_FTP|PROT_HTTP|PROT_SCP|PROT_SFTP)) {
+    /* This is a FTP, HTTP, SCP or SFTP URL, we will now try to extract the
+     * possible user+password pair in a string like:
      * ftp://user:password@ftp.my.site:8021/README */
     char *ptr=strchr(conn->host.name, '@');
     char *userpass = conn->host.name;

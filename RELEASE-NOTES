@@ -11,7 +11,7 @@ Curl and libcurl 7.16.1
 
 This release includes the following changes:
  
- o Support for SCP added
+ o Support for SCP and SFTP were added
 
 This release includes the following bugfixes:
 

@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel (24 November 2006)
+- James Housley did lots of work and introduced SFTP downloads.
+
 Daniel (13 November 2006)
 - Ron in bug #1595348 (http://curl.haxx.se/bug/view.cgi?id=1595348) pointed
   out a stack overwrite (and the corresponding fix) on 64bit Windows when

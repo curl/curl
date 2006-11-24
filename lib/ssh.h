@@ -1,5 +1,5 @@
-#ifndef __SFTP_H
-#define __SFTP_H
+#ifndef __SSH_H
+#define __SSH_H
 
 /***************************************************************************
  *                                  _   _ ____  _
@@ -26,15 +26,24 @@
 
 #ifdef USE_LIBSSH2
 
-CURLcode Curl_scp_connect(struct connectdata *conn, bool *done);
+CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done);
+
 CURLcode Curl_scp_do(struct connectdata *conn, bool *done);
 CURLcode Curl_scp_done(struct connectdata *conn, CURLcode);
 
-int Curl_scp_send(struct connectdata *conn, int sockindex,
-                  void *mem, size_t len);
-int Curl_scp_recv(struct connectdata *conn, int sockindex,
-                  char *mem, size_t len);
+ssize_t Curl_scp_send(struct connectdata *conn, int sockindex,
+                      void *mem, size_t len);
+ssize_t Curl_scp_recv(struct connectdata *conn, int sockindex,
+                      char *mem, size_t len);
 
-#endif
+CURLcode Curl_sftp_do(struct connectdata *conn, bool *done);
+CURLcode Curl_sftp_done(struct connectdata *conn, CURLcode);
+
+ssize_t Curl_sftp_send(struct connectdata *conn, int sockindex,
+                       void *mem, size_t len);
+ssize_t Curl_sftp_recv(struct connectdata *conn, int sockindex,
+                       char *mem, size_t len);
 
 #endif /* USE_LIBSSH2 */
+
+#endif /* __SSH_H */

@@ -138,6 +138,7 @@ static const char * const protocols[] = {
 
 #ifdef USE_LIBSSH2
   "scp",
+  "sftp",
 #endif
 
   NULL
