@@ -76,6 +76,15 @@
 /* Define if you have the signal function.  */
 #define HAVE_SIGNAL 1
 
+/* Define if you have the <signal.h> header file. */
+#define HAVE_SIGNAL_H 1
+
+/* Define if sig_atomic_t is an available typedef. */
+#define HAVE_SIG_ATOMIC_T 1
+
+/* Define if sig_atomic_t is already defined as volatile. */
+/* #define HAVE_SIG_ATOMIC_T_VOLATILE 1 */
+
 /* Define if you have the socket function.  */
 #define HAVE_SOCKET 1
 

@@ -48,6 +48,9 @@
 /* Define if you have the <netinet/in.h> header file.  */
 /* #define HAVE_NETINET_IN_H 1 */
 
+/* Define if you have the <signal.h> header file. */
+#define HAVE_SIGNAL_H 1
+
 /* Define if you have the <sgtty.h> header file.  */
 /* #define HAVE_SGTTY_H 1 */
 
@@ -113,6 +116,9 @@
 /* ---------------------------------------------------------------- */
 /*                        OTHER HEADER INFO                         */
 /* ---------------------------------------------------------------- */
+
+/* Define if sig_atomic_t is an available typedef. */
+#define HAVE_SIG_ATOMIC_T 1
 
 /* Define if you have the ANSI C header files.  */
 #define STDC_HEADERS 1

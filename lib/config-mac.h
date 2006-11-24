@@ -32,6 +32,8 @@
 
 //#define HAVE_STRICMP          1
 #define HAVE_SIGACTION          1
+#define HAVE_SIGNAL_H           1
+#define HAVE_SIG_ATOMIC_T       1
 
 #ifdef MACOS_SSL_SUPPORT
 #       define USE_SSLEAY       1
