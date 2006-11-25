@@ -278,13 +278,15 @@
 #define in_addr_t unsigned long
 
 /* Define as the return type of signal handlers (int or void).  */
-/* #define RETSIGTYPE void */
+#define RETSIGTYPE void
 
-/* Define to `unsigned' if size_t is not an available 'typedefed' type */
-/* #define size_t unsigned */
-
-/* Define to 'int' if ssize_t is not an available 'typedefed' type */
+/* Define ssize_t if it is not an available 'typedefed' type */
+#if (defined(__WATCOMC__) && (__WATCOMC__ >= 1240)) || defined(__POCC__)
+#elif defined(_WIN64)
+#define ssize_t __int64
+#else
 #define ssize_t int
+#endif
 
 /* Define to 'int' if socklen_t is not an available 'typedefed' type */
 #ifndef HAVE_WS2TCPIP_H

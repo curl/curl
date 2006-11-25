@@ -179,9 +179,6 @@ static void signalPipeClose(struct curl_llist *pipe);
 #ifndef WIN32
 /* not for WIN32 builds */
 
-#ifndef RETSIGTYPE
-#define RETSIGTYPE void
-#endif
 #ifdef HAVE_SIGSETJMP
 extern sigjmp_buf curl_jmpenv;
 #endif

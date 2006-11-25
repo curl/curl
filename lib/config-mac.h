@@ -47,6 +47,8 @@
 
 #define HAVE_FIONBIO            1
 
+#define RETSIGTYPE void
+
 #define HAVE_GETNAMEINFO 1
 #define GETNAMEINFO_QUAL_ARG1 const
 #define GETNAMEINFO_TYPE_ARG1 struct sockaddr *

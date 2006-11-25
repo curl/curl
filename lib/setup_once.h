@@ -140,5 +140,14 @@ typedef int sig_atomic_t;
 #endif
 
 
+/*
+ * Default return type for signal handlers.
+ */
+
+#ifndef RETSIGTYPE
+#define RETSIGTYPE void
+#endif
+
+
 #endif /* __SETUP_ONCE_H */
 

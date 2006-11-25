@@ -294,7 +294,7 @@
 #define in_addr_t unsigned long
 
 /* Define as the return type of signal handlers (int or void).  */
-/* #define RETSIGTYPE void */
+#define RETSIGTYPE void
 
 #if (defined(__WATCOMC__) && (__WATCOMC__ >= 1240)) || defined(__POCC__)
 #elif defined(_WIN64)
