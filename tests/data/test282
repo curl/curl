@@ -1,31 +1,30 @@
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
 #
 # Server-side
 <reply>
-<data mode="text">
-HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
-Server: test-server/fake
-Content-Length: 3
+<data>
+HTTP/1.1 200 OK
 
-OK
 </data>
 </reply>
 
+#
 # Client-side
 <client>
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
-<tool>
-lib516
-</tool>
-
  <name>
-make a HTTPPOST set to NULL
+HTTP GET with no response body or headers
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/516
+http://%HOSTIP:%HTTPPORT/282
 </command>
 </client>
 
@@ -36,10 +35,9 @@ http://%HOSTIP:%HTTPPORT/516
 ^User-Agent:.*
 </strip>
 <protocol>
-POST /516 HTTP/1.1
+GET /282 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Content-Length: 0
 
 </protocol>
 </verify>

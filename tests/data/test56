@@ -9,7 +9,7 @@ chunked Transfer-Encoding
 # Server-side
 <reply>
 <data>
-HTTP/1.1 200 OK swsclose
+HTTP/1.0 200 OK swsclose
 Funny-head: yesyes
 
 This is the proof it works

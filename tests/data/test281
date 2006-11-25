@@ -50,7 +50,7 @@ Weird
 </strip>
 <protocol>
 PUT /we/want/281 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 38
 Expect: 100-continue

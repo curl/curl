@@ -13,6 +13,7 @@ This is not the real page
 HTTP/1.1 200 moo swsclose
 Server: Microsoft-IIS/6.0
 Content-Type: text/html; charset=iso-8859-1
+Content-Length: 16
 
 content for you
 </data1>
@@ -26,6 +27,7 @@ Content-Type: text/html; charset=iso-8859-1
 HTTP/1.1 200 moo swsclose
 Server: Microsoft-IIS/6.0
 Content-Type: text/html; charset=iso-8859-1
+Content-Length: 16
 
 content for you
 </datacheck>

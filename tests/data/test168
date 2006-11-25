@@ -20,6 +20,7 @@ you should ignore this data too
 <data1001>
 HTTP/1.1 200 OK swsclose
 Server: no
+Content-Length: 15
 
 Nice auth sir!
 </data1001>
@@ -33,6 +34,7 @@ WWW-Authenticate: Digest realm="realmweirdo", nonce="123456"
 
 HTTP/1.1 200 OK swsclose
 Server: no
+Content-Length: 15
 
 Nice auth sir!
 </datacheck>

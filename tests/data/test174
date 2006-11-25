@@ -5,6 +5,7 @@ HTTP/1.1 200 beng swsclose
 Server: Microsoft-IIS/6.0
 Authentication-Info: Passport1.4 tname=MSPAuth,tname=MSPProf,tname=MSPConsent,tname=MSPSecAuth
 Content-Type: text/html; charset=iso-8859-1
+Content-Length: 26
 
 This is not the real page
 </data>

@@ -572,6 +572,9 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   req->open = FALSE;
 
   if(req->testno < 0) {
+    size_t msglen;
+    char msgbuf[64];
+
     switch(req->testno) {
     case DOCNUMBER_QUIT:
       logmsg("Replying to QUIT");
@@ -580,8 +583,10 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     case DOCNUMBER_WERULEZ:
       /* we got a "friends?" question, reply back that we sure are */
       logmsg("Identifying ourselves as friends");
-      sprintf(weare, "HTTP/1.1 200 OK\r\n\r\nWE ROOLZ: %d\r\n",
-              (int)getpid());
+      sprintf(msgbuf, "WE ROOLZ: %d\r\n", (int)getpid());
+      msglen = strlen(msgbuf);
+      sprintf(weare, "HTTP/1.1 200 OK\r\nContent-Length: %d\r\n\r\n%s",
+              msglen, msgbuf);
       buffer = weare;
       break;
     case DOCNUMBER_INTERNAL:

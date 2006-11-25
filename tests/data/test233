@@ -28,6 +28,7 @@ Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/html
 Funny-head: yesyes
+Content-Length: 9
 
 contents
 </data2>
@@ -47,6 +48,7 @@ Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/html
 Funny-head: yesyes
+Content-Length: 9
 
 contents
 </datacheck>

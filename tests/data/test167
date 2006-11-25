@@ -9,6 +9,7 @@ WWW-Authenticate: Digest realm="weirdorealm", nonce="12345"
 <data1000>
 HTTP/1.1 200 OK swsclose
 Server: no
+Content-Length: 15
 
 Nice auth sir!
 </data1000>
@@ -19,6 +20,7 @@ WWW-Authenticate: Digest realm="weirdorealm", nonce="12345"
 
 HTTP/1.1 200 OK swsclose
 Server: no
+Content-Length: 15
 
 Nice auth sir!
 </datacheck>

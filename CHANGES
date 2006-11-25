@@ -6,6 +6,19 @@
 
                                   Changelog
 
+Daniel (25 November 2006)
+- Venkat Akella found out that libcurl did not like HTTP responses that simply
+  responded with a single status line and no headers nor body. Starting now, a
+  HTTP response on a persistent connection (i.e not set to be closed after the
+  response has been taken care of) must have Content-Length or chunked
+  encoding set, or libcurl will simply assume that there is no body.
+
+  To my horror I learned that we had no less than 57(!) test cases that did bad
+  HTTP responses like this, and even the test http server (sws) responded badly
+  when queried by the test system if it is the test system. So although the
+  actual fix for the problem was tiny, going through all the newly failing test
+  cases got really painful and boring.
+
 Daniel (24 November 2006)
 - James Housley did lots of work and introduced SFTP downloads.
 

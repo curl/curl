@@ -16,7 +16,7 @@ Hey you, authenticate or go away!
 HTTP/1.1 200 Things are fine in proxy land swsclose
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
-Content-Length; 42
+Content-Length: 42
 
 Contents of that page you requested, sir.
 </data1002>
@@ -29,7 +29,7 @@ Content-Length: 34
 HTTP/1.1 200 Things are fine in proxy land swsclose
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
-Content-Length; 42
+Content-Length: 42
 
 Contents of that page you requested, sir.
 </datacheck>

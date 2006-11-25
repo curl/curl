@@ -14,6 +14,7 @@ This server reply is for testing a simple Location: following
 HTTP/1.1 200 Followed here fine swsclose
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
+Content-Length: 52
 
 If this is received, the location following worked
 
@@ -28,6 +29,7 @@ Connection: close
 HTTP/1.1 200 Followed here fine swsclose
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
+Content-Length: 52
 
 If this is received, the location following worked
 

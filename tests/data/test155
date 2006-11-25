@@ -33,6 +33,7 @@ This is not the real page either!
 HTTP/1.1 200 Type-3 Recevied and all Things are fine swsclose
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
 
 Finally, this is the real page!
 </data1002>
@@ -55,6 +56,7 @@ WWW-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAAAGgoEAc51AYVDgyNcAAAAAAAAAAG4Ab
 HTTP/1.1 200 Type-3 Recevied and all Things are fine swsclose
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
 
 Finally, this is the real page!
 </datacheck>

@@ -31,6 +31,7 @@ If this is received, the location following worked
 HTTP/1.1 200 Followed here fine swsclose
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
+Content-Length: 52
 
 If this is received, the location following worked
 
@@ -50,6 +51,7 @@ Location: http://athird.com/2570003
 HTTP/1.1 200 Followed here fine swsclose
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
+Content-Length: 52
 
 If this is received, the location following worked
 

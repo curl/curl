@@ -7,7 +7,7 @@ HTTP GET
 # Server-side
 <reply>
 <data>
-HTTP/1.1 200 Mooo swsclose
+HTTP/1.0 200 Mooo swsclose
 Server: test-server/fake
 Connection: close
 

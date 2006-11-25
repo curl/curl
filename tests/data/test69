@@ -14,6 +14,7 @@ WWW-Authenticate: Basic
 WWW-Authenticate: Wild-and-crazy
 WWW-Authenticate: NTLM
 Content-Type: text/html; charset=iso-8859-1
+Content-Length: 26
 
 This is not the real page
 </data>
@@ -36,6 +37,7 @@ This is not the real page either!
 HTTP/1.1 200 Things are fine in server land swsclose
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
 
 Finally, this is the real page!
 </data1002>
@@ -47,6 +49,7 @@ WWW-Authenticate: Basic
 WWW-Authenticate: Wild-and-crazy
 WWW-Authenticate: NTLM
 Content-Type: text/html; charset=iso-8859-1
+Content-Length: 26
 
 HTTP/1.1 401 Now gimme that second request of crap
 Server: Microsoft-IIS/5.0
@@ -57,6 +60,7 @@ WWW-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAAAGgoEAc51AYVDgyNcAAAAAAAAAAG4Ab
 HTTP/1.1 200 Things are fine in server land swsclose
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
 
 Finally, this is the real page!
 </datacheck>
