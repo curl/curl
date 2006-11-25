@@ -560,6 +560,7 @@ CURLcode Curl_scp_do(struct connectdata *conn, bool *done)
     }
     /* download data */
     bytecount = (curl_off_t) sb.st_size;
+    conn->data->reqdata.maxdownload =  (curl_off_t) sb.st_size;
     res = Curl_setup_transfer(conn, FIRSTSOCKET,
                               bytecount, FALSE, NULL, -1, NULL);
   }

@@ -2344,8 +2344,8 @@ CURLcode Curl_perform(struct SessionHandle *data)
 }
 
 /*
- * Curl_setup_transfer() is called to setup some basic properties for the upcoming
- * transfer.
+ * Curl_setup_transfer() is called to setup some basic properties for the
+ * upcoming transfer.
  */
 CURLcode
 Curl_setup_transfer(
