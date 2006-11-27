@@ -1,6 +1,12 @@
-To get fixed in 7.16.0 (planned release: October 2006)
+To get fixed in 7.16.1 (planned release: January 2007)
 ======================
 
-67 - Jeff Pohlmeyer's crashing pipelining test case
+69 - Jeff Pohlmeyer's crashing case (posted 17 nov 2006)
 
-69 - 
+70 - "active" FTP using the multi interface
+
+71 - rate-limit when transferring files (using the easy interface) is
+     completely broken
+
+72 - 
+
