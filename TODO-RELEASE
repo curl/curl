@@ -8,5 +8,6 @@ To get fixed in 7.16.1 (planned release: January 2007)
 71 - rate-limit when transferring files (using the easy interface) is
      completely broken
 
-72 - 
+72 - Is CURLOPT_FORBID_REUSE broken? sh.diao's mail from 29 nov 2006
 
+73 -
