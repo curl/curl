@@ -14,4 +14,6 @@ To get fixed in 7.16.1 (planned release: January 2007)
 
 74 - curl_getdate() wrong on windows bug #1230118 (re-opened)
 
-75 - 
+75 - "copying everything downloaded" (posted 11 nov 2006).
+
+76 - 
