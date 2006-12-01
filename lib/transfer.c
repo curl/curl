@@ -904,19 +904,20 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                        || checkprefix("x-compress", start))
                 k->content_encoding = COMPRESS;
             }
-            else if (Curl_compareheader(k->p, "Content-Range:", "bytes")) {
+            else if (checkprefix("Content-Range:", k->p)) {
               /* Content-Range: bytes [num]-
                  Content-Range: bytes: [num]-
+                 Content-Range: [num]-
 
                  The second format was added since Sun's webserver
                  JavaWebServer/1.1.1 obviously sends the header this way!
+                 The third added since some servers use that!
               */
 
-              char *ptr = Curl_strcasestr(k->p, "bytes");
-              ptr+=5;
+              char *ptr = k->p + 14;
 
-              if(*ptr == ':')
-                /* stupid colon skip */
+              /* Move forward until first digit */
+              while(*ptr && !ISDIGIT(*ptr))
                 ptr++;
 
               k->offset = curlx_strtoofft(ptr, NULL, 10);

@@ -25,6 +25,7 @@ This release includes the following bugfixes:
  o stack overwrite on 64bit Windows in the chunked decoding department
  o HTTP responses on persistent connections without Content-Length nor chunked
    encoding are now considered to be without response body
+ o Content-Range: header parsing improved
 
 Other curl-related news:
 
@@ -40,6 +41,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  James Housley, Olaf Stueben, Yang Tse, Gisle Vanem, Bradford Bruce,
- Ciprian Badescu, Dmitriy Sergeyev, Nir Soffer, Venkat Akella
+ Ciprian Badescu, Dmitriy Sergeyev, Nir Soffer, Venkat Akella, Toon Verwaest
 
         Thanks! (and sorry if I forgot to mention someone)

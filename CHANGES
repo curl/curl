@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel (1 December 2006)
+- Toon Verwaest reported that there are servers that send the Content-Range:
+  header in a third, not suppported by libcurl, format and we agreed that we
+  could make the parser more forgiving to accept all the three found
+  variations.
+
 Daniel (25 November 2006)
 - Venkat Akella found out that libcurl did not like HTTP responses that simply
   responded with a single status line and no headers nor body. Starting now, a
