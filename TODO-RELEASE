@@ -16,4 +16,8 @@ To get fixed in 7.16.1 (planned release: January 2007)
 
 75 - "copying everything downloaded" (posted 11 nov 2006).
 
-76 - 
+76 - CURLOPT_CLOSEPOLICY can't be set! (posted 30 nov 2006). I suggest we let
+     it remain unsettable and remove code that deals with the (two) different
+     cases it can be set to.
+
+77 -
