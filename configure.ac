@@ -1072,11 +1072,11 @@ if test X"$OPT_LIBSSH2" != Xno; then
     PREFIX_LIBSSH2=
     ;;
   *)
-    dnl check the given --with-libssh2 spot
+    dnl use the given --with-libssh2 spot
     PREFIX_LIBSSH2=$OPT_LIBSSH2
     LIB_LIBSSH2="$PREFIX_LIBSSH2/lib$libsuff"
     LDFLAGS="$LDFLAGS -L$LIB_LIBSSH2"
-    CPPFLAGS="$CPPFLAGS -I$PREFIX_LIBSSH2/include/libssh2 -I$PREFIX_LIBSSH2/include"
+    CPPFLAGS="$CPPFLAGS -I$PREFIX_LIBSSH2/include"
     ;;
   esac
 
@@ -1095,6 +1095,8 @@ if test X"$OPT_LIBSSH2" != Xno; then
        test "$LIBSSH2_ENABLED" != "1"; then
       AC_MSG_ERROR([libSSH2 libs and/or directories were not found where specified!])
     fi
+  else
+    AC_MSG_WARN([without the use of OpenSSL libs, libssh2 cannot work])
   fi
 
   if test "$LIBSSH2_ENABLED" = "1"; then
