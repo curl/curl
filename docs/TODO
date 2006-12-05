@@ -43,10 +43,6 @@ TODO
    powered libcurl the default build (which of course would require that we'd
    bundle the c-ares source code in the libcurl source code releases).
 
- * Support CONNECT 407 responses that kill the connection and expect the
-   client to reconnect to complete the authentication. Currently libcurl
-   assumes that a proxy connection will be kept alive.
-
  * Make the curl/*.h headers include the proper system includes based on what
    was present at the time when configure was run. Currently, the sys/select.h
    header is for example included by curl/multi.h only on specific platforms
