@@ -26,7 +26,8 @@ This release includes the following bugfixes:
  o HTTP responses on persistent connections without Content-Length nor chunked
    encoding are now considered to be without response body
  o Content-Range: header parsing improved
- o CPU 100% load when upload connection broke
+ o CPU 100% load when HTTP upload connection broke
+ o active FTP didn't work with multi interface
 
 Other curl-related news:
 
@@ -44,6 +45,6 @@ advice from friends like these:
 
  James Housley, Olaf Stueben, Yang Tse, Gisle Vanem, Bradford Bruce,
  Ciprian Badescu, Dmitriy Sergeyev, Nir Soffer, Venkat Akella, Toon Verwaest,
- Matt Witherspoon
+ Matt Witherspoon, Alexey Simak
 
         Thanks! (and sorry if I forgot to mention someone)

@@ -573,7 +573,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
 
             /* output debug output if that is requested */
             if(data->set.verbose)
-              Curl_debug(data, CURLINFO_HEADER_IN, 
+              Curl_debug(data, CURLINFO_HEADER_IN,
                          line_start, (size_t)perline, conn);
 
             /*
@@ -1167,6 +1167,15 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   ftpc->count1 = PORT;
 
 #endif /* end of ipv4-specific code */
+
+  /* this tcpconnect assignment below is a hackish work-around to make the
+     multi interface with active FTP work - as it will not wait for a
+     (passive) connect in Curl_is_connected().
+
+     The *proper* fix is to make sure that the active connection from the
+     server is done in a non-blocking way. Currently, it is still BLOCKING.
+  */
+  conn->bits.tcpconnect = TRUE;
 
   state(conn, FTP_PORT);
   return result;
@@ -3433,7 +3442,7 @@ CURLcode Curl_nbftpsendf(struct connectdata *conn,
     return res;
 
   if(conn->data->set.verbose)
-    Curl_debug(conn->data, CURLINFO_HEADER_OUT, 
+    Curl_debug(conn->data, CURLINFO_HEADER_OUT,
                sptr, (size_t)bytes_written, conn);
 
   if(bytes_written != (ssize_t)write_len) {
@@ -3491,7 +3500,7 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
       break;
 
     if(conn->data->set.verbose)
-      Curl_debug(conn->data, CURLINFO_HEADER_OUT, 
+      Curl_debug(conn->data, CURLINFO_HEADER_OUT,
                  sptr, (size_t)bytes_written, conn);
 
     if(bytes_written != (ssize_t)write_len) {

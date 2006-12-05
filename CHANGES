@@ -7,6 +7,22 @@
                                   Changelog
 
 Daniel (5 December 2006)
+- Alexey Simak filed bug report #1600447
+  (http://curl.haxx.se/bug/view.cgi?id=1600447) in which he noted that active
+  FTP connections don't work with the multi interface. The problem is here
+  that the multi interface state machine has a state during which it can wait
+  for the data connection to connect, but the active connection is not done in
+  the same step in the sequence as the passive one is so it doesn't quite work
+  for active. The active FTP code still use a blocking function to allow the
+  remote server to connect.
+
+  The fix (work-around is a better word) for this problem is to set the
+  boolean prematurely that the data connection is completed, so that the "wait
+  for connect" phase ends at once.
+
+  The proper fix, left for the future, is of course to make the active FTP
+  case to act in a non-blocking way too.
+
 - Matt Witherspoon fixed a problem case when the CPU load went to 100% when a
   HTTP upload was disconnected:
 
