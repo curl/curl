@@ -7,6 +7,12 @@
                                   Changelog
 
 Daniel (5 December 2006)
+- Sh Diao reported that CURLOPT_CLOSEPOLICY doesn't work, and indeed, there is
+  no code present in the library that receives the option. Since it was not
+  possible to use, we know that no current users exist and thus we simply
+  removed it from the docs and made the code always use the default path of
+  the code.
+
 - Jared Lundell filed bug report #1604956
   (http://curl.haxx.se/bug/view.cgi?id=1604956) which identified setting
   CURLOPT_MAXCONNECTS to zero caused libcurl to SIGSEGV. Starting now, libcurl

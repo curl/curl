@@ -1092,23 +1092,14 @@ value unless you are perfectly aware of how this work and changes libcurl's
 behaviour. This concerns connection using any of the protocols that support
 persistent connections.
 
-When reaching the maximum limit, curl uses the \fICURLOPT_CLOSEPOLICY\fP to
-figure out which of the existing connections to close to prevent the number of
-open connections to increase.
+When reaching the maximum limit, curl closes the oldest one in the cache to
+prevent the number of open connections to increase.
 
 If you already have performed transfers with this curl handle, setting a
 smaller MAXCONNECTS than before may cause open connections to get closed
 unnecessarily.
 .IP CURLOPT_CLOSEPOLICY
-Pass a long. This option sets what policy libcurl should use when the
-connection cache is filled and one of the open connections has to be closed to
-make room for a new connection. This must be one of the CURLCLOSEPOLICY_*
-defines. Use \fICURLCLOSEPOLICY_LEAST_RECENTLY_USED\fP to make libcurl close
-the connection that was least recently used, that connection is also least
-likely to be capable of re-use. Use \fICURLCLOSEPOLICY_OLDEST\fP to make
-libcurl close the oldest connection, the one that was created first among the
-ones in the connection cache. The other close policies are not support
-yet.
+(Obsolete) This option does nothing.
 .IP CURLOPT_FRESH_CONNECT
 Pass a long. Set to non-zero to make the next transfer use a new (fresh)
 connection by force. If the connection cache is full before this connection,
