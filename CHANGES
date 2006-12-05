@@ -7,6 +7,12 @@
                                   Changelog
 
 Daniel (5 December 2006)
+- Stefan Krause pointed out a compiler warning with a picky MSCV compiler when
+  passing a curl_off_t argument to the Curl_read_rewind() function which takes
+  an size_t argument. Curl_read_rewind() also had debug code left in it and it
+  was put in a different source file with no good reason when only used from
+  one single spot.
+
 - Sh Diao reported that CURLOPT_CLOSEPOLICY doesn't work, and indeed, there is
   no code present in the library that receives the option. Since it was not
   possible to use, we know that no current users exist and thus we simply

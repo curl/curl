@@ -266,6 +266,32 @@ static int data_pending(struct connectdata *conn)
 #define data_pending(x) 0
 #endif
 
+#ifndef MIN
+#define MIN(a,b) (a < b ? a : b)
+#endif
+
+static void read_rewind(struct connectdata *conn,
+                        size_t thismuch)
+{
+  conn->read_pos -= thismuch;
+  conn->bits.stream_was_rewound = TRUE;
+
+#ifdef CURLDEBUG
+  {
+    char buf[512 + 1];
+    size_t show;
+
+    show = MIN(conn->buf_len - conn->read_pos, sizeof(buf)-1);
+    memcpy(buf, conn->master_buffer + conn->read_pos, show);
+    buf[show] = '\0';
+
+    DEBUGF(infof(conn->data,
+                 "Buffer after stream rewind (read_pos = %d): [%s]",
+                 conn->read_pos, buf));
+  }
+#endif
+}
+
 /*
  * Curl_readwrite() is the low-level function to be called when data is to
  * be read and written to/from the connection.
@@ -1145,8 +1171,9 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
           if((-1 != k->maxdownload) &&
              (k->bytecount + nread >= k->maxdownload)) {
-            curl_off_t excess = k->bytecount +
-              ((curl_off_t) nread) - k->maxdownload;
+            /* The 'excess' amount below can't be more than BUFSIZE which
+               always will fit in a size_t */
+            size_t excess = k->bytecount + nread - k->maxdownload;
             if (excess > 0 && !k->ignorebody) {
               infof(data,
                     "Rewinding stream by : %" FORMAT_OFF_T
@@ -1155,7 +1182,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                     ", bytecount = %" FORMAT_OFF_T ", nread = %d)\n",
                     excess, conn->data->reqdata.path,
                     k->size, k->maxdownload, k->bytecount, nread);
-              Curl_read_rewind(conn, excess);
+              read_rewind(conn, excess);
             }
 
             nread = (ssize_t) (k->maxdownload - k->bytecount);
