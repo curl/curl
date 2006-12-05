@@ -124,7 +124,7 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
   if (writefd != CURL_SOCKET_BAD) {
     if (pfd[num].revents & POLLOUT)
       ret |= CSELECT_OUT;
-    if (pfd[num].revents & POLLERR)
+    if (pfd[num].revents & (POLLERR|POLLHUP))
       ret |= CSELECT_ERR;
   }
 

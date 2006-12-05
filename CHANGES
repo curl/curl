@@ -6,6 +6,19 @@
 
                                   Changelog
 
+Daniel (5 December 2006)
+- Matt Witherspoon fixed a problem case when the CPU load went to 100% when a
+  HTTP upload was disconnected:
+
+  "What appears to be happening is that my system (Linux 2.6.17 and 2.6.13) is
+  setting *only* POLLHUP on poll() when the conditions in my previous mail
+  occur. As you can see, select.c:Curl_select() does not check for POLLHUP. So
+  basically what was happening, is poll() was returning immediately (with
+  POLLHUP set), but when Curl_select() looked at the bits, neither POLLERR or
+  POLLOUT was set. This still caused Curl_readwrite() to be called, which
+  quickly returned. Then the transfer() loop kept continuing at full speed
+  forever."
+
 Daniel (1 December 2006)
 - Toon Verwaest reported that there are servers that send the Content-Range:
   header in a third, not suppported by libcurl, format and we agreed that we
