@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel (5 December 2006)
+- Sh Diao reported that CURLOPT_FORBID_REUSE no works, and indeed it broke in
+  the 7.16.0 release.
+
 - Martin Skinner brought back bug report #1230118 to haunt us once again.
   (http://curl.haxx.se/bug/view.cgi?id=1230118) curl_getdate() did not work
   properly for all input dates on Windows. It was mostly seen on some TZ time

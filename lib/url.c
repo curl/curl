@@ -4150,8 +4150,6 @@ CURLcode Curl_done(struct connectdata **connp,
      cancelled before we proceed */
   ares_cancel(data->state.areschannel);
 
-  ConnectionDone(conn); /* the connection is no longer in use */
-
   /* if data->set.reuse_forbid is TRUE, it means the libcurl client has
      forced us to close this no matter what we think.
 
@@ -4159,8 +4157,7 @@ CURLcode Curl_done(struct connectdata **connp,
      closed in spite of all our efforts to be nice, due to protocol
      restrictions in our or the server's end */
   if(data->set.reuse_forbid || conn->bits.close) {
-    CURLcode res2;
-    res2 = Curl_disconnect(conn); /* close the connection */
+    CURLcode res2 = Curl_disconnect(conn); /* close the connection */
 
     *connp = NULL; /* to make the caller of this function better detect that
                       this was actually killed here */
@@ -4171,6 +4168,8 @@ CURLcode Curl_done(struct connectdata **connp,
       result = res2;
   }
   else {
+    ConnectionDone(conn); /* the connection is no longer in use */
+
     /* remember the most recently used connection */
     data->state.lastconnect = conn->connectindex;
 
