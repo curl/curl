@@ -1204,7 +1204,6 @@ struct UserDefined {
   struct curl_slist *telnet_options; /* linked list of telnet options */
   curl_TimeCond timecondition; /* kind of time/date comparison */
   time_t timevalue;       /* what time to compare with */
-  curl_closepolicy closepolicy; /* connection cache close concept */
   Curl_HttpReq httpreq;   /* what kind of HTTP request (if any) is this */
   char *customrequest;    /* HTTP/FTP request to use */
   long httpversion; /* when non-zero, a specific HTTP version requested to
