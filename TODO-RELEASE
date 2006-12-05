@@ -3,21 +3,9 @@ To get fixed in 7.16.1 (planned release: January 2007)
 
 69 - Jeff Pohlmeyer's crashing case (posted 17 nov 2006)
 
-70 - "active" FTP using the multi interface bug #1600447
-
 71 - rate-limit when transferring files (using the easy interface) is
-     completely broken, bug #1603712
-
-72 - Is CURLOPT_FORBID_REUSE broken? sh.diao's mail from 29 nov 2006
-
-73 - segfault when CURLOPT_MAXCONNECTS is set bug #1604956
-
-74 - curl_getdate() wrong on windows bug #1230118 (re-opened)
+     completely broken, bug #1603712. Patch pending commit on feedback.
 
 75 - "copying everything downloaded" (posted 11 nov 2006).
-
-76 - CURLOPT_CLOSEPOLICY can't be set! (posted 30 nov 2006). I suggest we let
-     it remain unsettable and remove code that deals with the (two) different
-     cases it can be set to.
 
 77 -
