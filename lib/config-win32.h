@@ -352,6 +352,11 @@
 /* Undef keyword 'const' if it does not work.  */
 /* #undef const */
 
+#if _MSC_VER > 1310
+/* MSVC 2003 has gmtime_r */
+#define HAVE_GMTIME_R
+#endif
+
 /* ---------------------------------------------------------------- */
 /*                        LDAP LIBRARY FILES                        */
 /* ---------------------------------------------------------------- */
