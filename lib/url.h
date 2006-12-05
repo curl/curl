@@ -47,7 +47,7 @@ CURLcode Curl_protocol_doing(struct connectdata *conn, bool *done);
 void Curl_safefree(void *ptr);
 
 /* create a connection cache */
-struct conncache *Curl_mk_connc(int type);
+struct conncache *Curl_mk_connc(int type, int amount);
 /* free a connection cache */
 void Curl_rm_connc(struct conncache *c);
 /* Change number of entries of a connection cache */

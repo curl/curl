@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel (5 December 2006)
+- Jared Lundell filed bug report #1604956
+  (http://curl.haxx.se/bug/view.cgi?id=1604956) which identified setting
+  CURLOPT_MAXCONNECTS to zero caused libcurl to SIGSEGV. Starting now, libcurl
+  will always internally use no less than 1 entry in the connection cache.
+
 - Sh Diao reported that CURLOPT_FORBID_REUSE no works, and indeed it broke in
   the 7.16.0 release.
 
