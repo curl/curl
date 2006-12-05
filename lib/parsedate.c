@@ -239,18 +239,6 @@ static time_t Curl_parsedate(const char *date)
   const char *indate = date; /* save the original pointer */
   int part = 0; /* max 6 parts */
 
-#ifdef WIN32
-  /*
-   * On Windows, we need an odd work-around for the case when no TZ variable
-   * is set. If it isn't set and "automatic DST adjustment" is enabled, the
-   * time functions below will return values one hour off! As reported and
-   * investigated in bug report #1230118.
-  */
-  const char *env = getenv("TZ");
-  if(!env)
-    putenv("TZ=GMT");
-#endif
-
   while(*date && (part < 6)) {
     bool found=FALSE;
 
@@ -400,13 +388,22 @@ static time_t Curl_parsedate(const char *date)
     /* thread-safe version */
     struct tm keeptime2;
     gmt = (struct tm *)gmtime_r(&t, &keeptime2);
-#else
-    gmt = gmtime(&t); /* use gmtime_r() if available */
-#endif
     if(!gmt)
       return -1; /* illegal date/time */
-
     t2 = mktime(gmt);
+#else
+    /* It seems that at least the MSVC version of mktime() doesn't work
+       properly if it gets the 'gmt' pointer passed in (which is a pointer
+       returned from gmtime() pointing to static memory), so instead we copy
+       the tm struct to a local struct and pass a pointer to that struct as
+       input to mktime(). */
+    struct tm gmt2;
+    gmt = gmtime(&t); /* use gmtime_r() if available */
+    if(!gmt)
+      return -1; /* illegal date/time */
+    gmt2 = *gmt;
+    t2 = mktime(&gmt2);
+#endif
 
     /* Add the time zone diff (between the given timezone and GMT) and the
        diff between the local time zone and GMT. */

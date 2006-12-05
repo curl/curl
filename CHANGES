@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel (5 December 2006)
+- Martin Skinner brought back bug report #1230118 to haunt us once again.
+  (http://curl.haxx.se/bug/view.cgi?id=1230118) curl_getdate() did not work
+  properly for all input dates on Windows. It was mostly seen on some TZ time
+  zones using DST. Luckily, Martin also provided a fix.
+
 - Alexey Simak filed bug report #1600447
   (http://curl.haxx.se/bug/view.cgi?id=1600447) in which he noted that active
   FTP connections don't work with the multi interface. The problem is here

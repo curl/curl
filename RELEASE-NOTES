@@ -28,6 +28,7 @@ This release includes the following bugfixes:
  o Content-Range: header parsing improved
  o CPU 100% load when HTTP upload connection broke
  o active FTP didn't work with multi interface
+ o curl_getdate() could be off one hour for TZ time zones with DST, on windows
 
 Other curl-related news:
 
@@ -45,6 +46,6 @@ advice from friends like these:
 
  James Housley, Olaf Stueben, Yang Tse, Gisle Vanem, Bradford Bruce,
  Ciprian Badescu, Dmitriy Sergeyev, Nir Soffer, Venkat Akella, Toon Verwaest,
- Matt Witherspoon, Alexey Simak
+ Matt Witherspoon, Alexey Simak, Martin Skinner
 
         Thanks! (and sorry if I forgot to mention someone)
