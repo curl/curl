@@ -311,12 +311,15 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
   curl_off_t contentlength;
 
-  if(k->keepon & KEEP_READ)
+  /* only use the proper socket if the *_HOLD bit is not set simultaneously as
+     then we are in rate limiting state in that transfer direction */
+
+  if((k->keepon & (KEEP_READ|KEEP_READ_HOLD)) == KEEP_READ)
     fd_read = conn->sockfd;
   else
     fd_read = CURL_SOCKET_BAD;
 
-  if(k->keepon & KEEP_WRITE)
+  if((k->keepon & (KEEP_WRITE|KEEP_WRITE_HOLD)) == KEEP_WRITE)
     fd_write = conn->writesockfd;
   else
     fd_write = CURL_SOCKET_BAD;
@@ -1530,7 +1533,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   }
 
   /* Now update the "done" boolean we return */
-  *done = (bool)(0 == k->keepon);
+  *done = (bool)(0 == (k->keepon&(KEEP_READ|KEEP_WRITE)));
 
   return CURLE_OK;
 }
@@ -1699,37 +1702,40 @@ Transfer(struct connectdata *conn)
   while (!done) {
     curl_socket_t fd_read;
     curl_socket_t fd_write;
-    int interval_ms;
-
-    interval_ms = 1 * 1000;
 
     /* limit-rate logic: if speed exceeds threshold, then do not include fd in
-       select set */
-    if ( (data->set.max_send_speed > 0) &&
-         (data->progress.ulspeed > data->set.max_send_speed) )  {
+       select set. The current speed is recalculated in each Curl_readwrite()
+       call */
+    if ((k->keepon & KEEP_WRITE) &&
+        (!data->set.max_send_speed ||
+         (data->progress.ulspeed < data->set.max_send_speed) )) {
+      fd_write = conn->writesockfd;
+      k->keepon &= ~KEEP_WRITE_HOLD;
+    }
+    else {
       fd_write = CURL_SOCKET_BAD;
-      Curl_pgrsUpdate(conn);
-    }
-    else {
       if(k->keepon & KEEP_WRITE)
-        fd_write = conn->writesockfd;
-      else
-        fd_write = CURL_SOCKET_BAD;
+        k->keepon |= KEEP_WRITE_HOLD; /* hold it */
     }
 
-    if ( (data->set.max_recv_speed > 0) &&
-         (data->progress.dlspeed > data->set.max_recv_speed) ) {
-      fd_read = CURL_SOCKET_BAD;
-      Curl_pgrsUpdate(conn);
+    if ((k->keepon & KEEP_READ) &&
+        (!data->set.max_recv_speed ||
+         (data->progress.dlspeed < data->set.max_recv_speed)) ) {
+      fd_read = conn->sockfd;
+      k->keepon &= ~KEEP_READ_HOLD;
     }
     else {
+      fd_read = CURL_SOCKET_BAD;
       if(k->keepon & KEEP_READ)
-        fd_read = conn->sockfd;
-      else
-        fd_read = CURL_SOCKET_BAD;
+        k->keepon |= KEEP_READ_HOLD; /* hold it */
     }
 
-    switch (Curl_select(fd_read, fd_write, interval_ms)) {
+    /* The *_HOLD logic is necessary since even though there might be no
+       traffic during the select interval, we still call Curl_readwrite() for
+       the timeout case and if we limit transfer speed we must make sure that
+       this function doesn't transfer anything while in HOLD status. */
+
+    switch (Curl_select(fd_read, fd_write, 1000)) {
     case -1: /* select() error, stop reading */
 #ifdef EINTR
       /* The EINTR is not serious, and it seems you might get this more

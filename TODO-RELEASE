@@ -3,9 +3,6 @@ To get fixed in 7.16.1 (planned release: January 2007)
 
 69 - Jeff Pohlmeyer's crashing case (posted 17 nov 2006)
 
-71 - rate-limit when transferring files (using the easy interface) is
-     completely broken, bug #1603712. Patch pending commit on feedback.
-
 75 - "copying everything downloaded" (posted 11 nov 2006).
 
 77 -

@@ -503,12 +503,14 @@ struct hostname {
 /*
  * Flags on the keepon member of the Curl_transfer_keeper
  */
-enum {
-  KEEP_NONE,
-  KEEP_READ,
-  KEEP_WRITE
-};
 
+#define KEEP_NONE  0
+#define KEEP_READ  1      /* there is or may be data to read */
+#define KEEP_WRITE 2      /* there is or may be data to write */
+#define KEEP_READ_HOLD 4  /* when set, no reading should be done but there
+                             might still be data to read */
+#define KEEP_WRITE_HOLD 8 /* when set, no writing should be done but there
+                             might still be data to write */
 
 /*
  * This struct is all the previously local variables from Curl_perform() moved

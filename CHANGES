@@ -6,6 +6,15 @@
 
                                   Changelog
 
+Daniel (6 December 2006)
+- Sebastien Willemijns reported bug #1603712
+  (http://curl.haxx.se/bug/view.cgi?id=1603712) which is about connections
+  getting cut off prematurely when --limit-rate is used. While I found no such
+  problems in my tests nor in my reading of the code, I found that the
+  --limit-rate code was severly flawed (since it was moved into the lib, since
+  7.15.5) when used with the easy interface and it didn't work as documented
+  so I reworked it somewhat and now it works for my tests.
+
 Daniel (5 December 2006)
 - Stefan Krause pointed out a compiler warning with a picky MSCV compiler when
   passing a curl_off_t argument to the Curl_read_rewind() function which takes
