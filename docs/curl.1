@@ -615,6 +615,10 @@ The given speed is measured in bytes/second, unless a suffix is appended.
 Appending 'k' or 'K' will count the number as kilobytes, 'm' or M' makes it
 megabytes while 'g' or 'G' makes it gigabytes. Examples: 200K, 3m and 1G.
 
+The given rate is the average speed, counted during the entire transfer. It
+means that curl might use higher transfer speeds in short bursts, but over
+time it uses no more than the given rate.
+
 If you are also using the \fI-Y/--speed-limit\fP option, that option will take
 precedence and might cripple the rate-limiting slightly, to help keeping the
 speed-limit logic working.
