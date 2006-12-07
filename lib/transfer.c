@@ -1179,7 +1179,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             size_t excess = k->bytecount + nread - k->maxdownload;
             if (excess > 0 && !k->ignorebody) {
               infof(data,
-                    "Rewinding stream by : %" FORMAT_OFF_T
+                    "Rewinding stream by : %d"
                     " bytes on url %s (size = %" FORMAT_OFF_T
                     ", maxdownload = %" FORMAT_OFF_T
                     ", bytecount = %" FORMAT_OFF_T ", nread = %d)\n",
