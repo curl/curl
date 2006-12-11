@@ -121,8 +121,8 @@ $(DEF_FILE): $(OBJECTS) Makefile.VC6
        @echo   ares_gettimeofday      >> $@
        @echo   ares_parse_aaaa_reply  >> $@
 
-ahost.exe: $(OBJ_DIR) $(OBJ_DIR)\ahost.obj cares_imp.lib
-       link $(LDFLAGS) -out:$@ $(OBJ_DIR)\ahost.obj cares_imp.lib $(EX_LIBS)
+ahost.exe: $(OBJ_DIR) $(OBJ_DIR)\ahost.obj $(OBJ_DIR)\getopt.obj cares_imp.lib
+       link $(LDFLAGS) -out:$@ $(OBJ_DIR)\ahost.obj $(OBJ_DIR)\getopt.obj cares_imp.lib $(EX_LIBS)
 
 adig.exe: $(OBJ_DIR) $(OBJ_DIR)\adig.obj $(OBJ_DIR)\getopt.obj cares_imp.lib
        link $(LDFLAGS) -out:$@ $(OBJ_DIR)\adig.obj $(OBJ_DIR)\getopt.obj cares_imp.lib $(EX_LIBS)
