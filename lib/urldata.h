@@ -699,7 +699,6 @@ struct connectdata {
                         particular struct has */
   long protocol; /* PROT_* flags concerning the protocol set */
 #define PROT_MISSING (1<<0)
-#define PROT_CLOSEACTION (1<<1) /* needs action before socket close */
 #define PROT_HTTP    (1<<2)
 #define PROT_HTTPS   (1<<3)
 #define PROT_FTP     (1<<4)
@@ -712,6 +711,9 @@ struct connectdata {
 #define PROT_TFTP    (1<<11)
 #define PROT_SCP     (1<<12)
 #define PROT_SFTP    (1<<13)
+
+#define PROT_CLOSEACTION PROT_FTP /* these ones need action before socket
+                                     close */
 
   /* 'dns_entry' is the particular host we use. This points to an entry in the
      DNS cache and it will not get pruned while locked. It gets unlocked in
