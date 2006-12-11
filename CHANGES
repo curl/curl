@@ -6,6 +6,17 @@
 
                                   Changelog
 
+Daniel (11 December 2006)
+- Alexey Simak found out that when doing FTP with the multi interface and
+  something went wrong like it got a bad response code back from the server,
+  libcurl would leak memory. Added test case 538 to verify the fix.
+
+  I also noted that the connection would get cached in that case, which
+  doesn't make sense since it cannot be re-use when the authentication has
+  failed. I fixed that issue too at the same time, and also that the path
+  would be "remembered" in vain for cases where the connection was about to
+  get closed.
+
 Daniel (6 December 2006)
 - Sebastien Willemijns reported bug #1603712
   (http://curl.haxx.se/bug/view.cgi?id=1603712) which is about connections

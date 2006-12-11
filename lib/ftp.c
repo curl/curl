@@ -2965,6 +2965,28 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status)
      */
     return CURLE_OK;
 
+  switch(status) {
+  case CURLE_BAD_DOWNLOAD_RESUME:
+  case CURLE_FTP_WEIRD_PASV_REPLY:
+  case CURLE_FTP_PORT_FAILED:
+  case CURLE_FTP_COULDNT_SET_BINARY:
+  case CURLE_FTP_COULDNT_RETR_FILE:
+  case CURLE_FTP_COULDNT_STOR_FILE:
+  case CURLE_FTP_ACCESS_DENIED:
+    /* the connection stays alive fine even though this happened */
+    /* fall-through */
+  case CURLE_OK: /* doesn't affect the control connection's status */
+    ftpc->ctl_valid = was_ctl_valid;
+    break;
+  default:       /* by default, an error means the control connection is
+                    wedged and should not be used anymore */
+    ftpc->ctl_valid = FALSE;
+    ftpc->cwdfail = TRUE; /* set this TRUE to prevent us to remember the
+                             current path, as this connection is going */
+    conn->bits.close = TRUE; /* marked for closure */
+    break;
+  }
+
   /* now store a copy of the directory we are in */
   if(ftpc->prevpath)
     free(ftpc->prevpath);
@@ -2989,25 +3011,6 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status)
   }
   /* free the dir tree and file parts */
   freedirs(conn);
-
-  switch(status) {
-  case CURLE_BAD_DOWNLOAD_RESUME:
-  case CURLE_FTP_WEIRD_PASV_REPLY:
-  case CURLE_FTP_PORT_FAILED:
-  case CURLE_FTP_COULDNT_SET_BINARY:
-  case CURLE_FTP_COULDNT_RETR_FILE:
-  case CURLE_FTP_COULDNT_STOR_FILE:
-  case CURLE_FTP_ACCESS_DENIED:
-    /* the connection stays alive fine even though this happened */
-    /* fall-through */
-  case CURLE_OK: /* doesn't affect the control connection's status */
-    ftpc->ctl_valid = was_ctl_valid;
-    break;
-  default:       /* by default, an error means the control connection is
-                    wedged and should not be used anymore */
-    ftpc->ctl_valid = FALSE;
-    break;
-  }
 
 #ifdef HAVE_KRB4
   Curl_sec_fflush_fd(conn, conn->sock[SECONDARYSOCKET]);

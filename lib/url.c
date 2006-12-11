@@ -2171,10 +2171,7 @@ static void
 ConnectionDone(struct connectdata *conn)
 {
   conn->inuse = FALSE;
-  conn->data = NULL;
-
-  if (conn->send_pipe == 0 &&
-      conn->recv_pipe == 0)
+  if (!conn->send_pipe && !conn->recv_pipe)
     conn->is_in_pipeline = FALSE;
 }
 
@@ -3071,7 +3068,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
     conn->port = port;
     conn->remote_port = (unsigned short)port;
-    conn->protocol |= PROT_FTP|PROT_CLOSEACTION;
+    conn->protocol |= PROT_FTP;
 
     if(data->change.proxy &&
        *data->change.proxy &&
