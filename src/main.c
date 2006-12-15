@@ -3130,13 +3130,18 @@ static void free_config_fields(struct Configurable *config)
     free(config->cookiejar);
   if(config->ftp_account)
     free(config->ftp_account);
+  if(config->ftp_alternative_to_user)
+    free(config->ftp_alternative_to_user);
   if(config->iface)
     free(config->iface);
+  if(config->socksproxy)
+    free(config->socksproxy);
 
   curl_slist_free_all(config->quote); /* checks for config->quote == NULL */
   curl_slist_free_all(config->prequote);
   curl_slist_free_all(config->postquote);
   curl_slist_free_all(config->headers);
+  curl_slist_free_all(config->telnet_options);
 }
 
 #ifdef WIN32
