@@ -1614,7 +1614,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   struct HTTP *http;
   char *ppath = data->reqdata.path;
   char *host = conn->host.name;
-  const char *te = ""; /* tranfer-encoding */
+  const char *te = ""; /* transfer-encoding */
   char *ptr;
   char *request;
   Curl_HttpReq httpreq = data->set.httpreq;
