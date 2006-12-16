@@ -23,7 +23,7 @@
 
 /* This file is for "generic" SSL functions that all libcurl internals should
    use. It is responsible for calling the proper 'ossl' function in ssluse.c
-   (OpenSSL based) or the 'gtsl' function in gtsl.c (GnuTLS based).
+   (OpenSSL based) or the 'gtls' function in gtls.c (GnuTLS based).
 
    SSL-functions in libcurl should call functions in this source file, and not
    to any specific SSL-layer.
