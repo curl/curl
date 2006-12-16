@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (16 December 2006)
+- Brendan Jurd provided a fix that now prevents libcurl from getting a SIGPIPE
+  during certain conditions when GnuTLS is used.
+
 Daniel (11 December 2006)
 - Alexey Simak found out that when doing FTP with the multi interface and
   something went wrong like it got a bad response code back from the server,

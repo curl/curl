@@ -67,6 +67,23 @@ static void tls_log_func(int level, const char *str)
 }
 #endif
 
+/*
+ * Custom push and pull callback functions used by GNU TLS to read and write
+ * to the socket.  These functions are simple wrappers to send() and recv()
+ * (although here using the sread/swrite macros as defined by setup_once.h).
+ * We use custom functions rather than the GNU TLS defaults because it allows
+ * us to get specific about the fourth "flags" argument, and to use arbitrary
+ * private data with gnutls_transport_set_ptr if we wish.
+ */
+static ssize_t Curl_gtls_push(void *s, const void *buf, size_t len)
+{
+  return swrite(s, buf, len);
+}
+
+static ssize_t Curl_gtls_pull(void *s, void *buf, size_t len)
+{
+  return sread(s, buf, len);
+}
 
 /* Global GnuTLS init, called from Curl_ssl_init() */
 int Curl_gtls_init(void)
@@ -284,6 +301,13 @@ Curl_gtls_connect(struct connectdata *conn,
   /* set the connection handle (file descriptor for the socket) */
   gnutls_transport_set_ptr(session,
                            (gnutls_transport_ptr)conn->sock[sockindex]);
+
+  /* register callback functions to send and receive data. */
+  gnutls_transport_set_push_function(session, Curl_gtls_push);
+  gnutls_transport_set_pull_function(session, Curl_gtls_pull);
+
+  /* lowat must be set to zero when using custom push and pull functions. */
+  gnutls_transport_set_lowat(session, 0);
 
   /* This might be a reconnect, so we check for a session ID in the cache
      to speed up things */
