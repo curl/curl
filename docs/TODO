@@ -184,8 +184,8 @@ TODO
 
  * Fix the connection phase to be non-blocking when multi interface is used
 
- * Add a way to check if the connection seems to be alive, to corrspond to the
-   SSL_peak() way we use with OpenSSL.
+ * Add a way to check if the connection seems to be alive, to correspond to
+   the SSL_peak() way we use with OpenSSL.
 
  LDAP
 
@@ -196,9 +196,6 @@ TODO
  NEW PROTOCOLS
 
  * RTSP - RFC2326 (protocol - very HTTP-like, also contains URL description)
-
- * SFTP - SCP support is already added based on libssh2 and since the lib
-   supports SFTP too, it shouldn't be a lot of extra work...
 
  * RSYNC (no RFCs for protocol nor URI/URL format).  An implementation should
    most probably use an existing rsync library, such as librsync.
@@ -267,6 +264,10 @@ TODO
    instead of (g)nroff when building src/hugehelp.c
 
  TEST SUITE
+
+ * Make our own version of stunnel for simple port forwarding to enable HTTPS
+   and FTP-SSL tests without the stunnel dependency, and it could allow us to
+   provide test tools built with either OpenSSL or GnuTLS
 
  * Make the test servers able to serve multiple running test suites. Like if
    two users run 'make test' at once.
