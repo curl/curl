@@ -3,6 +3,20 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+37. Having more than one connection to the same host when doing NTLM
+  authentication (with performs multiple "passes" and authenticates a
+  connection rather than a HTTP request), and particularly when using the
+  multi interface, there's a risk that libcurl will re-use a wrong connection
+  when doing the different passes in the NTLM negotiation and thus fail to
+  negotiate (in seemingly mysterious ways).
+
+36. --limit-rate (CURLOPT_MAX_SEND_SPEED_LARGE and
+  CURLOPT_MAX_RECV_SPEED_LARGE) are broken on Windows (since 7.16.0, but
+  that's when they were introduced as previous to that the limiting logic was
+  made in the application only and not in the library). This problem is easily
+  repeated and it takes a Windows person to fire up his/hers debugger in order
+  to fix. http://curl.haxx.se/bug/view.cgi?id=1603712
+
 35. Both SOCKS5 and SOCKS4 proxy connections are done blocking, which is very
   bad when used with the multi interface.
 
