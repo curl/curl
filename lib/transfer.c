@@ -581,10 +581,10 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 return result;
 
               data->info.header_size += (long)headerlen;
-              k->headerbytecount += (long)headerlen;
+              conn->headerbytecount += (long)headerlen;
 
-              k->deductheadercount =
-                (100 == k->httpcode)?k->headerbytecount:0;
+              conn->deductheadercount =
+                (100 == k->httpcode)?conn->headerbytecount:0;
 
               if (data->reqdata.resume_from &&
                   (data->set.httpreq==HTTPREQ_GET) &&
@@ -1040,7 +1040,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               return result;
 
             data->info.header_size += (long)k->hbuflen;
-            k->headerbytecount += (long)k->hbuflen;
+            conn->headerbytecount += (long)k->hbuflen;
 
             /* reset hbufp pointer && hbuflen */
             k->hbufp = data->state.headerbuff;
@@ -1564,7 +1564,6 @@ CURLcode Curl_readwrite_init(struct connectdata *conn)
   k->writebytecountp = data->reqdata.writebytecountp;
 
   k->bytecount = 0;
-  k->headerbytecount = 0;
 
   k->buf = data->state.buffer;
   k->uploadbuf = data->state.uploadbuffer;
@@ -2247,7 +2246,7 @@ bool Curl_retry_request(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   struct Curl_transfer_keeper *k = &data->reqdata.keep;
 
-  if((data->reqdata.keep.bytecount+k->headerbytecount == 0) &&
+  if((data->reqdata.keep.bytecount+conn->headerbytecount == 0) &&
      conn->bits.reuse &&
      !conn->bits.no_body) {
     /* We got no data, we attempted to re-use a connection and yet we want a

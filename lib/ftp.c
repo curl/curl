@@ -329,7 +329,7 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
        * line */
       int i;
 
-      k->headerbytecount += gotbytes;
+      conn->headerbytecount += gotbytes;
 
       ftpc->nread_resp += gotbytes;
       for(i = 0; i < gotbytes; ptr++, i++) {
@@ -562,7 +562,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
          * line */
         int i;
 
-        k->headerbytecount += gotbytes;
+        conn->headerbytecount += gotbytes;
 
         *nreadp += gotbytes;
         for(i = 0; i < gotbytes; ptr++, i++) {

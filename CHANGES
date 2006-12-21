@@ -6,6 +6,19 @@
 
                                   Changelog
 
+Daniel (21 December 2006)
+- Robson Braga Araujo reported bug #1618359
+  (http://curl.haxx.se/bug/view.cgi?id=1618359) and subsequently provided a
+  patch for it: when downloading 2 zero byte files in a row, curl 7.16.0
+  enters an infinite loop, while curl 7.16.1-20061218 does one additional
+  unnecessary request.
+
+  Fix: During the "Major overhaul introducing http pipelining support and
+  shared connection cache within the multi handle." change, headerbytecount
+  was moved to live in the Curl_transfer_keeper structure. But that structure
+  is reset in the Transfer method, losing the information that we had about
+  the header size. This patch moves it back to the connectdata struct.
+
 Daniel (16 December 2006)
 - Brendan Jurd provided a fix that now prevents libcurl from getting a SIGPIPE
   during certain conditions when GnuTLS is used.

@@ -36,6 +36,7 @@ This release includes the following bugfixes:
  o getting FTP response code errors when using the multi-interface caused
    libcurl to leak memory
  o no more SIGPIPE when GnuTLS is used
+ o FTP downloading 2 zero byte files in a row
 
 Other curl-related news:
 
@@ -54,6 +55,7 @@ advice from friends like these:
  James Housley, Olaf Stueben, Yang Tse, Gisle Vanem, Bradford Bruce,
  Ciprian Badescu, Dmitriy Sergeyev, Nir Soffer, Venkat Akella, Toon Verwaest,
  Matt Witherspoon, Alexey Simak, Martin Skinner, Sh Diao, Jared Lundell,
- Stefan Krause, Sebastien Willemijns, Alexey Simak, Brendan Jurd
+ Stefan Krause, Sebastien Willemijns, Alexey Simak, Brendan Jurd,
+ Robson Braga Araujo
 
         Thanks! (and sorry if I forgot to mention someone)
