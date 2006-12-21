@@ -531,11 +531,11 @@ CURLcode Curl_scp_do(struct connectdata *conn, bool *done)
      *          same name as the last directory in the path.
      */
     scp->ssh_channel = libssh2_scp_send_ex(scp->ssh_session, scp->path,
-                                          LIBSSH2_SFTP_S_IRUSR|
-                                          LIBSSH2_SFTP_S_IWUSR|
-                                          LIBSSH2_SFTP_S_IRGRP|
-                                          LIBSSH2_SFTP_S_IROTH,
-                                          conn->data->set.infilesize, 0, 0);
+                                           LIBSSH2_SFTP_S_IRUSR|
+                                           LIBSSH2_SFTP_S_IWUSR|
+                                           LIBSSH2_SFTP_S_IRGRP|
+                                           LIBSSH2_SFTP_S_IROTH,
+                                           conn->data->set.infilesize, 0, 0);
     if (!scp->ssh_channel)
       return CURLE_FAILED_INIT;
 
