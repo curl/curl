@@ -265,7 +265,6 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
   ssize_t gotbytes;
   char *ptr;
   struct SessionHandle *data = conn->data;
-  struct Curl_transfer_keeper *k = &data->reqdata.keep;
   char *buf = data->state.buffer;
   CURLcode result = CURLE_OK;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
@@ -448,7 +447,6 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
   long timeout;              /* timeout in seconds */
   int interval_ms;
   struct SessionHandle *data = conn->data;
-  struct Curl_transfer_keeper *k = &data->reqdata.keep;
   char *line_start;
   int code=0; /* default ftp "error code" to return */
   char *buf = data->state.buffer;

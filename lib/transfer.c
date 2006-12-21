@@ -2244,7 +2244,6 @@ bool Curl_retry_request(struct connectdata *conn,
 {
   bool retry = FALSE;
   struct SessionHandle *data = conn->data;
-  struct Curl_transfer_keeper *k = &data->reqdata.keep;
 
   if((data->reqdata.keep.bytecount+conn->headerbytecount == 0) &&
      conn->bits.reuse &&
