@@ -593,12 +593,7 @@ CURL *curl_easy_duphandle(CURL *incurl)
         break;
       outcurl->change.url_alloc = TRUE;
     }
-    if(data->change.proxy) {
-      outcurl->change.proxy = strdup(data->change.proxy);
-      if(!outcurl->change.proxy)
-        break;
-      outcurl->change.proxy_alloc = TRUE;
-    }
+
     if(data->change.referer) {
       outcurl->change.referer = strdup(data->change.referer);
       if(!outcurl->change.referer)
@@ -633,8 +628,6 @@ CURL *curl_easy_duphandle(CURL *incurl)
         Curl_rm_connc(outcurl->state.connc);
       if(outcurl->state.headerbuff)
         free(outcurl->state.headerbuff);
-      if(outcurl->change.proxy)
-        free(outcurl->change.proxy);
       if(outcurl->change.url)
         free(outcurl->change.url);
       if(outcurl->change.referer)

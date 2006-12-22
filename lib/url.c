@@ -310,9 +310,6 @@ CURLcode Curl_close(struct SessionHandle *data)
   Curl_safefree(data->state.first_host);
   Curl_safefree(data->state.scratch);
 
-  if(data->change.proxy_alloc)
-    free(data->change.proxy);
-
   if(data->change.referer_alloc)
     free(data->change.referer);
 
@@ -1105,15 +1102,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * Setting it to NULL, means no proxy but allows the environment variables
      * to decide for us.
      */
-    if(data->change.proxy_alloc) {
-      /*
-       * The already set string is allocated, free that first
-       */
-      data->change.proxy_alloc = FALSE;
-      free(data->change.proxy);
-    }
-    data->set.set_proxy = va_arg(param, char *);
-    data->change.proxy = data->set.set_proxy;
+    data->set.proxy = va_arg(param, char *);
     break;
 
   case CURLOPT_WRITEHEADER:
@@ -1915,7 +1904,7 @@ int Curl_removeHandleFromPipeline(struct SessionHandle *handle,
   return 0;
 }
 
-#if 0
+#if 0 /* this code is saved here as it is useful for debugging purposes */
 static void Curl_printPipeline(struct curl_llist *pipe)
 {
   struct curl_llist_element *curr;
@@ -2082,7 +2071,6 @@ ConnectionExists(struct SessionHandle *data,
     }
 
     if(match) {
-#if 1
       if (!IsPipeliningEnabled(data)) {
         /* The check for a dead socket makes sense only in the
            non-pipelining case */
@@ -2097,7 +2085,6 @@ ConnectionExists(struct SessionHandle *data,
           return FALSE;
         }
       }
-#endif
 
       check->inuse = TRUE; /* mark this as being in use so that no other
                               handle in a multi stack may nick it */
@@ -2230,10 +2217,10 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
 {
   CURLcode result;
   Curl_addrinfo *addr;
-  char *hostname = data->change.proxy?conn->proxy.name:conn->host.name;
+  char *hostname = conn->bits.httpproxy?conn->proxy.name:conn->host.name;
 
   infof(data, "About to connect() to %s%s port %d (#%d)\n",
-        data->change.proxy?"proxy ":"",
+        conn->bits.httpproxy?"proxy ":"",
         hostname, conn->port, conn->connectindex);
 
   /*************************************************************
@@ -2706,6 +2693,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   char passwd[MAX_CURL_PASSWORD_LENGTH];
   int rc;
   bool reuse;
+  char *proxy;
+  bool proxy_alloc = FALSE;
 
 #ifndef USE_ARES
 #ifdef SIGALRM
@@ -2754,9 +2743,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD; /* no file descriptor */
   conn->connectindex = -1;    /* no index */
 
-  conn->bits.httpproxy = (bool)(data->change.proxy  /* http proxy or not */
-                             && *data->change.proxy
-                             && (data->set.proxytype == CURLPROXY_HTTP));
+  conn->bits.httpproxy = (bool)(data->set.proxy  /* http proxy or not */
+                                && *data->set.proxy
+                                && (data->set.proxytype == CURLPROXY_HTTP));
+  proxy = data->set.proxy; /* if global proxy is set, this is it */
 
   /* Default protocol-independent behavior doesn't support persistent
      connections, so we set this to force-close. Protocols that support
@@ -2856,7 +2846,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   /*************************************************************
    * Detect what (if any) proxy to use
    *************************************************************/
-  if(!data->change.proxy) {
+  if(!conn->bits.httpproxy) {
     /* If proxy was not specified, we check for default proxy environment
      * variables, to enable i.e Lynx compliance:
      *
@@ -2876,7 +2866,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      */
     char *no_proxy=NULL;
     char *no_proxy_tok_buf;
-    char *proxy=NULL;
     char proxy_env[128];
 
     no_proxy=curl_getenv("no_proxy");
@@ -2952,12 +2941,11 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
         if(proxy && *proxy) {
           long bits = conn->protocol & (PROT_HTTPS|PROT_SSL|PROT_MISSING);
-          data->change.proxy = proxy;
-          data->change.proxy_alloc=TRUE; /* this needs to be freed later */
-          conn->bits.httpproxy = TRUE;
-
           /* force this to become HTTP */
           conn->protocol = PROT_HTTP | bits;
+
+          proxy_alloc=TRUE; /* this needs to be freed later */
+          conn->bits.httpproxy = TRUE;
         }
       } /* if (!nope) - it wasn't specified non-proxy */
     } /* NO_PROXY wasn't specified or '*' */
@@ -3070,9 +3058,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->remote_port = (unsigned short)port;
     conn->protocol |= PROT_FTP;
 
-    if(data->change.proxy &&
-       *data->change.proxy &&
-       !data->set.tunnel_thru_httpproxy) {
+    if(proxy && *proxy && !data->set.tunnel_thru_httpproxy) {
       /* Unless we have asked to tunnel ftp operations through the proxy, we
          switch and use HTTP operations only */
 #ifndef CURL_DISABLE_HTTP
@@ -3270,7 +3256,7 @@ else {
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
 
-  if(data->change.proxy && *data->change.proxy) {
+  if(proxy && *proxy) {
     /* If this is supposed to use a proxy, we need to figure out the proxy
        host name name, so that we can re-use an existing connection
        that may exist registered to the same proxy host. */
@@ -3279,8 +3265,9 @@ else {
     char *endofprot;
 
     /* We need to make a duplicate of the proxy so that we can modify the
-       string safely. */
-    char *proxydup=strdup(data->change.proxy);
+       string safely. If 'proxy_alloc' is TRUE, the string is already
+       allocated and we can treat it as duplicated. */
+    char *proxydup=proxy_alloc?proxy:strdup(proxy);
 
     /* We use 'proxyptr' to point to the proxy name from now on... */
     char *proxyptr=proxydup;
@@ -3840,7 +3827,7 @@ else {
     /* set a pointer to the hostname we display */
     fix_hostname(data, conn, &conn->host);
 
-    if(!data->change.proxy || !*data->change.proxy) {
+    if(!proxy || !*proxy) {
       /* If not connecting via a proxy, extract the port from the URL, if it is
        * there, thus overriding any defaults that might have been set above. */
       conn->port =  conn->remote_port; /* it is the same port */
@@ -3953,8 +3940,7 @@ static CURLcode SetupConnection(struct connectdata *conn,
    * Send user-agent to HTTP proxies even if the target protocol
    * isn't HTTP.
    *************************************************************/
-  if((conn->protocol&PROT_HTTP) ||
-     (data->change.proxy && *data->change.proxy)) {
+  if((conn->protocol&PROT_HTTP) || conn->bits.httpproxy) {
     if(data->set.useragent) {
       Curl_safefree(conn->allocptr.uagent);
       conn->allocptr.uagent =

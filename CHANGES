@@ -7,6 +7,12 @@
                                   Changelog
 
 Daniel (22 December 2006)
+- Robert Foreman provided a prime example snippet showing how libcurl would
+  get confused and not acknowledge the 'no_proxy' variable properly once it
+  had used the proxy and you re-used the same easy handle. I made sure the
+  proxy name is properly stored in the connect struct rather than the
+  sessionhandle/easy struct.
+
 - David McCreedy fixed a bad call to getsockname() that wrongly used a size_t
   variable to point to when it should be a socklen_t.
 

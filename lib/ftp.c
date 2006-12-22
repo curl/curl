@@ -1668,7 +1668,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     return CURLE_FTP_WEIRD_PASV_REPLY;
   }
 
-  if(data->change.proxy && *data->change.proxy) {
+  if(data->set.proxy && *data->set.proxy) {
     /*
      * This is a tunnel through a http proxy and we need to connect to the
      * proxy again here.
