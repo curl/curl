@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (22 December 2006)
+- When setting a proxy with environment variables and (for example) running
+  'curl [URL]' with a URL without a protocol prefix, curl would not send a
+  correct request as it failed to add the protocol prefix.
+
 Daniel (21 December 2006)
 - Robson Braga Araujo reported bug #1618359
   (http://curl.haxx.se/bug/view.cgi?id=1618359) and subsequently provided a

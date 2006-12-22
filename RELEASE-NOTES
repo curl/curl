@@ -37,6 +37,7 @@ This release includes the following bugfixes:
    libcurl to leak memory
  o no more SIGPIPE when GnuTLS is used
  o FTP downloading 2 zero byte files in a row
+ o using proxy and URLs without protocol prefixes
 
 Other curl-related news:
 

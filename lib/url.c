@@ -2951,7 +2951,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
         }
 
         if(proxy && *proxy) {
-          long bits = conn->protocol & (PROT_HTTPS|PROT_SSL);
+          long bits = conn->protocol & (PROT_HTTPS|PROT_SSL|PROT_MISSING);
           data->change.proxy = proxy;
           data->change.proxy_alloc=TRUE; /* this needs to be freed later */
           conn->bits.httpproxy = TRUE;
