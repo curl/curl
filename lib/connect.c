@@ -384,11 +384,10 @@ static CURLcode bindlocal(struct connectdata *conn,
     if( bind(sockfd, sock, socksize) >= 0) {
       /* we succeeded to bind */
       struct Curl_sockaddr_storage add;
-      size_t size;
+      socklen_t size;
 
       size = sizeof(add);
-      if(getsockname(sockfd, (struct sockaddr *) &add,
-                     (socklen_t *)&size)<0) {
+      if(getsockname(sockfd, (struct sockaddr *) &add, &size) < 0) {
         failf(data, "getsockname() failed");
         return CURLE_HTTP_PORT_FAILED;
       }

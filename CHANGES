@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel (22 December 2006)
+- David McCreedy fixed a bad call to getsockname() that wrongly used a size_t
+  variable to point to when it should be a socklen_t.
+
 - When setting a proxy with environment variables and (for example) running
   'curl [URL]' with a URL without a protocol prefix, curl would not send a
   correct request as it failed to add the protocol prefix.
