@@ -77,6 +77,9 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
   struct curl_slist **param_slistp=NULL;
   char buf;
 
+  if(!data)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
   va_start(arg, info);
 
   switch(info&CURLINFO_TYPEMASK) {
