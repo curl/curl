@@ -38,6 +38,8 @@ This release includes the following bugfixes:
  o no more SIGPIPE when GnuTLS is used
  o FTP downloading 2 zero byte files in a row
  o using proxy and URLs without protocol prefixes
+ o first using a proxy and then accessing a site that 'no_proxy' matched,
+   would still make libcurl use the proxy...
 
 Other curl-related news:
 
