@@ -618,6 +618,8 @@ CURL *curl_easy_duphandle(CURL *incurl)
 
     Curl_easy_initHandleData(outcurl);
 
+    outcurl->magic = CURLEASY_MAGIC_NUMBER;
+
     fail = FALSE; /* we reach this point and thus we are OK */
 
   } while(0);

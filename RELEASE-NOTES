@@ -40,6 +40,8 @@ This release includes the following bugfixes:
  o using proxy and URLs without protocol prefixes
  o first using a proxy and then accessing a site that 'no_proxy' matched,
    would still make libcurl use the proxy...
+ o curl_easy_duphandle() now makes a handle that is valid for the multi
+   interface since the magic number is set fine
 
 Other curl-related news:
 

@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel (29 December 2006)
+- Make curl_easy_duphandle() set the magic number in the new handle.
+
 Daniel (22 December 2006)
 - Robert Foreman provided a prime example snippet showing how libcurl would
   get confused and not acknowledge the 'no_proxy' variable properly once it
