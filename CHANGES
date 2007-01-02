@@ -7,6 +7,16 @@
                                   Changelog
 
 Daniel (2 January 2007)
+- Victor Snezhko helped us fix bug report #1603712
+  (http://curl.haxx.se/bug/view.cgi?id=1603712) (known bug #36) --limit-rate
+  (CURLOPT_MAX_SEND_SPEED_LARGE and CURLOPT_MAX_RECV_SPEED_LARGE) are broken
+  on Windows (since 7.16.0, but that's when they were introduced as previous
+  to that the limiting logic was made in the application only and not in the
+  library). It was actually also broken on select()-based systems (as apposed
+  to poll()) but we haven't had any such reports. We now use select(), Sleep()
+  or delay() properly to sleep a while without waiting for anything input or
+  output when the rate limiting is activated with the easy interface.
+
 - Modified libcurl.pc.in to use Libs.private for the libs libcurl itself needs
   to get built static. It has been mentioned before and was again brought to
   our attention by Nathanael Nerode who filed debian bug report #405226

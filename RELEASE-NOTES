@@ -42,6 +42,9 @@ This release includes the following bugfixes:
    would still make libcurl use the proxy...
  o curl_easy_duphandle() now makes a handle that is valid for the multi
    interface since the magic number is set fine
+ o libcurl.pc now uses Libs.private for "private" libs
+ o --limit-rate (CURLOPT_MAX_SEND_SPEED_LARGE and CURLOPT_MAX_RECV_SPEED_LARGE)
+   now work on windows again
 
 Other curl-related news:
 
@@ -61,6 +64,7 @@ advice from friends like these:
  Ciprian Badescu, Dmitriy Sergeyev, Nir Soffer, Venkat Akella, Toon Verwaest,
  Matt Witherspoon, Alexey Simak, Martin Skinner, Sh Diao, Jared Lundell,
  Stefan Krause, Sebastien Willemijns, Alexey Simak, Brendan Jurd,
- Robson Braga Araujo, David McCreedy, Robert Foreman
+ Robson Braga Araujo, David McCreedy, Robert Foreman, Nathanael Nerode,
+ Victor Snezhko
 
         Thanks! (and sorry if I forgot to mention someone)

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -140,6 +140,21 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
 
   timeout.tv_sec = timeout_ms / 1000;
   timeout.tv_usec = (timeout_ms % 1000) * 1000;
+
+  if((readfd == CURL_SOCKET_BAD) && (writefd == CURL_SOCKET_BAD)) {
+    /* According to POSIX we should pass in NULL pointers if we don't want to
+       wait for anything in particular but just use the timeout function.
+       Windows however returns immediately if done so. I copied the MSDOS
+       delay() use from src/main.c that already had this work-around. */
+#ifdef WIN32
+    Sleep(timeout_ms);
+#elif defined(__MSDOS__)
+    delay(ms);
+#else
+    select(0, NULL, NULL, NULL, &timeout);
+#endif
+    return 0;
+  }
 
   FD_ZERO(&fds_err);
   maxfd = (curl_socket_t)-1;
