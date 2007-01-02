@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel (2 January 2007)
+- Modified libcurl.pc.in to use Libs.private for the libs libcurl itself needs
+  to get built static. It has been mentioned before and was again brought to
+  our attention by Nathanael Nerode who filed debian bug report #405226
+  (http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=405226).
+
 Daniel (29 December 2006)
 - Make curl_easy_duphandle() set the magic number in the new handle.
 
