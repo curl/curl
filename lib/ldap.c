@@ -5,7 +5,7 @@
  *                | (__| |_| |  _ <| |___
  *                 \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -402,7 +402,9 @@ CURLcode Curl_ldap(struct connectdata *conn, bool *done)
                       (char *)attribute +
                       (strlen((char *)attribute) - 7)) == 0)) {
             /* Binary attribute, encode to base64. */
-            val_b64_sz = Curl_base64_encode(vals[i]->bv_val, vals[i]->bv_len,
+            val_b64_sz = Curl_base64_encode(conn->data,
+                                            vals[i]->bv_val,
+                                            vals[i]->bv_len,
                                             &val_b64);
             if (val_b64_sz > 0) {
               Curl_client_write(conn, CLIENTWRITE_BODY, val_b64, val_b64_sz);

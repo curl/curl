@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -706,7 +706,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     });
 
     /* now size is the size of the base64 encoded package size */
-    size = Curl_base64_encode((char *)ntlmbuf, size, &base64);
+    size = Curl_base64_encode(conn->data, (char *)ntlmbuf, size, &base64);
 
     if(size >0 ) {
       Curl_safefree(*allocuserpwd);
@@ -1017,7 +1017,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 #endif
 
     /* convert the binary blob into base64 */
-    size = Curl_base64_encode((char *)ntlmbuf, size, &base64);
+    size = Curl_base64_encode(conn->data, (char *)ntlmbuf, size, &base64);
 
     if(size >0 ) {
       Curl_safefree(*allocuserpwd);

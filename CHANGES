@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (4 January 2007)
+- David McCreedy made changes to allow base64 encoding/decoding to work on
+  non-ASCII platforms.
+
 Daniel (3 January 2007)
 - Matt Witherspoon fixed the flaw which made libcurl 7.16.0 always store
   downloaded data in two buffers, just to be able to deal with a special HTTP

@@ -7,7 +7,7 @@
  *
  * Copyright (c) 1995, 1996, 1997, 1998, 1999 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
- * Copyright (c) 2004 - 2006 Daniel Stenberg
+ * Copyright (c) 2004 - 2007 Daniel Stenberg
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -252,7 +252,7 @@ krb4_auth(void *app_data, struct connectdata *conn)
   }
 #endif
 
-  if(Curl_base64_encode((char *)adat.dat, adat.length, &p) < 1) {
+  if(Curl_base64_encode(conn->data, (char *)adat.dat, adat.length, &p) < 1) {
     Curl_failf(data, "Out of memory base64-encoding");
     return AUTH_CONTINUE;
   }
@@ -400,7 +400,8 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   memset(key, 0, sizeof(key));
   memset(schedule, 0, sizeof(schedule));
   memset(passwd, 0, sizeof(passwd));
-  if(Curl_base64_encode((char *)tktcopy.dat, tktcopy.length, &p) < 1) {
+  if(Curl_base64_encode(conn->data, (char *)tktcopy.dat, tktcopy.length, &p)
+     < 1) {
     failf(conn->data, "Out of memory base64-encoding.");
     Curl_set_command_prot(conn, save);
     return CURLE_OUT_OF_MEMORY;
