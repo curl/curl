@@ -45,6 +45,7 @@ This release includes the following bugfixes:
  o libcurl.pc now uses Libs.private for "private" libs
  o --limit-rate (CURLOPT_MAX_SEND_SPEED_LARGE and CURLOPT_MAX_RECV_SPEED_LARGE)
    now work on windows again
+ o improved download performance by avoiding the unconditional "double copying"
 
 Other curl-related news:
 

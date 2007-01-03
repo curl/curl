@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel (3 January 2007)
+- Matt Witherspoon fixed the flaw which made libcurl 7.16.0 always store
+  downloaded data in two buffers, just to be able to deal with a special HTTP
+  pipelining case. That is now only activated for pipelined transfers. In
+  Matt's case, it showed as a considerable performance difference,
+
 Daniel (2 January 2007)
 - Victor Snezhko helped us fix bug report #1603712
   (http://curl.haxx.se/bug/view.cgi?id=1603712) (known bug #36) --limit-rate

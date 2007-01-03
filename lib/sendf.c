@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -46,6 +46,7 @@
 #include "connect.h" /* for the Curl_sockerrno() proto */
 #include "sslgen.h"
 #include "ssh.h"
+#include "multiif.h"
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */
 #include <curl/mprintf.h>
@@ -453,7 +454,7 @@ CURLcode Curl_client_write(struct connectdata *conn,
   return CURLE_OK;
 }
 
-#define MIN(a,b) (a < b ? a : b)
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
 
 /*
  * Internal read-from-socket function. This is meant to deal with plain
@@ -469,8 +470,10 @@ int Curl_read(struct connectdata *conn, /* connection data */
               ssize_t *n)               /* amount bytes read */
 {
   ssize_t nread;
-  size_t bytestocopy = MIN(conn->buf_len - conn->read_pos, sizerequested);
   size_t bytesfromsocket = 0;
+  char *buffertofill = NULL;
+  bool pipelining = (conn->data->multi &&
+                     Curl_multi_canPipeline(conn->data->multi));
 
   /* Set 'num' to 0 or 1, depending on which socket that has been sent here.
      If it is the second socket, we set num to 1. Otherwise to 0. This lets
@@ -479,22 +482,32 @@ int Curl_read(struct connectdata *conn, /* connection data */
 
   *n=0; /* reset amount to zero */
 
-  /* Copy from our master buffer first if we have some unread data there*/
-  if (bytestocopy > 0) {
-    memcpy(buf, conn->master_buffer + conn->read_pos, bytestocopy);
-    conn->read_pos += bytestocopy;
-    conn->bits.stream_was_rewound = FALSE;
+  /* If session can pipeline, check connection buffer  */
+  if(pipelining) {
+    size_t bytestocopy = MIN(conn->buf_len - conn->read_pos, sizerequested);
 
-    *n = (ssize_t)bytestocopy;
-    return CURLE_OK;
+    /* Copy from our master buffer first if we have some unread data there*/
+    if (bytestocopy > 0) {
+      memcpy(buf, conn->master_buffer + conn->read_pos, bytestocopy);
+      conn->read_pos += bytestocopy;
+      conn->bits.stream_was_rewound = FALSE;
+
+      *n = (ssize_t)bytestocopy;
+      return CURLE_OK;
+    }
+    /* If we come here, it means that there is no data to read from the buffer,
+     * so we read from the socket */
+    bytesfromsocket = MIN(sizerequested, sizeof(conn->master_buffer));
+    buffertofill = conn->master_buffer;
+  }
+  else {
+    bytesfromsocket = MIN((long)sizerequested, conn->data->set.buffer_size ?
+                          conn->data->set.buffer_size : BUFSIZE);
+    buffertofill = buf;
   }
 
-  /* If we come here, it means that there is no data to read from the buffer,
-   * so we read from the socket */
-  bytesfromsocket = MIN(sizerequested, sizeof(conn->master_buffer));
-
   if(conn->ssl[num].use) {
-    nread = Curl_ssl_recv(conn, num, conn->master_buffer, bytesfromsocket);
+    nread = Curl_ssl_recv(conn, num, buffertofill, bytesfromsocket);
 
     if(nread == -1) {
       return -1; /* -1 from Curl_ssl_recv() means EWOULDBLOCK */
@@ -502,20 +515,20 @@ int Curl_read(struct connectdata *conn, /* connection data */
   }
 #ifdef USE_LIBSSH2
   else if (conn->protocol & PROT_SCP) {
-    nread = Curl_scp_recv(conn, num, conn->master_buffer, bytesfromsocket);
+    nread = Curl_scp_recv(conn, num, buffertofill, bytesfromsocket);
     /* TODO: return CURLE_OK also for nread <= 0
              read failures and timeouts ? */
   }
   else if (conn->protocol & PROT_SFTP) {
-    nread = Curl_sftp_recv(conn, num, conn->master_buffer, bytesfromsocket);
+    nread = Curl_sftp_recv(conn, num, buffertofill, bytesfromsocket);
   }
 #endif /* !USE_LIBSSH2 */
   else {
     if(conn->sec_complete)
-      nread = Curl_sec_read(conn, sockfd, conn->master_buffer,
+      nread = Curl_sec_read(conn, sockfd, buffertofill,
                             bytesfromsocket);
     else
-      nread = sread(sockfd, conn->master_buffer, bytesfromsocket);
+      nread = sread(sockfd, buffertofill, bytesfromsocket);
 
     if(-1 == nread) {
       int err = Curl_sockerrno();
@@ -529,10 +542,12 @@ int Curl_read(struct connectdata *conn, /* connection data */
   }
 
   if (nread >= 0) {
-    memcpy(buf, conn->master_buffer, nread);
+    if(pipelining) {
+      memcpy(buf, conn->master_buffer, nread);
+      conn->buf_len = nread;
+      conn->read_pos = nread;
+    }
 
-    conn->buf_len = nread;
-    conn->read_pos = nread;
     *n = nread;
   }
 
