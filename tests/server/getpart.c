@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,6 +31,11 @@
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
+
+/* just to please base64.h we create a fake struct */
+struct SessionHandle {
+  int fake;
+};
 
 #include "base64.h"
 
