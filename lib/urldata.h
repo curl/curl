@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -302,7 +302,7 @@ struct HTTP {
  ***************************************************************************/
 typedef enum {
   FTP_STOP,    /* do nothing state, stops the state machine */
-  FTP_WAIT220, /* waiting for the inintial 220 response immediately after
+  FTP_WAIT220, /* waiting for the initial 220 response immediately after
                   a connect */
   FTP_AUTH,
   FTP_USER,
@@ -310,6 +310,7 @@ typedef enum {
   FTP_ACCT,
   FTP_PBSZ,
   FTP_PROT,
+  FTP_CCC,
   FTP_PWD,
   FTP_QUOTE, /* waiting for a response to a command sent in a quote list */
   FTP_RETR_PREQUOTE,
@@ -1273,6 +1274,8 @@ struct UserDefined {
   bool reuse_fresh;      /* do not re-use an existing connection  */
   bool ftp_use_epsv;     /* if EPSV is to be attempted or not */
   bool ftp_use_eprt;     /* if EPRT is to be attempted or not */
+  bool ftp_use_ccc;      /* if CCC is to be attempted or not */
+
   curl_ftpssl ftp_ssl;   /* if AUTH TLS is to be attempted etc */
   curl_ftpauth ftpsslauth; /* what AUTH XXX to be attempted */
   bool no_signal;        /* do not use any signal/alarm handler */

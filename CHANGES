@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel (5 January 2007)
+- Linus Nielsen Feltzing introduced the --ftp-ssl-ccc command line option to
+  curl that uses the new CURLOPT_FTP_SSL_CCC option in libcurl. If enabled, it
+  will make libcurl shutdown SSL/TLS after the authentication is done on a
+  FTP-SSL operation.
+
 Daniel (4 January 2007)
 - David McCreedy made changes to allow base64 encoding/decoding to work on
   non-ASCII platforms.

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -395,6 +395,18 @@ void Curl_ssl_close(struct connectdata *conn)
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
   }
+}
+
+CURLcode Curl_ssl_shutdown(struct connectdata *conn, int sockindex)
+{
+  if(conn->ssl[sockindex].use) {
+#ifdef USE_GNUTLS
+    return Curl_gtls_shutdown(conn, sockindex);
+#else
+    return Curl_ossl_shutdown(conn, sockindex);
+#endif
+  }
+  return CURLE_OK;
 }
 
 /* Selects an (Open)SSL crypto engine

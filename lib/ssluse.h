@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -29,8 +29,8 @@
 
 #include "urldata.h"
 CURLcode Curl_ossl_connect(struct connectdata *conn, int sockindex);
-CURLcode Curl_ossl_connect_nonblocking(struct connectdata *conn, 
-                                       int sockindex, 
+CURLcode Curl_ossl_connect_nonblocking(struct connectdata *conn,
+                                       int sockindex,
                                        bool *done);
 void Curl_ossl_close(struct connectdata *conn); /* close a SSL connection */
 /* tell OpenSSL to close down all open information regarding connections (and
@@ -65,5 +65,7 @@ ssize_t Curl_ossl_recv(struct connectdata *conn, /* connection data */
 size_t Curl_ossl_version(char *buffer, size_t size);
 int Curl_ossl_check_cxn(struct connectdata *cxn);
 int Curl_ossl_seed(struct SessionHandle *data);
+
+int Curl_ossl_shutdown(struct connectdata *conn, int sockindex);
 
 #endif

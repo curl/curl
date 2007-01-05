@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -69,9 +69,13 @@ size_t Curl_ssl_version(char *buffer, size_t size);
 
 int Curl_ssl_check_cxn(struct connectdata *conn);
 
+CURLcode Curl_ssl_shutdown(struct connectdata *conn, int sockindex);
+
 #if !defined(USE_SSL) && !defined(SSLGEN_C)
 /* set up blank macros for none-SSL builds */
 #define Curl_ssl_close_all(x)
 #endif
+
+#define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
 #endif

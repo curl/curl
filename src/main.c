@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -349,6 +349,7 @@ struct Configurable {
   bool ftp_ssl;
   bool ftp_ssl_reqd;
   bool ftp_ssl_control;
+  bool ftp_ssl_ccc;
 
   char *socksproxy; /* set to server string */
   int socksver;     /* set to CURLPROXY_SOCKS* define */
@@ -529,6 +530,7 @@ static void help(void)
     "    --ftp-ssl       Try SSL/TLS for ftp transfer (F)",
     "    --ftp-ssl-control Require SSL/TLS for ftp login, clear for transfer (F)",
     "    --ftp-ssl-reqd  Require SSL/TLS for ftp transfer (F)",
+    "    --ftp-ssl-ccc   Send CCC after authenticating (F)",
     " -F/--form <name=content> Specify HTTP multipart POST data (H)",
     "    --form-string <name=string> Specify HTTP multipart POST data (H)",
     " -g/--globoff       Disable URL sequences and ranges using {} and []",
@@ -1355,6 +1357,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$v", "ftp-ssl-reqd", FALSE},
     {"$w", "no-sessionid", FALSE},
     {"$x", "ftp-ssl-control", FALSE},
+    {"$y", "ftp-ssl-ccc", FALSE},
 
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
@@ -1778,6 +1781,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'x': /* --ftp-ssl-control */
         config->ftp_ssl_control ^= TRUE;
+        break;
+      case 'y': /* --ftp-ssl-ccc */
+        config->ftp_ssl_ccc ^= TRUE;
         break;
       }
       break;
@@ -4001,6 +4007,10 @@ operate(struct Configurable *config, int argc, char *argv[])
         /* new in curl 7.16.0 */
         else if(config->ftp_ssl_control)
           curl_easy_setopt(curl, CURLOPT_FTP_SSL, CURLFTPSSL_CONTROL);
+
+        /* new in curl 7.16.1 */
+        if(config->ftp_ssl_ccc)
+          curl_easy_setopt(curl, CURLOPT_FTP_SSL_CCC, TRUE);
 
         /* new in curl 7.11.1, modified in 7.15.2 */
         if(config->socksproxy) {

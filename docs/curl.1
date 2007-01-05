@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -431,6 +431,14 @@ If this option is used twice, the second will again disable this.
 (FTP) Require SSL/TLS for the FTP connection.
 Terminates the connection if the server doesn't support SSL/TLS.
 (Added in 7.15.5)
+
+If this option is used twice, the second will again disable this.
+.IP "--ftp-ssl-ccc"
+(FTP) Use CCC (Clear Command Channel)
+Shuts down the SSL/TLS layer after authenticating. The rest of the
+control channel communication will be unencrypted. This allows
+NAT routers to follow the FTP transaction.
+(Added in 7.16.1)
 
 If this option is used twice, the second will again disable this.
 .IP "-F/--form <name=content>"

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -666,6 +666,7 @@ static void state(struct connectdata *conn,
     "ACCT",
     "PBSZ",
     "PROT",
+    "CCC",
     "PWD",
     "QUOTE",
     "RETR_PREQUOTE",
@@ -2545,6 +2546,27 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
         /* we failed and bails out */
         return CURLE_FTP_SSL_FAILED;
 
+      if(data->set.ftp_use_ccc) {
+        /* CCC - Clear Command Channel
+         */
+        NBFTPSENDF(conn, "CCC", NULL);
+        state(conn, FTP_CCC);
+      }
+      else {
+        result = ftp_state_pwd(conn);
+        if(result)
+          return result;
+      }
+      break;
+
+    case FTP_CCC:
+      /* First shut down the SSL layer (note: this call will block) */
+      result = Curl_ssl_shutdown(conn, FIRSTSOCKET);
+
+      if(result)
+        return CURLE_FTP_SSL_CCC_FAILED;
+
+      /* Then continue as normal */
       result = ftp_state_pwd(conn);
       if(result)
         return result;

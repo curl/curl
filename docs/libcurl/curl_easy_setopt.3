@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -925,6 +925,12 @@ Try "AUTH SSL" first, and only if that fails try "AUTH TLS"
 .IP CURLFTPAUTH_TLS
 Try "AUTH TLS" first, and only if that fails try "AUTH SSL"
 .RE
+.IP CURLOPT_FTP_SSL_CCC
+Pass a long that is set to 0 to disable and 1 to enable. If enabled, this
+option makes libcurl use CCC (Clear Command Channel). It shuts down the
+SSL/TLS layer after authenticating. The rest of the control channel
+communication will be unencrypted. This allows NAT routers to follow the FTP
+transaction.  (Added in 7.16.1)
 .IP CURLOPT_FTP_ACCOUNT
 Pass a pointer to a zero-terminated string (or NULL to disable). When an FTP
 server asks for "account data" after user name and password has been provided,

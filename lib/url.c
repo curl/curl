@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1138,6 +1138,10 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 
   case CURLOPT_FTP_USE_EPSV:
     data->set.ftp_use_epsv = (bool)(0 != va_arg(param, long));
+    break;
+
+  case CURLOPT_FTP_SSL_CCC:
+    data->set.ftp_use_ccc = (bool)(0 != va_arg(param, long));
     break;
 
   case CURLOPT_FTP_SKIP_PASV_IP:

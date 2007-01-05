@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -397,6 +397,8 @@ typedef enum {
                                     generic so the error message will be of
                                     interest when this has happened */
 
+  CURLE_FTP_SSL_CCC_FAILED,      /* 80 - Failed to clear the FTP command
+                                    channel */
   CURL_LAST /* never use! */
 } CURLcode;
 
@@ -1048,6 +1050,9 @@ typedef enum {
   /* Used by scp/sftp to do public/private key authentication */
   CINIT(SSH_PUBLIC_KEYFILE, OBJECTPOINT, 152),
   CINIT(SSH_PRIVATE_KEYFILE, OBJECTPOINT, 153),
+
+  /* Send CCC (Clear Command Channel) after authentication */
+  CINIT(FTP_SSL_CCC, LONG, 154),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2004 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2004 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -243,6 +243,9 @@ curl_easy_strerror(CURLcode error)
 
   case CURLE_FTP_SSL_FAILED:
     return "Requested FTP SSL level failed";
+
+  case CURLE_FTP_SSL_CCC_FAILED:
+    return "Failed to clear the FTP command channel";
 
   case CURLE_SEND_FAIL_REWIND:
     return "Send failed since rewinding of the data stream failed";
