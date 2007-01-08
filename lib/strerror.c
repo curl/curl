@@ -244,8 +244,8 @@ curl_easy_strerror(CURLcode error)
   case CURLE_FTP_SSL_FAILED:
     return "Requested FTP SSL level failed";
 
-  case CURLE_FTP_SSL_CCC_FAILED:
-    return "Failed to clear the FTP command channel";
+  case CURLE_SSL_SHUTDOWN_FAILED:
+    return "Failed to shut down the SSL connection";
 
   case CURLE_SEND_FAIL_REWIND:
     return "Send failed since rewinding of the data stream failed";

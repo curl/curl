@@ -2563,8 +2563,10 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
       /* First shut down the SSL layer (note: this call will block) */
       result = Curl_ssl_shutdown(conn, FIRSTSOCKET);
 
-      if(result)
-        return CURLE_FTP_SSL_CCC_FAILED;
+      if(result) {
+        failf(conn->data, "Failed to clear the command channel (CCC)");
+        return result;
+      }
 
       /* Then continue as normal */
       result = ftp_state_pwd(conn);

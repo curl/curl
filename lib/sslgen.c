@@ -401,10 +401,12 @@ CURLcode Curl_ssl_shutdown(struct connectdata *conn, int sockindex)
 {
   if(conn->ssl[sockindex].use) {
 #ifdef USE_SSLEAY
-    return Curl_ossl_shutdown(conn, sockindex);
+    if(Curl_ossl_shutdown(conn, sockindex))
+      return CURLE_SSL_SHUTDOWN_FAILED;
 #else
 #ifdef USE_GNUTLS
-    return Curl_gtls_shutdown(conn, sockindex);
+    if(Curl_gtls_shutdown(conn, sockindex))
+      return CURLE_SSL_SHUTDOWN_FAILED;
 #else
     (void)conn;
     (void)sockindex;
