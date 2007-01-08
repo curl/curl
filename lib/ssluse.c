@@ -734,7 +734,6 @@ void Curl_ossl_close(struct connectdata *conn)
  */
 int Curl_ossl_shutdown(struct connectdata *conn, int sockindex)
 {
-  int result;
   int retval = 0;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct SessionHandle *data = conn->data;
