@@ -676,6 +676,7 @@ PORTS
         - PowerPC Linux
         - PowerPC Mac OS 9
         - PowerPC Mac OS X
+        - SuperH4 Linux 2.6.X
         - SINIX-Z v5
         - Sparc Linux
         - Sparc Solaris 2.4, 2.5, 2.5.1, 2.6, 7, 8, 9, 10
