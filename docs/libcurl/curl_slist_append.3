@@ -24,8 +24,9 @@ The list should be freed again (after usage) with
 A null pointer is returned if anything went wrong, otherwise the new list
 pointer is returned.
 .SH EXAMPLE
+.nf
  CURL handle;
- curl_slist *slist=NULL;
+ struct curl_slist *slist=NULL;
 
  slist = curl_slist_append(slist, "pragma:");
  curl_easy_setopt(handle, CURLOPT_HTTPHEADER, slist);
@@ -33,5 +34,6 @@ pointer is returned.
  curl_easy_perform(handle);
 
  curl_slist_free_all(slist); /* free the list again */
+.fi
 .SH "SEE ALSO"
 .BR curl_slist_free_all "(3), "
