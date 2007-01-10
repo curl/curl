@@ -634,8 +634,8 @@ CURLcode Curl_ossl_set_engine(struct SessionHandle *data, const char *engine)
   if (data->state.engine) {
     ENGINE_finish(data->state.engine);
     ENGINE_free(data->state.engine);
+    data->state.engine = NULL;
   }
-  data->state.engine = NULL;
   if (!ENGINE_init(e)) {
     char buf[256];
 
@@ -661,10 +661,10 @@ CURLcode Curl_ossl_set_engine_default(struct SessionHandle *data)
 #ifdef HAVE_OPENSSL_ENGINE_H
   if (data->state.engine) {
     if (ENGINE_set_default(data->state.engine, ENGINE_METHOD_ALL) > 0) {
-      infof(data,"set default crypto engine %s\n", data->state.engine);
+      infof(data,"set default crypto engine '%s'\n", ENGINE_get_id(data->state.engine));
     }
     else {
-      failf(data, "set default crypto engine %s failed", data->state.engine);
+      failf(data, "set default crypto engine '%s' failed", ENGINE_get_id(data->state.engine));
       return CURLE_SSL_ENGINE_SETFAILED;
     }
   }
