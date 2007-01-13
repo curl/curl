@@ -48,6 +48,8 @@ This release includes the following bugfixes:
    now work on windows again
  o improved download performance by avoiding the unconditional "double copying"
  o base64 encoding/decoding works on non-ASCII platforms
+ o large file downloads
+ o CURLOPT_COOKIELIST set to "ALL" crash
 
 Other curl-related news:
 
@@ -68,6 +70,6 @@ advice from friends like these:
  Matt Witherspoon, Alexey Simak, Martin Skinner, Sh Diao, Jared Lundell,
  Stefan Krause, Sebastien Willemijns, Alexey Simak, Brendan Jurd,
  Robson Braga Araujo, David McCreedy, Robert Foreman, Nathanael Nerode,
- Victor Snezhko, Linus Nielsen Feltzing
+ Victor Snezhko, Linus Nielsen Feltzing, Toby Peterson
 
         Thanks! (and sorry if I forgot to mention someone)

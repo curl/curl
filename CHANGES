@@ -6,6 +6,15 @@
 
                                   Changelog
 
+Daniel (14 January 2007)
+- Setting CURLOPT_COOKIELIST to "ALL" when no cookies at all was present,
+  libcurl would crash when trying to read a NULL pointer.
+
+Daniel (12 January 2007)
+- Toby Peterson found a nasty bug that prevented (lib)curl from properly
+  downloading (most) things that were larger than 4GB on 32 bit systems.  Matt
+  Witherspoon helped as narrow down the problem.
+
 Daniel (5 January 2007)
 - Linus Nielsen Feltzing introduced the --ftp-ssl-ccc command line option to
   curl that uses the new CURLOPT_FTP_SSL_CCC option in libcurl. If enabled, it
