@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -347,8 +347,14 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         size_t bytestoread = buffersize;
         int readrc;
 
-        if (k->size != -1 && !k->header)
-          bytestoread = (size_t)(k->size - k->bytecount);
+        if (k->size != -1 && !k->header) {
+          /* make sure we don't read "too much" if we can help it since we
+             might be pipelining and then someone else might want to read what
+             follows! */
+          curl_off_t totalleft = k->size - k->bytecount;
+          if(totalleft < bytestoread)
+            bytestoread = (size_t)totalleft;
+        }
 
         /* receive data from the network! */
         readrc = Curl_read(conn, conn->sockfd, k->buf, bytestoread, &nread);
