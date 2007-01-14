@@ -189,17 +189,39 @@ checkhttpprefix(struct SessionHandle *data,
                 const char *s)
 {
   struct curl_slist *head = data->set.http200aliases;
+  bool rc = FALSE;
+#ifdef CURL_DOES_CONVERSIONS
+  /* convert from the network encoding using a scratch area */
+  char *scratch = calloc(1, strlen(s)+1);
+  if (NULL == scratch) {
+     failf (data, "Failed to calloc memory for conversion!");
+     return FALSE; /* can't return CURLE_OUT_OF_MEMORY so return FALSE */
+  }
+  strcpy(scratch, s);
+  if (CURLE_OK != Curl_convert_from_network(data, scratch, strlen(s)+1)) {
+    /* Curl_convert_from_network calls failf if unsuccessful */
+     free(scratch);
+     return FALSE; /* can't return CURLE_foobar so return FALSE */
+  }
+  s = scratch;
+#endif /* CURL_DOES_CONVERSIONS */
 
   while (head) {
-    if (checkprefix(head->data, s))
-      return TRUE;
+    if (checkprefix(head->data, s)) {
+      rc = TRUE;
+      break;
+    }
     head = head->next;
   }
 
-  if(checkprefix("HTTP/", s))
-    return TRUE;
+  if ((rc != TRUE) && (checkprefix("HTTP/", s))) {
+    rc = TRUE;
+  }
 
-  return FALSE;
+#ifdef CURL_DOES_CONVERSIONS
+  free(scratch);
+#endif /* CURL_DOES_CONVERSIONS */
+  return rc;
 }
 
 /*
@@ -412,7 +434,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             /* str_start is start of line within buf */
             k->str_start = k->str;
 
-            k->end_ptr = memchr(k->str_start, '\n', nread);
+            /* data is in network encoding so use 0x0a instead of '\n' */
+            k->end_ptr = memchr(k->str_start, 0x0a, nread);
 
             if (!k->end_ptr) {
               /* Not a complete header line within buffer, append the data to
@@ -510,14 +533,27 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               }
             }
 
-            if (('\n' == *k->p) || ('\r' == *k->p)) {
+            /* headers are in network encoding so
+               use 0x0a and 0x0d instead of '\n' and '\r' */
+            if ((0x0a == *k->p) || (0x0d == *k->p)) {
               size_t headerlen;
               /* Zero-length header line means end of headers! */
 
+#ifdef CURL_DOES_CONVERSIONS
+              if (0x0d == *k->p) {
+                *k->p = '\r'; /* replace with CR in host encoding */
+                k->p++;       /* pass the CR byte */
+              }
+              if (0x0a == *k->p) {
+                *k->p = '\n'; /* replace with LF in host encoding */
+                k->p++;       /* pass the LF byte */
+              }
+#else
               if ('\r' == *k->p)
                 k->p++; /* pass the \r byte */
               if ('\n' == *k->p)
                 k->p++; /* pass the \n byte */
+#endif /* CURL_DOES_CONVERSIONS */
 
               if(100 == k->httpcode) {
                 /*
@@ -679,12 +715,37 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
             if (!k->headerline++) {
               /* This is the first header, it MUST be the error code line
-                 or else we consiser this to be the body right away! */
+                 or else we consider this to be the body right away! */
               int httpversion_major;
-              int nc=sscanf(k->p, " HTTP/%d.%d %3d",
-                            &httpversion_major,
-                            &k->httpversion,
-                            &k->httpcode);
+              int nc;
+#ifdef CURL_DOES_CONVERSIONS
+#define HEADER1 scratch
+#define SCRATCHSIZE 21
+              CURLcode res;
+              char scratch[SCRATCHSIZE+1]; /* "HTTP/major.minor 123" */
+              /* We can't really convert this yet because we
+                 don't know if it's the 1st header line or the body.
+                 So we do a partial conversion into a scratch area,
+                 leaving the data at k->p as-is.
+              */
+              strncpy(&scratch[0], k->p, SCRATCHSIZE);
+              scratch[SCRATCHSIZE] = 0; /* null terminate */
+              res = Curl_convert_from_network(data,
+                                              &scratch[0],
+                                              SCRATCHSIZE);
+              if (CURLE_OK != res) {
+                /* Curl_convert_from_network calls failf if unsuccessful */
+                return res;
+              }
+#else
+#define HEADER1 k->p /* no conversion needed, just use k->p */
+#endif /* CURL_DOES_CONVERSIONS */
+
+              nc = sscanf(HEADER1,
+                          " HTTP/%d.%d %3d",
+                          &httpversion_major,
+                          &k->httpversion,
+                          &k->httpcode);
               if (nc==3) {
                 k->httpversion += 10 * httpversion_major;
               }
@@ -692,7 +753,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 /* this is the real world, not a Nirvana
                    NCSA 1.5.x returns this crap when asked for HTTP/1.1
                 */
-                nc=sscanf(k->p, " HTTP %3d", &k->httpcode);
+                nc=sscanf(HEADER1, " HTTP %3d", &k->httpcode);
                 k->httpversion = 10;
 
                /* If user has set option HTTP200ALIASES,
@@ -775,6 +836,15 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               }
             }
 
+#ifdef CURL_DOES_CONVERSIONS
+            /* convert from the network encoding */
+            result = Curl_convert_from_network(data, k->p, strlen(k->p));
+            if (CURLE_OK != result) {
+               return(result);
+            }
+            /* Curl_convert_from_network calls failf if unsuccessful */
+#endif /* CURL_DOES_CONVERSIONS */
+
             /* Check for Content-Length: header lines to get size. Ignore
                the header completely if we get a 416 response as then we're
                resuming a document that we don't get, and this header contains
@@ -812,6 +882,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                   start++)
                 ;  /* empty loop */
 
+              /* data is now in the host encoding so
+                 use '\r' and '\n' instead of 0x0d and 0x0a */
               end = strchr(start, '\r');
               if(!end)
                 end = strchr(start, '\n');

@@ -3948,7 +3948,7 @@ static CURLcode SetupConnection(struct connectdata *conn,
     if(data->set.useragent) {
       Curl_safefree(conn->allocptr.uagent);
       conn->allocptr.uagent =
-        aprintf("User-Agent: %s\015\012", data->set.useragent);
+        aprintf("User-Agent: %s\r\n", data->set.useragent);
       if(!conn->allocptr.uagent)
         return CURLE_OUT_OF_MEMORY;
     }

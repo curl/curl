@@ -36,6 +36,7 @@
 #include "content_encoding.h"
 #include "http.h"
 #include "memory.h"
+#include "easyif.h" /* for Curl_convert_to_network prototype */
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -96,6 +97,9 @@ void Curl_httpchunk_init(struct connectdata *conn)
  * client (for byte-counting and whatever).
  *
  * The states and the state-machine is further explained in the header file.
+ *
+ * This function always uses ASCII hex values to accommodate non-ASCII hosts.
+ * For example, 0x0d and 0x0a are used instead of '\r' and '\n'.
  */
 CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
                               char *datap,
@@ -115,7 +119,11 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
   while(length) {
     switch(ch->state) {
     case CHUNK_HEX:
-      if(ISXDIGIT(*datap)) {
+       /* Check for an ASCII hex digit.
+          We avoid the use of isxdigit to accommodate non-ASCII hosts. */
+       if((*datap >= 0x30 && *datap <= 0x39)    /* 0-9 */
+       || (*datap >= 0x41 && *datap <= 0x46)    /* A-F */
+       || (*datap >= 0x61 && *datap <= 0x66)) { /* a-f */
         if(ch->hexindex < MAXNUM_SIZE) {
           ch->hexbuffer[ch->hexindex] = *datap;
           datap++;
@@ -134,6 +142,17 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         }
         /* length and datap are unmodified */
         ch->hexbuffer[ch->hexindex]=0;
+#ifdef CURL_DOES_CONVERSIONS
+        /* convert to host encoding before calling strtoul */
+        result = Curl_convert_from_network(conn->data,
+                                           ch->hexbuffer,
+                                           ch->hexindex);
+        if(result != CURLE_OK) {
+          /* Curl_convert_from_network calls failf if unsuccessful */
+          /* Treat it as a bad hex character */
+          return(CHUNKE_ILLEGAL_HEX);
+        }
+#endif /* CURL_DOES_CONVERSIONS */
         ch->datasize=strtoul(ch->hexbuffer, NULL, 16);
         ch->state = CHUNK_POSTHEX;
       }
@@ -143,7 +162,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
       /* In this state, we're waiting for CRLF to arrive. We support
          this to allow so called chunk-extensions to show up here
          before the CRLF comes. */
-      if(*datap == '\r')
+      if(*datap == 0x0d)
         ch->state = CHUNK_CR;
       length--;
       datap++;
@@ -151,7 +170,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
 
     case CHUNK_CR:
       /* waiting for the LF */
-      if(*datap == '\n') {
+      if(*datap == 0x0a) {
         /* we're now expecting data to come, unless size was zero! */
         if(0 == ch->datasize) {
           if (conn->bits.trailerHdrPresent!=TRUE) {
@@ -235,7 +254,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
       break;
 
     case CHUNK_POSTCR:
-      if(*datap == '\r') {
+      if(*datap == 0x0d) {
         ch->state = CHUNK_POSTLF;
         datap++;
         length--;
@@ -245,7 +264,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
       break;
 
     case CHUNK_POSTLF:
-      if(*datap == '\n') {
+      if(*datap == 0x0a) {
         /*
          * The last one before we go back to hex state and start all
          * over.
@@ -277,7 +296,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
       }
       conn->trailer[conn->trlPos++]=*datap;
 
-      if(*datap == '\r')
+      if(*datap == 0x0d)
         ch->state = CHUNK_TRAILER_CR;
       else {
         datap++;
@@ -286,7 +305,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
       break;
 
     case CHUNK_TRAILER_CR:
-      if(*datap == '\r') {
+      if(*datap == 0x0d) {
         ch->state = CHUNK_TRAILER_POSTCR;
         datap++;
         length--;
@@ -296,14 +315,25 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
       break;
 
     case CHUNK_TRAILER_POSTCR:
-      if (*datap == '\n') {
-        conn->trailer[conn->trlPos++]='\n';
+      if (*datap == 0x0a) {
+        conn->trailer[conn->trlPos++]=0x0a;
         conn->trailer[conn->trlPos]=0;
         if (conn->trlPos==2) {
           ch->state = CHUNK_STOP;
           return CHUNKE_STOP;
         }
         else {
+#ifdef CURL_DOES_CONVERSIONS
+        /* Convert to host encoding before calling Curl_client_write */
+        result = Curl_convert_from_network(conn->data,
+                                           ch->hexbuffer,
+                                           ch->hexindex);
+        if(result != CURLE_OK) {
+          /* Curl_convert_from_network calls failf if unsuccessful */
+          /* Treat it as a bad chunk */
+          return(CHUNKE_BAD_CHUNK);
+        }
+#endif /* CURL_DOES_CONVERSIONS */
           Curl_client_write(conn, CLIENTWRITE_HEADER,
                             conn->trailer, conn->trlPos);
         }

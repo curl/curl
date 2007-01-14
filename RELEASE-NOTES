@@ -5,15 +5,16 @@ Curl and libcurl 7.16.1
  Available command line options:           112
  Available curl_easy_setopt() options:     133
  Number of public functions in libcurl:    54
- Amount of public web site mirrors:        38
+ Amount of public web site mirrors:        39
  Number of known libcurl bindings:         35
  Number of contributors:                   524
 
 This release includes the following changes:
  
- o Support for SCP and SFTP were added
+ o Support for SCP and SFTP were added (powered by libssh2)
  o CURLOPT_CLOSEPOLICY is now deprecated
  o --ftp-ssl-ccc and CURLOPT_FTP_SSL_CCC were added
+ o HTTP support for non-ASCII platforms
 
 This release includes the following bugfixes:
 

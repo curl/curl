@@ -80,6 +80,7 @@
 #include <curl/curl.h>
 #include "transfer.h"
 #include "sendf.h"
+#include "easyif.h" /* for Curl_convert_... prototypes */
 #include "formdata.h"
 #include "progress.h"
 #include "base64.h"
@@ -154,7 +155,7 @@ static CURLcode Curl_output_basic(struct connectdata *conn, bool proxy)
                         &authorization) > 0) {
     if(*userp)
       free(*userp);
-    *userp = aprintf( "%sAuthorization: Basic %s\015\012",
+    *userp = aprintf( "%sAuthorization: Basic %s\r\n",
                       proxy?"Proxy-":"",
                       authorization);
     free(authorization);
@@ -873,6 +874,20 @@ CURLcode add_buffer_send(send_buffer *in,
   ptr = in->buffer;
   size = in->size_used;
 
+#ifdef CURL_DOES_CONVERSIONS
+  if(size - included_body_bytes > 0) {
+    res = Curl_convert_to_network(conn->data, ptr, size - included_body_bytes);
+    /* Curl_convert_to_network calls failf if unsuccessful */
+    if(res != CURLE_OK) {
+      /* conversion failed, free memory and return to the caller */
+      if(in->buffer)
+        free(in->buffer);
+      free(in);
+      return res;
+    }
+  }
+#endif /* CURL_DOES_CONVERSIONS */
+
   if(conn->protocol & PROT_HTTPS) {
     /* We never send more than CURL_MAX_WRITE_SIZE bytes in one single chunk
        when we speak HTTPS, as if only a fraction of it is sent now, this data
@@ -1512,7 +1527,7 @@ CURLcode Curl_http_done(struct connectdata *conn,
   if(HTTPREQ_POST_FORM == data->set.httpreq) {
     k->bytecount = http->readbytecount + http->writebytecount;
 
-    Curl_formclean(http->sendit); /* Now free that whole lot */
+    Curl_formclean(&http->sendit); /* Now free that whole lot */
     if(http->form.fp) {
       /* a file being uploaded was left opened, close it! */
       fclose(http->form.fp);
@@ -1699,7 +1714,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
   Curl_safefree(conn->allocptr.ref);
   if(data->change.referer && !checkheaders(data, "Referer:"))
-    conn->allocptr.ref = aprintf("Referer: %s\015\012", data->change.referer);
+    conn->allocptr.ref = aprintf("Referer: %s\r\n", data->change.referer);
   else
     conn->allocptr.ref = NULL;
 
@@ -1710,7 +1725,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
      data->set.encoding) {
     Curl_safefree(conn->allocptr.accept_encoding);
     conn->allocptr.accept_encoding =
-      aprintf("Accept-Encoding: %s\015\012", data->set.encoding);
+      aprintf("Accept-Encoding: %s\r\n", data->set.encoding);
     if(!conn->allocptr.accept_encoding)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -2194,10 +2209,19 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                                      &http->readbytecount,
                                      FIRSTSOCKET,
                                      &http->writebytecount);
+
       if(result) {
-        Curl_formclean(http->sendit); /* free that whole lot */
+        Curl_formclean(&http->sendit); /* free that whole lot */
         return result;
       }
+#ifdef CURL_DOES_CONVERSIONS
+/* time to convert the form data... */
+      result = Curl_formconvert(data, http->sendit);
+      if(result) {
+        Curl_formclean(&http->sendit); /* free that whole lot */
+        return result;
+      }
+#endif /* CURL_DOES_CONVERSIONS */
       break;
 
     case HTTPREQ_PUT: /* Let's PUT the data to the server! */
@@ -2316,8 +2340,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                                   (size_t)postsize);
             if(CURLE_OK == result)
               result = add_buffer(req_buffer,
-                                  "\r\n0\r\n\r\n", 7); /* end of a chunked
-                                                          transfer stream */
+                                  "\x0d\x0a\x30\x0d\x0a\x0d\x0a", 7);
+                                  /* CR  LF   0  CR  LF  CR  LF */
             included_body = postsize + 7;
           }
           if(result)

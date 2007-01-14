@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel (14 January 2007)
+- David McCreedy provided libcurl changes for doing HTTP communication on
+  non-ASCII platforms. It does add some complexity, most notably with more
+  #ifdefs, but I want to see this supported added and I can't see how we can
+  add it without the extra stuff added.
+
 - Setting CURLOPT_COOKIELIST to "ALL" when no cookies at all was present,
   libcurl would crash when trying to read a NULL pointer.
 
