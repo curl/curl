@@ -615,6 +615,7 @@ again:
 
   /* store input protocol */
   fprintf(test->server, "mode: %s\n", mode);
+  fflush(test->server);
 
   for (pf = formats; pf->f_mode; pf++)
     if (strcmp(pf->f_mode, mode) == 0)
@@ -799,10 +800,9 @@ static void sendtftp(struct testcase *test, struct formats *pf)
   } while (size == SEGSIZE);
 }
 
-static void justquit(int signum)
+static void justtimeout(int signum)
 {
   (void)signum;
-  exit(0);
 }
 
 
@@ -876,7 +876,7 @@ send_ack:
   ap->th_block = htons((u_short)(block));
   (void) swrite(peer, ackbuf, 4);
 #if defined(HAVE_ALARM) && defined(SIGALRM)
-  mysignal(SIGALRM, justquit);           /* just quit on timeout */
+  mysignal(SIGALRM, justtimeout);        /* just abort read on timeout */
   alarm(rexmtval);
 #endif
   n = sread(peer, buf, sizeof(buf));     /* normally times out and quits */
