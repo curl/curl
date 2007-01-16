@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel (16 January 2007)
+- Armel Asselin improved libcurl to behave a lot better when an easy handle
+  doing an FTP transfer is removed from a multi handle before completion. The
+  fix also fixed the "alive counter" to be correct on "premature removal" for
+  all protocols.
+
 Dan F (16 January 2007)
 - Fixed a small memory leak in tftp uploads discovered by curl's memory leak
   detector.  Also changed tftp downloads to URL-unescape the downloaded

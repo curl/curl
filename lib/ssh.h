@@ -8,7 +8,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -29,7 +29,7 @@
 CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done);
 
 CURLcode Curl_scp_do(struct connectdata *conn, bool *done);
-CURLcode Curl_scp_done(struct connectdata *conn, CURLcode);
+CURLcode Curl_scp_done(struct connectdata *conn, CURLcode, bool premature);
 
 ssize_t Curl_scp_send(struct connectdata *conn, int sockindex,
                       void *mem, size_t len);
@@ -37,7 +37,7 @@ ssize_t Curl_scp_recv(struct connectdata *conn, int sockindex,
                       char *mem, size_t len);
 
 CURLcode Curl_sftp_do(struct connectdata *conn, bool *done);
-CURLcode Curl_sftp_done(struct connectdata *conn, CURLcode);
+CURLcode Curl_sftp_done(struct connectdata *conn, CURLcode, bool premature);
 
 ssize_t Curl_sftp_send(struct connectdata *conn, int sockindex,
                        void *mem, size_t len);

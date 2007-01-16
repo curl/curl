@@ -8,7 +8,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,7 +25,7 @@
  ***************************************************************************/
 #ifndef CURL_DISABLE_FILE
 CURLcode Curl_file(struct connectdata *, bool *done);
-CURLcode Curl_file_done(struct connectdata *, CURLcode);
+CURLcode Curl_file_done(struct connectdata *, CURLcode, bool premature);
 CURLcode Curl_file_connect(struct connectdata *);
 #endif
 #endif

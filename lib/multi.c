@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -512,9 +512,11 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
   }
 
   if(easy) {
+    bool premature = easy->state != CURLM_STATE_COMPLETED;
+
     /* If the 'state' is not INIT or COMPLETED, we might need to do something
        nice to put the easy_handle in a good known state when this returns. */
-    if(easy->state != CURLM_STATE_COMPLETED)
+    if(premature)
       /* this handle is "alive" so we need to count down the total number of
          alive connections when this is removed */
       multi->num_alive--;
@@ -547,7 +549,7 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
 
       /* Curl_done() clears the conn->data field to lose the association
          between the easy handle and the connection */
-      Curl_done(&easy->easy_conn, easy->result);
+      Curl_done(&easy->easy_conn, easy->result, premature);
 
       if(easy->easy_conn)
         /* the connection is still alive, set back the association to enable
@@ -802,7 +804,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       char *gotourl;
       Curl_posttransfer(easy->easy_handle);
 
-      easy->result = Curl_done(&easy->easy_conn, CURLE_OK);
+      easy->result = Curl_done(&easy->easy_conn, CURLE_OK, FALSE);
       /* We make sure that the pipe broken flag is reset
          because in this case, it isn't an actual break */
       easy->easy_handle->state.pipe_broke = FALSE;
@@ -950,7 +952,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       else if(easy->result) {
         /* failure detected */
         Curl_posttransfer(easy->easy_handle);
-        Curl_done(&easy->easy_conn, easy->result);
+        Curl_done(&easy->easy_conn, easy->result, FALSE);
         Curl_disconnect(easy->easy_conn); /* close the connection */
         easy->easy_conn = NULL;           /* no more connection */
       }
@@ -1017,7 +1019,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         else {
           /* failure detected */
           Curl_posttransfer(easy->easy_handle);
-          Curl_done(&easy->easy_conn, easy->result);
+          Curl_done(&easy->easy_conn, easy->result, FALSE);
           Curl_disconnect(easy->easy_conn); /* close the connection */
           easy->easy_conn = NULL;           /* no more connection */
         }
@@ -1050,7 +1052,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       else {
         /* failure detected */
         Curl_posttransfer(easy->easy_handle);
-        Curl_done(&easy->easy_conn, easy->result);
+        Curl_done(&easy->easy_conn, easy->result, FALSE);
         Curl_disconnect(easy->easy_conn); /* close the connection */
         easy->easy_conn = NULL;           /* no more connection */
       }
@@ -1169,7 +1171,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           easy->easy_conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD;
         }
         Curl_posttransfer(easy->easy_handle);
-        Curl_done(&easy->easy_conn, easy->result);
+        Curl_done(&easy->easy_conn, easy->result, FALSE);
       }
       else if(TRUE == done) {
         char *newurl;
@@ -1188,7 +1190,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             newurl = easy->easy_handle->reqdata.newurl;
             easy->easy_handle->reqdata.newurl = NULL;
           }
-          easy->result = Curl_done(&easy->easy_conn, CURLE_OK);
+          easy->result = Curl_done(&easy->easy_conn, CURLE_OK, FALSE);
           if(easy->result == CURLE_OK)
             easy->result = Curl_follow(easy->easy_handle, newurl, retry);
           if(CURLE_OK == easy->result) {
@@ -1224,7 +1226,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
       if (!easy->easy_handle->state.cancelled) {
         /* post-transfer command */
-        easy->result = Curl_done(&easy->easy_conn, CURLE_OK);
+        easy->result = Curl_done(&easy->easy_conn, CURLE_OK, FALSE);
 
         /* after we have DONE what we're supposed to do, go COMPLETED, and
            it doesn't matter what the Curl_done() returned! */

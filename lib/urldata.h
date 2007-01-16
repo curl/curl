@@ -614,7 +614,7 @@ struct Curl_async {
    within the source when we need to cast between data pointers (such as NULL)
    and function pointers. */
 typedef CURLcode (*Curl_do_more_func)(struct connectdata *);
-typedef CURLcode (*Curl_done_func)(struct connectdata *, CURLcode);
+typedef CURLcode (*Curl_done_func)(struct connectdata *, CURLcode, bool);
 
 
 /*

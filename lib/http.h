@@ -35,7 +35,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 
 /* protocol-specific functions set up to be called by the main engine */
 CURLcode Curl_http(struct connectdata *conn, bool *done);
-CURLcode Curl_http_done(struct connectdata *, CURLcode);
+CURLcode Curl_http_done(struct connectdata *, CURLcode, bool premature);
 CURLcode Curl_http_connect(struct connectdata *conn, bool *done);
 CURLcode Curl_https_connecting(struct connectdata *conn, bool *done);
 int Curl_https_getsock(struct connectdata *conn,

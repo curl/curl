@@ -2964,7 +2964,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn,
  *
  * Input argument is already checked for validity.
  */
-CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status)
+CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status, bool premature)
 {
   struct SessionHandle *data = conn->data;
   struct FTP *ftp = data->reqdata.proto.ftp;
@@ -2998,8 +2998,12 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status)
     /* the connection stays alive fine even though this happened */
     /* fall-through */
   case CURLE_OK: /* doesn't affect the control connection's status */
-    ftpc->ctl_valid = was_ctl_valid;
-    break;
+    if (!premature) {
+      ftpc->ctl_valid = was_ctl_valid;
+      break;
+    }
+    /* until we cope better with prematurely ended requests, let them 
+     * fallback as if in complete failure */
   default:       /* by default, an error means the control connection is
                     wedged and should not be used anymore */
     ftpc->ctl_valid = FALSE;
@@ -3048,7 +3052,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status)
 
   conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD;
 
-  if(!ftp->no_transfer && !status) {
+  if(!ftp->no_transfer && !status && !premature) {
     /*
      * Let's see what the server says about the transfer we just performed,
      * but lower the timeout as sometimes this connection has died while the
@@ -3081,7 +3085,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status)
     }
   }
 
-  if(result)
+  if(result || premature)
     /* the response code from the transfer showed an error already so no
        use checking further */
     ;
@@ -3123,7 +3127,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status)
   ftpc->dont_check = FALSE;
 
   /* Send any post-transfer QUOTE strings? */
-  if(!status && !result && data->set.postquote)
+  if(!status && !result && !premature && data->set.postquote)
     result = ftp_sendquote(conn, data->set.postquote);
 
   return result;

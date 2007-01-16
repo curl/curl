@@ -1503,11 +1503,12 @@ int Curl_https_getsock(struct connectdata *conn,
  */
 
 CURLcode Curl_http_done(struct connectdata *conn,
-                        CURLcode status)
+                        CURLcode status, bool premature)
 {
   struct SessionHandle *data = conn->data;
   struct HTTP *http =data->reqdata.proto.http;
   struct Curl_transfer_keeper *k = &data->reqdata.keep;
+  (void)premature; /* not used */
 
   /* set the proper values (possibly modified on POST) */
   conn->fread = data->set.fread; /* restore */

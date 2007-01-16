@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -77,6 +77,7 @@
 #include "connect.h"
 #include "strerror.h"
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
+#include "url.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -288,7 +289,8 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
     }
     /* As RFC3617 describes the separator slash is not actually part of the
     file name so we skip the always-present first letter of the path string. */
-    filename = curl_easy_unescape(data, &state->conn->data->reqdata.path[1], 0, NULL);
+    filename = curl_easy_unescape(data, &state->conn->data->reqdata.path[1], 0,
+                                  NULL);
     snprintf((char *)&state->spacket.data[2],
              TFTP_BLOCKSIZE,
              "%s%c%s%c", filename, '\0',  mode, '\0');
@@ -622,9 +624,11 @@ CURLcode Curl_tftp_connect(struct connectdata *conn, bool *done)
  * The done callback
  *
  **********************************************************/
-CURLcode Curl_tftp_done(struct connectdata *conn, CURLcode status)
+CURLcode Curl_tftp_done(struct connectdata *conn, CURLcode status,
+                        bool premature)
 {
   (void)status; /* unused */
+  (void)premature; /* not used */
 
 #if 0
   free(conn->data->reqdata.proto.tftp);

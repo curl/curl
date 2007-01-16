@@ -8,7 +8,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,6 +26,6 @@
 #ifndef CURL_DISABLE_TFTP
 CURLcode Curl_tftp_connect(struct connectdata *conn, bool *done);
 CURLcode Curl_tftp(struct connectdata *conn, bool *done);
-CURLcode Curl_tftp_done(struct connectdata *conn, CURLcode);
+CURLcode Curl_tftp_done(struct connectdata *conn, CURLcode, bool premature);
 #endif
 #endif

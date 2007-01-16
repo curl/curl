@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -165,7 +165,7 @@ CURLcode Curl_file_connect(struct connectdata *conn)
   file->fd = fd;
   if(!conn->data->set.upload && (fd == -1)) {
     failf(conn->data, "Couldn't open file %s", conn->data->reqdata.path);
-    Curl_file_done(conn, CURLE_FILE_COULDNT_READ_FILE);
+    Curl_file_done(conn, CURLE_FILE_COULDNT_READ_FILE, FALSE);
     return CURLE_FILE_COULDNT_READ_FILE;
   }
 
@@ -173,10 +173,11 @@ CURLcode Curl_file_connect(struct connectdata *conn)
 }
 
 CURLcode Curl_file_done(struct connectdata *conn,
-                        CURLcode status)
+                        CURLcode status, bool premature)
 {
   struct FILEPROTO *file = conn->data->reqdata.proto.file;
   (void)status; /* not used */
+  (void)premature; /* not used */
   Curl_safefree(file->freepath);
 
   if(file->fd != -1)

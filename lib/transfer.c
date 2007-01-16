@@ -2303,7 +2303,7 @@ Curl_connect_host(struct SessionHandle *data,
        to the new URL */
     urlchanged = data->change.url_changed;
     if ((CURLE_OK == res) && urlchanged) {
-      res = Curl_done(conn, res);
+      res = Curl_done(conn, res, FALSE);
       if(CURLE_OK == res) {
         char *gotourl = strdup(data->change.url);
         res = Curl_follow(data, gotourl, FALSE);
@@ -2379,7 +2379,7 @@ CURLcode Curl_perform(struct SessionHandle *data)
       if(data->set.connect_only) {
         /* keep connection open for application to use the socket */
         conn->bits.close = FALSE;
-        res = Curl_done(&conn, CURLE_OK);
+        res = Curl_done(&conn, CURLE_OK, FALSE);
         break;
       }
       res = Curl_do(&conn, &do_done);
@@ -2412,14 +2412,14 @@ CURLcode Curl_perform(struct SessionHandle *data)
 
         /* Always run Curl_done(), even if some of the previous calls
            failed, but return the previous (original) error code */
-        res2 = Curl_done(&conn, res);
+        res2 = Curl_done(&conn, res, FALSE);
 
         if(CURLE_OK == res)
           res = res2;
       }
       else
         /* Curl_do() failed, clean up left-overs in the done-call */
-        res2 = Curl_done(&conn, res);
+        res2 = Curl_done(&conn, res, FALSE);
 
       /*
        * Important: 'conn' cannot be used here, since it may have been closed
