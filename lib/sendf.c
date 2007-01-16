@@ -550,7 +550,7 @@ int Curl_read(struct connectdata *conn, /* connection data */
       conn->read_pos = nread;
     }
 
-    *n = nread;
+    *n += nread;
   }
 
   return CURLE_OK;
