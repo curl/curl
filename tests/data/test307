@@ -1,0 +1,43 @@
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Tue, 16 Jan 2007 18:00:14 GMT
+Server: test-server/fake
+Content-Length: 7
+
+MooMoo
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+OpenSSL
+</features>
+<server>
+https
+</server>
+ <name>
+simple HTTPS GET with openssl engine
+ </name>
+ <command>
+--engine openssl -k https://%HOSTIP:%HTTPSPORT/307
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /307 HTTP/1.1
+Host: 127.0.0.1:%HTTPSPORT
+Accept: */*
+
+</protocol>
+</verify>
