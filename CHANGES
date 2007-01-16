@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Dan F (16 January 2007)
+- Fixed a small memory leak in tftp uploads discovered by curl's memory leak
+  detector.  Also changed tftp downloads to URL-unescape the downloaded
+  file name.
+
 Daniel (14 January 2007)
 - David McCreedy provided libcurl changes for doing HTTP communication on
   non-ASCII platforms. It does add some complexity, most notably with more

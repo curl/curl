@@ -255,10 +255,7 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
 {
   int sbytes;
   const char *mode = "octet";
-
-  /* As RFC3617 describes the separator slash is not actually part of the file
-     name so we skip the always-present first letter of the path string. */
-  char *filename = &state->conn->data->reqdata.path[1];
+  char *filename;
   struct SessionHandle *data = state->conn->data;
   CURLcode res = CURLE_OK;
 
@@ -281,7 +278,6 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
     if(data->set.upload) {
       /* If we are uploading, send an WRQ */
       setpacketevent(&state->spacket, TFTP_EVENT_WRQ);
-      filename = curl_easy_unescape(data, filename, 0, NULL);
       state->conn->data->reqdata.upload_fromhere = (char *)&state->spacket.data[4];
       if(data->set.infilesize != -1)
         Curl_pgrsSetUploadSize(data, data->set.infilesize);
@@ -290,6 +286,9 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
       /* If we are downloading, send an RRQ */
       setpacketevent(&state->spacket, TFTP_EVENT_RRQ);
     }
+    /* As RFC3617 describes the separator slash is not actually part of the
+    file name so we skip the always-present first letter of the path string. */
+    filename = curl_easy_unescape(data, &state->conn->data->reqdata.path[1], 0, NULL);
     snprintf((char *)&state->spacket.data[2],
              TFTP_BLOCKSIZE,
              "%s%c%s%c", filename, '\0',  mode, '\0');
@@ -301,6 +300,7 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
     if(sbytes < 0) {
       failf(data, "%s\n", Curl_strerror(state->conn, Curl_sockerrno()));
     }
+    Curl_safefree(filename);
     break;
 
   case TFTP_EVENT_ACK: /* Connected for transmit */
