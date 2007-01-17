@@ -60,7 +60,7 @@ http://%HOSTIP:%HTTPPORT/239 --proxy http://%HOSTIP:%HTTPPORT --proxy-user silly
 # the local host name and thus differs on different machines!
 <strippart>
 s/^(Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA).*/$1/
-</strippart)
+</strippart>
 <protocol nonewline=yes>
 POST http://%HOSTIP:%HTTPPORT/239 HTTP/1.1
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=

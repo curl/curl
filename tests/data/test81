@@ -73,7 +73,7 @@ http://%HOSTIP:%HTTPPORT/81 --proxy-user testuser:testpass -x http://%HOSTIP:%HT
 # the local host name and thus differs on different machines!
 <strippart>
 s/(Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAA).*/$1/
-</strippart)
+</strippart>
 <protocol>
 GET http://127.0.0.1:%HTTPPORT/81 HTTP/1.1
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=

@@ -93,7 +93,7 @@ http://%HOSTIP:%HTTPPORT/91 --anyauth -u mydomain\\myself:secret
 # the local host name and thus differs on different machines!
 <strippart>
 s/^(Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAgACABwAAAABgAGAHgAAAA).*/$1/
-</strippart)
+</strippart>
 <protocol>
 GET /91 HTTP/1.1
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3

@@ -108,7 +108,7 @@ http://%HOSTIP:%HTTPPORT/89 -u testuser:testpass --ntlm -L
 # the local host name and thus differs on different machines!
 <strippart>
 s/^(Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAA).*/$1/
-</strippart)
+</strippart>
 <protocol>
 GET /89 HTTP/1.1
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=

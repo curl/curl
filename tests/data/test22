@@ -40,5 +40,5 @@ User-Agent: curl/7.4.2 (sparc-sun-solaris2.7) libcurl 7.4.2 (SSL 0.9.6)
 Host: 127.0.0.1:%HTTPPORT
 Accept: */*
 
-</protocol
+</protocol>
 </verify>

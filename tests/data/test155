@@ -94,7 +94,7 @@ four is the number of lines
 # the local host name and thus differs on different machines!
 <strippart>
 s/^(Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAA).*/$1/
-</strippart)
+</strippart>
 <protocol>
 PUT /155 HTTP/1.1
 Host: 127.0.0.1:%HTTPPORT

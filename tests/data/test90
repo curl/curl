@@ -147,7 +147,7 @@ http://%HOSTIP:%HTTPPORT/90 -u testuser:testpass --anyauth -L
 # the local host name and thus differs on different machines!
 <strippart>
 s/^(Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAA).*/$1/
-</strippart)
+</strippart>
 <protocol>
 GET /90 HTTP/1.1
 Host: 127.0.0.1:%HTTPPORT

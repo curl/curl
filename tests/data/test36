@@ -50,7 +50,7 @@ http://%HOSTIP:%HTTPPORT/36
 <verify>
 <errorcode>
 56
-</errocode>
+</errorcode>
 <strip>
 ^User-Agent:.*
 </strip>

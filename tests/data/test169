@@ -84,7 +84,7 @@ http://data.from.server.requiring.digest.hohoho.com/169 --proxy http://%HOSTIP:%
 # the local host name and thus differs on different machines!
 <strippart>
 s/^(Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAAAwADAHAAAAA).*/$1/
-</strippart)
+</strippart>
 <protocol>
 GET http://data.from.server.requiring.digest.hohoho.com/169 HTTP/1.1
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=

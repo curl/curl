@@ -31,7 +31,7 @@ the
    POST
       feature
 </file>
-</reply>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

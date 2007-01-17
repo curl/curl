@@ -31,7 +31,7 @@ http://%HOSTIP:%HTTPPORT/37
 <verify>
 <errorcode>
 52
-</errocode>
+</errorcode>
 <strip>
 ^User-Agent:.*
 </strip>

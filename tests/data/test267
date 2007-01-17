@@ -75,7 +75,7 @@ http://%HOSTIP:%HTTPPORT/267 -u testuser:testpass --ntlm -d "data" -H "Header1: 
 # the local host name and thus differs on different machines!
 <strippart>
 s/^(Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAA).*/$1/
-</strippart)
+</strippart>
 <protocol nonewline=yes>
 POST /267 HTTP/1.1
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=

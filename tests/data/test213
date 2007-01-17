@@ -82,7 +82,7 @@ http://test.remote.server.com:213/path/2130002 --proxy http://%HOSTIP:%HTTPPORT 
 # the local host name and thus differs on different machines!
 <strippart>
 s/^(Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA).*/$1/
-</strippart)
+</strippart>
 <protocol nonewline=yes>
 CONNECT test.remote.server.com:213 HTTP/1.0
 Host: test.remote.server.com:213
