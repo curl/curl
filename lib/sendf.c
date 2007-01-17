@@ -565,7 +565,7 @@ static int showit(struct SessionHandle *data, curl_infotype type,
 
 #ifdef CURL_DOES_CONVERSIONS
   char buf[BUFSIZE+1];
-  int conv_size;
+  size_t conv_size = 0;
 
   switch(type) {
   case CURLINFO_HEADER_OUT:
@@ -582,7 +582,7 @@ static int showit(struct SessionHandle *data, curl_infotype type,
      * We want to convert just the headers, leaving the data as-is.
      */
     if(size > 4) {
-      int i;
+      size_t i;
       for(i = 0; i < size-4; i++) {
         if(memcmp(&buf[i], "\x0d\x0a\x0d\x0a", 4) == 0) {
           /* convert everthing through this CRLFCRLF but no further */
