@@ -1014,10 +1014,16 @@ to POST with \fICURLOPT_POST\fP etc.
 When uploading a file to a remote site, this option should be used to tell
 libcurl what the expected size of the infile is. This value should be passed
 as a long. See also \fICURLOPT_INFILESIZE_LARGE\fP.
+
+Note that this option does not limit how much data libcurl will actually send,
+as that is controlled entirely by what the read callback returns.
 .IP CURLOPT_INFILESIZE_LARGE
 When uploading a file to a remote site, this option should be used to tell
 libcurl what the expected size of the infile is.  This value should be passed
 as a curl_off_t. (Added in 7.11.0)
+
+Note that this option does not limit how much data libcurl will actually send,
+as that is controlled entirely by what the read callback returns.
 .IP CURLOPT_UPLOAD
 A non-zero parameter tells the library to prepare for an upload. The
 \fICURLOPT_READDATA\fP and \fICURLOPT_INFILESIZE\fP or
