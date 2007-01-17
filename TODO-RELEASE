@@ -13,6 +13,10 @@ To get fixed in 7.16.1 (planned release: January 2007)
 79 - Vlad's Connection resuability after CURLE_WRITE_ERROR
      http://curl.haxx.se/mail/lib-2007-01/0122.html
 
-80 - 
+80 - Steffen Rumler's Race Condition in Curl_proxyCONNECT:
+     http://curl.haxx.se/mail/lib-2007-01/0045.html
 
+81 - Kumar Swamy Bhatt's problem in ftp/ssl "LIST" operation:
+     http://curl.haxx.se/mail/lib-2007-01/0103.html
 
+82 - 
