@@ -8,7 +8,7 @@ OpenSSL
 https
 </server>
  <name>
-simple HTTPS GET with invaild crypto engine
+simple HTTPS GET with invalid crypto engine
  </name>
  <command>
 --engine invalid-crypto-engine-xyzzy -k https://%HOSTIP:%HTTPSPORT/308

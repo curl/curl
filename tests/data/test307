@@ -20,6 +20,10 @@ OpenSSL
 <server>
 https
 </server>
+<precheck>
+echo Cannot determine list of SSL engines
+</precheck>
+
  <name>
 simple HTTPS GET with openssl engine
  </name>
