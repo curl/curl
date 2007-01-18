@@ -133,6 +133,9 @@ if ($^O eq 'MSWin32' || $targetos) {
     $binext = '.exe';
     $libext = '.lib';
   }
+  elsif ($targetos =~ /mingw32/) {
+    $binext = '.exe';
+  }
   elsif ($targetos =~ /netware/) {
     $configurebuild = 0;
     $binext = '.nlm';

@@ -64,7 +64,7 @@ sub getpart {
             $inside++;
         }
         elsif((1 ==$inside) && ($_ =~ /^ *\<$part[ \>]/)) {
-            if($_ =~ /$part .*base64=/) {
+            if($_ =~ /$part [^>]*base64=/) {
                 # attempt to detect base64 encoded parts
                 $base64=1;
             }
