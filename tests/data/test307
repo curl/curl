@@ -21,7 +21,7 @@ OpenSSL
 https
 </server>
 <precheck>
-echo Cannot determine list of SSL engines
+perl %SRCDIR/libtest/test307.pl %CURL
 </precheck>
 
  <name>

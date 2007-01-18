@@ -35,6 +35,8 @@ INCLUDES = -I$(top_srcdir)/include/curl \
 
 LIBDIR = $(top_builddir)/lib
 
+EXTRA_DIST = test307.pl
+
 # these files are used in every single test program below
 SUPPORTFILES = first.c test.h
 

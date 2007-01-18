@@ -1111,6 +1111,7 @@ sub subVariables {
   $$thing =~ s/%PWD/$pwd/g;
   $$thing =~ s/%TFTPPORT/$TFTPPORT/g;
   $$thing =~ s/%TFTP6PORT/$TFTP6PORT/g;
+  $$thing =~ s/%CURL/$CURL/g;
 
   # The purpose of FTPTIME2 and FTPTIME3 is to provide times that can be
   # used for time-out tests and that whould work on most hosts as these
@@ -1226,6 +1227,7 @@ sub singletest {
         my @precheck = getpart("client", "precheck");
         $cmd = $precheck[0];
         chomp $cmd;
+        subVariables \$cmd;
         if($cmd) {
             my @o = `$cmd 2>/dev/null`;
             if($o[0]) {
