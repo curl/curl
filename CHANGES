@@ -6,6 +6,32 @@
 
                                   Changelog
 
+Daniel (23 January 2007)
+- David McCreedy did NTLM changes mainly for non-ASCII platforms:
+
+  #1
+  There's a compilation error in http_ntlm.c if USE_NTLM2SESSION is NOT
+  defined.  I noticed this while testing various configurations.  Line 867 of
+  the current http_ntlm.c is a closing bracket for an if/else pair that only
+  gets compiled in if USE_NTLM2SESSION is defined.  But this closing bracket
+  wasn't in an #ifdef so the code fails to compile unless USE_NTLM2SESSION was
+  defined.  Lines 198 and 140 of my patch wraps that closing bracket in an
+  #ifdef USE_NTLM2SESSION.
+
+  #2
+  I noticed several picky compiler warnings when DEBUG_ME is defined.  I've
+  fixed them with casting.  By the way, DEBUG_ME was a huge help in
+  understanding this code.
+
+  #3
+  Hopefully the last non-ASCII conversion patch for libcurl in a while.  I
+  changed the "NTLMSSP" literal to hex since this signature must always be in
+  ASCII.
+
+  Conversion code was strategically added where necessary.  And the
+  Curl_base64_encode calls were changed so the binary "blobs" http_ntlm.c
+  creates are NOT translated on non-ASCII platforms.
+
 Dan F (22 January 2007)
 - Converted (most of) the test data files into genuine XML.  A handful still
   are not, due mainly to the lack of support for XML character entities
