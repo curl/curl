@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 HTTP
@@ -7,7 +8,7 @@ HTTP GET
 </info>
 # Server-side
 <reply>
-<data nocheck=1>
+<data nocheck="1">
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 4
@@ -86,3 +87,4 @@ Content-Length: 4
 hoo
 </stdout>
 </verify>
+</testcase>

@@ -1,3 +1,4 @@
+<testcase>
 <reply>
 <mdtm>
 213 20030409102659
@@ -37,3 +38,4 @@ MDTM 247
 QUIT
 </protocol>
 </verify>
+</testcase>

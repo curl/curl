@@ -1,3 +1,4 @@
+<testcase>
 <reply>
 <mdtm>
 213 20050409102659
@@ -46,3 +47,4 @@ STOR 248
 QUIT
 </protocol>
 </verify>
+</testcase>

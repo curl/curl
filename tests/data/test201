@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 <data>
@@ -23,3 +24,4 @@ file://localhost/%PWD/log/non-existant-file.txt
 37
 </errorcode>
 </verify>
+</testcase>

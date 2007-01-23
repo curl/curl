@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 <data1>
@@ -160,3 +161,4 @@ http://%HOSTIP:%HTTPPORT/506
 .host.foo.com	TRUE	/	FALSE	1170330987	test5	five
 </file>
 </verify>
+</testcase>

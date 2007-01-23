@@ -1,3 +1,4 @@
+<testcase>
 #
 # Server-side
 <reply>
@@ -43,3 +44,4 @@ Content-Type: application/x-www-form-urlencoded
 this is what we post to the silly web server
 </protocol>
 </verify>
+</testcase>

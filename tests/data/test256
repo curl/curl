@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 HTTP
@@ -9,7 +10,7 @@ FAILURE
 </info>
 # Server-side
 <reply>
-<data nocheck=1>
+<data nocheck="1">
 HTTP/1.0 200 Mooo
 Date: Mon, 13 Nov 2000 13:41:09 GMT
 Server: myown/1.0
@@ -61,3 +62,4 @@ This text is here to simulate a partly downloaded file to resume
 download on.
 </file>
 </verify>
+</testcase>

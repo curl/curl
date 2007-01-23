@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 FTP
@@ -49,3 +50,4 @@ RETR 103
 QUIT
 </protocol>
 </verify>
+</testcase>

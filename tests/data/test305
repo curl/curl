@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 <data>
@@ -31,3 +32,4 @@ https://%HOSTIP:%HTTPSPORT/want/305 --cacert moooo
 77
 </errorcode>
 </verify>
+</testcase>

@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 FAILURE
@@ -17,7 +18,7 @@ none
  <name>
 HTTP, -O with no file name part in the URL
  </name>
- <command option=no-output>
+ <command option="no-output">
 http://%HOSTIP:%HTTPPORT/76/ -O
 </command>
 </client>
@@ -32,3 +33,4 @@ http://%HOSTIP:%HTTPPORT/76/ -O
 23
 </errorcode>
 </verify>
+</testcase>

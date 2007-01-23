@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 <data>
@@ -48,3 +49,4 @@ Proxy-Connection: Keep-Alive
 </protocol>
 
 </verify>
+</testcase>

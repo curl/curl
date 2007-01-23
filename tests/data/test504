@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 </reply>
@@ -26,3 +27,4 @@ http://%HOSTIP:%HTTPSPORT/504 127.0.0.1:55555
 100
 </errorcode>
 </verify>
+</testcase>

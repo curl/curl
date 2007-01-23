@@ -1,3 +1,4 @@
+<testcase>
 <reply>
 <data mode="text">
 HTTP/1.1 404 Badness
@@ -61,3 +62,4 @@ Accept: */*
 
 </protocol>
 </verify>
+</testcase>

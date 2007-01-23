@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 [] range
@@ -17,7 +18,7 @@ none
  <name>
 urlglob with bad -o #[num] usage
  </name>
- <command option=no-output>
+ <command option="no-output">
 "http://%HOSTIP:%HTTPPORT/[870001-870003]" -o "log/dumpit#2.dump"
 </command>
 </client>
@@ -29,3 +30,4 @@ urlglob with bad -o #[num] usage
 2
 </errorcode>
 </verify>
+</testcase>

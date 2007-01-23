@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 FTP
@@ -37,3 +38,4 @@ CWD path
 QUIT
 </protocol>
 </verify>
+</testcase>

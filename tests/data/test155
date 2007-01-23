@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 <servercmd>
@@ -123,3 +124,4 @@ line three
 four is the number of lines
 </protocol>
 </verify>
+</testcase>

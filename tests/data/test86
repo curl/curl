@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 HTTP
@@ -8,7 +9,7 @@ HTTP GET
 #
 # Server-side
 <reply>
-<data nocheck=1>
+<data nocheck="1">
 HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -20,7 +21,7 @@ Connection: close
 Content-Type: text/html
 Funny-head: yesyes
 
-<foo>
+-foo-
 </data>
 <data1>
 HTTP/1.0 200 OK
@@ -54,7 +55,7 @@ http
  <name>
 HTTP, urlglob []-retrieval and -o #[num] usage
  </name>
- <command option=no-output>
+ <command option="no-output">
 "http://%HOSTIP:%HTTPPORT/[860001-860003]" -o "log/dumpit#1.dump"
 </command>
 </client>
@@ -92,3 +93,4 @@ Funny-head: swsclose
 crap data
 </file>
 </verify>
+</testcase>

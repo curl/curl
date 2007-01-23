@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 <data>
@@ -32,3 +33,4 @@ moo
 # Verify data after the test has been "shot"
 <verify>
 </verify>
+</testcase>

@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 FTP
@@ -25,3 +26,4 @@ ftp://bad%0auser:passwd@%HOSTIP:%FTPPORT/225%0a
 3
 </errorcode>
 </verify>
+</testcase>

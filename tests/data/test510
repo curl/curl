@@ -1,3 +1,4 @@
+<testcase>
 #
 # Server-side
 <reply>
@@ -52,3 +53,4 @@ and a final longer crap: four
 
 </protocol>
 </verify>
+</testcase>

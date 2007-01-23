@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 FTP
@@ -36,3 +37,4 @@ MDTM 272
 QUIT
 </protocol>
 </verify>
+</testcase>

@@ -1,8 +1,9 @@
+<testcase>
 # Server-side
 <reply>
 
 # this is returned first since we get no proxy-auth
-<data nocheck=1>
+<data nocheck="1">
 HTTP/1.1 405 Method Not Allowed swsclose
 
 And you should ignore this data.
@@ -44,3 +45,4 @@ HTTP/1.1 405 Method Not Allowed swsclose
 000 405
 </stdout>
 </verify>
+</testcase>

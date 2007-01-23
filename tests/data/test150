@@ -1,10 +1,13 @@
-# Server-side
+<testcase>
+
+<!-- Server-side -->
 <reply>
 
-# no <data> in this test since we have NTLM from the start
+<!-- no <data> in this test since we have NTLM from the start
 
-# This is supposed to be returned when the server gets a first
-# Authorization: NTLM line passed-in from the client
+This is supposed to be returned when the server gets a first
+Authorization: NTLM line passed-in from the client -->
+
 <data1001>
 HTTP/1.1 401 Now gimme that second request of crap
 Server: Microsoft-IIS/5.0
@@ -84,3 +87,4 @@ Accept: */*
 
 </protocol>
 </verify>
+</testcase>

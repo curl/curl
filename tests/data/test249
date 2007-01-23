@@ -1,3 +1,4 @@
+<testcase>
 #
 # Server-side
 <reply>
@@ -43,3 +44,4 @@ If-Modified-Since: Sun, 12 Dec 1999 12:00:00 GMT
 
 </protocol>
 </verify>
+</testcase>

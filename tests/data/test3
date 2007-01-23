@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 HTTP
@@ -45,7 +46,7 @@ HTTP POST with auth and contents but with content-length set to 0
 <strip>
 ^User-Agent:.*
 </strip>
-<protocol nonewline=yes>
+<protocol nonewline="yes">
 POST /3 HTTP/1.1
 Authorization: Basic ZmFrZTotdXNlcg==
 Host: 127.0.0.1:%HTTPPORT
@@ -56,3 +57,4 @@ Content-Type: application/x-www-form-urlencoded
 fooo=mooo&pooo=clue&doo=%20%20%20++++
 </protocol>
 </verify>
+</testcase>

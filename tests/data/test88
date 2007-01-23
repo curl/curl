@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 HTTP
@@ -94,3 +95,4 @@ line three
 four is the number of lines
 </protocol>
 </verify>
+</testcase>

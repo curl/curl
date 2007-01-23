@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 FTP-ipv6
@@ -58,3 +59,4 @@ LIST
 QUIT
 </protocol>
 </verify>
+</testcase>

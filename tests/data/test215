@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 # When doing LIST, we get the default list output hard-coded in the test
@@ -48,3 +49,4 @@ LIST
 QUIT
 </protocol>
 </verify>
+</testcase>

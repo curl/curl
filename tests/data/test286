@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 TFTP
@@ -88,3 +89,4 @@ filename: /test286.txt
 mode: octet
 </protocol>
 </verify>
+</testcase>

@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Dan F (22 January 2007)
+- Converted (most of) the test data files into genuine XML.  A handful still
+  are not, due mainly to the lack of support for XML character entities
+  (e.g. & => &amp; ).  This will make it easier to validate test files using
+  tools like xmllint, as well as to edit and view them using XML tools.
+
 Daniel (16 January 2007)
 - Armel Asselin improved libcurl to behave a lot better when an easy handle
   doing an FTP transfer is removed from a multi handle before completion. The

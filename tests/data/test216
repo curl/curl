@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 </reply>
@@ -35,3 +36,4 @@ STOR ..anotherup
 QUIT
 </protocol>
 </verify>
+</testcase>

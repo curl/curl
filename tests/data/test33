@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 HTTP
@@ -60,3 +61,4 @@ Expect: 100-continue
 012345678
 </protocol>
 </verify>
+</testcase>

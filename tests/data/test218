@@ -1,3 +1,4 @@
+<testcase>
 #
 # Server-side
 <reply>
@@ -48,3 +49,4 @@ just some tiny teeny contents
 
 </protocol>
 </verify>
+</testcase>

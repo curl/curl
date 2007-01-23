@@ -1,3 +1,4 @@
+<testcase>
 # Client-side
 <client>
 <server>
@@ -35,3 +36,4 @@ QUIT
 25
 </errorcode>
 </verify>
+</testcase>

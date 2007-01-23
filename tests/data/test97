@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 HTTP
@@ -38,7 +39,7 @@ HTTP POST with custom content-type
 <strip>
 ^User-Agent:.*
 </strip>
-<protocol nonewline=yes>
+<protocol nonewline="yes">
 POST /97 HTTP/1.1
 Host: 127.0.0.1:%HTTPPORT
 Accept: */*
@@ -48,3 +49,4 @@ Content-Length: 14
 hejsanallabarn
 </protocol>
 </verify>
+</testcase>

@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 <data>
@@ -27,3 +28,4 @@ contents in a single file
 contents in a single file
 </stdout>
 </verify>
+</testcase>

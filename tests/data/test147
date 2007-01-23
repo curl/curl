@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 <data>
@@ -46,3 +47,4 @@ RETR 147
 QUIT
 </protocol>
 </verify>
+</testcase>

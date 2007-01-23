@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 HTTP
@@ -58,3 +59,4 @@ we post this
 
 </protocol>
 </verify>
+</testcase>

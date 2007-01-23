@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 FTP
@@ -43,3 +44,4 @@ SIZE 111
 QUIT
 </protocol>
 </verify>
+</testcase>

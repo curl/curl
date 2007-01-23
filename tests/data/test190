@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 moooooooo
@@ -35,3 +36,4 @@ PWD
 CWD path
 </protocol>
 </verify>
+</testcase>

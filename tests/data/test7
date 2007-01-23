@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 HTTP
@@ -56,3 +57,4 @@ Set-Cookie: partmatch=present; domain=.0.0.1; path=/;
 
 </file>
 </verify>
+</testcase>

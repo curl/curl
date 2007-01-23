@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 FTP
@@ -40,3 +41,4 @@ USER anonymous
 PASS curl_by_daniel@haxx.se
 </protocol>
 </verify>
+</testcase>

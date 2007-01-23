@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 HTTP
@@ -112,3 +113,4 @@ Accept: */*
 47
 </errorcode>
 </verify>
+</testcase>

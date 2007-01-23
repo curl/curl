@@ -1,3 +1,4 @@
+<testcase>
 <reply>
 <data>
 HTTP/1.0 200 OK swsclose
@@ -56,3 +57,4 @@ the
       feature
 </protocol>
 </verify>
+</testcase>

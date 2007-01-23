@@ -1,6 +1,7 @@
+<testcase>
 # Server-side
 <reply>
-<data1001 nocheck=1>
+<data1001 nocheck="1">
 HTTP/1.0 407 BAD BOY
 Proxy-Authenticate: Basic realm="Squid proxy-caching web server"
 Server: swsclose
@@ -47,3 +48,4 @@ Proxy-Connection: Keep-Alive
 22
 </errorcode>
 </verify>
+</testcase>

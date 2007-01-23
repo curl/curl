@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 HTTP
@@ -50,3 +51,4 @@ Cookie: mooo=indeed
 
 </protocol>
 </verify>
+</testcase>

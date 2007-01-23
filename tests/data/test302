@@ -1,3 +1,4 @@
+<testcase>
 #
 # Server-side
 <reply>
@@ -36,3 +37,4 @@ HTTPS GET over HTTP proxy fails
 [insert full protocol verifiction dump here]
 </data>
 </verify>
+</testcase>

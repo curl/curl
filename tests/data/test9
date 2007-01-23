@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 HTTP
@@ -69,3 +70,4 @@ bar
 ------------------------------9ef8d6205763--
 </protocol>
 </verify>
+</testcase>

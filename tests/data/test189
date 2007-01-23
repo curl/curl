@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 <data>
@@ -65,3 +66,4 @@ Accept: */*
 33
 </errorcode>
 </verify>
+</testcase>

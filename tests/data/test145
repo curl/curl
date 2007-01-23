@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 <data>
@@ -41,3 +42,4 @@ NLST
 QUIT
 </protocol>
 </verify>
+</testcase>

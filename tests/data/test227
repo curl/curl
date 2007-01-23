@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 FTP
@@ -52,3 +53,4 @@ NOOP 3
 QUIT
 </protocol>
 </verify>
+</testcase>

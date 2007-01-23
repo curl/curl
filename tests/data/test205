@@ -1,3 +1,4 @@
+<testcase>
 # no Server-side
 
 # Client-side
@@ -27,3 +28,4 @@ write
 23
 </errorcode>
 </verify>
+</testcase>

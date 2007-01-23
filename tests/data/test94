@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 HTTPS
@@ -9,7 +10,7 @@ FAILURE
 #
 # Server-side
 <reply>
-<data nocheck=1>
+<data nocheck="1">
 HTTP/1.1 407 Needs proxy authentication
 Server: test-server/fake swsclose yesyes
 Proxy-Authenticate: Basic "oh please"
@@ -53,3 +54,4 @@ Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>
+</testcase>

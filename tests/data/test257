@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 HTTP
@@ -111,3 +112,4 @@ Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>
+</testcase>

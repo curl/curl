@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 <data>
@@ -46,3 +47,4 @@ daniel
 52
 </errorcode>
 </verify>
+</testcase>

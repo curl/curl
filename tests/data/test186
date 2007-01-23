@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 <data>
@@ -52,3 +53,4 @@ Content-Type: text/html
 ------------------------------212d9006ceb5--
 </protocol>
 </verify>
+</testcase>

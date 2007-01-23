@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 <data>
@@ -69,3 +70,4 @@ curl
 ------------------------------c2d1767eb6ac--
 </protocol>
 </verify>
+</testcase>

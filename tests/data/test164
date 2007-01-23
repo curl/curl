@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 # This particular response is an exact excerpt from an actual Apache
 # server when asked for a 0-10,12-15 range.
@@ -56,3 +57,4 @@ Accept: */*
 
 </protocol>
 </verify>
+</testcase>

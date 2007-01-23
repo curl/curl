@@ -1,3 +1,4 @@
+<testcase>
 #
 # Server-side
 <reply>
@@ -37,3 +38,4 @@ Content-Type: application/x-www-form-urlencoded
 42
 </errorcode>
 </verify>
+</testcase>

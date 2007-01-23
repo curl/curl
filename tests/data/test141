@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 <data>
@@ -37,3 +38,4 @@ QUIT
 Last-Modified: Wed, 09 Apr 2003 10:26:59 GMT
 </stdout>
 </verify>
+</testcase>

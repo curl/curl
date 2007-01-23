@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 HTTP
@@ -13,7 +14,7 @@ HTTP/1.0 200 OK swsclose
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 
-<foo> within foo </foo>
+-foo- within foo -!foo-
 </data>
 </reply>
 
@@ -45,3 +46,4 @@ Accept: */*
 </protocol>
 </verify>
 
+</testcase>

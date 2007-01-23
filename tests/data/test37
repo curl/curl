@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 HTTP
@@ -43,3 +44,4 @@ Accept: */*
 </protocol>
 </verify>
 
+</testcase>

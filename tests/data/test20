@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 non-existing host name
@@ -29,3 +30,4 @@ non-existing-and-weeeeeeirdname.
 6
 </errorcode>
 </verify>
+</testcase>

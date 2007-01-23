@@ -1,6 +1,7 @@
+<testcase>
 # Server-side
 <reply>
-<data sendzero=yes>
+<data sendzero="yes">
 </data>
 <size>
 0
@@ -33,3 +34,4 @@ RETR 182
 QUIT
 </protocol>
 </verify>
+</testcase>

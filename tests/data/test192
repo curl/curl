@@ -1,7 +1,8 @@
+<testcase>
 #
 # Server-side
 <reply>
-<data nocheck=1>
+<data nocheck="1">
 HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Content-Length: 8
@@ -48,3 +49,4 @@ monster
 1
 </stdout>
 </verify>
+</testcase>

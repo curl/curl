@@ -1,14 +1,15 @@
+<testcase>
 #
 # Server-side
 <reply>
-<data nocheck=1>
+<data nocheck="1">
 HTTP/1.1 503 OK swsbounce
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Content-Length: 21
 
 server not available
 </data>
-<data1 nocheck=1>
+<data1 nocheck="1">
 HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Content-Length: 3
@@ -65,3 +66,4 @@ ok
 </stdout>
 
 </verify>
+</testcase>

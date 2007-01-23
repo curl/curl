@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 FTP
@@ -38,3 +39,4 @@ ACCT one count
 11
 </errorcode>
 </verify>
+</testcase>

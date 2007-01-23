@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 </reply>
@@ -56,3 +57,4 @@ RNTO 505-forreal
 QUIT
 </protocol>
 </verify>
+</testcase>

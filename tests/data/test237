@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 </reply>
@@ -38,3 +39,4 @@ PWD
 PASV
 </protocol>
 </verify>
+</testcase>

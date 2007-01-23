@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 unsupported protocol
@@ -29,3 +30,4 @@ htfp://%HOSTIP:%HTTPPORT/none.htfml
 1
 </errorcode>
 </verify>
+</testcase>

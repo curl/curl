@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 <data>
@@ -45,3 +46,4 @@ Cookie: moo2=indeed
 
 </protocol>
 </verify>
+</testcase>

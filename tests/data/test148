@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 </reply>
@@ -39,3 +40,4 @@ MKD attempt
 QUIT
 </protocol>
 </verify>
+</testcase>

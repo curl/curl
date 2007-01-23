@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 HTTP
@@ -7,7 +8,7 @@ HTTP GET
 </info>
 # Server-side
 <reply>
-<data nocheck=1>
+<data nocheck="1">
 HTTP/1.1 200 OK swsclose
 Funny-head: yesyes
 Content-Type: text/html; charset=ISO-8859-4   
@@ -30,7 +31,7 @@ HTTP content-type with spaces in
 
 # Verify data after the test has been "shot"
 <verify>
-<stdout mode=text>
+<stdout mode="text">
 text/html; charset=ISO-8859-4
 </stdout>
 <strip>
@@ -43,3 +44,4 @@ Accept: */*
 
 </protocol>
 </verify>
+</testcase>

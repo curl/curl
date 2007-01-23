@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 FTP
@@ -33,3 +34,4 @@ REPLY USER 314 bluah you fewl!
 USER anonymous
 </protocol>
 </verify>
+</testcase>

@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 # reply back and ask for Digest auth
@@ -118,3 +119,4 @@ Content-Length: 30
 This IS the second real page!
 </stdout>
 </verify>
+</testcase>

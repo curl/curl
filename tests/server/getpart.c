@@ -120,6 +120,7 @@ const char *spitout(FILE *stream,
 
   enum {
     STATE_OUTSIDE,
+    STATE_OUTER,
     STATE_INMAIN,
     STATE_INSUB,
     STATE_ILLEGAL
@@ -173,6 +174,10 @@ const char *spitout(FILE *stream,
         cmain[0]=0; /* no main anymore */
         display=0;
       }
+      else if(state == STATE_OUTER) {
+        /* this is the end of the outermost file section */
+        state--;
+      }
     }
     else if(!display) {
       /* this is the beginning of a section */
@@ -182,6 +187,10 @@ const char *spitout(FILE *stream,
       *end = 0;
       switch(state) {
       case STATE_OUTSIDE:
+        /* Ignore the outermost <testcase> element */
+        state = STATE_OUTER;
+        break;
+      case STATE_OUTER:
         strcpy(cmain, ptr);
         state = STATE_INMAIN;
         break;
@@ -213,6 +222,10 @@ const char *spitout(FILE *stream,
        !strcmp(csub, sub)) {
       show(("* (%d bytes) %s\n", stringlen, buffer));
       display = 1; /* start displaying */
+    }
+    else if ((*cmain == '!') || (*csub == '!')) {
+        /* This is just a comment, not a new section */
+        state--;
     }
     else {
       show(("%d (%s/%s): %s\n", state, cmain, csub, buffer));

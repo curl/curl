@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 </reply>
@@ -40,3 +41,4 @@ this is the *****crap******** that we're gonna upload
 worx?
 </upload>
 </verify>
+</testcase>

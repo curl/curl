@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 <data>
@@ -69,3 +70,4 @@ line8
 ------------------------------5dbea401cd8c--
 </protocol>
 </verify>
+</testcase>

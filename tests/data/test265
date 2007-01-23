@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 
@@ -86,7 +87,7 @@ http://test.remote.server.com:265/path/2650002 --proxy http://%HOSTIP:%HTTPPORT 
 <strippart>
 s/^(Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA).*/$1/
 </strippart>
-<protocol nonewline=yes>
+<protocol nonewline="yes">
 CONNECT test.remote.server.com:265 HTTP/1.0
 Host: test.remote.server.com:265
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
@@ -107,3 +108,4 @@ Content-Type: application/x-www-form-urlencoded
 postit
 </protocol>
 </verify>
+</testcase>

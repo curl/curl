@@ -1,7 +1,8 @@
+<testcase>
 #
 # Server-side
 <reply>
-<data nocheck=1>
+<data nocheck="1">
 HTTP/1.1 302 OK swsbounce swsclose
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Content-Length: 8
@@ -10,7 +11,7 @@ Location: ./193
 
 monster
 </data>
-<data1 nocheck=1>
+<data1 nocheck="1">
 HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Content-Length: 8
@@ -69,3 +70,4 @@ monster
 </stdout>
 
 </verify>
+</testcase>

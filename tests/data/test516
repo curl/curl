@@ -1,3 +1,4 @@
+<testcase>
 #
 # Server-side
 <reply>
@@ -43,3 +44,4 @@ Content-Length: 0
 
 </protocol>
 </verify>
+</testcase>

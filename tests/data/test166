@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 <data>
@@ -50,3 +51,4 @@ data inside the file
 ------------------------------b0b3d6d23991--
 </protocol>
 </verify>
+</testcase>

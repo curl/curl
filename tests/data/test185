@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 <data>
@@ -67,3 +68,4 @@ Host: another.visitor.stay.a.while.stay.foreeeeeever
 </protocol>
 
 </verify>
+</testcase>

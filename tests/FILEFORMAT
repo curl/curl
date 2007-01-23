@@ -1,7 +1,16 @@
- The file format of the test suite is a very simple and extendable format. All
-data for a single test case resides in a single ASCII file. Labels mark the
-beginning and the end of all sections. Each label must be written in its own
-line and is resembling XML/HTML.
+ The test suite's file format is very simple and extendable, closely
+resembling XML. All data for a single test case resides in a single
+ASCII file. Labels mark the beginning and the end of all sections, and each
+label must be written in its own line.  Comments are either XML-style
+(enclosed with <!-- and -->) or C-style (beginning with #) and must appear
+on their own lines and not alongside actual test data.  Most test data files
+are syntactically valid XML, although a few files are not (lack of
+support for character entities is the biggest omission).
+
+ The file begins with a 'testcase' tag, which encompasses the remainder of
+the file.
+
+<testcase>
 
  Each file is split up in three main sections: reply, client and verify. The
 reply section is used for the server to know what to send as a reply for the
@@ -24,14 +33,14 @@ statistical/informational purposes.
 </info>
 
 <reply>
-<data [nocheck=1] [sendzero=yes] [base64=yes]>
-§data to sent to the client on its request and later verified that it arrived
+<data [nocheck="1"] [sendzero="yes"] [base64="yes"]>
+data to be sent to the client on its request and later verified that it arrived
 safely. Set the nocheck=1 to prevent the test script to verify the arrival
 of this data.
 
 If the data contains 'swsclose' anywhere within the start and end tag, and
 this is a HTTP test, then the connection will be closed by the server after
-this response is sent. If not, the connection will be kept persistant.
+this response is sent. If not, the connection will be kept persistent.
 
 If the data contains 'swsbounce' anywhere within the start and end tag, the
 HTTP server will detect if this is a second request using the same test and
@@ -55,7 +64,7 @@ B) The request was HTTP and included digest details, which adds 1000 to NUM
 C) If a HTTP request is NTLM type-1, it adds 1001 to num
 D) If a HTTP request is NTLM type-3, it adds 1002 to num
 </dataNUM>
-<datacheck [nonewline=yes]>
+<datacheck [nonewline="yes"]>
 if the data is sent but this is what should be checked afterwards. If
 'nonewline' is set, we will cut off the trailing newline of this given data
 before comparing with the one actually received by the client
@@ -115,13 +124,15 @@ A list of features that MUST be present in the client/library for this test to
 be able to run (if these features are not present, the test will be
 SKIPPED). Features testable here are:
 
-SSL
-netrc_debug
-large_file
-idn
 getrlimit
+GnuTLS
+idn
 ipv6
+large_file
 libz
+netrc_debug
+OpenSSL
+SSL
 </features>
 
 <killserver>
@@ -154,7 +165,7 @@ Set the given environment variables to the specified value before the actual
 command is run, they are cleared again after the command has been run.
 </setenv>
 
-<command [option=no-output]>
+<command [option="no-output"]>
 command line to run, there's a bunch of %variables that get replaced
 accordingly.
 
@@ -172,13 +183,20 @@ argument that directs the output to a file. The --output is also not added if
 the client/stdout section is used.
 
 Available substitute variables include:
-%HOSTIP    - IP address of the host running this test
+%HOSTIP    - IPv6 address of the host running this test
 %HOSTPORT  - Port number of the HTTP server
+%HOST6IP   - IPv6 address of the host running this test
+%HOST6PORT - IPv6 port number of the HTTP server
 %HTTPSPORT - Port number of the HTTPS server
 %FTPPORT   - Port number of the FTP server
+%FTP6PORT  - IPv6 port number of the FTP server
 %FTPSPORT  - Port number of the FTPS server
+%FTP2PORT  - Port number of the FTP server 2
+%TFTPPORT  - Port number of the TFTP server
+%TFTP6PORT - IPv6 port number of the TFTP server
 %SRCDIR    - Full path to the source dir
 %PWD       - Current directory
+%CURL      - Path to the curl executable
 </command>
 
 <file name="log/filename">
@@ -200,28 +218,28 @@ example.
 </errorcode>
 <strip>
 One regex per line that is removed from the protocol dumps before the
-comparison is made. This is very useful to remove dependencies on dynamicly
+comparison is made. This is very useful to remove dependencies on dynamically
 changing protocol data such as port numbers or user-agent strings.
 </strip>
 <strippart>
 One perl op per line that operates on the protocol dump. This is pretty
 advanced. Example: "s/^EPRT .*/EPRT stripped/"
 </strippart>
-<protocol [nonewline=yes]>
+<protocol [nonewline="yes"]>
 the protocol dump curl should transmit, if 'nonewline' is set, we will cut
 off the trailing newline of this given data before comparing with the one
 actually sent by the client
 </protocol>
-<stdout [mode=text]>
-This verfies that this data was passed to stdout.
+<stdout [mode="text"]>
+This verifies that this data was passed to stdout.
 
-Use the "mode=text" attribute if the output is in text mode on platforms that
+Use the "mode="text"" attribute if the output is in text mode on platforms that
 have a text/binary difference.
 </stdout>
-<file name="log/filename" [mode=text]>
+<file name="log/filename" [mode="text"]>
 The file's contents must be identical to this after the test is complete.
 
-Use the "mode=text" attribute if the output is in text mode on platforms that
+Use the "mode="text" attribute if the output is in text mode on platforms that
 have a text/binary difference.
 </file>
 <stripfile>
@@ -235,3 +253,5 @@ the contents of the upload data curl should have sent
 disable - disables the valgrind log check for this test
 </valgrind>
 </verify>
+
+</testcase>

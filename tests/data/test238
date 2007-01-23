@@ -1,3 +1,4 @@
+<testcase>
 # Server-side
 <reply>
 </reply>
@@ -37,3 +38,4 @@ EPSV
 PASV
 </protocol>
 </verify>
+</testcase>

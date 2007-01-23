@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 HTTP
@@ -74,3 +75,4 @@ chunky-trailer: header data
 </file>
 </verify>
 
+</testcase>

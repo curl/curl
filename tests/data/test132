@@ -1,3 +1,4 @@
+<testcase>
 <info>
 <keywords>
 FTP
@@ -64,3 +65,4 @@ LIST
 QUIT
 </protocol>
 </verify>
+</testcase>
