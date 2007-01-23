@@ -821,9 +821,9 @@ CURLcode Curl_sftp_do(struct connectdata *conn, bool *done)
        * Work on getting the specified file
        */
       sftp->sftp_handle =
-      libssh2_sftp_open(sftp->sftp_session, sftp->path, LIBSSH2_FXF_READ,
-                        LIBSSH2_SFTP_S_IRUSR|LIBSSH2_SFTP_S_IWUSR|
-                        LIBSSH2_SFTP_S_IRGRP|LIBSSH2_SFTP_S_IROTH);
+        libssh2_sftp_open(sftp->sftp_session, sftp->path, LIBSSH2_FXF_READ,
+                          LIBSSH2_SFTP_S_IRUSR|LIBSSH2_SFTP_S_IWUSR|
+                          LIBSSH2_SFTP_S_IRGRP|LIBSSH2_SFTP_S_IROTH);
       if (!sftp->sftp_handle)
         return CURLE_SSH;
 
