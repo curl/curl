@@ -19,7 +19,12 @@ endif
 
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8c
+OPENSSL_PATH = ../../openssl-0.9.8d
+endif
+
+# Edit the path below to point to the base of your LibSSH2 package.
+ifndef LIBSSH2_PATH
+LIBSSH2_PATH = ../../libssh2-0.14
 endif
 
 ifndef INSTDIR
@@ -29,7 +34,7 @@ endif
 # Edit the vars below to change NLM target settings.
 TARGET  = libcurl
 VERSION	= $(LIBCURL_VERSION)
-COPYR	= Copyright (C) 1996 - 2006, Daniel Stenberg, <daniel@haxx.se>
+COPYR	= Copyright (C) 1996 - 2007, Daniel Stenberg, <daniel@haxx.se>
 DESCR	= cURL libcurl $(LIBCURL_VERSION_STR) - http://curl.haxx.se
 MTSAFE	= YES
 STACK	= 64000
@@ -120,6 +125,15 @@ ifdef WITH_SSL
 	INCLUDES += -I$(OPENSSL_PATH)/outinc_nw_libc -I$(OPENSSL_PATH)/outinc_nw_libc/openssl
 	LDLIBS += $(OPENSSL_PATH)/out_nw_libc/crypto.lib $(OPENSSL_PATH)/out_nw_libc/ssl.lib
 	IMPORTS += GetProcessSwitchCount RunningProcess
+endif
+ifdef WITH_SSH2
+	INCLUDES += -I$(LIBSSH2_PATH)/include
+ifdef LINK_STATIC
+	LDLIBS += $(LIBSSH2_PATH)/nw/libssh2.lib
+else
+	IMPORTS += @$(LIBSSH2_PATH)/nw/libssh2.imp
+	MODULES += libssh2.nlm
+endif
 endif
 ifdef WITH_ZLIB
 	INCLUDES += -I$(ZLIB_PATH)
@@ -403,6 +417,11 @@ ifdef WITH_SSL
 	@echo $(DL)#define HAVE_LIBSSL 1$(DL) >> $@
 	@echo $(DL)#define HAVE_LIBCRYPTO 1$(DL) >> $@
 	@echo $(DL)#define OPENSSL_NO_KRB5 1$(DL) >> $@
+endif
+ifdef WITH_SSH2
+	@echo $(DL)#define USE_LIBSSH2 1$(DL) >> $@
+	@echo $(DL)#define HAVE_LIBSSH2 1$(DL) >> $@
+	@echo $(DL)#define HAVE_LIBSSH2_H 1$(DL) >> $@
 endif
 ifdef OLD_NOVELLSDK
 	@echo $(DL)#define socklen_t int$(DL) >> $@
