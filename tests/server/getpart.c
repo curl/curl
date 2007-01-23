@@ -187,7 +187,9 @@ const char *spitout(FILE *stream,
       *end = 0;
       switch(state) {
       case STATE_OUTSIDE:
-        /* Ignore the outermost <testcase> element */
+        /* Skip over the outermost element (<testcase>), but if it turns out
+           to be a comment, completely ignore it below */
+        strcpy(cmain, ptr);
         state = STATE_OUTER;
         break;
       case STATE_OUTER:
@@ -206,7 +208,7 @@ const char *spitout(FILE *stream,
         /* There might be attributes here. Check for those we know of and care
            about. */
         if(strstr(&end[1], "base64=")) {
-          /* rought and dirty, but "mostly" functional */
+          /* rough and dirty, but "mostly" functional */
           /* Treat all data as base64 encoded */
           base64 = 1;
         }
@@ -223,8 +225,9 @@ const char *spitout(FILE *stream,
       show(("* (%d bytes) %s\n", stringlen, buffer));
       display = 1; /* start displaying */
     }
-    else if ((*cmain == '!') || (*csub == '!')) {
-        /* This is just a comment, not a new section */
+    else if ((*cmain == '?') || (*cmain == '!') || (*csub == '!')) {
+        /* Ignore comments, DOCTYPEs and XML declarations */
+        show(("%d ignoring (%s/%s)\n", state, cmain, csub));
         state--;
     }
     else {
