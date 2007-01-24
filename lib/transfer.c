@@ -273,20 +273,10 @@ CURLcode Curl_readrewind(struct connectdata *conn)
   return CURLE_OK;
 }
 
-#ifdef USE_SSLEAY
-/* FIX: this is nasty OpenSSL-specific code that really shouldn't be here */
 static int data_pending(struct connectdata *conn)
 {
-  if(conn->ssl[FIRSTSOCKET].handle)
-    /* SSL is in use */
-    return SSL_pending(conn->ssl[FIRSTSOCKET].handle);
-
-  return 0; /* nothing */
+  return Curl_ssl_data_pending(conn, FIRSTSOCKET);
 }
-#else
-/* non-SSL never have pending data */
-#define data_pending(x) 0
-#endif
 
 #ifndef MIN
 #define MIN(a,b) (a < b ? a : b)

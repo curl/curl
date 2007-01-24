@@ -600,3 +600,16 @@ int Curl_ssl_check_cxn(struct connectdata *conn)
   return -1; /* connection status unknown */
 #endif /* USE_SSLEAY */
 }
+
+bool Curl_ssl_data_pending(struct connectdata *conn,
+                           int connindex)
+{
+#ifdef USE_SSLEAY
+  /* OpenSSL-specific */
+  if(conn->ssl[connindex].handle)
+    /* SSL is in use */
+    return SSL_pending(conn->ssl[connindex].handle);
+#endif
+  return FALSE; /* nothing pending */
+
+}

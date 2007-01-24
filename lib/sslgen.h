@@ -71,9 +71,13 @@ int Curl_ssl_check_cxn(struct connectdata *conn);
 
 CURLcode Curl_ssl_shutdown(struct connectdata *conn, int sockindex);
 
+bool Curl_ssl_data_pending(struct connectdata *conn,
+                           int connindex);
+
 #if !defined(USE_SSL) && !defined(SSLGEN_C)
 /* set up blank macros for none-SSL builds */
 #define Curl_ssl_close_all(x)
+#define Curl_ssl_data_pending(x) 0
 #endif
 
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
