@@ -1420,6 +1420,8 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
       free(data->state.first_host);
 
     data->state.first_host = strdup(conn->host.name);
+    if(!data->state.first_host)
+      return CURLE_OUT_OF_MEMORY;
   }
 
   if(conn->protocol & PROT_HTTPS) {
