@@ -2,18 +2,21 @@
 # $Id$
 #
 ## Makefile for building curl.exe with MingW32 (GCC-3.2) and
-## optionally OpenSSL (0.9.7)
+## optionally OpenSSL (0.9.8)
 ##
-## Use: make -f Makefile.m32 [SSL=1] [DYN=1]
+## Use: make -f Makefile.m32 [SSL=1] [SSH2=1] [DYN=1]
 ##
 ## Comments to: Troy Engel <tengel@sonic.net> or
 ##              Joern Hartroth <hartroth@acm.org>
 
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.7d
+OPENSSL_PATH = ../../openssl-0.9.8d
+endif
+ifndef LIBSSH2_PATH
+LIBSSH2_PATH = ../../libssh2-0.14
 endif
 ifndef ZLIB_PATH
-ZLIB_PATH = ../../zlib-1.2.1
+ZLIB_PATH = ../../zlib-1.2.3
 endif
 
 CC = gcc
@@ -29,9 +32,6 @@ STRIP = strip -s
 
 INCLUDES = -I. -I.. -I../include -I../lib -I$(ZLIB_PATH)
 CFLAGS = -g -O2 -DMINGW32
-ifdef SSL
-  CFLAGS += -DUSE_SSLEAY -DHAVE_OPENSSL_ENGINE_H
-endif
 LDFLAGS =
 COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
 LINK = $(CC) $(CFLAGS) $(LDFLAGS) -o $@
@@ -45,10 +45,15 @@ else
   curl_LDADD = -L../lib -lcurl
   COMPILE += -DCURL_STATICLIB
 endif
-curl_LDADD += -lwsock32 -lws2_32 -lwinmm -L$(ZLIB_PATH) -lz
+ifdef SSH2
+  CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
+  curl_LDADD += -L$(LIBSSH2_PATH)/win32 -lssh2
+endif
 ifdef SSL
+  CFLAGS += -DUSE_SSLEAY -DHAVE_OPENSSL_ENGINE_H
   curl_LDADD += -L$(OPENSSL_PATH)/out -leay32 -lssl32
 endif
+curl_LDADD += -lwsock32 -lws2_32 -lwinmm -L$(ZLIB_PATH) -lz
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc

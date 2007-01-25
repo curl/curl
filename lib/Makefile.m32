@@ -2,18 +2,21 @@
 # $Id$
 #
 ## Makefile for building libcurl.a with MingW32 (GCC-3.2) and
-## optionally OpenSSL (0.9.7)
+## optionally OpenSSL (0.9.8)
 ##
-## Use: make -f Makefile.m32
+## Use: make -f Makefile.m32 [SSL=1] [SSH2=1] [DYN=1]
 ##
 ## Comments to: Troy Engel <tengel@sonic.net> or
 ##              Joern Hartroth <hartroth@acm.org>
 
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.7d
+OPENSSL_PATH = ../../openssl-0.9.8d
+endif
+ifndef LIBSSH2_PATH
+LIBSSH2_PATH = ../../libssh2-0.14
 endif
 ifndef ZLIB_PATH
-ZLIB_PATH = ../../zlib-1.2.1
+ZLIB_PATH = ../../zlib-1.2.3
 endif
 
 CC = gcc
@@ -27,12 +30,17 @@ STRIP = strip -g
 
 INCLUDES = -I. -I../include
 CFLAGS = -g -O2 -DMINGW32 -DBUILDING_LIBCURL -DHAVE_LONGLONG
+ifdef SSH2
+  INCLUDES += -I"$(LIBSSH2_PATH)/include" -I"$(LIBSSH2_PATH)/win32"
+  CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
+  DLL_LIBS += -L$(LIBSSH2_PATH)/win32 -lssh2
+endif
 ifdef SSL
   INCLUDES += -I"$(OPENSSL_PATH)/outinc" -I"$(OPENSSL_PATH)/outinc/openssl"
   CFLAGS += -DUSE_SSLEAY -DUSE_OPENSSL -DHAVE_OPENSSL_ENGINE_H -DHAVE_OPENSSL_PKCS12_H \
             -DHAVE_ENGINE_LOAD_BUILTIN_ENGINES -DOPENSSL_NO_KRB5 \
             -DCURL_CA_BUNDLE='getenv("CURL_CA_BUNDLE")'
-  DLL_LIBS = -L$(OPENSSL_PATH)/out -leay32 -lssl32
+  DLL_LIBS += -L$(OPENSSL_PATH)/out -leay32 -lssl32
 endif
 ifdef ZLIB
   INCLUDES += -I"$(ZLIB_PATH)"
