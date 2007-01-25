@@ -3380,12 +3380,13 @@ else {
     conn->proxy.name = conn->proxy.rawalloc;
 
     free(proxydup); /* free the duplicate pointer and not the modified */
+    proxy = NULL;   /* this may have just been freed */
     if(!conn->proxy.rawalloc)
       return CURLE_OUT_OF_MEMORY;
   }
 
   /*************************************************************
-   * If the protcol is using SSL and HTTP proxy is used, we set
+   * If the protocol is using SSL and HTTP proxy is used, we set
    * the tunnel_proxy bit.
    *************************************************************/
   if((conn->protocol&PROT_SSL) && conn->bits.httpproxy)
@@ -3831,7 +3832,7 @@ else {
     /* set a pointer to the hostname we display */
     fix_hostname(data, conn, &conn->host);
 
-    if(!proxy || !*proxy) {
+    if(!conn->proxy.name || !*conn->proxy.name) {
       /* If not connecting via a proxy, extract the port from the URL, if it is
        * there, thus overriding any defaults that might have been set above. */
       conn->port =  conn->remote_port; /* it is the same port */

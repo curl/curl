@@ -1706,7 +1706,7 @@ sub singletest {
 
     if($curl_debug) {
         if(! -f $memdump) {
-            logmsg "\n** ALERT! memory debuggin without any output file?\n";
+            logmsg "\n** ALERT! memory debugging without any output file?\n";
         }
         else {
             my @memdata=`$memanalyze $memdump`;

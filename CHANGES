@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Dan F (24 January 2007)
+- Fixed a dangling pointer problem that prevented the http_proxy environment
+  variable from being properly used in many cases (and caused test case 63
+  to fail).
+
 Daniel (23 January 2007)
 - David McCreedy did NTLM changes mainly for non-ASCII platforms:
 
