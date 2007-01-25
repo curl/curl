@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel (25 January 2007)
+- Added the --libcurl [file] option to curl. Append this option to any
+  ordinary curl command line, and you will get a libcurl-using source code
+  written to the file that does the equivalent operation of what your command
+  line operation does!
+
 Dan F (24 January 2007)
 - Fixed a dangling pointer problem that prevented the http_proxy environment
   variable from being properly used in many cases (and caused test case 63

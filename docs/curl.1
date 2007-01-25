@@ -599,7 +599,7 @@ line. So, it could look similar to this:
 
 url = "http://curl.haxx.se/docs/"
 
-This option can be used multiple times.
+This option can be used multiple times to load multiple config files.
 
 When curl is invoked, it always (unless \fI-q\fP is used) checks for a default
 config file and uses it if found. The default config file is checked for in
@@ -614,6 +614,12 @@ resort the '%USERPROFILE%\Application Data'.
 2) On windows, if there is no _curlrc file in the home dir, it checks for one
 in the same dir the executable curl is placed. On unix-like systems, it will
 simply try to load .curlrc from the determined home dir.
+.IP "--libcurl <file>"
+Append this option to any ordinary curl command line, and you will get a
+libcurl-using source code written to the file that does the equivalent
+operation of what your command line operation does!
+
+If this option is used several times, the last given file name will be used.
 .IP "--limit-rate <speed>"
 Specify the maximum transfer rate you want curl to use. This feature is useful
 if you have a limited pipe and you'd like your transfer not use your entire
