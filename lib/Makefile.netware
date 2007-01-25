@@ -420,7 +420,6 @@ ifdef WITH_SSL
 endif
 ifdef WITH_SSH2
 	@echo $(DL)#define USE_LIBSSH2 1$(DL) >> $@
-	@echo $(DL)#define HAVE_LIBSSH2 1$(DL) >> $@
 	@echo $(DL)#define HAVE_LIBSSH2_H 1$(DL) >> $@
 endif
 ifdef OLD_NOVELLSDK
