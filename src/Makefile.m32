@@ -31,7 +31,7 @@ STRIP = strip -s
 ## Nothing more to do below this line!
 
 INCLUDES = -I. -I.. -I../include -I../lib -I$(ZLIB_PATH)
-CFLAGS = -g -O2 -DMINGW32
+CFLAGS = -g -O2
 LDFLAGS =
 COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
 LINK = $(CC) $(CFLAGS) $(LDFLAGS) -o $@

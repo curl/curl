@@ -29,7 +29,7 @@ STRIP = strip -g
 ## Nothing more to do below this line!
 
 INCLUDES = -I. -I../include
-CFLAGS = -g -O2 -DMINGW32 -DBUILDING_LIBCURL -DHAVE_LONGLONG
+CFLAGS = -g -O2 -DBUILDING_LIBCURL -DHAVE_LONGLONG
 ifdef SSH2
   INCLUDES += -I"$(LIBSSH2_PATH)/include" -I"$(LIBSSH2_PATH)/win32"
   CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
