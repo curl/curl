@@ -73,6 +73,10 @@ mingw32-ssl:
 	$(MAKE) -C lib -f Makefile.m32 SSL=1 ZLIB=1
 	$(MAKE) -C src -f Makefile.m32 SSL=1 ZLIB=1
 
+mingw32-ssh2-ssl:
+	$(MAKE) -C lib -f Makefile.m32 SSH2=1 SSL=1 ZLIB=1
+	$(MAKE) -C src -f Makefile.m32 SSH2=1 SSL=1 ZLIB=1
+
 mingw32-clean:
 	$(MAKE) -C lib -f Makefile.m32 clean
 	$(MAKE) -C src -f Makefile.m32 clean
@@ -211,6 +215,10 @@ netware-ssl:
 netware-ssl-zlib:
 	$(MAKE) -C lib -f Makefile.netware WITH_SSL=1 WITH_ZLIB=1
 	$(MAKE) -C src -f Makefile.netware WITH_SSL=1 WITH_ZLIB=1
+
+netware-ssh2-ssl-zlib:
+	$(MAKE) -C lib -f Makefile.netware WITH_SSH2=1 WITH_SSL=1 WITH_ZLIB=1
+	$(MAKE) -C src -f Makefile.netware WITH_SSH2=1 WITH_SSL=1 WITH_ZLIB=1
 
 netware-zlib:
 	$(MAKE) -C lib -f Makefile.netware WITH_ZLIB=1
