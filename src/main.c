@@ -2200,7 +2200,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
               "A specfied range MUST include at least one dash (-). "
               "Appending one for you!\n");
         off = curlx_strtoofft(nextarg, NULL, 10);
-        snprintf(buffer, sizeof(buffer), CURL_FORMAT_OFF_T "-", off);
+        snprintf(buffer, sizeof(buffer), "%Od-", off);
         GetStr(&config->range, buffer);
       }
       else
@@ -3253,7 +3253,7 @@ CURLcode _my_setopt(CURL *curl, const char *name, CURLoption tag, ...)
   }
   else {
     curl_off_t oval = va_arg(arg, curl_off_t);
-    snprintf(value, sizeof(value), "(curl_off_t)"CURL_FORMAT_OFF_T, oval);
+    snprintf(value, sizeof(value), "(curl_off_t)%Od", oval);
     ret = curl_easy_setopt(curl, tag, oval);
   }
 
@@ -4268,8 +4268,7 @@ operate(struct Configurable *config, int argc, char *argv[])
                 /* We have written data to a output file, we truncate file
                  */
                 if(!(config->conf&CONF_MUTE))
-                  fprintf(stderr, "Throwing away " CURL_FORMAT_OFF_T
-                          " bytes\n", outs.bytes);
+                  fprintf(stderr, "Throwing away %Od bytes\n", outs.bytes);
                 fflush(outs.stream);
                 /* truncate file at the position where we started appending */
 #ifdef HAVE_FTRUNCATE
