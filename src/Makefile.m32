@@ -36,7 +36,7 @@ INCLUDES = -I. -I.. -I../include -I../lib -I$(ZLIB_PATH)
 CFLAGS = -g -O2
 LDFLAGS =
 COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
-LINK = $(CC) $(CFLAGS) $(LDFLAGS) -o $@
+LINK = $(CC) $(LDFLAGS) -o $@
 
 curl_PROGRAMS = curl.exe
 ifdef DYN
