@@ -3225,13 +3225,21 @@ CURLcode _my_setopt(CURL *curl, const char *name, CURLoption tag, ...)
 
   }
   else if(tag < CURLOPTTYPE_OFF_T) {
-    /* we treat both object and function pointers like this */
     void *pval = va_arg(arg, void *);
     unsigned char *ptr = (unsigned char *)pval;
 
+    /* function pointers are never printable */
+    if (tag >= CURLOPTTYPE_FUNCTIONPOINT) {
+      if (pval) {
+        snprintf(value, sizeof(value), "%p", pval);
+        remark = TRUE;
+      }
+      else
+        strcpy(value, "NULL");
+    }
     /* attempt to figure out if it is a string (since the tag numerical doesn't
        offer this info) and then output it as a string if so */
-    if(pval && isgraph(ptr[0]) && isgraph(ptr[1]))
+    else if(pval && isgraph(ptr[0]) && isgraph(ptr[1]))
       snprintf(value, sizeof(value), "\"%s\"", (char *)ptr);
     else if(pval) {
       snprintf(value, sizeof(value), "%p", pval);
