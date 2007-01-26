@@ -20,6 +20,8 @@ ZLIB_PATH = ../../zlib-1.2.3
 endif
 
 CC = gcc
+RC = windres
+RCFLAGS = --include-dir=../include -O COFF -i
 RM = rm -f
 STRIP = strip -s
 
@@ -62,12 +64,13 @@ curl_OBJECTS := $(patsubst %.c,%.o,$(notdir $(strip $(CURL_SOURCES) ../lib/timev
 # curlx_OBJECTS := $(patsubst %.c,%.o,$(notdir $(strip $(CURLX_ONES))))
 # vpath %.c ../lib
 
+.SUFFIXES: .rc .res
 
 all: curl.exe
 
-curl.exe: $(curl_OBJECTS) $(curl_DEPENDENCIES)
+curl.exe: curl.res $(curl_OBJECTS) $(curl_DEPENDENCIES)
 	$(RM) $@
-	$(LINK) $(curl_OBJECTS) $(curl_LDADD)
+	$(LINK) $< $(curl_OBJECTS) $(curl_LDADD)
 	$(STRIP) $@
 
 timeval.o: ../lib/timeval.c
@@ -77,6 +80,9 @@ timeval.o: ../lib/timeval.c
 # hugehelp.c: ../README.curl ../curl.1 mkhelp.pl
 # 	$(RM) hugehelp.c
 # 	$(NROFF) -man ../curl.1 | $(PERL) mkhelp.pl ../README.curl > hugehelp.c
+
+.rc.res:
+	$(RC) $(RCFLAGS) $< -o $@
 
 .c.o:
 	$(COMPILE) -c $<
