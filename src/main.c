@@ -422,6 +422,11 @@ static CURLcode main_init(void)
   /* stop stat() wasting time */
   _djstat_flags |= _STAT_INODE | _STAT_EXEC_MAGIC | _STAT_DIRSIZE;
 #endif
+
+#ifdef WIN32
+  LoadLibrary ("exchndl.dll");
+#endif
+
   return curl_global_init(CURL_GLOBAL_DEFAULT);
 }
 
@@ -3147,6 +3152,8 @@ static void free_config_fields(struct Configurable *config)
     free(config->iface);
   if(config->socksproxy)
     free(config->socksproxy);
+  if(config->libcurl)
+    free(config->libcurl);
 
   curl_slist_free_all(config->quote); /* checks for config->quote == NULL */
   curl_slist_free_all(config->prequote);
