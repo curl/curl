@@ -20,6 +20,8 @@ ZLIB_PATH = ../../zlib-1.2.3
 endif
 
 CC = gcc
+CFLAGS = -g -O2
+LDFLAGS =
 RC = windres
 RCFLAGS = --include-dir=../include -O COFF -i
 RM = rm -f
@@ -33,8 +35,6 @@ STRIP = strip -s
 ## Nothing more to do below this line!
 
 INCLUDES = -I. -I.. -I../include -I../lib -I$(ZLIB_PATH)
-CFLAGS = -g -O2
-LDFLAGS =
 COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
 LINK = $(CC) $(LDFLAGS) -o $@
 
