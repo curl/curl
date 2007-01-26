@@ -364,7 +364,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
              might be pipelining and then someone else might want to read what
              follows! */
           curl_off_t totalleft = k->size - k->bytecount;
-          if(totalleft < bytestoread)
+          if(totalleft < (curl_off_t)bytestoread)
             bytestoread = (size_t)totalleft;
         }
 
