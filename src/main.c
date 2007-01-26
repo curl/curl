@@ -422,11 +422,6 @@ static CURLcode main_init(void)
   /* stop stat() wasting time */
   _djstat_flags |= _STAT_INODE | _STAT_EXEC_MAGIC | _STAT_DIRSIZE;
 #endif
-
-#ifdef WIN32
-  LoadLibrary ("exchndl.dll");
-#endif
-
   return curl_global_init(CURL_GLOBAL_DEFAULT);
 }
 
