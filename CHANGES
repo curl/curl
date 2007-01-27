@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (28 January 2007)
+- David McCreedy fixed the Curl command line tool for HTTP on non-ASCII
+  platforms.
+
 Daniel (25 January 2007)
 - Added the --libcurl [file] option to curl. Append this option to any
   ordinary curl command line, and you will get a libcurl-using source code

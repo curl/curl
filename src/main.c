@@ -203,9 +203,112 @@ typedef enum {
 #define struct_stat struct stat
 #endif
 
-#if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
+#ifdef CURL_DOES_CONVERSIONS
+#ifdef HAVE_ICONV
 iconv_t inbound_cd  = (iconv_t)-1;
-#endif /* CURL_DOES_CONVERSIONS && HAVE_ICONV */
+iconv_t outbound_cd = (iconv_t)-1;
+
+/*
+ * convert_to_network() is an internal function to convert
+ * from the host encoding to ASCII on non-ASCII platforms.
+ */
+static CURLcode
+convert_to_network(char *buffer, size_t length)
+{
+  CURLcode rc;
+
+  /* translate from the host encoding to the network encoding */
+  char *input_ptr, *output_ptr;
+  size_t in_bytes, out_bytes;
+
+  /* open an iconv conversion descriptor if necessary */
+  if(outbound_cd == (iconv_t)-1) {
+    outbound_cd = iconv_open(CURL_ICONV_CODESET_OF_NETWORK,
+                             CURL_ICONV_CODESET_OF_HOST);
+    if(outbound_cd == (iconv_t)-1) {
+      return CURLE_CONV_FAILED;
+    }
+  }
+  /* call iconv */
+  input_ptr = output_ptr = buffer;
+  in_bytes = out_bytes = length;
+  rc = iconv(outbound_cd, &input_ptr,  &in_bytes,
+                          &output_ptr, &out_bytes);
+  if ((rc == -1) || (in_bytes != 0)) {
+    return CURLE_CONV_FAILED;
+  }
+
+  return CURLE_OK;
+}
+
+/*
+ * convert_from_network() is an internal function
+ * for performing ASCII conversions on non-ASCII platforms.
+ */
+static CURLcode
+convert_from_network(char *buffer, size_t length)
+{
+  CURLcode rc;
+
+  /* translate from the network encoding to the host encoding */
+  char *input_ptr, *output_ptr;
+  size_t in_bytes, out_bytes;
+
+  /* open an iconv conversion descriptor if necessary */
+  if(inbound_cd == (iconv_t)-1) {
+    inbound_cd = iconv_open(CURL_ICONV_CODESET_OF_HOST,
+                            CURL_ICONV_CODESET_OF_NETWORK);
+    if(inbound_cd == (iconv_t)-1) {
+      return CURLE_CONV_FAILED;
+    }
+  }
+  /* call iconv */
+  input_ptr = output_ptr = buffer;
+  in_bytes = out_bytes = length;
+  rc = iconv(inbound_cd, &input_ptr,  &in_bytes,
+                         &output_ptr, &out_bytes);
+  if ((rc == -1) || (in_bytes != 0)) {
+    return CURLE_CONV_FAILED;
+  }
+
+  return CURLE_OK;
+}
+#endif /* HAVE_ICONV */
+
+static
+char convert_char(curl_infotype infotype, char this_char)
+{
+/* determine how this specific character should be displayed */
+  switch(infotype) {
+  case CURLINFO_DATA_IN:
+  case CURLINFO_DATA_OUT:
+  case CURLINFO_SSL_DATA_IN:
+  case CURLINFO_SSL_DATA_OUT:
+    /* data, treat as ASCII */
+    if ((this_char >= 0x20) && (this_char < 0x7f)) {
+      /* printable ASCII hex value: convert to host encoding */
+      convert_from_network(&this_char, 1);
+    }
+    else {
+      /* non-printable ASCII, use a replacement character */
+      return UNPRINTABLE_CHAR;
+    }
+    /* fall through to default */
+  default:
+    /* treat as host encoding */
+    if (ISPRINT(this_char)
+        &&  (this_char != '\t')
+        &&  (this_char != '\r')
+        &&  (this_char != '\n')) {
+      /* printable characters excluding tabs and line end characters */
+      return this_char;
+    }
+    break;
+  }
+  /* non-printable, use a replacement character  */
+  return UNPRINTABLE_CHAR;
+}
+#endif /* CURL_DOES_CONVERSIONS */
 
 #ifdef WIN32
 /*
@@ -434,9 +537,10 @@ static void main_free(void)
   curl_global_cleanup();
 #if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
   /* close iconv conversion descriptor */
-  if (inbound_cd != (iconv_t)-1) {
-     iconv_close(inbound_cd);
-  }
+  if(inbound_cd != (iconv_t)-1)
+    iconv_close(inbound_cd);
+  if(outbound_cd != (iconv_t)-1)
+    iconv_close(outbound_cd);
 #endif /* CURL_DOES_CONVERSIONS && HAVE_ICONV */
 }
 
@@ -1088,6 +1192,9 @@ static int formparse(struct Configurable *config,
         }
       }
       else {
+#ifdef CURL_DOES_CONVERSIONS
+        convert_to_network(contp, strlen(contp));
+#endif
         info[i].option = CURLFORM_COPYCONTENTS;
         info[i].value = contp;
         i++;
@@ -1909,6 +2016,12 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         else {
           GetStr(&postdata, nextarg);
         }
+ 
+#ifdef CURL_DOES_CONVERSIONS
+        if(subletter != 'b') { /* NOT forced binary, convert to ASCII */
+          convert_to_network(postdata, strlen(postdata));
+        }
+#endif
 
         if(config->postfields) {
           /* we already have a string, we append this one
@@ -1918,7 +2031,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           config->postfields=malloc(newlen);
           if(!config->postfields)
             return PARAM_NO_MEM;
-          snprintf(config->postfields, newlen, "%s&%s", oldpost, postdata);
+          /* use ASCII value 0x26 for '&' to accommodate non-ASCII platforms */
+          snprintf(config->postfields, newlen, "%s\x26%s", oldpost, postdata);
           free(oldpost);
           free(postdata);
         }
@@ -2832,74 +2946,6 @@ void progressbarinit(struct ProgressData *bar,
   bar->out = config->errors;
 }
 
-#if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
-/*
- * convert_from_network() is an internal function
- * for performing ASCII conversions on non-ASCII platforms.
- */
-CURLcode
-convert_from_network(char *buffer, size_t length)
-{
-  CURLcode rc;
-
-  /* translate from the network encoding to the host encoding */
-  char *input_ptr, *output_ptr;
-  size_t in_bytes, out_bytes;
-
-  /* open an iconv conversion descriptor if necessary */
-  if(inbound_cd == (iconv_t)-1) {
-    inbound_cd = iconv_open(CURL_ICONV_CODESET_OF_HOST,
-                            CURL_ICONV_CODESET_OF_NETWORK);
-    if(inbound_cd == (iconv_t)-1) {
-      return CURLE_CONV_FAILED;
-    }
-  }
-  /* call iconv */
-  input_ptr = output_ptr = buffer;
-  in_bytes = out_bytes = length;
-  rc = iconv(inbound_cd, &input_ptr,  &in_bytes,
-                         &output_ptr, &out_bytes);
-  if ((rc == -1) || (in_bytes != 0)) {
-    return CURLE_CONV_FAILED;
-  }
-
-  return CURLE_OK;
-}
-
-static
-char convert_char(curl_infotype infotype, char this_char)
-{
-/* determine how this specific character should be displayed */
-  switch(infotype) {
-  case CURLINFO_DATA_IN:
-  case CURLINFO_DATA_OUT:
-  case CURLINFO_SSL_DATA_IN:
-  case CURLINFO_SSL_DATA_OUT:
-    /* data, treat as ASCII */
-    if ((this_char >= 0x20) && (this_char < 0x7f)) {
-      /* printable ASCII hex value: convert to host encoding */
-      convert_from_network(&this_char, 1);
-    }
-    else {
-      /* non-printable ASCII, use a replacement character */
-      return UNPRINTABLE_CHAR;
-    }
-    /* fall through to default */
-  default:
-    /* treat as host encoding */
-    if (ISPRINT(this_char)
-        &&  (this_char != '\t')
-        &&  (this_char != '\r')
-        &&  (this_char != '\n')) {
-      /* printable characters excluding tabs and line end characters */
-      return this_char;
-    }
-    break;
-  }
-  /* non-printable, use a replacement character  */
-  return UNPRINTABLE_CHAR;
-}
-#endif /* CURL_DOES_CONVERSIONS */
 
 static
 void dump(char *timebuf, const char *text,
@@ -2937,14 +2983,20 @@ void dump(char *timebuf, const char *text,
         i+=(c+2-width);
         break;
       }
-#if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
+#ifdef CURL_DOES_CONVERSIONS
+      /* repeat the 0D0A check above but use the host encoding for CRLF */
+      if ((tracetype == TRACE_ASCII) &&
+          (i+c+1 < size) && ptr[i+c]=='\r' && ptr[i+c+1]=='\n') {
+        i+=(c+2-width);
+        break;
+      }
       /* convert to host encoding and print this character */
       fprintf(stream, "%c", convert_char(infotype, ptr[i+c]));
 #else
       (void)infotype;
       fprintf(stream, "%c",
               (ptr[i+c]>=0x20) && (ptr[i+c]<0x80)?ptr[i+c]:UNPRINTABLE_CHAR);
-#endif /* CURL_DOES_CONVERSIONS && HAVE_ICONV */
+#endif /* CURL_DOES_CONVERSIONS */
       /* check again for 0D0A, to avoid an extra \n if it's at width */
       if ((tracetype == TRACE_ASCII) &&
           (i+c+2 < size) && ptr[i+c+1]==0x0D && ptr[i+c+2]==0x0A) {
@@ -3066,6 +3118,27 @@ int my_trace(CURL *handle, curl_infotype type,
     return 0;
   }
 
+#ifdef CURL_DOES_CONVERSIONS
+  /* Special processing is needed for CURLINFO_HEADER_OUT blocks
+   * if they contain both headers and data (separated by CRLFCRLF).
+   * We dump the header text and then switch type to CURLINFO_DATA_OUT.
+   */
+  if((type == CURLINFO_HEADER_OUT) && (size > 4)) {
+    int i;
+    for(i = 0; i < size - 4; i++) {
+      if(memcmp(&data[i], "\r\n\r\n", 4) == 0) {
+        /* dump everthing through the CRLFCRLF as a sent header */
+        text = "=> Send header";
+        dump(timebuf, text, output, data, i+4, config->tracetype, type);
+        data += i + 3;
+        size -= i + 4;
+        type = CURLINFO_DATA_OUT;
+        data += 1;
+        break;
+      }
+    }
+  }
+#endif /* CURL_DOES_CONVERSIONS */
 
   switch (type) {
   case CURLINFO_TEXT:

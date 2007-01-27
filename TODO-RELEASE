@@ -1,16 +1,4 @@
 To get fixed in 7.16.1 (planned release: January 2007)
 ======================
 
-69 - Jeff Pohlmeyer's curl_multi_socket crashing case. Recipe and instructions
-     here: http://curl.haxx.se/mail/lib-2007-01/0022.html
-
-78 - HTTP Pipelining, NULL content
-     http://curl.haxx.se/bug/view.cgi?id=1631566
-
-80 - Steffen Rumler's Race Condition in Curl_proxyCONNECT:
-     http://curl.haxx.se/mail/lib-2007-01/0045.html
-
-81 - Kumar Swamy Bhatt's problem in ftp/ssl "LIST" operation:
-     http://curl.haxx.se/mail/lib-2007-01/0103.html
-
 82 - 
