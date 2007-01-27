@@ -337,6 +337,7 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
 
 #ifdef CURL_LIBSSH2_DEBUG
   /* The fingerprint points to static storage (!), don't free() it. */
+  infof(data, "Fingerprint: ");
   for (i = 0; i < 16; i++) {
     infof(data, "%02X ", (unsigned char) fingerprint[i]);
   }
