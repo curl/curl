@@ -512,7 +512,7 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
   }
 
   if(easy) {
-    bool premature = easy->state != CURLM_STATE_COMPLETED;
+    bool premature = (bool)(easy->state != CURLM_STATE_COMPLETED);
 
     /* If the 'state' is not INIT or COMPLETED, we might need to do something
        nice to put the easy_handle in a good known state when this returns. */

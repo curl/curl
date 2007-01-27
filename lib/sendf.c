@@ -474,7 +474,7 @@ int Curl_read(struct connectdata *conn, /* connection data */
   ssize_t nread;
   size_t bytesfromsocket = 0;
   char *buffertofill = NULL;
-  bool pipelining = (conn->data->multi &&
+  bool pipelining = (bool)(conn->data->multi &&
                      Curl_multi_canPipeline(conn->data->multi));
 
   /* Set 'num' to 0 or 1, depending on which socket that has been sent here.
