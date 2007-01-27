@@ -3,7 +3,7 @@
 
 /* $Id$ */
 
-/* Copyright (C) 2004 - 2006 by Daniel Stenberg et al
+/* Copyright (C) 2004 - 2007 by Daniel Stenberg et al
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -29,7 +29,7 @@
 
 /*
  * If we have the MSG_NOSIGNAL define, make sure we use
- * it as the fourth argument of send() and recv()
+ * it as the fourth argument of function send()
  */
 
 #ifdef HAVE_MSG_NOSIGNAL
@@ -74,7 +74,7 @@
 #define sread(x,y,z) (ssize_t)recv((RECV_TYPE_ARG1)(x), \
                                    (RECV_TYPE_ARG2)(y), \
                                    (RECV_TYPE_ARG3)(z), \
-                                   (RECV_TYPE_ARG4)(SEND_4TH_ARG))
+                                   (RECV_TYPE_ARG4)(0))
 #endif
 #else /* HAVE_RECV */
 #ifndef sread
