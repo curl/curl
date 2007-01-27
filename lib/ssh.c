@@ -807,7 +807,8 @@ CURLcode Curl_sftp_do(struct connectdata *conn, bool *done)
                                 filename);
           }
 
-          infof(data, "%s\n", line);
+          currLen += snprintf(line+currLen, totalLen-currLen, "\n");
+          res = Curl_client_write(conn, CLIENTWRITE_BOTH, line, 0);
           free(line);
         }
       }
