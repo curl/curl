@@ -7,6 +7,8 @@
                                   Changelog
 
 Daniel (28 January 2007)
+- curl_easy_reset() now resets the CA bundle path correctly.
+
 - David McCreedy fixed the Curl command line tool for HTTP on non-ASCII
   platforms.
 
