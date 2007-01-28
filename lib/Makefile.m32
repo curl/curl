@@ -47,6 +47,9 @@ ifdef ZLIB
   CFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
   DLL_LIBS += -L$(ZLIB_PATH) -lz
 endif
+ifdef SSPI
+  CFLAGS += -DUSE_WINDOWS_SSPI
+endif
 COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines

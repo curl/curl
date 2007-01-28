@@ -55,6 +55,9 @@ ifdef SSL
   CFLAGS += -DUSE_SSLEAY -DHAVE_OPENSSL_ENGINE_H
   curl_LDADD += -L$(OPENSSL_PATH)/out -leay32 -lssl32
 endif
+ifdef SSPI
+  CFLAGS += -DUSE_WINDOWS_SSPI
+endif
 curl_LDADD += -lwsock32 -lws2_32 -lwinmm -L$(ZLIB_PATH) -lz
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
