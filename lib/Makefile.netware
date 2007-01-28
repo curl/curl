@@ -68,6 +68,7 @@ ifdef METROWERKS
 else
 	CC = gcc
 endif
+AWK	= awk
 YACC	= bison -y
 CP	= cp -afv
 # RM	= rm -f
@@ -198,7 +199,7 @@ $(OBJDIR)/%.o: %.c
 
 $(OBJDIR)/version.inc: ../include/curl/curlver.h $(OBJDIR)
 	@echo Creating $@
-	@awk -f ../packages/NetWare/get_ver.awk $< > $@
+	@$(AWK) -f ../packages/NetWare/get_ver.awk $< > $@
 
 dist: all
 	-$(RM) $(OBJDIR)/*.o $(OBJDIR)/$(TARGET).map $(OBJDIR)/$(TARGET).ncv
@@ -443,6 +444,11 @@ ifdef WITH_SSL
 	@echo SSL support:     enabled (OpenSSL)
 else
 	@echo SSL support:     no
+endif
+ifdef WITH_SSH2
+	@echo SSH2 support:    enabled (libssh2)
+else
+	@echo SSH2 support:    no
 endif
 ifdef WITH_ZLIB
 	@echo zlib support:    enabled

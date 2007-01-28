@@ -68,6 +68,7 @@ ifdef METROWERKS
 else
 	CC = gcc
 endif
+AWK	= awk
 CP	= cp -afv
 # RM	= rm -f
 # if you want to mark the target as MTSAFE you will need a tool for
@@ -180,7 +181,7 @@ $(OBJDIR)/%.o: %.c
 
 $(OBJDIR)/version.inc: $(CURL_INC)/curl/curlver.h $(OBJDIR)
 	@echo Creating $@
-	@awk -f ../packages/NetWare/get_ver.awk $< > $@
+	@$(AWK) -f ../packages/NetWare/get_ver.awk $< > $@
 
 dist: all
 	-$(RM) $(OBJDIR)/*.o $(OBJDIR)/$(TARGET).map $(OBJDIR)/$(TARGET).ncv
