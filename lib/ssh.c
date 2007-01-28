@@ -21,7 +21,7 @@
 * $Id$
 ***************************************************************************/
 
-#define CURL_LIBSSH2_DEBUG
+/* #define CURL_LIBSSH2_DEBUG */
 
 #include "setup.h"
 
@@ -808,7 +808,7 @@ CURLcode Curl_sftp_do(struct connectdata *conn, bool *done)
           }
 
           currLen += snprintf(line+currLen, totalLen-currLen, "\n");
-          res = Curl_client_write(conn, CLIENTWRITE_BOTH, line, 0);
+          res = Curl_client_write(conn, CLIENTWRITE_BODY, line, 0);
           free(line);
         }
       }
