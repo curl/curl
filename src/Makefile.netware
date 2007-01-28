@@ -198,6 +198,9 @@ endif
 	-$(RM) config.h
 	-$(RM) -r $(OBJDIR)
 
+distclean: clean
+	-$(RM) -r $(TARGET).nlm
+
 $(INSTDIR):
 	@mkdir $(INSTDIR)
 
