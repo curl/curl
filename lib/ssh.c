@@ -186,6 +186,11 @@ kbd_callback(const char *name, int name_len, const char *instruction,
   fprintf(stderr, "instruction=%s\n", instruction);
   fprintf(stderr, "instruction_len=%d\n", instruction_len);
   fprintf(stderr, "num_prompts=%d\n", num_prompts);
+#else
+  (void)name;
+  (void)name_len;
+  (void)instruction;
+  (void)instruction_len;
 #endif  /* CURL_LIBSSH2_DEBUG */
   if (num_prompts == 1) {
     responses[0].text = strdup(ssh->passwd);
