@@ -10,7 +10,6 @@
 
 #include "test.h"
 
-#include <sys/time.h>
 #include <sys/types.h>
 
 #include "timeval.h"
@@ -83,7 +82,7 @@ int test(char *URL)
     interval.tv_sec = 1;
     interval.tv_usec = 0;
 
-    if (curlx_tvdiff(curlx_tvnow(), ml_start) > 
+    if (curlx_tvdiff(curlx_tvnow(), ml_start) >
         MAIN_LOOP_HANG_TIMEOUT) {
       ml_timedout = TRUE;
       break;
@@ -97,7 +96,7 @@ int test(char *URL)
 
     while (res == CURLM_CALL_MULTI_PERFORM) {
       res = curl_multi_perform(m, &running);
-      if (curlx_tvdiff(curlx_tvnow(), mp_start) > 
+      if (curlx_tvdiff(curlx_tvnow(), mp_start) >
           MULTI_PERFORM_HANG_TIMEOUT) {
         mp_timedout = TRUE;
         break;
