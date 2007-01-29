@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (29 January 2007)
+- Michael Wallner reported that when doing a CONNECT with a custom User-Agent
+  header, you got _two_ User-Agent headers in the CONNECT request...! Added
+  test case 287 to verify the fix.
+
 Daniel (28 January 2007)
 - curl_easy_reset() now resets the CA bundle path correctly.
 
