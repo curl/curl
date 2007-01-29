@@ -6,6 +6,8 @@
 
                                   Changelog
 
+Version 7.16.1 (29 January 2007)
+
 Daniel (29 January 2007)
 - Michael Wallner reported that when doing a CONNECT with a custom User-Agent
   header, you got _two_ User-Agent headers in the CONNECT request...! Added
