@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -37,6 +37,10 @@ LIBDIR = $(top_builddir)/lib
 
 EXTRA_DIST = test307.pl
 
+# *NOTICE* that some test cases use curlx_* functions that are not in the API
+# but must be provided by source
+TIMEVAL=$(top_srcdir)/lib/timeval.c
+
 # these files are used in every single test program below
 SUPPORTFILES = first.c test.h
 
@@ -56,13 +60,13 @@ lib500_DEPENDENCIES = $(DEPENDENCIES)
 lib501_SOURCES = lib501.c $(SUPPORTFILES)
 lib501_DEPENDENCIES = $(DEPENDENCIES)
 
-lib502_SOURCES = lib502.c $(SUPPORTFILES)
+lib502_SOURCES = lib502.c $(SUPPORTFILES) $(TIMEVAL)
 lib502_DEPENDENCIES = $(DEPENDENCIES)
 
-lib503_SOURCES = lib503.c $(SUPPORTFILES)
+lib503_SOURCES = lib503.c $(SUPPORTFILES) $(TIMEVAL)
 lib503_DEPENDENCIES = $(DEPENDENCIES)
 
-lib504_SOURCES = lib504.c $(SUPPORTFILES)
+lib504_SOURCES = lib504.c $(SUPPORTFILES) $(TIMEVAL)
 lib504_DEPENDENCIES = $(DEPENDENCIES)
 
 lib505_SOURCES = lib505.c $(SUPPORTFILES)
@@ -71,13 +75,13 @@ lib505_DEPENDENCIES = $(DEPENDENCIES)
 lib506_SOURCES = lib506.c $(SUPPORTFILES)
 lib506_DEPENDENCIES = $(DEPENDENCIES)
 
-lib507_SOURCES = lib507.c $(SUPPORTFILES)
+lib507_SOURCES = lib507.c $(SUPPORTFILES) $(TIMEVAL)
 lib507_DEPENDENCIES = $(DEPENDENCIES)
 
 lib508_SOURCES = lib508.c $(SUPPORTFILES)
 lib508_DEPENDENCIES = $(DEPENDENCIES)
 
-lib509_SOURCES = lib509.c $(SUPPORTFILES)
+lib509_SOURCES = lib509.c $(SUPPORTFILES) $(TIMEVAL)
 lib509_DEPENDENCIES = $(DEPENDENCIES)
 
 lib510_SOURCES = lib510.c $(SUPPORTFILES)
@@ -122,10 +126,10 @@ lib523_DEPENDENCIES = $(DEPENDENCIES)
 lib524_SOURCES = lib524.c $(SUPPORTFILES)
 lib524_DEPENDENCIES = $(DEPENDENCIES)
 
-lib525_SOURCES = lib525.c $(SUPPORTFILES)
+lib525_SOURCES = lib525.c $(SUPPORTFILES) $(TIMEVAL)
 lib525_DEPENDENCIES = $(DEPENDENCIES)
 
-lib526_SOURCES = lib526.c $(SUPPORTFILES)
+lib526_SOURCES = lib526.c $(SUPPORTFILES) $(TIMEVAL)
 lib526_CFLAGS = -DLIB526
 lib526_DEPENDENCIES = $(DEPENDENCIES)
 
@@ -137,7 +141,7 @@ lib529_SOURCES = lib525.c $(SUPPORTFILES)
 lib529_CFLAGS = -DLIB529
 lib529_DEPENDENCIES = $(DEPENDENCIES)
 
-lib530_SOURCES = lib530.c $(SUPPORTFILES)
+lib530_SOURCES = lib530.c $(SUPPORTFILES) $(TIMEVAL)
 lib530_CFLAGS = -DLIB530
 lib530_DEPENDENCIES = $(DEPENDENCIES)
 
@@ -145,10 +149,10 @@ lib532_SOURCES = lib526.c $(SUPPORTFILES)
 lib532_CFLAGS = -DLIB532
 lib532_DEPENDENCIES = $(DEPENDENCIES)
 
-lib533_SOURCES = lib533.c $(SUPPORTFILES)
+lib533_SOURCES = lib533.c $(SUPPORTFILES) $(TIMEVAL)
 lib533_DEPENDENCIES = $(DEPENDENCIES)
 
-lib536_SOURCES = lib536.c $(SUPPORTFILES)
+lib536_SOURCES = lib536.c $(SUPPORTFILES) $(TIMEVAL)
 lib536_DEPENDENCIES = $(DEPENDENCIES)
 
 lib537_SOURCES = lib537.c $(SUPPORTFILES)
