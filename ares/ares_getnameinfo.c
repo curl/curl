@@ -220,7 +220,8 @@ static void nameinfo_callback(void *arg, int status, struct hostent *host)
                  *end = 0;
              }
         }
-      niquery->callback(niquery->arg, ARES_SUCCESS, host->h_name, service);
+      niquery->callback(niquery->arg, ARES_SUCCESS, (char *)(host->h_name),
+                        service);
       return;
     }
   /* We couldn't find the host, but it's OK, we can use the IP */

@@ -239,7 +239,7 @@ static int fake_hostent(const char *name, int family, ares_host_callback callbac
   hostent.h_addr_list = addrs;
   callback(arg, ARES_SUCCESS, &hostent);
 
-  free(hostent.h_name);
+  free((char *)(hostent.h_name));
   return 1;
 }
 
