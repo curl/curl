@@ -55,6 +55,7 @@ This release includes the following bugfixes:
  o easy handle removal from multi handle before completion
  o TFTP upload memory leak
  o curl_easy_reset() now resets the CA bundle path correctly
+ o two User-Agent headers in CONNECT requests with custom User-Agent
 
 This release includes the following known bugs:
 
