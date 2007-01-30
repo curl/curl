@@ -356,9 +356,9 @@ static int rlimit(int keep_open)
    * with an indication that select limit would be exceeded.
    */
 
-  sprintf(strbuff2, fmt, num_open.rlim_max);
+  sprintf(strbuff1, fmt, num_open.rlim_max);
   sprintf(strbuff, "fds open %s > select limit %d",
-          strbuff2, FD_SETSIZE);
+          strbuff1, FD_SETSIZE);
   store_errmsg(strbuff, 0);
   fprintf(stderr, "%s\n", msgbuff);
   close_file_descriptors();
