@@ -30,7 +30,9 @@ struct iovec
     size_t iov_len;     /* Length of data.  */
 };
 
+#ifndef __WATCOMC__
 #define getpid() _getpid()
+#endif
 
 int ares_writev (SOCKET s, const struct iovec *vector, size_t count);
 #define writev(s,vect,count)  ares_writev(s,vect,count)

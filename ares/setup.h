@@ -133,7 +133,7 @@ typedef int ares_socket_t;
  * Assume a few thing unless they're set by configure
  */
 
-#if !defined(HAVE_SYS_TIME_H) && !defined(_MSC_VER)
+#if !defined(HAVE_SYS_TIME_H) && !defined(_MSC_VER) && !defined(__WATCOMC__)
 #define HAVE_SYS_TIME_H
 #endif
 
