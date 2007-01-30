@@ -1,7 +1,7 @@
-Curl and libcurl 7.16.1
+Curl and libcurl 7.16.2
 
- Public curl release number:               97
- Releases counted from the very beginning: 124
+ Public curl release number:               98
+ Releases counted from the very beginning: 125
  Available command line options:           115
  Available curl_easy_setopt() options:     137
  Number of public functions in libcurl:    54
@@ -11,51 +11,11 @@ Curl and libcurl 7.16.1
 
 This release includes the following changes:
  
- o Support for SCP and SFTP were added (powered by libssh2)
- o CURLOPT_CLOSEPOLICY is now deprecated
- o --ftp-ssl-ccc and CURLOPT_FTP_SSL_CCC were added
- o HTTP support for non-ASCII platforms
- o --libcurl was added
+ o 
 
 This release includes the following bugfixes:
 
- o proxy close during CONNECT authentication is now dealt with nicely
- o the CURLOPT_DEBUGFUNCTION was sometimes called even when CURLOPT_VERBOSE
-   was not enabled
- o multiple TFTP transfers on the same (easy or multi) handle could cause a
-   crash
- o SIGSEGV when disconnecting on a transfer on a re-used handle when the
-   host name didn't resolve
- o stack overwrite on 64bit Windows in the chunked decoding department
- o HTTP responses on persistent connections without Content-Length nor chunked
-   encoding are now considered to be without response body
- o Content-Range: header parsing improved
- o CPU 100% load when HTTP upload connection broke
- o active FTP didn't work with multi interface
- o curl_getdate() could be off one hour for TZ time zones with DST, on windows
- o CURLOPT_FORBID_REUSE works again
- o CURLOPT_MAXCONNECTS set to zero caused libcurl to SIGSEGV
- o rate limiting works better
- o getting FTP response code errors when using the multi-interface caused
-   libcurl to leak memory
- o no more SIGPIPE when GnuTLS is used
- o FTP downloading 2 zero byte files in a row
- o using proxy and URLs without protocol prefixes
- o first using a proxy and then accessing a site that 'no_proxy' matched,
-   would still make libcurl use the proxy...
- o curl_easy_duphandle() now makes a handle that is valid for the multi
-   interface since the magic number is set fine
- o libcurl.pc now uses Libs.private for "private" libs
- o --limit-rate (CURLOPT_MAX_SEND_SPEED_LARGE and CURLOPT_MAX_RECV_SPEED_LARGE)
-   now work on windows again
- o improved download performance by avoiding the unconditional "double copying"
- o base64 encoding/decoding works on non-ASCII platforms
- o large file downloads
- o CURLOPT_COOKIELIST set to "ALL" crash
- o easy handle removal from multi handle before completion
- o TFTP upload memory leak
- o curl_easy_reset() now resets the CA bundle path correctly
- o two User-Agent headers in CONNECT requests with custom User-Agent
+ o 
 
 This release includes the following known bugs:
 
@@ -63,24 +23,15 @@ This release includes the following known bugs:
 
 Other curl-related news:
 
- o TclCurl 7.16.0 was released:
-   http://personal1.iddeo.es/andresgarci/tclcurl/english/
- o Curb - Libcurl bindings for Ruby: http://curb.rubyforge.org/
+ o 
 
 New curl mirrors:
 
- o curl.miroir-francais.fr is a new French web mirror
- o curl.dsmirror.nl is a new Dutch web mirror
+ o 
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- James Housley, Olaf Stueben, Yang Tse, Gisle Vanem, Bradford Bruce,
- Ciprian Badescu, Dmitriy Sergeyev, Nir Soffer, Venkat Akella, Toon Verwaest,
- Matt Witherspoon, Alexey Simak, Martin Skinner, Sh Diao, Jared Lundell,
- Stefan Krause, Sebastien Willemijns, Alexey Simak, Brendan Jurd,
- Robson Braga Araujo, David McCreedy, Robert Foreman, Nathanael Nerode,
- Victor Snezhko, Linus Nielsen Feltzing, Toby Peterson, Dan Fandrich, 
- Armel Asselin, Michael Wallner, Guenter Knauf
+ 
 
         Thanks! (and sorry if I forgot to mention someone)
