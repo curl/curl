@@ -344,6 +344,33 @@ static int rlimit(int keep_open)
   sprintf(strbuff, fmt, num_open.rlim_max);
   fprintf(stderr, "%s file descriptors open\n", strbuff);
 
+#if !defined(HAVE_POLL_FINE)    && \
+    !defined(CURL_HAVE_WSAPOLL) && \
+    !defined(USE_WINSOCK)       && \
+    !defined(TPF)
+
+  /*
+   * when using select() instead of poll() we cannot test
+   * libcurl functionality with a socket number equal or
+   * greater than FD_SETSIZE. In any case, macro VERIFY_SOCK
+   * in lib/select.c enforces this check and protects libcurl
+   * from a possible crash. The effect of this protection
+   * is that test 518 will always fail, since the actual
+   * call to select() never takes place. We skip test 518
+   * with an indication that select limit would be exceeded.
+   */
+
+  sprintf(strbuff2, fmt, num_open.rlim_max);
+  sprintf(strbuff, "fds open %s > select limit %d",
+          strbuff2, FD_SETSIZE);
+  store_errmsg(strbuff, 0);
+  fprintf(stderr, "%s\n", msgbuff);
+  close_file_descriptors();
+  free(memchunk);
+  return -10;
+
+#endif
+
   /* free the chunk of memory we were reserving so that it
      becomes becomes available to the test */
 
