@@ -1851,7 +1851,7 @@ AC_DEFUN([CURL_DLLIB_NAME],
 AC_MSG_CHECKING([name of dynamic library $2])
 dnl The shared library extension variable name changes from version to
 dnl version of libtool.  Try a few names then just set one statically.
-test -z "$shared_ext" && shared_ext="$shrext_cmds"
+test -z "$shared_ext" && shared_ext="$std_shrext"
 test -z "$shared_ext" && shared_ext="$shrext"
 test -z "$shared_ext" && shared_ext=".so"
 
