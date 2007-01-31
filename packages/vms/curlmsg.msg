@@ -98,6 +98,9 @@ TFTP_ILLEGAL		<illegal TFTP operation>
 TFTP_UNKNOWNID		<unknown transfer ID>
 TFTP_EXISTS		<file already exists>
 TFTP_NOSUCHUSER		<no such user>
+CONV_FAILED		<conversion failed>
+CONV_REQD		<caller must register conversion callbacks>
+SSL_CACERT_BADFILE	<could not load CACERT file>
 CURL_LAST		<CURLMSG.MSG is out of sync with the source code>
 
 .END

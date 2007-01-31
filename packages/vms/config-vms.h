@@ -7,6 +7,7 @@
 /*                getpass.c no longer undef'd it during compile.           */
 /* MSK, 02/08/05, turned two config-vms files into one by using USE_SSLEAY */
 /* MPZ, 12/28/05, changed HAVE_STRTOK_R define to use CRTL_VER             */
+/* MSK, 01/27/07, needed to add HAVE_STRUCT_TIMEVAL define                 */
 
 /* Define cpu-machine-OS */
 #ifdef __ALPHA
@@ -75,15 +76,6 @@
 
 /* Define if you have the signal function.  */
 #define HAVE_SIGNAL 1
-
-/* Define if you have the <signal.h> header file. */
-#define HAVE_SIGNAL_H 1
-
-/* Define if sig_atomic_t is an available typedef. */
-#define HAVE_SIG_ATOMIC_T 1
-
-/* Define if sig_atomic_t is already defined as volatile. */
-/* #define HAVE_SIG_ATOMIC_T_VOLATILE 1 */
 
 /* Define if you have the socket function.  */
 #define HAVE_SOCKET 1
@@ -222,6 +214,10 @@
 
 #define	HAVE_TIMEVAL_H	1
 
+/* Guess HAVE_TIMEVAL_H isn't enough so now we add HAVE_STRUCT_TIMEVAL */
+
+#define	HAVE_STRUCT_TIMEVAL 1
+
 /* Name of this package! */
 #define PACKAGE "not-used"
 
@@ -345,3 +341,4 @@
 
 /* Define to the function return type for send. */
 #define SEND_TYPE_RETV int
+
