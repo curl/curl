@@ -26,6 +26,14 @@
 #include <string.h>
 #endif
 
+#if !defined(HAVE_POLL_FINE)    && \
+    !defined(CURL_HAVE_WSAPOLL) && \
+    !defined(USE_WINSOCK)       && \
+    !defined(TPF)               && \
+    !defined(FD_SETSIZE)
+#error "this test requires FD_SETSIZE"
+#endif
+
 #define SAFETY_MARGIN (10)
 
 #if defined(WIN32) || defined(_WIN32) || defined(MSDOS)
@@ -356,16 +364,31 @@ static int rlimit(int keep_open)
    * with an indication that select limit would be exceeded.
    */
 
-  sprintf(strbuff1, fmt, num_open.rlim_max);
-  sprintf(strbuff, "fds open %s > select limit %d",
-          strbuff1, FD_SETSIZE);
-  store_errmsg(strbuff, 0);
-  fprintf(stderr, "%s\n", msgbuff);
-  close_file_descriptors();
-  free(memchunk);
-  return -8;
+  num_open.rlim_cur = FD_SETSIZE - SAFETY_MARGIN;
+  if (num_open.rlim_max > num_open.rlim_cur) {
+    sprintf(strbuff, "select limit is FD_SETSIZE %d", FD_SETSIZE);
+    store_errmsg(strbuff, 0);
+    fprintf(stderr, "%s\n", msgbuff);
+    close_file_descriptors();
+    free(memchunk);
+    return -8;
+  }
 
-#endif
+  num_open.rlim_cur = FD_SETSIZE - SAFETY_MARGIN;
+  for (rl.rlim_cur = 0;
+       rl.rlim_cur < num_open.rlim_max;
+       rl.rlim_cur++) {
+    if (fd[rl.rlim_cur] > num_open.rlim_cur) {
+      sprintf(strbuff, "select limit is FD_SETSIZE %d", FD_SETSIZE);
+      store_errmsg(strbuff, 0);
+      fprintf(stderr, "%s\n", msgbuff);
+      close_file_descriptors();
+      free(memchunk);
+      return -9;
+    }
+  }
+
+#endif /* using a FD_SETSIZE bound select() */
 
   /* free the chunk of memory we were reserving so that it
      becomes becomes available to the test */
