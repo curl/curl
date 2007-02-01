@@ -609,7 +609,7 @@ static int open_tcp_socket(ares_channel channel, struct server_state *server)
   memset(&sockin, 0, sizeof(sockin));
   sockin.sin_family = AF_INET;
   sockin.sin_addr = server->addr;
-  sockin.sin_port = channel->tcp_port;
+  sockin.sin_port = (unsigned short)(channel->tcp_port & 0xffff);
   if (connect(s, (struct sockaddr *) &sockin, sizeof(sockin)) == -1) {
     int err = GET_ERRNO();
 
@@ -642,7 +642,7 @@ static int open_udp_socket(ares_channel channel, struct server_state *server)
   memset(&sockin, 0, sizeof(sockin));
   sockin.sin_family = AF_INET;
   sockin.sin_addr = server->addr;
-  sockin.sin_port = channel->udp_port;
+  sockin.sin_port = (unsigned short)(channel->udp_port & 0xffff);
   if (connect(s, (struct sockaddr *) &sockin, sizeof(sockin)) == -1)
     {
       closesocket(s);

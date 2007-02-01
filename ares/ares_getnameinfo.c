@@ -110,7 +110,8 @@ void ares_getnameinfo(ares_channel channel, const struct sockaddr *sa, socklen_t
         port = addr->sin_port;
       else
         port = addr6->sin6_port;
-      service = lookup_service(port, flags, buf, sizeof(buf));
+      service = lookup_service((unsigned short)(port & 0xffff),
+                               flags, buf, sizeof(buf));
       callback(arg, ARES_SUCCESS, NULL, service);
       return;
     }
@@ -151,7 +152,8 @@ void ares_getnameinfo(ares_channel channel, const struct sockaddr *sa, socklen_t
           }
         /* They also want a service */
         if (flags & ARES_NI_LOOKUPSERVICE)
-          service = lookup_service(port, flags, srvbuf, sizeof(srvbuf));
+          service = lookup_service((unsigned short)(port & 0xffff),
+                                   flags, srvbuf, sizeof(srvbuf));
         callback(arg, ARES_SUCCESS, ipbuf, service);
         return;
       }

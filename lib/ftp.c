@@ -1586,7 +1586,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
           }
         }
         if(ptr) {
-          newport = num;
+          newport = (unsigned short)(num & 0xffff);
 
           if (conn->bits.tunnel_proxy)
             /* proxy tunnel -> use other host info because ip_addr_str is the
@@ -1650,7 +1650,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     else
       snprintf(newhost, sizeof(newhost),
                "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
-    newport = (port[0]<<8) + port[1];
+    newport = (unsigned short)(((port[0]<<8) + port[1]) & 0xffff);
   }
   else if(ftpc->count1 == 0) {
     /* EPSV failed, move on to PASV */

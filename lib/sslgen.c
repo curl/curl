@@ -608,7 +608,7 @@ bool Curl_ssl_data_pending(struct connectdata *conn,
   /* OpenSSL-specific */
   if(conn->ssl[connindex].handle)
     /* SSL is in use */
-    return SSL_pending(conn->ssl[connindex].handle);
+    return (bool)(0 != SSL_pending(conn->ssl[connindex].handle));
 #else
   (void)conn;
   (void)connindex;
