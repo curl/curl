@@ -694,7 +694,7 @@ static int dprintf_formatf(
     else
       prec = -1;
 
-    alt = (p->flags & FLAGS_ALT)?TRUE:FALSE;
+    alt = (char)((p->flags & FLAGS_ALT)?TRUE:FALSE);
 
     switch (p->type) {
     case FORMAT_INT:
@@ -734,14 +734,14 @@ static int dprintf_formatf(
 #ifdef ENABLE_64BIT
       if(p->flags & FLAGS_LONGLONG) {
         /* long long */
-        is_neg = p->data.lnum < 0;
+        is_neg = (char)(p->data.lnum < 0);
         num = is_neg ? (- p->data.lnum) : p->data.lnum;
       }
       else
 #endif
       {
         signed_num = (long) num;
-        is_neg = signed_num < 0;
+        is_neg = (char)(signed_num < 0);
         num = is_neg ? (- signed_num) : signed_num;
       }
       goto number;
@@ -944,9 +944,9 @@ static int dprintf_formatf(
           *fptr++ = 'l';
 
         if (p->flags & FLAGS_FLOATE)
-          *fptr++ = p->flags&FLAGS_UPPER ? 'E':'e';
+          *fptr++ = (char)((p->flags & FLAGS_UPPER) ? 'E':'e');
         else if (p->flags & FLAGS_FLOATG)
-          *fptr++ = p->flags & FLAGS_UPPER ? 'G' : 'g';
+          *fptr++ = (char)((p->flags & FLAGS_UPPER) ? 'G' : 'g');
         else
           *fptr++ = 'f';
 

@@ -79,8 +79,8 @@ void ares_send(ares_channel channel, const unsigned char *qbuf, int qlen,
   /* Form the TCP query buffer by prepending qlen (as two
    * network-order bytes) to qbuf.
    */
-  query->tcpbuf[0] = (qlen >> 8) & 0xff;
-  query->tcpbuf[1] = qlen & 0xff;
+  query->tcpbuf[0] = (unsigned char)((qlen >> 8) & 0xff);
+  query->tcpbuf[1] = (unsigned char)(qlen & 0xff);
   memcpy(query->tcpbuf + 2, qbuf, qlen);
   query->tcplen = qlen + 2;
 

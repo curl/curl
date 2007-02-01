@@ -3208,7 +3208,7 @@ static CURLcode ftp_nb_type(struct connectdata *conn,
   state(conn, newstate);
 
   /* keep track of our current transfer type */
-  ftpc->transfertype = want;
+  ftpc->transfertype = (char)want;
   return CURLE_OK;
 }
 

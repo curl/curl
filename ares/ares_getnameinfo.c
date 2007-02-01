@@ -357,6 +357,7 @@ static void append_scopeid(struct sockaddr_in6 *addr6, unsigned int flags,
 static char *ares_striendstr(const char *s1, const char *s2)
 {
   const char *c1, *c2, *c1_begin;
+  int lo1, lo2;
   size_t s1_len = strlen(s1), s2_len = strlen(s2);
 
   /* If the substr is longer than the full str, it can't match */
@@ -369,7 +370,9 @@ static char *ares_striendstr(const char *s1, const char *s2)
   c2 = s2;
   while (c2 < s2+s2_len)
     {
-      if (tolower(*c1) != tolower(*c2))
+      lo1 = tolower(*c1);
+      lo2 = tolower(*c2);
+      if (lo1 != lo2)
         return NULL;
       else
         {

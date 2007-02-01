@@ -141,7 +141,7 @@ int ares_mkquery(const char *name, int dnsclass, int type, unsigned short id,
         return ARES_EBADNAME;
 
       /* Encode the length and copy the data. */
-      *q++ = len;
+      *q++ = (unsigned char)len;
       for (p = name; *p && *p != '.'; p++)
         {
           if (*p == '\\' && *(p + 1) != 0)
