@@ -150,7 +150,7 @@ size_t Curl_base64_encode(struct SessionHandle *data,
   char *output;
   char *base64data;
 #ifdef CURL_DOES_CONVERSIONS
-  char *convbuf;
+  char *convbuf = NULL;
 #endif
 
   char *indata = (char *)inp;
