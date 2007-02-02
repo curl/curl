@@ -62,7 +62,7 @@ Accept: */*
 
 .127.0.0.1	TRUE	/silly/	FALSE	0	ismatch	this
 .127.0.0.1	TRUE	/	FALSE	0	partmatch	present
-127.0.0.1	FALSE	/we/want/	FALSE	1391255787	nodomain	value
+127.0.0.1	FALSE	/we/want/	FALSE	2147483647	nodomain	value
 </file>
 </verify>
 </testcase>
