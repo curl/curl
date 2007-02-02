@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -1080,23 +1080,16 @@ if test X"$OPT_LIBSSH2" != Xno; then
     ;;
   esac
 
-  if test X"$HAVECRYPTO" = X"yes"; then
-    dnl This is only reasonable to do if crypto actually is there: check for
-    dnl LIBSSH2 libs NOTE: it is important to do this AFTER the crypto lib
+  AC_CHECK_LIB(ssh2, libssh2_channel_open_ex)
+  
+  AC_CHECK_HEADERS(libssh2.h,
+    curl_ssh_msg="enabled (libSSH2)"
+    LIBSSH2_ENABLED=1
+    AC_DEFINE(USE_LIBSSH2, 1, [if libSSH2 is in use]))
 
-    AC_CHECK_LIB(ssh2, libssh2_channel_open_ex)
-    
-    AC_CHECK_HEADERS(libssh2.h,
-      curl_ssh_msg="enabled (libSSH2)"
-      LIBSSH2_ENABLED=1
-      AC_DEFINE(USE_LIBSSH2, 1, [if libSSH2 is in use]))
-
-    if test X"$OPT_LIBSSH2" != Xoff &&
-       test "$LIBSSH2_ENABLED" != "1"; then
-      AC_MSG_ERROR([libSSH2 libs and/or directories were not found where specified!])
-    fi
-  else
-    AC_MSG_WARN([without the use of OpenSSL libs, libssh2 cannot work])
+  if test X"$OPT_LIBSSH2" != Xoff &&
+     test "$LIBSSH2_ENABLED" != "1"; then
+    AC_MSG_ERROR([libSSH2 libs and/or directories were not found where specified!])
   fi
 
   if test "$LIBSSH2_ENABLED" = "1"; then
