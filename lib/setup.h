@@ -358,12 +358,6 @@ int fileno( FILE *stream);
 #endif
 #endif
 
-#ifdef CURLDEBUG
-#define DEBUGF(x) x
-#else
-#define DEBUGF(x)
-#endif
-
 /* non-configure builds may define CURL_WANTS_CA_BUNDLE_ENV */
 #if defined(CURL_WANTS_CA_BUNDLE_ENV) && !defined(CURL_CA_BUNDLE)
 #define CURL_CA_BUNDLE getenv("CURL_CA_BUNDLE")

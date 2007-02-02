@@ -149,5 +149,16 @@ typedef int sig_atomic_t;
 #endif
 
 
+/*
+ * Macro used to include code only in debug builds.
+ */
+
+#ifdef CURLDEBUG
+#define DEBUGF(X) X
+#else
+#define DEBUGF(X) do { } while (0)
+#endif
+
+
 #endif /* __SETUP_ONCE_H */
 
