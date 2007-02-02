@@ -14,7 +14,7 @@ HTTP/1.1 200 OK
 Server: Microsoft-IIS/4.0
 Date: Tue, 25 Sep 2001 19:37:44 GMT
 Content-Type: text/html
-Set-Cookie: ckyPersistent=permanent; expires=Tue, 01-Jan-2010 05:00:00 GMT; path=/
+Set-Cookie: ckyPersistent=permanent; expires=Tue, 01-Jan-2038 05:00:00 GMT; path=/
 Set-Cookie: ckySession=temporary; path=/
 Set-Cookie: ASPSESSIONIDQGGQQSJJ=GKNBDIFAAOFDPDAIEAKDIBKE; path=/
 Set-Cookie: justaname=; path=/;
