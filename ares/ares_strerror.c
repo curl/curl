@@ -41,7 +41,9 @@ const char *ares_strerror(int code)
     "Out of memory",
     "Channel is being destroyed",
     "Misformatted string",
-    "Illegal flags specified"
+    "Illegal flags specified",
+    "Given hostname is not numeric",
+    "Illegal hints flags specified"
   };
 
   assert(code >= 0 && code < (int)(sizeof(errtext) / sizeof(*errtext)));
