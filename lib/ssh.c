@@ -627,9 +627,10 @@ ssize_t Curl_scp_send(struct connectdata *conn, int sockindex,
  * a regular CURLcode value.
  */
 ssize_t Curl_scp_recv(struct connectdata *conn, int sockindex,
-                  char *mem, size_t len)
+                      char *mem, size_t len)
 {
   ssize_t nread;
+  (void)sockindex; /* we only support SCP on the fixed known primary socket */
 
   /* libssh2_channel_read() returns int
    *
@@ -637,10 +638,16 @@ ssize_t Curl_scp_recv(struct connectdata *conn, int sockindex,
    * in the SessionHandle struct
    */
 
+#ifdef LIBSSH2CHANNEL_EAGAIN
+  /* we prefer the non-blocking API but that didn't exist previously */
+  nread = (ssize_t)
+    libssh2_channel_readnb(conn->data->reqdata.proto.ssh->ssh_channel,
+                           mem, len);
+#else
   nread = (ssize_t)
     libssh2_channel_read(conn->data->reqdata.proto.ssh->ssh_channel,
                          mem, len);
-  (void)sockindex;
+#endif
   return nread;
 }
 

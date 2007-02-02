@@ -516,13 +516,19 @@ int Curl_read(struct connectdata *conn, /* connection data */
     }
   }
 #ifdef USE_LIBSSH2
-  else if (conn->protocol & PROT_SCP) {
-    nread = Curl_scp_recv(conn, num, buffertofill, bytesfromsocket);
-    /* TODO: return CURLE_OK also for nread <= 0
-             read failures and timeouts ? */
-  }
-  else if (conn->protocol & PROT_SFTP) {
-    nread = Curl_sftp_recv(conn, num, buffertofill, bytesfromsocket);
+  else if (conn->protocol & (PROT_SCP|PROT_SFTP)) {
+    if(conn->protocol & PROT_SCP)
+      nread = Curl_scp_recv(conn, num, buffertofill, bytesfromsocket);
+    else if (conn->protocol & PROT_SFTP)
+      nread = Curl_sftp_recv(conn, num, buffertofill, bytesfromsocket);
+#ifdef LIBSSH2CHANNEL_EAGAIN
+    if((nread == LIBSSH2CHANNEL_EAGAIN) || (nread == 0))
+      /* EWOULDBLOCK */
+      return -1;
+#endif
+    if(nread < 0)
+      /* since it is negative and not EGAIN, it was a protocol-layer error */
+      return CURLE_RECV_ERROR;
   }
 #endif /* !USE_LIBSSH2 */
   else {
