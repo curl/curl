@@ -91,7 +91,8 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
                       int optmask)
 {
   ares_channel channel;
-  int i, status;
+  int i;
+  int status = ARES_SUCCESS;
   struct server_state *server;
   struct timeval tv;
 
@@ -106,8 +107,10 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
 #endif
 
   channel = malloc(sizeof(struct ares_channeldata));
-  if (!channel)
+  if (!channel) {
+    *channelptr = NULL;
     return ARES_ENOMEM;
+  }
 
   /* Set everything to distinguished values so we know they haven't
    * been set yet.
@@ -132,13 +135,31 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
   /* Initialize configuration by each of the four sources, from highest
    * precedence to lowest.
    */
+
+  if (status == ARES_SUCCESS) {
   status = init_by_options(channel, options, optmask);
-  if (status == ARES_SUCCESS)
+    if (status != ARES_SUCCESS)
+      DEBUGF(fprintf(stderr, "Error: init_by_options failed: %s\n",
+                     ares_strerror(status)));
+  }
+  if (status == ARES_SUCCESS) {
     status = init_by_environment(channel);
-  if (status == ARES_SUCCESS)
+    if (status != ARES_SUCCESS)
+      DEBUGF(fprintf(stderr, "Error: init_by_environment failed: %s\n",
+                     ares_strerror(status)));
+  }
+  if (status == ARES_SUCCESS) {
     status = init_by_resolv_conf(channel);
-  if (status == ARES_SUCCESS)
+    if (status != ARES_SUCCESS)
+      DEBUGF(fprintf(stderr, "Error: init_by_resolv_conf failed: %s\n",
+                     ares_strerror(status)));
+  }
+  if (status == ARES_SUCCESS) {
     status = init_by_defaults(channel);
+    if (status != ARES_SUCCESS)
+      DEBUGF(fprintf(stderr, "Error: init_by_defaults failed: %s\n",
+                     ares_strerror(status)));
+  }
   if (status != ARES_SUCCESS)
     {
       /* Something failed; clean up memory we may have allocated. */
