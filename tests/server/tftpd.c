@@ -258,7 +258,7 @@ static void read_ahead(struct testcase *test,
         newline = 1;
       }
     }
-    *p++ = c;
+    *p++ = (char)c;
   }
   b->counter = (int)(p - dp->th_data);
 }
@@ -611,7 +611,7 @@ again:
 
   for (cp = mode; *cp; cp++)
     if (isupper((int)*cp))
-      *cp = tolower((int)*cp);
+      *cp = (char)tolower((int)*cp);
 
   /* store input protocol */
   fprintf(test->server, "mode: %s\n", mode);

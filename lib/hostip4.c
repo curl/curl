@@ -134,6 +134,10 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 
   *waitp = 0; /* don't wait, we act synchronously */
 
+#if defined(HAVE_GETHOSTBYNAME_R_3) || defined(HAVE_GETHOSTBYNAME_R_6)
+  int res = ERANGE;
+#endif
+
   if(1 == Curl_inet_pton(AF_INET, hostname, &in))
     /* This is a dotted IP address 123.123.123.123-style */
     return Curl_ip2addr(in, hostname, port);
@@ -146,7 +150,6 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
    */
   else {
     int h_errnop;
-    int res=ERANGE;
 
     buf = (struct hostent *)calloc(CURL_HOSTENT_SIZE, 1);
     if(!buf)
@@ -159,7 +162,6 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 
 #ifdef HAVE_GETHOSTBYNAME_R_5
     /* Solaris, IRIX and more */
-    (void)res; /* prevent compiler warning */
     h = gethostbyname_r(hostname,
                         (struct hostent *)buf,
                         (char *)buf + sizeof(struct hostent),

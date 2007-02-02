@@ -305,7 +305,7 @@ static char *lookup_service(unsigned short port, int flags,
         strcpy(tmpbuf, sep->s_name);
       else
         /* get port as a string */
-        sprintf(tmpbuf, "%u", ntohs(port));
+        sprintf(tmpbuf, "%u", (unsigned short)ntohs(port));
       if (strlen(tmpbuf) < buflen)
         /* return it if buffer big enough */
         strcpy(buf, tmpbuf);

@@ -422,7 +422,8 @@ char *glob_next_url(URLGlob *glob)
         }
         break;
       case UPTCharRange:
-        pat->content.CharRange.ptr_c += (char)(pat->content.CharRange.step);
+        pat->content.CharRange.ptr_c = (char)(pat->content.CharRange.step +
+                           (int)((unsigned char)pat->content.CharRange.ptr_c));
         if (pat->content.CharRange.ptr_c > pat->content.CharRange.max_c) {
           pat->content.CharRange.ptr_c = pat->content.CharRange.min_c;
           carry = TRUE;
