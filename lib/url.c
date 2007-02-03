@@ -2084,8 +2084,9 @@ ConnectionExists(struct SessionHandle *data,
       }
     }
     else { /* The requested needle connection is using a proxy,
-              is the checked one using the same? */
-      if(check->bits.httpproxy &&
+              is the checked one using the same host, port and type? */
+      if(check->bits.proxy &&
+         (needle->proxytype == check->proxytype) &&
          strequal(needle->proxy.name, check->proxy.name) &&
          needle->port == check->port) {
         /* This is the same proxy connection, use it! */
@@ -2240,10 +2241,10 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
 {
   CURLcode result;
   Curl_addrinfo *addr;
-  char *hostname = conn->bits.httpproxy?conn->proxy.name:conn->host.name;
+  char *hostname = conn->bits.proxy?conn->proxy.name:conn->host.name;
 
   infof(data, "About to connect() to %s%s port %d (#%d)\n",
-        conn->bits.httpproxy?"proxy ":"",
+        conn->bits.proxy?"proxy ":"",
         hostname, conn->port, conn->connectindex);
 
   /*************************************************************
@@ -2287,7 +2288,7 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
 static void verboseconnect(struct connectdata *conn)
 {
   infof(conn->data, "Connected to %s (%s) port %d (#%d)\n",
-        conn->bits.httpproxy ? conn->proxy.dispname : conn->host.dispname,
+        conn->bits.proxy ? conn->proxy.dispname : conn->host.dispname,
         conn->ip_addr_str, conn->port, conn->connectindex);
 }
 
@@ -2766,9 +2767,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD; /* no file descriptor */
   conn->connectindex = -1;    /* no index */
 
-  conn->bits.httpproxy = (bool)(data->set.proxy  /* http proxy or not */
-                                && *data->set.proxy
-                                && (data->set.proxytype == CURLPROXY_HTTP));
+  conn->proxytype = data->set.proxytype; /* type */
+  conn->bits.proxy = (bool)(data->set.proxy && *data->set.proxy);
+  conn->bits.httpproxy = (bool)(conn->bits.proxy
+                                && (conn->proxytype == CURLPROXY_HTTP));
   proxy = data->set.proxy; /* if global proxy is set, this is it */
 
   /* Default protocol-independent behavior doesn't support persistent
@@ -2867,9 +2869,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
 #ifndef CURL_DISABLE_HTTP
   /*************************************************************
-   * Detect what (if any) proxy to use
+   * Detect what (if any) proxy to use. Remember that this selects a host
+   * name and is not limited to HTTP proxies only.
    *************************************************************/
-  if(!conn->bits.httpproxy) {
+  if(!proxy) {
     /* If proxy was not specified, we check for default proxy environment
      * variables, to enable i.e Lynx compliance:
      *
@@ -2964,11 +2967,14 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
         if(proxy && *proxy) {
           long bits = conn->protocol & (PROT_HTTPS|PROT_SSL|PROT_MISSING);
-          /* force this to become HTTP */
-          conn->protocol = PROT_HTTP | bits;
 
           proxy_alloc=TRUE; /* this needs to be freed later */
-          conn->bits.httpproxy = TRUE;
+
+          if(conn->proxytype == CURLPROXY_HTTP) {
+            /* force this connection's protocol to become HTTP */
+            conn->protocol = PROT_HTTP | bits;
+            conn->bits.httpproxy = TRUE;
+          }
         }
       } /* if (!nope) - it wasn't specified non-proxy */
     } /* NO_PROXY wasn't specified or '*' */
@@ -3081,7 +3087,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->remote_port = (unsigned short)port;
     conn->protocol |= PROT_FTP;
 
-    if(proxy && *proxy && !data->set.tunnel_thru_httpproxy) {
+    if(conn->bits.httpproxy && !data->set.tunnel_thru_httpproxy) {
       /* Unless we have asked to tunnel ftp operations through the proxy, we
          switch and use HTTP operations only */
 #ifndef CURL_DISABLE_HTTP
@@ -3686,16 +3692,15 @@ else {
     }
 
     /* host can change, when doing keepalive with a proxy ! */
-    if (conn->bits.httpproxy) {
+    if (conn->bits.proxy) {
       free(conn->host.rawalloc);
       conn->host=old_conn->host;
     }
+    else
+      free(old_conn->host.rawalloc); /* free the newly allocated name buffer */
 
     /* get the newly set value, not the old one */
     conn->bits.no_body = old_conn->bits.no_body;
-
-    if (!conn->bits.httpproxy)
-      free(old_conn->host.rawalloc); /* free the newly allocated name buffer */
 
     /* re-use init */
     conn->bits.reuse = TRUE; /* yes, we're re-using here */
@@ -3743,7 +3748,7 @@ else {
 
     infof(data, "Re-using existing connection! (#%ld) with host %s\n",
           conn->connectindex,
-          conn->bits.httpproxy?conn->proxy.dispname:conn->host.dispname);
+          proxy?conn->proxy.dispname:conn->host.dispname);
   }
   else {
     /*
@@ -3842,7 +3847,7 @@ else {
     hostaddr = NULL;
     /* we'll need to clear conn->dns_entry later in Curl_disconnect() */
 
-    if (conn->bits.httpproxy)
+    if (conn->bits.proxy)
       fix_hostname(data, conn, &conn->host);
   }
   else {
@@ -3961,17 +3966,14 @@ static CURLcode SetupConnection(struct connectdata *conn,
   *protocol_done = FALSE; /* default to not done */
 
   /*************************************************************
-   * Send user-agent to HTTP proxies even if the target protocol
-   * isn't HTTP.
+   * Set user-agent for HTTP
    *************************************************************/
-  if((conn->protocol&PROT_HTTP) || conn->bits.httpproxy) {
-    if(data->set.useragent) {
-      Curl_safefree(conn->allocptr.uagent);
-      conn->allocptr.uagent =
-        aprintf("User-Agent: %s\r\n", data->set.useragent);
-      if(!conn->allocptr.uagent)
-        return CURLE_OUT_OF_MEMORY;
-    }
+  if((conn->protocol&PROT_HTTP) && data->set.useragent) {
+    Curl_safefree(conn->allocptr.uagent);
+    conn->allocptr.uagent =
+      aprintf("User-Agent: %s\r\n", data->set.useragent);
+    if(!conn->allocptr.uagent)
+      return CURLE_OUT_OF_MEMORY;
   }
 
   conn->headerbytecount = 0;

@@ -432,6 +432,7 @@ struct ConnectBits {
   bool close; /* if set, we close the connection after this request */
   bool reuse; /* if set, this is a re-used connection */
   bool chunk; /* if set, this is a chunked transfer-encoding */
+  bool proxy; /* if set, this transfer is done through a proxy - any type */
   bool httpproxy;    /* if set, this transfer is done through a http proxy */
   bool user_passwd;    /* do we use user+password for this connection? */
   bool proxy_user_passwd; /* user+password for the proxy? */
@@ -748,6 +749,7 @@ struct connectdata {
 
   char *proxyuser;    /* proxy user name string, allocated */
   char *proxypasswd;  /* proxy password string, allocated */
+  curl_proxytype proxytype; /* what kind of proxy that is in use */
 
   struct timeval now;     /* "current" time */
   struct timeval created; /* creation time */
