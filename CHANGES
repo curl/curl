@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel (3 February 2007)
+- Yang Tse fixed the cookie expiry date in several test cases that started to
+  fail since they used "1 feb 2007"...
+
+- Manfred Schwarb reported that socks5 support was broken and help us pinpoint
+  the problem. The code now tries harder to use httproxy and proxy where
+  apppropriate, as not all proxies are HTTP...
+
 Version 7.16.1 (29 January 2007)
 
 Daniel (29 January 2007)

@@ -11,11 +11,12 @@ Curl and libcurl 7.16.2
 
 This release includes the following changes:
  
- o In testsuite, update test cookies expiration from 2007-Feb-1 to 2038-Feb-1
+ o
 
 This release includes the following bugfixes:
 
- o 
+ o in testsuite, update test cookies expiration from 2007-Feb-1 to 2038-Feb-1
+ o socks5 works
 
 This release includes the following known bugs:
 
@@ -32,6 +33,6 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- 
+ Yang Tse, Manfred Schwarb
 
         Thanks! (and sorry if I forgot to mention someone)
