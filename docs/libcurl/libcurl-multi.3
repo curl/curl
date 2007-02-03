@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH libcurl-multi 3 "13 Oct 2001" "libcurl 7.10.1" "libcurl multi interface"
+.TH libcurl-multi 3 "3 Feb 2007" "libcurl 7.16.0" "libcurl multi interface"
 .SH NAME
 libcurl-multi \- how to use the multi interface
 .SH DESCRIPTION
@@ -112,3 +112,22 @@ to clean them up properly.
 If you want to re-use an easy handle that was added to the multi handle for
 transfer, you must first remove it from the multi stack and then re-add it
 again (possibly after having altered some options at your own choice).
+.SH "MULTI_SOCKET"
+Since 7.16.0, the \fIcurl_multi_socket(3)\fP function offers a way for
+applications to not only avoid being forced to use select(), but it also
+offers a much more high-performing API that will make a significant difference
+for applications using large numbers of simultaneous connections.
+
+\fIcurl_multi_socket(3)\fP (and \fIcurl_multi_socket_all(3)\fP) is then used
+instead of \fIcurl_multi_perform(3)\fP.
+.SH "BLOCKING"
+A few areas in the code are still using blocking code, even when used from the
+multi interface. While we certainly want and intend for these to get fixed in
+the future, you should be aware of the following current restrictions:
+
+ - Name resolves on non-windows unless c-ares is used
+ - GnuTLS SSL connections
+ - Active FTP connections
+ - HTTP proxy CONNECT operations
+ - SCP and SFTP connections
+ - SFTP transfers
