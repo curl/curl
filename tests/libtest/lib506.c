@@ -24,7 +24,7 @@ void lock(CURL *handle, curl_lock_data data, curl_lock_access access,
 void unlock(CURL *handle, curl_lock_data data, void *useptr );
 struct curl_slist *sethost(struct curl_slist *headers);
 void *fire(void *ptr);
-char *suburl(char *base, int i);
+char *suburl(const char *base, int i);
 
 /* struct containing data of a thread */
 struct Tdata {
@@ -49,13 +49,13 @@ void lock(CURL *handle, curl_lock_data data, curl_lock_access access,
 
   switch ( data ) {
     case CURL_LOCK_DATA_SHARE:
-      what = "share";  
+      what = "share";
       break;
     case CURL_LOCK_DATA_DNS:
-      what = "dns";  
+      what = "dns";
       break;
     case CURL_LOCK_DATA_COOKIE:
-      what = "cookie";  
+      what = "cookie";
       break;
     default:
       fprintf(stderr, "lock: no such data: %d\n", (int)data);
@@ -73,13 +73,13 @@ void unlock(CURL *handle, curl_lock_data data, void *useptr )
   (void)handle;
   switch ( data ) {
     case CURL_LOCK_DATA_SHARE:
-      what = "share";  
+      what = "share";
       break;
     case CURL_LOCK_DATA_DNS:
-      what = "dns";  
+      what = "dns";
       break;
     case CURL_LOCK_DATA_COOKIE:
-      what = "cookie";  
+      what = "cookie";
       break;
     default:
       fprintf(stderr, "unlock: no such data: %d\n", (int)data);
@@ -135,7 +135,7 @@ void *fire(void *ptr)
 
 
 /* build request url */
-char *suburl(char *base, int i)
+char *suburl(const char *base, int i)
 {
   return curl_maprintf("%s000%c", base, 48+i);
 }
@@ -156,7 +156,7 @@ int test(char *URL)
 
   user.text = (char *)"Pigs in space";
   user.counter = 0;
-  
+
   printf( "GLOBAL_INIT\n" );
   if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
@@ -199,12 +199,12 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  
+
   res = 0;
 
   /* start treads */
   for (i=1; i<=THREADS; i++ ) {
-    
+
     /* set thread data */
     tdata.url   = suburl( URL, i ); /* must be curl_free()d */
     tdata.share = share;
@@ -256,17 +256,17 @@ int test(char *URL)
   curl_slist_free_all( headers );
 
   curl_free(url);
-  
+
   /* free share */
   printf( "SHARE_CLEANUP\n" );
   scode = curl_share_cleanup( share );
   if ( scode!=CURLSHE_OK )
     fprintf(stderr, "curl_share_cleanup failed, code errno %d\n",
             (int)scode);
-  
+
   printf( "GLOBAL_CLEANUP\n" );
   curl_global_cleanup();
- 
+
   return res;
 }
 
