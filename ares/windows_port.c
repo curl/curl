@@ -20,6 +20,19 @@
 #include "ares.h"
 #include "ares_private.h"
 
+#ifdef __WATCOMC__
+/* Watcom needs a DlMain() in order to initialise the clib startup code.
+ */
+BOOL
+DllMain (HINSTANCE hnd, DWORD reason, LPVOID reserved)
+{
+  (void) hnd;
+  (void) reason;
+  (void) reserved;
+  return (TRUE);
+}
+#endif
+
 #ifndef __MINGW32__
 int
 ares_strncasecmp(const char *a, const char *b, int n)
