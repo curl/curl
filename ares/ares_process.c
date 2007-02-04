@@ -557,8 +557,12 @@ static int nonblock(ares_socket_t sockfd,    /* operate on this */
 #endif
 
 #if defined(HAVE_IOCTLSOCKET) && (SETBLOCK == 0)
+#ifdef WATT32
+  char flags;
+#else
   /* Windows? */
   unsigned long flags;
+#endif
   flags = nonblock;
 
   return ioctlsocket(sockfd, FIONBIO, &flags);
