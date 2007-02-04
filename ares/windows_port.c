@@ -21,10 +21,11 @@
 #include "ares_private.h"
 
 #ifdef __WATCOMC__
-/* Watcom needs a DlMain() in order to initialise the clib startup code.
+/*
+ * Watcom needs a DlMain() in order to initialise the clib startup code.
  */
 BOOL
-DllMain (HINSTANCE hnd, DWORD reason, LPVOID reserved)
+WINAPI DllMain (HINSTANCE hnd, DWORD reason, LPVOID reserved)
 {
   (void) hnd;
   (void) reason;
