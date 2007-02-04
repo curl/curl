@@ -471,7 +471,7 @@ int Curl_read(struct connectdata *conn, /* connection data */
               size_t sizerequested,     /* max amount to read */
               ssize_t *n)               /* amount bytes read */
 {
-  ssize_t nread;
+  ssize_t nread = 0;
   size_t bytesfromsocket = 0;
   char *buffertofill = NULL;
   bool pipelining = (bool)(conn->data->multi &&
