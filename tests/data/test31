@@ -22,10 +22,10 @@ Set-Cookie: partmatch=present; domain=127.0.0.1 ; path=/;
 Set-Cookie:eat=this; domain=moo.foo.moo;
 Set-Cookie: eat=this-too; domain=.foo.moo;
 Set-Cookie: nodomainnovalue
-Set-Cookie:   nodomain=value; expires=Tue Feb 1 11:56:27 GMT 2038
+Set-Cookie:   nodomain=value; expires=Fri Feb 2 11:56:27 GMT 2035
 Set-Cookie: novalue; domain=reallysilly
-Set-Cookie: test=yes; domain=foo.com; expires=Tue Feb 1 11:56:27 GMT 2038
-Set-Cookie: test2=yes; domain=se; expires=Tue Feb 1 11:56:27 GMT 2038
+Set-Cookie: test=yes; domain=foo.com; expires=Sat Feb 2 11:56:27 GMT 2030
+Set-Cookie: test2=yes; domain=se; expires=Sat Feb 2 11:56:27 GMT 2030
 
 boo
 </data>
@@ -62,7 +62,7 @@ Accept: */*
 
 .127.0.0.1	TRUE	/silly/	FALSE	0	ismatch	this
 .127.0.0.1	TRUE	/	FALSE	0	partmatch	present
-127.0.0.1	FALSE	/we/want/	FALSE	2147483647	nodomain	value
+127.0.0.1	FALSE	/we/want/	FALSE	2054030187	nodomain	value
 </file>
 </verify>
 </testcase>

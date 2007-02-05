@@ -14,7 +14,7 @@ HTTP/1.1 200 OK
 Server: Microsoft-IIS/4.0
 Date: Tue, 25 Sep 2001 19:37:44 GMT
 Content-Type: text/html
-Set-Cookie: ckyPersistent=permanent; expires=Tue, 01-Feb-2038 11:56:27 GMT; path=/
+Set-Cookie: ckyPersistent=permanent; expires=Fri, 02-Feb-2035 11:56:27 GMT; path=/
 Set-Cookie: ckySession=temporary; path=/
 Set-Cookie: ASPSESSIONIDQGGQQSJJ=GKNBDIFAAOFDPDAIEAKDIBKE; path=/
 Set-Cookie: justaname=; path=/;
@@ -70,7 +70,7 @@ www.fake.come	FALSE	/	FALSE	1022144953	cookiecliente	si
 www.loser.com	FALSE	/	FALSE	1139150993	UID	99
 127.0.0.1	FALSE	/	FALSE	1439150993	mooo	indeed
 127.0.0.1	FALSE	/	FALSE	0	empty	
-127.0.0.1	FALSE	/	FALSE	2147483647	ckyPersistent	permanent
+127.0.0.1	FALSE	/	FALSE	2054030187	ckyPersistent	permanent
 127.0.0.1	FALSE	/	FALSE	0	ckySession	temporary
 127.0.0.1	FALSE	/	FALSE	0	ASPSESSIONIDQGGQQSJJ	GKNBDIFAAOFDPDAIEAKDIBKE
 127.0.0.1	FALSE	/	FALSE	0	justaname	
