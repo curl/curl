@@ -734,7 +734,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * An FTP option that specifies how quickly an FTP response must be
      * obtained before it is considered failure.
      */
-    data->set.ftp_response_timeout = va_arg( param , long );
+    data->set.ftp_response_timeout = va_arg( param , long ) * 1000;
     break;
   case CURLOPT_FTPLISTONLY:
     /*
@@ -1242,12 +1242,21 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * The maximum time you allow curl to use for a single transfer
      * operation.
      */
+    data->set.timeout = va_arg(param, long) * 1000L;
+    break;
+
+  case CURLOPT_TIMEOUT_MS:
     data->set.timeout = va_arg(param, long);
     break;
+
   case CURLOPT_CONNECTTIMEOUT:
     /*
      * The maximum time you allow curl to use to connect.
      */
+    data->set.connecttimeout = va_arg(param, long) * 1000L;
+    break;
+
+  case CURLOPT_CONNECTTIMEOUT_MS:
     data->set.connecttimeout = va_arg(param, long);
     break;
 
@@ -3828,9 +3837,14 @@ else {
       /* if timeout is not set, use the connect timeout */
       shortest = data->set.connecttimeout;
 
+    if(shortest < 1000)
+      /* the alarm() function only provide integer second resolution, so if
+         we want to wait less than one second we must bail out already now. */
+      return CURLE_OPERATION_TIMEDOUT;
+
     /* alarm() makes a signal get sent when the timeout fires off, and that
        will abort system calls */
-    prev_alarm = alarm((unsigned int) shortest);
+    prev_alarm = alarm((unsigned int) (shortest ? shortest/1000L : shortest));
     /* We can expect the conn->created time to be "now", as that was just
        recently set in the beginning of this function and nothing slow
        has been done since then until now. */

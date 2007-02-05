@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_easy_setopt 3 "2 Nov 2006" "libcurl 7.16.1" "libcurl Manual"
+.TH curl_easy_setopt 3 "5 Feb 2007" "libcurl 7.16.2" "libcurl Manual"
 .SH NAME
 curl_easy_setopt \- set options for a curl easy handle
 .SH SYNOPSIS
@@ -1078,6 +1078,10 @@ SIGALRM to enable time-outing system calls.
 
 In unix-like systems, this might cause signals to be used unless
 \fICURLOPT_NOSIGNAL\fP is set.
+.IP CURLOPT_TIMEOUT_MS
+Like \fICURLOPT_TIMEOUT\fP but takes number of milliseconds instead. If
+libcurl is built to use the standard system name resolver, that part will
+still use full-second resolution for timeouts. (Added in 7.16.2)
 .IP CURLOPT_LOW_SPEED_LIMIT
 Pass a long as parameter. It contains the transfer speed in bytes per second
 that the transfer should be below during \fICURLOPT_LOW_SPEED_TIME\fP seconds
@@ -1135,6 +1139,10 @@ timeouts). See also the \fICURLOPT_TIMEOUT\fP option.
 
 In unix-like systems, this might cause signals to be used unless
 \fICURLOPT_NOSIGNAL\fP is set.
+.IP CURLOPT_CONNECTTIMEOUT_MS
+Like \fICURLOPT_CONNECTTIMEOUT\fP but takes number of milliseconds instead. If
+libcurl is built to use the standard system name resolver, that part will
+still use full-second resolution for timeouts. (Added in 7.16.2)
 .IP CURLOPT_IPRESOLVE
 Allows an application to select what kind of IP addresses to use when
 resolving host names. This is only interesting when using host names that

@@ -6,6 +6,19 @@
 
                                   Changelog
 
+Daniel (5 February 2007)
+- Michael Wallner added support for CURLOPT_TIMEOUT_MS and
+  CURLOPT_CONNECTTIMEOUT_MS that, as their names suggest, do the timeouts with
+  millisecond resolution. The only restriction to that is the alarm()
+  (sometimes) used to abort name resolves as that uses full seconds. I fixed
+  the FTP response timeout part of the patch.
+
+  Internally we now count and keep the timeouts in milliseconds but it also
+  means we multiply set timeouts with 1000. The effect of this is that no
+  timeout can be set to more than 2^31 milliseconds (on 32 bit systems), which
+  equals 24.86 days.  We probably couldn't before either since the code did
+  *1000 on the timeout values on several places already.
+
 Daniel (3 February 2007)
 - Yang Tse fixed the cookie expiry date in several test cases that started to
   fail since they used "1 feb 2007"...

@@ -1387,7 +1387,7 @@ CURLcode Curl_telnet(struct connectdata *conn, bool *done)
     if(data->set.timeout) {
       struct timeval now;           /* current time */
       now = Curl_tvnow();
-      if(Curl_tvdiff(now, conn->created)/1000 >= data->set.timeout) {
+      if(Curl_tvdiff(now, conn->created) >= data->set.timeout) {
         failf(data, "Time-out");
         code = CURLE_OPERATION_TIMEOUTED;
         keepon = FALSE;

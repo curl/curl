@@ -144,12 +144,12 @@ static CURLcode handshake(struct connectdata *conn,
       long has_passed;
 
       if(duringconnect && data->set.connecttimeout)
-        timeout_ms = data->set.connecttimeout*1000;
+        timeout_ms = data->set.connecttimeout;
 
       if(data->set.timeout) {
         /* get the strictest timeout of the ones converted to milliseconds */
-        if((data->set.timeout*1000) < timeout_ms)
-          timeout_ms = data->set.timeout*1000;
+        if(data->set.timeout) < timeout_ms)
+          timeout_ms = data->set.timeout;
       }
 
       /* Evaluate in milliseconds how much time that has passed */

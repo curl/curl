@@ -11,7 +11,7 @@ Curl and libcurl 7.16.2
 
 This release includes the following changes:
  
- o
+ o Added CURLOPT_TIMEOUT_MS and CURLOPT_CONNECTTIMEOUT_MS
 
 This release includes the following bugfixes:
 
@@ -33,6 +33,6 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Yang Tse, Manfred Schwarb
+ Yang Tse, Manfred Schwarb, Michael Wallner
 
         Thanks! (and sorry if I forgot to mention someone)

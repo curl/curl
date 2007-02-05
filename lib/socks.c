@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -120,14 +120,14 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
   /* get timeout */
   if(data->set.timeout && data->set.connecttimeout) {
     if (data->set.timeout < data->set.connecttimeout)
-      timeout = data->set.timeout*1000;
+      timeout = data->set.timeout;
     else
-      timeout = data->set.connecttimeout*1000;
+      timeout = data->set.connecttimeout;
   }
   else if(data->set.timeout)
-    timeout = data->set.timeout*1000;
+    timeout = data->set.timeout;
   else if(data->set.connecttimeout)
-    timeout = data->set.connecttimeout*1000;
+    timeout = data->set.connecttimeout;
   else
     timeout = DEFAULT_CONNECT_TIMEOUT;
 

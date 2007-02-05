@@ -1459,17 +1459,17 @@ Curl_ossl_connect_step2(struct connectdata *conn,
   if(data->set.timeout && data->set.connecttimeout) {
     /* get the most strict timeout of the ones converted to milliseconds */
     if(data->set.timeout<data->set.connecttimeout)
-      *timeout_ms = data->set.timeout*1000;
+      *timeout_ms = data->set.timeout;
     else
-      *timeout_ms = data->set.connecttimeout*1000;
+      *timeout_ms = data->set.connecttimeout;
   }
   else if(data->set.timeout)
-    *timeout_ms = data->set.timeout*1000;
+    *timeout_ms = data->set.timeout;
   else if(data->set.connecttimeout)
-    *timeout_ms = data->set.connecttimeout*1000;
+    *timeout_ms = data->set.connecttimeout;
   else
     /* no particular time-out has been set */
-    *timeout_ms= DEFAULT_CONNECT_TIMEOUT;
+    *timeout_ms = DEFAULT_CONNECT_TIMEOUT;
 
   /* Evaluate in milliseconds how much time that has passed */
   has_passed = Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle);

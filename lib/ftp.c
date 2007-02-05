@@ -184,7 +184,7 @@ static CURLcode AllowServerConnect(struct connectdata *conn)
   struct SessionHandle *data = conn->data;
   curl_socket_t sock = conn->sock[SECONDARYSOCKET];
   struct timeval now = Curl_tvnow();
-  long timespent = Curl_tvdiff(Curl_tvnow(), now)/1000;
+  long timespent = Curl_tvdiff(Curl_tvnow(), now);
   long timeout = data->set.connecttimeout?data->set.connecttimeout:
     (data->set.timeout?data->set.timeout: 0);
 
@@ -198,7 +198,7 @@ static CURLcode AllowServerConnect(struct connectdata *conn)
 
   /* We allow the server 60 seconds to connect to us, or a custom timeout.
      Note the typecast here. */
-  timeout_ms = (timeout?(int)timeout:60) * 1000;
+  timeout_ms = (timeout?(int)timeout:60000);
 
   switch (Curl_select(sock, CURL_SOCKET_BAD, timeout_ms)) {
   case -1: /* error */
@@ -444,7 +444,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
   bool keepon=TRUE;
   ssize_t gotbytes;
   char *ptr;
-  long timeout;              /* timeout in seconds */
+  long timeout;              /* timeout in milliseconds */
   int interval_ms;
   struct SessionHandle *data = conn->data;
   char *line_start;
@@ -473,16 +473,16 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
          the response for any given ftp response, not for the time
          from connect to the given ftp response. */
       timeout = data->set.ftp_response_timeout - /* timeout time */
-        Curl_tvdiff(Curl_tvnow(), now)/1000; /* spent time */
+        Curl_tvdiff(Curl_tvnow(), now); /* spent time */
     else if(data->set.timeout)
       /* if timeout is requested, find out how much remaining time we have */
       timeout = data->set.timeout - /* timeout time */
-        Curl_tvdiff(Curl_tvnow(), conn->now)/1000; /* spent time */
+        Curl_tvdiff(Curl_tvnow(), conn->now); /* spent time */
     else
       /* Even without a requested timeout, we only wait response_time
          seconds for the full response to arrive before we bail out */
       timeout = ftpc->response_time -
-        Curl_tvdiff(Curl_tvnow(), now)/1000; /* spent time */
+        Curl_tvdiff(Curl_tvnow(), now); /* spent time */
 
     if(timeout <=0 ) {
       failf(data, "FTP response timeout");
@@ -491,6 +491,8 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
 
     if(!ftpc->cache) {
       interval_ms = 1 * 1000;  /* use 1 second timeout intervals */
+      if(timeout < interval_ms)
+        interval_ms = timeout;
 
       switch (Curl_select(sockfd, CURL_SOCKET_BAD, interval_ms)) {
       case -1: /* select() error, stop reading */
@@ -2751,16 +2753,16 @@ static long ftp_state_timeout(struct connectdata *conn)
        time.  Also, use ftp->response because FTP_RESPONSE_TIMEOUT is supposed
        to govern the response for any given ftp response, not for the time
        from connect to the given ftp response. */
-    timeout_ms = data->set.ftp_response_timeout*1000 - /* timeout time */
+    timeout_ms = data->set.ftp_response_timeout - /* timeout time */
       Curl_tvdiff(Curl_tvnow(), ftpc->response); /* spent time */
   else if(data->set.timeout)
     /* if timeout is requested, find out how much remaining time we have */
-    timeout_ms = data->set.timeout*1000 - /* timeout time */
+    timeout_ms = data->set.timeout - /* timeout time */
       Curl_tvdiff(Curl_tvnow(), conn->now); /* spent time */
   else
     /* Without a requested timeout, we only wait 'response_time' seconds for
        the full response to arrive before we bail out */
-    timeout_ms = ftpc->response_time*1000 -
+    timeout_ms = ftpc->response_time -
       Curl_tvdiff(Curl_tvnow(), ftpc->response); /* spent time */
 
   return timeout_ms;
@@ -2904,7 +2906,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn,
   /* We always support persistant connections on ftp */
   conn->bits.close = FALSE;
 
-  ftpc->response_time = 3600; /* set default response time-out */
+  ftpc->response_time = 3600000; /* set default response time-out */
 
 #ifndef CURL_DISABLE_HTTP
   if (conn->bits.tunnel_proxy && conn->bits.httpproxy) {
@@ -3063,7 +3065,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status, bool premature
      */
     long old_time = ftpc->response_time;
 
-    ftpc->response_time = 60; /* give it only a minute for now */
+    ftpc->response_time = 60000; /* give it only a minute for now */
 
     result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
 

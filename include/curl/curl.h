@@ -1054,6 +1054,10 @@ typedef enum {
   /* Send CCC (Clear Command Channel) after authentication */
   CINIT(FTP_SSL_CCC, LONG, 154),
 
+  /* Same as TIMEOUT and CONNECTTIMEOUT, but with ms resolution */
+  CINIT(TIMEOUT_MS, LONG, 155),
+  CINIT(CONNECTTIMEOUT_MS, LONG, 156),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

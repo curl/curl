@@ -1121,7 +1121,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
   ssize_t gotbytes;
   char *ptr;
   long timeout =
-    data->set.timeout?data->set.timeout:3600; /* in seconds */
+    data->set.timeout?data->set.timeout:3600000; /* in milliseconds */
   char *line_start;
   char *host_port;
   curl_socket_t tunnelsocket = conn->sock[sockindex];
@@ -1225,15 +1225,16 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 
       /* if timeout is requested, find out how much remaining time we have */
       long check = timeout - /* timeout time */
-        Curl_tvdiff(Curl_tvnow(), conn->now)/1000; /* spent time */
-      if(check <=0 ) {
+        Curl_tvdiff(Curl_tvnow(), conn->now); /* spent time */
+      if(check <= 0) {
         failf(data, "Proxy CONNECT aborted due to timeout");
         error = SELECT_TIMEOUT; /* already too little time */
         break;
       }
 
-      /* timeout each second and check the timeout */
-      switch (Curl_select(tunnelsocket, CURL_SOCKET_BAD, 1000)) {
+      /* loop every second at least, less if the timeout is near */
+      switch (Curl_select(tunnelsocket, CURL_SOCKET_BAD,
+                          check<1000?check:1000)) {
       case -1: /* select() error, stop reading */
         error = SELECT_ERROR;
         failf(data, "Proxy CONNECT aborted due to select() error");

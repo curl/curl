@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -558,15 +558,15 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   /* subtract the most strict timeout of the ones */
   if(data->set.timeout && data->set.connecttimeout) {
     if (data->set.timeout < data->set.connecttimeout)
-      allow_total = allow = data->set.timeout*1000;
+      allow_total = allow = data->set.timeout;
     else
-      allow = data->set.connecttimeout*1000;
+      allow = data->set.connecttimeout;
   }
   else if(data->set.timeout) {
-    allow_total = allow = data->set.timeout*1000;
+    allow_total = allow = data->set.timeout;
   }
   else if(data->set.connecttimeout) {
-    allow = data->set.connecttimeout*1000;
+    allow = data->set.connecttimeout;
   }
 
   if(has_passed > allow ) {
@@ -826,14 +826,14 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     /* get the most strict timeout of the ones converted to milliseconds */
     if(data->set.timeout && data->set.connecttimeout) {
       if (data->set.timeout < data->set.connecttimeout)
-        timeout_ms = data->set.timeout*1000;
+        timeout_ms = data->set.timeout;
       else
-        timeout_ms = data->set.connecttimeout*1000;
+        timeout_ms = data->set.connecttimeout;
     }
     else if(data->set.timeout)
-      timeout_ms = data->set.timeout*1000;
+      timeout_ms = data->set.timeout;
     else
-      timeout_ms = data->set.connecttimeout*1000;
+      timeout_ms = data->set.connecttimeout;
 
     /* subtract the passed time */
     timeout_ms -= has_passed;

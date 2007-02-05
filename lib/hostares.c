@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -183,7 +183,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
 {
   CURLcode rc=CURLE_OK;
   struct SessionHandle *data = conn->data;
-  long timeout = CURL_TIMEOUT_RESOLVE; /* default name resolve timeout */
+  long timeout;
 
   /* now, see if there's a connect timeout or a regular timeout to
      use instead of the default one */
@@ -191,14 +191,8 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
     timeout = conn->data->set.connecttimeout;
   else if(conn->data->set.timeout)
     timeout = conn->data->set.timeout;
-
-  /* We convert the number of seconds into number of milliseconds here: */
-  if(timeout < 2147483)
-    /* maximum amount of seconds that can be multiplied with 1000 and
-       still fit within 31 bits */
-    timeout *= 1000;
   else
-    timeout = 0x7fffffff; /* ridiculous amount of time anyway */
+    timeout = CURL_TIMEOUT_RESOLVE * 1000; /* default name resolve timeout */
 
   /* Wait for the name resolve query to complete. */
   while (1) {
