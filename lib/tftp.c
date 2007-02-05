@@ -583,7 +583,7 @@ CURLcode Curl_tftp_connect(struct connectdata *conn, bool *done)
   state->state = TFTP_STATE_START;
 
   ((struct sockaddr *)&state->local_addr)->sa_family =
-    conn->ip_addr->ai_family;
+    (unsigned short)(conn->ip_addr->ai_family);
 
   tftp_set_timeouts(state);
 

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -125,7 +125,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
                                 int *waitp)
 {
 #if defined(HAVE_GETHOSTBYNAME_R_3) || defined(HAVE_GETHOSTBYNAME_R_6)
-  int res = ERANGE;
+  int res;
 #endif
   Curl_addrinfo *ai = NULL;
   struct hostent *h = NULL;
@@ -380,7 +380,7 @@ Curl_addrinfo *Curl_he2ai(const struct hostent *he, int port)
     addr = (struct sockaddr_in *)ai->ai_addr; /* storage area for this info */
 
     memcpy((char *)&(addr->sin_addr), curr, sizeof(struct in_addr));
-    addr->sin_family = he->h_addrtype;
+    addr->sin_family = (unsigned short)(he->h_addrtype);
     addr->sin_port = htons((unsigned short)port);
 
     prevai = ai;
