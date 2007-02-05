@@ -15,7 +15,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o in testsuite, update test cookies expiration from 2007-Feb-1 to 2038-Feb-1
+ o in testsuite, update test cookies expiration from 2007-Feb-1 to year 2035 
  o socks5 works
 
 This release includes the following known bugs:
