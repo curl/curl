@@ -18,7 +18,7 @@ CFLAGS += -DWATT32 -DHAVE_AF_INET6 -DHAVE_PF_INET6 -DHAVE_FIONBIO \
           -DSEND_TYPE_ARG4='int'   -DSEND_TYPE_RETV='int' \
           -DRECV_TYPE_ARG1='int'   -DRECV_TYPE_ARG2='void*' \
           -DRECV_TYPE_ARG3='int'   -DRECV_TYPE_ARG4='int' \
-          -DRECV_TYPE_RETV='int'   -UHAVE_CONFIG_H -Dselect=select_s
+          -DRECV_TYPE_RETV='int'   -UHAVE_CONFIG_H
 
 LDFLAGS = -s
 
@@ -59,7 +59,7 @@ clean:
 	rm -f $(OBJECTS) libcares.a
 
 vclean realclean: clean
-	rm -f ahost.exe adig.exe depend.dj
+	rm -f ahost.exe adig.exe
 	- rmdir $(OBJ_DIR)
 
 # DO NOT DELETE THIS LINE
