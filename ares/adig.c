@@ -21,12 +21,16 @@
 #if defined(WIN32) && !defined(WATT32)
 #include "nameser.h"
 #else
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <arpa/nameser.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <netdb.h>
 #endif
 #ifdef HAVE_GETOPT_H
