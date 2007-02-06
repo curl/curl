@@ -124,7 +124,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
                                 int port,
                                 int *waitp)
 {
-#if defined(HAVE_GETHOSTBYNAME_R_3) || defined(HAVE_GETHOSTBYNAME_R_6)
+#if defined(HAVE_GETHOSTBYNAME_R_3)
   int res;
 #endif
   Curl_addrinfo *ai = NULL;
@@ -181,7 +181,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 #ifdef HAVE_GETHOSTBYNAME_R_6
     /* Linux */
 
-    res=gethostbyname_r(hostname,
+    (void)gethostbyname_r(hostname,
                         (struct hostent *)buf,
                         (char *)buf + sizeof(struct hostent),
                         CURL_HOSTENT_SIZE - sizeof(struct hostent),

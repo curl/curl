@@ -322,6 +322,9 @@ static char *lookup_service(unsigned short port, int flags,
 static void append_scopeid(struct sockaddr_in6 *addr6, unsigned int flags,
                            char *buf, size_t buflen)
 {
+#ifdef HAVE_IF_INDEXTONAME
+  int is_ll, is_mcll;
+#endif
   char fmt_u[] = "%u";
   char fmt_lu[] = "%lu";
   char tmpbuf[IF_NAMESIZE + 2];
@@ -331,9 +334,10 @@ static void append_scopeid(struct sockaddr_in6 *addr6, unsigned int flags,
   tmpbuf[0] = '%';
 
 #ifdef HAVE_IF_INDEXTONAME
+  is_ll = IN6_IS_ADDR_LINKLOCAL(&addr6->sin6_addr);
+  is_mcll = IN6_IS_ADDR_MC_LINKLOCAL(&addr6->sin6_addr);
   if ((flags & ARES_NI_NUMERICSCOPE) ||
-      (!IN6_IS_ADDR_LINKLOCAL(&addr6->sin6_addr)
-       && !IN6_IS_ADDR_MC_LINKLOCAL(&addr6->sin6_addr)))
+      (!is_ll && !is_mcll))
     {
        sprintf(&tmpbuf[1], fmt, addr6->sin6_scope_id);
     }
