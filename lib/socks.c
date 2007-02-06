@@ -343,14 +343,14 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   /* get timeout */
   if(data->set.timeout && data->set.connecttimeout) {
     if (data->set.timeout < data->set.connecttimeout)
-      timeout = data->set.timeout*1000;
+      timeout = data->set.timeout;
     else
-      timeout = data->set.connecttimeout*1000;
+      timeout = data->set.connecttimeout;
   }
   else if(data->set.timeout)
-    timeout = data->set.timeout*1000;
+    timeout = data->set.timeout;
   else if(data->set.connecttimeout)
-    timeout = data->set.connecttimeout*1000;
+    timeout = data->set.connecttimeout;
   else
     timeout = DEFAULT_CONNECT_TIMEOUT;
 
