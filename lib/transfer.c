@@ -1549,11 +1549,11 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   if (data->set.timeout &&
       (Curl_tvdiff(k->now, k->start) >= data->set.timeout)) {
     if (k->size != -1) {
-      failf(data, "Operation timed out after %d milliseconds with %"
+      failf(data, "Operation timed out after %ld milliseconds with %"
             FORMAT_OFF_T " out of %" FORMAT_OFF_T " bytes received",
             data->set.timeout, k->bytecount, k->size);
     } else {
-      failf(data, "Operation timed out after %d milliseconds with %"
+      failf(data, "Operation timed out after %ld milliseconds with %"
             FORMAT_OFF_T " bytes received",
             data->set.timeout, k->bytecount);
     }

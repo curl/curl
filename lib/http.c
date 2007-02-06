@@ -1234,7 +1234,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 
       /* loop every second at least, less if the timeout is near */
       switch (Curl_select(tunnelsocket, CURL_SOCKET_BAD,
-                          check<1000?check:1000)) {
+                          check<1000L?(int)check:1000)) {
       case -1: /* select() error, stop reading */
         error = SELECT_ERROR;
         failf(data, "Proxy CONNECT aborted due to select() error");
