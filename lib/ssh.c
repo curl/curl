@@ -974,12 +974,18 @@ ssize_t Curl_sftp_recv(struct connectdata *conn, int sockindex,
                    char *mem, size_t len)
 {
   ssize_t nread;
+  (void)sockindex;
 
   /* libssh2_sftp_read() returns size_t !*/
 
+#ifdef LIBSSH2SFTP_EAGAIN
+  /* we prefer the non-blocking API but that didn't exist previously */
+  nread = (ssize_t)
+    libssh2_sftp_readnb(conn->data->reqdata.proto.ssh->sftp_handle, mem, len);
+#else
   nread = (ssize_t)
     libssh2_sftp_read(conn->data->reqdata.proto.ssh->sftp_handle, mem, len);
-  (void)sockindex;
+#endif
   return nread;
 }
 
