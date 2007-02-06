@@ -19,12 +19,16 @@
 #include <sys/types.h>
 
 #if !defined(WIN32) || defined(WATT32)
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #endif
 
 #include <stdio.h>
@@ -39,6 +43,11 @@
 #include "ares_dns.h"
 #include "inet_ntop.h"
 #include "inet_net_pton.h"
+
+#ifndef optind
+extern int   optind;
+extern char *optarg;
+#endif
 
 #ifndef INADDR_NONE
 #define INADDR_NONE 0xffffffff
