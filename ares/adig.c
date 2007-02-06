@@ -555,8 +555,9 @@ static const unsigned char *display_rr(const unsigned char *aptr,
       if (p + 20 > aptr + dlen)
         return NULL;
       printf("\t\t\t\t\t\t( %lu %lu %lu %lu %lu )",
-             DNS__32BIT(p), DNS__32BIT(p+4), DNS__32BIT(p+8),
-             DNS__32BIT(p+12), DNS__32BIT(p+16));
+             (unsigned long)DNS__32BIT(p), (unsigned long)DNS__32BIT(p+4),
+             (unsigned long)DNS__32BIT(p+8), (unsigned long)DNS__32BIT(p+12),
+             (unsigned long)DNS__32BIT(p+16));
       break;
 
     case T_TXT:
