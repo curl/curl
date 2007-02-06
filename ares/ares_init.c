@@ -43,6 +43,9 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#ifdef HAVE_PROCESS_H
+#include <process.h>  /* Some have getpid() here */
+#endif
 #endif
 
 #include <stdio.h>
