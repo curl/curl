@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel (6 February 2007)
+- Regular file downloads wiht SFTP and SCP are now done using the non-blocking
+  API of libssh2, if the libssh2 headers seem to support them. This will make
+  SCP and SFTP much more responsive and better libcurl citizens when used with
+  the multi interface etc.
+
 Daniel (5 February 2007)
 - Michael Wallner added support for CURLOPT_TIMEOUT_MS and
   CURLOPT_CONNECTTIMEOUT_MS that, as their names suggest, do the timeouts with
