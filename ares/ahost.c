@@ -78,10 +78,16 @@ int main(int argc, char **argv)
   WSAStartup(wVersionRequested, &wsaData);
 #endif
 
-  while ((c = getopt(argc,argv,"t:h")) != -1)
+  while ((c = getopt(argc,argv,"dt:h")) != -1)
     {
       switch (c)
         {
+        case 'd':
+#ifdef WATT32
+          dbug_init();
+#endif
+          break;
+
         case 't':
           if (!strcasecmp(optarg,"a"))
             addr_family = AF_INET;
