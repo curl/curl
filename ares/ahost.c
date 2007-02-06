@@ -49,10 +49,6 @@ extern int   optind;
 extern char *optarg;
 #endif
 
-#ifndef INADDR_NONE
-#define INADDR_NONE 0xffffffff
-#endif
-
 #ifndef HAVE_STRUCT_IN6_ADDR
 struct in6_addr
 {
@@ -87,7 +83,6 @@ int main(int argc, char **argv)
           dbug_init();
 #endif
           break;
-
         case 't':
           if (!strcasecmp(optarg,"a"))
             addr_family = AF_INET;
