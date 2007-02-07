@@ -615,9 +615,15 @@ ssize_t Curl_scp_send(struct connectdata *conn, int sockindex,
    * NOTE: we should not store nor rely on connection-related data to be
    * in the SessionHandle struct
    */
+#ifdef LIBSSH2CHANNEL_EAGAIN
+  nwrite = (ssize_t)
+    libssh2_channel_writenb(conn->data->reqdata.proto.ssh->ssh_channel,
+                            mem, len);
+#else
   nwrite = (ssize_t)
     libssh2_channel_write(conn->data->reqdata.proto.ssh->ssh_channel,
                           mem, len);
+#endif
   (void)sockindex;
   return nwrite;
 }
