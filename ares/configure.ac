@@ -78,6 +78,13 @@ AC_MSG_RESULT($need_no_undefined)
 AM_CONDITIONAL(NO_UNDEFINED, test x$need_no_undefined = xyes)
 
 dnl **********************************************************************
+dnl check if this is the Intel ICC compiler, and if so make it stricter
+dnl (convert warning 147 into an error) so that it properly can detect the
+dnl gethostbyname_r() version
+dnl **********************************************************************
+CURL_DETECT_ICC([CFLAGS="$CFLAGS -we 147"])
+
+dnl **********************************************************************
 dnl Checks for libraries.
 dnl **********************************************************************
 
@@ -197,6 +204,77 @@ AC_HELP_STRING([--enable-libgcc],[use libgcc when linking]),
   esac ],
        AC_MSG_RESULT(no)
 )
+
+
+dnl Default is to try the thread-safe versions of a few functions
+OPT_THREAD=on
+
+dnl detect AIX 4.3 or later
+AC_MSG_CHECKING([AIX 4.3 or later])
+AC_PREPROC_IFELSE([
+#if defined(_AIX) && defined(_AIX43)
+printf("just fine");
+#else
+#error "this is not AIX 4.3 or later"
+#endif
+],
+ [ AC_MSG_RESULT([yes])
+   RECENTAIX=yes
+   OPT_THREAD=off ],
+ [ AC_MSG_RESULT([no]) ]
+)
+
+AC_ARG_ENABLE(thread,dnl
+AC_HELP_STRING([--disable-thread],[don't look for thread-safe functions])
+AC_HELP_STRING([--enable-thread],[look for thread-safe functions]),
+[ case "$enableval" in
+  no)
+    OPT_THREAD=off
+    AC_MSG_WARN(c-ares will not get built using thread-safe functions)
+    ;;
+  *)
+    ;;
+  esac
+]
+)
+
+if test X"$OPT_THREAD" = Xoff
+then
+  AC_DEFINE(DISABLED_THREADSAFE, 1,
+    [Set to explicitly specify we don't want to use thread-safe functions])
+fi
+
+dnl for recent AIX versions, we skip all the thread-safe checks above since
+dnl they claim a thread-safe libc using the standard API. But there are
+dnl some functions still not thread-safe. Check for these!
+
+dnl Let's hope this split URL remains working:
+dnl http://publibn.boulder.ibm.com/doc_link/en_US/a_doc_lib/aixprggd/ \
+dnl genprogc/thread_quick_ref.htm
+
+if test "x$RECENTAIX" = "xyes"; then
+
+  AC_DEFINE(_THREAD_SAFE, 1, [define this if you need it to compile thread-safe code])
+
+  dnl check if this is the IBM xlc compiler
+  dnl Details thanks to => http://predef.sourceforge.net/
+  AC_MSG_CHECKING([if this is the xlc compiler])
+  AC_EGREP_CPP([^__xlC__], [__xlC__],
+         dnl action if the text is found, this it has not been replaced by the
+         dnl cpp
+         XLC="no"
+         AC_MSG_RESULT([no]),
+         dnl the text was not found, it was replaced by the cpp
+         XLC="yes"
+         AC_MSG_RESULT([yes])
+         CFLAGS="$CFLAGS -qthreaded"
+         dnl AIX xlc has to have strict aliasing turned off. If not,
+         dnl the optimizer assumes that pointers can only point to
+         dnl an object of the same type.
+         CFLAGS="$CFLAGS -qnoansialias"
+       )
+fi
+
 
 dnl **********************************************************************
 dnl Back to "normal" configuring
