@@ -1459,6 +1459,10 @@ if test "x$RECENTAIX" = "xyes"; then
          XLC="yes"
          AC_MSG_RESULT([yes])
          CFLAGS="$CFLAGS -qthreaded"
+         dnl AIX xlc has to have strict aliasing turned off. If not,
+         dnl the optimizer assumes that pointers can only point to
+         dnl an object of the same type.
+         CFLAGS="$CFLAGS -qnoansialias"
        )
 
 
