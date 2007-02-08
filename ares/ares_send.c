@@ -73,7 +73,7 @@ void ares_send(ares_channel channel, const unsigned char *qbuf, int qlen,
     }
 
   /* Compute the query ID.  Start with no timeout. */
-  query->qid = DNS_HEADER_QID(qbuf);
+  query->qid = (unsigned short)DNS_HEADER_QID(qbuf);
   query->timeout = 0;
 
   /* Form the TCP query buffer by prepending qlen (as two

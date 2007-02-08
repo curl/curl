@@ -21,12 +21,12 @@
 #define DNS__16BIT(p)                   (((p)[0] << 8) | (p)[1])
 #define DNS__32BIT(p)                   (((p)[0] << 24) | ((p)[1] << 16) | \
                                          ((p)[2] << 8) | (p)[3])
-#define DNS__SET16BIT(p, v)             (((p)[0] = ((v) >> 8) & 0xff), \
-                                         ((p)[1] = (v) & 0xff))
-#define DNS__SET32BIT(p, v)             (((p)[0] = ((v) >> 24) & 0xff), \
-                                         ((p)[1] = ((v) >> 16) & 0xff), \
-                                         ((p)[2] = ((v) >> 8) & 0xff), \
-                                         ((p)[3] = (v) & 0xff))
+#define DNS__SET16BIT(p, v)             (((p)[0] = (unsigned char)((v) >> 8) & 0xff), \
+                                         ((p)[1] = (unsigned char)(v) & 0xff))
+#define DNS__SET32BIT(p, v)             (((p)[0] = (unsigned char)((v) >> 24) & 0xff), \
+                                         ((p)[1] = (unsigned char)((v) >> 16) & 0xff), \
+                                         ((p)[2] = (unsigned char)((v) >> 8) & 0xff), \
+                                         ((p)[3] = (unsigned char)(v) & 0xff))
 
 #if 0
 /* we cannot use this approach on systems where we can't access 16/32 bit
