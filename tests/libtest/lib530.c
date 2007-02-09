@@ -13,7 +13,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "timeval.h"
+#include "testutil.h"
 
 #define MAIN_LOOP_HANG_TIMEOUT     30 * 1000
 #define MULTI_PERFORM_HANG_TIMEOUT 20 * 1000
@@ -84,7 +84,7 @@ int test(char *URL)
   curl_multi_setopt(m, CURLMOPT_PIPELINING, 1);
 
   ml_timedout = FALSE;
-  ml_start = curlx_tvnow();
+  ml_start = tutil_tvnow();
 
   fprintf(stderr, "Start at URL 0\n");
 
@@ -96,17 +96,17 @@ int test(char *URL)
     interval.tv_sec = 1;
     interval.tv_usec = 0;
 
-    if (curlx_tvdiff(curlx_tvnow(), ml_start) > 
+    if (tutil_tvdiff(tutil_tvnow(), ml_start) > 
         MAIN_LOOP_HANG_TIMEOUT) {
       ml_timedout = TRUE;
       break;
     }
     mp_timedout = FALSE;
-    mp_start = curlx_tvnow();
+    mp_start = tutil_tvnow();
 
     while (res == CURLM_CALL_MULTI_PERFORM) {
       res = (int)curl_multi_perform(m, &running);
-      if (curlx_tvdiff(curlx_tvnow(), mp_start) > 
+      if (tutil_tvdiff(tutil_tvnow(), mp_start) > 
           MULTI_PERFORM_HANG_TIMEOUT) {
         mp_timedout = TRUE;
         break;

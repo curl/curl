@@ -10,7 +10,7 @@
 
 #include "test.h"
 
-#include "timeval.h"
+#include "testutil.h"
 
 #define MULTI_PERFORM_HANG_TIMEOUT 30 * 1000
 
@@ -57,11 +57,11 @@ int test(char *URL)
   }
 
   mp_timedout = FALSE;
-  mp_start = curlx_tvnow();
+  mp_start = tutil_tvnow();
 
   while (running) {
     res = (int)curl_multi_perform(m, &running);
-    if (curlx_tvdiff(curlx_tvnow(), mp_start) > 
+    if (tutil_tvdiff(tutil_tvnow(), mp_start) > 
         MULTI_PERFORM_HANG_TIMEOUT) {
       mp_timedout = TRUE;
       break;

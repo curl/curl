@@ -14,7 +14,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "timeval.h"
+#include "testutil.h"
 
 #define MAIN_LOOP_HANG_TIMEOUT     30 * 1000
 #define MULTI_PERFORM_HANG_TIMEOUT 20 * 1000
@@ -30,11 +30,11 @@ static CURLMcode perform(CURLM * multi)
   char mp_timedout = FALSE;
 
   mp_timedout = FALSE;
-  mp_start = curlx_tvnow();
+  mp_start = tutil_tvnow();
 
   for (;;) {
     code = curl_multi_perform(multi, &handles);
-    if (curlx_tvdiff(curlx_tvnow(), mp_start) > 
+    if (tutil_tvdiff(tutil_tvnow(), mp_start) > 
         MULTI_PERFORM_HANG_TIMEOUT) {
       mp_timedout = TRUE;
       break;

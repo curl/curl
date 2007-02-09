@@ -10,7 +10,7 @@
 
 #include "test.h"
 
-#include "timeval.h"
+#include "testutil.h"
 
 #define MAIN_LOOP_HANG_TIMEOUT     30 * 1000
 #define MULTI_PERFORM_HANG_TIMEOUT 20 * 1000
@@ -58,11 +58,11 @@ int test(char *URL)
   }
 
   mp_timedout = FALSE;
-  mp_start = curlx_tvnow();
+  mp_start = tutil_tvnow();
 
   do {
     res = curl_multi_perform(multi, &still_running);
-    if (curlx_tvdiff(curlx_tvnow(), mp_start) > 
+    if (tutil_tvdiff(tutil_tvnow(), mp_start) > 
         MULTI_PERFORM_HANG_TIMEOUT) {
       mp_timedout = TRUE;
       break;
@@ -70,7 +70,7 @@ int test(char *URL)
   } while (res == CURLM_CALL_MULTI_PERFORM);
 
   ml_timedout = FALSE;
-  ml_start = curlx_tvnow();
+  ml_start = tutil_tvnow();
 
   while ((!ml_timedout) && (!mp_timedout) && (still_running)) {
     struct timeval timeout;
@@ -86,7 +86,7 @@ int test(char *URL)
     timeout.tv_sec = 1;
     timeout.tv_usec = 0;
 
-    if (curlx_tvdiff(curlx_tvnow(), ml_start) > 
+    if (tutil_tvdiff(tutil_tvnow(), ml_start) > 
         MAIN_LOOP_HANG_TIMEOUT) {
       ml_timedout = TRUE;
       break;
@@ -100,10 +100,10 @@ int test(char *URL)
       case 0:
       default:
         mp_timedout = FALSE;
-        mp_start = curlx_tvnow();
+        mp_start = tutil_tvnow();
         do {
           res = curl_multi_perform(multi, &still_running);
-          if (curlx_tvdiff(curlx_tvnow(), mp_start) > 
+          if (tutil_tvdiff(tutil_tvnow(), mp_start) > 
               MULTI_PERFORM_HANG_TIMEOUT) {
             mp_timedout = TRUE;
             break;
