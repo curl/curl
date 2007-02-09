@@ -37,8 +37,8 @@ LIBDIR = $(top_builddir)/lib
 
 EXTRA_DIST = test307.pl
 
-# Source code file used only in some libcurl test programs
-TESTUTIL = testutil.c
+# files used only in some libcurl test programs
+TESTUTIL = testutil.c testutil.h
 
 # these files are used in every single test program below
 SUPPORTFILES = first.c test.h
