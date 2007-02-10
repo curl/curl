@@ -1,4 +1,4 @@
-Updated: November 2, 2005 (http://curl.haxx.se/docs/faq.html)
+Updated: Features 11, 2007 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -114,10 +114,10 @@ FAQ
   libcurl
 
     A free and easy-to-use client-side URL transfer library, supporting FTP,
-    FTPS, HTTP, HTTPS, TELNET, DICT, FILE and LDAP.  libcurl supports
-    HTTPS certificates, HTTP POST, HTTP PUT, FTP uploading, kerberos, HTTP
-    form based upload, proxies, cookies, user+password authentication, file
-    transfer resume, http proxy tunneling and more!
+    FTPS, HTTP, HTTPS, SCP, SFTP, TFTP, TELNET, DICT, FILE and LDAP.  libcurl
+    supports HTTPS certificates, HTTP POST, HTTP PUT, FTP uploading, kerberos,
+    HTTP form based upload, proxies, cookies, user+password authentication,
+    file transfer resume, http proxy tunneling and more!
 
     libcurl is highly portable, it builds and works identically on numerous
     platforms, including Solaris, NetBSD, FreeBSD, OpenBSD, Darwin, HPUX,
@@ -132,7 +132,8 @@ FAQ
     A command line tool for getting or sending files using URL syntax.
 
     Since curl uses libcurl, it supports a range of common Internet protocols,
-    currently including HTTP, HTTPS, FTP, FTPS, LDAP, DICT, TELNET and FILE.
+    currently including HTTP, HTTPS, FTP, FTPS, SCP, SFTP, TFTP, LDAP, DICT,
+    TELNET and FILE.
 
   We pronounce curl and cURL with an initial k sound: [kurl].
 
@@ -211,7 +212,7 @@ FAQ
   improvements and have them inserted in the main sources (of course on the
   condition that developers agree on that the fixes are good).
 
-  The full list of the more than 450 contributors is found in the docs/THANKS
+  The full list of the more than 530 contributors is found in the docs/THANKS
   file.
 
   curl is developed by a community, with Daniel at the wheel.
@@ -355,10 +356,10 @@ FAQ
 
   2.2 Does curl work/build with other SSL libraries?
 
-  Curl has been written to use OpenSSL or GnuTLS, although there should not be
-  many problems using a different library. If anyone does "port" curl to use a
-  different SSL library, we are of course very interested in getting the
-  patch!
+  Curl has been written to use OpenSSL, GnuTLS or yassl, although there should
+  not be many problems using a different library. If anyone does "port" curl
+  to use a different SSL library, we are of course very interested in getting
+  the patch!
 
   2.3 Where can I find a copy of LIBEAY32.DLL?
 
@@ -896,8 +897,6 @@ FAQ
   Similarly, if you use CURLOPT_READDATA you must also specify
   CURLOPT_READFUNCTION.
 
-  (Provided by Joel DeYoung and Bob Schader)
-
   5.6 What about Keep-Alive or persistent connections?
 
   curl and libcurl have excellent support for persistent connections when
@@ -915,8 +914,6 @@ FAQ
   This is determined by the /MD, /ML, /MT (and their corresponding /M?d)
   options to the command line compiler. /MD (linking against MSVCRT dll) seems
   to be the most commonly used option.
-
-  (Provided by Andrew Francis)
 
   When building an application that uses the static libcurl library, you must
   add -DCURL_STATICLIB to your CFLAGS. Otherwise the linker will look for
