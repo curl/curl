@@ -157,7 +157,7 @@ FAQ
 
   1.3 What is curl not?
 
-  Curl is *not* a wget clone. That is a common misconception.  Never, during
+  Curl is not a wget clone. That is a common misconception.  Never, during
   curl's development, have we intended curl to replace wget or compete on its
   market. Curl is targeted at single-shot file transfers.
 
@@ -172,9 +172,10 @@ FAQ
   Curl is not a PHP tool, even though it works perfectly well when used from
   or with PHP (when using the PHP/CURL module).
 
-  Curl is not a single-OS program. Curl exists, compiles, builds and runs
-  under a wide range of operating systems, including all modern Unixes (and a
-  bunch of older ones too), Windows, Amiga, BeOS, OS/2, OS X, QNX etc.
+  Curl is not a program for a single operating system. Curl exists, compiles,
+  builds and runs under a wide range of operating systems, including all
+  modern Unixes (and a bunch of older ones too), Windows, Amiga, BeOS, OS/2,
+  OS X, QNX etc.
 
   1.4 When will you make curl do XXXX ?
 
@@ -288,13 +289,13 @@ FAQ
 
   Some facts to use as input to the math:
 
-  curl packages have been downloaded from the curl.haxx.se site well over a
-  million times. curl is installed by default with most Linux
+  curl packages are downloaded from the curl.haxx.se and mirrors almost one
+  million times per year. curl is installed by default with most Linux
   distributions. curl is installed by default with Mac OS X. curl and libcurl
   as used by numerous applications that include libcurl binaries in their
   distribution packages (like Adobe Acrobat Reader and Google Earth).
 
-  More than 40 known named companies use curl in commercial environments and
+  More than 60 known named companies use curl in commercial environments and
   products. More than 100 known named open source projects depend on
   (lib)curl.
 
@@ -305,6 +306,9 @@ FAQ
   of some 29 millions, while Netcraft detected some 4 million "active" Linux
   based web servers. A guess is that a fair amount of these Linux
   installations have curl installed.
+
+  All this taken together, there is no doubt that there are millions of
+  (lib)curl users.
 
   http://curl.haxx.se/docs/companies.html
   http://curl.haxx.se/docs/programs.html
@@ -338,8 +342,6 @@ FAQ
     Workaround: Specifying "LDFLAGS=-L/usr/local/ssl/lib" in front of
     ./configure places the -L/usr/local/ssl/lib early enough in the command
     line to make things work
-
-    Solution submitted by: Bob Allison <allisonb@users.sourceforge.net>
 
     2.1.2 only the libssl lib is missing
 
@@ -465,10 +467,12 @@ FAQ
   install and use them, in the libcurl section of the curl web site:
   http://curl.haxx.se/libcurl/
 
-  In February 2003, there are interfaces available for the following
-  languages: Basic, C, C++, Cocoa, Dylan, Euphoria, Java, Lua, Object-Pascal,
-  Pascal, Perl, PHP, PostgreSQL, Python, Rexx, Ruby, Scheme and Tcl. By the
-  time you read this, additional ones may have appeared!
+  In February 2007, there are interfaces available for the following
+  languages: Ada95, Basic, C, C++, Ch, Cocoa, D, Dylan, Euphoria, Ferite,
+  Gambas, glib/GTK+, Java, Lisp, Lua, Mono, .NET, Object-Pascal, O'Caml,
+  Pascal, Perl, PHP, PostgreSQL, Python, R, Rexx, Ruby, Scheme, S-Lang,
+  Smalltalk, SPL, Tcl, Visual Basic, Q, wxwidgets and XBLite. By the time you
+  read this, additional ones may have appeared!
 
   3.10 What about SOAP, WebDAV, XML-RPC or similar protocols over HTTP?
 
