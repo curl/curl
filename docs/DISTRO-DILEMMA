@@ -1,11 +1,11 @@
-  Date: May 15, 2006
+  Date: February 11, 2007
   Author: Daniel Stenberg <daniel@haxx.se>
   URL: http://curl.haxx.se/legal/distro-dilemma.html
 
 Condition
 
- This document is written to describe the situation as it is right
- now. libcurl 7.15.3 is currently the latest version available. Things may of
+ This document is written to describe the situation as it is right now.
+ libcurl 7.16.1 is currently the latest version available. Things may of
  course change in the future.
 
  This document reflects my view and understanding of these things. Please tell
@@ -48,24 +48,34 @@ Part of the Operating System
  Debian does however not take this stance and has officially(?) claimed that
  OpenSSL is not a required part of the Debian operating system
 
+ Some people claim that this paragraph cannot be exploited this way by a Linux
+ distro, but I am not a lawyer and that is a discussion left outside of this
+ document.
+
 GnuTLS
 
- With the release of libcurl 7.14.0 (May 2005), libcurl can now get built to
- use GnuTLS instead of OpenSSL. GnuTLS is an LGPL[7] licensed library that
- offers a matching set of features as OpenSSL does. Now, you can build and
- distribute an TLS/SSL capable libcurl without including any Original BSD
- licensed code.
+ Since May 2005 libcurl can get built to use GnuTLS instead of OpenSSL. GnuTLS
+ is an LGPL[7] licensed library that offers a matching set of features as
+ OpenSSL does. Now, you can build and distribute an TLS/SSL capable libcurl
+ without including any Original BSD licensed code.
 
- I believe Debian is the first distro to provide libcurl/GnutTLS packages.
+ I believe Debian is the first (only?) distro that provides libcurl/GnutTLS
+ packages.
 
-GnuTLS vs OpenSSL
+yassl
 
- While these two libraries offer similar features, they are not equal. Both
- libraries have features the other one lacks. libcurl does not (yet) offer a
- standardized stable ABI if you decide to switch from using libcurl-openssl to
- libcurl-gnutls or vice versa. The GnuTLS support is very recent in libcurl
- and it has not been tested nor used very extensively, while the OpenSSL
- equivalent code has been used and thus matured for more than seven (7) years.
+ libcurl can get also get built to use yassl for the TLS/SSL layer. yassl is a
+ GPL[3] licensed library.
+
+
+GnuTLS vs OpenSSL vs yassl
+
+ While these three libraries offer similar features, they are not equal.
+ libcurl does not (yet) offer a standardized stable ABI if you decide to
+ switch from using libcurl-openssl to libcurl-gnutls or vice versa. The GnuTLS
+ and yassl support is very recent in libcurl and it has not been tested nor
+ used very extensively, while the OpenSSL equivalent code has been used and
+ thus matured since 1999.
 
  GnuTLS
    - LGPL licensened
@@ -82,7 +92,12 @@ GnuTLS vs OpenSSL
    - provides crypto functions libcurl uses for NTLM
    - libcurl can do non-blocking connects with it in 7.15.4 and later
 
-The Better License, Original BSD or LGPL?
+ yassl
+   - GPL licensed
+   - much untested and unproven in the real work by (lib)curl users so we don't
+     know a lot about restrictions or benefits from using this
+
+The Better License, Original BSD, GPL or LGPL?
 
  It isn't obvious or without debate to any objective interested party that
  either of these licenses are the "better" or even the "preferred" one in a
@@ -91,8 +106,8 @@ The Better License, Original BSD or LGPL?
  Instead, I think we should accept the fact that the SSL/TLS libraries and
  their different licenses will fit different applications and their authors
  differently depending on the applications' licenses and their general usage
- pattern (considering how LGPL libraries for example can be burdensome for
- embedded systems usage).
+ pattern (considering how GPL and LGPL libraries for example can be burdensome
+ for embedded systems usage).
 
  In Debian land, there seems to be a common opinion that LGPL is "maximally
  compatible" with apps while Original BSD is not. Like this:
@@ -101,8 +116,8 @@ The Better License, Original BSD or LGPL?
 
 More SSL Libraries
 
- In libcurl, there's no stopping us here. There are at least a few more Open
- Source/Free SSL/TLS libraries and we would very much like to support them as
+ In libcurl, there's no stopping us here. There are more Open Source/Free
+ SSL/TLS libraries out there and we would very much like to support them as
  well, to offer application authors an even wider scope of choice.
 
 Application Angle of this Problem
@@ -137,63 +152,13 @@ Project cURL Angle of this Problem
 Distro Angle of this Problem
 
  To my knowledge there is only one distro that ships libcurl built with either
- one of the SSL libs supported.
+ OpenSSL or GnuTLS.
 
  Debian Linux is now (since mid September 2005) providing two different
  libcurl packages, one for libcurl built with OpenSSL and one built with
  GnuTLS. They use different .so names and can this both be installed in a
  single system simultaneously. This has been said to be a transitional system
  not desired to keep in the long run.
-
-Fixing the Only Problem
-
- The only problem is thus for distributions that want to offer libcurl
- versions built with more than one SSL/TLS library.
-
- Since multiple libcurl binaries using different names are ruled out, we need
- to come up with a way to have one single libcurl that someone uses different
- underlying libraries. The best(?) approach currently suggested involves this:
-
- A new intermediate library (named lib2 so far in the discussions) with the
- single purpose of providing libcurl with SSL/TLS capabilities. It would have
- a unified API and ABI no matter what underlying library it would use.
-
- There would be one lib2 binary provided for each supported SSL/TLS library.
- For example: lib2-openssl, lib2-gnutls, lib2-yassl, lib2-matrixssl and
- lib2-nossl. Yes, take note of the last one that provides the lib2 ABI but
- that lacks the actual powers.
-
- When libcurl is built and linked, it will be linked against a lib2 with the
- set ABI.
-
- When you link an app against libcurl, it would also need to provide one of
- the (many) lib2 libs to decide what approach that fits the app. An app that
- doesn't want SSL at all would still need to link with the lib2-nossl lib.
-
- GPL apps can pick the lib2-gnutls, others may pick the lib2-openssl.
-
- This concept works equally well both for shared and static libraries.
-
- A positive side effect of this approach could be a more generic "de facto"
- standard API for SSL/TLS libraries.
-
-When Will This Happen
-
- This is not a problem in curl, it doesn't solve any actual technical problems
- in our project. Don't hold your breath for this to happen very soon (if at
- all) unless you step forward and contribute.
-
- The suggestion that is outlined above is still only a suggestion. Feel free
- to bring a better idea!
-
- Also, to keep in mind: I don't want this new concept to have too much of an
- impact on the existing code. Preferably it should be possible to build the
- code like today (without the use of lib2), should you decide to ignore the
- problems outlined in this document.
-
- Work on this was suggested by Richard Atterer:
-
-        http://curl.haxx.se/mail/lib-2005-09/0066.html
 
 Footnotes
 
