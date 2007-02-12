@@ -1058,6 +1058,11 @@ typedef enum {
   CINIT(TIMEOUT_MS, LONG, 155),
   CINIT(CONNECTTIMEOUT_MS, LONG, 156),
 
+  /* set to zero to disable the libcurl's decoding and thus pass the raw body
+     data to the appliction even when it is encoded/compressed */
+  CINIT(HTTP_TRANSFER_DECODING, LONG, 157),
+  CINIT(HTTP_CONTENT_DECODING, LONG, 158),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

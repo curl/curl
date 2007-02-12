@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl 1 "3 Nov 2006" "Curl 7.16.1" "Curl Manual"
+.TH curl 1 "12 Feb 2007" "Curl 7.16.2" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -901,6 +901,11 @@ FTP range downloads only support the simple syntax 'start-stop' (optionally
 with one of the numbers omitted). It depends on the non-RFC command SIZE.
 
 If this option is used several times, the last one will be used.
+.IP "--raw"
+When used, it disables all internal HTTP decoding of content or transfer
+encodings and instead makes them passed on unaltered, raw. (Added in 7.16.2)
+
+If this option is used several times, each occurrence toggles this on/off.
 .IP "-R/--remote-time"
 When used, this will make libcurl attempt to figure out the timestamp of the
 remote file, and if that is available make the local file get that same

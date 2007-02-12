@@ -1725,6 +1725,19 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.ssh_private_key = va_arg(param, char *);
     break;
 
+  case CURLOPT_HTTP_TRANSFER_DECODING:
+    /*
+     * disable libcurl transfer encoding is used
+     */
+    data->set.http_te_skip = (bool)(0 == va_arg(param, long));
+    break;
+
+  case CURLOPT_HTTP_CONTENT_DECODING:
+    /*
+     * raw data passed to the application when content encoding is used
+     */
+    data->set.http_ce_skip = (bool)(0 == va_arg(param, long));
+    break;
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_FAILED_INIT; /* correct this */

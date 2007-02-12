@@ -116,6 +116,12 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
 
   *wrote = 0; /* nothing's written yet */
 
+  /* the original data is written to the client, but we go on with the
+     chunk read process, to properly calculate the content length*/
+  if ( data->set.http_te_skip )
+    Curl_client_write(conn, CLIENTWRITE_BODY, datap,datalen);
+
+
   while(length) {
     switch(ch->state) {
     case CHUNK_HEX:
@@ -206,12 +212,17 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
 
       /* Write the data portion available */
 #ifdef HAVE_LIBZ
-      switch (data->reqdata.keep.content_encoding) {
+      switch (conn->data->set.http_ce_skip?
+              IDENTITY : data->reqdata.keep.content_encoding) {
         case IDENTITY:
 #endif
-          if(!k->ignorebody)
-            result = Curl_client_write(conn, CLIENTWRITE_BODY, datap,
-                                       piece);
+          if(!k->ignorebody) {
+            if ( !data->set.http_te_skip )
+              result = Curl_client_write(conn, CLIENTWRITE_BODY, datap,
+                                         piece);
+            else
+              result = CURLE_OK;
+          }
 #ifdef HAVE_LIBZ
           break;
 
@@ -334,6 +345,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
             return(CHUNKE_BAD_CHUNK);
           }
 #endif /* CURL_DOES_CONVERSIONS */
+          if ( !data->set.http_te_skip )
           Curl_client_write(conn, CLIENTWRITE_HEADER,
                             conn->trailer, conn->trlPos);
         }

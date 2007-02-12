@@ -7,6 +7,15 @@
                                   Changelog
 
 Daniel (12 February 2007)
+- Shmulik Regev fixed so that the final CRLF of HTTP response headers are sent
+  to the debug callback.
+
+- Shmulik Regev added CURLOPT_HTTP_CONTENT_DECODING and
+  CURLOPT_HTTP_TRANSFER_DECODING that if set to zero will disable libcurl's
+  internal decoding of content or transfer encoded content. This may be
+  preferable in cases where you use libcurl for proxy purposes or similar. The
+  command line tool got a --raw option to disable both at once.
+  
 - Jeff Pohlmeyer fixed a flaw in curl_multi_add_handle() when adding a handle
   that has an easy handle present in the "closure" list pending closure.
 

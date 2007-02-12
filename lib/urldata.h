@@ -1292,6 +1292,10 @@ struct UserDefined {
                              authentication */
   char *ssh_private_key;  /* the path to the private key file for
                              authentication */
+  bool http_te_skip;     /* pass the raw body data to the user, even when
+                            transfer-encoded (chunked, compressed) */
+  bool http_ce_skip;     /* pass the raw body data to the user, even when
+                            content-encoded (chunked, compressed) */
 };
 
 struct Names {

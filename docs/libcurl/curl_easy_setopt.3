@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_easy_setopt 3 "5 Feb 2007" "libcurl 7.16.2" "libcurl Manual"
+.TH curl_easy_setopt 3 "12 Feb 2007" "libcurl 7.16.2" "libcurl Manual"
 .SH NAME
 curl_easy_setopt \- set options for a curl easy handle
 .SH SYNOPSIS
@@ -815,6 +815,16 @@ servers) which will report incorrect content length for files over 2
 gigabytes. If this option is used, curl will not be able to accurately report
 progress, and will simply stop the download when the server ends the
 connection. (added in 7.14.1)
+.IP CURLOPT_HTTP_CONTENT_DECODING
+Pass a long to tell libcurl how to act on content decoding. If set to zero,
+content decoding will be disabled. If set to 1 it is enabled. Note however
+that libcurl has no default content decoding but requires you to use
+\fICURLOPT_ENCODING\fP for that. (added in 7.16.2)
+.IP CURLOPT_HTTP_TRANSFER_DECODING
+Pass a long to tell libcurl how to act on transfer decoding. If set to zero,
+transfer decoding will be disabled, if set to 1 it is enabled
+(default). libcurl does chunked transfer decoding by default unless this
+option is set to zero. (added in 7.16.2)
 .RE
 .SH FTP OPTIONS
 .IP CURLOPT_FTPPORT

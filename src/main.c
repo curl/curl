@@ -20,7 +20,6 @@
  *
  * $Id$
  ***************************************************************************/
-
 #include "setup.h"
 
 #include <stdio.h>
@@ -470,7 +469,7 @@ struct Configurable {
   bool disable_sessionid;
 
   char *libcurl; /* output libcurl code to this file name */
-
+  bool raw;
   struct OutStruct *outs;
 };
 
@@ -683,6 +682,7 @@ static void help(void)
     " -Q/--quote <cmd>   Send command(s) to server before file transfer (F)",
     " -r/--range <range> Retrieve a byte range from a HTTP/1.1 or FTP server",
     "    --random-file <file> File for reading random data from (SSL)",
+    "    --raw           Pass HTTP \"raw\", without any transfer decoding (H)",
     " -R/--remote-time   Set the remote file's time on the local output",
     "    --retry <num>   Retry request <num> times if transient problems occur",
     "    --retry-delay <seconds> When retrying, wait this many seconds between each",
@@ -1473,6 +1473,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$x", "ftp-ssl-control", FALSE},
     {"$y", "ftp-ssl-ccc", FALSE},
     {"$z", "libcurl",    TRUE},
+    {"$#", "raw",        FALSE},
 
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
@@ -1902,6 +1903,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'z': /* --libcurl */
         GetStr(&config->libcurl, nextarg);
+        break;
+      case '#': /* --raw */
+        config->raw ^= TRUE;
         break;
       }
       break;
@@ -4252,6 +4256,12 @@ operate(struct Configurable *config, int argc, char *argv[])
         /* curl 7.16.0 */
         my_setopt(curl, CURLOPT_SSL_SESSIONID_CACHE,
                   !config->disable_sessionid);
+
+        /* curl 7.16.2 */
+        if(config->raw) {
+          my_setopt(curl, CURLOPT_HTTP_CONTENT_DECODING, FALSE);
+          my_setopt(curl, CURLOPT_HTTP_TRANSFER_DECODING, FALSE);
+        }
 
         retry_numretries = config->req_retry;
 

@@ -689,6 +689,9 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                   k->keepon &= ~KEEP_READ;
                 }
 
+                if(data->set.verbose)
+                  Curl_debug(data, CURLINFO_HEADER_IN,
+                             k->str_start, headerlen, conn);
                 break;          /* exit header line loop */
               }
 
@@ -1286,7 +1289,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                  Make sure that ALL_CONTENT_ENCODINGS contains all the
                  encodings handled here. */
 #ifdef HAVE_LIBZ
-              switch (k->content_encoding) {
+              switch (conn->data->set.http_ce_skip ?
+                      IDENTITY : k->content_encoding) {
               case IDENTITY:
 #endif
                 /* This is the default when the server sends no
