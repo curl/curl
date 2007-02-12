@@ -20,6 +20,10 @@ Daniel (12 February 2007)
   internal decoding of content or transfer encoded content. This may be
   preferable in cases where you use libcurl for proxy purposes or similar. The
   command line tool got a --raw option to disable both at once.
+
+- release tarballs made with maketgz will from now on have a LIBCURL_TIMESTAMP
+  define set to hold the exact date and time of when the tarball was built, as
+  a human readable string using the UTC time zone.
   
 - Jeff Pohlmeyer fixed a flaw in curl_multi_add_handle() when adding a handle
   that has an easy handle present in the "closure" list pending closure.
