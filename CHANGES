@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (12 February 2007)
+- Jeff Pohlmeyer fixed a flaw in curl_multi_add_handle() when adding a handle
+  that has an easy handle present in the "closure" list pending closure.
+
 Daniel (6 February 2007)
 - Regular file downloads wiht SFTP and SCP are now done using the non-blocking
   API of libssh2, if the libssh2 headers seem to support them. This will make

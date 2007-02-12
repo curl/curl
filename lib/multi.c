@@ -396,6 +396,7 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
       break; /* no need to continue since this handle can only be present once
                 in the list */
     }
+    prev = cl;
     cl = next;
   }
 
