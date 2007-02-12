@@ -53,4 +53,15 @@
 */
 #define LIBCURL_VERSION_NUM 0x071002
 
+/*
+ * This is the date and time when the full source package was created. The
+ * timestamp is not stored in CVS, as the timestamp is properly set in the
+ * tarballs by the maketgz script.
+ *
+ * The format of the date should follow this template:
+ *
+ * "Mon Feb 12 11:35:33 UTC 2007"
+ */
+#define LIBCURL_TIMESTAMP "CVS"
+
 #endif /* __CURL_CURLVER_H */

@@ -23,12 +23,16 @@ numeric=`perl -e 'printf("%02x%02x%02x\n", '"$major, $minor, $patch);"`
 HEADER=include/curl/curlver.h
 CHEADER=src/version.h
 
+# requires a date command that knows -u for UTC time zone
+datestamp=`date -u`
+
 # Replace version number in header file:
 sed -e 's/^#define LIBCURL_VERSION .*/#define LIBCURL_VERSION "'$libversion'"/g' \
     -e 's/^#define LIBCURL_VERSION_NUM .*/#define LIBCURL_VERSION_NUM 0x'$numeric'/g' \
     -e 's/^#define LIBCURL_VERSION_MAJOR .*/#define LIBCURL_VERSION_MAJOR '$major'/g' \
     -e 's/^#define LIBCURL_VERSION_MINOR .*/#define LIBCURL_VERSION_MINOR '$minor'/g' \
     -e 's/^#define LIBCURL_VERSION_PATCH .*/#define LIBCURL_VERSION_PATCH '$patch'/g' \
+    -e "s/^#define LIBCURL_TIMESTAMP .*/#define LIBCURL_TIMESTAMP \"$datestamp\"/g" \
  $HEADER >$HEADER.dist
 
 # Replace version number in header file:
@@ -41,6 +45,7 @@ sed "s/7\.12\.3/$libversion/g" $PLIST > $PLIST.dist
 echo "curl version $curlversion"
 echo "libcurl version $libversion"
 echo "libcurl numerical $numeric"
+echo "datestamp $datestamp"
 
 findprog()
 {
