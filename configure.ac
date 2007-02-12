@@ -1183,6 +1183,7 @@ if test "$OPENSSL_ENABLED" != "1"; then
        [
        AC_DEFINE(USE_GNUTLS, 1, [if GnuTLS is enabled])
        AC_SUBST(USE_GNUTLS, [1])
+       GNUTLS_ENABLED = 1
        USE_GNUTLS="yes"
        curl_ssl_msg="enabled (GnuTLS)"
        ],
@@ -1208,12 +1209,84 @@ if test "$OPENSSL_ENABLED" != "1"; then
 
   fi dnl GNUTLS not disabled
 
-  if test X"$USE_GNUTLS" != "Xyes"; then
-    AC_MSG_WARN([SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more.])
-    AC_MSG_WARN([Use --with-ssl or --with-gnutls to address this.])
-  fi
-
 fi dnl OPENSSL != 1
+
+dnl ----------------------------------------------------
+dnl NSS. Only check if GnuTLS and OpenSSL are not enabled
+dnl ----------------------------------------------------
+
+dnl Default to compiler & linker defaults for NSS files & libraries.
+OPT_NSS=no
+
+AC_ARG_WITH(nss,dnl
+AC_HELP_STRING([--with-nss=PATH],[where to look for NSS, PATH points to the installation root (default: /usr/local/)])
+AC_HELP_STRING([--without-nss], [disable NSS detection]),
+  OPT_NSS=$withval)
+
+if test "$OPENSSL_ENABLED" != "1" -a "$GNUTLS_ENABLED" != "1"; then
+
+  if test X"$OPT_NSS" != Xno; then
+    if test "x$OPT_NSS" = "xyes"; then
+     check=`pkg-config --version 2>/dev/null`
+     if test -n "$check"; then
+       addlib=`pkg-config --libs nss`
+       addcflags=`pkg-config --cflags nss`
+       version=`pkg-config --modversion nss`
+       nssprefix=`pkg-config --variable=prefix nss`
+     fi
+    else
+      # Without pkg-config, we'll kludge in some defaults
+      addlib="-lssl3 -lsmime3 -lnss3 -lplds4 -lplc4 -lnspr4 -lpthread -ldl"
+      addcflags="-I$OPT_NSS/include" 
+      version="unknown"
+      gtlsprefix=$OPT_GNUTLS
+    fi
+    if test -n "$addlib"; then
+
+      CLEANLIBS="$LIBS"
+      CLEANCPPFLAGS="$CPPFLAGS"
+  
+      LIBS="$LIBS $addlib"
+      if test "$addcflags" != "-I/usr/include"; then
+         CPPFLAGS="$CPPFLAGS $addcflags"
+      fi
+  
+      AC_CHECK_LIB(nss3, NSS_Initialize,
+       [
+       AC_DEFINE(USE_NSS, 1, [if NSS is enabled])
+       AC_SUBST(USE_NSS, [1])
+       USE_NSS="yes"
+       NSS_ENABLED=1
+       curl_ssl_msg="enabled (NSS)"
+       ],
+       [
+         LIBS="$CLEANLIBS"
+         CPPFLAGS="$CLEANCPPFLAGS"
+       ])
+  
+      if test "x$USE_NSS" = "xyes"; then
+        AC_MSG_NOTICE([detected NSS version $version])
+
+        dnl when shared libs were found in a path that the run-time
+        dnl linker doesn't search through, we need to add it to
+        dnl LD_LIBRARY_PATH to prevent further configure tests to fail
+        dnl due to this
+
+        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$nssprefix/lib$libsuff"
+        export LD_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $nssprefix/lib$libsuff to LD_LIBRARY_PATH])
+      fi
+
+    fi
+
+  fi dnl NSS not disabled
+
+fi dnl OPENSSL != 1 -a GNUTLS_ENABLED != 1
+
+if test "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED" = "x"; then
+  AC_MSG_WARN([SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more.])
+  AC_MSG_WARN([Use --with-ssl, --with-gnutls or --with-nss to address this.])
+fi
 
 dnl **********************************************************************
 dnl Check for the CA bundle

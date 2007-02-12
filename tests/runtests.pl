@@ -143,6 +143,7 @@ my $has_getrlimit;  # set if system has getrlimit()
 my $has_ntlm;    # set if libcurl is built with NTLM support
 my $has_openssl; # set if libcurl is built with OpenSSL
 my $has_gnutls;  # set if libcurl is built with GnuTLS
+my $has_nss;     # set if libcurl is built with NSS
 my $has_textaware; # set if running on a system that has a text mode concept
   # on files. Windows for example
 
@@ -955,6 +956,10 @@ sub checksystem {
                # GnuTLS in use
                $has_gnutls=1;
            }
+           elsif ($libcurl =~ /nss/i) {
+               # NSS in use
+               $has_nss=1;
+           }
         }
         elsif($_ =~ /^Protocols: (.*)/i) {
             # these are the supported protocols, we don't use this knowledge
@@ -1083,7 +1088,7 @@ sub checksystem {
 
     if($ssl_version) {
         logmsg sprintf("* SSL library:    %s\n",
-               $has_gnutls?"GnuTLS":($has_openssl?"OpenSSL":"<unknown>"));
+               $has_gnutls?"GnuTLS":($has_openssl?"OpenSSL":($has_nss?"NSS":"<unknown>")));
     }
 
     $has_textaware = ($^O eq 'MSWin32') || ($^O eq 'msys');
@@ -1176,6 +1181,11 @@ sub singletest {
         }
         elsif($f eq "GnuTLS") {
             if($has_gnutls) {
+                next;
+            }
+        }
+        elsif($f eq "NSS") {
+            if($has_nss) {
                 next;
             }
         }

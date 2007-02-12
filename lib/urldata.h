@@ -78,6 +78,10 @@
 #include <gnutls/gnutls.h>
 #endif
 
+#ifdef USE_NSS
+#include <nspr.h>
+#endif
+
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -169,6 +173,9 @@ struct ssl_connect_data {
   gnutls_session session;
   gnutls_certificate_credentials cred;
 #endif /* USE_GNUTLS */
+#ifdef USE_NSS
+  PRFileDesc *handle;
+#endif /* USE_NSS */
 };
 
 struct ssl_config_data {

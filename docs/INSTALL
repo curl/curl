@@ -140,6 +140,9 @@ UNIX
      yassl with its OpenSSL emulation enabled and point to that directory root
      with configure --with-ssl.
 
+     To build with NSS support instead of OpenSSL for SSL/TLS, note that
+     you need to use both --without-ssl and --with-nss.
+
 
 Win32
 =====

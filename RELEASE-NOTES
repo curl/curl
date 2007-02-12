@@ -14,6 +14,7 @@ This release includes the following changes:
  o Added CURLOPT_TIMEOUT_MS and CURLOPT_CONNECTTIMEOUT_MS
  o Added CURLOPT_HTTP_CONTENT_DECODING, CURLOPT_HTTP_TRANSFER_DECODING and
    --raw
+ o Added support for using the NSS library for TLS/SSL
 
 This release includes the following bugfixes:
 
@@ -36,6 +37,7 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Yang Tse, Manfred Schwarb, Michael Wallner, Jeff Pohlmeyer, Shmulik Regev
+ Yang Tse, Manfred Schwarb, Michael Wallner, Jeff Pohlmeyer, Shmulik Regev,
+ Rob Crittenden
 
         Thanks! (and sorry if I forgot to mention someone)

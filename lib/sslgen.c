@@ -31,6 +31,7 @@
    Curl_ssl_ - prefix for generic ones
    Curl_ossl_ - prefix for OpenSSL ones
    Curl_gtls_ - prefix for GnuTLS ones
+   Curl_nss_ - prefix for NSS ones
 
    "SSL/TLS Strong Encryption: An Introduction"
    http://httpd.apache.org/docs-2.0/ssl/ssl_intro.html
@@ -52,6 +53,7 @@
 #include "sslgen.h" /* generic SSL protos etc */
 #include "ssluse.h" /* OpenSSL versions */
 #include "gtls.h"   /* GnuTLS versions */
+#include "nssg.h"   /* NSS versions */
 #include "sendf.h"
 #include "strequal.h"
 #include "url.h"
@@ -169,8 +171,12 @@ int Curl_ssl_init(void)
 #ifdef USE_GNUTLS
   return Curl_gtls_init();
 #else
+#ifdef USE_NSS
+  return Curl_nss_init();
+#else
   /* no SSL support */
   return 1;
+#endif /* USE_NSS */
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
 }
@@ -186,6 +192,9 @@ void Curl_ssl_cleanup(void)
 #else
 #ifdef USE_GNUTLS
     Curl_gtls_cleanup();
+#ifdef USE_NSS
+    Curl_nss_cleanup();
+#endif /* USE_NSS */
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
     init_ssl = FALSE;
@@ -204,6 +213,10 @@ Curl_ssl_connect(struct connectdata *conn, int sockindex)
 #else
 #ifdef USE_GNUTLS
   return Curl_gtls_connect(conn, sockindex);
+#else
+#ifdef USE_NSS
+  return Curl_nss_connect(conn, sockindex);
+#endif /* USE_NSS */
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
 
@@ -225,11 +238,16 @@ Curl_ssl_connect_nonblocking(struct connectdata *conn, int sockindex,
   return Curl_ossl_connect_nonblocking(conn, sockindex, done);
 
 #else
+#ifdef USE_NSS
+  *done = TRUE; /* fallback to BLOCKING */
+  return Curl_nss_connect(conn, sockindex);
+#else
   /* not implemented!
      fallback to BLOCKING call. */
   *done = TRUE;
   return Curl_ssl_connect(conn, sockindex);
-#endif
+#endif /* USE_NSS */
+#endif /* USE_SSLEAY */
 }
 
 #ifdef USE_SSL
@@ -283,8 +301,14 @@ static int kill_session(struct curl_ssl_session *session)
 #ifdef USE_SSLEAY
     Curl_ossl_session_free(session->sessionid);
 #else
+#ifdef USE_GNUTLS
     Curl_gtls_session_free(session->sessionid);
-#endif
+#else
+#ifdef USE_NSS
+    /* NSS has its own session ID cache */
+#endif /* USE_NSS */
+#endif /* USE_GNUTLS */
+#endif /* USE_SSLEAY */
     session->sessionid=NULL;
     session->age = 0; /* fresh */
 
@@ -375,6 +399,10 @@ void Curl_ssl_close_all(struct SessionHandle *data)
 #else
 #ifdef USE_GNUTLS
   Curl_gtls_close_all(data);
+#else
+#ifdef USE_NSS
+  Curl_nss_close_all(data);
+#endif /* USE_NSS */
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
 #else /* USE_SSL */
@@ -391,7 +419,11 @@ void Curl_ssl_close(struct connectdata *conn)
 #ifdef USE_GNUTLS
     Curl_gtls_close(conn);
 #else
+#ifdef USE_GNUTLS
+    Curl_nss_close(conn);
+#else
   (void)conn;
+#endif /* USE_NSS */
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
   }
@@ -429,10 +461,17 @@ CURLcode Curl_ssl_set_engine(struct SessionHandle *data, const char *engine)
   (void)engine;
   return CURLE_FAILED_INIT;
 #else
+#ifdef USE_NSS
+  /* NSS doesn't set an engine this way */
+  (void)data;
+  (void)engine;
+  return CURLE_FAILED_INIT;
+#else
   /* no SSL layer */
   (void)data;
   (void)engine;
   return CURLE_FAILED_INIT;
+#endif /* USE_NSS */
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
 }
@@ -449,9 +488,15 @@ CURLcode Curl_ssl_set_engine_default(struct SessionHandle *data)
   (void)data;
   return CURLE_FAILED_INIT;
 #else
+#ifdef USE_NSS
+  /* A no-op for NSS */
+  (void)data;
+  return CURLE_FAILED_INIT;
+#else
   /* No SSL layer */
   (void)data;
   return CURLE_FAILED_INIT;
+#endif /* USE_NSS */
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
 }
@@ -467,8 +512,14 @@ struct curl_slist *Curl_ssl_engines_list(struct SessionHandle *data)
   (void)data;
   return NULL;
 #else
+#ifdef USE_NSS
+  /* In theory we could return the PKCS#11 modules loaded but that
+   * would just confuse things */
   (void)data;
   return NULL;
+  (void)data;
+  return NULL;
+#endif /* USE_NSS */
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
 }
@@ -485,11 +536,15 @@ ssize_t Curl_ssl_send(struct connectdata *conn,
 #ifdef USE_GNUTLS
   return Curl_gtls_send(conn, sockindex, mem, len);
 #else
+#ifdef USE_NSS
+  return Curl_nss_send(conn, sockindex, mem, len);
+#else
   (void)conn;
   (void)sockindex;
   (void)mem;
   (void)len;
   return 0;
+#endif /* USE_NSS */
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
 }
@@ -514,6 +569,10 @@ ssize_t Curl_ssl_recv(struct connectdata *conn, /* connection data */
 #else
 #ifdef USE_GNUTLS
   nread = Curl_gtls_recv(conn, sockindex, mem, len, &block);
+#else
+#ifdef USE_NSS
+  nread = Curl_nss_recv(conn, sockindex, mem, len, &block);
+#endif /* USE_NSS */
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
   if(nread == -1) {
@@ -574,9 +633,13 @@ size_t Curl_ssl_version(char *buffer, size_t size)
 #ifdef USE_GNUTLS
   return Curl_gtls_version(buffer, size);
 #else
+#ifdef USE_NSS
+  return Curl_nss_version(buffer, size);
+#else
   (void)buffer;
   (void)size;
   return 0; /* no SSL support */
+#endif /* USE_NSS */
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
 }
@@ -595,9 +658,13 @@ int Curl_ssl_check_cxn(struct connectdata *conn)
 #ifdef USE_SSLEAY
   return Curl_ossl_check_cxn(conn);
 #else
+#ifdef USE_NSS
+  return Curl_nss_check_cxn(conn);
+#else
   (void)conn;
   /* TODO: we lack implementation of this for GnuTLS */
   return -1; /* connection status unknown */
+#endif /* USE_NSS */
 #endif /* USE_SSLEAY */
 }
 

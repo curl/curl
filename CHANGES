@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel (12 February 2007)
+- Rob Crittenden added support for NSS (Network Security Service) for the
+  SSL/TLS layer. http://www.mozilla.org/projects/security/pki/nss/
+
+  This is the fourth supported library for TLS/SSL that libcurl supports!
+
 - Shmulik Regev fixed so that the final CRLF of HTTP response headers are sent
   to the debug callback.
 

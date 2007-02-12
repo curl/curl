@@ -358,10 +358,10 @@ FAQ
 
   2.2 Does curl work/build with other SSL libraries?
 
-  Curl has been written to use OpenSSL, GnuTLS or yassl, although there should
-  not be many problems using a different library. If anyone does "port" curl
-  to use a different SSL library, we are of course very interested in getting
-  the patch!
+  Curl has been written to use OpenSSL, GnuTLS, yassl or NSS, although there
+  should not be many problems using a different library. If anyone does "port"
+  curl to use a different SSL library, we are of course very interested in
+  getting the patch!
 
   2.3 Where can I find a copy of LIBEAY32.DLL?
 
@@ -843,6 +843,8 @@ FAQ
   for the crypto functions).
 
     http://www.gnu.org/software/gnutls/manual/html_node/Multi_002dthreaded-applications.html
+
+  No special locking is needed with a NSS-powered libcurl. NSS is thread-safe.
 
   5.2 How can I receive all data into a large memory chunk?
 

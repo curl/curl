@@ -116,10 +116,10 @@ FILE
 FOOTNOTES
 =========
 
-  *1 = requires OpenSSL or GnuTLS
+  *1 = requires OpenSSL, GnuTLS or NSS
   *2 = requires OpenLDAP
   *3 = requires a GSSAPI-compliant library, such as Heimdal or similar.
   *4 = requires FBopenssl
   *5 = requires a krb4 library, such as the MIT one or similar.
   *6 = requires c-ares
-  *7 = requires OpenSSL specificly, as GnuTLS only supports SSLv3 and TLSv1
+  *7 = requires OpenSSL or NSS, as GnuTLS only supports SSLv3 and TLSv1

@@ -1178,6 +1178,9 @@ transfers. (Added in 7.15.2)
 Pass a pointer to a zero terminated string as parameter. The string should be
 the file name of your certificate. The default format is "PEM" and can be
 changed with \fICURLOPT_SSLCERTTYPE\fP.
+
+With NSS this is the nickname of the certificate you wish to authenticate
+with.
 .IP CURLOPT_SSLCERTTYPE
 Pass a pointer to a zero terminated string as parameter. The string should be
 the format of your certificate. Supported formats are "PEM" and "DER".  (Added
@@ -1222,8 +1225,8 @@ Pass a long as parameter to control what version of SSL/TLS to attempt to use.
 The available options are:
 .RS
 .IP CURL_SSLVERSION_DEFAULT
-The default action. When libcurl built with OpenSSL, this will attempt to
-figure out the remote SSL protocol version. Unfortunately there are a lot of
+The default action. When libcurl built with OpenSSL or NSS, this will attempt
+to figure out the remote SSL protocol version. Unfortunately there are a lot of
 ancient and broken servers in use which cannot handle this technique and will
 fail to connect. When libcurl is built with GnuTLS, this will mean SSLv3.
 .IP CURL_SSLVERSION_TLSv1
@@ -1266,6 +1269,9 @@ even indicate an accessible file.
 
 Note that option is by default set to the system path where libcurl's cacert
 bundle is assumed to be stored, as established at build time.
+
+When built against NSS this is the directory that the NSS certificate
+database resides in.
 .IP CURLOPT_CAPATH
 Pass a char * to a zero terminated string naming a directory holding multiple
 CA certificates to verify the peer with. The certificate directory must be
@@ -1315,12 +1321,23 @@ Pass a char *, pointing to a zero terminated string holding the list of
 ciphers to use for the SSL connection. The list must be syntactically correct,
 it consists of one or more cipher strings separated by colons. Commas or spaces
 are also acceptable separators but colons are normally used, \!, \- and \+ can
-be used as operators. Valid examples of cipher lists include 'RC4-SHA',
+be used as operators.
+
+For OpenSSL and GnuTLS valid examples of cipher lists include 'RC4-SHA',
 \'SHA1+DES\', 'TLSv1' and 'DEFAULT'. The default list is normally set when you
 compile OpenSSL.
 
 You'll find more details about cipher lists on this URL:
 \fIhttp://www.openssl.org/docs/apps/ciphers.html\fP
+
+For NSS valid examples of cipher lists include 'rsa_rc4_128_md5',
+\'rsa_aes_128_sha\', etc. With NSS you don't add/remove ciphers. If one uses
+this option then all known ciphers are disabled and only those passed in
+are enabled.
+
+You'll find more details about the NSS cipher lists on this URL:
+\fIhttp://directory.fedora.redhat.com/docs/mod_nss.html#Directives\fP
+
 .IP CURLOPT_SSL_SESSIONID_CACHE
 Pass a long set to 0 to disable libcurl's use of SSL session-ID caching. Set
 this to 1 to enable it. By default all transfers are done using the

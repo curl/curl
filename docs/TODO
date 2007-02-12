@@ -157,16 +157,14 @@ TODO
    Clark)
 
  * Make curl's SSL layer capable of using other free SSL libraries.  Such as
-   Mozilla Security Services
-   (http://www.mozilla.org/projects/security/pki/nss/) or MatrixSSL
-   (http://www.matrixssl.org/).
+   MatrixSSL (http://www.matrixssl.org/).
 
  * Peter Sylvester's patch for SRP on the TLS layer.
    Awaits OpenSSL support for this, no need to support this in libcurl before
    there's an OpenSSL release that does it.
 
- * make the configure --with-ssl option first check for OpenSSL and then for
-   GnuTLS if OpenSSL wasn't detected.
+ * make the configure --with-ssl option first check for OpenSSL, then GnuTLS,
+   then NSS...
 
  GnuTLS
 
