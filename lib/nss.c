@@ -180,7 +180,7 @@ static SECStatus set_ciphers(struct SessionHandle *data, PRFileDesc * model,
   cipher = cipher_list;
 
   while(cipher_list && (cipher_list[0])) {
-    while((*cipher) && (isspace(*cipher)))
+    while((*cipher) && (ISSPACE(*cipher)))
       ++cipher;
 
     if((cipher_list = strchr(cipher, ','))) {
