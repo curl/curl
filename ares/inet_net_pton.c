@@ -86,7 +86,7 @@ inet_net_pton_ipv4(const char *src, unsigned char *dst, size_t size)
     dirty = 0;
     src++;  /* skip x or X. */
     while ((ch = *src++) != '\0' && ISXDIGIT(ch)) {
-      if (isupper(ch))
+      if (ISUPPER(ch))
         ch = tolower(ch);
       n = (int)(strchr(xdigits, ch) - xdigits);
       if (dirty == 0)

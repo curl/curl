@@ -122,6 +122,8 @@
 #define ISGRAPH(x)  (isgraph((int)  ((unsigned char)x)))
 #define ISALPHA(x)  (isalpha((int)  ((unsigned char)x)))
 #define ISPRINT(x)  (isprint((int)  ((unsigned char)x)))
+#define ISUPPER(x)  (isupper((int)  ((unsigned char)x)))
+#define ISLOWER(x)  (islower((int)  ((unsigned char)x)))
 
 
 /*

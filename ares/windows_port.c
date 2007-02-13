@@ -41,8 +41,8 @@ ares_strncasecmp(const char *a, const char *b, int n)
     int i;
 
     for (i = 0; i < n; i++) {
-        int c1 = isupper(a[i]) ? tolower(a[i]) : a[i];
-        int c2 = isupper(b[i]) ? tolower(b[i]) : b[i];
+        int c1 = ISUPPER(a[i]) ? tolower(a[i]) : a[i];
+        int c2 = ISUPPER(b[i]) ? tolower(b[i]) : b[i];
         if (c1 != c2) return c1-c2;
     }
     return 0;
