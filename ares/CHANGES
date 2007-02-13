@@ -1,5 +1,11 @@
   Changelog for the c-ares project
 
+* February 13
+
+- Yang Tse: Fix failure to get the search sequence of /etc/hosts and
+  DNS from /etc/nsswitch.conf, /etc/host.conf or /etc/svc.conf when
+  /etc/resolv.conf did not exist or was unable to read it.
+
 * November 22
 
 - Install ares_dns.h too

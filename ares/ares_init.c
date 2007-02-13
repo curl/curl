@@ -574,7 +574,7 @@ DhcpNameServer
     do {
       space = strchr(pos, ' ');
       if (space)
-        *space = 0;
+        *space = '\0';
       status = config_nameserver(&servers, &nservers, pos);
       if (status != ARES_SUCCESS)
         break;
@@ -612,30 +612,41 @@ DhcpNameServer
     int linesize;
 
     fp = fopen(PATH_RESOLV_CONF, "r");
-    if (!fp)
-      return (errno == ENOENT) ? ARES_SUCCESS : ARES_EFILE;
-    while ((status = ares__read_line(fp, &line, &linesize)) == ARES_SUCCESS)
-    {
-      if ((p = try_config(line, "domain")) && channel->ndomains == -1)
-        status = config_domain(channel, p);
-      else if ((p = try_config(line, "lookup")) && !channel->lookups)
-        status = config_lookup(channel, p, "bind", "file");
-      else if ((p = try_config(line, "search")) && channel->ndomains == -1)
-        status = set_search(channel, p);
-      else if ((p = try_config(line, "nameserver")) && channel->nservers == -1)
-        status = config_nameserver(&servers, &nservers, p);
-      else if ((p = try_config(line, "sortlist")) && channel->nsort == -1)
-        status = config_sortlist(&sortlist, &nsort, p);
-      else if ((p = try_config(line, "options")))
-        status = set_options(channel, p);
-      else
-        status = ARES_SUCCESS;
-      if (status != ARES_SUCCESS)
-        break;
+    if (fp) {
+      while ((status = ares__read_line(fp, &line, &linesize)) == ARES_SUCCESS)
+      {
+        if ((p = try_config(line, "domain")) && channel->ndomains == -1)
+          status = config_domain(channel, p);
+        else if ((p = try_config(line, "lookup")) && !channel->lookups)
+          status = config_lookup(channel, p, "bind", "file");
+        else if ((p = try_config(line, "search")) && channel->ndomains == -1)
+          status = set_search(channel, p);
+        else if ((p = try_config(line, "nameserver")) && channel->nservers == -1)
+          status = config_nameserver(&servers, &nservers, p);
+        else if ((p = try_config(line, "sortlist")) && channel->nsort == -1)
+          status = config_sortlist(&sortlist, &nsort, p);
+        else if ((p = try_config(line, "options")))
+          status = set_options(channel, p);
+        else
+          status = ARES_SUCCESS;
+        if (status != ARES_SUCCESS)
+          break;
+      }
+      fclose(fp);
     }
-    fclose(fp);
+    else {
+      switch(errno) {
+      case ENOENT:
+        status = ARES_EOF;
+        break;
+      default:
+        DEBUGF(fprintf(stderr, "Error opening file: %s\n", PATH_RESOLV_CONF));
+        DEBUGF(fprintf(stderr, "fopen() failed with error: %d\n", errno));
+        status = ARES_EFILE;
+      }
+    }
 
-    if (!channel->lookups) {
+    if ((status == ARES_EOF) && (!channel->lookups)) {
       /* Many systems (Solaris, Linux, BSD's) use nsswitch.conf */
       fp = fopen("/etc/nsswitch.conf", "r");
       if (fp) {
@@ -646,9 +657,20 @@ DhcpNameServer
         }
         fclose(fp);
       }
+      else {
+        switch(errno) {
+        case ENOENT:
+          status = ARES_EOF;
+          break;
+        default:
+          DEBUGF(fprintf(stderr, "Error opening file: %s\n", "/etc/nsswitch.conf"));
+          DEBUGF(fprintf(stderr, "fopen() failed with error: %d\n", errno));
+          status = ARES_EFILE;
+        }
+      }
     }
 
-    if (!channel->lookups) {
+    if ((status == ARES_EOF) && (!channel->lookups)) {
       /* Linux / GNU libc 2.x and possibly others have host.conf */
       fp = fopen("/etc/host.conf", "r");
       if (fp) {
@@ -659,9 +681,20 @@ DhcpNameServer
         }
         fclose(fp);
       }
+      else {
+        switch(errno) {
+        case ENOENT:
+          status = ARES_EOF;
+          break;
+        default:
+          DEBUGF(fprintf(stderr, "Error opening file: %s\n", "/etc/host.conf"));
+          DEBUGF(fprintf(stderr, "fopen() failed with error: %d\n", errno));
+          status = ARES_EFILE;
+        }
+      }
     }
 
-    if (!channel->lookups) {
+    if ((status == ARES_EOF) && (!channel->lookups)) {
       /* Tru64 uses /etc/svc.conf */
       fp = fopen("/etc/svc.conf", "r");
       if (fp) {
@@ -671,6 +704,17 @@ DhcpNameServer
             status = config_lookup(channel, p, "bind", "local");
         }
         fclose(fp);
+      }
+      else {
+        switch(errno) {
+        case ENOENT:
+          status = ARES_EOF;
+          break;
+        default:
+          DEBUGF(fprintf(stderr, "Error opening file: %s\n", "/etc/svc.conf"));
+          DEBUGF(fprintf(stderr, "fopen() failed with error: %d\n", errno));
+          status = ARES_EFILE;
+        }
       }
     }
 
@@ -785,7 +829,7 @@ static int config_domain(ares_channel channel, char *str)
   q = str;
   while (*q && !ISSPACE(*q))
     q++;
-  *q = 0;
+  *q = '\0';
   return set_search(channel, str);
 }
 
@@ -812,7 +856,7 @@ static int config_lookup(ares_channel channel, const char *str,
       while (*p && (ISSPACE(*p) || (*p == ',')))
         p++;
     }
-  *l = 0;
+  *l = '\0';
   channel->lookups = strdup(lookups);
   return (channel->lookups) ? ARES_SUCCESS : ARES_ENOMEM;
 }
@@ -839,7 +883,7 @@ static int config_nameserver(struct server_state **servers, int *nservers,
 
     if (*p)
     {
-      *p = 0;
+      *p = '\0';
       more = 1;
     }
 
@@ -897,7 +941,7 @@ static int config_sortlist(struct apattern **sortlist, int *nsort,
       while (*q && *q != '/' && *q != ';' && !ISSPACE(*q))
         q++;
       memcpy(ipbuf, str, (int)(q-str));
-      ipbuf[(int)(q-str)] = 0;
+      ipbuf[(int)(q-str)] = '\0';
       /* Find the prefix */
       if (*q == '/')
         {
@@ -905,11 +949,11 @@ static int config_sortlist(struct apattern **sortlist, int *nsort,
           while (*q && *q != ';' && !ISSPACE(*q))
             q++;
           memcpy(ipbufpfx, str, (int)(q-str));
-          ipbufpfx[(int)(q-str)] = 0;
+          ipbufpfx[(int)(q-str)] = '\0';
           str = str2;
         }
       else
-        ipbufpfx[0] = 0;
+        ipbufpfx[0] = '\0';
       /* Lets see if it is CIDR */
       /* First we'll try IPv6 */
       if ((bits = ares_inet_net_pton(AF_INET6, ipbufpfx ? ipbufpfx : ipbuf,
@@ -938,7 +982,7 @@ static int config_sortlist(struct apattern **sortlist, int *nsort,
           if (ipbufpfx)
             {
               memcpy(ipbuf, str, (int)(q-str));
-              ipbuf[(int)(q-str)] = 0;
+              ipbuf[(int)(q-str)] = '\0';
               if (ip_addr(ipbuf, (int)(q - str), &pat.mask.addr.addr4) != 0)
                 natural_mask(&pat);
             }
