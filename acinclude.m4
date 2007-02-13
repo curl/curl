@@ -1859,12 +1859,16 @@ dnl Create the library link name of the correct form for this platform
 LIBNAME_LINK_SPEC=`echo "$library_names_spec" | $SED 's/^.* //'`
 DLGUESSLIB=`name=$2 eval echo "$libname_spec"`
 DLGUESSFILE=`libname="$DLGUESSLIB" release="" major="" versuffix="" eval echo "$LIBNAME_LINK_SPEC"`
+dnl Last resort in case libtool knows nothing about shared libs on this platform
+test -z "$DLGUESSFILE" && DLGUESSFILE="$DLGUESSLIB$shared_ext"
 
 dnl Synthesize a likely dynamic library name in case we can't find an actual one
 SO_NAME_SPEC="$soname_spec"
 dnl soname_spec undefined when identical to the 1st entry in library_names_spec
 test -z "$SO_NAME_SPEC" && SO_NAME_SPEC=`echo "$library_names_spec" | $SED 's/ .*$//'`
 DLGUESSSOFILE=`libname="$DLGUESSLIB" release="" major="" versuffix="" eval echo "$SO_NAME_SPEC"`
+dnl Last resort in case libtool knows nothing about shared libs on this platform
+test -z "$DLGUESSSOFILE" && DLGUESSSOFILE="$DLGUESSFILE"
 
 if test "$cross_compiling" = yes; then
   dnl Can't look at filesystem when cross-compiling
