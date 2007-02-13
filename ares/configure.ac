@@ -553,6 +553,7 @@ AC_CHECK_MEMBER(struct addrinfo.ai_flags,
 
 
 AC_CHECK_FUNCS( bitncmp \
+                isblank \
                 if_indextoname,
 dnl if found
 [],

@@ -122,7 +122,6 @@
  */
 
 #define ISSPACE(x)  (isspace((int)  ((unsigned char)x)))
-#define ISBLANK(x)  (isblank((int)  ((unsigned char)x)))
 #define ISDIGIT(x)  (isdigit((int)  ((unsigned char)x)))
 #define ISALNUM(x)  (isalnum((int)  ((unsigned char)x)))
 #define ISXDIGIT(x) (isxdigit((int) ((unsigned char)x)))
@@ -131,6 +130,13 @@
 #define ISPRINT(x)  (isprint((int)  ((unsigned char)x)))
 #define ISUPPER(x)  (isupper((int)  ((unsigned char)x)))
 #define ISLOWER(x)  (islower((int)  ((unsigned char)x)))
+
+#ifdef HAVE_ISBLANK
+#define ISBLANK(x)  (isblank((int)  ((unsigned char)x)))
+#else
+#define ISBLANK(x)  (int)((((unsigned char)x) == ' ') || \
+                          (((unsigned char)x) == '\t'))
+#endif
 
 
 /*
