@@ -40,7 +40,7 @@ REPLY ACCT 230 thank you
 <verify>
 <protocol>
 USER anonymous
-PASS curl_by_daniel@haxx.se
+PASS ftp@example.com
 ACCT one count
 PWD
 EPSV

@@ -31,7 +31,7 @@ DELAY CWD 60
 </errorcode>
 <protocol>
 USER anonymous
-PASS curl_by_daniel@haxx.se
+PASS ftp@example.com
 PWD
 CWD path
 </protocol>

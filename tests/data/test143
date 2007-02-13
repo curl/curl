@@ -23,7 +23,7 @@ FTP URL with type=a
 <verify>
 <protocol>
 USER anonymous
-PASS curl_by_daniel@haxx.se
+PASS ftp@example.com
 PWD
 CWD /tmp
 CWD moo

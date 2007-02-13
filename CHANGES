@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel (13 February 2007)
+- The default password for anonymous FTP connections is now changed to be
+  "ftp@example.com".
+
 - Robert A. Monat made libcurl build fine with VC2005 - it doesn't have
   gmtime_r() like the older VC versions. He also made use of some machine-
   specific defines to differentiate the "OS" define.

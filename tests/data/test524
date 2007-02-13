@@ -34,7 +34,7 @@ ftp://%HOSTIP:%FTPPORT/path/to/
 <verify>
 <protocol>
 USER anonymous
-PASS curl_by_daniel@haxx.se
+PASS ftp@example.com
 PWD
 </protocol>
 

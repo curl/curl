@@ -30,7 +30,7 @@ data blobb
 <verify>
 <protocol>
 USER anonymous
-PASS curl_by_daniel@haxx.se
+PASS ftp@example.com
 PWD
 CWD a
 CWD path

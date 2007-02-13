@@ -39,7 +39,7 @@ REPLY EPSV 314 bluah you f00l!
 <verify>
 <protocol>
 USER anonymous
-PASS curl_by_daniel@haxx.se
+PASS ftp@example.com
 PWD
 EPSV
 PASV

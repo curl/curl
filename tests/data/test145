@@ -34,7 +34,7 @@ REPLY NLST 550 Have a taste on this!
 </strip>
 <protocol>
 USER anonymous
-PASS curl_by_daniel@haxx.se
+PASS ftp@example.com
 PWD
 PORT 127,0,0,1,243,212
 TYPE A

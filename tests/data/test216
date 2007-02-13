@@ -23,7 +23,7 @@ upload this file twice
 <verify>
 <protocol>
 USER anonymous
-PASS curl_by_daniel@haxx.se
+PASS ftp@example.com
 PWD
 CWD a
 CWD path

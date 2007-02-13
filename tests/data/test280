@@ -54,7 +54,7 @@ filter off really nothing
 <protocol>
 USER anonymous
 USER replacement
-PASS curl_by_daniel@haxx.se
+PASS ftp@example.com
 PWD
 CWD 280
 EPSV

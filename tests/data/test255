@@ -51,7 +51,7 @@ s/^(EPRT \|2\|::1\|)(.*)/$1/
 </strippart>
 <protocol>
 USER anonymous
-PASS curl_by_daniel@haxx.se
+PASS ftp@example.com
 PWD
 EPRT |2|::1|
 TYPE A

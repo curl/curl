@@ -38,7 +38,7 @@ REPLY PORT 314 bluah you f00l!
 </strip>
 <protocol>
 USER anonymous
-PASS curl_by_daniel@haxx.se
+PASS ftp@example.com
 PWD
 QUIT
 </protocol>

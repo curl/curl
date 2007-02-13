@@ -31,7 +31,7 @@ ftp://%HOSTIP:%FTPPORT/272 -z "2004 jan 1 12:12:12 UTC"
 <verify>
 <protocol>
 USER anonymous
-PASS curl_by_daniel@haxx.se
+PASS ftp@example.com
 PWD
 MDTM 272
 QUIT

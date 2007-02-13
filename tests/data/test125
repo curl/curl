@@ -32,7 +32,7 @@ REPLY CWD 314 bluah you f00l!
 </errorcode>
 <protocol>
 USER anonymous
-PASS curl_by_daniel@haxx.se
+PASS ftp@example.com
 PWD
 CWD path
 QUIT

@@ -44,7 +44,7 @@ don't upload this
 </strip>
 <protocol>
 USER anonymous
-PASS curl_by_daniel@haxx.se
+PASS ftp@example.com
 PWD
 CWD path
 PORT 127,0,0,1,5,109

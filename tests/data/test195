@@ -26,7 +26,7 @@ REPLY PASS 530 temporarily not available
 </errorcode>
 <protocol>
 USER anonymous
-PASS curl_by_daniel@haxx.se
+PASS ftp@example.com
 </protocol>
 </verify>
 </testcase>

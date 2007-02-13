@@ -33,7 +33,7 @@ COUNT CWD 1
 </strip>
 <protocol>
 USER anonymous
-PASS curl_by_daniel@haxx.se
+PASS ftp@example.com
 PWD
 CWD first
 MKD first

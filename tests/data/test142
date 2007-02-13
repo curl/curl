@@ -23,7 +23,7 @@ ftp://%HOSTIP:%FTPPORT/part1/part2/part3/part4/part5/part6/part7/part8/part9/par
 <verify>
 <protocol>
 USER anonymous
-PASS curl_by_daniel@haxx.se
+PASS ftp@example.com
 PWD
 CWD part1
 CWD part2

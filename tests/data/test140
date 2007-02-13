@@ -25,7 +25,7 @@ ftp://%HOSTIP:%FTPPORT/blalbla/140 -z "1 jan 2004"
 <verify>
 <protocol>
 USER anonymous
-PASS curl_by_daniel@haxx.se
+PASS ftp@example.com
 PWD
 CWD blalbla
 MDTM 140

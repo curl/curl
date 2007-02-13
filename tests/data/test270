@@ -38,7 +38,7 @@ ftp://%HOSTIP:%FTPPORT/270 --ftp-skip-pasv-ip --disable-epsv
 <verify>
 <protocol>
 USER anonymous
-PASS curl_by_daniel@haxx.se
+PASS ftp@example.com
 PWD
 PASV
 TYPE I

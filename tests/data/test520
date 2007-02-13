@@ -34,7 +34,7 @@ REPLY MDTM 213 20030405060708
 
 <protocol>
 USER anonymous
-PASS curl_by_daniel@haxx.se
+PASS ftp@example.com
 PWD
 MDTM 520
 EPSV

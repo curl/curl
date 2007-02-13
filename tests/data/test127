@@ -31,7 +31,7 @@ ftp://%HOSTIP:%FTPPORT/path/to/file/127 --disable-epsv
 <verify>
 <protocol>
 USER anonymous
-PASS curl_by_daniel@haxx.se
+PASS ftp@example.com
 PWD
 CWD path
 CWD to
