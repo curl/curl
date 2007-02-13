@@ -517,6 +517,7 @@ struct curl_slist *Curl_ssl_engines_list(struct SessionHandle *data)
    * would just confuse things */
   (void)data;
   return NULL;
+#else
   (void)data;
   return NULL;
 #endif /* USE_NSS */
