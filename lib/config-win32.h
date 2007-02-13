@@ -352,8 +352,8 @@
 /* Undef keyword 'const' if it does not work.  */
 /* #undef const */
 
-#if defined(_MSC_VER) && (_MSC_VER > 1310)
-/* MSVC 2003 has gmtime_r */
+#if defined(_MSC_VER) && (_MSC_VER > 1310) && (_MSC_VER < 1400)
+/* MSVC 2003 has gmtime_r, MSVC 2005 doesn't */
 #define HAVE_GMTIME_R
 #endif
 
@@ -377,7 +377,15 @@
 
 /* Define cpu-machine-OS */
 #undef OS
+#if defined(_M_IX86) /* x86 */
 #define OS "i386-pc-win32"
+#elif defined(_M_IA64) /* Itanium */
+#define OS "ia64-pc-win32"
+#elif defined(_M_X64) /* AMD64/EM64T - Not defined until MSVC 2005 */
+#define OS "amd64-pc-win32"
+#else
+#define OS "unknown-pc-win32"
+#endif
 
 /* Name of package */
 #define PACKAGE "curl"

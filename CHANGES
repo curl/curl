@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (13 February 2007)
+- Robert A. Monat made libcurl build fine with VC2005 - it doesn't have
+  gmtime_r() like the older VC versions. He also made use of some machine-
+  specific defines to differentiate the "OS" define.
+
 Daniel (12 February 2007)
 - Rob Crittenden added support for NSS (Network Security Service) for the
   SSL/TLS layer. http://www.mozilla.org/projects/security/pki/nss/
