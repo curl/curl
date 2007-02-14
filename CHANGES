@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Dan F (14 February 2007)
+- Fixed curl-config --libs so it doesn't list unnecessary libraries (and
+  therefore introduce unnecessary dependencies) when it's not needed.
+  Also, don't bother adding a library path of /usr/lib
+
 Daniel (13 February 2007)
 - The default password for anonymous FTP connections is now changed to be
   "ftp@example.com".
