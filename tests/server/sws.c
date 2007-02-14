@@ -460,7 +460,7 @@ void storerequest(char *reqbuf)
   if (reqbuf == NULL)
     return;
 
-  totalsize = strlen(reqbuf);
+  totalsize = (ssize_t)strlen(reqbuf);
   if (totalsize == 0)
     return;
 
@@ -475,8 +475,8 @@ void storerequest(char *reqbuf)
 
   writeleft = totalsize;
   do {
-    written = fwrite((void *) &reqbuf[totalsize-writeleft],
-                     1, (size_t)writeleft, dump);
+    written = (ssize_t)fwrite((void *) &reqbuf[totalsize-writeleft],
+                              1, (size_t)writeleft, dump);
     if (written > 0)
       writeleft -= written;
   } while ((writeleft > 0) && ((error = errno) == EINTR));
