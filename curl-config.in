@@ -181,8 +181,12 @@ while test $# -gt 0; do
        	;;
 
     --libs)
-       	echo -L@libdir@ -lcurl @LDFLAGS@ @LIBS@
-       	;;
+	if test "X@REQUIRE_LIB_DEPS@" = "Xyes"; then
+	  echo -L@libdir@ -lcurl @LDFLAGS@ @LIBS@
+	else
+	  echo -L@libdir@ -lcurl @LDFLAGS@
+	fi
+	;;
 
     *)
         echo "unknown option: $1"

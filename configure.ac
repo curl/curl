@@ -158,6 +158,15 @@ case $host in
     ;;
 esac
 
+# Determine whether all dependent libraries must be specified when linking
+if test "X$enable_shared" = "Xyes" -a "X$link_all_deplibs" = "Xno"
+then
+    REQUIRE_LIB_DEPS=no
+else
+    REQUIRE_LIB_DEPS=yes
+fi
+AC_SUBST(REQUIRE_LIB_DEPS)
+
 dnl The install stuff has already been taken care of by the automake stuff
 dnl AC_PROG_INSTALL
 AC_PROG_MAKE_SET
