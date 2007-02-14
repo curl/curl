@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -451,19 +451,46 @@ int ProcessRequest(struct httprequest *req)
 /* store the entire request in a file */
 void storerequest(char *reqbuf)
 {
+  int error;
+  ssize_t written;
+  ssize_t writeleft;
+  ssize_t totalsize;
   FILE *dump;
 
-  dump = fopen(REQUEST_DUMP, "ab"); /* b is for windows-preparing */
-  if(dump) {
-    size_t len = strlen(reqbuf);
-    fwrite(reqbuf, 1, len, dump);
+  if (reqbuf == NULL)
+    return;
 
-    fclose(dump);
-    logmsg("Wrote request (%d bytes) input to " REQUEST_DUMP,
-           (int)len);
+  totalsize = strlen(reqbuf);
+  if (totalsize == 0)
+    return;
+
+  do {
+    dump = fopen(REQUEST_DUMP, "ab");
+  } while ((dump == NULL) && ((error = errno) == EINTR));
+  if (dump == NULL) {
+    logmsg("Error opening file %s error: %d", REQUEST_DUMP, error);
+    logmsg("Failed to write request input to " REQUEST_DUMP);
+    return;
+  }
+
+  writeleft = totalsize;
+  do {
+    written = fwrite((void *) &reqbuf[totalsize-writeleft],
+                     1, (size_t)writeleft, dump);
+    if (written > 0)
+      writeleft -= written;
+  } while ((writeleft > 0) && ((error = errno) == EINTR));
+
+  fclose(dump);  /* close it ASAP */
+
+  if (writeleft > 0) {
+    logmsg("Error writing file %s error: %d", REQUEST_DUMP, error);
+    logmsg("Wrote only (%d bytes) of (%d bytes) request input to %s",
+           totalsize-writeleft, totalsize, REQUEST_DUMP);
   }
   else {
-    logmsg("Failed to write request input to " REQUEST_DUMP);
+    logmsg("Wrote request (%d bytes) input to " REQUEST_DUMP,
+           totalsize);
   }
 }
 
