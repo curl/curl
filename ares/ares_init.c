@@ -689,7 +689,7 @@ DhcpNameServer
           status = ARES_EOF;
           break;
         default:
-          DEBUGF(fprintf(stderr, "fopen() failed with error: %d %s\n"
+          DEBUGF(fprintf(stderr, "fopen() failed with error: %d %s\n",
                          errno, strerror(errno)));
           DEBUGF(fprintf(stderr, "Error opening file: %s\n", "/etc/host.conf"));
           status = ARES_EFILE;
