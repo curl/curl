@@ -84,7 +84,6 @@ Example set of cookies:
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 #define _MPRINTF_REPLACE /* without this on windows OS we get undefined reference to snprintf */
 #include <curl/mprintf.h>

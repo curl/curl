@@ -1770,7 +1770,6 @@ AC_CHECK_FUNCS( strtoll \
                 getprotobyname \
                 getrlimit \
                 setrlimit \
-                isblank \
                 fork,
 dnl if found
 [],
