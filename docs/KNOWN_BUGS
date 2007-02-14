@@ -3,6 +3,10 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+42. SSL is not properly disabled on the control channel when using
+  --ftp-ssl-ccc on some servers.  Recipe and instructions here:
+  http://curl.haxx.se/mail/lib-2007-01/0210.html
+
 41. Jeff Pohlmeyer's curl_multi_socket crashing case. Recipe and instructions
   here: http://curl.haxx.se/mail/lib-2007-01/0022.html
 
