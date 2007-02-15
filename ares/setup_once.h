@@ -158,5 +158,33 @@ typedef int sig_atomic_t;
 #endif
 
 
+/*
+ * Macro SOCKERRNO / SET_SOCKERRNO() returns / sets the *socket-related* errno
+ * (or equivalent) on this platform to hide platform details to code using it.
+ */
+
+#ifdef USE_WINSOCK
+#define SOCKERRNO         ((int)WSAGetLastError())
+#define SET_SOCKERRNO(x)  (WSASetLastError((int)(x)))
+#else
+#define SOCKERRNO         (errno)
+#define SET_SOCKERRNO(x)  (errno = (x))
+#endif
+
+
+/*
+ * Macro ERRNO / SET_ERRNO() returns / sets the NOT *socket-related* errno
+ * (or equivalent) on this platform to hide platform details to code using it.
+ */
+
+#ifdef WIN32
+#define ERRNO         ((int)GetLastError())
+#define SET_ERRNO(x)  (SetLastError((DWORD)(x)))
+#else
+#define ERRNO         (errno)
+#define SET_ERRNO(x)  (errno = (x))
+#endif
+
+
 #endif /* __SETUP_ONCE_H */
 
