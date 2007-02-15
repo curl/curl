@@ -58,6 +58,9 @@ endif
 ifdef SSPI
   CFLAGS += -DUSE_WINDOWS_SSPI
 endif
+ifdef IPV6
+  CFLAGS += -DENABLE_IPV6
+endif
 curl_LDADD += -lwsock32 -lws2_32 -lwinmm -L$(ZLIB_PATH) -lz
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines

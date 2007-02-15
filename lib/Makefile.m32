@@ -50,6 +50,9 @@ endif
 ifdef SSPI
   CFLAGS += -DUSE_WINDOWS_SSPI
 endif
+ifdef IPV6
+  CFLAGS += -DENABLE_IPV6
+endif
 COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
