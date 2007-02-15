@@ -2,7 +2,7 @@
 #define __LIB_CONFIG_WIN32_H
 
 /* ================================================================ */
-/*    lib/config-win32.h - Hand crafted config file for windows     */
+/*    lib/config-win32.h - Hand crafted config file for Windows     */
 /* ================================================================ */
 
 /* ---------------------------------------------------------------- */
@@ -352,10 +352,8 @@
 /* Undef keyword 'const' if it does not work.  */
 /* #undef const */
 
-#if defined(_MSC_VER) && (_MSC_VER > 1310) && (_MSC_VER < 1400)
-/* MSVC 2003 has gmtime_r, MSVC 2005 doesn't */
-#define HAVE_GMTIME_R
-#endif
+/* Windows should not have HAVE_GMTIME_R defined */
+/* #undef HAVE_GMTIME_R */
 
 /* ---------------------------------------------------------------- */
 /*                        LDAP LIBRARY FILES                        */
