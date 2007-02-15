@@ -573,7 +573,7 @@ get_winsock_error (int err, char *buf, size_t len)
     return NULL;
   }
 #else
-  if (error == CURLE_OK)
+  if (err == CURLE_OK)
     return NULL;
   else
     p = "error";
