@@ -57,9 +57,6 @@
 
 #ifdef USE_WINSOCK
 #define EAFNOSUPPORT    WSAEAFNOSUPPORT
-#define SET_ERRNO(e)    WSASetLastError(errno = (e))
-#else
-#define SET_ERRNO(e)    errno = e
 #endif
 
 /*
@@ -204,8 +201,14 @@ static char *inet_ntop6 (const unsigned char *src, char *dst, size_t size)
 /*
  * Convert a network format address to presentation format.
  *
- * Returns pointer to presentation format address (`buf'),
- * Returns NULL on error (see errno).
+ * Returns pointer to presentation format address (`buf').
+ * Returns NULL on error and errno set with the specific
+ * error, EAFNOSUPPORT or ENOSPC.
+ *
+ * On Windows we store the error in the thread errno, not
+ * in the winsock error code. This is to avoid loosing the
+ * actual last winsock error. So use macro ERRNO to fetch the
+ * errno this funtion sets when returning NULL, not SOCKERRNO.
  */
 char *Curl_inet_ntop(int af, const void *src, char *buf, size_t size)
 {
