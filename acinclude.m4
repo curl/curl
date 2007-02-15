@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -1742,6 +1742,16 @@ AC_DEFUN([CURL_CC_DEBUG_OPTS],
          dnl   which we know and do on purpose.
 
          WARN="-wd279,269,981,1418,1419"
+
+         if test "$gccnum" -eq "900"; then
+            dnl icc 9.0 when compiling its generated code for its own FD_SET,
+            dnl FD_ISSET, and FD_ZERO macros emits warnings #1469 and #593.
+            dnl So for icc 9.0 we also ignore warnings #1469 and #593.
+            dnl * 593 warns on "variable __d0 was set but never used"
+            dnl * 1469 warns on "cc clobber ignored"
+            dnl
+            WARN="$WARN,593,1469"
+         fi
 
          if test "$gccnum" -gt "600"; then
             dnl icc 6.0 and older doesn't have the -Wall flag
