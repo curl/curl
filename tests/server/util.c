@@ -65,8 +65,14 @@ extern const char *serverlogfile;
 void logmsg(const char *msg, ...)
 {
   va_list ap;
-  char buffer[256]; /* possible overflow if you pass in a huge string */
+  char buffer[512]; /* possible overflow if you pass in a huge string */
   FILE *logfp;
+  int error;
+
+  if (!serverlogfile) {
+    fprintf(stderr, "Error: serverlogfile not set\n");
+    return;
+  }
 
   struct timeval tv = curlx_tvnow();
   time_t sec = tv.tv_sec;
@@ -86,13 +92,20 @@ void logmsg(const char *msg, ...)
     fprintf(logfp, "%s %s\n", timebuf, buffer);
     fclose(logfp);
   }
+  else {
+    error = ERRNO;
+    fprintf(stderr, "fopen() failed with error: %d %s\n",
+            error, strerror(error));
+    fprintf(stderr, "Error opening file: %s\n", serverlogfile);
+    fprintf(stderr, "Msg not logged: %s %s\n", timebuf, buffer);
+  }
 }
 
 #ifdef WIN32
 /* use instead of perror() on generic windows */
 void win32_perror (const char *msg)
 {
-  char buf[256];
+  char buf[512];
   DWORD err = SOCKERRNO;
 
   if (!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
