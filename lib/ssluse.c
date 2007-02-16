@@ -49,7 +49,7 @@
 #include "url.h" /* for the ssl config check function */
 #include "inet_pton.h"
 #include "ssluse.h"
-#include "connect.h" /* Curl_sockerrno() proto */
+#include "connect.h"
 #include "strequal.h"
 #include "select.h"
 #include "sslgen.h"
@@ -781,7 +781,7 @@ int Curl_ossl_shutdown(struct connectdata *conn, int sockindex)
           sslerror = ERR_get_error();
           failf(conn->data, "SSL read: %s, errno %d",
                 ERR_error_string(sslerror, buf),
-                Curl_sockerrno() );
+                SOCKERRNO);
           done = 1;
           break;
         }
@@ -794,7 +794,7 @@ int Curl_ossl_shutdown(struct connectdata *conn, int sockindex)
       }
       else {
         /* anything that gets here is fatally bad */
-        failf(data, "select on SSL socket, errno: %d", Curl_sockerrno());
+        failf(data, "select on SSL socket, errno: %d", SOCKERRNO);
         retval = -1;
         done = 1;
       }
@@ -1739,7 +1739,7 @@ Curl_ossl_connect_common(struct connectdata *conn,
         }
         else {
           /* anything that gets here is fatally bad */
-          failf(data, "select on SSL socket, errno: %d", Curl_sockerrno());
+          failf(data, "select on SSL socket, errno: %d", SOCKERRNO);
           return CURLE_SSL_CONNECT_ERROR;
         }
       } /* while()-loop for the select() */
@@ -1822,7 +1822,7 @@ ssize_t Curl_ossl_send(struct connectdata *conn,
       return 0;
     case SSL_ERROR_SYSCALL:
       failf(conn->data, "SSL_write() returned SYSCALL, errno = %d\n",
-            Curl_sockerrno());
+            SOCKERRNO);
       return -1;
     case SSL_ERROR_SSL:
       /*  A failure in the SSL library occurred, usually a protocol error.
@@ -1874,7 +1874,7 @@ ssize_t Curl_ossl_recv(struct connectdata *conn, /* connection data */
       sslerror = ERR_get_error();
       failf(conn->data, "SSL read: %s, errno %d",
             ERR_error_string(sslerror, error_buffer),
-            Curl_sockerrno() );
+            SOCKERRNO);
       return -1;
     }
   }

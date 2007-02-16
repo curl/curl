@@ -76,7 +76,7 @@
 #include "strerror.h"
 #include "url.h"
 #include "multiif.h"
-#include "connect.h" /* for the Curl_sockerrno() proto */
+#include "connect.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -214,7 +214,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
       break;
     tvp = ares_timeout(data->state.areschannel, &store, &tv);
     count = select(nfds, &read_fds, &write_fds, NULL, tvp);
-    if (count < 0 && Curl_sockerrno() != EINVAL)
+    if ((count < 0) && (SOCKERRNO != EINVAL))
       break;
 
     ares_process(data->state.areschannel, &read_fds, &write_fds);

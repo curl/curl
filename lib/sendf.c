@@ -43,7 +43,7 @@
 #include <curl/curl.h>
 #include "urldata.h"
 #include "sendf.h"
-#include "connect.h" /* for the Curl_sockerrno() proto */
+#include "connect.h"
 #include "sslgen.h"
 #include "ssh.h"
 #include "multiif.h"
@@ -323,7 +323,7 @@ static ssize_t Curl_plain_send(struct connectdata *conn,
   ssize_t bytes_written = swrite(sockfd, mem, len);
 
   if(-1 == bytes_written) {
-    int err = Curl_sockerrno();
+    int err = SOCKERRNO;
 
     if(
 #ifdef WSAEWOULDBLOCK
@@ -539,7 +539,7 @@ int Curl_read(struct connectdata *conn, /* connection data */
       nread = sread(sockfd, buffertofill, bytesfromsocket);
 
     if(-1 == nread) {
-      int err = Curl_sockerrno();
+      int err = SOCKERRNO;
 #ifdef USE_WINSOCK
       if(WSAEWOULDBLOCK == err)
 #else

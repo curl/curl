@@ -302,7 +302,7 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
                     state->conn->ip_addr->ai_addr,
                     state->conn->ip_addr->ai_addrlen);
     if(sbytes < 0) {
-      failf(data, "%s\n", Curl_strerror(state->conn, Curl_sockerrno()));
+      failf(data, "%s\n", Curl_strerror(state->conn, SOCKERRNO));
     }
     Curl_safefree(filename);
     break;
@@ -370,7 +370,7 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
                     (struct sockaddr *)&state->remote_addr,
                     state->remote_addrlen);
     if(sbytes < 0) {
-      failf(data, "%s\n", Curl_strerror(state->conn, Curl_sockerrno()));
+      failf(data, "%s\n", Curl_strerror(state->conn, SOCKERRNO));
     }
 
     /* Check if completed (That is, a less than full packet is received) */
@@ -399,7 +399,7 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
                       state->remote_addrlen);
       /* Check all sbytes were sent */
       if(sbytes<0) {
-        failf(data, "%s\n", Curl_strerror(state->conn, Curl_sockerrno()));
+        failf(data, "%s\n", Curl_strerror(state->conn, SOCKERRNO));
       }
     }
     break;
@@ -456,7 +456,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
                         state->remote_addrlen);
         /* Check all sbytes were sent */
         if(sbytes<0) {
-          failf(data, "%s\n", Curl_strerror(state->conn, Curl_sockerrno()));
+          failf(data, "%s\n", Curl_strerror(state->conn, SOCKERRNO));
           res = CURLE_SEND_ERROR;
         }
       }
@@ -481,7 +481,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
                     state->remote_addrlen);
     /* Check all sbytes were sent */
     if(sbytes<0) {
-      failf(data, "%s\n", Curl_strerror(state->conn, Curl_sockerrno()));
+      failf(data, "%s\n", Curl_strerror(state->conn, SOCKERRNO));
     }
     break;
 
@@ -502,7 +502,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
                       state->remote_addrlen);
       /* Check all sbytes were sent */
       if(sbytes<0) {
-        failf(data, "%s\n", Curl_strerror(state->conn, Curl_sockerrno()));
+        failf(data, "%s\n", Curl_strerror(state->conn, SOCKERRNO));
       }
     }
     break;
@@ -607,7 +607,7 @@ CURLcode Curl_tftp_connect(struct connectdata *conn, bool *done)
               conn->ip_addr->ai_addrlen);
     if(rc) {
       failf(conn->data, "bind() failed; %s\n",
-            Curl_strerror(conn, Curl_sockerrno()));
+            Curl_strerror(conn, SOCKERRNO));
       return CURLE_COULDNT_CONNECT;
     }
   }
@@ -689,7 +689,7 @@ CURLcode Curl_tftp(struct connectdata *conn, bool *done)
 
     if(rc == -1) {
       /* bail out */
-      int error = Curl_sockerrno();
+      int error = SOCKERRNO;
       failf(data, "%s\n", Curl_strerror(conn, error));
       event = TFTP_EVENT_ERROR;
     }

@@ -498,7 +498,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
       case -1: /* select() error, stop reading */
         result = CURLE_RECV_ERROR;
         failf(data, "FTP response aborted due to select() error: %d",
-              Curl_sockerrno());
+              SOCKERRNO);
         break;
       case 0: /* timeout */
         if(Curl_pgrsUpdate(conn))
@@ -841,7 +841,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     sslen = sizeof(ss);
     if (getsockname(conn->sock[FIRSTSOCKET], (struct sockaddr *)&ss, &sslen)) {
       failf(data, "getsockname() failed: %s",
-          Curl_strerror(conn, Curl_sockerrno()) );
+          Curl_strerror(conn, SOCKERRNO) );
       return CURLE_FTP_PORT_FAILED;
     }
 
@@ -882,7 +882,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
 
     portsock = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
     if (portsock == CURL_SOCKET_BAD) {
-      error = Curl_sockerrno();
+      error = SOCKERRNO;
       continue;
     }
     break;
@@ -902,7 +902,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     if (getsockname(conn->sock[FIRSTSOCKET],
                     (struct sockaddr *)sa, &sslen)) {
       failf(data, "getsockname() failed: %s",
-          Curl_strerror(conn, Curl_sockerrno()) );
+          Curl_strerror(conn, SOCKERRNO) );
       sclose(portsock);
       return CURLE_FTP_PORT_FAILED;
     }
@@ -917,7 +917,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
       sslen = sizeof(ss);
 
     if(bind(portsock, (struct sockaddr *)sa, sslen)) {
-      failf(data, "bind failed: %s", Curl_strerror(conn, Curl_sockerrno()));
+      failf(data, "bind failed: %s", Curl_strerror(conn, SOCKERRNO));
       sclose(portsock);
       return CURLE_FTP_PORT_FAILED;
     }
@@ -928,7 +928,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   sslen = sizeof(ss);
   if(getsockname(portsock, (struct sockaddr *)sa, &sslen)) {
     failf(data, "getsockname() failed: %s",
-          Curl_strerror(conn, Curl_sockerrno()) );
+          Curl_strerror(conn, SOCKERRNO) );
     sclose(portsock);
     return CURLE_FTP_PORT_FAILED;
   }
@@ -936,7 +936,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   /* step 4, listen on the socket */
 
   if (listen(portsock, 1)) {
-    failf(data, "socket failure: %s", Curl_strerror(conn, Curl_sockerrno()));
+    failf(data, "socket failure: %s", Curl_strerror(conn, SOCKERRNO));
     sclose(portsock);
     return CURLE_FTP_PORT_FAILED;
   }
@@ -1080,7 +1080,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     if (getsockname(conn->sock[FIRSTSOCKET],
                     (struct sockaddr *)&sa, &sslen)) {
       failf(data, "getsockname() failed: %s",
-          Curl_strerror(conn, Curl_sockerrno()) );
+          Curl_strerror(conn, SOCKERRNO) );
       return CURLE_FTP_PORT_FAILED;
     }
     if (sslen > (socklen_t)sizeof(sa))
@@ -1116,7 +1116,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
         if(getsockname(portsock, (struct sockaddr *) &add,
                        &socksize)) {
           failf(data, "getsockname() failed: %s",
-            Curl_strerror(conn, Curl_sockerrno()) );
+            Curl_strerror(conn, SOCKERRNO) );
           return CURLE_FTP_PORT_FAILED;
         }
         porttouse = ntohs(add.sin_port);

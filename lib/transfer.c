@@ -1811,7 +1811,7 @@ Transfer(struct connectdata *conn)
 #ifdef EINTR
       /* The EINTR is not serious, and it seems you might get this more
          ofen when using the lib in a multi-threaded environment! */
-      if(errno == EINTR)
+      if(SOCKERRNO == EINTR)
         ;
       else
 #endif

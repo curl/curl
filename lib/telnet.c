@@ -303,7 +303,7 @@ static void send_negotiation(struct connectdata *conn, int cmd, int option)
 
    bytes_written = swrite(conn->sock[FIRSTSOCKET], buf, 3);
    if(bytes_written < 0) {
-     err = Curl_sockerrno();
+     err = SOCKERRNO;
      failf(data,"Sending data failed (%d)",err);
    }
 
@@ -872,7 +872,7 @@ static void suboption(struct connectdata *conn)
                CURL_TELQUAL_IS, tn->subopt_ttype, CURL_IAC, CURL_SE);
       bytes_written = swrite(conn->sock[FIRSTSOCKET], temp, len);
       if(bytes_written < 0) {
-        err = Curl_sockerrno();
+        err = SOCKERRNO;
         failf(data,"Sending data failed (%d)",err);
       }
       printsub(data, '>', &temp[2], len-2);
@@ -884,7 +884,7 @@ static void suboption(struct connectdata *conn)
                CURL_TELQUAL_IS, tn->subopt_xdisploc, CURL_IAC, CURL_SE);
       bytes_written = swrite(conn->sock[FIRSTSOCKET], temp, len);
       if(bytes_written < 0) {
-        err = Curl_sockerrno();
+        err = SOCKERRNO;
         failf(data,"Sending data failed (%d)",err);
       }
       printsub(data, '>', &temp[2], len-2);
@@ -911,7 +911,7 @@ static void suboption(struct connectdata *conn)
       len += 2;
       bytes_written = swrite(conn->sock[FIRSTSOCKET], temp, len);
       if(bytes_written < 0) {
-        err = Curl_sockerrno();
+        err = SOCKERRNO;
         failf(data,"Sending data failed (%d)",err);
       }
       printsub(data, '>', &temp[2], len-2);
@@ -1140,7 +1140,7 @@ CURLcode Curl_telnet(struct connectdata *conn, bool *done)
   /* load ws2_32.dll and get the function pointers we need. */
   wsock2 = LoadLibrary("WS2_32.DLL");
   if (wsock2 == NULL) {
-    failf(data,"failed to load WS2_32.DLL (%d)",GetLastError());
+    failf(data,"failed to load WS2_32.DLL (%d)", ERRNO);
     return CURLE_FAILED_INIT;
   }
 
@@ -1148,7 +1148,7 @@ CURLcode Curl_telnet(struct connectdata *conn, bool *done)
   create_event_func = GetProcAddress(wsock2,"WSACreateEvent");
   if (create_event_func == NULL) {
     failf(data,"failed to find WSACreateEvent function (%d)",
-          GetLastError());
+          ERRNO);
     FreeLibrary(wsock2);
     return CURLE_FAILED_INIT;
   }
@@ -1157,7 +1157,7 @@ CURLcode Curl_telnet(struct connectdata *conn, bool *done)
   close_event_func = GetProcAddress(wsock2,"WSACloseEvent");
   if (close_event_func == NULL) {
     failf(data,"failed to find WSACloseEvent function (%d)",
-          GetLastError());
+          ERRNO);
     FreeLibrary(wsock2);
     return CURLE_FAILED_INIT;
   }
@@ -1166,7 +1166,7 @@ CURLcode Curl_telnet(struct connectdata *conn, bool *done)
   event_select_func = GetProcAddress(wsock2,"WSAEventSelect");
   if (event_select_func == NULL) {
     failf(data,"failed to find WSAEventSelect function (%d)",
-          GetLastError());
+          ERRNO);
     FreeLibrary(wsock2);
     return CURLE_FAILED_INIT;
   }
@@ -1175,7 +1175,7 @@ CURLcode Curl_telnet(struct connectdata *conn, bool *done)
   enum_netevents_func = GetProcAddress(wsock2,"WSAEnumNetworkEvents");
   if (enum_netevents_func == NULL) {
     failf(data,"failed to find WSAEnumNetworkEvents function (%d)",
-          GetLastError());
+          ERRNO);
     FreeLibrary(wsock2);
     return CURLE_FAILED_INIT;
   }
@@ -1188,7 +1188,7 @@ CURLcode Curl_telnet(struct connectdata *conn, bool *done)
   /* First, create a sockets event object */
   event_handle = (WSAEVENT)create_event_func();
   if (event_handle == WSA_INVALID_EVENT) {
-    failf(data,"WSACreateEvent failed (%d)",WSAGetLastError());
+    failf(data,"WSACreateEvent failed (%d)", SOCKERRNO);
     FreeLibrary(wsock2);
     return CURLE_FAILED_INIT;
   }
@@ -1316,7 +1316,7 @@ CURLcode Curl_telnet(struct connectdata *conn, bool *done)
 
   /* We called WSACreateEvent, so call WSACloseEvent */
   if (close_event_func(event_handle) == FALSE) {
-    infof(data,"WSACloseEvent failed (%d)",WSAGetLastError());
+    infof(data,"WSACloseEvent failed (%d)", SOCKERRNO);
   }
 
   /* "Forget" pointers into the library we're about to free */
@@ -1327,7 +1327,7 @@ CURLcode Curl_telnet(struct connectdata *conn, bool *done)
 
   /* We called LoadLibrary, so call FreeLibrary */
   if (!FreeLibrary(wsock2))
-    infof(data,"FreeLibrary(wsock2) failed (%d)",GetLastError());
+    infof(data,"FreeLibrary(wsock2) failed (%d)", ERRNO);
 #else
   pfd[0].fd = sockfd;
   pfd[0].events = POLLIN;

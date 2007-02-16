@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -93,7 +93,7 @@ void logmsg(const char *msg, ...)
 void win32_perror (const char *msg)
 {
   char buf[256];
-  DWORD err = WSAGetLastError();
+  DWORD err = SOCKERRNO;
 
   if (!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
                      LANG_NEUTRAL, buf, sizeof(buf), NULL))

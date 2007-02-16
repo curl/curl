@@ -253,7 +253,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
                             (struct hostent *)buf,
                             (struct hostent_data *)((char *)buf +
                                                     sizeof(struct hostent)));
-      h_errnop= errno; /* we don't deal with this, but set it anyway */
+      h_errnop = SOCKERRNO; /* we don't deal with this, but set it anyway */
     }
     else
       res = -1; /* failure, too smallish buffer size */

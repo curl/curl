@@ -147,7 +147,7 @@ static void dump_addrinfo (struct connectdata *conn, const struct addrinfo *ai)
     if (Curl_printable_address(ai, buf, sizeof(buf)))
       trace_it("%s\n", buf);
     else
-      trace_it("failed; %s\n", Curl_strerror(conn,WSAGetLastError()));
+      trace_it("failed; %s\n", Curl_strerror(conn, SOCKERRNO));
   }
 }
 #endif
@@ -301,7 +301,8 @@ static unsigned __stdcall gethostbyname_thread (void *arg)
     return (unsigned)-1;
   }
 
-  WSASetLastError (conn->async.status = NO_DATA); /* pending status */
+  conn->async.status = NO_DATA;  /* pending status */
+  SET_SOCKERRNO(conn->async.status);
 
   /* Signaling that we have initialized all copies of data and handles we
      need */
@@ -318,7 +319,7 @@ static unsigned __stdcall gethostbyname_thread (void *arg)
       rc = Curl_addrinfo4_callback(conn, CURL_ASYNC_SUCCESS, he);
     }
     else {
-      rc = Curl_addrinfo4_callback(conn, (int)WSAGetLastError(), NULL);
+      rc = Curl_addrinfo4_callback(conn, SOCKERRNO, NULL);
     }
     TRACE(("Winsock-error %d, addr %s\n", conn->async.status,
            he ? inet_ntoa(*(struct in_addr*)he->h_addr) : "unknown"));
@@ -362,7 +363,8 @@ static unsigned __stdcall getaddrinfo_thread (void *arg)
 
   itoa(conn->async.port, service, 10);
 
-  WSASetLastError(conn->async.status = NO_DATA); /* pending status */
+  conn->async.status = NO_DATA;  /* pending status */
+  SET_SOCKERRNO(conn->async.status);
 
   /* Signaling that we have initialized all copies of data and handles we
      need */
@@ -383,7 +385,7 @@ static unsigned __stdcall getaddrinfo_thread (void *arg)
       rc = Curl_addrinfo6_callback(conn, CURL_ASYNC_SUCCESS, res);
     }
     else {
-      rc = Curl_addrinfo6_callback(conn, (int)WSAGetLastError(), NULL);
+      rc = Curl_addrinfo6_callback(conn, SOCKERRNO, NULL);
       TRACE(("Winsock-error %d, no address\n", conn->async.status));
     }
     release_thread_sync(&tsd);
@@ -461,7 +463,7 @@ static bool init_resolve_thread (struct connectdata *conn,
   HANDLE thread_and_event[2] = {0};
 
   if (!td) {
-    SetLastError(ENOMEM);
+    SET_ERRNO(ENOMEM);
     return FALSE;
   }
 
@@ -469,7 +471,7 @@ static bool init_resolve_thread (struct connectdata *conn,
   conn->async.hostname = strdup(hostname);
   if (!conn->async.hostname) {
     free(td);
-    SetLastError(ENOMEM);
+    SET_ERRNO(ENOMEM);
     return FALSE;
   }
 
@@ -486,7 +488,7 @@ static bool init_resolve_thread (struct connectdata *conn,
   td->mutex_waiting = CreateMutex(NULL, TRUE, NULL);
   if (td->mutex_waiting == NULL) {
     Curl_destroy_thread_data(&conn->async);
-    SetLastError(EAGAIN);
+    SET_ERRNO(EAGAIN);
     return FALSE;
   }
 
@@ -496,7 +498,7 @@ static bool init_resolve_thread (struct connectdata *conn,
   td->event_resolved = CreateEvent(NULL, TRUE, FALSE, NULL);
   if (td->event_resolved == NULL) {
     Curl_destroy_thread_data(&conn->async);
-    SetLastError(EAGAIN);
+    SET_ERRNO(EAGAIN);
     return FALSE;
   }
   /* Create the mutex used to serialize access to event_terminated
@@ -505,7 +507,7 @@ static bool init_resolve_thread (struct connectdata *conn,
   td->mutex_terminate = CreateMutex(NULL, FALSE, NULL);
   if (td->mutex_terminate == NULL) {
     Curl_destroy_thread_data(&conn->async);
-    SetLastError(EAGAIN);
+    SET_ERRNO(EAGAIN);
     return FALSE;
   }
   /* Create the event used to signal thread that it should terminate.
@@ -513,7 +515,7 @@ static bool init_resolve_thread (struct connectdata *conn,
   td->event_terminate = CreateEvent(NULL, TRUE, FALSE, NULL);
   if (td->event_terminate == NULL) {
     Curl_destroy_thread_data(&conn->async);
-    SetLastError(EAGAIN);
+    SET_ERRNO(EAGAIN);
     return FALSE;
   }
   /* Create the event used by thread to inform it has initialized its own data.
@@ -521,7 +523,7 @@ static bool init_resolve_thread (struct connectdata *conn,
   td->event_thread_started = CreateEvent(NULL, TRUE, FALSE, NULL);
   if (td->event_thread_started == NULL) {
     Curl_destroy_thread_data(&conn->async);
-    SetLastError(EAGAIN);
+    SET_ERRNO(EAGAIN);
     return FALSE;
   }
 
@@ -543,10 +545,10 @@ static bool init_resolve_thread (struct connectdata *conn,
 
   if (!td->thread_hnd) {
 #ifdef _WIN32_WCE
-     TRACE(("CreateThread() failed; %s\n", Curl_strerror(conn,GetLastError())));
+     TRACE(("CreateThread() failed; %s\n", Curl_strerror(conn, ERRNO)));
 #else
-     SetLastError(errno);
-     TRACE(("_beginthreadex() failed; %s\n", Curl_strerror(conn,errno)));
+     SET_ERRNO(errno);
+     TRACE(("_beginthreadex() failed; %s\n", Curl_strerror(conn, ERRNO)));
 #endif
      Curl_destroy_thread_data(&conn->async);
      return FALSE;
@@ -627,7 +629,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
        * thread.  'conn->async.done = TRUE' is set in
        * Curl_addrinfo4/6_callback().
        */
-      WSASetLastError(conn->async.status);
+      SET_SOCKERRNO(conn->async.status);
       GetExitCodeThread(td->thread_hnd, &td->thread_status);
       TRACE(("%s() status %lu, thread retval %lu, ",
              THREAD_NAME, status, td->thread_status));
@@ -749,12 +751,12 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 
   /* fall-back to blocking version */
   infof(data, "init_resolve_thread() failed for %s; %s\n",
-        hostname, Curl_strerror(conn,GetLastError()));
+        hostname, Curl_strerror(conn, ERRNO));
 
   h = gethostbyname(hostname);
   if (!h) {
     infof(data, "gethostbyname(2) failed for %s:%d; %s\n",
-          hostname, port, Curl_strerror(conn,WSAGetLastError()));
+          hostname, port, Curl_strerror(conn, SOCKERRNO));
     return NULL;
   }
   return Curl_he2ai(h, port);
@@ -826,12 +828,12 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 
   /* fall-back to blocking version */
   infof(data, "init_resolve_thread() failed for %s; %s\n",
-        hostname, Curl_strerror(conn,GetLastError()));
+        hostname, Curl_strerror(conn, ERRNO));
 
   error = getaddrinfo(hostname, sbuf, &hints, &res);
   if (error) {
     infof(data, "getaddrinfo() failed for %s:%d; %s\n",
-          hostname, port, Curl_strerror(conn,WSAGetLastError()));
+          hostname, port, Curl_strerror(conn, SOCKERRNO));
     return NULL;
   }
   return res;

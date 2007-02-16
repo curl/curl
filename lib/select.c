@@ -54,13 +54,15 @@
 #include "connect.h"
 #include "select.h"
 
+/* Winsock and TPF sockets are not in range [0..FD_SETSIZE-1] */
+
 #if defined(USE_WINSOCK) || defined(TPF)
-#define VERIFY_SOCK(x)  /* sockets are not in range [0..FD_SETSIZE] */
+#define VERIFY_SOCK(x) do { } while (0)
 #else
 #define VALID_SOCK(s) (((s) >= 0) && ((s) < FD_SETSIZE))
 #define VERIFY_SOCK(x) do { \
   if(!VALID_SOCK(x)) { \
-    errno = EINVAL; \
+    SET_SOCKERRNO(EINVAL); \
     return -1; \
   } \
 } while(0)
@@ -96,13 +98,13 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
     num++;
   }
 
-#ifdef HAVE_POLL_FINE
   do {
-    r = poll(pfd, num, timeout_ms);
-  } while((r == -1) && (errno == EINTR));
+#ifdef CURL_HAVE_WSAPOLL
+    r = WSAPoll(pfd, num, timeout_ms);
 #else
-  r = WSAPoll(pfd, num, timeout_ms);
+    r = poll(pfd, num, timeout_ms);
 #endif
+  } while((r == -1) && (SOCKERRNO == EINTR));
 
   if (r < 0)
     return -1;
@@ -117,7 +119,7 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
     if (pfd[num].revents & POLLERR) {
 #ifdef __CYGWIN__
       /* Cygwin 1.5.21 needs this hack to pass test 160 */
-      if (errno == EINPROGRESS)
+      if (ERRNO == EINPROGRESS)
         ret |= CSELECT_IN;
       else
 #endif
@@ -182,7 +184,7 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
 
   do {
     r = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
-  } while((r == -1) && (Curl_sockerrno() == EINTR));
+  } while((r == -1) && (SOCKERRNO == EINTR));
 
   if (r < 0)
     return -1;
@@ -222,11 +224,13 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
   int r;
 #ifdef HAVE_POLL_FINE
   do {
-    r = poll(ufds, nfds, timeout_ms);
-  } while((r == -1) && (errno == EINTR));
-#elif defined(CURL_HAVE_WSAPOLL)
-  r = WSAPoll(ufds, nfds, timeout_ms);
+#ifdef CURL_HAVE_WSAPOLL
+    r = WSAPoll(ufds, nfds, timeout_ms);
 #else
+    r = poll(ufds, nfds, timeout_ms);
+#endif
+  } while((r == -1) && (SOCKERRNO == EINTR));
+#else  /* HAVE_POLL_FINE */
   struct timeval timeout;
   struct timeval *ptimeout;
   fd_set fds_read;
@@ -243,9 +247,10 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
   for (i = 0; i < nfds; i++) {
     if (ufds[i].fd == CURL_SOCKET_BAD)
       continue;
-#ifndef USE_WINSOCK  /* winsock sockets are not in range [0..FD_SETSIZE] */
+#if !defined(USE_WINSOCK) && !defined(TPF)
+    /* Winsock and TPF sockets are not in range [0..FD_SETSIZE-1] */
     if (ufds[i].fd >= FD_SETSIZE) {
-      errno = EINVAL;
+      SET_SOCKERRNO(EINVAL);
       return -1;
     }
 #endif
@@ -269,7 +274,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
 
   do {
     r = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, ptimeout);
-  } while((r == -1) && (Curl_sockerrno() == EINTR));
+  } while((r == -1) && (SOCKERRNO == EINTR));
 
   if (r < 0)
     return -1;
@@ -290,7 +295,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
     if (ufds[i].revents != 0)
       r++;
   }
-#endif
+#endif  /* HAVE_POLL_FINE */
   return r;
 }
 
