@@ -105,7 +105,7 @@ ares_writev (ares_socket_t s, const struct iovec *vector, size_t count)
   buffer = bp = (char*) alloca (bytes);
   if (!buffer)
   {
-    errno = ENOMEM;
+    SET_ERRNO(ENOMEM);
     return (-1);
   }
 

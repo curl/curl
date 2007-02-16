@@ -610,6 +610,7 @@ DhcpNameServer
     char *p;
     FILE *fp;
     int linesize;
+    int error;
 
     fp = fopen(PATH_RESOLV_CONF, "r");
     if (fp) {
@@ -635,13 +636,14 @@ DhcpNameServer
       fclose(fp);
     }
     else {
-      switch(errno) {
+      error = ERRNO;
+      switch(error) {
       case ENOENT:
         status = ARES_EOF;
         break;
       default:
         DEBUGF(fprintf(stderr, "fopen() failed with error: %d %s\n",
-                       errno, strerror(errno)));
+                       error, strerror(error)));
         DEBUGF(fprintf(stderr, "Error opening file: %s\n", PATH_RESOLV_CONF));
         status = ARES_EFILE;
       }
@@ -659,13 +661,14 @@ DhcpNameServer
         fclose(fp);
       }
       else {
-        switch(errno) {
+        error = ERRNO;
+        switch(error) {
         case ENOENT:
           status = ARES_EOF;
           break;
         default:
           DEBUGF(fprintf(stderr, "fopen() failed with error: %d %s\n",
-                         errno, strerror(errno)));
+                         error, strerror(error)));
           DEBUGF(fprintf(stderr, "Error opening file: %s\n", "/etc/nsswitch.conf"));
           status = ARES_EFILE;
         }
@@ -684,13 +687,14 @@ DhcpNameServer
         fclose(fp);
       }
       else {
-        switch(errno) {
+        error = ERRNO;
+        switch(error) {
         case ENOENT:
           status = ARES_EOF;
           break;
         default:
           DEBUGF(fprintf(stderr, "fopen() failed with error: %d %s\n",
-                         errno, strerror(errno)));
+                         error, strerror(error)));
           DEBUGF(fprintf(stderr, "Error opening file: %s\n", "/etc/host.conf"));
           status = ARES_EFILE;
         }
@@ -709,13 +713,14 @@ DhcpNameServer
         fclose(fp);
       }
       else {
-        switch(errno) {
+        error = ERRNO;
+        switch(error) {
         case ENOENT:
           status = ARES_EOF;
           break;
         default:
           DEBUGF(fprintf(stderr, "fopen() failed with error: %d %s\n",
-                         errno, strerror(errno)));
+                         error, strerror(error)));
           DEBUGF(fprintf(stderr, "Error opening file: %s\n", "/etc/svc.conf"));
           status = ARES_EFILE;
         }

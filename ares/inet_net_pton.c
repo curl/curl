@@ -66,6 +66,11 @@
  * note:
  *      network byte order assumed.  this means 192.5.5.240/28 has
  *      0b11110000 in its fourth octet.
+ * note:
+ *      On Windows we store the error in the thread errno, not
+ *      in the winsock error code. This is to avoid loosing the
+ *      actual last winsock error. So use macro ERRNO to fetch the
+ *      errno this funtion sets when returning (-1), not SOCKERRNO.
  * author:
  *      Paul Vixie (ISC), June 1996
  */
@@ -186,11 +191,11 @@ inet_net_pton_ipv4(const char *src, unsigned char *dst, size_t size)
   return (bits);
 
   enoent:
-  errno = ENOENT;
+  SET_ERRNO(ENOENT);
   return (-1);
 
   emsgsize:
-  errno = EMSGSIZE;
+  SET_ERRNO(EMSGSIZE);
   return (-1);
 }
 
@@ -381,11 +386,11 @@ inet_net_pton_ipv6(const char *src, unsigned char *dst, size_t size)
   return (bits);
 
   enoent:
-  errno = ENOENT;
+  SET_ERRNO(ENOENT);
   return (-1);
 
   emsgsize:
-  errno = EMSGSIZE;
+  SET_ERRNO(EMSGSIZE);
   return (-1);
 }
 
@@ -399,6 +404,11 @@ inet_net_pton_ipv6(const char *src, unsigned char *dst, size_t size)
  *      number of bits, either imputed classfully or specified with /CIDR,
  *      or -1 if some failure occurred (check errno).  ENOENT means it was
  *      not a valid network specification.
+ * note:
+ *      On Windows we store the error in the thread errno, not
+ *      in the winsock error code. This is to avoid loosing the
+ *      actual last winsock error. So use macro ERRNO to fetch the
+ *      errno this funtion sets when returning (-1), not SOCKERRNO.
  * author:
  *      Paul Vixie (ISC), June 1996
  */
@@ -411,7 +421,7 @@ ares_inet_net_pton(int af, const char *src, void *dst, size_t size)
   case AF_INET6:
     return (inet_net_pton_ipv6(src, dst, size));
   default:
-    errno = EAFNOSUPPORT;
+    SET_ERRNO(EAFNOSUPPORT);
     return (-1);
   }
 }
@@ -429,11 +439,11 @@ int ares_inet_pton(int af, const char *src, void *dst)
     size = sizeof(struct in6_addr);
   else
   {
-    errno = EAFNOSUPPORT;
+    SET_ERRNO(EAFNOSUPPORT);
     return -1;
   }
   result = ares_inet_net_pton(af, src, dst, size);
-  if (result == -1 && errno == ENOENT)
+  if (result == -1 && ERRNO == ENOENT)
     return 0;
   return (result > -1 ? 1 : -1);
 }

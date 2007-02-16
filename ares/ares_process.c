@@ -59,12 +59,6 @@
 #define TRUE 1
 #endif
 
-#ifdef USE_WINSOCK
-#define GET_ERRNO()  WSAGetLastError()
-#else
-#define GET_ERRNO()  errno
-#endif
-
 static int try_again(int errnum);
 static void write_tcp_data(ares_channel channel, fd_set *write_fds,
                            time_t now);
@@ -97,7 +91,7 @@ void ares_process(ares_channel channel, fd_set *read_fds, fd_set *write_fds)
   process_timeouts(channel, now);
 }
 
-/* Return 1 if the specified errno describes a readiness error, or 0
+/* Return 1 if the specified error number describes a readiness error, or 0
  * otherwise. This is mostly for HP-UX, which could return EAGAIN or
  * EWOULDBLOCK. See this man page
  *
@@ -164,7 +158,7 @@ static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
           free(vec);
           if (wcount < 0)
             {
-              if (!try_again(GET_ERRNO()))
+              if (!try_again(SOCKERRNO))
                   handle_error(channel, i, now);
               continue;
             }
@@ -200,7 +194,7 @@ static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
           scount = swrite(server->tcp_socket, sendreq->data, sendreq->len);
           if (scount < 0)
             {
-              if (!try_again(GET_ERRNO()))
+              if (!try_again(SOCKERRNO))
                   handle_error(channel, i, now);
               continue;
             }
@@ -253,7 +247,7 @@ static void read_tcp_data(ares_channel channel, fd_set *read_fds, time_t now)
                         2 - server->tcp_lenbuf_pos);
           if (count <= 0)
             {
-              if (!(count == -1 && try_again(GET_ERRNO())))
+              if (!(count == -1 && try_again(SOCKERRNO)))
                   handle_error(channel, i, now);
               continue;
             }
@@ -280,7 +274,7 @@ static void read_tcp_data(ares_channel channel, fd_set *read_fds, time_t now)
                         server->tcp_length - server->tcp_buffer_pos);
           if (count <= 0)
             {
-              if (!(count == -1 && try_again(GET_ERRNO())))
+              if (!(count == -1 && try_again(SOCKERRNO)))
                   handle_error(channel, i, now);
               continue;
             }
@@ -322,7 +316,7 @@ static void read_udp_packets(ares_channel channel, fd_set *read_fds,
         continue;
 
       count = sread(server->udp_socket, buf, sizeof(buf));
-      if (count == -1 && try_again(GET_ERRNO()))
+      if (count == -1 && try_again(SOCKERRNO))
         continue;
       else if (count <= 0)
         handle_error(channel, i, now);
@@ -615,7 +609,7 @@ static int open_tcp_socket(ares_channel channel, struct server_state *server)
   sockin.sin_addr = server->addr;
   sockin.sin_port = (unsigned short)(channel->tcp_port & 0xffff);
   if (connect(s, (struct sockaddr *) &sockin, sizeof(sockin)) == -1) {
-    int err = GET_ERRNO();
+    int err = SOCKERRNO;
 
     if (err != EINPROGRESS && err != EWOULDBLOCK) {
       closesocket(s);

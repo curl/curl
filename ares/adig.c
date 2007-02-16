@@ -289,7 +289,7 @@ int main(int argc, char **argv)
         break;
       tvp = ares_timeout(channel, NULL, &tv);
       count = select(nfds, &read_fds, &write_fds, NULL, tvp);
-      if (count < 0 && errno != EINVAL)
+      if (count < 0 && SOCKERRNO != EINVAL)
         {
           perror("select");
           return 1;
