@@ -48,20 +48,6 @@ static int *fd = NULL;
 static struct rlimit num_open;
 static char msgbuff[256];
 
-/*
- * our_errno() returns the NOT *socket-related* errno (or equivalent)
- * on this platform to hide platform specific for the calling function.
- */
-
-static int our_errno(void)
-{
-#ifdef WIN32
-  return (int)GetLastError();
-#else
-  return errno;
-#endif
-}
-
 static void store_errmsg(const char *msg, int err)
 {
   if (!err)
@@ -104,7 +90,7 @@ static int rlimit(int keep_open)
   /* get initial open file limits */
 
   if (getrlimit(RLIMIT_NOFILE, &rl) != 0) {
-    store_errmsg("getrlimit() failed", our_errno());
+    store_errmsg("getrlimit() failed", ERRNO);
     fprintf(stderr, "%s\n", msgbuff);
     return -1;
   }
@@ -141,7 +127,7 @@ static int rlimit(int keep_open)
     fprintf(stderr, "raising soft limit up to hard limit\n");
     rl.rlim_cur = rl.rlim_max;
     if (setrlimit(RLIMIT_NOFILE, &rl) != 0) {
-      store_errmsg("setrlimit() failed", our_errno());
+      store_errmsg("setrlimit() failed", ERRNO);
       fprintf(stderr, "%s\n", msgbuff);
       return -2;
     }
@@ -149,7 +135,7 @@ static int rlimit(int keep_open)
     /* get current open file limits */
 
     if (getrlimit(RLIMIT_NOFILE, &rl) != 0) {
-      store_errmsg("getrlimit() failed", our_errno());
+      store_errmsg("getrlimit() failed", ERRNO);
       fprintf(stderr, "%s\n", msgbuff);
       return -3;
     }
@@ -208,7 +194,7 @@ static int rlimit(int keep_open)
     }
   } while (nitems && !memchunk);
   if (!memchunk) {
-    store_errmsg("memchunk, malloc() failed", our_errno());
+    store_errmsg("memchunk, malloc() failed", ERRNO);
     fprintf(stderr, "%s\n", msgbuff);
     return -4;
   }
@@ -263,7 +249,7 @@ static int rlimit(int keep_open)
     }
   } while (num_open.rlim_max && !fd);
   if (!fd) {
-    store_errmsg("fd, malloc() failed", our_errno());
+    store_errmsg("fd, malloc() failed", ERRNO);
     fprintf(stderr, "%s\n", msgbuff);
     free(memchunk);
     return -6;
@@ -286,7 +272,7 @@ static int rlimit(int keep_open)
   fd[0] = open(DEV_NULL, O_RDONLY);
   if (fd[0] < 0) {
     sprintf(strbuff, "opening of %s failed", DEV_NULL);
-    store_errmsg(strbuff, our_errno());
+    store_errmsg(strbuff, ERRNO);
     fprintf(stderr, "%s\n", msgbuff);
     free(fd);
     fd = NULL;

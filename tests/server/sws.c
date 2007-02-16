@@ -466,7 +466,7 @@ void storerequest(char *reqbuf)
 
   do {
     dump = fopen(REQUEST_DUMP, "ab");
-  } while ((dump == NULL) && ((error = errno) == EINTR));
+  } while ((dump == NULL) && ((error = ERRNO) == EINTR));
   if (dump == NULL) {
     logmsg("Error opening file %s error: %d", REQUEST_DUMP, error);
     logmsg("Failed to write request input to " REQUEST_DUMP);
@@ -479,7 +479,7 @@ void storerequest(char *reqbuf)
                               1, (size_t)writeleft, dump);
     if (written > 0)
       writeleft -= written;
-  } while ((writeleft > 0) && ((error = errno) == EINTR));
+  } while ((writeleft > 0) && ((error = ERRNO) == EINTR));
 
   fclose(dump);  /* close it ASAP */
 
@@ -515,7 +515,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
     ssize_t got = sread(sock, reqbuf + req->offset, REQBUFSIZ - req->offset);
     if (got <= 0) {
       if (got < 0) {
-        logmsg("recv() returned error: %d", errno);
+        logmsg("recv() returned error: %d", SOCKERRNO);
         return DOCNUMBER_INTERNAL;
       }
       logmsg("Connection closed by client");
@@ -830,14 +830,14 @@ int main(int argc, char *argv[])
 #endif
 
   if (CURL_SOCKET_BAD == sock) {
-    logmsg("Error opening socket: %d", errno);
+    logmsg("Error opening socket: %d", SOCKERRNO);
     return 1;
   }
 
   flag = 1;
   if (0 != setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
             (void *) &flag, sizeof(flag))) {
-    logmsg("setsockopt(SO_REUSEADDR) failed: %d", errno);
+    logmsg("setsockopt(SO_REUSEADDR) failed: %d", SOCKERRNO);
     sclose(sock);
     return 1;
   }
@@ -861,7 +861,7 @@ int main(int argc, char *argv[])
   }
 #endif /* ENABLE_IPV6 */
   if(0 != rc) {
-    logmsg("Error binding socket: %d", errno);
+    logmsg("Error binding socket: %d", SOCKERRNO);
     sclose(sock);
     return 1;
   }
@@ -888,7 +888,7 @@ int main(int argc, char *argv[])
   /* start accepting connections */
   rc = listen(sock, 5);
   if(0 != rc) {
-    logmsg("listen() failed with error: %d", errno);
+    logmsg("listen() failed with error: %d", SOCKERRNO);
     sclose(sock);
     return 1;
   }
@@ -897,7 +897,7 @@ int main(int argc, char *argv[])
     msgsock = accept(sock, NULL, NULL);
 
     if (CURL_SOCKET_BAD == msgsock) {
-      printf("MAJOR ERROR: accept() failed with error: %d\n", errno);
+      printf("MAJOR ERROR: accept() failed with error: %d\n", SOCKERRNO);
       break;
     }
 

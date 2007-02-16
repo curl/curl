@@ -749,7 +749,7 @@ static void sendtftp(struct testcase *test, struct formats *pf)
   do {
     size = readit(test, &dp, pf->f_convert);
     if (size < 0) {
-      nak(errno + 100);
+      nak(ERRNO + 100);
       return;
     }
     dp->th_opcode = htons((u_short)DATA);
@@ -864,7 +864,7 @@ send_ack:
     size = writeit(test, &dp, (int)(n - 4), pf->f_convert);
     if (size != (n-4)) {                 /* ahem */
       if (size < 0)
-        nak(errno + 100);
+        nak(ERRNO + 100);
       else
         nak(ENOSPACE);
       goto abort;

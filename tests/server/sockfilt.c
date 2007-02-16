@@ -238,7 +238,7 @@ static int juggle(curl_socket_t *sockfdp,
 
   do {
     rc = select(maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
-  } while((rc == -1) && (our_sockerrno() == EINTR));
+  } while((rc == -1) && (SOCKERRNO == EINTR));
 
   switch(rc) {
   case -1:
@@ -447,7 +447,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
   /* start accepting connections */
   rc = listen(sock, 4);
   if(0 != rc) {
-    logmsg("listen() failed with error: %d", errno);
+    logmsg("listen() failed with error: %d", SOCKERRNO);
     sclose(sock);
     return CURL_SOCKET_BAD;
   }
@@ -570,7 +570,7 @@ int main(int argc, char *argv[])
 
   sock = mksock(use_ipv6);
   if (CURL_SOCKET_BAD == sock) {
-    logmsg("Error opening socket: %d", errno);
+    logmsg("Error opening socket: %d", SOCKERRNO);
     return 1;
   }
 

@@ -59,19 +59,6 @@
 const struct in6_addr in6addr_any = {{ IN6ADDR_ANY_INIT }};
 #endif
 
-/*
- * our_sockerrno() returns the *socket-related* errno (or equivalent) on this
- * platform to hide platform specific for the function that calls this.
- */
-int our_sockerrno(void)
-{
-#ifdef USE_WINSOCK
-  return (int)WSAGetLastError();
-#else
-  return errno;
-#endif
-}
-
 /* someone else must set this properly */
 extern const char *serverlogfile;
 

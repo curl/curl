@@ -23,7 +23,6 @@
  * $Id$
  ***************************************************************************/
 
-int our_sockerrno(void);
 void logmsg(const char *msg, ...);
 
 #ifndef FALSE
