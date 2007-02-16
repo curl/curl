@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (16 February 2007)
+- Duncan Mac-Vicar Prett and Michal Marek reported problems with resetting
+  CURLOPT_RANGE back to no range on an easy handle when using FTP.
+
 Dan F (14 February 2007)
 - Fixed curl-config --libs so it doesn't list unnecessary libraries (and
   therefore introduce unnecessary dependencies) when it's not needed.

@@ -22,6 +22,7 @@ This release includes the following bugfixes:
  o in testsuite, update test cookies expiration from 2007-Feb-1 to year 2035 
  o socks5 works
  o builds fine with VC2005
+ o CURLOPT_RANGE set to NULL resets the range for FTP
 
 This release includes the following known bugs:
 
@@ -39,6 +40,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Yang Tse, Manfred Schwarb, Michael Wallner, Jeff Pohlmeyer, Shmulik Regev,
- Rob Crittenden, Robert A. Monat
+ Rob Crittenden, Robert A. Monat, Duncan Mac-Vicar Prett, Michal Marek
 
         Thanks! (and sorry if I forgot to mention someone)

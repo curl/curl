@@ -3285,6 +3285,8 @@ static CURLcode ftp_range(struct connectdata *conn)
                  from, to, data->reqdata.maxdownload));
     ftpc->dont_check = TRUE; /* dont check for successful transfer */
   }
+  else
+    data->reqdata.maxdownload = -1;
   return CURLE_OK;
 }
 
