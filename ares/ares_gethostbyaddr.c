@@ -216,9 +216,26 @@ static int file_lookup(union ares_addr *addr, int family, struct hostent **host)
     return ARES_ENOTFOUND;
 #endif
 
+  int error;
+
   fp = fopen(PATH_HOSTS, "r");
   if (!fp)
-    return ARES_ENOTFOUND;
+    {
+      error = ERRNO;
+      switch(error) 
+        {
+        case ENOENT:
+          return ARES_ENOTFOUND;
+          break;
+        default:
+          DEBUGF(fprintf(stderr, "fopen() failed with error: %d %s\n",
+                         error, strerror(error)));
+          DEBUGF(fprintf(stderr, "Error opening file: %s\n", 
+                         PATH_HOSTS));
+          *host = NULL;
+          return ARES_EFILE;
+        }
+    }
   while ((status = ares__get_hostent(fp, family, host)) == ARES_SUCCESS)
     {
       if (family != (*host)->h_addrtype)

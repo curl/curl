@@ -25,6 +25,7 @@ int test(char *URL)
   CURL *curl;
   FILE *hd_src ;
   int hd ;
+  int error;
   struct_stat file_info;
   int running;
   char done=FALSE;
@@ -48,6 +49,13 @@ int test(char *URL)
      fdopen() from the previous descriptor, but hey this is just
      an example! */
   hd_src = fopen(arg2, "rb");
+  if(NULL == hd_src) {
+    error = ERRNO;
+    fprintf(stderr, "fopen() failed with error: %d %s\n",
+            error, strerror(error));
+    fprintf(stderr, "Error opening file: %s\n", arg2);
+    return TEST_ERR_MAJOR_BAD;
+  }
 
   if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
