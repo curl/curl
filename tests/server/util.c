@@ -27,8 +27,6 @@
 #include <string.h>
 #include <stdarg.h>
 #include <signal.h>
-#include <time.h>
-#include <sys/time.h>
 #include <sys/types.h>
 
 #ifdef HAVE_UNISTD_H
@@ -54,6 +52,7 @@
 #include "curlx.h" /* from the private lib dir */
 #include "getpart.h"
 #include "util.h"
+#include "timeval.h"
 
 #if defined(ENABLE_IPV6) && defined(__MINGW32__)
 const struct in6_addr in6addr_any = {{ IN6ADDR_ANY_INIT }};
@@ -68,18 +67,20 @@ void logmsg(const char *msg, ...)
   char buffer[512]; /* possible overflow if you pass in a huge string */
   FILE *logfp;
   int error;
+  struct timeval tv;
+  time_t sec;
+  struct tm *now;
+  char timebuf[20];
 
   if (!serverlogfile) {
     fprintf(stderr, "Error: serverlogfile not set\n");
     return;
   }
 
-  struct timeval tv = curlx_tvnow();
-  time_t sec = tv.tv_sec;
-  struct tm *now =
-    localtime(&sec); /* not multithread safe but we don't care */
+  tv = curlx_tvnow();
+  sec = tv.tv_sec;
+  now = localtime(&sec); /* not multithread safe but we don't care */
 
-  char timebuf[20];
   snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld",
            now->tm_hour, now->tm_min, now->tm_sec, tv.tv_usec);
 
