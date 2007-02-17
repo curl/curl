@@ -18,11 +18,6 @@
 
 #define MAXHOSTNAMELEN 256
 
-#define EINPROGRESS WSAEINPROGRESS
-#define EWOULDBLOCK WSAEWOULDBLOCK
-#define EMSGSIZE     WSAEMSGSIZE
-#define EAFNOSUPPORT WSAEAFNOSUPPORT
-
 /* Structure for scatter/gather I/O.  */
 struct iovec
 {

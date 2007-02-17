@@ -55,10 +55,6 @@
 #define INADDRSZ         4
 #define INT16SZ          2
 
-#ifdef USE_WINSOCK
-#define EAFNOSUPPORT    WSAEAFNOSUPPORT
-#endif
-
 /*
  * Format an IPv4 address, more or less like inet_ntoa().
  *

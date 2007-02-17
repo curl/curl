@@ -49,12 +49,6 @@ void win32_perror (const char *msg);
 #endif  /* WIN32 */
 
 #ifdef USE_WINSOCK
-#define EINPROGRESS  WSAEINPROGRESS
-#define EWOULDBLOCK  WSAEWOULDBLOCK
-#define EISCONN      WSAEISCONN
-#define ENOTSOCK     WSAENOTSOCK
-#define ECONNREFUSED WSAECONNREFUSED
-
 void win32_init(void);
 void win32_cleanup(void);
 #endif  /* USE_WINSOCK */

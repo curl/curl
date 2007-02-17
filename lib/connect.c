@@ -84,14 +84,6 @@
 #define FALSE 0
 #endif
 
-#ifdef USE_WINSOCK
-#define EINPROGRESS WSAEINPROGRESS
-#define EWOULDBLOCK WSAEWOULDBLOCK
-#define EISCONN     WSAEISCONN
-#define ENOTSOCK    WSAENOTSOCK
-#define ECONNREFUSED WSAECONNREFUSED
-#endif
-
 #include "urldata.h"
 #include "sendf.h"
 #include "if2ip.h"
