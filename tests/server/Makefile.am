@@ -46,6 +46,8 @@ sockfilt_SOURCES = sockfilt.c util.c util.h $(useful)	\
 sockfilt_LDADD = @TEST_SERVER_LIBS@
 
 getpart_SOURCES= testpart.c $(useful)
+# This is needed because of (unused) network debugging functions in memdebug.c
+getpart_LDADD = @TEST_SERVER_LIBS@
 
 tftpd_SOURCES = tftpd.c util.c util.h $(useful) tftp.h
 tftpd_LDADD = @TEST_SERVER_LIBS@
