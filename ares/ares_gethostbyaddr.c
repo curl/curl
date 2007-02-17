@@ -188,6 +188,7 @@ static int file_lookup(union ares_addr *addr, int family, struct hostent **host)
   int status;
 
 #ifdef WIN32
+  int error;
   char PATH_HOSTS[MAX_PATH];
   if (IS_NT()) {
     char tmp[MAX_PATH];
@@ -216,8 +217,6 @@ static int file_lookup(union ares_addr *addr, int family, struct hostent **host)
     return ARES_ENOTFOUND;
 #endif
 
-  int error;
-
   fp = fopen(PATH_HOSTS, "r");
   if (!fp)
     {
@@ -226,7 +225,6 @@ static int file_lookup(union ares_addr *addr, int family, struct hostent **host)
         {
         case ENOENT:
           return ARES_ENOTFOUND;
-          break;
         default:
           DEBUGF(fprintf(stderr, "fopen() failed with error: %d %s\n",
                          error, strerror(error)));
