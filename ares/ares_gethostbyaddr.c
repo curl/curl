@@ -186,9 +186,9 @@ static int file_lookup(union ares_addr *addr, int family, struct hostent **host)
 {
   FILE *fp;
   int status;
+  int error;
 
 #ifdef WIN32
-  int error;
   char PATH_HOSTS[MAX_PATH];
   if (IS_NT()) {
     char tmp[MAX_PATH];
