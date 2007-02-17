@@ -39,6 +39,7 @@ EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 Makefile.riscos	\
 CLEANFILES = $(DSP) $(VCPROJ)
 
 lib_LTLIBRARIES = libcurl.la
+LIBCURL_LIBS = @LIBCURL_LIBS@
 
 # we use srcdir/include for the static global include files
 # we use builddir/lib for the generated lib/config.h file to get found
@@ -89,7 +90,7 @@ if MIMPURE
 MIMPURE = -mimpure-text
 endif
 
-libcurl_la_LDFLAGS = $(UNDEF) $(VERSION) $(MIMPURE)
+libcurl_la_LDFLAGS = $(UNDEF) $(VERSION) $(MIMPURE) $(LIBCURL_LIBS)
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc

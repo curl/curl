@@ -37,7 +37,7 @@ bin_PROGRAMS = curl
 
 include Makefile.inc
 
-curl_LDADD = ../lib/libcurl.la
+curl_LDADD = ../lib/libcurl.la @CURL_LIBS@
 curl_DEPENDENCIES = ../lib/libcurl.la
 BUILT_SOURCES = hugehelp.c
 CLEANFILES = hugehelp.c
