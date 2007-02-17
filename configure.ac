@@ -432,9 +432,14 @@ fi
 dnl socket lib?
 AC_CHECK_FUNC(connect, , [ AC_CHECK_LIB(socket, connect) ])
 
-dnl dl lib?
-AC_CHECK_FUNC(dlclose, , [ AC_CHECK_LIB(dl, dlopen) ])
+dnl **********************************************************************
+dnl The preceding library checks are all potentially useful for test
+dnl servers (for providing networking support).  Save the list of required
+dnl libraries at this point for use while linking those test servers.
+dnl **********************************************************************
+TEST_SERVER_LIBS=$LIBS
 
+dnl **********************************************************************
 AC_MSG_CHECKING([whether to use libgcc])
 AC_ARG_ENABLE(libgcc,
 AC_HELP_STRING([--enable-libgcc],[use libgcc when linking]),
@@ -448,6 +453,9 @@ AC_HELP_STRING([--enable-libgcc],[use libgcc when linking]),
   esac ],
        AC_MSG_RESULT(no)
 )
+
+dnl dl lib?
+AC_CHECK_FUNC(dlclose, , [ AC_CHECK_LIB(dl, dlopen) ])
 
 dnl **********************************************************************
 dnl Check for the name of dynamic OpenLDAP libraries
@@ -1419,6 +1427,10 @@ fi
 dnl set variable for use in automakefile(s)
 AM_CONDITIONAL(HAVE_LIBZ, test x"$AMFIXLIB" = x1)
 
+dnl **********************************************************************
+dnl Check for the presence of IDN libraries and headers
+dnl **********************************************************************
+
 AC_MSG_CHECKING([whether to build with libidn])
 AC_ARG_WITH(libidn,
 AC_HELP_STRING([--with-libidn=PATH],[Enable libidn usage])
@@ -1567,7 +1579,7 @@ if test x$cross_compiling != xyes; then
 
   if test x$checkfor_gmtime_r = xyes; then
 
-    dnl if gmtime_r was found, verify that it actuall works, as (at least) HPUX
+    dnl if gmtime_r was found, verify that it actually works, as (at least) HPUX
     dnl 10.20 is known to have a buggy one. If it doesn't work, disable use of
     dnl it.
 
@@ -2190,23 +2202,22 @@ if test "x$ws2" = "xyes"; then
   dnl end.
 
   LIBS="$LIBS -lws2_32"
+  TEST_SERVER_LIBS="$TEST_SERVER_LIBS -lws2_32"
 
 fi
 
 dnl
 dnl All the library dependencies put into $LIB apply to libcurl only.
 dnl Those in $CURL_LIBS apply to the curl command-line client only.
-dnl Those in $TEST_SERVER_LIBS apply to test servers (for simplicity, this
-dnl   is currently the same as libcurl's libraries).
+dnl Those in $TEST_SERVER_LIBS apply to test servers only.
 dnl Those in $ALL_LIBS apply to all targets, including test targets.
 dnl
 LIBCURL_LIBS=$LIBS
-TEST_SERVER_LIBS=$LIBCURL_LIBS
 
 AC_SUBST(LIBCURL_LIBS)
 AC_SUBST(CURL_LIBS)
 AC_SUBST(TEST_SERVER_LIBS)
-LIBS=$ALL_LIBS  dnl LIBS is a magic variable
+LIBS=$ALL_LIBS  dnl LIBS is a magic variable that's used for every link
 
 AM_CONDITIONAL(CROSSCOMPILING, test x$cross_compiling = xyes)
 
