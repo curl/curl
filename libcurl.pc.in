@@ -33,6 +33,6 @@ Name: libcurl
 URL: http://curl.haxx.se/
 Description: Library to transfer files with ftp, http, etc.
 Version: @VERSION@
-Libs: -L${libdir} -lcurl @LDFLAGS@
-Libs.private: @LIBS@
+Libs: -L${libdir} -lcurl @LDFLAGS@ @LIBS@
+Libs.private: @LIBCURL_LIBS@ @LIBS@
 Cflags: -I${includedir}
