@@ -534,8 +534,8 @@ struct Curl_transfer_keeper {
   curl_off_t size;        /* -1 if unknown at this point */
   curl_off_t *bytecountp; /* return number of bytes read or NULL */
 
-  curl_off_t maxdownload; /* in bytes, the maximum amount of data to fetch, 0
-                             means unlimited */
+  curl_off_t maxdownload; /* in bytes, the maximum amount of data to fetch,
+                             -1 means unlimited */
   curl_off_t *writebytecountp; /* return number of bytes written or NULL */
 
   /** End of HandleData struct copies **/
