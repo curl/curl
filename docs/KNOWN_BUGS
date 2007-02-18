@@ -7,9 +7,6 @@ may have been fixed since this was written!
   --ftp-ssl-ccc on some servers.  Recipe and instructions here:
   http://curl.haxx.se/mail/lib-2007-01/0210.html
 
-41. Jeff Pohlmeyer's curl_multi_socket crashing case. Recipe and instructions
-  here: http://curl.haxx.se/mail/lib-2007-01/0022.html
-
 40. HTTP Pipelining, NULL content
   http://curl.haxx.se/bug/view.cgi?id=1631566
 

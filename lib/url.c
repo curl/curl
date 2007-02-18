@@ -2030,7 +2030,8 @@ ConnectionExists(struct SessionHandle *data,
                                   from the multi */
     }
 
-    infof(data, "Examining connection #%ld for reuse\n", check->connectindex);
+    DEBUGF(infof(data, "Examining connection #%ld for reuse\n",
+                 check->connectindex));
 
     if(check->inuse && !canPipeline) {
       /* can only happen within multi handles, and means that another easy
@@ -2056,11 +2057,11 @@ ConnectionExists(struct SessionHandle *data,
       continue;
     }
 
-    if (data->state.is_in_pipeline && check->bits.close) {
-        /* Don't pick a connection that is going to be closed */
-        infof(data, "Connection #%ld has been marked for close, can't reuse\n",
-              check->connectindex);
-        continue;
+    if (check->bits.close) {
+      /* Don't pick a connection that is going to be closed. */
+      infof(data, "Connection #%ld has been marked for close, can't reuse\n",
+            check->connectindex);
+      continue;
     }
 
     if((needle->protocol&PROT_SSL) != (check->protocol&PROT_SSL))
@@ -4136,8 +4137,9 @@ CURLcode Curl_async_resolved(struct connectdata *conn,
 
 
 CURLcode Curl_done(struct connectdata **connp,
-                   CURLcode status, bool premature) /* an error if this is called after an
-                                       error was detected */
+                   CURLcode status,  /* an error if this is called after an
+                                        error was detected */
+                   bool premature)
 {
   CURLcode result;
   struct connectdata *conn = *connp;

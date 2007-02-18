@@ -542,11 +542,10 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
       easy->easy_handle->dns.hostcachetype = HCACHE_NONE;
     }
 
-    /* if we have a connection we must call Curl_done() here so that we
-       don't leave a half-baked one around */
-    if(easy->easy_conn) {
-      /* Set up the association right */
-      easy->easy_conn->data = easy->easy_handle;
+    /* we must call Curl_done() here (if we still "own it") so that we don't
+       leave a half-baked one around */
+    if(easy->easy_conn &&
+       (easy->easy_conn->data == easy->easy_handle)) {
 
       /* Curl_done() clears the conn->data field to lose the association
          between the easy handle and the connection */

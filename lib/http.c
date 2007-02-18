@@ -1403,6 +1403,10 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
 
   data=conn->data;
 
+  /* We default to persistent connections. We set this already in this connect
+     function to make the re-use checks properly be able to check this bit. */
+  conn->bits.close = FALSE;
+
   /* If we are not using a proxy and we want a secure connection, perform SSL
    * initialization & connection now.  If using a proxy with https, then we
    * must tell the proxy to CONNECT to the host we want to talk to.  Only
@@ -1673,9 +1677,6 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   }
   else
     http = data->reqdata.proto.http;
-
-  /* We default to persistent connections */
-  conn->bits.close = FALSE;
 
   if ( (conn->protocol&(PROT_HTTP|PROT_FTP)) &&
        data->set.upload) {

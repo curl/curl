@@ -23,6 +23,7 @@ This release includes the following bugfixes:
  o socks5 works
  o builds fine with VC2005
  o CURLOPT_RANGE set to NULL resets the range for FTP
+ o curl_multi_remove_handle() rare crash
 
 This release includes the following known bugs:
 
@@ -40,6 +41,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Yang Tse, Manfred Schwarb, Michael Wallner, Jeff Pohlmeyer, Shmulik Regev,
- Rob Crittenden, Robert A. Monat, Duncan Mac-Vicar Prett, Michal Marek
+ Rob Crittenden, Robert A. Monat,  Dan Fandrich, Duncan Mac-Vicar Prett,
+ Michal Marek
 
         Thanks! (and sorry if I forgot to mention someone)

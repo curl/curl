@@ -6,6 +6,15 @@
 
                                   Changelog
 
+Daniel (18 February 2007)
+- Jeff Pohlmeyer identified two problems: first a rather obscure problem with
+  the multi interface and connection re-use that could make a
+  curl_multi_remove_handle() ruin a pointer in another handle.
+
+  The second problem was less of an actual problem but more of minor quirk:
+  the re-using of connections wasn't properly checking if the connection was
+  marked for closure.
+
 Daniel (16 February 2007)
 - Duncan Mac-Vicar Prett and Michal Marek reported problems with resetting
   CURLOPT_RANGE back to no range on an easy handle when using FTP.
