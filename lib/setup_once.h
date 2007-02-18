@@ -35,6 +35,13 @@
 
 
 /*
+ * Inclusion of common header files.
+ */
+
+#include <errno.h>
+
+
+/*
  * If we have the MSG_NOSIGNAL define, make sure we use
  * it as the fourth argument of function send()
  */
@@ -226,10 +233,14 @@ typedef int sig_atomic_t;
 #define ETIMEDOUT        WSAETIMEDOUT
 #define ECONNREFUSED     WSAECONNREFUSED
 #define ELOOP            WSAELOOP
+#ifndef ENAMETOOLONG     /* possible previous definition in errno.h */
 #define ENAMETOOLONG     WSAENAMETOOLONG
+#endif
 #define EHOSTDOWN        WSAEHOSTDOWN
 #define EHOSTUNREACH     WSAEHOSTUNREACH
+#ifndef ENOTEMPTY        /* possible previous definition in errno.h */
 #define ENOTEMPTY        WSAENOTEMPTY
+#endif
 #define EPROCLIM         WSAEPROCLIM
 #define EUSERS           WSAEUSERS
 #define EDQUOT           WSAEDQUOT
