@@ -285,7 +285,7 @@ $pwd = cwd();
 # libcurl timestamp is present in curlver.h only if this isn't a CVS version.
 # If no timestamp available in curlver.h then we are building from CVS and we
 # will use current UTC build time as the CVS version timestamp.
-if ((-f "$CURLDIR/include/curl/curlver.hh") &&
+if ((-f "$CURLDIR/include/curl/curlver.h") &&
     (grepfile("define LIBCURL_TIMESTAMP",
               "$CURLDIR/include/curl/curlver.h")) &&
     (open(F, "<$CURLDIR/include/curl/curlver.h"))) {
