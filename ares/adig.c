@@ -51,10 +51,6 @@
 #undef WIN32  /* Redefined in MingW headers */
 #endif
 
-#ifndef INADDR_NONE
-#define INADDR_NONE 0xffffffff
-#endif
-
 /* Mac OS X portability check */
 #ifndef T_SRV
 #define T_SRV 33 /* server selection */
