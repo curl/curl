@@ -7,6 +7,8 @@
                                   Changelog
 
 Daniel (19 February 2007)
+- Ian Turner fixed the libcurl.m4 macro's support for --with-libcurl.
+
 - Shmulik Regev found a memory leak in re-used HTTPS connections, at least
   when the multi interface was used.
 

@@ -26,6 +26,7 @@ This release includes the following bugfixes:
  o curl_multi_remove_handle() rare crash
  o passive FTP transfers work with SOCKS
  o multi interface HTTPS connection re-use memory leak
+ o libcurl.m4's --with-libcurl is improved
 
 This release includes the following known bugs:
 
@@ -44,6 +45,6 @@ advice from friends like these:
 
  Yang Tse, Manfred Schwarb, Michael Wallner, Jeff Pohlmeyer, Shmulik Regev,
  Rob Crittenden, Robert A. Monat, Dan Fandrich, Duncan Mac-Vicar Prett,
- Michal Marek, Robson Braga Araujo
+ Michal Marek, Robson Braga Araujo, Ian Turner
 
         Thanks! (and sorry if I forgot to mention someone)
