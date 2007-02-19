@@ -67,6 +67,7 @@ OBJECTS = $(OBJ_DIR)\ares_fds.obj              \
           $(OBJ_DIR)\ares_expand_name.obj      \
           $(OBJ_DIR)\ares_parse_a_reply.obj    \
           $(OBJ_DIR)\ares_parse_aaaa_reply.obj \
+          $(OBJ_DIR)\ares_parse_ns_reply.obj   \
           $(OBJ_DIR)\windows_port.obj          \
           $(OBJ_DIR)\ares_expand_string.obj    \
           $(OBJ_DIR)\ares_parse_ptr_reply.obj  \
@@ -75,6 +76,7 @@ OBJECTS = $(OBJ_DIR)\ares_fds.obj              \
           $(OBJ_DIR)\inet_ntop.obj
 
 all: $(OBJ_DIR) cares.lib cares.dll cares_imp.lib ahost.exe adig.exe
+       @echo Welcome to c-ares library and examples
 
 $(OBJ_DIR):
        mkdir $(OBJ_DIR)
@@ -105,6 +107,7 @@ $(DEF_FILE): $(OBJECTS) Makefile.VC6
        @echo   ares_mkquery           >> $@
        @echo   ares_parse_a_reply     >> $@
        @echo   ares_parse_ptr_reply   >> $@
+       @echo   ares_parse_ns_reply    >> $@
        @echo   ares_process           >> $@
        @echo   ares_query             >> $@
        @echo   ares_search            >> $@
@@ -142,56 +145,87 @@ vclean realclean: clean
 #
 $(OBJ_DIR)\ares_fds.obj: ares_fds.c setup.h setup_once.h ares.h ares_private.h \
   ares_ipv6.h
+
 $(OBJ_DIR)\ares_process.obj: ares_process.c setup.h setup_once.h nameser.h     \
   ares.h ares_dns.h ares_private.h ares_ipv6.h
+
 $(OBJ_DIR)\ares_free_hostent.obj: ares_free_hostent.c setup.h setup_once.h     \
   ares.h ares_private.h ares_ipv6.h
+
 $(OBJ_DIR)\ares_query.obj: ares_query.c setup.h setup_once.h nameser.h         \
   ares.h ares_dns.h ares_private.h ares_ipv6.h
+
 $(OBJ_DIR)\ares__close_sockets.obj: ares__close_sockets.c setup.h setup_once.h \
   ares.h ares_private.h ares_ipv6.h
+
 $(OBJ_DIR)\ares_free_string.obj: ares_free_string.c setup.h setup_once.h ares.h
+
 $(OBJ_DIR)\ares_search.obj: ares_search.c setup.h setup_once.h nameser.h       \
   ares.h ares_private.h ares_ipv6.h
+
 $(OBJ_DIR)\ares__get_hostent.obj: ares__get_hostent.c setup.h setup_once.h     \
   ares.h ares_private.h ares_ipv6.h inet_net_pton.h
+
 $(OBJ_DIR)\ares_gethostbyaddr.obj: ares_gethostbyaddr.c setup.h setup_once.h   \
   nameser.h ares.h ares_private.h ares_ipv6.h inet_net_pton.h
+
 $(OBJ_DIR)\ares_send.obj: ares_send.c setup.h setup_once.h nameser.h ares.h    \
   ares_dns.h ares_private.h ares_ipv6.h
+
 $(OBJ_DIR)\ares__read_line.obj: ares__read_line.c setup.h setup_once.h ares.h  \
   ares_private.h ares_ipv6.h
+
 $(OBJ_DIR)\ares_gethostbyname.obj: ares_gethostbyname.c setup.h setup_once.h   \
   nameser.h ares.h ares_private.h ares_ipv6.h inet_net_pton.h bitncmp.h
+
 $(OBJ_DIR)\ares_strerror.obj: ares_strerror.c setup.h setup_once.h ares.h
+
 $(OBJ_DIR)\ares_cancel.obj: ares_cancel.c setup.h setup_once.h ares.h          \
   ares_private.h ares_ipv6.h
+
 $(OBJ_DIR)\ares_init.obj: ares_init.c setup.h setup_once.h nameser.h ares.h    \
   ares_private.h ares_ipv6.h inet_net_pton.h
+
 $(OBJ_DIR)\ares_timeout.obj: ares_timeout.c setup.h setup_once.h ares.h        \
   ares_private.h ares_ipv6.h
+
 $(OBJ_DIR)\ares_destroy.obj: ares_destroy.c setup.h setup_once.h ares.h        \
   ares_private.h ares_ipv6.h
+
 $(OBJ_DIR)\ares_mkquery.obj: ares_mkquery.c setup.h setup_once.h nameser.h     \
   ares.h ares_dns.h
+
 $(OBJ_DIR)\ares_version.obj: ares_version.c setup.h setup_once.h ares_version.h
+
 $(OBJ_DIR)\ares_expand_name.obj: ares_expand_name.c setup.h setup_once.h       \
   nameser.h ares.h ares_private.h ares_ipv6.h
+
 $(OBJ_DIR)\ares_parse_a_reply.obj: ares_parse_a_reply.c setup.h setup_once.h   \
   nameser.h ares.h ares_dns.h ares_private.h ares_ipv6.h
+
 $(OBJ_DIR)\windows_port.obj: windows_port.c setup.h setup_once.h nameser.h     \
   ares.h ares_private.h ares_ipv6.h
+
 $(OBJ_DIR)\ares_expand_string.obj: ares_expand_string.c setup.h setup_once.h   \
   nameser.h ares.h ares_private.h ares_ipv6.h
+
 $(OBJ_DIR)\ares_parse_ptr_reply.obj: ares_parse_ptr_reply.c setup.h            \
   setup_once.h nameser.h ares.h ares_dns.h ares_private.h ares_ipv6.h
+
 $(OBJ_DIR)\ares_parse_aaaa_reply.obj: ares_parse_aaaa_reply.c setup.h          \
   setup_once.h nameser.h ares.h ares_dns.h inet_net_pton.h ares_private.h      \
   ares_ipv6.h
+
+$(OBJ_DIR)\ares_parse_ns_reply.obj: ares_parse_ns_reply.c setup.h            \
+  setup_once.h nameser.h ares.h ares_dns.h ares_private.h ares_ipv6.h
+
 $(OBJ_DIR)\ares_getnameinfo.obj: ares_getnameinfo.c setup.h setup_once.h       \
   nameser.h ares.h ares_private.h ares_ipv6.h inet_ntop.h
+
 $(OBJ_DIR)\inet_net_pton.obj: inet_net_pton.c setup.h setup_once.h nameser.h   \
   ares_ipv6.h inet_net_pton.h
+
 $(OBJ_DIR)\bitncmp.obj: bitncmp.c bitncmp.h
+
 $(OBJ_DIR)\inet_ntop.obj: inet_ntop.c setup.h setup_once.h nameser.h           \
   ares_ipv6.h inet_ntop.h
