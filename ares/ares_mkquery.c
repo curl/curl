@@ -115,7 +115,12 @@ int ares_mkquery(const char *name, int dnsclass, int type, unsigned short id,
   memset(q, 0, HFIXEDSZ);
   DNS_HEADER_SET_QID(q, id);
   DNS_HEADER_SET_OPCODE(q, QUERY);
-  DNS_HEADER_SET_RD(q, (rd) ? 1 : 0);
+  if (rd) {
+    DNS_HEADER_SET_RD(q, 1);
+  }
+  else {
+    DNS_HEADER_SET_RD(q, 0);
+  }
   DNS_HEADER_SET_QDCOUNT(q, 1);
 
   /* A name of "." is a screw case for the loop below, so adjust it. */
