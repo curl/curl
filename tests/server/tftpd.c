@@ -424,6 +424,7 @@ int main(int argc, char **argv)
   curl_socket_t sock;
   int flag;
   int rc;
+  int error;
   struct testcase test;
 
   while(argc>arg) {
@@ -513,8 +514,12 @@ int main(int argc, char **argv)
     fprintf(pidfile, "%d\n", (int)getpid());
     fclose(pidfile);
   }
-  else
-    fprintf(stderr, "Couldn't write pid file\n");
+  else {
+    error = ERRNO;
+    logmsg("fopen() failed with error: %d %s", error, strerror(error));
+    logmsg("Error opening file: %s", pidname);
+    logmsg("Couldn't write pid file");
+  }
 
   logmsg("Running IPv%d version on port UDP/%d",
 #ifdef ENABLE_IPV6
@@ -554,8 +559,12 @@ int main(int argc, char **argv)
     if (tp->th_opcode == RRQ || tp->th_opcode == WRQ) {
       memset(&test, 0, sizeof(test));
       server = fopen(REQUEST_DUMP, "ab");
-      if(!server)
+      if(!server) {
+        error = ERRNO;
+        logmsg("fopen() failed with error: %d %s", error, strerror(error));
+        logmsg("Error opening file: %s", REQUEST_DUMP);
         break;
+      }
       test.server = server;
       tftp(&test, tp, n);
       if(test.buffer)
@@ -645,6 +654,7 @@ static int validate_access(struct testcase *test,
 {
   char *ptr;
   long testno;
+  int error;
 
   logmsg("trying to get file: %s mode %x", filename, mode);
 
@@ -684,6 +694,9 @@ static int validate_access(struct testcase *test,
     if(file) {
       FILE *stream=fopen(file, "rb");
       if(!stream) {
+        error = ERRNO;
+        logmsg("fopen() failed with error: %d %s", error, strerror(error));
+        logmsg("Error opening file: %s", file);
         logmsg("Couldn't open test file: %s", file);
         return EACCESS;
       }

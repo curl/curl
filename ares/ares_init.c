@@ -639,6 +639,7 @@ DhcpNameServer
       error = ERRNO;
       switch(error) {
       case ENOENT:
+      case ESRCH:
         status = ARES_EOF;
         break;
       default:
@@ -664,6 +665,7 @@ DhcpNameServer
         error = ERRNO;
         switch(error) {
         case ENOENT:
+        case ESRCH:
           status = ARES_EOF;
           break;
         default:
@@ -690,6 +692,7 @@ DhcpNameServer
         error = ERRNO;
         switch(error) {
         case ENOENT:
+        case ESRCH:
           status = ARES_EOF;
           break;
         default:
@@ -716,6 +719,7 @@ DhcpNameServer
         error = ERRNO;
         switch(error) {
         case ENOENT:
+        case ESRCH:
           status = ARES_EOF;
           break;
         default:

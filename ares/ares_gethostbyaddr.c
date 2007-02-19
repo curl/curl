@@ -224,6 +224,7 @@ static int file_lookup(union ares_addr *addr, int family, struct hostent **host)
       switch(error) 
         {
         case ENOENT:
+        case ESRCH:
           return ARES_ENOTFOUND;
         default:
           DEBUGF(fprintf(stderr, "fopen() failed with error: %d %s\n",

@@ -273,6 +273,7 @@ static int single_domain(ares_channel channel, const char *name, char **s)
               switch(error) 
                 {
                 case ENOENT:
+                case ESRCH:
                   break;
                 default:
                   DEBUGF(fprintf(stderr, "fopen() failed with error: %d %s\n",

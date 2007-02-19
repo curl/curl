@@ -353,7 +353,7 @@ static int juggle(curl_socket_t *sockfdp,
          client connecting. */
       sockfd = accept(sockfd, NULL, NULL);
       if(CURL_SOCKET_BAD == sockfd)
-        logmsg("accept() failed\n");
+        logmsg("accept() failed");
       else {
         logmsg("====> Client connect");
         write(fileno(stdout), "CNCT\n", 5);
@@ -438,7 +438,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
 
     if(getsockname(sock, (struct sockaddr *) &add,
                    &socksize)<0) {
-      fprintf(stderr, "getsockname() failed");
+      logmsg("getsockname() failed with error: %d", SOCKERRNO);
       return CURL_SOCKET_BAD;
     }
     *port = ntohs(add.sin_port);
@@ -489,6 +489,7 @@ int main(int argc, char *argv[])
   FILE *pidfile;
   char *pidname= (char *)".sockfilt.pid";
   int rc;
+  int error;
   int arg=1;
   enum sockmode mode = PASSIVE_LISTEN; /* default */
 
@@ -631,7 +632,10 @@ int main(int argc, char *argv[])
     logmsg("Wrote pid %d to %s", pid, pidname);
   }
   else {
-    fprintf(stderr, "Couldn't write pid file\n");
+    error = ERRNO;
+    logmsg("fopen() failed with error: %d %s\n", error, strerror(error));
+    logmsg("Error opening file: %s\n", pidname);
+    logmsg("Couldn't write pid file\n");
     sclose(sock);
     return 1;
   }

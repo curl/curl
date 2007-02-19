@@ -197,6 +197,7 @@ int ProcessRequest(struct httprequest *req)
   char logbuf[256];
   int prot_major, prot_minor;
   char *end;
+  int error;
   end = strstr(line, END_OF_HEADERS);
 
   logmsg("ProcessRequest() called");
@@ -263,6 +264,9 @@ int ProcessRequest(struct httprequest *req)
 
       stream=fopen(filename, "rb");
       if(!stream) {
+        error = ERRNO;
+        logmsg("fopen() failed with error: %d %s", error, strerror(error));
+        logmsg("Error opening file: %s", filename);
         logmsg("Couldn't open test file %d", req->testno);
         req->open = FALSE; /* closes connection */
         return 1; /* done */
@@ -569,6 +573,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   FILE *dump;
   int persistant = TRUE;
   size_t responsesize;
+  int error;
 
   static char weare[256];
 
@@ -646,6 +651,9 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
 
     stream=fopen(filename, "rb");
     if(!stream) {
+      error = ERRNO;
+      logmsg("fopen() failed with error: %d %s", error, strerror(error));
+      logmsg("Error opening file: %s", filename);
       logmsg("Couldn't open test file");
       return 0;
     }
@@ -658,6 +666,9 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     /* re-open the same file again */
     stream=fopen(filename, "rb");
     if(!stream) {
+      error = ERRNO;
+      logmsg("fopen() failed with error: %d %s", error, strerror(error));
+      logmsg("Error opening file: %s", filename);
       logmsg("Couldn't open test file");
       return 0;
     }
@@ -670,6 +681,9 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
 
   dump = fopen(RESPONSE_DUMP, "ab"); /* b is for windows-preparing */
   if(!dump) {
+    error = ERRNO;
+    logmsg("fopen() failed with error: %d %s", error, strerror(error));
+    logmsg("Error opening file: %s", RESPONSE_DUMP);
     logmsg("couldn't create logfile: " RESPONSE_DUMP);
     return -1;
   }
@@ -872,7 +886,10 @@ int main(int argc, char *argv[])
     fclose(pidfile);
   }
   else {
-    fprintf(stderr, "Couldn't write pid file\n");
+    error = ERRNO;
+    logmsg("fopen() failed with error: %d %s", error, strerror(error));
+    logmsg("Error opening file: %s", pidname);
+    logmsg("Couldn't write pid file");
     sclose(sock);
     return 1;
   }

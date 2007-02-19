@@ -130,7 +130,7 @@ void win32_init(void)
 
   if (err != 0) {
     perror("Winsock init failed");
-    logmsg("Error initialising winsock -- aborting\n");
+    logmsg("Error initialising winsock -- aborting");
     exit(1);
   }
 
@@ -139,7 +139,7 @@ void win32_init(void)
 
     WSACleanup();
     perror("Winsock init failed");
-    logmsg("No suitable winsock.dll found -- aborting\n");
+    logmsg("No suitable winsock.dll found -- aborting");
     exit(1);
   }
 }
