@@ -65,7 +65,7 @@ use vars qw($version $fixed $infixed $CURLDIR $CVS $pwd $build $buildlog
             $buildlogname $configurebuild $targetos $confsuffix $binext
             $libext);
 use vars qw($name $email $desc $confopts $runtestopts $setupfile $mktarball
-            $nocvsup $nobuildconf $crosscompile);
+            $nocvsup $nobuildconf $crosscompile $timestamp);
 
 # version of this script
 $version='$Revision$';
@@ -281,6 +281,28 @@ logit "date = ".(scalar gmtime)." UTC";
 # Make $pwd to become the path without newline. We'll use that in order to cut
 # off that path from all possible logs and error messages etc.
 $pwd = cwd();
+
+# libcurl timestamp is present in curlver.h only if this isn't a CVS version.
+# If no timestamp available in curlver.h then we are building from CVS and we
+# will use current UTC build time as the CVS version timestamp.
+if ((-f "$CURLDIR/include/curl/curlver.hh") &&
+    (grepfile("define LIBCURL_TIMESTAMP",
+              "$CURLDIR/include/curl/curlver.h")) &&
+    (open(F, "<$CURLDIR/include/curl/curlver.h"))) {
+  while (<F>) {
+    chomp;
+    if ($_ =~ /^\#define LIBCURL_TIMESTAMP\s+\"(.+)\".*$/) {
+      $timestamp = $1;
+      $timestamp =~ s/\s+UTC//;
+      $timestamp .= " UTC";
+    }
+  }
+  close(F);
+}
+if(not defined $timestamp) {
+  $timestamp = scalar(gmtime)." UTC";
+}
+logit "timestamp = $timestamp";
 
 if (-d $CURLDIR) {
   if ($CVS && -d "$CURLDIR/CVS") {
