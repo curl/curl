@@ -28,6 +28,9 @@
  * final destination server.
  */
 CURLcode Curl_SOCKS4(const char *proxy_name,
+                     char *hostname,
+                     int remote_port,
+                     int sockindex,
                      struct connectdata *conn);
 
 /*
@@ -36,6 +39,9 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
  */
 CURLcode Curl_SOCKS5(const char *proxy_name,
                      const char *proxy_password,
+                     char *hostname,
+                     int remote_port,
+                     int sockindex,
                      struct connectdata *conn);
 
 #endif

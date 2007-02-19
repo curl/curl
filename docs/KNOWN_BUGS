@@ -64,11 +64,14 @@ may have been fixed since this was written!
   "system context" will make it use wrong(?) user name - at least when compared
   to what winhttp does. See http://curl.haxx.se/bug/view.cgi?id=1281867
 
-23. We don't support SOCKS for IPv6. We don't support FTPS over a SOCKS proxy.
-  We don't have any test cases for SOCKS proxy. We probably have even more
-  bugs and lack of features when a SOCKS proxy is used. And there seem to be a
-  problem with SOCKS when doing FTP: See
-  http://curl.haxx.se/bug/view.cgi?id=1371540
+23. SOCKS-related problems:
+  A) libcurl doesn't support SOCKS for IPv6.
+  B) libcurl doesn't support FTPS over a SOCKS proxy.
+  C) We don't have any test cases for SOCKS proxy.
+  E) libcurl doesn't support active FTP over a SOCKS proxy
+
+  We probably have even more bugs and lack of features when a SOCKS proxy is
+  used.
 
 22. Sending files to a FTP server using curl on VMS, might lead to curl
   complaining on "unaligned file size" on completion. The problem is related

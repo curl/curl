@@ -108,12 +108,15 @@ static int blockread_all(struct connectdata *conn, /* connection data */
 *   Nonsupport "Identification Protocol (RFC1413)"
 */
 CURLcode Curl_SOCKS4(const char *proxy_name,
+                     char *hostname,
+                     int remote_port,
+                     int sockindex,
                      struct connectdata *conn)
 {
   unsigned char socksreq[262]; /* room for SOCKS4 request incl. user id */
   int result;
   CURLcode code;
-  curl_socket_t sock = conn->sock[FIRSTSOCKET];
+  curl_socket_t sock = conn->sock[sockindex];
   long timeout;
   struct SessionHandle *data = conn->data;
 
@@ -146,7 +149,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
 
   socksreq[0] = 4; /* version (SOCKS4) */
   socksreq[1] = 1; /* connect */
-  *((unsigned short*)&socksreq[2]) = htons(conn->remote_port);
+  *((unsigned short*)&socksreq[2]) = htons(remote_port);
 
   /* DNS resolve */
   {
@@ -154,7 +157,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
     Curl_addrinfo *hp=NULL;
     int rc;
 
-    rc = Curl_resolv(conn, conn->host.name, (int)conn->remote_port, &dns);
+    rc = Curl_resolv(conn, hostname, remote_port, &dns);
 
     if(rc == CURLRESOLV_ERROR)
       return CURLE_COULDNT_RESOLVE_PROXY;
@@ -190,7 +193,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
     }
     if(!hp) {
       failf(data, "Failed to resolve \"%s\" for SOCKS4 connect.",
-            conn->host.name);
+            hostname);
       return CURLE_COULDNT_RESOLVE_HOST;
     }
   }
@@ -312,6 +315,9 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
  */
 CURLcode Curl_SOCKS5(const char *proxy_name,
                      const char *proxy_password,
+                     char *hostname,
+                     int remote_port,
+                     int sockindex,
                      struct connectdata *conn)
 {
   /*
@@ -336,7 +342,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   ssize_t written;
   int result;
   CURLcode code;
-  curl_socket_t sock = conn->sock[FIRSTSOCKET];
+  curl_socket_t sock = conn->sock[sockindex];
   struct SessionHandle *data = conn->data;
   long timeout;
 
@@ -507,7 +513,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   {
     struct Curl_dns_entry *dns;
     Curl_addrinfo *hp=NULL;
-    int rc = Curl_resolv(conn, conn->host.name, (int)conn->remote_port, &dns);
+    int rc = Curl_resolv(conn, hostname, remote_port, &dns);
 
     if(rc == CURLRESOLV_ERROR)
       return CURLE_COULDNT_RESOLVE_HOST;
@@ -541,12 +547,12 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     }
     if(!hp) {
       failf(data, "Failed to resolve \"%s\" for SOCKS5 connect.",
-            conn->host.name);
+            hostname);
       return CURLE_COULDNT_RESOLVE_HOST;
     }
   }
 
-  *((unsigned short*)&socksreq[8]) = htons(conn->remote_port);
+  *((unsigned short*)&socksreq[8]) = htons(remote_port);
 
   {
     const int packetsize = 10;

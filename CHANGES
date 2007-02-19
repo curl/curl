@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (19 February 2007)
+- Robson Braga Araujo made passive FTP transfers work with SOCKS (both 4 and
+  5).
+
 Daniel (18 February 2007)
 - Jeff Pohlmeyer identified two problems: first a rather obscure problem with
   the multi interface and connection re-use that could make a
