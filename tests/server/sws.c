@@ -771,6 +771,7 @@ int main(int argc, char *argv[])
   char *pidname= (char *)".http.pid";
   struct httprequest req;
   int rc;
+  int error;
   int arg=1;
 #ifdef CURL_SWS_FORK_ENABLED
   bool use_fork = FALSE;
