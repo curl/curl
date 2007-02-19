@@ -27,6 +27,7 @@ This release includes the following bugfixes:
  o passive FTP transfers work with SOCKS
  o multi interface HTTPS connection re-use memory leak
  o libcurl.m4's --with-libcurl is improved
+ o curl-config --libs and libcurl.pc no longer list unnecessary dependencies
 
 This release includes the following known bugs:
 
