@@ -22,7 +22,7 @@
 
 #ifdef __WATCOMC__
 /*
- * Watcom needs a DlMain() in order to initialise the clib startup code.
+ * Watcom needs a DllMain() in order to initialise the clib startup code.
  */
 BOOL
 WINAPI DllMain (HINSTANCE hnd, DWORD reason, LPVOID reserved)
