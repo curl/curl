@@ -1,5 +1,9 @@
   Changelog for the c-ares project
 
+* February 19
+
+- Vlad Dinulescu added ares_parse_ns_reply().
+
 * February 13
 
 - Yang Tse: Fix failure to get the search sequence of /etc/hosts and

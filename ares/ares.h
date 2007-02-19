@@ -213,6 +213,8 @@ int ares_parse_aaaa_reply(const unsigned char *abuf, int alen,
                        struct hostent **host);
 int ares_parse_ptr_reply(const unsigned char *abuf, int alen, const void *addr,
                          int addrlen, int family, struct hostent **host);
+int ares_parse_ns_reply(const unsigned char *abuf, int alen,
+                       struct hostent **host);
 void ares_free_string(void *str);
 void ares_free_hostent(struct hostent *host);
 const char *ares_strerror(int code);
