@@ -1786,6 +1786,8 @@ static void conn_free(struct connectdata *conn)
   Curl_destroy_thread_data(&conn->async);
 #endif
 
+  Curl_ssl_close(conn);
+
   Curl_free_ssl_config(&conn->ssl_config);
 
   free(conn); /* free all the connection oriented data */

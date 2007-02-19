@@ -25,6 +25,7 @@ This release includes the following bugfixes:
  o CURLOPT_RANGE set to NULL resets the range for FTP
  o curl_multi_remove_handle() rare crash
  o passive FTP transfers work with SOCKS
+ o multi interface HTTPS connection re-use memory leak
 
 This release includes the following known bugs:
 

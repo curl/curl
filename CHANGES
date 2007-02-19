@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel (19 February 2007)
+- Shmulik Regev found a memory leak in re-used HTTPS connections, at least
+  when the multi interface was used.
+
 - Robson Braga Araujo made passive FTP transfers work with SOCKS (both 4 and
   5).
 
