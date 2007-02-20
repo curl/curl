@@ -936,11 +936,20 @@ Try "AUTH SSL" first, and only if that fails try "AUTH TLS"
 Try "AUTH TLS" first, and only if that fails try "AUTH SSL"
 .RE
 .IP CURLOPT_FTP_SSL_CCC
-Pass a long that is set to 0 to disable and 1 to enable. If enabled, this
-option makes libcurl use CCC (Clear Command Channel). It shuts down the
-SSL/TLS layer after authenticating. The rest of the control channel
-communication will be unencrypted. This allows NAT routers to follow the FTP
-transaction.  (Added in 7.16.1)
+If enabled, this option makes libcurl use CCC (Clear Command Channel). It
+shuts down the SSL/TLS layer after authenticating. The rest of the
+control channel communication will be unencrypted. This allows NAT routers
+to follow the FTP transaction. Pass a long using one of the values below.
+(Added in 7.16.1)
+.RS
+.IP CURLFTPSSL_CCC_NONE
+Don't attempt to use CCC.
+.IP CURLFTPSSL_CCC_PASSIVE
+Do not initiate the shutdown, but wait for the server to do it. Do not send
+a reply.
+.IP CURLFTPSSL_CCC_ACTIVE
+Initiate the shutdown and wait for a reply.
+.RE
 .IP CURLOPT_FTP_ACCOUNT
 Pass a pointer to a zero-terminated string (or NULL to disable). When an FTP
 server asks for "account data" after user name and password has been provided,

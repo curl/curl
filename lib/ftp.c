@@ -2566,7 +2566,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
         /* we failed and bails out */
         return CURLE_FTP_SSL_FAILED;
 
-      if(data->set.ftp_use_ccc) {
+      if(data->set.ftp_ccc) {
         /* CCC - Clear Command Channel
          */
         NBFTPSENDF(conn, "CCC", NULL);

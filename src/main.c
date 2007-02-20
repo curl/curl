@@ -440,6 +440,7 @@ struct Configurable {
   bool ftp_ssl_reqd;
   bool ftp_ssl_control;
   bool ftp_ssl_ccc;
+  int ftp_ssl_ccc_mode;
 
   char *socksproxy; /* set to server string */
   int socksver;     /* set to CURLPROXY_SOCKS* define */
@@ -627,7 +628,8 @@ static void help(void)
     "    --ftp-ssl       Try SSL/TLS for ftp transfer (F)",
     "    --ftp-ssl-control Require SSL/TLS for ftp login, clear for transfer (F)",
     "    --ftp-ssl-reqd  Require SSL/TLS for ftp transfer (F)",
-    "    --ftp-ssl-ccc   Send CCC after authenticating (F)",
+    "    --ftp-ssl-ccc   Send CCC after authenticating. (F)",
+    "    --ftp-ssl-ccc-mode [active/passive] Set CCC mode (F)",
     " -F/--form <name=content> Specify HTTP multipart POST data (H)",
     "    --form-string <name=string> Specify HTTP multipart POST data (H)",
     " -g/--globoff       Disable URL sequences and ranges using {} and []",
@@ -1380,6 +1382,16 @@ static int ftpfilemethod(struct Configurable *config, char *str)
   return CURLFTPMETHOD_MULTICWD;
 }
 
+static int ftpcccmethod(struct Configurable *config, char *str)
+{
+  if(curlx_strequal("passive", str))
+    return CURLFTPSSL_CCC_PASSIVE;
+  if(curlx_strequal("active", str))
+    return CURLFTPSSL_CCC_ACTIVE;
+  warnf(config, "unrecognized ftp CCC method '%s', using default\n", str);
+  return CURLFTPSSL_CCC_PASSIVE;
+}
+
 static ParameterError getparameter(char *flag, /* f or -long-flag */
                                    char *nextarg, /* NULL if unset */
                                    bool *usedarg, /* set to TRUE if the arg
@@ -1460,6 +1472,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$w", "no-sessionid", FALSE},
     {"$x", "ftp-ssl-control", FALSE},
     {"$y", "ftp-ssl-ccc", FALSE},
+    {"$j", "ftp-ssl-ccc-mode", TRUE},
     {"$z", "libcurl",    TRUE},
     {"$#", "raw",        FALSE},
 
@@ -1888,6 +1901,12 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'y': /* --ftp-ssl-ccc */
         config->ftp_ssl_ccc ^= TRUE;
+        if(!config->ftp_ssl_ccc_mode)
+            config->ftp_ssl_ccc_mode = CURLFTPSSL_CCC_PASSIVE;
+        break;
+      case 'j': /* --ftp-ssl-ccc-mode */
+        config->ftp_ssl_ccc = TRUE;
+        config->ftp_ssl_ccc_mode = ftpcccmethod(config, nextarg);
         break;
       case 'z': /* --libcurl */
         GetStr(&config->libcurl, nextarg);
@@ -4211,7 +4230,7 @@ operate(struct Configurable *config, int argc, char *argv[])
 
         /* new in curl 7.16.1 */
         if(config->ftp_ssl_ccc)
-          my_setopt(curl, CURLOPT_FTP_SSL_CCC, TRUE);
+            my_setopt(curl, CURLOPT_FTP_SSL_CCC, config->ftp_ssl_ccc_mode);
 
         /* new in curl 7.11.1, modified in 7.15.2 */
         if(config->socksproxy) {

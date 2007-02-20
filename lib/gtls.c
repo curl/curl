@@ -533,6 +533,9 @@ int Curl_gtls_shutdown(struct connectdata *conn, int sockindex)
      response. Thus we wait for a close notify alert from the server, but
      we do not send one. Let's hope other servers do the same... */
 
+  if(data->set.ftp_ccc == CURLFTPSSL_CCC_ACTIVE)
+      gnutls_bye(conn->ssl[sockindex].session, GNUTLS_SHUT_WR);
+
   if(conn->ssl[sockindex].session) {
     while(!done) {
       int what = Curl_select(conn->sock[sockindex],

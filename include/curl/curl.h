@@ -465,6 +465,14 @@ typedef enum {
   CURLFTPSSL_LAST     /* not an option, never use */
 } curl_ftpssl;
 
+/* parameter for the CURLOPT_FTP_SSL_CCC option */
+typedef enum {
+  CURLFTPSSL_CCC_NONE,    /* do not send CCC */
+  CURLFTPSSL_CCC_PASSIVE, /* Let the server initiate the shutdown */
+  CURLFTPSSL_CCC_ACTIVE,  /* Initiate the shutdown */
+  CURLFTPSSL_CCC_LAST     /* not an option, never use */
+} curl_ftpccc;
+
 /* parameter for the CURLOPT_FTPSSLAUTH option */
 typedef enum {
   CURLFTPAUTH_DEFAULT, /* let libcurl decide */

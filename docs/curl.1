@@ -448,10 +448,18 @@ If this option is used twice, the second will again disable this.
 (FTP) Use CCC (Clear Command Channel)
 Shuts down the SSL/TLS layer after authenticating. The rest of the
 control channel communication will be unencrypted. This allows
-NAT routers to follow the FTP transaction.
+NAT routers to follow the FTP transaction. The default mode is
+passive. See --ftp-ssl-ccc-mode for other modes.
 (Added in 7.16.1)
 
 If this option is used twice, the second will again disable this.
+.IP "--ftp-ssl-ccc-mode [active/passive]"
+(FTP) Use CCC (Clear Command Channel)
+Sets the CCC mode. The passive mode will not initiate the shutdown, but
+instead wait for the server to do it, and will not reply to the
+shutdown from the server. The active mode initiates the shutdown and
+waits for a reply from the server.
+(Added in 7.16.2)
 .IP "-F/--form <name=content>"
 (HTTP) This lets curl emulate a filled in form in which a user has pressed the
 submit button. This causes curl to POST data using the Content-Type

@@ -749,6 +749,9 @@ int Curl_ossl_shutdown(struct connectdata *conn, int sockindex)
      response. Thus we wait for a close notify alert from the server, but
      we do not send one. Let's hope other servers do the same... */
 
+  if(data->set.ftp_ccc == CURLFTPSSL_CCC_ACTIVE)
+      (void)SSL_shutdown(connssl->handle);
+
   if(connssl->handle) {
     while(!done) {
       int what = Curl_select(conn->sock[sockindex],
