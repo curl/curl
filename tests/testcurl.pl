@@ -265,6 +265,10 @@ if ($fixed < 4) {
     close(F);
 }
 
+# Set timestamp to the UTC this script is running. Its value might
+# be changed later in the script to the value present in curlver.h
+$timestamp = scalar(gmtime)." UTC";
+
 logit "STARTING HERE"; # first line logged, for scripts to trigger on
 logit "NAME = $name";
 logit "EMAIL = $email";
@@ -276,33 +280,11 @@ logit "LDFLAGS = ".$ENV{LDFLAGS};
 logit "CC = ".$ENV{CC};
 logit "target = ".$targetos;
 logit "version = $version"; # script version
-logit "date = ".(scalar gmtime)." UTC";
+logit "date = $timestamp";  # When the test build starts
 
 # Make $pwd to become the path without newline. We'll use that in order to cut
 # off that path from all possible logs and error messages etc.
 $pwd = cwd();
-
-# libcurl timestamp is present in curlver.h only if this isn't a CVS version.
-# If no timestamp available in curlver.h then we are building from CVS and we
-# will use current UTC build time as the CVS version timestamp.
-if ((-f "$CURLDIR/include/curl/curlver.h") &&
-    (grepfile("define LIBCURL_TIMESTAMP",
-              "$CURLDIR/include/curl/curlver.h")) &&
-    (open(F, "<$CURLDIR/include/curl/curlver.h"))) {
-  while (<F>) {
-    chomp;
-    if ($_ =~ /^\#define LIBCURL_TIMESTAMP\s+\"(.+)\".*$/) {
-      $timestamp = $1;
-      $timestamp =~ s/\s+UTC//;
-      $timestamp .= " UTC";
-    }
-  }
-  close(F);
-}
-if(not defined $timestamp) {
-  $timestamp = scalar(gmtime)." UTC";
-}
-logit "timestamp = $timestamp";
 
 if (-d $CURLDIR) {
   if ($CVS && -d "$CURLDIR/CVS") {
@@ -381,6 +363,10 @@ if ($CVS) {
   if ($cvsstat != 0) {
     mydie "failed to update from CVS ($cvsstat), exiting";
   }
+  elsif (!$nocvsup) {
+    # Set timestamp to the UTC the CVS update took place.
+    $timestamp = scalar(gmtime)." UTC";
+  }
 
   if($nobuildconf) {
       logit "told to not run buildconf";
@@ -413,6 +399,28 @@ if ($CVS) {
     logit "buildconf was successful (dummy message)";
   }
 }
+
+# Set timestamp to the one in curlver.h if this isn't a CVS test build.
+if ((-f "$CURLDIR/include/curl/curlver.h") &&
+    (grepfile("define LIBCURL_TIMESTAMP",
+              "$CURLDIR/include/curl/curlver.h")) &&
+    (open(F, "<$CURLDIR/include/curl/curlver.h"))) {
+  while (<F>) {
+    chomp;
+    if ($_ =~ /^\#define\s+LIBCURL_TIMESTAMP\s+\"(.+)\".*$/) {
+      my $stampstring = $1;
+      if ($stampstring !~ /CVS/) {
+          $stampstring =~ s/\s+UTC//;
+          $timestamp = $stampstring." UTC";
+      }
+      last;
+    }
+  }
+  close(F);
+}
+
+# Show timestamp we are using for this test build.
+logit "timestamp = $timestamp";
 
 if ($configurebuild) {
   if (-f "configure") {
