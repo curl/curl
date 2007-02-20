@@ -11,7 +11,7 @@
 ## Updated by: Craig Davison <cd@securityfocus.com>
 ## release-ssl added by Miklos Nemeth <mnemeth@kfkisystems.com>
 ## winmm.lib added by Miklos Nemeth <mnemeth@kfkisystems.com> to support
-## timeGetTime() in timeval.c
+## timeGetTime() in curlutil.c
 
 PROGRAM_NAME = curl.exe
 
@@ -77,7 +77,7 @@ RELEASE_OBJS= \
 	urlglobr.obj \
 	getpassr.obj \
 	homedirr.obj \
-	timevalr.obj \
+	curlutilr.obj \
 	strtoofftr.obj \
 	mainr.obj \
 	curlr.res
@@ -88,7 +88,7 @@ DEBUG_OBJS= \
 	urlglobd.obj \
 	getpassd.obj \
 	homedird.obj \
-	timevald.obj \
+	curlutild.obj \
 	strtoofftd.obj \
 	maind.obj \
 	curld.res
@@ -221,8 +221,8 @@ getpassr.obj: getpass.c
 	$(CCR) $(CFLAGS) /Fo"$@" getpass.c
 homedirr.obj: homedir.c
 	$(CCR) $(CFLAGS) /Fo"$@" homedir.c
-timevalr.obj: ../lib/timeval.c
-	$(CCR) $(CFLAGS) /Fo"$@" ../lib/timeval.c
+curlutilr.obj: curlutil.c
+	$(CCR) $(CFLAGS) /Fo"$@" curlutil.c
 strtoofftr.obj: ../lib/strtoofft.c
 	$(CCR) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
 mainr.obj: main.c
@@ -241,8 +241,8 @@ getpassd.obj: getpass.c
 	$(CCD) $(CFLAGS) /Fo"$@" getpass.c
 homedird.obj: homedir.c
 	$(CCD) $(CFLAGS) /Fo"$@" homedir.c
-timevald.obj: ../lib/timeval.c
-	$(CCD) $(CFLAGS) /Fo"$@" ../lib/timeval.c
+curlutild.obj: curlutil.c
+	$(CCD) $(CFLAGS) /Fo"$@" curlutil.c
 strtoofftd.obj: ../lib/strtoofft.c
 	$(CCD) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
 maind.obj: main.c

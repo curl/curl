@@ -60,6 +60,8 @@ realclean vclean: clean
 	- rm -f $(PROGRAM) hugehelp.c
 
 # DO NOT DELETE THIS LINE
+djgpp/curlutil.o: curlutil.c setup.h config.h ../lib/config.dj ../lib/setup.h \
+  ../lib/config.h curlutil.h
 djgpp/getpass.o: getpass.c setup.h config.h ../lib/config.dj ../lib/setup.h \
   ../lib/config.h getpass.h
 djgpp/homedir.o: homedir.c setup.h config.h ../lib/config.dj ../lib/setup.h \
@@ -72,7 +74,7 @@ djgpp/main.o: main.c setup.h config.h ../lib/config.dj ../lib/setup.h \
   ../include/curl/easy.h ../include/curl/multi.h urlglob.h writeout.h \
   getpass.h homedir.h hugehelp.h writeenv.h version.h ../lib/curlx.h \
   ../include/curl/mprintf.h ../lib/strequal.h ../lib/strtoofft.h \
-  ../lib/timeval.h ../lib/memdebug.h ../lib/memory.h
+  curlutil.h ../lib/memdebug.h ../lib/memory.h
 djgpp/urlglob.o: urlglob.c setup.h config.h ../lib/config.dj ../lib/setup.h \
   ../lib/config.h ../include/curl/curl.h ../include/curl/curlver.h \
   ../include/curl/easy.h ../include/curl/multi.h \

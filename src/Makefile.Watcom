@@ -29,7 +29,7 @@ OBJ_DIR = Watcom_obj
 
 OBJS = $(OBJ_DIR)\getpass.obj  $(OBJ_DIR)\homedir.obj $(OBJ_DIR)\hugehelp.obj &
        $(OBJ_DIR)\main.obj     $(OBJ_DIR)\urlglob.obj $(OBJ_DIR)\writeenv.obj &
-       $(OBJ_DIR)\writeout.obj $(OBJ_DIR)\timeval.obj
+       $(OBJ_DIR)\writeout.obj $(OBJ_DIR)\curlutil.obj
 
 RESOURCE = $(OBJ_DIR)\curl.res
 
@@ -59,7 +59,7 @@ $(RESOURCE): curl.rc
 	wrc -dCURLDEBUG=1 -q -r -zm -I..\include -fo=$@ curl.rc
 
 .ERASE
-$(OBJ_DIR)\timeval.obj: ..\lib\timeval.c
+$(OBJ_DIR)\curlutil.obj: curlutil.c
 	$(CC) $[@ $(CFLAGS) -fo=$@
 	@echo .
 
@@ -89,7 +89,7 @@ $(OBJ_DIR)/main.obj: main.c setup.h config-win32.h ..\lib\setup.h &
   ..\include\curl\easy.h ..\include\curl\multi.h ..\include\curl\curl.h &
   urlglob.h writeout.h getpass.h homedir.h hugehelp.h version.h &
   ..\include\curl\curlver.h ..\lib\curlx.h ..\include\curl\mprintf.h &
-  ..\lib\strequal.h ..\lib\strtoofft.h ..\lib\setup.h ..\lib\timeval.h &
+  ..\lib\strequal.h ..\lib\strtoofft.h ..\lib\setup.h curlutil.h &
   ..\lib\memdebug.h
 
 $(OBJ_DIR)/urlglob.obj: urlglob.c setup.h config-win32.h ..\lib\setup.h &
@@ -105,5 +105,5 @@ $(OBJ_DIR)/writeout.obj: writeout.c setup.h config-win32.h ..\lib\setup.h &
   ..\include\curl\easy.h ..\include\curl\multi.h ..\include\curl\curl.h &
   ..\include\curl\mprintf.h writeout.h
 
-$(OBJ_DIR)\timeval.obj: ..\lib\timeval.c ..\lib\timeval.h ..\lib\setup.h &
+$(OBJ_DIR)\curlutil.obj: curlutil.c curlutil.h ..\lib\setup.h &
   ..\lib\config-win32.h

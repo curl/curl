@@ -37,6 +37,7 @@
 #include "writeout.h"
 #include "getpass.h"
 #include "homedir.h"
+#include "curlutil.h"
 #ifdef USE_MANUAL
 #include "hugehelp.h"
 #endif
@@ -49,19 +50,6 @@
 #ifdef __NOVELL_LIBC__
 #include <screen.h>
 #endif
-
-#ifdef TIME_WITH_SYS_TIME
-/* We can include both fine */
-#include <sys/time.h>
-#include <time.h>
-#else
-#ifdef HAVE_SYS_TIME_H
-# include <sys/time.h>
-#else
-# include <time.h>
-#endif
-#endif
-
 
 #include "version.h"
 
@@ -3028,7 +3016,7 @@ int my_trace(CURL *handle, curl_infotype type,
 
   (void)handle; /* prevent compiler warning */
 
-  tv = curlx_tvnow();
+  tv = cutil_tvnow();
   secs = tv.tv_sec;
   now = localtime(&secs);  /* not multithread safe but we don't care */
   if(config->tracetime)
@@ -3502,8 +3490,8 @@ operate(struct Configurable *config, int argc, char *argv[])
   config->conf=CONF_DEFAULT;
   config->use_httpget=FALSE;
   config->create_dirs=FALSE;
-  config->lastrecvtime = curlx_tvnow();
-  config->lastsendtime = curlx_tvnow();
+  config->lastrecvtime = cutil_tvnow();
+  config->lastsendtime = cutil_tvnow();
   config->maxredirs = DEFAULT_MAXREDIRS;
 
   if(argc>1 &&
@@ -4265,7 +4253,7 @@ operate(struct Configurable *config, int argc, char *argv[])
 
         retry_numretries = config->req_retry;
 
-        retrystart = curlx_tvnow();
+        retrystart = cutil_tvnow();
 
         do {
           res = curl_easy_perform(curl);
@@ -4276,7 +4264,7 @@ operate(struct Configurable *config, int argc, char *argv[])
              time */
           if(retry_numretries &&
              (!config->retry_maxtime ||
-              (curlx_tvdiff(curlx_tvnow(), retrystart)<
+              (cutil_tvdiff(cutil_tvnow(), retrystart)<
                config->retry_maxtime*1000)) ) {
             enum {
               RETRY_NO,
