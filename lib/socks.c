@@ -31,6 +31,9 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 
 #include "urldata.h"
 #include "sendf.h"
