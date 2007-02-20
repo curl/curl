@@ -149,7 +149,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
 
   socksreq[0] = 4; /* version (SOCKS4) */
   socksreq[1] = 1; /* connect */
-  *((unsigned short*)&socksreq[2]) = htons(remote_port);
+  *((unsigned short*)&socksreq[2]) = htons((unsigned short)remote_port);
 
   /* DNS resolve */
   {
@@ -552,7 +552,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     }
   }
 
-  *((unsigned short*)&socksreq[8]) = htons(remote_port);
+  *((unsigned short*)&socksreq[8]) = htons((unsigned short)remote_port);
 
   {
     const int packetsize = 10;
