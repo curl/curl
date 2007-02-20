@@ -21,6 +21,8 @@
  * $Id$
  ***************************************************************************/
 
+#include "setup.h"
+
 #include "testutil.h"
 
 #ifndef HAVE_GETTIMEOFDAY

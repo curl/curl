@@ -30,27 +30,6 @@
 
 #include "setup.h"
 
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#ifdef TIME_WITH_SYS_TIME
-#include <time.h>
-#endif
-#else
-#ifdef HAVE_TIME_H
-#include <time.h>
-#endif
-#endif
-
-#ifndef HAVE_STRUCT_TIMEVAL
-struct timeval {
- long tv_sec;
- long tv_usec;
-};
-#endif
-
 struct timeval curlx_tvnow(void);
 
 /*
