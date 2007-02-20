@@ -75,7 +75,9 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
   double *param_doublep=NULL;
   char **param_charp=NULL;
   struct curl_slist **param_slistp=NULL;
+#ifdef MSG_PEEK
   char buf;
+#endif
 
   if(!data)
     return CURLE_BAD_FUNCTION_ARGUMENT;
