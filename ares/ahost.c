@@ -143,6 +143,11 @@ int main(int argc, char **argv)
     }
 
   ares_destroy(channel);
+
+#ifdef USE_WINSOCK
+  WSACleanup();
+#endif
+
   return 0;
 }
 
