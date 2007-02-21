@@ -204,13 +204,6 @@ typedef unsigned char bool;
   #include <clib.h>
 #endif
 
-#if defined(CURLDEBUG) && defined(HAVE_ASSERT_H)
-#define curlassert(x) assert(x)
-#else
-/* does nothing without CURLDEBUG defined */
-#define curlassert(x)
-#endif
-
 
 /* To make large file support transparent even on Windows */
 #if defined(WIN32) && (SIZEOF_CURL_OFF_T > 4)

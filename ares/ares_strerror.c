@@ -46,6 +46,6 @@ const char *ares_strerror(int code)
     "Illegal hints flags specified"
   };
 
-  assert(code >= 0 && code < (int)(sizeof(errtext) / sizeof(*errtext)));
+  DEBUGASSERT(code >= 0 && code < (int)(sizeof(errtext) / sizeof(*errtext)));
   return errtext[code];
 }

@@ -391,7 +391,7 @@ Curl_http_output_auth(struct connectdata *conn,
   struct auth *authhost;
   struct auth *authproxy;
 
-  curlassert(data);
+  DEBUGASSERT(data);
 
   authhost = &data->state.authhost;
   authproxy = &data->state.authproxy;
@@ -676,9 +676,9 @@ int Curl_http_should_fail(struct connectdata *conn)
   struct SessionHandle *data;
   struct Curl_transfer_keeper *k;
 
-  curlassert(conn);
+  DEBUGASSERT(conn);
   data = conn->data;
-  curlassert(data);
+  DEBUGASSERT(data);
 
   /*
   ** For readability
@@ -717,7 +717,7 @@ int Curl_http_should_fail(struct connectdata *conn)
   /*
   ** All we have left to deal with is 401 and 407
   */
-  curlassert((k->httpcode == 401) || (k->httpcode == 407));
+  DEBUGASSERT((k->httpcode == 401) || (k->httpcode == 407));
 
   /*
   ** Examine the current authentication state to see if this
@@ -864,7 +864,7 @@ CURLcode add_buffer_send(send_buffer *in,
   size_t sendsize;
   curl_socket_t sockfd;
 
-  curlassert(socketindex <= SECONDARYSOCKET);
+  DEBUGASSERT(socketindex <= SECONDARYSOCKET);
 
   sockfd = conn->sock[socketindex];
 
@@ -1459,7 +1459,7 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
 CURLcode Curl_https_connecting(struct connectdata *conn, bool *done)
 {
   CURLcode result;
-  curlassert(conn->protocol & PROT_HTTPS);
+  DEBUGASSERT((conn) && (conn->protocol & PROT_HTTPS));
 
   /* perform SSL initialization for this socket */
   result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, done);
@@ -1690,7 +1690,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     if(conn->bits.no_body)
       request = (char *)"HEAD";
     else {
-      curlassert((httpreq > HTTPREQ_NONE) && (httpreq < HTTPREQ_LAST));
+      DEBUGASSERT((httpreq > HTTPREQ_NONE) && (httpreq < HTTPREQ_LAST));
       switch(httpreq) {
       case HTTPREQ_POST:
       case HTTPREQ_POST_FORM:

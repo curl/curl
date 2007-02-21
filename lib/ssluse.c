@@ -1272,7 +1272,7 @@ Curl_ossl_connect_step1(struct connectdata *conn,
   curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
-  curlassert(ssl_connect_1 == connssl->connecting_state);
+  DEBUGASSERT(ssl_connect_1 == connssl->connecting_state);
 
   /* Make funny stuff to get random input */
   Curl_ossl_seed(data);
@@ -1451,7 +1451,7 @@ Curl_ossl_connect_step2(struct connectdata *conn,
   long has_passed;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
-  curlassert(ssl_connect_2 == connssl->connecting_state
+  DEBUGASSERT(ssl_connect_2 == connssl->connecting_state
              || ssl_connect_2_reading == connssl->connecting_state
              || ssl_connect_2_writing == connssl->connecting_state);
 
@@ -1581,7 +1581,7 @@ Curl_ossl_connect_step3(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
-  curlassert(ssl_connect_3 == connssl->connecting_state);
+  DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
 
   if(Curl_ssl_getsessionid(conn, &ssl_sessionid, NULL)) {
     /* Since this is not a cached session ID, then we want to stach this one
@@ -1794,7 +1794,7 @@ Curl_ossl_connect(struct connectdata *conn,
   if (retcode)
     return retcode;
 
-  curlassert(done);
+  DEBUGASSERT(done);
 
   return CURLE_OK;
 }

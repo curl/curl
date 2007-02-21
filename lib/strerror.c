@@ -600,8 +600,8 @@ const char *Curl_strerror(struct connectdata *conn, int err)
   char *buf, *p;
   size_t max;
 
-  curlassert(conn);
-  curlassert(err >= 0);
+  DEBUGASSERT(conn);
+  DEBUGASSERT(err >= 0);
 
   buf = conn->syserr_buf;
   max = sizeof(conn->syserr_buf)-1;
@@ -685,7 +685,7 @@ const char *Curl_idn_strerror (struct connectdata *conn, int err)
   char *buf;
   size_t max;
 
-  curlassert(conn);
+  DEBUGASSERT(conn);
 
   buf = conn->syserr_buf;
   max = sizeof(conn->syserr_buf)-1;

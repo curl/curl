@@ -67,7 +67,7 @@ static char *inet_ntop4 (const unsigned char *src, char *dst, size_t size)
 {
 #if defined(HAVE_INET_NTOA_R_2_ARGS)
   const char *ptr;
-  curlassert(size >= 16);
+  DEBUGASSERT(size >= 16);
   ptr = inet_ntoa_r(*(struct in_addr*)src, dst);
   return (char *)memmove(dst, ptr, strlen(ptr)+1);
 

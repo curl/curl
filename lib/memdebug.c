@@ -170,7 +170,7 @@ char *curl_dostrdup(const char *str, int line, const char *source)
   char *mem;
   size_t len;
 
-  curlassert(str != NULL);
+  DEBUGASSERT(str != NULL);
 
   if(countcheck("strdup", line, source))
     return NULL;
@@ -220,7 +220,7 @@ void curl_dofree(void *ptr, int line, const char *source)
 {
   struct memdebug *mem;
 
-  curlassert(ptr != NULL);
+  DEBUGASSERT(ptr != NULL);
 
   mem = (struct memdebug *)((char *)ptr - offsetof(struct memdebug, mem));
 
@@ -280,7 +280,7 @@ int curl_fclose(FILE *file, int line, const char *source)
 {
   int res;
 
-  curlassert(file != NULL);
+  DEBUGASSERT(file != NULL);
 
   res=(fclose)(file);
   if(logfile)

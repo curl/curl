@@ -537,7 +537,7 @@ static bool init_resolve_thread (struct connectdata *conn,
 #endif
 
 #ifdef CURLRES_IPV6
-  curlassert(hints);
+  DEBUGASSERT(hints);
   td->hints = *hints;
 #else
   (void) hints;
@@ -591,7 +591,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
   DWORD  status, ticks;
   CURLcode rc;
 
-  curlassert (conn && td);
+  DEBUGASSERT(conn && td);
 
   /* now, see if there's a connect timeout or a regular timeout to
      use instead of the default one */

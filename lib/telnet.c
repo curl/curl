@@ -179,7 +179,7 @@ check_wsock2 ( struct SessionHandle *data )
   WORD wVersionRequested;
   WSADATA wsaData;
 
-  curlassert(data);
+  DEBUGASSERT(data);
 
   /* telnet requires at least WinSock 2.0 so ask for it. */
   wVersionRequested = MAKEWORD(2, 0);

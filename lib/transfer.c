@@ -2481,7 +2481,7 @@ Curl_setup_transfer(
   if(!conn)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  curlassert((sockindex <= 1) && (sockindex >= -1));
+  DEBUGASSERT((sockindex <= 1) && (sockindex >= -1));
 
   /* now copy all input parameters */
   conn->sockfd = sockindex == -1 ?

@@ -207,9 +207,20 @@ typedef int sig_atomic_t;
  */
 
 #ifdef CURLDEBUG
-#define DEBUGF(X) X
+#define DEBUGF(x) x
 #else
-#define DEBUGF(X) do { } while (0)
+#define DEBUGF(x) do { } while (0)
+#endif
+
+
+/*
+ * Macro used to include assertion code only in debug builds.
+ */
+
+#if defined(CURLDEBUG) && defined(HAVE_ASSERT_H)
+#define DEBUGASSERT(x) assert(x)
+#else
+#define DEBUGASSERT(x) do { } while (0)
 #endif
 
 

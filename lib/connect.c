@@ -527,7 +527,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   long allow_total = 0;
   long has_passed;
 
-  curlassert(sockindex >= FIRSTSOCKET && sockindex <= SECONDARYSOCKET);
+  DEBUGASSERT(sockindex >= FIRSTSOCKET && sockindex <= SECONDARYSOCKET);
 
   *connected = FALSE; /* a very negative world view is best */
 
