@@ -1156,7 +1156,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
 
   case CURLOPT_FTP_SSL_CCC:
-    data->set.ftp_ccc = va_arg(param, long);
+    data->set.ftp_ccc = (curl_ftpccc)va_arg(param, long);
     break;
 
   case CURLOPT_FTP_SKIP_PASV_IP:
