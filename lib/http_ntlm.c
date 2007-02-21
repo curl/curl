@@ -993,7 +993,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
                     LONGQUARTET(ntlm->flags));
     DEBUGASSERT(size==64);
 
-    DEBUGASSERT(size == lmrespoff);
+    DEBUGASSERT(size == (size_t)lmrespoff);
     /* We append the binary hashes */
     if(size < (sizeof(ntlmbuf) - 0x18)) {
       memcpy(&ntlmbuf[size], lmresp, 0x18);
@@ -1007,7 +1007,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 
 #if USE_NTRESPONSES
     if(size < (sizeof(ntlmbuf) - 0x18)) {
-      DEBUGASSERT(size == ntrespoff);
+      DEBUGASSERT(size == (size_t)ntrespoff);
       memcpy(&ntlmbuf[size], ntresp, 0x18);
       size += 0x18;
     }
