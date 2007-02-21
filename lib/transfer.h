@@ -32,6 +32,7 @@ int Curl_single_getsock(struct connectdata *conn,
                         curl_socket_t *socks,
                         int numsocks);
 CURLcode Curl_readwrite_init(struct connectdata *conn);
+void Curl_pre_readwrite(struct connectdata *conn);
 CURLcode Curl_readrewind(struct connectdata *conn);
 CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp);
 bool Curl_retry_request(struct connectdata *conn, char **url);

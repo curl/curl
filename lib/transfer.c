@@ -1214,11 +1214,11 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 #ifndef CURL_DISABLE_HTTP
           if(conn->bits.chunk) {
             /*
-             * Bless me father for I have sinned. Here comes a chunked
-             * transfer flying and we need to decode this properly.  While
-             * the name says read, this function both reads and writes away
-             * the data. The returned 'nread' holds the number of actual
-             * data it wrote to the client.  */
+             * Here comes a chunked transfer flying and we need to decode this
+             * properly.  While the name says read, this function both reads
+             * and writes away the data. The returned 'nread' holds the number
+             * of actual data it wrote to the client.
+             */
 
             CHUNKcode res =
               Curl_httpchunk_read(conn, k->str, nread, &nread);
@@ -1232,12 +1232,22 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               return CURLE_RECV_ERROR;
             }
             else if(CHUNKE_STOP == res) {
+              size_t dataleft;
               /* we're done reading chunks! */
               k->keepon &= ~KEEP_READ; /* read no more */
 
               /* There are now possibly N number of bytes at the end of the
-                 str buffer that weren't written to the client, but we don't
-                 care about them right now. */
+                 str buffer that weren't written to the client.
+
+                 We DO care about this data if we are pipelining.
+                 Push it back to be read on the next pass. */
+
+              dataleft = data->reqdata.proto.http->chunk.dataleft;
+              if (dataleft != 0) {
+                infof(conn->data, "Leftovers after chunking. "
+                      " Rewinding %d bytes\n",dataleft);
+                read_rewind(conn, dataleft);
+              }
             }
             /* If it returned OK, we just keep going */
           }
@@ -1692,6 +1702,23 @@ CURLcode Curl_readwrite_init(struct connectdata *conn)
 }
 
 /*
+ * Curl_readwrite may get called multiple times.  This function is called
+ * immediately before the first Curl_readwrite.  Note that this can't be moved
+ * to Curl_readwrite_init since that function can get called while another
+ * pipeline request is in the middle of receiving data.
+ *
+ * We init chunking and trailer bits to their default values here immediately
+ * before receiving any header data for the current request in the pipeline.
+ */
+void Curl_pre_readwrite(struct connectdata *conn)
+{
+  DEBUGF(infof(conn->data, "Pre readwrite setting chunky header "
+               "values to default\n"));
+  conn->bits.chunk=FALSE;
+  conn->bits.trailerHdrPresent=FALSE;
+}
+
+/*
  * Curl_single_getsock() gets called by the multi interface code when the app
  * has requested to get the sockets for the current connection. This function
  * will then be called once for every connection that the multi interface
@@ -1756,10 +1783,12 @@ Transfer(struct connectdata *conn)
   struct Curl_transfer_keeper *k = &data->reqdata.keep;
   bool done=FALSE;
 
-  if(!(conn->protocol & PROT_FILE))
+  if(!(conn->protocol & PROT_FILE)) {
     /* Only do this if we are not transferring FILE:, since the file: treatment
        is different*/
     Curl_readwrite_init(conn);
+    Curl_pre_readwrite(conn);
+  }
 
   if((conn->sockfd == CURL_SOCKET_BAD) &&
      (conn->writesockfd == CURL_SOCKET_BAD))

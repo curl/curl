@@ -164,6 +164,8 @@ static void conn_free(struct connectdata *conn);
 
 static void signalPipeClose(struct curl_llist *pipe);
 
+static struct SessionHandle* gethandleathead(struct curl_llist *pipe);
+
 #define MAX_PIPELINE_LENGTH 5
 
 /*
@@ -1973,6 +1975,16 @@ bool Curl_isHandleAtHead(struct SessionHandle *handle,
   return FALSE;
 }
 
+static struct SessionHandle* gethandleathead(struct curl_llist *pipe)
+{
+  struct curl_llist_element *curr = pipe->head;
+  if (curr) {
+    return (struct SessionHandle *) curr->ptr;
+  }
+
+  return NULL;
+}
+
 static void signalPipeClose(struct curl_llist *pipe)
 {
   struct curl_llist_element *curr;
@@ -2017,6 +2029,7 @@ ConnectionExists(struct SessionHandle *data,
 
   for(i=0; i< data->state.connc->num; i++) {
     bool match = FALSE;
+    int pipeLen = 0;
     /*
      * Note that if we use a HTTP proxy, we check connections to that
      * proxy and not to the actual remote server.
@@ -2026,18 +2039,20 @@ ConnectionExists(struct SessionHandle *data,
       /* NULL pointer means not filled-in entry */
       continue;
 
+    pipeLen = check->send_pipe->size + check->recv_pipe->size;
+
     if (check->connectindex == -1) {
       check->connectindex = i; /* Set this appropriately since it might have
                                   been set to -1 when the easy was removed
                                   from the multi */
     }
 
-    DEBUGF(infof(data, "Examining connection #%ld for reuse\n",
-                 check->connectindex));
+    DEBUGF(infof(data, "Examining connection #%ld for reuse \
+                 (pipeLen = %ld)\n", check->connectindex, pipeLen));
 
-    if(check->inuse && !canPipeline) {
+    if(pipeLen > 0 && !canPipeline) {
       /* can only happen within multi handles, and means that another easy
-      handle is using this connection */
+         handle is using this connection */
       continue;
     }
 
@@ -2052,11 +2067,24 @@ ConnectionExists(struct SessionHandle *data,
     }
 #endif
 
-    if (check->send_pipe->size +
-        check->recv_pipe->size >= MAX_PIPELINE_LENGTH) {
+    if (pipeLen >= MAX_PIPELINE_LENGTH) {
       infof(data, "Connection #%ld has its pipeline full, can't reuse\n",
             check->connectindex);
       continue;
+    }
+
+    if (canPipeline) {
+      /* Make sure the pipe has only GET requests */
+      struct SessionHandle* sh = gethandleathead(check->send_pipe);
+      struct SessionHandle* rh = gethandleathead(check->recv_pipe);
+      if (sh) {
+        if(!IsPipeliningPossible(sh))
+          continue;
+      }
+      else if (rh) {
+        if(!IsPipeliningPossible(rh))
+          continue;
+      }
     }
 
     if (check->bits.close) {
@@ -3731,8 +3759,6 @@ else {
 
     /* re-use init */
     conn->bits.reuse = TRUE; /* yes, we're re-using here */
-    conn->bits.chunk = FALSE; /* always assume not chunked unless told
-                                 otherwise */
 
     Curl_safefree(old_conn->user);
     Curl_safefree(old_conn->passwd);

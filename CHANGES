@@ -6,6 +6,23 @@
 
                                   Changelog
 
+Daniel (21 February 2007)
+- Ravi Pratap provided work on libcurl making pipelining more robust and
+  fixing some bugs:
+  o Don't mix GET and POST requests in a pipeline
+  o Fix the order in which requests are dispatched from the pipeline
+  o Fixed several curl bugs with pipelining when the server is returning
+    chunked encoding:
+    * Added states to chunked parsing for final CRLF
+    * Rewind buffer after parsing chunk with data remaining
+    * Moved chunked header initializing to a spot just before receiving
+      headers
+
+Daniel (20 February 2007)
+- Linus Nielsen Feltzing changed the CURLOPT_FTP_SSL_CCC option to handle
+  active and passive CCC shutdown and added the --ftp-ssl-ccc-mode command
+  line option.
+
 Daniel (19 February 2007)
 - Ian Turner fixed the libcurl.m4 macro's support for --with-libcurl.
 

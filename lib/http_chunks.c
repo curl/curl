@@ -181,19 +181,24 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         if(0 == ch->datasize) {
           if (conn->bits.trailerHdrPresent!=TRUE) {
             /* No Trailer: header found - revert to original Curl processing */
-            ch->state = CHUNK_STOP;
-            if (1 == length) {
-               /* This is the final byte, return right now */
-               return CHUNKE_STOP;
-            }
+            ch->state = CHUNK_STOPCR;
+
+            /* We need to increment the datap here since we bypass the
+               increment below with the immediate break */
+            length--;
+            datap++;
+
+            /* This is the final byte, continue to read the final CRLF */
+            break;
           }
           else {
             ch->state = CHUNK_TRAILER; /* attempt to read trailers */
             conn->trlPos=0;
           }
         }
-        else
+        else {
           ch->state = CHUNK_DATA;
+        }
       }
       else
         /* previously we got a fake CR, go back to CR waiting! */
@@ -270,8 +275,9 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         datap++;
         length--;
       }
-      else
+      else {
         return CHUNKE_BAD_CHUNK;
+      }
       break;
 
     case CHUNK_POSTLF:
@@ -284,8 +290,10 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         datap++;
         length--;
       }
-      else
+      else {
         return CHUNKE_BAD_CHUNK;
+      }
+
       break;
 
     case CHUNK_TRAILER:
@@ -331,7 +339,17 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         conn->trailer[conn->trlPos]=0;
         if (conn->trlPos==2) {
           ch->state = CHUNK_STOP;
-          return CHUNKE_STOP;
+          datap++;
+          length--;
+
+          /*
+           * Note that this case skips over the final STOP states since we've
+           * already read the final CRLF and need to return
+           */
+
+          ch->dataleft = length;
+
+          return CHUNKE_STOP; /* return stop */
         }
         else {
 #ifdef CURL_DOES_CONVERSIONS
@@ -346,8 +364,8 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
           }
 #endif /* CURL_DOES_CONVERSIONS */
           if ( !data->set.http_te_skip )
-          Curl_client_write(conn, CLIENTWRITE_HEADER,
-                            conn->trailer, conn->trlPos);
+            Curl_client_write(conn, CLIENTWRITE_HEADER,
+                              conn->trailer, conn->trlPos);
         }
         ch->state = CHUNK_TRAILER;
         conn->trlPos=0;
@@ -358,11 +376,35 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         return CHUNKE_BAD_CHUNK;
       break;
 
+    case CHUNK_STOPCR:
+      /* Read the final CRLF that ends all chunk bodies */
+
+      if(*datap == 0x0d) {
+        ch->state = CHUNK_STOP;
+        datap++;
+        length--;
+      }
+      else {
+        return CHUNKE_BAD_CHUNK;
+      }
+      break;
+
     case CHUNK_STOP:
-      /* If we arrive here, there is data left in the end of the buffer
-         even if there's no more chunks to read */
-      ch->dataleft = length;
-      return CHUNKE_STOP; /* return stop */
+      if (*datap == 0x0a) {
+        datap++;
+        length--;
+
+        /* Record the length of any data left in the end of the buffer
+           even if there's no more chunks to read */
+
+        ch->dataleft = length;
+        return CHUNKE_STOP; /* return stop */
+      }
+      else {
+        return CHUNKE_BAD_CHUNK;
+      }
+      break;
+
     default:
       return CHUNKE_STATE_ERROR;
     }

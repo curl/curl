@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -55,6 +55,10 @@ typedef enum {
   /* POSTLF should get a LF and nothing else, then move back to HEX as the
      CRLF combination marks the end of a chunk */
   CHUNK_POSTLF,
+
+  /* Each Chunk body should end with a CRLF.  Read a CR and nothing else,
+     then move to CHUNK_STOP */
+  CHUNK_STOPCR,
 
   /* This is mainly used to really mark that we're out of the game.
      NOTE: that there's a 'dataleft' field in the struct that will tell how

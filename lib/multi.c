@@ -354,6 +354,12 @@ CURLM *curl_multi_init(void)
     return NULL;
   }
 
+  /* Let's make the doubly-linked list a circular list.  This makes
+     the linked list code simpler and allows inserting at the end
+     with less work (we didn't keep a tail pointer before). */
+  multi->easy.next = &multi->easy;
+  multi->easy.prev = &multi->easy;
+
   return (CURLM *) multi;
 }
 
@@ -435,18 +441,21 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   /* Make sure the type is setup correctly */
   easy->easy_handle->state.connc->type = CONNCACHE_MULTI;
 
-  /* We add this new entry first in the list. We make our 'next' point to the
-     previous next and our 'prev' point back to the 'first' struct */
-  easy->next = multi->easy.next;
-  easy->prev = &multi->easy;
+  /* This adds the new entry at the back of the list
+     to try and maintain a FIFO queue so the pipelined
+     requests are in order. */
 
-  /* make 'easy' the first node in the chain */
-  multi->easy.next = easy;
+  /* We add this new entry last in the list. We make our 'next' point to the
+     'first' struct and our 'prev' point to the previous 'prev' */
+  easy->next = &multi->easy;
+  easy->prev = multi->easy.prev;
 
-  /* if there was a next node, make sure its 'prev' pointer links back to
+  /* make 'easy' the last node in the chain */
+  multi->easy.prev = easy;
+
+  /* if there was a prev node, make sure its 'next' pointer links to
      the new node */
-  if(easy->next)
-    easy->next->prev = easy;
+  easy->prev->next = easy;
 
   Curl_easy_addmulti(easy_handle, multi_handle);
 
@@ -506,7 +515,7 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
 
   /* scan through the list and remove the 'curl_handle' */
   easy = multi->easy.next;
-  while(easy) {
+  while(easy != &multi->easy) {
     if(easy->easy_handle == (struct SessionHandle *)curl_handle)
       break;
     easy=easy->next;
@@ -726,7 +735,7 @@ CURLMcode curl_multi_fdset(CURLM *multi_handle,
     return CURLM_BAD_HANDLE;
 
   easy=multi->easy.next;
-  while(easy) {
+  while(easy != &multi->easy) {
     bitmap = multi_getsock(easy, sockbunch, MAX_SOCKSPEREASYHANDLE);
 
     for(i=0; i< MAX_SOCKSPEREASYHANDLE; i++) {
@@ -1092,6 +1101,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                easy->easy_conn->recv_pipe);
       multistate(easy, CURLM_STATE_WAITPERFORM);
       result = CURLM_CALL_MULTI_PERFORM;
+
+      Curl_pre_readwrite(easy->easy_conn);
+
       break;
 
     case CURLM_STATE_WAITPERFORM:
@@ -1313,7 +1325,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
     return CURLM_BAD_HANDLE;
 
   easy=multi->easy.next;
-  while(easy) {
+  while(easy != &multi->easy) {
     CURLMcode result;
 
     if (easy->easy_handle->state.cancelled &&
@@ -1409,7 +1421,7 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
 
     /* remove all easy handles */
     easy = multi->easy.next;
-    while(easy) {
+    while(easy != &multi->easy) {
       nexteasy=easy->next;
       if(easy->easy_handle->dns.hostcachetype == HCACHE_MULTI) {
         /* clear out the usage of the shared DNS cache */
@@ -1588,7 +1600,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     /* walk through each easy handle and do the socket state change magic
        and callbacks */
     easyp=multi->easy.next;
-    while(easyp) {
+    while(easyp != &multi->easy) {
       singlesocket(multi, easyp);
       easyp = easyp->next;
     }
