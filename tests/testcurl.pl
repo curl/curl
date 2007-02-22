@@ -401,10 +401,8 @@ if ($CVS) {
 }
 
 # Set timestamp to the one in curlver.h if this isn't a CVS test build.
-if ((-f "$CURLDIR/include/curl/curlver.h") &&
-    (grepfile("define LIBCURL_TIMESTAMP",
-              "$CURLDIR/include/curl/curlver.h")) &&
-    (open(F, "<$CURLDIR/include/curl/curlver.h"))) {
+if ((-f "include/curl/curlver.h") &&
+    (open(F, "<include/curl/curlver.h"))) {
   while (<F>) {
     chomp;
     if ($_ =~ /^\#define\s+LIBCURL_TIMESTAMP\s+\"(.+)\".*$/) {
