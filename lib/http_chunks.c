@@ -403,7 +403,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
       else {
         return CHUNKE_BAD_CHUNK;
       }
-      break;
+
 
     default:
       return CHUNKE_STATE_ERROR;
