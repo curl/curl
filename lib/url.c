@@ -2029,7 +2029,7 @@ ConnectionExists(struct SessionHandle *data,
 
   for(i=0; i< data->state.connc->num; i++) {
     bool match = FALSE;
-    int pipeLen = 0;
+    size_t pipeLen = 0;
     /*
      * Note that if we use a HTTP proxy, we check connections to that
      * proxy and not to the actual remote server.
