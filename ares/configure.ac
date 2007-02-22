@@ -376,6 +376,9 @@ AC_CHECK_TYPE([bool],[
   AC_DEFINE(HAVE_BOOL_T, 1,
     [Define to 1 if bool is an available type.])
 ], ,[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 #ifdef HAVE_STDBOOL_H
 #include <stdbool.h>
 #endif
