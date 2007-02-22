@@ -258,7 +258,7 @@ sub startnew {
         die "error: exec() has returned !!!";
     }
 
-    my $count=5;
+    my $count=12;
     while($count--) {
         if(-f $pidfile) {
             open(PID, "<$pidfile");
