@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -53,14 +53,6 @@
 #define COMMENT      0x10 /* bit 4 set: file comment present */
 #define RESERVED     0xE0 /* bits 5..7: reserved */
 
-enum zlibState {
-  ZLIB_UNINIT,          /* uninitialized */
-  ZLIB_INIT,            /* initialized */
-  ZLIB_GZIP_HEADER,     /* reading gzip header */
-  ZLIB_GZIP_INFLATING,  /* inflating gzip stream */
-  ZLIB_INIT_GZIP        /* initialized in transparent gzip mode */
-};
-
 static CURLcode
 process_zlib_error(struct connectdata *conn, z_stream *z)
 {
@@ -76,7 +68,7 @@ process_zlib_error(struct connectdata *conn, z_stream *z)
 }
 
 static CURLcode
-exit_zlib(z_stream *z, bool *zlib_init, CURLcode result)
+exit_zlib(z_stream *z, zlibInitState *zlib_init, CURLcode result)
 {
   inflateEnd(z);
   *zlib_init = ZLIB_UNINIT;

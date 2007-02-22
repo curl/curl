@@ -521,6 +521,16 @@ struct hostname {
 #define KEEP_WRITE_HOLD 8 /* when set, no writing should be done but there
                              might still be data to write */
 
+#ifdef HAVE_LIBZ
+typedef enum {
+  ZLIB_UNINIT,          /* uninitialized */
+  ZLIB_INIT,            /* initialized */
+  ZLIB_GZIP_HEADER,     /* reading gzip header */
+  ZLIB_GZIP_INFLATING,  /* inflating gzip stream */
+  ZLIB_INIT_GZIP        /* initialized in transparent gzip mode */
+} zlibInitState;
+#endif
+
 /*
  * This struct is all the previously local variables from Curl_perform() moved
  * to struct to allow the function to return and get re-invoked better without
@@ -581,7 +591,7 @@ struct Curl_transfer_keeper {
 #define COMPRESS 3              /* Not handled, added for completeness */
 
 #ifdef HAVE_LIBZ
-  bool zlib_init;               /* True if zlib already initialized;
+  zlibInitState zlib_init;      /* possible zlib init state;
                                    undefined if Content-Encoding header. */
   z_stream z;                   /* State structure for zlib. */
 #endif
