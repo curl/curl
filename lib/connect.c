@@ -79,11 +79,6 @@
 #include <errno.h>
 #include <string.h>
 
-#ifndef TRUE
-#define TRUE 1
-#define FALSE 0
-#endif
-
 #include "urldata.h"
 #include "sendf.h"
 #include "if2ip.h"
@@ -122,7 +117,7 @@ int Curl_nonblock(curl_socket_t sockfd,    /* operate on this */
   int flags;
 
   flags = fcntl(sockfd, F_GETFL, 0);
-  if (TRUE == nonblock)
+  if (FALSE != nonblock)
     return fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
   else
     return fcntl(sockfd, F_SETFL, flags & (~O_NONBLOCK));

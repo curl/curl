@@ -69,6 +69,10 @@
 #include <fcntl.h>
 #endif
 
+#ifdef HAVE_STDBOOL_H
+#include <stdbool.h>
+#endif
+
 
 /*
  * Definition of timeval struct for platforms that don't have it.
@@ -181,6 +185,28 @@ struct timeval {
 
 #define ISBLANK(x)  (int)((((unsigned char)x) == ' ') || \
                           (((unsigned char)x) == '\t'))
+
+
+/*
+ * Typedef to 'unsigned char' if bool is not an available 'typedefed' type.
+ */
+
+#ifndef HAVE_BOOL_T
+typedef unsigned char bool;
+#define HAVE_BOOL_T
+#endif
+
+
+/*
+ * Default definition of uppercase TRUE and FALSE.
+ */
+
+#ifndef TRUE
+#define TRUE 1
+#endif
+#ifndef FALSE
+#define FALSE 0
+#endif
 
 
 /*

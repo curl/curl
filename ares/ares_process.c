@@ -54,10 +54,6 @@
 #include "ares_dns.h"
 #include "ares_private.h"
 
-#ifndef TRUE
-/* at least Solaris 7 does not have TRUE at this point */
-#define TRUE 1
-#endif
 
 static int try_again(int errnum);
 static void write_tcp_data(ares_channel channel, fd_set *write_fds,
@@ -532,7 +528,7 @@ static int nonblock(ares_socket_t sockfd,    /* operate on this */
   int flags;
 
   flags = fcntl(sockfd, F_GETFL, 0);
-  if (TRUE == nonblock)
+  if (FALSE != nonblock)
     return fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
   else
     return fcntl(sockfd, F_SETFL, flags & (~O_NONBLOCK));

@@ -25,13 +25,6 @@
 
 void logmsg(const char *msg, ...);
 
-#ifndef FALSE
-#define FALSE 0
-#endif
-#ifndef TRUE
-#define TRUE 1
-#endif
-
 #define TEST_DATA_PATH "%s/data/test%ld"
 
 /* global variable, where to find the 'data' dir */

@@ -120,18 +120,6 @@
 #endif
 
 
-#ifndef TRUE
-#define TRUE 1
-#endif
-#ifndef FALSE
-#define FALSE 0
-#endif
-
-#if !defined(__cplusplus) && !defined(__BEOS__) && !defined(__ECOS) && !defined(typedef_bool)
-typedef unsigned char bool;
-#define typedef_bool
-#endif
-
 #ifdef HAVE_LONGLONG
 #define LONG_LONG long long
 #define ENABLE_64BIT
