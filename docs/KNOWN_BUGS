@@ -3,9 +3,6 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
-40. HTTP Pipelining, NULL content
-  http://curl.haxx.se/bug/view.cgi?id=1631566
-
 39. Steffen Rumler's Race Condition in Curl_proxyCONNECT:
   http://curl.haxx.se/mail/lib-2007-01/0045.html
 
