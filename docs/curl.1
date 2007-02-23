@@ -1033,6 +1033,9 @@ Enables a full trace dump of all incoming and outgoing data, including
 descriptive information, to the given output file. Use "-" as filename to have
 the output sent to stdout.
 
+This option overrides previous uses of \fI-v/--verbose\fP or
+\fI--trace-ascii\fP.
+
 If this option is used several times, the last one will be used.
 .IP "--trace-ascii <file>"
 Enables a full trace dump of all incoming and outgoing data, including
@@ -1042,6 +1045,8 @@ the output sent to stdout.
 This is very similar to \fI--trace\fP, but leaves out the hex part and only
 shows the ASCII part of the dump. It makes smaller output that might be easier
 to read for untrained humans.
+
+This option overrides previous uses of \fI-v/--verbose\fP or \fI--trace\fP.
 
 If this option is used several times, the last one will be used.
 .IP "--trace-time"
@@ -1084,7 +1089,9 @@ might be option you're looking for.
 If you think this option still doesn't give you enough details, consider using
 \fI--trace\fP or \fI--trace-ascii\fP instead.
 
-If this option is used twice, the second will again disable verbose.
+This option overrides previous uses of \fI--trace-ascii\fP or \fI--trace\fP.
+
+If this option is used twice, the second will do nothing extra.
 .IP "-V/--version"
 Displays information about curl and the libcurl version it uses.
 

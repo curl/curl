@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (23 February 2007)
+- Added warning outputs if the command line uses more than one of the options
+  -v, --trace and --trace-ascii, since it could really confuse the user.
+  Clarified this fact in the man page.
+
 Daniel (21 February 2007)
 - Ravi Pratap provided work on libcurl making pipelining more robust and
   fixing some bugs:
