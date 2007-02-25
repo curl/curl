@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (25 February 2007)
+- Adam D. Moss made the HTTP CONNECT procedure less blocking when used from
+  the multi interface. Note that it still does a part of the connection in a
+  blocking manner.
+
 Daniel (23 February 2007)
 - Added warning outputs if the command line uses more than one of the options
   -v, --trace and --trace-ascii, since it could really confuse the user.

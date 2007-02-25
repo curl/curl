@@ -47,6 +47,7 @@
 #include "multiif.h"
 #include "sendf.h"
 #include "timeval.h"
+#include "http.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -62,6 +63,7 @@ typedef enum {
   CURLM_STATE_CONNECT,     /* resolve/connect has been sent off */
   CURLM_STATE_WAITRESOLVE, /* awaiting the resolve to finalize */
   CURLM_STATE_WAITCONNECT, /* awaiting the connect to finalize */
+  CURLM_STATE_WAITPROXYCONNECT, /* awaiting proxy CONNECT to finalize */
   CURLM_STATE_PROTOCONNECT, /* completing the protocol-specific connect
                                phase */
   CURLM_STATE_WAITDO,      /* wait for our turn to send the request */
@@ -791,7 +793,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         multistate(easy, CURLM_STATE_CONNECT);
         result = CURLM_CALL_MULTI_PERFORM;
         easy->result = CURLE_OK;
-      } else {
+      }
+      else {
         easy->result = CURLE_COULDNT_CONNECT;
         multistate(easy, CURLM_STATE_COMPLETED);
       }
@@ -871,10 +874,13 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
              WAITDO! */
           result = CURLM_CALL_MULTI_PERFORM;
 
-          if(protocol_connect) {
+          if(protocol_connect)
             multistate(easy, CURLM_STATE_WAITDO);
-          } else {
-            multistate(easy, CURLM_STATE_WAITCONNECT);
+          else {
+            if (easy->easy_conn->bits.tunnel_connecting)
+              multistate(easy, CURLM_STATE_WAITPROXYCONNECT);
+            else
+              multistate(easy, CURLM_STATE_WAITCONNECT);
           }
         }
       }
@@ -903,8 +909,12 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           result = CURLM_CALL_MULTI_PERFORM;
           if(protocol_connect)
             multistate(easy, CURLM_STATE_DO);
-          else
-            multistate(easy, CURLM_STATE_WAITCONNECT);
+          else {
+            if (easy->easy_conn->bits.tunnel_connecting)
+              multistate(easy, CURLM_STATE_WAITPROXYCONNECT);
+            else
+              multistate(easy, CURLM_STATE_WAITCONNECT);
+          }
         }
       }
 
@@ -916,6 +926,16 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
     }
     break;
+
+    case CURLM_STATE_WAITPROXYCONNECT:
+      /* this is HTTP-specific, but sending CONNECT to a proxy is HTTP... */
+      easy->result = Curl_http_connect(easy->easy_conn, &protocol_connect);
+
+      if(CURLE_OK == easy->result) {
+        if (!easy->easy_conn->bits.tunnel_connecting)
+          multistate(easy, CURLM_STATE_WAITCONNECT);
+      }
+      break;
 
     case CURLM_STATE_WAITCONNECT:
       /* awaiting a completion of an asynch connect */
