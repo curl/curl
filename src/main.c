@@ -115,7 +115,7 @@
 #ifdef __DJGPP__
 #include <dos.h>
 
-char *msdosify(char *);
+const char *msdosify(const char *);
 char *rename_if_dos_device_name(char *);
 
 /* we want to glob our own argv[] */
@@ -731,7 +731,7 @@ static curl_version_info_data *curlinfo;
 static int parseconfig(const char *filename,
                        struct Configurable *config);
 static char *my_get_line(FILE *fp);
-static int create_dir_hierarchy(char *outfile);
+static int create_dir_hierarchy(const char *outfile);
 
 static void GetStr(char **string,
                    char *value)
@@ -2032,7 +2032,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         else {
           GetStr(&postdata, nextarg);
         }
- 
+
 #ifdef CURL_DOES_CONVERSIONS
         if(subletter != 'b') { /* NOT forced binary, convert to ASCII */
           convert_to_network(postdata, strlen(postdata));
@@ -3143,7 +3143,7 @@ int my_trace(CURL *handle, curl_infotype type,
    * We dump the header text and then switch type to CURLINFO_DATA_OUT.
    */
   if((type == CURLINFO_HEADER_OUT) && (size > 4)) {
-    int i;
+    size_t i;
     for(i = 0; i < size - 4; i++) {
       if(memcmp(&data[i], "\r\n\r\n", 4) == 0) {
         /* dump everthing through the CRLFCRLF as a sent header */
@@ -3286,7 +3286,7 @@ static void FindWin32CACert(struct Configurable *config,
 #define RETRY_SLEEP_MAX     600000 /* ms == 10 minutes */
 
 static bool
-output_expected(char* url, char* uploadfile)
+output_expected(const char* url, const char* uploadfile)
 {
   if(!uploadfile)
     return TRUE;  /* download */
@@ -4629,7 +4629,7 @@ static char *my_get_line(FILE *fp)
    curl "http://my.site/dir[1-5]/file[1-5].txt" -o "dir#1/file#2.txt"
    should create all the dir* automagically
 */
-static int create_dir_hierarchy(char *outfile)
+static int create_dir_hierarchy(const char *outfile)
 {
   char *tempdir;
   char *tempdir2;
@@ -4714,14 +4714,15 @@ static int create_dir_hierarchy(char *outfile)
 /* The following functions are taken with modification from the DJGPP
  * port of tar 1.12. They use algorithms originally from DJTAR. */
 
-char *
-msdosify (char *file_name)
+const char *
+msdosify (const char *file_name)
 {
   static char dos_name[PATH_MAX];
   static const char illegal_chars_dos[] = ".+, ;=[]|<>\\\":?*";
   static const char *illegal_chars_w95 = &illegal_chars_dos[8];
   int idx, dot_idx;
-  char *s = file_name, *d = dos_name;
+  const char *s = file_name;
+  char *d = dos_name;
   const char *illegal_aliens = illegal_chars_dos;
   size_t len = sizeof (illegal_chars_dos) - 1;
   int lfn = 0;
