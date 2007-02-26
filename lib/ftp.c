@@ -34,13 +34,10 @@
 #include <unistd.h>
 #endif
 
-#ifdef WIN32
-
-#else /* probably some kind of unix */
+#ifndef WIN32
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#include <sys/types.h>
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -57,7 +54,7 @@
 #include <in.h>
 #include <inet.h>
 #endif
-#endif
+#endif  /* !WIN32 */
 
 #if (defined(NETWARE) && defined(__NOVELL_LIBC__))
 #undef in_addr_t
@@ -3024,7 +3021,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status, bool premature
       ftpc->ctl_valid = was_ctl_valid;
       break;
     }
-    /* until we cope better with prematurely ended requests, let them 
+    /* until we cope better with prematurely ended requests, let them
      * fallback as if in complete failure */
   default:       /* by default, an error means the control connection is
                     wedged and should not be used anymore */

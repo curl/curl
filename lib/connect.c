@@ -28,9 +28,6 @@
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -59,9 +56,9 @@
 #include <arpa/inet.h>
 #endif
 #ifdef HAVE_STDLIB_H
-#include <stdlib.h> /* required for free() prototype, without it, this crashes
-                       on macos 68K */
-#endif
+#include <stdlib.h> /* required for free() prototype, without it, this crashes */
+#endif              /* on macos 68K */
+
 #if (defined(HAVE_FIONBIO) && defined(__NOVELL_LIBC__))
 #include <sys/filio.h>
 #endif
@@ -74,7 +71,8 @@
 #include <inet.h>
 #endif
 
-#endif
+#endif  /* !WIN32 */
+
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>

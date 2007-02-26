@@ -44,24 +44,14 @@
 #include <fcntl.h>
 #endif
 
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
-
 #ifdef HAVE_TIME_H
 #include <time.h>
 #endif
 
-#ifdef WIN32
-
-#else /* probably some kind of unix */
+#ifndef WIN32
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#include <sys/types.h>
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -78,7 +68,7 @@
 #include <in.h>
 #include <inet.h>
 #endif
-#endif
+#endif /* !WIN32 */
 
 #if (defined(NETWARE) && defined(__NOVELL_LIBC__))
 #undef in_addr_t

@@ -30,12 +30,6 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <ctype.h>
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
 
 #if defined(WIN32)
 #include <time.h>
@@ -65,8 +59,7 @@
 #include <sys/param.h>
 #endif
 
-
-#endif
+#endif  /* WIN32 */
 
 #include "urldata.h"
 #include <curl/curl.h>
