@@ -14,7 +14,6 @@
  */
 
 #include "setup.h"
-#include <sys/types.h>
 
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>

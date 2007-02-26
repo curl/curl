@@ -19,9 +19,7 @@
 
 #ifndef HAVE_BITNCMP
 
-#include <sys/types.h>
-#include <string.h>
-#include <stdlib.h>
+#include "setup.h"
 #include "bitncmp.h"
 
 /*

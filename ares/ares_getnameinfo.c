@@ -15,8 +15,6 @@
  * without express or implied warranty.
  */
 #include "setup.h"
-#include <sys/types.h>
-#include <ctype.h>
 
 #if defined(WIN32) && !defined(WATT32)
 #include "nameser.h"

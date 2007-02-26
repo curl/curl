@@ -16,7 +16,6 @@
  */
 
 #include "setup.h"
-#include <sys/types.h>
 
 #if !defined(WIN32) || defined(WATT32)
 #include <sys/socket.h>
