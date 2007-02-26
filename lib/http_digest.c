@@ -101,8 +101,8 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
       if((2 == sscanf(header, "%31[^=]=\"%127[^\"]\"",
                       value, content)) ||
          /* try the same scan but without quotes around the content but don't
-            include the possibly trailing comma */
-         (2 ==  sscanf(header, "%31[^=]=%127[^,]",
+            include the possibly trailing comma, newline or carriage return */
+         (2 ==  sscanf(header, "%31[^=]=%127[^\r\n,]",
                        value, content)) ) {
         if(strequal(value, "nonce")) {
           d->nonce = strdup(content);
