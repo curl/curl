@@ -167,7 +167,7 @@
 #endif
 
 /*
- * PellesC cludge section (yikes);
+ * PellesC kludge section (yikes);
  *  - It has 'ssize_t', but it is in <unistd.h>. The way the headers
  *    on Win32 are included, forces me to include this header here.
  *  - sys_nerr, EINTR is missing in v4.0 or older.
@@ -182,7 +182,7 @@
 #endif
 
 /*
- * Salford-C cludge section (mostly borrowed from wxWidgets).
+ * Salford-C kludge section (mostly borrowed from wxWidgets).
  */
 #ifdef __SALFORDC__
   #pragma suppress 353             /* Possible nested comments */
