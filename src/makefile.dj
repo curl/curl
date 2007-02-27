@@ -34,9 +34,8 @@ EX_LIBS += $(WATT32_ROOT)/lib/libwatt.a
 
 CFLAGS += -DUSE_ENVIRONMENT
 
-PROGRAM   = curl.exe
-CSOURCES += $(CURL_SOURCES)
-OBJECTS  += $(addprefix $(OBJ_DIR)/, $(CSOURCES:.c=.o))
+PROGRAM  = curl.exe
+OBJECTS += $(addprefix $(OBJ_DIR)/, $(CSOURCES:.c=.o))
 
 all: $(OBJ_DIR) config.h $(PROGRAM)
 	@echo Welcome to cURL
