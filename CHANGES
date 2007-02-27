@@ -6,6 +6,20 @@
 
                                   Changelog
 
+Daniel (27 February 2007)
+- Hang Kin Lau found and fixed: When I use libcurl to connect to an https
+  server through a proxy and have the remote https server port set using the
+  CURLOPT_PORT option, protocol gets reset to http from https after the first
+  request.
+ 
+  User defined URL was modified internally by libcurl and subsequent reuse of
+  the easy handle may lead to connection using a different protocol (if not
+  originally http).
+ 
+  I found that libcurl hardcoded the protocol to "http" when it tries to
+  regenerate the URL if CURLOPT_PORT is set. I tried to fix the problem as
+  follows and it's working fine so far
+
 Daniel (25 February 2007)
 - Adam D. Moss made the HTTP CONNECT procedure less blocking when used from
   the multi interface. Note that it still does a part of the connection in a

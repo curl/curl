@@ -3590,8 +3590,8 @@ else {
       /* we need to create new URL with the new port number */
       char *url;
 
-      url = aprintf("http://%s:%d%s", conn->host.name, conn->remote_port,
-                    data->reqdata.path);
+      url = aprintf("%s://%s:%d%s", conn->protostr, conn->host.name,
+                    conn->remote_port, data->reqdata.path);
       if(!url)
         return CURLE_OUT_OF_MEMORY;
 
