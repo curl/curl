@@ -5,6 +5,7 @@
 # I.e use "set LFN=n" before untaring on Win9x/XP.
 # Requires sed, yacc, rm and the usual stuff.
 #
+# Define TOPDIR before including this file.
 
 .SUFFIXES: .exe .y
 
@@ -51,18 +52,19 @@ default: all
 # WATT_ROOT should be set during Watt-32 install.
 #
 WATT32_ROOT  = $(subst \,/,$(WATT_ROOT))
-OPENSSL_ROOT = /net/openssl.098
-ZLIB_ROOT    = /djgpp/contrib/zlib
-LIBIDN_ROOT  = ../../IDN/libidn
-ARES_ROOT    = ../ares
+OPENSSL_ROOT = e:/net/openssl.099
+ZLIB_ROOT    = $(DJDIR)/contrib/zlib
+LIBIDN_ROOT  = $(TOPDIR)/../IDN/libidn
+ARES_ROOT    = $(TOPDIR)/ares
 
 CC   = gcc
 YACC = bison -y
 
-CFLAGS = -g -O2 -I. -I../include -I../lib -I$(WATT32_ROOT)/inc -Wall -DHAVE_CONFIG_H
+CFLAGS = -g -gcoff -O2 -I. -I$(TOPDIR)/include -I$(TOPDIR)/lib \
+         -I$(WATT32_ROOT)/inc -Wall -DHAVE_CONFIG_H
 
 ifeq ($(USE_SSL),1)
-  CFLAGS += -DUSE_SSLEAY -I$(OPENSSL_ROOT)
+  CFLAGS += -DUSE_SSLEAY -DUSE_OPENSSL -I$(OPENSSL_ROOT)
 endif
 
 ifeq ($(USE_ZLIB),1)
@@ -78,12 +80,12 @@ ifeq ($(USE_ARES),1)
 endif
 
 ifeq ($(USE_IDNA),1)
-  CFLAGS   += -DHAVE_LIBIDN -DHAVE_IDN_FREE_H -DHAVE_IDN_FREE -DHAVE_TLD_H \
-              -DHAVE_TLD_STRERROR -I$(LIBIDN_ROOT)/lib
+  CFLAGS += -DHAVE_LIBIDN -DHAVE_IDN_FREE_H -DHAVE_IDN_FREE -DHAVE_TLD_H \
+            -DHAVE_TLD_STRERROR -I$(LIBIDN_ROOT)/lib
 endif
 
 ifeq ($(USE_DEBUG),1)
-  CFLAGS += -DDEBUG=1 -DCURLDEBUG #-DMALLOCDEBUG=1 -DDPRINTF_DEBUG2=1
+  CFLAGS += -DDEBUG=1 -DCURLDEBUG # -DDPRINTF_DEBUG2=1
 endif
 
 $(OBJ_DIR):
@@ -93,22 +95,6 @@ $(OBJ_DIR)/%.o: %.c
 	$(CC) $(CFLAGS) -o $@ -c $<
 	@echo
 
-#
-# Generated dependencies; Due to some hacks in gcc 2.95+ and djgpp 2.03
-# we must prevent "$(DJDIR)/bin/../include/sys/version.h" from beeing
-# included in dependency output (or else this makefile cannot be used on
-# another machine). We therefore use a special 'specs' file during
-# pre-processing.
-#
-MM_SPECS = ./specs.dj
-
-depend: $(DEPEND_PREREQ)
-	@echo Generating dependencies..
-	@copy $(MAKEFILE) Makefile.bak
-	@echo "*cpp: %(cpp_cpu) %{posix:-D_POSIX_SOURCE} -remap" > $(MM_SPECS)
-	sed -e "/^# DO NOT DELETE THIS LINE/,$$d" < Makefile.bak > $(MAKEFILE)
-	echo "# DO NOT DELETE THIS LINE"                        >> $(MAKEFILE)
-	$(CC) -MM -specs=$(MM_SPECS) $(CFLAGS) $(CSOURCES) | \
-	sed -e 's/^\([a-zA-Z0-9_-]*\.o:\)/$$(OBJ_DIR)\/\1/'    >> $(MAKEFILE)
-	rm -f $(MM_SPECS)
-
+depend: $(DEPEND_PREREQ) $(MAKEFILE)
+	$(CC) -MM $(CFLAGS) $(CSOURCES) | \
+	sed -e 's/^\([a-zA-Z0-9_-]*\.o:\)/$$(OBJ_DIR)\/\1/' > depend.dj
