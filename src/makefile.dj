@@ -8,6 +8,7 @@
 DEPEND_PREREQ = config.h hugehelp.c
 
 top_srcdir = ..
+TOPDIR = ..
 
 include ../packages/DOS/common.dj
 include Makefile.inc
@@ -33,56 +34,31 @@ EX_LIBS += $(WATT32_ROOT)/lib/libwatt.a
 
 CFLAGS += -DUSE_ENVIRONMENT
 
-PROGRAM  = curl.exe
-CSOURCES = $(CURL_SOURCES)
-OBJECTS  = $(addprefix $(OBJ_DIR)/, $(CURL_SOURCES:.c=.o))
+PROGRAM   = curl.exe
+CSOURCES += $(CURL_SOURCES)
+OBJECTS  += $(addprefix $(OBJ_DIR)/, $(CSOURCES:.c=.o))
 
 all: $(OBJ_DIR) config.h $(PROGRAM)
 	@echo Welcome to cURL
 
 $(PROGRAM): $(OBJECTS) ../lib/libcurl.a
-	$(CC) -o $@ $^ $(EX_LIBS)
+	$(CC) -o $@ $^ $(LDFLAGS) $(EX_LIBS)
 
 config.h:
-	@echo '#include "../lib/config.dj"' > $@
+	@echo '#include "../lib/config.dos"' > $@
 
 #
 # groff 1.18+ requires "-P -c"
 #
 hugehelp.c: ../docs/MANUAL ../docs/curl.1 mkhelp.pl
 	groff -Tascii -man ../docs/curl.1 | \
-        perl -w mkhelp.pl ../docs/MANUAL > $@
+	perl -w mkhelp.pl ../docs/MANUAL > $@
 
 clean:
-	- rm -f $(OBJECTS) Makefile.bak config.h
+	- rm -f $(OBJECTS) config.h
 
 realclean vclean: clean
-	- rm -f $(PROGRAM) hugehelp.c
+	- rm -f $(PROGRAM) hugehelp.c depend.dj
 
-# DO NOT DELETE THIS LINE
-djgpp/curlutil.o: curlutil.c setup.h config.h ../lib/config.dj ../lib/setup.h \
-  ../lib/config.h curlutil.h
-djgpp/getpass.o: getpass.c setup.h config.h ../lib/config.dj ../lib/setup.h \
-  ../lib/config.h getpass.h
-djgpp/homedir.o: homedir.c setup.h config.h ../lib/config.dj ../lib/setup.h \
-  ../lib/config.h homedir.h
-djgpp/hugehelp.o: hugehelp.c setup.h config.h ../lib/config.dj ../lib/setup.h \
-  ../lib/config.h hugehelp.h e:/djgpp/contrib/zlib/zlib.h \
-  e:/djgpp/contrib/zlib/zconf.h
-djgpp/main.o: main.c setup.h config.h ../lib/config.dj ../lib/setup.h \
-  ../lib/config.h ../include/curl/curl.h ../include/curl/curlver.h \
-  ../include/curl/easy.h ../include/curl/multi.h urlglob.h writeout.h \
-  getpass.h homedir.h hugehelp.h writeenv.h version.h ../lib/curlx.h \
-  ../include/curl/mprintf.h ../lib/strequal.h ../lib/strtoofft.h \
-  curlutil.h ../lib/memdebug.h ../lib/memory.h
-djgpp/urlglob.o: urlglob.c setup.h config.h ../lib/config.dj ../lib/setup.h \
-  ../lib/config.h ../include/curl/curl.h ../include/curl/curlver.h \
-  ../include/curl/easy.h ../include/curl/multi.h \
-  ../include/curl/mprintf.h urlglob.h
-djgpp/writeenv.o: writeenv.c setup.h config.h ../lib/config.dj ../lib/setup.h \
-  ../lib/config.h ../include/curl/curl.h ../include/curl/curlver.h \
-  ../include/curl/easy.h ../include/curl/multi.h
-djgpp/writeout.o: writeout.c setup.h config.h ../lib/config.dj ../lib/setup.h \
-  ../lib/config.h ../include/curl/curl.h ../include/curl/curlver.h \
-  ../include/curl/easy.h ../include/curl/multi.h \
-  ../include/curl/mprintf.h writeout.h
+-include depend.dj
+
