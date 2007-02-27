@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH libcurl-tutorial 3 "9 May 2005" "libcurl" "libcurl programming"
+.TH libcurl-tutorial 3 "27 Feb 2007" "libcurl" "libcurl programming"
 .SH NAME
 libcurl-tutorial \- libcurl programming tutorial
 .SH "Objective"
@@ -64,10 +64,10 @@ $ curl-config --libs
 .IP "SSL or Not"
 libcurl can be built and customized in many ways. One of the things that
 varies from different libraries and builds is the support for SSL-based
-transfers, like HTTPS and FTPS. If OpenSSL was detected properly at
-build-time, libcurl will be built with SSL support. To figure out if an
-installed libcurl has been built with SSL support enabled, use 'curl-config'
-like this:
+transfers, like HTTPS and FTPS. If a supported SSL library was detected
+properly at build-time, libcurl will be built with SSL support. To figure out
+if an installed libcurl has been built with SSL support enabled, use
+\&'curl-config' like this:
 
 $ curl-config --feature
 
@@ -111,11 +111,10 @@ sockets properly. You should only do this once for each application, so if
 your program already does this or of another library in use does it, you
 should not tell libcurl to do this as well.
 .IP CURL_GLOBAL_SSL
-which only does anything on libcurls compiled and built
-SSL-enabled. On these systems, this will make libcurl initialize OpenSSL
-properly for this application. This is only needed to do once for each
-application so if your program or another library already does this, this
-bit should not be needed.
+which only does anything on libcurls compiled and built SSL-enabled. On these
+systems, this will make libcurl initialize the SSL library properly for this
+application. This is only needed to do once for each application so if your
+program or another library already does this, this bit should not be needed.
 .RE
 
 libcurl has a default protection mechanism that detects if
@@ -256,17 +255,26 @@ handlers. Signals are used timeouting name resolves (during DNS lookup) - when
 built without c-ares support and not on Windows..
 
 If you are accessing HTTPS or FTPS URLs in a multi-threaded manner, you are
-then of course using OpenSSL/GnuTLS multi-threaded and those libs have their
-own requirements on this issue. Basically, you need to provide one or two
-functions to allow it to function properly. For all details, see this:
+then of course using the underlying SSL library multi-threaded and those libs
+might have their own requirements on this issue. Basically, you need to
+provide one or two functions to allow it to function properly. For all
+details, see this:
 
 OpenSSL
 
-   http://www.openssl.org/docs/crypto/threads.html#DESCRIPTION
+ http://www.openssl.org/docs/crypto/threads.html#DESCRIPTION
 
 GnuTLS
 
  http://www.gnu.org/software/gnutls/manual/html_node/Multi_002dthreaded-applications.html
+
+NSS
+ 
+ is claimed to be thread-safe already without anything required
+
+yassl
+
+ Required actions unknown
 
 When using multiple threads you should set the CURLOPT_NOSIGNAL option to TRUE
 for all handles. Everything will or might work fine except that timeouts are
@@ -614,22 +622,26 @@ What "proxy" means according to Merriam-Webster: "a person authorized to act
 for another" but also "the agency, function, or office of a deputy who acts as
 a substitute for another".
 
-Proxies are exceedingly common these days. Companies often only offer
-Internet access to employees through their HTTP proxies. Network clients or
-user-agents ask the proxy for documents, the proxy does the actual request
-and then it returns them.
+Proxies are exceedingly common these days. Companies often only offer Internet
+access to employees through their proxies. Network clients or user-agents ask
+the proxy for documents, the proxy does the actual request and then it returns
+them.
 
-libcurl has full support for HTTP proxies, so when a given URL is wanted,
-libcurl will ask the proxy for it instead of trying to connect to the actual
-host identified in the URL.
+libcurl supports SOCKS and HTTP proxies. When a given URL is wanted, libcurl
+will ask the proxy for it instead of trying to connect to the actual host
+identified in the URL.
 
-The fact that the proxy is a HTTP proxy puts certain restrictions on what can
-actually happen. A requested URL that might not be a HTTP URL will be still
-be passed to the HTTP proxy to deliver back to libcurl. This happens
-transparently, and an application may not need to know. I say "may", because
-at times it is very important to understand that all operations over a HTTP
-proxy is using the HTTP protocol. For example, you can't invoke your own
-custom FTP commands or even proper FTP directory listings.
+If you're using a SOCKS proxy, you may find that libcurl doesn't quite support
+all operations through it.
+
+For HTTP proxies: the fact that the proxy is a HTTP proxy puts certain
+restrictions on what can actually happen. A requested URL that might not be a
+HTTP URL will be still be passed to the HTTP proxy to deliver back to
+libcurl. This happens transparently, and an application may not need to
+know. I say "may", because at times it is very important to understand that
+all operations over a HTTP proxy is using the HTTP protocol. For example, you
+can't invoke your own custom FTP commands or even proper FTP directory
+listings.
 
 .IP "Proxy Options"
 
@@ -644,6 +656,11 @@ pass that information similar to this:
 
 If you want to, you can specify the host name only in the CURLOPT_PROXY
 option, and set the port number separately with CURLOPT_PROXYPORT.
+
+Tell libcurl what kind of proxy it is with CURLOPT_PROXYTYPE (if not, it will
+default to assume a HTTP proxy):
+
+ curl_easy_setopt(easyhandle, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
 
 .IP "Environment Variables"
 
@@ -669,6 +686,8 @@ for any URL in case the protocol specific variable wasn't set, and
 variable may say so. If 'no_proxy' is a plain asterisk ("*") it matches all
 hosts.
 
+To explicitly disable libcurl's checking for and using the proxy environment
+variables, set the proxy name to "" - an empty string - with CURLOPT_PROXY.
 .IP "SSL and Proxies"
 
 SSL is for secure point-to-point connections. This involves strong encryption
@@ -768,26 +787,6 @@ with the CURLOPT_MAXCONNECTS option. Default is 5. It is very seldom any
 point in changing this value, and if you think of changing this it is often
 just a matter of thinking again.
 
-When the connection cache gets filled, libcurl must close an existing
-connection in order to get room for the new one. To know which connection to
-close, libcurl uses a "close policy" that you can affect with the
-CURLOPT_CLOSEPOLICY option. There's only two polices implemented as of this
-writing (libcurl 7.9.4) and they are:
-
-.RS
-.IP CURLCLOSEPOLICY_LEAST_RECENTLY_USED
-simply close the one that hasn't been used for the longest time. This is the
-default behavior.
-.IP CURLCLOSEPOLICY_OLDEST
-closes the oldest connection, the one that was created the longest time ago.
-.RE
-
-There are, or at least were, plans to support a close policy that would call
-a user-specified callback to let the user be able to decide which connection
-to dump when this is necessary and therefor is the CURLOPT_CLOSEFUNCTION an
-existing option still today. Nothing ever uses this though and this will not
-be used within the foreseeable future either.
-
 To force your upcoming request to not use an already existing connection (it
 will even close one first if there happens to be one alive to the same host
 you're about to operate on), you can do that by setting CURLOPT_FRESH_CONNECT
@@ -797,7 +796,8 @@ CURLOPT_FORBID_REUSE to TRUE.
 
 .SH "HTTP Headers Used by libcurl"
 When you use libcurl to do HTTP requests, it'll pass along a series of headers
-automatically. It might be good for you to know and understand these ones.
+automatically. It might be good for you to know and understand these ones. You
+can replace or remove them by using the CURLOPT_HTTPHEADER option.
 
 .IP "Host"
 This header is required by HTTP 1.1 and even many 1.0 servers and should be
@@ -811,10 +811,11 @@ fetch a fresh one.
 .IP "Accept"
 \&"*/*".
 
-.IP "Expect:"
-When doing multi-part formposts, libcurl will set this header to
-\&"100-continue" to ask the server for an "OK" message before it proceeds with
-sending the data part of the post.
+.IP "Expect"
+When doing POST requests, libcurl sets this header to \&"100-continue" to ask
+the server for an "OK" message before it proceeds with sending the data part
+of the post. If the POSTed data amount is deemed "small", libcurl will not use
+this header.
 
 .SH "Customizing Operations"
 There is an ongoing development today where more and more protocols are built
@@ -888,12 +889,10 @@ data size is unknown.
 
 .IP "HTTP Version"
 
-There's only one aspect left in the HTTP requests that we haven't yet
-mentioned how to modify: the version field. All HTTP requests includes the
-version number to tell the server which version we support. libcurl speak HTTP
-1.1 by default. Some very old servers don't like getting 1.1-requests and when
-dealing with stubborn old things like that, you can tell libcurl to use 1.0
-instead by doing something like this:
+All HTTP requests includes the version number to tell the server which version
+we support. libcurl speak HTTP 1.1 by default. Some very old servers don't
+like getting 1.1-requests and when dealing with stubborn old things like that,
+you can tell libcurl to use 1.0 instead by doing something like this:
 
  curl_easy_setopt(easyhandle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
 
@@ -1051,7 +1050,7 @@ The headers are passed to the callback function one by one, and you can
 depend on that fact. It makes it easier for you to add custom header parsers
 etc.
 
-"Headers" for FTP transfers equal all the FTP server responses. They aren't
+\&"Headers" for FTP transfers equal all the FTP server responses. They aren't
 actually true headers, but in this case we pretend they are! ;-)
 
 .SH "Post Transfer Information"
