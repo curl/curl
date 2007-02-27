@@ -35,6 +35,7 @@ This release includes the following bugfixes:
  o several HTTP pipelining problems
  o HTTP CONNECT thru a proxy is now less blocking when the multi interface is
    used
+ o HTTP Digest header parsing fix for unquoted last word ending with CRLF
 
 This release includes the following known bugs:
 
@@ -55,6 +56,6 @@ advice from friends like these:
  Yang Tse, Manfred Schwarb, Michael Wallner, Jeff Pohlmeyer, Shmulik Regev,
  Rob Crittenden, Robert A. Monat, Dan Fandrich, Duncan Mac-Vicar Prett,
  Michal Marek, Robson Braga Araujo, Ian Turner, Linus Nielsen Feltzing,
- Ravi Pratap, Adam D. Moss
+ Ravi Pratap, Adam D. Moss, Jose Kahan
 
         Thanks! (and sorry if I forgot to mention someone)
