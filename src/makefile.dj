@@ -13,6 +13,8 @@ TOPDIR = ..
 include ../packages/DOS/common.dj
 include Makefile.inc
 
+CSOURCES = $(CURL_SOURCES)
+
 ifeq ($(USE_SSL),1)
   EX_LIBS += $(OPENSSL_ROOT)/lib/libssl.a $(OPENSSL_ROOT)/lib/libcrypt.a
 endif
