@@ -21,7 +21,7 @@
  * $Id$
  ***************************************************************************/
 
-#if !defined(WIN32) && !defined(_WIN32) && !defined(__WIN32__) && !defined(_WIN32_WCE)
+#ifdef NETWARE /* Novell NetWare */
 
 #include <errno.h>
 #include <string.h>
@@ -301,4 +301,4 @@ void DisposeThreadData(void    *data)
   }
 }
 
-#endif /* Not for Windows */
+#endif /* NETWARE */
