@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,6 +20,8 @@
  *
  * $Id$
  ***************************************************************************/
+
+#if !defined(WIN32) && !defined(_WIN32) && !defined(__WIN32__) && !defined(_WIN32_WCE)
 
 #include "amigaos.h"
 #include <amitcp/socketbasetags.h>
@@ -72,3 +74,5 @@ BOOL amiga_init()
 #ifdef __libnix__
 ADD2EXIT(amiga_cleanup,-50);
 #endif
+
+#endif /* Not for Windows */
