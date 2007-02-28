@@ -63,7 +63,7 @@
 #include "config-mac.h"
 #endif
 
-#ifdef AMIGA
+#ifdef __AMIGA__
 #include "amigaos.h"
 #endif
 

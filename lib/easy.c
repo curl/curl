@@ -231,7 +231,7 @@ CURLcode curl_global_init(long flags)
       return CURLE_FAILED_INIT;
     }
 
-#ifdef _AMIGASF
+#ifdef __AMIGA__
   if(!amiga_init()) {
     DEBUGF(fprintf(stderr, "Error: amiga_init failed\n"));
     return CURLE_FAILED_INIT;
@@ -298,7 +298,7 @@ void curl_global_cleanup(void)
   if (init_flags & CURL_GLOBAL_WIN32)
     win32_cleanup();
 
-#ifdef _AMIGASF
+#ifdef __AMIGA__
   amiga_cleanup();
 #endif
 

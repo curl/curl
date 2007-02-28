@@ -21,7 +21,7 @@
  * $Id$
  ***************************************************************************/
 
-#if !defined(WIN32) && !defined(_WIN32) && !defined(__WIN32__) && !defined(_WIN32_WCE)
+#ifdef __AMIGA__ /* Any AmigaOS flavour */
 
 #include "amigaos.h"
 #include <amitcp/socketbasetags.h>
@@ -75,4 +75,4 @@ BOOL amiga_init()
 ADD2EXIT(amiga_cleanup,-50);
 #endif
 
-#endif /* Not for Windows */
+#endif /* __AMIGA__ */

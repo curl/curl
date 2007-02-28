@@ -1,3 +1,5 @@
+#ifndef LIBCURL_AMIGAOS_H
+#define LIBCURL_AMIGAOS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -21,10 +23,7 @@
  * $Id$
  ***************************************************************************/
 
-#if !defined(WIN32) && !defined(_WIN32) && !defined(__WIN32__) && !defined(_WIN32_WCE)
-
-#ifndef LIBCURL_AMIGAOS_H
-#define LIBCURL_AMIGAOS_H
+#ifdef __AMIGA__ /* Any AmigaOS flavour */
 
 #ifndef __ixemul__
 
@@ -57,6 +56,6 @@ extern BOOL amiga_init();
 #warning compiling with ixemul...
 
 #endif /* __ixemul__ */
+#endif /* __AMIGA__ */
 #endif /* LIBCURL_AMIGAOS_H */
 
-#endif /* Not for Windows */

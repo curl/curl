@@ -78,7 +78,7 @@
 # define BOOL char
 #endif
 
-#ifdef _AMIGASF
+#ifdef __AMIGA__
 # undef FORMAT_INT
 #endif
 

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -39,7 +39,7 @@
  */
 #if !defined(WIN32) && !defined(__BEOS__) && !defined(__CYGWIN__) && \
     !defined(__riscos__) && !defined(__INTERIX) && !defined(NETWARE) && \
-    !defined(_AMIGASF) && !defined(__minix)
+    !defined(__AMIGA__) && !defined(__minix)
 
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
