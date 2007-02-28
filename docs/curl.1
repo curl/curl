@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl 1 "12 Feb 2007" "Curl 7.16.2" "Curl Manual"
+.TH curl 1 "28 Feb 2007" "Curl 7.16.2" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -608,9 +608,11 @@ used as if they were written on the actual command line. Options and their
 parameters must be specified on the same config file line. If the parameter is
 to contain white spaces, the parameter must be enclosed within quotes.  If the
 first column of a config line is a '#' character, the rest of the line will be
-treated as a comment.
+treated as a comment. Only write one option per physical line in the config
+file.
 
-Specify the filename as '-' to make curl read the file from stdin.
+Specify the filename to -K/--config as '-' to make curl read the file from
+stdin.
 
 Note that to be able to specify a URL in the config file, you need to specify
 it using the \fI--url\fP option, and not by simply writing the URL on its own
@@ -618,7 +620,8 @@ line. So, it could look similar to this:
 
 url = "http://curl.haxx.se/docs/"
 
-This option can be used multiple times to load multiple config files.
+Long option names can optionally be given in the config file without the
+initial double dashes.
 
 When curl is invoked, it always (unless \fI-q\fP is used) checks for a default
 config file and uses it if found. The default config file is checked for in
@@ -633,6 +636,22 @@ resort the '%USERPROFILE%\Application Data'.
 2) On windows, if there is no _curlrc file in the home dir, it checks for one
 in the same dir the executable curl is placed. On unix-like systems, it will
 simply try to load .curlrc from the determined home dir.
+
+.nf
+# --- Example file ---
+# this is a comment
+url = "curl.haxx.se"
+output = "curlhere.html"
+user-agent = "superagent/1.0"
+
+# and fetch another URL too
+url = "curl.haxx.se/docs/manpage.html"
+-O
+referer = "http://nowhereatall.com/"
+# --- End of example file ---
+.fi
+
+This option can be used multiple times to load multiple config files.
 .IP "--libcurl <file>"
 Append this option to any ordinary curl command line, and you will get a
 libcurl-using source code written to the file that does the equivalent
