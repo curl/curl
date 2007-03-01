@@ -61,11 +61,8 @@ typedef enum {
   CURLM_STATE_CONNECT,     /* resolve/connect has been sent off */
   CURLM_STATE_WAITRESOLVE, /* awaiting the resolve to finalize */
   CURLM_STATE_WAITCONNECT, /* awaiting the connect to finalize */
-#ifndef CURL_DISABLE_HTTP
   CURLM_STATE_WAITPROXYCONNECT, /* awaiting proxy CONNECT to finalize */
-#endif
-  CURLM_STATE_PROTOCONNECT, /* completing the protocol-specific connect
-                               phase */
+  CURLM_STATE_PROTOCONNECT, /* completing the protocol-specific connect phase */
   CURLM_STATE_WAITDO,      /* wait for our turn to send the request */
   CURLM_STATE_DO,          /* start send off the request (part 1) */
   CURLM_STATE_DOING,       /* sending off the request (part 1) */
