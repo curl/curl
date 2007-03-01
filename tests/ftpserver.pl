@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -124,6 +124,35 @@ my $sfpid;
 
 local(*SFREAD, *SFWRITE);
 
+sub sysread_or_die {
+    my $FH     = shift;
+    my $scalar = shift;
+    my $length = shift;
+    my $fcaller;
+    my $lcaller;
+    my $result;
+
+    $result = sysread($$FH, $$scalar, $length);
+
+    if(not defined $result) {
+        ($fcaller, $lcaller) = (caller)[1,2];
+        logmsg "Failed to read input\n";
+        logmsg "Error: ftp$ftpdnum$ext sysread error: $!\n";
+        kill(9, $sfpid);
+        die "Died in sysread_or_die() when called from $fcaller " .
+            "at line $lcaller. ftp$ftpdnum$ext sysread error: $!\n";
+    }
+    elsif($result == 0) {
+        ($fcaller, $lcaller) = (caller)[1,2];
+        logmsg "Failed to read input\n";
+        logmsg "Error: ftp$ftpdnum$ext read zero\n";
+        kill(9, $sfpid);
+        die "Died in sysread_or_die() when called from $fcaller " .
+            "at line $lcaller. ftp$ftpdnum$ext read zero\n";
+    }
+
+    return $result;
+}
 
 sub startsf {
     my $cmd="./server/sockfilt --port $port --logfile log/sockctrl$ftpdnum$ext.log --pidfile .sockfilt$ftpdnum$ext.pid $ipv6";
@@ -536,7 +565,7 @@ sub PASV_command {
     print DWRITE "PING\n";
     my $pong;
 
-    sysread(DREAD, $pong, 5) || die;
+    sysread_or_die(\*DREAD, \$pong, 5);
 
     if($pong !~ /^PONG/) {
         kill(9, $slavepid);
@@ -552,15 +581,15 @@ sub PASV_command {
     print DWRITE "PORT\n";
         
     # READ the response code
-    sysread(DREAD, $i, 5) || die;
+    sysread_or_die(\*DREAD, \$i, 5);
 
     # READ the response size
-    sysread(DREAD, $i, 5) || die;
+    sysread_or_die(\*DREAD, \$i, 5);
 
     my $size = hex($i);
         
     # READ the response data
-    sysread(DREAD, $i, $size) || die;
+    sysread_or_die(\*DREAD, \$i, $size);
         
     # The data is in the format
     # IPvX/NNN
@@ -745,7 +774,7 @@ while(1) {
     my $input;
 
     logmsg "Awaiting input\n";
-    sysread(SFREAD, $input, 5) || die "ftp$ftpdnum$ext read zero";
+    sysread_or_die(\*SFREAD, \$input, 5);
 
     if($input !~ /^CNCT/) {
         # we wait for a connected client
@@ -777,7 +806,7 @@ while(1) {
         # part only is FTP lingo.
 
         # COMMAND
-        sysread(SFREAD, $i, 5) || die "ftp$ftpdnum$ext read zero";
+        sysread_or_die(\*SFREAD, \$i, 5);
 
         if($i !~ /^DATA/) {
             logmsg "sockfilt said $i";
@@ -789,7 +818,8 @@ while(1) {
         }
 
         # SIZE of data
-        sysread(SFREAD, $i, 5) || die;
+        sysread_or_die(\*SFREAD, \$i, 5);
+
         my $size = hex($i);
 
         # data
