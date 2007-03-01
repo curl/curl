@@ -79,9 +79,8 @@ USING PASSWORDS
 
  HTTP
 
-   The HTTP URL doesn't support user and password in the URL string. Curl
-   does support that anyway to provide a ftp-style interface and thus you can
-   pick a file like:
+   Curl also supports user and password in HTTP URLs, thus you can pick a file
+   like:
 
         curl http://name:passwd@machine.domain/full/path/to/file
 
