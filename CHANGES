@@ -6,6 +6,15 @@
 
                                   Changelog
 
+Daniel (2 March 2007)
+- Robert A. Monat and Shmulik Regev helped out to fix the new */Makefile.vc8
+  makefiles that are included in the source release archives, generated from
+  the Makefile.vc6 files by the maketgz script. I also modified the root
+  Makefile to have a VC variable that defaults to vc6 but can be overridden to
+  allow it to be used for vc8 as well. Like this:
+
+    nmake VC=vc8 vc
+
 Daniel (27 February 2007)
 - Hang Kin Lau found and fixed: When I use libcurl to connect to an https
   server through a proxy and have the remote https server port set using the

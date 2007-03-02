@@ -18,7 +18,8 @@ This release includes the following changes:
  o changed default anonymous FTP password
  o changed the CURLOPT_FTP_SSL_CCC option to handle active and passive
    CCC shutdown
- o Added the --ftp-ssl-ccc-mode command line option
+ o added the --ftp-ssl-ccc-mode command line option
+ o includes VC8 Makefiles in the release archive
 
 This release includes the following bugfixes:
 
