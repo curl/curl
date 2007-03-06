@@ -787,16 +787,20 @@ static char *file2memory(FILE *file, long *size)
   if(file) {
     while((len = fread(buffer, 1, sizeof(buffer), file))) {
       if(string) {
-        newstring = realloc(string, len+stringlen);
+        newstring = realloc(string, len+stringlen+1);
         if(newstring)
           string = newstring;
         else
           break; /* no more strings attached! :-) */
       }
       else
-        string = malloc(len);
+        string = malloc(len+1);
       memcpy(&string[stringlen], buffer, len);
       stringlen+=len;
+    }
+    if (string) {
+      /* NUL terminate the buffer in case it's treated as a string later */
+      string[stringlen] = 0;
     }
     *size = stringlen;
     return string;
@@ -3333,7 +3337,7 @@ CURLcode _my_setopt(CURL *curl, const char *name, CURLoption tag, ...)
     }
     /* attempt to figure out if it is a string (since the tag numerical doesn't
        offer this info) and then output it as a string if so */
-    else if(pval && isgraph(ptr[0]) && isgraph(ptr[1]))
+    else if(pval && isgraph(ptr[0]) && isgraph(ptr[1]) && isgraph(ptr[2]))
       snprintf(value, sizeof(value), "\"%s\"", (char *)ptr);
     else if(pval) {
       snprintf(value, sizeof(value), "%p", pval);
