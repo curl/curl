@@ -63,11 +63,17 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
        AC_MSG_RESULT(no)
 )
 
-dnl skip libtool C++ and Fortran checks
+dnl skip libtool C++ and Fortran compiler checks
 m4_undefine([AC_PROG_CXX])
 m4_defun([AC_PROG_CXX],[])
 m4_undefine([AC_PROG_F77])
 m4_defun([AC_PROG_F77],[])
+
+dnl skip libtool C++ and Fortran linker checks
+m4_undefine([AC_LIBTOOL_CXX])
+m4_defun([AC_LIBTOOL_CXX],[])
+m4_undefine([AC_LIBTOOL_F77])
+m4_defun([AC_LIBTOOL_F77],[])
 
 dnl libtool setup
 AC_PROG_LIBTOOL
