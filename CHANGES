@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Dan F (7 March 2007)
+- Honour --ftp-ssl-control on ftps:// URLs to allow encrypted control and
+  unencrypted data connections.
+
+Dan F (6 March 2007)
+- Fixed a couple of improper pointer uses detected by valgrind in test
+  cases 181 & 216.
+
 Daniel (2 March 2007)
 - Robert A. Monat and Shmulik Regev helped out to fix the new */Makefile.vc8
   makefiles that are included in the source release archives, generated from
