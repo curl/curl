@@ -7,6 +7,14 @@ AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 AM_INIT_AUTOMAKE(c-ares, CVS)
 
+dnl
+dnl Detect the canonical host and target build environment
+dnl
+
+AC_CANONICAL_HOST
+dnl Get system canonical name
+AC_DEFINE_UNQUOTED(OS, "${host}", [cpu-machine-OS])
+
 AC_AIX
 AC_PROG_CC
 AC_PROG_INSTALL
@@ -74,6 +82,18 @@ m4_ifdef([AC_LIBTOOL_CXX], [m4_undefine([AC_LIBTOOL_CXX])])
 m4_defun([AC_LIBTOOL_CXX],[])
 m4_ifdef([AC_LIBTOOL_F77], [m4_undefine([AC_LIBTOOL_F77])])
 m4_defun([AC_LIBTOOL_F77],[])
+
+dnl force libtool to build static libraries with PIC on AMD64
+AC_MSG_CHECKING([if target is AMD64 (to build static libraries with PIC)])
+case $host in
+  x86_64*linux* | *-*-cygwin)
+    AC_MSG_RESULT([yes])
+    with_pic=yes
+    ;;
+  *)
+    AC_MSG_RESULT([no])
+    ;;
+esac
 
 dnl libtool setup
 AC_PROG_LIBTOOL
