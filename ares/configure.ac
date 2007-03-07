@@ -86,7 +86,7 @@ m4_defun([AC_LIBTOOL_F77],[])
 dnl force libtool to build static libraries with PIC on AMD64
 AC_MSG_CHECKING([if target is AMD64 (to build static libraries with PIC)])
 case $host in
-  x86_64*linux* | *-*-cygwin)
+  x86_64*linux*)
     AC_MSG_RESULT([yes])
     with_pic=yes
     ;;
