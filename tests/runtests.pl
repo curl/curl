@@ -480,7 +480,11 @@ sub verifyftp {
     my ($proto, $ip, $port) = @_;
     my $pid;
     my $time=time();
-    my $cmd="$CURL -m$server_response_maxtime --silent -vg \"$proto://$ip:$port/verifiedserver\" 2>log/verifyftp";
+    my $extra;
+    if($proto eq "ftps") {
+    	$extra = "-k --ftp-ssl-control ";
+    }
+    my $cmd="$CURL -m$server_response_maxtime --silent -vg $extra\"$proto://$ip:$port/verifiedserver\" 2>log/verifyftp";
     # check if this is our server running on this port:
     my @data=`$cmd`;
     logmsg "RUN: $cmd\n" if($verbose);
@@ -518,6 +522,7 @@ sub verifyftp {
 my %protofunc = ('http' => \&verifyhttp,
                  'https' => \&verifyhttp,
                  'ftp' => \&verifyftp,
+                 'ftps' => \&verifyftp,
                  'tftp' => \&verifyftp);
 
 sub verifyserver {
@@ -628,7 +633,7 @@ sub runhttpsserver {
     }
 
     my $flag=$debugprotocol?"-v ":"";
-    my $cmd="$perl $srcdir/httpsserver.pl $flag -s \"$stunnel\" -d $srcdir -r $HTTPPORT $HTTPSPORT";
+    my $cmd="$perl $srcdir/httpsserver.pl $flag -p https -s \"$stunnel\" -d $srcdir -r $HTTPPORT $HTTPSPORT";
 
     my ($httpspid, $pid2) = startnew($cmd, $HTTPSPIDFILE);
 
@@ -719,6 +724,60 @@ sub runftpserver {
     sleep(1);
 
     return ($pid2, $ftppid);
+}
+
+#######################################################################
+# start the ftps server (or rather, tunnel)
+#
+sub runftpsserver {
+    my ($verbose, $ipv6) = @_;
+    my $STATUS;
+    my $RUNNING;
+    my $ip = $HOSTIP;
+
+    if(!$stunnel) {
+        return 0;
+    }
+
+    if($ipv6) {
+        # not complete yet
+        $ip = $HOST6IP;
+    }
+
+    my $pid=checkserver($FTPSPIDFILE);
+
+    if($pid > 0) {
+        # kill previous stunnel!
+        stopserver($pid);
+    }
+
+    my $flag=$debugprotocol?"-v ":"";
+    my $cmd="$perl $srcdir/httpsserver.pl $flag -p ftps -s \"$stunnel\" -d $srcdir -r $FTPPORT $FTPSPORT";
+
+    my ($ftpspid, $pid2) = startnew($cmd, $FTPSPIDFILE);
+
+    if(!kill(0, $ftpspid)) {
+        # it is NOT alive
+        logmsg "RUN: failed to start the FTPS server!\n";
+        stopservers($verbose);
+        return(0,0);
+    }
+
+    # Server is up. Verify that we can speak to it.
+    if(!verifyserver("ftps", $ip, $FTPSPORT)) {
+        logmsg "RUN: FTPS server failed verification\n";
+        # failed to talk to it properly. Kill the server and return failure
+        stopserver("$ftpspid $pid2");
+        return (0,0);
+    }
+
+    if($verbose) {
+        logmsg "RUN: FTPS server is now running PID $ftpspid\n";
+    }
+
+    sleep(1);
+
+    return ($ftpspid, $pid2);
 }
 
 #######################################################################
@@ -1072,7 +1131,7 @@ sub checksystem {
     logmsg sprintf("* FTP port:       %d\n", $FTPPORT);
     logmsg sprintf("* FTP port 2:     %d\n", $FTP2PORT);
     if($stunnel) {
-        #logmsg sprintf("* FTPS port:      %d\n", $FTPSPORT);
+        logmsg sprintf("* FTPS port:      %d\n", $FTPSPORT);
         logmsg sprintf("* HTTPS port:     %d\n", $HTTPSPORT);
     }
     if($http_ipv6) {
@@ -1890,8 +1949,32 @@ sub startservers {
             }
         }
         elsif($what eq "ftps") {
-            # we can't run ftps tests at all for the moment
-            return "test suite lacks FTPS support";
+            if(!$stunnel) {
+                # we can't run ftps tests without stunnel
+                return "no stunnel";
+            }
+            if(!$ssl_version) {
+                # we can't run ftps tests if libcurl is SSL-less
+                return "curl lacks SSL support";
+            }
+
+            if(!$run{'ftp'}) {
+                ($pid, $pid2) = runftpserver("", $verbose);
+                if($pid <= 0) {
+                    return "failed starting FTP server";
+                }
+                printf ("* pid ftp => %d %d\n", $pid, $pid2) if($verbose);
+                $run{'ftp'}="$pid $pid2";
+            }
+            if(!$run{'ftps'}) {
+                ($pid, $pid2) = runftpsserver($verbose);
+                if($pid <= 0) {
+                    return "failed starting FTPS server (stunnel)";
+                }
+                logmsg sprintf("* pid ftps => %d %d\n", $pid, $pid2)
+                    if($verbose);
+                $run{'ftps'}="$pid $pid2";
+            }
         }
         elsif($what eq "file") {
             # we support it but have no server!

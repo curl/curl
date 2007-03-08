@@ -13,13 +13,17 @@ Requires:
 
 TCP ports used:
 
-  - 8999 on localhost for HTTP tests
-  - 8433 on localhost for HTTPS tests
-  - 8921 on localhost for FTP tests
-  - 8821 on localhost for FTPS tests (currently disabled)
+  - 8990 on localhost for HTTP tests
+  - 8991 on localhost for HTTPS tests
+  - 8994 on localhost for HTTP IPv6 tests
+  - 8992 on localhost for FTP tests
+  - 8995 on localhost for FTP (2) tests
+  - 8993 on localhost for FTPS tests
+  - 8996 on localhost for FTP IPv6 tests
+  - 8997 on localhost for TFTP tests
 
-  The test suite runs simple FTP and HTTP servers on these ports to which
-  it makes requests.
+  The test suite runs simple FTP, HTTP and TFTP servers on these ports to
+  which it makes requests.
 
 Run:
   'make test'. This invokes the 'runtests.pl' perl script. Edit the top
@@ -57,12 +61,12 @@ Debug:
           (gdb) where
 
 Logs:
-  All logs are generated in the logs/ subdirctory (it is emptied first
+  All logs are generated in the logs/ subdirectory (it is emptied first
   in the runtests.pl script). Use runtests.pl -k to keep the temporary files
   after the test run.
 
 Data:
-  All test cases are put in the data/ subdirctory. Each test is stored in the
+  All test cases are put in the data/ subdirectory. Each test is stored in the
   file named according to the test number.
 
   See FILEFORMAT for the description of the test case files.
@@ -85,4 +89,4 @@ TEST CASE NUMBERS
 
 TODO:
 
-  * Add tests for TELNET, LDAP, DICT...
+  * Add tests for TELNET, LDAP, DICT, SCP, SFTP...
