@@ -7,6 +7,14 @@
                                   Changelog
 
 Dan F (7 March 2007)
+- Reintroduced (after a 3 year hiatus) an FTPS test case (400) into the test
+  harness.  It is very limited as it supports only ftps:// URLs with
+  --ftp-ssl-control specified, which implicitly encrypts the control
+  channel but not the data channels.  That allows stunnel to be used with
+  an unmodified ftp server in exactly the same way that the test https
+  server is set up.
+
+Dan F (7 March 2007)
 - Honour --ftp-ssl-control on ftps:// URLs to allow encrypted control and
   unencrypted data connections.
 
