@@ -1541,39 +1541,3 @@ else
 fi
 ])
 
-# Prevent libtool for checking how to run C++ compiler and check for other
-# tools we don't want to use. We do this by m4-defining the _LT_AC_TAGCONFIG
-# variable to the code to run, as by default it uses a much more complicated
-# approach. The code below that is actually added seems to be used for cases
-# where configure has trouble figuring out what C compiler to use but where
-# the installed libtool has an idea.
-#
-# This function is a re-implemented version of the Paolo Bonzini fix posted to
-# the c-ares mailing list by Bram Matthys on May 6 2006. My version removes
-# redundant code but also adds the LTCFLAGS check that wasn't in that patch.
-#
-# Some code in this function was extracted from the generated configure script.
-#
-# CARES_CLEAR_LIBTOOL_TAGS
-AC_DEFUN([CARES_CLEAR_LIBTOOL_TAGS],
-  [m4_define([_LT_AC_TAGCONFIG], [
-  if test -f "$ltmain"; then
-    if test ! -f "${ofile}"; then
-      AC_MSG_WARN([output file `$ofile' does not exist])
-    fi
-
-    if test -z "$LTCC"; then
-      eval "`$SHELL ${ofile} --config | grep '^LTCC='`"
-      if test -z "$LTCC"; then
-        AC_MSG_WARN([output file `$ofile' does not look like a libtool
-script])
-      else
-        AC_MSG_WARN([using `LTCC=$LTCC', extracted from `$ofile'])
-      fi
-    fi
-    if test -z "$LTCFLAGS"; then
-      eval "`$SHELL ${ofile} --config | grep '^LTCFLAGS='`"
-    fi
-  fi
-  ])]
-)
