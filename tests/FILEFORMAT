@@ -1,11 +1,12 @@
- The test suite's file format is very simple and extendable, closely
+ The test suite's file format is very simple and extensible, closely
 resembling XML. All data for a single test case resides in a single
 ASCII file. Labels mark the beginning and the end of all sections, and each
 label must be written in its own line.  Comments are either XML-style
 (enclosed with <!-- and -->) or C-style (beginning with #) and must appear
 on their own lines and not alongside actual test data.  Most test data files
 are syntactically valid XML, although a few files are not (lack of
-support for character entities is the biggest omission).
+support for character entities and the preservation of CR/LF characters at
+the end of lines are the biggest differences).
 
  The file begins with a 'testcase' tag, which encompasses the remainder of
 the file.
@@ -146,6 +147,7 @@ restart servers.
 A command line that if set gets run by the test script before the test. If an
 output is displayed by the command line, the test will be skipped and the
 (single-line) output will be displayed as reason for not running the test.
+Variables are substituted as in the <command> section.
 </precheck>
 
 <tool>
@@ -162,7 +164,8 @@ variable1=contents1
 variable2=contents2
 
 Set the given environment variables to the specified value before the actual
-command is run, they are cleared again after the command has been run.
+command is run. They are cleared again after the command has been run.
+Variables are first substituted as in the <command> section.
 </setenv>
 
 <command [option="no-output"]>
@@ -200,8 +203,10 @@ Available substitute variables include:
 </command>
 
 <file name="log/filename">
-this creates the named file with this content before the test case is run
+This creates the named file with this content before the test case is run,
 which is useful if the test case needs a file to act on.
+Variables are substituted on the contents of the file as in the <command>
+section.
 </file>
 
 <stdin>
@@ -233,13 +238,13 @@ actually sent by the client
 <stdout [mode="text"]>
 This verifies that this data was passed to stdout.
 
-Use the "mode="text"" attribute if the output is in text mode on platforms that
+Use the mode="text" attribute if the output is in text mode on platforms that
 have a text/binary difference.
 </stdout>
 <file name="log/filename" [mode="text"]>
 The file's contents must be identical to this after the test is complete.
 
-Use the "mode="text" attribute if the output is in text mode on platforms that
+Use the mode="text" attribute if the output is in text mode on platforms that
 have a text/binary difference.
 </file>
 <stripfile>
