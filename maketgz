@@ -40,8 +40,8 @@ sed 's/#define CURL_VERSION .*/#define CURL_VERSION "'$curlversion'"/g' $CHEADER
 
 echo "generate VC8 makefiles"
 # Generate VC8 versions from the VC6 Makefile versions 
-sed -e "s#/GX /DWIN32 /YX#/EHsc /DWIN32#" -e 's#/GZ#/RTC1#' -e 's/VC6/VC8/g' lib/Makefile.vc6 > lib/Makefile.vc8.dist
-sed -e "s#/GX /DWIN32 /YX#/EHsc /DWIN32#" -e 's#/GZ#/RTC1#' -e 's/VC6/VC8/g' src/Makefile.vc6 > src/Makefile.vc8.dist
+sed -e "s#/GX /DWIN32 /YX#/EHsc /DWIN32#" -e 's#/GZ#/RTC1#' -e 's/wsock32.lib/wsock32.lib bufferoverflowu.lib/g' -e 's/VC6/VC8/g' lib/Makefile.vc6 > lib/Makefile.vc8.dist
+sed -e "s#/GX /DWIN32 /YX#/EHsc /DWIN32#" -e 's#/GZ#/RTC1#' -e 's/wsock32.lib/wsock32.lib bufferoverflowu.lib/g' -e 's/VC6/VC8/g' src/Makefile.vc6 > src/Makefile.vc8.dist
 
 # Replace version number in plist file:
 PLIST=lib/libcurl.plist

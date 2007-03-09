@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel (9 March 2007)
+- Robert A. Monat improved the maketgz and VC6/8 generating to set the correct
+  machine type too.
+
 - Justin Fletcher fixed a file descriptor leak in the curl tool when trying to
   upload a file it couldn't open. Bug #1676581
   (http://curl.haxx.se/bug/view.cgi?id=1676581)

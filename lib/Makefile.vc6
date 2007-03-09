@@ -41,6 +41,10 @@ OPENSSL_PATH   = ../../openssl-0.9.7e
 ZLIB_PATH  = ../../zlib-1.2.1
 !ENDIF
 
+!IFNDEF MACHINE
+MACHINE  = X86
+!ENDIF
+
 # USE_WINDOWS_SSPI uses windows libraries to allow NTLM authentication
 # without an openssl installation and offers the ability to authenticate
 # using the "current logged in user".  It does however require that the
@@ -74,7 +78,7 @@ CFLAGS     = /I. /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c /DBUILDING_LIBC
 CFLAGSLIB  = /DCURL_STATICLIB
 LNKDLL     = link.exe /DLL
 LNKLIB     = link.exe /lib
-LFLAGS     = /nologo
+LFLAGS     = /nologo /machine:$(MACHINE)
 SSLLIBS    = libeay32.lib ssleay32.lib
 ZLIBLIBSDLL= zdll.lib
 ZLIBLIBS   = zlib.lib
