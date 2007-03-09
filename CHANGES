@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Dan F (9 March 2007)
+- Updated the test harness to check for protocol support before running each
+  test, fixing KNOWN_BUGS #11.
+
 Dan F (7 March 2007)
 - Reintroduced (after a 3 year hiatus) an FTPS test case (400) into the test
   harness.  It is very limited as it supports only ftps:// URLs with

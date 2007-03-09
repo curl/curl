@@ -7,8 +7,11 @@
 # Client-side
 <client>
 <server>
-file
+none
 </server>
+<features>
+http
+</features>
 # tool is what to use instead of 'curl'
 <tool>
 lib501

@@ -106,9 +106,6 @@ may have been fixed since this was written!
   acknowledged after the actual TCP connect (during the SOCKS "negotiate"
   phase).
 
-11. Using configure --disable-[protocol] may cause 'make test' to fail for
-  tests using the disabled protocol(s).
-
 10. To get HTTP Negotiate authentication to work fine, you need to provide a
   (fake) user name (this concerns both curl and the lib) because the code
   wrongly only considers authentication if there's a user name provided.

@@ -146,6 +146,7 @@ my $has_gnutls;  # set if libcurl is built with GnuTLS
 my $has_nss;     # set if libcurl is built with NSS
 my $has_textaware; # set if running on a system that has a text mode concept
   # on files. Windows for example
+my @protocols;   # array of supported protocols
 
 my $skipped=0;  # number of tests skipped; reported in main loop
 my %skipped;    # skipped{reason}=counter, reasons for skip
@@ -1021,8 +1022,16 @@ sub checksystem {
            }
         }
         elsif($_ =~ /^Protocols: (.*)/i) {
-            # these are the supported protocols, we don't use this knowledge
-            # at this point
+            # these are the protocols compiled in to this libcurl
+            @protocols = split(' ', $1);
+
+            # Generate a "proto-ipv6" version of each protocol to match the
+            # IPv6 <server> name. This works even if IPv6 support isn't
+            # compiled in because the <features> test will fail.
+            push @protocols, map($_ . "-ipv6", @protocols);
+
+            # 'none' is used in test cases to mean no server
+            push @protocols, ('none');
         }
         elsif($_ =~ /^Features: (.*)/i) {
             $feat = $1;
@@ -1282,6 +1291,10 @@ sub singletest {
             if($has_getrlimit) {
                 next;
             }
+        }
+        # See if this "feature" is in the list of supported protocols
+        elsif (grep /^$f$/, @protocols) {
+            next;
         }
 
         $why = "curl lacks $f support";
@@ -2063,6 +2076,12 @@ sub serverfortest {
     if(!$what[0]) {
         warn "Test case $testnum has no server(s) specified!";
         return "no server specified";
+    }
+
+    my $proto = lc($what[0]);
+    chomp $proto;
+    if (! grep /^$proto$/, @protocols) {
+        return "curl lacks $proto support";
     }
 
     return &startservers(@what);

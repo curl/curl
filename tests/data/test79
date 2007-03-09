@@ -27,6 +27,9 @@ contents
 <server>
 http
 </server>
+<features>
+ftp
+</features>
  <name>
 FTP over HTTP proxy
  </name>

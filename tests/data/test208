@@ -16,6 +16,9 @@ blablabla
 <server>
 http
 </server>
+<features>
+ftp
+</features>
  <name>
 HTTP PUT a to a FTP URL with username+password - over HTTP proxy
  </name>

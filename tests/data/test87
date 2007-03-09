@@ -15,6 +15,9 @@ FAILURE
 <server>
 none
 </server>
+<features>
+http
+</features>
  <name>
 urlglob with bad -o #[num] usage
  </name>

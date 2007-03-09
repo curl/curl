@@ -16,6 +16,9 @@ FAILURE
 <server>
 none
 </server>
+<features>
+http
+</features>
  <name>
 attempt connect to non-existing host name
  </name>

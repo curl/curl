@@ -8,7 +8,7 @@
 # Client-side
 <client>
 <server>
-none
+file
 </server>
  <name>
 two file:// URLs to stdout

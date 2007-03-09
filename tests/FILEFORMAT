@@ -117,7 +117,17 @@ pipe: [num] -   tell the server to expect this many HTTP requests before
 
 <server>
 What server(s) this test case requires/uses:
-'http' 'ftp', 'https', 'ftps', 'http-ipv6'. Give only one per line.
+
+file
+ftp
+ftp-ipv6
+ftps
+http
+http-ipv6
+https
+none
+
+Give only one per line.  This subsection is mandatory.
 </server>
 
 <features>
@@ -134,6 +144,10 @@ libz
 netrc_debug
 OpenSSL
 SSL
+
+as well as each protocol that curl supports.  A protocol only needs to be
+specified if it is different from the server (useful when the server
+is 'none').
 </features>
 
 <killserver>

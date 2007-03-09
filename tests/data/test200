@@ -13,7 +13,7 @@ moo
 # Client-side
 <client>
 <server>
-none
+file
 </server>
  <name>
 basic file:// file

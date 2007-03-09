@@ -13,7 +13,7 @@ moo
 # Client-side
 <client>
 <server>
-none
+file
 </server>
  <name>
 file:/path URL with a single slash

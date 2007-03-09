@@ -12,7 +12,7 @@ data blobb
 ipv6
 </features>
 <server>
-ftp
+ftp-ipv6
 </server>
  <name>
 Get two FTP files with no remote EPRT support

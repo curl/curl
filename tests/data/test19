@@ -17,6 +17,9 @@ FAILURE
 <server>
 none
 </server>
+<features>
+http
+</features>
  <name>
 attempt connect to non-listening socket
  </name>

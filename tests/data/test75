@@ -17,6 +17,9 @@ FAILURE
 <server>
 none
 </server>
+<features>
+http
+</features>
  <name>
 HTTP, urlglob retrieval with bad range
  </name>
