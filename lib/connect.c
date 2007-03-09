@@ -233,7 +233,9 @@ static CURLcode bindlocal(struct connectdata *conn,
     char myhost[256] = "";
     in_addr_t in;
     int rc;
+    char ipv6_addr[16];
     bool was_iface = FALSE;
+    int in6 = -1;
 
     /* First check if the given name is an IP address */
     in=inet_addr(data->set.device);
@@ -314,7 +316,11 @@ static CURLcode bindlocal(struct connectdata *conn,
 #endif
 
     in=inet_addr(myhost);
-    if (CURL_INADDR_NONE == in) {
+
+#ifdef ENABLE_IPV6
+    in6 = inet_pton (AF_INET6, myhost, (void *)&ipv6_addr);
+#endif
+    if (CURL_INADDR_NONE == in && -1 == in6) {
       failf(data,"couldn't find my own IP address (%s)", myhost);
       return CURLE_HTTP_PORT_FAILED;
     } /* end of inet_addr */

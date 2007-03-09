@@ -38,6 +38,7 @@ This release includes the following bugfixes:
    used
  o HTTP Digest header parsing fix for unquoted last word ending with CRLF
  o CURLOPT_PORT, HTTP proxy, re-using connections and non-HTTP protocols
+ o CURLOPT_INTERFACE for ipv6
 
 This release includes the following known bugs:
 
@@ -58,6 +59,7 @@ advice from friends like these:
  Yang Tse, Manfred Schwarb, Michael Wallner, Jeff Pohlmeyer, Shmulik Regev,
  Rob Crittenden, Robert A. Monat, Dan Fandrich, Duncan Mac-Vicar Prett,
  Michal Marek, Robson Braga Araujo, Ian Turner, Linus Nielsen Feltzing,
- Ravi Pratap, Adam D. Moss, Jose Kahan, Hang Kin Lau, Justin Fletcher
+ Ravi Pratap, Adam D. Moss, Jose Kahan, Hang Kin Lau, Justin Fletcher,
+ Robert Iakobashvili
 
         Thanks! (and sorry if I forgot to mention someone)

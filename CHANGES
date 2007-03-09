@@ -7,6 +7,8 @@
                                   Changelog
 
 Daniel (9 March 2007)
+- Robert Iakobashvili fixed CURLOPT_INTERFACE for IPv6.
+
 - Robert A. Monat improved the maketgz and VC6/8 generating to set the correct
   machine type too.
 
