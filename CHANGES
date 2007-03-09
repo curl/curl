@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (9 March 2007)
+- Justin Fletcher fixed a file descriptor leak in the curl tool when trying to
+  upload a file it couldn't open. Bug #1676581
+  (http://curl.haxx.se/bug/view.cgi?id=1676581)
+
 Dan F (9 March 2007)
 - Updated the test harness to check for protocol support before running each
   test, fixing KNOWN_BUGS #11.

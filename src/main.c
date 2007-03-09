@@ -3931,6 +3931,8 @@ operate(struct Configurable *config, int argc, char *argv[])
           infd=(FILE *) fopen(uploadfile, "rb");
           if (!infd || stat(uploadfile, &fileinfo)) {
             helpf("Can't open '%s'!\n", uploadfile);
+            if(infd)
+              fclose(infd);
             return CURLE_READ_ERROR;
           }
           infdfopen=TRUE;
