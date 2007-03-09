@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Dan F (9 March 2007)
+- Updated the test harness to add a new "crypto" feature check and updated the
+  appropriate test case to use it.  For now, this is treated the same as the
+  "SSL" feature because curl doesn't list it separately.
+
 Daniel (9 March 2007)
 - Robert Iakobashvili fixed CURLOPT_INTERFACE for IPv6.
 

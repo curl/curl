@@ -144,6 +144,7 @@ my $has_ntlm;    # set if libcurl is built with NTLM support
 my $has_openssl; # set if libcurl is built with OpenSSL
 my $has_gnutls;  # set if libcurl is built with GnuTLS
 my $has_nss;     # set if libcurl is built with NSS
+my $has_crypto;  # set if libcurl is built with cryptographic support
 my $has_textaware; # set if running on a system that has a text mode concept
   # on files. Windows for example
 my @protocols;   # array of supported protocols
@@ -1044,6 +1045,9 @@ sub checksystem {
             if($feat =~ /SSL/i) {
                 # ssl enabled
                 $ssl_version=1;
+                # curl doesn't list cryptographic support separately, so treat
+                # it the same as SSL for the time being
+                $has_crypto=1;
             }
             if($feat =~ /Largefile/i) {
                 # large file support
@@ -1289,6 +1293,11 @@ sub singletest {
         }
         elsif($f eq "getrlimit") {
             if($has_getrlimit) {
+                next;
+            }
+        }
+        elsif($f eq "crypto") {
+            if($has_crypto) {
                 next;
             }
         }

@@ -16,6 +16,9 @@ Content-Type: text/html; charset=iso-8859-1
 <server>
 http
 </server>
+<features>
+crypto
+</features>
  <name>
 HTTP POST --digest to server doing a 302-location response
  </name>

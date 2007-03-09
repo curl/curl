@@ -32,6 +32,9 @@ Nice auth sir!
 <server>
 http
 </server>
+<features>
+crypto
+</features>
  <name>
 HTTP with proxy-requiring-Basic to site-requiring-Digest
  </name>

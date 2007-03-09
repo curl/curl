@@ -51,6 +51,9 @@ ok
 <server>
 http
 </server>
+<features>
+crypto
+</features>
  <name>
 HTTP POST --digest with server doing a 100 before 401 response
  </name>

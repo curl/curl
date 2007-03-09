@@ -55,6 +55,9 @@ This IS the real page!
 <server>
 http
 </server>
+<features>
+crypto
+</features>
  <name>
 HTTP PUT with Digest authorization
  </name>

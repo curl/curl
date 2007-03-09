@@ -53,6 +53,9 @@ daniel
 <server>
 http
 </server>
+<features>
+crypto
+</features>
  <name>
 HTTP proxy CONNECT auth Digest
  </name>

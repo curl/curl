@@ -51,6 +51,9 @@ This is not the real page either
 <server>
 http
 </server>
+<features>
+crypto
+</features>
  <name>
 HTTP with Digest authorization with bad password
  </name>

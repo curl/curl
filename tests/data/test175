@@ -41,6 +41,9 @@ content for you
 <server>
 http
 </server>
+<features>
+crypto
+</features>
  <name>
 HTTP POST --digest to server not requiring any auth at all
  </name>

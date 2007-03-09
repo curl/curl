@@ -53,6 +53,9 @@ ok
 <server>
 http
 </server>
+<features>
+crypto
+</features>
  <name>
 HTTP POST multipart without Expect: header using proxy anyauth (Digest)
  </name>

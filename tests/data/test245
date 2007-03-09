@@ -41,6 +41,9 @@ ok
 <server>
 http
 </server>
+<features>
+crypto
+</features>
  <name>
 HTTP POST --digest
  </name>

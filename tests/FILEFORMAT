@@ -135,6 +135,7 @@ A list of features that MUST be present in the client/library for this test to
 be able to run (if these features are not present, the test will be
 SKIPPED). Features testable here are:
 
+crypto
 getrlimit
 GnuTLS
 idn

@@ -46,6 +46,9 @@ Nice auth sir!
 <server>
 http
 </server>
+<features>
+crypto
+</features>
  <name>
 HTTP with proxy-requiring-Digest to site-requiring-Digest
  </name>
