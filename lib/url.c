@@ -4240,6 +4240,10 @@ CURLcode Curl_done(struct connectdata **connp,
     infof(data, "Connection #%ld to host %s left intact\n",
           conn->connectindex,
           conn->bits.httpproxy?conn->proxy.dispname:conn->host.dispname);
+
+    *connp = NULL; /* to make the caller of this function better detect that
+                      this connection is handed over and no longer used from
+                      this point on */
   }
 
   return result;
