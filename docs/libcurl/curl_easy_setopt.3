@@ -67,8 +67,9 @@ A non-zero parameter tells the library to include the header in the body
 output. This is only relevant for protocols that actually have headers
 preceding the data (like HTTP).
 .IP CURLOPT_NOPROGRESS
-A non-zero parameter tells the library to shut off the built-in progress meter
-completely.
+A non-zero parameter tells the library not to call your progress callback
+(see \fICURLOPT_PROGRESSFUNCTION\fP)
+and to shut off the built-in progress meter completely.
 
 Future versions of libcurl is likely to not have any built-in progress meter
 at all.
@@ -185,23 +186,45 @@ argument in the sockopt callback set with \fICURLOPT_SOCKOPTFUNCTION\fP.
 .IP CURLOPT_PROGRESSFUNCTION
 Function pointer that should match the \fIcurl_progress_callback\fP prototype
 found in \fI<curl/curl.h>\fP. This function gets called by libcurl instead of
-its internal equivalent with a frequent interval during operation (roughly
+its internal equivalent frequently during operation (roughly
 once per second) no matter if data is being transfered or not.  Unknown/unused
 argument values passed to the callback will be set to zero (like if you only
-download data, the upload size will remain 0). Returning a non-zero value from
-this callback will cause libcurl to abort the transfer and return
-\fICURLE_ABORTED_BY_CALLBACK\fP.
+download data, the upload size will remain 0).
+
+The callback serves two purposes: 1) updates you on the progress of
+the transfer; 2) gives you an opportunity to abort the transfer.  If
+the callback returns a non-zero value, libcurl aborts the transfer and
+returns \fICURLE_ABORTED_BY_CALLBACK\fP.
+
+libcurl calls the progress callback at least once a second, and
+sometimes when the process receives and catches a signal.  Ideally, it 
+would get called every time the process receives and catches a signal,
+but in the current implementation, libcurl may fail to recognize a signal
+during name resolution, during the wait for a TCP connection, and during
+some tiny windows other times.
+
+If you want a signal to interrupt your call to libcurl, install a signal
+handler for it.  Have that signal handler set a flag indicating that the
+signal was received.  Set up a libcurl progress callback that checks that
+flag and, if it is set, returns a nonzero return code.
+
+Two common kinds of signals you might want to allow to interrupt
+libcurl are: 1) SIGINT, the signal that typically results from a user
+typing control-C; 2) SIGALRM, a signal indicating a timeout.  (libcurl
+also has specific timeout facilities, but SIGALRM can be from a master
+timeout established at a higher layer of your program).
 
 If you transfer data with the multi interface, this function will not be
 called during periods of idleness unless you call the appropriate libcurl
 function that performs transfers. Usage of the \fBCURLOPT_PROGRESSFUNCTION\fP
 callback is not recommended when using the multi interface.
 
-\fICURLOPT_NOPROGRESS\fP must be set to FALSE to make this function actually
-get called.
+This callback gets called only if you set \fICURLOPT_NOPROGRESS\fP to FALSE.
+
 .IP CURLOPT_PROGRESSDATA
 Pass a pointer that will be untouched by libcurl and passed as the first
 argument in the progress callback set with \fICURLOPT_PROGRESSFUNCTION\fP.
+
 .IP CURLOPT_HEADERFUNCTION
 Function pointer that should match the following prototype: \fIsize_t
 function( void *ptr, size_t size, size_t nmemb, void *stream);\fP. This

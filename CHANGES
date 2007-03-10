@@ -6,6 +6,29 @@
 
                                   Changelog
 
+Daniel (10 March 2007)
+- Bryan Henderson introduces two things:
+  1) the progress callback gets called more frequently (at times)
+  2) libcurl *might* call the callback when it receives a signal:
+
+  libcurl calls the progress callback at least once a second, and sometimes
+  when the process receives and catches a signal.  Ideally, it would get
+  called every time the process receives and catches a signal, but in the
+  current implementation, libcurl may fail to recognize a signal during name
+  resolution, during the wait for a TCP connection, and during some tiny
+  windows other times.
+
+  If you want a signal to interrupt your call to libcurl, install a signal
+  handler for it.  Have that signal handler set a flag indicating that the
+  signal was received.  Set up a libcurl progress callback that checks that
+  flag and, if it is set, returns a nonzero return code.
+
+  Two common kinds of signals you might want to allow to interrupt libcurl
+  are: 1) SIGINT, the signal that typically results from a user typing
+  control-C; 2) SIGALRM, a signal indicating a timeout.  (libcurl also has
+  specific timeout facilities, but SIGALRM can be from a master timeout
+  established at a higher layer of your program).
+
 Dan F (9 March 2007)
 - Updated the test harness to add a new "crypto" feature check and updated the
   appropriate test case to use it.  For now, this is treated the same as the
