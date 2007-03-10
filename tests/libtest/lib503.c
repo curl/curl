@@ -14,8 +14,8 @@
 
 #include "testutil.h"
 
-#define MAIN_LOOP_HANG_TIMEOUT     300 * 1000
-#define MULTI_PERFORM_HANG_TIMEOUT 120 * 1000
+#define MAIN_LOOP_HANG_TIMEOUT     90 * 1000
+#define MULTI_PERFORM_HANG_TIMEOUT 60 * 1000
 
 /*
  * Source code in here hugely as reported in bug report 651460 by

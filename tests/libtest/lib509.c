@@ -29,8 +29,8 @@
 
 #include "testutil.h"
 
-#define MAIN_LOOP_HANG_TIMEOUT     30 * 1000
-#define MULTI_PERFORM_HANG_TIMEOUT 20 * 1000
+#define MAIN_LOOP_HANG_TIMEOUT     90 * 1000
+#define MULTI_PERFORM_HANG_TIMEOUT 60 * 1000
 
 /*
  * We use this ZERO_NULL to avoid picky compiler warnings,
