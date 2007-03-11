@@ -1794,7 +1794,6 @@ esac
 AC_CHECK_FUNCS( strtoll \
                 socket \
                 select \
-                pselect \
                 strdup \
                 strstr \
                 strtok_r \

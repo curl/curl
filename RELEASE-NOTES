@@ -39,8 +39,6 @@ This release includes the following bugfixes:
  o HTTP Digest header parsing fix for unquoted last word ending with CRLF
  o CURLOPT_PORT, HTTP proxy, re-using connections and non-HTTP protocols
  o CURLOPT_INTERFACE for ipv6
- o the progress callback can get called more frequently
- o libcurl might call the progress callback when it receives a signal
  o use-after-free issue with HTTP transfers with the multi interface
 
 This release includes the following known bugs:

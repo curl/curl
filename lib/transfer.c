@@ -1603,6 +1603,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
       failf(data, "transfer closed with outstanding read data remaining");
       return CURLE_PARTIAL_FILE;
     }
+    if(Curl_pgrsUpdate(conn))
+      return CURLE_ABORTED_BY_CALLBACK;
   }
 
   /* Now update the "done" boolean we return */
@@ -1752,18 +1754,6 @@ int Curl_single_getsock(struct connectdata *conn,
 }
 
 
-
-static bool
-errnoIsInterruption(int errnoarg)
-{
-#ifdef EINTR
-  return (errnoarg == EINTR);
-#else
-  return FALSE;
-#endif
-}
-
-
 /*
  * Transfer()
  *
@@ -1785,12 +1775,6 @@ Transfer(struct connectdata *conn)
   struct SessionHandle *data = conn->data;
   struct Curl_transfer_keeper *k = &data->reqdata.keep;
   bool done=FALSE;
-  sigset_t callersigmask;
-  sigset_t allsignals;
-  int pgrsrc;
-  int selectrc;
-
-  sigfillset(&allsignals);
 
   if(!(conn->protocol & PROT_FILE)) {
     /* Only do this if we are not transferring FILE:, since the file: treatment
@@ -1844,33 +1828,28 @@ Transfer(struct connectdata *conn)
        the timeout case and if we limit transfer speed we must make sure that
        this function doesn't transfer anything while in HOLD status. */
 
-    sigprocmask(SIG_SETMASK, &allsignals, &callersigmask);
-
-    pgrsrc = Curl_pgrsUpdate(conn);
-
-    if(!pgrsrc)
-      selectrc = Curl_pselect(fd_read, fd_write, 3000, &callersigmask);
-
-    sigprocmask(SIG_SETMASK, &callersigmask, NULL);
-
-    if(pgrsrc)
-      return CURLE_ABORTED_BY_CALLBACK;
-
-    if (selectrc == -1 && !errnoIsInterruption(SOCKERRNO)) {
-      done = TRUE; /* no more read or write */
+    switch (Curl_select(fd_read, fd_write, 1000)) {
+    case -1: /* select() error, stop reading */
+#ifdef EINTR
+      /* The EINTR is not serious, and it seems you might get this more
+         ofen when using the lib in a multi-threaded environment! */
+      if(SOCKERRNO == EINTR)
+        ;
+      else
+#endif
+        done = TRUE; /* no more read or write */
       continue;
-    } else {
-      /* ready files, timeout, or signal received */
+    case 0:  /* timeout */
+    default: /* readable descriptors */
 
       result = Curl_readwrite(conn, &done);
-
-      /* "done" signals to us if the transfer(s) are ready */
-
-      if(result)
-        return result;
+      break;
     }
+    if(result)
+      return result;
+
+    /* "done" signals to us if the transfer(s) are ready */
   }
-  Curl_pgrsUpdate(conn);
 
   return CURLE_OK;
 }

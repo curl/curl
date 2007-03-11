@@ -51,9 +51,6 @@ struct pollfd
 #define CSELECT_OUT  0x02
 #define CSELECT_ERR  0x04
 
-int Curl_pselect(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms,
-                 sigset_t * sigmask);
-
 int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms);
 
 int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms);
