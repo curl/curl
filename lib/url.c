@@ -4223,9 +4223,6 @@ CURLcode Curl_done(struct connectdata **connp,
   if(data->set.reuse_forbid || conn->bits.close) {
     CURLcode res2 = Curl_disconnect(conn); /* close the connection */
 
-    *connp = NULL; /* to make the caller of this function better detect that
-                      this was actually killed here */
-
     /* If we had an error already, make sure we return that one. But
        if we got a new error, return that. */
     if(!result && res2)
@@ -4240,11 +4237,12 @@ CURLcode Curl_done(struct connectdata **connp,
     infof(data, "Connection #%ld to host %s left intact\n",
           conn->connectindex,
           conn->bits.httpproxy?conn->proxy.dispname:conn->host.dispname);
-
-    *connp = NULL; /* to make the caller of this function better detect that
-                      this connection is handed over and no longer used from
-                      this point on */
   }
+
+  *connp = NULL; /* to make the caller of this function better detect that
+                    this was either closed or handed over to the connection
+                    cache here, and therefore cannot be used from this point on
+                 */
 
   return result;
 }
