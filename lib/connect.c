@@ -216,6 +216,9 @@ int waitconnect(curl_socket_t sockfd, /* socket */
 static CURLcode bindlocal(struct connectdata *conn,
                           curl_socket_t sockfd)
 {
+#ifdef ENABLE_IPV6
+  char ipv6_addr[16];
+#endif
   struct SessionHandle *data = conn->data;
   struct sockaddr_in me;
   struct sockaddr *sock = NULL;  /* bind to this address */
@@ -233,7 +236,6 @@ static CURLcode bindlocal(struct connectdata *conn,
     char myhost[256] = "";
     in_addr_t in;
     int rc;
-    char ipv6_addr[16];
     bool was_iface = FALSE;
     int in6 = -1;
 
