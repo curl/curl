@@ -200,6 +200,11 @@ static dynafunc DynaGetFunction(const char *name)
      * compilers! */
     *(void**) (&func) = dlsym(libldap, name);
   }
+#ifdef DL_LBER_FILE
+  if (!func && liblber) {
+    *(void**) (&func) = dlsym(liblber, name);
+  }
+#endif
 #elif defined(WIN32)
   if (libldap) {
     func = (dynafunc)GetProcAddress((HINSTANCE)libldap, name);
