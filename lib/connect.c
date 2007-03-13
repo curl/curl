@@ -88,6 +88,7 @@
 #include "multiif.h"
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "inet_ntop.h"
+#include "inet_pton.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -320,7 +321,7 @@ static CURLcode bindlocal(struct connectdata *conn,
     in=inet_addr(myhost);
 
 #ifdef ENABLE_IPV6
-    in6 = inet_pton (AF_INET6, myhost, (void *)&ipv6_addr);
+    in6 = Curl_inet_pton (AF_INET6, myhost, (void *)&ipv6_addr);
 #endif
     if (CURL_INADDR_NONE == in && -1 == in6) {
       failf(data,"couldn't find my own IP address (%s)", myhost);
