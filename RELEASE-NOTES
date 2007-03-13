@@ -20,6 +20,7 @@ This release includes the following changes:
    CCC shutdown
  o added the --ftp-ssl-ccc-mode command line option
  o includes VC8 Makefiles in the release archive
+ o --ftp-ssl-control is now honoured on ftps:// URLs
 
 This release includes the following bugfixes:
 
