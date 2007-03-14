@@ -352,6 +352,7 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
    */
   authlist = libssh2_userauth_list(ssh->ssh_session, ssh->user,
                                    strlen(ssh->user));
+  infof(data, "SSH authentication methods available: %s\n", authlist);
 
   /*
    * Check the supported auth types in the order I feel is most secure with the
@@ -375,20 +376,26 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
 
     curl_free(home);
 
+    infof(conn->data, "Using ssh public key file %s\n", rsa_pub);
+    infof(conn->data, "Using ssh private key file %s\n", rsa);
+
     if (rsa_pub[0]) {
       /* The function below checks if the files exists, no need to stat() here.
       */
       if (libssh2_userauth_publickey_fromfile(ssh->ssh_session, ssh->user,
                                               rsa_pub, rsa, "") == 0) {
         authed = TRUE;
+        infof(conn->data, "Initialized SSH public key authentication\n");
       }
     }
   }
   if (!authed &&
       (data->set.ssh_auth_types & CURLSSH_AUTH_PASSWORD) &&
       (strstr(authlist, "password") != NULL)) {
-    if (!libssh2_userauth_password(ssh->ssh_session, ssh->user, ssh->passwd))
+    if (!libssh2_userauth_password(ssh->ssh_session, ssh->user, ssh->passwd)) {
       authed = TRUE;
+      infof(conn->data, "Initialized password authentication\n");
+    }
   }
   if (!authed && (data->set.ssh_auth_types & CURLSSH_AUTH_HOST) &&
       (strstr(authlist, "hostbased") != NULL)) {
@@ -400,6 +407,7 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
                                                  strlen(ssh->user),
                                                  &kbd_callback) == 0) {
       authed = TRUE;
+      infof(conn->data, "Initialized keyboard interactive authentication\n");
     }
   }
 
@@ -424,8 +432,6 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
     ssh->sftp_session = libssh2_sftp_init(ssh->ssh_session);
     if (ssh->sftp_session == NULL) {
       failf(data, "Failure initialising sftp session\n");
-      libssh2_sftp_shutdown(ssh->sftp_session);
-      ssh->sftp_session = NULL;
       libssh2_session_free(ssh->ssh_session);
       ssh->ssh_session = NULL;
       return CURLE_FAILED_INIT;
