@@ -1023,6 +1023,9 @@ if test X"$OPT_SSL" != Xno; then
         OPENSSL_ENABLED=1
         AC_DEFINE(USE_OPENSSL, 1, [if OpenSSL is in use]))
 
+      dnl yassl doesn't have SSL_get_shutdown ?
+      AC_CHECK_FUNCS( SSL_get_shutdown )
+
       if test $ac_cv_header_openssl_x509_h = no; then
         dnl we don't use the "action" part of the AC_CHECK_HEADERS macro
         dnl since 'err.h' might in fact find a krb4 header with the same

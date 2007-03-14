@@ -801,6 +801,7 @@ int Curl_ossl_shutdown(struct connectdata *conn, int sockindex)
     } /* while()-loop for the select() */
 
     if(data->set.verbose) {
+#ifdef HAVE_SSL_GET_SHUTDOWN
       switch(SSL_get_shutdown(connssl->handle)) {
       case SSL_SENT_SHUTDOWN:
         infof(data, "SSL_get_shutdown() returned SSL_SENT_SHUTDOWN\n");
@@ -813,6 +814,7 @@ int Curl_ossl_shutdown(struct connectdata *conn, int sockindex)
               "SSL_RECEIVED__SHUTDOWN\n");
         break;
       }
+#endif
     }
 
     connssl->use = FALSE; /* get back to ordinary socket usage */
