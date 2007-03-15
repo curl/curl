@@ -352,6 +352,12 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
    */
   authlist = libssh2_userauth_list(ssh->ssh_session, ssh->user,
                                    strlen(ssh->user));
+  if (!authlist) {
+    libssh2_session_free(ssh->ssh_session);
+    ssh->ssh_session = NULL;
+    Curl_safefree(ssh->path);
+    return CURLE_OUT_OF_MEMORY;
+  }
   infof(data, "SSH authentication methods available: %s\n", authlist);
 
   /*
@@ -410,6 +416,8 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
       infof(conn->data, "Initialized keyboard interactive authentication\n");
     }
   }
+  Curl_safefree((void *)authlist);
+  authlist = NULL;
 
   if (!authed) {
     failf(data, "Authentication failure\n");
@@ -460,7 +468,7 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
     }
   }
 
-  /* Check for /~/ , indicating realative to the users home directory */
+  /* Check for /~/ , indicating relative to the user's home directory */
   if (conn->protocol == PROT_SCP) {
     real_path = (char *)malloc(working_path_len+1);
     if (real_path == NULL) {
@@ -546,7 +554,7 @@ CURLcode Curl_scp_do(struct connectdata *conn, bool *done)
   }
   else {
     /*
-     * We must check the remote file, if it is a directory no vaules will
+     * We must check the remote file; if it is a directory no values will
      * be set in sb
      */
     curl_off_t bytecount;
@@ -782,7 +790,7 @@ CURLcode Curl_sftp_do(struct connectdata *conn, bool *done)
                                 attrs.filesize);
           }
           if (attrs.flags & LIBSSH2_SFTP_ATTR_ACMODTIME) {
-            const char *months[12] = {
+            static const char * const months[12] = {
               "Jan", "Feb", "Mar", "Apr", "May", "Jun",
               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
             struct tm *nowParts;
