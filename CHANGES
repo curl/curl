@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (15 March 2007)
+- Nick made the curl tool accept globbing ranges that only is one number, i.e
+  you can now use [1-1] without curl complaining.
+
 Daniel (10 March 2007)
 - Eygene Ryabinkin:
 
