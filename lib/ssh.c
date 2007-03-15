@@ -307,6 +307,7 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
   if (ssh->ssh_session == NULL) {
     failf(data, "Failure initialising ssh session\n");
     Curl_safefree(ssh->path);
+    Curl_safefree(working_path);
     return CURLE_FAILED_INIT;
   }
 #ifdef CURL_LIBSSH2_DEBUG
@@ -318,6 +319,7 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
     libssh2_session_free(ssh->ssh_session);
     ssh->ssh_session = NULL;
     Curl_safefree(ssh->path);
+    Curl_safefree(working_path);
     return CURLE_FAILED_INIT;
   }
 
@@ -356,6 +358,7 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
     libssh2_session_free(ssh->ssh_session);
     ssh->ssh_session = NULL;
     Curl_safefree(ssh->path);
+    Curl_safefree(working_path);
     return CURLE_OUT_OF_MEMORY;
   }
   infof(data, "SSH authentication methods available: %s\n", authlist);
@@ -424,6 +427,7 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
     libssh2_session_free(ssh->ssh_session);
     ssh->ssh_session = NULL;
     Curl_safefree(ssh->path);
+    Curl_safefree(working_path);
     return CURLE_FAILED_INIT;
   }
 
@@ -442,6 +446,7 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
       failf(data, "Failure initialising sftp session\n");
       libssh2_session_free(ssh->ssh_session);
       ssh->ssh_session = NULL;
+      Curl_safefree(working_path);
       return CURLE_FAILED_INIT;
     }
 
@@ -458,6 +463,7 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
         ssh->sftp_session = NULL;
         libssh2_session_free(ssh->ssh_session);
         ssh->ssh_session = NULL;
+        Curl_safefree(working_path);
         return CURLE_OUT_OF_MEMORY;
       }
     }
@@ -472,9 +478,11 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
   if (conn->protocol == PROT_SCP) {
     real_path = (char *)malloc(working_path_len+1);
     if (real_path == NULL) {
-      Curl_safefree(working_path);
+      libssh2_sftp_shutdown(ssh->sftp_session);
+      ssh->sftp_session = NULL;
       libssh2_session_free(ssh->ssh_session);
       ssh->ssh_session = NULL;
+      Curl_safefree(working_path);
       return CURLE_OUT_OF_MEMORY;
     }
     if (working_path[1] == '~')
@@ -507,6 +515,8 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
     else {
       real_path = (char *)malloc(working_path_len+1);
       if (real_path == NULL) {
+        libssh2_sftp_shutdown(ssh->sftp_session);
+        ssh->sftp_session = NULL;
         libssh2_session_free(ssh->ssh_session);
         ssh->ssh_session = NULL;
         Curl_safefree(working_path);
@@ -515,8 +525,14 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
       memcpy(real_path, working_path, 1+working_path_len);
     }
   }
-  else
+  else {
+    libssh2_sftp_shutdown(ssh->sftp_session);
+    ssh->sftp_session = NULL;
+    libssh2_session_free(ssh->ssh_session);
+    ssh->ssh_session = NULL;
+    Curl_safefree(working_path);
     return CURLE_FAILED_INIT;
+  }
 
   Curl_safefree(working_path);
   ssh->path = real_path;
