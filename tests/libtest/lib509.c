@@ -15,6 +15,10 @@
 #include <sys/types.h>
 
 #include <openssl/opensslv.h>
+#include <openssl/ssl.h>
+
+#ifndef YASSL_VERSION
+
 #include <openssl/x509v3.h>
 #include <openssl/x509_vfy.h>
 #include <openssl/crypto.h>
@@ -25,7 +29,6 @@
 #include <openssl/x509.h>
 #include <openssl/pkcs12.h>
 #include <openssl/bio.h>
-#include <openssl/ssl.h>
 
 #include "testutil.h"
 
@@ -332,7 +335,7 @@ int test(char *URL)
 
   return i;
 }
-
+#endif /* YASSL_VERSION */
 #else /* USE_SSLEAY */
 
 int test(char *URL)
