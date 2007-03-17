@@ -26,7 +26,10 @@ CFLAGS += -DWATT32 -DHAVE_AF_INET6 -DHAVE_PF_INET6 -DHAVE_FIONBIO \
 LDFLAGS = -s
 
 ifeq ($(USE_DEBUG),1)
-  EX_LIBS = ../lib/libcurl.a
+  EX_LIBS  = ../lib/libcurl.a
+  OBJ_HACK = $(OBJECTS)
+else
+  OBJ_HACK = libcares.a
 endif
 
 ifeq ($(USE_SSL),1)
@@ -52,10 +55,10 @@ all: $(OBJ_DIR) libcares.a ahost.exe adig.exe
 libcares.a: $(OBJECTS)
 	ar rs $@ $?
 
-ahost.exe: ahost.c libcares.a
+ahost.exe: ahost.c $(OBJ_HACK)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $^ $(EX_LIBS)
 
-adig.exe: adig.c libcares.a
+adig.exe: adig.c $(OBJ_HACK)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $^ $(EX_LIBS)
 
 clean:
