@@ -9,9 +9,6 @@
 /*                          HEADER FILES                            */
 /* ---------------------------------------------------------------- */
 
-/* Define if you have the <alloca.h> header file.  */
-/* #define HAVE_ALLOCA_H 1 */
-
 /* Define if you have the <arpa/inet.h> header file.  */
 /* #define HAVE_ARPA_INET_H 1 */
 
@@ -35,11 +32,6 @@
 
 /* Define if you have the <io.h> header file.  */
 #define HAVE_IO_H 1
-
-/* Define if you have the <malloc.h> header file.  */
-#ifndef __SALFORDC__
-#define HAVE_MALLOC_H 1
-#endif
 
 /* Define if you need the malloc.h header file even with stdlib.h  */
 #ifndef __SALFORDC__
@@ -218,16 +210,10 @@
 /* Define if you have the tcsetattr function.  */
 /* #define HAVE_TCSETATTR 1 */
 
-/* Define if you have the uname function.  */
-/* #define HAVE_UNAME 1 */
-
 /* Define if you have the utime function */
 #ifndef __BORLANDC__
 #define HAVE_UTIME 1
 #endif
-
-/* Define if you have the vprintf function.  */
-#define HAVE_VPRINTF 1
 
 /* Define if you have the getnameinfo function. */
 #define HAVE_GETNAMEINFO 1
@@ -375,7 +361,7 @@
 
 /* Define cpu-machine-OS */
 #undef OS
-#if defined(_M_IX86) /* x86 */
+#if defined(_M_IX86) || defined(__i386__) /* x86 (MSVC or gcc) */
 #define OS "i386-pc-win32"
 #elif defined(_M_IA64) /* Itanium */
 #define OS "ia64-pc-win32"
