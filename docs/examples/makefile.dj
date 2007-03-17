@@ -1,13 +1,16 @@
+#  $Id$
 #
 #  Adapted for djgpp / Watt-32 / DOS by
 #  Gisle Vanem <giva@bgnett.no>
 #
 
-include ../../packages/DOS/common.dj
+TOPDIR = ../..
 
-CFLAGS += -I../../include -DFALSE=0 -DTRUE=1
+include $(TOPDIR)/packages/DOS/common.dj
 
-LIBS = ../../lib/libcurl.a
+CFLAGS += -DFALSE=0 -DTRUE=1
+
+LIBS = $(TOPDIR)/lib/libcurl.a
 
 ifeq ($(USE_SSL),1)
   LIBS += $(OPENSSL_ROOT)/lib/libssl.a $(OPENSSL_ROOT)/lib/libcrypt.a
@@ -15,22 +18,24 @@ endif
 
 LIBS += $(WATT32_ROOT)/lib/libwatt.a $(ZLIB_ROOT)/libz.a
 
-CSOURCES = fopen.c ftpget.c ftpgetresp.c ftpupload.c getinmemory.c \
-           http-post.c httpput.c multi-app.c multi-double.c multi-post.c \
-           multi-single.c persistant.c post-callback.c postit2.c \
-           sepheaders.c simple.c simplessl.c https.c ftp3rdparty.c \
-           getinfo.c anyauthput.c cookie_interface.c 10-at-a-time.c
+CSOURCES = fopen.c ftpget.c ftpgetresp.c ftpupload.c getinmemory.c  \
+           http-post.c httpput.c https.c multi-app.c multi-double.c \
+           multi-post.c multi-single.c persistant.c post-callback.c \
+           postit2.c sepheaders.c simple.c simplepost.c simplessl.c \
+           multi-debugcallback.c fileupload.c getinfo.c anyauthput.c \
+           10-at-a-time.c # ftpuploadresume.c ftp3rdparty.c cookie_interface.c
 
 PROGRAMS = $(CSOURCES:.c=.exe)
 
 all: $(PROGRAMS)
+	@echo Welcome to libcurl example program
 
 %.exe: %.c
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 	@echo
 
-clean:
-	rm -f $(PROGRAMS)
+clean vclean realclean:
+	- rm -f $(PROGRAMS) depend.dj
 
-# DO NOT DELETE THIS LINE
+-include depend.dj
 
