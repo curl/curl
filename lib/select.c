@@ -66,6 +66,33 @@
 #endif
 
 /*
+ * Internal function used for waiting a specific amount of ms
+ * in Curl_select() and Curl_poll() when no file descriptor is
+ * provided to wait on, just being used to delay execution.
+ * WinSock select() and poll() timeout mechanisms need a valid
+ * socket descriptor in a not null file descriptor set to work.
+ * Waiting indefinitely with this function is not allowed, a
+ * zero or negative timeout value will return immediately.
+ */
+static void wait_ms(int timeout_ms)
+{
+  if (timeout_ms <= 0)
+    return;
+#if defined(__MSDOS__)
+  delay(timeout_ms);
+#elif defined(USE_WINSOCK)
+  Sleep(timeout_ms);
+#elif defined(HAVE_POLL_FINE)
+  poll(NULL, 0, timeout_ms);
+#else
+  struct timeval timeout;
+  timeout.tv_sec = timeout_ms / 1000;
+  timeout.tv_usec = (timeout_ms % 1000) * 1000;
+  select(0, NULL, NULL, NULL, &timeout);
+#endif
+}
+
+/*
  * This is an internal function used for waiting for read or write
  * events on single file descriptors.  It attempts to replace select()
  * in order to avoid limits with FD_SETSIZE.
@@ -77,11 +104,25 @@
  */
 int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
 {
-#if defined(HAVE_POLL_FINE) || defined(CURL_HAVE_WSAPOLL)
+#ifdef HAVE_POLL_FINE
   struct pollfd pfd[2];
   int num;
+#else
+  struct timeval timeout;
+  fd_set fds_read;
+  fd_set fds_write;
+  fd_set fds_err;
+  curl_socket_t maxfd;
+#endif
   int r;
   int ret;
+
+  if((readfd == CURL_SOCKET_BAD) && (writefd == CURL_SOCKET_BAD)) {
+    wait_ms(timeout_ms);
+    return 0;
+  }
+
+#ifdef HAVE_POLL_FINE
 
   num = 0;
   if (readfd != CURL_SOCKET_BAD) {
@@ -96,11 +137,7 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
   }
 
   do {
-#ifdef CURL_HAVE_WSAPOLL
-    r = WSAPoll(pfd, num, timeout_ms);
-#else
     r = poll(pfd, num, timeout_ms);
-#endif
   } while((r == -1) && (SOCKERRNO == EINTR));
 
   if (r < 0)
@@ -132,32 +169,11 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
   }
 
   return ret;
-#else
-  struct timeval timeout;
-  fd_set fds_read;
-  fd_set fds_write;
-  fd_set fds_err;
-  curl_socket_t maxfd;
-  int r;
-  int ret;
+
+#else  /* HAVE_POLL_FINE */
 
   timeout.tv_sec = timeout_ms / 1000;
   timeout.tv_usec = (timeout_ms % 1000) * 1000;
-
-  if((readfd == CURL_SOCKET_BAD) && (writefd == CURL_SOCKET_BAD)) {
-    /* According to POSIX we should pass in NULL pointers if we don't want to
-       wait for anything in particular but just use the timeout function.
-       Windows however returns immediately if done so. I copied the MSDOS
-       delay() use from src/main.c that already had this work-around. */
-#ifdef WIN32
-    Sleep(timeout_ms);
-#elif defined(__MSDOS__)
-    delay(timeout_ms);
-#else
-    select(0, NULL, NULL, NULL, &timeout);
-#endif
-    return 0;
-  }
 
   FD_ZERO(&fds_err);
   maxfd = (curl_socket_t)-1;
@@ -203,7 +219,9 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
   }
 
   return ret;
-#endif
+
+#endif  /* HAVE_POLL_FINE */
+
 }
 
 /*
@@ -218,23 +236,38 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
  */
 int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
 {
-  int r;
-#ifdef HAVE_POLL_FINE
-  do {
-#ifdef CURL_HAVE_WSAPOLL
-    r = WSAPoll(ufds, nfds, timeout_ms);
-#else
-    r = poll(ufds, nfds, timeout_ms);
-#endif
-  } while((r == -1) && (SOCKERRNO == EINTR));
-#else  /* HAVE_POLL_FINE */
+#ifndef HAVE_POLL_FINE
   struct timeval timeout;
   struct timeval *ptimeout;
   fd_set fds_read;
   fd_set fds_write;
   fd_set fds_err;
   curl_socket_t maxfd;
+#endif
+  bool fds_none = TRUE;
   unsigned int i;
+  int r;
+
+  if (ufds) {
+    for (i = 0; i < nfds; i++) {
+      if (ufds[i].fd != CURL_SOCKET_BAD) {
+        fds_none = FALSE;
+        break;
+      }
+    }
+  }
+  if (fds_none) {
+    wait_ms(timeout_ms);
+    return 0;
+  }
+
+#ifdef HAVE_POLL_FINE
+
+  do {
+    r = poll(ufds, nfds, timeout_ms);
+  } while((r == -1) && (SOCKERRNO == EINTR));
+
+#else  /* HAVE_POLL_FINE */
 
   FD_ZERO(&fds_read);
   FD_ZERO(&fds_write);
@@ -244,13 +277,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
   for (i = 0; i < nfds; i++) {
     if (ufds[i].fd == CURL_SOCKET_BAD)
       continue;
-#if !defined(USE_WINSOCK) && !defined(TPF)
-    /* Winsock and TPF sockets are not in range [0..FD_SETSIZE-1] */
-    if (ufds[i].fd >= FD_SETSIZE) {
-      SET_SOCKERRNO(EINVAL);
-      return -1;
-    }
-#endif
+    VERIFY_SOCK(ufds[i].fd);
     if (ufds[i].fd > maxfd)
       maxfd = ufds[i].fd;
     if (ufds[i].events & POLLIN)
@@ -292,7 +319,9 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
     if (ufds[i].revents != 0)
       r++;
   }
+
 #endif  /* HAVE_POLL_FINE */
+
   return r;
 }
 
