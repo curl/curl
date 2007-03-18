@@ -76,6 +76,11 @@
  */
 static void wait_ms(int timeout_ms)
 {
+#if !defined(__MSDOS__)   && \
+    !defined(USE_WINSOCK) && \
+    !defined(HAVE_POLL_FINE)
+  struct timeval timeout;
+#endif
   if (timeout_ms <= 0)
     return;
 #if defined(__MSDOS__)
@@ -85,7 +90,6 @@ static void wait_ms(int timeout_ms)
 #elif defined(HAVE_POLL_FINE)
   poll(NULL, 0, timeout_ms);
 #else
-  struct timeval timeout;
   timeout.tv_sec = timeout_ms / 1000;
   timeout.tv_usec = (timeout_ms % 1000) * 1000;
   select(0, NULL, NULL, NULL, &timeout);
