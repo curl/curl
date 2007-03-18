@@ -1023,9 +1023,6 @@ if test X"$OPT_SSL" != Xno; then
         OPENSSL_ENABLED=1
         AC_DEFINE(USE_OPENSSL, 1, [if OpenSSL is in use]))
 
-      dnl yassl doesn't have SSL_get_shutdown ?
-      AC_CHECK_FUNCS( SSL_get_shutdown )
-
       if test $ac_cv_header_openssl_x509_h = no; then
         dnl we don't use the "action" part of the AC_CHECK_HEADERS macro
         dnl since 'err.h' might in fact find a krb4 header with the same
@@ -1071,12 +1068,33 @@ if test X"$OPT_SSL" != Xno; then
               ])
 
     dnl these can only exist if openssl exists
+    dnl yassl doesn't have SSL_get_shutdown
 
     AC_CHECK_FUNCS( RAND_status \
                     RAND_screen \
                     RAND_egd \
-                    CRYPTO_cleanup_all_ex_data )
+                    CRYPTO_cleanup_all_ex_data \
+                    SSL_get_shutdown )
 
+    dnl Make an attempt to detect if this is actually yassl's headers and
+    dnl OpenSSL emulation layer. We still leave everything else believing
+    dnl and acting like OpenSSL.
+
+    AC_MSG_CHECKING([for yassl in disguise])
+    AC_EGREP_CPP([^check for YASSL_VERSION], [
+#include <openssl/ssl.h>
+check for YASSL_VERSION
+],
+         dnl action if the text is found, this it has not been replaced by the
+         dnl cpp
+         AC_MSG_RESULT([no])
+         ,
+         dnl the text was not found, it was replaced by the cpp
+         yassl="yes"
+         AC_DEFINE(USE_YASSLEMUL, 1, [if you use yassl])
+         AC_MSG_RESULT([yes])
+         curl_ssl_msg="enabled (OpenSSL emulation by yassl)"
+       )
   fi
 
   if test "$OPENSSL_ENABLED" = "1"; then
