@@ -160,7 +160,7 @@ restart servers.
 
 <precheck>
 A command line that if set gets run by the test script before the test. If an
-output is displayed by the command line, the test will be skipped and the
+output is displayed by the command, the test will be skipped and the
 (single-line) output will be displayed as reason for not running the test.
 Variables are substituted as in the <command> section.
 </precheck>
