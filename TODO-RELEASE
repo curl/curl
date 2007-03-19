@@ -25,7 +25,4 @@ To be addressed before 7.16.2 (planned release: March/April 2007)
 90 - Crash during gethostbyname in libcurl (Sebastien Trottier)
      http://curl.haxx.se/mail/lib-2007-03/0158.html
 
-91 - Frequent calling of user progress callback (Bryan Henderson)
-     http://curl.haxx.se/mail/lib-2007-03/0204.html
-
 92 -
