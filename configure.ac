@@ -1080,21 +1080,23 @@ if test X"$OPT_SSL" != Xno; then
     dnl OpenSSL emulation layer. We still leave everything else believing
     dnl and acting like OpenSSL.
 
-    AC_MSG_CHECKING([for yassl in disguise])
-    AC_EGREP_CPP([^check for YASSL_VERSION], [
+    AC_MSG_CHECKING([for yaSSL using OpenSSL compatibility mode])
+    AC_TRY_COMPILE([
 #include <openssl/ssl.h>
-check for YASSL_VERSION
-],
-         dnl action if the text is found, this it has not been replaced by the
-         dnl cpp
-         AC_MSG_RESULT([no])
-         ,
-         dnl the text was not found, it was replaced by the cpp
-         yassl="yes"
-         AC_DEFINE(USE_YASSLEMUL, 1, [if you use yassl])
-         AC_MSG_RESULT([yes])
-         curl_ssl_msg="enabled (OpenSSL emulation by yassl)"
-       )
+      ],[
+#if defined(YASSL_VERSION) && defined(OPENSSL_VERSION_NUMBER)
+        int dummy = SSL_ERROR_NONE;
+#else
+        Not the yaSSL OpenSSL compatibility header.
+#endif
+      ],[ 
+        AC_MSG_RESULT([yes])
+        AC_DEFINE_UNQUOTED(USE_YASSLEMUL, 1,
+          [Define to 1 if using yaSSL in OpenSSL compatibility mode.])
+        curl_ssl_msg="enabled (OpenSSL emulation by yaSSL)"
+      ],[
+        AC_MSG_RESULT([no])
+    ])
   fi
 
   if test "$OPENSSL_ENABLED" = "1"; then
