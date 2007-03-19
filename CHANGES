@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Yang Tse (19 March 2007)
+- Bryan Henderson fixed the progress function so that it can get called more
+  frequently allowing same calling frecuency for the client progress callback.
+  
 Dan F (15 March 2007)
 - Various memory leaks plugged and NULL pointer fixes made in the ssh code.
 

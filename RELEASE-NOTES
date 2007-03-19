@@ -41,6 +41,7 @@ This release includes the following bugfixes:
  o CURLOPT_PORT, HTTP proxy, re-using connections and non-HTTP protocols
  o CURLOPT_INTERFACE for ipv6
  o use-after-free issue with HTTP transfers with the multi interface
+ o the progress callback can get called more frequently
 
 This release includes the following known bugs:
 
