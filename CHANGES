@@ -6,6 +6,19 @@
 
                                   Changelog
 
+Yang Tse (20 March 2007)
+- Fixed: When a signal was caught awaiting for an event using Curl_select()
+  or Curl_poll() with a non-zero timeout both functions would restart the
+  specified timeout. This could even lead to the extreme case that if a
+  signal arrived with a frecuency lower to the specified timeout neither
+  function would ever exit.
+
+  Added experimental symbol definition check CURL_ACKNOWLEDGE_EINTR in
+  Curl_select() and Curl_poll(). When compiled with CURL_ACKNOWLEDGE_EINTR
+  defined both functions will return as soon as a signal is caught. Use it
+  at your own risk, all calls to these functions in the library should be
+  revisited and checked before fully supporting this feature.
+
 Yang Tse (19 March 2007)
 - Bryan Henderson fixed the progress function so that it can get called more
   frequently allowing same calling frecuency for the client progress callback.

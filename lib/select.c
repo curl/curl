@@ -51,6 +51,13 @@
 #include "connect.h"
 #include "select.h"
 
+#ifdef USE_WINSOCK
+#  undef  EINTR
+#  define EINTR  WSAEINTR
+#  undef  EINVAL
+#  define EINVAL WSAEINVAL
+#endif
+
 /* Winsock and TPF sockets are not in range [0..FD_SETSIZE-1] */
 
 #if defined(USE_WINSOCK) || defined(TPF)
@@ -98,11 +105,19 @@ static void wait_ms(int timeout_ms)
 
 /*
  * This is an internal function used for waiting for read or write
- * events on single file descriptors.  It attempts to replace select()
- * in order to avoid limits with FD_SETSIZE.
+ * events on a pair of file descriptors.  It uses poll() when a fine
+ * poll() is available, in order to avoid limits with FD_SETSIZE,
+ * otherwise select() is used.  An error is returned if select() is
+ * being used and a file descriptor is too large for FD_SETSIZE.
+ * A negative timeout value makes this function wait indefinitely,
+ * unles no valid file descriptor is given, when this happens the
+ * negative timeout is ignored and the function times out immediately.
+ * When compiled with CURL_ACKNOWLEDGE_EINTR defined, EINTR condition
+ * is honored and function will exit early without awaiting timeout,
+ * otherwise EINTR will be ignored.
  *
  * Return values:
- *   -1 = system call error
+ *   -1 = system call error or fd >= FD_SETSIZE
  *    0 = timeout
  *    CSELECT_IN | CSELECT_OUT | CSELECT_ERR
  */
@@ -112,12 +127,15 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
   struct pollfd pfd[2];
   int num;
 #else
-  struct timeval timeout;
+  struct timeval pending_tv;
+  struct timeval *ptimeout;
   fd_set fds_read;
   fd_set fds_write;
   fd_set fds_err;
   curl_socket_t maxfd;
 #endif
+  struct timeval initial_tv;
+  int pending_ms;
   int r;
   int ret;
 
@@ -126,23 +144,35 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
     return 0;
   }
 
+  pending_ms = timeout_ms;
+  initial_tv = curlx_tvnow();
+
 #ifdef HAVE_POLL_FINE
 
   num = 0;
   if (readfd != CURL_SOCKET_BAD) {
     pfd[num].fd = readfd;
     pfd[num].events = POLLIN;
+    pfd[num].revents = 0;
     num++;
   }
   if (writefd != CURL_SOCKET_BAD) {
     pfd[num].fd = writefd;
     pfd[num].events = POLLOUT;
+    pfd[num].revents = 0;
     num++;
   }
 
   do {
-    r = poll(pfd, num, timeout_ms);
-  } while((r == -1) && (SOCKERRNO == EINTR));
+    if (timeout_ms < 0)
+      pending_ms = -1;
+    r = poll(pfd, num, pending_ms);
+  } while ((r == -1) && (SOCKERRNO != EINVAL) &&
+#ifdef CURL_ACKNOWLEDGE_EINTR
+    (SOCKERRNO != EINTR) &&
+#endif
+    ((timeout_ms < 0) ||
+    ((pending_ms = timeout_ms - curlx_tvdiff(curlx_tvnow(), initial_tv)) > 0)));
 
   if (r < 0)
     return -1;
@@ -176,9 +206,6 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
 
 #else  /* HAVE_POLL_FINE */
 
-  timeout.tv_sec = timeout_ms / 1000;
-  timeout.tv_usec = (timeout_ms % 1000) * 1000;
-
   FD_ZERO(&fds_err);
   maxfd = (curl_socket_t)-1;
 
@@ -199,9 +226,20 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
       maxfd = writefd;
   }
 
+  ptimeout = (timeout_ms < 0) ? NULL : &pending_tv;
+
   do {
-    r = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
-  } while((r == -1) && (SOCKERRNO == EINTR));
+    if (ptimeout) {
+      pending_tv.tv_sec = pending_ms / 1000;
+      pending_tv.tv_usec = (pending_ms % 1000) * 1000;
+    }
+    r = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, ptimeout);
+  } while ((r == -1) && (SOCKERRNO != EINVAL) &&
+#ifdef CURL_ACKNOWLEDGE_EINTR
+    (SOCKERRNO != EINTR) &&
+#endif
+    ((timeout_ms < 0) ||
+    ((pending_ms = timeout_ms - curlx_tvdiff(curlx_tvnow(), initial_tv)) > 0)));
 
   if (r < 0)
     return -1;
@@ -231,25 +269,33 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
 /*
  * This is a wrapper around poll().  If poll() does not exist, then
  * select() is used instead.  An error is returned if select() is
- * being used and a file descriptor too large for FD_SETSIZE.
+ * being used and a file descriptor is too large for FD_SETSIZE.
+ * A negative timeout value makes this function wait indefinitely,
+ * unles no valid file descriptor is given, when this happens the
+ * negative timeout is ignored and the function times out immediately.
+ * When compiled with CURL_ACKNOWLEDGE_EINTR defined, EINTR condition
+ * is honored and function will exit early without awaiting timeout,
+ * otherwise EINTR will be ignored.
  *
  * Return values:
  *   -1 = system call error or fd >= FD_SETSIZE
  *    0 = timeout
- *    1 = number of structures with non zero revent fields
+ *    N = number of structures with non zero revent fields
  */
 int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
 {
 #ifndef HAVE_POLL_FINE
-  struct timeval timeout;
+  struct timeval pending_tv;
   struct timeval *ptimeout;
   fd_set fds_read;
   fd_set fds_write;
   fd_set fds_err;
   curl_socket_t maxfd;
 #endif
+  struct timeval initial_tv;
   bool fds_none = TRUE;
   unsigned int i;
+  int pending_ms;
   int r;
 
   if (ufds) {
@@ -265,11 +311,21 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
     return 0;
   }
 
+  pending_ms = timeout_ms;
+  initial_tv = curlx_tvnow();
+
 #ifdef HAVE_POLL_FINE
 
   do {
-    r = poll(ufds, nfds, timeout_ms);
-  } while((r == -1) && (SOCKERRNO == EINTR));
+    if (timeout_ms < 0)
+      pending_ms = -1;
+    r = poll(ufds, nfds, pending_ms);
+  } while ((r == -1) && (SOCKERRNO != EINVAL) &&
+#ifdef CURL_ACKNOWLEDGE_EINTR
+    (SOCKERRNO != EINTR) &&
+#endif
+    ((timeout_ms < 0) ||
+    ((pending_ms = timeout_ms - curlx_tvdiff(curlx_tvnow(), initial_tv)) > 0)));
 
 #else  /* HAVE_POLL_FINE */
 
@@ -279,30 +335,36 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
   maxfd = (curl_socket_t)-1;
 
   for (i = 0; i < nfds; i++) {
+    ufds[i].revents = 0;
     if (ufds[i].fd == CURL_SOCKET_BAD)
       continue;
     VERIFY_SOCK(ufds[i].fd);
-    if (ufds[i].fd > maxfd)
-      maxfd = ufds[i].fd;
-    if (ufds[i].events & POLLIN)
-      FD_SET(ufds[i].fd, &fds_read);
-    if (ufds[i].events & POLLOUT)
-      FD_SET(ufds[i].fd, &fds_write);
-    if (ufds[i].events & POLLERR)
-      FD_SET(ufds[i].fd, &fds_err);
+    if (ufds[i].events & (POLLIN|POLLOUT|POLLERR)) {
+      if (ufds[i].fd > maxfd)
+        maxfd = ufds[i].fd;
+      if (ufds[i].events & POLLIN)
+        FD_SET(ufds[i].fd, &fds_read);
+      if (ufds[i].events & POLLOUT)
+        FD_SET(ufds[i].fd, &fds_write);
+      if (ufds[i].events & POLLERR)
+        FD_SET(ufds[i].fd, &fds_err);
+    }
   }
 
-  if (timeout_ms < 0) {
-    ptimeout = NULL;      /* wait forever */
-  } else {
-    timeout.tv_sec = timeout_ms / 1000;
-    timeout.tv_usec = (timeout_ms % 1000) * 1000;
-    ptimeout = &timeout;
-  }
+  ptimeout = (timeout_ms < 0) ? NULL : &pending_tv;
 
   do {
+    if (ptimeout) {
+      pending_tv.tv_sec = pending_ms / 1000;
+      pending_tv.tv_usec = (pending_ms % 1000) * 1000;
+    }
     r = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, ptimeout);
-  } while((r == -1) && (SOCKERRNO == EINTR));
+  } while ((r == -1) && (SOCKERRNO != EINVAL) &&
+#ifdef CURL_ACKNOWLEDGE_EINTR
+    (SOCKERRNO != EINTR) &&
+#endif
+    ((timeout_ms < 0) ||
+    ((pending_ms = timeout_ms - curlx_tvdiff(curlx_tvnow(), initial_tv)) > 0)));
 
   if (r < 0)
     return -1;

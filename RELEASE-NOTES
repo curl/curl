@@ -21,6 +21,7 @@ This release includes the following changes:
  o added the --ftp-ssl-ccc-mode command line option
  o includes VC8 Makefiles in the release archive
  o --ftp-ssl-control is now honoured on ftps:// URLs
+ o added experimental CURL_ACKNOWLEDGE_EINTR symbol definition check
 
 This release includes the following bugfixes:
 
@@ -42,6 +43,7 @@ This release includes the following bugfixes:
  o CURLOPT_INTERFACE for ipv6
  o use-after-free issue with HTTP transfers with the multi interface
  o the progress callback can get called more frequently
+ o timeout would restart when signal caught while awaiting socket events
 
 This release includes the following known bugs:
 
