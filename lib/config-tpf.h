@@ -74,9 +74,6 @@
 /* Define to the type of arg 7 for getnameinfo. */
 /* #undef GETNAMEINFO_TYPE_ARG7 */
 
-/* Define to 1 if you have the <alloca.h> header file. */
-#define HAVE_ALLOCA_H 1
-
 /* Define to 1 if you have the <arpa/inet.h> header file. */
 #define HAVE_ARPA_INET_H 1
 
@@ -286,9 +283,6 @@
 
 /* if your compiler supports long long */
 #define HAVE_LONGLONG 1
-
-/* Define to 1 if you have the <malloc.h> header file. */
-/* #undef HAVE_MALLOC_H */
 
 /* Define to 1 if you need the malloc.h header file even with stdlib.h  */
 /* #undef NEED_MALLOC_H */
@@ -538,9 +532,6 @@
 
 /* Define to 1 if you have the `tld_strerror' function. */
 /* #undef HAVE_TLD_STRERROR */
-
-/* Define to 1 if you have the `uname' function. */
-/* #undef HAVE_UNAME */
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H 1

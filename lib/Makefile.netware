@@ -335,7 +335,6 @@ config.h: Makefile.netware
 	@echo $(DL)#define HAVE_INTTYPES_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_LIMITS_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_LONGLONG 1$(DL) >> $@
-	@echo $(DL)#define HAVE_MALLOC_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_NETINET_IN_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_RECV 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SELECT 1$(DL) >> $@
@@ -360,7 +359,6 @@ config.h: Makefile.netware
 	@echo $(DL)#define HAVE_SYS_TIME_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_TERMIOS_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_TIME_H 1$(DL) >> $@
-	@echo $(DL)#define HAVE_UNAME 1$(DL) >> $@
 	@echo $(DL)#define HAVE_UNISTD_H 1$(DL) >> $@
 	@echo $(DL)#define RECV_TYPE_ARG1 int$(DL) >> $@
 	@echo $(DL)#define RECV_TYPE_ARG2 char *$(DL) >> $@

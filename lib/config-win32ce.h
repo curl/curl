@@ -9,9 +9,6 @@
 /*                          HEADER FILES                            */
 /* ---------------------------------------------------------------- */
 
-/* Define if you have the <alloca.h> header file.  */
-/* #define HAVE_ALLOCA_H 1 */
-
 /* Define if you have the <arpa/inet.h> header file.  */
 /* #define HAVE_ARPA_INET_H 1 */
 
@@ -35,9 +32,6 @@
 
 /* Define if you have the <io.h> header file.  */
 #define HAVE_IO_H 1
-
-/* Define if you have the <malloc.h> header file.  */
-#define HAVE_MALLOC_H 1
 
 /* Define if you need the malloc.h header header file even with stdlib.h  */
 #define NEED_MALLOC_H 1
@@ -204,14 +198,8 @@
 /* Define if you have the tcsetattr function.  */
 /* #define HAVE_TCSETATTR 1 */
 
-/* Define if you have the uname function.  */
-/* #define HAVE_UNAME 1 */
-
 /* Define if you have the utime function */
 #define HAVE_UTIME 1
-
-/* Define if you have the vprintf function.  */
-#define HAVE_VPRINTF 1
 
 /* Define if you have the getnameinfo function. */
 #define HAVE_GETNAMEINFO 1
