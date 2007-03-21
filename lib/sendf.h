@@ -28,7 +28,19 @@ CURLcode Curl_sendf(curl_socket_t sockfd, struct connectdata *,
 void Curl_infof(struct SessionHandle *, const char *fmt, ...);
 void Curl_failf(struct SessionHandle *, const char *fmt, ...);
 
+#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(__GNUC__)
+/* This style of variable argument macros is a gcc extension */
+#define infof(x...) /*ignore*/
+#else
+/* C99 compilers could use this if we could detect them */
+/*#define infof(...) */
+/* Cast the args to void to make them a noop, side effects notwithstanding */
+#define infof (void)
+#endif
+#else
 #define infof Curl_infof
+#endif
 #define failf Curl_failf
 
 #define CLIENTWRITE_BODY   1

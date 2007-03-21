@@ -224,10 +224,6 @@ static size_t convert_lineends(struct SessionHandle *data,
 
 void Curl_infof(struct SessionHandle *data, const char *fmt, ...)
 {
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-  (void)fmt;
-#else
   if(data && data->set.verbose) {
     va_list ap;
     size_t len;
@@ -238,7 +234,6 @@ void Curl_infof(struct SessionHandle *data, const char *fmt, ...)
     len = strlen(print_buffer);
     Curl_debug(data, CURLINFO_TEXT, print_buffer, len, NULL);
   }
-#endif
 }
 
 /* Curl_failf() is for messages stating why we failed.
