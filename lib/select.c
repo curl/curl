@@ -172,7 +172,7 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
     (SOCKERRNO != EINTR) &&
 #endif
     ((timeout_ms < 0) ||
-    ((pending_ms = timeout_ms - curlx_tvdiff(curlx_tvnow(), initial_tv)) > 0)));
+    ((pending_ms = timeout_ms - (int)curlx_tvdiff(curlx_tvnow(), initial_tv)) > 0)));
 
   if (r < 0)
     return -1;
@@ -239,7 +239,7 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
     (SOCKERRNO != EINTR) &&
 #endif
     ((timeout_ms < 0) ||
-    ((pending_ms = timeout_ms - curlx_tvdiff(curlx_tvnow(), initial_tv)) > 0)));
+    ((pending_ms = timeout_ms - (int)curlx_tvdiff(curlx_tvnow(), initial_tv)) > 0)));
 
   if (r < 0)
     return -1;
@@ -325,7 +325,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
     (SOCKERRNO != EINTR) &&
 #endif
     ((timeout_ms < 0) ||
-    ((pending_ms = timeout_ms - curlx_tvdiff(curlx_tvnow(), initial_tv)) > 0)));
+    ((pending_ms = timeout_ms - (int)curlx_tvdiff(curlx_tvnow(), initial_tv)) > 0)));
 
 #else  /* HAVE_POLL_FINE */
 
@@ -364,7 +364,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
     (SOCKERRNO != EINTR) &&
 #endif
     ((timeout_ms < 0) ||
-    ((pending_ms = timeout_ms - curlx_tvdiff(curlx_tvnow(), initial_tv)) > 0)));
+    ((pending_ms = timeout_ms - (int)curlx_tvdiff(curlx_tvnow(), initial_tv)) > 0)));
 
   if (r < 0)
     return -1;
