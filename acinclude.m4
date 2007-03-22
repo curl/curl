@@ -2011,8 +2011,8 @@ AC_DEFUN([CURL_CHECK_VARIADIC_MACROS], [
         int fun2(int arg1, int arg2)
         { return arg1 + arg2; }
       ],[
-        int res3 = c99_vmacro3(1, 2, 3);
-        int res2 = c99_vmacro2(1, 2);
+        int res3 = gcc_vmacro3(1, 2, 3);
+        int res2 = gcc_vmacro2(1, 2);
       ])
     ],[
       curl_cv_variadic_macros_gcc="yes"
