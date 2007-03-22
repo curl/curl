@@ -72,6 +72,16 @@
 } while(0)
 #endif
 
+/* Convenience local macros */
+
+#define elapsed_ms  (int)curlx_tvdiff(curlx_tvnow(), initial_tv)
+
+#ifdef CURL_ACKNOWLEDGE_EINTR
+#define sockerrno_not_EINTR  (SOCKERRNO != EINTR)
+#else
+#define sockerrno_not_EINTR  (1)
+#endif
+
 /*
  * Internal function used for waiting a specific amount of ms
  * in Curl_select() and Curl_poll() when no file descriptor is
@@ -80,27 +90,56 @@
  * socket descriptor in a not null file descriptor set to work.
  * Waiting indefinitely with this function is not allowed, a
  * zero or negative timeout value will return immediately.
+ * Timeout resolution, accuracy, as well as maximum supported
+ * value is system dependant, neither factor is a citical issue
+ * for the intended use of this function in the library.
+ * On non-DOS and non-Winsock platforms, when compiled with
+ * CURL_ACKNOWLEDGE_EINTR defined, EINTR condition is honored
+ * and function might exit early without awaiting full timeout,
+ * otherwise EINTR will be ignored and full timeout will elapse.
+ *
+ * Return values:
+ *   -1 = system call error, invalid timeout value, or interrupted
+ *    0 = specified timeout has elapsed
  */
-static void wait_ms(int timeout_ms)
+static int wait_ms(int timeout_ms)
 {
-#if !defined(__MSDOS__)   && \
-    !defined(USE_WINSOCK) && \
-    !defined(HAVE_POLL_FINE)
-  struct timeval timeout;
+#if !defined(__MSDOS__) && !defined(USE_WINSOCK)
+#ifndef HAVE_POLL_FINE
+  struct timeval pending_tv;
 #endif
-  if (timeout_ms <= 0)
-    return;
+  struct timeval initial_tv;
+  int pending_ms;
+#endif
+  int r = 0;
+
+  if (!timeout_ms)
+    return 0;
+  if (timeout_ms < 0) {
+    SET_SOCKERRNO(EINVAL);
+    return -1;
+  }
 #if defined(__MSDOS__)
   delay(timeout_ms);
 #elif defined(USE_WINSOCK)
   Sleep(timeout_ms);
-#elif defined(HAVE_POLL_FINE)
-  poll(NULL, 0, timeout_ms);
 #else
-  timeout.tv_sec = timeout_ms / 1000;
-  timeout.tv_usec = (timeout_ms % 1000) * 1000;
-  select(0, NULL, NULL, NULL, &timeout);
-#endif
+  pending_ms = timeout_ms;
+  initial_tv = curlx_tvnow();
+  do {
+#if defined(HAVE_POLL_FINE)
+    r = poll(NULL, 0, pending_ms);
+#else
+    pending_tv.tv_sec = pending_ms / 1000;
+    pending_tv.tv_usec = (pending_ms % 1000) * 1000;
+    r = select(0, NULL, NULL, NULL, &pending_tv);
+#endif /* HAVE_POLL_FINE */
+  } while ((r == -1) && (SOCKERRNO != EINVAL) && sockerrno_not_EINTR &&
+           ((pending_ms = timeout_ms - elapsed_ms) > 0));
+#endif /* USE_WINSOCK */
+  if (r)
+    r = -1;
+  return r;
 }
 
 /*
@@ -113,7 +152,7 @@ static void wait_ms(int timeout_ms)
  * unles no valid file descriptor is given, when this happens the
  * negative timeout is ignored and the function times out immediately.
  * When compiled with CURL_ACKNOWLEDGE_EINTR defined, EINTR condition
- * is honored and function will exit early without awaiting timeout,
+ * is honored and function might exit early without awaiting timeout,
  * otherwise EINTR will be ignored.
  *
  * Return values:
@@ -140,8 +179,8 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
   int ret;
 
   if((readfd == CURL_SOCKET_BAD) && (writefd == CURL_SOCKET_BAD)) {
-    wait_ms(timeout_ms);
-    return 0;
+    r = wait_ms(timeout_ms);
+    return r;
   }
 
   pending_ms = timeout_ms;
@@ -167,12 +206,8 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
     if (timeout_ms < 0)
       pending_ms = -1;
     r = poll(pfd, num, pending_ms);
-  } while ((r == -1) && (SOCKERRNO != EINVAL) &&
-#ifdef CURL_ACKNOWLEDGE_EINTR
-    (SOCKERRNO != EINTR) &&
-#endif
-    ((timeout_ms < 0) ||
-    ((pending_ms = timeout_ms - (int)curlx_tvdiff(curlx_tvnow(), initial_tv)) > 0)));
+  } while ((r == -1) && (SOCKERRNO != EINVAL) && sockerrno_not_EINTR &&
+           ((timeout_ms < 0) || ((pending_ms = timeout_ms - elapsed_ms) > 0)));
 
   if (r < 0)
     return -1;
@@ -234,12 +269,8 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
       pending_tv.tv_usec = (pending_ms % 1000) * 1000;
     }
     r = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, ptimeout);
-  } while ((r == -1) && (SOCKERRNO != EINVAL) &&
-#ifdef CURL_ACKNOWLEDGE_EINTR
-    (SOCKERRNO != EINTR) &&
-#endif
-    ((timeout_ms < 0) ||
-    ((pending_ms = timeout_ms - (int)curlx_tvdiff(curlx_tvnow(), initial_tv)) > 0)));
+  } while ((r == -1) && (SOCKERRNO != EINVAL) && sockerrno_not_EINTR &&
+           ((timeout_ms < 0) || ((pending_ms = timeout_ms - elapsed_ms) > 0)));
 
   if (r < 0)
     return -1;
@@ -274,7 +305,7 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
  * unles no valid file descriptor is given, when this happens the
  * negative timeout is ignored and the function times out immediately.
  * When compiled with CURL_ACKNOWLEDGE_EINTR defined, EINTR condition
- * is honored and function will exit early without awaiting timeout,
+ * is honored and function might exit early without awaiting timeout,
  * otherwise EINTR will be ignored.
  *
  * Return values:
@@ -307,8 +338,8 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
     }
   }
   if (fds_none) {
-    wait_ms(timeout_ms);
-    return 0;
+    r = wait_ms(timeout_ms);
+    return r;
   }
 
   pending_ms = timeout_ms;
@@ -320,12 +351,8 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
     if (timeout_ms < 0)
       pending_ms = -1;
     r = poll(ufds, nfds, pending_ms);
-  } while ((r == -1) && (SOCKERRNO != EINVAL) &&
-#ifdef CURL_ACKNOWLEDGE_EINTR
-    (SOCKERRNO != EINTR) &&
-#endif
-    ((timeout_ms < 0) ||
-    ((pending_ms = timeout_ms - (int)curlx_tvdiff(curlx_tvnow(), initial_tv)) > 0)));
+  } while ((r == -1) && (SOCKERRNO != EINVAL) && sockerrno_not_EINTR &&
+           ((timeout_ms < 0) || ((pending_ms = timeout_ms - elapsed_ms) > 0)));
 
 #else  /* HAVE_POLL_FINE */
 
@@ -359,12 +386,8 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
       pending_tv.tv_usec = (pending_ms % 1000) * 1000;
     }
     r = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, ptimeout);
-  } while ((r == -1) && (SOCKERRNO != EINVAL) &&
-#ifdef CURL_ACKNOWLEDGE_EINTR
-    (SOCKERRNO != EINTR) &&
-#endif
-    ((timeout_ms < 0) ||
-    ((pending_ms = timeout_ms - (int)curlx_tvdiff(curlx_tvnow(), initial_tv)) > 0)));
+  } while ((r == -1) && (SOCKERRNO != EINVAL) && sockerrno_not_EINTR &&
+           ((timeout_ms < 0) || ((pending_ms = timeout_ms - elapsed_ms) > 0)));
 
   if (r < 0)
     return -1;
