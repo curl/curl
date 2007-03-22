@@ -29,12 +29,13 @@ void Curl_infof(struct SessionHandle *, const char *fmt, ...);
 void Curl_failf(struct SessionHandle *, const char *fmt, ...);
 
 #if defined(CURL_DISABLE_VERBOSE_STRINGS)
-#if defined(__GNUC__)
-/* This style of variable argument macros is a gcc extension */
-#define infof(x...) /*ignore*/
+#if defined(__STDC__) && defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
+/* C99 compilers support variadic macros */
+#define infof(...)
+#elif defined(__GNUC__)
+/* This style of variable argument macros is an old gcc extension */
+#define infof(x...)
 #else
-/* C99 compilers could use this if we could detect them */
-/*#define infof(...) */
 /* Cast the args to void to make them a noop, side effects notwithstanding */
 #define infof (void)
 #endif
