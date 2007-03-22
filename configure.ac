@@ -1739,6 +1739,7 @@ dnl default includes
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
+CURL_CHECK_VARIADIC_MACROS
 AC_TYPE_SIZE_T
 AC_HEADER_TIME
 CURL_CHECK_STRUCT_TIMEVAL
