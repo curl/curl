@@ -699,9 +699,9 @@ TIME CONDITIONS
         curl -z -local.html http://remote.server.com/remote.html
 
  You can specify a "free text" date as condition. Tell curl to only download
- the file if it was updated since yesterday:
+ the file if it was updated since January 12, 2012:
 
-        curl -z yesterday http://remote.server.com/remote.html
+        curl -z "Jan 12 2012" http://remote.server.com/remote.html
 
  Curl will then accept a wide range of date formats. You always make the date
  check the other way around by prepending it with a dash '-'.
