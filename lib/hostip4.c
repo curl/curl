@@ -127,7 +127,6 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   Curl_addrinfo *ai = NULL;
   struct hostent *h = NULL;
   in_addr_t in;
-  struct SessionHandle *data = conn->data;
   struct hostent *buf = NULL;
 
   (void)port; /* unused in IPv4 code */
@@ -271,7 +270,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
     else
 #endif /* HAVE_GETHOSTBYNAME_R_3 */
       {
-      infof(data, "gethostbyname_r(2) failed for %s\n", hostname);
+      infof(conn->data, "gethostbyname_r(2) failed for %s\n", hostname);
       h = NULL; /* set return code to NULL */
       free(buf);
     }
@@ -283,7 +282,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   else {
     h = gethostbyname(hostname);
     if (!h)
-      infof(data, "gethostbyname(2) failed for %s\n", hostname);
+      infof(conn->data, "gethostbyname(2) failed for %s\n", hostname);
 #endif /*HAVE_GETHOSTBYNAME_R */
   }
 
