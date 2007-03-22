@@ -3229,8 +3229,12 @@ static void free_config_fields(struct Configurable *config)
     free(config->writeout);
   if(config->httppost)
     curl_formfree(config->httppost);
+  if (config->cert)
+    free(config->cert);
   if(config->cacert)
     free(config->cacert);
+  if (config->cert_type)
+    free(config->cert_type);
   if(config->capath)
     free(config->capath);
   if(config->cookiejar)
@@ -3245,6 +3249,14 @@ static void free_config_fields(struct Configurable *config)
     free(config->socksproxy);
   if(config->libcurl)
     free(config->libcurl);
+  if (config->key_passwd)
+    free(config->key_passwd);
+  if (config->key)
+    free(config->key);
+  if (config->key_type)
+    free(config->key_type);
+  if (config->referer)
+    free(config->referer);
 
   curl_slist_free_all(config->quote); /* checks for config->quote == NULL */
   curl_slist_free_all(config->prequote);
