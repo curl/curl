@@ -45,7 +45,7 @@ void Curl_failf(struct SessionHandle *, const char *fmt, ...);
 
 #else
 
-#if (defined(__STDC__) && defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
+#if defined(__STDC__) && defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
 #define infof(...)  do { } while (0)
 #elif defined(__GNUC__)
 #define infof(x...)  do { } while (0)
