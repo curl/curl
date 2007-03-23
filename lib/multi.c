@@ -56,6 +56,9 @@ struct Curl_message {
   struct Curl_message *next;
 };
 
+/* NOTE: if you add a state here, add the name to the statename[] array as
+   well!
+*/
 typedef enum {
   CURLM_STATE_INIT,        /* start in this state */
   CURLM_STATE_CONNECT,     /* resolve/connect has been sent off */
@@ -182,6 +185,7 @@ static const char *statename[]={
   "CONNECT",
   "WAITRESOLVE",
   "WAITCONNECT",
+  "WAITPROXYCONNECT",
   "PROTOCONNECT",
   "WAITDO",
   "DO",
