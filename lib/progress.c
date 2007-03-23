@@ -71,8 +71,8 @@ static char *max5data(curl_off_t bytes, char *max5)
 #define ONE_KILOBYTE 1024
 #define ONE_MEGABYTE (1024* ONE_KILOBYTE)
 #define ONE_GIGABYTE (1024* ONE_MEGABYTE)
-#define ONE_TERRABYTE ((curl_off_t)1024* ONE_GIGABYTE)
-#define ONE_PETABYTE ((curl_off_t)1024* ONE_TERRABYTE)
+#define ONE_TERABYTE ((curl_off_t)1024* ONE_GIGABYTE)
+#define ONE_PETABYTE ((curl_off_t)1024* ONE_TERABYTE)
 
   if(bytes < 100000) {
     snprintf(max5, 6, "%5" FORMAT_OFF_T, bytes);
@@ -101,9 +101,9 @@ static char *max5data(curl_off_t bytes, char *max5)
     /* up to 10000GB, display without decimal: XXXXG */
     snprintf(max5, 6, "%4dG", (int)(bytes/ONE_GIGABYTE));
 
-  else if(bytes < (curl_off_t)10000 * ONE_TERRABYTE)
+  else if(bytes < (curl_off_t)10000 * ONE_TERABYTE)
     /* up to 10000TB, display without decimal: XXXXT */
-    snprintf(max5, 6, "%4dT", (int)(bytes/ONE_TERRABYTE));
+    snprintf(max5, 6, "%4dT", (int)(bytes/ONE_TERABYTE));
   else {
     /* up to 10000PB, display without decimal: XXXXP */
     snprintf(max5, 6, "%4dP", (int)(bytes/ONE_PETABYTE));
@@ -249,7 +249,9 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   now = Curl_tvnow(); /* what time is it */
 
   /* The time spent so far (from the start) */
-  data->progress.timespent = Curl_tvdiff_secs(now, data->progress.start);
+  data->progress.timespent =
+    (double)(now.tv_sec - data->progress.start.tv_sec) +
+    (double)(now.tv_usec - data->progress.start.tv_usec)/1000000.0;
   timespent = (long)data->progress.timespent;
 
   /* The average download speed this far */
@@ -263,12 +265,12 @@ int Curl_pgrsUpdate(struct connectdata *conn)
      (data->progress.timespent>0?data->progress.timespent:1));
 
   /* Calculations done at most once a second, unless end is reached */
-  if(data->progress.lastshow != Curl_tvlong(now)) {
+  if(data->progress.lastshow != (long)now.tv_sec) {
 
     data->progress.lastshow = now.tv_sec;
 
     /* Let's do the "current speed" thing, which should use the fastest
-       of the dl/ul speeds. Store the fasted speed at entry 'nowindex'. */
+       of the dl/ul speeds. Store the faster speed at entry 'nowindex'. */
     data->progress.speeder[ nowindex ] =
       data->progress.downloaded>data->progress.uploaded?
       data->progress.downloaded:data->progress.uploaded;
@@ -377,7 +379,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
                         (data->progress.size_dl/100));
     }
 
-    /* Now figure out which of them that is slower and use for the for
+    /* Now figure out which of them is slower and use that one for the
        total estimate! */
     total_estimate = ulestimate>dlestimate?ulestimate:dlestimate;
 
