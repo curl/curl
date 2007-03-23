@@ -55,6 +55,10 @@ void Curl_failf(struct SessionHandle *, const char *fmt, ...);
 
 #endif
 
+#else /* CURL_DISABLE_VERBOSE_STRINGS */
+
+#define infof Curl_infof
+
 #endif /* CURL_DISABLE_VERBOSE_STRINGS */
 
 #define failf Curl_failf
