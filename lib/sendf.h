@@ -23,25 +23,40 @@
  * $Id$
  ***************************************************************************/
 
+#include "setup.h"
+
 CURLcode Curl_sendf(curl_socket_t sockfd, struct connectdata *,
                     const char *fmt, ...);
 void Curl_infof(struct SessionHandle *, const char *fmt, ...);
 void Curl_failf(struct SessionHandle *, const char *fmt, ...);
 
 #if defined(CURL_DISABLE_VERBOSE_STRINGS)
-#if defined(__STDC__) && defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
-/* C99 compilers support variadic macros */
-#define infof(...)
-#elif defined(__GNUC__)
-/* This style of variable argument macros is an old gcc extension */
-#define infof(x...)
+
+#if defined(HAVE_CONFIG_H) || \
+    defined(HAVE_VARIADIC_MACROS_C99) || defined(HAVE_VARIADIC_MACROS_GCC)
+
+#if defined(HAVE_VARIADIC_MACROS_C99)
+#define infof(...)  do { } while (0)
+#elif defined(HAVE_VARIADIC_MACROS_GCC)
+#define infof(x...)  do { } while (0)
 #else
-/* Cast the args to void to make them a noop, side effects notwithstanding */
 #define infof (void)
 #endif
+
 #else
-#define infof Curl_infof
+
+#if (defined(__STDC__) && defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
+#define infof(...)  do { } while (0)
+#elif defined(__GNUC__)
+#define infof(x...)  do { } while (0)
+#else
+#define infof (void)
 #endif
+
+#endif
+
+#endif /* CURL_DISABLE_VERBOSE_STRINGS */
+
 #define failf Curl_failf
 
 #define CLIENTWRITE_BODY   1
@@ -70,4 +85,4 @@ int Curl_debug(struct SessionHandle *handle, curl_infotype type,
                struct connectdata *conn);
 
 
-#endif
+#endif /* __SENDF_H */
