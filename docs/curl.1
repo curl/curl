@@ -582,7 +582,7 @@ See this online resource for further details:
 
 If this option is used twice, the second time will again disable it.
 .IP "--key <key>"
-(SSL) Private key file name. Allows you to provide your private key in this
+(SSL/SSH) Private key file name. Allows you to provide your private key in this
 separate file.
 
 If this option is used several times, the last one will be used.
@@ -825,7 +825,7 @@ nothing else.
 
 You may use this option as many times as you have number of URLs.
 .IP "--pass <phrase>"
-(SSL) Pass phrase for the private key
+(SSL/SSH) Pass phrase for the private key
 
 If this option is used several times, the last one will be used.
 .IP "--proxy-anyauth"
@@ -860,6 +860,11 @@ CONNECT request and requires that the proxy allows direct connect to the
 remote port number curl wants to tunnel through to.
 
 If this option is used twice, the second will again disable proxy tunnel.
+.IP "--pubkey <key>"
+(SSH) Public key file name. Allows you to provide your public key in this
+separate file.
+
+If this option is used several times, the last one will be used.
 .IP "-P/--ftp-port <address>"
 (FTP) Reverses the initiator/listener roles when connecting with ftp. This
 switch makes Curl use the PORT command instead of PASV. In practice, PORT

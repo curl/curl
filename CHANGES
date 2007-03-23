@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Dan F (23 March 2007)
+- Added --pubkey option to curl and made --key also work for SCP/SFTP,
+  plus made --pass work on an SSH private key as well.
+
 Yang Tse (20 March 2007)
 - Fixed: When a signal was caught awaiting for an event using Curl_select()
   or Curl_poll() with a non-zero timeout both functions would restart the

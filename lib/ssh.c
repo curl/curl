@@ -268,9 +268,6 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
   struct SSHPROTO *ssh;
   const char *fingerprint;
   const char *authlist;
-  char *home;
-  char rsa_pub[PATH_MAX];
-  char rsa[PATH_MAX];
   char tempHome[PATH_MAX];
   curl_socket_t sock;
   char *real_path;
@@ -279,8 +276,6 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
   bool authed = FALSE;
   CURLcode result;
   struct SessionHandle *data = conn->data;
-
-  rsa_pub[0] = rsa[0] = '\0';
 
   result = ssh_init(conn);
   if (result)
@@ -369,6 +364,13 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
    */
   if ((data->set.ssh_auth_types & CURLSSH_AUTH_PUBLICKEY) &&
       (strstr(authlist, "publickey") != NULL)) {
+    const char *home;
+    const char *passphrase;
+    char rsa_pub[PATH_MAX];
+    char rsa[PATH_MAX];
+
+    rsa_pub[0] = rsa[0] = '\0';
+
     /* To ponder about: should really the lib be messing about with the HOME
        environment variable etc? */
     home = curl_getenv("HOME");
@@ -383,6 +385,10 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
     else if (home)
       snprintf(rsa, sizeof(rsa), "%s/.ssh/id_dsa", home);
 
+    passphrase = data->set.key_passwd;
+    if (!passphrase)
+      passphrase = "";
+
     curl_free(home);
 
     infof(conn->data, "Using ssh public key file %s\n", rsa_pub);
@@ -392,7 +398,7 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
       /* The function below checks if the files exists, no need to stat() here.
       */
       if (libssh2_userauth_publickey_fromfile(ssh->ssh_session, ssh->user,
-                                              rsa_pub, rsa, "") == 0) {
+                                              rsa_pub, rsa, passphrase) == 0) {
         authed = TRUE;
         infof(conn->data, "Initialized SSH public key authentication\n");
       }

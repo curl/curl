@@ -389,6 +389,7 @@ struct Configurable {
   char *key;
   char *key_type;
   char *key_passwd;
+  char *pubkey;
   char *engine;
   bool list_engines;
   bool crlf;
@@ -607,9 +608,10 @@ static void help(void)
     " -e/--referer       Referer URL (H)",
     " -E/--cert <cert[:passwd]> Client certificate file and password (SSL)",
     "    --cert-type <type> Certificate file type (DER/PEM/ENG) (SSL)",
-    "    --key <key>     Private key file name (SSL)",
+    "    --key <key>     Private key file name (SSL/SSH)",
     "    --key-type <type> Private key file type (DER/PEM/ENG) (SSL)",
-    "    --pass  <pass>  Pass phrase for the private key (SSL)",
+    "    --pass  <pass>  Pass phrase for the private key (SSL/SSH)",
+    "    --pubkey <key>  Public key file name (SSH)",
     "    --engine <eng>  Crypto engine to use (SSL). \"--engine list\" for list",
     "    --cacert <file> CA certificate to verify peer against (SSL)",
     "    --capath <directory> CA directory (made using c_rehash) to verify",
@@ -1505,6 +1507,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"Ee","pass",        TRUE},
     {"Ef","engine",      TRUE},
     {"Eg","capath ",     TRUE},
+    {"Eh","pubkey",      TRUE},
     {"f", "fail",        FALSE},
     {"F", "form",        TRUE},
     {"Fs","form-string", TRUE},
@@ -2110,6 +2113,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       case 'g': /* CA info PEM file */
         /* CA cert directory */
         GetStr(&config->capath, nextarg);
+        break;
+      case 'h': /* --pubkey public key file */
+        GetStr(&config->pubkey, nextarg);
         break;
       default: /* certificate file */
         {
@@ -3255,6 +3261,8 @@ static void free_config_fields(struct Configurable *config)
     free(config->key);
   if (config->key_type)
     free(config->key_type);
+  if (config->pubkey)
+    free(config->pubkey);
   if (config->referer)
     free(config->referer);
 
@@ -4111,6 +4119,10 @@ operate(struct Configurable *config, int argc, char *argv[])
         my_setopt(curl, CURLOPT_SSLKEY, config->key);
         my_setopt(curl, CURLOPT_SSLKEYTYPE, config->key_type);
         my_setopt(curl, CURLOPT_SSLKEYPASSWD, config->key_passwd);
+
+	/* SSH private key uses the same command-line option as SSL private key */
+        my_setopt(curl, CURLOPT_SSH_PRIVATE_KEYFILE, config->key);
+        my_setopt(curl, CURLOPT_SSH_PUBLIC_KEYFILE, config->pubkey);
 
         /* default to strict verifyhost */
         my_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2);

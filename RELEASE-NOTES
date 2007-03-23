@@ -2,7 +2,7 @@ Curl and libcurl 7.16.2
 
  Public curl release number:               98
  Releases counted from the very beginning: 125
- Available command line options:           117
+ Available command line options:           118
  Available curl_easy_setopt() options:     141
  Number of public functions in libcurl:    54
  Amount of public web site mirrors:        38
@@ -22,6 +22,8 @@ This release includes the following changes:
  o includes VC8 Makefiles in the release archive
  o --ftp-ssl-control is now honoured on ftps:// URLs
  o added experimental CURL_ACKNOWLEDGE_EINTR symbol definition check
+ o --key and new --pubkey options for SSH public key file logins
+ o --pass now works for a SSH public key file, too
 
 This release includes the following bugfixes:
 
