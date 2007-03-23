@@ -2042,8 +2042,8 @@ ConnectionExists(struct SessionHandle *data,
                                   from the multi */
     }
 
-    DEBUGF(infof(data, "Examining connection #%ld for reuse \
-                 (pipeLen = %ld)\n", check->connectindex, pipeLen));
+    DEBUGF(infof(data, "Examining connection #%ld for reuse, "
+                 "(pipeLen = %ld)\n", check->connectindex, pipeLen));
 
     if(pipeLen > 0 && !canPipeline) {
       /* can only happen within multi handles, and means that another easy
