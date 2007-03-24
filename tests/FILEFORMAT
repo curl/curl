@@ -126,6 +126,8 @@ http
 http-ipv6
 https
 none
+scp
+sftp
 
 Give only one per line.  This subsection is mandatory.
 </server>
@@ -212,9 +214,11 @@ Available substitute variables include:
 %FTP2PORT  - Port number of the FTP server 2
 %TFTPPORT  - Port number of the TFTP server
 %TFTP6PORT - IPv6 port number of the TFTP server
+%SSHPORT   - Port number of the SCP/SFTP server
 %SRCDIR    - Full path to the source dir
 %PWD       - Current directory
 %CURL      - Path to the curl executable
+%USER      - Login ID of the user running the test
 </command>
 
 <file name="log/filename">

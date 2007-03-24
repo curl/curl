@@ -48,6 +48,7 @@ my $FTPSPORT; # FTPS server port
 my $FTP6PORT; # FTP IPv6 server port
 my $TFTPPORT; # TFTP
 my $TFTP6PORT; # TFTP
+my $SSHPORT; # SCP/SFTP
 
 my $CURL="../src/curl"; # what curl executable to run on the tests
 my $DBGCURL=$CURL; #"../src/.libs/curl";  # alternative for debugging
@@ -79,6 +80,7 @@ my $FTP2PIDFILE=".ftp2.pid";
 my $FTPSPIDFILE=".ftps.pid";
 my $TFTPPIDFILE=".tftpd.pid";
 my $TFTP6PIDFILE=".tftp6.pid";
+my $SSHPIDFILE=".ssh.pid";
 
 # invoke perl like this:
 my $perl="perl -I$srcdir";
@@ -197,6 +199,15 @@ sub logmsg {
 
 chomp($pwd = `pwd`);
 
+# get the name of the current user
+my $USER = $ENV{USER};	# Linux
+if (!$USER) {
+    $USER = $ENV{USERNAME};	# Windows
+    if (!$USER) {
+        $USER = $ENV{LOGNAME};	# Some UNIX (I think)
+    }
+}
+
 # enable memory debugging if curl is compiled with it
 $ENV{'CURL_MEMDEBUG'} = $memdump;
 $ENV{'HOME'}=$pwd;
@@ -229,6 +240,16 @@ foreach $protocol (('ftp', 'http', 'ftps', 'https', 'no')) {
 $ENV{'SSL_CERT_DIR'}=undef;
 $ENV{'SSL_CERT_PATH'}=undef;
 $ENV{'CURL_CA_BUNDLE'}=undef;
+
+#######################################################################
+# Check if a given child process has just died. Reaps it if so.
+#
+sub checkdied {
+    use POSIX ":sys_wait_h";
+    my $pid = $_[0];
+    my $rc = waitpid($pid, &WNOHANG);
+    return $rc == $pid;
+}
 
 #######################################################################
 # Start a new thread/process and run the given command line in there.
@@ -276,6 +297,15 @@ sub startnew {
                 # similar!
                 last;
             }
+        }
+        if (checkdied($child)) {
+            logmsg "startnew: Warning: child process has died\n" if($verbose);
+            # We can't just abort waiting for the server with a
+            # return (-1,-1);
+            # because the server might have forked and could still start
+            # up normally. Instead, just reduce the amount of time we remain
+            # waiting.
+            $count >>= 2;
         }
         sleep(1);
     }
@@ -411,8 +441,10 @@ sub stopserver {
         return; # whad'da'ya wanna'da with no pid ?
     }
 
-    # it might be more than one pid
+    # It might be more than one pid
+    # Send each one a SIGTERM to gracefully kill it
 
+    my @killed;
     my @pids = split(/\s+/, $pid);
     for (@pids) {
         chomp($_);
@@ -421,8 +453,25 @@ sub stopserver {
                 if($verbose) {
                     logmsg "RUN: Test server pid $1 signalled to die\n";
                 }
-                kill(9, $1); # die!
+                kill(15, $1); # die!
+                push @killed, $1;
             }
+        }
+    }
+
+    # Give each process killed up to a few seconds to die, then send
+    # a SIGKILL to finish it off for good.
+    for (@killed) {
+        my $count = 5; # wait for this many seconds for server to die
+	while($count--) {
+            if (!kill(0, $_) || checkdied($_)) {
+                last;
+            }
+            sleep(1);
+        }
+        if ($count < 0) {
+            logmsg "RUN: forcing pid $_ to die with SIGKILL\n";
+            kill(9, $_); # die!
         }
     }
 }
@@ -521,6 +570,17 @@ sub verifyftp {
 }
 
 #######################################################################
+# STUB for verifying scp/sftp
+
+sub verifyssh {
+    my ($proto, $ip, $port) = @_;
+    open(FILE, "<" . $SSHPIDFILE);
+    my $pid=0+<FILE>;
+    close(FILE);
+    return $pid;
+}
+
+#######################################################################
 # Verify that the server that runs on $ip, $port is our server.
 # Retry during 5 seconds before giving up.
 #
@@ -529,7 +589,8 @@ my %protofunc = ('http' => \&verifyhttp,
                  'https' => \&verifyhttp,
                  'ftp' => \&verifyftp,
                  'ftps' => \&verifyftp,
-                 'tftp' => \&verifyftp);
+                 'tftp' => \&verifyftp,
+                 'ssh' => \&verifyssh);
 
 sub verifyserver {
     my ($proto, $ip, $port) = @_;
@@ -853,6 +914,44 @@ sub runtftpserver {
 
 
 #######################################################################
+# Start the scp/sftp server
+#
+sub runsshserver {
+    my ($id, $verbose, $ipv6) = @_;
+    my $ip=$HOSTIP;
+    my $port = $SSHPORT;
+    my $pidfile = $SSHPIDFILE;
+
+    my $pid = checkserver($pidfile);
+    if($pid > 0) {
+        stopserver($pid);
+    }
+
+    my $flag=$debugprotocol?"-v ":"";
+    my $cmd="$perl $srcdir/sshserver.pl $flag-u $USER -d $srcdir $port";
+    my ($sshpid, $pid2) =
+        startnew($cmd, $pidfile); # start the server in a new process
+
+    if(!$sshpid || !kill(0, $sshpid)) {
+        # it is NOT alive
+        logmsg "RUN: failed to start the SSH server!\n";
+        # failed to talk to it properly. Kill the server and return failure
+        stopserver("$sshpid $pid2");
+        return -1;
+    }
+
+    if (!verifyserver('ssh',$ip,$port)) {
+        logmsg "RUN: SSH server failed verification\n";
+        return (0,0);
+    }
+    if($verbose) {
+        logmsg "RUN: SSH server is now running PID $sshpid\n";
+    }
+
+    return ($pid2, $sshpid);
+}
+
+#######################################################################
 # Remove all files in the specified directory
 #
 sub cleardir {
@@ -1167,9 +1266,10 @@ sub checksystem {
     if($tftp_ipv6) {
         logmsg sprintf("* TFTP IPv6 port: %d\n", $TFTP6PORT);
     }
+    logmsg sprintf("* SCP/SFTP port:  %d\n", $SSHPORT);
 
     if($ssl_version) {
-        logmsg sprintf("* SSL library:    %s\n", $ssllib?"yassl":"<unknown>");
+        logmsg sprintf("* SSL library:    %s\n", $ssllib);
     }
 
     $has_textaware = ($^O eq 'MSWin32') || ($^O eq 'msys');
@@ -1197,7 +1297,9 @@ sub subVariables {
   $$thing =~ s/%PWD/$pwd/g;
   $$thing =~ s/%TFTPPORT/$TFTPPORT/g;
   $$thing =~ s/%TFTP6PORT/$TFTP6PORT/g;
+  $$thing =~ s/%SSHPORT/$SSHPORT/g;
   $$thing =~ s/%CURL/$CURL/g;
+  $$thing =~ s/%USER/$USER/g;
 
   # The purpose of FTPTIME2 and FTPTIME3 is to provide times that can be
   # used for time-out tests and that whould work on most hosts as these
@@ -2058,6 +2160,16 @@ sub startservers {
                 $run{'tftp-ipv6'}="$pid $pid2";
             }
         }
+        elsif($what eq "sftp" || $what eq "scp") {
+            if(!$run{'ssh'}) {
+                ($pid, $pid2) = runsshserver("", $verbose);
+                if($pid <= 0) {
+                    return "failed starting SSH server";
+                }
+                printf ("* pid ssh => %d %d\n", $pid, $pid2) if($verbose);
+                $run{'ssh'}="$pid $pid2";
+            }
+        }
         elsif($what eq "none") {
             logmsg "* starts no server\n" if ($verbose);
         }
@@ -2244,6 +2356,7 @@ $FTP2PORT =  $base + 5; # FTP server 2 port
 $FTP6PORT =  $base + 6; # FTP IPv6 port
 $TFTPPORT =  $base + 7; # TFTP (UDP) port
 $TFTP6PORT =  $base + 8; # TFTP IPv6 (UDP) port
+$SSHPORT =   $base + 9; # SSH (SCP/SFTP) port
 
 #######################################################################
 # clear and create logging directory:
