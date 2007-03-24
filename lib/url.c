@@ -2767,8 +2767,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   char passwd[MAX_CURL_PASSWORD_LENGTH];
   int rc;
   bool reuse;
-  char *proxy;
-  bool proxy_alloc = FALSE;
+  char *proxy = NULL;
 
 #ifndef USE_ARES
 #ifdef SIGALRM
@@ -2821,7 +2820,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   conn->bits.proxy = (bool)(data->set.proxy && *data->set.proxy);
   conn->bits.httpproxy = (bool)(conn->bits.proxy
                                 && (conn->proxytype == CURLPROXY_HTTP));
-  proxy = data->set.proxy; /* if global proxy is set, this is it */
+
 
   /* Default protocol-independent behavior doesn't support persistent
      connections, so we set this to force-close. Protocols that support
@@ -2916,6 +2915,15 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     if(!conn->proxypasswd)
       return CURLE_OUT_OF_MEMORY;
   }
+
+  if (data->set.proxy) {
+    proxy = strdup(data->set.proxy); /* if global proxy is set, this is it */
+    if(NULL == proxy) {
+      failf(data, "memory shortage");
+      return CURLE_OUT_OF_MEMORY;
+    }
+  }
+  /* proxy must be freed later unless NULL */
 
 #ifndef CURL_DISABLE_HTTP
   /*************************************************************
@@ -3018,8 +3026,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
         if(proxy && *proxy) {
           long bits = conn->protocol & (PROT_HTTPS|PROT_SSL|PROT_MISSING);
 
-          proxy_alloc=TRUE; /* this needs to be freed later */
-
           if(conn->proxytype == CURLPROXY_HTTP) {
             /* force this connection's protocol to become HTTP */
             conn->protocol = PROT_HTTP | bits;
@@ -3044,35 +3050,16 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
     reurl = aprintf("%s://%s", conn->protostr, data->change.url);
 
-    if(!reurl)
+    if(!reurl) {
+      Curl_safefree(proxy);
       return CURLE_OUT_OF_MEMORY;
+    }
 
     data->change.url = reurl;
     data->change.url_alloc = TRUE; /* free this later */
     conn->protocol &= ~PROT_MISSING; /* switch that one off again */
   }
 
-#ifndef CURL_DISABLE_HTTP
-  /************************************************************
-   * RESUME on a HTTP page is a tricky business. First, let's just check that
-   * 'range' isn't used, then set the range parameter and leave the resume as
-   * it is to inform about this situation for later use. We will then
-   * "attempt" to resume, and if we're talking to a HTTP/1.1 (or later)
-   * server, we will get the document resumed. If we talk to a HTTP/1.0
-   * server, we just fail since we can't rewind the file writing from within
-   * this function.
-   ***********************************************************/
-  if(data->reqdata.resume_from) {
-    if(!data->reqdata.use_range) {
-      /* if it already was in use, we just skip this */
-      data->reqdata.range = aprintf("%" FORMAT_OFF_T "-", data->reqdata.resume_from);
-      if(!data->reqdata.range)
-        return CURLE_OUT_OF_MEMORY;
-      data->reqdata.rangestringalloc = TRUE; /* mark as allocated */
-      data->reqdata.use_range = 1; /* switch on range usage */
-    }
-  }
-#endif
   /*************************************************************
    * Setup internals depending on protocol
    *************************************************************/
@@ -3206,6 +3193,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 #else
     failf(data, LIBCURL_NAME
           " was built with TELNET disabled!");
+    return CURLE_UNSUPPORTED_PROTOCOL;
 #endif
   }
   else if (strequal(conn->protostr, "DICT")) {
@@ -3219,6 +3207,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 #else
     failf(data, LIBCURL_NAME
           " was built with DICT disabled!");
+    return CURLE_UNSUPPORTED_PROTOCOL;
 #endif
   }
   else if (strequal(conn->protostr, "LDAP")) {
@@ -3232,6 +3221,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 #else
     failf(data, LIBCURL_NAME
           " was built with LDAP disabled!");
+    return CURLE_UNSUPPORTED_PROTOCOL;
 #endif
   }
   else if (strequal(conn->protostr, "FILE")) {
@@ -3240,25 +3230,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
     conn->curl_do = Curl_file;
     conn->curl_done = Curl_file_done;
-
-    /* anyway, this is supposed to be the connect function so we better
-       at least check that the file is present here! */
-    result = Curl_file_connect(conn);
-
-    /* Setup a "faked" transfer that'll do nothing */
-    if(CURLE_OK == result) {
-      conn->data = data;
-      conn->bits.tcpconnect = TRUE; /* we are "connected */
-      ConnectionStore(data, conn);
-
-      result = Curl_setup_transfer(conn, -1, -1, FALSE, NULL, /* no download */
-                                   -1, NULL); /* no upload */
-    }
-
-    return result;
 #else
     failf(data, LIBCURL_NAME
           " was built with FILE disabled!");
+    return CURLE_UNSUPPORTED_PROTOCOL;
 #endif
   }
   else if (strequal(conn->protostr, "TFTP")) {
@@ -3297,6 +3272,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 #else
     failf(data, LIBCURL_NAME
           " was built with TFTP disabled!");
+    return CURLE_UNSUPPORTED_PROTOCOL;
 #endif
   }
   else if (strequal(conn->protostr, "SCP")) {
@@ -3344,20 +3320,10 @@ else {
     char *prox_portno;
     char *endofprot;
 
-    /* We need to make a duplicate of the proxy so that we can modify the
-       string safely. If 'proxy_alloc' is TRUE, the string is already
-       allocated and we can treat it as duplicated. */
-    char *proxydup=proxy_alloc?proxy:strdup(proxy);
-
     /* We use 'proxyptr' to point to the proxy name from now on... */
-    char *proxyptr=proxydup;
+    char *proxyptr=proxy;
     char *portptr;
     char *atsign;
-
-    if(NULL == proxydup) {
-      failf(data, "memory shortage");
-      return CURLE_OUT_OF_MEMORY;
-    }
 
     /* We do the proxy host string parsing here. We want the host name and the
      * port name. Accept a protocol:// prefix, even though it should just be
@@ -3404,15 +3370,15 @@ else {
           atsign = strdup(atsign+1); /* the right side of the @-letter */
 
           if(atsign) {
-            free(proxydup); /* free the former proxy string */
-            proxydup = proxyptr = atsign; /* now use this instead */
+            free(proxy); /* free the former proxy string */
+            proxy = proxyptr = atsign; /* now use this instead */
           }
           else
             res = CURLE_OUT_OF_MEMORY;
         }
 
         if(res) {
-          free(proxydup); /* free the allocated proxy string */
+          free(proxy); /* free the allocated proxy string */
           return res;
         }
       }
@@ -3455,10 +3421,31 @@ else {
     conn->proxy.rawalloc = strdup(proxyptr);
     conn->proxy.name = conn->proxy.rawalloc;
 
-    free(proxydup); /* free the duplicate pointer and not the modified */
-    proxy = NULL;   /* this may have just been freed */
+    free(proxy);
+    proxy = NULL;
     if(!conn->proxy.rawalloc)
       return CURLE_OUT_OF_MEMORY;
+  }
+
+  /***********************************************************************
+   * file: is a special case in that it doesn't need a network connection
+   ***********************************************************************/
+  if (strequal(conn->protostr, "FILE")) {
+      /* anyway, this is supposed to be the connect function so we better
+	 at least check that the file is present here! */
+     result = Curl_file_connect(conn);
+
+      /* Setup a "faked" transfer that'll do nothing */
+     if(CURLE_OK == result) {
+	conn->data = data;
+	conn->bits.tcpconnect = TRUE; /* we are "connected */
+	ConnectionStore(data, conn);
+
+      result = Curl_setup_transfer(conn, -1, -1, FALSE, NULL, /* no download */
+				     -1, NULL); /* no upload */
+    }
+
+    return result;
   }
 
   /*************************************************************
@@ -3678,6 +3665,28 @@ else {
   if(!conn->user || !conn->passwd)
     return CURLE_OUT_OF_MEMORY;
 
+#ifndef CURL_DISABLE_HTTP
+  /************************************************************
+   * RESUME on a HTTP page is a tricky business. First, let's just check that
+   * 'range' isn't used, then set the range parameter and leave the resume as
+   * it is to inform about this situation for later use. We will then
+   * "attempt" to resume, and if we're talking to a HTTP/1.1 (or later)
+   * server, we will get the document resumed. If we talk to a HTTP/1.0
+   * server, we just fail since we can't rewind the file writing from within
+   * this function.
+   ***********************************************************/
+  if(data->reqdata.resume_from) {
+    if(!data->reqdata.use_range) {
+      /* if it already was in use, we just skip this */
+      data->reqdata.range = aprintf("%" FORMAT_OFF_T "-", data->reqdata.resume_from);
+      if(!data->reqdata.range)
+        return CURLE_OUT_OF_MEMORY;
+      data->reqdata.rangestringalloc = TRUE; /* mark as allocated */
+      data->reqdata.use_range = 1; /* switch on range usage */
+    }
+  }
+#endif
+
   /*************************************************************
    * Check the current list of connections to see if we can
    * re-use an already existing one or if we have to create a
@@ -3797,7 +3806,7 @@ else {
 
     infof(data, "Re-using existing connection! (#%ld) with host %s\n",
           conn->connectindex,
-          proxy?conn->proxy.dispname:conn->host.dispname);
+          conn->proxy.name?conn->proxy.dispname:conn->host.dispname);
   }
   else {
     /*

@@ -1,0 +1,42 @@
+<testcase>
+# Server-side
+<reply>
+<data>
+foo
+   bar
+bar
+   foo
+moo
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+file
+</features>
+ <name>
+file:// with (unsupported) proxy, authentication and range
+ </name>
+<setenv>
+all_proxy=http://fake:user@%HOSTIP:%HTTPPORT/
+</setenv>
+ <command>
+file://localhost/%PWD/log/test288.txt
+</command>
+<file name="log/test288.txt">
+foo
+   bar
+bar
+   foo
+moo
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+</verify>
+</testcase>
