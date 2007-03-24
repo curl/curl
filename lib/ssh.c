@@ -364,7 +364,7 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
    */
   if ((data->set.ssh_auth_types & CURLSSH_AUTH_PUBLICKEY) &&
       (strstr(authlist, "publickey") != NULL)) {
-    const char *home;
+    char *home;
     const char *passphrase;
     char rsa_pub[PATH_MAX];
     char rsa[PATH_MAX];

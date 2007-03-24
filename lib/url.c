@@ -3430,6 +3430,7 @@ else {
   /***********************************************************************
    * file: is a special case in that it doesn't need a network connection
    ***********************************************************************/
+#ifndef CURL_DISABLE_FILE
   if (strequal(conn->protostr, "FILE")) {
       /* anyway, this is supposed to be the connect function so we better
 	 at least check that the file is present here! */
@@ -3447,6 +3448,7 @@ else {
 
     return result;
   }
+#endif
 
   /*************************************************************
    * If the protocol is using SSL and HTTP proxy is used, we set
