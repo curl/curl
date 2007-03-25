@@ -2507,7 +2507,7 @@ static bool tld_check_name(struct SessionHandle *data,
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   if (rc != TLD_SUCCESS)
 #ifdef HAVE_TLD_STRERROR
-    tld_errmsg = tld_strerror((Tld_rc)rc);
+    tld_errmsg = (char *)tld_strerror((Tld_rc)rc);
 #else
     tld_errmsg = no_msg;
 #endif
