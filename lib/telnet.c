@@ -95,6 +95,10 @@
 #define  CURL_SB_EOF(x) (x->subpointer >= x->subend)
 #define  CURL_SB_LEN(x) (x->subend - x->subpointer)
 
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+#define printoption(a,b,c,d)  do { } while (0)
+#endif
+
 #ifdef USE_WINSOCK
 typedef FARPROC WSOCK2_FUNC;
 static CURLcode check_wsock2 ( struct SessionHandle *data );
@@ -105,9 +109,11 @@ void telrcv(struct connectdata *,
             unsigned char *inbuf,       /* Data received from socket */
             ssize_t count);             /* Number of bytes received */
 
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 static void printoption(struct SessionHandle *data,
                         const char *direction,
                         int cmd, int option);
+#endif
 
 static void negotiate(struct connectdata *);
 static void send_negotiation(struct connectdata *, int cmd, int option);
@@ -244,6 +250,7 @@ static void negotiate(struct connectdata *conn)
   }
 }
 
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 static void printoption(struct SessionHandle *data,
                         const char *direction, int cmd, int option)
 {
@@ -282,6 +289,7 @@ static void printoption(struct SessionHandle *data,
     }
   }
 }
+#endif
 
 static void send_negotiation(struct connectdata *conn, int cmd, int option)
 {

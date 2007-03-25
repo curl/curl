@@ -109,16 +109,22 @@
 #define NIFLAGS NI_NUMERICHOST | NI_NUMERICSERV
 #endif
 
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+#define ftp_pasv_verbose(a,b,c,d)  do { } while (0)
+#endif
+
 /* Local API functions */
 static CURLcode ftp_sendquote(struct connectdata *conn,
                               struct curl_slist *quote);
 static CURLcode ftp_quit(struct connectdata *conn);
 static CURLcode ftp_parse_url_path(struct connectdata *conn);
 static CURLcode ftp_regular_transfer(struct connectdata *conn, bool *done);
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 static void ftp_pasv_verbose(struct connectdata *conn,
                              Curl_addrinfo *ai,
                              char *newhost, /* ascii version */
                              int port);
+#endif
 static CURLcode ftp_state_post_rest(struct connectdata *conn);
 static CURLcode ftp_state_post_cwd(struct connectdata *conn);
 static CURLcode ftp_state_quote(struct connectdata *conn,
@@ -3238,23 +3244,18 @@ static CURLcode ftp_nb_type(struct connectdata *conn,
  * possibly new IP address.
  *
  */
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 static void
 ftp_pasv_verbose(struct connectdata *conn,
                  Curl_addrinfo *ai,
                  char *newhost, /* ascii version */
                  int port)
 {
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)conn;
-  (void)ai;
-  (void)newhost;
-  (void)port;
-#else
   char buf[256];
   Curl_printable_address(ai, buf, sizeof(buf));
   infof(conn->data, "Connecting to %s (%s) port %d\n", newhost, buf, port);
-#endif
 }
+#endif
 
 /*
   Check if this is a range download, and if so, set the internal variables

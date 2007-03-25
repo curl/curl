@@ -188,6 +188,10 @@ Curl_cookie_add(struct SessionHandle *data,
   bool replace_old = FALSE;
   bool badcookie = FALSE; /* cookies are good by default. mmmmm yummy */
 
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+  (void)data;
+#endif
+
   /* First, alloc and init a new struct for it */
   co = (struct Cookie *)calloc(sizeof(struct Cookie), 1);
   if(!co)
