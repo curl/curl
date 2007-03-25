@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel S (25 March 2007)
+- Daniel Johnson fixed multi code to traverse the easy handle list properly.
+  A left-over bug from the February 21 fix.
+
 Dan F (23 March 2007)
 - Added --pubkey option to curl and made --key also work for SCP/SFTP,
   plus made --pass work on an SSH private key as well.

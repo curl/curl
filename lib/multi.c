@@ -1488,7 +1488,7 @@ CURLMsg *curl_multi_info_read(CURLM *multi_handle, int *msgs_in_queue)
       return NULL; /* no messages left to return */
 
     easy=multi->easy.next;
-    while(easy) {
+    while(easy != &multi->easy) {
       if(easy->msg_num) {
         easy->msg_num--;
         break;
@@ -1999,7 +1999,7 @@ void curl_multi_dump(CURLM *multi_handle)
   int i;
   fprintf(stderr, "* Multi status: %d handles, %d alive\n",
           multi->num_easy, multi->num_alive);
-  for(easy=multi->easy.next; easy; easy = easy->next) {
+  for(easy=multi->easy.next; easy != &multi->easy; easy = easy->next) {
     if(easy->state != CURLM_STATE_COMPLETED) {
       /* only display handles that are not completed */
       fprintf(stderr, "handle %p, state %s, %d sockets\n",
