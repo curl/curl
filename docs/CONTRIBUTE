@@ -17,7 +17,9 @@ Join the Community
  you start sending patches! We prefer patches and discussions being held on
  the mailing list(s), not sent to individuals.
 
-The License Issue
+ We also hang out on IRC in #curl on irc.freenode.net
+
+License
 
  When contributing with code, you agree to put your changes and new code under
  the same license curl and libcurl is already using unless stated and agreed
@@ -43,9 +45,10 @@ The License Issue
 
 What To Read
 
- Source code, the man pages, the INTERNALS document, the TODO, the most recent
- CHANGES. Just lurking on the libcurl mailing list is gonna give you a lot of
- insights on what's going on right now. Asking there is a good idea too.
+ Source code, the man pages, the INTERNALS document, TODO, KNOWN_BUGS, the
+ most recent CHANGES. Just lurking on the libcurl mailing list is gonna give
+ you a lot of insights on what's going on right now. Asking there is a good
+ idea too.
 
 Naming
 
@@ -170,3 +173,21 @@ How To Make a Patch
 
         http://gnuwin32.sourceforge.net/packages/patch.htm
         http://gnuwin32.sourceforge.net/packages/diffutils.htm
+
+How to get your patches into the libcurl sources
+
+ 1. Submit your patch to the curl-library mailing list
+
+ 2. Make the patch against as recent sources as possible.
+
+ 3. Make sure your patch adheres to the source indent and coding style of
+    already existing source code. Failing to do so just adds more work for me.
+
+ 4. Respond to replies on the list about the patch and answer questions and/or
+    fix nits/flaws. This is very important. I will take lack of replies as a
+    sign that you're not very anxious to get your patch accepted and I tend to
+    simply drop such patches from my TODO list.
+
+ 5. If you've followed the above mentioned paragraphs and your patch still
+    hasn't been incorporated after some weeks, consider resubmitting them to
+    the list.
