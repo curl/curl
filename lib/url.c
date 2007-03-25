@@ -195,6 +195,10 @@ RETSIGTYPE alarmfunc(int sig)
 #endif /* WIN32 */
 #endif /* USE_ARES */
 
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+#define verboseconnect(x)  do { } while (0)
+#endif
+
 void Curl_safefree(void *ptr)
 {
   if(ptr)
@@ -2289,11 +2293,13 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
 {
   CURLcode result;
   Curl_addrinfo *addr;
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   char *hostname = conn->bits.proxy?conn->proxy.name:conn->host.name;
 
   infof(data, "About to connect() to %s%s port %d (#%d)\n",
         conn->bits.proxy?"proxy ":"",
         hostname, conn->port, conn->connectindex);
+#endif
 
   /*************************************************************
    * Connect to server/proxy
@@ -2335,12 +2341,14 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
 /*
  * verboseconnect() displays verbose information after a connect
  */
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 static void verboseconnect(struct connectdata *conn)
 {
   infof(conn->data, "Connected to %s (%s) port %d (#%d)\n",
         conn->bits.proxy ? conn->proxy.dispname : conn->host.dispname,
         conn->ip_addr_str, conn->port, conn->connectindex);
 }
+#endif
 
 int Curl_protocol_getsock(struct connectdata *conn,
                           curl_socket_t *socks,
@@ -2481,6 +2489,14 @@ static bool tld_check_name(struct SessionHandle *data,
   size_t err_pos;
   char *uc_name = NULL;
   int rc;
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+  char *tld_errmsg;
+#ifndef HAVE_TLD_STRERROR
+  char no_msg[] = "<no msg>";
+#endif
+#else
+  (void)data;
+#endif
 
   /* Convert (and downcase) ACE-name back into locale's character set */
   rc = idna_to_unicode_lzlz(ace_hostname, &uc_name, 0);
@@ -2488,24 +2504,21 @@ static bool tld_check_name(struct SessionHandle *data,
     return (FALSE);
 
   rc = tld_check_lz(uc_name, &err_pos, NULL);
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+  if (rc != TLD_SUCCESS)
+#ifdef HAVE_TLD_STRERROR
+    tld_errmsg = tld_strerror((Tld_rc)rc);
+#else
+    tld_errmsg = no_msg;
+#endif
   if (rc == TLD_INVALID)
-     infof(data, "WARNING: %s; pos %u = `%c'/0x%02X\n",
-#ifdef HAVE_TLD_STRERROR
-           tld_strerror((Tld_rc)rc),
-#else
-           "<no msg>",
-#endif
-           err_pos, uc_name[err_pos],
-           uc_name[err_pos] & 255);
+    infof(data, "WARNING: %s; pos %u = `%c'/0x%02X\n",
+          tld_errmsg, err_pos, uc_name[err_pos],
+          uc_name[err_pos] & 255);
   else if (rc != TLD_SUCCESS)
-       infof(data, "WARNING: TLD check for %s failed; %s\n",
-             uc_name,
-#ifdef HAVE_TLD_STRERROR
-             tld_strerror((Tld_rc)rc)
-#else
-             "<no msg>"
-#endif
-         );
+    infof(data, "WARNING: TLD check for %s failed; %s\n",
+          uc_name, tld_errmsg);
+#endif /* CURL_DISABLE_VERBOSE_STRINGS */
   if (uc_name)
      idn_free(uc_name);
   return (bool)(rc == TLD_SUCCESS);

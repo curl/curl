@@ -129,6 +129,10 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   in_addr_t in;
   struct hostent *buf = NULL;
 
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+  (void)conn;
+#endif
+
   (void)port; /* unused in IPv4 code */
 
   *waitp = 0; /* don't wait, we act synchronously */
