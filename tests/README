@@ -10,6 +10,7 @@ Requires:
   perl (and a unix-style shell)
   diff (when a test fail, a diff is shown)
   stunnel (for HTTPS and FTPS tests)
+  sshd (for SCP and SFTP tests; OpenSSH ver. 3.9 is known to work)
 
 TCP ports used:
 
@@ -21,9 +22,12 @@ TCP ports used:
   - 8993 on localhost for FTPS tests
   - 8996 on localhost for FTP IPv6 tests
   - 8997 on localhost for TFTP tests
+  - 8999 on localhost for SCP/SFTP tests
 
   The test suite runs simple FTP, HTTP and TFTP servers on these ports to
-  which it makes requests.
+  which it makes requests.  For SSL tests, it runs stunnel to handle
+  encryption to the regular servers. For SSH, it runs a standard OpenSSH
+  server.
 
 Run:
   'make test'. This invokes the 'runtests.pl' perl script. Edit the top
@@ -82,6 +86,7 @@ TEST CASE NUMBERS
  300 - 399   HTTPS
  400 - 499   FTPS
  500 - 599   libcurl source code tests, not using the curl command tool
+ 600 - 699   SCP/SFTP
 
  Since 30-apr-2003, there's nothing in the system that requires us to keep
  within these number series. Each test case now specifies its own server
@@ -89,4 +94,4 @@ TEST CASE NUMBERS
 
 TODO:
 
-  * Add tests for TELNET, LDAP, DICT, SCP, SFTP...
+  * Add tests for TELNET, LDAP, DICT...
