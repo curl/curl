@@ -142,7 +142,12 @@ if ($^O eq 'MSWin32' || $targetos) {
   elsif ($targetos =~ /netware/) {
     $configurebuild = 0;
     $binext = '.nlm';
-    $libext = '.lib';
+    if ($^O eq 'MSWin32') {
+      $libext = '.lib';
+    }
+    else {
+      $libext = '.a';
+    }
   }
 }
 
