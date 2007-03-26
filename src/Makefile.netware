@@ -19,7 +19,7 @@ endif
 
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8d
+OPENSSL_PATH = ../../openssl-0.9.8e
 endif
 
 # Edit the path below to point to the base of your LibSSH2 package.
@@ -81,7 +81,8 @@ CFLAGS	= $(OPT) -D$(DB) -DNETWARE -DHAVE_CONFIG_H -nostdinc
 
 ifeq ($(CC),mwccnlm)
 LD	= mwldnlm
-LDFLAGS	= -nostdlib $(PRELUDE) $(LDLIBS) $(OBJS) $(OBJX) -o $(TARGET).nlm -commandfile
+LDFLAGS	= -nostdlib $(PRELUDE) $(LDLIBS) $(OBJS) $(OBJX) -o $@ -commandfile
+LIBEXT	= lib
 CFLAGS	+= -gccinc -inline off -opt nointrinsics -proc 586
 CFLAGS	+= -relax_pointers
 #CFLAGS	+= -w on
@@ -96,6 +97,7 @@ endif
 else
 LD	= nlmconv
 LDFLAGS	= -T
+LIBEXT	= a
 CFLAGS	+= -fno-builtin -fpcc-struct-return -fno-strict-aliasing
 CFLAGS	+= -Wall # -pedantic
 ifeq ($(LIBARCH),LIBC)
@@ -116,7 +118,7 @@ CURL_LIB = ../lib
 INCLUDES = -I$(CURL_INC) -I$(CURL_LIB)
 
 ifdef LINK_STATIC
-	LDLIBS	= ../lib/libcurl.lib
+	LDLIBS	= ../lib/libcurl.$(LIBEXT)
 	IMPORTS = GetProcessSwitchCount RunningProcess
 else
 	MODULES	= libcurl.nlm
@@ -125,7 +127,7 @@ endif
 ifdef WITH_ZLIB
 	INCLUDES += -I$(ZLIB_PATH)
 ifdef LINK_STATIC
-	LDLIBS += $(ZLIB_PATH)/nw/libz.lib
+	LDLIBS += $(ZLIB_PATH)/nw/libz.$(LIBEXT)
 else
 	IMPORTS += @$(ZLIB_PATH)/nw/libz.imp
 	MODULES += libz.nlm
@@ -285,6 +287,9 @@ ifeq ($(LD),nlmconv)
 	@echo $(DL)input $(OBJS)$(DL) >> $@
 	@echo $(DL)input $(OBJX)$(DL) >> $@
 	@echo $(DL)input $(PRELUDE)$(DL) >> $@
+ifdef LDLIBS
+	@echo $(DL)input $(LDLIBS)$(DL) >> $@
+endif
 	@echo $(DL)output $(TARGET).nlm$(DL) >> $@
 endif
 

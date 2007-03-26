@@ -19,7 +19,7 @@ endif
 
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8d
+OPENSSL_PATH = ../../openssl-0.9.8e
 endif
 
 # Edit the path below to point to the base of your LibSSH2 package.
@@ -82,9 +82,10 @@ CFLAGS	= $(OPT) -D$(DB) -DNETWARE -DHAVE_CONFIG_H -nostdinc
 
 ifeq ($(CC),mwccnlm)
 LD	= mwldnlm
-LDFLAGS	= -nostdlib $(PRELUDE) $(OBJL) -o $(TARGET).nlm -commandfile
+LDFLAGS	= -nostdlib $(PRELUDE) $(OBJL) -o $@ -commandfile
 AR	= mwldnlm
 ARFLAGS	= -type library -w nocmdline $(OBJS) -o
+LIBEXT	= lib
 CFLAGS	+= -msgstyle gcc -gccinc -inline off -opt nointrinsics -proc 586
 CFLAGS	+= -relax_pointers
 #CFLAGS	+= -w on
@@ -101,6 +102,7 @@ LD	= nlmconv
 LDFLAGS	= -T
 AR	= ar
 ARFLAGS	= -cq
+LIBEXT	= a
 CFLAGS	+= -fno-builtin -fpcc-struct-return -fno-strict-aliasing
 CFLAGS	+= -Wall # -pedantic
 ifeq ($(LIBARCH),LIBC)
@@ -120,17 +122,17 @@ INCLUDES = -I. -I../include
 
 ifdef WITH_ARES
 	INCLUDES += -I../ares
-	LDLIBS = ../ares/libcares.lib
+	LDLIBS = ../ares/libcares.$(LIBEXT)
 endif
 ifdef WITH_SSL
 	INCLUDES += -I$(OPENSSL_PATH)/outinc_nw_libc -I$(OPENSSL_PATH)/outinc_nw_libc/openssl
-	LDLIBS += $(OPENSSL_PATH)/out_nw_libc/crypto.lib $(OPENSSL_PATH)/out_nw_libc/ssl.lib
+	LDLIBS += $(OPENSSL_PATH)/out_nw_libc/crypto.$(LIBEXT) $(OPENSSL_PATH)/out_nw_libc/ssl.$(LIBEXT)
 	IMPORTS += GetProcessSwitchCount RunningProcess
 endif
 ifdef WITH_SSH2
 	INCLUDES += -I$(LIBSSH2_PATH)/include
 ifdef LINK_STATIC
-	LDLIBS += $(LIBSSH2_PATH)/nw/libssh2.lib
+	LDLIBS += $(LIBSSH2_PATH)/nw/libssh2.$(LIBEXT)
 else
 	IMPORTS += @$(LIBSSH2_PATH)/nw/libssh2.imp
 	MODULES += libssh2.nlm
@@ -139,7 +141,7 @@ endif
 ifdef WITH_ZLIB
 	INCLUDES += -I$(ZLIB_PATH)
 ifdef LINK_STATIC
-	LDLIBS += $(ZLIB_PATH)/nw/libz.lib
+	LDLIBS += $(ZLIB_PATH)/nw/libz.$(LIBEXT)
 else
 	IMPORTS += @$(ZLIB_PATH)/nw/libz.imp
 	MODULES += libz.nlm
@@ -189,7 +191,7 @@ all: lib nlm
 
 nlm: prebuild $(TARGET).nlm
 
-lib: prebuild $(TARGET).lib
+lib: prebuild $(TARGET).$(LIBEXT)
 
 prebuild: $(OBJDIR) $(OBJDIR)/version.inc config.h ca-bundle.h
 
@@ -207,7 +209,7 @@ dist: all
 
 install: $(INSTDIR) all
 	@$(CP) $(TARGET).nlm $(INSTDIR)
-	@$(CP) $(TARGET).lib $(INSTDIR)
+	@$(CP) $(TARGET).$(LIBEXT) $(INSTDIR)
 	@$(CP) ../CHANGES $(INSTDIR)
 	@$(CP) ../COPYING $(INSTDIR)
 	@$(CP) ../README $(INSTDIR)
@@ -221,7 +223,7 @@ clean:
 	-$(RM) -r $(OBJDIR)
 
 distclean: clean
-	-$(RM) -r $(TARGET).lib $(TARGET).nlm
+	-$(RM) -r $(TARGET).$(LIBEXT) $(TARGET).nlm
 
 $(INSTDIR):
 	@mkdir $(INSTDIR)
@@ -229,7 +231,7 @@ $(INSTDIR):
 $(OBJDIR):
 	@mkdir $(OBJDIR)
 
-$(TARGET).lib: $(OBJS)
+$(TARGET).$(LIBEXT): $(OBJS)
 	@echo Creating $@
 	@-$(RM) $@
 	@$(AR) $(ARFLAGS) $@ $^
