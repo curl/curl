@@ -751,7 +751,7 @@ int Curl_ossl_shutdown(struct connectdata *conn, int sockindex)
 
   if(connssl->handle) {
     while(!done) {
-      int what = Curl_select(conn->sock[sockindex],
+      int what = Curl_socket_ready(conn->sock[sockindex],
                              CURL_SOCKET_BAD, SSL_SHUTDOWN_TIMEOUT);
       if(what > 0) {
         /* Something to read, let's do it and hope that it is the close
@@ -1728,7 +1728,7 @@ Curl_ossl_connect_common(struct connectdata *conn,
         connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
 
       while(1) {
-        int what = Curl_select(readfd, writefd, nonblocking?0:(int)timeout_ms);
+        int what = Curl_socket_ready(readfd, writefd, nonblocking?0:(int)timeout_ms);
         if(what > 0)
           /* readable or writable, go loop in the outer loop */
           break;

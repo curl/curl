@@ -204,7 +204,7 @@ static CURLcode AllowServerConnect(struct connectdata *conn)
      Note the typecast here. */
   timeout_ms = (timeout?(int)timeout:60000);
 
-  switch (Curl_select(sock, CURL_SOCKET_BAD, timeout_ms)) {
+  switch (Curl_socket_ready(sock, CURL_SOCKET_BAD, timeout_ms)) {
   case -1: /* error */
     /* let's die here */
     failf(data, "Error while waiting for server connect");
@@ -498,7 +498,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
       if(timeout < interval_ms)
         interval_ms = timeout;
 
-      switch (Curl_select(sockfd, CURL_SOCKET_BAD, (int)interval_ms)) {
+      switch (Curl_socket_ready(sockfd, CURL_SOCKET_BAD, (int)interval_ms)) {
       case -1: /* select() error, stop reading */
         result = CURLE_RECV_ERROR;
         failf(data, "FTP response aborted due to select() error: %d",
@@ -2808,7 +2808,7 @@ CURLcode Curl_ftp_multi_statemach(struct connectdata *conn,
     return CURLE_OPERATION_TIMEDOUT;
   }
 
-  rc = Curl_select(ftpc->sendleft?CURL_SOCKET_BAD:sock, /* reading */
+  rc = Curl_socket_ready(ftpc->sendleft?CURL_SOCKET_BAD:sock, /* reading */
                    ftpc->sendleft?sock:CURL_SOCKET_BAD, /* writing */
                    0);
 
@@ -2841,7 +2841,7 @@ static CURLcode ftp_easy_statemach(struct connectdata *conn)
       return CURLE_OPERATION_TIMEDOUT; /* already too little time */
     }
 
-    rc = Curl_select(ftpc->sendleft?CURL_SOCKET_BAD:sock, /* reading */
+    rc = Curl_socket_ready(ftpc->sendleft?CURL_SOCKET_BAD:sock, /* reading */
                      ftpc->sendleft?sock:CURL_SOCKET_BAD, /* writing */
                      (int)timeout_ms);
 

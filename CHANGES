@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Yang Tse (20 March 2007)
+- Internal function Curl_select() renamed to Curl_socket_ready()
+
 Daniel S (25 March 2007)
 - Daniel Johnson fixed multi code to traverse the easy handle list properly.
   A left-over bug from the February 21 fix.

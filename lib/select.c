@@ -84,8 +84,8 @@
 
 /*
  * Internal function used for waiting a specific amount of ms
- * in Curl_select() and Curl_poll() when no file descriptor is
- * provided to wait on, just being used to delay execution.
+ * in Curl_socket_ready() and Curl_poll() when no file descriptor
+ * is provided to wait on, just being used to delay execution.
  * WinSock select() and poll() timeout mechanisms need a valid
  * socket descriptor in a not null file descriptor set to work.
  * Waiting indefinitely with this function is not allowed, a
@@ -160,7 +160,7 @@ static int wait_ms(int timeout_ms)
  *    0 = timeout
  *    CSELECT_IN | CSELECT_OUT | CSELECT_ERR
  */
-int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
+int Curl_socket_ready(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
 {
 #ifdef HAVE_POLL_FINE
   struct pollfd pfd[2];

@@ -161,7 +161,7 @@ static CURLcode handshake(struct connectdata *conn,
         return CURLE_OPERATION_TIMEOUTED;
       }
 
-      rc = Curl_select(conn->sock[sockindex],
+      rc = Curl_socket_ready(conn->sock[sockindex],
                        conn->sock[sockindex], (int)timeout_ms);
       if(rc > 0)
         /* reabable or writable, go loop*/
@@ -535,7 +535,7 @@ int Curl_gtls_shutdown(struct connectdata *conn, int sockindex)
 
   if(conn->ssl[sockindex].session) {
     while(!done) {
-      int what = Curl_select(conn->sock[sockindex],
+      int what = Curl_socket_ready(conn->sock[sockindex],
                              CURL_SOCKET_BAD, SSL_SHUTDOWN_TIMEOUT);
       if(what > 0) {
         /* Something to read, let's do it and hope that it is the close

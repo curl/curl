@@ -678,7 +678,7 @@ CURLcode Curl_tftp(struct connectdata *conn, bool *done)
       tftp_state_machine(state, event) ) {
 
     /* Wait until ready to read or timeout occurs */
-    rc=Curl_select(state->sockfd, CURL_SOCKET_BAD, state->retry_time * 1000);
+    rc=Curl_socket_ready(state->sockfd, CURL_SOCKET_BAD, state->retry_time * 1000);
 
     if(rc == -1) {
       /* bail out */
