@@ -118,35 +118,39 @@ NDK_ROOT = $(NDKBASE)/ndk
 SDK_CLIB = $(NDK_ROOT)/nwsdk
 SDK_LIBC = $(NDK_ROOT)/libc
 SDK_LDAP = $(NDK_ROOT)/cldapsdk/netware
+CURL_INC = ../include
+CURL_LIB = ../lib
+ARES_LIB = ../ares
 
-INCLUDES = -I. -I../include
+INCLUDES = -I$(CURL_INC) -I$(CURL_LIB)
 
 ifdef WITH_ARES
-	INCLUDES += -I../ares
-	LDLIBS = ../ares/libcares.$(LIBEXT)
-endif
-ifdef WITH_SSL
-	INCLUDES += -I$(OPENSSL_PATH)/outinc_nw_libc -I$(OPENSSL_PATH)/outinc_nw_libc/openssl
-	LDLIBS += $(OPENSSL_PATH)/out_nw_libc/crypto.$(LIBEXT) $(OPENSSL_PATH)/out_nw_libc/ssl.$(LIBEXT)
-	IMPORTS += GetProcessSwitchCount RunningProcess
-endif
-ifdef WITH_SSH2
-	INCLUDES += -I$(LIBSSH2_PATH)/include
-ifdef LINK_STATIC
-	LDLIBS += $(LIBSSH2_PATH)/nw/libssh2.$(LIBEXT)
-else
-	IMPORTS += @$(LIBSSH2_PATH)/nw/libssh2.imp
-	MODULES += libssh2.nlm
-endif
+	INCLUDES += -I$(ARES_LIB)
+	LDLIBS = $(ARES_LIB)/libcares.$(LIBEXT)
 endif
 ifdef WITH_ZLIB
 	INCLUDES += -I$(ZLIB_PATH)
 ifdef LINK_STATIC
 	LDLIBS += $(ZLIB_PATH)/nw/libz.$(LIBEXT)
 else
-	IMPORTS += @$(ZLIB_PATH)/nw/libz.imp
 	MODULES += libz.nlm
+	IMPORTS += @$(ZLIB_PATH)/nw/libz.imp
 endif
+endif
+ifdef WITH_SSH2
+	INCLUDES += -I$(LIBSSH2_PATH)/include
+ifdef LINK_STATIC
+	LDLIBS += $(LIBSSH2_PATH)/nw/libssh2.$(LIBEXT)
+else
+	MODULES += libssh2.nlm
+	IMPORTS += @$(LIBSSH2_PATH)/nw/libssh2.imp
+endif
+endif
+ifdef WITH_SSL
+	INCLUDES += -I$(OPENSSL_PATH)/outinc_nw_libc -I$(OPENSSL_PATH)/outinc_nw_libc/openssl
+	LDLIBS += $(OPENSSL_PATH)/out_nw_libc/ssl.$(LIBEXT)
+	LDLIBS += $(OPENSSL_PATH)/out_nw_libc/crypto.$(LIBEXT)
+	IMPORTS += GetProcessSwitchCount RunningProcess
 endif
 
 ifeq ($(LIBARCH),LIBC)
@@ -184,9 +188,9 @@ endif
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
 
-OBJS	:= $(patsubst %.c,$(OBJDIR)/%.o,$(strip $(CSOURCES))) $(LDLIBS)
+OBJS	:= $(patsubst %.c,$(OBJDIR)/%.o,$(strip $(CSOURCES)))
 
-OBJL	= $(OBJS) $(OBJDIR)/nwlib.o
+OBJL	= $(OBJS) $(OBJDIR)/nwlib.o $(LDLIBS)
 
 all: lib nlm
 
@@ -306,11 +310,11 @@ ifdef IMPORTS
 	@echo $(DL)import $(IMPORTS)$(DL) >> $@
 endif
 ifeq ($(LD),nlmconv)
-ifdef LDLIBS
-	@echo $(DL)input $(LDLIBS)$(DL) >> $@
-endif
 	@echo $(DL)input $(OBJL)$(DL) >> $@
 	@echo $(DL)input $(PRELUDE)$(DL) >> $@
+#ifdef LDLIBS
+#	@echo $(DL)input $(LDLIBS)$(DL) >> $@
+#endif
 	@echo $(DL)output $(TARGET).nlm$(DL) >> $@
 endif
 
@@ -478,6 +482,6 @@ else
 endif
 
 $(LIBCARES):
-	$(MAKE) -C ../ares -f Makefile.netware lib
+	$(MAKE) -C $(ARES_LIB) -f Makefile.netware lib
 
 

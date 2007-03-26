@@ -82,7 +82,7 @@ CFLAGS	= $(OPT) -D$(DB) -DNETWARE -DHAVE_CONFIG_H -nostdinc
 
 ifeq ($(CC),mwccnlm)
 LD	= mwldnlm
-LDFLAGS	= -nostdlib $(PRELUDE) $(LDLIBS) $(OBJS) $(OBJX) -o $@ -commandfile
+LDFLAGS	= -nostdlib $(OBJS) $(PRELUDE) $(LDLIBS) -o $@ -commandfile
 LIBEXT	= lib
 CFLAGS	+= -gccinc -inline off -opt nointrinsics -proc 586
 CFLAGS	+= -relax_pointers
@@ -115,24 +115,38 @@ SDK_LIBC = $(NDK_ROOT)/libc
 SDK_LDAP = $(NDK_ROOT)/cldapsdk/netware
 CURL_INC = ../include
 CURL_LIB = ../lib
+ARES_LIB = ../ares
 
 INCLUDES = -I$(CURL_INC) -I$(CURL_LIB)
 
 ifdef LINK_STATIC
-	LDLIBS	= ../lib/libcurl.$(LIBEXT)
-	IMPORTS = GetProcessSwitchCount RunningProcess
+	LDLIBS	= $(CURL_LIB)/libcurl.$(LIBEXT)
 else
 	MODULES	= libcurl.nlm
-	IMPORTS	= @../lib/libcurl.imp
+	IMPORTS	= @$(CURL_LIB)/libcurl.imp
 endif
 ifdef WITH_ZLIB
 	INCLUDES += -I$(ZLIB_PATH)
 ifdef LINK_STATIC
 	LDLIBS += $(ZLIB_PATH)/nw/libz.$(LIBEXT)
 else
-	IMPORTS += @$(ZLIB_PATH)/nw/libz.imp
 	MODULES += libz.nlm
+	IMPORTS += @$(ZLIB_PATH)/nw/libz.imp
 endif
+endif
+ifdef WITH_SSH2
+	INCLUDES += -I$(LIBSSH2_PATH)/include
+ifdef LINK_STATIC
+	LDLIBS += $(LIBSSH2_PATH)/nw/libssh2.$(LIBEXT)
+else
+	MODULES += libssh2.nlm
+	IMPORTS += @$(LIBSSH2_PATH)/nw/libssh2.imp
+endif
+endif
+ifdef WITH_SSL
+	LDLIBS += $(OPENSSL_PATH)/out_nw_libc/ssl.$(LIBEXT)
+	LDLIBS += $(OPENSSL_PATH)/out_nw_libc/crypto.$(LIBEXT)
+	IMPORTS += GetProcessSwitchCount RunningProcess
 endif
 
 ifeq ($(LIBARCH),LIBC)
@@ -169,10 +183,10 @@ endif
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
 
-OBJS	:= $(patsubst %.c,$(OBJDIR)/%.o,$(strip $(CURL_SOURCES)))
 OBJX	:= $(patsubst %.c,$(OBJDIR)/%.o,$(notdir $(strip $(CURLX_ONES))))
+OBJS	:= $(patsubst %.c,$(OBJDIR)/%.o,$(strip $(CURL_SOURCES))) $(OBJX)
 
-vpath %.c ../lib
+vpath %.c $(CURL_LIB)
 
 all: prebuild $(TARGET).nlm 
 
