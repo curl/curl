@@ -1,42 +1,41 @@
 <testcase>
 <info>
 <keywords>
-SFTP
+SCP
+SCP upload
 </keywords>
 </info>
 
 #
 # Server-side
 <reply>
-<data>
-Test data
-for ssh test
-</data>
 </reply>
 
 #
 # Client-side
 <client>
 <server>
-sftp
+scp
 </server>
  <name>
-SFTP retrieval
+SCP upload
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT/%PWD/log/file600.txt
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file603.txt scp://%HOSTIP:%SSHPORT/%PWD/log/upload.603
 </command>
-<file name="log/file600.txt">
+<file name="log/file603.txt">
 Test data
-for ssh test
+for ssh upload test
 </file>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-</protocol>
+<upload>
+Test data
+for ssh upload test
+</upload>
 <valgrind>
 disable
 </valgrind>

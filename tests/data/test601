@@ -8,7 +8,7 @@ SCP
 #
 # Server-side
 <reply>
-<data mode="text">
+<data>
 Test data
 for ssh test
 </data>
