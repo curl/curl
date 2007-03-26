@@ -6,7 +6,7 @@
 
                                   Changelog
 
-Yang Tse (20 March 2007)
+Yang Tse (27 March 2007)
 - Internal function Curl_select() renamed to Curl_socket_ready()
 
 Daniel S (25 March 2007)
