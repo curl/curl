@@ -52,6 +52,8 @@
 #include "select.h"
 
 #ifdef USE_WINSOCK
+#  undef  EBADF
+#  define EBADF  WSAEBADF
 #  undef  EINTR
 #  define EINTR  WSAEINTR
 #  undef  EINVAL
@@ -77,9 +79,9 @@
 #define elapsed_ms  (int)curlx_tvdiff(curlx_tvnow(), initial_tv)
 
 #ifdef CURL_ACKNOWLEDGE_EINTR
-#define sockerrno_not_EINTR  (SOCKERRNO != EINTR)
+#define error_not_EINTR  (error != EINTR)
 #else
-#define sockerrno_not_EINTR  (1)
+#define error_not_EINTR  (1)
 #endif
 
 /*
@@ -110,6 +112,7 @@ static int wait_ms(int timeout_ms)
 #endif
   struct timeval initial_tv;
   int pending_ms;
+  int error;
 #endif
   int r = 0;
 
@@ -134,7 +137,8 @@ static int wait_ms(int timeout_ms)
     pending_tv.tv_usec = (pending_ms % 1000) * 1000;
     r = select(0, NULL, NULL, NULL, &pending_tv);
 #endif /* HAVE_POLL_FINE */
-  } while ((r == -1) && (SOCKERRNO != EINVAL) && sockerrno_not_EINTR &&
+  } while ((r == -1) && (error = SOCKERRNO) &&
+           (error != EINVAL) && error_not_EINTR &&
            ((pending_ms = timeout_ms - elapsed_ms) > 0));
 #endif /* USE_WINSOCK */
   if (r)
@@ -175,6 +179,7 @@ int Curl_socket_ready(curl_socket_t readfd, curl_socket_t writefd, int timeout_m
 #endif
   struct timeval initial_tv;
   int pending_ms;
+  int error;
   int r;
   int ret;
 
@@ -206,7 +211,8 @@ int Curl_socket_ready(curl_socket_t readfd, curl_socket_t writefd, int timeout_m
     if (timeout_ms < 0)
       pending_ms = -1;
     r = poll(pfd, num, pending_ms);
-  } while ((r == -1) && (SOCKERRNO != EINVAL) && sockerrno_not_EINTR &&
+  } while ((r == -1) && (error = SOCKERRNO) &&
+           (error != EINVAL) && error_not_EINTR &&
            ((timeout_ms < 0) || ((pending_ms = timeout_ms - elapsed_ms) > 0)));
 
   if (r < 0)
@@ -269,7 +275,8 @@ int Curl_socket_ready(curl_socket_t readfd, curl_socket_t writefd, int timeout_m
       pending_tv.tv_usec = (pending_ms % 1000) * 1000;
     }
     r = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, ptimeout);
-  } while ((r == -1) && (SOCKERRNO != EINVAL) && sockerrno_not_EINTR &&
+  } while ((r == -1) && (error = SOCKERRNO) &&
+           (error != EINVAL) && (error != EBADF) && error_not_EINTR &&
            ((timeout_ms < 0) || ((pending_ms = timeout_ms - elapsed_ms) > 0)));
 
   if (r < 0)
@@ -327,6 +334,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
   bool fds_none = TRUE;
   unsigned int i;
   int pending_ms;
+  int error;
   int r;
 
   if (ufds) {
@@ -351,7 +359,8 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
     if (timeout_ms < 0)
       pending_ms = -1;
     r = poll(ufds, nfds, pending_ms);
-  } while ((r == -1) && (SOCKERRNO != EINVAL) && sockerrno_not_EINTR &&
+  } while ((r == -1) && (error = SOCKERRNO) &&
+           (error != EINVAL) && error_not_EINTR &&
            ((timeout_ms < 0) || ((pending_ms = timeout_ms - elapsed_ms) > 0)));
 
 #else  /* HAVE_POLL_FINE */
@@ -386,7 +395,8 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
       pending_tv.tv_usec = (pending_ms % 1000) * 1000;
     }
     r = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, ptimeout);
-  } while ((r == -1) && (SOCKERRNO != EINVAL) && sockerrno_not_EINTR &&
+  } while ((r == -1) && (error = SOCKERRNO) &&
+           (error != EINVAL) && (error != EBADF) && error_not_EINTR &&
            ((timeout_ms < 0) || ((pending_ms = timeout_ms - elapsed_ms) > 0)));
 
   if (r < 0)
