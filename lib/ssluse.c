@@ -794,7 +794,7 @@ int Curl_ossl_shutdown(struct connectdata *conn, int sockindex)
       }
       else {
         /* anything that gets here is fatally bad */
-        failf(data, "select on SSL socket, errno: %d", SOCKERRNO);
+        failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
         retval = -1;
         done = 1;
       }
@@ -1745,7 +1745,7 @@ Curl_ossl_connect_common(struct connectdata *conn,
         }
         else {
           /* anything that gets here is fatally bad */
-          failf(data, "select on SSL socket, errno: %d", SOCKERRNO);
+          failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
           return CURLE_SSL_CONNECT_ERROR;
         }
       } /* while()-loop for the select() */

@@ -173,7 +173,7 @@ static CURLcode handshake(struct connectdata *conn,
       }
       else {
         /* anything that gets here is fatally bad */
-        failf(data, "select on SSL socket, errno: %d", SOCKERRNO);
+        failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
         return CURLE_SSL_CONNECT_ERROR;
       }
     }
@@ -566,7 +566,7 @@ int Curl_gtls_shutdown(struct connectdata *conn, int sockindex)
       }
       else {
         /* anything that gets here is fatally bad */
-        failf(data, "select on SSL socket, errno: %d", SOCKERRNO);
+        failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
         retval = -1;
         done = 1;
       }

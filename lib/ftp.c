@@ -501,7 +501,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
       switch (Curl_socket_ready(sockfd, CURL_SOCKET_BAD, (int)interval_ms)) {
       case -1: /* select() error, stop reading */
         result = CURLE_RECV_ERROR;
-        failf(data, "FTP response aborted due to select() error: %d",
+        failf(data, "FTP response aborted due to select/poll error: %d",
               SOCKERRNO);
         break;
       case 0: /* timeout */
@@ -2813,7 +2813,7 @@ CURLcode Curl_ftp_multi_statemach(struct connectdata *conn,
                    0);
 
   if(rc == -1) {
-    failf(data, "select error");
+    failf(data, "select/poll error");
     return CURLE_OUT_OF_MEMORY;
   }
   else if(rc != 0) {
@@ -2846,7 +2846,7 @@ static CURLcode ftp_easy_statemach(struct connectdata *conn)
                      (int)timeout_ms);
 
     if(rc == -1) {
-      failf(data, "select error");
+      failf(data, "select/poll error");
       return CURLE_OUT_OF_MEMORY;
     }
     else if(rc == 0) {
