@@ -91,6 +91,8 @@ print FILE <<EOF
 # This is a generated file!  Do not edit!
 # OpenSSH sshd configuration file for curl testing
 AllowUsers $username
+DenyUsers
+DenyGroups
 AuthorizedKeysFile $path/curl_client_key.pub
 HostKey $path/curl_host_dsa_key
 PidFile $path/.ssh.pid
@@ -98,6 +100,7 @@ Port $port
 ListenAddress localhost
 Protocol 2
 AllowTcpForwarding no
+GatewayPorts no
 HostbasedAuthentication no
 IgnoreRhosts yes
 IgnoreUserKnownHosts yes
@@ -111,6 +114,7 @@ StrictModes no
 Subsystem sftp $sftp
 UseLogin no
 X11Forwarding no
+UsePrivilegeSeparation no
 # Newer OpenSSH options
 UsePam no
 UseDNS no

@@ -10,7 +10,7 @@ Requires:
   perl (and a unix-style shell)
   diff (when a test fail, a diff is shown)
   stunnel (for HTTPS and FTPS tests)
-  sshd (for SCP and SFTP tests; OpenSSH ver. 3.9 is known to work)
+  sshd (for SCP and SFTP tests; OpenSSH ver. 3.8 is known to work)
 
 TCP ports used:
 
