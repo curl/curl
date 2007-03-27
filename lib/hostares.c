@@ -74,6 +74,7 @@
 #include "url.h"
 #include "multiif.h"
 #include "connect.h"
+#include "select.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -144,8 +145,8 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
 
   nfds = ares_fds(data->state.areschannel, &read_fds, &write_fds);
 
-  (void)select(nfds, &read_fds, &write_fds, NULL,
-               (struct timeval *)&tv);
+  (void)Curl_select(nfds, &read_fds, &write_fds, NULL,
+                    (struct timeval *)&tv);
 
   /* Call ares_process() unconditonally here, even if we simply timed out
      above, as otherwise the ares name resolve won't timeout! */
@@ -210,7 +211,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
       /* no file descriptors means we're done waiting */
       break;
     tvp = ares_timeout(data->state.areschannel, &store, &tv);
-    count = select(nfds, &read_fds, &write_fds, NULL, tvp);
+    count = Curl_select(nfds, &read_fds, &write_fds, NULL, tvp);
     if ((count < 0) && (SOCKERRNO != EINVAL))
       break;
 

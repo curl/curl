@@ -64,6 +64,18 @@ struct pollfd
 
 #endif
 
+#ifndef POLLRDNORM
+#define POLLRDNORM POLLIN
+#endif
+
+#ifndef POLLWRNORM
+#define POLLWRNORM POLLOUT
+#endif
+
+#ifndef POLLRDBAND
+#define POLLRDBAND POLLPRI
+#endif
+
 #define CSELECT_IN   0x01
 #define CSELECT_OUT  0x02
 #define CSELECT_ERR  0x04
@@ -71,6 +83,10 @@ struct pollfd
 int Curl_socket_ready(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms);
 
 int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms);
+
+int Curl_select(int nfds,
+                fd_set *fds_read, fd_set *fds_write, fd_set *fds_excep,
+                struct timeval *timeout);
 
 #ifdef TPF
 int tpf_select_libcurl(int maxfds, fd_set* reads, fd_set* writes,

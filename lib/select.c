@@ -32,8 +32,8 @@
 #include <sys/time.h>
 #endif
 
-#ifndef HAVE_SELECT
-#error "We can't compile without select() support!"
+#if !defined(HAVE_SELECT) && !defined(HAVE_POLL_FINE)
+#error "We can't compile without select() or poll() support."
 #endif
 
 #ifdef __BEOS__
@@ -64,10 +64,18 @@
 
 #if defined(USE_WINSOCK) || defined(TPF)
 #define VERIFY_SOCK(x) do { } while (0)
+#define VERIFY_NFDS(x) do { } while (0)
 #else
 #define VALID_SOCK(s) (((s) >= 0) && ((s) < FD_SETSIZE))
 #define VERIFY_SOCK(x) do { \
   if(!VALID_SOCK(x)) { \
+    SET_SOCKERRNO(EINVAL); \
+    return -1; \
+  } \
+} while(0)
+#define VALID_NFDS(n) (((n) >= 0) && ((n) <= FD_SETSIZE))
+#define VERIFY_NFDS(x) do { \
+  if(!VALID_NFDS(x)) { \
     SET_SOCKERRNO(EINVAL); \
     return -1; \
   } \
@@ -83,6 +91,8 @@
 #else
 #define error_not_EINTR  (1)
 #endif
+
+#define SMALL_POLLNFDS  0X20
 
 /*
  * Internal function used for waiting a specific amount of ms
@@ -422,6 +432,189 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
 #endif  /* HAVE_POLL_FINE */
 
   return r;
+}
+
+/*
+ * This is a wrapper around select().  It uses poll() when a fine
+ * poll() is available, in order to avoid limits with FD_SETSIZE,
+ * otherwise select() is used.  An error is returned if select() is
+ * being used and a the number of file descriptors is larger than
+ * FD_SETSIZE.  A NULL timeout pointer makes this function wait
+ * indefinitely, unles no valid file descriptor is given, when this
+ * happens the NULL timeout is ignored and the function times out
+ * immediately.  When compiled with CURL_ACKNOWLEDGE_EINTR defined,
+ * EINTR condition is honored and function might exit early without
+ * awaiting timeout, otherwise EINTR will be ignored.
+ *
+ * Return values:
+ *   -1 = system call error or nfds > FD_SETSIZE
+ *    0 = timeout
+ *    N = number of file descriptors kept in file descriptor sets.
+ */
+int Curl_select(int nfds,
+                fd_set *fds_read, fd_set *fds_write, fd_set *fds_excep,
+                struct timeval *timeout)
+{
+  struct timeval initial_tv;
+  int timeout_ms;
+  int pending_ms;
+  int error;
+  int r;
+#ifdef HAVE_POLL_FINE
+  struct pollfd small_fds[SMALL_POLLNFDS];
+  struct pollfd *poll_fds;
+  int ix;
+  int fd;
+  int poll_nfds = 0;
+#else
+  struct timeval pending_tv;
+  struct timeval *ptimeout;
+#endif
+  int ret = 0;
+
+  if ((nfds < 0) ||
+     ((nfds > 0) && (!fds_read && !fds_write && !fds_excep))) {
+    SET_SOCKERRNO(EINVAL);
+    return -1;
+  }
+
+  if (timeout) {
+    if ((timeout->tv_sec < 0) ||
+        (timeout->tv_usec < 0) ||
+        (timeout->tv_usec >= 1000000)) {
+      SET_SOCKERRNO(EINVAL);
+      return -1;
+    }
+    timeout_ms = (timeout->tv_sec * 1000) + (timeout->tv_usec / 1000);
+  }
+  else {
+    timeout_ms = -1;
+  }
+
+  if ((!nfds) || (!fds_read && !fds_write && !fds_excep)) {
+    r = wait_ms(timeout_ms);
+    return r;
+  }
+
+  pending_ms = timeout_ms;
+  initial_tv = curlx_tvnow();
+
+#ifdef HAVE_POLL_FINE
+
+  if (fds_read || fds_write || fds_excep) {
+    fd = nfds;
+    while (fd--) {
+      if ((fds_read && (0 != FD_ISSET(fd, fds_read))) ||
+          (fds_write && (0 != FD_ISSET(fd, fds_write))) ||
+          (fds_excep && (0 != FD_ISSET(fd, fds_excep))))
+        poll_nfds++;
+    }
+  }
+
+  if (!poll_nfds)
+    poll_fds = NULL;
+  else if (poll_nfds <= SMALL_POLLNFDS)
+    poll_fds = small_fds;
+  else {
+    poll_fds = calloc((size_t)poll_nfds, sizeof(struct pollfd));
+    if (!poll_fds) {
+      SET_SOCKERRNO(ENOBUFS);
+      return -1;
+    }
+  }
+
+  if (poll_fds) {
+    ix = 0;
+    fd = nfds;
+    while (fd--) {
+      poll_fds[ix].events = 0;
+      if (fds_read && (0 != FD_ISSET(fd, fds_read)))
+        poll_fds[ix].events |= (POLLRDNORM|POLLIN);
+      if (fds_write && (0 != FD_ISSET(fd, fds_write)))
+        poll_fds[ix].events |= (POLLWRNORM|POLLOUT);
+      if (fds_excep && (0 != FD_ISSET(fd, fds_excep)))
+        poll_fds[ix].events |= (POLLRDBAND|POLLPRI);
+      if (poll_fds[ix].events) {
+        poll_fds[ix].fd = fd;
+        poll_fds[ix].revents = 0;
+        ix++;
+      }
+    }
+  }
+
+  do {
+    if (timeout_ms < 0)
+      pending_ms = -1;
+    r = poll(poll_fds, poll_nfds, pending_ms);
+  } while ((r == -1) && (error = SOCKERRNO) &&
+           (error != EINVAL) && error_not_EINTR &&
+           ((timeout_ms < 0) || ((pending_ms = timeout_ms - elapsed_ms) > 0)));
+
+  if (r < 0)
+    ret = -1;
+
+  if (r > 0) {
+    ix = poll_nfds;
+    while (ix--) {
+      if (poll_fds[ix].revents & POLLNVAL) {
+        SET_SOCKERRNO(EBADF);
+        ret = -1;
+        break;
+      }
+    }
+  }
+
+  if (!ret) {
+    ix = poll_nfds;
+    while (ix--) {
+      if (fds_read && (0 != FD_ISSET(poll_fds[ix].fd, fds_read))) {
+        if (0 == (poll_fds[ix].revents & (POLLRDNORM|POLLERR|POLLHUP|POLLIN)))
+          FD_CLR(poll_fds[ix].fd, fds_read);
+        else
+          ret++;
+      }
+      if (fds_write && (0 != FD_ISSET(poll_fds[ix].fd, fds_write))) {
+        if (0 == (poll_fds[ix].revents & (POLLWRNORM|POLLERR|POLLHUP|POLLOUT)))
+          FD_CLR(poll_fds[ix].fd, fds_write);
+        else
+          ret++;
+      }
+      if (fds_excep && (0 != FD_ISSET(poll_fds[ix].fd, fds_excep))) {
+        if (0 == (poll_fds[ix].revents & (POLLRDBAND|POLLERR|POLLHUP|POLLPRI)))
+          FD_CLR(poll_fds[ix].fd, fds_excep);
+        else
+          ret++;
+      }
+    }
+  }
+
+  if (poll_fds && (poll_nfds > SMALL_POLLNFDS))
+    free(poll_fds);
+
+#else  /* HAVE_POLL_FINE */
+
+  VERIFY_NFDS(nfds);
+
+  ptimeout = (timeout_ms < 0) ? NULL : &pending_tv;
+
+  do {
+    if (ptimeout) {
+      pending_tv.tv_sec = pending_ms / 1000;
+      pending_tv.tv_usec = (pending_ms % 1000) * 1000;
+    }
+    r = select(nfds, fds_read, fds_write, fds_excep, ptimeout);
+  } while ((r == -1) && (error = SOCKERRNO) &&
+           (error != EINVAL) && (error != EBADF) && error_not_EINTR &&
+           ((timeout_ms < 0) || ((pending_ms = timeout_ms - elapsed_ms) > 0)));
+
+  if (r < 0)
+    ret = -1;
+  else
+    ret = r;
+
+#endif  /* HAVE_POLL_FINE */
+
+  return ret;
 }
 
 #ifdef TPF

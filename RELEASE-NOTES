@@ -24,6 +24,7 @@ This release includes the following changes:
  o added experimental CURL_ACKNOWLEDGE_EINTR symbol definition check
  o --key and new --pubkey options for SSH public key file logins
  o --pass now works for a SSH public key file, too
+ o select (2) support no longer needed to build the library if poll() used
 
 This release includes the following bugfixes:
 
