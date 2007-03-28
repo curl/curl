@@ -2490,7 +2490,7 @@ static bool tld_check_name(struct SessionHandle *data,
   char *uc_name = NULL;
   int rc;
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-  char *tld_errmsg = "<no msg>";
+  char *tld_errmsg = (char *)"<no msg>";
 #else
   (void)data;
 #endif
@@ -2523,6 +2523,13 @@ static bool tld_check_name(struct SessionHandle *data,
 static void fix_hostname(struct SessionHandle *data,
                          struct connectdata *conn, struct hostname *host)
 {
+#ifndef USE_LIBIDN
+  (void)data;
+  (void)conn;
+#elif defined(CURL_DISABLE_VERBOSE_STRINGS)
+  (void)conn;
+#endif
+
   /* set the name we use to display the host name */
   host->dispname = host->name;
 
@@ -2549,12 +2556,6 @@ static void fix_hostname(struct SessionHandle *data,
       host->name = host->encalloc;
     }
   }
-#else
-  (void)data; /* never used */
-  (void)conn; /* never used */
-#endif
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)conn; /* never used */
 #endif
 }
 
