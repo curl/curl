@@ -114,6 +114,7 @@
   #define HAVE_SIGACTION  1
   #define HAVE_SIGSETJMP  1
   #define HAVE_SYS_TIME_H 1
+  #define HAVE_VARIADIC_MACROS_GCC 1
 
   #if (DJGPP_MINOR >= 4)
     #define HAVE_STRLCAT  1
