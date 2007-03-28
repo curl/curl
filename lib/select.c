@@ -206,13 +206,13 @@ int Curl_socket_ready(curl_socket_t readfd, curl_socket_t writefd, int timeout_m
   num = 0;
   if (readfd != CURL_SOCKET_BAD) {
     pfd[num].fd = readfd;
-    pfd[num].events = POLLIN;
+    pfd[num].events = POLLRDNORM|POLLIN|POLLRDBAND|POLLPRI;
     pfd[num].revents = 0;
     num++;
   }
   if (writefd != CURL_SOCKET_BAD) {
     pfd[num].fd = writefd;
-    pfd[num].events = POLLOUT;
+    pfd[num].events = POLLWRNORM|POLLOUT;
     pfd[num].revents = 0;
     num++;
   }
@@ -233,23 +233,15 @@ int Curl_socket_ready(curl_socket_t readfd, curl_socket_t writefd, int timeout_m
   ret = 0;
   num = 0;
   if (readfd != CURL_SOCKET_BAD) {
-    if (pfd[num].revents & (POLLIN|POLLHUP))
+    if (pfd[num].revents & (POLLRDNORM|POLLIN|POLLERR|POLLHUP))
       ret |= CSELECT_IN;
-    if (pfd[num].revents & POLLERR) {
-#ifdef __CYGWIN__
-      /* Cygwin 1.5.21 needs this hack to pass test 160 */
-      if (ERRNO == EINPROGRESS)
-        ret |= CSELECT_IN;
-      else
-#endif
-        ret |= CSELECT_ERR;
-    }
-    num++;
+    if (pfd[num].revents & (POLLRDBAND|POLLPRI|POLLNVAL))
+      ret |= CSELECT_ERR;
   }
   if (writefd != CURL_SOCKET_BAD) {
-    if (pfd[num].revents & POLLOUT)
+    if (pfd[num].revents & (POLLWRNORM|POLLOUT))
       ret |= CSELECT_OUT;
-    if (pfd[num].revents & (POLLERR|POLLHUP))
+    if (pfd[num].revents & (POLLERR|POLLHUP|POLLNVAL))
       ret |= CSELECT_ERR;
   }
 
@@ -385,14 +377,15 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
     if (ufds[i].fd == CURL_SOCKET_BAD)
       continue;
     VERIFY_SOCK(ufds[i].fd);
-    if (ufds[i].events & (POLLIN|POLLOUT|POLLERR)) {
+    if (ufds[i].events & (POLLIN|POLLOUT|POLLPRI|
+                          POLLRDNORM|POLLWRNORM|POLLRDBAND)) {
       if (ufds[i].fd > maxfd)
         maxfd = ufds[i].fd;
-      if (ufds[i].events & POLLIN)
+      if (ufds[i].events & (POLLRDNORM|POLLIN))
         FD_SET(ufds[i].fd, &fds_read);
-      if (ufds[i].events & POLLOUT)
+      if (ufds[i].events & (POLLWRNORM|POLLOUT))
         FD_SET(ufds[i].fd, &fds_write);
-      if (ufds[i].events & POLLERR)
+      if (ufds[i].events & (POLLRDBAND|POLLPRI))
         FD_SET(ufds[i].fd, &fds_err);
     }
   }
@@ -424,7 +417,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
     if (FD_ISSET(ufds[i].fd, &fds_write))
       ufds[i].revents |= POLLOUT;
     if (FD_ISSET(ufds[i].fd, &fds_err))
-      ufds[i].revents |= POLLERR;
+      ufds[i].revents |= POLLPRI;
     if (ufds[i].revents != 0)
       r++;
   }
