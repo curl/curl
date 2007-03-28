@@ -133,7 +133,7 @@ if (system "$sshd -t -q -f $conffile") {
 # Start the server
 my $rc = system "$sshd -e -D -f $conffile > log/ssh.log 2>&1";
 $rc >>= 8;
-if($rc) {
+if($rc && $verbose) {
     print STDERR "$sshd exited with $rc!\n";
 }
 
