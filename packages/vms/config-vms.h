@@ -212,10 +212,10 @@
 /* Define if getaddrinfo exists and works */
 #define HAVE_GETADDRINFO 1
 
+/* Define if you have the <timeval.h> header file.  */
 #define	HAVE_TIMEVAL_H	1
 
-/* Guess HAVE_TIMEVAL_H isn't enough so now we add HAVE_STRUCT_TIMEVAL */
-
+/* Define if you have the timeval struct.  */
 #define	HAVE_STRUCT_TIMEVAL 1
 
 /* Name of this package! */
