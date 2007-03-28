@@ -2553,6 +2553,9 @@ static void fix_hostname(struct SessionHandle *data,
   (void)data; /* never used */
   (void)conn; /* never used */
 #endif
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+  (void)conn; /* never used */
+#endif
 }
 
 /*
