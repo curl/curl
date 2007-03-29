@@ -237,6 +237,7 @@ int Curl_socket_ready(curl_socket_t readfd, curl_socket_t writefd, int timeout_m
       ret |= CSELECT_IN;
     if (pfd[num].revents & (POLLRDBAND|POLLPRI|POLLNVAL))
       ret |= CSELECT_ERR;
+    num++;
   }
   if (writefd != CURL_SOCKET_BAD) {
     if (pfd[num].revents & (POLLWRNORM|POLLOUT))
