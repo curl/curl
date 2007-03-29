@@ -16,7 +16,7 @@ clause). You may still build your own copies that use them all, but
 distributing them as binaries would be to violate the GPL license - unless you
 accompany your license with an exception[2]. This particular problem was
 addressed when the Modified BSD license was created, which does not have the
-annoncement clause that collides with GPL.
+announcement clause that collides with GPL.
 
 libcurl http://curl.haxx.se/docs/copyright.html
 
@@ -28,7 +28,7 @@ libcurl http://curl.haxx.se/docs/copyright.html
 OpenSSL http://www.openssl.org/source/license.html
 
         (May be used for SSL/TLS support) Uses an Original BSD-style license
-        with an announement clause that makes it "incompatible" with GPL. You
+        with an announcement clause that makes it "incompatible" with GPL. You
         are not allowed to ship binaries that link with OpenSSL that includes
         GPL code (unless that specific GPL code includes an exception for
         OpenSSL - a habit that is growing more and more common). If OpenSSL's
@@ -96,10 +96,10 @@ fbopenssl
         that it uses the OpenSSL license and thus shares the same issues as
         described for OpenSSL above.
 
-libidn  http://www.gnu.org/licenses/lgpl.html
+libidn  http://josefsson.org/libidn/
 
         (Used for IDNA support) Uses the GNU Lesser General Public
-        License. LGPL is a variation of GPL with slightly less aggressive
+        License [3]. LGPL is a variation of GPL with slightly less aggressive
         "copyleft". This license requires more requirements to be met when
         distributing binaries, see the license for details. Also note that if
         you distribute a binary that includes this library, you must also
@@ -112,6 +112,10 @@ OpenLDAP http://www.openldap.org/software/release/license.html
         libcurl uses OpenLDAP as a shared library only, I have not heard of
         anyone that ships OpenLDAP linked with libcurl in an app.
 
+libssh2 http://www.libssh2.org/
+
+        (Used for scp and sftp support) libssh2 uses a Modified BSD-style
+        license.
 
 [1] = GPL - GNU General Public License: http://www.gnu.org/licenses/gpl.html
 [2] = http://www.fsf.org/licenses/gpl-faq.html#GPLIncompatibleLibs details on
