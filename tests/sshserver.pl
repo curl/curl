@@ -112,6 +112,7 @@ IgnoreUserKnownHosts yes
 KeepAlive no
 PasswordAuthentication no
 PermitEmptyPasswords no
+PermitUserEnvironment no
 PermitRootLogin no
 PrintLastLog no
 PrintMotd no
@@ -121,7 +122,7 @@ UseLogin no
 X11Forwarding no
 UsePrivilegeSeparation no
 # Newer OpenSSH options
-UsePam no
+UsePAM no
 UseDNS no
 ChallengeResponseAuthentication no
 EOF
