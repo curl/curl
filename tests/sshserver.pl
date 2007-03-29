@@ -76,6 +76,11 @@ if ($verbose) {
 	print STDERR "SFTP server plugin found at $sftp\n";
 }
 
+if ($username eq "root") {
+	print "Will not run ssh daemon as root to mitigate security risks\n";
+	exit 1;
+}
+
 if (! -e "curl_client_key.pub") {
 	if ($verbose) {
 		print STDERR "Generating host and client keys...\n";
