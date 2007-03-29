@@ -41,7 +41,7 @@ SIMPLE USAGE
 
   Get a file from an SSH server using SFTP:
 
-        curl -u username sftp://shell.example.com/~/personal.txt
+        curl -u username sftp://shell.example.com/etc/issue
 
   Get a file from an SSH server using SCP using a private key to authenticate:
 
