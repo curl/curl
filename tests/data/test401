@@ -1,0 +1,56 @@
+<testcase>
+<info>
+<keywords>
+FTPS
+EPSV
+STOR
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+SSL
+</features>
+<server>
+ftps
+</server>
+ <name>
+FTPS PASV upload file
+ </name>
+<file name="log/test401.txt">
+data
+    to
+      see
+that FTPS
+works
+  so does it?
+</file>
+ <command>
+-k --ftp-ssl-control ftps://%HOSTIP:%FTPSPORT/401 -T log/test401.txt
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<upload>
+data
+    to
+      see
+that FTPS
+works
+  so does it?
+</upload>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PBSZ 0
+PROT C
+PWD
+EPSV
+TYPE I
+STOR 401
+QUIT
+</protocol>
+</verify>
+</testcase>
