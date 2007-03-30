@@ -442,7 +442,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     int len;
     if(proxy_name && proxy_password) {
       userlen = strlen(proxy_name);
-      pwlen = proxy_password?strlen(proxy_password):0;
+      pwlen = strlen(proxy_password);
     }
     else {
       userlen = 0;
