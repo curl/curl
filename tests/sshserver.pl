@@ -33,10 +33,10 @@ sub searchpath {
   shift;
   my @path = @_;
   foreach (@path) {
-	my $file = File::Spec->catfile($_, $fn);
-	if (-e $file) {
-		return $file;
-	}
+      my $file = File::Spec->catfile($_, $fn);
+      if (-e $file) {
+          return $file;
+      }
   }
 }
 
@@ -54,41 +54,46 @@ do {
     }
 } while(shift @ARGV);
 
-my $conffile="curl_sshd_config";	# sshd configuration data
+my $conffile="curl_sshd_config";    # sshd configuration data
 
-# Search the PATH for sshd.  sshd insists on being called with an absolute
-# path for some reason.
-my $sshd = searchpath("sshd", File::Spec->path());
+# Searching for sshd and sftp-server will be done first
+# in the PATH and afterwards in other common locations.
+my @spath;
+push(@spath, File::Spec->path()); 
+push(@spath, @sftppath); 
+
+# sshd insists on being called with an absolute path.
+my $sshd = searchpath("sshd", @spath);
 if (!$sshd) {
-	print "sshd is not available\n";
-	exit 1;
+    print "sshd$exeext not found\n";
+    exit 1;
 }
 if ($verbose) {
-	print STDERR "SSH server found at $sshd\n";
+    print STDERR "SSH server found at $sshd\n";
 }
 
-my $sftp = searchpath("sftp-server", @sftppath);
+my $sftp = searchpath("sftp-server", @spath);
 if (!$sftp) {
-	print "Could not find sftp-server plugin\n";
-	exit 1;
+    print "Could not find sftp-server$exeext plugin\n";
+    exit 1;
 }
 if ($verbose) {
-	print STDERR "SFTP server plugin found at $sftp\n";
+    print STDERR "SFTP server plugin found at $sftp\n";
 }
 
 if ($username eq "root") {
-	print "Will not run ssh daemon as root to mitigate security risks\n";
-	exit 1;
+    print "Will not run ssh daemon as root to mitigate security risks\n";
+    exit 1;
 }
 
 if (! -e "curl_client_key.pub") {
-	if ($verbose) {
-		print STDERR "Generating host and client keys...\n";
-	}
-	# Make sure all files are gone so ssh-keygen doesn't complain
-	unlink("curl_host_dsa_key", "curl_client_key","curl_host_dsa_key.pub", "curl_client_key.pub"); 
-	system "ssh-keygen -q -t dsa -f curl_host_dsa_key -C 'curl test server' -N ''" and die "Could not generate key";
-        system "ssh-keygen -q -t dsa -f curl_client_key -C 'curl test client' -N ''" and die "Could not generate key";
+    if ($verbose) {
+        print STDERR "Generating host and client keys...\n";
+    }
+    # Make sure all files are gone so ssh-keygen doesn't complain
+    unlink("curl_host_dsa_key", "curl_client_key","curl_host_dsa_key.pub", "curl_client_key.pub"); 
+    system "ssh-keygen -q -t dsa -f curl_host_dsa_key -C 'curl test server' -N ''" and die "Could not generate key";
+    system "ssh-keygen -q -t dsa -f curl_client_key -C 'curl test client' -N ''" and die "Could not generate key";
 }
 
 open(FILE, ">$conffile") || die "Could not write $conffile";
@@ -130,10 +135,10 @@ EOF
 close FILE;
 
 if (system "$sshd -t -q -f $conffile") {
-	# This is likely due to missing support for UsePam
-	print "$sshd is too old and is not supported\n";
-	unlink $conffile;
-	exit 1;
+    # This is likely due to missing support for UsePam
+    print "$sshd is too old and is not supported\n";
+    unlink $conffile;
+    exit 1;
 }
 
 # Start the server
