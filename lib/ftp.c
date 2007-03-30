@@ -3674,7 +3674,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
   case FTPFILE_SINGLECWD:
     /* get the last slash */
     slash_pos=strrchr(cur_pos, '/');
-    if(slash_pos || !cur_pos || !*cur_pos) {
+    if(slash_pos || !*cur_pos) {
       ftpc->dirdepth = 1; /* we consider it to be a single dir */
       ftpc->dirs = (char **)calloc(1, sizeof(ftpc->dirs[0]));
       if(!ftpc->dirs)
