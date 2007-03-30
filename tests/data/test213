@@ -31,7 +31,7 @@ Funny-head: yesyes
 daniel
 </data2>
 
-# then this is returned when we get proxý-auth
+# then this is returned when we get proxy-auth
 <data1000>
 HTTP/1.1 200 OK swsbounce
 Server: no
