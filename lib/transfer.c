@@ -2498,10 +2498,12 @@ Curl_setup_transfer(
    )
 {
   struct connectdata *conn = (struct connectdata *)c_conn;
-  struct SessionHandle *data = conn->data;
+  struct SessionHandle *data;
 
   if(!conn)
     return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  data = conn->data;
 
   DEBUGASSERT((sockindex <= 1) && (sockindex >= -1));
 
