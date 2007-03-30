@@ -6,6 +6,15 @@
 
                                   Changelog
 
+Dan F (29 March 2007)
+- Don't tear down the ftp connection if the maximum filesize was exceeded
+  and added tests 290 and 291 to check.
+
+- Added ftps upload and SSL required tests 401 and 402.
+
+- Send an EOF message before closing an SCP channel, as recommended by
+  RFC4254. Enable libssh2 tracing when ssh debugging is turned on.
+
 Yang Tse (27 March 2007)
 - Internal function Curl_select() renamed to Curl_socket_ready()
 

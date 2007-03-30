@@ -3020,6 +3020,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status, bool premature
   case CURLE_FTP_COULDNT_RETR_FILE:
   case CURLE_FTP_COULDNT_STOR_FILE:
   case CURLE_FTP_ACCESS_DENIED:
+  case CURLE_FILESIZE_EXCEEDED:
     /* the connection stays alive fine even though this happened */
     /* fall-through */
   case CURLE_OK: /* doesn't affect the control connection's status */
