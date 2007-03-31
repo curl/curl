@@ -47,6 +47,7 @@ This release includes the following bugfixes:
  o use-after-free issue with HTTP transfers with the multi interface
  o the progress callback can get called more frequently
  o timeout would restart when signal caught while awaiting socket events
+ o curl -f with user+password embedded in the URL
 
 This release includes the following known bugs:
 

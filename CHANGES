@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel S (31 March 2007)
+- Fixed several minor issues detected by the coverity.com scanner.
+
+- "Pixel" fixed a problem that appeared when you used -f with user+password
+  embedded in the URL.
+
 Dan F (29 March 2007)
 - Don't tear down the ftp connection if the maximum filesize was exceeded
   and added tests 290 and 291 to check.
