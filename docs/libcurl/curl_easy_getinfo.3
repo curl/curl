@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -98,13 +98,13 @@ downloaded. The amount is only for the latest transfer and will be reset again
 for each new transfer.
 .IP CURLINFO_SPEED_DOWNLOAD
 Pass a pointer to a double to receive the average download speed that curl
-measured for the complete download.
+measured for the complete download. Measured in bytes/second.
 .IP CURLINFO_SPEED_UPLOAD
 Pass a pointer to a double to receive the average upload speed that curl
-measured for the complete upload.
+measured for the complete upload. Measured in bytes/second.
 .IP CURLINFO_HEADER_SIZE
 Pass a pointer to a long to receive the total size of all the headers
-received.
+received. Measured in number of bytes.
 .IP CURLINFO_REQUEST_SIZE
 Pass a pointer to a long to receive the total size of the issued
 requests. This is so far only for HTTP requests. Note that this may be more
