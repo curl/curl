@@ -627,7 +627,8 @@ CURL *curl_easy_duphandle(CURL *incurl)
 
   if(fail) {
     if(outcurl) {
-      if(outcurl->state.connc->type == CONNCACHE_PRIVATE)
+      if((outcurl->state.connc->type == CONNCACHE_PRIVATE) &&
+         outcurl->state.connc)
         Curl_rm_connc(outcurl->state.connc);
       if(outcurl->state.headerbuff)
         free(outcurl->state.headerbuff);
