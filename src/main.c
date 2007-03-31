@@ -2052,8 +2052,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           char *oldpost=config->postfields;
           size_t newlen = strlen(oldpost) + strlen(postdata) + 2;
           config->postfields=malloc(newlen);
-          if(!config->postfields)
+          if(!config->postfields) {
+            free(postdata);
             return PARAM_NO_MEM;
+          }
           /* use ASCII value 0x26 for '&' to accommodate non-ASCII platforms */
           snprintf(config->postfields, newlen, "%s\x26%s", oldpost, postdata);
           free(oldpost);
