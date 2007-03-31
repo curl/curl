@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -78,36 +78,36 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
 #ifdef MSG_PEEK
   char buf;
 #endif
+  CURLINFO type;
 
   if(!data)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   va_start(arg, info);
 
-  switch(info&CURLINFO_TYPEMASK) {
-  default:
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  case CURLINFO_STRING:
+  type = info&CURLINFO_TYPEMASK;
+  if(type == CURLINFO_STRING) {
     param_charp = va_arg(arg, char **);
     if(NULL == param_charp)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    break;
-  case CURLINFO_LONG:
+  }
+  else if(type == CURLINFO_LONG) {
     param_longp = va_arg(arg, long *);
     if(NULL == param_longp)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    break;
-  case CURLINFO_DOUBLE:
+  }
+  else if(type == CURLINFO_DOUBLE) {
     param_doublep = va_arg(arg, double *);
     if(NULL == param_doublep)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    break;
-  case CURLINFO_SLIST:
+  }
+  else if(type == CURLINFO_SLIST) {
     param_slistp = va_arg(arg, struct curl_slist **);
     if(NULL == param_slistp)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    break;
   }
+  else
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
   switch(info) {
   case CURLINFO_EFFECTIVE_URL:
