@@ -768,8 +768,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                  * are definitely errors, so give up here.
                  */
                 if (data->set.http_fail_on_error && (k->httpcode >= 400) &&
-                    ((k->httpcode != 401) || !data->set.userpwd) &&
-                    ((k->httpcode != 407) || !data->set.proxyuserpwd) ) {
+                    ((k->httpcode != 401) || !conn->bits.user_passwd) &&
+                    ((k->httpcode != 407) || !conn->bits.proxy_user_passwd) ) {
 
                   if (data->reqdata.resume_from &&
                       (data->set.httpreq==HTTPREQ_GET) &&
