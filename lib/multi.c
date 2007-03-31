@@ -680,7 +680,14 @@ static int multi_getsock(struct Curl_one_easy *easy,
                                                  of sockets */
                          int numsocks)
 {
-  if (easy->easy_handle->state.pipe_broke) {
+  /* If the pipe broke, or if there's no connection left for this easy handle,
+     then we MUST bail out now with no bitmask set. The no connection case can
+     happen when this is called from curl_multi_remove_handle() =>
+     singlesocket() => multi_getsock().
+  */
+
+  if (easy->easy_handle->state.pipe_broke ||
+      !easy->easy_conn) {
     return 0;
   }
 
