@@ -86,6 +86,28 @@ if ($username eq "root") {
     exit 1;
 }
 
+# Support for some options might have not been built into sshd.  On some
+# platforms specifying an unsupported option prevents sshd from starting.
+# Check here for possible unsupported options, avoiding its use in sshd.
+sub sshd_supports_opt($) {
+    my ($option) = @_;
+    my $err = 1;
+    chomp($err = qx($sshd -t -o $option=no 2>&1 | grep $option 2>&1 | wc -l));
+    return !$err;
+}
+
+my $supports_UsePAM = sshd_supports_opt('UsePAM');
+my $supports_UseDNS = sshd_supports_opt('UseDNS');
+my $supports_ChReAu = sshd_supports_opt('ChallengeResponseAuthentication');
+if ($verbose) {
+    print STDERR "sshd supports UsePAM: ";
+    print STDERR $supports_UsePAM ? "yes\n" : "no\n";
+    print STDERR "sshd supports UseDNS: ";
+    print STDERR $supports_UseDNS ? "yes\n" : "no\n";
+    print STDERR "sshd supports ChallengeResponseAuthentication: ";
+    print STDERR $supports_ChReAu ? "yes\n" : "no\n";
+}
+
 if (! -e "curl_client_key.pub") {
     if ($verbose) {
         print STDERR "Generating host and client keys...\n";
@@ -96,8 +118,8 @@ if (! -e "curl_client_key.pub") {
     system "ssh-keygen -q -t dsa -f curl_client_key -C 'curl test client' -N ''" and die "Could not generate key";
 }
 
-open(FILE, ">$conffile") || die "Could not write $conffile";
-print FILE <<EOF
+open(my $FILE, ">$conffile") || die "Could not write $conffile";
+print $FILE <<EOF
 # This is a generated file!  Do not edit!
 # OpenSSH sshd configuration file for curl testing
 AllowUsers $username
@@ -127,12 +149,27 @@ UseLogin no
 X11Forwarding no
 UsePrivilegeSeparation no
 # Newer OpenSSH options
-UsePAM no
-UseDNS no
-ChallengeResponseAuthentication no
 EOF
 ;
-close FILE;
+close $FILE;
+
+sub set_sshd_option {
+    my ($string) = @_;
+    if (open(my $FILE, ">>$conffile")) {
+        print $FILE "$string\n";
+        close $FILE;
+    }
+}
+
+if ($supports_UsePAM) {
+    set_sshd_option('UsePAM no');
+}
+if ($supports_UseDNS) {
+    set_sshd_option('UseDNS no');
+}
+if ($supports_ChReAu) {
+    set_sshd_option('ChallengeResponseAuthentication no');
+}
 
 if (system "$sshd -t -q -f $conffile") {
     # This is likely due to missing support for UsePam
