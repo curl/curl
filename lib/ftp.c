@@ -274,8 +274,7 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   int code = 0;
 
-  if (ftpcode)
-    *ftpcode = 0; /* 0 for errors or not done */
+  *ftpcode = 0; /* 0 for errors or not done */
 
   ptr=buf + ftpc->nread_resp;
 
@@ -416,7 +415,6 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
 #endif
 
   *ftpcode=code; /* return the initial number like this */
-
 
   /* store the latest code for later retrieval */
   conn->data->info.httpcode=code;
