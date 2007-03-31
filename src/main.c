@@ -4671,9 +4671,14 @@ static int create_dir_hierarchy(const char *outfile)
   int error;
 
   outdup = strdup(outfile);
-  dirbuildup = malloc(sizeof(char) * strlen(outfile));
-  if(!dirbuildup)
+  if(!outdup)
     return -1;
+
+  dirbuildup = malloc(sizeof(char) * strlen(outfile));
+  if(!dirbuildup) {
+    free(outdup);
+    return -1;
+  }
   dirbuildup[0] = '\0';
 
   tempdir = strtok(outdup, DIR_CHAR);
