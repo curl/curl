@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel S (1 April 2007)
+- Matt Kraai provided a patch that makes curl build on QNX 6 fine again.
+
 Daniel S (31 March 2007)
 - Fixed several minor issues detected by the coverity.com scanner.
 

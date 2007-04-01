@@ -72,6 +72,9 @@
 /*                             FUNCTIONS                            */
 /* ---------------------------------------------------------------- */
 
+/* Define if you have the setmode function. */
+#define HAVE_SETMODE 1
+
 /* Define if you have the ftruncate function.  */
 #define HAVE_FTRUNCATE 1
 

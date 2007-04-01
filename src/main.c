@@ -2014,7 +2014,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 
           if(curlx_strequal("-", nextarg)) {
             file = stdin;
-#ifdef O_BINARY
+#if defined(O_BINARY) && defined(HAVE_SETMODE)
             if(subletter == 'b') /* forced binary */
               setmode(fileno(stdin), O_BINARY);
 #endif
@@ -3966,7 +3966,7 @@ operate(struct Configurable *config, int argc, char *argv[])
 
         }
         else if(uploadfile && curlx_strequal(uploadfile, "-")) {
-#ifdef O_BINARY
+#if defined(O_BINARY) && defined(HAVE_SETMODE)
           setmode(fileno(stdin), O_BINARY);
 #endif
           infd = stdin;
@@ -4029,7 +4029,7 @@ operate(struct Configurable *config, int argc, char *argv[])
         if(!config->errors)
           config->errors = stderr;
 
-#ifdef O_BINARY
+#if defined(O_BINARY) && defined(HAVE_SETMODE)
         if(!outfile && !(config->conf & CONF_GETTEXT)) {
           /* We get the output to stdout and we have not got the ASCII/text flag,
              then set stdout to be binary */
