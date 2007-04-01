@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel S (1 April 2007)
+- Robert Iakobashvili made curl_multi_remove_handle() a lot faster when many
+  easy handles are added to a multi handle, by avoiding the looping over all
+  the handles to find which one to remove.
+
 - Matt Kraai provided a patch that makes curl build on QNX 6 fine again.
 
 Daniel S (31 March 2007)

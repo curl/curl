@@ -413,6 +413,9 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   easy->easy_handle = easy_handle;
   multistate(easy, CURLM_STATE_INIT);
 
+  /* set the back pointer to one_easy to assist in removal */
+  easy->easy_handle->multi_pos =  easy;
+
   /* for multi interface connections, we share DNS cache automatically if the
      easy handle's one is currently private. */
   if (easy->easy_handle->dns.hostcache &&
@@ -516,13 +519,8 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
   if(!GOOD_EASY_HANDLE(curl_handle))
     return CURLM_BAD_EASY_HANDLE;
 
-  /* scan through the list and remove the 'curl_handle' */
-  easy = multi->easy.next;
-  while(easy != &multi->easy) {
-    if(easy->easy_handle == (struct SessionHandle *)curl_handle)
-      break;
-    easy=easy->next;
-  }
+  /* pick-up from the 'curl_handle' the kept position in the list */
+  easy = ((struct SessionHandle *)curl_handle)->multi_pos;
 
   if(easy) {
     bool premature = (bool)(easy->state != CURLM_STATE_COMPLETED);
@@ -625,6 +623,9 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
       easy->next->prev = easy->prev;
 
     easy->easy_handle->set.one_easy = NULL; /* detached */
+
+    /* Null the position in the controlling structure */
+    easy->easy_handle->multi_pos = NULL;
 
     /* NOTE NOTE NOTE
        We do not touch the easy handle here! */

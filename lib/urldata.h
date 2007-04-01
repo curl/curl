@@ -1342,6 +1342,9 @@ struct SessionHandle {
   struct Names dns;
   struct Curl_multi *multi;    /* if non-NULL, points to the multi handle
                                   struct to which this "belongs" */
+  struct Curl_one_easy *multi_pos; /* if non-NULL, points to the its position
+                                      in multi controlling structure to assist
+                                      in removal. */
   struct Curl_share *share;    /* Share, handles global variable mutexing */
   struct HandleData reqdata;   /* Request-specific data */
   struct UserDefined set;      /* values set by the libcurl user */
