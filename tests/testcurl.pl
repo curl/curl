@@ -343,12 +343,12 @@ if ($CVS) {
 
   sub cvsup() {
     # update quietly to the latest CVS
-    logit "run cvs up";
     if($nocvsup) {
         logit "Skipping CVS update (--nocvsup)";
         return 1;
     }
     else {
+        logit "run cvs up";
         system("cvs -Q up -dP 2>&1");
     }
 
