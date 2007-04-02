@@ -479,7 +479,7 @@ int Curl_select(int nfds,
       SET_SOCKERRNO(EINVAL);
       return -1;
     }
-    timeout_ms = (timeout->tv_sec * 1000) + (timeout->tv_usec / 1000);
+    timeout_ms = (int)(timeout->tv_sec * 1000) + (int)(timeout->tv_usec / 1000);
   }
   else {
     timeout_ms = -1;
