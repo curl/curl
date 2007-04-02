@@ -78,36 +78,38 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
 #ifdef MSG_PEEK
   char buf;
 #endif
-  CURLINFO type;
+  int type;
 
   if(!data)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   va_start(arg, info);
 
-  type = info&CURLINFO_TYPEMASK;
-  if(type == CURLINFO_STRING) {
+  type = CURLINFO_TYPEMASK & (int)info;
+  switch(type) {
+  case CURLINFO_STRING:
     param_charp = va_arg(arg, char **);
     if(NULL == param_charp)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-  }
-  else if(type == CURLINFO_LONG) {
+    break;
+  case CURLINFO_LONG:
     param_longp = va_arg(arg, long *);
     if(NULL == param_longp)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-  }
-  else if(type == CURLINFO_DOUBLE) {
+    break;
+  case CURLINFO_DOUBLE:
     param_doublep = va_arg(arg, double *);
     if(NULL == param_doublep)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-  }
-  else if(type == CURLINFO_SLIST) {
+    break;
+  case CURLINFO_SLIST:
     param_slistp = va_arg(arg, struct curl_slist **);
     if(NULL == param_slistp)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-  }
-  else
+    break;
+  default:
     return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
 
   switch(info) {
   case CURLINFO_EFFECTIVE_URL:
