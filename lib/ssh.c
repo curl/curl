@@ -157,6 +157,10 @@
 #define LIBSSH2_SFTP_S_IXOTH S_IXOTH
 #endif
 
+/* Local functions: */
+static CURLcode sftp_sendquote(struct connectdata *conn,
+                               struct curl_slist *quote);
+
 static LIBSSH2_ALLOC_FUNC(libssh2_malloc);
 static LIBSSH2_REALLOC_FUNC(libssh2_realloc);
 static LIBSSH2_FREE_FUNC(libssh2_free);
@@ -953,6 +957,14 @@ CURLcode Curl_sftp_done(struct connectdata *conn, CURLcode status,
   Curl_safefree(sftp->homedir);
   sftp->homedir = NULL;
 
+  /* Before we shut down, see if there are any post-quote commands to send: */
+  if(!status && !premature && conn->data->set.postquote) {
+    CURLcode result = sftp_sendquote(conn, conn->data->set.postquote);
+
+    if (result != CURLE_OK)
+      return result;
+  }
+
   if (sftp->sftp_handle) {
     if (libssh2_sftp_close(sftp->sftp_handle) < 0) {
       infof(conn->data, "Failed to close libssh2 file\n");
@@ -1000,12 +1012,337 @@ ssize_t Curl_sftp_send(struct connectdata *conn, int sockindex,
   return nwrite;
 }
 
+
+/* The get_pathname() function is being borrowed from OpenSSH sftp.c
+   version 4.6p1. */
+/*
+ * Copyright (c) 2001-2004 Damien Miller <djm@openbsd.org>
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+static int
+get_pathname(const char **cpp, char **path)
+{
+  const char *cp = *cpp, *end;
+  char quot;
+  u_int i, j;
+  const char *WHITESPACE = " \t\r\n";
+
+  cp += strspn(cp, WHITESPACE);
+  if (!*cp) {
+    *cpp = cp;
+    *path = NULL;
+    return CURLE_FTP_QUOTE_ERROR;	/* this was originally 0 in OpenSSH
+                                       but we want it to be an error */
+  }
+
+  *path = malloc(strlen(cp) + 1);
+  if (*path == NULL)
+    return CURLE_OUT_OF_MEMORY;
+
+  /* Check for quoted filenames */
+  if (*cp == '\"' || *cp == '\'') {
+    quot = *cp++;
+
+    /* Search for terminating quote, unescape some chars */
+    for (i = j = 0; i <= strlen(cp); i++) {
+      if (cp[i] == quot) {  /* Found quote */
+        i++;
+        (*path)[j] = '\0';
+        break;
+      }
+      if (cp[i] == '\0') {  /* End of string */
+        /*error("Unterminated quote");*/
+        goto fail;
+      }
+      if (cp[i] == '\\') {  /* Escaped characters */
+        i++;
+        if (cp[i] != '\'' && cp[i] != '\"' &&
+            cp[i] != '\\') {
+          /*error("Bad escaped character '\\%c'",
+              cp[i]);*/
+          goto fail;
+        }
+      }
+      (*path)[j++] = cp[i];
+    }
+
+    if (j == 0) {
+      /*error("Empty quotes");*/
+      goto fail;
+    }
+    *cpp = cp + i + strspn(cp + i, WHITESPACE);
+  }
+  else {
+    /* Read to end of filename */
+    end = strpbrk(cp, WHITESPACE);
+    if (end == NULL)
+      end = strchr(cp, '\0');
+    *cpp = end + strspn(end, WHITESPACE);
+
+    memcpy(*path, cp, end - cp);
+    (*path)[end - cp] = '\0';
+  }
+  return (0);
+
+  fail:
+    free(*path);
+    *path = NULL;
+    return CURLE_FTP_QUOTE_ERROR;
+}
+
+
+static const char *sftp_libssh2_strerror(unsigned long err)
+{
+  switch (err) {
+  case LIBSSH2_FX_NO_SUCH_FILE:
+    return "No such file or directory";
+  case LIBSSH2_FX_PERMISSION_DENIED:
+    return "Permission denied";
+  case LIBSSH2_FX_FAILURE:
+    return "Operation failed";
+  case LIBSSH2_FX_BAD_MESSAGE:
+    return "Bad message from SFTP server";
+  case LIBSSH2_FX_NO_CONNECTION:
+    return "Not connected to SFTP server";
+  case LIBSSH2_FX_CONNECTION_LOST:
+    return "Connection to SFTP server lost";
+  case LIBSSH2_FX_OP_UNSUPPORTED:
+    return "Operation not supported by SFTP server";
+  case LIBSSH2_FX_INVALID_HANDLE:
+    return "Invalid handle";
+  case LIBSSH2_FX_NO_SUCH_PATH:
+    return "No such file or directory";
+  case LIBSSH2_FX_FILE_ALREADY_EXISTS:
+    return "File already exists";
+  case LIBSSH2_FX_WRITE_PROTECT:
+    return "File is write protected";
+  case LIBSSH2_FX_NO_MEDIA:
+    return "No media";
+  case LIBSSH2_FX_NO_SPACE_ON_FILESYSTEM:
+    return "Disk full";
+  case LIBSSH2_FX_QUOTA_EXCEEDED:
+    return "User quota exceeded";
+  case LIBSSH2_FX_UNKNOWN_PRINCIPLE:
+    return "Unknown principle";
+  case LIBSSH2_FX_LOCK_CONFlICT:
+    return "File lock conflict";
+  case LIBSSH2_FX_DIR_NOT_EMPTY:
+    return "Directory not empty";
+  case LIBSSH2_FX_NOT_A_DIRECTORY:
+    return "Not a directory";
+  case LIBSSH2_FX_INVALID_FILENAME:
+    return "Invalid filename";
+  case LIBSSH2_FX_LINK_LOOP:
+    return "Link points to itself";
+  }
+  return "Unknown error in libssh2";
+}
+
+/* BLOCKING */
+static CURLcode sftp_sendquote(struct connectdata *conn,
+                               struct curl_slist *quote)
+{
+  struct curl_slist *item=quote;
+  const char *cp;
+  long err;
+  struct SessionHandle *data = conn->data;
+  LIBSSH2_SFTP *sftp_session = data->reqdata.proto.ssh->sftp_session;
+
+  while (item) {
+    if (item->data) {
+      char *path1 = NULL;
+      char *path2 = NULL;
+
+      /* the arguments following the command must be separated from the
+         command with a space so we can check for it unconditionally */
+      cp = strchr(item->data, ' ');
+      if (cp == NULL) {
+        failf(data, "Syntax error in SFTP command. Supply parameter(s)!");
+        return CURLE_FTP_QUOTE_ERROR;
+      }
+
+      /* also, every command takes at least one argument so we get that first
+         argument right now */
+      err = get_pathname(&cp, &path1);
+      if (err) {
+        if (err == CURLE_OUT_OF_MEMORY)
+          failf(data, "Out of memory");
+        else
+          failf(data, "Syntax error: Bad first parameter");
+        return err;
+      }
+
+      /* SFTP is a binary protocol, so we don't send text commands to the
+         server. Instead, we scan for commands for commands used by OpenSSH's
+         sftp program and call the appropriate libssh2 functions. */
+      if (curl_strnequal(item->data, "chgrp ", 6) ||
+          curl_strnequal(item->data, "chmod ", 6) ||
+          curl_strnequal(item->data, "chown ", 6) ) { /* attribute change */
+        LIBSSH2_SFTP_ATTRIBUTES attrs;
+
+        /* path1 contains the mode to set */
+        err = get_pathname(&cp, &path2);  /* get the destination */
+        if (err) {
+          if (err == CURLE_OUT_OF_MEMORY)
+            failf(data, "Out of memory");
+          else
+            failf(data,
+                  "Syntax error in chgrp/chmod/chown: Bad second parameter");
+          free(path1);
+          return err;
+        }
+        memset(&attrs, 0, sizeof(LIBSSH2_SFTP_ATTRIBUTES));
+        if (libssh2_sftp_stat(sftp_session,
+                              path2, &attrs) != 0) { /* get those attributes */
+          err = libssh2_sftp_last_error(sftp_session);
+          free(path1);
+          free(path2);
+          failf(data, "Attempt to get SFTP stats failed: %s",
+                sftp_libssh2_strerror(err));
+          return CURLE_FTP_QUOTE_ERROR;
+        }
+
+        /* Now set the new attributes... */
+        if (curl_strnequal(item->data, "chgrp", 5)) {
+          attrs.gid = strtol(path1, NULL, 10);
+          if (attrs.gid == 0) {
+            free(path1);
+            free(path2);
+            failf(data, "Syntax error: chgrp gid not a number");
+            return CURLE_FTP_QUOTE_ERROR;
+          }
+        }
+        else if (curl_strnequal(item->data, "chmod", 5)) {
+          attrs.permissions = strtol(path1, NULL, 8);/* permissions are octal */
+          if (attrs.permissions == 0) {
+            free(path1);
+            free(path2);
+            failf(data, "Syntax error: chmod permissions not a number");
+            return CURLE_FTP_QUOTE_ERROR;
+          }
+        }
+        else if (curl_strnequal(item->data, "chown", 5)) {
+          attrs.uid = strtol(path1, NULL, 10);
+          if (attrs.uid == 0) {
+            free(path1);
+            free(path2);
+            failf(data, "Syntax error: chown uid not a number");
+            return CURLE_FTP_QUOTE_ERROR;
+          }
+        }
+
+        /* Now send the completed structure... */
+        if (libssh2_sftp_setstat(sftp_session, path2, &attrs) != 0) {
+          err = libssh2_sftp_last_error(sftp_session);
+          free(path1);
+          free(path2);
+          failf(data, "Attempt to set SFTP stats failed: %s",
+                sftp_libssh2_strerror(err));
+          return CURLE_FTP_QUOTE_ERROR;
+        }
+      }
+      else if (curl_strnequal(item->data, "ln ", 3) ||
+               curl_strnequal(item->data, "symlink ", 8)) {
+        /* symbolic linking */
+        /* path1 is the source */
+        err = get_pathname(&cp, &path2);  /* get the destination */
+        if (err) {
+          if (err == CURLE_OUT_OF_MEMORY)
+            failf(data, "Out of memory");
+          else
+            failf(data,
+                  "Syntax error in ln/symlink: Bad second parameter");
+          free(path1);
+          return err;
+        }
+        if (libssh2_sftp_symlink(sftp_session, path1, path2) != 0) {
+          err = libssh2_sftp_last_error(sftp_session);
+          free(path1);
+          free(path2);
+          failf(data, "symlink command failed: %s",
+                sftp_libssh2_strerror(err));
+          return CURLE_FTP_QUOTE_ERROR;
+        }
+      }
+      else if (curl_strnequal(item->data, "mkdir ", 6)) { /* create dir */
+        if (libssh2_sftp_mkdir(sftp_session, path1, 0744) != 0) {
+          err = libssh2_sftp_last_error(sftp_session);
+          free(path1);
+          failf(data, "mkdir command failed: %s",
+                sftp_libssh2_strerror(err));
+          return CURLE_FTP_QUOTE_ERROR;
+        }
+      }
+      else if (curl_strnequal(item->data, "rename ", 7)) { /* rename file */
+        /* first param is the source path */
+        err = get_pathname(&cp, &path2);  /* second param is the dest. path */
+        if (err) {
+          if (err == CURLE_OUT_OF_MEMORY)
+            failf(data, "Out of memory");
+          else
+            failf(data,
+                  "Syntax error in rename: Bad second parameter");
+          free(path1);
+          return err;
+        }
+        if (libssh2_sftp_rename(sftp_session,
+                                path1, path2) != 0) {
+          err = libssh2_sftp_last_error(sftp_session);
+          free(path1);
+          free(path2);
+          failf(data, "rename command failed: %s",
+                sftp_libssh2_strerror(err));
+          return CURLE_FTP_QUOTE_ERROR;
+        }
+      }
+      else if (curl_strnequal(item->data, "rmdir ", 6)) { /* delete dir */
+        if (libssh2_sftp_rmdir(sftp_session,
+                               path1) != 0) {
+          err = libssh2_sftp_last_error(sftp_session);
+          free(path1);
+          failf(data, "rmdir command failed: %s",
+                sftp_libssh2_strerror(err));
+          return CURLE_FTP_QUOTE_ERROR;
+        }
+      }
+      else if (curl_strnequal(item->data, "rm ", 3)) { /* delete file */
+        if (libssh2_sftp_unlink(sftp_session, path1) != 0) {
+          err = libssh2_sftp_last_error(sftp_session);
+          free(path1);
+          failf(data, "rm command failed: %s",
+                sftp_libssh2_strerror(err));
+          return CURLE_FTP_QUOTE_ERROR;
+        }
+      }
+
+      if (path1)
+        free(path1);
+      if (path2)
+        free(path2);
+    }
+    item = item->next;
+  }
+  return CURLE_OK;
+}
+
+
 /*
  * If the read would block (EWOULDBLOCK) we return -1. Otherwise we return
  * a regular CURLcode value.
  */
 ssize_t Curl_sftp_recv(struct connectdata *conn, int sockindex,
-                   char *mem, size_t len)
+                       char *mem, size_t len)
 {
   ssize_t nread;
   (void)sockindex;

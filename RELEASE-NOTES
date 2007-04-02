@@ -25,6 +25,7 @@ This release includes the following changes:
  o --key and new --pubkey options for SSH public key file logins
  o --pass now works for a SSH public key file, too
  o select (2) support no longer needed to build the library if poll() used
+ o CURLOPT_POSTQUOTE works for SFTP
 
 This release includes the following bugfixes:
 
@@ -71,6 +72,6 @@ advice from friends like these:
  Michal Marek, Robson Braga Araujo, Ian Turner, Linus Nielsen Feltzing,
  Ravi Pratap, Adam D. Moss, Jose Kahan, Hang Kin Lau, Justin Fletcher,
  Robert Iakobashvili, Bryan Henderson, Eygene Ryabinkin, Daniel Johnson,
- Matt Kraai
+ Matt Kraai, Nick Zitzmann
 
         Thanks! (and sorry if I forgot to mention someone)

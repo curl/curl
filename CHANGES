@@ -6,6 +6,43 @@
 
                                   Changelog
 
+Daniel S (2 April 2007)
+- Nick Zitzmann made the CURLOPT_POSTQUOTE option work for SFTP as well. The
+  accepted commands are as follows:
+
+  chgrp (gid) (path)
+    Changes the group ID of the file or directory at (path) to (gid). (gid)
+    must be a number.
+
+  chmod (perms) (path)
+    Changes the permissions of the file or directory at (path) to
+    (perms). (perms) must be a number in the format used by the chmod Unix
+    command.
+
+  chown (uid) (path)
+    Changes the user ID of the file or directory at (path) to (uid). (uid)
+    must be a number.
+
+  ln (source) (dest)
+    Creates a symbolic link at (dest) that points to the file located at
+    (source).
+
+  mkdir (path)
+    Creates a new directory at (path).
+
+  rename (source) (dest)
+    Moves the file or directory at (source) to (dest).
+
+  rm (path)
+    Deletes the file located at (path).
+
+  rmdir (path)
+    Deletes the directory located at (path). This command will raise an error
+    if the directory is not empty.
+
+  symlink (source) (dest)
+    Same as ln.
+
 Daniel S (1 April 2007)
 - Robert Iakobashvili made curl_multi_remove_handle() a lot faster when many
   easy handles are added to a multi handle, by avoiding the looping over all
