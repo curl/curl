@@ -2490,8 +2490,7 @@ static bool tld_check_name(struct SessionHandle *data,
   char *uc_name = NULL;
   int rc;
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-  char nomsg_str[] = "<no msg>";
-  char *tld_errmsg = nomsg_str;
+  char *tld_errmsg = (char *)"<no msg>";
 #else
   (void)data;
 #endif
