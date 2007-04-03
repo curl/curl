@@ -110,12 +110,18 @@ if (($ssh_daemon !~ /OpenSSH/) || (10 * $ssh_ver_major + $ssh_ver_minor < 37)) {
     exit 1;
 }
 
+# Initialize sshd configuration file for curl's tests.
+open(my $CONF, ">$conffile") || die "Could not write $conffile";
+print $CONF "# This is a generated file!  Do not edit!\n";
+print $CONF "# OpenSSH sshd configuration file for curl testing\n";
+close $CONF;
+
 # Support for some options might have not been built into sshd.  On some
 # platforms specifying an unsupported option prevents sshd from starting.
 # Check here for possible unsupported options, avoiding its use in sshd.
 sub sshd_supports_opt($) {
     my ($option) = @_;
-    my $err = grep /$option/, qx($sshd -t -o $option=no 2>&1);
+    my $err = grep /Unsupported .* $option/, qx($sshd -t -f $conffile -o $option=no 2>&1);
     return !$err;
 }
 
@@ -141,10 +147,8 @@ if (! -e "curl_client_key.pub") {
     system "ssh-keygen -q -t dsa -f curl_client_key -C 'curl test client' -N ''" and die "Could not generate key";
 }
 
-open(my $FILE, ">$conffile") || die "Could not write $conffile";
+open(my $FILE, ">>$conffile") || die "Could not write $conffile";
 print $FILE <<EOF
-# This is a generated file!  Do not edit!
-# OpenSSH sshd configuration file for curl testing
 AllowUsers $username
 DenyUsers
 DenyGroups
