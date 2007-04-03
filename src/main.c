@@ -622,6 +622,7 @@ static void help(void)
     "    --create-dirs   Create necessary local directory hierarchy",
     "    --crlf          Convert LF to CRLF in upload",
     " -f/--fail          Fail silently (no output at all) on HTTP errors (H)",
+    "    --ftp-account <data> Account data to send when requested by server (F)",
     "    --ftp-alternative-to-user String to replace \"USER [name]\" (F)",
     "    --ftp-create-dirs Create the remote dirs if not present (F)",
     "    --ftp-method [multicwd/nocwd/singlecwd] Control CWD usage (F)",
