@@ -1,24 +1,8 @@
-To be addressed before 7.16.2 (planned release: March/April 2007)
+To be addressed before 7.16.2 (planned release: April 2007)
 =============================
 
-*83 - re-using connection with authentication (Sigrid Thijs)
-     http://curl.haxx.se/mail/lib-2007-03/0129.html
-
-*84 - SSL_CTX caching (Shmulik Regev)
-     http://curl.haxx.se/mail/lib-2007-03/0061.html
-
-*85 - NTLM proxy nightmare - POST problem (Jonathan Arnold)
-     http://curl.haxx.se/mail/lib-2007-03/0146.html
-
-*86 - Updated patch coming (Ravi Pratap)
+86 - Updated patch coming (Ravi Pratap)
      [only discussed privately so far]
-
-*88 - FD leakage with dump (Pedro Larroy)
-     http://curl.haxx.se/mail/lib-2007-03/0112.html
-
-*90 - Crash during gethostbyname in libcurl (Sebastien Trottier)
-     http://curl.haxx.se/mail/lib-2007-03/0158.html
 
 93 - 
 
-[*] = partly addressed, awaits further comments or updates from users
