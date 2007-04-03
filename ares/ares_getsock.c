@@ -1,6 +1,6 @@
 /* $Id$ */
 
-/* Copyright (C) 2005 - 2006, Daniel Stenberg
+/* Copyright (C) 2005 - 2007, Daniel Stenberg
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
