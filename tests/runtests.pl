@@ -2543,7 +2543,7 @@ if($skipped) {
         # now show all test case numbers that had this reason for being
         # skipped
         my $c=0;
-        for(0 .. $lasttest) {
+        for(0 .. scalar @teststat) {
             my $t = $_;
             if($teststat[$_] eq $r) {
                 logmsg ", " if($c);
