@@ -122,12 +122,13 @@
   #define SET_BINMODE(file)   ((void)0)
 #endif
 
-#ifdef __DJGPP__
+#ifdef MSDOS
 #include <dos.h>
 
 const char *msdosify(const char *);
 char *rename_if_dos_device_name(char *);
 
+#ifdef DJGPP
 /* we want to glob our own argv[] */
 char **__crt0_glob_function (char *arg)
 {
@@ -135,6 +136,7 @@ char **__crt0_glob_function (char *arg)
   return (char**)0;
 }
 #endif /* __DJGPP__ */
+#endif /* MSDOS */
 
 #define CURL_PROGRESS_STATS 0 /* default progress display */
 #define CURL_PROGRESS_BAR   1
@@ -520,7 +522,7 @@ static void warnf(struct Configurable *config, const char *fmt, ...)
  */
 static CURLcode main_init(void)
 {
-#ifdef __DJGPP__
+#ifdef DJGPP
   /* stop stat() wasting time */
   _djstat_flags |= _STAT_INODE | _STAT_EXEC_MAGIC | _STAT_DIRSIZE;
 #endif
@@ -705,7 +707,7 @@ static void help(void)
     " -U/--proxy-user <user[:password]> Set proxy user and password",
     " -v/--verbose       Make the operation more talkative",
     " -V/--version       Show version number and quit",
-#ifdef __DJGPP__
+#ifdef MSDOS
     "    --wdebug        Turn on Watt-32 debugging under DJGPP",
 #endif
     " -w/--write-out [format] What to output after completion",
@@ -1455,7 +1457,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"*m", "ntlm",       FALSE},
     {"*n", "basic",      FALSE},
     {"*o", "anyauth",    FALSE},
-#ifdef __DJGPP__
+#ifdef MSDOS
     {"*p", "wdebug",     FALSE},
 #endif
     {"*q", "ftp-create-dirs", FALSE},
@@ -1750,7 +1752,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         config->authtype = CURLAUTH_ANY;
         break;
 
-#ifdef __DJGPP__
+#ifdef MSDOS
       case 'p': /* --wdebug */
         dbug_init();
         break;
@@ -3831,7 +3833,7 @@ operate(struct Configurable *config, int argc, char *argv[])
               free(url);
               break;
             }
-#if defined(__DJGPP__)
+#if defined(MSDOS)
             {
               /* This is for DOS, and then we do some major replacing of
                  bad characters in the file name before using it */
@@ -3841,7 +3843,7 @@ operate(struct Configurable *config, int argc, char *argv[])
               free (outfile);
               outfile = strdup (rename_if_dos_device_name(file1));
             }
-#endif /* __DJGPP__ */
+#endif /* MSDOS */
           }
           else if(urls) {
             /* fill '#1' ... '#9' terms from URL pattern */
@@ -4756,7 +4758,34 @@ static int create_dir_hierarchy(const char *outfile)
   return result; /* 0 is fine, -1 is badness */
 }
 
-#ifdef __DJGPP__
+#ifdef MSDOS
+
+#ifndef HAVE_BASENAME
+/* basename() returns a pointer to the last component of a pathname.
+ * Ripped from lib/formdata.c.
+ */
+static char *basename(char *path)
+{
+  /* Ignore all the details above for now and make a quick and simple
+     implementaion here */
+  char *s1;
+  char *s2;
+
+  s1=strrchr(path, '/');
+  s2=strrchr(path, '\\');
+
+  if(s1 && s2) {
+    path = (s1 > s2? s1 : s2)+1;
+  }
+  else if(s1)
+    path = s1 + 1;
+  else if(s2)
+    path = s2 + 1;
+
+  return path;
+}
+#endif /* HAVE_BASENAME */
+
 /* The following functions are taken with modification from the DJGPP
  * port of tar 1.12. They use algorithms originally from DJTAR. */
 
@@ -4773,9 +4802,11 @@ msdosify (const char *file_name)
   size_t len = sizeof (illegal_chars_dos) - 1;
   int lfn = 0;
 
-  /* Support for Windows 9X VFAT systems, when available.  */
+#ifdef DJGPP
+  /* Support for Windows 9X VFAT systems, when available (djgpp only). */
   if (_use_lfn (file_name))
     lfn = 1;
+#endif
   if (lfn) {
     illegal_aliens = illegal_chars_w95;
     len -= (illegal_chars_w95 - illegal_chars_dos);
@@ -4870,5 +4901,4 @@ rename_if_dos_device_name (char *file_name)
   }
   return file_name;
 }
-
-#endif /* __DJGPP__ */
+#endif /* MSDOS */
