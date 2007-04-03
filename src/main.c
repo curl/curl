@@ -112,6 +112,16 @@
 
 #define DEFAULT_MAXREDIRS  50L
 
+#if defined(O_BINARY) && defined(HAVE_SETMODE)
+  #ifdef __HIGHC__
+    #define SET_BINMODE(file) _setmode(file,O_BINARY)
+  #else
+    #define SET_BINMODE(file) setmode(fileno(file),O_BINARY)
+  #endif
+#else
+  #define SET_BINMODE(file)   ((void)0)
+#endif
+
 #ifdef __DJGPP__
 #include <dos.h>
 
@@ -2015,10 +2025,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 
           if(curlx_strequal("-", nextarg)) {
             file = stdin;
-#if defined(O_BINARY) && defined(HAVE_SETMODE)
             if(subletter == 'b') /* forced binary */
-              setmode(fileno(stdin), O_BINARY);
-#endif
+              SET_BINMODE(stdin);
           }
           else {
             file = fopen(nextarg, "rb");
@@ -3967,9 +3975,7 @@ operate(struct Configurable *config, int argc, char *argv[])
 
         }
         else if(uploadfile && curlx_strequal(uploadfile, "-")) {
-#if defined(O_BINARY) && defined(HAVE_SETMODE)
-          setmode(fileno(stdin), O_BINARY);
-#endif
+          SET_BINMODE(stdin);
           infd = stdin;
         }
 
@@ -4030,13 +4036,11 @@ operate(struct Configurable *config, int argc, char *argv[])
         if(!config->errors)
           config->errors = stderr;
 
-#if defined(O_BINARY) && defined(HAVE_SETMODE)
         if(!outfile && !(config->conf & CONF_GETTEXT)) {
           /* We get the output to stdout and we have not got the ASCII/text flag,
              then set stdout to be binary */
-          setmode( fileno(stdout), O_BINARY );
+          SET_BINMODE(stdout);
         }
-#endif
 
         if(1 == config->tcp_nodelay)
           my_setopt(curl, CURLOPT_TCP_NODELAY, 1);
