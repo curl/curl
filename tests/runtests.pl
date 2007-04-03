@@ -282,7 +282,7 @@ sub startnew {
 
         exec($cmd) || die "Can't exec() $cmd: $!";
 
-        die "error: exec() has returned !!!";
+        die "error: exec() has returned";
     }
 
     my $count=12;
@@ -391,7 +391,7 @@ sub torture {
 
         if(-r "core") {
             # there's core file present now!
-            logmsg " core dumped!\n";
+            logmsg " core dumped\n";
             $dumped_core = 1;
             $fail = 2;
         }
@@ -562,7 +562,7 @@ sub verifyftp {
     my $took = time()-$time;
 
     if($verbose) {
-        logmsg "RUN: Verifying our test FTP server took $took seconds!\n";
+        logmsg "RUN: Verifying our test FTP server took $took seconds\n";
     }
     $ftpchecktime = $took?$took:1; # make sure it never is zero
 
@@ -652,7 +652,7 @@ sub runhttpserver {
 
     if(!kill(0, $httppid)) {
         # it is NOT alive
-        logmsg "RUN: failed to start the HTTP server!\n";
+        logmsg "RUN: failed to start the HTTP server\n";
         stopservers($verbose);
         return (0,0);
     }
@@ -706,7 +706,7 @@ sub runhttpsserver {
 
     if(!kill(0, $httpspid)) {
         # it is NOT alive
-        logmsg "RUN: failed to start the HTTPS server!\n";
+        logmsg "RUN: failed to start the HTTPS server\n";
         stopservers($verbose);
         return(0,0);
     }
@@ -772,7 +772,7 @@ sub runftpserver {
 
     if(!$ftppid || !kill(0, $ftppid)) {
         # it is NOT alive
-        logmsg "RUN: failed to start the FTP$id$nameext server!\n";
+        logmsg "RUN: failed to start the FTP$id$nameext server\n";
         return -1;
     }
 
@@ -825,7 +825,7 @@ sub runftpsserver {
 
     if(!kill(0, $ftpspid)) {
         # it is NOT alive
-        logmsg "RUN: failed to start the FTPS server!\n";
+        logmsg "RUN: failed to start the FTPS server\n";
         stopservers($verbose);
         return(0,0);
     }
@@ -891,7 +891,7 @@ sub runtftpserver {
 
     if(!$tftppid || !kill(0, $tftppid)) {
         # it is NOT alive
-        logmsg "RUN: failed to start the FTP$id$nameext server!\n";
+        logmsg "RUN: failed to start the FTP$id$nameext server\n";
         return -1;
     }
 
@@ -934,7 +934,7 @@ sub runsshserver {
 
     if(!$sshpid || !kill(0, $sshpid)) {
         # it is NOT alive
-        logmsg "RUN: failed to start the SSH server!\n";
+        logmsg "RUN: failed to start the SSH server\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$sshpid $pid2");
         return -1;
@@ -1089,7 +1089,7 @@ sub checksystem {
                     }
                 }
                 if(!$matchlen) {
-                    logmsg "Serious error, can't find our \"real\" path!\n";
+                    logmsg "Serious error, can't find our \"real\" path\n";
                 }
                 else {
                     # now prepend the prefix from the mount command to build
@@ -1175,7 +1175,7 @@ sub checksystem {
         }
     }
     if(!$curl) {
-        logmsg "unable to get curl's version! further details are:\n";
+        logmsg "unable to get curl's version, further details are:\n";
         logmsg "issued command: \n";
         logmsg "$versioncmd \n";
         if ($versretval == -1) {
@@ -1193,7 +1193,7 @@ sub checksystem {
         displaylogcontent("$curlverout");
         logmsg "contents of $curlvererr: \n";
         displaylogcontent("$curlvererr");
-        die "couldn't get curl's version!";
+        die "couldn't get curl's version";
     }
 
     if(-r "../lib/config.h") {
@@ -1338,7 +1338,7 @@ sub singletest {
     if(loadtest("${TESTDIR}/test${testnum}")) {
         if($verbose) {
             # this is not a test
-            logmsg "RUN: $testnum doesn't look like a test case!\n";
+            logmsg "RUN: $testnum doesn't look like a test case\n";
         }
         $why = "no test";
     }
@@ -1561,7 +1561,7 @@ sub singletest {
         my $filename=$fileattr{'name'};
 
         if(!$filename) {
-            logmsg "ERROR: section client=>file has no name attribute!\n";
+            logmsg "ERROR: section client=>file has no name attribute\n";
             return -1;
         }
         my $fileContent = join('', @inputfile);
@@ -1681,7 +1681,7 @@ sub singletest {
     }
 
     if($dumped_core) {
-        logmsg "core dumped!\n";
+        logmsg "core dumped\n";
         if(0 && $gdb) {
             logmsg "running gdb for post-mortem analysis:\n";
             open(GDBCMD, ">log/gdbcmd2");
@@ -1831,7 +1831,7 @@ sub singletest {
 
         my $filename=$hash{'name'};
         if(!$filename) {
-            logmsg "ERROR: section verify=>file has no name attribute!\n";
+            logmsg "ERROR: section verify=>file has no name attribute\n";
             stopservers($verbose);
             return -1;
         }
@@ -1908,7 +1908,7 @@ sub singletest {
 
     if($curl_debug) {
         if(! -f $memdump) {
-            logmsg "\n** ALERT! memory debugging without any output file?\n";
+            logmsg "\n** ALERT! memory debugging with no output file?\n";
         }
         else {
             my @memdata=`$memanalyze $memdump`;
@@ -2196,7 +2196,7 @@ sub serverfortest {
     if(loadtest("${TESTDIR}/test${testnum}")) {
         if($verbose) {
             # this is not a test
-            logmsg "$testnum doesn't look like a test case!\n";
+            logmsg "$testnum doesn't look like a test case\n";
         }
         return "no test";
     }
@@ -2204,7 +2204,7 @@ sub serverfortest {
     my @what = getpart("client", "server");
 
     if(!$what[0]) {
-        warn "Test case $testnum has no server(s) specified!";
+        warn "Test case $testnum has no server(s) specified";
         return "no server specified";
     }
 
@@ -2425,11 +2425,14 @@ open(CMDLOG, ">$CURLLOG") ||
 
 sub displaylogcontent {
     my ($file)=@_;
-    open(SINGLE, "<$file");
-    while(<SINGLE>) {
-        logmsg " $_";
+    if(open(my $SINGLE, "<$file")) {
+        while(my $line = <$SINGLE>) {
+            chomp $line;
+            $line =~ s/\s*\!$//;
+            logmsg " $line\n";
+        }
+        close($SINGLE);
     }
-    close(SINGLE);
 }
 
 sub displaylogs {
@@ -2521,7 +2524,7 @@ if($total) {
     }
 }
 else {
-    logmsg "TESTFAIL: No tests were performed!\n";
+    logmsg "TESTFAIL: No tests were performed\n";
 }
 
 if($all) {
