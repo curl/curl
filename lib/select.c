@@ -41,7 +41,7 @@
 #include <socket.h>
 #endif
 
-#ifdef __MSDOS__
+#ifdef MSDOS
 #include <dos.h>  /* delay() */
 #endif
 
@@ -116,7 +116,7 @@
  */
 static int wait_ms(int timeout_ms)
 {
-#if !defined(__MSDOS__) && !defined(USE_WINSOCK)
+#if !defined(MSDOS) && !defined(USE_WINSOCK)
 #ifndef HAVE_POLL_FINE
   struct timeval pending_tv;
 #endif
@@ -132,7 +132,7 @@ static int wait_ms(int timeout_ms)
     SET_SOCKERRNO(EINVAL);
     return -1;
   }
-#if defined(__MSDOS__)
+#if defined(MSDOS)
   delay(timeout_ms);
 #elif defined(USE_WINSOCK)
   Sleep(timeout_ms);

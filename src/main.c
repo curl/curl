@@ -2794,7 +2794,7 @@ static void go_sleep(long ms)
 #ifdef WIN32
   /* Windows offers a millisecond sleep */
   Sleep(ms);
-#elif defined(__MSDOS__)
+#elif defined(MSDOS)
   delay(ms);
 #else
   /* Other systems must use select() for this */
