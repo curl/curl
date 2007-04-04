@@ -354,7 +354,6 @@ static int rlimit(int keep_open)
   fprintf(stderr, "%s file descriptors open\n", strbuff);
 
 #if !defined(HAVE_POLL_FINE)    && \
-    !defined(CURL_HAVE_WSAPOLL) && \
     !defined(USE_WINSOCK)       && \
     !defined(TPF)
 
