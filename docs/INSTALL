@@ -147,6 +147,29 @@ UNIX
 Win32
 =====
 
+   Building Windows DLLs and C run-time (CRT) linkage issues
+   ---------------------------------------------------------
+
+   As a general rule, building a DLL with static CRT linkage is highly
+   discouraged, and intermixing CRTs in the same app is something to
+   avoid at any cost.
+
+   Reading and comprehension of Microsoft Knowledge Base articles
+   KB94248 and KB140584 is a must for any Windows developer. Especially
+   important is full understanding if you are not going to follow the
+   advice given above.
+
+   KB94248  - How To Use the C Run-Time
+              http://support.microsoft.com/kb/94248/en-us
+
+   KB140584 - How to link with the correct C Run-Time (CRT) library
+              http://support.microsoft.com/kb/140584/en-us
+
+   If your app is misbehaving in some strange way, or it is suffering
+   from memory corruption, before asking for further help, please try
+   first to rebuild every single library your app uses as well as your
+   app using the debug multithreaded dynamic C runtime.
+
    MingW32
    -------
 
