@@ -1,0 +1,44 @@
+<testcase>
+<info>
+<keywords>
+SFTP
+post-quote
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+Test file for rename test
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+sftp
+</server>
+ <name>
+SFTP post-quote rename
+ </name>
+ <command>
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: -Q "-rename %PWD/log/file608.txt %PWD/log/file608-renamed.txt" sftp://%HOSTIP:%SSHPORT%PWD/log/file608.txt
+</command>
+<file name="log/file608.txt">
+Test file for rename test
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<file name="log/file608-renamed.txt">
+Test file for rename test
+</file>
+<valgrind>
+disable
+</valgrind>
+</verify>
+</testcase>

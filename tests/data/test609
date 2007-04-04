@@ -1,0 +1,45 @@
+<testcase>
+<info>
+<keywords>
+SFTP
+post-quote
+FAILURE
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+Test file for mkdir test
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+sftp
+</server>
+ <name>
+SFTP post-quote mkdir failure
+ </name>
+ <command>
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: -Q "-mkdir %PWD/log/file609.txt" sftp://%HOSTIP:%SSHPORT%PWD/log/file609.txt
+</command>
+<file name="log/file609.txt">
+Test file for mkdir test
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+21
+</errorcode>
+<valgrind>
+disable
+</valgrind>
+</verify>
+</testcase>
