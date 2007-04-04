@@ -65,23 +65,23 @@ static void close_file_descriptors(void)
   fd = NULL;
 }
 
-static int stdio_limit_256(void)
+static int fopen_works(void)
 {
-  FILE *fpa[300];
+  FILE *fpa[SAFETY_MARGIN];
   int i;
-  int ret = 0;
+  int ret = 1;
 
-  for (i = 0; i < 300; i++) {
+  for (i = 0; i < SAFETY_MARGIN; i++) {
     fpa[i] = NULL;
   }
-  for (i = 0; i < 300; i++) {
+  for (i = 0; i < SAFETY_MARGIN; i++) {
     fpa[i] = fopen(DEV_NULL, "r");
     if (fpa[i] == NULL) {
-      ret = -1;
+      ret = 0;
       break;
     }
   }
-  for (i = 0; i < 300; i++) {
+  for (i = 0; i < SAFETY_MARGIN; i++) {
     if (fpa[i] != NULL)
       fclose(fpa[i]);
   }
@@ -258,18 +258,6 @@ static int rlimit(int keep_open)
 
   num_open.rlim_max = NUM_OPEN;
 
-  /* verify that we don't have an ancient stdio */
-
-  if (((size_t)(num_open.rlim_max) > (size_t)256) && stdio_limit_256()) {
-    sprintf(strbuff1, fmt, num_open.rlim_max);
-    sprintf(strbuff, "fds needed %s > stdio limit 256",
-            strbuff1);
-    store_errmsg(strbuff, 0);
-    fprintf(stderr, "%s\n", msgbuff);
-    free(memchunk);
-    return -12;
-  }
-
   /* verify that we won't overflow size_t in malloc() */
 
   if ((size_t)(num_open.rlim_max) > ((size_t)-1) / sizeof(*fd)) {
@@ -406,6 +394,19 @@ static int rlimit(int keep_open)
   }
 
 #endif /* using a FD_SETSIZE bound select() */
+
+  /* test stdio's capability to fopen() SAFETY_MARGIN additional files */
+
+  if (!fopen_works()) {
+    sprintf(strbuff1, fmt, num_open.rlim_max);
+    sprintf(strbuff, "stdio fopen() fails with %s open() files",
+            strbuff1);
+    store_errmsg(strbuff, 0);
+    fprintf(stderr, "%s\n", msgbuff);
+    close_file_descriptors();
+    free(memchunk);
+    return -12;
+  }
 
   /* free the chunk of memory we were reserving so that it
      becomes becomes available to the test */
