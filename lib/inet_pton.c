@@ -41,10 +41,6 @@
 #define INADDRSZ         4
 #define INT16SZ          2
 
-#ifdef USE_WINSOCK
-#define EAFNOSUPPORT    WSAEAFNOSUPPORT
-#endif
-
 /*
  * WARNING: Don't even consider trying to compile this on a system where
  * sizeof(int) < 4.  sizeof(int) > 4 is fine; all the world's not a VAX.

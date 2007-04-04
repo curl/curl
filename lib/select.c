@@ -23,8 +23,6 @@
 
 #include "setup.h"
 
-#include <errno.h>
-
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
@@ -50,15 +48,6 @@
 #include "urldata.h"
 #include "connect.h"
 #include "select.h"
-
-#ifdef USE_WINSOCK
-#  undef  EBADF
-#  define EBADF  WSAEBADF
-#  undef  EINTR
-#  define EINTR  WSAEINTR
-#  undef  EINVAL
-#  define EINVAL WSAEINVAL
-#endif
 
 /* Winsock and TPF sockets are not in range [0..FD_SETSIZE-1] */
 

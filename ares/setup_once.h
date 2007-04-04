@@ -276,6 +276,12 @@ typedef int sig_atomic_t;
  */
 
 #ifdef USE_WINSOCK
+#undef  EBADF            /* override definition in errno.h */
+#define EBADF            WSAEBADF
+#undef  EINTR            /* override definition in errno.h */
+#define EINTR            WSAEINTR
+#undef  EINVAL           /* override definition in errno.h */
+#define EINVAL           WSAEINVAL
 #define EWOULDBLOCK      WSAEWOULDBLOCK
 #define EINPROGRESS      WSAEINPROGRESS
 #define EALREADY         WSAEALREADY
