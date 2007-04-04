@@ -77,6 +77,8 @@ static int fopen_works(void)
   for (i = 0; i < 3; i++) {
     fpa[i] = fopen(DEV_NULL, "r");
     if (fpa[i] == NULL) {
+      store_errmsg("fopen() failed", ERRNO);
+      fprintf(stderr, "%s\n", msgbuff);
       ret = 0;
       break;
     }
@@ -394,11 +396,18 @@ static int rlimit(int keep_open)
 
 #endif /* using a FD_SETSIZE bound select() */
 
-  /* test stdio's capability to fopen() SAFETY_MARGIN additional files */
+  /*
+   * Old or 'backwards compatible' implementations of stdio do not allow
+   * handling of streams with an underlying file descriptor number greater
+   * than 255, even when allowing high numbered file descriptors for sockets.
+   * At this point we have a big number of file descriptors which have been
+   * opened using dup(), so lets test the stdio implementation and discover
+   * if it is capable of fopen()ing some additional files.
+   */
 
   if (!fopen_works()) {
     sprintf(strbuff1, fmt, num_open.rlim_max);
-    sprintf(strbuff, "stdio fopen() fails with %s open() files",
+    sprintf(strbuff, "stdio fopen() fails with %s fds open()",
             strbuff1);
     store_errmsg(strbuff, 0);
     fprintf(stderr, "%s\n", msgbuff);
