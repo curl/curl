@@ -2856,6 +2856,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   /* Initialize the pipeline lists */
   conn->send_pipe = Curl_llist_alloc((curl_llist_dtor) llist_dtor);
   conn->recv_pipe = Curl_llist_alloc((curl_llist_dtor) llist_dtor);
+  if (!conn->send_pipe || !conn->recv_pipe)
+    return CURLE_OUT_OF_MEMORY;
 
   /* Store creation time to help future close decision making */
   conn->created = Curl_tvnow();

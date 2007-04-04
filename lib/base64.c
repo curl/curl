@@ -173,11 +173,13 @@ size_t Curl_base64_encode(struct SessionHandle *data,
   if(data) {
     convbuf = (char*)malloc(insize);
     if(!convbuf) {
+      free(output);
       return 0;
     }
     memcpy(convbuf, indata, insize);
     if(CURLE_OK != Curl_convert_to_network(data, convbuf, insize)) {
       free(convbuf);
+      free(output);
       return 0;
     }
     indata = convbuf; /* switch to the converted buffer */

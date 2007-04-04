@@ -295,7 +295,7 @@ CURLcode Curl_output_negotiate(struct connectdata *conn)
                            neg_ctx->output_token.length,
                            &encoded);
 
-  if (len < 0)
+  if (len == 0)
     return CURLE_OUT_OF_MEMORY;
 
   conn->allocptr.userpwd =

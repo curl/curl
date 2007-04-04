@@ -421,6 +421,10 @@ static void mk_nt_hash(struct SessionHandle *data,
 {
   size_t len = strlen(password);
   unsigned char *pw = malloc(len*2);
+  if (!pw)
+    /* No way to report this error; just rely on future malloc failures
+       to be caught */
+    return;
 
   utf8_to_unicode_le(pw, password, len);
 
