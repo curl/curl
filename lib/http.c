@@ -157,6 +157,8 @@ static CURLcode Curl_output_basic(struct connectdata *conn, bool proxy)
                       proxy?"Proxy-":"",
                       authorization);
     free(authorization);
+    if(!*userp)
+      return CURLE_OUT_OF_MEMORY;
   }
   else
     return CURLE_OUT_OF_MEMORY;
@@ -1150,8 +1152,10 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
         return CURLE_OUT_OF_MEMORY;
 
       host_port = aprintf("%s:%d", hostname, remote_port);
-      if(!host_port)
+      if(!host_port) {
+        free(req_buffer);
         return CURLE_OUT_OF_MEMORY;
+      }
 
       /* Setup the proxy-authorization header, if any */
       result = Curl_http_output_auth(conn, (char *)"CONNECT", host_port, TRUE);
@@ -1163,8 +1167,11 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 
         if(!checkheaders(data, "Host:")) {
           host = aprintf("Host: %s\r\n", host_port);
-          if(!host)
+          if(!host) {
+            free(req_buffer);
+            free(host_port);
             result = CURLE_OUT_OF_MEMORY;
+          }
         }
         if(!checkheaders(data, "Proxy-Connection:"))
           proxyconn = "Proxy-Connection: Keep-Alive\r\n";
