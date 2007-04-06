@@ -1170,7 +1170,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
           if(!host) {
             free(req_buffer);
             free(host_port);
-            result = CURLE_OUT_OF_MEMORY;
+            return CURLE_OUT_OF_MEMORY;
           }
         }
         if(!checkheaders(data, "Proxy-Connection:"))
