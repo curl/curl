@@ -2450,25 +2450,43 @@ sub displaylogcontent {
 
 sub displaylogs {
     my ($testnum)=@_;
-    opendir(DIR, "$LOGDIR") ||
+    opendir(my $DIR, "$LOGDIR") ||
         die "can't open dir: $!";
-    my @logs = readdir(DIR);
-    closedir DIR;
-    my $log;
+    my @logs = readdir($DIR);
+    closedir($DIR);
 
     logmsg "== Contents of files in the log/ dir after test $testnum\n";
-    foreach $log (sort @logs) {
-        # the log file is not "." or ".." and contains more than zero bytes
-        if(($log !~ /\.(\.|)$/) &&
-           ($log ne "memdump") && # and not "memdump"
-           -s "$LOGDIR/$log") {
-            if($log =~ /^\.nfs/) {
-                next;
-            }
-            logmsg "== Start of file $log\n";
-            displaylogcontent("$LOGDIR/$log");
-            logmsg "== End of file $log\n";
+    foreach my $log (sort @logs) {
+        if($log =~ /\.(\.|)$/) {
+            next; # skip "." and ".."
         }
+        if($log =~ /^\.nfs/) {
+            next; # skip ".nfs"
+        }
+        if(($log eq "memdump") || ($log eq "core")) {
+            next; # skip "memdump" and  "core"
+        }
+        if((-d "$LOGDIR/$log") || (! -s "$LOGDIR/$log")) {
+            next; # skip directory and empty files
+        }
+        if(($log =~ /^stdout\d+/) && ($log !~ /^stdout$testnum/)) {
+            next; # skip stdoutNnn of other tests
+        }
+        if(($log =~ /^stderr\d+/) && ($log !~ /^stderr$testnum/)) {
+            next; # skip stderrNnn of other tests
+        }
+        if(($log =~ /^upload\d+/) && ($log !~ /^upload$testnum/)) {
+            next; # skip uploadNnn of other tests
+        }
+        if(($log =~ /^curl\d+\.out/) && ($log !~ /^curl$testnum\.out/)) {
+            next; # skip curlNnn.out of other tests
+        }
+        if(($log =~ /^test\d+\.txt/) && ($log !~ /^test$testnum\.txt/)) {
+            next; # skip testNnn.txt of other tests
+        }
+        logmsg "=== Start of file $log\n";
+        displaylogcontent("$LOGDIR/$log");
+        logmsg "=== End of file $log\n";
     }
 }
 
