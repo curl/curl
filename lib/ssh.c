@@ -305,12 +305,12 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
                                             libssh2_realloc, ssh);
   if (ssh->ssh_session == NULL) {
     failf(data, "Failure initialising ssh session\n");
-    Curl_safefree(ssh->path);
     Curl_safefree(working_path);
     return CURLE_FAILED_INIT;
   }
+
 #ifdef CURL_LIBSSH2_DEBUG
-  libssh2_trace(ssh->ssh_session, LIBSSH2_TRACE_CONN|LIBSSH2_TRACE_TRANS|LIBSSH2_TRACE_SCP|LIBSSH2_TRACE_SFTP|LIBSSH2_TRACE_ERROR);
+  libssh2_trace(ssh->ssh_session, LIBSSH2_TRACE_CONN|LIBSSH2_TRACE_TRANS|LIBSSH2_TRACE_KEX|LIBSSH2_TRACE_AUTH|LIBSSH2_TRACE_SCP|LIBSSH2_TRACE_SFTP|LIBSSH2_TRACE_ERROR|LIBSSH2_TRACE_PUBLICKEY);
   infof(data, "SSH socket: %d\n", sock);
 #endif /* CURL_LIBSSH2_DEBUG */
 
@@ -318,7 +318,6 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
     failf(data, "Failure establishing ssh session\n");
     libssh2_session_free(ssh->ssh_session);
     ssh->ssh_session = NULL;
-    Curl_safefree(ssh->path);
     Curl_safefree(working_path);
     return CURLE_FAILED_INIT;
   }
@@ -357,7 +356,6 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
   if (!authlist) {
     libssh2_session_free(ssh->ssh_session);
     ssh->ssh_session = NULL;
-    Curl_safefree(ssh->path);
     Curl_safefree(working_path);
     return CURLE_OUT_OF_MEMORY;
   }
@@ -437,7 +435,6 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
     failf(data, "Authentication failure\n");
     libssh2_session_free(ssh->ssh_session);
     ssh->ssh_session = NULL;
-    Curl_safefree(ssh->path);
     Curl_safefree(working_path);
     return CURLE_FAILED_INIT;
   }
@@ -511,6 +508,8 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
         ssh->sftp_session = NULL;
         libssh2_session_free(ssh->ssh_session);
         ssh->ssh_session = NULL;
+        Curl_safefree(ssh->homedir);
+        ssh->homedir = NULL;
         Curl_safefree(working_path);
         return CURLE_OUT_OF_MEMORY;
       }
@@ -530,6 +529,8 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
         ssh->sftp_session = NULL;
         libssh2_session_free(ssh->ssh_session);
         ssh->ssh_session = NULL;
+        Curl_safefree(ssh->homedir);
+        ssh->homedir = NULL;
         Curl_safefree(working_path);
         return CURLE_OUT_OF_MEMORY;
       }
