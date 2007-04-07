@@ -1252,7 +1252,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
              (k->bytecount + nread >= k->maxdownload)) {
             /* The 'excess' amount below can't be more than BUFSIZE which
                always will fit in a size_t */
-            size_t excess = k->bytecount + nread - k->maxdownload;
+            size_t excess = (size_t)(k->bytecount + nread - k->maxdownload);
             if (excess > 0 && !k->ignorebody) {
               infof(data,
                     "Rewinding stream by : %d"
