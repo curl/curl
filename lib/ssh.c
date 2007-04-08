@@ -158,6 +158,7 @@
 #endif
 
 /* Local functions: */
+static const char *sftp_libssh2_strerror(unsigned long err);
 static CURLcode sftp_sendquote(struct connectdata *conn,
                                struct curl_slist *quote);
 
@@ -194,23 +195,24 @@ kbd_callback(const char *name, int name_len, const char *instruction,
   (void)abstract;
 } /* kbd_callback */
 
-static CURLcode libssh2_error_to_CURLE(struct connectdata *conn)
+static CURLcode sftp_libssh2_error_to_CURLE(unsigned long err)
 {
-  int errorcode;
-  struct SSHPROTO *scp = conn->data->reqdata.proto.ssh;
-
-  /* Get the libssh2 error code and string */
-  errorcode = libssh2_session_last_error(scp->ssh_session, &scp->errorstr,
-                                         NULL, 0);
-  if (errorcode == LIBSSH2_FX_OK)
+  if (err == LIBSSH2_FX_OK)
     return CURLE_OK;
-
-  infof(conn->data, "libssh2 error %d, '%s'\n", errorcode, scp->errorstr);
 
   /* TODO: map some of the libssh2 errors to the more appropriate CURLcode
      error code, and possibly add a few new SSH-related one. We must however
      not return or even depend on libssh2 errors in the public libcurl API */
 
+  if (err == LIBSSH2_FX_NO_SUCH_FILE)
+     return CURLE_REMOTE_FILE_NOT_FOUND;
+
+  return CURLE_SSH;
+}
+
+static CURLcode libssh2_session_error_to_CURLE(int err)
+{
+  (void)err;
   return CURLE_SSH;
 }
 
@@ -304,7 +306,7 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
   ssh->ssh_session = libssh2_session_init_ex(libssh2_malloc, libssh2_free,
                                             libssh2_realloc, ssh);
   if (ssh->ssh_session == NULL) {
-    failf(data, "Failure initialising ssh session\n");
+    failf(data, "Failure initialising ssh session");
     Curl_safefree(working_path);
     return CURLE_FAILED_INIT;
   }
@@ -315,7 +317,7 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
 #endif /* CURL_LIBSSH2_DEBUG */
 
   if (libssh2_session_startup(ssh->ssh_session, sock)) {
-    failf(data, "Failure establishing ssh session\n");
+    failf(data, "Failure establishing ssh session");
     libssh2_session_free(ssh->ssh_session);
     ssh->ssh_session = NULL;
     Curl_safefree(working_path);
@@ -432,11 +434,11 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
   authlist = NULL;
 
   if (!authed) {
-    failf(data, "Authentication failure\n");
+    failf(data, "Authentication failure");
     libssh2_session_free(ssh->ssh_session);
     ssh->ssh_session = NULL;
     Curl_safefree(working_path);
-    return CURLE_FAILED_INIT;
+    return CURLE_LOGIN_DENIED;
   }
 
   /*
@@ -592,7 +594,8 @@ CURLcode Curl_scp_do(struct connectdata *conn, bool *done)
         /* Since sb is still empty, it is likely the file was not found */
         return CURLE_REMOTE_FILE_NOT_FOUND;
       }
-      return libssh2_error_to_CURLE(conn);
+      return libssh2_session_error_to_CURLE(
+        libssh2_session_last_error(scp->ssh_session, NULL, NULL, 0));
     }
     /* download data */
     bytecount = (curl_off_t) sb.st_size;
@@ -614,7 +617,8 @@ CURLcode Curl_scp_done(struct connectdata *conn, CURLcode status,
   scp->path = NULL;
 
   if (scp->ssh_channel) {
-    if (conn->data->set.upload && libssh2_channel_send_eof(scp->ssh_channel) < 0) {
+    if (conn->data->set.upload &&
+        libssh2_channel_send_eof(scp->ssh_channel) < 0) {
       infof(conn->data, "Failed to send libssh2 channel EOF\n");
     }
     if (libssh2_channel_close(scp->ssh_channel) < 0) {
@@ -702,6 +706,7 @@ CURLcode Curl_sftp_do(struct connectdata *conn, bool *done)
   struct SessionHandle *data = conn->data;
   curl_off_t bytecount = 0;
   char *buf = data->state.buffer;
+  unsigned long err = 0;
 
   *done = TRUE; /* unconditionally */
 
@@ -717,8 +722,12 @@ CURLcode Curl_sftp_do(struct connectdata *conn, bool *done)
                         LIBSSH2_FXF_WRITE|LIBSSH2_FXF_CREAT,
                         LIBSSH2_SFTP_S_IRUSR|LIBSSH2_SFTP_S_IWUSR|
                         LIBSSH2_SFTP_S_IRGRP|LIBSSH2_SFTP_S_IROTH);
-    if (!sftp->sftp_handle)
-      return CURLE_FAILED_INIT;
+    if (!sftp->sftp_handle) {
+      err = libssh2_sftp_last_error(sftp->sftp_session);
+      failf(conn->data, "Could not open remote file for writing: %s",
+            sftp_libssh2_strerror(err));
+      return sftp_libssh2_error_to_CURLE(err);
+    }
 
     /* upload data */
     res = Curl_setup_transfer(conn, -1, -1, FALSE, NULL, FIRSTSOCKET, NULL);
@@ -739,8 +748,12 @@ CURLcode Curl_sftp_do(struct connectdata *conn, bool *done)
 
       sftp->sftp_handle =
         libssh2_sftp_opendir(sftp->sftp_session, sftp->path);
-      if (!sftp->sftp_handle)
-        return CURLE_SSH;
+      if (!sftp->sftp_handle) {
+        err = libssh2_sftp_last_error(sftp->sftp_session);
+        failf(conn->data, "Could not open directory for reading: %s",
+            sftp_libssh2_strerror(err));
+        return sftp_libssh2_error_to_CURLE(err);
+      }
 
       while ((len = libssh2_sftp_readdir(sftp->sftp_handle, filename,
                                          PATH_MAX, &attrs)) > 0) {
@@ -877,8 +890,12 @@ CURLcode Curl_sftp_do(struct connectdata *conn, bool *done)
         libssh2_sftp_open(sftp->sftp_session, sftp->path, LIBSSH2_FXF_READ,
                           LIBSSH2_SFTP_S_IRUSR|LIBSSH2_SFTP_S_IWUSR|
                           LIBSSH2_SFTP_S_IRGRP|LIBSSH2_SFTP_S_IROTH);
-      if (!sftp->sftp_handle)
-        return CURLE_SSH;
+      if (!sftp->sftp_handle) {
+        err = libssh2_sftp_last_error(sftp->sftp_session);
+        failf(conn->data, "Could not open remote file for reading: %s",
+            sftp_libssh2_strerror(err));
+        return sftp_libssh2_error_to_CURLE(err);
+      }
 
       if (libssh2_sftp_stat(sftp->sftp_session, sftp->path, &attrs)) {
         /*
@@ -1041,8 +1058,7 @@ get_pathname(const char **cpp, char **path)
   if (!*cp) {
     *cpp = cp;
     *path = NULL;
-    return CURLE_FTP_QUOTE_ERROR;	/* this was originally 0 in OpenSSH
-                                       but we want it to be an error */
+    return CURLE_FTP_QUOTE_ERROR;
   }
 
   *path = malloc(strlen(cp) + 1);

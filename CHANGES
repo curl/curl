@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel S (9 April 2007)
+- Nick Zitzmann did ssh.c cleanups
+
 Daniel S (3 April 2007)
 - Rob Jones fixed better #ifdef'ing for a bunch of #include lines.
 
