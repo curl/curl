@@ -501,6 +501,9 @@ CURLcode Curl_open(struct SessionHandle **curl)
 {
   CURLcode res = CURLE_OK;
   struct SessionHandle *data;
+#ifdef USE_ARES
+  int status;
+#endif
 
   /* Very simple start-up: alloc the struct, init it with zeroes and return */
   data = (struct SessionHandle *)calloc(1, sizeof(struct SessionHandle));
@@ -513,10 +516,13 @@ CURLcode Curl_open(struct SessionHandle **curl)
   data->magic = CURLEASY_MAGIC_NUMBER;
 
 #ifdef USE_ARES
-  if(ARES_SUCCESS != ares_init(&data->state.areschannel)) {
+  if ((status = ares_init(&data->state.areschannel)) != ARES_SUCCESS) {
     DEBUGF(fprintf(stderr, "Error: ares_init failed\n"));
     free(data);
-    return CURLE_FAILED_INIT;
+    if (status == ARES_ENOMEM)
+      return CURLE_OUT_OF_MEMORY;
+    else
+      return CURLE_FAILED_INIT;
   }
   /* make sure that all other returns from this function should destroy the
      ares channel before returning error! */

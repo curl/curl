@@ -397,7 +397,10 @@ CURLcode curl_easy_perform(CURL *easy)
   mcode = curl_multi_add_handle(multi, easy);
   if(mcode) {
     curl_multi_cleanup(multi);
-    return CURLE_FAILED_INIT;
+    if(mcode == CURLM_OUT_OF_MEMORY)
+      return CURLE_OUT_OF_MEMORY;
+    else
+      return CURLE_FAILED_INIT;
   }
 
   /* we start some action by calling perform right away */
