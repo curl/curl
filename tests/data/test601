@@ -35,8 +35,6 @@ for ssh test
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-</protocol>
 <valgrind>
 disable
 </valgrind>

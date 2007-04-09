@@ -24,7 +24,7 @@ SCP invalid user login
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
-2
+67
 </errorcode>
 <valgrind>
 disable
