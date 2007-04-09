@@ -166,6 +166,21 @@
 #define HAVE_STRUCT_TIMEVAL 1
 
 /* ---------------------------------------------------------------- */
+/*                        COMPILER SPECIFIC                         */
+/* ---------------------------------------------------------------- */
+
+/* Undef keyword 'const' if it does not work.  */
+/* #undef const */
+
+/* Windows should not have HAVE_GMTIME_R defined */
+/* #undef HAVE_GMTIME_R */
+
+/* Define if the compiler supports C99 variadic macro style. */
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+#define HAVE_VARIADIC_MACROS_C99 1
+#endif
+
+/* ---------------------------------------------------------------- */
 /*                       ADDITIONAL DEFINITIONS                     */
 /* ---------------------------------------------------------------- */
 
