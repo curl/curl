@@ -4,8 +4,8 @@ changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
 41. When doing an operation over FTP that requires the ACCT command (but not
-  when logging in), the operation will fail since libcurl does detect this and
-  thus fails to issue the correct command:
+  when logging in), the operation will fail since libcurl doesn't detect this
+  and thus fails to issue the correct command:
   http://curl.haxx.se/bug/view.cgi?id=1693337
 
 40. Mac OS X test failures (Daniel Johnson)
