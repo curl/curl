@@ -2018,3 +2018,39 @@ AC_DEFUN([CURL_CHECK_VARIADIC_MACROS], [
       ;;
   esac
 ])
+
+
+dnl CURL_CHECK_NATIVE_WINDOWS
+dnl -------------------------------------------------
+dnl Check if building a native Windows target
+
+AC_DEFUN([CURL_CHECK_NATIVE_WINDOWS], [
+  AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
+  AC_CACHE_CHECK([whether build target is a native Windows one], [ac_cv_native_windows], [
+    if test "$ac_cv_header_windows_h" = "no"; then
+      ac_cv_native_windows="no"
+    else
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([
+        ],[
+#ifdef __MINGW32__
+          int dummy=1;
+#else
+          Not a native Windows build target.
+#endif
+        ])
+      ],[
+        ac_cv_native_windows="yes"
+      ],[
+        ac_cv_native_windows="no"
+      ])
+    fi
+  ])
+  case "$ac_cv_native_windows" in
+    yes)
+      AC_DEFINE_UNQUOTED(NATIVE_WINDOWS, 1,
+        [Define to 1 if you are building a native Windows target.])
+      ;;
+  esac
+])
+

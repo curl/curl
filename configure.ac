@@ -2124,19 +2124,26 @@ AC_HELP_STRING([--disable-verbose],[Disable verbose strings]),
        AC_MSG_RESULT(yes)
 )
 
+CURL_CHECK_NATIVE_WINDOWS
+
 dnl ************************************************************
 dnl enable SSPI support
 dnl
-AC_MSG_CHECKING([whether to enable SSPI support (win32 builds only)])
+AC_MSG_CHECKING([whether to enable SSPI support (Windows native builds only)])
 AC_ARG_ENABLE(sspi,
 AC_HELP_STRING([--enable-sspi],[Enable SSPI])
 AC_HELP_STRING([--disable-sspi],[Disable SSPI]),
 [ case "$enableval" in
   yes)
-       AC_MSG_RESULT(yes)
-       AC_DEFINE(USE_WINDOWS_SSPI, 1, [to enable SSPI support])
-       AC_SUBST(USE_WINDOWS_SSPI)
-       curl_sspi_msg="yes"
+       if test "$ac_cv_native_windows" = "yes"; then
+         AC_MSG_RESULT(yes)
+         AC_DEFINE(USE_WINDOWS_SSPI, 1, [to enable SSPI support])
+         AC_SUBST(USE_WINDOWS_SSPI)
+         curl_sspi_msg="yes"
+       else
+         AC_MSG_RESULT(no)
+         AC_MSG_WARN([--enable-sspi Ignored. Only supported on native Windows builds.])
+       fi
        ;;
   *)
        AC_MSG_RESULT(no)
