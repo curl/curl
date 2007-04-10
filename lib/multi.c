@@ -207,7 +207,7 @@ void curl_multi_dump(CURLM *multi_handle);
 static void multistate(struct Curl_one_easy *easy, CURLMstate state)
 {
 #ifdef CURLDEBUG
-  long index = -1;
+  long index = -5000;
 #endif
   CURLMstate oldstate = easy->state;
 
@@ -534,10 +534,12 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
       multi->num_alive--;
 
     if (easy->easy_handle->state.is_in_pipeline &&
-        easy->state > CURLM_STATE_DO) {
+        easy->state > CURLM_STATE_DO &&
+        easy->state < CURLM_STATE_COMPLETED) {
       /* If the handle is in a pipeline and has finished sending off its
-         request, we need to remember the fact that we want to remove this
-         handle but do the actual removal at a later time */
+         request but not received its reponse yet, we need to remember the
+         fact that we want to remove this handle but do the actual removal at
+         a later time */
       easy->easy_handle->state.cancelled = TRUE;
       return CURLM_OK;
     }
@@ -603,7 +605,9 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
 
       /* and modify the connectindex since this handle can't point to the
          connection cache anymore */
-      if(easy->easy_conn)
+      if(easy->easy_conn &&
+         (easy->easy_conn->send_pipe->size +
+          easy->easy_conn->recv_pipe->size == 0))
         easy->easy_conn->connectindex = -1;
     }
 
@@ -646,6 +650,14 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
 bool Curl_multi_canPipeline(struct Curl_multi* multi)
 {
   return multi->pipelining_enabled;
+}
+
+void Curl_multi_handlePipeBreak(struct SessionHandle *data)
+{
+  struct Curl_one_easy *one_easy = data->set.one_easy;
+
+  if (one_easy)
+    one_easy->easy_conn = NULL;
 }
 
 static int waitconnect_getsock(struct connectdata *conn,
@@ -791,13 +803,17 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   struct Curl_transfer_keeper *k;
 
   do {
+    bool disconnect_conn = FALSE;
 
     if(!GOOD_EASY_HANDLE(easy->easy_handle))
       return CURLM_BAD_EASY_HANDLE;
 
+    /* Handle the case when the pipe breaks, i.e., the connection
+       we're using gets cleaned up and we're left with nothing. */
     if (easy->easy_handle->state.pipe_broke) {
       infof(easy->easy_handle, "Pipe broke: handle 0x%x, url = %s\n",
             easy, easy->easy_handle->reqdata.path);
+
       if(easy->easy_handle->state.is_in_pipeline) {
         /* Head back to the CONNECT state */
         multistate(easy, CURLM_STATE_CONNECT);
@@ -920,7 +936,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           /* call again please so that we get the next socket setup */
           result = CURLM_CALL_MULTI_PERFORM;
           if(protocol_connect)
-            multistate(easy, CURLM_STATE_DO);
+            multistate(easy, CURLM_STATE_WAITDO);
           else {
 #ifndef CURL_DISABLE_HTTP
             if (easy->easy_conn->bits.tunnel_connecting)
@@ -934,8 +950,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
       if(CURLE_OK != easy->result) {
         /* failure detected */
-        Curl_disconnect(easy->easy_conn); /* disconnect properly */
-        easy->easy_conn = NULL;           /* no more connection */
+        disconnect_conn = TRUE;
         break;
       }
     }
@@ -964,8 +979,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
       if(CURLE_OK != easy->result) {
         /* failure detected */
-        Curl_disconnect(easy->easy_conn); /* close the connection */
-        easy->easy_conn = NULL;           /* no more connection */
+        /* Just break, the cleaning up is handled all in one place */
+        disconnect_conn = TRUE;
         break;
       }
 
@@ -998,8 +1013,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         /* failure detected */
         Curl_posttransfer(easy->easy_handle);
         Curl_done(&easy->easy_conn, easy->result, FALSE);
-        Curl_disconnect(easy->easy_conn); /* close the connection */
-        easy->easy_conn = NULL;           /* no more connection */
+        disconnect_conn = TRUE;
       }
       break;
 
@@ -1065,8 +1079,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           /* failure detected */
           Curl_posttransfer(easy->easy_handle);
           Curl_done(&easy->easy_conn, easy->result, FALSE);
-          Curl_disconnect(easy->easy_conn); /* close the connection */
-          easy->easy_conn = NULL;           /* no more connection */
+          disconnect_conn = TRUE;
         }
       }
       break;
@@ -1098,8 +1111,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         /* failure detected */
         Curl_posttransfer(easy->easy_handle);
         Curl_done(&easy->easy_conn, easy->result, FALSE);
-        Curl_disconnect(easy->easy_conn); /* close the connection */
-        easy->easy_conn = NULL;           /* no more connection */
+        disconnect_conn = TRUE;
       }
       break;
 
@@ -1208,9 +1220,11 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
       if(easy->result)  {
         /* The transfer phase returned error, we mark the connection to get
-         * closed to prevent being re-used. This is becasue we can't
+         * closed to prevent being re-used. This is because we can't
          * possibly know if the connection is in a good shape or not now. */
         easy->easy_conn->bits.close = TRUE;
+        Curl_removeHandleFromPipeline(easy->easy_handle,
+                                      easy->easy_conn->recv_pipe);
 
         if(CURL_SOCKET_BAD != easy->easy_conn->sock[SECONDARYSOCKET]) {
           /* if we failed anywhere, we must clean up the secondary socket if
@@ -1292,10 +1306,17 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
       /* This node should be delinked from the list now and we should post
          an information message that we are complete. */
+
+      /* Important: reset the conn pointer so that we don't point to memory
+         that could be freed anytime */
+      easy->easy_conn = NULL;
       break;
 
     case CURLM_STATE_CANCELLED:
       /* Cancelled transfer, wait to be cleaned up */
+
+      /* Reset the conn pointer so we don't leave it dangling */
+      easy->easy_conn = NULL;
       break;
 
     default:
@@ -1308,6 +1329,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
          * If an error was returned, and we aren't in completed state now,
          * then we go to completed and consider this transfer aborted.
          */
+
+        /* NOTE: no attempt to disconnect connections must be made
+           in the case blocks above - cleanup happens only here */
+
         easy->easy_handle->state.is_in_pipeline = FALSE;
         easy->easy_handle->state.pipe_broke = FALSE;
 
@@ -1315,7 +1340,21 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           /* if this has a connection, unsubscribe from the pipelines */
           easy->easy_conn->writechannel_inuse = FALSE;
           easy->easy_conn->readchannel_inuse = FALSE;
+          Curl_removeHandleFromPipeline(easy->easy_handle,
+                                        easy->easy_conn->send_pipe);
+          Curl_removeHandleFromPipeline(easy->easy_handle,
+                                        easy->easy_conn->recv_pipe);
         }
+
+        if (disconnect_conn) {
+          Curl_disconnect(easy->easy_conn); /* disconnect properly */
+
+          /* This is where we make sure that the easy_conn pointer is reset.
+             We don't have to do this in every case block above where a
+             failure is detected */
+          easy->easy_conn = NULL;
+        }
+
         multistate(easy, CURLM_STATE_COMPLETED);
       }
     }

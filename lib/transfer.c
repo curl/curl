@@ -366,6 +366,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         /* receive data from the network! */
         readrc = Curl_read(conn, conn->sockfd, k->buf, bytestoread, &nread);
 
+        DEBUGF(infof(data, "Read %ld bytes from stream (readrc = %d)\n", nread, readrc));
         /* subzero, this would've blocked */
         if(0 > readrc)
           break; /* get out of loop */
@@ -394,7 +395,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         else if (0 >= nread) {
           /* if we receive 0 or less here, the server closed the connection
              and we bail out from this! */
-
+          DEBUGF(infof(data, "nread <= 0, server closed connection, bailing\n"));
           k->keepon &= ~KEEP_READ;
           break;
         }
@@ -608,10 +609,10 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 return result;
 
               data->info.header_size += (long)headerlen;
-              conn->headerbytecount += (long)headerlen;
+              data->reqdata.keep.headerbytecount += (long)headerlen;
 
-              conn->deductheadercount =
-                (100 == k->httpcode)?conn->headerbytecount:0;
+              data->reqdata.keep.deductheadercount =
+                (100 == k->httpcode)?data->reqdata.keep.headerbytecount:0;
 
               if (data->reqdata.resume_from &&
                   (data->set.httpreq==HTTPREQ_GET) &&
@@ -1106,7 +1107,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               return result;
 
             data->info.header_size += (long)k->hbuflen;
-            conn->headerbytecount += (long)k->hbuflen;
+            data->reqdata.keep.headerbytecount += (long)k->hbuflen;
 
             /* reset hbufp pointer && hbuflen */
             k->hbufp = data->state.headerbuff;
@@ -2341,7 +2342,8 @@ bool Curl_retry_request(struct connectdata *conn,
   bool retry = FALSE;
   struct SessionHandle *data = conn->data;
 
-  if((data->reqdata.keep.bytecount+conn->headerbytecount == 0) &&
+  if((data->reqdata.keep.bytecount +
+      data->reqdata.keep.headerbytecount == 0) &&
      conn->bits.reuse &&
      !conn->bits.no_body) {
     /* We got no data, we attempted to re-use a connection and yet we want a

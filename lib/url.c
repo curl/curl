@@ -1970,8 +1970,7 @@ static void Curl_printPipeline(struct curl_llist *pipe)
   curr = pipe->head;
   while (curr) {
     struct SessionHandle *data = (struct SessionHandle *) curr->ptr;
-    infof(data, "Handle in pipeline: %s\n",
-          data->reqdata.path);
+    infof(data, "Handle in pipeline: %s\n", data->reqdata.path);
     curr = curr->next;
   }
 }
@@ -2010,12 +2009,12 @@ static void signalPipeClose(struct curl_llist *pipe)
 #ifdef CURLDEBUG /* debug-only code */
     if(data->magic != CURLEASY_MAGIC_NUMBER) {
       /* MAJOR BADNESS */
-      fprintf(stderr, "signalPipeClose() found BAAD easy handle\n");
+      infof(data, "signalPipeClose() found BAAD easy handle\n");
     }
-    else
 #endif
 
     data->state.pipe_broke = TRUE;
+    Curl_multi_handlePipeBreak(data);
     Curl_llist_remove(pipe, curr, NULL);
     curr = next;
   }
@@ -2060,8 +2059,8 @@ ConnectionExists(struct SessionHandle *data,
                                   from the multi */
     }
 
-    DEBUGF(infof(data, "Examining connection #%ld for reuse, "
-                 "(pipeLen = %ld)\n", check->connectindex, pipeLen));
+    DEBUGF(infof(data, "Examining connection #%ld for reuse"
+                 " (pipeLen = %ld)\n", check->connectindex, pipeLen));
 
     if(pipeLen > 0 && !canPipeline) {
       /* can only happen within multi handles, and means that another easy
@@ -2074,11 +2073,25 @@ ConnectionExists(struct SessionHandle *data,
        yet and until then we don't re-use this connection */
     if (!check->ip_addr_str) {
       infof(data,
-            "Connection #%ld has not finished name resolve, can't reuse\n",
+            "Connection #%ld hasn't finished name resolve, can't reuse\n",
             check->connectindex);
       continue;
     }
 #endif
+
+    if ((check->sock[FIRSTSOCKET] == CURL_SOCKET_BAD) || check->bits.close) {
+      /* Don't pick a connection that hasn't connected yet or that is going to
+         get closed. */
+      infof(data, "Connection #%ld isn't open enough, can't reuse\n",
+            check->connectindex);
+#ifdef CURLDEBUG
+      if (check->recv_pipe->size > 0) {
+        infof(data, "BAD! Unconnected #%ld has a non-empty recv pipeline!\n",
+              check->connectindex);
+      }
+#endif
+      continue;
+    }
 
     if (pipeLen >= MAX_PIPELINE_LENGTH) {
       infof(data, "Connection #%ld has its pipeline full, can't reuse\n",
@@ -2098,13 +2111,6 @@ ConnectionExists(struct SessionHandle *data,
         if(!IsPipeliningPossible(rh))
           continue;
       }
-    }
-
-    if (check->bits.close) {
-      /* Don't pick a connection that is going to be closed. */
-      infof(data, "Connection #%ld has been marked for close, can't reuse\n",
-            check->connectindex);
-      continue;
     }
 
     if((needle->protocol&PROT_SSL) != (check->protocol&PROT_SSL))
@@ -2178,15 +2184,11 @@ ConnectionExists(struct SessionHandle *data,
 
       check->inuse = TRUE; /* mark this as being in use so that no other
                               handle in a multi stack may nick it */
-
       if (canPipeline) {
         /* Mark the connection as being in a pipeline */
         check->is_in_pipeline = TRUE;
       }
 
-      check->connectindex = i; /* Set this appropriately since it might have
-                                  been set to -1 when the easy was removed
-                                  from the multi */
       *usethis = check;
       return TRUE; /* yes, we found one to use! */
     }
@@ -4069,7 +4071,7 @@ static CURLcode SetupConnection(struct connectdata *conn,
       return CURLE_OUT_OF_MEMORY;
   }
 
-  conn->headerbytecount = 0;
+  data->reqdata.keep.headerbytecount = 0;
 
 #ifdef CURL_DO_LINEEND_CONV
   data->state.crlf_conversions = 0; /* reset CRLF conversion counter */

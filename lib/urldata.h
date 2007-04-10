@@ -555,6 +555,13 @@ struct Curl_transfer_keeper {
   curl_off_t bytecount;         /* total number of bytes read */
   curl_off_t writebytecount;    /* number of bytes written */
 
+  long headerbytecount;  /* only count received headers */
+  long deductheadercount; /* this amount of bytes doesn't count when we check
+                          if anything has been transfered at the end of
+                          a connection. We use this counter to make only
+                          a 100 reply (without a following second response
+                          code) result in a CURLE_GOT_NOTHING error code */
+
   struct timeval start;         /* transfer started at this time */
   struct timeval now;           /* current time */
   bool header;                  /* incoming data has HTTP header */
@@ -755,13 +762,6 @@ struct connectdata {
   long port;       /* which port to use locally */
   unsigned short remote_port; /* what remote port to connect to,
                                  not the proxy port! */
-
-  long headerbytecount;  /* only count received headers */
-  long deductheadercount; /* this amount of bytes doesn't count when we check
-                             if anything has been transfered at the end of
-                             a connection. We use this counter to make only
-                             a 100 reply (without a following second response
-                             code) result in a CURLE_GOT_NOTHING error code */
 
   char *user;    /* user name string, allocated */
   char *passwd;  /* password string, allocated */

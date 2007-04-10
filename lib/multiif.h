@@ -31,6 +31,7 @@ void Curl_expire(struct SessionHandle *data, long milli);
 void Curl_multi_rmeasy(void *multi, CURL *data);
 
 bool Curl_multi_canPipeline(struct Curl_multi* multi);
+void Curl_multi_handlePipeBreak(struct SessionHandle *data);
 
 /* the write bits start at bit 16 for the *getsock() bitmap */
 #define GETSOCK_WRITEBITSTART 16

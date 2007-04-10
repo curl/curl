@@ -1630,8 +1630,8 @@ CURLcode Curl_http_done(struct connectdata *conn,
 
   if(!conn->bits.retry &&
      ((http->readbytecount +
-       conn->headerbytecount -
-       conn->deductheadercount)) <= 0) {
+       data->reqdata.keep.headerbytecount -
+       data->reqdata.keep.deductheadercount)) <= 0) {
     /* If this connection isn't simply closed to be retried, AND nothing was
        read from the HTTP server (that counts), this can't be right so we
        return an error here */
