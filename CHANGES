@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Yang Tse (10 April 2007)
+- configure script will ignore --enable-sspi option for non-native Windows.
+
 Daniel S (9 April 2007)
 - Nick Zitzmann did ssh.c cleanups
 
