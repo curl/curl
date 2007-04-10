@@ -423,7 +423,7 @@ sub torture {
             logmsg " Failed on alloc number $limit in test.\n",
             " invoke with -t$limit to repeat this single case.\n";
             stopservers($verbose);
-            exit 1;
+            return 1;
         }
     }
 
