@@ -415,16 +415,14 @@ static void utf8_to_unicode_le(unsigned char *dest, const char *src,
 /*
  * Set up nt hashed passwords
  */
-static void mk_nt_hash(struct SessionHandle *data,
-                       char *password,
-                       unsigned char *ntbuffer /* 21 bytes */)
+static CURLcode mk_nt_hash(struct SessionHandle *data,
+                           char *password,
+                           unsigned char *ntbuffer /* 21 bytes */)
 {
   size_t len = strlen(password);
   unsigned char *pw = malloc(len*2);
   if (!pw)
-    /* No way to report this error; just rely on future malloc failures
-       to be caught */
-    return;
+    return CURLE_OUT_OF_MEMORY;
 
   utf8_to_unicode_le(pw, password, len);
 
@@ -451,6 +449,7 @@ static void mk_nt_hash(struct SessionHandle *data,
   }
 
   free(pw);
+  return CURLE_OK;
 }
 #endif
 
@@ -875,7 +874,8 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       MD5_Final(md5sum, &MD5);
       /* We shall only use the first 8 bytes of md5sum,
          but the des code in lm_resp only encrypt the first 8 bytes */
-      mk_nt_hash(conn->data, passwdp, ntbuffer);
+      if (mk_nt_hash(conn->data, passwdp, ntbuffer) == CURLE_OUT_OF_MEMORY)
+        return CURLE_OUT_OF_MEMORY;
       lm_resp(ntbuffer, md5sum, ntresp);
 
       /* End of NTLM2 Session code */
@@ -889,7 +889,8 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       unsigned char lmbuffer[0x18];
 
 #if USE_NTRESPONSES
-      mk_nt_hash(conn->data, passwdp, ntbuffer);
+      if (mk_nt_hash(conn->data, passwdp, ntbuffer) == CURLE_OUT_OF_MEMORY)
+        return CURLE_OUT_OF_MEMORY;
       lm_resp(ntbuffer, &ntlm->nonce[0], ntresp);
 #endif
 

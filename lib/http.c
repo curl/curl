@@ -332,6 +332,8 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
 
   if(pickhost || pickproxy) {
     data->reqdata.newurl = strdup(data->change.url); /* clone URL */
+    if (!data->reqdata.newurl)
+      return CURLE_OUT_OF_MEMORY;
 
     if((data->set.httpreq != HTTPREQ_GET) &&
        (data->set.httpreq != HTTPREQ_HEAD) &&
@@ -352,6 +354,8 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
     if((data->set.httpreq != HTTPREQ_GET) &&
        (data->set.httpreq != HTTPREQ_HEAD)) {
       data->reqdata.newurl = strdup(data->change.url); /* clone URL */
+      if (!data->reqdata.newurl)
+        return CURLE_OUT_OF_MEMORY;
       data->state.authhost.done = TRUE;
     }
   }
@@ -992,8 +996,7 @@ CURLcode add_bufferf(send_buffer *in, const char *fmt, ...)
   if(s) {
     CURLcode result = add_buffer(in, s, strlen(s));
     free(s);
-    if(CURLE_OK == result)
-      return CURLE_OK;
+    return result;
   }
   /* If we failed, we cleanup the whole buffer and return error */
   if(in->buffer)
@@ -1021,8 +1024,12 @@ CURLcode add_buffer(send_buffer *in, const void *inptr, size_t size)
       /* create a new buffer */
       new_rb = (char *)malloc(new_size);
 
-    if(!new_rb)
+    if(!new_rb) {
+      /* If we failed, we cleanup the whole buffer and return error */
+      Curl_safefree(in->buffer);
+      free(in);
       return CURLE_OUT_OF_MEMORY;
+    }
 
     in->buffer = new_rb;
     in->size_max = new_size;
@@ -1179,40 +1186,38 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
         if(!checkheaders(data, "User-Agent:") && data->set.useragent)
           useragent = conn->allocptr.uagent;
 
-        if(CURLE_OK == result) {
-          /* Send the connect request to the proxy */
-          /* BLOCKING */
-          result =
-            add_bufferf(req_buffer,
-                        "CONNECT %s:%d HTTP/1.0\r\n"
-                        "%s"  /* Host: */
-                        "%s"  /* Proxy-Authorization */
-                        "%s"  /* User-Agent */
-                        "%s", /* Proxy-Connection */
-                        hostname, remote_port,
-                        host,
-                        conn->allocptr.proxyuserpwd?
-                        conn->allocptr.proxyuserpwd:"",
-                        useragent,
-                        proxyconn);
+	/* Send the connect request to the proxy */
+	/* BLOCKING */
+	result =
+	  add_bufferf(req_buffer,
+		      "CONNECT %s:%d HTTP/1.0\r\n"
+		      "%s"  /* Host: */
+		      "%s"  /* Proxy-Authorization */
+		      "%s"  /* User-Agent */
+		      "%s", /* Proxy-Connection */
+		      hostname, remote_port,
+		      host,
+		      conn->allocptr.proxyuserpwd?
+		      conn->allocptr.proxyuserpwd:"",
+		      useragent,
+		      proxyconn);
 
-          if(CURLE_OK == result)
-            result = add_custom_headers(conn, req_buffer);
+	if(host && *host)
+	  free(host);
 
-          if(host && *host)
-            free(host);
+	if(CURLE_OK == result)
+	  result = add_custom_headers(conn, req_buffer);
 
-          if(CURLE_OK == result)
-            /* CRLF terminate the request */
-            result = add_bufferf(req_buffer, "\r\n");
+	if(CURLE_OK == result)
+	  /* CRLF terminate the request */
+	  result = add_bufferf(req_buffer, "\r\n");
 
-          if(CURLE_OK == result) {
-            /* Now send off the request */
-            result = add_buffer_send(req_buffer, conn,
-                                     &data->info.request_size, 0, sockindex);
-            req_buffer = NULL;
-          }
-        }
+	if(CURLE_OK == result) {
+	  /* Now send off the request */
+	  result = add_buffer_send(req_buffer, conn,
+				   &data->info.request_size, 0, sockindex);
+	}
+        req_buffer = NULL;
         if(result)
           failf(data, "Failed sending CONNECT to proxy");
       }
@@ -1666,7 +1671,6 @@ static CURLcode expect100(struct SessionHandle *data,
 static CURLcode add_custom_headers(struct connectdata *conn,
                                    send_buffer *req_buffer)
 {
-  CURLcode result = CURLE_OK;
   char *ptr;
   struct curl_slist *headers=conn->data->set.headers;
 
@@ -1693,7 +1697,7 @@ static CURLcode add_custom_headers(struct connectdata *conn,
                                strlen("Content-Type:")))
           ;
         else {
-          result = add_bufferf(req_buffer, "%s\r\n", headers->data);
+          CURLcode result = add_bufferf(req_buffer, "%s\r\n", headers->data);
           if(result)
             return result;
         }
@@ -1701,7 +1705,7 @@ static CURLcode add_custom_headers(struct connectdata *conn,
     }
     headers = headers->next;
   }
-  return result;
+  return CURLE_OK;
 }
 
 /*
@@ -2445,11 +2449,15 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           /* set the upload size to the progress meter */
           Curl_pgrsSetUploadSize(data, http->postsize);
 
-          add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
+          result = add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
+          if(result)
+            return result;
         }
       }
       else {
-        add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
+        result = add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
+        if(result)
+          return result;
 
         if(data->set.postfieldsize) {
           /* set the upload size to the progress meter */
@@ -2475,7 +2483,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       break;
 
     default:
-      add_buffer(req_buffer, "\r\n", 2);
+      result = add_buffer(req_buffer, "\r\n", 2);
+      if(result)
+        return result;
 
       /* issue the request */
       result = add_buffer_send(req_buffer, conn,
