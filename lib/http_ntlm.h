@@ -67,7 +67,7 @@ void Curl_ntlm_cleanup(struct connectdata *conn);
    should be encrypted (message confidentiality). */
 
 #define NTLMFLAG_NEGOTIATE_DATAGRAM_STYLE        (1<<6)
-/* unknown purpose */
+/* Indicates that datagram authentication is being used. */
 
 #define NTLMFLAG_NEGOTIATE_LM_KEY                (1<<7)
 /* Indicates that the LAN Manager session key should be used for signing and
@@ -80,7 +80,10 @@ void Curl_ntlm_cleanup(struct connectdata *conn);
 /* Indicates that NTLM authentication is being used. */
 
 /* unknown (1<<10) */
-/* unknown (1<<11) */
+
+#define NTLMFLAG_NEGOTIATE_ANONYMOUS             (1<<11)
+/* Sent by the client in the Type 3 message to indicate that an anonymous
+   context has been established. This also affects the response fields. */
 
 #define NTLMFLAG_NEGOTIATE_DOMAIN_SUPPLIED       (1<<12)
 /* Sent by the client in the Type 1 message to indicate that a desired
@@ -139,7 +142,8 @@ void Curl_ntlm_cleanup(struct connectdata *conn);
 /* Indicates that 128-bit encryption is supported. */
 
 #define NTLMFLAG_NEGOTIATE_KEY_EXCHANGE          (1<<30)
-/* unknown purpose */
+/* Indicates that the client will provide an encrypted master key in
+   the "Session Key" field of the Type 3 message. */
 
 #define NTLMFLAG_NEGOTIATE_56                    (1<<31)
 /* Indicates that 56-bit encryption is supported. */

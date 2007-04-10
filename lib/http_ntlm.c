@@ -146,8 +146,8 @@ static void print_flags(FILE *handle, unsigned long flags)
     fprintf(handle, "NTLMFLAG_NEGOTIATE_NTLM_KEY ");
   if(flags & (1<<10))
     fprintf(handle, "NTLMFLAG_UNKNOWN_10 ");
-  if(flags & (1<<11))
-    fprintf(handle, "NTLMFLAG_UNKNOWN_11 ");
+  if(flags & NTLMFLAG_NEGOTIATE_ANONYMOUS)
+    fprintf(handle, "NTLMFLAG_NEGOTIATE_ANONYMOUS ");
   if(flags & NTLMFLAG_NEGOTIATE_DOMAIN_SUPPLIED)
     fprintf(handle, "NTLMFLAG_NEGOTIATE_DOMAIN_SUPPLIED ");
   if(flags & NTLMFLAG_NEGOTIATE_WORKSTATION_SUPPLIED)
