@@ -220,6 +220,17 @@ typedef int sig_atomic_t;
 
 
 /*
+ * Convenience SIG_ATOMIC_T definition
+ */
+
+#ifdef HAVE_SIG_ATOMIC_T_VOLATILE
+#define SIG_ATOMIC_T static sig_atomic_t
+#else
+#define SIG_ATOMIC_T static volatile sig_atomic_t
+#endif
+
+
+/*
  * Default return type for signal handlers.
  */
 
