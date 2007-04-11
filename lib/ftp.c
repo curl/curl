@@ -3647,7 +3647,6 @@ CURLcode Curl_ftp_disconnect(struct connectdata *conn)
 static
 CURLcode ftp_parse_url_path(struct connectdata *conn)
 {
-  CURLcode retcode = CURLE_OK;
   struct SessionHandle *data = conn->data;
   /* the ftp struct is already inited in ftp_connect() */
   struct FTP *ftp = data->reqdata.proto.ftp;
@@ -3720,6 +3719,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
           return CURLE_OUT_OF_MEMORY;
         }
         if (isBadFtpString(ftpc->dirs[ftpc->dirdepth])) {
+          free(ftpc->dirs[ftpc->dirdepth]);
           freedirs(conn);
           return CURLE_URL_MALFORMAT;
         }
@@ -3729,20 +3729,17 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
         continue;
       }
 
-      if(!retcode) {
-        cur_pos = slash_pos + 1; /* jump to the rest of the string */
-        if(++ftpc->dirdepth >= ftpc->diralloc) {
-          /* enlarge array */
-          char *bigger;
-          ftpc->diralloc *= 2; /* double the size each time */
-          bigger = realloc(ftpc->dirs, ftpc->diralloc * sizeof(ftpc->dirs[0]));
-          if(!bigger) {
-            ftpc->dirdepth--;
-            freedirs(conn);
-            return CURLE_OUT_OF_MEMORY;
-          }
-          ftpc->dirs = (char **)bigger;
-        }
+      cur_pos = slash_pos + 1; /* jump to the rest of the string */
+      if(++ftpc->dirdepth >= ftpc->diralloc) {
+	/* enlarge array */
+	char *bigger;
+	ftpc->diralloc *= 2; /* double the size each time */
+	bigger = realloc(ftpc->dirs, ftpc->diralloc * sizeof(ftpc->dirs[0]));
+	if(!bigger) {
+	  freedirs(conn);
+	  return CURLE_OUT_OF_MEMORY;
+	}
+	ftpc->dirs = (char **)bigger;
       }
     }
 
@@ -3790,7 +3787,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
     free(path);
   }
 
-  return retcode;
+  return CURLE_OK;
 }
 
 /* call this when the DO phase has completed */

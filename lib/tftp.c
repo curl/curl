@@ -286,6 +286,9 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
     file name so we skip the always-present first letter of the path string. */
     filename = curl_easy_unescape(data, &state->conn->data->reqdata.path[1], 0,
                                   NULL);
+    if (!filename)
+      return CURLE_OUT_OF_MEMORY;
+
     snprintf((char *)&state->spacket.data[2],
              TFTP_BLOCKSIZE,
              "%s%c%s%c", filename, '\0',  mode, '\0');
@@ -673,9 +676,9 @@ CURLcode Curl_tftp(struct connectdata *conn, bool *done)
   }
 
   /* Run the TFTP State Machine */
-  for(tftp_state_machine(state, TFTP_EVENT_INIT);
-      state->state != TFTP_STATE_FIN;
-      tftp_state_machine(state, event) ) {
+  for(code=tftp_state_machine(state, TFTP_EVENT_INIT);
+      (state->state != TFTP_STATE_FIN) && (code == CURLE_OK);
+      code=tftp_state_machine(state, event) ) {
 
     /* Wait until ready to read or timeout occurs */
     rc=Curl_socket_ready(state->sockfd, CURL_SOCKET_BAD, state->retry_time * 1000);
@@ -761,6 +764,8 @@ CURLcode Curl_tftp(struct connectdata *conn, bool *done)
     }
 
   }
+  if(code)
+    return code;
 
   /* Tell curl we're done */
   code = Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
