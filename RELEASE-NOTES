@@ -1,56 +1,21 @@
-Curl and libcurl 7.16.2
+Curl and libcurl 7.16.3
 
- Public curl release number:               98
- Releases counted from the very beginning: 125
+ Public curl release number:               99
+ Releases counted from the very beginning: 126
  Available command line options:           118
  Available curl_easy_setopt() options:     141
  Number of public functions in libcurl:    54
- Amount of public web site mirrors:        38
+ Amount of public web site mirrors:        36
  Number of known libcurl bindings:         35
- Number of contributors:                   539
+ Number of contributors:                   554
 
 This release includes the following changes:
  
- o added CURLOPT_TIMEOUT_MS and CURLOPT_CONNECTTIMEOUT_MS
- o added CURLOPT_HTTP_CONTENT_DECODING, CURLOPT_HTTP_TRANSFER_DECODING and
-   --raw
- o added support for using the NSS library for TLS/SSL
- o changed default anonymous FTP password
- o changed the CURLOPT_FTP_SSL_CCC option to handle active and passive
-   CCC shutdown
- o added the --ftp-ssl-ccc-mode command line option
- o includes VC8 Makefiles in the release archive
- o --ftp-ssl-control is now honoured on ftps:// URLs
- o added experimental CURL_ACKNOWLEDGE_EINTR symbol definition check
- o --key and new --pubkey options for SSH public key file logins
- o --pass now works for a SSH public key file, too
- o select (2) support no longer needed to build the library if poll() used
- o CURLOPT_POSTQUOTE works for SFTP
+ o 
 
 This release includes the following bugfixes:
 
- o in testsuite, update test cookies expiration from 2007-Feb-1 to year 2035 
- o socks5 works
- o builds fine with VC2005
- o CURLOPT_RANGE set to NULL resets the range for FTP
- o curl_multi_remove_handle() rare crash
- o passive FTP transfers work with SOCKS
- o multi interface HTTPS connection re-use memory leak
- o libcurl.m4's --with-libcurl is improved
- o curl-config --libs and libcurl.pc no longer list unnecessary dependencies
- o fixed an issue with CCC not working on some servers
- o several HTTP pipelining problems
- o HTTP CONNECT thru a proxy is now less blocking when the multi interface is
-   used
- o HTTP Digest header parsing fix for unquoted last word ending with CRLF
- o CURLOPT_PORT, HTTP proxy, re-using connections and non-HTTP protocols
- o CURLOPT_INTERFACE for ipv6
- o use-after-free issue with HTTP transfers with the multi interface
- o the progress callback can get called more frequently
- o timeout would restart when signal caught while awaiting socket events
- o curl -f with user+password embedded in the URL
- o 26 flaws identified by coverity.com
- o builds on QNX 6 again
+ o 
 
 This release includes the following known bugs:
 
@@ -58,21 +23,14 @@ This release includes the following known bugs:
 
 Other curl-related news:
 
- o pycurl 7.16.1 was released: http://pycurl.sf.net/
+ o 
 
 New curl mirrors:
 
- o http://curl.basemirror.de is a new mirror in Germany
- o http://curl.xxtracker.org is a new mirror in The Netherlands
+ o 
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Yang Tse, Manfred Schwarb, Michael Wallner, Jeff Pohlmeyer, Shmulik Regev,
- Rob Crittenden, Robert A. Monat, Dan Fandrich, Duncan Mac-Vicar Prett,
- Michal Marek, Robson Braga Araujo, Ian Turner, Linus Nielsen Feltzing,
- Ravi Pratap, Adam D. Moss, Jose Kahan, Hang Kin Lau, Justin Fletcher,
- Robert Iakobashvili, Bryan Henderson, Eygene Ryabinkin, Daniel Johnson,
- Matt Kraai, Nick Zitzmann, Rob Jones
 
         Thanks! (and sorry if I forgot to mention someone)
