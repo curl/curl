@@ -2996,8 +2996,6 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status, bool premature
   int ftpcode;
   CURLcode result=CURLE_OK;
   bool was_ctl_valid = ftpc->ctl_valid;
-  size_t flen;
-  size_t dlen;
   char *path;
   char *path_to_use = data->reqdata.path;
   struct Curl_transfer_keeper *k = &data->reqdata.keep;
@@ -3043,21 +3041,25 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status, bool premature
 
   /* get the "raw" path */
   path = curl_easy_unescape(data, path_to_use, 0, NULL);
-  if(!path)
-    return CURLE_OUT_OF_MEMORY;
-
-  flen = ftp->file?strlen(ftp->file):0; /* file is "raw" already */
-  dlen = strlen(path)-flen;
-  if(dlen && !ftpc->cwdfail) {
-    ftpc->prevpath = path;
-    if(flen)
-      /* if 'path' is not the whole string */
-      ftpc->prevpath[dlen]=0; /* terminate */
-    infof(data, "Remembering we are in dir %s\n", ftpc->prevpath);
-  }
-  else {
+  if(!path) {
+    /* out of memory, but we can limp along anyway (and should try to
+     * since we're in the out of memory cleanup path) */
     ftpc->prevpath = NULL; /* no path */
-    free(path);
+
+  } else {
+    size_t flen = ftp->file?strlen(ftp->file):0; /* file is "raw" already */
+    size_t dlen = strlen(path)-flen;
+    if(dlen && !ftpc->cwdfail) {
+      ftpc->prevpath = path;
+      if(flen)
+	/* if 'path' is not the whole string */
+	ftpc->prevpath[dlen]=0; /* terminate */
+      infof(data, "Remembering we are in dir %s\n", ftpc->prevpath);
+    }
+    else {
+      ftpc->prevpath = NULL; /* no path */
+      free(path);
+    }
   }
   /* free the dir tree and file parts */
   freedirs(conn);
