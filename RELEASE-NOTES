@@ -5,7 +5,7 @@ Curl and libcurl 7.16.3
  Available command line options:           118
  Available curl_easy_setopt() options:     141
  Number of public functions in libcurl:    54
- Amount of public web site mirrors:        36
+ Amount of public web site mirrors:        37
  Number of known libcurl bindings:         35
  Number of contributors:                   554
 
@@ -15,7 +15,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o 
+ o if2up too long interface name memory leak
 
 This release includes the following known bugs:
 
@@ -27,10 +27,12 @@ Other curl-related news:
 
 New curl mirrors:
 
- o 
+ o curl.spegulo.be is a new mirror in Belgium
+ o curl.piotrkosoft.net is a new mirror in Poland
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
+ Song Ma
 
         Thanks! (and sorry if I forgot to mention someone)
