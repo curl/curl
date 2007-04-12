@@ -44,9 +44,12 @@
  * #endif
  */
 
+#include "setup.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "ares.h"
 
 /* declarations to provide consistent linkage */
 extern char *optarg;
@@ -61,7 +64,7 @@ char  *optarg;        /* argument associated with option */
 
 #define  BADCH   (int)'?'
 #define  BADARG  (int)':'
-#define  EMSG    ""
+#define  EMSG    (char *)""
 
 /*
  * ares_getopt --
