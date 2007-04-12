@@ -57,6 +57,7 @@ OBJECTS = $(OBJ_DIR)\ares_fds.obj              \
           $(OBJ_DIR)\ares__read_line.obj       \
           $(OBJ_DIR)\ares_gethostbyname.obj    \
           $(OBJ_DIR)\ares_getnameinfo.obj      \
+          $(OBJ_DIR)\ares_getopt.obj           \
           $(OBJ_DIR)\ares_strerror.obj         \
           $(OBJ_DIR)\ares_cancel.obj           \
           $(OBJ_DIR)\ares_init.obj             \
@@ -121,6 +122,7 @@ $(DEF_FILE): $(OBJECTS) Makefile.VC6
        @echo   ares_inet_pton         >> $@
        @echo   ares_writev            >> $@
        @echo   ares_getnameinfo       >> $@
+       @echo   ares_getopt            >> $@
        @echo   ares_gettimeofday      >> $@
        @echo   ares_parse_aaaa_reply  >> $@
 
@@ -216,7 +218,7 @@ $(OBJ_DIR)\ares_parse_aaaa_reply.obj: ares_parse_aaaa_reply.c setup.h          \
   setup_once.h nameser.h ares.h ares_dns.h inet_net_pton.h ares_private.h      \
   ares_ipv6.h
 
-$(OBJ_DIR)\ares_parse_ns_reply.obj: ares_parse_ns_reply.c setup.h            \
+$(OBJ_DIR)\ares_parse_ns_reply.obj: ares_parse_ns_reply.c setup.h              \
   setup_once.h nameser.h ares.h ares_dns.h ares_private.h ares_ipv6.h
 
 $(OBJ_DIR)\ares_getnameinfo.obj: ares_getnameinfo.c setup.h setup_once.h       \
@@ -229,3 +231,5 @@ $(OBJ_DIR)\bitncmp.obj: bitncmp.c bitncmp.h
 
 $(OBJ_DIR)\inet_ntop.obj: inet_ntop.c setup.h setup_once.h nameser.h           \
   ares_ipv6.h inet_ntop.h
+
+$(OBJ_DIR)\ares_getopt.obj: ares_getopt.c setup.h setup_once.h ares.h

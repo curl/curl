@@ -32,9 +32,6 @@
 #endif
 #include <netdb.h>
 #endif
-#ifdef HAVE_GETOPT_H
-#include <getopt.h>
-#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -163,7 +160,7 @@ int main(int argc, char **argv)
   options.flags = ARES_FLAG_NOCHECKRESP;
   options.servers = NULL;
   options.nservers = 0;
-  while ((c = getopt(argc, argv, "df:s:c:t:T:U:")) != -1)
+  while ((c = ares_getopt(argc, argv, "df:s:c:t:T:U:")) != -1)
     {
       switch (c)
         {

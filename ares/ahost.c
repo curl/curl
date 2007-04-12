@@ -34,10 +34,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef HAVE_GETOPT_H
-#include <getopt.h>
-#endif
-
 #include "ares.h"
 #include "ares_dns.h"
 #include "inet_ntop.h"
@@ -73,7 +69,7 @@ int main(int argc, char **argv)
   WSAStartup(wVersionRequested, &wsaData);
 #endif
 
-  while ((c = getopt(argc,argv,"dt:h")) != -1)
+  while ((c = ares_getopt(argc,argv,"dt:h")) != -1)
     {
       switch (c)
         {
