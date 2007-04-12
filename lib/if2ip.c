@@ -98,8 +98,10 @@ char *Curl_if2ip(const char *interface, char *buf, int buf_size)
     struct ifreq req;
     size_t len = strlen(interface);
     memset(&req, 0, sizeof(req));
-    if(len >= sizeof(req.ifr_name))
+    if(len >= sizeof(req.ifr_name)) {
+      sclose(dummy);
       return NULL; /* this can't be a fine interface name */
+    }
     memcpy(req.ifr_name, interface, len+1);
     req.ifr_addr.sa_family = AF_INET;
 #ifdef IOCTL_3_ARGS

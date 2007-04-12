@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel S (12 April 2007)
+- Song Ma found a memory leak in the if2ip code if you pass in an interface
+  name longer than the name field of the ifreq struct (typically 6 bytes), as
+  then it wouldn't close the used dummy socket. Bug #1698974
+  (http://curl.haxx.se/bug/view.cgi?id=1698974)
+
 Version 7.16.2 (11 April 2007)
 
 Yang Tse (10 April 2007)
