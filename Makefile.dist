@@ -241,3 +241,8 @@ unix-ssl: ssl
 linux: all
 
 linux-ssl: ssl
+
+vc8:
+	echo "generate VC8 makefiles"
+	sed -e "s#/GX /DWIN32 /YX#/EHsc /DWIN32#" -e 's#/GZ#/RTC1#' -e 's/wsock32.lib/wsock32.lib bufferoverflowu.lib/g' -e 's/VC6/VC8/g' lib/Makefile.vc6 > lib/Makefile.vc8
+	sed -e "s#/GX /DWIN32 /YX#/EHsc /DWIN32#" -e 's#/GZ#/RTC1#' -e 's/wsock32.lib/wsock32.lib bufferoverflowu.lib/g' -e 's/VC6/VC8/g' src/Makefile.vc6 > src/Makefile.vc8
