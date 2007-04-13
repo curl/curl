@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Dan F (13 April 2007)
+- Added test cases 294 and 295 to test --ftp-account handling
+
+- Improved handling of out of memory in ftp.
+
 Yang Tse (13 April 2007)
 - Fix test case 534 which started to fail 2007-04-13 due to the existance
   of a new host on the net with the same silly domain the test was using
