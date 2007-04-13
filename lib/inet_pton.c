@@ -116,7 +116,7 @@ inet_pton4(const char *src, unsigned char *dst)
 
       if (val > 255)
         return (0);
-      *tp = val;
+      *tp = (unsigned char)val;
       if (! saw_digit) {
         if (++octets > 4)
           return (0);
