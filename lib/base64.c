@@ -59,7 +59,7 @@ static void decodeQuantum(unsigned char *dest, const char *src)
   char *found;
 
   for(i = 0; i < 4; i++) {
-    if((found = strchr(table64, src[i])) != 0)
+    if((found = strchr(table64, src[i])) != NULL)
       x = (x << 6) + (unsigned int)(found - table64);
     else if(src[i] == '=')
       x = (x << 6);
