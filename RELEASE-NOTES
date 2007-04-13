@@ -17,6 +17,10 @@ This release includes the following bugfixes:
 
  o if2up too long interface name memory leak
 
+ o test case 534 started to fail 2007-04-13 due to the existance of a
+   new host on the net with the same silly domain the test was using
+   for a host which was supposed not to exist.
+
 This release includes the following known bugs:
 
  o see docs/KNOWN_BUGS (http://curl.haxx.se/docs/knownbugs.html)

@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Yang Tse (13 April 2007)
+- Fix test case 534 which started to fail 2007-04-13 due to the existance
+  of a new host on the net with the same silly domain the test was using
+  for a host which was supposed not to exist.
+
 Daniel S (12 April 2007)
 - Song Ma found a memory leak in the if2ip code if you pass in an interface
   name longer than the name field of the ifreq struct (typically 6 bytes), as
