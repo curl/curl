@@ -132,7 +132,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
   return(getpassword(prompt, buffer, buflen));
 }
 #define DONE
-#endif /* WIN32 */
+#endif /* NETWARE */
 
 #ifndef DONE /* not previously provided */
 
