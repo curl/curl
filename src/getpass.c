@@ -124,6 +124,16 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 #define DONE
 #endif /* WIN32 */
 
+#ifdef NETWARE
+/* NetWare implementation */
+#include <screen.h>
+char *getpass_r(const char *prompt, char *buffer, size_t buflen)
+{
+  return(getpassword(prompt, buffer, buflen));
+}
+#define DONE
+#endif /* WIN32 */
+
 #ifndef DONE /* not previously provided */
 
 #ifdef HAVE_TERMIOS_H
