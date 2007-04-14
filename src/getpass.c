@@ -129,7 +129,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 #include <screen.h>
 char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 {
-  return(getpassword(prompt, buffer, buflen));
+  return getpassword(prompt, buffer, buflen);
 }
 #define DONE
 #endif /* NETWARE */
