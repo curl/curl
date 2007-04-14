@@ -16,7 +16,6 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o if2up too long interface name memory leak
-
  o test case 534 started to fail 2007-04-13 due to the existance of a
    new host on the net with the same silly domain the test was using
    for a host which was supposed not to exist.
@@ -27,7 +26,7 @@ This release includes the following known bugs:
 
 Other curl-related news:
 
- o 
+ o PycURL 7.16.2 was released: http://pycurl.sf.net/
 
 New curl mirrors:
 
@@ -37,6 +36,6 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Song Ma
+ Song Ma, Dan Fandrich, Yang Tse
 
         Thanks! (and sorry if I forgot to mention someone)
