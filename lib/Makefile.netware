@@ -87,6 +87,7 @@ LDFLAGS	= -nostdlib $(PRELUDE) $(OBJL) -o $@ -commandfile
 AR	= mwldnlm
 ARFLAGS	= -type library -w nocmdline $(OBJS) -o
 LIBEXT	= lib
+#RANLIB	=
 CFLAGS	+= -msgstyle gcc -gccinc -inline off -opt nointrinsics -proc 586
 CFLAGS	+= -relax_pointers
 #CFLAGS	+= -w on
@@ -104,6 +105,7 @@ LDFLAGS	= -T
 AR	= ar
 ARFLAGS	= -cq
 LIBEXT	= a
+RANLIB	= ranlib
 CFLAGS	+= -fno-builtin -fpcc-struct-return -fno-strict-aliasing
 CFLAGS	+= -Wall # -pedantic
 ifeq ($(LIBARCH),LIBC)
@@ -240,6 +242,9 @@ $(TARGET).$(LIBEXT): $(OBJS)
 	@echo Creating $@
 	@-$(RM) $@
 	@$(AR) $(ARFLAGS) $@ $^
+ifdef RANLIB
+	@$(RANLIB) $@
+endif
 
 $(TARGET).nlm: $(OBJDIR)/$(TARGET).def $(OBJL) $(XDCDATA)
 	@echo Linking $@
