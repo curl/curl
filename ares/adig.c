@@ -53,11 +53,6 @@
 #define T_SRV 33 /* server selection */
 #endif
 
-#ifndef optind
-extern int optind;
-extern char *optarg;
-#endif
-
 struct nv {
   const char *name;
   int value;

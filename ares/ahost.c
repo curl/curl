@@ -40,11 +40,6 @@
 #include "inet_net_pton.h"
 #include "ares_getopt.h"
 
-#ifndef optind
-extern int   optind;
-extern char *optarg;
-#endif
-
 #ifndef HAVE_STRUCT_IN6_ADDR
 struct in6_addr
 {

@@ -33,5 +33,9 @@
 
 int ares_getopt(int nargc, char * const nargv[], const char *ostr);
 
+extern char *optarg;
+extern int optind;
+extern int opterr;
+
 
 #endif /* ARES_GETOPT_H */
