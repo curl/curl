@@ -5,27 +5,30 @@
 ## Use: make -f Makefile.m32 [demos]
 ##
 ## Quick hack by Guenter; comments to: /dev/nul
-
-CC = gcc
-RANLIB = ranlib
-
+#
 ########################################################
 ## Nothing more to do below this line!
 
-LIB=libcares.a
-CC=gcc
-CFLAGS=-O2 -Wall
-LDFLAGS=-s
-LIBS=-lwsock32
+LIB	= libcares.a
 
-MANPAGES := $(patsubst %.c,%.o,$(wildcard ares_*.3))
+CC	= gcc
+LD	= gcc
+RANLIB	= ranlib
+#RM	= rm -f
 
-OBJS	:= $(patsubst %.c,%.o,$(wildcard ares_*.c))
-OBJS	+= windows_port.o inet_ntop.o inet_net_pton.o bitncmp.o
+CFLAGS	= -O2 -Wall
+LDFLAGS	= -s
+LIBS	= -lwsock32
 
-$(LIB): ${OBJS}
-	ar cru $@ ${OBJS}
-	${RANLIB} $@
+# Makefile.inc provides the CSOURCES and HHEADERS defines
+include Makefile.inc
+
+OBJLIB	:= $(patsubst %.c,%.o,$(strip $(CSOURCES)))
+
+
+$(LIB): $(OBJLIB)
+	ar cru $@ $^
+	$(RANLIB) $@
 
 all: $(LIB) demos
 
@@ -34,16 +37,13 @@ demos: adig.exe ahost.exe
 tags:
 	etags *.[ch]
 
-adig.exe: adig.o $(LIB)
-	${CC} ${LDFLAGS} -o $@ adig.o $(LIB) ${LIBS}
+%.exe: %.o ares_getopt.o $(LIB)
+	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
 
-ahost.exe: ahost.o $(LIB)
-	${CC} ${LDFLAGS} -o $@ ahost.o $(LIB) ${LIBS}
-
-${OBJS}: ares.h ares_dns.h ares_private.h
+$(OBJLIB): ares.h ares_dns.h ares_private.h
 
 .c.o:
-	${CC} -c ${CFLAGS} $<
+	$(CC) $(CFLAGS) -c $<
 
 check:
 
@@ -61,8 +61,8 @@ install:
 	done)
 
 clean:
-	rm -f ${OBJS} $(LIB) adig.o adig.exe ahost.o ahost.exe
+	$(RM) ares_getopt.o $(OBJLIB) $(LIB) adig.exe ahost.exe
 
 distclean: clean
-	rm -f config.cache config.log config.status Makefile
+	$(RM) config.cache config.log config.status Makefile
 
