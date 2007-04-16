@@ -70,7 +70,7 @@ CFLAGS	= $(OPT) -D$(DB) -DNETWARE -DHAVE_CONFIG_H -nostdinc
 
 ifeq ($(CC),mwccnlm)
 LD	= mwldnlm
-LDFLAGS	= -nostdlib $(PRELUDE) $(OBJS) $(<:.def=.o) -o $@ -commandfile
+LDFLAGS	= -nostdlib $(PRELUDE) $(OBJEXE) $(<:.def=.o) -o $@ -commandfile
 AR	= mwldnlm
 ARFLAGS	= -type library -w nocmdline $(OBJDIR)/*.o -o
 LIBEXT	= lib
@@ -132,7 +132,8 @@ endif
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
 
-OBJS	:= $(patsubst %.c,$(OBJDIR)/%.o,$(strip $(CSOURCES)))
+OBJLIB	:= $(patsubst %.c,$(OBJDIR)/%.o,$(strip $(CSOURCES)))
+OBJEXE	= $(OBJLIB) $(OBJDIR)/ares_getopt.o  
 
 .PHONY: lib nlm prebuild dist install clean
 
@@ -143,7 +144,7 @@ nlm: prebuild $(TARGETS)
 prebuild: $(OBJDIR) $(OBJDIR)/version.inc config.h arpa/nameser.h
 
 dist: all
-	-$(RM) $(OBJS) $(OBJDIR)/*.map $(OBJDIR)/*.ncv
+	-$(RM) $(OBJLIB) $(OBJDIR)/*.map $(OBJDIR)/*.ncv
 	-$(RM) $(OBJDIR)/*.def $(OBJDIR)/*.xdc $(OBJDIR)/version.inc
 
 install: $(INSTDIR) all
@@ -158,12 +159,12 @@ clean:
 	-$(RM) -r $(OBJDIR)
 	-$(RM) -r arpa
 
-%.$(LIBEXT): $(OBJS)
+%.$(LIBEXT): $(OBJLIB)
 	@echo Creating $@
 	@-$(RM) $@
 	@$(AR) $(ARFLAGS) $@ $^
 
-%.nlm: $(OBJDIR)/%.def $(OBJDIR)/%.o $(OBJDIR)/%.xdc $(OBJS)
+%.nlm: $(OBJDIR)/%.def $(OBJDIR)/%.o $(OBJDIR)/%.xdc $(OBJEXE)
 	@echo Linking $@
 	@-$(RM) $@
 	@$(LD) $(LDFLAGS) $<
@@ -247,7 +248,7 @@ ifdef IMPORTS
 	@echo $(DL)import $(IMPORTS)$(DL) >> $@
 endif
 ifeq ($(LD),nlmconv)
-	@echo $(DL)input $(OBJS)$(DL) >> $@
+	@echo $(DL)input $(OBJEXE)$(DL) >> $@
 	@echo $(DL)input $(PRELUDE)$(DL) >> $@
 	@echo $(DL)output $(notdir $(@:.def=.nlm))$(DL) >> $@
 endif
