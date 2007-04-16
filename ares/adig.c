@@ -42,6 +42,7 @@
 #include "ares.h"
 #include "ares_dns.h"
 #include "inet_ntop.h"
+#include "ares_getopt.h"
 
 #ifdef WATT32
 #undef WIN32  /* Redefined in MingW headers */

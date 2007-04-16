@@ -89,10 +89,18 @@ LINK32=link.exe
 
 SOURCE=..\..\adig.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\ares_getopt.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE=..\..\ares_getopt.h
+# End Source File
 # End Group
 # Begin Group "Resource Files"
 

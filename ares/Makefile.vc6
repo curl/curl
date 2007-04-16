@@ -57,7 +57,6 @@ OBJECTS = $(OBJ_DIR)\ares_fds.obj              \
           $(OBJ_DIR)\ares__read_line.obj       \
           $(OBJ_DIR)\ares_gethostbyname.obj    \
           $(OBJ_DIR)\ares_getnameinfo.obj      \
-          $(OBJ_DIR)\ares_getopt.obj           \
           $(OBJ_DIR)\ares_strerror.obj         \
           $(OBJ_DIR)\ares_cancel.obj           \
           $(OBJ_DIR)\ares_init.obj             \
@@ -122,15 +121,14 @@ $(DEF_FILE): $(OBJECTS) Makefile.VC6
        @echo   ares_inet_pton         >> $@
        @echo   ares_writev            >> $@
        @echo   ares_getnameinfo       >> $@
-       @echo   ares_getopt            >> $@
        @echo   ares_gettimeofday      >> $@
        @echo   ares_parse_aaaa_reply  >> $@
 
-ahost.exe: $(OBJ_DIR) $(OBJ_DIR)\ahost.obj $(OBJ_DIR)\getopt.obj cares_imp.lib
-       link $(LDFLAGS) -out:$@ $(OBJ_DIR)\ahost.obj $(OBJ_DIR)\getopt.obj cares_imp.lib $(EX_LIBS)
+ahost.exe: $(OBJ_DIR) $(OBJ_DIR)\ahost.obj $(OBJ_DIR)\ares_getopt.obj cares_imp.lib
+       link $(LDFLAGS) -out:$@ $(OBJ_DIR)\ahost.obj $(OBJ_DIR)\ares_getopt.obj cares_imp.lib $(EX_LIBS)
 
-adig.exe: $(OBJ_DIR) $(OBJ_DIR)\adig.obj $(OBJ_DIR)\getopt.obj cares_imp.lib
-       link $(LDFLAGS) -out:$@ $(OBJ_DIR)\adig.obj $(OBJ_DIR)\getopt.obj cares_imp.lib $(EX_LIBS)
+adig.exe: $(OBJ_DIR) $(OBJ_DIR)\adig.obj $(OBJ_DIR)\ares_getopt.obj cares_imp.lib
+       link $(LDFLAGS) -out:$@ $(OBJ_DIR)\adig.obj $(OBJ_DIR)\ares_getopt.obj cares_imp.lib $(EX_LIBS)
 
 clean:
        - del $(OBJ_DIR)\*.obj *.ilk *.pdb *.pbt *.pbi *.pbo *._xe *.map
@@ -232,4 +230,4 @@ $(OBJ_DIR)\bitncmp.obj: bitncmp.c bitncmp.h
 $(OBJ_DIR)\inet_ntop.obj: inet_ntop.c setup.h setup_once.h nameser.h           \
   ares_ipv6.h inet_ntop.h
 
-$(OBJ_DIR)\ares_getopt.obj: ares_getopt.c setup.h setup_once.h ares.h
+$(OBJ_DIR)\ares_getopt.obj: ares_getopt.c ares_getopt.h

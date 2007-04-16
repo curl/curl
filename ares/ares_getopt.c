@@ -44,12 +44,10 @@
  * #endif
  */
 
-#include "setup.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "ares.h"
+#include "ares_getopt.h"
 
 /* declarations to provide consistent linkage */
 extern char *optarg;

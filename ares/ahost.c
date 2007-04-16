@@ -38,6 +38,7 @@
 #include "ares_dns.h"
 #include "inet_ntop.h"
 #include "inet_net_pton.h"
+#include "ares_getopt.h"
 
 #ifndef optind
 extern int   optind;
