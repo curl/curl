@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -224,6 +224,10 @@ CURL_EXTERN const char *curl_multi_strerror(CURLMcode);
 
 #define CURL_SOCKET_TIMEOUT CURL_SOCKET_BAD
 
+#define CURL_CSELECT_IN   0x01
+#define CURL_CSELECT_OUT  0x02
+#define CURL_CSELECT_ERR  0x04
+
 typedef int (*curl_socket_callback)(CURL *easy,      /* easy handle */
                                     curl_socket_t s, /* socket */
                                     int what,        /* see above */
@@ -249,8 +253,20 @@ typedef int (*curl_multi_timer_callback)(CURLM *multi,    /* multi handle */
 CURL_EXTERN CURLMcode curl_multi_socket(CURLM *multi_handle, curl_socket_t s,
                                         int *running_handles);
 
+CURL_EXTERN CURLMcode curl_multi_socket_action(CURLM *multi_handle,
+                                               curl_socket_t s,
+                                               int ev_bitmask,
+                                               int *running_handles);
+
 CURL_EXTERN CURLMcode curl_multi_socket_all(CURLM *multi_handle,
                                             int *running_handles);
+
+#ifndef CURL_ALLOW_OLD_MULTI_SOCKET
+/* This macro below was added in 7.16.3 to push users who recompile to use
+   the new curl_multi_socket_action() instead of the old curl_multi_socket()
+*/
+#define curl_multi_socket(x,y,z) curl_multi_socket_action(x,y,0,z)
+#endif
 
 /*
  * Name:    curl_multi_timeout()

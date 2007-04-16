@@ -161,7 +161,7 @@ static int wait_ms(int timeout_ms)
  * Return values:
  *   -1 = system call error or fd >= FD_SETSIZE
  *    0 = timeout
- *    CSELECT_IN | CSELECT_OUT | CSELECT_ERR
+ *    CURL_CSELECT_IN | CURL_CSELECT_OUT | CURL_CSELECT_ERR
  */
 int Curl_socket_ready(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
 {
@@ -223,16 +223,16 @@ int Curl_socket_ready(curl_socket_t readfd, curl_socket_t writefd, int timeout_m
   num = 0;
   if (readfd != CURL_SOCKET_BAD) {
     if (pfd[num].revents & (POLLRDNORM|POLLIN|POLLERR|POLLHUP))
-      ret |= CSELECT_IN;
+      ret |= CURL_CSELECT_IN;
     if (pfd[num].revents & (POLLRDBAND|POLLPRI|POLLNVAL))
-      ret |= CSELECT_ERR;
+      ret |= CURL_CSELECT_ERR;
     num++;
   }
   if (writefd != CURL_SOCKET_BAD) {
     if (pfd[num].revents & (POLLWRNORM|POLLOUT))
-      ret |= CSELECT_OUT;
+      ret |= CURL_CSELECT_OUT;
     if (pfd[num].revents & (POLLERR|POLLHUP|POLLNVAL))
-      ret |= CSELECT_ERR;
+      ret |= CURL_CSELECT_ERR;
   }
 
   return ret;
@@ -279,15 +279,15 @@ int Curl_socket_ready(curl_socket_t readfd, curl_socket_t writefd, int timeout_m
   ret = 0;
   if (readfd != CURL_SOCKET_BAD) {
     if (FD_ISSET(readfd, &fds_read))
-      ret |= CSELECT_IN;
+      ret |= CURL_CSELECT_IN;
     if (FD_ISSET(readfd, &fds_err))
-      ret |= CSELECT_ERR;
+      ret |= CURL_CSELECT_ERR;
   }
   if (writefd != CURL_SOCKET_BAD) {
     if (FD_ISSET(writefd, &fds_write))
-      ret |= CSELECT_OUT;
+      ret |= CURL_CSELECT_OUT;
     if (FD_ISSET(writefd, &fds_err))
-      ret |= CSELECT_ERR;
+      ret |= CURL_CSELECT_ERR;
   }
 
   return ret;

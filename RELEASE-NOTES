@@ -11,7 +11,8 @@ Curl and libcurl 7.16.3
 
 This release includes the following changes:
  
- o 
+ o Added curl_multi_socket_action()
+ o Deprecated curl_multi_socket()
 
 This release includes the following bugfixes:
 
@@ -37,6 +38,6 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Song Ma, Dan Fandrich, Yang Tse, Jay Austin
+ Song Ma, Dan Fandrich, Yang Tse, Jay Austin, Robert Iakobashvil
 
         Thanks! (and sorry if I forgot to mention someone)

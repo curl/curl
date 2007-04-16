@@ -1661,6 +1661,7 @@ static void singlesocket(struct Curl_multi *multi,
 static CURLMcode multi_socket(struct Curl_multi *multi,
                               bool checkall,
                               curl_socket_t s,
+                              int ev_bitmask,
                               int *running_handles)
 {
   CURLMcode result = CURLM_OK;
@@ -1698,7 +1699,13 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
       /* bad bad bad bad bad bad bad */
       return CURLM_INTERNAL_ERROR;
 
+    if (data->set.one_easy->easy_conn)  /* set socket event bitmask */
+      data->set.one_easy->easy_conn->cselect_bits = ev_bitmask;
+
     result = multi_runsingle(multi, data->set.one_easy);
+
+    if (data->set.one_easy->easy_conn)
+      data->set.one_easy->easy_conn->cselect_bits = 0;
 
     if(result == CURLM_OK)
       /* get the socket(s) and check if the state has been changed since
@@ -1791,12 +1798,24 @@ CURLMcode curl_multi_setopt(CURLM *multi_handle,
   return res;
 }
 
+/* we define curl_multi_socket() in the public multi.h header */
+#undef curl_multi_socket
 
 CURLMcode curl_multi_socket(CURLM *multi_handle, curl_socket_t s,
                             int *running_handles)
 {
   CURLMcode result = multi_socket((struct Curl_multi *)multi_handle, FALSE, s,
-                                  running_handles);
+                                  0, running_handles);
+  if (CURLM_OK == result)
+    update_timer((struct Curl_multi *)multi_handle);
+  return result;
+}
+
+CURLMcode curl_multi_socket_action(CURLM *multi_handle, curl_socket_t s,
+                                     int ev_bitmask, int *running_handles)
+{
+  CURLMcode result = multi_socket((struct Curl_multi *)multi_handle, FALSE, s,
+                                  ev_bitmask, running_handles);
   if (CURLM_OK == result)
     update_timer((struct Curl_multi *)multi_handle);
   return result;
@@ -1806,7 +1825,7 @@ CURLMcode curl_multi_socket_all(CURLM *multi_handle, int *running_handles)
 
 {
   CURLMcode result = multi_socket((struct Curl_multi *)multi_handle,
-                                  TRUE, CURL_SOCKET_BAD, running_handles);
+                                  TRUE, CURL_SOCKET_BAD, 0, running_handles);
   if (CURLM_OK == result)
     update_timer((struct Curl_multi *)multi_handle);
   return result;

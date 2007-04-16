@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel S (16 April 2007)
+- Robert Iakobashvil added curl_multi_socket_action() to libcurl, which is a
+  function that deprecates the curl_multi_socket() function. Using the new
+  function the application tell libcurl what action that was found in the
+  socket that it passes in. This gives a significant performance boost as it
+  allows libcurl to avoid a call to poll()/select() for every call to
+  curl_multi_socket*().
+
 Daniel S (14 April 2007)
 - Jay Austin added "DH PARAMETERS" to the stunnel.pem certificate for the test
   suite to make stunnel run better in some (most?) environments.

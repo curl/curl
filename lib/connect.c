@@ -206,7 +206,7 @@ int waitconnect(curl_socket_t sockfd, /* socket */
     /* timeout, no connect today */
     return WAITCONN_TIMEOUT;
 
-  if(rc & CSELECT_ERR)
+  if(rc & CURL_CSELECT_ERR)
     /* error condition caught */
     return WAITCONN_FDSET_ERROR;
 

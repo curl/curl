@@ -900,6 +900,8 @@ struct connectdata {
   union {
     struct ftp_conn ftpc;
   } proto;
+
+  int cselect_bits; /* bitmask of socket events */
 };
 
 /* The end of connectdata. */

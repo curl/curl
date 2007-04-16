@@ -314,9 +314,10 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
   curl_socket_t fd_read;
   curl_socket_t fd_write;
-  int select_res;
-
   curl_off_t contentlength;
+  int select_res = conn->cselect_bits;
+
+  conn->cselect_bits = 0;
 
   /* only use the proper socket if the *_HOLD bit is not set simultaneously as
      then we are in rate limiting state in that transfer direction */
@@ -331,8 +332,12 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   else
     fd_write = CURL_SOCKET_BAD;
 
-  select_res = Curl_socket_ready(fd_read, fd_write, 0);
-  if(select_res == CSELECT_ERR) {
+   if (!select_res) { /* Call for select()/poll() only, if read/write/error 
+                         status is not known. */
+       select_res = Curl_socket_ready(fd_read, fd_write, 0);
+   }
+ 
+  if(select_res == CURL_CSELECT_ERR) {
     failf(data, "select/poll returned error");
     return CURLE_SEND_ERROR;
   }
@@ -342,7 +347,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
        the stream was rewound (in which case we have data in a
        buffer) */
     if((k->keepon & KEEP_READ) &&
-       ((select_res & CSELECT_IN) || conn->bits.stream_was_rewound)) {
+       ((select_res & CURL_CSELECT_IN) || conn->bits.stream_was_rewound)) {
       /* read */
       bool is_empty_data = FALSE;
 
@@ -1350,7 +1355,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
     /* If we still have writing to do, we check if we have a writable
        socket. */
-    if((k->keepon & KEEP_WRITE) && (select_res & CSELECT_OUT)) {
+    if((k->keepon & KEEP_WRITE) && (select_res & CURL_CSELECT_OUT)) {
       /* write */
 
       int i, si;
