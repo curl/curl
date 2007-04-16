@@ -19,6 +19,7 @@ This release includes the following bugfixes:
  o test case 534 started to fail 2007-04-13 due to the existance of a
    new host on the net with the same silly domain the test was using
    for a host which was supposed not to exist.
+ o test suite SSL certificate works better with newer stunnel
 
 This release includes the following known bugs:
 
@@ -36,6 +37,6 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Song Ma, Dan Fandrich, Yang Tse
+ Song Ma, Dan Fandrich, Yang Tse, Jay Austin
 
         Thanks! (and sorry if I forgot to mention someone)

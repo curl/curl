@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel S (14 April 2007)
+- Jay Austin added "DH PARAMETERS" to the stunnel.pem certificate for the test
+  suite to make stunnel run better in some (most?) environments.
+
 Dan F (13 April 2007)
 - Added test cases 294 and 295 to test --ftp-account handling
 
