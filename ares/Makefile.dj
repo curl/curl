@@ -21,7 +21,7 @@ CFLAGS += -DWATT32 -DHAVE_AF_INET6 -DHAVE_PF_INET6 -DHAVE_FIONBIO \
           -DRECV_TYPE_ARG1='int'   -DRECV_TYPE_ARG2='void*' \
           -DRECV_TYPE_ARG3='int'   -DRECV_TYPE_ARG4='int' \
           -DRECV_TYPE_RETV='int'   -DHAVE_STRUCT_TIMEVAL \
-          -UHAVE_CONFIG_H
+          -Dselect=select_s        -UHAVE_CONFIG_H
 
 LDFLAGS = -s
 
@@ -38,7 +38,6 @@ endif
 
 ifeq ($(USE_ZLIB),1)
   EX_LIBS += $(ZLIB_ROOT)/libz.a
-  CFLAGS  += -DUSE_MANUAL
 endif
 
 ifeq ($(USE_IDNA),1)
@@ -55,10 +54,10 @@ all: $(OBJ_DIR) libcares.a ahost.exe adig.exe
 libcares.a: $(OBJECTS)
 	ar rs $@ $?
 
-ahost.exe: ahost.c $(OBJ_HACK)
+ahost.exe: ahost.c $(OBJ_DIR)/ares_getopt.o $(OBJ_HACK)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $^ $(EX_LIBS)
 
-adig.exe: adig.c $(OBJ_HACK)
+adig.exe: adig.c $(OBJ_DIR)/ares_getopt.o $(OBJ_HACK)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $^ $(EX_LIBS)
 
 clean:
