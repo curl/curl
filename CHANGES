@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Dan F (17 April 2007)
+- Added test cases 296, 297 and 298 to test --ftp-method handling
+
 Daniel S (16 April 2007)
 - Robert Iakobashvil added curl_multi_socket_action() to libcurl, which is a
   function that deprecates the curl_multi_socket() function. Using the new
