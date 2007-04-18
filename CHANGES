@@ -7,6 +7,8 @@
                                   Changelog
 
 Daniel S (18 April 2007)
+- James Housley made SFTP uploads use libssh2's non-blocking API
+
 - Prevent the internal progress meter from updating more frequently than once
   per second.
 

@@ -1018,16 +1018,19 @@ CURLcode Curl_sftp_done(struct connectdata *conn, CURLcode status,
 ssize_t Curl_sftp_send(struct connectdata *conn, int sockindex,
                        void *mem, size_t len)
 {
-  ssize_t nwrite;
+  ssize_t nwrite;   /* libssh2_sftp_write() returns size_t !*/
 
-  /* libssh2_sftp_write() returns size_t !*/
-
+#ifdef LIBSSH2SFTP_EAGAIN
+  /* we prefer the non-blocking API but that didn't exist previously */
+  nwrite = (ssize_t)
+    libssh2_sftp_writenb(conn->data->reqdata.proto.ssh->sftp_handle, mem, len);
+#else
   nwrite = (ssize_t)
     libssh2_sftp_write(conn->data->reqdata.proto.ssh->sftp_handle, mem, len);
+#endif
   (void)sockindex;
   return nwrite;
 }
-
 
 /* The get_pathname() function is being borrowed from OpenSSH sftp.c
    version 4.6p1. */
