@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel S (18 April 2007)
+- Prevent the internal progress meter from updating more frequently than once
+  per second.
+
 Dan F (17 April 2007)
 - Added test cases 296, 297 and 298 to test --ftp-method handling
 

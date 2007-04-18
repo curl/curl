@@ -21,6 +21,7 @@ This release includes the following bugfixes:
    new host on the net with the same silly domain the test was using
    for a host which was supposed not to exist.
  o test suite SSL certificate works better with newer stunnel
+ o internal progress meter update frequency back to once per second
 
 This release includes the following known bugs:
 
@@ -29,6 +30,8 @@ This release includes the following known bugs:
 Other curl-related news:
 
  o PycURL 7.16.2 was released: http://pycurl.sf.net/
+ o TclCurl 7.16.2 was released:
+   http://personal1.iddeo.es/andresgarci/tclcurl/english/
 
 New curl mirrors:
 

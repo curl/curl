@@ -245,6 +245,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   long ulestimate=0;
   long dlestimate=0;
   long total_estimate;
+  bool shownow=FALSE;
 
   now = Curl_tvnow(); /* what time is it */
 
@@ -266,6 +267,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
   /* Calculations done at most once a second, unless end is reached */
   if(data->progress.lastshow != (long)now.tv_sec) {
+    shownow = TRUE;
 
     data->progress.lastshow = now.tv_sec;
 
@@ -346,7 +348,12 @@ int Curl_pgrsUpdate(struct connectdata *conn)
       return result;
     }
 
-    /* If there's no external callback set, use internal code to show progress */
+    if(!shownow)
+      /* only show the internal progress meter once per second */
+      return 0;
+
+    /* If there's no external callback set, use internal code to show
+       progress */
 
     if(!(data->progress.flags & PGRS_HEADERS_OUT)) {
       if(data->reqdata.resume_from) {
@@ -422,7 +429,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
     /* we flush the output stream to make it appear as soon as possible */
     fflush(data->set.err);
 
-  }
+  } /* !(data->progress.flags & PGRS_HIDE) */
 
   return 0;
 }
