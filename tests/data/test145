@@ -1,6 +1,9 @@
 <testcase>
 # Server-side
 <reply>
+<servercmd>
+REPLY NLST 550 Have a taste on this!
+</servercmd>
 <data>
 </data>
 </reply>
@@ -16,9 +19,6 @@ FTP NLST dir list with weird reply code, using PORT
  <command>
 ftp://%HOSTIP:%FTPPORT/ -P - -l
 </command>
-<file name="log/ftpserver.cmd">
-REPLY NLST 550 Have a taste on this!
-</file>
 </client>
 
 # Verify data after the test has been "shot"

@@ -7,6 +7,9 @@ FAILURE
 </info>
 # Server-side
 <reply>
+<servercmd>
+REPLY USER 314 bluah you fewl!
+</servercmd>
 </reply>
 
 # Client-side
@@ -20,9 +23,6 @@ FTP download, failed login: USER not valid
  <command>
 ftp://%HOSTIP:%FTPPORT/113
 </command>
-<file name="log/ftpserver.cmd">
-REPLY USER 314 bluah you fewl!
-</file>
 </client>
 
 # Verify data after the test has been "shot"

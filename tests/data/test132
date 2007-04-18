@@ -52,9 +52,6 @@ machine %HOSTIP login user2 password passwd2
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-filter off really nothing
-</strip>
 <protocol>
 USER mary
 PASS mark

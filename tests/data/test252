@@ -45,9 +45,6 @@ FTP IPv6 dir list PASV
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-filter off really nothing
-</strip>
 <protocol>
 USER anonymous
 PASS ftp@example.com

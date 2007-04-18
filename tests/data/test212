@@ -4,6 +4,9 @@
 <data>
 data blobb
 </data>
+<servercmd>
+REPLY EPRT 500 no such command
+</servercmd>
 </reply>
 
 # Client-side
@@ -20,9 +23,6 @@ Get two FTP files with no remote EPRT support
  <command>
 ftp://%HOSTIP:%FTPPORT/a/path/212 ftp://%HOSTIP:%FTPPORT/a/path/212 -P -
 </command>
-<file name="log/ftpserver.cmd">
-REPLY EPRT 500 no such command
-</file>
 <stdout>
 data blobb
 data blobb

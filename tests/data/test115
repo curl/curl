@@ -8,6 +8,10 @@ FAILURE
 </info>
 # Server-side
 <reply>
+<servercmd>
+REPLY PASV 314 bluah you f00l!
+REPLY EPSV 314 bluah you f00l!
+</servercmd>
 </reply>
 
 # Client-side
@@ -21,10 +25,6 @@ FTP download, failed PASV
  <command>
 ftp://%HOSTIP:%FTPPORT/115
 </command>
-<file name="log/ftpserver.cmd">
-REPLY PASV 314 bluah you f00l!
-REPLY EPSV 314 bluah you f00l!
-</file>
 </client>
 
 # Verify data after the test has been "shot"

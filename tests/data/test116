@@ -8,6 +8,9 @@ FAILURE
 </info>
 # Server-side
 <reply>
+<servercmd>
+REPLY PORT 314 bluah you f00l!
+</servercmd>
 </reply>
 
 # Client-side
@@ -21,9 +24,6 @@ FTP download, failed PORT
  <command>
 ftp://%HOSTIP:%FTPPORT/116 -P 127.0.0.1
 </command>
-<file name="log/ftpserver.cmd">
-REPLY PORT 314 bluah you f00l!
-</file>
 </client>
 
 # Verify data after the test has been "shot"

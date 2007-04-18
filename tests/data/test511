@@ -2,6 +2,10 @@
 #
 # Server-side
 <reply>
+<servercmd>
+REPLY MDTM 550 bluah you f00l!
+REPLY SIZE 550 bluah you f00l!
+</servercmd>
 </reply>
 
 # Client-side
@@ -20,10 +24,6 @@ FTP with FILETIME and NOBODY but missing file
  <command>
 ftp://%HOSTIP:%FTPPORT/511
 </command>
-<file name="log/ftpserver.cmd">
-REPLY MDTM 550 bluah you f00l!
-REPLY SIZE 550 bluah you f00l!
-</file>
 </client>
 
 #

@@ -1,4 +1,14 @@
 <testcase>
+
+# Server-side
+<reply>
+<servercmd>
+REPLY SIZE 550 access to this file is very much denied
+REPLY APPE 550 I said: access to this file is very much denied
+REPLY STOR 550 I said: access to this file is very much denied
+</servercmd>
+</reply>
+
 # Client-side
 <client>
 <server>
@@ -8,12 +18,10 @@ ftp
 FTP resume upload but denied access to remote file
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/236 -T log/ftpserver.cmd -C -
+ftp://%HOSTIP:%FTPPORT/236 -T log/file236.txt -C -
 </command>
-<file name="log/ftpserver.cmd">
-REPLY SIZE 550 access to this file is very much denied
-REPLY APPE 550 I said: access to this file is very much denied
-REPLY STOR 550 I said: access to this file is very much denied
+<file name="log/file236.txt">
+Test data
 </file>
 </client>
 

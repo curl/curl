@@ -5,6 +5,9 @@
 <data>
 contents of file
 </data>
+<servercmd>
+REPLY MDTM 213 20030405060708
+</servercmd>
 </reply>
 
 # Client-side
@@ -23,9 +26,6 @@ FTP RETR with FILETIME
  <command>
 ftp://%HOSTIP:%FTPPORT/520
 </command>
-<file name="log/ftpserver.cmd">
-REPLY MDTM 213 20030405060708
-</file>
 </client>
 
 #

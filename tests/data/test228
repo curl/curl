@@ -16,6 +16,10 @@ that FTP
 works
   so does it?
 </data>
+<servercmd>
+REPLY PASS 332 please provide account name
+REPLY ACCT 230 thank you
+</servercmd>
 </reply>
 
 # Client-side
@@ -29,10 +33,6 @@ FTP RETR with ACCT
  <command>
 ftp://%HOSTIP:%FTPPORT/228 --ftp-account "one count"
 </command>
-<file name="log/ftpserver.cmd">
-REPLY PASS 332 please provide account name
-REPLY ACCT 230 thank you
-</file>
 </client>
 
 

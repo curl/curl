@@ -11,6 +11,10 @@ RETR
 <data>
 we can still send data even if pwd fails!
 </data>
+<servercmd>
+REPLY PWD 314 bluah you f00l!
+REPLY EPSV 314 bluah you f00l!
+</servercmd>
 </reply>
 
 # Client-side
@@ -24,10 +28,6 @@ FTP download, failed PWD
  <command>
 ftp://%HOSTIP:%FTPPORT/124
 </command>
-<file name="log/ftpserver.cmd">
-REPLY PWD 314 bluah you f00l!
-REPLY EPSV 314 bluah you f00l!
-</file>
 </client>
 
 # Verify data after the test has been "shot"

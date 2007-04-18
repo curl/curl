@@ -3,6 +3,9 @@
 <reply>
 <data>
 </data>
+<servercmd>
+REPLY NLST 450 No files found
+</servercmd>
 </reply>
 
 # Client-side
@@ -16,9 +19,6 @@ FTP NLST dir list without contents, using PORT
  <command>
 ftp://%HOSTIP:%FTPPORT/ -P - -l
 </command>
-<file name="log/ftpserver.cmd">
-REPLY NLST 450 No files found
-</file>
 </client>
 
 # Verify data after the test has been "shot"

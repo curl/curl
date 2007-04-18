@@ -16,6 +16,9 @@ that FTP
 works
   so does it?
 </data>
+<servercmd>
+REPLY EPSV 500 no such command
+</servercmd>
 </reply>
 
 # Client-side
@@ -30,9 +33,6 @@ FTP RETR PASV
 ftp://%HOSTIP:%FTPPORT/102
 </command>
 
-<file name="log/ftpserver.cmd">
-REPLY EPSV 500 no such command
-</file>
 </client>
 
 # Verify data after the test has been "shot"

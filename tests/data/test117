@@ -7,6 +7,10 @@ FAILURE
 </info>
 # Server-side
 <reply>
+<servercmd>
+REPLY EPSV 314 bluah you f00l!
+REPLY TYPE 314 bluah you f00l!
+</servercmd>
 </reply>
 
 # Client-side
@@ -20,10 +24,6 @@ FTP download, failed TYPE
  <command>
 ftp://%HOSTIP:%FTPPORT/117
 </command>
-<file name="log/ftpserver.cmd">
-REPLY EPSV 314 bluah you f00l!
-REPLY TYPE 314 bluah you f00l!
-</file>
 </client>
 
 # Verify data after the test has been "shot"

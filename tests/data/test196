@@ -1,6 +1,9 @@
 <testcase>
 # Server-side
 <reply>
+<servercmd>
+REPLY PASS 530 temporarily not available
+</servercmd>
 </reply>
 
 # Client-side
@@ -14,9 +17,6 @@ FTP transient error, retry request once
  <command>
 ftp://%HOSTIP:%FTPPORT/196 --retry 1
 </command>
-<file name="log/ftpserver.cmd">
-REPLY PASS 530 temporarily not available
-</file>
 </client>
 
 # Verify data after the test has been "shot"

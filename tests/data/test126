@@ -12,6 +12,9 @@ RETRWEIRDO
 <data>
 this is file contents
 </data>
+<servercmd>
+RETRWEIRDO
+</servercmd>
 </reply>
 
 # Client-side
@@ -25,9 +28,6 @@ FTP download with multiple replies at once in RETR
  <command>
 ftp://%HOSTIP:%FTPPORT/blalbla/lululul/126
 </command>
-<file name="log/ftpserver.cmd">
-RETRWEIRDO
-</file>
 </client>
 
 # Verify data after the test has been "shot"

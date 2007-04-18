@@ -17,6 +17,10 @@ that FTP
 works
   so does it?
 </data>
+<servercmd>
+REPLY EPSV 500 no such command
+REPLY SIZE 500 no such command
+</servercmd>
 </reply>
 
 # Client-side
@@ -30,10 +34,6 @@ FTP user+password in URL and ASCII transfer
  <command>
 ftp://userdude:passfellow@%HOSTIP:%FTPPORT/103 --use-ascii
 </command>
-<file name="log/ftpserver.cmd">
-REPLY EPSV 500 no such command
-REPLY SIZE 500 no such command
-</file>
 </client>
 
 # Verify data after the test has been "shot"

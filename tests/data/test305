@@ -1,10 +1,4 @@
 <testcase>
-# Server-side
-<reply>
-<data>
-</data>
-</reply>
-
 # Client-side
 <client>
 <features>
@@ -26,8 +20,6 @@ https://%HOSTIP:%HTTPSPORT/want/305 --cacert moooo
 <strip>
 ^User-Agent:.*
 </strip>
-<protocol>
-</protocol>
 <errorcode>
 77
 </errorcode>

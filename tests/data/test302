@@ -1,11 +1,4 @@
 <testcase>
-#
-# Server-side
-<reply>
-MOOOOO
-</reply>
-
-#
 # Client-side
 <client>
 <features>
@@ -31,10 +24,7 @@ HTTPS GET over HTTP proxy fails
 <strip>
 ^User-Agent:.*
 </strip>
-<protocol>
-</protocol>
 <data>
-[insert full protocol verifiction dump here]
 </data>
 </verify>
 </testcase>

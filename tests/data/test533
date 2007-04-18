@@ -35,8 +35,6 @@ ftp://%HOSTIP:%FTPPORT/path/533 ftp://%HOSTIP:%FTPPORT/path/533
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-</strip>
 <protocol>
 USER anonymous
 PASS ftp@example.com

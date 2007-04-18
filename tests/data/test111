@@ -32,8 +32,6 @@ ftp://%HOSTIP:%FTPPORT/111 -C 2000
 <errorcode>
 36
 </errorcode>
-<strip>
-</strip>
 <protocol>
 USER anonymous
 PASS ftp@example.com

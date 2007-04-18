@@ -7,6 +7,9 @@ FAILURE
 </info>
 # Server-side
 <reply>
+<servercmd>
+REPLY PASS 314 bluah you f00l!
+</servercmd>
 </reply>
 
 # Client-side
@@ -20,9 +23,6 @@ FTP download, failed login: PASS not valid
  <command>
 ftp://%HOSTIP:%FTPPORT/114
 </command>
-<file name="log/ftpserver.cmd">
-REPLY PASS 314 bluah you f00l!
-</file>
 </client>
 
 # Verify data after the test has been "shot"

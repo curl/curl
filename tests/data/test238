@@ -1,6 +1,10 @@
 <testcase>
 # Server-side
 <reply>
+<servercmd>
+REPLY EPSV 229 Entering Passiv Mode (|||1000000|)
+REPLY PASV 227 Entering Passiv Mode (1216,256,2,127,127,127)
+</servercmd>
 </reply>
 
 # Client-side
@@ -14,10 +18,6 @@ FTP getting bad port in response to EPSV and in response to PASV
  <command>
 ftp://%HOSTIP:%FTPPORT/238
 </command>
-<file name="log/ftpserver.cmd">
-REPLY EPSV 229 Entering Passiv Mode (|||1000000|)
-REPLY PASV 227 Entering Passiv Mode (1216,256,2,127,127,127)
-</file>
 </client>
 
 # Verify data after the test has been "shot"

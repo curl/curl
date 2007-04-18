@@ -7,6 +7,9 @@ this is file contents
 <size>
 -1
 </size>
+<servercmd>
+RETRNOSIZE
+</servercmd>
 </reply>
 
 # Client-side
@@ -20,9 +23,6 @@ FTP download without size in RETR string and no SIZE command
  <command>
 ftp://%HOSTIP:%FTPPORT/blalbla/lululul/138
 </command>
-<file name="log/ftpserver.cmd">
-RETRNOSIZE
-</file>
 </client>
 
 # Verify data after the test has been "shot"

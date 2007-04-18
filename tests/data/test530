@@ -56,8 +56,6 @@ http://%HOSTIP:%HTTPPORT/path/530
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-</strip>
 <protocol>
 GET /path/530 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT

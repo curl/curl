@@ -1,7 +1,9 @@
 <testcase>
 # Server-side
 <reply>
-moooooooo
+<servercmd>
+DELAY CWD 60
+</servercmd>
 </reply>
 
 # Client-side
@@ -18,9 +20,6 @@ FTP download with strict timeout and slow CWD
  <command>
 ftp://%HOSTIP:%FTPPORT/path/to/file/190 -m %FTPTIME2
 </command>
-<file name="log/ftpserver.cmd">
-DELAY CWD 60
-</file>
 </client>
 
 # Verify data after the test has been "shot"

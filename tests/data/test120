@@ -17,6 +17,9 @@ that FTP
 works
   so does it?
 </data>
+<servercmd>
+REPLY EPSV 314 bluah you f00l!
+</servercmd>
 </reply>
 
 # Client-side
@@ -30,9 +33,6 @@ ftp download with post-quote delete operation
  <command>
 ftp://%HOSTIP:%FTPPORT/120 -Q "-DELE file"
 </command>
-<file name="log/ftpserver.cmd">
-REPLY EPSV 314 bluah you f00l!
-</file>
 </client>
 
 # Verify data after the test has been "shot"

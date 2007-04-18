@@ -11,6 +11,9 @@ Resume
 <size>
 5
 </size>
+<servercmd>
+REPLY EPSV 500 no such command
+</servercmd>
 </reply>
 
 # Client-side
@@ -24,9 +27,6 @@ FTP download resume with whole file already downloaded
  <command>
 ftp://%HOSTIP:%FTPPORT/122 -C 5
 </command>
-<file name="log/ftpserver.cmd">
-REPLY EPSV 500 no such command
-</file>
 </client>
 
 # Verify data after the test has been "shot"
