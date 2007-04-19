@@ -432,16 +432,15 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
 
 #endif
 
-  if( -1 == getsockopt(sockfd, SOL_SOCKET, SO_ERROR,
-                       (void *)&err, &errSize))
+  if (0 != getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (void *)&err, &errSize))
     err = SOCKERRNO;
-
 #ifdef _WIN32_WCE
-  /* Always returns this error, bug in CE? */
-  if(WSAENOPROTOOPT==err)
-    err=0;
+  /* Old WinCE versions don't support SO_ERROR */
+  if (WSAENOPROTOOPT == err) {
+    SET_SOCKERRNO(0);
+    err = 0;
+  }
 #endif
-
   if ((0 == err) || (EISCONN == err))
     /* we are connected, awesome! */
     rc = TRUE;
