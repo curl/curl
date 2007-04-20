@@ -139,16 +139,16 @@ sub sysread_or_die {
         logmsg "Failed to read input\n";
         logmsg "Error: ftp$ftpdnum$ext sysread error: $!\n";
         kill(9, $sfpid);
-        die "Died in sysread_or_die() when called from $fcaller " .
-            "at line $lcaller. ftp$ftpdnum$ext sysread error: $!\n";
+        die "Died in sysread_or_die() at $fcaller " .
+            "line $lcaller. ftp$ftpdnum$ext sysread error: $!\n";
     }
     elsif($result == 0) {
         ($fcaller, $lcaller) = (caller)[1,2];
         logmsg "Failed to read input\n";
         logmsg "Error: ftp$ftpdnum$ext read zero\n";
         kill(9, $sfpid);
-        die "Died in sysread_or_die() when called from $fcaller " .
-            "at line $lcaller. ftp$ftpdnum$ext read zero\n";
+        die "Died in sysread_or_die() at $fcaller " .
+            "line $lcaller. ftp$ftpdnum$ext read zero\n";
     }
 
     return $result;
