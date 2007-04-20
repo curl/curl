@@ -22,6 +22,7 @@ This release includes the following bugfixes:
    for a host which was supposed not to exist.
  o test suite SSL certificate works better with newer stunnel
  o internal progress meter update frequency back to once per second
+ o avoid some unnecessary calls to function gettimeofday
 
 This release includes the following known bugs:
 

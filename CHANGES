@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Yang Tse (20 April 2007)
+- Save one call to curlx_tvnow(), which calls gettimeofday(), in each of
+  Curl_socket_ready(), Curl_poll() and Curl_select() when these are called
+  with a zero timeout or a timeout value indicating a blocking call should
+  be performed.
+
 Daniel S (18 April 2007)
 - James Housley made SFTP uploads use libssh2's non-blocking API
 
