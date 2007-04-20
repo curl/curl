@@ -210,9 +210,13 @@ typedef int (*curl_progress_callback)(void *clientp,
                                       double ultotal,
                                       double ulnow);
 
+#ifndef CURL_MAX_WRITE_SIZE
   /* Tests have proven that 20K is a very bad buffer size for uploads on
-     Windows, while 16K for some odd reason performed a lot better. */
+     Windows, while 16K for some odd reason performed a lot better.
+     We do the ifndef check to allow this value to easier be changed at build
+     time for those who feel adventurous. */
 #define CURL_MAX_WRITE_SIZE 16384
+#endif
 
 typedef size_t (*curl_write_callback)(char *buffer,
                                       size_t size,
