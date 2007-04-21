@@ -413,17 +413,14 @@ void Curl_ssl_close(struct connectdata *conn)
   if(conn->ssl[FIRSTSOCKET].use) {
 #ifdef USE_SSLEAY
     Curl_ossl_close(conn);
-#else
+#endif /* USE_SSLEAY */
 #ifdef USE_GNUTLS
     Curl_gtls_close(conn);
-#else
-#ifdef USE_GNUTLS
-    Curl_nss_close(conn);
-#else
-  (void)conn;
-#endif /* USE_NSS */
 #endif /* USE_GNUTLS */
-#endif /* USE_SSLEAY */
+#ifdef USE_NSS
+    Curl_nss_close(conn);
+#endif /* USE_NSS */
+    conn->ssl[FIRSTSOCKET].use = FALSE;
   }
 }
 
