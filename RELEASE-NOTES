@@ -23,6 +23,9 @@ This release includes the following bugfixes:
  o test suite SSL certificate works better with newer stunnel
  o internal progress meter update frequency back to once per second
  o avoid some unnecessary calls to function gettimeofday
+ o a double-free in the SSL-layer
+ o GnuTLS free of NULL credentials
+ o NSS-fix for closing down SSL
 
 This release includes the following known bugs:
 
@@ -42,6 +45,7 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Song Ma, Dan Fandrich, Yang Tse, Jay Austin, Robert Iakobashvil, James Housley
+ Song Ma, Dan Fandrich, Yang Tse, Jay Austin, Robert Iakobashvil,
+ James Housley, Daniel Black
 
         Thanks! (and sorry if I forgot to mention someone)

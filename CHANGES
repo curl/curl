@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel S (21 April 2007)
+- Daniel Black filed bug #1704675
+  (http://curl.haxx.se/bug/view.cgi?id=1704675) identifying a double-free
+  problem in the SSL-dealing layer, telling GnuTLS to free NULL credentials on
+  closedown after a failure and a bad #ifdef for NSS when closing down SSL.
+
 Yang Tse (20 April 2007)
 - Save one call to curlx_tvnow(), which calls gettimeofday(), in each of
   Curl_socket_ready(), Curl_poll() and Curl_select() when these are called
