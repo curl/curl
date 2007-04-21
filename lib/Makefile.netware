@@ -85,7 +85,7 @@ ifeq ($(CC),mwccnlm)
 LD	= mwldnlm
 LDFLAGS	= -nostdlib $(PRELUDE) $(OBJL) -o $@ -commandfile
 AR	= mwldnlm
-ARFLAGS	= -type library -w nocmdline $(OBJS) -o
+ARFLAGS	= -nostdlib -type library -o
 LIBEXT	= lib
 #RANLIB	=
 CFLAGS	+= -msgstyle gcc -gccinc -inline off -opt nointrinsics -proc 586

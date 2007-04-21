@@ -1,7 +1,7 @@
 #################################################################
 # $Id$
 #
-## Makefile for building libares (NetWare version - gnu make)
+## Makefile for building libcares (NetWare version - gnu make)
 ## Use: make -f Makefile.netware
 ##
 ## Comments to: Guenter Knauf http://www.gknw.de/phpbb
@@ -72,7 +72,7 @@ ifeq ($(CC),mwccnlm)
 LD	= mwldnlm
 LDFLAGS	= -nostdlib $(PRELUDE) $(OBJEXE) $(<:.def=.o) -o $@ -commandfile
 AR	= mwldnlm
-ARFLAGS	= -type library -w nocmdline $(OBJDIR)/*.o -o
+ARFLAGS	= -nostdlib -type library -o
 LIBEXT	= lib
 #RANLIB	=
 CFLAGS	+= -msgstyle gcc -gccinc -inline off -opt nointrinsics -proc 586
