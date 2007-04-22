@@ -1337,7 +1337,7 @@ if test "$OPENSSL_ENABLED" != "1"; then
        [
        AC_DEFINE(USE_GNUTLS, 1, [if GnuTLS is enabled])
        AC_SUBST(USE_GNUTLS, [1])
-       GNUTLS_ENABLED = 1
+       GNUTLS_ENABLED=1
        USE_GNUTLS="yes"
        curl_ssl_msg="enabled (GnuTLS)"
        ],
