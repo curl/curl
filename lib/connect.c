@@ -781,6 +781,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   int num_addr;
   Curl_addrinfo *ai;
   Curl_addrinfo *curr_addr;
+  int timeout_set = 0;
 
   struct timeval after;
   struct timeval before = Curl_tvnow();
@@ -788,36 +789,39 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   /*************************************************************
    * Figure out what maximum time we have left
    *************************************************************/
-  long timeout_ms= DEFAULT_CONNECT_TIMEOUT;
+  long timeout_ms;
   long timeout_per_addr;
 
   *connected = FALSE; /* default to not connected */
 
-  if(data->set.timeout || data->set.connecttimeout) {
-    long has_passed;
+  /* if a timeout is set, use the most restrictive one */
 
-    /* Evaluate in milliseconds how much time that has passed */
-    has_passed = Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle);
+  if (data->set.timeout > 0)
+    timeout_set += 1;
+  if (data->set.connecttimeout > 0)
+    timeout_set += 2;
 
-#ifndef min
-#define min(a, b)   ((a) < (b) ? (a) : (b))
-#endif
-
-    /* get the most strict timeout of the ones converted to milliseconds */
-    if(data->set.timeout && data->set.connecttimeout) {
-      if (data->set.timeout < data->set.connecttimeout)
-        timeout_ms = data->set.timeout;
-      else
-        timeout_ms = data->set.connecttimeout;
-    }
-    else if(data->set.timeout)
+  switch (timeout_set) {
+  case 1:
+    timeout_ms = data->set.timeout;
+    break;
+  case 2:
+    timeout_ms = data->set.connecttimeout;
+    break;
+  case 3:
+    if (data->set.timeout < data->set.connecttimeout)
       timeout_ms = data->set.timeout;
     else
       timeout_ms = data->set.connecttimeout;
+    break;
+  default:
+    timeout_ms = DEFAULT_CONNECT_TIMEOUT;
+    break;
+  }
 
-    /* subtract the passed time */
-    timeout_ms -= has_passed;
-
+  if (timeout_set > 0) {
+    /* if a timeout was already set, substract elapsed time */
+    timeout_ms -= Curl_tvdiff(before, data->progress.t_startsingle);
     if(timeout_ms < 0) {
       /* a precaution, no need to continue if time already is up */
       failf(data, "Connection time-out");

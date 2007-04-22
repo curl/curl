@@ -184,27 +184,46 @@ static bool isBadFtpString(const char *string)
  */
 static CURLcode AllowServerConnect(struct connectdata *conn)
 {
-  int timeout_ms;
+  long timeout_ms;
   struct SessionHandle *data = conn->data;
   curl_socket_t sock = conn->sock[SECONDARYSOCKET];
-  struct timeval now = Curl_tvnow();
-  long timespent = Curl_tvdiff(Curl_tvnow(), now);
-  long timeout = data->set.connecttimeout?data->set.connecttimeout:
-    (data->set.timeout?data->set.timeout: 0);
+  int timeout_set = 0;
 
-  if(timeout) {
-    timeout -= timespent;
-    if(timeout<=0) {
+  /* if a timeout is set, use the most restrictive one */
+
+  if (data->set.timeout > 0)
+    timeout_set += 1;
+  if (data->set.connecttimeout > 0)
+    timeout_set += 2;
+
+  switch (timeout_set) {
+  case 1:
+    timeout_ms = data->set.timeout;
+    break;
+  case 2:
+    timeout_ms = data->set.connecttimeout;
+    break;
+  case 3:
+    if (data->set.timeout < data->set.connecttimeout)
+      timeout_ms = data->set.timeout;
+    else
+      timeout_ms = data->set.connecttimeout;
+    break;
+  default:
+    timeout_ms = 60000; /* 60 seconds default timeout */
+    break;
+  }
+
+  if (timeout_set > 0) {
+    /* if a timeout was already set, substract elapsed time */
+    timeout_ms -= Curl_tvdiff(Curl_tvnow(), conn->now);
+    if(timeout_ms < 0) {
       failf(data, "Timed out before server could connect to us");
       return CURLE_OPERATION_TIMEDOUT;
     }
   }
 
-  /* We allow the server 60 seconds to connect to us, or a custom timeout.
-     Note the typecast here. */
-  timeout_ms = (timeout?(int)timeout:60000);
-
-  switch (Curl_socket_ready(sock, CURL_SOCKET_BAD, timeout_ms)) {
+  switch (Curl_socket_ready(sock, CURL_SOCKET_BAD, (int)timeout_ms)) {
   case -1: /* error */
     /* let's die here */
     failf(data, "Error while waiting for server connect");
