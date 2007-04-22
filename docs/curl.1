@@ -704,6 +704,11 @@ able to intercept the user+password. See also \fI--location-trusted\fP on how
 to change this. You can limit the amount of redirects to follow by using the
 \fI--max-redirs\fP option.
 
+When curl follows a redirect and the request is not a plain GET (for example
+POST or PUT), it will do the following request with a GET if the HTTP response
+was 301, 302, or 303. If the response code was any other 3xx code, curl will
+re-send the following request using the same unmodified method.
+
 If this option is used twice, the second will again disable location following.
 .IP "--location-trusted"
 (HTTP/HTTPS) Like \fI-L/--location\fP, but will allow sending the name +
