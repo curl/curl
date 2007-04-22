@@ -941,6 +941,10 @@ specifies two separate 100 bytes ranges(*)(H)
 (*) = NOTE that this will cause the server to reply with a multipart
 response!
 
+Only digit characters (0-9) are valid in 'start' and 'stop' of range syntax
+\&'start-stop'. If a non-digit character is given in the range, the server's
+response will be unexpectable, depending on different server's configuration.
+
 You should also be aware that many HTTP/1.1 servers do not have this feature
 enabled, so that when you attempt to get a range, you'll instead get the whole
 document.

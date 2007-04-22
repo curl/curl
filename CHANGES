@@ -6,6 +6,15 @@
 
                                   Changelog
 
+Daniel S (22 April 2007)
+- Song Ma's warning if -r/--range is given with a "bad" range, also noted in
+  the man page now.
+
+- Daniel Black filed bug #1705177
+  (http://curl.haxx.se/bug/view.cgi?id=1705177) where --without-ssl
+  --with-gnutl outputs a warning about SSL not being enabled even though GnuTLS
+  was found and used.
+
 Daniel S (21 April 2007)
 - Daniel Black filed bug #1704675
   (http://curl.haxx.se/bug/view.cgi?id=1704675) identifying a double-free
