@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Dan F (23 April 2007)
+- Added <postcheck> support to the test harness.
+
+- Added tests 610-612 to test more SFTP post-quote commands.
+
 Daniel S (22 April 2007)
 - Song Ma's warning if -r/--range is given with a "bad" range, also noted in
   the man page now.
