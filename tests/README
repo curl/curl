@@ -81,16 +81,18 @@ TEST CASE NUMBERS
  So far, I've used this system:
 
  1   -  99   HTTP
- 100 - 199   FTP
- 200 - 299   FILE
+ 100 - 199   FTP*
+ 200 - 299   FILE*
  300 - 399   HTTPS
  400 - 499   FTPS
  500 - 599   libcurl source code tests, not using the curl command tool
  600 - 699   SCP/SFTP
+ 700 - 799   miscellanous*
 
  Since 30-apr-2003, there's nothing in the system that requires us to keep
- within these number series. Each test case now specifies its own server
- requirements, independent of test number.
+ within these number series, and those sections marked with * actually
+ contain tests for a variety of protocols. Each test case now specifies
+ its own server requirements, independent of test number.
 
 TODO:
 

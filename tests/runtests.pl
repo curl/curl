@@ -1633,6 +1633,7 @@ sub singletest {
     my $dumped_core;
     my $cmdres;
 
+    # Apr 2007: precommand isn't being used and could be removed
     my @precommand= getpart("client", "precommand");
     if($precommand[0]) {
         # this is pure perl to eval!
@@ -1654,7 +1655,7 @@ sub singletest {
     }
     # run the command line we built
     if ($torture) {
-        return torture($CMDLINE,
+        $cmdres = torture($CMDLINE,
                        "$gdb --directory libtest $DBGCURL -x log/gdbcmd");
     }
     elsif($gdbthis) {
@@ -1692,12 +1693,31 @@ sub singletest {
         }
     }
 
+    # run the postcheck command
+    my @postcheck= getpart("client", "postcheck");
+    $cmd = $postcheck[0];
+    chomp $cmd;
+    subVariables \$cmd;
+    if($cmd) {
+	my $rc = system("$cmd");
+	if($rc != 0) {
+	    logmsg "postcheck failure\n";
+	    return 1;
+	}
+	logmsg "postchecked $cmd\n" if($verbose);
+    }
+
     # remove the special FTP command file after each test!
     unlink($FTPDCMD);
 
     my $e;
     for $e (@envs) {
         $ENV{$e}=""; # clean up
+    }
+
+    # Don't bother doing verification on torture tests
+    if ($torture) {
+        return $cmdres;
     }
 
     my @err = getpart("verify", "errorcode");

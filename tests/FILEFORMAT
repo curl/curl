@@ -105,8 +105,8 @@ NOSAVE
  - Don't actually save what is received
 SLOWDOWN
  - Send FTP responses with 0.1 sec delay between each byte
-PASVBADIP  - makes PASV send back an illegal IP in its 227 response
- - Send back a bad IP in the PASV response
+PASVBADIP
+ - makes PASV send back an illegal IP in its 227 response
 
 For HTTP/HTTPS:
 auth_required - if this is set and a POST/PUT is made without auth, the
@@ -172,6 +172,12 @@ output is displayed by the command, the test will be skipped and the
 (single-line) output will be displayed as reason for not running the test.
 Variables are substituted as in the <command> section.
 </precheck>
+
+<postcheck>
+A command line that if set gets run by the test script after the test. If
+the command exists with a non-zero status code, the test will be considered
+to have failed. Variables are substituted as in the <command> section.
+</postcheck>
 
 <tool>
 Name of tool to use instead of "curl". This tool must be built and exist
