@@ -80,10 +80,15 @@ have it return that the file doesn't exist
 <postcmd>
 special purpose server-command to control its behavior *after* the
 reply is sent
+For HTTP/HTTPS, these are supported:
+
+wait [secs]
+ - Pause for the given time
 </postcmd>
 <servercmd>
 Special-commands for the server.
 For FTP, these are supported:
+
 REPLY [command] [return value] [response string]
  - Changes how the server responds to the [command]
 COUNT [command] [num]
@@ -103,7 +108,7 @@ SLOWDOWN
 PASVBADIP  - makes PASV send back an illegal IP in its 227 response
  - Send back a bad IP in the PASV response
 
-For HTTP:
+For HTTP/HTTPS:
 auth_required - if this is set and a POST/PUT is made without auth, the
                 server will NOT wait for the full request body to get sent
 idle -          do nothing after receiving the request, just "sit idle"
@@ -145,6 +150,7 @@ ipv6
 large_file
 libz
 netrc_debug
+NSS
 OpenSSL
 SSL
 
