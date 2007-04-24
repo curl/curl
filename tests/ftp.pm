@@ -64,6 +64,7 @@ sub ftpkillslave {
         if($pid > 0) {
             printf ("* kill pid for %s => %d\n", "ftp-$base$id$ext", $pid) if($verbose);
             kill (9, $pid); # die!
+            waitpid($pid, 0);
         }
         unlink($f);
     }

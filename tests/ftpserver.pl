@@ -139,6 +139,7 @@ sub sysread_or_die {
         logmsg "Failed to read input\n";
         logmsg "Error: ftp$ftpdnum$ext sysread error: $!\n";
         kill(9, $sfpid);
+        waitpid($sfpid, 0);
         die "Died in sysread_or_die() at $fcaller " .
             "line $lcaller. ftp$ftpdnum$ext sysread error: $!\n";
     }
@@ -147,6 +148,7 @@ sub sysread_or_die {
         logmsg "Failed to read input\n";
         logmsg "Error: ftp$ftpdnum$ext read zero\n";
         kill(9, $sfpid);
+        waitpid($sfpid, 0);
         die "Died in sysread_or_die() at $fcaller " .
             "line $lcaller. ftp$ftpdnum$ext read zero\n";
     }
@@ -167,6 +169,7 @@ sub startsf {
     if($pong !~ /^PONG/) {
         logmsg "Failed sockfilt command: $cmd\n";
         kill(9, $sfpid);
+        waitpid($sfpid, 0);
         die "Failed to start sockfilt!";
     }
 }
@@ -569,6 +572,7 @@ sub PASV_command {
 
     if($pong !~ /^PONG/) {
         kill(9, $slavepid);
+        waitpid($slavepid, 0);
         sendcontrol "500 no free ports!\r\n";
         logmsg "failed to run sockfilt for data connection\n";
         return 0;
@@ -697,6 +701,7 @@ sub PORT_command {
     if($pong !~ /^PONG/) {
         logmsg "Failed sockfilt for data connection\n";
         kill(9, $slavepid);
+        waitpid($slavepid, 0);
     }
 
     logmsg "====> Client DATA connect to port $port\n";
@@ -712,6 +717,12 @@ sub customize {
 
     $nosave = 0; # default is to save as normal
     $controldelay = 0; # default is no delaying the responses
+    $retrweirdo = 0;
+    $retrnosize = 0;
+    $pasvbadip = 0;
+    $nosave = 0;
+    %customcount = ();
+    %delayreply = ();
 
     open(CUSTOM, "<log/ftpserver.cmd") ||
         return 1;
@@ -787,6 +798,7 @@ while(1) {
     $| = 1;
 
     kill(9, $slavepid) if($slavepid);
+    waitpid($slavepid, 0) if($slavepid);
     $slavepid=0;
         
     &customize(); # read test control instructions
