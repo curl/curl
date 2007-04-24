@@ -1715,8 +1715,11 @@ sub singletest {
         $ENV{$e}=""; # clean up
     }
 
-    # Don't bother doing verification on torture tests
+    # Skip all the verification on torture tests
     if ($torture) {
+	if(!$cmdres && !$keepoutfiles) {
+	    cleardir($LOGDIR);
+	}
         return $cmdres;
     }
 
