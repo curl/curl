@@ -11,8 +11,9 @@ Curl and libcurl 7.16.3
 
 This release includes the following changes:
  
- o Added curl_multi_socket_action()
- o Deprecated curl_multi_socket()
+ o added curl_multi_socket_action()
+ o deprecated curl_multi_socket()
+ o uses less memory in non-pipelined use cases
 
 This release includes the following bugfixes:
 
@@ -34,7 +35,7 @@ This release includes the following known bugs:
 
 Other curl-related news:
 
- o PycURL 7.16.2 was released: http://pycurl.sf.net/
+ o PycURL 7.16.2.1 was released: http://pycurl.sf.net/
  o TclCurl 7.16.2 was released:
    http://personal1.iddeo.es/andresgarci/tclcurl/english/
 

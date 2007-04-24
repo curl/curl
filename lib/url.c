@@ -1789,6 +1789,7 @@ static void conn_free(struct connectdata *conn)
   Curl_safefree(conn->trailer);
   Curl_safefree(conn->host.rawalloc); /* host name buffer */
   Curl_safefree(conn->proxy.rawalloc); /* proxy name buffer */
+  Curl_safefree(conn->master_buffer);
 
   Curl_llist_destroy(conn->send_pipe, NULL);
   Curl_llist_destroy(conn->recv_pipe, NULL);
@@ -2825,7 +2826,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      to not have to modify everything at once, we allocate a temporary
      connection data struct and fill in for comparison purposes. */
 
-  conn = (struct connectdata *)calloc(sizeof(struct connectdata), 1);
+  conn = (struct connectdata *)calloc(1, sizeof(struct connectdata));
   if(!conn) {
     *in_connect = NULL; /* clear the pointer */
     return CURLE_OUT_OF_MEMORY;
@@ -2834,6 +2835,14 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      parent can cleanup any possible allocs we may have done before
      any failure */
   *in_connect = conn;
+
+  if (data->multi && Curl_multi_canPipeline(data->multi) &&
+      !conn->master_buffer) {
+    /* Allocate master_buffer to be used for pipelining */
+    conn->master_buffer = calloc(BUFSIZE, sizeof (char));
+    if (!conn->master_buffer)
+      return CURLE_OUT_OF_MEMORY;
+  }
 
   /* and we setup a few fields in case we end up actually using this struct */
 
@@ -3803,6 +3812,7 @@ else {
     Curl_safefree(old_conn->proxypasswd);
     Curl_llist_destroy(old_conn->send_pipe, NULL);
     Curl_llist_destroy(old_conn->recv_pipe, NULL);
+    Curl_safefree(old_conn->master_buffer);
 
     free(old_conn);          /* we don't need this anymore */
 

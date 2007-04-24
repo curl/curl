@@ -868,7 +868,8 @@ struct connectdata {
   struct curl_llist *recv_pipe; /* List of handles waiting to read
                                    their responses on this pipeline */
 
-  char master_buffer[BUFSIZE]; /* The master buffer for this connection. */
+  char* master_buffer; /* The master buffer allocated on-demand; 
+                          used for pipelining. */
   size_t read_pos; /* Current read position in the master buffer */
   size_t buf_len; /* Length of the buffer?? */
 
