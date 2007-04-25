@@ -252,7 +252,7 @@ size_t Curl_base64_encode(struct SessionHandle *data,
 #define TEST_NEED_SUCK
 void *suck(int *);
 
-int main(int argc, char **argv, char **envp)
+int main(int argc, argv_item_t argv[], char **envp)
 {
   char *base64;
   size_t base64Len;
@@ -293,7 +293,7 @@ int main(int argc, char **argv, char **envp)
 #define TEST_NEED_SUCK
 void *suck(int *);
 
-int main(int argc, char **argv, char **envp)
+int main(int argc, argv_item_t argv[], char **envp)
 {
   char *base64;
   int base64Len;

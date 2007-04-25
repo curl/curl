@@ -3482,7 +3482,7 @@ static void dumpeasycode(struct Configurable *config)
 }
 
 static int
-operate(struct Configurable *config, int argc, char *argv[])
+operate(struct Configurable *config, int argc, argv_item_t argv[])
 {
   char errorbuffer[CURL_ERROR_SIZE];
   char useragent[128]; /* buah, we don't want a larger default user agent */

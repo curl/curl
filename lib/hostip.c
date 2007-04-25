@@ -598,6 +598,14 @@ struct namebuf {
 Curl_addrinfo *Curl_ip2addr(in_addr_t num, const char *hostname, int port)
 {
   Curl_addrinfo *ai;
+
+#if defined(VMS) && \
+    defined(__INITIAL_POINTER_SIZE) && (__INITIAL_POINTER_SIZE == 64)
+#pragma pointer_size save
+#pragma pointer_size short
+#pragma message disable PTRMISMATCH
+#endif
+
   struct hostent *h;
   struct in_addr *addrentry;
   struct namebuf buffer;
@@ -624,10 +632,16 @@ Curl_addrinfo *Curl_ip2addr(in_addr_t num, const char *hostname, int port)
   /* Now store the dotted version of the address */
   snprintf((char *)h->h_name, 16, "%s", hostname);
 
+#if defined(VMS) && \
+    defined(__INITIAL_POINTER_SIZE) && (__INITIAL_POINTER_SIZE == 64)
+#pragma pointer_size restore
+#pragma message enable PTRMISMATCH
+#endif
+
   ai = Curl_he2ai(h, port);
 
   return ai;
 }
-#endif
+#endif /* CURLRES_IPV4 || CURLRES_ARES */
 
 

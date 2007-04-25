@@ -337,5 +337,26 @@ typedef int sig_atomic_t;
 #endif
 
 
+/*
+ *  Actually use __32_getpwuid() on 64-bit VMS builds for getpwuid()
+ */
+
+#if defined(VMS) && \
+    defined(__INITIAL_POINTER_SIZE) && (__INITIAL_POINTER_SIZE == 64)
+#define getpwuid __32_getpwuid
+#endif
+
+
+/*
+ * Macro argv_item_t hides platform details to code using it.
+ */
+
+#ifdef VMS
+#define argv_item_t  __char_ptr32
+#else
+#define argv_item_t  char *
+#endif
+
+
 #endif /* __SETUP_ONCE_H */
 

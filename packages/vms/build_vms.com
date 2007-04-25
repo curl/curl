@@ -21,7 +21,9 @@ $!
 $! Parameter(s):
 $!
 $! P1 - LISTING will create .lis files during the C compile
-$!      DEBUG will compile and link with debug
+$!      DEBUG   will compile and link with debug; also will create
+$!              compiler listings and linker map files
+$!      64      will compile and link with 64-bit pointers
 $!
 $! Revisions:
 $!
@@ -44,6 +46,7 @@ $!                   USE_SSLEAY to define if the target has SSL support built
 $!                   in.  Changed the cc/define parameter accordingly.
 $! 11-FEB-2005, MSK, If [--.LIB]AMIGAOS.C and NWLIB.C are there, rename them
 $! 23-MAR-2005, MSK, relocated cc_qual define so that DEBUG option would work
+$! 25-APR-2007, STL, allow compilation in 64-bit mode.
 $!
 $ on control_y then goto Common_Exit
 $ ctrl_y  = 1556 
@@ -75,25 +78,27 @@ $ set def 'thisdir'
 $!
 $ hpssl   = 0
 $ openssl = 0
-$ cc_qual = "/define=HAVE_CONFIG_H=1/OBJ=OBJDIR:"
+$ cc_qual = "/define=HAVE_CONFIG_H=1"
 $ link_qual = ""
 $ if f$trnlnm( "CURL_BUILD_NOSSL") .eqs. ""
 $ then
 $    if f$trnlnm( "OPENSSL") .nes. "" 
 $    then
 $       openssl = 1
-$       cc_qual = "/define=(HAVE_CONFIG_H=1,USE_SSLEAY=1)/OBJ=OBJDIR:"
+$       cc_qual = "/define=(HAVE_CONFIG_H=1,USE_SSLEAY=1)"
 $       if ( f$trnlnm( "SSL$INCLUDE") .nes. "") .and. -
            ( f$trnlnm( "CURL_BUILD_NOHPSSL") .eqs. "")
 $       then hpssl = 1
 $       endif
 $    endif
 $ endif
-$ if p1 .eqs. "LISTING" then cc_qual = cc_qual + "/LIST/MACHINE"
+$ cc_qual = cc_qual + "/OBJ=OBJDIR:"
+$ if p1 .eqs. "64" then cc_qual = cc_qual + "/POINTER=64"
+$ if p1 .eqs. "LISTING" then cc_qual = cc_qual + "/LIST/SHOW=ALL"
 $ if p1 .eqs. "DEBUG" 
 $ then 
-$    cc_qual = cc_qual + "/LIST/MACHINE/DEBUG/NOOPT"
-$    link_qual = "/DEBUG"
+$    cc_qual = cc_qual + "/LIST/SHOW=ALL/DEBUG/NOOPT"
+$    link_qual = "/DEBUG/MAP"
 $ endif
 $ msg_qual = "/OBJ=OBJDIR:"
 $!

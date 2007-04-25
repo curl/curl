@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Yang Tse (25 April 2007)
+- Steve Little fixed compilation on VMS 64-bit mode
+
 Daniel S (24 April 2007)
 - Robert Iakobashvili made the 'master_buffer' get allocated first once it is
   can/will be used as it then makes the common cases save 16KB of data for each
