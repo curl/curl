@@ -2446,10 +2446,15 @@ open(CMDLOG, ">$CURLLOG") ||
 
 #######################################################################
 
+# Display the contents of the given file.  Line endings are canonicalized
+# and excessively long files are truncated
 sub displaylogcontent {
     my ($file)=@_;
     if(open(my $SINGLE, "<$file")) {
         my $lfcount;
+        my $linecount = 0;
+        my $truncate;
+        my @tail;
         while(my $string = <$SINGLE>) {
             $string =~ s/\r\n/\n/g;
             $string =~ s/[\r\f\032]/\n/g;
@@ -2458,14 +2463,30 @@ sub displaylogcontent {
             if($lfcount == 1) {
                 $string =~ s/\n//;
                 $string =~ s/\s*\!$//;
-                logmsg " $string\n";
+                $linecount++;
+                if ($truncate) {
+                    push @tail, " $string\n";
+                } else {
+                    logmsg " $string\n";
+                }
             }
             else {
                 for my $line (split("\n", $string)) {
                     $line =~ s/\s*\!$//;
-                    logmsg " $line\n";
+                    $linecount++;
+                    if ($truncate) {
+                        push @tail, " $line\n";
+                    } else {
+                        logmsg " $line\n";
+		    }
                 }
             }
+            $truncate = $linecount > 1000;
+        }
+        if (@tail) {
+            logmsg "=== File too long: lines here were removed\n";
+            # This won't work properly if time stamps are enabled in logmsg
+            logmsg join('',@tail[$#tail-200..$#tail]);
         }
         close($SINGLE);
     }
