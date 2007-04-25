@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel S (25 April 2007)
+- Sonia Subramanian brought our attention to a problem that happens if you set
+  the CURLOPT_RESUME_FROM or CURLOPT_RANGE options and an existing connection
+  in the connection cache is closed to make room for the new one when you call
+  curl_easy_perform(). It would then wrongly free range-related data in the
+  connection close funtion.
+
 Yang Tse (25 April 2007)
 - Steve Little fixed compilation on VMS 64-bit mode
 

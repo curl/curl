@@ -1830,16 +1830,6 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   Curl_expire(data, 0); /* shut off timers */
   Curl_hostcache_prune(data); /* kill old DNS cache entries */
 
-  /*
-   * The range string is usually freed in curl_done(), but we might
-   * get here *instead* if we fail prematurely. Thus we need to be able
-   * to free this resource here as well.
-   */
-  if(data->reqdata.rangestringalloc) {
-    free(data->reqdata.range);
-    data->reqdata.rangestringalloc = FALSE;
-  }
-
   if((conn->ntlm.state != NTLMSTATE_NONE) ||
      (conn->proxyntlm.state != NTLMSTATE_NONE)) {
     /* Authentication data is a mix of connection-related and sessionhandle-
