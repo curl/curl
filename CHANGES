@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Dan F (25 April 2007)
+- Added support in runtests.pl for "!n" test numbers to disable individual
+  tests.  Changed -t to only keep log files around when -k is specified,
+  to have the same behaviour as without -t.
+
 Daniel S (25 April 2007)
 - Sonia Subramanian brought our attention to a problem that happens if you set
   the CURLOPT_RESUME_FROM or CURLOPT_RANGE options and an existing connection

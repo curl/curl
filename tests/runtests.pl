@@ -2247,6 +2247,7 @@ sub serverfortest {
 my $number=0;
 my $fromnum=-1;
 my @testthis;
+my %disabled;
 do {
     if ($ARGV[0] eq "-v") {
         # verbose output
@@ -2321,6 +2322,7 @@ Usage: runtests.pl [options]
   -t       torture
   -v       verbose output
   [num]    like "5 6 9" or " 5 to 22 " to run those tests only
+  ![num]   like "!5 !6 !9" to disable those tests
 EOHELP
     ;
         exit;
@@ -2339,6 +2341,10 @@ EOHELP
     }
     elsif($ARGV[0] =~ /^to$/i) {
         $fromnum = $number+1;
+    }
+    elsif($ARGV[0] =~ /^!(\d+)/) {
+        $fromnum = -1;
+        $disabled{$1}=$1;
     }
 } while(shift @ARGV);
 
@@ -2406,7 +2412,6 @@ if ( $TESTCASES eq "all") {
     my @cmds = grep { /^test([0-9]+)$/ && -f "$TESTDIR/$_" } readdir(DIR);
     closedir DIR;
 
-    my %dis;
     open(D, "$TESTDIR/DISABLED");
     while(<D>) {
         if(/^ *\#/) {
@@ -2414,9 +2419,10 @@ if ( $TESTCASES eq "all") {
             next;
         }
         if($_ =~ /(\d+)/) {
-            $dis{$1}=$1; # disable this test number
+            $disabled{$1}=$1; # disable this test number
         }
     }
+    close(D);
 
     $TESTCASES=""; # start with no test cases
 
@@ -2426,9 +2432,9 @@ if ( $TESTCASES eq "all") {
     }
     # the the numbers from low to high
     foreach my $n (sort { $a <=> $b } @cmds) {
-        if($dis{$n}) {
+        if($disabled{$n}) {
             # skip disabled test cases
-            my $why = "mentioned in DISABLED";
+            my $why = "configured as DISABLED";
             $skipped++;
             $skipped{$why}++;
             $teststat[$n]=$why; # store reason for this test case
