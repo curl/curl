@@ -3693,7 +3693,6 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
     /* get the last slash */
     slash_pos=strrchr(cur_pos, '/');
     if(slash_pos || !*cur_pos) {
-      ftpc->dirdepth = 1; /* we consider it to be a single dir */
       ftpc->dirs = (char **)calloc(1, sizeof(ftpc->dirs[0]));
       if(!ftpc->dirs)
         return CURLE_OUT_OF_MEMORY;
@@ -3702,9 +3701,10 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
                                          slash_pos?(int)(slash_pos-cur_pos):1,
                                          NULL);
       if(!ftpc->dirs[0]) {
-        free(ftpc->dirs);
+        freedirs(conn);
         return CURLE_OUT_OF_MEMORY;
       }
+      ftpc->dirdepth = 1; /* we consider it to be a single dir */
       ftp->file = slash_pos ? slash_pos+1 : cur_pos; /* rest is file name */
     }
     else
@@ -3796,8 +3796,10 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
     /* prevpath is "raw" so we convert the input path before we compare the
        strings */
     char *path = curl_easy_unescape(conn->data, data->reqdata.path, 0, NULL);
-    if(!path)
+    if(!path) {
+      freedirs(conn);
       return CURLE_OUT_OF_MEMORY;
+    }
 
     dlen = strlen(path) - (ftp->file?strlen(ftp->file):0);
     if((dlen == strlen(ftpc->prevpath)) &&
