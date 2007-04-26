@@ -5,7 +5,7 @@ Curl and libcurl 7.16.3
  Available command line options:           118
  Available curl_easy_setopt() options:     141
  Number of public functions in libcurl:    54
- Amount of public web site mirrors:        38
+ Amount of public web site mirrors:        39
  Number of known libcurl bindings:         35
  Number of contributors:                   554
 
@@ -29,6 +29,7 @@ This release includes the following bugfixes:
  o NSS-fix for closing down SSL
  o bad warning from configure when gnutls was selected
  o compilation on VMS 64-bit mode
+ o SCP/SFTP downloads could hang on the last bytes of a transfer
 
 This release includes the following known bugs:
 
@@ -45,11 +46,12 @@ New curl mirrors:
  o http://curl.spegulo.be is a new mirror in Belgium
  o http://curl.piotrkosoft.net is a new mirror in Poland
  o http://curl.smudge-it.net is a new mirror in St Louis, MO, USA
+ o http://curl.askapache.com is a new mirror in Indiana, USA
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Song Ma, Dan Fandrich, Yang Tse, Jay Austin, Robert Iakobashvil,
- James Housley, Daniel Black, Steve Little, Sonia Subramanian
+ James Housley, Daniel Black, Steve Little, Sonia Subramanian, Peter O'Gorman
 
         Thanks! (and sorry if I forgot to mention someone)

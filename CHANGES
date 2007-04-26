@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel S (26 April 2007)
+- Peter O'Gorman found a problem with SCP downloads when the downloaded file
+  was 16385 bytes (16K+1) and it turned out we didn't properly always "suck
+  out" all data from libssh2. The effect being that libcurl would hang on the
+  socket waiting for data when libssh2 had in fact already read it all...
+
 Dan F (25 April 2007)
 - Added support in runtests.pl for "!n" test numbers to disable individual
   tests.  Changed -t to only keep log files around when -k is specified,
