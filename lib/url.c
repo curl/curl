@@ -310,6 +310,9 @@ CURLcode Curl_close(struct SessionHandle *data)
     }
   }
 
+  if(data->reqdata.rangestringalloc)
+    free(data->reqdata.range);
+
   /* Free the pathbuffer */
   Curl_safefree(data->reqdata.pathbuffer);
   Curl_safefree(data->reqdata.proto.generic);
@@ -1826,12 +1829,6 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   Curl_hash_apply(data->hostcache,
                   NULL, Curl_scan_cache_used);
 #endif
-
-  /* cleanups done even if the connection is re-used */
-  if(data->reqdata.rangestringalloc) {
-    free(data->reqdata.range);
-    data->reqdata.rangestringalloc = FALSE;
-  }
 
   Curl_expire(data, 0); /* shut off timers */
   Curl_hostcache_prune(data); /* kill old DNS cache entries */
