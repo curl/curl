@@ -1827,6 +1827,12 @@ CURLcode Curl_disconnect(struct connectdata *conn)
                   NULL, Curl_scan_cache_used);
 #endif
 
+  /* cleanups done even if the connection is re-used */
+  if(data->reqdata.rangestringalloc) {
+    free(data->reqdata.range);
+    data->reqdata.rangestringalloc = FALSE;
+  }
+
   Curl_expire(data, 0); /* shut off timers */
   Curl_hostcache_prune(data); /* kill old DNS cache entries */
 
@@ -2746,6 +2752,37 @@ static void llist_dtor(void *user, void *element)
   /* Do nothing */
 }
 
+static CURLcode setup_range(struct SessionHandle *data)
+{
+  /*
+   * If we're doing a resumed transfer, we need to setup our stuff
+   * properly.
+   */
+  struct HandleData *req = &data->reqdata;
+
+  req->resume_from = data->set.set_resume_from;
+  if (req->resume_from || data->set.set_range) {
+    if (req->rangestringalloc == TRUE)
+      free(req->range);
+
+    if(req->resume_from)
+      req->range = aprintf("%" FORMAT_OFF_T "-", req->resume_from);
+    else
+      req->range = strdup(data->set.set_range);
+
+    req->rangestringalloc = req->range?TRUE:FALSE;
+
+    if(!req->range)
+      return CURLE_OUT_OF_MEMORY;
+
+    /* tell ourselves to fetch this range */
+    req->use_range = TRUE;        /* enable range download */
+  }
+  else
+    req->use_range = FALSE; /* disable range download */
+
+  return CURLE_OK;
+}
 
 /**
  * CreateConnection() sets up a new connectdata struct, or re-uses an already
@@ -2869,11 +2906,13 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   /* Store creation time to help future close decision making */
   conn->created = Curl_tvnow();
 
+#if 0
   /* range status */
   data->reqdata.use_range = (bool)(NULL != data->set.set_range);
 
   data->reqdata.range = data->set.set_range; /* clone the range setting */
   data->reqdata.resume_from = data->set.set_resume_from;
+#endif
 
   conn->bits.user_passwd = (bool)(NULL != data->set.userpwd);
   conn->bits.proxy_user_passwd = (bool)(NULL != data->set.proxyuserpwd);
@@ -3462,17 +3501,17 @@ else {
 #ifndef CURL_DISABLE_FILE
   if (strequal(conn->protostr, "FILE")) {
       /* anyway, this is supposed to be the connect function so we better
-	 at least check that the file is present here! */
+         at least check that the file is present here! */
      result = Curl_file_connect(conn);
 
       /* Setup a "faked" transfer that'll do nothing */
      if(CURLE_OK == result) {
-	conn->data = data;
-	conn->bits.tcpconnect = TRUE; /* we are "connected */
-	ConnectionStore(data, conn);
+        conn->data = data;
+        conn->bits.tcpconnect = TRUE; /* we are "connected */
+        ConnectionStore(data, conn);
 
       result = Curl_setup_transfer(conn, -1, -1, FALSE, NULL, /* no download */
-				     -1, NULL); /* no upload */
+                                     -1, NULL); /* no upload */
     }
 
     return result;
@@ -3696,28 +3735,6 @@ else {
   if(!conn->user || !conn->passwd)
     return CURLE_OUT_OF_MEMORY;
 
-#ifndef CURL_DISABLE_HTTP
-  /************************************************************
-   * RESUME on a HTTP page is a tricky business. First, let's just check that
-   * 'range' isn't used, then set the range parameter and leave the resume as
-   * it is to inform about this situation for later use. We will then
-   * "attempt" to resume, and if we're talking to a HTTP/1.1 (or later)
-   * server, we will get the document resumed. If we talk to a HTTP/1.0
-   * server, we just fail since we can't rewind the file writing from within
-   * this function.
-   ***********************************************************/
-  if(data->reqdata.resume_from) {
-    if(!data->reqdata.use_range) {
-      /* if it already was in use, we just skip this */
-      data->reqdata.range = aprintf("%" FORMAT_OFF_T "-", data->reqdata.resume_from);
-      if(!data->reqdata.range)
-        return CURLE_OUT_OF_MEMORY;
-      data->reqdata.rangestringalloc = TRUE; /* mark as allocated */
-      data->reqdata.use_range = 1; /* switch on range usage */
-    }
-  }
-#endif
-
   /*************************************************************
    * Check the current list of connections to see if we can
    * re-use an already existing one or if we have to create a
@@ -3806,34 +3823,6 @@ else {
 
     free(old_conn);          /* we don't need this anymore */
 
-    /*
-     * If we're doing a resumed transfer, we need to setup our stuff
-     * properly.
-     */
-    data->reqdata.resume_from = data->set.set_resume_from;
-    if (data->reqdata.resume_from) {
-      if (data->reqdata.rangestringalloc == TRUE)
-        free(data->reqdata.range);
-      data->reqdata.range = aprintf("%" FORMAT_OFF_T "-",
-                                    data->reqdata.resume_from);
-      if(!data->reqdata.range)
-        return CURLE_OUT_OF_MEMORY;
-
-      /* tell ourselves to fetch this range */
-      data->reqdata.use_range = TRUE;        /* enable range download */
-      data->reqdata.rangestringalloc = TRUE; /* mark range string allocated */
-    }
-    else if (data->set.set_range) {
-      /* There is a range, but is not a resume, useful for random ftp access */
-      data->reqdata.range = strdup(data->set.set_range);
-      if(!data->reqdata.range)
-        return CURLE_OUT_OF_MEMORY;
-      data->reqdata.rangestringalloc = TRUE; /* mark range string allocated */
-      data->reqdata.use_range = TRUE;        /* enable range download */
-    }
-    else
-      data->reqdata.use_range = FALSE; /* disable range download */
-
     *in_connect = conn;      /* return this instead! */
 
     infof(data, "Re-using existing connection! (#%ld) with host %s\n",
@@ -3847,6 +3836,10 @@ else {
      */
     ConnectionStore(data, conn);
   }
+
+  result = setup_range(data);
+  if(result)
+    return result;
 
   /* Continue connectdata initialization here. */
 
@@ -4225,12 +4218,6 @@ CURLcode Curl_done(struct connectdata **connp,
   if(Curl_removeHandleFromPipeline(data, conn->send_pipe) &&
      conn->writechannel_inuse)
     conn->writechannel_inuse = FALSE;
-
-  /* cleanups done even if the connection is re-used */
-  if(data->reqdata.rangestringalloc) {
-    free(data->reqdata.range);
-    data->reqdata.rangestringalloc = FALSE;
-  }
 
   /* Cleanup possible redirect junk */
   if(data->reqdata.newurl) {
