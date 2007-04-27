@@ -2906,14 +2906,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   /* Store creation time to help future close decision making */
   conn->created = Curl_tvnow();
 
-#if 0
-  /* range status */
-  data->reqdata.use_range = (bool)(NULL != data->set.set_range);
-
-  data->reqdata.range = data->set.set_range; /* clone the range setting */
-  data->reqdata.resume_from = data->set.set_resume_from;
-#endif
-
   conn->bits.user_passwd = (bool)(NULL != data->set.userpwd);
   conn->bits.proxy_user_passwd = (bool)(NULL != data->set.proxyuserpwd);
   conn->bits.no_body = data->set.opt_no_body;
