@@ -63,7 +63,7 @@ static void tls_log_func(int level, const char *str)
     fprintf(stderr, "|<%d>| %s", level, str);
 }
 #endif
-
+static bool gtls_inited = FALSE;
 /*
  * Custom push and pull callback functions used by GNU TLS to read and write
  * to the socket.  These functions are simple wrappers to send() and recv()
@@ -85,17 +85,33 @@ static ssize_t Curl_gtls_pull(void *s, void *buf, size_t len)
 /* Global GnuTLS init, called from Curl_ssl_init() */
 int Curl_gtls_init(void)
 {
-  gnutls_global_init();
-#ifdef GTLSDEBUG
-  gnutls_global_set_log_function(tls_log_func);
-  gnutls_global_set_log_level(2);
-#endif
+/* Unfortunately we can not init here, things like curl --version will
+ * fail to work if there is no egd socket available because libgcrypt
+ * will EXIT the application!!
+ * By doing the actual init later (before actually trying to use GnuTLS),
+ * we can at least provide basic info etc.
+ */
   return 1;
+}
+
+static int _Curl_gtls_init(void)
+{
+  int ret = 1;
+  if (!gtls_inited) {
+    ret = gnutls_global_init()?0:1;
+#ifdef GTLSDEBUG
+    gnutls_global_set_log_function(tls_log_func);
+    gnutls_global_set_log_level(2);
+#endif
+    gtls_inited = TRUE;
+  }
+  return ret;
 }
 
 int Curl_gtls_cleanup(void)
 {
-  gnutls_global_deinit();
+  if (gtls_inited)
+    gnutls_global_deinit();
   return 1;
 }
 
@@ -132,7 +148,8 @@ static CURLcode handshake(struct connectdata *conn,
 {
   struct SessionHandle *data = conn->data;
   int rc;
-
+  if (!gtls_inited)
+    _Curl_gtls_init();
   do {
     rc = gnutls_handshake(session);
 
@@ -227,6 +244,7 @@ Curl_gtls_connect(struct connectdata *conn,
   void *ssl_sessionid;
   size_t ssl_idsize;
 
+  if (!gtls_inited) _Curl_gtls_init();
   /* GnuTLS only supports TLSv1 (and SSLv3?) */
   if(data->set.ssl.version == CURL_SSLVERSION_SSLv2) {
     failf(data, "GnuTLS does not support SSLv2");

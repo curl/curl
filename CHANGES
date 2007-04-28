@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel S (28 April 2007)
+- Peter O'Gorman fixed libcurl to not init GnuTLS as early as we did before,
+  since it then inits libgcrypt and libgcrypt is being evil and EXITS the
+  application if it fails to get a fine random seed. That's really not a nice
+  thing to do by a library.
+
 - Frank Hempel fixed a curl_easy_duphandle() crash on a handle that had
   been removed from a multi handle, and then fixed another flaw that prevented
   curl_easy_duphandle() to work even after the first fix - the handle was

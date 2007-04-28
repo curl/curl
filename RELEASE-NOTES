@@ -31,6 +31,8 @@ This release includes the following bugfixes:
  o compilation on VMS 64-bit mode
  o SCP/SFTP downloads could hang on the last bytes of a transfer
  o curl_easy_duphandle() crash
+ o curl -V / curl_verion*() works even when GnuTLS is used on a system without
+   a good random source
 
 This release includes the following known bugs:
 
