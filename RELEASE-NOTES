@@ -30,6 +30,7 @@ This release includes the following bugfixes:
  o bad warning from configure when gnutls was selected
  o compilation on VMS 64-bit mode
  o SCP/SFTP downloads could hang on the last bytes of a transfer
+ o curl_easy_duphandle() crash
 
 This release includes the following known bugs:
 
@@ -52,6 +53,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Song Ma, Dan Fandrich, Yang Tse, Jay Austin, Robert Iakobashvil,
- James Housley, Daniel Black, Steve Little, Sonia Subramanian, Peter O'Gorman
+ James Housley, Daniel Black, Steve Little, Sonia Subramanian, Peter O'Gorman,
+ Frank Hempel
 
         Thanks! (and sorry if I forgot to mention someone)

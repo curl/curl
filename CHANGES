@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel S (28 April 2007)
+- Frank Hempel fixed a curl_easy_duphandle() crash on a handle that had
+  been removed from a multi handle, and then fixed another flaw that prevented
+  curl_easy_duphandle() to work even after the first fix - the handle was
+  still marked as using the multi interface.
+
 Daniel S (26 April 2007)
 - Peter O'Gorman found a problem with SCP downloads when the downloaded file
   was 16385 bytes (16K+1) and it turned out we didn't properly always "suck

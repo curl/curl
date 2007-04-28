@@ -511,6 +511,10 @@ void Curl_easy_addmulti(struct SessionHandle *data,
                         void *multi)
 {
   data->multi = multi;
+  if (multi == NULL)
+    /* the association is cleared, mark the easy handle as not used by an
+       interface */
+    data->state.used_interface = Curl_if_none;
 }
 
 void Curl_easy_initHandleData(struct SessionHandle *data)
@@ -636,8 +640,8 @@ CURL *curl_easy_duphandle(CURL *incurl)
 
   if(fail) {
     if(outcurl) {
-      if((outcurl->state.connc->type == CONNCACHE_PRIVATE) &&
-         outcurl->state.connc)
+      if(outcurl->state.connc &&
+         (outcurl->state.connc->type == CONNCACHE_PRIVATE))
         Curl_rm_connc(outcurl->state.connc);
       if(outcurl->state.headerbuff)
         free(outcurl->state.headerbuff);
