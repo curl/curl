@@ -2860,14 +2860,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      any failure */
   *in_connect = conn;
 
-  if (data->multi && Curl_multi_canPipeline(data->multi) &&
-      !conn->master_buffer) {
-    /* Allocate master_buffer to be used for pipelining */
-    conn->master_buffer = calloc(BUFSIZE, sizeof (char));
-    if (!conn->master_buffer)
-      return CURLE_OUT_OF_MEMORY;
-  }
-
   /* and we setup a few fields in case we end up actually using this struct */
 
   conn->data = data; /* Setup the association between this connection
@@ -2894,12 +2886,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   conn->read_pos = 0;
   conn->buf_len = 0;
 
-  /* Initialize the pipeline lists */
-  conn->send_pipe = Curl_llist_alloc((curl_llist_dtor) llist_dtor);
-  conn->recv_pipe = Curl_llist_alloc((curl_llist_dtor) llist_dtor);
-  if (!conn->send_pipe || !conn->recv_pipe)
-    return CURLE_OUT_OF_MEMORY;
-
   /* Store creation time to help future close decision making */
   conn->created = Curl_tvnow();
 
@@ -2909,6 +2895,20 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   conn->bits.tunnel_proxy = data->set.tunnel_thru_httpproxy;
   conn->bits.ftp_use_epsv = data->set.ftp_use_epsv;
   conn->bits.ftp_use_eprt = data->set.ftp_use_eprt;
+
+  if (data->multi && Curl_multi_canPipeline(data->multi) &&
+      !conn->master_buffer) {
+    /* Allocate master_buffer to be used for pipelining */
+    conn->master_buffer = calloc(BUFSIZE, sizeof (char));
+    if (!conn->master_buffer)
+      return CURLE_OUT_OF_MEMORY;
+  }
+
+  /* Initialize the pipeline lists */
+  conn->send_pipe = Curl_llist_alloc((curl_llist_dtor) llist_dtor);
+  conn->recv_pipe = Curl_llist_alloc((curl_llist_dtor) llist_dtor);
+  if (!conn->send_pipe || !conn->recv_pipe)
+    return CURLE_OUT_OF_MEMORY;
 
   /* This initing continues below, see the comment "Continue connectdata
    * initialization here" */
