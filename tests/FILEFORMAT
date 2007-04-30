@@ -265,6 +265,7 @@ advanced. Example: "s/^EPRT .*/EPRT stripped/"
 the protocol dump curl should transmit, if 'nonewline' is set, we will cut
 off the trailing newline of this given data before comparing with the one
 actually sent by the client
+Variables are substituted as in the <command> section.
 </protocol>
 <stdout [mode="text"]>
 This verifies that this data was passed to stdout.

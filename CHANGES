@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Dan F (30 April 2007)
+- Improved the test harness to allow running test servers on other than
+  the default port numbers, allowing more than one test suite to run
+  simultaneously on the same host.
+
 Daniel S (28 April 2007)
 - Peter O'Gorman fixed libcurl to not init GnuTLS as early as we did before,
   since it then inits libgcrypt and libgcrypt is being evil and EXITS the

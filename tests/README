@@ -12,7 +12,7 @@ Requires:
   stunnel (for HTTPS and FTPS tests)
   sshd (for SCP and SFTP tests; OpenSSH ver. 3.8 is known to work)
 
-TCP ports used:
+TCP ports used by default:
 
   - 8990 on localhost for HTTP tests
   - 8991 on localhost for HTTPS tests
@@ -27,7 +27,11 @@ TCP ports used:
   The test suite runs simple FTP, HTTP and TFTP servers on these ports to
   which it makes requests.  For SSL tests, it runs stunnel to handle
   encryption to the regular servers. For SSH, it runs a standard OpenSSH
-  server.
+  server.  
+
+  The base port number shown above can be changed using runtests' -b option
+  to allow running more than one instance of the test suite simultaneously
+  on one machine.
 
 Run:
   'make test'. This invokes the 'runtests.pl' perl script. Edit the top
