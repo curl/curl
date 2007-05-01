@@ -38,7 +38,7 @@ char *curlx_strdup(const char *str)
   if (!newstr)
     return (char *)NULL;
 
-  strcpy(newstr,str);
+  memcpy(newstr,str,(len+1)*sizeof(char));
 
   return newstr;
 
