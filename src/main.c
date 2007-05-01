@@ -3409,7 +3409,7 @@ CURLcode _my_setopt(CURL *curl, const char *name, CURLoption tag, ...)
                        remark?"/* ":"", name, value,
                        remark?" [REMARK] */":"");
 
-  if (!curl_slist_append(easycode, bufp))
+  if (!bufp || !curl_slist_append(easycode, bufp))
     ret = CURLE_OUT_OF_MEMORY;
   curl_free(bufp);
   va_end(arg);
@@ -3500,7 +3500,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
   URLGlob *inglob=NULL;
   int urlnum;
   int infilenum;
-  char *outfiles;
+  char *outfiles=NULL;
   char *infiles; /* might a glob pattern */
   char *uploadfile=NULL; /* a single file, never a glob */
 
@@ -3776,7 +3776,13 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
     outs.bytes = 0; /* nothing written yet */
 
     /* save outfile pattern before expansion */
-    outfiles = urlnode->outfile?strdup(urlnode->outfile):NULL;
+    if (urlnode->outfile) {
+      outfiles = strdup(urlnode->outfile);
+      if (!outfiles) {
+        clean_getout(config);
+        break;
+      }
+    } 
 
     infiles = urlnode->infile;
 
@@ -4592,7 +4598,8 @@ quit_curl:
 
   /* cleanup the curl handle! */
   curl_easy_cleanup(curl);
-  curl_slist_append(easycode, "curl_easy_cleanup(hnd);");
+  if (easycode)
+    curl_slist_append(easycode, "curl_easy_cleanup(hnd);");
 
   if(config->headerfile && !headerfilep && heads.stream)
     fclose(heads.stream);
