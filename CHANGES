@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel S (2 May 2007)
+- Jeff Pohlmeyer improved the hiperfifo.c example to use the
+  CURLMOPT_TIMERFUNCTION callback option.
+
 - Set the timeout for easy handles to expire really soon after addition or
   when CURLM_CALL_MULTI_PERFORM is returned from curl_multi_socket*/perform,
   to make applications using only curl_multi_socket() to properly function

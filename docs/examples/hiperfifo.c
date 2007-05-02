@@ -92,18 +92,15 @@ typedef struct _SockInfo {
 
 
 /* Update the event timer after curl_multi library calls */
-static void update_timeout(GlobalInfo *g)
+static int multi_timer_cb(CURLM *multi, long timeout_ms, GlobalInfo *g)
 {
-  long timeout_ms;
   struct timeval timeout;
-
-  curl_multi_timeout(g->multi, &timeout_ms);
-  if(timeout_ms < 0)
-    return;
 
   timeout.tv_sec = timeout_ms/1000;
   timeout.tv_usec = (timeout_ms%1000)*1000;
+  fprintf(MSG_OUT, "multi_timer_cb: Setting timeout to %ld ms\n", timeout_ms);
   evtimer_add(&g->timer_event, &timeout);
+  return 0;
 }
 
 
@@ -185,9 +182,7 @@ static void event_cb(int fd, short kind, void *userp)
   } while (rc == CURLM_CALL_MULTI_PERFORM);
   mcode_or_die("event_cb: curl_multi_socket", rc);
   check_run_count(g);
-  if(g->still_running) {
-    update_timeout(g);
-  } else {
+  if ( g->still_running <= 0 ) {
     fprintf(MSG_OUT, "last transfer done, kill timeout\n");
     if (evtimer_pending(&g->timer_event, NULL)) {
       evtimer_del(&g->timer_event);
@@ -210,7 +205,6 @@ static void timer_cb(int fd, short kind, void *userp)
   } while (rc == CURLM_CALL_MULTI_PERFORM);
   mcode_or_die("timer_cb: curl_multi_socket", rc);
   check_run_count(g);
-  if ( g->still_running ) { update_timeout(g); }
 }
 
 
@@ -406,10 +400,11 @@ int main(int argc, char **argv)
   evtimer_set(&g.timer_event, timer_cb, &g);
   curl_multi_setopt(g.multi, CURLMOPT_SOCKETFUNCTION, sock_cb);
   curl_multi_setopt(g.multi, CURLMOPT_SOCKETDATA, &g);
+  curl_multi_setopt(g.multi, CURLMOPT_TIMERFUNCTION, multi_timer_cb);
+  curl_multi_setopt(g.multi, CURLMOPT_TIMERDATA, &g);
   do {
     rc = curl_multi_socket_all(g.multi, &g.still_running);
   } while (CURLM_CALL_MULTI_PERFORM == rc);
-  update_timeout(&g);
   event_dispatch();
   curl_multi_cleanup(g.multi);
   return 0;
