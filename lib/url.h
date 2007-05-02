@@ -62,8 +62,8 @@ int Curl_doing_getsock(struct connectdata *conn,
                        curl_socket_t *socks,
                        int numsocks);
 
-void Curl_addHandleToPipeline(struct SessionHandle *handle,
-                              struct curl_llist *pipe);
+CURLcode Curl_addHandleToPipeline(struct SessionHandle *handle,
+                                  struct curl_llist *pipe);
 int Curl_removeHandleFromPipeline(struct SessionHandle *handle,
                                   struct curl_llist *pipe);
 bool Curl_isHandleAtHead(struct SessionHandle *handle,

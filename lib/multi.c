@@ -121,9 +121,9 @@ struct Curl_one_easy {
 #define CURL_MULTI_HANDLE 0x000bab1e
 
 #define GOOD_MULTI_HANDLE(x) \
-  ((x)&&(((struct Curl_multi *)x)->type == CURL_MULTI_HANDLE))
+  ((x)&&(((struct Curl_multi *)(x))->type == CURL_MULTI_HANDLE))
 #define GOOD_EASY_HANDLE(x) \
- (((struct SessionHandle *)x)->magic == CURLEASY_MAGIC_NUMBER)
+ (((struct SessionHandle *)(x))->magic == CURLEASY_MAGIC_NUMBER)
 
 /* This is the struct known as CURLM on the outside */
 struct Curl_multi {
@@ -180,7 +180,7 @@ static void add_closure(struct Curl_multi *multi,
 static int update_timer(struct Curl_multi *multi);
 
 #ifdef CURLDEBUG
-static const char *statename[]={
+static const char * const statename[]={
   "INIT",
   "CONNECT",
   "WAITRESOLVE",
@@ -896,29 +896,30 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
       if(CURLE_OK == easy->result) {
         /* Add this handle to the send pipeline */
-        Curl_addHandleToPipeline(easy->easy_handle,
-                                 easy->easy_conn->send_pipe);
+        easy->result = Curl_addHandleToPipeline(easy->easy_handle,
+                                                easy->easy_conn->send_pipe);
+	if(CURLE_OK == easy->result) {
+	  if(async)
+	    /* We're now waiting for an asynchronous name lookup */
+	    multistate(easy, CURLM_STATE_WAITRESOLVE);
+	  else {
+	    /* after the connect has been sent off, go WAITCONNECT unless the
+	       protocol connect is already done and we can go directly to
+	       WAITDO! */
+	    result = CURLM_CALL_MULTI_PERFORM;
 
-        if(async)
-          /* We're now waiting for an asynchronous name lookup */
-          multistate(easy, CURLM_STATE_WAITRESOLVE);
-        else {
-          /* after the connect has been sent off, go WAITCONNECT unless the
-             protocol connect is already done and we can go directly to
-             WAITDO! */
-          result = CURLM_CALL_MULTI_PERFORM;
-
-          if(protocol_connect)
-            multistate(easy, CURLM_STATE_WAITDO);
-          else {
+	    if(protocol_connect)
+	      multistate(easy, CURLM_STATE_WAITDO);
+	    else {
 #ifndef CURL_DISABLE_HTTP
-            if (easy->easy_conn->bits.tunnel_connecting)
-              multistate(easy, CURLM_STATE_WAITPROXYCONNECT);
-            else
+	      if (easy->easy_conn->bits.tunnel_connecting)
+		multistate(easy, CURLM_STATE_WAITPROXYCONNECT);
+	      else
 #endif
-              multistate(easy, CURLM_STATE_WAITCONNECT);
-          }
-        }
+		multistate(easy, CURLM_STATE_WAITCONNECT);
+	    }
+	  }
+	}
       }
       break;
 
@@ -1153,8 +1154,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       Curl_removeHandleFromPipeline(easy->easy_handle,
                                     easy->easy_conn->send_pipe);
       /* Add ourselves to the recv pipeline */
-      Curl_addHandleToPipeline(easy->easy_handle,
-                               easy->easy_conn->recv_pipe);
+      easy->result = Curl_addHandleToPipeline(easy->easy_handle,
+                                              easy->easy_conn->recv_pipe);
       multistate(easy, CURLM_STATE_WAITPERFORM);
       result = CURLM_CALL_MULTI_PERFORM;
 

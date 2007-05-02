@@ -1925,8 +1925,8 @@ static bool IsPipeliningEnabled(struct SessionHandle *handle)
   return FALSE;
 }
 
-void Curl_addHandleToPipeline(struct SessionHandle *data,
-                              struct curl_llist *pipe)
+CURLcode Curl_addHandleToPipeline(struct SessionHandle *data,
+                                  struct curl_llist *pipe)
 {
 #ifdef CURLDEBUG
   if(!IsPipeliningPossible(data)) {
@@ -1935,7 +1935,9 @@ void Curl_addHandleToPipeline(struct SessionHandle *data,
       infof(data, "PIPE when no PIPE supposed!\n");
   }
 #endif
-  Curl_llist_insert_next(pipe, pipe->tail, data);
+  if (!Curl_llist_insert_next(pipe, pipe->tail, data))
+    return CURLE_OUT_OF_MEMORY;
+  return CURLE_OK;
 }
 
 
@@ -1994,6 +1996,9 @@ static struct SessionHandle* gethandleathead(struct curl_llist *pipe)
 static void signalPipeClose(struct curl_llist *pipe)
 {
   struct curl_llist_element *curr;
+
+  if (!pipe)
+    return;
 
   curr = pipe->head;
   while (curr) {
