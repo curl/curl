@@ -19,8 +19,6 @@
 #define MAIN_LOOP_HANG_TIMEOUT     90 * 1000
 #define MULTI_PERFORM_HANG_TIMEOUT 60 * 1000
 
-static CURLMcode perform(CURLM * multi);
-
 static CURLMcode perform(CURLM * multi)
 {
   int handles, maxfd;
@@ -72,6 +70,7 @@ int test(char *URL)
 {
   CURLM *multi;
   CURL *easy;
+  int res = 0;
 
   if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
@@ -97,26 +96,34 @@ int test(char *URL)
   curl_easy_setopt(easy, CURLOPT_FAILONERROR, 1);
   curl_easy_setopt(easy, CURLOPT_URL, URL);
 
-  curl_multi_add_handle(multi, easy);
-  if (perform(multi) != CURLM_OK)
-    printf("retrieve 1 failed\n");
+  if (curl_multi_add_handle(multi, easy) != CURLM_OK) {
+    printf("curl_multi_add_handle() failed\n");
+    res = TEST_ERR_MAJOR_BAD;
+  } else {
+    if (perform(multi) != CURLM_OK)
+      printf("retrieve 1 failed\n");
 
-  curl_multi_remove_handle(multi, easy);
+    curl_multi_remove_handle(multi, easy);
+  }
   curl_easy_reset(easy);
 
   curl_easy_setopt(easy, CURLOPT_FAILONERROR, 1);
   curl_easy_setopt(easy, CURLOPT_URL, arg2);
 
-  curl_multi_add_handle(multi, easy);
-  if (perform(multi) != CURLM_OK)
-    printf("retrieve 2 failed\n");
+  if (curl_multi_add_handle(multi, easy) != CURLM_OK) {
+    printf("curl_multi_add_handle() 2 failed\n");
+    res = TEST_ERR_MAJOR_BAD;
+  } else {
+    if (perform(multi) != CURLM_OK)
+      printf("retrieve 2 failed\n");
 
-  curl_multi_remove_handle(multi, easy);
+    curl_multi_remove_handle(multi, easy);
+  }
   curl_easy_cleanup(easy);
   curl_multi_cleanup(multi);
   curl_global_cleanup();
 
   printf("Finished!\n");
 
-  return 0;
+  return res;
 }
