@@ -766,8 +766,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                   if (checkhttpprefix(data, k->p)) {
                     nc = 1;
                     k->httpcode = 200;
-                    k->httpversion =
-                      (data->set.httpversion==CURL_HTTP_VERSION_1_0)? 10 : 11;
+                    k->httpversion = 10;
                   }
                 }
               }

@@ -7,6 +7,12 @@
                                   Changelog
 
 Daniel S (2 May 2007)
+- Anders Gustafsson remarked that requiring CURLOPT_HTTP_VERSION set to 1.0
+  when CURLOPT_HTTP200ALIASES is used to avoid the problem mentioned below is
+  not very nice if the client wants to be able to use _either_ a HTTP 1.1
+  server or one within the aliases list... so starting now, libcurl will
+  simply consider 200-alias matches the to be HTTP 1.0 compliant.
+
 - Tobias Rundström reported a problem they experienced with xmms2 and recent
   libcurls, which turned out to be the 25-nov-2006 change which treats HTTP
   responses without Content-Length or chunked encoding as without bodies. We

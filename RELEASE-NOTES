@@ -14,6 +14,7 @@ This release includes the following changes:
  o added curl_multi_socket_action()
  o deprecated curl_multi_socket()
  o uses less memory in non-pipelined use cases
+ o CURLOPT_HTTP200ALIASES matched transfers assume HTTP 1.0 compliance
 
 This release includes the following bugfixes:
 
@@ -59,6 +60,7 @@ advice from friends like these:
 
  Song Ma, Dan Fandrich, Yang Tse, Jay Austin, Robert Iakobashvil,
  James Housley, Daniel Black, Steve Little, Sonia Subramanian, Peter O'Gorman,
- Frank Hempel, Michael Wallner, Jeff Pohlmeyer, Tobias Rundström
+ Frank Hempel, Michael Wallner, Jeff Pohlmeyer, Tobias Rundström,
+ Anders Gustafsson
 
         Thanks! (and sorry if I forgot to mention someone)
