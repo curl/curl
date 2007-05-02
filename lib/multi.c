@@ -469,6 +469,14 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   /* make the SessionHandle struct refer back to this struct */
   easy->easy_handle->set.one_easy = easy;
 
+  /* Set the timeout for this handle to expire really soon so that it will
+     be taken care of even when this handle is added in the midst of operation
+     when only the curl_multi_socket() API is used. During that flow, only
+     sockets that time-out or have actions will be dealt with. Since this
+     handle has no action yet, we make sure it times out to get things to
+     happen. */
+  Curl_expire(easy->easy_handle, 10);
+
   /* increase the node-counter */
   multi->num_easy++;
 
@@ -1384,6 +1392,17 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
     multi->num_msgs++; /* increase message counter */
   }
+
+  if(CURLM_CALL_MULTI_PERFORM == result)
+    /* Set the timeout for this handle to expire really soon so that it will
+       be taken care of even when this handle is added in the midst of
+       operation when only the curl_multi_socket() API is used. During that
+       flow, only sockets that time-out or have actions will be dealt
+       with. Since this handle has no action yet, we make sure it times out to
+       get things to happen. Also, this makes it less important for callers of
+       the curl_multi_* functions to bother about the CURLM_CALL_MULTI_PERFORM
+       return code, as long as they deal with the timeouts properly. */
+    Curl_expire(easy->easy_handle, 10);
 
   return result;
 }

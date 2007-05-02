@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel S (2 May 2007)
+- Set the timeout for easy handles to expire really soon after addition or
+  when CURLM_CALL_MULTI_PERFORM is returned from curl_multi_socket*/perform,
+  to make applications using only curl_multi_socket() to properly function
+  when adding easy handles "on the fly". Bug report and test app provided by
+  Michael Wallner.
+
 Dan F (30 April 2007)
 - Improved the test harness to allow running test servers on other than
   the default port numbers, allowing more than one test suite to run
