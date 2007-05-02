@@ -79,11 +79,11 @@ static struct curl_slist *slist_get_last(struct curl_slist *list)
 }
 
 /*
- * curl_slist_append() appends a string to the linked list. It always retunrs
- * the address of the first record, so that you can sure this function as an
+ * curl_slist_append() appends a string to the linked list. It always returns
+ * the address of the first record, so that you can use this function as an
  * initialization function as well as an append function. If you find this
  * bothersome, then simply create a separate _init function and call it
- * appropriately from within the proram.
+ * appropriately from within the program.
  */
 struct curl_slist *curl_slist_append(struct curl_slist *list,
                                      const char *data)
