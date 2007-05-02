@@ -7,6 +7,12 @@
                                   Changelog
 
 Daniel S (2 May 2007)
+- Tobias Rundström reported a problem they experienced with xmms2 and recent
+  libcurls, which turned out to be the 25-nov-2006 change which treats HTTP
+  responses without Content-Length or chunked encoding as without bodies. We
+  now added the conditional that the above mentioned response is only without
+  body if the response is HTTP 1.1.
+
 - Jeff Pohlmeyer improved the hiperfifo.c example to use the
   CURLMOPT_TIMERFUNCTION callback option.
 

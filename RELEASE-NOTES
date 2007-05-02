@@ -34,6 +34,8 @@ This release includes the following bugfixes:
  o curl -V / curl_verion*() works even when GnuTLS is used on a system without
    a good random source
  o curl_multi_socket() not "noticing" newly added handles
+ o lack of Content-Length and chunked encoding now requires HTTP 1.1 as well
+   to be treated as without response body
 
 This release includes the following known bugs:
 
@@ -57,6 +59,6 @@ advice from friends like these:
 
  Song Ma, Dan Fandrich, Yang Tse, Jay Austin, Robert Iakobashvil,
  James Housley, Daniel Black, Steve Little, Sonia Subramanian, Peter O'Gorman,
- Frank Hempel, Michael Wallner, Jeff Pohlmeyer
+ Frank Hempel, Michael Wallner, Jeff Pohlmeyer, Tobias Rundström
 
         Thanks! (and sorry if I forgot to mention someone)
