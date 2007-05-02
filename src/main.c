@@ -3411,7 +3411,8 @@ CURLcode _my_setopt(CURL *curl, const char *name, CURLoption tag, ...)
 
   if (!bufp || !curl_slist_append(easycode, bufp))
     ret = CURLE_OUT_OF_MEMORY;
-  curl_free(bufp);
+  if (bufp)
+    curl_free(bufp);
   va_end(arg);
 
   return ret;
@@ -3494,22 +3495,15 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
   struct OutStruct heads;
   struct InStruct input;
 
-  char *url = NULL;
-
   URLGlob *urls=NULL;
   URLGlob *inglob=NULL;
   int urlnum;
   int infilenum;
-  char *outfiles=NULL;
-  char *infiles; /* might a glob pattern */
   char *uploadfile=NULL; /* a single file, never a glob */
-
-  int separator = 0;
 
   FILE *infd = stdin;
   bool infdfopen;
   FILE *headerfilep = NULL;
-  char *urlbuffer=NULL;
   curl_off_t uploadfilesize; /* -1 means unknown */
   bool stillflags=TRUE;
 
@@ -3520,12 +3514,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
   CURL *curl;
   int res = 0;
   int i;
-  int up; /* upload file counter within a single upload glob */
   long retry_sleep_default;
-  long retry_numretries;
   long retry_sleep;
-  long response;
-  struct timeval retrystart;
 
   char *env;
 #ifdef CURLDEBUG
@@ -3751,7 +3741,11 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
   /* loop through the list of given URLs */
   while(urlnode) {
+    int up; /* upload file counter within a single upload glob */
     char *dourl;
+    char *url;
+    char *infiles; /* might be a glob pattern */
+    char *outfiles=NULL;
 
     /* get the full URL (it might be NULL) */
     dourl=urlnode->url;
@@ -3807,6 +3801,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
            glob_next_url(inglob):
            (!up?strdup(infiles):NULL));
         up++) {
+      int separator = 0;
+      long retry_numretries;
       uploadfilesize=-1;
 
       if(!config->globoff) {
@@ -3830,6 +3826,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           (url = urls?glob_next_url(urls):(i?NULL:strdup(url)));
           i++) {
         char *outfile;
+        struct timeval retrystart;
         outfile = outfiles?strdup(outfiles):NULL;
 
         if((urlnode->flags&GETOUT_USEREMOTE) ||
@@ -3958,8 +3955,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             filep = curl_easy_escape(curl, filep, 0 /* use strlen */);
 
             if(filep) {
-
-              urlbuffer=(char *)malloc(strlen(url) + strlen(filep) + 3);
+              char *urlbuffer=(char *)malloc(strlen(url) + strlen(filep) + 3);
               if(!urlbuffer) {
                 helpf("out of memory\n");
                 return CURLE_OUT_OF_MEMORY;
@@ -4024,6 +4020,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             printf("%s%s\n", CURLseparator, url);
         }
         if (httpgetfields) {
+          char *urlbuffer;
           /* Find out whether the url contains a file name */
           const char *pc =strstr(url, "://");
           char sep='?';
@@ -4372,6 +4369,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
               RETRY_FTP,
               RETRY_LAST /* not used */
             } retry = RETRY_NO;
+            long response;
             if(CURLE_OPERATION_TIMEDOUT == res)
               /* retry timeout always */
               retry = RETRY_TIMEOUT;
