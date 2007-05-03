@@ -345,7 +345,7 @@ A non-zero parameter tells the library to fail silently if the HTTP code
 returned is equal to or larger than 400. The default action would be to return
 the page normally, ignoring that code.
 
-This method is not fail-safe and there are occasions where non-succesful
+This method is not fail-safe and there are occasions where non-successful
 response codes will slip through, especially when authentication is involved
 (response codes 401 and 407).
 
@@ -445,7 +445,7 @@ not an order. You cannot be guaranteed to actually get the given size. (Added
 in 7.10)
 
 This size is by default set as big as possible (CURL_MAX_WRITE_SIZE), so it
-only makse sense to use this option if you want it smaller.
+only makes sense to use this option if you want it smaller.
 .IP CURLOPT_PORT
 Pass a long specifying what remote port number to connect to, instead of the
 one specified in the URL or the default port for the used protocol.
@@ -649,7 +649,7 @@ When setting \fICURLOPT_POST\fP to a non-zero value, it will automatically set
 \fICURLOPT_NOBODY\fP to 0 (since 7.14.1).
 
 If you issue a POST request and then want to make a HEAD or GET using the same
-re-used handle, you must explictly set the new request type using
+re-used handle, you must explicitly set the new request type using
 \fICURLOPT_NOBODY\fP or \fICURLOPT_HTTPGET\fP or similar.
 .IP CURLOPT_POSTFIELDS
 Pass a char * as parameter, which should be the full data to post in an HTTP
@@ -738,7 +738,7 @@ be properly filled in.  Use \fIcurl_slist_append(3)\fP to create the list and
 
 The alias itself is not parsed for any version strings. Before libcurl 7.16.3,
 Libcurl used the value set by option \fICURLOPT_HTTP_VERSION\fP, but starting
-wiht 7.16.3 the protocol is assumed to match HTTP 1.0 when an alias matched.
+with 7.16.3 the protocol is assumed to match HTTP 1.0 when an alias matched.
 .IP CURLOPT_COOKIE
 Pass a pointer to a zero terminated string as parameter. It will be used to
 set a cookie in the http request. The format of the string should be
@@ -1359,7 +1359,7 @@ require you to disable this in order for you to succeed. (Added in 7.16.0)
 Pass a char * as parameter. Set the krb4 security level, this also enables
 krb4 awareness.  This is a string, 'clear', 'safe', 'confidential' or
 \&'private'.  If the string is set but doesn't match one of these, 'private'
-will be used. Set the string to NULL to disable kerberos4. The kerberos
+will be used. Set the string to NULL to disable Kerberos4. The Kerberos
 support only works for FTP.
 .SH SSH OPTIONS
 .IP CURLOPT_SSH_AUTH_TYPES
