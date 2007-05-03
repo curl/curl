@@ -736,10 +736,9 @@ The linked list should be a fully valid list of struct curl_slist structs, and
 be properly filled in.  Use \fIcurl_slist_append(3)\fP to create the list and
 \fIcurl_slist_free_all(3)\fP to clean up an entire list.
 
-The alias itself is not parsed for any version strings.  So if your alias is
-\&"MYHTTP/9.9", Libcurl will not treat the server as responding with HTTP
-version 9.9.  Instead Libcurl will use the value set by option
-\fICURLOPT_HTTP_VERSION\fP.
+The alias itself is not parsed for any version strings. Before libcurl 7.16.3,
+Libcurl used the value set by option \fICURLOPT_HTTP_VERSION\fP, but starting
+wiht 7.16.3 the protocol is assumed to match HTTP 1.0 when an alias matched.
 .IP CURLOPT_COOKIE
 Pass a pointer to a zero terminated string as parameter. It will be used to
 set a cookie in the http request. The format of the string should be
