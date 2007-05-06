@@ -113,6 +113,12 @@ Daniel S (16 April 2007)
   allows libcurl to avoid a call to poll()/select() for every call to
   curl_multi_socket*().
 
+  I added a define in the public curl/multi.h header file that will make your
+  existing application automatically use curl_multi_socket_action() instead of
+  curl_multi_socket() when you recompile. But of course you'll get better
+  performance if you adjust your code manually and actually pass in the
+  correct action bitmask to this function.
+
 Daniel S (14 April 2007)
 - Jay Austin added "DH PARAMETERS" to the stunnel.pem certificate for the test
   suite to make stunnel run better in some (most?) environments.
