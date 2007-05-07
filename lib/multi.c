@@ -485,7 +485,7 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
        the shared cache every single easy handle had 5 entries in their cache
        by default. */
     CURLcode res = Curl_ch_connc(easy_handle, multi->connc,
-                                 multi->connc->num*4);
+                                 multi->num_easy * 4);
     if(res != CURLE_OK)
       /* TODO: we need to do some cleaning up here! */
       return CURLM_OUT_OF_MEMORY;

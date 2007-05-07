@@ -37,6 +37,7 @@ This release includes the following bugfixes:
  o curl_multi_socket() not "noticing" newly added handles
  o lack of Content-Length and chunked encoding now requires HTTP 1.1 as well
    to be treated as without response body
+ o connection cache growth in multi handles
 
 This release includes the following known bugs:
 
@@ -61,6 +62,6 @@ advice from friends like these:
  Song Ma, Dan Fandrich, Yang Tse, Jay Austin, Robert Iakobashvil,
  James Housley, Daniel Black, Steve Little, Sonia Subramanian, Peter O'Gorman,
  Frank Hempel, Michael Wallner, Jeff Pohlmeyer, Tobias Rundström,
- Anders Gustafsson
+ Anders Gustafsson, James Bursa
 
         Thanks! (and sorry if I forgot to mention someone)

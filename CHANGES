@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel S (7 May 2007)
+- James Bursa fixed a bug in the multi handle code that made the connection
+  cache grow a bit too much, beyond the normal 4 * easy_handles.
+
 Daniel S (2 May 2007)
 - Anders Gustafsson remarked that requiring CURLOPT_HTTP_VERSION set to 1.0
   when CURLOPT_HTTP200ALIASES is used to avoid the problem mentioned below is
