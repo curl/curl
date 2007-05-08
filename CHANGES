@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Dan F (8 May 2007)
+- Added FTPS test cases 406 and 407
+
 Daniel S (8 May 2007)
 - CURLE_FTP_COULDNT_STOR_FILE is now known as CURLE_UPLOAD_FAILED. This is
   because I just made SCP uploads return this value if the file size of
