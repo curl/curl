@@ -562,11 +562,15 @@ CURLcode Curl_scp_do(struct connectdata *conn, bool *done)
   *done = TRUE; /* unconditionally */
 
   if (conn->data->set.upload) {
+    if(conn->data->set.infilesize < 0) {
+      failf(conn->data, "SCP requries a known file size for upload");
+      return CURLE_UPLOAD_FAILED;
+    }
     /*
-     * NOTE!!!  libssh2 requires that the destination path is a full path
-     *          that includes the destination file and name OR ends in a "/" .
-     *          If this is not done the destination file will be named the
-     *          same name as the last directory in the path.
+     * libssh2 requires that the destination path is a full path that includes
+     * the destination file and name OR ends in a "/" .  If this is not done
+     * the destination file will be named the same name as the last directory
+     * in the path.
      */
     scp->ssh_channel = libssh2_scp_send_ex(scp->ssh_session, scp->path,
                                            LIBSSH2_SFTP_S_IRUSR|

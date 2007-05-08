@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel S (8 May 2007)
+- CURLE_FTP_COULDNT_STOR_FILE is now known as CURLE_UPLOAD_FAILED. This is
+  because I just made SCP uploads return this value if the file size of
+  the upload file isn't given with CURLOPT_INFILESIZE*. Docs updated to
+  reflect this news, and a define for the old name was added to the public
+  header file.
+
 Daniel S (7 May 2007)
 - James Bursa fixed a bug in the multi handle code that made the connection
   cache grow a bit too much, beyond the normal 4 * easy_handles.

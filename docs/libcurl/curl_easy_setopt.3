@@ -1035,12 +1035,17 @@ When uploading a file to a remote site, this option should be used to tell
 libcurl what the expected size of the infile is. This value should be passed
 as a long. See also \fICURLOPT_INFILESIZE_LARGE\fP.
 
+For uploading using SCP, this option or \fICURLOPT_INFILESIZE_LARGE\fP is
+mandatory.
+
 Note that this option does not limit how much data libcurl will actually send,
 as that is controlled entirely by what the read callback returns.
 .IP CURLOPT_INFILESIZE_LARGE
 When uploading a file to a remote site, this option should be used to tell
 libcurl what the expected size of the infile is.  This value should be passed
 as a curl_off_t. (Added in 7.11.0)
+
+For uploading using SCP, this option or \fICURLOPT_INFILESIZE\fP is mandatory.
 
 Note that this option does not limit how much data libcurl will actually send,
 as that is controlled entirely by what the read callback returns.

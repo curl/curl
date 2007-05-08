@@ -1,8 +1,27 @@
-.\" You can view this file with:
-.\" nroff -man [file]
-.\" $Id$
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" * $Id$
+.\" **************************************************************************
 .\"
-.TH libcurl-errors 3 "9 Feb 2005" "libcurl 7.13.1" "libcurl errors"
+.TH libcurl-errors 3 "8 May 2007" "libcurl 7.16.3" "libcurl errors"
 .SH NAME
 libcurl-errors \- error codes in libcurl
 .SH DESCRIPTION
@@ -86,9 +105,10 @@ An error occurred when writing received data to a local file, or an error was
 returned to libcurl from a write callback.
 .IP "CURLE_MALFORMAT_USER (24)"
 This is never returned by current libcurl.
-.IP "CURLE_FTP_COULDNT_STOR_FILE (25)"
-FTP couldn't STOR file. The server denied the STOR operation. The error buffer
-usually contains the server's explanation to this.
+.IP "CURLE_UPLOAD_FAILED (25)"
+Failed starting the upload. For FTP, the server typcially denied the STOR
+command. The error buffer usually contains the server's explanation to this.
+(This error code was formerly known as CURLE_FTP_COULDNT_STOR_FILE.)
 .IP "CURLE_READ_ERROR (26)"
 There was a problem reading a local file or an error returned by the read
 callback.

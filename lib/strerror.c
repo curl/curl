@@ -123,8 +123,8 @@ curl_easy_strerror(CURLcode error)
   case CURLE_WRITE_ERROR:
     return "failed writing received data to disk/application";
 
-  case CURLE_FTP_COULDNT_STOR_FILE:
-    return "failed FTP upload (the STOR command)";
+  case CURLE_UPLOAD_FAILED:
+    return "upload failed (at start/before it took off)";
 
   case CURLE_READ_ERROR:
     return "failed to open/read local data from file/application";
