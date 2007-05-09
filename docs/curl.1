@@ -370,7 +370,7 @@ normal cases when a HTTP server fails to deliver a document, it returns an
 HTML document stating so (which often also describes why and more). This flag
 will prevent curl from outputting that and return error 22.
 
-This method is not fail-safe and there are occasions where non-succesful
+This method is not fail-safe and there are occasions where non-successful
 response codes will slip through, especially when authentication is involved
 (response codes 401 and 407).
 
@@ -593,11 +593,11 @@ assumed.
 
 If this option is used several times, the last one will be used.
 .IP "--krb4 <level>"
-(FTP) Enable kerberos4 authentication and use. The level must be entered and
+(FTP) Enable Kerberos4 authentication and use. The level must be entered and
 should be one of 'clear', 'safe', 'confidential' or 'private'. Should you use
 a level that is not one of these, 'private' will instead be used.
 
-This option requires that the library was built with kerberos4 support. This
+This option requires that the library was built with Kerberos4 support. This
 is not very common. Use \fI-V/--version\fP to see if your curl supports it.
 
 If this option is used several times, the last one will be used.
@@ -689,7 +689,7 @@ subdirectories and symbolic links.
 
 If this option is used twice, the second will again disable list only.
 .IP "--local-port <num>[-num]"
-Set a prefered number or range of local port numbers to use for the
+Set a preferred number or range of local port numbers to use for the
 connection(s).  Note that port numbers by nature is a scarce resource that
 will be busy at times so setting this range to something too narrow might
 cause unnecessary connection setup failures. (Added in 7.15.2)
@@ -872,7 +872,7 @@ separate file.
 If this option is used several times, the last one will be used.
 .IP "-P/--ftp-port <address>"
 (FTP) Reverses the initiator/listener roles when connecting with ftp. This
-switch makes Curl use the PORT command instead of PASV. In practice, PORT
+switch makes Curl use the PORT command instead of PASV. In practise, PORT
 tells the server to connect to the client's specified address and port, while
 PASV asks the server for an ip address and port to connect to. <address>
 should be one of:
@@ -896,14 +896,18 @@ If used as the first parameter on the command line, the \fIcurlrc\fP config
 file will not be read and used. See the \fI-K/--config\fP for details on the
 default config file search path.
 .IP "-Q/--quote <command>"
-(FTP) Send an arbitrary command to the remote FTP server. Quote commands are
+(FTP/SFTP) Send an arbitrary command to the remote FTP or SFTP server. Quote
+commands are
 sent BEFORE the transfer is taking place (just after the initial PWD command
 to be exact). To make commands take place after a successful transfer, prefix
-them with a dash '-'. To make commands get sent after libcurl has changed
-working directory, just before the transfer command(s), prefix the command
-with '+'. You may specify any amount of commands. If the server returns
-failure for one of the commands, the entire operation will be aborted. You
-must send syntactically correct FTP commands as RFC959 defines.
+them with a dash '-' (only the latter is support with SFTP). To make
+commands get sent after libcurl has changed working directory, just
+before the transfer command(s), prefix the command with '+'. You may
+specify any amount of commands. If the server returns failure for one
+of the commands, the entire operation will be aborted. You must send
+syntactically correct FTP commands as RFC959 defines to FTP servers, or
+one of the following commands (with appropriate arguments) to SFTP servers:
+chgrp, chmod, chown, ln, mkdir, rename, rm, rmdir, symlink.
 
 This option can be used multiple times.
 .IP "--random-file <file>"
@@ -943,7 +947,7 @@ response!
 
 Only digit characters (0-9) are valid in 'start' and 'stop' of range syntax
 \&'start-stop'. If a non-digit character is given in the range, the server's
-response will be unexpectable, depending on different server's configuration.
+response will be indeterminable, depending on different server's configuration.
 
 You should also be aware that many HTTP/1.1 servers do not have this feature
 enabled, so that when you attempt to get a range, you'll instead get the whole
@@ -1091,7 +1095,7 @@ If this option is used several times, each occurrence will toggle it on/off.
 Specify user and password to use for server authentication. Overrides
 \fI-n/--netrc\fP and \fI--netrc-optional\fP.
 
-If you use an SSPI-enabled curl binary and do NTLM autentication, you can
+If you use an SSPI-enabled curl binary and do NTLM authentication, you can
 force curl to pick up the user name and password from your environment by
 simply specifying a single colon with this option: "-u :".
 
@@ -1099,7 +1103,7 @@ If this option is used several times, the last one will be used.
 .IP "-U/--proxy-user <user:password>"
 Specify user and password to use for proxy authentication.
 
-If you use an SSPI-enabled curl binary and do NTLM autentication, you can
+If you use an SSPI-enabled curl binary and do NTLM authentication, you can
 force curl to pick up the user name and password from your environment by
 simply specifying a single colon with this option: "-U :".
 
@@ -1467,7 +1471,7 @@ Internal error. A function was called in a bad order.
 .IP 45
 Interface error. A specified outgoing interface could not be used.
 .IP 46
-Bad password entered. An error was signaled when the password was entered.
+Bad password entered. An error was signalled when the password was entered.
 .IP 47
 Too many redirects. When following redirects, curl hit the maximum amount.
 .IP 48
