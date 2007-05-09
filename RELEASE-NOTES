@@ -15,6 +15,7 @@ This release includes the following changes:
  o deprecated curl_multi_socket()
  o uses less memory in non-pipelined use cases
  o CURLOPT_HTTP200ALIASES matched transfers assume HTTP 1.0 compliance
+ o more than one test harness can run at the same time without conflict
 
 This release includes the following bugfixes:
 
@@ -32,12 +33,14 @@ This release includes the following bugfixes:
  o compilation on VMS 64-bit mode
  o SCP/SFTP downloads could hang on the last bytes of a transfer
  o curl_easy_duphandle() crash
- o curl -V / curl_verion*() works even when GnuTLS is used on a system without
+ o curl -V / curl_version*() works even when GnuTLS is used on a system without
    a good random source
  o curl_multi_socket() not "noticing" newly added handles
  o lack of Content-Length and chunked encoding now requires HTTP 1.1 as well
    to be treated as without response body
  o connection cache growth in multi handles
+ o better handling of out of memory conditions
+ o overwriting an uploaded file with sftp now truncates it first
 
 This release includes the following known bugs:
 
@@ -62,6 +65,6 @@ advice from friends like these:
  Song Ma, Dan Fandrich, Yang Tse, Jay Austin, Robert Iakobashvil,
  James Housley, Daniel Black, Steve Little, Sonia Subramanian, Peter O'Gorman,
  Frank Hempel, Michael Wallner, Jeff Pohlmeyer, Tobias Rundström,
- Anders Gustafsson, James Bursa
+ Anders Gustafsson, James Bursa, Kristian Gunstone
 
         Thanks! (and sorry if I forgot to mention someone)

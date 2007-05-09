@@ -5,6 +5,10 @@
                              \___|\___/|_| \_\_____|
 
                                   Changelog
+Dan F (9 May 2007)
+- Kristian Gunstone fixed a problem where overwriting an uploaded file with
+  sftp didn't truncate it first, which would corrupt the file if the new
+  file was shorter than the old.
 
 Dan F (8 May 2007)
 - Added FTPS test cases 406 and 407
