@@ -1,0 +1,61 @@
+<testcase>
+<info>
+<keywords>
+FTPS
+PORT
+STOR
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+<features>
+SSL
+</features>
+<server>
+ftps
+</server>
+ <name>
+FTPS PORT upload with CWD
+ </name>
+ <command>
+-k --ftp-ssl-control ftps://%HOSTIP:%FTPSPORT/CWD/STOR/RETR/408 -T log/upload408 -P -
+</command>
+<file name="log/upload408">
+Moooooooooooo
+ upload this
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^PORT .*
+^EPRT .*
+^LPRT .*
+</strip>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PBSZ 0
+PROT C
+PWD
+CWD CWD
+CWD STOR
+CWD RETR
+PORT 127,0,0,1,5,109
+TYPE I
+STOR 408
+QUIT
+</protocol>
+<upload>
+Moooooooooooo
+ upload this
+</upload>
+</verify>
+</testcase>
