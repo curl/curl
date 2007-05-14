@@ -5,6 +5,9 @@
                              \___|\___/|_| \_\_____|
 
                                   Changelog
+Dan F (14 May 2007)
+- Added SFTP directory listing test case 613.
+
 Dan F (9 May 2007)
 - Kristian Gunstone fixed a problem where overwriting an uploaded file with
   sftp didn't truncate it first, which would corrupt the file if the new

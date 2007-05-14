@@ -41,4 +41,4 @@ EXTRA_DIST = test1 test108 test117 test127 test20 test27 test34 test46	   \
  test603 test401 test402 test290 test291 test292 test293 test403 test404   \
  test405 test604 test605 test606 test607 test608 test609 test294 test295   \
  test296 test297 test298 test610 test611 test612 test406 test407 test408   \
- test409
+ test409 test613

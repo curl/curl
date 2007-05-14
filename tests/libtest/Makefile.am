@@ -35,7 +35,7 @@ INCLUDES = -I$(top_srcdir)/include/curl \
 
 LIBDIR = $(top_builddir)/lib
 
-EXTRA_DIST = test75.pl test307.pl test610.pl
+EXTRA_DIST = test75.pl test307.pl test610.pl test613.pl
 
 # files used only in some libcurl test programs
 TESTUTIL = testutil.c testutil.h
