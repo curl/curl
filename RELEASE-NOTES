@@ -16,6 +16,7 @@ This release includes the following changes:
  o uses less memory in non-pipelined use cases
  o CURLOPT_HTTP200ALIASES matched transfers assume HTTP 1.0 compliance
  o more than one test harness can run at the same time without conflict
+ o SFTP now supports quote commands before a transfer
 
 This release includes the following bugfixes:
 
@@ -41,6 +42,7 @@ This release includes the following bugfixes:
  o connection cache growth in multi handles
  o better handling of out of memory conditions
  o overwriting an uploaded file with sftp now truncates it first
+ o SFTP quote commands chmod, chown, chgrp can now set a value of 0
 
 This release includes the following known bugs:
 

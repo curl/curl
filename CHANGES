@@ -8,6 +8,14 @@
 Dan F (14 May 2007)
 - Added SFTP directory listing test case 613.
 
+- Added support for quote commands before a transfer using SFTP and test
+  case 614.
+
+- Changed the post-quote commands to occur after the transferred file is
+  closed.
+
+- Allow SFTP quote commands chmod, chown, chgrp to set a value of 0.
+
 Dan F (9 May 2007)
 - Kristian Gunstone fixed a problem where overwriting an uploaded file with
   sftp didn't truncate it first, which would corrupt the file if the new

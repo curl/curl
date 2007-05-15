@@ -714,6 +714,14 @@ CURLcode Curl_sftp_do(struct connectdata *conn, bool *done)
 
   *done = TRUE; /* unconditionally */
 
+  /* Send any quote commands */
+  if(conn->data->set.quote) {
+    infof(conn->data, "Sending quote commands\n");
+    res = sftp_sendquote(conn, conn->data->set.quote);
+    if (res != CURLE_OK)
+      return res;
+  }
+
   if (data->set.upload) {
     /*
      * NOTE!!!  libssh2 requires that the destination path is a full path
@@ -980,15 +988,16 @@ CURLcode Curl_sftp_done(struct connectdata *conn, CURLcode status,
   Curl_safefree(sftp->homedir);
   sftp->homedir = NULL;
 
-  /* Before we shut down, see if there are any post-quote commands to send: */
-  if(!status && !premature && conn->data->set.postquote) {
-    rc = sftp_sendquote(conn, conn->data->set.postquote);
-  }
-
   if (sftp->sftp_handle) {
     if (libssh2_sftp_close(sftp->sftp_handle) < 0) {
       infof(conn->data, "Failed to close libssh2 file\n");
     }
+  }
+
+  /* Before we shut down, see if there are any post-quote commands to send: */
+  if(!status && !premature && conn->data->set.postquote) {
+    infof(conn->data, "Sending postquote commands\n");
+    rc = sftp_sendquote(conn, conn->data->set.postquote);
   }
 
   if (sftp->sftp_session) {
@@ -1060,7 +1069,7 @@ get_pathname(const char **cpp, char **path)
   const char *cp = *cpp, *end;
   char quot;
   u_int i, j;
-  const char *WHITESPACE = " \t\r\n";
+  static const char * const WHITESPACE = " \t\r\n";
 
   cp += strspn(cp, WHITESPACE);
   if (!*cp) {
@@ -1239,7 +1248,7 @@ static CURLcode sftp_sendquote(struct connectdata *conn,
         /* Now set the new attributes... */
         if (curl_strnequal(item->data, "chgrp", 5)) {
           attrs.gid = strtol(path1, NULL, 10);
-          if (attrs.gid == 0) {
+          if (attrs.gid == 0 && !ISDIGIT(path1[0])) {
             free(path1);
             free(path2);
             failf(data, "Syntax error: chgrp gid not a number");
@@ -1248,7 +1257,7 @@ static CURLcode sftp_sendquote(struct connectdata *conn,
         }
         else if (curl_strnequal(item->data, "chmod", 5)) {
           attrs.permissions = strtol(path1, NULL, 8);/* permissions are octal */
-          if (attrs.permissions == 0) {
+          if (attrs.permissions == 0 && !ISDIGIT(path1[0])) {
             free(path1);
             free(path2);
             failf(data, "Syntax error: chmod permissions not a number");
@@ -1257,7 +1266,7 @@ static CURLcode sftp_sendquote(struct connectdata *conn,
         }
         else if (curl_strnequal(item->data, "chown", 5)) {
           attrs.uid = strtol(path1, NULL, 10);
-          if (attrs.uid == 0) {
+          if (attrs.uid == 0 && !ISDIGIT(path1[0])) {
             free(path1);
             free(path2);
             failf(data, "Syntax error: chown uid not a number");

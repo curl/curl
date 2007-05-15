@@ -839,19 +839,20 @@ address. Default FTP operations are passive, and thus won't use PORT.
 You disable PORT again and go back to using the passive version by setting
 this option to NULL.
 .IP CURLOPT_QUOTE
-Pass a pointer to a linked list of FTP commands to pass to the server prior to
-your ftp request. This will be done before any other FTP commands are issued
-(even before the CWD command). The linked list should be a fully valid list of
-'struct curl_slist' structs properly filled in. Use \fIcurl_slist_append(3)\fP
-to append strings (commands) to the list, and clear the entire list afterwards
-with \fIcurl_slist_free_all(3)\fP. Disable this operation again by setting a
-NULL to this option.
+Pass a pointer to a linked list of FTP or SFTP commands to pass to
+the server prior to your ftp request. This will be done before any
+other commands are issued (even before the CWD command for FTP). The
+linked list should be a fully valid list of 'struct curl_slist' structs
+properly filled in with text strings. Use \fIcurl_slist_append(3)\fP
+to append strings (commands) to the list, and clear the entire list
+afterwards with \fIcurl_slist_free_all(3)\fP. Disable this operation
+again by setting a NULL to this option.
 .IP CURLOPT_POSTQUOTE
-Pass a pointer to a linked list of FTP commands to pass to the server after
-your ftp transfer request. The linked list should be a fully valid list of
-struct curl_slist structs properly filled in as described for
-\fICURLOPT_QUOTE\fP. Disable this operation again by setting a NULL to this
-option.
+Pass a pointer to a linked list of FTP or SFTP commands to pass to the
+server after your ftp transfer request. The linked list should be a
+fully valid list of struct curl_slist structs properly filled in as
+described for \fICURLOPT_QUOTE\fP. Disable this operation again by
+setting a NULL to this option.
 .IP CURLOPT_PREQUOTE
 Pass a pointer to a linked list of FTP commands to pass to the server after
 the transfer type is set. The linked list should be a fully valid list of
