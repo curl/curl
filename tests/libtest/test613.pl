@@ -60,19 +60,19 @@ elsif ($ARGV[0] eq "postprocess")
 		# or may be unsupported on some platforms (e.g. Windows)
 
 		my $newfile = $logfile . ".new";
-		open(OUT, ">$newfile") || die "$!";
 		open(IN, "<$logfile") || die "$!";
+		open(OUT, ">$newfile") || die "$!";
 		while (<IN>) {
 			s/^(.)(..).(..).(..).(.{4}?).{6}?.{6}?(.{12}?)/\1\2?\3?\4?\5     U     U\6/;
 			if ($1 eq "d") {
 				# Erase inodes, size, mode, time fields for directories
-				s/^.{14}?(.{12}?).{11}? ... .\d \d\d:\d\d/d?????????   N\1          N ???  N NN:NN/;
+				s/^.{14}?(.{12}?).{11}? ... .\d .\d:\d\d/d?????????   N\1          N ???  N NN:NN/;
 			}
 			print OUT $_;
 		}
 
-		close(IN);
 		close(OUT);
+		close(IN);
 
 		unlink $logfile;
 		rename $newfile, $logfile;
