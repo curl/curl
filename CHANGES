@@ -7,7 +7,7 @@
                                   Changelog
 Daniel S (17 May 2007)
 - Feng Tu pointed out a division by zero error in the TFTP connect timeout
-  code for timeouts less than fice seconds, and also provided a fix for it.
+  code for timeouts less than five seconds, and also provided a fix for it.
 
 Dan F (16 May 2007)
 - Added support for compiling under Minix 3.1.3 using ACK.
