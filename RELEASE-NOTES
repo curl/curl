@@ -43,6 +43,7 @@ This release includes the following bugfixes:
  o better handling of out of memory conditions
  o overwriting an uploaded file with sftp now truncates it first
  o SFTP quote commands chmod, chown, chgrp can now set a value of 0
+ o TFTP connect timouts less than 5 seconds
 
 This release includes the following known bugs:
 
@@ -67,6 +68,6 @@ advice from friends like these:
  Song Ma, Dan Fandrich, Yang Tse, Jay Austin, Robert Iakobashvil,
  James Housley, Daniel Black, Steve Little, Sonia Subramanian, Peter O'Gorman,
  Frank Hempel, Michael Wallner, Jeff Pohlmeyer, Tobias Rundström,
- Anders Gustafsson, James Bursa, Kristian Gunstone
+ Anders Gustafsson, James Bursa, Kristian Gunstone, Feng Tu
 
         Thanks! (and sorry if I forgot to mention someone)
