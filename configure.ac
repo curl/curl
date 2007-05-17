@@ -418,6 +418,21 @@ fi
 
 if test "$HAVE_GETHOSTBYNAME" != "1"
 then
+  dnl This is for Minix 3.1
+  AC_MSG_CHECKING([for gethostbyname for Minix 3])
+  AC_TRY_LINK([
+/* Older Minix versions may need <net/gen/netdb.h> here instead */
+#include <netdb.h>],
+               [gethostbyname("www.dummysite.com");],
+               [ dnl worked!
+               AC_MSG_RESULT([yes])
+               HAVE_GETHOSTBYNAME="1"],
+               AC_MSG_RESULT(no)
+             )
+fi
+
+if test "$HAVE_GETHOSTBYNAME" != "1"
+then
   dnl This is for eCos with a stubbed DNS implementation
   AC_MSG_CHECKING([for gethostbyname for eCos])
   AC_TRY_LINK([

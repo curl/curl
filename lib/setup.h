@@ -259,6 +259,12 @@
 #define sclose(x) CloseSocket(x)
 #endif
 
+#ifdef __minix
+/* Minix 3 versions up to at least 3.1.3 are missing these prototypes */
+extern char * strtok_r(char *s, const char *delim, char **last);
+extern struct tm * gmtime_r(const time_t * const timep, struct tm *tmp);
+#endif
+
 #define DIR_CHAR      "/"
 #ifndef DOT_CHAR
 #define DOT_CHAR      "."

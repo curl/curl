@@ -577,20 +577,31 @@ eCos
 
 Minix
 =====
-   curl can be compiled on Minix 3 using gcc (ACK has a few problems due
-   to mismatched headers and libraries as of ver. 3.1.2).  The gcc and bash
-   packages must be installed first.  The default heap size allocated to
-   bash is inadequate for running configure and will result in out of memory
-   errors.  Increase it with the command:
+   curl can be compiled on Minix 3 using gcc or ACK (starting with
+   ver. 3.1.3).  The gcc and bash packages must be installed first.
+   The default heap size allocated to bash is inadequate for running
+   configure and will result in out of memory errors.  Increase it with
+   the command:
 
      chmem =2048000 /usr/local/bin/bash
 
-   Make sure gcc and bash are in the PATH then configure curl with a
-   command like this:
+   Make sure gcc and bash are in the PATH with the command:
+   
+     export PATH=/usr/gnu/bin:$PATH
+   
+   then configure curl with a command like this:
 
-     ./configure GREP=/usr/bin/grep AR=/usr/gnu/bin/gar --disable-ldap
+     ./configure CC=gcc GREP=grep AR=/usr/gnu/bin/gar --disable-ldap
 
    Then simply run 'make'.
+
+   To compile with the ACK C compiler:
+
+     chmem =1024000 /usr/lib/em_cemcom.ansi
+     chmem =512000 /usr/lib/i386/as
+     ./configure CC=cc LD=cc GREP=grep CPPFLAGS=-D_POSIX_SOURCE=1 \
+                 --disable-ldap
+     make
 
 
 CROSS COMPILE
@@ -728,7 +739,7 @@ PORTS
         - i386 FreeBSD
         - i386 HURD
         - i386 Linux 1.3, 2.0, 2.2, 2.3, 2.4, 2.6
-        - i386 MINIX 3.1.2
+        - i386 MINIX 3.1
         - i386 NetBSD
         - i386 Novell NetWare
         - i386 OS/2
