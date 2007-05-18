@@ -415,8 +415,6 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
     return CURLE_TFTP_ILLEGAL; /* not really the perfect return code for
                                   this */
   }
-  Curl_pgrsSetDownloadCounter(data,
-                              (curl_off_t) state->block*TFTP_BLOCKSIZE);
   return CURLE_OK;
 }
 
@@ -485,6 +483,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
     /* Check all sbytes were sent */
     if(sbytes<0) {
       failf(data, "%s\n", Curl_strerror(state->conn, SOCKERRNO));
+      return CURLE_SEND_ERROR;
     }
     break;
 
@@ -497,7 +496,8 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
     if(state->retries > state->retry_max) {
       state->error = TFTP_ERR_TIMEOUT;
       state->state = TFTP_STATE_FIN;
-    } else {
+    }
+    else {
       /* Re-send the data packet */
       sbytes = sendto(state->sockfd, (void *)&state->spacket,
                       4+state->sbytes, SEND_4TH_ARG,
@@ -506,6 +506,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
       /* Check all sbytes were sent */
       if(sbytes<0) {
         failf(data, "%s\n", Curl_strerror(state->conn, SOCKERRNO));
+        return CURLE_SEND_ERROR;
       }
     }
     break;
@@ -738,6 +739,8 @@ CURLcode Curl_tftp(struct connectdata *conn, bool *done)
                                      state->rbytes-4);
             if(code)
               return code;
+            Curl_pgrsSetDownloadCounter(data,
+                                        (curl_off_t) state->rbytes-4);
           }
           break;
         case TFTP_EVENT_ERROR:

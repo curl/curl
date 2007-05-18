@@ -5,7 +5,7 @@ Curl and libcurl 7.16.3
  Available command line options:           118
  Available curl_easy_setopt() options:     141
  Number of public functions in libcurl:    54
- Amount of public web site mirrors:        39
+ Amount of public web site mirrors:        38
  Number of known libcurl bindings:         35
  Number of contributors:                   554
 
@@ -44,6 +44,7 @@ This release includes the following bugfixes:
  o overwriting an uploaded file with sftp now truncates it first
  o SFTP quote commands chmod, chown, chgrp can now set a value of 0
  o TFTP connect timouts less than 5 seconds
+ o improved curl -w for TFTP transfers
 
 This release includes the following known bugs:
 

@@ -5,9 +5,16 @@
                              \___|\___/|_| \_\_____|
 
                                   Changelog
+Daniel S (18 May 2007)
+- Feng Tu reported that curl -w did wrong on TFTP transfers in 
+  bug report #1715394 (http://curl.haxx.se/bug/view.cgi?id=1715394), and the
+  transfer-related info "variables" were indeed overwritten with zeroes wrongly
+  and have now been adjusted. The upload size still isn't accurate.
+
 Daniel S (17 May 2007)
 - Feng Tu pointed out a division by zero error in the TFTP connect timeout
   code for timeouts less than five seconds, and also provided a fix for it.
+  Bug report #1715392 (http://curl.haxx.se/bug/view.cgi?id=1715392)
 
 Dan F (16 May 2007)
 - Added support for compiling under Minix 3.1.3 using ACK.
