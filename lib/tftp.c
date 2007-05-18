@@ -371,6 +371,7 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
                     state->remote_addrlen);
     if(sbytes < 0) {
       failf(data, "%s\n", Curl_strerror(state->conn, SOCKERRNO));
+      return CURLE_SEND_ERROR;
     }
 
     /* Check if completed (That is, a less than full packet is received) */
@@ -400,6 +401,7 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
       /* Check all sbytes were sent */
       if(sbytes<0) {
         failf(data, "%s\n", Curl_strerror(state->conn, SOCKERRNO));
+        return CURLE_SEND_ERROR;
       }
     }
     break;
@@ -410,7 +412,8 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
 
   default:
     failf(data, "%s\n", "tftp_rx: internal error");
-    break;
+    return CURLE_TFTP_ILLEGAL; /* not really the perfect return code for
+                                  this */
   }
   Curl_pgrsSetDownloadCounter(data,
                               (curl_off_t) state->block*TFTP_BLOCKSIZE);
@@ -685,7 +688,8 @@ CURLcode Curl_tftp(struct connectdata *conn, bool *done)
       code=tftp_state_machine(state, event) ) {
 
     /* Wait until ready to read or timeout occurs */
-    rc=Curl_socket_ready(state->sockfd, CURL_SOCKET_BAD, state->retry_time * 1000);
+    rc=Curl_socket_ready(state->sockfd, CURL_SOCKET_BAD,
+                         state->retry_time * 1000);
 
     if(rc == -1) {
       /* bail out */
