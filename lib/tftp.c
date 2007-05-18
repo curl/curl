@@ -431,6 +431,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
   int sbytes;
   int rblock;
   CURLcode res = CURLE_OK;
+  struct Curl_transfer_keeper *k = &data->reqdata.keep;
 
   switch(event) {
 
@@ -485,6 +486,9 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
       failf(data, "%s\n", Curl_strerror(state->conn, SOCKERRNO));
       return CURLE_SEND_ERROR;
     }
+    /* Update the progress meter */
+    k->writebytecount += state->sbytes;
+    Curl_pgrsSetUploadCounter(data, k->writebytecount);
     break;
 
   case TFTP_EVENT_TIMEOUT:
@@ -508,6 +512,8 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
         failf(data, "%s\n", Curl_strerror(state->conn, SOCKERRNO));
         return CURLE_SEND_ERROR;
       }
+      /* since this was a re-send, we remain at the still byte position */
+      Curl_pgrsSetUploadCounter(data, k->writebytecount);
     }
     break;
 
@@ -519,9 +525,6 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
     failf(data, "%s\n", "tftp_tx: internal error");
     break;
   }
-
-  /* Update the progress meter */
-  Curl_pgrsSetUploadCounter(data, (curl_off_t) state->block*TFTP_BLOCKSIZE);
 
   return res;
 }
@@ -667,6 +670,7 @@ CURLcode Curl_tftp(struct connectdata *conn, bool *done)
   struct Curl_sockaddr_storage fromaddr;
   socklen_t             fromlen;
   int                   check_time = 0;
+  struct Curl_transfer_keeper *k = &data->reqdata.keep;
 
   *done = TRUE;
 
@@ -739,8 +743,8 @@ CURLcode Curl_tftp(struct connectdata *conn, bool *done)
                                      state->rbytes-4);
             if(code)
               return code;
-            Curl_pgrsSetDownloadCounter(data,
-                                        (curl_off_t) state->rbytes-4);
+            k->bytecount += state->rbytes-4;
+            Curl_pgrsSetDownloadCounter(data, (curl_off_t) k->bytecount);
           }
           break;
         case TFTP_EVENT_ERROR:
