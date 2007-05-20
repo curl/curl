@@ -595,7 +595,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
   timeout =
     conn->data->set.connecttimeout ? conn->data->set.connecttimeout :
     conn->data->set.timeout ? conn->data->set.timeout :
-    CURL_TIMEOUT_RESOLVE; /* default name resolve timeout */
+    CURL_TIMEOUT_RESOLVE * 1000; /* default name resolve timeout */
   ticks = GetTickCount();
 
   /* wait for the thread to resolve the name */
