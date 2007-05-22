@@ -9,7 +9,7 @@ Daniel S (22 May 2007)
 - Andre Guibert de Bruet fixed a memory leak in the function that verifies the
   peer's name in the SSL certificate when built for OpenSSL. The leak happens
   for libcurls with CURL_DOES_CONVERSIONS enabled that fail to convert the CN
-  name from UTF8.
+  name from UTF8. He also fixed a leak when PKCS #12 parsing failed.
 
 Daniel S (18 May 2007)
 - Feng Tu reported that curl -w did wrong on TFTP transfers in bug report

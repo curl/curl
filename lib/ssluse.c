@@ -377,6 +377,7 @@ int cert_stuff(struct connectdata *conn,
         failf(data,
               "could not parse PKCS12 file, check password, OpenSSL error %s",
               ERR_error_string(ERR_get_error(), NULL) );
+        PKCS12_free(p12);
         return 0;
       }
 

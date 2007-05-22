@@ -46,6 +46,7 @@ This release includes the following bugfixes:
  o TFTP connect timouts less than 5 seconds
  o improved curl -w for TFTP transfers
  o memory leak when failed OpenSSL certificate CN field checking
+ o memory leak when OpenSSL failed PKCS #12 parsing
 
 This release includes the following known bugs:
 
