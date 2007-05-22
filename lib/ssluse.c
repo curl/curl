@@ -1123,7 +1123,8 @@ static CURLcode verifyhost(struct connectdata *conn,
       rc = Curl_convert_from_utf8(data, peer_CN, strlen(peer_CN));
       /* Curl_convert_from_utf8 calls failf if unsuccessful */
       if (rc != CURLE_OK) {
-        return(rc);
+        OPENSSL_free(peer_CN);
+        return rc;
       }
     }
 #endif /* CURL_DOES_CONVERSIONS */

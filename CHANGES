@@ -5,11 +5,17 @@
                              \___|\___/|_| \_\_____|
 
                                   Changelog
+Daniel S (22 May 2007)
+- Andre Guibert de Bruet fixed a memory leak in the function that verifies the
+  peer's name in the SSL certificate when built for OpenSSL. The leak happens
+  for libcurls with CURL_DOES_CONVERSIONS enabled that fail to convert the CN
+  name from UTF8.
+
 Daniel S (18 May 2007)
-- Feng Tu reported that curl -w did wrong on TFTP transfers in 
-  bug report #1715394 (http://curl.haxx.se/bug/view.cgi?id=1715394), and the
-  transfer-related info "variables" were indeed overwritten with zeroes wrongly
-  and have now been adjusted. The upload size still isn't accurate.
+- Feng Tu reported that curl -w did wrong on TFTP transfers in bug report
+  #1715394 (http://curl.haxx.se/bug/view.cgi?id=1715394), and the
+  transfer-related info "variables" were indeed overwritten with zeroes
+  wrongly and have now been adjusted. The upload size still isn't accurate.
 
 Daniel S (17 May 2007)
 - Feng Tu pointed out a division by zero error in the TFTP connect timeout

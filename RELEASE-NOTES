@@ -45,6 +45,7 @@ This release includes the following bugfixes:
  o SFTP quote commands chmod, chown, chgrp can now set a value of 0
  o TFTP connect timouts less than 5 seconds
  o improved curl -w for TFTP transfers
+ o memory leak when failed OpenSSL certificate CN field checking
 
 This release includes the following known bugs:
 
@@ -69,6 +70,7 @@ advice from friends like these:
  Song Ma, Dan Fandrich, Yang Tse, Jay Austin, Robert Iakobashvil,
  James Housley, Daniel Black, Steve Little, Sonia Subramanian, Peter O'Gorman,
  Frank Hempel, Michael Wallner, Jeff Pohlmeyer, Tobias Rundström,
- Anders Gustafsson, James Bursa, Kristian Gunstone, Feng Tu
+ Anders Gustafsson, James Bursa, Kristian Gunstone, Feng Tu,
+ Andre Guibert de Bruet
 
         Thanks! (and sorry if I forgot to mention someone)
