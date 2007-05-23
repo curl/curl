@@ -125,6 +125,7 @@ A few areas in the code are still using blocking code, even when used from the
 multi interface. While we certainly want and intend for these to get fixed in
 the future, you should be aware of the following current restrictions:
 
+.nf
  - Name resolves on non-windows unless c-ares is used
  - GnuTLS SSL connections
  - Active FTP connections
@@ -132,3 +133,4 @@ the future, you should be aware of the following current restrictions:
  - SCP and SFTP connections
  - SFTP transfers
  - file:// transfers
+.fi
