@@ -5,6 +5,12 @@
                              \___|\___/|_| \_\_____|
 
                                   Changelog
+Daniel S (24 May 2007)
+- 'mytx' in bug report #1723194 (http://curl.haxx.se/bug/view.cgi?id=1723194)
+  pointed out that the warnf() function in the curl tool didn't properly deal
+  with the cases when excessively long words were used in the string to chop
+  up.
+
 Daniel S (22 May 2007)
 - Andre Guibert de Bruet fixed a memory leak in the function that verifies the
   peer's name in the SSL certificate when built for OpenSSL. The leak happens
