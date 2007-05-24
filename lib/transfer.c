@@ -1631,8 +1631,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
 
 /*
- * Curl_readwrite_init() inits the readwrite session. This is inited each time for a
- * transfer, sometimes multiple times on the same SessionHandle
+ * Curl_readwrite_init() inits the readwrite session. This is inited each time
+ * for a transfer, sometimes multiple times on the same SessionHandle
  */
 
 CURLcode Curl_readwrite_init(struct connectdata *conn)
