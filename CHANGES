@@ -5,6 +5,12 @@
                              \___|\___/|_| \_\_____|
 
                                   Changelog
+Daniel S (25 May 2007)
+- Rob Crittenden fixed bug #1705802
+  (http://curl.haxx.se/bug/view.cgi?id=1705802), which was filed by Daniel
+  Black identifying several FTP-SSL test cases fail when we build libcurl with
+  NSS for TLS/SSL. Listed as #42 in KNOWN_BUGS.
+
 Daniel S (24 May 2007)
 - Song Ma filed bug report #1724016
   (http://curl.haxx.se/bug/view.cgi?id=1724016) noticing that downloading

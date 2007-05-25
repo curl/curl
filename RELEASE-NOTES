@@ -47,6 +47,7 @@ This release includes the following bugfixes:
  o improved curl -w for TFTP transfers
  o memory leak when failed OpenSSL certificate CN field checking
  o memory leak when OpenSSL failed PKCS #12 parsing
+ o FPL-SSL when built with NSS
 
 This release includes the following known bugs:
 
@@ -72,6 +73,6 @@ advice from friends like these:
  James Housley, Daniel Black, Steve Little, Sonia Subramanian, Peter O'Gorman,
  Frank Hempel, Michael Wallner, Jeff Pohlmeyer, Tobias Rundström,
  Anders Gustafsson, James Bursa, Kristian Gunstone, Feng Tu,
- Andre Guibert de Bruet
+ Andre Guibert de Bruet, Rob Crittenden
 
         Thanks! (and sorry if I forgot to mention someone)

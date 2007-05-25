@@ -3,10 +3,6 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
-42. Daniel Black filed bug report #1705802 where he accurately mentions that
-  several FTP-SSL test cases fail when we build libcurl with NSS for TLS/SSL:
-  http://curl.haxx.se/bug/view.cgi?id=1705802
-
 41. When doing an operation over FTP that requires the ACCT command (but not
   when logging in), the operation will fail since libcurl doesn't detect this
   and thus fails to issue the correct command:

@@ -74,6 +74,8 @@ PRFileDesc *PR_ImportTCPSocket(PRInt32 osfd);
 static int initialized = 0;
 static int noverify = 0;
 
+#define HANDSHAKE_TIMEOUT 30
+
 typedef struct {
   PRInt32 retryCount;
   struct SessionHandle *data;
@@ -512,6 +514,12 @@ CURLcode Curl_nss_connect(struct connectdata * conn, int sockindex)
   SSL_ResetHandshake(connssl->handle, /* asServer */ PR_FALSE);
 
   SSL_SetURL(connssl->handle, conn->host.name);
+
+  /* Force the handshake now */
+  if (SSL_ForceHandshakeWithTimeout(connssl->handle,
+                                    PR_SecondsToInterval(HANDSHAKE_TIMEOUT))
+      != SECSuccess)
+    goto error;
 
   return CURLE_OK;
 
