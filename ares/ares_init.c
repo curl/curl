@@ -555,6 +555,10 @@ DhcpNameServer
 
   if (status == ARES_SUCCESS)
     status = ARES_EOF;
+  else
+    /* Catch the case when all the above checks fail (which happens when there
+       is no network card or the cable is unplugged) */
+    status = ARES_EFILE;
 
 #elif defined(__riscos__)
 

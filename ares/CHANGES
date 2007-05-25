@@ -1,5 +1,9 @@
   Changelog for the c-ares project
 
+* May 25 2007
+- Ravi Pratap fixed a flaw in the init_by_resolv_conf() function for windows
+  that could cause it to return a bad return code.
+
 * April 16 2007
 
 - Yang Tse: Provide ares_getopt() command-line parser function as a source
