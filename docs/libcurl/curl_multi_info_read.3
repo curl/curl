@@ -25,8 +25,8 @@ queue so calling this function again will not return the same message
 again. It will instead return new messages at each new invoke until the queue
 is emptied.
 
-The data the returned pointer points to will not survive calling
-\fIcurl_multi_cleanup(3)\fP, \fIcurl_multi_remove_handle(3)\fP or
+\fBWARNING:\fP The data the returned pointer points to will not survive
+calling \fIcurl_multi_cleanup(3)\fP, \fIcurl_multi_remove_handle(3)\fP or
 \fIcurl_easy_cleanup(3)\fP.
 
 The 'CURLMsg' struct is very simple and only contain very basic information.
