@@ -5,6 +5,12 @@
                              \___|\___/|_| \_\_____|
 
                                   Changelog
+Daniel S (27 May 2007)
+- When working with a problem Stefan Becker had, I found an off-by-one buffer
+  overwrite in Curl_select(). While fixing it, I also improved its performance
+  somewhat by changing calloc to malloc and breaking out of a loop earlier
+  (when possible).
+
 Daniel S (25 May 2007)
 - Rob Crittenden fixed bug #1705802
   (http://curl.haxx.se/bug/view.cgi?id=1705802), which was filed by Daniel

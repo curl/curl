@@ -48,6 +48,7 @@ This release includes the following bugfixes:
  o memory leak when failed OpenSSL certificate CN field checking
  o memory leak when OpenSSL failed PKCS #12 parsing
  o FPL-SSL when built with NSS
+ o out-of-boundary write in Curl_select()
 
 This release includes the following known bugs:
 
