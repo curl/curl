@@ -104,6 +104,12 @@ get more messages until the message queue is empty. The information you
 receive there includes an easy handle pointer which you may use to identify
 which easy handle the information regards.
 
+When a single transfer is completed, the easy handle is still left added to
+the multi stack. You need to first remove the easy handle with
+\fIcurl_multi_remove_handle(3)\fP and then close it with
+\fIcurl_easy_cleanup(3)\fP, or possibly set new options to it and add it again
+with \fIcurl_multi_add_handle(3)\fP to start another transfer.
+
 When all transfers in the multi stack are done, cleanup the multi handle with
 \fIcurl_multi_cleanup(3)\fP. Be careful and please note that you \fBMUST\fP
 invoke separate \fIcurl_easy_cleanup(3)\fP calls on every single easy handle
