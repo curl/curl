@@ -573,7 +573,7 @@ int Curl_select(int nfds,
   else if (poll_nfds <= SMALL_POLLNFDS)
     poll_fds = small_fds;
   else {
-    poll_fds = calloc((size_t)poll_nfds, sizeof(struct pollfd));
+    poll_fds = malloc(poll_nfds * sizeof(struct pollfd));
     if (!poll_fds) {
       SET_SOCKERRNO(ENOBUFS);
       return -1;
@@ -581,20 +581,27 @@ int Curl_select(int nfds,
   }
 
   if (poll_fds) {
+    int events;
     ix = 0;
     fd = nfds;
     while (fd--) {
-      poll_fds[ix].events = 0;
+      events = 0;
       if (fds_read && (0 != FD_ISSET(fd, fds_read)))
-        poll_fds[ix].events |= (POLLRDNORM|POLLIN);
+        events |= (POLLRDNORM|POLLIN);
       if (fds_write && (0 != FD_ISSET(fd, fds_write)))
-        poll_fds[ix].events |= (POLLWRNORM|POLLOUT);
+        events |= (POLLWRNORM|POLLOUT);
       if (fds_excep && (0 != FD_ISSET(fd, fds_excep)))
-        poll_fds[ix].events |= (POLLRDBAND|POLLPRI);
-      if (poll_fds[ix].events) {
+        events |= (POLLRDBAND|POLLPRI);
+      if (events) {
+        poll_fds[ix].events = events;
         poll_fds[ix].fd = fd;
         poll_fds[ix].revents = 0;
         ix++;
+        if(ix == poll_nfds)
+          /* since we know this is the total amount of descriptors with
+             interesting actions, we can skip the rest of the loop at this
+             point */
+          break;
       }
     }
   }
