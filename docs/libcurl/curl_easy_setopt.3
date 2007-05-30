@@ -1129,10 +1129,10 @@ speed. (Added in 7.15.5)
 .IP CURLOPT_MAXCONNECTS
 Pass a long. The set number will be the persistent connection cache size. The
 set amount will be the maximum amount of simultaneously open connections that
-libcurl may cache. Default is 5, and there isn't much point in changing this
-value unless you are perfectly aware of how this work and changes libcurl's
-behaviour. This concerns connection using any of the protocols that support
-persistent connections.
+libcurl may cache in this easy handle. Default is 5, and there isn't much
+point in changing this value unless you are perfectly aware of how this work
+and changes libcurl's behaviour. This concerns connection using any of the
+protocols that support persistent connections.
 
 When reaching the maximum limit, curl closes the oldest one in the cache to
 prevent the number of open connections to increase.
@@ -1140,6 +1140,10 @@ prevent the number of open connections to increase.
 If you already have performed transfers with this curl handle, setting a
 smaller MAXCONNECTS than before may cause open connections to get closed
 unnecessarily.
+
+Note that if you add this easy handle to a multi handle, this setting is not
+being acknowledged, but you must instead use \fIcurl_multi_setopt(3)\fP and
+the \fICURLMOPT_MAXCONNECTS\fP option.
 .IP CURLOPT_CLOSEPOLICY
 (Obsolete) This option does nothing.
 .IP CURLOPT_FRESH_CONNECT

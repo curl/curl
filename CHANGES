@@ -5,6 +5,10 @@
                              \___|\___/|_| \_\_____|
 
                                   Changelog
+Daniel S (30 May 2007)
+- Added CURLMOPT_MAXCONNECTS which is a curl_multi_setopt() option for setting
+  the maximum size of the connection cache maximum size of the multi handle.
+
 Daniel S (27 May 2007)
 - When working with a problem Stefan Becker had, I found an off-by-one buffer
   overwrite in Curl_select(). While fixing it, I also improved its performance

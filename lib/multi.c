@@ -160,6 +160,8 @@ struct Curl_multi {
 
   /* shared connection cache */
   struct conncache *connc;
+  long maxconnects; /* if >0, a fixed limit of the maximum number of entries
+                       we're allowed to grow the connection cache to */
 
   /* list of easy handles kept around for doing nice connection closures */
   struct closure *closure;
@@ -484,11 +486,19 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
     /* We want the connection cache to have plenty room. Before we supported
        the shared cache every single easy handle had 5 entries in their cache
        by default. */
-    CURLcode res = Curl_ch_connc(easy_handle, multi->connc,
-                                 multi->num_easy * 4);
-    if(res != CURLE_OK)
-      /* TODO: we need to do some cleaning up here! */
-      return CURLM_OUT_OF_MEMORY;
+    int newmax = multi->num_easy * 4;
+
+    if(multi->maxconnects && (multi->maxconnects < newmax))
+      /* don't grow beyond the allowed size */
+      newmax = multi->maxconnects;
+
+    if(newmax > multi->connc->num) {
+      /* we only do this is we can in fact grow the cache */
+      CURLcode res = Curl_ch_connc(easy_handle, multi->connc, newmax);
+      if(res != CURLE_OK)
+        /* TODO: we need to do some cleaning up here! */
+        return CURLM_OUT_OF_MEMORY;
+    }
   }
 
   /* increase the alive-counter */
@@ -1809,6 +1819,9 @@ CURLMcode curl_multi_setopt(CURLM *multi_handle,
     break;
   case CURLMOPT_TIMERDATA:
     multi->timer_userp = va_arg(param, void *);
+    break;
+  case CURLMOPT_MAXCONNECTS:
+    multi->maxconnects = va_arg(param, long);
     break;
   default:
     res = CURLM_UNKNOWN_OPTION;

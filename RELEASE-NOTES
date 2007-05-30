@@ -17,6 +17,7 @@ This release includes the following changes:
  o CURLOPT_HTTP200ALIASES matched transfers assume HTTP 1.0 compliance
  o more than one test harness can run at the same time without conflict
  o SFTP now supports quote commands before a transfer
+ o CURLMOPT_MAXCONNECTS added to curl_multi_setopt()
 
 This release includes the following bugfixes:
 

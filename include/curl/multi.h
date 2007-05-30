@@ -309,6 +309,9 @@ typedef enum {
   /* This is the argument passed to the timer callback */
   CINIT(TIMERDATA, OBJECTPOINT, 5),
 
+  /* maximum number of entries in the connection cache */
+  CINIT(MAXCONNECTS, LONG, 6),
+
   CURLMOPT_LASTENTRY /* the last unused */
 } CURLMoption;
 
