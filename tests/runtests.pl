@@ -2542,6 +2542,9 @@ sub displaylogs {
         if(($log =~ /^test\d+\.txt/) && ($log !~ /^test$testnum\.txt/)) {
             next; # skip testNnn.txt of other tests
         }
+        if(($log =~ /^file\d+\.txt/) && ($log !~ /^file$testnum\.txt/)) {
+            next; # skip fileNnn.txt of other tests
+        }
         logmsg "=== Start of file $log\n";
         displaylogcontent("$LOGDIR/$log");
         logmsg "=== End of file $log\n";
