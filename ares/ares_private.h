@@ -80,6 +80,8 @@
 
 #endif
 
+#define ARES_ID_KEY_LEN 31
+
 #include "ares_ipv6.h"
 
 struct send_request {
@@ -156,6 +158,13 @@ struct apattern {
   unsigned short type;
 };
 
+typedef struct rc4_key
+{
+  unsigned char state[256];
+  unsigned char x;
+  unsigned char y;
+} rc4_key;
+
 struct ares_channeldata {
   /* Configuration data */
   int flags;
@@ -176,6 +185,8 @@ struct ares_channeldata {
 
   /* ID to use for next query */
   unsigned short next_id;
+  /* key to use when generating new ids */
+  rc4_key id_key;
 
   /* Active queries */
   struct query *queries;
@@ -184,10 +195,15 @@ struct ares_channeldata {
   void *sock_state_cb_data;
 };
 
+void ares__rc4(rc4_key* key,unsigned char *buffer_ptr, int buffer_len);
 void ares__send_query(ares_channel channel, struct query *query, time_t now);
 void ares__close_sockets(ares_channel channel, struct server_state *server);
 int ares__get_hostent(FILE *fp, int family, struct hostent **host);
 int ares__read_line(FILE *fp, char **buf, int *bufsize);
+short ares__generate_new_id(rc4_key* key);
+
+#define ARES_SWAP_BYTE(a,b) \
+  { unsigned char swapByte = *(a);  *(a) = *(b);  *(b) = swapByte; }
 
 #define SOCK_STATE_CALLBACK(c, s, r, w)                                 \
   do {                                                                  \

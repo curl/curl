@@ -2,6 +2,32 @@
 
 * May 30 2007
 
+- Shmulik Regev brought cryptographically secure transaction IDs:
+
+  The c-ares library implementation uses a DNS "Transaction ID" field that is
+  seeded with a pseudo random number (based on gettimeofday) which is
+  incremented (++) between consecutive calls and is therefore rather
+  predictable. In general, predictability of DNS Transaction ID is a well
+  known security problem (e.g.
+  http://bak.spc.org/dms/archive/dns_id_attack.txt) and makes a c-ares based
+  implementation vulnerable to DNS poisoning. Credit goes to Amit Klein
+  (Trusteer) for identifying this problem.
+
+  The patch I wrote changes the implementation to use a more secure way of
+  generating unique IDs. It starts by obtaining a key with reasonable entropy
+  which is used with an RC4 stream to generate the cryptographically secure
+  transaction IDs.
+
+  Note that the key generation code (in ares_init:randomize_key) has two
+  versions, the Windows specific one uses a cryptographically safe function
+  provided (but undocumented :) by the operating system (described at
+  http://blogs.msdn.com/michael_howard/archive/2005/01/14/353379.aspx).  The
+  default implementation is a bit naive and uses the standard 'rand'
+  function. Surely a better way to generate random keys exists for other
+  platforms.
+
+  The patch can be tested by using the adig utility and using the '-s' option.
+
 - Brad House added ares_save_options() and ares_destroy_options() that can be
   used to keep options for later re-usal when ares_init_options() is used.
   

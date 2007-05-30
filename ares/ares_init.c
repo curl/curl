@@ -72,6 +72,8 @@ static int config_nameserver(struct server_state **servers, int *nservers,
 static int set_search(ares_channel channel, const char *str);
 static int set_options(ares_channel channel, const char *str);
 static const char *try_option(const char *p, const char *q, const char *opt);
+static void init_id_key(rc4_key* key,int key_data_len);
+
 #ifndef WIN32
 static int sortlist_alloc(struct apattern **sortlist, int *nsort, struct apattern *pat);
 static int ip_addr(const char *s, int len, struct in_addr *addr);
@@ -85,10 +87,10 @@ static char *try_config(char *s, const char *opt);
 #endif
 
 #define ARES_CONFIG_CHECK(x) (x->lookups && x->nsort > -1 && \
-			     x->nservers > -1 && \
+                             x->nservers > -1 && \
                              x->ndomains > -1 && \
-			     x->ndots > -1 && x->timeout > -1 && \
-			     x->tries > -1)
+                             x->ndots > -1 && x->timeout > -1 && \
+                             x->tries > -1)
 
 int ares_init(ares_channel *channelptr)
 {
@@ -102,7 +104,6 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
   int i;
   int status = ARES_SUCCESS;
   struct server_state *server;
-  struct timeval tv;
 
 #ifdef CURLDEBUG
   const char *env = getenv("CARES_MEMDEBUG");
@@ -203,15 +204,9 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
       server->qtail = NULL;
     }
 
-  /* Choose a somewhat random query ID.  The main point is to avoid
-   * collisions with stale queries.  An attacker trying to spoof a DNS
-   * answer also has to guess the query ID, but it's only a 16-bit
-   * field, so there's not much to be done about that.
-   */
-  gettimeofday(&tv, NULL);
-  channel->next_id = (unsigned short)
-    ((tv.tv_sec ^ tv.tv_usec ^ getpid()) & 0xffff);
+  init_id_key(&channel->id_key, ARES_ID_KEY_LEN);
 
+  channel->next_id = ares__generate_new_id(&channel->id_key);
   channel->queries = NULL;
 
   *channelptr = channel;
@@ -1271,3 +1266,67 @@ static void natural_mask(struct apattern *pat)
     pat->mask.addr.addr4.s_addr = htonl(IN_CLASSC_NET);
 }
 #endif
+/* initialize an rc4 key. If possible a cryptographically secure random key
+   is generated using a suitable function (for example win32's RtlGenRandom as
+   described in
+   http://blogs.msdn.com/michael_howard/archive/2005/01/14/353379.aspx
+   otherwise the code defaults to cross-platform albeit less secure mechanism
+   using rand
+*/
+static void randomize_key(unsigned char* key,int key_data_len)
+{
+  int randomized = 0;
+#ifdef WIN32
+  HMODULE lib=LoadLibrary("ADVAPI32.DLL");
+  if (lib) {
+    BOOLEAN (APIENTRY *pfn)(void*, ULONG) =
+      (BOOLEAN (APIENTRY *)(void*,ULONG))GetProcAddress(lib,"SystemFunction036");
+    if (pfn && pfn(key,key_data_len) )
+      randomized = 1;
+
+    FreeLibrary(lib);
+  }
+#endif
+
+  if ( !randomized ) {
+    int counter;
+    for (counter=0;counter<key_data_len;counter++)
+      key[counter]=rand() % 256;
+  }
+}
+
+static void init_id_key(rc4_key* key,int key_data_len)
+{
+  unsigned char index1;
+  unsigned char index2;
+  unsigned char* state;
+  short counter;
+  unsigned char *key_data_ptr = 0;
+
+  key_data_ptr = calloc(1,key_data_len);
+  randomize_key(key->state,key_data_len);
+  state = &key->state[0];
+  for(counter = 0; counter < 256; counter++)
+        state[counter] = counter;
+  key->x = 0;
+  key->y = 0;
+  index1 = 0;
+  index2 = 0;
+  for(counter = 0; counter < 256; counter++)
+  {
+    index2 = (key_data_ptr[index1] + state[counter] +
+              index2) % 256;
+    ARES_SWAP_BYTE(&state[counter], &state[index2]);
+
+    index1 = (index1 + 1) % key_data_len;
+  }
+  free(key_data_ptr);
+
+}
+
+short ares__generate_new_id(rc4_key* key)
+{
+  short r;
+  ares__rc4(key, (unsigned char *)&r, sizeof(r));
+  return r;
+}
