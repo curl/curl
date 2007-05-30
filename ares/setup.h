@@ -3,7 +3,7 @@
 
 /* $Id$ */
 
-/* Copyright (C) 2004 - 2005 by Daniel Stenberg et al
+/* Copyright (C) 2004 - 2007 by Daniel Stenberg et al
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -116,18 +116,6 @@
 #undef PACKAGE_NAME
 #undef VERSION
 #undef PACKAGE
-
-/*
- * Typedef our socket type
- */
-
-#ifdef USE_WINSOCK
-typedef SOCKET ares_socket_t;
-#define ARES_SOCKET_BAD INVALID_SOCKET
-#else
-typedef int ares_socket_t;
-#define ARES_SOCKET_BAD -1
-#endif
 
 /*
  * Assume a few thing unless they're set by configure

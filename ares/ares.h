@@ -136,6 +136,22 @@ extern "C" {
 #define ARES_GETSOCK_WRITABLE(bits,num) (bits & (1 << ((num) + \
                                          ARES_GETSOCK_MAXNUM)))
 
+
+/*
+ * Typedef our socket type
+ */
+
+#ifndef ares_socket_typedef
+#ifdef WIN32
+typedef SOCKET ares_socket_t;
+#define ARES_SOCKET_BAD INVALID_SOCKET
+#else
+typedef int ares_socket_t;
+#define ARES_SOCKET_BAD -1
+#endif
+#define ares_socket_typedef
+#endif /* ares_socket_typedef */
+
 #ifdef WIN32
 typedef void (*ares_sock_state_cb)(void *data,
                                    SOCKET socket,
@@ -200,6 +216,8 @@ int ares_getsock(ares_channel channel, int *socks, int numsocks);
 struct timeval *ares_timeout(ares_channel channel, struct timeval *maxtv,
                              struct timeval *tv);
 void ares_process(ares_channel channel, fd_set *read_fds, fd_set *write_fds);
+void ares_process_fd(ares_channel channel, ares_socket_t read_fd,
+                     ares_socket_t write_fd);
 
 int ares_mkquery(const char *name, int dnsclass, int type, unsigned short id,
                  int rd, unsigned char **buf, int *buflen);

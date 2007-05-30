@@ -1,6 +1,16 @@
   Changelog for the c-ares project
 
+* May 30 2007
+
+- Daniel S added ares_process_fd() to allow applications to ask for processing
+  on specific sockets and thus avoiding select() and associated
+  functions/macros.  This function will be used by upcoming libcurl releases
+  for this very reason. It also made me export the ares_socket_t type in the
+  public ares.h header file, since ares_process_fd() uses that type for two of
+  the arguments.
+
 * May 25 2007
+
 - Ravi Pratap fixed a flaw in the init_by_resolv_conf() function for windows
   that could cause it to return a bad return code.
 

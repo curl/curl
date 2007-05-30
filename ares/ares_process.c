@@ -56,10 +56,11 @@
 
 static int try_again(int errnum);
 static void write_tcp_data(ares_channel channel, fd_set *write_fds,
-                           time_t now);
-static void read_tcp_data(ares_channel channel, fd_set *read_fds, time_t now);
+                           ares_socket_t write_fd, time_t now);
+static void read_tcp_data(ares_channel channel, fd_set *read_fds,
+                          ares_socket_t read_fd, time_t now);
 static void read_udp_packets(ares_channel channel, fd_set *read_fds,
-                             time_t now);
+                             ares_socket_t read_fd, time_t now);
 static void process_timeouts(ares_channel channel, time_t now);
 static void process_answer(ares_channel channel, unsigned char *abuf,
                            int alen, int whichserver, int tcp, int now);
@@ -80,11 +81,29 @@ void ares_process(ares_channel channel, fd_set *read_fds, fd_set *write_fds)
   time_t now;
 
   time(&now);
-  write_tcp_data(channel, write_fds, now);
-  read_tcp_data(channel, read_fds, now);
-  read_udp_packets(channel, read_fds, now);
+  write_tcp_data(channel, write_fds, ARES_SOCKET_BAD, now);
+  read_tcp_data(channel, read_fds, ARES_SOCKET_BAD, now);
+  read_udp_packets(channel, read_fds, ARES_SOCKET_BAD, now);
   process_timeouts(channel, now);
 }
+
+/* Something interesting happened on the wire, or there was a timeout.
+ * See what's up and respond accordingly.
+ */
+void ares_process_fd(ares_channel channel,
+                     ares_socket_t read_fd, /* use ARES_SOCKET_BAD or valid
+                                               file descriptors */
+                     ares_socket_t write_fd)
+{
+  time_t now;
+
+  time(&now);
+  write_tcp_data(channel, NULL, write_fd, now);
+  read_tcp_data(channel, NULL, read_fd, now);
+  read_udp_packets(channel, NULL, read_fd, now);
+  process_timeouts(channel, now);
+}
+
 
 /* Return 1 if the specified error number describes a readiness error, or 0
  * otherwise. This is mostly for HP-UX, which could return EAGAIN or
@@ -114,7 +133,10 @@ static int try_again(int errnum)
 /* If any TCP sockets select true for writing, write out queued data
  * we have for them.
  */
-static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
+static void write_tcp_data(ares_channel channel,
+                           fd_set *write_fds,
+                           ares_socket_t write_fd,
+                           time_t now)
 {
   struct server_state *server;
   struct send_request *sendreq;
@@ -124,13 +146,26 @@ static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
   ssize_t wcount;
   size_t n;
 
+  if(!write_fds && (write_fd == ARES_SOCKET_BAD))
+    /* no possible action */
+    return;
+
   for (i = 0; i < channel->nservers; i++)
     {
-      /* Make sure server has data to send and is selected in write_fds. */
+      /* Make sure server has data to send and is selected in write_fds or
+         write_fd. */
       server = &channel->servers[i];
-      if (!server->qhead || server->tcp_socket == ARES_SOCKET_BAD
-          || !FD_ISSET(server->tcp_socket, write_fds))
+      if (!server->qhead || server->tcp_socket == ARES_SOCKET_BAD)
         continue;
+
+      if(write_fds) {
+        if(!FD_ISSET(server->tcp_socket, write_fds))
+          continue;
+      }
+      else {
+        if(server->tcp_socket != write_fd)
+          continue;
+      }
 
       /* Count the number of send queue items. */
       n = 0;
@@ -218,19 +253,32 @@ static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
  * allocate a buffer if we finish reading the length word, and process
  * a packet if we finish reading one.
  */
-static void read_tcp_data(ares_channel channel, fd_set *read_fds, time_t now)
+static void read_tcp_data(ares_channel channel, fd_set *read_fds,
+                          ares_socket_t read_fd, time_t now)
 {
   struct server_state *server;
   int i;
   ssize_t count;
 
+  if(!read_fds && (read_fd == ARES_SOCKET_BAD))
+    /* no possible action */
+    return;
+
   for (i = 0; i < channel->nservers; i++)
     {
       /* Make sure the server has a socket and is selected in read_fds. */
       server = &channel->servers[i];
-      if (server->tcp_socket == ARES_SOCKET_BAD ||
-          !FD_ISSET(server->tcp_socket, read_fds))
+      if (server->tcp_socket == ARES_SOCKET_BAD)
         continue;
+
+      if(read_fds) {
+        if(!FD_ISSET(server->tcp_socket, read_fds))
+          continue;
+      }
+      else {
+        if(server->tcp_socket != read_fd)
+          continue;
+      }
 
       if (server->tcp_lenbuf_pos != 2)
         {
@@ -294,21 +342,33 @@ static void read_tcp_data(ares_channel channel, fd_set *read_fds, time_t now)
 
 /* If any UDP sockets select true for reading, process them. */
 static void read_udp_packets(ares_channel channel, fd_set *read_fds,
-                             time_t now)
+                             ares_socket_t read_fd, time_t now)
 {
   struct server_state *server;
   int i;
   ssize_t count;
   unsigned char buf[PACKETSZ + 1];
 
+  if(!read_fds && (read_fd == ARES_SOCKET_BAD))
+    /* no possible action */
+    return;
+
   for (i = 0; i < channel->nservers; i++)
     {
       /* Make sure the server has a socket and is selected in read_fds. */
       server = &channel->servers[i];
 
-      if (server->udp_socket == ARES_SOCKET_BAD ||
-          !FD_ISSET(server->udp_socket, read_fds))
+      if (server->udp_socket == ARES_SOCKET_BAD)
         continue;
+
+      if(read_fds) {
+        if(!FD_ISSET(server->udp_socket, read_fds))
+          continue;
+      }
+      else {
+        if(server->udp_socket != read_fd)
+          continue;
+      }
 
       count = sread(server->udp_socket, buf, sizeof(buf));
       if (count == -1 && try_again(SOCKERRNO))

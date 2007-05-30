@@ -24,16 +24,16 @@ ares_process \- Process events for name resolution
 .B void ares_process(ares_channel \fIchannel\fP, fd_set *\fIread_fds\fP,
 .B	fd_set *\fIwrite_fds\fP)
 .fi
+.PP
+.B void ares_process_fd(ares_channel \fIchannel\fP,
+.B      ares_socket_t \fIread_fd\fP,
+.B	ares_socket_t \fIwrite_fd\fP)
+.fi
 .SH DESCRIPTION
-The
-.B ares_process
-function handles input/output events and timeouts associated with
-queries pending on the name service channel identified by
+The \fBares_process(3)\fP function handles input/output events and timeouts
+associated with queries pending on the name service channel identified by
 .IR channel .
-The file descriptor sets pointed to by
-.I read_fds
-and
-.I write_fds
+The file descriptor sets pointed to by \fIread_fds\fP and \fIwrite_fds\fP
 should have file descriptors set in them according to whether the file
 descriptors specified by \fIares_fds(3)\fP are ready for reading and writing.
 (The easiest way to determine this information is to invoke
@@ -44,6 +44,11 @@ The
 .B ares_process
 function will invoke callbacks for pending queries if they complete
 successfully or fail.
+
+\fBares_process_fd(3)\fP works the same way but acts and operates only on the
+specific file descriptors (sockets) you pass in to the function. Use
+ARES_SOCKET_BAD for "no action". This function is of course provided to allow
+users of c-ares to void select() in their applications and within c-ares.
 .SS EXAMPLE
 The following code fragment waits for all pending queries on a channel
 to complete:
