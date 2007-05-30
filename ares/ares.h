@@ -94,6 +94,7 @@ extern "C" {
 #define ARES_OPT_DOMAINS        (1 << 7)
 #define ARES_OPT_LOOKUPS        (1 << 8)
 #define ARES_OPT_SOCK_STATE_CB  (1 << 9)
+#define ARES_OPT_SORTLIST       (1 << 10)
 
 /* Nameinfo flag values */
 #define ARES_NI_NOFQDN                  (1 << 0)
@@ -164,6 +165,8 @@ typedef void (*ares_sock_state_cb)(void *data,
                                    int writable);
 #endif
 
+struct apattern;
+
 struct ares_options {
   int flags;
   int timeout;
@@ -178,6 +181,8 @@ struct ares_options {
   char *lookups;
   ares_sock_state_cb sock_state_cb;
   void *sock_state_cb_data;
+  struct apattern *sortlist;
+  int nsort;
 };
 
 struct hostent;
@@ -195,6 +200,8 @@ typedef void (*ares_nameinfo_callback)(void *arg, int status,
 int ares_init(ares_channel *channelptr);
 int ares_init_options(ares_channel *channelptr, struct ares_options *options,
                       int optmask);
+int ares_save_options(ares_channel channel, struct ares_options *options, int *optmask);
+void ares_destroy_options(struct ares_options *options);
 void ares_destroy(ares_channel channel);
 void ares_cancel(ares_channel channel);
 void ares_send(ares_channel channel, const unsigned char *qbuf, int qlen,

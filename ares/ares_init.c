@@ -61,7 +61,7 @@
 #undef WIN32  /* Redefined in MingW/MSVC headers */
 #endif
 
-static int init_by_options(ares_channel channel, struct ares_options *options,
+static int init_by_options(ares_channel channel, const struct ares_options *options,
                            int optmask);
 static int init_by_environment(ares_channel channel);
 static int init_by_resolv_conf(ares_channel channel);
@@ -83,6 +83,12 @@ static int config_sortlist(struct apattern **sortlist, int *nsort,
                            const char *str);
 static char *try_config(char *s, const char *opt);
 #endif
+
+#define ARES_CONFIG_CHECK(x) (x->lookups && x->nsort > -1 && \
+			     x->nservers > -1 && \
+                             x->ndomains > -1 && \
+			     x->ndots > -1 && x->timeout > -1 && \
+			     x->tries > -1)
 
 int ares_init(ares_channel *channelptr)
 {
@@ -212,7 +218,76 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
   return ARES_SUCCESS;
 }
 
-static int init_by_options(ares_channel channel, struct ares_options *options,
+/* Save options from initialized channel */
+int ares_save_options(ares_channel channel, struct ares_options *options,
+                      int *optmask)
+{
+  int i;
+
+  /* Zero everything out */
+  memset(options, 0, sizeof(struct ares_options));
+
+  if (!ARES_CONFIG_CHECK(channel))
+    return ARES_ENODATA;
+
+  (*optmask) = (ARES_OPT_FLAGS|ARES_OPT_TIMEOUT|ARES_OPT_TRIES|ARES_OPT_NDOTS|
+                ARES_OPT_UDP_PORT|ARES_OPT_TCP_PORT|ARES_OPT_SOCK_STATE_CB|
+                ARES_OPT_SERVERS|ARES_OPT_DOMAINS|ARES_OPT_LOOKUPS|
+                ARES_OPT_SORTLIST);
+
+  /* Copy easy stuff */
+  options->flags   = channel->flags;
+  options->timeout = channel->timeout;
+  options->tries   = channel->tries;
+  options->ndots   = channel->ndots;
+  options->udp_port = channel->udp_port;
+  options->tcp_port = channel->tcp_port;
+  options->sock_state_cb     = channel->sock_state_cb;
+  options->sock_state_cb_data = channel->sock_state_cb_data;
+
+  /* Copy servers */
+  options->servers =
+    malloc(channel->nservers * sizeof(struct server_state));
+  if (!options->servers && channel->nservers != 0)
+    return ARES_ENOMEM;
+  for (i = 0; i < channel->nservers; i++)
+    options->servers[i] = channel->servers[i].addr;
+  options->nservers = channel->nservers;
+
+  /* copy domains */
+  options->domains = malloc(channel->ndomains * sizeof(char *));
+  if (!options->domains)
+    return ARES_ENOMEM;
+  for (i = 0; i < channel->ndomains; i++)
+  {
+    options->ndomains = i;
+    options->domains[i] = strdup(channel->domains[i]);
+    if (!options->domains[i])
+      return ARES_ENOMEM;
+  }
+  options->ndomains = channel->ndomains;
+
+  /* copy lookups */
+  options->lookups = strdup(channel->lookups);
+  if (!options->lookups)
+    return ARES_ENOMEM;
+
+  /* copy sortlist */
+  options->sortlist = malloc(channel->nsort * sizeof(struct apattern));
+  if (!options->sortlist)
+    return ARES_ENOMEM;
+  for (i = 0; i < channel->nsort; i++)
+  {
+    memcpy(&(options->sortlist[i]), &(channel->sortlist[i]),
+           sizeof(struct apattern));
+  }
+  options->nsort = channel->nsort;
+
+  return ARES_SUCCESS;
+}
+
+static int init_by_options(ares_channel channel,
+                           const struct ares_options *options,
                            int optmask)
 {
   int i;
@@ -280,6 +355,19 @@ static int init_by_options(ares_channel channel, struct ares_options *options,
       channel->lookups = strdup(options->lookups);
       if (!channel->lookups)
         return ARES_ENOMEM;
+    }
+
+  /* copy sortlist */
+  if ((optmask & ARES_OPT_SORTLIST) && channel->nsort == -1)
+    {
+      channel->sortlist = malloc(options->nsort * sizeof(struct apattern));
+      if (!channel->sortlist)
+        return ARES_ENOMEM;
+      for (i = 0; i < options->nsort; i++)
+        {
+          memcpy(&(channel->sortlist[i]), &(options->sortlist[i]), sizeof(struct apattern));
+        }
+      channel->nsort = options->nsort;
     }
 
   return ARES_SUCCESS;
@@ -614,6 +702,10 @@ DhcpNameServer
     FILE *fp;
     int linesize;
     int error;
+
+    /* Don't read resolv.conf and friends if we don't have to */
+    if (ARES_CONFIG_CHECK(channel))
+        return ARES_SUCCESS;
 
     fp = fopen(PATH_RESOLV_CONF, "r");
     if (fp) {

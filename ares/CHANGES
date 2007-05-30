@@ -2,6 +2,25 @@
 
 * May 30 2007
 
+- Brad House added ares_save_options() and ares_destroy_options() that can be
+  used to keep options for later re-usal when ares_init_options() is used.
+  
+  Problem: Calling ares_init() for each lookup can be unnecessarily resource
+         intensive.  On windows, it must LoadLibrary() or search the registry
+         on each call to ares_init().  On unix, it must read and parse
+         multiple files to obtain the necessary configuration information.  In
+         a single-threaded environment, it would make sense to only
+         ares_init() once, but in a heavily multi-threaded environment, it is
+         undesirable to ares_init() and ares_destroy() for each thread created
+         and track that.
+
+  Solution: Create ares_save_options() and ares_destroy_options() functions to
+         retrieve and free options obtained from an initialized channel.  The
+         options populated can be used to pass back into ares_init_options(),
+         it should populate all needed fields and not retrieve any information
+         from the system.  Probably wise to destroy the cache every minute or
+         so to prevent the data from becoming stale.
+
 - Daniel S added ares_process_fd() to allow applications to ask for processing
   on specific sockets and thus avoiding select() and associated
   functions/macros.  This function will be used by upcoming libcurl releases
