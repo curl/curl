@@ -785,4 +785,20 @@ AC_C_BIGENDIAN(
     [AC_MSG_WARN([couldn't figure out endianess, assuming little endian!])]
 )
 
+dnl Check for user-specified random device
+AC_ARG_WITH(random,
+AC_HELP_STRING([--with-random=FILE],
+               [read randomness from FILE (default=/dev/urandom)]),
+    [ RANDOM_FILE="$withval" ],
+    [
+        dnl Check for random device
+        AC_CHECK_FILE("/dev/urandom", [ RANDOM_FILE="/dev/urandom"] )
+    ]
+)
+if test -n "$RANDOM_FILE" && test X"$RANDOM_FILE" != Xno ; then
+        AC_SUBST(RANDOM_FILE)
+        AC_DEFINE_UNQUOTED(RANDOM_FILE, "$RANDOM_FILE",
+        [a suitable file/device to read random data from])
+fi
+
 AC_OUTPUT(Makefile)
