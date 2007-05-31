@@ -18,6 +18,7 @@ This release includes the following changes:
  o more than one test harness can run at the same time without conflict
  o SFTP now supports quote commands before a transfer
  o CURLMOPT_MAXCONNECTS added to curl_multi_setopt()
+ o upload resume works for file:// URLs
 
 This release includes the following bugfixes:
 

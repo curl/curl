@@ -198,6 +198,8 @@ static CURLcode file_upload(struct connectdata *conn)
   size_t nwrite;
   curl_off_t bytecount = 0;
   struct timeval now = Curl_tvnow();
+  struct_stat file_stat;
+  char* buf2;
 
   /*
    * Since FILE: doesn't do the full init, we need to provide some extra
@@ -213,7 +215,11 @@ static CURLcode file_upload(struct connectdata *conn)
   if(!dir[1])
      return CURLE_FILE_COULDNT_READ_FILE; /* fix: better error code */
 
-  fp = fopen(file->path, "wb");
+  if(data->reqdata.resume_from)
+    fp = fopen( file->path, "ab" );
+  else
+    fp = fopen(file->path, "wb");
+
   if(!fp) {
     failf(data, "Can't open %s for writing", file->path);
     return CURLE_WRITE_ERROR;
@@ -222,6 +228,17 @@ static CURLcode file_upload(struct connectdata *conn)
   if(-1 != data->set.infilesize)
     /* known size of data to "upload" */
     Curl_pgrsSetUploadSize(data, data->set.infilesize);
+
+  /* treat the negative resume offset value as the case of "-" */
+  if(data->reqdata.resume_from < 0){
+    if(stat(file->path, &file_stat)){
+      fclose(fp);
+      failf(data, "Can't get the size of %s", file->path);
+      return CURLE_WRITE_ERROR;
+    }
+    else
+      data->reqdata.resume_from = (curl_off_t)file_stat.st_size;
+  }
 
   while (res == CURLE_OK) {
     int readcount;
@@ -234,8 +251,24 @@ static CURLcode file_upload(struct connectdata *conn)
 
     nread = (size_t)readcount;
 
+    /*skip bytes before resume point*/
+    if(data->reqdata.resume_from) {
+      if( nread <= data->reqdata.resume_from ) {
+        data->reqdata.resume_from -= nread;
+        nread = 0;
+        buf2 = buf;
+      }
+      else {
+        buf2 = buf + data->reqdata.resume_from;
+        nread -= data->reqdata.resume_from;
+        data->reqdata.resume_from = 0;
+      }
+    }
+    else
+      buf2 = buf;
+
     /* write the data to the target */
-    nwrite = fwrite(buf, 1, nread, fp);
+    nwrite = fwrite(buf2, 1, nread, fp);
     if(nwrite != nread) {
       res = CURLE_SEND_ERROR;
       break;
