@@ -10,6 +10,16 @@ Daniel S (31 May 2007)
 - Feng Tu made (lib)curl support "upload" resuming work for file:// URLs.
 
 Daniel S (30 May 2007)
+- I modified the 10-at-a-time.c example to transfer 500 downloads in parallel
+  with a c-ares enabled build only to find that it crashed miserably, and this
+  was due to some select()isms left in the code. This was due to API
+  restrictions in c-ares 1.3.x, but with the upcoming c-ares 1.4.0 this is no
+  longer the case so now libcurl runs much better with c-ares and the multi
+  interface with > 1024 file descriptors in use.
+
+  Extra note: starting now we require c-ares 1.4.0 for asynchronous name
+  resolves.
+
 - Added CURLMOPT_MAXCONNECTS which is a curl_multi_setopt() option for setting
   the maximum size of the connection cache maximum size of the multi handle.
 

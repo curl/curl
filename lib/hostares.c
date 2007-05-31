@@ -126,6 +126,69 @@ int Curl_resolv_getsock(struct connectdata *conn,
 }
 
 /*
+ * ares_waitperform()
+ *
+ * 1) Ask ares what sockets it currently plays with, then
+ * 2) wait for the timeout period to check for action on ares' sockets.
+ * 3) tell ares to act on all the sockets marked as "with action"
+ *
+ * return number of sockets it worked on
+ */
+
+static int ares_waitperform(struct connectdata *conn, int timeout_ms)
+{
+  struct SessionHandle *data = conn->data;
+  int nfds;
+  int bitmask;
+  int socks[ARES_GETSOCK_MAXNUM];
+  struct pollfd pfd[ARES_GETSOCK_MAXNUM];
+  int m;
+  int i;
+  int num;
+
+  bitmask = ares_getsock(data->state.areschannel, socks, ARES_GETSOCK_MAXNUM);
+
+  for(i=0; i < ARES_GETSOCK_MAXNUM; i++) {
+    pfd[i].events = 0;
+    m=0;
+    if(ARES_GETSOCK_READABLE(bitmask, i)) {
+      pfd[i].fd = socks[i];
+      pfd[i].events |= POLLRDNORM|POLLIN;
+      m=1;
+    }
+    if(ARES_GETSOCK_WRITABLE(bitmask, i)) {
+      pfd[i].fd = socks[i];
+      pfd[i].events |= POLLWRNORM|POLLOUT;
+      m=1;
+    }
+    pfd[i].revents=0;
+    if(!m)
+      break;
+  }
+  num = i;
+
+  if(num)
+    nfds = Curl_poll(pfd, num, timeout_ms);
+  else
+    nfds = 0;
+
+  if(!nfds)
+    /* Call ares_process() unconditonally here, even if we simply timed out
+       above, as otherwise the ares name resolve won't timeout! */
+    ares_process_fd(data->state.areschannel, ARES_SOCKET_BAD, ARES_SOCKET_BAD);
+  else {
+    /* move through the descriptors and ask for processing on them */
+    for(i=0; i < num; i++)
+      ares_process_fd(data->state.areschannel,
+                      pfd[i].revents & (POLLRDNORM|POLLIN)?
+                      pfd[i].fd:ARES_SOCKET_BAD,
+                      pfd[i].revents & (POLLWRNORM|POLLOUT)?
+                      pfd[i].fd:ARES_SOCKET_BAD);
+  }
+  return nfds;
+}
+
+/*
  * Curl_is_resolved() is called repeatedly to check if a previous name resolve
  * request has completed. It should also make sure to time-out if the
  * operation seems to take too long.
@@ -135,24 +198,11 @@ int Curl_resolv_getsock(struct connectdata *conn,
 CURLcode Curl_is_resolved(struct connectdata *conn,
                           struct Curl_dns_entry **dns)
 {
-  fd_set read_fds, write_fds;
-  struct timeval tv={0,0};
   struct SessionHandle *data = conn->data;
-  int nfds;
-
-  FD_ZERO(&read_fds);
-  FD_ZERO(&write_fds);
-
-  nfds = ares_fds(data->state.areschannel, &read_fds, &write_fds);
-
-  (void)Curl_select(nfds, &read_fds, &write_fds, NULL,
-                    (struct timeval *)&tv);
-
-  /* Call ares_process() unconditonally here, even if we simply timed out
-     above, as otherwise the ares name resolve won't timeout! */
-  ares_process(data->state.areschannel, &read_fds, &write_fds);
 
   *dns = NULL;
+
+  ares_waitperform(conn, 0);
 
   if(conn->async.done) {
     /* we're done, kill the ares handle */
@@ -194,28 +244,18 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
 
   /* Wait for the name resolve query to complete. */
   while (1) {
-    int nfds=0;
-    fd_set read_fds, write_fds;
     struct timeval *tvp, tv, store;
-    int count;
     struct timeval now = Curl_tvnow();
     long timediff;
 
     store.tv_sec = (int)timeout/1000;
     store.tv_usec = (timeout%1000)*1000;
 
-    FD_ZERO(&read_fds);
-    FD_ZERO(&write_fds);
-    nfds = ares_fds(data->state.areschannel, &read_fds, &write_fds);
-    if (nfds == 0)
-      /* no file descriptors means we're done waiting */
-      break;
     tvp = ares_timeout(data->state.areschannel, &store, &tv);
-    count = Curl_select(nfds, &read_fds, &write_fds, NULL, tvp);
-    if ((count < 0) && (SOCKERRNO != EINVAL))
-      break;
 
-    ares_process(data->state.areschannel, &read_fds, &write_fds);
+    if(!ares_waitperform(conn, tv.tv_sec * 1000 + tv.tv_usec/1000))
+      /* no sockets to wait on, get out of the loop */
+      break;
 
     timediff = Curl_tvdiff(Curl_tvnow(), now); /* spent time */
     timeout -= timediff?timediff:1; /* always deduct at least 1 */

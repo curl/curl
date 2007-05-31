@@ -420,10 +420,13 @@ CURLcode curl_easy_perform(CURL *easy)
     timeout.tv_sec = 1;
     timeout.tv_usec = 0;
 
-    /* get file descriptors from the transfers */
+    /* Old deprecated style: get file descriptors from the transfers */
     curl_multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
-
     rc = Curl_select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+
+    /* The way is to extract the sockets and wait for them without using
+       select. This whole alternative version should probably rather use the
+       curl_multi_socket() approach. */
 
     if(rc == -1)
       /* select error */

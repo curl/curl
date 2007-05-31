@@ -2050,10 +2050,10 @@ fi
 dnl set variable for use in automakefile(s)
 AM_CONDITIONAL(USE_MANUAL, test x"$USE_MANUAL" = x1)
 
-AC_MSG_CHECKING([whether to enable ares])
+AC_MSG_CHECKING([whether to enable c-ares])
 AC_ARG_ENABLE(ares,
-AC_HELP_STRING([--enable-ares=PATH],[Enable ares for name lookups])
-AC_HELP_STRING([--disable-ares],[Disable ares for name lookups]),
+AC_HELP_STRING([--enable-ares=PATH],[Enable c-ares for name lookups])
+AC_HELP_STRING([--disable-ares],[Disable c-ares for name lookups]),
 [ case "$enableval" in
   no)
        AC_MSG_RESULT(no)
@@ -2061,10 +2061,10 @@ AC_HELP_STRING([--disable-ares],[Disable ares for name lookups]),
   *)   AC_MSG_RESULT(yes)
 
        if test "x$IPV6_ENABLED" = "x1"; then
-         AC_MSG_NOTICE([ares may not work properly with ipv6])
+         AC_MSG_NOTICE([c-ares may not work properly with ipv6])
        fi
 
-       AC_DEFINE(USE_ARES, 1, [Define if you want to enable ares support])
+       AC_DEFINE(USE_ARES, 1, [Define if you want to enable c-ares support])
        dnl substitute HAVE_ARES for curl-config and similar
        HAVE_ARES="1"
        AC_SUBST(HAVE_ARES)
@@ -2109,7 +2109,8 @@ void curl_domalloc() { }
 int main(void)
 {
   ares_channel channel;
-  ares_cancel(channel);
+  ares_cancel(channel); /* added in 1.2.0 */
+  ares_process_fd(channel, 0, 0); /* added in 1.4.0 */
   return 0;
 }
 ],

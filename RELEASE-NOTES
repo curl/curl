@@ -19,6 +19,7 @@ This release includes the following changes:
  o SFTP now supports quote commands before a transfer
  o CURLMOPT_MAXCONNECTS added to curl_multi_setopt()
  o upload resume works for file:// URLs
+ o asynchronous name resolves now require c-ares 1.4.0 or later
 
 This release includes the following bugfixes:
 

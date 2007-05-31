@@ -81,10 +81,6 @@ int Curl_socket_ready(curl_socket_t readfd, curl_socket_t writefd,
 
 int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms);
 
-int Curl_select(int nfds,
-                fd_set *fds_read, fd_set *fds_write, fd_set *fds_excep,
-                struct timeval *timeout);
-
 #ifdef TPF
 int tpf_select_libcurl(int maxfds, fd_set* reads, fd_set* writes,
                        fd_set* excepts, struct timeval* tv);
