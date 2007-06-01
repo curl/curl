@@ -1737,7 +1737,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     if (data->set.one_easy->easy_conn)
       data->set.one_easy->easy_conn->cselect_bits = 0;
 
-    if(result >= CURLM_OK)
+    if(CURLM_OK >= result)
       /* get the socket(s) and check if the state has been changed since
          last */
       singlesocket(multi, data->set.one_easy);
@@ -1763,7 +1763,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     if(data) {
       result = multi_runsingle(multi, data->set.one_easy);
 
-      if(result >= CURLM_OK)
+      if(CURLM_OK >= result)
         /* get the socket(s) and check if the state has been changed since
            last */
         singlesocket(multi, data->set.one_easy);
