@@ -1473,7 +1473,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
 
   *running_handles = multi->num_alive;
 
-  if ( CURLM_OK == returncode )
+  if ( CURLM_OK >= returncode )
     update_timer(multi);
   return returncode;
 }
@@ -1737,7 +1737,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     if (data->set.one_easy->easy_conn)
       data->set.one_easy->easy_conn->cselect_bits = 0;
 
-    if(result == CURLM_OK)
+    if(result >= CURLM_OK)
       /* get the socket(s) and check if the state has been changed since
          last */
       singlesocket(multi, data->set.one_easy);
@@ -1763,7 +1763,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     if(data) {
       result = multi_runsingle(multi, data->set.one_easy);
 
-      if(result == CURLM_OK)
+      if(result >= CURLM_OK)
         /* get the socket(s) and check if the state has been changed since
            last */
         singlesocket(multi, data->set.one_easy);
@@ -1839,7 +1839,7 @@ CURLMcode curl_multi_socket(CURLM *multi_handle, curl_socket_t s,
 {
   CURLMcode result = multi_socket((struct Curl_multi *)multi_handle, FALSE, s,
                                   0, running_handles);
-  if (CURLM_OK == result)
+  if (CURLM_OK >= result)
     update_timer((struct Curl_multi *)multi_handle);
   return result;
 }
@@ -1849,7 +1849,7 @@ CURLMcode curl_multi_socket_action(CURLM *multi_handle, curl_socket_t s,
 {
   CURLMcode result = multi_socket((struct Curl_multi *)multi_handle, FALSE, s,
                                   ev_bitmask, running_handles);
-  if (CURLM_OK == result)
+  if (CURLM_OK >= result)
     update_timer((struct Curl_multi *)multi_handle);
   return result;
 }
@@ -1859,7 +1859,7 @@ CURLMcode curl_multi_socket_all(CURLM *multi_handle, int *running_handles)
 {
   CURLMcode result = multi_socket((struct Curl_multi *)multi_handle,
                                   TRUE, CURL_SOCKET_BAD, 0, running_handles);
-  if (CURLM_OK == result)
+  if (CURLM_OK >= result)
     update_timer((struct Curl_multi *)multi_handle);
   return result;
 }
