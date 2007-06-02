@@ -2,6 +2,9 @@
 
 * June 2 2007
 
+- Brad Spencer found and fixed three flaws in the code, found with the new
+  gcc 4.2.0 warning: -Waddress
+
 - Brad House fixed VS2005 compiler warnings due to time_t being 64bit.
   He also made recent Microsoft compilers use _strdup() instead of strdup().
 

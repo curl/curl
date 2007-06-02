@@ -1059,7 +1059,7 @@ static int config_sortlist(struct apattern **sortlist, int *nsort,
         ipbufpfx[0] = '\0';
       /* Lets see if it is CIDR */
       /* First we'll try IPv6 */
-      if ((bits = ares_inet_net_pton(AF_INET6, ipbufpfx ? ipbufpfx : ipbuf,
+      if ((bits = ares_inet_net_pton(AF_INET6, ipbufpfx[0] ? ipbufpfx : ipbuf,
                                      &pat.addr.addr6,
                                      sizeof(pat.addr.addr6))) > 0)
         {
@@ -1069,7 +1069,7 @@ static int config_sortlist(struct apattern **sortlist, int *nsort,
           if (!sortlist_alloc(sortlist, nsort, &pat))
             return ARES_ENOMEM;
         }
-      if (ipbufpfx &&
+      if (ipbufpfx[0] &&
           (bits = ares_inet_net_pton(AF_INET, ipbufpfx, &pat.addr.addr4,
                                      sizeof(pat.addr.addr4))) > 0)
         {
@@ -1082,7 +1082,7 @@ static int config_sortlist(struct apattern **sortlist, int *nsort,
       /* See if it is just a regular IP */
       else if (ip_addr(ipbuf, (int)(q-str), &pat.addr.addr4) == 0)
         {
-          if (ipbufpfx)
+          if (ipbufpfx[0])
             {
               memcpy(ipbuf, str, (int)(q-str));
               ipbuf[(int)(q-str)] = '\0';
