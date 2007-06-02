@@ -116,7 +116,7 @@ static void next_lookup(struct host_query *hquery)
 {
   int status;
   const char *p;
-  struct hostent *host;
+  struct hostent *host = NULL;
 
   for (p = hquery->remaining_lookups; *p; p++)
     {
@@ -151,7 +151,7 @@ static void host_callback(void *arg, int status, unsigned char *abuf, int alen)
 {
   struct host_query *hquery = (struct host_query *) arg;
   ares_channel channel = hquery->channel;
-  struct hostent *host;
+  struct hostent *host = NULL;
 
   if (status == ARES_SUCCESS)
     {
@@ -242,12 +242,86 @@ static int fake_hostent(const char *name, int family, ares_host_callback callbac
   return 1;
 }
 
+static int add_host(struct hostent *hostent, struct hostent **host)
+{
+  char **p;
+  char **h_addr_list = NULL;
+  struct hostent *hostptr = *host;
+  int count = 0;
+  int index = 0;
+
+  if (hostptr == NULL)
+  {
+    *host = hostent;
+    return 0;
+  }
+
+  for (p = hostptr->h_addr_list; *p; p++)
+  {
+    count++;
+  }
+
+  for (p = hostent->h_addr_list; *p; p++)
+  {
+    count++;
+  }
+
+  h_addr_list = malloc((count+1) * sizeof(char *));
+  if (!h_addr_list)
+  {
+    *host = NULL;
+    return -1;
+  }
+
+  for (p = hostptr->h_addr_list; *p; p++)
+  {
+    h_addr_list[index] = malloc(sizeof(struct in_addr));
+    if (h_addr_list[index])
+    {
+      memcpy(h_addr_list[index], *p, sizeof(struct in_addr));
+    }
+    else
+    {
+      free(h_addr_list);
+      return -1;
+    }
+    index++;
+  }
+
+  for(p = hostent->h_addr_list; *p; p++)
+  {
+    h_addr_list[index] = malloc(sizeof(struct in_addr));
+    if (h_addr_list[index])
+    {
+      memcpy(h_addr_list[index], *p, sizeof(struct in_addr));
+    }
+    else
+    {
+      free(h_addr_list);
+      return -1;
+    }
+    index++;
+  }
+
+  h_addr_list[index] = NULL;
+
+  for (p = hostptr->h_addr_list; *p; p++)
+  {
+    free(*p);
+  }
+  free(hostptr->h_addr_list);
+  hostptr->h_addr_list = h_addr_list;
+  return 0;
+}
+
 static int file_lookup(const char *name, int family, struct hostent **host)
 {
   FILE *fp;
   char **alias;
   int status;
   int error;
+  int match;
+  struct hostent *hostent = NULL;
 
 #ifdef WIN32
   char PATH_HOSTS[MAX_PATH];
@@ -283,35 +357,60 @@ static int file_lookup(const char *name, int family, struct hostent **host)
     {
       error = ERRNO;
       switch(error)
-        {
-        case ENOENT:
-        case ESRCH:
-          return ARES_ENOTFOUND;
-        default:
-          DEBUGF(fprintf(stderr, "fopen() failed with error: %d %s\n",
-                         error, strerror(error)));
-          DEBUGF(fprintf(stderr, "Error opening file: %s\n",
-                         PATH_HOSTS));
-          *host = NULL;
-          return ARES_EFILE;
-        }
+      {
+      case ENOENT:
+      case ESRCH:
+        return ARES_ENOTFOUND;
+      default:
+        DEBUGF(fprintf(stderr, "fopen() failed with error: %d %s\n",
+                       error, strerror(error)));
+        DEBUGF(fprintf(stderr, "Error opening file: %s\n",
+                       PATH_HOSTS));
+        *host = NULL;
+        return ARES_EFILE;
+      }
     }
   while ((status = ares__get_hostent(fp, family, host)) == ARES_SUCCESS)
     {
+      match = 0;
+      hostent = *host;
       if (strcasecmp((*host)->h_name, name) == 0)
-        break;
-      for (alias = (*host)->h_aliases; *alias; alias++)
+      {
+        match = 1;
+      }
+      else
+      {
+        for (alias = (*host)->h_aliases; *alias; alias++)
         {
           if (strcasecmp(*alias, name) == 0)
+          {
+            match = 1;
             break;
+          }
         }
-      if (*alias)
-        break;
-      ares_free_hostent(*host);
+      }
+      if (match)
+      {
+        if(!add_host(hostent, host))
+          ares_free_hostent(hostent);
+        else {
+          *host = NULL;
+        }
+      }
+      else
+      {
+        ares_free_hostent(*host);
+        *host = NULL;
+      }
     }
   fclose(fp);
   if (status == ARES_EOF)
-    status = ARES_ENOTFOUND;
+  {
+    if ( *host)
+      status = ARES_SUCCESS;
+    else
+      status = ARES_ENOTFOUND;
+  }
   if (status != ARES_SUCCESS)
     *host = NULL;
   return status;

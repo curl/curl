@@ -1,5 +1,14 @@
   Changelog for the c-ares project
 
+* June 2 2007
+
+- Brad House's man pages for ares_save_options() and ares_destroy_options()
+  were added.
+
+- Ashish Sharma provided a patch for supporting multiple entries in the
+  /etc/hosts file. Patch edited for coding style and functionality by me
+  (Daniel).
+
 * May 30 2007
 
 - Shmulik Regev brought cryptographically secure transaction IDs:

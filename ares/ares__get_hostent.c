@@ -183,6 +183,7 @@ int ares__get_hostent(FILE *fp, int family, struct hostent **host)
             free(hostent->h_addr_list);
           free(hostent);
         }
+      *host = NULL;
       return ARES_ENOMEM;
     }
 

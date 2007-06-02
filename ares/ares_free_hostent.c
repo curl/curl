@@ -33,7 +33,10 @@ void ares_free_hostent(struct hostent *host)
   for (p = host->h_aliases; *p; p++)
     free(*p);
   free(host->h_aliases);
-  free(host->h_addr_list[0]);
+  for(p = host->h_addr_list; *p; p++)
+  {
+    free(*p);
+  }
   free(host->h_addr_list);
   free(host);
 }
