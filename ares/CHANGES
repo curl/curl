@@ -2,6 +2,9 @@
 
 * June 2 2007
 
+- Brad House fixed VS2005 compiler warnings due to time_t being 64bit.
+  He also made recent Microsoft compilers use _strdup() instead of strdup().
+
 - Brad House's man pages for ares_save_options() and ares_destroy_options()
   were added.
 

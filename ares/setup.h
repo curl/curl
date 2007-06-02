@@ -144,6 +144,11 @@ int ares_strcasecmp(const char *s1, const char *s2);
    same */
 #define strncasecmp(a,b,c) ares_strncasecmp(a,b,c)
 #define strcasecmp(a,b) ares_strcasecmp(a,b)
+#ifdef _MSC_VER
+#  if _MSC_VER >= 1400
+#    define strdup(a) _strdup(a)
+#  endif
+#endif
 #endif
 
 /* IPv6 compatibility */

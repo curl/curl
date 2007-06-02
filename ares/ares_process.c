@@ -63,7 +63,7 @@ static void read_udp_packets(ares_channel channel, fd_set *read_fds,
                              ares_socket_t read_fd, time_t now);
 static void process_timeouts(ares_channel channel, time_t now);
 static void process_answer(ares_channel channel, unsigned char *abuf,
-                           int alen, int whichserver, int tcp, int now);
+                           int alen, int whichserver, int tcp, time_t now);
 static void handle_error(ares_channel channel, int whichserver, time_t now);
 static struct query *next_server(ares_channel channel, struct query *query, time_t now);
 static int open_tcp_socket(ares_channel channel, struct server_state *server);
@@ -398,7 +398,7 @@ static void process_timeouts(ares_channel channel, time_t now)
 
 /* Handle an answer from a server. */
 static void process_answer(ares_channel channel, unsigned char *abuf,
-                           int alen, int whichserver, int tcp, int now)
+                           int alen, int whichserver, int tcp, time_t now)
 {
   int id, tc, rcode;
   struct query *query;
