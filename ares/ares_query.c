@@ -108,13 +108,13 @@ void ares_query(ares_channel channel, const char *name, int dnsclass,
   rd = !(channel->flags & ARES_FLAG_NORECURSE);
   status = ares_mkquery(name, dnsclass, type, channel->next_id, rd, &qbuf,
                         &qlen);
-  channel->next_id = generate_unique_id(channel);
-
   if (status != ARES_SUCCESS)
     {
       callback(arg, status, NULL, 0);
       return;
     }
+
+  channel->next_id = generate_unique_id(channel);
 
   /* Allocate and fill in the query structure. */
   qquery = malloc(sizeof(struct qquery));
