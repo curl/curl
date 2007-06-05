@@ -1,5 +1,15 @@
   Changelog for the c-ares project
 
+* June 4 2007 (Daniel Stenberg)
+
+- James Bursa reported a major memory problem when resolving multi-IP names
+  and I found and fixed the problem. It was added by Ashish Sharma's patch
+  two days ago.
+
+  When I then tried to verify multiple entries in /etc/hosts after my fix, I
+  got another segfault and decided this code was not ripe for inclusion and I
+  reverted the patch.
+
 * June 2 2007
 
 - Brad Spencer found and fixed three flaws in the code, found with the new
