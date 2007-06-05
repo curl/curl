@@ -1,0 +1,39 @@
+#based off  19
+<testcase>
+<info>
+<keywords>
+HTTP
+SOCKS4
+connect to non-listen
+FAILURE
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+socks4
+</server>
+<features>
+http
+</features>
+ <name>
+attempt connect to non-listening socket via sock5 proxy
+ </name>
+ <command>
+--socks5 %HOSTIP:%SOCKSPORT  %HOSTIP:60000
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+7
+</errorcode>
+</verify>
+</testcase>
