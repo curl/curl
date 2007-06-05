@@ -98,6 +98,11 @@ static int blockread_all(struct connectdata *conn, /* connection data */
       result = CURLE_OK;
       break;
     }
+    if(!nread) {
+      result = ~CURLE_OK;
+      break;
+    }
+
     buffersize -= nread;
     buf += nread;
     allread += nread;
