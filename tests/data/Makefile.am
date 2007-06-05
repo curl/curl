@@ -28,8 +28,8 @@ EXTRA_DIST = test1 test108 test117 test127 test20 test27 test34 test46	   \
  test194 test195 test196 test197 test198 test515 test516 test517 test518   \
  test210 test211 test212 test220 test221 test222 test223 test224 test206   \
  test207 test208 test209 test213 test240 test241 test242 test519 test214   \
- test215 test216 test217 test218 test199 test225 test226 test227 \
- test228 test229 test233 test234 test235 test236 test520   \
+ test215 test216 test217 test218 test199 test225 test226 test227	   \
+ test228 test229 test233 test234 test235 test236 test520		   \
  test237 test238 test239 test243 test245 test246 test247 test248 test249   \
  test250 test251 test252 test253 test254 test255 test521 test522 test523   \
  test256 test257 test258 test259 test260 test261 test262 test263 test264   \
@@ -41,4 +41,4 @@ EXTRA_DIST = test1 test108 test117 test127 test20 test27 test34 test46	   \
  test603 test401 test402 test290 test291 test292 test293 test403 test404   \
  test405 test604 test605 test606 test607 test608 test609 test294 test295   \
  test296 test297 test298 test610 test611 test612 test406 test407 test408   \
- test409 test613 test614
+ test409 test613 test614 test700 test701 test702 test704 test705

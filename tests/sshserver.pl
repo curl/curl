@@ -23,7 +23,7 @@ if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys' || $^O eq 'dos' || $^O 
 }
 
 # Where to look for sftp-server
-my @sftppath=qw(/usr/lib/openssh /usr/libexec/openssh /usr/libexec /usr/local/libexec /opt/local/libexec /usr/lib/ssh /usr/libexec/ssh /usr/sbin /usr/lib /usr/lib/ssh/openssh /usr/lib64/ssh);
+my @sftppath=qw(/usr/lib/openssh /usr/libexec/openssh /usr/libexec /usr/local/libexec /opt/local/libexec /usr/lib/ssh /usr/libexec/ssh /usr/sbin /usr/lib /usr/lib/ssh/openssh /usr/lib64/ssh /usr/lib64/misc);
 
 my $username = $ENV{USER};
 
@@ -55,6 +55,8 @@ do {
 } while(shift @ARGV);
 
 my $conffile="curl_sshd_config";    # sshd configuration data
+my $conffile_ssh="curl_ssh_config";    # ssh configuration data
+my $knownhostsfile="curl_client_knownhosts";    # ssh knownhosts file
 
 # Searching for sshd and sftp-server will be done first
 # in the PATH and afterwards in other common locations.
@@ -146,9 +148,21 @@ if (! -e "curl_client_key.pub") {
     system "ssh-keygen -q -t dsa -f curl_host_dsa_key -C 'curl test server' -N ''" and die "Could not generate key";
     system "ssh-keygen -q -t dsa -f curl_client_key -C 'curl test client' -N ''" and die "Could not generate key";
 }
+# setup knownhosts
+open(my $DSAKEYFILE, "<", "curl_host_dsa_key.pub") || die 'Could not read curl_host_dsa_key.pub';
+my @dsahostkey = do { local $/ = ' '; <$DSAKEYFILE> };
+close $DSAKEYFILE || die "Could not close RSAKEYFILE";
+open(my $RSAKEYFILE, "<", "curl_host_dsa_key.pub") || die 'Could not read curl_host_dsa_key.pub';
+my @rsahostkey = do { local $/ = ' '; <$RSAKEYFILE> };
+close $RSAKEYFILE || die "Could not close RSAKEYFILE";
+open(my $KNOWNHOSTS, ">>", $knownhostsfile) || die "Could not write $knownhostsfile";
+print {$KNOWNHOSTS} "[127.0.0.1]:$port ssh-dss $dsahostkey[1]\n" || die 'Could not write to KNOWNHOSTS';
+print {$KNOWNHOSTS} "[127.0.0.1]:$port ssh-rsa $rsahostkey[1]\n" || die 'Could not write to KNOWNHOSTS';
+close $KNOWNHOSTS || die "Could not close KNOWNHOSTS";
 
-open(my $FILE, ">>$conffile") || die "Could not write $conffile";
-print $FILE <<EOF
+
+open(my $FILE, ">>", $conffile) || die "Could not write $conffile";
+print $FILE <<EOFSSHD
 AllowUsers $username
 DenyUsers
 DenyGroups
@@ -158,7 +172,7 @@ PidFile $path/.ssh.pid
 Port $port
 ListenAddress localhost
 Protocol 2
-AllowTcpForwarding no
+AllowTcpForwarding yes
 GatewayPorts no
 HostbasedAuthentication no
 IgnoreRhosts yes
@@ -173,12 +187,22 @@ PrintMotd no
 StrictModes no
 Subsystem sftp $sftp
 UseLogin no
+PrintLastLog no
 X11Forwarding no
 UsePrivilegeSeparation no
 # Newer OpenSSH options
-EOF
+EOFSSHD
 ;
-close $FILE;
+close $FILE ||  die "Could not close $conffile";
+
+open(my $SSHFILE, ">>", $conffile_ssh) || die "Could not write $conffile_ssh";
+print $SSHFILE <<EOFSSH
+UserKnownHostsFile $path/$knownhostsfile
+IdentityFile $path/curl_client_key
+EOFSSH
+;
+close $SSHFILE ||  die "Could not close $conffile_ssh";
+
 
 sub set_sshd_option {
     my ($string) = @_;

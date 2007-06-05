@@ -133,6 +133,8 @@ https
 none
 scp
 sftp
+socks4
+socks5
 
 Give only one per line.  This subsection is mandatory.
 </server>
@@ -227,6 +229,7 @@ Available substitute variables include:
 %TFTPPORT  - Port number of the TFTP server
 %TFTP6PORT - IPv6 port number of the TFTP server
 %SSHPORT   - Port number of the SCP/SFTP server
+%SOCKSPORT - Port number of the SOCKS4/5 server
 %SRCDIR    - Full path to the source dir
 %PWD       - Current directory
 %CURL      - Path to the curl executable

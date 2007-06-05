@@ -5,8 +5,11 @@ log
 *.pid
 *.pdf
 *.html
+curl_client_knownhosts
 curl_client_key
 curl_client_key.pub
 curl_host_dsa_key
 curl_host_dsa_key.pub
+curl_sshd_config
+curl_ssh_config
 stunnel.conf
