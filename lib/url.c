@@ -2346,6 +2346,8 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
       break;
     }
   }
+  if(result)
+    *connected = FALSE; /* mark it as not connected */
 
   return result;
 }
