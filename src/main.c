@@ -2388,7 +2388,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
     case 's':
       /* don't show progress meter, don't show errors : */
-      config->conf |= (CONF_MUTE|CONF_NOPROGRESS);
+      config->conf ^= (CONF_MUTE|CONF_NOPROGRESS);
       config->showerror ^= TRUE; /* toggle off */
       break;
     case 'S':
