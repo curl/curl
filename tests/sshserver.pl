@@ -1,6 +1,8 @@
 #/usr/bin/env perl
 # $Id$
-# Start sshd for use in the SCP and SFTP curl test harness tests
+# Starts sshd for use in the SCP, SFTP and SOCKS curl test harness tests.
+# Also creates the ssh configuration files (this could be moved to a
+# separate script).
 
 # Options:
 # -u user
@@ -113,10 +115,10 @@ if (($ssh_daemon !~ /OpenSSH/) || (10 * $ssh_ver_major + $ssh_ver_minor < 37)) {
 }
 
 # Initialize sshd configuration file for curl's tests.
-open(my $CONF, ">$conffile") || die "Could not write $conffile";
-print $CONF "# This is a generated file!  Do not edit!\n";
-print $CONF "# OpenSSH sshd configuration file for curl testing\n";
-close $CONF;
+open(CONF, ">$conffile") || die "Could not write $conffile";
+print CONF "# This is a generated file!  Do not edit!\n";
+print CONF "# OpenSSH sshd configuration file for curl testing\n";
+close CONF;
 
 # Support for some options might have not been built into sshd.  On some
 # platforms specifying an unsupported option prevents sshd from starting.
@@ -148,21 +150,9 @@ if (! -e "curl_client_key.pub") {
     system "ssh-keygen -q -t dsa -f curl_host_dsa_key -C 'curl test server' -N ''" and die "Could not generate key";
     system "ssh-keygen -q -t dsa -f curl_client_key -C 'curl test client' -N ''" and die "Could not generate key";
 }
-# setup knownhosts
-open(my $DSAKEYFILE, "<", "curl_host_dsa_key.pub") || die 'Could not read curl_host_dsa_key.pub';
-my @dsahostkey = do { local $/ = ' '; <$DSAKEYFILE> };
-close $DSAKEYFILE || die "Could not close RSAKEYFILE";
-open(my $RSAKEYFILE, "<", "curl_host_dsa_key.pub") || die 'Could not read curl_host_dsa_key.pub';
-my @rsahostkey = do { local $/ = ' '; <$RSAKEYFILE> };
-close $RSAKEYFILE || die "Could not close RSAKEYFILE";
-open(my $KNOWNHOSTS, ">>", $knownhostsfile) || die "Could not write $knownhostsfile";
-print {$KNOWNHOSTS} "[127.0.0.1]:$port ssh-dss $dsahostkey[1]\n" || die 'Could not write to KNOWNHOSTS';
-print {$KNOWNHOSTS} "[127.0.0.1]:$port ssh-rsa $rsahostkey[1]\n" || die 'Could not write to KNOWNHOSTS';
-close $KNOWNHOSTS || die "Could not close KNOWNHOSTS";
 
-
-open(my $FILE, ">>", $conffile) || die "Could not write $conffile";
-print $FILE <<EOFSSHD
+open(FILE, ">>", $conffile) || die "Could not write $conffile";
+print FILE <<EOFSSHD
 AllowUsers $username
 DenyUsers
 DenyGroups
@@ -193,22 +183,13 @@ UsePrivilegeSeparation no
 # Newer OpenSSH options
 EOFSSHD
 ;
-close $FILE ||  die "Could not close $conffile";
-
-open(my $SSHFILE, ">>", $conffile_ssh) || die "Could not write $conffile_ssh";
-print $SSHFILE <<EOFSSH
-UserKnownHostsFile $path/$knownhostsfile
-IdentityFile $path/curl_client_key
-EOFSSH
-;
-close $SSHFILE ||  die "Could not close $conffile_ssh";
-
+close FILE ||  die "Could not close $conffile";
 
 sub set_sshd_option {
     my ($string) = @_;
-    if (open(my $FILE, ">>$conffile")) {
-        print $FILE "$string\n";
-        close $FILE;
+    if (open(FILE, ">>$conffile")) {
+        print FILE "$string\n";
+        close FILE;
     }
 }
 
@@ -222,6 +203,41 @@ if ($supports_ChReAu) {
     set_sshd_option('ChallengeResponseAuthentication no');
 }
 
+
+# Now, set up some configuration files for the ssh client
+open(DSAKEYFILE, "<", "curl_host_dsa_key.pub") || die 'Could not read curl_host_dsa_key.pub';
+my @dsahostkey = do { local $/ = ' '; <DSAKEYFILE> };
+close DSAKEYFILE || die "Could not close RSAKEYFILE";
+
+open(RSAKEYFILE, "<", "curl_host_dsa_key.pub") || die 'Could not read curl_host_dsa_key.pub';
+my @rsahostkey = do { local $/ = ' '; <RSAKEYFILE> };
+close RSAKEYFILE || die "Could not close RSAKEYFILE";
+
+open(KNOWNHOSTS, ">", $knownhostsfile) || die "Could not write $knownhostsfile";
+print KNOWNHOSTS "[127.0.0.1]:$port ssh-dss $dsahostkey[1]\n" || die 'Could not write to KNOWNHOSTS';
+print KNOWNHOSTS "[127.0.0.1]:$port ssh-rsa $rsahostkey[1]\n" || die 'Could not write to KNOWNHOSTS';
+close KNOWNHOSTS || die "Could not close KNOWNHOSTS";
+
+open(SSHFILE, ">", $conffile_ssh) || die "Could not write $conffile_ssh";
+print SSHFILE <<EOFSSH
+IdentityFile $path/curl_client_key
+UserKnownHostsFile $path/$knownhostsfile
+StrictHostKeyChecking no
+Protocol 2
+BatchMode yes
+CheckHostIP no
+Compression no
+ConnectTimeout 20
+ForwardX11 no
+HostbasedAuthentication yes
+NoHostAuthenticationForLocalhost no
+# Newer OpenSSH options
+#SetupTimeOut 20
+EOFSSH
+;
+close SSHFILE ||  die "Could not close $conffile_ssh";
+
+
 if (system "$sshd -t -q -f $conffile") {
     # This is likely due to missing support for UsePam
     print "$sshd is too old and is not supported\n";
@@ -230,7 +246,7 @@ if (system "$sshd -t -q -f $conffile") {
 }
 
 # Start the server
-my $rc = system "$sshd -e -D -f $conffile > log/ssh.log 2>&1";
+my $rc = system "$sshd -e -D -f $conffile > log/sshd.log 2>&1";
 $rc >>= 8;
 if($rc && $verbose) {
     print STDERR "$sshd exited with $rc!\n";
