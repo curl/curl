@@ -292,12 +292,16 @@ sub startnew {
 
     # Ugly hack but ssh doesn't support pid files
     if ($fake) {
-        logmsg "$pidfile faked with pid=$child\n";
+        logmsg "$pidfile faked with pid=$child\n" if($verbose);
         open(my $OUT, ">", $pidfile);
         print $OUT $child;
         close $OUT;
 	# could/should do a while connect fails sleep a bit and loop
 	sleep 1;
+        if (checkdied($child)) {
+            logmsg "startnew: Warning: child process has failed to start\n" if($verbose);
+            return (-1,-1);
+        }
     }
     my $count=12;
     while($count--) {
@@ -451,7 +455,7 @@ sub torture {
 sub stopserver {
     my ($pid) = @_;
 
-    if(not defined $pid) {
+    if(not defined $pid || $pid <= 0) {
         return; # whad'da'ya wanna'da with no pid ?
     }
 
@@ -991,7 +995,7 @@ sub runsocksserver {
     my ($sshpid, $pid2) =
         startnew($cmd, $pidfile,1); # start the server in a new process
 
-    if(!$sshpid || !kill(0, $sshpid)) {
+    if($sshpid <= 0 || !kill(0, $sshpid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the SOCKS server\n";
         # failed to talk to it properly. Kill the server and return failure
@@ -2266,10 +2270,11 @@ sub startservers {
                    if ($sshversion =~ /SSH_(\d+)\.(\d+)/i) {
                        if ($1*10+$2 < 37) {
 		       # need 3.7 for socks5 - http://www.openssh.com/txt/release-3.7
-                           return "ssh version ($1.$2) $sshversion insufficient need at least 3.7\n" if ($verbose);
+                           return "ssh version ($1.$2) insufficient; need at least 3.7";
 		       }
+                   } else {
+                       return "Unsupported ssh client\n";
                    }
-                   
 		}
             	if(!$run{'socks'}) {
                     ($pid, $pid2) = runsocksserver("", $verbose);
