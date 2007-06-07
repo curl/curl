@@ -20,6 +20,7 @@ This release includes the following changes:
  o CURLMOPT_MAXCONNECTS added to curl_multi_setopt()
  o upload resume works for file:// URLs
  o asynchronous name resolves now require c-ares 1.4.0 or later
+ o added SOCKS test cases
 
 This release includes the following bugfixes:
 
@@ -52,6 +53,7 @@ This release includes the following bugfixes:
  o memory leak when OpenSSL failed PKCS #12 parsing
  o FPL-SSL when built with NSS
  o out-of-boundary write in Curl_select()
+ o -s/--silent can now be used to toggle off the silence again
 
 This release includes the following known bugs:
 

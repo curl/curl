@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel S (6 June 2007)
+- -s/--silent can now be used to toggle off the silence again if used a second
+  time.
+
+Daniel S (5 June 2007)
+- Added Daniel Black's work that adds the first few SOCKS test cases. I also
+  fixed two minor SOCKS problems to make the test cases run fine.
+
 Daniel S (31 May 2007)
 - Feng Tu made (lib)curl support "upload" resuming work for file:// URLs.
 
