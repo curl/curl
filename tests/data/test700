@@ -34,7 +34,7 @@ http
 socks4
 </server>
  <name>
-HTTP GET via SOCK4 proxy
+HTTP GET via SOCKS4 proxy
  </name>
  <command>
 --socks4 %HOSTIP:%SOCKSPORT http://%HOSTIP:%HTTPPORT/700

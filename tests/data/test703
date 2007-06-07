@@ -1,9 +1,9 @@
-#based off  19
 <testcase>
+#based off  19
 <info>
 <keywords>
 HTTP
-SOCKS4
+SOCKS5
 connect to non-listen
 FAILURE
 </keywords>
@@ -17,16 +17,16 @@ FAILURE
 # Client-side
 <client>
 <server>
-socks4
+socks5
 </server>
 <features>
 http
 </features>
  <name>
-attempt connect to non-listening socket via sock5 proxy
+Attempt connect to non-listening HTTP server via SOCKS5 proxy
  </name>
  <command>
---socks5 %HOSTIP:%SOCKSPORT  %HOSTIP:60000
+--socks5 %HOSTIP:%SOCKSPORT http://%HOSTIP:60000
 </command>
 </client>
 

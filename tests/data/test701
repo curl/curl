@@ -34,7 +34,7 @@ http
 socks5
 </server>
  <name>
-HTTP GET via SOCK5 proxy
+HTTP GET via SOCKS5 proxy
  </name>
  <command>
 --socks5 %HOSTIP:%SOCKSPORT http://%HOSTIP:%HTTPPORT/701

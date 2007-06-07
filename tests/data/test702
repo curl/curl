@@ -1,5 +1,5 @@
-#based off  19
 <testcase>
+#based off  19
 <info>
 <keywords>
 HTTP
@@ -23,10 +23,10 @@ socks4
 http
 </features>
  <name>
-attempt connect to non-listening socket via sock4 proxy
+Attempt connect to non-listening HTTP server via SOCKS4 proxy
  </name>
  <command>
---socks4 %HOSTIP:%SOCKSPORT  %HOSTIP:60000
+--socks4 %HOSTIP:%SOCKSPORT http://%HOSTIP:60000
 </command>
 </client>
 

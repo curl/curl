@@ -1,9 +1,9 @@
-#based off  19
 <testcase>
+#based off  19
 <info>
 <keywords>
 HTTP
-SOCKS4 fail
+SOCKS4
 connect to non-listen
 FAILURE
 </keywords>
@@ -19,17 +19,11 @@ FAILURE
 <server>
 http
 </server>
-<killserver>
-socks4
-</killserver>
-<features>
-http
-</features>
  <name>
-attempt connect to non-listening sock4 proxy
+Attempt connect to non-listening SOCKS4 proxy
  </name>
  <command>
---socks4 %HOSTIP:%SOCKSPORT  %HOSTIP:60000
+--socks4 %HOSTIP:60000 http://%HOSTIP:%HTTPPORT/704
 </command>
 </client>
 

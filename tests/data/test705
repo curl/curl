@@ -1,9 +1,9 @@
-#based off  19
 <testcase>
+#based off  19
 <info>
 <keywords>
 HTTP
-SOCKS5 fail
+SOCKS5
 connect to non-listen
 FAILURE
 </keywords>
@@ -19,20 +19,13 @@ FAILURE
 <server>
 http
 </server>
-<features>
-http
-</features>
  <name>
-attempt connect to non-listening sock5 proxy
+Attempt connect to non-listening SOCKS5 proxy
  </name>
  <command>
---socks5 %HOSTIP:%SOCKSPORT  %HOSTIP:60000
+--socks5 %HOSTIP:60000 http://%HOSTIP:%HTTPPORT/705
 </command>
 </client>
-
-<killserver>
-sock5
-</killserver>
 
 # Verify data after the test has been "shot"
 <verify>
