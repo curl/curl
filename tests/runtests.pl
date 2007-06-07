@@ -113,15 +113,15 @@ if($valgrind) {
     if (($? >> 8)==0) {
         $valgrind_tool="--tool=memcheck ";
     }
-    open( my $C, "<", $CURL);
-    my $l = <$C>;
+    open(C, "<", $CURL);
+    my $l = <C>;
     if($l =~ /^\#\!/) {
         # The first line starts with "#!" which implies a shell-script.
         # This means libcurl is built shared and curl is a wrapper-script
         # Disable valgrind in this setup
         $valgrind=0;
     }
-    close($C);
+    close(C);
 
     # valgrind 3 renamed the --logfile option to --log-file!!!
     my $ver=`valgrind --version`;
@@ -182,8 +182,6 @@ my %run;	  # running server
 my $torture;
 my $tortnum;
 my $tortalloc;
-
-my $CMDLOG; #log filehandle
 
 # open and close each time to allow removal at any time
 sub logmsg {
@@ -293,9 +291,9 @@ sub startnew {
     # Ugly hack but ssh doesn't support pid files
     if ($fake) {
         logmsg "$pidfile faked with pid=$child\n" if($verbose);
-        open(my $OUT, ">", $pidfile);
-        print $OUT $child;
-        close $OUT;
+        open(OUT, ">", $pidfile);
+        print OUT $child;
+        close(OUT);
 	# could/should do a while connect fails sleep a bit and loop
 	sleep 1;
         if (checkdied($child)) {
@@ -306,9 +304,9 @@ sub startnew {
     my $count=12;
     while($count--) {
         if(-f $pidfile) {
-            open(my $PID, "<", $pidfile);
-            $pid2 = 0 + <$PID>;
-            close($PID);
+            open(PID, "<", $pidfile);
+            $pid2 = 0 + <PID>;
+            close(PID);
             if($pid2 && kill(0, $pid2)) {
                 # if $pid2 is valid, then make sure this pid is alive, as
                 # otherwise it is just likely to be the _previous_ pidfile or
@@ -523,9 +521,9 @@ sub verifyhttp {
             }
         }
     }
-    open(my $FILE, "<", "log/verifiedserver");
-    my @file=<$FILE>;
-    close($FILE);
+    open(FILE, "<", "log/verifiedserver");
+    my @file=<FILE>;
+    close(FILE);
     $data=$file[0]; # first line
 
     if ( $data =~ /WE ROOLZ: (\d+)/ ) {
@@ -592,9 +590,9 @@ sub verifyftp {
 
 sub verifyssh {
     my ($proto, $ip, $port) = @_;
-    open(my $FILE, "<" . $SSHPIDFILE);
-    my $pid=0+<$FILE>;
-    close($FILE);
+    open(FILE, "<" . $SSHPIDFILE);
+    my $pid=0+<FILE>;
+    close(FILE);
     return $pid;
 }
 
@@ -603,9 +601,9 @@ sub verifyssh {
 
 sub verifysocks {
     my ($proto, $ip, $port) = @_;
-    open(my $FILE, "<" . $SOCKSPIDFILE);
-    my $pid=0+<$FILE>;
-    close($FILE);
+    open(FILE, "<" . $SOCKSPIDFILE);
+    my $pid=0+<FILE>;
+    close(FILE);
     return $pid;
 }
 
@@ -991,7 +989,7 @@ sub runsocksserver {
     my $pidfile = $SOCKSPIDFILE;
 
     my $flag=$debugprotocol?"-v ":"";
-    my $cmd="ssh -D ${HOSTIP}:$SOCKSPORT -N -F curl_ssh_config ${USER}\@${HOSTIP} -p ${SSHPORT}";
+    my $cmd="ssh -D ${HOSTIP}:$SOCKSPORT -N -F curl_ssh_config ${USER}\@${HOSTIP} -p ${SSHPORT} >log/ssh.log 2>&1";
     my ($sshpid, $pid2) =
         startnew($cmd, $pidfile,1); # start the server in a new process
 
@@ -1045,20 +1043,20 @@ sub filteroff {
     my $filter=$_[1];
     my $ofile=$_[2];
 
-    open(my $IN, "<", $infile)
+    open(IN, "<", $infile)
         || return 1;
 
-    open(my $OUT, ">", $ofile)
+    open(OUT, ">", $ofile)
         || return 1;
 
     # logmsg "FILTER: off $filter from $infile to $ofile\n";
 
-    while(<$IN>) {
+    while(<IN>) {
         $_ =~ s/$filter//;
-        print $OUT $_;
+        print OUT $_;
     }
-    close($IN);
-    close($OUT);
+    close(IN);
+    close(OUT);
     return 0;
 }
 
@@ -1109,9 +1107,9 @@ sub checksystem {
     $versretval = system($versioncmd);
     $versnoexec = $!;
 
-    open(my $VERSOUT, "<", $curlverout);
-    @version = <$VERSOUT>;
-    close($VERSOUT);
+    open(VERSOUT, "<", $curlverout);
+    @version = <VERSOUT>;
+    close(VERSOUT);
 
     for(@version) {
         chomp;
@@ -1261,13 +1259,13 @@ sub checksystem {
     }
 
     if(-r "../lib/config.h") {
-        open(my $CONF, "<", "../lib/config.h");
-        while(<$CONF>) {
+        open(CONF, "<", "../lib/config.h");
+        while(<CONF>) {
             if($_ =~ /^\#define HAVE_GETRLIMIT/) {
                 $has_getrlimit = 1;
             }
         }
-        close($CONF);
+        close(CONF);
     }
 
     if($has_ipv6) {
@@ -1636,10 +1634,10 @@ sub singletest {
         my $fileContent = join('', @inputfile);
         subVariables \$fileContent;
 #        logmsg "DEBUG: writing file " . $filename . "\n";
-        open my $OUTFILE, ">", $filename;
-        binmode $OUTFILE; # for crapage systems, use binary
-        print $OUTFILE $fileContent;
-        close $OUTFILE;
+        open(OUTFILE, ">", $filename);
+        binmode OUTFILE; # for crapage systems, use binary
+        print OUTFILE $fileContent;
+        close(OUTFILE);
     }
 
     my %cmdhash = getpartattr("client", "command");
@@ -1695,7 +1693,7 @@ sub singletest {
         logmsg "$CMDLINE\n";
     }
 
-    print $CMDLOG "$CMDLINE\n";
+    print CMDLOG "$CMDLINE\n";
 
     unlink("core");
 
@@ -1717,10 +1715,10 @@ sub singletest {
     }
 
     if($gdbthis) {
-        open( my $GDBCMD, ">", "log/gdbcmd");
-        print $GDBCMD "set args $cmdargs\n";
-        print $GDBCMD "show args\n";
-        close($GDBCMD);
+        open(GDBCMD, ">", "log/gdbcmd");
+        print GDBCMD "set args $cmdargs\n";
+        print GDBCMD "show args\n";
+        close(GDBCMD);
     }
     # run the command line we built
     if ($torture) {
@@ -1754,9 +1752,9 @@ sub singletest {
         logmsg "core dumped\n";
         if(0 && $gdb) {
             logmsg "running gdb for post-mortem analysis:\n";
-            open( my $GDBCMD, ">", "log/gdbcmd2");
-            print $GDBCMD "bt\n";
-            close($GDBCMD);
+            open(GDBCMD, ">", "log/gdbcmd2");
+            print GDBCMD "bt\n";
+            close(GDBCMD);
             system("$gdb --directory libtest -x log/gdbcmd2 -batch $DBGCURL core ");
      #       unlink("log/gdbcmd2");
         }
@@ -2032,10 +2030,10 @@ sub singletest {
 
         if($disable[0] !~ /disable/) {
 
-            opendir( my $DIR, "log") ||
+            opendir(DIR, "log") ||
                 return 0; # can't open log dir
-            my @files = readdir($DIR);
-            closedir $DIR;
+            my @files = readdir(DIR);
+            closedir(DIR);
             my $f;
             my $l;
             foreach $f (@files) {
@@ -2468,10 +2466,10 @@ if($valgrind) {
 }
 
 # open the executable curl and read the first 4 bytes of it
-open(my $CHECK, "<", $CURL);
+open(CHECK, "<", $CURL);
 my $c;
-sysread $CHECK, $c, 4;
-close($CHECK);
+sysread CHECK, $c, 4;
+close(CHECK);
 if($c eq "#! /") {
     # A shell script. This is typically when built with libtool,
     $libtool = 1;
@@ -2512,12 +2510,12 @@ if(!$listonly) {
 
 if ( $TESTCASES eq "all") {
     # Get all commands and find out their test numbers
-    opendir(my $DIR, $TESTDIR) || die "can't opendir $TESTDIR: $!";
-    my @cmds = grep { /^test([0-9]+)$/ && -f "$TESTDIR/$_" } readdir($DIR);
-    closedir $DIR;
+    opendir(DIR, $TESTDIR) || die "can't opendir $TESTDIR: $!";
+    my @cmds = grep { /^test([0-9]+)$/ && -f "$TESTDIR/$_" } readdir(DIR);
+    closedir(DIR);
 
-    open(my $D, "$TESTDIR/DISABLED");
-    while(<$D>) {
+    open(D, "$TESTDIR/DISABLED");
+    while(<D>) {
         if(/^ *\#/) {
             # allow comments
             next;
@@ -2526,7 +2524,7 @@ if ( $TESTCASES eq "all") {
             $disabled{$1}=$1; # disable this test number
         }
     }
-    close($D);
+    close(D);
 
     $TESTCASES=""; # start with no test cases
 
@@ -2551,7 +2549,7 @@ if ( $TESTCASES eq "all") {
 #######################################################################
 # Start the command line log
 #
-open($CMDLOG, ">", $CURLLOG) ||
+open(CMDLOG, ">", $CURLLOG) ||
     logmsg "can't log command lines to $CURLLOG\n";
 
 #######################################################################
@@ -2560,12 +2558,12 @@ open($CMDLOG, ">", $CURLLOG) ||
 # and excessively long files are truncated
 sub displaylogcontent {
     my ($file)=@_;
-    if(open(my $SINGLE, "<$file")) {
+    if(open(SINGLE, "<$file")) {
         my $lfcount;
         my $linecount = 0;
         my $truncate;
         my @tail;
-        while(my $string = <$SINGLE>) {
+        while(my $string = <SINGLE>) {
             $string =~ s/\r\n/\n/g;
             $string =~ s/[\r\f\032]/\n/g;
             $string .= "\n" unless ($string =~ /\n$/);
@@ -2598,16 +2596,16 @@ sub displaylogcontent {
             # This won't work properly if time stamps are enabled in logmsg
             logmsg join('',@tail[$#tail-200..$#tail]);
         }
-        close($SINGLE);
+        close(SINGLE);
     }
 }
 
 sub displaylogs {
     my ($testnum)=@_;
-    opendir(my $DIR, "$LOGDIR") ||
+    opendir(DIR, "$LOGDIR") ||
         die "can't open dir: $!";
-    my @logs = readdir($DIR);
-    closedir($DIR);
+    my @logs = readdir(DIR);
+    closedir(DIR);
 
     logmsg "== Contents of files in the log/ dir after test $testnum\n";
     foreach my $log (sort @logs) {
@@ -2696,7 +2694,7 @@ foreach $testnum (@at) {
 #######################################################################
 # Close command log
 #
-close($CMDLOG);
+close(CMDLOG);
 
 # Tests done, stop the servers
 stopservers($verbose);
