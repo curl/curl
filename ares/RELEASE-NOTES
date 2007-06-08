@@ -1,24 +1,9 @@
-This is what's new and changed in the c-ares 1.4.0 release:
+This is what's new and changed in the c-ares 1.4.1 release:
 
- o fixed VS2005 compiler warnings due to time_t being 64bit
- o introduced cryptographically secure transaction IDs
- o added ares_save_options()
- o added ares_destroy_options()
- o added ares_process_fd()
- o fixed undefined return value in init_by_resolv_conf() function for windows
- o added ares_parse_ns_reply()
- o fix failure to get the search sequence of /etc/hosts and DNS from
-   /etc/nsswitch.conf, /etc/host.conf or /etc/svc.conf when /etc/resolv.conf
-   did not exist
- o when domains were sert in the options struct, and there were domain/search
-   entries in /etc/resolv.conf, the domains of the options struct would be
-   overridden
- o removed a couple of potential zero size memory allocations
- o fixed the line endings in areslib.dsp
+ o 
 
 Thanks go to these friendly people for their efforts and contributions:
 
- Andreas Rieke, Yang Tse, Michael Wallner, Vlad Dinulescu, Ravi Pratap,
- Brad House, Shmulik Regev, Brad Spencer
+ 
 
 Have fun!
