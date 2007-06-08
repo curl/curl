@@ -113,7 +113,7 @@ if($valgrind) {
     if (($? >> 8)==0) {
         $valgrind_tool="--tool=memcheck ";
     }
-    open(C, "<", $CURL);
+    open(C, "<$CURL");
     my $l = <C>;
     if($l =~ /^\#\!/) {
         # The first line starts with "#!" which implies a shell-script.
@@ -291,7 +291,7 @@ sub startnew {
     # Ugly hack but ssh doesn't support pid files
     if ($fake) {
         logmsg "$pidfile faked with pid=$child\n" if($verbose);
-        open(OUT, ">", $pidfile);
+        open(OUT, ">$pidfile");
         print OUT $child;
         close(OUT);
 	# could/should do a while connect fails sleep a bit and loop
@@ -304,7 +304,7 @@ sub startnew {
     my $count=12;
     while($count--) {
         if(-f $pidfile) {
-            open(PID, "<", $pidfile);
+            open(PID, "<$pidfile");
             $pid2 = 0 + <PID>;
             close(PID);
             if($pid2 && kill(0, $pid2)) {
@@ -521,7 +521,7 @@ sub verifyhttp {
             }
         }
     }
-    open(FILE, "<", "log/verifiedserver");
+    open(FILE, "<log/verifiedserver");
     my @file=<FILE>;
     close(FILE);
     $data=$file[0]; # first line
@@ -590,7 +590,7 @@ sub verifyftp {
 
 sub verifyssh {
     my ($proto, $ip, $port) = @_;
-    open(FILE, "<" . $SSHPIDFILE);
+    open(FILE, "<$SSHPIDFILE");
     my $pid=0+<FILE>;
     close(FILE);
     return $pid;
@@ -601,7 +601,7 @@ sub verifyssh {
 
 sub verifysocks {
     my ($proto, $ip, $port) = @_;
-    open(FILE, "<" . $SOCKSPIDFILE);
+    open(FILE, "<$SOCKSPIDFILE");
     my $pid=0+<FILE>;
     close(FILE);
     return $pid;
@@ -1043,10 +1043,10 @@ sub filteroff {
     my $filter=$_[1];
     my $ofile=$_[2];
 
-    open(IN, "<", $infile)
+    open(IN, "<$infile")
         || return 1;
 
-    open(OUT, ">", $ofile)
+    open(OUT, ">$ofile")
         || return 1;
 
     # logmsg "FILTER: off $filter from $infile to $ofile\n";
@@ -1107,7 +1107,7 @@ sub checksystem {
     $versretval = system($versioncmd);
     $versnoexec = $!;
 
-    open(VERSOUT, "<", $curlverout);
+    open(VERSOUT, "<$curlverout");
     @version = <VERSOUT>;
     close(VERSOUT);
 
@@ -1259,7 +1259,7 @@ sub checksystem {
     }
 
     if(-r "../lib/config.h") {
-        open(CONF, "<", "../lib/config.h");
+        open(CONF, "<../lib/config.h");
         while(<CONF>) {
             if($_ =~ /^\#define HAVE_GETRLIMIT/) {
                 $has_getrlimit = 1;
@@ -1634,7 +1634,7 @@ sub singletest {
         my $fileContent = join('', @inputfile);
         subVariables \$fileContent;
 #        logmsg "DEBUG: writing file " . $filename . "\n";
-        open(OUTFILE, ">", $filename);
+        open(OUTFILE, ">$filename");
         binmode OUTFILE; # for crapage systems, use binary
         print OUTFILE $fileContent;
         close(OUTFILE);
@@ -1715,7 +1715,7 @@ sub singletest {
     }
 
     if($gdbthis) {
-        open(GDBCMD, ">", "log/gdbcmd");
+        open(GDBCMD, ">log/gdbcmd");
         print GDBCMD "set args $cmdargs\n";
         print GDBCMD "show args\n";
         close(GDBCMD);
@@ -1752,7 +1752,7 @@ sub singletest {
         logmsg "core dumped\n";
         if(0 && $gdb) {
             logmsg "running gdb for post-mortem analysis:\n";
-            open(GDBCMD, ">", "log/gdbcmd2");
+            open(GDBCMD, ">log/gdbcmd2");
             print GDBCMD "bt\n";
             close(GDBCMD);
             system("$gdb --directory libtest -x log/gdbcmd2 -batch $DBGCURL core ");
@@ -2466,7 +2466,7 @@ if($valgrind) {
 }
 
 # open the executable curl and read the first 4 bytes of it
-open(CHECK, "<", $CURL);
+open(CHECK, "<$CURL");
 my $c;
 sysread CHECK, $c, 4;
 close(CHECK);
@@ -2514,7 +2514,7 @@ if ( $TESTCASES eq "all") {
     my @cmds = grep { /^test([0-9]+)$/ && -f "$TESTDIR/$_" } readdir(DIR);
     closedir(DIR);
 
-    open(D, "$TESTDIR/DISABLED");
+    open(D, "<$TESTDIR/DISABLED");
     while(<D>) {
         if(/^ *\#/) {
             # allow comments
@@ -2549,7 +2549,7 @@ if ( $TESTCASES eq "all") {
 #######################################################################
 # Start the command line log
 #
-open(CMDLOG, ">", $CURLLOG) ||
+open(CMDLOG, ">$CURLLOG") ||
     logmsg "can't log command lines to $CURLLOG\n";
 
 #######################################################################
