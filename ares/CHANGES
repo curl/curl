@@ -1,5 +1,7 @@
   Changelog for the c-ares project
 
+Version 1.4.0 (June 8, 2007)
+
 * June 4 2007 (Daniel Stenberg)
 
 - James Bursa reported a major memory problem when resolving multi-IP names
