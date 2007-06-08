@@ -14,6 +14,9 @@ Dan F (8 June 2007)
 - Reverted some recent changes to runtests.pl that weren't compatible with
   perl 5.0.
 
+- Fixed the test harness so that it actually kills the ssh being used as
+  the SOCKS server.
+
 Daniel S (6 June 2007)
 - -s/--silent can now be used to toggle off the silence again if used a second
   time.

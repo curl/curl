@@ -273,17 +273,12 @@ sub startnew {
     if(0 == $child) {
         # Here we are the child. Run the given command.
 
-        # Calling exec() within a pseudo-process actually spawns the requested
-        # executable in a separate process and waits for it to complete before
-        # exiting with the same exit status as that process.  This means that
-        # the process ID reported within the running executable will be
-        # different from what the earlier Perl fork() might have returned.
+        # Put an "exec" in front of the command so that the child process
+        # keeps this child's process ID.
+        exec("exec $cmd") || die "Can't exec() $cmd: $!";
 
         # exec() should never return back here to this process. We protect
-        # ourselfs calling die() just in case something goes really bad.
-
-        exec($cmd) || die "Can't exec() $cmd: $!";
-
+        # ourselves by calling die() just in case something goes really bad.
         die "error: exec() has returned";
     }
 
@@ -292,10 +287,10 @@ sub startnew {
     if ($fake) {
         logmsg "$pidfile faked with pid=$child\n" if($verbose);
         open(OUT, ">$pidfile");
-        print OUT $child;
+        print OUT $child . "\n";
         close(OUT);
 	# could/should do a while connect fails sleep a bit and loop
-	sleep 1;
+	sleep 2;
         if (checkdied($child)) {
             logmsg "startnew: Warning: child process has failed to start\n" if($verbose);
             return (-1,-1);
@@ -326,6 +321,9 @@ sub startnew {
         sleep(1);
     }
 
+    # Return two PIDs, the one for the child process we spawned and the one
+    # reported by the server itself (in case it forked again on its own).
+    # Both (potentially) need to be killed at the end of the test.
     return ($child, $pid2);
 }
 
