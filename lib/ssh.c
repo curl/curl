@@ -755,6 +755,7 @@ CURLcode Curl_scp_done(struct connectdata *conn, CURLcode status,
       infof(conn->data, "Failed to stop libssh2 channel subsystem\n");
     }
 #endif /* !(LIBSSH2_APINO >= 200706012030) */
+    libssh2_channel_free(scp->ssh_channel);
   }
 
   if (scp->ssh_session) {
