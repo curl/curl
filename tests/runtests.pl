@@ -290,7 +290,7 @@ sub startnew {
         print OUT $child . "\n";
         close(OUT);
 	# could/should do a while connect fails sleep a bit and loop
-	sleep 2;
+	sleep 5;
         if (checkdied($child)) {
             logmsg "startnew: Warning: child process has failed to start\n" if($verbose);
             return (-1,-1);
@@ -607,7 +607,9 @@ sub verifysocks {
 
 #######################################################################
 # Verify that the server that runs on $ip, $port is our server.
-# Retry during 5 seconds before giving up.
+# Retry over several seconds before giving up.  The ssh server in
+# particular can take a long time to start if it needs to generate
+# keys on a slow or loaded host.
 #
 
 my %protofunc = ('http' => \&verifyhttp,
@@ -621,7 +623,7 @@ my %protofunc = ('http' => \&verifyhttp,
 sub verifyserver {
     my ($proto, $ip, $port) = @_;
 
-    my $count = 5; # try for this many seconds
+    my $count = 30; # try for this many seconds
     my $pid;
 
     while($count--) {
@@ -676,7 +678,7 @@ sub runhttpserver {
     my ($httppid, $pid2) =
         startnew($cmd, $pidfile,0); # start the server in a new process
 
-    if(!kill(0, $httppid)) {
+    if($httppid <= 0 || !kill(0, $httppid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the HTTP server\n";
         stopservers($verbose);
@@ -730,7 +732,7 @@ sub runhttpsserver {
 
     my ($httpspid, $pid2) = startnew($cmd, $HTTPSPIDFILE,0);
 
-    if(!kill(0, $httpspid)) {
+    if($httpspid <= 0 || !kill(0, $httpspid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the HTTPS server\n";
         stopservers($verbose);
@@ -796,7 +798,7 @@ sub runftpserver {
 
     my ($ftppid, $pid2) = startnew($cmd, $pidfile,0);
 
-    if(!$ftppid || !kill(0, $ftppid)) {
+    if($ftppid <= 0 || !kill(0, $ftppid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the FTP$id$nameext server\n";
         return -1;
@@ -849,7 +851,7 @@ sub runftpsserver {
 
     my ($ftpspid, $pid2) = startnew($cmd, $FTPSPIDFILE,0);
 
-    if(!kill(0, $ftpspid)) {
+    if($ftpspid <= 0 || !kill(0, $ftpspid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the FTPS server\n";
         stopservers($verbose);
@@ -915,7 +917,7 @@ sub runtftpserver {
 
     my ($tftppid, $pid2) = startnew($cmd, $pidfile,0);
 
-    if(!$tftppid || !kill(0, $tftppid)) {
+    if($tftppid <= 0 || !kill(0, $tftppid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the FTP$id$nameext server\n";
         return -1;
@@ -958,7 +960,7 @@ sub runsshserver {
     my ($sshpid, $pid2) =
         startnew($cmd, $pidfile,0); # start the server in a new process
 
-    if(!$sshpid || !kill(0, $sshpid)) {
+    if($sshpid <= 0 || !kill(0, $sshpid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the SSH server\n";
         # failed to talk to it properly. Kill the server and return failure
@@ -2261,18 +2263,17 @@ sub startservers {
                 if (!checkcmd("ssh")) {
                    return "failed to find SSH client for socks support";
 		}
-                if ($what eq "socks5") {
-		   my $sshversion=`ssh -V 2>&1`;
-                   if ($sshversion =~ /SSH_(\d+)\.(\d+)/i) {
+            	if(!$run{'socks'}) {
+		    my $sshversion=`ssh -V 2>&1`;
+                    if ($sshversion =~ /SSH_(\d+)\.(\d+)/i) {
                        if ($1*10+$2 < 37) {
 		       # need 3.7 for socks5 - http://www.openssh.com/txt/release-3.7
                            return "ssh version ($1.$2) insufficient; need at least 3.7";
 		       }
-                   } else {
+                    } else {
                        return "Unsupported ssh client\n";
-                   }
-		}
-            	if(!$run{'socks'}) {
+                    }
+
                     ($pid, $pid2) = runsocksserver("", $verbose);
                     if($pid <= 0) {
                         return "failed starting socks server";
