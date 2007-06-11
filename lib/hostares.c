@@ -253,7 +253,8 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
 
     tvp = ares_timeout(data->state.areschannel, &store, &tv);
 
-    ares_waitperform(conn, timeout);
+    /* use the timeout period ares returned to us above */
+    ares_waitperform(conn, tv.tv_sec * 1000 + tv.tv_usec/1000);
 
     if(conn->async.done)
       break;
