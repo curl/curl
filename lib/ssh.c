@@ -310,7 +310,7 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
     Curl_safefree(working_path);
     return CURLE_FAILED_INIT;
   }
-  
+
 #if (LIBSSH2_APINO >= 200706012030)
   /* Set libssh2 to non-blocking, since cURL is all non-blocking */
   libssh2_session_set_blocking(ssh->ssh_session, 0);
@@ -371,7 +371,7 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
   do {
     authlist = libssh2_userauth_list(ssh->ssh_session, ssh->user,
                                      strlen(ssh->user));
-      
+
     if (!authlist && (libssh2_session_last_errno(ssh->ssh_session) !=
                       LIBSSH2_ERROR_EAGAIN)) {
       libssh2_session_free(ssh->ssh_session);
@@ -760,7 +760,7 @@ CURLcode Curl_scp_done(struct connectdata *conn, CURLcode status,
 
   if (scp->ssh_session) {
 #if (LIBSSH2_APINO >= 200706012030)
-    while (libssh2_session_disconnect(scp->ssh_session, "Shutdown") == 
+    while (libssh2_session_disconnect(scp->ssh_session, "Shutdown") ==
            LIBSSH2_ERROR_EAGAIN);
 #else /* !(LIBSSH2_APINO >= 200706012030) */
     libssh2_session_disconnect(scp->ssh_session, "Shutdown");
@@ -774,6 +774,7 @@ CURLcode Curl_scp_done(struct connectdata *conn, CURLcode status,
   Curl_pgrsDone(conn);
 
   (void)status; /* unused */
+  (void) rc;    /* possiby unused */
 
   return CURLE_OK;
 }
@@ -1145,7 +1146,7 @@ CURLcode Curl_sftp_do(struct connectdata *conn, bool *done)
       while (res == CURLE_OK) {
 #if (LIBSSH2_APINO >= 200706012030)
         ssize_t nread;
-        
+
         while ((nread = libssh2_sftp_read(data->reqdata.proto.ssh->sftp_handle,
                                   buf, BUFSIZE-1)) == LIBSSH2_ERROR_EAGAIN);
 #else /* !(LIBSSH2_APINO >= 200706012030) */
@@ -1265,6 +1266,7 @@ CURLcode Curl_sftp_done(struct connectdata *conn, CURLcode status,
   Curl_pgrsDone(conn);
 
   (void)status; /* unused */
+  (void)ret;    /* possibly unused */
 
   return rc;
 }
@@ -1702,6 +1704,8 @@ static CURLcode sftp_sendquote(struct connectdata *conn,
     }
     item = item->next;
   }
+  (void)ret;    /* possibly unused */
+
   return CURLE_OK;
 }
 
