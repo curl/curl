@@ -253,8 +253,9 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
 
     tvp = ares_timeout(data->state.areschannel, &store, &tv);
 
-    if(!ares_waitperform(conn, tv.tv_sec * 1000 + tv.tv_usec/1000))
-      /* no sockets to wait on, get out of the loop */
+    ares_waitperform(conn, timeout);
+
+    if(conn->async.done)
       break;
 
     timediff = Curl_tvdiff(Curl_tvnow(), now); /* spent time */
