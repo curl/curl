@@ -755,7 +755,9 @@ FAQ
   4.9 Curl can't authenticate to the server that requires NTLM?
 
   This is supported in curl 7.10.6 or later. No earlier curl version knows
-  of this magic.
+  of this magic. Later versions require the OpenSSL or Microsoft Windows 
+  libraries to provide this functionality. Using GnuTLS or NSS libraries will 
+  not provide NTLM authentication functionality in curl.
 
   NTLM is a Microsoft proprietary protocol. Proprietary formats are evil. You
   should not use such ones.
