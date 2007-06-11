@@ -147,8 +147,8 @@ if (! -e "curl_client_key.pub") {
     }
     # Make sure all files are gone so ssh-keygen doesn't complain
     unlink("curl_host_dsa_key", "curl_client_key","curl_host_dsa_key.pub", "curl_client_key.pub"); 
-    system "ssh-keygen -q -t dsa -f curl_host_dsa_key -C 'curl test server' -N ''" and die "Could not generate key";
-    system "ssh-keygen -q -t dsa -f curl_client_key -C 'curl test client' -N ''" and die "Could not generate key";
+    system "ssh-keygen -q -t dsa -f curl_host_dsa_key -C 'curl test server' -N ''" and die "Could not generate host key";
+    system "ssh-keygen -q -t dsa -f curl_client_key -C 'curl test client' -N ''" and die "Could not generate client key";
 }
 
 open(FILE, ">>$conffile") || die "Could not write $conffile";
@@ -207,15 +207,10 @@ if ($supports_ChReAu) {
 # Now, set up some configuration files for the ssh client
 open(DSAKEYFILE, "<curl_host_dsa_key.pub") || die 'Could not read curl_host_dsa_key.pub';
 my @dsahostkey = do { local $/ = ' '; <DSAKEYFILE> };
-close DSAKEYFILE || die "Could not close RSAKEYFILE";
-
-open(RSAKEYFILE, "<curl_host_dsa_key.pub") || die 'Could not read curl_host_dsa_key.pub';
-my @rsahostkey = do { local $/ = ' '; <RSAKEYFILE> };
-close RSAKEYFILE || die "Could not close RSAKEYFILE";
+close DSAKEYFILE || die "Could not close DSAKEYFILE";
 
 open(KNOWNHOSTS, ">$knownhostsfile") || die "Could not write $knownhostsfile";
 print KNOWNHOSTS "[127.0.0.1]:$port ssh-dss $dsahostkey[1]\n" || die 'Could not write to KNOWNHOSTS';
-print KNOWNHOSTS "[127.0.0.1]:$port ssh-rsa $rsahostkey[1]\n" || die 'Could not write to KNOWNHOSTS';
 close KNOWNHOSTS || die "Could not close KNOWNHOSTS";
 
 open(SSHFILE, ">$conffile_ssh") || die "Could not write $conffile_ssh";
