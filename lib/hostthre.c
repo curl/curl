@@ -179,28 +179,21 @@ struct thread_sync_data {
 static
 void destroy_thread_sync_data(struct thread_sync_data * tsd)
 {
-  if (tsd->hostname) {
+  if (tsd->hostname)
     free(tsd->hostname);
-    tsd->hostname = NULL;
-  }
-  if (tsd->event_terminate) {
+  if (tsd->event_terminate)
     CloseHandle(tsd->event_terminate);
-    tsd->event_terminate = NULL;
-  }
-  if (tsd->mutex_terminate) {
+  if (tsd->mutex_terminate)
     CloseHandle(tsd->mutex_terminate);
-    tsd->mutex_terminate = NULL;
-  }
-  if (tsd->mutex_waiting) {
+  if (tsd->mutex_waiting)
     CloseHandle(tsd->mutex_waiting);
-    tsd->mutex_waiting = NULL;
-  }
+  memset(tsd,0,sizeof(*tsd));
 }
 
 /* Initialize resolver thread synchronization data */
 static
 BOOL init_thread_sync_data(struct thread_data * td,
-                           char * hostname,
+                           const char * hostname,
                            struct thread_sync_data * tsd)
 {
   HANDLE curr_proc = GetCurrentProcess();
@@ -293,6 +286,7 @@ static unsigned __stdcall gethostbyname_thread (void *arg)
    * due to a resolver timeout.
    */
   struct thread_sync_data tsd = { 0,0,0,NULL };
+
   if (!init_thread_sync_data(td, conn->async.hostname, &tsd)) {
     /* thread synchronization data initialization failed */
     return (unsigned)-1;
@@ -353,6 +347,7 @@ static unsigned __stdcall getaddrinfo_thread (void *arg)
    * due to a resolver timeout.
    */
   struct thread_sync_data tsd = { 0,0,0,NULL };
+
   if (!init_thread_sync_data(td, conn->async.hostname, &tsd)) {
     /* thread synchronization data initialization failed */
     return -1;
