@@ -136,7 +136,6 @@ typedef struct tftp_state_data {
   time_t          max_time;
   unsigned short  block;
   struct Curl_sockaddr_storage   local_addr;
-  socklen_t       local_addrlen;
   struct Curl_sockaddr_storage   remote_addr;
   socklen_t       remote_addrlen;
   int             rbytes;
