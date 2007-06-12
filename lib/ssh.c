@@ -451,6 +451,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
       if ((data->set.ssh_auth_types & CURLSSH_AUTH_HOST) &&
           (strstr(sshc->authlist, "hostbased") != NULL)) {
         state(conn, SSH_AUTH_HOST);
+      } else {
+        state(conn, SSH_AUTH_KEY_INIT);
       }
       break;
       
