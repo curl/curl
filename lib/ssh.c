@@ -234,6 +234,522 @@ static LIBSSH2_FREE_FUNC(libssh2_free)
   (void)abstract;
 }
 
+/*
+ * SSH State machine related code 
+ */
+/* This is the ONLY way to change SSH state! */
+static void state(struct connectdata *conn, ftpstate state)
+{
+#if defined(CURLDEBUG) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+  /* for debug purposes */
+  const char *names[]={
+    "STOP",
+    "SSH_S_STARTUP",
+    "SSH_AUTHLIST",
+    "SSH_AUTH_PKEY_INIT",
+    "SSH_AUTH_PKEY",
+    "SSH_AUTH_PASS_INIT",
+    "SSH_AUTH_PASS",
+    "SSH_AUTH_HOST_INIT",
+    "SSH_AUTH_HOST",
+    "SSH_AUTH_KEY_INIT",
+    "SSH_AUTH_KEY",
+    "SSH_AUTH_DONE",
+    "SSH_SFTP_INIT",
+    "SSH_SFTP_REALPATH",
+    "SSH_GET_WORKINGPATH",
+    "QUIT"
+  };
+#endif
+  struct ssh_conn *sshc = &conn->proto.sshc;
+  
+#if defined(CURLDEBUG) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+  if (sshc->state != state) {
+    infof(conn->data, "FTP %p state change from %s to %s\n",
+          sshc, names[sshc->state], names[state]);
+  }
+#endif
+  
+  sshc->state = state;
+}
+
+static CURLcode ssh_statemach_act(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data=conn->data;
+  struct ssh_conn *sshc = &conn->proto.sshc;
+  curl_socket_t sock = conn->sock[FIRSTSOCKET];
+  struct SSHPROTO *ssh;
+#ifdef CURL_LIBSSH2_DEBUG
+  const char *fingerprint;
+#endif /* CURL_LIBSSH2_DEBUG */
+  int rc;
+  
+  ssh = data->reqdata.proto.ssh;
+  
+  switch(sshc->state) {
+    case SSH_S_STARTUP:
+      rc = libssh2_session_startup(ssh->ssh_session, sock);
+      if (rc == LIBSSH2_ERROR_EAGAIN) {
+        break;
+      }
+      else if (rc) {
+        failf(data, "Failure establishing ssh session");
+        libssh2_session_free(ssh->ssh_session);
+        ssh->ssh_session = NULL;
+        state(conn, SSH_STOP);
+        result = CURLE_FAILED_INIT;
+        break;
+      }
+        
+#ifdef CURL_LIBSSH2_DEBUG
+      /*
+       * Before we authenticate we should check the hostkey's fingerprint
+       * against our known hosts. How that is handled (reading from file,
+       * whatever) is up to us. As for know not much is implemented, besides
+       * showing how to get the fingerprint.
+       */
+      fingerprint = libssh2_hostkey_hash(ssh->ssh_session,
+                                         LIBSSH2_HOSTKEY_HASH_MD5);
+      
+      /* The fingerprint points to static storage (!), don't free() it. */
+      infof(data, "Fingerprint: ");
+      for (i = 0; i < 16; i++) {
+        infof(data, "%02X ", (unsigned char) fingerprint[i]);
+      }
+      infof(data, "\n");
+#endif /* CURL_LIBSSH2_DEBUG */
+      
+      state(conn, SSH_AUTHLIST);
+      break;
+      
+    case SSH_AUTHLIST:
+      /* TBD - methods to check the host keys need to be done */
+      
+      /*
+       * Figure out authentication methods
+       * NB: As soon as we have provided a username to an openssh server we
+       * must never change it later. Thus, always specify the correct username
+       * here, even though the libssh2 docs kind of indicate that it should be
+       * possible to get a 'generic' list (not user-specific) of authentication
+       * methods, presumably with a blank username. That won't work in my
+       * experience.
+       * So always specify it here.
+       */
+      sshc->authlist = libssh2_userauth_list(ssh->ssh_session, ssh->user,
+                                       strlen(ssh->user));
+      
+      if (!sshc->authlist) {
+        if (libssh2_session_last_errno(ssh->ssh_session) ==
+                        LIBSSH2_ERROR_EAGAIN) {
+          break;
+        } else {
+          libssh2_session_free(ssh->ssh_session);
+          ssh->ssh_session = NULL;
+          state(conn, SSH_STOP);
+          result = CURLE_OUT_OF_MEMORY;
+          break;
+        }
+      }
+      infof(data, "SSH authentication methods available: %s\n", sshc->authlist);
+
+      state(conn, SSH_AUTH_PKEY_INIT);
+      break;
+      
+    case SSH_AUTH_PKEY_INIT:
+      /*
+       * Check the supported auth types in the order I feel is most secure with
+       * the requested type of authentication
+       */
+      sshc->authed = FALSE;
+      
+      if ((data->set.ssh_auth_types & CURLSSH_AUTH_PUBLICKEY) &&
+          (strstr(sshc->authlist, "publickey") != NULL)) {
+        char *home;
+        
+        sshc->rsa_pub[0] = sshc->rsa[0] = '\0';
+        
+        /* To ponder about: should really the lib be messing about with the
+           HOME environment variable etc? */
+        home = curl_getenv("HOME");
+        
+        if (data->set.ssh_public_key)
+          snprintf(sshc->rsa_pub, sizeof(sshc->rsa_pub), "%s",
+                   data->set.ssh_public_key);
+        else if (home)
+          snprintf(sshc->rsa_pub, sizeof(sshc->rsa_pub), "%s/.ssh/id_dsa.pub",
+                   home);
+        
+        if (data->set.ssh_private_key)
+          snprintf(sshc->rsa, sizeof(sshc->rsa), "%s",
+                   data->set.ssh_private_key);
+        else if (home)
+          snprintf(sshc->rsa, sizeof(sshc->rsa), "%s/.ssh/id_dsa", home);
+        
+        sshc->passphrase = data->set.key_passwd;
+        if (!sshc->passphrase)
+          sshc->passphrase = "";
+        
+        curl_free(home);
+        
+        infof(conn->data, "Using ssh public key file %s\n", sshc->rsa_pub);
+        infof(conn->data, "Using ssh private key file %s\n", sshc->rsa);
+        
+        if (sshc->rsa_pub[0]) {
+          state(conn, SSH_AUTH_PKEY);
+        } else {
+          state(conn, SSH_AUTH_PASS_INIT);
+        }
+      } else {
+        state(conn, SSH_AUTH_PASS_INIT);
+      }
+      break;
+      
+    case SSH_AUTH_PKEY:
+      /* The function below checks if the files exists, no need to stat() here.
+       */
+      rc = libssh2_userauth_publickey_fromfile(ssh->ssh_session, ssh->user,
+                                               sshc->rsa_pub, sshc->rsa,
+                                               sshc->passphrase);
+      if (rc == LIBSSH2_ERROR_EAGAIN) {
+        break;
+      }
+      else if (rc == 0) {
+        sshc->authed = TRUE;
+        infof(conn->data, "Initialized SSH public key authentication\n");
+        state(conn, SSH_AUTH_DONE);
+      } else {
+        state(conn, SSH_AUTH_PASS_INIT);
+      }
+      break;
+
+    case SSH_AUTH_PASS_INIT:
+      if ((data->set.ssh_auth_types & CURLSSH_AUTH_PASSWORD) &&
+          (strstr(sshc->authlist, "password") != NULL)) {
+        state(conn, SSH_AUTH_PASS);
+      } else {
+        state(conn, SSH_AUTH_HOST_INIT);
+      }
+      break;
+      
+    case SSH_AUTH_PASS:
+      rc = libssh2_userauth_password(ssh->ssh_session, ssh->user,
+                                     ssh->passwd);
+      if (rc == LIBSSH2_ERROR_EAGAIN) {
+        break;
+      }
+      else if (rc == 0) {
+        sshc->authed = TRUE;
+        infof(conn->data, "Initialized password authentication\n");
+        state(conn, SSH_AUTH_DONE);
+      } else {
+        state(conn, SSH_AUTH_HOST_INIT);
+      }
+      break;
+      
+    case SSH_AUTH_HOST_INIT:
+      if ((data->set.ssh_auth_types & CURLSSH_AUTH_HOST) &&
+          (strstr(sshc->authlist, "hostbased") != NULL)) {
+        state(conn, SSH_AUTH_HOST);
+      }
+      break;
+      
+    case SSH_AUTH_HOST:
+      state(conn, SSH_AUTH_KEY_INIT);
+      break;
+      
+    case SSH_AUTH_KEY_INIT:
+      if ((data->set.ssh_auth_types & CURLSSH_AUTH_KEYBOARD)
+          && (strstr(sshc->authlist, "keyboard-interactive") != NULL)) {
+        state(conn, SSH_AUTH_KEY);
+      } else {
+        state(conn, SSH_AUTH_DONE);
+      }        
+      break;
+      
+    case SSH_AUTH_KEY:
+      /* Authentication failed. Continue with keyboard-interactive now. */
+      rc = libssh2_userauth_keyboard_interactive_ex(ssh->ssh_session,
+                                                    ssh->user,
+                                                    strlen(ssh->user),
+                                                    &kbd_callback);
+      if (rc == LIBSSH2_ERROR_EAGAIN) {
+        break;
+      }
+      else if (rc == 0) {
+        sshc->authed = TRUE;
+        infof(conn->data, "Initialized keyboard interactive authentication\n");
+      }
+      state(conn, SSH_AUTH_DONE);
+      break;
+      
+    case SSH_AUTH_DONE:
+      if (!sshc->authed) {
+        failf(data, "Authentication failure");
+        libssh2_session_free(ssh->ssh_session);
+        ssh->ssh_session = NULL;
+        state(conn, SSH_STOP);
+        result = CURLE_LOGIN_DENIED;
+        break;
+      }
+      
+      /*
+       * At this point we have an authenticated ssh session.
+       */
+      infof(conn->data, "Authentication complete\n");
+      
+      conn->sockfd = sock;
+      conn->writesockfd = CURL_SOCKET_BAD;
+
+      if (conn->protocol == PROT_SFTP) {
+        state(conn, SSH_SFTP_INIT);
+        break;
+      }
+      state(conn, SSH_GET_WORKINGPATH);
+      break;
+      
+    case SSH_SFTP_INIT:
+      /*
+       * Start the libssh2 sftp session
+       */
+      ssh->sftp_session = libssh2_sftp_init(ssh->ssh_session);
+      if (!ssh->sftp_session) {
+        if (libssh2_session_last_errno(ssh->ssh_session) ==
+            LIBSSH2_ERROR_EAGAIN) {
+          break;
+        } else {
+          failf(data, "Failure initialising sftp session\n");
+          libssh2_session_free(ssh->ssh_session);
+          ssh->ssh_session = NULL;
+          state(conn, SSH_STOP);
+          result = CURLE_FAILED_INIT;
+          break;
+        }
+      }
+      state(conn, SSH_SFTP_REALPATH);
+      break;
+        
+    case SSH_SFTP_REALPATH:
+      {
+        char tempHome[PATH_MAX];
+        
+        /*
+         * Get the "home" directory
+         */
+        rc = libssh2_sftp_realpath(ssh->sftp_session, ".",
+                                   tempHome, PATH_MAX-1);
+        if (rc == LIBSSH2_ERROR_EAGAIN) {
+          break;
+        }
+        else if (rc > 0) {
+          /* It seems that this string is not always NULL terminated */
+          tempHome[rc] = '\0';
+          ssh->homedir = (char *)strdup(tempHome);
+          if (!ssh->homedir) {
+            libssh2_sftp_shutdown(ssh->sftp_session);
+            ssh->sftp_session = NULL;
+            libssh2_session_free(ssh->ssh_session);
+            ssh->ssh_session = NULL;
+            state(conn, SSH_STOP);
+            result = CURLE_OUT_OF_MEMORY;
+            break;
+          }
+        } else {
+          /* Return the error type */
+          result = libssh2_sftp_last_error(ssh->sftp_session);
+          DEBUGF(infof(data, "error = %d\n", result));
+          state(conn, SSH_STOP);
+          break;
+        }
+        state(conn, SSH_GET_WORKINGPATH);
+      }
+      break;
+      
+    case SSH_GET_WORKINGPATH:
+      {
+        char *real_path;
+        char *working_path;
+        int working_path_len;
+        
+        working_path = curl_easy_unescape(data, data->reqdata.path, 0,
+                                          &working_path_len);
+        if (!working_path) {
+          state(conn, SSH_STOP);
+          result = CURLE_OUT_OF_MEMORY;
+          break;
+        }
+        
+        /* Check for /~/ , indicating relative to the user's home directory */
+        if (conn->protocol == PROT_SCP) {
+          real_path = (char *)malloc(working_path_len+1);
+          if (real_path == NULL) {
+            libssh2_session_free(ssh->ssh_session);
+            ssh->ssh_session = NULL;
+            Curl_safefree(working_path);
+            state(conn, SSH_STOP);
+            result = CURLE_OUT_OF_MEMORY;
+            break;
+          }
+          if (working_path[1] == '~')
+            /* It is referenced to the home directory, so strip the
+               leading '/' */
+            memcpy(real_path, working_path+1, 1 + working_path_len-1);
+          else
+            memcpy(real_path, working_path, 1 + working_path_len);
+        }
+        else if (conn->protocol == PROT_SFTP) {
+          if (working_path[1] == '~') {
+            real_path = (char *)malloc(strlen(ssh->homedir) +
+                                       working_path_len + 1);
+            if (real_path == NULL) {
+              libssh2_sftp_shutdown(ssh->sftp_session);
+              ssh->sftp_session = NULL;
+              libssh2_session_free(ssh->ssh_session);
+              ssh->ssh_session = NULL;
+              Curl_safefree(ssh->homedir);
+              ssh->homedir = NULL;
+              Curl_safefree(working_path);
+              state(conn, SSH_STOP);
+              result = CURLE_OUT_OF_MEMORY;
+              break;
+            }
+            /* It is referenced to the home directory, so strip the
+               leading '/' */
+            memcpy(real_path, ssh->homedir, strlen(ssh->homedir));
+            real_path[strlen(ssh->homedir)] = '/';
+            real_path[strlen(ssh->homedir)+1] = '\0';
+            if (working_path_len > 3) {
+              memcpy(real_path+strlen(ssh->homedir)+1, working_path + 3,
+                     1 + working_path_len -3);
+            }
+          }
+          else {
+            real_path = (char *)malloc(working_path_len+1);
+            if (real_path == NULL) {
+              libssh2_sftp_shutdown(ssh->sftp_session);
+              ssh->sftp_session = NULL;
+              libssh2_session_free(ssh->ssh_session);
+              ssh->ssh_session = NULL;
+              Curl_safefree(ssh->homedir);
+              ssh->homedir = NULL;
+              Curl_safefree(working_path);
+              state(conn, SSH_STOP);
+              result = CURLE_OUT_OF_MEMORY;
+              break;
+            }
+            memcpy(real_path, working_path, 1+working_path_len);
+          }
+        }
+        else {
+          libssh2_session_free(ssh->ssh_session);
+          ssh->ssh_session = NULL;
+          Curl_safefree(working_path);
+          state(conn, SSH_STOP);
+          result = CURLE_FAILED_INIT;
+          break;
+        }
+        
+        Curl_safefree(working_path);
+        ssh->path = real_path;
+        
+        /* Connect is all done */
+        state(conn, SSH_STOP);
+      }
+      break;
+      
+    case SSH_QUIT:
+      /* fallthrough, just stop! */
+    default:
+      /* internal error */
+      state(conn, SSH_STOP);
+      break;
+  }
+
+  return result;
+}
+
+/* called repeatedly until done from multi.c */
+CURLcode Curl_ssh_multi_statemach(struct connectdata *conn,
+                                  bool *done)
+{
+  curl_socket_t sock = conn->sock[FIRSTSOCKET];
+  int rc = 1;
+  struct SessionHandle *data=conn->data;
+  struct ssh_conn *sshc = &conn->proto.sshc;
+  CURLcode result = CURLE_OK;
+#if 0
+  long timeout_ms = ssh_state_timeout(conn);
+#endif
+  
+  *done = FALSE; /* default to not done yet */
+  
+#if 0
+  if (timeout_ms <= 0) {
+    failf(data, "SSH response timeout");
+    return CURLE_OPERATION_TIMEDOUT;
+  }
+
+  rc = Curl_socket_ready(sshc->sendleft?CURL_SOCKET_BAD:sock, /* reading */
+                         sshc->sendleft?sock:CURL_SOCKET_BAD, /* writing */
+                         0);
+#endif
+
+  if (rc == -1) {
+    failf(data, "select/poll error");
+    return CURLE_OUT_OF_MEMORY;
+  }
+  else if (rc != 0) {
+    result = ssh_statemach_act(conn);
+    *done = (bool)(sshc->state == SSH_STOP);
+  }
+  /* if rc == 0, then select() timed out */
+
+  return result;
+}
+
+static CURLcode ssh_easy_statemach(struct connectdata *conn)
+{
+  curl_socket_t sock = conn->sock[FIRSTSOCKET];
+  int rc = 1;
+  struct SessionHandle *data=conn->data;
+  struct ssh_conn *sshc = &conn->proto.sshc;
+  CURLcode result = CURLE_OK;
+  
+  while(sshc->state != SSH_STOP) {
+#if 0
+    long timeout_ms = ssh_state_timeout(conn);
+    
+    if (timeout_ms <=0 ) {
+      failf(data, "SSH response timeout");
+      return CURLE_OPERATION_TIMEDOUT; /* already too little time */
+    }
+
+    rc = Curl_socket_ready(sshc->sendleft?CURL_SOCKET_BAD:sock, /* reading */
+                           sshc->sendleft?sock:CURL_SOCKET_BAD, /* writing */
+                           (int)timeout_ms);
+#endif
+
+    if (rc == -1) {
+      failf(data, "select/poll error");
+      return CURLE_OUT_OF_MEMORY;
+    }
+    else if (rc == 0) {
+      result = CURLE_OPERATION_TIMEDOUT;
+      break;
+    }
+    else {
+      result = ssh_statemach_act(conn);
+      if (result)
+        break;
+    }
+  }
+
+return result;
+}
+
+/*
+ * SSH setup and connection
+ */
 static CURLcode ssh_init(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
@@ -289,11 +805,6 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
 
   ssh = data->reqdata.proto.ssh;
 
-  working_path = curl_easy_unescape(data, data->reqdata.path, 0,
-                                    &working_path_len);
-  if (!working_path)
-    return CURLE_OUT_OF_MEMORY;
-
 #ifdef CURL_LIBSSH2_DEBUG
   if (ssh->user) {
     infof(data, "User: %s\n", ssh->user);
@@ -307,14 +818,8 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
                                             libssh2_realloc, ssh);
   if (ssh->ssh_session == NULL) {
     failf(data, "Failure initialising ssh session");
-    Curl_safefree(working_path);
     return CURLE_FAILED_INIT;
   }
-
-#if (LIBSSH2_APINO >= 200706012030)
-  /* Set libssh2 to non-blocking, since cURL is all non-blocking */
-  libssh2_session_set_blocking(ssh->ssh_session, 0);
-#endif /* LIBSSH2_APINO >= 200706012030 */
 
 #ifdef CURL_LIBSSH2_DEBUG
   libssh2_trace(ssh->ssh_session, LIBSSH2_TRACE_CONN|LIBSSH2_TRACE_TRANS|
@@ -325,16 +830,35 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
 #endif /* CURL_LIBSSH2_DEBUG */
 
 #if (LIBSSH2_APINO >= 200706012030)
-  while ((i = libssh2_session_startup(ssh->ssh_session, sock)) ==
-         LIBSSH2_ERROR_EAGAIN);
+  /* Set libssh2 to non-blocking, since cURL is all non-blocking */
+  libssh2_session_set_blocking(ssh->ssh_session, 0);
+  
+  state(conn, SSH_S_STARTUP);
+  
+  if (data->state.used_interface == Curl_if_multi)
+    result = Curl_ssh_multi_statemach(conn, done);
+  else {
+    result = ssh_easy_statemach(conn);
+    if (!result)
+      *done = TRUE;
+  }
+
+  return result;
+  (void)authed; /* not used */
+  (void)working_path; /* not used */
+  (void)working_path_len; /* not used */
+  (void)real_path; /* not used */
+  (void)tempHome; /* not used */
+  (void)authlist; /* not used */
+  (void)fingerprint; /* not used */
+  (void)i; /* not used */
+  
 #else /* !(LIBSSH2_APINO >= 200706012030) */
-  i = libssh2_session_startup(ssh->ssh_session, sock);
-#endif /* !(LIBSSH2_APINO >= 200706012030) */
-  if (i) {
+  
+  if (libssh2_session_startup(ssh->ssh_session, sock)) {
     failf(data, "Failure establishing ssh session");
     libssh2_session_free(ssh->ssh_session);
     ssh->ssh_session = NULL;
-    Curl_safefree(working_path);
     return CURLE_FAILED_INIT;
   }
 
@@ -367,29 +891,13 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
    * presumably with a blank username. That won't work in my experience.
    * So always specify it here.
    */
-#if (LIBSSH2_APINO >= 200706012030)
-  do {
-    authlist = libssh2_userauth_list(ssh->ssh_session, ssh->user,
-                                     strlen(ssh->user));
-
-    if (!authlist && (libssh2_session_last_errno(ssh->ssh_session) !=
-                      LIBSSH2_ERROR_EAGAIN)) {
-      libssh2_session_free(ssh->ssh_session);
-      ssh->ssh_session = NULL;
-      Curl_safefree(working_path);
-      return CURLE_OUT_OF_MEMORY;
-    }
-  } while (!authlist);
-#else /* !(LIBSSH2_APINO >= 200706012030) */
   authlist = libssh2_userauth_list(ssh->ssh_session, ssh->user,
                                    strlen(ssh->user));
   if (!authlist) {
     libssh2_session_free(ssh->ssh_session);
     ssh->ssh_session = NULL;
-    Curl_safefree(working_path);
     return CURLE_OUT_OF_MEMORY;
   }
-#endif /* !(LIBSSH2_APINO >= 200706012030) */
   infof(data, "SSH authentication methods available: %s\n", authlist);
 
   /*
@@ -431,16 +939,8 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
     if (rsa_pub[0]) {
       /* The function below checks if the files exists, no need to stat() here.
       */
-#if (LIBSSH2_APINO >= 200706012030)
-      while ((i = libssh2_userauth_publickey_fromfile(ssh->ssh_session,
-                                                      ssh->user, rsa_pub,
-                                                      rsa, passphrase)) ==
-             LIBSSH2_ERROR_EAGAIN);
-#else /* !(LIBSSH2_APINO >= 200706012030) */
-      i = libssh2_userauth_publickey_fromfile(ssh->ssh_session, ssh->user,
-                                          rsa_pub, rsa, passphrase);
-#endif /* !(LIBSSH2_APINO >= 200706012030) */
-      if (i == 0) {
+      if (libssh2_userauth_publickey_fromfile(ssh->ssh_session, ssh->user,
+                                              rsa_pub, rsa, passphrase) == 0) {
         authed = TRUE;
         infof(conn->data, "Initialized SSH public key authentication\n");
       }
@@ -449,14 +949,7 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
   if (!authed &&
       (data->set.ssh_auth_types & CURLSSH_AUTH_PASSWORD) &&
       (strstr(authlist, "password") != NULL)) {
-#if (LIBSSH2_APINO >= 200706012030)
-    while ((i = libssh2_userauth_password(ssh->ssh_session, ssh->user,
-                                          ssh->passwd)) ==
-           LIBSSH2_ERROR_EAGAIN);
-#else /* !(LIBSSH2_APINO >= 200706012030) */
-    i = libssh2_userauth_password(ssh->ssh_session, ssh->user, ssh->passwd);
-#endif /* !(LIBSSH2_APINO >= 200706012030) */
-    if (i == 0) {
+    if (!libssh2_userauth_password(ssh->ssh_session, ssh->user, ssh->passwd)) {
       authed = TRUE;
       infof(conn->data, "Initialized password authentication\n");
     }
@@ -467,18 +960,9 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
   if (!authed && (data->set.ssh_auth_types & CURLSSH_AUTH_KEYBOARD)
       && (strstr(authlist, "keyboard-interactive") != NULL)) {
     /* Authentication failed. Continue with keyboard-interactive now. */
-#if (LIBSSH2_APINO >= 200706012030)
-    while ((i = libssh2_userauth_keyboard_interactive_ex(ssh->ssh_session,
-                                                         ssh->user,
-                                                         strlen(ssh->user),
-                                                         &kbd_callback)) ==
-           LIBSSH2_ERROR_EAGAIN);
-#else /* !(LIBSSH2_APINO >= 200706012030) */
-    i = libssh2_userauth_keyboard_interactive_ex(ssh->ssh_session, ssh->user,
-                                                 strlen(ssh->user),
-                                                 &kbd_callback);
-#endif /* !(LIBSSH2_APINO >= 200706012030) */
-    if (i == 0) {
+    if (!libssh2_userauth_keyboard_interactive_ex(ssh->ssh_session, ssh->user,
+                                                  strlen(ssh->user),
+                                                  &kbd_callback)) {
       authed = TRUE;
       infof(conn->data, "Initialized keyboard interactive authentication\n");
     }
@@ -490,7 +974,6 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
     failf(data, "Authentication failure");
     libssh2_session_free(ssh->ssh_session);
     ssh->ssh_session = NULL;
-    Curl_safefree(working_path);
     return CURLE_LOGIN_DENIED;
   }
 
@@ -506,40 +989,19 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
     /*
      * Start the libssh2 sftp session
      */
-#if (LIBSSH2_APINO >= 200706012030)
-    do {
-      ssh->sftp_session = libssh2_sftp_init(ssh->ssh_session);
-      if (!ssh->sftp_session && (libssh2_session_last_errno(ssh->ssh_session) !=
-                                 LIBSSH2_ERROR_EAGAIN)) {
-        failf(data, "Failure initialising sftp session\n");
-        libssh2_session_free(ssh->ssh_session);
-        ssh->ssh_session = NULL;
-        Curl_safefree(working_path);
-        return CURLE_FAILED_INIT;
-      }
-    } while (!ssh->sftp_session);
-#else /* !(LIBSSH2_APINO >= 200706012030) */
     ssh->sftp_session = libssh2_sftp_init(ssh->ssh_session);
     if (ssh->sftp_session == NULL) {
       failf(data, "Failure initialising sftp session\n");
       libssh2_session_free(ssh->ssh_session);
       ssh->ssh_session = NULL;
-      Curl_safefree(working_path);
       return CURLE_FAILED_INIT;
     }
-#endif /* !(LIBSSH2_APINO >= 200706012030) */
 
     /*
      * Get the "home" directory
      */
-#if (LIBSSH2_APINO >= 200706012030)
-    while ((i = libssh2_sftp_realpath(ssh->sftp_session, ".",
-                                      tempHome, PATH_MAX-1)) ==
-           LIBSSH2_ERROR_EAGAIN);
-#else /* !(LIBSSH2_APINO >= 200706012030) */
-    i = libssh2_sftp_realpath(ssh->sftp_session, ".", tempHome, PATH_MAX-1);
-#endif /* !(LIBSSH2_APINO >= 200706012030) */
-    if (i > 0) {
+    if (libssh2_sftp_realpath(ssh->sftp_session, ".", tempHome, PATH_MAX-1)
+        > 0) {
       /* It seems that this string is not always NULL terminated */
       tempHome[i] = '\0';
       ssh->homedir = (char *)strdup(tempHome);
@@ -548,7 +1010,6 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
         ssh->sftp_session = NULL;
         libssh2_session_free(ssh->ssh_session);
         ssh->ssh_session = NULL;
-        Curl_safefree(working_path);
         return CURLE_OUT_OF_MEMORY;
       }
     }
@@ -559,6 +1020,11 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
     }
   }
 
+  working_path = curl_easy_unescape(data, data->reqdata.path, 0,
+                                    &working_path_len);
+  if (!working_path)
+    return CURLE_OUT_OF_MEMORY;
+  
   /* Check for /~/ , indicating relative to the user's home directory */
   if (conn->protocol == PROT_SCP) {
     real_path = (char *)malloc(working_path_len+1);
@@ -624,6 +1090,7 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
 
   *done = TRUE;
   return CURLE_OK;
+#endif /* !(LIBSSH2_APINO >= 200706012030) */
 }
 
 CURLcode Curl_scp_do(struct connectdata *conn, bool *done)

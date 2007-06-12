@@ -406,6 +406,29 @@ struct ftp_conn {
   ftpstate state; /* always use ftp.c:state() to change state! */
 };
 
+/****************************************************************************
+ * SSH unique setup
+ ***************************************************************************/
+typedef enum {
+  SSH_STOP,    /* do nothing state, stops the state machine */
+  SSH_S_STARTUP,  /* Session startup */
+  SSH_AUTHLIST,
+  SSH_AUTH_PKEY_INIT,
+  SSH_AUTH_PKEY,
+  SSH_AUTH_PASS_INIT,
+  SSH_AUTH_PASS,
+  SSH_AUTH_HOST_INIT,
+  SSH_AUTH_HOST,
+  SSH_AUTH_KEY_INIT,
+  SSH_AUTH_KEY,
+  SSH_AUTH_DONE,
+  SSH_SFTP_INIT,
+  SSH_SFTP_REALPATH,
+  SSH_GET_WORKINGPATH,
+  SSH_QUIT,
+  SSH_LAST  /* never used */
+} sshstate;
+
 struct SSHPROTO {
   curl_off_t *bytecountp;
   char *user;
@@ -419,6 +442,17 @@ struct SSHPROTO {
   LIBSSH2_SFTP          *sftp_session; /* SFTP handle */
   LIBSSH2_SFTP_HANDLE   *sftp_handle;
 #endif /* USE_LIBSSH2 */
+};
+
+/* ssh_conn is used for struct connection-oriented data in the connectdata
+   struct */
+struct ssh_conn {
+  const char *authlist; /* List of auth. methods, managed by libssh2 */
+  const char *passphrase;
+  char rsa_pub[PATH_MAX];
+  char rsa[PATH_MAX];
+  bool authed;
+  sshstate state; /* always use ssh.c:state() to change state! */
 };
 
 
@@ -900,6 +934,7 @@ struct connectdata {
 
   union {
     struct ftp_conn ftpc;
+    struct ssh_conn sshc;
   } proto;
 
   int cselect_bits; /* bitmask of socket events */

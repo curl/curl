@@ -27,6 +27,7 @@
 #ifdef USE_LIBSSH2
 
 CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done);
+CURLcode Curl_ssh_multi_statemach(struct connectdata *conn, bool *done);
 
 CURLcode Curl_scp_do(struct connectdata *conn, bool *done);
 CURLcode Curl_scp_done(struct connectdata *conn, CURLcode, bool premature);
