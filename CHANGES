@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel S (12 June 2007)
+- James Housley brought his revamped SSH code that is state-machine driven to
+  really take advantage of the now totally non-blocking libssh2 (in CVS).
+
 Dan F (8 June 2007)
 - Incorporated Daniel Black's test706 and test707 SOCKS test cases.
 
