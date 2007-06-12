@@ -204,6 +204,9 @@ dnl The install stuff has already been taken care of by the automake stuff
 dnl AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
+dnl check if there's a way to force code inline
+AC_C_INLINE
+
 dnl **********************************************************************
 dnl Make sure that our checks for headers windows.h winsock.h winsock2.h 
 dnl and ws2tcpip.h take precedence over any other further checks which 
