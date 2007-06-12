@@ -425,6 +425,8 @@ typedef enum {
   SSH_SFTP_INIT,
   SSH_SFTP_REALPATH,
   SSH_GET_WORKINGPATH,
+  SSH_SFTP_SHUTDOWN,
+  SSH_SESSION_FREE,
   SSH_QUIT,
   SSH_LAST  /* never used */
 } sshstate;
@@ -453,6 +455,7 @@ struct ssh_conn {
   char rsa[PATH_MAX];
   bool authed;
   sshstate state; /* always use ssh.c:state() to change state! */
+  CURLcode actualCode;  /* the actual error code */
 };
 
 
