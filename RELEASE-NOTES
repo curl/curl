@@ -54,6 +54,7 @@ This release includes the following bugfixes:
  o FPL-SSL when built with NSS
  o out-of-boundary write in Curl_select()
  o -s/--silent can now be used to toggle off the silence again
+ o builds fine on 64bit HP-UX
 
 This release includes the following known bugs:
 
@@ -79,6 +80,6 @@ advice from friends like these:
  James Housley, Daniel Black, Steve Little, Sonia Subramanian, Peter O'Gorman,
  Frank Hempel, Michael Wallner, Jeff Pohlmeyer, Tobias Rundström,
  Anders Gustafsson, James Bursa, Kristian Gunstone, Feng Tu,
- Andre Guibert de Bruet, Rob Crittenden
+ Andre Guibert de Bruet, Rob Crittenden, Rich Rauenzahn
 
         Thanks! (and sorry if I forgot to mention someone)

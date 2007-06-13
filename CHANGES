@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel S (13 June 2007)
+- Rich Rauenzahn filed bug report #1733119
+  (http://curl.haxx.se/bug/view.cgi?id=1733119) and we collaborated on the
+  fix.  The problem is that for 64bit HPUX builds, several socket-related
+  functions would still assume int (32 bit) arguments and not socklen_t (64
+  bit) ones.
+
 Daniel S (12 June 2007)
 - James Housley brought his revamped SSH code that is state-machine driven to
   really take advantage of the now totally non-blocking libssh2 (in CVS).
