@@ -651,7 +651,10 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
       break;
 
     case SSH_SESSION_FREE:
-      libssh2_session_free(ssh->ssh_session);
+      rc = libssh2_session_free(ssh->ssh_session);
+      if (rc == LIBSSH2_ERROR_EAGAIN) {
+        break;
+      }
       ssh->ssh_session = NULL;
       state(conn, SSH_STOP);
       result = sshc->actualCode;
