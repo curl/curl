@@ -234,6 +234,7 @@ static LIBSSH2_FREE_FUNC(libssh2_free)
   (void)abstract;
 }
 
+#if (LIBSSH2_APINO >= 200706012030)
 /*
  * SSH State machine related code 
  */
@@ -674,7 +675,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
 CURLcode Curl_ssh_multi_statemach(struct connectdata *conn,
                                   bool *done)
 {
+#if 0
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
+#endif
   int rc = 1;
   struct SessionHandle *data=conn->data;
   struct ssh_conn *sshc = &conn->proto.sshc;
@@ -711,7 +714,9 @@ CURLcode Curl_ssh_multi_statemach(struct connectdata *conn,
 
 static CURLcode ssh_easy_statemach(struct connectdata *conn)
 {
+#if 0
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
+#endif
   int rc = 1;
   struct SessionHandle *data=conn->data;
   struct ssh_conn *sshc = &conn->proto.sshc;
@@ -748,6 +753,7 @@ static CURLcode ssh_easy_statemach(struct connectdata *conn)
 
 return result;
 }
+#endif (LIBSSH2_APINO >= 200706012030)
 
 /*
  * SSH setup and connection
