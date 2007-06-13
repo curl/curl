@@ -216,7 +216,8 @@ local directory hierarchy as needed. This option creates the dirs mentioned
 with the -o option, nothing else. If the -o file name uses no dir or if the
 dirs it mentions already exist, no dir will be created.
 
-To create remote directories when using FTP, try \fI--ftp-create-dirs\fP.
+To create remote directories when using FTP or SFTP, try 
+\fI--ftp-create-dirs\fP.
 .IP "--crlf"
 (FTP) Convert LF to CRLF in upload. Useful for MVS (OS/390).
 
@@ -382,7 +383,7 @@ has been provided, this data is sent off using the ACCT command. (Added in
 
 If this option is used twice, the second will override the previous use.
 .IP "--ftp-create-dirs"
-(FTP) When an FTP URL/operation uses a path that doesn't currently exist on
+(FTP) When an FTP or SFTP URL/operation uses a path that doesn't currently exist on
 the server, the standard behavior of curl is to fail. Using this option, curl
 will instead attempt to create missing directories.
 
