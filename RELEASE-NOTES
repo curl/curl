@@ -21,6 +21,8 @@ This release includes the following changes:
  o upload resume works for file:// URLs
  o asynchronous name resolves now require c-ares 1.4.0 or later
  o added SOCKS test cases
+ o CURLOPT_FTP_CREATE_MISSING_DIRS and --ftp-create-dirs now work for SFTP
+   operations as well
 
 This release includes the following bugfixes:
 
@@ -80,6 +82,6 @@ advice from friends like these:
  James Housley, Daniel Black, Steve Little, Sonia Subramanian, Peter O'Gorman,
  Frank Hempel, Michael Wallner, Jeff Pohlmeyer, Tobias Rundström,
  Anders Gustafsson, James Bursa, Kristian Gunstone, Feng Tu,
- Andre Guibert de Bruet, Rob Crittenden, Rich Rauenzahn
+ Andre Guibert de Bruet, Rob Crittenden, Rich Rauenzahn, Tom Regner
 
         Thanks! (and sorry if I forgot to mention someone)
