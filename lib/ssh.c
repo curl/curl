@@ -468,7 +468,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
         state(conn, SSH_AUTH_KEY);
       } else {
         state(conn, SSH_AUTH_DONE);
-      }    
+      }
       break;
 
     case SSH_AUTH_KEY:
@@ -651,10 +651,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
       break;
 
     case SSH_SESSION_FREE:
-      rc = libssh2_session_free(ssh->ssh_session);
-      if (rc == LIBSSH2_ERROR_EAGAIN) {
-        break;
-      }
+      libssh2_session_free(ssh->ssh_session);
       ssh->ssh_session = NULL;
       state(conn, SSH_STOP);
       result = sshc->actualCode;
@@ -753,7 +750,7 @@ static CURLcode ssh_easy_statemach(struct connectdata *conn)
 
 return result;
 }
-#endif (LIBSSH2_APINO >= 200706012030)
+#endif /* (LIBSSH2_APINO >= 200706012030) */
 
 /*
  * SSH setup and connection
