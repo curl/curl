@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel S (14 June 2007)
+- Dave Vasilevsky filed bug report #1736875
+  (http://curl.haxx.se/bug/view.cgi?id=1736875) almost simultanouesly as Dan
+  Fandrich mentioned a related build problem on the libcurl mailing list:
+  http://curl.haxx.se/mail/lib-2007-06/0131.html. Both problems had the same
+  reason: the definitions of the POLL* defines and the pollfd struct in the
+  libcurl code was depending on HAVE_POLL instead of HAVE_SYS_POLL_H.
+
 Daniel S (13 June 2007)
 - Tom Regner provided a patch and worked together with James Housley, so now
   CURLOPT_FTP_CREATE_MISSING_DIRS works for SFTP connections as well as FTP
