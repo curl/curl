@@ -1007,8 +1007,15 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         if(!protocol_connect) {
           /* We have a TCP connection, but 'protocol_connect' may be false
              and then we continue to 'STATE_PROTOCONNECT'. If protocol
-             connect is TRUE, we move on to STATE_DO. */
-          multistate(easy, CURLM_STATE_PROTOCONNECT);
+             connect is TRUE, we move on to STATE_DO.
+             BUT if we are using a proxy we must change to WAITPROXYCONNECT
+             */
+#ifndef CURL_DISABLE_HTTP
+          if (easy->easy_conn->bits.tunnel_connecting)
+            multistate(easy, CURLM_STATE_WAITPROXYCONNECT);
+          else
+#endif
+            multistate(easy, CURLM_STATE_PROTOCONNECT);
         }
         else {
           /* after the connect has completed, go WAITDO */

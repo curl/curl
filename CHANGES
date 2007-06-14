@@ -7,6 +7,32 @@
                                   Changelog
 
 Daniel S (14 June 2007)
+- Shmulik Regev:
+
+  I've encountered (and hopefully fixed) a problem involving proxy CONNECT
+  requests and easy handles state management. The problem isn't simple to
+  reproduce since it depends on socket state. It only manifests itself when
+  working with non-blocking sockets.
+
+  Here is the scenario:
+
+  1. in multi_runsingle the easy handle is in the CURLM_STATE_WAITCONNECT and
+  calls Curl_protocol_connect
+
+  2. in Curl_proxyCONNECT, line 1247, if the socket isn't ready the function
+  returns and conn->bits.tunnel_connecting is TRUE
+
+  3. when the call to Curl_protocol_connect returns the protocol_connect flag
+  is false and the easy state is changed to CURLM_STATE_PROTOCONNECT which
+  isn't correct if a proxy is used.  Rather CURLM_STATE_WAITPROXYCONNECT
+  should be used.
+
+  I discovered this while performing an HTTPS request through a proxy (squid)
+  on my local network. The problem caused openssl to fail as it read the proxy
+  response to the CONNECT call ('HTTP/1.0 Established') rather than the SSL
+  handshake (the exact openssl error was 'wrong ssl version' but this isn't
+  very important)
+
 - Dave Vasilevsky filed bug report #1736875
   (http://curl.haxx.se/bug/view.cgi?id=1736875) almost simultanouesly as Dan
   Fandrich mentioned a related build problem on the libcurl mailing list:

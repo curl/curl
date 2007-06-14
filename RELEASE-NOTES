@@ -57,6 +57,7 @@ This release includes the following bugfixes:
  o out-of-boundary write in Curl_select()
  o -s/--silent can now be used to toggle off the silence again
  o builds fine on 64bit HP-UX
+ o multi interface HTTP CONNECT glitch
 
 This release includes the following known bugs:
 
@@ -83,6 +84,6 @@ advice from friends like these:
  Frank Hempel, Michael Wallner, Jeff Pohlmeyer, Tobias Rundström,
  Anders Gustafsson, James Bursa, Kristian Gunstone, Feng Tu,
  Andre Guibert de Bruet, Rob Crittenden, Rich Rauenzahn, Tom Regner,
- Dave Vasilevsky
+ Dave Vasilevsky, Shmulik Regev
 
         Thanks! (and sorry if I forgot to mention someone)
