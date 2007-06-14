@@ -2044,15 +2044,6 @@ static CURLcode sftp_sendquote(struct connectdata *conn,
           return err;
         }
         memset(&attrs, 0, sizeof(LIBSSH2_SFTP_ATTRIBUTES));
-        if (libssh2_sftp_stat(sftp_session,
-                              path2, &attrs) != 0) { /* get those attributes */
-          err = libssh2_sftp_last_error(sftp_session);
-          free(path1);
-          free(path2);
-          failf(data, "Attempt to get SFTP stats failed: %s",
-                sftp_libssh2_strerror(err));
-          return CURLE_FTP_QUOTE_ERROR;
-        }
 #if (LIBSSH2_APINO >= 200706012030)
         while ((ret = libssh2_sftp_stat(sftp_session,
                                         path2, &attrs)) ==
