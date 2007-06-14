@@ -46,7 +46,7 @@
  * Definition of pollfd struct and constants for platforms lacking them.
  */
 
-#ifndef HAVE_POLL
+#ifndef HAVE_SYS_POLL_H
 
 #define POLLIN      0x01
 #define POLLPRI     0x02
