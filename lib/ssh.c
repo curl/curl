@@ -1005,8 +1005,8 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
     /*
      * Get the "home" directory
      */
-    if (libssh2_sftp_realpath(ssh->sftp_session, ".", tempHome, PATH_MAX-1)
-        > 0) {
+    i = libssh2_sftp_realpath(ssh->sftp_session, ".", tempHome, PATH_MAX-1);
+    if (i > 0) {
       /* It seems that this string is not always NULL terminated */
       tempHome[i] = '\0';
       ssh->homedir = (char *)strdup(tempHome);
