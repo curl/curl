@@ -3719,51 +3719,57 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
     if(!ftpc->dirs)
       return CURLE_OUT_OF_MEMORY;
 
-    /* parse the URL path into separate path components */
-    while ((slash_pos = strchr(cur_pos, '/')) != NULL) {
-      /* 1 or 0 to indicate absolute directory */
-      bool absolute_dir = (bool)((cur_pos - data->reqdata.path > 0) &&
-        (ftpc->dirdepth == 0));
+    /* we have a special case for listing the root dir only */
+    if(strequal(path_to_use, "/")) {
+      cur_pos++; /* make it point to the zero byte */
+      ftpc->dirs[0] = strdup("/");
+      ftpc->dirdepth++;
+    }
+    else {
+      /* parse the URL path into separate path components */
+      while ((slash_pos = strchr(cur_pos, '/')) != NULL) {
+        /* 1 or 0 to indicate absolute directory */
+        bool absolute_dir = (bool)((cur_pos - data->reqdata.path > 0) &&
+                                   (ftpc->dirdepth == 0));
 
-      /* seek out the next path component */
-      if (slash_pos-cur_pos) {
-        /* we skip empty path components, like "x//y" since the FTP command
-           CWD requires a parameter and a non-existant parameter a) doesn't
-           work on many servers and b) has no effect on the others. */
-        int len = (int)(slash_pos - cur_pos + absolute_dir);
-        ftpc->dirs[ftpc->dirdepth] = curl_easy_unescape(conn->data,
-                                                        cur_pos - absolute_dir,
-                                                        len, NULL);
-        if (!ftpc->dirs[ftpc->dirdepth]) { /* run out of memory ... */
-          failf(data, "no memory");
-          freedirs(conn);
-          return CURLE_OUT_OF_MEMORY;
+        /* seek out the next path component */
+        if (slash_pos-cur_pos) {
+          /* we skip empty path components, like "x//y" since the FTP command
+             CWD requires a parameter and a non-existant parameter a) doesn't
+             work on many servers and b) has no effect on the others. */
+          int len = (int)(slash_pos - cur_pos + absolute_dir);
+          ftpc->dirs[ftpc->dirdepth] =
+            curl_easy_unescape(conn->data, cur_pos - absolute_dir, len, NULL);
+          if (!ftpc->dirs[ftpc->dirdepth]) { /* run out of memory ... */
+            failf(data, "no memory");
+            freedirs(conn);
+            return CURLE_OUT_OF_MEMORY;
+          }
+          if (isBadFtpString(ftpc->dirs[ftpc->dirdepth])) {
+            free(ftpc->dirs[ftpc->dirdepth]);
+            freedirs(conn);
+            return CURLE_URL_MALFORMAT;
+          }
         }
-        if (isBadFtpString(ftpc->dirs[ftpc->dirdepth])) {
-          free(ftpc->dirs[ftpc->dirdepth]);
-          freedirs(conn);
-          return CURLE_URL_MALFORMAT;
+        else {
+          cur_pos = slash_pos + 1; /* jump to the rest of the string */
+          continue;
         }
-      }
-      else {
+
         cur_pos = slash_pos + 1; /* jump to the rest of the string */
-        continue;
-      }
-
-      cur_pos = slash_pos + 1; /* jump to the rest of the string */
-      if(++ftpc->dirdepth >= ftpc->diralloc) {
-	/* enlarge array */
-	char *bigger;
-	ftpc->diralloc *= 2; /* double the size each time */
-	bigger = realloc(ftpc->dirs, ftpc->diralloc * sizeof(ftpc->dirs[0]));
-	if(!bigger) {
-	  freedirs(conn);
-	  return CURLE_OUT_OF_MEMORY;
-	}
-	ftpc->dirs = (char **)bigger;
+        if(++ftpc->dirdepth >= ftpc->diralloc) {
+          /* enlarge array */
+          char *bigger;
+          ftpc->diralloc *= 2; /* double the size each time */
+          bigger = realloc(ftpc->dirs, ftpc->diralloc * sizeof(ftpc->dirs[0]));
+          if(!bigger) {
+            freedirs(conn);
+            return CURLE_OUT_OF_MEMORY;
+          }
+          ftpc->dirs = (char **)bigger;
+        }
       }
     }
-
     ftp->file = cur_pos;  /* the rest is the file name */
   }
 
