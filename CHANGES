@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel S (18 June 2007)
+- Robson Braga Araujo filed bug report #1739100
+  (http://curl.haxx.se/bug/view.cgi?id=1739100) that mentioned that libcurl
+  could not actually list the contents of the root directory of a given FTP
+  server if the login directory isn't root. I fixed the problem and added
+  three test cases (one is disabled for now since I identified KNOWN_BUGS #44,
+  we cannot use --ftp-method nocwd and list ftp directories).
+
 Daniel S (14 June 2007)
 - Shmulik Regev:
 
