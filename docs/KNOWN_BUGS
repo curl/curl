@@ -3,6 +3,9 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+44. --ftp-method nocwd does not handle URLs ending with a slash properly (it
+  should list the contents of that directory). See test case 351.
+
 43. There seems to be a problem when connecting to the Microsoft telnet server.
   http://curl.haxx.se/bug/view.cgi?id=1720605
 
