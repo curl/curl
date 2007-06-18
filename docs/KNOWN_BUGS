@@ -11,9 +11,6 @@ may have been fixed since this was written!
   and thus fails to issue the correct command:
   http://curl.haxx.se/bug/view.cgi?id=1693337
 
-40. Mac OS X test failures (Daniel Johnson)
-  http://curl.haxx.se/mail/lib-2007-03/0095.html
-
 39. Steffen Rumler's Race Condition in Curl_proxyCONNECT:
   http://curl.haxx.se/mail/lib-2007-01/0045.html
 
