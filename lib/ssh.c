@@ -318,8 +318,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
 
       /* The fingerprint points to static storage (!), don't free() it. */
       infof(data, "Fingerprint: ");
-      for (i = 0; i < 16; i++) {
-        infof(data, "%02X ", (unsigned char) fingerprint[i]);
+      for (rc = 0; rc < 16; rc++) {
+        infof(data, "%02X ", (unsigned char) fingerprint[rc]);
       }
       infof(data, "\n");
 #endif /* CURL_LIBSSH2_DEBUG */
