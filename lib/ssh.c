@@ -403,7 +403,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
           infof(conn->data, "Using ssh private key file %s\n", sshc->rsa);
         }
 
-        if (sshc->rsa_pub && sshc->rsa_pub) {
+        if (sshc->rsa_pub && sshc->rsa) {
           state(conn, SSH_AUTH_PKEY);
         } else {
           /* One or both aprint()'s might have failed,
