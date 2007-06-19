@@ -118,6 +118,11 @@
 #include "memdebug.h"
 #endif
 
+#ifndef PATH_MAX
+#define PATH_MAX 1024 /* just an extra precaution since there are systems that
+                         have their definition hidden well */
+#endif
+
 #ifndef LIBSSH2_SFTP_S_IRUSR
 /* Here's a work-around for those of you who happend to run a libssh2 version
    that is 0.14 or older. We should remove this kludge as soon as we can
