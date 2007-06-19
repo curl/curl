@@ -451,8 +451,8 @@ struct SSHPROTO {
 struct ssh_conn {
   const char *authlist; /* List of auth. methods, managed by libssh2 */
   const char *passphrase;
-  char rsa_pub[PATH_MAX];
-  char rsa[PATH_MAX];
+  char *rsa_pub;
+  char *rsa;
   bool authed;
   sshstate state; /* always use ssh.c:state() to change state! */
   CURLcode actualCode;  /* the actual error code */

@@ -369,24 +369,21 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
           (strstr(sshc->authlist, "publickey") != NULL)) {
         char *home;
 
-        sshc->rsa_pub[0] = sshc->rsa[0] = '\0';
+        sshc->rsa_pub = sshc->rsa = NULL;
 
         /* To ponder about: should really the lib be messing about with the
            HOME environment variable etc? */
         home = curl_getenv("HOME");
 
         if (data->set.ssh_public_key)
-          snprintf(sshc->rsa_pub, sizeof(sshc->rsa_pub), "%s",
-                   data->set.ssh_public_key);
+          sshc->rsa_pub = aprintf("%s", data->set.ssh_public_key);
         else if (home)
-          snprintf(sshc->rsa_pub, sizeof(sshc->rsa_pub), "%s/.ssh/id_dsa.pub",
-                   home);
+          sshc->rsa_pub = aprintf("%s/.ssh/id_dsa.pub", home);
 
         if (data->set.ssh_private_key)
-          snprintf(sshc->rsa, sizeof(sshc->rsa), "%s",
-                   data->set.ssh_private_key);
+          sshc->rsa = aprintf("%s", data->set.ssh_private_key);
         else if (home)
-          snprintf(sshc->rsa, sizeof(sshc->rsa), "%s/.ssh/id_dsa", home);
+          sshc->rsa = aprintf("%s/.ssh/id_dsa", home);
 
         sshc->passphrase = data->set.key_passwd;
         if (!sshc->passphrase)
@@ -394,12 +391,21 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
 
         curl_free(home);
 
-        infof(conn->data, "Using ssh public key file %s\n", sshc->rsa_pub);
-        infof(conn->data, "Using ssh private key file %s\n", sshc->rsa);
+        if (sshc->rsa_pub) {
+          infof(conn->data, "Using ssh public key file %s\n", sshc->rsa_pub);
+        }
+        if (sshc->rsa) {
+          infof(conn->data, "Using ssh private key file %s\n", sshc->rsa);
+        }
 
-        if (sshc->rsa_pub[0]) {
+        if (sshc->rsa_pub && sshc->rsa_pub) {
           state(conn, SSH_AUTH_PKEY);
         } else {
+          /* One or both aprint()'s might have failed,
+             move on to password authentication */
+          curl_free(sshc->rsa_pub);
+          curl_free(sshc->rsa);
+
           state(conn, SSH_AUTH_PASS_INIT);
         }
       } else {
@@ -416,7 +422,11 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
       if (rc == LIBSSH2_ERROR_EAGAIN) {
         break;
       }
-      else if (rc == 0) {
+
+      curl_free(sshc->rsa_pub);
+      curl_free(sshc->rsa);
+
+      if (rc == 0) {
         sshc->authed = TRUE;
         infof(conn->data, "Initialized SSH public key authentication\n");
         state(conn, SSH_AUTH_DONE);
