@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel S (20 June 2007)
+- Adam Piggott filed bug report #1740263
+  (http://curl.haxx.se/bug/view.cgi?id=1740263). Adam discovered that when
+  getting a large amount of URLs with curl, they were fetched slower and
+  slower... which turned out to be because the --libcurl data collecting which
+  wrongly always was enabled, but no longer is...
+
 Daniel S (18 June 2007)
 - Robson Braga Araujo filed bug report #1739100
   (http://curl.haxx.se/bug/view.cgi?id=1739100) that mentioned that libcurl

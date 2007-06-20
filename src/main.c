@@ -3354,13 +3354,15 @@ output_expected(const char* url, const char* uploadfile)
   return FALSE; /* non-HTTP upload, probably no output should be expected */
 }
 
-#define my_setopt(x,y,z) _my_setopt(x, #y, y, z)
+#define my_setopt(x,y,z) _my_setopt(x, config, #y, y, z)
 
 static struct curl_slist *easycode;
 
-CURLcode _my_setopt(CURL *curl, const char *name, CURLoption tag, ...);
+CURLcode _my_setopt(CURL *curl, struct Configurable *config, const char *name,
+                    CURLoption tag, ...);
 
-CURLcode _my_setopt(CURL *curl, const char *name, CURLoption tag, ...)
+CURLcode _my_setopt(CURL *curl, struct Configurable *config, const char *name,
+                    CURLoption tag, ...)
 {
   va_list arg;
   CURLcode ret;
@@ -3409,14 +3411,18 @@ CURLcode _my_setopt(CURL *curl, const char *name, CURLoption tag, ...)
     ret = curl_easy_setopt(curl, tag, oval);
   }
 
-  bufp = curl_maprintf("%scurl_easy_setopt(hnd, %s, %s);%s",
-                       remark?"/* ":"", name, value,
-                       remark?" [REMARK] */":"");
+  if(config->libcurl) {
+    /* we only use this for real if --libcurl was used */
 
-  if (!bufp || !curl_slist_append(easycode, bufp))
-    ret = CURLE_OUT_OF_MEMORY;
-  if (bufp)
-    curl_free(bufp);
+    bufp = curl_maprintf("%scurl_easy_setopt(hnd, %s, %s);%s",
+                         remark?"/* ":"", name, value,
+                         remark?" [REMARK] */":"");
+
+    if (!bufp || !curl_slist_append(easycode, bufp))
+      ret = CURLE_OUT_OF_MEMORY;
+    if (bufp)
+      curl_free(bufp);
+  }
   va_end(arg);
 
   return ret;

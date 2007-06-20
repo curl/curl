@@ -59,6 +59,7 @@ This release includes the following bugfixes:
  o builds fine on 64bit HP-UX
  o multi interface HTTP CONNECT glitch
  o list FTP root directories when login dir is not root
+ o no longer slows down when getting very many URLs on the same command line
 
 This release includes the following known bugs:
 
@@ -85,6 +86,6 @@ advice from friends like these:
  Frank Hempel, Michael Wallner, Jeff Pohlmeyer, Tobias Rundström,
  Anders Gustafsson, James Bursa, Kristian Gunstone, Feng Tu,
  Andre Guibert de Bruet, Rob Crittenden, Rich Rauenzahn, Tom Regner,
- Dave Vasilevsky, Shmulik Regev, Robson Braga Araujo
+ Dave Vasilevsky, Shmulik Regev, Robson Braga Araujo, Adam Piggott
 
         Thanks! (and sorry if I forgot to mention someone)
