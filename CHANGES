@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel S (21 June 2007)
+- Gerrit Bruchhäuser pointed out a warning that the Intel(R) Thread Checker
+  tool reports and it was indeed a legitimate one and it is one fixed. It was
+  a use of a share without doing the proper locking first.
+  
 Daniel S (20 June 2007)
 - Adam Piggott filed bug report #1740263
   (http://curl.haxx.se/bug/view.cgi?id=1740263). Adam discovered that when

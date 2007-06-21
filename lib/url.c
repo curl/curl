@@ -378,8 +378,11 @@ CURLcode Curl_close(struct SessionHandle *data)
 #endif /* CURL_DOES_CONVERSIONS && HAVE_ICONV */
 
   /* No longer a dirty share, if it exists */
-  if (data->share)
+  if (data->share) {
+    Curl_share_lock(data, CURL_LOCK_DATA_SHARE, CURL_LOCK_ACCESS_SINGLE);
     data->share->dirty--;
+    Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
+  }
 
   free(data);
   return CURLE_OK;
