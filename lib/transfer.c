@@ -379,7 +379,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         /* receive data from the network! */
         readrc = Curl_read(conn, conn->sockfd, k->buf, bytestoread, &nread);
 
-        DEBUGF(infof(data, "Read %ld bytes from stream (readrc = %d)\n", nread, readrc));
         /* subzero, this would've blocked */
         if(0 > readrc)
           break; /* get out of loop */
