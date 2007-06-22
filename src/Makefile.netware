@@ -25,7 +25,7 @@ endif
 
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-0.14
+LIBSSH2_PATH = ../../libssh2-0.15
 endif
 
 ifndef INSTDIR
@@ -48,9 +48,10 @@ ifndef LIBARCH
 LIBARCH = LIBC
 endif
 
-# must be equal to DEBUG or NDEBUG
+# must be equal to NDEBUG or DEBUG, CURLDEBUG
+ifndef DB
 DB	= NDEBUG
-# DB	= DEBUG
+endif
 # Optimization: -O<n> or debugging: -g
 ifeq ($(DB),NDEBUG)
 	OPT	= -O2
@@ -252,7 +253,7 @@ ifdef SCREEN
 else
 	@echo $(DL)screenname "DEFAULT"$(DL) >> $@
 endif
-ifeq ($(DB),DEBUG)
+ifneq ($(DB),NDEBUG)
 	@echo $(DL)debug$(DL) >> $@
 endif
 	@echo $(DL)threadname "$(TARGET)"$(DL) >> $@
