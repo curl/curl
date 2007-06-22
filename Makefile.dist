@@ -234,6 +234,10 @@ netware-clean:
 	$(MAKE) -C lib -f Makefile.netware clean
 	$(MAKE) -C src -f Makefile.netware clean
 
+netware-install:
+	$(MAKE) -C lib -f Makefile.netware install
+	$(MAKE) -C src -f Makefile.netware install
+
 unix: all
 
 unix-ssl: ssl
