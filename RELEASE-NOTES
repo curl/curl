@@ -61,6 +61,7 @@ This release includes the following bugfixes:
  o list FTP root directories when login dir is not root
  o no longer slows down when getting very many URLs on the same command line
  o lock share before decreasing dirty counter
+ o no-body FTP requests on re-used connections
 
 This release includes the following known bugs:
 

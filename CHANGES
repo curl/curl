@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel S (23 June 2007)
+- As reported by "Tro" in http://curl.haxx.se/mail/lib-2007-06/0161.html and
+  http://curl.haxx.se/mail/lib-2007-06/0238.html, libcurl didn't properly do
+  no-body requests on FTP files on re-used connections properly, or at least
+  it didn't provide the info back in the header callback properly in the
+  subsequent requests.
+
 Daniel S (21 June 2007)
 - Gerrit Bruchhäuser pointed out a warning that the Intel(R) Thread Checker
   tool reports and it was indeed a legitimate one and it is one fixed. It was

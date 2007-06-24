@@ -1253,9 +1253,8 @@ static CURLcode ftp_state_post_rest(struct connectdata *conn)
   struct FTP *ftp = conn->data->reqdata.proto.ftp;
   struct SessionHandle *data = conn->data;
 
-  if(ftp->no_transfer || conn->bits.no_body) {
+  if(ftp->no_transfer) {
     /* doesn't transfer any data */
-    ftp->no_transfer = TRUE;
 
     /* still possibly do PRE QUOTE jobs */
     state(conn, FTP_RETR_PREQUOTE);
@@ -3351,7 +3350,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
 
   DEBUGF(infof(data, "DO-MORE phase starts\n"));
 
-  if(!ftp->no_transfer && !conn->bits.no_body) {
+  if(!ftp->no_transfer) {
     /* a transfer is about to take place */
 
     if(data->set.upload) {
@@ -3414,6 +3413,13 @@ CURLcode ftp_perform(struct connectdata *conn,
   CURLcode result=CURLE_OK;
 
   DEBUGF(infof(conn->data, "DO phase starts\n"));
+
+  if(conn->bits.no_body) {
+    /* requested no body means no transfer... */
+    struct FTP *ftp = conn->data->reqdata.proto.ftp;
+    ftp->no_transfer = TRUE;
+  }
+
 
   *dophase_done = FALSE; /* not done yet */
 
@@ -3795,8 +3801,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
     ftp->file=NULL; /* instead of point to a zero byte, we make it a NULL
                        pointer */
 
-  if(data->set.upload && !ftp->file &&
-     (!ftp->no_transfer || conn->bits.no_body)) {
+  if(data->set.upload && !ftp->file && !ftp->no_transfer) {
     /* We need a file name when uploading. Return error! */
     failf(data, "Uploading to a URL without a file name!");
     return CURLE_URL_MALFORMAT;
