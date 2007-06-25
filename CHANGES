@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel S (25 June 2007)
+- Adjusted how libcurl treats HTTP 1.1 responses without content-lenth or
+  chunked encoding (that also lacks "Connection: close"). It now simply
+  assumes that the connection WILL be closed to signal the end, as that is how
+  RFC2616 section 4.4 point #5 says we should behave.
+  
 Version 7.16.3 (25 June 2007)
 
 Daniel S (23 June 2007)

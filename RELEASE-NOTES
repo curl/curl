@@ -15,7 +15,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o 
+ o adjusted how libcurl treats HTTP 1.1 responses without content-lenth or
+   chunked encoding
 
 This release includes the following known bugs:
 

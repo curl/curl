@@ -577,11 +577,12 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                    (k->httpversion >= 11) )
                   /* On HTTP 1.1, when connection is not to get closed, but no
                      Content-Length nor Content-Encoding chunked have been
-                     received, there is no body in this response. We don't set
-                     stop_reading TRUE since that would also prevent necessary
-                     authentication actions to take place. */
-                  conn->bits.no_body = TRUE;
-
+                     received, according to RFC2616 section 4.4 point 5, we
+                     assume that the server will close the connection to
+                     signal the end of the document. */
+                  infof(data, "no chunk, no close, no size. Assume close to "
+                        "signal end\n");
+                  conn->bits.close = TRUE;
               }
 
               if (417 == k->httpcode) {
