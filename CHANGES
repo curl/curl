@@ -6,6 +6,8 @@
 
                                   Changelog
 
+Version 7.16.3 (25 June 2007)
+
 Daniel S (23 June 2007)
 - As reported by "Tro" in http://curl.haxx.se/mail/lib-2007-06/0161.html and
   http://curl.haxx.se/mail/lib-2007-06/0238.html, libcurl didn't properly do
