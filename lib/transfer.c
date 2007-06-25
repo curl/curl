@@ -574,7 +574,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 k->header = FALSE; /* no more header to parse! */
 
                 if((k->size == -1) && !conn->bits.chunk && !conn->bits.close &&
-                   (k->httpversion >= 11) )
+                   (k->httpversion >= 11) ) {
                   /* On HTTP 1.1, when connection is not to get closed, but no
                      Content-Length nor Content-Encoding chunked have been
                      received, according to RFC2616 section 4.4 point 5, we
@@ -583,6 +583,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                   infof(data, "no chunk, no close, no size. Assume close to "
                         "signal end\n");
                   conn->bits.close = TRUE;
+                }
               }
 
               if (417 == k->httpcode) {
@@ -801,11 +802,13 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                   }
                 }
 
-                if(k->httpversion == 10)
+                if(k->httpversion == 10) {
                   /* Default action for HTTP/1.0 must be to close, unless
                      we get one of those fancy headers that tell us the
                      server keeps it open for us! */
+                  infof(data, "HTTP 1.0, assume close after body\n");
                   conn->bits.close = TRUE;
+                }
 
                 switch(k->httpcode) {
                 case 204:
@@ -1721,8 +1724,6 @@ CURLcode Curl_readwrite_init(struct connectdata *conn)
  */
 void Curl_pre_readwrite(struct connectdata *conn)
 {
-  DEBUGF(infof(conn->data, "Pre readwrite setting chunky header "
-               "values to default\n"));
   conn->bits.chunk=FALSE;
   conn->bits.trailerHdrPresent=FALSE;
 }
