@@ -34,7 +34,7 @@
    defines: */
 #define LIBCURL_VERSION_MAJOR 7
 #define LIBCURL_VERSION_MINOR 16
-#define LIBCURL_VERSION_PATCH 3
+#define LIBCURL_VERSION_PATCH 4
 
 /* This is the numeric version of the libcurl version number, meant for easier
    parsing and comparions by programs. The LIBCURL_VERSION_NUM define will
@@ -51,7 +51,7 @@
    and it is always a greater number in a more recent release. It makes
    comparisons with greater than and less than work.
 */
-#define LIBCURL_VERSION_NUM 0x071003
+#define LIBCURL_VERSION_NUM 0x071004
 
 /*
  * This is the date and time when the full source package was created. The
