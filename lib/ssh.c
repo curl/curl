@@ -1487,7 +1487,14 @@ CURLcode Curl_sftp_do(struct connectdata *conn, bool *done)
           filename[len] = '\0';
 
           if (data->set.ftp_list_only) {
-            infof(data, "%s\n", filename);
+            char *tmpLine;
+            
+            tmpLine = aprintf("%s\n", filename);
+            if (tmpLine == NULL) {
+              return CURLE_OUT_OF_MEMORY;
+            }
+            result = Curl_client_write(conn, CLIENTWRITE_BODY, tmpLine, 0);
+            Curl_safefree(tmpLine);
           }
           else {
             totalLen = 80 + len;
