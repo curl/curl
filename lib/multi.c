@@ -50,6 +50,15 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
+/*
+  CURL_SOCKET_HASH_TABLE_SIZE should be a prime number. Increasing it from 97
+  to 911 takes on a 32-bit machine 4 x 804 = 3211 more bytes.  Still, every
+  CURL handle takes 45-50 K memory, therefore this 3K are not significant.
+*/
+#ifndef CURL_SOCKET_HASH_TABLE_SIZE
+#define CURL_SOCKET_HASH_TABLE_SIZE 911
+#endif
+
 struct Curl_message {
   /* the 'CURLMsg' is the part that is visible to the external user */
   struct CURLMsg extmsg;
@@ -305,6 +314,21 @@ static void sh_freeentry(void *freethis)
   free(p);
 }
 
+static size_t fd_key_compare(void*k1, size_t k1_len, void*k2, size_t k2_len)
+{
+  (void) k1_len; (void) k2_len;
+
+  return ((*((int* ) k1)) == (*((int* ) k2))) ? 1 : 0;
+}
+
+static size_t hash_fd(void* key, size_t key_length, size_t slots_num)
+{
+  int fd = * ((int* ) key);
+  (void) key_length;
+
+  return (fd % (int)slots_num);
+}
+
 /*
  * sh_init() creates a new socket hash and returns the handle for it.
  *
@@ -325,7 +349,8 @@ static void sh_freeentry(void *freethis)
  */
 static struct curl_hash *sh_init(void)
 {
-  return Curl_hash_alloc(97, sh_freeentry);
+  return Curl_hash_alloc(CURL_SOCKET_HASH_TABLE_SIZE, hash_fd, fd_key_compare,
+                         sh_freeentry);
 }
 
 CURLM *curl_multi_init(void)

@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel S (26 June 2007)
+- Robert Iakobashvili re-arranged the internal hash code to work with a custom
+  hash function for different hashes, and also expanded the default size for
+  the socket hash table used in multi handles to greatly enhance speed when
+  very many connections are added and the socket API is used.
+
 Daniel S (25 June 2007)
 - Adjusted how libcurl treats HTTP 1.1 responses without content-lenth or
   chunked encoding (that also lacks "Connection: close"). It now simply

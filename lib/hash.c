@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -33,20 +33,6 @@
 /* this must be the last include file */
 #include "memdebug.h"
 
-static unsigned long
-hash_str(const char *key, size_t key_length)
-{
-  char *end = (char *) key + key_length;
-  unsigned long h = 5381;
-
-  while (key < end) {
-    h += h << 5;
-    h ^= (unsigned long) *key++;
-  }
-
-  return h;
-}
-
 static void
 hash_element_dtor(void *user, void *element)
 {
@@ -63,10 +49,20 @@ hash_element_dtor(void *user, void *element)
 
 /* return 1 on error, 0 is fine */
 int
-Curl_hash_init(struct curl_hash *h, int slots, curl_hash_dtor dtor)
+Curl_hash_init(struct curl_hash *h,
+               int slots,
+               hash_function hfunc,
+               comp_function comparator,
+               curl_hash_dtor dtor)
 {
   int i;
 
+  if (!slots || !hfunc || !comparator ||!dtor) {
+    return 1; /* failure */
+  }
+
+  h->hash_func = hfunc;
+  h->comp_func = comparator;
   h->dtor = dtor;
   h->size = 0;
   h->slots = slots;
@@ -89,13 +85,20 @@ Curl_hash_init(struct curl_hash *h, int slots, curl_hash_dtor dtor)
 }
 
 struct curl_hash *
-Curl_hash_alloc(int slots, curl_hash_dtor dtor)
+Curl_hash_alloc(int slots,
+                hash_function hfunc,
+                comp_function comparator,
+                curl_hash_dtor dtor)
 {
   struct curl_hash *h;
 
+  if (!slots || !hfunc || !comparator ||!dtor) {
+    return NULL; /* failure */
+  }
+
   h = (struct curl_hash *) malloc(sizeof(struct curl_hash));
   if (h) {
-    if(Curl_hash_init(h, slots, dtor)) {
+    if(Curl_hash_init(h, slots, hfunc, comparator, dtor)) {
       /* failure */
       free(h);
       h = NULL;
@@ -105,26 +108,16 @@ Curl_hash_alloc(int slots, curl_hash_dtor dtor)
   return h;
 }
 
-static int
-hash_key_compare(char *key1, size_t key1_len, char *key2, size_t key2_len)
-{
-  if (key1_len == key2_len &&
-      *key1 == *key2 &&
-      memcmp(key1, key2, key1_len) == 0) {
-    return 1;
-  }
 
-  return 0;
-}
 
 static struct curl_hash_element *
-mk_hash_element(char *key, size_t key_len, const void *p)
+mk_hash_element(void *key, size_t key_len, const void *p)
 {
   struct curl_hash_element *he =
     (struct curl_hash_element *) malloc(sizeof(struct curl_hash_element));
 
   if(he) {
-    char *dup = malloc(key_len);
+    void *dup = malloc(key_len);
     if(dup) {
       /* copy the key */
       memcpy(dup, key, key_len);
@@ -142,22 +135,20 @@ mk_hash_element(char *key, size_t key_len, const void *p)
   return he;
 }
 
-#define find_slot(__h, __k, __k_len) (hash_str(__k, __k_len) % (__h)->slots)
-
-#define FETCH_LIST(x,y,z) x->table[find_slot(x, y, z)]
+#define FETCH_LIST(x,y,z) x->table[x->hash_func(y, z, x->slots)]
 
 /* Return the data in the hash. If there already was a match in the hash,
    that data is returned. */
 void *
-Curl_hash_add(struct curl_hash *h, char *key, size_t key_len, void *p)
+Curl_hash_add(struct curl_hash *h, void *key, size_t key_len, void *p)
 {
   struct curl_hash_element  *he;
   struct curl_llist_element *le;
-  struct curl_llist *l = FETCH_LIST(h, key, key_len);
+  struct curl_llist *l = FETCH_LIST (h, key, key_len);
 
   for (le = l->head; le; le = le->next) {
     he = (struct curl_hash_element *) le->ptr;
-    if (hash_key_compare(he->key, he->key_len, key, key_len)) {
+    if (h->comp_func(he->key, he->key_len, key, key_len)) {
       h->dtor(p);     /* remove the NEW entry */
       return he->ptr; /* return the EXISTING entry */
     }
@@ -183,7 +174,7 @@ Curl_hash_add(struct curl_hash *h, char *key, size_t key_len, void *p)
 }
 
 /* remove the identified hash entry, returns non-zero on failure */
-int Curl_hash_delete(struct curl_hash *h, char *key, size_t key_len)
+int Curl_hash_delete(struct curl_hash *h, void *key, size_t key_len)
 {
   struct curl_llist_element *le;
   struct curl_hash_element  *he;
@@ -191,7 +182,7 @@ int Curl_hash_delete(struct curl_hash *h, char *key, size_t key_len)
 
   for (le = l->head; le; le = le->next) {
     he = le->ptr;
-    if (hash_key_compare(he->key, he->key_len, key, key_len)) {
+    if (h->comp_func(he->key, he->key_len, key, key_len)) {
       Curl_llist_remove(l, le, (void *) h);
       return 0;
     }
@@ -200,7 +191,7 @@ int Curl_hash_delete(struct curl_hash *h, char *key, size_t key_len)
 }
 
 void *
-Curl_hash_pick(struct curl_hash *h, char *key, size_t key_len)
+Curl_hash_pick(struct curl_hash *h, void *key, size_t key_len)
 {
   struct curl_llist_element *le;
   struct curl_hash_element  *he;
@@ -208,7 +199,7 @@ Curl_hash_pick(struct curl_hash *h, char *key, size_t key_len)
 
   for (le = l->head; le; le = le->next) {
     he = le->ptr;
-    if (hash_key_compare(he->key, he->key_len, key, key_len)) {
+    if (h->comp_func(he->key, he->key_len, key, key_len)) {
       return he->ptr;
     }
   }
@@ -280,6 +271,34 @@ Curl_hash_destroy(struct curl_hash *h)
 
   Curl_hash_clean(h);
   free(h);
+}
+
+size_t Curl_hash_str(void* key, size_t key_length, size_t slots_num)
+{
+  char* key_str = (char *) key;
+  char *end = (char *) key_str + key_length;
+  unsigned long h = 5381;
+
+  while (key_str < end) {
+    h += h << 5;
+    h ^= (unsigned long) *key_str++;
+  }
+
+  return (h % slots_num);
+}
+
+size_t Curl_str_key_compare(void*k1, size_t key1_len, void*k2, size_t key2_len)
+{
+  char *key1 = (char *)k1;
+  char *key2 = (char *)k2;
+
+  if (key1_len == key2_len &&
+      *key1 == *key2 &&
+      memcmp(key1, key2, key1_len) == 0) {
+    return 1;
+  }
+
+  return 0;
 }
 
 #if 0 /* useful function for debugging hashes and their contents */
