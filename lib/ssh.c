@@ -1487,11 +1487,7 @@ CURLcode Curl_sftp_do(struct connectdata *conn, bool *done)
           filename[len] = '\0';
 
           if (data->set.ftp_list_only) {
-            if ((attrs.flags & LIBSSH2_SFTP_ATTR_PERMISSIONS) &&
-                ((attrs.permissions & LIBSSH2_SFTP_S_IFMT) ==
-                 LIBSSH2_SFTP_S_IFDIR)) {
-              infof(data, "%s\n", filename);
-            }
+            infof(data, "%s\n", filename);
           }
           else {
             totalLen = 80 + len;
