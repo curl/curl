@@ -1,4 +1,4 @@
-Updated: February 11, 2007 (http://curl.haxx.se/docs/faq.html)
+Updated: June 26, 2007 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -445,6 +445,10 @@ FAQ
   One example would be to delete a file after you have downloaded it:
 
      curl -O ftp://download.com/coolfile -Q '-DELE coolfile'
+
+  or rename a file after upload:
+
+     curl -T infile ftp://upload.com/dir/ -Q "-RNFR infile" -Q "-RNTO newname"
 
   3.8 How do I tell curl to follow HTTP redirects?
 
