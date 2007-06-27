@@ -155,6 +155,8 @@ int main(void)
       }
       if (C < CNT) {
         init(cm, C++);
+        U++; /* just to prevent it from remaining at 0 if there are more
+                URLs to get */
       }
     }
   }
