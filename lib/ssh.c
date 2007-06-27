@@ -384,7 +384,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
           sshc->rsa_pub = aprintf("%s", data->set.ssh_public_key);
         else if (home)
           sshc->rsa_pub = aprintf("%s/.ssh/id_dsa.pub", home);
-        
+
         if (sshc->rsa_pub == NULL) {
           curl_free(home);
           state(conn, SSH_SESSION_FREE);
@@ -1488,7 +1488,7 @@ CURLcode Curl_sftp_do(struct connectdata *conn, bool *done)
 
           if (data->set.ftp_list_only) {
             char *tmpLine;
-            
+
             tmpLine = aprintf("%s\n", filename);
             if (tmpLine == NULL) {
               return CURLE_OUT_OF_MEMORY;
