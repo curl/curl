@@ -1493,7 +1493,7 @@ CURLcode Curl_sftp_do(struct connectdata *conn, bool *done)
             if (tmpLine == NULL) {
               return CURLE_OUT_OF_MEMORY;
             }
-            result = Curl_client_write(conn, CLIENTWRITE_BODY, tmpLine, 0);
+            res = Curl_client_write(conn, CLIENTWRITE_BODY, tmpLine, 0);
             Curl_safefree(tmpLine);
           }
           else {
