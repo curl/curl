@@ -1401,6 +1401,17 @@ this curl handle use the data from the shared handle instead of keeping the
 data to itself. This enables several curl handles to share data. If the curl
 handles are used simultaneously, you \fBMUST\fP use the locking methods in the
 share handle. See \fIcurl_share_setopt(3)\fP for details.
+.IP CURLOPT_NEW_FILE_PERMS
+Pass a long as a parameter, containing the value of the permissions that will
+be assigned to newly created files on the remote server.  The default value is
+\fI0644\fP, but any valid value can be used.  The only protocols that can use
+this are \fIsftp://\fP, \fIscp://\fP and \fIfile://\fP. (Added in 7.16.4)
+.IP CURLOPT_NEW_DIRECTORY_PERMS
+Pass a long as a parameter, containing the value of the permissions that will
+be assigned to newly created directories on the remote server.  The default
+value is \fI0755\fP, but any valid value can be used.  The only protocols that
+can use this are \fIsftp://\fP, \fIscp://\fP and \fIfile://\fP.
+(Added in 7.16.4)
 .SH TELNET OPTIONS
 .IP CURLOPT_TELNETOPTIONS
 Provide a pointer to a curl_slist with variables to pass to the telnet

@@ -1137,10 +1137,7 @@ CURLcode Curl_scp_do(struct connectdata *conn, bool *done)
 #if (LIBSSH2_APINO >= 200706012030)
     do {
       scp->ssh_channel = libssh2_scp_send_ex(scp->ssh_session, scp->path,
-                                             LIBSSH2_SFTP_S_IRUSR|
-                                             LIBSSH2_SFTP_S_IWUSR|
-                                             LIBSSH2_SFTP_S_IRGRP|
-                                             LIBSSH2_SFTP_S_IROTH,
+                                             conn->data->set.new_file_perms,
                                              conn->data->set.infilesize, 0, 0);
       if (!scp->ssh_channel &&
           (libssh2_session_last_errno(scp->ssh_session) !=
@@ -1150,10 +1147,7 @@ CURLcode Curl_scp_do(struct connectdata *conn, bool *done)
     } while (!scp->ssh_channel);
 #else /* !(LIBSSH2_APINO >= 200706012030) */
     scp->ssh_channel = libssh2_scp_send_ex(scp->ssh_session, scp->path,
-                                           LIBSSH2_SFTP_S_IRUSR|
-                                           LIBSSH2_SFTP_S_IWUSR|
-                                           LIBSSH2_SFTP_S_IRGRP|
-                                           LIBSSH2_SFTP_S_IROTH,
+                                           conn->data->set.new_file_perms,
                                            conn->data->set.infilesize, 0, 0);
     if (!scp->ssh_channel)
       return CURLE_FAILED_INIT;
@@ -1363,8 +1357,7 @@ CURLcode Curl_sftp_do(struct connectdata *conn, bool *done)
       sftp->sftp_handle =
         libssh2_sftp_open(sftp->sftp_session, sftp->path,
                         LIBSSH2_FXF_WRITE|LIBSSH2_FXF_CREAT|LIBSSH2_FXF_TRUNC,
-                        LIBSSH2_SFTP_S_IRUSR|LIBSSH2_SFTP_S_IWUSR|
-                        LIBSSH2_SFTP_S_IRGRP|LIBSSH2_SFTP_S_IROTH);
+                        data->set.new_file_perms);
       if (!sftp->sftp_handle &&
           (libssh2_session_last_errno(sftp->ssh_session) !=
            LIBSSH2_ERROR_EAGAIN)) {
@@ -1381,8 +1374,7 @@ CURLcode Curl_sftp_do(struct connectdata *conn, bool *done)
               sftp->sftp_handle = libssh2_sftp_open(sftp->sftp_session,
                           sftp->path,
                           LIBSSH2_FXF_WRITE|LIBSSH2_FXF_CREAT|LIBSSH2_FXF_TRUNC,
-                          LIBSSH2_SFTP_S_IRUSR|LIBSSH2_SFTP_S_IWUSR|
-                          LIBSSH2_SFTP_S_IRGRP|LIBSSH2_SFTP_S_IROTH);
+                          data->set.new_file_perms);
               if (!sftp->sftp_handle &&
                   (libssh2_session_last_errno(sftp->ssh_session) !=
                    LIBSSH2_ERROR_EAGAIN)) {
@@ -1406,8 +1398,7 @@ CURLcode Curl_sftp_do(struct connectdata *conn, bool *done)
     sftp->sftp_handle =
       libssh2_sftp_open(sftp->sftp_session, sftp->path,
                         LIBSSH2_FXF_WRITE|LIBSSH2_FXF_CREAT|LIBSSH2_FXF_TRUNC,
-                        LIBSSH2_SFTP_S_IRUSR|LIBSSH2_SFTP_S_IWUSR|
-                        LIBSSH2_SFTP_S_IRGRP|LIBSSH2_SFTP_S_IROTH);
+                        data->set.new_file_perms);
     if (!sftp->sftp_handle) {
       err = libssh2_sftp_last_error(sftp->sftp_session);
       if (((err == LIBSSH2_FX_NO_SUCH_FILE) ||
@@ -1420,8 +1411,7 @@ CURLcode Curl_sftp_do(struct connectdata *conn, bool *done)
         if (res == 0) {
           sftp->sftp_handle = libssh2_sftp_open(sftp->sftp_session, sftp->path,
                     LIBSSH2_FXF_WRITE|LIBSSH2_FXF_CREAT|LIBSSH2_FXF_TRUNC,
-                    LIBSSH2_SFTP_S_IRUSR|LIBSSH2_SFTP_S_IWUSR|
-                    LIBSSH2_SFTP_S_IRGRP|LIBSSH2_SFTP_S_IROTH);
+                    data->set.new_file_perms);
         }
       }
       if (!sftp->sftp_handle) {
@@ -1636,8 +1626,7 @@ CURLcode Curl_sftp_do(struct connectdata *conn, bool *done)
       do {
         sftp->sftp_handle =
           libssh2_sftp_open(sftp->sftp_session, sftp->path, LIBSSH2_FXF_READ,
-                          LIBSSH2_SFTP_S_IRUSR|LIBSSH2_SFTP_S_IWUSR|
-                          LIBSSH2_SFTP_S_IRGRP|LIBSSH2_SFTP_S_IROTH);
+                          data->set.new_file_perms);
         if (!sftp->sftp_handle &&
             (libssh2_session_last_errno(sftp->ssh_session) !=
                                    LIBSSH2_ERROR_EAGAIN)) {
@@ -1650,8 +1639,7 @@ CURLcode Curl_sftp_do(struct connectdata *conn, bool *done)
 #else /* !(LIBSSH2_APINO >= 200706012030) */
       sftp->sftp_handle =
         libssh2_sftp_open(sftp->sftp_session, sftp->path, LIBSSH2_FXF_READ,
-                          LIBSSH2_SFTP_S_IRUSR|LIBSSH2_SFTP_S_IWUSR|
-                          LIBSSH2_SFTP_S_IRGRP|LIBSSH2_SFTP_S_IROTH);
+                          data->set.new_file_perms);
       if (!sftp->sftp_handle) {
         err = libssh2_sftp_last_error(sftp->sftp_session);
         failf(conn->data, "Could not open remote file for reading: %s",
@@ -2304,15 +2292,11 @@ static CURLcode sftp_create_dirs(struct connectdata *conn) {
       /* 'mode' - parameter is preliminary - default to 0644 */
 #if (LIBSSH2_APINO >= 200706012030)
       while ((rc = libssh2_sftp_mkdir(sftp->sftp_session, sftp->path,
-                               LIBSSH2_SFTP_S_IRWXU |
-                               LIBSSH2_SFTP_S_IRGRP | LIBSSH2_SFTP_S_IXGRP |
-                               LIBSSH2_SFTP_S_IROTH | LIBSSH2_SFTP_S_IXOTH)) ==
+                                      conn->data->set.new_directory_perms)) ==
              LIBSSH2_ERROR_EAGAIN);
 #else /* !(LIBSSH2_APINO >= 200706012030) */
       rc = libssh2_sftp_mkdir(sftp->sftp_session, sftp->path,
-                               LIBSSH2_SFTP_S_IRWXU |
-                               LIBSSH2_SFTP_S_IRGRP | LIBSSH2_SFTP_S_IXGRP |
-                               LIBSSH2_SFTP_S_IROTH | LIBSSH2_SFTP_S_IXOTH);
+                               conn->data->set.new_directory_perms);
 #endif /* !(LIBSSH2_APINO >= 200706012030) */
       *slash_pos = '/';
       ++slash_pos;

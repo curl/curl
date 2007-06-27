@@ -1076,6 +1076,11 @@ typedef enum {
   CINIT(HTTP_TRANSFER_DECODING, LONG, 157),
   CINIT(HTTP_CONTENT_DECODING, LONG, 158),
 
+  /* Permission used when creating new files and directories on the remote
+     server for protocols that support it, SFTP/SCP/FILE */
+  CINIT(NEW_FILE_PERMS, LONG, 159),
+  CINIT(NEW_DIRECTORY_PERMS, LONG, 160),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

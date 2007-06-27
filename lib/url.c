@@ -595,6 +595,8 @@ CURLcode Curl_open(struct SessionHandle **curl)
 
     data->set.ssh_auth_types = CURLSSH_AUTH_DEFAULT; /* defaults to any auth
                                                         type */
+    data->set.new_file_perms = 0644;    /* Default permissions */
+    data->set.new_directory_perms = 0755; /* Default permissions */
 
     /* most recent connection is not yet defined */
     data->state.lastconnect = -1;
@@ -1759,6 +1761,21 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      */
     data->set.http_ce_skip = (bool)(0 == va_arg(param, long));
     break;
+
+  case CURLOPT_NEW_FILE_PERMS:
+    /*
+     * Uses these permissions instead of 0644
+     */
+    data->set.new_file_perms = va_arg(param, long);
+    break;
+
+  case CURLOPT_NEW_DIRECTORY_PERMS:
+    /*
+     * Uses these permissions instead of 0755
+     */
+    data->set.new_directory_perms = va_arg(param, long);
+    break;
+
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_FAILED_INIT; /* correct this */

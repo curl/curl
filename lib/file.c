@@ -217,8 +217,23 @@ static CURLcode file_upload(struct connectdata *conn)
 
   if(data->reqdata.resume_from)
     fp = fopen( file->path, "ab" );
-  else
+  else {
+    int fd;
+
+#if defined(WIN32) || defined(MSDOS) || defined(__EMX__)
+    fd = open(file->path, O_WRONLY|O_CREAT|O_TRUNC|O_BINARY,
+              conn->data->set.new_file_perms);
+#else /* !(WIN32 || MSDOS || __EMX__) */
+    fd = open(file->path, O_WRONLY|O_CREAT|O_TRUNC,
+              conn->data->set.new_file_perms);
+#endif /* !(WIN32 || MSDOS || __EMX__) */
+    if (fd < 0) {
+      failf(data, "Can't open %s for writing", file->path);
+      return CURLE_WRITE_ERROR;
+    }
+    close(fd);
     fp = fopen(file->path, "wb");
+  }
 
   if(!fp) {
     failf(data, "Can't open %s for writing", file->path);

@@ -731,6 +731,8 @@ void curl_easy_reset(CURL *curl)
 
   data->set.ssh_auth_types = CURLSSH_AUTH_DEFAULT; /* defaults to any auth
                                                       type */
+  data->set.new_file_perms = 0644;    /* Default permissions */
+  data->set.new_directory_perms = 0755; /* Default permissions */
 }
 
 #ifdef CURL_DOES_CONVERSIONS
