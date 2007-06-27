@@ -13,7 +13,10 @@
  * Written by Michael Wallner
  */
 
+#include <errno.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 #include <curl/multi.h>
 
 static const char *urls[] = {
@@ -106,6 +109,10 @@ int main(void)
 
   cm = curl_multi_init();
 
+  /* we can optionally limit the total amount of connections this multi handle
+     uses */
+  curl_multi_setopt(cm, CURLMOPT_MAXCONNECTS, MAX);
+
   for (C = 0; C < MAX; ++C) {
     init(cm, C);
   }
@@ -123,20 +130,24 @@ int main(void)
         return EXIT_FAILURE;
       }
 
-      /* In a real-world program you OF COURSE check the return that maxfd is
-         bigger than -1 so that the call to select() below makes sense! */
-
       if (curl_multi_timeout(cm, &L)) {
         fprintf(stderr, "E: curl_multi_timeout\n");
         return EXIT_FAILURE;
       }
+      if (L == -1)
+        L = 100;
 
-      T.tv_sec = L/1000;
-      T.tv_usec = (L%1000)*1000;
+      if (M == -1) {
+        sleep(L / 1000);
+      } else {
+        T.tv_sec = L/1000;
+        T.tv_usec = (L%1000)*1000;
 
-      if (0 > select(M+1, &R, &W, &E, &T)) {
-        fprintf(stderr, "E: select\n");
-        return EXIT_FAILURE;
+        if (0 > select(M+1, &R, &W, &E, &T)) {
+          fprintf(stderr, "E: select(%i,,,,%li): %i: %s\n",
+              M+1, L, errno, strerror(errno));
+          return EXIT_FAILURE;
+        }
       }
     }
 
