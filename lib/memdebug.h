@@ -67,6 +67,8 @@ CURL_EXTERN int curl_accept(int s, void *addr, void *addrlen,
 /* FILE functions */
 CURL_EXTERN FILE *curl_fopen(const char *file, const char *mode, int line,
                              const char *source);
+CURL_EXTERN FILE *curl_fdopen(int filedes, const char *mode, int line,
+                              const char *source);
 CURL_EXTERN int curl_fclose(FILE *file, int line, const char *source);
 
 #ifndef MEMDEBUG_NODEFINES
@@ -117,6 +119,8 @@ CURL_EXTERN int curl_fclose(FILE *file, int line, const char *source);
 
 #undef fopen
 #define fopen(file,mode) curl_fopen(file,mode,__LINE__,__FILE__)
+#undef fdopen
+#define fdopen(file,mode) curl_fdopen(file,mode,__LINE__,__FILE__)
 #define fclose(file) curl_fclose(file,__LINE__,__FILE__)
 
 #endif /* MEMDEBUG_NODEFINES */

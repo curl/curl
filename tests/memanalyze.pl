@@ -237,7 +237,7 @@ while(<FILE>) {
         $linenum = $2;
         $function = $3;
 
-        if($function =~ /fopen\(\"([^\"]*)\",\"([^\"]*)\"\) = (\(nil\)|0x([0-9a-f]*))/) {
+        if($function =~ /f[d]*open\(\"([^\"]*)\",\"([^\"]*)\"\) = (\(nil\)|0x([0-9a-f]*))/) {
             if($3 eq "(nil)") {
                 ;
             }

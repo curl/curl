@@ -231,8 +231,7 @@ static CURLcode file_upload(struct connectdata *conn)
       failf(data, "Can't open %s for writing", file->path);
       return CURLE_WRITE_ERROR;
     }
-    close(fd);
-    fp = fopen(file->path, "wb");
+    fp = fdopen(fd, "wb");
   }
 
   if(!fp) {

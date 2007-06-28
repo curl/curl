@@ -280,6 +280,16 @@ FILE *curl_fopen(const char *file, const char *mode,
   return res;
 }
 
+FILE *curl_fdopen(int filedes, const char *mode,
+                  int line, const char *source)
+{
+  FILE *res=(fdopen)(filedes, mode);
+  if(logfile)
+    fprintf(logfile, "FILE %s:%d fdopen(\"%d\",\"%s\") = %p\n",
+            source, line, filedes, mode, res);
+  return res;
+}
+
 int curl_fclose(FILE *file, int line, const char *source)
 {
   int res;
