@@ -477,14 +477,14 @@ if ($configurebuild) {
     mydie "configure didn't work";
   }
 } else {
-  logit "Copying files to build dir...";
+  logit "copying files to build dir ...";
   if (($^O eq 'MSWin32') && ($targetos !~ /netware/)) {
     system("xcopy /s /q ..\\$CURLDIR .");
     system("buildconf.bat");
   }
   elsif (($^O eq 'linux') || ($targetos =~ /netware/)) {
-    system("cp -afr --no-preserve=ownership ../$CURLDIR/* ."); 
-    system("cp -af --no-preserve=ownership ../$CURLDIR/Makefile.dist Makefile"); 
+    system("cp -afr ../$CURLDIR/* ."); 
+    system("cp -af ../$CURLDIR/Makefile.dist Makefile"); 
     system("$make -i -C lib -f Makefile.$targetos prebuild");
     system("$make -i -C src -f Makefile.$targetos prebuild");
   }
