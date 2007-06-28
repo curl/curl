@@ -3,20 +3,22 @@ Curl and libcurl 7.16.4
  Public curl release number:               100
  Releases counted from the very beginning: 126
  Available command line options:           118
- Available curl_easy_setopt() options:     141
+ Available curl_easy_setopt() options:     143
  Number of public functions in libcurl:    54
- Amount of public web site mirrors:        38
+ Amount of public web site mirrors:        39
  Number of known libcurl bindings:         35
  Number of contributors:                   554
 
 This release includes the following changes:
  
- o 
+ o added CURLOPT_NEW_FILE_PERMS and CURLOPT_NEW_DIRECTORY_PERMS
+ o improved hashing of sockets for the multi_socket API
 
 This release includes the following bugfixes:
 
  o adjusted how libcurl treats HTTP 1.1 responses without content-lenth or
    chunked encoding
+ o fixed the 10-at-a-time.c example
 
 This release includes the following known bugs:
 
@@ -33,6 +35,6 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Robert Iakobashvili
+ Robert Iakobashvili, James Housley, Günter Knauf, James Bursa
 
         Thanks! (and sorry if I forgot to mention someone)

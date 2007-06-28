@@ -6,11 +6,24 @@
 
                                   Changelog
 
+Daniel S (27 June 2007)
+- James Housley: Add two new options for the SFTP/SCP/FILE protocols:
+  CURLOPT_NEW_FILE_PERMS and CURLOPT_NEW_DIRECTORY_PERMS. These control the
+  premissions for files and directories created on the remote
+  server. CURLOPT_NEW_FILE_PERMS defaults to 0644 and
+  CURLOPT_NEW_DIRECTORY_PERMS defaults to 0755
+
+- I corrected the 10-at-a-time.c example and applied a patch for it by James
+  Bursa.
+
 Daniel S (26 June 2007)
 - Robert Iakobashvili re-arranged the internal hash code to work with a custom
   hash function for different hashes, and also expanded the default size for
   the socket hash table used in multi handles to greatly enhance speed when
   very many connections are added and the socket API is used.
+
+- James Housley made the CURLOPT_FTPLISTONLY mode work for SFTP directory
+  listings as well
 
 Daniel S (25 June 2007)
 - Adjusted how libcurl treats HTTP 1.1 responses without content-lenth or
