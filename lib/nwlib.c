@@ -23,9 +23,12 @@
 
 #ifdef NETWARE /* Novell NetWare */
 
+#include <stdlib.h>
+
+#ifdef __NOVELL_LIBC__
+/* For native LibC-based NLM we need to register as a real lib. */
 #include <errno.h>
 #include <string.h>
-#include <stdlib.h>
 #include <library.h>
 #include <netware.h>
 #include <screen.h>
@@ -148,7 +151,7 @@ void _NonAppStop( void )
 ** we return a non-zero value. Right now, there isn't any reason not to allow
 ** it.
 */
-int  _NonAppCheckUnload( void )
+int _NonAppCheckUnload( void )
 {
     return 0;
 }
@@ -275,10 +278,10 @@ int GetOrSetUpData(int id, libdata_t **appData,
   return err;
 }
 
-int DisposeLibraryData( void    *data)
+int DisposeLibraryData( void *data )
 {
   if (data) {
-    void    *tenbytes = ((libdata_t *) data)->tenbytes;
+    void *tenbytes = ((libdata_t *) data)->tenbytes;
     
     if (tenbytes)
       free(tenbytes);
@@ -289,10 +292,10 @@ int DisposeLibraryData( void    *data)
   return 0;
 }
 
-void DisposeThreadData(void    *data)
+void DisposeThreadData( void *data )
 {
   if (data) {
-    void    *twentybytes = ((libthreaddata_t *) data)->twentybytes;
+    void *twentybytes = ((libthreaddata_t *) data)->twentybytes;
     
     if (twentybytes)
       free(twentybytes);
@@ -300,5 +303,29 @@ void DisposeThreadData(void    *data)
     free(data);
   }
 }
+
+#else /* __NOVELL_LIBC__ */
+/* For native CLib-based NLM seems we can do a bit more simple. */
+#include <nwthread.h>
+
+/* Make the CLIB Ctx stuff link */
+/*
+#include <stdio.h>
+#include <netdb.h>
+NETDB_DEFINE_CONTEXT
+*/
+
+int main ( void )
+{
+    /* initialize any globals here... */
+
+    /* do this if any global initializing was done 
+    SynchronizeStart();
+    */
+    ExitThread (TSR_THREAD, 0);
+    return 0;
+}
+
+#endif /* __NOVELL_LIBC__ */
 
 #endif /* NETWARE */
