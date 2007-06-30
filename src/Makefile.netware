@@ -66,10 +66,14 @@ endif
 
 # The following line defines your compiler.
 ifdef METROWERKS
+	# MWCW_PATH = $(subst \,/,$(METROWERKS))/Novell Support
+	MWCW_PATH = $(subst \,/,$(METROWERKS))/Novell Support/Metrowerks Support
 	CC = mwccnlm
 else
 	CC = gcc
 endif
+# a native win32 awk can be downloaded from here:
+# http://www.gknw.net/development/prgtools/awk-20050424.zip
 AWK	= awk
 CP	= cp -afv
 # RM	= rm -f
@@ -92,9 +96,10 @@ ifeq ($(LIBARCH),LIBC)
 	PRELUDE = $(SDK_LIBC)/imports/libcpre.o
 	CFLAGS += -align 4
 else
-	PRELUDE = "$(METROWERKS)/Novell Support/libraries/runtime/prelude.obj"
-	PRELUDE += "$(subst \,/,$(METROWERKS))/Novell Support/libraries/runtime/mwcrtl.lib"
-	CFLAGS += -include "$(subst \,/,$(METROWERKS))/Novell Support/headers/nlm_clib_prefix.h"
+	PRELUDE = "$(MWCW_PATH)/libraries/runtime/prelude.obj"
+	# PRELUDE += "$(MWCW_PATH)/libraries/runtime/mwcrtl.lib"
+	PRELUDE += "$(MWCW_PATH)/libraries/runtime/output/clib/mwcrtl.lib"
+	CFLAGS += -include "$(MWCW_PATH)/headers/nlm_clib_prefix.h"
 	CFLAGS += -align 1
 endif
 else
