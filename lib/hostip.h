@@ -26,9 +26,9 @@
 #include "setup.h"
 #include "hash.h"
 
-#if (defined(NETWARE) && defined(__NOVELL_LIBC__))
+#ifdef NETWARE
 #undef in_addr_t
-#define in_addr_t uint32_t
+#define in_addr_t unsigned long
 #endif
 
 /*

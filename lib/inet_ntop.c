@@ -42,6 +42,10 @@
 
 #include "inet_ntop.h"
 
+#if (defined(NETWARE) && !defined(__NOVELL_LIBC__))
+NETINET_DEFINE_CONTEXT
+#endif
+
 #if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)
 /* this platform has a inet_ntoa_r() function, but no proto declared anywhere
    so we include our own proto to make compilers happy */

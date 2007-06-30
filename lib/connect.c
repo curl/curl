@@ -59,10 +59,13 @@
 #include <stdlib.h> /* required for free() prototype, without it, this crashes */
 #endif              /* on macos 68K */
 
-#if (defined(HAVE_FIONBIO) && defined(__NOVELL_LIBC__))
+#if (defined(HAVE_FIONBIO) && defined(NETWARE))
 #include <sys/filio.h>
 #endif
-#if (defined(NETWARE) && defined(__NOVELL_LIBC__))
+#ifdef NETWARE
+#ifndef __NOVELL_LIBC__
+NETDB_DEFINE_CONTEXT
+#endif
 #undef in_addr_t
 #define in_addr_t unsigned long
 #endif

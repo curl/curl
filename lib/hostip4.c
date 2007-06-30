@@ -284,7 +284,12 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
      * which the gethostbyname() is the preferred() function.
      */
   else {
+#if (defined(NETWARE) && !defined(__NOVELL_LIBC__))
+    NETDB_DEFINE_CONTEXT
+    h = gethostbyname((char*)hostname);
+#else
     h = gethostbyname(hostname);
+#endif
     if (!h)
       infof(conn->data, "gethostbyname(2) failed for %s\n", hostname);
 #endif /*HAVE_GETHOSTBYNAME_R */

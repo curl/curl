@@ -126,11 +126,31 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 
 #ifdef NETWARE
 /* NetWare implementation */
+#ifdef __NOVELL_LIBC__
 #include <screen.h>
 char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 {
   return getpassword(prompt, buffer, buflen);
 }
+#else
+#include <nwconio.h>
+char *getpass_r(const char *prompt, char *buffer, size_t buflen)
+{
+  int i = 0;
+  int c;
+
+  printf("%s", prompt);
+  do {
+    c = getch();
+    if (c != 13) {
+      buffer[i] = c;
+      i++;
+      printf("%s", "*");
+    }
+  } while ((c != 13) && (i < buflen));
+  return buffer;
+}
+#endif /* __NOVELL_LIBC__ */
 #define DONE
 #endif /* NETWARE */
 

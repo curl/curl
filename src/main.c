@@ -47,8 +47,13 @@
 
 #define CURLseparator   "--_curl_--"
 
+#ifdef NETWARE
 #ifdef __NOVELL_LIBC__
 #include <screen.h>
+#else
+#include <nwconio.h>
+#define mkdir mkdir_510
+#endif
 #endif
 
 #include "version.h"
@@ -731,7 +736,7 @@ static void help(void)
   };
   for(i=0; helptext[i]; i++) {
     puts(helptext[i]);
-#ifdef __NOVELL_LIBC__
+#ifdef NETWARE
     if (i && ((i % 23) == 0))
       pressanykey();
 #endif
