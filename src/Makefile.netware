@@ -112,6 +112,7 @@ ifeq ($(LIBARCH),LIBC)
 	PRELUDE = $(SDK_LIBC)/imports/libcpre.gcc.o
 else
 	PRELUDE = $(SDK_CLIB)/imports/clibpre.gcc.o
+	PRELUDE += c:/usr/lib/gcc-lib/i586-netware/3.2.3/libgcc.$(LIBEXT)
 	CFLAGS += -include $(NDKBASE)/nlmconv/genlm.h
 endif
 endif
