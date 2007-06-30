@@ -70,9 +70,6 @@ static int gettimeofday(struct timeval *tp, void *nothing)
 }
 #else /* WIN32 */
 /* non-win32 version of Curl_gettimeofday() */
-#if (defined(NETWARE) && !defined(__NOVELL_LIBC__))
-#include <sys/timeval.h>
-#endif
 static int gettimeofday(struct timeval *tp, void *nothing)
 {
   (void)nothing; /* we don't support specific time-zones */

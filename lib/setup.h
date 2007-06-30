@@ -315,6 +315,10 @@ int fileno( FILE *stream);
 #endif
 
 #ifdef NETWARE
+#ifndef __NOVELL_LIBC__
+#include <sys/bsdskt.h>
+#include <sys/timeval.h>
+#endif
 #undef HAVE_ALARM
 #endif
 

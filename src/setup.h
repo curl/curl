@@ -176,6 +176,10 @@ int fileno( FILE *stream);
 #define typedef_bool
 #endif
 
+#if (defined(NETWARE) && !defined(__NOVELL_LIBC__))
+#include <sys/timeval.h>
+#endif
+
 #ifndef SIZEOF_CURL_OFF_T
 #define SIZEOF_CURL_OFF_T sizeof(curl_off_t)
 #endif
