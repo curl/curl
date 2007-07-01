@@ -484,17 +484,26 @@ NetWare
      http://www.gknw.net/development/prgtools/
    - recent Novell LibC SDK available from:
      http://developer.novell.com/ndk/libc.htm
-   - optional zlib sources (at the moment only dynamic linking with zlib.imp);
+   - or recent Novell CLib SDK available from:
+     http://developer.novell.com/ndk/clib.htm
+   - optional zlib sources (static or dynamic linking with zlib.imp);
      sources with NetWare Makefile can be obtained from:
      http://www.gknw.net/mirror/zlib/
-   - optional OpenSSL sources (version 0.9.8 or later which builds with BSD);
+   - optional OpenSSL sources (version 0.9.8 or later build with BSD sockets);
+     you can find precompiled packages at:
+     http://www.gknw.net/development/ossl/netware/
+     for CLIB-based builds OpenSSL needs to be extended to build with BSD
+     sockets (currently only a winsock-based CLIB build is supported); 
+   - optional SSH2 sources (version 0.15 or later);
 
    Set a search path to your compiler, linker and tools; on Linux make
-   sure that the var OSTYPE contains the string 'linux'; and then type
+   sure that the var OSTYPE contains the string 'linux'; set the var
+   NDKBASE to point to the base of your Novell NDK; and then type
    'make netware' from the top source directory; other tagets available
    are 'netware-ssl', 'netware-ssl-zlib', 'netware-zlib' and 'netware-ares';
    if you need other combinations you can control the build with the
-   environment variables WITH_SSL, WITH_ZLIB, WITH_ARES and ENABLE_IPV6.
+   environment variables WITH_SSL, WITH_ZLIB, WITH_ARES, WITH_SSH2, and
+   ENABLE_IPV6; you can set LINK_STATIC=1 to link curl.nlm statically.
    I found on some Linux systems (RH9) that OS detection didnt work although
    a 'set | grep OSTYPE' shows the var present and set; I simply overwrote it
    with 'OSTYPE=linux-rh9-gnu' and the detection in the Makefile worked...
