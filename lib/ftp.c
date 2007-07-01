@@ -1610,7 +1610,9 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
         if(ptr) {
           newport = (unsigned short)(num & 0xffff);
 
-          if (conn->bits.tunnel_proxy)
+          if (conn->bits.tunnel_proxy ||
+              data->set.proxytype == CURLPROXY_SOCKS5 ||
+              data->set.proxytype == CURLPROXY_SOCKS4)
             /* proxy tunnel -> use other host info because ip_addr_str is the
                proxy address not the ftp host */
             snprintf(newhost, sizeof(newhost), "%s", conn->host.name);
@@ -1662,7 +1664,9 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
       infof(data, "Skips %d.%d.%d.%d for data connection, uses %s instead\n",
             ip[0], ip[1], ip[2], ip[3],
             conn->ip_addr_str);
-      if (conn->bits.tunnel_proxy)
+      if (conn->bits.tunnel_proxy ||
+          data->set.proxytype == CURLPROXY_SOCKS5 ||
+          data->set.proxytype == CURLPROXY_SOCKS4)
         /* proxy tunnel -> use other host info because ip_addr_str is the
            proxy address not the ftp host */
         snprintf(newhost, sizeof(newhost), "%s", conn->host.name);

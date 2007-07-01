@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel S (1 July 2007)
+- Song Ma helped me verify and extend a fix for doing FTP over a SOCKS4/5
+  proxy.
+
 Daniel S (27 June 2007)
 - James Housley: Add two new options for the SFTP/SCP/FILE protocols:
   CURLOPT_NEW_FILE_PERMS and CURLOPT_NEW_DIRECTORY_PERMS. These control the

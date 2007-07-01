@@ -19,6 +19,7 @@ This release includes the following bugfixes:
  o adjusted how libcurl treats HTTP 1.1 responses without content-lenth or
    chunked encoding
  o fixed the 10-at-a-time.c example
+ o FTP over SOCKS proxy
 
 This release includes the following known bugs:
 
@@ -35,6 +36,6 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Robert Iakobashvili, James Housley, Günter Knauf, James Bursa
+ Robert Iakobashvili, James Housley, Günter Knauf, James Bursa, Song Ma
 
         Thanks! (and sorry if I forgot to mention someone)
