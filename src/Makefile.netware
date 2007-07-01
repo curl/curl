@@ -96,9 +96,9 @@ ifeq ($(LIBARCH),LIBC)
 	PRELUDE = $(SDK_LIBC)/imports/libcpre.o
 	CFLAGS += -align 4
 else
+	# PRELUDE = $(SDK_CLIB)/imports/clibpre.o
+	# to avoid the __init... whoes dont use prelude from NDK
 	PRELUDE = "$(MWCW_PATH)/libraries/runtime/prelude.obj"
-	# PRELUDE += "$(MWCW_PATH)/libraries/runtime/mwcrtl.lib"
-	PRELUDE += "$(MWCW_PATH)/libraries/runtime/output/clib/mwcrtl.lib"
 	CFLAGS += -include "$(MWCW_PATH)/headers/nlm_clib_prefix.h"
 	CFLAGS += -align 1
 endif
@@ -111,8 +111,10 @@ CFLAGS	+= -Wall # -pedantic
 ifeq ($(LIBARCH),LIBC)
 	PRELUDE = $(SDK_LIBC)/imports/libcpre.gcc.o
 else
-	PRELUDE = $(SDK_CLIB)/imports/clibpre.gcc.o
-	PRELUDE += c:/usr/lib/gcc-lib/i586-netware/3.2.3/libgcc.$(LIBEXT)
+	# PRELUDE = $(SDK_CLIB)/imports/clibpre.gcc.o
+	# to avoid the __init... whoes dont use prelude from NDK
+	# http://www.gknw.net/development/mk_nlm/gcc_pre.exe
+	PRELUDE = $(NDK_ROOT)/pre/prelude.o
 	CFLAGS += -include $(NDKBASE)/nlmconv/genlm.h
 endif
 endif
@@ -327,24 +329,23 @@ config.h: Makefile.netware
 	@echo $(DL)#define VERSION "$(LIBCURL_VERSION_STR)"$(DL) >> $@
 	@echo $(DL)#define PACKAGE_BUGREPORT "a suitable curl mailing list => http://curl.haxx.se/mail/"$(DL) >> $@
 ifeq ($(LIBARCH),CLIB)
-	@echo $(DL)#define OS "i586-clib-NetWare"$(DL) >> $@
+	@echo $(DL)#define OS "i586-pc-clib-NetWare"$(DL) >> $@
 	@echo $(DL)#define NETDB_USE_INTERNET 1$(DL) >> $@
-	@echo $(DL)#define CURL_DISABLE_CRYPTO_AUTH 1$(DL) >> $@
-	@echo $(DL)#define HAVE_INET_NTOA 1$(DL) >> $@
 #	@echo $(DL)#define HAVE_INET_NTOA_R_DECL 1$(DL) >> $@
 	@echo $(DL)#define HAVE_LL 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRICMP 1$(DL) >> $@
 	@echo $(DL)#define socklen_t int$(DL) >> $@
 	@echo $(DL)#define pressanykey PressAnyKeyToContinue$(DL) >> $@
 else
-	@echo $(DL)#define OS "i586-libc-NetWare"$(DL) >> $@
+	@echo $(DL)#define OS "i586-pc-libc-NetWare"$(DL) >> $@
 	@echo $(DL)#define HAVE_DLFCN_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_DLOPEN 1$(DL) >> $@
 	@echo $(DL)#define HAVE_FTRUNCATE 1$(DL) >> $@
 	@echo $(DL)#define HAVE_GETTIMEOFDAY 1$(DL) >> $@
 	@echo $(DL)#define HAVE_INET_PTON 1$(DL) >> $@
-	@echo $(DL)#define HAVE_LIMITS_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_INTTYPES_H 1$(DL) >> $@
+	@echo $(DL)#define HAVE_LIMITS_H 1$(DL) >> $@
+	@echo $(DL)#define HAVE_LONGLONG 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STDINT_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRCASECMP 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRLCAT 1$(DL) >> $@
@@ -362,7 +363,6 @@ endif
 	@echo $(DL)#define HAVE_GETHOSTBYADDR 1$(DL) >> $@
 	@echo $(DL)#define HAVE_INET_ADDR 1$(DL) >> $@
 	@echo $(DL)#define HAVE_INET_NTOA 1$(DL) >> $@
-	@echo $(DL)#define HAVE_LONGLONG 1$(DL) >> $@
 	@echo $(DL)#define HAVE_MALLOC_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_NETINET_IN_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_RECV 1$(DL) >> $@
