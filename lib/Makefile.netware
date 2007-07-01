@@ -348,9 +348,18 @@ config.h: Makefile.netware
 ifeq ($(LIBARCH),CLIB)
 	@echo $(DL)#define OS "i586-pc-clib-NetWare"$(DL) >> $@
 	@echo $(DL)#define NETDB_USE_INTERNET 1$(DL) >> $@
-#	@echo $(DL)#define CURL_DISABLE_CRYPTO_AUTH 1$(DL) >> $@
-#	@echo $(DL)#define HAVE_INET_NTOA_R_DECL 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRICMP 1$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_ARG1 int$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_ARG2 char *$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_ARG3 int$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_ARG4 int$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_RETV int$(DL) >> $@
+	@echo $(DL)#define SEND_QUAL_ARG2$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_ARG1 int$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_ARG2 char *$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_ARG3 int$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_ARG4 int$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_RETV int$(DL) >> $@
 	@echo $(DL)#define socklen_t int$(DL) >> $@
 	@echo $(DL)#define DL_LDAP_FILE "ldapsdk.nlm"$(DL) >> $@
 else
@@ -375,10 +384,22 @@ else
 	@echo $(DL)#define HAVE_PF_INET6 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRUCT_IN6_ADDR 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRUCT_SOCKADDR_IN6 1$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_ARG1 int$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_ARG2 void *$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_ARG3 size_t$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_ARG4 int$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_RETV ssize_t$(DL) >> $@
+	@echo $(DL)#define SEND_QUAL_ARG2$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_ARG1 int$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_ARG2 void *$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_ARG3 size_t$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_ARG4 int$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_RETV ssize_t$(DL) >> $@
 	@echo $(DL)#define SIZEOF_STRUCT_IN6_ADDR 16$(DL) >> $@
 	@echo $(DL)#define DL_LDAP_FILE "lldapsdk.nlm"$(DL) >> $@
-#	@echo $(DL)#define _FILE_OFFSET_BITS 64$(DL) >> $@
-#	@echo $(DL)#define _LARGE_FILES 64$(DL) >> $@
+ifdef ENABLE_IPV6
+	@echo $(DL)#define ENABLE_IPV6 1$(DL) >> $@
+endif
 endif
 	@echo $(DL)#define HAVE_ARPA_INET_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_ASSERT_H 1$(DL) >> $@
@@ -408,6 +429,8 @@ endif
 	@echo $(DL)#define HAVE_STRFTIME 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRING_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRSTR 1$(DL) >> $@
+	@echo $(DL)#define HAVE_STRUCT_ADDRINFO 1$(DL) >> $@
+	@echo $(DL)#define HAVE_STRUCT_TIMEVAL 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SYS_IOCTL_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SYS_STAT_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SYS_TIME_H 1$(DL) >> $@
@@ -416,29 +439,13 @@ endif
 	@echo $(DL)#define HAVE_UNISTD_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_UTIME 1$(DL) >> $@
 	@echo $(DL)#define HAVE_UTIME_H 1$(DL) >> $@
-	@echo $(DL)#define RECV_TYPE_ARG1 int$(DL) >> $@
-	@echo $(DL)#define RECV_TYPE_ARG2 char *$(DL) >> $@
-	@echo $(DL)#define RECV_TYPE_ARG3 int$(DL) >> $@
-	@echo $(DL)#define RECV_TYPE_ARG4 int$(DL) >> $@
-	@echo $(DL)#define RECV_TYPE_RETV int$(DL) >> $@
 	@echo $(DL)#define RETSIGTYPE void$(DL) >> $@
-	@echo $(DL)#define SEND_QUAL_ARG2$(DL) >> $@
-	@echo $(DL)#define SEND_TYPE_ARG1 int$(DL) >> $@
-	@echo $(DL)#define SEND_TYPE_ARG2 char *$(DL) >> $@
-	@echo $(DL)#define SEND_TYPE_ARG3 int$(DL) >> $@
-	@echo $(DL)#define SEND_TYPE_ARG4 int$(DL) >> $@
-	@echo $(DL)#define SEND_TYPE_RETV int$(DL) >> $@
 	@echo $(DL)#define SIZEOF_CURL_OFF_T 4$(DL) >> $@
+	@echo $(DL)#define SIZEOF_STRUCT_IN_ADDR 4$(DL) >> $@
 	@echo $(DL)#define STDC_HEADERS 1$(DL) >> $@
 	@echo $(DL)#define TIME_WITH_SYS_TIME 1$(DL) >> $@
-	@echo $(DL)#define HAVE_STRUCT_ADDRINFO 1$(DL) >> $@
-	@echo $(DL)#define HAVE_STRUCT_TIMEVAL 1$(DL) >> $@
-	@echo $(DL)#define SIZEOF_STRUCT_IN_ADDR 4$(DL) >> $@
 ifdef DISABLE_LDAP
 	@echo $(DL)#define CURL_DISABLE_LDAP 1$(DL) >> $@
-endif
-ifdef ENABLE_IPV6
-	@echo $(DL)#define ENABLE_IPV6 1$(DL) >> $@
 endif
 ifdef NW_WINSOCK
 	@echo $(DL)#define HAVE_CLOSESOCKET 1$(DL) >> $@
