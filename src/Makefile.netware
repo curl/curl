@@ -215,7 +215,7 @@ dist: all
 	-$(RM) $(OBJDIR)/$(TARGET).def $(OBJDIR)/version.inc $(XDCDATA)
 
 install: $(INSTDIR) all
-	@$(CP) ../docs/$(TARGET).pdf $(INSTDIR)
+	@-$(CP) ../docs/$(TARGET).pdf $(INSTDIR)
 	@$(CP) $(TARGET).nlm $(INSTDIR)
 
 clean:
