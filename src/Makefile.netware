@@ -36,7 +36,7 @@ endif
 TARGET  = curl
 VERSION	= $(LIBCURL_VERSION)
 COPYR	= Copyright (C) 1996 - 2007, Daniel Stenberg, <daniel@haxx.se>
-DESCR	= cURL $(LIBCURL_VERSION_STR) - http://curl.haxx.se
+DESCR	= cURL $(LIBCURL_VERSION_STR) ($(LIBARCH)) - http://curl.haxx.se
 MTSAFE	= YES
 STACK	= 64000
 SCREEN	= $(TARGET) commandline utility
