@@ -809,18 +809,19 @@ CUSTOM OUTPUT
 
         curl -w 'We downloaded %{size_download} bytes\n' www.download.com
 
-KERBEROS4 FTP TRANSFER
+KERBEROS FTP TRANSFER
 
-  Curl supports kerberos4 for FTP transfers. You need the kerberos package
-  installed and used at curl build time for it to be used.
+  Curl supports kerberos4 and kerberos5/GSSAPI for FTP transfers. You need
+  the kerberos package installed and used at curl build time for it to be
+  used.
 
-  First, get the krb-ticket the normal way, like with the kauth tool. Then use
-  curl in way similar to:
+  First, get the krb-ticket the normal way, like with the kinit/kauth tool.
+  Then use curl in way similar to:
 
-        curl --krb4 private ftp://krb4site.com -u username:fakepwd
+        curl --krb private ftp://krb4site.com -u username:fakepwd
 
   There's no use for a password on the -u switch, but a blank one will make
-  curl ask for one and you already entered the real password to kauth.
+  curl ask for one and you already entered the real password to kinit/kauth.
 
 TELNET
 

@@ -4,6 +4,7 @@ CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	\
   cookie.c http.c sendf.c ftp.c url.c dict.c if2ip.c speedcheck.c	\
   ldap.c ssluse.c version.c getenv.c escape.c mprintf.c telnet.c	\
   netrc.c getinfo.c transfer.c strequal.c easy.c security.c krb4.c	\
+  krb5.c \
   memdebug.c http_chunks.c strtok.c connect.c llist.c hash.c multi.c	\
   content_encoding.c share.c http_digest.c md5.c http_negotiate.c	\
   http_ntlm.c inet_pton.c strtoofft.c strerror.c hostares.c hostasyn.c	\

@@ -380,6 +380,9 @@ Curl_addrinfo *Curl_he2ai(const struct hostent *he, int port)
        and use that area to store the address */
     ai->ai_addr = (struct sockaddr *) ((char*)ai + sizeof(Curl_addrinfo));
 
+    /* FIXME: need to free this eventually */
+    ai->ai_canonname = strdup(he->h_name);
+
     /* leave the rest of the struct filled with zero */
 
     addr = (struct sockaddr_in *)ai->ai_addr; /* storage area for this info */

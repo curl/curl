@@ -47,7 +47,7 @@
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */
 #include <curl/mprintf.h>
 
-#ifdef HAVE_KRB4
+#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
 #include "krb4.h"
 #else
 #define Curl_sec_send(a,b,c,d) -1
@@ -365,7 +365,7 @@ CURLcode Curl_write(struct connectdata *conn,
     bytes_written = Curl_sftp_send(conn, num, mem, len);
 #endif /* !USE_LIBSSH2 */
   else if(conn->sec_complete)
-    /* only TRUE if krb4 enabled */
+    /* only TRUE if krb enabled */
     bytes_written = Curl_sec_send(conn, num, mem, len);
   else
     bytes_written = Curl_plain_send(conn, num, mem, len);

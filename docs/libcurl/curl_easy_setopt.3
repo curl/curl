@@ -1370,12 +1370,12 @@ this to 1 to enable it. By default all transfers are done using the
 cache. Note that while nothing ever should get hurt by attempting to reuse SSL
 session-IDs, there seem to be broken SSL implementations in the wild that may
 require you to disable this in order for you to succeed. (Added in 7.16.0)
-.IP CURLOPT_KRB4LEVEL
-Pass a char * as parameter. Set the krb4 security level, this also enables
-krb4 awareness.  This is a string, 'clear', 'safe', 'confidential' or
-\&'private'.  If the string is set but doesn't match one of these, 'private'
-will be used. Set the string to NULL to disable Kerberos4. The Kerberos
-support only works for FTP.
+.IP CURLOPT_KRBLEVEL
+Pass a char * as parameter. Set the kerberos security level for FTP; this
+also enables kerberos awareness.  This is a string, 'clear', 'safe',
+'confidential' or \&'private'.  If the string is set but doesn't match one
+of these, 'private' will be used. Set the string to NULL to disable kerberos
+support for FTP.
 .SH SSH OPTIONS
 .IP CURLOPT_SSH_AUTH_TYPES
 Pass a long set to a bitmask consisting of one or more of

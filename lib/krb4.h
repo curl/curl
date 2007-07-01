@@ -40,7 +40,12 @@ struct Curl_sec_client_mech {
 #define AUTH_CONTINUE   1
 #define AUTH_ERROR      2
 
+#ifdef HAVE_KRB4
 extern struct Curl_sec_client_mech Curl_krb4_client_mech;
+#endif
+#ifdef HAVE_GSSAPI
+extern struct Curl_sec_client_mech Curl_krb5_client_mech;
+#endif
 
 CURLcode Curl_krb_kauth(struct connectdata *conn);
 int Curl_sec_fflush_fd(struct connectdata *conn, int fd);

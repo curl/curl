@@ -41,7 +41,7 @@
 #include "setup.h"
 
 #ifndef CURL_DISABLE_FTP
-#ifdef HAVE_KRB4
+#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
 
 #define _MPRINTF_REPLACE /* we want curl-functions instead of native ones */
 #include <curl/mprintf.h>
@@ -87,8 +87,8 @@ name_to_level(const char *name)
 }
 
 static const struct Curl_sec_client_mech * const mechs[] = {
-#ifdef KRB5
-  /* not supported */
+#ifdef HAVE_GSSAPI
+    &Curl_krb5_client_mech,
 #endif
 #ifdef HAVE_KRB4
     &Curl_krb4_client_mech,
@@ -118,6 +118,8 @@ block_read(int fd, void *buf, size_t len)
     b = read(fd, p, len);
     if (b == 0)
       return 0;
+    else if (b < 0 && (errno == EINTR || errno == EAGAIN))
+      continue;
     else if (b < 0)
       return -1;
     len -= b;
@@ -133,7 +135,9 @@ block_write(int fd, void *buf, size_t len)
   int b;
   while(len) {
     b = write(fd, p, len);
-    if(b < 0)
+    if (b < 0 && (errno == EINTR || errno == EAGAIN))
+      continue;
+    else if(b < 0)
       return -1;
     len -= b;
     p += b;
@@ -155,7 +159,7 @@ sec_get_data(struct connectdata *conn,
     return -1;
   len = ntohl(len);
   buf->data = realloc(buf->data, len);
-  b = block_read(fd, buf->data, len);
+  b = buf->data ? block_read(fd, buf->data, len) : -1;
   if (b == 0)
     return 0;
   else if (b < 0)
@@ -234,11 +238,36 @@ sec_send(struct connectdata *conn, int fd, char *from, int length)
 {
   int bytes;
   void *buf;
-  bytes = (conn->mech->encode)(conn->app_data, from, length, conn->data_prot,
+  enum protection_level protlevel = conn->data_prot;
+  int iscmd = protlevel == prot_cmd;
+
+  if(iscmd) {
+    if(!strncmp(from, "PASS ", 5) || !strncmp(from, "ACCT ", 5))
+      protlevel = prot_private;
+    else
+      protlevel = conn->command_prot;
+  }
+  bytes = (conn->mech->encode)(conn->app_data, from, length, protlevel,
                                &buf, conn);
-  bytes = htonl(bytes);
-  block_write(fd, &bytes, sizeof(bytes));
-  block_write(fd, buf, ntohl(bytes));
+  if(iscmd) {
+    char *cmdbuf;
+
+    bytes = Curl_base64_encode(conn->data, (char *)buf, bytes, &cmdbuf);
+    if(bytes > 0) {
+      if(protlevel == prot_private)
+	block_write(fd, "ENC ", 4);
+      else
+	block_write(fd, "MIC ", 4);
+      block_write(fd, cmdbuf, bytes);
+      block_write(fd, "\r\n", 2);
+      Curl_infof(conn->data, "%s %s\n", protlevel == prot_private ? "ENC" : "MIC", cmdbuf);
+      free(cmdbuf);
+    }
+  } else {
+    bytes = htonl(bytes);
+    block_write(fd, &bytes, sizeof(bytes));
+    block_write(fd, buf, ntohl(bytes));
+  }
   free(buf);
   return length;
 }
@@ -267,6 +296,8 @@ Curl_sec_write(struct connectdata *conn, int fd, char *buffer, int length)
     return write(fd, buffer, length);
 
   len -= (conn->mech->overhead)(conn->app_data, conn->data_prot, len);
+  if(len <= 0)
+    len = length;
   while(length){
     if(length < len)
       len = length;
@@ -319,6 +350,11 @@ Curl_sec_read_msg(struct connectdata *conn, char *s, int level)
     return -1;
   }
 
+  if(conn->data->set.verbose) {
+    buf[len] = '\n';
+    Curl_debug(conn->data, CURLINFO_HEADER_IN, (char *)buf, len + 1, conn);
+  }
+
   buf[len] = '\0';
 
   if(buf[3] == '-')
@@ -360,7 +396,7 @@ sec_prot_internal(struct connectdata *conn, int level)
     if(Curl_GetFTPResponse(&nread, conn, &code))
       return -1;
 
-    if(code/100 != '2'){
+    if(code/100 != 2){
       failf(conn->data, "Failed to set protection buffer size.");
       return -1;
     }
@@ -385,6 +421,8 @@ sec_prot_internal(struct connectdata *conn, int level)
   }
 
   conn->data_prot = (enum protection_level)level;
+  if(level == prot_private)
+    conn->command_prot = (enum protection_level)level;
   return 0;
 }
 
@@ -468,6 +506,9 @@ Curl_sec_login(struct connectdata *conn)
     conn->mech = *m;
     conn->sec_complete = 1;
     conn->command_prot = prot_safe;
+    /* Set the requested protection level */
+    /* BLOCKING */
+    Curl_sec_set_protection_level(conn);
     break;
   }
 

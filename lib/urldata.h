@@ -133,8 +133,8 @@
    We prefix with CURL to prevent name collisions. */
 #define CURLMAX(x,y) ((x)>(y)?(x):(y))
 
-#ifdef HAVE_KRB4
-/* Types needed for krb4-ftp connections */
+#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+/* Types needed for krb4/5-ftp connections */
 struct krb4buffer {
   void *data;
   size_t size;
@@ -145,7 +145,8 @@ enum protection_level {
   prot_clear,
   prot_safe,
   prot_confidential,
-  prot_private
+  prot_private,
+  prot_cmd
 };
 #endif
 
@@ -882,8 +883,8 @@ struct connectdata {
     char *cookiehost; /* free later if not NULL */
   } allocptr;
 
-  int sec_complete; /* if krb4 is enabled for this connection */
-#ifdef HAVE_KRB4
+  int sec_complete; /* if kerberos is enabled for this connection */
+#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
   enum protection_level command_prot;
   enum protection_level data_prot;
   enum protection_level request_data_prot;
@@ -1277,7 +1278,7 @@ struct UserDefined {
                     * to which to send the authorization data to, and no other
                     * host (which location-following otherwise could lead to)
                     */
-  char *krb4_level; /* what security level */
+  char *krb_level;  /* what security level */
   struct ssl_config_data ssl;  /* user defined SSL stuff */
 
   curl_proxytype proxytype; /* what kind of proxy that is in use */
@@ -1331,7 +1332,7 @@ struct UserDefined {
   char *netrc_file;      /* if not NULL, use this instead of trying to find
                             $HOME/.netrc */
   bool verbose;
-  bool krb4;             /* kerberos4 connection requested */
+  bool krb;              /* kerberos connection requested */
   bool reuse_forbid;     /* forbidden to be reused, close after use */
   bool reuse_fresh;      /* do not re-use an existing connection  */
   bool ftp_use_epsv;     /* if EPSV is to be attempted or not */

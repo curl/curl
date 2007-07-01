@@ -279,9 +279,10 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
     /* the given address is numerical only, prevent a reverse lookup */
     hints.ai_flags = AI_NUMERICHOST;
   }
-#if 0 /* removed nov 8 2005 before 7.15.1 */
-  else
-    hints.ai_flags = AI_CANONNAME;
+#ifdef HAVE_GSSAPI
+  if(conn->data->set.krb)
+    /* if krb is used, we (might) need the canonical host name */
+    hints.ai_flags |= AI_CANONNAME;
 #endif
 
   if(port) {

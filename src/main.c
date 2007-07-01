@@ -411,7 +411,7 @@ struct Configurable {
   bool list_engines;
   bool crlf;
   char *customrequest;
-  char *krb4level;
+  char *krblevel;
   char *trace_dump; /* file to dump the network trace to, or NULL */
   FILE *trace_stream;
   bool trace_fopened;
@@ -665,7 +665,7 @@ static void help(void)
     " -I/--head          Show document info only",
     " -j/--junk-session-cookies Ignore session cookies read from file (H)",
     "    --interface <interface> Specify network interface/address to use",
-    "    --krb4 <level>  Enable krb4 with specified security level (F)",
+    "    --krb <level>   Enable kerberos with specified security level (F)",
     " -k/--insecure      Allow connections to SSL sites without certs (H)",
     " -K/--config        Specify which config file to read",
     "    --libcurl <file> Dump libcurl equivalent code of this command line",
@@ -1476,7 +1476,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"*u", "crlf",        FALSE},
     {"*v", "stderr",      TRUE},
     {"*w", "interface",   TRUE},
-    {"*x", "krb4",        TRUE},
+    {"*x", "krb" ,        TRUE},
+    {"*x", "krb4" ,       TRUE}, /* this is the previous name */
     {"*y", "max-filesize", TRUE},
     {"*z", "disable-eprt", FALSE},
     {"$a", "ftp-ssl",    FALSE},
@@ -1809,10 +1810,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         /* interface */
         GetStr(&config->iface, nextarg);
         break;
-      case 'x': /* --krb4 */
-        /* krb4 level string */
-        if(curlinfo->features & CURL_VERSION_KERBEROS4)
-          GetStr(&config->krb4level, nextarg);
+      case 'x': /* --krb */
+        /* kerberos level string */
+        if(curlinfo->features & (CURL_VERSION_KERBEROS4 | CURL_VERSION_GSSNEGOTIATE))
+          GetStr(&config->krblevel, nextarg);
         else
           return PARAM_LIBCURL_DOESNT_SUPPORT;
         break;
@@ -3260,8 +3261,8 @@ static void free_config_fields(struct Configurable *config)
     free(config->cookie);
   if(config->cookiefile)
     free(config->cookiefile);
-  if(config->krb4level)
-    free(config->krb4level);
+  if(config->krblevel)
+    free(config->krblevel);
   if(config->headerfile)
     free(config->headerfile);
   if(config->ftpport)
@@ -4221,7 +4222,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         /* three new ones in libcurl 7.3: */
         my_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, config->proxytunnel);
         my_setopt(curl, CURLOPT_INTERFACE, config->iface);
-        my_setopt(curl, CURLOPT_KRB4LEVEL, config->krb4level);
+        my_setopt(curl, CURLOPT_KRBLEVEL, config->krblevel);
 
         progressbarinit(&progressbar, config);
         if((config->progressmode == CURL_PROGRESS_BAR) &&

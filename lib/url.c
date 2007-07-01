@@ -146,9 +146,6 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
-#ifdef HAVE_KRB4
-#include "krb4.h"
-#endif
 #include "memory.h"
 
 /* The last #include file should be: */
@@ -1498,12 +1495,12 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      */
     data->set.localportrange = (int) va_arg(param, long);
     break;
-  case CURLOPT_KRB4LEVEL:
+  case CURLOPT_KRBLEVEL:
     /*
-     * A string that defines the krb4 security level.
+     * A string that defines the kerberos security level.
      */
-    data->set.krb4_level = va_arg(param, char *);
-    data->set.krb4 = (bool)(NULL != data->set.krb4_level);
+    data->set.krb_level = va_arg(param, char *);
+    data->set.krb = (bool)(NULL != data->set.krb_level);
     break;
   case CURLOPT_SSL_VERIFYPEER:
     /*

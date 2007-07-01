@@ -75,7 +75,7 @@
 #include "socks.h"
 #include "ftp.h"
 
-#ifdef HAVE_KRB4
+#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
 #include "krb4.h"
 #endif
 
@@ -319,8 +319,17 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
       ftpc->cache_size = 0; /* zero the size just in case */
     }
     else {
-      int res = Curl_read(conn, sockfd, ptr, BUFSIZE-ftpc->nread_resp,
-                          &gotbytes);
+      int res;
+#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+      enum protection_level prot = conn->data_prot;
+
+      conn->data_prot = 0;
+#endif
+      res = Curl_read(conn, sockfd, ptr, BUFSIZE-ftpc->nread_resp,
+		      &gotbytes);
+#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+      conn->data_prot = prot;
+#endif
       if(res < 0)
         /* EWOULDBLOCK */
         return CURLE_OK; /* return */
@@ -360,6 +369,9 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
              the line isn't really terminated until the LF comes */
 
           /* output debug output if that is requested */
+#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+	  if(!conn->sec_complete)
+#endif
           if(data->set.verbose)
             Curl_debug(data, CURLINFO_HEADER_IN,
                        ftpc->linestart_resp, (size_t)perline, conn);
@@ -414,18 +426,18 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
   if(!result)
     code = atoi(buf);
 
-#ifdef HAVE_KRB4
+#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
   /* handle the security-oriented responses 6xx ***/
   /* FIXME: some errorchecking perhaps... ***/
   switch(code) {
   case 631:
-    Curl_sec_read_msg(conn, buf, prot_safe);
+    code = Curl_sec_read_msg(conn, buf, prot_safe);
     break;
   case 632:
-    Curl_sec_read_msg(conn, buf, prot_private);
+    code = Curl_sec_read_msg(conn, buf, prot_private);
     break;
   case 633:
-    Curl_sec_read_msg(conn, buf, prot_confidential);
+    code = Curl_sec_read_msg(conn, buf, prot_confidential);
     break;
   default:
     /* normal ftp stuff we pass through! */
@@ -553,7 +565,17 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
         ftpc->cache_size = 0; /* zero the size just in case */
       }
       else {
-        int res = Curl_read(conn, sockfd, ptr, BUFSIZE-*nreadp, &gotbytes);
+	int res;
+#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+	enum protection_level prot = conn->data_prot;
+
+	conn->data_prot = 0;
+#endif
+	res = Curl_read(conn, sockfd, ptr, BUFSIZE-*nreadp,
+			&gotbytes);
+#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+	conn->data_prot = prot;
+#endif
         if(res < 0)
           /* EWOULDBLOCK */
           continue; /* go looping again */
@@ -593,6 +615,9 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
                the line isn't really terminated until the LF comes */
 
             /* output debug output if that is requested */
+#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+	  if(!conn->sec_complete)
+#endif
             if(data->set.verbose)
               Curl_debug(data, CURLINFO_HEADER_IN,
                          line_start, (size_t)perline, conn);
@@ -646,18 +671,18 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
   if(!result)
     code = atoi(buf);
 
-#ifdef HAVE_KRB4
+#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
   /* handle the security-oriented responses 6xx ***/
   /* FIXME: some errorchecking perhaps... ***/
   switch(code) {
   case 631:
-    Curl_sec_read_msg(conn, buf, prot_safe);
+    code = Curl_sec_read_msg(conn, buf, prot_safe);
     break;
   case 632:
-    Curl_sec_read_msg(conn, buf, prot_private);
+    code = Curl_sec_read_msg(conn, buf, prot_private);
     break;
   case 633:
-    Curl_sec_read_msg(conn, buf, prot_confidential);
+    code = Curl_sec_read_msg(conn, buf, prot_confidential);
     break;
   default:
     /* normal ftp stuff we pass through! */
@@ -2299,14 +2324,7 @@ static CURLcode ftp_state_loggedin(struct connectdata *conn)
   CURLcode result = CURLE_OK;
 
 #ifdef HAVE_KRB4
-  if(conn->data->set.krb4) {
-    /* We are logged in, asked to use Kerberos. Set the requested
-     * protection level
-     */
-    if(conn->sec_complete)
-      /* BLOCKING */
-      Curl_sec_set_protection_level(conn);
-
+  if(conn->data->set.krb) {
     /* We may need to issue a KAUTH here to have access to the files
      * do it if user supplied a password
      */
@@ -2353,7 +2371,8 @@ static CURLcode ftp_state_user_resp(struct connectdata *conn,
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   (void)instate; /* no use for this yet */
 
-  if((ftpcode == 331) && (ftpc->state == FTP_USER)) {
+  /* some need password anyway, and others just return 2xx ignored */
+  if((ftpcode == 331 || ftpcode/100 == 2) && (ftpc->state == FTP_USER)) {
     /* 331 Password required for ...
        (the server requires to send the user's password too) */
     NBFTPSENDF(conn, "PASS %s", ftp->passwd?ftp->passwd:"");
@@ -2461,15 +2480,15 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
       }
 
       /* We have received a 220 response fine, now we proceed. */
-#ifdef HAVE_KRB4
-      if(data->set.krb4) {
+#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+      if(data->set.krb) {
         /* If not anonymous login, try a secure login. Note that this
            procedure is still BLOCKING. */
 
         Curl_sec_request_prot(conn, "private");
         /* We set private first as default, in case the line below fails to
            set a valid level */
-        Curl_sec_request_prot(conn, data->set.krb4_level);
+	Curl_sec_request_prot(conn, data->set.krb_level);
 
         if(Curl_sec_login(conn) != 0)
           infof(data, "Logging in with password in cleartext!\n");
@@ -3086,7 +3105,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status, bool premature
   /* free the dir tree and file parts */
   freedirs(conn);
 
-#ifdef HAVE_KRB4
+#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
   Curl_sec_fflush_fd(conn, conn->sock[SECONDARYSOCKET]);
 #endif
 
@@ -3496,16 +3515,21 @@ CURLcode Curl_nbftpsendf(struct connectdata *conn,
                        const char *fmt, ...)
 {
   ssize_t bytes_written;
-  char s[256];
+/* may still not be big enough for some krb5 tokens */
+#define SBUF_SIZE 1024
+  char s[SBUF_SIZE];
   size_t write_len;
   char *sptr=s;
   CURLcode res = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
+#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+  enum protection_level data_sec = conn->data_prot;
+#endif
 
   va_list ap;
   va_start(ap, fmt);
-  vsnprintf(s, 250, fmt, ap);
+  vsnprintf(s, SBUF_SIZE-3, fmt, ap);
   va_end(ap);
 
   strcat(s, "\r\n"); /* append a trailing CRLF */
@@ -3523,8 +3547,14 @@ CURLcode Curl_nbftpsendf(struct connectdata *conn,
   }
 #endif /* CURL_DOES_CONVERSIONS */
 
+#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+  conn->data_prot = prot_cmd;
+#endif
   res = Curl_write(conn, conn->sock[FIRSTSOCKET], sptr, write_len,
                    &bytes_written);
+#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+  conn->data_prot = data_sec;
+#endif
 
   if(CURLE_OK != res)
     return res;
@@ -3557,14 +3587,17 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
                        const char *fmt, ...)
 {
   ssize_t bytes_written;
-  char s[256];
+  char s[SBUF_SIZE];
   size_t write_len;
   char *sptr=s;
   CURLcode res = CURLE_OK;
+#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+  enum protection_level data_sec = conn->data_prot;
+#endif
 
   va_list ap;
   va_start(ap, fmt);
-  vsnprintf(s, 250, fmt, ap);
+  vsnprintf(s, SBUF_SIZE-3, fmt, ap);
   va_end(ap);
 
   strcat(s, "\r\n"); /* append a trailing CRLF */
@@ -3581,8 +3614,14 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
 #endif /* CURL_DOES_CONVERSIONS */
 
   while(1) {
+#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+    conn->data_prot = prot_cmd;
+#endif
     res = Curl_write(conn, conn->sock[FIRSTSOCKET], sptr, write_len,
                      &bytes_written);
+#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+    conn->data_prot = data_sec;
+#endif
 
     if(CURLE_OK != res)
       break;

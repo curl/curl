@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel S (1 July 2007)
+- Thomas J. Moore provided a patch that introduces Kerberos5 support in
+  libcurl. This also makes the options change name to --krb (from --krb4) and
+  CURLOPT_KRBLEVEL (from CURLOPT_KRB4LEVEL) but the old names are still 
+
 - Song Ma helped me verify and extend a fix for doing FTP over a SOCKS4/5
   proxy.
 

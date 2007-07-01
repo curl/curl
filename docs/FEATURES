@@ -73,7 +73,7 @@ HTTPS (*1)
 FTP
  - download
  - authentication
- - kerberos4 (*5)
+ - kerberos4 (*5), kerberos5 (*3)
  - active/passive using PORT, EPRT, PASV or EPSV
  - single file size information (compare to HTTP HEAD)
  - 'type=' URL support

@@ -575,6 +575,8 @@ void Curl_freeaddrinfo(Curl_addrinfo *ai)
   /* walk over the list and free all entries */
   while(ai) {
     next = ai->ai_next;
+    if(ai->ai_canonname)
+      free(ai->ai_canonname);
     free(ai);
     ai = next;
   }

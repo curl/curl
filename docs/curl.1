@@ -593,13 +593,14 @@ private key is. DER, PEM and ENG are supported. If not specified, PEM is
 assumed.
 
 If this option is used several times, the last one will be used.
-.IP "--krb4 <level>"
-(FTP) Enable Kerberos4 authentication and use. The level must be entered and
+.IP "--krb <level>"
+(FTP) Enable Kerberos authentication and use. The level must be entered and
 should be one of 'clear', 'safe', 'confidential' or 'private'. Should you use
 a level that is not one of these, 'private' will instead be used.
 
-This option requires that the library was built with Kerberos4 support. This
-is not very common. Use \fI-V/--version\fP to see if your curl supports it.
+This option requires that the library was built with kerberos4 or GSSAPI
+(GSS-Negotiate) support. This is not very common. Use \fI-V/--version\fP to
+see if your curl supports it.
 
 If this option is used several times, the last one will be used.
 .IP "-K/--config <config file>"
@@ -1153,7 +1154,7 @@ Automatic decompression of compressed files over HTTP is supported.
 .IP "NTLM"
 NTLM authentication is supported.
 .IP "GSS-Negotiate"
-Negotiate authentication is supported.
+Negotiate authentication and krb5 for ftp is supported.
 .IP "Debug"
 This curl uses a libcurl built with Debug. This enables more error-tracking
 and memory debugging etc. For curl-developers only!

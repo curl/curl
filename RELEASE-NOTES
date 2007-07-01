@@ -13,6 +13,7 @@ This release includes the following changes:
  
  o added CURLOPT_NEW_FILE_PERMS and CURLOPT_NEW_DIRECTORY_PERMS
  o improved hashing of sockets for the multi_socket API
+ o ftp kerberos5 support added
 
 This release includes the following bugfixes:
 
@@ -36,6 +37,7 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Robert Iakobashvili, James Housley, Günter Knauf, James Bursa, Song Ma
+ Robert Iakobashvili, James Housley, Günter Knauf, James Bursa, Song Ma,
+ Thomas J. Moore
 
         Thanks! (and sorry if I forgot to mention someone)
