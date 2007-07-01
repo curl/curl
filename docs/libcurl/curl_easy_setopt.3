@@ -1376,6 +1376,8 @@ also enables kerberos awareness.  This is a string, 'clear', 'safe',
 'confidential' or \&'private'.  If the string is set but doesn't match one
 of these, 'private' will be used. Set the string to NULL to disable kerberos
 support for FTP.
+
+(This option was known as CURLOPT_KRB4LEVEL up to 7.16.3)
 .SH SSH OPTIONS
 .IP CURLOPT_SSH_AUTH_TYPES
 Pass a long set to a bitmask consisting of one or more of
