@@ -810,6 +810,7 @@ it thinks fit.
 Enforce HTTP 1.0 requests.
 .IP CURL_HTTP_VERSION_1_1
 Enforce HTTP 1.1 requests.
+.RE
 .IP CURLOPT_IGNORE_CONTENT_LENGTH
 Ignore the Content-Length header. This is useful for Apache 1.x (and similar
 servers) which will report incorrect content length for files over 2
@@ -826,7 +827,6 @@ Pass a long to tell libcurl how to act on transfer decoding. If set to zero,
 transfer decoding will be disabled, if set to 1 it is enabled
 (default). libcurl does chunked transfer decoding by default unless this
 option is set to zero. (added in 7.16.2)
-.RE
 .SH FTP OPTIONS
 .IP CURLOPT_FTPPORT
 Pass a pointer to a zero terminated string as parameter. It will be used to
