@@ -35,10 +35,10 @@ ifndef LIBARCH
 LIBARCH = LIBC
 endif
 
-# must be equal to DEBUG or NDEBUG
+# must be equal to NDEBUG or DEBUG, CURLDEBUG
+ifndef DB
 DB	= NDEBUG
-# DB	= DEBUG
-# DB	= CURLDEBUG
+endif
 # Optimization: -O<n> or debugging: -g
 ifeq ($(DB),NDEBUG)
 	OPT	= -O2
@@ -53,10 +53,15 @@ endif
 
 # The following line defines your compiler.
 ifdef METROWERKS
+	# MWCW_PATH = $(subst \,/,$(METROWERKS))/Novell Support
+	MWCW_PATH = $(subst \,/,$(METROWERKS))/Novell Support/Metrowerks Support
 	CC = mwccnlm
 else
 	CC = gcc
 endif
+# a native win32 awk can be downloaded from here:
+# http://www.gknw.net/development/prgtools/awk-20050424.zip
+AWK	= awk
 YACC	= bison -y
 CP	= cp -afv
 # RM	= rm -f
@@ -82,8 +87,10 @@ ifeq ($(LIBARCH),LIBC)
 	PRELUDE = $(SDK_LIBC)/imports/libcpre.o
 	CFLAGS += -align 4
 else
-	PRELUDE = "$(METROWERKS)/Novell Support/libraries/runtime/prelude.obj"
-#	CFLAGS += -include "$(METROWERKS)/Novell Support/headers/nlm_prefix.h"
+	# PRELUDE = $(SDK_CLIB)/imports/clibpre.o
+	# to avoid the __init... whoes dont use prelude from NDK
+	PRELUDE = "$(MWCW_PATH)/libraries/runtime/prelude.obj"
+	# CFLAGS += -include "$(MWCW_PATH)/headers/nlm_clib_prefix.h"
 	CFLAGS += -align 1
 endif
 else
@@ -186,7 +193,7 @@ $(OBJDIR)/%.o: %.c
 
 $(OBJDIR)/version.inc: ares_version.h $(OBJDIR)
 	@echo Creating $@
-	@awk -f ../packages/NetWare/get_ver.awk $< > $@
+	@$(AWK) -f ../packages/NetWare/get_ver.awk $< > $@
 
 $(OBJDIR)/%.xdc: Makefile.netware
 	@echo Creating $@
@@ -267,7 +274,7 @@ config.h: Makefile.netware
 	@echo $(DL)#ifndef NETWARE$(DL) >> $@
 	@echo $(DL)#error This $(notdir $@) is created for NetWare platform!$(DL) >> $@
 	@echo $(DL)#endif$(DL) >> $@
-	@echo $(DL)#define OS "i586-pc-NetWare"$(DL) >> $@
+	@echo $(DL)#define OS "i586-pc-libc-NetWare"$(DL) >> $@
 	@echo $(DL)#define VERSION "$(LIBCARES_VERSION_STR)"$(DL) >> $@
 	@echo $(DL)#define PACKAGE_BUGREPORT "a suitable curl mailing list => http://curl.haxx.se/mail/"$(DL) >> $@
 	@echo $(DL)#define HAVE_ARPA_INET_H 1$(DL) >> $@
@@ -305,6 +312,10 @@ config.h: Makefile.netware
 	@echo $(DL)#define HAVE_STRLCAT 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRLCPY 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRSTR 1$(DL) >> $@
+	@echo $(DL)#define HAVE_STRUCT_ADDRINFO 1$(DL) >> $@
+	@echo $(DL)#define HAVE_STRUCT_IN6_ADDR 1$(DL) >> $@
+	@echo $(DL)#define HAVE_STRUCT_SOCKADDR_IN6 1$(DL) >> $@
+	@echo $(DL)#define HAVE_STRUCT_TIMEVAL 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SYS_PARAM_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SYS_SELECT_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SYS_STAT_H 1$(DL) >> $@
@@ -314,28 +325,24 @@ config.h: Makefile.netware
 	@echo $(DL)#define HAVE_UNAME 1$(DL) >> $@
 	@echo $(DL)#define HAVE_UNISTD_H 1$(DL) >> $@
 	@echo $(DL)#define RECV_TYPE_ARG1 int$(DL) >> $@
-	@echo $(DL)#define RECV_TYPE_ARG2 char *$(DL) >> $@
-	@echo $(DL)#define RECV_TYPE_ARG3 int$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_ARG2 void *$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_ARG3 size_t$(DL) >> $@
 	@echo $(DL)#define RECV_TYPE_ARG4 int$(DL) >> $@
-	@echo $(DL)#define RECV_TYPE_RETV int$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_RETV ssize_t$(DL) >> $@
 	@echo $(DL)#define RETSIGTYPE void$(DL) >> $@
 	@echo $(DL)#define SEND_QUAL_ARG2$(DL) >> $@
 	@echo $(DL)#define SEND_TYPE_ARG1 int$(DL) >> $@
-	@echo $(DL)#define SEND_TYPE_ARG2 char *$(DL) >> $@
-	@echo $(DL)#define SEND_TYPE_ARG3 int$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_ARG2 void *$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_ARG3 size_t$(DL) >> $@
 	@echo $(DL)#define SEND_TYPE_ARG4 int$(DL) >> $@
-	@echo $(DL)#define SEND_TYPE_RETV int$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_RETV ssize_t$(DL) >> $@
 	@echo $(DL)#define SIZEOF_CURL_OFF_T 4$(DL) >> $@
+	@echo $(DL)#define SIZEOF_STRUCT_IN6_ADDR 16$(DL) >> $@
+	@echo $(DL)#define SIZEOF_STRUCT_IN_ADDR 4$(DL) >> $@
 	@echo $(DL)#define STDC_HEADERS 1$(DL) >> $@
 	@echo $(DL)#define TIME_WITH_SYS_TIME 1$(DL) >> $@
 	@echo $(DL)#define HAVE_AF_INET6 1$(DL) >> $@
 	@echo $(DL)#define HAVE_PF_INET6 1$(DL) >> $@
-	@echo $(DL)#define HAVE_STRUCT_ADDRINFO 1$(DL) >> $@
-	@echo $(DL)#define HAVE_STRUCT_IN6_ADDR 1$(DL) >> $@
-	@echo $(DL)#define HAVE_STRUCT_SOCKADDR_IN6 1$(DL) >> $@
-	@echo $(DL)#define HAVE_STRUCT_TIMEVAL 1$(DL) >> $@
-	@echo $(DL)#define SIZEOF_STRUCT_IN6_ADDR 16$(DL) >> $@
-	@echo $(DL)#define SIZEOF_STRUCT_IN_ADDR 4$(DL) >> $@
 ifdef NW_WINSOCK
 	@echo $(DL)#define HAVE_CLOSESOCKET 1$(DL) >> $@
 else
