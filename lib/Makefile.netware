@@ -60,9 +60,6 @@ else
 	OBJDIR	= debug
 endif
 
-# Include the version info retrieved from curlver.h
--include $(OBJDIR)/version.inc
-
 # The following line defines your compiler.
 ifdef METROWERKS
 	# MWCW_PATH = $(subst \,/,$(METROWERKS))/Novell Support
@@ -82,6 +79,12 @@ CP	= cp -afv
 # http://www.gknw.net/development/prgtools/mkxdc.zip
 MPKXDC	= mkxdc
 
+# LIBARCH_U = $(shell $(AWK) 'BEGIN {print toupper(ARGV[1])}' $(LIBARCH))
+LIBARCH_L = $(shell $(AWK) 'BEGIN {print tolower(ARGV[1])}' $(LIBARCH))
+
+# Include the version info retrieved from curlver.h
+-include $(OBJDIR)/version.inc
+
 # Global flags for all compilers
 CFLAGS	= $(OPT) -D$(DB) -DNETWARE -DHAVE_CONFIG_H -nostdinc
 
@@ -100,9 +103,9 @@ ifeq ($(LIBARCH),LIBC)
 	CFLAGS += -align 4
 else
 	# PRELUDE = $(SDK_CLIB)/imports/clibpre.o
-	# to avoid the __init... whoes dont use prelude from NDK
+	# to avoid the __init_* / __deinit_* whoes dont use prelude from NDK
 	PRELUDE = "$(MWCW_PATH)/libraries/runtime/prelude.obj"
-	CFLAGS += -include "$(MWCW_PATH)/headers/nlm_clib_prefix.h"
+	# CFLAGS += -include "$(MWCW_PATH)/headers/nlm_clib_prefix.h"
 	CFLAGS += -align 1
 endif
 else
@@ -118,8 +121,8 @@ ifeq ($(LIBARCH),LIBC)
 	PRELUDE = $(SDK_LIBC)/imports/libcpre.gcc.o
 else
 	# PRELUDE = $(SDK_CLIB)/imports/clibpre.gcc.o
-	# to avoid the __init... whoes dont use prelude from NDK
-	# http://www.gknw.net/development/mk_nlm/gcc_pre.exe
+	# to avoid the __init_* / __deinit_* whoes dont use prelude from NDK
+	# http://www.gknw.net/development/mk_nlm/gcc_pre.zip
 	PRELUDE = $(NDK_ROOT)/pre/prelude.o
 	CFLAGS += -include $(NDKBASE)/nlmconv/genlm.h
 endif
@@ -142,10 +145,10 @@ endif
 ifdef WITH_ZLIB
 	INCLUDES += -I$(ZLIB_PATH)
 ifdef LINK_STATIC
-	LDLIBS += $(ZLIB_PATH)/nw/libz.$(LIBEXT)
+	LDLIBS += $(ZLIB_PATH)/nw/$(LIBARCH)/libz.$(LIBEXT)
 else
 	MODULES += libz.nlm
-	IMPORTS += @$(ZLIB_PATH)/nw/libz.imp
+	IMPORTS += @$(ZLIB_PATH)/nw/$(LIBARCH)/libz.imp
 endif
 endif
 ifdef WITH_SSH2
@@ -158,9 +161,9 @@ else
 endif
 endif
 ifdef WITH_SSL
-	INCLUDES += -I$(OPENSSL_PATH)/outinc_nw_libc -I$(OPENSSL_PATH)/outinc_nw_libc/openssl
-	LDLIBS += $(OPENSSL_PATH)/out_nw_libc/ssl.$(LIBEXT)
-	LDLIBS += $(OPENSSL_PATH)/out_nw_libc/crypto.$(LIBEXT)
+	INCLUDES += -I$(OPENSSL_PATH)/outinc_nw_$(LIBARCH_L) -I$(OPENSSL_PATH)/outinc_nw_$(LIBARCH_L)/openssl
+	LDLIBS += $(OPENSSL_PATH)/out_nw_$(LIBARCH_L)/ssl.$(LIBEXT)
+	LDLIBS += $(OPENSSL_PATH)/out_nw_$(LIBARCH_L)/crypto.$(LIBEXT)
 	IMPORTS += GetProcessSwitchCount RunningProcess
 endif
 
