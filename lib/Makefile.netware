@@ -539,7 +539,7 @@ else
 	@echo ipv6 support:    no
 endif
 
-$(LIBCARES):
+$(ARES_LIB)/libcares.$(LIBEXT):
 	$(MAKE) -C $(ARES_LIB) -f Makefile.netware lib
 
 

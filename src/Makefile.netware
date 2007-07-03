@@ -204,7 +204,7 @@ OBJS	:= $(patsubst %.c,$(OBJDIR)/%.o,$(strip $(CURL_SOURCES))) $(OBJX)
 
 vpath %.c $(CURL_LIB)
 
-all: prebuild $(TARGET).nlm 
+all: prebuild $(TARGET).nlm
 
 prebuild: $(OBJDIR) $(OBJDIR)/version.inc config.h
 
@@ -465,4 +465,7 @@ hugehelp.c:
 	@echo Creating $@
 	@$(CP) hugehelp.c.cvs $@
 
- 
+$(ARES_LIB)/libcares.$(LIBEXT):
+	$(MAKE) -C $(ARES_LIB) -f Makefile.netware lib
+
+
