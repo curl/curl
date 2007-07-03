@@ -134,6 +134,9 @@ INCLUDES = -I$(CURL_INC) -I$(CURL_LIB)
 
 ifdef LINK_STATIC
 	LDLIBS	= $(CURL_LIB)/libcurl.$(LIBEXT)
+ifdef WITH_ARES
+	LDLIBS += $(ARES_LIB)/libcares.$(LIBEXT)
+endif
 else
 	MODULES	= libcurl.nlm
 	IMPORTS	= @$(CURL_LIB)/libcurl.imp
