@@ -32,7 +32,9 @@ struct iovec
 int ares_writev (SOCKET s, const struct iovec *vector, size_t count);
 #define writev(s,vect,count)  ares_writev(s,vect,count)
 
+#ifndef HAVE_STRUCT_TIMEVAL
 struct timezone { int dummy; };
+#endif
 
 int ares_gettimeofday(struct timeval *tv, struct timezone *tz);
 #define gettimeofday(tv,tz) ares_gettimeofday(tv,tz)
