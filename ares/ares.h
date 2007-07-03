@@ -26,6 +26,9 @@
    require it! */
 #include <sys/select.h>
 #endif
+#if (defined(NETWARE) && !defined(__NOVELL_LIBC__))
+#include <sys/bsdskt.h>
+#endif
 
 #if defined(WATT32)
   #include <netinet/in.h>
