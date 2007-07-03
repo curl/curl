@@ -281,8 +281,8 @@ config.h: Makefile.netware
 	@echo $(DL)#define PACKAGE_BUGREPORT "a suitable curl mailing list => http://curl.haxx.se/mail/"$(DL) >> $@
 ifeq ($(LIBARCH),CLIB)
 	@echo $(DL)#define OS "i586-pc-clib-NetWare"$(DL) >> $@
+	@echo $(DL)#define MAXHOSTNAMELEN 256$(DL) >> $@
 	@echo $(DL)#define NETDB_USE_INTERNET 1$(DL) >> $@
-	@echo $(DL)#define HAVE_STRICMP 1$(DL) >> $@
 	@echo $(DL)#define RECV_TYPE_ARG1 int$(DL) >> $@
 	@echo $(DL)#define RECV_TYPE_ARG2 char *$(DL) >> $@
 	@echo $(DL)#define RECV_TYPE_ARG3 int$(DL) >> $@
@@ -294,9 +294,10 @@ ifeq ($(LIBARCH),CLIB)
 	@echo $(DL)#define SEND_TYPE_ARG3 int$(DL) >> $@
 	@echo $(DL)#define SEND_TYPE_ARG4 int$(DL) >> $@
 	@echo $(DL)#define SEND_TYPE_RETV int$(DL) >> $@
-	@echo $(DL)#define socklen_t int$(DL) >> $@
 	@echo $(DL)#define DL_LDAP_FILE "ldapsdk.nlm"$(DL) >> $@
-	@echo $(DL)#define MAXHOSTNAMELEN 256$(DL) >> $@
+	@echo $(DL)#define socklen_t int$(DL) >> $@
+	@echo $(DL)#define strncasecmp strnicmp$(DL) >> $@
+	@echo $(DL)#define strcasecmp stricmp$(DL) >> $@
 else
 	@echo $(DL)#define OS "i586-pc-libc-NetWare"$(DL) >> $@
 	@echo $(DL)#define HAVE_DLFCN_H 1$(DL) >> $@

@@ -295,7 +295,11 @@ static char *lookup_service(unsigned short port, int flags,
 #endif
 #else
           /* Lets just hope the OS uses TLS! */
+#if (defined(NETWARE) && !defined(__NOVELL_LIBC__))
+          sep = getservbyport(port, (char*)proto);
+#else
           sep = getservbyport(port, proto);
+#endif
 #endif
         }
       if (sep && sep->s_name)
