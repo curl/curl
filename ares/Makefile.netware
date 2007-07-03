@@ -88,7 +88,7 @@ ifeq ($(LIBARCH),LIBC)
 	CFLAGS += -align 4
 else
 	# PRELUDE = $(SDK_CLIB)/imports/clibpre.o
-	# to avoid the __init... whoes dont use prelude from NDK
+	# to avoid the __init_* / __deinit_* whoes dont use prelude from NDK
 	PRELUDE = "$(MWCW_PATH)/libraries/runtime/prelude.obj"
 	# CFLAGS += -include "$(MWCW_PATH)/headers/nlm_clib_prefix.h"
 	CFLAGS += -align 1
@@ -105,7 +105,10 @@ CFLAGS	+= -Wall -Wno-format -Wno-uninitialized # -pedantic
 ifeq ($(LIBARCH),LIBC)
 	PRELUDE = $(SDK_LIBC)/imports/libcpre.gcc.o
 else
-	PRELUDE = $(SDK_CLIB)/imports/clibpre.gcc.o
+	# PRELUDE = $(SDK_CLIB)/imports/clibpre.gcc.o
+	# to avoid the __init_* / __deinit_* whoes dont use prelude from NDK
+	# http://www.gknw.net/development/mk_nlm/gcc_pre.zip
+	PRELUDE = $(NDK_ROOT)/pre/prelude.o
 	CFLAGS += -include $(NDKBASE)/nlmconv/genlm.h
 endif
 endif
@@ -142,13 +145,13 @@ endif
 include Makefile.inc
 
 OBJLIB	:= $(patsubst %.c,$(OBJDIR)/%.o,$(strip $(CSOURCES)))
-OBJEXE	= $(OBJLIB) $(OBJDIR)/ares_getopt.o  
+OBJEXE	= $(OBJLIB) $(OBJDIR)/ares_getopt.o
 
 .PHONY: lib nlm prebuild dist install clean
 
 lib: prebuild $(LTARGET)
 
-nlm: prebuild $(TARGETS) 
+nlm: prebuild $(TARGETS)
 
 prebuild: $(OBJDIR) $(OBJDIR)/version.inc config.h arpa/nameser.h
 
@@ -274,25 +277,76 @@ config.h: Makefile.netware
 	@echo $(DL)#ifndef NETWARE$(DL) >> $@
 	@echo $(DL)#error This $(notdir $@) is created for NetWare platform!$(DL) >> $@
 	@echo $(DL)#endif$(DL) >> $@
-	@echo $(DL)#define OS "i586-pc-libc-NetWare"$(DL) >> $@
 	@echo $(DL)#define VERSION "$(LIBCARES_VERSION_STR)"$(DL) >> $@
 	@echo $(DL)#define PACKAGE_BUGREPORT "a suitable curl mailing list => http://curl.haxx.se/mail/"$(DL) >> $@
-	@echo $(DL)#define HAVE_ARPA_INET_H 1$(DL) >> $@
-	@echo $(DL)#define HAVE_ARPA_NAMESER_H 1$(DL) >> $@
-	@echo $(DL)#define HAVE_ASSERT_H 1$(DL) >> $@
+ifeq ($(LIBARCH),CLIB)
+	@echo $(DL)#define OS "i586-pc-clib-NetWare"$(DL) >> $@
+	@echo $(DL)#define NETDB_USE_INTERNET 1$(DL) >> $@
+	@echo $(DL)#define HAVE_STRICMP 1$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_ARG1 int$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_ARG2 char *$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_ARG3 int$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_ARG4 int$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_RETV int$(DL) >> $@
+	@echo $(DL)#define SEND_QUAL_ARG2$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_ARG1 int$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_ARG2 char *$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_ARG3 int$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_ARG4 int$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_RETV int$(DL) >> $@
+	@echo $(DL)#define socklen_t int$(DL) >> $@
+	@echo $(DL)#define DL_LDAP_FILE "ldapsdk.nlm"$(DL) >> $@
+	@echo $(DL)#define MAXHOSTNAMELEN 256$(DL) >> $@
+else
+	@echo $(DL)#define OS "i586-pc-libc-NetWare"$(DL) >> $@
 	@echo $(DL)#define HAVE_DLFCN_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_DLOPEN 1$(DL) >> $@
-	@echo $(DL)#define HAVE_ERR_H 1$(DL) >> $@
-	@echo $(DL)#define HAVE_FCNTL_H 1$(DL) >> $@
-	@echo $(DL)#define HAVE_FIONBIO 1$(DL) >> $@
-	@echo $(DL)#define HAVE_GETHOSTBYADDR 1$(DL) >> $@
+	@echo $(DL)#define HAVE_FTRUNCATE 1$(DL) >> $@
 	@echo $(DL)#define HAVE_GETTIMEOFDAY 1$(DL) >> $@
-	@echo $(DL)#define HAVE_INET_ADDR 1$(DL) >> $@
-	@echo $(DL)#define HAVE_INET_NTOA 1$(DL) >> $@
 	@echo $(DL)#define HAVE_INET_PTON 1$(DL) >> $@
 	@echo $(DL)#define HAVE_INTTYPES_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_LIMITS_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_LONGLONG 1$(DL) >> $@
+	@echo $(DL)#define HAVE_STDINT_H 1$(DL) >> $@
+	@echo $(DL)#define HAVE_STRCASECMP 1$(DL) >> $@
+	@echo $(DL)#define HAVE_STRLCAT 1$(DL) >> $@
+	@echo $(DL)#define HAVE_STRLCPY 1$(DL) >> $@
+	@echo $(DL)#define HAVE_STRTOLL 1$(DL) >> $@
+	@echo $(DL)#define HAVE_SYS_PARAM_H 1$(DL) >> $@
+	@echo $(DL)#define HAVE_SYS_SELECT_H 1$(DL) >> $@
+	@echo $(DL)#define HAVE_TERMIOS_H 1$(DL) >> $@
+	@echo $(DL)#define HAVE_AF_INET6 1$(DL) >> $@
+	@echo $(DL)#define HAVE_PF_INET6 1$(DL) >> $@
+	@echo $(DL)#define HAVE_STRUCT_IN6_ADDR 1$(DL) >> $@
+	@echo $(DL)#define HAVE_STRUCT_SOCKADDR_IN6 1$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_ARG1 int$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_ARG2 void *$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_ARG3 size_t$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_ARG4 int$(DL) >> $@
+	@echo $(DL)#define RECV_TYPE_RETV ssize_t$(DL) >> $@
+	@echo $(DL)#define SEND_QUAL_ARG2$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_ARG1 int$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_ARG2 void *$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_ARG3 size_t$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_ARG4 int$(DL) >> $@
+	@echo $(DL)#define SEND_TYPE_RETV ssize_t$(DL) >> $@
+	@echo $(DL)#define SIZEOF_STRUCT_IN6_ADDR 16$(DL) >> $@
+	@echo $(DL)#define DL_LDAP_FILE "lldapsdk.nlm"$(DL) >> $@
+endif
+	@echo $(DL)#define HAVE_ARPA_INET_H 1$(DL) >> $@
+	@echo $(DL)#define HAVE_ARPA_NAMESER_H 1$(DL) >> $@
+	@echo $(DL)#define HAVE_ASSERT_H 1$(DL) >> $@
+	@echo $(DL)#define HAVE_ERR_H 1$(DL) >> $@
+	@echo $(DL)#define HAVE_FCNTL_H 1$(DL) >> $@
+	@echo $(DL)#define HAVE_FIONBIO 1$(DL) >> $@
+	@echo $(DL)#define HAVE_GETHOSTBYADDR 1$(DL) >> $@
+	@echo $(DL)#define HAVE_GETHOSTBYNAME 1$(DL) >> $@
+	@echo $(DL)#define HAVE_GETPROTOBYNAME 1$(DL) >> $@
+	@echo $(DL)#define HAVE_GMTIME_R 1$(DL) >> $@
+	@echo $(DL)#define HAVE_INET_ADDR 1$(DL) >> $@
+	@echo $(DL)#define HAVE_INET_NTOA 1$(DL) >> $@
+	@echo $(DL)#define HAVE_LL 1$(DL) >> $@
+	@echo $(DL)#define HAVE_LOCALTIME_R 1$(DL) >> $@
 	@echo $(DL)#define HAVE_MALLOC_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_NETINET_IN_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_RECV 1$(DL) >> $@
@@ -303,46 +357,26 @@ config.h: Makefile.netware
 	@echo $(DL)#define HAVE_SIGNAL_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SIG_ATOMIC_T 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SOCKET 1$(DL) >> $@
-	@echo $(DL)#define HAVE_STDINT_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STDLIB_H 1$(DL) >> $@
-	@echo $(DL)#define HAVE_STRCASECMP 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRDUP 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRFTIME 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRING_H 1$(DL) >> $@
-	@echo $(DL)#define HAVE_STRLCAT 1$(DL) >> $@
-	@echo $(DL)#define HAVE_STRLCPY 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRSTR 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRUCT_ADDRINFO 1$(DL) >> $@
-	@echo $(DL)#define HAVE_STRUCT_IN6_ADDR 1$(DL) >> $@
-	@echo $(DL)#define HAVE_STRUCT_SOCKADDR_IN6 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRUCT_TIMEVAL 1$(DL) >> $@
-	@echo $(DL)#define HAVE_SYS_PARAM_H 1$(DL) >> $@
-	@echo $(DL)#define HAVE_SYS_SELECT_H 1$(DL) >> $@
+	@echo $(DL)#define HAVE_SYS_IOCTL_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SYS_STAT_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SYS_TIME_H 1$(DL) >> $@
-	@echo $(DL)#define HAVE_TERMIOS_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_TIME_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_UNAME 1$(DL) >> $@
 	@echo $(DL)#define HAVE_UNISTD_H 1$(DL) >> $@
-	@echo $(DL)#define RECV_TYPE_ARG1 int$(DL) >> $@
-	@echo $(DL)#define RECV_TYPE_ARG2 void *$(DL) >> $@
-	@echo $(DL)#define RECV_TYPE_ARG3 size_t$(DL) >> $@
-	@echo $(DL)#define RECV_TYPE_ARG4 int$(DL) >> $@
-	@echo $(DL)#define RECV_TYPE_RETV ssize_t$(DL) >> $@
+	@echo $(DL)#define HAVE_UTIME 1$(DL) >> $@
+	@echo $(DL)#define HAVE_UTIME_H 1$(DL) >> $@
 	@echo $(DL)#define RETSIGTYPE void$(DL) >> $@
-	@echo $(DL)#define SEND_QUAL_ARG2$(DL) >> $@
-	@echo $(DL)#define SEND_TYPE_ARG1 int$(DL) >> $@
-	@echo $(DL)#define SEND_TYPE_ARG2 void *$(DL) >> $@
-	@echo $(DL)#define SEND_TYPE_ARG3 size_t$(DL) >> $@
-	@echo $(DL)#define SEND_TYPE_ARG4 int$(DL) >> $@
-	@echo $(DL)#define SEND_TYPE_RETV ssize_t$(DL) >> $@
 	@echo $(DL)#define SIZEOF_CURL_OFF_T 4$(DL) >> $@
-	@echo $(DL)#define SIZEOF_STRUCT_IN6_ADDR 16$(DL) >> $@
 	@echo $(DL)#define SIZEOF_STRUCT_IN_ADDR 4$(DL) >> $@
 	@echo $(DL)#define STDC_HEADERS 1$(DL) >> $@
 	@echo $(DL)#define TIME_WITH_SYS_TIME 1$(DL) >> $@
-	@echo $(DL)#define HAVE_AF_INET6 1$(DL) >> $@
-	@echo $(DL)#define HAVE_PF_INET6 1$(DL) >> $@
 ifdef NW_WINSOCK
 	@echo $(DL)#define HAVE_CLOSESOCKET 1$(DL) >> $@
 else
