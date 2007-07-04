@@ -601,6 +601,7 @@ AC_CHECK_MEMBER(struct addrinfo.ai_flags,
 
 
 AC_CHECK_FUNCS( bitncmp \
+                gettimeofday \
                 if_indextoname,
 dnl if found
 [],
