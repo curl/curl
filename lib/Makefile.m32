@@ -19,6 +19,8 @@ ifndef ZLIB_PATH
 ZLIB_PATH = ../../zlib-1.2.3
 endif
 
+ARES_LIB = ../ares
+
 CC = gcc
 AR = ar
 RM = rm -f
@@ -30,6 +32,11 @@ STRIP = strip -g
 
 INCLUDES = -I. -I../include
 CFLAGS = -g -O2 -DBUILDING_LIBCURL -DHAVE_LONGLONG
+ifdef ARES
+  INCLUDES += -I$(ARES_LIB)
+  CFLAGS += -DUSE_ARES
+  DLL_LIBS += -L$(ARES_LIB) -lcares
+endif
 ifdef SSH2
   INCLUDES += -I"$(LIBSSH2_PATH)/include" -I"$(LIBSSH2_PATH)/win32"
   CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H

@@ -19,6 +19,8 @@ ifndef ZLIB_PATH
 ZLIB_PATH = ../../zlib-1.2.3
 endif
 
+ARES_LIB = ../ares
+
 CC = gcc
 CFLAGS = -g -O2
 LDFLAGS =
@@ -46,6 +48,10 @@ else
   curl_DEPENDENCIES = ../lib/libcurl.a
   curl_LDADD = -L../lib -lcurl
   COMPILE += -DCURL_STATICLIB
+endif
+ifdef ARES
+  CFLAGS += -DUSE_ARES
+  curl_LDADD += -L$(ARES_LIB) -lcares
 endif
 ifdef SSH2
   CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
