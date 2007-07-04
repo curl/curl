@@ -1125,7 +1125,7 @@ CURLcode Curl_scp_do(struct connectdata *conn, bool *done)
 
   if (conn->data->set.upload) {
     if(conn->data->set.infilesize < 0) {
-      failf(conn->data, "SCP requries a known file size for upload");
+      failf(conn->data, "SCP requires a known file size for upload");
       return CURLE_UPLOAD_FAILED;
     }
     /*
