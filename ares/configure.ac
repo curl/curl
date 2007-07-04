@@ -337,6 +337,7 @@ AC_CHECK_HEADERS(
        sys/select.h \
        sys/socket.h \
        sys/ioctl.h \
+       sys/param.h \
        netdb.h \
        netinet/in.h \
        net/if.h \
