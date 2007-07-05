@@ -1142,7 +1142,13 @@ CURLcode Curl_scp_do(struct connectdata *conn, bool *done)
       if (!scp->ssh_channel &&
           (libssh2_session_last_errno(scp->ssh_session) !=
            LIBSSH2_ERROR_EAGAIN)) {
-        return CURLE_FAILED_INIT;
+        int err;
+        char *err_msg;
+
+        err = libssh2_session_error_to_CURLE(
+            libssh2_session_last_error(scp->ssh_session, &err_msg, NULL, 0));
+        failf(conn->data, "%s", err_msg);
+        return err;
       }
     } while (!scp->ssh_channel);
 #else /* !(LIBSSH2_APINO >= 200706012030) */

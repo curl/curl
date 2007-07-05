@@ -6,6 +6,12 @@
 
                                   Changelog
 
+James H (5 July 2007)
+- Gavrie Philipson provided a patch that will use a more specific error
+  message for an scp:// upload failure.  If libssh2 has his matching
+  patch, then the error message return by the server will be used instead
+  of a more generic error.
+
 Daniel S (1 July 2007)
 - Thomas J. Moore provided a patch that introduces Kerberos5 support in
   libcurl. This also makes the options change name to --krb (from --krb4) and
