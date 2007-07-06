@@ -129,9 +129,9 @@ block_read(int fd, void *buf, size_t len)
 }
 
 static int
-block_write(int fd, void *buf, size_t len)
+block_write(int fd, const void *buf, size_t len)
 {
-  unsigned char *p = buf;
+  const unsigned char *p = buf;
   int b;
   while(len) {
     b = write(fd, p, len);

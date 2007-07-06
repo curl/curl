@@ -1,11 +1,4 @@
-/* This source code was modified by Martin Hedenfalk <mhe@stacken.kth.se> for
- * use in Curl. His latest changes were done 2000-09-18.
- *
- * It has since been patched away like a madman by Daniel Stenberg
- * <daniel@haxx.se> to make it better applied to curl conditions, and to make
- * it not use globals, pollute name space and more. This source code awaits a
- * rewrite to work around the paragraph 2 in the BSD licenses as explained
- * below.
+/* GSSAPI/krb5 support for FTP - loosely based on old krb4.c
  *
  * Copyright (c) 1995, 1996, 1997, 1998, 1999 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
@@ -52,10 +45,6 @@
 #include <gssapi/gssapi_generic.h>
 #include <gssapi/gssapi_krb5.h>
 
-#ifdef HAVE_UNISTD_H
-#include <unistd.h> /* for getpid() */
-#endif
-
 #include "urldata.h"
 #include "base64.h"
 #include "ftp.h"
@@ -63,22 +52,15 @@
 #include "krb4.h"
 #include "memory.h"
 
-#if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)
-#include "inet_ntoa_r.h"
-#endif
-
 /* The last #include file should be: */
 #include "memdebug.h"
 
 #define LOCAL_ADDR (&conn->local_addr)
 #define REMOTE_ADDR conn->ip_addr->ai_addr
-#define myctladdr LOCAL_ADDR
-#define hisctladdr REMOTE_ADDR
 
 static int
 krb5_check_prot(void *app_data, int level)
 {
-  gss_ctx_id_t *context = app_data;
   app_data = NULL; /* prevent compiler warning */
   if(level == prot_confidential)
     return -1;
@@ -92,6 +74,10 @@ krb5_decode(void *app_data, void *buf, int len, int level,
   gss_ctx_id_t *context = app_data;
   OM_uint32 maj, min;
   gss_buffer_desc enc, dec;
+
+  /* shut gcc up */
+  level = 0;
+  conn = NULL;
 
   enc.value = buf;
   enc.length = len;
@@ -112,7 +98,6 @@ krb5_decode(void *app_data, void *buf, int len, int level,
 static int
 krb5_overhead(void *app_data, int level, int len)
 {
-  gss_ctx_id_t *context = app_data;
   /* no arguments are used, just init them to prevent compiler warnings */
   app_data = NULL;
   level = 0;
@@ -129,6 +114,9 @@ krb5_encode(void *app_data, void *from, int length, int level, void **to,
   OM_uint32 maj, min;
   int state;
   int len;
+
+  /* shut gcc up */
+  conn = NULL;
 
   dec.value = from;
   dec.length = length;
@@ -155,9 +143,6 @@ krb5_auth(void *app_data, struct connectdata *conn)
 {
   int ret;
   char *p;
-  unsigned char *ptr;
-  size_t len;
-  u_int32_t cs;
   const char *host = conn->dns_entry->addr->ai_canonname;
   ssize_t nread;
   unsigned int l = sizeof(conn->local_addr);
