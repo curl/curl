@@ -4,10 +4,10 @@ Curl and libcurl 7.16.4
  Releases counted from the very beginning: 126
  Available command line options:           118
  Available curl_easy_setopt() options:     143
- Number of public functions in libcurl:    54
+ Number of public functions in libcurl:    55
  Amount of public web site mirrors:        39
  Number of known libcurl bindings:         35
- Number of contributors:                   554
+ Number of contributors:                   572
 
 This release includes the following changes:
  
@@ -21,6 +21,7 @@ This release includes the following bugfixes:
    chunked encoding
  o fixed the 10-at-a-time.c example
  o FTP over SOCKS proxy
+ o improved error messages on SCP upload failures
 
 This release includes the following known bugs:
 
@@ -38,6 +39,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Robert Iakobashvili, James Housley, Günter Knauf, James Bursa, Song Ma,
- Thomas J. Moore
+ Thomas J. Moore, Gavrie Philipson
 
         Thanks! (and sorry if I forgot to mention someone)
