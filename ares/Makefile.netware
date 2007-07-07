@@ -118,14 +118,14 @@ SDK_CLIB = $(NDK_ROOT)/nwsdk
 SDK_LIBC = $(NDK_ROOT)/libc
 
 ifeq ($(LIBARCH),LIBC)
-	INCLUDES += -I$(SDK_LIBC)/include -I$(SDK_LIBC)/include/nks
+	INCLUDES += -I$(SDK_LIBC)/include
+	# INCLUDES += -I$(SDK_LIBC)/include/nks
 	# INCLUDES += -I$(SDK_LIBC)/include/winsock
 	CFLAGS += -D_POSIX_SOURCE
-#	CFLAGS += -D__ANSIC__
 else
-	INCLUDES += -I$(SDK_CLIB)/include/nlm -I$(SDK_CLIB)/include
+	INCLUDES += -I$(SDK_CLIB)/include/nlm
 	# INCLUDES += -I$(SDK_CLIB)/include/nlm/obsolete
-	CFLAGS += -DNETDB_USE_INTERNET
+	# INCLUDES += -I$(SDK_CLIB)/include
 endif
 CFLAGS	+= -I. $(INCLUDES)
 

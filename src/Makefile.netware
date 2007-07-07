@@ -166,15 +166,15 @@ ifdef WITH_SSL
 endif
 
 ifeq ($(LIBARCH),LIBC)
-	INCLUDES += -I$(SDK_LIBC)/include -I$(SDK_LIBC)/include/nks
+	INCLUDES += -I$(SDK_LIBC)/include
+	# INCLUDES += -I$(SDK_LIBC)/include/nks
 	# INCLUDES += -I$(SDK_LIBC)/include/winsock
 	# INCLUDES += -I$(SDK_LDAP)/libc/inc
 	CFLAGS += -D_POSIX_SOURCE
-	# CFLAGS += -D__ANSIC__
 else
-	INCLUDES += -I$(SDK_CLIB)/include/nlm -I$(SDK_CLIB)/include
+	INCLUDES += -I$(SDK_CLIB)/include/nlm
+	# INCLUDES += -I$(SDK_CLIB)/include
 	# INCLUDES += -I$(SDK_LDAP)/clib/inc
-	CFLAGS += -DNETDB_USE_INTERNET
 endif
 CFLAGS	+= $(INCLUDES)
 
