@@ -51,7 +51,10 @@ endif
 # Include the version info retrieved from curlver.h
 -include $(OBJDIR)/version.inc
 
-# The following line defines your compiler.
+# The following lines defines your compiler.
+ifdef CWFolder
+	METROWERKS = $(CWFolder)
+endif
 ifdef METROWERKS
 	# MWCW_PATH = $(subst \,/,$(METROWERKS))/Novell Support
 	MWCW_PATH = $(subst \,/,$(METROWERKS))/Novell Support/Metrowerks Support
