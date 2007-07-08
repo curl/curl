@@ -61,7 +61,10 @@ else
 	OBJDIR	= debug
 endif
 
-# The following line defines your compiler.
+# The following lines defines your compiler.
+ifdef CWFolder
+	METROWERKS = $(CWFolder)
+endif
 ifdef METROWERKS
 	# MWCW_PATH = $(subst \,/,$(METROWERKS))/Novell Support
 	MWCW_PATH = $(subst \,/,$(METROWERKS))/Novell Support/Metrowerks Support
@@ -393,12 +396,14 @@ endif
 	@echo $(DL)#define HAVE_INET_ADDR 1$(DL) >> $@
 	@echo $(DL)#define HAVE_INET_NTOA 1$(DL) >> $@
 	@echo $(DL)#define HAVE_LL 1$(DL) >> $@
+	@echo $(DL)#define HAVE_LOCALE_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_MALLOC_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_NETINET_IN_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_RECV 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SELECT 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SEND 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SETJMP_H 1$(DL) >> $@
+	@echo $(DL)#define HAVE_SETLOCALE 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SIGNAL 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SIGNAL_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SIG_ATOMIC_T 1$(DL) >> $@
