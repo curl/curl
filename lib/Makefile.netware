@@ -60,7 +60,10 @@ else
 	OBJDIR	= debug
 endif
 
-# The following line defines your compiler.
+# The following lines defines your compiler.
+ifdef CWFolder
+	METROWERKS = $(CWFolder)
+endif
 ifdef METROWERKS
 	# MWCW_PATH = $(subst \,/,$(METROWERKS))/Novell Support
 	MWCW_PATH = $(subst \,/,$(METROWERKS))/Novell Support/Metrowerks Support
