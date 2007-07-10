@@ -1398,6 +1398,9 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                   else if(Curl_compareheader(line_start,
                                              "Connection:", "close"))
                     closeConnection = TRUE;
+                  else if(Curl_compareheader(line_start,
+                                             "Proxy-Connection:", "close"))
+                    closeConnection = TRUE;
                   else if(2 == sscanf(line_start, "HTTP/1.%d %d",
                                       &subversion,
                                       &k->httpcode)) {

@@ -16,6 +16,7 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o Test cases 31, 46, 61, 506, 517 now work in time zones that use leap seconds
+ o problem with closed proxy connection during HTTP CONNECT auth negotiation
 
 This release includes the following known bugs:
 
@@ -32,7 +33,6 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dan Fandrich, Song Ma, Daniel Black
+  Dan Fandrich, Song Ma, Daniel Black, Giancarlo Formicuccia
  
-
         Thanks! (and sorry if I forgot to mention someone)

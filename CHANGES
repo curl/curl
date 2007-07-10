@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel S (11 July 2007)
+- Giancarlo Formicuccia reported and fixed a problem with a closed connection
+  to a proxy during CONNECT auth negotiation.
+
 Dan F (10 July 2007)
 - Fixed a curl memory leak reported by Song Ma with a modified version
   of the patch he suggested.  Added his test case as test289 to verify.
