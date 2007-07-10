@@ -1,7 +1,7 @@
-Curl and libcurl 7.16.4
+Curl and libcurl 7.16.5
 
- Public curl release number:               100
- Releases counted from the very beginning: 126
+ Public curl release number:               101
+ Releases counted from the very beginning: 127
  Available command line options:           118
  Available curl_easy_setopt() options:     143
  Number of public functions in libcurl:    55
@@ -11,20 +11,11 @@ Curl and libcurl 7.16.4
 
 This release includes the following changes:
  
- o added CURLOPT_NEW_FILE_PERMS and CURLOPT_NEW_DIRECTORY_PERMS
- o improved hashing of sockets for the multi_socket API
- o ftp kerberos5 support added
+ o 
 
 This release includes the following bugfixes:
 
- o adjusted how libcurl treats HTTP 1.1 responses without content-lenth or
-   chunked encoding
- o fixed the 10-at-a-time.c example
- o FTP over SOCKS proxy
- o improved error messages on SCP upload failures
- o security flaw (http://curl.haxx.se/docs/adv_20070710.html) in which libcurl
-   failed to properly reject some outdated or not yet valid server certificates
-   when built with GnuTLS
+ o 
 
 This release includes the following known bugs:
 
@@ -41,7 +32,6 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Robert Iakobashvili, James Housley, Günter Knauf, James Bursa, Song Ma,
- Thomas J. Moore, Gavrie Philipson, Kees Cook
+ 
 
         Thanks! (and sorry if I forgot to mention someone)
