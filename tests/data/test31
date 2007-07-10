@@ -39,6 +39,12 @@ http
  <name>
 HTTP with weirdly formatted cookies and cookiejar storage
  </name>
+# Explicitly set the time zone to a known good one, in case the user is
+# using one of the 'right' zones that take into account leap seconds
+# which causes the cookie expiry times to be different.
+<setenv>
+TZ=GMT
+</setenv>
  <command>
 http://%HOSTIP:%HTTPPORT/we/want/31 -b none -c log/jar31.txt
 </command>

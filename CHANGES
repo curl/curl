@@ -6,6 +6,15 @@
 
                                   Changelog
 
+Dan F (10 July 2007)
+- Fixed a curl memory leak reported by Song Ma with a modified version
+  of the patch he suggested.  Added his test case as test289 to verify.
+
+- Force the time zone to GMT in the cookie tests in case the user is
+  using one of the so-called 'right' time zones that take into account
+  leap seconds, which causes the tests to fail (as reported by
+  Daniel Black in bug report #1745964).
+
 Version 7.16.4 (10 July 2007)
 
 Daniel S (10 July 2007)
