@@ -45,6 +45,13 @@ ssize_t Curl_sftp_send(struct connectdata *conn, int sockindex,
 ssize_t Curl_sftp_recv(struct connectdata *conn, int sockindex,
                        char *mem, size_t len);
 
+#if (LIBSSH2_APINO >= 200706012030)
+CURLcode Curl_sftp_doing(struct connectdata *conn,
+                         bool *dophase_done);
+CURLcode Curl_scp_doing(struct connectdata *conn,
+                        bool *dophase_done);
+#endif (LIBSSH2_APINO >= 200706012030)
+
 #endif /* USE_LIBSSH2 */
 
 #endif /* __SSH_H */

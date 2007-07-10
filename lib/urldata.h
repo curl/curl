@@ -411,8 +411,9 @@ struct ftp_conn {
  * SSH unique setup
  ***************************************************************************/
 typedef enum {
-  SSH_STOP,    /* do nothing state, stops the state machine */
-  SSH_S_STARTUP,  /* Session startup */
+  SSH_NO_STATE = -1,  /* Used for "nextState" so say there is none */
+  SSH_STOP = 0,       /* do nothing state, stops the state machine */
+  SSH_S_STARTUP,      /* Session startup */
   SSH_AUTHLIST,
   SSH_AUTH_PKEY_INIT,
   SSH_AUTH_PKEY,
@@ -426,7 +427,41 @@ typedef enum {
   SSH_SFTP_INIT,
   SSH_SFTP_REALPATH,
   SSH_GET_WORKINGPATH,
+  SSH_SFTP_QUOTE_INIT,
+  SSH_SFTP_POSTQUOTE_INIT,
+  SSH_SFTP_QUOTE,
+  SSH_SFTP_NEXT_QUOTE,
+  SSH_SFTP_QUOTE_STAT,
+  SSH_SFTP_QUOTE_SETSTAT,
+  SSH_SFTP_QUOTE_SYMLINK,
+  SSH_SFTP_QUOTE_MKDIR,
+  SSH_SFTP_QUOTE_RENAME,
+  SSH_SFTP_QUOTE_RMDIR,
+  SSH_SFTP_QUOTE_UNLINK,
+  SSH_SFTP_TRANS_INIT,
+  SSH_SFTP_UPLOAD_INIT,
+  SSH_SFTP_CREATE_DIRS_INIT,
+  SSH_SFTP_CREATE_DIRS,
+  SSH_SFTP_CREATE_DIRS_MKDIR,
+  SSH_SFTP_READDIR_INIT,
+  SSH_SFTP_READDIR,
+  SSH_SFTP_READDIR_LINK,
+  SSH_SFTP_READDIR_BOTTOM,
+  SSH_SFTP_READDIR_DONE,
+  SSH_SFTP_DOWNLOAD_INIT,
+  SSH_SFTP_DOWNLOAD_STAT,
+  SSH_SFTP_CLOSE,
   SSH_SFTP_SHUTDOWN,
+  SSH_SCP_TRANS_INIT,
+  SSH_SCP_UPLOAD_INIT,
+  SSH_SCP_DOWNLOAD_INIT,
+  SSH_SCP_DONE,
+  SSH_SCP_SEND_EOF,
+  SSH_SCP_WAIT_EOF,
+  SSH_SCP_WAIT_CLOSE,
+  SSH_SCP_CHANNEL_FREE,
+  SSH_CHANNEL_CLOSE,
+  SSH_SESSION_DISCONECT,
   SSH_SESSION_FREE,
   SSH_QUIT,
   SSH_LAST  /* never used */
@@ -451,12 +486,27 @@ struct SSHPROTO {
    struct */
 struct ssh_conn {
   const char *authlist; /* List of auth. methods, managed by libssh2 */
+#ifdef USE_LIBSSH2
   const char *passphrase;
   char *rsa_pub;
   char *rsa;
   bool authed;
   sshstate state; /* always use ssh.c:state() to change state! */
+  sshstate nextState; /* the state to goto after stopping */
   CURLcode actualCode;  /* the actual error code */
+  struct curl_slist *quote_item;
+  char *quote_path1;
+  char *quote_path2;
+  LIBSSH2_SFTP_ATTRIBUTES quote_attrs;
+  LIBSSH2_SFTP_ATTRIBUTES readdir_attrs;
+  char *readdir_filename;
+  char *readdir_longentry;
+  int readdir_len, readdir_totalLen, readdir_currLen;
+  char *readdir_line;
+  char *readdir_linkPath;
+  int secondCreateDirs;
+  char *slash_pos;
+#endif /* USE_LIBSSH2 */
 };
 
 
@@ -906,7 +956,7 @@ struct connectdata {
   struct curl_llist *recv_pipe; /* List of handles waiting to read
                                    their responses on this pipeline */
 
-  char* master_buffer; /* The master buffer allocated on-demand; 
+  char* master_buffer; /* The master buffer allocated on-demand;
                           used for pipelining. */
   size_t read_pos; /* Current read position in the master buffer */
   size_t buf_len; /* Length of the buffer?? */

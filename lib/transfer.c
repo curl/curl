@@ -330,9 +330,13 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   /* only use the proper socket if the *_HOLD bit is not set simultaneously as
      then we are in rate limiting state in that transfer direction */
 
-  if((k->keepon & (KEEP_READ|KEEP_READ_HOLD)) == KEEP_READ)
+  if((k->keepon & (KEEP_READ|KEEP_READ_HOLD)) == KEEP_READ) {
     fd_read = conn->sockfd;
-  else
+#if defined(USE_LIBSSH2) && (LIBSSH2_APINO >= 200706012030)
+    if (conn->protocol & (PROT_SCP|PROT_SFTP))
+      select_res |= CURL_CSELECT_IN;
+#endif /* USE_LIBSSH2 && (LIBSSH2_APINO >= 200706012030) */
+  } else
     fd_read = CURL_SOCKET_BAD;
 
   if((k->keepon & (KEEP_WRITE|KEEP_WRITE_HOLD)) == KEEP_WRITE)
@@ -340,11 +344,11 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   else
     fd_write = CURL_SOCKET_BAD;
 
-   if (!select_res) { /* Call for select()/poll() only, if read/write/error 
+   if (!select_res) { /* Call for select()/poll() only, if read/write/error
                          status is not known. */
        select_res = Curl_socket_ready(fd_read, fd_write, 0);
    }
- 
+
   if(select_res == CURL_CSELECT_ERR) {
     failf(data, "select/poll returned error");
     return CURLE_SEND_ERROR;

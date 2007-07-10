@@ -3361,6 +3361,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->curl_connect = Curl_ssh_connect; /* ssh_connect? */
     conn->curl_do = Curl_scp_do;
     conn->curl_done = Curl_scp_done;
+#if (LIBSSH2_APINO >= 200706012030)
+    conn->curl_connecting = Curl_ssh_multi_statemach;
+    conn->curl_doing = Curl_scp_doing;
+#endif (LIBSSH2_APINO >= 200706012030)
     conn->curl_do_more = (Curl_do_more_func)ZERO_NULL;
 #else
     failf(data, LIBCURL_NAME
@@ -3376,14 +3380,18 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->curl_connect = Curl_ssh_connect; /* ssh_connect? */
     conn->curl_do = Curl_sftp_do;
     conn->curl_done = Curl_sftp_done;
-    conn->curl_do_more = (Curl_do_more_func)NULL;
+#if (LIBSSH2_APINO >= 200706012030)
+    conn->curl_connecting = Curl_ssh_multi_statemach;
+    conn->curl_doing = Curl_sftp_doing;
+#endif (LIBSSH2_APINO >= 200706012030)
+    conn->curl_do_more = (Curl_do_more_func)ZERO_NULL;
 #else
     failf(data, LIBCURL_NAME
           " was built without LIBSSH2, scp: not supported!");
     return CURLE_UNSUPPORTED_PROTOCOL;
 #endif
-}
-else {
+  }
+  else {
     /* We fell through all checks and thus we don't support the specified
        protocol */
     failf(data, "Unsupported protocol: %s", conn->protostr);
