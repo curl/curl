@@ -84,6 +84,24 @@ Data:
 
   See FILEFORMAT for the description of the test case files.
 
+Code coverage:
+  gcc provides a tool that can determine the code coverage figures for
+  the test suite.  To use it, configure curl with
+  CFLAGS='-fprofile-arcs -ftest-coverage -g -O0'.  Make sure you run the normal
+  and torture tests to get more full coverage, i.e. do:
+
+    make test
+    cd tests
+    make torture-test
+
+  The graphical tool ggcov can be used to browse the source and create
+  coverage reports on *NIX hosts:
+
+    ggcov -r lib src
+
+  The text mode tool gcov may also be used, but it doesn't handle object files
+  in more than one directory very well.
+
 
 TEST CASE NUMBERS
 
@@ -97,7 +115,7 @@ TEST CASE NUMBERS
  500 - 599   libcurl source code tests, not using the curl command tool
  600 - 699   SCP/SFTP
  700 - 799   SOCKS4 (even numbers) and SOCK5 (odd numbers)
- 1000 - x    miscellanous*
+ 1000 - x    miscellaneous*
 
  Since 30-apr-2003, there's nothing in the system that requires us to keep
  within these number series, and those sections marked with * actually
