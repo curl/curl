@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel S (11 July 2007)
+- Shmulik Regev fixed a bug with transfer-encoding skipping during the 407
+  error pages for proxy authentication.
+
 - Giancarlo Formicuccia reported and fixed a problem with a closed connection
   to a proxy during CONNECT auth negotiation.
 

@@ -118,9 +118,8 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
 
   /* the original data is written to the client, but we go on with the
      chunk read process, to properly calculate the content length*/
-  if ( data->set.http_te_skip )
+  if (data->set.http_te_skip && !k->ignorebody)
     Curl_client_write(conn, CLIENTWRITE_BODY, datap,datalen);
-
 
   while(length) {
     switch(ch->state) {
