@@ -22,6 +22,9 @@ This release includes the following bugfixes:
  o fixed the 10-at-a-time.c example
  o FTP over SOCKS proxy
  o improved error messages on SCP upload failures
+ o security flaw (http://curl.haxx.se/docs/adv_20070710.html) in which libcurl
+   failed to properly reject some outdated or not yet valid server certificates
+   when built with GnuTLS
 
 This release includes the following known bugs:
 
@@ -39,6 +42,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Robert Iakobashvili, James Housley, Günter Knauf, James Bursa, Song Ma,
- Thomas J. Moore, Gavrie Philipson
+ Thomas J. Moore, Gavrie Philipson, Kees Cook
 
         Thanks! (and sorry if I forgot to mention someone)

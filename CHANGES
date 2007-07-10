@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Version 7.16.4 (10 July 2007)
+
+Daniel S (10 July 2007)
+- Kees Cook notified us about a security flaw
+  (http://curl.haxx.se/docs/adv_20070710.html) in which libcurl failed to
+  properly reject some outdated or not yet valid server certificates when
+  built with GnuTLS. Kees also provided the patch.
+
 James H (5 July 2007)
 - Gavrie Philipson provided a patch that will use a more specific error
   message for an scp:// upload failure.  If libssh2 has his matching

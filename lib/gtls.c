@@ -420,6 +420,43 @@ Curl_gtls_connect(struct connectdata *conn,
   else
     infof(data, "\t common name: %s (matched)\n", certbuf);
 
+  /* Check for time-based validity */
+  clock = gnutls_x509_crt_get_expiration_time(x509_cert);
+
+  if(clock == (time_t)-1) {
+    failf(data, "server cert expiration date verify failed");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
+  if(clock < time(NULL)) {
+    if (data->set.ssl.verifypeer) {
+      failf(data, "server certificate expiration date has passed.");
+      return CURLE_SSL_PEER_CERTIFICATE;
+    }
+    else
+      infof(data, "\t server certificate expiration date FAILED\n");
+  }
+  else
+    infof(data, "\t server certificate expiration date OK\n");
+
+  clock = gnutls_x509_crt_get_activation_time(x509_cert);
+
+  if(clock == (time_t)-1) {
+    failf(data, "server cert activation date verify failed");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
+  if(clock > time(NULL)) {
+    if (data->set.ssl.verifypeer) {
+      failf(data, "server certificate not activated yet.");
+      return CURLE_SSL_PEER_CERTIFICATE;
+    }
+    else
+      infof(data, "\t server certificate activation date FAILED\n");
+  }
+  else
+    infof(data, "\t server certificate activation date OK\n");
+
   /* Show:
 
   - ciphers used
