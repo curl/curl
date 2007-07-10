@@ -4009,7 +4009,21 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             helpf("Can't open '%s'!\n", uploadfile);
             if(infd)
               fclose(infd);
-            return CURLE_READ_ERROR;
+
+            /* Free the list of remaining URLs and globbed upload files
+             * to force curl to exit immediately
+             */
+	    if(urls) {
+	      glob_cleanup(urls);
+	      urls = NULL;
+	    }
+	    if(inglob) {
+	      glob_cleanup(inglob);
+	      inglob = NULL;
+	    }
+
+	    res = CURLE_READ_ERROR;
+	    goto quit_urls;
           }
           infdfopen=TRUE;
           uploadfilesize=fileinfo.st_size;
@@ -4557,6 +4571,7 @@ show_error:
         SetComment( outs.filename, url);
 #endif
 
+quit_urls:
         if(headerfilep)
           fclose(headerfilep);
 
@@ -4571,9 +4586,11 @@ show_error:
 
       } /* loop to the next URL */
 
-      if(urls)
+      if(urls) {
         /* cleanup memory used for URL globbing patterns */
         glob_cleanup(urls);
+        urls = NULL;
+      }
 
       if(uploadfile)
         free(uploadfile);
