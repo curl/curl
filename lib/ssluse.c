@@ -1131,16 +1131,9 @@ static CURLcode verifyhost(struct connectdata *conn,
 #endif /* CURL_DOES_CONVERSIONS */
 
     if (!peer_CN) {
-      if(data->set.ssl.verifyhost > 1) {
-        failf(data,
-              "SSL: unable to obtain common name from peer certificate");
-        return CURLE_SSL_PEER_CERTIFICATE;
-      }
-      else {
-        /* Consider verifyhost == 1 as an "OK" for a missing CN field, but we
-           output a note about the situation */
-        infof(data, "\t common name: WARNING couldn't obtain\n");
-      }
+      failf(data,
+            "SSL: unable to obtain common name from peer certificate");
+      return CURLE_SSL_PEER_CERTIFICATE;
     }
     else if(!cert_hostcheck((const char *)peer_CN, conn->host.name)) {
       if(data->set.ssl.verifyhost > 1) {

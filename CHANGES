@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel S (12 July 2007)
+- Made CURLOPT_SSL_VERIFYHOST set to 1 acts as described in the documentation:
+  fail to connect if there is no Common Name field found in the remote cert.
+  We should deprecate the support for this set to 1 anyway soon, since the
+  feature is pointless and most likely never really used by anyone.
+
 Daniel S (11 July 2007)
 - Shmulik Regev fixed a bug with transfer-encoding skipping during the 407
   error pages for proxy authentication.

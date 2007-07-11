@@ -18,6 +18,7 @@ This release includes the following bugfixes:
  o test cases 31, 46, 61, 506, 517 now work in time zones that use leap seconds
  o problem with closed proxy connection during HTTP CONNECT auth negotiation
  o transfer-encoding skipping didn't ignore the 407 response bodies properly
+ o CURLOPT_SSL_VERIFYHOST set to 1
 
 This release includes the following known bugs:
 
@@ -25,7 +26,7 @@ This release includes the following known bugs:
 
 Other curl-related news:
 
- o 
+ o pycurl 7.16.4 was released http://pycurl.sf.net
 
 New curl mirrors:
 
