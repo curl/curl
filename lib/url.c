@@ -3364,7 +3364,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 #if (LIBSSH2_APINO >= 200706012030)
     conn->curl_connecting = Curl_ssh_multi_statemach;
     conn->curl_doing = Curl_scp_doing;
-#endif (LIBSSH2_APINO >= 200706012030)
+#endif /* (LIBSSH2_APINO >= 200706012030) */
     conn->curl_do_more = (Curl_do_more_func)ZERO_NULL;
 #else
     failf(data, LIBCURL_NAME
@@ -3383,7 +3383,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 #if (LIBSSH2_APINO >= 200706012030)
     conn->curl_connecting = Curl_ssh_multi_statemach;
     conn->curl_doing = Curl_sftp_doing;
-#endif (LIBSSH2_APINO >= 200706012030)
+#endif /* (LIBSSH2_APINO >= 200706012030) */
     conn->curl_do_more = (Curl_do_more_func)ZERO_NULL;
 #else
     failf(data, LIBCURL_NAME
