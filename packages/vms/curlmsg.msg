@@ -101,6 +101,9 @@ TFTP_NOSUCHUSER		<no such user>
 CONV_FAILED		<conversion failed>
 CONV_REQD		<caller must register conversion callbacks>
 SSL_CACERT_BADFILE	<could not load CACERT file>
+REMOTE_FILE_NOT_FOUND	<remote file not found>
+SSH			<unspecified error from the SSH layer>
+SSL_SHUTDOWN_FAILED	<failed to shut down the SSL connection>
 CURL_LAST		<CURLMSG.MSG is out of sync with the source code>
 
 .END
