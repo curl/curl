@@ -1383,13 +1383,16 @@ support for FTP.
 Pass a long set to a bitmask consisting of one or more of
 CURLSSH_AUTH_PUBLICKEY, CURLSSH_AUTH_PASSWORD, CURLSSH_AUTH_HOST,
 CURLSSH_AUTH_KEYBOARD. Set CURLSSH_AUTH_ANY to let libcurl pick one.
+(Added in 7.16.1)
 .IP CURLOPT_SSH_PUBLIC_KEYFILE
 Pass a char * pointing to a file name for your public key. If not used,
 libcurl defaults to using \fB~/.ssh/id_dsa.pub\fP.
+(Added in 7.16.1)
 .IP CURLOPT_SSH_PRIVATE_KEYFILE
 Pass a char * pointing to a file name for your private key. If not used,
 libcurl defaults to using \fB~/.ssh/id_dsa\fP.
 If the file is password-protected, set the password with \fICURLOPT_SSLKEYPASSWD\fP.
+(Added in 7.16.1)
 .SH OTHER OPTIONS
 .IP CURLOPT_PRIVATE
 Pass a char * as parameter, pointing to data that should be associated with
