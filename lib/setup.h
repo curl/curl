@@ -315,6 +315,7 @@ int fileno( FILE *stream);
 #endif
 
 #ifdef NETWARE
+int netware_init(void);
 #ifndef __NOVELL_LIBC__
 #include <sys/bsdskt.h>
 #include <sys/timeval.h>

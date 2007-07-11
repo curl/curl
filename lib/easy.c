@@ -241,6 +241,12 @@ CURLcode curl_global_init(long flags)
   }
 #endif
 
+#ifdef NETWARE
+  if(netware_init()) {
+    DEBUGF(fprintf(stderr, "Warning: LONG namespace not available\n"));
+  }
+#endif
+
 #ifdef USE_LIBIDN
   idna_init();
 #endif
