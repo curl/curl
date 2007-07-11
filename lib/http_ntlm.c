@@ -48,6 +48,10 @@
 #include <unistd.h>
 #endif
 
+#if (defined(NETWARE) && !defined(__NOVELL_LIBC__))
+#include <netdb.h>
+#endif
+
 #include "urldata.h"
 #include "easyif.h"  /* for Curl_convert_... prototypes */
 #include "sendf.h"
