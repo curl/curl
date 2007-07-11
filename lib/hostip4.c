@@ -285,7 +285,6 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
      */
   else {
 #if (defined(NETWARE) && !defined(__NOVELL_LIBC__))
-    NETDB_DEFINE_CONTEXT
     h = gethostbyname((char*)hostname);
 #else
     h = gethostbyname(hostname);

@@ -308,13 +308,6 @@ void DisposeThreadData( void *data )
 /* For native CLib-based NLM seems we can do a bit more simple. */
 #include <nwthread.h>
 
-/* Make the CLIB Ctx stuff link */
-/*
-#include <stdio.h>
-#include <netdb.h>
-NETDB_DEFINE_CONTEXT
-*/
-
 int main ( void )
 {
     /* initialize any globals here... */

@@ -63,9 +63,6 @@
 #include <sys/filio.h>
 #endif
 #ifdef NETWARE
-#ifndef __NOVELL_LIBC__
-NETDB_DEFINE_CONTEXT
-#endif
 #undef in_addr_t
 #define in_addr_t unsigned long
 #endif
