@@ -50,7 +50,7 @@ CURLcode Curl_sftp_doing(struct connectdata *conn,
                          bool *dophase_done);
 CURLcode Curl_scp_doing(struct connectdata *conn,
                         bool *dophase_done);
-#endif (LIBSSH2_APINO >= 200706012030)
+#endif /* (LIBSSH2_APINO >= 200706012030) */
 
 #endif /* USE_LIBSSH2 */
 
