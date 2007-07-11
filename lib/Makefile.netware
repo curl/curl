@@ -123,10 +123,10 @@ CFLAGS	+= -Wall # -pedantic
 ifeq ($(LIBARCH),LIBC)
 	PRELUDE = $(SDK_LIBC)/imports/libcpre.gcc.o
 else
-	# PRELUDE = $(SDK_CLIB)/imports/clibpre.gcc.o
+	PRELUDE = $(SDK_CLIB)/imports/clibpre.gcc.o
 	# to avoid the __init_* / __deinit_* whoes dont use prelude from NDK
 	# http://www.gknw.net/development/mk_nlm/gcc_pre.zip
-	PRELUDE = $(NDK_ROOT)/pre/prelude.o
+	# PRELUDE = $(NDK_ROOT)/pre/prelude.o
 	CFLAGS += -include $(NDKBASE)/nlmconv/genlm.h
 endif
 endif
@@ -207,7 +207,7 @@ endif
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
 
-OBJS	:= $(patsubst %.c,$(OBJDIR)/%.o,$(strip $(CSOURCES)))
+OBJS	:= $(patsubst %.c,$(OBJDIR)/%.o,$(strip $(CSOURCES))) $(OBJDIR)/nwos.o
 
 OBJL	= $(OBJS) $(OBJDIR)/nwlib.o $(LDLIBS)
 
