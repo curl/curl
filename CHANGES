@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel S (12 July 2007)
+- Shmulik Regev found an (albeit rare) case where the proxy CONNECT operation
+  could in fact get stuck in an endless loop.
+
 - Made CURLOPT_SSL_VERIFYHOST set to 1 acts as described in the documentation:
   fail to connect if there is no Common Name field found in the remote cert.
   We should deprecate the support for this set to 1 anyway soon, since the

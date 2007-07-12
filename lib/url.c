@@ -4071,6 +4071,12 @@ static CURLcode SetupConnection(struct connectdata *conn,
   }
   *protocol_done = FALSE; /* default to not done */
 
+  /* set proxy_connect_closed to false unconditionally already here since it
+     is used strictly to provide extra information to a parent function in the
+     case of proxy CONNECT failures and we must make sure we don't have it
+     lingering set from a previous invoke */
+  conn->bits.proxy_connect_closed = FALSE;
+
   /*************************************************************
    * Set user-agent for HTTP
    *************************************************************/

@@ -19,6 +19,7 @@ This release includes the following bugfixes:
  o problem with closed proxy connection during HTTP CONNECT auth negotiation
  o transfer-encoding skipping didn't ignore the 407 response bodies properly
  o CURLOPT_SSL_VERIFYHOST set to 1
+ o CONNECT endless loop
 
 This release includes the following known bugs:
 
