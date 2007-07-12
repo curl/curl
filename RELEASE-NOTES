@@ -20,6 +20,7 @@ This release includes the following bugfixes:
  o transfer-encoding skipping didn't ignore the 407 response bodies properly
  o CURLOPT_SSL_VERIFYHOST set to 1
  o CONNECT endless loop
+ o krb5 support builds with Heimdal
 
 This release includes the following known bugs:
 

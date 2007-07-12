@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel S (12 July 2007)
+- Made the krb5 code build with Heimdal's GSSAPI lib.
+
 Dan F (12 July 2007)
 - Compile most of the example apps in docs/examples when doing a 'make check'.
   Fixed some compile warnings and errors in those examples.

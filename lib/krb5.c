@@ -36,14 +36,24 @@
 #ifndef CURL_DISABLE_FTP
 #ifdef HAVE_GSSAPI
 
+#ifdef HAVE_GSSMIT
+#define GSS_C_NT_HOSTBASED_SERVICE gss_nt_service_name
+#endif
+
 #include <stdlib.h>
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
 #include <string.h>
+#ifdef HAVE_GSSMIT
+/* MIT style */
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
 #include <gssapi/gssapi_krb5.h>
+#else
+/* Heimdal-style */
+#include <gssapi.h>
+#endif
 
 #include "urldata.h"
 #include "base64.h"
@@ -185,7 +195,7 @@ krb5_auth(void *app_data, struct connectdata *conn)
 
     gssbuf.value = data->state.buffer;
     gssbuf.length = snprintf(gssbuf.value, BUFSIZE, "%s@%s", service, host);
-    maj = gss_import_name(&min, &gssbuf, gss_nt_service_name, &gssname);
+    maj = gss_import_name(&min, &gssbuf, GSS_C_NT_HOSTBASED_SERVICE, &gssname);
     if(maj != GSS_S_COMPLETE) {
       gss_release_name(&min, &gssname);
       if(service == srv_host) {
