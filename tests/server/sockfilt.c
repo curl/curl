@@ -405,7 +405,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
        (void *)&flag, sizeof(flag));
   while ((rc < 0) && maxretr) {
     maxretr--;
-    go_sleep(10);
+    go_sleep(50);
     rc = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
          (void *)&flag, sizeof(flag));
   }
