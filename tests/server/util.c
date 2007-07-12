@@ -45,6 +45,9 @@
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
+#ifdef HAVE_SYS_POLL_H
+#include <sys/poll.h>
+#endif
 
 #define ENABLE_CURLX_PRINTF
 /* make the curlx header define all printf() functions to use the curlx_*
@@ -159,3 +162,32 @@ char *test2file(long testno)
   snprintf(filename, sizeof(filename), TEST_DATA_PATH, path, testno);
   return filename;
 }
+
+void go_sleep(long ms)
+{
+#ifdef HAVE_POLL_FINE
+  /* portable subsecond "sleep" */
+  poll((void *)0, 0, (int)ms);
+#else
+  /* systems without poll() need other solutions */
+
+#ifdef WIN32
+  /* Windows offers a millisecond sleep */
+  Sleep(ms);
+#elif defined(MSDOS)
+  delay(ms);
+#else
+  /* Other systems must use select() for this */
+  struct timeval timeout;
+
+  timeout.tv_sec = ms/1000;
+  ms = ms%1000;
+  timeout.tv_usec = ms * 1000;
+
+  select(0, NULL,  NULL, NULL, &timeout);
+#endif
+
+#endif
+}
+
+

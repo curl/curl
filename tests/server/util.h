@@ -49,4 +49,6 @@ void win32_cleanup(void);
 /* returns the path name to the test case file */
 char *test2file(long testno);
 
+void go_sleep(long ms);
+
 #endif  /* __SERVER_UTIL_H */

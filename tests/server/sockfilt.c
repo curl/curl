@@ -399,10 +399,17 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
 #endif /* ENABLE_IPV6 */
   int flag = 1;
   int rc;
+  int maxretr = 100;
 
-  if (setsockopt
-      (sock, SOL_SOCKET, SO_REUSEADDR, (void *)&flag,
-       sizeof(flag)) < 0) {
+  rc = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
+       (void *)&flag, sizeof(flag));
+  while ((rc < 0) && maxretr) {
+    maxretr--;
+    go_sleep(10);
+    rc = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
+         (void *)&flag, sizeof(flag));
+  }
+  if (rc < 0) {
     perror("setsockopt(SO_REUSEADDR)");
   }
 
