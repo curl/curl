@@ -11,11 +11,16 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include <curl/curl.h>
 
 #if LIBCURL_VERSION_NUM < 0x070c03
 #error "upgrade your libcurl to no less than 7.12.3"
+#endif
+
+#ifndef TRUE
+#define TRUE 1
 #endif
 
 /*
