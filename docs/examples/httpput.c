@@ -75,10 +75,10 @@ int main(int argc, char **argv)
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
 
     /* enable uploading */
-    curl_easy_setopt(curl, CURLOPT_UPLOAD, TRUE) ;
+    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1) ;
 
     /* HTTP PUT please */
-    curl_easy_setopt(curl, CURLOPT_PUT, TRUE);
+    curl_easy_setopt(curl, CURLOPT_PUT, 1);
 
     /* specify target URL, and note that this URL should include a file
        name, not only a directory */

@@ -135,4 +135,5 @@ int main(void)
 
   curl_easy_cleanup(ch);
   curl_global_cleanup();
+  return rv;
 }

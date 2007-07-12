@@ -24,7 +24,7 @@
   http://www.openssl.org/docs/crypto/threads.html#DESCRIPTION
 
 */
-char *urls[]= {
+const char *urls[]= {
   "http://curl.haxx.se/",
   "ftp://cool.haxx.se/",
   "http://www.contactor.se/",
@@ -59,7 +59,7 @@ int main(int argc, char **argv)
     error = pthread_create(&tid[i],
                            NULL, /* default attributes please */
                            pull_one_url,
-                           urls[i]);
+                           (void *)urls[i]);
     if(0 != error)
       fprintf(stderr, "Couldn't run thread number %d, errno %d\n", i, error);
     else

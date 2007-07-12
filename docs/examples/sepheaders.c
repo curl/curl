@@ -25,9 +25,9 @@ size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
 int main(int argc, char **argv)
 {
   CURL *curl_handle;
-  char *headerfilename = "head.out";
+  static const char *headerfilename = "head.out";
   FILE *headerfile;
-  char *bodyfilename = "body.out";
+  static const char *bodyfilename = "body.out";
   FILE *bodyfile;
 
   curl_global_init(CURL_GLOBAL_ALL);

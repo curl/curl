@@ -47,7 +47,7 @@ int main(int argc, char **argv)
   curl_easy_setopt(handles[HTTP_HANDLE], CURLOPT_URL, "http://website.com");
 
   curl_easy_setopt(handles[FTP_HANDLE], CURLOPT_URL, "ftp://ftpsite.com");
-  curl_easy_setopt(handles[FTP_HANDLE], CURLOPT_UPLOAD, TRUE);
+  curl_easy_setopt(handles[FTP_HANDLE], CURLOPT_UPLOAD, 1);
 
   /* init a multi stack */
   multi_handle = curl_multi_init();

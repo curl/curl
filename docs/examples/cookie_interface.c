@@ -74,7 +74,7 @@ main(void)
 #define snprintf _snprintf
 #endif
     /* Netscape format cookie */
-    snprintf(nline, 256, "%s\t%s\t%s\t%s\t%u\t%s\t%s",
+    snprintf(nline, sizeof(nline), "%s\t%s\t%s\t%s\t%u\t%s\t%s",
       ".google.com", "TRUE", "/", "FALSE", time(NULL) + 31337, "PREF", "hello google, i like you very much!");
     res = curl_easy_setopt(curl, CURLOPT_COOKIELIST, nline);
     if (res != CURLE_OK) {
@@ -83,7 +83,7 @@ main(void)
     }
 
     /* HTTP-header style cookie */
-    snprintf(nline, 256,
+    snprintf(nline, sizeof(nline),
       "Set-Cookie: OLD_PREF=3d141414bf4209321; "
       "expires=Sun, 17-Jan-2038 19:14:07 GMT; path=/; domain=.google.com");
     res = curl_easy_setopt(curl, CURLOPT_COOKIELIST, nline);

@@ -22,7 +22,7 @@
  */
 
 struct FtpFile {
-  char *filename;
+  const char *filename;
   FILE *stream;
 };
 
@@ -65,7 +65,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &ftpfile);
 
     /* Switch on full protocol/debug output */
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, TRUE);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
 
     res = curl_easy_perform(curl);
 

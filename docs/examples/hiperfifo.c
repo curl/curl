@@ -252,7 +252,7 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 {
   GlobalInfo *g = (GlobalInfo*) cbp;
   SockInfo *fdp = (SockInfo*) sockp;
-  char *whatstr[]={ "none", "IN", "OUT", "INOUT", "REMOVE" };
+  const char *whatstr[]={ "none", "IN", "OUT", "INOUT", "REMOVE" };
 
   fprintf(MSG_OUT,
           "socket callback: s=%d e=%p what=%s ", s, e, whatstr[what]);
@@ -357,7 +357,7 @@ void fifo_cb(int fd, short event, void *arg) {
 /* Create a named pipe and tell libevent to monitor it */
 int init_fifo (GlobalInfo *g) {
   struct stat st;
-  char *fifo = "hiper.fifo";
+  static const char *fifo = "hiper.fifo";
   int socket;
 
   fprintf(MSG_OUT, "Creating named pipe \"%s\"\n", fifo);

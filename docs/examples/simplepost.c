@@ -9,6 +9,7 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 #include <curl/curl.h>
 
 int main(void)
@@ -16,7 +17,7 @@ int main(void)
   CURL *curl;
   CURLcode res;
 
-  char *postthis="moo mooo moo moo";
+  static const char *postthis="moo mooo moo moo";
 
   curl = curl_easy_init();
   if(curl) {

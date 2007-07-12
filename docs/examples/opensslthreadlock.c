@@ -16,6 +16,11 @@
  * Author: Jeremy Brown
  */
 
+
+#include <stdio.h>
+#include <pthread.h>
+#include <openssl/err.h>
+
 #define MUTEX_TYPE       pthread_mutex_t
 #define MUTEX_SETUP(x)   pthread_mutex_init(&(x), NULL)
 #define MUTEX_CLEANUP(x) pthread_mutex_destroy(&(x))
@@ -25,7 +30,7 @@
 
 
 void handle_error(const char *file, int lineno, const char *msg){
-     fprintf(stderr, ** %s:%i %s\n, file, lineno, msg);
+     fprintf(stderr, "** %s:%d %s\n", file, lineno, msg);
      ERR_print_errors_fp(stderr);
      /* exit(-1); */
  }

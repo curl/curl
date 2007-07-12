@@ -87,7 +87,7 @@ typedef struct
   char timeserver[MAX_STRING1];
 } conf_t;
 
-char DefaultTimeServer[4][MAX_STRING1] =
+const char DefaultTimeServer[4][MAX_STRING1] =
 {
   "http://nist.time.gov/timezone.cgi?UTC/s/0",
   "http://www.google.com/",
@@ -95,9 +95,9 @@ char DefaultTimeServer[4][MAX_STRING1] =
   "http://www.worldtime.com/cgi-bin/wt.cgi"
 };
 
-char *DayStr[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-char *MthStr[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+const char *DayStr[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+const char *MthStr[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
 int  ShowAllHeader;
 int  AutoSyncTime;

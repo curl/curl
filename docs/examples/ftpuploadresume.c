@@ -24,7 +24,9 @@
 
 /* The MinGW headers are missing a few Win32 function definitions,
    you shouldn't need this if you use VC++ */
+#ifdef __MINGW32__
 int __cdecl _snscanf(const char * input, size_t length, const char * format, ...);
+#endif
 
 
 /* parse headers for Content-Length */
@@ -75,7 +77,7 @@ int upload(CURL *curlhandle, const char * remotepath, const char * localpath,
 		return 0;
 	}
 
-	curl_easy_setopt(curlhandle, CURLOPT_UPLOAD, TRUE);
+	curl_easy_setopt(curlhandle, CURLOPT_UPLOAD, 1);
 
 	curl_easy_setopt(curlhandle, CURLOPT_URL, remotepath);
 
@@ -91,9 +93,9 @@ int upload(CURL *curlhandle, const char * remotepath, const char * localpath,
 	curl_easy_setopt(curlhandle, CURLOPT_READDATA, f);
 
 	curl_easy_setopt(curlhandle, CURLOPT_FTPPORT, "-"); /* disable passive mode */
-	curl_easy_setopt(curlhandle, CURLOPT_FTP_CREATE_MISSING_DIRS, TRUE);
+	curl_easy_setopt(curlhandle, CURLOPT_FTP_CREATE_MISSING_DIRS, 1);
 
-	curl_easy_setopt(curlhandle, CURLOPT_VERBOSE, TRUE);
+	curl_easy_setopt(curlhandle, CURLOPT_VERBOSE, 1);
 
 	for (c = 0; (r != CURLE_OK) && (c < tries); c++) {
 		/* are we resuming? */
@@ -108,22 +110,22 @@ int upload(CURL *curlhandle, const char * remotepath, const char * localpath,
 			 * because HEADER will dump the headers to stdout
 			 * without it.
 			 */
-			curl_easy_setopt(curlhandle, CURLOPT_NOBODY, TRUE);
-			curl_easy_setopt(curlhandle, CURLOPT_HEADER, TRUE);
+			curl_easy_setopt(curlhandle, CURLOPT_NOBODY, 1);
+			curl_easy_setopt(curlhandle, CURLOPT_HEADER, 1);
 
 			r = curl_easy_perform(curlhandle);
 			if (r != CURLE_OK)
 				continue;
 
-			curl_easy_setopt(curlhandle, CURLOPT_NOBODY, FALSE);
-			curl_easy_setopt(curlhandle, CURLOPT_HEADER, FALSE);
+			curl_easy_setopt(curlhandle, CURLOPT_NOBODY, 0);
+			curl_easy_setopt(curlhandle, CURLOPT_HEADER, 0);
 
 			fseek(f, uploaded_len, SEEK_SET);
 
-			curl_easy_setopt(curlhandle, CURLOPT_FTPAPPEND, TRUE);
+			curl_easy_setopt(curlhandle, CURLOPT_FTPAPPEND, 1);
 		}
 		else { /* no */
-			curl_easy_setopt(curlhandle, CURLOPT_FTPAPPEND, FALSE);
+			curl_easy_setopt(curlhandle, CURLOPT_FTPAPPEND, 0);
 		}
 
 		r = curl_easy_perform(curlhandle);

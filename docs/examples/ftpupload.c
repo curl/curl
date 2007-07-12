@@ -31,14 +31,13 @@ int main(int argc, char **argv)
 {
   CURL *curl;
   CURLcode res;
-  FILE *ftpfile;
   FILE * hd_src ;
   int hd ;
   struct stat file_info;
 
   struct curl_slist *headerlist=NULL;
-  char buf_1 [] = "RNFR " UPLOAD_FILE_AS;
-  char buf_2 [] = "RNTO " RENAME_FILE_TO;
+  static const char buf_1 [] = "RNFR " UPLOAD_FILE_AS;
+  static const char buf_2 [] = "RNTO " RENAME_FILE_TO;
 
   /* get the file size of the local file */
   hd = open(LOCAL_FILE, O_RDONLY) ;
@@ -61,7 +60,7 @@ int main(int argc, char **argv)
     headerlist = curl_slist_append(headerlist, buf_2);
 
     /* enable uploading */
-    curl_easy_setopt(curl, CURLOPT_UPLOAD, TRUE) ;
+    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1) ;
 
     /* specify target */
     curl_easy_setopt(curl,CURLOPT_URL, REMOTE_URL);

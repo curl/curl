@@ -31,7 +31,7 @@ int main(void)
      * default bundle, then the CURLOPT_CAPATH option might come handy for
      * you.
      */
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
 #endif
 
 #ifdef SKIP_HOSTNAME_VERFICATION

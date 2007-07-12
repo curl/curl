@@ -15,10 +15,10 @@
 #include <string.h>
 #include <curl/curl.h>
 
-char data[]="this is what we post to the silly web server";
+const char data[]="this is what we post to the silly web server";
 
 struct WriteThis {
-  char *readptr;
+  const char *readptr;
   int sizeleft;
 };
 
@@ -55,7 +55,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL,
                      "http://receivingsite.com.pooh/index.cgi");
     /* Now specify we want to POST data */
-    curl_easy_setopt(curl, CURLOPT_POST, TRUE);
+    curl_easy_setopt(curl, CURLOPT_POST, 1);
 
     /* we want to use our own read function */
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);

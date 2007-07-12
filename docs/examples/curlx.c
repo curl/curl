@@ -81,6 +81,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <curl/curl.h>
 #include <openssl/x509v3.h>
 #include <openssl/x509_vfy.h>
@@ -94,13 +95,13 @@
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
 
-static char *curlx_usage[]={
+static const char *curlx_usage[]={
   "usage: curlx args\n",
   " -p12 arg         - tia  file ",
   " -envpass arg     - environement variable which content the tia private key password",
   " -out arg         - output file (response)- default stdout",
   " -in arg          - input file (request)- default stdin",
-  " -connect arg     - URL of the server for the connection ex: www.openevidenve.org",
+  " -connect arg     - URL of the server for the connection ex: www.openevidence.org",
   " -mimetype arg    - MIME type for data in ex : application/timestamp-query or application/dvcs -default application/timestamp-query",
   " -acceptmime arg  - MIME type acceptable for the response ex : application/timestamp-response or application/dvcs -default none",
   " -accesstype arg  - an Object identifier in an AIA/SIA method, e.g. AD_DVCS or ad_timestamping",
@@ -268,19 +269,21 @@ int main(int argc, char **argv) {
   char* mimetype;
   char* mimetypeaccept=NULL;
   char* contenttype;
-  char** pp;
+  const char** pp;
   unsigned char* hostporturl = NULL;
-  binaryptr=(char*)malloc(tabLength);
   BIO * p12bio ;
   char **args = argv + 1;
   unsigned char * serverurl;
   sslctxparm p;
   char *response;
-  p.verbose = 0;
 
   CURLcode res;
   struct curl_slist * headers=NULL;
+  int badarg=0;
 
+  binaryptr=(char*)malloc(tabLength);
+
+  p.verbose = 0;
   p.errorbio = BIO_new_fp (stderr, BIO_NOCLOSE);
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -292,7 +295,6 @@ int main(int argc, char **argv) {
   ERR_load_crypto_strings();
 
 
-  int badarg=0;
 
   while (*args && *args[0] == '-') {
     if (!strcmp (*args, "-in")) {
@@ -407,10 +409,9 @@ int main(int argc, char **argv) {
   }
   else if (p.accesstype != 0) { /* see whether we can find an AIA or SIA for a given access type */
     if (!(serverurl = my_get_ext(p.usercert,p.accesstype,NID_info_access))) {
+      int j=0;
       BIO_printf(p.errorbio,"no service URL in user cert "
                  "cherching in others certificats\n");
-      int j=0;
-      int find=0;
       for (j=0;j<sk_X509_num(p.ca);j++) {
         if ((serverurl = my_get_ext(sk_X509_value(p.ca,j),p.accesstype,
                                     NID_info_access)))

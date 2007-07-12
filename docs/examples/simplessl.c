@@ -38,9 +38,10 @@ int main(int argc, char **argv)
   CURL *curl;
   CURLcode res;
   FILE *headerfile;
+  const char *pPassphrase = NULL;
 
-  const char *pCertFile = "testcert.pem";
-  const char *pCACertFile="cacert.pem";
+  static const char *pCertFile = "testcert.pem";
+  static const char *pCACertFile="cacert.pem";
 
   const char *pKeyName;
   const char *pKeyType;
@@ -56,8 +57,6 @@ int main(int argc, char **argv)
   pKeyType  = "PEM";
   pEngine   = NULL;
 #endif
-
-  const char *pPassphrase = NULL;
 
   headerfile = fopen("dumpit", "w");
 

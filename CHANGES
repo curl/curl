@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Dan F (12 July 2007)
+- Compile most of the example apps in docs/examples when doing a 'make check'.
+  Fixed some compile warnings and errors in those examples.
+
+- Removed the example program ftp3rdparty.c since libcurl doesn't support
+  3rd party FTP transfers any longer.
+
 Daniel S (12 July 2007)
 - Shmulik Regev found an (albeit rare) case where the proxy CONNECT operation
   could in fact get stuck in an endless loop.

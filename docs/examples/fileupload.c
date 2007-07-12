@@ -17,7 +17,6 @@ int main(void)
 {
   CURL *curl;
   CURLcode res;
-  curl_off_t size;
   struct stat file_info;
   double speed_upload, total_time;
   FILE *fd;

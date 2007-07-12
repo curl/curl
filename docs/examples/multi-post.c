@@ -19,7 +19,6 @@
 int main(int argc, char *argv[])
 {
   CURL *curl;
-  CURLcode res;
 
   CURLM *multi_handle;
   int still_running;
@@ -27,7 +26,7 @@ int main(int argc, char *argv[])
   struct curl_httppost *formpost=NULL;
   struct curl_httppost *lastptr=NULL;
   struct curl_slist *headerlist=NULL;
-  char buf[] = "Expect:";
+  static const char buf[] = "Expect:";
 
   /* Fill in the file upload field. This makes libcurl load data from  
      the given file name when curl_easy_perform() is called. */
@@ -58,7 +57,6 @@ int main(int argc, char *argv[])
      wanted */
   headerlist = curl_slist_append(headerlist, buf);
   if(curl && multi_handle) {
-    int perform=0;
 
     /* what URL that receives this POST */
     curl_easy_setopt(curl, CURLOPT_URL,

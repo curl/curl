@@ -91,9 +91,9 @@ typedef struct _SockInfo {
 
 
 /* Die if we get a bad CURLMcode somewhere */
-static void mcode_or_die(char *where, CURLMcode code) {
+static void mcode_or_die(const char *where, CURLMcode code) {
   if ( CURLM_OK != code ) {
-    char *s;
+    const char *s;
     switch (code) {
       case     CURLM_CALL_MULTI_PERFORM: s="CURLM_CALL_MULTI_PERFORM"; break;
       case     CURLM_OK:                 s="CURLM_OK";                 break;
@@ -259,7 +259,7 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 {
   GlobalInfo *g = (GlobalInfo*) cbp;
   SockInfo *fdp = (SockInfo*) sockp;
-  char *whatstr[]={ "none", "IN", "OUT", "INOUT", "REMOVE" };
+  static const char *whatstr[]={ "none", "IN", "OUT", "INOUT", "REMOVE" };
 
   MSG_OUT("socket callback: s=%d e=%p what=%s ", s, e, whatstr[what]);
   if (what == CURL_POLL_REMOVE) {
@@ -402,7 +402,7 @@ static gboolean fifo_cb (GIOChannel *ch, GIOCondition condition, gpointer data)
 int init_fifo(void)
 {
  struct stat st;
- char *fifo = "hiper.fifo";
+ const char *fifo = "hiper.fifo";
  int socket;
 
  if (lstat (fifo, &st) == 0) {
