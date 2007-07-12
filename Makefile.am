@@ -49,7 +49,7 @@ html:
 pdf:
 	cd docs; make pdf
 
-check: test
+check: test examples
 
 if CROSSCOMPILING
 test-full: test
@@ -70,6 +70,9 @@ test-torture:
 	@(cd tests; $(MAKE) all torture-test)
 
 endif
+
+examples:
+	@(cd docs/examples; $(MAKE) all)
 
 #
 # Build source and binary rpms. For rpm-3.0 and above, the ~/.rpmmacros

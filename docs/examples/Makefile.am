@@ -2,17 +2,31 @@
 # $Id$
 #
 
-AUTOMAKE_OPTIONS = foreign no-dependencies
+AUTOMAKE_OPTIONS = foreign nostdinc
 
-EXTRA_DIST = README curlgtk.c sepheaders.c simple.c postit2.c		\
- persistant.c ftpget.c Makefile.example multithread.c getinmemory.c	\
- ftpupload.c httpput.c simplessl.c ftpgetresp.c http-post.c		\
- post-callback.c multi-app.c multi-double.c multi-single.c		\
- multi-post.c fopen.c simplepost.c makefile.dj curlx.c https.c		\
- multi-debugcallback.c fileupload.c getinfo.c ftp3rdparty.c debug.c	\
- anyauthput.c htmltitle.cc htmltidy.c opensslthreadlock.c		\
- cookie_interface.c cacertinmem.c synctime.c sampleconv.c ftpuploadresume.c \
- 10-at-a-time.c hiperfifo.c ghiper.c
+EXTRA_DIST = README Makefile.example makefile.dj $(COMPLICATED_EXAMPLES)
 
-all:
-	@echo "done"
+INCLUDES = -I$(top_srcdir)/include/curl \
+           -I$(top_builddir)/lib   \
+           -I$(top_srcdir)/lib
+
+LIBDIR = $(top_builddir)/lib
+
+# Dependencies
+LDADD = $(LIBDIR)/libcurl.la
+
+# These are all libcurl example programs to be test compiled
+noinst_PROGRAMS = 10-at-a-time anyauthput cookie_interface \
+  debug fileupload fopen ftpget ftpgetresp ftpupload \
+  getinfo getinmemory http-post httpput \
+  https multi-app multi-debugcallback multi-double \
+  multi-post multi-single persistant post-callback \
+  postit2 sepheaders simple simplepost simplessl
+
+# These examples require external dependencies that may not be commonly
+# available on POSIX systems, so don't bother attempting to compile them here.
+COMPLICATED_EXAMPLES = \
+ curlgtk.c curlx.c htmltitle.cc cacertinmem.c ftpuploadresume.c \
+ ghiper.c hiperfifo.c htmltidy.c multithread.c \
+ opensslthreadlock.c sampleconv.c synctime.c
+
