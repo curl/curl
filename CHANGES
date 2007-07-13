@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel S (13 July 2007)
+- Daniel Cater fixes:
+  1 - made 'make vc8' work on windows.
+  2 - made libcurl itself built with CURL_NO_OLDIES defined (which doesn't
+      define the symbols for backwards source compatibility)
+
 Daniel S (12 July 2007)
 - Made the krb5 code build with Heimdal's GSSAPI lib.
 

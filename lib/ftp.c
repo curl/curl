@@ -2157,7 +2157,7 @@ static CURLcode ftp_state_stor_resp(struct connectdata *conn,
   if(ftpcode>=400) {
     failf(data, "Failed FTP upload: %0d", ftpcode);
     /* oops, we never close the sockets! */
-    return CURLE_FTP_COULDNT_STOR_FILE;
+    return CURLE_UPLOAD_FAILED;
   }
 
   if(data->set.ftp_use_port) {
@@ -3055,7 +3055,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status, bool premature
   case CURLE_FTP_PORT_FAILED:
   case CURLE_FTP_COULDNT_SET_BINARY:
   case CURLE_FTP_COULDNT_RETR_FILE:
-  case CURLE_FTP_COULDNT_STOR_FILE:
+  case CURLE_UPLOAD_FAILED:
   case CURLE_FTP_ACCESS_DENIED:
   case CURLE_FILESIZE_EXCEEDED:
     /* the connection stays alive fine even though this happened */
