@@ -6,9 +6,7 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 
 EXTRA_DIST = README Makefile.example makefile.dj $(COMPLICATED_EXAMPLES)
 
-INCLUDES = -I$(top_srcdir)/include \
-           -I$(top_builddir)/lib   \
-           -I$(top_srcdir)/lib
+INCLUDES = -I$(top_srcdir)/include
 
 LIBDIR = $(top_builddir)/lib
 
