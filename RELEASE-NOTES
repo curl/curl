@@ -21,6 +21,7 @@ This release includes the following bugfixes:
  o CURLOPT_SSL_VERIFYHOST set to 1
  o CONNECT endless loop
  o krb5 support builds with Heimdal
+ o added returned error string for connection refused case
 
 This release includes the following known bugs:
 
@@ -38,6 +39,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Dan Fandrich, Song Ma, Daniel Black, Giancarlo Formicuccia, Shmulik Regev,
- Daniel Cater
+ Daniel Cater, Colin Hogben
  
         Thanks! (and sorry if I forgot to mention someone)

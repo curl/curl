@@ -7,10 +7,17 @@
                                   Changelog
 
 Daniel S (13 July 2007)
+- Colin Hogben filed bug report #1750274
+  (http://curl.haxx.se/bug/view.cgi?id=1750274) and submitted a patch for the
+  case where libcurl did a connect attempt to a non-listening port and didn't
+  provide a human readable error string back.
+
 - Daniel Cater fixes:
   1 - made 'make vc8' work on windows.
   2 - made libcurl itself built with CURL_NO_OLDIES defined (which doesn't
       define the symbols for backwards source compatibility)
+  3 - updated libcurl-errors.3
+  4 - added CURL_DISABLE_TFTP to docs/INSTALL
 
 Daniel S (12 July 2007)
 - Made the krb5 code build with Heimdal's GSSAPI lib.
