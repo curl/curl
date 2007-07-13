@@ -99,7 +99,8 @@ When sending custom "QUOTE" commands to the remote server, one of the commands
 returned an error code that was 400 or higher.
 .IP "CURLE_HTTP_RETURNED_ERROR (22)"
 This is returned if CURLOPT_FAILONERROR is set TRUE and the HTTP server
-returns an error code that is >= 400.
+returns an error code that is >= 400. (This error code was formerly known as
+CURLE_HTTP_NOT_FOUND.)
 .IP "CURLE_WRITE_ERROR (23)"
 An error occurred when writing received data to a local file, or an error was
 returned to libcurl from a write callback.
@@ -157,10 +158,11 @@ Aborted by callback. A callback returned "abort" to libcurl.
 Internal error. A function was called with a bad parameter.
 .IP "CURLE_BAD_CALLING_ORDER (44)"
 This is never returned by current libcurl.
-.IP "CURLE_HTTP_PORT_FAILED (45)"
+.IP "CURLE_INTERFACE_FAILED (45)"
 Interface error. A specified outgoing interface could not be used. Set which
 interface to use for outgoing connections' source IP address with
-CURLOPT_INTERFACE.
+CURLOPT_INTERFACE. (This error code was formerly known as
+CURLE_HTTP_PORT_FAILED.)
 .IP "CURLE_BAD_PASSWORD_ENTERED (46)"
 This is never returned by current libcurl.
 .IP "CURLE_TOO_MANY_REDIRECTS (47)"
