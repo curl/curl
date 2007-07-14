@@ -529,12 +529,12 @@ sub verifyhttp {
     }
     elsif($res == 6) {
         # curl: (6) Couldn't resolve host '::1'
-        logmsg "RUN: failed to resolve host\n";
-        return 0;
+        logmsg "RUN: failed to resolve host ($proto://$ip:$port/verifiedserver)\n";
+        return -1;
     }
     elsif($data || ($res != 7)) {
         logmsg "RUN: Unknown server is running on port $port\n";
-        return 0;
+        return -1;
     }
     return $pid;
 }
@@ -631,8 +631,12 @@ sub verifyserver {
 
         $pid = &$fun($proto, $ip, $port);
 
-        if($pid) {
+        if($pid > 0) {
             last;
+        }
+        elsif($pid < 0) {
+            # a real failure, stop trying and bail out
+            return 0;
         }
         sleep(1);
     }
