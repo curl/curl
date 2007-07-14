@@ -2,7 +2,36 @@
 
 * July 14 2007 (Daniel Stenberg)
 
-- Vlad Dinulescu fixed two outstanding valgrind reports.
+- Vlad Dinulescu fixed two outstanding valgrind reports:
+
+ 
+  1. In ares_query.c , in find_query_by_id we compare q->qid (which is a short
+  int variable) with qid, which is declared as an int variable.  Moreover,
+  DNS_HEADER_SET_QID is used to set the value of qid, but DNS_HEADER_SET_QID
+  sets only the first two bytes of qid. I think that qid should be declared as
+  "unsigned short" in this function.
+
+  2. The same problem occurs in ares_process.c, process_answer() .  query->qid
+  (an unsigned short integer variable) is compared with id, which is an
+  integer variable. Moreover, id is initialized from DNS_HEADER_QID which sets
+  only the first two bytes of id. I think that the id variable should be
+  declared as "unsigned short" in this function.
+
+  Even after declaring these variables as "unsigned short", the valgrind
+  errors are still there. Which brings us to the third problem.
+
+  3. The third problem is that Valgrind assumes that query->qid is not
+  initialised correctly. And it does that because query->qid is set from
+  DNS_HEADER_QID(qbuf); Valgrind says that qbuf has unitialised bytes. And
+  qbuf has uninitialised bytes because of channel->next_id . And next_id is
+  set by ares_init.c:ares__generate_new_id() . I found that putting short r=0
+  in this function (instead of short r) makes all Valgrind warnings go away.
+  I have studied ares__rc4() too, and this is the offending line:
+
+        buffer_ptr[counter] ^= state[xorIndex];   (ares_query.c:62)
+
+  This is what triggers Valgrind.. buffer_ptr is unitialised in this function,
+  and by applying ^= on it, it remains unitialised.
 
 Version 1.4.0 (June 8, 2007)
 
