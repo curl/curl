@@ -1,0 +1,87 @@
+<testcase>
+# Server-side
+<reply>
+
+# this is returned first since we get no proxy-auth
+<data>
+HTTP/1.1 407 Authorization Required to proxy me my dear
+Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
+
+And you should ignore this data.
+</data>
+
+# then this is returned when we get proxy-auth
+<data1000>
+HTTP/1.1 200 OK
+Content-Length: 21
+Server: no
+
+Nice proxy auth sir!
+</data1000>
+
+<datacheck>
+HTTP/1.1 407 Authorization Required to proxy me my dear
+Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
+
+HTTP/1.1 200 OK
+Content-Length: 21
+Server: no
+
+Nice proxy auth sir!
+HTTP/1.1 200 OK
+Content-Length: 21
+Server: no
+
+Nice proxy auth sir!
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib540
+</tool>
+<features>
+crypto
+</features>
+ <name>
+HTTP proxy auth Digest multi API re-using connection
+ </name>
+ <command>
+http://test.remote.server.com/path/540 http://%HOSTIP:%HTTPPORT silly:person
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent: curl/.*
+</strip>
+<protocol>
+GET http://test.remote.server.com/path/540 HTTP/1.1
+Host: test.remote.server.com
+Pragma: no-cache
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+GET http://test.remote.server.com/path/540 HTTP/1.1
+Proxy-Authorization: Digest username="silly", realm="weirdorealm", nonce="12345", uri="/path/540", response="ca507dcf189196b6a5374d3233042261"
+Host: test.remote.server.com
+Pragma: no-cache
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+GET http://test.remote.server.com/path/540 HTTP/1.1
+Proxy-Authorization: Digest username="silly", realm="weirdorealm", nonce="12345", uri="/path/540", response="ca507dcf189196b6a5374d3233042261"
+Host: test.remote.server.com
+Pragma: no-cache
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+</protocol>
+</verify>
+</testcase>
