@@ -1341,7 +1341,7 @@ static void init_id_key(rc4_key* key,int key_data_len)
 
 short ares__generate_new_id(rc4_key* key)
 {
-  short r;
+  short r=0;
   ares__rc4(key, (unsigned char *)&r, sizeof(r));
   return r;
 }

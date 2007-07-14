@@ -67,7 +67,7 @@ void ares__rc4(rc4_key* key, unsigned char *buffer_ptr, int buffer_len)
 
 static struct query* find_query_by_id(ares_channel channel, int id)
 {
-  int qid;
+  unsigned short qid;
   struct query* q;
   DNS_HEADER_SET_QID(((unsigned char*)&qid), id);
 
