@@ -3361,10 +3361,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->curl_connect = Curl_ssh_connect; /* ssh_connect? */
     conn->curl_do = Curl_scp_do;
     conn->curl_done = Curl_scp_done;
-#if (LIBSSH2_APINO >= 200706012030)
+#if defined(LIBSSH2_APINO) && (LIBSSH2_APINO >= 200706012030L)
     conn->curl_connecting = Curl_ssh_multi_statemach;
     conn->curl_doing = Curl_scp_doing;
-#endif /* (LIBSSH2_APINO >= 200706012030) */
+#endif /* LIBSSH2_APINO && (LIBSSH2_APINO >= 200706012030L) */
     conn->curl_do_more = (Curl_do_more_func)ZERO_NULL;
 #else
     failf(data, LIBCURL_NAME
@@ -3380,10 +3380,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->curl_connect = Curl_ssh_connect; /* ssh_connect? */
     conn->curl_do = Curl_sftp_do;
     conn->curl_done = Curl_sftp_done;
-#if (LIBSSH2_APINO >= 200706012030)
+#if defined(LIBSSH2_APINO) && (LIBSSH2_APINO >= 200706012030L)
     conn->curl_connecting = Curl_ssh_multi_statemach;
     conn->curl_doing = Curl_sftp_doing;
-#endif /* (LIBSSH2_APINO >= 200706012030) */
+#endif /* LIBSSH2_APINO && (LIBSSH2_APINO >= 200706012030L) */
     conn->curl_do_more = (Curl_do_more_func)ZERO_NULL;
 #else
     failf(data, LIBCURL_NAME

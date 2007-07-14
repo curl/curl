@@ -163,11 +163,11 @@
 
 /* Local functions: */
 static const char *sftp_libssh2_strerror(unsigned long err);
-#if (LIBSSH2_APINO < 200706012030)
+#if (LIBSSH2_APINO < 200706012030L)
 static CURLcode sftp_sendquote(struct connectdata *conn,
                                struct curl_slist *quote);
 static CURLcode sftp_create_dirs(struct connectdata *conn);
-#endif /* !(LIBSSH2_APINO < 200706012030) */
+#endif /* !(LIBSSH2_APINO < 200706012030L) */
 
 static LIBSSH2_ALLOC_FUNC(libssh2_malloc);
 static LIBSSH2_REALLOC_FUNC(libssh2_realloc);
@@ -243,7 +243,7 @@ static LIBSSH2_FREE_FUNC(libssh2_free)
   (void)abstract;
 }
 
-#if (LIBSSH2_APINO >= 200706012030)
+#if (LIBSSH2_APINO >= 200706012030L)
 /*
  * SSH State machine related code
  */
@@ -1231,19 +1231,19 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
       break;
 
     case SSH_SFTP_READDIR:
-#if (LIBSSH2_APINO >= 200706151200)
+#if (LIBSSH2_APINO >= 200706151200L)
       sshc->readdir_len = libssh2_sftp_readdir_ex(sftp_scp->sftp_handle,
                                                   sshc->readdir_filename,
                                                   PATH_MAX,
                                                   sshc->readdir_longentry,
                                                   PATH_MAX,
                                                   &sshc->readdir_attrs);
-#else /* !(LIBSSH2_APINO >= 200706151200) */
+#else /* !(LIBSSH2_APINO >= 200706151200L) */
       sshc->readdir_len = libssh2_sftp_readdir(sftp_scp->sftp_handle,
                                                sshc->readdir_filename,
                                                PATH_MAX,
                                                &sshc->readdir_attrs);
-#endif /* !(LIBSSH2_APINO >= 200706151200) */
+#endif /* !(LIBSSH2_APINO >= 200706151200L) */
       if (sshc->readdir_len == LIBSSH2_ERROR_EAGAIN) {
         break;
       }
@@ -1268,7 +1268,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
                        sshc->readdir_len, conn);
           }
         } else {
-#if (LIBSSH2_APINO >= 200706151200)
+#if (LIBSSH2_APINO >= 200706151200L)
           sshc->readdir_currLen = strlen(sshc->readdir_longentry);
           sshc->readdir_totalLen = 80 + sshc->readdir_currLen;
           sshc->readdir_line = (char *)calloc(sshc->readdir_totalLen, 1);
@@ -1284,7 +1284,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
 
           memcpy(sshc->readdir_line, sshc->readdir_longentry,
                  sshc->readdir_currLen);
-#else /* !(LIBSSH2_APINO >= 200706151200) */
+#else /* !(LIBSSH2_APINO >= 200706151200L) */
           sshc->readdir_totalLen = 80 + sshc->readdir_len;
           sshc->readdir_line = (char *)malloc(sshc->readdir_totalLen);
           if (!sshc->readdir_line) {
@@ -1401,7 +1401,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
                                             sshc->readdir_totalLen -
                                             sshc->readdir_currLen, " %s",
                                             sshc->readdir_filename);
-#endif /* !(LIBSSH2_APINO >= 200706151200) */
+#endif /* !(LIBSSH2_APINO >= 200706151200L) */
           if ((sshc->readdir_attrs.flags & LIBSSH2_SFTP_ATTR_PERMISSIONS) &&
               ((sshc->readdir_attrs.permissions & LIBSSH2_SFTP_S_IFMT) ==
                LIBSSH2_SFTP_S_IFLNK)) {
@@ -1858,7 +1858,7 @@ static CURLcode ssh_easy_statemach(struct connectdata *conn)
 
   return result;
 }
-#endif /* (LIBSSH2_APINO >= 200706012030) */
+#endif /* (LIBSSH2_APINO >= 200706012030L) */
 
 /*
  * SSH setup and connection
@@ -1942,7 +1942,7 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
   infof(data, "SSH socket: %d\n", sock);
 #endif /* CURL_LIBSSH2_DEBUG */
 
-#if (LIBSSH2_APINO >= 200706012030)
+#if (LIBSSH2_APINO >= 200706012030L)
   state(conn, SSH_S_STARTUP);
 
   if (data->state.used_interface == Curl_if_multi)
@@ -1963,7 +1963,7 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
   (void)fingerprint; /* not used */
   (void)i; /* not used */
 
-#else /* !(LIBSSH2_APINO >= 200706012030) */
+#else /* !(LIBSSH2_APINO >= 200706012030L) */
 
   if (libssh2_session_startup(ssh->ssh_session, sock)) {
     failf(data, "Failure establishing ssh session");
@@ -2200,10 +2200,10 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
 
   *done = TRUE;
   return CURLE_OK;
-#endif /* !(LIBSSH2_APINO >= 200706012030) */
+#endif /* !(LIBSSH2_APINO >= 200706012030L) */
 }
 
-#if (LIBSSH2_APINO >= 200706012030)
+#if (LIBSSH2_APINO >= 200706012030L)
 
 /*
  ***********************************************************************
@@ -2257,11 +2257,11 @@ CURLcode Curl_scp_doing(struct connectdata *conn,
   return result;
 }
 
-#endif /* !(LIBSSH2_APINO >= 200706012030) */
+#endif /* !(LIBSSH2_APINO >= 200706012030L) */
 
 CURLcode Curl_scp_do(struct connectdata *conn, bool *done)
 {
-#if (LIBSSH2_APINO >= 200706012030)
+#if (LIBSSH2_APINO >= 200706012030L)
   CURLcode res;
   bool connected = 0;
   struct SessionHandle *data = conn->data;
@@ -2299,7 +2299,7 @@ CURLcode Curl_scp_do(struct connectdata *conn, bool *done)
 
   return res;
 
-#else /* !(LIBSSH2_APINO >= 200706012030) */
+#else /* !(LIBSSH2_APINO >= 200706012030L) */
 
   struct stat sb;
   struct SSHPROTO *scp = conn->data->reqdata.proto.ssh;
@@ -2351,13 +2351,13 @@ CURLcode Curl_scp_do(struct connectdata *conn, bool *done)
   }
 
   return res;
-#endif /* !(LIBSSH2_APINO >= 200706012030) */
+#endif /* !(LIBSSH2_APINO >= 200706012030L) */
 }
 
 CURLcode Curl_scp_done(struct connectdata *conn, CURLcode status,
                        bool premature)
 {
-#if (LIBSSH2_APINO >= 200706012030)
+#if (LIBSSH2_APINO >= 200706012030L)
   CURLcode result = CURLE_OK;
   bool done = FALSE;
 
@@ -2382,7 +2382,7 @@ CURLcode Curl_scp_done(struct connectdata *conn, CURLcode status,
   }
 
   return result;
-#else /* !(LIBSSH2_APINO >= 200706012030) */
+#else /* !(LIBSSH2_APINO >= 200706012030L) */
 
   struct SSHPROTO *scp = conn->data->reqdata.proto.ssh;
 
@@ -2411,7 +2411,7 @@ CURLcode Curl_scp_done(struct connectdata *conn, CURLcode status,
   Curl_pgrsDone(conn);
 
   return CURLE_OK;
-#endif /* !(LIBSSH2_APINO >= 200706012030) */
+#endif /* !(LIBSSH2_APINO >= 200706012030L) */
   (void)premature; /* not used */
   (void)status; /* unused */
 
@@ -2428,7 +2428,7 @@ ssize_t Curl_scp_send(struct connectdata *conn, int sockindex,
    * NOTE: we should not store nor rely on connection-related data to be
    * in the SessionHandle struct
    */
-#if defined(LIBSSH2CHANNEL_EAGAIN) && (LIBSSH2_APINO < 200706012030)
+#if defined(LIBSSH2CHANNEL_EAGAIN) && (LIBSSH2_APINO < 200706012030L)
   nwrite = (ssize_t)
     libssh2_channel_writenb(conn->data->reqdata.proto.ssh->ssh_channel,
                             mem, len);
@@ -2436,7 +2436,7 @@ ssize_t Curl_scp_send(struct connectdata *conn, int sockindex,
   nwrite = (ssize_t)
     libssh2_channel_write(conn->data->reqdata.proto.ssh->ssh_channel,
                           mem, len);
-#if (LIBSSH2_APINO >= 200706012030)
+#if (LIBSSH2_APINO >= 200706012030L)
   if (nwrite == LIBSSH2_ERROR_EAGAIN) {
     return 0;
   }
@@ -2462,7 +2462,7 @@ ssize_t Curl_scp_recv(struct connectdata *conn, int sockindex,
    * in the SessionHandle struct
    */
 
-#if defined(LIBSSH2CHANNEL_EAGAIN) && (LIBSSH2_APINO < 200706012030)
+#if defined(LIBSSH2CHANNEL_EAGAIN) && (LIBSSH2_APINO < 200706012030L)
   /* we prefer the non-blocking API but that didn't exist previously */
   nread = (ssize_t)
     libssh2_channel_readnb(conn->data->reqdata.proto.ssh->ssh_channel,
@@ -2479,7 +2479,7 @@ ssize_t Curl_scp_recv(struct connectdata *conn, int sockindex,
  * =============== SFTP ===============
  */
 
-#if (LIBSSH2_APINO >= 200706012030)
+#if (LIBSSH2_APINO >= 200706012030L)
 
 /*
  ***********************************************************************
@@ -2533,11 +2533,11 @@ CURLcode Curl_sftp_doing(struct connectdata *conn,
   return result;
 }
 
-#endif /* !(LIBSSH2_APINO >= 200706012030) */
+#endif /* !(LIBSSH2_APINO >= 200706012030L) */
 
 CURLcode Curl_sftp_do(struct connectdata *conn, bool *done)
 {
-#if (LIBSSH2_APINO >= 200706012030)
+#if (LIBSSH2_APINO >= 200706012030L)
   CURLcode res;
   bool connected = 0;
   struct SessionHandle *data = conn->data;
@@ -2575,7 +2575,7 @@ CURLcode Curl_sftp_do(struct connectdata *conn, bool *done)
 
   return res;
 
-#else /* !(LIBSSH2_APINO >= 200706012030) */
+#else /* !(LIBSSH2_APINO >= 200706012030L) */
 
   LIBSSH2_SFTP_ATTRIBUTES attrs;
   struct SSHPROTO *sftp = conn->data->reqdata.proto.ssh;
@@ -2866,7 +2866,7 @@ CURLcode Curl_sftp_do(struct connectdata *conn, bool *done)
   }
 
   return res;
-#endif /* !(LIBSSH2_APINO >= 200706012030) */
+#endif /* !(LIBSSH2_APINO >= 200706012030L) */
 }
 
 CURLcode Curl_sftp_done(struct connectdata *conn, CURLcode status,
@@ -2874,7 +2874,7 @@ CURLcode Curl_sftp_done(struct connectdata *conn, CURLcode status,
 {
   CURLcode result = CURLE_OK;
 
-#if (LIBSSH2_APINO >= 200706012030)
+#if (LIBSSH2_APINO >= 200706012030L)
   bool done = FALSE;
   struct ssh_conn *sshc = &conn->proto.sshc;
 
@@ -2905,7 +2905,7 @@ CURLcode Curl_sftp_done(struct connectdata *conn, CURLcode status,
     Curl_pgrsDone(conn);
   }
 
-#else /* !(LIBSSH2_APINO >= 200706012030) */
+#else /* !(LIBSSH2_APINO >= 200706012030L) */
 
   struct SSHPROTO *sftp = conn->data->reqdata.proto.ssh;
 
@@ -2948,7 +2948,7 @@ CURLcode Curl_sftp_done(struct connectdata *conn, CURLcode status,
   Curl_safefree(conn->data->reqdata.proto.ssh);
   conn->data->reqdata.proto.ssh = NULL;
   Curl_pgrsDone(conn);
-#endif /* !(LIBSSH2_APINO >= 200706012030) */
+#endif /* !(LIBSSH2_APINO >= 200706012030L) */
 
   (void)status; /* unused */
 
@@ -2962,14 +2962,14 @@ ssize_t Curl_sftp_send(struct connectdata *conn, int sockindex,
   ssize_t nwrite;   /* libssh2_sftp_write() used to return size_t in 0.14
                        but is changed to ssize_t in 0.15! */
 
-#if defined(LIBSSH2SFTP_EAGAIN) && (LIBSSH2_APINO < 200706012030)
+#if defined(LIBSSH2SFTP_EAGAIN) && (LIBSSH2_APINO < 200706012030L)
   /* we prefer the non-blocking API but that didn't exist previously */
   nwrite = (ssize_t)
     libssh2_sftp_writenb(conn->data->reqdata.proto.ssh->sftp_handle, mem, len);
 #else
   nwrite = (ssize_t)
     libssh2_sftp_write(conn->data->reqdata.proto.ssh->sftp_handle, mem, len);
-#if (LIBSSH2_APINO >= 200706012030)
+#if (LIBSSH2_APINO >= 200706012030L)
   if (nwrite == LIBSSH2_ERROR_EAGAIN) {
     return 0;
   }
@@ -2991,7 +2991,7 @@ ssize_t Curl_sftp_recv(struct connectdata *conn, int sockindex,
 
   /* libssh2_sftp_read() returns size_t !*/
 
-#if defined(LIBSSH2SFTP_EAGAIN) && (LIBSSH2_APINO < 200706012030)
+#if defined(LIBSSH2SFTP_EAGAIN) && (LIBSSH2_APINO < 200706012030L)
   /* we prefer the non-blocking API but that didn't exist previously */
   nread = (ssize_t)
     libssh2_sftp_readnb(conn->data->reqdata.proto.ssh->sftp_handle, mem, len);
@@ -3156,7 +3156,7 @@ static const char *sftp_libssh2_strerror(unsigned long err)
   return "Unknown error in libssh2";
 }
 
-#if (LIBSSH2_APINO < 200706012030)
+#if (LIBSSH2_APINO < 200706012030L)
 /* BLOCKING */
 static CURLcode sftp_sendquote(struct connectdata *conn,
                                struct curl_slist *quote)
@@ -3365,7 +3365,7 @@ static CURLcode sftp_sendquote(struct connectdata *conn,
  * returns CURL_OK on success, -1 on failure
  *
  * NOTE: This version of sftp_create_dirs() is only used when
- *       LIBSSH2_APINO < 200706012030.  After that version the code is in
+ *       LIBSSH2_APINO < 200706012030L.  After that version the code is in
  *       ssh_statemachine_act()
  */
 static CURLcode sftp_create_dirs(struct connectdata *conn) {
@@ -3403,6 +3403,6 @@ static CURLcode sftp_create_dirs(struct connectdata *conn) {
   }
   return result;
 }
-#endif /* !(LIBSSH2_APINO < 200706012030) */
+#endif /* !(LIBSSH2_APINO < 200706012030L) */
 
 #endif /* USE_LIBSSH2 */
