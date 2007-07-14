@@ -33,12 +33,13 @@ allocated by one of the functions \fIares_parse_a_reply(3)\fP,
 .SH NOTES
 It is not necessary (and is not correct) to free the host structure passed to
 the callback functions for \fIares_gethostbyname(3)\fP or
-\fIares_gethostbyaddr(3)\fP. The ares library will automatically free such
-host structures when the callback returns.
+\fIares_gethostbyaddr(3)\fP. c-ares will automatically free such host
+structures when the callback returns.
 .SH SEE ALSO
 .BR ares_parse_a_reply (3),
 .BR ares_parse_aaaa_reply (3),
-.BR ares_parse_ptr_reply (3)
+.BR ares_parse_ptr_reply (3),
+.BR ares_parse_ns_reply (3)
 .SH AUTHOR
 Greg Hudson, MIT Information Systems
 .br
