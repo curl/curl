@@ -52,7 +52,7 @@ crypto
 HTTP proxy auth Digest multi API re-using connection
  </name>
  <command>
-http://test.remote.server.com/path/540 http://%HOSTIP:%HTTPPORT silly:person
+http://test.remote.server.com/path/540 http://%HOSTIP:%HTTPPORT silly:person custom.set.host.name
 </command>
 </client>
 
@@ -63,24 +63,24 @@ http://test.remote.server.com/path/540 http://%HOSTIP:%HTTPPORT silly:person
 </strip>
 <protocol>
 GET http://test.remote.server.com/path/540 HTTP/1.1
-Host: test.remote.server.com
 Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive
+Host: custom.set.host.name
 
 GET http://test.remote.server.com/path/540 HTTP/1.1
 Proxy-Authorization: Digest username="silly", realm="weirdorealm", nonce="12345", uri="/path/540", response="ca507dcf189196b6a5374d3233042261"
-Host: test.remote.server.com
 Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive
+Host: custom.set.host.name
 
 GET http://test.remote.server.com/path/540 HTTP/1.1
 Proxy-Authorization: Digest username="silly", realm="weirdorealm", nonce="12345", uri="/path/540", response="ca507dcf189196b6a5374d3233042261"
-Host: test.remote.server.com
 Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive
+Host: custom.set.host.name
 
 </protocol>
 </verify>

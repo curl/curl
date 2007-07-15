@@ -13,14 +13,17 @@
  * argv1 = URL
  * argv2 = proxy
  * argv3 = proxyuser:password
+ * argv4 = host name to use for the custom Host: header
  */
 
 #include "test.h"
 
 #define PROXY arg2
 #define PROXYUSERPWD arg3
+#define HOST test_argv[4]
 
-static void init(CURLM *cm, const char* url, const char* userpwd)
+static void init(CURLM *cm, const char* url, const char* userpwd,
+                struct curl_slist *headers)
 {
   CURL *eh = curl_easy_init();
 
@@ -30,11 +33,13 @@ static void init(CURLM *cm, const char* url, const char* userpwd)
   curl_easy_setopt(eh, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
   curl_easy_setopt(eh, CURLOPT_VERBOSE, 1);
   curl_easy_setopt(eh, CURLOPT_HEADER, 1);
+  curl_easy_setopt(eh, CURLOPT_HTTPHEADER, headers); /* custom Host: */
 
   curl_multi_add_handle(cm, eh);
 }
 
-static int loop(CURLM *cm, const char* url, const char* userpwd)
+static int loop(CURLM *cm, const char* url, const char* userpwd,
+                struct curl_slist *headers)
 {
   CURLMsg *msg;
   long L;
@@ -42,7 +47,7 @@ static int loop(CURLM *cm, const char* url, const char* userpwd)
   fd_set R, W, E;
   struct timeval T;
 
-  init(cm, url, userpwd);
+  init(cm, url, userpwd, headers);
 
   while (U) {
     while (CURLM_CALL_MULTI_PERFORM == curl_multi_perform(cm, &U));
@@ -102,18 +107,30 @@ static int loop(CURLM *cm, const char* url, const char* userpwd)
 int test(char *URL)
 {
   CURLM *cm;
+  struct curl_slist *headers = NULL;
+  char buffer[246]; /* naively fixed-size */
+
+  if(test_argc < 4)
+    return 99;
+
+  sprintf(buffer, "Host: %s", HOST);
+
+  /* now add a custom Host: header */
+  headers = curl_slist_append(headers, buffer);
 
   curl_global_init(CURL_GLOBAL_ALL);
 
   cm = curl_multi_init();
-  loop(cm, URL, PROXYUSERPWD);
+  loop(cm, URL, PROXYUSERPWD, headers);
 
   fprintf(stderr, "lib540: now we do the request again\n");
-  loop(cm, URL, PROXYUSERPWD);
+  loop(cm, URL, PROXYUSERPWD, headers);
 
   curl_multi_cleanup(cm);
 
   curl_global_cleanup();
+
+  curl_slist_free_all(headers);
 
   return EXIT_SUCCESS;
 }
