@@ -1,4 +1,5 @@
 #############################################################
+# $Id: Makefile.vc6,v 1.19 2004/11/14 13:48:15 giva Exp $
 #
 # Makefile for building libcurl with MSVC6
 #
@@ -34,11 +35,11 @@ IMPLIB_NAME       = libcurl_imp
 IMPLIB_NAME_DEBUG = libcurld_imp
 
 !IFNDEF OPENSSL_PATH
-OPENSSL_PATH   = ../../openssl-0.9.7e
+OPENSSL_PATH   = ../../openssl-0.9.8e
 !ENDIF
 
 !IFNDEF ZLIB_PATH
-ZLIB_PATH  = ../../zlib-1.2.1
+ZLIB_PATH  = ../../zlib-1.2.3
 !ENDIF
 
 !IFNDEF MACHINE
@@ -47,8 +48,10 @@ MACHINE  = X86
 
 # USE_WINDOWS_SSPI uses windows libraries to allow NTLM authentication
 # without an openssl installation and offers the ability to authenticate
-# using the "current logged in user".  It does however require that the
-# Windows SDK be installed.
+# using the "current logged in user". Since at least with MSVC6 the sspi.h
+# header is broken it is either required to install the Windows SDK,
+# or to fix sspi.h with adding this define at the beginning of sspi.h:
+# #define FreeCredentialHandle FreeCredentialsHandle
 #
 # If, for some reason the Windows SDK is installed but not installed
 # in the default location, you can specify WINDOWS_SDK_PATH.
