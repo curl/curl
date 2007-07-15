@@ -39,6 +39,10 @@
 extern char *arg2; /* set by first.c to the argv[2] or NULL */
 extern char *arg3; /* set by first.c to the argv[3] or NULL */
 
+/* argc and argv as passed in to the main() function */
+extern int test_argc;
+extern char **test_argv;
+
 int select_test (int num_fds, fd_set *rd, fd_set *wr, fd_set *exc,
                  struct timeval *tv);
 
