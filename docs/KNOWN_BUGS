@@ -3,6 +3,13 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+45. libcurl built to support ipv6 uses getaddrinfo() to resolve host names.
+  getaddrinfo() sorts the response list which effectively kills how libcurl
+  deals with round-robin DNS entries. All details:
+    http://curl.haxx.se/mail/lib-2007-07/0168.html
+  initial suggested function to use for randomizing the response:
+    http://curl.haxx.se/mail/lib-2007-07/0178.html
+
 44. --ftp-method nocwd does not handle URLs ending with a slash properly (it
   should list the contents of that directory). See test case 351.
 
