@@ -22,7 +22,7 @@ struct WriteThis {
   int sizeleft;
 };
 
-size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp)
+static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct WriteThis *pooh = (struct WriteThis *)userp;
 

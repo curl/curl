@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include <curl/curl.h>
 
@@ -24,7 +25,7 @@
  * http://www.apacheweek.com/features/put
  */
 
-size_t read_callback(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   size_t retcode;
 

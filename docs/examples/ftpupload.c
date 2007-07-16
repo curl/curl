@@ -14,6 +14,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 /*
  * This example shows an FTP upload, with a rename of the file just after

@@ -21,7 +21,7 @@
  * This functionality was introduced in libcurl 7.9.3.
  */
 
-size_t
+static size_t
 write_response(void *ptr, size_t size, size_t nmemb, void *data)
 {
   FILE *writehere = (FILE *)data;

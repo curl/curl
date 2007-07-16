@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <errno.h>
 #include <time.h>
 
@@ -74,7 +75,7 @@ main(void)
 #define snprintf _snprintf
 #endif
     /* Netscape format cookie */
-    snprintf(nline, sizeof(nline), "%s\t%s\t%s\t%s\t%u\t%s\t%s",
+    snprintf(nline, sizeof(nline), "%s\t%s\t%s\t%s\t%lu\t%s\t%s",
       ".google.com", "TRUE", "/", "FALSE", time(NULL) + 31337, "PREF", "hello google, i like you very much!");
     res = curl_easy_setopt(curl, CURLOPT_COOKIELIST, nline);
     if (res != CURLE_OK) {

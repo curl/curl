@@ -57,7 +57,7 @@ static curlioerr my_ioctl(CURL *handle, curliocmd cmd, void *userp)
 }
 
 /* read callback function, fread() look alike */
-size_t read_callback(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   size_t retcode;
 
