@@ -55,15 +55,25 @@ elsif ($ARGV[0] eq "postprocess")
 	rmdir $dirname || die "$!";
 
 	if ($logfile) {
-		# Process the directory file to remove all information that could
-		# be inconsistent from one test run to the next (e.g. file date)
-		# or may be unsupported on some platforms (e.g. Windows)
+		# Process the directory file to remove all information that
+		# could be inconsistent from one test run to the next (e.g.
+		# file date) or may be unsupported on some platforms (e.g.
+		# Windows). Also, since >7.16.4, the sftp directory listing
+		# format can be dependent on the server (with a recent
+		# enough version of libssh2) so this script must also
+		# canonicalize the format.  These are the two formats
+		# currently supported:
+		# -r--r--r--    1 ausername grp            47 Dec 31  2000 rofile.txt
+		# -r--r--r--   1  1234  4321         47 Dec 31  2000 rofile.txt
+		# The "canonical" format is similar to the second (which is
+		# the one generated with an older libssh2):
+		# -r-?r-?r-?   1     U     U         47 Dec 31  2000 rofile.txt
 
 		my $newfile = $logfile . ".new";
 		open(IN, "<$logfile") || die "$!";
 		open(OUT, ">$newfile") || die "$!";
 		while (<IN>) {
-			s/^(.)(..).(..).(..).(.{4}?).{6}?.{6}?(.{12}?)/\1\2?\3?\4?\5     U     U\6/;
+			s/^(.)(..).(..).(..).\s*(\d+)\s+\S+ \S?.{5}?(\s+\d)+(.{12}?)/\1\2?\3?\4?   \5     U     U\6\7/;
 			if ($1 eq "d") {
 				# Erase inodes, size, mode, time fields for directories
 				s/^.{14}?(.{12}?).{11}? ... .\d .\d:\d\d/d?????????   N\1          N ???  N NN:NN/;

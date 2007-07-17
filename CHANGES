@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Dan F (17 July 2007)
+- Fixed test cases 613 and 614 by improving the log postprocessor to handle
+  a new directory listing format that newer libssh2's can provide.  This
+  is probably NOT sufficient to handle all directory listing formats that
+  server's can provide, and should be revisited.
+
 Daniel S (17 July 2007)
 - Jofell Gallardo posted a libcurl log using FTP that exposed a bug which made
   a control connection that was deemed "dead" to yet be re-used in a following
