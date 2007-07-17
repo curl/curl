@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel S (17 July 2007)
+- Jofell Gallardo posted a libcurl log using FTP that exposed a bug which made
+  a control connection that was deemed "dead" to yet be re-used in a following
+  request.
+
 Daniel S (13 July 2007)
 - Colin Hogben filed bug report #1750274
   (http://curl.haxx.se/bug/view.cgi?id=1750274) and submitted a patch for the

@@ -3137,7 +3137,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status, bool premature
     if(!nread && (CURLE_OPERATION_TIMEDOUT == result)) {
       failf(data, "control connection looks dead");
       ftpc->ctl_valid = FALSE; /* mark control connection as bad */
-      return result;
+      conn->bits.close = TRUE; /* mark for closure */
     }
 
     if(result)

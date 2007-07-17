@@ -22,6 +22,7 @@ This release includes the following bugfixes:
  o CONNECT endless loop
  o krb5 support builds with Heimdal
  o added returned error string for connection refused case
+ o re-use of dead control connections
 
 This release includes the following known bugs:
 
@@ -39,6 +40,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Dan Fandrich, Song Ma, Daniel Black, Giancarlo Formicuccia, Shmulik Regev,
- Daniel Cater, Colin Hogben
+ Daniel Cater, Colin Hogben, Jofell Gallardo
  
         Thanks! (and sorry if I forgot to mention someone)
