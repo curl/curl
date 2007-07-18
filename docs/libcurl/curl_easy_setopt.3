@@ -847,6 +847,8 @@ properly filled in with text strings. Use \fIcurl_slist_append(3)\fP
 to append strings (commands) to the list, and clear the entire list
 afterwards with \fIcurl_slist_free_all(3)\fP. Disable this operation
 again by setting a NULL to this option.
+The valid SFTP commands are: chgrp, chmod, chown, ln, mkdir,
+rename, rm, rmdir, symlink. (SFTP support added in 7.16.3)
 .IP CURLOPT_POSTQUOTE
 Pass a pointer to a linked list of FTP or SFTP commands to pass to the
 server after your ftp transfer request. The linked list should be a
