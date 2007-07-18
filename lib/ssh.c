@@ -1643,7 +1643,6 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
                                                &err_msg, NULL, 0);
           err = libssh2_session_error_to_CURLE(ssh_err);
           failf(conn->data, "%s", err_msg);
-          Curl_safefree(err_msg);
           state(conn, SSH_SCP_CHANNEL_FREE);
           sshc->actualCode = err;
           break;
@@ -1686,7 +1685,6 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
                                                  &err_msg, NULL, 0);
             err = libssh2_session_error_to_CURLE(ssh_err);
             failf(conn->data, "%s", err_msg);
-            Curl_safefree(err_msg);
             state(conn, SSH_SCP_CHANNEL_FREE);
             sshc->actualCode = err;
             break;
