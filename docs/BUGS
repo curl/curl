@@ -8,7 +8,7 @@ $Id$
 BUGS
 
   Curl and libcurl have grown substantially since the beginning. At the time
-  of writing (August 2003), there are about 40000 lines of source code, and by
+  of writing (July 2007), there are about 47000 lines of source code, and by
   the time you read this it has probably grown even more.
 
   Of course there are lots of bugs left. And lots of misfeatures.
@@ -39,6 +39,7 @@ WHAT TO REPORT
    - your operating system's name and version number (uname -a under a unix
      is fine)
    - what version of curl you're using (curl -V is fine)
+   - versions of the used libraries that libcurl is built to use
    - what URL you were working with (if possible), at least which protocol
 
   and anything and everything else you think matters. Tell us what you
