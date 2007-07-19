@@ -147,8 +147,8 @@ if (! -e "curl_client_key.pub") {
     }
     # Make sure all files are gone so ssh-keygen doesn't complain
     unlink("curl_host_dsa_key", "curl_client_key","curl_host_dsa_key.pub", "curl_client_key.pub"); 
-    system "ssh-keygen -q -t dsa -b 512 -f curl_host_dsa_key -C 'curl test server' -N ''" and die "Could not generate host key";
-    system "ssh-keygen -q -t dsa -b 512 -f curl_client_key -C 'curl test client' -N ''" and die "Could not generate client key";
+    system "ssh-keygen -q -t dsa -f curl_host_dsa_key -C 'curl test server' -N ''" and die "Could not generate host key";
+    system "ssh-keygen -q -t dsa -f curl_client_key -C 'curl test client' -N ''" and die "Could not generate client key";
 }
 
 open(FILE, ">>$conffile") || die "Could not write $conffile";
