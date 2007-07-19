@@ -13,6 +13,9 @@ Dan F (17 July 2007)
   server's can provide, and should be revisited.
 
 Daniel S (17 July 2007)
+- Daniel Johnson fixed a bug in how libssh2_session_last_error() was used, in
+  two places.
+
 - Jofell Gallardo posted a libcurl log using FTP that exposed a bug which made
   a control connection that was deemed "dead" to yet be re-used in a following
   request.
