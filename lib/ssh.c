@@ -749,6 +749,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
                      sftp_scp->path);
             Curl_debug(data, CURLINFO_HEADER_IN, tmp, strlen(tmp), conn);
           }
+          state(conn, SSH_SFTP_NEXT_QUOTE);
+          break;
         }
         else if (sshc->quote_item->data) {
           fprintf(stderr, "data: %s\n", sshc->quote_item->data);
