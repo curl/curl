@@ -115,6 +115,8 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
            previous one as well */
         i = i - (i>=1?2:1);
   }
+  /* since echo is disabled, print a newline */
+  fputs("\n", stderr);
   /* if user didn't hit ENTER, terminate buffer */
   if (i==buflen)
     buffer[buflen-1]=0;
