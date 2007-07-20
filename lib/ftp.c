@@ -2372,7 +2372,7 @@ static CURLcode ftp_state_user_resp(struct connectdata *conn,
   (void)instate; /* no use for this yet */
 
   /* some need password anyway, and others just return 2xx ignored */
-  if((ftpcode == 331 || ftpcode/100 == 2) && (ftpc->state == FTP_USER)) {
+  if((ftpcode == 331) && (ftpc->state == FTP_USER)) {
     /* 331 Password required for ...
        (the server requires to send the user's password too) */
     NBFTPSENDF(conn, "PASS %s", ftp->passwd?ftp->passwd:"");

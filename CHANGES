@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel S (20 July 2007)
+- Ralf S. Engelschall filed bug report #1757328
+  (http://curl.haxx.se/bug/view.cgi?id=1757328) and submitted a patch. It
+  turns out we broke login to FTP servers that don't require (nor understand)
+  PASS after the USER command. The breakage was done as part of the krb5
+  commit so a krb-using person needs to verify that the current version now
+  works or if we need to fix it (in a different way of course).
+
 Dan F (17 July 2007)
 - Fixed test cases 613 and 614 by improving the log postprocessor to handle
   a new directory listing format that newer libssh2's can provide.  This
