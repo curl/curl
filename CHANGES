@@ -7,6 +7,8 @@
                                   Changelog
 
 Daniel S (20 July 2007)
+- James Housley fixed the SFTP PWD command to work.
+
 - Ralf S. Engelschall filed bug report #1757328
   (http://curl.haxx.se/bug/view.cgi?id=1757328) and submitted a patch. It
   turns out we broke login to FTP servers that don't require (nor understand)

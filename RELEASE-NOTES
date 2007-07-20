@@ -26,6 +26,7 @@ This release includes the following bugfixes:
  o login to FTP servers that don't require (nor understand) PASS after the
    USER command
  o bad free of memory from libssh2
+ o the SFTP PWD command works
 
 This release includes the following known bugs:
 
@@ -44,6 +45,6 @@ advice from friends like these:
 
  Dan Fandrich, Song Ma, Daniel Black, Giancarlo Formicuccia, Shmulik Regev,
  Daniel Cater, Colin Hogben, Jofell Gallardo, Daniel Johnson,
- Ralf S. Engelschall
+ Ralf S. Engelschall, James Housley
  
         Thanks! (and sorry if I forgot to mention someone)
