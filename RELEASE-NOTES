@@ -24,7 +24,8 @@ This release includes the following bugfixes:
  o added returned error string for connection refused case
  o re-use of dead FTP control connections
  o login to FTP servers that don't require (nor understand) PASS after the
-   USER command.
+   USER command
+ o bad free of memory from libssh2
 
 This release includes the following known bugs:
 
