@@ -130,6 +130,9 @@ else
 	# INCLUDES += -I$(SDK_CLIB)/include/nlm/obsolete
 	# INCLUDES += -I$(SDK_CLIB)/include
 endif
+ifeq ($(DB),CURLDEBUG)
+INCLUDES += -I../include
+endif
 CFLAGS	+= -I. $(INCLUDES)
 
 ifeq ($(MTSAFE),YES)
