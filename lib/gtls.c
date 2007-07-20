@@ -227,7 +227,7 @@ Curl_gtls_connect(struct connectdata *conn,
                   int sockindex)
 
 {
-  const int cert_type_priority[] = { GNUTLS_CRT_X509, 0 };
+  static const int cert_type_priority[] = { GNUTLS_CRT_X509, 0 };
   struct SessionHandle *data = conn->data;
   gnutls_session session;
   int rc;

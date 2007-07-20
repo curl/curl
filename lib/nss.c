@@ -96,7 +96,7 @@ typedef struct {
 
 enum sslversion { SSL2 = 1, SSL3 = 2, TLS = 4 };
 
-cipher_s cipherlist[ciphernum] = {
+static const cipher_s cipherlist[ciphernum] = {
   /* SSL2 cipher suites */
   {"rc4", SSL_EN_RC4_128_WITH_MD5, SSL2},
   {"rc4export", SSL_EN_RC4_128_EXPORT40_WITH_MD5, SSL2},
