@@ -252,7 +252,7 @@ static void state(struct connectdata *conn, sshstate state)
 {
 #if defined(CURLDEBUG) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   /* for debug purposes */
-  static const char *names[] = {
+  static const char * const names[] = {
     "SSH_STOP",
     "SSH_S_STARTUP",
     "SSH_AUTHLIST",

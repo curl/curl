@@ -705,7 +705,7 @@ static void state(struct connectdata *conn,
 {
 #if defined(CURLDEBUG) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   /* for debug purposes */
-  static const char *names[]={
+  static const char * const names[]={
     "STOP",
     "WAIT220",
     "AUTH",
@@ -862,7 +862,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   char hbuf[NI_MAXHOST];
   struct sockaddr *sa=(struct sockaddr *)&ss;
   char tmp[1024];
-  static const char *mode[] = { "EPRT", "PORT", NULL };
+  static const char * const mode[] = { "EPRT", "PORT", NULL };
   int rc;
   int error;
   char *host=NULL;
@@ -1246,7 +1246,7 @@ static CURLcode ftp_state_use_pasv(struct connectdata *conn)
 
   */
 
-  static const char *mode[] = { "EPSV", "PASV", NULL };
+  static const char * const mode[] = { "EPSV", "PASV", NULL };
   int modeoff;
 
 #ifdef PF_INET6
