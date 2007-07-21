@@ -230,44 +230,6 @@ sub senddata {
     }
 }
 
-# USER is ok in fresh state
-my %commandok = (
-                 'USER' => 'fresh|passwd',
-                 'PASS' => 'passwd',
-                 'PASV' => 'loggedin|twosock',
-                 'EPSV' => 'loggedin|twosock',
-                 'PORT' => 'loggedin|twosock',
-                 'EPRT' => 'loggedin|twosock',
-                 'TYPE' => 'loggedin|twosock',
-                 'LIST' => 'twosock',
-                 'NLST' => 'twosock',
-                 'RETR' => 'twosock',
-                 'STOR' => 'twosock',
-                 'APPE' => 'twosock',
-                 'REST' => 'twosock',
-                 'ACCT' => 'loggedin',
-                 'CWD'  => 'loggedin|twosock',
-                 'SYST' => 'loggedin',
-                 'SIZE' => 'loggedin|twosock',
-                 'PWD'  => 'loggedin|twosock',
-                 'MKD'  => 'loggedin|twosock',
-                 'QUIT'  => 'loggedin|twosock',
-                 'RNFR'  => 'loggedin|twosock',
-                 'RNTO'  => 'loggedin|twosock',
-                 'DELE' => 'loggedin|twosock',
-                 'MDTM' => 'loggedin|twosock',
-                 'NOOP' => 'loggedin|twosock',
-                 );
-
-# initially, we're in 'fresh' state
-my %statechange = ( 'USER' => 'passwd',    # USER goes to passwd state
-                    'PASS' => 'loggedin',  # PASS goes to loggedin state
-                    'PORT' => 'twosock',   # PORT goes to twosock
-                    'EPRT' => 'twosock',   # EPRT goes to twosock
-                    'PASV' => 'twosock',   # PASV goes to twosock
-                    'EPSV' => 'twosock',   # EPSV goes to twosock
-                    );
-
 # this text is shown before the function specified below is run
 my %displaytext = ('USER' => '331 We are happy you popped in!',
                    'PASS' => '230 Welcome you silly person',
@@ -285,6 +247,8 @@ my %displaytext = ('USER' => '331 We are happy you popped in!',
                    'RNFR' => '350 Received your order. Please provide more',
                    'RNTO' => '250 Ok, thanks. File renaming completed.',
                    'NOOP' => '200 Yes, I\'m very good at doing nothing.',
+                   'PBSZ' => '500 PBSZ not implemented',
+                   'PROT' => '500 PROT not implemented',
                    );
 
 # callback functions for certain commands
@@ -809,7 +773,6 @@ while(1) {
             print STDERR "OUT: $_";
         }
     }
-    my $state="fresh";
 
     while(1) {
         my $i;
@@ -856,24 +819,6 @@ while(1) {
             print STDERR "IN: $full\n";
         }
 
-        my $ok = $commandok{$FTPCMD};
-        if($ok !~ /$state/) {
-            sendcontrol "500 $FTPCMD not OK in state: $state!\r\n";
-            next;
-        }
-
-        my $newstate=$statechange{$FTPCMD};
-        if($newstate eq "") {
-            # remain in the same state
-        }
-        else {
-            
-            if($state != $newstate) {
-                logmsg "switch to state $state\n";
-            }
-            $state = $newstate;
-        }
-
         my $delay = $delayreply{$FTPCMD};
         if($delay) {
             # just go sleep this many seconds!
@@ -893,18 +838,26 @@ while(1) {
                 $customreply{$FTPCMD}="";
             }
         }
+        my $check;
         if($text) {
             sendcontrol "$text\r\n";
+        }
+        else {
+            $check=1; # no repsonse yet
         }
 
         if($fake eq "") {
             # only perform this if we're not faking a reply
-            # see if the new state is a function caller.
             my $func = $commandfunc{$FTPCMD};
             if($func) {
-                # it is!
                 &$func($FTPARG, $FTPCMD);
+                $check=0; # taken care of
             }
+        }
+
+        if($check) {
+            print STDERR "$FTPCMD wasn't handled!\n";
+            sendcontrol "500 $FTPCMD is not dealt with!\r\n";
         }
             
     } # while(1)
