@@ -3,6 +3,9 @@
 <reply>
 <data>
 </data>
+<size>
+42
+</size>
 <mdtm>
 213 20030409102659
 </mdtm>
@@ -36,6 +39,8 @@ QUIT
 </protocol>
 <stdout>
 Last-Modified: Wed, 09 Apr 2003 10:26:59 GMT
+Content-Length: 42
+Accept-ranges: bytes
 </stdout>
 </verify>
 </testcase>
