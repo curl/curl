@@ -35,10 +35,12 @@ This release includes the following known bugs:
 Other curl-related news:
 
  o pycurl 7.16.4 was released http://pycurl.sf.net
+ o TclCurl 7.16.4 was released
+   http://personal1.iddeo.es/andresgarci/tclcurl/english/
 
 New curl mirrors:
 
- o 
+ o http://curl.freeby.pctools.cl is a new mirror in Chile
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
