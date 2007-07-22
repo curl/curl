@@ -27,55 +27,6 @@ This release includes the following bugfixes:
    USER command
  o bad free of memory from libssh2
  o the SFTP PWD command works
-
-This release includes the following known bugs:
-
- o see docs/KNOWN_BUGS (http://curl.haxx.se/docs/knownbugs.html)
-
-Other curl-related news:
-
- o pycurl 7.16.4 was released http://pycurl.sf.net
- o TclCurl 7.16.4 was released
-   http://personal1.iddeo.es/andresgarci/tclcurl/english/
-
-New curl mirrors:
-
- o http://curl.freeby.pctools.cl is a new mirror in Chile
-
-This release would not have looked like this without help, code, reports and
-advice from friends like these:
-
- Dan Fandrich, Song Ma, Daniel Black, Giancarlo Formicuccia, Shmulik Regev,
- Daniel Cater, Colin Hogben, Jofell Gallardo, Daniel Johnson,
- Ralf S. Engelschall, James Housley, Curl and libcurl 7.16.5
-
- Public curl release number:               101
- Releases counted from the very beginning: 127
- Available command line options:           118
- Available curl_easy_setopt() options:     143
- Number of public functions in libcurl:    55
- Amount of public web site mirrors:        39
- Number of known libcurl bindings:         35
- Number of contributors:                   572
-
-This release includes the following changes:
- 
- o 
-
-This release includes the following bugfixes:
-
- o test cases 31, 46, 61, 506, 517 now work in time zones that use leap seconds
- o problem with closed proxy connection during HTTP CONNECT auth negotiation
- o transfer-encoding skipping didn't ignore the 407 response bodies properly
- o CURLOPT_SSL_VERIFYHOST set to 1
- o CONNECT endless loop
- o krb5 support builds with Heimdal
- o added returned error string for connection refused case
- o re-use of dead FTP control connections
- o login to FTP servers that don't require (nor understand) PASS after the
-   USER command
- o bad free of memory from libssh2
- o the SFTP PWD command works
  o HTTP Digest auth on a re-used connection
 
 This release includes the following known bugs:
