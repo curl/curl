@@ -6,6 +6,17 @@
 
                                   Changelog
 
+Daniel S (22 July 2007)
+- Added test case 354 that makes a simple FTP retrieval without password, which
+  verifies the bug fix in #1757328.
+
+Daniel S (21 July 2007)
+- To allow more flexibility in FTP test cases, I've removed the enforced states
+  from the test server code as they served no real purpose. The test server
+  is here to serve for the test cases, not to attempt to function as a real
+  server! While at it, I modified test case 141 to better test and verify
+  curl -I on a single FTP file.
+
 Daniel S (20 July 2007)
 - James Housley fixed the SFTP PWD command to work.
 
