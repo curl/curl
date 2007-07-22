@@ -266,6 +266,11 @@ CURLcode Curl_output_digest(struct connectdata *conn,
     authp = &data->state.authhost;
   }
 
+  if (*allocuserpwd) {
+    Curl_safefree(*allocuserpwd);
+    *allocuserpwd = NULL;
+  }
+
   /* not set means empty */
   if(!userp)
     userp=(char *)"";
@@ -387,8 +392,6 @@ CURLcode Curl_output_digest(struct connectdata *conn,
     Authorization: Digest username="testuser", realm="testrealm", \
     nonce="1053604145", uri="/64", response="c55f7f30d83d774a3d2dcacf725abaca"
   */
-
-  Curl_safefree(*allocuserpwd);
 
   if (d->qop) {
     *allocuserpwd =

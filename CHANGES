@@ -7,6 +7,33 @@
                                   Changelog
 
 Daniel S (22 July 2007)
+- HTTP Digest bug fix by Chris Flerackers:
+
+  Scenario
+
+  - Perfoming a POST request with body
+  - With authentication (only Digest)
+  - Re-using a connection
+
+  libcurl would send a HTTP POST with an Authorization header but without
+  body. Our server would return 400 Bad Request in that case (because
+  authentication passed, but the body was empty).
+
+  Cause
+
+  1) http_digest.c -> Curl_output_digest
+  - Updates allocptr.userpwd/allocptr.proxyuserpwd *only* if d->nonce is
+  filled in (and no errors)
+  - authp->done = TRUE if d->nonce is filled in
+  2) http.c -> Curl_http
+  - *Always* uses allocptr.userpwd/allocptr.proxyuserpwd if not NULL
+  3) http.c -> Curl_http, Curl_http_output_auth
+
+  So what happens is that Curl_output_digest cannot yet update the
+  Authorization header (allocptr.userpwd) which results in authhost->done=0 ->
+  authhost->multi=1 -> conn->bits.authneg = TRUE.  The body is not
+  added. *However*, allocptr.userpwd is still used when building the request
+
 - Added test case 354 that makes a simple FTP retrieval without password, which
   verifies the bug fix in #1757328.
 
