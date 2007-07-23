@@ -1477,7 +1477,7 @@ static CURLcode ftp_state_ul_setup(struct connectdata *conn,
         readthisamountnow = BUFSIZE;
 
       actuallyread = (curl_off_t)
-        conn->fread(data->state.buffer, 1, (size_t)readthisamountnow,
+        conn->fread_func(data->state.buffer, 1, (size_t)readthisamountnow,
                     conn->fread_in);
 
       passed += actuallyread;

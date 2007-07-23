@@ -546,10 +546,10 @@ CURLcode Curl_open(struct SessionHandle **curl)
     data->set.err  = stderr;  /* default stderr to stderr */
 
     /* use fwrite as default function to store output */
-    data->set.fwrite = (curl_write_callback)fwrite;
+    data->set.fwrite_func = (curl_write_callback)fwrite;
 
     /* use fread as default function to read input */
-    data->set.fread = (curl_read_callback)fread;
+    data->set.fread_func = (curl_read_callback)fread;
 
     /* conversion callbacks for non-ASCII hosts */
     data->set.convfromnetwork = (curl_conv_callback)ZERO_NULL;
@@ -1380,19 +1380,19 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Set data write callback
      */
-    data->set.fwrite = va_arg(param, curl_write_callback);
-    if(!data->set.fwrite)
+    data->set.fwrite_func = va_arg(param, curl_write_callback);
+    if(!data->set.fwrite_func)
       /* When set to NULL, reset to our internal default function */
-      data->set.fwrite = (curl_write_callback)fwrite;
+      data->set.fwrite_func = (curl_write_callback)fwrite;
     break;
   case CURLOPT_READFUNCTION:
     /*
      * Read data callback
      */
-    data->set.fread = va_arg(param, curl_read_callback);
-    if(!data->set.fread)
+    data->set.fread_func = va_arg(param, curl_read_callback);
+    if(!data->set.fread_func)
       /* When set to NULL, reset to our internal default function */
-      data->set.fread = (curl_read_callback)fread;
+      data->set.fread_func = (curl_read_callback)fread;
     break;
   case CURLOPT_CONV_FROM_NETWORK_FUNCTION:
     /*
@@ -1416,7 +1416,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * I/O control callback. Might be NULL.
      */
-    data->set.ioctl = va_arg(param, curl_ioctl_callback);
+    data->set.ioctl_func = va_arg(param, curl_ioctl_callback);
     break;
   case CURLOPT_IOCTLDATA:
     /*
@@ -3865,7 +3865,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    *
    * Inherit the proper values from the urldata struct AFTER we have arranged
    * the persistent connection stuff */
-  conn->fread = data->set.fread;
+  conn->fread_func = data->set.fread_func;
   conn->fread_in = data->set.in;
 
   if ((conn->protocol&PROT_HTTP) &&

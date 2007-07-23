@@ -790,7 +790,7 @@ static size_t readmoredata(char *buffer,
       /* move backup data into focus and continue on that */
       http->postdata = http->backup.postdata;
       http->postsize = http->backup.postsize;
-      conn->fread =    http->backup.fread;
+      conn->fread_func = http->backup.fread_func;
       conn->fread_in = http->backup.fread_in;
 
       http->sending++; /* move one step up */
@@ -940,13 +940,13 @@ CURLcode add_buffer_send(send_buffer *in,
         ptr = in->buffer + amount;
 
         /* backup the currently set pointers */
-        http->backup.fread = conn->fread;
+        http->backup.fread_func = conn->fread_func;
         http->backup.fread_in = conn->fread_in;
         http->backup.postdata = http->postdata;
         http->backup.postsize = http->postsize;
 
         /* set the new pointers for the request-sending */
-        conn->fread = (curl_read_callback)readmoredata;
+        conn->fread_func = (curl_read_callback)readmoredata;
         conn->fread_in = (void *)conn;
         http->postdata = ptr;
         http->postsize = (curl_off_t)size;
@@ -1606,7 +1606,7 @@ CURLcode Curl_http_done(struct connectdata *conn,
   (void)premature; /* not used */
 
   /* set the proper values (possibly modified on POST) */
-  conn->fread = data->set.fread; /* restore */
+  conn->fread_func = data->set.fread_func; /* restore */
   conn->fread_in = data->set.in; /* restore */
 
   if (http == NULL)
@@ -1991,7 +1991,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           readthisamountnow = BUFSIZE;
 
         actuallyread =
-          data->set.fread(data->state.buffer, 1, (size_t)readthisamountnow,
+          data->set.fread_func(data->state.buffer, 1, (size_t)readthisamountnow,
                           data->set.in);
 
         passed += actuallyread;
@@ -2246,7 +2246,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       }
 
       /* set the read function to read from the generated form data */
-      conn->fread = (curl_read_callback)Curl_FormReader;
+      conn->fread_func = (curl_read_callback)Curl_FormReader;
       conn->fread_in = &http->form;
 
       http->sending = HTTPSEND_BODY;
@@ -2446,7 +2446,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
           http->sending = HTTPSEND_BODY;
 
-          conn->fread = (curl_read_callback)readmoredata;
+          conn->fread_func = (curl_read_callback)readmoredata;
           conn->fread_in = (void *)conn;
 
           /* set the upload size to the progress meter */

@@ -127,7 +127,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
 
   /* this function returns a size_t, so we typecast to int to prevent warnings
      with picky compilers */
-  nread = (int)conn->fread(data->reqdata.upload_fromhere, 1,
+  nread = (int)conn->fread_func(data->reqdata.upload_fromhere, 1,
                            buffersize, conn->fread_in);
 
   if(nread == CURL_READFUNC_ABORT) {
@@ -237,10 +237,10 @@ CURLcode Curl_readrewind(struct connectdata *conn)
      (data->set.httpreq == HTTPREQ_POST_FORM))
     ; /* do nothing */
   else {
-    if(data->set.ioctl) {
+    if(data->set.ioctl_func) {
       curlioerr err;
 
-      err = (data->set.ioctl) (data, CURLIOCMD_RESTARTREAD,
+      err = (data->set.ioctl_func) (data, CURLIOCMD_RESTARTREAD,
                             data->set.ioctl_client);
       infof(data, "the ioctl callback returned %d\n", (int)err);
 
@@ -254,7 +254,7 @@ CURLcode Curl_readrewind(struct connectdata *conn)
       /* If no CURLOPT_READFUNCTION is used, we know that we operate on a
          given FILE * stream and we can actually attempt to rewind that
          ourself with fseek() */
-      if(data->set.fread == (curl_read_callback)fread) {
+      if(data->set.fread_func == (curl_read_callback)fread) {
         if(-1 != fseek(data->set.in, 0, SEEK_SET))
           /* successful rewind */
           return CURLE_OK;

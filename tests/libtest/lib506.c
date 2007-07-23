@@ -19,13 +19,6 @@ const char *HOSTHEADER = "Host: www.host.foo.com";
 const char *JAR = "log/jar506";
 #define THREADS 2
 
-void lock(CURL *handle, curl_lock_data data, curl_lock_access access,
-          void *useptr );
-void unlock(CURL *handle, curl_lock_data data, void *useptr );
-struct curl_slist *sethost(struct curl_slist *headers);
-void *fire(void *ptr);
-char *suburl(const char *base, int i);
-
 /* struct containing data of a thread */
 struct Tdata {
   CURLSH *share;
@@ -38,7 +31,7 @@ struct userdata {
 };
 
 /* lock callback */
-void lock(CURL *handle, curl_lock_data data, curl_lock_access access,
+static void my_lock(CURL *handle, curl_lock_data data, curl_lock_access access,
           void *useptr )
 {
   const char *what;
@@ -66,7 +59,7 @@ void lock(CURL *handle, curl_lock_data data, curl_lock_access access,
 }
 
 /* unlock callback */
-void unlock(CURL *handle, curl_lock_data data, void *useptr )
+static void my_unlock(CURL *handle, curl_lock_data data, void *useptr )
 {
   const char *what;
   struct userdata *user = (struct userdata *)useptr;
@@ -91,7 +84,7 @@ void unlock(CURL *handle, curl_lock_data data, void *useptr )
 
 
 /* build host entry */
-struct curl_slist *sethost(struct curl_slist *headers)
+static struct curl_slist *sethost(struct curl_slist *headers)
 {
   (void)headers;
   return curl_slist_append(NULL, HOSTHEADER );
@@ -99,7 +92,7 @@ struct curl_slist *sethost(struct curl_slist *headers)
 
 
 /* the dummy thread function */
-void *fire(void *ptr)
+static void *fire(void *ptr)
 {
   CURLcode code;
   struct curl_slist *headers;
@@ -135,7 +128,7 @@ void *fire(void *ptr)
 
 
 /* build request url */
-char *suburl(const char *base, int i)
+static char *suburl(const char *base, int i)
 {
   return curl_maprintf("%s000%c", base, 48+i);
 }
@@ -173,11 +166,11 @@ int test(char *URL)
 
   if ( CURLSHE_OK == scode ) {
     printf( "CURLSHOPT_LOCKFUNC\n" );
-    scode = curl_share_setopt( share, CURLSHOPT_LOCKFUNC, lock);
+    scode = curl_share_setopt( share, CURLSHOPT_LOCKFUNC, my_lock);
   }
   if ( CURLSHE_OK == scode ) {
     printf( "CURLSHOPT_UNLOCKFUNC\n" );
-    scode = curl_share_setopt( share, CURLSHOPT_UNLOCKFUNC, unlock);
+    scode = curl_share_setopt( share, CURLSHOPT_UNLOCKFUNC, my_unlock);
   }
   if ( CURLSHE_OK == scode ) {
     printf( "CURLSHOPT_USERDATA\n" );

@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Dan F (23 July 2007)
+- Implemented only the parts of Patrick Monnerat's OS/400 patch that renamed
+  some few internal identifiers to avoid conflicts, which could be useful on
+  other platforms.
+
 Daniel S (22 July 2007)
 - HTTP Digest bug fix by Chris Flerackers:
 

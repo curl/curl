@@ -416,7 +416,7 @@ CURLcode Curl_client_write(struct connectdata *conn,
     /* If the previous block of data ended with CR and this block of data is
        just a NL, then the length might be zero */
     if (len) {
-      wrote = data->set.fwrite(ptr, 1, len, data->set.out);
+      wrote = data->set.fwrite_func(ptr, 1, len, data->set.out);
     }
     else {
       wrote = len;
@@ -435,7 +435,7 @@ CURLcode Curl_client_write(struct connectdata *conn,
      * header callback function (added after version 7.7.1).
      */
     curl_write_callback writeit=
-      data->set.fwrite_header?data->set.fwrite_header:data->set.fwrite;
+      data->set.fwrite_header?data->set.fwrite_header:data->set.fwrite_func;
 
     /* Note: The header is in the host encoding
        regardless of the ftp transfer mode (ASCII/Image) */

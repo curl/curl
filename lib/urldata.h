@@ -288,7 +288,7 @@ struct HTTP {
   struct Curl_chunker chunk;
 
   struct back {
-    curl_read_callback fread; /* backup storage for fread pointer */
+    curl_read_callback fread_func; /* backup storage for fread pointer */
     void *fread_in;           /* backup storage for fread_in pointer */
     char *postdata;
     curl_off_t postsize;
@@ -965,7 +965,7 @@ struct connectdata {
   /*************** Request - specific items ************/
 
   /* previously this was in the urldata struct */
-  curl_read_callback fread; /* function that reads the input */
+  curl_read_callback fread_func; /* function that reads the input */
   void *fread_in;           /* pointer to pass to the fread() above */
 
   struct ntlmdata ntlm;     /* NTLM differs from other authentication schemes
@@ -1268,12 +1268,12 @@ struct UserDefined {
   unsigned short localport; /* local port number to bind to */
   int localportrange; /* number of additional port numbers to test in case the
                          'localport' one can't be bind()ed */
-  curl_write_callback fwrite;        /* function that stores the output */
+  curl_write_callback fwrite_func;   /* function that stores the output */
   curl_write_callback fwrite_header; /* function that stores headers */
-  curl_read_callback fread;          /* function that reads the input */
+  curl_read_callback fread_func;     /* function that reads the input */
   curl_progress_callback fprogress;  /* function for progress information */
   curl_debug_callback fdebug;      /* function that write informational data */
-  curl_ioctl_callback ioctl;       /* function for I/O control */
+  curl_ioctl_callback ioctl_func;  /* function for I/O control */
   curl_sockopt_callback fsockopt;  /* function for setting socket options */
   void *sockopt_client; /* pointer to pass to the socket options callback */
 

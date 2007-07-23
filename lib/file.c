@@ -205,7 +205,7 @@ static CURLcode file_upload(struct connectdata *conn)
    * Since FILE: doesn't do the full init, we need to provide some extra
    * assignments here.
    */
-  conn->fread = data->set.fread;
+  conn->fread_func = data->set.fread_func;
   conn->fread_in = data->set.in;
   conn->data->reqdata.upload_fromhere = buf;
 
