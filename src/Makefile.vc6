@@ -59,7 +59,7 @@ ZLIB_IMP_LIBS = zdll.lib
 SSL_CFLAGS     = /DUSE_SSLEAY
 SSL_LFLAGS     = /LIBPATH:"$(OPENSSL_PATH)/out32"
 SSL_IMP_LFLAGS = /LIBPATH:"$(OPENSSL_PATH)/out32dll"
-SSL_LIBS       = libeay32.lib ssleay32.lib gdi32.lib
+SSL_LIBS       = libeay32.lib ssleay32.lib gdi32.lib user32.lib advapi32.lib
 
 ## Release
 CCR   = cl.exe /MD /O2 /DNDEBUG
