@@ -856,7 +856,7 @@ while(1) {
         }
 
         if($check) {
-            print STDERR "$FTPCMD wasn't handled!\n";
+            logmsg "$FTPCMD wasn't handled!\n";
             sendcontrol "500 $FTPCMD is not dealt with!\r\n";
         }
             
