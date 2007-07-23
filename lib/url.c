@@ -60,7 +60,7 @@
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
-#if HAVE_SIGNAL_H
+#ifdef HAVE_SIGNAL_H
 #include <signal.h>
 #endif
 
