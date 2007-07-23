@@ -11,7 +11,7 @@ Curl and libcurl 7.16.5
 
 This release includes the following changes:
  
- o 
+ o support for OS/400 Secure Sockets Layer library
 
 This release includes the following bugfixes:
 

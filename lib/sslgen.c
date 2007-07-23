@@ -52,6 +52,7 @@
 #include "ssluse.h" /* OpenSSL versions */
 #include "gtls.h"   /* GnuTLS versions */
 #include "nssg.h"   /* NSS versions */
+#include "qssl.h"   /* QSOSSL versions */
 #include "sendf.h"
 #include "strequal.h"
 #include "url.h"
@@ -172,8 +173,12 @@ int Curl_ssl_init(void)
 #ifdef USE_NSS
   return Curl_nss_init();
 #else
+#ifdef USE_QSOSSL
+  return Curl_qsossl_init();
+#else
   /* no SSL support */
   return 1;
+#endif /* USE_QSOSSL */
 #endif /* USE_NSS */
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
@@ -190,8 +195,13 @@ void Curl_ssl_cleanup(void)
 #else
 #ifdef USE_GNUTLS
     Curl_gtls_cleanup();
+#else
 #ifdef USE_NSS
     Curl_nss_cleanup();
+#else
+#ifdef USE_QSOSSL
+    Curl_qsossl_cleanup();
+#endif /* USE_QSOSSL */
 #endif /* USE_NSS */
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
@@ -214,6 +224,10 @@ Curl_ssl_connect(struct connectdata *conn, int sockindex)
 #else
 #ifdef USE_NSS
   return Curl_nss_connect(conn, sockindex);
+#else
+#ifdef USE_QSOSSL
+  return Curl_qsossl_connect(conn, sockindex);
+#endif /* USE_QSOSSL */
 #endif /* USE_NSS */
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
@@ -240,10 +254,15 @@ Curl_ssl_connect_nonblocking(struct connectdata *conn, int sockindex,
   *done = TRUE; /* fallback to BLOCKING */
   return Curl_nss_connect(conn, sockindex);
 #else
+#ifdef USE_QSOSSL
+  *done = TRUE; /* fallback to BLOCKING */
+  return Curl_qsossl_connect(conn, sockindex);
+#else
   /* not implemented!
      fallback to BLOCKING call. */
   *done = TRUE;
   return Curl_ssl_connect(conn, sockindex);
+#endif /* USE_QSOSSL */
 #endif /* USE_NSS */
 #endif /* USE_SSLEAY */
 }
@@ -302,9 +321,13 @@ static int kill_session(struct curl_ssl_session *session)
 #ifdef USE_GNUTLS
     Curl_gtls_session_free(session->sessionid);
 #else
+#ifdef USE_QSOSSL
+    /* No session handling for QsoSSL. */
+#else
 #ifdef USE_NSS
     /* NSS has its own session ID cache */
 #endif /* USE_NSS */
+#endif /* USE_QSOSSL */
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
     session->sessionid=NULL;
@@ -400,6 +423,10 @@ void Curl_ssl_close_all(struct SessionHandle *data)
 #else
 #ifdef USE_NSS
   Curl_nss_close_all(data);
+#else
+#ifdef USE_QSOSSL
+  Curl_qsossl_close_all(data);
+#endif /* USE_QSOSSL */
 #endif /* USE_NSS */
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
@@ -420,6 +447,9 @@ void Curl_ssl_close(struct connectdata *conn)
 #ifdef USE_NSS
     Curl_nss_close(conn);
 #endif /* USE_NSS */
+#ifdef USE_QSOSSL
+    Curl_qsossl_close(conn);
+#endif /* USE_QSOSSL */
     conn->ssl[FIRSTSOCKET].use = FALSE;
   }
 }
@@ -435,8 +465,13 @@ CURLcode Curl_ssl_shutdown(struct connectdata *conn, int sockindex)
     if(Curl_gtls_shutdown(conn, sockindex))
       return CURLE_SSL_SHUTDOWN_FAILED;
 #else
+#ifdef USE_QSOSSL
+    if(Curl_qsossl_shutdown(conn, sockindex))
+      return CURLE_SSL_SHUTDOWN_FAILED;
+#else
     (void)conn;
     (void)sockindex;
+#endif /* USE_QSOSSL */
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
   }
@@ -462,10 +497,17 @@ CURLcode Curl_ssl_set_engine(struct SessionHandle *data, const char *engine)
   (void)engine;
   return CURLE_FAILED_INIT;
 #else
+#ifdef USE_QSOSSL
+  /* QSOSSL doesn't set an engine this way */
+  (void)data;
+  (void)engine;
+  return CURLE_FAILED_INIT;
+#else
   /* no SSL layer */
   (void)data;
   (void)engine;
   return CURLE_FAILED_INIT;
+#endif /* USE_QSOSSL */
 #endif /* USE_NSS */
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
@@ -488,9 +530,15 @@ CURLcode Curl_ssl_set_engine_default(struct SessionHandle *data)
   (void)data;
   return CURLE_FAILED_INIT;
 #else
+#ifdef USE_QSOSSL
+  /* A no-op for QSOSSL */
+  (void)data;
+  return CURLE_FAILED_INIT;
+#else
   /* No SSL layer */
   (void)data;
   return CURLE_FAILED_INIT;
+#endif /* USE_QSOSSL */
 #endif /* USE_NSS */
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
@@ -513,8 +561,14 @@ struct curl_slist *Curl_ssl_engines_list(struct SessionHandle *data)
   (void)data;
   return NULL;
 #else
+#ifdef USE_QSOSSL
+  /* No engine support in QSOSSL. */
   (void)data;
   return NULL;
+#else
+  (void)data;
+  return NULL;
+#endif /* USE_QSOSSL */
 #endif /* USE_NSS */
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
@@ -535,11 +589,15 @@ ssize_t Curl_ssl_send(struct connectdata *conn,
 #ifdef USE_NSS
   return Curl_nss_send(conn, sockindex, mem, len);
 #else
+#ifdef USE_QSOSSL
+  return Curl_qsossl_send(conn, sockindex, mem, len);
+#else
   (void)conn;
   (void)sockindex;
   (void)mem;
   (void)len;
   return 0;
+#endif /* USE_QSOSSL */
 #endif /* USE_NSS */
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
@@ -568,6 +626,10 @@ ssize_t Curl_ssl_recv(struct connectdata *conn, /* connection data */
 #else
 #ifdef USE_NSS
   nread = Curl_nss_recv(conn, sockindex, mem, len, &block);
+#else
+#ifdef USE_QSOSSL
+  nread = Curl_qsossl_recv(conn, sockindex, mem, len, &block);
+#endif /* USE_QSOSSL */
 #endif /* USE_NSS */
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
@@ -632,9 +694,13 @@ size_t Curl_ssl_version(char *buffer, size_t size)
 #ifdef USE_NSS
   return Curl_nss_version(buffer, size);
 #else
+#ifdef USE_QSOSSL
+  return Curl_qsossl_version(buffer, size);
+#else
   (void)buffer;
   (void)size;
   return 0; /* no SSL support */
+#endif /* USE_QSOSSL */
 #endif /* USE_NSS */
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
@@ -657,9 +723,13 @@ int Curl_ssl_check_cxn(struct connectdata *conn)
 #ifdef USE_NSS
   return Curl_nss_check_cxn(conn);
 #else
+#ifdef USE_QSOSSL
+  return Curl_qsossl_check_cxn(conn);
+#else
   (void)conn;
   /* TODO: we lack implementation of this for GnuTLS */
   return -1; /* connection status unknown */
+#endif /* USE_QSOSSL */
 #endif /* USE_NSS */
 #endif /* USE_SSLEAY */
 }
