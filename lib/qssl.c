@@ -40,9 +40,6 @@
 #include "memdebug.h"
 
 
-static bool qsossl_inited = FALSE;
-
-
 int Curl_qsossl_init(void)
 
 {
@@ -157,7 +154,7 @@ static CURLcode Curl_qsossl_create(struct connectdata * conn, int sockindex)
 static int Curl_qsossl_trap_cert(SSLHandle * h)
 
 {
-	return 1;       /* Accept certificate. */
+  return 1;       /* Accept certificate. */
 }
 
 
