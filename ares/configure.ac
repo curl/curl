@@ -803,4 +803,4 @@ if test -n "$RANDOM_FILE" && test X"$RANDOM_FILE" != Xno ; then
         [a suitable file/device to read random data from])
 fi
 
-AC_OUTPUT(Makefile)
+AC_OUTPUT(Makefile libcares.pc)
