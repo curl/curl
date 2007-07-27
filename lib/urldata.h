@@ -82,6 +82,10 @@
 #include <nspr.h>
 #endif
 
+#ifdef USE_QSOSSL
+#include <qsossl.h>
+#endif
+
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -177,6 +181,9 @@ struct ssl_connect_data {
 #ifdef USE_NSS
   PRFileDesc *handle;
 #endif /* USE_NSS */
+#ifdef USE_QSOSSL
+  SSLHandle *handle;
+#endif /* USE_QSOSSL */
 };
 
 struct ssl_config_data {
