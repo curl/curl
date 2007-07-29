@@ -1,4 +1,4 @@
-Updated: June 26, 2007 (http://curl.haxx.se/docs/faq.html)
+Updated: July 30, 2007 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -68,6 +68,7 @@ FAQ
   4.12 Why do I get "certificate verify failed" ?
   4.13 Why is curl -R on Windows one hour off?
   4.14 Redirects work in browser but not with curl!
+  4.15 FTPS doesn't work
 
  5. libcurl Issues
   5.1 Is libcurl thread-safe?
@@ -289,13 +290,13 @@ FAQ
 
   Some facts to use as input to the math:
 
-  curl packages are downloaded from the curl.haxx.se and mirrors almost one
+  curl packages are downloaded from the curl.haxx.se and mirrors over a
   million times per year. curl is installed by default with most Linux
   distributions. curl is installed by default with Mac OS X. curl and libcurl
   as used by numerous applications that include libcurl binaries in their
   distribution packages (like Adobe Acrobat Reader and Google Earth).
 
-  More than 60 known named companies use curl in commercial environments and
+  More than 70 known named companies use curl in commercial environments and
   products. More than 100 known named open source projects depend on
   (lib)curl.
 
@@ -374,7 +375,7 @@ FAQ
 
   2.4 Does curl support Socks (RFC 1928) ?
 
-  Yes, SOCKS5 is supported.
+  Yes, SOCKS 4 and 5 are supported.
 
 
 3. Usage problems
@@ -828,6 +829,20 @@ FAQ
   manually figure out what the page is set to do, or you write a script that
   parses the results and fetches the new URL.
 
+  4.15 FTPS doesn't work
+
+  curl supports FTPS (sometimes known as FTP-SSL) both implicit and explicit
+  mode.
+
+  When a URL is used that starts with FTPS://, curl assumes implicit SSL on
+  the control connection and will therefore immediately connect and try to
+  speak SSL. FTPS:// connections default to port 990.
+
+  To use explicit FTPS, you use a FTP:// URL and the --ftp-ssl option (or one
+  of its related flavours). This is the most common method, and the one
+  mandated by RFC4217. This kind of connection then of course uses the
+  standard FTP port 21 by default.
+
 
 5. libcurl Issues
 
@@ -1103,14 +1118,14 @@ FAQ
   In the cURL project we call this module PHP/CURL to differentiate it from
   curl the command line tool and libcurl the library. The PHP team however
   does not refer to it like this (for unknown reasons). They call it plain
-  CURL (often using all caps) which causes much confusion to users which in
-  turn gives us a higher question load.
+  CURL (often using all caps) or sometimes ext/curl, but both cause much
+  confusion to users which in turn gives us a higher question load.
 
   7.2 Who write PHP/CURL?
 
   PHP/CURL is a module that comes with the regular PHP package. It depends and
   uses libcurl, so you need to have libcurl installed properly first before
-  PHP/CURL can be used. PHP/CURL is written by Sterling Hughes.
+  PHP/CURL can be used. PHP/CURL was initially written by Sterling Hughes.
 
   7.3 Can I perform multiple requests using the same handle?
 
