@@ -556,17 +556,17 @@ static void close_one(struct connectdata *conn,
   if(conn->ssl[index].session) {
     gnutls_bye(conn->ssl[index].session, GNUTLS_SHUT_RDWR);
     gnutls_deinit(conn->ssl[index].session);
+    conn->ssl[index].session = NULL;
   }
-  if(conn->ssl[index].cred)
+  if(conn->ssl[index].cred) {
     gnutls_certificate_free_credentials(conn->ssl[index].cred);
+    conn->ssl[index].cred = NULL;
+  }
 }
 
-void Curl_gtls_close(struct connectdata *conn)
+void Curl_gtls_close(struct connectdata *conn, int sockindex)
 {
-  if(conn->ssl[0].use)
-    close_one(conn, 0);
-  if(conn->ssl[1].use)
-    close_one(conn, 1);
+  close_one(conn, sockindex);
 }
 
 /*
@@ -631,8 +631,8 @@ int Curl_gtls_shutdown(struct connectdata *conn, int sockindex)
   }
   gnutls_certificate_free_credentials(conn->ssl[sockindex].cred);
 
+  conn->ssl[sockindex].cred = NULL;
   conn->ssl[sockindex].session = NULL;
-  conn->ssl[sockindex].use = FALSE;
 
   return retval;
 }

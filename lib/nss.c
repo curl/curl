@@ -384,18 +384,13 @@ Curl_nss_check_cxn(struct connectdata *conn)
 /*
  * This function is called when an SSL connection is closed.
  */
-void Curl_nss_close(struct connectdata *conn)
+void Curl_nss_close(struct connectdata *conn, int sockindex)
 {
-  int i;
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
-  for(i=0; i<2; i++) {
-    struct ssl_connect_data *connssl = &conn->ssl[i];
-
-    if(connssl->handle) {
-      PR_Close(connssl->handle);
-      connssl->handle = NULL;
-    }
-    connssl->use = FALSE; /* get back to ordinary socket usage */
+  if(connssl->handle) {
+    PR_Close(connssl->handle);
+    connssl->handle = NULL;
   }
 }
 

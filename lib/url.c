@@ -1822,7 +1822,8 @@ static void conn_free(struct connectdata *conn)
   Curl_destroy_thread_data(&conn->async);
 #endif
 
-  Curl_ssl_close(conn);
+  Curl_ssl_close(conn, FIRSTSOCKET);
+  Curl_ssl_close(conn, SECONDARYSOCKET);
 
   Curl_free_ssl_config(&conn->ssl_config);
 
@@ -1892,7 +1893,7 @@ CURLcode Curl_disconnect(struct connectdata *conn)
                                        allocated by libidn */
 #endif
 
-  Curl_ssl_close(conn);
+  Curl_ssl_close(conn, FIRSTSOCKET);
 
   /* Indicate to all handles on the pipe that we're dead */
   if (IsPipeliningEnabled(data)) {

@@ -435,46 +435,43 @@ void Curl_ssl_close_all(struct SessionHandle *data)
 #endif /* USE_SSL */
 }
 
-void Curl_ssl_close(struct connectdata *conn)
+void Curl_ssl_close(struct connectdata *conn, int sockindex)
 {
-  if(conn->ssl[FIRSTSOCKET].use) {
+  DEBUGASSERT((sockindex <= 1) && (sockindex >= -1));
+
 #ifdef USE_SSLEAY
-    Curl_ossl_close(conn);
+  Curl_ossl_close(conn, sockindex);
 #endif /* USE_SSLEAY */
 #ifdef USE_GNUTLS
-    Curl_gtls_close(conn);
+  Curl_gtls_close(conn, sockindex);
 #endif /* USE_GNUTLS */
 #ifdef USE_NSS
-    Curl_nss_close(conn);
+  Curl_nss_close(conn, sockindex);
 #endif /* USE_NSS */
 #ifdef USE_QSOSSL
-    Curl_qsossl_close(conn);
+  Curl_qsossl_close(conn, sockindex);
 #endif /* USE_QSOSSL */
-    conn->ssl[FIRSTSOCKET].use = FALSE;
-  }
 }
 
 CURLcode Curl_ssl_shutdown(struct connectdata *conn, int sockindex)
 {
-  if(conn->ssl[sockindex].use) {
 #ifdef USE_SSLEAY
-    if(Curl_ossl_shutdown(conn, sockindex))
-      return CURLE_SSL_SHUTDOWN_FAILED;
+  if(Curl_ossl_shutdown(conn, sockindex))
+    return CURLE_SSL_SHUTDOWN_FAILED;
 #else
 #ifdef USE_GNUTLS
-    if(Curl_gtls_shutdown(conn, sockindex))
-      return CURLE_SSL_SHUTDOWN_FAILED;
+  if(Curl_gtls_shutdown(conn, sockindex))
+    return CURLE_SSL_SHUTDOWN_FAILED;
 #else
 #ifdef USE_QSOSSL
-    if(Curl_qsossl_shutdown(conn, sockindex))
-      return CURLE_SSL_SHUTDOWN_FAILED;
-#else
-    (void)conn;
-    (void)sockindex;
+  if(Curl_qsossl_shutdown(conn, sockindex))
+    return CURLE_SSL_SHUTDOWN_FAILED;
 #endif /* USE_QSOSSL */
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
-  }
+
+  conn->ssl[sockindex].use = FALSE; /* get back to ordinary socket usage */
+
   return CURLE_OK;
 }
 

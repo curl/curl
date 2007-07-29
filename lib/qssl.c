@@ -275,7 +275,7 @@ static int Curl_qsossl_close_one(struct ssl_connect_data * conn,
 {
   int rc;
 
-  if (!conn->handle)
+  if(!conn->handle)
     return 0;
 
   rc = SSL_Destroy(conn->handle);
@@ -291,22 +291,16 @@ static int Curl_qsossl_close_one(struct ssl_connect_data * conn,
     return -1;
   }
 
-  conn->use = FALSE;    /* get back to ordinary socket usage */
   conn->handle = NULL;
   return 0;
 }
 
 
-void Curl_qsossl_close(struct connectdata * conn)
+void Curl_qsossl_close(struct connectdata *conn, int sockindex)
 
 {
-  struct SessionHandle * data = conn->data;
-  struct ssl_connect_data * connssl = conn->ssl;
-
-  if(connssl->use)
-    (void) Curl_qsossl_close_one(connssl, data);
-
-  connssl++;
+  struct SessionHandle *data = conn->data;
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
   if(connssl->use)
     (void) Curl_qsossl_close_one(connssl, data);
