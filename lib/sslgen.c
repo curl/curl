@@ -451,6 +451,10 @@ void Curl_ssl_close(struct connectdata *conn, int sockindex)
 #ifdef USE_QSOSSL
   Curl_qsossl_close(conn, sockindex);
 #endif /* USE_QSOSSL */
+#ifndef USE_SSL
+  (void)conn;
+  (void)sockindex;
+#endif /* !USE_SSL */
 }
 
 CURLcode Curl_ssl_shutdown(struct connectdata *conn, int sockindex)
