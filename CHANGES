@@ -13,9 +13,9 @@ Daniel S (29 July 2007)
   in the flow it would call the SSL layer to do SSL shutdown which then would
   use a socket that had already been closed - so if the application had opened
   a new one in the mean time, libcurl could send gibberish that way! I worked
-  with "Greg" to properly diagnose and fix this. The fix affects code for all
-  SSL libraries we support, but it has only been truly verified to work fine
-  for the OpenSSL version. The others have only been code reviewed.
+  with Greg Zavertnik to properly diagnose and fix this. The fix affects code
+  for all SSL libraries we support, but it has only been truly verified to
+  work fine for the OpenSSL version. The others have only been code reviewed.
 
 Daniel S (23 July 2007)
 - Implemented the parts of Patrick Monnerat's OS/400 patch that introduces
