@@ -29,6 +29,7 @@ This release includes the following bugfixes:
  o the SFTP PWD command works
  o HTTP Digest auth on a re-used connection
  o FTPS data connection close
+ o AIX 4 and 5 get to use non-blocking sockets
 
 This release includes the following known bugs:
 
@@ -50,6 +51,6 @@ advice from friends like these:
  Dan Fandrich, Song Ma, Daniel Black, Giancarlo Formicuccia, Shmulik Regev,
  Daniel Cater, Colin Hogben, Jofell Gallardo, Daniel Johnson,
  Ralf S. Engelschall, James Housley, Chris Flerackers, Patrick Monnerat,
- Jayesh A Shah, Greg Zavertnik
+ Jayesh A Shah, Greg Zavertnik, Peter O'Gorman
  
         Thanks! (and sorry if I forgot to mention someone)
