@@ -123,22 +123,25 @@ function returns OK.
 
 4. Call curl_multi_socket_all() first once
 
-5. Setup a "collection" of sockets to supervise when your socket
-callback is called.
+5. Provide some means to manage the sockets libcurl is using, so you can check
+them for activity. This can be done through your application code, or by way
+of an external library such as libevent or glib.
 
-6. Use curl_multi_timeout() to figure out how long to wait for action
+6. Use curl_multi_timeout() to figure out how long to wait for activity
 
-7. Wait for action on any of libcurl's sockets
+7. Wait for activity on any of libcurl's sockets
 
-8, When action happens, call curl_multi_socket_action() for the socket(s) that got
-action.
+8, When activity is detected, call curl_multi_socket_action() for the
+socket(s) that got action.
 
 9. Go back to step 6.
 .SH AVAILABILITY
-This function was added in libcurl 7.15.4, although deemed stablesince 7.16.0.
+This function was added in libcurl 7.15.4, although deemed stable since
+7.16.0.
 
 \fIcurl_multi_socket(3)\fP is deprecated, use
 \fIcurl_multi_socket_action(3)\fP instead!
 .SH "SEE ALSO"
 .BR curl_multi_cleanup "(3), " curl_multi_init "(3), "
-.BR curl_multi_fdset "(3), " curl_multi_info_read "(3)"
+.BR curl_multi_fdset "(3), " curl_multi_info_read "(3), "
+.BR "the hiperfifo.c example"
