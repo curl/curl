@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel S (31 July 2007)
+- Peter O'Gorman pointed out (and fixed) that the non-blocking check in
+  configure made libcurl use blocking sockets on AIX 4 and 5, while that
+  wasn't the intention.
+
 Daniel S (29 July 2007)
 - Jayesh A Shah filed bug report #1759542
   (http://curl.haxx.se/bug/view.cgi?id=1759542) identifying a rather serious

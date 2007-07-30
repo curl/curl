@@ -1107,7 +1107,7 @@ AC_DEFUN([CURL_CHECK_NONBLOCKING_SOCKET],
 #  define PLATFORM_SUNOS4
 # endif
 #endif
-#if (defined(_AIX) || defined(__xlC__)) && !defined(_AIX4)
+#if (defined(_AIX) || defined(__xlC__)) && !defined(_AIX41)
 # define PLATFORM_AIX_V3
 #endif
 
