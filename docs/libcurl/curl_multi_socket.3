@@ -106,7 +106,7 @@ The \fIuserp\fP argument is a private pointer you have previously set with
 CURLMcode type, general libcurl multi interface error code.
 
 If you receive \fICURLM_CALL_MULTI_PERFORM\fP, this basically means that you
-should call \fIcurl_multi_perform\fP again, before you wait for more actions
+should call \fIcurl_multi_socket(3)\fP again, before you wait for more actions
 on libcurl's sockets. You don't have to do it immediately, but the return code
 means that libcurl may have more data available to return or that there may be
 more data to send off before it is "satisfied".
@@ -119,22 +119,25 @@ function returns OK.
 
 2. Set the socket callback with CURLMOPT_SOCKETFUNCTION
 
-3. Add easy handles
+3. Set the timeout callback with CURLMOPT_TIMERFUNCTION, to get to know what
+timeout value to use when waiting for socket activities.
 
-4. Call curl_multi_socket_all() first once
+4. Add easy handles
 
-5. Provide some means to manage the sockets libcurl is using, so you can check
+5. Call curl_multi_socket_all() first once
+
+6. Provide some means to manage the sockets libcurl is using, so you can check
 them for activity. This can be done through your application code, or by way
 of an external library such as libevent or glib.
 
-6. Use curl_multi_timeout() to figure out how long to wait for activity
-
-7. Wait for activity on any of libcurl's sockets
+7. Wait for activity on any of libcurl's sockets, use the timeout value your
+calback has been told
 
 8, When activity is detected, call curl_multi_socket_action() for the
-socket(s) that got action.
+socket(s) that got action. If no activity is detected and the timeout expires,
+call \fIcurl_multi_socket(3)\fP with \fICURL_SOCKET_TIMEOUT\fP
 
-9. Go back to step 6.
+9. Go back to step 7.
 .SH AVAILABILITY
 This function was added in libcurl 7.15.4, although deemed stable since
 7.16.0.
