@@ -853,10 +853,10 @@ send_buffer *add_buffer_init(void)
 static
 CURLcode add_buffer_send(send_buffer *in,
                          struct connectdata *conn,
-                         long *bytes_written, /* add the number of sent
-                                                 bytes to this counter */
+                         long *bytes_written, /* add the number of sent bytes
+                                                 to this counter */
                          size_t included_body_bytes, /* how much of the buffer
-                                        contains body data (for log tracing) */
+                                                        contains body data */
                          int socketindex)
 
 {
@@ -921,10 +921,14 @@ CURLcode add_buffer_send(send_buffer *in,
       /* this data _may_ contain binary stuff */
       Curl_debug(conn->data, CURLINFO_HEADER_OUT, ptr,
                  (size_t)(amount-included_body_bytes), conn);
-      if (included_body_bytes)
+      if (included_body_bytes) {
         Curl_debug(conn->data, CURLINFO_DATA_OUT,
                    ptr+amount-included_body_bytes,
                    (size_t)included_body_bytes, conn);
+        /* since we sent a piece of the body here, up the byte counter for it
+           accordingly */
+        http->writebytecount = included_body_bytes;
+      }
     }
 
     *bytes_written += amount;
@@ -2038,7 +2042,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       /* if a line like this was already allocated, free the previous one */
       if(conn->allocptr.rangeline)
         free(conn->allocptr.rangeline);
-      conn->allocptr.rangeline = aprintf("Range: bytes=%s\r\n", data->reqdata.range);
+      conn->allocptr.rangeline = aprintf("Range: bytes=%s\r\n",
+                                         data->reqdata.range);
     }
     else if((httpreq != HTTPREQ_GET) &&
             !checkheaders(data, "Content-Range:")) {
@@ -2418,7 +2423,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
         if(!data->state.expect100header &&
            (postsize < MAX_INITIAL_POST_SIZE))  {
-          /* if we don't use expect:-100  AND
+          /* if we don't use expect: 100  AND
              postsize is less than MAX_INITIAL_POST_SIZE
 
              then append the post data to the HTTP request header. This limit
@@ -2492,9 +2497,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       else
         result =
           Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
-                        &http->readbytecount,
-                        http->postdata?FIRSTSOCKET:-1,
-                        http->postdata?&http->writebytecount:NULL);
+                              &http->readbytecount,
+                              http->postdata?FIRSTSOCKET:-1,
+                              http->postdata?&http->writebytecount:NULL);
       break;
 
     default:

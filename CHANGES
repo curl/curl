@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel S (1 August 2007)
+- Greg Morse reported a problem with POSTing using ANYAUTH to a server
+  requiring NTLM, and he provided test code and a test server and we worked
+  out a bug fix. We failed to count sent body data at times, which then caused
+  internal confusions when libcurl tried to send the rest of the data in order
+  to maintain the same connection alive.
+
 Daniel S (31 July 2007)
 - Peter O'Gorman pointed out (and fixed) that the non-blocking check in
   configure made libcurl use blocking sockets on AIX 4 and 5, while that
