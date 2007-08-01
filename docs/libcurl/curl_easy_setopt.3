@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_easy_setopt 3 "22 Feb 2007" "libcurl 7.16.2" "libcurl Manual"
+.TH curl_easy_setopt 3 "1 Aug 2007" "libcurl 7.17.0" "libcurl Manual"
 .SH NAME
 curl_easy_setopt \- set options for a curl easy handle
 .SH SYNOPSIS
@@ -44,11 +44,13 @@ between transfers, so if you want subsequent transfers with different options,
 you must change them between the transfers. You can optionally reset all
 options back to internal default with \fIcurl_easy_reset(3)\fP.
 
-Strings passed to libcurl as 'char *' arguments, will not be copied by the
-library. Instead you should keep them available until libcurl no longer needs
-them. Failing to do so will cause very odd behavior or even crashes. libcurl
-will need them until you call \fIcurl_easy_cleanup(3)\fP or you set the same
-option again to use a different pointer.
+Strings passed to libcurl as 'char *' arguments, are copied by the library;
+thus the string storage associated to the pointer argument may be overwritten
+after curl_easy_setopt() returns. Exceptions to this rule are described in
+the option details below.
+
+NOTE: before 7.17.0 strings were not copied. Instead the user was forced keep
+them available until libcurl no longer needed them.
 
 The \fIhandle\fP is the return code from a \fIcurl_easy_init(3)\fP or
 \fIcurl_easy_duphandle(3)\fP call.
@@ -330,6 +332,12 @@ system.
 Pass a char * to a buffer that the libcurl may store human readable error
 messages in. This may be more helpful than just the return code from
 \fIcurl_easy_perform\fP. The buffer must be at least CURL_ERROR_SIZE big.
+Although this argument is a 'char *', it does not describe an input string.
+Therefore the (probably undefined) contents of the buffer is NOT copied
+by the library. You should keep the associated storage available until
+libcurl no longer needs it. Failing to do so will cause very odd behavior
+or even crashes. libcurl will need it until you call \fIcurl_easy_cleanup(3)\fP
+or you set the same option again to use a different pointer. 
 
 Use \fICURLOPT_VERBOSE\fP and \fICURLOPT_DEBUGFUNCTION\fP to better
 debug/trace why errors happen.
@@ -1397,7 +1405,7 @@ If the file is password-protected, set the password with \fICURLOPT_SSLKEYPASSWD
 (Added in 7.16.1)
 .SH OTHER OPTIONS
 .IP CURLOPT_PRIVATE
-Pass a char * as parameter, pointing to data that should be associated with
+Pass a void * as parameter, pointing to data that should be associated with
 this curl handle.  The pointer can subsequently be retrieved using
 \fIcurl_easy_getinfo(3)\fP with the CURLINFO_PRIVATE option. libcurl itself
 does nothing with this data. (Added in 7.10.3)

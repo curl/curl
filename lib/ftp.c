@@ -871,11 +871,12 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
 
   /* Step 1, figure out what address that is requested */
 
-  if(data->set.ftpport && (strlen(data->set.ftpport) > 1)) {
+  if(data->set.str[STRING_FTPPORT] &&
+     (strlen(data->set.str[STRING_FTPPORT]) > 1)) {
     /* attempt to get the address of the given interface name */
-    if(!Curl_if2ip(data->set.ftpport, hbuf, sizeof(hbuf)))
+    if(!Curl_if2ip(data->set.str[STRING_FTPPORT], hbuf, sizeof(hbuf)))
       /* not an interface, use the given string as host name instead */
-      host = data->set.ftpport;
+      host = data->set.str[STRING_FTPPORT];
     else
       host = hbuf; /* use the hbuf for host name */
   } /* data->set.ftpport */
@@ -1080,27 +1081,28 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   unsigned short ip[4];
   bool freeaddr = TRUE;
   socklen_t sslen = sizeof(sa);
+  const char *ftpport = data->set.str[STRING_FTPPORT];
 
   (void)fcmd; /* not used in the IPv4 code */
-  if(data->set.ftpport) {
+  if(ftpport) {
     in_addr_t in;
 
     /* First check if the given name is an IP address */
-    in=inet_addr(data->set.ftpport);
+    in=inet_addr(ftpport);
 
     if(in != CURL_INADDR_NONE)
       /* this is an IPv4 address */
-      addr = Curl_ip2addr(in, data->set.ftpport, 0);
+      addr = Curl_ip2addr(in, ftpport, 0);
     else {
-      if(Curl_if2ip(data->set.ftpport, myhost, sizeof(myhost))) {
+      if(Curl_if2ip(ftpport, myhost, sizeof(myhost))) {
         /* The interface to IP conversion provided a dotted address */
         in=inet_addr(myhost);
         addr = Curl_ip2addr(in, myhost, 0);
       }
-      else if(strlen(data->set.ftpport)> 1) {
+      else if(strlen(ftpport)> 1) {
         /* might be a host name! */
         struct Curl_dns_entry *h=NULL;
-        int rc = Curl_resolv(conn, data->set.ftpport, 0, &h);
+        int rc = Curl_resolv(conn, ftpport, 0, &h);
         if(rc == CURLRESOLV_PENDING)
           /* BLOCKING */
           rc = Curl_wait_for_resolv(conn, &h);
@@ -1114,11 +1116,11 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
                                since it points to a DNS cache entry! */
         } /* (h) */
         else {
-          infof(data, "Failed to resolve host name %s\n", data->set.ftpport);
+          infof(data, "Failed to resolve host name %s\n", ftpport);
         }
       } /* strlen */
     } /* CURL_INADDR_NONE */
-  } /* data->set.ftpport */
+  } /* ftpport */
 
   if(!addr) {
     /* pick a suitable default here */
@@ -1346,7 +1348,8 @@ static CURLcode ftp_state_post_listtype(struct connectdata *conn)
      servers either... */
 
   NBFTPSENDF(conn, "%s",
-             data->set.customrequest?data->set.customrequest:
+             data->set.str[STRING_CUSTOMREQUEST]?
+             data->set.str[STRING_CUSTOMREQUEST]:
              (data->set.ftp_list_only?"NLST":"LIST"));
 
   state(conn, FTP_LIST);
@@ -1720,7 +1723,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     return CURLE_FTP_WEIRD_PASV_REPLY;
   }
 
-  if(data->set.proxy && *data->set.proxy) {
+  if(data->set.str[STRING_PROXY] && *data->set.str[STRING_PROXY]) {
     /*
      * This is a tunnel through a http proxy and we need to connect to the
      * proxy again here.
@@ -2384,8 +2387,8 @@ static CURLcode ftp_state_user_resp(struct connectdata *conn,
     result = ftp_state_loggedin(conn);
   }
   else if(ftpcode == 332) {
-    if(data->set.ftp_account) {
-      NBFTPSENDF(conn, "ACCT %s", data->set.ftp_account);
+    if(data->set.str[STRING_FTP_ACCOUNT]) {
+      NBFTPSENDF(conn, "ACCT %s", data->set.str[STRING_FTP_ACCOUNT]);
       state(conn, FTP_ACCT);
     }
     else {
@@ -2399,10 +2402,11 @@ static CURLcode ftp_state_user_resp(struct connectdata *conn,
     530 User ... access denied
     (the server denies to log the specified user) */
 
-    if (conn->data->set.ftp_alternative_to_user &&
+    if (conn->data->set.str[STRING_FTP_ALTERNATIVE_TO_USER] &&
         !conn->data->state.ftp_trying_alternative) {
       /* Ok, USER failed.  Let's try the supplied command. */
-      NBFTPSENDF(conn, "%s", conn->data->set.ftp_alternative_to_user);
+      NBFTPSENDF(conn, "%s",
+                 conn->data->set.str[STRING_FTP_ALTERNATIVE_TO_USER]);
       conn->data->state.ftp_trying_alternative = TRUE;
       state(conn, FTP_USER);
       result = CURLE_OK;
@@ -2488,7 +2492,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
         Curl_sec_request_prot(conn, "private");
         /* We set private first as default, in case the line below fails to
            set a valid level */
-	Curl_sec_request_prot(conn, data->set.krb_level);
+	Curl_sec_request_prot(conn, data->set.str[STRING_KRB_LEVEL]);
 
         if(Curl_sec_login(conn) != 0)
           infof(data, "Logging in with password in cleartext!\n");

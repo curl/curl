@@ -32,6 +32,8 @@
 CURLcode Curl_open(struct SessionHandle **curl);
 CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
                      va_list arg);
+CURLcode Curl_dupset(struct SessionHandle * dst, struct SessionHandle * src);
+void Curl_freeset(struct SessionHandle * data);
 CURLcode Curl_close(struct SessionHandle *data); /* opposite of curl_open() */
 CURLcode Curl_connect(struct SessionHandle *, struct connectdata **,
                       bool *async, bool *protocol_connect);

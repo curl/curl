@@ -233,7 +233,7 @@ CURLcode Curl_readrewind(struct connectdata *conn)
   /* We have sent away data. If not using CURLOPT_POSTFIELDS or
      CURLOPT_HTTPPOST, call app to rewind
   */
-  if(data->set.postfields ||
+  if(data->set.str[STRING_POSTFIELDS] ||
      (data->set.httpreq == HTTPREQ_POST_FORM))
     ; /* do nothing */
   else {
@@ -992,7 +992,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             }
 
             else if (checkprefix("Content-Encoding:", k->p) &&
-                     data->set.encoding) {
+                     data->set.str[STRING_ENCODING]) {
               /*
                * Process Content-Encoding. Look for the values: identity,
                * gzip, deflate, compress, x-gzip and x-compress. x-gzip and

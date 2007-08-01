@@ -217,6 +217,59 @@ static void close_connections(struct SessionHandle *data)
     ; /* empty loop */
 }
 
+void Curl_freeset(struct SessionHandle * data)
+{
+  /* Free all dynamic strings stored in the data->set substructure. */
+  enum dupstring i;
+  for(i=0; i < STRING_LAST; i++)
+    Curl_safefree(data->set.str[i]);
+}
+
+static CURLcode Curl_setstropt(char **charp, char * s)
+{
+  /* Release the previous storage at `charp' and replace by a dynamic storage
+     copy of `s'. Return CURLE_OK or CURLE_OUT_OF_MEMORY. */
+
+  if (*charp) {
+    free(*charp);
+    *charp = (char *) NULL;
+  }
+
+  if (s) {
+    s = strdup(s);
+
+    if (!s)
+      return CURLE_OUT_OF_MEMORY;
+
+    *charp = s;
+  }
+
+  return CURLE_OK;
+}
+
+CURLcode Curl_dupset(struct SessionHandle * dst, struct SessionHandle * src)
+{
+  CURLcode r;
+  enum dupstring i;
+
+  /* Copy src->set into dst->set first, then deal with the strings
+     afterwards */
+  dst->set = src->set;
+
+  /* clear all string pointers first */
+  memset(dst->set.str, 0, STRING_LAST * sizeof(char *));
+
+  /* duplicate all strings */
+  for(i=0; i< STRING_LAST; i++) {
+    r = Curl_setstropt(&dst->set.str[i], src->set.str[i]);
+    if (r != CURLE_OK)
+      break;
+  }
+
+  /* If a failure occurred, freeing has to be performed externally. */
+  return r;
+}
+
 /*
  * This is the internal function curl_easy_cleanup() calls. This should
  * cleanup and free all resources associated with this sessionhandle.
@@ -329,7 +382,7 @@ CURLcode Curl_close(struct SessionHandle *data)
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
   Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
-  if(data->set.cookiejar) {
+  if(data->set.str[STRING_COOKIEJAR]) {
     if(data->change.cookielist) {
       /* If there is a list of cookie files to read, do it first so that
          we have all the told files read before we write the new jar */
@@ -337,9 +390,9 @@ CURLcode Curl_close(struct SessionHandle *data)
     }
 
     /* we have a "destination" for all the cookies to get dumped to */
-    if(Curl_cookie_output(data->cookies, data->set.cookiejar))
+    if(Curl_cookie_output(data->cookies, data->set.str[STRING_COOKIEJAR]))
       infof(data, "WARNING: failed to save cookies in %s\n",
-            data->set.cookiejar);
+            data->set.str[STRING_COOKIEJAR]);
   }
   else {
     if(data->change.cookielist)
@@ -381,6 +434,7 @@ CURLcode Curl_close(struct SessionHandle *data)
     Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
   }
 
+  Curl_freeset(data);
   free(data);
   return CURLE_OK;
 }
@@ -609,7 +663,8 @@ CURLcode Curl_open(struct SessionHandle **curl)
     data->set.ssl.sessionid = TRUE; /* session ID caching enabled by default */
 #ifdef CURL_CA_BUNDLE
     /* This is our preferred CA cert bundle since install time */
-    data->set.ssl.CAfile = (char *)CURL_CA_BUNDLE;
+    res = Curl_setstropt(&data->set.str[STRING_SSL_CAFILE],
+                         (char *) CURL_CA_BUNDLE);
 #endif
   }
 
@@ -617,6 +672,7 @@ CURLcode Curl_open(struct SessionHandle **curl)
     ares_destroy(data->state.areschannel);
     if(data->state.headerbuff)
       free(data->state.headerbuff);
+    Curl_freeset(data);
     free(data);
     data = NULL;
   }
@@ -648,7 +704,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
   case CURLOPT_SSL_CIPHER_LIST:
     /* set a list of cipher we want to use in the SSL connection */
-    data->set.ssl.cipher_list = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_SSL_CIPHER_LIST],
+                            va_arg(param, char *));
     break;
 
   case CURLOPT_RANDOM_FILE:
@@ -656,13 +713,15 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * This is the path name to a file that contains random data to seed
      * the random SSL stuff with. The file is only used for reading.
      */
-    data->set.ssl.random_file = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_SSL_RANDOM_FILE],
+                            va_arg(param, char *));
     break;
   case CURLOPT_EGDSOCKET:
     /*
      * The Entropy Gathering Daemon socket pathname
      */
-    data->set.ssl.egdsocket = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_SSL_EGDSOCKET],
+                            va_arg(param, char *));
     break;
   case CURLOPT_MAXCONNECTS:
     /*
@@ -785,7 +844,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Use this file instead of the $HOME/.netrc file
      */
-    data->set.netrc_file = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_NETRC_FILE],
+                            va_arg(param, char *));
     break;
   case CURLOPT_TRANSFERTEXT:
     /*
@@ -836,9 +896,10 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * and ignore an received Content-Encoding header.
      *
      */
-    data->set.encoding = va_arg(param, char *);
-    if(data->set.encoding && !*data->set.encoding)
-      data->set.encoding = (char*)ALL_CONTENT_ENCODINGS;
+    argptr = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_ENCODING],
+                            (argptr && !*argptr)?
+                            (char *) ALL_CONTENT_ENCODINGS: argptr);
     break;
 
   case CURLOPT_FOLLOWLOCATION:
@@ -881,7 +942,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * A string with POST data. Makes curl HTTP POST. Even if it is NULL.
      */
-    data->set.postfields = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_POSTFIELDS],
+                            va_arg(param, char *));
     data->set.httpreq = HTTPREQ_POST;
     break;
 
@@ -918,15 +980,17 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       free(data->change.referer);
       data->change.referer_alloc = FALSE;
     }
-    data->set.set_referer = va_arg(param, char *);
-    data->change.referer = data->set.set_referer;
+    result = Curl_setstropt(&data->set.str[STRING_SET_REFERER],
+                            va_arg(param, char *));
+    data->change.referer = data->set.str[STRING_SET_REFERER];
     break;
 
   case CURLOPT_USERAGENT:
     /*
      * String to use in the HTTP User-Agent field
      */
-    data->set.useragent = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_USERAGENT],
+                            va_arg(param, char *));
     break;
 
   case CURLOPT_HTTPHEADER:
@@ -948,7 +1012,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Cookie string to send to the remote server in the request.
      */
-    data->set.cookie = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_COOKIE],
+                            va_arg(param, char *));
     break;
 
   case CURLOPT_COOKIEFILE:
@@ -973,7 +1038,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Set cookie file name to dump all cookies to when we're done.
      */
-    data->set.cookiejar = (char *)va_arg(param, void *);
+    result = Curl_setstropt(&data->set.str[STRING_COOKIEJAR],
+                            va_arg(param, char *));
 
     /*
      * Activate the cookie parser. This may or may not already
@@ -1071,7 +1137,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Set a custom string to use as request
      */
-    data->set.customrequest = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_CUSTOMREQUEST],
+                            va_arg(param, char *));
 
     /* we don't set
        data->set.httpreq = HTTPREQ_CUSTOM;
@@ -1137,7 +1204,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * Setting it to NULL, means no proxy but allows the environment variables
      * to decide for us.
      */
-    data->set.proxy = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_PROXY],
+                            va_arg(param, char *));
     break;
 
   case CURLOPT_WRITEHEADER:
@@ -1163,8 +1231,9 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Use FTP PORT, this also specifies which IP address to use
      */
-    data->set.ftpport = va_arg(param, char *);
-    data->set.ftp_use_port = (bool)(NULL != data->set.ftpport);
+    result = Curl_setstropt(&data->set.str[STRING_FTPPORT],
+                            va_arg(param, char *));
+    data->set.ftp_use_port = (bool)(NULL != data->set.str[STRING_FTPPORT]);
     break;
 
   case CURLOPT_FTP_USE_EPRT:
@@ -1247,8 +1316,9 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       free(data->change.url);
       data->change.url_alloc=FALSE;
     }
-    data->set.set_url = va_arg(param, char *);
-    data->change.url = data->set.set_url;
+    result = Curl_setstropt(&data->set.str[STRING_SET_URL],
+                            va_arg(param, char *));
+    data->change.url = data->set.str[STRING_SET_URL];
     data->change.url_changed = TRUE;
     break;
   case CURLOPT_PORT:
@@ -1284,7 +1354,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * user:password to use in the operation
      */
-    data->set.userpwd = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_USERPWD],
+                            va_arg(param, char *));
     break;
   case CURLOPT_POSTQUOTE:
     /*
@@ -1325,13 +1396,15 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * user:password needed to use the proxy
      */
-    data->set.proxyuserpwd = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_PROXYUSERPWD],
+                            va_arg(param, char *));
     break;
   case CURLOPT_RANGE:
     /*
      * What range of the file you want to transfer
      */
-    data->set.set_range = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_SET_RANGE],
+                            va_arg(param, char *));
     break;
   case CURLOPT_RESUME_FROM:
     /*
@@ -1428,31 +1501,36 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * String that holds file name of the SSL certificate to use
      */
-    data->set.cert = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_CERT],
+                            va_arg(param, char *));
     break;
   case CURLOPT_SSLCERTTYPE:
     /*
      * String that holds file type of the SSL certificate to use
      */
-    data->set.cert_type = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_CERT_TYPE],
+                            va_arg(param, char *));
     break;
   case CURLOPT_SSLKEY:
     /*
      * String that holds file name of the SSL certificate to use
      */
-    data->set.key = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_KEY],
+                            va_arg(param, char *));
     break;
   case CURLOPT_SSLKEYTYPE:
     /*
      * String that holds file type of the SSL certificate to use
      */
-    data->set.key_type = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_KEY_TYPE],
+                            va_arg(param, char *));
     break;
   case CURLOPT_SSLKEYPASSWD:
     /*
      * String that holds the SSL private key password.
      */
-    data->set.key_passwd = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_KEY_PASSWD],
+                            va_arg(param, char *));
     break;
   case CURLOPT_SSLENGINE:
     /*
@@ -1481,7 +1559,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * Set what interface or address/hostname to bind the socket to when
      * performing an operation and thus what from-IP your connection will use.
      */
-    data->set.device = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_DEVICE],
+                            va_arg(param, char *));
     break;
   case CURLOPT_LOCALPORT:
     /*
@@ -1499,8 +1578,9 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * A string that defines the kerberos security level.
      */
-    data->set.krb_level = va_arg(param, char *);
-    data->set.krb = (bool)(NULL != data->set.krb_level);
+    result = Curl_setstropt(&data->set.str[STRING_KRB_LEVEL],
+                            va_arg(param, char *));
+    data->set.krb = (bool)(NULL != data->set.str[STRING_KRB_LEVEL]);
     break;
   case CURLOPT_SSL_VERIFYPEER:
     /*
@@ -1530,7 +1610,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Set CA info for SSL connection. Specify file name of the CA certificate
      */
-    data->set.ssl.CAfile = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_SSL_CAFILE],
+                            va_arg(param, char *));
     break;
   case CURLOPT_CAPATH:
     /*
@@ -1538,7 +1619,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * certificates which have been prepared using openssl c_rehash utility.
      */
     /* This does not work on windows. */
-    data->set.ssl.CApath = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_SSL_CAPATH],
+                            va_arg(param, char *));
     break;
   case CURLOPT_TELNETOPTIONS:
     /*
@@ -1639,7 +1721,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Set private data pointer.
      */
-    data->set.private_data = va_arg(param, char *);
+    data->set.private_data = va_arg(param, void *);
     break;
 
   case CURLOPT_MAXFILESIZE:
@@ -1691,7 +1773,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       These former 3rd party transfer options are deprecated */
 
   case CURLOPT_FTP_ACCOUNT:
-    data->set.ftp_account = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_FTP_ACCOUNT],
+                            va_arg(param, char *));
     break;
 
   case CURLOPT_IGNORE_CONTENT_LENGTH:
@@ -1706,7 +1789,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
 
   case CURLOPT_FTP_ALTERNATIVE_TO_USER:
-    data->set.ftp_alternative_to_user = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_FTP_ALTERNATIVE_TO_USER],
+                            va_arg(param, char *));
     break;
 
   case CURLOPT_SOCKOPTFUNCTION:
@@ -1735,14 +1819,16 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Use this file instead of the $HOME/.ssh/id_dsa.pub file
      */
-    data->set.ssh_public_key = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_SSH_PUBLIC_KEY],
+                            va_arg(param, char *));
     break;
 
   case CURLOPT_SSH_PRIVATE_KEYFILE:
     /*
      * Use this file instead of the $HOME/.ssh/id_dsa file
      */
-    data->set.ssh_private_key = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_SSH_PRIVATE_KEY],
+                            va_arg(param, char *));
     break;
 
   case CURLOPT_HTTP_TRANSFER_DECODING:
@@ -2780,14 +2866,14 @@ static CURLcode setup_range(struct SessionHandle *data)
   struct HandleData *req = &data->reqdata;
 
   req->resume_from = data->set.set_resume_from;
-  if (req->resume_from || data->set.set_range) {
+  if (req->resume_from || data->set.str[STRING_SET_RANGE]) {
     if (req->rangestringalloc == TRUE)
       free(req->range);
 
     if(req->resume_from)
       req->range = aprintf("%" FORMAT_OFF_T "-", req->resume_from);
     else
-      req->range = strdup(data->set.set_range);
+      req->range = strdup(data->set.str[STRING_SET_RANGE]);
 
     req->rangestringalloc = req->range?TRUE:FALSE;
 
@@ -2892,7 +2978,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   conn->connectindex = -1;    /* no index */
 
   conn->proxytype = data->set.proxytype; /* type */
-  conn->bits.proxy = (bool)(data->set.proxy && *data->set.proxy);
+  conn->bits.proxy = (bool)(data->set.str[STRING_PROXY] &&
+                            *data->set.str[STRING_PROXY]);
   conn->bits.httpproxy = (bool)(conn->bits.proxy
                                 && (conn->proxytype == CURLPROXY_HTTP));
 
@@ -2911,8 +2998,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   /* Store creation time to help future close decision making */
   conn->created = Curl_tvnow();
 
-  conn->bits.user_passwd = (bool)(NULL != data->set.userpwd);
-  conn->bits.proxy_user_passwd = (bool)(NULL != data->set.proxyuserpwd);
+  conn->bits.user_passwd = (bool)(NULL != data->set.str[STRING_USERPWD]);
+  conn->bits.proxy_user_passwd = (bool)(NULL != data->set.str[STRING_PROXYUSERPWD]);
   conn->bits.no_body = data->set.opt_no_body;
   conn->bits.tunnel_proxy = data->set.tunnel_thru_httpproxy;
   conn->bits.ftp_use_epsv = data->set.ftp_use_epsv;
@@ -2945,11 +3032,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   if(urllen < LEAST_PATH_ALLOC)
     urllen=LEAST_PATH_ALLOC;
 
-  if (!data->set.source_url /* 3rd party FTP */
-      && data->reqdata.pathbuffer) {
-      /* Free the old buffer */
-      free(data->reqdata.pathbuffer);
-  }
+  /* Free the old buffer */
+  Curl_safefree(data->reqdata.pathbuffer);
 
   /*
    * We malloc() the buffers below urllen+2 to make room for to possibilities:
@@ -2981,7 +3065,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     char proxyuser[MAX_CURL_USER_LENGTH]="";
     char proxypasswd[MAX_CURL_PASSWORD_LENGTH]="";
 
-    sscanf(data->set.proxyuserpwd,
+    sscanf(data->set.str[STRING_PROXYUSERPWD],
            "%" MAX_CURL_USER_LENGTH_TXT "[^:]:"
            "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^\n]",
            proxyuser, proxypasswd);
@@ -2995,8 +3079,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       return CURLE_OUT_OF_MEMORY;
   }
 
-  if (data->set.proxy) {
-    proxy = strdup(data->set.proxy); /* if global proxy is set, this is it */
+  if (data->set.str[STRING_PROXY]) {
+    proxy = strdup(data->set.str[STRING_PROXY]);
+    /* if global proxy is set, this is it */
     if(NULL == proxy) {
       failf(data, "memory shortage");
       return CURLE_OUT_OF_MEMORY;
@@ -3711,9 +3796,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    * user_password is set in "inherit initial knowledge' above,
    * so it doesn't have to be set in this block
    */
-  if (data->set.userpwd != NULL) {
+  if (data->set.str[STRING_USERPWD] != NULL) {
     /* the name is given, get user+password */
-    sscanf(data->set.userpwd,
+    sscanf(data->set.str[STRING_USERPWD],
            "%" MAX_CURL_USER_LENGTH_TXT "[^:]:"
            "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^\n]",
            user, passwd);
@@ -3723,7 +3808,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   if (data->set.use_netrc != CURL_NETRC_IGNORED) {
     if(Curl_parsenetrc(conn->host.name,
                        user, passwd,
-                       data->set.netrc_file)) {
+                       data->set.str[STRING_NETRC_FILE])) {
       infof(data, "Couldn't find host %s in the " DOT_CHAR
             "netrc file, using defaults\n",
             conn->host.name);
@@ -3760,8 +3845,21 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    * new one.
    *************************************************************/
 
-  /* get a cloned copy of the SSL config situation stored in the
-     connection struct */
+  /* Get a cloned copy of the SSL config situation stored in the
+     connection struct. But to get this going nicely, we must first make
+     sure that the strings in the master copy are pointing to the correct
+     strings in the session handle strings array!
+
+     Keep in mind that the pointers in the master copy are pointing to strings
+     that will be freed as part of the SessionHandle struct, but all cloned
+     copies will be separately allocated.
+  */
+  data->set.ssl.CApath = data->set.str[STRING_SSL_CAPATH];
+  data->set.ssl.CAfile = data->set.str[STRING_SSL_CAFILE];
+  data->set.ssl.random_file = data->set.str[STRING_SSL_RANDOM_FILE];
+  data->set.ssl.egdsocket = data->set.str[STRING_SSL_EGDSOCKET];
+  data->set.ssl.cipher_list = data->set.str[STRING_SSL_CIPHER_LIST];
+
   if(!Curl_clone_ssl_config(&data->set.ssl, &conn->ssl_config))
     return CURLE_OUT_OF_MEMORY;
 
@@ -4081,10 +4179,10 @@ static CURLcode SetupConnection(struct connectdata *conn,
   /*************************************************************
    * Set user-agent for HTTP
    *************************************************************/
-  if((conn->protocol&PROT_HTTP) && data->set.useragent) {
+  if((conn->protocol&PROT_HTTP) && data->set.str[STRING_USERAGENT]) {
     Curl_safefree(conn->allocptr.uagent);
     conn->allocptr.uagent =
-      aprintf("User-Agent: %s\r\n", data->set.useragent);
+      aprintf("User-Agent: %s\r\n", data->set.str[STRING_USERAGENT]);
     if(!conn->allocptr.uagent)
       return CURLE_OUT_OF_MEMORY;
   }

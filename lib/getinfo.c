@@ -176,7 +176,7 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
     *param_charp = data->info.contenttype;
     break;
   case CURLINFO_PRIVATE:
-    *param_charp = data->set.private_data;
+    *param_charp = (char *) data->set.private_data;
     break;
   case CURLINFO_HTTPAUTH_AVAIL:
     *param_longp = data->info.httpauthavail;

@@ -182,8 +182,9 @@ static int ossl_seed(struct SessionHandle *data)
 #endif
   {
     /* let the option override the define */
-    nread += RAND_load_file((data->set.ssl.random_file?
-                             data->set.ssl.random_file:RANDOM_FILE),
+    nread += RAND_load_file((data->set.str[STRING_SSL_RANDOM_FILE]?
+                             data->set.str[STRING_SSL_RANDOM_FILE]:
+                             RANDOM_FILE),
                             RAND_LOAD_LENGTH);
     if(seed_enough(nread))
       return nread;
@@ -195,14 +196,14 @@ static int ossl_seed(struct SessionHandle *data)
 #ifndef EGD_SOCKET
   /* If we don't have the define set, we only do this if the egd-option
      is set */
-  if(data->set.ssl.egdsocket)
+  if(data->set.str[STRING_SSL_EGDSOCKET])
 #define EGD_SOCKET "" /* doesn't matter won't be used */
 #endif
   {
     /* If there's an option and a define, the option overrides the
        define */
-    int ret = RAND_egd(data->set.ssl.egdsocket?
-                       data->set.ssl.egdsocket:EGD_SOCKET);
+    int ret = RAND_egd(data->set.str[STRING_SSL_EGDSOCKET]?
+                       data->set.str[STRING_SSL_EGDSOCKET]:EGD_SOCKET);
     if(-1 != ret) {
       nread += ret;
       if(seed_enough(nread))
@@ -261,7 +262,8 @@ int Curl_ossl_seed(struct SessionHandle *data)
      time-consuming seedings in vain */
   static bool ssl_seeded = FALSE;
 
-  if(!ssl_seeded || data->set.ssl.random_file || data->set.ssl.egdsocket) {
+  if(!ssl_seeded || data->set.str[STRING_SSL_RANDOM_FILE] ||
+     data->set.str[STRING_SSL_EGDSOCKET]) {
     ossl_seed(data);
     ssl_seeded = TRUE;
   }
@@ -306,7 +308,7 @@ int cert_stuff(struct connectdata *conn,
     X509 *x509;
     int cert_done = 0;
 
-    if(data->set.key_passwd) {
+    if(data->set.str[STRING_KEY_PASSWD]) {
 #ifndef HAVE_USERDATA_IN_PWD_CALLBACK
       /*
        * If password has been given, we store that in the global
@@ -320,7 +322,7 @@ int cert_stuff(struct connectdata *conn,
        * We set the password in the callback userdata
        */
       SSL_CTX_set_default_passwd_cb_userdata(ctx,
-                                             data->set.key_passwd);
+                                             data->set.str[STRING_KEY_PASSWD]);
 #endif
       /* Set passwd callback: */
       SSL_CTX_set_default_passwd_cb(ctx, passwd_callback);
@@ -373,7 +375,8 @@ int cert_stuff(struct connectdata *conn,
 
       PKCS12_PBE_add();
 
-      if (!PKCS12_parse(p12, data->set.key_passwd, &pri, &x509, NULL)) {
+      if (!PKCS12_parse(p12, data->set.str[STRING_KEY_PASSWD], &pri, &x509,
+                        NULL)) {
         failf(data,
               "could not parse PKCS12 file, check password, OpenSSL error %s",
               ERR_error_string(ERR_get_error(), NULL) );
@@ -446,7 +449,7 @@ int cert_stuff(struct connectdata *conn,
 #ifdef HAVE_ENGINE_LOAD_FOUR_ARGS
                                     ui_method,
 #endif
-                                    data->set.key_passwd);
+                                    data->set.str[STRING_KEY_PASSWD]);
           if(!priv_key) {
             failf(data, "failed to load private key from crypto engine\n");
             return 0;
@@ -1340,37 +1343,40 @@ Curl_ossl_connect_step1(struct connectdata *conn,
     SSL_CTX_ctrl(connssl->ctx, BIO_C_SET_NBIO, 1, NULL);
 #endif
 
-  if(data->set.cert) {
+  if(data->set.str[STRING_CERT]) {
     if(!cert_stuff(conn,
                    connssl->ctx,
-                   data->set.cert,
-                   data->set.cert_type,
-                   data->set.key,
-                   data->set.key_type)) {
+                   data->set.str[STRING_CERT],
+                   data->set.str[STRING_CERT_TYPE],
+                   data->set.str[STRING_KEY],
+                   data->set.str[STRING_KEY_TYPE])) {
       /* failf() is already done in cert_stuff() */
       return CURLE_SSL_CERTPROBLEM;
     }
   }
 
-  if(data->set.ssl.cipher_list) {
+  if(data->set.str[STRING_SSL_CIPHER_LIST]) {
     if(!SSL_CTX_set_cipher_list(connssl->ctx,
-                                data->set.ssl.cipher_list)) {
+                                data->set.str[STRING_SSL_CIPHER_LIST])) {
       failf(data, "failed setting cipher list");
       return CURLE_SSL_CIPHER;
     }
   }
 
-  if (data->set.ssl.CAfile || data->set.ssl.CApath) {
+  if (data->set.str[STRING_SSL_CAFILE] || data->set.str[STRING_SSL_CAPATH]) {
     /* tell SSL where to find CA certificates that are used to verify
        the servers certificate. */
-    if (!SSL_CTX_load_verify_locations(connssl->ctx, data->set.ssl.CAfile,
-                                       data->set.ssl.CApath)) {
+    if (!SSL_CTX_load_verify_locations(connssl->ctx,
+                                       data->set.str[STRING_SSL_CAFILE],
+                                       data->set.str[STRING_SSL_CAPATH])) {
       if (data->set.ssl.verifypeer) {
         /* Fail if we insist on successfully verifying the server. */
         failf(data,"error setting certificate verify locations:\n"
               "  CAfile: %s\n  CApath: %s\n",
-              data->set.ssl.CAfile ? data->set.ssl.CAfile : "none",
-              data->set.ssl.CApath ? data->set.ssl.CApath : "none");
+              data->set.str[STRING_SSL_CAFILE]?
+              data->set.str[STRING_SSL_CAFILE]: "none",
+              data->set.str[STRING_SSL_CAPATH]?
+              data->set.str[STRING_SSL_CAPATH] : "none");
         return CURLE_SSL_CACERT_BADFILE;
       }
       else {
@@ -1387,8 +1393,10 @@ Curl_ossl_connect_step1(struct connectdata *conn,
     infof(data,
           "  CAfile: %s\n"
           "  CApath: %s\n",
-          data->set.ssl.CAfile ? data->set.ssl.CAfile : "none",
-          data->set.ssl.CApath ? data->set.ssl.CApath : "none");
+          data->set.str[STRING_SSL_CAFILE] ? data->set.str[STRING_SSL_CAFILE]:
+          "none",
+          data->set.str[STRING_SSL_CAPATH] ? data->set.str[STRING_SSL_CAPATH]:
+          "none");
   }
   /* SSL always tries to verify the peer, this only says whether it should
    * fail to connect if the verification fails, or if it should continue

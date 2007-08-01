@@ -228,11 +228,12 @@ static CURLcode bindlocal(struct connectdata *conn,
                                                 "random" */
   /* how many port numbers to try to bind to, increasing one at a time */
   int portnum = data->set.localportrange;
+  const char *dev = data->set.str[STRING_DEVICE];
 
   /*************************************************************
    * Select device to bind socket to
    *************************************************************/
-  if (data->set.device && (strlen(data->set.device)<255) ) {
+  if (dev && (strlen(dev)<255) ) {
     struct Curl_dns_entry *h=NULL;
     char myhost[256] = "";
     in_addr_t in;
@@ -241,10 +242,10 @@ static CURLcode bindlocal(struct connectdata *conn,
     int in6 = -1;
 
     /* First check if the given name is an IP address */
-    in=inet_addr(data->set.device);
+    in=inet_addr(dev);
 
     if((in == CURL_INADDR_NONE) &&
-       Curl_if2ip(data->set.device, myhost, sizeof(myhost))) {
+       Curl_if2ip(dev, myhost, sizeof(myhost))) {
       /*
        * We now have the numerical IPv4-style x.y.z.w in the 'myhost' buffer
        */
@@ -263,7 +264,7 @@ static CURLcode bindlocal(struct connectdata *conn,
        * This was not an interface, resolve the name as a host name
        * or IP number
        */
-      rc = Curl_resolv(conn, data->set.device, 0, &h);
+      rc = Curl_resolv(conn, dev, 0, &h);
       if(rc == CURLRESOLV_PENDING)
         (void)Curl_wait_for_resolv(conn, &h);
 
@@ -275,7 +276,7 @@ static CURLcode bindlocal(struct connectdata *conn,
                          myhost, sizeof myhost);
         else
           /* we know data->set.device is shorter than the myhost array */
-          strcpy(myhost, data->set.device);
+          strcpy(myhost, dev);
         Curl_resolv_unlock(data, h);
       }
     }
@@ -287,7 +288,7 @@ static CURLcode bindlocal(struct connectdata *conn,
          hostent_buf,
          sizeof(hostent_buf));
       */
-      failf(data, "Couldn't bind to '%s'", data->set.device);
+      failf(data, "Couldn't bind to '%s'", dev);
       return CURLE_INTERFACE_FAILED;
     }
 
@@ -307,11 +308,10 @@ static CURLcode bindlocal(struct connectdata *conn,
        * hostname or ip address.
        */
       if (setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
-                     data->set.device, strlen(data->set.device)+1) != 0) {
+                     dev, strlen(dev)+1) != 0) {
         /* printf("Failed to BINDTODEVICE, socket: %d  device: %s error: %s\n",
-           sockfd, data->set.device, Curl_strerror(SOCKERRNO)); */
-        infof(data, "SO_BINDTODEVICE %s failed\n",
-              data->set.device);
+           sockfd, dev, Curl_strerror(SOCKERRNO)); */
+        infof(data, "SO_BINDTODEVICE %s failed\n", dev);
         /* This is typically "errno 1, error: Operation not permitted" if
            you're not running as root or another suitable privileged user */
       }

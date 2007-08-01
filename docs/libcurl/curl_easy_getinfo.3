@@ -133,7 +133,9 @@ protocol used doesn't support this.
 .IP CURLINFO_PRIVATE
 Pass a pointer to a 'char *' to receive the pointer to the private data
 associated with the curl handle (set with the CURLOPT_PRIVATE option to
-\fIcurl_easy_setopt(3)\fP). (Added in 7.10.3)
+\fIcurl_easy_setopt(3)\fP). Please note that for internal reasons, the
+value is returned as a 'char *', although effectively being a 'void *'.
+(Added in 7.10.3)
 .IP CURLINFO_HTTPAUTH_AVAIL
 Pass a pointer to a long to receive a bitmask indicating the authentication
 method(s) available. The meaning of the bits is explained in the

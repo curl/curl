@@ -195,7 +195,7 @@ struct ssl_config_data {
   long verifyhost;       /* 0: no verify
                             1: check that CN exists
                             2: CN must match hostname */
-  char *CApath;          /* DOES NOT WORK ON WINDOWS */
+  char *CApath;          /* certificate dir (doesn't work on windows) */
   char *CAfile;          /* cerficate to verify peer against */
   char *random_file;     /* path to file containing "random" data */
   char *egdsocket;       /* path to file containing the EGD daemon socket */
@@ -1237,43 +1237,69 @@ struct DynamicStatic {
  * calculated internally for the "session handle" MUST be defined within the
  * 'struct UrlState' instead. The only exceptions MUST note the changes in
  * the 'DynamicStatic' struct.
+ * Character pointer fields point to dynamic storage, unless otherwise stated.
  */
 struct Curl_one_easy; /* declared and used only in multi.c */
 struct Curl_multi;    /* declared and used only in multi.c */
 
+enum dupstring {
+  STRING_CERT,            /* client certificate file name */
+  STRING_CERT_TYPE,       /* format for certificate (default: PEM)*/
+  STRING_COOKIE,          /* HTTP cookie string to send */
+  STRING_COOKIEJAR,       /* dump all cookies to this file */
+  STRING_CUSTOMREQUEST,   /* HTTP/FTP request/method to use */
+  STRING_DEVICE,          /* local network interface/address to use */
+  STRING_ENCODING,        /* Accept-Encoding string */
+  STRING_FTP_ACCOUNT,     /* ftp account data */
+  STRING_FTP_ALTERNATIVE_TO_USER, /* command to send if USER/PASS fails */
+  STRING_FTPPORT,         /* port to send with the FTP PORT command */
+  STRING_KEY,             /* private key file name */
+  STRING_KEY_PASSWD,      /* plain text private key password */
+  STRING_KEY_TYPE,        /* format for private key (default: PEM) */
+  STRING_KRB_LEVEL,       /* krb security level */
+  STRING_NETRC_FILE,      /* if not NULL, use this instead of trying to find
+                             $HOME/.netrc */
+  STRING_POSTFIELDS,      /* if POST, set the fields' values here */
+  STRING_PROXY,           /* proxy to use */
+  STRING_PROXYUSERPWD,    /* Proxy <user:password>, if used */
+  STRING_SET_RANGE,       /* range, if used */
+  STRING_SET_REFERER,     /* custom string for the HTTP referer field */
+  STRING_SET_URL,         /* what original URL to work on */
+  STRING_SSH_PRIVATE_KEY, /* path to the private key file for auth */
+  STRING_SSH_PUBLIC_KEY,  /* path to the public key file for auth */
+  STRING_SSL_CAPATH,      /* CA directory name (doesn't work on windows) */
+  STRING_SSL_CAFILE,      /* certificate file to verify peer against */
+  STRING_SSL_CIPHER_LIST, /* list of ciphers to use */
+  STRING_SSL_EGDSOCKET,   /* path to file containing the EGD daemon socket */
+  STRING_SSL_RANDOM_FILE, /* path to file containing "random" data */
+  STRING_USERAGENT,       /* User-Agent string */
+  STRING_USERPWD,         /* <user:password>, if used */
+
+  /* -- end of strings -- */
+  STRING_LAST /* not used, just an end-of-list marker */
+};
+
 struct UserDefined {
   FILE *err;         /* the stderr user data goes here */
   void *debugdata;   /* the data that will be passed to fdebug */
-  char *errorbuffer; /* store failure messages in here */
-  char *proxyuserpwd;  /* Proxy <user:password>, if used */
+  char *errorbuffer; /* (Static) store failure messages in here */
   long proxyport; /* If non-zero, use this port number by default. If the
                      proxy string features a ":[port]" that one will override
                      this. */
   void *out;         /* the fetched file goes here */
   void *in;          /* the uploaded file is read from here */
   void *writeheader; /* write the header to this if non-NULL */
-  char *set_url;     /* what original URL to work on */
-  char *proxy;       /* proxy to use */
   long use_port;     /* which port to use (when not using default) */
-  char *userpwd;     /* <user:password>, if used */
   long httpauth;     /* what kind of HTTP authentication to use (bitmask) */
   long proxyauth;    /* what kind of proxy authentication to use (bitmask) */
-  char *set_range;   /* range, if used. See README for detailed specification
-                        on this syntax. */
   long followlocation; /* as in HTTP Location: */
   long maxredirs;    /* maximum no. of http(s) redirects to follow, set to -1
                         for infinity */
-  char *set_referer; /* custom string */
   bool free_referer; /* set TRUE if 'referer' points to a string we
                         allocated */
-  char *useragent;   /* User-Agent string */
-  char *encoding;    /* Accept-Encoding string */
-  char *postfields;  /* if POST, set the fields' values here */
   curl_off_t postfieldsize; /* if POST, this might have a size to use instead
                                of strlen(), and then the data *may* be binary
                                (contain zero bytes) */
-  char *ftpport;     /* port to send with the FTP PORT command */
-  char *device;      /* local network interface/address to use */
   unsigned short localport; /* local port number to bind to */
   int localportrange; /* number of additional port numbers to test in case the
                          'localport' one can't be bind()ed */
@@ -1305,19 +1331,10 @@ struct UserDefined {
   curl_off_t max_send_speed; /* high speed limit in bytes/second for upload */
   curl_off_t max_recv_speed; /* high speed limit in bytes/second for download */
   curl_off_t set_resume_from;  /* continue [ftp] transfer from here */
-  char *cookie;         /* HTTP cookie string to send */
   struct curl_slist *headers; /* linked list of extra headers */
   struct curl_httppost *httppost;  /* linked list of POST data */
-  char *cert;           /* certificate */
-  char *cert_type;      /* format for certificate (default: PEM) */
-  char *key;            /* private key */
-  char *key_type;       /* format for private key (default: PEM) */
-  char *key_passwd;     /* plain text private key password */
-  char *cookiejar;      /* dump all cookies to this file */
   bool cookiesession;   /* new cookie session? */
   bool crlf;            /* convert crlf on ftp upload(?) */
-  char *ftp_account;    /* ftp account data */
-  char *ftp_alternative_to_user;   /* command to send if USER/PASS fails */
   struct curl_slist *quote;     /* after connection is established */
   struct curl_slist *postquote; /* after the transfer */
   struct curl_slist *prequote; /* before the transfer, after type */
@@ -1330,14 +1347,8 @@ struct UserDefined {
   curl_TimeCond timecondition; /* kind of time/date comparison */
   time_t timevalue;       /* what time to compare with */
   Curl_HttpReq httpreq;   /* what kind of HTTP request (if any) is this */
-  char *customrequest;    /* HTTP/FTP request to use */
   long httpversion; /* when non-zero, a specific HTTP version requested to
                        be used in the library's request(s) */
-  char *auth_host; /* if set, this is the allocated string to the host name
-                    * to which to send the authorization data to, and no other
-                    * host (which location-following otherwise could lead to)
-                    */
-  char *krb_level;  /* what security level */
   struct ssl_config_data ssl;  /* user defined SSL stuff */
 
   curl_proxytype proxytype; /* what kind of proxy that is in use */
@@ -1345,7 +1356,7 @@ struct UserDefined {
   int dns_cache_timeout; /* DNS cache timeout */
   long buffer_size;      /* size of receive buffer to use */
 
-  char *private_data; /* Private data */
+  void *private_data; /* Private data */
 
   struct Curl_one_easy *one_easy; /* When adding an easy handle to a multi
                                      handle, an internal 'Curl_one_easy'
@@ -1358,9 +1369,6 @@ struct UserDefined {
   long ip_version;
 
   curl_off_t max_filesize; /* Maximum file size to download */
-
-  char *source_url;     /* for 3rd party transfer */
-  char *source_userpwd;  /* for 3rd party transfer */
 
   curl_ftpfile ftp_filemethod; /* how to get to a file when FTP is used  */
 
@@ -1388,8 +1396,6 @@ struct UserDefined {
   bool upload;
   enum CURL_NETRC_OPTION
        use_netrc;        /* defined in include/curl.h */
-  char *netrc_file;      /* if not NULL, use this instead of trying to find
-                            $HOME/.netrc */
   bool verbose;
   bool krb;              /* kerberos connection requested */
   bool reuse_forbid;     /* forbidden to be reused, close after use */
@@ -1408,16 +1414,14 @@ struct UserDefined {
                             us */
   bool connect_only;     /* make connection, let application use the socket */
   long ssh_auth_types;   /* allowed SSH auth types */
-  char *ssh_public_key;   /* the path to the public key file for
-                             authentication */
-  char *ssh_private_key;  /* the path to the private key file for
-                             authentication */
   bool http_te_skip;     /* pass the raw body data to the user, even when
                             transfer-encoded (chunked, compressed) */
   bool http_ce_skip;     /* pass the raw body data to the user, even when
                             content-encoded (chunked, compressed) */
   long new_file_perms;    /* Permissions to use when creating remote files */
   long new_directory_perms; /* Permissions to use when creating remote dirs */
+
+  char *str[STRING_LAST]; /* array of strings, pointing to allocated memory */
 };
 
 struct Names {

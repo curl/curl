@@ -579,7 +579,8 @@ CURL *curl_easy_duphandle(CURL *incurl)
     outcurl->state.headersize=HEADERSIZE;
 
     /* copy all userdefined values */
-    outcurl->set = data->set;
+    if (Curl_dupset(outcurl, data) != CURLE_OK)
+      break;
 
     if(data->state.used_interface == Curl_if_multi)
       outcurl->state.connc = data->state.connc;
@@ -658,6 +659,7 @@ CURL *curl_easy_duphandle(CURL *incurl)
         free(outcurl->change.url);
       if(outcurl->change.referer)
         free(outcurl->change.referer);
+      Curl_freeset(outcurl);
       free(outcurl); /* free the memory again */
       outcurl = NULL;
     }
@@ -681,6 +683,7 @@ void curl_easy_reset(CURL *curl)
   data->reqdata.proto.generic=NULL;
 
   /* zero out UserDefined data: */
+  Curl_freeset(data);
   memset(&data->set, 0, sizeof(struct UserDefined));
 
   /* zero out Progress data: */
@@ -732,7 +735,7 @@ void curl_easy_reset(CURL *curl)
   data->set.ssl.verifyhost = 2;
 #ifdef CURL_CA_BUNDLE
   /* This is our prefered CA cert bundle since install time */
-  data->set.ssl.CAfile = (char *)CURL_CA_BUNDLE;
+  (void) curl_easy_setopt(curl, CURLOPT_CAINFO, (char *) CURL_CA_BUNDLE);
 #endif
 
   data->set.ssh_auth_types = CURLSSH_AUTH_DEFAULT; /* defaults to any auth

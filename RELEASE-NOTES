@@ -12,6 +12,7 @@ Curl and libcurl 7.16.5
 This release includes the following changes:
  
  o support for OS/400 Secure Sockets Layer library
+ o curl_easy_setopt() now allocates strings passed to it
 
 This release includes the following bugfixes:
 

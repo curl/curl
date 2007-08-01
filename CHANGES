@@ -7,6 +7,18 @@
                                   Changelog
 
 Daniel S (1 August 2007)
+- Patrick Monnerat and I modified libcurl so that now it *copies* all strings
+  passed to it with curl_easy_setopt()! Previously it has always just refered
+  to the data, forcing the user to keep the data around until libcurl is done
+  with it. That is now history and libcurl will instead clone the given
+  strings and keep private copies. This is also part of Patrick Monnerat's
+  OS/400 port.
+
+  Due to this being a somewhat interesting change API wise, I've decided to
+  bump the version of the upcoming release to 7.17.0. Older applications will
+  of course not notice this change nor do they have to care, but new
+  applications can be written to take advantage of this.
+
 - Greg Morse reported a problem with POSTing using ANYAUTH to a server
   requiring NTLM, and he provided test code and a test server and we worked
   out a bug fix. We failed to count sent body data at times, which then caused

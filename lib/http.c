@@ -1187,7 +1187,8 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
         if(!checkheaders(data, "Proxy-Connection:"))
           proxyconn = "Proxy-Connection: Keep-Alive\r\n";
 
-        if(!checkheaders(data, "User-Agent:") && data->set.useragent)
+        if(!checkheaders(data, "User-Agent:") &&
+           data->set.str[STRING_USERAGENT])
           useragent = conn->allocptr.uagent;
 
 	/* Send the connect request to the proxy */
@@ -1770,8 +1771,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   }
 
   /* Now set the 'request' pointer to the proper request string */
-  if(data->set.customrequest)
-    request = data->set.customrequest;
+  if(data->set.str[STRING_CUSTOMREQUEST])
+    request = data->set.str[STRING_CUSTOMREQUEST];
   else {
     if(conn->bits.no_body)
       request = (char *)"HEAD";
@@ -1826,14 +1827,14 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   else
     conn->allocptr.ref = NULL;
 
-  if(data->set.cookie && !checkheaders(data, "Cookie:"))
-    addcookies = data->set.cookie;
+  if(data->set.str[STRING_COOKIE] && !checkheaders(data, "Cookie:"))
+    addcookies = data->set.str[STRING_COOKIE];
 
   if(!checkheaders(data, "Accept-Encoding:") &&
-     data->set.encoding) {
+     data->set.str[STRING_ENCODING]) {
     Curl_safefree(conn->allocptr.accept_encoding);
     conn->allocptr.accept_encoding =
-      aprintf("Accept-Encoding: %s\r\n", data->set.encoding);
+      aprintf("Accept-Encoding: %s\r\n", data->set.str[STRING_ENCODING]);
     if(!conn->allocptr.accept_encoding)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -2107,19 +2108,23 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                 conn->allocptr.userpwd?conn->allocptr.userpwd:"",
                 (data->reqdata.use_range && conn->allocptr.rangeline)?
                 conn->allocptr.rangeline:"",
-                (data->set.useragent && *data->set.useragent && conn->allocptr.uagent)?
+                (data->set.str[STRING_USERAGENT] &&
+                 *data->set.str[STRING_USERAGENT] && conn->allocptr.uagent)?
                 conn->allocptr.uagent:"",
                 (conn->allocptr.host?conn->allocptr.host:""), /* Host: host */
                 http->p_pragma?http->p_pragma:"",
                 http->p_accept?http->p_accept:"",
-                (data->set.encoding && *data->set.encoding && conn->allocptr.accept_encoding)?
-                conn->allocptr.accept_encoding:"",
-                (data->change.referer && conn->allocptr.ref)?conn->allocptr.ref:"" /* Referer: <data> */,
-                (conn->bits.httpproxy &&
-                 !conn->bits.tunnel_proxy &&
-                 !checkheaders(data, "Proxy-Connection:"))?
+                (data->set.str[STRING_ENCODING] &&
+                 *data->set.str[STRING_ENCODING] &&
+                 conn->allocptr.accept_encoding)?
+                  conn->allocptr.accept_encoding:"",
+                  (data->change.referer && conn->allocptr.ref)?
+                  conn->allocptr.ref:"" /* Referer: <data> */,
+                  (conn->bits.httpproxy &&
+                   !conn->bits.tunnel_proxy &&
+                   !checkheaders(data, "Proxy-Connection:"))?
                   "Proxy-Connection: Keep-Alive\r\n":"",
-                te
+                  te
                 );
 
     if(result)
@@ -2384,7 +2389,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         /* figure out the size of the postfields */
         postsize = (data->set.postfieldsize != -1)?
           data->set.postfieldsize:
-          (data->set.postfields?(curl_off_t)strlen(data->set.postfields):0);
+          (data->set.str[STRING_POSTFIELDS]?
+           (curl_off_t)strlen(data->set.str[STRING_POSTFIELDS]):0);
 
       if(!conn->bits.upload_chunky) {
         /* We only set Content-Length and allow a custom Content-Length if
@@ -2409,7 +2415,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           return result;
       }
 
-      if(data->set.postfields) {
+      if(data->set.str[STRING_POSTFIELDS]) {
 
         /* for really small posts we don't use Expect: headers at all, and for
            the somewhat bigger ones we allow the app to disable it */
@@ -2437,7 +2443,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           if(!conn->bits.upload_chunky) {
             /* We're not sending it 'chunked', append it to the request
                already now to reduce the number if send() calls */
-            result = add_buffer(req_buffer, data->set.postfields,
+            result = add_buffer(req_buffer, data->set.str[STRING_POSTFIELDS],
                                 (size_t)postsize);
             included_body = postsize;
           }
@@ -2445,7 +2451,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
             /* Append the POST data chunky-style */
             result = add_bufferf(req_buffer, "%x\r\n", (int)postsize);
             if(CURLE_OK == result)
-              result = add_buffer(req_buffer, data->set.postfields,
+              result = add_buffer(req_buffer, data->set.str[STRING_POSTFIELDS],
                                   (size_t)postsize);
             if(CURLE_OK == result)
               result = add_buffer(req_buffer,
@@ -2459,7 +2465,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         else {
           /* A huge POST coming up, do data separate from the request */
           http->postsize = postsize;
-          http->postdata = data->set.postfields;
+          http->postdata = data->set.str[STRING_POSTFIELDS];
 
           http->sending = HTTPSEND_BODY;
 

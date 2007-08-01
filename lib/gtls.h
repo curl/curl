@@ -29,7 +29,9 @@ CURLcode Curl_gtls_connect(struct connectdata *conn, int sockindex);
 /* tell GnuTLS to close down all open information regarding connections (and
    thus session ID caching etc) */
 void Curl_gtls_close_all(struct SessionHandle *data);
-void Curl_gtls_close(struct connectdata *conn); /* close a SSL connection */
+
+ /* close a SSL connection */
+void Curl_gtls_close(struct connectdata *conn, int index);
 
 /* return number of sent (non-SSL) bytes */
 ssize_t Curl_gtls_send(struct connectdata *conn, int sockindex,

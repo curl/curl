@@ -225,8 +225,8 @@ static char * nss_get_password(PK11SlotInfo * slot, PRBool retry, void *arg)
   pphrase_arg_t *parg = (pphrase_arg_t *) arg;
   (void)slot; /* unused */
   (void)retry; /* unused */
-  if(parg->data->set.key_passwd)
-    return (char *)PORT_Strdup((char *)parg->data->set.key_passwd);
+  if(parg->data->set.str[STRING_KEY_PASSWD])
+    return (char *)PORT_Strdup((char *)parg->data->set.str[STRING_KEY_PASSWD]);
   else
     return NULL;
 }
@@ -488,10 +488,11 @@ CURLcode Curl_nss_connect(struct connectdata * conn, int sockindex)
                            NULL) != SECSuccess)
     goto error;
 
-  if(data->set.cert) {
+  if(data->set.str[STRING_CERT]) {
     if(SSL_GetClientAuthDataHook(model,
                                  (SSLGetClientAuthData) SelectClientCert,
-                                 (void *)data->set.cert) != SECSuccess) {
+                                 (void *)data->set.str[STRING_CERT]) !=
+       SECSuccess) {
       curlerr = CURLE_SSL_CERTPROBLEM;
       goto error;
     }
