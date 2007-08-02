@@ -921,15 +921,15 @@ CURLcode add_buffer_send(send_buffer *in,
       /* this data _may_ contain binary stuff */
       Curl_debug(conn->data, CURLINFO_HEADER_OUT, ptr,
                  (size_t)(amount-included_body_bytes), conn);
-      if (included_body_bytes) {
+      if (included_body_bytes)
         Curl_debug(conn->data, CURLINFO_DATA_OUT,
                    ptr+amount-included_body_bytes,
                    (size_t)included_body_bytes, conn);
-        /* since we sent a piece of the body here, up the byte counter for it
-           accordingly */
-        http->writebytecount = included_body_bytes;
-      }
     }
+    if (included_body_bytes)
+      /* since we sent a piece of the body here, up the byte counter for it
+         accordingly */
+      http->writebytecount = included_body_bytes;
 
     *bytes_written += amount;
 
