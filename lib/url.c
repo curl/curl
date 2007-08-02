@@ -249,7 +249,7 @@ static CURLcode Curl_setstropt(char **charp, char * s)
 
 CURLcode Curl_dupset(struct SessionHandle * dst, struct SessionHandle * src)
 {
-  CURLcode r;
+  CURLcode r = CURLE_OK;
   enum dupstring i;
 
   /* Copy src->set into dst->set first, then deal with the strings
