@@ -670,6 +670,12 @@ set that Content-Type by default when this option is used), which is the most
 commonly used one by HTML forms. See also the \fICURLOPT_POST\fP. Using
 \fICURLOPT_POSTFIELDS\fP implies \fICURLOPT_POST\fP.
 
+If you want to do a zero-byte POST, you need to set
+\fICURLOPT_POSTFIELDSIZE\fP explicitly to zero, as simply setting
+\fICURLOPT_POSTFIELDS\fP to NULL or "" just effectively disables the sending
+of the specified string. libcurl will instead assume that you'll send the POST
+data using the read callback!
+
 Using POST with HTTP 1.1 implies the use of a "Expect: 100-continue" header.
 You can disable this header with \fICURLOPT_HTTPHEADER\fP as usual.
 
