@@ -7,6 +7,12 @@
                                   Changelog
 
 Daniel S (2 August 2007)
+- Scott Cantor filed bug report #1766320
+  (http://curl.haxx.se/bug/view.cgi?id=1766320) pointing out that the libcurl
+  code accessed two curl_easy_setopt() options (CURLOPT_DNS_CACHE_TIMEOUT and
+  CURLOPT_DNS_USE_GLOBAL_CACHE) as ints even though they're documented to be
+  passed in as longs, and that makes a difference on 64 bit architectures.
+
 - Dmitriy Sergeyev reported a regression: resumed file:// transfers broke
   after 7.16.2. This is much due to the different treatment file:// gets
   internally, but now I added test 231 to make it less likely to happen again

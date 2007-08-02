@@ -690,14 +690,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 
   switch(option) {
   case CURLOPT_DNS_CACHE_TIMEOUT:
-    data->set.dns_cache_timeout = va_arg(param, int);
+    data->set.dns_cache_timeout = va_arg(param, long);
     break;
   case CURLOPT_DNS_USE_GLOBAL_CACHE:
     {
-      int use_cache = va_arg(param, int);
-      if (use_cache) {
+      long use_cache = va_arg(param, long);
+      if (use_cache)
         Curl_global_host_cache_init();
-      }
 
       data->set.global_dns_cache = (bool)(0 != use_cache);
     }

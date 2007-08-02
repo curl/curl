@@ -33,6 +33,7 @@ This release includes the following bugfixes:
  o AIX 4 and 5 get to use non-blocking sockets
  o small POST with NTLM
  o resumed file:// transfers
+ o CURLOPT_DNS_CACHE_TIMEOUT and CURLOPT_DNS_USE_GLOBAL_CACHE are 64 bit "clean"
 
 This release includes the following known bugs:
 
@@ -54,6 +55,7 @@ advice from friends like these:
  Dan Fandrich, Song Ma, Daniel Black, Giancarlo Formicuccia, Shmulik Regev,
  Daniel Cater, Colin Hogben, Jofell Gallardo, Daniel Johnson,
  Ralf S. Engelschall, James Housley, Chris Flerackers, Patrick Monnerat,
- Jayesh A Shah, Greg Zavertnik, Peter O'Gorman, Greg Morse, Dmitriy Sergeyev
+ Jayesh A Shah, Greg Zavertnik, Peter O'Gorman, Greg Morse, Dmitriy Sergeyev,
+ Scott Cantor
  
         Thanks! (and sorry if I forgot to mention someone)
