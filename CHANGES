@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel S (2 August 2007)
+- Dmitriy Sergeyev reported a regression: resumed file:// transfers broke
+  after 7.16.2. This is much due to the different treatment file:// gets
+  internally, but now I added test 231 to make it less likely to happen again
+  without us noticing!
+
 Daniel S (1 August 2007)
 - Patrick Monnerat and I modified libcurl so that now it *copies* all strings
   passed to it with curl_easy_setopt()! Previously it has always just refered
