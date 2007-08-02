@@ -78,10 +78,10 @@ static CURLcode Curl_qsossl_init_session(struct SessionHandle * data)
    * We first try to SSL_Init_Application(), then SSL_Init() if it failed.
    */
 
-  certname = data->set.cert;
+  certname = data->set.str[STRING_CERT];
 
   if (!certname) {
-    certname = data->set.ssl.CAfile;
+    certname = data->set.str[STRING_SSL_CAFILE];
 
     if (!certname)
       return CURLE_OK;          /* Use previous setup. */
@@ -96,7 +96,7 @@ static CURLcode Curl_qsossl_init_session(struct SessionHandle * data)
 
   if (rc == SSL_ERROR_NOT_REGISTERED) {
     initstr.keyringFileName = certname;
-    initstr.keyringPassword = data->set.key;
+    initstr.keyringPassword = data->set.str[STRING_KEY];
     initstr.cipherSuiteList = NULL;    /* Use default. */
     initstr.cipherSuiteListLen = 0;
     rc = SSL_Init(&initstr);
@@ -190,7 +190,7 @@ static CURLcode Curl_qsossl_handshake(struct connectdata * conn, int sockindex)
 
   /* Set-up protocol. */
 
-  switch(data->set.ssl.version) {
+  switch (data->set.ssl.version) {
 
   default:
   case CURL_SSLVERSION_DEFAULT:
