@@ -68,18 +68,22 @@ watcom-clean:
 	wmake -f Makefile.Watcom clean
 
 mingw32:
+	$(MAKE) -C lib -f Makefile.m32
+	$(MAKE) -C src -f Makefile.m32
+
+mingw32-zlib:
 	$(MAKE) -C lib -f Makefile.m32 ZLIB=1
 	$(MAKE) -C src -f Makefile.m32 ZLIB=1
 
-mingw32-ssl:
+mingw32-ssl-zlib:
 	$(MAKE) -C lib -f Makefile.m32 SSL=1 ZLIB=1
 	$(MAKE) -C src -f Makefile.m32 SSL=1 ZLIB=1
 
-mingw32-ssh2-ssl:
+mingw32-ssh2-ssl-zlib:
 	$(MAKE) -C lib -f Makefile.m32 SSH2=1 SSL=1 ZLIB=1
 	$(MAKE) -C src -f Makefile.m32 SSH2=1 SSL=1 ZLIB=1
 
-mingw32-ssh2-ssl-sspi:
+mingw32-ssh2-ssl-sspi-zlib:
 	$(MAKE) -C lib -f Makefile.m32 SSH2=1 SSL=1 SSPI=1 ZLIB=1
 	$(MAKE) -C src -f Makefile.m32 SSH2=1 SSL=1 SSPI=1 ZLIB=1
 
