@@ -127,44 +127,6 @@
                          have their definition hidden well */
 #endif
 
-#ifndef LIBSSH2_SFTP_S_IRUSR
-/* Here's a work-around for those of you who happend to run a libssh2 version
-   that is 0.14 or older. We should remove this kludge as soon as we can
-   require a more recent libssh2 release. */
-#ifndef S_IRGRP
-#define S_IRGRP  0
-#endif
-
-#ifndef S_IROTH
-#define S_IROTH 0
-#endif
-
-/* File mode */
-/* Read, write, execute/search by owner */
-#define LIBSSH2_SFTP_S_IRWXU  S_IRWXU     /* RWX mask for owner */
-#define LIBSSH2_SFTP_S_IRUSR  S_IRUSR     /* R for owner */
-#define LIBSSH2_SFTP_S_IWUSR  S_IWUSR     /* W for owner */
-#define LIBSSH2_SFTP_S_IXUSR  S_IXUSR     /* X for owner */
-/* Read, write, execute/search by group */
-#define LIBSSH2_SFTP_S_IRWXG  S_IRWXG     /* RWX mask for group */
-#define LIBSSH2_SFTP_S_IRGRP  S_IRGRP     /* R for group */
-#define LIBSSH2_SFTP_S_IWGRP  S_IWGRP     /* W for group */
-#define LIBSSH2_SFTP_S_IXGRP  S_IXGRP     /* X for group */
-/* Read, write, execute/search by others */
-#define LIBSSH2_SFTP_S_IRWXO  S_IRWXO     /* RWX mask for other */
-#define LIBSSH2_SFTP_S_IROTH  S_IROTH     /* R for other */
-#define LIBSSH2_SFTP_S_IWOTH  S_IWOTH     /* W for other */
-#define LIBSSH2_SFTP_S_IXOTH  S_IXOTH     /* X for other */
-
-/* File type */
-#define LIBSSH2_SFTP_S_IFMT   S_IFMT      /* type of file mask */
-#define LIBSSH2_SFTP_S_IFDIR  S_IFDIR     /* directory */
-#define LIBSSH2_SFTP_S_IFLNK  S_IFLNK     /* symbolic link */
-#define LIBSSH2_SFTP_S_IFSOCK S_IFSOCK    /* socket */
-#define LIBSSH2_SFTP_S_IFCHR  S_IFCHR     /* character special */
-#define LIBSSH2_SFTP_S_IFBLK  S_IFBLK     /* block special */
-#endif
-
 /* Local functions: */
 static const char *sftp_libssh2_strerror(unsigned long err);
 static LIBSSH2_ALLOC_FUNC(libssh2_malloc);
