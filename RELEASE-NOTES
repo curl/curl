@@ -1,4 +1,4 @@
-Curl and libcurl 7.16.5
+Curl and libcurl 7.17.0
 
  Public curl release number:               101
  Releases counted from the very beginning: 127
@@ -13,6 +13,7 @@ This release includes the following changes:
  
  o support for OS/400 Secure Sockets Layer library
  o curl_easy_setopt() now allocates strings passed to it
+ o SCP and SFTP support now requires libssh2 0.16 or later
 
 This release includes the following bugfixes:
 
