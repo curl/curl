@@ -46,7 +46,7 @@ ifdef DYN
 else
   curl_DEPENDENCIES = ../lib/libcurl.a
   curl_LDADD = -L../lib -lcurl
-  COMPILE += -DCURL_STATICLIB
+  CFLAGS += -DCURL_STATICLIB
 endif
 ifdef ARES
   CFLAGS += -DUSE_ARES
