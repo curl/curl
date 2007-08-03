@@ -4,7 +4,7 @@
 ## Makefile for building curl.exe with MingW32 (GCC-3.2) and
 ## optionally OpenSSL (0.9.8)
 ##
-## Use: make -f Makefile.m32 [SSL=1] [SSH2=1] [DYN=1]
+## Use: mingw32-make -f Makefile.m32 [SSL=1] [SSH2=1] [DYN=1]
 ##
 ## Comments to: Troy Engel <tengel@sonic.net> or
 ##              Joern Hartroth <hartroth@acm.org>
@@ -23,11 +23,11 @@ ARES_LIB = ../ares
 
 CC = gcc
 CFLAGS = -g -O2
-LDFLAGS =
+# comment LDFLAGS below to keep debug info
+LDFLAGS = -s
 RC = windres
 RCFLAGS = --include-dir=../include -O COFF -i
-RM = del /f
-STRIP = strip -s
+RM = del /q /f
 
 # We may need these someday
 # PERL = perl
@@ -36,8 +36,7 @@ STRIP = strip -s
 ########################################################
 ## Nothing more to do below this line!
 
-INCLUDES = -I. -I.. -I../include -I../lib -I$(ZLIB_PATH)
-COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
+INCLUDES = -I. -I.. -I../include -I../lib
 LINK = $(CC) $(LDFLAGS) -o $@
 
 curl_PROGRAMS = curl.exe
@@ -61,13 +60,19 @@ ifdef SSL
   CFLAGS += -DUSE_SSLEAY -DHAVE_OPENSSL_ENGINE_H
   curl_LDADD += -L$(OPENSSL_PATH)/out -leay32 -lssl32
 endif
+ifdef ZLIB
+  INCLUDES += -I"$(ZLIB_PATH)"
+  CFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
+  curl_LDADD += -L$(ZLIB_PATH) -lz
+endif
 ifdef SSPI
   CFLAGS += -DUSE_WINDOWS_SSPI
 endif
 ifdef IPV6
   CFLAGS += -DENABLE_IPV6
 endif
-curl_LDADD += -lwsock32 -lws2_32 -lwinmm -L$(ZLIB_PATH) -lz
+curl_LDADD += -lwsock32 -lws2_32 -lwinmm
+COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
@@ -83,15 +88,11 @@ all: curl.exe
 curl.exe: curl.res $(curl_OBJECTS) $(curl_DEPENDENCIES)
 	$(RM) $@
 	$(LINK) $< $(curl_OBJECTS) $(curl_LDADD)
-	$(STRIP) $@
 
 # We don't have nroff normally under win32
 # hugehelp.c: ../README.curl ../curl.1 mkhelp.pl
 # 	$(RM) hugehelp.c
 # 	$(NROFF) -man ../curl.1 | $(PERL) mkhelp.pl ../README.curl > hugehelp.c
-
-.rc.res:
-	$(RC) $(RCFLAGS) $< -o $@
 
 .c.o:
 	$(COMPILE) -c $<
@@ -102,8 +103,11 @@ curl.exe: curl.res $(curl_OBJECTS) $(curl_DEPENDENCIES)
 .S.o:
 	$(COMPILE) -c $<
 
+.rc.res:
+	$(RC) $(RCFLAGS) $< -o $@
+
 clean:
-	$(RM) $(curl_OBJECTS) curl.exe
+	$(RM) $(curl_OBJECTS)
 
 distrib: clean
 	$(RM) $(curl_PROGRAMS)
