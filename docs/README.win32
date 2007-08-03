@@ -20,3 +20,7 @@ README.win32
   command line similar to this in order to extract a separate text file:
 
         curl -M >manual.txt
+
+  Read the INSTALL file for instructions how to compile curl self.
+
+
