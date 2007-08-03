@@ -332,10 +332,10 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
   if((k->keepon & (KEEP_READ|KEEP_READ_HOLD)) == KEEP_READ) {
     fd_read = conn->sockfd;
-#if defined(USE_LIBSSH2) && defined(LIBSSH2_APINO) && (LIBSSH2_APINO >= 200706012030L)
+#if defined(USE_LIBSSH2)
     if (conn->protocol & (PROT_SCP|PROT_SFTP))
       select_res |= CURL_CSELECT_IN;
-#endif /* USE_LIBSSH2 && LIBSSH2_APINO && (LIBSSH2_APINO >= 200706012030L) */
+#endif /* USE_LIBSSH2 */
   } else
     fd_read = CURL_SOCKET_BAD;
 
