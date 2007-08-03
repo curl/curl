@@ -10,10 +10,10 @@
 ##              Joern Hartroth <hartroth@acm.org>
 
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8d
+OPENSSL_PATH = ../../openssl-0.9.8e
 endif
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-0.14
+LIBSSH2_PATH = ../../libssh2-0.16
 endif
 ifndef ZLIB_PATH
 ZLIB_PATH = ../../zlib-1.2.3
@@ -26,7 +26,7 @@ CFLAGS = -g -O2
 LDFLAGS =
 RC = windres
 RCFLAGS = --include-dir=../include -O COFF -i
-RM = rm -f
+RM = del /f
 STRIP = strip -s
 
 # We may need these someday
