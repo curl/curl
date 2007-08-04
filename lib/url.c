@@ -221,7 +221,7 @@ void Curl_freeset(struct SessionHandle * data)
 {
   /* Free all dynamic strings stored in the data->set substructure. */
   enum dupstring i;
-  for(i=0; i < STRING_LAST; i++)
+  for(i=(enum dupstring)0; i < STRING_LAST; i++)
     Curl_safefree(data->set.str[i]);
 }
 
@@ -3274,6 +3274,10 @@ static char *detect_proxy(struct connectdata *conn)
   } /* NO_PROXY wasn't specified or '*' */
   if(no_proxy)
     free(no_proxy);
+
+#else /* !CURL_DISABLE_HTTP */
+
+  (void)conn;
 #endif /* CURL_DISABLE_HTTP */
 
   return proxy;
