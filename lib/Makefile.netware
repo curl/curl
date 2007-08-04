@@ -25,7 +25,7 @@ endif
 
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-0.15
+LIBSSH2_PATH = ../../libssh2-0.16
 endif
 
 ifndef INSTDIR
@@ -145,15 +145,6 @@ ifdef WITH_ARES
 	INCLUDES += -I$(ARES_LIB)
 	LDLIBS += $(ARES_LIB)/libcares.$(LIBEXT)
 endif
-ifdef WITH_ZLIB
-	INCLUDES += -I$(ZLIB_PATH)
-ifdef LINK_STATIC
-	LDLIBS += $(ZLIB_PATH)/nw/$(LIBARCH)/libz.$(LIBEXT)
-else
-	MODULES += libz.nlm
-	IMPORTS += @$(ZLIB_PATH)/nw/$(LIBARCH)/libz.imp
-endif
-endif
 ifdef WITH_SSH2
 	INCLUDES += -I$(LIBSSH2_PATH)/include
 ifdef LINK_STATIC
@@ -168,6 +159,15 @@ ifdef WITH_SSL
 	LDLIBS += $(OPENSSL_PATH)/out_nw_$(LIBARCH_L)/ssl.$(LIBEXT)
 	LDLIBS += $(OPENSSL_PATH)/out_nw_$(LIBARCH_L)/crypto.$(LIBEXT)
 	IMPORTS += GetProcessSwitchCount RunningProcess
+endif
+ifdef WITH_ZLIB
+	INCLUDES += -I$(ZLIB_PATH)
+ifdef LINK_STATIC
+	LDLIBS += $(ZLIB_PATH)/nw/$(LIBARCH)/libz.$(LIBEXT)
+else
+	MODULES += libz.nlm
+	IMPORTS += @$(ZLIB_PATH)/nw/$(LIBARCH)/libz.imp
+endif
 endif
 
 ifeq ($(LIBARCH),LIBC)
