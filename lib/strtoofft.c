@@ -37,6 +37,18 @@
 #include <ctype.h>
 #include <errno.h>
 
+/* Range tests can be used for alphanum decoding if characters are consecutive,
+   like in ASCII. Else an array is scanned. Determine this condition now. */
+
+#if ('9' - '0') != 9 || ('Z' - 'A') != 25 || ('z' - 'a') != 25
+#include <string.h>
+
+#define NO_RANGE_TEST
+
+static const char valchars[] =
+            "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+#endif
+
 static int get_char(char c, int base);
 
 /**
@@ -145,6 +157,7 @@ curlx_strtoll(const char *nptr, char **endptr, int base)
  */
 static int get_char(char c, int base)
 {
+#ifndef NO_RANGE_TEST
   int value = -1;
   if (c <= '9' && c >= '0') {
     value = c - '0';
@@ -155,6 +168,20 @@ static int get_char(char c, int base)
   else if (c <= 'z' && c >= 'a') {
     value = c - 'a' + 10;
   }
+#else
+  const char * cp;
+  int value;
+
+  cp = memchr(valchars, c, 10 + 26 + 26);
+
+  if (!cp)
+    return -1;
+
+  value = cp - valchars;
+
+  if (value >= 10 + 26)
+    value -= 26;                /* Lowercase. */
+#endif
 
   if (value >= base) {
     value = -1;

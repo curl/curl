@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel S (4 August 2007)
+- Patrick Monnerat fixed curl_easy_escape() and curlx_strtoll() to work on
+  non-ASCII systems.
+
+Daniel S (3 August 2007)
+- I cut out support for libssh2 versions older than 0.16 to make our code a
+  lot simpler, and to avoid getting trouble with the LIBSSH2_APINO define
+  that 1) didn't work properly since it was >32 bits and 2) is removed in
+  libssh2 0.16...
+
 Daniel S (2 August 2007)
 - Scott Cantor filed bug report #1766320
   (http://curl.haxx.se/bug/view.cgi?id=1766320) pointing out that the libcurl
