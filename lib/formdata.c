@@ -24,7 +24,10 @@
 /*
   Debug the form generator stand-alone by compiling this source file with:
 
-  gcc -DHAVE_CONFIG_H -I../ -g -D_FORM_DEBUG -DCURLDEBUG -o formdata -I../include formdata.c strequal.c memdebug.c mprintf.c strerror.c
+  gcc -DHAVE_CONFIG_H -I../ -g -D_FORM_DEBUG -DCURLDEBUG -o formdata \
+    -I../include formdata.c strequal.c memdebug.c mprintf.c strerror.c
+
+  (depending on circumstances you may need further externals added)
 
   run the 'formdata' executable the output should end with:
   All Tests seem to have worked ...
@@ -49,8 +52,8 @@ vlue for PTRCONTENTS + CONTENTSLENGTH
 (or you might see v^@lue at the start)
 
 Content-Disposition: form-data; name="PTRCONTENTS_+_CONTENTSLENGTH_+_CONTENTTYPE"
-Content-Type: text/plain
-vlue for PTRCOTNENTS + CONTENTSLENGTH + CONTENTTYPE
+Content-Type: application/octet-stream
+vlue for PTRCONTENTS + CONTENTSLENGTH + CONTENTTYPE
 (or you might see v^@lue at the start)
 
 Content-Disposition: form-data; name="FILE1_+_CONTENTTYPE"; filename="inet_ntoa_r.h"
@@ -61,23 +64,23 @@ Content-Disposition: form-data; name="FILE1_+_FILE2"
 Content-Type: multipart/mixed, boundary=curlz1s0dkticx49MV1KGcYP5cvfSsz
 ...
 Content-Disposition: attachment; filename="inet_ntoa_r.h"
-Content-Type: text/plain
+Content-Type: application/octet-stream
 ...
 Content-Disposition: attachment; filename="Makefile.b32"
-Content-Type: text/plain
+Content-Type: application/octet-stream
 ...
 
 Content-Disposition: form-data; name="FILE1_+_FILE2_+_FILE3"
 Content-Type: multipart/mixed, boundary=curlirkYPmPwu6FrJ1vJ1u1BmtIufh1
 ...
 Content-Disposition: attachment; filename="inet_ntoa_r.h"
-Content-Type: text/plain
+Content-Type: application/octet-stream
 ...
 Content-Disposition: attachment; filename="Makefile.b32"
-Content-Type: text/plain
+Content-Type: application/octet-stream
 ...
 Content-Disposition: attachment; filename="inet_ntoa_r.h"
-Content-Type: text/plain
+Content-Type: application/octet-stream
 ...
 
 
@@ -85,13 +88,13 @@ Content-Disposition: form-data; name="ARRAY: FILE1_+_FILE2_+_FILE3"
 Content-Type: multipart/mixed, boundary=curlirkYPmPwu6FrJ1vJ1u1BmtIufh1
 ...
 Content-Disposition: attachment; filename="inet_ntoa_r.h"
-Content-Type: text/plain
+Content-Type: application/octet-stream
 ...
 Content-Disposition: attachment; filename="Makefile.b32"
-Content-Type: text/plain
+Content-Type: application/octet-stream
 ...
 Content-Disposition: attachment; filename="inet_ntoa_r.h"
-Content-Type: text/plain
+Content-Type: application/octet-stream
 ...
 
 Content-Disposition: form-data; name="FILECONTENT"
@@ -278,8 +281,6 @@ static const char * ContentTypeForFilename (const char *filename,
     /* default to the previously set/used! */
     contenttype = prevtype;
   else
-    /* It seems RFC1867 defines no Content-Type to default to
-       text/plain so we don't actually need to set this: */
     contenttype = HTTPPOST_CONTENTTYPE_DEFAULT;
 
   if(filename) { /* in case a NULL was passed in */
@@ -1495,7 +1496,7 @@ int FormAddTest(const char * errormsg,
 }
 
 
-int main()
+int main(int argc, argv_item_t argv[])
 {
   char name1[] = "simple_COPYCONTENTS";
   char name2[] = "COPYCONTENTS_+_CONTENTTYPE";
@@ -1513,7 +1514,7 @@ int main()
   char value3[] = "value for PTRNAME + NAMELENGTH + COPYNAME + CONTENTSLENGTH";
   char value4[] = "value for simple PTRCONTENTS";
   char value5[] = "value for PTRCONTENTS + CONTENTSLENGTH";
-  char value6[] = "value for PTRCOTNENTS + CONTENTSLENGTH + CONTENTTYPE";
+  char value6[] = "value for PTRCONTENTS + CONTENTSLENGTH + CONTENTTYPE";
   char value7[] = "inet_ntoa_r.h";
   char value8[] = "Makefile.b32";
   char type2[] = "image/gif";
@@ -1521,11 +1522,11 @@ int main()
   char type7[] = "text/html";
   int name3length = strlen(name3);
   int value3length = strlen(value3);
-  int value5length = strlen(value4);
-  int value6length = strlen(value5);
+  int value5length = strlen(value5);
+  int value6length = strlen(value6);
   int errors = 0;
   CURLcode rc;
-  size_t size;
+  curl_off_t size;
   size_t nread;
   char buffer[4096];
   struct curl_httppost *httppost=NULL;
@@ -1534,6 +1535,9 @@ int main()
 
   struct FormData *form;
   struct Form formread;
+
+  (void) argc;
+  (void) argv;
 
   if (FormAddTest("simple COPYCONTENTS test", &httppost, &last_post,
                   CURLFORM_COPYNAME, name1, CURLFORM_COPYCONTENTS, value1,
@@ -1621,7 +1625,9 @@ int main()
     fwrite(buffer, nread, 1, stdout);
   } while(1);
 
-  fprintf(stdout, "size: %d\n", size);
+  fprintf(stdout, "size: ");
+  fprintf(stdout, CURL_FORMAT_OFF_T, size);
+  fprintf(stdout, "\n");
   if (errors)
     fprintf(stdout, "\n==> %d Test(s) failed!\n", errors);
   else
