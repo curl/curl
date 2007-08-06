@@ -170,8 +170,9 @@ Win32
    MingW32
    -------
 
-   Run the 'mingw32.bat' file to get the proper environment variables set,
-   then run 'mingw32-make mingw32' in the root dir. There are other make
+   MinGW32 does not provide a batch script to set environment variables
+   automatically. Make sure that MinGW32's bin dir is in PATH and then
+   run 'mingw32-make mingw32' in the root dir. There are other make
    targets available to build libcurl with more features, use:
    'mingw32-make mingw32-zlib' to build with Zlib support;
    'mingw32-make mingw32-ssl-zlib' to build with SSL and Zlib enabled;
