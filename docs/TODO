@@ -81,10 +81,6 @@ TODO
  * Make the detection of (bad) %0d and %0a codes in FTP url parts earlier in
    the process to avoid doing a resolve and connect in vain.
 
- * Support GSS/Kerberos 5 for ftp file transfer. This will allow user
-   authentication and file encryption.  Possible libraries and example clients
-   are available from MIT or Heimdal. Requested by Markus Moeller.
-
  * REST fix for servers not behaving well on >2GB requests. This should fail
    if the server doesn't set the pointer to the requested index. The tricky
    (impossible?) part is to figure out if the server did the right thing or
