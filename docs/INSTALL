@@ -85,15 +85,6 @@ UNIX
 
         LDFLAGS=-R/usr/local/ssl/lib ./configure --with-ssl
 
-   Another option to the previous trick, is to set LD_LIBRARY_PATH or edit the
-   /etc/ld.so.conf file.
-
-   If your SSL library was compiled with rsaref (this was common in the past
-   when used in the United States), you may also need to set:
-
-     LIBS=-lRSAglue -lrsaref
-     (as suggested by Doug Kaufman)
-
    MORE OPTIONS
 
      To force configure to use the standard cc compiler if both cc and gcc are
@@ -143,6 +134,12 @@ UNIX
      To build with NSS support instead of OpenSSL for SSL/TLS, note that
      you need to use both --without-ssl and --with-nss.
 
+     To get GSSAPI support, build with --with-gssapi and have the MIT or
+     Heimdal Kerberos 5 packages installed.
+
+     To get support for SCP and SFTP, build with --with-libssh2 and have
+     libssh2 0.16 or later installed.
+     
 
 Win32
 =====
