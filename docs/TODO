@@ -52,6 +52,10 @@ TODO
    that would risk collide with other apps that use libcurl and that runs
    configure).
 
+   Work on this has been started but hasn't been finished, and the initial
+   patch and some details are found here:
+   http://curl.haxx.se/mail/lib-2006-12/0084.html
+
  LIBCURL - multi interface
 
  * Make sure we don't ever loop because of non-blocking sockets return
