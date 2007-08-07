@@ -44,6 +44,16 @@ CURL_EXTERN char *curl_maprintf(const char *format, ...);
 CURL_EXTERN char *curl_mvaprintf(const char *format, va_list args);
 
 #ifdef _MPRINTF_REPLACE
+# undef printf
+# undef fprintf
+# undef sprintf
+# undef vsprintf
+# undef snprintf
+# undef vprintf
+# undef vfprintf
+# undef vsnprintf
+# undef aprintf
+# undef vaprintf
 # define printf curl_mprintf
 # define fprintf curl_mfprintf
 #ifdef CURLDEBUG

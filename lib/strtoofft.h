@@ -39,7 +39,7 @@
  * 'strtoofft' such that it can be used to work with curl_off_t's regardless.
  */
 #if (SIZEOF_CURL_OFF_T > 4) && (SIZEOF_LONG < 8)
-#if HAVE_STRTOLL
+#ifdef HAVE_STRTOLL
 #define curlx_strtoofft strtoll
 #else /* HAVE_STRTOLL */
 

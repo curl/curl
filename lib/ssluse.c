@@ -125,7 +125,7 @@ static char global_passwd[64];
 #endif
 
 static int passwd_callback(char *buf, int num, int verify
-#if HAVE_USERDATA_IN_PWD_CALLBACK
+#ifdef HAVE_USERDATA_IN_PWD_CALLBACK
                            /* This was introduced in 0.9.4, we can set this
                               using SSL_CTX_set_default_passwd_cb_userdata()
                               */
