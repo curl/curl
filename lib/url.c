@@ -260,7 +260,7 @@ CURLcode Curl_dupset(struct SessionHandle * dst, struct SessionHandle * src)
   memset(dst->set.str, 0, STRING_LAST * sizeof(char *));
 
   /* duplicate all strings */
-  for(i=0; i< STRING_LAST; i++) {
+  for(i=(enum dupstring)0; i< STRING_LAST; i++) {
     r = Curl_setstropt(&dst->set.str[i], src->set.str[i]);
     if (r != CURLE_OK)
       break;
