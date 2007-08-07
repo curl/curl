@@ -13,7 +13,7 @@ STATIC = 0
 CC = wcc386
 
 CFLAGS = -3r -mf -d3 -hc -zff -zgf -zq -zm -s -fr=con -w2 -fpi -oilrtfm     &
-         -bt=nt -d+ -dWIN32 -dHAVE_LONGLONG -dHAVE_STRTOLL -dWITHOUT_MM_LIB &
+         -bt=nt -d+ -dWIN32 -dHAVE_STRTOLL -dWITHOUT_MM_LIB                 &
          -dSIZEOF_CURL_OFF_T=8 -dCURLDEBUG -dENABLE_IPV6 -dHAVE_WINSOCK2_H  &
          -I..\include -I..\lib
 

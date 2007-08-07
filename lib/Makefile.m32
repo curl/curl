@@ -35,7 +35,7 @@ STRIP = strip -g
 ## Nothing more to do below this line!
 
 INCLUDES = -I. -I../include
-CFLAGS = -g -O2 -DBUILDING_LIBCURL -DHAVE_LONGLONG
+CFLAGS = -g -O2 -DBUILDING_LIBCURL
 ifdef ARES
   INCLUDES += -I$(ARES_LIB)
   CFLAGS += -DUSE_ARES

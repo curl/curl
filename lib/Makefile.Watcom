@@ -9,7 +9,7 @@ TARGETS = libcurl_wc.lib libcurl_wc.dll libcurl_wc_imp.lib
 CC = wcc386
 
 CFLAGS = -3r -mf -d3 -hc -zff -zgf -zq -zm -zc -s -fr=con -w2 -fpi -oilrtfm -bt=nt -bd &
-         -d+ -dWIN32 -dHAVE_LONGLONG -dCURL_CA_BUNDLE=getenv("CURL_CA_BUNDLE")     &
+         -d+ -dWIN32 -dCURL_CA_BUNDLE=getenv("CURL_CA_BUNDLE")                     &
          -dBUILDING_LIBCURL -dWITHOUT_MM_LIB -dHAVE_SPNEGO=1 -dENABLE_IPV6         &
          -dDEBUG_THREADING_GETADDRINFO -dDEBUG=1 -dCURLDEBUG -d_WIN32_WINNT=0x0501 &
          -I. -I..\include
