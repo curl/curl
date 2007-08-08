@@ -43,6 +43,9 @@ int netware_init ( void )
 /* Make the CLIB Ctx stuff link */
 #include <netdb.h>
 NETDB_DEFINE_CONTEXT
+/* Make the CLIB Inet stuff link */
+#include <arpa/inet.h>
+NETINET_DEFINE_CONTEXT
 
 int netware_init ( void )
 {
