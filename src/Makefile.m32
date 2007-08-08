@@ -97,12 +97,6 @@ curl.exe: curl.res $(curl_OBJECTS) $(curl_DEPENDENCIES)
 .c.o:
 	$(COMPILE) -c $<
 
-.s.o:
-	$(COMPILE) -c $<
-
-.S.o:
-	$(COMPILE) -c $<
-
 .rc.res:
 	$(RC) $(RCFLAGS) $< -o $@
 
