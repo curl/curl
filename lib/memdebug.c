@@ -47,7 +47,10 @@
 
 struct memdebug {
   size_t size;
-  double mem[1];
+  union {
+    double d;
+    void * p;
+  } mem[1];
   /* I'm hoping this is the thing with the strictest alignment
    * requirements.  That also means we waste some space :-( */
 };

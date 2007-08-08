@@ -155,7 +155,7 @@ krb5_auth(void *app_data, struct connectdata *conn)
   char *p;
   const char *host = conn->dns_entry->addr->ai_canonname;
   ssize_t nread;
-  unsigned int l = sizeof(conn->local_addr);
+  socklen_t l = sizeof(conn->local_addr);
   struct SessionHandle *data = conn->data;
   CURLcode result;
   const char *service = "ftp", *srv_host = "host";
