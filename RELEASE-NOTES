@@ -35,6 +35,7 @@ This release includes the following bugfixes:
  o small POST with NTLM
  o resumed file:// transfers
  o CURLOPT_DNS_CACHE_TIMEOUT and CURLOPT_DNS_USE_GLOBAL_CACHE are 64 bit "clean"
+ o memory leak when handling compressed data streams from broken servers
 
 This release includes the following known bugs:
 

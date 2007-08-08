@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Dan F (8 August 2007)
+- Song Ma noted a zlib memory leak in the illegal compressed header
+  countermeasures code path.
+
 Daniel S (4 August 2007)
 - Patrick Monnerat fixed curl_easy_escape() and curlx_strtoll() to work on
   non-ASCII systems.

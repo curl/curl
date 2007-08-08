@@ -133,7 +133,7 @@ inflate_stream(struct connectdata *conn,
       /* some servers seem to not generate zlib headers, so this is an attempt
          to fix and continue anyway */
 
-      inflateReset(z);
+      (void) inflateEnd(z);	/* don't care about the return code */
       if (inflateInit2(z, -MAX_WBITS) != Z_OK) {
         return process_zlib_error(conn, z);
       }
