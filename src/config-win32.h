@@ -141,7 +141,8 @@
 /* Define as the return type of signal handlers (int or void).  */
 #define RETSIGTYPE void
 
-#if (defined(__WATCOMC__) && (__WATCOMC__ >= 1240)) || defined(__POCC__)
+#if (defined(__WATCOMC__) && (__WATCOMC__ >= 1240)) || defined(__POCC__) || \
+    defined(__MINGW32__)
 #elif defined(_WIN64)
 #define ssize_t __int64
 #else
