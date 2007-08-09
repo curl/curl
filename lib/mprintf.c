@@ -296,10 +296,10 @@ int dprintf_Pass1Report(va_stack_t *vto, int max)
  *
  ******************************************************************/
 
-static long dprintf_Pass1(char *format, va_stack_t *vto, char **endpos,
+static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
                           va_list arglist)
 {
-  char *fmt = format;
+  char *fmt = (char *)format;
   int param_num = 0;
   long this_param;
   long width;
@@ -614,7 +614,7 @@ static int dprintf_formatf(
   va_stack_t *p;
 
   /* Do the actual %-code parsing */
-  dprintf_Pass1((char *)format, vto, endpos, ap_save);
+  dprintf_Pass1(format, vto, endpos, ap_save);
 
   end = &endpos[0]; /* the initial end-position from the list dprintf_Pass1()
                        created for us */
