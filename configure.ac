@@ -89,6 +89,7 @@ dnl initialize all the info variables
  curl_manual_msg="no      (--enable-manual)"
 curl_verbose_msg="enabled (--disable-verbose)"
    curl_sspi_msg="no      (--enable-sspi)"
+   curl_ldap_msg="no      (--enable-ldap / --with-ldap-lib / --with-lber-lib)"
 
 dnl
 dnl Save anything in $LIBS for later
@@ -500,55 +501,79 @@ AC_HELP_STRING([--enable-libgcc],[use libgcc when linking]),
        AC_MSG_RESULT(no)
 )
 
-dnl dl lib?
-AC_CHECK_FUNC(dlclose, , [ AC_CHECK_LIB(dl, dlopen) ])
-
 dnl **********************************************************************
-dnl Check for the name of dynamic OpenLDAP libraries
+dnl Check for LDAP
 dnl **********************************************************************
 
 LDAPLIBNAME=""
 AC_ARG_WITH(ldap-lib,
-AC_HELP_STRING([--with-ldap-lib=libname],[Specify name of dynamic ldap lib file]),
+AC_HELP_STRING([--with-ldap-lib=libname],[Specify name of ldap lib file]),
  [LDAPLIBNAME="$withval"])
 
 LBERLIBNAME=""
 AC_ARG_WITH(lber-lib,
-AC_HELP_STRING([--with-lber-lib=libname],[Specify name of dynamic lber lib file]),
+AC_HELP_STRING([--with-lber-lib=libname],[Specify name of lber lib file]),
  [LBERLIBNAME="$withval"])
 
 if test x$CURL_DISABLE_LDAP != x1 ; then
 
   if test -z "$LDAPLIBNAME" ; then
     case $host in
-      *-*-cygwin | *-*-mingw* | *-*-pw32*)
+      *-*-cygwin* | *-*-mingw* | *-*-pw32*)
         dnl Windows uses a single and unique OpenLDAP DLL name
-        LDAPLIBNAME="wldap32.dll"
+        LDAPLIBNAME="wldap32"
         LBERLIBNAME="no"
         ;;
     esac
   fi
 
   if test "$LDAPLIBNAME" ; then
-    AC_DEFINE_UNQUOTED(DL_LDAP_FILE, "$LDAPLIBNAME")
-    AC_MSG_CHECKING([name of dynamic library ldap])
-    AC_MSG_RESULT($LDAPLIBNAME)
+    AC_CHECK_LIB("$LDAPLIBNAME", ldap_init,, [
+      AC_MSG_WARN(["$LDAPLIBNAME" is not an LDAP library: LDAP disabled])
+      AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
+      AC_SUBST(CURL_DISABLE_LDAP, [1])])
   else
     dnl Try to find the right ldap library name for this system
-    CURL_DLLIB_NAME(DL_LDAP_FILE, ldap)
+    AC_SEARCH_LIBS(ldap_init, [ldap],, [
+      AC_MSG_WARN([Cannot find LDAP library: LDAP disabled])
+      AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
+      AC_SUBST(CURL_DISABLE_LDAP, [1])])
   fi
+fi
+
+if test x$CURL_DISABLE_LDAP != x1 ; then
 
   if test "$LBERLIBNAME" ; then
-    dnl If name is "no" then don't define this variable at all
+    dnl If name is "no" then don't define this library at all
     dnl (it's only needed if libldap.so's dependencies are broken).
     if test "$LBERLIBNAME" != "no" ; then 
-      AC_DEFINE_UNQUOTED(DL_LBER_FILE, "$LBERLIBNAME")
+      AC_CHECK_LIB("$LBERLIBNAME", ber_free,, [
+        AC_MSG_WARN(["$LBERLIBNAME" is not an LBER library: LDAP disabled])
+        AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
+        AC_SUBST(CURL_DISABLE_LDAP, [1])])
     fi
-    AC_MSG_CHECKING([name of dynamic library lber])
-    AC_MSG_RESULT($LBERLIBNAME)
   else
     dnl Try to find the right lber library name for this system
-    CURL_DLLIB_NAME(DL_LBER_FILE, lber)
+    AC_SEARCH_LIBS(ber_free, [lber],, [
+      AC_MSG_WARN([Cannot find a library defining ber_free(): LDAP disabled])
+      AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
+      AC_SUBST(CURL_DISABLE_LDAP, [1])])
+  fi
+fi
+
+if test x$CURL_DISABLE_LDAP != x1 ; then
+  AC_CHECK_FUNCS([ldap_url_parse])
+
+  if test "$LDAPLIBNAME" = "wldap32"; then
+    curl_ldap_msg="yes (winldap)"
+    AC_DEFINE(CURL_LDAP_WIN, 1, [Use W$ LDAP implementation])
+    case $host in
+      *-*-cygwin* | *-*-mingw* | *-*-pw32*)
+        AC_DEFINE(CURL_LDAP_HYBRID, 1, [W$ LDAP with non-W$ compiler])
+        ;;
+    esac
+  else
+    curl_ldap_msg="yes (OpenLDAP)"
   fi
 fi
 
@@ -1716,7 +1741,6 @@ AC_CHECK_HEADERS(
         termio.h \
         sgtty.h \
         fcntl.h \
-        dlfcn.h \
         alloca.h \
         time.h \
         io.h \
@@ -1858,7 +1882,6 @@ AC_CHECK_FUNCS( strtoll \
                 strlcat \
                 getpwuid \
                 geteuid \
-                dlopen \
                 utime \
                 sigsetjmp \
                 basename \
@@ -2363,4 +2386,5 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   Verbose errors:  ${curl_verbose_msg}
   SSPI support:    ${curl_sspi_msg}
   ca cert path:    ${ca}
+  LDAP support:    ${curl_ldap_msg}
 ])

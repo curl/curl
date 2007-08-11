@@ -227,9 +227,6 @@
 /* Define if you have the getpass function.  */
 #undef HAVE_GETPASS
 
-/* Define if you have the `dlopen' function. */
-#define HAVE_DLOPEN 1
-
 /* Define if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
@@ -261,9 +258,6 @@
 
 /* Define to 1 if you have the <limits.h> header file. */
 #define HAVE_LIMITS_H 1
-
-/* Define to 1 if you have the <dlfcn.h> header file. */
-#define HAVE_DLFCN_H 1
 
 /* Define to 1 if you have the <sys/ioctl.h> header file. */
 #define HAVE_SYS_IOCTL_H 1

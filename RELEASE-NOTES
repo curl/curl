@@ -14,6 +14,7 @@ This release includes the following changes:
  o support for OS/400 Secure Sockets Layer library
  o curl_easy_setopt() now allocates strings passed to it
  o SCP and SFTP support now requires libssh2 0.16 or later
+ o LDAP libraries are now linked "regularly" and not with dlopen
 
 This release includes the following bugfixes:
 

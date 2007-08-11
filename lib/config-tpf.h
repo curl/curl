@@ -104,12 +104,6 @@
 /* disabled non-blocking sockets */
 /* #undef HAVE_DISABLED_NONBLOCKING */
 
-/* Define to 1 if you have the <dlfcn.h> header file. */
-#define HAVE_DLFCN_H 1
-
-/* Define to 1 if you have the `dlopen' function. */
-#define HAVE_DLOPEN 1
-
 /* Define to 1 if you have the `ENGINE_load_builtin_engines' function. */
 /* #undef HAVE_ENGINE_LOAD_BUILTIN_ENGINES */
 #define HAVE_ENGINE_LOAD_BUILTIN_ENGINES 1
@@ -243,9 +237,6 @@
 
 /* Define to 1 if you have the <krb.h> header file. */
 /* #undef HAVE_KRB_H */
-
-/* Define to 1 if you have the `dl' library (-ldl). */
-#define HAVE_LIBDL 1
 
 /* Define to 1 if you have the <libgen.h> header file. */
 /* #undef HAVE_LIBGEN_H 1 */

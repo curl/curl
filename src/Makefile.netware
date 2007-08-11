@@ -356,8 +356,6 @@ ifeq ($(LIBARCH),CLIB)
 	@echo $(DL)#define pressanykey PressAnyKeyToContinue$(DL) >> $@
 else
 	@echo $(DL)#define OS "i586-pc-libc-NetWare"$(DL) >> $@
-	@echo $(DL)#define HAVE_DLFCN_H 1$(DL) >> $@
-	@echo $(DL)#define HAVE_DLOPEN 1$(DL) >> $@
 	@echo $(DL)#define HAVE_FTRUNCATE 1$(DL) >> $@
 	@echo $(DL)#define HAVE_GETTIMEOFDAY 1$(DL) >> $@
 	@echo $(DL)#define HAVE_INET_PTON 1$(DL) >> $@

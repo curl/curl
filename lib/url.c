@@ -130,7 +130,7 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
 #include "tftp.h"
 #include "http.h"
 #include "file.h"
-#include "ldap.h"
+#include "curl_ldap.h"
 #include "ssh.h"
 #include "url.h"
 #include "connect.h"

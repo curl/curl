@@ -3,7 +3,7 @@
 # During dev at least, we use a static libcurl.
 #
 
-LDFLAGS = -lcrypt -lidn -lssl -lcrypto -ldl -lz -lresolv -L../ares/.libs \
+LDFLAGS = -lcrypt -lidn -lssl -lcrypto -lz -lresolv -L../ares/.libs \
  -lcares
 LIBCURL = -L../lib/.libs/ -lcurl
 CFLAGS = -I../include -g

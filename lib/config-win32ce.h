@@ -18,9 +18,6 @@
 /* Define if you have the <crypto.h> header file.  */
 /* #define HAVE_CRYPTO_H 1 */
 
-/* Define if you have the <dlfcn.h> header file.  */
-/* #define HAVE_DLFCN_H 1 */
-
 /* Define if you have the <err.h> header file.  */
 /* #define HAVE_ERR_H 1 */
 
@@ -317,14 +314,12 @@
 /* #undef const */
 
 /* ---------------------------------------------------------------- */
-/*                        LDAP LIBRARY FILES                        */
+/*                           LDAP SUPPORT                           */
 /* ---------------------------------------------------------------- */
 
-/* lber dynamic library file */
-/* #define DL_LBER_FILE */
-
-/* ldap dynamic library file */
-/* #define DL_LDAP_FILE "wldap32.dll" */
+#define CURL_LDAP_WIN 1
+#undef CURL_LDAP_HYBRID
+#undef HAVE_LDAP_URL_PARSE
 
 /* ---------------------------------------------------------------- */
 /*                       ADDITIONAL DEFINITIONS                     */

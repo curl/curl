@@ -74,12 +74,6 @@
 /* Define if you have the <des.h> header file. */
 #undef HAVE_DES_H
 
-/* Define if you have the <dlfcn.h> header file. */
-#undef HAVE_DLFCN_H
-
-/* Define if you have the `dlopen' function. */
-#undef HAVE_DLOPEN
-
 /* Define if you have the <err.h> header file. */
 #undef HAVE_ERR_H
 
@@ -145,9 +139,6 @@
 
 /* Define if you have the `crypto' library (-lcrypto). */
 #undef HAVE_LIBCRYPTO
-
-/* Define if you have the `dl' library (-ldl). */
-#undef HAVE_LIBDL
 
 /* Define if you have the `nsl' library (-lnsl). */
 #undef HAVE_LIBNSL

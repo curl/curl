@@ -154,7 +154,7 @@ $(OBJ_DIR)\url.obj: url.c setup.h config-win32.h setup_once.h urldata.h cookie.h
   http_chunks.h hostip.h hash.h llist.h splay.h netrc.h base64.h sslgen.h &
   transfer.h sendf.h progress.h strequal.h strerror.h escape.h strtok.h &
   share.h content_encoding.h http_digest.h http_negotiate.h select.h &
-  multiif.h ftp.h dict.h telnet.h tftp.h http.h file.h ldap.h url.h &
+  multiif.h ftp.h dict.h telnet.h tftp.h http.h file.h curl_ldap.h url.h &
   connect.h inet_ntop.h http_ntlm.h .\ca-bundle.h &
   ..\include\curl\mprintf.h memory.h memdebug.h .\memory.h
 $(OBJ_DIR)\dict.obj: dict.c setup.h config-win32.h setup_once.h urldata.h cookie.h &
