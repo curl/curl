@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel S (11 August 2007)
+- Allen Pulsifer provided a patch that makes libcurl set the expected download
+  size earlier when doing HTTP downloads, so that applications and the
+  progress meter etc know get the info earlier in the flow than before.
+
 - Patrick Monnerat modified the LDAP code and approach in curl. Starting now,
   the configure script checks for openldap and friends and we link with those
   libs just like we link all other third party libraries, and we no longer
