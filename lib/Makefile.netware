@@ -176,6 +176,8 @@ ifeq ($(LIBARCH),LIBC)
 	# INCLUDES += -I$(SDK_LIBC)/include/winsock
 	# INCLUDES += -I$(SDK_LDAP)/libc/inc
 	CFLAGS += -D_POSIX_SOURCE
+	# disable LDAP since we can no longer compile.
+	DISABLE_LDAP = 1
 else
 	INCLUDES += -I$(SDK_CLIB)/include/nlm
 	# INCLUDES += -I$(SDK_CLIB)/include/nlm/obsolete
