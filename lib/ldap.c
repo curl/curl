@@ -126,7 +126,6 @@ CURLcode Curl_ldap(struct connectdata *conn, bool *done)
   int rc = 0;
   LDAP *server;
   LDAPURLDesc *ludp = NULL;
-  const char *mod_name;
   LDAPMessage *result;
   LDAPMessage *entryIterator;
   int num = 0;
