@@ -74,9 +74,7 @@
 
 /* Use our own implementation. */
 
-typedef struct ldap_url_desc {
-    struct ldap_url_desc *lud_next;
-    char   *lud_scheme;
+typedef struct {
     char   *lud_host;
     int     lud_port;
     char   *lud_dn;
@@ -84,14 +82,17 @@ typedef struct ldap_url_desc {
     int     lud_scope;
     char   *lud_filter;
     char  **lud_exts;
-    int     lud_crit_exts;
-} LDAPURLDesc;
+} CURL_LDAPURLDesc;
+
+#undef LDAPURLDesc
+#define LDAPURLDesc             CURL_LDAPURLDesc
 
 static int  _ldap_url_parse (const struct connectdata *conn,
                              LDAPURLDesc **ludp);
 static void _ldap_free_urldesc (LDAPURLDesc *ludp);
 
-static void (*ldap_free_urldesc)(LDAPURLDesc *) = _ldap_free_urldesc;
+#undef ldap_free_urldesc
+#define ldap_free_urldesc       _ldap_free_urldesc
 #endif
 
 #ifndef LDAP_SIZELIMIT_EXCEEDED
