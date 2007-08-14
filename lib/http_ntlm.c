@@ -917,6 +917,13 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     useroff = domoff + domlen;
     hostoff = useroff + userlen;
 
+    /*
+     * In the case the server sets the flag NTLMFLAG_NEGOTIATE_UNICODE, we
+     * need to filter it off because libcurl doesn't UNICODE encode the
+     * strings it packs into the NTLM authenticate packet.
+     */
+    ntlm->flags &= ~NTLMFLAG_NEGOTIATE_UNICODE;
+
     /* Create the big type-3 message binary blob */
     size = snprintf((char *)ntlmbuf, sizeof(ntlmbuf),
                     NTLMSSP_SIGNATURE "%c"

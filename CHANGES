@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel S (14 August 2007)
+- Andrew Wansink provided an NTLM bugfix: in the case the server sets the flag
+  NTLMFLAG_NEGOTIATE_UNICODE, we need to filter it off because libcurl doesn't
+  UNICODE encode the strings it packs into the NTLM authenticate packet.
+
 Daniel S (11 August 2007)
 - Allen Pulsifer provided a patch that makes libcurl set the expected download
   size earlier when doing HTTP downloads, so that applications and the
