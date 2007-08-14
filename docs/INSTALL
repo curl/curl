@@ -490,15 +490,18 @@ NetWare
      http://developer.novell.com/ndk/libc.htm
    - or recent Novell CLib SDK available from:
      http://developer.novell.com/ndk/clib.htm
+   - optional recent Novell CLDAP SDK available from:
+     http://developer.novell.com/ndk/cldap.htm
    - optional zlib sources (static or dynamic linking with zlib.imp);
      sources with NetWare Makefile can be obtained from:
      http://www.gknw.net/mirror/zlib/
    - optional OpenSSL sources (version 0.9.8 or later build with BSD sockets);
      you can find precompiled packages at:
      http://www.gknw.net/development/ossl/netware/
-     for CLIB-based builds OpenSSL needs to be extended to build with BSD
-     sockets (currently only a winsock-based CLIB build is supported); 
-   - optional SSH2 sources (version 0.15 or later);
+     for CLIB-based builds OpenSSL needs to be patched to build with BSD
+     sockets (currently only a winsock-based CLIB build is supported):
+     http://www.gknw.net/development/ossl/netware/patches/v_0.9.8e/openssl-0.9.8e.diff
+   - optional SSH2 sources (version 0.17 or later);
 
    Set a search path to your compiler, linker and tools; on Linux make
    sure that the var OSTYPE contains the string 'linux'; set the var
@@ -508,6 +511,9 @@ NetWare
    if you need other combinations you can control the build with the
    environment variables WITH_SSL, WITH_ZLIB, WITH_ARES, WITH_SSH2, and
    ENABLE_IPV6; you can set LINK_STATIC=1 to link curl.nlm statically.
+   By default LDAP support is enabled, however currently you will need a patch
+   in order to use the CLDAP NDK with BSD sockets (Novell Bug 300237):
+   http://www.gknw.net/test/curl/cldap_ndk/ldap_ndk.diff
    I found on some Linux systems (RH9) that OS detection didnt work although
    a 'set | grep OSTYPE' shows the var present and set; I simply overwrote it
    with 'OSTYPE=linux-rh9-gnu' and the detection in the Makefile worked...
