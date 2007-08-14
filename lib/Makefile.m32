@@ -40,6 +40,7 @@ ifdef ARES
   INCLUDES += -I$(ARES_LIB)
   CFLAGS += -DUSE_ARES
   DLL_LIBS += -L$(ARES_LIB) -lcares
+  libcurl_dll_DEPENDENCIES = $(ARES_LIB)/libcares.a
 endif
 ifdef SSH2
   INCLUDES += -I"$(LIBSSH2_PATH)/include" -I"$(LIBSSH2_PATH)/win32"
@@ -70,29 +71,31 @@ COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
 
-libcurl_a_OBJECTS := $(patsubst %.c,%.o,$(strip $(CSOURCES)))
+libcurl_dll_LIBRARY = libcurl.dll
+libcurl_dll_a_LIBRARY = libcurldll.a
+libcurl_a_LIBRARY = libcurl.a
 
-libcurl_a_LIBRARIES = libcurl.a
-libcurl_a_DEPENDENCIES = $(strip $(CSOURCES) $(HHEADERS))
+libcurl_a_OBJECTS := $(patsubst %.c,%.o,$(strip $(CSOURCES)))
+libcurl_a_DEPENDENCIES := $(strip $(CSOURCES) $(HHEADERS))
 
 RESOURCE = libcurl.res
 
 .SUFFIXES: .rc .res
 
-all: libcurl.a libcurl.dll libcurldll.a
+all: $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY)
 
-libcurl.a: $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
-	$(RM) libcurl.a
-	$(AR) cru libcurl.a $(libcurl_a_OBJECTS)
-	$(RANLIB) libcurl.a
+$(libcurl_a_LIBRARY): $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
+	$(RM) $@
+	$(AR) cru $@ $(libcurl_a_OBJECTS)
+	$(RANLIB) $@
 	$(STRIP) $@
 
 # remove the last line above to keep debug info
 
-libcurl.dll libcurldll.a: $(libcurl_a_OBJECTS) $(RESOURCE)
+$(libcurl_dll_LIBRARY): $(libcurl_a_OBJECTS) $(RESOURCE) $(libcurl_dll_DEPENDENCIES)
 	$(RM) $@
-	$(CC) $(LDFLAGS) -shared -Wl,--out-implib,libcurldll.a -o libcurl.dll \
-	  $(libcurl_a_OBJECTS) $(RESOURCE) $(DLL_LIBS)
+	$(CC) $(LDFLAGS) -shared -Wl,--out-implib,$(libcurl_dll_a_LIBRARY) \
+	  -o $@ $(libcurl_a_OBJECTS) $(RESOURCE) $(DLL_LIBS)
 
 .c.o:
 	$(COMPILE) -c $<
@@ -104,5 +107,9 @@ clean:
 	$(RM) $(libcurl_a_OBJECTS) $(RESOURCE)
 
 distrib: clean
-	$(RM) $(libcurl_a_LIBRARIES)
+	$(RM) $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY) $(libcurl_dll_a_LIBRARY)
+
+$(ARES_LIB)/libcares.a:
+	$(MAKE) -C $(ARES_LIB) -f Makefile.m32
+
 

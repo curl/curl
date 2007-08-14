@@ -49,6 +49,9 @@ else
   CFLAGS += -DCURL_STATICLIB
 endif
 ifdef ARES
+  ifndef DYN
+    curl_DEPENDENCIES += $(ARES_LIB)/libcares.a
+  endif
   CFLAGS += -DUSE_ARES
   curl_LDADD += -L$(ARES_LIB) -lcares
 endif
