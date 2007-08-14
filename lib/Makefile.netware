@@ -174,13 +174,14 @@ ifeq ($(LIBARCH),LIBC)
 	INCLUDES += -I$(SDK_LIBC)/include
 	# INCLUDES += -I$(SDK_LIBC)/include/nks
 	# INCLUDES += -I$(SDK_LIBC)/include/winsock
-	INCLUDES += -I$(SDK_LDAP)/libc/inc
 	CFLAGS += -D_POSIX_SOURCE
 else
 	INCLUDES += -I$(SDK_CLIB)/include/nlm
 	# INCLUDES += -I$(SDK_CLIB)/include/nlm/obsolete
 	# INCLUDES += -I$(SDK_CLIB)/include
-	INCLUDES += -I$(SDK_LDAP)/clib/inc
+endif
+ifndef DISABLE_LDAP
+	INCLUDES += -I$(SDK_LDAP)/$(LIBARCH_L)/inc
 endif
 CFLAGS	+= $(INCLUDES)
 
