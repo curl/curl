@@ -174,17 +174,13 @@ ifeq ($(LIBARCH),LIBC)
 	INCLUDES += -I$(SDK_LIBC)/include
 	# INCLUDES += -I$(SDK_LIBC)/include/nks
 	# INCLUDES += -I$(SDK_LIBC)/include/winsock
-	# INCLUDES += -I$(SDK_LDAP)/libc/inc
+	INCLUDES += -I$(SDK_LDAP)/libc/inc
 	CFLAGS += -D_POSIX_SOURCE
-	# disable LDAP since we can no longer compile.
-	DISABLE_LDAP = 1
 else
 	INCLUDES += -I$(SDK_CLIB)/include/nlm
 	# INCLUDES += -I$(SDK_CLIB)/include/nlm/obsolete
 	# INCLUDES += -I$(SDK_CLIB)/include
-	# INCLUDES += -I$(SDK_LDAP)/clib/inc
-	# for now disable LDAP unless we have coded a CLIB dynaloader.
-	DISABLE_LDAP = 1
+	INCLUDES += -I$(SDK_LDAP)/clib/inc
 endif
 CFLAGS	+= $(INCLUDES)
 
@@ -308,9 +304,12 @@ ifeq ($(LIBARCH),CLIB)
 	@echo $(DL)import @$(SDK_CLIB)/imports/threads.imp$(DL) >> $@
 	@echo $(DL)import @$(SDK_CLIB)/imports/nlmlib.imp$(DL) >> $@
 	@echo $(DL)import @$(SDK_CLIB)/imports/socklib.imp$(DL) >> $@
-#	@echo $(DL)import @$(SDK_LDAP)/clib/imports/ldapsdk.imp$(DL) >> $@
-#	@echo $(DL)import @$(SDK_LDAP)/clib/imports/ldapssl.imp$(DL) >> $@
-#	@echo $(DL)import @$(SDK_LDAP)/clib/imports/ldapx.imp$(DL) >> $@
+ifndef DISABLE_LDAP
+	@echo $(DL)import @$(SDK_LDAP)/clib/imports/ldapsdk.imp$(DL) >> $@
+	@echo $(DL)import @$(SDK_LDAP)/clib/imports/ldapssl.imp$(DL) >> $@
+	@echo $(DL)import @$(SDK_LDAP)/clib/imports/ldapx.imp$(DL) >> $@
+	@echo $(DL)module ldapx$(DL) >> $@
+endif
 	@echo $(DL)module clib$(DL) >> $@
 else
 	@echo $(DL)pseudopreemption$(DL) >> $@
@@ -319,9 +318,12 @@ else
 	@echo $(DL)check _LibCCheckUnload$(DL) >> $@
 	@echo $(DL)import @$(SDK_LIBC)/imports/libc.imp$(DL) >> $@
 	@echo $(DL)import @$(SDK_LIBC)/imports/netware.imp$(DL) >> $@
-#	@echo $(DL)import @$(SDK_LDAP)/libc/imports/lldapsdk.imp$(DL) >> $@
-#	@echo $(DL)import @$(SDK_LDAP)/libc/imports/lldapssl.imp$(DL) >> $@
-#	@echo $(DL)import @$(SDK_LDAP)/libc/imports/lldapx.imp$(DL) >> $@
+ifndef DISABLE_LDAP
+	@echo $(DL)import @$(SDK_LDAP)/libc/imports/lldapsdk.imp$(DL) >> $@
+	@echo $(DL)import @$(SDK_LDAP)/libc/imports/lldapssl.imp$(DL) >> $@
+	@echo $(DL)import @$(SDK_LDAP)/libc/imports/lldapx.imp$(DL) >> $@
+	@echo $(DL)module lldapx$(DL) >> $@
+endif
 	@echo $(DL)module libc$(DL) >> $@
 endif
 ifdef MODULES
@@ -452,10 +454,13 @@ endif
 	@echo $(DL)#define TIME_WITH_SYS_TIME 1$(DL) >> $@
 ifdef DISABLE_LDAP
 	@echo $(DL)#define CURL_DISABLE_LDAP 1$(DL) >> $@
+else
+	@echo $(DL)#define HAVE_LDAP_URL_PARSE 1$(DL) >> $@
 endif
 ifdef NW_WINSOCK
 	@echo $(DL)#define HAVE_CLOSESOCKET 1$(DL) >> $@
 else
+	@echo $(DL)#define USE_BSD_SOCKETS 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SYS_TYPES_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SYS_SOCKET_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SYS_SOCKIO_H 1$(DL) >> $@
