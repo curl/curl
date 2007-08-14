@@ -198,7 +198,7 @@ Win32
 
    Almost identical to the unix installation. Run the configure script in the
    curl root with 'sh configure'. Make sure you have the sh executable in
-   /bin/ or you'll see the configure fail towards the end.
+   /bin/ or you'll see the configure fail toward the end.
 
    Run 'make'
 
@@ -403,7 +403,7 @@ VMS
 
    Facility - basically the program ID. A code assigned to the program
    the name can be fetched from external or internal message libraries
-   Errorcode - the errodes assigned by the application
+   Error code - the err codes assigned by the application
    Sev. - severity: Even = error, off = non error
       0 = Warning
       1 = Success
@@ -413,7 +413,7 @@ VMS
       <5-7> reserved.
 
    This all presents itself with:
-   %<FACILITY>-<SeV>-<Errorname>, <Error message>
+   %<FACILITY>-<Sev>-<Errorname>, <Error message>
 
    See also the src/curlmsg.msg file, it has the source for the messages In
    src/main.c a section is devoted to message status values, the globalvalues
@@ -506,7 +506,7 @@ NetWare
    Set a search path to your compiler, linker and tools; on Linux make
    sure that the var OSTYPE contains the string 'linux'; set the var
    NDKBASE to point to the base of your Novell NDK; and then type
-   'make netware' from the top source directory; other tagets available
+   'make netware' from the top source directory; other targets available
    are 'netware-ssl', 'netware-ssl-zlib', 'netware-zlib' and 'netware-ares';
    if you need other combinations you can control the build with the
    environment variables WITH_SSL, WITH_ZLIB, WITH_ARES, WITH_SSH2, and
@@ -514,7 +514,7 @@ NetWare
    By default LDAP support is enabled, however currently you will need a patch
    in order to use the CLDAP NDK with BSD sockets (Novell Bug 300237):
    http://www.gknw.net/test/curl/cldap_ndk/ldap_ndk.diff
-   I found on some Linux systems (RH9) that OS detection didnt work although
+   I found on some Linux systems (RH9) that OS detection didn't work although
    a 'set | grep OSTYPE' shows the var present and set; I simply overwrote it
    with 'OSTYPE=linux-rh9-gnu' and the detection in the Makefile worked...
    Any help in testing appreciated!
@@ -610,7 +610,7 @@ Minix
    
    then configure curl with a command like this:
 
-     ./configure CC=gcc GREP=grep AR=/usr/gnu/bin/gar --disable-ldap
+     ./configure CC=gcc GREP=grep AR=/usr/gnu/bin/gar
 
    Then simply run 'make'.
 
@@ -618,8 +618,7 @@ Minix
 
      chmem =1024000 /usr/lib/em_cemcom.ansi
      chmem =512000 /usr/lib/i386/as
-     ./configure CC=cc LD=cc GREP=grep CPPFLAGS=-D_POSIX_SOURCE=1 \
-                 --disable-ldap
+     ./configure CC=cc LD=cc GREP=grep CPPFLAGS=-D_POSIX_SOURCE=1
      make
 
 
