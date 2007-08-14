@@ -76,6 +76,16 @@ TODO
    internally use and assume the multi interface. The select()-loop should use
    curl_multi_socket().
 
+ * curl_multi_handle_control() - this can control the easy handle (while)
+   added to a multi handle in various ways:
+   o RESTART, unconditionally restart this easy handle's transfer from the
+     start, re-init the state
+   o RESTART_COMPLETED, restart this easy handle's transfer but only if the
+     existing transfer has already completed and it is in a "finished state".
+   o STOP, just stop this transfer and consider it completed
+   o PAUSE?
+   o RESUME?
+
  DOCUMENTATION
 
  * More and better
