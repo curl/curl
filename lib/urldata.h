@@ -34,6 +34,7 @@
 #define PORT_HTTPS 443
 #define PORT_DICT 2628
 #define PORT_LDAP 389
+#define PORT_LDAPS 636
 #define PORT_TFTP 69
 #define PORT_SSH 22
 
