@@ -57,8 +57,9 @@ char *curl_version(void)
   size_t len;
   size_t left = sizeof(version);
   strcpy(ptr, LIBCURL_NAME "/" LIBCURL_VERSION );
-  ptr=strchr(ptr, '\0');
-  left -= strlen(ptr);
+  len = strlen(ptr);
+  left -= len;
+  ptr += len;
 
   len = Curl_ssl_version(ptr, left);
   left -= len;
