@@ -48,6 +48,9 @@
 #else
 #define LDAP_DEPRECATED 1       /* Be sure ldap_init() is defined. */
 # include <ldap.h>
+#ifdef HAVE_LDAP_SSL
+# include <ldap_ssl.h>
+#endif /* CURL_LDAP_USE_SSL */
 #endif
 
 #ifdef HAVE_UNISTD_H
@@ -107,7 +110,16 @@ static void _ldap_free_urldesc (LDAPURLDesc *ludp);
 #ifndef LDAP_OPT_PROTOCOL_VERSION
 #define LDAP_OPT_PROTOCOL_VERSION 0x0011
 #endif
-
+#ifndef LDAP_OPT_NETWORK_TIMEOUT /* socket level timeout */
+#define LDAP_OPT_NETWORK_TIMEOUT 0x5005
+#endif
+#ifndef LDAPSSL_VERIFY_NONE
+#define LDAPSSL_VERIFY_NONE 0x00
+#endif
+#ifndef LDAPSSL_VERIFY_SERVER
+#define LDAPSSL_VERIFY_SERVER 0x01
+#endif
+ 
 #ifdef DEBUG_LDAP
   #define LDAP_TRACE(x)   do { \
                             _ldap_trace ("%u: ", __LINE__); \
@@ -131,26 +143,72 @@ CURLcode Curl_ldap(struct connectdata *conn, bool *done)
   int num = 0;
   struct SessionHandle *data=conn->data;
   int ldap_proto;
+  int ldap_ssl = 0;
   char *val_b64;
   size_t val_b64_sz;
+  struct timeval ldap_timeout = {10,0}; /* 10 sec connection/search timeout */
 
   *done = TRUE; /* unconditionally */
   infof(data, "LDAP local: %s\n", data->change.url);
 
-  server = ldap_init(conn->host.name, (int)conn->port);
+#ifndef HAVE_LDAP_URL_PARSE
+  rc = _ldap_url_parse(conn, &ludp);
+#else
+  rc = ldap_url_parse(data->change.url, &ludp);
+#endif
+  if (rc != 0) {
+    failf(data, "LDAP local: %s", ldap_err2string(rc));
+    status = CURLE_LDAP_INVALID_URL;
+    goto quit;
+  }
+
+  /* Get the URL scheme ( either ldap or ldaps ) */
+  if (strequal(conn->protostr, "LDAPS"))
+    ldap_ssl = 1;
+  infof(data, "LDAP local: trying to establish %s connection\n",
+          ldap_ssl ? "encrypted" : "cleartext");
+
+  ldap_set_option(NULL, LDAP_OPT_NETWORK_TIMEOUT, &ldap_timeout);
+  ldap_proto = LDAP_VERSION3;
+  ldap_set_option(NULL, LDAP_OPT_PROTOCOL_VERSION, &ldap_proto);
+
+  if (ldap_ssl) {
+#ifdef HAVE_LDAP_SSL
+#ifdef CURL_LDAP_WIN
+    server = ldap_sslinit(conn->host.name, (int)conn->port, 1);
+    ldap_set_option(server, LDAP_OPT_SSL, LDAP_OPT_ON);
+#else
+    rc = ldapssl_client_init(NULL,     /* DER encoded cert file  */
+                             NULL);    /* reserved, use NULL */
+    if (rc != LDAP_SUCCESS) {
+      failf(data, "LDAP local: %s", ldap_err2string(rc));
+      status = CURLE_SSL_CERTPROBLEM;
+      goto quit;
+    }
+    rc = ldapssl_set_verify_mode(LDAPSSL_VERIFY_NONE);
+    if (rc != LDAP_SUCCESS) {
+      failf(data, "LDAP local: ldapssl_set_verify_mode error: %d", rc);
+      status = CURLE_SSL_CERTPROBLEM;
+      goto quit;
+    }
+    server = ldapssl_init(conn->host.name, (int)conn->port, 1);
+#endif
+#endif /* CURL_LDAP_USE_SSL */
+  } else {
+    server = ldap_init(conn->host.name, (int)conn->port);
+  }
+
   if (server == NULL) {
     failf(data, "LDAP local: Cannot connect to %s:%d",
-          conn->host.name, conn->port);
+            conn->host.name, conn->port);
     status = CURLE_COULDNT_CONNECT;
     goto quit;
   }
 
-  ldap_proto = LDAP_VERSION3;
-  ldap_set_option(server, LDAP_OPT_PROTOCOL_VERSION, &ldap_proto);
   rc = ldap_simple_bind_s(server,
                           conn->bits.user_passwd ? conn->user : NULL,
                           conn->bits.user_passwd ? conn->passwd : NULL);
-  if (rc != 0) {
+  if (!ldap_ssl && rc != 0) {
     ldap_proto = LDAP_VERSION2;
     ldap_set_option(server, LDAP_OPT_PROTOCOL_VERSION, &ldap_proto);
     rc = ldap_simple_bind_s(server,
@@ -160,18 +218,6 @@ CURLcode Curl_ldap(struct connectdata *conn, bool *done)
   if (rc != 0) {
      failf(data, "LDAP local: %s", ldap_err2string(rc));
      status = CURLE_LDAP_CANNOT_BIND;
-     goto quit;
-  }
-
-#ifndef HAVE_LDAP_URL_PARSE
-  rc = _ldap_url_parse(conn, &ludp);
-#else
-  rc = ldap_url_parse(data->change.url, &ludp);
-#endif
-
-  if (rc != 0) {
-     failf(data, "LDAP local: %s", ldap_err2string(rc));
-     status = CURLE_LDAP_INVALID_URL;
      goto quit;
   }
 
@@ -242,15 +288,22 @@ CURLcode Curl_ldap(struct connectdata *conn, bool *done)
   }
 
 quit:
-  LDAP_TRACE (("Received %d entries\n", num));
+  if (result) {
+    ldap_msgfree(result);
+    LDAP_TRACE (("Received %d entries\n", num));
+  }
   if (rc == LDAP_SIZELIMIT_EXCEEDED)
-     infof(data, "There are more than %d entries\n", num);
-  if (result)
-     ldap_msgfree(result);
+    infof(data, "There are more than %d entries\n", num);
   if (ludp)
-     ldap_free_urldesc(ludp);
+    ldap_free_urldesc(ludp);
   if (server)
-     ldap_unbind_s(server);
+    ldap_unbind_s(server);
+#ifdef HAVE_LDAP_SSL
+#ifndef CURL_LDAP_WIN
+  if (ldap_ssl)
+    ldapssl_client_deinit();
+#endif
+#endif /* CURL_LDAP_USE_SSL */
 
   /* no data to transfer */
   Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);

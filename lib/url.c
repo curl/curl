@@ -3062,6 +3062,23 @@ static CURLcode setup_connection_internals(struct SessionHandle *data,
 #endif
   }
 
+#ifdef HAVE_LDAP_SSL
+  else if (strequal(conn->protostr, "LDAPS")) {
+#ifndef CURL_DISABLE_LDAP
+    conn->protocol |= PROT_LDAP|PROT_SSL;
+    conn->port = PORT_LDAPS;
+    conn->remote_port = PORT_LDAPS;
+    conn->curl_do = Curl_ldap;
+    /* no LDAP-specific done */
+    conn->curl_done = (Curl_done_func)ZERO_NULL;
+#else
+    failf(data, LIBCURL_NAME
+          " was built with LDAP disabled!");
+    return CURLE_UNSUPPORTED_PROTOCOL;
+#endif
+  }
+#endif /* CURL_LDAP_USE_SSL */
+
   else if (strequal(conn->protostr, "FILE")) {
 #ifndef CURL_DISABLE_FILE
     conn->protocol |= PROT_FILE;

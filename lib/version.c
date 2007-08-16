@@ -120,6 +120,9 @@ static const char * const protocols[] = {
 #endif
 #ifndef CURL_DISABLE_LDAP
   "ldap",
+#ifdef HAVE_LDAP_SSL
+  "ldaps",
+#endif
 #endif
 #ifndef CURL_DISABLE_HTTP
   "http",
