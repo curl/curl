@@ -1,5 +1,14 @@
 <testcase>
-# Server-side
+<info>
+<keywords>
+HTTP
+Digest
+PUT
+Resume
+CUSTOMREQUEST
+</keywords>
+</info>
+
 <reply>
 <data>
 HTTP/1.1 100 Continue

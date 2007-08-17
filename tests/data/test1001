@@ -1,4 +1,13 @@
 <testcase>
+<info>
+<keywords>
+HTTP
+Digest
+PUT
+Resume
+CUSTOMREQUEST
+</keywords>
+</info>
 # Server-side
 <reply>
 <data>
