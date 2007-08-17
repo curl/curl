@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel S (18 August 2007)
+- Robson Braga Araujo filed bug report #1776235
+  (http://curl.haxx.se/bug/view.cgi?id=1776235) about ftp requests with NOBODY
+  on a directory would do a "SIZE (null)" request. This is now fixed and test
+  case 1000 was added to verify.
+
 Daniel S (17 August 2007)
 - Song Ma provided a patch that cures a problem libcurl has when doing resume
   HTTP PUT using Digest authentication. Test case 5320 and 5322 were also

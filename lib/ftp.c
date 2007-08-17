@@ -140,6 +140,19 @@ static int ftp_need_type(struct connectdata *conn,
 #define NBFTPSENDF(x,y,z)  if ((result = Curl_nbftpsendf(x,y,z)) != CURLE_OK) \
                               return result
 
+
+/*
+ * NOTE: back in the old days, we added code in the FTP code that made NOBODY
+ * requests on files respond with headers passed to the client/stdout that
+ * looked like HTTP ones.
+ *
+ * This approach is not very elegant, it causes confusion and is error-prone.
+ * It is subject for removal at the next (or at least a future) soname bump.
+ * Until then you can test the effects of the removal by undefining the
+ * following define named CURL_FTP_HTTPSTYLE_HEAD.
+ */
+#define CURL_FTP_HTTPSTYLE_HEAD 1
+
 static void freedirs(struct connectdata *conn)
 {
   struct ftp_conn *ftpc = &conn->proto.ftpc;
@@ -1303,8 +1316,8 @@ static CURLcode ftp_state_post_size(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct FTP *ftp = conn->data->reqdata.proto.ftp;
 
-  if(ftp->no_transfer) {
-    /* if a "head"-like request is being made */
+  if(ftp->no_transfer && ftp->file) {
+    /* if a "head"-like request is being made (on a file) */
 
     /* Determine if server can respond to REST command and therefore
        whether it supports range */
@@ -1323,8 +1336,8 @@ static CURLcode ftp_state_post_type(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct FTP *ftp = conn->data->reqdata.proto.ftp;
 
-  if(ftp->no_transfer) {
-    /* if a "head"-like request is being made */
+  if(ftp->no_transfer && ftp->file) {
+    /* if a "head"-like request is being made (on a file) */
 
     /* we know ftp->file is a valid pointer to a file name */
     NBFTPSENDF(conn, "SIZE %s", ftp->file);
@@ -1898,6 +1911,7 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
         data->info.filetime = (long)curl_getdate(buf, &secs);
       }
 
+#ifdef CURL_FTP_HTTPSTYLE_HEAD
       /* If we asked for a time of the file and we actually got one as well,
          we "emulate" a HTTP-style header in our output. */
 
@@ -1928,6 +1942,7 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
         if(result)
           return result;
       } /* end of a ridiculous amount of conditionals */
+#endif
     }
     break;
   default:
@@ -2096,6 +2111,7 @@ static CURLcode ftp_state_size_resp(struct connectdata *conn,
   filesize = (ftpcode == 213)?curlx_strtoofft(buf+4, NULL, 0):-1;
 
   if(instate == FTP_SIZE) {
+#ifdef CURL_FTP_HTTPSTYLE_HEAD
     if(-1 != filesize) {
       snprintf(buf, sizeof(data->state.buffer),
                "Content-Length: %" FORMAT_OFF_T "\r\n", filesize);
@@ -2103,6 +2119,7 @@ static CURLcode ftp_state_size_resp(struct connectdata *conn,
       if(result)
         return result;
     }
+#endif
     result = ftp_state_post_size(conn);
   }
   else if(instate == FTP_RETR_SIZE)
@@ -2125,13 +2142,14 @@ static CURLcode ftp_state_rest_resp(struct connectdata *conn,
   switch(instate) {
   case FTP_REST:
   default:
+#ifdef CURL_FTP_HTTPSTYLE_HEAD
     if (ftpcode == 350) {
       result = Curl_client_write(conn, CLIENTWRITE_BOTH,
                                (char *)"Accept-ranges: bytes\r\n", 0);
       if(result)
         return result;
     }
-
+#endif
     result = ftp_state_post_rest(conn);
     break;
 

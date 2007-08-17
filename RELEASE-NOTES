@@ -41,6 +41,7 @@ This release includes the following bugfixes:
  o memory leak when handling compressed data streams from broken servers
  o no NTLM unicode response
  o resume HTTP PUT using Digest authentication
+ o FTP NOBODY requests on directories sent "SIZE (null)"
 
 This release includes the following known bugs:
 
@@ -64,6 +65,6 @@ advice from friends like these:
  Daniel Cater, Colin Hogben, Jofell Gallardo, Daniel Johnson,
  Ralf S. Engelschall, James Housley, Chris Flerackers, Patrick Monnerat,
  Jayesh A Shah, Greg Zavertnik, Peter O'Gorman, Greg Morse, Dmitriy Sergeyev,
- Scott Cantor, Allen Pulsifer, Andrew Wansink
+ Scott Cantor, Allen Pulsifer, Andrew Wansink, Robson Braga Araujo
  
         Thanks! (and sorry if I forgot to mention someone)
