@@ -2144,8 +2144,8 @@ static CURLcode ftp_state_rest_resp(struct connectdata *conn,
   default:
 #ifdef CURL_FTP_HTTPSTYLE_HEAD
     if (ftpcode == 350) {
-      result = Curl_client_write(conn, CLIENTWRITE_BOTH,
-                               (char *)"Accept-ranges: bytes\r\n", 0);
+      char buffer[24]= { "Accept-ranges: bytes\r\n" };
+      result = Curl_client_write(conn, CLIENTWRITE_BOTH, buffer, 0);
       if(result)
         return result;
     }

@@ -42,6 +42,7 @@ This release includes the following bugfixes:
  o no NTLM unicode response
  o resume HTTP PUT using Digest authentication
  o FTP NOBODY requests on directories sent "SIZE (null)"
+ o FTP NOBODY request on file crash
 
 This release includes the following known bugs:
 

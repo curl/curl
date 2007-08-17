@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel S (18 August 2007)
+- Robson Braga Araujo filed bug report #1776232
+  (http://curl.haxx.se/bug/view.cgi?id=1776232) about libcurl calling
+  Curl_client_write(), passing on a const string that the caller may not
+  modify and yet it does (on some platforms).
+
 - Robson Braga Araujo filed bug report #1776235
   (http://curl.haxx.se/bug/view.cgi?id=1776235) about ftp requests with NOBODY
   on a directory would do a "SIZE (null)" request. This is now fixed and test
