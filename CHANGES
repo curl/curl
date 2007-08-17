@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel S (17 August 2007)
+- Song Ma provided a patch that cures a problem libcurl has when doing resume
+  HTTP PUT using Digest authentication. Test case 5320 and 5322 were also
+  added to verify the functionality.
+
 Daniel S (14 August 2007)
 - Andrew Wansink provided an NTLM bugfix: in the case the server sets the flag
   NTLMFLAG_NEGOTIATE_UNICODE, we need to filter it off because libcurl doesn't

@@ -1993,7 +1993,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
        data->reqdata.resume_from = 0;
     }
 
-    if(data->reqdata.resume_from) {
+    if(data->reqdata.resume_from && !data->state.this_is_a_follow) {
       /* do we still game? */
       curl_off_t passed=0;
 
@@ -2049,6 +2049,10 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     else if((httpreq != HTTPREQ_GET) &&
             !checkheaders(data, "Content-Range:")) {
 
+      /* if a line like this was already allocated, free the previous one */
+      if(conn->allocptr.rangeline)
+        free(conn->allocptr.rangeline);
+
       if(data->reqdata.resume_from) {
         /* This is because "resume" was selected */
         curl_off_t total_expected_size=
@@ -2066,6 +2070,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
             aprintf("Content-Range: bytes %s/%" FORMAT_OFF_T "\r\n",
                     data->reqdata.range, data->set.infilesize);
       }
+      if(!conn->allocptr.rangeline)
+        return CURLE_OUT_OF_MEMORY;
     }
   }
 
@@ -2185,11 +2191,11 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     if(data->set.timecondition) {
       struct tm *tm;
 
-      /* Phil Karn (Fri, 13 Apr 2001) pointed out that the If-Modified-Since
-       * header family should have their times set in GMT as RFC2616 defines:
-       * "All HTTP date/time stamps MUST be represented in Greenwich Mean Time
-       * (GMT), without exception. For the purposes of HTTP, GMT is exactly
-       * equal to UTC (Coordinated Universal Time)." (see page 20 of RFC2616).
+      /* The If-Modified-Since header family should have their times set in
+       * GMT as RFC2616 defines: "All HTTP date/time stamps MUST be
+       * represented in Greenwich Mean Time (GMT), without exception. For the
+       * purposes of HTTP, GMT is exactly equal to UTC (Coordinated Universal
+       * Time)." (see page 20 of RFC2616).
        */
 
 #ifdef HAVE_GMTIME_R

@@ -40,6 +40,7 @@ This release includes the following bugfixes:
    "clean"
  o memory leak when handling compressed data streams from broken servers
  o no NTLM unicode response
+ o resume HTTP PUT using Digest authentication
 
 This release includes the following known bugs:
 
