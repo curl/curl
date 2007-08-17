@@ -287,6 +287,11 @@ TODO
  * Make the test suite work on more platforms. OpenBSD and Mac OS. Remove
    fork()s and it should become even more portable.
 
+ NEXT soname bump
+
+ * #undef CURL_FTP_HTTPSTYLE_HEAD in lib/ftp.c to remove the HTTP-style headers
+   from being output in NOBODY requests over ftp
+
  NEXT MAJOR RELEASE
 
  * curl_easy_cleanup() returns void, but curl_multi_cleanup() returns a
