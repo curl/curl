@@ -2,9 +2,10 @@
 # $Id$
 #
 ## Makefile for building curl.exe with MingW32 (GCC-3.2) and
-## optionally OpenSSL (0.9.8)
+## optionally OpenSSL (0.9.8), libssh2 (0.17), zlib (1.2.3)
 ##
-## Use: mingw32-make -f Makefile.m32 [SSL=1] [SSH2=1] [DYN=1]
+## Usage:
+## mingw32-make -f Makefile.m32 [SSL=1] [SSH2=1] [ZLIB=1] [SSPI=1] [IPV6=1] [DYN=1]
 ##
 ## Comments to: Troy Engel <tengel@sonic.net> or
 ##              Joern Hartroth <hartroth@acm.org>
