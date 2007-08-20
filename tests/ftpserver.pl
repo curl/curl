@@ -585,7 +585,7 @@ sub PASV_command {
         local $SIG{ALRM} = sub { die "alarm\n" };
 
 	# assume swift operations unless explicitly slow
-	alarm ($controldelay?20:5);
+	alarm ($controldelay?20:7);
 
         # Wait for 'CNCT'
 	my $input;
