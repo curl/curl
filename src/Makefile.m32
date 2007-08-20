@@ -91,7 +91,7 @@ ifdef LDAPS
   CFLAGS += -DHAVE_LDAP_SSL
   ifdef USE_LDAP_NOVELL
     # INCLUDES += -I"$(LDAP_SDK)/inc"
-    CFLAGS += -DCURL_LDAP_NOVELL
+    CFLAGS += -DCURL_HAS_NOVELL_LDAPSDK
     curl_LDADD += -L"$(LDAP_SDK)/lib/mscvc" -lldapsdk -lldapssl -lldapx
   endif
 endif
