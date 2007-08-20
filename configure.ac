@@ -675,26 +675,26 @@ AC_MSG_CHECKING([if argv can be written to])
 AC_CACHE_VAL(curl_cv_writable_argv, [
 AC_RUN_IFELSE([[
 int main(int argc, char ** argv) {
-	argv[0][0] = ' ';
-	return (argv[0][0] == ' ')?0:1;
+        argv[0][0] = ' ';
+        return (argv[0][0] == ' ')?0:1;
 }
-	]],
-	curl_cv_writable_argv=yes,
-	curl_cv_writable_argv=no,
-	curl_cv_writable_argv=cross)
+        ]],
+        curl_cv_writable_argv=yes,
+        curl_cv_writable_argv=no,
+        curl_cv_writable_argv=cross)
 ])
 case $curl_cv_writable_argv in
 yes)
-	AC_DEFINE(HAVE_WRITABLE_ARGV, 1, [Define this symbol if your OS supports changing the contents of argv])
-	AC_MSG_RESULT(yes)
-	;;
+        AC_DEFINE(HAVE_WRITABLE_ARGV, 1, [Define this symbol if your OS supports changing the contents of argv])
+        AC_MSG_RESULT(yes)
+        ;;
 no)
-	AC_MSG_RESULT(no)
-	;;
+        AC_MSG_RESULT(no)
+        ;;
 *)
         AC_MSG_RESULT(no)
         AC_MSG_WARN([the previous check could not be made default was used])
-	;;
+        ;;
 esac
 
 dnl **********************************************************************
@@ -840,7 +840,7 @@ AC_ARG_WITH(gssapi-includes,
 
 AC_ARG_WITH(gssapi-libs,
   AC_HELP_STRING([--with-gssapi-libs=DIR],
-  		 [Specify location of GSSAPI libs]),
+                 [Specify location of GSSAPI libs]),
   [ GSSAPI_LIB_DIR="-L$withval"
     want_gss="yes" ]
 )
@@ -912,7 +912,7 @@ if test x"$want_gss" = xyes; then
   elif test -z "$GSSAPI_LIB_DIR"; then
      if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
         gss_ldflags=`$GSSAPI_ROOT/bin/krb5-config --libs gssapi`
-	LDFLAGS="$LDFLAGS $gss_ldflags"
+        LDFLAGS="$LDFLAGS $gss_ldflags"
      elif test "$GSSAPI_ROOT" != "yes"; then
         LDFLAGS="$LDFLAGS -L$GSSAPI_ROOT/lib$libsuff -lgssapi"
      else
@@ -990,7 +990,7 @@ if test X"$OPT_SSL" != Xno; then
         SSL_LDFLAGS=`$PKGCONFIG --libs-only-L openssl 2>/dev/null`
         SSL_CPPFLAGS=`$PKGCONFIG --cflags-only-I openssl 2>/dev/null`
 
-	LIB_OPENSSL=`echo $SSL_LDFLAGS | sed -e 's/-L//g'`
+        LIB_OPENSSL=`echo $SSL_LDFLAGS | sed -e 's/-L//g'`
 
         dnl use the values pkg-config reported
         LIBS="$LIBS $SSL_LIBS"
@@ -2279,25 +2279,25 @@ AC_HELP_STRING([--disable-hidden-symbols],[Leave all symbols with default visibi
        AC_MSG_CHECKING([whether $CC supports it])
        if test "$GCC" = yes ; then
          if $CC --help --verbose 2>&1 | grep fvisibility= > /dev/null ; then
-	   AC_MSG_RESULT(yes)
-	   AC_DEFINE(CURL_HIDDEN_SYMBOLS, 1, [to enable hidden symbols])
-	   AC_SUBST(CURL_HIDDEN_SYMBOLS)
-	   AC_DEFINE(CURL_EXTERN_SYMBOL, [__attribute__ ((visibility ("default")))], [to make a symbol visible])
-	   AC_SUBST(CURL_EXTERN_SYMBOL)
-	   CFLAGS="$CFLAGS -fvisibility=hidden"
+           AC_MSG_RESULT(yes)
+           AC_DEFINE(CURL_HIDDEN_SYMBOLS, 1, [to enable hidden symbols])
+           AC_SUBST(CURL_HIDDEN_SYMBOLS)
+           AC_DEFINE(CURL_EXTERN_SYMBOL, [__attribute__ ((visibility ("default")))], [to make a symbol visible])
+           AC_SUBST(CURL_EXTERN_SYMBOL)
+           CFLAGS="$CFLAGS -fvisibility=hidden"
          else
             AC_MSG_RESULT(no)
           fi
 
        else
-       	 dnl Test for SunPro cc
-       	 if $CC 2>&1 | grep flags >/dev/null && $CC -flags | grep xldscope= >/dev/null ; then
+         dnl Test for SunPro cc
+         if $CC 2>&1 | grep flags >/dev/null && $CC -flags | grep xldscope= >/dev/null ; then
            AC_MSG_RESULT(yes)
-	   AC_DEFINE(CURL_HIDDEN_SYMBOLS, 1, [to enable hidden symbols])
-	   AC_SUBST(CURL_HIDDEN_SYMBOLS)
-	   AC_DEFINE(CURL_EXTERN_SYMBOL, [__global], [to make a symbol visible])
-	   AC_SUBST(CURL_EXTERN_SYMBOL)
-	   CFLAGS="$CFLAGS -xldscope=hidden"
+           AC_DEFINE(CURL_HIDDEN_SYMBOLS, 1, [to enable hidden symbols])
+           AC_SUBST(CURL_HIDDEN_SYMBOLS)
+           AC_DEFINE(CURL_EXTERN_SYMBOL, [__global], [to make a symbol visible])
+           AC_SUBST(CURL_EXTERN_SYMBOL)
+           CFLAGS="$CFLAGS -xldscope=hidden"
          else
            AC_MSG_RESULT(no)
          fi
@@ -2336,24 +2336,24 @@ LIBS=$ALL_LIBS  dnl LIBS is a magic variable that's used for every link
 AM_CONDITIONAL(CROSSCOMPILING, test x$cross_compiling = xyes)
 
 AC_CONFIG_FILES([Makefile \
-	   docs/Makefile \
+           docs/Makefile \
            docs/examples/Makefile \
            docs/libcurl/Makefile \
-	   include/Makefile \
-	   include/curl/Makefile \
-	   src/Makefile \
+           include/Makefile \
+           include/curl/Makefile \
+           src/Makefile \
            lib/Makefile \
            tests/Makefile \
            tests/data/Makefile \
            tests/server/Makefile \
            tests/libtest/Makefile \
-	   packages/Makefile \
-	   packages/Win32/Makefile \
-	   packages/Win32/cygwin/Makefile \
-	   packages/Linux/Makefile \
-	   packages/Linux/RPM/Makefile \
-	   packages/Linux/RPM/curl.spec \
-	   packages/Linux/RPM/curl-ssl.spec \
+           packages/Makefile \
+           packages/Win32/Makefile \
+           packages/Win32/cygwin/Makefile \
+           packages/Linux/Makefile \
+           packages/Linux/RPM/Makefile \
+           packages/Linux/RPM/curl.spec \
+           packages/Linux/RPM/curl-ssl.spec \
            packages/Solaris/Makefile \
            packages/DOS/Makefile \
            packages/EPM/curl.list \
