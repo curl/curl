@@ -568,7 +568,7 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
     curl_ldap_msg="yes (winldap)"
     AC_DEFINE(CURL_LDAP_WIN, 1, [Use W$ LDAP implementation])
     case $host in
-      *-*-cygwin* | *-*-mingw* | *-*-pw32*)
+      *-*-cygwin* | *-*-pw32*)
         AC_DEFINE(CURL_LDAP_HYBRID, 1, [W$ LDAP with non-W$ compiler])
         ;;
     esac
