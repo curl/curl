@@ -1,4 +1,4 @@
-#############################################################
+#########################################################################
 # $Id$
 #
 ## Makefile for building libcurl.a with MingW32 (GCC-3.2) and
@@ -7,17 +7,29 @@
 ## Usage:
 ## mingw32-make -f Makefile.m32 [SSL=1] [SSH2=1] [ZLIB=1] [SSPI=1] [IPV6=1] [DYN=1]
 ##
+## Hint: you can also set environment vars to control the build, f.e.:
+## set ZLIB_PATH=c:/zlib-1.2.3
+## set ZLIB=1
+##
 ## Comments to: Troy Engel <tengel@sonic.net> or
 ##              Joern Hartroth <hartroth@acm.org>
+#########################################################################
 
+# Edit the path below to point to the base of your Zlib sources.
+ifndef ZLIB_PATH
+ZLIB_PATH = ../../zlib-1.2.3
+endif
+# Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
 OPENSSL_PATH = ../../openssl-0.9.8e
 endif
+# Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
 LIBSSH2_PATH = ../../libssh2-0.16
 endif
-ifndef ZLIB_PATH
-ZLIB_PATH = ../../zlib-1.2.3
+# Edit the path below to point to the base of your Novell LDAP NDK.
+ifndef LDAP_SDK
+LDAP_SDK = c:/novell/ndk/cldapsdk/win32
 endif
 
 ARES_LIB = ../ares
@@ -65,6 +77,14 @@ ifdef SSPI
 endif
 ifdef IPV6
   CFLAGS += -DENABLE_IPV6
+endif
+ifdef LDAPS
+  CFLAGS += -DHAVE_LDAP_SSL
+  ifdef USE_LDAP_NOVELL
+    INCLUDES += -I"$(LDAP_SDK)/inc"
+    CFLAGS += -DCURL_HAS_NOVELL_LDAPSDK
+    DLL_LIBS += -L"$(LDAP_SDK)/lib/mscvc" -lldapsdk -lldapssl -lldapx
+  endif
 endif
 DLL_LIBS += -lws2_32 -lwinmm -lwldap32
 COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
