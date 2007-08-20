@@ -98,19 +98,6 @@ static void _ldap_free_urldesc (LDAPURLDesc *ludp);
 #define ldap_free_urldesc       _ldap_free_urldesc
 #endif
 
-#ifndef LDAP_SIZELIMIT_EXCEEDED
-#define LDAP_SIZELIMIT_EXCEEDED 4
-#endif
-#ifndef LDAP_VERSION2
-#define LDAP_VERSION2 2
-#endif
-#ifndef LDAP_VERSION3
-#define LDAP_VERSION3 3
-#endif
-#ifndef LDAP_OPT_PROTOCOL_VERSION
-#define LDAP_OPT_PROTOCOL_VERSION 0x0011
-#endif
- 
 #ifdef DEBUG_LDAP
   #define LDAP_TRACE(x)   do { \
                             _ldap_trace ("%u: ", __LINE__); \
@@ -135,7 +122,6 @@ CURLcode Curl_ldap(struct connectdata *conn, bool *done)
   struct SessionHandle *data=conn->data;
   int ldap_proto;
   int ldap_ssl = 0;
-  int ldap_option;
   char *val_b64;
   size_t val_b64_sz;
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
@@ -176,8 +162,9 @@ CURLcode Curl_ldap(struct connectdata *conn, bool *done)
     server = ldap_sslinit(conn->host.name, (int)conn->port, 1);
     ldap_set_option(server, LDAP_OPT_SSL, LDAP_OPT_ON);
 #else
-    char* ldap_ca = NULL; /* XXX fix me: need to get CA path option here! */
+    int ldap_option;
     int verify_cert = 0;  /* XXX fix me: need to get insecure option here! */
+    char* ldap_ca = NULL; /* XXX fix me: need to get CA path option here! */
 #if defined(CURL_HAS_NOVELL_LDAPSDK)
     rc = ldapssl_client_init(NULL, NULL);
     if (rc != LDAP_SUCCESS) {
