@@ -29,7 +29,7 @@ AC_INIT(curl, [-], [a suitable curl mailing list => http://curl.haxx.se/mail/])
 
 dnl configure script copyright
 AC_COPYRIGHT([Copyright (c) 1998 - 2006 Daniel Stenberg, <daniel@haxx.se>
-This configure script may be copied, distributed and modified under the 
+This configure script may be copied, distributed and modified under the
 terms of the curl license; see COPYING for more details])
 
 AC_CONFIG_SRCDIR([lib/urldata.h])
@@ -209,8 +209,8 @@ dnl check if there's a way to force code inline
 AC_C_INLINE
 
 dnl **********************************************************************
-dnl Make sure that our checks for headers windows.h winsock.h winsock2.h 
-dnl and ws2tcpip.h take precedence over any other further checks which 
+dnl Make sure that our checks for headers windows.h winsock.h winsock2.h
+dnl and ws2tcpip.h take precedence over any other further checks which
 dnl could be done later using AC_CHECK_HEADER or AC_CHECK_HEADERS for
 dnl this specific header files. And do them before its results are used.
 dnl **********************************************************************
@@ -546,7 +546,7 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
   if test "$LBERLIBNAME" ; then
     dnl If name is "no" then don't define this library at all
     dnl (it's only needed if libldap.so's dependencies are broken).
-    if test "$LBERLIBNAME" != "no" ; then 
+    if test "$LBERLIBNAME" != "no" ; then
       AC_CHECK_LIB("$LBERLIBNAME", ber_free,, [
         AC_MSG_WARN(["$LBERLIBNAME" is not an LBER library: LDAP disabled])
         AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
@@ -817,7 +817,7 @@ if test x"$want_spnego" = xyes; then
      else
         LDFLAGS="$LDFLAGS $SPNEGO_LIB_DIR"
      fi
- 
+
      AC_MSG_RESULT(yes)
      AC_DEFINE(HAVE_SPNEGO, 1,
                [Define this if you have the SPNEGO library fbopenssl])
@@ -834,7 +834,7 @@ dnl **********************************************************************
 AC_ARG_WITH(gssapi-includes,
   AC_HELP_STRING([--with-gssapi-includes=DIR],
                  [Specify location of GSSAPI header]),
-  [ GSSAPI_INCS="-I$withval" 
+  [ GSSAPI_INCS="-I$withval"
     want_gss="yes" ]
 )
 
@@ -850,7 +850,7 @@ AC_ARG_WITH(gssapi,
                  [Where to look for GSSAPI]), [
   GSSAPI_ROOT="$withval"
   if test x"$GSSAPI_ROOT" != xno; then
-    want_gss="yes" 
+    want_gss="yes"
   fi
 ])
 
@@ -882,10 +882,10 @@ if test x"$want_gss" = xyes; then
           AC_DEFINE(HAVE_GSSHEIMDAL, 1, [if you have the Heimdal gssapi libraries])
         ],
         [
-          dnl not found, check in gssapi/ subdir 
+          dnl not found, check in gssapi/ subdir
           AC_CHECK_HEADER(gssapi/gssapi.h,
             [
-              dnl found 
+              dnl found
               AC_DEFINE(HAVE_GSSMIT, 1, [if you have the MIT gssapi libraries])
             ],
             [
@@ -895,7 +895,7 @@ if test x"$want_gss" = xyes; then
             ]
           )
         ]
-      )        
+      )
     ]
   )
 else
@@ -924,7 +924,7 @@ if test x"$want_gss" = xyes; then
 else
   CPPFLAGS="$save_CPPFLAGS"
 fi
-  
+
 dnl **********************************************************************
 dnl Check for the presence of SSL libraries and headers
 dnl **********************************************************************
@@ -1004,7 +1004,7 @@ if test X"$OPT_SSL" != Xno; then
   fi
 
   dnl This is for Msys/Mingw
-  case $host in    
+  case $host in
     *-*-cygwin*)
       dnl Under Cygwin this is extraneous and causes an unnecessary -lgdi32
       dnl to be added to LIBS and recorded in the .la file.
@@ -1076,7 +1076,7 @@ if test X"$OPT_SSL" != Xno; then
         dnl name
         AC_CHECK_HEADERS(x509.h rsa.h crypto.h pem.h ssl.h err.h)
 
-        if test $ac_cv_header_x509_h = yes && 
+        if test $ac_cv_header_x509_h = yes &&
            test $ac_cv_header_crypto_h = yes &&
            test $ac_cv_header_ssl_h = yes; then
           dnl three matches
@@ -1136,7 +1136,7 @@ if test X"$OPT_SSL" != Xno; then
 #else
         Not the yaSSL OpenSSL compatibility header.
 #endif
-      ],[ 
+      ],[
         AC_MSG_RESULT([yes])
         AC_DEFINE_UNQUOTED(USE_YASSLEMUL, 1,
           [Define to 1 if using yaSSL in OpenSSL compatibility mode.])
@@ -1282,7 +1282,7 @@ if test X"$OPT_LIBSSH2" != Xno; then
   esac
 
   AC_CHECK_LIB(ssh2, libssh2_channel_open_ex)
-  
+
   AC_CHECK_HEADERS(libssh2.h,
     curl_ssh_msg="enabled (libSSH2)"
     LIBSSH2_ENABLED=1
@@ -1307,7 +1307,7 @@ if test X"$OPT_LIBSSH2" != Xno; then
 fi
 
 dnl **********************************************************************
-dnl Check for the random seed preferences 
+dnl Check for the random seed preferences
 dnl **********************************************************************
 
 if test X"$OPENSSL_ENABLED" = X"1"; then
@@ -1374,12 +1374,12 @@ if test "$OPENSSL_ENABLED" != "1"; then
 
       CLEANLIBS="$LIBS"
       CLEANCPPFLAGS="$CPPFLAGS"
-  
+
       LIBS="$LIBS $addlib"
       if test "$addcflags" != "-I/usr/include"; then
          CPPFLAGS="$CPPFLAGS $addcflags"
       fi
-  
+
       AC_CHECK_LIB(gnutls, gnutls_check_version,
        [
        AC_DEFINE(USE_GNUTLS, 1, [if GnuTLS is enabled])
@@ -1392,7 +1392,7 @@ if test "$OPENSSL_ENABLED" != "1"; then
          LIBS="$CLEANLIBS"
          CPPFLAGS="$CLEANCPPFLAGS"
        ])
-  
+
       if test "x$USE_GNUTLS" = "xyes"; then
         AC_MSG_NOTICE([detected GnuTLS version $version])
 
@@ -1438,7 +1438,7 @@ if test "$OPENSSL_ENABLED" != "1" -a "$GNUTLS_ENABLED" != "1"; then
     else
       # Without pkg-config, we'll kludge in some defaults
       addlib="-lssl3 -lsmime3 -lnss3 -lplds4 -lplc4 -lnspr4 -lpthread -ldl"
-      addcflags="-I$OPT_NSS/include" 
+      addcflags="-I$OPT_NSS/include"
       version="unknown"
       gtlsprefix=$OPT_GNUTLS
     fi
@@ -1446,12 +1446,12 @@ if test "$OPENSSL_ENABLED" != "1" -a "$GNUTLS_ENABLED" != "1"; then
 
       CLEANLIBS="$LIBS"
       CLEANCPPFLAGS="$CPPFLAGS"
-  
+
       LIBS="$LIBS $addlib"
       if test "$addcflags" != "-I/usr/include"; then
          CPPFLAGS="$CPPFLAGS $addcflags"
       fi
-  
+
       AC_CHECK_LIB(nss3, NSS_Initialize,
        [
        AC_DEFINE(USE_NSS, 1, [if NSS is enabled])
@@ -1464,7 +1464,7 @@ if test "$OPENSSL_ENABLED" != "1" -a "$GNUTLS_ENABLED" != "1"; then
          LIBS="$CLEANLIBS"
          CPPFLAGS="$CLEANCPPFLAGS"
        ])
-  
+
       if test "x$USE_NSS" = "xyes"; then
         AC_MSG_NOTICE([detected NSS version $version])
 
@@ -1511,7 +1511,7 @@ AC_HELP_STRING([--without-ca-bundle], [Don't install the CA bundle]),
 
     if test "x$ca" != "xno"; then
       CURL_CA_BUNDLE='"'$ca'"'
-      AC_SUBST(CURL_CA_BUNDLE)  
+      AC_SUBST(CURL_CA_BUNDLE)
     fi
     AC_MSG_RESULT([$ca])
 fi dnl only done if some kind of SSL was enabled
@@ -1564,8 +1564,8 @@ case "$LIBIDN" in
          AC_CHECK_FUNCS( idn_free idna_strerror tld_strerror)
          AC_CHECK_HEADERS( idn-free.h tld.h )
        fi
-                    
-       ;; 
+
+       ;;
 esac
 
 dnl Default is to try the thread-safe versions of a few functions
@@ -1799,7 +1799,7 @@ AC_CHECK_SIZEOF(time_t)
 
 AC_CHECK_TYPE(long long,
    [AC_DEFINE(HAVE_LONGLONG, 1, [if your compiler supports long long])]
-   longlong="yes"  
+   longlong="yes"
 )
 
 if test "xyes" = "x$longlong"; then
@@ -1934,7 +1934,7 @@ if test "$ac_cv_func_select" = "no"; then
 #endif
     ],[
       select(0,(fd_set *)NULL,(fd_set *)NULL,(fd_set *)NULL,(struct timeval *)NULL);
-    ],[ 
+    ],[
       AC_MSG_RESULT([yes])
       HAVE_SELECT="1"
       AC_DEFINE_UNQUOTED(HAVE_SELECT, 1,
@@ -2027,11 +2027,11 @@ if test "$disable_poll" = "no"; then
 fi dnl poll()-check is not disabled
 
 
-AC_PATH_PROG( PERL, perl, , 
+AC_PATH_PROG( PERL, perl, ,
   $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin )
 AC_SUBST(PERL)
 
-AC_PATH_PROGS( NROFF, gnroff nroff, , 
+AC_PATH_PROGS( NROFF, gnroff nroff, ,
   $PATH:/usr/bin/:/usr/local/bin )
 AC_SUBST(NROFF)
 
@@ -2275,7 +2275,7 @@ AC_HELP_STRING([--disable-hidden-symbols],[Leave all symbols with default visibi
   no)
        AC_MSG_RESULT(no)
        ;;
-  *)   
+  *)
        AC_MSG_CHECKING([whether $CC supports it])
        if test "$GCC" = yes ; then
          if $CC --help --verbose 2>&1 | grep fvisibility= > /dev/null ; then
@@ -2382,7 +2382,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   c-ares support:  ${curl_ares_msg}
   ipv6 support:    ${curl_ipv6_msg}
   IDN support:     ${curl_idn_msg}
-  Build libcurl:   Shared=${enable_shared}, Static=${enable_static} 
+  Build libcurl:   Shared=${enable_shared}, Static=${enable_static}
   Built-in manual: ${curl_manual_msg}
   Verbose errors:  ${curl_verbose_msg}
   SSPI support:    ${curl_sspi_msg}
