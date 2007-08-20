@@ -48,9 +48,9 @@
 #else
 #define LDAP_DEPRECATED 1       /* Be sure ldap_init() is defined. */
 # include <ldap.h>
-#ifdef HAVE_LDAP_SSL
+#if (defined(HAVE_LDAP_SSL) && defined(HAVE_LDAP_SSL_H))
 # include <ldap_ssl.h>
-#endif /* CURL_LDAP_USE_SSL */
+#endif /* HAVE_LDAP_SSL && HAVE_LDAP_SSL_H */
 #endif
 
 #ifdef HAVE_UNISTD_H
@@ -110,15 +110,6 @@ static void _ldap_free_urldesc (LDAPURLDesc *ludp);
 #ifndef LDAP_OPT_PROTOCOL_VERSION
 #define LDAP_OPT_PROTOCOL_VERSION 0x0011
 #endif
-#ifndef LDAP_OPT_NETWORK_TIMEOUT /* socket level timeout */
-#define LDAP_OPT_NETWORK_TIMEOUT 0x5005
-#endif
-#ifndef LDAPSSL_VERIFY_NONE
-#define LDAPSSL_VERIFY_NONE 0x00
-#endif
-#ifndef LDAPSSL_VERIFY_SERVER
-#define LDAPSSL_VERIFY_SERVER 0x01
-#endif
  
 #ifdef DEBUG_LDAP
   #define LDAP_TRACE(x)   do { \
@@ -144,11 +135,16 @@ CURLcode Curl_ldap(struct connectdata *conn, bool *done)
   struct SessionHandle *data=conn->data;
   int ldap_proto;
   int ldap_ssl = 0;
+  int ldap_option;
   char *val_b64;
   size_t val_b64_sz;
+#ifdef LDAP_OPT_NETWORK_TIMEOUT
   struct timeval ldap_timeout = {10,0}; /* 10 sec connection/search timeout */
+#endif
 
   *done = TRUE; /* unconditionally */
+  infof(data, "LDAP local: LDAP Vendor = %s ; LDAP Version = %d\n",
+          LDAP_VENDOR_NAME, LDAP_VENDOR_VERSION);
   infof(data, "LDAP local: %s\n", data->change.url);
 
 #ifndef HAVE_LDAP_URL_PARSE
@@ -168,7 +164,9 @@ CURLcode Curl_ldap(struct connectdata *conn, bool *done)
   infof(data, "LDAP local: trying to establish %s connection\n",
           ldap_ssl ? "encrypted" : "cleartext");
 
+#ifdef LDAP_OPT_NETWORK_TIMEOUT
   ldap_set_option(NULL, LDAP_OPT_NETWORK_TIMEOUT, &ldap_timeout);
+#endif
   ldap_proto = LDAP_VERSION3;
   ldap_set_option(NULL, LDAP_OPT_PROTOCOL_VERSION, &ldap_proto);
 
@@ -178,31 +176,103 @@ CURLcode Curl_ldap(struct connectdata *conn, bool *done)
     server = ldap_sslinit(conn->host.name, (int)conn->port, 1);
     ldap_set_option(server, LDAP_OPT_SSL, LDAP_OPT_ON);
 #else
-    rc = ldapssl_client_init(NULL,     /* DER encoded cert file  */
-                             NULL);    /* reserved, use NULL */
+    char* ldap_ca = NULL; /* XXX fix me: need to get CA path option here! */
+    int verify_cert = 0;  /* XXX fix me: need to get insecure option here! */
+#if defined(CURL_HAS_NOVELL_LDAPSDK)
+    rc = ldapssl_client_init(NULL, NULL);
     if (rc != LDAP_SUCCESS) {
       failf(data, "LDAP local: %s", ldap_err2string(rc));
       status = CURLE_SSL_CERTPROBLEM;
       goto quit;
     }
-    rc = ldapssl_set_verify_mode(LDAPSSL_VERIFY_NONE);
+    if (verify_cert) {
+      /* Novell SDK supports DER or BASE64 files. */
+      rc = ldapssl_add_trusted_cert(ldap_ca, LDAPSSL_CERT_FILETYPE_B64);
+      if (rc != LDAP_SUCCESS) {
+        failf(data, "LDAP local: ERROR setting PEM CA cert: %s",
+                ldap_err2string(rc));
+        status = CURLE_SSL_CERTPROBLEM;
+        goto quit;
+      }
+      ldap_option = LDAPSSL_VERIFY_SERVER;
+    } else {
+      ldap_option = LDAPSSL_VERIFY_NONE;
+    }
+    rc = ldapssl_set_verify_mode(ldap_option);
     if (rc != LDAP_SUCCESS) {
-      failf(data, "LDAP local: ldapssl_set_verify_mode error: %d", rc);
+      failf(data, "LDAP local: ERROR setting verify mode: %s",
+              ldap_err2string(rc));
       status = CURLE_SSL_CERTPROBLEM;
       goto quit;
     }
     server = ldapssl_init(conn->host.name, (int)conn->port, 1);
+    if (server == NULL) {
+      failf(data, "LDAP local: Cannot connect to %s:%d",
+              conn->host.name, conn->port);
+      status = CURLE_COULDNT_CONNECT;
+      goto quit;
+    }
+#elif defined(LDAP_OPT_X_TLS)
+    if (verify_cert) {
+      /* OpenLDAP SDK supports BASE64 files. */
+      rc = ldap_set_option(NULL, LDAP_OPT_X_TLS_CACERTFILE, ldap_ca);
+      if (rc != LDAP_SUCCESS) {
+        failf(data, "LDAP local: ERROR setting PEM CA cert: %s",
+                ldap_err2string(rc));
+        status = CURLE_SSL_CERTPROBLEM;
+        goto quit;
+      }
+      ldap_option = LDAP_OPT_X_TLS_DEMAND;
+    } else {
+      ldap_option = LDAP_OPT_X_TLS_NEVER;
+    }
+    rc = ldap_set_option(NULL, LDAP_OPT_X_TLS_REQUIRE_CERT, &ldap_option);
+    if (rc != LDAP_SUCCESS) {
+      failf(data, "LDAP local: ERROR setting verify mode: %s",
+              ldap_err2string(rc));
+      status = CURLE_SSL_CERTPROBLEM;
+      goto quit;
+    }
+    server = ldap_init(conn->host.name, (int)conn->port);
+    if (server == NULL) {
+      failf(data, "LDAP local: Cannot connect to %s:%d",
+              conn->host.name, conn->port);
+      status = CURLE_COULDNT_CONNECT;
+      goto quit;
+    }
+    ldap_option = LDAP_OPT_X_TLS_HARD;
+    rc = ldap_set_option(server, LDAP_OPT_X_TLS, &ldap_option);
+    if (rc != LDAP_SUCCESS) {
+      failf(data, "LDAP local: ERROR setting SSL/TLS mode: %s",
+              ldap_err2string(rc));
+      status = CURLE_SSL_CERTPROBLEM;
+      goto quit;
+    }
+    rc = ldap_start_tls_s(server, NULL, NULL);
+    if (rc != LDAP_SUCCESS) {
+      failf(data, "LDAP local: ERROR starting SSL/TLS mode: %s",
+              ldap_err2string(rc));
+      status = CURLE_SSL_CERTPROBLEM;
+      goto quit;
+    }
+#else
+    /* we should probably never come up to here since configure
+       should check in first place if we can support LDAP SSL/TLS */
+    failf(data, "LDAP local: SSL/TLS not supported with this version "
+            "of the OpenLDAP toolkit\n");
+    status = CURLE_SSL_CERTPROBLEM;
+    goto quit;
+#endif
 #endif
 #endif /* CURL_LDAP_USE_SSL */
   } else {
     server = ldap_init(conn->host.name, (int)conn->port);
-  }
-
-  if (server == NULL) {
-    failf(data, "LDAP local: Cannot connect to %s:%d",
-            conn->host.name, conn->port);
-    status = CURLE_COULDNT_CONNECT;
-    goto quit;
+    if (server == NULL) {
+      failf(data, "LDAP local: Cannot connect to %s:%d",
+              conn->host.name, conn->port);
+      status = CURLE_COULDNT_CONNECT;
+      goto quit;
+    }
   }
 
   rc = ldap_simple_bind_s(server,
@@ -298,12 +368,10 @@ quit:
     ldap_free_urldesc(ludp);
   if (server)
     ldap_unbind_s(server);
-#ifdef HAVE_LDAP_SSL
-#ifndef CURL_LDAP_WIN
+#if defined(HAVE_LDAP_SSL) && defined(CURL_HAS_NOVELL_LDAPSDK)
   if (ldap_ssl)
     ldapssl_client_deinit();
-#endif
-#endif /* CURL_LDAP_USE_SSL */
+#endif /* HAVE_LDAP_SSL && CURL_HAS_NOVELL_LDAPSDK */
 
   /* no data to transfer */
   Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
