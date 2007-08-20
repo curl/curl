@@ -456,6 +456,8 @@ endif
 ifdef DISABLE_LDAP
 	@echo $(DL)#define CURL_DISABLE_LDAP 1$(DL) >> $@
 else
+	@echo $(DL)#define CURL_HAS_NOVELL_LDAPSDK 1$(DL) >> $@
+	@echo $(DL)#define HAVE_LDAP_SSL_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_LDAP_URL_PARSE 1$(DL) >> $@
 endif
 ifdef NW_WINSOCK

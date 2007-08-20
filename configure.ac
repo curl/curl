@@ -1728,6 +1728,7 @@ AC_CHECK_HEADERS(
         assert.h \
         unistd.h \
         stdlib.h \
+        ldap_ssl.h \
         limits.h \
         arpa/inet.h \
         net/if.h \

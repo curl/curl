@@ -353,9 +353,16 @@
 /*                           LDAP SUPPORT                           */
 /* ---------------------------------------------------------------- */
 
-#define CURL_LDAP_WIN 1
+#ifdef CURL_HAS_NOVELL_LDAPSDK
+#undef CURL_LDAP_HYBRID
+#undef CURL_LDAP_WIN
+#define HAVE_LDAP_SSL_H 1
+#define HAVE_LDAP_URL_PARSE 1
+#else
 #undef CURL_LDAP_HYBRID
 #undef HAVE_LDAP_URL_PARSE
+#define CURL_LDAP_WIN 1
+#endif
 
 /* ---------------------------------------------------------------- */
 /*                       ADDITIONAL DEFINITIONS                     */
