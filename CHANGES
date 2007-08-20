@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel S (20 August 2007)
+- Based on a patch by Christian Vogt, the FTP code now sets the upcoming
+  download transfer size much earlier to be possible to get read with
+  CURLINFO_CONTENT_LENGTH_DOWNLOAD as soon as possible. This is very much in a
+  similar spirit to the HTTP size change from August 11 2007.
+
 Daniel S (18 August 2007)
 - Robson Braga Araujo filed bug report #1776232
   (http://curl.haxx.se/bug/view.cgi?id=1776232) about libcurl calling

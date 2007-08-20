@@ -2120,10 +2120,13 @@ static CURLcode ftp_state_size_resp(struct connectdata *conn,
         return result;
     }
 #endif
+    Curl_pgrsSetDownloadSize(data, filesize);
     result = ftp_state_post_size(conn);
   }
-  else if(instate == FTP_RETR_SIZE)
+  else if(instate == FTP_RETR_SIZE) {
+    Curl_pgrsSetDownloadSize(data, filesize);
     result = ftp_state_post_retr_size(conn, filesize);
+  }
   else if(instate == FTP_STOR_SIZE) {
     data->reqdata.resume_from = filesize;
     result = ftp_state_ul_setup(conn, TRUE);

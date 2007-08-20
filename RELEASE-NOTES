@@ -16,6 +16,7 @@ This release includes the following changes:
  o SCP and SFTP support now requires libssh2 0.16 or later
  o LDAP libraries are now linked "regularly" and not with dlopen
  o HTTP transfers have the download size info "available" earlier
+ o FTP transfers have the download size info "available" earlier
 
 This release includes the following bugfixes:
 
@@ -66,6 +67,7 @@ advice from friends like these:
  Daniel Cater, Colin Hogben, Jofell Gallardo, Daniel Johnson,
  Ralf S. Engelschall, James Housley, Chris Flerackers, Patrick Monnerat,
  Jayesh A Shah, Greg Zavertnik, Peter O'Gorman, Greg Morse, Dmitriy Sergeyev,
- Scott Cantor, Allen Pulsifer, Andrew Wansink, Robson Braga Araujo
+ Scott Cantor, Allen Pulsifer, Andrew Wansink, Robson Braga Araujo,
+ Christian Vogt
  
         Thanks! (and sorry if I forgot to mention someone)
