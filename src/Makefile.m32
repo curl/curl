@@ -25,7 +25,7 @@ OPENSSL_PATH = ../../openssl-0.9.8e
 endif
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-0.16
+LIBSSH2_PATH = ../../libssh2-0.17
 endif
 # Edit the path below to point to the base of your Novell LDAP NDK.
 ifndef LDAP_SDK
