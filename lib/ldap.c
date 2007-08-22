@@ -235,6 +235,7 @@ CURLcode Curl_ldap(struct connectdata *conn, bool *done)
       status = CURLE_SSL_CERTPROBLEM;
       goto quit;
     }
+/*
     rc = ldap_start_tls_s(server, NULL, NULL);
     if (rc != LDAP_SUCCESS) {
       failf(data, "LDAP local: ERROR starting SSL/TLS mode: %s",
@@ -242,6 +243,7 @@ CURLcode Curl_ldap(struct connectdata *conn, bool *done)
       status = CURLE_SSL_CERTPROBLEM;
       goto quit;
     }
+*/
 #else
     /* we should probably never come up to here since configure
        should check in first place if we can support LDAP SSL/TLS */
