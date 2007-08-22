@@ -307,6 +307,12 @@ static int juggle(curl_socket_t *sockfdp,
         }
         logmsg("> %d bytes data, server => client", buffer_len);
 
+        if(buffer_len > (ssize_t)sizeof(buffer)) {
+          logmsg("ERROR: %d bytes of data does not fit within the %d "
+                 "bytes buffer", buffer_len, sizeof(buffer));
+          return FALSE;
+        }
+
         /*
          * To properly support huge data chunks, we need to repeat the call
          * to read() until we're done or it fails.
