@@ -96,7 +96,8 @@
  */
 CURLcode Curl_file_connect(struct connectdata *conn)
 {
-  char *real_path = curl_easy_unescape(conn->data, conn->data->reqdata.path, 0, NULL);
+  char *real_path = curl_easy_unescape(conn->data, conn->data->reqdata.path, 0,
+                                       NULL);
   struct FILEPROTO *file;
   int fd;
 #if defined(WIN32) || defined(MSDOS) || defined(__EMX__)
@@ -113,9 +114,8 @@ CURLcode Curl_file_connect(struct connectdata *conn)
     return CURLE_OUT_OF_MEMORY;
   }
 
-  if (conn->data->reqdata.proto.file) {
+  if (conn->data->reqdata.proto.file)
     free(conn->data->reqdata.proto.file);
-  }
 
   conn->data->reqdata.proto.file = file;
 
@@ -176,6 +176,9 @@ CURLcode Curl_file_done(struct connectdata *conn,
 
   if(file->fd != -1)
     close(file->fd);
+
+  free(file);
+  conn->data->reqdata.proto.file= NULL; /* clear it! */
 
   return CURLE_OK;
 }

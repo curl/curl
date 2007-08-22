@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel S (23 August 2007)
+- Bug report #1779751 (http://curl.haxx.se/bug/view.cgi?id=1779751) pointed
+  out that doing first a file:// upload and then an FTP upload crashed libcurl
+  or at best caused furious valgrind complaints. Fixed now!
+
 Daniel S (22 August 2007)
 - Bug report #1779054 (http://curl.haxx.se/bug/view.cgi?id=1779054) pointed
   out that libcurl didn't deal with very long (>16K) FTP server response lines

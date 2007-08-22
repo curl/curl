@@ -45,6 +45,7 @@ This release includes the following bugfixes:
  o FTP NOBODY requests on directories sent "SIZE (null)"
  o FTP NOBODY request on file crash
  o excessively long FTP server response lines
+ o file:// upload then FTP:// upload crash
 
 This release includes the following known bugs:
 
