@@ -175,8 +175,11 @@ static int juggle(curl_socket_t *sockfdp,
   ssize_t nread_socket;
   ssize_t bytes_written;
   ssize_t buffer_len;
-  unsigned char buffer[256]; /* FIX: bigger buffer */
-  char data[256];
+
+ /* 'buffer' is this excessively large only to be able to support things like
+    test 1003 which tests exceedingly large server response lines */
+  unsigned char buffer[17010];
+  char data[16];
 
   timeout.tv_sec = 120;
   timeout.tv_usec = 0;
@@ -280,7 +283,7 @@ static int juggle(curl_socket_t *sockfdp,
            Replies to PORT with "IPv[num]/[port]" */
         sprintf((char *)buffer, "IPv%d/%d\n", use_ipv6?6:4, (int)port);
         buffer_len = (ssize_t)strlen((char *)buffer);
-        sprintf(data, "PORT\n%04x\n", buffer_len);
+        snprintf(data, sizeof(data), "PORT\n%04x\n", buffer_len);
         write(fileno(stdout), data, 10);
         write(fileno(stdout), buffer, buffer_len);
       }
@@ -302,11 +305,23 @@ static int juggle(curl_socket_t *sockfdp,
                    (int)sizeof(buffer), buffer_len);
           return FALSE;
         }
-        nread_stdin = read(fileno(stdin), buffer, buffer_len);
-        if(nread_stdin != buffer_len)
-          return FALSE;
-
         logmsg("> %d bytes data, server => client", buffer_len);
+
+        /*
+         * To properly support huge data chunks, we need to repeat the call
+         * to read() until we're done or it fails.
+         */
+        nread_stdin = 0;
+        do {
+          /* get data in the buffer at the correct position */
+          ssize_t rc = read(fileno(stdin), &buffer[nread_stdin],
+                            buffer_len - nread_stdin);
+          logmsg("read %d bytes", rc);
+          if(rc <= 0)
+            return FALSE;
+          nread_stdin += rc;
+        } while (nread_stdin < buffer_len);
+
         lograw(buffer, buffer_len);
 
         if(*mode == PASSIVE_LISTEN) {
@@ -378,7 +393,7 @@ static int juggle(curl_socket_t *sockfdp,
       return TRUE;
     }
 
-    sprintf(data, "DATA\n%04x\n", nread_socket);
+    snprintf(data, sizeof(data), "DATA\n%04x\n", nread_socket);
     write(fileno(stdout), data, 10);
     write(fileno(stdout), buffer, nread_socket);
 
