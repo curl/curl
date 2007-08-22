@@ -287,9 +287,13 @@ static void ftp_respinit(struct connectdata *conn)
   ftpc->linestart_resp = conn->data->state.buffer;
 }
 
+/* macro to check for a three-digit ftp status code at the start of the
+   given string */
+#define STATUSCODE(line) (ISDIGIT(line[0]) && ISDIGIT(line[1]) && \
+                        ISDIGIT(line[2]))
+
 /* macro to check for the last line in an FTP server response */
-#define lastline(line) (ISDIGIT(line[0]) && ISDIGIT(line[1]) && \
-                        ISDIGIT(line[2]) && (' ' == line[3]))
+#define LASTLINE(line) (STATUSCODE(line) && (' ' == line[3]))
 
 static CURLcode ftp_readresp(curl_socket_t sockfd,
                              struct connectdata *conn,
@@ -399,7 +403,7 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
           if(result)
             return result;
 
-          if(perline>3 && lastline(ftpc->linestart_resp)) {
+          if(perline>3 && LASTLINE(ftpc->linestart_resp)) {
             /* This is the end of the last line, copy the last line to the
                start of the buffer and zero terminate, for old times sake (and
                krb4)! */
@@ -431,6 +435,27 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
           memcpy(ftpc->cache, ftpc->linestart_resp, (int)ftpc->cache_size);
         else
           return CURLE_OUT_OF_MEMORY; /**BANG**/
+      }
+      else if(keepon && (i == gotbytes) && (gotbytes > BUFSIZE/2)) {
+        /* We got an excessive line without newlines and we need to deal
+           with it. First, check if it seems to start with a valid status
+           code and then we keep just that in the line cache. Then throw
+           away the rest. */
+        infof(data, "Excessive FTP response line length received, %zd bytes."
+              " Stripping\n", gotbytes);
+        if(STATUSCODE(ftpc->linestart_resp)) {
+          ftpc->cache_size = 4; /* we copy 4 bytes since after the three-digit
+                                   number there is a dash or a space and it
+                                   is significant */
+          ftpc->cache = (char *)malloc((int)ftpc->cache_size);
+          if(ftpc->cache)
+            memcpy(ftpc->cache, ftpc->linestart_resp, (int)ftpc->cache_size);
+          else
+            return CURLE_OUT_OF_MEMORY;
+        }
+        /* now we forget what we read and get a new chunk in the next loop
+           and append to the small piece we might have put in the cache */
+        ftpc->nread_resp = 0;
       }
     } /* there was data */
 
@@ -645,7 +670,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
             if(result)
               return result;
 
-            if(perline>3 && lastline(line_start)) {
+            if(perline>3 && LASTLINE(line_start)) {
               /* This is the end of the last line, copy the last
                * line to the start of the buffer and zero terminate,
                * for old times sake (and krb4)! */

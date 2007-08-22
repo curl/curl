@@ -44,6 +44,7 @@ This release includes the following bugfixes:
  o resume HTTP PUT using Digest authentication
  o FTP NOBODY requests on directories sent "SIZE (null)"
  o FTP NOBODY request on file crash
+ o excessively long FTP server response lines
 
 This release includes the following known bugs:
 

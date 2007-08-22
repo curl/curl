@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel S (22 August 2007)
+- Bug report #1779054 (http://curl.haxx.se/bug/view.cgi?id=1779054) pointed
+  out that libcurl didn't deal with very long (>16K) FTP server response lines
+  properly. Starting now, libcurl will chop them off (thus the client app will
+  not get the full line) but survive and deal with them fine otherwise. Test
+  case 1003 was added to verify this.
+
 Daniel S (20 August 2007)
 - Based on a patch by Christian Vogt, the FTP code now sets the upcoming
   download transfer size much earlier to be possible to get read with
