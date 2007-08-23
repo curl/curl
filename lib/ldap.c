@@ -159,24 +159,38 @@ CURLcode Curl_ldap(struct connectdata *conn, bool *done)
   if (ldap_ssl) {
 #ifdef HAVE_LDAP_SSL
 #ifdef CURL_LDAP_WIN
+    /* Win32 LDAP SDK doesnt support insecure mode without CA! */
     server = ldap_sslinit(conn->host.name, (int)conn->port, 1);
     ldap_set_option(server, LDAP_OPT_SSL, LDAP_OPT_ON);
 #else
     int ldap_option;
-    int verify_cert = 0;  /* XXX fix me: need to get insecure option here! */
-    char* ldap_ca = NULL; /* XXX fix me: need to get CA path option here! */
+    char* ldap_ca = data->set.str[STRING_SSL_CAFILE];
 #if defined(CURL_HAS_NOVELL_LDAPSDK)
     rc = ldapssl_client_init(NULL, NULL);
     if (rc != LDAP_SUCCESS) {
-      failf(data, "LDAP local: %s", ldap_err2string(rc));
+      failf(data, "LDAP local: ldapssl_client_init %s", ldap_err2string(rc));
       status = CURLE_SSL_CERTPROBLEM;
       goto quit;
     }
-    if (verify_cert) {
+    if (data->set.ssl.verifypeer) {
       /* Novell SDK supports DER or BASE64 files. */
-      rc = ldapssl_add_trusted_cert(ldap_ca, LDAPSSL_CERT_FILETYPE_B64);
+      int cert_type = LDAPSSL_CERT_FILETYPE_B64;
+      if ((data->set.str[STRING_CERT_TYPE]) &&
+              (strequal(data->set.str[STRING_CERT_TYPE], "DER")))
+        cert_type = LDAPSSL_CERT_FILETYPE_DER;
+      if (!ldap_ca) {
+        failf(data, "LDAP local: ERROR %s CA cert not set!",
+              (cert_type == LDAPSSL_CERT_FILETYPE_DER ? "DER" : "PEM"));
+        status = CURLE_SSL_CERTPROBLEM;
+        goto quit;
+      }
+      infof(data, "LDAP local: using %s CA cert '%s'\n",
+              (cert_type == LDAPSSL_CERT_FILETYPE_DER ? "DER" : "PEM"),
+              ldap_ca);
+      rc = ldapssl_add_trusted_cert(ldap_ca, cert_type);
       if (rc != LDAP_SUCCESS) {
-        failf(data, "LDAP local: ERROR setting PEM CA cert: %s",
+        failf(data, "LDAP local: ERROR setting %s CA cert: %s",
+                (cert_type == LDAPSSL_CERT_FILETYPE_DER ? "DER" : "PEM"),
                 ldap_err2string(rc));
         status = CURLE_SSL_CERTPROBLEM;
         goto quit;
@@ -187,7 +201,7 @@ CURLcode Curl_ldap(struct connectdata *conn, bool *done)
     }
     rc = ldapssl_set_verify_mode(ldap_option);
     if (rc != LDAP_SUCCESS) {
-      failf(data, "LDAP local: ERROR setting verify mode: %s",
+      failf(data, "LDAP local: ERROR setting cert verify mode: %s",
               ldap_err2string(rc));
       status = CURLE_SSL_CERTPROBLEM;
       goto quit;
@@ -200,8 +214,14 @@ CURLcode Curl_ldap(struct connectdata *conn, bool *done)
       goto quit;
     }
 #elif defined(LDAP_OPT_X_TLS)
-    if (verify_cert) {
+    if (data->set.ssl.verifypeer) {
       /* OpenLDAP SDK supports BASE64 files. */
+      if (!ldap_ca) {
+        failf(data, "LDAP local: ERROR PEM CA cert not set!");
+        status = CURLE_SSL_CERTPROBLEM;
+        goto quit;
+      }
+      infof(data, "LDAP local: using PEM CA cert: %s\n", ldap_ca);
       rc = ldap_set_option(NULL, LDAP_OPT_X_TLS_CACERTFILE, ldap_ca);
       if (rc != LDAP_SUCCESS) {
         failf(data, "LDAP local: ERROR setting PEM CA cert: %s",
@@ -215,7 +235,7 @@ CURLcode Curl_ldap(struct connectdata *conn, bool *done)
     }
     rc = ldap_set_option(NULL, LDAP_OPT_X_TLS_REQUIRE_CERT, &ldap_option);
     if (rc != LDAP_SUCCESS) {
-      failf(data, "LDAP local: ERROR setting verify mode: %s",
+      failf(data, "LDAP local: ERROR setting cert verify mode: %s",
               ldap_err2string(rc));
       status = CURLE_SSL_CERTPROBLEM;
       goto quit;
@@ -275,7 +295,7 @@ CURLcode Curl_ldap(struct connectdata *conn, bool *done)
                             conn->bits.user_passwd ? conn->passwd : NULL);
   }
   if (rc != 0) {
-     failf(data, "LDAP local: %s", ldap_err2string(rc));
+     failf(data, "LDAP local: ldap_simple_bind_s %s", ldap_err2string(rc));
      status = CURLE_LDAP_CANNOT_BIND;
      goto quit;
   }
