@@ -67,6 +67,11 @@
 #include "amigaos.h"
 #endif
 
+#ifdef __OS400__
+#include "config-os400.h"
+#include "setup-os400.h"
+#endif
+
 #ifdef TPF
 #include "config-tpf.h" /* hand-modified TPF config.h */
 /* change which select is used for libcurl */

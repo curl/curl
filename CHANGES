@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Patrick M (23 August 2007)
+- OS/400 port: new files lib/config-os400.h lib/setup-os400.h packages/OS400/*.
+  See packages/OS400/README.OS400.
+
 Daniel S (23 August 2007)
 - Bug report #1779751 (http://curl.haxx.se/bug/view.cgi?id=1779751) pointed
   out that doing first a file:// upload and then an FTP upload crashed libcurl
