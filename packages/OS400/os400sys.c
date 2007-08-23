@@ -24,6 +24,8 @@
 
 /* OS/400 additional support. */
 
+#include "config-os400.h"	/* Not setup.h: we only need some defines. */
+
 #include <sys/types.h>
 #include <sys/socket.h>
 
@@ -33,14 +35,22 @@
 #include <netdb.h>
 #include <qadrt.h>
 #include <errno.h>
+
+#ifdef USE_QSOSSL
 #include <qsossl.h>
+#endif
+
+#ifdef HAVE_GSSAPI
 #include <gssapi.h>
+#endif
+
+#ifndef CURL_DISABLE_LDAP
 #include <ldap.h>
+#endif
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include "config-os400.h"	/* Not config.h: need only some defines. */
 #include "os400sys.h"
 
 
