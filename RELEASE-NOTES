@@ -17,6 +17,7 @@ This release includes the following changes:
  o LDAP libraries are now linked "regularly" and not with dlopen
  o HTTP transfers have the download size info "available" earlier
  o FTP transfers have the download size info "available" earlier
+ o builds and runs on OS/400
 
 This release includes the following bugfixes:
 
