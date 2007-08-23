@@ -734,6 +734,7 @@ PORTS
         - HP3000 MPE/iX
         - MIPS IRIX 6.2, 6.5
         - MIPS Linux
+        - OS/400
         - Pocket PC/Win CE 3.0
         - Power AIX 3.2.5, 4.2, 4.3.1, 4.3.2, 5.1, 5.2
         - PowerPC Darwin 1.0
@@ -748,6 +749,7 @@ PORTS
         - StrongARM (and other ARM) RISC OS 3.1, 4.02
         - StrongARM/ARM7/ARM9 Linux 2.4, 2.6
         - StrongARM NetBSD 1.4.1
+        - TPF
         - Ultrix 4.3a
         - UNICOS 9.0
         - i386 BeOS
