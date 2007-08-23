@@ -677,14 +677,13 @@ my %customreply;
 my %customcount;
 my %delayreply;
 sub customize {
-    undef %customreply;
-
     $nosave = 0; # default is to save as normal
     $controldelay = 0; # default is no delaying the responses
     $retrweirdo = 0;
     $retrnosize = 0;
     $pasvbadip = 0;
     $nosave = 0;
+    %customreply = ();
     %customcount = ();
     %delayreply = ();
 
@@ -695,7 +694,7 @@ sub customize {
 
     while(<CUSTOM>) {
         if($_ =~ /REPLY ([A-Z]+) (.*)/) {
-            $customreply{$1}=$2;
+            $customreply{$1}=eval "qq{$2}";
             logmsg "FTPD: set custom reply for $1\n";
         }
         if($_ =~ /COUNT ([A-Z]+) (.*)/) {

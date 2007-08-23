@@ -90,7 +90,8 @@ Special-commands for the server.
 For FTP, these are supported:
 
 REPLY [command] [return value] [response string]
- - Changes how the server responds to the [command]
+ - Changes how the server responds to the [command]. [response string] is
+   evaluated as a perl string, so it can contain embedded \r\n, for example.
 COUNT [command] [num]
  - Do the REPLY change for [command] only [num] times and then go back to the
    built-in approach
