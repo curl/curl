@@ -26,7 +26,7 @@ the content goes here
 http
 </server>
  <name>
-HTTP with proxy athorization
+HTTP with proxy authorization
  </name>
  <command>
  -U fake@user:§§§looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong -x %HOSTIP:%HTTPPORT http://we.want.that.site.com/16
