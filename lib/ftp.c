@@ -343,7 +343,7 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
       conn->data_prot = 0;
 #endif
       res = Curl_read(conn, sockfd, ptr, BUFSIZE-ftpc->nread_resp,
-		      &gotbytes);
+                      &gotbytes);
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
       conn->data_prot = prot;
 #endif
@@ -387,7 +387,7 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
 
           /* output debug output if that is requested */
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
-	  if(!conn->sec_complete)
+          if(!conn->sec_complete)
 #endif
           if(data->set.verbose)
             Curl_debug(data, CURLINFO_HEADER_IN,
@@ -424,6 +424,7 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
           ftpc->linestart_resp = ptr+1;
         }
       }
+
       if(!keepon && (i != gotbytes)) {
         /* We found the end of the response lines, but we didn't parse the
            full chunk of data we have read from the server. We therefore need
@@ -436,26 +437,45 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
         else
           return CURLE_OUT_OF_MEMORY; /**BANG**/
       }
-      else if(keepon && (i == gotbytes) && (gotbytes > BUFSIZE/2)) {
-        /* We got an excessive line without newlines and we need to deal
-           with it. First, check if it seems to start with a valid status
-           code and then we keep just that in the line cache. Then throw
-           away the rest. */
-        infof(data, "Excessive FTP response line length received, %zd bytes."
-              " Stripping\n", gotbytes);
-        if(STATUSCODE(ftpc->linestart_resp)) {
-          ftpc->cache_size = 4; /* we copy 4 bytes since after the three-digit
-                                   number there is a dash or a space and it
-                                   is significant */
-          ftpc->cache = (char *)malloc((int)ftpc->cache_size);
-          if(ftpc->cache)
-            memcpy(ftpc->cache, ftpc->linestart_resp, (int)ftpc->cache_size);
-          else
-            return CURLE_OUT_OF_MEMORY;
+      else if(keepon) {
+        int clipamount = 0;
+        bool restart = FALSE;
+
+        if((perline == gotbytes) && (gotbytes > BUFSIZE/2)) {
+          /* We got an excessive line without newlines and we need to deal
+             with it. First, check if it seems to start with a valid status
+             code and then we keep just that in the line cache. Then throw
+             away the rest. */
+          infof(data, "Excessive FTP response line length received, %zd bytes."
+                " Stripping\n", gotbytes);
+          restart = TRUE;
+          if(STATUSCODE(ftpc->linestart_resp))
+            /* we copy 4 bytes since after the three-digit number there is a
+               dash or a space and it is significant */
+            clipamount = 4;
         }
-        /* now we forget what we read and get a new chunk in the next loop
-           and append to the small piece we might have put in the cache */
-        ftpc->nread_resp = 0;
+        else if(perline && (ftpc->nread_resp > BUFSIZE/2)) {
+          /* We got a large chunk of data and there's still trailing data to
+             take care of, so we put that part in the "cache" and restart */
+          clipamount = perline;
+          restart = TRUE;
+        }
+
+        if(restart) {
+          if(clipamount) {
+            ftpc->cache_size = clipamount;
+            ftpc->cache = (char *)malloc((int)ftpc->cache_size);
+            if(ftpc->cache)
+              memcpy(ftpc->cache, ftpc->linestart_resp, (int)ftpc->cache_size);
+            else
+              return CURLE_OUT_OF_MEMORY;
+          }
+          /* now reset a few variables to start over nicely from the start of
+             the big buffer */
+          ftpc->nread_resp = 0; /* start over from scratch in the buffer */
+          ptr = ftpc->linestart_resp = buf;
+          perline = 0;
+        }
       }
     } /* there was data */
 
@@ -603,16 +623,16 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
         ftpc->cache_size = 0; /* zero the size just in case */
       }
       else {
-	int res;
+        int res;
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
-	enum protection_level prot = conn->data_prot;
+        enum protection_level prot = conn->data_prot;
 
-	conn->data_prot = 0;
+        conn->data_prot = 0;
 #endif
-	res = Curl_read(conn, sockfd, ptr, BUFSIZE-*nreadp,
-			&gotbytes);
+        res = Curl_read(conn, sockfd, ptr, BUFSIZE-*nreadp,
+                        &gotbytes);
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
-	conn->data_prot = prot;
+        conn->data_prot = prot;
 #endif
         if(res < 0)
           /* EWOULDBLOCK */
@@ -654,7 +674,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
 
             /* output debug output if that is requested */
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
-	  if(!conn->sec_complete)
+          if(!conn->sec_complete)
 #endif
             if(data->set.verbose)
               Curl_debug(data, CURLINFO_HEADER_IN,
@@ -2538,7 +2558,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
         Curl_sec_request_prot(conn, "private");
         /* We set private first as default, in case the line below fails to
            set a valid level */
-	Curl_sec_request_prot(conn, data->set.str[STRING_KRB_LEVEL]);
+        Curl_sec_request_prot(conn, data->set.str[STRING_KRB_LEVEL]);
 
         if(Curl_sec_login(conn) != 0)
           infof(data, "Logging in with password in cleartext!\n");
@@ -2673,13 +2693,13 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
 
     case FTP_CCC:
       if (ftpcode < 500) {
-	/* First shut down the SSL layer (note: this call will block) */
-	result = Curl_ssl_shutdown(conn, FIRSTSOCKET);
+        /* First shut down the SSL layer (note: this call will block) */
+        result = Curl_ssl_shutdown(conn, FIRSTSOCKET);
 
-	if(result) {
-	  failf(conn->data, "Failed to clear the command channel (CCC)");
-	  return result;
-	}
+        if(result) {
+          failf(conn->data, "Failed to clear the command channel (CCC)");
+          return result;
+        }
       }
 
       /* Then continue as normal */
@@ -3143,8 +3163,8 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status, bool premature
     if(dlen && !ftpc->cwdfail) {
       ftpc->prevpath = path;
       if(flen)
-	/* if 'path' is not the whole string */
-	ftpc->prevpath[dlen]=0; /* terminate */
+        /* if 'path' is not the whole string */
+        ftpc->prevpath[dlen]=0; /* terminate */
       infof(data, "Remembering we are in dir %s\n", ftpc->prevpath);
     }
     else {
