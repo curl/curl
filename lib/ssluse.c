@@ -1898,7 +1898,7 @@ size_t Curl_ossl_version(char *buffer, size_t size)
 #ifdef YASSL_VERSION
   /* yassl provides an OpenSSL API compatiblity layer so it looks identical
      to OpenSSL in all other aspects */
-  return snprintf(buffer, size, " yassl/%s", YASSL_VERSION);
+  return snprintf(buffer, size, "yassl/%s", YASSL_VERSION);
 #else /* YASSL_VERSION */
 
 #if (SSLEAY_VERSION_NUMBER >= 0x905000)
@@ -1919,7 +1919,7 @@ size_t Curl_ossl_version(char *buffer, size_t size)
         sub[0]='\0';
     }
 
-    return snprintf(buffer, size, " OpenSSL/%lx.%lx.%lx%s",
+    return snprintf(buffer, size, "OpenSSL/%lx.%lx.%lx%s",
                     (ssleay_value>>28)&0xf,
                     (ssleay_value>>20)&0xff,
                     (ssleay_value>>12)&0xff,
@@ -1929,7 +1929,7 @@ size_t Curl_ossl_version(char *buffer, size_t size)
 #else /* SSLEAY_VERSION_NUMBER is less than 0.9.5 */
 
 #if (SSLEAY_VERSION_NUMBER >= 0x900000)
-  return snprintf(buffer, size, " OpenSSL/%lx.%lx.%lx",
+  return snprintf(buffer, size, "OpenSSL/%lx.%lx.%lx",
                   (SSLEAY_VERSION_NUMBER>>28)&0xff,
                   (SSLEAY_VERSION_NUMBER>>20)&0xff,
                   (SSLEAY_VERSION_NUMBER>>12)&0xf);
@@ -1944,7 +1944,7 @@ size_t Curl_ossl_version(char *buffer, size_t size)
     else
       sub[0]='\0';
 
-    return snprintf(buffer, size, " SSL/%x.%x.%x%s",
+    return snprintf(buffer, size, "SSL/%x.%x.%x%s",
                     (SSLEAY_VERSION_NUMBER>>12)&0xff,
                     (SSLEAY_VERSION_NUMBER>>8)&0xf,
                     (SSLEAY_VERSION_NUMBER>>4)&0xf, sub);

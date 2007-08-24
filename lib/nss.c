@@ -601,6 +601,6 @@ ssize_t Curl_nss_recv(struct connectdata * conn, /* connection data */
 
 size_t Curl_nss_version(char *buffer, size_t size)
 {
-  return snprintf(buffer, size, " NSS/%s", NSS_VERSION);
+  return snprintf(buffer, size, "NSS/%s", NSS_VERSION);
 }
 #endif /* USE_NSS */

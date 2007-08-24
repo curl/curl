@@ -61,9 +61,15 @@ char *curl_version(void)
   left -= len;
   ptr += len;
 
-  len = Curl_ssl_version(ptr, left);
-  left -= len;
-  ptr += len;
+  if (left > 1) {
+    len = Curl_ssl_version(ptr + 1, left - 1);
+
+    if (len > 0) {
+      *ptr = ' ';
+      left -= ++len;
+      ptr += len;
+    }
+  }
 
 #ifdef HAVE_LIBZ
   len = snprintf(ptr, left, " zlib/%s", zlibVersion());
