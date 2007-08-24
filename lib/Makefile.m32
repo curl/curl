@@ -80,11 +80,16 @@ ifdef IPV6
 endif
 ifdef LDAPS
   CFLAGS += -DHAVE_LDAP_SSL
-  ifdef USE_LDAP_NOVELL
-    INCLUDES += -I"$(LDAP_SDK)/inc"
-    CFLAGS += -DCURL_HAS_NOVELL_LDAPSDK
-    DLL_LIBS += -L"$(LDAP_SDK)/lib/mscvc" -lldapsdk -lldapssl -lldapx
-  endif
+endif
+ifdef USE_LDAP_NOVELL
+  INCLUDES += -I"$(LDAP_SDK)/inc"
+  CFLAGS += -DCURL_HAS_NOVELL_LDAPSDK
+  DLL_LIBS += -L"$(LDAP_SDK)/lib/mscvc" -lldapsdk -lldapssl -lldapx
+endif
+ifdef USE_LDAP_OPENLDAP
+  INCLUDES += -I"$(LDAP_SDK)/include"
+  CFLAGS += -DCURL_HAS_OPENLDAP_LDAPSDK
+  DLL_LIBS += -L"$(LDAP_SDK)/lib" -lldap -llber
 endif
 DLL_LIBS += -lws2_32 -lwinmm -lwldap32
 COMPILE = $(CC) $(INCLUDES) $(CFLAGS)

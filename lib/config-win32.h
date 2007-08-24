@@ -353,10 +353,14 @@
 /*                           LDAP SUPPORT                           */
 /* ---------------------------------------------------------------- */
 
-#ifdef CURL_HAS_NOVELL_LDAPSDK
+#if defined(CURL_HAS_NOVELL_LDAPSDK) || defined(CURL_HAS_MOZILLA_LDAPSDK)
 #undef CURL_LDAP_HYBRID
 #undef CURL_LDAP_WIN
 #define HAVE_LDAP_SSL_H 1
+#define HAVE_LDAP_URL_PARSE 1
+#elif defined(CURL_HAS_OPENLDAP_LDAPSDK)
+#undef CURL_LDAP_HYBRID
+#undef CURL_LDAP_WIN
 #define HAVE_LDAP_URL_PARSE 1
 #else
 #undef CURL_LDAP_HYBRID
