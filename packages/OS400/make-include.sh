@@ -15,7 +15,7 @@ SRCPF="${LIBIFSNAME}/H.FILE"
 
 if action_needed "${SRCPF}"
 then    CMD="CRTSRCPF FILE(${TARGETLIB}/H) RCDLEN(112)"
-        CMD="${CMD} TEXT('curl: Header files')"
+        CMD="${CMD} CCSID(${TGTCCSID}) TEXT('curl: Header files')"
         system "${CMD}"
 fi
 
