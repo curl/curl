@@ -91,7 +91,12 @@ ifdef USE_LDAP_OPENLDAP
   CFLAGS += -DCURL_HAS_OPENLDAP_LDAPSDK
   DLL_LIBS += -L"$(LDAP_SDK)/lib" -lldap -llber
 endif
-DLL_LIBS += -lws2_32 -lwinmm -lwldap32
+ifndef USE_LDAP_NOVELL
+ifndef USE_LDAP_OPENLDAP
+DLL_LIBS += -lwldap32
+endif
+endif
+DLL_LIBS += -lws2_32 -lwinmm
 COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
