@@ -216,6 +216,12 @@ CURLcode Curl_ldap(struct connectdata *conn, bool *done)
 #elif defined(LDAP_OPT_X_TLS)
     if (data->set.ssl.verifypeer) {
       /* OpenLDAP SDK supports BASE64 files. */
+      if ((data->set.str[STRING_CERT_TYPE]) &&
+              (!strequal(data->set.str[STRING_CERT_TYPE], "PEM"))) {
+        failf(data, "LDAP local: ERROR OpenLDAP does only support PEM cert-type!");
+        status = CURLE_SSL_CERTPROBLEM;
+        goto quit;
+      }
       if (!ldap_ca) {
         failf(data, "LDAP local: ERROR PEM CA cert not set!");
         status = CURLE_SSL_CERTPROBLEM;
