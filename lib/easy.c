@@ -886,7 +886,8 @@ CURLcode Curl_convert_from_utf8(struct SessionHandle *data,
   } else {
 #ifdef HAVE_ICONV
     /* do the translation ourselves */
-    char *input_ptr, *output_ptr;
+    const char *input_ptr;
+    char *output_ptr;
     size_t in_bytes, out_bytes, rc;
     int error;
 
@@ -907,7 +908,7 @@ CURLcode Curl_convert_from_utf8(struct SessionHandle *data,
     /* call iconv */
     input_ptr = output_ptr = buffer;
     in_bytes = out_bytes = length;
-    rc = iconv(data->utf8_cd, (const char**)&input_ptr, &in_bytes,
+    rc = iconv(data->utf8_cd, &input_ptr, &in_bytes,
                &output_ptr, &out_bytes);
     if ((rc == ICONV_ERROR) || (in_bytes != 0)) {
       error = ERRNO;

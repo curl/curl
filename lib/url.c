@@ -158,8 +158,8 @@ static bool ConnectionExists(struct SessionHandle *data,
                              struct connectdata **usethis);
 static long ConnectionStore(struct SessionHandle *data,
                             struct connectdata *conn);
-static bool IsPipeliningPossible(struct SessionHandle *handle);
-static bool IsPipeliningEnabled(struct SessionHandle *handle);
+static bool IsPipeliningPossible(const struct SessionHandle *handle);
+static bool IsPipeliningEnabled(const struct SessionHandle *handle);
 static void conn_free(struct connectdata *conn);
 
 static void signalPipeClose(struct curl_llist *pipe);
@@ -292,7 +292,7 @@ CURLcode Curl_close(struct SessionHandle *data)
 
   if(data->state.connc && data->state.connc->type == CONNCACHE_MULTI) {
     struct conncache *c = data->state.connc;
-    int i;
+    long i;
     struct curl_llist *pipe;
     struct curl_llist_element *curr;
     struct connectdata *connptr;
@@ -536,7 +536,7 @@ CURLcode Curl_ch_connc(struct SessionHandle *data,
 void Curl_rm_connc(struct conncache *c)
 {
   if(c->connects) {
-    int i;
+    long i;
     for(i = 0; i < c->num; ++i)
       conn_free(c->connects[i]);
 
@@ -2010,7 +2010,7 @@ static bool SocketIsDead(curl_socket_t sock)
   return ret_val;
 }
 
-static bool IsPipeliningPossible(struct SessionHandle *handle)
+static bool IsPipeliningPossible(const struct SessionHandle *handle)
 {
   if (handle->multi && Curl_multi_canPipeline(handle->multi) &&
       (handle->set.httpreq == HTTPREQ_GET ||
@@ -2021,7 +2021,7 @@ static bool IsPipeliningPossible(struct SessionHandle *handle)
   return FALSE;
 }
 
-static bool IsPipeliningEnabled(struct SessionHandle *handle)
+static bool IsPipeliningEnabled(const struct SessionHandle *handle)
 {
   if (handle->multi && Curl_multi_canPipeline(handle->multi))
     return TRUE;
@@ -2430,24 +2430,27 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
     conn->dns_entry = hostaddr;
     conn->ip_addr = addr;
 
-    Curl_store_ip_addr(conn);
+    result = Curl_store_ip_addr(conn);
 
-    switch(data->set.proxytype) {
-    case CURLPROXY_SOCKS5:
-      result = Curl_SOCKS5(conn->proxyuser, conn->proxypasswd, conn->host.name,
-                           conn->remote_port, FIRSTSOCKET, conn);
-      break;
-    case CURLPROXY_HTTP:
-      /* do nothing here. handled later. */
-      break;
-    case CURLPROXY_SOCKS4:
-      result = Curl_SOCKS4(conn->proxyuser, conn->host.name, conn->remote_port,
-                           FIRSTSOCKET, conn);
-      break;
-    default:
-      failf(data, "unknown proxytype option given");
-      result = CURLE_COULDNT_CONNECT;
-      break;
+    if(CURLE_OK == result) {
+
+      switch(data->set.proxytype) {
+      case CURLPROXY_SOCKS5:
+	result = Curl_SOCKS5(conn->proxyuser, conn->proxypasswd, conn->host.name,
+			     conn->remote_port, FIRSTSOCKET, conn);
+	break;
+      case CURLPROXY_HTTP:
+	/* do nothing here. handled later. */
+	break;
+      case CURLPROXY_SOCKS4:
+	result = Curl_SOCKS4(conn->proxyuser, conn->host.name, conn->remote_port,
+			     FIRSTSOCKET, conn);
+	break;
+      default:
+	failf(data, "unknown proxytype option given");
+	result = CURLE_COULDNT_CONNECT;
+	break;
+      }
     }
   }
   if(result)
@@ -2867,7 +2870,7 @@ static CURLcode setup_range(struct SessionHandle *data)
 
   req->resume_from = data->set.set_resume_from;
   if (req->resume_from || data->set.str[STRING_SET_RANGE]) {
-    if (req->rangestringalloc == TRUE)
+    if (req->rangestringalloc)
       free(req->range);
 
     if(req->resume_from)

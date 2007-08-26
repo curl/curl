@@ -82,13 +82,13 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-static char *unescape_word(struct SessionHandle *data, char *inp)
+static char *unescape_word(struct SessionHandle *data, const char *inp)
 {
   char *newp;
   char *dictp;
   char *ptr;
   int len;
-  unsigned char byte;
+  char byte;
   int olen=0;
 
   newp = curl_easy_unescape(data, inp, 0, &len);
@@ -100,7 +100,7 @@ static char *unescape_word(struct SessionHandle *data, char *inp)
     /* According to RFC2229 section 2.2, these letters need to be escaped with
        \[letter] */
     for(ptr = newp;
-        (byte = (unsigned char)*ptr) != 0;
+        (byte = *ptr) != 0;
         ptr++) {
       if ((byte <= 32) || (byte == 127) ||
           (byte == '\'') || (byte == '\"') || (byte == '\\')) {

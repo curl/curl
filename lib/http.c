@@ -1055,7 +1055,7 @@ CURLcode add_buffer(send_buffer *in, const void *inptr, size_t size)
  * Pass headers WITH the colon.
  */
 bool
-Curl_compareheader(char *headerline,    /* line to check */
+Curl_compareheader(const char *headerline, /* line to check */
                    const char *header,  /* header keyword _with_ colon */
                    const char *content) /* content string to find */
 {
@@ -1067,8 +1067,8 @@ Curl_compareheader(char *headerline,    /* line to check */
   size_t hlen = strlen(header);
   size_t clen;
   size_t len;
-  char *start;
-  char *end;
+  const char *start;
+  const char *end;
 
   if(!strnequal(headerline, header, hlen))
     return FALSE; /* doesn't start with header */
@@ -1119,7 +1119,7 @@ Curl_compareheader(char *headerline,    /* line to check */
 CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                            int sockindex,
                            char *hostname,
-                           int remote_port)
+                           unsigned short remote_port)
 {
   int subversion=0;
   struct SessionHandle *data=conn->data;

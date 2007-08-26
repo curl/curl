@@ -24,14 +24,14 @@
  * $Id$
  ***************************************************************************/
 #ifndef CURL_DISABLE_HTTP
-bool Curl_compareheader(char *headerline,     /* line to check */
+bool Curl_compareheader(const char *headerline,  /* line to check */
                         const char *header,   /* header keyword _with_ colon */
                         const char *content); /* content string to find */
 
 /* ftp can use this as well */
 CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                            int tunnelsocket,
-                           char *hostname, int remote_port);
+                           char *hostname, unsigned short remote_port);
 
 /* protocol-specific functions set up to be called by the main engine */
 CURLcode Curl_http(struct connectdata *conn, bool *done);

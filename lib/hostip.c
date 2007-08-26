@@ -200,7 +200,7 @@ create_hostcache_id(const char *server, int port)
 }
 
 struct hostcache_prune_data {
-  int cache_timeout;
+  long cache_timeout;
   time_t now;
 };
 
@@ -232,7 +232,7 @@ hostcache_timestamp_remove(void *datap, void *hc)
  * Prune the DNS cache. This assumes that a lock has already been taken.
  */
 static void
-hostcache_prune(struct curl_hash *hostcache, int cache_timeout, time_t now)
+hostcache_prune(struct curl_hash *hostcache, long cache_timeout, time_t now)
 {
   struct hostcache_prune_data user;
 
