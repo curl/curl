@@ -268,7 +268,7 @@ CURLcode Curl_readrewind(struct connectdata *conn)
   return CURLE_OK;
 }
 
-static int data_pending(struct connectdata *conn)
+static int data_pending(const struct connectdata *conn)
 {
   /* in the case of libssh2, we can never be really sure that we have emptied
      its internal buffers so we MUST always try until we get EAGAIN back */
@@ -1377,7 +1377,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     if((k->keepon & KEEP_WRITE) && (select_res & CURL_CSELECT_OUT)) {
       /* write */
 
-      int i, si;
+      ssize_t i, si;
       ssize_t bytes_written;
       bool writedone=TRUE;
 
@@ -1743,14 +1743,14 @@ void Curl_pre_readwrite(struct connectdata *conn)
  * keeps track of. This function will only be called for connections that are
  * in the proper state to have this information available.
  */
-int Curl_single_getsock(struct connectdata *conn,
+int Curl_single_getsock(const struct connectdata *conn,
                         curl_socket_t *sock, /* points to numsocks number
                                                 of sockets */
                         int numsocks)
 {
-  struct SessionHandle *data = conn->data;
+  const struct SessionHandle *data = conn->data;
   int bitmap = GETSOCK_BLANK;
-  int index = 0;
+  unsigned index = 0;
 
   if(numsocks < 2)
     /* simple check but we might need two slots */
@@ -1957,16 +1957,17 @@ CURLcode Curl_posttransfer(struct SessionHandle *data)
  * strlen_url() returns the length of the given URL if the spaces within the
  * URL were properly URL encoded.
  */
-static int strlen_url(char *url)
+static size_t strlen_url(const char *url)
 {
-  char *ptr;
-  int newlen=0;
+  const char *ptr;
+  size_t newlen=0;
   bool left=TRUE; /* left side of the ? */
 
   for(ptr=url; *ptr; ptr++) {
     switch(*ptr) {
     case '?':
       left=FALSE;
+      /* fall through */
     default:
       newlen++;
       break;
@@ -1984,11 +1985,11 @@ static int strlen_url(char *url)
 /* strcpy_url() copies a url to a output buffer and URL-encodes the spaces in
  * the source URL accordingly.
  */
-static void strcpy_url(char *output, char *url)
+static void strcpy_url(char *output, const char *url)
 {
   /* we must add this with whitespace-replacing */
   bool left=TRUE;
-  char *iptr;
+  const char *iptr;
   char *optr = output;
   for(iptr = url;    /* read from here */
       *iptr;         /* until zero byte */
@@ -1996,6 +1997,7 @@ static void strcpy_url(char *output, char *url)
     switch(*iptr) {
     case '?':
       left=FALSE;
+      /* fall through */
     default:
       *optr++=*iptr;
       break;

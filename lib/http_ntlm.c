@@ -218,8 +218,8 @@ static void print_hex(FILE *handle, const char *buf, size_t len)
 
 CURLntlm Curl_input_ntlm(struct connectdata *conn,
                          bool proxy,   /* if proxy or not */
-                         char *header) /* rest of the www-authenticate:
-                                          header */
+                         const char *header) /* rest of the www-authenticate:
+                                                header */
 {
   /* point to the correct struct with this */
   struct ntlmdata *ntlm;

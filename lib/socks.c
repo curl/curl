@@ -122,7 +122,7 @@ static int blockread_all(struct connectdata *conn, /* connection data */
 *   Nonsupport "Identification Protocol (RFC1413)"
 */
 CURLcode Curl_SOCKS4(const char *proxy_name,
-                     char *hostname,
+                     const char *hostname,
                      int remote_port,
                      int sockindex,
                      struct connectdata *conn)
@@ -329,7 +329,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
  */
 CURLcode Curl_SOCKS5(const char *proxy_name,
                      const char *proxy_password,
-                     char *hostname,
+                     const char *hostname,
                      int remote_port,
                      int sockindex,
                      struct connectdata *conn)

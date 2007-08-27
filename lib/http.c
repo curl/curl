@@ -384,14 +384,14 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
  */
 static CURLcode
 Curl_http_output_auth(struct connectdata *conn,
-                      char *request,
-                      char *path,
+                      const char *request,
+                      const char *path,
                       bool proxytunnel) /* TRUE if this is the request setting
                                            up the proxy tunnel */
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  char *auth=NULL;
+  const char *auth=NULL;
   struct auth *authhost;
   struct auth *authproxy;
 
@@ -426,7 +426,7 @@ Curl_http_output_auth(struct connectdata *conn,
       (conn->bits.tunnel_proxy == proxytunnel)) {
 #ifdef USE_NTLM
     if(authproxy->picked == CURLAUTH_NTLM) {
-      auth=(char *)"NTLM";
+      auth="NTLM";
       result = Curl_output_ntlm(conn, TRUE);
       if(result)
         return result;
@@ -437,7 +437,7 @@ Curl_http_output_auth(struct connectdata *conn,
         /* Basic */
         if(conn->bits.proxy_user_passwd &&
            !checkheaders(data, "Proxy-authorization:")) {
-          auth=(char *)"Basic";
+          auth="Basic";
           result = Curl_output_basic(conn, TRUE);
           if(result)
             return result;
@@ -448,11 +448,11 @@ Curl_http_output_auth(struct connectdata *conn,
       }
 #ifndef CURL_DISABLE_CRYPTO_AUTH
       else if(authproxy->picked == CURLAUTH_DIGEST) {
-        auth=(char *)"Digest";
+        auth="Digest";
         result = Curl_output_digest(conn,
                                     TRUE, /* proxy */
-                                    (unsigned char *)request,
-                                    (unsigned char *)path);
+                                    (const unsigned char *)request,
+                                    (const unsigned char *)path);
         if(result)
           return result;
       }
@@ -485,7 +485,7 @@ Curl_http_output_auth(struct connectdata *conn,
       if((authhost->picked == CURLAUTH_GSSNEGOTIATE) &&
          data->state.negotiate.context &&
          !GSS_ERROR(data->state.negotiate.status)) {
-        auth=(char *)"GSS-Negotiate";
+        auth="GSS-Negotiate";
         result = Curl_output_negotiate(conn);
         if (result)
           return result;
@@ -495,7 +495,7 @@ Curl_http_output_auth(struct connectdata *conn,
 #endif
 #ifdef USE_NTLM
       if(authhost->picked == CURLAUTH_NTLM) {
-        auth=(char *)"NTLM";
+        auth="NTLM";
         result = Curl_output_ntlm(conn, FALSE);
         if(result)
           return result;
@@ -505,11 +505,11 @@ Curl_http_output_auth(struct connectdata *conn,
       {
 #ifndef CURL_DISABLE_CRYPTO_AUTH
         if(authhost->picked == CURLAUTH_DIGEST) {
-          auth=(char *)"Digest";
+          auth="Digest";
           result = Curl_output_digest(conn,
                                       FALSE, /* not a proxy */
-                                      (unsigned char *)request,
-                                      (unsigned char *)path);
+                                      (const unsigned char *)request,
+                                      (const unsigned char *)path);
           if(result)
             return result;
         } else
@@ -517,7 +517,7 @@ Curl_http_output_auth(struct connectdata *conn,
         if(authhost->picked == CURLAUTH_BASIC) {
           if(conn->bits.user_passwd &&
              !checkheaders(data, "Authorization:")) {
-            auth=(char *)"Basic";
+            auth="Basic";
             result = Curl_output_basic(conn, FALSE);
             if(result)
               return result;
@@ -551,7 +551,7 @@ Curl_http_output_auth(struct connectdata *conn,
 
 CURLcode Curl_http_input_auth(struct connectdata *conn,
                               int httpcode,
-                              char *header) /* the first non-space */
+                              const char *header) /* the first non-space */
 {
   /*
    * This resource requires authentication
@@ -559,7 +559,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
 
   long *availp;
-  char *start;
+  const char *start;
   struct auth *authp;
 
   if (httpcode == 407) {
@@ -1118,7 +1118,7 @@ Curl_compareheader(const char *headerline, /* line to check */
 
 CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                            int sockindex,
-                           char *hostname,
+                           const char *hostname,
                            unsigned short remote_port)
 {
   int subversion=0;

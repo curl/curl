@@ -113,7 +113,7 @@ log_gss_error(struct connectdata *conn, OM_uint32 error_status, char *prefix)
   infof(conn->data, "%s", buf);
 }
 
-int Curl_input_negotiate(struct connectdata *conn, char *header)
+int Curl_input_negotiate(struct connectdata *conn, const char *header)
 {
   struct negotiatedata *neg_ctx = &conn->data->state.negotiate;
   OM_uint32 major_status, minor_status, minor_status2;

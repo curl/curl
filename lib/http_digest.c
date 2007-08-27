@@ -56,8 +56,8 @@ Proxy-Authenticate: Digest realm="testrealm", nonce="1053604598"
 
 CURLdigest Curl_input_digest(struct connectdata *conn,
                              bool proxy,
-                             char *header) /* rest of the *-authenticate:
-                                              header */
+                             const char *header) /* rest of the *-authenticate:
+                                                    header */
 {
   bool more = TRUE;
   char *token = NULL;
@@ -212,8 +212,8 @@ static void md5_to_ascii(unsigned char *source, /* 16 bytes */
 
 CURLcode Curl_output_digest(struct connectdata *conn,
                             bool proxy,
-                            unsigned char *request,
-                            unsigned char *uripath)
+                            const unsigned char *request,
+                            const unsigned char *uripath)
 {
   /* We have a Digest setup for this, use it!  Now, to get all the details for
      this sorted out, I must urge you dear friend to read up on the RFC2617

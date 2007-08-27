@@ -858,9 +858,9 @@ int Curl_ossl_close_all(struct SessionHandle *data)
 
 static int Curl_ASN1_UTCTIME_output(struct connectdata *conn,
                                     const char *prefix,
-                                    ASN1_UTCTIME *tm)
+                                    const ASN1_UTCTIME *tm)
 {
-  char *asn1_string;
+  const char *asn1_string;
   int gmt=FALSE;
   int i;
   int year=0,month=0,day=0,hour=0,minute=0,second=0;
@@ -874,7 +874,7 @@ static int Curl_ASN1_UTCTIME_output(struct connectdata *conn,
     return 0;
 
   i=tm->length;
-  asn1_string=(char *)tm->data;
+  asn1_string=(const char *)tm->data;
 
   if(i < 10)
     return 1;
@@ -929,7 +929,7 @@ static int Curl_ASN1_UTCTIME_output(struct connectdata *conn,
 static int hostmatch(const char *hostname, const char *pattern)
 {
   while (1) {
-    int c = *pattern++;
+    char c = *pattern++;
 
     if (c == '\0')
       return (*hostname ? HOST_NOMATCH : HOST_MATCH);

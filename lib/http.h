@@ -31,7 +31,7 @@ bool Curl_compareheader(const char *headerline,  /* line to check */
 /* ftp can use this as well */
 CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                            int tunnelsocket,
-                           char *hostname, unsigned short remote_port);
+                           const char *hostname, unsigned short remote_port);
 
 /* protocol-specific functions set up to be called by the main engine */
 CURLcode Curl_http(struct connectdata *conn, bool *done);
@@ -50,7 +50,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn, char *datap,
 /* These functions are in http.c */
 void Curl_http_auth_stage(struct SessionHandle *data, int stage);
 CURLcode Curl_http_input_auth(struct connectdata *conn,
-                              int httpcode, char *header);
+                              int httpcode, const char *header);
 CURLcode Curl_http_auth_act(struct connectdata *conn);
 
 int Curl_http_should_fail(struct connectdata *conn);

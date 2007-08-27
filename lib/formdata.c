@@ -481,7 +481,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         return_value = CURL_FORMADD_OPTION_TWICE;
       else
         current_form->namelength =
-          array_state?(long)array_value:(long)va_arg(params, long);
+          array_state?(size_t)array_value:(size_t)va_arg(params, long);
       break;
 
       /*
@@ -506,7 +506,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         return_value = CURL_FORMADD_OPTION_TWICE;
       else
         current_form->contentslength =
-          array_state?(long)array_value:va_arg(params, long);
+          array_state?(size_t)array_value:(size_t)va_arg(params, long);
       break;
 
       /* Get contents from a given file name */
@@ -514,7 +514,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
       if (current_form->flags != 0)
         return_value = CURL_FORMADD_OPTION_TWICE;
       else {
-        char *filename = array_state?
+        const char *filename = array_state?
           array_value:va_arg(params, char *);
         if (filename) {
           current_form->value = strdup(filename);
@@ -533,7 +533,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
       /* We upload a file */
     case CURLFORM_FILE:
       {
-        char *filename = array_state?array_value:
+        const char *filename = array_state?array_value:
           va_arg(params, char *);
 
         if (current_form->value) {
@@ -567,7 +567,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
 
     case CURLFORM_BUFFER:
       {
-        char *filename = array_state?array_value:
+        const char *filename = array_state?array_value:
           va_arg(params, char *);
 
         if (current_form->value) {
@@ -615,12 +615,12 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         return_value = CURL_FORMADD_OPTION_TWICE;
       else
         current_form->bufferlength =
-          array_state?(long)array_value:va_arg(params, long);
+          array_state?(size_t)array_value:(size_t)va_arg(params, long);
       break;
 
     case CURLFORM_CONTENTTYPE:
       {
-        char *contenttype =
+        const char *contenttype =
           array_state?array_value:va_arg(params, char *);
         if (current_form->contenttype) {
           if (current_form->flags & HTTPPOST_FILENAME) {
@@ -666,7 +666,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
       }
     case CURLFORM_FILENAME:
       {
-        char *filename = array_state?array_value:
+        const char *filename = array_state?array_value:
           va_arg(params, char *);
         if( current_form->showfilename )
           return_value = CURL_FORMADD_OPTION_TWICE;
@@ -1055,7 +1055,7 @@ static char *basename(char *path)
 }
 #endif
 
-static char *strippath(char *fullfile)
+static char *strippath(const char *fullfile)
 {
   char *filename;
   char *base;

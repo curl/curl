@@ -374,7 +374,7 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
       /* we got a whole chunk of data, which can be anything from one
        * byte to a set of lines and possible just a piece of the last
        * line */
-      int i;
+      ssize_t i;
 
       data->reqdata.keep.headerbytecount += gotbytes;
 
@@ -661,7 +661,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
         /* we got a whole chunk of data, which can be anything from one
          * byte to a set of lines and possible just a piece of the last
          * line */
-        int i;
+        ssize_t i;
 
         data->reqdata.keep.headerbytecount += gotbytes;
 
@@ -3340,7 +3340,7 @@ static CURLcode ftp_nb_type(struct connectdata *conn,
 {
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   CURLcode result;
-  int want = ascii?'A':'I';
+  char want = ascii?'A':'I';
 
   if (ftpc->transfertype == want) {
     state(conn, newstate);
@@ -3351,7 +3351,7 @@ static CURLcode ftp_nb_type(struct connectdata *conn,
   state(conn, newstate);
 
   /* keep track of our current transfer type */
-  ftpc->transfertype = (char)want;
+  ftpc->transfertype = want;
   return CURLE_OK;
 }
 

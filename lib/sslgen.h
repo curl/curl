@@ -71,7 +71,7 @@ int Curl_ssl_check_cxn(struct connectdata *conn);
 
 CURLcode Curl_ssl_shutdown(struct connectdata *conn, int sockindex);
 
-bool Curl_ssl_data_pending(struct connectdata *conn,
+bool Curl_ssl_data_pending(const struct connectdata *conn,
                            int connindex);
 
 #if !defined(USE_SSL) && !defined(SSLGEN_C)

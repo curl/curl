@@ -345,7 +345,7 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
                                void *ssl_sessionid,
                                size_t idsize)
 {
-  int i;
+  long i;
   struct SessionHandle *data=conn->data; /* the mother of all structs */
   struct curl_ssl_session *store = &data->state.session[0];
   long oldest_age=data->state.session[0].age; /* zero if unused */
@@ -395,7 +395,7 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
 void Curl_ssl_close_all(struct SessionHandle *data)
 {
 #ifdef USE_SSL
-  int i;
+  long i;
   /* kill the session ID cache */
   if(data->state.session) {
     for(i=0; i< data->set.ssl.numsessions; i++)
@@ -632,7 +632,7 @@ ssize_t Curl_ssl_recv(struct connectdata *conn, /* connection data */
       return -1;
   }
 
-  return (int)nread;
+  return nread;
 
 #else /* USE_SSL */
   (void)conn;
@@ -726,7 +726,7 @@ int Curl_ssl_check_cxn(struct connectdata *conn)
 #endif /* USE_SSLEAY */
 }
 
-bool Curl_ssl_data_pending(struct connectdata *conn,
+bool Curl_ssl_data_pending(const struct connectdata *conn,
                            int connindex)
 {
 #ifdef USE_SSLEAY
