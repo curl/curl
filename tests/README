@@ -38,8 +38,10 @@ TCP ports used by default:
   on one machine.
 
 Run:
-  'make test'. This invokes the 'runtests.pl' perl script. Edit the top
-  variables of that script in case you have some specific needs.
+  'make test'. This builds the test suite support code and invokes the
+  'runtests.pl' perl script to run all the tests. Edit the top variables
+  of that script in case you have some specific needs, or run the script
+  manually (after the support code has been built).
 
   The script breaks on the first test that doesn't do OK. Use -a to prevent
   the script from abort on the first error. Run the script with -v for more
@@ -57,6 +59,11 @@ Memory:
   curl has been built with the CURLDEBUG define set. The script will
   automatically detect if that is the case, and it will use the ../memanalyze
   script to analyze the memory debugging output.
+
+  The -t option will enable torture testing mode, which runs each test
+  many times but causes a different memory allocation to fail on each
+  successive run.  This tests the out of memory error handling code to
+  ensure that memory leaks do not occur even in those situations.
 
 Debug:
   If a test case fails, you can conveniently get the script to invoke the
