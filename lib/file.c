@@ -192,7 +192,7 @@ CURLcode Curl_file_done(struct connectdata *conn,
 static CURLcode file_upload(struct connectdata *conn)
 {
   struct FILEPROTO *file = conn->data->reqdata.proto.file;
-  char *dir = strchr(file->path, DIRSEP);
+  const char *dir = strchr(file->path, DIRSEP);
   FILE *fp;
   CURLcode res=CURLE_OK;
   struct SessionHandle *data = conn->data;
@@ -202,7 +202,7 @@ static CURLcode file_upload(struct connectdata *conn)
   curl_off_t bytecount = 0;
   struct timeval now = Curl_tvnow();
   struct_stat file_stat;
-  char* buf2;
+  const char* buf2;
 
   /*
    * Since FILE: doesn't do the full init, we need to provide some extra
@@ -372,11 +372,11 @@ CURLcode Curl_file(struct connectdata *conn, bool *done)
       return result;
 
     if(fstated) {
-      struct tm *tm;
+      const struct tm *tm;
       time_t clock = (time_t)statbuf.st_mtime;
 #ifdef HAVE_GMTIME_R
       struct tm buffer;
-      tm = (struct tm *)gmtime_r(&clock, &buffer);
+      tm = (const struct tm *)gmtime_r(&clock, &buffer);
 #else
       tm = gmtime(&clock);
 #endif

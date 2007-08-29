@@ -111,7 +111,7 @@ Curl_hash_alloc(int slots,
 
 
 static struct curl_hash_element *
-mk_hash_element(void *key, size_t key_len, const void *p)
+mk_hash_element(const void *key, size_t key_len, const void *p)
 {
   struct curl_hash_element *he =
     (struct curl_hash_element *) malloc(sizeof(struct curl_hash_element));
@@ -275,8 +275,8 @@ Curl_hash_destroy(struct curl_hash *h)
 
 size_t Curl_hash_str(void* key, size_t key_length, size_t slots_num)
 {
-  char* key_str = (char *) key;
-  char *end = (char *) key_str + key_length;
+  const char* key_str = (const char *) key;
+  const char *end = key_str + key_length;
   unsigned long h = 5381;
 
   while (key_str < end) {

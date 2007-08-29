@@ -104,7 +104,6 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
 #include "netrc.h"
 
 #include "formdata.h"
-#include "base64.h"
 #include "sslgen.h"
 #include "hostip.h"
 #include "transfer.h"

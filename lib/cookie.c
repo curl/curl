@@ -172,16 +172,13 @@ Curl_cookie_add(struct SessionHandle *data,
                 struct CookieInfo *c,
                 bool httpheader, /* TRUE if HTTP header-style line */
                 char *lineptr,   /* first character of the line */
-                char *domain,    /* default domain */
-                char *path)      /* full path used when this cookie is set,
+                const char *domain, /* default domain */
+                const char *path)   /* full path used when this cookie is set,
                                     used to get default path for the cookie
                                     unless set */
 {
   struct Cookie *clist;
-  char *what;
   char name[MAX_NAME];
-  char *ptr;
-  char *semiptr;
   struct Cookie *co;
   struct Cookie *lastc=NULL;
   time_t now = time(NULL);
@@ -199,7 +196,10 @@ Curl_cookie_add(struct SessionHandle *data,
 
   if(httpheader) {
     /* This line was read off a HTTP-header */
-    char *sep;
+    const char *ptr;
+    const char *sep;
+    const char *semiptr;
+    char *what;
 
     what = malloc(MAX_COOKIE_LINE);
     if(!what) {
@@ -228,7 +228,7 @@ Curl_cookie_add(struct SessionHandle *data,
                        name, what)) {
           /* this is a <name>=<what> pair */
 
-          char *whatptr;
+          const char *whatptr;
 
           /* Strip off trailing whitespace from the 'what' */
           size_t len=strlen(what);
@@ -428,6 +428,7 @@ Curl_cookie_add(struct SessionHandle *data,
   else {
     /* This line is NOT a HTTP header style line, we do offer support for
        reading the odd netscape cookies-file format here */
+    char *ptr;
     char *firstptr;
     char *tok_buf;
     int fields;
@@ -655,7 +656,7 @@ Curl_cookie_add(struct SessionHandle *data,
  *
  ****************************************************************************/
 struct CookieInfo *Curl_cookie_init(struct SessionHandle *data,
-                                    char *file,
+                                    const char *file,
                                     struct CookieInfo *inc,
                                     bool newsession)
 {
@@ -734,7 +735,8 @@ struct CookieInfo *Curl_cookie_init(struct SessionHandle *data,
  ****************************************************************************/
 
 struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
-                                   char *host, char *path, bool secure)
+                                   const char *host, const char *path,
+				   bool secure)
 {
   struct Cookie *newco;
   struct Cookie *co;
@@ -937,7 +939,7 @@ static char *get_netscape_format(const struct Cookie *co)
  *
  * The function returns non-zero on write failure.
  */
-int Curl_cookie_output(struct CookieInfo *c, char *dumphere)
+int Curl_cookie_output(struct CookieInfo *c, const char *dumphere)
 {
   struct Cookie *co;
   FILE *out;
