@@ -320,8 +320,8 @@ static int juggle(curl_socket_t *sockfdp,
         nread_stdin = 0;
         do {
           /* get data in the buffer at the correct position */
-          ssize_t rc = read(fileno(stdin), &buffer[nread_stdin],
-                            buffer_len - nread_stdin);
+          rc = read(fileno(stdin), &buffer[nread_stdin],
+                    buffer_len - nread_stdin);
           logmsg("read %d bytes", rc);
           if(rc <= 0)
             return FALSE;

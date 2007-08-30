@@ -511,7 +511,7 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
     /* We want the connection cache to have plenty room. Before we supported
        the shared cache every single easy handle had 5 entries in their cache
        by default. */
-    int newmax = multi->num_easy * 4;
+    long newmax = multi->num_easy * 4;
 
     if(multi->maxconnects && (multi->maxconnects < newmax))
       /* don't grow beyond the allowed size */
@@ -520,9 +520,11 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
     if(newmax > multi->connc->num) {
       /* we only do this is we can in fact grow the cache */
       CURLcode res = Curl_ch_connc(easy_handle, multi->connc, newmax);
-      if(res != CURLE_OK)
-        /* TODO: we need to do some cleaning up here! */
-        return CURLM_OUT_OF_MEMORY;
+      if(res != CURLE_OK) {
+        /* FIXME: may need to do more cleanup here */
+        curl_multi_remove_handle(multi_handle, easy_handle);
+        return res;
+      }
     }
   }
 
