@@ -52,6 +52,9 @@ Dan F (30 August 2007)
 
 - Documented some newer error codes in libcurl-error(3)
 
+- Added more accurate error code returns from SFTP operations.  Added test
+  case 615 to test an SFTP upload failure.
+
 Dan F (28 August 2007)
 - Some minor internal type and const changes based on a splint scan.
 

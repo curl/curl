@@ -20,6 +20,7 @@ This release includes the following changes:
  o builds and runs on OS/400
  o several error codes and options were marked as obsolete and subject to
    future removal (set CURL_NO_OLDIES to see if your application is using them)
+ o SFTP errors can return more specific error codes 
 
 This release includes the following bugfixes:
 

@@ -95,7 +95,6 @@
 #include "speedcheck.h"
 #include "getinfo.h"
 
-#include "strtoofft.h"
 #include "strequal.h"
 #include "sslgen.h"
 #include "connect.h"
@@ -166,15 +165,32 @@ kbd_callback(const char *name, int name_len, const char *instruction,
 
 static CURLcode sftp_libssh2_error_to_CURLE(unsigned long err)
 {
-  if (err == LIBSSH2_FX_OK)
-    return CURLE_OK;
+  switch (err) {
+    case LIBSSH2_FX_OK:
+      return CURLE_OK;
 
-  /* TODO: map some of the libssh2 errors to the more appropriate CURLcode
-     error code, and possibly add a few new SSH-related one. We must however
-     not return or even depend on libssh2 errors in the public libcurl API */
+    case LIBSSH2_FX_NO_SUCH_FILE:
+    case LIBSSH2_FX_NO_SUCH_PATH:
+      return CURLE_REMOTE_FILE_NOT_FOUND;
 
-  if (err == LIBSSH2_FX_NO_SUCH_FILE)
-    return CURLE_REMOTE_FILE_NOT_FOUND;
+    case LIBSSH2_FX_PERMISSION_DENIED:
+    case LIBSSH2_FX_WRITE_PROTECT:
+    case LIBSSH2_FX_LOCK_CONFlICT:
+      return CURLE_REMOTE_ACCESS_DENIED;
+
+    case LIBSSH2_FX_NO_SPACE_ON_FILESYSTEM:
+    case LIBSSH2_FX_QUOTA_EXCEEDED:
+      return CURLE_REMOTE_DISK_FULL;
+
+    case LIBSSH2_FX_FILE_ALREADY_EXISTS:
+      return CURLE_REMOTE_FILE_EXISTS;
+
+    case LIBSSH2_FX_DIR_NOT_EMPTY:
+      return CURLE_QUOTE_ERROR;
+
+    default:
+      break;
+  }
 
   return CURLE_SSH;
 }
@@ -183,6 +199,11 @@ static CURLcode libssh2_session_error_to_CURLE(int err)
 {
   if (err == LIBSSH2_ERROR_ALLOC)
     return CURLE_OUT_OF_MEMORY;
+
+  /* TODO: map some more of the libssh2 errors to the more appropriate CURLcode
+     error code, and possibly add a few new SSH-related one. We must however
+     not return or even depend on libssh2 errors in the public libcurl API */
+
   return CURLE_SSH;
 }
 
@@ -1065,15 +1086,16 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
        *          same name as the last directory in the path.
        */
       sftp_scp->sftp_handle =
-      libssh2_sftp_open(sftp_scp->sftp_session, sftp_scp->path,
-                        LIBSSH2_FXF_WRITE|LIBSSH2_FXF_CREAT|LIBSSH2_FXF_TRUNC,
-                        data->set.new_file_perms);
+        libssh2_sftp_open(sftp_scp->sftp_session, sftp_scp->path,
+                          LIBSSH2_FXF_WRITE|LIBSSH2_FXF_CREAT|LIBSSH2_FXF_TRUNC,
+                          data->set.new_file_perms);
       if (!sftp_scp->sftp_handle) {
         if (libssh2_session_last_errno(sftp_scp->ssh_session) ==
             LIBSSH2_ERROR_EAGAIN) {
           break;
         } else {
           err = libssh2_sftp_last_error(sftp_scp->sftp_session);
+          failf(data, "Upload failed: %s", sftp_libssh2_strerror(err));
           if (sshc->secondCreateDirs) {
             state(conn, SSH_SFTP_CLOSE);
             sshc->actualCode = err;
