@@ -375,6 +375,8 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
        * byte to a set of lines and possible just a piece of the last
        * line */
       ssize_t i;
+      int clipamount = 0;
+      bool restart = FALSE;
 
       data->reqdata.keep.headerbytecount += gotbytes;
 
@@ -430,16 +432,10 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
            full chunk of data we have read from the server. We therefore need
            to store the rest of the data to be checked on the next invoke as
            it may actually contain another end of response already! */
-        ftpc->cache_size = gotbytes - i;
-        ftpc->cache = (char *)malloc((int)ftpc->cache_size);
-        if(ftpc->cache)
-          memcpy(ftpc->cache, ftpc->linestart_resp, (int)ftpc->cache_size);
-        else
-          return CURLE_OUT_OF_MEMORY; /**BANG**/
+        clipamount = gotbytes - i;
+        restart = TRUE;
       }
       else if(keepon) {
-        int clipamount = 0;
-        bool restart = FALSE;
 
         if((perline == gotbytes) && (gotbytes > BUFSIZE/2)) {
           /* We got an excessive line without newlines and we need to deal
@@ -460,23 +456,26 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
           clipamount = perline;
           restart = TRUE;
         }
-
-        if(restart) {
-          if(clipamount) {
-            ftpc->cache_size = clipamount;
-            ftpc->cache = (char *)malloc((int)ftpc->cache_size);
-            if(ftpc->cache)
-              memcpy(ftpc->cache, ftpc->linestart_resp, (int)ftpc->cache_size);
-            else
-              return CURLE_OUT_OF_MEMORY;
-          }
-          /* now reset a few variables to start over nicely from the start of
-             the big buffer */
-          ftpc->nread_resp = 0; /* start over from scratch in the buffer */
-          ptr = ftpc->linestart_resp = buf;
-          perline = 0;
-        }
       }
+      else if(i == gotbytes)
+        restart = TRUE;
+
+      if(clipamount) {
+        ftpc->cache_size = clipamount;
+        ftpc->cache = (char *)malloc((int)ftpc->cache_size);
+        if(ftpc->cache)
+          memcpy(ftpc->cache, ftpc->linestart_resp, (int)ftpc->cache_size);
+        else
+          return CURLE_OUT_OF_MEMORY;
+      }
+      if(restart) {
+        /* now reset a few variables to start over nicely from the start of
+           the big buffer */
+        ftpc->nread_resp = 0; /* start over from scratch in the buffer */
+        ptr = ftpc->linestart_resp = buf;
+        perline = 0;
+      }
+
     } /* there was data */
 
   } /* while there's buffer left and loop is requested */
@@ -514,9 +513,9 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
 /* --- parse FTP server responses --- */
 
 /*
- * Curl_GetFTPResponse() is supposed to be invoked after each command sent to
- * a remote FTP server. This function will wait and read all lines of the
- * response and extract the relevant return code for the invoking function.
+ * Curl_GetFTPResponse() is a BLOCKING function to read the full response
+ * from a server after a command.
+ *
  */
 
 CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
@@ -531,31 +530,20 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
    * line in a response or continue reading.  */
 
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
-  int perline; /* count bytes per line */
-  bool keepon=TRUE;
-  ssize_t gotbytes;
-  char *ptr;
   long timeout;              /* timeout in milliseconds */
   long interval_ms;
   struct SessionHandle *data = conn->data;
-  char *line_start;
-  int code=0; /* default ftp "error code" to return */
-  char *buf = data->state.buffer;
   CURLcode result = CURLE_OK;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   struct timeval now = Curl_tvnow();
+  size_t nread;
 
   if (ftpcode)
     *ftpcode = 0; /* 0 for errors */
 
-  ptr=buf;
-  line_start = buf;
-
   *nreadp=0;
-  perline=0;
-  keepon=TRUE;
 
-  while((*nreadp<BUFSIZE) && (keepon && !result)) {
+  while(!*ftpcode && !result) {
     /* check and reset timeout value every lap */
     if(data->set.ftp_response_timeout )
       /* if CURLOPT_FTP_RESPONSE_TIMEOUT is set, use that to determine
@@ -580,179 +568,32 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
       return CURLE_OPERATION_TIMEDOUT; /* already too little time */
     }
 
-    if(!ftpc->cache) {
-      interval_ms = 1 * 1000;  /* use 1 second timeout intervals */
-      if(timeout < interval_ms)
-        interval_ms = timeout;
+    interval_ms = 1 * 1000;  /* use 1 second timeout intervals */
+    if(timeout < interval_ms)
+      interval_ms = timeout;
 
-      switch (Curl_socket_ready(sockfd, CURL_SOCKET_BAD, (int)interval_ms)) {
-      case -1: /* select() error, stop reading */
-        result = CURLE_RECV_ERROR;
-        failf(data, "FTP response aborted due to select/poll error: %d",
-              SOCKERRNO);
-        break;
-      case 0: /* timeout */
-        if(Curl_pgrsUpdate(conn))
-          return CURLE_ABORTED_BY_CALLBACK;
-        continue; /* just continue in our loop for the timeout duration */
+    switch (Curl_socket_ready(sockfd, CURL_SOCKET_BAD, (int)interval_ms)) {
+    case -1: /* select() error, stop reading */
+      failf(data, "FTP response aborted due to select/poll error: %d",
+            SOCKERRNO);
+      return CURLE_RECV_ERROR;
 
-      default:
-        break;
-      }
+    case 0: /* timeout */
+      if(Curl_pgrsUpdate(conn))
+        return CURLE_ABORTED_BY_CALLBACK;
+      continue; /* just continue in our loop for the timeout duration */
+      
+    default: /* for clarity */
+      break;
     }
-    if(CURLE_OK == result) {
-      /*
-       * This code previously didn't use the kerberos sec_read() code
-       * to read, but when we use Curl_read() it may do so. Do confirm
-       * that this is still ok and then remove this comment!
-       */
-      if(ftpc->cache) {
-        /* we had data in the "cache", copy that instead of doing an actual
-         * read
-         *
-         * Dave Meyer, December 2003:
-         * ftp->cache_size is cast to int here.  This should be safe,
-         * because it would have been populated with something of size
-         * int to begin with, even though its datatype may be larger
-         * than an int.
-         */
-        memcpy(ptr, ftpc->cache, (int)ftpc->cache_size);
-        gotbytes = (int)ftpc->cache_size;
-        free(ftpc->cache);    /* free the cache */
-        ftpc->cache = NULL;   /* clear the pointer */
-        ftpc->cache_size = 0; /* zero the size just in case */
-      }
-      else {
-        int res;
-#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
-        enum protection_level prot = conn->data_prot;
 
-        conn->data_prot = 0;
-#endif
-        res = Curl_read(conn, sockfd, ptr, BUFSIZE-*nreadp,
-                        &gotbytes);
-#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
-        conn->data_prot = prot;
-#endif
-        if(res < 0)
-          /* EWOULDBLOCK */
-          continue; /* go looping again */
+    result = ftp_readresp(sockfd, conn, ftpcode, &nread);
+    if(result)
+      break;
 
-#ifdef CURL_DOES_CONVERSIONS
-        if((res == CURLE_OK) && (gotbytes > 0)) {
-          /* convert from the network encoding */
-          result = res = Curl_convert_from_network(data, ptr, gotbytes);
-          /* Curl_convert_from_network calls failf if unsuccessful */
-        }
-#endif /* CURL_DOES_CONVERSIONS */
-
-        if(CURLE_OK != res)
-          keepon = FALSE;
-      }
-
-      if(!keepon)
-        ;
-      else if(gotbytes <= 0) {
-        keepon = FALSE;
-        result = CURLE_RECV_ERROR;
-        failf(data, "FTP response reading failed");
-      }
-      else {
-        /* we got a whole chunk of data, which can be anything from one
-         * byte to a set of lines and possible just a piece of the last
-         * line */
-        ssize_t i;
-
-        data->reqdata.keep.headerbytecount += gotbytes;
-
-        *nreadp += gotbytes;
-        for(i = 0; i < gotbytes; ptr++, i++) {
-          perline++;
-          if(*ptr=='\n') {
-            /* a newline is CRLF in ftp-talk, so the CR is ignored as
-               the line isn't really terminated until the LF comes */
-
-            /* output debug output if that is requested */
-#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
-          if(!conn->sec_complete)
-#endif
-            if(data->set.verbose)
-              Curl_debug(data, CURLINFO_HEADER_IN,
-                         line_start, (size_t)perline, conn);
-
-            /*
-             * We pass all response-lines to the callback function registered
-             * for "headers". The response lines can be seen as a kind of
-             * headers.
-             */
-            result = Curl_client_write(conn, CLIENTWRITE_HEADER,
-                                       line_start, perline);
-            if(result)
-              return result;
-
-            if(perline>3 && LASTLINE(line_start)) {
-              /* This is the end of the last line, copy the last
-               * line to the start of the buffer and zero terminate,
-               * for old times sake (and krb4)! */
-              char *meow;
-              int n;
-              for(meow=line_start, n=0; meow<ptr; meow++, n++)
-                buf[n] = *meow;
-              *meow=0; /* zero terminate */
-              keepon=FALSE;
-              line_start = ptr+1; /* advance pointer */
-              i++; /* skip this before getting out */
-              break;
-            }
-            perline=0; /* line starts over here */
-            line_start = ptr+1;
-          }
-        }
-        if(!keepon && (i != gotbytes)) {
-          /* We found the end of the response lines, but we didn't parse the
-             full chunk of data we have read from the server. We therefore
-             need to store the rest of the data to be checked on the next
-             invoke as it may actually contain another end of response
-             already!  Cleverly figured out by Eric Lavigne in December
-             2001. */
-          ftpc->cache_size = gotbytes - i;
-          ftpc->cache = (char *)malloc((int)ftpc->cache_size);
-          if(ftpc->cache)
-            memcpy(ftpc->cache, line_start, (int)ftpc->cache_size);
-          else
-            return CURLE_OUT_OF_MEMORY; /**BANG**/
-        }
-      } /* there was data */
-    } /* if(no error) */
+    *nreadp += nread;
+    
   } /* while there's buffer left and loop is requested */
-
-  if(!result)
-    code = atoi(buf);
-
-#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
-  /* handle the security-oriented responses 6xx ***/
-  /* FIXME: some errorchecking perhaps... ***/
-  switch(code) {
-  case 631:
-    code = Curl_sec_read_msg(conn, buf, prot_safe);
-    break;
-  case 632:
-    code = Curl_sec_read_msg(conn, buf, prot_private);
-    break;
-  case 633:
-    code = Curl_sec_read_msg(conn, buf, prot_confidential);
-    break;
-  default:
-    /* normal ftp stuff we pass through! */
-    break;
-  }
-#endif
-
-  if(ftpcode)
-    *ftpcode=code; /* return the initial number like this */
-
-  /* store the latest code for later retrieval */
-  conn->data->info.httpcode=code;
 
   return result;
 }
