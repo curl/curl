@@ -122,10 +122,10 @@ int upload(CURL *curlhandle, const char * remotepath, const char * localpath,
 
 			fseek(f, uploaded_len, SEEK_SET);
 
-			curl_easy_setopt(curlhandle, CURLOPT_FTPAPPEND, 1);
+			curl_easy_setopt(curlhandle, CURLOPT_APPEND, 1);
 		}
 		else { /* no */
-			curl_easy_setopt(curlhandle, CURLOPT_FTPAPPEND, 0);
+			curl_easy_setopt(curlhandle, CURLOPT_APPEND, 0);
 		}
 
 		r = curl_easy_perform(curlhandle);

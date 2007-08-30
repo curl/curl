@@ -801,7 +801,7 @@ CURLcode Curl_tftp(struct connectdata *conn, bool *done)
       code = CURLE_TFTP_PERM;
       break;
     case TFTP_ERR_DISKFULL:
-      code = CURLE_TFTP_DISKFULL;
+      code = CURLE_REMOTE_DISK_FULL;
       break;
     case TFTP_ERR_ILLEGAL:
       code = CURLE_TFTP_ILLEGAL;
@@ -810,13 +810,13 @@ CURLcode Curl_tftp(struct connectdata *conn, bool *done)
       code = CURLE_TFTP_UNKNOWNID;
       break;
     case TFTP_ERR_EXISTS:
-      code = CURLE_TFTP_EXISTS;
+      code = CURLE_REMOTE_FILE_EXISTS;
       break;
     case TFTP_ERR_NOSUCHUSER:
       code = CURLE_TFTP_NOSUCHUSER;
       break;
     case TFTP_ERR_TIMEOUT:
-      code = CURLE_OPERATION_TIMEOUTED;
+      code = CURLE_OPERATION_TIMEDOUT;
       break;
     case TFTP_ERR_NORESPONSE:
       code = CURLE_COULDNT_CONNECT;

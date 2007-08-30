@@ -81,14 +81,11 @@ curl_easy_strerror(CURLcode error)
   case CURLE_FTP_WEIRD_SERVER_REPLY:
     return "FTP: weird server reply";
 
-  case CURLE_FTP_ACCESS_DENIED:
-    return "FTP: access denied";
+  case CURLE_REMOTE_ACCESS_DENIED:
+    return "access denied";
 
   case CURLE_FTP_WEIRD_PASS_REPLY:
     return "FTP: unknown PASS reply";
-
-  case CURLE_FTP_WEIRD_USER_REPLY:
-    return "FTP: unknown USER reply";
 
   case CURLE_FTP_WEIRD_PASV_REPLY:
     return "FTP: unknown PASV reply";
@@ -99,11 +96,8 @@ curl_easy_strerror(CURLcode error)
   case CURLE_FTP_CANT_GET_HOST:
     return "FTP: can't figure out the host in the PASV response";
 
-  case CURLE_FTP_CANT_RECONNECT:
-    return "FTP: can't connect to server the response code is unknown";
-
-  case CURLE_FTP_COULDNT_SET_BINARY:
-    return "FTP: couldn't set binary mode";
+  case CURLE_FTP_COULDNT_SET_TYPE:
+    return "FTP: couldn't set file type";
 
   case CURLE_PARTIAL_FILE:
     return "Transferred a partial file";
@@ -111,11 +105,8 @@ curl_easy_strerror(CURLcode error)
   case CURLE_FTP_COULDNT_RETR_FILE:
     return "FTP: couldn't retrieve (RETR failed) the specified file";
 
-  case CURLE_FTP_WRITE_ERROR:
-    return "FTP: the post-transfer acknowledge response was not OK";
-
-  case CURLE_FTP_QUOTE_ERROR:
-    return "FTP: a quote command returned error";
+  case CURLE_QUOTE_ERROR:
+    return "a quote command returned error";
 
   case CURLE_HTTP_RETURNED_ERROR:
     return "HTTP response code said error";
@@ -130,17 +121,10 @@ curl_easy_strerror(CURLcode error)
     return "failed to open/read local data from file/application";
 
   case CURLE_OUT_OF_MEMORY:
-#ifdef CURL_DOES_CONVERSIONS
-    return "conversion failed -or- out of memory";
-#else
     return "out of memory";
-#endif /* CURL_DOES_CONVERSIONS */
 
-  case CURLE_OPERATION_TIMEOUTED:
+  case CURLE_OPERATION_TIMEDOUT:
     return "a timeout was reached";
-
-  case CURLE_FTP_COULDNT_SET_ASCII:
-    return "FTP could not set ASCII mode (TYPE A)";
 
   case CURLE_FTP_PORT_FAILED:
     return "FTP command PORT failed";
@@ -148,10 +132,7 @@ curl_easy_strerror(CURLcode error)
   case CURLE_FTP_COULDNT_USE_REST:
     return "FTP command REST failed";
 
-  case CURLE_FTP_COULDNT_GET_SIZE:
-    return "FTP command SIZE failed";
-
-  case CURLE_HTTP_RANGE_ERROR:
+  case CURLE_RANGE_ERROR:
     return "a range was requested but the server did not deliver it";
 
   case CURLE_HTTP_POST_ERROR:
@@ -171,9 +152,6 @@ curl_easy_strerror(CURLcode error)
 
   case CURLE_LDAP_SEARCH_FAILED:
     return "LDAP: search failed";
-
-  case CURLE_LIBRARY_NOT_FOUND:
-    return "a required shared library was not found";
 
   case CURLE_FUNCTION_NOT_FOUND:
     return "a required function in the shared library was not found";
@@ -217,9 +195,6 @@ curl_easy_strerror(CURLcode error)
   case CURLE_RECV_ERROR:
     return "failure when receiving data from the peer";
 
-  case CURLE_SHARE_IN_USE:
-    return "share is already in use";
-
   case CURLE_SSL_CERTPROBLEM:
     return "problem with the local SSL certificate";
 
@@ -259,8 +234,8 @@ curl_easy_strerror(CURLcode error)
   case CURLE_TFTP_PERM:
     return "TFTP: Access Violation";
 
-  case CURLE_TFTP_DISKFULL:
-    return "TFTP: Disk full or allocation exceeded";
+  case CURLE_REMOTE_DISK_FULL:
+    return "Disk full or allocation exceeded";
 
   case CURLE_TFTP_ILLEGAL:
     return "TFTP: Illegal operation";
@@ -268,8 +243,8 @@ curl_easy_strerror(CURLcode error)
   case CURLE_TFTP_UNKNOWNID:
     return "TFTP: Unknown transfer ID";
 
-  case CURLE_TFTP_EXISTS:
-    return "TFTP: File already exists";
+  case CURLE_REMOTE_FILE_EXISTS:
+    return "File already exists";
 
   case CURLE_TFTP_NOSUCHUSER:
     return "TFTP: No such user";
@@ -287,12 +262,19 @@ curl_easy_strerror(CURLcode error)
     return "Error in the SSH layer";
 
     /* error codes not used by current libcurl */
-  case CURLE_URL_MALFORMAT_USER:
-  case CURLE_FTP_USER_PASSWORD_INCORRECT:
-  case CURLE_MALFORMAT_USER:
-  case CURLE_BAD_CALLING_ORDER:
-  case CURLE_BAD_PASSWORD_ENTERED:
-  case CURLE_OBSOLETE:
+  case CURLE_OBSOLETE4:
+  case CURLE_OBSOLETE10:
+  case CURLE_OBSOLETE12:
+  case CURLE_OBSOLETE16:
+  case CURLE_OBSOLETE20:
+  case CURLE_OBSOLETE24:
+  case CURLE_OBSOLETE29:
+  case CURLE_OBSOLETE32:
+  case CURLE_OBSOLETE40:
+  case CURLE_OBSOLETE44:
+  case CURLE_OBSOLETE46:
+  case CURLE_OBSOLETE50:
+  case CURLE_OBSOLETE57:
   case CURL_LAST:
     break;
   }

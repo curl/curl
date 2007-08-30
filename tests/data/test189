@@ -61,7 +61,7 @@ Host: 127.0.0.1:%HTTPPORT
 Accept: */*
 
 </protocol>
-# 33 is CURLE_HTTP_RANGE_ERROR
+# 33 is CURLE_RANGE_ERROR
 <errorcode>
 33
 </errorcode>

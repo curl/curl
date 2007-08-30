@@ -175,7 +175,7 @@ typedef enum {
 #define CONF_NOPROGRESS (1<<10) /* shut off the progress meter */
 #define CONF_NOBODY   (1<<11) /* use HEAD to get http document */
 #define CONF_FAILONERROR (1<<12) /* no output on http error codes >= 300 */
-#define CONF_FTPLISTONLY (1<<16) /* Use NLST when listing ftp dir */
+#define CONF_DIRLISTONLY (1<<16) /* request nonverbose directory listing */
 #define CONF_FTPAPPEND (1<<20) /* Append instead of overwrite on upload! */
 #define CONF_NETRC    (1<<22)  /* read user+password from .netrc */
 #define CONF_FOLLOWLOCATION (1<<23) /* use Location: Luke! */
@@ -2242,7 +2242,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
               nextarg);
       break;
     case 'l':
-      config->conf ^= CONF_FTPLISTONLY; /* only list the names of the FTP dir */
+      config->conf ^= CONF_DIRLISTONLY; /* only list the names of the FTP dir */
       break;
     case 'L':
       config->conf ^= CONF_FOLLOWLOCATION; /* Follow Location: HTTP headers */
@@ -4132,9 +4132,9 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         my_setopt(curl, CURLOPT_FAILONERROR,
                   config->conf&CONF_FAILONERROR);
         my_setopt(curl, CURLOPT_UPLOAD, uploadfile?TRUE:FALSE);
-        my_setopt(curl, CURLOPT_FTPLISTONLY,
-                  config->conf&CONF_FTPLISTONLY);
-        my_setopt(curl, CURLOPT_FTPAPPEND, config->conf&CONF_FTPAPPEND);
+        my_setopt(curl, CURLOPT_DIRLISTONLY,
+                  config->conf&CONF_DIRLISTONLY);
+        my_setopt(curl, CURLOPT_APPEND, config->conf&CONF_FTPAPPEND);
 
         if (config->conf&CONF_NETRC_OPT)
           my_setopt(curl, CURLOPT_NETRC, CURL_NETRC_OPTIONAL);
@@ -4185,7 +4185,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         my_setopt(curl, CURLOPT_SSLCERTTYPE, config->cert_type);
         my_setopt(curl, CURLOPT_SSLKEY, config->key);
         my_setopt(curl, CURLOPT_SSLKEYTYPE, config->key_type);
-        my_setopt(curl, CURLOPT_SSLKEYPASSWD, config->key_passwd);
+        my_setopt(curl, CURLOPT_KEYPASSWD, config->key_passwd);
 
 	/* SSH private key uses the same command-line option as SSL private key */
         my_setopt(curl, CURLOPT_SSH_PRIVATE_KEYFILE, config->key);
@@ -4323,15 +4323,15 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         /* new in curl 7.15.5 */
         if(config->ftp_ssl_reqd)
-          my_setopt(curl, CURLOPT_FTP_SSL, CURLFTPSSL_ALL);
+          my_setopt(curl, CURLOPT_USE_SSL, CURLFTPSSL_ALL);
 
         /* new in curl 7.11.0 */
         else if(config->ftp_ssl)
-          my_setopt(curl, CURLOPT_FTP_SSL, CURLFTPSSL_TRY);
+          my_setopt(curl, CURLOPT_USE_SSL, CURLFTPSSL_TRY);
 
         /* new in curl 7.16.0 */
         else if(config->ftp_ssl_control)
-          my_setopt(curl, CURLOPT_FTP_SSL, CURLFTPSSL_CONTROL);
+          my_setopt(curl, CURLOPT_USE_SSL, CURLFTPSSL_CONTROL);
 
         /* new in curl 7.16.1 */
         if(config->ftp_ssl_ccc)

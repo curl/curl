@@ -1885,7 +1885,7 @@ static CURLcode ftp_state_type_resp(struct connectdata *conn,
        successful 'TYPE I'. While that is not as RFC959 says, it is still a
        positive response code and we allow that. */
     failf(data, "Couldn't set desired mode");
-    return CURLE_FTP_COULDNT_SET_BINARY; /* FIX */
+    return CURLE_FTP_COULDNT_SET_TYPE;
   }
   if(ftpcode != 200)
     infof(data, "Got a %03d response code instead of the assumed 200\n",
@@ -2608,7 +2608,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
     case FTP_STOR_PREQUOTE:
       if(ftpcode >= 400) {
         failf(conn->data, "QUOT command failed with %03d", ftpcode);
-        return CURLE_FTP_QUOTE_ERROR;
+        return CURLE_QUOTE_ERROR;
       }
       result = ftp_state_quote(conn, FALSE, ftpc->state);
       if(result)
@@ -2631,7 +2631,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
           failf(data, "Server denied you to change to the given directory");
           ftpc->cwdfail = TRUE; /* don't remember this path as we failed
                                    to enter it */
-          return CURLE_FTP_ACCESS_DENIED;
+          return CURLE_REMOTE_ACCESS_DENIED;
         }
       }
       else {
@@ -2653,7 +2653,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
       if(ftpcode/100 != 2) {
         /* failure to MKD the dir */
         failf(data, "Failed to MKD dir: %03d", ftpcode);
-        return CURLE_FTP_ACCESS_DENIED;
+        return CURLE_REMOTE_ACCESS_DENIED;
       }
       state(conn, FTP_CWD);
       /* send CWD */
@@ -2964,10 +2964,10 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status, bool premature
   case CURLE_BAD_DOWNLOAD_RESUME:
   case CURLE_FTP_WEIRD_PASV_REPLY:
   case CURLE_FTP_PORT_FAILED:
-  case CURLE_FTP_COULDNT_SET_BINARY:
+  case CURLE_FTP_COULDNT_SET_TYPE:
   case CURLE_FTP_COULDNT_RETR_FILE:
   case CURLE_UPLOAD_FAILED:
-  case CURLE_FTP_ACCESS_DENIED:
+  case CURLE_REMOTE_ACCESS_DENIED:
   case CURLE_FILESIZE_EXCEEDED:
     /* the connection stays alive fine even though this happened */
     /* fall-through */
@@ -3146,7 +3146,7 @@ CURLcode ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
 
       if (ftpcode >= 400) {
         failf(conn->data, "QUOT string not accepted: %s", item->data);
-        return CURLE_FTP_QUOTE_ERROR;
+        return CURLE_QUOTE_ERROR;
       }
     }
 

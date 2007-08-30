@@ -1182,7 +1182,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                  * wasn't a GET we did a POST or PUT resume) */
                 failf(data, "HTTP server doesn't seem to support "
                       "byte ranges. Cannot resume.");
-                return CURLE_HTTP_RANGE_ERROR;
+                return CURLE_RANGE_ERROR;
               }
 
               if(data->set.timecondition && !data->reqdata.range) {
@@ -1591,7 +1591,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             FORMAT_OFF_T " bytes received",
             data->set.timeout, k->bytecount);
     }
-    return CURLE_OPERATION_TIMEOUTED;
+    return CURLE_OPERATION_TIMEDOUT;
   }
 
   if(!k->keepon) {

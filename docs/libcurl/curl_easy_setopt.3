@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_easy_setopt 3 "1 Aug 2007" "libcurl 7.17.0" "libcurl Manual"
+.TH curl_easy_setopt 3 "30 Aug 2007" "libcurl 7.17.0" "libcurl Manual"
 .SH NAME
 curl_easy_setopt \- set options for a curl easy handle
 .SH SYNOPSIS
@@ -764,7 +764,7 @@ multiple cookies in one string like this: "name1=content1; name2=content2;"
 etc.
 
 Using this option multiple times will only make the latest string override the
-previously ones.
+previous ones.
 .IP CURLOPT_COOKIEFILE
 Pass a pointer to a zero terminated string as parameter. It should contain the
 name of your file holding cookie data to read. The cookie data may be in
@@ -875,17 +875,21 @@ struct curl_slist structs properly filled in as described for
 \fICURLOPT_QUOTE\fP. Disable this operation again by setting a NULL to this
 option. Before version 7.15.6, if you also set \fICURLOPT_NOBODY\fP non-zero,
 this option didn't work.
-.IP CURLOPT_FTPLISTONLY
-A non-zero parameter tells the library to just list the names of an ftp
+.IP CURLOPT_DIRLISTONLY
+A non-zero parameter tells the library to just list the names of files in a
 directory, instead of doing a full directory listing that would include file
-sizes, dates etc.
+sizes, dates etc. This works for FTP and SFTP URLs.
 
-This causes an FTP NLST command to be sent.  Beware that some FTP servers list
-only files in their response to NLST; they might not include subdirectories
-and symbolic links.
-.IP CURLOPT_FTPAPPEND
+This causes an FTP NLST command to be sent on an FTP server.  Beware
+that some FTP servers list only files in their response to NLST; they
+might not include subdirectories and symbolic links.
+
+(This option was known as CURLOPT_FTPLISTONLY up to 7.16.4)
+.IP CURLOPT_APPEND
 A non-zero parameter tells the library to append to the remote file instead of
 overwrite it. This is only useful when uploading to an ftp site.
+
+(This option was known as CURLOPT_FTPAPPEND up to 7.16.4)
 .IP CURLOPT_FTP_USE_EPRT
 Pass a long. If the value is non-zero, it tells curl to use the EPRT (and
 LPRT) command when doing active FTP downloads (which is enabled by
@@ -932,9 +936,11 @@ same IP address it already uses for the control connection. But it will use
 the port number from the 227-response. (Added in 7.14.2)
 
 This option has no effect if PORT, EPRT or EPSV is used instead of PASV.
-.IP CURLOPT_FTP_SSL
+.IP CURLOPT_USE_SSL
 Pass a long using one of the values from below, to make libcurl use your
 desired level of SSL for the ftp transfer. (Added in 7.11.0)
+
+(This option was known as CURLOPT_FTP_SSL up to 7.16.4)
 .RS
 .IP CURLFTPSSL_NONE
 Don't attempt to use SSL.
@@ -1225,13 +1231,6 @@ with.
 Pass a pointer to a zero terminated string as parameter. The string should be
 the format of your certificate. Supported formats are "PEM" and "DER".  (Added
 in 7.9.3)
-.IP CURLOPT_SSLCERTPASSWD
-Pass a pointer to a zero terminated string as parameter. It will be used as
-the password required to use the \fICURLOPT_SSLCERT\fP certificate.
-
-This option is replaced by \fICURLOPT_SSLKEYPASSWD\fP and should only be used
-for backward compatibility. You never needed a pass phrase to load a
-certificate but you need one to load your private key.
 .IP CURLOPT_SSLKEY
 Pass a pointer to a zero terminated string as parameter. The string should be
 the file name of your private key. The default format is "PEM" and can be
@@ -1244,10 +1243,15 @@ The format "ENG" enables you to load the private key from a crypto engine. In
 this case \fICURLOPT_SSLKEY\fP is used as an identifier passed to the
 engine. You have to set the crypto engine with \fICURLOPT_SSLENGINE\fP.
 \&"DER" format key file currently does not work because of a bug in OpenSSL.
-.IP CURLOPT_SSLKEYPASSWD
+.IP CURLOPT_KEYPASSWD
 Pass a pointer to a zero terminated string as parameter. It will be used as
 the password required to use the \fICURLOPT_SSLKEY\fP or
 \fICURLOPT_SSH_PRIVATE_KEYFILE\fP private key.
+You never needed a pass phrase to load a certificate but you need one to
+load your private key.
+
+(This option was known as CURLOPT_SSLKEYPASSWD up to 7.16.4 and
+CURLOPT_SSLCERTPASSWD up to 7.9.2)
 .IP CURLOPT_SSLENGINE
 Pass a pointer to a zero terminated string as parameter. It will be used as
 the identifier for the crypto engine you want to use for your private
@@ -1406,7 +1410,7 @@ libcurl defaults to using \fB~/.ssh/id_dsa.pub\fP.
 .IP CURLOPT_SSH_PRIVATE_KEYFILE
 Pass a char * pointing to a file name for your private key. If not used,
 libcurl defaults to using \fB~/.ssh/id_dsa\fP.
-If the file is password-protected, set the password with \fICURLOPT_SSLKEYPASSWD\fP.
+If the file is password-protected, set the password with \fICURLOPT_KEYPASSWD\fP.
 (Added in 7.16.1)
 .SH OTHER OPTIONS
 .IP CURLOPT_PRIVATE

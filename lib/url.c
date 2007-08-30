@@ -813,16 +813,16 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      */
     data->set.ftp_response_timeout = va_arg( param , long ) * 1000;
     break;
-  case CURLOPT_FTPLISTONLY:
+  case CURLOPT_DIRLISTONLY:
     /*
-     * An FTP option that changes the command to one that asks for a list
+     * An option that changes the command to one that asks for a list
      * only, no file info details.
      */
     data->set.ftp_list_only = (bool)(0 != va_arg(param, long));
     break;
-  case CURLOPT_FTPAPPEND:
+  case CURLOPT_APPEND:
     /*
-     * We want to upload and append to an existing (FTP) file.
+     * We want to upload and append to an existing file.
      */
     data->set.ftp_append = (bool)(0 != va_arg(param, long));
     break;
@@ -1524,9 +1524,9 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     result = Curl_setstropt(&data->set.str[STRING_KEY_TYPE],
                             va_arg(param, char *));
     break;
-  case CURLOPT_SSLKEYPASSWD:
+  case CURLOPT_KEYPASSWD:
     /*
-     * String that holds the SSL private key password.
+     * String that holds the SSL or SSH private key password.
      */
     result = Curl_setstropt(&data->set.str[STRING_KEY_PASSWD],
                             va_arg(param, char *));
@@ -1730,9 +1730,9 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.max_filesize = va_arg(param, long);
     break;
 
-  case CURLOPT_FTP_SSL:
+  case CURLOPT_USE_SSL:
     /*
-     * Make FTP transfers attempt to use SSL/TLS.
+     * Make transfers attempt to use SSL/TLS.
      */
     data->set.ftp_ssl = (curl_ftpssl)va_arg(param, long);
     break;
@@ -4226,7 +4226,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
            won't, and zero would be to switch it off so we never set it to
            less than 1! */
         alarm(1);
-        result = CURLE_OPERATION_TIMEOUTED;
+        result = CURLE_OPERATION_TIMEDOUT;
         failf(data, "Previous alarm fired off!");
       }
       else

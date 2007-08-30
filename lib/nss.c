@@ -550,7 +550,7 @@ int Curl_nss_send(struct connectdata *conn,  /* connection data */
 
     if(err == PR_IO_TIMEOUT_ERROR) {
       failf(data, "SSL connection timeout");
-      return CURLE_OPERATION_TIMEOUTED;
+      return CURLE_OPERATION_TIMEDOUT;
     }
 
     failf(conn->data, "SSL write: error %d\n", err);
@@ -591,7 +591,7 @@ ssize_t Curl_nss_recv(struct connectdata * conn, /* connection data */
     }
     if(err == PR_IO_TIMEOUT_ERROR) {
       failf(data, "SSL connection timeout");
-      return CURLE_OPERATION_TIMEOUTED;
+      return CURLE_OPERATION_TIMEDOUT;
     }
     failf(conn->data, "SSL read: errno %d", err);
     return -1;

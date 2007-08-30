@@ -18,6 +18,8 @@ This release includes the following changes:
  o HTTP transfers have the download size info "available" earlier
  o FTP transfers have the download size info "available" earlier
  o builds and runs on OS/400
+ o several error codes and options were marked as obsolete and subject to
+   future removal (set CURL_NO_OLDIES to see if your application is using them)
 
 This release includes the following bugfixes:
 

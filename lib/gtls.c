@@ -175,7 +175,7 @@ static CURLcode handshake(struct connectdata *conn,
       if(timeout_ms < 0) {
         /* a precaution, no need to continue if time already is up */
         failf(data, "SSL connection timeout");
-        return CURLE_OPERATION_TIMEOUTED;
+        return CURLE_OPERATION_TIMEDOUT;
       }
 
       rc = Curl_socket_ready(conn->sock[sockindex],

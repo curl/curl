@@ -722,7 +722,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
           if (cp == NULL) {
             failf(data, "Syntax error in SFTP command. Supply parameter(s)!");
             state(conn, SSH_SFTP_CLOSE);
-            sshc->actualCode = CURLE_FTP_QUOTE_ERROR;
+            sshc->actualCode = CURLE_QUOTE_ERROR;
             break;
           }
 
@@ -880,7 +880,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
         failf(data, "Attempt to get SFTP stats failed: %s",
               sftp_libssh2_strerror(err));
         state(conn, SSH_SFTP_CLOSE);
-        sshc->actualCode = CURLE_FTP_QUOTE_ERROR;
+        sshc->actualCode = CURLE_QUOTE_ERROR;
         break;
       }
 
@@ -894,7 +894,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
           sshc->quote_path2 = NULL;
           failf(data, "Syntax error: chgrp gid not a number");
           state(conn, SSH_SFTP_CLOSE);
-          sshc->actualCode = CURLE_FTP_QUOTE_ERROR;
+          sshc->actualCode = CURLE_QUOTE_ERROR;
           break;
         }
       }
@@ -909,7 +909,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
           sshc->quote_path2 = NULL;
           failf(data, "Syntax error: chmod permissions not a number");
           state(conn, SSH_SFTP_CLOSE);
-          sshc->actualCode = CURLE_FTP_QUOTE_ERROR;
+          sshc->actualCode = CURLE_QUOTE_ERROR;
           break;
         }
       }
@@ -922,7 +922,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
           sshc->quote_path2 = NULL;
           failf(data, "Syntax error: chown uid not a number");
           state(conn, SSH_SFTP_CLOSE);
-          sshc->actualCode = CURLE_FTP_QUOTE_ERROR;
+          sshc->actualCode = CURLE_QUOTE_ERROR;
           break;
         }
       }
@@ -945,7 +945,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
         failf(data, "Attempt to set SFTP stats failed: %s",
               sftp_libssh2_strerror(err));
         state(conn, SSH_SFTP_CLOSE);
-        sshc->actualCode = CURLE_FTP_QUOTE_ERROR;
+        sshc->actualCode = CURLE_QUOTE_ERROR;
         break;
       }
       state(conn, SSH_SFTP_NEXT_QUOTE);
@@ -966,7 +966,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
         failf(data, "symlink command failed: %s",
               sftp_libssh2_strerror(err));
         state(conn, SSH_SFTP_CLOSE);
-        sshc->actualCode = CURLE_FTP_QUOTE_ERROR;
+        sshc->actualCode = CURLE_QUOTE_ERROR;
         break;
       }
       state(conn, SSH_SFTP_NEXT_QUOTE);
@@ -983,7 +983,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
         sshc->quote_path1 = NULL;
         failf(data, "mkdir command failed: %s", sftp_libssh2_strerror(err));
         state(conn, SSH_SFTP_CLOSE);
-        sshc->actualCode = CURLE_FTP_QUOTE_ERROR;
+        sshc->actualCode = CURLE_QUOTE_ERROR;
         break;
       }
       state(conn, SSH_SFTP_NEXT_QUOTE);
@@ -1002,7 +1002,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
         sshc->quote_path2 = NULL;
         failf(data, "rename command failed: %s", sftp_libssh2_strerror(err));
         state(conn, SSH_SFTP_CLOSE);
-        sshc->actualCode = CURLE_FTP_QUOTE_ERROR;
+        sshc->actualCode = CURLE_QUOTE_ERROR;
         break;
       }
       state(conn, SSH_SFTP_NEXT_QUOTE);
@@ -1019,7 +1019,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
         sshc->quote_path1 = NULL;
         failf(data, "rmdir command failed: %s", sftp_libssh2_strerror(err));
         state(conn, SSH_SFTP_CLOSE);
-        sshc->actualCode = CURLE_FTP_QUOTE_ERROR;
+        sshc->actualCode = CURLE_QUOTE_ERROR;
         break;
       }
       state(conn, SSH_SFTP_NEXT_QUOTE);
@@ -1036,7 +1036,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
         sshc->quote_path1 = NULL;
         failf(data, "rm command failed: %s", sftp_libssh2_strerror(err));
         state(conn, SSH_SFTP_CLOSE);
-        sshc->actualCode = CURLE_FTP_QUOTE_ERROR;
+        sshc->actualCode = CURLE_QUOTE_ERROR;
         break;
       }
       state(conn, SSH_SFTP_NEXT_QUOTE);
@@ -2143,7 +2143,7 @@ get_pathname(const char **cpp, char **path)
   if (!*cp) {
     *cpp = cp;
     *path = NULL;
-    return CURLE_FTP_QUOTE_ERROR;
+    return CURLE_QUOTE_ERROR;
   }
 
   *path = malloc(strlen(cp) + 1);
@@ -2198,7 +2198,7 @@ get_pathname(const char **cpp, char **path)
   fail:
     Curl_safefree(*path);
     *path = NULL;
-    return CURLE_FTP_QUOTE_ERROR;
+    return CURLE_QUOTE_ERROR;
 }
 
 

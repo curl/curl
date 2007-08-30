@@ -6,6 +6,55 @@
 
                                   Changelog
 
+Dan F (30 August 2007)
+- Renamed several libcurl error codes and options to make them more general
+  and allow reuse by multiple protocols. Several unused error codes were
+  removed.  In all cases, macros were added to preserve source (and binary)
+  compatibility with the old names.  These macros are subject to removal at
+  a future date, but probably not before 2009.  An application can be
+  tested to see if it is using any obsolete code by compiling it with the
+  CURL_NO_OLDIES macro defined.
+
+  The following unused error codes were removed:
+
+    CURLE_BAD_CALLING_ORDER
+    CURLE_BAD_PASSWORD_ENTERED
+    CURLE_FTP_CANT_RECONNECT
+    CURLE_FTP_COULDNT_GET_SIZE
+    CURLE_FTP_COULDNT_SET_ASCII
+    CURLE_FTP_USER_PASSWORD_INCORRECT
+    CURLE_FTP_WEIRD_USER_REPLY
+    CURLE_FTP_WRITE_ERROR
+    CURLE_LIBRARY_NOT_FOUND
+    CURLE_MALFORMAT_USER
+    CURLE_OBSOLETE
+    CURLE_SHARE_IN_USE
+    CURLE_URL_MALFORMAT_USER
+
+  The following error codes were renamed:
+
+    CURLE_FTP_ACCESS_DENIED =>      CURLE_REMOTE_ACCESS_DENIED
+    CURLE_FTP_COULDNT_SET_BINARY => CURLE_FTP_COULDNT_SET_TYPE
+    CURLE_FTP_QUOTE_ERROR =>        CURLE_QUOTE_ERROR
+    CURLE_TFTP_DISKFULL =>          CURLE_REMOTE_DISK_FULL
+    CURLE_TFTP_EXISTS =>            CURLE_REMOTE_FILE_EXISTS
+    CURLE_HTTP_RANGE_ERROR =>       CURLE_RANGE_ERROR 
+
+  The following options were renamed:
+
+    CURLOPT_SSLKEYPASSWD => CURLOPT_KEYPASSWD 
+    CURLOPT_FTPAPPEND =>    CURLOPT_APPEND
+    CURLOPT_FTPLISTONLY =>  CURLOPT_DIRLISTONLY
+    CURLOPT_FTP_SSL =>      CURLOPT_USE_SSL
+
+  A few more changes will take place with the next SONAME bump of the
+  library.  These are documented in docs/TODO
+
+- Documented some newer error codes in libcurl-error(3)
+
+Dan F (28 August 2007)
+- Some minor internal type and const changes based on a splint scan.
+
 Daniel S (24 August 2007)
 - Bug report #1779054 (http://curl.haxx.se/bug/view.cgi?id=1779054) pointed
   out that libcurl didn't deal with large responses from server commands, when

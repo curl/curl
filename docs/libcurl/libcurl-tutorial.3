@@ -415,7 +415,7 @@ you're using an SSL private key for secure transfers.
 
 To pass the known private key password to libcurl:
 
- curl_easy_setopt(easyhandle, CURLOPT_SSLKEYPASSWD, "keypassword");
+ curl_easy_setopt(easyhandle, CURLOPT_KEYPASSWD, "keypassword");
 
 .SH "HTTP Authentication"
 The previous chapter showed how to set user name and password for getting
@@ -931,7 +931,7 @@ would instead be called CURLOPT_POSTQUOTE and used the exact same way.
 The custom FTP command will be issued to the server in the same order they are
 added to the list, and if a command gets an error code returned back from the
 server, no more commands will be issued and libcurl will bail out with an
-error code (CURLE_FTP_QUOTE_ERROR). Note that if you use CURLOPT_QUOTE to send
+error code (CURLE_QUOTE_ERROR). Note that if you use CURLOPT_QUOTE to send
 commands before a transfer, no transfer will actually take place when a quote
 command has failed.
 

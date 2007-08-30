@@ -552,7 +552,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   if(has_passed > allow ) {
     /* time-out, bail out, go home */
     failf(data, "Connection time-out after %ld ms", has_passed);
-    return CURLE_OPERATION_TIMEOUTED;
+    return CURLE_OPERATION_TIMEDOUT;
   }
   if(conn->bits.tcpconnect) {
     /* we are connected already! */
@@ -827,7 +827,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     if(timeout_ms < 0) {
       /* a precaution, no need to continue if time already is up */
       failf(data, "Connection time-out");
-      return CURLE_OPERATION_TIMEOUTED;
+      return CURLE_OPERATION_TIMEDOUT;
     }
   }
   Curl_expire(data, timeout_ms);
@@ -863,7 +863,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     timeout_ms -= Curl_tvdiff(after, before);
     if(timeout_ms < 0) {
       failf(data, "connect() timed out!");
-      return CURLE_OPERATION_TIMEOUTED;
+      return CURLE_OPERATION_TIMEDOUT;
     }
     before = after;
   }  /* end of connect-to-each-address loop */

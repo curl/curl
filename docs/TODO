@@ -275,9 +275,6 @@ TODO
    and FTP-SSL tests without the stunnel dependency, and it could allow us to
    provide test tools built with either OpenSSL or GnuTLS
 
- * Make the test servers able to serve multiple running test suites. Like if
-   two users run 'make test' at once.
-
  * If perl wasn't found by the configure script, don't attempt to run the
    tests but explain something nice why it doesn't.
 
@@ -291,6 +288,22 @@ TODO
 
  * #undef CURL_FTP_HTTPSTYLE_HEAD in lib/ftp.c to remove the HTTP-style headers
    from being output in NOBODY requests over ftp
+
+ * Combine some of the error codes to remove duplicates.  The original
+   numbering should not be changed, and the old identifiers would be
+   macroed to the new ones in an CURL_NO_OLDIES section to help with
+   backward compatibility.
+
+   Candidates for removal and their replacements:
+
+      CURLE_FILE_COULDNT_READ_FILE => CURLE_REMOTE_FILE_NOT_FOUND
+      CURLE_FTP_COULDNT_RETR_FILE => CURLE_REMOTE_FILE_NOT_FOUND
+      CURLE_FTP_COULDNT_USE_REST => CURLE_RANGE_ERROR
+      CURLE_FUNCTION_NOT_FOUND => CURLE_FAILED_INIT
+      CURLE_LDAP_INVALID_URL => CURLE_URL_MALFORMAT
+      CURLE_TFTP_NOSUCHUSER => CURLE_TFTP_ILLEGAL
+      CURLE_TFTP_NOTFOUND => CURLE_REMOTE_FILE_NOT_FOUND
+      CURLE_TFTP_PERM => CURLE_REMOTE_ACCESS_DENIED
 
  NEXT MAJOR RELEASE
 

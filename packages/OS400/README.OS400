@@ -52,7 +52,7 @@ from CURLOPT_CAINFO.
 _ The certificate identifier is then used as an application identifier in the
 main certificate store. If successful, this context is used.
 _ If the previous step failed, the certificate identifier is used as the file
-name of a keyring. CURLOPT_SSLKEYPASSWD is used here as the keyring password.
+name of a keyring. CURLOPT_KEYPASSWD is used here as the keyring password.
 _ The default ca-bundle (CURLOPT_CAINFO) is set to the main certificate store's
 keyring file name: this allows to use the system global CAs by default. (In that
 case, the keyring password is safely recovered from the system... IBM dixit!)
@@ -78,6 +78,7 @@ options:
         CURLOPT_FTP_ACCOUNT
         CURLOPT_FTP_ALTERNATIVE_TO_USER
         CURLOPT_INTERFACE
+        CURLOPT_KEYPASSWD
         CURLOPT_KRBLEVEL
         CURLOPT_NETRC_FILE
         CURLOPT_POSTFIELDS
@@ -92,7 +93,6 @@ options:
         CURLOPT_SSLCERTTYPE
         CURLOPT_SSLENGINE
         CURLOPT_SSLKEY
-        CURLOPT_SSLKEYPASSWD
         CURLOPT_SSLKEYTYPE
         CURLOPT_SSL_CIPHER_LIST
         CURLOPT_URL

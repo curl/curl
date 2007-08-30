@@ -57,7 +57,7 @@ CURLcode Curl_speedcheck(struct SessionHandle *data,
             "Less than %d bytes/sec transfered the last %d seconds",
             data->set.low_speed_limit,
             data->set.low_speed_time);
-      return CURLE_OPERATION_TIMEOUTED;
+      return CURLE_OPERATION_TIMEDOUT;
     }
     Curl_expire(data, howlong);
   }
