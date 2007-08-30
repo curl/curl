@@ -90,6 +90,7 @@ dnl initialize all the info variables
 curl_verbose_msg="enabled (--disable-verbose)"
    curl_sspi_msg="no      (--enable-sspi)"
    curl_ldap_msg="no      (--enable-ldap / --with-ldap-lib / --with-lber-lib)"
+  curl_ldaps_msg="no      (--enable-ldaps)"
 
 dnl
 dnl Save anything in $LIBS for later
@@ -285,6 +286,32 @@ AC_HELP_STRING([--disable-ldap],[Disable LDAP support]),
   esac ],
        AC_MSG_RESULT(yes)
 )
+AC_MSG_CHECKING([whether to support ldaps])
+AC_ARG_ENABLE(ldaps,
+AC_HELP_STRING([--enable-ldaps],[Enable LDAPS support])
+AC_HELP_STRING([--disable-ldaps],[Disable LDAPS support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
+       AC_SUBST(CURL_DISABLE_LDAPS, [1])
+       ;;
+  *)   if test x$CURL_DISABLE_LDAP = x1 ; then
+               AC_MSG_RESULT(LDAP support needs to be enabled in order to enable LDAPS support!)
+               AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
+               AC_SUBST(CURL_DISABLE_LDAPS, [1])
+       else
+               AC_MSG_RESULT(yes)
+               AC_DEFINE(HAVE_LDAP_SSL, 1, [Use LDAPS implementation])
+               curl_ldaps_msg="enabled"
+       fi
+       ;;
+  esac ],
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
+       AC_SUBST(CURL_DISABLE_LDAPS, [1])
+)
+
 AC_MSG_CHECKING([whether to support dict])
 AC_ARG_ENABLE(dict,
 AC_HELP_STRING([--enable-dict],[Enable DICT support])
@@ -565,7 +592,7 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
   AC_CHECK_FUNCS([ldap_url_parse])
 
   if test "$LDAPLIBNAME" = "wldap32"; then
-    curl_ldap_msg="yes (winldap)"
+    curl_ldap_msg="enabled (winldap)"
     AC_DEFINE(CURL_LDAP_WIN, 1, [Use W$ LDAP implementation])
     case $host in
       *-*-cygwin* | *-*-pw32*)
@@ -573,7 +600,7 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
         ;;
     esac
   else
-    curl_ldap_msg="yes (OpenLDAP)"
+    curl_ldap_msg="enabled (OpenLDAP)"
   fi
 fi
 
@@ -2388,4 +2415,5 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   SSPI support:    ${curl_sspi_msg}
   ca cert path:    ${ca}
   LDAP support:    ${curl_ldap_msg}
+  LDAPS support:   ${curl_ldaps_msg}
 ])
