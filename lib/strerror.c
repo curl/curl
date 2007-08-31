@@ -216,8 +216,8 @@ curl_easy_strerror(CURLcode error)
   case CURLE_FILESIZE_EXCEEDED:
     return "Maximum file size exceeded";
 
-  case CURLE_FTP_SSL_FAILED:
-    return "Requested FTP SSL level failed";
+  case CURLE_USE_SSL_FAILED:
+    return "Requested SSL level failed";
 
   case CURLE_SSL_SHUTDOWN_FAILED:
     return "Failed to shut down the SSL connection";

@@ -10,6 +10,15 @@ Dan F (31 August 2007)
 - Made some of the error strings returned by the *strerror functions more
   generic, and more consistent with each other.
 
+- Renamed the curl_ftpssl enum to curl_usessl and its enumerated constants,
+  creating macros for backward compatibility:
+
+    CURLFTPSSL_NONE => CURLUSESSL_NONE
+    CURLFTPSSL_TRY => CURLUSESSL_TRY
+    CURLFTPSSL_CONTROL => CURLUSESSL_CONTROL
+    CURLFTPSSL_ALL => CURLUSESSL_ALL
+    CURLFTPSSL_LAST => CURLUSESSL_LAST
+
 Dan F (30 August 2007)
 - Renamed several libcurl error codes and options to make them more general
   and allow reuse by multiple protocols. Several unused error codes were
@@ -39,6 +48,7 @@ Dan F (30 August 2007)
 
     CURLE_FTP_ACCESS_DENIED =>      CURLE_REMOTE_ACCESS_DENIED
     CURLE_FTP_COULDNT_SET_BINARY => CURLE_FTP_COULDNT_SET_TYPE
+    CURLE_FTP_SSL_FAILED =>         CURLE_USE_SSL_FAILED
     CURLE_FTP_QUOTE_ERROR =>        CURLE_QUOTE_ERROR
     CURLE_TFTP_DISKFULL =>          CURLE_REMOTE_DISK_FULL
     CURLE_TFTP_EXISTS =>            CURLE_REMOTE_FILE_EXISTS

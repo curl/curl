@@ -1734,7 +1734,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Make transfers attempt to use SSL/TLS.
      */
-    data->set.ftp_ssl = (curl_ftpssl)va_arg(param, long);
+    data->set.ftp_ssl = (curl_usessl)va_arg(param, long);
     break;
 
   case CURLOPT_FTPSSLAUTH:
@@ -2948,7 +2948,7 @@ static CURLcode setup_connection_internals(struct SessionHandle *data,
 #ifdef USE_SSL
       conn->protocol |= PROT_FTPS|PROT_SSL;
       /* send data securely unless specifically requested otherwise */
-      conn->ssl[SECONDARYSOCKET].use = data->set.ftp_ssl != CURLFTPSSL_CONTROL;
+      conn->ssl[SECONDARYSOCKET].use = data->set.ftp_ssl != CURLUSESSL_CONTROL;
       port = PORT_FTPS;
 #else
       failf(data, LIBCURL_NAME

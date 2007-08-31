@@ -940,16 +940,17 @@ This option has no effect if PORT, EPRT or EPSV is used instead of PASV.
 Pass a long using one of the values from below, to make libcurl use your
 desired level of SSL for the ftp transfer. (Added in 7.11.0)
 
-(This option was known as CURLOPT_FTP_SSL up to 7.16.4)
+(This option was known as CURLOPT_FTP_SSL up to 7.16.4, and the constants
+were known as CURLFTPSSL_*)
 .RS
-.IP CURLFTPSSL_NONE
+.IP CURLUSESSL_NONE
 Don't attempt to use SSL.
-.IP CURLFTPSSL_TRY
+.IP CURLUSESSL_TRY
 Try using SSL, proceed as normal otherwise.
-.IP CURLFTPSSL_CONTROL
-Require SSL for the control connection or fail with \fICURLE_FTP_SSL_FAILED\fP.
-.IP CURLFTPSSL_ALL
-Require SSL for all communication or fail with \fICURLE_FTP_SSL_FAILED\fP.
+.IP CURLUSESSL_CONTROL
+Require SSL for the control connection or fail with \fICURLE_USE_SSL_FAILED\fP.
+.IP CURLUSESSL_ALL
+Require SSL for all communication or fail with \fICURLE_USE_SSL_FAILED\fP.
 .RE
 .IP CURLOPT_FTPSSLAUTH
 Pass a long using one of the values from below, to alter how libcurl issues

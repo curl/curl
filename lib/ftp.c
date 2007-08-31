@@ -2465,9 +2465,9 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
         /* remain in this same state */
       }
       else {
-        if(data->set.ftp_ssl > CURLFTPSSL_TRY)
-          /* we failed and CURLFTPSSL_CONTROL or CURLFTPSSL_ALL is set */
-          result = CURLE_FTP_SSL_FAILED;
+        if(data->set.ftp_ssl > CURLUSESSL_TRY)
+          /* we failed and CURLUSESSL_CONTROL or CURLUSESSL_ALL is set */
+          result = CURLE_USE_SSL_FAILED;
         else
           /* ignore the failure and continue */
           result = ftp_state_user(conn);
@@ -2497,7 +2497,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
       */
       if(!conn->ssl[SECONDARYSOCKET].use) {
         NBFTPSENDF(conn, "PROT %c",
-                   data->set.ftp_ssl == CURLFTPSSL_CONTROL ? 'C' : 'P');
+                   data->set.ftp_ssl == CURLUSESSL_CONTROL ? 'C' : 'P');
         state(conn, FTP_PROT);
       }
       else {
@@ -2512,12 +2512,12 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
       if(ftpcode/100 == 2)
         /* We have enabled SSL for the data connection! */
         conn->ssl[SECONDARYSOCKET].use =
-          (bool)(data->set.ftp_ssl != CURLFTPSSL_CONTROL);
+          (bool)(data->set.ftp_ssl != CURLUSESSL_CONTROL);
       /* FTP servers typically responds with 500 if they decide to reject
          our 'P' request */
-      else if(data->set.ftp_ssl> CURLFTPSSL_CONTROL)
+      else if(data->set.ftp_ssl > CURLUSESSL_CONTROL)
         /* we failed and bails out */
-        return CURLE_FTP_SSL_FAILED;
+        return CURLE_USE_SSL_FAILED;
 
       if(data->set.ftp_ccc) {
         /* CCC - Clear Command Channel

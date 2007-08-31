@@ -381,7 +381,7 @@ typedef enum {
   CURLE_BAD_CONTENT_ENCODING,    /* 61 - Unrecognized transfer encoding */
   CURLE_LDAP_INVALID_URL,        /* 62 - Invalid LDAP URL */
   CURLE_FILESIZE_EXCEEDED,       /* 63 - Maximum file size exceeded */
-  CURLE_FTP_SSL_FAILED,          /* 64 - Requested FTP SSL level failed */
+  CURLE_USE_SSL_FAILED,          /* 64 - Requested FTP SSL level failed */
   CURLE_SEND_FAIL_REWIND,        /* 65 - Sending the data requires a rewind
                                     that failed */
   CURLE_SSL_ENGINE_INITFAILED,   /* 66 - failed to initialise ENGINE */
@@ -439,6 +439,7 @@ typedef enum {
 #define CURLE_TFTP_DISKFULL CURLE_REMOTE_DISK_FULL
 #define CURLE_TFTP_EXISTS CURLE_REMOTE_FILE_EXISTS
 #define CURLE_HTTP_RANGE_ERROR CURLE_RANGE_ERROR 
+#define CURLE_FTP_SSL_FAILED CURLE_USE_SSL_FAILED
 
 /* The following were added earlier */
 
@@ -492,12 +493,26 @@ typedef enum {
 
 /* parameter for the CURLOPT_USE_SSL option */
 typedef enum {
-  CURLFTPSSL_NONE,    /* do not attempt to use SSL */
-  CURLFTPSSL_TRY,     /* try using SSL, proceed anyway otherwise */
-  CURLFTPSSL_CONTROL, /* SSL for the control connection or fail */
-  CURLFTPSSL_ALL,     /* SSL for all communication or fail */
-  CURLFTPSSL_LAST     /* not an option, never use */
-} curl_ftpssl;
+  CURLUSESSL_NONE,    /* do not attempt to use SSL */
+  CURLUSESSL_TRY,     /* try using SSL, proceed anyway otherwise */
+  CURLUSESSL_CONTROL, /* SSL for the control connection or fail */
+  CURLUSESSL_ALL,     /* SSL for all communication or fail */
+  CURLUSESSL_LAST     /* not an option, never use */
+} curl_usessl;
+
+#ifndef CURL_NO_OLDIES /* define this to test if your app builds with all
+                          the obsolete stuff removed! */
+
+/* Backwards compatibility with older names */
+/* These are scheduled to disappear by 2009 */
+
+#define CURLFTPSSL_NONE CURLUSESSL_NONE
+#define CURLFTPSSL_TRY CURLUSESSL_TRY
+#define CURLFTPSSL_CONTROL CURLUSESSL_CONTROL
+#define CURLFTPSSL_ALL CURLUSESSL_ALL
+#define CURLFTPSSL_LAST CURLUSESSL_LAST
+#define curl_ftpssl curl_usessl
+#endif /*!CURL_NO_OLDIES*/
 
 /* parameter for the CURLOPT_FTP_SSL_CCC option */
 typedef enum {
