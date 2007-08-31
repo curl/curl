@@ -58,31 +58,31 @@ curl_easy_strerror(CURLcode error)
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   switch (error) {
   case CURLE_OK:
-    return "no error";
+    return "No error";
 
   case CURLE_UNSUPPORTED_PROTOCOL:
-    return "unsupported protocol";
+    return "Unsupported protocol";
 
   case CURLE_FAILED_INIT:
-    return "failed init";
+    return "Failed initialization";
 
   case CURLE_URL_MALFORMAT:
     return "URL using bad/illegal format or missing URL";
 
   case CURLE_COULDNT_RESOLVE_PROXY:
-    return "couldn't resolve proxy name";
+    return "Couldn't resolve proxy name";
 
   case CURLE_COULDNT_RESOLVE_HOST:
-    return "couldn't resolve host name";
+    return "Couldn't resolve host name";
 
   case CURLE_COULDNT_CONNECT:
-    return "couldn't connect to server";
+    return "Couldn't connect to server";
 
   case CURLE_FTP_WEIRD_SERVER_REPLY:
     return "FTP: weird server reply";
 
   case CURLE_REMOTE_ACCESS_DENIED:
-    return "access denied";
+    return "Access denied to remote resource";
 
   case CURLE_FTP_WEIRD_PASS_REPLY:
     return "FTP: unknown PASS reply";
@@ -106,46 +106,46 @@ curl_easy_strerror(CURLcode error)
     return "FTP: couldn't retrieve (RETR failed) the specified file";
 
   case CURLE_QUOTE_ERROR:
-    return "a quote command returned error";
+    return "Quote command returned error";
 
   case CURLE_HTTP_RETURNED_ERROR:
     return "HTTP response code said error";
 
   case CURLE_WRITE_ERROR:
-    return "failed writing received data to disk/application";
+    return "Failed writing received data to disk/application";
 
   case CURLE_UPLOAD_FAILED:
-    return "upload failed (at start/before it took off)";
+    return "Upload failed (at start/before it took off)";
 
   case CURLE_READ_ERROR:
-    return "failed to open/read local data from file/application";
+    return "Failed to open/read local data from file/application";
 
   case CURLE_OUT_OF_MEMORY:
-    return "out of memory";
+    return "Out of memory";
 
   case CURLE_OPERATION_TIMEDOUT:
-    return "a timeout was reached";
+    return "Timeout was reached";
 
   case CURLE_FTP_PORT_FAILED:
-    return "FTP command PORT failed";
+    return "FTP: command PORT failed";
 
   case CURLE_FTP_COULDNT_USE_REST:
-    return "FTP command REST failed";
+    return "FTP: command REST failed";
 
   case CURLE_RANGE_ERROR:
-    return "a range was requested but the server did not deliver it";
+    return "Requested range was not delivered by the server";
 
   case CURLE_HTTP_POST_ERROR:
-    return "internal problem setting up the POST";
+    return "Internal problem setting up the POST";
 
   case CURLE_SSL_CONNECT_ERROR:
     return "SSL connect error";
 
   case CURLE_BAD_DOWNLOAD_RESUME:
-    return "couldn't resume download";
+    return "Couldn't resume download";
 
   case CURLE_FILE_COULDNT_READ_FILE:
-    return "couldn't read a file:// file";
+    return "Couldn't read a file:// file";
 
   case CURLE_LDAP_CANNOT_BIND:
     return "LDAP: cannot bind";
@@ -154,58 +154,58 @@ curl_easy_strerror(CURLcode error)
     return "LDAP: search failed";
 
   case CURLE_FUNCTION_NOT_FOUND:
-    return "a required function in the shared library was not found";
+    return "A required function in the library was not found";
 
   case CURLE_ABORTED_BY_CALLBACK:
-    return "the operation was aborted by an application callback";
+    return "Operation was aborted by an application callback";
 
   case CURLE_BAD_FUNCTION_ARGUMENT:
-    return "a libcurl function was given a bad argument";
+    return "A libcurl function was given a bad argument";
 
   case CURLE_INTERFACE_FAILED:
-    return "failed binding local connection end";
+    return "Failed binding local connection end";
 
   case CURLE_TOO_MANY_REDIRECTS :
-    return "number of redirects hit maximum amount";
+    return "Number of redirects hit maximum amount";
 
   case CURLE_UNKNOWN_TELNET_OPTION:
-    return "User specified an unknown option";
+    return "User specified an unknown telnet option";
 
   case CURLE_TELNET_OPTION_SYNTAX :
     return "Malformed telnet option";
 
   case CURLE_SSL_PEER_CERTIFICATE:
-    return "SSL peer certificate was not ok";
+    return "SSL peer certificate was not OK";
 
   case CURLE_GOT_NOTHING:
-    return "server returned nothing (no headers, no data)";
+    return "Server returned nothing (no headers, no data)";
 
   case CURLE_SSL_ENGINE_NOTFOUND:
     return "SSL crypto engine not found";
 
   case CURLE_SSL_ENGINE_SETFAILED:
-    return "can not set SSL crypto engine as default";
+    return "Can not set SSL crypto engine as default";
 
   case CURLE_SSL_ENGINE_INITFAILED:
-    return "failed to initialise SSL crypto engine";
+    return "Failed to initialise SSL crypto engine";
 
   case CURLE_SEND_ERROR:
-    return "failed sending data to the peer";
+    return "Failed sending data to the peer";
 
   case CURLE_RECV_ERROR:
-    return "failure when receiving data from the peer";
+    return "Failure when receiving data from the peer";
 
   case CURLE_SSL_CERTPROBLEM:
-    return "problem with the local SSL certificate";
+    return "Problem with the local SSL certificate";
 
   case CURLE_SSL_CIPHER:
-    return "couldn't use specified SSL cipher";
+    return "Couldn't use specified SSL cipher";
 
   case CURLE_SSL_CACERT:
-    return "peer certificate cannot be authenticated with known CA certificates";
+    return "Peer certificate cannot be authenticated with known CA certificates";
 
   case CURLE_SSL_CACERT_BADFILE:
-    return "problem with the SSL CA cert (path? access rights?)";
+    return "Problem with the SSL CA cert (path? access rights?)";
 
   case CURLE_BAD_CONTENT_ENCODING:
     return "Unrecognized HTTP Content-Encoding";
@@ -226,7 +226,7 @@ curl_easy_strerror(CURLcode error)
     return "Send failed since rewinding of the data stream failed";
 
   case CURLE_LOGIN_DENIED:
-    return "FTP: login denied";
+    return "Login denied";
 
   case CURLE_TFTP_NOTFOUND:
     return "TFTP: File Not Found";
@@ -244,16 +244,16 @@ curl_easy_strerror(CURLcode error)
     return "TFTP: Unknown transfer ID";
 
   case CURLE_REMOTE_FILE_EXISTS:
-    return "File already exists";
+    return "Remote file already exists";
 
   case CURLE_TFTP_NOSUCHUSER:
     return "TFTP: No such user";
 
   case CURLE_CONV_FAILED:
-    return "conversion failed";
+    return "Conversion failed";
 
   case CURLE_CONV_REQD:
-    return "caller must register CURLOPT_CONV_ callback options";
+    return "Caller must register CURLOPT_CONV_ callback options";
 
   case CURLE_REMOTE_FILE_NOT_FOUND:
     return "Remote file not found";
@@ -292,12 +292,12 @@ curl_easy_strerror(CURLcode error)
    * The line number for the error will be near this comment, which
    * is why it is here, and not at the start of the switch.
    */
-  return "unknown error";
+  return "Unknown error";
 #else
   if (error == CURLE_OK)
-    return "no error";
+    return "No error";
   else
-    return "error";
+    return "Error";
 #endif
 }
 
@@ -307,39 +307,39 @@ curl_multi_strerror(CURLMcode error)
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   switch (error) {
   case CURLM_CALL_MULTI_PERFORM:
-    return "please call curl_multi_perform() soon";
+    return "Please call curl_multi_perform() soon";
 
   case CURLM_OK:
-    return "no error";
+    return "No error";
 
   case CURLM_BAD_HANDLE:
-    return "invalid multi handle";
+    return "Invalid multi handle";
 
   case CURLM_BAD_EASY_HANDLE:
-    return "invalid easy handle";
+    return "Invalid easy handle";
 
   case CURLM_OUT_OF_MEMORY:
-    return "out of memory";
+    return "Out of memory";
 
   case CURLM_INTERNAL_ERROR:
-    return "internal error";
+    return "Internal error";
 
   case CURLM_BAD_SOCKET:
-    return "invalid socket argument";
+    return "Invalid socket argument";
 
   case CURLM_UNKNOWN_OPTION:
-    return "unknown option";
+    return "Unknown option";
 
   case CURLM_LAST:
     break;
   }
 
-  return "unknown error";
+  return "Unknown error";
 #else
   if (error == CURLM_OK)
-    return "no error";
+    return "No error";
   else
-    return "error";
+    return "Error";
 #endif
 }
 
@@ -349,30 +349,30 @@ curl_share_strerror(CURLSHcode error)
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   switch (error) {
   case CURLSHE_OK:
-    return "no error";
+    return "No error";
 
   case CURLSHE_BAD_OPTION:
-    return "unknown share option";
+    return "Unknown share option";
 
   case CURLSHE_IN_USE:
-    return "share currently in use";
+    return "Share currently in use";
 
   case CURLSHE_INVALID:
-    return "invalid share handle";
+    return "Invalid share handle";
 
   case CURLSHE_NOMEM:
-    return "out of memory";
+    return "Out of memory";
 
   case CURLSHE_LAST:
     break;
   }
 
-  return "CURLSH unknown";
+  return "CURLSHcode unknown";
 #else
   if (error == CURLSHE_OK)
-    return "no error";
+    return "No error";
   else
-    return "error";
+    return "Error";
 #endif
 }
 
@@ -388,7 +388,7 @@ get_winsock_error (int err, char *buf, size_t len)
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   switch (err) {
   case WSAEINTR:
-    p = "Call interrupted.";
+    p = "Call interrupted";
     break;
   case WSAEBADF:
     p = "Bad file";
@@ -413,7 +413,7 @@ get_winsock_error (int err, char *buf, size_t len)
     p = "Blocking call in progress";
     break;
   case WSAENOTSOCK:
-    p = "Descriptor is not a socket.";
+    p = "Descriptor is not a socket";
     break;
   case WSAEDESTADDRREQ:
     p = "Need destination address";
@@ -527,7 +527,7 @@ get_winsock_error (int err, char *buf, size_t len)
     p = "Winsock library not initialised";
     break;
   case WSAVERNOTSUPPORTED:
-    p = "Winsock version not supported.";
+    p = "Winsock version not supported";
     break;
 
     /* getXbyY() errors (already handled in herrmsg):
@@ -571,7 +571,7 @@ get_winsock_error (int err, char *buf, size_t len)
  *
  * The 'err' argument passed in to this function MUST be a true errno number
  * as reported on this system. We do no range checking on the number before
- * we pass it to the "number-to-message" convertion function and there might
+ * we pass it to the "number-to-message" conversion function and there might
  * be systems that don't do proper range checking in there themselves.
  *
  * We don't do range checking (on systems other than Windows) since there is
@@ -696,7 +696,7 @@ const char *Curl_idn_strerror (struct connectdata *conn, int err)
       str = "No ACE prefix (\"xn--\")";
       break;
     case IDNA_ROUNDTRIP_VERIFY_ERROR:
-      str = "Roundtrip verify error";
+      str = "Round trip verify error";
       break;
     case IDNA_CONTAINS_ACE_PREFIX:
       str = "Already have ACE prefix (\"xn--\")";
@@ -719,7 +719,7 @@ const char *Curl_idn_strerror (struct connectdata *conn, int err)
   if ((Idna_rc)err == IDNA_SUCCESS)
     str = "No error";
   else
-    str = "error";
+    str = "Error";
 #endif
   if (str)
     strncpy(buf, str, max);

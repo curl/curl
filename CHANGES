@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Dan F (31 August 2007)
+- Made some of the error strings returned by the *strerror functions more
+  generic, and more consistent with each other.
+
 Dan F (30 August 2007)
 - Renamed several libcurl error codes and options to make them more general
   and allow reuse by multiple protocols. Several unused error codes were
