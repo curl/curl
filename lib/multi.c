@@ -523,7 +523,7 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
       if(res != CURLE_OK) {
         /* FIXME: may need to do more cleanup here */
         curl_multi_remove_handle(multi_handle, easy_handle);
-        return res;
+        return CURLM_OUT_OF_MEMORY;
       }
     }
   }
