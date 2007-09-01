@@ -597,28 +597,40 @@ eCos
 Minix
 =====
    curl can be compiled on Minix 3 using gcc or ACK (starting with
-   ver. 3.1.3).  The gcc and bash packages must be installed first.
-   The default heap size allocated to bash is inadequate for running
-   configure and will result in out of memory errors.  Increase it with
-   the command:
-
-     chmem =2048000 /usr/local/bin/bash
-
-   Make sure gcc and bash are in the PATH with the command:
+   ver. 3.1.3).  The default heap size allocated to several required
+   programs is inadequate for configuring and compiling curl and will
+   result in strange errors unless fixed (which only needs to be done
+   once).
    
-     export PATH=/usr/gnu/bin:$PATH
-   
-   then configure curl with a command like this:
-
-     ./configure CC=gcc GREP=grep AR=/usr/gnu/bin/gar
-
-   Then simply run 'make'.
-
-   To compile with the ACK C compiler:
+   ACK
+   ---
+   Increase heap sizes with the commands:
 
      chmem =1024000 /usr/lib/em_cemcom.ansi
      chmem =512000 /usr/lib/i386/as
+
+   If you have bash installed:
+
+     chmem =2048000 /usr/local/bin/bash
+
+   Configure and compile with:
+
      ./configure CC=cc LD=cc GREP=grep CPPFLAGS=-D_POSIX_SOURCE=1
+     make
+
+   GCC
+   ---
+   If you have bash installed:
+
+     chmem =2048000 /usr/local/bin/bash
+
+   Make sure gcc is in your PATH with the command:
+   
+     export PATH=/usr/gnu/bin:$PATH
+   
+   then configure and compile curl with:
+
+     ./configure CC=gcc GREP=grep AR=/usr/gnu/bin/gar
      make
 
 
