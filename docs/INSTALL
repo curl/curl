@@ -170,15 +170,17 @@ Win32
    MingW32
    -------
 
-   MinGW32 does not provide a batch script to set environment variables
-   automatically. Make sure that MinGW32's bin dir is in PATH and then
-   run 'mingw32-make mingw32' in the root dir. There are other make
-   targets available to build libcurl with more features, use:
+   Make sure that MinGW32's bin dir is in the search path, for example:
+
+     set PATH=c:\mingw32\bin;%PATH%
+
+   then run 'mingw32-make mingw32' in the root dir. There are other
+   make targets available to build libcurl with more features, use:
    'mingw32-make mingw32-zlib' to build with Zlib support;
    'mingw32-make mingw32-ssl-zlib' to build with SSL and Zlib enabled;
    'mingw32-make mingw32-ssh2-ssl-zlib' to build with SSH2, SSL, Zlib;
    'mingw32-make mingw32-ssh2-ssl-sspi-zlib' to build with SSH2, SSL, Zlib
-   and SSPI.
+   and SSPI support.
 
    If you have any problems linking libraries or finding header files, be sure
    to verify that the provided "Makefile.m32" files use the proper paths, and
@@ -187,11 +189,30 @@ Win32
 
      set ZLIB_PATH=c:\zlib-1.2.3
      set OPENSSL_PATH=c:\openssl-0.9.8e
-     set LIBSSH2_PATH=c:\libssh2-0.16
+     set LIBSSH2_PATH=c:\libssh2-0.17
 
    ATTENTION: if you want to build with libssh2 support you have to use latest
-   sources fetched from CVS - the current 0.15 release will NOT work!
+   version 0.17 - previous versions will NOT work with 7.17.0 and later!
    Use 'mingw32-make mingw32-ssh2-ssl-zlib' to build with SSH2 and SSL enabled.
+
+   It is now also possible to build with other LDAP SDKs than MS LDAP;
+   currently it is possible to build with native Win32 OpenLDAP, or with the
+   Novell CLDAP SDK. If you want to use these you need to set these vars:
+
+     set LDAP_SDK=c:\openldap
+     set USE_LDAP_OPENLDAP=1
+
+   or for using the Novell SDK:
+
+     set USE_LDAP_NOVELL=1
+
+   If you want to enable LDAPS support then set LDAPS=1.
+
+   - optional MingW32-built OpenlDAP SDK available from:
+     http://www.gknw.net/mirror/openldap/
+   - optional recent Novell CLDAP SDK available from:
+     http://developer.novell.com/ndk/cldap.htm
+
 
    Cygwin
    ------
@@ -236,7 +257,7 @@ Win32
    Before running nmake define the OPENSSL_PATH environment variable with
    the root/base directory of OpenSSL, for example:
 
-     set OPENSSL_PATH=c:\openssl-0.9.8d
+     set OPENSSL_PATH=c:\openssl-0.9.8e
 
    Then run 'nmake vc-ssl' or 'nmake vc-ssl-dll' in curl's root
    directory.  'nmake vc-ssl' will create a libcurl static and dynamic
