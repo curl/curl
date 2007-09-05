@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel S (5 September 2007)
+- Continued the work on a fix for #1779054
+  (http://curl.haxx.se/bug/view.cgi?id=1779054). My previous fix from August
+  24 was not complete (either) but could accidentally "forget" parts of a
+  server response which led to faulty server response time-out errors.
+
 Dan F (5 September 2007)
 - Minix doesn't support getsockopt on UDP sockets or send/recv on TCP
   sockets.

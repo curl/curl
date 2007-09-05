@@ -537,6 +537,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   struct timeval now = Curl_tvnow();
   size_t nread;
+  int cache_skip=0;
 
   if (ftpcode)
     *ftpcode = 0; /* 0 for errors */
@@ -572,27 +573,59 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
     if(timeout < interval_ms)
       interval_ms = timeout;
 
-    switch (Curl_socket_ready(sockfd, CURL_SOCKET_BAD, (int)interval_ms)) {
-    case -1: /* select() error, stop reading */
-      failf(data, "FTP response aborted due to select/poll error: %d",
-            SOCKERRNO);
-      return CURLE_RECV_ERROR;
+    /*
+     * Since this function is blocking, we need to wait here for input on the
+     * connection and only then we call the response reading function. We do
+     * timeout at least every second to make the timeout check run.
+     *
+     * A caution here is that the ftp_readresp() function has a cache that may
+     * contain pieces of a response from the previous invoke and we need to
+     * make sure we don't just wait for input while there is unhandled data in
+     * that cache. But also, if the cache is there, we call ftp_readresp() and
+     * the cache wasn't good enough to continue we must not just busy-loop
+     * around this function.
+     *
+     */
 
-    case 0: /* timeout */
-      if(Curl_pgrsUpdate(conn))
-        return CURLE_ABORTED_BY_CALLBACK;
-      continue; /* just continue in our loop for the timeout duration */
-      
-    default: /* for clarity */
-      break;
+    if(ftpc->cache && (cache_skip < 2)) {
+      /*
+       * There's a cache left since before. We then skipping the wait for
+       * socket action, unless this is the same cache like the previous round
+       * as then the cache was deemed not enough to act on and we then need to
+       * wait for more data anyway.
+       */
     }
+    else {
+      switch (Curl_socket_ready(sockfd, CURL_SOCKET_BAD, (int)interval_ms)) {
+      case -1: /* select() error, stop reading */
+        failf(data, "FTP response aborted due to select/poll error: %d",
+              SOCKERRNO);
+        return CURLE_RECV_ERROR;
 
+      case 0: /* timeout */
+        if(Curl_pgrsUpdate(conn))
+          return CURLE_ABORTED_BY_CALLBACK;
+        continue; /* just continue in our loop for the timeout duration */
+
+      default: /* for clarity */
+        break;
+      }
+    }
     result = ftp_readresp(sockfd, conn, ftpcode, &nread);
     if(result)
       break;
 
+    if(!nread && ftpc->cache)
+      /* bump cache skip counter as on repeated skips we must wait for more
+         data */
+      cache_skip++;
+    else
+      /* when we got data or there is no cache left, we reset the cache skip
+         counter */
+      cache_skip=0;
+
     *nreadp += nread;
-    
+
   } /* while there's buffer left and loop is requested */
 
   return result;
