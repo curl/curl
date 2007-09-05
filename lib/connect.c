@@ -441,6 +441,13 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
     err = 0;
   }
 #endif
+#ifdef __minix
+  /* Minix 3.1.x doesn't support getsockopt on UDP sockets */
+  if (EBADIOCTL == err) {
+    SET_SOCKERRNO(0);
+    err = 0;
+  }
+#endif
   if ((0 == err) || (EISCONN == err))
     /* we are connected, awesome! */
     rc = TRUE;

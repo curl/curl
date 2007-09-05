@@ -98,6 +98,13 @@ struct timeval {
 #endif
 
 
+#if defined(__minix)
+/* Minix doesn't support recv on TCP sockets */
+#define sread(x,y,z) (ssize_t)read((RECV_TYPE_ARG1)(x), \
+                                   (RECV_TYPE_ARG2)(y), \
+                                   (RECV_TYPE_ARG3)(z))
+
+#elif defined(HAVE_RECV)
 /*
  * The definitions for the return type and arguments types
  * of functions recv() and send() belong and come from the
@@ -120,7 +127,6 @@ struct timeval {
  * SEND_TYPE_RETV must also be defined.
  */
 
-#ifdef HAVE_RECV
 #if !defined(RECV_TYPE_ARG1) || \
     !defined(RECV_TYPE_ARG2) || \
     !defined(RECV_TYPE_ARG3) || \
@@ -143,7 +149,14 @@ struct timeval {
 #endif
 #endif /* HAVE_RECV */
 
-#ifdef HAVE_SEND
+
+#if defined(__minix)
+/* Minix doesn't support send on TCP sockets */
+#define swrite(x,y,z) (ssize_t)write((SEND_TYPE_ARG1)(x), \
+                                    (SEND_TYPE_ARG2)(y), \
+                                    (SEND_TYPE_ARG3)(z))
+
+#elif defined(HAVE_SEND)
 #if !defined(SEND_TYPE_ARG1) || \
     !defined(SEND_QUAL_ARG2) || \
     !defined(SEND_TYPE_ARG2) || \
