@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Dan F (5 September 2007)
+- Minix doesn't support getsockopt on UDP sockets or send/recv on TCP
+  sockets.
+
 Dan F (31 August 2007)
 - Made some of the error strings returned by the *strerror functions more
   generic, and more consistent with each other.
