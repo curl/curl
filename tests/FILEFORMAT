@@ -227,6 +227,8 @@ Available substitute variables include:
 %FTP6PORT  - IPv6 port number of the FTP server
 %FTPSPORT  - Port number of the FTPS server
 %FTP2PORT  - Port number of the FTP server 2
+%FTPTIME2  - Timeout in seconds that should be just sufficient to receive
+             a response from the test FTP server
 %TFTPPORT  - Port number of the TFTP server
 %TFTP6PORT - IPv6 port number of the TFTP server
 %SSHPORT   - Port number of the SCP/SFTP server

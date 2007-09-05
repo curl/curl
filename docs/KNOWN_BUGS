@@ -63,7 +63,7 @@ may have been fixed since this was written!
   IPv6 numerical addresses in URLs.
 
 29. IPv6 URLs with zone ID is not supported.
-  http://www.ietf.org/internet-drafts/draft-fenner-literal-zone-02.txt
+  http://www.ietf.org/internet-drafts/draft-fenner-literal-zone-02.txt (expired)
   specifies the use of a plus sign instead of a percent when specifying zone
   IDs in URLs to get around the problem of percent signs being
   special. According to the reporter, Firefox deals with the URL _with_ a
@@ -78,7 +78,6 @@ may have been fixed since this was written!
 23. SOCKS-related problems:
   A) libcurl doesn't support SOCKS for IPv6.
   B) libcurl doesn't support FTPS over a SOCKS proxy.
-  C) We don't have any test cases for SOCKS proxy.
   E) libcurl doesn't support active FTP over a SOCKS proxy
 
   We probably have even more bugs and lack of features when a SOCKS proxy is
