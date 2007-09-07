@@ -10,6 +10,9 @@ Dan F (5 September 2007)
 - Added test case 1007 to test permission problem when uploading with TFTP
   (to validate bug #1790403).
 
+- TFTP now reports the "not defined" TFTP error code 0 as an error,
+  not success.
+
 Daniel S (5 September 2007)
 - Continued the work on a fix for #1779054
   (http://curl.haxx.se/bug/view.cgi?id=1779054). My previous fix from August

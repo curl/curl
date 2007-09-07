@@ -115,6 +115,9 @@ typedef enum {
   TFTP_ERR_UNKNOWNID,
   TFTP_ERR_EXISTS,
   TFTP_ERR_NOSUCHUSER,	/* This will never be triggered by this code */
+
+  /* The remaining error codes are internal to curl */
+  TFTP_ERR_NONE = -100,
   TFTP_ERR_TIMEOUT,
   TFTP_ERR_NORESPONSE
 } tftp_error_t;
@@ -588,6 +591,7 @@ CURLcode Curl_tftp_connect(struct connectdata *conn, bool *done)
   state->conn = conn;
   state->sockfd = state->conn->sock[FIRSTSOCKET];
   state->state = TFTP_STATE_START;
+  state->error = TFTP_ERR_NONE;
 
   ((struct sockaddr *)&state->local_addr)->sa_family =
     (unsigned short)(conn->ip_addr->ai_family);
@@ -790,7 +794,7 @@ CURLcode Curl_tftp(struct connectdata *conn, bool *done)
     return code;
 
   /* If we have encountered an error */
-  if(state->error) {
+  if(state->error != TFTP_ERR_NONE) {
 
     /* Translate internal error codes to curl error codes */
     switch(state->error) {
@@ -803,6 +807,7 @@ CURLcode Curl_tftp(struct connectdata *conn, bool *done)
     case TFTP_ERR_DISKFULL:
       code = CURLE_REMOTE_DISK_FULL;
       break;
+    case TFTP_ERR_UNDEF:
     case TFTP_ERR_ILLEGAL:
       code = CURLE_TFTP_ILLEGAL;
       break;
