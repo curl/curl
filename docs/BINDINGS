@@ -160,6 +160,10 @@ Smalltalk
   Smalltalk binding written by Danil Osipchuk
   http://www.squeaksource.com/CurlPlugin/
 
+SP-Forth
+  SP-Forth binding by ygrek
+  http://www.forth.org.ru/~ac/lib/lin/curl/
+
 SPL
 
   SPL binding written by Clifford Wolf

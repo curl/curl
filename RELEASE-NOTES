@@ -6,7 +6,7 @@ Curl and libcurl 7.17.0
  Available curl_easy_setopt() options:     143
  Number of public functions in libcurl:    55
  Amount of public web site mirrors:        42
- Number of known libcurl bindings:         35
+ Number of known libcurl bindings:         36
  Number of contributors:                   572
 
 This release includes the following changes:
@@ -62,6 +62,8 @@ Other curl-related news:
    http://personal1.iddeo.es/andresgarci/tclcurl/english/
  o curlpp 0.7.1 was released
    http://rrette.com/textpattern/index.php?s=cURLpp
+ o A brand new binding for SP-Forth was written by ygrek:
+   http://www.forth.org.ru/~ac/lib/lin/curl/
 
 New curl mirrors:
 
