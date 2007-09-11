@@ -51,7 +51,7 @@ This release includes the following bugfixes:
  o excessively long FTP server responses and response lines
  o file:// upload then FTP:// upload crash
  o uploading empty file over FTP on re-used connection
- o superfluous CWD command on re-used connections without used directories 
+ o superfluous CWD command on re-used FTP connections without subdirs used
 
 This release includes the following known bugs:
 
