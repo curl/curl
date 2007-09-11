@@ -1,0 +1,51 @@
+<testcase>
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib541
+</tool>
+
+ <name>
+FTP upload and upload same file again without rewind
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/541 log/upload541
+</command>
+<file name="log/upload541">
+Contents
+of
+a file
+to verify
+ftp
+upload
+
+
+works?
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<upload>
+</upload>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+EPSV
+TYPE I
+STOR 541
+EPSV
+STOR 541
+QUIT
+</protocol>
+</verify>
+</testcase>

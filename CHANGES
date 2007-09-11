@@ -6,6 +6,17 @@
 
                                   Changelog
 
+Daniel S (12 September 2007)
+- Bug report #1792649 (http://curl.haxx.se/bug/view.cgi?id=1792649) pointed
+  out a problem with doing an empty upload over FTP on a re-used connection.
+  I added test case 541 to reproduce it and to verify the fix.
+
+- I noticed while writing test 541 that the FTP code wrongly did a CWD on the
+  second transfer as it didn't store and remember the "" path from the
+  previous transfer so it would instead CWD to the entry path as stored. This
+  worked, but did a superfluous command. Thus, test case 541 now also verifies
+  this fix.
+
 Dan F (5 September 2007)
 - Added test case 1007 to test permission problem when uploading with TFTP
   (to validate bug #1790403).
