@@ -2368,6 +2368,11 @@ bool Curl_retry_request(struct connectdata *conn,
   bool retry = FALSE;
   struct SessionHandle *data = conn->data;
 
+  /* if we're talking upload, we can't do the checks below, unless the protocol
+     is HTTP as when uploading over HTTP we will still get a response */
+  if(data->set.upload && !(conn->protocol&PROT_HTTP))
+    return retry;
+
   if((data->reqdata.keep.bytecount +
       data->reqdata.keep.headerbytecount == 0) &&
      conn->bits.reuse &&
