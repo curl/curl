@@ -2972,7 +2972,8 @@ CURLcode Curl_ftp_connect(struct connectdata *conn,
  *
  * Input argument is already checked for validity.
  */
-CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status, bool premature)
+CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status,
+                       bool premature)
 {
   struct SessionHandle *data = conn->data;
   struct FTP *ftp = data->reqdata.proto.ftp;
@@ -3034,12 +3035,19 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status, bool premature
   } else {
     size_t flen = ftp->file?strlen(ftp->file):0; /* file is "raw" already */
     size_t dlen = strlen(path)-flen;
-    if(dlen && !ftpc->cwdfail) {
-      ftpc->prevpath = path;
-      if(flen)
-        /* if 'path' is not the whole string */
-        ftpc->prevpath[dlen]=0; /* terminate */
-      infof(data, "Remembering we are in dir %s\n", ftpc->prevpath);
+    if(!ftpc->cwdfail) {
+      if(dlen) {
+        ftpc->prevpath = path;
+        if(flen)
+          /* if 'path' is not the whole string */
+          ftpc->prevpath[dlen]=0; /* terminate */
+      }
+      else {
+        /* we never changed dir */
+        ftpc->prevpath=strdup("");
+        free(path);
+      }
+      infof(data, "Remembering we are in dir \"%s\"\n", ftpc->prevpath);
     }
     else {
       ftpc->prevpath = NULL; /* no path */
