@@ -50,6 +50,7 @@ This release includes the following bugfixes:
  o FTP NOBODY request on file crash
  o excessively long FTP server responses and response lines
  o file:// upload then FTP:// upload crash
+ o TFTP error 0 is no longer treated as success
  o uploading empty file over FTP on re-used connection
  o superfluous CWD command on re-used FTP connections without subdirs used
 
