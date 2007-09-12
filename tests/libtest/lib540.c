@@ -87,11 +87,9 @@ static int loop(CURLM *cm, const char* url, const char* userpwd,
 
     while ((msg = curl_multi_info_read(cm, &Q))) {
       if (msg->msg == CURLMSG_DONE) {
-        char *usedurl;
         CURL *e = msg->easy_handle;
-        curl_easy_getinfo(msg->easy_handle, CURLINFO_PRIVATE, &usedurl);
-        fprintf(stderr, "R: %d - %s <%s>\n", (int)msg->data.result,
-                curl_easy_strerror(msg->data.result), usedurl);
+        fprintf(stderr, "R: %d - %s\n", (int)msg->data.result,
+                curl_easy_strerror(msg->data.result));
         curl_multi_remove_handle(cm, e);
         curl_easy_cleanup(e);
       }
