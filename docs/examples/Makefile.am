@@ -9,6 +9,7 @@ EXTRA_DIST = README Makefile.example makefile.dj $(COMPLICATED_EXAMPLES)
 INCLUDES = -I$(top_srcdir)/include
 
 LIBDIR = $(top_builddir)/lib
+CPPFLAGS = -DCURL_NO_OLDIES
 
 # Dependencies
 LDADD = $(LIBDIR)/libcurl.la
