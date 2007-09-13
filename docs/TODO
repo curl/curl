@@ -92,6 +92,16 @@ TODO
 
  FTP
 
+ * PRET is a command that primarily "drftpd" supports, which could be useful
+   when using libcurl against such a server. It is a non-standard and a rather
+   oddly designed command, but...
+   http://curl.haxx.se/bug/feature.cgi?id=1729967
+
+ * When trying to connect passively to a server which only supports active
+   connections, libcurl returns CURLE_FTP_WEIRD_PASV_REPLY and closes the
+   connection. There could be a way to fallback to an active connection (and
+   vice versa). http://curl.haxx.se/bug/feature.cgi?id=1754793
+
  * Make the detection of (bad) %0d and %0a codes in FTP url parts earlier in
    the process to avoid doing a resolve and connect in vain.
 
@@ -106,6 +116,7 @@ TODO
 
  * Make CURLOPT_FTPPORT support an additional port number on the IP/if/name,
    like "blabla:[port]" or possibly even "blabla:[portfirst]-[portsecond]".
+   http://curl.haxx.se/bug/feature.cgi?id=1505166
 
  * FTP ASCII transfers do not follow RFC959. They don't convert the data
    accordingly.
@@ -125,6 +136,9 @@ TODO
    never been reported as causing trouble to anyone, but should be considered
    to use the HTTP version the user has chosen.
 
+ * "Better" support for persistent connections over HTTP 1.0
+   http://curl.haxx.se/bug/feature.cgi?id=1089001
+
  TELNET
 
  * Reading input (to send to the remote server) on stdin is a crappy solution
@@ -136,6 +150,9 @@ TODO
    work for telnet.
 
  SSL
+
+ * Provide an option that allows for disabling specific SSL versions, such as
+   SSLv2 http://curl.haxx.se/bug/feature.cgi?id=1767276
 
  * Provide a libcurl API for setting mutex callbacks in the underlying SSL
    library, so that the same application code can use mutex-locking
@@ -208,6 +225,11 @@ TODO
 
  CLIENT
 
+ * Add option that is similar to -O but that takes the output file name from
+   the Content-Disposition: header, and/or uses the local file name used in
+   redirections for the cases the server bounces the request further to a
+   different file (name): http://curl.haxx.se/bug/feature.cgi?id=1364676 
+
  * "curl --sync http://example.com/feed[1-100].rss" or
    "curl --sync http://example.net/{index,calendar,history}.html"
 
@@ -227,10 +249,10 @@ TODO
 
  * "curl ftp://site.com/*.txt"
 
- * The client could be told to use maximum N simultaneous transfers and then
-   just make sure that happens. It should of course not make more than one
-   connection to the same remote host. This would require the client to use
-   the multi interface.
+ * The client could be told to use maximum N simultaneous parallel transfers
+   and then just make sure that happens. It should of course not make more
+   than one connection to the same remote host. This would require the client
+   to use the multi interface. http://curl.haxx.se/bug/feature.cgi?id=1558595
 
  * Extending the capabilities of the multipart formposting. How about leaving
    the ';type=foo' syntax as it is and adding an extra tag (headers) which
