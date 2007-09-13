@@ -6,6 +6,8 @@
 
                                   Changelog
 
+Version 7.17.0 (13 September 2007)
+
 Daniel S (12 September 2007)
 - Bug report #1792649 (http://curl.haxx.se/bug/view.cgi?id=1792649) pointed
   out a problem with doing an empty upload over FTP on a re-used connection.
