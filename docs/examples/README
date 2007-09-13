@@ -40,7 +40,6 @@ curlx.c        - getting file info from the remote cert data
 debug.c        - showing how to use the debug callback
 fileupload.c   - uploading to a file:// URL
 fopen.c        - fopen() layer that supports opening URLs and files
-ftp3rdparty.c  - FTP 3rd party transfer
 ftpget.c       - simple getting a file from FTP
 ftpgetresp.c   - get the response strings from the FTP server
 ftpupload.c    - upload a file to an FTP server
@@ -50,6 +49,7 @@ getinmemory.c  - download a file to memory only
 ghiper.c       - curl_multi_socket() using code with glib-2
 hiperfifo.c    - downloads all URLs written to the fifo, using
                  curl_multi_socket() and libevent
+htmltidy.c     - download a document and use libtidy to parse the HTML
 htmltitle.cc   - download a HTML file and extract the <title> tag from a HTML
                  page using libxml
 http-post.c    - HTTP POST
@@ -60,9 +60,9 @@ multi-debugcallback.c - a multi-interface app using the debug callback
 multi-double.c - a multi-interface app doing two simultaneous transfers
 multi-post.c   - a multi-interface app doing a multipart formpost
 multi-single.c - a multi-interface app getting a single file
-multithread.c  - an example using multi-treading transfering multiple files
+multithread.c  - an example using multi-treading transferring multiple files
 opensslthreadlock.c - show how to do locking when using OpenSSL multi-threaded
-persistant.c   - request two URLs with a persistant connection
+persistant.c   - request two URLs with a persistent connection
 post-callback.c - send a HTTP POST using a callback
 postit2.c      - send a HTTP multipart formpost
 sampleconv.c   - showing how a program on a non-ASCII platform would invoke
@@ -72,5 +72,5 @@ sepheaders.c   - download headers to a separate file
 simple.c       - the most simple download a URL source
 simplepost.c   - HTTP POST
 simplessl.c    - HTTPS example with certificates many options set
-synctime.c     - Sync local time by extracing date from remote HTTP servers
+synctime.c     - Sync local time by extracting date from remote HTTP servers
 10-at-a-time.c - Download many files simultaneously, 10 at a time.
