@@ -1,7 +1,7 @@
-Curl and libcurl 7.17.0
+Curl and libcurl 7.17.1
 
- Public curl release number:               101
- Releases counted from the very beginning: 127
+ Public curl release number:               102
+ Releases counted from the very beginning: 128
  Available command line options:           118
  Available curl_easy_setopt() options:     143
  Number of public functions in libcurl:    55
@@ -11,48 +11,11 @@ Curl and libcurl 7.17.0
 
 This release includes the following changes:
  
- o support for OS/400 Secure Sockets Layer library
- o curl_easy_setopt() now allocates strings passed to it
- o SCP and SFTP support now requires libssh2 0.16 or later
- o LDAP libraries are now linked "regularly" and not with dlopen
- o HTTP transfers have the download size info "available" earlier
- o FTP transfers have the download size info "available" earlier
- o builds and runs on OS/400
- o several error codes and options were marked as obsolete and subject to
-   future removal (set CURL_NO_OLDIES to see if your application is using them)
- o SFTP errors can return more specific error codes 
+ o 
 
 This release includes the following bugfixes:
 
- o test cases 31, 46, 61, 506, 517 now work in time zones that use leap seconds
- o problem with closed proxy connection during HTTP CONNECT auth negotiation
- o transfer-encoding skipping didn't ignore the 407 response bodies properly
- o CURLOPT_SSL_VERIFYHOST set to 1
- o CONNECT endless loop
- o krb5 support builds with Heimdal
- o added returned error string for connection refused case
- o re-use of dead FTP control connections
- o login to FTP servers that don't require (nor understand) PASS after the
-   USER command
- o bad free of memory from libssh2
- o the SFTP PWD command works
- o HTTP Digest auth on a re-used connection
- o FTPS data connection close
- o AIX 4 and 5 get to use non-blocking sockets
- o small POST with NTLM
- o resumed file:// transfers
- o CURLOPT_DNS_CACHE_TIMEOUT and CURLOPT_DNS_USE_GLOBAL_CACHE are 64 bit
-   "clean"
- o memory leak when handling compressed data streams from broken servers
- o no NTLM unicode response
- o resume HTTP PUT using Digest authentication
- o FTP NOBODY requests on directories sent "SIZE (null)"
- o FTP NOBODY request on file crash
- o excessively long FTP server responses and response lines
- o file:// upload then FTP:// upload crash
- o TFTP error 0 is no longer treated as success
- o uploading empty file over FTP on re-used connection
- o superfluous CWD command on re-used FTP connections without subdirs used
+ o 
 
 This release includes the following known bugs:
 
@@ -60,29 +23,15 @@ This release includes the following known bugs:
 
 Other curl-related news:
 
- o pycurl 7.16.4 was released http://pycurl.sf.net
- o TclCurl 7.16.4 was released
-   http://personal1.iddeo.es/andresgarci/tclcurl/english/
- o curlpp 0.7.1 was released
-   http://rrette.com/textpattern/index.php?s=cURLpp
- o A brand new binding for SP-Forth was written by ygrek:
-   http://www.forth.org.ru/~ac/lib/lin/curl/
+ o 
 
 New curl mirrors:
 
- o http://curl.freeby.pctools.cl is a new mirror in Santiago, Chile
- o http://curl.site2nd.org is a new mirror in Dallas, Texas, USA
- o http://curl.cheap.co.il is a new mirror in Tel-Aviv, Israel
- o http://curl.digimirror.nl is a new mirror in Amsterdam, the Netherlands
+ o 
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dan Fandrich, Song Ma, Daniel Black, Giancarlo Formicuccia, Shmulik Regev,
- Daniel Cater, Colin Hogben, Jofell Gallardo, Daniel Johnson,
- Ralf S. Engelschall, James Housley, Chris Flerackers, Patrick Monnerat,
- Jayesh A Shah, Greg Zavertnik, Peter O'Gorman, Greg Morse, Dmitriy Sergeyev,
- Scott Cantor, Allen Pulsifer, Andrew Wansink, Robson Braga Araujo,
- Christian Vogt
+ Dan Fandrich
  
         Thanks! (and sorry if I forgot to mention someone)
