@@ -36,7 +36,7 @@ data inside the file
 <protocol>
 POST /we/want/166 HTTP/1.1
 User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b zlib/1.1.4 c-ares/1.2.0 libidn/0.4.3
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 223
 Expect: 100-continue

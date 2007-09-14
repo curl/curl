@@ -40,8 +40,8 @@ http://%HOSTIP:%HTTPPORT/93 -x %HOSTIP:%HTTPPORT
 ^User-Agent:.*
 </strip>
 <protocol>
-GET http://127.0.0.1:%HTTPPORT/93 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+GET http://%HOSTIP:%HTTPPORT/93 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive

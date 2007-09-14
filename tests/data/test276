@@ -64,11 +64,11 @@ HTTP Location: following with multiple question marks in URLs
 </strip>
 <protocol>
 GET /want?uri=http://anything/276?secondq/276 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 GET /data/2760002.txt?coolsite=http://anotherurl/?a_second/2760002 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

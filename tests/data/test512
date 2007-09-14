@@ -38,7 +38,7 @@ http://%HOSTIP:%HTTPPORT/512
 </strip>
 <protocol>
 GET /512 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

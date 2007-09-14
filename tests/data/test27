@@ -38,16 +38,16 @@ Get same cookie page several times
 </strip>
 <protocol>
 GET /want/27 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 GET /want/27 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Cookie: thewinneris=nowayyouwin
 
 GET /want/27 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Cookie: thewinneris=nowayyouwin
 

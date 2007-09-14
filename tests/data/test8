@@ -51,7 +51,7 @@ Set-Cookie: nocookie=yes; path=/WE;
 </strip>
 <protocol>
 GET /we/want/8 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Cookie: cookie=yes; partmatch=present; foobar=name
 

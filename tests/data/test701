@@ -49,7 +49,7 @@ HTTP GET via SOCKS5 proxy
 </strip>
 <protocol>
 GET /701 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

@@ -36,7 +36,7 @@ http://%HOSTIP:%HTTPPORT/want/14 -i --head
 <protocol>
 HEAD /want/14 HTTP/1.1
 User-Agent: curl/7.4.2-pre4 (sparc-sun-solaris2.7) libcurl 7.4.2-pre4
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

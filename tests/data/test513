@@ -27,7 +27,7 @@ http://%HOSTIP:%HTTPPORT/513
 <verify>
 <protocol>
 POST /513 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 1
 Content-Type: application/x-www-form-urlencoded

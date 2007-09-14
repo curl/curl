@@ -44,7 +44,7 @@ data on stdin
 </strip>
 <protocol>
 PUT /98 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 14
 Expect: 100-continue

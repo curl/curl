@@ -45,8 +45,8 @@ ftp://%HOSTIP:%HTTPPORT/we/want/that/page/79 -x %HOSTIP:%HTTPPORT
 ^User-Agent:.*
 </strip>
 <protocol>
-GET ftp://127.0.0.1:%HTTPPORT/we/want/that/page/79 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+GET ftp://%HOSTIP:%HTTPPORT/we/want/that/page/79 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive

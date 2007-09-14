@@ -64,14 +64,14 @@ http://%HOSTIP:%HTTPPORT/want/43 -L -x %HOSTIP:%HTTPPORT
 ^User-Agent:.*
 </strip>
 <protocol>
-GET http://127.0.0.1:%HTTPPORT/want/43 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+GET http://%HOSTIP:%HTTPPORT/want/43 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://127.0.0.1:%HTTPPORT/want/data/430002.txt?coolsite=yes HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+GET http://%HOSTIP:%HTTPPORT/want/data/430002.txt?coolsite=yes HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive

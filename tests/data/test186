@@ -34,7 +34,7 @@ http://%HOSTIP:%HTTPPORT/we/want/186 -F "name=daniel;type=moo/foo" -F "html= <bo
 <protocol>
 POST /we/want/186 HTTP/1.1
 User-Agent: curl/7.12.2-CVS (i686-pc-linux-gnu) libcurl/7.12.2-CVS OpenSSL/0.9.7d zlib/1.2.1.1 c-ares/1.2.0 libidn/0.5.2
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 305
 Expect: 100-continue

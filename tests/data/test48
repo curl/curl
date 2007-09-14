@@ -39,7 +39,7 @@ HTTP with -d and -G and -I
 </strip>
 <protocol>
 HEAD /48?foo=moo&moo=poo HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

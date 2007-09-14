@@ -39,7 +39,7 @@ http://%HOSTIP:%HTTPPORT/we/want/that/page/6 -b "name=contents;name2=content2"
 </strip>
 <protocol>
 GET /we/want/that/page/6 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Cookie: name=contents;name2=content2
 

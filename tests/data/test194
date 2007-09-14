@@ -38,7 +38,7 @@ http://%HOSTIP:%HTTPPORT/want/194 -C 87 --fail
 <protocol>
 GET /want/194 HTTP/1.1
 Range: bytes=87-
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

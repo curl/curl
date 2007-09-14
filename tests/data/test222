@@ -190,7 +190,7 @@ http://%HOSTIP:%HTTPPORT/222 --compressed
 </strip>
 <protocol>
 GET /222 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Accept-Encoding: deflate, gzip
 

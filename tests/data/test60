@@ -40,7 +40,7 @@ more than one byte
 </strip>
 <protocol>
 PUT /bzz/60 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Transfer-Encoding: chunked
 Content-Length: 1

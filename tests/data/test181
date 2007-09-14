@@ -41,7 +41,7 @@ the
 </strip>
 <protocol>
 POST /we/want/181 HTTP/1.0
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 79
 Content-Type: application/x-www-form-urlencoded

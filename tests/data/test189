@@ -51,13 +51,13 @@ http://%HOSTIP:%HTTPPORT/189 -C 50 -L
 GET /189 HTTP/1.1
 Range: bytes=50-
 User-Agent: curl/7.6 (sparc-sun-solaris2.7) libcurl 7.6-pre4 (SSL 0.9.6) (krb4 enabled)
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 GET /189 HTTP/1.1
 Range: bytes=50-
 User-Agent: curl/7.12.2-CVS (i686-pc-linux-gnu) libcurl/7.12.2-CVS OpenSSL/0.9.7d zlib/1.2.1.2 libidn/0.5.2
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

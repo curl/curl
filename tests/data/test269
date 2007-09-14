@@ -45,7 +45,7 @@ http://%HOSTIP:%HTTPPORT/269 --ignore-content-length
 </strip>
 <protocol>
 GET /269 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

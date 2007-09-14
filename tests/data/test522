@@ -49,7 +49,7 @@ http://%HOSTIP/522 %HTTPPORT
 <protocol>
 GET /522 HTTP/1.1
 Authorization: Basic eHh4Onl5eQ==
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

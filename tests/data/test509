@@ -32,7 +32,7 @@ lib509
 simple HTTPS GET and URL redirect in certificate
  </name>
  <command>
-https://127.0.0.1:%HTTPSPORT/dvcs %HTTPSPORT
+https://%HOSTIP:%HTTPSPORT/dvcs %HTTPSPORT
 </command>
 </client>
 
@@ -44,7 +44,7 @@ https://127.0.0.1:%HTTPSPORT/dvcs %HTTPSPORT
 </strip>
 <protocol>
 GET /509 HTTP/1.1
-Host: 127.0.0.1:%HTTPSPORT
+Host: %HOSTIP:%HTTPSPORT
 Accept: */*
 
 </protocol>

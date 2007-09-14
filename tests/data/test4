@@ -42,7 +42,7 @@ Replaced internal and added custom HTTP headers
 </strip>
 <protocol>
 GET /4 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 extra-header: here
 Accept: replaced
 

@@ -32,7 +32,7 @@ http://%HOSTIP:%HTTPPORT/want/30
 </strip>
 <protocol>
 GET /want/30 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

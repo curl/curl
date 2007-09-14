@@ -54,11 +54,11 @@ HTTP, urlglob {}-retrieval and -o #[num] usage
 </strip>
 <protocol>
 GET /74 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 GET /740001 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

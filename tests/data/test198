@@ -51,11 +51,11 @@ http://%HOSTIP:%HTTPPORT/198 --retry 1000
 </strip>
 <protocol>
 GET /198 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 GET /198 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

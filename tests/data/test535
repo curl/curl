@@ -49,11 +49,11 @@ http://%HOSTIP:%HTTPPORT/535 http://%HOSTIP:%HTTPPORT/5350001
 <verify>
 <protocol>
 GET /535 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 GET /5350001 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

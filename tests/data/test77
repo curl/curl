@@ -46,7 +46,7 @@ http://%HOSTIP:%HTTPPORT/77 -z "dec 12 12:00:00 1999 GMT"
 </strip>
 <protocol>
 GET /77 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 If-Modified-Since: Sun, 12 Dec 1999 12:00:00 GMT
 

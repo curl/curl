@@ -53,11 +53,11 @@ http://%HOSTIP:%HTTPPORT/536 http://%HOSTIP:%HTTPPORT/5360001
 <verify>
 <protocol>
 GET /536 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 GET /5360001 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

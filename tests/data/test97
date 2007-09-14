@@ -41,7 +41,7 @@ HTTP POST with custom content-type
 </strip>
 <protocol nonewline="yes">
 POST /97 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Type: silly/type
 Content-Length: 14

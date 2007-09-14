@@ -35,7 +35,7 @@ http://%HOSTIP:%HTTPPORT/178
 </strip>
 <protocol>
 GET /178 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

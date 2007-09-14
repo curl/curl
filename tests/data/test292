@@ -48,7 +48,7 @@ http://%HOSTIP:%HTTPPORT/292 --max-filesize 1000
 </strip>
 <protocol>
 GET /292 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

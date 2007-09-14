@@ -76,18 +76,18 @@ http://%HOSTIP:%HTTPPORT/81 --proxy-user testuser:testpass -x http://%HOSTIP:%HT
 s/(Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAA).*/$1/
 </strippart>
 <protocol>
-GET http://127.0.0.1:%HTTPPORT/81 HTTP/1.1
+GET http://%HOSTIP:%HTTPPORT/81 HTTP/1.1
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://127.0.0.1:%HTTPPORT/81 HTTP/1.1
+GET http://%HOSTIP:%HTTPPORT/81 HTTP/1.1
 Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAA
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive

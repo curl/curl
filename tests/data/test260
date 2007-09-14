@@ -47,7 +47,7 @@ HTTP GET URL without slash but with questionmark
 </strip>
 <protocol>
 GET /?260 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

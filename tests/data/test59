@@ -39,7 +39,7 @@ HTTP URL with slash but with "parameter"
 </strip>
 <protocol>
 GET /?mooo/59 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

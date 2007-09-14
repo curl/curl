@@ -63,11 +63,11 @@ http://%HOSTIP:%HTTPPORT/want/28 -L
 </strip>
 <protocol>
 GET /want/28 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 GET /online/1,1795,Welcome,00.html/280002.txt?logout=TRUE HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

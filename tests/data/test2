@@ -42,7 +42,7 @@ HTTP GET with user and password
 <protocol>
 GET /2 HTTP/1.1
 Authorization: Basic ZmFrZTp1c2Vy
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

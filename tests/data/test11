@@ -64,11 +64,11 @@ http://%HOSTIP:%HTTPPORT/want/11 -L
 </strip>
 <protocol>
 GET /want/11 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 GET /want/data/110002.txt?coolsite=yes HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

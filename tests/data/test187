@@ -57,11 +57,11 @@ http://%HOSTIP:%HTTPPORT?oh=what-weird=test/187 -L
 </strip>
 <protocol>
 GET /?oh=what-weird=test/187 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 GET /root/1870002.txt?coolsite=yes HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

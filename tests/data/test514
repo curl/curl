@@ -42,7 +42,7 @@ http://%HOSTIP:%HTTPPORT/514
 </strip>
 <protocol>
 HEAD /514 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

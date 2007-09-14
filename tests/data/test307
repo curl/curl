@@ -41,7 +41,7 @@ simple HTTPS GET with openssl engine
 </strip>
 <protocol>
 GET /307 HTTP/1.1
-Host: 127.0.0.1:%HTTPSPORT
+Host: %HOSTIP:%HTTPSPORT
 Accept: */*
 
 </protocol>

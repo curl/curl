@@ -72,13 +72,13 @@ http://%HOSTIP:%HTTPPORT/72 -u testuser:testpass --anyauth
 <protocol>
 GET /72 HTTP/1.1
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 GET /72 HTTP/1.1
 Authorization: Digest username="testuser", realm="testrealm", nonce="1053604199", uri="/72", response="9fcd1330377365a09bbcb33b2cbb25bd"
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

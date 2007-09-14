@@ -44,7 +44,7 @@ line8
 <protocol>
 POST /we/want/173 HTTP/1.1
 User-Agent: curl/7.12.1-CVS (i686-pc-linux-gnu) libcurl/7.12.1-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS libidn/0.4.6
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 359
 Expect: 100-continue

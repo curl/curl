@@ -45,7 +45,7 @@ bar
 <protocol>
 POST /we/want/9 HTTP/1.1
 User-Agent: curl/7.10.4 (i686-pc-linux-gnu) libcurl/7.10.4 OpenSSL/0.9.7a ipv6 zlib/1.1.3
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 407
 Expect: 100-continue

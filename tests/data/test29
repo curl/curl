@@ -41,7 +41,7 @@ http://%HOSTIP:%HTTPPORT/want/29 -m 2
 </strip>
 <protocol>
 GET /want/29 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

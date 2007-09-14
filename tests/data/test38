@@ -47,7 +47,7 @@ download on.
 <protocol>
 GET /want/38 HTTP/1.1
 Range: bytes=78-
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

@@ -39,7 +39,7 @@ text/html; charset=ISO-8859-4
 </strip>
 <protocol>
 GET /57 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>
