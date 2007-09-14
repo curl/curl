@@ -131,11 +131,18 @@ while test $# -gt 0; do
 	if test "@CURL_DISABLE_LDAP@" != "1"; then
           echo "LDAP"
         fi
+	if test "@CURL_DISABLE_LDAPS@" != "1"; then
+          echo "LDAPS"
+        fi
 	if test "@CURL_DISABLE_DICT@" != "1"; then
           echo "DICT"
         fi
 	if test "@CURL_DISABLE_TFTP@" != "1"; then
           echo "TFTP"
+        fi
+	if test "@USE_LIBSSH2@" = "1"; then
+          echo "SCP"
+          echo "SFTP"
         fi
 	;;
     --version)

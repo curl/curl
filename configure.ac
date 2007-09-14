@@ -1314,6 +1314,7 @@ if test X"$OPT_LIBSSH2" != Xno; then
     curl_ssh_msg="enabled (libSSH2)"
     LIBSSH2_ENABLED=1
     AC_DEFINE(USE_LIBSSH2, 1, [if libSSH2 is in use]))
+    AC_SUBST(USE_LIBSSH2, [1])
 
   if test X"$OPT_LIBSSH2" != Xoff &&
      test "$LIBSSH2_ENABLED" != "1"; then
@@ -2189,7 +2190,6 @@ AC_HELP_STRING([--disable-verbose],[Disable verbose strings]),
   no)
        AC_MSG_RESULT(no)
        AC_DEFINE(CURL_DISABLE_VERBOSE_STRINGS, 1, [to disable verbose strings])
-       AC_SUBST(CURL_DISABLE_VERBOSE_STRINGS)
        curl_verbose_msg="no"
        ;;
   *)   AC_MSG_RESULT(yes)
@@ -2212,7 +2212,7 @@ AC_HELP_STRING([--disable-sspi],[Disable SSPI]),
        if test "$ac_cv_native_windows" = "yes"; then
          AC_MSG_RESULT(yes)
          AC_DEFINE(USE_WINDOWS_SSPI, 1, [to enable SSPI support])
-         AC_SUBST(USE_WINDOWS_SSPI)
+         AC_SUBST(USE_WINDOWS_SSPI, [1])
          curl_sspi_msg="yes"
        else
          AC_MSG_RESULT(no)
@@ -2262,7 +2262,6 @@ AC_HELP_STRING([--disable-crypto-auth],[Disable cryptographic authentication]),
   no)
        AC_MSG_RESULT(no)
        AC_DEFINE(CURL_DISABLE_CRYPTO_AUTH, 1, [to disable cryptographic authentication])
-       AC_SUBST(CURL_DISABLE_CRYPTO_AUTH)
        ;;
   *)   AC_MSG_RESULT(yes)
        ;;
@@ -2281,7 +2280,6 @@ AC_HELP_STRING([--disable-cookies],[Disable cookies support]),
   no)
        AC_MSG_RESULT(no)
        AC_DEFINE(CURL_DISABLE_COOKIES, 1, [to disable cookies support])
-       AC_SUBST(CURL_DISABLE_COOKIES)
        ;;
   *)   AC_MSG_RESULT(yes)
        ;;
@@ -2308,9 +2306,7 @@ AC_HELP_STRING([--disable-hidden-symbols],[Leave all symbols with default visibi
          if $CC --help --verbose 2>&1 | grep fvisibility= > /dev/null ; then
            AC_MSG_RESULT(yes)
            AC_DEFINE(CURL_HIDDEN_SYMBOLS, 1, [to enable hidden symbols])
-           AC_SUBST(CURL_HIDDEN_SYMBOLS)
            AC_DEFINE(CURL_EXTERN_SYMBOL, [__attribute__ ((visibility ("default")))], [to make a symbol visible])
-           AC_SUBST(CURL_EXTERN_SYMBOL)
            CFLAGS="$CFLAGS -fvisibility=hidden"
          else
             AC_MSG_RESULT(no)
@@ -2321,9 +2317,7 @@ AC_HELP_STRING([--disable-hidden-symbols],[Leave all symbols with default visibi
          if $CC 2>&1 | grep flags >/dev/null && $CC -flags | grep xldscope= >/dev/null ; then
            AC_MSG_RESULT(yes)
            AC_DEFINE(CURL_HIDDEN_SYMBOLS, 1, [to enable hidden symbols])
-           AC_SUBST(CURL_HIDDEN_SYMBOLS)
            AC_DEFINE(CURL_EXTERN_SYMBOL, [__global], [to make a symbol visible])
-           AC_SUBST(CURL_EXTERN_SYMBOL)
            CFLAGS="$CFLAGS -xldscope=hidden"
          else
            AC_MSG_RESULT(no)
