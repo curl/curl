@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Dan F (13 September 2007)
+- Added LDAPS, SCP and SFTP to curl-config --protocols. Removed and
+  fixed some AC_SUBST configure entries.
+
 Version 7.17.0 (13 September 2007)
 
 Daniel S (12 September 2007)

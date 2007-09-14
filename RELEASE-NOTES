@@ -15,7 +15,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o 
+ o curl-config --protocols now properly reports LDAPS, SCP and SFTP
 
 This release includes the following known bugs:
 
