@@ -86,9 +86,9 @@ SSLLIBS    = libeay32.lib ssleay32.lib
 ZLIBLIBSDLL= zdll.lib
 ZLIBLIBS   = zlib.lib
 !IFDEF USEMM_LIBS
-WINLIBS    = wsock32.lib winmm.lib
+WINLIBS    = wsock32.lib wldap32.lib winmm.lib
 !ELSE
-WINLIBS    = wsock32.lib
+WINLIBS    = wsock32.lib wldap32.lib
 CFLAGS     = $(CFLAGS) /DWITHOUT_MM_LIB
 !ENDIF
 #  RSAglue.lib was formerly needed in the SSLLIBS

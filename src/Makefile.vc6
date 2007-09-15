@@ -207,8 +207,8 @@ LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS) $(ZLIB_LFLAGS)
 !ENDIF
 
 
-LINKLIBS       = $(LINKLIBS) wsock32.lib winmm.lib
-LINKLIBS_DEBUG = $(LINKLIBS_DEBUG) wsock32.lib winmm.lib
+LINKLIBS       = $(LINKLIBS) wsock32.lib wldap32.lib winmm.lib
+LINKLIBS_DEBUG = $(LINKLIBS_DEBUG) wsock32.lib wldap32.lib winmm.lib
 
 all : release
 
