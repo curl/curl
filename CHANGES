@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel S (15 September 2007)
+- Michal Marek made libcurl automatically append ";type=<a|i>" when using HTTP
+  proxies for FTP urls.
+
+- Günter Knauf fixed LDAP builds in the Windows makefiles and fixed LDAPv3
+  support on Windows.
+
 Dan F (13 September 2007)
 - Added LDAPS, SCP and SFTP to curl-config --protocols. Removed and
   fixed some AC_SUBST configure entries.

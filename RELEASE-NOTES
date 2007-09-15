@@ -11,7 +11,7 @@ Curl and libcurl 7.17.1
 
 This release includes the following changes:
  
- o 
+ o automatically append ";type=<a|i>" when using HTTP proxies for FTP urls
 
 This release includes the following bugfixes:
 
@@ -32,6 +32,6 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dan Fandrich
+ Dan Fandrich, Michal Marek
  
         Thanks! (and sorry if I forgot to mention someone)

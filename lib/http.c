@@ -1740,6 +1740,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   CURLcode result=CURLE_OK;
   struct HTTP *http;
   char *ppath = data->reqdata.path;
+  char ftp_typecode[sizeof(";type=?")] = "";
   char *host = conn->host.name;
   const char *te = ""; /* transfer-encoding */
   char *ptr;
@@ -1950,6 +1951,23 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       }
     }
     ppath = data->change.url;
+    /* when doing ftp, append ;type=<a|i> if not present */
+    if (checkprefix("ftp://", ppath) || checkprefix("ftps://", ppath)) {
+      char *p = strstr(ppath, ";type=");
+      if (p && p[6] && p[7] == 0) {
+        switch (toupper(p[6])) {
+        case 'A':
+        case 'D':
+        case 'I':
+          break;
+        default:
+          p = NULL;
+        }
+      }
+      if (!p)
+        snprintf(ftp_typecode, sizeof(ftp_typecode), ";type=%c",
+                 data->set.prefer_ascii ? 'a' : 'i');
+    }
   }
   if(HTTPREQ_POST_FORM == httpreq) {
     /* we must build the whole darned post sequence first, so that we have
@@ -2093,7 +2111,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     result =
       add_bufferf(req_buffer,
                   "%s " /* GET/HEAD/POST/PUT */
-                  "%s HTTP/%s\r\n" /* path + HTTP version */
+                  "%s%s HTTP/%s\r\n" /* path + HTTP version */
                   "%s" /* proxyuserpwd */
                   "%s" /* userpwd */
                   "%s" /* range */
@@ -2108,6 +2126,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
                 request,
                 ppath,
+                ftp_typecode,
                 httpstring,
                 conn->allocptr.proxyuserpwd?
                 conn->allocptr.proxyuserpwd:"",
