@@ -5,13 +5,7 @@ To be addressed before 7.17.1 (planned release: November 2007)
 
 94 - NSS patch
 
-95 - LDAPv3 on windows fix
-
-96 - ldap in MSVC makefiles
-
 97 - check ip callback
-
-98 - fix FTP url over HTTP proxy
 
 99 - curl_easy_close() ?
 
@@ -20,3 +14,5 @@ To be addressed before 7.17.1 (planned release: November 2007)
 101 - known bug #47, if a CONNECT response is larger than BUFSIZE
 
 102 - known bug #46, if a CONNECT response is chunked-encoded
+
+103 -
