@@ -148,7 +148,5 @@ ls -l $targz $bzip2 $zip
 
 md5sum $targz $bzip2 $zip
 
-echo "Run these commands:"
-echo "gpg -b -a $targz"
-echo "gpg -b -a $bzip2"
-echo "gpg -b -a $zip"
+echo "Run this:"
+echo "gpg -b -a $targz && gpg -b -a $bzip2 && gpg -b -a $zip"
