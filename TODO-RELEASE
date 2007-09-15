@@ -1,5 +1,18 @@
-To be addressed before 7.16.3 (planned release: June 2007)
+To be addressed before 7.17.1 (planned release: November 2007)
 =============================
 
-93 - 
+93 - Digest for IIS fix
 
+94 - NSS patch
+
+95 - LDAPv3 on windows fix
+
+96 - ldap in MSVC makefiles
+
+97 - check ip callback
+
+98 - fix FTP url over HTTP proxy
+
+99 - curl_easy_close() ?
+
+100 - icc segmentation faults
