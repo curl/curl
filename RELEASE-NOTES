@@ -16,6 +16,8 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o curl-config --protocols now properly reports LDAPS, SCP and SFTP
+ o ldapv3 support on Windows
+ o ldap builds with the MSVC makefiles
 
 This release includes the following known bugs:
 
@@ -32,6 +34,6 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dan Fandrich, Michal Marek
+ Dan Fandrich, Michal Marek, Günter Knauf
  
         Thanks! (and sorry if I forgot to mention someone)
