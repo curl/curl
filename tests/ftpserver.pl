@@ -623,6 +623,7 @@ sub PASV_command {
 sub PORT_command {
     my ($arg, $cmd) = @_;
     my $port;
+    my $addr;
 
     # We always ignore the given IP and use localhost.
 
@@ -633,6 +634,7 @@ sub PORT_command {
             return 0;
         }
         $port = ($5<<8)+$6;
+        $addr = "$1.$2.$3.$4";
     }
     # EPRT |2|::1|49706|
     elsif(($cmd eq "EPRT") && ($grok_eprt)) {
@@ -642,6 +644,7 @@ sub PORT_command {
         }
         sendcontrol "200 Thanks for dropping by. We contact you later\r\n";
         $port = $3;
+        $addr = $2;
     }
     else {
         sendcontrol "500 we don't like $cmd now\r\n";
@@ -653,10 +656,12 @@ sub PORT_command {
         return 1;
     }
 
-    # We fire up a new sockfilt to do the data tranfer for us.
+    # We fire up a new sockfilt to do the data transfer for us.
     # FIX: make it use IPv6 if need be
-    $slavepid = open2(\*DREAD, \*DWRITE,
-                      "./server/sockfilt --connect $port --logfile log/sockdata$ftpdnum$ext.log --pidfile .sockdata$ftpdnum$ext.pid $ipv6");
+    my $filtcmd="./server/sockfilt --connect $port --addr $addr --logfile log/sockdata$ftpdnum$ext.log --pidfile .sockdata$ftpdnum$ext.pid $ipv6";
+    $slavepid = open2(\*DREAD, \*DWRITE, $filtcmd);
+
+    print STDERR "$filtcmd\n" if($verbose);
 
     print DWRITE "PING\n";
     my $pong;

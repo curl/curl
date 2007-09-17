@@ -522,6 +522,7 @@ int main(int argc, char *argv[])
   int error;
   int arg=1;
   enum sockmode mode = PASSIVE_LISTEN; /* default */
+  const char *addr = NULL;
 
   while(argc>arg) {
     if(!strcmp("--version", argv[arg])) {
@@ -571,6 +572,14 @@ int main(int argc, char *argv[])
         arg++;
       }
     }
+    else if(!strcmp("--addr", argv[arg])) {
+      /* Set an IP address to use with --connect; otherwise use localhost */
+      arg++;
+      if(argc>arg) {
+        addr = argv[arg];
+        arg++;
+      }
+    }
     else {
       puts("Usage: sockfilt [option]\n"
            " --version\n"
@@ -578,7 +587,9 @@ int main(int argc, char *argv[])
            " --pidfile [file]\n"
            " --ipv4\n"
            " --ipv6\n"
-           " --port [port]");
+           " --port [port]\n"
+           " --connect [port]\n"
+           " --addr [address]");
       return 0;
     }
   }
@@ -615,7 +626,9 @@ int main(int argc, char *argv[])
       me.sin_family = AF_INET;
       me.sin_port = htons(connectport);
       me.sin_addr.s_addr = INADDR_ANY;
-      Curl_inet_pton(AF_INET, "127.0.0.1", &me.sin_addr);
+      if (!addr)
+        addr = "127.0.0.1";
+      Curl_inet_pton(AF_INET, addr, &me.sin_addr);
 
       rc = connect(sock, (struct sockaddr *) &me, sizeof(me));
 #ifdef ENABLE_IPV6
@@ -624,7 +637,9 @@ int main(int argc, char *argv[])
       memset(&me6, 0, sizeof(me6));
       me6.sin6_family = AF_INET6;
       me6.sin6_port = htons(connectport);
-      Curl_inet_pton(AF_INET6, "::1", &me6.sin6_addr);
+      if (!addr)
+        addr = "::1";
+      Curl_inet_pton(AF_INET6, addr, &me6.sin6_addr);
 
       rc = connect(sock, (struct sockaddr *) &me6, sizeof(me6));
     }
