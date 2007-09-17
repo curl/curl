@@ -11,11 +11,8 @@ REPLY EPRT 500 no such command
 
 # Client-side
 <client>
-<features>
-ipv6
-</features>
 <server>
-ftp-ipv6
+ftp
 </server>
  <name>
 Get two FTP files with no remote EPRT support
