@@ -58,27 +58,34 @@ elsif ($ARGV[0] eq "postprocess")
 		# Process the directory file to remove all information that
 		# could be inconsistent from one test run to the next (e.g.
 		# file date) or may be unsupported on some platforms (e.g.
-		# Windows). Also, since >7.16.4, the sftp directory listing
+		# Windows). Also, since 7.17.0, the sftp directory listing
 		# format can be dependent on the server (with a recent
 		# enough version of libssh2) so this script must also
-		# canonicalize the format.  These are the two formats
-		# currently supported:
-		# -r--r--r--    1 ausername grp            47 Dec 31  2000 rofile.txt
+		# canonicalize the format.  Here are examples of the general
+		# format supported:
+		# -r--r--r--   12 ausername grp            47 Dec 31  2000 rofile.txt
 		# -r--r--r--   1  1234  4321         47 Dec 31  2000 rofile.txt
-		# The "canonical" format is similar to the second (which is
-		# the one generated with an older libssh2):
-		# -r-?r-?r-?   1     U     U         47 Dec 31  2000 rofile.txt
+		# The "canonical" format is similar to the first (which is
+		# the one generated on a typical Linux installation):
+		# -r-?r-?r-?   12 U         U              47 Dec 31  2000 rofile.txt
 
 		my $newfile = $logfile . ".new";
 		open(IN, "<$logfile") || die "$!";
 		open(OUT, ">$newfile") || die "$!";
 		while (<IN>) {
-			s/^(.)(..).(..).(..).\s*(\d+)\s+\S+ \S?.{5}?(\s+\d)+(.{12}?)/\1\2?\3?\4?   \5     U     U\6\7/;
+			/^(.)(..).(..).(..).\s*(\S+)\s+\S+\s+\S+\s+(\S+)\s+(\S+\s+\S+\s+\S+)(.*)$/;
 			if ($1 eq "d") {
-				# Erase inodes, size, mode, time fields for directories
-				s/^.{14}?(.{12}?).{11}? ... .\d .\d:\d\d/d?????????   N\1          N ???  N NN:NN/;
+				# Erase all directory metadata except for the name, as it is not
+				# consistent for across all test systems and filesystems
+				print OUT "d?????????    N U         U               N ???  N NN:NN$8\n";
+			} elsif ($1 eq "-") {
+				# Erase user and group names, as they are not consistent across
+				# all test systems
+				printf OUT "%s%s?%s?%s?%5d U         U %15d %s%s\n", $1,$2,$3,$4,$5,$6,$7,$8;
+			} else {
+				# Unexpected format; just pass it through and let the test fail
+				print OUT $_;
 			}
-			print OUT $_;
 		}
 
 		close(OUT);
