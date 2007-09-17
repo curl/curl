@@ -21,6 +21,24 @@
 #
 # $Id$
 ###########################################################################
+
+# Experimental hooks are available to run tests remotely on machines that
+# are able to run curl but are unable to run the test harness.  
+# The following sections need to be modified:
+#  $HOSTIP, $HOST6IP - Set to the address of the host running the test suite
+#  $CLIENTIP, $CLIENT6IP - Set to the address of the host running curl
+#  checktestcmd - Modify to check the remote system's PATH (only needed
+#    if -g is given, or -n is NOT given)
+#  runcurl - Modify to copy all the files in the log/ directory to the
+#    system running curl, run the given command remotely and save the
+#    return code, then copy all the files from the remote system's log/
+#    directory back to the host running the test suite.  This can be
+#    done a few ways, such as using scp & ssh, or rsync & telnet.
+# Note that even with these changes a number of tests will still fail
+# (mainly to do with cookies or authentication) due to hard-coded
+# addresses within various protocol fields.
+
+
 # These should be the only variables that might be needed to get edited:
 
 use strict;
@@ -33,9 +51,10 @@ require "getpart.pm"; # array functions
 require "valgrind.pm"; # valgrind report parser
 require "ftp.pm";
 
-my $srcdir = $ENV{'srcdir'} || '.';
-my $HOSTIP="127.0.0.1";
-my $HOST6IP="[::1]";
+my $HOSTIP="127.0.0.1";   # address on which the test server listens
+my $HOST6IP="[::1]";      # address on which the test server listens
+my $CLIENTIP="127.0.0.1"; # address which curl uses for incoming connections
+my $CLIENT6IP="[::1]";    # address which curl uses for incoming connections
 
 my $base = 8990; # base port number
 
@@ -51,6 +70,7 @@ my $TFTP6PORT; # TFTP
 my $SSHPORT; # SCP/SFTP
 my $SOCKSPORT; # SOCKS4/5 port
 
+my $srcdir = $ENV{'srcdir'} || '.';
 my $CURL="../src/curl"; # what curl executable to run on the tests
 my $DBGCURL=$CURL; #"../src/.libs/curl";  # alternative for debugging
 my $LOGDIR="log";
@@ -99,7 +119,7 @@ my $memdump="$LOGDIR/memdump";
 my $memanalyze="$perl $srcdir/memanalyze.pl";
 
 my $stunnel = checkcmd("stunnel4") || checkcmd("stunnel");
-my $valgrind = checkcmd("valgrind");
+my $valgrind = checktestcmd("valgrind");
 my $valgrind_logfile="--logfile";
 my $start;
 my $forkserver=0;
@@ -109,7 +129,7 @@ my $valgrind_tool;
 if($valgrind) {
     # since valgrind 2.1.x, '--tool' option is mandatory
     # use it, if it is supported by the version installed on the system
-    system("valgrind --help 2>&1 | grep -- --tool > /dev/null 2>&1");
+    runcurl("valgrind --help 2>&1 | grep -- --tool > /dev/null 2>&1");
     if (($? >> 8)==0) {
         $valgrind_tool="--tool=memcheck ";
     }
@@ -133,7 +153,7 @@ if($valgrind) {
     }
 }
 
-my $gdb = checkcmd("gdb");
+my $gdb = checktestcmd("gdb");
 
 my $ssl_version; # set if libcurl is built with SSL support
 my $large_file;  # set if libcurl is built with large file support
@@ -329,7 +349,7 @@ sub startnew {
 
 
 #######################################################################
-# Check for a command in the PATH.
+# Check for a command in the PATH of the test server.
 #
 sub checkcmd {
     my ($cmd)=@_;
@@ -343,6 +363,22 @@ sub checkcmd {
 }
 
 #######################################################################
+# Check for a command in the PATH of the machine running curl.
+#
+sub checktestcmd {
+    my ($cmd)=@_;
+    return checkcmd($cmd);
+}
+
+#######################################################################
+# Run the application under test
+#
+sub runcurl {
+    my ($cmd)=@_;
+    return system($cmd);
+}
+
+#######################################################################
 # Memory allocation test and failure torture testing.
 #
 sub torture {
@@ -353,7 +389,7 @@ sub torture {
     unlink($memdump);
 
     # First get URL from test server, ignore the output/result
-    system($testcmd);
+    runcurl($testcmd);
 
     logmsg " CMD: $testcmd\n" if($verbose);
 
@@ -394,10 +430,10 @@ sub torture {
 
         my $ret;
         if($gdbthis) {
-            system($gdbline)
+            runcurl($gdbline)
         }
         else {
-            $ret = system($testcmd);
+            $ret = runcurl($testcmd);
         }
 
         # Now clear the variable again
@@ -503,7 +539,7 @@ sub verifyhttp {
 
     # verify if our/any server is running on this port
     logmsg "CMD; $cmd\n" if ($verbose);
-    my $res = system($cmd);
+    my $res = runcurl($cmd);
 
     $res >>= 8; # rotate the result
     my $data;
@@ -960,7 +996,7 @@ sub runsshserver {
     }
 
     my $flag=$debugprotocol?"-v ":"";
-    my $cmd="$perl $srcdir/sshserver.pl $flag-u $USER -d $srcdir $port";
+    my $cmd="$perl $srcdir/sshserver.pl $flag-u $USER -l $HOSTIP -d $srcdir $port";
     my ($sshpid, $pid2) =
         startnew($cmd, $pidfile,0); # start the server in a new process
 
@@ -1108,7 +1144,7 @@ sub checksystem {
     unlink($curlverout);
     unlink($curlvererr);
 
-    $versretval = system($versioncmd);
+    $versretval = runcurl($versioncmd);
     $versnoexec = $!;
 
     open(VERSOUT, "<$curlverout");
@@ -1368,6 +1404,8 @@ sub subVariables {
   $$thing =~ s/%SOCKSPORT/$SOCKSPORT/g;
   $$thing =~ s/%CURL/$CURL/g;
   $$thing =~ s/%USER/$USER/g;
+  $$thing =~ s/%CLIENTIP/$CLIENTIP/g;
+  $$thing =~ s/%CLIENT6IP/$CLIENT6IP/g;
 
   # The purpose of FTPTIME2 and FTPTIME3 is to provide times that can be
   # used for time-out tests and that whould work on most hosts as these
@@ -1730,11 +1768,11 @@ sub singletest {
                        "$gdb --directory libtest $DBGCURL -x log/gdbcmd");
     }
     elsif($gdbthis) {
-        system("$gdb --directory libtest $DBGCURL -x log/gdbcmd");
+        runcurl("$gdb --directory libtest $DBGCURL -x log/gdbcmd");
         $cmdres=0; # makes it always continue after a debugged run
     }
     else {
-        $cmdres = system("$CMDLINE");
+        $cmdres = runcurl("$CMDLINE");
         my $signal_num  = $cmdres & 127;
         $dumped_core = $cmdres & 128;
 
@@ -1759,7 +1797,7 @@ sub singletest {
             open(GDBCMD, ">log/gdbcmd2");
             print GDBCMD "bt\n";
             close(GDBCMD);
-            system("$gdb --directory libtest -x log/gdbcmd2 -batch $DBGCURL core ");
+            runcurl("$gdb --directory libtest -x log/gdbcmd2 -batch $DBGCURL core ");
      #       unlink("log/gdbcmd2");
         }
     }
@@ -1770,7 +1808,7 @@ sub singletest {
     chomp $cmd;
     subVariables \$cmd;
     if($cmd) {
-	my $rc = system("$cmd");
+	my $rc = runcurl("$cmd");
 	if($rc != 0) {
 	    logmsg "postcheck failure\n";
 	    return 1;
@@ -2460,7 +2498,7 @@ if($valgrind) {
     # we have found valgrind on the host, use it
 
     # verify that we can invoke it fine
-    my $code = system("valgrind >/dev/null 2>&1");
+    my $code = runcurl("valgrind >/dev/null 2>&1");
 
     if(($code>>8) != 1) {
         #logmsg "Valgrind failure, disable it\n";

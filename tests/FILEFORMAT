@@ -218,7 +218,9 @@ argument that directs the output to a file. The --output is also not added if
 the client/stdout section is used.
 
 Available substitute variables include:
-%HOSTIP    - IPv6 address of the host running this test
+%CLIENTIP   - IPv4 address of the client running curl
+%CLIENT6IP  - IPv6 address of the client running curl
+%HOSTIP    - IPv4 address of the host running this test
 %HOSTPORT  - Port number of the HTTP server
 %HOST6IP   - IPv6 address of the host running this test
 %HOST6PORT - IPv6 port number of the HTTP server
