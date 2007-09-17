@@ -39,18 +39,17 @@ ftps
 FTPS dir list, PORT with specified IP
  </name>
  <command>
--k --ftp-ssl-control -P %HOSTIP ftps://%HOSTIP:%FTPSPORT/
+-k --ftp-ssl-control -P %CLIENTIP ftps://%HOSTIP:%FTPSPORT/
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-# strip all kinds of PORT, EPRT and LPRT curl can do
+# Strip all valid kinds of PORT and EPRT that curl can send
 <strip>
-^PORT 127,0,0,1,.*
-^EPRT.*
-^LPRT.*
+^PORT \d{1,3},\d{1,3},\d{1,3},\d{1,3},\d{1,3},\d{1,3}
+^EPRT \|1\|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\|\d{1,5}\|
 </strip>
 <protocol>
 USER anonymous

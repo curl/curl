@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Dan F (17 September 2007)
+- Added hooks to the test suite to make it possible to test a curl running
+  on a remote host.
+
+- Changed some FTP tests to validate the format of the PORT and EPRT commands
+  sent by curl, if not the addresses themselves.
+
 Daniel S (15 September 2007)
 - Michal Marek made libcurl automatically append ";type=<a|i>" when using HTTP
   proxies for FTP urls.

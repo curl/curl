@@ -22,7 +22,7 @@ ftp
 FTP download, failed PORT
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/116 -P 127.0.0.1
+ftp://%HOSTIP:%FTPPORT/116 -P 1.2.3.4
 </command>
 </client>
 
@@ -31,15 +31,17 @@ ftp://%HOSTIP:%FTPPORT/116 -P 127.0.0.1
 <errorcode>
 30
 </errorcode>
-<strip>
-^PORT 127,0,0,1,.*
-^EPRT .*
-^LPRT .*
-</strip>
+# Strip the port number but leave the rest
+<strippart>
+s/^(PORT \d{1,3},\d{1,3},\d{1,3},\d{1,3},)\d{1,3},\d{1,3}/$1/
+s/^(EPRT \|1\|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\|)\d{1,5}\|/$1/
+</strippart>
 <protocol>
 USER anonymous
 PASS ftp@example.com
 PWD
+EPRT |1|1.2.3.4|
+PORT 1,2,3,4,
 QUIT
 </protocol>
 </verify>
