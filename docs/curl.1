@@ -330,7 +330,9 @@ them independently.
 
 If curl is built against the NSS SSL library then this option tells
 curl the nickname of the certificate to use within the NSS database defined
-by --cacert.
+by the environment variable SSL_DIR (or by default /etc/pki/nssdb). If the
+NSS PEM PKCS#11 module (libnsspem.so) is available then PEM files may be
+loaded.
 
 If this option is used several times, the last one will be used.
 .IP "--cert-type <type>"
@@ -352,7 +354,10 @@ The windows version of curl will automatically look for a CA certs file named
 Current Working Directory, or in any folder along your PATH.
 
 If curl is built against the NSS SSL library then this option tells
-curl the directory that the NSS certificate database resides in.
+curl the nickname of the CA certificate to use within the NSS database
+defined by the environment variable SSL_DIR (or by default /etc/pki/nssdb).
+If the NSS PEM PKCS#11 module (libnsspem.so) is available then PEM files
+may be loaded.
 
 If this option is used several times, the last one will be used.
 .IP "--capath <CA certificate directory>"

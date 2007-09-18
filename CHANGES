@@ -6,6 +6,31 @@
 
                                   Changelog
 
+Daniel S (19 September 2007)
+- Rob Crittenden provided an NSS update with the following highlights:
+
+  o It looks for the NSS database first in the environment variable SSL_DIR,
+    then in /etc/pki/nssdb, then it initializes with no database if neither of
+    those exist.
+
+  o If the NSS PKCS#11 libnspsem.so driver is available then PEM files may be
+    loaded, including the ca-bundle. If it is not available then only
+    certificates already in the NSS database are used.
+
+  o Tries to detect whether a file or nickname is being passed in so the right
+    thing is done
+
+  o Added a bit of code to make the output more like the OpenSSL module,
+    including displaying the certificate information when connecting in
+    verbose mode
+
+  o Improved handling of certificate errors (expired, untrusted, etc)
+
+  The libnsspem.so PKCS#11 module is currently only available in Fedora
+  8/rawhide. Work will be done soon to upstream it. The NSS module will work
+  with or without it, all that changes is the source of the certificates and
+  keys.
+
 Daniel S (18 September 2007)
 - Immanuel pointed out that public key SSH auth failed if no public/private
   key was specified and there was no HOME environment variable, and then it

@@ -1470,6 +1470,14 @@ if test "$OPENSSL_ENABLED" != "1" -a "$GNUTLS_ENABLED" != "1"; then
       version="unknown"
       gtlsprefix=$OPT_GNUTLS
     fi
+
+    dnl Check for functionPK11_CreateGenericObject
+    dnl this is needed for using the PEM PKCS#11 module
+    AC_CHECK_LIB(nss3, PK11_CreateGenericObject-d,
+     [
+     AC_DEFINE(HAVE_PK11_CREATEGENERICOBJECT, 1, [if you have the function PK11_CreateGenericObject])
+     AC_SUBST(HAVE_PK11_CREATEGENERICOBJECT, [1])
+     ])
     if test -n "$addlib"; then
 
       CLEANLIBS="$LIBS"
@@ -1521,7 +1529,7 @@ dnl **********************************************************************
 dnl Check for the CA bundle
 dnl **********************************************************************
 
-if test X"$USE_GNUTLS$OPENSSL_ENABLED" != "X"; then
+if test X"$USE_NSS$USE_GNUTLS$OPENSSL_ENABLED" != "X"; then
 
   AC_MSG_CHECKING([CA cert bundle install path])
 

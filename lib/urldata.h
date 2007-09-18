@@ -183,6 +183,7 @@ struct ssl_connect_data {
 #endif /* USE_GNUTLS */
 #ifdef USE_NSS
   PRFileDesc *handle;
+  char *client_nickname;
 #endif /* USE_NSS */
 #ifdef USE_QSOSSL
   SSLHandle *handle;
