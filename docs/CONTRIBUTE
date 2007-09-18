@@ -78,6 +78,10 @@ Commenting
  replaced when someone wants to extend things, since other persons' source
  code can get quite hard to read.
 
+Line Lengths
+
+ We try to keep source lines shorter than 80 columns.
+
 General Style
 
  Keep your functions small. If they're small you avoid a lot of mistakes and
@@ -189,5 +193,5 @@ How to get your patches into the libcurl sources
     simply drop such patches from my TODO list.
 
  5. If you've followed the above mentioned paragraphs and your patch still
-    hasn't been incorporated after some weeks, consider resubmitting them to
-    the list.
+    hasn't been incorporated after some weeks, consider resubmitting it to the
+    list.
