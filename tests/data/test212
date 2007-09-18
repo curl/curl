@@ -14,6 +14,10 @@ REPLY EPRT 500 no such command
 <server>
 ftp
 </server>
+# EPRT is only sent when IPv6 is enabled
+<features>
+ipv6
+</features>
  <name>
 Get two FTP files with no remote EPRT support
  </name>

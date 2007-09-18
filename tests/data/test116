@@ -18,6 +18,10 @@ REPLY PORT 314 bluah you f00l!
 <server>
 ftp
 </server>
+# EPRT is only sent when IPv6 is enabled
+<features>
+ipv6
+</features>
  <name>
 FTP download, failed PORT
  </name>
