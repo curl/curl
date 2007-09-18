@@ -18,6 +18,7 @@ This release includes the following bugfixes:
  o curl-config --protocols now properly reports LDAPS, SCP and SFTP
  o ldapv3 support on Windows
  o ldap builds with the MSVC makefiles
+ o no HOME and no key given caused SSH auth failure
 
 This release includes the following known bugs:
 

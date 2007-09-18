@@ -407,6 +407,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
           sshc->rsa_pub = aprintf("%s", data->set.str[STRING_SSH_PUBLIC_KEY]);
         else if (home)
           sshc->rsa_pub = aprintf("%s/.ssh/id_dsa.pub", home);
+        else
+          /* as a final resort, try current dir! */
+          sshc->rsa_pub = strdup("id_dsa.pub");
 
         if (sshc->rsa_pub == NULL) {
           Curl_safefree(home);
@@ -420,6 +423,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
           sshc->rsa = aprintf("%s", data->set.str[STRING_SSH_PRIVATE_KEY]);
         else if (home)
           sshc->rsa = aprintf("%s/.ssh/id_dsa", home);
+        else
+          /* as a final resort, try current dir! */
+          sshc->rsa = strdup("id_dsa");
 
         if (sshc->rsa == NULL) {
           Curl_safefree(home);
