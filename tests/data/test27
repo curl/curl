@@ -27,7 +27,7 @@ http
 Get same cookie page several times
  </name>
  <command>
-'http://%HOSTIP:%HTTPPORT/want/{27,27,27}' -b none
+"http://%HOSTIP:%HTTPPORT/want/{27,27,27}" -b none
 </command>
 </client>
 

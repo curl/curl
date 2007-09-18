@@ -40,7 +40,7 @@ http
 multiple requests using {} in URL
  </name>
  <command>
-'%HOSTIP:%HTTPPORT/{18,180002,180003}'
+"%HOSTIP:%HTTPPORT/{18,180002,180003}"
 </command>
 </client>
 

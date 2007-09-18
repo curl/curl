@@ -28,7 +28,7 @@ http
 HTTP with -d, -G and {}
  </name>
  <command>
--d "foo=moo&moo=poo" http://%HOSTIP:%HTTPPORT/{199,199} -G
+-d "foo=moo&moo=poo" "http://%HOSTIP:%HTTPPORT/{199,199}" -G
 </command>
 </client>
 

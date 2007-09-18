@@ -28,7 +28,7 @@ http
 --write-out test
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/15 --write-out '%{url_effective} %{http_code} %{size_download}\n'
+http://%HOSTIP:%HTTPPORT/want/15 --write-out "%{url_effective} %{http_code} %{size_download}\n"
 </command>
 </client>
 

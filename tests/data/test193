@@ -32,7 +32,7 @@ http
 HTTP GET -w num_connects with redirected fetch (2 connects)
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/193 -w '%{num_connects}\n' -L
+http://%HOSTIP:%HTTPPORT/193 -w "%{num_connects}\n" -L
 </command>
 </client>
 

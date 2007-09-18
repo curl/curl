@@ -25,7 +25,7 @@ http
 HTTP content-type with spaces in
  </name>
  <command>
--w '%{content_type}\n' http://%HOSTIP:%HTTPPORT/57 -o log/out57
+-w "%{content_type}\n" http://%HOSTIP:%HTTPPORT/57 -o log/out57
 </command>
 </client>
 

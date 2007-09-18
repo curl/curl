@@ -27,7 +27,7 @@ http
 HTTP RFC1867-type formposting without Expect: header
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/44 -F name=daniel -F tool=curl -F file=@log/test44.txt -H 'Expect:'
+http://%HOSTIP:%HTTPPORT/we/want/44 -F name=daniel -F tool=curl -F file=@log/test44.txt -H "Expect:"
 </command>
 # We create this file before the command is invoked!
 <file name="log/test44.txt">

@@ -22,7 +22,7 @@ http
 HTTP GET -w num_connects with one simple connect
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/192 -w '%{num_connects}\n'
+http://%HOSTIP:%HTTPPORT/192 -w "%{num_connects}\n"
 </command>
 </client>
 

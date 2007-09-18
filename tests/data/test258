@@ -60,7 +60,7 @@ crypto
 HTTP POST multipart without Expect: header using proxy anyauth (Digest)
  </name>
  <command>
--x http://%HOSTIP:%HTTPPORT http://remotehost:54321/we/want/258 -F name=daniel -F tool=curl -F file=@log/test258.txt -H 'Expect:' -U uuuser:pppassword --proxy-anyauth
+-x http://%HOSTIP:%HTTPPORT http://remotehost:54321/we/want/258 -F name=daniel -F tool=curl -F file=@log/test258.txt -H "Expect:" -U uuuser:pppassword --proxy-anyauth
 </command>
 # We create this file before the command is invoked!
 <file name="log/test258.txt">

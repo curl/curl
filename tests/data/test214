@@ -23,7 +23,7 @@ http
 HTTP URL with escaped { and }
  </name>
 <command>
-'http://%HOSTIP:%HTTPPORT/\{\}\/214'
+"http://%HOSTIP:%HTTPPORT/\{\}\/214"
 </command>
 </client>
 
