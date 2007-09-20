@@ -32,11 +32,11 @@ Daniel S (19 September 2007)
   keys.
 
 Daniel S (18 September 2007)
-- Immanuel pointed out that public key SSH auth failed if no public/private
-  key was specified and there was no HOME environment variable, and then it
-  didn't continue to try the other auth methods. Now it will instead try to
-  get the files id_dsa.pub and id_dsa from the current directory if none of
-  the two conditions were met.
+- Immanuel Gregoire pointed out that public key SSH auth failed if no
+  public/private key was specified and there was no HOME environment variable,
+  and then it didn't continue to try the other auth methods. Now it will
+  instead try to get the files id_dsa.pub and id_dsa from the current
+  directory if none of the two conditions were met.
 
 Dan F (17 September 2007)
 - Added hooks to the test suite to make it possible to test a curl running
