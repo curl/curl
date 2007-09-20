@@ -32,9 +32,9 @@ HTTP, junk session cookies
 %HOSTIP:%HTTPPORT/want/53 -b log/injar53 -j
 </command>
 <file name="log/injar53">
-127.0.0.1	FALSE	/	FALSE	2139150993	mooo	indeed
-127.0.0.1	FALSE	/	FALSE	0		moo1	indeed
-127.0.0.1	FALSE	/	FALSE	1		moo2	indeed
+%HOSTIP	FALSE	/	FALSE	2139150993	mooo	indeed
+%HOSTIP	FALSE	/	FALSE	0		moo1	indeed
+%HOSTIP	FALSE	/	FALSE	1		moo2	indeed
 </file>
 </client>
 

@@ -109,6 +109,12 @@ Code coverage:
   The text mode tool gcov may also be used, but it doesn't handle object files
   in more than one directory very well.
 
+Remote testing:
+  The runtests.pl script provides some hooks to allow curl to be tested on a
+  machine where perl can not be run.  The test framework in this case runs on
+  a workstation where perl is available, while curl itself is run on a remote
+  system using ssh or some other remote execution method.  See the comments at
+  the beginning of runtests.pl for details.
 
 TEST CASE NUMBERS
 

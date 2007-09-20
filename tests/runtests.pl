@@ -25,18 +25,33 @@
 # Experimental hooks are available to run tests remotely on machines that
 # are able to run curl but are unable to run the test harness.  
 # The following sections need to be modified:
+#
 #  $HOSTIP, $HOST6IP - Set to the address of the host running the test suite
 #  $CLIENTIP, $CLIENT6IP - Set to the address of the host running curl
-#  checktestcmd - Modify to check the remote system's PATH (only needed
-#    if -g is given, or -n is NOT given)
-#  runcurl - Modify to copy all the files in the log/ directory to the
-#    system running curl, run the given command remotely and save the
-#    return code, then copy all the files from the remote system's log/
-#    directory back to the host running the test suite.  This can be
-#    done a few ways, such as using scp & ssh, or rsync & telnet.
-# Note that even with these changes a number of tests will still fail
-# (mainly to do with cookies or authentication) due to hard-coded
-# addresses within various protocol fields.
+#  runclient, runclientoutput - Modify to copy all the files in the log/
+#    directory to the system running curl, run the given command remotely
+#    and save the return code or returned stdout (respectively), then
+#    copy all the files from the remote system's log/ directory back to
+#    the host running the test suite.  This can be done a few ways, such
+#    as using scp & ssh, rsync & telnet, or using a NFS shared directory
+#    and ssh.
+#
+# 'make && make test' needs to be done on both machines before making the
+# above changes and running runtests.pl manually.  In the shared NFS case,
+# the contents of the tests/server/ directory must be from the host
+# running the test suite, while the rest must be from the host running curl.
+#
+# Note that even with these changes a number of tests will still fail (mainly
+# to do with cookies, those that set environment variables, or those that
+# do more than touch the file system in a <precheck> or <postcheck>
+# section). These can be added to the $TESTCASES line below,
+# e.g. $TESTCASES="!8 !31 !63..."
+#
+# Finally, to properly support -g and -n, checktestcmd needs to change
+# to check the remote system's PATH, and the places in the code where
+# the curl binary is read directly to determine its type also need to be
+# fixed. As long as the -g option is never given, and the -n is always
+# given, this won't be a problem.
 
 
 # These should be the only variables that might be needed to get edited:
@@ -118,41 +133,17 @@ my $memdump="$LOGDIR/memdump";
 # the path to the script that analyzes the memory debug output file:
 my $memanalyze="$perl $srcdir/memanalyze.pl";
 
-my $stunnel = checkcmd("stunnel4") || checkcmd("stunnel");
-my $valgrind = checktestcmd("valgrind");
-my $valgrind_logfile="--logfile";
+my $pwd;          # current working directory
+chomp($pwd = `pwd`);
+
 my $start;
 my $forkserver=0;
 my $ftpchecktime; # time it took to verify our test FTP server
 
+my $stunnel = checkcmd("stunnel4") || checkcmd("stunnel");
+my $valgrind = checktestcmd("valgrind");
+my $valgrind_logfile="--logfile";
 my $valgrind_tool;
-if($valgrind) {
-    # since valgrind 2.1.x, '--tool' option is mandatory
-    # use it, if it is supported by the version installed on the system
-    runcurl("valgrind --help 2>&1 | grep -- --tool > /dev/null 2>&1");
-    if (($? >> 8)==0) {
-        $valgrind_tool="--tool=memcheck ";
-    }
-    open(C, "<$CURL");
-    my $l = <C>;
-    if($l =~ /^\#\!/) {
-        # The first line starts with "#!" which implies a shell-script.
-        # This means libcurl is built shared and curl is a wrapper-script
-        # Disable valgrind in this setup
-        $valgrind=0;
-    }
-    close(C);
-
-    # valgrind 3 renamed the --logfile option to --log-file!!!
-    my $ver=`valgrind --version`;
-    # cut off all but digits and dots
-    $ver =~ s/[^0-9.]//g;
-
-    if($ver >= 3) {
-        $valgrind_logfile="--log-file";
-    }
-}
-
 my $gdb = checktestcmd("gdb");
 
 my $ssl_version; # set if libcurl is built with SSL support
@@ -194,8 +185,6 @@ my $keepoutfiles; # keep stdout and stderr files after tests
 my $listonly;     # only list the tests
 my $postmortem;   # display detailed info about failed tests
 
-my $pwd;          # current working directory
-
 my %run;	  # running server
 
 # torture test variables
@@ -218,8 +207,6 @@ sub logmsg {
         print "${t}$_";
     }
 }
-
-chomp($pwd = `pwd`);
 
 # get the name of the current user
 my $USER = $ENV{USER};	# Linux
@@ -371,12 +358,30 @@ sub checktestcmd {
 }
 
 #######################################################################
-# Run the application under test
+# Run the application under test and return its return code
 #
-sub runcurl {
+sub runclient {
     my ($cmd)=@_;
     return system($cmd);
+
+# This is one way to test curl on a remote machine
+#    my $out = system("ssh $CLIENTIP cd \'$pwd\' \\; \'$cmd\'");
+#    sleep 2;	# time to allow the NFS server to be updated
+#    return $out;
 }
+
+#######################################################################
+# Run the application under test and return its stdout
+#
+sub runclientoutput {
+    my ($cmd)=@_;
+    return `$cmd`;
+
+# This is one way to test curl on a remote machine
+#    my @out = `ssh $CLIENTIP cd \'$pwd\' \\; \'$cmd\'`;
+#    sleep 2;	# time to allow the NFS server to be updated
+#    return @out;
+ }
 
 #######################################################################
 # Memory allocation test and failure torture testing.
@@ -389,7 +394,7 @@ sub torture {
     unlink($memdump);
 
     # First get URL from test server, ignore the output/result
-    runcurl($testcmd);
+    runclient($testcmd);
 
     logmsg " CMD: $testcmd\n" if($verbose);
 
@@ -430,10 +435,10 @@ sub torture {
 
         my $ret;
         if($gdbthis) {
-            runcurl($gdbline)
+            runclient($gdbline)
         }
         else {
-            $ret = runcurl($testcmd);
+            $ret = runclient($testcmd);
         }
 
         # Now clear the variable again
@@ -539,7 +544,7 @@ sub verifyhttp {
 
     # verify if our/any server is running on this port
     logmsg "CMD; $cmd\n" if ($verbose);
-    my $res = runcurl($cmd);
+    my $res = runclient($cmd);
 
     $res >>= 8; # rotate the result
     my $data;
@@ -591,7 +596,7 @@ sub verifyftp {
     }
     my $cmd="$CURL -m$server_response_maxtime --silent -vg $extra\"$proto://$ip:$port/verifiedserver\" 2>log/verifyftp";
     # check if this is our server running on this port:
-    my @data=`$cmd`;
+    my @data=runclientoutput($cmd);
     logmsg "RUN: $cmd\n" if($verbose);
     my $line;
 
@@ -826,13 +831,17 @@ sub runftpserver {
     # start our server:
     my $flag=$debugprotocol?"-v ":"";
     $flag .= "-s \"$srcdir\" ";
+    my $addr;
     if($id) {
         $flag .="--id $id ";
     }
     if($ipv6) {
         $flag .="--ipv6 ";
+        $addr = $HOST6IP;
+    } else {
+        $addr = $HOSTIP;
     }
-    $cmd="$perl $srcdir/ftpserver.pl --pidfile $pidfile $flag --port $port";
+    $cmd="$perl $srcdir/ftpserver.pl --pidfile $pidfile $flag --port $port --addr \"$addr\"";
 
     unlink($pidfile);
 
@@ -1144,7 +1153,7 @@ sub checksystem {
     unlink($curlverout);
     unlink($curlvererr);
 
-    $versretval = runcurl($versioncmd);
+    $versretval = runclient($versioncmd);
     $versnoexec = $!;
 
     open(VERSOUT, "<$curlverout");
@@ -1334,8 +1343,8 @@ sub checksystem {
     # always available
     $has_crypto=1;
 
-    my $hostname=`hostname`;
-    my $hosttype=`uname -a`;
+    my $hostname=join(' ', runclientoutput("hostname"));
+    my $hosttype=join(' ', runclientoutput("uname -a"));
 
     logmsg ("********* System characteristics ******** \n",
     "* $curl\n",
@@ -1768,11 +1777,11 @@ sub singletest {
                        "$gdb --directory libtest $DBGCURL -x log/gdbcmd");
     }
     elsif($gdbthis) {
-        runcurl("$gdb --directory libtest $DBGCURL -x log/gdbcmd");
+        runclient("$gdb --directory libtest $DBGCURL -x log/gdbcmd");
         $cmdres=0; # makes it always continue after a debugged run
     }
     else {
-        $cmdres = runcurl("$CMDLINE");
+        $cmdres = runclient("$CMDLINE");
         my $signal_num  = $cmdres & 127;
         $dumped_core = $cmdres & 128;
 
@@ -1797,7 +1806,7 @@ sub singletest {
             open(GDBCMD, ">log/gdbcmd2");
             print GDBCMD "bt\n";
             close(GDBCMD);
-            runcurl("$gdb --directory libtest -x log/gdbcmd2 -batch $DBGCURL core ");
+            runclient("$gdb --directory libtest -x log/gdbcmd2 -batch $DBGCURL core ");
      #       unlink("log/gdbcmd2");
         }
     }
@@ -1808,7 +1817,7 @@ sub singletest {
     chomp $cmd;
     subVariables \$cmd;
     if($cmd) {
-	my $rc = runcurl("$cmd");
+	my $rc = runclient("$cmd");
 	if($rc != 0) {
 	    logmsg "postcheck failure\n";
 	    return 1;
@@ -1958,7 +1967,7 @@ sub singletest {
 
     my @outfile=getpart("verify", "file");
     if(@outfile) {
-        # we're supposed to verify a dynamicly generated file!
+        # we're supposed to verify a dynamically generated file!
         my %hash = getpartattr("verify", "file");
 
         my $filename=$hash{'name'};
@@ -1986,6 +1995,8 @@ sub singletest {
                 eval $strip;
             }
         }
+
+        @outfile = fixarray(@outfile);
 
         $res = compare("output", \@generated, \@outfile);
         if($res) {
@@ -2498,23 +2509,51 @@ if($valgrind) {
     # we have found valgrind on the host, use it
 
     # verify that we can invoke it fine
-    my $code = runcurl("valgrind >/dev/null 2>&1");
+    my $code = runclient("valgrind >/dev/null 2>&1");
 
     if(($code>>8) != 1) {
         #logmsg "Valgrind failure, disable it\n";
         undef $valgrind;
+    } else {
+
+	# since valgrind 2.1.x, '--tool' option is mandatory
+	# use it, if it is supported by the version installed on the system
+	runclient("valgrind --help 2>&1 | grep -- --tool > /dev/null 2>&1");
+	if (($? >> 8)==0) {
+	    $valgrind_tool="--tool=memcheck ";
+	}
+	open(C, "<$CURL");
+	my $l = <C>;
+	if($l =~ /^\#\!/) {
+	    # The first line starts with "#!" which implies a shell-script.
+	    # This means libcurl is built shared and curl is a wrapper-script
+	    # Disable valgrind in this setup
+	    $valgrind=0;
+	}
+	close(C);
+
+	# valgrind 3 renamed the --logfile option to --log-file!!!
+	my $ver=join(' ', runclientoutput("valgrind --version"));
+	# cut off all but digits and dots
+	$ver =~ s/[^0-9.]//g;
+
+	if($ver >= 3) {
+	    $valgrind_logfile="--log-file";
+	}
     }
 }
 
-# open the executable curl and read the first 4 bytes of it
-open(CHECK, "<$CURL");
-my $c;
-sysread CHECK, $c, 4;
-close(CHECK);
-if($c eq "#! /") {
-    # A shell script. This is typically when built with libtool,
-    $libtool = 1;
-    $gdb = "libtool --mode=execute gdb";
+if ($gdbthis) {
+    # open the executable curl and read the first 4 bytes of it
+    open(CHECK, "<$CURL");
+    my $c;
+    sysread CHECK, $c, 4;
+    close(CHECK);
+    if($c eq "#! /") {
+	# A shell script. This is typically when built with libtool,
+	$libtool = 1;
+	$gdb = "libtool --mode=execute gdb";
+    }
 }
 
 $HTTPPORT =  $base + 0; # HTTP server port

@@ -112,6 +112,7 @@ do {
     }
     elsif($ARGV[0] eq "--addr") {
         $listenaddr = $ARGV[1];
+	$listenaddr =~ s/^\[(.*)\]$/\1/;
         shift @ARGV;
     }
 } while(shift @ARGV);
