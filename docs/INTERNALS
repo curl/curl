@@ -1,4 +1,3 @@
-                                    Updated for curl 7.9.1 on November 2, 2001
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -37,8 +36,8 @@ Windows vs Unix
 
  2. Windows requires a couple of init calls for the socket stuff.
 
-   Those must be made by the application that uses libcurl, in curl that means
-   src/main.c has some code #ifdef'ed to do just that.
+   That's taken care of by the curl_global_init() call, but if other libs also
+   do it etc there might be reasons for applications to alter that behaviour.
 
  3. The file descriptors for network communication and file operations are
     not easily interchangable as in unix.
