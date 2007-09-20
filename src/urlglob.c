@@ -186,7 +186,7 @@ static GlobCode glob_range(URLGlob *glob, char *pattern,
     if ((rc < 3) || (min_c >= max_c) || ((max_c - min_c) > ('z' - 'a'))) {
       /* the pattern is not well-formed */
       snprintf(glob->errormsg, sizeof(glob->errormsg),
-               "errpr: bad range specification after pos %d\n", pos);
+               "error: bad range specification after pos %d\n", pos);
       return GLOB_ERROR;
     }
 
