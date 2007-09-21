@@ -426,6 +426,7 @@ struct Configurable {
   bool create_dirs;
   bool ftp_create_dirs;
   bool ftp_skip_ip;
+  bool proxynegotiate;
   bool proxyntlm;
   bool proxydigest;
   bool proxybasic;
@@ -690,6 +691,7 @@ static void help(void)
     "    --proxy-anyauth Pick \"any\" proxy authentication method (H)",
     "    --proxy-basic   Use Basic authentication on the proxy (H)",
     "    --proxy-digest  Use Digest authentication on the proxy (H)",
+    "    --proxy-negotiate Use Negotiate authentication on the proxy (H)",
     "    --proxy-ntlm    Use NTLM authentication on the proxy (H)",
     " -P/--ftp-port <address> Use PORT with address instead of PASV (F)",
     " -q                 If used as the first parameter disables .curlrc",
@@ -1492,6 +1494,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$g", "retry",      TRUE},
     {"$h", "retry-delay", TRUE},
     {"$i", "retry-max-time", TRUE},
+    {"$k", "proxy-negotiate",   FALSE},
     {"$m", "ftp-account", TRUE},
     {"$n", "proxy-anyauth", FALSE},
     {"$o", "trace-time", FALSE},
@@ -1892,6 +1895,12 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           return PARAM_BAD_NUMERIC;
         break;
 
+      case 'k': /* --proxy-negotiate */
+        if(curlinfo->features & CURL_VERSION_GSSNEGOTIATE)
+          config->proxynegotiate ^= TRUE;
+        else
+          return PARAM_LIBCURL_DOESNT_SUPPORT;
+        break;
       case 'm': /* --ftp-account */
         GetStr(&config->ftp_account, nextarg);
         break;
@@ -4302,6 +4311,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
                          config->ftp_create_dirs);
         if(config->proxyanyauth)
           my_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
+        else if(config->proxynegotiate)
+          my_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_GSSNEGOTIATE);
         else if(config->proxyntlm)
           my_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_NTLM);
         else if(config->proxydigest)

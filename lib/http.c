@@ -424,6 +424,18 @@ Curl_http_output_auth(struct connectdata *conn,
   /* Send proxy authentication header if needed */
   if (conn->bits.httpproxy &&
       (conn->bits.tunnel_proxy == proxytunnel)) {
+#ifdef HAVE_GSSAPI
+    if((authproxy->picked == CURLAUTH_GSSNEGOTIATE) &&
+       data->state.negotiate.context &&
+       !GSS_ERROR(data->state.negotiate.status)) {
+      auth="GSS-Negotiate";
+      result = Curl_output_negotiate(conn, TRUE);
+      if (result)
+        return result;
+      authproxy->done = TRUE;
+    } 
+    else
+#endif
 #ifdef USE_NTLM
     if(authproxy->picked == CURLAUTH_NTLM) {
       auth="NTLM";
@@ -486,7 +498,7 @@ Curl_http_output_auth(struct connectdata *conn,
          data->state.negotiate.context &&
          !GSS_ERROR(data->state.negotiate.status)) {
         auth="GSS-Negotiate";
-        result = Curl_output_negotiate(conn);
+        result = Curl_output_negotiate(conn, FALSE);
         if (result)
           return result;
         authhost->done = TRUE;
@@ -593,7 +605,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
     authp->avail |= CURLAUTH_GSSNEGOTIATE;
     if(authp->picked == CURLAUTH_GSSNEGOTIATE) {
       /* if exactly this is wanted, go */
-      int neg = Curl_input_negotiate(conn, start);
+      int neg = Curl_input_negotiate(conn, (bool)(httpcode == 407), start);
       if (neg == 0) {
         data->reqdata.newurl = strdup(data->change.url);
         data->state.authproblem = (data->reqdata.newurl == NULL);

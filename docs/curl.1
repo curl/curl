@@ -774,6 +774,9 @@ meant as a support for Kerberos5 authentication but may be also used along
 with another authentication methods. For more information see IETF draft
 draft-brezak-spnego-http-04.txt.
 
+If you want to enable Negotiate for your proxy authentication, then use
+\fI--proxy-negotiate\fP.
+
 This option requires that the library was built with GSSAPI support. This is
 not very common. Use \fI-V/--version\fP to see if your version supports
 GSS-Negotiate.
@@ -863,6 +866,14 @@ Tells curl to use HTTP Digest authentication when communicating with the given
 proxy. Use \fI--digest\fP for enabling HTTP Digest with a remote host.
 
 If this option is used twice, the second will again disable proxy HTTP Digest.
+.IP "--proxy-negotiate"
+Tells curl to use HTTP Negotiate authentication when communicating
+with the given proxy. Use \fI--negotiate\fP for enabling HTTP Negotiate
+with a remote host.
+
+If this option is used twice, the second will again disable proxy HTTP
+Negotiate.
+
 .IP "--proxy-ntlm"
 Tells curl to use HTTP NTLM authentication when communicating with the given
 proxy. Use \fI--ntlm\fP for enabling NTLM with a remote host.

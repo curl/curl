@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel S (21 September 2007)
+- Mark Davies fixed Negotiate authentication over proxy, and also introduced
+  the --proxy-negotiate command line option to allow a user to explicitly
+  select it.
+
 Daniel S (19 September 2007)
 - Rob Crittenden provided an NSS update with the following highlights:
 
