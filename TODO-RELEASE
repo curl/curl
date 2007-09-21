@@ -3,8 +3,6 @@ To be addressed before 7.17.1 (planned release: November 2007)
 
 93 - Digest for IIS fix
 
-94 - NSS patch
-
 97 - check ip callback
 
 99 - curl_easy_close() ?
