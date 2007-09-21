@@ -2,7 +2,7 @@ Curl and libcurl 7.17.1
 
  Public curl release number:               102
  Releases counted from the very beginning: 128
- Available command line options:           118
+ Available command line options:           119
  Available curl_easy_setopt() options:     143
  Number of public functions in libcurl:    55
  Amount of public web site mirrors:        42
