@@ -1,9 +1,17 @@
   Changelog for the c-ares project
 
+* September 22 2007 (Daniel Stenberg)
+
+- Brad House provided a fix for ares_save_options():
+
+  Apparently I overlooked something with the ares_save_options() where it
+  would try to do a malloc(0) when no options of that type needed to be saved.
+  On most platforms, this was fine because malloc(0) doesn't actually return
+  NULL, but on AIX it does, so ares_save_options would return ARES_ENOMEM.
+
 * July 14 2007 (Daniel Stenberg)
 
 - Vlad Dinulescu fixed two outstanding valgrind reports:
-
  
   1. In ares_query.c , in find_query_by_id we compare q->qid (which is a short
   int variable) with qid, which is declared as an int variable.  Moreover,

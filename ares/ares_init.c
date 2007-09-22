@@ -244,40 +244,49 @@ int ares_save_options(ares_channel channel, struct ares_options *options,
   options->sock_state_cb_data = channel->sock_state_cb_data;
 
   /* Copy servers */
-  options->servers =
-    malloc(channel->nservers * sizeof(struct server_state));
-  if (!options->servers && channel->nservers != 0)
-    return ARES_ENOMEM;
-  for (i = 0; i < channel->nservers; i++)
-    options->servers[i] = channel->servers[i].addr;
+  if (channel->nservers) {
+    options->servers =
+      malloc(channel->nservers * sizeof(struct server_state));
+    if (!options->servers && channel->nservers != 0)
+      return ARES_ENOMEM;
+    for (i = 0; i < channel->nservers; i++)
+      options->servers[i] = channel->servers[i].addr;
+  }
   options->nservers = channel->nservers;
 
   /* copy domains */
-  options->domains = malloc(channel->ndomains * sizeof(char *));
-  if (!options->domains)
-    return ARES_ENOMEM;
-  for (i = 0; i < channel->ndomains; i++)
-  {
-    options->ndomains = i;
-    options->domains[i] = strdup(channel->domains[i]);
-    if (!options->domains[i])
+  if (channel->ndomains) {
+    options->domains = malloc(channel->ndomains * sizeof(char *));
+    if (!options->domains)
       return ARES_ENOMEM;
+
+    for (i = 0; i < channel->ndomains; i++)
+    {
+      options->ndomains = i;
+      options->domains[i] = strdup(channel->domains[i]);
+      if (!options->domains[i])
+        return ARES_ENOMEM;
+    }
   }
   options->ndomains = channel->ndomains;
 
   /* copy lookups */
-  options->lookups = strdup(channel->lookups);
-  if (!options->lookups)
-    return ARES_ENOMEM;
+  if (channel->lookups) {
+    options->lookups = strdup(channel->lookups);
+    if (!options->lookups && channel->lookups)
+      return ARES_ENOMEM;
+  }
 
   /* copy sortlist */
-  options->sortlist = malloc(channel->nsort * sizeof(struct apattern));
-  if (!options->sortlist)
-    return ARES_ENOMEM;
-  for (i = 0; i < channel->nsort; i++)
-  {
-    memcpy(&(options->sortlist[i]), &(channel->sortlist[i]),
-           sizeof(struct apattern));
+  if (channel->nsort) {
+    options->sortlist = malloc(channel->nsort * sizeof(struct apattern));
+    if (!options->sortlist)
+      return ARES_ENOMEM;
+    for (i = 0; i < channel->nsort; i++)
+    {
+      memcpy(&(options->sortlist[i]), &(channel->sortlist[i]),
+             sizeof(struct apattern));
+    }
   }
   options->nsort = channel->nsort;
 
