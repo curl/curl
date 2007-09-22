@@ -2,6 +2,9 @@
 
 * September 22 2007 (Daniel Stenberg)
 
+- Steinar H. Gunderson modified c-ares to now also do to DNS retries even when
+  TCP is used since there are several edge cases where it still makes sense.
+
 - Brad House provided a fix for ares_save_options():
 
   Apparently I overlooked something with the ares_save_options() where it
