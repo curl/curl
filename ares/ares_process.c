@@ -167,6 +167,13 @@ static void write_tcp_data(ares_channel channel,
           continue;
       }
 
+      /* If there's an error and we close this socket, then open
+       * another with the same fd to talk to another server, then we
+       * don't want to think that it was the new socket that was
+       * ready. This is not disastrous, but is likely to result in
+       * extra system calls and confusion. */
+      FD_CLR(server->tcp_socket, write_fds);
+
       /* Count the number of send queue items. */
       n = 0;
       for (sendreq = server->qhead; sendreq; sendreq = sendreq->next)
@@ -280,6 +287,13 @@ static void read_tcp_data(ares_channel channel, fd_set *read_fds,
           continue;
       }
 
+      /* If there's an error and we close this socket, then open
+       * another with the same fd to talk to another server, then we
+       * don't want to think that it was the new socket that was
+       * ready. This is not disastrous, but is likely to result in
+       * extra system calls and confusion. */
+      FD_CLR(server->tcp_socket, read_fds);
+
       if (server->tcp_lenbuf_pos != 2)
         {
           /* We haven't yet read a length word, so read that (or
@@ -369,6 +383,13 @@ static void read_udp_packets(ares_channel channel, fd_set *read_fds,
         if(server->udp_socket != read_fd)
           continue;
       }
+
+      /* If there's an error and we close this socket, then open
+       * another with the same fd to talk to another server, then we
+       * don't want to think that it was the new socket that was
+       * ready. This is not disastrous, but is likely to result in
+       * extra system calls and confusion. */
+      FD_CLR(server->udp_socket, read_fds);
 
       count = sread(server->udp_socket, buf, sizeof(buf));
       if (count == -1 && try_again(SOCKERRNO))

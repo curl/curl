@@ -2,6 +2,11 @@
 
 * September 22 2007 (Daniel Stenberg)
 
+- Steinar H. Gunderson fixed: Correctly clear sockets from the fd_set on in
+  several functions (write_tcp_data, read_tcp_data, read_udp_packets) so that
+  if it fails and the socket is closed the following code doesn't try to use
+  the file descriptor.
+
 - Steinar H. Gunderson modified c-ares to now also do to DNS retries even when
   TCP is used since there are several edge cases where it still makes sense.
 
