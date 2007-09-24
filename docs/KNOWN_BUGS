@@ -17,9 +17,6 @@ may have been fixed since this was written!
   initial suggested function to use for randomizing the response:
     http://curl.haxx.se/mail/lib-2007-07/0178.html
 
-44. --ftp-method nocwd does not handle URLs ending with a slash properly (it
-  should list the contents of that directory). See test case 351.
-
 43. There seems to be a problem when connecting to the Microsoft telnet server.
   http://curl.haxx.se/bug/view.cgi?id=1720605
 

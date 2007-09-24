@@ -22,6 +22,7 @@ This release includes the following bugfixes:
  o ldap builds with the MSVC makefiles
  o no HOME and no key given caused SSH auth failure
  o Negotiate authentication over proxy
+ o --ftp-method nocwd on directory listings
 
 This release includes the following known bugs:
 

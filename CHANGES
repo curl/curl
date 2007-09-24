@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel S (24 September 2007)
+- Immanuel Gregoire fixed KNOWN_BUGS #44: --ftp-method nocwd did not handle
+  URLs ending with a slash properly (it should list the contents of that
+  directory). Test case 351 brought back and also test 1010 was added.
+
 Daniel S (21 September 2007)
 - Mark Davies fixed Negotiate authentication over proxy, and also introduced
   the --proxy-negotiate command line option to allow a user to explicitly

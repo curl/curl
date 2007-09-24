@@ -1279,10 +1279,52 @@ static CURLcode ftp_state_post_listtype(struct connectdata *conn)
      way. It has turned out that the NLST list output is not the same on all
      servers either... */
 
-  NBFTPSENDF(conn, "%s",
-             data->set.str[STRING_CUSTOMREQUEST]?
-             data->set.str[STRING_CUSTOMREQUEST]:
-             (data->set.ftp_list_only?"NLST":"LIST"));
+  /*
+     if FTPFILE_NOCWD was specified, we are currently in
+     the user's home directory, so we should add the path
+     as argument for the LIST / NLST / or custom command.
+     Whether the server will support this, is uncertain.
+
+     The other ftp_filemethods will CWD into dir/dir/ first and
+     then just do LIST (in that case: nothing to do here)
+  */
+  char *cmd,*lstArg,*slashPos;
+
+  lstArg = NULL;
+  if((data->set.ftp_filemethod == FTPFILE_NOCWD) &&
+     data->reqdata.path &&
+     data->reqdata.path[0] &&
+     strchr(data->reqdata.path,'/')) {
+
+    lstArg = strdup(data->reqdata.path);
+    if(!lstArg)
+      return CURLE_OUT_OF_MEMORY;
+
+    /* Check if path does not end with /, as then we cut off the file part */
+    if(lstArg[strlen(lstArg) - 1] != '/')  {
+
+      /* chop off the file part if format is dir/dir/file */
+      slashPos = strrchr(lstArg,'/');
+      *(slashPos+1) = '\0';
+    }
+  }
+
+  cmd = aprintf( "%s%s%s",
+                 data->set.str[STRING_CUSTOMREQUEST]?
+                 data->set.str[STRING_CUSTOMREQUEST]:
+                 (data->set.ftp_list_only?"NLST":"LIST"),
+                 lstArg? " ": "",
+                 lstArg? lstArg: "" );
+
+  if(!cmd)
+    return CURLE_OUT_OF_MEMORY;
+
+  NBFTPSENDF(conn, "%s",cmd);
+
+  if(lstArg)
+    free(lstArg);
+
+  free(cmd);
 
   state(conn, FTP_LIST);
 
@@ -3036,7 +3078,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status,
     size_t flen = ftp->file?strlen(ftp->file):0; /* file is "raw" already */
     size_t dlen = strlen(path)-flen;
     if(!ftpc->cwdfail) {
-      if(dlen) {
+      if(dlen && (data->set.ftp_filemethod != FTPFILE_NOCWD)) {
         ftpc->prevpath = path;
         if(flen)
           /* if 'path' is not the whole string */
@@ -3695,7 +3737,26 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
   switch(data->set.ftp_filemethod) {
   case FTPFILE_NOCWD:
     /* fastest, but less standard-compliant */
-    ftp->file = data->reqdata.path;  /* this is a full file path */
+
+    /*
+      The best time to check whether the path is a file or directory is right
+      here. so:
+
+      the first condition in the if() right here, is there just in case
+      someone decides to set path to NULL one day
+   */
+    if(data->reqdata.path &&
+       data->reqdata.path[0] &&
+       (data->reqdata.path[strlen(data->reqdata.path) - 1] != '/') )
+      ftp->file = data->reqdata.path;  /* this is a full file path */
+    else
+      ftp->file = NULL;
+      /*
+        ftp->file is not used anywhere other than for operations on a file.
+        In other words, never for directory operations.
+        So we can safely set it to NULL here and use it as a
+        argument in dir/file decisions.
+      */
     break;
 
   case FTPFILE_SINGLECWD:
