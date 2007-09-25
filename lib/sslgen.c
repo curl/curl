@@ -390,7 +390,7 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
 }
 
 
-#endif
+#endif /* USE_SSL */
 
 void Curl_ssl_close_all(struct SessionHandle *data)
 {

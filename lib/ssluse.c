@@ -618,8 +618,6 @@ int Curl_ossl_check_cxn(struct connectdata *conn)
   return -1; /* connection status unknown */
 }
 
-#endif /* USE_SSLEAY */
-
 /* Selects an OpenSSL crypto engine
  */
 CURLcode Curl_ossl_set_engine(struct SessionHandle *data, const char *engine)
@@ -654,7 +652,6 @@ CURLcode Curl_ossl_set_engine(struct SessionHandle *data, const char *engine)
 #endif
 }
 
-#ifdef USE_SSLEAY
 /* Sets engine as default for all SSL operations
  */
 CURLcode Curl_ossl_set_engine_default(struct SessionHandle *data)
@@ -674,7 +671,6 @@ CURLcode Curl_ossl_set_engine_default(struct SessionHandle *data)
 #endif
   return CURLE_OK;
 }
-#endif /* USE_SSLEAY */
 
 /* Return list of OpenSSL crypto engine names.
  */
@@ -700,8 +696,6 @@ struct curl_slist *Curl_ossl_engines_list(struct SessionHandle *data)
   return (list);
 }
 
-
-#ifdef USE_SSLEAY
 
 /*
  * This function is called when an SSL connection is closed.
@@ -907,10 +901,7 @@ static int Curl_ASN1_UTCTIME_output(struct connectdata *conn,
   return 0;
 }
 
-#endif
-
 /* ====================================================== */
-#ifdef USE_SSLEAY
 
 /*
  * Match a hostname against a wildcard pattern.
@@ -1150,7 +1141,7 @@ static CURLcode verifyhost(struct connectdata *conn,
   }
   return res;
 }
-#endif
+#endif /* USE_SSLEAY */
 
 /* The SSL_CTRL_SET_MSG_CALLBACK doesn't exist in ancient OpenSSL versions
    and thus this cannot be done there. */
