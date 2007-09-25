@@ -21,6 +21,11 @@
  * $Id$
  ***************************************************************************/
 
+#ifndef _GNU_SOURCE
+/* glibc needs this to define the prototype for strcasestr */
+#define _GNU_SOURCE 1
+#endif
+
 #include "setup.h"
 
 #include <string.h>
