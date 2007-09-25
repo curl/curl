@@ -82,8 +82,11 @@ Lisp
 
 Lua
 
-  LuaCURL Written by Alexander Marinov
+  luacurl by Alexander Marinov
   http://luacurl.luaforge.net/
+
+  Lua-cURL by Jürgen Hötzel
+  http://luaforge.net/projects/lua-curl/
 
 Mono
 
@@ -92,7 +95,7 @@ Mono
 
 .NET
 
-  libcurl-net Written by Jeffrey Phillips
+  libcurl-net by Jeffrey Phillips
   http://sourceforge.net/projects/libcurl-net/
 
 Object-Pascal
@@ -127,12 +130,12 @@ PostgreSQL
 
 Python
 
-  PycURL is written by Kjetil Jacobsen
+  PycURL by Kjetil Jacobsen
   http://pycurl.sourceforge.net/
 
 R
 
-  RCurl is written by Duncan Temple Lang
+  RCurl by Duncan Temple Lang
   http://www.omegahat.org/RCurl/
 
 Rexx
@@ -147,17 +150,17 @@ Ruby
 
 Scheme
 
-  Bigloo binding written by Kirill Lisovsky
+  Bigloo binding by Kirill Lisovsky
   http://curl.haxx.se/libcurl/scheme/
 
 S-Lang
 
-  S-Lang binding written by John E Davis
+  S-Lang binding by John E Davis
   http://www.jedsoft.org/slang/modules/curl.html
 
 Smalltalk
 
-  Smalltalk binding written by Danil Osipchuk
+  Smalltalk binding by Danil Osipchuk
   http://www.squeaksource.com/CurlPlugin/
 
 SP-Forth
@@ -166,17 +169,17 @@ SP-Forth
 
 SPL
 
-  SPL binding written by Clifford Wolf
+  SPL binding by Clifford Wolf
   http://www.clifford.at/spl/
 
 Tcl
 
-  Tclcurl is written by Andrés García
+  Tclcurl by Andrés García
   http://personal1.iddeo.es/andresgarci/tclcurl/english/docs.html
 
 Visual Basic
 
-  libcurl-vb is written by Jeffrey Phillips
+  libcurl-vb by Jeffrey Phillips
   http://sourceforge.net/projects/libcurl-vb/
 
 Q
