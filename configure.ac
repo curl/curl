@@ -1900,6 +1900,7 @@ AC_CHECK_FUNCS( strtoll \
                 select \
                 strdup \
                 strstr \
+                strcasestr \
                 strtok_r \
                 uname \
                 strcasecmp \

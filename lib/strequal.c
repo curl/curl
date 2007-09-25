@@ -90,6 +90,9 @@ int curl_strnequal(const char *first, const char *second, size_t max)
  */
 char *Curl_strcasestr(const char *haystack, const char *needle)
 {
+#if defined(HAVE_STRCASESTR)
+  return strcasestr(haystack, needle);
+#else
   size_t nlen = strlen(needle);
   size_t hlen = strlen(haystack);
 
@@ -99,6 +102,7 @@ char *Curl_strcasestr(const char *haystack, const char *needle)
     haystack++;
   }
   return NULL;
+#endif
 }
 
 #ifndef HAVE_STRLCAT
