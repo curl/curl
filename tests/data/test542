@@ -1,0 +1,57 @@
+<testcase>
+<info>
+<keywords>
+FTP
+PASV
+RETR
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+data
+    to
+      see
+that FTP
+works
+  so does it?
+</data>
+<datacheck>
+Content-Length: 51
+Accept-ranges: bytes
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+<tool>
+lib542
+</tool>
+ <name>
+FTP a file with NOBODY yes and HEADER no
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/542
+</command>
+
+</client>
+
+# Verify data after the test has been "shot"
+#
+# There's no MTDM in the protocol here since this code doesn't ask for the
+# time/date of the file
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+TYPE I
+SIZE 542
+REST 0
+QUIT
+</protocol>
+</verify>
+</testcase>

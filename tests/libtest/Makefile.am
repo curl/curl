@@ -47,7 +47,7 @@ SUPPORTFILES = first.c test.h
 noinst_PROGRAMS = lib500 lib501 lib502 lib503 lib504 lib505 lib506	\
   lib507 lib508 lib509 lib510 lib511 lib512 lib513 lib514 lib515 lib516	\
   lib517 lib518 lib519 lib520 lib521 lib523 lib524 lib525 lib526 lib527	\
-  lib529 lib530 lib532 lib533 lib536 lib537 lib540 lib541
+  lib529 lib530 lib532 lib533 lib536 lib537 lib540 lib541 lib542
 
 # Dependencies (may need to be overriden)
 LDADD = $(LIBDIR)/libcurl.la
@@ -128,3 +128,5 @@ lib537_SOURCES = lib537.c $(SUPPORTFILES)
 lib540_SOURCES = lib540.c $(SUPPORTFILES)
 
 lib541_SOURCES = lib541.c $(SUPPORTFILES)
+
+lib542_SOURCES = lib542.c $(SUPPORTFILES)

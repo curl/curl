@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel S (26 September 2007)
+- Max Katsev reported that when doing a libcurl FTP request with
+  CURLOPT_NOBODY enabled but not CURLOPT_HEADER, libcurl wouldn't do TYPE
+  before it does SIZE which makes it less useful. I walked over the code and
+  made it do this properly, and added test case 542 to verify it.
+
 Daniel S (24 September 2007)
 - Immanuel Gregoire fixed KNOWN_BUGS #44: --ftp-method nocwd did not handle
   URLs ending with a slash properly (it should list the contents of that

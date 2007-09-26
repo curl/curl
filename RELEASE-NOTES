@@ -23,6 +23,8 @@ This release includes the following bugfixes:
  o no HOME and no key given caused SSH auth failure
  o Negotiate authentication over proxy
  o --ftp-method nocwd on directory listings
+ o FTP, CURLOPT_NOBODY enabled and CURLOPT_HEADER disabled now does TYPE
+   before SIZE
 
 This release includes the following known bugs:
 
@@ -40,6 +42,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Dan Fandrich, Michal Marek, Günter Knauf, Rob Crittenden, Immanuel Gregoire,
- Mark Davies
+ Mark Davies, Max Katsev
  
         Thanks! (and sorry if I forgot to mention someone)
