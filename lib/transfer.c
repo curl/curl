@@ -2257,10 +2257,13 @@ CURLcode Curl_follow(struct SessionHandle *data,
      * violation, many webservers expect this misbehavior. So these servers
      * often answers to a POST request with an error page.  To be sure that
      * libcurl gets the page that most user agents would get, libcurl has to
-     * force GET:
+     * force GET.
+     *
+     * This behaviour can be overriden with CURLOPT_POST301.
      */
-    if( data->set.httpreq == HTTPREQ_POST
-        || data->set.httpreq == HTTPREQ_POST_FORM) {
+    if( (data->set.httpreq == HTTPREQ_POST
+         || data->set.httpreq == HTTPREQ_POST_FORM)
+        && !data->set.post301) {
       infof(data,
             "Violate RFC 2616/10.3.2 and switch from POST to GET\n");
       data->set.httpreq = HTTPREQ_GET;

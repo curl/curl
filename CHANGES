@@ -7,6 +7,19 @@
                                   Changelog
 
 Daniel S (26 September 2007)
+- Philip Langdale provided the new CURLOPT_POST301 option for
+  curl_easy_setopt() that alters how libcurl functions when following
+  redirects. It makes libcurl obey the RFC2616 when a 301 response is received
+  after a non-GET request is made. Default libcurl behaviour is to change
+  method to GET in the subsequent request (like it does for response code 302
+  - because that's what many/most browsers do), but with this CURLOPT_POST301
+  option enabled it will do what the spec says and do the next request using
+  the same method again. I.e keep POST after 301. 
+
+  The curl tool got this option as --post301
+
+  Test case 1011 and 1012 were added to verify.
+
 - Max Katsev reported that when doing a libcurl FTP request with
   CURLOPT_NOBODY enabled but not CURLOPT_HEADER, libcurl wouldn't do TYPE
   before it does SIZE which makes it less useful. I walked over the code and

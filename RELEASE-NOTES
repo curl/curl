@@ -2,7 +2,7 @@ Curl and libcurl 7.17.1
 
  Public curl release number:               102
  Releases counted from the very beginning: 128
- Available command line options:           119
+ Available command line options:           120
  Available curl_easy_setopt() options:     143
  Number of public functions in libcurl:    55
  Amount of public web site mirrors:        42
@@ -14,6 +14,7 @@ This release includes the following changes:
  o automatically append ";type=<a|i>" when using HTTP proxies for FTP urls
  o improved NSS support
  o added --proxy-negotiate
+ o added --post301 and CURLOPT_POST301
 
 This release includes the following bugfixes:
 
@@ -42,6 +43,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Dan Fandrich, Michal Marek, Günter Knauf, Rob Crittenden, Immanuel Gregoire,
- Mark Davies, Max Katsev
+ Mark Davies, Max Katsev, Philip Langdale
  
         Thanks! (and sorry if I forgot to mention someone)

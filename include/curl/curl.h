@@ -1124,6 +1124,9 @@ typedef enum {
   CINIT(NEW_FILE_PERMS, LONG, 159),
   CINIT(NEW_DIRECTORY_PERMS, LONG, 160),
 
+  /* Obey RFC 2616/10.3.2 and keep POSTs as POSTs after a 301 */
+  CINIT(POST301, LONG, 161),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

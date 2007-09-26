@@ -924,6 +924,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.maxredirs = va_arg(param, long);
     break;
 
+  case CURLOPT_POST301:
+    /*
+     * Obey RFC 2616/10.3.2 and resubmit a POST as a POST after a 301.
+     */
+    data->set.post301 = (bool)(0 != va_arg(param, long));
+    break;
+
   case CURLOPT_POST:
     /* Does this option serve a purpose anymore? Yes it does, when
        CURLOPT_POSTFIELDS isn't used and the POST data is read off the

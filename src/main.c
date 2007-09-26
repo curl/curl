@@ -478,6 +478,7 @@ struct Configurable {
 
   char *libcurl; /* output libcurl code to this file name */
   bool raw;
+  bool post301;
   struct OutStruct *outs;
 };
 
@@ -687,6 +688,7 @@ static void help(void)
     "    --no-sessionid  Disable SSL session-ID reusing (SSL)",
     " -o/--output <file> Write output to <file> instead of stdout",
     " -O/--remote-name   Write output to a file named as the remote file",
+    "    --post301       Do not switch to GET after following a 301 redirect (H)",
     " -p/--proxytunnel   Operate through a HTTP proxy tunnel (using CONNECT)",
     "    --proxy-anyauth Pick \"any\" proxy authentication method (H)",
     "    --proxy-basic   Use Basic authentication on the proxy (H)",
@@ -1511,6 +1513,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$j", "ftp-ssl-ccc-mode", TRUE},
     {"$z", "libcurl",    TRUE},
     {"$#", "raw",        FALSE},
+    {"$0", "post301",    FALSE},
 
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
@@ -1962,6 +1965,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       case '#': /* --raw */
         config->raw ^= TRUE;
         break;
+      case '0': /* --post301 */
+        config->post301 ^= TRUE;
+        break;
       }
       break;
     case '#': /* --progress-bar */
@@ -2046,7 +2052,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 
           if(curlx_strequal("-", nextarg)) {
             file = stdin;
-            if(subletter == 'b') /* forced binary */
+            if(subletter == 'b') /* forced data-binary */
               SET_BINMODE(stdin);
           }
           else {
@@ -3801,7 +3807,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         clean_getout(config);
         break;
       }
-    } 
+    }
 
     infiles = urlnode->infile;
 
@@ -4022,17 +4028,17 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             /* Free the list of remaining URLs and globbed upload files
              * to force curl to exit immediately
              */
-	    if(urls) {
-	      glob_cleanup(urls);
-	      urls = NULL;
-	    }
-	    if(inglob) {
-	      glob_cleanup(inglob);
-	      inglob = NULL;
-	    }
+            if(urls) {
+              glob_cleanup(urls);
+              urls = NULL;
+            }
+            if(inglob) {
+              glob_cleanup(inglob);
+              inglob = NULL;
+            }
 
-	    res = CURLE_READ_ERROR;
-	    goto quit_urls;
+            res = CURLE_READ_ERROR;
+            goto quit_urls;
           }
           infdfopen=TRUE;
           uploadfilesize=fileinfo.st_size;
@@ -4196,7 +4202,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         my_setopt(curl, CURLOPT_SSLKEYTYPE, config->key_type);
         my_setopt(curl, CURLOPT_KEYPASSWD, config->key_passwd);
 
-	/* SSH private key uses the same command-line option as SSL private key */
+        /* SSH private key uses the same command-line option as SSL private key */
         my_setopt(curl, CURLOPT_SSH_PRIVATE_KEYFILE, config->key);
         my_setopt(curl, CURLOPT_SSH_PUBLIC_KEYFILE, config->pubkey);
 
@@ -4385,6 +4391,9 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           my_setopt(curl, CURLOPT_HTTP_CONTENT_DECODING, FALSE);
           my_setopt(curl, CURLOPT_HTTP_TRANSFER_DECODING, FALSE);
         }
+
+        /* curl 7.17.1 */
+        my_setopt(curl, CURLOPT_POST301, config->post301);
 
         retry_numretries = config->req_retry;
 
