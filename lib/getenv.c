@@ -55,7 +55,7 @@ char *GetEnv(const char *variable)
   if (env && strcmp("HOME",variable) == 0)
     env = decc$translate_vms(env);
 #endif
-  return env?strdup(env):NULL;
+  return (env && env[0])?strdup(env):NULL;
 #endif
 #endif
 }
