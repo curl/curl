@@ -146,7 +146,7 @@ static void write_tcp_data(ares_channel channel,
   ssize_t wcount;
   size_t n;
 
-  if(!write_fds && (write_fd == ARES_SOCKET_BAD))
+  if(!write_fds || (write_fd == ARES_SOCKET_BAD))
     /* no possible action */
     return;
 
@@ -267,7 +267,7 @@ static void read_tcp_data(ares_channel channel, fd_set *read_fds,
   int i;
   ssize_t count;
 
-  if(!read_fds && (read_fd == ARES_SOCKET_BAD))
+  if(!read_fds || (read_fd == ARES_SOCKET_BAD))
     /* no possible action */
     return;
 
@@ -363,7 +363,7 @@ static void read_udp_packets(ares_channel channel, fd_set *read_fds,
   ssize_t count;
   unsigned char buf[PACKETSZ + 1];
 
-  if(!read_fds && (read_fd == ARES_SOCKET_BAD))
+  if(!read_fds || (read_fd == ARES_SOCKET_BAD))
     /* no possible action */
     return;
 
