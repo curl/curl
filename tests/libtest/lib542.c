@@ -36,11 +36,9 @@ int test(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
-  FILE *hd_src ;
 
   if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
-    fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
   }
 
@@ -48,7 +46,6 @@ int test(char *URL)
   if ((curl = curl_easy_init()) == NULL) {
     fprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
-    fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
   }
 
