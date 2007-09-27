@@ -278,7 +278,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
     /* a name was not resolved */
     if((timeout < 0) || (conn->async.status == ARES_ETIMEOUT)) {
       failf(data, "Resolving host timed out: %s", conn->host.dispname);
-      rc = CURLE_OPERATION_TIMEDOUT;
+      rc = CURLE_COULDNT_RESOLVE_HOST;
     }
     else if(conn->async.done) {
       failf(data, "Could not resolve host: %s (%s)", conn->host.dispname,
