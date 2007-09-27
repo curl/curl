@@ -42,7 +42,7 @@ struct Curl_tree *Curl_splayremove(int key, struct Curl_tree *t,
 struct Curl_tree *Curl_splaygetbest(int key, struct Curl_tree *t,
                                     struct Curl_tree **removed);
 int Curl_splayremovebyaddr(struct Curl_tree *t,
-                           struct Curl_tree *remove,
+                           struct Curl_tree *removenode,
                            struct Curl_tree **newroot);
 
 #ifdef CURLDEBUG

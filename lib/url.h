@@ -65,11 +65,11 @@ int Curl_doing_getsock(struct connectdata *conn,
                        int numsocks);
 
 CURLcode Curl_addHandleToPipeline(struct SessionHandle *handle,
-                                  struct curl_llist *pipe);
+                                  struct curl_llist *pipeline);
 int Curl_removeHandleFromPipeline(struct SessionHandle *handle,
-                                  struct curl_llist *pipe);
+                                  struct curl_llist *pipeline);
 bool Curl_isHandleAtHead(struct SessionHandle *handle,
-                         struct curl_llist *pipe);
+                         struct curl_llist *pipeline);
 
 void Curl_close_connections(struct SessionHandle *data);
 

@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Dan F (26 September 2007)
+- Enabled a few more gcc warnings with --enable-debug.  Renamed a few
+  variables to avoid shadowing global declarations.
+
 Daniel S (26 September 2007)
 - Philip Langdale provided the new CURLOPT_POST301 option for
   curl_easy_setopt() that alters how libcurl functions when following

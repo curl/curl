@@ -1750,15 +1750,15 @@ int Curl_single_getsock(const struct connectdata *conn,
 {
   const struct SessionHandle *data = conn->data;
   int bitmap = GETSOCK_BLANK;
-  unsigned index = 0;
+  unsigned sockindex = 0;
 
   if(numsocks < 2)
     /* simple check but we might need two slots */
     return GETSOCK_BLANK;
 
   if(data->reqdata.keep.keepon & KEEP_READ) {
-    bitmap |= GETSOCK_READSOCK(index);
-    sock[index] = conn->sockfd;
+    bitmap |= GETSOCK_READSOCK(sockindex);
+    sock[sockindex] = conn->sockfd;
   }
 
   if(data->reqdata.keep.keepon & KEEP_WRITE) {
@@ -1768,11 +1768,11 @@ int Curl_single_getsock(const struct connectdata *conn,
       /* only if they are not the same socket or we didn't have a readable
          one, we increase index */
       if(data->reqdata.keep.keepon & KEEP_READ)
-        index++; /* increase index if we need two entries */
-      sock[index] = conn->writesockfd;
+        sockindex++; /* increase index if we need two entries */
+      sock[sockindex] = conn->writesockfd;
     }
 
-    bitmap |= GETSOCK_WRITESOCK(index);
+    bitmap |= GETSOCK_WRITESOCK(sockindex);
   }
 
   return bitmap;

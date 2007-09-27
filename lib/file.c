@@ -373,12 +373,12 @@ CURLcode Curl_file(struct connectdata *conn, bool *done)
 
     if(fstated) {
       const struct tm *tm;
-      time_t clock = (time_t)statbuf.st_mtime;
+      time_t filetime = (time_t)statbuf.st_mtime;
 #ifdef HAVE_GMTIME_R
       struct tm buffer;
-      tm = (const struct tm *)gmtime_r(&clock, &buffer);
+      tm = (const struct tm *)gmtime_r(&filetime, &buffer);
 #else
-      tm = gmtime(&clock);
+      tm = gmtime(&filetime);
 #endif
       /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
       snprintf(buf, BUFSIZE-1,

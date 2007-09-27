@@ -286,7 +286,7 @@ static int writeit(struct testcase *test, struct tftphdr **dpp,
  */
 static ssize_t write_behind(struct testcase *test, int convert)
 {
-  char *buf;
+  char *writebuf;
   int count;
   int ct;
   char *p;
@@ -312,15 +312,15 @@ static ssize_t write_behind(struct testcase *test, int convert)
   b->counter = BF_FREE;           /* reset flag */
   dp = (struct tftphdr *)b->buf;
   nextone = !nextone;             /* incr for next time */
-  buf = dp->th_data;
+  writebuf = dp->th_data;
 
   if (count <= 0)
     return -1;                    /* nak logic? */
 
   if (convert == 0)
-    return write(test->ofile, buf, count);
+    return write(test->ofile, writebuf, count);
 
-  p = buf;
+  p = writebuf;
   ct = count;
   while (ct--) {                  /* loop over the buffer */
     c = *p++;                     /* pick up a character */
@@ -363,8 +363,8 @@ static int synchnet(curl_socket_t f /* socket to flush */)
 #endif
   int j = 0;
   char rbuf[PKTSIZE];
-  struct sockaddr_in from;
-  socklen_t fromlen;
+  struct sockaddr_in fromaddr;
+  socklen_t fromaddrlen;
 
   while (1) {
 #if defined(HAVE_IOCTLSOCKET)
@@ -374,9 +374,9 @@ static int synchnet(curl_socket_t f /* socket to flush */)
 #endif
     if (i) {
       j++;
-      fromlen = sizeof from;
+      fromaddrlen = sizeof fromaddr;
       (void) recvfrom(f, rbuf, sizeof (rbuf), 0,
-                      (struct sockaddr *)&from, &fromlen);
+                      (struct sockaddr *)&fromaddr, &fromaddrlen);
     }
     else
       break;

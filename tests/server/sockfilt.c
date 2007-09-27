@@ -411,7 +411,7 @@ static int juggle(curl_socket_t *sockfdp,
 }
 
 static curl_socket_t sockdaemon(curl_socket_t sock,
-                                unsigned short *port)
+                                unsigned short *listenport)
 {
   /* passive daemon style */
   struct sockaddr_in me;
@@ -441,7 +441,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
 #endif
     me.sin_family = AF_INET;
     me.sin_addr.s_addr = INADDR_ANY;
-    me.sin_port = htons(*port);
+    me.sin_port = htons(*listenport);
     rc = bind(sock, (struct sockaddr *) &me, sizeof(me));
 #ifdef ENABLE_IPV6
   }
@@ -449,7 +449,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
     memset(&me6, 0, sizeof(struct sockaddr_in6));
     me6.sin6_family = AF_INET6;
     me6.sin6_addr = in6addr_any;
-    me6.sin6_port = htons(*port);
+    me6.sin6_port = htons(*listenport);
     rc = bind(sock, (struct sockaddr *) &me6, sizeof(me6));
   }
 #endif /* ENABLE_IPV6 */
@@ -459,7 +459,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
     return CURL_SOCKET_BAD;
   }
 
-  if(!*port) {
+  if(!*listenport) {
     /* The system picked a port number, now figure out which port we actually
        got */
     /* we succeeded to bind */
@@ -471,7 +471,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
       logmsg("getsockname() failed with error: %d", SOCKERRNO);
       return CURL_SOCKET_BAD;
     }
-    *port = ntohs(add.sin_port);
+    *listenport = ntohs(add.sin_port);
   }
 
   /* start accepting connections */
@@ -485,13 +485,13 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
   return sock;
 }
 
-static curl_socket_t mksock(bool use_ipv6)
+static curl_socket_t mksock(bool ipv6)
 {
   curl_socket_t sock;
 #ifdef ENABLE_IPV6
-  if(!use_ipv6)
+  if(!ipv6)
 #else
-    (void)use_ipv6;
+    (void)ipv6;
 #endif
   sock = socket(AF_INET, SOCK_STREAM, 0);
 #ifdef ENABLE_IPV6

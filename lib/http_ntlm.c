@@ -443,11 +443,11 @@ static CURLcode mk_nt_hash(struct SessionHandle *data,
 
   {
     /* Create NT hashed password. */
-    MD4_CTX MD4;
+    MD4_CTX MD4pw;
 
-    MD4_Init(&MD4);
-    MD4_Update(&MD4, pw, 2*len);
-    MD4_Final(ntbuffer, &MD4);
+    MD4_Init(&MD4pw);
+    MD4_Update(&MD4pw, pw, 2*len);
+    MD4_Final(ntbuffer, &MD4pw);
 
     memset(ntbuffer + 16, 0, 21 - 16);
   }
@@ -857,25 +857,25 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       unsigned char ntbuffer[0x18];
       unsigned char tmp[0x18];
       unsigned char md5sum[MD5_DIGEST_LENGTH];
-      MD5_CTX MD5;
-      unsigned char random[8];
+      MD5_CTX MD5pw;
+      unsigned char entropy[8];
 
       /* Need to create 8 bytes random data */
       Curl_ossl_seed(conn->data); /* Initiate the seed if not already done */
-      RAND_bytes(random,8);
+      RAND_bytes(entropy,8);
 
       /* 8 bytes random data as challenge in lmresp */
-      memcpy(lmresp,random,8);
+      memcpy(lmresp,entropy,8);
       /* Pad with zeros */
       memset(lmresp+8,0,0x10);
 
-      /* Fill tmp with challenge(nonce?) + random */
+      /* Fill tmp with challenge(nonce?) + entropy */
       memcpy(tmp,&ntlm->nonce[0],8);
-      memcpy(tmp+8,random,8);
+      memcpy(tmp+8,entropy,8);
 
-      MD5_Init(&MD5);
-      MD5_Update(&MD5, tmp, 16);
-      MD5_Final(md5sum, &MD5);
+      MD5_Init(&MD5pw);
+      MD5_Update(&MD5pw, tmp, 16);
+      MD5_Final(md5sum, &MD5pw);
       /* We shall only use the first 8 bytes of md5sum,
          but the des code in lm_resp only encrypt the first 8 bytes */
       if (mk_nt_hash(conn->data, passwdp, ntbuffer) == CURLE_OUT_OF_MEMORY)

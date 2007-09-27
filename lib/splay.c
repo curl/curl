@@ -260,34 +260,34 @@ struct Curl_tree *Curl_splaygetbest(int i, struct Curl_tree *t,
    'newroot' will be made to point to NULL.
 */
 int Curl_splayremovebyaddr(struct Curl_tree *t,
-                           struct Curl_tree *remove,
+                           struct Curl_tree *removenode,
                            struct Curl_tree **newroot)
 {
   struct Curl_tree *x;
 
-  if (!t || !remove)
+  if (!t || !removenode)
     return 1;
 
-  if(KEY_NOTUSED == remove->key) {
+  if(KEY_NOTUSED == removenode->key) {
     /* Key set to NOTUSED means it is a subnode within a 'same' linked list
        and thus we can unlink it easily. The 'smaller' link of a subnode
        links to the parent node. */
-    if (remove->smaller == NULL)
+    if (removenode->smaller == NULL)
       return 3;
 
-    remove->smaller->same = remove->same;
-    if(remove->same)
-      remove->same->smaller = remove->smaller;
+    removenode->smaller->same = removenode->same;
+    if(removenode->same)
+      removenode->same->smaller = removenode->smaller;
 
     /* Ensures that double-remove gets caught. */
-    remove->smaller = NULL;
+    removenode->smaller = NULL;
 
     /* voila, we're done! */
     *newroot = t; /* return the same root */
     return 0;
   }
 
-  t = Curl_splay(remove->key, t);
+  t = Curl_splay(removenode->key, t);
 
   /* First make sure that we got the same root node as the one we want
      to remove, as otherwise we might be trying to remove a node that
@@ -296,7 +296,7 @@ int Curl_splayremovebyaddr(struct Curl_tree *t,
      We cannot just compare the keys here as a double remove in quick
      succession of a node with key != KEY_NOTUSED && same != NULL
      could return the same key but a different node. */
-  if(t != remove)
+  if(t != removenode)
     return 2;
 
   /* Check if there is a list with identical sizes, as then we're trying to
@@ -315,7 +315,7 @@ int Curl_splayremovebyaddr(struct Curl_tree *t,
     if (t->smaller == NULL)
       x = t->larger;
     else {
-      x = Curl_splay(remove->key, t->smaller);
+      x = Curl_splay(removenode->key, t->smaller);
       x->larger = t->larger;
     }
   }

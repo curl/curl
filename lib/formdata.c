@@ -950,21 +950,21 @@ int curl_formget(struct curl_httppost *form, void *arg,
   for (ptr = data; ptr; ptr = ptr->next) {
     if (ptr->type == FORM_FILE) {
       char buffer[8192];
-      size_t read;
+      size_t nread;
       struct Form temp;
 
       Curl_FormInit(&temp, ptr);
 
       do {
-        read = readfromfile(&temp, buffer, sizeof(buffer));
-        if ((read == (size_t) -1) || (read != append(arg, buffer, read))) {
+        nread = readfromfile(&temp, buffer, sizeof(buffer));
+        if ((nread == (size_t) -1) || (nread != append(arg, buffer, nread))) {
           if (temp.fp) {
             fclose(temp.fp);
           }
           Curl_formclean(&data);
           return -1;
         }
-      } while (read == sizeof(buffer));
+      } while (nread == sizeof(buffer));
     } else {
       if (ptr->length != append(arg, ptr->line, ptr->length)) {
         Curl_formclean(&data);

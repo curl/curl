@@ -161,9 +161,9 @@ static bool IsPipeliningPossible(const struct SessionHandle *handle);
 static bool IsPipeliningEnabled(const struct SessionHandle *handle);
 static void conn_free(struct connectdata *conn);
 
-static void signalPipeClose(struct curl_llist *pipe);
+static void signalPipeClose(struct curl_llist *pipeline);
 
-static struct SessionHandle* gethandleathead(struct curl_llist *pipe);
+static struct SessionHandle* gethandleathead(struct curl_llist *pipeline);
 
 #define MAX_PIPELINE_LENGTH 5
 
@@ -292,7 +292,7 @@ CURLcode Curl_close(struct SessionHandle *data)
   if(data->state.connc && data->state.connc->type == CONNCACHE_MULTI) {
     struct conncache *c = data->state.connc;
     long i;
-    struct curl_llist *pipe;
+    struct curl_llist *pipeline;
     struct curl_llist_element *curr;
     struct connectdata *connptr;
 
@@ -301,9 +301,9 @@ CURLcode Curl_close(struct SessionHandle *data)
       if(!connptr)
         continue;
 
-      pipe = connptr->send_pipe;
-      if(pipe) {
-        for (curr = pipe->head; curr; curr=curr->next) {
+      pipeline = connptr->send_pipe;
+      if(pipeline) {
+        for (curr = pipeline->head; curr; curr=curr->next) {
           if(data == (struct SessionHandle *) curr->ptr) {
             fprintf(stderr,
                     "MAJOR problem we %p are still in send pipe for %p done %d\n",
@@ -311,9 +311,9 @@ CURLcode Curl_close(struct SessionHandle *data)
           }
         }
       }
-      pipe = connptr->recv_pipe;
-      if(pipe) {
-        for (curr = pipe->head; curr; curr=curr->next) {
+      pipeline = connptr->recv_pipe;
+      if(pipeline) {
+        for (curr = pipeline->head; curr; curr=curr->next) {
           if(data == (struct SessionHandle *) curr->ptr) {
             fprintf(stderr,
                     "MAJOR problem we %p are still in recv pipe for %p done %d\n",
@@ -2036,30 +2036,30 @@ static bool IsPipeliningEnabled(const struct SessionHandle *handle)
 }
 
 CURLcode Curl_addHandleToPipeline(struct SessionHandle *data,
-                                  struct curl_llist *pipe)
+                                  struct curl_llist *pipeline)
 {
 #ifdef CURLDEBUG
   if(!IsPipeliningPossible(data)) {
     /* when not pipelined, there MUST be no handle in the list already */
-    if(pipe->head)
+    if(pipeline->head)
       infof(data, "PIPE when no PIPE supposed!\n");
   }
 #endif
-  if (!Curl_llist_insert_next(pipe, pipe->tail, data))
+  if (!Curl_llist_insert_next(pipeline, pipeline->tail, data))
     return CURLE_OUT_OF_MEMORY;
   return CURLE_OK;
 }
 
 
 int Curl_removeHandleFromPipeline(struct SessionHandle *handle,
-                                   struct curl_llist *pipe)
+                                   struct curl_llist *pipeline)
 {
   struct curl_llist_element *curr;
 
-  curr = pipe->head;
+  curr = pipeline->head;
   while (curr) {
     if (curr->ptr == handle) {
-      Curl_llist_remove(pipe, curr, NULL);
+      Curl_llist_remove(pipeline, curr, NULL);
       return 1; /* we removed a handle */
     }
     curr = curr->next;
@@ -2069,11 +2069,11 @@ int Curl_removeHandleFromPipeline(struct SessionHandle *handle,
 }
 
 #if 0 /* this code is saved here as it is useful for debugging purposes */
-static void Curl_printPipeline(struct curl_llist *pipe)
+static void Curl_printPipeline(struct curl_llist *pipeline)
 {
   struct curl_llist_element *curr;
 
-  curr = pipe->head;
+  curr = pipeline->head;
   while (curr) {
     struct SessionHandle *data = (struct SessionHandle *) curr->ptr;
     infof(data, "Handle in pipeline: %s\n", data->reqdata.path);
@@ -2083,9 +2083,9 @@ static void Curl_printPipeline(struct curl_llist *pipe)
 #endif
 
 bool Curl_isHandleAtHead(struct SessionHandle *handle,
-                         struct curl_llist *pipe)
+                         struct curl_llist *pipeline)
 {
-  struct curl_llist_element *curr = pipe->head;
+  struct curl_llist_element *curr = pipeline->head;
   if (curr) {
     return (bool)(curr->ptr == handle);
   }
@@ -2093,9 +2093,9 @@ bool Curl_isHandleAtHead(struct SessionHandle *handle,
   return FALSE;
 }
 
-static struct SessionHandle* gethandleathead(struct curl_llist *pipe)
+static struct SessionHandle* gethandleathead(struct curl_llist *pipeline)
 {
-  struct curl_llist_element *curr = pipe->head;
+  struct curl_llist_element *curr = pipeline->head;
   if (curr) {
     return (struct SessionHandle *) curr->ptr;
   }
@@ -2103,14 +2103,14 @@ static struct SessionHandle* gethandleathead(struct curl_llist *pipe)
   return NULL;
 }
 
-static void signalPipeClose(struct curl_llist *pipe)
+static void signalPipeClose(struct curl_llist *pipeline)
 {
   struct curl_llist_element *curr;
 
-  if (!pipe)
+  if (!pipeline)
     return;
 
-  curr = pipe->head;
+  curr = pipeline->head;
   while (curr) {
     struct curl_llist_element *next = curr->next;
     struct SessionHandle *data = (struct SessionHandle *) curr->ptr;
@@ -2124,7 +2124,7 @@ static void signalPipeClose(struct curl_llist *pipe)
 
     data->state.pipe_broke = TRUE;
     Curl_multi_handlePipeBreak(data);
-    Curl_llist_remove(pipe, curr, NULL);
+    Curl_llist_remove(pipeline, curr, NULL);
     curr = next;
   }
 }

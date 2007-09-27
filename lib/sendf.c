@@ -93,10 +93,10 @@ struct curl_slist *curl_slist_append(struct curl_slist *list,
 
   new_item = (struct curl_slist *) malloc(sizeof(struct curl_slist));
   if (new_item) {
-    char *dup = strdup(data);
-    if(dup) {
+    char *dupdata = strdup(data);
+    if(dupdata) {
       new_item->next = NULL;
-      new_item->data = dup;
+      new_item->data = dupdata;
     }
     else {
       free(new_item);

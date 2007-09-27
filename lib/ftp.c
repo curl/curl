@@ -633,7 +633,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
 
 /* This is the ONLY way to change FTP state! */
 static void state(struct connectdata *conn,
-                  ftpstate state)
+                  ftpstate newstate)
 {
 #if defined(CURLDEBUG) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   /* for debug purposes */
@@ -674,11 +674,11 @@ static void state(struct connectdata *conn,
 #endif
   struct ftp_conn *ftpc = &conn->proto.ftpc;
 #if defined(CURLDEBUG) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
-  if(ftpc->state != state)
+  if(ftpc->state != newstate)
     infof(conn->data, "FTP %p state change from %s to %s\n",
-          ftpc, names[ftpc->state], names[state]);
+          ftpc, names[ftpc->state], names[newstate]);
 #endif
-  ftpc->state = state;
+  ftpc->state = newstate;
 }
 
 static CURLcode ftp_state_user(struct connectdata *conn)
@@ -1882,12 +1882,12 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
          data->set.get_filetime &&
          (data->info.filetime>=0) ) {
         struct tm *tm;
-        time_t clock = (time_t)data->info.filetime;
+        time_t filetime = (time_t)data->info.filetime;
 #ifdef HAVE_GMTIME_R
         struct tm buffer;
-        tm = (struct tm *)gmtime_r(&clock, &buffer);
+        tm = (struct tm *)gmtime_r(&filetime, &buffer);
 #else
-        tm = gmtime(&clock);
+        tm = gmtime(&filetime);
 #endif
         /* format: "Tue, 15 Nov 1994 12:45:26" */
         snprintf(buf, BUFSIZE-1,
