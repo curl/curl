@@ -109,7 +109,7 @@ void ares_process_fd(ares_channel channel,
  * otherwise. This is mostly for HP-UX, which could return EAGAIN or
  * EWOULDBLOCK. See this man page
  *
- * 	http://devrsrc1.external.hp.com/STKS/cgi-bin/man2html?manpage=/usr/share/man/man2.Z/send.2
+ *      http://devrsrc1.external.hp.com/STKS/cgi-bin/man2html?manpage=/usr/share/man/man2.Z/send.2
  */
 static int try_again(int errnum)
 {
@@ -146,7 +146,7 @@ static void write_tcp_data(ares_channel channel,
   ssize_t wcount;
   size_t n;
 
-  if(!write_fds || (write_fd == ARES_SOCKET_BAD))
+  if(!write_fds && (write_fd == ARES_SOCKET_BAD))
     /* no possible action */
     return;
 
@@ -167,12 +167,13 @@ static void write_tcp_data(ares_channel channel,
           continue;
       }
 
-      /* If there's an error and we close this socket, then open
-       * another with the same fd to talk to another server, then we
-       * don't want to think that it was the new socket that was
-       * ready. This is not disastrous, but is likely to result in
-       * extra system calls and confusion. */
-      FD_CLR(server->tcp_socket, write_fds);
+      if(write_fds)
+        /* If there's an error and we close this socket, then open
+         * another with the same fd to talk to another server, then we
+         * don't want to think that it was the new socket that was
+         * ready. This is not disastrous, but is likely to result in
+         * extra system calls and confusion. */
+        FD_CLR(server->tcp_socket, write_fds);
 
       /* Count the number of send queue items. */
       n = 0;
@@ -267,7 +268,7 @@ static void read_tcp_data(ares_channel channel, fd_set *read_fds,
   int i;
   ssize_t count;
 
-  if(!read_fds || (read_fd == ARES_SOCKET_BAD))
+  if(!read_fds && (read_fd == ARES_SOCKET_BAD))
     /* no possible action */
     return;
 
@@ -287,12 +288,13 @@ static void read_tcp_data(ares_channel channel, fd_set *read_fds,
           continue;
       }
 
-      /* If there's an error and we close this socket, then open
-       * another with the same fd to talk to another server, then we
-       * don't want to think that it was the new socket that was
-       * ready. This is not disastrous, but is likely to result in
-       * extra system calls and confusion. */
-      FD_CLR(server->tcp_socket, read_fds);
+      if(read_fds)
+        /* If there's an error and we close this socket, then open
+         * another with the same fd to talk to another server, then we
+         * don't want to think that it was the new socket that was
+         * ready. This is not disastrous, but is likely to result in
+         * extra system calls and confusion. */
+        FD_CLR(server->tcp_socket, read_fds);
 
       if (server->tcp_lenbuf_pos != 2)
         {
@@ -363,7 +365,7 @@ static void read_udp_packets(ares_channel channel, fd_set *read_fds,
   ssize_t count;
   unsigned char buf[PACKETSZ + 1];
 
-  if(!read_fds || (read_fd == ARES_SOCKET_BAD))
+  if(!read_fds && (read_fd == ARES_SOCKET_BAD))
     /* no possible action */
     return;
 
@@ -384,12 +386,13 @@ static void read_udp_packets(ares_channel channel, fd_set *read_fds,
           continue;
       }
 
-      /* If there's an error and we close this socket, then open
-       * another with the same fd to talk to another server, then we
-       * don't want to think that it was the new socket that was
-       * ready. This is not disastrous, but is likely to result in
-       * extra system calls and confusion. */
-      FD_CLR(server->udp_socket, read_fds);
+      if(read_fds)
+        /* If there's an error and we close this socket, then open
+         * another with the same fd to talk to another server, then we
+         * don't want to think that it was the new socket that was
+         * ready. This is not disastrous, but is likely to result in
+         * extra system calls and confusion. */
+        FD_CLR(server->udp_socket, read_fds);
 
       count = sread(server->udp_socket, buf, sizeof(buf));
       if (count == -1 && try_again(SOCKERRNO))
