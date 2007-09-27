@@ -33,7 +33,7 @@ CURLcode Curl_nss_connect_nonblocking(struct connectdata *conn,
                                       int sockindex,
                                       bool *done);
 /* close a SSL connection */
-void Curl_nss_close(struct connectdata *conn, int index);
+void Curl_nss_close(struct connectdata *conn, int sockindex);
 
 /* tell NSS to close down all open information regarding connections (and
    thus session ID caching etc) */

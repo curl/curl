@@ -130,7 +130,7 @@ static CURLcode ftp_state_post_cwd(struct connectdata *conn);
 static CURLcode ftp_state_quote(struct connectdata *conn,
                                 bool init, ftpstate instate);
 static CURLcode ftp_nb_type(struct connectdata *conn,
-                            bool ascii, ftpstate state);
+                            bool ascii, ftpstate newstate);
 static int ftp_need_type(struct connectdata *conn,
                          bool ascii);
 
@@ -1013,28 +1013,28 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   unsigned short ip[4];
   bool freeaddr = TRUE;
   socklen_t sslen = sizeof(sa);
-  const char *ftpport = data->set.str[STRING_FTPPORT];
+  const char *ftpportstr = data->set.str[STRING_FTPPORT];
 
   (void)fcmd; /* not used in the IPv4 code */
-  if(ftpport) {
+  if(ftpportstr) {
     in_addr_t in;
 
     /* First check if the given name is an IP address */
-    in=inet_addr(ftpport);
+    in=inet_addr(ftpportstr);
 
     if(in != CURL_INADDR_NONE)
       /* this is an IPv4 address */
-      addr = Curl_ip2addr(in, ftpport, 0);
+      addr = Curl_ip2addr(in, ftpportstr, 0);
     else {
-      if(Curl_if2ip(ftpport, myhost, sizeof(myhost))) {
+      if(Curl_if2ip(ftpportstr, myhost, sizeof(myhost))) {
         /* The interface to IP conversion provided a dotted address */
         in=inet_addr(myhost);
         addr = Curl_ip2addr(in, myhost, 0);
       }
-      else if(strlen(ftpport)> 1) {
+      else if(strlen(ftpportstr)> 1) {
         /* might be a host name! */
         struct Curl_dns_entry *h=NULL;
-        int rc = Curl_resolv(conn, ftpport, 0, &h);
+        int rc = Curl_resolv(conn, ftpportstr, 0, &h);
         if(rc == CURLRESOLV_PENDING)
           /* BLOCKING */
           rc = Curl_wait_for_resolv(conn, &h);
@@ -1048,11 +1048,11 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
                                since it points to a DNS cache entry! */
         } /* (h) */
         else {
-          infof(data, "Failed to resolve host name %s\n", ftpport);
+          infof(data, "Failed to resolve host name %s\n", ftpportstr);
         }
       } /* strlen */
     } /* CURL_INADDR_NONE */
-  } /* ftpport */
+  } /* ftpportstr */
 
   if(!addr) {
     /* pick a suitable default here */
