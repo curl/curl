@@ -14,7 +14,7 @@ EXTRA_DIST = CHANGES README.cares Makefile.inc adig.c ahost.c $(man_MANS) \
  $(MSVCFILES) AUTHORS config-win32.h RELEASE-NOTES libcares.pc.in
 
 
-VER=-version-info 1:0:0
+VER=-version-info 2:0:0
 # This flag accepts an argument of the form current[:revision[:age]]. So,
 # passing -version-info 3:12:1 sets current to 3, revision to 12, and age to
 # 1.
