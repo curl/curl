@@ -59,6 +59,7 @@ struct nameinfo_query {
   } addr;
   int family;
   int flags;
+  int timeouts;
 };
 
 #ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
@@ -67,7 +68,7 @@ struct nameinfo_query {
 #define IPBUFSIZ 40
 #endif
 
-static void nameinfo_callback(void *arg, int status, struct hostent *host);
+static void nameinfo_callback(void *arg, int status, int timeouts, struct hostent *host);
 static char *lookup_service(unsigned short port, int flags,
                             char *buf, size_t buflen);
 #ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
@@ -90,7 +91,7 @@ void ares_getnameinfo(ares_channel channel, const struct sockaddr *sa, socklen_t
     addr6 = (struct sockaddr_in6 *)sa;
   else
     {
-      callback(arg, ARES_ENOTIMP, NULL, NULL);
+      callback(arg, ARES_ENOTIMP, 0, NULL, NULL);
       return;
     }
 
@@ -110,7 +111,7 @@ void ares_getnameinfo(ares_channel channel, const struct sockaddr *sa, socklen_t
         port = addr6->sin6_port;
       service = lookup_service((unsigned short)(port & 0xffff),
                                flags, buf, sizeof(buf));
-      callback(arg, ARES_SUCCESS, NULL, service);
+      callback(arg, ARES_SUCCESS, 0, NULL, service);
       return;
     }
 
@@ -131,7 +132,7 @@ void ares_getnameinfo(ares_channel channel, const struct sockaddr *sa, socklen_t
          */
         if (flags & ARES_NI_NAMEREQD)
           {
-            callback(arg, ARES_EBADFLAGS, NULL, NULL);
+            callback(arg, ARES_EBADFLAGS, 0, NULL, NULL);
             return;
           }
         if (salen == sizeof(struct sockaddr_in6))
@@ -152,7 +153,7 @@ void ares_getnameinfo(ares_channel channel, const struct sockaddr *sa, socklen_t
         if (flags & ARES_NI_LOOKUPSERVICE)
           service = lookup_service((unsigned short)(port & 0xffff),
                                    flags, srvbuf, sizeof(srvbuf));
-        callback(arg, ARES_SUCCESS, ipbuf, service);
+        callback(arg, ARES_SUCCESS, 0, ipbuf, service);
         return;
       }
     /* This is where a DNS lookup becomes necessary */
@@ -161,12 +162,13 @@ void ares_getnameinfo(ares_channel channel, const struct sockaddr *sa, socklen_t
         niquery = malloc(sizeof(struct nameinfo_query));
         if (!niquery)
           {
-            callback(arg, ARES_ENOMEM, NULL, NULL);
+            callback(arg, ARES_ENOMEM, 0, NULL, NULL);
             return;
           }
         niquery->callback = callback;
         niquery->arg = arg;
         niquery->flags = flags;
+        niquery->timeouts = 0;
         if (sa->sa_family == AF_INET)
           {
             niquery->family = AF_INET;
@@ -185,13 +187,13 @@ void ares_getnameinfo(ares_channel channel, const struct sockaddr *sa, socklen_t
     }
 }
 
-static void nameinfo_callback(void *arg, int status, struct hostent *host)
+static void nameinfo_callback(void *arg, int status, int timeouts, struct hostent *host)
 {
   struct nameinfo_query *niquery = (struct nameinfo_query *) arg;
   char srvbuf[33];
   char *service = NULL;
 
-
+  niquery->timeouts += timeouts;
   if (status == ARES_SUCCESS)
     {
       /* They want a service too */
@@ -220,7 +222,7 @@ static void nameinfo_callback(void *arg, int status, struct hostent *host)
                  *end = 0;
              }
         }
-      niquery->callback(niquery->arg, ARES_SUCCESS, (char *)(host->h_name),
+      niquery->callback(niquery->arg, ARES_SUCCESS, niquery->timeouts, (char *)(host->h_name),
                         service);
       return;
     }
@@ -247,10 +249,10 @@ static void nameinfo_callback(void *arg, int status, struct hostent *host)
             service = lookup_service(niquery->addr.addr6.sin6_port,
                                      niquery->flags, srvbuf, sizeof(srvbuf));
         }
-      niquery->callback(niquery->arg, ARES_SUCCESS, ipbuf, service);
+      niquery->callback(niquery->arg, ARES_SUCCESS, 0, ipbuf, service);
       return;
     }
-  niquery->callback(niquery->arg, status, NULL, NULL);
+  niquery->callback(niquery->arg, status, 0, NULL, NULL);
   free(niquery);
 }
 

@@ -22,7 +22,7 @@ ares_send \- Initiate a DNS query
 .B #include <ares.h>
 .PP
 .B typedef void (*ares_callback)(void *\fIarg\fP, int \fIstatus\fP,
-.B	unsigned char *\fIabuf\fP, int \fIalen\fP)
+.B	int \fItimeouts\fP, unsigned char *\fIabuf\fP, int \fIalen\fP)
 .PP
 .B void ares_send(ares_channel \fIchannel\fP, const unsigned char *\fIqbuf\fP,
 .B 	int \fIqlen\fP, ares_callback \fIcallback\fP, void *\fIarg\fP)
@@ -78,6 +78,11 @@ Memory was exhausted.
 The name service channel
 .I channel
 is being destroyed; the query will not be completed.
+.PP
+The callback argument
+.I timeouts
+reports how many times a query timed out during the execution of the
+given request.
 .PP
 If the query completed, the callback argument
 .I abuf

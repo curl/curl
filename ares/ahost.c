@@ -47,7 +47,7 @@ struct in6_addr
 };
 #endif
 
-static void callback(void *arg, int status, struct hostent *host);
+static void callback(void *arg, int status, int timeouts, struct hostent *host);
 static void usage(void);
 
 int main(int argc, char **argv)
@@ -142,7 +142,7 @@ int main(int argc, char **argv)
   return 0;
 }
 
-static void callback(void *arg, int status, struct hostent *host)
+static void callback(void *arg, int status, int timeouts, struct hostent *host)
 {
   char **p;
 

@@ -54,11 +54,12 @@ struct host_query {
   void *arg;
   int family;
   const char *remaining_lookups;
+  int timeouts;
 };
 
 static void next_lookup(struct host_query *hquery);
-static void host_callback(void *arg, int status, unsigned char *abuf,
-                          int alen);
+static void host_callback(void *arg, int status, int timeouts,
+                          unsigned char *abuf, int alen);
 static void end_hquery(struct host_query *hquery, int status,
                        struct hostent *host);
 static int fake_hostent(const char *name, int family, ares_host_callback callback,
@@ -81,7 +82,7 @@ void ares_gethostbyname(ares_channel channel, const char *name, int family,
   /* Right now we only know how to look up Internet addresses. */
   if (family != AF_INET && family != AF_INET6)
     {
-      callback(arg, ARES_ENOTIMP, NULL);
+      callback(arg, ARES_ENOTIMP, 0, NULL);
       return;
     }
 
@@ -92,7 +93,7 @@ void ares_gethostbyname(ares_channel channel, const char *name, int family,
   hquery = malloc(sizeof(struct host_query));
   if (!hquery)
     {
-      callback(arg, ARES_ENOMEM, NULL);
+      callback(arg, ARES_ENOMEM, 0, NULL);
       return;
     }
   hquery->channel = channel;
@@ -101,12 +102,13 @@ void ares_gethostbyname(ares_channel channel, const char *name, int family,
   if (!hquery->name)
     {
       free(hquery);
-      callback(arg, ARES_ENOMEM, NULL);
+      callback(arg, ARES_ENOMEM, 0, NULL);
       return;
     }
   hquery->callback = callback;
   hquery->arg = arg;
   hquery->remaining_lookups = channel->lookups;
+  hquery->timeouts = 0;
 
   /* Start performing lookups according to channel->lookups. */
   next_lookup(hquery);
@@ -144,15 +146,16 @@ static void next_lookup(struct host_query *hquery)
           break;
         }
     }
-  end_hquery(hquery, ARES_ENOTFOUND, NULL);
 }
 
-static void host_callback(void *arg, int status, unsigned char *abuf, int alen)
+static void host_callback(void *arg, int status, int timeouts,
+                          unsigned char *abuf, int alen)
 {
   struct host_query *hquery = (struct host_query *) arg;
   ares_channel channel = hquery->channel;
   struct hostent *host;
 
+  hquery->timeouts += timeouts;
   if (status == ARES_SUCCESS)
     {
       if (hquery->family == AF_INET)
@@ -185,7 +188,7 @@ static void host_callback(void *arg, int status, unsigned char *abuf, int alen)
 static void end_hquery(struct host_query *hquery, int status,
                        struct hostent *host)
 {
-  hquery->callback(hquery->arg, status, host);
+  hquery->callback(hquery->arg, status, hquery->timeouts, host);
   if (host)
     ares_free_hostent(host);
   free(hquery->name);
@@ -227,7 +230,7 @@ static int fake_hostent(const char *name, int family, ares_host_callback callbac
   hostent.h_name = strdup(name);
   if (!hostent.h_name)
     {
-      callback(arg, ARES_ENOMEM, NULL);
+      callback(arg, ARES_ENOMEM, 0, NULL);
       return 1;
     }
 
@@ -236,7 +239,7 @@ static int fake_hostent(const char *name, int family, ares_host_callback callbac
   hostent.h_aliases = aliases;
   hostent.h_addrtype = family;
   hostent.h_addr_list = addrs;
-  callback(arg, ARES_SUCCESS, &hostent);
+  callback(arg, ARES_SUCCESS, 0, &hostent);
 
   free((char *)(hostent.h_name));
   return 1;
@@ -416,4 +419,3 @@ static int get6_address_index(struct in6_addr *addr, struct apattern *sortlist,
     }
   return i;
 }
-

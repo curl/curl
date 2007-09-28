@@ -62,7 +62,7 @@ void ares_destroy(ares_channel channel)
   while (channel->queries) {
     query = channel->queries;
     channel->queries = query->next;
-    query->callback(query->arg, ARES_EDESTRUCTION, NULL, 0);
+    query->callback(query->arg, ARES_EDESTRUCTION, 0, NULL, 0);
     if (query->tcpbuf)
       free(query->tcpbuf);
     if (query->server_info)

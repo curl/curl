@@ -49,11 +49,12 @@ struct addr_query {
   void *arg;
 
   const char *remaining_lookups;
+  int timeouts;
 };
 
 static void next_lookup(struct addr_query *aquery);
-static void addr_callback(void *arg, int status, unsigned char *abuf,
-                          int alen);
+static void addr_callback(void *arg, int status, int timeouts,
+                          unsigned char *abuf, int alen);
 static void end_aquery(struct addr_query *aquery, int status,
                        struct hostent *host);
 static int file_lookup(union ares_addr *addr, int family, struct hostent **host);
@@ -65,21 +66,21 @@ void ares_gethostbyaddr(ares_channel channel, const void *addr, int addrlen,
 
   if (family != AF_INET && family != AF_INET6)
     {
-      callback(arg, ARES_ENOTIMP, NULL);
+      callback(arg, ARES_ENOTIMP, 0, NULL);
       return;
     }
 
   if ((family == AF_INET && addrlen != sizeof(struct in_addr)) ||
       (family == AF_INET6 && addrlen != sizeof(struct in6_addr)))
     {
-      callback(arg, ARES_ENOTIMP, NULL);
+      callback(arg, ARES_ENOTIMP, 0, NULL);
       return;
     }
 
   aquery = malloc(sizeof(struct addr_query));
   if (!aquery)
     {
-      callback(arg, ARES_ENOMEM, NULL);
+      callback(arg, ARES_ENOMEM, 0, NULL);
       return;
     }
   aquery->channel = channel;
@@ -91,6 +92,7 @@ void ares_gethostbyaddr(ares_channel channel, const void *addr, int addrlen,
   aquery->callback = callback;
   aquery->arg = arg;
   aquery->remaining_lookups = channel->lookups;
+  aquery->timeouts = 0;
 
   next_lookup(aquery);
 }
@@ -151,11 +153,13 @@ static void next_lookup(struct addr_query *aquery)
   end_aquery(aquery, ARES_ENOTFOUND, NULL);
 }
 
-static void addr_callback(void *arg, int status, unsigned char *abuf, int alen)
+static void addr_callback(void *arg, int status, int timeouts,
+                          unsigned char *abuf, int alen)
 {
   struct addr_query *aquery = (struct addr_query *) arg;
   struct hostent *host;
 
+  aquery->timeouts += timeouts;
   if (status == ARES_SUCCESS)
     {
       if (aquery->family == AF_INET)
@@ -175,7 +179,7 @@ static void addr_callback(void *arg, int status, unsigned char *abuf, int alen)
 static void end_aquery(struct addr_query *aquery, int status,
                        struct hostent *host)
 {
-  aquery->callback(aquery->arg, status, host);
+  aquery->callback(aquery->arg, status, aquery->timeouts, host);
   if (host)
     ares_free_hostent(host);
   free(aquery);

@@ -31,7 +31,7 @@ void ares_cancel(ares_channel channel)
   for (query = channel->queries; query; query = next)
   {
     next = query->next;
-    query->callback(query->arg, ARES_ETIMEOUT, NULL, 0);
+    query->callback(query->arg, ARES_ETIMEOUT, 0, NULL, 0);
     free(query->tcpbuf);
     free(query->server_info);
     free(query);

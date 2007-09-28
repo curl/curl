@@ -41,10 +41,11 @@ struct search_query {
   int status_as_is;             /* error status from trying as-is */
   int next_domain;              /* next search domain to try */
   int trying_as_is;             /* current query is for name as-is */
+  int timeouts;                 /* number of timeouts we saw for this request */
 };
 
-static void search_callback(void *arg, int status, unsigned char *abuf,
-                            int alen);
+static void search_callback(void *arg, int status, int timeouts,
+                            unsigned char *abuf, int alen);
 static void end_squery(struct search_query *squery, int status,
                        unsigned char *abuf, int alen);
 static int cat_domain(const char *name, const char *domain, char **s);
@@ -64,7 +65,7 @@ void ares_search(ares_channel channel, const char *name, int dnsclass,
   status = single_domain(channel, name, &s);
   if (status != ARES_SUCCESS)
     {
-      callback(arg, status, NULL, 0);
+      callback(arg, status, 0, NULL, 0);
       return;
     }
   if (s)
@@ -80,7 +81,7 @@ void ares_search(ares_channel channel, const char *name, int dnsclass,
   squery = malloc(sizeof(struct search_query));
   if (!squery)
     {
-      callback(arg, ARES_ENOMEM, NULL, 0);
+      callback(arg, ARES_ENOMEM, 0, NULL, 0);
       return;
     }
   squery->channel = channel;
@@ -88,7 +89,7 @@ void ares_search(ares_channel channel, const char *name, int dnsclass,
   if (!squery->name)
     {
       free(squery);
-      callback(arg, ARES_ENOMEM, NULL, 0);
+      callback(arg, ARES_ENOMEM, 0, NULL, 0);
       return;
     }
   squery->dnsclass = dnsclass;
@@ -96,6 +97,7 @@ void ares_search(ares_channel channel, const char *name, int dnsclass,
   squery->status_as_is = -1;
   squery->callback = callback;
   squery->arg = arg;
+  squery->timeouts = 0;
 
   /* Count the number of dots in name. */
   ndots = 0;
@@ -132,17 +134,19 @@ void ares_search(ares_channel channel, const char *name, int dnsclass,
         /* failed, free the malloc()ed memory */
         free(squery->name);
         free(squery);
-        callback(arg, status, NULL, 0);
+        callback(arg, status, 0, NULL, 0);
       }
     }
 }
 
-static void search_callback(void *arg, int status, unsigned char *abuf,
-                            int alen)
+static void search_callback(void *arg, int status, int timeouts,
+                            unsigned char *abuf, int alen)
 {
   struct search_query *squery = (struct search_query *) arg;
   ares_channel channel = squery->channel;
   char *s;
+
+  squery->timeouts += timeouts;
 
   /* Stop searching unless we got a non-fatal error. */
   if (status != ARES_ENODATA && status != ARES_ESERVFAIL
@@ -184,7 +188,7 @@ static void search_callback(void *arg, int status, unsigned char *abuf,
 static void end_squery(struct search_query *squery, int status,
                        unsigned char *abuf, int alen)
 {
-  squery->callback(squery->arg, status, abuf, alen);
+  squery->callback(squery->arg, status, squery->timeouts, abuf, alen);
   free(squery->name);
   free(squery);
 }

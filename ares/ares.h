@@ -193,11 +193,11 @@ struct timeval;
 struct sockaddr;
 struct ares_channeldata;
 typedef struct ares_channeldata *ares_channel;
-typedef void (*ares_callback)(void *arg, int status, unsigned char *abuf,
-                              int alen);
-typedef void (*ares_host_callback)(void *arg, int status,
+typedef void (*ares_callback)(void *arg, int status, int timeouts,
+                              unsigned char *abuf, int alen);
+typedef void (*ares_host_callback)(void *arg, int status, int timeouts,
                                    struct hostent *hostent);
-typedef void (*ares_nameinfo_callback)(void *arg, int status,
+typedef void (*ares_nameinfo_callback)(void *arg, int status, int timeouts,
                                        char *node, char *service);
 
 int ares_init(ares_channel *channelptr);

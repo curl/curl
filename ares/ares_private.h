@@ -152,6 +152,7 @@ struct query {
 
   /* Next query in chain */
   struct query *next;
+  int timeouts; /* number of timeouts we saw for this request */
 };
 
 /* Per-server state for a query */
@@ -195,6 +196,8 @@ struct ares_channeldata {
   int ndots;
   int udp_port;
   int tcp_port;
+  int socket_send_buffer_size;
+  int socket_receive_buffer_size;
   char **domains;
   int ndomains;
   struct apattern *sortlist;

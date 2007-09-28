@@ -37,7 +37,7 @@ struct qquery {
   void *arg;
 };
 
-static void qcallback(void *arg, int status, unsigned char *abuf, int alen);
+static void qcallback(void *arg, int status, int timeouts, unsigned char *abuf, int alen);
 
 void ares__rc4(rc4_key* key, unsigned char *buffer_ptr, int buffer_len)
 {
@@ -110,7 +110,8 @@ void ares_query(ares_channel channel, const char *name, int dnsclass,
                         &qlen);
   if (status != ARES_SUCCESS)
     {
-      callback(arg, status, NULL, 0);
+      if (qbuf != NULL) free(qbuf);
+      callback(arg, status, 0, NULL, 0);
       return;
     }
 
@@ -121,7 +122,7 @@ void ares_query(ares_channel channel, const char *name, int dnsclass,
   if (!qquery)
     {
       ares_free_string(qbuf);
-      callback(arg, ARES_ENOMEM, NULL, 0);
+      callback(arg, ARES_ENOMEM, 0, NULL, 0);
       return;
     }
   qquery->callback = callback;
@@ -132,14 +133,14 @@ void ares_query(ares_channel channel, const char *name, int dnsclass,
   ares_free_string(qbuf);
 }
 
-static void qcallback(void *arg, int status, unsigned char *abuf, int alen)
+static void qcallback(void *arg, int status, int timeouts, unsigned char *abuf, int alen)
 {
   struct qquery *qquery = (struct qquery *) arg;
   unsigned int ancount;
   int rcode;
 
   if (status != ARES_SUCCESS)
-    qquery->callback(qquery->arg, status, abuf, alen);
+    qquery->callback(qquery->arg, status, timeouts, abuf, alen);
   else
     {
       /* Pull the response code and answer count from the packet. */
@@ -168,7 +169,7 @@ static void qcallback(void *arg, int status, unsigned char *abuf, int alen)
           status = ARES_EREFUSED;
           break;
         }
-      qquery->callback(qquery->arg, status, abuf, alen);
+      qquery->callback(qquery->arg, status, timeouts, abuf, alen);
     }
   free(qquery);
 }
