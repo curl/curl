@@ -62,8 +62,9 @@ void ares_send(ares_channel channel, const unsigned char *qbuf, int qlen,
       callback(arg, ARES_ENOMEM, NULL, 0);
       return;
     }
-  query->skip_server = malloc(channel->nservers * sizeof(int));
-  if (!query->skip_server)
+  query->server_info = malloc(channel->nservers *
+                              sizeof(query->server_info[0]));
+  if (!query->server_info)
     {
       free(query->tcpbuf);
       free(query);
@@ -93,7 +94,10 @@ void ares_send(ares_channel channel, const unsigned char *qbuf, int qlen,
   query->try = 0;
   query->server = 0;
   for (i = 0; i < channel->nservers; i++)
-    query->skip_server[i] = 0;
+    {
+      query->server_info[i].skip_server = 0;
+      query->server_info[i].tcp_connection_generation = 0;
+    }
   query->using_tcp = (channel->flags & ARES_FLAG_USEVC) || qlen > PACKETSZ;
   query->error_status = ARES_ECONNREFUSED;
 

@@ -33,7 +33,7 @@ void ares_cancel(ares_channel channel)
     next = query->next;
     query->callback(query->arg, ARES_ETIMEOUT, NULL, 0);
     free(query->tcpbuf);
-    free(query->skip_server);
+    free(query->server_info);
     free(query);
   }
   channel->queries = NULL;

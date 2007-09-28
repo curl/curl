@@ -62,6 +62,7 @@ static void read_tcp_data(ares_channel channel, fd_set *read_fds,
 static void read_udp_packets(ares_channel channel, fd_set *read_fds,
                              ares_socket_t read_fd, time_t now);
 static void process_timeouts(ares_channel channel, time_t now);
+static void process_broken_connections(ares_channel channel, time_t now);
 static void process_answer(ares_channel channel, unsigned char *abuf,
                            int alen, int whichserver, int tcp, time_t now);
 static void handle_error(ares_channel channel, int whichserver, time_t now);
@@ -87,6 +88,7 @@ void ares_process(ares_channel channel, fd_set *read_fds, fd_set *write_fds)
   read_tcp_data(channel, read_fds, ARES_SOCKET_BAD, now);
   read_udp_packets(channel, read_fds, ARES_SOCKET_BAD, now);
   process_timeouts(channel, now);
+  process_broken_connections(channel, now);
 }
 
 /* Something interesting happened on the wire, or there was a timeout.
@@ -157,7 +159,7 @@ static void write_tcp_data(ares_channel channel,
       /* Make sure server has data to send and is selected in write_fds or
          write_fd. */
       server = &channel->servers[i];
-      if (!server->qhead || server->tcp_socket == ARES_SOCKET_BAD)
+      if (!server->qhead || server->tcp_socket == ARES_SOCKET_BAD || server->is_broken)
         continue;
 
       if(write_fds) {
@@ -216,6 +218,8 @@ static void write_tcp_data(ares_channel channel,
                       SOCK_STATE_CALLBACK(channel, server->tcp_socket, 1, 0);
                       server->qtail = NULL;
                     }
+                  if (sendreq->data_storage != NULL)
+                    free(sendreq->data_storage);
                   free(sendreq);
                 }
               else
@@ -248,6 +252,8 @@ static void write_tcp_data(ares_channel channel,
                   SOCK_STATE_CALLBACK(channel, server->tcp_socket, 1, 0);
                   server->qtail = NULL;
                 }
+              if (sendreq->data_storage != NULL)
+                free(sendreq->data_storage);
               free(sendreq);
             }
           else
@@ -278,7 +284,7 @@ static void read_tcp_data(ares_channel channel, fd_set *read_fds,
     {
       /* Make sure the server has a socket and is selected in read_fds. */
       server = &channel->servers[i];
-      if (server->tcp_socket == ARES_SOCKET_BAD)
+      if (server->tcp_socket == ARES_SOCKET_BAD || server->is_broken)
         continue;
 
       if(read_fds) {
@@ -376,7 +382,7 @@ static void read_udp_packets(ares_channel channel, fd_set *read_fds,
       /* Make sure the server has a socket and is selected in read_fds. */
       server = &channel->servers[i];
 
-      if (server->udp_socket == ARES_SOCKET_BAD)
+      if (server->udp_socket == ARES_SOCKET_BAD || server->is_broken)
         continue;
 
       if(read_fds) {
@@ -492,6 +498,20 @@ static void process_answer(ares_channel channel, unsigned char *abuf,
   end_query(channel, query, ARES_SUCCESS, abuf, alen);
 }
 
+/* Close all the connections that are no longer usable. */
+static void process_broken_connections(ares_channel channel, time_t now)
+{
+  int i;
+  for (i = 0; i < channel->nservers; i++)
+    {
+      struct server_state *server = &channel->servers[i];
+      if (server->is_broken)
+        {
+          handle_error(channel, i, now);
+        }
+    }
+}
+
 static void handle_error(ares_channel channel, int whichserver, time_t now)
 {
   struct query *query, *next;
@@ -526,7 +546,7 @@ static void skip_server(ares_channel channel, struct query *query,
    */
   if (channel->nservers > 1)
     {
-      query->skip_server[whichserver] = 1;
+      query->server_info[whichserver].skip_server = 1;
     }
 }
 
@@ -538,10 +558,21 @@ static struct query *next_server(ares_channel channel, struct query *query, time
     {
       for (; query->server < channel->nservers; query->server++)
         {
-          if (!query->skip_server[query->server])
+          struct server_state *server = &channel->servers[query->server];
+          /* We don't want to use this server if (1) we decided this
+           * connection is broken, and thus about to be closed, (2)
+           * we've decided to skip this server because of earlier
+           * errors we encountered, or (3) we already sent this query
+           * over this exact connection.
+           */
+          if (!server->is_broken &&
+               !query->server_info[query->server].skip_server &&
+               !(query->using_tcp &&
+                 (query->server_info[query->server].tcp_connection_generation ==
+                  server->tcp_connection_generation)))
             {
-              ares__send_query(channel, query, now);
-              return (query->next);
+               ares__send_query(channel, query, now);
+               return (query->next);
             }
         }
       query->server = 0;
@@ -582,8 +613,16 @@ void ares__send_query(ares_channel channel, struct query *query, time_t now)
         end_query(channel, query, ARES_ENOMEM, NULL, 0);
           return;
         }
+      /* To make the common case fast, we avoid copies by using the
+       * query's tcpbuf for as long as the query is alive. In the rare
+       * case where the query ends while it's queued for transmission,
+       * then we give the sendreq its own copy of the request packet
+       * and put it in sendreq->data_storage.
+       */
+      sendreq->data_storage = NULL;
       sendreq->data = query->tcpbuf;
       sendreq->len = query->tcplen;
+      sendreq->owner_query = query;
       sendreq->next = NULL;
       if (server->qtail)
         server->qtail->next = sendreq;
@@ -594,6 +633,8 @@ void ares__send_query(ares_channel channel, struct query *query, time_t now)
         }
       server->qtail = sendreq;
       query->timeout = 0;
+      query->server_info[query->server].tcp_connection_generation =
+        server->tcp_connection_generation;
     }
   else
     {
@@ -721,6 +762,7 @@ static int open_tcp_socket(ares_channel channel, struct server_state *server)
   SOCK_STATE_CALLBACK(channel, s, 1, 0);
   server->tcp_buffer_pos = 0;
   server->tcp_socket = s;
+  server->tcp_connection_generation = ++channel->tcp_connection_generation;
   return 0;
 }
 
@@ -839,6 +881,61 @@ static struct query *end_query (ares_channel channel, struct query *query, int s
   struct query **q, *next;
   int i;
 
+  /* First we check to see if this query ended while one of our send
+   * queues still has pointers to it.
+   */
+  for (i = 0; i < channel->nservers; i++)
+    {
+      struct server_state *server = &channel->servers[i];
+      struct send_request *sendreq;
+      for (sendreq = server->qhead; sendreq; sendreq = sendreq->next)
+        if (sendreq->owner_query == query)
+          {
+            sendreq->owner_query = NULL;
+            assert(sendreq->data_storage == NULL);
+            if (status == ARES_SUCCESS)
+              {
+                /* We got a reply for this query, but this queued
+                 * sendreq points into this soon-to-be-gone query's
+                 * tcpbuf. Probably this means we timed out and queued
+                 * the query for retransmission, then received a
+                 * response before actually retransmitting. This is
+                 * perfectly fine, so we want to keep the connection
+                 * running smoothly if we can. But in the worst case
+                 * we may have sent only some prefix of the query,
+                 * with some suffix of the query left to send. Also,
+                 * the buffer may be queued on multiple queues. To
+                 * prevent dangling pointers to the query's tcpbuf and
+                 * handle these cases, we just give such sendreqs
+                 * their own copy of the query packet.
+                 */
+               sendreq->data_storage = malloc(sendreq->len);
+               if (sendreq->data_storage != NULL)
+                 {
+                   memcpy(sendreq->data_storage, sendreq->data, sendreq->len);
+                   sendreq->data = sendreq->data_storage;
+                 }
+              }
+            if ((status != ARES_SUCCESS) || (sendreq->data_storage == NULL))
+              {
+                /* We encountered an error (probably a timeout,
+                 * suggesting the DNS server we're talking to is
+                 * probably unreachable, wedged, or severely
+                 * overloaded) or we couldn't copy the request, so
+                 * mark the connection as broken. When we get to
+                 * process_broken_connections() we'll close the
+                 * connection and try to re-send requests to another
+                 * server.
+                 */
+               server->is_broken = 1;
+               /* Just to be paranoid, zero out this sendreq... */
+               sendreq->data = NULL;
+               sendreq->len = 0;
+             }
+          }
+    }
+ 
+  /* Invoke the callback */ 
   query->callback(query->arg, status, abuf, alen);
   for (q = &channel->queries; *q; q = &(*q)->next)
     {
@@ -851,7 +948,7 @@ static struct query *end_query (ares_channel channel, struct query *query, int s
   else
     next = NULL;
   free(query->tcpbuf);
-  free(query->skip_server);
+  free(query->server_info);
   free(query);
 
   /* Simple cleanup policy: if no queries are remaining, close all

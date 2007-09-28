@@ -89,6 +89,11 @@ struct send_request {
   const unsigned char *data;
   size_t len;
 
+  /* The query for which we're sending this data */
+  struct query* owner_query;
+  /* The buffer we're using, if we have our own copy of the packet */
+  unsigned char *data_storage;
+
   /* Next request in queue */
   struct send_request *next;
 };
@@ -110,6 +115,17 @@ struct server_state {
   /* TCP output queue */
   struct send_request *qhead;
   struct send_request *qtail;
+
+  /* Which incarnation of this connection is this? We don't want to
+   * retransmit requests into the very same socket, but if the server
+   * closes on us and we re-open the connection, then we do want to
+   * re-send. */
+  int tcp_connection_generation;
+
+  /* Is this server broken? We mark connections as broken when a
+   * request that is queued for sending times out.
+   */
+  int is_broken;
 };
 
 struct query {
@@ -130,12 +146,18 @@ struct query {
   /* Query status */
   int try;
   int server;
-  int *skip_server;
+  struct query_server_info *server_info;   /* per-server state */
   int using_tcp;
   int error_status;
 
   /* Next query in chain */
   struct query *next;
+};
+
+/* Per-server state for a query */
+struct query_server_info {
+  int skip_server;  /* should we skip server, due to errors, etc? */
+  int tcp_connection_generation;  /* into which TCP connection did we send? */
 };
 
 /* An IP address pattern; matches an IP address X if X & mask == addr */
@@ -188,6 +210,9 @@ struct ares_channeldata {
   /* key to use when generating new ids */
   rc4_key id_key;
 
+  /* Generation number to use for the next TCP socket open/close */
+  int tcp_connection_generation;
+
   /* Active queries */
   struct query *queries;
 
@@ -220,4 +245,3 @@ short ares__generate_new_id(rc4_key* key);
 #endif
 
 #endif /* __ARES_PRIVATE_H */
-
