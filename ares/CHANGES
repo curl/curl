@@ -1,5 +1,26 @@
   Changelog for the c-ares project
 
+* September 28 2007 (Daniel Stenberg)
+
+- Bumped version to 1.5.0 for next release and soname bumped to 2 due to ABI
+  and API changes in the progress callback (and possibly more coming up from
+  Steinar)
+
+* September 28 2007 (Steinar H. Gunderson)
+
+- Don't skip a server if it's the only one. (Bugfix from the Google tree.)
+
+- Made the query callbacks receive the number of timeouts that happened during
+  the execution of a query, and updated documentation accordingly. (Patch from
+  the Google tree.)
+
+- Support a few more socket options: ARES_OPT_SOCK_SNDBUF and
+  ARES_OPT_SOCK_RCVBUF
+
+- Always register for TCP events even if there are no outstanding queries, as
+  the other side could always close the connection, which is a valid event
+  which should be responded to.
+
 * September 22 2007 (Daniel Stenberg)
 
 - Steinar H. Gunderson fixed: Correctly clear sockets from the fd_set on in
