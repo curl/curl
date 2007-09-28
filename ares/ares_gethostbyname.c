@@ -160,13 +160,13 @@ static void host_callback(void *arg, int status, int timeouts,
     {
       if (hquery->family == AF_INET)
         {
-          status = ares_parse_a_reply(abuf, alen, &host, NULL, NULL);
+          status = ares_parse_a_reply(abuf, alen, &host);
           if (host && channel->nsort)
             sort_addresses(host, channel->sortlist, channel->nsort);
         }
       else if (hquery->family == AF_INET6)
         {
-          status = ares_parse_aaaa_reply(abuf, alen, &host, NULL, NULL);
+          status = ares_parse_aaaa_reply(abuf, alen, &host);
           if (host && channel->nsort)
             sort6_addresses(host, channel->sortlist, channel->nsort);
         }
