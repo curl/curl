@@ -398,7 +398,6 @@ int Curl_resolv(struct connectdata *conn,
   char *entry_id = NULL;
   struct Curl_dns_entry *dns = NULL;
   size_t entry_len;
-  int wait;
   struct SessionHandle *data = conn->data;
   CURLcode result;
   int rc;
@@ -447,19 +446,20 @@ int Curl_resolv(struct connectdata *conn,
     /* The entry was not in the cache. Resolve it to IP address */
 
     Curl_addrinfo *addr;
+    int respwait;
 
     /* Check what IP specifics the app has requested and if we can provide it.
      * If not, bail out. */
     if(!Curl_ipvalid(data))
       return CURLRESOLV_ERROR;
 
-    /* If Curl_getaddrinfo() returns NULL, 'wait' might be set to a non-zero
-       value indicating that we need to wait for the response to the resolve
-       call */
-    addr = Curl_getaddrinfo(conn, hostname, port, &wait);
+    /* If Curl_getaddrinfo() returns NULL, 'respwait' might be set to a
+       non-zero value indicating that we need to wait for the response to the
+       resolve call */
+    addr = Curl_getaddrinfo(conn, hostname, port, &respwait);
 
     if (!addr) {
-      if(wait) {
+      if(respwait) {
         /* the response to our resolve call will come asynchronously at
            a later time, good or bad */
         /* First, check that we haven't received the info by now */
