@@ -25,6 +25,7 @@
 #ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>
 #endif
+#include <netinet/tcp.h>   /* for TCP_NODELAY */
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/nameser.h>
@@ -732,9 +733,36 @@ static int nonblock(ares_socket_t sockfd,    /* operate on this */
 #endif
 }
 
+static int configure_socket(int s, ares_channel channel)
+{
+  nonblock(s, TRUE);
+
+#ifdef FD_CLOEXEC
+  /* Configure the socket fd as close-on-exec. */
+  if (fcntl(s, F_SETFD, FD_CLOEXEC) == -1)
+    return -1;
+#endif
+
+  /* Set the socket's send and receive buffer sizes. */
+  if ((channel->socket_send_buffer_size > 0) &&
+      setsockopt(s, SOL_SOCKET, SO_SNDBUF,
+                 &channel->socket_send_buffer_size,
+                 sizeof(channel->socket_send_buffer_size)) == -1)
+    return -1;
+       
+  if ((channel->socket_receive_buffer_size > 0) &&
+      setsockopt(s, SOL_SOCKET, SO_RCVBUF,
+                 &channel->socket_receive_buffer_size,
+                 sizeof(channel->socket_receive_buffer_size)) == -1)
+    return -1;
+
+  return 0;
+ } 
+
 static int open_tcp_socket(ares_channel channel, struct server_state *server)
 {
   ares_socket_t s;
+  int opt;
   struct sockaddr_in sockin;
 
   /* Acquire a socket. */
@@ -742,8 +770,25 @@ static int open_tcp_socket(ares_channel channel, struct server_state *server)
   if (s == ARES_SOCKET_BAD)
     return -1;
 
-  /* Set the socket non-blocking. */
-  nonblock(s, TRUE);
+  /* Configure it. */
+  if (configure_socket(s, channel) < 0)
+    {
+       close(s);
+       return -1;
+    }
+
+  /*
+   * Disable the Nagle algorithm (only relevant for TCP sockets, and thus not in
+   * configure_socket). In general, in DNS lookups we're pretty much interested
+   * in firing off a single request and then waiting for a reply, so batching
+   * isn't very interesting in general.
+   */
+  opt = 1;
+  if (setsockopt(s, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(opt)) == -1)
+    {
+       close(s);
+       return -1;
+    }
 
   /* Connect to the server. */
   memset(&sockin, 0, sizeof(sockin));
@@ -777,7 +822,11 @@ static int open_udp_socket(ares_channel channel, struct server_state *server)
     return -1;
 
   /* Set the socket non-blocking. */
-  nonblock(s, TRUE);
+  if (configure_socket(s, channel) < 0)
+    {
+       close(s);
+       return -1;
+    }
 
   /* Connect to the server. */
   memset(&sockin, 0, sizeof(sockin));

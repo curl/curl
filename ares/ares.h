@@ -98,6 +98,8 @@ extern "C" {
 #define ARES_OPT_LOOKUPS        (1 << 8)
 #define ARES_OPT_SOCK_STATE_CB  (1 << 9)
 #define ARES_OPT_SORTLIST       (1 << 10)
+#define ARES_OPT_SOCK_SNDBUF    (1 << 11)
+#define ARES_OPT_SOCK_RCVBUF    (1 << 12)
 
 /* Nameinfo flag values */
 #define ARES_NI_NOFQDN                  (1 << 0)
@@ -177,6 +179,8 @@ struct ares_options {
   int ndots;
   unsigned short udp_port;
   unsigned short tcp_port;
+  int socket_send_buffer_size;
+  int socket_receive_buffer_size;
   struct in_addr *servers;
   int nservers;
   char **domains;

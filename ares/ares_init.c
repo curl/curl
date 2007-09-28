@@ -133,6 +133,8 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
   channel->ndots = -1;
   channel->udp_port = -1;
   channel->tcp_port = -1;
+  channel->socket_send_buffer_size = -1;
+  channel->socket_receive_buffer_size = -1;
   channel->nservers = -1;
   channel->ndomains = -1;
   channel->nsort = -1;
@@ -320,6 +322,12 @@ static int init_by_options(ares_channel channel,
       channel->sock_state_cb = options->sock_state_cb;
       channel->sock_state_cb_data = options->sock_state_cb_data;
     }
+  if ((optmask & ARES_OPT_SOCK_SNDBUF)
+      && channel->socket_send_buffer_size == -1)
+    channel->socket_send_buffer_size = options->socket_send_buffer_size;
+  if ((optmask & ARES_OPT_SOCK_RCVBUF)
+      && channel->socket_receive_buffer_size == -1)
+    channel->socket_receive_buffer_size = options->socket_receive_buffer_size;
 
   /* Copy the servers, if given. */
   if ((optmask & ARES_OPT_SERVERS) && channel->nservers == -1)
