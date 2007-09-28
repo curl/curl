@@ -65,6 +65,8 @@ static void process_timeouts(ares_channel channel, time_t now);
 static void process_answer(ares_channel channel, unsigned char *abuf,
                            int alen, int whichserver, int tcp, time_t now);
 static void handle_error(ares_channel channel, int whichserver, time_t now);
+static void skip_server(ares_channel channel, struct query *query,
+                        int whichserver);
 static struct query *next_server(ares_channel channel, struct query *query, time_t now);
 static int open_tcp_socket(ares_channel channel, struct server_state *server);
 static int open_udp_socket(ares_channel channel, struct server_state *server);
@@ -474,7 +476,7 @@ static void process_answer(ares_channel channel, unsigned char *abuf,
     {
       if (rcode == SERVFAIL || rcode == NOTIMP || rcode == REFUSED)
         {
-          query->skip_server[whichserver] = 1;
+          skip_server(channel, query, whichserver);
           if (query->server == whichserver)
             next_server(channel, query, now);
           return;
@@ -506,9 +508,25 @@ static void handle_error(ares_channel channel, int whichserver, time_t now)
       next = query->next;
       if (query->server == whichserver)
         {
-          query->skip_server[whichserver] = 1;
+          skip_server(channel, query, whichserver);
           next = next_server(channel, query, now);
         }
+    }
+}
+
+static void skip_server(ares_channel channel, struct query *query,
+                        int whichserver) {
+  /* The given server gave us problems with this query, so if we have
+   * the luxury of using other servers, then let's skip the
+   * potentially broken server and just use the others. If we only
+   * have one server and we need to retry then we should just go ahead
+   * and re-use that server, since it's our only hope; perhaps we
+   * just got unlucky, and retrying will work (eg, the server timed
+   * out our TCP connection just as we were sending another request).
+   */
+  if (channel->nservers > 1)
+    {
+      query->skip_server[whichserver] = 1;
     }
 }
 
@@ -553,7 +571,7 @@ void ares__send_query(ares_channel channel, struct query *query, time_t now)
         {
           if (open_tcp_socket(channel, server) == -1)
             {
-              query->skip_server[query->server] = 1;
+              skip_server(channel, query, query->server);
               next_server(channel, query, now);
               return;
             }
@@ -583,7 +601,7 @@ void ares__send_query(ares_channel channel, struct query *query, time_t now)
         {
           if (open_udp_socket(channel, server) == -1)
             {
-              query->skip_server[query->server] = 1;
+              skip_server(channel, query, query->server);
               next_server(channel, query, now);
               return;
             }
@@ -591,7 +609,7 @@ void ares__send_query(ares_channel channel, struct query *query, time_t now)
       if (swrite(server->udp_socket, query->qbuf, query->qlen) == -1)
         {
           /* FIXME: Handle EAGAIN here since it likely can happen. */
-          query->skip_server[query->server] = 1;
+          skip_server(channel, query, query->server);
           next_server(channel, query, now);
           return;
         }
