@@ -229,7 +229,7 @@ static LIBSSH2_FREE_FUNC(libssh2_free)
  * SSH State machine related code
  */
 /* This is the ONLY way to change SSH state! */
-static void state(struct connectdata *conn, sshstate state)
+static void state(struct connectdata *conn, sshstate nowstate)
 {
 #if defined(CURLDEBUG) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   /* for debug purposes */
@@ -291,13 +291,13 @@ static void state(struct connectdata *conn, sshstate state)
   struct ssh_conn *sshc = &conn->proto.sshc;
 
 #if defined(CURLDEBUG) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
-  if (sshc->state != state) {
+  if (sshc->state != nowstate) {
     infof(conn->data, "SFTP %p state change from %s to %s\n",
-          sshc, names[sshc->state], names[state]);
+          sshc, names[sshc->state], names[nowstate]);
   }
 #endif
 
-  sshc->state = state;
+  sshc->state = nowstate;
 }
 
 static CURLcode ssh_statemach_act(struct connectdata *conn)
