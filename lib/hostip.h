@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -34,6 +34,10 @@
 /*
  * Setup comfortable CURLRES_* defines to use in the host*.c sources.
  */
+
+#ifdef USE_ARES
+#include <ares_version.h>
+#endif
 
 #ifdef USE_ARES
 #define CURLRES_ASYNCH
@@ -85,6 +89,10 @@
 
 #ifdef CURLRES_ARES
 #define CURL_ASYNC_SUCCESS ARES_SUCCESS
+#if ARES_VERSION >= 0x010500
+/* c-ares 1.5.0 or later, the callback proto is modified */
+#define HAVE_CARES_CALLBACK_TIMEOUTS 1
+#endif
 #else
 #define CURL_ASYNC_SUCCESS CURLE_OK
 #define ares_cancel(x) do {} while(0)
@@ -216,11 +224,17 @@ int curl_dogetnameinfo(GETNAMEINFO_QUAL_ARG1 GETNAMEINFO_TYPE_ARG1 sa,
    resolve, ipv4 */
 CURLcode Curl_addrinfo4_callback(void *arg,
                                  int status,
+#ifdef HAVE_CARES_CALLBACK_TIMEOUTS
+                                 int timeouts,
+#endif
                                  struct hostent *hostent);
 /* This is the callback function that is used when we build with asynch
    resolve, ipv6 */
 CURLcode Curl_addrinfo6_callback(void *arg,
                                  int status,
+#ifdef HAVE_CARES_CALLBACK_TIMEOUTS
+                                 int timeouts,
+#endif
                                  struct addrinfo *ai);
 
 

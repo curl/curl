@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel S (28 September 2007)
+- Adapted the c-ares code to the API change c-ares 1.5.0 brings in the
+  notifier callback(s).
+
 Dan F (26 September 2007)
 - Enabled a few more gcc warnings with --enable-debug.  Renamed a few
   variables to avoid shadowing global declarations.

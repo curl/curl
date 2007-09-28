@@ -15,6 +15,7 @@ This release includes the following changes:
  o improved NSS support
  o added --proxy-negotiate
  o added --post301 and CURLOPT_POST301
+ o builds with c-ares 1.5.0
 
 This release includes the following bugfixes:
 
