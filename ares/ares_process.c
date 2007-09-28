@@ -70,6 +70,7 @@ static void handle_error(ares_channel channel, int whichserver, time_t now);
 static void skip_server(ares_channel channel, struct query *query,
                         int whichserver);
 static struct query *next_server(ares_channel channel, struct query *query, time_t now);
+static int configure_socket(int s, ares_channel channel);
 static int open_tcp_socket(ares_channel channel, struct server_state *server);
 static int open_udp_socket(ares_channel channel, struct server_state *server);
 static int same_questions(const unsigned char *qbuf, int qlen,
@@ -424,6 +425,7 @@ static void process_timeouts(ares_channel channel, time_t now)
       if (query->timeout != 0 && now >= query->timeout)
         {
           query->error_status = ARES_ETIMEOUT;
+          ++query->timeouts;
           next = next_server(channel, query, now);
         }
     }
