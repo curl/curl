@@ -108,6 +108,23 @@ int ares_mkquery(const char *name, int dnsclass, int type, unsigned short id,
   if (*name && *(p - 1) != '.')
     len++;
 
+  /* Immediately reject names that are longer than the maximum of 255
+   * bytes that's specified in RFC 1035 ("To simplify implementations,
+   * the total length of a domain name (i.e., label octets and label
+   * length octets) is restricted to 255 octets or less."). We aren't
+   * doing this just to be a stickler about RFCs. For names that are
+   * too long, 'dnscache' closes its TCP connection to us immediately
+   * (when using TCP) and ignores the request when using UDP, and
+   * BIND's named returns ServFail (TCP or UDP). Sending a request
+   * that we know will cause 'dnscache' to close the TCP connection is
+   * painful, since that makes any other outstanding requests on that
+   * connection fail. And sending a UDP request that we know
+   * 'dnscache' will ignore is bad because resources will be tied up
+   * until we time-out the request.
+   */
+  if (len > MAXCDNAME)
+    return ARES_EBADNAME;
+
   *buflen = len + HFIXEDSZ + QFIXEDSZ;
   *buf = malloc(*buflen);
   if (!*buf)
