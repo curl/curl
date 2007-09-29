@@ -209,7 +209,27 @@ static int fake_hostent(const char *name, int family, ares_host_callback callbac
   struct in6_addr in6;
 
   if (family == AF_INET)
-    result = ((in.s_addr = inet_addr(name)) == INADDR_NONE ? 0 : 1);
+    {
+      /* It only looks like an IP address if it's all numbers and dots. */
+      int numdots = 0;
+      const char *p;
+      for (p = name; *p; p++)
+        {
+          if (!isdigit(*p) && *p != '.') {
+            return 0;
+          } else if (*p == '.') {
+            numdots++;
+          }
+        }
+    
+      /* if we don't have 3 dots, it is illegal 
+       * (although inet_addr doesn't think so).
+       */
+      if (numdots != 3)
+        result = 0;
+      else
+        result = ((in.s_addr = inet_addr(name)) == INADDR_NONE ? 0 : 1);
+    }
   else if (family == AF_INET6)
     result = (ares_inet_pton(AF_INET6, name, &in6) < 1 ? 0 : 1);
 
