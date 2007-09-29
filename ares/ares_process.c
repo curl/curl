@@ -62,6 +62,8 @@ static void read_tcp_data(ares_channel channel, fd_set *read_fds,
                           ares_socket_t read_fd, time_t now);
 static void read_udp_packets(ares_channel channel, fd_set *read_fds,
                              ares_socket_t read_fd, time_t now);
+static void advance_tcp_send_queue(ares_channel channel, int whichserver,
+                                   ssize_t num_bytes);
 static void process_timeouts(ares_channel channel, time_t now);
 static void process_broken_connections(ares_channel channel, time_t now);
 static void process_answer(ares_channel channel, unsigned char *abuf,
@@ -208,29 +210,7 @@ static void write_tcp_data(ares_channel channel,
             }
 
           /* Advance the send queue by as many bytes as we sent. */
-          while (wcount)
-            {
-              sendreq = server->qhead;
-              if ((size_t)wcount >= sendreq->len)
-                {
-                  wcount -= sendreq->len;
-                  server->qhead = sendreq->next;
-                  if (server->qhead == NULL)
-                    {
-                      SOCK_STATE_CALLBACK(channel, server->tcp_socket, 1, 0);
-                      server->qtail = NULL;
-                    }
-                  if (sendreq->data_storage != NULL)
-                    free(sendreq->data_storage);
-                  free(sendreq);
-                }
-              else
-                {
-                  sendreq->data += wcount;
-                  sendreq->len -= wcount;
-                  break;
-                }
-            }
+          advance_tcp_send_queue(channel, i, wcount);
         }
       else
         {
@@ -246,24 +226,39 @@ static void write_tcp_data(ares_channel channel,
             }
 
           /* Advance the send queue by as many bytes as we sent. */
-          if ((size_t)scount == sendreq->len)
-            {
-              server->qhead = sendreq->next;
-              if (server->qhead == NULL)
-                {
-                  SOCK_STATE_CALLBACK(channel, server->tcp_socket, 1, 0);
-                  server->qtail = NULL;
-                }
-              if (sendreq->data_storage != NULL)
-                free(sendreq->data_storage);
-              free(sendreq);
-            }
-          else
-            {
-              sendreq->data += scount;
-              sendreq->len -= scount;
-            }
+          advance_tcp_send_queue(channel, i, scount);
         }
+    }
+}
+          
+/* Consume the given number of bytes from the head of the TCP send queue. */
+static void advance_tcp_send_queue(ares_channel channel, int whichserver,
+                                   ssize_t num_bytes)
+{
+  struct send_request *sendreq;
+  struct server_state *server = &channel->servers[whichserver];
+  while (num_bytes > 0)
+    {
+      sendreq = server->qhead;
+      if ((size_t)num_bytes >= sendreq->len)
+       {
+         num_bytes -= sendreq->len;
+         server->qhead = sendreq->next;
+         if (server->qhead == NULL)
+           {
+             SOCK_STATE_CALLBACK(channel, server->tcp_socket, 1, 0);
+             server->qtail = NULL;
+           }
+         if (sendreq->data_storage != NULL)
+           free(sendreq->data_storage);
+         free(sendreq);
+       }
+      else
+       {
+         sendreq->data += num_bytes;
+         sendreq->len -= num_bytes;
+         num_bytes = 0;
+       }
     }
 }
 
