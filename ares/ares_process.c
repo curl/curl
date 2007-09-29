@@ -44,6 +44,7 @@
 #include <sys/filio.h>
 #endif
 
+#include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 #include <fcntl.h>

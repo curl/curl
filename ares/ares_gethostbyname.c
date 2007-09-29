@@ -215,7 +215,7 @@ static int fake_hostent(const char *name, int family, ares_host_callback callbac
       const char *p;
       for (p = name; *p; p++)
         {
-          if (!isdigit(*p) && *p != '.') {
+          if (!ISDIGIT(*p) && *p != '.') {
             return 0;
           } else if (*p == '.') {
             numdots++;
