@@ -634,7 +634,6 @@ void ares__send_query(ares_channel channel, struct query *query, time_t now)
           server->qhead = sendreq;
         }
       server->qtail = sendreq;
-      query->timeout = 0;
       query->server_info[query->server].tcp_connection_generation =
         server->tcp_connection_generation;
     }
@@ -656,10 +655,10 @@ void ares__send_query(ares_channel channel, struct query *query, time_t now)
           next_server(channel, query, now);
           return;
         }
-      query->timeout = now
-          + ((query->try == 0) ? channel->timeout
-             : channel->timeout << query->try / channel->nservers);
     }
+    query->timeout = now
+        + ((query->try == 0) ? channel->timeout
+           : channel->timeout << query->try / channel->nservers);
 }
 
 /*
