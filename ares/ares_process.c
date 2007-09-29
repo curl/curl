@@ -71,13 +71,13 @@ static void process_answer(ares_channel channel, unsigned char *abuf,
 static void handle_error(ares_channel channel, int whichserver, time_t now);
 static void skip_server(ares_channel channel, struct query *query,
                         int whichserver);
-static struct query *next_server(ares_channel channel, struct query *query, time_t now);
+static void next_server(ares_channel channel, struct query *query, time_t now);
 static int configure_socket(int s, ares_channel channel);
 static int open_tcp_socket(ares_channel channel, struct server_state *server);
 static int open_udp_socket(ares_channel channel, struct server_state *server);
 static int same_questions(const unsigned char *qbuf, int qlen,
                           const unsigned char *abuf, int alen);
-static struct query *end_query(ares_channel channel, struct query *query, int status,
+static void end_query(ares_channel channel, struct query *query, int status,
                       unsigned char *abuf, int alen);
 
 /* Something interesting happened on the wire, or there was a timeout.
@@ -416,18 +416,33 @@ static void read_udp_packets(ares_channel channel, fd_set *read_fds,
 /* If any queries have timed out, note the timeout and move them on. */
 static void process_timeouts(ares_channel channel, time_t now)
 {
-  struct query *query, *next;
+  time_t t;  /* the time of the timeouts we're processing */
+  struct query *query;
+  struct list_node* list_head;
+  struct list_node* list_node;
 
-  for (query = channel->queries; query; query = next)
+  /* Process all the timeouts that have fired since the last time we
+   * processed timeouts. If things are going well, then we'll have
+   * hundreds/thousands of queries that fall into future buckets, and
+   * only a handful of requests that fall into the "now" bucket, so
+   * this should be quite quick.
+   */
+  for (t = channel->last_timeout_processed; t <= now; t++)
     {
-      next = query->next;
-      if (query->timeout != 0 && now >= query->timeout)
+      list_head = &(channel->queries_by_timeout[t % ARES_TIMEOUT_TABLE_SIZE]);
+      for (list_node = list_head->next; list_node != list_head; )
         {
-          query->error_status = ARES_ETIMEOUT;
-          ++query->timeouts;
-          next = next_server(channel, query, now);
+          query = list_node->data;
+          list_node = list_node->next;  /* in case the query gets deleted */
+          if (query->timeout != 0 && now >= query->timeout)
+            {
+              query->error_status = ARES_ETIMEOUT;
+              ++query->timeouts;
+              next_server(channel, query, now);
+            }
         }
-    }
+     }
+  channel->last_timeout_processed = now;
 }
 
 /* Handle an answer from a server. */
@@ -437,6 +452,8 @@ static void process_answer(ares_channel channel, unsigned char *abuf,
   int tc, rcode;
   unsigned short id;
   struct query *query;
+  struct list_node* list_head;
+  struct list_node* list_node;
 
   /* If there's no room in the answer for a header, we can't do much
    * with it. */
@@ -448,11 +465,24 @@ static void process_answer(ares_channel channel, unsigned char *abuf,
   tc = DNS_HEADER_TC(abuf);
   rcode = DNS_HEADER_RCODE(abuf);
 
-  /* Find the query corresponding to this packet. */
-  for (query = channel->queries; query; query = query->next)
+  /* Find the query corresponding to this packet. The queries are
+   * hashed/bucketed by query id, so this lookup should be quick.
+   * Note that both the query id and the questions must be the same;
+   * when the query id wraps around we can have multiple outstanding
+   * queries with the same query id, so we need to check both the id and
+   * question.
+   */
+  query = NULL;
+  list_head = &(channel->queries_by_qid[id % ARES_QID_TABLE_SIZE]);
+  for (list_node = list_head->next; list_node != list_head;
+       list_node = list_node->next)
     {
-      if (query->qid == id)
-        break;
+      struct query *q = list_node->data;
+      if ((q->qid == id) && same_questions(q->qbuf, q->qlen, abuf, alen))
+        {
+          query = q;
+          break;
+        }
     }
   if (!query)
     return;
@@ -516,24 +546,37 @@ static void process_broken_connections(ares_channel channel, time_t now)
 
 static void handle_error(ares_channel channel, int whichserver, time_t now)
 {
-  struct query *query, *next;
+  struct server_state *server;
+  struct query *query;
+  struct list_node list_head;
+  struct list_node* list_node;
+
+  server = &channel->servers[whichserver];
 
   /* Reset communications with this server. */
-  ares__close_sockets(channel, &channel->servers[whichserver]);
+  ares__close_sockets(channel, server);
 
   /* Tell all queries talking to this server to move on and not try
-   * this server again.
+   * this server again. We steal the current list of queries that were
+   * in-flight to this server, since when we call next_server this can
+   * cause the queries to be re-sent to this server, which will
+   * re-insert these queries in that same server->queries_to_server
+   * list.
    */
-
-  for (query = channel->queries; query; query = next)
+  ares__init_list_head(&list_head);
+  ares__swap_lists(&list_head, &(server->queries_to_server));
+  for (list_node = list_head.next; list_node != &list_head; )
     {
-      next = query->next;
-      if (query->server == whichserver)
-        {
-          skip_server(channel, query, whichserver);
-          next = next_server(channel, query, now);
-        }
+      query = list_node->data;
+      list_node = list_node->next;  /* in case the query gets deleted */
+      assert(query->server == whichserver);
+      skip_server(channel, query, whichserver);
+      next_server(channel, query, now);
     }
+  /* Each query should have removed itself from our temporary list as
+   * it re-sent itself or finished up...
+   */
+  assert(ares__is_list_empty(&list_head));
 }
 
 static void skip_server(ares_channel channel, struct query *query,
@@ -552,7 +595,7 @@ static void skip_server(ares_channel channel, struct query *query,
     }
 }
 
-static struct query *next_server(ares_channel channel, struct query *query, time_t now)
+static void next_server(ares_channel channel, struct query *query, time_t now)
 {
   /* Advance to the next server or try. */
   query->server++;
@@ -574,7 +617,7 @@ static struct query *next_server(ares_channel channel, struct query *query, time
                   server->tcp_connection_generation)))
             {
                ares__send_query(channel, query, now);
-               return (query->next);
+               return;
             }
         }
       query->server = 0;
@@ -586,7 +629,7 @@ static struct query *next_server(ares_channel channel, struct query *query, time
        * tickle a bug that drops our request.
        */
     }
-  return end_query(channel, query, query->error_status, NULL, 0);
+  end_query(channel, query, query->error_status, NULL, 0);
 }
 
 void ares__send_query(ares_channel channel, struct query *query, time_t now)
@@ -659,6 +702,21 @@ void ares__send_query(ares_channel channel, struct query *query, time_t now)
     query->timeout = now
         + ((query->try == 0) ? channel->timeout
            : channel->timeout << query->try / channel->nservers);
+    /* Keep track of queries bucketed by timeout, so we can process
+     * timeout events quickly.
+     */
+    ares__remove_from_list(&(query->queries_by_timeout));
+    ares__insert_in_list(
+        &(query->queries_by_timeout),
+        &(channel->queries_by_timeout[query->timeout %
+                                      ARES_TIMEOUT_TABLE_SIZE]));
+  
+    /* Keep track of queries bucketed by server, so we can process server
+     * errors quickly.
+     */
+    ares__remove_from_list(&(query->queries_to_server));
+    ares__insert_in_list(&(query->queries_to_server),
+                         &(server->queries_to_server));
 }
 
 /*
@@ -925,10 +983,9 @@ static int same_questions(const unsigned char *qbuf, int qlen,
   return 1;
 }
 
-static struct query *end_query (ares_channel channel, struct query *query, int status,
-                      unsigned char *abuf, int alen)
+static void end_query (ares_channel channel, struct query *query, int status,
+                       unsigned char *abuf, int alen)
 {
-  struct query **q, *next;
   int i;
 
   /* First we check to see if this query ended while one of our send
@@ -987,27 +1044,31 @@ static struct query *end_query (ares_channel channel, struct query *query, int s
 
   /* Invoke the callback */
   query->callback(query->arg, status, query->timeouts, abuf, alen);
-  for (q = &channel->queries; *q; q = &(*q)->next)
-    {
-      if (*q == query)
-        break;
-    }
-  *q = query->next;
-  if (*q)
-    next = (*q)->next;
-  else
-    next = NULL;
-  free(query->tcpbuf);
-  free(query->server_info);
-  free(query);
+  ares__free_query(query);
 
   /* Simple cleanup policy: if no queries are remaining, close all
    * network sockets unless STAYOPEN is set.
    */
-  if (!channel->queries && !(channel->flags & ARES_FLAG_STAYOPEN))
+  if (!(channel->flags & ARES_FLAG_STAYOPEN) &&
+      ares__is_list_empty(&(channel->all_queries)))
     {
       for (i = 0; i < channel->nservers; i++)
         ares__close_sockets(channel, &channel->servers[i]);
     }
-  return (next);
+}
+
+void ares__free_query(struct query *query)
+{
+  /* Remove the query from all the lists in which it is linked */
+  ares__remove_from_list(&(query->queries_by_qid));
+  ares__remove_from_list(&(query->queries_by_timeout));
+  ares__remove_from_list(&(query->queries_to_server));
+  ares__remove_from_list(&(query->all_queries));
+  /* Zero out some important stuff, to help catch bugs */
+  query->callback = NULL;
+  query->arg = NULL;
+  /* Deallocate the memory associated with the query */
+  free(query->tcpbuf);
+  free(query->server_info);
+  free(query);
 }

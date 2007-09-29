@@ -14,6 +14,7 @@
  */
 
 #include "setup.h"
+#include <assert.h>
 #include <stdlib.h>
 #include "ares.h"
 #include "ares_private.h"
@@ -25,18 +26,33 @@
  */
 void ares_cancel(ares_channel channel)
 {
-  struct query *query, *next;
+  struct query *query;
+  struct list_node* list_head;
+  struct list_node* list_node;
   int i;
 
-  for (query = channel->queries; query; query = next)
+  list_head = &(channel->all_queries);
+  for (list_node = list_head->next; list_node != list_head; )
   {
-    next = query->next;
+    query = list_node->data;
+    list_node = list_node->next;  /* since we're deleting the query */
     query->callback(query->arg, ARES_ETIMEOUT, 0, NULL, 0);
-    free(query->tcpbuf);
-    free(query->server_info);
-    free(query);
+    ares__free_query(query);
   }
-  channel->queries = NULL;
+#ifndef NDEBUG
+  /* Freeing the query should remove it from all the lists in which it sits,
+   * so all query lists should be empty now.
+   */
+  assert(ares__is_list_empty(&(channel->all_queries)));
+  for (i = 0; i < ARES_QID_TABLE_SIZE; i++)
+    {
+      assert(ares__is_list_empty(&(channel->queries_by_qid[i])));
+    }
+  for (i = 0; i < ARES_TIMEOUT_TABLE_SIZE; i++)
+    {
+      assert(ares__is_list_empty(&(channel->queries_by_timeout[i])));
+    }
+#endif
   if (!(channel->flags & ARES_FLAG_STAYOPEN))
   {
     if (channel->servers)

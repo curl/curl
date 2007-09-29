@@ -68,15 +68,19 @@ void ares__rc4(rc4_key* key, unsigned char *buffer_ptr, int buffer_len)
 static struct query* find_query_by_id(ares_channel channel, int id)
 {
   unsigned short qid;
-  struct query* q;
+  struct list_node* list_head;
+  struct list_node* list_node;
   DNS_HEADER_SET_QID(((unsigned char*)&qid), id);
 
   /* Find the query corresponding to this packet. */
-  for (q = channel->queries; q; q = q->next)
-  {
-	if (q->qid == qid)
+  list_head = &(channel->queries_by_qid[qid % ARES_QID_TABLE_SIZE]);
+  for (list_node = list_head->next; list_node != list_head;
+       list_node = list_node->next)
+    {
+       struct query *q = list_node->data;
+       if (q->qid == qid)
 	  return q;
-  }
+    }
   return NULL;
 }
 

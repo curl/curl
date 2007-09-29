@@ -30,6 +30,9 @@ int ares_fds(ares_channel channel, fd_set *read_fds, fd_set *write_fds)
   ares_socket_t nfds;
   int i;
 
+  /* Are there any active queries? */
+  int active_queries = !ares__is_list_empty(&(channel->all_queries));
+
   nfds = 0;
   for (i = 0; i < channel->nservers; i++)
     {
@@ -37,7 +40,7 @@ int ares_fds(ares_channel channel, fd_set *read_fds, fd_set *write_fds)
       /* We only need to register interest in UDP sockets if we have
        * outstanding queries.
        */
-      if (channel->queries && server->udp_socket != ARES_SOCKET_BAD)
+      if (active_queries && server->udp_socket != ARES_SOCKET_BAD)
         {
           FD_SET(server->udp_socket, read_fds);
           if (server->udp_socket >= nfds)

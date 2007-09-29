@@ -107,6 +107,7 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
   int i;
   int status = ARES_SUCCESS;
   struct server_state *server;
+  struct timeval tv;
 
 #ifdef CURLDEBUG
   const char *env = getenv("CARES_MEMDEBUG");
@@ -140,12 +141,25 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
   channel->nsort = -1;
   channel->tcp_connection_generation = 0;
   channel->lookups = NULL;
-  channel->queries = NULL;
   channel->domains = NULL;
   channel->sortlist = NULL;
   channel->servers = NULL;
   channel->sock_state_cb = NULL;
   channel->sock_state_cb_data = NULL;
+
+  gettimeofday(&tv, NULL);
+  channel->last_timeout_processed = tv.tv_sec;
+
+  /* Initialize our lists of queries */
+  ares__init_list_head(&(channel->all_queries));
+  for (i = 0; i < ARES_QID_TABLE_SIZE; i++)
+    {
+      ares__init_list_head(&(channel->queries_by_qid[i]));
+    }
+  for (i = 0; i < ARES_TIMEOUT_TABLE_SIZE; i++)
+    {
+      ares__init_list_head(&(channel->queries_by_timeout[i]));
+    }
 
   /* Initialize configuration by each of the four sources, from highest
    * precedence to lowest.
@@ -209,13 +223,14 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
       server->tcp_buffer = NULL;
       server->qhead = NULL;
       server->qtail = NULL;
+      ares__init_list_head(&(server->queries_to_server));
+      server->channel = channel;
       server->is_broken = 0;
     }
 
   init_id_key(&channel->id_key, ARES_ID_KEY_LEN);
 
   channel->next_id = ares__generate_new_id(&channel->id_key);
-  channel->queries = NULL;
 
   *channelptr = channel;
   return ARES_SUCCESS;

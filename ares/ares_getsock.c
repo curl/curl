@@ -35,7 +35,7 @@ int ares_getsock(ares_channel channel,
   ares_socket_t *socks = (ares_socket_t *)s;
 
   /* No queries, no file descriptors. */
-  if (!channel->queries)
+  if (ares__is_list_empty(&(channel->all_queries)))
     return 0;
 
   for (i = 0;
