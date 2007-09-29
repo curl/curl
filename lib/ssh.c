@@ -1765,6 +1765,11 @@ CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
   CURLcode result;
   struct SessionHandle *data = conn->data;
 
+  if (data->reqdata.proto.ssh) {
+    Curl_safefree(data->reqdata.proto.ssh);
+    data->reqdata.proto.ssh = NULL;
+  }
+
   result = ssh_init(conn);
   if (result)
     return result;

@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel S (29 September 2007)
+- Immanuel Gregoire fixed a problem with persistent transfers over SFTP.
+
 Daniel S (28 September 2007)
 - Adapted the c-ares code to the API change c-ares 1.5.0 brings in the
   notifier callback(s).

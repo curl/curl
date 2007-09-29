@@ -27,6 +27,7 @@ This release includes the following bugfixes:
  o --ftp-method nocwd on directory listings
  o FTP, CURLOPT_NOBODY enabled and CURLOPT_HEADER disabled now does TYPE
    before SIZE
+ o persistent transfers over SFTP
 
 This release includes the following known bugs:
 
