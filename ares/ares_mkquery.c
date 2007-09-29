@@ -88,6 +88,10 @@ int ares_mkquery(const char *name, int dnsclass, int type, unsigned short id,
   unsigned char *q;
   const char *p;
 
+  /* Set our results early, in case we bail out early with an error. */
+  *buflen = 0;
+  *buf = NULL;
+
   /* Compute the length of the encoded name so we can check buflen.
    * Start counting at 1 for the zero-length label at the end. */
   len = 1;
