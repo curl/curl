@@ -230,7 +230,7 @@ static void write_tcp_data(ares_channel channel,
         }
     }
 }
-          
+
 /* Consume the given number of bytes from the head of the TCP send queue. */
 static void advance_tcp_send_queue(ares_channel channel, int whichserver,
                                    ssize_t num_bytes)
@@ -746,18 +746,18 @@ static int configure_socket(int s, ares_channel channel)
   /* Set the socket's send and receive buffer sizes. */
   if ((channel->socket_send_buffer_size > 0) &&
       setsockopt(s, SOL_SOCKET, SO_SNDBUF,
-                 &channel->socket_send_buffer_size,
+                 (const void*)&channel->socket_send_buffer_size,
                  sizeof(channel->socket_send_buffer_size)) == -1)
     return -1;
-       
+
   if ((channel->socket_receive_buffer_size > 0) &&
       setsockopt(s, SOL_SOCKET, SO_RCVBUF,
-                 &channel->socket_receive_buffer_size,
+                 (const void*)&channel->socket_receive_buffer_size,
                  sizeof(channel->socket_receive_buffer_size)) == -1)
     return -1;
 
   return 0;
- } 
+ }
 
 static int open_tcp_socket(ares_channel channel, struct server_state *server)
 {
@@ -784,7 +784,8 @@ static int open_tcp_socket(ares_channel channel, struct server_state *server)
    * isn't very interesting in general.
    */
   opt = 1;
-  if (setsockopt(s, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(opt)) == -1)
+  if (setsockopt(s, IPPROTO_TCP, TCP_NODELAY,
+                 (const void*)&opt, sizeof(opt)) == -1)
     {
        close(s);
        return -1;
@@ -983,8 +984,8 @@ static struct query *end_query (ares_channel channel, struct query *query, int s
              }
           }
     }
- 
-  /* Invoke the callback */ 
+
+  /* Invoke the callback */
   query->callback(query->arg, status, query->timeouts, abuf, alen);
   for (q = &channel->queries; *q; q = &(*q)->next)
     {
