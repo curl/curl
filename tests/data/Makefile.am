@@ -44,4 +44,19 @@ EXTRA_DIST = test1 test108 test117 test127 test20 test27 test34 test46	   \
  test409 test613 test614 test700 test701 test702 test704 test705 test703   \
  test706 test707 test350 test351 test352 test353 test289 test540 test354   \
  test231 test1000 test1001 test1002 test1003 test1004 test1005 test1006    \
- test615 test1007 test541 test1010 test1011 test1012 test542 test543
+ test615 test1007 test541 test1010 test1011 test1012 test542 test543 test536
+
+filecheck:
+	@mkdir test-place; \
+	cp test[0-9]* test-place/; \
+	for f in $(EXTRA_DIST); do \
+	  if test -f $$f; then \
+	    rm -f test-place/$$f; \
+	  else \
+	    echo "$$f is listed but missing!"; \
+	  fi \
+	done; \
+	echo "Local files not present in EXTRA_DIST:" ; \
+	ls test-place; \
+	rm -rf test-place
+
