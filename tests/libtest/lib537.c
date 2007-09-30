@@ -387,7 +387,8 @@ static int rlimit(int keep_open)
   for (rl.rlim_cur = 0;
        rl.rlim_cur < num_open.rlim_max;
        rl.rlim_cur++) {
-    if (fd[rl.rlim_cur] > num_open.rlim_cur) {
+    if ((fd[rl.rlim_cur] > 0) &&
+       ((unsigned int)fd[rl.rlim_cur] > num_open.rlim_cur) {
       sprintf(strbuff, "select limit is FD_SETSIZE %d", FD_SETSIZE);
       store_errmsg(strbuff, 0);
       fprintf(stderr, "%s\n", msgbuff);
