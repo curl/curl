@@ -340,6 +340,7 @@ AC_CHECK_HEADERS(
        sys/param.h \
        netdb.h \
        netinet/in.h \
+       netinet/tcp.h \
        net/if.h \
        errno.h \
        stdbool.h \
