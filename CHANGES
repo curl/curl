@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel S (1 October 2007)
+- Alex Fishman reported a curl_easy_escape() problem that was made the
+  function do wrong on all input bytes that are >= 0x80 (decimal 128) due to a
+  signed / unsigned mistake in the code. I fixed it and added test case 543 to
+  verify.
+
 Daniel S (29 September 2007)
 - Immanuel Gregoire fixed a problem with persistent transfers over SFTP.
 

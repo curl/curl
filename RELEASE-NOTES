@@ -27,7 +27,8 @@ This release includes the following bugfixes:
  o --ftp-method nocwd on directory listings
  o FTP, CURLOPT_NOBODY enabled and CURLOPT_HEADER disabled now does TYPE
    before SIZE
- o persistent transfers over SFTP
+ o re-used handle transfers with SFTP
+ o curl_easy_escape() problem with byte values >= 128
 
 This release includes the following known bugs:
 
@@ -45,6 +46,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Dan Fandrich, Michal Marek, Günter Knauf, Rob Crittenden, Immanuel Gregoire,
- Mark Davies, Max Katsev, Philip Langdale
+ Mark Davies, Max Katsev, Philip Langdale, Alex Fishman
  
         Thanks! (and sorry if I forgot to mention someone)
