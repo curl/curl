@@ -146,6 +146,7 @@ static void next_lookup(struct host_query *hquery)
           break;
         }
     }
+  end_hquery(hquery, status, NULL);
 }
 
 static void host_callback(void *arg, int status, int timeouts,
