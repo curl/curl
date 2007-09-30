@@ -149,6 +149,11 @@ typedef enum __ns_opcode {
 
 #define T_CNAME                ns_t_cname
 
+#define NS_MAXDNAME   256     /* maximum domain name */
+#define MAXDNAME      NS_MAXDNAME
+
+#define NS_MAXCDNAME  255     /* maximum compressed domain name */
+#define MAXCDNAME     NS_MAXCDNAME
 
 #define NS_PACKETSZ   512     /* maximum packet size */
 #define PACKETSZ       NS_PACKETSZ
