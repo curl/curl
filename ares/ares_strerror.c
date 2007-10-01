@@ -46,6 +46,8 @@ const char *ares_strerror(int code)
     "Illegal hints flags specified"
   };
 
-  DEBUGASSERT(code >= 0 && code < (int)(sizeof(errtext) / sizeof(*errtext)));
-  return errtext[code];
+  if(code >= 0 && code < (int)(sizeof(errtext) / sizeof(*errtext)))
+    return errtext[code];
+  else
+    return "unknown";
 }
