@@ -57,7 +57,7 @@ struct host_query {
   int timeouts;
 };
 
-static void next_lookup(struct host_query *hquery);
+static void next_lookup(struct host_query *hquery, int status);
 static void host_callback(void *arg, int status, int timeouts,
                           unsigned char *abuf, int alen);
 static void end_hquery(struct host_query *hquery, int status,
@@ -111,12 +111,11 @@ void ares_gethostbyname(ares_channel channel, const char *name, int family,
   hquery->timeouts = 0;
 
   /* Start performing lookups according to channel->lookups. */
-  next_lookup(hquery);
+  next_lookup(hquery, ARES_SUCCESS);
 }
 
-static void next_lookup(struct host_query *hquery)
+static void next_lookup(struct host_query *hquery, int status)
 {
-  int status;
   const char *p;
   struct hostent *host;
 
@@ -128,8 +127,8 @@ static void next_lookup(struct host_query *hquery)
           /* DNS lookup */
           hquery->remaining_lookups = p + 1;
           if (hquery->family == AF_INET6)
-            ares_search(hquery->channel, hquery->name, C_IN, T_AAAA, host_callback,
-                        hquery);
+            ares_search(hquery->channel, hquery->name, C_IN, T_AAAA,
+                        host_callback, hquery);
           else
             ares_search(hquery->channel, hquery->name, C_IN, T_A, host_callback,
                         hquery);
@@ -183,7 +182,7 @@ static void host_callback(void *arg, int status, int timeouts,
   else if (status == ARES_EDESTRUCTION)
     end_hquery(hquery, status, NULL);
   else
-    next_lookup(hquery);
+    next_lookup(hquery, status);
 }
 
 static void end_hquery(struct host_query *hquery, int status,
