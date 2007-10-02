@@ -45,6 +45,7 @@
 
 #ifdef CURL_LDAP_WIN            /* Use W$ LDAP implementation. */
 # include <winldap.h>
+# include <winber.h>
 #else
 #define LDAP_DEPRECATED 1       /* Be sure ldap_init() is defined. */
 # include <ldap.h>
