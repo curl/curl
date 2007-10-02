@@ -137,6 +137,10 @@ SOURCE=..\..\ares_init.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\ares_llist.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\ares_mkquery.c
 # End Source File
 # Begin Source File
@@ -210,6 +214,10 @@ SOURCE=..\..\ares_dns.h
 # Begin Source File
 
 SOURCE=..\..\ares_ipv6.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\ares_llist.h
 # End Source File
 # Begin Source File
 
