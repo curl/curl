@@ -60,6 +60,7 @@ OBJECTS = $(OBJ_DIR)\ares_fds.obj              \
           $(OBJ_DIR)\ares_strerror.obj         \
           $(OBJ_DIR)\ares_cancel.obj           \
           $(OBJ_DIR)\ares_init.obj             \
+          $(OBJ_DIR)\ares_llist.obj            \
           $(OBJ_DIR)\ares_timeout.obj          \
           $(OBJ_DIR)\ares_destroy.obj          \
           $(OBJ_DIR)\ares_mkquery.obj          \
@@ -231,3 +232,6 @@ $(OBJ_DIR)\inet_ntop.obj: inet_ntop.c setup.h setup_once.h nameser.h           \
   ares_ipv6.h inet_ntop.h
 
 $(OBJ_DIR)\ares_getopt.obj: ares_getopt.c ares_getopt.h
+
+$(OBJ_DIR)\ares_llist.obj: ares_llist.c setup.h setup_once.h ares.h            \
+  ares_private.h ares_llist.h

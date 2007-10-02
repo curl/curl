@@ -83,15 +83,9 @@
 #define ARES_ID_KEY_LEN 31
 
 #include "ares_ipv6.h"
+#include "ares_llist.h"
 
 struct query;
-
-/* Node definition for circular, doubly-linked list */
-struct list_node {
-  struct list_node *prev;
-  struct list_node *next;
-  void* data;
-};
 
 struct send_request {
   /* Remaining data to send */
@@ -264,73 +258,6 @@ int ares__get_hostent(FILE *fp, int family, struct hostent **host);
 int ares__read_line(FILE *fp, char **buf, int *bufsize);
 void ares__free_query(struct query *query);
 short ares__generate_new_id(rc4_key* key);
-
-
-/* Routines for managing doubly-linked circular linked lists with a
- * dummy head.
- */
-
-/* Initialize a new head node */
-static inline void ares__init_list_head(struct list_node* head) {
-  head->prev = head;
-  head->next = head;
-  head->data = NULL;
-}
-
-/* Initialize a list node */
-static inline void ares__init_list_node(struct list_node* node, void* d) {
-  node->prev = NULL;
-  node->next = NULL;
-  node->data = d;
-}
-
-/* Returns true iff the given list is empty */
-static inline int ares__is_list_empty(struct list_node* head) {
-  return ((head->next == head) && (head->prev == head));
-}
-
-/* Inserts new_node before old_node */
-static inline void ares__insert_in_list(struct list_node* new_node,
-                                        struct list_node* old_node) {
-  new_node->next = old_node;
-  new_node->prev = old_node->prev;
-  old_node->prev->next = new_node;
-  old_node->prev = new_node;
-}
-
-/* Removes the node from the list it's in, if any */
-static inline void ares__remove_from_list(struct list_node* node) {
-  if (node->next != NULL) {
-    node->prev->next = node->next;
-    node->next->prev = node->prev;
-    node->prev = NULL;
-    node->next = NULL;
-  }
-}
-
-/* Swap the contents of two lists */
-static inline void ares__swap_lists(struct list_node* head_a,
-                                    struct list_node* head_b) {
-  int is_a_empty = ares__is_list_empty(head_a);
-  int is_b_empty = ares__is_list_empty(head_b);
-  struct list_node old_a = *head_a;
-  struct list_node old_b = *head_b;
-
-  if (is_a_empty) {
-    ares__init_list_head(head_b);
-  } else {
-    *head_b = old_a;
-    old_a.next->prev = head_b;
-    old_a.prev->next = head_b;
-  }
-  if (is_b_empty) {
-    ares__init_list_head(head_a);
-  } else {
-    *head_a = old_b;
-    old_b.next->prev = head_a;
-    old_b.prev->next = head_a;
-  }
-}
 
 #define ARES_SWAP_BYTE(a,b) \
   { unsigned char swapByte = *(a);  *(a) = *(b);  *(b) = swapByte; }
