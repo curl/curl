@@ -75,7 +75,7 @@ static int config_nameserver(struct server_state **servers, int *nservers,
 static int set_search(ares_channel channel, const char *str);
 static int set_options(ares_channel channel, const char *str);
 static const char *try_option(const char *p, const char *q, const char *opt);
-static void init_id_key(rc4_key* key,int key_data_len);
+static int init_id_key(rc4_key* key,int key_data_len);
 
 #ifndef WIN32
 static int sortlist_alloc(struct apattern **sortlist, int *nsort, struct apattern *pat);
@@ -189,6 +189,18 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
       DEBUGF(fprintf(stderr, "Error: init_by_defaults failed: %s\n",
                      ares_strerror(status)));
   }
+
+  /* Generate random key */
+
+  if (status == ARES_SUCCESS) {
+    status = init_id_key(&channel->id_key, ARES_ID_KEY_LEN);
+    if (status == ARES_SUCCESS)
+      channel->next_id = ares__generate_new_id(&channel->id_key);
+    else
+      DEBUGF(fprintf(stderr, "Error: init_id_key failed: %s\n",
+                     ares_strerror(status)));
+  }
+
   if (status != ARES_SUCCESS)
     {
       /* Something failed; clean up memory we may have allocated. */
@@ -227,10 +239,6 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
       server->channel = channel;
       server->is_broken = 0;
     }
-
-  init_id_key(&channel->id_key, ARES_ID_KEY_LEN);
-
-  channel->next_id = ares__generate_new_id(&channel->id_key);
 
   *channelptr = channel;
   return ARES_SUCCESS;
@@ -1345,7 +1353,7 @@ static void randomize_key(unsigned char* key,int key_data_len)
   }
 }
 
-static void init_id_key(rc4_key* key,int key_data_len)
+static int init_id_key(rc4_key* key,int key_data_len)
 {
   unsigned char index1;
   unsigned char index2;
@@ -1354,6 +1362,9 @@ static void init_id_key(rc4_key* key,int key_data_len)
   unsigned char *key_data_ptr = 0;
 
   key_data_ptr = calloc(1,key_data_len);
+  if (!key_data_ptr)
+    return ARES_ENOMEM;
+
   randomize_key(key->state,key_data_len);
   state = &key->state[0];
   for(counter = 0; counter < 256; counter++)
@@ -1372,7 +1383,7 @@ static void init_id_key(rc4_key* key,int key_data_len)
     index1 = (index1 + 1) % key_data_len;
   }
   free(key_data_ptr);
-
+  return ARES_SUCCESS;
 }
 
 short ares__generate_new_id(rc4_key* key)

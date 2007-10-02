@@ -1,8 +1,12 @@
   Changelog for the c-ares project
 
 * October 2 2007 (Daniel Stenberg)
+
 - ares_strerror() segfaulted if the input error number was out of the currently
   supported range.
+
+- Yang Tse: Avoid a segfault when generating a DNS "Transaction ID" in
+  internal function init_id_key() under low memory conditions.
 
 * September 28 2007 (Daniel Stenberg)
 
