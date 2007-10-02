@@ -48,7 +48,7 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  curl_easy_setopt(c, CURLOPT_PROXY, arg2); /* set in first.c */
+  curl_easy_setopt(c, CURLOPT_PROXY, libtest_arg2); /* set in first.c */
   curl_easy_setopt(c, CURLOPT_URL, URL);
   curl_easy_setopt(c, CURLOPT_USERPWD, "test:ing");
   curl_easy_setopt(c, CURLOPT_PROXYUSERPWD, "test:ing");

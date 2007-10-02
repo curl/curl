@@ -18,8 +18,8 @@
 
 #include "test.h"
 
-#define PROXY arg2
-#define PROXYUSERPWD arg3
+#define PROXY libtest_arg2
+#define PROXYUSERPWD libtest_arg3
 #define HOST test_argv[4]
 
 static void init(CURLM *cm, const char* url, const char* userpwd,

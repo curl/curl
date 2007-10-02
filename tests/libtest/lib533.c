@@ -102,7 +102,7 @@ int test(char *URL)
           /* make us re-use the same handle all the time, and try resetting
              the handle first too */
           curl_easy_reset(curl);
-          curl_easy_setopt(curl, CURLOPT_URL, arg2);
+          curl_easy_setopt(curl, CURLOPT_URL, libtest_arg2);
           curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
           curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
 

@@ -34,8 +34,8 @@ int select_test (int num_fds, fd_set *rd, fd_set *wr, fd_set *exc,
   return select(num_fds, rd, wr, exc, tv);
 }
 
-char *arg2=NULL;
-char *arg3=NULL;
+char *libtest_arg2=NULL;
+char *libtest_arg3=NULL;
 int test_argc;
 char **test_argv;
 
@@ -73,10 +73,10 @@ int main(int argc, char **argv)
   test_argv = argv;
 
   if(argc>2)
-    arg2=argv[2];
+    libtest_arg2=argv[2];
 
   if(argc>3)
-    arg3=argv[3];
+    libtest_arg3=argv[3];
 
   URL = argv[1]; /* provide this to the rest */
 

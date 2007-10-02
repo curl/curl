@@ -27,7 +27,7 @@ int test(char *URL)
   }
 
   curl_easy_setopt(curl, CURLOPT_URL, URL);
-  curl_easy_setopt(curl, CURLOPT_PORT, atoi(arg2));
+  curl_easy_setopt(curl, CURLOPT_PORT, atoi(libtest_arg2));
   curl_easy_setopt(curl, CURLOPT_USERPWD, "xxx:yyy");
   curl_easy_setopt(curl, CURLOPT_VERBOSE, TRUE);
 

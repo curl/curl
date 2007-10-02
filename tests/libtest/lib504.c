@@ -53,7 +53,7 @@ int test(char *URL)
 
   /* the point here being that there must not run anything on the given
      proxy port */
-  curl_easy_setopt(c, CURLOPT_PROXY, arg2);
+  curl_easy_setopt(c, CURLOPT_PROXY, libtest_arg2);
   curl_easy_setopt(c, CURLOPT_URL, URL);
   curl_easy_setopt(c, CURLOPT_VERBOSE, 1);
 

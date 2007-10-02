@@ -35,25 +35,25 @@ int test(char *URL)
   char ml_timedout = FALSE;
   char mp_timedout = FALSE;
 
-  if (!arg2) {
+  if (!libtest_arg2) {
     fprintf(stderr, "Usage: lib525 [url] [uploadfile]\n");
     return -1;
   }
 
   /* get the file size of the local file */
-  hd = open(arg2, O_RDONLY) ;
+  hd = open(libtest_arg2, O_RDONLY) ;
   fstat(hd, &file_info);
   close(hd) ;
 
   /* get a FILE * of the same file, could also be made with
      fdopen() from the previous descriptor, but hey this is just
      an example! */
-  hd_src = fopen(arg2, "rb");
+  hd_src = fopen(libtest_arg2, "rb");
   if(NULL == hd_src) {
     error = ERRNO;
     fprintf(stderr, "fopen() failed with error: %d %s\n",
             error, strerror(error));
-    fprintf(stderr, "Error opening file: %s\n", arg2);
+    fprintf(stderr, "Error opening file: %s\n", libtest_arg2);
     return TEST_ERR_MAJOR_BAD;
   }
 

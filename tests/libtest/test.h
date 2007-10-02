@@ -36,8 +36,8 @@
 #define TEST_ERR_MAJOR_BAD     100
 #define TEST_ERR_RUNS_FOREVER   99
 
-extern char *arg2; /* set by first.c to the argv[2] or NULL */
-extern char *arg3; /* set by first.c to the argv[3] or NULL */
+extern char *libtest_arg2; /* set by first.c to the argv[2] or NULL */
+extern char *libtest_arg3; /* set by first.c to the argv[3] or NULL */
 
 /* argc and argv as passed in to the main() function */
 extern int test_argc;

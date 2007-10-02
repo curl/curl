@@ -206,8 +206,8 @@ int test(char *URL)
   char ml_timedout = FALSE;
   char mp_timedout = FALSE;
 
-  if(arg2) {
-    portnum = atoi(arg2);
+  if(libtest_arg2) {
+    portnum = atoi(libtest_arg2);
   }
 
   if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
