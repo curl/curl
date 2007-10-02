@@ -2884,7 +2884,7 @@ static CURLcode setup_range(struct SessionHandle *data)
     else
       req->range = strdup(data->set.str[STRING_SET_RANGE]);
 
-    req->rangestringalloc = req->range?TRUE:FALSE;
+    req->rangestringalloc = (unsigned char)(req->range?TRUE:FALSE);
 
     if(!req->range)
       return CURLE_OUT_OF_MEMORY;

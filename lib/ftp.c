@@ -3264,7 +3264,7 @@ static CURLcode ftp_nb_type(struct connectdata *conn,
 {
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   CURLcode result;
-  char want = ascii?'A':'I';
+  char want = (char)(ascii?'A':'I');
 
   if (ftpc->transfertype == want) {
     state(conn, newstate);
