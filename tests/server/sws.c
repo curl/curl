@@ -55,6 +55,9 @@
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
+#ifdef HAVE_NETINET_TCP_H
+#include <netinet/tcp.h> /* for TCP_NODELAY */
+#endif
 
 #define ENABLE_CURLX_PRINTF
 /* make the curlx header define all printf() functions to use the curlx_*
@@ -705,10 +708,19 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
 
   responsesize = count;
   do {
-    written = swrite(sock, buffer, count);
+    /* Ok, we send no more than 200 bytes at a time, just to make sure that
+       larger chunks are split up so that the client will need to do multiple
+       recv() calls to get it and thus we exercise that code better */
+    int num = count;
+    if(num > 200)
+      num = 200;
+    written = swrite(sock, buffer, num);
     if (written < 0) {
       logmsg("Sending response failed and we bailed out!");
       return -1;
+    }
+    else {
+      logmsg("Sent off %d bytes", written);
     }
     /* write to file as well */
     fwrite(buffer, 1, written, dump);
@@ -776,6 +788,7 @@ int main(int argc, char *argv[])
 #ifdef CURL_SWS_FORK_ENABLED
   bool use_fork = FALSE;
 #endif
+  int opt;
 
   while(argc>arg) {
     if(!strcmp("--version", argv[arg])) {
@@ -938,7 +951,17 @@ int main(int argc, char *argv[])
 #endif
     logmsg("====> Client connect");
 
-    do {
+    /*
+     * Disable the Nagle algorithm to make it easier to send out a large
+     * response in many small segments to torture the clients more.
+     */
+    opt = 1;
+    if (setsockopt(msgsock, IPPROTO_TCP, TCP_NODELAY,
+                   (void *)&opt, sizeof(opt)) == -1) {
+      logmsg("====> TCP_NODELAY failed");
+    }
+
+  do {
       if(get_request(msgsock, &req))
         /* non-zero means error, break out of loop */
         break;
