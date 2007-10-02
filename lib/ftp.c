@@ -1316,8 +1316,11 @@ static CURLcode ftp_state_post_listtype(struct connectdata *conn)
                  lstArg? " ": "",
                  lstArg? lstArg: "" );
 
-  if(!cmd)
+  if(!cmd) {
+    if(lstArg)
+      free(lstArg);
     return CURLE_OUT_OF_MEMORY;
+  }
 
   NBFTPSENDF(conn, "%s",cmd);
 
