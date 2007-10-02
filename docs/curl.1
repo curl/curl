@@ -847,6 +847,13 @@ You may use this option as many times as you have number of URLs.
 (SSL/SSH) Pass phrase for the private key
 
 If this option is used several times, the last one will be used.
+.IP "--post301"
+Tells curl to respect RFC 2616/10.3.2 and not convert POST requests into GET
+requests when following a 301 redirection. The non-RFC behaviour is ubiquitous
+in web browsers, so curl does the conversion by default to maintain
+consistency. However, a server may requires a POST to remain a POST after such
+a redirection. This option is meaningful only when using \fI-L/--location\fP
+(Added in 7.17.1)
 .IP "--proxy-anyauth"
 Tells curl to pick a suitable authentication method when communicating with
 the given proxy. This will cause an extra request/response round-trip. (Added
