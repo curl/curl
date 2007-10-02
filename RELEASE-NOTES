@@ -29,6 +29,7 @@ This release includes the following bugfixes:
    before SIZE
  o re-used handle transfers with SFTP
  o curl_easy_escape() problem with byte values >= 128
+ o handles chunked-encoded CONNECT responses
 
 This release includes the following known bugs:
 

@@ -7,9 +7,6 @@ may have been fixed since this was written!
   to be kept alive, the function will return prematurely and will confuse the
   rest of the HTTP protocol code.
 
-46. If a CONNECT response is chunked-encoded, the function may return
-  prematurely and will confuse the rest of the HTTP protocol code.
-
 45. libcurl built to support ipv6 uses getaddrinfo() to resolve host names.
   getaddrinfo() sorts the response list which effectively kills how libcurl
   deals with round-robin DNS entries. All details:

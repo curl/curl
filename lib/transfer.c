@@ -1262,7 +1262,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                  We DO care about this data if we are pipelining.
                  Push it back to be read on the next pass. */
 
-              dataleft = data->reqdata.proto.http->chunk.dataleft;
+              dataleft = conn->chunk.dataleft;
               if (dataleft != 0) {
                 infof(conn->data, "Leftovers after chunking. "
                       " Rewinding %d bytes\n",dataleft);
@@ -1617,7 +1617,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     }
     else if(!(conn->bits.no_body) &&
             conn->bits.chunk &&
-            (data->reqdata.proto.http->chunk.state != CHUNK_STOP)) {
+            (conn->chunk.state != CHUNK_STOP)) {
       /*
        * In chunked mode, return an error if the connection is closed prior to
        * the empty (terminiating) chunk is read.

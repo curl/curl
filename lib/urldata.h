@@ -296,7 +296,6 @@ struct HTTP {
 
   /* For FORM posting */
   struct Form form;
-  struct Curl_chunker chunk;
 
   struct back {
     curl_read_callback fread_func; /* backup storage for fread pointer */
@@ -817,6 +816,11 @@ struct connectdata {
      caution that this might very well vary between different times this
      connection is used! */
   struct SessionHandle *data;
+
+  /* chunk is for HTTP chunked encoding, but is in the general connectdata
+     struct only because we can do just about any protocol through a HTTP proxy
+     and a HTTP proxy may in fact respond using chunked encoding */
+  struct Curl_chunker chunk;
 
   bool inuse; /* This is a marker for the connection cache logic. If this is
                  TRUE this handle is being used by an easy handle and cannot

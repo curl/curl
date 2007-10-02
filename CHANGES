@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel S (2 October 2007)
+- libcurl now handles chunked-encoded CONNECT responses
+
 Daniel S (1 October 2007)
 - Alex Fishman reported a curl_easy_escape() problem that was made the
   function do wrong on all input bytes that are >= 0x80 (decimal 128) due to a
