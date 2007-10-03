@@ -419,7 +419,7 @@ typedef enum {
 /* These are scheduled to disappear by 2009 */
 
 /* The following were added in 7.17.0 */
-#define CURLE_OBSOLETE CURLE_OBSOLETE50	/* noone should be using this! */
+#define CURLE_OBSOLETE CURLE_OBSOLETE50 /* noone should be using this! */
 #define CURLE_BAD_PASSWORD_ENTERED CURLE_OBSOLETE46
 #define CURLE_BAD_CALLING_ORDER CURLE_OBSOLETE44
 #define CURLE_FTP_USER_PASSWORD_INCORRECT CURLE_OBSOLETE10
@@ -438,7 +438,7 @@ typedef enum {
 #define CURLE_FTP_QUOTE_ERROR CURLE_QUOTE_ERROR
 #define CURLE_TFTP_DISKFULL CURLE_REMOTE_DISK_FULL
 #define CURLE_TFTP_EXISTS CURLE_REMOTE_FILE_EXISTS
-#define CURLE_HTTP_RANGE_ERROR CURLE_RANGE_ERROR 
+#define CURLE_HTTP_RANGE_ERROR CURLE_RANGE_ERROR
 #define CURLE_FTP_SSL_FAILED CURLE_USE_SSL_FAILED
 
 /* The following were added earlier */
@@ -1127,6 +1127,9 @@ typedef enum {
   /* Obey RFC 2616/10.3.2 and keep POSTs as POSTs after a 301 */
   CINIT(POST301, LONG, 161),
 
+  /* used by scp/sftp to verify the host's public key */
+  CINIT(SSH_HOST_PUBLIC_KEY_MD5, OBJECTPOINT, 162),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -1137,7 +1140,7 @@ typedef enum {
 /* These are scheduled to disappear by 2009 */
 
 /* The following were added in 7.17.0 */
-#define CURLOPT_SSLKEYPASSWD CURLOPT_KEYPASSWD 
+#define CURLOPT_SSLKEYPASSWD CURLOPT_KEYPASSWD
 #define CURLOPT_FTPAPPEND CURLOPT_APPEND
 #define CURLOPT_FTPLISTONLY CURLOPT_DIRLISTONLY
 #define CURLOPT_FTP_SSL CURLOPT_USE_SSL

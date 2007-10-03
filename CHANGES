@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel S (3 October 2007)
+- Based on a patch brought by Johnny Luong, libcurl now offers
+  CURLOPT_SSH_HOST_PUBLIC_KEY_MD5 and the curl tool --hostpubmd5. They both
+  make the SCP or SFTP connection verify the remote host's md5 checksum of the
+  public key before doing a connect, to reduce the risk of a man-in-the-middle
+  attack.
+
 Daniel S (2 October 2007)
 - libcurl now handles chunked-encoded CONNECT responses
 

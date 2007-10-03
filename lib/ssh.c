@@ -310,7 +310,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
 #ifdef CURL_LIBSSH2_DEBUG
   const char *fingerprint;
 #endif /* CURL_LIBSSH2_DEBUG */
-  int rc;
+  const char *host_public_key_md5;
+  int rc,i;
   long err;
 
   switch(sshc->state) {
@@ -350,6 +351,30 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
       }
       infof(data, "\n");
 #endif /* CURL_LIBSSH2_DEBUG */
+
+      /* Before we authenticate we check the hostkey's MD5 fingerprint
+       * against a known fingerprint, if available.  This implementation pulls
+       * it from the curl option.
+       */
+      if (data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5] &&
+          strlen(data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5]) == 32)
+      {
+        char buf[33];
+        host_public_key_md5 = libssh2_hostkey_hash(sftp_scp->ssh_session,
+                                                   LIBSSH2_HOSTKEY_HASH_MD5);
+        for (i = 0; i < 16; i++)
+          snprintf(&buf[i*2], 3, "%02x",
+                   (unsigned char) host_public_key_md5[i]);
+        if(!strequal(buf, data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5])) {
+          failf(data,
+                "Denied establishing ssh session: mismatch md5 fingerprint. "
+                "Remote %s is not equal to %s",
+                buf, data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5]);
+          state(conn, SSH_SESSION_FREE);
+          sshc->actualCode = CURLE_FAILED_INIT;
+          break;
+        }
+      }
 
       state(conn, SSH_AUTHLIST);
       break;

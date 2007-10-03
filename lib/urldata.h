@@ -1289,6 +1289,7 @@ enum dupstring {
   STRING_SSL_RANDOM_FILE, /* path to file containing "random" data */
   STRING_USERAGENT,       /* User-Agent string */
   STRING_USERPWD,         /* <user:password>, if used */
+  STRING_SSH_HOST_PUBLIC_KEY_MD5, /* md5 of host public key in ascii hex */
 
   /* -- end of strings -- */
   STRING_LAST /* not used, just an end-of-list marker */

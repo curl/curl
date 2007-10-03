@@ -1836,7 +1836,14 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     result = Curl_setstropt(&data->set.str[STRING_SSH_PRIVATE_KEY],
                             va_arg(param, char *));
     break;
-
+  case CURLOPT_SSH_HOST_PUBLIC_KEY_MD5:
+    /*
+     * Option to allow for the MD5 of the host public key to be checked 
+     * for validation purposes.
+     */
+    result = Curl_setstropt(&data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5],
+                            va_arg(param, char *));
+    break;
   case CURLOPT_HTTP_TRANSFER_DECODING:
     /*
      * disable libcurl transfer encoding is used

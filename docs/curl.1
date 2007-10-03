@@ -544,6 +544,11 @@ for you.
 See also the \fI-A/--user-agent\fP and \fI-e/--referer\fP options.
 
 This option can be used multiple times to add/replace/remove multiple headers.
+.IP "--hostpubmd5"
+Pass a string containing 32 hexadecimal digits. The string should be the 128
+bit MD5 cheksum of the remote host's public key, curl will refuse the
+connection with the host unless the md5sums match. This option is only for SCP
+and SFTP transfers. (Added in 7.17.1)
 .IP "--ignore-content-length"
 (HTTP)
 Ignore the Content-Length header. This is particularly useful for servers

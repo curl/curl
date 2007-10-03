@@ -407,6 +407,7 @@ struct Configurable {
   char *key_type;
   char *key_passwd;
   char *pubkey;
+  char *hostpubmd5;
   char *engine;
   bool list_engines;
   bool crlf;
@@ -639,6 +640,7 @@ static void help(void)
     "    --cacert <file> CA certificate to verify peer against (SSL)",
     "    --capath <directory> CA directory (made using c_rehash) to verify",
     "                    peer against (SSL)",
+    "    --hostpubmd5 <md5> Hex encoded MD5 string of the host public key. (SSH)",
     "    --ciphers <list> SSL ciphers to use (SSL)",
     "    --compressed    Request compressed response (using deflate or gzip)",
     "    --connect-timeout <seconds> Maximum time allowed for connection",
@@ -1541,6 +1543,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"Ef","engine",      TRUE},
     {"Eg","capath ",     TRUE},
     {"Eh","pubkey",      TRUE},
+    {"Ei", "hostpubmd5", TRUE},
     {"f", "fail",        FALSE},
     {"F", "form",        TRUE},
     {"Fs","form-string", TRUE},
@@ -2158,6 +2161,11 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'h': /* --pubkey public key file */
         GetStr(&config->pubkey, nextarg);
+        break;
+      case 'i': /* --hostpubmd5 md5 of the host public key */
+        GetStr(&config->hostpubmd5, nextarg);
+        if (!config->hostpubmd5 || strlen(config->hostpubmd5) != 32)
+           return PARAM_BAD_USE;
         break;
       default: /* certificate file */
         {
@@ -4205,6 +4213,12 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         /* SSH private key uses the same command-line option as SSL private key */
         my_setopt(curl, CURLOPT_SSH_PRIVATE_KEYFILE, config->key);
         my_setopt(curl, CURLOPT_SSH_PUBLIC_KEYFILE, config->pubkey);
+
+        /* SSH host key md5 checking allows us to fail if we are
+         * not talking to who we think we should 
+         */
+        my_setopt(curl, CURLOPT_SSH_HOST_PUBLIC_KEY_MD5, config->hostpubmd5);
+
 
         /* default to strict verifyhost */
         my_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2);

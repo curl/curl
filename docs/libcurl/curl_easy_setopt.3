@@ -1411,6 +1411,11 @@ Pass a long set to a bitmask consisting of one or more of
 CURLSSH_AUTH_PUBLICKEY, CURLSSH_AUTH_PASSWORD, CURLSSH_AUTH_HOST,
 CURLSSH_AUTH_KEYBOARD. Set CURLSSH_AUTH_ANY to let libcurl pick one.
 (Added in 7.16.1)
+.IP CURLOPT_SSH_HOST_PUBLIC_KEY_MD5
+Pass a char * pointing to a string containing 32 hexadecimal digits. The
+string should be the 128 bit MD5 cheksum of the remote host's public key, and
+libcurl will reject the connection to the host unless the md5sums match. This
+option is only for SCP and SFTP transfers. (Added in 7.17.1)
 .IP CURLOPT_SSH_PUBLIC_KEYFILE
 Pass a char * pointing to a file name for your public key. If not used,
 libcurl defaults to using \fB~/.ssh/id_dsa.pub\fP.
