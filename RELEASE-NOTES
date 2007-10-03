@@ -3,7 +3,7 @@ Curl and libcurl 7.17.1
  Public curl release number:               102
  Releases counted from the very beginning: 128
  Available command line options:           121
- Available curl_easy_setopt() options:     145
+ Available curl_easy_setopt() options:     147
  Number of public functions in libcurl:    55
  Amount of public web site mirrors:        42
  Number of known libcurl bindings:         36
@@ -17,6 +17,8 @@ This release includes the following changes:
  o added --post301 and CURLOPT_POST301
  o builds with c-ares 1.5.0
  o added CURLOPT_SSH_HOST_PUBLIC_KEY_MD5 and --hostpubmd5
+ o renamed CURLE_SSL_PEER_CERTIFICATE to CURLE_PEER_FAILED_VERIFICATION
+ o added CURLOPT_OPENSOCKETFUNCTION and CURLOPT_OPENSOCKETDATA
 
 This release includes the following bugfixes:
 
@@ -48,6 +50,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Dan Fandrich, Michal Marek, Günter Knauf, Rob Crittenden, Immanuel Gregoire,
- Mark Davies, Max Katsev, Philip Langdale, Alex Fishman, Johnny Luong
+ Mark Davies, Max Katsev, Philip Langdale, Alex Fishman, Johnny Luong,
+ Alexey Pesternikov, Yang Tse
  
         Thanks! (and sorry if I forgot to mention someone)

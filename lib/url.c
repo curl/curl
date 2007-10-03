@@ -1813,6 +1813,21 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.sockopt_client = va_arg(param, void *);
     break;
 
+  case CURLOPT_OPENSOCKETFUNCTION:
+    /*
+     * open/create socket callback function: called instead of socket(),
+     * before connect()
+     */
+    data->set.fopensocket = va_arg(param, curl_opensocket_callback);
+    break;
+
+  case CURLOPT_OPENSOCKETDATA:
+    /*
+     * socket callback data pointer. Might be NULL.
+     */
+    data->set.opensocket_client = va_arg(param, void *);
+    break;
+
   case CURLOPT_SSL_SESSIONID_CACHE:
     data->set.ssl.sessionid = (bool)(0 != va_arg(param, long));
     break;
@@ -1838,7 +1853,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
   case CURLOPT_SSH_HOST_PUBLIC_KEY_MD5:
     /*
-     * Option to allow for the MD5 of the host public key to be checked 
+     * Option to allow for the MD5 of the host public key to be checked
      * for validation purposes.
      */
     result = Curl_setstropt(&data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5],
@@ -2449,20 +2464,20 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
 
       switch(data->set.proxytype) {
       case CURLPROXY_SOCKS5:
-	result = Curl_SOCKS5(conn->proxyuser, conn->proxypasswd, conn->host.name,
-			     conn->remote_port, FIRSTSOCKET, conn);
-	break;
+        result = Curl_SOCKS5(conn->proxyuser, conn->proxypasswd, conn->host.name,
+                             conn->remote_port, FIRSTSOCKET, conn);
+        break;
       case CURLPROXY_HTTP:
-	/* do nothing here. handled later. */
-	break;
+        /* do nothing here. handled later. */
+        break;
       case CURLPROXY_SOCKS4:
-	result = Curl_SOCKS4(conn->proxyuser, conn->host.name, conn->remote_port,
-			     FIRSTSOCKET, conn);
-	break;
+        result = Curl_SOCKS4(conn->proxyuser, conn->host.name, conn->remote_port,
+                             FIRSTSOCKET, conn);
+        break;
       default:
-	failf(data, "unknown proxytype option given");
-	result = CURLE_COULDNT_CONNECT;
-	break;
+        failf(data, "unknown proxytype option given");
+        result = CURLE_COULDNT_CONNECT;
+        break;
       }
     }
   }
@@ -2910,7 +2925,7 @@ static CURLcode setup_range(struct SessionHandle *data)
 * Setup connection internals specific to the requested protocol
 ***************************************************************/
 static CURLcode setup_connection_internals(struct SessionHandle *data,
-					   struct connectdata *conn)
+                                           struct connectdata *conn)
 {
   conn->socktype = SOCK_STREAM; /* most of them are TCP streams */
 
@@ -3237,17 +3252,17 @@ static char *detect_proxy(struct connectdata *conn)
       size_t namelen;
       char *endptr = strchr(conn->host.name, ':');
       if(endptr)
-	namelen=endptr-conn->host.name;
+        namelen=endptr-conn->host.name;
       else
-	namelen=strlen(conn->host.name);
+        namelen=strlen(conn->host.name);
 
       if(strlen(nope) <= namelen) {
-	char *checkn=
-	  conn->host.name + namelen - strlen(nope);
-	if(checkprefix(nope, checkn)) {
-	  /* no proxy for this host! */
-	  break;
-	}
+        char *checkn=
+          conn->host.name + namelen - strlen(nope);
+        if(checkprefix(nope, checkn)) {
+          /* no proxy for this host! */
+          break;
+        }
       }
       nope=strtok_r(NULL, ", ", &no_proxy_tok_buf);
     }
@@ -3259,7 +3274,7 @@ static char *detect_proxy(struct connectdata *conn)
 
       /* Now, build <protocol>_proxy and check for such a one to use */
       while(*protop)
-	*envp++ = (char)tolower((int)*protop++);
+        *envp++ = (char)tolower((int)*protop++);
 
       /* append _proxy */
       strcpy(envp, "_proxy");
@@ -3280,29 +3295,29 @@ static char *detect_proxy(struct connectdata *conn)
        * arbitrarily redirected by any external attacker.
        */
       if(!prox && !strequal("http_proxy", proxy_env)) {
-	/* There was no lowercase variable, try the uppercase version: */
-	for(envp = proxy_env; *envp; envp++)
-	  *envp = (char)toupper((int)*envp);
-	prox=curl_getenv(proxy_env);
+        /* There was no lowercase variable, try the uppercase version: */
+        for(envp = proxy_env; *envp; envp++)
+          *envp = (char)toupper((int)*envp);
+        prox=curl_getenv(proxy_env);
       }
 
       if(prox && *prox) { /* don't count "" strings */
-	proxy = prox; /* use this */
+        proxy = prox; /* use this */
       }
       else {
-	proxy = curl_getenv("all_proxy"); /* default proxy to use */
-	if(!proxy)
-	  proxy=curl_getenv("ALL_PROXY");
+        proxy = curl_getenv("all_proxy"); /* default proxy to use */
+        if(!proxy)
+          proxy=curl_getenv("ALL_PROXY");
       }
 
       if(proxy && *proxy) {
-	long bits = conn->protocol & (PROT_HTTPS|PROT_SSL|PROT_MISSING);
+        long bits = conn->protocol & (PROT_HTTPS|PROT_SSL|PROT_MISSING);
 
-	if(conn->proxytype == CURLPROXY_HTTP) {
-	  /* force this connection's protocol to become HTTP */
-	  conn->protocol = PROT_HTTP | bits;
-	  conn->bits.httpproxy = TRUE;
-	}
+        if(conn->proxytype == CURLPROXY_HTTP) {
+          /* force this connection's protocol to become HTTP */
+          conn->protocol = PROT_HTTP | bits;
+          conn->bits.httpproxy = TRUE;
+        }
       }
     } /* if (!nope) - it wasn't specified non-proxy */
   } /* NO_PROXY wasn't specified or '*' */
@@ -3351,43 +3366,43 @@ static CURLcode parse_proxy(struct SessionHandle *data,
     proxypasswd[0] = 0;
 
     if(1 <= sscanf(proxyptr,
-		   "%" MAX_CURL_USER_LENGTH_TXT"[^:]:"
-		   "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^@]",
-		   proxyuser, proxypasswd)) {
+                   "%" MAX_CURL_USER_LENGTH_TXT"[^:]:"
+                   "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^@]",
+                   proxyuser, proxypasswd)) {
       CURLcode res = CURLE_OK;
 
       /* found user and password, rip them out.  note that we are
-	 unescaping them, as there is otherwise no way to have a
-	 username or password with reserved characters like ':' in
-	 them. */
+         unescaping them, as there is otherwise no way to have a
+         username or password with reserved characters like ':' in
+         them. */
       Curl_safefree(conn->proxyuser);
       conn->proxyuser = curl_easy_unescape(data, proxyuser, 0, NULL);
 
       if(!conn->proxyuser)
-	res = CURLE_OUT_OF_MEMORY;
+        res = CURLE_OUT_OF_MEMORY;
       else {
-	Curl_safefree(conn->proxypasswd);
-	conn->proxypasswd = curl_easy_unescape(data, proxypasswd, 0, NULL);
+        Curl_safefree(conn->proxypasswd);
+        conn->proxypasswd = curl_easy_unescape(data, proxypasswd, 0, NULL);
 
-	if(!conn->proxypasswd)
-	  res = CURLE_OUT_OF_MEMORY;
+        if(!conn->proxypasswd)
+          res = CURLE_OUT_OF_MEMORY;
       }
 
       if(CURLE_OK == res) {
-	conn->bits.proxy_user_passwd = TRUE; /* enable it */
-	atsign = strdup(atsign+1); /* the right side of the @-letter */
+        conn->bits.proxy_user_passwd = TRUE; /* enable it */
+        atsign = strdup(atsign+1); /* the right side of the @-letter */
 
-	if(atsign) {
-	  free(proxy); /* free the former proxy string */
-	  proxy = proxyptr = atsign; /* now use this instead */
-	}
-	else
-	  res = CURLE_OUT_OF_MEMORY;
+        if(atsign) {
+          free(proxy); /* free the former proxy string */
+          proxy = proxyptr = atsign; /* now use this instead */
+        }
+        else
+          res = CURLE_OUT_OF_MEMORY;
       }
 
       if(res) {
-	free(proxy); /* free the allocated proxy string */
-	return res;
+        free(proxy); /* free the allocated proxy string */
+        return res;
       }
     }
   }
@@ -3443,9 +3458,9 @@ static CURLcode parse_proxy_auth(struct SessionHandle *data, struct connectdata 
   char proxypasswd[MAX_CURL_PASSWORD_LENGTH]="";
 
   sscanf(data->set.str[STRING_PROXYUSERPWD],
-	 "%" MAX_CURL_USER_LENGTH_TXT "[^:]:"
-	 "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^\n]",
-	 proxyuser, proxypasswd);
+         "%" MAX_CURL_USER_LENGTH_TXT "[^:]:"
+         "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^\n]",
+         proxyuser, proxypasswd);
 
   conn->proxyuser = curl_easy_unescape(data, proxyuser, 0, NULL);
   if(!conn->proxyuser)
@@ -3633,7 +3648,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   if(conn->bits.proxy_user_passwd) {
     result = parse_proxy_auth(data, conn);
     if (result != CURLE_OK)
-    	return result;
+        return result;
   }
 
   /*************************************************************

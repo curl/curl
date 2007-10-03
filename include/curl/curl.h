@@ -246,6 +246,19 @@ typedef int (*curl_sockopt_callback)(void *clientp,
                                      curl_socket_t curlfd,
                                      curlsocktype purpose);
 
+struct Curl_sockaddr {
+  int family;
+  int socktype;
+  int protocol;
+  socklen_t addrlen;
+  struct sockaddr addr;
+};
+
+typedef curl_socket_t
+(*curl_opensocket_callback)(void* clentp,
+                            curlsocktype purpose,
+                            struct Curl_sockaddr* address);
+
 #ifndef CURL_NO_OLDIES
   /* not used since 7.10.8, will be removed in a future release */
 typedef int (*curl_passwd_callback)(void *clientp,
@@ -1134,6 +1147,13 @@ typedef enum {
 
   /* used by scp/sftp to verify the host's public key */
   CINIT(SSH_HOST_PUBLIC_KEY_MD5, OBJECTPOINT, 162),
+
+  /* Callback function for opening socket (instead of socket(2)). Optionally,
+     callback is able change the address or refuse to connect returning
+     CURL_SOCKET_BAD.  The callback should have type
+     curl_opensocket_callback */
+  CINIT(OPENSOCKETFUNCTION, FUNCTIONPOINT, 163),
+  CINIT(OPENSOCKETDATA, OBJECTPOINT, 164),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

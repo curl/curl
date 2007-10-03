@@ -1328,6 +1328,9 @@ struct UserDefined {
   curl_ioctl_callback ioctl_func;  /* function for I/O control */
   curl_sockopt_callback fsockopt;  /* function for setting socket options */
   void *sockopt_client; /* pointer to pass to the socket options callback */
+  curl_opensocket_callback fopensocket; /* function for checking/translating
+                                           the address and opening the socket */
+  void* opensocket_client;
 
   /* the 3 curl_conv_callback functions below are used on non-ASCII hosts */
   /* function to convert from the network encoding: */

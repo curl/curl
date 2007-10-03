@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel S (3 October 2007)
+- Alexey Pesternikov introduced CURLOPT_OPENSOCKETFUNCTION and
+  CURLOPT_OPENSOCKETDATA to set a callback that allows an application to
+  replace the socket() call used by libcurl. It basically allows the app to
+  change address, protocol or whatever of the socket.
+
 - I renamed the CURLE_SSL_PEER_CERTIFICATE error code to
   CURLE_PEER_FAILED_VERIFICATION (standard CURL_NO_OLDIES style), and made
   this return code get used by the previous SSH MD5 fingerprint check in case
