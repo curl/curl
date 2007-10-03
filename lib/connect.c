@@ -682,10 +682,11 @@ singleipconnect(struct connectdata *conn,
    * for a largest possible struct sockaddr only. We should add some space for
    * the other fields we are using. Hence the addr_storage size math.
    */
-  char addr_storage[sizeof(struct Curl_sockaddr)-
+  char addr_storage[sizeof(struct curl_sockaddr)-
                     sizeof(struct sockaddr)+
                     sizeof(struct Curl_sockaddr_storage)];
-  struct Curl_sockaddr* addr=(struct Curl_sockaddr*)&addr_storage;
+  struct curl_sockaddr *addr=(struct curl_sockaddr*)&addr_storage;
+  const void *iptoprint;
 
   addr->family=ai->ai_family;
   addr->socktype=conn->socktype;
@@ -697,7 +698,7 @@ singleipconnect(struct connectdata *conn,
   /* optionally use callback to get the socket */
   sockfd = (data->set.fopensocket)?
     data->set.fopensocket(data->set.opensocket_client, CURLSOCKTYPE_IPCXN,
-                          &addr):
+                          addr):
     socket(addr->family, addr->socktype, addr->protocol);
   if (sockfd == CURL_SOCKET_BAD)
     return CURL_SOCKET_BAD;
@@ -706,7 +707,7 @@ singleipconnect(struct connectdata *conn,
 
   /* FIXME: do we have Curl_printable_address-like with struct sockaddr* as
      argument? */
-  const void *iptoprint = &((const struct sockaddr_in*)(&addr->addr))->sin_addr;
+  iptoprint = &((const struct sockaddr_in*)(&addr->addr))->sin_addr;
 #ifdef ENABLE_IPV6
   if(addr->family==AF_INET6)
     iptoprint= &((const struct sockaddr_in6*)(&addr->addr))->sin6_addr;

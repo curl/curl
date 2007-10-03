@@ -246,7 +246,7 @@ typedef int (*curl_sockopt_callback)(void *clientp,
                                      curl_socket_t curlfd,
                                      curlsocktype purpose);
 
-struct Curl_sockaddr {
+struct curl_sockaddr {
   int family;
   int socktype;
   int protocol;
@@ -255,9 +255,9 @@ struct Curl_sockaddr {
 };
 
 typedef curl_socket_t
-(*curl_opensocket_callback)(void* clentp,
+(*curl_opensocket_callback)(void *clientp,
                             curlsocktype purpose,
-                            struct Curl_sockaddr* address);
+                            struct curl_sockaddr *address);
 
 #ifndef CURL_NO_OLDIES
   /* not used since 7.10.8, will be removed in a future release */
