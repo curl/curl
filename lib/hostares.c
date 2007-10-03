@@ -109,7 +109,8 @@ int Curl_resolv_getsock(struct connectdata *conn,
 
 {
   struct timeval maxtime;
-  struct timeval timeout;
+  struct timeval timebuf;
+  struct timeval *timeout;
   int max = ares_getsock(conn->data->state.areschannel,
                          (int *)socks, numsocks);
 
@@ -117,10 +118,10 @@ int Curl_resolv_getsock(struct connectdata *conn,
   maxtime.tv_sec = CURL_TIMEOUT_RESOLVE;
   maxtime.tv_usec = 0;
 
-  ares_timeout(conn->data->state.areschannel, &maxtime, &timeout);
+  timeout = ares_timeout(conn->data->state.areschannel, &maxtime, &timebuf);
 
   Curl_expire(conn->data,
-              (timeout.tv_sec * 1000) + (timeout.tv_usec/1000) );
+              (timeout->tv_sec * 1000) + (timeout->tv_usec/1000));
 
   return max;
 }
@@ -254,7 +255,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
     tvp = ares_timeout(data->state.areschannel, &store, &tv);
 
     /* use the timeout period ares returned to us above */
-    ares_waitperform(conn, tv.tv_sec * 1000 + tv.tv_usec/1000);
+    ares_waitperform(conn, tvp->tv_sec * 1000 + tvp->tv_usec/1000);
 
     if(conn->async.done)
       break;

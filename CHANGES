@@ -7,6 +7,8 @@
                                   Changelog
 
 Daniel S (3 October 2007)
+- Yang Tse, fix issue related with the use of ares_timeout() result.
+
 - Alexey Pesternikov introduced CURLOPT_OPENSOCKETFUNCTION and
   CURLOPT_OPENSOCKETDATA to set a callback that allows an application to
   replace the socket() call used by libcurl. It basically allows the app to
