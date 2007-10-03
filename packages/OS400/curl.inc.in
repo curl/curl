@@ -306,7 +306,7 @@
      d                 c                   49
      d  CURLE_OBSOLETE50...
      d                 c                   50
-     d  CURLE_SSL_PEER_CERTIFICATE...
+     d  CURLE_PEER_FAILED_VERIFICATION...
      d                 c                   51
      d  CURLE_GOT_NOTHING...
      d                 c                   52
@@ -725,6 +725,12 @@
      d                 c                   00160
      d  CURLOPT_POST301...
      d                 c                   00161
+     d  CURLOPT_SSH_HOST_PUBLIC_KEY_MD5...
+     d                 c                   10162
+     d  CURLOPT_OPENSOCKETFUNCTION...
+     d                 c                   20163
+     d  CURLOPT_OPENSOCKETDATA...
+     d                 c                   10164
       *
      d CURLFORMcode    s             10i 0 based(######ptr######)               Enum
      d  CURL_FORMADD_OK...
@@ -1004,6 +1010,14 @@
      d  flags                        10i 0                                      long
      d  showfilename                   *                                        char *
       *
+     d curl_sockaddr   ds                  based(######ptr######)
+     d                                     qualified
+     d  family                       10i 0
+     d  socktype                     10i 0
+     d  protocol                     10i 0
+     d  addrlen                      10i 0                                      socklen_t
+     d  addr                         16                                         struct sockaddr
+      *
      d curl_forms      ds                  based(######ptr######)
      d                                     qualified
      d  option                             like(CURLformoption)
@@ -1084,6 +1098,9 @@
      d                 s               *   based(######ptr######) procptr
       *
      d curl_socket_callback...
+     d                 s               *   based(######ptr######) procptr
+      *
+     d curl_opensocket_callback...
      d                 s               *   based(######ptr######) procptr
       *
       **************************************************************************

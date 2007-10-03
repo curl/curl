@@ -1016,7 +1016,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   if (testwarn) {
     testwarn = 0;
 
-    if ((int) STRING_LAST != (int) STRING_USERPWD + 1)
+    if ((int) STRING_LAST != (int) STRING_SSH_HOST_PUBLIC_KEY_MD5 + 1)
       curl_mfprintf(stderr,
        "*** WARNING: curl_easy_setopt_ccsid() should be reworked ***\n");
     }
@@ -1059,6 +1059,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   case CURLOPT_URL:
   case CURLOPT_USERAGENT:
   case CURLOPT_USERPWD:
+  case CURLOPT_SSH_HOST_PUBLIC_KEY_MD5:
     s = va_arg(arg, char *);
     ccsid = va_arg(arg, unsigned int);
 
