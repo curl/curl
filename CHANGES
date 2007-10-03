@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel S (3 October 2007)
+- I renamed the CURLE_SSL_PEER_CERTIFICATE error code to
+  CURLE_PEER_FAILED_VERIFICATION (standard CURL_NO_OLDIES style), and made
+  this return code get used by the previous SSH MD5 fingerprint check in case
+  it fails.
+
 - Based on a patch brought by Johnny Luong, libcurl now offers
   CURLOPT_SSH_HOST_PUBLIC_KEY_MD5 and the curl tool --hostpubmd5. They both
   make the SCP or SFTP connection verify the remote host's md5 checksum of the

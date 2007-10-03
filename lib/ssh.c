@@ -371,7 +371,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
                 "Remote %s is not equal to %s",
                 buf, data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5]);
           state(conn, SSH_SESSION_FREE);
-          sshc->actualCode = CURLE_FAILED_INIT;
+          sshc->actualCode = CURLE_PEER_FAILED_VERIFICATION;
           break;
         }
       }

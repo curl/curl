@@ -1121,13 +1121,13 @@ static CURLcode verifyhost(struct connectdata *conn,
     if (!peer_CN) {
       failf(data,
             "SSL: unable to obtain common name from peer certificate");
-      return CURLE_SSL_PEER_CERTIFICATE;
+      return CURLE_PEER_FAILED_VERIFICATION;
     }
     else if(!cert_hostcheck((const char *)peer_CN, conn->host.name)) {
       if(data->set.ssl.verifyhost > 1) {
         failf(data, "SSL: certificate subject name '%s' does not match "
               "target host name '%s'", peer_CN, conn->host.dispname);
-        res = CURLE_SSL_PEER_CERTIFICATE;
+        res = CURLE_PEER_FAILED_VERIFICATION;
       }
       else
         infof(data, "\t common name: %s (does not match '%s')\n",
@@ -1624,7 +1624,7 @@ Curl_ossl_connect_step3(struct connectdata *conn,
   connssl->server_cert = SSL_get_peer_certificate(connssl->handle);
   if(!connssl->server_cert) {
     failf(data, "SSL: couldn't get peer certificate!");
-    return CURLE_SSL_PEER_CERTIFICATE;
+    return CURLE_PEER_FAILED_VERIFICATION;
   }
   infof (data, "Server certificate:\n");
 
@@ -1675,7 +1675,7 @@ Curl_ossl_connect_step3(struct connectdata *conn,
            and we return earlyer if verifypeer is set? */
         failf(data, "SSL certificate verify result: %s (%ld)",
               X509_verify_cert_error_string(lerr), lerr);
-        retcode = CURLE_SSL_PEER_CERTIFICATE;
+        retcode = CURLE_PEER_FAILED_VERIFICATION;
       }
       else
         infof(data, "SSL certificate verify result: %s (%ld),"

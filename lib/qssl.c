@@ -220,7 +220,7 @@ static CURLcode Curl_qsossl_handshake(struct connectdata * conn, int sockindex)
   case SSL_ERROR_BAD_CERTIFICATE:
   case SSL_ERROR_BAD_CERT_SIG:
   case SSL_ERROR_NOT_TRUSTED_ROOT:
-    return CURLE_SSL_PEER_CERTIFICATE;
+    return CURLE_PEER_FAILED_VERIFICATION;
 
   case SSL_ERROR_BAD_CIPHER_SUITE:
   case SSL_ERROR_NO_CIPHERS:

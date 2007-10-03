@@ -352,7 +352,7 @@ Curl_gtls_connect(struct connectdata *conn,
   if(!chainp) {
     if(data->set.ssl.verifyhost) {
       failf(data, "failed to get server cert");
-      return CURLE_SSL_PEER_CERTIFICATE;
+      return CURLE_PEER_FAILED_VERIFICATION;
     }
     infof(data, "\t common name: WARNING couldn't obtain\n");
   }
@@ -413,7 +413,7 @@ Curl_gtls_connect(struct connectdata *conn,
       failf(data, "SSL: certificate subject name (%s) does not match "
             "target host name '%s'", certbuf, conn->host.dispname);
       gnutls_x509_crt_deinit(x509_cert);
-      return CURLE_SSL_PEER_CERTIFICATE;
+      return CURLE_PEER_FAILED_VERIFICATION;
     }
     else
       infof(data, "\t common name: %s (does not match '%s')\n",
@@ -433,7 +433,7 @@ Curl_gtls_connect(struct connectdata *conn,
   if(clock < time(NULL)) {
     if (data->set.ssl.verifypeer) {
       failf(data, "server certificate expiration date has passed.");
-      return CURLE_SSL_PEER_CERTIFICATE;
+      return CURLE_PEER_FAILED_VERIFICATION;
     }
     else
       infof(data, "\t server certificate expiration date FAILED\n");
@@ -451,7 +451,7 @@ Curl_gtls_connect(struct connectdata *conn,
   if(clock > time(NULL)) {
     if (data->set.ssl.verifypeer) {
       failf(data, "server certificate not activated yet.");
-      return CURLE_SSL_PEER_CERTIFICATE;
+      return CURLE_PEER_FAILED_VERIFICATION;
     }
     else
       infof(data, "\t server certificate activation date FAILED\n");
