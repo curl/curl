@@ -183,7 +183,7 @@ int Curl_socket_ready(curl_socket_t readfd, curl_socket_t writefd,
   fd_set fds_err;
   curl_socket_t maxfd;
 #endif
-  struct timeval initial_tv;
+  struct timeval initial_tv = {0,0};
   int pending_ms = 0;
   int error;
   int r;
@@ -358,7 +358,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
   fd_set fds_err;
   curl_socket_t maxfd;
 #endif
-  struct timeval initial_tv;
+  struct timeval initial_tv = {0,0};
   bool fds_none = TRUE;
   unsigned int i;
   int pending_ms = 0;
