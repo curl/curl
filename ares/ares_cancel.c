@@ -20,8 +20,8 @@
 #include "ares_private.h"
 
 /*
- * ares_cancel() cancels a ongoing request/resolve that might be going on on
- * the given channel. It does NOT kill the channel, use ares_destroy() for
+ * ares_cancel() cancels all ongoing requests/resolves that might be going on
+ * on the given channel. It does NOT kill the channel, use ares_destroy() for
  * that.
  */
 void ares_cancel(ares_channel channel)
