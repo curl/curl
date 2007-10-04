@@ -530,12 +530,6 @@ static void process_answer(ares_channel channel, unsigned char *abuf,
             next_server(channel, query, now);
           return;
         }
-      if (!same_questions(query->qbuf, query->qlen, abuf, alen))
-        {
-          if (query->server == whichserver)
-            next_server(channel, query, now);
-          return;
-        }
     }
 
   end_query(channel, query, ARES_SUCCESS, abuf, alen);
