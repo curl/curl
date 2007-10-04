@@ -249,7 +249,7 @@ static void nameinfo_callback(void *arg, int status, int timeouts, struct hosten
             service = lookup_service(niquery->addr.addr6.sin6_port,
                                      niquery->flags, srvbuf, sizeof(srvbuf));
         }
-      niquery->callback(niquery->arg, ARES_SUCCESS, 0, ipbuf, service);
+      niquery->callback(niquery->arg, ARES_SUCCESS, niquery->timeouts, ipbuf, service);
       return;
     }
   niquery->callback(niquery->arg, status, niquery->timeouts, NULL, NULL);
