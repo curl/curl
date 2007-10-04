@@ -252,7 +252,7 @@ static void nameinfo_callback(void *arg, int status, int timeouts, struct hosten
       niquery->callback(niquery->arg, ARES_SUCCESS, 0, ipbuf, service);
       return;
     }
-  niquery->callback(niquery->arg, status, 0, NULL, NULL);
+  niquery->callback(niquery->arg, status, niquery->timeouts, NULL, NULL);
   free(niquery);
 }
 
