@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel S (5 October 2007)
+- The new file docs/libcurl/ABI describes how we view ABI breakages, soname
+  bumps and what the version number's significance to all that is.
+
 Daniel S (4 October 2007)
 - I enabled test 1009 and made the --local-port use a wide range to reduce the
   risk of failures.
