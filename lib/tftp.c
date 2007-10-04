@@ -598,9 +598,9 @@ CURLcode Curl_tftp_connect(struct connectdata *conn, bool *done)
 
   tftp_set_timeouts(state);
 
-  if(!conn->bits.reuse) {
-    /* If not reused, bind to any interface, random UDP port. If it is reused,
-     * this has already been done!
+  if(!conn->bits.bound) {
+    /* If not already bound, bind to any interface, random UDP port. If it is
+     * reused or a custom local port was desired, this has already been done!
      *
      * We once used the size of the local_addr struct as the third argument for
      * bind() to better work with IPv6 or whatever size the struct could have,
@@ -619,6 +619,7 @@ CURLcode Curl_tftp_connect(struct connectdata *conn, bool *done)
             Curl_strerror(conn, SOCKERRNO));
       return CURLE_COULDNT_CONNECT;
     }
+    conn->bits.bound = TRUE;
   }
 
   Curl_pgrsStartNow(conn->data);

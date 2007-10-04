@@ -609,6 +609,8 @@ struct ConnectBits {
   bool proxy_connect_closed; /* set true if a proxy disconnected the
                                 connection in a CONNECT request with auth, so
                                 that libcurl should reconnect and continue. */
+  bool bound; /* set true if bind() has already been done on this socket/
+                 connection */
 };
 
 struct hostname {

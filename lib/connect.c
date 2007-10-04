@@ -380,6 +380,7 @@ static CURLcode bindlocal(struct connectdata *conn,
         port = ntohs(((struct sockaddr_in6 *)&add)->sin6_port);
 #endif
       infof(data, "Local port: %d\n", port);
+      conn->bits.bound = TRUE;
       return CURLE_OK;
     }
     if(--portnum > 0) {

@@ -6,8 +6,18 @@
 
                                   Changelog
 
+Daniel S (4 October 2007)
+- Kim Rinnewitz reported that --local-port didn't work with TFTP transfers.
+  This happened because the tftp code always uncondionally did a bind()
+  without caring if one already had been done and then it failed. I wrote a
+  test case (1009) to verify this, but it is a bit error-prone since it will
+  have to pick a fixed local port number and since the tests are run on so
+  many different hosts in different situations I'll add it in disabled state.
+
+Yang Tse (3 October 2007)
+- Fixed issue related with the use of ares_timeout() result.
+
 Daniel S (3 October 2007)
-- Yang Tse, fix issue related with the use of ares_timeout() result.
 
 - Alexey Pesternikov introduced CURLOPT_OPENSOCKETFUNCTION and
   CURLOPT_OPENSOCKETDATA to set a callback that allows an application to
