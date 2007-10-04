@@ -3,6 +3,7 @@
 <keywords>
 TFTP
 TFTP RRQ
+--local-port
 </keywords>
 </info>
 
@@ -24,10 +25,10 @@ returned
 tftp
 </server>
  <name>
-TFTP retrieve
+TFTP retrieve with --local-port
  </name>
  <command>
-tftp://%HOSTIP:%TFTPPORT//1009 --local-port 44444
+tftp://%HOSTIP:%TFTPPORT//1009 --local-port 44444-45444
 </command>
 </client>
 

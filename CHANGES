@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel S (4 October 2007)
+- I enabled test 1009 and made the --local-port use a wide range to reduce the
+  risk of failures.
+
 - Kim Rinnewitz reported that --local-port didn't work with TFTP transfers.
   This happened because the tftp code always uncondionally did a bind()
   without caring if one already had been done and then it failed. I wrote a
