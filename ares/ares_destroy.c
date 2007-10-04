@@ -40,6 +40,9 @@ void ares_destroy(ares_channel channel)
   struct query *query;
   struct list_node* list_head;
   struct list_node* list_node;
+  
+  if (!channel)
+    return;
 
   list_head = &(channel->all_queries);
   for (list_node = list_head->next; list_node != list_head; )
@@ -63,9 +66,6 @@ void ares_destroy(ares_channel channel)
       assert(ares__is_list_empty(&(channel->queries_by_timeout[i])));
     }
 #endif
-
-  if (!channel)
-    return;
 
   if (channel->servers) {
     for (i = 0; i < channel->nservers; i++)
