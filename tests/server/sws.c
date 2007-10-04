@@ -711,11 +711,12 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     /* Ok, we send no more than 200 bytes at a time, just to make sure that
        larger chunks are split up so that the client will need to do multiple
        recv() calls to get it and thus we exercise that code better */
-    int num = count;
+    size_t num = count;
     if(num > 200)
       num = 200;
     written = swrite(sock, buffer, num);
     if (written < 0) {
+      fclose(dump);
       logmsg("Sending response failed and we bailed out!");
       return -1;
     }
