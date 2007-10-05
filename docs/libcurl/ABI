@@ -6,12 +6,15 @@
 
                           libcurl's binary interface
 
-ABI
+ABI - Application Binary Interface
 
   First, allow me to define the word for this context: ABI describes the
   low-level interface between an application program a library. Calling
   conventions, function arguments, return values, struct sizes/defines and
   more.
+
+  For a longer descricption, see
+  http://en.wikipedia.org/wiki/Application_binary_interface
 
 Upgrades
 
