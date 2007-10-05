@@ -810,7 +810,9 @@ format or just regular HTTP-style header (Set-Cookie: ...) format. If cURL
 cookie engine was not enabled it will enable its cookie engine.  Passing a
 magic string \&"ALL" will erase all cookies known by cURL. (Added in 7.14.1)
 Passing the special string \&"SESS" will only erase all session cookies known
-by cURL. (Added in 7.15.4)
+by cURL. (Added in 7.15.4) Passing the special string \&"FLUSH" will write
+all cookies known by cURL to the file specified by \fICURLOPT_COOKIEJAR\fP.
+(Added in 7.17.1)
 .IP CURLOPT_HTTPGET
 Pass a long. If the long is non-zero, this forces the HTTP request to get back
 to GET. usable if a POST, HEAD, PUT or a custom request have been used

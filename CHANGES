@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel S (5 October 2007)
+- Michael Wallner made the CULROPT_COOKIELIST option support a new magic
+  string: "FLUSH". Using that will cause libcurl to flush its cookies to the
+  CURLOPT_COOKIEJAR file.
+
 - The new file docs/libcurl/ABI describes how we view ABI breakages, soname
   bumps and what the version number's significance to all that is.
 
@@ -25,7 +29,6 @@ Yang Tse (3 October 2007)
 - Fixed issue related with the use of ares_timeout() result.
 
 Daniel S (3 October 2007)
-
 - Alexey Pesternikov introduced CURLOPT_OPENSOCKETFUNCTION and
   CURLOPT_OPENSOCKETDATA to set a callback that allows an application to
   replace the socket() call used by libcurl. It basically allows the app to

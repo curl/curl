@@ -19,6 +19,7 @@ This release includes the following changes:
  o added CURLOPT_SSH_HOST_PUBLIC_KEY_MD5 and --hostpubmd5
  o renamed CURLE_SSL_PEER_CERTIFICATE to CURLE_PEER_FAILED_VERIFICATION
  o added CURLOPT_OPENSOCKETFUNCTION and CURLOPT_OPENSOCKETDATA
+ o CULROPT_COOKIELIST supports "FLUSH"
 
 This release includes the following bugfixes:
 
@@ -53,6 +54,6 @@ advice from friends like these:
 
  Dan Fandrich, Michal Marek, Günter Knauf, Rob Crittenden, Immanuel Gregoire,
  Mark Davies, Max Katsev, Philip Langdale, Alex Fishman, Johnny Luong,
- Alexey Pesternikov, Yang Tse, Kim Rinnewitz
+ Alexey Pesternikov, Yang Tse, Kim Rinnewitz, Michael Wallner
  
         Thanks! (and sorry if I forgot to mention someone)
