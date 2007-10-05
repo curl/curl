@@ -184,6 +184,30 @@ unrecoverable error to the library and it will close the socket and return
 Pass a pointer that will be untouched by libcurl and passed as the first
 argument in the sockopt callback set with \fICURLOPT_SOCKOPTFUNCTION\fP.
 (Option added in 7.15.6.)
+.IP CURLOPT_OPENSOCKETFUNCTION
+Function pointer that should match the \fIcurl_opensocket_callback\fP
+prototype found in \fI<curl/curl.h>\fP. This function gets called by libcurl
+instead of the \fIsocket(2)\fP call. The callback's \fIpurpose\fP argument
+identifies the exact purpose for this particular socket, and currently only
+one value is supported: \fICURLSOCKTYPE_IPCXN\fP for the primary connection
+(meaning the control connection in the FTP case). Future versions of libcurl
+may support more purposes. It passes the resolved peer address as a
+\fIaddress\fP argument so the callback can modify the address or refuse to
+connect at all. The callback function should return the socket or
+\fICURL_SOCKET_BAD\fP in case no connection should be established or any error
+detected. Any additional \fIsetsockopt(2)\fP calls can be done on the socket
+at the user's discretion.  \fICURL_SOCKET_BAD\fP return value from the
+callback function will signal an unrecoverable error to the library and it
+will return \fICURLE_COULDNT_CONNECT\fP.  This return code can be used for IP
+address blacklisting.  The default behavior is:
+.Bd -literal -offset indent
+   return socket(addr->family, addr->socktype, addr->protocol);
+.Ed
+(Option added in 7.17.1.)
+.IP CURLOPT_OPENSOCKETDATA
+Pass a pointer that will be untouched by libcurl and passed as the first
+argument in the opensocket callback set with \fICURLOPT_OPENSOCKETFUNCTION\fP.
+(Option added in 7.17.1.)
 .IP CURLOPT_PROGRESSFUNCTION
 Function pointer that should match the \fIcurl_progress_callback\fP prototype
 found in \fI<curl/curl.h>\fP. This function gets called by libcurl instead of
