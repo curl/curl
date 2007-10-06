@@ -151,6 +151,7 @@ extern "C" {
 /* The check above prevents the winsock2 inclusion if winsock.h already was
    included, since they can't co-exist without problems */
 #include <winsock2.h>
+#include <ws2tcpip.h>
 #endif
 #else
 
