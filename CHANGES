@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel S (7 October 2007)
+- Known bug #47, which confused libcurl if doing NTLM auth over a proxy with
+  a response that was larger than 16KB is now improved slightly so that now
+  the restriction at 16KB is for the headers only and it should be a rare
+  situation where the response-headers exceed 16KB. Thus, I consider #47 fixed
+  and the header limitation is now known as known bug #48.
+
 Daniel S (5 October 2007)
 - Michael Wallner made the CULROPT_COOKIELIST option support a new magic
   string: "FLUSH". Using that will cause libcurl to flush its cookies to the

@@ -1342,6 +1342,8 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 
             if(keepon > TRUE) {
               /* This means we are currently ignoring a response-body */
+
+              nread = 0; /* make next read start over in the read buffer */
               if(cl) {
                 /* A Content-Length based body: simply count down the counter
                    and make sure to break out of the loop when we're done! */
@@ -1399,6 +1401,8 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                   if(('\r' == line_start[0]) ||
                      ('\n' == line_start[0])) {
                     /* end of response-headers from the proxy */
+                    nread = 0; /* make next read start over in the read
+                                  buffer */
                     if((407 == k->httpcode) && !data->state.authproblem) {
                       /* If we get a 407 response code with content length
                          when we have no auth problem, we must ignore the

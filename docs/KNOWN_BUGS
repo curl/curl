@@ -3,9 +3,10 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
-47. If a CONNECT response is larger than BUFSIZE when the connection is meant
-  to be kept alive, the function will return prematurely and will confuse the
-  rest of the HTTP protocol code.
+48. If a CONNECT response-headers are larger than BUFSIZE (16KB) when the
+  connection is meant to be kept alive (like for NTLM proxy auth), the
+  function will return prematurely and will confuse the rest of the HTTP
+  protocol code. This should be very rare.
 
 45. libcurl built to support ipv6 uses getaddrinfo() to resolve host names.
   getaddrinfo() sorts the response list which effectively kills how libcurl
