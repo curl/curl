@@ -715,7 +715,7 @@ void ares__send_query(ares_channel channel, struct query *query, time_t now)
         &(query->queries_by_timeout),
         &(channel->queries_by_timeout[query->timeout %
                                       ARES_TIMEOUT_TABLE_SIZE]));
-  
+
     /* Keep track of queries bucketed by server, so we can process server
      * errors quickly.
      */
@@ -800,7 +800,7 @@ static int configure_socket(int s, ares_channel channel)
 {
   nonblock(s, TRUE);
 
-#ifdef FD_CLOEXEC
+#if defined(FD_CLOEXEC) && !defined(MSDOS)
   /* Configure the socket fd as close-on-exec. */
   if (fcntl(s, F_SETFD, FD_CLOEXEC) == -1)
     return -1;
