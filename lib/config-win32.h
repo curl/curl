@@ -291,7 +291,7 @@
 #endif
 
 /* Define to 'int' if socklen_t is not an available 'typedefed' type */
-#ifndef HAVE_WS2TCPIP_H
+#if defined(_MSC_VER) && (_MSC_VER <= 1400)
 #define socklen_t int
 #endif
 
