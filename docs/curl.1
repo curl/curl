@@ -1408,8 +1408,6 @@ Unsupported protocol. This build of curl has no support for this protocol.
 Failed to initialize.
 .IP 3
 URL malformat. The syntax was not correct.
-.IP 4
-URL user malformatted. The user-part of the URL syntax was not correct.
 .IP 5
 Couldn't resolve proxy. The given proxy host could not be resolved.
 .IP 6
@@ -1422,21 +1420,14 @@ FTP weird server reply. The server sent data curl couldn't parse.
 FTP access denied. The server denied login or denied access to the particular
 resource or directory you wanted to reach. Most often you tried to change to a
 directory that doesn't exist on the server.
-.IP 10
-FTP user/password incorrect. Either one or both were not accepted by the
-server.
 .IP 11
 FTP weird PASS reply. Curl couldn't parse the reply sent to the PASS request.
-.IP 12
-FTP weird USER reply. Curl couldn't parse the reply sent to the USER request.
 .IP 13
 FTP weird PASV reply, Curl couldn't parse the reply sent to the PASV request.
 .IP 14
 FTP weird 227 format. Curl couldn't parse the 227-line the server sent.
 .IP 15
 FTP can't get host. Couldn't resolve the host IP we got in the 227-line.
-.IP 16
-FTP can't reconnect. Couldn't connect to the host we got in the 227-line.
 .IP 17
 FTP couldn't set binary. Couldn't change transfer method to binary.
 .IP 18
@@ -1444,8 +1435,6 @@ Partial file. Only a part of the file was transferred.
 .IP 19
 FTP couldn't download/access the given file, the RETR (or similar) command
 failed.
-.IP 20
-FTP write error. The transfer was reported bad by the server.
 .IP 21
 FTP quote error. A quote command returned error from the server.
 .IP 22
@@ -1454,8 +1443,6 @@ error with the HTTP error code being 400 or above. This return code only
 appears if \fI-f/--fail\fP is used.
 .IP 23
 Write error. Curl couldn't write data to a local filesystem or similar.
-.IP 24
-Malformed user. User name badly specified.
 .IP 25
 FTP couldn't STOR file. The server denied the STOR operation, used for FTP
 uploading.
@@ -1466,17 +1453,12 @@ Out of memory. A memory allocation request failed.
 .IP 28
 Operation timeout. The specified time-out period was reached according to the
 conditions.
-.IP 29
-FTP couldn't set ASCII. The server returned an unknown reply.
 .IP 30
 FTP PORT failed. The PORT command failed. Not all FTP servers support the PORT
 command, try doing a transfer using PASV instead!
 .IP 31
 FTP couldn't use REST. The REST command failed. This command is used for
 resumed FTP transfers.
-.IP 32
-FTP couldn't use SIZE. The SIZE command failed. The command is an extension
-to the original FTP spec RFC 959.
 .IP 33
 HTTP range error. The range "command" didn't work.
 .IP 34
@@ -1491,20 +1473,14 @@ FILE couldn't read file. Failed to open the file. Permissions?
 LDAP cannot bind. LDAP bind operation failed.
 .IP 39
 LDAP search failed.
-.IP 40
-Library not found. The LDAP library was not found.
 .IP 41
 Function not found. A required LDAP function was not found.
 .IP 42
 Aborted by callback. An application told curl to abort the operation.
 .IP 43
 Internal error. A function was called with a bad parameter.
-.IP 44
-Internal error. A function was called in a bad order.
 .IP 45
 Interface error. A specified outgoing interface could not be used.
-.IP 46
-Bad password entered. An error was signalled when the password was entered.
 .IP 47
 Too many redirects. When following redirects, curl hit the maximum amount.
 .IP 48
@@ -1523,8 +1499,6 @@ Cannot set SSL crypto engine as default
 Failed sending network data
 .IP 56
 Failure in receiving network data
-.IP 57
-Share is in use (internal error)
 .IP 58
 Problem with the local certificate
 .IP 59

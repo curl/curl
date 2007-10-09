@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel S (9 October 2007)
+- Michal Marek removed the no longer existing return codes from the curl.1
+  man page.
+
 Daniel S (7 October 2007)
 - Known bug #47, which confused libcurl if doing NTLM auth over a proxy with
   a response that was larger than 16KB is now improved slightly so that now
