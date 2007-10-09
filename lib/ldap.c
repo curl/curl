@@ -52,6 +52,9 @@
 # endif
 #else
 #define LDAP_DEPRECATED 1       /* Be sure ldap_init() is defined. */
+#ifdef HAVE_LBER_H
+# include <lber.h>
+#endif
 # include <ldap.h>
 #if (defined(HAVE_LDAP_SSL) && defined(HAVE_LDAP_SSL_H))
 # include <ldap_ssl.h>
