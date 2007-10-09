@@ -475,7 +475,8 @@ void storerequest(char *reqbuf)
     dump = fopen(REQUEST_DUMP, "ab");
   } while ((dump == NULL) && ((error = ERRNO) == EINTR));
   if (dump == NULL) {
-    logmsg("Error opening file %s error: %d", REQUEST_DUMP, error);
+    logmsg("Error opening file %s error: %d %s",
+           REQUEST_DUMP, error, strerror(error));
     logmsg("Failed to write request input to " REQUEST_DUMP);
     return;
   }
@@ -491,7 +492,8 @@ void storerequest(char *reqbuf)
   fclose(dump);  /* close it ASAP */
 
   if (writeleft > 0) {
-    logmsg("Error writing file %s error: %d", REQUEST_DUMP, error);
+    logmsg("Error writing file %s error: %d %s",
+           REQUEST_DUMP, error, strerror(error));
     logmsg("Wrote only (%d bytes) of (%d bytes) request input to %s",
            totalsize-writeleft, totalsize, REQUEST_DUMP);
   }
