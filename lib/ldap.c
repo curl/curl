@@ -45,7 +45,11 @@
 
 #ifdef CURL_LDAP_WIN            /* Use W$ LDAP implementation. */
 # include <winldap.h>
-# include <winber.h>
+# ifndef LDAP_VENDOR_NAME
+#  error Your Platform SDK is NOT sufficient for LDAP support! Update your Platform SDK, or disable LDAP LDAP support!
+# else
+#  include <winber.h>
+# endif
 #else
 #define LDAP_DEPRECATED 1       /* Be sure ldap_init() is defined. */
 # include <ldap.h>
