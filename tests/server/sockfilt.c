@@ -678,9 +678,9 @@ int main(int argc, char *argv[])
   }
   else {
     error = ERRNO;
-    logmsg("fopen() failed with error: %d %s\n", error, strerror(error));
-    logmsg("Error opening file: %s\n", pidname);
-    logmsg("Couldn't write pid file\n");
+    logmsg("fopen() failed with error: %d %s", error, strerror(error));
+    logmsg("Error opening file: %s", pidname);
+    logmsg("Couldn't write pid file");
     sclose(sock);
     return 1;
   }
