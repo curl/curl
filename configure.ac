@@ -544,6 +544,8 @@ AC_HELP_STRING([--with-lber-lib=libname],[Specify name of lber lib file]),
 
 if test x$CURL_DISABLE_LDAP != x1 ; then
 
+  AC_CHECK_HEADERS(ldap.h)
+
   if test -z "$LDAPLIBNAME" ; then
     case $host in
       *-*-cygwin* | *-*-mingw* | *-*-pw32*)
@@ -569,6 +571,8 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
 fi
 
 if test x$CURL_DISABLE_LDAP != x1 ; then
+
+  AC_CHECK_HEADERS(lber.h)
 
   if test "$LBERLIBNAME" ; then
     dnl If name is "no" then don't define this library at all
