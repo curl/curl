@@ -1063,11 +1063,18 @@ option to -1 to make the transfer start from the end of the target file
 Pass a curl_off_t as parameter. It contains the offset in number of bytes that
 you want the transfer to start from. (Added in 7.11.0)
 .IP CURLOPT_CUSTOMREQUEST
-Pass a pointer to a zero terminated string as parameter. It will be user
+Pass a pointer to a zero terminated string as parameter. It will be used
 instead of GET or HEAD when doing an HTTP request, or instead of LIST or NLST
 when doing an ftp directory listing. This is useful for doing DELETE or other
 more or less obscure HTTP requests. Don't do this at will, make sure your
 server supports the command first.
+
+Note that libcurl will still act and assume the keyword it would use if you
+didn't set your custom one is the one in use and it will act according to
+that. Thus, changing this to a HEAD when libcurl otherwise would do a GET
+might cause libcurl to act funny, and similar. To switch to a proper HEAD, use
+\fICURLOPT_NOBODY\fP, to switch to a proper POST, use \fICURLOPT_POST\fP or
+\fICURLOPT_POSTFIELDS\fP and so on.
 
 Restore to the internal default by setting this to NULL.
 
