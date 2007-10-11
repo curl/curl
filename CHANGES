@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Dan F (11 October 2007)
+- Fixed the -l option of runtests.pl
+
+- Added support for skipping tests based on key words.
+
 Daniel S (9 October 2007)
 - Michal Marek removed the no longer existing return codes from the curl.1
   man page.

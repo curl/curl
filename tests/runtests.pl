@@ -171,6 +171,7 @@ my @protocols;   # array of supported protocols
 my $skipped=0;  # number of tests skipped; reported in main loop
 my %skipped;    # skipped{reason}=counter, reasons for skip
 my @teststat;   # teststat[testnum]=reason, reasons for skip
+my %disabled_keywords;	# key words of tests to skip
 
 #######################################################################
 # variables the command line options may set
@@ -1544,6 +1545,17 @@ sub singletest {
     }
 
     if(!$why) {
+        my @keywords = getpart("info", "keywords");
+        my $k;
+        for $k (@keywords) {
+            chomp $k;
+            if ($disabled_keywords{$k}) {
+            	$why = "disabled by keyword";
+            }
+        }
+    }
+
+    if(!$why) {
         my @precheck = getpart("client", "precheck");
         $cmd = $precheck[0];
         chomp $cmd;
@@ -1558,7 +1570,7 @@ sub singletest {
         }
     }
 
-    if($why) {
+    if($why && !$listonly) {
         # there's a problem, count it as "skipped"
         $skipped++;
         $skipped{$why}++;
@@ -2358,15 +2370,6 @@ sub startservers {
 sub serverfortest {
     my ($testnum)=@_;
 
-    # load the test case file definition
-    if(loadtest("${TESTDIR}/test${testnum}")) {
-        if($verbose) {
-            # this is not a test
-            logmsg "$testnum doesn't look like a test case\n";
-        }
-        return "no test";
-    }
-
     my @what = getpart("client", "server");
 
     if(!$what[0]) {
@@ -2393,7 +2396,7 @@ my $number=0;
 my $fromnum=-1;
 my @testthis;
 my %disabled;
-do {
+while(@ARGV) {
     if ($ARGV[0] eq "-v") {
         # verbose output
         $verbose=1;
@@ -2476,6 +2479,7 @@ Usage: runtests.pl [options] [test number(s)]
   -v       verbose output
   [num]    like "5 6 9" or " 5 to 22 " to run those tests only
   [!num]   like "!5 !6 !9" to disable those tests
+  [!keyword] like "!cookies !IPv6" to disable tests with those key words
 EOHELP
     ;
         exit;
@@ -2499,7 +2503,15 @@ EOHELP
         $fromnum = -1;
         $disabled{$1}=$1;
     }
-} while(shift @ARGV);
+    elsif($ARGV[0] =~ /^!(.+)/) {
+        $disabled_keywords{$1}=$1;
+    }
+    else {
+    	print "Unknown option: $ARGV[0]\n";
+    	exit;
+    }
+    shift @ARGV;
+} 
 
 if($testthis[0] ne "") {
     $TESTCASES=join(" ", @testthis);

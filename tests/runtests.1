@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH runtests.pl 1 "17 Mar 2005" "Curl 7.13.2" "runtests"
+.TH runtests.pl 1 "11 Oct 2007" "Curl 7.17.1" "runtests"
 .SH NAME
 runtests.pl \- run one or more test cases
 .SH SYNOPSIS
@@ -34,11 +34,18 @@ test suite. It is often called from the root Makefile of the curl package with
 If no test case number is given, all existing tests that the script can find
 will be considered for running. You can specify single test cases to run,
 space-separated, like "1 3 5 7 11", and you can specify a range like "45 to
-67".
+67". You can also specify only the tests you don't want to run by listing
+the numbers with a leading exclamation point, like "!66".
+.P
+It is also possible to specify tests to skip based on a key word describing
+the test. These are specified with a leading exclamation point and the
+key word or phrase, like "!HTTP NTLM auth".
 .SH OPTIONS
 .IP "-a"
 Continue running the rest of the test cases even if one test fails. By
 default, the test script stops as soon as an error is detected.
+.IP "-bN"
+Use N as the base TCP/UDP port number on which to start the test servers.
 .IP "-c <curl>"
 Provide a custom curl binary to run the tests with. Default is the curl
 executable in the build tree.
@@ -78,7 +85,7 @@ Enable verbose output. Speaks more than default.
 .SH "RUNNING TESTS"
 Many tests have conditions that must be met before the test case can run
 fine. They could depend on built-in features in libcurl or features present in
-the operating system or even in 3rd party libraries that curl may or may not
+the operating system or even in third-party libraries that curl may or may not
 use.
 
 The test script checks this by itself, why it is safe to attempt to run all
