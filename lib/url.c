@@ -194,7 +194,7 @@ extern sigjmp_buf curl_jmpenv;
  * Protocol table.
  */
 
-static const struct Curl_handler * protocols[] = {
+static const struct Curl_handler * const protocols[] = {
 
 #ifndef CURL_DISABLE_HTTP
   &Curl_handler_http,
@@ -3020,7 +3020,7 @@ static CURLcode setup_range(struct SessionHandle *data)
 static CURLcode setup_connection_internals(struct SessionHandle *data,
                                            struct connectdata *conn)
 {
-  const struct Curl_handler * * pp;
+  const struct Curl_handler * const * pp;
   const struct Curl_handler * p;
   CURLcode result;
 
@@ -3028,7 +3028,7 @@ static CURLcode setup_connection_internals(struct SessionHandle *data,
 
   /* Scan protocol handler table. */
 
-  for (pp = protocols; p = *pp; pp++)
+  for (pp = protocols; (p = *pp) != NULL; pp++)
     if (strequal(p->scheme, conn->protostr)) {
       /* Protocol found in table. Perform setup complement if some. */
       conn->handler = p;

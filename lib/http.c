@@ -110,9 +110,11 @@
  */
 
 static CURLcode Curl_https_connecting(struct connectdata *conn, bool *done);
+#ifdef USE_SSL
 static int Curl_https_getsock(struct connectdata *conn,
                               curl_socket_t *socks,
                               int numsocks);
+#endif
 
 /*
  * HTTP handler interface.
