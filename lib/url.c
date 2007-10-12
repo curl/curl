@@ -178,6 +178,7 @@ static void flush_cookies(struct SessionHandle *data, int cleanup);
 
 #define ZERO_NULL 0
 
+
 #ifndef USE_ARES
 /* not for ares builds */
 
@@ -187,6 +188,82 @@ static void flush_cookies(struct SessionHandle *data, int cleanup);
 #ifdef HAVE_SIGSETJMP
 extern sigjmp_buf curl_jmpenv;
 #endif
+
+
+/*
+ * Protocol table.
+ */
+
+static const struct Curl_handler * protocols[] = {
+
+#ifndef CURL_DISABLE_HTTP
+  &Curl_handler_http,
+#endif
+
+#if defined(USE_SSL) && !defined(CURL_DISABLE_HTTP)
+  &Curl_handler_https,
+#endif
+
+#ifndef CURL_DISABLE_FTP
+  &Curl_handler_ftp,
+#endif
+
+#if defined(USE_SSL) && !defined(CURL_DISABLE_FTP)
+  &Curl_handler_ftps,
+#endif
+
+#ifndef CURL_DISABLE_TELNET
+  &Curl_handler_telnet,
+#endif
+
+#ifndef CURL_DISABLE_DICT
+  &Curl_handler_dict,
+#endif
+
+#ifndef CURL_DISABLE_LDAP
+  &Curl_handler_ldap,
+#endif
+
+#if defined(HAVE_LDAP_SSL) && !defined(CURL_DISABLE_SSL)
+  &Curl_handler_ldaps,
+#endif
+
+#ifndef CURL_DISABLE_FILE
+  &Curl_handler_file,
+#endif
+
+#ifndef CURL_DISABLE_TFTP
+  &Curl_handler_tftp,
+#endif
+
+#ifdef USE_LIBSSH2
+  &Curl_handler_scp,
+  &Curl_handler_sftp,
+#endif
+
+  (struct Curl_handler *) NULL
+};
+
+/*
+ * Dummy handler for undefined protocol schemes.
+ */
+
+const struct Curl_handler Curl_handler_dummy = {
+  "<no protocol>",                      /* scheme */
+  NULL,                                 /* setup_connection */
+  NULL,                                 /* do_it */
+  NULL,                                 /* done */
+  NULL,                                 /* do_more */
+  NULL,                                 /* connect_it */
+  NULL,                                 /* connecting */
+  NULL,                                 /* doing */
+  NULL,                                 /* proto_getsock */
+  NULL,                                 /* doing_getsock */
+  NULL,                                 /* disconnect */
+  0,                                    /* defport */
+  0                                     /* protocol */
+};
+
 
 #ifdef SIGALRM
 static
@@ -1999,9 +2076,9 @@ CURLcode Curl_disconnect(struct connectdata *conn)
     Curl_ntlm_cleanup(conn);
   }
 
-  if(conn->curl_disconnect)
+  if(conn->handler->disconnect)
     /* This is set if protocol-specific cleanups should be made */
-    conn->curl_disconnect(conn);
+    conn->handler->disconnect(conn);
 
   if(-1 != conn->connectindex) {
     /* unlink ourselves! */
@@ -2519,8 +2596,8 @@ int Curl_protocol_getsock(struct connectdata *conn,
                           curl_socket_t *socks,
                           int numsocks)
 {
-  if(conn->curl_proto_getsock)
-    return conn->curl_proto_getsock(conn, socks, numsocks);
+  if(conn->handler->proto_getsock)
+    return conn->handler->proto_getsock(conn, socks, numsocks);
   return GETSOCK_BLANK;
 }
 
@@ -2528,8 +2605,8 @@ int Curl_doing_getsock(struct connectdata *conn,
                        curl_socket_t *socks,
                        int numsocks)
 {
-  if(conn && conn->curl_doing_getsock)
-    return conn->curl_doing_getsock(conn, socks, numsocks);
+  if(conn && conn->handler && conn->handler->doing_getsock)
+    return conn->handler->doing_getsock(conn, socks, numsocks);
   return GETSOCK_BLANK;
 }
 
@@ -2544,9 +2621,9 @@ CURLcode Curl_protocol_connecting(struct connectdata *conn,
 {
   CURLcode result=CURLE_OK;
 
-  if(conn && conn->curl_connecting) {
+  if(conn && conn->handler && conn->handler->connecting) {
     *done = FALSE;
-    result = conn->curl_connecting(conn, done);
+    result = conn->handler->connecting(conn, done);
   }
   else
     *done = TRUE;
@@ -2563,9 +2640,9 @@ CURLcode Curl_protocol_doing(struct connectdata *conn, bool *done)
 {
   CURLcode result=CURLE_OK;
 
-  if(conn && conn->curl_doing) {
+  if(conn && conn->handler && conn->handler->doing) {
     *done = FALSE;
-    result = conn->curl_doing(conn, done);
+    result = conn->handler->doing(conn, done);
   }
   else
     *done = TRUE;
@@ -2593,7 +2670,7 @@ CURLcode Curl_protocol_connect(struct connectdata *conn,
 
        Unless this protocol doesn't have any protocol-connect callback, as
        then we know we're done. */
-    if(!conn->curl_connecting)
+    if(!conn->handler->connecting)
       *protocol_done = TRUE;
 
     return CURLE_OK;
@@ -2608,7 +2685,7 @@ CURLcode Curl_protocol_connect(struct connectdata *conn,
   }
 
   if(!conn->bits.protoconnstart) {
-    if(conn->curl_connect) {
+    if(conn->handler->connect_it) {
       /* is there a protocol-specific connect() procedure? */
 
       /* Set start time here for timeout purposes in the connect procedure, it
@@ -2616,7 +2693,7 @@ CURLcode Curl_protocol_connect(struct connectdata *conn,
       conn->now = Curl_tvnow();
 
       /* Call the protocol-specific connect function */
-      result = conn->curl_connect(conn, protocol_done);
+      result = conn->handler->connect_it(conn, protocol_done);
     }
     else
       *protocol_done = TRUE;
@@ -2943,285 +3020,39 @@ static CURLcode setup_range(struct SessionHandle *data)
 static CURLcode setup_connection_internals(struct SessionHandle *data,
                                            struct connectdata *conn)
 {
+  const struct Curl_handler * * pp;
+  const struct Curl_handler * p;
+  CURLcode result;
+
   conn->socktype = SOCK_STREAM; /* most of them are TCP streams */
 
-  if (strequal(conn->protostr, "HTTP")) {
-#ifndef CURL_DISABLE_HTTP
-    conn->port = PORT_HTTP;
-    conn->remote_port = PORT_HTTP;
-    conn->protocol |= PROT_HTTP;
-    conn->curl_do = Curl_http;
-    conn->curl_do_more = (Curl_do_more_func)ZERO_NULL;
-    conn->curl_done = Curl_http_done;
-    conn->curl_connect = Curl_http_connect;
-#else
-    failf(data, LIBCURL_NAME
-          " was built with HTTP disabled, http: not supported!");
-    return CURLE_UNSUPPORTED_PROTOCOL;
-#endif
-  }
+  /* Scan protocol handler table. */
 
-  else if (strequal(conn->protostr, "HTTPS")) {
-#if defined(USE_SSL) && !defined(CURL_DISABLE_HTTP)
+  for (pp = protocols; p = *pp; pp++)
+    if (strequal(p->scheme, conn->protostr)) {
+      /* Protocol found in table. Perform setup complement if some. */
+      conn->handler = p;
 
-    conn->port = PORT_HTTPS;
-    conn->remote_port = PORT_HTTPS;
-    conn->protocol |= PROT_HTTP|PROT_HTTPS|PROT_SSL;
+      if (p->setup_connection) {
+        result = (*p->setup_connection)(conn);
 
-    conn->curl_do = Curl_http;
-    conn->curl_do_more = (Curl_do_more_func)ZERO_NULL;
-    conn->curl_done = Curl_http_done;
-    conn->curl_connect = Curl_http_connect;
-    conn->curl_connecting = Curl_https_connecting;
-    conn->curl_proto_getsock = Curl_https_getsock;
+        if (result != CURLE_OK)
+          return result;
 
-#else /* USE_SSL */
-    failf(data, LIBCURL_NAME
-          " was built with SSL disabled, https: not supported!");
-    return CURLE_UNSUPPORTED_PROTOCOL;
-#endif /* !USE_SSL */
-  }
-
-  else if(strequal(conn->protostr, "FTP") ||
-          strequal(conn->protostr, "FTPS")) {
-
-#ifndef CURL_DISABLE_FTP
-    char *type;
-    int port = PORT_FTP;
-
-    if(strequal(conn->protostr, "FTPS")) {
-#ifdef USE_SSL
-      conn->protocol |= PROT_FTPS|PROT_SSL;
-      /* send data securely unless specifically requested otherwise */
-      conn->ssl[SECONDARYSOCKET].use = data->set.ftp_ssl != CURLUSESSL_CONTROL;
-      port = PORT_FTPS;
-#else
-      failf(data, LIBCURL_NAME
-            " was built with SSL disabled, ftps: not supported!");
-      return CURLE_UNSUPPORTED_PROTOCOL;
-#endif /* !USE_SSL */
-    }
-
-    conn->port = port;
-    conn->remote_port = (unsigned short)port;
-    conn->protocol |= PROT_FTP;
-
-    if(conn->bits.httpproxy && !data->set.tunnel_thru_httpproxy) {
-      /* Unless we have asked to tunnel ftp operations through the proxy, we
-         switch and use HTTP operations only */
-#ifndef CURL_DISABLE_HTTP
-      conn->curl_do = Curl_http;
-      conn->curl_done = Curl_http_done;
-      conn->protocol = PROT_HTTP; /* switch to HTTP */
-#else
-      failf(data, "FTP over http proxy requires HTTP support built-in!");
-      return CURLE_UNSUPPORTED_PROTOCOL;
-#endif
-    }
-    else {
-      conn->curl_do = Curl_ftp;
-      conn->curl_do_more = Curl_ftp_nextconnect;
-      conn->curl_done = Curl_ftp_done;
-      conn->curl_connect = Curl_ftp_connect;
-      conn->curl_connecting = Curl_ftp_multi_statemach;
-      conn->curl_doing = Curl_ftp_doing;
-      conn->curl_proto_getsock = Curl_ftp_getsock;
-      conn->curl_doing_getsock = Curl_ftp_getsock;
-      conn->curl_disconnect = Curl_ftp_disconnect;
-    }
-
-    data->reqdata.path++; /* don't include the initial slash */
-
-    /* FTP URLs support an extension like ";type=<typecode>" that
-     * we'll try to get now! */
-    type=strstr(data->reqdata.path, ";type=");
-    if(!type) {
-      type=strstr(conn->host.rawalloc, ";type=");
-    }
-    if(type) {
-      char command;
-      *type=0;                     /* it was in the middle of the hostname */
-      command = (char)toupper((int)type[6]);
-      switch(command) {
-      case 'A': /* ASCII mode */
-        data->set.prefer_ascii = TRUE;
-        break;
-      case 'D': /* directory mode */
-        data->set.ftp_list_only = TRUE;
-        break;
-      case 'I': /* binary mode */
-      default:
-        /* switch off ASCII */
-        data->set.prefer_ascii = FALSE;
-        break;
+        p = conn->handler;              /* May have changed. */
       }
+
+      conn->port = p->defport;
+      conn->remote_port = p->defport;
+      conn->protocol |= p->protocol;
+      return CURLE_OK;
     }
-#else /* CURL_DISABLE_FTP */
-    failf(data, LIBCURL_NAME
-          " was built with FTP disabled, ftp/ftps: not supported!");
-    return CURLE_UNSUPPORTED_PROTOCOL;
-#endif
-  }
 
-  else if(strequal(conn->protostr, "TELNET")) {
-#ifndef CURL_DISABLE_TELNET
-    /* telnet testing factory */
-    conn->protocol |= PROT_TELNET;
-
-    conn->port = PORT_TELNET;
-    conn->remote_port = PORT_TELNET;
-    conn->curl_do = Curl_telnet;
-    conn->curl_done = Curl_telnet_done;
-#else
-    failf(data, LIBCURL_NAME
-          " was built with TELNET disabled!");
-    return CURLE_UNSUPPORTED_PROTOCOL;
-#endif
-  }
-
-  else if (strequal(conn->protostr, "DICT")) {
-#ifndef CURL_DISABLE_DICT
-    conn->protocol |= PROT_DICT;
-    conn->port = PORT_DICT;
-    conn->remote_port = PORT_DICT;
-    conn->curl_do = Curl_dict;
-    /* no DICT-specific done */
-    conn->curl_done = (Curl_done_func)ZERO_NULL;
-#else
-    failf(data, LIBCURL_NAME
-          " was built with DICT disabled!");
-    return CURLE_UNSUPPORTED_PROTOCOL;
-#endif
-  }
-
-  else if (strequal(conn->protostr, "LDAP")) {
-#ifndef CURL_DISABLE_LDAP
-    conn->protocol |= PROT_LDAP;
-    conn->port = PORT_LDAP;
-    conn->remote_port = PORT_LDAP;
-    conn->curl_do = Curl_ldap;
-    /* no LDAP-specific done */
-    conn->curl_done = (Curl_done_func)ZERO_NULL;
-#else
-    failf(data, LIBCURL_NAME
-          " was built with LDAP disabled!");
-    return CURLE_UNSUPPORTED_PROTOCOL;
-#endif
-  }
-
-#ifdef HAVE_LDAP_SSL
-  else if (strequal(conn->protostr, "LDAPS")) {
-#ifndef CURL_DISABLE_LDAP
-    conn->protocol |= PROT_LDAP|PROT_SSL;
-    conn->port = PORT_LDAPS;
-    conn->remote_port = PORT_LDAPS;
-    conn->curl_do = Curl_ldap;
-    /* no LDAP-specific done */
-    conn->curl_done = (Curl_done_func)ZERO_NULL;
-#else
-    failf(data, LIBCURL_NAME
-          " was built with LDAP disabled!");
-    return CURLE_UNSUPPORTED_PROTOCOL;
-#endif
-  }
-#endif /* CURL_LDAP_USE_SSL */
-
-  else if (strequal(conn->protostr, "FILE")) {
-#ifndef CURL_DISABLE_FILE
-    conn->protocol |= PROT_FILE;
-
-    conn->curl_do = Curl_file;
-    conn->curl_done = Curl_file_done;
-#else
-    failf(data, LIBCURL_NAME
-          " was built with FILE disabled!");
-    return CURLE_UNSUPPORTED_PROTOCOL;
-#endif
-  }
-
-  else if (strequal(conn->protostr, "TFTP")) {
-#ifndef CURL_DISABLE_TFTP
-    char *type;
-    conn->socktype = SOCK_DGRAM; /* UDP datagram based */
-    conn->protocol |= PROT_TFTP;
-    conn->port = PORT_TFTP;
-    conn->remote_port = PORT_TFTP;
-    conn->curl_connect = Curl_tftp_connect;
-    conn->curl_do = Curl_tftp;
-    conn->curl_done = Curl_tftp_done;
-    /* TFTP URLs support an extension like ";mode=<typecode>" that
-     * we'll try to get now! */
-    type=strstr(data->reqdata.path, ";mode=");
-    if(!type) {
-      type=strstr(conn->host.rawalloc, ";mode=");
-    }
-    if(type) {
-      char command;
-      *type=0;                     /* it was in the middle of the hostname */
-      command = (char)toupper((int)type[6]);
-      switch(command) {
-      case 'A': /* ASCII mode */
-      case 'N': /* NETASCII mode */
-        data->set.prefer_ascii = TRUE;
-        break;
-      case 'O': /* octet mode */
-      case 'I': /* binary mode */
-      default:
-        /* switch off ASCII */
-        data->set.prefer_ascii = FALSE;
-        break;
-      }
-    }
-#else
-    failf(data, LIBCURL_NAME
-          " was built with TFTP disabled!");
-    return CURLE_UNSUPPORTED_PROTOCOL;
-#endif
-  }
-
-  else if (strequal(conn->protostr, "SCP")) {
-#ifdef USE_LIBSSH2
-    conn->port = PORT_SSH;
-    conn->remote_port = PORT_SSH;
-    conn->protocol = PROT_SCP;
-    conn->curl_connect = Curl_ssh_connect; /* ssh_connect? */
-    conn->curl_do = Curl_scp_do;
-    conn->curl_done = Curl_scp_done;
-    conn->curl_connecting = Curl_ssh_multi_statemach;
-    conn->curl_doing = Curl_scp_doing;
-    conn->curl_do_more = (Curl_do_more_func)ZERO_NULL;
-#else
-    failf(data, LIBCURL_NAME
-          " was built without LIBSSH2, scp: not supported!");
-    return CURLE_UNSUPPORTED_PROTOCOL;
-#endif
-  }
-
-  else if (strequal(conn->protostr, "SFTP")) {
-#ifdef USE_LIBSSH2
-    conn->port = PORT_SSH;
-    conn->remote_port = PORT_SSH;
-    conn->protocol = PROT_SFTP;
-    conn->curl_connect = Curl_ssh_connect; /* ssh_connect? */
-    conn->curl_do = Curl_sftp_do;
-    conn->curl_done = Curl_sftp_done;
-    conn->curl_connecting = Curl_ssh_multi_statemach;
-    conn->curl_doing = Curl_sftp_doing;
-    conn->curl_do_more = (Curl_do_more_func)ZERO_NULL;
-#else
-    failf(data, LIBCURL_NAME
-          " was built without LIBSSH2, scp: not supported!");
-    return CURLE_UNSUPPORTED_PROTOCOL;
-#endif
-  }
-
-  else {
-    /* We fell through all checks and thus we don't support the specified
-       protocol */
-    failf(data, "Unsupported protocol: %s", conn->protostr);
-    return CURLE_UNSUPPORTED_PROTOCOL;
-  }
-  return CURLE_OK;
+  /* Protocol not found in table. */
+  conn->handler = &Curl_handler_dummy;  /* Be sure we have a handler defined. */
+  failf(data, "Protocol %s not supported or disabled in " LIBCURL_NAME,
+        conn->protostr);
+  return CURLE_UNSUPPORTED_PROTOCOL;
 }
 
 /****************************************************************
@@ -4495,8 +4326,8 @@ CURLcode Curl_done(struct connectdata **connp,
   }
 
   /* this calls the protocol-specific function pointer previously set */
-  if(conn->curl_done)
-    result = conn->curl_done(conn, status, premature);
+  if(conn->handler->done)
+    result = conn->handler->done(conn, status, premature);
   else
     result = CURLE_OK;
 
@@ -4548,9 +4379,9 @@ CURLcode Curl_do(struct connectdata **connp, bool *done)
   conn->bits.done = FALSE; /* Curl_done() is not called yet */
   conn->bits.do_more = FALSE; /* by default there's no curl_do_more() to use */
 
-  if(conn->curl_do) {
+  if(conn->handler->do_it) {
     /* generic protocol-specific function pointer set in curl_connect() */
-    result = conn->curl_do(conn, done);
+    result = conn->handler->do_it(conn, done);
 
     /* This was formerly done in transfer.c, but we better do it here */
 
@@ -4599,7 +4430,7 @@ CURLcode Curl_do(struct connectdata **connp, bool *done)
           }
 
           /* ... finally back to actually retry the DO phase */
-          result = conn->curl_do(conn, done);
+          result = conn->handler->do_it(conn, done);
         }
       }
     }
@@ -4611,8 +4442,8 @@ CURLcode Curl_do_more(struct connectdata *conn)
 {
   CURLcode result=CURLE_OK;
 
-  if(conn->curl_do_more)
-    result = conn->curl_do_more(conn);
+  if(conn->handler->do_more)
+    result = conn->handler->do_more(conn);
 
   return result;
 }

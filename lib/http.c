@@ -104,6 +104,57 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
+
+/*
+ * Forward declarations.
+ */
+
+static CURLcode Curl_https_connecting(struct connectdata *conn, bool *done);
+static int Curl_https_getsock(struct connectdata *conn,
+                              curl_socket_t *socks,
+                              int numsocks);
+
+/*
+ * HTTP handler interface.
+ */
+const struct Curl_handler Curl_handler_http = {
+  "HTTP",                               /* scheme */
+  NULL,                                 /* setup_connection */
+  Curl_http,                            /* do_it */
+  Curl_http_done,                       /* done */
+  NULL,                                 /* do_more */
+  Curl_http_connect,                    /* connect_it */
+  NULL,                                 /* connecting */
+  NULL,                                 /* doing */
+  NULL,                                 /* proto_getsock */
+  NULL,                                 /* doing_getsock */
+  NULL,                                 /* disconnect */
+  PORT_HTTP,                            /* defport */
+  PROT_HTTP,                            /* protocol */
+};
+
+#ifdef USE_SSL
+/*
+ * HTTPS handler interface.
+ */
+const struct Curl_handler Curl_handler_https = {
+  "HTTPS",                              /* scheme */
+  NULL,                                 /* setup_connection */
+  Curl_http,                            /* do_it */
+  Curl_http_done,                       /* done */
+  NULL,                                 /* do_more */
+  Curl_http_connect,                    /* connect_it */
+  Curl_https_connecting,                /* connecting */
+  NULL,                                 /* doing */
+  Curl_https_getsock,                   /* proto_getsock */
+  NULL,                                 /* doing_getsock */
+  NULL,                                 /* disconnect */
+  PORT_HTTPS,                           /* defport */
+  PROT_HTTP | PROT_HTTPS | PROT_SSL     /* protocol */
+};
+#endif
+
+
 /*
  * checkheaders() checks the linked list of custom HTTP headers for a
  * particular header (prefix).
@@ -1619,7 +1670,7 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
   return CURLE_OK;
 }
 
-CURLcode Curl_https_connecting(struct connectdata *conn, bool *done)
+static CURLcode Curl_https_connecting(struct connectdata *conn, bool *done)
 {
   CURLcode result;
   DEBUGASSERT((conn) && (conn->protocol & PROT_HTTPS));
@@ -1635,9 +1686,9 @@ CURLcode Curl_https_connecting(struct connectdata *conn, bool *done)
 #ifdef USE_SSLEAY
 /* This function is OpenSSL-specific. It should be made to query the generic
    SSL layer instead. */
-int Curl_https_getsock(struct connectdata *conn,
-                       curl_socket_t *socks,
-                       int numsocks)
+static int Curl_https_getsock(struct connectdata *conn,
+                              curl_socket_t *socks,
+                              int numsocks)
 {
   if (conn->protocol & PROT_HTTPS) {
     struct ssl_connect_data *connssl = &conn->ssl[FIRSTSOCKET];

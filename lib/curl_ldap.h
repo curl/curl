@@ -24,6 +24,11 @@
  * $Id$
  ***************************************************************************/
 #ifndef CURL_DISABLE_LDAP
-CURLcode Curl_ldap(struct connectdata *conn, bool *done);
+extern const struct Curl_handler Curl_handler_ldap;
+
+#ifdef HAVE_LDAP_SSL
+extern const struct Curl_handler Curl_handler_ldaps;
+#endif
+
 #endif
 #endif /* __CURL_LDAP_H */

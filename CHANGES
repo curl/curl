@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Patrick M (12 October 2007)
+- Added per-protocol callback static tables, replacing callback ptr storage
+  in the connectdata structure by a single handler table ptr.
+
 Dan F (11 October 2007)
 - Fixed the -l option of runtests.pl
 

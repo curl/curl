@@ -24,7 +24,6 @@
  * $Id$
  ***************************************************************************/
 #ifndef CURL_DISABLE_TELNET
-CURLcode Curl_telnet(struct connectdata *conn, bool *done);
-CURLcode Curl_telnet_done(struct connectdata *conn, CURLcode, bool premature);
+extern const struct Curl_handler Curl_handler_telnet;
 #endif
 #endif

@@ -118,7 +118,52 @@ static void _ldap_free_urldesc (LDAPURLDesc *ludp);
 #endif
 
 
-CURLcode Curl_ldap(struct connectdata *conn, bool *done)
+static CURLcode Curl_ldap(struct connectdata *conn, bool *done);
+
+/*
+ * LDAP protocol handler.
+ */
+
+const struct Curl_handler Curl_handler_ldap = {
+  "LDAP",                               /* scheme */
+  NULL,                                 /* setup_connection */
+  Curl_ldap,                            /* do_it */
+  NULL,                                 /* done */
+  NULL,                                 /* do_more */
+  NULL,                                 /* connect_it */
+  NULL,                                 /* connecting */
+  NULL,                                 /* doing */
+  NULL,                                 /* proto_getsock */
+  NULL,                                 /* doing_getsock */
+  NULL,                                 /* disconnect */
+  PORT_LDAP,                            /* defport */
+  PROT_LDAP                             /* protocol */
+};
+
+#ifdef HAVE_LDAP_SSL
+/*
+ * LDAPS protocol handler.
+ */
+
+const struct Curl_handler Curl_handler_ldaps = {
+  "LDAPS",                              /* scheme */
+  NULL,                                 /* setup_connection */
+  Curl_ldap,                            /* do_it */
+  NULL,                                 /* done */
+  NULL,                                 /* do_more */
+  NULL,                                 /* connect_it */
+  NULL,                                 /* connecting */
+  NULL,                                 /* doing */
+  NULL,                                 /* proto_getsock */
+  NULL,                                 /* doing_getsock */
+  NULL,                                 /* disconnect */
+  PORT_LDAPS,                           /* defport */
+  PROT_LDAP | PROT_SSL                  /* protocol */
+};
+#endif
+
+
+static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
 {
   CURLcode status = CURLE_OK;
   int rc = 0;

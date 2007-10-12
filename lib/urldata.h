@@ -810,6 +810,59 @@ struct HandleData {
 };
 
 /*
+ * Specific protocol handler.
+ */
+
+struct Curl_handler {
+  const char * scheme;        /* URL scheme name. */
+
+  /* Complement to setup_connection_internals(). */
+  CURLcode (*setup_connection)(struct connectdata *);
+
+  /* These two functions MUST be set to be protocol dependent */
+  CURLcode (*do_it)(struct connectdata *, bool *done);
+  Curl_done_func done;
+
+  /* If the curl_do() function is better made in two halves, this
+   * curl_do_more() function will be called afterwards, if set. For example
+   * for doing the FTP stuff after the PASV/PORT command.
+   */
+  Curl_do_more_func do_more;
+
+  /* This function *MAY* be set to a protocol-dependent function that is run
+   * after the connect() and everything is done, as a step in the connection.
+   * The 'done' pointer points to a bool that should be set to TRUE if the
+   * function completes before return. If it doesn't complete, the caller
+   * should call the curl_connecting() function until it is.
+   */
+  CURLcode (*connect_it)(struct connectdata *, bool *done);
+
+  /* See above. Currently only used for FTP. */
+  CURLcode (*connecting)(struct connectdata *, bool *done);
+  CURLcode (*doing)(struct connectdata *, bool *done);
+
+  /* Called from the multi interface during the PROTOCONNECT phase, and it
+     should then return a proper fd set */
+  int (*proto_getsock)(struct connectdata *conn,
+                       curl_socket_t *socks,
+                       int numsocks);
+
+  /* Called from the multi interface during the DOING phase, and it should
+     then return a proper fd set */
+  int (*doing_getsock)(struct connectdata *conn,
+                       curl_socket_t *socks,
+                       int numsocks);
+
+  /* This function *MAY* be set to a protocol-dependent function that is run
+   * by the curl_disconnect(), as a step in the disconnection.
+   */
+  CURLcode (*disconnect)(struct connectdata *);
+
+  long defport;       /* Default port. */
+  long protocol;      /* PROT_* flags concerning the protocol set */
+};
+
+/*
  * The connectdata struct contains all fields and variables that should be
  * unique for an entire connection.
  */
@@ -894,50 +947,7 @@ struct connectdata {
 
   struct ConnectBits bits;    /* various state-flags for this connection */
 
-  /* These two functions MUST be set by the curl_connect() function to be
-     be protocol dependent */
-  CURLcode (*curl_do)(struct connectdata *, bool *done);
-  Curl_done_func curl_done;
-
-  /* If the curl_do() function is better made in two halves, this
-   * curl_do_more() function will be called afterwards, if set. For example
-   * for doing the FTP stuff after the PASV/PORT command.
-   */
-  Curl_do_more_func curl_do_more;
-
-  /* This function *MAY* be set to a protocol-dependent function that is run
-   * after the connect() and everything is done, as a step in the connection.
-   * The 'done' pointer points to a bool that should be set to TRUE if the
-   * function completes before return. If it doesn't complete, the caller
-   * should call the curl_connecting() function until it is.
-   */
-  CURLcode (*curl_connect)(struct connectdata *, bool *done);
-
-  /* See above. Currently only used for FTP. */
-  CURLcode (*curl_connecting)(struct connectdata *, bool *done);
-  CURLcode (*curl_doing)(struct connectdata *, bool *done);
-
-  /* Called from the multi interface during the PROTOCONNECT phase, and it
-     should then return a proper fd set */
-  int (*curl_proto_getsock)(struct connectdata *conn,
-                            curl_socket_t *socks,
-                            int numsocks);
-
-  /* Called from the multi interface during the DOING phase, and it should
-     then return a proper fd set */
-  int (*curl_doing_getsock)(struct connectdata *conn,
-                            curl_socket_t *socks,
-                            int numsocks);
-
-  /* This function *MAY* be set to a protocol-dependent function that is run
-   * by the curl_disconnect(), as a step in the disconnection.
-   */
-  CURLcode (*curl_disconnect)(struct connectdata *);
-
-  /* This function *MAY* be set to a protocol-dependent function that is run
-   * in the curl_close() function if protocol-specific cleanups are required.
-   */
-  CURLcode (*curl_close)(struct connectdata *);
+  const struct Curl_handler * handler;  /* Connection's protocol handler. */
 
   /**** curl_get() phase fields */
 

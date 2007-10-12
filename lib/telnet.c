@@ -125,6 +125,10 @@ static void printsub(struct SessionHandle *data,
                      size_t length);
 static void suboption(struct connectdata *);
 
+static CURLcode Curl_telnet(struct connectdata *conn, bool *done);
+static CURLcode Curl_telnet_done(struct connectdata *conn,
+                                 CURLcode, bool premature);
+
 /* For negotiation compliant to RFC 1143 */
 #define CURL_NO          0
 #define CURL_YES         1
@@ -169,6 +173,28 @@ struct TELNET {
 
   TelnetReceive telrcv_state;
 };
+
+
+/*
+ * TELNET protocol handler.
+ */
+
+const struct Curl_handler Curl_handler_telnet = {
+  "TELNET",                             /* scheme */
+  NULL,                                 /* setup_connection */
+  Curl_telnet,                          /* do_it */
+  Curl_telnet_done,                     /* done */
+  NULL,                                 /* do_more */
+  NULL,                                 /* connect_it */
+  NULL,                                 /* connecting */
+  NULL,                                 /* doing */
+  NULL,                                 /* proto_getsock */
+  NULL,                                 /* doing_getsock */
+  NULL,                                 /* disconnect */
+  PORT_TELNET,                          /* defport */
+  PROT_TELNET                           /* protocol */
+};
+
 
 #ifdef USE_WINSOCK
 static CURLcode
@@ -1074,7 +1100,8 @@ void telrcv(struct connectdata *conn,
   }
 }
 
-CURLcode Curl_telnet_done(struct connectdata *conn, CURLcode status, bool premature)
+static CURLcode Curl_telnet_done(struct connectdata *conn,
+                                 CURLcode status, bool premature)
 {
   struct TELNET *tn = (struct TELNET *)conn->data->reqdata.proto.telnet;
   (void)status; /* unused */
@@ -1088,7 +1115,7 @@ CURLcode Curl_telnet_done(struct connectdata *conn, CURLcode status, bool premat
   return CURLE_OK;
 }
 
-CURLcode Curl_telnet(struct connectdata *conn, bool *done)
+static CURLcode Curl_telnet(struct connectdata *conn, bool *done)
 {
   CURLcode code;
   struct SessionHandle *data = conn->data;

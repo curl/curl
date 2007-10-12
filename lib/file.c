@@ -89,6 +89,33 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
+
+/*
+ * Forward declarations.
+ */
+
+static CURLcode Curl_file(struct connectdata *, bool *done);
+
+/*
+ * FILE scheme handler.
+ */
+
+const struct Curl_handler Curl_handler_file = {
+  "FILE",                               /* scheme */
+  NULL,                                 /* setup_connection */
+  Curl_file,                            /* do_it */
+  Curl_file_done,                       /* done */
+  NULL,                                 /* do_more */
+  NULL,                                 /* connect_it */
+  NULL,                                 /* connecting */
+  NULL,                                 /* doing */
+  NULL,                                 /* proto_getsock */
+  NULL,                                 /* doing_getsock */
+  NULL,                                 /* disconnect */
+  0,                                    /* defport */
+  PROT_FILE                             /* protocol */
+};
+
 /*
  * Curl_file_connect() gets called from Curl_protocol_connect() to allow us to
  * do protocol-specific actions at connect-time.  We emulate a
@@ -316,7 +343,7 @@ static CURLcode file_upload(struct connectdata *conn)
  * opposed to sockets) we instead perform the whole do-operation in this
  * function.
  */
-CURLcode Curl_file(struct connectdata *conn, bool *done)
+static CURLcode Curl_file(struct connectdata *conn, bool *done)
 {
   /* This implementation ignores the host name in conformance with
      RFC 1738. Only local files (reachable via the standard file system)

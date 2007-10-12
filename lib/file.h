@@ -24,7 +24,8 @@
  * $Id$
  ***************************************************************************/
 #ifndef CURL_DISABLE_FILE
-CURLcode Curl_file(struct connectdata *, bool *done);
+extern const struct Curl_handler Curl_handler_file;
+
 CURLcode Curl_file_done(struct connectdata *, CURLcode, bool premature);
 CURLcode Curl_file_connect(struct connectdata *);
 #endif
