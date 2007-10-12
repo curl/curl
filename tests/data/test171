@@ -1,4 +1,12 @@
 <testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+cookies
+</keywords>
+</info>
+
 # Server-side
 <reply>
 <data>
@@ -9,7 +17,7 @@ Set-Cookie: XToken=xt;Domain=.z.x.com;Path=/
 Cache-control: private
 Content-Length: 62
 
-This server reply is for testing a simple Location: following
+This server reply is for testing a simple cookie test case...
 </data>
 </reply>
 

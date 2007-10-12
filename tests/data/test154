@@ -1,4 +1,13 @@
 <testcase>
+<info>
+<keywords>
+HTTP
+HTTP PUT
+HTTP Digest auth
+--anyauth
+</keywords>
+</info>
+
 # Server-side
 <reply>
 <servercmd>

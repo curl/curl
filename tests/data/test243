@@ -4,7 +4,7 @@
 HTTP
 HTTP GET
 --proxy-anyauth
-HTTP proxy NTLM
+HTTP proxy NTLM auth
 </keywords>
 </info>
 # Server-side

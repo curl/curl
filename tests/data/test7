@@ -3,9 +3,11 @@
 <keywords>
 HTTP
 HTTP GET
+cookies
 header dump
 </keywords>
 </info>
+
 # Server-side
 <reply>
 <data>

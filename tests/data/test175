@@ -1,4 +1,12 @@
 <testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+HTTP Digest auth
+</keywords>
+</info>
+
 # Server-side
 <reply>
 <data>

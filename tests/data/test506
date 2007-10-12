@@ -1,4 +1,13 @@
 <testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+cookies
+shared cookies
+</keywords>
+</info>
+
 # Server-side
 <reply>
 <data1>

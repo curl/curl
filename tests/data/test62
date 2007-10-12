@@ -4,8 +4,10 @@
 HTTP
 HTTP GET
 HTTP replaced headers
+cookies
 </keywords>
 </info>
+
 # Server-side
 <reply>
 <data>

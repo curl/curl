@@ -1,4 +1,12 @@
 <testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+Range
+Resume
+</keywords>
+
 # Server-side
 <reply>
 <data>

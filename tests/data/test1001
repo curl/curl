@@ -2,12 +2,14 @@
 <info>
 <keywords>
 HTTP
-Digest
-PUT
+HTTP Digest auth
+HTTP PUT
 Resume
+Content-Range
 CUSTOMREQUEST
 </keywords>
 </info>
+
 # Server-side
 <reply>
 <data>
