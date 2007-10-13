@@ -146,7 +146,9 @@ static int Curl_ftp_getsock(struct connectdata *conn,
 static CURLcode Curl_ftp_doing(struct connectdata *conn,
                                bool *dophase_done);
 static CURLcode Curl_ftp_setup_connection(struct connectdata * conn);
+#ifdef USE_SSL
 static CURLcode Curl_ftps_setup_connection(struct connectdata * conn);
+#endif
 
 /* easy-to-use macro: */
 #define FTPSENDF(x,y,z)    if ((result = Curl_ftpsendf(x,y,z)) != CURLE_OK) \
@@ -4159,6 +4161,7 @@ static CURLcode Curl_ftp_setup_connection(struct connectdata * conn)
   return CURLE_OK;
 }
 
+#ifdef USE_SSL
 static CURLcode Curl_ftps_setup_connection(struct connectdata * conn)
 {
   struct SessionHandle *data = conn->data;
@@ -4166,4 +4169,6 @@ static CURLcode Curl_ftps_setup_connection(struct connectdata * conn)
   conn->ssl[SECONDARYSOCKET].use = data->set.ftp_ssl != CURLUSESSL_CONTROL;
   return Curl_ftp_setup_connection(conn);
 }
+#endif
+
 #endif /* CURL_DISABLE_FTP */

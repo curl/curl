@@ -26,7 +26,6 @@
 #ifndef CURL_DISABLE_FILE
 extern const struct Curl_handler Curl_handler_file;
 
-CURLcode Curl_file_done(struct connectdata *, CURLcode, bool premature);
 CURLcode Curl_file_connect(struct connectdata *);
 #endif
 #endif

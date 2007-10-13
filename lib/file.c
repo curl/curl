@@ -95,6 +95,8 @@
  */
 
 static CURLcode Curl_file(struct connectdata *, bool *done);
+static CURLcode Curl_file_done(struct connectdata *conn,
+                               CURLcode status, bool premature);
 
 /*
  * FILE scheme handler.
@@ -193,8 +195,8 @@ CURLcode Curl_file_connect(struct connectdata *conn)
   return CURLE_OK;
 }
 
-CURLcode Curl_file_done(struct connectdata *conn,
-                        CURLcode status, bool premature)
+static CURLcode Curl_file_done(struct connectdata *conn,
+                               CURLcode status, bool premature)
 {
   struct FILEPROTO *file = conn->data->reqdata.proto.file;
   (void)status; /* not used */

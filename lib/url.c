@@ -169,6 +169,10 @@ static struct SessionHandle* gethandleathead(struct curl_llist *pipeline);
 static void flush_cookies(struct SessionHandle *data, int cleanup);
 #endif
 
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+#define verboseconnect(x)  do { } while (0)
+#endif
+
 #define MAX_PIPELINE_LENGTH 5
 
 /*
@@ -262,7 +266,7 @@ static const struct Curl_handler * const protocols[] = {
  * Dummy handler for undefined protocol schemes.
  */
 
-const struct Curl_handler Curl_handler_dummy = {
+static const struct Curl_handler Curl_handler_dummy = {
   "<no protocol>",                      /* scheme */
   NULL,                                 /* setup_connection */
   NULL,                                 /* do_it */
@@ -277,10 +281,6 @@ const struct Curl_handler Curl_handler_dummy = {
   0,                                    /* defport */
   0                                     /* protocol */
 };
-
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-#define verboseconnect(x)  do { } while (0)
-#endif
 
 void Curl_safefree(void *ptr)
 {
@@ -3579,7 +3579,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
       result = setup_range(data);
       if(result) {
-        Curl_file_done(conn, result, FALSE);
+        if(conn->handler->done)
+          result = conn->handler->done(conn, result, FALSE);
         return result;
       }
 
