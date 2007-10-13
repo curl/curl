@@ -171,6 +171,84 @@ AC_DEFUN([CURL_CHECK_HEADER_WS2TCPIP], [
 ])
 
 
+dnl CURL_CHECK_HEADER_WINLDAP
+dnl -------------------------------------------------
+dnl Check for compilable and valid winldap.h header
+
+AC_DEFUN([CURL_CHECK_HEADER_WINLDAP], [
+  AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
+  AC_CACHE_CHECK([for winldap.h], [ac_cv_header_winldap_h], [
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([
+#undef inline
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#include <winldap.h>
+      ],[
+#ifdef __CYGWIN__
+        HAVE_WINLDAP_H shall not be defined.
+#else
+        LDAP *ldp = ldap_init("dummy", LDAP_PORT);
+        ULONG res = ldap_unbind(ldp);
+#endif
+      ])
+    ],[
+      ac_cv_header_winldap_h="yes"
+    ],[
+      ac_cv_header_winldap_h="no"
+    ])
+  ])
+  case "$ac_cv_header_winldap_h" in
+    yes)
+      AC_DEFINE_UNQUOTED(HAVE_WINLDAP_H, 1,
+        [Define to 1 if you have the winldap.h header file.])
+      ;;
+  esac
+])
+
+
+dnl CURL_CHECK_HEADER_WINBER
+dnl -------------------------------------------------
+dnl Check for compilable and valid winber.h header
+
+AC_DEFUN([CURL_CHECK_HEADER_WINBER], [
+  AC_REQUIRE([CURL_CHECK_HEADER_WINLDAP])dnl
+  AC_CACHE_CHECK([for winber.h], [ac_cv_header_winber_h], [
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([
+#undef inline
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#include <winldap.h>
+#include <winber.h>
+      ],[
+#ifdef __CYGWIN__
+        HAVE_WINBER_H shall not be defined.
+#else
+        BERVAL *bvp = NULL;
+        BerElement *bep = ber_init(bvp);
+        ber_free(bep, 1);
+#endif
+      ])
+    ],[
+      ac_cv_header_winber_h="yes"
+    ],[
+      ac_cv_header_winber_h="no"
+    ])
+  ])
+  case "$ac_cv_header_winber_h" in
+    yes)
+      AC_DEFINE_UNQUOTED(HAVE_WINBER_H, 1,
+        [Define to 1 if you have the winber.h header file.])
+      ;;
+  esac
+])
+
+
 dnl CURL_CHECK_HEADER_MALLOC
 dnl -------------------------------------------------
 dnl Check for compilable and valid malloc.h header,

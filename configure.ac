@@ -221,6 +221,8 @@ CURL_CHECK_HEADER_WINSOCK
 CURL_CHECK_HEADER_WINSOCK2
 CURL_CHECK_HEADER_WS2TCPIP
 
+CURL_CHECK_HEADER_WINLDAP
+CURL_CHECK_HEADER_WINBER
 
 dnl ************************************************************
 dnl switch off particular protocols
