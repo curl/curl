@@ -475,12 +475,12 @@ dnl and prepended to LIBS any needed libraries.
 AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
   AC_REQUIRE([CURL_CHECK_HEADER_LDAP])dnl
   #
-  AC_MSG_CHECKING([libraries for LDAP support])
+  AC_MSG_CHECKING([for LDAP libraries])
   #
   curl_cv_save_LIBS=$LIBS
   curl_cv_ldap_LIBS="unknown"
   #
-  for x_nlibs in '' '-ldap' '-lber -ldap' '-ldap -lber'; do
+  for x_nlibs in '' '-lldap' '-llber -lldap' '-lldap -llber'; do
     if test -z "$x_nlibs"; then
       LIBS="$curl_cv_save_LIBS"
     else
@@ -525,7 +525,7 @@ AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
   #
   case X-"$curl_cv_ldap_LIBS" in
     X-unknown)
-      AC_MSG_RESULT([cannot find libraries for LDAP support])
+      AC_MSG_RESULT([cannot find LDAP libraries])
       ;;
     X-)
       AC_MSG_RESULT([no additional lib required])
