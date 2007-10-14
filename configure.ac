@@ -567,11 +567,15 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
       AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
       AC_SUBST(CURL_DISABLE_LDAP, [1])])
   else
-    dnl Try to find the right ldap library name for this system
-    AC_SEARCH_LIBS(ldap_init, [ldap],, [
-      AC_MSG_WARN([Cannot find LDAP library: LDAP disabled])
-      AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
-      AC_SUBST(CURL_DISABLE_LDAP, [1])])
+    dnl Try to find the right ldap libraries for this system
+    CURL_CHECK_LIBS_LDAP
+    case X-"$curl_cv_ldap_LIBS" in
+      X-unknown)
+        AC_MSG_WARN([Cannot find libraries for LDAP support: LDAP disabled])
+        AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
+        AC_SUBST(CURL_DISABLE_LDAP, [1])
+        ;;
+    esac
   fi
 fi
 
@@ -586,12 +590,6 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
         AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
         AC_SUBST(CURL_DISABLE_LDAP, [1])])
     fi
-  else
-    dnl Try to find the right lber library name for this system
-    AC_SEARCH_LIBS(ber_free, [lber],, [
-      AC_MSG_WARN([Cannot find a library defining ber_free(): LDAP disabled])
-      AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
-      AC_SUBST(CURL_DISABLE_LDAP, [1])])
   fi
 fi
 

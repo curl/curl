@@ -467,6 +467,82 @@ AC_DEFUN([CURL_CHECK_HEADER_LDAPSSL], [
 ])
 
 
+dnl CURL_CHECK_LIBS_LDAP
+dnl -------------------------------------------------
+dnl Check for libraries needed for LDAP support,
+dnl and prepended to LIBS any needed libraries.
+
+AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
+  AC_REQUIRE([CURL_CHECK_HEADER_LDAP])dnl
+  #
+  AC_MSG_CHECKING([libraries for LDAP support])
+  #
+  curl_cv_save_LIBS=$LIBS
+  curl_cv_ldap_LIBS="unknown"
+  #
+  for x_nlibs in '' '-ldap' '-lber -ldap' '-ldap -lber'; do
+    if test -z "$x_nlibs"; then
+      LIBS="$curl_cv_save_LIBS"
+    else
+      LIBS="$x_nlibs $curl_cv_save_LIBS"
+    fi
+    AC_LINK_IFELSE([
+      AC_LANG_PROGRAM([
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#else
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#endif
+#ifndef LDAP_DEPRECATED
+#define LDAP_DEPRECATED 1
+#endif
+#ifdef NEED_LBER_H
+#include <lber.h>
+#endif
+#ifdef HAVE_LDAP_H
+#include <ldap.h>
+#endif"
+      ],[
+        BerValue *bvp = NULL;
+        BerElement *bep = ber_init(bvp);
+        LDAP *ldp = ldap_init("dummy", LDAP_PORT);
+        int res = ldap_unbind(ldp);
+        ber_free(bep, 1);
+      ])
+    ],[
+       curl_cv_ldap_LIBS="$x_nlibs"
+       break
+    ])
+  done
+  #
+  LIBS=$curl_cv_save_LIBS
+  #
+  case X-"$curl_cv_ldap_LIBS" in
+    X-unknown)
+      AC_MSG_RESULT([cannot find libraries for LDAP support])
+      ;;
+    X-)
+      AC_MSG_RESULT([no additional lib required])
+      ;;
+    *)
+      if test -z "$curl_cv_save_LIBS"; then
+        LIBS="$curl_cv_ldap_LIBS"
+      else
+        LIBS="$curl_cv_ldap_LIBS $curl_cv_save_LIBS"
+      fi
+      AC_MSG_RESULT([$curl_cv_ldap_LIBS])
+      ;;
+  esac
+  #
+])
+
+
 dnl CURL_CHECK_HEADER_MALLOC
 dnl -------------------------------------------------
 dnl Check for compilable and valid malloc.h header,
