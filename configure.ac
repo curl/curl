@@ -546,24 +546,10 @@ AC_HELP_STRING([--with-lber-lib=libname],[Specify name of lber lib file]),
 
 if test x$CURL_DISABLE_LDAP != x1 ; then
 
-  AC_CHECK_HEADERS(lber.h)
-
-  AC_CHECK_HEADERS(ldap.h,
-    [],[],[
-#if HAVE_LBER_H
-#include <lber.h>
-#endif
-])
-
-  AC_CHECK_HEADERS(ldap_ssl.h,
-    [],[],[
-#if HAVE_LBER_H
-#include <lber.h>
-#endif
-#if HAVE_LDAP_H
-#include <ldap.h>
-#endif
-])
+  CURL_CHECK_HEADER_LBER
+  CURL_CHECK_HEADER_LDAP
+  CURL_CHECK_HEADER_LDAPSSL
+  CURL_CHECK_HEADER_LDAP_SSL
 
   if test -z "$LDAPLIBNAME" ; then
     case $host in

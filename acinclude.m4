@@ -249,6 +249,224 @@ AC_DEFUN([CURL_CHECK_HEADER_WINBER], [
 ])
 
 
+dnl CURL_CHECK_HEADER_LBER
+dnl -------------------------------------------------
+dnl Check for compilable and valid lber.h header,
+dnl and check if it is needed even with ldap.h
+
+AC_DEFUN([CURL_CHECK_HEADER_LBER], [
+  AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
+  AC_CACHE_CHECK([for lber.h], [ac_cv_header_lber_h], [
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#else
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#endif
+#include <lber.h>
+      ],[
+        BerValue *bvp = NULL;
+        BerElement *bep = ber_init(bvp);
+        ber_free(bep, 1);
+      ])
+    ],[
+      ac_cv_header_lber_h="yes"
+    ],[
+      ac_cv_header_lber_h="no"
+    ])
+  ])
+  if test "$ac_cv_header_lber_h" = "yes"; then
+    AC_DEFINE_UNQUOTED(HAVE_LBER_H, 1,
+      [Define to 1 if you have the lber.h header file.])
+    #
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#else
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#endif
+#ifndef LDAP_DEPRECATED
+#define LDAP_DEPRECATED 1
+#endif
+#include <ldap.h>
+      ],[
+        BerValue *bvp = NULL;
+        BerElement *bep = ber_init(bvp);
+        ber_free(bep, 1);
+      ])
+    ],[
+      curl_cv_need_header_lber_h="no"
+    ],[
+      curl_cv_need_header_lber_h="yes"
+    ])
+    #
+    case "$curl_cv_need_header_lber_h" in
+      yes)
+        AC_DEFINE_UNQUOTED(NEED_LBER_H, 1,
+          [Define to 1 if you need the lber.h header file even with ldap.h])
+        ;;
+    esac
+  fi
+])
+
+
+dnl CURL_CHECK_HEADER_LDAP
+dnl -------------------------------------------------
+dnl Check for compilable and valid ldap.h header
+
+AC_DEFUN([CURL_CHECK_HEADER_LDAP], [
+  AC_REQUIRE([CURL_CHECK_HEADER_LBER])dnl
+  AC_CACHE_CHECK([for ldap.h], [ac_cv_header_ldap_h], [
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#else
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#endif
+#ifndef LDAP_DEPRECATED
+#define LDAP_DEPRECATED 1
+#endif
+#ifdef NEED_LBER_H
+#include <lber.h>
+#endif
+#include <ldap.h>
+      ],[
+        LDAP *ldp = ldap_init("dummy", LDAP_PORT);
+        int res = ldap_unbind(ldp);
+      ])
+    ],[
+      ac_cv_header_ldap_h="yes"
+    ],[
+      ac_cv_header_ldap_h="no"
+    ])
+  ])
+  case "$ac_cv_header_ldap_h" in
+    yes)
+      AC_DEFINE_UNQUOTED(HAVE_LDAP_H, 1,
+        [Define to 1 if you have the ldap.h header file.])
+      ;;
+  esac
+])
+
+
+dnl CURL_CHECK_HEADER_LDAP_SSL
+dnl -------------------------------------------------
+dnl Check for compilable and valid ldap_ssl.h header
+
+AC_DEFUN([CURL_CHECK_HEADER_LDAP_SSL], [
+  AC_REQUIRE([CURL_CHECK_HEADER_LDAP])dnl
+  AC_CACHE_CHECK([for ldap_ssl.h], [ac_cv_header_ldap_ssl_h], [
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#else
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#endif
+#ifndef LDAP_DEPRECATED
+#define LDAP_DEPRECATED 1
+#endif
+#ifdef NEED_LBER_H
+#include <lber.h>
+#endif
+#ifdef HAVE_LDAP_H
+#include <ldap.h>
+#endif
+#include <ldap_ssl.h>
+      ],[
+        LDAP *ldp = ldapssl_init("dummy", LDAPS_PORT, 1);
+      ])
+    ],[
+      ac_cv_header_ldap_ssl_h="yes"
+    ],[
+      ac_cv_header_ldap_ssl_h="no"
+    ])
+  ])
+  case "$ac_cv_header_ldap_ssl_h" in
+    yes)
+      AC_DEFINE_UNQUOTED(HAVE_LDAP_SSL_H, 1,
+        [Define to 1 if you have the ldap_ssl.h header file.])
+      ;;
+  esac
+])
+
+
+dnl CURL_CHECK_HEADER_LDAPSSL
+dnl -------------------------------------------------
+dnl Check for compilable and valid ldapssl.h header
+
+AC_DEFUN([CURL_CHECK_HEADER_LDAPSSL], [
+  AC_REQUIRE([CURL_CHECK_HEADER_LDAP])dnl
+  AC_CACHE_CHECK([for ldapssl.h], [ac_cv_header_ldapssl_h], [
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#else
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#endif
+#ifndef LDAP_DEPRECATED
+#define LDAP_DEPRECATED 1
+#endif
+#ifdef NEED_LBER_H
+#include <lber.h>
+#endif
+#ifdef HAVE_LDAP_H
+#include <ldap.h>
+#endif
+#include <ldapssl.h>
+      ],[
+        char *cert_label = NULL;
+        LDAP *ldp = ldap_ssl_init("dummy", LDAPS_PORT, cert_label);
+      ])
+    ],[
+      ac_cv_header_ldapssl_h="yes"
+    ],[
+      ac_cv_header_ldapssl_h="no"
+    ])
+  ])
+  case "$ac_cv_header_ldapssl_h" in
+    yes)
+      AC_DEFINE_UNQUOTED(HAVE_LDAPSSL_H, 1,
+        [Define to 1 if you have the ldapssl.h header file.])
+      ;;
+  esac
+])
+
+
 dnl CURL_CHECK_HEADER_MALLOC
 dnl -------------------------------------------------
 dnl Check for compilable and valid malloc.h header,
