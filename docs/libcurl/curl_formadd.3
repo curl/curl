@@ -44,7 +44,7 @@ parts.
 .IP CURLFORM_COPYNAME
 followed by a string which provides the \fIname\fP of this part. libcurl
 copies the string so your application doesn't need to keep it around after
-this function call. If the name isn't null terminated, or if you'd
+this function call. If the name isn't NUL-terminated, or if you'd
 like it to contain zero bytes, you must set its length with
 \fBCURLFORM_NAMELENGTH\fP. The copied data will be freed by
 \fIcurl_formfree(3)\fP.
@@ -53,7 +53,7 @@ like it to contain zero bytes, you must set its length with
 followed by a string which provides the \fIname\fP of this part. libcurl
 will use the pointer and refer to the data in your application, so you
 must make sure it remains until curl no longer needs it. If the name
-isn't null terminated, or if you'd like it to contain zero
+isn't NUL-terminated, or if you'd like it to contain zero
 bytes, you must set its length with \fBCURLFORM_NAMELENGTH\fP.
 
 .IP CURLFORM_COPYCONTENTS
@@ -68,7 +68,7 @@ data will be freed by \fIcurl_formfree(3)\fP.
 followed by a pointer to the contents of this part, the actual data
 to send away. libcurl will use the pointer and refer to the data in your
 application, so you must make sure it remains until curl no longer needs it.
-If the data isn't null terminated, or if you'd like it to contain zero bytes,
+If the data isn't NUL-terminated, or if you'd like it to contain zero bytes,
 you must set its length  with \fBCURLFORM_CONTENTSLENGTH\fP.
 
 .IP CURLFORM_CONTENTSLENGTH
