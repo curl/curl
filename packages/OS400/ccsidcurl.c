@@ -40,8 +40,13 @@
 
 #include "os400sys.h"
 
+#ifndef SIZE_MAX
+#define SIZE_MAX        ((size_t) ~0)   /* Is unsigned on OS/400. */
+#endif
+
 
 #define ASCII_CCSID     819     /* Use ISO-8859-1 as ASCII. */
+#define NOCONV_CCSID    65535   /* No conversion. */
 #define ICONV_ID_SIZE   32      /* Size of iconv_open() code identifier. */
 #define ICONV_OPEN_ERROR(t)     ((t).return_value == -1)
 
@@ -62,7 +67,7 @@ makeOS400IconvCode(char buf[ICONV_ID_SIZE], unsigned int ccsid)
 
   ccsid &= 0xFFFF;
 
-  if (ccsid == 65535)
+  if (ccsid == NOCONV_CCSID)
     ccsid = ASCII_CCSID;
 
   memset(buf, 0, ICONV_ID_SIZE);
@@ -1004,7 +1009,10 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   va_list arg;
   struct SessionHandle * data;
   char * s;
+  char * cp;
   unsigned int ccsid;
+  size_t len;
+  curl_off_t pfsize;
   static char testwarn = 1;
 
   /* Warns if this procedure has not been updated when the dupstring enum
@@ -1042,7 +1050,6 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   case CURLOPT_KEYPASSWD:
   case CURLOPT_KRBLEVEL:
   case CURLOPT_NETRC_FILE:
-  case CURLOPT_POSTFIELDS:
   case CURLOPT_PROXY:
   case CURLOPT_PROXYUSERPWD:
   case CURLOPT_RANDOM_FILE:
@@ -1077,6 +1084,66 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
     if (s)
       free(s);
 
+    break;
+
+  case CURLOPT_COPYPOSTFIELDS:
+    /* Special case: byte count may have been given by CURLOPT_POSTFIELDSIZE
+       prior to this call. In this case, convert the given byte count and
+       replace the length according to the conversion result. */
+    s = va_arg(arg, char *);
+    ccsid = va_arg(arg, unsigned int);
+
+    pfsize = data->set.postfieldsize;
+
+    if (!s || !pfsize || ccsid == NOCONV_CCSID || ccsid == ASCII_CCSID) {
+      result = curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, s);
+      break;
+      }
+
+    if (pfsize == -1) {
+      /* Data is null-terminated. */
+      s = dynconvert(ASCII_CCSID, s, -1, ccsid);
+
+      if (!s) {
+        result = CURLE_OUT_OF_MEMORY;
+        break;
+        }
+      }
+    else {
+      /* Data length specified. */
+
+      if (pfsize < 0 || pfsize > SIZE_MAX) {
+        result = CURLE_OUT_OF_MEMORY;
+        break;
+        }
+
+      len = pfsize;
+      pfsize = len * MAX_CONV_EXPANSION;
+
+      if (pfsize > SIZE_MAX)
+        pfsize = SIZE_MAX;
+
+      cp = malloc(pfsize);
+
+      if (!cp) {
+        result = CURLE_OUT_OF_MEMORY;
+        break;
+        }
+
+      pfsize = convert(cp, pfsize, ASCII_CCSID, s, len, ccsid);
+
+      if (pfsize < 0) {
+        free(cp);
+        result = CURLE_OUT_OF_MEMORY;
+        break;
+        }
+
+      data->set.postfieldsize = pfsize;         /* Replace data size. */
+      s = cp;
+      }
+
+    result = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, s);
+    data->set.str[STRING_COPYPOSTFIELDS] = s;   /* Give to library. */
     break;
 
   case CURLOPT_ERRORBUFFER:                     /* This is an output buffer. */

@@ -386,8 +386,7 @@ POST/PUT and a 401 or 407 is received immediately afterwards.
 .SH NETWORK OPTIONS
 .IP CURLOPT_URL
 The actual URL to deal with. The parameter should be a char * to a zero
-terminated string. The string must remain present until curl no longer needs
-it, as it doesn't copy the string.
+terminated string.
 
 If the given URL lacks the protocol part ("http://" or "ftp://" etc), it will
 attempt to guess which protocol to use based on the given host name. If the
@@ -662,14 +661,16 @@ also make the library use the a "Content-Type:
 application/x-www-form-urlencoded" header. (This is by far the most commonly
 used POST method).
 
-Use the \fICURLOPT_POSTFIELDS\fP option to specify what data to post and
-\fICURLOPT_POSTFIELDSIZE\fP to set the data size.
+Use one of \fICURLOPT_POSTFIELDS\fP or \fICURLOPT_COPYPOSTFIELDS\fP options to
+specify what data to post and \fICURLOPT_POSTFIELDSIZE\fP or
+\fICURLOPT_POSTFIELDSIZE_LARGE\fP to set the data size.
 
 Optionally, you can provide data to POST using the \fICURLOPT_READFUNCTION\fP
 and \fICURLOPT_READDATA\fP options but then you must make sure to not set
 \fICURLOPT_POSTFIELDS\fP to anything but NULL. When providing data with a
 callback, you must transmit it using chunked transfer-encoding or you must set
-the size of the data with the \fICURLOPT_POSTFIELDSIZE\fP option.
+the size of the data with the \fICURLOPT_POSTFIELDSIZE\fP or
+\fICURLOPT_POSTFIELDSIZE_LARGE\fP option.
 
 You can override the default POST Content-Type: header by setting your own
 with \fICURLOPT_HTTPHEADER\fP.
@@ -690,10 +691,13 @@ If you issue a POST request and then want to make a HEAD or GET using the same
 re-used handle, you must explicitly set the new request type using
 \fICURLOPT_NOBODY\fP or \fICURLOPT_HTTPGET\fP or similar.
 .IP CURLOPT_POSTFIELDS
-Pass a char * as parameter, which should be the full data to post in an HTTP
+Pass a void * as parameter, which should be the full data to post in an HTTP
 POST operation. You must make sure that the data is formatted the way you want
 the server to receive it. libcurl will not convert or encode it for you. Most
 web servers will assume this data to be url-encoded. Take note.
+
+The pointed data are NOT copied by the library: as a consequence, they must
+be preserved by the calling application until the transfer finishes.
 
 This POST is a normal application/x-www-form-urlencoded kind (and libcurl will
 set that Content-Type by default when this option is used), which is the most
@@ -721,6 +725,21 @@ Pass a curl_off_t as parameter. Use this to set the size of the
 \fICURLOPT_POSTFIELDS\fP data to prevent libcurl from doing strlen() on the
 data to figure out the size. This is the large file version of the
 \fICURLOPT_POSTFIELDSIZE\fP option. (Added in 7.11.1)
+.IP CURLOPT_COPYPOSTFIELDS
+Pass a char * as parameter, which should be the full data to post in an HTTP
+POST operation. It behaves has the \fICURLOPT_POSTFIELDS\fP option, but the
+original data are copied by the library, allowing the application to overwrite
+the original data after setting this option.
+
+Because data are copied, care must be taken when using this option in
+conjunction with \fICURLOPT_POSTFIELDSIZE\fP or
+\fICURLOPT_POSTFIELDSIZE_LARGE\fP: If the size has not been set prior to
+\fICURLOPT_COPYPOSTFIELDS\fP, the data are assumed to be a null-terminated
+string; else the stored size informs the library about the data byte count to
+copy. In any case, the size must not be changed after
+\fICURLOPT_COPYPOSTFIELDS\fP, unless another \fICURLOPT_POSTFIELDS\fP or
+\fICURLOPT_COPYPOSTFIELDS\fP option is issued.
+
 .IP CURLOPT_HTTPPOST
 Tells libcurl you want a multipart/formdata HTTP POST to be made and you
 instruct what data to pass on to the server.  Pass a pointer to a linked list

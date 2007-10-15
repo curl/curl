@@ -771,6 +771,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
                      va_list param)
 {
   char *argptr;
+  curl_off_t bigsize;
   CURLcode result = CURLE_OK;
 
   switch(option) {
@@ -1029,12 +1030,52 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       data->set.httpreq = HTTPREQ_GET;
     break;
 
-  case CURLOPT_POSTFIELDS:
+  case CURLOPT_COPYPOSTFIELDS:
     /*
      * A string with POST data. Makes curl HTTP POST. Even if it is NULL.
+     * If needed, CURLOPT_POSTFIELDSIZE must have been set prior to
+     *  CURLOPT_COPYPOSTFIELDS and not altered later.
      */
-    result = Curl_setstropt(&data->set.str[STRING_POSTFIELDS],
-                            va_arg(param, char *));
+    argptr = va_arg(param, char *);
+
+    if (!argptr || data->set.postfieldsize == -1)
+      result = Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], argptr);
+    else {
+      /*
+       *  Check that request length does not overflow the size_t type.
+       */
+
+      if ((curl_off_t) ((size_t) data->set.postfieldsize) !=
+          data->set.postfieldsize ||
+          data->set.postfieldsize < (curl_off_t) 0 ||
+          (size_t) data->set.postfieldsize < (size_t) 0)
+        result = CURLE_OUT_OF_MEMORY;
+      else {
+        char * p;
+
+        (void) Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
+        p = malloc(data->set.postfieldsize);
+
+        if (!p)
+          result = CURLE_OUT_OF_MEMORY;
+        else {
+          memcpy(p, argptr, data->set.postfieldsize);
+          data->set.str[STRING_COPYPOSTFIELDS] = p;
+	}
+      }
+    }
+
+    data->set.postfields = data->set.str[STRING_COPYPOSTFIELDS];
+    data->set.httpreq = HTTPREQ_POST;
+    break;
+
+  case CURLOPT_POSTFIELDS:
+    /*
+     * Like above, but use static data instead of copying it.
+     */
+    data->set.postfields = va_arg(param, void *);
+    /* Release old copied data. */
+    (void) Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
     data->set.httpreq = HTTPREQ_POST;
     break;
 
@@ -1043,7 +1084,16 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * The size of the POSTFIELD data to prevent libcurl to do strlen() to
      * figure it out. Enables binary posts.
      */
-    data->set.postfieldsize = va_arg(param, long);
+    bigsize = va_arg(param, long);
+
+    if (data->set.postfieldsize < bigsize &&
+        data->set.postfields == data->set.str[STRING_COPYPOSTFIELDS]) {
+      /* Previous CURLOPT_COPYPOSTFIELDS is no longer valid. */
+      (void) Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
+      data->set.postfields = NULL;
+      }
+
+    data->set.postfieldsize = bigsize;
     break;
 
   case CURLOPT_POSTFIELDSIZE_LARGE:
@@ -1051,7 +1101,16 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * The size of the POSTFIELD data to prevent libcurl to do strlen() to
      * figure it out. Enables binary posts.
      */
-    data->set.postfieldsize = va_arg(param, curl_off_t);
+    bigsize = va_arg(param, curl_off_t);
+
+    if (data->set.postfieldsize < bigsize &&
+        data->set.postfields == data->set.str[STRING_COPYPOSTFIELDS]) {
+      /* Previous CURLOPT_COPYPOSTFIELDS is no longer valid. */
+      (void) Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
+      data->set.postfields = NULL;
+      }
+
+    data->set.postfieldsize = bigsize;
     break;
 
   case CURLOPT_HTTPPOST:

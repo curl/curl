@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Patrick M (15 October 2007)
+- Fixed the dynamic CURLOPT_POSTFIELDS problem: this option is now static again
+  and option CURLOPT_COPYPOSTFIELDS has been added to support dynamic mode.
+
 Patrick M (12 October 2007)
 - Added per-protocol callback static tables, replacing callback ptr storage
   in the connectdata structure by a single handler table ptr.

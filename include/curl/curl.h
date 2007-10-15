@@ -659,7 +659,7 @@ typedef enum {
    */
   CINIT(INFILESIZE, LONG, 14),
 
-  /* POST input fields. */
+  /* POST static input fields. */
   CINIT(POSTFIELDS, OBJECTPOINT, 15),
 
   /* Set the referer page (needed by some CGIs) */
@@ -1155,6 +1155,9 @@ typedef enum {
      curl_opensocket_callback */
   CINIT(OPENSOCKETFUNCTION, FUNCTIONPOINT, 163),
   CINIT(OPENSOCKETDATA, OBJECTPOINT, 164),
+
+  /* POST volatile input fields. */
+  CINIT(COPYPOSTFIELDS, OBJECTPOINT, 165),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

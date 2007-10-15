@@ -2554,8 +2554,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         /* figure out the size of the postfields */
         postsize = (data->set.postfieldsize != -1)?
           data->set.postfieldsize:
-          (data->set.str[STRING_POSTFIELDS]?
-           (curl_off_t)strlen(data->set.str[STRING_POSTFIELDS]):0);
+          (data->set.postfields? (curl_off_t)strlen(data->set.postfields):0);
 
       if(!conn->bits.upload_chunky) {
         /* We only set Content-Length and allow a custom Content-Length if
@@ -2580,7 +2579,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           return result;
       }
 
-      if(data->set.str[STRING_POSTFIELDS]) {
+      if(data->set.postfields) {
 
         /* for really small posts we don't use Expect: headers at all, and for
            the somewhat bigger ones we allow the app to disable it */
@@ -2608,7 +2607,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           if(!conn->bits.upload_chunky) {
             /* We're not sending it 'chunked', append it to the request
                already now to reduce the number if send() calls */
-            result = add_buffer(req_buffer, data->set.str[STRING_POSTFIELDS],
+            result = add_buffer(req_buffer, data->set.postfields,
                                 (size_t)postsize);
             included_body = postsize;
           }
@@ -2616,7 +2615,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
             /* Append the POST data chunky-style */
             result = add_bufferf(req_buffer, "%x\r\n", (int)postsize);
             if(CURLE_OK == result)
-              result = add_buffer(req_buffer, data->set.str[STRING_POSTFIELDS],
+              result = add_buffer(req_buffer, data->set.postfields,
                                   (size_t)postsize);
             if(CURLE_OK == result)
               result = add_buffer(req_buffer,
@@ -2630,7 +2629,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         else {
           /* A huge POST coming up, do data separate from the request */
           http->postsize = postsize;
-          http->postdata = data->set.str[STRING_POSTFIELDS];
+          http->postdata = data->set.postfields;
 
           http->sending = HTTPSEND_BODY;
 

@@ -1286,7 +1286,7 @@ enum dupstring {
   STRING_KRB_LEVEL,       /* krb security level */
   STRING_NETRC_FILE,      /* if not NULL, use this instead of trying to find
                              $HOME/.netrc */
-  STRING_POSTFIELDS,      /* if POST, set the fields' values here */
+  STRING_COPYPOSTFIELDS,  /* if POST, set the fields' values here */
   STRING_PROXY,           /* proxy to use */
   STRING_PROXYUSERPWD,    /* Proxy <user:password>, if used */
   STRING_SET_RANGE,       /* range, if used */
@@ -1326,6 +1326,7 @@ struct UserDefined {
   bool post301;      /* Obey RFC 2616/10.3.2 and keep POSTs as POSTs after a 301 */
   bool free_referer; /* set TRUE if 'referer' points to a string we
                         allocated */
+  void *postfields;  /* if POST, set the fields' values here */
   curl_off_t postfieldsize; /* if POST, this might have a size to use instead
                                of strlen(), and then the data *may* be binary
                                (contain zero bytes) */

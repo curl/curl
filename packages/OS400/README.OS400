@@ -81,7 +81,7 @@ options:
         CURLOPT_KEYPASSWD
         CURLOPT_KRBLEVEL
         CURLOPT_NETRC_FILE
-        CURLOPT_POSTFIELDS
+        CURLOPT_COPYPOSTFIELDS
         CURLOPT_PROXY
         CURLOPT_PROXYUSERPWD
         CURLOPT_RANDOM_FILE
@@ -102,6 +102,10 @@ options:
   Else it is the same as for curl_easy_setopt().
   Note that CURLOPT_ERRORBUFFER is not in the list above, since it gives the
 address of an (empty) character buffer, not the address of a string.
+CURLOPT_POSTFIELDS stores the address of static binary data (of type void *) and
+thus is not converted. If CURLOPT_COPYPOSTFIELDS is issued after
+CURLOPT_POSTFIELDSIZE != -1, the data size is adjusted according to the
+CCSID conversion result length.
 
 _ curl_formadd_ccsid()
   In the variable argument list, string pointers should be followed by a (long)

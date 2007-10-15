@@ -233,7 +233,7 @@ CURLcode Curl_readrewind(struct connectdata *conn)
   /* We have sent away data. If not using CURLOPT_POSTFIELDS or
      CURLOPT_HTTPPOST, call app to rewind
   */
-  if(data->set.str[STRING_POSTFIELDS] ||
+  if(data->set.postfields ||
      (data->set.httpreq == HTTPREQ_POST_FORM))
     ; /* do nothing */
   else {
