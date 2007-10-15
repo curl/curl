@@ -181,10 +181,12 @@ AC_DEFUN([CURL_CHECK_HEADER_WINLDAP], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([
 #undef inline
+#ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
+#endif
 #include <winldap.h>
       ],[
 #ifdef __CYGWIN__
@@ -219,10 +221,12 @@ AC_DEFUN([CURL_CHECK_HEADER_WINBER], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([
 #undef inline
+#ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
+#endif
 #include <winldap.h>
 #include <winber.h>
       ],[
@@ -266,10 +270,12 @@ AC_DEFUN([CURL_CHECK_HEADER_LBER], [
 #endif
 #include <windows.h>
 #else
-#include <stddef.h>
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
+#endif
+#ifndef NULL
+#define NULL (void *)0
 #endif
 #include <lber.h>
       ],[
@@ -296,10 +302,12 @@ AC_DEFUN([CURL_CHECK_HEADER_LBER], [
 #endif
 #include <windows.h>
 #else
-#include <stddef.h>
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
+#endif
+#ifndef NULL
+#define NULL (void *)0
 #endif
 #ifndef LDAP_DEPRECATED
 #define LDAP_DEPRECATED 1
@@ -436,10 +444,12 @@ AC_DEFUN([CURL_CHECK_HEADER_LDAPSSL], [
 #endif
 #include <windows.h>
 #else
-#include <stddef.h>
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
+#endif
+#ifndef NULL
+#define NULL (void *)0
 #endif
 #ifndef LDAP_DEPRECATED
 #define LDAP_DEPRECATED 1
@@ -498,10 +508,12 @@ AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
 #endif
 #include <windows.h>
 #else
-#include <stddef.h>
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
+#endif
+#ifndef NULL
+#define NULL (void *)0
 #endif
 #ifndef LDAP_DEPRECATED
 #define LDAP_DEPRECATED 1
@@ -1689,10 +1701,12 @@ dnl
 AC_DEFUN([CURL_CHECK_WORKING_RESOLVER],[
 AC_MSG_CHECKING([if "localhost" resolves])
 AC_TRY_RUN([
-#include <stddef.h>
 #include <string.h>
 #include <sys/types.h>
 #include <netdb.h>
+#ifndef NULL
+#define NULL (void *)0
+#endif
 
 int
 main () {
