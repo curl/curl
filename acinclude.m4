@@ -266,6 +266,7 @@ AC_DEFUN([CURL_CHECK_HEADER_LBER], [
 #endif
 #include <windows.h>
 #else
+#include <stddef.h>
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -295,6 +296,7 @@ AC_DEFUN([CURL_CHECK_HEADER_LBER], [
 #endif
 #include <windows.h>
 #else
+#include <stddef.h>
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -434,6 +436,7 @@ AC_DEFUN([CURL_CHECK_HEADER_LDAPSSL], [
 #endif
 #include <windows.h>
 #else
+#include <stddef.h>
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -495,6 +498,7 @@ AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
 #endif
 #include <windows.h>
 #else
+#include <stddef.h>
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -507,7 +511,7 @@ AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
 #endif
 #ifdef HAVE_LDAP_H
 #include <ldap.h>
-#endif"
+#endif
       ],[
         BerValue *bvp = NULL;
         BerElement *bep = ber_init(bvp);
@@ -1685,6 +1689,7 @@ dnl
 AC_DEFUN([CURL_CHECK_WORKING_RESOLVER],[
 AC_MSG_CHECKING([if "localhost" resolves])
 AC_TRY_RUN([
+#include <stddef.h>
 #include <string.h>
 #include <sys/types.h>
 #include <netdb.h>

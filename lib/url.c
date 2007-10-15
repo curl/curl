@@ -242,7 +242,7 @@ static const struct Curl_handler * const protocols[] = {
   &Curl_handler_ldap,
 #endif
 
-#if defined(HAVE_LDAP_SSL) && !defined(CURL_DISABLE_SSL)
+#if !defined(CURL_DISABLE_LDAP) && defined(HAVE_LDAP_SSL)
   &Curl_handler_ldaps,
 #endif
 
