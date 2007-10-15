@@ -714,6 +714,9 @@ REDUCING SIZE
 
       ./configure CFLAGS='-Os' ...
 
+   Note that newer compilers often produce smaller code than older versions
+   due to better optimization.
+
    Be sure to specify as many --disable- and --without- flags on the configure
    command-line as you can to disable all the libcurl features that you
    know your application is not going to need.  Besides specifying the
@@ -740,9 +743,9 @@ REDUCING SIZE
    sections of the shared library using the -R option to objcopy (e.g. the
    .comment section).
 
-   Using these techniques it is possible to create an HTTP-only shared
-   libcurl library for i386 Linux platforms that is less than 90 KB in
-   size (as of version 7.15.4).
+   Using these techniques it is possible to create an HTTP-only shared libcurl
+   library for i386 Linux platforms that is only 96 KiB in size (as of libcurl
+   version 7.17.1, using gcc 4.2.2).
 
    You may find that statically linking libcurl to your application will
    result in a lower total size.
