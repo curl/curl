@@ -1047,10 +1047,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
        *  Check that request length does not overflow the size_t type.
        */
 
-      if ((curl_off_t) ((size_t) data->set.postfieldsize) !=
-          data->set.postfieldsize ||
-          data->set.postfieldsize < (curl_off_t) 0 ||
-          (size_t) data->set.postfieldsize < (size_t) 0)
+      if ((data->set.postfieldsize < 0) ||
+          (data->set.postfieldsize > (curl_off_t)((size_t)-1)))
         result = CURLE_OUT_OF_MEMORY;
       else {
         char * p;
