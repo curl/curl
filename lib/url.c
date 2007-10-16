@@ -771,8 +771,10 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
                      va_list param)
 {
   char *argptr;
-  curl_off_t bigsize;
   CURLcode result = CURLE_OK;
+#ifndef CURL_DISABLE_HTTP
+  curl_off_t bigsize;
+#endif
 
   switch(option) {
   case CURLOPT_DNS_CACHE_TIMEOUT:
