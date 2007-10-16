@@ -42,6 +42,7 @@ struct search_query {
   int next_domain;              /* next search domain to try */
   int trying_as_is;             /* current query is for name as-is */
   int timeouts;                 /* number of timeouts we saw for this request */
+  int ever_got_nodata;          /* did we ever get ARES_ENODATA along the way? */
 };
 
 static void search_callback(void *arg, int status, int timeouts,
@@ -58,7 +59,7 @@ void ares_search(ares_channel channel, const char *name, int dnsclass,
   char *s;
   const char *p;
   int status, ndots;
-
+            
   /* If name only yields one domain to search, then we don't have
    * to keep extra state, so just do an ares_query().
    */
@@ -98,6 +99,7 @@ void ares_search(ares_channel channel, const char *name, int dnsclass,
   squery->callback = callback;
   squery->arg = arg;
   squery->timeouts = 0;
+  squery->ever_got_nodata = 0;
 
   /* Count the number of dots in name. */
   ndots = 0;
@@ -145,7 +147,7 @@ static void search_callback(void *arg, int status, int timeouts,
   struct search_query *squery = (struct search_query *) arg;
   ares_channel channel = squery->channel;
   char *s;
-
+                
   squery->timeouts += timeouts;
 
   /* Stop searching unless we got a non-fatal error. */
@@ -157,6 +159,17 @@ static void search_callback(void *arg, int status, int timeouts,
       /* Save the status if we were trying as-is. */
       if (squery->trying_as_is)
         squery->status_as_is = status;
+
+      /* 
+       * If we ever get ARES_ENODATA along the way, record that; if the search
+       * should run to the very end and we got at least one ARES_ENODATA,
+       * then callers like ares_gethostbyname() may want to try a T_A search
+       * even if the last domain we queried for T_AAAA resource records
+       * returned ARES_ENOTFOUND.
+       */
+      if (status == ARES_ENODATA)
+        squery->ever_got_nodata = 1;
+
       if (squery->next_domain < channel->ndomains)
         {
           /* Try the next domain. */
@@ -180,8 +193,13 @@ static void search_callback(void *arg, int status, int timeouts,
           ares_query(channel, squery->name, squery->dnsclass, squery->type,
                      search_callback, squery);
         }
-      else
-        end_squery(squery, squery->status_as_is, NULL, 0);
+      else {
+        if (squery->status_as_is == ARES_ENOTFOUND && squery->ever_got_nodata) {
+          end_squery(squery, ARES_ENODATA, NULL, 0);
+        }
+        else
+          end_squery(squery, squery->status_as_is, NULL, 0);
+      }
     }
 }
 
