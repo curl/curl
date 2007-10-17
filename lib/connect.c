@@ -697,11 +697,12 @@ singleipconnect(struct connectdata *conn,
      ai->ai_addrlen : (socklen_t)sizeof(struct Curl_sockaddr_storage);
   memcpy(&addr->addr, ai->ai_addr, addr->addrlen);
 
-  /* optionally use callback to get the socket */
-  sockfd = (data->set.fopensocket)?
-    data->set.fopensocket(data->set.opensocket_client, CURLSOCKTYPE_IPCXN,
-                          addr):
-    socket(addr->family, addr->socktype, addr->protocol);
+  /* If set, use opensocket callback to get the socket */
+  if(data->set.fopensocket)
+    sockfd = data->set.fopensocket(data->set.opensocket_client,
+                                   CURLSOCKTYPE_IPCXN, addr);
+  else
+    sockfd = socket(addr->family, addr->socktype, addr->protocol);
   if (sockfd == CURL_SOCKET_BAD)
     return CURL_SOCKET_BAD;
 
