@@ -692,8 +692,9 @@ singleipconnect(struct connectdata *conn,
   addr->family=ai->ai_family;
   addr->socktype=conn->socktype;
   addr->protocol=ai->ai_protocol;
-  addr->addrlen=(ai->ai_addrlen<=sizeof(struct Curl_sockaddr_storage))?
-    ai->ai_addrlen:sizeof(struct Curl_sockaddr_storage);
+  addr->addrlen =
+    (ai->ai_addrlen < (socklen_t)sizeof(struct Curl_sockaddr_storage)) ?
+     ai->ai_addrlen : (socklen_t)sizeof(struct Curl_sockaddr_storage);
   memcpy(&addr->addr, ai->ai_addr, addr->addrlen);
 
   /* optionally use callback to get the socket */
