@@ -484,16 +484,42 @@ dnl CURL_CHECK_LIBS_LDAP
 dnl -------------------------------------------------
 dnl Check for libraries needed for LDAP support,
 dnl and prepended to LIBS any needed libraries.
+dnl This macro can take an optional parameter with a
+dnl white space separated list of libraries to check
+dnl before the default ones.
 
 AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
   AC_REQUIRE([CURL_CHECK_HEADER_LDAP])dnl
+  #
+  u_libs=""
+  for x_lib in $1; do
+    case "$x_lib" in
+      -l*)
+        l_lib="$x_lib"
+        ;;
+      *)
+        l_lib="-l$x_lib"
+        ;;
+    esac
+    if test -z "$u_libs"; then
+      u_libs="$l_lib"
+    else
+      u_libs="$u_libs $l_lib"
+    fi
+  done
   #
   AC_MSG_CHECKING([for LDAP libraries])
   #
   curl_cv_save_LIBS=$LIBS
   curl_cv_ldap_LIBS="unknown"
   #
-  for x_nlibs in '' '-lldap' '-llber -lldap' '-lldap -llber'; do
+  for x_nlibs in "$u_libs" \
+    '' \
+    '-lldap' \
+    '-llber -lldap' \
+    '-lldap -llber' \
+    '-lldapssl -lldapx -lldapsdk' \
+    '-lldapsdk -lldapx -lldapssl' ; do
     if test -z "$x_nlibs"; then
       LIBS="$curl_cv_save_LIBS"
     else
