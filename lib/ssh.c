@@ -155,16 +155,16 @@ static CURLcode Curl_sftp_doing(struct connectdata *conn,
 
 const struct Curl_handler Curl_handler_scp = {
   "SCP",                                /* scheme */
-  NULL,                                 /* setup_connection */
+  ZERO_NULL,                            /* setup_connection */
   Curl_scp_do,                          /* do_it */
   Curl_scp_done,                        /* done */
-  NULL,                                 /* do_more */
+  ZERO_NULL,                            /* do_more */
   Curl_ssh_connect,                     /* connect_it */
   Curl_ssh_multi_statemach,             /* connecting */
   Curl_scp_doing,                       /* doing */
-  NULL,                                 /* proto_getsock */
-  NULL,                                 /* doing_getsock */
-  NULL,                                 /* disconnect */
+  ZERO_NULL,                            /* proto_getsock */
+  ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* disconnect */
   PORT_SSH,                             /* defport */
   PROT_SCP                              /* protocol */
 };
@@ -176,16 +176,16 @@ const struct Curl_handler Curl_handler_scp = {
 
 const struct Curl_handler Curl_handler_sftp = {
   "SFTP",                               /* scheme */
-  NULL,                                 /* setup_connection */
+  ZERO_NULL,                            /* setup_connection */
   Curl_sftp_do,                         /* do_it */
   Curl_sftp_done,                       /* done */
-  NULL,                                 /* do_more */
+  ZERO_NULL,                            /* do_more */
   Curl_ssh_connect,                     /* connect_it */
   Curl_ssh_multi_statemach,             /* connecting */
   Curl_sftp_doing,                      /* doing */
-  NULL,                                 /* proto_getsock */
-  NULL,                                 /* doing_getsock */
-  NULL,                                 /* disconnect */
+  ZERO_NULL,                            /* proto_getsock */
+  ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* disconnect */
   PORT_SSH,                             /* defport */
   PROT_SFTP                             /* protocol */
 };

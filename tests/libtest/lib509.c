@@ -35,13 +35,6 @@
 #define MAIN_LOOP_HANG_TIMEOUT     90 * 1000
 #define MULTI_PERFORM_HANG_TIMEOUT 60 * 1000
 
-/*
- * We use this ZERO_NULL to avoid picky compiler warnings,
- * when assigning a NULL pointer to a function pointer var.
- */
-
-#define ZERO_NULL 0
-
 int portnum; /* the HTTPS port number we use */
 
 typedef struct sslctxparm_st {

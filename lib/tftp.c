@@ -167,13 +167,13 @@ const struct Curl_handler Curl_handler_tftp = {
   Curl_tftp_setup_connection,           /* setup_connection */
   Curl_tftp,                            /* do_it */
   Curl_tftp_done,                       /* done */
-  NULL,                                 /* do_more */
+  ZERO_NULL,                            /* do_more */
   Curl_tftp_connect,                    /* connect_it */
-  NULL,                                 /* connecting */
-  NULL,                                 /* doing */
-  NULL,                                 /* proto_getsock */
-  NULL,                                 /* doing_getsock */
-  NULL,                                 /* disconnect */
+  ZERO_NULL,                            /* connecting */
+  ZERO_NULL,                            /* doing */
+  ZERO_NULL,                            /* proto_getsock */
+  ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* disconnect */
   PORT_TFTP,                            /* defport */
   PROT_TFTP                             /* protocol */
 };

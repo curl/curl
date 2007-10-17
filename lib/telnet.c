@@ -181,16 +181,16 @@ struct TELNET {
 
 const struct Curl_handler Curl_handler_telnet = {
   "TELNET",                             /* scheme */
-  NULL,                                 /* setup_connection */
+  ZERO_NULL,                            /* setup_connection */
   Curl_telnet,                          /* do_it */
   Curl_telnet_done,                     /* done */
-  NULL,                                 /* do_more */
-  NULL,                                 /* connect_it */
-  NULL,                                 /* connecting */
-  NULL,                                 /* doing */
-  NULL,                                 /* proto_getsock */
-  NULL,                                 /* doing_getsock */
-  NULL,                                 /* disconnect */
+  ZERO_NULL,                            /* do_more */
+  ZERO_NULL,                            /* connect_it */
+  ZERO_NULL,                            /* connecting */
+  ZERO_NULL,                            /* doing */
+  ZERO_NULL,                            /* proto_getsock */
+  ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* disconnect */
   PORT_TELNET,                          /* defport */
   PROT_TELNET                           /* protocol */
 };
