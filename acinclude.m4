@@ -492,21 +492,24 @@ AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
   AC_REQUIRE([CURL_CHECK_HEADER_LDAP])dnl
   #
   u_libs=""
-  for x_lib in $1; do
-    case "$x_lib" in
-      -l*)
-        l_lib="$x_lib"
-        ;;
-      *)
-        l_lib="-l$x_lib"
-        ;;
-    esac
-    if test -z "$u_libs"; then
-      u_libs="$l_lib"
-    else
-      u_libs="$u_libs $l_lib"
-    fi
-  done
+  #
+  ifelse($1,,,[
+    for x_lib in $1; do
+      case "$x_lib" in
+        -l*)
+          l_lib="$x_lib"
+          ;;
+        *)
+          l_lib="-l$x_lib"
+          ;;
+      esac
+      if test -z "$u_libs"; then
+        u_libs="$l_lib"
+      else
+        u_libs="$u_libs $l_lib"
+      fi
+    done
+  ])
   #
   AC_MSG_CHECKING([for LDAP libraries])
   #
