@@ -1349,7 +1349,7 @@ static void randomize_key(unsigned char* key,int key_data_len)
 
   if ( !randomized ) {
     for (;counter<key_data_len;counter++)
-      key[counter]=rand() % 256;
+      key[counter]=(unsigned char)(rand() % 256);
   }
 }
 
@@ -1369,18 +1369,18 @@ static int init_id_key(rc4_key* key,int key_data_len)
   state = &key->state[0];
   for(counter = 0; counter < 256; counter++)
     /* unnecessary AND but it keeps some compilers happier */
-    state[counter] = counter & 0xff;
+    state[counter] = (unsigned char)(counter & 0xff);
   key->x = 0;
   key->y = 0;
   index1 = 0;
   index2 = 0;
   for(counter = 0; counter < 256; counter++)
   {
-    index2 = (key_data_ptr[index1] + state[counter] +
-              index2) % 256;
+    index2 = (unsigned char)((key_data_ptr[index1] + state[counter] +
+                              index2) % 256);
     ARES_SWAP_BYTE(&state[counter], &state[index2]);
 
-    index1 = (index1 + 1) % key_data_len;
+    index1 = (unsigned char)((index1 + 1) % key_data_len);
   }
   free(key_data_ptr);
   return ARES_SUCCESS;
