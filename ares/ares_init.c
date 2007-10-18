@@ -499,7 +499,7 @@ static int get_iphlpapi_dns_info (char *ret_buf, size_t ret_size)
   FIXED_INFO    *fi   = alloca (sizeof(*fi));
   DWORD          size = sizeof (*fi);
   typedef DWORD (WINAPI* get_net_param_func) (FIXED_INFO*, DWORD*);
-  get_net_param_func GetNetworkParams;  /* available only on Win-98/2000+ */
+  get_net_param_func fpGetNetworkParams;  /* available only on Win-98/2000+ */
   HMODULE        handle;
   IP_ADDR_STRING *ipAddr;
   int            i, count = 0;
@@ -516,16 +516,16 @@ static int get_iphlpapi_dns_info (char *ret_buf, size_t ret_size)
   if (!handle)
      return (0);
 
-  GetNetworkParams = (get_net_param_func) GetProcAddress (handle, "GetNetworkParams");
-  if (!GetNetworkParams)
+  fpGetNetworkParams = (get_net_param_func) GetProcAddress (handle, "GetNetworkParams");
+  if (!fpGetNetworkParams)
      goto quit;
 
-  res = (*GetNetworkParams) (fi, &size);
+  res = (*fpGetNetworkParams) (fi, &size);
   if ((res != ERROR_BUFFER_OVERFLOW) && (res != ERROR_SUCCESS))
      goto quit;
 
   fi = alloca (size);
-  if (!fi || (*GetNetworkParams) (fi, &size) != ERROR_SUCCESS)
+  if (!fi || (*fpGetNetworkParams) (fi, &size) != ERROR_SUCCESS)
      goto quit;
 
   if (debug)
