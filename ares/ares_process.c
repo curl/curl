@@ -725,10 +725,10 @@ void ares__send_query(ares_channel channel, struct query *query, time_t now)
 }
 
 /*
- * nonblock() set the given socket to either blocking or non-blocking mode
+ * setsocknonblock sets the given socket to either blocking or non-blocking mode
  * based on the 'nonblock' boolean argument. This function is highly portable.
  */
-static int nonblock(ares_socket_t sockfd,    /* operate on this */
+static int setsocknonblock(ares_socket_t sockfd,    /* operate on this */
                     int nonblock   /* TRUE or FALSE */)
 {
 #undef SETBLOCK
@@ -798,7 +798,7 @@ static int nonblock(ares_socket_t sockfd,    /* operate on this */
 
 static int configure_socket(int s, ares_channel channel)
 {
-  nonblock(s, TRUE);
+  setsocknonblock(s, TRUE);
 
 #if defined(FD_CLOEXEC) && !defined(MSDOS)
   /* Configure the socket fd as close-on-exec. */
