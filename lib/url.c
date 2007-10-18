@@ -1036,10 +1036,10 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       result = Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], argptr);
     else {
       /*
-       *  Check that request length does not overflow the size_t type.
+       *  Check that requested length does not overflow the size_t type.
        */
 
-      if ((data->set.postfieldsize < 1) ||
+      if ((data->set.postfieldsize < 0) ||
           ((sizeof(curl_off_t) != sizeof(size_t)) &&
            (data->set.postfieldsize > (curl_off_t)((size_t)-1))))
         result = CURLE_OUT_OF_MEMORY;
@@ -1047,14 +1047,22 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
         char * p;
 
         (void) Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
-        p = malloc(data->set.postfieldsize);
+
+        /* Allocate even when size == 0. This satisfies the need of possible
+           later address compare to detect the COPYPOSTFIELDS mode, and
+           to mark that postfields is used rather than read function or
+           form data.
+         */
+        p = malloc(data->set.postfieldsize? data->set.postfieldsize: 1);
 
         if (!p)
           result = CURLE_OUT_OF_MEMORY;
         else {
-          memcpy(p, argptr, data->set.postfieldsize);
+          if (data->set.postfieldsize)
+            memcpy(p, argptr, data->set.postfieldsize);
+
           data->set.str[STRING_COPYPOSTFIELDS] = p;
-	}
+        }
       }
     }
 
