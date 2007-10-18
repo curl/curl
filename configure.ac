@@ -224,6 +224,42 @@ CURL_CHECK_HEADER_WS2TCPIP
 CURL_CHECK_HEADER_WINLDAP
 CURL_CHECK_HEADER_WINBER
 
+dnl **********************************************************************
+dnl platform/compiler/architecture specific checks/flags
+dnl **********************************************************************
+
+case $host in
+  #
+  x86_64*linux*)
+    #
+    dnl find out if icc is being used
+    if test "z$ICC" = "z"; then
+      CURL_DETECT_ICC
+    fi
+    #
+    if test "$ICC" = "yes"; then
+      dnl figure out icc version
+      iccver=`$CC -dumpversion`
+      iccnhi=`echo $iccver | cut -d . -f1`
+      iccnlo=`echo $iccver | cut -d . -f2`
+      iccnum=`(expr $iccnhi "*" 100 + $iccnlo) 2>/dev/null`
+      AC_MSG_RESULT($iccver)
+      #
+      if test "$iccnum" -ge "900" && test "$iccnum" -lt "1000"; then
+        dnl icc 9.X specific
+        CFLAGS="$CFLAGS -i-dynamic"
+      fi
+      #
+      if test "$iccnum" -ge "1000"; then
+        dnl icc 10.X or later
+        CFLAGS="$CFLAGS -shared-intel"
+      fi
+      #
+    fi
+    ;;
+  #
+esac
+
 dnl ************************************************************
 dnl switch off particular protocols
 dnl
