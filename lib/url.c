@@ -2126,7 +2126,7 @@ CURLcode Curl_disconnect(struct connectdata *conn)
     Curl_ntlm_cleanup(conn);
   }
 
-  if(conn->handler->disconnect)
+  if(conn->handler && conn->handler->disconnect)
     /* This is set if protocol-specific cleanups should be made */
     conn->handler->disconnect(conn);
 
