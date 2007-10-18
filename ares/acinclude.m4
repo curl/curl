@@ -1085,7 +1085,7 @@ AC_DEFUN([CURL_CHECK_NONBLOCKING_SOCKET],
 #  define PLATFORM_SUNOS4
 # endif
 #endif
-#if (defined(_AIX) || defined(__xlC__)) && !defined(_AIX4)
+#if (defined(_AIX) || defined(__xlC__)) && !defined(_AIX41)
 # define PLATFORM_AIX_V3
 #endif
 
@@ -1369,7 +1369,7 @@ AC_DEFUN([CURL_CC_DEBUG_OPTS],
            dnl only if the compiler is newer than 2.95 since we got lots of
            dnl "`_POSIX_C_SOURCE' is not defined" in system headers with
            dnl gcc 2.95.4 on FreeBSD 4.9!
-           WARN="$WARN -Wundef -Wno-long-long -Wsign-compare"
+           WARN="$WARN -Wundef -Wno-long-long -Wsign-compare -Wshadow -Wno-multichar"
          fi
 
          if test "$gccnum" -ge "296"; then
