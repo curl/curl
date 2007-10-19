@@ -132,6 +132,7 @@ case $host in
     #
     if test "$ICC" = "yes"; then
       dnl figure out icc version
+      AC_MSG_CHECKING([icc version])
       iccver=`$CC -dumpversion`
       iccnhi=`echo $iccver | cut -d . -f1`
       iccnlo=`echo $iccver | cut -d . -f2`
