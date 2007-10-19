@@ -158,17 +158,10 @@ typedef int ares_socket_t;
 #define ares_socket_typedef
 #endif /* ares_socket_typedef */
 
-#ifdef WIN32
 typedef void (*ares_sock_state_cb)(void *data,
-                                   SOCKET socket,
+                                   ares_socket_t socket_fd,
                                    int readable,
                                    int writable);
-#else
-typedef void (*ares_sock_state_cb)(void *data,
-                                   int socket,
-                                   int readable,
-                                   int writable);
-#endif
 
 struct apattern;
 
