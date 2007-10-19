@@ -480,16 +480,18 @@ AC_DEFUN([CURL_CHECK_HEADER_LDAPSSL], [
 ])
 
 
-dnl CURL_CHECK_LIBS_LDAP
+dnl CURL_CHECK_LIBS_WINLDAP
 dnl -------------------------------------------------
-dnl Check for libraries needed for LDAP support,
+dnl Check for libraries needed for WINLDAP support,
 dnl and prepended to LIBS any needed libraries.
 dnl This macro can take an optional parameter with a
 dnl white space separated list of libraries to check
-dnl before the default ones.
+dnl before the WINLDAP default ones.
 
-AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
-  AC_REQUIRE([CURL_CHECK_HEADER_LDAP])dnl
+AC_DEFUN([CURL_CHECK_LIBS_WINLDAP], [
+  AC_REQUIRE([CURL_CHECK_HEADER_WINBER])dnl
+  #
+  AC_MSG_CHECKING([for WINLDAP libraries])
   #
   u_libs=""
   #
@@ -511,13 +513,103 @@ AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
     done
   ])
   #
+  curl_cv_save_LIBS=$LIBS
+  curl_cv_ldap_LIBS="unknown"
+  #
+  for x_nlibs in '' "$u_libs" \
+    '-lwldap32' ; do
+    if test -z "$x_nlibs"; then
+      LIBS="$curl_cv_save_LIBS"
+    else
+      LIBS="$x_nlibs $curl_cv_save_LIBS"
+    fi
+    AC_LINK_IFELSE([
+      AC_LANG_PROGRAM([
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#ifdef HAVE_WINLDAP_H
+#include <winldap.h>
+#endif
+#ifdef HAVE_WINBER_H
+#include <winber.h>
+#endif
+#endif
+      ],[
+        BERVAL *bvp = NULL;
+        BerElement *bep = ber_init(bvp);
+        LDAP *ldp = ldap_init("dummy", LDAP_PORT);
+        ULONG res = ldap_unbind(ldp);
+        ber_free(bep, 1);
+      ])
+    ],[
+       curl_cv_ldap_LIBS="$x_nlibs"
+       break
+    ])
+  done
+  #
+  LIBS=$curl_cv_save_LIBS
+  #
+  case X-"$curl_cv_ldap_LIBS" in
+    X-unknown)
+      AC_MSG_RESULT([cannot find WINLDAP libraries])
+      ;;
+    X-)
+      AC_MSG_RESULT([no additional lib required])
+      ;;
+    *)
+      if test -z "$curl_cv_save_LIBS"; then
+        LIBS="$curl_cv_ldap_LIBS"
+      else
+        LIBS="$curl_cv_ldap_LIBS $curl_cv_save_LIBS"
+      fi
+      AC_MSG_RESULT([$curl_cv_ldap_LIBS])
+      ;;
+  esac
+  #
+])
+
+
+dnl CURL_CHECK_LIBS_LDAP
+dnl -------------------------------------------------
+dnl Check for libraries needed for LDAP support,
+dnl and prepended to LIBS any needed libraries.
+dnl This macro can take an optional parameter with a
+dnl white space separated list of libraries to check
+dnl before the default ones.
+
+AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
+  AC_REQUIRE([CURL_CHECK_HEADER_LDAP])dnl
+  #
   AC_MSG_CHECKING([for LDAP libraries])
+  #
+  u_libs=""
+  #
+  ifelse($1,,,[
+    for x_lib in $1; do
+      case "$x_lib" in
+        -l*)
+          l_lib="$x_lib"
+          ;;
+        *)
+          l_lib="-l$x_lib"
+          ;;
+      esac
+      if test -z "$u_libs"; then
+        u_libs="$l_lib"
+      else
+        u_libs="$u_libs $l_lib"
+      fi
+    done
+  ])
   #
   curl_cv_save_LIBS=$LIBS
   curl_cv_ldap_LIBS="unknown"
   #
-  for x_nlibs in "$u_libs" \
-    '' \
+  for x_nlibs in '' "$u_libs" \
     '-lldap' \
     '-llber -lldap' \
     '-lldap -llber' \
