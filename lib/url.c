@@ -3101,7 +3101,7 @@ static CURLcode setup_connection_internals(struct SessionHandle *data,
       }
 
       conn->port = p->defport;
-      conn->remote_port = p->defport;
+      conn->remote_port = (unsigned short)p->defport;
       conn->protocol |= p->protocol;
       return CURLE_OK;
     }
