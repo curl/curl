@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel S (22 October 2007)
+- Bug report #1815530 (http://curl.haxx.se/bug/view.cgi?id=1815530) points out
+  that specifying a proxy with a trailing slash didn't work (unless it also
+  contained a port number).
+
 Patrick M (15 October 2007)
 - Fixed the dynamic CURLOPT_POSTFIELDS problem: this option is now static again
   and option CURLOPT_COPYPOSTFIELDS has been added to support dynamic mode.

@@ -3339,10 +3339,17 @@ static CURLcode parse_proxy(struct SessionHandle *data,
     /* now set the local port number */
     conn->port = atoi(prox_portno);
   }
-  else if(data->set.proxyport) {
-    /* None given in the proxy string, then get the default one if it is
-       given */
-    conn->port = data->set.proxyport;
+  else {
+    /* without a port number after the host name, some people seem to use
+       a slash so we strip everything from the first slash */
+    atsign = strchr(proxyptr, '/');
+    if(atsign)
+      *atsign = 0x0; /* cut off path part from host name */
+
+    if(data->set.proxyport)
+      /* None given in the proxy string, then get the default one if it is
+         given */
+      conn->port = data->set.proxyport;
   }
 
   /* now, clone the cleaned proxy host name */
@@ -3357,7 +3364,8 @@ static CURLcode parse_proxy(struct SessionHandle *data,
 }
 
 /* Extract the user and password from the authentication string */
-static CURLcode parse_proxy_auth(struct SessionHandle *data, struct connectdata *conn)
+static CURLcode parse_proxy_auth(struct SessionHandle *data,
+                                 struct connectdata *conn)
 {
   char proxyuser[MAX_CURL_USER_LENGTH]="";
   char proxypasswd[MAX_CURL_PASSWORD_LENGTH]="";

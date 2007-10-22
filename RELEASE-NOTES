@@ -36,6 +36,8 @@ This release includes the following bugfixes:
  o handles chunked-encoded CONNECT responses
  o misuse of ares_timeout() result
  o --local-port on TFTP transfers
+ o specifying a proxy with a trailing slash didn't work (unless it also
+   contained a port number)
 
 This release includes the following known bugs:
 
