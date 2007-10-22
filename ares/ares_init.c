@@ -107,7 +107,6 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
   int i;
   int status = ARES_SUCCESS;
   struct server_state *server;
-  struct timeval tv;
 
 #ifdef CURLDEBUG
   const char *env = getenv("CARES_MEMDEBUG");
@@ -147,8 +146,7 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
   channel->sock_state_cb = NULL;
   channel->sock_state_cb_data = NULL;
 
-  gettimeofday(&tv, NULL);
-  channel->last_timeout_processed = tv.tv_sec;
+  channel->last_timeout_processed = (long)time(NULL);
 
   /* Initialize our lists of queries */
   ares__init_list_head(&(channel->all_queries));
