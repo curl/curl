@@ -5,8 +5,6 @@ To be addressed before 7.17.1 (planned release: November 2007)
 
 100 - icc segmentation faults (subject for removal)
 
-103 - "Impossible to post binary data with CURLOPT_POSTFIELDS"
-
 104 - [ curl-Bugs-1812190 ] libcurl can use wrong connection, when using
       https
 
