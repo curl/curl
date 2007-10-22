@@ -20,6 +20,7 @@ This release includes the following changes:
  o renamed CURLE_SSL_PEER_CERTIFICATE to CURLE_PEER_FAILED_VERIFICATION
  o added CURLOPT_OPENSOCKETFUNCTION and CURLOPT_OPENSOCKETDATA
  o CULROPT_COOKIELIST supports "FLUSH"
+ o added CURLOPT_COPYPOSTFIELDS
 
 This release includes the following bugfixes:
 
@@ -36,6 +37,7 @@ This release includes the following bugfixes:
  o handles chunked-encoded CONNECT responses
  o misuse of ares_timeout() result
  o --local-port on TFTP transfers
+ o CURLOPT_POSTFIELDS could fail to send binary data
  o specifying a proxy with a trailing slash didn't work (unless it also
    contained a port number)
 
@@ -56,6 +58,7 @@ advice from friends like these:
 
  Dan Fandrich, Michal Marek, Günter Knauf, Rob Crittenden, Immanuel Gregoire,
  Mark Davies, Max Katsev, Philip Langdale, Alex Fishman, Johnny Luong,
- Alexey Pesternikov, Yang Tse, Kim Rinnewitz, Michael Wallner
+ Alexey Pesternikov, Yang Tse, Kim Rinnewitz, Michael Wallner,
+ Patrick Monnerat,
  
         Thanks! (and sorry if I forgot to mention someone)
