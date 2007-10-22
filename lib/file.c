@@ -125,8 +125,8 @@ const struct Curl_handler Curl_handler_file = {
  */
 CURLcode Curl_file_connect(struct connectdata *conn)
 {
-  char *real_path = curl_easy_unescape(conn->data, conn->data->reqdata.path, 0,
-                                       NULL);
+  struct SessionHandle *data = conn->data;
+  char *real_path = curl_easy_unescape(data, data->reqdata.path, 0, NULL);
   struct FILEPROTO *file;
   int fd;
 #if defined(WIN32) || defined(MSDOS) || defined(__EMX__)
@@ -137,16 +137,18 @@ CURLcode Curl_file_connect(struct connectdata *conn)
   if(!real_path)
     return CURLE_OUT_OF_MEMORY;
 
-  file = (struct FILEPROTO *)calloc(sizeof(struct FILEPROTO), 1);
-  if(!file) {
-    free(real_path);
-    return CURLE_OUT_OF_MEMORY;
+  /* If there already is a protocol-specific struct allocated for this
+     sessionhandle, deal with it */
+  Curl_reset_reqproto(conn);
+
+  if (!data->reqdata.proto.file) {
+    file = (struct FILEPROTO *)calloc(sizeof(struct FILEPROTO), 1);
+    if(!file) {
+      free(real_path);
+      return CURLE_OUT_OF_MEMORY;
+    }
+    data->reqdata.proto.file = file;
   }
-
-  if (conn->data->reqdata.proto.file)
-    free(conn->data->reqdata.proto.file);
-
-  conn->data->reqdata.proto.file = file;
 
 #if defined(WIN32) || defined(MSDOS) || defined(__EMX__)
   /* If the first character is a slash, and there's
@@ -186,8 +188,8 @@ CURLcode Curl_file_connect(struct connectdata *conn)
   file->freepath = real_path; /* free this when done */
 
   file->fd = fd;
-  if(!conn->data->set.upload && (fd == -1)) {
-    failf(conn->data, "Couldn't open file %s", conn->data->reqdata.path);
+  if(!data->set.upload && (fd == -1)) {
+    failf(data, "Couldn't open file %s", data->reqdata.path);
     Curl_file_done(conn, CURLE_FILE_COULDNT_READ_FILE, FALSE);
     return CURLE_FILE_COULDNT_READ_FILE;
   }

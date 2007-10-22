@@ -1846,10 +1846,9 @@ static CURLcode Curl_ssh_connect(struct connectdata *conn, bool *done)
   CURLcode result;
   struct SessionHandle *data = conn->data;
 
-  if (data->reqdata.proto.ssh) {
-    Curl_safefree(data->reqdata.proto.ssh);
-    data->reqdata.proto.ssh = NULL;
-  }
+  /* If there already is a protocol-specific struct allocated for this
+     sessionhandle, deal with it */
+  Curl_reset_reqproto(conn);
 
   result = ssh_init(conn);
   if (result)

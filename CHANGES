@@ -7,6 +7,23 @@
                                   Changelog
 
 Daniel S (22 October 2007)
+- Michal Marek forwarded the bug report
+  https://bugzilla.novell.com/show_bug.cgi?id=332917 about a HTTP redirect to
+  FTP that caused memory havoc. His work together with my efforts created two
+  fixes:
+
+  #1 - FTP::file was moved to struct ftp_conn, because is has to be dealt with
+       at connection cleanup, at which time the struct HandleData could be
+       used by another connection.
+       Also, the unused char *urlpath member is removed from struct FTP.
+ 
+  #2 - provide a Curl_reset_reqproto() function that frees
+       data->reqdata.proto.* on connection setup if needed (that is if the
+       SessionHandle was used by a different connection).
+
+  A long-term goal is of course to somehow get rid of how the reqdata struct
+  is used, as it is too error-prone.
+ 
 - Bug report #1815530 (http://curl.haxx.se/bug/view.cgi?id=1815530) points out
   that specifying a proxy with a trailing slash didn't work (unless it also
   contained a port number).

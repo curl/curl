@@ -84,4 +84,9 @@ CURLcode Curl_doing_fdset(struct connectdata *conn,
                           int *max_fdp);
 #endif
 
+/* Called on connect, and if there's already a protocol-specific struct
+   allocated for a different connection, this frees it that it can be setup
+   properly later on. */
+void Curl_reset_reqproto(struct connectdata *conn);
+
 #endif

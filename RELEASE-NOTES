@@ -40,6 +40,7 @@ This release includes the following bugfixes:
  o CURLOPT_POSTFIELDS could fail to send binary data
  o specifying a proxy with a trailing slash didn't work (unless it also
    contained a port number)
+ o redirect from HTTP to FTP memory problem
 
 This release includes the following known bugs:
 

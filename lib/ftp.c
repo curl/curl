@@ -90,6 +90,7 @@
 #include "parsedate.h" /* for the week day and month names */
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "multiif.h"
+#include "url.h"
 
 #if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)
 #include "inet_ntoa_r.h"
@@ -261,7 +262,6 @@ const struct Curl_handler Curl_handler_ftps_proxy = {
 static void freedirs(struct connectdata *conn)
 {
   struct ftp_conn *ftpc = &conn->proto.ftpc;
-  struct FTP *ftp = conn->data->reqdata.proto.ftp;
 
   int i;
   if(ftpc->dirs) {
@@ -274,9 +274,9 @@ static void freedirs(struct connectdata *conn)
     free(ftpc->dirs);
     ftpc->dirs = NULL;
   }
-  if(ftp->file) {
-    free(ftp->file);
-    ftp->file = NULL;
+  if(ftpc->file) {
+    free(ftpc->file);
+    ftpc->file = NULL;
   }
 }
 
@@ -1339,8 +1339,9 @@ static CURLcode ftp_state_post_size(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct FTP *ftp = conn->data->reqdata.proto.ftp;
+  struct ftp_conn *ftpc = &conn->proto.ftpc;
 
-  if((ftp->transfer != FTPTRANSFER_BODY) && ftp->file) {
+  if((ftp->transfer != FTPTRANSFER_BODY) && ftpc->file) {
     /* if a "head"-like request is being made (on a file) */
 
     /* Determine if server can respond to REST command and therefore
@@ -1359,12 +1360,13 @@ static CURLcode ftp_state_post_type(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct FTP *ftp = conn->data->reqdata.proto.ftp;
+  struct ftp_conn *ftpc = &conn->proto.ftpc;
 
-  if((ftp->transfer == FTPTRANSFER_INFO) && ftp->file) {
+  if((ftp->transfer == FTPTRANSFER_INFO) && ftpc->file) {
     /* if a "head"-like request is being made (on a file) */
 
-    /* we know ftp->file is a valid pointer to a file name */
-    NBFTPSENDF(conn, "SIZE %s", ftp->file);
+    /* we know ftpc->file is a valid pointer to a file name */
+    NBFTPSENDF(conn, "SIZE %s", ftpc->file);
 
     state(conn, FTP_SIZE);
   }
@@ -1466,11 +1468,12 @@ static CURLcode ftp_state_post_mdtm(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct FTP *ftp = conn->data->reqdata.proto.ftp;
   struct SessionHandle *data = conn->data;
+  struct ftp_conn *ftpc = &conn->proto.ftpc;
 
   /* If we have selected NOBODY and HEADER, it means that we only want file
      information. Which in FTP can't be much more than the file size and
      date. */
-  if(conn->bits.no_body && ftp->file &&
+  if(conn->bits.no_body && ftpc->file &&
      ftp_need_type(conn, data->set.prefer_ascii)) {
     /* The SIZE command is _not_ RFC 959 specified, and therefor many servers
        may not support it! It is however the only way we have to get a file's
@@ -1496,15 +1499,15 @@ static CURLcode ftp_state_post_mdtm(struct connectdata *conn)
 static CURLcode ftp_state_post_cwd(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  struct FTP *ftp = conn->data->reqdata.proto.ftp;
   struct SessionHandle *data = conn->data;
+  struct ftp_conn *ftpc = &conn->proto.ftpc;
 
   /* Requested time of file or time-depended transfer? */
-  if((data->set.get_filetime || data->set.timecondition) && ftp->file) {
+  if((data->set.get_filetime || data->set.timecondition) && ftpc->file) {
 
     /* we have requested to get the modified-time of the file, this is a white
        spot as the MDTM is not mentioned in RFC959 */
-    NBFTPSENDF(conn, "MDTM %s", ftp->file);
+    NBFTPSENDF(conn, "MDTM %s", ftpc->file);
 
     state(conn, FTP_MDTM);
   }
@@ -1522,6 +1525,7 @@ static CURLcode ftp_state_ul_setup(struct connectdata *conn,
   CURLcode result = CURLE_OK;
   struct FTP *ftp = conn->data->reqdata.proto.ftp;
   struct SessionHandle *data = conn->data;
+  struct ftp_conn *ftpc = &conn->proto.ftpc;
   curl_off_t passed=0;
 
   if((data->reqdata.resume_from && !sizechecked) ||
@@ -1541,7 +1545,7 @@ static CURLcode ftp_state_ul_setup(struct connectdata *conn,
 
     if(data->reqdata.resume_from < 0 ) {
       /* Got no given size to start from, figure it out */
-      NBFTPSENDF(conn, "SIZE %s", ftp->file);
+      NBFTPSENDF(conn, "SIZE %s", ftpc->file);
       state(conn, FTP_STOR_SIZE);
       return result;
     }
@@ -1596,7 +1600,7 @@ static CURLcode ftp_state_ul_setup(struct connectdata *conn,
   } /* resume_from */
 
   NBFTPSENDF(conn, data->set.ftp_append?"APPE %s":"STOR %s",
-             ftp->file);
+             ftpc->file);
 
   state(conn, FTP_STOR);
 
@@ -1659,7 +1663,7 @@ static CURLcode ftp_state_quote(struct connectdata *conn,
       if (ftp->transfer != FTPTRANSFER_BODY)
         state(conn, FTP_STOP);
       else {
-        NBFTPSENDF(conn, "SIZE %s", ftp->file);
+        NBFTPSENDF(conn, "SIZE %s", ftpc->file);
         state(conn, FTP_RETR_SIZE);
       }
       break;
@@ -1961,6 +1965,7 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
   CURLcode result = CURLE_OK;
   struct SessionHandle *data=conn->data;
   struct FTP *ftp = data->reqdata.proto.ftp;
+  struct ftp_conn *ftpc = &conn->proto.ftpc;
 
   switch(ftpcode) {
   case 213:
@@ -1986,7 +1991,7 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
          we "emulate" a HTTP-style header in our output. */
 
       if(conn->bits.no_body &&
-         ftp->file &&
+         ftpc->file &&
          data->set.get_filetime &&
          (data->info.filetime>=0) ) {
         struct tm *tm;
@@ -2092,6 +2097,7 @@ static CURLcode ftp_state_post_retr_size(struct connectdata *conn,
   CURLcode result = CURLE_OK;
   struct SessionHandle *data=conn->data;
   struct FTP *ftp = data->reqdata.proto.ftp;
+  struct ftp_conn *ftpc = &conn->proto.ftpc;
 
   if (data->set.max_filesize && (filesize > data->set.max_filesize)) {
     failf(data, "Maximum file size exceeded");
@@ -2160,7 +2166,7 @@ static CURLcode ftp_state_post_retr_size(struct connectdata *conn,
   }
   else {
     /* no resume */
-    NBFTPSENDF(conn, "RETR %s", ftp->file);
+    NBFTPSENDF(conn, "RETR %s", ftpc->file);
     state(conn, FTP_RETR);
   }
 
@@ -2209,7 +2215,7 @@ static CURLcode ftp_state_rest_resp(struct connectdata *conn,
                                     ftpstate instate)
 {
   CURLcode result = CURLE_OK;
-  struct FTP *ftp = conn->data->reqdata.proto.ftp;
+  struct ftp_conn *ftpc = &conn->proto.ftpc;
 
   switch(instate) {
   case FTP_REST:
@@ -2231,7 +2237,7 @@ static CURLcode ftp_state_rest_resp(struct connectdata *conn,
       result = CURLE_FTP_COULDNT_USE_REST;
     }
     else {
-      NBFTPSENDF(conn, "RETR %s", ftp->file);
+      NBFTPSENDF(conn, "RETR %s", ftpc->file);
       state(conn, FTP_RETR);
     }
     break;
@@ -3047,11 +3053,9 @@ static CURLcode Curl_ftp_connect(struct connectdata *conn,
 
   *done = FALSE; /* default to not done yet */
 
-  if (data->reqdata.proto.ftp) {
-    Curl_ftp_disconnect(conn);
-    free(data->reqdata.proto.ftp);
-    data->reqdata.proto.ftp = NULL;
-  }
+  /* If there already is a protocol-specific struct allocated for this
+     sessionhandle, deal with it */
+  Curl_reset_reqproto(conn);
 
   result = ftp_init(conn);
   if(result)
@@ -3183,7 +3187,7 @@ static CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status,
     ftpc->prevpath = NULL; /* no path */
 
   } else {
-    size_t flen = ftp->file?strlen(ftp->file):0; /* file is "raw" already */
+    size_t flen = ftpc->file?strlen(ftpc->file):0; /* file is "raw" already */
     size_t dlen = strlen(path)-flen;
     if(!ftpc->cwdfail) {
       if(dlen && (data->set.ftp_filemethod != FTPFILE_NOCWD)) {
@@ -3476,6 +3480,7 @@ static CURLcode ftp_range(struct connectdata *conn)
 static CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
 {
   struct SessionHandle *data=conn->data;
+  struct ftp_conn *ftpc = &conn->proto.ftpc;
   CURLcode result = CURLE_OK;
 
   /* the ftp struct is inited in Curl_ftp_connect() */
@@ -3499,7 +3504,7 @@ static CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
       result = ftp_range(conn);
       if(result)
         ;
-      else if(data->set.ftp_list_only || !ftp->file) {
+      else if(data->set.ftp_list_only || !ftpc->file) {
         /* The specified path ends with a slash, and therefore we think this
            is a directory that is requested, use LIST. But before that we
            need to set ASCII transfer mode. */
@@ -3602,6 +3607,7 @@ static CURLcode Curl_ftp(struct connectdata *conn, bool *done)
     make sure we have a good 'struct FTP' to play with. For new connections,
     the struct FTP is allocated and setup in the Curl_ftp_connect() function.
   */
+  Curl_reset_reqproto(conn);
   retcode = ftp_init(conn);
   if(retcode)
     return retcode;
@@ -3800,12 +3806,16 @@ static CURLcode Curl_ftp_disconnect(struct connectdata *conn)
   */
 
   /* The FTP session may or may not have been allocated/setup at this point! */
+  /* FIXME: checking for conn->data->reqdata.proto.ftp is not correct here,
+   * the reqdata structure could be used by another connection already */
   if(conn->data->reqdata.proto.ftp) {
     (void)ftp_quit(conn); /* ignore errors on the QUIT */
 
     if(ftpc->entrypath) {
       struct SessionHandle *data = conn->data;
-      data->state.most_recent_ftp_entrypath = NULL;
+      if (data->state.most_recent_ftp_entrypath == ftpc->entrypath) {
+        data->state.most_recent_ftp_entrypath = NULL;
+      }
       free(ftpc->entrypath);
       ftpc->entrypath = NULL;
     }
@@ -3861,11 +3871,11 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
     if(data->reqdata.path &&
        data->reqdata.path[0] &&
        (data->reqdata.path[strlen(data->reqdata.path) - 1] != '/') )
-      ftp->file = data->reqdata.path;  /* this is a full file path */
+      ftpc->file = data->reqdata.path;  /* this is a full file path */
     else
-      ftp->file = NULL;
+      ftpc->file = NULL;
       /*
-        ftp->file is not used anywhere other than for operations on a file.
+        ftpc->file is not used anywhere other than for operations on a file.
         In other words, never for directory operations.
         So we can safely set it to NULL here and use it as a
         argument in dir/file decisions.
@@ -3877,7 +3887,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
     if(!path_to_use[0]) {
       /* no dir, no file */
       ftpc->dirdepth = 0;
-      ftp->file = NULL;
+      ftpc->file = NULL;
       break;
     }
     slash_pos=strrchr(cur_pos, '/');
@@ -3894,10 +3904,10 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
         return CURLE_OUT_OF_MEMORY;
       }
       ftpc->dirdepth = 1; /* we consider it to be a single dir */
-      ftp->file = slash_pos ? slash_pos+1 : cur_pos; /* rest is file name */
+      ftpc->file = slash_pos ? slash_pos+1 : cur_pos; /* rest is file name */
     }
     else
-      ftp->file = cur_pos;  /* this is a file name only */
+      ftpc->file = cur_pos;  /* this is a file name only */
     break;
 
   default: /* allow pretty much anything */
@@ -3959,26 +3969,26 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
         }
       }
     }
-    ftp->file = cur_pos;  /* the rest is the file name */
+    ftpc->file = cur_pos;  /* the rest is the file name */
   }
 
-  if(ftp->file && *ftp->file) {
-    ftp->file = curl_easy_unescape(conn->data, ftp->file, 0, NULL);
-    if(NULL == ftp->file) {
+  if(ftpc->file && *ftpc->file) {
+    ftpc->file = curl_easy_unescape(conn->data, ftpc->file, 0, NULL);
+    if(NULL == ftpc->file) {
       freedirs(conn);
       failf(data, "no memory");
       return CURLE_OUT_OF_MEMORY;
     }
-    if (isBadFtpString(ftp->file)) {
+    if (isBadFtpString(ftpc->file)) {
       freedirs(conn);
       return CURLE_URL_MALFORMAT;
     }
   }
   else
-    ftp->file=NULL; /* instead of point to a zero byte, we make it a NULL
+    ftpc->file=NULL; /* instead of point to a zero byte, we make it a NULL
                        pointer */
 
-  if(data->set.upload && !ftp->file && (ftp->transfer == FTPTRANSFER_BODY)) {
+  if(data->set.upload && !ftpc->file && (ftp->transfer == FTPTRANSFER_BODY)) {
     /* We need a file name when uploading. Return error! */
     failf(data, "Uploading to a URL without a file name!");
     return CURLE_URL_MALFORMAT;
@@ -3995,7 +4005,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
       return CURLE_OUT_OF_MEMORY;
     }
 
-    dlen = strlen(path) - (ftp->file?strlen(ftp->file):0);
+    dlen = strlen(path) - (ftpc->file?strlen(ftpc->file):0);
     if((dlen == strlen(ftpc->prevpath)) &&
        curl_strnequal(path, ftpc->prevpath, dlen)) {
       infof(data, "Request has same path as previous transfer\n");

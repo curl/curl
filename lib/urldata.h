@@ -376,8 +376,6 @@ struct FTP {
   curl_off_t *bytecountp;
   char *user;    /* user name string */
   char *passwd;  /* password string */
-  char *urlpath; /* the originally given path part of the URL */
-  char *file;    /* decoded file */
 
   /* transfer a file/body or not, done as a typedefed enum just to make
      debuggers display the full symbol and not just the numerical value */
@@ -392,6 +390,7 @@ struct ftp_conn {
   char **dirs;   /* realloc()ed array for path components */
   int dirdepth;  /* number of entries used in the 'dirs' array */
   int diralloc;  /* number of entries allocated for the 'dirs' array */
+  char *file;    /* decoded file */
   char *cache;       /* data cache between getresponse()-calls */
   curl_off_t cache_size; /* size of cache in bytes */
   bool dont_check;  /* Set to TRUE to prevent the final (post-transfer)
@@ -807,6 +806,8 @@ struct HandleData {
     void *generic;
     struct SSHPROTO *ssh;
   } proto;
+  /* current user of this HandleData instance, or NULL */
+  struct connectdata *current_conn;
 };
 
 /*
