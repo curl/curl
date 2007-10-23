@@ -149,6 +149,16 @@ CURLcode Curl_file_connect(struct connectdata *conn)
     }
     data->reqdata.proto.file = file;
   }
+  else {
+    /* file is not a protocol that can deal with "persistancy" */
+    file = data->reqdata.proto.file;
+    Curl_safefree(file->freepath);
+    if(file->fd != -1)
+      close(file->fd);
+    file->path = NULL;
+    file->freepath = NULL;
+    file->fd = -1;
+  }
 
 #if defined(WIN32) || defined(MSDOS) || defined(__EMX__)
   /* If the first character is a slash, and there's
