@@ -31,7 +31,7 @@ static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp)
     return 1;                        /* we return 1 byte at a time! */
   }
 
-  return -1;                         /* no more data left to deliver */
+  return 0;                         /* no more data left to deliver */
 }
 
 int test(char *URL)
