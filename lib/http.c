@@ -2098,7 +2098,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     if (checkprefix("ftp://", ppath) || checkprefix("ftps://", ppath)) {
       char *p = strstr(ppath, ";type=");
       if (p && p[6] && p[7] == 0) {
-        switch (toupper(p[6])) {
+        switch (toupper((int)((unsigned char)p[6]))) {
         case 'A':
         case 'D':
         case 'I':
