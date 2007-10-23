@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel S (23 October 2007)
+- Bug report #1812190 (http://curl.haxx.se/bug/view.cgi?id=1812190) points out
+  that libcurl tried to re-use connections a bit too much when using non-SSL
+  protocols tunneled over a HTTP proxy.
+
 Daniel S (22 October 2007)
 - Michal Marek forwarded the bug report
   https://bugzilla.novell.com/show_bug.cgi?id=332917 about a HTTP redirect to

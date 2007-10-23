@@ -41,6 +41,8 @@ This release includes the following bugfixes:
  o specifying a proxy with a trailing slash didn't work (unless it also
    contained a port number)
  o redirect from HTTP to FTP memory problem
+ o re-used connections a bit too much when using non-SSL protocols tunneled
+   over a HTTP proxy
 
 This release includes the following known bugs:
 

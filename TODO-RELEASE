@@ -1,7 +1,4 @@
-To be addressed before 7.17.1 (planned release: November 2007)
+To be addressed before 7.17.1 (planned release: late October 2007)
 =============================
-
-104 - [ curl-Bugs-1812190 ] libcurl can use wrong connection, when using
-      https
 
 106 - 

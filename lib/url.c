@@ -2399,14 +2399,18 @@ ConnectionExists(struct SessionHandle *data,
       /* don't do mixed SSL and non-SSL connections */
       continue;
 
-    if(!needle->bits.httpproxy || needle->protocol&PROT_SSL) {
-      /* The requested connection does not use a HTTP proxy or it
-         uses SSL. */
+    if(needle->bits.proxy != check->bits.proxy)
+      /* don't do mixed proxy and non-proxy connections */
+      continue;
 
-      if(!(needle->protocol&PROT_SSL) && check->bits.httpproxy)
-        /* we don't do SSL but the cached connection has a proxy,
-           then don't match this */
-        continue;
+    if(!needle->bits.httpproxy || needle->protocol&PROT_SSL ||
+       (needle->bits.httpproxy && check->bits.httpproxy &&
+        needle->bits.tunnel_proxy && check->bits.tunnel_proxy &&
+        strequal(needle->proxy.name, check->proxy.name) &&
+        (needle->port == check->port))) {
+      /* The requested connection does not use a HTTP proxy or it uses SSL or
+         it is a non-SSL protocol tunneled over the same http proxy name and
+         port number */
 
       if(strequal(needle->protostr, check->protostr) &&
          strequal(needle->host.name, check->host.name) &&
