@@ -111,7 +111,6 @@ struct testcase {
   size_t rcount;  /* amount of data left to read of the file */
   long num;       /* test case number */
   int ofile;      /* file descriptor for output file when uploading to us */
-  FILE *server;   /* write input "protocol" there for client verification */
 };
 
 static int synchnet(curl_socket_t);
@@ -530,8 +529,6 @@ int main(int argc, char **argv)
          , port );
 
   do {
-    FILE *server;
-
     fromlen = sizeof(from);
     n = recvfrom(sock, buf, sizeof (buf), 0,
                  (struct sockaddr *)&from, &fromlen);
@@ -558,19 +555,11 @@ int main(int argc, char **argv)
     tp->th_opcode = ntohs(tp->th_opcode);
     if (tp->th_opcode == RRQ || tp->th_opcode == WRQ) {
       memset(&test, 0, sizeof(test));
-      server = fopen(REQUEST_DUMP, "ab");
-      if(!server) {
-        error = ERRNO;
-        logmsg("fopen() failed with error: %d %s", error, strerror(error));
-        logmsg("Error opening file: %s", REQUEST_DUMP);
+      if (tftp(&test, tp, n) < 0)
         break;
-      }
-      test.server = server;
-      tftp(&test, tp, n);
       if(test.buffer)
         free(test.buffer);
     }
-    fclose(server);
     sclose(peer);
   } while(1);
   return 0;
@@ -594,9 +583,20 @@ static int tftp(struct testcase *test, struct tftphdr *tp, int size)
   int first = 1, ecode;
   struct formats *pf;
   char *filename, *mode = NULL;
+  int error;
+  FILE *server;
+
+  /* Open request dump file. */
+  server = fopen(REQUEST_DUMP, "ab");
+  if(!server) {
+    error = ERRNO;
+    logmsg("fopen() failed with error: %d %s", error, strerror(error));
+    logmsg("Error opening file: %s", REQUEST_DUMP);
+    return -1;
+  }
 
   /* store input protocol */
-  fprintf(test->server, "opcode: %x\n", tp->th_opcode);
+  fprintf(server, "opcode: %x\n", tp->th_opcode);
 
   cp = (char *)&tp->th_stuff;
   filename = cp;
@@ -608,6 +608,7 @@ again:
   }
   if (*cp) {
     nak(EBADOP);
+    fclose(server);
     return 3;
   }
   if (first) {
@@ -616,15 +617,15 @@ again:
     goto again;
   }
   /* store input protocol */
-  fprintf(test->server, "filename: %s\n", filename);
+  fprintf(server, "filename: %s\n", filename);
 
   for (cp = mode; *cp; cp++)
     if (isupper((int)*cp))
       *cp = (char)tolower((int)*cp);
 
   /* store input protocol */
-  fprintf(test->server, "mode: %s\n", mode);
-  fflush(test->server);
+  fprintf(server, "mode: %s\n", mode);
+  fclose(server);
 
   for (pf = formats; pf->f_mode; pf++)
     if (strcmp(pf->f_mode, mode) == 0)
