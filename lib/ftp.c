@@ -259,10 +259,8 @@ const struct Curl_handler Curl_handler_ftps_proxy = {
  */
 #define CURL_FTP_HTTPSTYLE_HEAD 1
 
-static void freedirs(struct connectdata *conn)
+static void freedirs(struct ftp_conn *ftpc)
 {
-  struct ftp_conn *ftpc = &conn->proto.ftpc;
-
   int i;
   if(ftpc->dirs) {
     for (i=0; i < ftpc->dirdepth; i++){
@@ -3209,7 +3207,7 @@ static CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status,
     }
   }
   /* free the dir tree and file parts */
-  freedirs(conn);
+  freedirs(ftpc);
 
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
   Curl_sec_fflush_fd(conn, conn->sock[SECONDARYSOCKET]);
@@ -3806,29 +3804,26 @@ static CURLcode Curl_ftp_disconnect(struct connectdata *conn)
   */
 
   /* The FTP session may or may not have been allocated/setup at this point! */
-  /* FIXME: checking for conn->data->reqdata.proto.ftp is not correct here,
-   * the reqdata structure could be used by another connection already */
-  if(conn->data->reqdata.proto.ftp) {
-    (void)ftp_quit(conn); /* ignore errors on the QUIT */
+  (void)ftp_quit(conn); /* ignore errors on the QUIT */
 
-    if(ftpc->entrypath) {
-      struct SessionHandle *data = conn->data;
-      if (data->state.most_recent_ftp_entrypath == ftpc->entrypath) {
-        data->state.most_recent_ftp_entrypath = NULL;
-      }
-      free(ftpc->entrypath);
-      ftpc->entrypath = NULL;
+  if(ftpc->entrypath) {
+    struct SessionHandle *data = conn->data;
+    if (data->state.most_recent_ftp_entrypath == ftpc->entrypath) {
+      data->state.most_recent_ftp_entrypath = NULL;
     }
-    if(ftpc->cache) {
-      free(ftpc->cache);
-      ftpc->cache = NULL;
-    }
-    freedirs(conn);
-    if(ftpc->prevpath) {
-      free(ftpc->prevpath);
-      ftpc->prevpath = NULL;
-    }
+    free(ftpc->entrypath);
+    ftpc->entrypath = NULL;
   }
+  if(ftpc->cache) {
+    free(ftpc->cache);
+    ftpc->cache = NULL;
+  }
+  freedirs(ftpc);
+  if(ftpc->prevpath) {
+    free(ftpc->prevpath);
+    ftpc->prevpath = NULL;
+  }
+
   return CURLE_OK;
 }
 
@@ -3900,7 +3895,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
                                          slash_pos?(int)(slash_pos-cur_pos):1,
                                          NULL);
       if(!ftpc->dirs[0]) {
-        freedirs(conn);
+        freedirs(ftpc);
         return CURLE_OUT_OF_MEMORY;
       }
       ftpc->dirdepth = 1; /* we consider it to be a single dir */
@@ -3941,12 +3936,12 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
             curl_easy_unescape(conn->data, cur_pos - absolute_dir, len, NULL);
           if (!ftpc->dirs[ftpc->dirdepth]) { /* run out of memory ... */
             failf(data, "no memory");
-            freedirs(conn);
+            freedirs(ftpc);
             return CURLE_OUT_OF_MEMORY;
           }
           if (isBadFtpString(ftpc->dirs[ftpc->dirdepth])) {
             free(ftpc->dirs[ftpc->dirdepth]);
-            freedirs(conn);
+            freedirs(ftpc);
             return CURLE_URL_MALFORMAT;
           }
         }
@@ -3962,7 +3957,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
           ftpc->diralloc *= 2; /* double the size each time */
           bigger = realloc(ftpc->dirs, ftpc->diralloc * sizeof(ftpc->dirs[0]));
           if(!bigger) {
-            freedirs(conn);
+            freedirs(ftpc);
             return CURLE_OUT_OF_MEMORY;
           }
           ftpc->dirs = (char **)bigger;
@@ -3975,12 +3970,12 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
   if(ftpc->file && *ftpc->file) {
     ftpc->file = curl_easy_unescape(conn->data, ftpc->file, 0, NULL);
     if(NULL == ftpc->file) {
-      freedirs(conn);
+      freedirs(ftpc);
       failf(data, "no memory");
       return CURLE_OUT_OF_MEMORY;
     }
     if (isBadFtpString(ftpc->file)) {
-      freedirs(conn);
+      freedirs(ftpc);
       return CURLE_URL_MALFORMAT;
     }
   }
@@ -4001,7 +3996,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
        strings */
     char *path = curl_easy_unescape(conn->data, data->reqdata.path, 0, NULL);
     if(!path) {
-      freedirs(conn);
+      freedirs(ftpc);
       return CURLE_OUT_OF_MEMORY;
     }
 
@@ -4106,7 +4101,7 @@ CURLcode ftp_regular_transfer(struct connectdata *conn,
       return result;
   }
   else
-    freedirs(conn);
+    freedirs(ftpc);
 
   return result;
 }
