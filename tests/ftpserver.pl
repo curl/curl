@@ -337,6 +337,11 @@ sub NLST_command {
 
 sub MDTM_command {
     my $testno = $_[0];
+    my $testpart = "";
+    if ($testno > 10000) {
+    	$testpart = $testno % 10000;
+    	$testno = $testno / 10000;
+    }
 
     loadtest("$srcdir/data/test$testno");
 
@@ -359,6 +364,11 @@ sub MDTM_command {
 
 sub SIZE_command {
     my $testno = $_[0];
+    my $testpart = "";
+    if ($testno > 10000) {
+    	$testpart = $testno % 10000;
+    	$testno = $testno / 10000;
+    }
 
     loadtest("$srcdir/data/test$testno");
 
@@ -383,7 +393,7 @@ sub SIZE_command {
     }
     else {
         $size=0;
-        @data = getpart("reply", "data");
+        @data = getpart("reply", "data" . $testpart);
         for(@data) {
             $size += length($_);
         }
@@ -416,17 +426,22 @@ sub RETR_command {
     }
 
     $testno =~ s/^([^0-9]*)//;
+    my $testpart = "";
+    if ($testno > 10000) {
+    	$testpart = $testno % 10000;
+    	$testno = $testno / 10000;
+    }
 
     loadtest("$srcdir/data/test$testno");
 
-    my @data = getpart("reply", "data");
+    my @data = getpart("reply", "data" . $testpart);
 
     my $size=0;
     for(@data) {
         $size += length($_);
     }
 
-    my %hash = getpartattr("reply", "data");
+    my %hash = getpartattr("reply", "data" . $testpart);
 
     if($size || $hash{'sendzero'}) {
     
