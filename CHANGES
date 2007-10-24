@@ -7,9 +7,10 @@
                                   Changelog
 
 Dan F (24 October 2007)
-- Fixed the test FTP server to support the >10000 test number notation
+- Fixed the test FTP and TFTP servers to support the >10000 test number
+  notation
 
-- Added test cases 2000 and 2001 which test multiple protocols using the
+- Added test cases 2000 through 2003 which test multiple protocols using the
   same easy handle
 
 - Fixed the filecheck: make target to work outside the source tree
