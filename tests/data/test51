@@ -46,7 +46,7 @@ body
 http
 </server>
  <name>
-HTTP follow redirect with exessive ../
+HTTP follow redirect with excessive ../
  </name>
  <command>
 http://%HOSTIP:%HTTPPORT/we/are/all/twits/51 -L

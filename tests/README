@@ -128,7 +128,8 @@ TEST CASE NUMBERS
  500 - 599   libcurl source code tests, not using the curl command tool
  600 - 699   SCP/SFTP
  700 - 799   SOCKS4 (even numbers) and SOCK5 (odd numbers)
- 1000 - x    miscellaneous*
+ 1000 - 1999 miscellaneous*
+ 2000 - x    multiple sequential protocols per test case*
 
  Since 30-apr-2003, there's nothing in the system that requires us to keep
  within these number series, and those sections marked with * actually
