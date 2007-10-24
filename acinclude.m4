@@ -513,7 +513,7 @@ AC_DEFUN([CURL_CHECK_LIBS_WINLDAP], [
     done
   ])
   #
-  curl_cv_save_LIBS=$LIBS
+  curl_cv_save_LIBS="$LIBS"
   curl_cv_ldap_LIBS="unknown"
   #
   for x_nlibs in '' "$u_libs" \
@@ -551,7 +551,7 @@ AC_DEFUN([CURL_CHECK_LIBS_WINLDAP], [
     ])
   done
   #
-  LIBS=$curl_cv_save_LIBS
+  LIBS="$curl_cv_save_LIBS"
   #
   case X-"$curl_cv_ldap_LIBS" in
     X-unknown)
@@ -606,7 +606,7 @@ AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
     done
   ])
   #
-  curl_cv_save_LIBS=$LIBS
+  curl_cv_save_LIBS="$LIBS"
   curl_cv_ldap_LIBS="unknown"
   #
   for x_nlibs in '' "$u_libs" \
@@ -658,7 +658,7 @@ AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
     ])
   done
   #
-  LIBS=$curl_cv_save_LIBS
+  LIBS="$curl_cv_save_LIBS"
   #
   case X-"$curl_cv_ldap_LIBS" in
     X-unknown)
