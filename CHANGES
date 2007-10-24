@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel S (24 October 2007)
+- Vladimir Lazarenko pointed out that we should do some 'mt' magic when
+  building with VC8 to get the "manifest" embedded to make fine stand-alone
+  binaries. The maketgz and the src/Makefile.vc6 files were adjusted
+  accordingly.
+
 Daniel S (23 October 2007)
 - Bug report #1812190 (http://curl.haxx.se/bug/view.cgi?id=1812190) points out
   that libcurl tried to re-use connections a bit too much when using non-SSL

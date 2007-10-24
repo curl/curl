@@ -75,6 +75,11 @@ CFLAGS   = /I../lib /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c
 LFLAGS   = /nologo /out:$(PROGRAM_NAME) /subsystem:console /machine:$(MACHINE)
 RESFLAGS = /i../include
 
+# This manifest thing is for VC8, enabled by the maketgz script that
+# builds the VC8 version of this makefile. Left commented out in the VC6
+# version!
+#MANIFESTTOOL = mt -manifest $(PROGRAM_NAME).manifest -outputresource:$(PROGRAM_NAME);1
+
 !IFDEF WINDOWS_SSPI
 CFLAGS = $(CFLAGS) /DUSE_WINDOWS_SSPI /I$(WINDOWS_SDK_PATH)\include
 !ENDIF
@@ -214,9 +219,11 @@ all : release
 
 release: $(RELEASE_OBJS)
 	$(LINKR) $(LFLAGS) $(LINKLIBS) $(RELEASE_OBJS)
+        $(MANIFESTTOOL)
 
 debug: $(DEBUG_OBJS)
 	$(LINKD) $(LFLAGS) $(LINKLIBS_DEBUG) $(DEBUG_OBJS)
+        $(MANIFESTTOOL)
 
 ## Release
 hugehelpr.obj: hugehelp.c

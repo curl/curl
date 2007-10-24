@@ -43,6 +43,7 @@ This release includes the following bugfixes:
  o redirect from HTTP to FTP memory problem
  o re-used connections a bit too much when using non-SSL protocols tunneled
    over a HTTP proxy
+ o embed the manifest in VC8 builds
 
 This release includes the following known bugs:
 
@@ -62,6 +63,6 @@ advice from friends like these:
  Dan Fandrich, Michal Marek, Günter Knauf, Rob Crittenden, Immanuel Gregoire,
  Mark Davies, Max Katsev, Philip Langdale, Alex Fishman, Johnny Luong,
  Alexey Pesternikov, Yang Tse, Kim Rinnewitz, Michael Wallner,
- Patrick Monnerat,
+ Patrick Monnerat, Vladimir Lazarenko
  
         Thanks! (and sorry if I forgot to mention someone)
