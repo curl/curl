@@ -794,8 +794,13 @@ struct HandleData {
                   this syntax. */
   curl_off_t resume_from; /* continue [ftp] transfer from here */
 
-  /* Protocol specific data */
-
+  /* Protocol specific data.
+   *
+   *************************************************************************
+   * Note that this data will be REMOVED after each request, so anything that
+   * should be kept/stored on a per-connection basis and thus live for the
+   * next requst on the same connection MUST be put in the connectdata struct!
+   *************************************************************************/
   union {
     struct HTTP *http;
     struct HTTP *https;  /* alias, just for the sake of being more readable */
