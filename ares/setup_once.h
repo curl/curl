@@ -91,6 +91,24 @@ struct timeval {
 #endif
 
 
+/*
+ * Windows build targets have socklen_t definition in
+ * ws2tcpip.h but some versions of ws2tcpip.h do not
+ * have the definition. It seems that when the socklen_t
+ * definition is missing from ws2tcpip.h the definition
+ * for INET_ADDRSTRLEN is also missing, and that when one
+ * definition is present the other one also is available.
+ */
+
+#if defined(WIN32) && !defined(HAVE_SOCKLEN_T)
+#  if ( defined(_MSC_VER) && !defined(INET_ADDRSTRLEN) ) || \
+      (!defined(_MSC_VER) && !defined(HAVE_WS2TCPIP_H) )
+#    define socklen_t int
+#    define HAVE_SOCKLEN_T
+#  endif
+#endif
+
+
 #if defined(__minix)
 /* Minix doesn't support recv on TCP sockets */
 #define sread(x,y,z) (ssize_t)read((RECV_TYPE_ARG1)(x), \

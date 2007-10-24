@@ -149,11 +149,6 @@
 #define ssize_t int
 #endif
 
-/* Define to 'int' if socklen_t is not an available 'typedefed' type */
-#ifndef HAVE_WS2TCPIP_H
-#define socklen_t int
-#endif
-
 /* ---------------------------------------------------------------- */
 /*                          STRUCT RELATED                          */
 /* ---------------------------------------------------------------- */

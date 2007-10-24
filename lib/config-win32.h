@@ -290,11 +290,6 @@
 #define _SSIZE_T_DEFINED
 #endif
 
-/* Define to 'int' if socklen_t is not an available 'typedefed' type */
-#if defined(_MSC_VER) && (_MSC_VER <= 1400)
-#define socklen_t int
-#endif
-
 /* ---------------------------------------------------------------- */
 /*                            TYPE SIZES                            */
 /* ---------------------------------------------------------------- */
