@@ -612,10 +612,12 @@ static CURLcode Curl_tftp_connect(struct connectdata *conn, bool *done)
      sessionhandle, deal with it */
   Curl_reset_reqproto(conn);
 
-  state = conn->data->reqdata.proto.tftp = calloc(sizeof(tftp_state_data_t),
-                                                  1);
-  if(!state)
-    return CURLE_OUT_OF_MEMORY;
+  if(!(state = conn->data->reqdata.proto.tftp)) {
+    state = conn->data->reqdata.proto.tftp = calloc(sizeof(tftp_state_data_t),
+                                                    1);
+    if(!state)
+      return CURLE_OUT_OF_MEMORY;
+  }
 
   conn->bits.close = FALSE; /* keep it open if possible */
 
