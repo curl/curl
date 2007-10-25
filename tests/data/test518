@@ -53,5 +53,8 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>
+<valgrind>
+disable
+</valgrind>
 </verify>
 </testcase>
