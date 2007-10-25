@@ -1746,7 +1746,8 @@ sub singletest {
         $DBGCURL=$CMDLINE;
     }
 
-    if($valgrind) {
+    my $usevalgrind = $valgrind && ((getpart("verify", "valgrind"))[0] !~ /disable/);
+    if($usevalgrind) {
         $CMDLINE = "$valgrind ".$valgrind_tool."--leak-check=yes --num-callers=16 ${valgrind_logfile}=log/valgrind$testnum $CMDLINE";
     }
 
@@ -2091,9 +2092,7 @@ sub singletest {
 
     if($valgrind) {
         # this is the valid protocol blurb curl should generate
-        my @disable= getpart("verify", "valgrind");
-
-        if($disable[0] !~ /disable/) {
+        if($usevalgrind) {
 
             opendir(DIR, "log") ||
                 return 0; # can't open log dir
@@ -2121,7 +2120,7 @@ sub singletest {
         }
         else {
             if(!$short) {
-                logmsg " valgrind SKIPPED";
+                logmsg " valgrind SKIPPED\n";
             }
             $ok .= "-"; # skipped
         }
