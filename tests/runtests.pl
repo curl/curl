@@ -1747,7 +1747,7 @@ sub singletest {
     }
 
     if($valgrind) {
-        $CMDLINE = "valgrind ".$valgrind_tool."--leak-check=yes --num-callers=16 ${valgrind_logfile}=log/valgrind$testnum $CMDLINE";
+        $CMDLINE = "$valgrind ".$valgrind_tool."--leak-check=yes --num-callers=16 ${valgrind_logfile}=log/valgrind$testnum $CMDLINE";
     }
 
     $CMDLINE .= "$cmdargs >>$STDOUT 2>>$STDERR";
@@ -2537,10 +2537,8 @@ if($valgrind) {
 	open(C, "<$CURL");
 	my $l = <C>;
 	if($l =~ /^\#\!/) {
-	    # The first line starts with "#!" which implies a shell-script.
-	    # This means libcurl is built shared and curl is a wrapper-script
-	    # Disable valgrind in this setup
-	    $valgrind=0;
+	    # A shell script. This is typically when built with libtool,
+	    $valgrind="../libtool --mode=execute $valgrind";
 	}
 	close(C);
 

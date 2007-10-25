@@ -44,6 +44,7 @@ This release includes the following bugfixes:
  o re-used connections a bit too much when using non-SSL protocols tunneled
    over a HTTP proxy
  o embed the manifest in VC8 builds
+ o use valgrind in the tests even when the lib is built shared with libtool
 
 This release includes the following known bugs:
 

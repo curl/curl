@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel S (25 October 2007)
+- Michal Marek fixed the test script to be able to use valgrind even when the
+  lib is built shared with libtool.
+
 - Fixed a few memory leaks when the same easy handle is re-used to request
   URLs with different protocols. FTP and TFTP related leaks. Caught thanks to
   Dan F's new test cases.
