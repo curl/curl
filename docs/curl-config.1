@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl-config 1 "25 Jan 2004" "Curl 7.15.4" "curl-config manual"
+.TH curl-config 1 "25 Oct 2007" "Curl 7.17.1" "curl-config manual"
 .SH NAME
 curl-config \- Get information about a libcurl installation
 .SH SYNOPSIS
@@ -62,6 +62,9 @@ the time of writing, this list may include HTTP, HTTPS, FTP, FTPS, FILE,
 TELNET, LDAP, DICT. Do not assume any particular order. The protocols will
 be listed using uppercase and are separated by newlines. There may be none,
 one or several protocols in the list. (Added in 7.13.0)
+.IP "--static-libs"
+Shows the complete set of libs and other linker options you will need in order
+to link your application with libcurl statically.
 .IP "--version"
 Outputs version information about the installed libcurl.
 .IP "--vernum"

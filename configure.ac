@@ -55,6 +55,7 @@ AC_SUBST(AR)
 if test "x$AR" = "xar-was-not-found-by-configure"; then
   AC_MSG_WARN([ar was not found, this may ruin your chances to build fine])
 fi
+AC_SUBST(libext)
 
 dnl figure out the libcurl version
 VERSION=`$SED -ne 's/^#define LIBCURL_VERSION "\(.*\)"/\1/p' ${srcdir}/include/curl/curlver.h`

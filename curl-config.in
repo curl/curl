@@ -41,10 +41,11 @@ Available values for OPTION include:
   --cflags    pre-processor and compiler flags
   --checkfor [version] check for (lib)curl of the specified version
   --features  newline separated list of enabled features
-  --protocols newline separated list of enabled protocols
   --help      display this help and exit
   --libs      library linking information
   --prefix    curl install prefix
+  --protocols newline separated list of enabled protocols
+  --static-libs static libcurl library linking information
   --version   output version information
   --vernum    output the version information as a number (hexadecimal)
 EOF
@@ -198,6 +199,10 @@ while test $# -gt 0; do
 	else
 	  echo ${CURLLIBDIR}-lcurl @LDFLAGS@ @LIBS@
 	fi
+	;;
+
+    --static-libs)
+	echo @libdir@/libcurl.@libext@ @LDFLAGS@ @LIBCURL_LIBS@ @LIBS@
 	;;
 
     *)

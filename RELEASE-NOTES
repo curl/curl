@@ -21,6 +21,7 @@ This release includes the following changes:
  o added CURLOPT_OPENSOCKETFUNCTION and CURLOPT_OPENSOCKETDATA
  o CULROPT_COOKIELIST supports "FLUSH"
  o added CURLOPT_COPYPOSTFIELDS
+ o added --static-libs to curl-config
 
 This release includes the following bugfixes:
 

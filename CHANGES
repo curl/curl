@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Dan F (25 October 2007)
+- Added the --static-libs option to curl-config
+
 Daniel S (25 October 2007)
 - Made libcurl built with NSS possible to ignore the peer verification.
   Previously it would fail if the ca bundle wasn't present, even if the code
