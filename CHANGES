@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel S (25 October 2007)
+- Made libcurl built with NSS possible to ignore the peer verification.
+  Previously it would fail if the ca bundle wasn't present, even if the code
+  ignored the verification results.
+
 Patrick M (25 October 2007)
 - Fixed test server to allow null bytes in binary posts.
 _ Added tests 35, 544 & 545 to check binary data posts, both static (in place)

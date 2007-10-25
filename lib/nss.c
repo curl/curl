@@ -909,9 +909,12 @@ CURLcode Curl_nss_connect(struct connectdata * conn, int sockindex)
                            NULL) != SECSuccess)
     goto error;
 
-  if (data->set.ssl.CAfile) {
-    rv = nss_load_cert(data->set.ssl.CAfile, PR_TRUE);
-    if (!rv) {
+  if(!data->set.ssl.verifypeer)
+    /* skip the verifying of the peer */
+    ;
+  else if (data->set.ssl.CAfile) {
+    int rc = nss_load_cert(data->set.ssl.CAfile, PR_TRUE);
+    if (!rc) {
       curlerr = CURLE_SSL_CACERT_BADFILE;
       goto error;
     }
@@ -954,8 +957,8 @@ CURLcode Curl_nss_connect(struct connectdata * conn, int sockindex)
         data->set.ssl.CApath ? data->set.ssl.CApath : "none");
 
   if(data->set.str[STRING_CERT]) {
-    char * n;
-    char * nickname;
+    char *n;
+    char *nickname;
 
     nickname = (char *)malloc(PATH_MAX);
     if(is_file(data->set.str[STRING_CERT])) {
@@ -973,7 +976,7 @@ CURLcode Curl_nss_connect(struct connectdata * conn, int sockindex)
       goto error;
     }
     if (!cert_stuff(conn, data->set.str[STRING_CERT],
-        data->set.str[STRING_KEY])) {
+                    data->set.str[STRING_KEY])) {
       /* failf() is already done in cert_stuff() */
       free(nickname);
       return CURLE_SSL_CERTPROBLEM;
@@ -983,7 +986,7 @@ CURLcode Curl_nss_connect(struct connectdata * conn, int sockindex)
     if(SSL_GetClientAuthDataHook(model,
                                  (SSLGetClientAuthData) SelectClientCert,
                                  (void *)connssl->client_nickname) !=
-                                 SECSuccess) {
+       SECSuccess) {
       curlerr = CURLE_SSL_CERTPROBLEM;
       goto error;
     }

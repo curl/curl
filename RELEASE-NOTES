@@ -45,6 +45,8 @@ This release includes the following bugfixes:
    over a HTTP proxy
  o embed the manifest in VC8 builds
  o use valgrind in the tests even when the lib is built shared with libtool
+ o libcurl built with NSS can now ignore the peer verification even whjen the
+   ca cert bundle is absent
 
 This release includes the following known bugs:
 
