@@ -110,7 +110,7 @@ struct httprequest {
 };
 
 int ProcessRequest(struct httprequest *req);
-void storerequest(char *reqbuf);
+void storerequest(char *reqbuf, ssize_t totalsize);
 
 #define DEFAULT_PORT 8999
 
@@ -446,7 +446,7 @@ int ProcessRequest(struct httprequest *req)
     return 1;
 
   if(req->cl) {
-    if(req->cl <= strlen(end+strlen(END_OF_HEADERS)))
+    if(req->cl <= req->offset - (end - req->reqbuf) - strlen(END_OF_HEADERS))
       return 1; /* done */
     else
       return 0; /* not complete yet */
@@ -456,18 +456,16 @@ int ProcessRequest(struct httprequest *req)
 }
 
 /* store the entire request in a file */
-void storerequest(char *reqbuf)
+void storerequest(char *reqbuf, ssize_t totalsize)
 {
   int error;
   ssize_t written;
   ssize_t writeleft;
-  ssize_t totalsize;
   FILE *dump;
 
   if (reqbuf == NULL)
     return;
 
-  totalsize = (ssize_t)strlen(reqbuf);
   if (totalsize == 0)
     return;
 
@@ -531,7 +529,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
       reqbuf[req->offset]=0;
 
       /* dump the request receivied so far to the external file */
-      storerequest(reqbuf);
+      storerequest(reqbuf, req->offset);
       return DOCNUMBER_INTERNAL;
     }
 
@@ -560,7 +558,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
     reqbuf[req->offset]=0;
 
   /* dump the request to an external file */
-  storerequest(reqbuf);
+  storerequest(reqbuf, req->offset);
 
   return fail; /* success */
 }

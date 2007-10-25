@@ -1,0 +1,49 @@
+<testcase>
+#
+# Server-side
+<reply>
+<data mode="text">
+HTTP/1.1 200 OK swsclose
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 3
+
+OK
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib544
+</tool>
+
+ <name>
+HTTP POST text data using CURLOPT_COPYPOSTFIELDS
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/544
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol nonewline="yes">
+POST /544 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 4
+Content-Type: application/x-www-form-urlencoded
+
+This
+</protocol>
+</verify>
+</testcase>
