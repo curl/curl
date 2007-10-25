@@ -2058,9 +2058,6 @@ static void conn_free(struct connectdata *conn)
   if(CURL_SOCKET_BAD != conn->sock[FIRSTSOCKET])
     sclose(conn->sock[FIRSTSOCKET]);
 
-  if (conn->data->reqdata.current_conn == conn) {
-    conn->data->reqdata.current_conn = NULL;
-  }
   Curl_safefree(conn->user);
   Curl_safefree(conn->passwd);
   Curl_safefree(conn->proxyuser);
@@ -2170,6 +2167,7 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   }
 
   conn_free(conn);
+  data->reqdata.current_conn = NULL;
 
   return CURLE_OK;
 }
