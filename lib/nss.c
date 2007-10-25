@@ -548,7 +548,7 @@ static SECStatus nss_Init_Tokens(struct connectdata * conn)
   return status;
 }
 
-static SECStatus BadCertHandler(void *arg, PRFileDesc * socket)
+static SECStatus BadCertHandler(void *arg, PRFileDesc *sock)
 {
   SECStatus success = SECSuccess;
   struct connectdata *conn = (struct connectdata *)arg;
@@ -560,7 +560,7 @@ static SECStatus BadCertHandler(void *arg, PRFileDesc * socket)
     return success;
 
   conn->data->set.ssl.certverifyresult=err;
-  cert = SSL_PeerCertificate(socket);
+  cert = SSL_PeerCertificate(sock);
   subject = CERT_NameToAscii(&cert->subject);
   issuer = CERT_NameToAscii(&cert->issuer);
   CERT_DestroyCertificate(cert);
@@ -606,14 +606,14 @@ static SECStatus BadCertHandler(void *arg, PRFileDesc * socket)
 /**
  * Inform the application that the handshake is complete.
  */
-static SECStatus HandshakeCallback(PRFileDesc * socket, void *arg)
+static SECStatus HandshakeCallback(PRFileDesc *sock, void *arg)
 {
-  (void)socket;
+  (void)sock;
   (void)arg;
   return SECSuccess;
 }
 
-static void display_conn_info(struct connectdata *conn, PRFileDesc * socket)
+static void display_conn_info(struct connectdata *conn, PRFileDesc *sock)
 {
   SSLChannelInfo channel;
   SSLCipherSuiteInfo suite;
@@ -623,7 +623,7 @@ static void display_conn_info(struct connectdata *conn, PRFileDesc * socket)
   char timeString[256];
   PRTime notBefore, notAfter;
 
-  if (SSL_GetChannelInfo(socket, &channel, sizeof channel) ==
+  if (SSL_GetChannelInfo(sock, &channel, sizeof channel) ==
     SECSuccess && channel.length == sizeof channel &&
     channel.cipherSuite) {
     if (SSL_GetCipherSuiteInfo(channel.cipherSuite,
@@ -634,7 +634,7 @@ static void display_conn_info(struct connectdata *conn, PRFileDesc * socket)
 
   infof(conn->data, "Server certificate:\n");
 
-  cert = SSL_PeerCertificate(socket);
+  cert = SSL_PeerCertificate(sock);
   subject = CERT_NameToAscii(&cert->subject);
   issuer = CERT_NameToAscii(&cert->issuer);
   common_name = CERT_GetCommonName(&cert->subject);
@@ -663,10 +663,10 @@ static void display_conn_info(struct connectdata *conn, PRFileDesc * socket)
  *
  * Callback to pick the SSL client certificate.
  */
-static SECStatus SelectClientCert(void *arg, PRFileDesc * socket,
-                                  struct CERTDistNamesStr * caNames,
-                                  struct CERTCertificateStr ** pRetCert,
-                                  struct SECKEYPrivateKeyStr ** pRetKey)
+static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
+                                  struct CERTDistNamesStr *caNames,
+                                  struct CERTCertificateStr **pRetCert,
+                                  struct SECKEYPrivateKeyStr **pRetKey)
 {
   CERTCertificate *cert;
   SECKEYPrivateKey *privKey;
@@ -676,7 +676,7 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc * socket,
   PK11SlotInfo *slot;
   (void)caNames;
 
-  proto_win = SSL_RevealPinArg(socket);
+  proto_win = SSL_RevealPinArg(sock);
 
   if (!nickname)
     return secStatus;
@@ -800,7 +800,9 @@ CURLcode Curl_nss_connect(struct connectdata * conn, int sockindex)
   curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   SECStatus rv;
+#ifdef HAVE_PK11_CREATEGENERICOBJECT
   char *configstring = NULL;
+#endif
   char *certDir = NULL;
   int curlerr;
 
@@ -925,7 +927,7 @@ CURLcode Curl_nss_connect(struct connectdata * conn, int sockindex)
     }
 
     if (S_ISDIR(st.st_mode)) {
-      int rv;
+      int rc;
 
       dir = PR_OpenDir(data->set.ssl.CApath);
       do {
@@ -936,7 +938,8 @@ CURLcode Curl_nss_connect(struct connectdata * conn, int sockindex)
 
           snprintf(fullpath, sizeof(fullpath), "%s/%s", data->set.ssl.CApath,
                    entry->name);
-          rv = nss_load_cert(fullpath, PR_TRUE);
+          rc = nss_load_cert(fullpath, PR_TRUE);
+          /* FIXME: check this return value! */
         }
       /* This is purposefully tolerant of errors so non-PEM files
        * can be in the same directory */
