@@ -468,6 +468,11 @@ void storerequest(char *reqbuf, ssize_t totalsize)
 
   if (totalsize == 0)
     return;
+  else if (totalsize < 0) {
+    logmsg("Invalid size (%d bytes) for request input. Not written to %s",
+           totalsize, REQUEST_DUMP);
+    return;
+  }
 
   do {
     dump = fopen(REQUEST_DUMP, "ab");
