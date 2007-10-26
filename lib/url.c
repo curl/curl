@@ -1053,7 +1053,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
            to mark that postfields is used rather than read function or
            form data.
          */
-        p = malloc(data->set.postfieldsize? data->set.postfieldsize: 1);
+        p = malloc((size_t)(data->set.postfieldsize?data->set.postfieldsize:1));
 
         if (!p)
           result = CURLE_OUT_OF_MEMORY;
