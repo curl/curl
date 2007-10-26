@@ -414,6 +414,7 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
   int code = 0;
 
   *ftpcode = 0; /* 0 for errors or not done */
+  *size = 0;
 
   ptr=buf + ftpc->nread_resp;
 
