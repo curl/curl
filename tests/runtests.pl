@@ -2376,12 +2376,14 @@ sub serverfortest {
         return "no server specified";
     }
 
-    my $proto = lc($what[0]);
-    chomp $proto;
-    if (! grep /^$proto$/, @protocols) {
-        if (substr($proto,0,5) ne "socks") {
-		return "curl lacks any $proto support";
-        }
+    for (@what) {
+	my $proto = lc($_);
+	chomp $proto;
+	if (! grep /^$proto$/, @protocols) {
+	    if (substr($proto,0,5) ne "socks") {
+		    return "curl lacks any $proto support";
+	    }
+	}
     }
 
     return &startservers(@what);
