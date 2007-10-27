@@ -180,7 +180,7 @@ sub startsf {
     }
 }
 
-# remove the file here so that if startsf() fails, it is very noticable 
+# remove the file here so that if startsf() fails, it is very noticeable 
 unlink($pidfile);
 
 startsf();
@@ -340,7 +340,7 @@ sub MDTM_command {
     my $testpart = "";
     if ($testno > 10000) {
     	$testpart = $testno % 10000;
-    	$testno = $testno / 10000;
+    	$testno = int($testno / 10000);
     }
 
     loadtest("$srcdir/data/test$testno");
@@ -367,7 +367,7 @@ sub SIZE_command {
     my $testpart = "";
     if ($testno > 10000) {
     	$testpart = $testno % 10000;
-    	$testno = $testno / 10000;
+    	$testno = int($testno / 10000);
     }
 
     loadtest("$srcdir/data/test$testno");
@@ -393,7 +393,7 @@ sub SIZE_command {
     }
     else {
         $size=0;
-        @data = getpart("reply", "data" . $testpart);
+        @data = getpart("reply", "data$testpart");
         for(@data) {
             $size += length($_);
         }
@@ -429,19 +429,19 @@ sub RETR_command {
     my $testpart = "";
     if ($testno > 10000) {
     	$testpart = $testno % 10000;
-    	$testno = $testno / 10000;
+    	$testno = int($testno / 10000);
     }
 
     loadtest("$srcdir/data/test$testno");
 
-    my @data = getpart("reply", "data" . $testpart);
+    my @data = getpart("reply", "data$testpart");
 
     my $size=0;
     for(@data) {
         $size += length($_);
     }
 
-    my %hash = getpartattr("reply", "data" . $testpart);
+    my %hash = getpartattr("reply", "data$testpart");
 
     if($size || $hash{'sendzero'}) {
     
@@ -546,7 +546,7 @@ sub PASV_command {
         kill(9, $prev);
     }
 
-    # We fire up a new sockfilt to do the data tranfer for us.
+    # We fire up a new sockfilt to do the data transfer for us.
     $slavepid = open2(\*DREAD, \*DWRITE,
                       "./server/sockfilt --port 0 --logfile log/sockdata$ftpdnum$ext.log --pidfile $pidf $ipv6");
 
@@ -869,7 +869,7 @@ while(1) {
             sendcontrol "$text\r\n";
         }
         else {
-            $check=1; # no repsonse yet
+            $check=1; # no response yet
         }
 
         if($fake eq "") {
