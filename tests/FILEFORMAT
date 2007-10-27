@@ -213,9 +213,9 @@ If a CONNECT is used to the server (to emulate HTTPS etc over proxy), the port
 number given in the CONNECT request will be used to identify which test that
 is being run, if the proxy host name is said to start with 'test'.
 
-Set 'option=no-output' to prevent the test script to slap on the --output
+Set option="no-output" to prevent the test script to slap on the --output
 argument that directs the output to a file. The --output is also not added if
-the client/stdout section is used.
+the verify/stdout section is used.
 
 Available substitute variables include:
 %CLIENTIP   - IPv4 address of the client running curl

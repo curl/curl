@@ -13,7 +13,7 @@ multiprotocol
 #
 # Server-side
 <reply>
-<data1>
+<data1 nocheck="1">
 HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -27,7 +27,7 @@ Funny-head: yesyes
 
 -foo-
 </data1>
-<data2>
+<data2 nocheck="1">
 data
     to
       see
@@ -80,5 +80,30 @@ SIZE 20010002
 RETR 20010002
 QUIT
 </protocol>
+<stdout>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+data
+    to
+      see
+that FTP
+works
+  so does it?
+foo
+   bar
+bar
+   foo
+moo
+</stdout>
 </verify>
 </testcase>

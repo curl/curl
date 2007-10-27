@@ -13,7 +13,7 @@ multiprotocol
 #
 # Server-side
 <reply>
-<data>
+<data nocheck="1">
 Test data file
 for tftp test
 </data>
@@ -49,6 +49,22 @@ opcode: 1
 filename: /2004
 mode: octet
 </protocol>
+<stdout>
+Test data file
+for tftp test
+This is test data
+for several protocols
+This is test data
+for several protocols
+This is test data
+for several protocols
+This is test data
+for several protocols
+This is test data
+for several protocols
+Test data file
+for tftp test
+</stdout>
 <valgrind>
 disable
 </valgrind>

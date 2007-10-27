@@ -11,7 +11,7 @@ multiprotocol
 #
 # Server-side
 <reply>
-<data>
+<data nocheck="1">
 data
     to
       see
@@ -56,5 +56,18 @@ SIZE 2000
 RETR 2000
 QUIT
 </protocol>
+<stdout>
+data
+    to
+      see
+that FTP
+works
+  so does it?
+foo
+   bar
+bar
+   foo
+moo
+</stdout>
 </verify>
 </testcase>
