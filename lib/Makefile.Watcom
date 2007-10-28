@@ -4,7 +4,7 @@
 #
 # $Id$
 
-TARGETS = libcurl_wc.lib libcurl_wc.dll libcurl_wc_imp.lib
+TARGETS = ca-bundle.h libcurl_wc.lib libcurl_wc.dll libcurl_wc_imp.lib
 
 CC = wcc386
 
@@ -12,41 +12,41 @@ CFLAGS = -3r -mf -d3 -hc -zff -zgf -zq -zm -zc -s -fr=con -w2 -fpi -oilrtfm -bt=
          -d+ -dWIN32 -dCURL_CA_BUNDLE=getenv("CURL_CA_BUNDLE")                     &
          -dBUILDING_LIBCURL -dWITHOUT_MM_LIB -dHAVE_SPNEGO=1 -dENABLE_IPV6         &
          -dDEBUG_THREADING_GETADDRINFO -dDEBUG=1 -dCURLDEBUG -d_WIN32_WINNT=0x0501 &
-         -I. -I..\include
+         -I. -I..\include -dCURL_DISABLE_LDAP
 
 OBJ_DIR  = Watcom_obj
 LIB_ARG  = $(OBJ_DIR)\wlib.arg
 LINK_ARG = $(OBJ_DIR)\wlink.arg
 
-OBJS = $(OBJ_DIR)\transfer.obj         $(OBJ_DIR)\file.obj       &
-       $(OBJ_DIR)\strequal.obj         $(OBJ_DIR)\timeval.obj    &
-       $(OBJ_DIR)\easy.obj             $(OBJ_DIR)\base64.obj     &
-       $(OBJ_DIR)\security.obj         $(OBJ_DIR)\hostip.obj     &
-       $(OBJ_DIR)\krb4.obj             $(OBJ_DIR)\progress.obj   &
-       $(OBJ_DIR)\memdebug.obj         $(OBJ_DIR)\formdata.obj   &
-       $(OBJ_DIR)\http_chunks.obj      $(OBJ_DIR)\cookie.obj     &
-       $(OBJ_DIR)\strtok.obj           $(OBJ_DIR)\http.obj       &
-       $(OBJ_DIR)\connect.obj          $(OBJ_DIR)\sendf.obj      &
-       $(OBJ_DIR)\llist.obj            $(OBJ_DIR)\ftp.obj        &
-       $(OBJ_DIR)\hash.obj             $(OBJ_DIR)\url.obj        &
-       $(OBJ_DIR)\multi.obj            $(OBJ_DIR)\dict.obj       &
-       $(OBJ_DIR)\content_encoding.obj $(OBJ_DIR)\if2ip.obj      &
-       $(OBJ_DIR)\share.obj            $(OBJ_DIR)\speedcheck.obj &
-       $(OBJ_DIR)\http_digest.obj      $(OBJ_DIR)\ldap.obj       &
-       $(OBJ_DIR)\md5.obj              $(OBJ_DIR)\ssluse.obj     &
-       $(OBJ_DIR)\http_negotiate.obj   $(OBJ_DIR)\version.obj    &
-       $(OBJ_DIR)\http_ntlm.obj        $(OBJ_DIR)\getenv.obj     &
-       $(OBJ_DIR)\inet_pton.obj        $(OBJ_DIR)\escape.obj     &
-       $(OBJ_DIR)\strtoofft.obj        $(OBJ_DIR)\mprintf.obj    &
-       $(OBJ_DIR)\strerror.obj         $(OBJ_DIR)\telnet.obj     &
-       $(OBJ_DIR)\hostares.obj         $(OBJ_DIR)\netrc.obj      &
-       $(OBJ_DIR)\hostasyn.obj         $(OBJ_DIR)\getinfo.obj    &
-       $(OBJ_DIR)\hostip4.obj          $(OBJ_DIR)\hostthre.obj   &
-       $(OBJ_DIR)\hostip6.obj          $(OBJ_DIR)\inet_ntop.obj  &
-       $(OBJ_DIR)\hostsyn.obj          $(OBJ_DIR)\parsedate.obj  &
-       $(OBJ_DIR)\select.obj           $(OBJ_DIR)\sslgen.obj     &
-       $(OBJ_DIR)\gtls.obj             $(OBJ_DIR)\tftp.obj       &
-       $(OBJ_DIR)\splay.obj	       $(OBJ_DIR)\socks.obj
+OBJS = $(OBJ_DIR)\base64.obj           $(OBJ_DIR)\connect.obj     &
+       $(OBJ_DIR)\content_encoding.obj $(OBJ_DIR)\cookie.obj      &
+       $(OBJ_DIR)\dict.obj             $(OBJ_DIR)\easy.obj        &
+       $(OBJ_DIR)\escape.obj           $(OBJ_DIR)\file.obj        &
+       $(OBJ_DIR)\formdata.obj         $(OBJ_DIR)\ftp.obj         &
+       $(OBJ_DIR)\getenv.obj           $(OBJ_DIR)\getinfo.obj     &
+       $(OBJ_DIR)\gtls.obj             $(OBJ_DIR)\hash.obj        &
+       $(OBJ_DIR)\hostares.obj         $(OBJ_DIR)\hostasyn.obj    &
+       $(OBJ_DIR)\hostip.obj           $(OBJ_DIR)\hostip4.obj     &
+       $(OBJ_DIR)\hostip6.obj          $(OBJ_DIR)\hostsyn.obj     &
+       $(OBJ_DIR)\hostthre.obj         $(OBJ_DIR)\http.obj        &
+       $(OBJ_DIR)\http_chunks.obj      $(OBJ_DIR)\http_digest.obj &
+       $(OBJ_DIR)\http_negotiate.obj   $(OBJ_DIR)\http_ntlm.obj   &
+       $(OBJ_DIR)\if2ip.obj            $(OBJ_DIR)\inet_ntop.obj   &
+       $(OBJ_DIR)\inet_pton.obj        $(OBJ_DIR)\krb4.obj        &
+       $(OBJ_DIR)\ldap.obj             $(OBJ_DIR)\llist.obj       &
+       $(OBJ_DIR)\md5.obj              $(OBJ_DIR)\memdebug.obj    &
+       $(OBJ_DIR)\mprintf.obj          $(OBJ_DIR)\multi.obj       &
+       $(OBJ_DIR)\netrc.obj            $(OBJ_DIR)\parsedate.obj   &
+       $(OBJ_DIR)\progress.obj         $(OBJ_DIR)\security.obj    &
+       $(OBJ_DIR)\select.obj           $(OBJ_DIR)\sendf.obj       &
+       $(OBJ_DIR)\share.obj            $(OBJ_DIR)\socks.obj       &
+       $(OBJ_DIR)\speedcheck.obj       $(OBJ_DIR)\splay.obj       &
+       $(OBJ_DIR)\sslgen.obj           $(OBJ_DIR)\ssluse.obj      &
+       $(OBJ_DIR)\strequal.obj         $(OBJ_DIR)\strerror.obj    &
+       $(OBJ_DIR)\strtok.obj           $(OBJ_DIR)\strtoofft.obj   &
+       $(OBJ_DIR)\telnet.obj           $(OBJ_DIR)\tftp.obj        &
+       $(OBJ_DIR)\timeval.obj          $(OBJ_DIR)\transfer.obj    &
+       $(OBJ_DIR)\url.obj              $(OBJ_DIR)\version.obj
 
 RESOURCE = $(OBJ_DIR)\libcurl.res
 
@@ -55,6 +55,9 @@ all: $(OBJ_DIR) $(TARGETS) .SYMBOLIC
 
 $(OBJ_DIR):
 	mkdir $(OBJ_DIR)
+
+ca-bundle.h:
+	@echo /* dummy ca-bundle.h. Not used */ > $@
 
 libcurl_wc.lib: $(OBJS) $(LIB_ARG)
 	wlib -q -b -c $@ @$(LIB_ARG)
