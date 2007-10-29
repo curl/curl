@@ -15,7 +15,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o 
+ o curl-config --features and --protocols show the correct output when built
+   with NSS
 
 This release includes the following known bugs:
 
