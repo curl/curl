@@ -560,7 +560,7 @@ int Curl_read(struct connectdata *conn, /* connection data */
 
 /* return 0 on success */
 static int showit(struct SessionHandle *data, curl_infotype type,
-                  const char *ptr, size_t size)
+                  char *ptr, size_t size)
 {
   static const char * const s_infotype[CURLINFO_END] = {
     "* ", "< ", "> ", "{ ", "} ", "{ ", "} " };
@@ -629,7 +629,7 @@ static int showit(struct SessionHandle *data, curl_infotype type,
 }
 
 int Curl_debug(struct SessionHandle *data, curl_infotype type,
-               const char *ptr, size_t size,
+               char *ptr, size_t size,
                struct connectdata *conn)
 {
   int rc;

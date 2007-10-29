@@ -70,7 +70,7 @@ CURLcode Curl_write(struct connectdata *conn,
 
 /* the function used to output verbose information */
 int Curl_debug(struct SessionHandle *handle, curl_infotype type,
-               const char *data, size_t size,
+               char *data, size_t size,
                struct connectdata *conn);
 
 
