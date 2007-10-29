@@ -6,6 +6,8 @@
 
                                   Changelog
 
+Version 7.17.1 (29 October 2007)
+
 Dan F (25 October 2007)
 - Added the --static-libs option to curl-config
 
