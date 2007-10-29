@@ -83,7 +83,7 @@ while test $# -gt 0; do
 	if test "@USE_SSLEAY@" = "1"; then
           echo "SSL"
           NTLM=1 # OpenSSL implies NTLM
-        elif test -n "@USE_GNUTLS@"; then
+        elif test -n "@SSL_ENABLED@"; then
           echo "SSL"
         fi
 	if test "@KRB4_ENABLED@" = "1"; then
@@ -113,13 +113,13 @@ while test $# -gt 0; do
     --protocols)
 	if test "@CURL_DISABLE_HTTP@" != "1"; then
           echo "HTTP"
-	  if test "@USE_SSLEAY@" = "1"; then
+	  if test "@SSL_ENABLED@" = "1"; then
             echo "HTTPS"
           fi
         fi
 	if test "@CURL_DISABLE_FTP@" != "1"; then
           echo "FTP"
-	  if test "@USE_SSLEAY@" = "1"; then
+	  if test "@SSL_ENABLED@" = "1"; then
             echo "FTPS"
           fi
         fi

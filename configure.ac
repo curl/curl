@@ -1566,13 +1566,17 @@ fi dnl OPENSSL != 1 -a GNUTLS_ENABLED != 1
 if test "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED" = "x"; then
   AC_MSG_WARN([SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more.])
   AC_MSG_WARN([Use --with-ssl, --with-gnutls or --with-nss to address this.])
+else
+  # SSL is enabled, genericly
+  AC_SUBST(SSL_ENABLED)
+  SSL_ENABLED="1"
 fi
 
 dnl **********************************************************************
 dnl Check for the CA bundle
 dnl **********************************************************************
 
-if test X"$USE_NSS$USE_GNUTLS$OPENSSL_ENABLED" != "X"; then
+if test X"$SSL_ENABLED" != "X"; then
 
   AC_MSG_CHECKING([CA cert bundle install path])
 

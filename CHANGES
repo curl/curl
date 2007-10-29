@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel S (29 October 2007)
+- Based on one of those bug reports that are intercepted by a distro's bug
+  tracker (https://bugzilla.redhat.com/show_bug.cgi?id=316191), I now made
+  curl-config --features and --protocols show the correct output when built
+  with NSS.
+
 Version 7.17.1 (29 October 2007)
 
 Dan F (25 October 2007)
