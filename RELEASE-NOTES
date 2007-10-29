@@ -1,7 +1,7 @@
-Curl and libcurl 7.17.1
+Curl and libcurl 7.17.2
 
- Public curl release number:               102
- Releases counted from the very beginning: 128
+ Public curl release number:               103
+ Releases counted from the very beginning: 129
  Available command line options:           121
  Available curl_easy_setopt() options:     147
  Number of public functions in libcurl:    55
@@ -11,43 +11,11 @@ Curl and libcurl 7.17.1
 
 This release includes the following changes:
  
- o automatically append ";type=<a|i>" when using HTTP proxies for FTP urls
- o improved NSS support
- o added --proxy-negotiate
- o added --post301 and CURLOPT_POST301
- o builds with c-ares 1.5.0
- o added CURLOPT_SSH_HOST_PUBLIC_KEY_MD5 and --hostpubmd5
- o renamed CURLE_SSL_PEER_CERTIFICATE to CURLE_PEER_FAILED_VERIFICATION
- o added CURLOPT_OPENSOCKETFUNCTION and CURLOPT_OPENSOCKETDATA
- o CULROPT_COOKIELIST supports "FLUSH"
- o added CURLOPT_COPYPOSTFIELDS
- o added --static-libs to curl-config
+ o 
 
 This release includes the following bugfixes:
 
- o curl-config --protocols now properly reports LDAPS, SCP and SFTP
- o ldapv3 support on Windows
- o ldap builds with the MSVC makefiles
- o no HOME and no key given caused SSH auth failure
- o Negotiate authentication over proxy
- o --ftp-method nocwd on directory listings
- o FTP, CURLOPT_NOBODY enabled and CURLOPT_HEADER disabled now does TYPE
-   before SIZE
- o re-used handle transfers with SFTP
- o curl_easy_escape() problem with byte values >= 128
- o handles chunked-encoded CONNECT responses
- o misuse of ares_timeout() result
- o --local-port on TFTP transfers
- o CURLOPT_POSTFIELDS could fail to send binary data
- o specifying a proxy with a trailing slash didn't work (unless it also
-   contained a port number)
- o redirect from HTTP to FTP or TFTP memory problems and leaks
- o re-used connections a bit too much when using non-SSL protocols tunneled
-   over a HTTP proxy
- o embed the manifest in VC8 builds
- o use valgrind in the tests even when the lib is built shared with libtool
- o libcurl built with NSS can now ignore the peer verification even when the
-   ca cert bundle is absent
+ o 
 
 This release includes the following known bugs:
 
@@ -59,14 +27,11 @@ Other curl-related news:
 
 New curl mirrors:
 
- o http://curl.wetzlmayr.at/ is a new web mirror in Nuremberg, Germany
+ o 
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dan Fandrich, Michal Marek, Günter Knauf, Rob Crittenden, Immanuel Gregoire,
- Mark Davies, Max Katsev, Philip Langdale, Alex Fishman, Johnny Luong,
- Alexey Pesternikov, Yang Tse, Kim Rinnewitz, Michael Wallner,
- Patrick Monnerat, Vladimir Lazarenko
+ 
  
         Thanks! (and sorry if I forgot to mention someone)
