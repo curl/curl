@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Dan F (29 October 2007)
+- Added test case 546 to check that subsequent FTP transfers work after a
+  failed one using the multi interface
+
 Daniel S (29 October 2007)
 - Based on one of those bug reports that are intercepted by a distro's bug
   tracker (https://bugzilla.redhat.com/show_bug.cgi?id=316191), I now made
