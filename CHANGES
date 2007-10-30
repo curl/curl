@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Dan F (30 October 2007)
+- Fixed an OOM problem with file: URLs
+
+- Moved Curl_file_connect into the protocol handler struct
+
 Dan F (29 October 2007)
 - Added test case 546 to check that subsequent FTP transfers work after a
   failed one using the multi interface

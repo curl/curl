@@ -97,6 +97,7 @@
 static CURLcode Curl_file(struct connectdata *, bool *done);
 static CURLcode Curl_file_done(struct connectdata *conn,
                                CURLcode status, bool premature);
+static CURLcode Curl_file_connect(struct connectdata *conn, bool *done);
 
 /*
  * FILE scheme handler.
@@ -108,7 +109,7 @@ const struct Curl_handler Curl_handler_file = {
   Curl_file,                            /* do_it */
   Curl_file_done,                       /* done */
   ZERO_NULL,                            /* do_more */
-  ZERO_NULL,                            /* connect_it */
+  Curl_file_connect,                    /* connect_it */
   ZERO_NULL,                            /* connecting */
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
@@ -123,7 +124,7 @@ const struct Curl_handler Curl_handler_file = {
  * do protocol-specific actions at connect-time.  We emulate a
  * connect-then-transfer protocol and "connect" to the file here
  */
-CURLcode Curl_file_connect(struct connectdata *conn)
+static CURLcode Curl_file_connect(struct connectdata *conn, bool *done)
 {
   struct SessionHandle *data = conn->data;
   char *real_path = curl_easy_unescape(data, data->reqdata.path, 0, NULL);
@@ -203,6 +204,7 @@ CURLcode Curl_file_connect(struct connectdata *conn)
     Curl_file_done(conn, CURLE_FILE_COULDNT_READ_FILE, FALSE);
     return CURLE_FILE_COULDNT_READ_FILE;
   }
+  *done = TRUE;
 
   return CURLE_OK;
 }
@@ -217,9 +219,6 @@ static CURLcode Curl_file_done(struct connectdata *conn,
 
   if(file->fd != -1)
     close(file->fd);
-
-  free(file);
-  conn->data->reqdata.proto.file= NULL; /* clear it! */
 
   return CURLE_OK;
 }
