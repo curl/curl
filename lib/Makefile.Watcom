@@ -12,7 +12,7 @@ CFLAGS = -3r -mf -d3 -hc -zff -zgf -zq -zm -zc -s -fr=con -w2 -fpi -oilrtfm -bt=
          -d+ -dWIN32 -dCURL_CA_BUNDLE=getenv("CURL_CA_BUNDLE")                     &
          -dBUILDING_LIBCURL -dWITHOUT_MM_LIB -dHAVE_SPNEGO=1 -dENABLE_IPV6         &
          -dDEBUG_THREADING_GETADDRINFO -dDEBUG=1 -dCURLDEBUG -d_WIN32_WINNT=0x0501 &
-         -I. -I..\include -dCURL_DISABLE_LDAP
+         -I. -I..\include -dWINBERAPI=__declspec(cdecl) -dWINLDAPAPI=__declspec(cdecl)
 
 #
 # Change to suite.
@@ -105,7 +105,7 @@ $(LINK_ARG): $(__MAKEFILES__)
 	@%append $^@ file { $(OBJS) }
 	@%append $^@ option quiet, map, caseexact, eliminate, implib=libcurl_wc_imp.lib,
 	@%append $^@ res=$(RESOURCE) libpath $(%watcom)\lib386;$(%watcom)\lib386\nt
-	@%append $^@ library clib3r.lib, ws2_32.lib
+	@%append $^@ library clib3r.lib, wldap32.lib, ws2_32.lib
 !ifeq USE_ZLIB 1
 	@%append $^@ library $(ZLIB_ROOT)\zlib.lib
 !endif
