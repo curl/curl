@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Dan F (31 October 2007)
+- Fixed the output of curl-config --protocols which showed SCP and SFTP
+  always, except when --without-libssh2 was given
+
 Dan F (30 October 2007)
 - Fixed an OOM problem with file: URLs
 
