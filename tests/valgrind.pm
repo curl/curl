@@ -21,6 +21,8 @@
 # $Id$
 ###########################################################################
 
+use File::Basename;
+
 sub valgrindparse {
     my ($srcdir,     # the dir in which the runtests script resides
         $sslenabled,
@@ -44,13 +46,13 @@ sub valgrindparse {
                 my $w = $4;
                 if($w =~ /(.*) \(([^:]*):(\d+)/) {
                     my ($func, $source, $line)=($1, $2, $3);
-
-                    if(-f "$srcdir/../src/$source" ||
-                       -f "$srcdir/../lib/$source") {
+                    my $sourcename = basename($source);
+                    if(-f "$srcdir/../src/$sourcename" ||
+                       -f "$srcdir/../lib/$sourcename") {
                         # this is our source
  #                       print "$func() at $source:$line\n";
                         $us++;
-                    }
+                    } #else {print "Not our source: $func, $source, $line\n";}
                 }
             }
             else {
