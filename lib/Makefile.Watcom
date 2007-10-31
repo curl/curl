@@ -14,7 +14,18 @@ CFLAGS = -3r -mf -d3 -hc -zff -zgf -zq -zm -zc -s -fr=con -w2 -fpi -oilrtfm -bt=
          -dDEBUG_THREADING_GETADDRINFO -dDEBUG=1 -dCURLDEBUG -d_WIN32_WINNT=0x0501 &
          -I. -I..\include -dCURL_DISABLE_LDAP
 
+#
+# Change to suite.
+#
+ZLIB_ROOT = ..\..\..\zlib-1.2.3
+USE_ZLIB  = 0
+
+!ifeq USE_ZLIB 1
+CFLAGS += -dHAVE_ZLIB_H -dHAVE_LIBZ -I$(ZLIB_ROOT)
+!endif
+
 OBJ_DIR  = Watcom_obj
+C_ARG    = $(OBJ_DIR)\wcc386.arg
 LIB_ARG  = $(OBJ_DIR)\wlib.arg
 LINK_ARG = $(OBJ_DIR)\wlink.arg
 
@@ -50,7 +61,7 @@ OBJS = $(OBJ_DIR)\base64.obj           $(OBJ_DIR)\connect.obj     &
 
 RESOURCE = $(OBJ_DIR)\libcurl.res
 
-all: $(OBJ_DIR) $(TARGETS) .SYMBOLIC
+all: $(OBJ_DIR) $(C_ARG) $(TARGETS) .SYMBOLIC
 	@echo Welcome to libcurl
 
 $(OBJ_DIR):
@@ -69,7 +80,7 @@ clean: .SYMBOLIC
 	- rm -f $(OBJS) $(RESOURCE)
 
 vclean realclean: clean .SYMBOLIC
-	- rm -f $(TARGETS) $(LIB_ARG) $(LINK_ARG) libcurl_wc.map
+	- rm -f $(TARGETS) $(C_ARG) $(LIB_ARG) $(LINK_ARG) libcurl_wc.map
 	- rmdir $(OBJ_DIR)
 
 .ERASE
@@ -78,8 +89,11 @@ $(RESOURCE): libcurl.rc
 
 .ERASE
 .c{$(OBJ_DIR)}.obj:
-	$(CC) $[@ $(CFLAGS) -fo=$@
-	@echo .
+	$(CC) $[@ @$(C_ARG) -fo=$@
+
+$(C_ARG): $(__MAKEFILES__)
+	%create $^@
+	%append $^@ $(CFLAGS)
 
 $(LIB_ARG): $(__MAKEFILES__)
 	%create $^@
@@ -92,6 +106,9 @@ $(LINK_ARG): $(__MAKEFILES__)
 	@%append $^@ option quiet, map, caseexact, eliminate, implib=libcurl_wc_imp.lib,
 	@%append $^@ res=$(RESOURCE) libpath $(%watcom)\lib386;$(%watcom)\lib386\nt
 	@%append $^@ library clib3r.lib, ws2_32.lib
+!ifeq USE_ZLIB 1
+	@%append $^@ library $(ZLIB_ROOT)\zlib.lib
+!endif
 
 #
 # Dependencies based on "gcc -MM .."
