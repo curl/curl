@@ -1832,7 +1832,7 @@ sub singletest {
     if($cmd) {
 	my $rc = runclient("$cmd");
 	if($rc != 0) {
-	    logmsg "postcheck failure\n";
+	    logmsg " postcheck FAILED\n";
 	    return 1;
 	}
 	logmsg "postchecked $cmd\n" if($verbose);
