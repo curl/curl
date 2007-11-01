@@ -8,8 +8,9 @@ if ( $#ARGV != 2 )
 
 my $what=$ARGV[2];
 
+# Read the output of curl --version
 my $curl_protocols="";
-open(CURL, "@ARGV[1]") || die "Can't get curl $what list\n";
+open(CURL, "$ARGV[1]") || die "Can't get curl $what list\n";
 while( <CURL> )
 {
     $curl_protocols = lc($_) if ( /$what:/i );
@@ -18,11 +19,14 @@ close CURL;
 
 $curl_protocols =~ /\w+: (.*)$/;
 @curl = split / /,$1;
-@curl = grep(!/^Debug|Largefile$/i, @curl);
+
+# These features are not supported by curl-config
+@curl = grep(!/^(Debug|Largefile|CharConv|GSS-Negotiate|SPNEGO)$/i, @curl);
 @curl = sort @curl;
 
+# Read the output of curl-config
 my @curl_config;
-open(CURLCONFIG, "sh @ARGV[0] --$what|") || die "Can't get curl-config $what list\n";
+open(CURLCONFIG, "sh $ARGV[0] --$what|") || die "Can't get curl-config $what list\n";
 while( <CURLCONFIG> )
 {
     chomp;
