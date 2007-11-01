@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Dan F (1 Nov 2007)
+- Fixed curl-config --features to not display libz when it wasn't used
+  due to a missing header file.
+
 Dan F (31 October 2007)
 - Fixed the output of curl-config --protocols which showed SCP and SFTP
   always, except when --without-libssh2 was given

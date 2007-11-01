@@ -1292,6 +1292,7 @@ else
   if test "$HAVE_LIBZ" = "1" && test "$HAVE_ZLIB_H" != "1"
   then
     AC_MSG_WARN([configure found only the libz lib, not the header file!])
+    HAVE_LIBZ=""
   elif test "$HAVE_LIBZ" != "1" && test "$HAVE_ZLIB_H" = "1"
   then
     AC_MSG_WARN([configure found only the libz header file, not the lib!])
