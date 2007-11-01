@@ -16,6 +16,7 @@ This release includes the following bugfixes:
 
  o curl-config --features and --protocols show the correct output when built
    with NSS, and also when SCP, SFTP and libz are not available
+ o free problem in the curl tool for users with empty home dir
 
 This release includes the following known bugs:
 
@@ -32,6 +33,6 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- 
+ Dan Fandrich, Gisle Vanem, Toby Peterson
  
         Thanks! (and sorry if I forgot to mention someone)

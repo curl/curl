@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel S (1 Nov 2007)
+- Toby Peterson patched a memory problem in the command line tool that
+  happened when a user had a home dir as an empty string. curl would then do
+  free() on a wrong area.
+
 Dan F (1 Nov 2007)
 - Fixed curl-config --features to not display libz when it wasn't used
   due to a missing header file.
