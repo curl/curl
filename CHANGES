@@ -10,8 +10,8 @@ Dan F (31 October 2007)
 - Fixed the output of curl-config --protocols which showed SCP and SFTP
   always, except when --without-libssh2 was given
 
-- Added test case 1013 to check that curl-config --protocols matches the
-  protocols listed in curl --version
+- Added test cases 1013 and 1014 to check that curl-config --protocols and
+  curl-config --features matches the output of curl --version
 
 Dan F (30 October 2007)
 - Fixed an OOM problem with file: URLs
