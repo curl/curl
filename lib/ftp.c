@@ -3525,10 +3525,10 @@ static CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
     result = ftp_easy_statemach(conn);
   }
 
-  if(ftp->transfer != FTPTRANSFER_BODY)
+  if((result == CURLE_OK) && (ftp->transfer != FTPTRANSFER_BODY))
     /* no data to transfer. FIX: it feels like a kludge to have this here
        too! */
-    result=Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+    result = Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
 
   /* end of transfer */
   DEBUGF(infof(data, "DO-MORE phase ends with %d\n", result));
