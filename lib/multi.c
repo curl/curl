@@ -935,28 +935,28 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         /* Add this handle to the send pipeline */
         easy->result = Curl_addHandleToPipeline(easy->easy_handle,
                                                 easy->easy_conn->send_pipe);
-	if(CURLE_OK == easy->result) {
-	  if(async)
-	    /* We're now waiting for an asynchronous name lookup */
-	    multistate(easy, CURLM_STATE_WAITRESOLVE);
-	  else {
-	    /* after the connect has been sent off, go WAITCONNECT unless the
-	       protocol connect is already done and we can go directly to
-	       WAITDO! */
-	    result = CURLM_CALL_MULTI_PERFORM;
+        if(CURLE_OK == easy->result) {
+          if(async)
+            /* We're now waiting for an asynchronous name lookup */
+            multistate(easy, CURLM_STATE_WAITRESOLVE);
+          else {
+            /* after the connect has been sent off, go WAITCONNECT unless the
+               protocol connect is already done and we can go directly to
+               WAITDO! */
+            result = CURLM_CALL_MULTI_PERFORM;
 
-	    if(protocol_connect)
-	      multistate(easy, CURLM_STATE_WAITDO);
-	    else {
+            if(protocol_connect)
+              multistate(easy, CURLM_STATE_WAITDO);
+            else {
 #ifndef CURL_DISABLE_HTTP
-	      if (easy->easy_conn->bits.tunnel_connecting)
-		multistate(easy, CURLM_STATE_WAITPROXYCONNECT);
-	      else
+              if (easy->easy_conn->bits.tunnel_connecting)
+                multistate(easy, CURLM_STATE_WAITPROXYCONNECT);
+              else
 #endif
-		multistate(easy, CURLM_STATE_WAITCONNECT);
-	    }
-	  }
-	}
+                multistate(easy, CURLM_STATE_WAITCONNECT);
+            }
+          }
+        }
       }
       break;
 
@@ -1057,7 +1057,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       /* protocol-specific connect phase */
       easy->result = Curl_protocol_connecting(easy->easy_conn,
                                               &protocol_connect);
-      if(protocol_connect) {
+      if((easy->result == CURLE_OK) && protocol_connect) {
         /* after the connect has completed, go WAITDO */
         multistate(easy, CURLM_STATE_WAITDO);
         result = CURLM_CALL_MULTI_PERFORM;
@@ -1181,14 +1181,19 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
         if(CURLE_OK == easy->result)
           easy->result = Curl_readwrite_init(easy->easy_conn);
-        else
-          /* Remove ourselves from the send pipeline */
-          Curl_removeHandleFromPipeline(easy->easy_handle,
-                                        easy->easy_conn->send_pipe);
+
+        /* No need to remove ourselves from the send pipeline here since that
+           is done for us in Curl_done() */
 
         if(CURLE_OK == easy->result) {
           multistate(easy, CURLM_STATE_DO_DONE);
           result = CURLM_CALL_MULTI_PERFORM;
+        }
+        else {
+          /* failure detected */
+          Curl_posttransfer(easy->easy_handle);
+          Curl_done(&easy->easy_conn, easy->result, FALSE);
+          disconnect_conn = TRUE;
         }
       }
       break;
