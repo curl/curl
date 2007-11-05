@@ -18,6 +18,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <curl/multi.h>
+#ifdef WIN32
+#include <windows.h>
+#endif
 
 static const char *urls[] = {
   "http://www.microsoft.com",
@@ -138,7 +141,11 @@ int main(void)
         L = 100;
 
       if (M == -1) {
+#ifdef WIN32
+        Sleep(L);
+#else
         sleep(L / 1000);
+#endif
       } else {
         T.tv_sec = L/1000;
         T.tv_usec = (L%1000)*1000;
