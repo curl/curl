@@ -110,18 +110,18 @@ static bool init_resolve_thread(struct connectdata *conn,
     defined(DEBUG_THREADING_GETADDRINFO)
 /* If this is defined, provide tracing */
 #define TRACE(args)  \
- do { trace_it("%u: ", __LINE__); trace_it args; } while (0)
+ do { trace_it("%u: ", __LINE__); trace_it args; } while(0)
 
 static void trace_it (const char *fmt, ...)
 {
   static int do_trace = -1;
   va_list args;
 
-  if (do_trace == -1) {
+  if(do_trace == -1) {
     const char *env = getenv("CURL_TRACE");
     do_trace = (env && atoi(env) > 0);
   }
-  if (!do_trace)
+  if(!do_trace)
     return;
   va_start (args, fmt);
   vfprintf (stderr, fmt, args);
@@ -141,7 +141,7 @@ static void dump_addrinfo (struct connectdata *conn, const struct addrinfo *ai)
 
     trace_it("    fam %2d, CNAME %s, ",
              ai->ai_family, ai->ai_canonname ? ai->ai_canonname : "<none>");
-    if (Curl_printable_address(ai, buf, sizeof(buf)))
+    if(Curl_printable_address(ai, buf, sizeof(buf)))
       trace_it("%s\n", buf);
     else
       trace_it("failed; %s\n", Curl_strerror(conn, SOCKERRNO));
@@ -179,13 +179,13 @@ struct thread_sync_data {
 static
 void destroy_thread_sync_data(struct thread_sync_data * tsd)
 {
-  if (tsd->hostname)
+  if(tsd->hostname)
     free(tsd->hostname);
-  if (tsd->event_terminate)
+  if(tsd->event_terminate)
     CloseHandle(tsd->event_terminate);
-  if (tsd->mutex_terminate)
+  if(tsd->mutex_terminate)
     CloseHandle(tsd->mutex_terminate);
-  if (tsd->mutex_waiting)
+  if(tsd->mutex_waiting)
     CloseHandle(tsd->mutex_waiting);
   memset(tsd,0,sizeof(*tsd));
 }
@@ -199,21 +199,21 @@ BOOL init_thread_sync_data(struct thread_data * td,
   HANDLE curr_proc = GetCurrentProcess();
 
   memset(tsd, 0, sizeof(*tsd));
-  if (!DuplicateHandle(curr_proc, td->mutex_waiting,
+  if(!DuplicateHandle(curr_proc, td->mutex_waiting,
                        curr_proc, &tsd->mutex_waiting, 0, FALSE,
                        DUPLICATE_SAME_ACCESS)) {
     /* failed to duplicate the mutex, no point in continuing */
     destroy_thread_sync_data(tsd);
     return FALSE;
   }
-  if (!DuplicateHandle(curr_proc, td->mutex_terminate,
+  if(!DuplicateHandle(curr_proc, td->mutex_terminate,
                        curr_proc, &tsd->mutex_terminate, 0, FALSE,
                        DUPLICATE_SAME_ACCESS)) {
     /* failed to duplicate the mutex, no point in continuing */
     destroy_thread_sync_data(tsd);
     return FALSE;
   }
-  if (!DuplicateHandle(curr_proc, td->event_terminate,
+  if(!DuplicateHandle(curr_proc, td->event_terminate,
                        curr_proc, &tsd->event_terminate, 0, FALSE,
                        DUPLICATE_SAME_ACCESS)) {
     /* failed to duplicate the event, no point in continuing */
@@ -224,7 +224,7 @@ BOOL init_thread_sync_data(struct thread_data * td,
    * thread during gethostbyname execution.
    */
   tsd->hostname = strdup(hostname);
-  if (!tsd->hostname) {
+  if(!tsd->hostname) {
     /* Memory allocation failed */
     destroy_thread_sync_data(tsd);
     return FALSE;
@@ -237,15 +237,15 @@ static
 BOOL acquire_thread_sync(struct thread_sync_data * tsd)
 {
   /* is the thread initiator still waiting for us ? */
-  if (WaitForSingleObject(tsd->mutex_waiting, 0) == WAIT_TIMEOUT) {
+  if(WaitForSingleObject(tsd->mutex_waiting, 0) == WAIT_TIMEOUT) {
     /* yes, it is */
 
     /* Waiting access to event_terminate */
-    if (WaitForSingleObject(tsd->mutex_terminate, INFINITE) != WAIT_OBJECT_0) {
+    if(WaitForSingleObject(tsd->mutex_terminate, INFINITE) != WAIT_OBJECT_0) {
       /* Something went wrong - now just ignoring */
     }
     else {
-      if (WaitForSingleObject(tsd->event_terminate, 0) != WAIT_TIMEOUT) {
+      if(WaitForSingleObject(tsd->event_terminate, 0) != WAIT_TIMEOUT) {
         /* Parent thread signaled us to terminate.
          * This means that all data in conn->async is now destroyed
          * and we cannot use it.
@@ -287,7 +287,7 @@ static unsigned __stdcall gethostbyname_thread (void *arg)
    */
   struct thread_sync_data tsd = { 0,0,0,NULL };
 
-  if (!init_thread_sync_data(td, conn->async.hostname, &tsd)) {
+  if(!init_thread_sync_data(td, conn->async.hostname, &tsd)) {
     /* thread synchronization data initialization failed */
     return (unsigned)-1;
   }
@@ -302,11 +302,11 @@ static unsigned __stdcall gethostbyname_thread (void *arg)
   he = gethostbyname (tsd.hostname);
 
   /* is parent thread waiting for us and are we able to access conn members? */
-  if (acquire_thread_sync(&tsd)) {
+  if(acquire_thread_sync(&tsd)) {
     /* Mark that we have obtained the information, and that we are calling
      * back with it. */
     SetEvent(td->event_resolved);
-    if (he) {
+    if(he) {
       rc = Curl_addrinfo4_callback(conn, CURL_ASYNC_SUCCESS, he);
     }
     else {
@@ -348,7 +348,7 @@ static unsigned __stdcall getaddrinfo_thread (void *arg)
    */
   struct thread_sync_data tsd = { 0,0,0,NULL };
 
-  if (!init_thread_sync_data(td, conn->async.hostname, &tsd)) {
+  if(!init_thread_sync_data(td, conn->async.hostname, &tsd)) {
     /* thread synchronization data initialization failed */
     return -1;
   }
@@ -365,12 +365,12 @@ static unsigned __stdcall getaddrinfo_thread (void *arg)
   rc = getaddrinfo(tsd.hostname, service, &hints, &res);
 
   /* is parent thread waiting for us and are we able to access conn members? */
-  if (acquire_thread_sync(&tsd)) {
+  if(acquire_thread_sync(&tsd)) {
     /* Mark that we have obtained the information, and that we are calling
        back with it. */
     SetEvent(td->event_resolved);
 
-    if (rc == 0) {
+    if(rc == 0) {
 #ifdef DEBUG_THREADING_GETADDRINFO
       dump_addrinfo (conn, res);
 #endif
@@ -397,16 +397,16 @@ static unsigned __stdcall getaddrinfo_thread (void *arg)
  */
 void Curl_destroy_thread_data (struct Curl_async *async)
 {
-  if (async->hostname)
+  if(async->hostname)
     free(async->hostname);
 
-  if (async->os_specific) {
+  if(async->os_specific) {
     struct thread_data *td = (struct thread_data*) async->os_specific;
     curl_socket_t sock = td->dummy_sock;
 
-    if (td->mutex_terminate && td->event_terminate) {
+    if(td->mutex_terminate && td->event_terminate) {
       /* Signaling resolver thread to terminate */
-      if (WaitForSingleObject(td->mutex_terminate, INFINITE) == WAIT_OBJECT_0) {
+      if(WaitForSingleObject(td->mutex_terminate, INFINITE) == WAIT_OBJECT_0) {
         SetEvent(td->event_terminate);
         ReleaseMutex(td->mutex_terminate);
       }
@@ -415,24 +415,24 @@ void Curl_destroy_thread_data (struct Curl_async *async)
       }
     }
 
-    if (td->mutex_terminate)
+    if(td->mutex_terminate)
       CloseHandle(td->mutex_terminate);
-    if (td->event_terminate)
+    if(td->event_terminate)
       CloseHandle(td->event_terminate);
-    if (td->event_thread_started)
+    if(td->event_thread_started)
       CloseHandle(td->event_thread_started);
 
-    if (sock != CURL_SOCKET_BAD)
+    if(sock != CURL_SOCKET_BAD)
       sclose(sock);
 
     /* destroy the synchronization objects */
-    if (td->mutex_waiting)
+    if(td->mutex_waiting)
       CloseHandle(td->mutex_waiting);
     td->mutex_waiting = NULL;
-    if (td->event_resolved)
+    if(td->event_resolved)
       CloseHandle(td->event_resolved);
 
-    if (td->thread_hnd)
+    if(td->thread_hnd)
       CloseHandle(td->thread_hnd);
 
     free(async->os_specific);
@@ -454,14 +454,14 @@ static bool init_resolve_thread (struct connectdata *conn,
   struct thread_data *td = calloc(sizeof(*td), 1);
   HANDLE thread_and_event[2] = {0};
 
-  if (!td) {
+  if(!td) {
     SET_ERRNO(ENOMEM);
     return FALSE;
   }
 
   Curl_safefree(conn->async.hostname);
   conn->async.hostname = strdup(hostname);
-  if (!conn->async.hostname) {
+  if(!conn->async.hostname) {
     free(td);
     SET_ERRNO(ENOMEM);
     return FALSE;
@@ -478,7 +478,7 @@ static bool init_resolve_thread (struct connectdata *conn,
    * still waiting, and take initial ownership.
    */
   td->mutex_waiting = CreateMutex(NULL, TRUE, NULL);
-  if (td->mutex_waiting == NULL) {
+  if(td->mutex_waiting == NULL) {
     Curl_destroy_thread_data(&conn->async);
     SET_ERRNO(EAGAIN);
     return FALSE;
@@ -488,7 +488,7 @@ static bool init_resolve_thread (struct connectdata *conn,
    * done resolving. Do not signal it.
    */
   td->event_resolved = CreateEvent(NULL, TRUE, FALSE, NULL);
-  if (td->event_resolved == NULL) {
+  if(td->event_resolved == NULL) {
     Curl_destroy_thread_data(&conn->async);
     SET_ERRNO(EAGAIN);
     return FALSE;
@@ -497,7 +497,7 @@ static bool init_resolve_thread (struct connectdata *conn,
    * between us and resolver thread.
    */
   td->mutex_terminate = CreateMutex(NULL, FALSE, NULL);
-  if (td->mutex_terminate == NULL) {
+  if(td->mutex_terminate == NULL) {
     Curl_destroy_thread_data(&conn->async);
     SET_ERRNO(EAGAIN);
     return FALSE;
@@ -505,7 +505,7 @@ static bool init_resolve_thread (struct connectdata *conn,
   /* Create the event used to signal thread that it should terminate.
    */
   td->event_terminate = CreateEvent(NULL, TRUE, FALSE, NULL);
-  if (td->event_terminate == NULL) {
+  if(td->event_terminate == NULL) {
     Curl_destroy_thread_data(&conn->async);
     SET_ERRNO(EAGAIN);
     return FALSE;
@@ -513,7 +513,7 @@ static bool init_resolve_thread (struct connectdata *conn,
   /* Create the event used by thread to inform it has initialized its own data.
    */
   td->event_thread_started = CreateEvent(NULL, TRUE, FALSE, NULL);
-  if (td->event_thread_started == NULL) {
+  if(td->event_thread_started == NULL) {
     Curl_destroy_thread_data(&conn->async);
     SET_ERRNO(EAGAIN);
     return FALSE;
@@ -535,7 +535,7 @@ static bool init_resolve_thread (struct connectdata *conn,
   (void) hints;
 #endif
 
-  if (!td->thread_hnd) {
+  if(!td->thread_hnd) {
 #ifdef _WIN32_WCE
      TRACE(("CreateThread() failed; %s\n", Curl_strerror(conn, ERRNO)));
 #else
@@ -549,7 +549,7 @@ static bool init_resolve_thread (struct connectdata *conn,
    */
   thread_and_event[0] = td->thread_hnd;
   thread_and_event[1] = td->event_thread_started;
-  if (WaitForMultipleObjects(sizeof(thread_and_event) /
+  if(WaitForMultipleObjects(sizeof(thread_and_event) /
                              sizeof(thread_and_event[0]),
                              (const HANDLE*)thread_and_event, FALSE,
                              INFINITE) == WAIT_FAILED) {
@@ -608,9 +608,9 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
   td->event_resolved = NULL;
 
   /* has the resolver thread succeeded in resolving our query ? */
-  if (status == WAIT_OBJECT_0) {
+  if(status == WAIT_OBJECT_0) {
     /* wait for the thread to exit, it's in the callback sequence */
-    if (WaitForSingleObject(td->thread_hnd, 5000) == WAIT_TIMEOUT) {
+    if(WaitForSingleObject(td->thread_hnd, 5000) == WAIT_TIMEOUT) {
       TerminateThread(td->thread_hnd, 0);
       conn->async.done = TRUE;
       td->thread_status = (DWORD)-1;
@@ -640,9 +640,9 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
 
   rc = CURLE_OK;
 
-  if (!conn->async.dns) {
+  if(!conn->async.dns) {
     /* a name was not resolved */
-    if (td->thread_status == CURLE_OUT_OF_MEMORY) {
+    if(td->thread_status == CURLE_OUT_OF_MEMORY) {
       rc = CURLE_OUT_OF_MEMORY;
       failf(data, "Could not resolve host: %s", curl_easy_strerror(rc));
     }
@@ -658,7 +658,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
         rc = CURLE_COULDNT_RESOLVE_HOST;
       }
     }
-    else if (td->thread_status == (DWORD)-1 || conn->async.status == NO_DATA) {
+    else if(td->thread_status == (DWORD)-1 || conn->async.status == NO_DATA) {
       failf(data, "Resolving host timed out: %s", conn->host.name);
       rc = CURLE_OPERATION_TIMEDOUT;
     }
@@ -684,10 +684,10 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
 {
   *entry = NULL;
 
-  if (conn->async.done) {
+  if(conn->async.done) {
     /* we're done */
     Curl_destroy_thread_data(&conn->async);
-    if (!conn->async.dns) {
+    if(!conn->async.dns) {
       TRACE(("Curl_is_resolved(): CURLE_COULDNT_RESOLVE_HOST\n"));
       return CURLE_COULDNT_RESOLVE_HOST;
     }
@@ -704,7 +704,7 @@ int Curl_resolv_getsock(struct connectdata *conn,
   const struct thread_data *td =
     (const struct thread_data *) conn->async.os_specific;
 
-  if (td && td->dummy_sock != CURL_SOCKET_BAD) {
+  if(td && td->dummy_sock != CURL_SOCKET_BAD) {
     if(numsocks) {
       /* return one socket waiting for writable, even though this is just
          a dummy */
@@ -731,12 +731,12 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   *waitp = 0; /* don't wait, we act synchronously */
 
   in = inet_addr(hostname);
-  if (in != CURL_INADDR_NONE)
+  if(in != CURL_INADDR_NONE)
     /* This is a dotted IP address 123.123.123.123-style */
     return Curl_ip2addr(in, hostname, port);
 
   /* fire up a new resolver thread! */
-  if (init_resolve_thread(conn, hostname, port, NULL)) {
+  if(init_resolve_thread(conn, hostname, port, NULL)) {
     *waitp = TRUE;  /* please wait for the response */
     return NULL;
   }
@@ -746,7 +746,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
         hostname, Curl_strerror(conn, ERRNO));
 
   h = gethostbyname(hostname);
-  if (!h) {
+  if(!h) {
     infof(data, "gethostbyname(2) failed for %s:%d; %s\n",
           hostname, port, Curl_strerror(conn, SOCKERRNO));
     return NULL;
@@ -775,7 +775,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 
   /* see if we have an IPv6 stack */
   s = socket(PF_INET6, SOCK_DGRAM, 0);
-  if (s == CURL_SOCKET_BAD) {
+  if(s == CURL_SOCKET_BAD) {
     /* Some non-IPv6 stacks have been found to make very slow name resolves
      * when PF_UNSPEC is used, so thus we switch to a mere PF_INET lookup if
      * the stack seems to be a non-ipv6 one. */
@@ -813,7 +813,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   itoa(port, sbuf, 10);
 
   /* fire up a new resolver thread! */
-  if (init_resolve_thread(conn, hostname, port, &hints)) {
+  if(init_resolve_thread(conn, hostname, port, &hints)) {
     *waitp = TRUE;  /* please wait for the response */
     return NULL;
   }
@@ -823,7 +823,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
         hostname, Curl_strerror(conn, ERRNO));
 
   error = getaddrinfo(hostname, sbuf, &hints, &res);
-  if (error) {
+  if(error) {
     infof(data, "getaddrinfo() failed for %s:%d; %s\n",
           hostname, port, Curl_strerror(conn, SOCKERRNO));
     return NULL;

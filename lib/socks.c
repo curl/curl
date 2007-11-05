@@ -136,7 +136,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
 
   /* get timeout */
   if(data->set.timeout && data->set.connecttimeout) {
-    if (data->set.timeout < data->set.connecttimeout)
+    if(data->set.timeout < data->set.connecttimeout)
       timeout = data->set.timeout;
     else
       timeout = data->set.connecttimeout;
@@ -186,7 +186,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
      */
     if(dns)
       hp=dns->addr;
-    if (hp) {
+    if(hp) {
       char buf[64];
       unsigned short ip[4];
       Curl_printable_address(hp, buf, sizeof(buf));
@@ -216,7 +216,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
    * This is currently not supporting "Identification Protocol (RFC1413)".
    */
   socksreq[8] = 0; /* ensure empty userid is NUL-terminated */
-  if (proxy_name)
+  if(proxy_name)
     strlcat((char*)socksreq + 8, proxy_name, sizeof(socksreq) - 8);
 
   /*
@@ -230,7 +230,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
 
     /* Send request */
     code = Curl_write(conn, sock, (char *)socksreq, packetsize, &written);
-    if ((code != CURLE_OK) || (written != packetsize)) {
+    if((code != CURLE_OK) || (written != packetsize)) {
       failf(data, "Failed to send SOCKS4 connect request.");
       return CURLE_COULDNT_CONNECT;
     }
@@ -240,7 +240,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
     /* Receive response */
     result = blockread_all(conn, sock, (char *)socksreq, packetsize,
                            &actualread, timeout);
-    if ((result != CURLE_OK) || (actualread != packetsize)) {
+    if((result != CURLE_OK) || (actualread != packetsize)) {
       failf(data, "Failed to receive SOCKS4 connect request ack.");
       return CURLE_COULDNT_CONNECT;
     }
@@ -265,7 +265,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
      */
 
     /* wrong version ? */
-    if (socksreq[0] != 0) {
+    if(socksreq[0] != 0) {
       failf(data,
             "SOCKS4 reply has wrong version, version should be 4.");
       return CURLE_COULDNT_CONNECT;
@@ -362,7 +362,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
 
   /* get timeout */
   if(data->set.timeout && data->set.connecttimeout) {
-    if (data->set.timeout < data->set.connecttimeout)
+    if(data->set.timeout < data->set.connecttimeout)
       timeout = data->set.timeout;
     else
       timeout = data->set.connecttimeout;
@@ -402,7 +402,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
 
   code = Curl_write(conn, sock, (char *)socksreq, (2 + (int)socksreq[1]),
                       &written);
-  if ((code != CURLE_OK) || (written != (2 + (int)socksreq[1]))) {
+  if((code != CURLE_OK) || (written != (2 + (int)socksreq[1]))) {
     failf(data, "Unable to send initial SOCKS5 request.");
     return CURLE_COULDNT_CONNECT;
   }
@@ -428,20 +428,20 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   Curl_nonblock(sock, FALSE);
 
   result=blockread_all(conn, sock, (char *)socksreq, 2, &actualread, timeout);
-  if ((result != CURLE_OK) || (actualread != 2)) {
+  if((result != CURLE_OK) || (actualread != 2)) {
     failf(data, "Unable to receive initial SOCKS5 response.");
     return CURLE_COULDNT_CONNECT;
   }
 
-  if (socksreq[0] != 5) {
+  if(socksreq[0] != 5) {
     failf(data, "Received invalid version in initial SOCKS5 response.");
     return CURLE_COULDNT_CONNECT;
   }
-  if (socksreq[1] == 0) {
+  if(socksreq[1] == 0) {
     /* Nothing to do, no authentication needed */
     ;
   }
-  else if (socksreq[1] == 2) {
+  else if(socksreq[1] == 2) {
     /* Needs user name and password */
     size_t userlen, pwlen;
     int len;
@@ -471,20 +471,20 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     len += pwlen;
 
     code = Curl_write(conn, sock, (char *)socksreq, len, &written);
-    if ((code != CURLE_OK) || (len != written)) {
+    if((code != CURLE_OK) || (len != written)) {
       failf(data, "Failed to send SOCKS5 sub-negotiation request.");
       return CURLE_COULDNT_CONNECT;
     }
 
     result=blockread_all(conn, sock, (char *)socksreq, 2, &actualread,
                          timeout);
-    if ((result != CURLE_OK) || (actualread != 2)) {
+    if((result != CURLE_OK) || (actualread != 2)) {
       failf(data, "Unable to receive SOCKS5 sub-negotiation response.");
       return CURLE_COULDNT_CONNECT;
     }
 
     /* ignore the first (VER) byte */
-    if (socksreq[1] != 0) { /* status */
+    if(socksreq[1] != 0) { /* status */
       failf(data, "User was rejected by the SOCKS5 server (%d %d).",
             socksreq[0], socksreq[1]);
       return CURLE_COULDNT_CONNECT;
@@ -494,13 +494,13 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   }
   else {
     /* error */
-    if (socksreq[1] == 1) {
+    if(socksreq[1] == 1) {
       failf(data,
             "SOCKS5 GSSAPI per-message authentication is not supported.");
       return CURLE_COULDNT_CONNECT;
     }
-    else if (socksreq[1] == 255) {
-      if (!proxy_name || !*proxy_name) {
+    else if(socksreq[1] == 255) {
+      if(!proxy_name || !*proxy_name) {
         failf(data,
               "No authentication method was acceptable. (It is quite likely"
               " that the SOCKS5 server wanted a username/password, since none"
@@ -542,7 +542,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
      */
     if(dns)
       hp=dns->addr;
-    if (hp) {
+    if(hp) {
       char buf[64];
       unsigned short ip[4];
       Curl_printable_address(hp, buf, sizeof(buf));
@@ -572,24 +572,24 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     const int packetsize = 10;
 
     code = Curl_write(conn, sock, (char *)socksreq, packetsize, &written);
-    if ((code != CURLE_OK) || (written != packetsize)) {
+    if((code != CURLE_OK) || (written != packetsize)) {
       failf(data, "Failed to send SOCKS5 connect request.");
       return CURLE_COULDNT_CONNECT;
     }
 
     result = blockread_all(conn, sock, (char *)socksreq, packetsize,
                            &actualread, timeout);
-    if ((result != CURLE_OK) || (actualread != packetsize)) {
+    if((result != CURLE_OK) || (actualread != packetsize)) {
       failf(data, "Failed to receive SOCKS5 connect request ack.");
       return CURLE_COULDNT_CONNECT;
     }
 
-    if (socksreq[0] != 5) { /* version */
+    if(socksreq[0] != 5) { /* version */
       failf(data,
             "SOCKS5 reply has wrong version, version should be 5.");
       return CURLE_COULDNT_CONNECT;
     }
-    if (socksreq[1] != 0) { /* Anything besides 0 is an error */
+    if(socksreq[1] != 0) { /* Anything besides 0 is an error */
         failf(data,
               "Can't complete SOCKS5 connection to %d.%d.%d.%d:%d. (%d)",
               (unsigned char)socksreq[4], (unsigned char)socksreq[5],

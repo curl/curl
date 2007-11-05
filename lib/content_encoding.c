@@ -57,7 +57,7 @@ static CURLcode
 process_zlib_error(struct connectdata *conn, z_stream *z)
 {
   struct SessionHandle *data = conn->data;
-  if (z->msg)
+  if(z->msg)
     failf (data, "Error while processing content unencoding: %s",
            z->msg);
   else
@@ -90,7 +90,7 @@ inflate_stream(struct connectdata *conn,
   /* Dynamically allocate a buffer for decompression because it's uncommonly
      large to hold on the stack */
   decomp = (char*)malloc(DSIZ);
-  if (decomp == NULL) {
+  if(decomp == NULL) {
     return exit_zlib(z, &k->zlib_init, CURLE_OUT_OF_MEMORY);
   }
 
@@ -102,39 +102,39 @@ inflate_stream(struct connectdata *conn,
     z->avail_out = DSIZ;
 
     status = inflate(z, Z_SYNC_FLUSH);
-    if (status == Z_OK || status == Z_STREAM_END) {
+    if(status == Z_OK || status == Z_STREAM_END) {
       allow_restart = 0;
       if(DSIZ - z->avail_out) {
         result = Curl_client_write(conn, CLIENTWRITE_BODY, decomp,
                                    DSIZ - z->avail_out);
         /* if !CURLE_OK, clean up, return */
-        if (result) {
+        if(result) {
           free(decomp);
           return exit_zlib(z, &k->zlib_init, result);
         }
       }
 
       /* Done? clean up, return */
-      if (status == Z_STREAM_END) {
+      if(status == Z_STREAM_END) {
         free(decomp);
-        if (inflateEnd(z) == Z_OK)
+        if(inflateEnd(z) == Z_OK)
           return exit_zlib(z, &k->zlib_init, result);
         else
           return exit_zlib(z, &k->zlib_init, process_zlib_error(conn, z));
       }
 
       /* Done with these bytes, exit */
-      if (status == Z_OK && z->avail_in == 0) {
+      if(status == Z_OK && z->avail_in == 0) {
         free(decomp);
         return result;
       }
     }
-    else if (allow_restart && status == Z_DATA_ERROR) {
+    else if(allow_restart && status == Z_DATA_ERROR) {
       /* some servers seem to not generate zlib headers, so this is an attempt
          to fix and continue anyway */
 
       (void) inflateEnd(z);	/* don't care about the return code */
-      if (inflateInit2(z, -MAX_WBITS) != Z_OK) {
+      if(inflateInit2(z, -MAX_WBITS) != Z_OK) {
         return process_zlib_error(conn, z);
       }
       z->next_in = orig_in;
@@ -158,13 +158,13 @@ Curl_unencode_deflate_write(struct connectdata *conn,
   z_stream *z = &k->z;          /* zlib state structure */
 
   /* Initialize zlib? */
-  if (k->zlib_init == ZLIB_UNINIT) {
+  if(k->zlib_init == ZLIB_UNINIT) {
     z->zalloc = (alloc_func)Z_NULL;
     z->zfree = (free_func)Z_NULL;
     z->opaque = 0;
     z->next_in = NULL;
     z->avail_in = 0;
-    if (inflateInit(z) != Z_OK)
+    if(inflateInit(z) != Z_OK)
       return process_zlib_error(conn, z);
     k->zlib_init = ZLIB_INIT;
   }
@@ -189,16 +189,16 @@ static enum {
   const ssize_t totallen = len;
 
   /* The shortest header is 10 bytes */
-  if (len < 10)
+  if(len < 10)
     return GZIP_UNDERFLOW;
 
-  if ((data[0] != GZIP_MAGIC_0) || (data[1] != GZIP_MAGIC_1))
+  if((data[0] != GZIP_MAGIC_0) || (data[1] != GZIP_MAGIC_1))
     return GZIP_BAD;
 
   method = data[2];
   flags = data[3];
 
-  if (method != Z_DEFLATED || (flags & RESERVED) != 0) {
+  if(method != Z_DEFLATED || (flags & RESERVED) != 0) {
     /* Can't handle this compression method or unknown flag */
     return GZIP_BAD;
   }
@@ -207,28 +207,28 @@ static enum {
   len -= 10;
   data += 10;
 
-  if (flags & EXTRA_FIELD) {
+  if(flags & EXTRA_FIELD) {
     ssize_t extra_len;
 
-    if (len < 2)
+    if(len < 2)
       return GZIP_UNDERFLOW;
 
     extra_len = (data[1] << 8) | data[0];
 
-    if (len < (extra_len+2))
+    if(len < (extra_len+2))
       return GZIP_UNDERFLOW;
 
     len -= (extra_len + 2);
     data += (extra_len + 2);
   }
 
-  if (flags & ORIG_NAME) {
+  if(flags & ORIG_NAME) {
     /* Skip over NUL-terminated file name */
-    while (len && *data) {
+    while(len && *data) {
       --len;
       ++data;
     }
-    if (!len || *data)
+    if(!len || *data)
       return GZIP_UNDERFLOW;
 
     /* Skip over the NUL */
@@ -236,13 +236,13 @@ static enum {
     ++data;
   }
 
-  if (flags & COMMENT) {
+  if(flags & COMMENT) {
     /* Skip over NUL-terminated comment */
-    while (len && *data) {
+    while(len && *data) {
       --len;
       ++data;
     }
-    if (!len || *data)
+    if(!len || *data)
       return GZIP_UNDERFLOW;
 
     /* Skip over the NUL */
@@ -250,8 +250,8 @@ static enum {
     ++data;
   }
 
-  if (flags & HEAD_CRC) {
-    if (len < 2)
+  if(flags & HEAD_CRC) {
+    if(len < 2)
       return GZIP_UNDERFLOW;
 
     len -= 2;
@@ -271,30 +271,30 @@ Curl_unencode_gzip_write(struct connectdata *conn,
   z_stream *z = &k->z;          /* zlib state structure */
 
   /* Initialize zlib? */
-  if (k->zlib_init == ZLIB_UNINIT) {
+  if(k->zlib_init == ZLIB_UNINIT) {
     z->zalloc = (alloc_func)Z_NULL;
     z->zfree = (free_func)Z_NULL;
     z->opaque = 0;
     z->next_in = NULL;
     z->avail_in = 0;
 
-    if (strcmp(zlibVersion(), "1.2.0.4") >= 0) {
+    if(strcmp(zlibVersion(), "1.2.0.4") >= 0) {
         /* zlib ver. >= 1.2.0.4 supports transparent gzip decompressing */
-        if (inflateInit2(z, MAX_WBITS+32) != Z_OK) {
+        if(inflateInit2(z, MAX_WBITS+32) != Z_OK) {
           return process_zlib_error(conn, z);
         }
         k->zlib_init = ZLIB_INIT_GZIP; /* Transparent gzip decompress state */
 
     } else {
         /* we must parse the gzip header ourselves */
-        if (inflateInit2(z, -MAX_WBITS) != Z_OK) {
+        if(inflateInit2(z, -MAX_WBITS) != Z_OK) {
           return process_zlib_error(conn, z);
         }
         k->zlib_init = ZLIB_INIT;   /* Initial call state */
     }
   }
 
-  if (k->zlib_init == ZLIB_INIT_GZIP) {
+  if(k->zlib_init == ZLIB_INIT_GZIP) {
      /* Let zlib handle the gzip decompression entirely */
      z->next_in = (Bytef *)k->str;
      z->avail_in = (uInt)nread;
@@ -342,7 +342,7 @@ Curl_unencode_gzip_write(struct connectdata *conn,
        */
       z->avail_in = (uInt)nread;
       z->next_in = malloc(z->avail_in);
-      if (z->next_in == NULL) {
+      if(z->next_in == NULL) {
         return exit_zlib(z, &k->zlib_init, CURLE_OUT_OF_MEMORY);
       }
       memcpy(z->next_in, k->str, z->avail_in);
@@ -366,7 +366,7 @@ Curl_unencode_gzip_write(struct connectdata *conn,
 
     z->avail_in += nread;
     z->next_in = realloc(z->next_in, z->avail_in);
-    if (z->next_in == NULL) {
+    if(z->next_in == NULL) {
       free(oldblock);
       return exit_zlib(z, &k->zlib_init, CURLE_OUT_OF_MEMORY);
     }
@@ -404,7 +404,7 @@ Curl_unencode_gzip_write(struct connectdata *conn,
     break;
   }
 
-  if (z->avail_in == 0) {
+  if(z->avail_in == 0) {
     /* We don't have any data to inflate; wait until next time */
     return CURLE_OK;
   }

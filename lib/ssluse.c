@@ -238,7 +238,7 @@ static int ossl_seed(struct SessionHandle *data)
       RAND_add(area, len, (len >> 1));
 
       free(area); /* now remove the random junk */
-    } while (!RAND_status());
+    } while(!RAND_status());
   }
 #endif
 
@@ -366,7 +366,7 @@ int cert_stuff(struct connectdata *conn,
       EVP_PKEY *pri;
 
       f = fopen(cert_file,"rb");
-      if (!f) {
+      if(!f) {
         failf(data, "could not open PKCS12 file '%s'", cert_file);
         return 0;
       }
@@ -375,7 +375,7 @@ int cert_stuff(struct connectdata *conn,
 
       PKCS12_PBE_add();
 
-      if (!PKCS12_parse(p12, data->set.str[STRING_KEY_PASSWD], &pri, &x509,
+      if(!PKCS12_parse(p12, data->set.str[STRING_KEY_PASSWD], &pri, &x509,
                         NULL)) {
         failf(data,
               "could not parse PKCS12 file, check password, OpenSSL error %s",
@@ -483,7 +483,7 @@ int cert_stuff(struct connectdata *conn,
     }
 
     ssl=SSL_new(ctx);
-    if (NULL == ssl) {
+    if(NULL == ssl) {
       failf(data,"unable to create an SSL structure\n");
       return 0;
     }
@@ -564,7 +564,7 @@ int Curl_ossl_init(void)
   SSL_load_error_strings();
 
   /* Setup all the global SSL stuff */
-  if (!SSLeay_add_ssl_algorithms())
+  if(!SSLeay_add_ssl_algorithms())
     return 0;
 
   return 1;
@@ -609,10 +609,10 @@ int Curl_ossl_check_cxn(struct connectdata *conn)
   char buf;
 
   rc = SSL_peek(conn->ssl[FIRSTSOCKET].handle, (void*)&buf, 1);
-  if (rc > 0)
+  if(rc > 0)
     return 1; /* connection still in place */
 
-  if (rc == 0)
+  if(rc == 0)
     return 0; /* connection has been closed */
 
   return -1; /* connection status unknown */
@@ -625,17 +625,17 @@ CURLcode Curl_ossl_set_engine(struct SessionHandle *data, const char *engine)
 #if defined(USE_SSLEAY) && defined(HAVE_OPENSSL_ENGINE_H)
   ENGINE *e = ENGINE_by_id(engine);
 
-  if (!e) {
+  if(!e) {
     failf(data, "SSL Engine '%s' not found", engine);
     return (CURLE_SSL_ENGINE_NOTFOUND);
   }
 
-  if (data->state.engine) {
+  if(data->state.engine) {
     ENGINE_finish(data->state.engine);
     ENGINE_free(data->state.engine);
     data->state.engine = NULL;
   }
-  if (!ENGINE_init(e)) {
+  if(!ENGINE_init(e)) {
     char buf[256];
 
     ENGINE_free(e);
@@ -657,8 +657,8 @@ CURLcode Curl_ossl_set_engine(struct SessionHandle *data, const char *engine)
 CURLcode Curl_ossl_set_engine_default(struct SessionHandle *data)
 {
 #ifdef HAVE_OPENSSL_ENGINE_H
-  if (data->state.engine) {
-    if (ENGINE_set_default(data->state.engine, ENGINE_METHOD_ALL) > 0) {
+  if(data->state.engine) {
+    if(ENGINE_set_default(data->state.engine, ENGINE_METHOD_ALL) > 0) {
       infof(data,"set default crypto engine '%s'\n", ENGINE_get_id(data->state.engine));
     }
     else {
@@ -683,11 +683,11 @@ struct curl_slist *Curl_ossl_engines_list(struct SessionHandle *data)
 
   for (e = ENGINE_get_first(); e; e = ENGINE_get_next(e)) {
     list = curl_slist_append(list, ENGINE_get_id(e));
-    if (list == NULL) {
+    if(list == NULL) {
       curl_slist_free_all(beg);
       return NULL;
     }
-    else if (beg == NULL) {
+    else if(beg == NULL) {
       beg = list;
     }
   }
@@ -919,26 +919,26 @@ static int Curl_ASN1_UTCTIME_output(struct connectdata *conn,
 
 static int hostmatch(const char *hostname, const char *pattern)
 {
-  while (1) {
+  while(1) {
     char c = *pattern++;
 
-    if (c == '\0')
+    if(c == '\0')
       return (*hostname ? HOST_NOMATCH : HOST_MATCH);
 
-    if (c == '*') {
+    if(c == '*') {
       c = *pattern;
-      if (c == '\0')      /* "*\0" matches anything remaining */
+      if(c == '\0')      /* "*\0" matches anything remaining */
         return HOST_MATCH;
 
-      while (*hostname) {
+      while(*hostname) {
         /* The only recursive function in libcurl! */
-        if (hostmatch(hostname++,pattern) == HOST_MATCH)
+        if(hostmatch(hostname++,pattern) == HOST_MATCH)
           return HOST_MATCH;
       }
       break;
     }
 
-    if (toupper(c) != toupper(*hostname++))
+    if(toupper(c) != toupper(*hostname++))
       break;
   }
   return HOST_NOMATCH;
@@ -947,14 +947,14 @@ static int hostmatch(const char *hostname, const char *pattern)
 static int
 cert_hostcheck(const char *match_pattern, const char *hostname)
 {
-  if (!match_pattern || !*match_pattern ||
+  if(!match_pattern || !*match_pattern ||
       !hostname || !*hostname) /* sanity check */
     return 0;
 
   if(curl_strequal(hostname,match_pattern)) /* trivial case */
     return 1;
 
-  if (hostmatch(hostname,match_pattern) == HOST_MATCH)
+  if(hostmatch(hostname,match_pattern) == HOST_MATCH)
     return 1;
   return 0;
 }
@@ -1042,7 +1042,7 @@ static CURLcode verifyhost(struct connectdata *conn,
              "I checked the 0.9.6 and 0.9.8 sources before my patch and
              it always 0-terminates an IA5String."
           */
-          if (cert_hostcheck(altptr, conn->host.name))
+          if(cert_hostcheck(altptr, conn->host.name))
             matched = TRUE;
           break;
 
@@ -1073,15 +1073,15 @@ static CURLcode verifyhost(struct connectdata *conn,
     unsigned char *peer_CN = nulstr;
 
     X509_NAME *name = X509_get_subject_name(server_cert) ;
-    if (name)
-      while ((j=X509_NAME_get_index_by_NID(name,NID_commonName,i))>=0)
+    if(name)
+      while((j=X509_NAME_get_index_by_NID(name,NID_commonName,i))>=0)
         i=j;
 
     /* we have the name entry and we will now convert this to a string
        that we can use for comparison. Doing this we support BMPstring,
        UTF8 etc. */
 
-    if (i>=0) {
+    if(i>=0) {
       ASN1_STRING *tmp = X509_NAME_ENTRY_get_data(X509_NAME_get_entry(name,i));
 
       /* In OpenSSL 0.9.7d and earlier, ASN1_STRING_to_UTF8 fails if the input
@@ -1089,11 +1089,11 @@ static CURLcode verifyhost(struct connectdata *conn,
          string manually to avoid the problem. This code can be made
          conditional in the future when OpenSSL has been fixed. Work-around
          brought by Alexis S. L. Carvalho. */
-      if (tmp && ASN1_STRING_type(tmp) == V_ASN1_UTF8STRING) {
+      if(tmp && ASN1_STRING_type(tmp) == V_ASN1_UTF8STRING) {
         j = ASN1_STRING_length(tmp);
-        if (j >= 0) {
+        if(j >= 0) {
           peer_CN = OPENSSL_malloc(j+1);
-          if (peer_CN) {
+          if(peer_CN) {
             memcpy(peer_CN, ASN1_STRING_data(tmp), j);
             peer_CN[j] = '\0';
           }
@@ -1103,7 +1103,7 @@ static CURLcode verifyhost(struct connectdata *conn,
         j = ASN1_STRING_to_UTF8(&peer_CN, tmp);
     }
 
-    if (peer_CN == nulstr)
+    if(peer_CN == nulstr)
        peer_CN = NULL;
 #ifdef CURL_DOES_CONVERSIONS
     else {
@@ -1111,14 +1111,14 @@ static CURLcode verifyhost(struct connectdata *conn,
       size_t rc;
       rc = Curl_convert_from_utf8(data, peer_CN, strlen(peer_CN));
       /* Curl_convert_from_utf8 calls failf if unsuccessful */
-      if (rc != CURLE_OK) {
+      if(rc != CURLE_OK) {
         OPENSSL_free(peer_CN);
         return rc;
       }
     }
 #endif /* CURL_DOES_CONVERSIONS */
 
-    if (!peer_CN) {
+    if(!peer_CN) {
       failf(data,
             "SSL: unable to obtain common name from peer certificate");
       return CURLE_PEER_FAILED_VERIFICATION;
@@ -1149,7 +1149,7 @@ static CURLcode verifyhost(struct connectdata *conn,
 
 static const char *ssl_msg_type(int ssl_ver, int msg)
 {
-  if (ssl_ver == SSL2_VERSION_MAJOR) {
+  if(ssl_ver == SSL2_VERSION_MAJOR) {
     switch (msg) {
       case SSL2_MT_ERROR:
         return "Error";
@@ -1171,7 +1171,7 @@ static const char *ssl_msg_type(int ssl_ver, int msg)
         return "Client CERT";
     }
   }
-  else if (ssl_ver == SSL3_VERSION_MAJOR) {
+  else if(ssl_ver == SSL3_VERSION_MAJOR) {
     switch (msg) {
       case SSL3_MT_HELLO_REQUEST:
         return "Hello request";
@@ -1221,7 +1221,7 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
   char ssl_buf[1024];
   int  ver, msg_type, txt_len;
 
-  if (!conn || !conn->data || !conn->data->set.fdebug ||
+  if(!conn || !conn->data || !conn->data->set.fdebug ||
       (direction != 0 && direction != 1))
     return;
 
@@ -1234,7 +1234,7 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
    * always pass-up content-type as 0. But the interesting message-type
    * is at 'buf[0]'.
    */
-  if (ssl_ver == SSL3_VERSION_MAJOR && content_type != 0)
+  if(ssl_ver == SSL3_VERSION_MAJOR && content_type != 0)
     tls_rt_name = tls_rt_type(content_type);
   else
     tls_rt_name = "";
@@ -1290,7 +1290,7 @@ Curl_ossl_connect_step1(struct connectdata *conn,
     break;
   }
 
-  if (connssl->ctx)
+  if(connssl->ctx)
     SSL_CTX_free(connssl->ctx);
   connssl->ctx = SSL_CTX_new(req_method);
 
@@ -1300,14 +1300,14 @@ Curl_ossl_connect_step1(struct connectdata *conn,
   }
 
 #ifdef SSL_CTRL_SET_MSG_CALLBACK
-  if (data->set.fdebug && data->set.verbose) {
+  if(data->set.fdebug && data->set.verbose) {
     /* the SSL trace callback is only used for verbose logging so we only
        inform about failures of setting it */
-    if (!SSL_CTX_callback_ctrl(connssl->ctx, SSL_CTRL_SET_MSG_CALLBACK,
+    if(!SSL_CTX_callback_ctrl(connssl->ctx, SSL_CTRL_SET_MSG_CALLBACK,
                                (void (*)(void))ssl_tls_trace)) {
       infof(data, "SSL: couldn't set callback!\n");
     }
-    else if (!SSL_CTX_ctrl(connssl->ctx, SSL_CTRL_SET_MSG_CALLBACK_ARG, 0,
+    else if(!SSL_CTX_ctrl(connssl->ctx, SSL_CTRL_SET_MSG_CALLBACK_ARG, 0,
                            conn)) {
       infof(data, "SSL: couldn't set callback argument!\n");
     }
@@ -1330,7 +1330,7 @@ Curl_ossl_connect_step1(struct connectdata *conn,
    * non-blocking. It doesn't seem to care, but just return with
    * SSL_ERROR_WANT_x.
    */
-  if (data->state.used_interface == Curl_if_multi)
+  if(data->state.used_interface == Curl_if_multi)
     SSL_CTX_ctrl(connssl->ctx, BIO_C_SET_NBIO, 1, NULL);
 #endif
 
@@ -1354,13 +1354,13 @@ Curl_ossl_connect_step1(struct connectdata *conn,
     }
   }
 
-  if (data->set.str[STRING_SSL_CAFILE] || data->set.str[STRING_SSL_CAPATH]) {
+  if(data->set.str[STRING_SSL_CAFILE] || data->set.str[STRING_SSL_CAPATH]) {
     /* tell SSL where to find CA certificates that are used to verify
        the servers certificate. */
-    if (!SSL_CTX_load_verify_locations(connssl->ctx,
+    if(!SSL_CTX_load_verify_locations(connssl->ctx,
                                        data->set.str[STRING_SSL_CAFILE],
                                        data->set.str[STRING_SSL_CAPATH])) {
-      if (data->set.ssl.verifypeer) {
+      if(data->set.ssl.verifypeer) {
         /* Fail if we insist on successfully verifying the server. */
         failf(data,"error setting certificate verify locations:\n"
               "  CAfile: %s\n  CApath: %s\n",
@@ -1408,10 +1408,10 @@ Curl_ossl_connect_step1(struct connectdata *conn,
   }
 
   /* Lets make an SSL structure */
-  if (connssl->handle)
+  if(connssl->handle)
     SSL_free(connssl->handle);
   connssl->handle = SSL_new(connssl->ctx);
-  if (!connssl->handle) {
+  if(!connssl->handle) {
     failf(data, "SSL: couldn't create a context (handle)!");
     return CURLE_OUT_OF_MEMORY;
   }
@@ -1422,7 +1422,7 @@ Curl_ossl_connect_step1(struct connectdata *conn,
   /* Check if there's a cached ID we can/should use here! */
   if(!Curl_ssl_getsessionid(conn, &ssl_sessionid, NULL)) {
     /* we got a session id, use it! */
-    if (!SSL_set_session(connssl->handle, ssl_sessionid)) {
+    if(!SSL_set_session(connssl->handle, ssl_sessionid)) {
       failf(data, "SSL: SSL_set_session failed: %s",
             ERR_error_string(ERR_get_error(),NULL));
       return CURLE_SSL_CONNECT_ERROR;
@@ -1432,7 +1432,7 @@ Curl_ossl_connect_step1(struct connectdata *conn,
   }
 
   /* pass the raw socket into the SSL layers */
-  if (!SSL_set_fd(connssl->handle, sockfd)) {
+  if(!SSL_set_fd(connssl->handle, sockfd)) {
      failf(data, "SSL: SSL_set_fd failed: %s",
            ERR_error_string(ERR_get_error(),NULL));
      return CURLE_SSL_CONNECT_ERROR;
@@ -1545,7 +1545,7 @@ Curl_ossl_connect_step2(struct connectdata *conn,
        * (RST connection etc.), OpenSSL gives no explanation whatsoever and
        * the SO_ERROR is also lost.
        */
-      if (CURLE_SSL_CONNECT_ERROR == rc && errdetail == 0) {
+      if(CURLE_SSL_CONNECT_ERROR == rc && errdetail == 0) {
         failf(data, "Unknown SSL protocol error in connection to %s:%d ",
               conn->host.name, conn->port);
         return rc;
@@ -1704,19 +1704,19 @@ Curl_ossl_connect_common(struct connectdata *conn,
   curl_socket_t sockfd = conn->sock[sockindex];
   long timeout_ms;
 
-  if (ssl_connect_1==connssl->connecting_state) {
+  if(ssl_connect_1==connssl->connecting_state) {
     retcode = Curl_ossl_connect_step1(conn, sockindex);
-    if (retcode)
+    if(retcode)
       return retcode;
   }
 
   timeout_ms = 0;
-  while (ssl_connect_2 == connssl->connecting_state ||
-         ssl_connect_2_reading == connssl->connecting_state ||
-         ssl_connect_2_writing == connssl->connecting_state) {
+  while(ssl_connect_2 == connssl->connecting_state ||
+        ssl_connect_2_reading == connssl->connecting_state ||
+        ssl_connect_2_writing == connssl->connecting_state) {
 
     /* if ssl is expecting something, check if it's available. */
-    if (connssl->connecting_state == ssl_connect_2_reading
+    if(connssl->connecting_state == ssl_connect_2_reading
         || connssl->connecting_state == ssl_connect_2_writing) {
 
       int writefd = ssl_connect_2_writing==
@@ -1730,7 +1730,7 @@ Curl_ossl_connect_common(struct connectdata *conn,
           /* readable or writable, go loop in the outer loop */
           break;
         else if(0 == what) {
-          if (nonblocking) {
+          if(nonblocking) {
             *done = FALSE;
             return CURLE_OK;
           }
@@ -1750,19 +1750,19 @@ Curl_ossl_connect_common(struct connectdata *conn,
 
     /* get the timeout from step2 to avoid computing it twice. */
     retcode = Curl_ossl_connect_step2(conn, sockindex, &timeout_ms);
-    if (retcode)
+    if(retcode)
       return retcode;
 
   } /* repeat step2 until all transactions are done. */
 
 
-  if (ssl_connect_3==connssl->connecting_state) {
+  if(ssl_connect_3==connssl->connecting_state) {
     retcode = Curl_ossl_connect_step3(conn, sockindex);
-    if (retcode)
+    if(retcode)
       return retcode;
   }
 
-  if (ssl_connect_done==connssl->connecting_state) {
+  if(ssl_connect_done==connssl->connecting_state) {
     *done = TRUE;
   }
   else {
@@ -1791,7 +1791,7 @@ Curl_ossl_connect(struct connectdata *conn,
   bool done = FALSE;
 
   retcode = Curl_ossl_connect_common(conn, sockindex, FALSE, &done);
-  if (retcode)
+  if(retcode)
     return retcode;
 
   DEBUGASSERT(done);
@@ -1892,7 +1892,7 @@ size_t Curl_ossl_version(char *buffer, size_t size)
   return snprintf(buffer, size, "yassl/%s", YASSL_VERSION);
 #else /* YASSL_VERSION */
 
-#if (SSLEAY_VERSION_NUMBER >= 0x905000)
+#if(SSLEAY_VERSION_NUMBER >= 0x905000)
   {
     char sub[2];
     unsigned long ssleay_value;
@@ -1919,7 +1919,7 @@ size_t Curl_ossl_version(char *buffer, size_t size)
 
 #else /* SSLEAY_VERSION_NUMBER is less than 0.9.5 */
 
-#if (SSLEAY_VERSION_NUMBER >= 0x900000)
+#if(SSLEAY_VERSION_NUMBER >= 0x900000)
   return snprintf(buffer, size, "OpenSSL/%lx.%lx.%lx",
                   (SSLEAY_VERSION_NUMBER>>28)&0xff,
                   (SSLEAY_VERSION_NUMBER>>20)&0xff,

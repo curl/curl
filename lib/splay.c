@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1997 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1997 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -42,37 +42,37 @@ struct Curl_tree *Curl_splay(int i, struct Curl_tree *t)
   struct Curl_tree N, *l, *r, *y;
   int comp;
 
-  if (t == NULL)
+  if(t == NULL)
     return t;
   N.smaller = N.larger = NULL;
   l = r = &N;
 
   for (;;) {
     comp = compare(i, t->key);
-    if (comp < 0) {
-      if (t->smaller == NULL)
+    if(comp < 0) {
+      if(t->smaller == NULL)
         break;
-      if (compare(i, t->smaller->key) < 0) {
+      if(compare(i, t->smaller->key) < 0) {
         y = t->smaller;                           /* rotate smaller */
         t->smaller = y->larger;
         y->larger = t;
         t = y;
-        if (t->smaller == NULL)
+        if(t->smaller == NULL)
           break;
       }
       r->smaller = t;                               /* link smaller */
       r = t;
       t = t->smaller;
     }
-    else if (comp > 0) {
-      if (t->larger == NULL)
+    else if(comp > 0) {
+      if(t->larger == NULL)
         break;
-      if (compare(i, t->larger->key) > 0) {
+      if(compare(i, t->larger->key) > 0) {
         y = t->larger;                          /* rotate larger */
         t->larger = y->smaller;
         y->smaller = t;
         t = y;
-        if (t->larger == NULL)
+        if(t->larger == NULL)
           break;
       }
       l->larger = t;                              /* link larger */
@@ -97,12 +97,12 @@ struct Curl_tree *Curl_splayinsert(int i,
                                    struct Curl_tree *t,
                                    struct Curl_tree *node)
 {
-  if (node == NULL)
+  if(node == NULL)
     return t;
 
-  if (t != NULL) {
+  if(t != NULL) {
     t = Curl_splay(i,t);
-    if (compare(i, t->key)==0) {
+    if(compare(i, t->key)==0) {
       /* There already exists a node in the tree with the very same key. Build
          a linked list of nodes. We make the new 'node' struct the new master
          node and make the previous node the first one in the 'same' list. */
@@ -123,10 +123,10 @@ struct Curl_tree *Curl_splayinsert(int i,
     }
   }
 
-  if (t == NULL) {
+  if(t == NULL) {
     node->smaller = node->larger = NULL;
   }
-  else if (compare(i, t->key) < 0) {
+  else if(compare(i, t->key) < 0) {
     node->smaller = t->smaller;
     node->larger = t;
     t->smaller = NULL;
@@ -156,11 +156,11 @@ struct Curl_tree *Curl_splayremove(int i, struct Curl_tree *t,
 
   *removed = NULL; /* default to no removed */
 
-  if (t==NULL)
+  if(t==NULL)
     return NULL;
 
   t = Curl_splay(i,t);
-  if (compare(i, t->key) == 0) {               /* found it */
+  if(compare(i, t->key) == 0) {               /* found it */
 
     /* FIRST! Check if there is a list with identical sizes */
     if((x = t->same)) {
@@ -176,7 +176,7 @@ struct Curl_tree *Curl_splayremove(int i, struct Curl_tree *t,
       return x; /* new root */
     }
 
-    if (t->smaller == NULL) {
+    if(t->smaller == NULL) {
       x = t->larger;
     }
     else {
@@ -199,7 +199,7 @@ struct Curl_tree *Curl_splaygetbest(int i, struct Curl_tree *t,
 {
   struct Curl_tree *x;
 
-  if (!t) {
+  if(!t) {
     *removed = NULL; /* none removed since there was no root */
     return NULL;
   }
@@ -216,7 +216,7 @@ struct Curl_tree *Curl_splaygetbest(int i, struct Curl_tree *t,
     }
   }
 
-  if (compare(i, t->key) >= 0) {               /* found it */
+  if(compare(i, t->key) >= 0) {               /* found it */
     /* FIRST! Check if there is a list with identical sizes */
     x = t->same;
     if(x) {
@@ -232,7 +232,7 @@ struct Curl_tree *Curl_splaygetbest(int i, struct Curl_tree *t,
       return x; /* new root */
     }
 
-    if (t->smaller == NULL) {
+    if(t->smaller == NULL) {
       x = t->larger;
     }
     else {
@@ -265,14 +265,14 @@ int Curl_splayremovebyaddr(struct Curl_tree *t,
 {
   struct Curl_tree *x;
 
-  if (!t || !removenode)
+  if(!t || !removenode)
     return 1;
 
   if(KEY_NOTUSED == removenode->key) {
     /* Key set to NOTUSED means it is a subnode within a 'same' linked list
        and thus we can unlink it easily. The 'smaller' link of a subnode
        links to the parent node. */
-    if (removenode->smaller == NULL)
+    if(removenode->smaller == NULL)
       return 3;
 
     removenode->smaller->same = removenode->same;
@@ -312,7 +312,7 @@ int Curl_splayremovebyaddr(struct Curl_tree *t,
   }
   else {
     /* Remove the root node */
-    if (t->smaller == NULL)
+    if(t->smaller == NULL)
       x = t->larger;
     else {
       x = Curl_splay(removenode->key, t->smaller);
@@ -332,7 +332,7 @@ void Curl_splayprint(struct Curl_tree * t, int d, char output)
   struct Curl_tree *node;
   int i;
   int count;
-  if (t == NULL)
+  if(t == NULL)
     return;
 
   Curl_splayprint(t->larger, d+1, output);

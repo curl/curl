@@ -127,7 +127,7 @@ static CURLcode win32_init(void)
 
   err = WSAStartup(wVersionRequested, &wsaData);
 
-  if (err != 0)
+  if(err != 0)
     /* Tell the user that we couldn't find a useable */
     /* winsock.dll.     */
     return CURLE_FAILED_INIT;
@@ -138,7 +138,7 @@ static CURLcode win32_init(void)
   /* wVersionRequested in wVersion. wHighVersion contains the */
   /* highest supported version. */
 
-  if ( LOBYTE( wsaData.wVersion ) != LOBYTE(wVersionRequested) ||
+  if( LOBYTE( wsaData.wVersion ) != LOBYTE(wVersionRequested) ||
        HIBYTE( wsaData.wVersion ) != HIBYTE(wVersionRequested) ) {
     /* Tell the user that we couldn't find a useable */
 
@@ -168,7 +168,7 @@ static void idna_init (void)
   char buf[60];
   UINT cp = GetACP();
 
-  if (!getenv("CHARSET") && cp > 0) {
+  if(!getenv("CHARSET") && cp > 0) {
     snprintf(buf, sizeof(buf), "CHARSET=cp%u", cp);
     putenv(buf);
   }
@@ -212,7 +212,7 @@ curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
  */
 CURLcode curl_global_init(long flags)
 {
-  if (initialized++)
+  if(initialized++)
     return CURLE_OK;
 
   /* Setup the default memory functions here (again) */
@@ -222,14 +222,14 @@ CURLcode curl_global_init(long flags)
   Curl_cstrdup = (curl_strdup_callback)system_strdup;
   Curl_ccalloc = (curl_calloc_callback)calloc;
 
-  if (flags & CURL_GLOBAL_SSL)
-    if (!Curl_ssl_init()) {
+  if(flags & CURL_GLOBAL_SSL)
+    if(!Curl_ssl_init()) {
       DEBUGF(fprintf(stderr, "Error: Curl_ssl_init failed\n"));
       return CURLE_FAILED_INIT;
     }
 
-  if (flags & CURL_GLOBAL_WIN32)
-    if (win32_init() != CURLE_OK) {
+  if(flags & CURL_GLOBAL_WIN32)
+    if(win32_init() != CURLE_OK) {
       DEBUGF(fprintf(stderr, "Error: win32_init failed\n"));
       return CURLE_FAILED_INIT;
     }
@@ -267,16 +267,16 @@ CURLcode curl_global_init_mem(long flags, curl_malloc_callback m,
   CURLcode code = CURLE_OK;
 
   /* Invalid input, return immediately */
-  if (!m || !f || !r || !s || !c)
+  if(!m || !f || !r || !s || !c)
     return CURLE_FAILED_INIT;
 
   /* Already initialized, don't do it again */
-  if ( initialized )
+  if( initialized )
     return CURLE_OK;
 
   /* Call the actual init function first */
   code = curl_global_init(flags);
-  if (code == CURLE_OK) {
+  if(code == CURLE_OK) {
     Curl_cmalloc = m;
     Curl_cfree = f;
     Curl_cstrdup = s;
@@ -293,18 +293,18 @@ CURLcode curl_global_init_mem(long flags, curl_malloc_callback m,
  */
 void curl_global_cleanup(void)
 {
-  if (!initialized)
+  if(!initialized)
     return;
 
-  if (--initialized)
+  if(--initialized)
     return;
 
   Curl_global_host_cache_dtor();
 
-  if (init_flags & CURL_GLOBAL_SSL)
+  if(init_flags & CURL_GLOBAL_SSL)
     Curl_ssl_cleanup();
 
-  if (init_flags & CURL_GLOBAL_WIN32)
+  if(init_flags & CURL_GLOBAL_WIN32)
     win32_cleanup();
 
 #ifdef __AMIGA__
@@ -324,7 +324,7 @@ CURL *curl_easy_init(void)
   struct SessionHandle *data;
 
   /* Make sure we inited the global SSL stuff */
-  if (!initialized) {
+  if(!initialized) {
     res = curl_global_init(CURL_GLOBAL_DEFAULT);
     if(res) {
       /* something in the global init failed, return nothing */
@@ -465,17 +465,17 @@ CURLcode curl_easy_perform(CURL *curl)
   if(!data)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  if ( ! (data->share && data->share->hostcache) ) {
+  if( ! (data->share && data->share->hostcache) ) {
 
-    if (Curl_global_host_cache_use(data) &&
+    if(Curl_global_host_cache_use(data) &&
         (data->dns.hostcachetype != HCACHE_GLOBAL)) {
-      if (data->dns.hostcachetype == HCACHE_PRIVATE)
+      if(data->dns.hostcachetype == HCACHE_PRIVATE)
         Curl_hash_destroy(data->dns.hostcache);
       data->dns.hostcache = Curl_global_host_cache_get();
       data->dns.hostcachetype = HCACHE_GLOBAL;
     }
 
-    if (!data->dns.hostcache) {
+    if(!data->dns.hostcache) {
       data->dns.hostcachetype = HCACHE_PRIVATE;
       data->dns.hostcache = Curl_mk_dnscache();
 
@@ -520,7 +520,7 @@ void Curl_easy_addmulti(struct SessionHandle *data,
                         void *multi)
 {
   data->multi = multi;
-  if (multi == NULL)
+  if(multi == NULL)
     /* the association is cleared, mark the easy handle as not used by an
        interface */
     data->state.used_interface = Curl_if_none;
@@ -579,7 +579,7 @@ CURL *curl_easy_duphandle(CURL *incurl)
     outcurl->state.headersize=HEADERSIZE;
 
     /* copy all userdefined values */
-    if (Curl_dupset(outcurl, data) != CURLE_OK)
+    if(Curl_dupset(outcurl, data) != CURLE_OK)
       break;
 
     if(data->state.used_interface == Curl_if_multi)
@@ -789,7 +789,7 @@ CURLcode Curl_convert_to_network(struct SessionHandle *data,
     in_bytes = out_bytes = length;
     rc = iconv(data->outbound_cd, (const char**)&input_ptr, &in_bytes,
                &output_ptr, &out_bytes);
-    if ((rc == ICONV_ERROR) || (in_bytes != 0)) {
+    if((rc == ICONV_ERROR) || (in_bytes != 0)) {
       error = ERRNO;
       failf(data,
         "The Curl_convert_to_network iconv call failed with errno %i: %s",
@@ -849,7 +849,7 @@ CURLcode Curl_convert_from_network(struct SessionHandle *data,
     in_bytes = out_bytes = length;
     rc = iconv(data->inbound_cd, (const char **)&input_ptr, &in_bytes,
                &output_ptr, &out_bytes);
-    if ((rc == ICONV_ERROR) || (in_bytes != 0)) {
+    if((rc == ICONV_ERROR) || (in_bytes != 0)) {
       error = ERRNO;
       failf(data,
         "The Curl_convert_from_network iconv call failed with errno %i: %s",
@@ -910,14 +910,14 @@ CURLcode Curl_convert_from_utf8(struct SessionHandle *data,
     in_bytes = out_bytes = length;
     rc = iconv(data->utf8_cd, &input_ptr, &in_bytes,
                &output_ptr, &out_bytes);
-    if ((rc == ICONV_ERROR) || (in_bytes != 0)) {
+    if((rc == ICONV_ERROR) || (in_bytes != 0)) {
       error = ERRNO;
       failf(data,
         "The Curl_convert_from_utf8 iconv call failed with errno %i: %s",
              error, strerror(error));
       return CURLE_CONV_FAILED;
     }
-    if (output_ptr < input_ptr) {
+    if(output_ptr < input_ptr) {
       /* null terminate the now shorter output string */
       *output_ptr = 0x00;
     }

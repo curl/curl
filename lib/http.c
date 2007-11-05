@@ -385,7 +385,7 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
 
   if(pickhost || pickproxy) {
     data->reqdata.newurl = strdup(data->change.url); /* clone URL */
-    if (!data->reqdata.newurl)
+    if(!data->reqdata.newurl)
       return CURLE_OUT_OF_MEMORY;
 
     if((data->set.httpreq != HTTPREQ_GET) &&
@@ -407,12 +407,12 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
     if((data->set.httpreq != HTTPREQ_GET) &&
        (data->set.httpreq != HTTPREQ_HEAD)) {
       data->reqdata.newurl = strdup(data->change.url); /* clone URL */
-      if (!data->reqdata.newurl)
+      if(!data->reqdata.newurl)
         return CURLE_OUT_OF_MEMORY;
       data->state.authhost.done = TRUE;
     }
   }
-  if (Curl_http_should_fail(conn)) {
+  if(Curl_http_should_fail(conn)) {
     failf (data, "The requested URL returned error: %d",
            data->reqdata.keep.httpcode);
     code = CURLE_HTTP_RETURNED_ERROR;
@@ -475,7 +475,7 @@ Curl_http_output_auth(struct connectdata *conn,
     authproxy->picked = authproxy->want;
 
   /* Send proxy authentication header if needed */
-  if (conn->bits.httpproxy &&
+  if(conn->bits.httpproxy &&
       (conn->bits.tunnel_proxy == proxytunnel)) {
 #ifdef HAVE_GSSAPI
     if((authproxy->picked == CURLAUTH_GSSNEGOTIATE) &&
@@ -483,7 +483,7 @@ Curl_http_output_auth(struct connectdata *conn,
        !GSS_ERROR(data->state.negotiate.status)) {
       auth="GSS-Negotiate";
       result = Curl_output_negotiate(conn, TRUE);
-      if (result)
+      if(result)
         return result;
       authproxy->done = TRUE;
     } 
@@ -552,7 +552,7 @@ Curl_http_output_auth(struct connectdata *conn,
          !GSS_ERROR(data->state.negotiate.status)) {
         auth="GSS-Negotiate";
         result = Curl_output_negotiate(conn, FALSE);
-        if (result)
+        if(result)
           return result;
         authhost->done = TRUE;
       }
@@ -627,7 +627,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
   const char *start;
   struct auth *authp;
 
-  if (httpcode == 407) {
+  if(httpcode == 407) {
     start = header+strlen("Proxy-authenticate:");
     availp = &data->info.proxyauthavail;
     authp = &data->state.authproxy;
@@ -652,14 +652,14 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
    */
 
 #ifdef HAVE_GSSAPI
-  if (checkprefix("GSS-Negotiate", start) ||
+  if(checkprefix("GSS-Negotiate", start) ||
       checkprefix("Negotiate", start)) {
     *availp |= CURLAUTH_GSSNEGOTIATE;
     authp->avail |= CURLAUTH_GSSNEGOTIATE;
     if(authp->picked == CURLAUTH_GSSNEGOTIATE) {
       /* if exactly this is wanted, go */
       int neg = Curl_input_negotiate(conn, (bool)(httpcode == 407), start);
-      if (neg == 0) {
+      if(neg == 0) {
         data->reqdata.newurl = strdup(data->change.url);
         data->state.authproblem = (data->reqdata.newurl == NULL);
       }
@@ -758,16 +758,16 @@ int Curl_http_should_fail(struct connectdata *conn)
   ** If we haven't been asked to fail on error,
   ** don't fail.
   */
-  if (!data->set.http_fail_on_error)
+  if(!data->set.http_fail_on_error)
     return 0;
 
   /*
   ** Any code < 400 is never terminal.
   */
-  if (k->httpcode < 400)
+  if(k->httpcode < 400)
     return 0;
 
-  if (data->reqdata.resume_from &&
+  if(data->reqdata.resume_from &&
       (data->set.httpreq==HTTPREQ_GET) &&
       (k->httpcode == 416)) {
     /* "Requested Range Not Satisfiable", just proceed and
@@ -779,7 +779,7 @@ int Curl_http_should_fail(struct connectdata *conn)
   ** Any code >= 400 that's not 401 or 407 is always
   ** a terminal error
   */
-  if ((k->httpcode != 401) &&
+  if((k->httpcode != 401) &&
       (k->httpcode != 407))
     return 1;
 
@@ -986,12 +986,12 @@ CURLcode add_buffer_send(send_buffer *in,
       /* this data _may_ contain binary stuff */
       Curl_debug(conn->data, CURLINFO_HEADER_OUT, ptr,
                  (size_t)(amount-included_body_bytes), conn);
-      if (included_body_bytes)
+      if(included_body_bytes)
         Curl_debug(conn->data, CURLINFO_DATA_OUT,
                    ptr+amount-included_body_bytes,
                    (size_t)included_body_bytes, conn);
     }
-    if (included_body_bytes)
+    if(included_body_bytes)
       /* since we sent a piece of the body here, up the byte counter for it
          accordingly */
       http->writebytecount = included_body_bytes;
@@ -1207,7 +1207,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
   conn->bits.proxy_connect_closed = FALSE;
 
   do {
-    if (!conn->bits.tunnel_connecting) { /* BEGIN CONNECT PHASE */
+    if(!conn->bits.tunnel_connecting) { /* BEGIN CONNECT PHASE */
       char *host_port;
       send_buffer *req_buffer;
 
@@ -1314,8 +1314,8 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
     }
 
     /* if we're in multi-mode and we would block, return instead for a retry */
-    if (Curl_if_multi == data->state.used_interface) {
-      if (0 == Curl_socket_ready(tunnelsocket, CURL_SOCKET_BAD, 0))
+    if(Curl_if_multi == data->state.used_interface) {
+      if(0 == Curl_socket_ready(tunnelsocket, CURL_SOCKET_BAD, 0))
         /* return so we'll be called again polling-style */
         return CURLE_OK;
       else {
@@ -1571,7 +1571,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
            headers. 'newurl' is set to a new URL if we must loop. */
         Curl_http_auth_act(conn);
 
-      if (closeConnection && data->reqdata.newurl) {
+      if(closeConnection && data->reqdata.newurl) {
         /* Connection closed by server. Don't use it anymore */
         sclose(conn->sock[sockindex]);
         conn->sock[sockindex] = CURL_SOCKET_BAD;
@@ -1584,7 +1584,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
     failf(data, "Received HTTP code %d from proxy after CONNECT",
           k->httpcode);
 
-    if (closeConnection && data->reqdata.newurl)
+    if(closeConnection && data->reqdata.newurl)
       conn->bits.proxy_connect_closed = TRUE;
 
     return CURLE_RECV_ERROR;
@@ -1634,14 +1634,14 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
       return result;
   }
 
-  if (conn->bits.tunnel_connecting) {
+  if(conn->bits.tunnel_connecting) {
     /* nothing else to do except wait right now - we're not done here. */
     return CURLE_OK;
   }
 
   if(!data->state.this_is_a_follow) {
     /* this is not a followed location, get the original host name */
-    if (data->state.first_host)
+    if(data->state.first_host)
       /* Free to avoid leaking memory on multiple requests*/
       free(data->state.first_host);
 
@@ -1692,18 +1692,18 @@ static int Curl_https_getsock(struct connectdata *conn,
                               curl_socket_t *socks,
                               int numsocks)
 {
-  if (conn->protocol & PROT_HTTPS) {
+  if(conn->protocol & PROT_HTTPS) {
     struct ssl_connect_data *connssl = &conn->ssl[FIRSTSOCKET];
 
     if(!numsocks)
       return GETSOCK_BLANK;
 
-    if (connssl->connecting_state == ssl_connect_2_writing) {
+    if(connssl->connecting_state == ssl_connect_2_writing) {
       /* write mode */
       socks[0] = conn->sock[FIRSTSOCKET];
       return GETSOCK_WRITESOCK(0);
     }
-    else if (connssl->connecting_state == ssl_connect_2_reading) {
+    else if(connssl->connecting_state == ssl_connect_2_reading) {
       /* read mode */
       socks[0] = conn->sock[FIRSTSOCKET];
       return GETSOCK_READSOCK(0);
@@ -1766,7 +1766,7 @@ CURLcode Curl_http_done(struct connectdata *conn,
   conn->fread_func = data->set.fread_func; /* restore */
   conn->fread_in = data->set.in; /* restore */
 
-  if (http == NULL)
+  if(http == NULL)
     return CURLE_OK;
 
   if(http->send_buffer) {
@@ -1790,7 +1790,7 @@ CURLcode Curl_http_done(struct connectdata *conn,
   else if(HTTPREQ_PUT == data->set.httpreq)
     k->bytecount = http->readbytecount + http->writebytecount;
 
-  if (status != CURLE_OK)
+  if(status != CURLE_OK)
     return (status);
 
   if(!conn->bits.retry &&
@@ -1909,7 +1909,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   else
     http = data->reqdata.proto.http;
 
-  if ( (conn->protocol&(PROT_HTTP|PROT_FTP)) &&
+  if( (conn->protocol&(PROT_HTTP|PROT_FTP)) &&
        data->set.upload) {
     httpreq = HTTPREQ_PUT;
   }
@@ -1990,7 +1990,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       Curl_compareheader(ptr, "Transfer-Encoding:", "chunked");
   }
   else {
-    if (httpreq == HTTPREQ_GET)
+    if(httpreq == HTTPREQ_GET)
       conn->bits.upload_chunky = FALSE;
     if(conn->bits.upload_chunky)
       te = "Transfer-Encoding: chunked\r\n";
@@ -2035,7 +2035,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
     if(((conn->protocol&PROT_HTTPS) && (conn->remote_port == PORT_HTTPS)) ||
        (!(conn->protocol&PROT_HTTPS) && (conn->remote_port == PORT_HTTP)) )
-      /* If (HTTPS on port 443) OR (non-HTTPS on port 80) then don't include
+      /* if(HTTPS on port 443) OR (non-HTTPS on port 80) then don't include
          the port number in the host string */
       conn->allocptr.host = aprintf("Host: %s%s%s\r\n",
                                     conn->bits.ipv6_ip?"[":"",
@@ -2053,7 +2053,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       return CURLE_OUT_OF_MEMORY;
   }
 
-  if (conn->bits.httpproxy && !conn->bits.tunnel_proxy)  {
+  if(conn->bits.httpproxy && !conn->bits.tunnel_proxy)  {
     /* Using a proxy but does not tunnel through it */
 
     /* The path sent to the proxy is in fact the entire URL. But if the remote
@@ -2095,9 +2095,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     }
     ppath = data->change.url;
     /* when doing ftp, append ;type=<a|i> if not present */
-    if (checkprefix("ftp://", ppath) || checkprefix("ftps://", ppath)) {
+    if(checkprefix("ftp://", ppath) || checkprefix("ftps://", ppath)) {
       char *p = strstr(ppath, ";type=");
-      if (p && p[6] && p[7] == 0) {
+      if(p && p[6] && p[7] == 0) {
         switch (toupper((int)((unsigned char)p[6]))) {
         case 'A':
         case 'D':
@@ -2107,7 +2107,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           p = NULL;
         }
       }
-      if (!p)
+      if(!p)
         snprintf(ftp_typecode, sizeof(ftp_typecode), ";type=%c",
                  data->set.prefer_ascii ? 'a' : 'i');
     }

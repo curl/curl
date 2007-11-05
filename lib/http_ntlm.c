@@ -198,7 +198,7 @@ static void print_hex(FILE *handle, const char *buf, size_t len)
 {
   const char *p = buf;
   fprintf(stderr, "0x");
-  while (len-- > 0)
+  while(len-- > 0)
     fprintf(stderr, "%02.2x", (unsigned int)*p++);
 }
 #else
@@ -263,7 +263,7 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
 
 #ifdef USE_WINDOWS_SSPI
       ntlm->type_2 = malloc(size+1);
-      if (ntlm->type_2 == NULL) {
+      if(ntlm->type_2 == NULL) {
         free(buffer);
         return CURLE_OUT_OF_MEMORY;
       }
@@ -368,7 +368,7 @@ static void mk_lm_hash(struct SessionHandle *data,
   unsigned int i;
   size_t len = strlen(password);
 
-  if (len > 14)
+  if(len > 14)
     len = 14;
 
   for (i=0; i<len; i++)
@@ -425,7 +425,7 @@ static CURLcode mk_nt_hash(struct SessionHandle *data,
 {
   size_t len = strlen(password);
   unsigned char *pw = malloc(len*2);
-  if (!pw)
+  if(!pw)
     return CURLE_OUT_OF_MEMORY;
 
   utf8_to_unicode_le(pw, password, len);
@@ -465,19 +465,19 @@ static CURLcode mk_nt_hash(struct SessionHandle *data,
 static void
 ntlm_sspi_cleanup(struct ntlmdata *ntlm)
 {
-  if (ntlm->type_2) {
+  if(ntlm->type_2) {
     free(ntlm->type_2);
     ntlm->type_2 = NULL;
   }
-  if (ntlm->has_handles) {
+  if(ntlm->has_handles) {
     s_pSecFn->DeleteSecurityContext(&ntlm->c_handle);
     s_pSecFn->FreeCredentialsHandle(&ntlm->handle);
     ntlm->has_handles = 0;
   }
-  if (ntlm->p_identity) {
-    if (ntlm->identity.User) free(ntlm->identity.User);
-    if (ntlm->identity.Password) free(ntlm->identity.Password);
-    if (ntlm->identity.Domain) free(ntlm->identity.Domain);
+  if(ntlm->p_identity) {
+    if(ntlm->identity.User) free(ntlm->identity.User);
+    if(ntlm->identity.Password) free(ntlm->identity.Password);
+    if(ntlm->identity.Domain) free(ntlm->identity.Domain);
     ntlm->p_identity = NULL;
   }
 }
@@ -546,7 +546,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 
 #ifdef USE_WINDOWS_SSPI
   /* If security interface is not yet initialized try to do this */
-  if (s_hSecDll == NULL) {
+  if(s_hSecDll == NULL) {
     /* Determine Windows version. Security functions are located in
      * security.dll on WinNT 4.0 and in secur32.dll on Win9x. Win2K and XP
      * contain both these DLLs (security.dll just forwards calls to
@@ -555,21 +555,21 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     OSVERSIONINFO osver;
     osver.dwOSVersionInfoSize = sizeof(osver);
     GetVersionEx(&osver);
-    if (osver.dwPlatformId == VER_PLATFORM_WIN32_NT
+    if(osver.dwPlatformId == VER_PLATFORM_WIN32_NT
       && osver.dwMajorVersion == 4)
       s_hSecDll = LoadLibrary("security.dll");
     else
       s_hSecDll = LoadLibrary("secur32.dll");
-    if (s_hSecDll != NULL) {
+    if(s_hSecDll != NULL) {
       INIT_SECURITY_INTERFACE pInitSecurityInterface;
       pInitSecurityInterface =
         (INIT_SECURITY_INTERFACE)GetProcAddress(s_hSecDll,
                                                 "InitSecurityInterfaceA");
-      if (pInitSecurityInterface != NULL)
+      if(pInitSecurityInterface != NULL)
         s_pSecFn = pInitSecurityInterface();
     }
   }
-  if (s_pSecFn == NULL)
+  if(s_pSecFn == NULL)
     return CURLE_RECV_ERROR;
 #endif
 
@@ -589,10 +589,10 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     ntlm_sspi_cleanup(ntlm);
 
     user = strchr(userp, '\\');
-    if (!user)
+    if(!user)
       user = strchr(userp, '/');
 
-    if (user) {
+    if(user) {
       domain = userp;
       domlen = user - userp;
       user++;
@@ -603,19 +603,19 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       domlen = 0;
     }
 
-    if (user && *user) {
+    if(user && *user) {
       /* note: initialize all of this before doing the mallocs so that
        * it can be cleaned up later without leaking memory.
        */
       ntlm->p_identity = &ntlm->identity;
       memset(ntlm->p_identity, 0, sizeof(*ntlm->p_identity));
-      if ((ntlm->identity.User = (unsigned char *)strdup(user)) == NULL)
+      if((ntlm->identity.User = (unsigned char *)strdup(user)) == NULL)
         return CURLE_OUT_OF_MEMORY;
       ntlm->identity.UserLength = strlen(user);
-      if ((ntlm->identity.Password = (unsigned char *)strdup(passwdp)) == NULL)
+      if((ntlm->identity.Password = (unsigned char *)strdup(passwdp)) == NULL)
         return CURLE_OUT_OF_MEMORY;
       ntlm->identity.PasswordLength = strlen(passwdp);
-      if ((ntlm->identity.Domain = malloc(domlen+1)) == NULL)
+      if((ntlm->identity.Domain = malloc(domlen+1)) == NULL)
         return CURLE_OUT_OF_MEMORY;
       strncpy((char *)ntlm->identity.Domain, domain, domlen);
       ntlm->identity.Domain[domlen] = '\0';
@@ -626,7 +626,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       ntlm->p_identity = NULL;
     }
 
-    if (s_pSecFn->AcquireCredentialsHandle(
+    if(s_pSecFn->AcquireCredentialsHandle(
           NULL, (char *)"NTLM", SECPKG_CRED_OUTBOUND, NULL, ntlm->p_identity,
           NULL, NULL, &ntlm->handle, &tsDummy
           ) != SEC_E_OK) {
@@ -650,11 +650,11 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
                                                  &ntlm->c_handle, &desc,
                                                  &attrs, &tsDummy);
 
-    if (status == SEC_I_COMPLETE_AND_CONTINUE ||
+    if(status == SEC_I_COMPLETE_AND_CONTINUE ||
         status == SEC_I_CONTINUE_NEEDED) {
       s_pSecFn->CompleteAuthToken(&ntlm->c_handle, &desc);
     }
-    else if (status != SEC_E_OK) {
+    else if(status != SEC_E_OK) {
       s_pSecFn->FreeCredentialsHandle(&ntlm->handle);
       return CURLE_RECV_ERROR;
     }
@@ -805,7 +805,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
                                        0, &ntlm->c_handle, &type_3_desc,
                                        &attrs, &tsDummy);
 
-    if (status != SEC_E_OK)
+    if(status != SEC_E_OK)
       return CURLE_RECV_ERROR;
 
     size = type_3.cbBuffer;
@@ -827,7 +827,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     if(!user)
       user = strchr(userp, '/');
 
-    if (user) {
+    if(user) {
       domain = userp;
       domlen = (user - domain);
       user++;
@@ -836,7 +836,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       user = userp;
     userlen = strlen(user);
 
-    if (gethostname(host, HOSTNAME_MAX)) {
+    if(gethostname(host, HOSTNAME_MAX)) {
       infof(conn->data, "gethostname() failed, continuing without!");
       hostlen = 0;
     }
@@ -846,14 +846,14 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
        * name, which NTLM doesn't like.
        */
       char *dot = strchr(host, '.');
-      if (dot)
+      if(dot)
         *dot = '\0';
       hostlen = strlen(host);
     }
 
 #if USE_NTLM2SESSION
     /* We don't support NTLM2 if we don't have USE_NTRESPONSES */
-    if (ntlm->flags & NTLMFLAG_NEGOTIATE_NTLM2_KEY) {
+    if(ntlm->flags & NTLMFLAG_NEGOTIATE_NTLM2_KEY) {
       unsigned char ntbuffer[0x18];
       unsigned char tmp[0x18];
       unsigned char md5sum[MD5_DIGEST_LENGTH];
@@ -878,7 +878,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       MD5_Final(md5sum, &MD5pw);
       /* We shall only use the first 8 bytes of md5sum,
          but the des code in lm_resp only encrypt the first 8 bytes */
-      if (mk_nt_hash(conn->data, passwdp, ntbuffer) == CURLE_OUT_OF_MEMORY)
+      if(mk_nt_hash(conn->data, passwdp, ntbuffer) == CURLE_OUT_OF_MEMORY)
         return CURLE_OUT_OF_MEMORY;
       lm_resp(ntbuffer, md5sum, ntresp);
 
@@ -893,7 +893,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       unsigned char lmbuffer[0x18];
 
 #if USE_NTRESPONSES
-      if (mk_nt_hash(conn->data, passwdp, ntbuffer) == CURLE_OUT_OF_MEMORY)
+      if(mk_nt_hash(conn->data, passwdp, ntbuffer) == CURLE_OUT_OF_MEMORY)
         return CURLE_OUT_OF_MEMORY;
       lm_resp(ntbuffer, &ntlm->nonce[0], ntresp);
 #endif
@@ -1113,7 +1113,7 @@ Curl_ntlm_cleanup(struct connectdata *conn)
 #ifdef USE_WINDOWS_SSPI
   ntlm_sspi_cleanup(&conn->ntlm);
   ntlm_sspi_cleanup(&conn->proxyntlm);
-  if (s_hSecDll != NULL) {
+  if(s_hSecDll != NULL) {
     FreeLibrary(s_hSecDll);
     s_hSecDll = NULL;
     s_pSecFn = NULL;

@@ -101,7 +101,7 @@ size_t Curl_base64_decode(const char *src, unsigned char **outptr)
   numQuantums = (length + equalsTerm) / 4;
 
   /* Don't allocate a buffer if the decoded length is 0 */
-  if (numQuantums <= 0)
+  if(numQuantums <= 0)
     return 0;
 
   rawlen = (numQuantums * 3) - equalsTerm;

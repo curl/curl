@@ -308,9 +308,9 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
   long max_param=0;
   long i;
 
-  while (*fmt) {
-    if (*fmt++ == '%') {
-      if (*fmt == '%') {
+  while(*fmt) {
+    if(*fmt++ == '%') {
+      if(*fmt == '%') {
         fmt++;
         continue; /* while */
       }
@@ -322,11 +322,11 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
       param_num++;
 
       this_param = dprintf_DollarString(fmt, &fmt);
-      if (0 == this_param)
+      if(0 == this_param)
         /* we got no positional, get the next counter */
         this_param = param_num;
 
-      if (this_param > max_param)
+      if(this_param > max_param)
         max_param = this_param;
 
       /*
@@ -340,7 +340,7 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
 
       /* Handle the flags */
 
-      while (dprintf_IsQualifierNoDollar(*fmt)) {
+      while(dprintf_IsQualifierNoDollar(*fmt)) {
         switch (*fmt++) {
         case ' ':
           flags |= FLAGS_SPACE;
@@ -357,7 +357,7 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
           break;
         case '.':
           flags |= FLAGS_PREC;
-          if ('*' == *fmt) {
+          if('*' == *fmt) {
             /* The precision is picked from a specified parameter */
 
             flags |= FLAGS_PRECPARAM;
@@ -365,12 +365,12 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
             param_num++;
 
             i = dprintf_DollarString(fmt, &fmt);
-            if (i)
+            if(i)
               precision = i;
             else
               precision = param_num;
 
-            if (precision > max_param)
+            if(precision > max_param)
               max_param = precision;
           }
           else {
@@ -382,7 +382,7 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
           flags |= FLAGS_SHORT;
           break;
         case 'l':
-          if (flags & FLAGS_LONG)
+          if(flags & FLAGS_LONG)
             flags |= FLAGS_LONGLONG;
           else
             flags |= FLAGS_LONG;
@@ -410,7 +410,7 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
 #endif
           break;
         case '0':
-          if (!(flags & FLAGS_LEFT))
+          if(!(flags & FLAGS_LEFT))
             flags |= FLAGS_PAD_NIL;
           /* FALLTHROUGH */
         case '1': case '2': case '3': case '4':
@@ -503,7 +503,7 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
       vto[i].width = width;
       vto[i].precision = precision;
 
-      if (flags & FLAGS_WIDTHPARAM) {
+      if(flags & FLAGS_WIDTHPARAM) {
         /* we have the width specified from a parameter, so we make that
            parameter's info setup properly */
         vto[i].width = width - 1;
@@ -513,7 +513,7 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
         vto[i].precision = vto[i].width = 0; /* can't use width or precision
                                                 of width! */
       }
-      if (flags & FLAGS_PRECPARAM) {
+      if(flags & FLAGS_PRECPARAM) {
         /* we have the precision specified from a parameter, so we make that
            parameter's info setup properly */
         vto[i].precision = precision - 1;
@@ -533,7 +533,7 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
 
   /* Read the arg list parameters into our data list */
   for (i=0; i<max_param; i++) {
-    if ((i + 1 < max_param) && (vto[i + 1].type == FORMAT_WIDTH))
+    if((i + 1 < max_param) && (vto[i + 1].type == FORMAT_WIDTH))
       {
         /* Width/precision arguments must be read before the main argument
          * they are attached to
@@ -620,7 +620,7 @@ static int dprintf_formatf(
                        created for us */
 
   f = (char *)format;
-  while (*f != '\0') {
+  while(*f != '\0') {
     /* Format spec modifiers.  */
     char alt;
 
@@ -644,7 +644,7 @@ static int dprintf_formatf(
 #endif
     long signed_num;
 
-    if (*f != '%') {
+    if(*f != '%') {
       /* This isn't a format spec, so write everything out until the next one
          OR end of string is reached.  */
       do {
@@ -659,7 +659,7 @@ static int dprintf_formatf(
        '%' as a conversion specifier, it says "The complete format
        specification shall be `%%'," so we can avoid all the width
        and precision processing.  */
-    if (*f == '%') {
+    if(*f == '%') {
       ++f;
       OUTCHAR('%');
       continue;
@@ -700,12 +700,12 @@ static int dprintf_formatf(
       num = p->data.num;
       if(p->flags & FLAGS_CHAR) {
         /* Character.  */
-        if (!(p->flags & FLAGS_LEFT))
-          while (--width > 0)
+        if(!(p->flags & FLAGS_LEFT))
+          while(--width > 0)
             OUTCHAR(' ');
         OUTCHAR((char) num);
-        if (p->flags & FLAGS_LEFT)
-          while (--width > 0)
+        if(p->flags & FLAGS_LEFT)
+          while(--width > 0)
             OUTCHAR(' ');
         break;
       }
@@ -756,47 +756,47 @@ static int dprintf_formatf(
         char *w;
 
         /* Supply a default precision if none was given.  */
-        if (prec == -1)
+        if(prec == -1)
           prec = 1;
 
         /* Put the number in WORK.  */
         w = workend;
-        while (num > 0) {
+        while(num > 0) {
           *w-- = digits[num % base];
           num /= base;
         }
         width -= (long)(workend - w);
         prec -= (long)(workend - w);
 
-        if (alt && base == 8 && prec <= 0) {
+        if(alt && base == 8 && prec <= 0) {
           *w-- = '0';
           --width;
         }
 
-        if (prec > 0) {
+        if(prec > 0) {
           width -= prec;
-          while (prec-- > 0)
+          while(prec-- > 0)
             *w-- = '0';
         }
 
-        if (alt && base == 16)
+        if(alt && base == 16)
           width -= 2;
 
-        if (is_neg || (p->flags & FLAGS_SHOWSIGN) || (p->flags & FLAGS_SPACE))
+        if(is_neg || (p->flags & FLAGS_SHOWSIGN) || (p->flags & FLAGS_SPACE))
           --width;
 
-        if (!(p->flags & FLAGS_LEFT) && !(p->flags & FLAGS_PAD_NIL))
-          while (width-- > 0)
+        if(!(p->flags & FLAGS_LEFT) && !(p->flags & FLAGS_PAD_NIL))
+          while(width-- > 0)
             OUTCHAR(' ');
 
-        if (is_neg)
+        if(is_neg)
           OUTCHAR('-');
-        else if (p->flags & FLAGS_SHOWSIGN)
+        else if(p->flags & FLAGS_SHOWSIGN)
           OUTCHAR('+');
-        else if (p->flags & FLAGS_SPACE)
+        else if(p->flags & FLAGS_SPACE)
           OUTCHAR(' ');
 
-        if (alt && base == 16) {
+        if(alt && base == 16) {
           OUTCHAR('0');
           if(p->flags & FLAGS_UPPER)
             OUTCHAR('X');
@@ -804,17 +804,17 @@ static int dprintf_formatf(
             OUTCHAR('x');
         }
 
-        if (!(p->flags & FLAGS_LEFT) && (p->flags & FLAGS_PAD_NIL))
-          while (width-- > 0)
+        if(!(p->flags & FLAGS_LEFT) && (p->flags & FLAGS_PAD_NIL))
+          while(width-- > 0)
             OUTCHAR('0');
 
         /* Write the number.  */
-        while (++w <= workend) {
+        while(++w <= workend) {
           OUTCHAR(*w);
         }
 
-        if (p->flags & FLAGS_LEFT)
-          while (width-- > 0)
+        if(p->flags & FLAGS_LEFT)
+          while(width-- > 0)
             OUTCHAR(' ');
       }
       break;
@@ -827,9 +827,9 @@ static int dprintf_formatf(
         size_t len;
 
         str = (char *) p->data.str;
-        if ( str == NULL) {
+        if( str == NULL) {
           /* Write null[] if there's space.  */
-          if (prec == -1 || prec >= (long) sizeof(null) - 1) {
+          if(prec == -1 || prec >= (long) sizeof(null) - 1) {
             str = null;
             len = sizeof(null) - 1;
             /* Disable quotes around (nil) */
@@ -843,24 +843,24 @@ static int dprintf_formatf(
         else
           len = strlen(str);
 
-        if (prec != -1 && (size_t) prec < len)
+        if(prec != -1 && (size_t) prec < len)
           len = prec;
         width -= (long)len;
 
-        if (p->flags & FLAGS_ALT)
+        if(p->flags & FLAGS_ALT)
           OUTCHAR('"');
 
-        if (!(p->flags&FLAGS_LEFT))
-          while (width-- > 0)
+        if(!(p->flags&FLAGS_LEFT))
+          while(width-- > 0)
             OUTCHAR(' ');
 
-        while (len-- > 0)
+        while(len-- > 0)
           OUTCHAR(*str++);
-        if (p->flags&FLAGS_LEFT)
-          while (width-- > 0)
+        if(p->flags&FLAGS_LEFT)
+          while(width-- > 0)
             OUTCHAR(' ');
 
-        if (p->flags & FLAGS_ALT)
+        if(p->flags & FLAGS_ALT)
           OUTCHAR('"');
       }
       break;
@@ -870,7 +870,7 @@ static int dprintf_formatf(
       {
         void *ptr;
         ptr = (void *) p->data.ptr;
-        if (ptr != NULL) {
+        if(ptr != NULL) {
           /* If the pointer is not NULL, write it as a %#x spec.  */
           base = 16;
           digits = (p->flags & FLAGS_UPPER)? upper_digits : lower_digits;
@@ -885,13 +885,13 @@ static int dprintf_formatf(
           const char *point;
 
           width -= sizeof(strnil) - 1;
-          if (p->flags & FLAGS_LEFT)
-            while (width-- > 0)
+          if(p->flags & FLAGS_LEFT)
+            while(width-- > 0)
               OUTCHAR(' ');
           for (point = strnil; *point != '\0'; ++point)
             OUTCHAR(*point);
-          if (! (p->flags & FLAGS_LEFT))
-            while (width-- > 0)
+          if(! (p->flags & FLAGS_LEFT))
+            while(width-- > 0)
               OUTCHAR(' ');
         }
       }
@@ -905,24 +905,24 @@ static int dprintf_formatf(
         int len;
 
         width = -1;
-        if (p->flags & FLAGS_WIDTH)
+        if(p->flags & FLAGS_WIDTH)
           width = p->width;
-        else if (p->flags & FLAGS_WIDTHPARAM)
+        else if(p->flags & FLAGS_WIDTHPARAM)
           width = vto[p->width].data.num;
 
         prec = -1;
-        if (p->flags & FLAGS_PREC)
+        if(p->flags & FLAGS_PREC)
           prec = p->precision;
-        else if (p->flags & FLAGS_PRECPARAM)
+        else if(p->flags & FLAGS_PRECPARAM)
           prec = vto[p->precision].data.num;
 
-        if (p->flags & FLAGS_LEFT)
+        if(p->flags & FLAGS_LEFT)
           strcat(formatbuf, "-");
-        if (p->flags & FLAGS_SHOWSIGN)
+        if(p->flags & FLAGS_SHOWSIGN)
           strcat(formatbuf, "+");
-        if (p->flags & FLAGS_SPACE)
+        if(p->flags & FLAGS_SPACE)
           strcat(formatbuf, " ");
-        if (p->flags & FLAGS_ALT)
+        if(p->flags & FLAGS_ALT)
           strcat(formatbuf, "#");
 
         fptr=&formatbuf[strlen(formatbuf)];
@@ -939,12 +939,12 @@ static int dprintf_formatf(
           fptr += len;
           left -= len;
         }
-        if (p->flags & FLAGS_LONG)
+        if(p->flags & FLAGS_LONG)
           *fptr++ = 'l';
 
-        if (p->flags & FLAGS_FLOATE)
+        if(p->flags & FLAGS_FLOATE)
           *fptr++ = (char)((p->flags & FLAGS_UPPER) ? 'E':'e');
-        else if (p->flags & FLAGS_FLOATG)
+        else if(p->flags & FLAGS_FLOATG)
           *fptr++ = (char)((p->flags & FLAGS_UPPER) ? 'G' : 'g');
         else
           *fptr++ = 'f';
@@ -963,13 +963,13 @@ static int dprintf_formatf(
     case FORMAT_INTPTR:
       /* Answer the count of characters written.  */
 #ifdef ENABLE_64BIT
-      if (p->flags & FLAGS_LONGLONG)
+      if(p->flags & FLAGS_LONGLONG)
         *(LONG_LONG *) p->data.ptr = (LONG_LONG)done;
       else
 #endif
-        if (p->flags & FLAGS_LONG)
+        if(p->flags & FLAGS_LONG)
           *(long *) p->data.ptr = (long)done;
-      else if (!(p->flags & FLAGS_SHORT))
+      else if(!(p->flags & FLAGS_SHORT))
         *(int *) p->data.ptr = (int)done;
       else
         *(short *) p->data.ptr = (short)done;

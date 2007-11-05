@@ -52,7 +52,7 @@
 /* Winsock and TPF sockets are not in range [0..FD_SETSIZE-1] */
 
 #if defined(USE_WINSOCK) || defined(TPF)
-#define VERIFY_SOCK(x) do { } while (0)
+#define VERIFY_SOCK(x) do { } while(0)
 #else
 #define VALID_SOCK(s) (((s) >= 0) && ((s) < FD_SETSIZE))
 #define VERIFY_SOCK(x) do { \
@@ -105,9 +105,9 @@ static int wait_ms(int timeout_ms)
 #endif
   int r = 0;
 
-  if (!timeout_ms)
+  if(!timeout_ms)
     return 0;
-  if (timeout_ms < 0) {
+  if(timeout_ms < 0) {
     SET_SOCKERRNO(EINVAL);
     return -1;
   }
@@ -126,17 +126,17 @@ static int wait_ms(int timeout_ms)
     pending_tv.tv_usec = (pending_ms % 1000) * 1000;
     r = select(0, NULL, NULL, NULL, &pending_tv);
 #endif /* HAVE_POLL_FINE */
-    if (r != -1)
+    if(r != -1)
       break;
     error = SOCKERRNO;
-    if ((error == EINVAL) || error_is_EINTR)
+    if((error == EINVAL) || error_is_EINTR)
       break;
     pending_ms = timeout_ms - elapsed_ms;
-    if (pending_ms <= 0)
+    if(pending_ms <= 0)
       break;
-  } while (r == -1);
+  } while(r == -1);
 #endif /* USE_WINSOCK */
-  if (r)
+  if(r)
     r = -1;
   return r;
 }
@@ -189,7 +189,7 @@ int Curl_socket_ready(curl_socket_t readfd, curl_socket_t writefd,
      when function is called with a zero timeout or a negative timeout
      value indicating a blocking call should be performed. */
 
-  if (timeout_ms > 0) {
+  if(timeout_ms > 0) {
     pending_ms = timeout_ms;
     initial_tv = curlx_tvnow();
   }
@@ -197,13 +197,13 @@ int Curl_socket_ready(curl_socket_t readfd, curl_socket_t writefd,
 #ifdef HAVE_POLL_FINE
 
   num = 0;
-  if (readfd != CURL_SOCKET_BAD) {
+  if(readfd != CURL_SOCKET_BAD) {
     pfd[num].fd = readfd;
     pfd[num].events = POLLRDNORM|POLLIN|POLLRDBAND|POLLPRI;
     pfd[num].revents = 0;
     num++;
   }
-  if (writefd != CURL_SOCKET_BAD) {
+  if(writefd != CURL_SOCKET_BAD) {
     pfd[num].fd = writefd;
     pfd[num].events = POLLWRNORM|POLLOUT;
     pfd[num].revents = 0;
@@ -211,41 +211,41 @@ int Curl_socket_ready(curl_socket_t readfd, curl_socket_t writefd,
   }
 
   do {
-    if (timeout_ms < 0)
+    if(timeout_ms < 0)
       pending_ms = -1;
-    else if (!timeout_ms)
+    else if(!timeout_ms)
       pending_ms = 0;
     r = poll(pfd, num, pending_ms);
-    if (r != -1)
+    if(r != -1)
       break;
     error = SOCKERRNO;
-    if ((error == EINVAL) || error_is_EINTR)
+    if((error == EINVAL) || error_is_EINTR)
       break;
-    if (timeout_ms > 0) {
+    if(timeout_ms > 0) {
       pending_ms = timeout_ms - elapsed_ms;
-      if (pending_ms <= 0)
+      if(pending_ms <= 0)
         break;
     }
-  } while (r == -1);
+  } while(r == -1);
 
-  if (r < 0)
+  if(r < 0)
     return -1;
-  if (r == 0)
+  if(r == 0)
     return 0;
 
   ret = 0;
   num = 0;
-  if (readfd != CURL_SOCKET_BAD) {
-    if (pfd[num].revents & (POLLRDNORM|POLLIN|POLLERR|POLLHUP))
+  if(readfd != CURL_SOCKET_BAD) {
+    if(pfd[num].revents & (POLLRDNORM|POLLIN|POLLERR|POLLHUP))
       ret |= CURL_CSELECT_IN;
-    if (pfd[num].revents & (POLLRDBAND|POLLPRI|POLLNVAL))
+    if(pfd[num].revents & (POLLRDBAND|POLLPRI|POLLNVAL))
       ret |= CURL_CSELECT_ERR;
     num++;
   }
-  if (writefd != CURL_SOCKET_BAD) {
-    if (pfd[num].revents & (POLLWRNORM|POLLOUT))
+  if(writefd != CURL_SOCKET_BAD) {
+    if(pfd[num].revents & (POLLWRNORM|POLLOUT))
       ret |= CURL_CSELECT_OUT;
-    if (pfd[num].revents & (POLLERR|POLLHUP|POLLNVAL))
+    if(pfd[num].revents & (POLLERR|POLLHUP|POLLNVAL))
       ret |= CURL_CSELECT_ERR;
   }
 
@@ -257,7 +257,7 @@ int Curl_socket_ready(curl_socket_t readfd, curl_socket_t writefd,
   maxfd = (curl_socket_t)-1;
 
   FD_ZERO(&fds_read);
-  if (readfd != CURL_SOCKET_BAD) {
+  if(readfd != CURL_SOCKET_BAD) {
     VERIFY_SOCK(readfd);
     FD_SET(readfd, &fds_read);
     FD_SET(readfd, &fds_err);
@@ -265,54 +265,54 @@ int Curl_socket_ready(curl_socket_t readfd, curl_socket_t writefd,
   }
 
   FD_ZERO(&fds_write);
-  if (writefd != CURL_SOCKET_BAD) {
+  if(writefd != CURL_SOCKET_BAD) {
     VERIFY_SOCK(writefd);
     FD_SET(writefd, &fds_write);
     FD_SET(writefd, &fds_err);
-    if (writefd > maxfd)
+    if(writefd > maxfd)
       maxfd = writefd;
   }
 
   ptimeout = (timeout_ms < 0) ? NULL : &pending_tv;
 
   do {
-    if (timeout_ms > 0) {
+    if(timeout_ms > 0) {
       pending_tv.tv_sec = pending_ms / 1000;
       pending_tv.tv_usec = (pending_ms % 1000) * 1000;
     }
-    else if (!timeout_ms) {
+    else if(!timeout_ms) {
       pending_tv.tv_sec = 0;
       pending_tv.tv_usec = 0;
     }
     r = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, ptimeout);
-    if (r != -1)
+    if(r != -1)
       break;
     error = SOCKERRNO;
-    if ((error == EINVAL) || (error == EBADF) || error_is_EINTR)
+    if((error == EINVAL) || (error == EBADF) || error_is_EINTR)
       break;
-    if (timeout_ms > 0) {
+    if(timeout_ms > 0) {
       pending_ms = timeout_ms - elapsed_ms;
-      if (pending_ms <= 0)
+      if(pending_ms <= 0)
         break;
     }
-  } while (r == -1);
+  } while(r == -1);
 
-  if (r < 0)
+  if(r < 0)
     return -1;
-  if (r == 0)
+  if(r == 0)
     return 0;
 
   ret = 0;
-  if (readfd != CURL_SOCKET_BAD) {
-    if (FD_ISSET(readfd, &fds_read))
+  if(readfd != CURL_SOCKET_BAD) {
+    if(FD_ISSET(readfd, &fds_read))
       ret |= CURL_CSELECT_IN;
-    if (FD_ISSET(readfd, &fds_err))
+    if(FD_ISSET(readfd, &fds_err))
       ret |= CURL_CSELECT_ERR;
   }
-  if (writefd != CURL_SOCKET_BAD) {
-    if (FD_ISSET(writefd, &fds_write))
+  if(writefd != CURL_SOCKET_BAD) {
+    if(FD_ISSET(writefd, &fds_write))
       ret |= CURL_CSELECT_OUT;
-    if (FD_ISSET(writefd, &fds_err))
+    if(FD_ISSET(writefd, &fds_err))
       ret |= CURL_CSELECT_ERR;
   }
 
@@ -355,15 +355,15 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
   int error;
   int r;
 
-  if (ufds) {
+  if(ufds) {
     for (i = 0; i < nfds; i++) {
-      if (ufds[i].fd != CURL_SOCKET_BAD) {
+      if(ufds[i].fd != CURL_SOCKET_BAD) {
         fds_none = FALSE;
         break;
       }
     }
   }
-  if (fds_none) {
+  if(fds_none) {
     r = wait_ms(timeout_ms);
     return r;
   }
@@ -373,7 +373,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
      when function is called with a zero timeout or a negative timeout
      value indicating a blocking call should be performed. */
 
-  if (timeout_ms > 0) {
+  if(timeout_ms > 0) {
     pending_ms = timeout_ms;
     initial_tv = curlx_tvnow();
   }
@@ -381,22 +381,22 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
 #ifdef HAVE_POLL_FINE
 
   do {
-    if (timeout_ms < 0)
+    if(timeout_ms < 0)
       pending_ms = -1;
-    else if (!timeout_ms)
+    else if(!timeout_ms)
       pending_ms = 0;
     r = poll(ufds, nfds, pending_ms);
-    if (r != -1)
+    if(r != -1)
       break;
     error = SOCKERRNO;
-    if ((error == EINVAL) || error_is_EINTR)
+    if((error == EINVAL) || error_is_EINTR)
       break;
-    if (timeout_ms > 0) {
+    if(timeout_ms > 0) {
       pending_ms = timeout_ms - elapsed_ms;
-      if (pending_ms <= 0)
+      if(pending_ms <= 0)
         break;
     }
-  } while (r == -1);
+  } while(r == -1);
 
 #else  /* HAVE_POLL_FINE */
 
@@ -407,18 +407,18 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
 
   for (i = 0; i < nfds; i++) {
     ufds[i].revents = 0;
-    if (ufds[i].fd == CURL_SOCKET_BAD)
+    if(ufds[i].fd == CURL_SOCKET_BAD)
       continue;
     VERIFY_SOCK(ufds[i].fd);
-    if (ufds[i].events & (POLLIN|POLLOUT|POLLPRI|
+    if(ufds[i].events & (POLLIN|POLLOUT|POLLPRI|
                           POLLRDNORM|POLLWRNORM|POLLRDBAND)) {
-      if (ufds[i].fd > maxfd)
+      if(ufds[i].fd > maxfd)
         maxfd = ufds[i].fd;
-      if (ufds[i].events & (POLLRDNORM|POLLIN))
+      if(ufds[i].events & (POLLRDNORM|POLLIN))
         FD_SET(ufds[i].fd, &fds_read);
-      if (ufds[i].events & (POLLWRNORM|POLLOUT))
+      if(ufds[i].events & (POLLWRNORM|POLLOUT))
         FD_SET(ufds[i].fd, &fds_write);
-      if (ufds[i].events & (POLLRDBAND|POLLPRI))
+      if(ufds[i].events & (POLLRDBAND|POLLPRI))
         FD_SET(ufds[i].fd, &fds_err);
     }
   }
@@ -426,44 +426,44 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
   ptimeout = (timeout_ms < 0) ? NULL : &pending_tv;
 
   do {
-    if (timeout_ms > 0) {
+    if(timeout_ms > 0) {
       pending_tv.tv_sec = pending_ms / 1000;
       pending_tv.tv_usec = (pending_ms % 1000) * 1000;
     }
-    else if (!timeout_ms) {
+    else if(!timeout_ms) {
       pending_tv.tv_sec = 0;
       pending_tv.tv_usec = 0;
     }
     r = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, ptimeout);
-    if (r != -1)
+    if(r != -1)
       break;
     error = SOCKERRNO;
-    if ((error == EINVAL) || (error == EBADF) || error_is_EINTR)
+    if((error == EINVAL) || (error == EBADF) || error_is_EINTR)
       break;
-    if (timeout_ms > 0) {
+    if(timeout_ms > 0) {
       pending_ms = timeout_ms - elapsed_ms;
-      if (pending_ms <= 0)
+      if(pending_ms <= 0)
         break;
     }
-  } while (r == -1);
+  } while(r == -1);
 
-  if (r < 0)
+  if(r < 0)
     return -1;
-  if (r == 0)
+  if(r == 0)
     return 0;
 
   r = 0;
   for (i = 0; i < nfds; i++) {
     ufds[i].revents = 0;
-    if (ufds[i].fd == CURL_SOCKET_BAD)
+    if(ufds[i].fd == CURL_SOCKET_BAD)
       continue;
-    if (FD_ISSET(ufds[i].fd, &fds_read))
+    if(FD_ISSET(ufds[i].fd, &fds_read))
       ufds[i].revents |= POLLIN;
-    if (FD_ISSET(ufds[i].fd, &fds_write))
+    if(FD_ISSET(ufds[i].fd, &fds_write))
       ufds[i].revents |= POLLOUT;
-    if (FD_ISSET(ufds[i].fd, &fds_err))
+    if(FD_ISSET(ufds[i].fd, &fds_err))
       ufds[i].revents |= POLLPRI;
-    if (ufds[i].revents != 0)
+    if(ufds[i].revents != 0)
       r++;
   }
 
