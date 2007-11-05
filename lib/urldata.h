@@ -485,6 +485,10 @@ typedef enum {
   SSH_LAST  /* never used */
 } sshstate;
 
+/* this struct is used in the HandleData struct which is part of the
+   SessionHandle, which means this is used on a per-easy handle basis.
+   Everything that is strictly related to a connection is banned from this
+   struct. */
 struct SSHPROTO {
   curl_off_t *bytecountp;
   char *user;
@@ -492,38 +496,42 @@ struct SSHPROTO {
   char *path;                   /* the path we operate on */
   char *homedir;
   char *errorstr;
-#ifdef USE_LIBSSH2
-  LIBSSH2_SESSION       *ssh_session;  /* Secure Shell session */
-  LIBSSH2_CHANNEL       *ssh_channel;  /* Secure Shell channel handle */
-  LIBSSH2_SFTP          *sftp_session; /* SFTP handle */
-  LIBSSH2_SFTP_HANDLE   *sftp_handle;
-#endif /* USE_LIBSSH2 */
 };
 
 /* ssh_conn is used for struct connection-oriented data in the connectdata
    struct */
 struct ssh_conn {
-  const char *authlist; /* List of auth. methods, managed by libssh2 */
+  const char *authlist;       /* List of auth. methods, managed by libssh2 */
 #ifdef USE_LIBSSH2
-  const char *passphrase;
-  char *rsa_pub;
-  char *rsa;
-  bool authed;
-  sshstate state; /* always use ssh.c:state() to change state! */
-  sshstate nextState; /* the state to goto after stopping */
-  CURLcode actualCode;  /* the actual error code */
-  struct curl_slist *quote_item;
-  char *quote_path1;
+  const char *passphrase;     /* passphrase to use */
+  char *rsa_pub;              /* path name */
+  char *rsa;                  /* path name */
+  bool authed;                /* the connection has been authenticated fine */
+  sshstate state;             /* always use ssh.c:state() to change state! */
+  sshstate nextState;         /* the state to goto after stopping */
+  CURLcode actualCode;        /* the actual error code */
+  struct curl_slist *quote_item; /* for the quote option */
+  char *quote_path1;          /* two generic pointers for the QUOTE stuff */
   char *quote_path2;
-  LIBSSH2_SFTP_ATTRIBUTES quote_attrs;
+  LIBSSH2_SFTP_ATTRIBUTES quote_attrs; /* used by the SFTP_QUOTE state */
+
+  /* Here's a set of struct members used by the SFTP_READDIR state */
   LIBSSH2_SFTP_ATTRIBUTES readdir_attrs;
   char *readdir_filename;
   char *readdir_longentry;
   int readdir_len, readdir_totalLen, readdir_currLen;
   char *readdir_line;
   char *readdir_linkPath;
-  int secondCreateDirs;
-  char *slash_pos;
+  /* end of READDIR stuff */
+
+  int secondCreateDirs;         /* counter use by the code to see if the
+                                   second attempt has been made to change
+                                   to/create a directory */
+  char *slash_pos;              /* used by the SFTP_CREATE_DIRS state */
+  LIBSSH2_SESSION *ssh_session; /* Secure Shell session */
+  LIBSSH2_CHANNEL *ssh_channel; /* Secure Shell channel handle */
+  LIBSSH2_SFTP *sftp_session;   /* SFTP handle */
+  LIBSSH2_SFTP_HANDLE *sftp_handle;
 #endif /* USE_LIBSSH2 */
 };
 
