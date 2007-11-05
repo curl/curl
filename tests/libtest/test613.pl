@@ -69,27 +69,31 @@ elsif ($ARGV[0] eq "postprocess")
 		# the one generated on a typical Linux installation):
 		# -r-?r-?r-?   12 U         U              47 Dec 31  2000 rofile.txt
 
-		my $newfile = $logfile . ".new";
+		my @canondir;
 		open(IN, "<$logfile") || die "$!";
-		open(OUT, ">$newfile") || die "$!";
 		while (<IN>) {
 			/^(.)(..).(..).(..).\s*(\S+)\s+\S+\s+\S+\s+(\S+)\s+(\S+\s+\S+\s+\S+)(.*)$/;
 			if ($1 eq "d") {
 				# Erase all directory metadata except for the name, as it is not
 				# consistent for across all test systems and filesystems
-				print OUT "d?????????    N U         U               N ???  N NN:NN$8\n";
+				push @canondir, "d?????????    N U         U               N ???  N NN:NN$8\n";
 			} elsif ($1 eq "-") {
 				# Erase user and group names, as they are not consistent across
 				# all test systems
-				printf OUT "%s%s?%s?%s?%5d U         U %15d %s%s\n", $1,$2,$3,$4,$5,$6,$7,$8;
+				my $line = sprintf("%s%s?%s?%s?%5d U         U %15d %s%s\n", $1,$2,$3,$4,$5,$6,$7,$8);
+				push @canondir, $line;
 			} else {
 				# Unexpected format; just pass it through and let the test fail
-				print OUT $_;
+				push @canondir, $_;
 			}
 		}
-
-		close(OUT);
 		close(IN);
+
+		@canondir = sort {substr($a,57) cmp substr($b,57)} @canondir;
+		my $newfile = $logfile . ".new";
+		open(OUT, ">$newfile") || die "$!";
+		print OUT join('', @canondir);
+		close(OUT);
 
 		unlink $logfile;
 		rename $newfile, $logfile;
