@@ -4,7 +4,7 @@ Curl and libcurl 7.17.2
  Command line options:         121
  curl_easy_setopt() options:   147
  Public functions in libcurl:  55
- Public web site mirrors:      43
+ Public web site mirrors:      41
  Known libcurl bindings:       36
  Contributors:                 597
 
@@ -24,7 +24,7 @@ This release includes the following known bugs:
 
 Other curl-related news:
 
- o 
+ o TclCurl 7.17.1 => http://personal1.iddeo.es/andresgarci/tclcurl/english/
 
 New curl mirrors:
 
