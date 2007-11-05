@@ -102,6 +102,8 @@
  using spaces only (no tabs) and having the opening brace ({) on the same line
  as the if() or while().
 
+ Also note that we use if() and while() with no space before the parenthesis.
+
 2.3 Commenting
 
  Comment your source code extensively using C comments (/* comment */), DO NOT
