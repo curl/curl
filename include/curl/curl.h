@@ -41,11 +41,47 @@
 # include <time.h>
 #endif /* defined (vms) */
 
-typedef void CURL;
+#if defined(_WIN32) && !defined(WIN32)
+/* Chris Lewis mentioned that he doesn't get WIN32 defined, only _WIN32 so we
+   make this adjustment to catch this. */
+#define WIN32 1
+#endif
+
+#if defined(WIN32) && !defined(_WIN32_WCE) && !defined(__GNUC__) && \
+  !defined(__CYGWIN__) || defined(__MINGW32__)
+#if !(defined(_WINSOCKAPI_) || defined(_WINSOCK_H))
+/* The check above prevents the winsock2 inclusion if winsock.h already was
+   included, since they can't co-exist without problems */
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#endif
+#else
+
+/* HP-UX systems version 9, 10 and 11 lack sys/select.h and so does oldish
+   libc5-based Linux systems. Only include it on system that are known to
+   require it! */
+#if defined(_AIX) || defined(__NOVELL_LIBC__) || defined(__NetBSD__) || defined(__minix)
+#include <sys/select.h>
+#endif
+
+#ifndef _WIN32_WCE
+#include <sys/socket.h>
+#endif
+#ifndef __WATCOMC__
+#include <sys/time.h>
+#endif
+#include <sys/types.h>
+#endif
+
+#ifdef __BEOS__
+#include <support/SupportDefs.h>
+#endif
 
 #ifdef  __cplusplus
 extern "C" {
 #endif
+
+typedef void CURL;
 
 /*
  * Decorate exportable functions for Win32 DLL linking.
@@ -137,38 +173,6 @@ extern "C" {
 #ifdef UNDEF_FILESIZEBITS
 /* this was defined above for our checks, undefine it again */
 #undef FILESIZEBITS
-#endif
-
-#if defined(_WIN32) && !defined(WIN32)
-/* Chris Lewis mentioned that he doesn't get WIN32 defined, only _WIN32 so we
-   make this adjustment to catch this. */
-#define WIN32 1
-#endif
-
-#if defined(WIN32) && !defined(_WIN32_WCE) && !defined(__GNUC__) && \
-  !defined(__CYGWIN__) || defined(__MINGW32__)
-#if !(defined(_WINSOCKAPI_) || defined(_WINSOCK_H))
-/* The check above prevents the winsock2 inclusion if winsock.h already was
-   included, since they can't co-exist without problems */
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#endif
-#else
-
-/* HP-UX systems version 9, 10 and 11 lack sys/select.h and so does oldish
-   libc5-based Linux systems. Only include it on system that are known to
-   require it! */
-#if defined(_AIX) || defined(__NOVELL_LIBC__) || defined(__NetBSD__) || defined(__minix)
-#include <sys/select.h>
-#endif
-
-#ifndef _WIN32_WCE
-#include <sys/socket.h>
-#endif
-#ifndef __WATCOMC__
-#include <sys/time.h>
-#endif
-#include <sys/types.h>
 #endif
 
 #ifndef curl_socket_typedef
@@ -1240,10 +1244,6 @@ typedef enum {
 
   CURL_TIMECOND_LAST
 } curl_TimeCond;
-
-#ifdef __BEOS__
-#include <support/SupportDefs.h>
-#endif
 
 
 /* curl_strequal() and curl_strnequal() are subject for removal in a future

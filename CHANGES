@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Yang Tse (6 Nov 2007)
+- Bug report #1824894 (http://curl.haxx.se/bug/view.cgi?id=1824894) pointed
+  out a problem in curl.h when building C++ apps with MSVC. To fix it, the
+  inclusion of header files in curl.h is moved outside of the C++ extern "C"
+  linkage block.
+
 Daniel S (1 Nov 2007)
 - Toby Peterson patched a memory problem in the command line tool that
   happened when a user had a home dir as an empty string. curl would then do

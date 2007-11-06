@@ -17,6 +17,7 @@ This release includes the following bugfixes:
  o curl-config --features and --protocols show the correct output when built
    with NSS, and also when SCP, SFTP and libz are not available
  o free problem in the curl tool for users with empty home dir
+ o curl.h version 7.17.1 problem when building C++ apps with MSVC
 
 This release includes the following known bugs:
 
