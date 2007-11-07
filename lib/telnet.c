@@ -106,7 +106,7 @@ static CURLcode check_wsock2 ( struct SessionHandle *data );
 
 static
 void telrcv(struct connectdata *,
-            unsigned char *inbuf,       /* Data received from socket */
+            const unsigned char *inbuf, /* Data received from socket */
             ssize_t count);             /* Number of bytes received */
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
@@ -949,104 +949,119 @@ static void suboption(struct connectdata *conn)
 
 static
 void telrcv(struct connectdata *conn,
-            unsigned char *inbuf,       /* Data received from socket */
+            const unsigned char *inbuf, /* Data received from socket */
             ssize_t count)              /* Number of bytes received */
 {
   unsigned char c;
   int in = 0;
+  int startwrite=-1;
   struct SessionHandle *data = conn->data;
   struct TELNET *tn = (struct TELNET *)data->reqdata.proto.telnet;
 
+#define startskipping() \
+    if (startwrite >= 0) \
+       Curl_client_write(conn, CLIENTWRITE_BODY, (char *)&inbuf[startwrite], in-startwrite); \
+    startwrite = -1
+
+#define writebyte() \
+    if (startwrite < 0) \
+      startwrite = in
+
+#define bufferflush() startskipping()
+
   while(count--)
   {
-    c = inbuf[in++];
+    c = inbuf[in];
 
+    /*infof(data,"In rcv state %d char %d\n", tn->telrcv_state, c);*/
     switch (tn->telrcv_state)
     {
       case CURL_TS_CR:
         tn->telrcv_state = CURL_TS_DATA;
         if(c == '\0')
         {
+          startskipping();
           break;   /* Ignore \0 after CR */
         }
-
-        Curl_client_write(conn, CLIENTWRITE_BODY, (char *)&c, 1);
-        continue;
+        writebyte();
+        break;
 
       case CURL_TS_DATA:
         if(c == CURL_IAC)
         {
           tn->telrcv_state = CURL_TS_IAC;
+          startskipping();
           break;
         }
         else if(c == '\r')
         {
           tn->telrcv_state = CURL_TS_CR;
         }
-
-        Curl_client_write(conn, CLIENTWRITE_BODY, (char *)&c, 1);
-        continue;
+        writebyte();
+        break;
 
       case CURL_TS_IAC:
       process_iac:
+      DEBUGASSERT(startwrite < 0);
       switch (c)
       {
         case CURL_WILL:
           tn->telrcv_state = CURL_TS_WILL;
-          continue;
+          break;
         case CURL_WONT:
           tn->telrcv_state = CURL_TS_WONT;
-          continue;
+          break;
         case CURL_DO:
           tn->telrcv_state = CURL_TS_DO;
-          continue;
+          break;
         case CURL_DONT:
           tn->telrcv_state = CURL_TS_DONT;
-          continue;
+          break;
         case CURL_SB:
           CURL_SB_CLEAR(tn);
           tn->telrcv_state = CURL_TS_SB;
-          continue;
+          break;
         case CURL_IAC:
-          Curl_client_write(conn, CLIENTWRITE_BODY, (char *)&c, 1);
+          tn->telrcv_state = CURL_TS_DATA;
+          writebyte();
           break;
         case CURL_DM:
         case CURL_NOP:
         case CURL_GA:
         default:
+          tn->telrcv_state = CURL_TS_DATA;
           printoption(data, "RCVD", CURL_IAC, c);
           break;
       }
-      tn->telrcv_state = CURL_TS_DATA;
-      continue;
+      break;
 
       case CURL_TS_WILL:
         printoption(data, "RCVD", CURL_WILL, c);
         tn->please_negotiate = 1;
         rec_will(conn, c);
         tn->telrcv_state = CURL_TS_DATA;
-        continue;
+        break;
 
       case CURL_TS_WONT:
         printoption(data, "RCVD", CURL_WONT, c);
         tn->please_negotiate = 1;
         rec_wont(conn, c);
         tn->telrcv_state = CURL_TS_DATA;
-        continue;
+        break;
 
       case CURL_TS_DO:
         printoption(data, "RCVD", CURL_DO, c);
         tn->please_negotiate = 1;
         rec_do(conn, c);
         tn->telrcv_state = CURL_TS_DATA;
-        continue;
+        break;
 
       case CURL_TS_DONT:
         printoption(data, "RCVD", CURL_DONT, c);
         tn->please_negotiate = 1;
         rec_dont(conn, c);
         tn->telrcv_state = CURL_TS_DATA;
-        continue;
+        break;
 
       case CURL_TS_SB:
         if(c == CURL_IAC)
@@ -1057,7 +1072,7 @@ void telrcv(struct connectdata *conn,
         {
           CURL_SB_ACCUM(tn,c);
         }
-        continue;
+        break;
 
       case CURL_TS_SE:
         if(c != CURL_SE)
@@ -1097,7 +1112,9 @@ void telrcv(struct connectdata *conn,
         }
         break;
     }
+    ++in;
   }
+  bufferflush();
 }
 
 static CURLcode Curl_telnet_done(struct connectdata *conn,
@@ -1143,7 +1160,7 @@ static CURLcode Curl_telnet(struct connectdata *conn, bool *done)
   char *buf = data->state.buffer;
   struct TELNET *tn;
 
-  *done = TRUE; /* uncontionally */
+  *done = TRUE; /* unconditionally */
 
   code = init_telnet(conn);
   if(code)

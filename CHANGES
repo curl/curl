@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Dan F (6 Nov 2007)
+- Improved telnet support by drastically reducing the number of write
+  callbacks needed to pass a buffer to the user.  Instead one per byte it
+  is now as little as one per segment.
+
 Yang Tse (6 Nov 2007)
 - Bug report #1824894 (http://curl.haxx.se/bug/view.cgi?id=1824894) pointed
   out a problem in curl.h when building C++ apps with MSVC. To fix it, the
