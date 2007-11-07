@@ -142,7 +142,7 @@ static CURLcode Curl_file_connect(struct connectdata *conn, bool *done)
      sessionhandle, deal with it */
   Curl_reset_reqproto(conn);
 
-  if (!data->reqdata.proto.file) {
+  if(!data->reqdata.proto.file) {
     file = (struct FILEPROTO *)calloc(sizeof(struct FILEPROTO), 1);
     if(!file) {
       free(real_path);
@@ -177,7 +177,7 @@ static CURLcode Curl_file_connect(struct connectdata *conn, bool *done)
      with a drive letter.
   */
   actual_path = real_path;
-  if ((actual_path[0] == '/') &&
+  if((actual_path[0] == '/') &&
       actual_path[1] &&
       (actual_path[2] == ':' || actual_path[2] == '|'))
   {
@@ -187,7 +187,7 @@ static CURLcode Curl_file_connect(struct connectdata *conn, bool *done)
 
   /* change path separators from '/' to '\\' for DOS, Windows and OS/2 */
   for (i=0; actual_path[i] != '\0'; ++i)
-    if (actual_path[i] == '/')
+    if(actual_path[i] == '/')
       actual_path[i] = '\\';
 
   fd = open(actual_path, O_RDONLY | O_BINARY);  /* no CR/LF translation! */
@@ -270,7 +270,7 @@ static CURLcode file_upload(struct connectdata *conn)
     fd = open(file->path, O_WRONLY|O_CREAT|O_TRUNC,
               conn->data->set.new_file_perms);
 #endif /* !(WIN32 || MSDOS || __EMX__) */
-    if (fd < 0) {
+    if(fd < 0) {
       failf(data, "Can't open %s for writing", file->path);
       return CURLE_WRITE_ERROR;
     }
@@ -297,13 +297,13 @@ static CURLcode file_upload(struct connectdata *conn)
       data->reqdata.resume_from = (curl_off_t)file_stat.st_size;
   }
 
-  while (res == CURLE_OK) {
+  while(res == CURLE_OK) {
     int readcount;
     res = Curl_fillreadbuffer(conn, BUFSIZE, &readcount);
     if(res)
       break;
 
-    if (readcount <= 0)  /* fix questionable compare error. curlvms */
+    if(readcount <= 0)  /* fix questionable compare error. curlvms */
       break;
 
     nread = (size_t)readcount;
@@ -435,14 +435,14 @@ static CURLcode Curl_file(struct connectdata *conn, bool *done)
     return result;
   }
 
-  if (data->reqdata.resume_from <= expected_size)
+  if(data->reqdata.resume_from <= expected_size)
     expected_size -= data->reqdata.resume_from;
   else {
     failf(data, "failed to resume file:// transfer");
     return CURLE_BAD_DOWNLOAD_RESUME;
   }
 
-  if (fstated && (expected_size == 0))
+  if(fstated && (expected_size == 0))
     return CURLE_OK;
 
   /* The following is a shortcut implementation of file reading
@@ -460,13 +460,13 @@ static CURLcode Curl_file(struct connectdata *conn, bool *done)
 
   Curl_pgrsTime(data, TIMER_STARTTRANSFER);
 
-  while (res == CURLE_OK) {
+  while(res == CURLE_OK) {
     nread = read(fd, buf, BUFSIZE-1);
 
-    if ( nread > 0)
+    if( nread > 0)
       buf[nread] = 0;
 
-    if (nread <= 0)
+    if(nread <= 0)
       break;
 
     bytecount += nread;

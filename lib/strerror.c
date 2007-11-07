@@ -294,7 +294,7 @@ curl_easy_strerror(CURLcode error)
    */
   return "Unknown error";
 #else
-  if (error == CURLE_OK)
+  if(error == CURLE_OK)
     return "No error";
   else
     return "Error";
@@ -336,7 +336,7 @@ curl_multi_strerror(CURLMcode error)
 
   return "Unknown error";
 #else
-  if (error == CURLM_OK)
+  if(error == CURLM_OK)
     return "No error";
   else
     return "Error";
@@ -369,7 +369,7 @@ curl_share_strerror(CURLSHcode error)
 
   return "CURLSHcode unknown";
 #else
-  if (error == CURLSHE_OK)
+  if(error == CURLSHE_OK)
     return "No error";
   else
     return "Error";
@@ -555,7 +555,7 @@ get_winsock_error (int err, char *buf, size_t len)
     return NULL;
   }
 #else
-  if (err == CURLE_OK)
+  if(err == CURLE_OK)
     return NULL;
   else
     p = "error";
@@ -604,10 +604,10 @@ const char *Curl_strerror(struct connectdata *conn, int err)
 #else
 
   /* 'sys_nerr' is the maximum errno number, it is not widely portable */
-  if (err >= 0 && err < sys_nerr)
+  if(err >= 0 && err < sys_nerr)
     strncpy(buf, strerror(err), max);
   else {
-    if (!get_winsock_error(err, buf, max) &&
+    if(!get_winsock_error(err, buf, max) &&
         !FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
                        LANG_NEUTRAL, buf, (DWORD)max, NULL))
       snprintf(buf, max, "Unknown error %d (%#x)", err, err);
@@ -646,9 +646,9 @@ const char *Curl_strerror(struct connectdata *conn, int err)
   buf[max] = '\0'; /* make sure the string is zero terminated */
 
   /* strip trailing '\r\n' or '\n'. */
-  if ((p = strrchr(buf,'\n')) != NULL && (p - buf) >= 2)
+  if((p = strrchr(buf,'\n')) != NULL && (p - buf) >= 2)
      *p = '\0';
-  if ((p = strrchr(buf,'\r')) != NULL && (p - buf) >= 1)
+  if((p = strrchr(buf,'\r')) != NULL && (p - buf) >= 1)
      *p = '\0';
   return buf;
 }
@@ -716,12 +716,12 @@ const char *Curl_idn_strerror (struct connectdata *conn, int err)
       break;
   }
 #else
-  if ((Idna_rc)err == IDNA_SUCCESS)
+  if((Idna_rc)err == IDNA_SUCCESS)
     str = "No error";
   else
     str = "Error";
 #endif
-  if (str)
+  if(str)
     strncpy(buf, str, max);
   buf[max] = '\0';
   return (buf);

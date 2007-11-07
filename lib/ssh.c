@@ -1801,7 +1801,7 @@ static CURLcode ssh_easy_statemach(struct connectdata *conn)
   struct ssh_conn *sshc = &conn->proto.sshc;
   CURLcode result = CURLE_OK;
 
-  while (sshc->state != SSH_STOP) {
+  while(sshc->state != SSH_STOP) {
     result = ssh_statemach_act(conn);
     if(result) {
       break;

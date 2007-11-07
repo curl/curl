@@ -112,7 +112,7 @@ char *curl_easy_escape(CURL *handle, const char *string, int inlength)
 
 #ifdef CURL_DOES_CONVERSIONS
 /* escape sequences are always in ASCII so convert them on non-ASCII hosts */
-      if (!handle ||
+      if(!handle ||
           (Curl_convert_to_network(handle, &in, 1) != CURLE_OK)) {
         /* Curl_convert_to_network calls failf if unsuccessful */
         free(ns);
@@ -163,7 +163,7 @@ char *curl_easy_unescape(CURL *handle, const char *string, int length,
 
 #ifdef CURL_DOES_CONVERSIONS
 /* escape sequences are always in ASCII so convert them on non-ASCII hosts */
-      if (!handle ||
+      if(!handle ||
           (Curl_convert_from_network(handle, &in, 1) != CURLE_OK)) {
         /* Curl_convert_from_network calls failf if unsuccessful */
         free(ns);

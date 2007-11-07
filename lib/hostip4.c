@@ -289,7 +289,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 #else
     h = gethostbyname(hostname);
 #endif
-    if (!h)
+    if(!h)
       infof(conn->data, "gethostbyname(2) failed for %s\n", hostname);
 #endif /*HAVE_GETHOSTBYNAME_R */
   }
@@ -297,7 +297,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   if(h) {
     ai = Curl_he2ai(h, port);
 
-    if (buf) /* used a *_r() function */
+    if(buf) /* used a *_r() function */
       free(buf);
   }
 

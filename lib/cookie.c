@@ -483,7 +483,7 @@ Curl_cookie_add(struct SessionHandle *data,
         /* It turns out, that sometimes the file format allows the path
            field to remain not filled in, we try to detect this and work
            around it! Andrés García made us aware of this... */
-        if (strcmp("TRUE", ptr) && strcmp("FALSE", ptr)) {
+        if(strcmp("TRUE", ptr) && strcmp("FALSE", ptr)) {
           /* only if the path doesn't look like a boolean option! */
           co->path = strdup(ptr);
           if(!co->path)
@@ -972,7 +972,7 @@ int Curl_cookie_output(struct CookieInfo *c, const char *dumphere)
 
     while(co) {
       format_ptr = get_netscape_format(co);
-      if (format_ptr == NULL) {
+      if(format_ptr == NULL) {
         fprintf(out, "#\n# Fatal libcurl error\n");
         fclose(out);
         return 1;
@@ -996,27 +996,27 @@ struct curl_slist *Curl_cookie_list(struct SessionHandle *data)
   struct Cookie *c;
   char *line;
 
-  if ((data->cookies == NULL) ||
+  if((data->cookies == NULL) ||
       (data->cookies->numcookies == 0))
     return NULL;
 
   c = data->cookies->cookies;
 
   beg = list;
-  while (c) {
+  while(c) {
     /* fill the list with _all_ the cookies we know */
     line = get_netscape_format(c);
-    if (line == NULL) {
+    if(line == NULL) {
       curl_slist_free_all(beg);
       return NULL;
     }
     list = curl_slist_append(list, line);
     free(line);
-    if (list == NULL) {
+    if(list == NULL) {
       curl_slist_free_all(beg);
       return NULL;
     }
-    else if (beg == NULL) {
+    else if(beg == NULL) {
       beg = list;
     }
     c = c->next;

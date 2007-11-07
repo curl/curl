@@ -318,7 +318,7 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
     file name so we skip the always-present first letter of the path string. */
     filename = curl_easy_unescape(data, &state->conn->data->reqdata.path[1], 0,
                                   NULL);
-    if (!filename)
+    if(!filename)
       return CURLE_OUT_OF_MEMORY;
 
     snprintf((char *)&state->spacket.data[2],
@@ -377,12 +377,12 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
 
     /* Is this the block we expect? */
     rblock = getrpacketblock(&state->rpacket);
-    if ((state->block+1) != rblock) {
+    if((state->block+1) != rblock) {
       /* No, log it, up the retry count and fail if over the limit */
       infof(data,
             "Received unexpected DATA packet block %d\n", rblock);
       state->retries++;
-      if (state->retries>state->retry_max) {
+      if(state->retries>state->retry_max) {
         failf(data, "tftp_rx: giving up waiting for block %d\n",
               state->block+1);
         return CURLE_TFTP_ILLEGAL;
@@ -403,7 +403,7 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
     }
 
     /* Check if completed (That is, a less than full packet is received) */
-    if (state->rbytes < (int)sizeof(state->spacket)){
+    if(state->rbytes < (int)sizeof(state->spacket)){
       state->state = TFTP_STATE_FIN;
     }
     else {
@@ -742,7 +742,7 @@ static CURLcode Curl_tftp(struct connectdata *conn, bool *done)
       failf(data, "%s\n", Curl_strerror(conn, error));
       event = TFTP_EVENT_ERROR;
     }
-    else if (rc==0) {
+    else if(rc==0) {
       /* A timeout occured */
       event = TFTP_EVENT_TIMEOUT;
 
@@ -763,7 +763,7 @@ static CURLcode Curl_tftp(struct connectdata *conn, bool *done)
       }
 
       /* Sanity check packet length */
-      if (state->rbytes < 4) {
+      if(state->rbytes < 4) {
         failf(conn->data, "Received too short packet\n");
         /* Not a timeout, but how best to handle it? */
         event = TFTP_EVENT_TIMEOUT;
@@ -776,7 +776,7 @@ static CURLcode Curl_tftp(struct connectdata *conn, bool *done)
         switch(event) {
         case TFTP_EVENT_DATA:
           /* Don't pass to the client empty or retransmitted packets */
-          if (state->rbytes > 4 &&
+          if(state->rbytes > 4 &&
               ((state->block+1) == getrpacketblock(&state->rpacket))) {
             code = Curl_client_write(conn, CLIENTWRITE_BODY,
                                      (char *)&state->rpacket.data[4],
@@ -882,10 +882,10 @@ static CURLcode Curl_tftp_setup_connection(struct connectdata * conn)
    * we'll try to get now! */
   type = strstr(data->reqdata.path, ";mode=");
 
-  if (!type)
+  if(!type)
     type = strstr(conn->host.rawalloc, ";mode=");
 
-  if (type) {
+  if(type) {
     *type = 0;                   /* it was in the middle of the hostname */
     command = (char) toupper((int) type[6]);
 

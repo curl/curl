@@ -58,7 +58,7 @@ CURLcode Curl_initinfo(struct SessionHandle *data)
   info->httpversion=0;
   info->filetime=-1; /* -1 is an illegal time and thus means unknown */
 
-  if (info->contenttype)
+  if(info->contenttype)
     free(info->contenttype);
   info->contenttype = NULL;
 
@@ -214,7 +214,7 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
       /* determine if ssl */
       if(c->ssl[FIRSTSOCKET].use) {
         /* use the SSL context */
-        if (!Curl_ssl_check_cxn(c))
+        if(!Curl_ssl_check_cxn(c))
           *param_longp = -1;   /* FIN received */
       }
 /* Minix 3.1 doesn't support any flags on recv; just assume socket is OK */

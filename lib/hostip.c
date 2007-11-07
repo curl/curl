@@ -130,7 +130,7 @@ static void freednsentry(void *freethis);
  */
 void Curl_global_host_cache_init(void)
 {
-  if (!host_cache_initialized) {
+  if(!host_cache_initialized) {
     Curl_hash_init(&hostname_cache, 7, Curl_hash_str, Curl_str_key_compare,
                    freednsentry);
     host_cache_initialized = 1;
@@ -150,7 +150,7 @@ struct curl_hash *Curl_global_host_cache_get(void)
  */
 void Curl_global_host_cache_dtor(void)
 {
-  if (host_cache_initialized) {
+  if(host_cache_initialized) {
     Curl_hash_clean(&hostname_cache);
     host_cache_initialized = 0;
   }
@@ -218,7 +218,7 @@ hostcache_timestamp_remove(void *datap, void *hc)
     (struct hostcache_prune_data *) datap;
   struct Curl_dns_entry *c = (struct Curl_dns_entry *) hc;
 
-  if ((data->now - c->timestamp < data->cache_timeout) ||
+  if((data->now - c->timestamp < data->cache_timeout) ||
       c->inuse) {
     /* please don't remove */
     return 0;
@@ -284,7 +284,7 @@ remove_entry_if_stale(struct SessionHandle *data, struct Curl_dns_entry *dns)
   time(&user.now);
   user.cache_timeout = data->set.dns_cache_timeout;
 
-  if ( !hostcache_timestamp_remove(&user,dns) )
+  if( !hostcache_timestamp_remove(&user,dns) )
     return 0;
 
   /* ok, we do need to clear the cache. although we need to remove just a
@@ -336,13 +336,13 @@ Curl_cache_addr(struct SessionHandle *data,
   /* Create an entry id, based upon the hostname and port */
   entry_id = create_hostcache_id(hostname, port);
   /* If we can't create the entry id, fail */
-  if (!entry_id)
+  if(!entry_id)
     return NULL;
   entry_len = strlen(entry_id);
 
   /* Create a new cache entry */
   dns = (struct Curl_dns_entry *) calloc(sizeof(struct Curl_dns_entry), 1);
-  if (!dns) {
+  if(!dns) {
     free(entry_id);
     return NULL;
   }
@@ -407,7 +407,7 @@ int Curl_resolv(struct connectdata *conn,
   /* this allows us to time-out from the name resolver, as the timeout
      will generate a signal and we will siglongjmp() from that here */
   if(!data->set.no_signal) {
-    if (sigsetjmp(curl_jmpenv, 1)) {
+    if(sigsetjmp(curl_jmpenv, 1)) {
       /* this is coming from a siglongjmp() */
       failf(data, "name lookup timed out");
       return CURLRESOLV_ERROR;
@@ -418,7 +418,7 @@ int Curl_resolv(struct connectdata *conn,
   /* Create an entry id, based upon the hostname and port */
   entry_id = create_hostcache_id(hostname, port);
   /* If we can't create the entry id, fail */
-  if (!entry_id)
+  if(!entry_id)
     return CURLRESOLV_ERROR;
 
   entry_len = strlen(entry_id);
@@ -437,12 +437,12 @@ int Curl_resolv(struct connectdata *conn,
 
   /* See whether the returned entry is stale. Deliberately done after the
      locked block */
-  if ( remove_entry_if_stale(data,dns) )
+  if( remove_entry_if_stale(data,dns) )
     dns = NULL; /* the memory deallocation is being handled by the hash */
 
   rc = CURLRESOLV_ERROR; /* default to failure */
 
-  if (!dns) {
+  if(!dns) {
     /* The entry was not in the cache. Resolve it to IP address */
 
     Curl_addrinfo *addr;
@@ -458,7 +458,7 @@ int Curl_resolv(struct connectdata *conn,
        resolve call */
     addr = Curl_getaddrinfo(conn, hostname, port, &respwait);
 
-    if (!addr) {
+    if(!addr) {
       if(respwait) {
         /* the response to our resolve call will come asynchronously at
            a later time, good or bad */

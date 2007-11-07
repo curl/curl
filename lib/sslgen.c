@@ -383,7 +383,7 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
   store->name = clone_host;               /* clone host name */
   store->remote_port = conn->remote_port; /* port number */
 
-  if (!Curl_clone_ssl_config(&conn->ssl_config, &store->ssl_config))
+  if(!Curl_clone_ssl_config(&conn->ssl_config, &store->ssl_config))
     return CURLE_OUT_OF_MEMORY;
 
   return CURLE_OK;

@@ -108,7 +108,7 @@ inet_pton4(const char *src, unsigned char *dst)
   octets = 0;
   tp = tmp;
   *tp = 0;
-  while ((ch = *src++) != '\0') {
+  while((ch = *src++) != '\0') {
     const char *pch;
 
     if((pch = strchr(digits, ch)) != NULL) {
@@ -173,7 +173,7 @@ inet_pton6(const char *src, unsigned char *dst)
   curtok = src;
   saw_xdigit = 0;
   val = 0;
-  while ((ch = *src++) != '\0') {
+  while((ch = *src++) != '\0') {
     const char *pch;
 
     if((pch = strchr((xdigits = xdigits_l), ch)) == NULL)

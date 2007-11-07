@@ -91,7 +91,7 @@ char *Curl_if2ip(const char *interface, char *buf, int buf_size)
     return NULL;
 
   dummy = socket(AF_INET, SOCK_STREAM, 0);
-  if (SYS_ERROR == dummy) {
+  if(SYS_ERROR == dummy) {
     return NULL;
   }
   else {
@@ -105,9 +105,9 @@ char *Curl_if2ip(const char *interface, char *buf, int buf_size)
     memcpy(req.ifr_name, interface, len+1);
     req.ifr_addr.sa_family = AF_INET;
 #ifdef IOCTL_3_ARGS
-    if (SYS_ERROR == ioctl(dummy, SIOCGIFADDR, &req)) {
+    if(SYS_ERROR == ioctl(dummy, SIOCGIFADDR, &req)) {
 #else
-    if (SYS_ERROR == ioctl(dummy, SIOCGIFADDR, &req, sizeof(req))) {
+    if(SYS_ERROR == ioctl(dummy, SIOCGIFADDR, &req, sizeof(req))) {
 #endif
       sclose(dummy);
       return NULL;

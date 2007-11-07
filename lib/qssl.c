@@ -80,10 +80,10 @@ static CURLcode Curl_qsossl_init_session(struct SessionHandle * data)
 
   certname = data->set.str[STRING_CERT];
 
-  if (!certname) {
+  if(!certname) {
     certname = data->set.str[STRING_SSL_CAFILE];
 
-    if (!certname)
+    if(!certname)
       return CURLE_OK;          /* Use previous setup. */
     }
 
@@ -94,7 +94,7 @@ static CURLcode Curl_qsossl_init_session(struct SessionHandle * data)
   initappstr.sessionType = SSL_REGISTERED_AS_CLIENT;
   rc = SSL_Init_Application(&initappstr);
 
-  if (rc == SSL_ERROR_NOT_REGISTERED) {
+  if(rc == SSL_ERROR_NOT_REGISTERED) {
     initstr.keyringFileName = certname;
     initstr.keyringPassword = data->set.str[STRING_KEY];
     initstr.cipherSuiteList = NULL;    /* Use default. */
@@ -141,7 +141,7 @@ static CURLcode Curl_qsossl_create(struct connectdata * conn, int sockindex)
 
   h = SSL_Create(conn->sock[sockindex], SSL_ENCRYPT);
 
-  if (!h) {
+  if(!h) {
     failf(conn->data, "SSL_Create() I/O error: %s\n", strerror(errno));
     return CURLE_SSL_CONNECT_ERROR;
     }
@@ -169,17 +169,17 @@ static CURLcode Curl_qsossl_handshake(struct connectdata * conn, int sockindex)
 
   h->exitPgm = NULL;
 
-  if (!data->set.ssl.verifyhost)
+  if(!data->set.ssl.verifyhost)
     h->exitPgm = Curl_qsossl_trap_cert;
 
-  if (data->set.connecttimeout) {
+  if(data->set.connecttimeout) {
     timeout_ms = data->set.connecttimeout;
 
-    if (data->set.timeout)
-      if (timeout_ms > data->set.timeout)
+    if(data->set.timeout)
+      if(timeout_ms > data->set.timeout)
         timeout_ms = data->set.timeout;
     }
-  else if (data->set.timeout)
+  else if(data->set.timeout)
     timeout_ms = data->set.timeout;
   else
     timeout_ms = DEFAULT_CONNECT_TIMEOUT;
@@ -253,10 +253,10 @@ CURLcode Curl_qsossl_connect(struct connectdata * conn, int sockindex)
 
   rc = Curl_qsossl_init_session(data);
 
-  if (rc == CURLE_OK) {
+  if(rc == CURLE_OK) {
     rc = Curl_qsossl_create(conn, sockindex);
 
-    if (rc == CURLE_OK)
+    if(rc == CURLE_OK)
       rc = Curl_qsossl_handshake(conn, sockindex);
     else {
       SSL_Destroy(connssl->handle);
@@ -281,7 +281,7 @@ static int Curl_qsossl_close_one(struct ssl_connect_data * conn,
   rc = SSL_Destroy(conn->handle);
 
   if(rc) {
-    if (rc == SSL_ERROR_IO) {
+    if(rc == SSL_ERROR_IO) {
       failf(data, "SSL_Destroy() I/O error: %s\n", strerror(errno));
       return -1;
     }
@@ -326,13 +326,13 @@ int Curl_qsossl_shutdown(struct connectdata * conn, int sockindex)
   int rc;
   char buf[120];
 
-  if (!connssl->handle)
+  if(!connssl->handle)
     return 0;
 
-  if (data->set.ftp_ccc != CURLFTPSSL_CCC_ACTIVE)
+  if(data->set.ftp_ccc != CURLFTPSSL_CCC_ACTIVE)
     return 0;
 
-  if (Curl_qsossl_close_one(connssl, data))
+  if(Curl_qsossl_close_one(connssl, data))
     return -1;
 
   rc = 0;
@@ -341,14 +341,14 @@ int Curl_qsossl_shutdown(struct connectdata * conn, int sockindex)
                            CURL_SOCKET_BAD, SSL_SHUTDOWN_TIMEOUT);
 
   for (;;) {
-    if (what < 0) {
+    if(what < 0) {
       /* anything that gets here is fatally bad */
       failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
       rc = -1;
       break;
     }
 
-    if (!what) {                                /* timeout */
+    if(!what) {                                /* timeout */
       failf(data, "SSL shutdown timeout");
       break;
     }
@@ -358,12 +358,12 @@ int Curl_qsossl_shutdown(struct connectdata * conn, int sockindex)
 
     nread = read(conn->sock[sockindex], buf, sizeof(buf));
 
-    if (nread < 0) {
+    if(nread < 0) {
       failf(data, "read: %s\n", strerror(errno));
       rc = -1;
     }
 
-    if (nread <= 0)
+    if(nread <= 0)
       break;
 
     what = Curl_socket_ready(conn->sock[sockindex], CURL_SOCKET_BAD, 0);
@@ -470,13 +470,13 @@ int Curl_qsossl_check_cxn(struct connectdata * cxn)
 
   /* The only thing that can be tested here is at the socket level. */
 
-  if (!cxn->ssl[FIRSTSOCKET].handle)
+  if(!cxn->ssl[FIRSTSOCKET].handle)
     return 0; /* connection has been closed */
 
   err = 0;
   errlen = sizeof err;
 
-  if (getsockopt(cxn->sock[FIRSTSOCKET], SOL_SOCKET, SO_ERROR,
+  if(getsockopt(cxn->sock[FIRSTSOCKET], SOL_SOCKET, SO_ERROR,
                  (unsigned char *) &err, &errlen) ||
       errlen != sizeof err || err)
     return 0; /* connection has been closed */

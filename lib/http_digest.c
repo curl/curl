@@ -133,23 +133,23 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
           if(!tmp)
             return CURLDIGEST_NOMEM;
           token = strtok_r(tmp, ",", &tok_buf);
-          while (token != NULL) {
-            if (strequal(token, "auth")) {
+          while(token != NULL) {
+            if(strequal(token, "auth")) {
               foundAuth = TRUE;
             }
-            else if (strequal(token, "auth-int")) {
+            else if(strequal(token, "auth-int")) {
               foundAuthInt = TRUE;
             }
             token = strtok_r(NULL, ",", &tok_buf);
           }
           free(tmp);
           /*select only auth o auth-int. Otherwise, ignore*/
-          if (foundAuth) {
+          if(foundAuth) {
             d->qop = strdup("auth");
             if(!d->qop)
               return CURLDIGEST_NOMEM;
           }
-          else if (foundAuthInt) {
+          else if(foundAuthInt) {
             d->qop = strdup("auth-int");
             if(!d->qop)
               return CURLDIGEST_NOMEM;
@@ -243,7 +243,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
 */
 #define CURL_OUTPUT_DIGEST_CONV(a, b) \
   rc = Curl_convert_to_network(a, (char *)b, strlen((const char*)b)); \
-  if (rc != CURLE_OK) { \
+  if(rc != CURLE_OK) { \
     free(b); \
     return rc; \
   }
@@ -266,7 +266,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
     authp = &data->state.authhost;
   }
 
-  if (*allocuserpwd) {
+  if(*allocuserpwd) {
     Curl_safefree(*allocuserpwd);
     *allocuserpwd = NULL;
   }
@@ -353,7 +353,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
     return CURLE_OUT_OF_MEMORY;
   }
 
-  if (d->qop && strequal(d->qop, "auth-int")) {
+  if(d->qop && strequal(d->qop, "auth-int")) {
     /* We don't support auth-int at the moment. I can't see a easy way to get
        entity-body here */
     /* TODO: Append H(entity-body)*/
@@ -363,7 +363,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   free(md5this); /* free this again */
   md5_to_ascii(md5buf, ha2);
 
-  if (d->qop) {
+  if(d->qop) {
     md5this = (unsigned char *)aprintf("%s:%s:%08x:%s:%s:%s",
                                        ha1,
                                        d->nonce,
@@ -393,7 +393,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
     nonce="1053604145", uri="/64", response="c55f7f30d83d774a3d2dcacf725abaca"
   */
 
-  if (d->qop) {
+  if(d->qop) {
     *allocuserpwd =
       aprintf( "%sAuthorization: Digest "
                "username=\"%s\", "

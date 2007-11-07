@@ -82,7 +82,7 @@ int _NonAppStart( void        *NLMHandle,
                   const char  **messages )
 {
   NX_LOCK_INFO_ALLOC(liblock, "Per-Application Data Lock", 0);
-  
+
 #ifndef __GNUC__
 #pragma unused(cmdLine)
 #pragma unused(loadDirPath)
@@ -105,7 +105,7 @@ int _NonAppStart( void        *NLMHandle,
                                   "<library-name> memory allocations",
                                   AllocSignature);
 
-  if (!gAllocTag) {
+  if(!gAllocTag) {
     OutputToScreen(errorScreen, "Unable to allocate resource tag for "
                    "library memory allocations.\n");
     return -1;
@@ -113,7 +113,7 @@ int _NonAppStart( void        *NLMHandle,
 
   gLibId = register_library(DisposeLibraryData);
 
-  if (gLibId < -1) {
+  if(gLibId < -1) {
     OutputToScreen(errorScreen, "Unable to register library with kernel.\n");
     return -1;
   }
@@ -121,8 +121,8 @@ int _NonAppStart( void        *NLMHandle,
   gLibHandle = NLMHandle;
 
   gLibLock = NXMutexAlloc(0, 0, &liblock);
-  
-  if (!gLibLock) {
+
+  if(!gLibLock) {
     OutputToScreen(errorScreen, "Unable to allocate library data lock.\n");
     return -1;
   }
@@ -175,7 +175,7 @@ int GetOrSetUpData(int id, libdata_t **appData,
 */
   app_data = (libdata_t *) get_app_data(id);
 
-  if (!app_data) {
+  if(!app_data) {
 /*
 ** This application hasn't called us before; set up application AND per-thread
 ** data. Of course, just in case a thread from this same application is calling
@@ -186,25 +186,25 @@ int GetOrSetUpData(int id, libdata_t **appData,
 */
     NXLock(gLibLock);
 
-    if (!(app_data = (libdata_t *) get_app_data(id))) {
+    if(!(app_data = (libdata_t *) get_app_data(id))) {
       app_data = (libdata_t *) malloc(sizeof(libdata_t));
 
-      if (app_data) {
+      if(app_data) {
         memset(app_data, 0, sizeof(libdata_t));
-        
+
         app_data->tenbytes = malloc(10);
         app_data->lock     = NXMutexAlloc(0, 0, &liblock);
-        
-        if (!app_data->tenbytes || !app_data->lock) {
-          if (app_data->lock)
+
+        if(!app_data->tenbytes || !app_data->lock) {
+          if(app_data->lock)
             NXMutexFree(app_data->lock);
-          
+
           free(app_data);
           app_data = (libdata_t *) NULL;
           err      = ENOMEM;
         }
-        
-        if (app_data) {
+
+        if(app_data) {
 /*
 ** Here we burn in the application data that we were trying to get by calling
 ** get_app_data(). Next time we call the first function, we'll get this data
@@ -213,8 +213,8 @@ int GetOrSetUpData(int id, libdata_t **appData,
 ** thread the first time it calls us.
 */
           err = set_app_data(gLibId, app_data);
-          
-          if (err) {
+
+          if(err) {
             free(app_data);
             app_data = (libdata_t *) NULL;
             err      = ENOMEM;
@@ -222,23 +222,23 @@ int GetOrSetUpData(int id, libdata_t **appData,
           else {
             /* create key for thread-specific data... */
             err = NXKeyCreate(DisposeThreadData, (void *) NULL, &key);
-            
-            if (err)                /* (no more keys left?) */
+
+            if(err)                /* (no more keys left?) */
               key = -1;
-            
+
             app_data->perthreadkey = key;
           }
         }
       }
     }
-    
+
     NXUnlock(gLibLock);
   }
 
-  if (app_data) {
+  if(app_data) {
     key = app_data->perthreadkey;
-    
-    if (key != -1 /* couldn't create a key? no thread data */
+
+    if(key != -1 /* couldn't create a key? no thread data */
         && !(err = NXKeyGetValue(key, (void **) &thread_data))
         && !thread_data) {
 /*
@@ -249,18 +249,18 @@ int GetOrSetUpData(int id, libdata_t **appData,
 ** complex per-thread data.
 */
       thread_data = (libthreaddata_t *) malloc(sizeof(libthreaddata_t));
-      
-      if (thread_data) {
+
+      if(thread_data) {
         thread_data->_errno      = 0;
         thread_data->twentybytes = malloc(20);
-          
-        if (!thread_data->twentybytes) {
+
+        if(!thread_data->twentybytes) {
           free(thread_data);
           thread_data = (libthreaddata_t *) NULL;
           err         = ENOMEM;
         }
-        
-        if ((err = NXKeySetValue(key, thread_data))) {
+
+        if((err = NXKeySetValue(key, thread_data))) {
           free(thread_data->twentybytes);
           free(thread_data);
           thread_data = (libthreaddata_t *) NULL;
@@ -269,10 +269,10 @@ int GetOrSetUpData(int id, libdata_t **appData,
     }
   }
 
-  if (appData)
+  if(appData)
     *appData = app_data;
 
-  if (threadData)
+  if(threadData)
     *threadData = thread_data;
 
   return err;
@@ -280,12 +280,12 @@ int GetOrSetUpData(int id, libdata_t **appData,
 
 int DisposeLibraryData( void *data )
 {
-  if (data) {
+  if(data) {
     void *tenbytes = ((libdata_t *) data)->tenbytes;
-    
-    if (tenbytes)
+
+    if(tenbytes)
       free(tenbytes);
-    
+
     free(data);
   }
 
@@ -294,12 +294,12 @@ int DisposeLibraryData( void *data )
 
 void DisposeThreadData( void *data )
 {
-  if (data) {
+  if(data) {
     void *twentybytes = ((libthreaddata_t *) data)->twentybytes;
-    
-    if (twentybytes)
+
+    if(twentybytes)
       free(twentybytes);
-    
+
     free(data);
   }
 }
@@ -312,7 +312,7 @@ int main ( void )
 {
     /* initialize any globals here... */
 
-    /* do this if any global initializing was done 
+    /* do this if any global initializing was done
     SynchronizeStart();
     */
     ExitThread (TSR_THREAD, 0);

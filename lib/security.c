@@ -9,6 +9,9 @@
  *
  * Copyright (c) 1998, 1999 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
+ *
+ * Copyright (C) 2001 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,13 +70,13 @@
 #define min(a, b)   ((a) < (b) ? (a) : (b))
 
 static const struct {
-    enum protection_level level;
-    const char *name;
+  enum protection_level level;
+  const char *name;
 } level_names[] = {
-    { prot_clear, "clear" },
-    { prot_safe, "safe" },
-    { prot_confidential, "confidential" },
-    { prot_private, "private" }
+  { prot_clear, "clear" },
+  { prot_safe, "safe" },
+  { prot_confidential, "confidential" },
+  { prot_private, "private" }
 };
 
 static enum protection_level
@@ -88,12 +91,12 @@ name_to_level(const char *name)
 
 static const struct Curl_sec_client_mech * const mechs[] = {
 #ifdef HAVE_GSSAPI
-    &Curl_krb5_client_mech,
+  &Curl_krb5_client_mech,
 #endif
 #ifdef HAVE_KRB4
-    &Curl_krb4_client_mech,
+  &Curl_krb4_client_mech,
 #endif
-    NULL
+  NULL
 };
 
 int
@@ -116,11 +119,11 @@ block_read(int fd, void *buf, size_t len)
   int b;
   while(len) {
     b = read(fd, p, len);
-    if (b == 0)
+    if(b == 0)
       return 0;
-    else if (b < 0 && (errno == EINTR || errno == EAGAIN))
+    else if(b < 0 && (errno == EINTR || errno == EAGAIN))
       continue;
-    else if (b < 0)
+    else if(b < 0)
       return -1;
     len -= b;
     p += b;
@@ -135,7 +138,7 @@ block_write(int fd, const void *buf, size_t len)
   int b;
   while(len) {
     b = write(fd, p, len);
-    if (b < 0 && (errno == EINTR || errno == EAGAIN))
+    if(b < 0 && (errno == EINTR || errno == EAGAIN))
       continue;
     else if(b < 0)
       return -1;
@@ -153,16 +156,16 @@ sec_get_data(struct connectdata *conn,
   int b;
 
   b = block_read(fd, &len, sizeof(len));
-  if (b == 0)
+  if(b == 0)
     return 0;
-  else if (b < 0)
+  else if(b < 0)
     return -1;
   len = ntohl(len);
   buf->data = realloc(buf->data, len);
   b = buf->data ? block_read(fd, buf->data, len) : -1;
-  if (b == 0)
+  if(b == 0)
     return 0;
-  else if (b < 0)
+  else if(b < 0)
     return -1;
   buf->size = (conn->mech->decode)(conn->app_data, buf->data, len,
                                    conn->data_prot, conn);
@@ -173,64 +176,64 @@ sec_get_data(struct connectdata *conn,
 static size_t
 buffer_read(struct krb4buffer *buf, void *data, size_t len)
 {
-    len = min(len, buf->size - buf->index);
-    memcpy(data, (char*)buf->data + buf->index, len);
-    buf->index += len;
-    return len;
+  len = min(len, buf->size - buf->index);
+  memcpy(data, (char*)buf->data + buf->index, len);
+  buf->index += len;
+  return len;
 }
 
 static size_t
 buffer_write(struct krb4buffer *buf, void *data, size_t len)
 {
-    if(buf->index + len > buf->size) {
-        void *tmp;
-        if(buf->data == NULL)
-            tmp = malloc(1024);
-        else
-            tmp = realloc(buf->data, buf->index + len);
-        if(tmp == NULL)
-            return -1;
-        buf->data = tmp;
-        buf->size = buf->index + len;
-    }
-    memcpy((char*)buf->data + buf->index, data, len);
-    buf->index += len;
-    return len;
+  if(buf->index + len > buf->size) {
+    void *tmp;
+    if(buf->data == NULL)
+      tmp = malloc(1024);
+    else
+      tmp = realloc(buf->data, buf->index + len);
+    if(tmp == NULL)
+      return -1;
+    buf->data = tmp;
+    buf->size = buf->index + len;
+  }
+  memcpy((char*)buf->data + buf->index, data, len);
+  buf->index += len;
+  return len;
 }
 
 int
 Curl_sec_read(struct connectdata *conn, int fd, void *buffer, int length)
 {
-    size_t len;
-    int rx = 0;
+  size_t len;
+  int rx = 0;
 
-    if(conn->sec_complete == 0 || conn->data_prot == 0)
-      return read(fd, buffer, length);
+  if(conn->sec_complete == 0 || conn->data_prot == 0)
+    return read(fd, buffer, length);
 
-    if(conn->in_buffer.eof_flag){
-      conn->in_buffer.eof_flag = 0;
-      return 0;
+  if(conn->in_buffer.eof_flag){
+    conn->in_buffer.eof_flag = 0;
+    return 0;
+  }
+
+  len = buffer_read(&conn->in_buffer, buffer, length);
+  length -= len;
+  rx += len;
+  buffer = (char*)buffer + len;
+
+  while(length) {
+    if(sec_get_data(conn, fd, &conn->in_buffer) < 0)
+      return -1;
+    if(conn->in_buffer.size == 0) {
+      if(rx)
+        conn->in_buffer.eof_flag = 1;
+      return rx;
     }
-
     len = buffer_read(&conn->in_buffer, buffer, length);
     length -= len;
     rx += len;
     buffer = (char*)buffer + len;
-
-    while(length) {
-      if(sec_get_data(conn, fd, &conn->in_buffer) < 0)
-        return -1;
-      if(conn->in_buffer.size == 0) {
-        if(rx)
-          conn->in_buffer.eof_flag = 1;
-        return rx;
-      }
-      len = buffer_read(&conn->in_buffer, buffer, length);
-      length -= len;
-      rx += len;
-      buffer = (char*)buffer + len;
-    }
-    return rx;
+  }
+  return rx;
 }
 
 static int
@@ -255,15 +258,17 @@ sec_send(struct connectdata *conn, int fd, char *from, int length)
     bytes = Curl_base64_encode(conn->data, (char *)buf, bytes, &cmdbuf);
     if(bytes > 0) {
       if(protlevel == prot_private)
-	block_write(fd, "ENC ", 4);
+        block_write(fd, "ENC ", 4);
       else
-	block_write(fd, "MIC ", 4);
+        block_write(fd, "MIC ", 4);
       block_write(fd, cmdbuf, bytes);
       block_write(fd, "\r\n", 2);
-      Curl_infof(conn->data, "%s %s\n", protlevel == prot_private ? "ENC" : "MIC", cmdbuf);
+      Curl_infof(conn->data, "%s %s\n",
+                 protlevel == prot_private ? "ENC" : "MIC", cmdbuf);
       free(cmdbuf);
     }
-  } else {
+  }
+  else {
     bytes = htonl(bytes);
     block_write(fd, &bytes, sizeof(bytes));
     block_write(fd, buf, ntohl(bytes));
@@ -278,7 +283,7 @@ Curl_sec_fflush_fd(struct connectdata *conn, int fd)
   if(conn->data_prot != prot_clear) {
     if(conn->out_buffer.index > 0){
       Curl_sec_write(conn, fd,
-                conn->out_buffer.data, conn->out_buffer.index);
+                     conn->out_buffer.data, conn->out_buffer.index);
       conn->out_buffer.index = 0;
     }
     sec_send(conn, fd, NULL, 0);
@@ -457,7 +462,7 @@ Curl_sec_login(struct connectdata *conn)
     void *tmp;
 
     tmp = realloc(conn->app_data, (*m)->size);
-    if (tmp == NULL) {
+    if(tmp == NULL) {
       failf (data, "realloc %u failed", (*m)->size);
       return -1;
     }
@@ -518,7 +523,7 @@ Curl_sec_login(struct connectdata *conn)
 void
 Curl_sec_end(struct connectdata *conn)
 {
-  if (conn->mech != NULL) {
+  if(conn->mech != NULL) {
     if(conn->mech->end)
       (conn->mech->end)(conn->app_data);
     memset(conn->app_data, 0, conn->mech->size);

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -30,12 +30,12 @@ char *curlx_strdup(const char *str)
   int len;
   char *newstr;
 
-  if (!str)
+  if(!str)
     return (char *)NULL;
 
   len = strlen(str);
   newstr = (char *) malloc((len+1)*sizeof(char));
-  if (!newstr)
+  if(!newstr)
     return (char *)NULL;
 
   memcpy(newstr,str,(len+1)*sizeof(char));

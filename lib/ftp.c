@@ -111,7 +111,7 @@
 #endif
 
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
-#define ftp_pasv_verbose(a,b,c,d)  do { } while (0)
+#define ftp_pasv_verbose(a,b,c,d)  do { } while(0)
 #endif
 
 /* Local API functions */

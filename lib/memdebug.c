@@ -71,7 +71,7 @@ static long memsize = 0;  /* set number of mallocs allowed */
 /* this sets the log file name */
 void curl_memdebug(const char *logname)
 {
-  if (!logfile) {
+  if(!logfile) {
     if(logname)
       logfile = fopen(logname, "w");
     else
@@ -87,7 +87,7 @@ void curl_memdebug(const char *logname)
    successfully! */
 void curl_memlimit(long limit)
 {
-  if (!memlimit) {
+  if(!memlimit) {
     memlimit = TRUE;
     memsize = limit;
   }
@@ -185,8 +185,8 @@ char *curl_dostrdup(const char *str, int line, const char *source)
   len=strlen(str)+1;
 
   mem=curl_domalloc(len, 0, NULL); /* NULL prevents logging */
-  if (mem)
-  memcpy(mem, str, len);
+  if(mem)
+    memcpy(mem, str, len);
 
   if(logfile)
     fprintf(logfile, "MEM %s:%d strdup(%p) (%zd) = %p\n",

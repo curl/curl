@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -325,7 +325,7 @@ static time_t Curl_parsedate(const char *date)
           yearnum = val;
           found = TRUE;
           if(yearnum < 1900) {
-            if (yearnum > 70)
+            if(yearnum > 70)
               yearnum += 1900;
             else
               yearnum += 2000;

@@ -959,12 +959,12 @@ void telrcv(struct connectdata *conn,
   struct TELNET *tn = (struct TELNET *)data->reqdata.proto.telnet;
 
 #define startskipping() \
-    if (startwrite >= 0) \
+    if(startwrite >= 0) \
        Curl_client_write(conn, CLIENTWRITE_BODY, (char *)&inbuf[startwrite], in-startwrite); \
     startwrite = -1
 
 #define writebyte() \
-    if (startwrite < 0) \
+    if(startwrite < 0) \
       startwrite = in
 
 #define bufferflush() startskipping()

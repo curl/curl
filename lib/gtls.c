@@ -97,7 +97,7 @@ int Curl_gtls_init(void)
 static int _Curl_gtls_init(void)
 {
   int ret = 1;
-  if (!gtls_inited) {
+  if(!gtls_inited) {
     ret = gnutls_global_init()?0:1;
 #ifdef GTLSDEBUG
     gnutls_global_set_log_function(tls_log_func);
@@ -110,7 +110,7 @@ static int _Curl_gtls_init(void)
 
 int Curl_gtls_cleanup(void)
 {
-  if (gtls_inited)
+  if(gtls_inited)
     gnutls_global_deinit();
   return 1;
 }
@@ -148,7 +148,7 @@ static CURLcode handshake(struct connectdata *conn,
 {
   struct SessionHandle *data = conn->data;
   int rc;
-  if (!gtls_inited)
+  if(!gtls_inited)
     _Curl_gtls_init();
   do {
     rc = gnutls_handshake(session);
@@ -198,7 +198,7 @@ static CURLcode handshake(struct connectdata *conn,
       break;
   } while(1);
 
-  if (rc < 0) {
+  if(rc < 0) {
     failf(data, "gnutls_handshake() failed: %s", gnutls_strerror(rc));
     return CURLE_SSL_CONNECT_ERROR;
   }
@@ -244,7 +244,7 @@ Curl_gtls_connect(struct connectdata *conn,
   void *ssl_sessionid;
   size_t ssl_idsize;
 
-  if (!gtls_inited) _Curl_gtls_init();
+  if(!gtls_inited) _Curl_gtls_init();
   /* GnuTLS only supports TLSv1 (and SSLv3?) */
   if(data->set.ssl.version == CURL_SSLVERSION_SSLv2) {
     failf(data, "GnuTLS does not support SSLv2");
@@ -269,7 +269,7 @@ Curl_gtls_connect(struct connectdata *conn,
     if(rc < 0) {
       infof(data, "error reading ca cert file %s (%s)\n",
             data->set.ssl.CAfile, gnutls_strerror(rc));
-      if (data->set.ssl.verifypeer)
+      if(data->set.ssl.verifypeer)
         return CURLE_SSL_CACERT_BADFILE;
     }
     else
@@ -365,14 +365,14 @@ Curl_gtls_connect(struct connectdata *conn,
      gnutls_certificate_set_verify_limits(). */
 
   rc = gnutls_certificate_verify_peers2(session, &verify_status);
-  if (rc < 0) {
+  if(rc < 0) {
     failf(data, "server cert verify failed: %d", rc);
     return CURLE_SSL_CONNECT_ERROR;
   }
 
   /* verify_status is a bitmask of gnutls_certificate_status bits */
   if(verify_status & GNUTLS_CERT_INVALID) {
-    if (data->set.ssl.verifypeer) {
+    if(data->set.ssl.verifypeer) {
       failf(data, "server certificate verification failed. CAfile: %s",
             data->set.ssl.CAfile?data->set.ssl.CAfile:"none");
       return CURLE_SSL_CACERT;
@@ -409,7 +409,7 @@ Curl_gtls_connect(struct connectdata *conn,
   rc = gnutls_x509_crt_check_hostname(x509_cert, conn->host.name);
 
   if(!rc) {
-    if (data->set.ssl.verifyhost > 1) {
+    if(data->set.ssl.verifyhost > 1) {
       failf(data, "SSL: certificate subject name (%s) does not match "
             "target host name '%s'", certbuf, conn->host.dispname);
       gnutls_x509_crt_deinit(x509_cert);
@@ -431,7 +431,7 @@ Curl_gtls_connect(struct connectdata *conn,
   }
 
   if(clock < time(NULL)) {
-    if (data->set.ssl.verifypeer) {
+    if(data->set.ssl.verifypeer) {
       failf(data, "server certificate expiration date has passed.");
       return CURLE_PEER_FAILED_VERIFICATION;
     }
@@ -449,7 +449,7 @@ Curl_gtls_connect(struct connectdata *conn,
   }
 
   if(clock > time(NULL)) {
-    if (data->set.ssl.verifypeer) {
+    if(data->set.ssl.verifypeer) {
       failf(data, "server certificate not activated yet.");
       return CURLE_PEER_FAILED_VERIFICATION;
     }
@@ -670,12 +670,12 @@ ssize_t Curl_gtls_recv(struct connectdata *conn, /* connection data */
   }
 
   *wouldblock = FALSE;
-  if (!ret) {
+  if(!ret) {
     failf(conn->data, "Peer closed the TLS connection");
     return -1;
   }
 
-  if (ret < 0) {
+  if(ret < 0) {
     failf(conn->data, "GnuTLS recv error (%d): %s",
           (int)ret, gnutls_strerror(ret));
     return -1;

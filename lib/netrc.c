@@ -99,7 +99,7 @@ int Curl_parsenetrc(char *host,
 
     char *override = curl_getenv("CURL_DEBUG_NETRC");
 
-    if (override) {
+    if(override) {
       fprintf(stderr, "NETRC: overridden " NETRC " file: %s\n", override);
       netrcfile = override;
       netrc_alloc = TRUE;
@@ -115,7 +115,7 @@ int Curl_parsenetrc(char *host,
     else {
       struct passwd *pw;
       pw= getpwuid(geteuid());
-      if (pw) {
+      if(pw) {
 #ifdef  VMS
         home = decc$translate_vms(pw->pw_dir);
 #else
@@ -148,7 +148,7 @@ int Curl_parsenetrc(char *host,
       tok=strtok_r(netrcbuffer, " \t\n", &tok_buf);
       while(!done && tok) {
 
-        if (login[0] && password[0]) {
+        if(login[0] && password[0]) {
           done=TRUE;
           break;
         }
@@ -179,7 +179,7 @@ int Curl_parsenetrc(char *host,
         case HOSTVALID:
           /* we are now parsing sub-keywords concerning "our" host */
           if(state_login) {
-            if (specific_login) {
+            if(specific_login) {
               state_our_login = strequal(login, tok);
             }
             else {
@@ -191,7 +191,7 @@ int Curl_parsenetrc(char *host,
             state_login=0;
           }
           else if(state_password) {
-            if (state_our_login || !specific_login) {
+            if(state_our_login || !specific_login) {
               strncpy(password, tok, PASSWORDSIZE-1);
 #ifdef _NETRC_DEBUG
               fprintf(stderr, "PASSWORD: %s\n", password);
@@ -212,7 +212,7 @@ int Curl_parsenetrc(char *host,
         } /* switch (state) */
 
         tok = strtok_r(NULL, " \t\n", &tok_buf);
-      } /* while (tok) */
+      } /* while(tok) */
     } /* while fgets() */
 
     fclose(file);
