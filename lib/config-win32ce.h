@@ -308,6 +308,12 @@
 /* Undef keyword 'const' if it does not work.  */
 /* #undef const */
 
+/* Define to avoid VS2005 complaining about portable C functions */
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+#define _CRT_SECURE_NO_DEPRECATE 1
+#define _CRT_NONSTDC_NO_DEPRECATE 1
+#endif
+
 /* ---------------------------------------------------------------- */
 /*                           LDAP SUPPORT                           */
 /* ---------------------------------------------------------------- */
@@ -319,10 +325,6 @@
 /* ---------------------------------------------------------------- */
 /*                       ADDITIONAL DEFINITIONS                     */
 /* ---------------------------------------------------------------- */
-
-/* Defines set for VS2005 to _not_ deprecate a few functions we use. */
-#define _CRT_SECURE_NO_DEPRECATE 1
-#define _CRT_NONSTDC_NO_DEPRECATE 1
 
 /* Define cpu-machine-OS */
 #undef OS
