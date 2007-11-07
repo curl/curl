@@ -98,5 +98,8 @@ int main(int argc, char **argv)
   if(chunk.memory)
     free(chunk.memory);
 
+  /* we're done with libcurl, so clean it up */
+  curl_global_cleanup();
+
   return 0;
 }
