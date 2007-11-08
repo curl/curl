@@ -370,7 +370,7 @@ static CURLcode ssh_getworkingpath(struct connectdata *conn,
                                                    real path to work with */
 {
   struct SessionHandle *data = conn->data;
-  char *real_path;
+  char *real_path = NULL;
   char *working_path;
   int working_path_len;
 
