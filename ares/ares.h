@@ -18,6 +18,14 @@
 #ifndef ARES__H
 #define ARES__H
 
+/*
+ * Define WIN32 when build target is Win32 API
+ */
+
+#if (defined(_WIN32) || defined(__WIN32__)) && !defined(WIN32)
+#define WIN32
+#endif
+
 #include <sys/types.h>
 
 #if defined(_AIX) || (defined(NETWARE) && defined(__NOVELL_LIBC__))
