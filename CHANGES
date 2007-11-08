@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel S (8 Nov 2007)
+- Bug report #1823487 (http://curl.haxx.se/bug/view.cgi?id=1823487) pointed
+  out that SFTP requests didn't use persistent connections. Neither did SCP
+  ones.  I gave the SSH code a good beating and now both SCP and SFTP should
+  use persistent connections fine. I also did a bunch for indent changes as
+  well as a bug fix for the "keyboard interactive" auth.
+
 Dan F (6 Nov 2007)
 - Improved telnet support by drastically reducing the number of write
   callbacks needed to pass a buffer to the user.  Instead one per byte it

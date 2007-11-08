@@ -431,7 +431,8 @@ struct ftp_conn {
 typedef enum {
   SSH_NO_STATE = -1,  /* Used for "nextState" so say there is none */
   SSH_STOP = 0,       /* do nothing state, stops the state machine */
-  SSH_S_STARTUP,      /* Session startup */
+
+  SSH_S_STARTUP,      /* Session startup, First rate in SSH-CONNECT */
   SSH_AUTHLIST,
   SSH_AUTH_PKEY_INIT,
   SSH_AUTH_PKEY,
@@ -443,10 +444,10 @@ typedef enum {
   SSH_AUTH_KEY,
   SSH_AUTH_DONE,
   SSH_SFTP_INIT,
-  SSH_SFTP_REALPATH,
-  SSH_GET_WORKINGPATH,
-  SSH_SFTP_QUOTE_INIT,
-  SSH_SFTP_POSTQUOTE_INIT,
+  SSH_SFTP_REALPATH,   /* Last state in SSH-CONNECT */
+
+  SSH_SFTP_QUOTE_INIT, /* First state in SFTP-DO */
+  SSH_SFTP_POSTQUOTE_INIT, /* (Possibly) First state in SFTP-DONE */
   SSH_SFTP_QUOTE,
   SSH_SFTP_NEXT_QUOTE,
   SSH_SFTP_QUOTE_STAT,
@@ -467,20 +468,19 @@ typedef enum {
   SSH_SFTP_READDIR_BOTTOM,
   SSH_SFTP_READDIR_DONE,
   SSH_SFTP_DOWNLOAD_INIT,
-  SSH_SFTP_DOWNLOAD_STAT,
-  SSH_SFTP_CLOSE,
-  SSH_SFTP_SHUTDOWN,
-  SSH_SCP_TRANS_INIT,
+  SSH_SFTP_DOWNLOAD_STAT, /* Last state in SFTP-DO */
+  SSH_SFTP_CLOSE,    /* Last state in SFTP-DONE */
+  SSH_SFTP_SHUTDOWN, /* First state in SFTP-DISCONNECT */
+  SSH_SCP_TRANS_INIT, /* First state in SCP-DO */
   SSH_SCP_UPLOAD_INIT,
   SSH_SCP_DOWNLOAD_INIT,
   SSH_SCP_DONE,
   SSH_SCP_SEND_EOF,
   SSH_SCP_WAIT_EOF,
   SSH_SCP_WAIT_CLOSE,
-  SSH_SCP_CHANNEL_FREE,
-  SSH_CHANNEL_CLOSE,
-  SSH_SESSION_DISCONECT,
-  SSH_SESSION_FREE,
+  SSH_SCP_CHANNEL_FREE,   /* Last state in SCP-DONE */
+  SSH_SESSION_DISCONNECT, /* First state in SCP-DISCONNECT */
+  SSH_SESSION_FREE,       /* Last state in SCP/SFTP-DISCONNECT */
   SSH_QUIT,
   SSH_LAST  /* never used */
 } sshstate;
@@ -491,11 +491,7 @@ typedef enum {
    struct. */
 struct SSHPROTO {
   curl_off_t *bytecountp;
-  char *user;
-  char *passwd;
   char *path;                   /* the path we operate on */
-  char *homedir;
-  char *errorstr;
 };
 
 /* ssh_conn is used for struct connection-oriented data in the connectdata
@@ -508,12 +504,14 @@ struct ssh_conn {
   char *rsa;                  /* path name */
   bool authed;                /* the connection has been authenticated fine */
   sshstate state;             /* always use ssh.c:state() to change state! */
-  sshstate nextState;         /* the state to goto after stopping */
-  CURLcode actualCode;        /* the actual error code */
+  sshstate nextstate;         /* the state to goto after stopping */
+  CURLcode actualcode;        /* the actual error code */
   struct curl_slist *quote_item; /* for the quote option */
   char *quote_path1;          /* two generic pointers for the QUOTE stuff */
   char *quote_path2;
   LIBSSH2_SFTP_ATTRIBUTES quote_attrs; /* used by the SFTP_QUOTE state */
+  char *homedir;              /* when doing SFTP we figure out home dir in the
+                                 connect phase */
 
   /* Here's a set of struct members used by the SFTP_READDIR state */
   LIBSSH2_SFTP_ATTRIBUTES readdir_attrs;
