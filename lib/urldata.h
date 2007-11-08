@@ -432,7 +432,7 @@ typedef enum {
   SSH_NO_STATE = -1,  /* Used for "nextState" so say there is none */
   SSH_STOP = 0,       /* do nothing state, stops the state machine */
 
-  SSH_S_STARTUP,      /* Session startup, First rate in SSH-CONNECT */
+  SSH_S_STARTUP,      /* Session startup, First state in SSH-CONNECT */
   SSH_AUTHLIST,
   SSH_AUTH_PKEY_INIT,
   SSH_AUTH_PKEY,
