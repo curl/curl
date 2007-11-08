@@ -1059,7 +1059,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
           result = CURLE_OUT_OF_MEMORY;
         else {
           if(data->set.postfieldsize)
-            memcpy(p, argptr, data->set.postfieldsize);
+            memcpy(p, argptr, (size_t)data->set.postfieldsize);
 
           data->set.str[STRING_COPYPOSTFIELDS] = p;
         }
