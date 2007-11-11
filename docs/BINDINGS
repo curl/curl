@@ -145,8 +145,11 @@ Rexx
 
 Ruby
 
-  Written by Ross Bamford
+  curb - written by Ross Bamford
   http://curb.rubyforge.org/
+
+  ruby-curl-multi - written by Kristjan Petursson and Keith Rarick
+  http://curl-multi.rubyforge.org/
 
 Scheme
 

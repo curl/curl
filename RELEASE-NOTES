@@ -4,7 +4,7 @@ Curl and libcurl 7.17.2
  Command line options:         121
  curl_easy_setopt() options:   147
  Public functions in libcurl:  55
- Public web site mirrors:      42
+ Public web site mirrors:      43
  Known libcurl bindings:       36
  Contributors:                 597
 
@@ -27,10 +27,11 @@ This release includes the following known bugs:
 Other curl-related news:
 
  o TclCurl 7.17.1 => http://personal1.iddeo.es/andresgarci/tclcurl/english/
+ o Ruby Curl::Multi 0.1 => http://curl-multi.rubyforge.org/ 
 
 New curl mirrors:
 
- o 
+ o http://curl.gominet.net/ is new web mirror in Vizcaya, Portugal
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
