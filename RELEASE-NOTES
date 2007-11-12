@@ -19,6 +19,7 @@ This release includes the following bugfixes:
  o free problem in the curl tool for users with empty home dir
  o curl.h version 7.17.1 problem when building C++ apps with MSVC
  o SFTP and SCP use persistent connections
+ o segfault on bad URL
 
 This release includes the following known bugs:
 
@@ -36,6 +37,7 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dan Fandrich, Gisle Vanem, Toby Peterson, Yang Tse
+ Dan Fandrich, Gisle Vanem, Toby Peterson, Yang Tse, Daniel Black,
+ Robin Johnson
  
         Thanks! (and sorry if I forgot to mention someone)

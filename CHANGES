@@ -6,11 +6,20 @@
 
                                   Changelog
 
+Daniel S (12 Nov 2007)
+- Bug report #1830637 (http://curl.haxx.se/bug/view.cgi?id=1830637), which was
+  forwarded from the Gentoo bug tracker by Daniel Black and was originally
+  submitted by Robin Johnson, pointed out that libcurl would do bad memory
+  references when it failed and bailed out before the handler thing was
+  setup. My fix is not done like the provided patch does it, but instead I
+  make sure that there's never any chance for a NULL pointer in that struct
+  member.
+
 Daniel S (8 Nov 2007)
 - Bug report #1823487 (http://curl.haxx.se/bug/view.cgi?id=1823487) pointed
   out that SFTP requests didn't use persistent connections. Neither did SCP
   ones.  I gave the SSH code a good beating and now both SCP and SFTP should
-  use persistent connections fine. I also did a bunch for indent changes as
+  use persistent connections fine. I also did a bunch of indent changes as
   well as a bug fix for the "keyboard interactive" auth.
 
 Dan F (6 Nov 2007)

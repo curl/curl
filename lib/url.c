@@ -2134,7 +2134,7 @@ CURLcode Curl_disconnect(struct connectdata *conn)
     Curl_ntlm_cleanup(conn);
   }
 
-  if(conn->handler && conn->handler->disconnect)
+  if(conn->handler->disconnect)
     /* This is set if protocol-specific cleanups should be made */
     conn->handler->disconnect(conn);
 
@@ -2668,7 +2668,7 @@ int Curl_doing_getsock(struct connectdata *conn,
                        curl_socket_t *socks,
                        int numsocks)
 {
-  if(conn && conn->handler && conn->handler->doing_getsock)
+  if(conn && conn->handler->doing_getsock)
     return conn->handler->doing_getsock(conn, socks, numsocks);
   return GETSOCK_BLANK;
 }
@@ -2684,7 +2684,7 @@ CURLcode Curl_protocol_connecting(struct connectdata *conn,
 {
   CURLcode result=CURLE_OK;
 
-  if(conn && conn->handler && conn->handler->connecting) {
+  if(conn && conn->handler->connecting) {
     *done = FALSE;
     result = conn->handler->connecting(conn, done);
   }
@@ -2703,7 +2703,7 @@ CURLcode Curl_protocol_doing(struct connectdata *conn, bool *done)
 {
   CURLcode result=CURLE_OK;
 
-  if(conn && conn->handler && conn->handler->doing) {
+  if(conn && conn->handler->doing) {
     *done = FALSE;
     result = conn->handler->doing(conn, done);
   }
@@ -3111,8 +3111,9 @@ static CURLcode setup_connection_internals(struct SessionHandle *data,
       return CURLE_OK;
     }
 
-  /* Protocol not found in table. */
-  conn->handler = &Curl_handler_dummy;  /* Be sure we have a handler defined. */
+  /* Protocol not found in table, but we don't have to assign it to anything
+     since it is already assign to a dummy-struct in the CreateConnection()
+     struct when the connectdata struct is allocated. */
   failf(data, "Protocol %s not supported or disabled in " LIBCURL_NAME,
         conn->protostr);
   return CURLE_UNSUPPORTED_PROTOCOL;
@@ -3469,6 +3470,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      parent can cleanup any possible allocs we may have done before
      any failure */
   *in_connect = conn;
+
+  conn->handler = &Curl_handler_dummy;  /* Be sure we have a handler defined
+                                           already from start to avoid NULL
+                                           situations and checks */
 
   /* and we setup a few fields in case we end up actually using this struct */
 
