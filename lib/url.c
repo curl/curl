@@ -3111,9 +3111,9 @@ static CURLcode setup_connection_internals(struct SessionHandle *data,
       return CURLE_OK;
     }
 
-  /* Protocol not found in table, but we don't have to assign it to anything
-     since it is already assign to a dummy-struct in the CreateConnection()
-     struct when the connectdata struct is allocated. */
+  /* The protocol was not found in the table, but we don't have to assign it
+     to anything since it is already assigned to a dummy-struct in the
+     CreateConnection() function when the connectdata struct is allocated. */
   failf(data, "Protocol %s not supported or disabled in " LIBCURL_NAME,
         conn->protostr);
   return CURLE_UNSUPPORTED_PROTOCOL;
