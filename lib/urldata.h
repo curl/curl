@@ -490,7 +490,6 @@ typedef enum {
    Everything that is strictly related to a connection is banned from this
    struct. */
 struct SSHPROTO {
-  curl_off_t *bytecountp;
   char *path;                   /* the path we operate on */
 };
 

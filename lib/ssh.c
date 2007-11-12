@@ -1340,8 +1340,17 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
           sshc->actualcode = CURLE_OUT_OF_MEMORY;
           break;
         }
-        result = Curl_client_write(conn, CLIENTWRITE_BODY, tmpLine, 0);
+        result = Curl_client_write(conn, CLIENTWRITE_BODY,
+                                   tmpLine, sshc->readdir_len+1);
         Curl_safefree(tmpLine);
+
+        if(result) {
+          state(conn, SSH_STOP);
+          break;
+        }
+        /* since this counts what we send to the client, we include the newline
+           in this counter */
+        data->reqdata.keep.bytecount += sshc->readdir_len+1;
 
         /* output debug output if that is requested */
         if(data->set.verbose) {
@@ -1450,16 +1459,25 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
                                       sshc->readdir_totalLen -
                                       sshc->readdir_currLen, "\n");
     result = Curl_client_write(conn, CLIENTWRITE_BODY,
-                               sshc->readdir_line, 0);
+                               sshc->readdir_line,
+                               sshc->readdir_currLen);
 
-    /* output debug output if that is requested */
-    if(data->set.verbose) {
-      Curl_debug(data, CURLINFO_DATA_OUT, sshc->readdir_line,
-                 sshc->readdir_currLen, conn);
+    if(result == CURLE_OK) {
+
+      /* output debug output if that is requested */
+      if(data->set.verbose) {
+        Curl_debug(data, CURLINFO_DATA_OUT, sshc->readdir_line,
+                   sshc->readdir_currLen, conn);
+      }
+      data->reqdata.keep.bytecount += sshc->readdir_currLen;
     }
     Curl_safefree(sshc->readdir_line);
     sshc->readdir_line = NULL;
-    state(conn, SSH_SFTP_READDIR);
+    if(result) {
+      state(conn, SSH_STOP);
+    }
+    else
+      state(conn, SSH_SFTP_READDIR);
     break;
 
   case SSH_SFTP_READDIR_DONE:
@@ -1818,12 +1836,8 @@ static CURLcode ssh_easy_statemach(struct connectdata *conn)
   struct ssh_conn *sshc = &conn->proto.sshc;
   CURLcode result = CURLE_OK;
 
-  while(sshc->state != SSH_STOP) {
+  while((sshc->state != SSH_STOP) && !result)
     result = ssh_statemach_act(conn);
-    if(result) {
-      break;
-    }
-  }
 
   return result;
 }
@@ -1843,9 +1857,6 @@ static CURLcode ssh_init(struct connectdata *conn)
     return CURLE_OUT_OF_MEMORY;
 
   data->reqdata.proto.ssh = ssh;
-
-  /* get some initial data into the ssh struct */
-  ssh->bytecountp = &data->reqdata.keep.bytecount;
 
   return CURLE_OK;
 }
@@ -1978,17 +1989,6 @@ static CURLcode ssh_do(struct connectdata *conn, bool *done)
 
   *done = FALSE; /* default to false */
 
-  /*
-   * Since connections can be re-used between SessionHandles, this might be a
-   * connection already existing but on a fresh SessionHandle struct so we must
-   * make sure we have a good 'struct SSHPROTO' to play with. For new
-   * connections, the struct SSHPROTO is allocated and setup in the
-   * Curl_ssh_connect() function.
-   */
-  res = ssh_init(conn);
-  if(res)
-    return res;
-
   data->reqdata.size = -1; /* make sure this is unknown at this point */
 
   Curl_pgrsSetUploadCounter(data, 0);
@@ -2010,6 +2010,9 @@ static CURLcode ssh_do(struct connectdata *conn, bool *done)
 static CURLcode scp_disconnect(struct connectdata *conn)
 {
   CURLcode result;
+
+  Curl_safefree(conn->data->reqdata.proto.ssh);
+  conn->data->reqdata.proto.ssh = NULL;
 
   state(conn, SSH_SESSION_DISCONNECT);
 
@@ -2044,11 +2047,8 @@ static CURLcode scp_done(struct connectdata *conn, CURLcode status,
 
   if(done) {
     struct SSHPROTO *sftp_scp = conn->data->reqdata.proto.ssh;
-
     Curl_safefree(sftp_scp->path);
-
-    Curl_safefree(sftp_scp);
-    conn->data->reqdata.proto.ssh = NULL;
+    sftp_scp->path = NULL;
     Curl_pgrsDone(conn);
   }
 
@@ -2154,6 +2154,9 @@ static CURLcode sftp_disconnect(struct connectdata *conn)
 
   DEBUGF(infof(conn->data, "SSH DISCONNECT starts now\n"));
 
+  Curl_safefree(conn->data->reqdata.proto.ssh);
+  conn->data->reqdata.proto.ssh = NULL;
+
   state(conn, SSH_SFTP_SHUTDOWN);
   result = ssh_easy_statemach(conn);
 
@@ -2195,8 +2198,6 @@ static CURLcode sftp_done(struct connectdata *conn, CURLcode status,
   }
 
   if(done) {
-    Curl_safefree(conn->data->reqdata.proto.ssh);
-    conn->data->reqdata.proto.ssh = NULL;
     Curl_pgrsDone(conn);
   }
 

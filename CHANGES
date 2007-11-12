@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel S (13 Nov 2007)
+- Fixed a remaining problem with doing SFTP directory listings on a re-used
+  persistent connection. Mentioned by Immanuel Gregoire on the mailing list.
+
 Daniel S (12 Nov 2007)
 - Bug report #1830637 (http://curl.haxx.se/bug/view.cgi?id=1830637), which was
   forwarded from the Gentoo bug tracker by Daniel Black and was originally
