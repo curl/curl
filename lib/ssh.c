@@ -1876,11 +1876,11 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
   ssh = &conn->proto.sshc;
 
 #ifdef CURL_LIBSSH2_DEBUG
-  if(ssh->user) {
-    infof(data, "User: %s\n", ssh->user);
+  if(conn->user) {
+    infof(data, "User: %s\n", conn->user);
   }
-  if(ssh->passwd) {
-    infof(data, "Password: %s\n", ssh->passwd);
+  if(conn->passwd) {
+    infof(data, "Password: %s\n", conn->passwd);
   }
 #endif /* CURL_LIBSSH2_DEBUG */
   sock = conn->sock[FIRSTSOCKET];
