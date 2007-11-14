@@ -306,7 +306,8 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
     if(data->set.upload) {
       /* If we are uploading, send an WRQ */
       setpacketevent(&state->spacket, TFTP_EVENT_WRQ);
-      state->conn->data->reqdata.upload_fromhere = (char *)&state->spacket.data[4];
+      state->conn->data->reqdata.upload_fromhere =
+        (char *)&state->spacket.data[4];
       if(data->set.infilesize != -1)
         Curl_pgrsSetUploadSize(data, data->set.infilesize);
     }
@@ -722,7 +723,7 @@ static CURLcode Curl_tftp(struct connectdata *conn, bool *done)
     if(code)
       return code;
   }
-  state = (tftp_state_data_t *)conn->data->reqdata.proto.tftp;
+  state = (tftp_state_data_t *)data->reqdata.proto.tftp;
 
   code = Curl_readwrite_init(conn);
   if(code)
@@ -765,7 +766,7 @@ static CURLcode Curl_tftp(struct connectdata *conn, bool *done)
 
       /* Sanity check packet length */
       if(state->rbytes < 4) {
-        failf(conn->data, "Received too short packet\n");
+        failf(data, "Received too short packet\n");
         /* Not a timeout, but how best to handle it? */
         event = TFTP_EVENT_TIMEOUT;
       }
@@ -790,14 +791,14 @@ static CURLcode Curl_tftp(struct connectdata *conn, bool *done)
           break;
         case TFTP_EVENT_ERROR:
           state->error = (tftp_error_t)getrpacketblock(&state->rpacket);
-          infof(conn->data, "%s\n", (char *)&state->rpacket.data[4]);
+          infof(data, "%s\n", (char *)&state->rpacket.data[4]);
           break;
         case TFTP_EVENT_ACK:
           break;
         case TFTP_EVENT_RRQ:
         case TFTP_EVENT_WRQ:
         default:
-          failf(conn->data, "%s\n", "Internal error: Unexpected packet");
+          failf(data, "%s\n", "Internal error: Unexpected packet");
           break;
         }
 
