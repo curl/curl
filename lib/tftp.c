@@ -698,8 +698,7 @@ static CURLcode Curl_tftp_done(struct connectdata *conn, CURLcode status,
 static CURLcode Curl_tftp(struct connectdata *conn, bool *done)
 {
   struct SessionHandle  *data = conn->data;
-  tftp_state_data_t     *state =
-    (tftp_state_data_t *) conn->data->reqdata.proto.tftp;
+  tftp_state_data_t     *state;
   tftp_event_t          event;
   CURLcode              code;
   int                   rc;
@@ -716,12 +715,14 @@ static CURLcode Curl_tftp(struct connectdata *conn, bool *done)
     make sure we have a good 'struct TFTP' to play with. For new connections,
     the struct TFTP is allocated and setup in the Curl_tftp_connect() function.
   */
-  if(!state) {
+  Curl_reset_reqproto(conn);
+
+  if(!data->reqdata.proto.tftp) {
     code = Curl_tftp_connect(conn, done);
     if(code)
       return code;
-    state = (tftp_state_data_t *)conn->data->reqdata.proto.tftp;
   }
+  state = (tftp_state_data_t *)conn->data->reqdata.proto.tftp;
 
   code = Curl_readwrite_init(conn);
   if(code)
