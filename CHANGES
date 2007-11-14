@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Yang Tse (14 Nov 2007)
+- Fix a variable potential wrapping in add_buffer() when using absolutely
+  huge send buffer sizes.
+
 Daniel S (13 Nov 2007)
 - Fixed a remaining problem with doing SFTP directory listings on a re-used
   persistent connection. Mentioned by Immanuel Gregoire on the mailing list.

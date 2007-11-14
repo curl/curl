@@ -20,6 +20,7 @@ This release includes the following bugfixes:
  o curl.h version 7.17.1 problem when building C++ apps with MSVC
  o SFTP and SCP use persistent connections
  o segfault on bad URL
+ o variable wrapping when using absolutely huge send buffer sizes
 
 This release includes the following known bugs:
 
