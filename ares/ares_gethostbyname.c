@@ -57,7 +57,7 @@ struct host_query {
   int timeouts;
 };
 
-static void next_lookup(struct host_query *hquery, int status);
+static void next_lookup(struct host_query *hquery, int status_code);
 static void host_callback(void *arg, int status, int timeouts,
                           unsigned char *abuf, int alen);
 static void end_hquery(struct host_query *hquery, int status,
@@ -111,13 +111,14 @@ void ares_gethostbyname(ares_channel channel, const char *name, int family,
   hquery->timeouts = 0;
 
   /* Start performing lookups according to channel->lookups. */
-  next_lookup(hquery, ARES_SUCCESS);
+  next_lookup(hquery, ARES_ECONNREFUSED /* initial error code */);
 }
 
-static void next_lookup(struct host_query *hquery, int status)
+static void next_lookup(struct host_query *hquery, int status_code)
 {
   const char *p;
   struct hostent *host;
+  int status = status_code;
 
   for (p = hquery->remaining_lookups; *p; p++)
     {
@@ -142,6 +143,7 @@ static void next_lookup(struct host_query *hquery, int status)
               end_hquery(hquery, status, host);
               return;
             }
+          status = status_code;   /* Use original status code */
           break;
         }
     }
