@@ -725,10 +725,6 @@ static CURLcode Curl_tftp(struct connectdata *conn, bool *done)
   }
   state = (tftp_state_data_t *)data->reqdata.proto.tftp;
 
-  code = Curl_readwrite_init(conn);
-  if(code)
-    return code;
-
   /* Run the TFTP State Machine */
   for(code=tftp_state_machine(state, TFTP_EVENT_INIT);
       (state->state != TFTP_STATE_FIN) && (code == CURLE_OK);

@@ -378,7 +378,6 @@ static CURLcode Curl_file(struct connectdata *conn, bool *done)
 
   *done = TRUE; /* unconditionally */
 
-  Curl_readwrite_init(conn);
   Curl_initinfo(data);
   Curl_pgrsStartNow(data);
 

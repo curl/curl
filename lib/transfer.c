@@ -992,7 +992,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                *
                * It seems both Trailer: and Trailers: occur in the wild.
                */
-              conn->bits.trailerHdrPresent = TRUE;
+              conn->bits.trailerhdrpresent = TRUE;
             }
 
             else if(checkprefix("Content-Encoding:", k->p) &&
@@ -1640,102 +1640,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   return CURLE_OK;
 }
 
-
-/*
- * Curl_readwrite_init() inits the readwrite session. This is inited each time
- * for a transfer, sometimes multiple times on the same SessionHandle
- */
-
-CURLcode Curl_readwrite_init(struct connectdata *conn)
-{
-  struct SessionHandle *data = conn->data;
-  struct Curl_transfer_keeper *k = &data->reqdata.keep;
-
-  /* NB: the content encoding software depends on this initialization of
-     Curl_transfer_keeper.*/
-  memset(k, 0, sizeof(struct Curl_transfer_keeper));
-
-  k->start = Curl_tvnow(); /* start time */
-  k->now = k->start;   /* current time is now */
-  k->header = TRUE; /* assume header */
-  k->httpversion = -1; /* unknown at this point */
-
-  k->size = data->reqdata.size;
-  k->maxdownload = data->reqdata.maxdownload;
-  k->bytecountp = data->reqdata.bytecountp;
-  k->writebytecountp = data->reqdata.writebytecountp;
-
-  k->bytecount = 0;
-
-  k->buf = data->state.buffer;
-  k->uploadbuf = data->state.uploadbuffer;
-  k->maxfd = (conn->sockfd>conn->writesockfd?
-              conn->sockfd:conn->writesockfd)+1;
-  k->hbufp = data->state.headerbuff;
-  k->ignorebody=FALSE;
-
-  Curl_pgrsTime(data, TIMER_PRETRANSFER);
-  Curl_speedinit(data);
-
-  Curl_pgrsSetUploadCounter(data, 0);
-  Curl_pgrsSetDownloadCounter(data, 0);
-
-  if(!conn->bits.getheader) {
-    k->header = FALSE;
-    if(k->size > 0)
-      Curl_pgrsSetDownloadSize(data, k->size);
-  }
-  /* we want header and/or body, if neither then don't do this! */
-  if(conn->bits.getheader || !conn->bits.no_body) {
-
-    if(conn->sockfd != CURL_SOCKET_BAD) {
-      k->keepon |= KEEP_READ;
-    }
-
-    if(conn->writesockfd != CURL_SOCKET_BAD) {
-      /* HTTP 1.1 magic:
-
-         Even if we require a 100-return code before uploading data, we might
-         need to write data before that since the REQUEST may not have been
-         finished sent off just yet.
-
-         Thus, we must check if the request has been sent before we set the
-         state info where we wait for the 100-return code
-      */
-      if(data->state.expect100header &&
-          (data->reqdata.proto.http->sending == HTTPSEND_BODY)) {
-        /* wait with write until we either got 100-continue or a timeout */
-        k->write_after_100_header = TRUE;
-        k->start100 = k->start;
-      }
-      else {
-        if(data->state.expect100header)
-          /* when we've sent off the rest of the headers, we must await a
-             100-continue */
-          k->wait100_after_headers = TRUE;
-        k->keepon |= KEEP_WRITE;
-      }
-    }
-  }
-
-  return CURLE_OK;
-}
-
-/*
- * Curl_readwrite may get called multiple times.  This function is called
- * immediately before the first Curl_readwrite.  Note that this can't be moved
- * to Curl_readwrite_init since that function can get called while another
- * pipeline request is in the middle of receiving data.
- *
- * We init chunking and trailer bits to their default values here immediately
- * before receiving any header data for the current request in the pipeline.
- */
-void Curl_pre_readwrite(struct connectdata *conn)
-{
-  conn->bits.chunk=FALSE;
-  conn->bits.trailerHdrPresent=FALSE;
-}
-
 /*
  * Curl_single_getsock() gets called by the multi interface code when the app
  * has requested to get the sockets for the current connection. This function
@@ -1757,6 +1661,9 @@ int Curl_single_getsock(const struct connectdata *conn,
     return GETSOCK_BLANK;
 
   if(data->reqdata.keep.keepon & KEEP_READ) {
+
+    DEBUGASSERT(conn->sockfd != CURL_SOCKET_BAD);
+
     bitmap |= GETSOCK_READSOCK(sockindex);
     sock[sockindex] = conn->sockfd;
   }
@@ -1769,6 +1676,9 @@ int Curl_single_getsock(const struct connectdata *conn,
          one, we increase index */
       if(data->reqdata.keep.keepon & KEEP_READ)
         sockindex++; /* increase index if we need two entries */
+
+      DEBUGASSERT(conn->writesockfd != CURL_SOCKET_BAD);
+
       sock[sockindex] = conn->writesockfd;
     }
 
@@ -1809,15 +1719,6 @@ Transfer(struct connectdata *conn)
   /* we want header and/or body, if neither then don't do this! */
   if(!conn->bits.getheader && conn->bits.no_body)
     return CURLE_OK;
-
-  if(!(conn->protocol & (PROT_FILE|PROT_TFTP))) {
-    /* Only do this if we are not transferring FILE or TFTP, since those
-       transfers are treated differently. They do their entire transfers in
-       the DO function and just returns from this. That is ugly indeed.
-    */
-    Curl_readwrite_init(conn);
-    Curl_pre_readwrite(conn);
-  }
 
   while(!done) {
     curl_socket_t fd_read;
@@ -2523,25 +2424,23 @@ CURLcode Curl_perform(struct SessionHandle *data)
  */
 CURLcode
 Curl_setup_transfer(
-    struct connectdata *c_conn, /* connection data */
-    int sockindex,       /* socket index to read from or -1 */
-    curl_off_t size,     /* -1 if unknown at this point */
-    bool getheader,      /* TRUE if header parsing is wanted */
-    curl_off_t *bytecountp, /* return number of bytes read or NULL */
-    int writesockindex,  /* socket index to write to, it may very
-                            well be the same we read from. -1
-                            disables */
-    curl_off_t *writecountp /* return number of bytes written or
-                               NULL */
-   )
+  struct connectdata *conn, /* connection data */
+  int sockindex,            /* socket index to read from or -1 */
+  curl_off_t size,          /* -1 if unknown at this point */
+  bool getheader,           /* TRUE if header parsing is wanted */
+  curl_off_t *bytecountp,   /* return number of bytes read or NULL */
+  int writesockindex,       /* socket index to write to, it may very well be
+                               the same we read from. -1 disables */
+  curl_off_t *writecountp   /* return number of bytes written or NULL */
+  )
 {
-  struct connectdata *conn = (struct connectdata *)c_conn;
   struct SessionHandle *data;
+  struct Curl_transfer_keeper *k;
 
-  if(!conn)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+  DEBUGASSERT(conn != NULL);
 
   data = conn->data;
+  k = &data->reqdata.keep;
 
   DEBUGASSERT((sockindex <= 1) && (sockindex >= -1));
 
@@ -2555,6 +2454,48 @@ Curl_setup_transfer(
   data->reqdata.size = size;
   data->reqdata.bytecountp = bytecountp;
   data->reqdata.writebytecountp = writecountp;
+
+  /* The code sequence below is placed in this function just because all
+     necessary input is not always known in do_complete() as this function may
+     be called after that */
+
+  if(!conn->bits.getheader) {
+    k->header = FALSE;
+    if(k->size > 0)
+      Curl_pgrsSetDownloadSize(data, k->size);
+  }
+  /* we want header and/or body, if neither then don't do this! */
+  if(conn->bits.getheader || !conn->bits.no_body) {
+
+    if(conn->sockfd != CURL_SOCKET_BAD) {
+      k->keepon |= KEEP_READ;
+    }
+
+    if(conn->writesockfd != CURL_SOCKET_BAD) {
+      /* HTTP 1.1 magic:
+
+         Even if we require a 100-return code before uploading data, we might
+         need to write data before that since the REQUEST may not have been
+         finished sent off just yet.
+
+         Thus, we must check if the request has been sent before we set the
+         state info where we wait for the 100-return code
+      */
+      if(data->state.expect100header &&
+          (data->reqdata.proto.http->sending == HTTPSEND_BODY)) {
+        /* wait with write until we either got 100-continue or a timeout */
+        k->write_after_100_header = TRUE;
+        k->start100 = k->start;
+      }
+      else {
+        if(data->state.expect100header)
+          /* when we've sent off the rest of the headers, we must await a
+             100-continue */
+          k->wait100_after_headers = TRUE;
+        k->keepon |= KEEP_WRITE;
+      }
+    }
+  }
 
   return CURLE_OK;
 }

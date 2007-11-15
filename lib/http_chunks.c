@@ -178,7 +178,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
       if(*datap == 0x0a) {
         /* we're now expecting data to come, unless size was zero! */
         if(0 == ch->datasize) {
-          if(conn->bits.trailerHdrPresent!=TRUE) {
+          if(conn->bits.trailerhdrpresent!=TRUE) {
             /* No Trailer: header found - revert to original Curl processing */
             ch->state = CHUNK_STOPCR;
 

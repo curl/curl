@@ -121,6 +121,7 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
 #include "select.h"
 #include "multiif.h"
 #include "easyif.h"
+#include "speedcheck.h"
 
 /* And now for the protocols */
 #include "ftp.h"
@@ -164,6 +165,8 @@ static void conn_free(struct connectdata *conn);
 static void signalPipeClose(struct curl_llist *pipeline);
 
 static struct SessionHandle* gethandleathead(struct curl_llist *pipeline);
+static CURLcode do_init(struct connectdata *conn);
+static void do_complete(struct connectdata *conn);
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
 static void flush_cookies(struct SessionHandle *data, int cleanup);
@@ -4449,21 +4452,83 @@ CURLcode Curl_done(struct connectdata **connp,
   return result;
 }
 
+/*
+ * do_init() inits the readwrite session. This is inited each time (in the DO
+ * function before the protocol-specific DO functions are invoked) for a
+ * transfer, sometimes multiple times on the same SessionHandle. Make sure
+ * nothing in here depends on stuff that are setup dynamicly for the transfer.
+ */
+
+static CURLcode do_init(struct connectdata *conn)
+{
+  struct SessionHandle *data = conn->data;
+  struct Curl_transfer_keeper *k = &data->reqdata.keep;
+
+  conn->bits.done = FALSE; /* Curl_done() is not called yet */
+  conn->bits.do_more = FALSE; /* by default there's no curl_do_more() to use */
+
+  /* NB: the content encoding software depends on this initialization of
+     Curl_transfer_keeper.*/
+  memset(k, 0, sizeof(struct Curl_transfer_keeper));
+
+  k->start = Curl_tvnow(); /* start time */
+  k->now = k->start;   /* current time is now */
+  k->header = TRUE; /* assume header */
+  k->httpversion = -1; /* unknown at this point */
+
+  k->bytecount = 0;
+
+  k->buf = data->state.buffer;
+  k->uploadbuf = data->state.uploadbuffer;
+  k->hbufp = data->state.headerbuff;
+  k->ignorebody=FALSE;
+
+  Curl_pgrsTime(data, TIMER_PRETRANSFER);
+  Curl_speedinit(data);
+
+  Curl_pgrsSetUploadCounter(data, 0);
+  Curl_pgrsSetDownloadCounter(data, 0);
+
+  return CURLE_OK;
+}
+
+/*
+ * do_complete is called when the DO actions are complete.
+ *
+ * We init chunking and trailer bits to their default values here immediately
+ * before receiving any header data for the current request in the pipeline.
+ */
+static void do_complete(struct connectdata *conn)
+{
+  struct SessionHandle *data = conn->data;
+  struct Curl_transfer_keeper *k = &data->reqdata.keep;
+  conn->bits.chunk=FALSE;
+  conn->bits.trailerhdrpresent=FALSE;
+
+  k->maxfd = (conn->sockfd>conn->writesockfd?
+              conn->sockfd:conn->writesockfd)+1;
+
+  k->size = data->reqdata.size;
+  k->maxdownload = data->reqdata.maxdownload;
+  k->bytecountp = data->reqdata.bytecountp;
+  k->writebytecountp = data->reqdata.writebytecountp;
+
+}
+
 CURLcode Curl_do(struct connectdata **connp, bool *done)
 {
   CURLcode result=CURLE_OK;
   struct connectdata *conn = *connp;
   struct SessionHandle *data = conn->data;
 
-  conn->bits.done = FALSE; /* Curl_done() is not called yet */
-  conn->bits.do_more = FALSE; /* by default there's no curl_do_more() to use */
+  /* setup and init stuff before DO starts, in preparing for the transfer */
+  do_init(conn);
 
   if(conn->handler->do_it) {
     /* generic protocol-specific function pointer set in curl_connect() */
     result = conn->handler->do_it(conn, done);
 
     /* This was formerly done in transfer.c, but we better do it here */
-
     if((CURLE_SEND_ERROR == result) && conn->bits.reuse) {
       /* This was a re-use of a connection and we got a write error in the
        * DO-phase. Then we DISCONNECT this connection and have another attempt
@@ -4513,6 +4578,10 @@ CURLcode Curl_do(struct connectdata **connp, bool *done)
         }
       }
     }
+
+    if(result == CURLE_OK)
+      /* pre readwrite must be called after the protocol-specific DO function */
+      do_complete(conn);
   }
   return result;
 }

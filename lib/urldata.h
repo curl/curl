@@ -600,7 +600,7 @@ struct ConnectBits {
                          requests */
   bool netrc;         /* name+password provided by netrc */
 
-  bool trailerHdrPresent; /* Set when Trailer: header found in HTTP response.
+  bool trailerhdrpresent; /* Set when Trailer: header found in HTTP response.
                              Required to determine whether to look for trailers
                              in case of Transfer-Encoding: chunking */
   bool done;          /* set to FALSE when Curl_do() is called and set to TRUE

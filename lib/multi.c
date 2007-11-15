@@ -1121,11 +1121,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           }
           else {
             /* we're done with the DO, now DO_DONE */
-            easy->result = Curl_readwrite_init(easy->easy_conn);
-            if(CURLE_OK == easy->result) {
-              multistate(easy, CURLM_STATE_DO_DONE);
-              result = CURLM_CALL_MULTI_PERFORM;
-            }
+            multistate(easy, CURLM_STATE_DO_DONE);
+            result = CURLM_CALL_MULTI_PERFORM;
           }
         }
         else {
@@ -1152,11 +1149,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           }
           else {
             /* we're done with the DO, now DO_DONE */
-            easy->result = Curl_readwrite_init(easy->easy_conn);
-            if(CURLE_OK == easy->result) {
-              multistate(easy, CURLM_STATE_DO_DONE);
-              result = CURLM_CALL_MULTI_PERFORM;
-            }
+            multistate(easy, CURLM_STATE_DO_DONE);
+            result = CURLM_CALL_MULTI_PERFORM;
           }
         } /* dophase_done */
       }
@@ -1178,9 +1172,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
          * When we are connected, DO MORE and then go DO_DONE
          */
         easy->result = Curl_do_more(easy->easy_conn);
-
-        if(CURLE_OK == easy->result)
-          easy->result = Curl_readwrite_init(easy->easy_conn);
 
         /* No need to remove ourselves from the send pipeline here since that
            is done for us in Curl_done() */
@@ -1207,9 +1198,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                               easy->easy_conn->recv_pipe);
       multistate(easy, CURLM_STATE_WAITPERFORM);
       result = CURLM_CALL_MULTI_PERFORM;
-
-      Curl_pre_readwrite(easy->easy_conn);
-
       break;
 
     case CURLM_STATE_WAITPERFORM:
