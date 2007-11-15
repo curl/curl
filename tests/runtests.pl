@@ -726,8 +726,7 @@ sub runhttpserver {
 
     if($httppid <= 0 || !kill(0, $httppid)) {
         # it is NOT alive
-        logmsg "RUN: failed to start the HTTP server\n";
-        stopservers($verbose);
+        logmsg "RUN: failed to start the HTTP$nameext server\n";
         return (0,0);
     }
 

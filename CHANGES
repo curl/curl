@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel S (15 Nov 2007)
+- Fixed yet another remaining problem with doing SFTP directory listings on a
+  re-used persistent connection. Mentioned by Immanuel Gregoire on the mailing
+  list.
+
+- Michal Marek fixed the test suite to better deal with the case when the HTTP
+  ipv6 server can't run.
+
 Yang Tse (14 Nov 2007)
 - Fix a variable potential wrapping in add_buffer() when using absolutely
   huge send buffer sizes.
