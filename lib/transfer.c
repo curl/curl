@@ -128,7 +128,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
   /* this function returns a size_t, so we typecast to int to prevent warnings
      with picky compilers */
   nread = (int)conn->fread_func(data->reqdata.upload_fromhere, 1,
-                           buffersize, conn->fread_in);
+                                buffersize, conn->fread_in);
 
   if(nread == CURL_READFUNC_ABORT) {
     failf(data, "operation aborted by callback\n");
@@ -1801,15 +1801,6 @@ Transfer(struct connectdata *conn)
   struct Curl_transfer_keeper *k = &data->reqdata.keep;
   bool done=FALSE;
 
-  if(!(conn->protocol & (PROT_FILE|PROT_TFTP))) {
-    /* Only do this if we are not transferring FILE or TFTP, since those
-       transfers are treated differently. They do their entire transfers in
-       the DO function and just returns from this. That is ugly indeed.
-    */
-    Curl_readwrite_init(conn);
-    Curl_pre_readwrite(conn);
-  }
-
   if((conn->sockfd == CURL_SOCKET_BAD) &&
      (conn->writesockfd == CURL_SOCKET_BAD))
     /* nothing to read, nothing to write, we're already OK! */
@@ -1818,6 +1809,15 @@ Transfer(struct connectdata *conn)
   /* we want header and/or body, if neither then don't do this! */
   if(!conn->bits.getheader && conn->bits.no_body)
     return CURLE_OK;
+
+  if(!(conn->protocol & (PROT_FILE|PROT_TFTP))) {
+    /* Only do this if we are not transferring FILE or TFTP, since those
+       transfers are treated differently. They do their entire transfers in
+       the DO function and just returns from this. That is ugly indeed.
+    */
+    Curl_readwrite_init(conn);
+    Curl_pre_readwrite(conn);
+  }
 
   while(!done) {
     curl_socket_t fd_read;
