@@ -3422,7 +3422,7 @@ CURLcode _my_setopt(CURL *curl, struct Configurable *config, const char *name,
     }
     /* attempt to figure out if it is a string (since the tag numerical doesn't
        offer this info) and then output it as a string if so */
-    else if(pval && isgraph(ptr[0]) && isgraph(ptr[1]) && isgraph(ptr[2]))
+    else if(pval && ISGRAPH(ptr[0]) && ISGRAPH(ptr[1]) && ISGRAPH(ptr[2]))
       snprintf(value, sizeof(value), "\"%s\"", (char *)ptr);
     else if(pval) {
       snprintf(value, sizeof(value), "%p", pval);
