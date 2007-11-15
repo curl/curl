@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel S (16 Nov 2007)
+- Ates Goral identified a problem in http.c:add_buffer_send() when a debug
+  callback was used, as it could wrongly pass on a bad size for the outgoing
+  HTTP header. The bad size would be a very large value as it was a wrapped
+  size_t content. This happened when the whole HTTP request failed to get sent
+  in one single send.  http://curl.haxx.se/mail/lib-2007-11/0165.html
+
 Daniel S (15 Nov 2007)
 - Fixed yet another remaining problem with doing SFTP directory listings on a
   re-used persistent connection. Mentioned by Immanuel Gregoire on the mailing

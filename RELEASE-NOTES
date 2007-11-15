@@ -4,7 +4,7 @@ Curl and libcurl 7.17.2
  Command line options:         121
  curl_easy_setopt() options:   147
  Public functions in libcurl:  55
- Public web site mirrors:      43
+ Public web site mirrors:      42
  Known libcurl bindings:       36
  Contributors:                 597
 
@@ -21,6 +21,8 @@ This release includes the following bugfixes:
  o SFTP and SCP use persistent connections
  o segfault on bad URL
  o variable wrapping when using absolutely huge send buffer sizes
+ o variable wrapping when using debug callback and the HTTP request wasn't sent
+   in one go
 
 This release includes the following known bugs:
 
@@ -39,6 +41,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Dan Fandrich, Gisle Vanem, Toby Peterson, Yang Tse, Daniel Black,
- Robin Johnson
+ Robin Johnson, Michal Marek, Ates Goral
  
         Thanks! (and sorry if I forgot to mention someone)

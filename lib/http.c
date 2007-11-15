@@ -932,6 +932,7 @@ CURLcode add_buffer_send(send_buffer *in,
   struct HTTP *http = conn->data->reqdata.proto.http;
   size_t sendsize;
   curl_socket_t sockfd;
+  size_t headersize;
 
   DEBUGASSERT(socketindex <= SECONDARYSOCKET);
 
@@ -943,10 +944,13 @@ CURLcode add_buffer_send(send_buffer *in,
   ptr = in->buffer;
   size = in->size_used;
 
-  DEBUGASSERT(size - included_body_bytes > 0);
+  headersize = size - included_body_bytes; /* the initial part that isn't body
+                                              is header */
+
+  DEBUGASSERT(headersize > 0);
 
 #ifdef CURL_DOES_CONVERSIONS
-  res = Curl_convert_to_network(conn->data, ptr, size - included_body_bytes);
+  res = Curl_convert_to_network(conn->data, ptr, headersize);
   /* Curl_convert_to_network calls failf if unsuccessful */
   if(res != CURLE_OK) {
     /* conversion failed, free memory and return to the caller */
@@ -981,20 +985,29 @@ CURLcode add_buffer_send(send_buffer *in,
   res = Curl_write(conn, sockfd, ptr, sendsize, &amount);
 
   if(CURLE_OK == res) {
+    /*
+     * Note that we may not send the entire chunk at once, and we have a set
+     * number of data bytes at the end of the big buffer (out of which we may
+     * only send away a part).
+     */
+    /* how much of the header that was sent */
+    size_t headlen = (size_t)amount>headersize?headersize:(size_t)amount;
+    size_t bodylen = amount - headlen;
 
     if(conn->data->set.verbose) {
       /* this data _may_ contain binary stuff */
-      Curl_debug(conn->data, CURLINFO_HEADER_OUT, ptr,
-                 (size_t)(amount-included_body_bytes), conn);
-      if(included_body_bytes)
+      Curl_debug(conn->data, CURLINFO_HEADER_OUT, ptr, headlen, conn);
+      if((size_t)amount > headlen) {
+        /* there was body data sent beyond the initial header part, pass that
+           on to the debug callback too */
         Curl_debug(conn->data, CURLINFO_DATA_OUT,
-                   ptr+amount-included_body_bytes,
-                   (size_t)included_body_bytes, conn);
+                   ptr+headlen, bodylen, conn);
+      }
     }
-    if(included_body_bytes)
+    if(bodylen)
       /* since we sent a piece of the body here, up the byte counter for it
          accordingly */
-      http->writebytecount = included_body_bytes;
+      http->writebytecount += bodylen;
 
     *bytes_written += amount;
 
