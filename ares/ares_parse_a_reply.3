@@ -22,24 +22,39 @@ ares_parse_a_reply \- Parse a reply to a DNS query of type A into a hostent
 .B #include <ares.h>
 .PP
 .B int ares_parse_a_reply(const unsigned char *\fIabuf\fP, int \fIalen\fP,
-.B 	struct hostent **\fIhost\fP);
+.B 	struct hostent **\fIhost\fP,
+.B      struct addrttl *\fIaddrttls\fB, int *\fInaddrttls\fB);
 .fi
 .SH DESCRIPTION
 The
 .B ares_parse_a_reply
 function parses the response to a query of type A into a
-.BR "struct hostent" .
+.BR "struct hostent"
+and/or an array of
+.BR "struct addrttls" . 
 The parameters
 .I abuf
 and
 .I alen
 give the contents of the response.  The result is stored in allocated
 memory and a pointer to it stored into the variable pointed to by
-.IR host .
+.IR host ,
+if host is nonnull.
 It is the caller's responsibility to free the resulting host structure
 using
 .BR ares_free_hostent (3)
 when it is no longer needed.
+.PP
+If
+.IR addrttls
+and
+.IR naddrttls
+are both nonnull,
+then up to *naddrttls
+.BR "struct addrttl"
+records are stored in the array pointed to by addrttls,
+and then *naddrttls is set to the number of records so stored.
+Note that the memory for these records is supplied by the caller.
 .SH RETURN VALUES
 .B ares_parse_a_reply
 can return any of the following values:

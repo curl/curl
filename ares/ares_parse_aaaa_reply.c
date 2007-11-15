@@ -40,19 +40,26 @@
 #include "ares_private.h"
 
 int ares_parse_aaaa_reply(const unsigned char *abuf, int alen,
-                       struct hostent **host)
+                          struct hostent **host, struct addr6ttl *addrttls,
+                          int *naddrttls)
 {
   unsigned int qdcount, ancount;
-  int status, i, rr_type, rr_class, rr_len, naddrs;
+  int status, i, rr_type, rr_class, rr_len, rr_ttl, naddrs;
+  int cname_ttl = INT_MAX;  /* the TTL imposed by the CNAME chain */
   int naliases;
   long len;
   const unsigned char *aptr;
   char *hostname, *rr_name, *rr_data, **aliases;
   struct in6_addr *addrs;
   struct hostent *hostent;
+  const int max_addr_ttls = (addrttls && naddrttls) ? *naddrttls : 0;
 
   /* Set *host to NULL for all failure cases. */
-  *host = NULL;
+  if (host)
+    *host = NULL;
+  /* Same with *naddrttls. */
+  if (naddrttls)
+    *naddrttls = 0;
 
   /* Give up if abuf doesn't have room for a header. */
   if (alen < HFIXEDSZ)
@@ -77,18 +84,26 @@ int ares_parse_aaaa_reply(const unsigned char *abuf, int alen,
   aptr += len + QFIXEDSZ;
 
   /* Allocate addresses and aliases; ancount gives an upper bound for both. */
-  addrs = malloc(ancount * sizeof(struct in6_addr));
-  if (!addrs)
+  if (host)
     {
-      free(hostname);
-      return ARES_ENOMEM;
+      addrs = malloc(ancount * sizeof(struct in6_addr));
+      if (!addrs)
+        {
+          free(hostname);
+          return ARES_ENOMEM;
+        }
+      aliases = malloc((ancount + 1) * sizeof(char *));
+      if (!aliases)
+        {
+          free(hostname);
+          free(addrs);
+          return ARES_ENOMEM;
+        }
     }
-  aliases = malloc((ancount + 1) * sizeof(char *));
-  if (!aliases)
+  else
     {
-      free(hostname);
-      free(addrs);
-      return ARES_ENOMEM;
+      addrs = NULL;
+      aliases = NULL;
     }
   naddrs = 0;
   naliases = 0;
@@ -109,13 +124,33 @@ int ares_parse_aaaa_reply(const unsigned char *abuf, int alen,
       rr_type = DNS_RR_TYPE(aptr);
       rr_class = DNS_RR_CLASS(aptr);
       rr_len = DNS_RR_LEN(aptr);
+      rr_ttl = DNS_RR_TTL(aptr);
       aptr += RRFIXEDSZ;
 
       if (rr_class == C_IN && rr_type == T_AAAA
           && rr_len == sizeof(struct in6_addr)
           && strcasecmp(rr_name, hostname) == 0)
         {
-          memcpy(&addrs[naddrs], aptr, sizeof(struct in6_addr));
+          if (addrs)
+            {
+              if (aptr + sizeof(struct in6_addr) > abuf + alen)
+              {
+                status = ARES_EBADRESP;
+                break;
+              }
+              memcpy(&addrs[naddrs], aptr, sizeof(struct in6_addr));
+            }
+          if (naddrs < max_addr_ttls)
+            {
+              struct addr6ttl * const at = &addrttls[naddrs];
+              if (aptr + sizeof(struct in6_addr) > abuf + alen)
+              {
+                status = ARES_EBADRESP;
+                break;
+              }
+              memcpy(&at->ip6addr, aptr,  sizeof(struct in6_addr));
+              at->ttl = rr_ttl;
+            }
           naddrs++;
           status = ARES_SUCCESS;
         }
@@ -123,7 +158,10 @@ int ares_parse_aaaa_reply(const unsigned char *abuf, int alen,
       if (rr_class == C_IN && rr_type == T_CNAME)
         {
           /* Record the RR name as an alias. */
-          aliases[naliases] = rr_name;
+          if (aliases)
+            aliases[naliases] = rr_name;
+          else
+            free(rr_name);
           naliases++;
 
           /* Decode the RR data and replace the hostname with it. */
@@ -132,6 +170,10 @@ int ares_parse_aaaa_reply(const unsigned char *abuf, int alen,
             break;
           free(hostname);
           hostname = rr_data;
+
+          /* Take the min of the TTLs we see in the CNAME chain. */
+          if (cname_ttl > rr_ttl)
+            cname_ttl = rr_ttl;
         }
       else
         free(rr_name);
@@ -148,28 +190,50 @@ int ares_parse_aaaa_reply(const unsigned char *abuf, int alen,
     status = ARES_ENODATA;
   if (status == ARES_SUCCESS)
     {
-      /* We got our answer.  Allocate memory to build the host entry. */
-      aliases[naliases] = NULL;
-      hostent = malloc(sizeof(struct hostent));
-      if (hostent)
+      /* We got our answer. */
+      if (naddrttls)
         {
-          hostent->h_addr_list = malloc((naddrs + 1) * sizeof(char *));
-          if (hostent->h_addr_list)
+          const int n = naddrs < max_addr_ttls ? naddrs : max_addr_ttls;
+          for (i = 0; i < n; i++)
             {
-              /* Fill in the hostent and return successfully. */
-              hostent->h_name = hostname;
-              hostent->h_aliases = aliases;
-              hostent->h_addrtype = AF_INET6;
-              hostent->h_length = sizeof(struct in6_addr);
-              for (i = 0; i < naddrs; i++)
-                hostent->h_addr_list[i] = (char *) &addrs[i];
-              hostent->h_addr_list[naddrs] = NULL;
-              *host = hostent;
-              return ARES_SUCCESS;
+              /* Ensure that each A TTL is no larger than the CNAME TTL. */
+              if (addrttls[i].ttl > cname_ttl)
+                addrttls[i].ttl = cname_ttl;
             }
-          free(hostent);
+          *naddrttls = n;
         }
-      status = ARES_ENOMEM;
+      if (aliases)
+        aliases[naliases] = NULL;
+      if (host)
+        {
+          /* Allocate memory to build the host entry. */
+          hostent = malloc(sizeof(struct hostent));
+          if (hostent)
+            {
+              hostent->h_addr_list = malloc((naddrs + 1) * sizeof(char *));
+              if (hostent->h_addr_list)
+                {
+                  /* Fill in the hostent and return successfully. */
+                  hostent->h_name = hostname;
+                  hostent->h_aliases = aliases;
+                  hostent->h_addrtype = AF_INET6;
+                  hostent->h_length = sizeof(struct in6_addr);
+                  for (i = 0; i < naddrs; i++)
+                    hostent->h_addr_list[i] = (char *) &addrs[i];
+                  hostent->h_addr_list[naddrs] = NULL;
+                  *host = hostent;
+                  return ARES_SUCCESS;
+                }
+              free(hostent);
+            }
+          status = ARES_ENOMEM;
+        }
+    }
+  if (aliases)
+    {
+      for (i = 0; i < naliases; i++)
+        free(aliases[i]);
+      free(aliases);
     }
   for (i = 0; i < naliases; i++)
     free(aliases[i]);

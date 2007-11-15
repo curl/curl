@@ -240,10 +240,29 @@ int ares_expand_name(const unsigned char *encoded, const unsigned char *abuf,
                      int alen, char **s, long *enclen);
 int ares_expand_string(const unsigned char *encoded, const unsigned char *abuf,
                      int alen, unsigned char **s, long *enclen);
+
+struct addrttl {
+  struct in_addr ipaddr;
+  int            ttl;
+};
+struct addr6ttl {
+  struct in6_addr ip6addr;
+  int             ttl;
+};
+
+/*
+** Parse the buffer, starting at *abuf and of length alen bytes, previously
+** obtained from an ares_search call.  Put the results in *host, if nonnull.
+** Also, if addrttls is nonnull, put up to *naddrttls IPv4 addresses along with
+** their TTLs in that array, and set *naddrttls to the number of addresses
+** so written.
+*/
 int ares_parse_a_reply(const unsigned char *abuf, int alen,
-                       struct hostent **host);
+                       struct hostent **host,
+                       struct addrttl *addrttls, int *naddrttls);
 int ares_parse_aaaa_reply(const unsigned char *abuf, int alen,
-                       struct hostent **host);
+                       struct hostent **host,
+                       struct addr6ttl *addrttls, int *naddrttls);
 int ares_parse_ptr_reply(const unsigned char *abuf, int alen, const void *addr,
                          int addrlen, int family, struct hostent **host);
 int ares_parse_ns_reply(const unsigned char *abuf, int alen,
