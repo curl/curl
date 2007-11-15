@@ -943,17 +943,17 @@ CURLcode add_buffer_send(send_buffer *in,
   ptr = in->buffer;
   size = in->size_used;
 
+  DEBUGASSERT(size - included_body_bytes > 0);
+
 #ifdef CURL_DOES_CONVERSIONS
-  if(size - included_body_bytes > 0) {
-    res = Curl_convert_to_network(conn->data, ptr, size - included_body_bytes);
-    /* Curl_convert_to_network calls failf if unsuccessful */
-    if(res != CURLE_OK) {
-      /* conversion failed, free memory and return to the caller */
-      if(in->buffer)
-        free(in->buffer);
-      free(in);
-      return res;
-    }
+  res = Curl_convert_to_network(conn->data, ptr, size - included_body_bytes);
+  /* Curl_convert_to_network calls failf if unsuccessful */
+  if(res != CURLE_OK) {
+    /* conversion failed, free memory and return to the caller */
+    if(in->buffer)
+      free(in->buffer);
+    free(in);
+    return res;
   }
 #endif /* CURL_DOES_CONVERSIONS */
 
