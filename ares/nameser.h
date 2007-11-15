@@ -7,9 +7,6 @@
    port build */
 
 #ifndef NETWARE
-#ifndef __CYGWIN__
-#include <windows.h>
-#endif
 #include <process.h> /* for the _getpid() proto */
 #endif  /* !NETWARE */
 #include <sys/types.h>

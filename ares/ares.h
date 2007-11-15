@@ -43,8 +43,12 @@
   #include <sys/socket.h>
   #include <tcp.h>
 #elif defined(WIN32)
-  #include <winsock2.h>
-  #include <windows.h>
+#  ifndef WIN32_LEAN_AND_MEAN
+#    define WIN32_LEAN_AND_MEAN
+#  endif
+#  include <windows.h>
+#  include <winsock2.h>
+#  include <ws2tcpip.h>
 #else
   #include <netinet/in.h>
   #include <sys/socket.h>
@@ -240,6 +244,15 @@ int ares_expand_name(const unsigned char *encoded, const unsigned char *abuf,
                      int alen, char **s, long *enclen);
 int ares_expand_string(const unsigned char *encoded, const unsigned char *abuf,
                      int alen, unsigned char **s, long *enclen);
+
+#ifndef s6_addr
+struct in6_addr {
+  union {
+    unsigned char _S6_u8[16];
+  } _S6_un;
+};
+#define s6_addr _S6_un._S6_u8
+#endif
 
 struct addrttl {
   struct in_addr ipaddr;

@@ -21,11 +21,13 @@
 #define PF_INET6 AF_INET6
 #endif
 
-#ifndef HAVE_STRUCT_IN6_ADDR
-struct in6_addr
-{
-  unsigned char s6_addr[16];
+#ifndef s6_addr
+struct in6_addr {
+  union {
+    unsigned char _S6_u8[16];
+  } _S6_un;
 };
+#define s6_addr _S6_un._S6_u8
 #endif
 
 #ifndef HAVE_STRUCT_SOCKADDR_IN6

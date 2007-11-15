@@ -40,13 +40,6 @@
 #include "inet_net_pton.h"
 #include "ares_getopt.h"
 
-#ifndef HAVE_STRUCT_IN6_ADDR
-struct in6_addr
-{
-  unsigned char s6_addr[16];
-};
-#endif
-
 static void callback(void *arg, int status, int timeouts, struct hostent *host);
 static void usage(void);
 
