@@ -186,7 +186,8 @@ my $keepoutfiles; # keep stdout and stderr files after tests
 my $listonly;     # only list the tests
 my $postmortem;   # display detailed info about failed tests
 
-my %run;	  # running server
+my %run;          # running server
+my %doesntrun;    # servers that don't work, identified by pidfile
 
 # torture test variables
 my $torture;
@@ -708,6 +709,11 @@ sub runhttpserver {
         $nameext="-ipv6";
     }
 
+    # don't retry if the server doesn't work
+    if ($doesntrun{$pidfile}) {
+        return (0,0);
+    }
+
     $pid = checkserver($pidfile);
 
     if($pid > 0) {
@@ -727,6 +733,7 @@ sub runhttpserver {
     if($httppid <= 0 || !kill(0, $httppid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the HTTP$nameext server\n";
+        $doesntrun{$pidfile} = 1;
         return (0,0);
     }
 
@@ -735,6 +742,7 @@ sub runhttpserver {
         logmsg "RUN: HTTP$nameext server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$httppid $pid2");
+        $doesntrun{$pidfile} = 1;
         return (0,0);
     }
 
@@ -755,6 +763,7 @@ sub runhttpsserver {
     my $STATUS;
     my $RUNNING;
     my $ip = $HOSTIP;
+    my $pidfile = $HTTPSPIDFILE;
 
     if(!$stunnel) {
         return 0;
@@ -765,7 +774,12 @@ sub runhttpsserver {
         $ip = $HOST6IP;
     }
 
-    my $pid=checkserver($HTTPSPIDFILE);
+    # don't retry if the server doesn't work
+    if ($doesntrun{$pidfile}) {
+        return (0,0);
+    }
+
+    my $pid=checkserver($pidfile);
 
     if($pid > 0) {
         # kill previous stunnel!
@@ -775,12 +789,13 @@ sub runhttpsserver {
     my $flag=$debugprotocol?"-v ":"";
     my $cmd="$perl $srcdir/httpsserver.pl $flag -p https -s \"$stunnel\" -d $srcdir -r $HTTPPORT $HTTPSPORT";
 
-    my ($httpspid, $pid2) = startnew($cmd, $HTTPSPIDFILE,0);
+    my ($httpspid, $pid2) = startnew($cmd, $pidfile,0);
 
     if($httpspid <= 0 || !kill(0, $httpspid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the HTTPS server\n";
         stopservers($verbose);
+        $doesntrun{$pidfile} = 1;
         return(0,0);
     }
 
@@ -789,6 +804,7 @@ sub runhttpsserver {
         logmsg "RUN: HTTPS server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$httpspid $pid2");
+        $doesntrun{$pidfile} = 1;
         return (0,0);
     }
 
@@ -823,6 +839,11 @@ sub runftpserver {
         $nameext="-ipv6";
     }
 
+    # don't retry if the server doesn't work
+    if ($doesntrun{$pidfile}) {
+        return (0,0);
+    }
+
     my $pid = checkserver($pidfile);
     if($pid >= 0) {
         stopserver($pid);
@@ -850,7 +871,8 @@ sub runftpserver {
     if($ftppid <= 0 || !kill(0, $ftppid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the FTP$id$nameext server\n";
-        return -1;
+        $doesntrun{$pidfile} = 1;
+        return (0,0);
     }
 
     # Server is up. Verify that we can speak to it.
@@ -858,6 +880,7 @@ sub runftpserver {
         logmsg "RUN: FTP$id$nameext server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$ftppid $pid2");
+        $doesntrun{$pidfile} = 1;
         return (0,0);
     }
 
@@ -878,6 +901,7 @@ sub runftpsserver {
     my $STATUS;
     my $RUNNING;
     my $ip = $HOSTIP;
+    my $pidfile = $FTPSPIDFILE;
 
     if(!$stunnel) {
         return 0;
@@ -888,7 +912,12 @@ sub runftpsserver {
         $ip = $HOST6IP;
     }
 
-    my $pid=checkserver($FTPSPIDFILE);
+    # don't retry if the server doesn't work
+    if ($doesntrun{$pidfile}) {
+        return (0,0);
+    }
+
+    my $pid=checkserver($pidfile);
 
     if($pid > 0) {
         # kill previous stunnel!
@@ -898,12 +927,13 @@ sub runftpsserver {
     my $flag=$debugprotocol?"-v ":"";
     my $cmd="$perl $srcdir/httpsserver.pl $flag -p ftps -s \"$stunnel\" -d $srcdir -r $FTPPORT $FTPSPORT";
 
-    my ($ftpspid, $pid2) = startnew($cmd, $FTPSPIDFILE,0);
+    my ($ftpspid, $pid2) = startnew($cmd, $pidfile,0);
 
     if($ftpspid <= 0 || !kill(0, $ftpspid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the FTPS server\n";
         stopservers($verbose);
+        $doesntrun{$pidfile} = 1;
         return(0,0);
     }
 
@@ -912,6 +942,7 @@ sub runftpsserver {
         logmsg "RUN: FTPS server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$ftpspid $pid2");
+        $doesntrun{$pidfile} = 1;
         return (0,0);
     }
 
@@ -946,6 +977,11 @@ sub runtftpserver {
         $nameext="-ipv6";
     }
 
+    # don't retry if the server doesn't work
+    if ($doesntrun{$pidfile}) {
+        return (0,0);
+    }
+
     my $pid = checkserver($pidfile);
     if($pid >= 0) {
         stopserver($pid);
@@ -968,8 +1004,9 @@ sub runtftpserver {
 
     if($tftppid <= 0 || !kill(0, $tftppid)) {
         # it is NOT alive
-        logmsg "RUN: failed to start the FTP$id$nameext server\n";
-        return -1;
+        logmsg "RUN: failed to start the TFTP$id$nameext server\n";
+        $doesntrun{$pidfile} = 1;
+        return (0,0);
     }
 
     # Server is up. Verify that we can speak to it.
@@ -977,6 +1014,7 @@ sub runtftpserver {
         logmsg "RUN: TFTP$id$nameext server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$tftppid $pid2");
+        $doesntrun{$pidfile} = 1;
         return (0,0);
     }
 
@@ -999,6 +1037,11 @@ sub runsshserver {
     my $port = $SSHPORT;
     my $pidfile = $SSHPIDFILE;
 
+    # don't retry if the server doesn't work
+    if ($doesntrun{$pidfile}) {
+        return (0,0);
+    }
+
     my $pid = checkserver($pidfile);
     if($pid > 0) {
         stopserver($pid);
@@ -1014,11 +1057,13 @@ sub runsshserver {
         logmsg "RUN: failed to start the SSH server\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$sshpid $pid2");
-        return -1;
+        $doesntrun{$pidfile} = 1;
+        return (0,0);
     }
 
     if (!verifyserver('ssh',$ip,$port)) {
         logmsg "RUN: SSH server failed verification\n";
+        $doesntrun{$pidfile} = 1;
         return (0,0);
     }
     if($verbose) {
@@ -1037,6 +1082,11 @@ sub runsocksserver {
     my $port = $SOCKSPORT;
     my $pidfile = $SOCKSPIDFILE;
 
+    # don't retry if the server doesn't work
+    if ($doesntrun{$pidfile}) {
+        return (0,0);
+    }
+
     my $flag=$debugprotocol?"-v ":"";
     my $cmd="ssh -D ${HOSTIP}:$SOCKSPORT -N -F curl_ssh_config ${USER}\@${HOSTIP} -p ${SSHPORT} -vv >log/ssh.log 2>&1";
     my ($sshpid, $pid2) =
@@ -1047,12 +1097,14 @@ sub runsocksserver {
         logmsg "RUN: failed to start the SOCKS server\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$sshpid $pid2");
+        $doesntrun{$pidfile} = 1;
         return (0,0);
     }
 
     # Ugly hack but ssh doesn't support pid files
     if (!verifyserver('socks',$ip,$port)) {
         logmsg "RUN: SOCKS server failed verification\n";
+        $doesntrun{$pidfile} = 1;
         return (0,0);
     }
     if($verbose) {
