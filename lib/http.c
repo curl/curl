@@ -947,7 +947,7 @@ CURLcode add_buffer_send(send_buffer *in,
   headersize = size - included_body_bytes; /* the initial part that isn't body
                                               is header */
 
-  DEBUGASSERT(headersize > 0);
+  DEBUGASSERT(size > included_body_bytes);
 
 #ifdef CURL_DOES_CONVERSIONS
   res = Curl_convert_to_network(conn->data, ptr, headersize);
