@@ -236,9 +236,6 @@ int ares_parse_aaaa_reply(const unsigned char *abuf, int alen,
         free(aliases[i]);
       free(aliases);
     }
-  for (i = 0; i < naliases; i++)
-    free(aliases[i]);
-  free(aliases);
   free(addrs);
   free(hostname);
   return status;
