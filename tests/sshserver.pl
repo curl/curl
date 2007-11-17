@@ -26,7 +26,23 @@ if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys' || $^O eq 'dos' || $^O 
 }
 
 # Where to look for sftp-server
-my @sftppath=qw(/usr/lib/openssh /usr/libexec/openssh /usr/libexec /usr/local/libexec /opt/local/libexec /usr/lib/ssh /usr/libexec/ssh /usr/sbin /usr/lib /usr/lib/ssh/openssh /usr/lib64/ssh /usr/lib64/misc /usr/lib/misc);
+my @sftppath = qw(
+    /usr/lib/openssh
+    /usr/libexec/openssh
+    /usr/libexec
+    /usr/local/libexec
+    /opt/local/libexec
+    /usr/lib/ssh
+    /usr/libexec/ssh
+    /usr/sbin
+    /usr/lib
+    /usr/lib/ssh/openssh
+    /usr/lib64/ssh
+    /usr/lib64/misc
+    /usr/lib/misc
+    /usr/local/sbin
+    /usr/freeware/bin
+    );
 
 my $username = $ENV{USER};
 
