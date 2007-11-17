@@ -131,7 +131,14 @@ if ($verbose) {
 
 # Verify minimum OpenSSH version.
 if (($ssh_daemon !~ /OpenSSH/) || (10 * $ssh_ver_major + $ssh_ver_minor < 37)) {
-    print "SCP, SFTP and SOCKS tests require OpenSSH 3.7 or later\n";
+    my $info;
+    if(!$ssh_daemon) {
+        $info = "OpenSSH not found";
+    }
+    else {
+        $info = "Found OpenSSH $ssh_ver_major.$ssh_ver_minor"
+    }
+    print "$info: SCP, SFTP and SOCKS tests require OpenSSH 3.7 or later\n";
     exit 1;
 }
 
