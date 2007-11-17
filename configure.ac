@@ -174,6 +174,7 @@ case $host in
 esac
 AC_MSG_RESULT($mimpure)
 AM_CONDITIONAL(MIMPURE, test x$mimpure = xyes)
+AM_CONDITIONAL(STATICLIB, false)
 
 AC_MSG_CHECKING([if we need BUILDING_LIBCURL])
 case $host in
@@ -185,6 +186,7 @@ case $host in
     then
       AC_DEFINE(CURL_STATICLIB, 1, [when not building a shared library])
       AC_MSG_RESULT(yes)
+      AM_CONDITIONAL(STATICLIB, true)
     else
       AC_MSG_RESULT(no)
     fi

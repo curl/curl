@@ -10,6 +10,9 @@ Daniel S (17 Nov 2007)
 - Michal Marek made the test suite remember what test servers that fail to
   start so that subsequent tries are simply skipped.
 
+- Andres Garcia made the examples build fine on Windows (mingw + msys) when
+  the lib was built staticly.
+
 Daniel S (16 Nov 2007)
 - Ates Goral identified a problem in http.c:add_buffer_send() when a debug
   callback was used, as it could wrongly pass on a bad size for the outgoing
