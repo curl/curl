@@ -6,6 +6,10 @@
 
                                   Changelog
 
+
+Daniel S (18 Nov 2007)
+- Rob Crittenden fixed SSL connections with NSS done with the multi-interface
+
 Daniel S (17 Nov 2007)
 - Michal Marek made the test suite remember what test servers that fail to
   start so that subsequent tries are simply skipped.

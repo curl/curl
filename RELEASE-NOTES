@@ -23,6 +23,7 @@ This release includes the following bugfixes:
  o variable wrapping when using absolutely huge send buffer sizes
  o variable wrapping when using debug callback and the HTTP request wasn't sent
    in one go
+ o SSL connections with NSS done with the multi-interface
 
 This release includes the following known bugs:
 
@@ -41,6 +42,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Dan Fandrich, Gisle Vanem, Toby Peterson, Yang Tse, Daniel Black,
- Robin Johnson, Michal Marek, Ates Goral
+ Robin Johnson, Michal Marek, Ates Goral, Andres Garcia, Rob Crittenden
  
         Thanks! (and sorry if I forgot to mention someone)

@@ -243,6 +243,7 @@ Curl_ssl_connect_nonblocking(struct connectdata *conn, int sockindex,
 #else
 #ifdef USE_NSS
   *done = TRUE; /* fallback to BLOCKING */
+  conn->ssl[sockindex].use = TRUE;
   return Curl_nss_connect(conn, sockindex);
 #else
 #ifdef USE_QSOSSL
