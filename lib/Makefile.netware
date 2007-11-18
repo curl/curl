@@ -20,12 +20,12 @@ endif
 
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8e
+OPENSSL_PATH = ../../openssl-0.9.8g
 endif
 
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-0.16
+LIBSSH2_PATH = ../../libssh2-0.18
 endif
 
 ifndef INSTDIR
@@ -372,7 +372,6 @@ ifeq ($(LIBARCH),CLIB)
 	@echo $(DL)#define SEND_TYPE_ARG4 int$(DL) >> $@
 	@echo $(DL)#define SEND_TYPE_RETV int$(DL) >> $@
 	@echo $(DL)#define socklen_t int$(DL) >> $@
-	@echo $(DL)#define DL_LDAP_FILE "ldapsdk.nlm"$(DL) >> $@
 else
 	@echo $(DL)#define OS "i586-pc-libc-NetWare"$(DL) >> $@
 	@echo $(DL)#define HAVE_FTRUNCATE 1$(DL) >> $@
@@ -405,7 +404,6 @@ else
 	@echo $(DL)#define SEND_TYPE_ARG4 int$(DL) >> $@
 	@echo $(DL)#define SEND_TYPE_RETV ssize_t$(DL) >> $@
 	@echo $(DL)#define SIZEOF_STRUCT_IN6_ADDR 16$(DL) >> $@
-	@echo $(DL)#define DL_LDAP_FILE "lldapsdk.nlm"$(DL) >> $@
 ifdef ENABLE_IPV6
 	@echo $(DL)#define ENABLE_IPV6 1$(DL) >> $@
 endif

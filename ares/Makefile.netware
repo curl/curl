@@ -300,7 +300,6 @@ ifeq ($(LIBARCH),CLIB)
 	@echo $(DL)#define SEND_TYPE_ARG3 int$(DL) >> $@
 	@echo $(DL)#define SEND_TYPE_ARG4 int$(DL) >> $@
 	@echo $(DL)#define SEND_TYPE_RETV int$(DL) >> $@
-	@echo $(DL)#define DL_LDAP_FILE "ldapsdk.nlm"$(DL) >> $@
 	@echo $(DL)#define socklen_t int$(DL) >> $@
 	@echo $(DL)#define strncasecmp strnicmp$(DL) >> $@
 	@echo $(DL)#define strcasecmp stricmp$(DL) >> $@
@@ -338,7 +337,6 @@ else
 	@echo $(DL)#define SEND_TYPE_ARG4 int$(DL) >> $@
 	@echo $(DL)#define SEND_TYPE_RETV ssize_t$(DL) >> $@
 	@echo $(DL)#define SIZEOF_STRUCT_IN6_ADDR 16$(DL) >> $@
-	@echo $(DL)#define DL_LDAP_FILE "lldapsdk.nlm"$(DL) >> $@
 endif
 	@echo $(DL)#define HAVE_ARPA_INET_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_ARPA_NAMESER_H 1$(DL) >> $@
