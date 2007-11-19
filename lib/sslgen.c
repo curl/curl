@@ -248,11 +248,13 @@ Curl_ssl_connect_nonblocking(struct connectdata *conn, int sockindex,
 #else
 #ifdef USE_QSOSSL
   *done = TRUE; /* fallback to BLOCKING */
+  conn->ssl[sockindex].use = TRUE;
   return Curl_qsossl_connect(conn, sockindex);
 #else
   /* not implemented!
      fallback to BLOCKING call. */
   *done = TRUE;
+  conn->ssl[sockindex].use = TRUE;
   return Curl_ssl_connect(conn, sockindex);
 #endif /* USE_QSOSSL */
 #endif /* USE_NSS */
