@@ -124,6 +124,13 @@ if ($tmpstr =~ /OpenSSH[_-](\d+)\.(\d+)(\.(\d+))*/) {
     ($ssh_ver_major, $ssh_ver_minor, $ssh_ver_patch) = ($1, $2, $4);
     $ssh_daemon = 'OpenSSH';
 }
+if(!$ssh_daemon) {
+    chomp($tmpstr = qx($sshd -V 2>&1 | grep Sun_SSH));
+    if($tmpstr =~ /Sun[_-]SSH[_-](\d+)\.(\d+)/) {
+        ($ssh_ver_major, $ssh_ver_minor) = ($1, $2);
+        $ssh_daemon = 'SunSSH';
+    }
+}
 if ($verbose) {
     print STDERR "ssh_daemon: $ssh_daemon\n";
     print STDERR "ssh_ver_major: $ssh_ver_major\n";
@@ -131,16 +138,23 @@ if ($verbose) {
     print STDERR "ssh_ver_patch: $ssh_ver_patch\n";
 }
 
-# Verify minimum OpenSSH version.
-if (($ssh_daemon !~ /OpenSSH/) || (10 * $ssh_ver_major + $ssh_ver_minor < 37)) {
-    if(!$ssh_daemon) {
-        print "SSH server daemon found is not an OpenSSH daemon\n";
-        chomp($tmpstr = qx($sshd -V 2>&1));
-        print "$tmpstr\n";
-    }
-    else {
-        print "SSH server daemon found is OpenSSH $ssh_ver_major.$ssh_ver_minor\n";
-    }
+# Verify minimum SSH daemon version.
+my $sshd_ver_ok = 1;
+if(($ssh_daemon =~ /OpenSSH/) && (10 * $ssh_ver_major + $ssh_ver_minor < 36)) {
+    print "SSH server daemon found is OpenSSH $ssh_ver_major.$ssh_ver_minor\n";
+    $sshd_ver_ok = 0;
+}
+if(($ssh_daemon =~ /SunSSH/) && (10 * $ssh_ver_major + $ssh_ver_minor < 11)) {
+    print "SSH server daemon found is SunSSH $ssh_ver_major.$ssh_ver_minor\n";
+    $sshd_ver_ok = 0;
+}
+if(!$ssh_daemon) {
+    print "SSH server daemon found is not OpenSSH nor SunSSH\n";
+    chomp($tmpstr = qx($sshd -V 2>&1));
+    print "$tmpstr\n";
+    $sshd_ver_ok = 0;
+}
+if(!$sshd_ver_ok) {
     print "SCP, SFTP and SOCKS tests require OpenSSH 3.7 or later\n";
     exit 1;
 }
