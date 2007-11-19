@@ -1,6 +1,7 @@
 /* $Id$ */
 
-/*
+/* Copyright (C) 2005 by Dominick Meglio
+ *
  * Permission to use, copy, modify, and distribute this
  * software and its documentation for any purpose and without
  * fee is hereby granted, provided that the above copyright
