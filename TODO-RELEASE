@@ -1,4 +1,7 @@
-To be addressed before 7.17.1 (planned release: late October 2007)
+To be addressed before 7.17.2 (planned release: December 2007)
 =============================
 
-106 - 
+106 - Share interface force-enable the cookie parser
+      http://curl.haxx.se/mail/lib-2007-11/0234.html
+
+107 -
