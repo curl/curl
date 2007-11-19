@@ -135,6 +135,8 @@ if ($verbose) {
 if (($ssh_daemon !~ /OpenSSH/) || (10 * $ssh_ver_major + $ssh_ver_minor < 37)) {
     if(!$ssh_daemon) {
         print "SSH server daemon found is not an OpenSSH daemon\n";
+        chomp($tmpstr = qx($sshd -V 2>&1));
+        print "$tmpstr\n";
     }
     else {
         print "SSH server daemon found is OpenSSH $ssh_ver_major.$ssh_ver_minor\n";
