@@ -686,8 +686,11 @@ static int dprintf_formatf(
       width = p->width;
 
     /* pick up the specified precision */
-    if(p->flags & FLAGS_PRECPARAM)
+    if(p->flags & FLAGS_PRECPARAM) {
       prec = vto[p->precision].data.num;
+      param_num++; /* since the precision is extraced from a parameter, we
+                      must skip that to get to the next one properly */
+    }
     else if(p->flags & FLAGS_PREC)
       prec = p->precision;
     else
