@@ -51,7 +51,8 @@
 static int
 get_gss_name(struct connectdata *conn, bool proxy, gss_name_t *server)
 {
-  struct negotiatedata *neg_ctx = &conn->data->state.negotiate;
+  struct negotiatedata *neg_ctx = proxy?&conn->data->state.proxyneg:
+    &conn->data->state.negotiate;
   OM_uint32 major_status, minor_status;
   gss_buffer_desc token = GSS_C_EMPTY_BUFFER;
   char name[2048];
@@ -98,12 +99,12 @@ log_gss_error(struct connectdata *conn, OM_uint32 error_status, char *prefix)
   snprintf(buf, sizeof(buf), "%s", prefix);
   len = strlen(buf);
   do {
-    maj_stat = gss_display_status (&min_stat,
-                                   error_status,
-                                   GSS_C_MECH_CODE,
-                                   GSS_C_NO_OID,
-                                   &msg_ctx,
-                                   &status_string);
+    maj_stat = gss_display_status(&min_stat,
+                                  error_status,
+                                  GSS_C_MECH_CODE,
+                                  GSS_C_NO_OID,
+                                  &msg_ctx,
+                                  &status_string);
       if(sizeof(buf) > len + status_string.length + 1) {
         snprintf(buf + len, sizeof(buf) - len,
                  ": %s", (char*) status_string.value);
@@ -118,7 +119,8 @@ log_gss_error(struct connectdata *conn, OM_uint32 error_status, char *prefix)
 int Curl_input_negotiate(struct connectdata *conn, bool proxy,
                          const char *header)
 {
-  struct negotiatedata *neg_ctx = &conn->data->state.negotiate;
+  struct negotiatedata *neg_ctx = proxy?&conn->data->state.proxyneg:
+    &conn->data->state.negotiate;
   OM_uint32 major_status, minor_status, minor_status2;
   gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
@@ -251,13 +253,14 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
 
 CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
 {
-  struct negotiatedata *neg_ctx = &conn->data->state.negotiate;
+  struct negotiatedata *neg_ctx = proxy?&conn->data->state.proxyneg:
+    &conn->data->state.negotiate;
   OM_uint32 minor_status;
   char *encoded = NULL;
   int len;
 
 #ifdef HAVE_SPNEGO /* Handle SPNEGO */
-  if(checkprefix("Negotiate",neg_ctx->protocol)) {
+  if(checkprefix("Negotiate", neg_ctx->protocol)) {
     ASN1_OBJECT *   object            = NULL;
     int             rc                = 1;
     unsigned char * spnegoToken       = NULL;
@@ -310,11 +313,9 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
   return (conn->allocptr.userpwd == NULL) ? CURLE_OUT_OF_MEMORY : CURLE_OK;
 }
 
-void Curl_cleanup_negotiate(struct SessionHandle *data)
+static void cleanup(struct negotiatedata *neg_ctx)
 {
   OM_uint32 minor_status;
-  struct negotiatedata *neg_ctx = &data->state.negotiate;
-
   if(neg_ctx->context != GSS_C_NO_CONTEXT)
     gss_delete_sec_context(&minor_status, &neg_ctx->context, GSS_C_NO_BUFFER);
 
@@ -325,6 +326,12 @@ void Curl_cleanup_negotiate(struct SessionHandle *data)
     gss_release_name(&minor_status, &neg_ctx->server_name);
 
   memset(neg_ctx, 0, sizeof(*neg_ctx));
+}
+
+void Curl_cleanup_negotiate(struct SessionHandle *data)
+{
+  cleanup(&data->state.negotiate);
+  cleanup(&data->state.proxyneg);
 }
 
 

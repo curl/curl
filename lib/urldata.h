@@ -1199,7 +1199,8 @@ struct UrlState {
   struct digestdata proxydigest; /* state data for proxy Digest auth */
 
 #ifdef HAVE_GSSAPI
-  struct negotiatedata negotiate; /* state data for Negotiate auth */
+  struct negotiatedata negotiate; /* state data for host Negotiate auth */
+  struct negotiatedata proxyneg; /* state data for proxy Negotiate auth */
 #endif
 
   struct auth authhost;  /* auth details for host */

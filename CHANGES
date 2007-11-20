@@ -7,7 +7,18 @@
                                   Changelog
 
 
+Daniel S (21 Nov 2007)
+- While inspecting the Negotiate code, I noticed how the proxy auth was using
+  the same state struct as the host auth, so both could never be used at the
+  same time! I fixed it (without being able to check) to use two separate
+  structs to allow authentication using Negotiate on host and proxy
+  simultanouesly.
+
 Daniel S (20 Nov 2007)
+- Emil Romanus pointed out a bug that made an easy handle get the cookie
+  engine activated when set to use a share (even if the share doesn't share
+  cookies). I fixed it.
+
 - Fixed a very long-lasting mprintf() bug that occured when we did "%.*s%s",
   since the second %s would then wrongly used the numerical precision argument
   instead and crash.
