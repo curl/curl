@@ -69,11 +69,13 @@ get_gss_name(struct connectdata *conn, bool proxy, gss_name_t *server)
   else
     service = "HTTP";
 
-  token.length = strlen(service) + 1 + strlen(proxy ? conn->proxy.name : conn->host.name) + 1;
+  token.length = strlen(service) + 1 + strlen(proxy ? conn->proxy.name :
+                                              conn->host.name) + 1;
   if(token.length + 1 > sizeof(name))
     return EMSGSIZE;
 
-  snprintf(name, sizeof(name), "%s@%s", service, proxy ? conn->proxy.name : conn->host.name);
+  snprintf(name, sizeof(name), "%s@%s", service, proxy ? conn->proxy.name :
+           conn->host.name);
 
   token.value = (void *) name;
   major_status = gss_import_name(&minor_status,
@@ -113,7 +115,8 @@ log_gss_error(struct connectdata *conn, OM_uint32 error_status, char *prefix)
   infof(conn->data, "%s", buf);
 }
 
-int Curl_input_negotiate(struct connectdata *conn, bool proxy, const char *header)
+int Curl_input_negotiate(struct connectdata *conn, bool proxy,
+                         const char *header)
 {
   struct negotiatedata *neg_ctx = &conn->data->state.negotiate;
   OM_uint32 major_status, minor_status, minor_status2;
@@ -165,7 +168,8 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy, const char *heade
 
   len = strlen(header);
   if(len > 0) {
-    int rawlen = Curl_base64_decode(header, (unsigned char **)&input_token.value);
+    int rawlen = Curl_base64_decode(header,
+                                    (unsigned char **)&input_token.value);
     if(rawlen < 0)
       return -1;
     input_token.length = rawlen;
@@ -299,7 +303,8 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
     return CURLE_OUT_OF_MEMORY;
 
   conn->allocptr.userpwd =
-    aprintf("%sAuthorization: %s %s\r\n", proxy ? "Proxy-" : "", neg_ctx->protocol, encoded);
+    aprintf("%sAuthorization: %s %s\r\n", proxy ? "Proxy-" : "",
+            neg_ctx->protocol, encoded);
   free(encoded);
   gss_release_buffer(&minor_status, &neg_ctx->output_token);
   return (conn->allocptr.userpwd == NULL) ? CURLE_OUT_OF_MEMORY : CURLE_OK;

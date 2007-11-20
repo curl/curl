@@ -2339,7 +2339,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
         co = Curl_cookie_getlist(data->cookies,
                                  conn->allocptr.cookiehost?
-                                 conn->allocptr.cookiehost:host, data->reqdata.path,
+                                 conn->allocptr.cookiehost:host,
+                                 data->reqdata.path,
                                  (bool)(conn->protocol&PROT_HTTPS?TRUE:FALSE));
         Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
       }
