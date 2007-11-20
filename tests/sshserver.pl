@@ -61,6 +61,19 @@ sub searchpath {
   }
 }
 
+# Display contents of the given file.
+sub displayfile {
+    my ($file) = @_;
+    print "=== Start of file $file\n";
+    if(open(SINGLE, "<$file")) {
+        while(my $string = <SINGLE>) {
+            print "$string";
+        }
+        close(SINGLE);
+    }
+    print "=== End of file $file\n";
+}
+
 # Parse options
 do {
     if($ARGV[0] eq "-v") {
@@ -170,7 +183,8 @@ close CONF;
 # Check here for possible unsupported options, avoiding its use in sshd.
 sub sshd_supports_opt($) {
     my ($option) = @_;
-    my $err = grep /Unsupported .* $option/, qx($sshd -t -f $conffile -o $option=no 2>&1);
+    my $err = grep /((Unsupported)|(Bad configuration)|(Deprecated)) option.*$option/,
+                    qx($sshd -t -f $conffile -o $option=no 2>&1);
     return !$err;
 }
 
@@ -278,9 +292,13 @@ EOFSSH
 close SSHFILE ||  die "Could not close $conffile_ssh";
 
 
-if (system "$sshd -t -q -f $conffile") {
+# Verify that sshd supports our configuration file
+if (system "$sshd -t -f $conffile > log/sshd.log 2>&1") {
     # This is likely due to missing support for UsePam
     print "$sshd is too old and is not supported\n";
+    displayfile("log/sshd.log");
+    displayfile("$conffile");
+    unlink "log/sshd.log";
     unlink $conffile;
     exit 1;
 }
@@ -290,6 +308,11 @@ my $rc = system "$sshd -e -D -f $conffile > log/sshd.log 2>&1";
 $rc >>= 8;
 if($rc && $verbose) {
     print STDERR "$sshd exited with $rc!\n";
+}
+if($rc) {
+    print "$sshd exited with $rc!\n";
+    displayfile("log/sshd.log");
+    displayfile("$conffile");
 }
 
 unlink $conffile;
