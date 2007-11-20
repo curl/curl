@@ -143,6 +143,12 @@ Rexx
   Written Mark Hessling
   http://rexxcurl.sourceforge.net/
 
+RPG
+
+  Support for ILE/RPG on OS/400 is included in source distribution
+  http://curl.haxx.se/libcurl/
+  See packages/OS400/README.OS400 and packages/OS400/curl.inc.in
+
 Ruby
 
   curb - written by Ross Bamford
