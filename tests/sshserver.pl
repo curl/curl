@@ -304,17 +304,24 @@ if (system "$sshd -t -f $conffile > log/sshd.log 2>&1") {
 }
 
 # Start the server
-my $rc = system "$sshd -e -D -f $conffile > log/sshd.log 2>&1";
-$rc >>= 8;
-if($rc && $verbose) {
-    print STDERR "$sshd exited with $rc!\n";
-}
-if($rc) {
-    print "$sshd exited with $rc!\n";
+my $cmdretval = system "$sshd -e -D -f $conffile > log/sshd.log 2>&1";
+my $cmdnoexec = $!;
+if ($cmdretval == -1) {
+    print "$sshd failed with: \n";
+    print "$cmdnoexec \n";
     displayfile("log/sshd.log");
     displayfile("$conffile");
+}
+elsif ($cmdretval & 127) {
+    printf("$sshd died with signal %d, and %s coredump.\n",
+           ($cmdretval & 127), ($cmdretval & 128)?"a":"no");
+    displayfile("log/sshd.log");
+    displayfile("$conffile");
+}
+elsif ($verbose && ($cmdretval >> 8)) {
+    printf("$sshd exited with %d \n", $cmdretval >> 8);
 }
 
 unlink $conffile;
 
-exit $rc;
+exit $cmdretval >> 8;
