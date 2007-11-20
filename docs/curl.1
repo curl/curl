@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl 1 "21 Sep 2007" "Curl 7.17.1" "Curl Manual"
+.TH curl 1 "20 Nov 2007" "Curl 7.17.2" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -269,11 +269,11 @@ The <data> part should be using one of the two following syntaxes:
 .RS
 .IP "name=content"
 This will make curl URL encode the content part and pass that on. Note that
-the name part is not encoded.
+the name part is expected to be URL encoded already.
 .IP "name@filename"
 This will make curl load data from the given file, URL encode that data and
 pass it on in the POST like \fIname=urlencoded-data\fP. Note that the name
-part is not encoded.
+is expected to be URL encoded already.
 .RE
 .IP "--digest"
 (HTTP) Enables HTTP Digest authentication. This is a authentication that
