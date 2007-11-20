@@ -1195,16 +1195,15 @@ struct UrlState {
 #endif
   bool allow_port; /* Is set.use_port allowed to take effect or not. This
                       is always set TRUE when curl_easy_perform() is called. */
-
-  struct digestdata digest;
-  struct digestdata proxydigest;
+  struct digestdata digest;      /* state data for host Digest auth */
+  struct digestdata proxydigest; /* state data for proxy Digest auth */
 
 #ifdef HAVE_GSSAPI
-  struct negotiatedata negotiate;
+  struct negotiatedata negotiate; /* state data for Negotiate auth */
 #endif
 
-  struct auth authhost;
-  struct auth authproxy;
+  struct auth authhost;  /* auth details for host */
+  struct auth authproxy; /* auth details for proxy */
 
   bool authproblem; /* TRUE if there's some problem authenticating */
 
@@ -1334,7 +1333,8 @@ struct UserDefined {
   long followlocation; /* as in HTTP Location: */
   long maxredirs;    /* maximum no. of http(s) redirects to follow, set to -1
                         for infinity */
-  bool post301;      /* Obey RFC 2616/10.3.2 and keep POSTs as POSTs after a 301 */
+  bool post301;      /* Obey RFC 2616/10.3.2 and keep POSTs as POSTs after a
+                        301 */
   bool free_referer; /* set TRUE if 'referer' points to a string we
                         allocated */
   void *postfields;  /* if POST, set the fields' values here */
@@ -1394,13 +1394,10 @@ struct UserDefined {
   long httpversion; /* when non-zero, a specific HTTP version requested to
                        be used in the library's request(s) */
   struct ssl_config_data ssl;  /* user defined SSL stuff */
-
   curl_proxytype proxytype; /* what kind of proxy that is in use */
-
   long dns_cache_timeout; /* DNS cache timeout */
   long buffer_size;      /* size of receive buffer to use */
-
-  void *private_data; /* Private data */
+  void *private_data; /* application-private data */
 
   struct Curl_one_easy *one_easy; /* When adding an easy handle to a multi
                                      handle, an internal 'Curl_one_easy'
@@ -1410,7 +1407,8 @@ struct UserDefined {
 
   struct curl_slist *http200aliases; /* linked list of aliases for http200 */
 
-  long ip_version;
+  long ip_version; /* the CURL_IPRESOLVE_* defines in the public header file
+                      0 - whatever, 1 - v2, 2 - v6 */
 
   curl_off_t max_filesize; /* Maximum file size to download */
 
@@ -1420,27 +1418,27 @@ struct UserDefined {
    this session. They are STATIC, set by libcurl users or at least initially
    and they don't change during operations. */
 
-  bool printhost;       /* printing host name in debug info */
-  bool get_filetime;
-  bool tunnel_thru_httpproxy;
-  bool prefer_ascii;    /* ASCII rather than binary */
-  bool ftp_append;
-  bool ftp_list_only;
-  bool ftp_create_missing_dirs;
-  bool ftp_use_port;
-  bool hide_progress;
-  bool http_fail_on_error;
-  bool http_follow_location;
+  bool printhost;        /* printing host name in debug info */
+  bool get_filetime;     /* get the time and get of the remote file */
+  bool tunnel_thru_httpproxy; /* use CONNECT through a HTTP proxy */
+  bool prefer_ascii;     /* ASCII rather than binary */
+  bool ftp_append;       /* append, not overwrite, on upload */
+  bool ftp_list_only;    /* switch FTP command for listing directories */
+  bool ftp_create_missing_dirs; /* create directories that don't exist */
+  bool ftp_use_port;     /* use the FTP PORT command */
+  bool hide_progress;    /* don't use the progress meter */
+  bool http_fail_on_error;  /* fail on HTTP error codes >= 300 */ 
+  bool http_follow_location; /* follow HTTP redirects */
   bool http_disable_hostname_check_before_authentication;
   bool include_header;   /* include received protocol headers in data output */
-  bool http_set_referer;
+  bool http_set_referer; /* is a custom referer used */
   bool http_auto_referer; /* set "correct" referer when following location: */
   bool opt_no_body;      /* as set with CURLOPT_NO_BODY */
-  bool set_port;
-  bool upload;
+  bool set_port;         /* custom port number used */
+  bool upload;           /* upload request */
   enum CURL_NETRC_OPTION
        use_netrc;        /* defined in include/curl.h */
-  bool verbose;
+  bool verbose;          /* output verbosity */
   bool krb;              /* kerberos connection requested */
   bool reuse_forbid;     /* forbidden to be reused, close after use */
   bool reuse_fresh;      /* do not re-use an existing connection  */
@@ -1500,8 +1498,10 @@ struct SessionHandle {
   struct HandleData reqdata;   /* Request-specific data */
   struct UserDefined set;      /* values set by the libcurl user */
   struct DynamicStatic change; /* possibly modified userdefined data */
-
-  struct CookieInfo *cookies;  /* the cookies, read from files and servers */
+  struct CookieInfo *cookies;  /* the cookies, read from files and servers.
+                                  NOTE that the 'cookie' field in the
+                                  UserDefined struct defines if the "engine"
+                                  is to be used or not. */
   struct Progress progress;    /* for all the progress meter data */
   struct UrlState state;       /* struct for fields used for state info and
                                   other dynamic purposes */
