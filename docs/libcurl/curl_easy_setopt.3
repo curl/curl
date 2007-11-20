@@ -1491,6 +1491,14 @@ this curl handle use the data from the shared handle instead of keeping the
 data to itself. This enables several curl handles to share data. If the curl
 handles are used simultaneously, you \fBMUST\fP use the locking methods in the
 share handle. See \fIcurl_share_setopt(3)\fP for details.
+
+If you add a share that is set to share cookies, your easy handle will use
+that cookie cache and get the cookie engine enabled. If you unshare an object
+that were using cookies (or change to another object that doesn't share
+cookies), the easy handle will get its cookie engine disabled.
+
+Data that the share object is not set to share will be dealt with the usual
+way, as if no share was used.
 .IP CURLOPT_NEW_FILE_PERMS
 Pass a long as a parameter, containing the value of the permissions that will
 be assigned to newly created files on the remote server.  The default value is
