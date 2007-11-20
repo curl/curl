@@ -357,6 +357,7 @@ struct OutStruct {
 };
 
 struct Configurable {
+  CURL *easy; /* once we have one, we keep it here */
   bool remote_time;
   char *random_file;
   char *egd_file;
@@ -619,6 +620,7 @@ static void help(void)
     " -d/--data <data>   HTTP POST data (H)",
     "    --data-ascii <data>  HTTP POST ASCII data (H)",
     "    --data-binary <data> HTTP POST binary data (H)",
+    "    --data-urlencode <name=data/name@filename> HTTP POST data url encoded (H)",
     "    --negotiate     Use HTTP Negotiate Authentication (H)",
     "    --digest        Use HTTP Digest Authentication (H)",
     "    --disable-eprt  Inhibit using EPRT or LPRT (F)",
@@ -1532,6 +1534,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"d", "data",        TRUE},
     {"da", "data-ascii", TRUE},
     {"db", "data-binary", TRUE},
+    {"de", "data-urlencode", TRUE},
     {"D", "dump-header", TRUE},
     {"e", "referer",     TRUE},
     {"E", "cert",        TRUE},
@@ -2045,12 +2048,83 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       /* postfield data */
       {
         char *postdata=NULL;
+        FILE *file;
 
-        if('@' == *nextarg) {
+        if(subletter == 'e') { /* --data-urlencode*/
+          /* [name]=[content], we encode the content part only
+           * [name]@[file name]
+           *
+           * Case 2: we first load the file using that name and then encode
+           * the content.
+           */
+          char *p = strchr(nextarg, '=');
+          long size = 0;
+          size_t nlen;
+          if(!p)
+            p = strchr(nextarg, '@');
+          if(!p) {
+            warnf(config, "bad use of --data-urlencode\n");
+            return PARAM_BAD_USE;
+          }
+          nlen = p - nextarg; /* length of the name part */
+          if('@' == *p) {
+            /* a '@' letter, it means that a file name or - (stdin) follows */
+
+            p++; /* pass the separator */
+
+            if(curlx_strequal("-", p)) {
+              file = stdin;
+              SET_BINMODE(stdin);
+            }
+            else {
+              file = fopen(p, "rb");
+              if(!file)
+                warnf(config,
+                      "Couldn't read data from file \"%s\", this makes "
+                      "an empty POST.\n", nextarg);
+            }
+
+            postdata = file2memory(file, &size);
+
+            if(file && (file != stdin))
+              fclose(file);
+          }
+          else {
+            GetStr(&postdata, ++p);
+            size = strlen(postdata);
+          }
+
+          if(!postdata) {
+            /* no data from the file, point to a zero byte string to make this
+               get sent as a POST anyway */
+            postdata=strdup("");
+          }
+          else {
+            char *enc = curl_easy_escape(config->easy, postdata, size);
+            if(enc) {
+              /* now make a string with the name from above and append the
+                 encoded string */
+              size_t outlen = nlen + strlen(enc) + 2;
+              char *n = malloc(outlen);
+              if(!n)
+                return PARAM_NO_MEM;
+
+              snprintf(n, outlen, "%.*s=%s", nlen, nextarg, enc);
+              curl_free(enc);
+              free(postdata);
+              if(n) {
+                postdata = n;
+              }
+              else
+                return PARAM_NO_MEM;
+            }
+            else
+              return PARAM_NO_MEM;
+          }
+        }
+        else if('@' == *nextarg) {
           /* the data begins with a '@' letter, it means that a file name
              or - (stdin) follows */
-          FILE *file;
-
           nextarg++; /* pass the @ */
 
           if(curlx_strequal("-", nextarg)) {
@@ -3334,6 +3408,9 @@ static void free_config_fields(struct Configurable *config)
   curl_slist_free_all(config->postquote);
   curl_slist_free_all(config->headers);
   curl_slist_free_all(config->telnet_options);
+
+  if(config->easy)
+    curl_easy_cleanup(config->easy);
 }
 
 #ifdef WIN32
@@ -3443,9 +3520,9 @@ CURLcode _my_setopt(CURL *curl, struct Configurable *config, const char *name,
   if(config->libcurl) {
     /* we only use this for real if --libcurl was used */
 
-    bufp = curl_maprintf("%scurl_easy_setopt(hnd, %s, %s);%s",
-                         remark?"/* ":"", name, value,
-                         remark?" [REMARK] */":"");
+    bufp = curlx_maprintf("%scurl_easy_setopt(hnd, %s, %s);%s",
+                          remark?"/* ":"", name, value,
+                          remark?" [REMARK] */":"");
 
     if (!bufp || !curl_slist_append(easycode, bufp))
       ret = CURLE_OUT_OF_MEMORY;
@@ -3576,6 +3653,17 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
     curl_free(env);
   }
 #endif
+
+  /*
+   * Get a curl handle to use for all forthcoming curl transfers.  Cleanup
+   * when all transfers are done.
+   */
+  curl = curl_easy_init();
+  if(!curl) {
+    clean_getout(config);
+    return CURLE_FAILED_INIT;
+  }
+  config->easy = curl;
 
   memset(&outs,0,sizeof(outs));
 
@@ -3731,16 +3819,6 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
       if(SetHTTPrequest(config, HTTPREQ_SIMPLEPOST, &config->httpreq))
         return PARAM_BAD_USE;
     }
-  }
-
-  /*
-   * Get a curl handle to use for all forthcoming curl transfers.  Cleanup
-   * when all transfers are done.
-   */
-  curl = curl_easy_init();
-  if(!curl) {
-    clean_getout(config);
-    return CURLE_FAILED_INIT;
   }
 
   /* This is the first entry added to easycode and it initializes the slist */
@@ -4663,6 +4741,7 @@ quit_curl:
 
   /* cleanup the curl handle! */
   curl_easy_cleanup(curl);
+  config->easy = NULL; /* cleanup now */
   if (easycode)
     curl_slist_append(easycode, "curl_easy_cleanup(hnd);");
 

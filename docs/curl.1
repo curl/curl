@@ -261,6 +261,20 @@ the \fI--data-ascii\fP option, this is for you.
 
 If this option is used several times, the ones following the first will
 append data.
+.IP "--data-urlencode <data>"
+(HTTP) This posts data, similar to the other --data options with the exception
+that this will do partial URL encoding. (Added in 7.17.2)
+
+The <data> part should be using one of the two following syntaxes:
+.RS
+.IP "name=content"
+This will make curl URL encode the content part and pass that on. Note that
+the name part is not encoded.
+.IP "name@filename"
+This will make curl load data from the given file, URL encode that data and
+pass it on in the POST like \fIname=urlencoded-data\fP. Note that the name
+part is not encoded.
+.RE
 .IP "--digest"
 (HTTP) Enables HTTP Digest authentication. This is a authentication that
 prevents the password from being sent over the wire in clear text. Use this in

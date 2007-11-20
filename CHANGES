@@ -7,6 +7,14 @@
                                   Changelog
 
 
+Daniel S (20 Nov 2007)
+- Fixed a very long-lasting mprintf() bug that occured when we did "%.*s%s",
+  since the second %s would then wrongly used the numerical precision argument
+  instead and crash.
+
+- Introuced --data-urlencode to the curl tool for easier url encoding of the
+  data sent in a post.
+
 Daniel S (18 Nov 2007)
 - Rob Crittenden fixed SSL connections with NSS done with the multi-interface
 
