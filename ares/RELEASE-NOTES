@@ -1,9 +1,9 @@
-This is what's new and changed in the c-ares 1.5.1 release:
+This is what's new and changed in the c-ares 1.5.2 release:
 
- o added the ares_llist.h header that was missing in the 1.5.0 release
+ o 
 
 Thanks go to these friendly people for their efforts and contributions:
 
- Robin Cornelius
+ 
 
 Have fun!

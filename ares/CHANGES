@@ -1,13 +1,13 @@
   Changelog for the c-ares project
 
-Version 1.5.1 (Nov 20, 2007)
+Version 1.5.1 (Nov 21, 2007)
 
-* November 20 2007 (Daniel Stenberg)
+* November 21 2007 (Daniel Stenberg)
 
 - Robin Cornelius pointed out that ares_llist.h was missing in the release
   archive for 1.5.0
 
-Version 1.5.0 (Nov 20, 2007)
+Version 1.5.0 (Nov 21, 2007)
 
 * October 2 2007 (Daniel Stenberg)
 
