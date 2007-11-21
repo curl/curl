@@ -1,26 +1,9 @@
-This is what's new and changed in the c-ares 1.5.0 release:
+This is what's new and changed in the c-ares 1.5.1 release:
 
- o SONAME bump to a few API and ABI breaking changes:
-   - ares_host_callback()
-   - ares_nameinfo_callback()
-   - ares_parse_a_reply()
-   - ares_parse_aaaa_reply()
-
- o two valgrind reports were silenced
- o ares_save_options() fix
- o do DNS retries even on TCP connections
- o correctly clear sockets from the fd_set in several functions
- o always wait on TCP events to detect connect closures
- o new socket options: ARES_OPT_SOCK_SNDBUF and ARES_OPT_SOCK_RCVBUF
- o made the query callbacks receive the number of timeouts that happened during
-   the execution of a query
- o don't skip a server if it's the only one
- o segfault when generating a DNS "Transaction ID" under low memory conditions
- o ares_strerror() segfault fix
- o added copyright texts to a few places that were missing them
+ o 
 
 Thanks go to these friendly people for their efforts and contributions:
 
- Vlad Dinulescu, Brad House, Steinar H. Gunderson, Yang Tse
+ 
 
 Have fun!
