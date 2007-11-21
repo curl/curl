@@ -4575,8 +4575,8 @@ CURLcode Curl_do(struct connectdata **connp, bool *done)
       }
     }
 
-    if(result == CURLE_OK)
-      /* pre readwrite must be called after the protocol-specific DO function */
+    if((result == CURLE_OK) && *done)
+      /* do_complete must be called after the protocol-specific DO function */
       do_complete(conn);
   }
   return result;
@@ -4588,6 +4588,10 @@ CURLcode Curl_do_more(struct connectdata *conn)
 
   if(conn->handler->do_more)
     result = conn->handler->do_more(conn);
+
+  if(result == CURLE_OK)
+    /* do_complete must be called after the protocol-specific DO function */
+    do_complete(conn);
 
   return result;
 }
