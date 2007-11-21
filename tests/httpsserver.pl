@@ -60,7 +60,7 @@ my $conffile="$path/stunnel.conf";	# stunnel configuration data
 my $certfile="$srcdir/stunnel.pem";	# stunnel server certificate
 my $pidfile="$path/.$proto.pid";	# stunnel process pid file
 
-open(CONF, ">$conffile") || return 1;
+open(CONF, ">$conffile") || exit 1;
 print CONF "
 	CApath=$path
 	cert = $certfile
