@@ -1039,31 +1039,40 @@ sub runsshserver {
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
+        logmsg "TRACESSH:runsshserver: ssh server previously failed to start with pidfile: $pidfile\n";
         return (0,0);
     }
 
     my $pid = checkserver($pidfile);
+    logmsg "TRACESSH:runsshserver: checkserver on pidfile: $pidfile returns pid: $pid\n";
     if($pid > 0) {
         stopserver($pid);
     }
 
     my $flag=$debugprotocol?"-v ":"";
     my $cmd="$perl $srcdir/sshserver.pl $flag-u $USER -l $HOSTIP -d $srcdir $port";
+    logmsg "TRACESSH:runsshserver: calling startnew with cmd: $cmd\n";
     my ($sshpid, $pid2) =
         startnew($cmd, $pidfile,0); # start the server in a new process
+
+    logmsg "TRACESSH:runsshserver: startnew returns sshpid: $sshpid pid2: $pid2\n";
 
     if($sshpid <= 0 || !kill(0, $sshpid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the SSH server\n";
         # failed to talk to it properly. Kill the server and return failure
+        logmsg "TRACESSH:runsshserver: calling stopserver with sshpid: $sshpid pid2: $pid2\n";
         stopserver("$sshpid $pid2");
         $doesntrun{$pidfile} = 1;
+        logmsg "TRACESSH:runsshserver: later dont try to start a server with pidfile: $pidfile\n";
         return (0,0);
     }
 
     if (!verifyserver('ssh',$ip,$port)) {
         logmsg "RUN: SSH server failed verification\n";
+        logmsg "TRACESSH:runsshserver: BUT It seems that we are letting sshpid: $sshpid pid2: $pid2 alive\n";
         $doesntrun{$pidfile} = 1;
+        logmsg "TRACESSH:runsshserver: later dont try to start a server with pidfile: $pidfile\n";
         return (0,0);
     }
     if($verbose) {
@@ -1084,20 +1093,26 @@ sub runsocksserver {
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
+        logmsg "TRACESSH:runsocksserver: socks server previously failed to start with pidfile: $pidfile\n";
         return (0,0);
     }
 
     my $flag=$debugprotocol?"-v ":"";
     my $cmd="ssh -D ${HOSTIP}:$SOCKSPORT -N -F curl_ssh_config ${USER}\@${HOSTIP} -p ${SSHPORT} -vv >log/ssh.log 2>&1";
+    logmsg "TRACESSH:runsocksserver: calling startnew with cmd: $cmd\n";
     my ($sshpid, $pid2) =
         startnew($cmd, $pidfile,1); # start the server in a new process
+
+    logmsg "TRACESSH:runsocksserver: startnew returns sshpid: $sshpid pid2: $pid2\n";
 
     if($sshpid <= 0 || !kill(0, $sshpid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the SOCKS server\n";
         # failed to talk to it properly. Kill the server and return failure
+        logmsg "TRACESSH:runsocksserver: calling stopserver with sshpid: $sshpid pid2: $pid2\n";
         stopserver("$sshpid $pid2");
         $doesntrun{$pidfile} = 1;
+        logmsg "TRACESSH:runsocksserver: later dont try to start a server with pidfile: $pidfile\n";
         return (0,0);
     }
 
@@ -1105,6 +1120,7 @@ sub runsocksserver {
     if (!verifyserver('socks',$ip,$port)) {
         logmsg "RUN: SOCKS server failed verification\n";
         $doesntrun{$pidfile} = 1;
+        logmsg "TRACESSH:runsocksserver: later dont try to start a server with pidfile: $pidfile\n";
         return (0,0);
     }
     if($verbose) {
@@ -2368,6 +2384,7 @@ sub startservers {
         elsif($what eq "sftp" || $what eq "scp" || $what eq "socks4" || $what eq "socks5" ) {
             if(!$run{'ssh'}) {
                 ($pid, $pid2) = runsshserver("", $verbose);
+                printf ("TRACESSH:startservers: runsshserver returns pid: %d pid2: %d\n", $pid, $pid2);
                 if($pid <= 0) {
                     return "failed starting SSH server";
                 }
@@ -2396,6 +2413,7 @@ sub startservers {
                     }
 
                     ($pid, $pid2) = runsocksserver("", $verbose);
+                    printf ("TRACESSH:startservers: runsocksserver returns pid: %d pid2: %d\n", $pid, $pid2);
                     if($pid <= 0) {
                         return "failed starting socks server";
                     }
