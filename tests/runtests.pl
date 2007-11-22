@@ -275,7 +275,7 @@ sub startnew {
     my $pid2;
 
     if(not defined $child) {
-        logmsg "fork() failure detected\n";
+        logmsg "startnew: fork() failure detected\n";
         return (-1,-1);
     }
 
@@ -291,27 +291,31 @@ sub startnew {
         die "error: exec() has returned";
     }
 
-
     # Ugly hack but ssh doesn't support pid files
     if ($fake) {
-        logmsg "$pidfile faked with pid=$child\n" if($verbose);
-        open(OUT, ">$pidfile");
-        print OUT $child . "\n";
-        close(OUT);
-	# could/should do a while connect fails sleep a bit and loop
-	sleep 5;
+        if(open(OUT, ">$pidfile")) {
+            print OUT $child . "\n";
+            close(OUT);
+            logmsg "startnew: $pidfile faked with pid=$child\n" if($verbose);
+        }
+        else {
+            logmsg "startnew: failed to write fake $pidfile with pid=$child\n";
+        }
+        # could/should do a while connect fails sleep a bit and loop
+        sleep 5;
         if (checkdied($child)) {
-            logmsg "startnew: Warning: child process has failed to start\n" if($verbose);
+            logmsg "startnew: child process has failed to start\n";
             return (-1,-1);
         }
     }
+
     my $count=12;
     while($count--) {
         if(-f $pidfile) {
             open(PID, "<$pidfile");
             $pid2 = 0 + <PID>;
             close(PID);
-            if($pid2 && kill(0, $pid2)) {
+            if(($pid2 > 0) && kill(0, $pid2)) {
                 # if $pid2 is valid, then make sure this pid is alive, as
                 # otherwise it is just likely to be the _previous_ pidfile or
                 # similar!
@@ -319,7 +323,7 @@ sub startnew {
             }
         }
         if (checkdied($child)) {
-            logmsg "startnew: Warning: child process has died\n" if($verbose);
+            logmsg "startnew: child process has died, but server might start up\n";
             # We can't just abort waiting for the server with a
             # return (-1,-1);
             # because the server might have forked and could still start
