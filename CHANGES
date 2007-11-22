@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel S (22 Nov 2007)
+- Alessandro Vesely helped me improve the --data-urlencode's syntax, parser
+  and documentation.
+
 Daniel S (21 Nov 2007)
 - While inspecting the Negotiate code, I noticed how the proxy auth was using
   the same state struct as the host auth, so both could never be used at the

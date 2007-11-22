@@ -224,56 +224,62 @@ To create remote directories when using FTP or SFTP, try
 If this option is used several times, the following occurrences make no
 difference.
 .IP "-d/--data <data>"
-(HTTP) Sends the specified data in a POST request to the HTTP server, in a way
-that can emulate as if a user has filled in a HTML form and pressed the submit
-button. Note that the data is sent exactly as specified with no extra
-processing (with all newlines cut off).  The data is expected to be
-\&"url-encoded". This will cause curl to pass the data to the server using the
-content-type application/x-www-form-urlencoded. Compare to \fI-F/--form\fP. If
-this option is used more than once on the same command line, the data pieces
-specified will be merged together with a separating &-letter. Thus, using '-d
-name=daniel -d skill=lousy' would generate a post chunk that looks like
-\&'name=daniel&skill=lousy'.
+(HTTP) Sends the specified data in a POST request to the HTTP server, in the
+same way that a browser does when a user has filled in an HTML form and
+presses the submit button. This will cause curl to pass the data to the server
+using the content-type application/x-www-form-urlencoded.  Compare to
+\fI-F/--form\fP.
+
+\fI-d/--data\fP is the same as \fI--data-ascii\fP. To post data purely binary,
+you should instead use the \fI--data-binary\fP option. To URL encode the value
+of a form field you may use \fI--data-urlencode\fP.
+
+If any of these options is used more than once on the same command line, the
+data pieces specified will be merged together with a separating
+&-letter. Thus, using '-d name=daniel -d skill=lousy' would generate a post
+chunk that looks like \&'name=daniel&skill=lousy'.
 
 If you start the data with the letter @, the rest should be a file name to
 read the data from, or - if you want curl to read the data from stdin.  The
 contents of the file must already be url-encoded. Multiple files can also be
 specified. Posting data from a file named 'foobar' would thus be done with
-\fI--data\fP @foobar".
-
-To post data purely binary, you should instead use the \fI--data-binary\fP
-option.
-
-\fI-d/--data\fP is the same as \fI--data-ascii\fP.
-
-If this option is used several times, the ones following the first will
-append data.
-.IP "--data-ascii <data>"
-(HTTP) This is an alias for the \fI-d/--data\fP option.
-
-If this option is used several times, the ones following the first will
-append data.
+\fI--data @foobar\fP.
 .IP "--data-binary <data>"
-(HTTP) This posts data in a similar manner as \fI--data-ascii\fP does,
-although when using this option the entire context of the posted data is kept
-as-is. If you want to post a binary file without the strip-newlines feature of
-the \fI--data-ascii\fP option, this is for you.
+(HTTP) This posts data exactly as specified with no extra processing
+whatsoever.
 
-If this option is used several times, the ones following the first will
-append data.
+If you start the data with the letter @, the rest should be a filename.  Data
+is posted in a similar manner as \fI--data-ascii\fP does, except that newlines
+are preserved and conversions are never done.
+
+If this option is used several times, the ones following the first will append
+data. As described in \fI-d/--data\fP.
 .IP "--data-urlencode <data>"
 (HTTP) This posts data, similar to the other --data options with the exception
-that this will do partial URL encoding. (Added in 7.17.2)
+that this performs URL encoding. (Added in 7.17.2)
 
-The <data> part should be using one of the two following syntaxes:
+To be CGI compliant, the <data> part should begin with a \fIname\fP followed
+by a separator and a content specification. The <data> part can be passed to
+curl using one of the following syntaxes:
 .RS
+.IP "content"
+This will make curl URL encode the content and pass that on. Just be careful
+so that the content doesn't contain any = or @ letters, as that will then make
+the syntax match one of the other cases below!
+.IP "=content"
+This will make curl URL encode the content and pass that on. The preceding =
+letter is not included in the data.
 .IP "name=content"
 This will make curl URL encode the content part and pass that on. Note that
 the name part is expected to be URL encoded already.
+.IP "@filename"
+This will make curl load data from the given file (including any newlines),
+URL encode that data and pass it on in the POST.
 .IP "name@filename"
-This will make curl load data from the given file, URL encode that data and
-pass it on in the POST like \fIname=urlencoded-data\fP. Note that the name
-is expected to be URL encoded already.
+This will make curl load data from the given file (including any newlines),
+URL encode that data and pass it on in the POST. The name part gets an equal
+sign appended, resulting in \fIname=urlencoded-file-content\fP. Note that the
+name is expected to be URL encoded already.
 .RE
 .IP "--digest"
 (HTTP) Enables HTTP Digest authentication. This is a authentication that
