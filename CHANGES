@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Yang Tse (22 Nov 2007)
+- Provide a socklen_t definition in curl.h for Win32 API build targets
+  which don't have one.
+
 Daniel S (22 Nov 2007)
 - Alessandro Vesely helped me improve the --data-urlencode's syntax, parser
   and documentation.

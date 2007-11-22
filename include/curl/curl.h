@@ -86,6 +86,23 @@ extern "C" {
 typedef void CURL;
 
 /*
+ * Windows build targets have socklen_t definition in
+ * ws2tcpip.h but some versions of ws2tcpip.h do not
+ * have the definition. It seems that when the socklen_t
+ * definition is missing from ws2tcpip.h the definition
+ * for INET_ADDRSTRLEN is also missing, and that when one
+ * definition is present the other one also is available.
+ */
+
+#if defined(WIN32) && !defined(HAVE_SOCKLEN_T)
+#  if ( defined(_MSC_VER) && !defined(INET_ADDRSTRLEN) ) || \
+      (!defined(_MSC_VER) && !defined(_WS2TCPIP_H_) && !defined(_WS2TCPIP_H) )
+#    define socklen_t int
+#    define HAVE_SOCKLEN_T
+#  endif
+#endif
+
+/*
  * Decorate exportable functions for Win32 DLL linking.
  * This avoids using a .def file for building libcurl.dll.
  */
