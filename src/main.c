@@ -2059,7 +2059,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
            */
           char *p = strchr(nextarg, '=');
           long size = 0;
-          int nlen;
+          size_t nlen;
           char is_file;
           if(!p)
             p = strchr(nextarg, '@');
