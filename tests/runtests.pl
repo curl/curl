@@ -86,11 +86,11 @@ my $SSHPORT; # SCP/SFTP
 my $SOCKSPORT; # SOCKS4/5 port
 
 my $srcdir = $ENV{'srcdir'} || '.';
-my $CURL="../src/curl"; # what curl executable to run on the tests
-my $DBGCURL=$CURL; #"../src/.libs/curl";  # alternative for debugging
+my $CURL="$srcdir/../src/curl"; # what curl executable to run on the tests
+my $DBGCURL=$CURL; #"$srcdir/../src/.libs/curl";  # alternative for debugging
 my $LOGDIR="log";
 my $TESTDIR="$srcdir/data";
-my $LIBDIR="./libtest";
+my $LIBDIR="$srcdir/libtest";
 my $SERVERIN="$LOGDIR/server.input"; # what curl sent the server
 my $SERVER2IN="$LOGDIR/server2.input"; # what curl sent the second server
 my $CURLLOG="$LOGDIR/curl.log"; # all command lines run
@@ -1000,7 +1000,7 @@ sub runtftpserver {
     if($ipv6) {
         $flag .="--ipv6 ";
     }
-    $cmd="./server/tftpd --pidfile $pidfile $flag $port";
+    $cmd="$srcdir/server/tftpd --pidfile $pidfile $flag $port";
 
     unlink($pidfile);
 
