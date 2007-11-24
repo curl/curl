@@ -676,10 +676,6 @@ static CURLcode Curl_tftp_done(struct connectdata *conn, CURLcode status,
   (void)status; /* unused */
   (void)premature; /* not used */
 
-#if 0
-  free(conn->data->reqdata.proto.tftp);
-  conn->data->reqdata.proto.tftp = NULL;
-#endif
   Curl_pgrsDone(conn);
 
   return CURLE_OK;

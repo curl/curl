@@ -555,7 +555,7 @@ static bool unescape_elements (void *data, LDAPURLDesc *ludp)
  *
  * <hostname> already known from 'conn->host.name'.
  * <port>     already known from 'conn->remote_port'.
- * extract the rest from 'conn->data->reqdata.path+1'. All fields are optional.
+ * extract the rest from 'conn->data->state.path+1'. All fields are optional.
  * e.g.
  *   ldap://<hostname>:<port>/?<attributes>?<scope>?<filter>
  * yields ludp->lud_dn = "".
@@ -568,8 +568,8 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
   int i;
 
   if(!conn->data ||
-      !conn->data->reqdata.path ||
-      conn->data->reqdata.path[0] != '/' ||
+      !conn->data->state.path ||
+      conn->data->state.path[0] != '/' ||
       !checkprefix(conn->protostr, conn->data->change.url))
     return LDAP_INVALID_SYNTAX;
 
@@ -579,7 +579,7 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
 
   /* parse DN (Distinguished Name).
    */
-  ludp->lud_dn = strdup(conn->data->reqdata.path+1);
+  ludp->lud_dn = strdup(conn->data->state.path+1);
   if(!ludp->lud_dn)
     return LDAP_NO_MEMORY;
 
