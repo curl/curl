@@ -845,7 +845,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   bool dophase_done;
   bool done;
   CURLMcode result = CURLM_OK;
-  struct Curl_transfer_keeper *k;
+  struct SingleRequest *k;
 
   do {
     bool disconnect_conn = FALSE;
@@ -857,7 +857,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
        we're using gets cleaned up and we're left with nothing. */
     if(easy->easy_handle->state.pipe_broke) {
       infof(easy->easy_handle, "Pipe broke: handle 0x%x, url = %s\n",
-            easy, easy->easy_handle->reqdata.path);
+            easy, easy->easy_handle->state.path);
 
       if(easy->easy_handle->state.is_in_pipeline) {
         /* Head back to the CONNECT state */
@@ -1252,7 +1252,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       /* read/write data if it is ready to do so */
       easy->result = Curl_readwrite(easy->easy_conn, &done);
 
-      k = &easy->easy_handle->reqdata.keep;
+      k = &easy->easy_handle->req;
 
       if(!(k->keepon & KEEP_READ)) {
           /* We're done reading */
@@ -1289,14 +1289,14 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         Curl_posttransfer(easy->easy_handle);
 
         /* When we follow redirects, must to go back to the CONNECT state */
-        if(easy->easy_handle->reqdata.newurl || retry) {
+        if(easy->easy_handle->req.newurl || retry) {
           Curl_removeHandleFromPipeline(easy->easy_handle,
                                         easy->easy_conn->recv_pipe);
           if(!retry) {
             /* if the URL is a follow-location and not just a retried request
                then figure out the URL here */
-            newurl = easy->easy_handle->reqdata.newurl;
-            easy->easy_handle->reqdata.newurl = NULL;
+            newurl = easy->easy_handle->req.newurl;
+            easy->easy_handle->req.newurl = NULL;
           }
           easy->result = Curl_done(&easy->easy_conn, CURLE_OK, FALSE);
           if(easy->result == CURLE_OK)

@@ -646,16 +646,36 @@ typedef enum {
 } zlibInitState;
 #endif
 
+#if defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME) || \
+    defined(USE_THREADING_GETADDRINFO)
+struct Curl_async {
+  char *hostname;
+  int port;
+  struct Curl_dns_entry *dns;
+  bool done;  /* set TRUE when the lookup is complete */
+  int status; /* if done is TRUE, this is the status from the callback */
+  void *os_specific;  /* 'struct thread_data' for Windows */
+};
+#endif
+
+#define FIRSTSOCKET     0
+#define SECONDARYSOCKET 1
+
+/* These function pointer types are here only to allow easier typecasting
+   within the source when we need to cast between data pointers (such as NULL)
+   and function pointers. */
+typedef CURLcode (*Curl_do_more_func)(struct connectdata *);
+typedef CURLcode (*Curl_done_func)(struct connectdata *, CURLcode, bool);
+
+
 /*
- * This struct is all the previously local variables from Curl_perform() moved
- * to struct to allow the function to return and get re-invoked better without
- * losing state.
+ * Request specific data in the easy handle (SessionHandle).  Previously,
+ * these members were on the connectdata struct but since a conn struct may
+ * now be shared between different SessionHandles, we store connection-specifc
+ * data here. This struct only keeps stuff that's interesting for *this*
+ * request, as it will be cleared between multiple ones
  */
-
-struct Curl_transfer_keeper {
-
-  /** Values copied over from the HandleData struct each time on init **/
-
+struct SingleRequest {
   curl_off_t size;        /* -1 if unknown at this point */
   curl_off_t *bytecountp; /* return number of bytes read or NULL */
 
@@ -663,17 +683,15 @@ struct Curl_transfer_keeper {
                              -1 means unlimited */
   curl_off_t *writebytecountp; /* return number of bytes written or NULL */
 
-  /** End of HandleData struct copies **/
-
   curl_off_t bytecount;         /* total number of bytes read */
   curl_off_t writebytecount;    /* number of bytes written */
 
-  long headerbytecount;  /* only count received headers */
+  long headerbytecount;         /* only count received headers */
   long deductheadercount; /* this amount of bytes doesn't count when we check
-                          if anything has been transfered at the end of
-                          a connection. We use this counter to make only
-                          a 100 reply (without a following second response
-                          code) result in a CURLE_GOT_NOTHING error code */
+                             if anything has been transfered at the end of a
+                             connection. We use this counter to make only a
+                             100 reply (without a following second response
+                             code) result in a CURLE_GOT_NOTHING error code */
 
   struct timeval start;         /* transfer started at this time */
   struct timeval now;           /* current time */
@@ -733,47 +751,9 @@ struct Curl_transfer_keeper {
   bool ignorebody;  /* we read a response-body but we ignore it! */
   bool ignorecl;    /* This HTTP response has no body so we ignore the Content-
                        Length: header */
-};
-
-#if defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME) || \
-    defined(USE_THREADING_GETADDRINFO)
-struct Curl_async {
-  char *hostname;
-  int port;
-  struct Curl_dns_entry *dns;
-  bool done;  /* set TRUE when the lookup is complete */
-  int status; /* if done is TRUE, this is the status from the callback */
-  void *os_specific;  /* 'struct thread_data' for Windows */
-};
-#endif
-
-#define FIRSTSOCKET     0
-#define SECONDARYSOCKET 1
-
-/* These function pointer types are here only to allow easier typecasting
-   within the source when we need to cast between data pointers (such as NULL)
-   and function pointers. */
-typedef CURLcode (*Curl_do_more_func)(struct connectdata *);
-typedef CURLcode (*Curl_done_func)(struct connectdata *, CURLcode, bool);
-
-
-/*
- * Store's request specific data in the easy handle (SessionHandle).
- * Previously, these members were on the connectdata struct but since
- * a conn struct may now be shared between different SessionHandles,
- * we store connection-specifc data here.
- *
- */
-struct HandleData {
-  char *pathbuffer;/* allocated buffer to store the URL's path part in */
-  char *path;      /* path to use, points to somewhere within the pathbuffer
-                      area */
 
   char *newurl; /* This can only be set if a Location: was in the
                    document headers */
-
-  /* This struct is inited when needed */
-  struct Curl_transfer_keeper keep;
 
   /* 'upload_present' is used to keep a byte counter of how much data there is
      still left in the buffer, aimed for upload. */
@@ -784,40 +764,6 @@ struct HandleData {
       and the 'upload_present' contains the number of bytes available at this
       position */
   char *upload_fromhere;
-
-  curl_off_t size;        /* -1 if unknown at this point */
-  curl_off_t *bytecountp; /* return number of bytes read or NULL */
-
-  curl_off_t maxdownload; /* in bytes, the maximum amount of data to fetch, -1
-                             means unlimited */
-  curl_off_t *writebytecountp; /* return number of bytes written or NULL */
-
-  bool use_range;
-  bool rangestringalloc; /* the range string is malloc()'ed */
-
-  char *range; /* range, if used. See README for detailed specification on
-                  this syntax. */
-  curl_off_t resume_from; /* continue [ftp] transfer from here */
-
-  /* Protocol specific data.
-   *
-   *************************************************************************
-   * Note that this data will be REMOVED after each request, so anything that
-   * should be kept/stored on a per-connection basis and thus live for the
-   * next requst on the same connection MUST be put in the connectdata struct!
-   *************************************************************************/
-  union {
-    struct HTTP *http;
-    struct HTTP *https;  /* alias, just for the sake of being more readable */
-    struct FTP *ftp;
-    void *tftp;        /* private for tftp.c-eyes only */
-    struct FILEPROTO *file;
-    void *telnet;        /* private for telnet.c-eyes only */
-    void *generic;
-    struct SSHPROTO *ssh;
-  } proto;
-  /* current user of this HandleData instance, or NULL */
-  struct connectdata *current_conn;
 };
 
 /*
@@ -1246,6 +1192,36 @@ struct UrlState {
   bool closed; /* set to TRUE when curl_easy_cleanup() has been called on this
                   handle, but it is kept around as mentioned for
                   shared_conn */
+  char *pathbuffer;/* allocated buffer to store the URL's path part in */
+  char *path;      /* path to use, points to somewhere within the pathbuffer
+                      area */
+
+  bool use_range;
+  bool rangestringalloc; /* the range string is malloc()'ed */
+
+  char *range; /* range, if used. See README for detailed specification on
+                  this syntax. */
+  curl_off_t resume_from; /* continue [ftp] transfer from here */
+
+  /* Protocol specific data.
+   *
+   *************************************************************************
+   * Note that this data will be REMOVED after each request, so anything that
+   * should be kept/stored on a per-connection basis and thus live for the
+   * next requst on the same connection MUST be put in the connectdata struct!
+   *************************************************************************/
+  union {
+    struct HTTP *http;
+    struct HTTP *https;  /* alias, just for the sake of being more readable */
+    struct FTP *ftp;
+    void *tftp;        /* private for tftp.c-eyes only */
+    struct FILEPROTO *file;
+    void *telnet;        /* private for telnet.c-eyes only */
+    void *generic;
+    struct SSHPROTO *ssh;
+  } proto;
+  /* current user of this SessionHandle instance, or NULL */
+  struct connectdata *current_conn;
 };
 
 
@@ -1428,7 +1404,7 @@ struct UserDefined {
   bool ftp_create_missing_dirs; /* create directories that don't exist */
   bool ftp_use_port;     /* use the FTP PORT command */
   bool hide_progress;    /* don't use the progress meter */
-  bool http_fail_on_error;  /* fail on HTTP error codes >= 300 */ 
+  bool http_fail_on_error;  /* fail on HTTP error codes >= 300 */
   bool http_follow_location; /* follow HTTP redirects */
   bool http_disable_hostname_check_before_authentication;
   bool include_header;   /* include received protocol headers in data output */
@@ -1496,7 +1472,7 @@ struct SessionHandle {
                                       in multi controlling structure to assist
                                       in removal. */
   struct Curl_share *share;    /* Share, handles global variable mutexing */
-  struct HandleData reqdata;   /* Request-specific data */
+  struct SingleRequest req;    /* Request-specific data */
   struct UserDefined set;      /* values set by the libcurl user */
   struct DynamicStatic change; /* possibly modified userdefined data */
   struct CookieInfo *cookies;  /* the cookies, read from files and servers.

@@ -155,8 +155,8 @@ static CURLcode Curl_dict(struct connectdata *conn, bool *done)
   struct SessionHandle *data=conn->data;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
 
-  char *path = data->reqdata.path;
-  curl_off_t *bytecount = &data->reqdata.keep.bytecount;
+  char *path = data->state.path;
+  curl_off_t *bytecount = &data->req.bytecount;
 
   *done = TRUE; /* unconditionally */
 

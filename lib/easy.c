@@ -528,9 +528,9 @@ void Curl_easy_addmulti(struct SessionHandle *data,
 
 void Curl_easy_initHandleData(struct SessionHandle *data)
 {
-    memset(&data->reqdata, 0, sizeof(struct HandleData));
+    memset(&data->req, 0, sizeof(struct SingleRequest));
 
-    data->reqdata.maxdownload = -1;
+    data->req.maxdownload = -1;
 }
 
 /*
@@ -676,11 +676,11 @@ void curl_easy_reset(CURL *curl)
 {
   struct SessionHandle *data = (struct SessionHandle *)curl;
 
-  Curl_safefree(data->reqdata.pathbuffer);
-  data->reqdata.pathbuffer=NULL;
+  Curl_safefree(data->state.pathbuffer);
+  data->state.pathbuffer=NULL;
 
-  Curl_safefree(data->reqdata.proto.generic);
-  data->reqdata.proto.generic=NULL;
+  Curl_safefree(data->state.proto.generic);
+  data->state.proto.generic=NULL;
 
   /* zero out UserDefined data: */
   Curl_freeset(data);

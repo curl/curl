@@ -109,7 +109,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
   CURLcode result=CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct Curl_chunker *ch = &conn->chunk;
-  struct Curl_transfer_keeper *k = &data->reqdata.keep;
+  struct SingleRequest *k = &data->req;
   size_t piece;
   size_t length = (size_t)datalen;
   size_t *wrote = (size_t *)wrotep;
@@ -217,7 +217,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
       /* Write the data portion available */
 #ifdef HAVE_LIBZ
       switch (conn->data->set.http_ce_skip?
-              IDENTITY : data->reqdata.keep.content_encoding) {
+              IDENTITY : data->req.content_encoding) {
       case IDENTITY:
 #endif
         if(!k->ignorebody) {
@@ -231,16 +231,16 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         break;
 
       case DEFLATE:
-        /* update data->reqdata.keep.str to point to the chunk data. */
-        data->reqdata.keep.str = datap;
-        result = Curl_unencode_deflate_write(conn, &data->reqdata.keep,
+        /* update data->req.keep.str to point to the chunk data. */
+        data->req.str = datap;
+        result = Curl_unencode_deflate_write(conn, &data->req,
                                              (ssize_t)piece);
         break;
 
       case GZIP:
-        /* update data->reqdata.keep.str to point to the chunk data. */
-        data->reqdata.keep.str = datap;
-        result = Curl_unencode_gzip_write(conn, &data->reqdata.keep,
+        /* update data->req.keep.str to point to the chunk data. */
+        data->req.str = datap;
+        result = Curl_unencode_gzip_write(conn, &data->req,
                                           (ssize_t)piece);
         break;
 

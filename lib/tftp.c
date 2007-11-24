@@ -306,7 +306,7 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
     if(data->set.upload) {
       /* If we are uploading, send an WRQ */
       setpacketevent(&state->spacket, TFTP_EVENT_WRQ);
-      state->conn->data->reqdata.upload_fromhere =
+      state->conn->data->req.upload_fromhere =
         (char *)&state->spacket.data[4];
       if(data->set.infilesize != -1)
         Curl_pgrsSetUploadSize(data, data->set.infilesize);
@@ -317,7 +317,7 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
     }
     /* As RFC3617 describes the separator slash is not actually part of the
     file name so we skip the always-present first letter of the path string. */
-    filename = curl_easy_unescape(data, &state->conn->data->reqdata.path[1], 0,
+    filename = curl_easy_unescape(data, &state->conn->data->state.path[1], 0,
                                   NULL);
     if(!filename)
       return CURLE_OUT_OF_MEMORY;
@@ -460,7 +460,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
   int sbytes;
   int rblock;
   CURLcode res = CURLE_OK;
-  struct Curl_transfer_keeper *k = &data->reqdata.keep;
+  struct SingleRequest *k = &data->req;
 
   switch(event) {
 
@@ -613,9 +613,9 @@ static CURLcode Curl_tftp_connect(struct connectdata *conn, bool *done)
      sessionhandle, deal with it */
   Curl_reset_reqproto(conn);
 
-  if(!(state = conn->data->reqdata.proto.tftp)) {
-    state = conn->data->reqdata.proto.tftp = calloc(sizeof(tftp_state_data_t),
-                                                    1);
+  if(!(state = conn->data->state.proto.tftp)) {
+    state = conn->data->state.proto.tftp = calloc(sizeof(tftp_state_data_t),
+                                                  1);
     if(!state)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -706,7 +706,7 @@ static CURLcode Curl_tftp(struct connectdata *conn, bool *done)
   struct Curl_sockaddr_storage fromaddr;
   socklen_t             fromlen;
   int                   check_time = 0;
-  struct Curl_transfer_keeper *k = &data->reqdata.keep;
+  struct SingleRequest *k = &data->req;
 
   *done = TRUE;
 
@@ -718,12 +718,12 @@ static CURLcode Curl_tftp(struct connectdata *conn, bool *done)
   */
   Curl_reset_reqproto(conn);
 
-  if(!data->reqdata.proto.tftp) {
+  if(!data->state.proto.tftp) {
     code = Curl_tftp_connect(conn, done);
     if(code)
       return code;
   }
-  state = (tftp_state_data_t *)data->reqdata.proto.tftp;
+  state = (tftp_state_data_t *)data->state.proto.tftp;
 
   /* Run the TFTP State Machine */
   for(code=tftp_state_machine(state, TFTP_EVENT_INIT);
@@ -878,7 +878,7 @@ static CURLcode Curl_tftp_setup_connection(struct connectdata * conn)
 
   /* TFTP URLs support an extension like ";mode=<typecode>" that
    * we'll try to get now! */
-  type = strstr(data->reqdata.path, ";mode=");
+  type = strstr(data->state.path, ";mode=");
 
   if(!type)
     type = strstr(conn->host.rawalloc, ";mode=");

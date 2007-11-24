@@ -463,12 +463,12 @@ CURLcode Curl_close(struct SessionHandle *data)
     }
   }
 
-  if(data->reqdata.rangestringalloc)
-    free(data->reqdata.range);
+  if(data->state.rangestringalloc)
+    free(data->state.range);
 
   /* Free the pathbuffer */
-  Curl_safefree(data->reqdata.pathbuffer);
-  Curl_safefree(data->reqdata.proto.generic);
+  Curl_safefree(data->state.pathbuffer);
+  Curl_safefree(data->state.proto.generic);
 
   /* Close down all open SSL info and sessions */
   Curl_ssl_close_all(data);
@@ -2166,7 +2166,7 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   }
 
   conn_free(conn);
-  data->reqdata.current_conn = NULL;
+  data->state.current_conn = NULL;
 
   return CURLE_OK;
 }
@@ -2872,7 +2872,7 @@ static CURLcode ParseURLAndFillConnection(struct SessionHandle *data,
   char *at;
   char *tmp;
 
-  char *path = data->reqdata.path;
+  char *path = data->state.path;
 
   /*************************************************************
    * Parse the URL.
@@ -3030,7 +3030,7 @@ static CURLcode ParseURLAndFillConnection(struct SessionHandle *data,
    * So if the URL was A://B/C,
    *   conn->protostr is A
    *   conn->host.name is B
-   *   data->reqdata.path is /C
+   *   data->state.path is /C
    */
 
   return CURLE_OK;
@@ -3049,28 +3049,27 @@ static CURLcode setup_range(struct SessionHandle *data)
    * If we're doing a resumed transfer, we need to setup our stuff
    * properly.
    */
-  struct HandleData *req = &data->reqdata;
+  struct UrlState *s = &data->state;
+  s->resume_from = data->set.set_resume_from;
+  if(s->resume_from || data->set.str[STRING_SET_RANGE]) {
+    if(s->rangestringalloc)
+      free(s->range);
 
-  req->resume_from = data->set.set_resume_from;
-  if(req->resume_from || data->set.str[STRING_SET_RANGE]) {
-    if(req->rangestringalloc)
-      free(req->range);
-
-    if(req->resume_from)
-      req->range = aprintf("%" FORMAT_OFF_T "-", req->resume_from);
+    if(s->resume_from)
+      s->range = aprintf("%" FORMAT_OFF_T "-", s->resume_from);
     else
-      req->range = strdup(data->set.str[STRING_SET_RANGE]);
+      s->range = strdup(data->set.str[STRING_SET_RANGE]);
 
-    req->rangestringalloc = (unsigned char)(req->range?TRUE:FALSE);
+    s->rangestringalloc = (bool)(s->range?TRUE:FALSE);
 
-    if(!req->range)
+    if(!s->range)
       return CURLE_OUT_OF_MEMORY;
 
     /* tell ourselves to fetch this range */
-    req->use_range = TRUE;        /* enable range download */
+    s->use_range = TRUE;        /* enable range download */
   }
   else
-    req->use_range = FALSE; /* disable range download */
+    s->use_range = FALSE; /* disable range download */
 
   return CURLE_OK;
 }
@@ -3539,7 +3538,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     urllen=LEAST_PATH_ALLOC;
 
   /* Free the old buffer */
-  Curl_safefree(data->reqdata.pathbuffer);
+  Curl_safefree(data->state.pathbuffer);
 
   /*
    * We malloc() the buffers below urllen+2 to make room for to possibilities:
@@ -3547,10 +3546,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    * 2 - an extra slash (in case a syntax like "www.host.com?moo" is used)
    */
 
-  data->reqdata.pathbuffer=(char *)malloc(urllen+2);
-  if(NULL == data->reqdata.pathbuffer)
+  data->state.pathbuffer=(char *)malloc(urllen+2);
+  if(NULL == data->state.pathbuffer)
     return CURLE_OUT_OF_MEMORY; /* really bad error */
-  data->reqdata.path = data->reqdata.pathbuffer;
+  data->state.path = data->state.pathbuffer;
 
   conn->host.rawalloc=(char *)malloc(urllen+2);
   if(NULL == conn->host.rawalloc)
@@ -3803,7 +3802,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       char *url;
 
       url = aprintf("%s://%s:%d%s", conn->protostr, conn->host.name,
-                    conn->remote_port, data->reqdata.path);
+                    conn->remote_port, data->state.path);
       if(!url)
         return CURLE_OUT_OF_MEMORY;
 
@@ -4237,7 +4236,7 @@ static CURLcode SetupConnection(struct connectdata *conn,
       return CURLE_OUT_OF_MEMORY;
   }
 
-  data->reqdata.keep.headerbytecount = 0;
+  data->req.headerbytecount = 0;
 
 #ifdef CURL_DO_LINEEND_CONV
   data->state.crlf_conversions = 0; /* reset CRLF conversion counter */
@@ -4393,9 +4392,9 @@ CURLcode Curl_done(struct connectdata **connp,
     conn->writechannel_inuse = FALSE;
 
   /* Cleanup possible redirect junk */
-  if(data->reqdata.newurl) {
-    free(data->reqdata.newurl);
-    data->reqdata.newurl = NULL;
+  if(data->req.newurl) {
+    free(data->req.newurl);
+    data->req.newurl = NULL;
   }
 
   if(conn->dns_entry) {
@@ -4458,14 +4457,13 @@ CURLcode Curl_done(struct connectdata **connp,
 static CURLcode do_init(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
-  struct Curl_transfer_keeper *k = &data->reqdata.keep;
+  struct SingleRequest *k = &data->req;
 
   conn->bits.done = FALSE; /* Curl_done() is not called yet */
   conn->bits.do_more = FALSE; /* by default there's no curl_do_more() to use */
 
-  /* NB: the content encoding software depends on this initialization of
-     Curl_transfer_keeper.*/
-  memset(k, 0, sizeof(struct Curl_transfer_keeper));
+  /* NB: the content encoding software depends on this initialization */
+  Curl_easy_initHandleData(data);
 
   k->start = Curl_tvnow(); /* start time */
   k->now = k->start;   /* current time is now */
@@ -4496,19 +4494,11 @@ static CURLcode do_init(struct connectdata *conn)
  */
 static void do_complete(struct connectdata *conn)
 {
-  struct SessionHandle *data = conn->data;
-  struct Curl_transfer_keeper *k = &data->reqdata.keep;
   conn->bits.chunk=FALSE;
   conn->bits.trailerhdrpresent=FALSE;
 
-  k->maxfd = (conn->sockfd>conn->writesockfd?
-              conn->sockfd:conn->writesockfd)+1;
-
-  k->size = data->reqdata.size;
-  k->maxdownload = data->reqdata.maxdownload;
-  k->bytecountp = data->reqdata.bytecountp;
-  k->writebytecountp = data->reqdata.writebytecountp;
-
+  conn->data->req.maxfd = (conn->sockfd>conn->writesockfd?
+                               conn->sockfd:conn->writesockfd)+1;
 }
 
 CURLcode Curl_do(struct connectdata **connp, bool *done)
@@ -4602,9 +4592,9 @@ CURLcode Curl_do_more(struct connectdata *conn)
 void Curl_reset_reqproto(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
-  if(data->reqdata.proto.generic && data->reqdata.current_conn != conn) {
-    free(data->reqdata.proto.generic);
-    data->reqdata.proto.generic = NULL;
+  if(data->state.proto.generic && data->state.current_conn != conn) {
+    free(data->state.proto.generic);
+    data->state.proto.generic = NULL;
   }
-  data->reqdata.current_conn = conn;
+  data->state.current_conn = conn;
 }

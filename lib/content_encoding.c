@@ -77,7 +77,7 @@ exit_zlib(z_stream *z, zlibInitState *zlib_init, CURLcode result)
 
 static CURLcode
 inflate_stream(struct connectdata *conn,
-               struct Curl_transfer_keeper *k)
+               struct SingleRequest *k)
 {
   int allow_restart = 1;
   z_stream *z = &k->z;          /* zlib state structure */
@@ -152,7 +152,7 @@ inflate_stream(struct connectdata *conn,
 
 CURLcode
 Curl_unencode_deflate_write(struct connectdata *conn,
-                            struct Curl_transfer_keeper *k,
+                            struct SingleRequest *k,
                             ssize_t nread)
 {
   z_stream *z = &k->z;          /* zlib state structure */
@@ -265,7 +265,7 @@ static enum {
 
 CURLcode
 Curl_unencode_gzip_write(struct connectdata *conn,
-                         struct Curl_transfer_keeper *k,
+                         struct SingleRequest *k,
                          ssize_t nread)
 {
   z_stream *z = &k->z;          /* zlib state structure */
