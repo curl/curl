@@ -270,7 +270,7 @@ sub checkdied {
 # Return the pids (yes plural) of the new child process to the parent.
 #
 sub startnew {
-    my ($cmd, $pidfile,$fake)=@_;
+    my ($cmd, $pidfile, $timeout, $fake)=@_;
 
     logmsg "startnew: $cmd\n" if ($verbose);
 
@@ -305,14 +305,14 @@ sub startnew {
             logmsg "startnew: failed to write fake $pidfile with pid=$child\n";
         }
         # could/should do a while connect fails sleep a bit and loop
-        sleep 5;
+        sleep $timeout;
         if (checkdied($child)) {
             logmsg "startnew: child process has failed to start\n";
             return (-1,-1);
         }
     }
 
-    my $count=12;
+    my $count = $timeout;
     while($count--) {
         if(-f $pidfile) {
             open(PID, "<$pidfile");
@@ -735,7 +735,7 @@ sub runhttpserver {
 
     my $cmd="$perl $srcdir/httpserver.pl -p $pidfile $fork$flag $port $ipv6";
     my ($httppid, $pid2) =
-        startnew($cmd, $pidfile,0); # start the server in a new process
+        startnew($cmd, $pidfile, 15, 0); # start the server in a new process
 
     if($httppid <= 0 || !kill(0, $httppid)) {
         # it is NOT alive
@@ -796,7 +796,7 @@ sub runhttpsserver {
     my $flag=$debugprotocol?"-v ":"";
     my $cmd="$perl $srcdir/httpsserver.pl $flag -p https -s \"$stunnel\" -d $srcdir -r $HTTPPORT $HTTPSPORT";
 
-    my ($httpspid, $pid2) = startnew($cmd, $pidfile,0);
+    my ($httpspid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($httpspid <= 0 || !kill(0, $httpspid)) {
         # it is NOT alive
@@ -873,7 +873,7 @@ sub runftpserver {
 
     unlink($pidfile);
 
-    my ($ftppid, $pid2) = startnew($cmd, $pidfile,0);
+    my ($ftppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($ftppid <= 0 || !kill(0, $ftppid)) {
         # it is NOT alive
@@ -934,7 +934,7 @@ sub runftpsserver {
     my $flag=$debugprotocol?"-v ":"";
     my $cmd="$perl $srcdir/httpsserver.pl $flag -p ftps -s \"$stunnel\" -d $srcdir -r $FTPPORT $FTPSPORT";
 
-    my ($ftpspid, $pid2) = startnew($cmd, $pidfile,0);
+    my ($ftpspid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($ftpspid <= 0 || !kill(0, $ftpspid)) {
         # it is NOT alive
@@ -1007,7 +1007,7 @@ sub runtftpserver {
 
     unlink($pidfile);
 
-    my ($tftppid, $pid2) = startnew($cmd, $pidfile,0);
+    my ($tftppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($tftppid <= 0 || !kill(0, $tftppid)) {
         # it is NOT alive
@@ -1060,7 +1060,7 @@ sub runsshserver {
     my $cmd="$perl $srcdir/sshserver.pl $flag-u $USER -l $HOSTIP -d $srcdir $port";
     logmsg "TRACESSH:runsshserver: calling startnew with cmd: $cmd\n";
     my ($sshpid, $pid2) =
-        startnew($cmd, $pidfile,0); # start the server in a new process
+        startnew($cmd, $pidfile, 60, 0); # start the server in a new process
 
     logmsg "TRACESSH:runsshserver: startnew returns sshpid: $sshpid pid2: $pid2\n";
 
@@ -1108,7 +1108,7 @@ sub runsocksserver {
     my $cmd="ssh -D ${HOSTIP}:$SOCKSPORT -N -F curl_ssh_config ${USER}\@${HOSTIP} -p ${SSHPORT} -vv >log/ssh.log 2>&1";
     logmsg "TRACESSH:runsocksserver: calling startnew with cmd: $cmd\n";
     my ($sshpid, $pid2) =
-        startnew($cmd, $pidfile,1); # start the server in a new process
+        startnew($cmd, $pidfile, 15, 1); # start the server in a new process
 
     logmsg "TRACESSH:runsocksserver: startnew returns sshpid: $sshpid pid2: $pid2\n";
 
