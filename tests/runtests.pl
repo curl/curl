@@ -1116,6 +1116,9 @@ sub runsocksserver {
         # it is NOT alive
         logmsg "RUN: failed to start the SOCKS server\n";
         # failed to talk to it properly. Kill the server and return failure
+        logmsg "=== Start of file log/ssh.log\n";
+        displaylogcontent("log/ssh.log");
+        logmsg "=== End of file log/ssh.log\n";
         logmsg "TRACESSH:runsocksserver: calling stopserver with sshpid: $sshpid pid2: $pid2\n";
         stopserver("$sshpid $pid2");
         $doesntrun{$pidfile} = 1;

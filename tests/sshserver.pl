@@ -13,6 +13,7 @@ use strict;
 use File::Spec;
 
 my $verbose=0; # set to 1 for debugging
+my $showfiles=0;
 
 my $port = 8999;        # just our default, weird enough
 my $listenaddr = "127.0.0.1"; # address on which to listen
@@ -136,12 +137,18 @@ chomp($tmpstr = qx($sshd -V 2>&1 | grep OpenSSH));
 if ($tmpstr =~ /OpenSSH[_-](\d+)\.(\d+)(\.(\d+))*/) {
     ($ssh_ver_major, $ssh_ver_minor, $ssh_ver_patch) = ($1, $2, $4);
     $ssh_daemon = 'OpenSSH';
+    if(10 * $ssh_ver_major + $ssh_ver_minor == 36) {
+        $showfiles=1;
+    }
 }
 if(!$ssh_daemon) {
     chomp($tmpstr = qx($sshd -V 2>&1 | grep Sun_SSH));
     if($tmpstr =~ /Sun[_-]SSH[_-](\d+)\.(\d+)/) {
         ($ssh_ver_major, $ssh_ver_minor) = ($1, $2);
         $ssh_daemon = 'SunSSH';
+        if(10 * $ssh_ver_major + $ssh_ver_minor == 11) {
+            $showfiles=1;
+        }
     }
 }
 if ($verbose) {
@@ -320,6 +327,11 @@ elsif ($cmdretval & 127) {
 }
 elsif ($verbose && ($cmdretval >> 8)) {
     printf("$sshd exited with %d \n", $cmdretval >> 8);
+}
+
+if($showfiles) {
+    displayfile("log/sshd.log");
+    displayfile("$conffile");
 }
 
 unlink $conffile;
