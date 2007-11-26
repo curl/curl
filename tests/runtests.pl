@@ -1067,9 +1067,8 @@ sub runsshserver {
     if($sshpid <= 0 || !kill(0, $sshpid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the SSH server\n";
-        # failed to talk to it properly. Kill the server and return failure
-        logmsg "TRACESSH:runsshserver: calling stopserver with sshpid: $sshpid pid2: $pid2\n";
-        stopserver("$sshpid $pid2");
+        logmsg "TRACESSH:runsshserver: calling stopserver with pid2: $pid2\n";
+        stopserver("$pid2");
         $doesntrun{$pidfile} = 1;
         logmsg "TRACESSH:runsshserver: later dont try to start a server with pidfile: $pidfile\n";
         return (0,0);
@@ -1077,7 +1076,9 @@ sub runsshserver {
 
     if (!verifyserver('ssh',$ip,$port)) {
         logmsg "RUN: SSH server failed verification\n";
-        logmsg "TRACESSH:runsshserver: BUT It seems that we are letting sshpid: $sshpid pid2: $pid2 alive\n";
+        # failed to talk to it properly. Kill the server and return failure
+        logmsg "TRACESSH:runsshserver: calling stopserver with sshpid: $sshpid pid2: $pid2\n";
+        stopserver("$sshpid $pid2");
         $doesntrun{$pidfile} = 1;
         logmsg "TRACESSH:runsshserver: later dont try to start a server with pidfile: $pidfile\n";
         return (0,0);
@@ -1115,12 +1116,11 @@ sub runsocksserver {
     if($sshpid <= 0 || !kill(0, $sshpid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the SOCKS server\n";
-        # failed to talk to it properly. Kill the server and return failure
         logmsg "=== Start of file log/ssh.log\n";
         displaylogcontent("log/ssh.log");
         logmsg "=== End of file log/ssh.log\n";
-        logmsg "TRACESSH:runsocksserver: calling stopserver with sshpid: $sshpid pid2: $pid2\n";
-        stopserver("$sshpid $pid2");
+        logmsg "TRACESSH:runsocksserver: calling stopserver with pid2: $pid2\n";
+        stopserver("$pid2");
         $doesntrun{$pidfile} = 1;
         logmsg "TRACESSH:runsocksserver: later dont try to start a server with pidfile: $pidfile\n";
         return (0,0);
@@ -1129,6 +1129,9 @@ sub runsocksserver {
     # Ugly hack but ssh doesn't support pid files
     if (!verifyserver('socks',$ip,$port)) {
         logmsg "RUN: SOCKS server failed verification\n";
+        # failed to talk to it properly. Kill the server and return failure
+        logmsg "TRACESSH:runsocksserver: calling stopserver with sshpid: $sshpid pid2: $pid2\n";
+        stopserver("$sshpid $pid2");
         $doesntrun{$pidfile} = 1;
         logmsg "TRACESSH:runsocksserver: later dont try to start a server with pidfile: $pidfile\n";
         return (0,0);
