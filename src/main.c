@@ -2062,13 +2062,15 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           size_t nlen;
           char is_file;
           if(!p)
+            /* there was no '=' letter, check for a '@' instead */
             p = strchr(nextarg, '@');
           if (p) {
             nlen = p - nextarg; /* length of the name part */
             is_file = *p++; /* pass the separator */
           }
           else {
-            nlen = is_file = -1;
+            /* neither @ nor =, so no name and it isn't a file */
+            nlen = is_file = 0;
             p = nextarg;
           }
           if('@' == is_file) {
@@ -3606,7 +3608,7 @@ static int
 operate(struct Configurable *config, int argc, argv_item_t argv[])
 {
   char errorbuffer[CURL_ERROR_SIZE];
-  char useragent[128]; /* buah, we don't want a larger default user agent */
+  char useragent[256]; /* buah, we don't want a larger default user agent */
   struct ProgressData progressbar;
   struct getout *urlnode;
   struct getout *nextnode;
