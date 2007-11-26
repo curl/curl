@@ -1,0 +1,53 @@
+<testcase>
+<info>
+<keywords>
+--data-urlencode
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 I am cool swsclose
+Server: Cool server/10.0
+Content-Length: 0
+
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+--data-urlencode
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/1015 --data-urlencode "my name is moo[]" --data-urlencode "y e s=s_i_r" --data-urlencode "v_alue@log/1015.txt" --data-urlencode @log/1015.txt 
+</command>
+<file name="log/1015.txt">
+content to _?!#$'|<>
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol nonewline="yes">
+POST /1015 HTTP/1.1
+User-Agent: curl/7.17.2-CVS (i686-pc-linux-gnu) libcurl/7.17.2-CVS OpenSSL/0.9.8g zlib/1.2.3.3 c-ares/1.5.2-CVS libidn/1.1 libssh2/0.19.0-C
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 141
+Content-Type: application/x-www-form-urlencoded
+
+my%20name%20is%20moo%5B%5D&y e s=s%5Fi%5Fr&v_alue=content%20to%20%5F%3F%21%23%24%27%7C%3C%3E%0A&content%20to%20%5F%3F%21%23%24%27%7C%3C%3E%0A
+</protocol>
+</verify>
+</testcase>
