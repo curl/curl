@@ -97,7 +97,9 @@ Library
 
    ... analyzes the URL, it separates the different components and connects to
    the remote host. This may involve using a proxy and/or using SSL. The
-   Curl_gethost() function in lib/hostip.c is used for looking up host names.
+   Curl_resolv() function in lib/hostip.c is used for looking up host names
+   (it does then use the proper underlying method, which may vary between
+   platforms and builds).
 
    When Curl_connect is done, we are connected to the remote site. Then it is
    time to tell the server to get a document/file. Curl_do() arranges this.
@@ -122,17 +124,20 @@ Library
    Curl_Transfer() function (in lib/transfer.c) to setup the transfer and
    returns.
 
-   Starting in 7.9.1, if this DO function fails and the connection is being
-   re-used, libcurl will then close this connection, setup a new connection
-   and re-issue the DO request on that. This is because there is no way to be
-   perfectly sure that we have discovered a dead connection before the DO
-   function and thus we might wrongly be re-using a connection that was closed
-   by the remote peer.
+   If this DO function fails and the connection is being re-used, libcurl will
+   then close this connection, setup a new connection and re-issue the DO
+   request on that. This is because there is no way to be perfectly sure that
+   we have discovered a dead connection before the DO function and thus we
+   might wrongly be re-using a connection that was closed by the remote peer.
+
+   Some time during the DO function, the Curl_setup_transfer() function must
+   be called with some basic info about the upcoming transfer: what socket(s)
+   to read/write and the expected file tranfer sizes (if known).
 
  o Transfer()
 
-   Curl_perform() then calls Transfer() in lib/transfer.c that performs
-   the entire file transfer.
+   Curl_perform() then calls Transfer() in lib/transfer.c that performs the
+   entire file transfer.
 
    During transfer, the progress functions in lib/progress.c are called at a
    frequent interval (or at the user's choice, a specified callback might get
@@ -236,9 +241,8 @@ Library
  URL encoding and decoding, called escaping and unescaping in the source code,
  is found in lib/escape.c.
 
- While transfering data in Transfer() a few functions might get
- used. curl_getdate() in lib/getdate.c is for HTTP date comparisons (and
- more).
+ While transfering data in Transfer() a few functions might get used.
+ curl_getdate() in lib/parsedate.c is for HTTP date comparisons (and more).
 
  lib/getenv.c offers curl_getenv() which is for reading environment variables
  in a neat platform independent way. That's used in the client, but also in
@@ -254,10 +258,6 @@ Library
  A function named curl_version() that returns the full curl version string is
  found in lib/version.c.
 
- If authentication is requested but no password is given, a getpass_r() clone
- exists in lib/getpass.c. libcurl offers a custom callback that can be used
- instead of this, but it doesn't change much to us.
-
 Persistent Connections
 ======================
 
@@ -269,9 +269,11 @@ Persistent Connections
    all the options etc that the library-user may choose.
  o The 'SessionHandle' struct holds the "connection cache" (an array of
    pointers to 'connectdata' structs). There's one connectdata struct
-   allocated for each connection that libcurl knows about.
- o This also enables the 'curl handle' to be reused on subsequent transfers,
-   something that was illegal before libcurl 7.7.
+   allocated for each connection that libcurl knows about. Note that when you
+   use the multi interface, the multi handle will hold the connection cache
+   and not the particular easy handle. This of course to allow all easy handles
+   in a multi stack to be able to share and re-use connections.
+ o This enables the 'curl handle' to be reused on subsequent transfers.
  o When we are about to perform a transfer with curl_easy_perform(), we first
    check for an already existing connection in the cache that we can use,
    otherwise we create a new one and add to the cache. If the cache is full
@@ -281,7 +283,8 @@ Persistent Connections
  o When the transfer operation is complete, we try to leave the connection
    open. Particular options may tell us not to, and protocols may signal
    closure on connections and then we don't keep it open of course.
- o When curl_easy_cleanup() is called, we close all still opened connections.
+ o When curl_easy_cleanup() is called, we close all still opened connections,
+   unless of course the multi interface "owns" the connections.
 
  You do realize that the curl handle must be re-used in order for the
  persistent connections to work.
