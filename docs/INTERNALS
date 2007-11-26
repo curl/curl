@@ -289,6 +289,40 @@ Persistent Connections
  You do realize that the curl handle must be re-used in order for the
  persistent connections to work.
 
+multi interface/non-blocking
+============================
+
+ We make an effort to provide a non-blocking interface to the library, the
+ multi interface. To make that interface work as good as possible, no
+ low-level functions within libcurl must be written to work in a blocking
+ manner.
+
+ One of the primary reasons we introduced c-ares support was to allow the name
+ resolve phase to be perfectly non-blocking as well.
+
+ The ultimate goal is to provide the easy interface simply by wrapping the
+ multi interface functions and thus treat everything internally as the multi
+ interface is the single interface we have.
+
+ The FTP and the SFTP/SCP protocols are thus perfect examples of how we adapt
+ and adjust the code to allow non-blocking operations even on multi-stage
+ protocols. The DICT, TELNET and TFTP are crappy examples and they are subject
+ for rewrite in the future to better fit the libcurl protocol family.
+
+SSL libraries
+=============
+
+ Originally libcurl supported SSLeay for SSL/TLS transports, but that was then
+ extended to its successor OpenSSL but has since also been extended to several
+ other SSL/TLS libraries and we expect and hope to further extend the support
+ in future libcurl versions.
+
+ To deal with this internally in the best way possible, we have a generic SSL
+ function API as provided by the sslgen.[ch] system, and they are the only SSL
+ functions we must use from within libcurl. sslgen is then crafted to use the
+ appropriate lower-level function calls to whatever SSL library that is in
+ use.
+
 Library Symbols
 ===============
  
@@ -311,6 +345,13 @@ Return Codes and Informationals
  function. Those messages are only displayed when the user explicitly asks for
  them. They are best used when revealing information that isn't otherwise
  obvious.
+
+API/ABI
+=======
+
+ We make an effort to not export or show internals or how internals work, as
+ that makes it easier to keep a solid API/ABI over time. See docs/libcurl/ABI
+ for our promise to users.
 
 Client
 ======
