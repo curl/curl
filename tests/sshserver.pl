@@ -290,6 +290,7 @@ CheckHostIP no
 Compression no
 ConnectTimeout 20
 ForwardX11 no
+GatewayPorts no
 HostbasedAuthentication yes
 NoHostAuthenticationForLocalhost no
 # Newer OpenSSH options
