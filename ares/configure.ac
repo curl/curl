@@ -258,9 +258,6 @@ fi
 dnl socket lib?
 AC_CHECK_FUNC(connect, , [ AC_CHECK_LIB(socket, connect) ])
 
-dnl dl lib?
-AC_CHECK_FUNC(dlclose, , [ AC_CHECK_LIB(dl, dlopen) ])
-
 AC_MSG_CHECKING([whether to use libgcc])
 AC_ARG_ENABLE(libgcc,
 AC_HELP_STRING([--enable-libgcc],[use libgcc when linking]),
