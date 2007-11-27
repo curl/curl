@@ -12,7 +12,7 @@ includedir=@includedir@
 
 Name: c-ares
 URL: http://daniel.haxx.se/projects/c-ares/
-Description: asyncronous DNS lookup library
+Description: asynchronous DNS lookup library
 Version: @VERSION@
 Requires: 
 Requires.private: 
