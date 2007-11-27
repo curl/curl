@@ -13,6 +13,8 @@ MSVCFILES = vc/adig/adig.dep vc/adig/adig.dsp vc/vc.dsw vc/ahost/ahost.dep \
 EXTRA_DIST = CHANGES README.cares Makefile.inc adig.c ahost.c $(man_MANS) \
  $(MSVCFILES) AUTHORS config-win32.h RELEASE-NOTES libcares.pc.in
 
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = libcares.pc
 
 VER=-version-info 2:0:0
 # This flag accepts an argument of the form current[:revision[:age]]. So,
