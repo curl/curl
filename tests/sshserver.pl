@@ -12,11 +12,15 @@
 use strict;
 use File::Spec;
 
-my $verbose=0; # set to 1 for debugging
+my $verbose=1; # set to 1 for debugging
 my $showfiles=0;
 
 my $port = 8999;        # just our default, weird enough
 my $listenaddr = "127.0.0.1"; # address on which to listen
+
+my $conffile="curl_sshd_config";    # sshd configuration data
+my $conffile_ssh="curl_ssh_config";    # ssh configuration data
+my $knownhostsfile="curl_client_knownhosts";    # ssh knownhosts file
 
 my $path = `pwd`;
 chomp $path;
@@ -75,6 +79,24 @@ sub displayfile {
     print "=== End of file $file\n";
 }
 
+# Append a string to sshd config file
+sub set_sshd_option {
+    my ($string) = @_;
+    if (open(FILE, ">>$conffile")) {
+        print FILE "$string\n";
+        close FILE;
+    }
+}
+
+# Append a string to ssh config file
+sub set_ssh_option {
+    my ($string) = @_;
+    if (open(FILE, ">>$conffile_ssh")) {
+        print FILE "$string\n";
+        close FILE;
+    }
+}
+
 # Parse options
 do {
     if($ARGV[0] eq "-v") {
@@ -92,10 +114,6 @@ do {
         $port = $1;
     }
 } while(shift @ARGV);
-
-my $conffile="curl_sshd_config";    # sshd configuration data
-my $conffile_ssh="curl_ssh_config";    # ssh configuration data
-my $knownhostsfile="curl_client_knownhosts";    # ssh knownhosts file
 
 # Searching for sshd and sftp-server will be done first
 # in the PATH and afterwards in other common locations.
@@ -133,45 +151,48 @@ my $ssh_daemon;
 my $ssh_ver_major;
 my $ssh_ver_minor;
 my $ssh_ver_patch;
-chomp($tmpstr = qx($sshd -V 2>&1 | grep OpenSSH));
-if ($tmpstr =~ /OpenSSH[_-](\d+)\.(\d+)(\.(\d+))*/) {
-    ($ssh_ver_major, $ssh_ver_minor, $ssh_ver_patch) = ($1, $2, $4);
-    $ssh_daemon = 'OpenSSH';
-    if(10 * $ssh_ver_major + $ssh_ver_minor == 36) {
-        $showfiles=1;
-    }
-}
-if(!$ssh_daemon) {
-    chomp($tmpstr = qx($sshd -V 2>&1 | grep Sun_SSH));
-    if($tmpstr =~ /Sun[_-]SSH[_-](\d+)\.(\d+)/) {
-        ($ssh_ver_major, $ssh_ver_minor) = ($1, $2);
-        $ssh_daemon = 'SunSSH';
-        if(10 * $ssh_ver_major + $ssh_ver_minor == 11) {
+my $ssh_version;
+foreach $tmpstr (qx($sshd -V 2>&1)) {
+    if($tmpstr =~ /OpenSSH[_-](\d+)\.(\d+)(\.(\d+))*/i) {
+        ($ssh_ver_major, $ssh_ver_minor, $ssh_ver_patch) = ($1, $2, $4);
+        $ssh_daemon = 'OpenSSH';
+        $ssh_version = 10 * $ssh_ver_major + $ssh_ver_minor;
+        if($ssh_version == 36) {
             $showfiles=1;
         }
+        last;
     }
-}
-if ($verbose) {
-    print STDERR "ssh_daemon: $ssh_daemon\n";
-    print STDERR "ssh_ver_major: $ssh_ver_major\n";
-    print STDERR "ssh_ver_minor: $ssh_ver_minor\n";
-    print STDERR "ssh_ver_patch: $ssh_ver_patch\n";
+    if($tmpstr =~ /Sun[_-]SSH[_-](\d+)\.(\d+)/i) {
+        ($ssh_ver_major, $ssh_ver_minor) = ($1, $2);
+        $ssh_daemon = 'SunSSH';
+        $ssh_version = 10 * $ssh_ver_major + $ssh_ver_minor;
+        if($ssh_version == 11) {
+            $showfiles=1;
+        }
+        last;
+    }
 }
 
 # Verify minimum SSH daemon version.
 my $sshd_ver_ok = 1;
-if(($ssh_daemon =~ /OpenSSH/) && (10 * $ssh_ver_major + $ssh_ver_minor < 36)) {
-    print "SSH server daemon found is OpenSSH $ssh_ver_major.$ssh_ver_minor\n";
-    $sshd_ver_ok = 0;
-}
-if(($ssh_daemon =~ /SunSSH/) && (10 * $ssh_ver_major + $ssh_ver_minor < 11)) {
-    print "SSH server daemon found is SunSSH $ssh_ver_major.$ssh_ver_minor\n";
-    $sshd_ver_ok = 0;
-}
 if(!$ssh_daemon) {
-    print "SSH server daemon found is not OpenSSH nor SunSSH\n";
-    chomp($tmpstr = qx($sshd -V 2>&1));
-    print "$tmpstr\n";
+    if($verbose) {
+        print STDERR "unsupported SSH server daemon found\n";
+        chomp($tmpstr = qx($sshd -V 2>&1));
+        print STDERR "$tmpstr\n";
+    }
+    $sshd_ver_ok = 0;
+}
+elsif(($ssh_daemon =~ /OpenSSH/) && ($ssh_version < 36)) {
+    if($verbose) {
+        print STDERR "sshd found is $ssh_daemon $ssh_ver_major.$ssh_ver_minor\n";
+    }
+    $sshd_ver_ok = 0;
+}
+elsif(($ssh_daemon =~ /SunSSH/) && ($ssh_version < 11)) {
+    if($verbose) {
+        print STDERR "sshd found is $ssh_daemon $ssh_ver_major.$ssh_ver_minor\n";
+    }
     $sshd_ver_ok = 0;
 }
 if(!$sshd_ver_ok) {
@@ -251,14 +272,6 @@ EOFSSHD
 ;
 close FILE ||  die "Could not close $conffile";
 
-sub set_sshd_option {
-    my ($string) = @_;
-    if (open(FILE, ">>$conffile")) {
-        print FILE "$string\n";
-        close FILE;
-    }
-}
-
 if ($supports_UsePAM) {
     set_sshd_option('UsePAM no');
 }
@@ -288,7 +301,6 @@ Protocol 2
 BatchMode yes
 CheckHostIP no
 Compression no
-ConnectTimeout 20
 ForwardX11 no
 GatewayPorts no
 HostbasedAuthentication yes
@@ -298,6 +310,10 @@ NoHostAuthenticationForLocalhost no
 EOFSSH
 ;
 close SSHFILE ||  die "Could not close $conffile_ssh";
+
+if(($ssh_daemon =~ /OpenSSH/) && ($ssh_version >= 37)) {
+    set_ssh_option('ConnectTimeout 20'); # Supported in OpenSSH 3.7 and later
+}
 
 
 # Verify that sshd supports our configuration file
