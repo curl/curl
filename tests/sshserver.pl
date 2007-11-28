@@ -128,7 +128,7 @@ if (!$sshd) {
     exit 1;
 }
 if ($verbose) {
-    print STDERR "SSH server found at $sshd\n";
+    print "SSH server found is $sshd\n";
 }
 
 my $sftp = searchpath("sftp-server", @spath);
@@ -137,7 +137,7 @@ if (!$sftp) {
     exit 1;
 }
 if ($verbose) {
-    print STDERR "SFTP server plugin found at $sftp\n";
+    print "SFTP server plugin found is $sftp\n";
 }
 
 if ($username eq "root") {
@@ -177,21 +177,21 @@ foreach $tmpstr (qx($sshd -V 2>&1)) {
 my $sshd_ver_ok = 1;
 if(!$ssh_daemon) {
     if($verbose) {
-        print STDERR "unsupported SSH server daemon found\n";
+        print "unsupported SSH server daemon found\n";
         chomp($tmpstr = qx($sshd -V 2>&1));
-        print STDERR "$tmpstr\n";
+        print "$tmpstr\n";
     }
     $sshd_ver_ok = 0;
 }
 elsif(($ssh_daemon =~ /OpenSSH/) && ($ssh_version < 36)) {
     if($verbose) {
-        print STDERR "sshd found is $ssh_daemon $ssh_ver_major.$ssh_ver_minor\n";
+        print "sshd found is $ssh_daemon $ssh_ver_major.$ssh_ver_minor\n";
     }
     $sshd_ver_ok = 0;
 }
 elsif(($ssh_daemon =~ /SunSSH/) && ($ssh_version < 11)) {
     if($verbose) {
-        print STDERR "sshd found is $ssh_daemon $ssh_ver_major.$ssh_ver_minor\n";
+        print "sshd found is $ssh_daemon $ssh_ver_major.$ssh_ver_minor\n";
     }
     $sshd_ver_ok = 0;
 }
@@ -203,7 +203,7 @@ if(!$sshd_ver_ok) {
 # Initialize sshd configuration file for curl's tests.
 open(CONF, ">$conffile") || die "Could not write $conffile";
 print CONF "# This is a generated file!  Do not edit!\n";
-print CONF "# OpenSSH sshd configuration file for curl testing\n";
+print CONF "# $ssh_daemon $ssh_ver_major.$ssh_ver_minor sshd configuration file for curl testing\n";
 close CONF;
 
 # Support for some options might have not been built into sshd.  On some
@@ -219,18 +219,10 @@ sub sshd_supports_opt($) {
 my $supports_UsePAM = sshd_supports_opt('UsePAM');
 my $supports_UseDNS = sshd_supports_opt('UseDNS');
 my $supports_ChReAu = sshd_supports_opt('ChallengeResponseAuthentication');
-if ($verbose) {
-    print STDERR "sshd supports UsePAM: ";
-    print STDERR $supports_UsePAM ? "yes\n" : "no\n";
-    print STDERR "sshd supports UseDNS: ";
-    print STDERR $supports_UseDNS ? "yes\n" : "no\n";
-    print STDERR "sshd supports ChallengeResponseAuthentication: ";
-    print STDERR $supports_ChReAu ? "yes\n" : "no\n";
-}
 
 if (! -e "curl_client_key.pub") {
     if ($verbose) {
-        print STDERR "Generating host and client keys...\n";
+        print "Generating host and client keys...\n";
     }
     # Make sure all files are gone so ssh-keygen doesn't complain
     unlink("curl_host_dsa_key", "curl_client_key","curl_host_dsa_key.pub", "curl_client_key.pub"); 
@@ -318,8 +310,7 @@ if(($ssh_daemon =~ /OpenSSH/) && ($ssh_version >= 37)) {
 
 # Verify that sshd supports our configuration file
 if (system "$sshd -t -f $conffile > log/sshd.log 2>&1") {
-    # This is likely due to missing support for UsePam
-    print "$sshd is too old and is not supported\n";
+    print "sshd configuration file failed verification\n";
     displayfile("log/sshd.log");
     displayfile("$conffile");
     unlink "log/sshd.log";
@@ -328,22 +319,18 @@ if (system "$sshd -t -f $conffile > log/sshd.log 2>&1") {
 }
 
 # Start the server
-my $cmdretval = system "$sshd -e -D -f $conffile > log/sshd.log 2>&1";
-my $cmdnoexec = $!;
-if ($cmdretval == -1) {
-    print "$sshd failed with: \n";
-    print "$cmdnoexec \n";
-    displayfile("log/sshd.log");
-    displayfile("$conffile");
+my $rc = system "$sshd -e -D -f $conffile > log/sshd.log 2>&1";
+if($rc == -1) {
+    print "$sshd failed with: $!\n";
+    $showfiles=1;
 }
-elsif ($cmdretval & 127) {
+elsif($rc & 127) {
     printf("$sshd died with signal %d, and %s coredump.\n",
-           ($cmdretval & 127), ($cmdretval & 128)?"a":"no");
-    displayfile("log/sshd.log");
-    displayfile("$conffile");
+           ($rc & 127), ($rc & 128)?"a":"no");
+    $showfiles=1;
 }
-elsif ($verbose && ($cmdretval >> 8)) {
-    printf("$sshd exited with %d \n", $cmdretval >> 8);
+elsif($verbose && ($rc >> 8)) {
+    printf("$sshd exited with %d \n", $rc >> 8);
 }
 
 if($showfiles) {
@@ -351,6 +338,7 @@ if($showfiles) {
     displayfile("$conffile");
 }
 
+unlink "log/sshd.log";
 unlink $conffile;
 
-exit $cmdretval >> 8;
+exit $rc >> 8;
