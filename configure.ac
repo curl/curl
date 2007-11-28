@@ -903,6 +903,9 @@ dnl **********************************************************************
 dnl Check for GSS-API libraries
 dnl **********************************************************************
 
+dnl check for gss stuff in the /usr as default
+
+GSSAPI_ROOT="/usr"
 AC_ARG_WITH(gssapi-includes,
   AC_HELP_STRING([--with-gssapi-includes=DIR],
                  [Specify location of GSSAPI header]),
@@ -923,6 +926,10 @@ AC_ARG_WITH(gssapi,
   GSSAPI_ROOT="$withval"
   if test x"$GSSAPI_ROOT" != xno; then
     want_gss="yes"
+    if test x"$GSSAPI_ROOT" = xyes; then
+      dnl if yes, then use default root
+      GSSAPI_ROOT="/usr"
+    fi
   fi
 ])
 
@@ -934,11 +941,15 @@ if test x"$want_gss" = xyes; then
   if test -z "$GSSAPI_INCS"; then
      if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
         GSSAPI_INCS=`$GSSAPI_ROOT/bin/krb5-config --cflags gssapi`
+        GSSAPI_LIBS=`$GSSAPI_ROOT/bin/krb5-config --libs gssapi`
      elif test "$GSSAPI_ROOT" != "yes"; then
         GSSAPI_INCS="-I$GSSAPI_ROOT/include"
+        GSSAPI_LIBS="-lgssapi"
      fi
   fi
+
   CPPFLAGS="$CPPFLAGS $GSSAPI_INCS"
+  LIBS="$LIBS $GSSAPI_LIBS"
 
   AC_CHECK_HEADER(gss.h,
     [
