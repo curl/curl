@@ -142,7 +142,11 @@ static void next_lookup(struct addr_query *aquery)
           return;
         case 'f':
           status = file_lookup(&aquery->addr, aquery->family, &host);
-          if (status != ARES_ENOTFOUND)
+
+          /* this status check below previously checked for !ARES_ENOTFOUND,
+             but we should not assume that this single error code is the one
+             that can occur, as that is in fact no longer the case */
+          if (status == ARES_SUCCESS)
             {
               end_aquery(aquery, status, host);
               return;
