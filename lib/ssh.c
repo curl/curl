@@ -1736,7 +1736,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
         break;
       }
       else if(rc) {
-        infof(data, "Failed to get channel EOF\n");
+        infof(data, "Failed to get channel EOF: %d\n", rc);
       }
     }
     state(conn, SSH_SCP_WAIT_CLOSE);
@@ -1749,7 +1749,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
         break;
       }
       else if(rc) {
-        infof(data, "Channel failed to close\n");
+        infof(data, "Channel failed to close: %d\n", rc);
       }
     }
     state(conn, SSH_SCP_CHANNEL_FREE);
