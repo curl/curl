@@ -1570,12 +1570,13 @@ static CURLcode ftp_state_ul_setup(struct connectdata *conn,
                     conn->fread_in);
 
       passed += actuallyread;
-      if(actuallyread != readthisamountnow) {
-        failf(data, "Could only read %" FORMAT_OFF_T
-              " bytes from the input", passed);
+      if((actuallyread <= 0) || (actuallyread > readthisamountnow)) {
+        /* this checks for greater-than only to make sure that the
+           CURL_READFUNC_ABORT return code still aborts */
+        failf(data, "Failed to read data");
         return CURLE_FTP_COULDNT_USE_REST;
       }
-    } while(passed != data->state.resume_from);
+    } while(passed < data->state.resume_from);
 
     /* now, decrease the size of the read */
     if(data->set.infilesize>0) {
