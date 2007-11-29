@@ -12,7 +12,7 @@ Daniel S (29 Nov 2007)
   with a 700+ letter nonce. Previously libcurl only support 127 letter ones
   and now I bumped it to 1023.
 
-- Fixed the resumed FTP upload loop to now require that the read callback
+- Fixed the resumed FTP upload loop to not require that the read callback
   returns a full buffer on each invoke.
 
 Daniel S (25 Nov 2007)
