@@ -1064,6 +1064,13 @@ or similar.
 libcurl does not do a complete ASCII conversion when doing ASCII transfers
 over FTP. This is a known limitation/flaw that nobody has rectified. libcurl
 simply sets the mode to ascii and performs a standard transfer.
+.IP CURLOPT_PROXY_TRANSFER_MODE
+Pass a long. If the value is set to 1 (one), it tells libcurl to set the
+transfer mode (binary or ASCII) for FTP transfers done via an HTTP proxy, by
+appending ;type=a or ;type=i to the URL. Without this setting, or it being
+set to 0 (zero, the default), \fICURLOPT_TRANSFERTEXT\fP has no effect when
+doing FTP via a proxy. Beware that not all proxies support this feature.
+(Added in 7.17.2)
 .IP CURLOPT_CRLF
 Convert Unix newlines to CRLF newlines on transfers.
 .IP CURLOPT_RANGE

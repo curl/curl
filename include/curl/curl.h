@@ -1182,6 +1182,9 @@ typedef enum {
   /* POST volatile input fields. */
   CINIT(COPYPOSTFIELDS, OBJECTPOINT, 165),
 
+  /* set transfer mode (;type=<a|i>) when doing FTP via an HTTP proxy */
+  CINIT(PROXY_TRANSFER_MODE, LONG, 166),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

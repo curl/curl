@@ -2122,22 +2122,24 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       }
     }
     ppath = data->change.url;
-    /* when doing ftp, append ;type=<a|i> if not present */
-    if(checkprefix("ftp://", ppath) || checkprefix("ftps://", ppath)) {
-      char *p = strstr(ppath, ";type=");
-      if(p && p[6] && p[7] == 0) {
-        switch (toupper((int)((unsigned char)p[6]))) {
-        case 'A':
-        case 'D':
-        case 'I':
-          break;
-        default:
-          p = NULL;
+    if (data->set.proxy_transfer_mode) {
+      /* when doing ftp, append ;type=<a|i> if not present */
+      if(checkprefix("ftp://", ppath) || checkprefix("ftps://", ppath)) {
+        char *p = strstr(ppath, ";type=");
+        if(p && p[6] && p[7] == 0) {
+          switch (toupper((int)((unsigned char)p[6]))) {
+          case 'A':
+          case 'D':
+          case 'I':
+            break;
+          default:
+            p = NULL;
+          }
         }
+        if(!p)
+          snprintf(ftp_typecode, sizeof(ftp_typecode), ";type=%c",
+                   data->set.prefer_ascii ? 'a' : 'i');
       }
-      if(!p)
-        snprintf(ftp_typecode, sizeof(ftp_typecode), ";type=%c",
-                 data->set.prefer_ascii ? 'a' : 'i');
     }
   }
   if(HTTPREQ_POST_FORM == httpreq) {

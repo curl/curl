@@ -2,7 +2,7 @@ Curl and libcurl 7.17.2
 
  Public curl releases:         103
  Command line options:         122
- curl_easy_setopt() options:   147
+ curl_easy_setopt() options:   148
  Public functions in libcurl:  55
  Public web site mirrors:      42
  Known libcurl bindings:       36
@@ -11,6 +11,7 @@ Curl and libcurl 7.17.2
 This release includes the following changes:
  
  o --data-urlencode was added
+ o CURLOPT_PROXY_TRANSFER_MODE was added
 
 This release includes the following bugfixes:
 

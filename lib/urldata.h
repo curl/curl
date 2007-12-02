@@ -1439,6 +1439,8 @@ struct UserDefined {
                             content-encoded (chunked, compressed) */
   long new_file_perms;    /* Permissions to use when creating remote files */
   long new_directory_perms; /* Permissions to use when creating remote dirs */
+  bool proxy_transfer_mode; /* set transfer mode (;type=<a|i>) when doing FTP
+                               via an HTTP proxy */
 
   char *str[STRING_LAST]; /* array of strings, pointing to allocated memory */
 };
