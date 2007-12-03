@@ -44,7 +44,7 @@ the
 ^User-Agent:.*
 </strip>
 <protocol>
-PUT ftp://daniel:mysecret@host.com/we/want/208;type=i HTTP/1.1
+PUT ftp://daniel:mysecret@host.com/we/want/208 HTTP/1.1
 Authorization: Basic ZGFuaWVsOm15c2VjcmV0
 Host: host.com:21
 Pragma: no-cache
