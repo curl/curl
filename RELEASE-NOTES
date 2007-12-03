@@ -31,6 +31,7 @@ This release includes the following bugfixes:
  o support HTTP Digest nonces up to 1023 letters
  o resumed ftp upload no longer requires the read callback to return full
    buffers
+ o no longer default-appends ;type= on FTP URLs thru proxies
 
 This release includes the following known bugs:
 
