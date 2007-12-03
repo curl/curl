@@ -8,6 +8,10 @@
 
 
 Daniel S (3 Dec 2007)
+- Now libcurl (built with OpenSSL) doesn't return error anymore if the remote
+  SSL-based server doesn't present a certificate when the request is told to
+  ignore certificate verification anyway.
+
 - Michal Marek introduced CURLOPT_PROXY_TRANSFER_MODE which is used to control
   the appending of the "type=" thing on FTP URLs when they are passed to a
   HTTP proxy. Some proxies just don't like that appending (which is done

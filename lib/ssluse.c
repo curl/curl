@@ -1569,14 +1569,105 @@ Curl_ossl_connect_step2(struct connectdata *conn,
   }
 }
 
-static CURLcode
-Curl_ossl_connect_step3(struct connectdata *conn,
-                  int sockindex)
+/*
+ * Get the server cert, verify it and show it etc, only call failf() if the
+ * 'strict' argument is TRUE as otherwise all this is for informational
+ * purposes only!
+ *
+ * We check certificates to authenticate the server; otherwise we risk
+ * man-in-the-middle attack.
+ */
+static CURLcode servercert(struct connectdata *conn,
+                           struct ssl_connect_data *connssl,
+                           bool strict)
 {
-  CURLcode retcode = CURLE_OK;
-  char * str;
+  CURLcode retcode;
+  char *str;
   long lerr;
   ASN1_TIME *certdate;
+  struct SessionHandle *data = conn->data;
+  connssl->server_cert = SSL_get_peer_certificate(connssl->handle);
+  if(!connssl->server_cert) {
+    if(strict)
+      failf(data, "SSL: couldn't get peer certificate!");
+    return CURLE_PEER_FAILED_VERIFICATION;
+  }
+  infof (data, "Server certificate:\n");
+
+  str = X509_NAME_oneline(X509_get_subject_name(connssl->server_cert),
+                          NULL, 0);
+  if(!str) {
+    if(strict)
+      failf(data, "SSL: couldn't get X509-subject!");
+    X509_free(connssl->server_cert);
+    connssl->server_cert = NULL;
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+  infof(data, "\t subject: %s\n", str);
+  CRYPTO_free(str);
+
+  certdate = X509_get_notBefore(connssl->server_cert);
+  Curl_ASN1_UTCTIME_output(conn, "\t start date: ", certdate);
+
+  certdate = X509_get_notAfter(connssl->server_cert);
+  Curl_ASN1_UTCTIME_output(conn, "\t expire date: ", certdate);
+
+  if(data->set.ssl.verifyhost) {
+    retcode = verifyhost(conn, connssl->server_cert);
+    if(retcode) {
+      X509_free(connssl->server_cert);
+      connssl->server_cert = NULL;
+      return retcode;
+    }
+  }
+
+  str = X509_NAME_oneline(X509_get_issuer_name(connssl->server_cert),
+                          NULL, 0);
+  if(!str) {
+    if(strict)
+      failf(data, "SSL: couldn't get X509-issuer name!");
+    retcode = CURLE_SSL_CONNECT_ERROR;
+  }
+  else {
+    infof(data, "\t issuer: %s\n", str);
+    CRYPTO_free(str);
+
+    /* We could do all sorts of certificate verification stuff here before
+       deallocating the certificate. */
+
+    lerr = data->set.ssl.certverifyresult=
+      SSL_get_verify_result(connssl->handle);
+    if(data->set.ssl.certverifyresult != X509_V_OK) {
+      if(data->set.ssl.verifypeer) {
+        /* We probably never reach this, because SSL_connect() will fail
+           and we return earlyer if verifypeer is set? */
+        if(strict)
+          failf(data, "SSL certificate verify result: %s (%ld)",
+                X509_verify_cert_error_string(lerr), lerr);
+        retcode = CURLE_PEER_FAILED_VERIFICATION;
+      }
+      else
+        infof(data, "SSL certificate verify result: %s (%ld),"
+              " continuing anyway.\n",
+              X509_verify_cert_error_string(lerr), lerr);
+    }
+    else
+      infof(data, "SSL certificate verify ok.\n");
+  }
+
+  X509_free(connssl->server_cert);
+  connssl->server_cert = NULL;
+  connssl->connecting_state = ssl_connect_done;
+
+  return retcode;
+}
+
+
+static CURLcode
+Curl_ossl_connect_step3(struct connectdata *conn,
+                        int sockindex)
+{
+  CURLcode retcode = CURLE_OK;
   void *ssl_sessionid=NULL;
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
@@ -1615,80 +1706,20 @@ Curl_ossl_connect_step3(struct connectdata *conn,
   }
 
 
-  /* Get server's certificate (note: beware of dynamic allocation) - opt */
-  /* major serious hack alert -- we should check certificates
-   * to authenticate the server; otherwise we risk man-in-the-middle
-   * attack
+  /*
+   * We check certificates to authenticate the server; otherwise we risk
+   * man-in-the-middle attack; NEVERTHELESS, if we're told explicitly not to
+   * verify the peer ignore faults and failures from the server cert
+   * operations.
    */
 
-  connssl->server_cert = SSL_get_peer_certificate(connssl->handle);
-  if(!connssl->server_cert) {
-    failf(data, "SSL: couldn't get peer certificate!");
-    return CURLE_PEER_FAILED_VERIFICATION;
-  }
-  infof (data, "Server certificate:\n");
+  if(!data->set.ssl.verifypeer)
+    (void)servercert(conn, connssl, FALSE);
+  else
+    retcode = servercert(conn, connssl, TRUE);
 
-  str = X509_NAME_oneline(X509_get_subject_name(connssl->server_cert),
-                          NULL, 0);
-  if(!str) {
-    failf(data, "SSL: couldn't get X509-subject!");
-    X509_free(connssl->server_cert);
-    connssl->server_cert = NULL;
-    return CURLE_SSL_CONNECT_ERROR;
-  }
-  infof(data, "\t subject: %s\n", str);
-  CRYPTO_free(str);
-
-  certdate = X509_get_notBefore(connssl->server_cert);
-  Curl_ASN1_UTCTIME_output(conn, "\t start date: ", certdate);
-
-  certdate = X509_get_notAfter(connssl->server_cert);
-  Curl_ASN1_UTCTIME_output(conn, "\t expire date: ", certdate);
-
-  if(data->set.ssl.verifyhost) {
-    retcode = verifyhost(conn, connssl->server_cert);
-    if(retcode) {
-      X509_free(connssl->server_cert);
-      connssl->server_cert = NULL;
-      return retcode;
-    }
-  }
-
-  str = X509_NAME_oneline(X509_get_issuer_name(connssl->server_cert),
-                          NULL, 0);
-  if(!str) {
-    failf(data, "SSL: couldn't get X509-issuer name!");
-    retcode = CURLE_SSL_CONNECT_ERROR;
-  }
-  else {
-    infof(data, "\t issuer: %s\n", str);
-    CRYPTO_free(str);
-
-    /* We could do all sorts of certificate verification stuff here before
-       deallocating the certificate. */
-
-    lerr = data->set.ssl.certverifyresult=
-      SSL_get_verify_result(connssl->handle);
-    if(data->set.ssl.certverifyresult != X509_V_OK) {
-      if(data->set.ssl.verifypeer) {
-        /* We probably never reach this, because SSL_connect() will fail
-           and we return earlyer if verifypeer is set? */
-        failf(data, "SSL certificate verify result: %s (%ld)",
-              X509_verify_cert_error_string(lerr), lerr);
-        retcode = CURLE_PEER_FAILED_VERIFICATION;
-      }
-      else
-        infof(data, "SSL certificate verify result: %s (%ld),"
-              " continuing anyway.\n",
-              X509_verify_cert_error_string(lerr), lerr);
-    }
-    else
-      infof(data, "SSL certificate verify ok.\n");
-  }
-
-  X509_free(connssl->server_cert);
-  connssl->server_cert = NULL;
-  connssl->connecting_state = ssl_connect_done;
+  if(CURLE_OK == retcode)
+    connssl->connecting_state = ssl_connect_done;
   return retcode;
 }
 
