@@ -96,6 +96,7 @@ bool
 Curl_clone_ssl_config(struct ssl_config_data *source,
                       struct ssl_config_data *dest)
 {
+  dest->sessionid = source->sessionid;
   dest->verifyhost = source->verifyhost;
   dest->verifypeer = source->verifypeer;
   dest->version = source->version;

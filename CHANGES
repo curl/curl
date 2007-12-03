@@ -8,6 +8,10 @@
 
 
 Daniel S (3 Dec 2007)
+- Bug report #1842029 (http://curl.haxx.se/bug/view.cgi?id=1842029) identified
+  a problem with SSL session caching that prevent it from working, and the
+  associated fix!
+
 - Now libcurl (built with OpenSSL) doesn't return error anymore if the remote
   SSL-based server doesn't present a certificate when the request is told to
   ignore certificate verification anyway.
