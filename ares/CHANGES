@@ -1,5 +1,11 @@
   Changelog for the c-ares project
 
+* December 3 2007 (Daniel Stenberg)
+
+- Brad Spencer fixed the configure script to assume that there's no
+  /dev/urandom when built cross-compiled as then the script cannot check for
+  it.
+
 Version 1.5.1 (Nov 21, 2007)
 
 * November 21 2007 (Daniel Stenberg)
