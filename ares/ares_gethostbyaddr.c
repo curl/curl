@@ -58,8 +58,7 @@ static void addr_callback(void *arg, int status, int timeouts,
 static void end_aquery(struct addr_query *aquery, int status,
                        struct hostent *host);
 static int file_lookup(union ares_addr *addr, int family, struct hostent **host);
-static void ptr_rr_name(char *name, size_t len, int family,
-                        union ares_addr *addr);
+static void ptr_rr_name(char *name, int family, union ares_addr *addr);
 
 void ares_gethostbyaddr(ares_channel channel, const void *addr, int addrlen,
                         int family, ares_host_callback callback, void *arg)
@@ -111,7 +110,7 @@ static void next_lookup(struct addr_query *aquery)
       switch (*p)
         {
         case 'b':
-          ptr_rr_name(name, sizeof(name), aquery->family, &aquery->addr);
+          ptr_rr_name(name, aquery->family, &aquery->addr);
           aquery->remaining_lookups = p + 1;
           ares_query(aquery->channel, name, C_IN, T_PTR, addr_callback,
                      aquery);
@@ -245,21 +244,21 @@ static int file_lookup(union ares_addr *addr, int family, struct hostent **host)
   return status;
 }
 
-static void ptr_rr_name(char *name, size_t len, int family,
-                        union ares_addr *addr) {
+static void ptr_rr_name(char *name, int family, union ares_addr *addr)
+{
   if (family == AF_INET)
     {
-       in_addr_t s_addr = ntohl(addr->addr4.s_addr);
-       int a1 = (int)((s_addr >> 24) & 0xff);
-       int a2 = (int)((s_addr >> 16) & 0xff);
-       int a3 = (int)((s_addr >> 8) & 0xff);
-       int a4 = (int)(s_addr & 0xff);
-       snprintf(name, len, "%d.%d.%d.%d.in-addr.arpa", a4, a3, a2, a1);
+       unsigned long laddr = ntohl(addr->addr4.s_addr);
+       int a1 = (int)((laddr >> 24) & 0xff);
+       int a2 = (int)((laddr >> 16) & 0xff);
+       int a3 = (int)((laddr >> 8) & 0xff);
+       int a4 = (int)(laddr & 0xff);
+       sprintf(name, "%d.%d.%d.%d.in-addr.arpa", a4, a3, a2, a1);
     }
   else
     {
        unsigned char *bytes = (unsigned char *)&addr->addr6.s6_addr;
-       snprintf(name, len,
+       sprintf(name,
                 "%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x."
                 "%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.ip6.arpa",
                 bytes[15]&0xf, bytes[15] >> 4, bytes[14]&0xf, bytes[14] >> 4,
