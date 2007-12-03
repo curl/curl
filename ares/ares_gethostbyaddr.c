@@ -58,6 +58,8 @@ static void addr_callback(void *arg, int status, int timeouts,
 static void end_aquery(struct addr_query *aquery, int status,
                        struct hostent *host);
 static int file_lookup(union ares_addr *addr, int family, struct hostent **host);
+static void ptr_rr_name(char *name, size_t len, int family,
+                        union ares_addr *addr);
 
 void ares_gethostbyaddr(ares_channel channel, const void *addr, int addrlen,
                         int family, ares_host_callback callback, void *arg)
@@ -101,44 +103,18 @@ static void next_lookup(struct addr_query *aquery)
 {
   const char *p;
   char name[128];
-  int a1, a2, a3, a4, status;
+  int status;
   struct hostent *host;
-  unsigned long addr;
 
   for (p = aquery->remaining_lookups; *p; p++)
     {
       switch (*p)
         {
         case 'b':
-          if (aquery->family == AF_INET)
-            {
-              addr = ntohl(aquery->addr.addr4.s_addr);
-              a1 = (int)((addr >> 24) & 0xff);
-              a2 = (int)((addr >> 16) & 0xff);
-              a3 = (int)((addr >> 8) & 0xff);
-              a4 = (int)(addr & 0xff);
-              sprintf(name, "%d.%d.%d.%d.in-addr.arpa", a4, a3, a2, a1);
-              aquery->remaining_lookups = p + 1;
-              ares_query(aquery->channel, name, C_IN, T_PTR, addr_callback,
-                         aquery);
-            }
-          else
-            {
-              unsigned char *bytes;
-              bytes = (unsigned char *)&aquery->addr.addr6.s6_addr;
-              sprintf(name, "%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.ip6.arpa",
-                      bytes[15]&0xf, bytes[15] >> 4, bytes[14]&0xf, bytes[14] >> 4,
-                      bytes[13]&0xf, bytes[13] >> 4, bytes[12]&0xf, bytes[12] >> 4,
-                      bytes[11]&0xf, bytes[11] >> 4, bytes[10]&0xf, bytes[10] >> 4,
-                      bytes[9]&0xf, bytes[9] >> 4, bytes[8]&0xf, bytes[8] >> 4,
-                      bytes[7]&0xf, bytes[7] >> 4, bytes[6]&0xf, bytes[6] >> 4,
-                      bytes[5]&0xf, bytes[5] >> 4, bytes[4]&0xf, bytes[4] >> 4,
-                      bytes[3]&0xf, bytes[3] >> 4, bytes[2]&0xf, bytes[2] >> 4,
-                      bytes[1]&0xf, bytes[1] >> 4, bytes[0]&0xf, bytes[0] >> 4);
-              aquery->remaining_lookups = p + 1;
-              ares_query(aquery->channel, name, C_IN, T_PTR, addr_callback,
-                         aquery);
-            }
+          ptr_rr_name(name, sizeof(name), aquery->family, &aquery->addr);
+          aquery->remaining_lookups = p + 1;
+          ares_query(aquery->channel, name, C_IN, T_PTR, addr_callback,
+                     aquery);
           return;
         case 'f':
           status = file_lookup(&aquery->addr, aquery->family, &host);
@@ -267,4 +243,32 @@ static int file_lookup(union ares_addr *addr, int family, struct hostent **host)
   if (status != ARES_SUCCESS)
     *host = NULL;
   return status;
+}
+
+static void ptr_rr_name(char *name, size_t len, int family,
+                        union ares_addr *addr) {
+  if (family == AF_INET)
+    {
+       in_addr_t s_addr = ntohl(addr->addr4.s_addr);
+       int a1 = (int)((s_addr >> 24) & 0xff);
+       int a2 = (int)((s_addr >> 16) & 0xff);
+       int a3 = (int)((s_addr >> 8) & 0xff);
+       int a4 = (int)(s_addr & 0xff);
+       snprintf(name, len, "%d.%d.%d.%d.in-addr.arpa", a4, a3, a2, a1);
+    }
+  else
+    {
+       unsigned char *bytes = (unsigned char *)&addr->addr6.s6_addr;
+       snprintf(name, len,
+                "%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x."
+                "%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.ip6.arpa",
+                bytes[15]&0xf, bytes[15] >> 4, bytes[14]&0xf, bytes[14] >> 4,
+                bytes[13]&0xf, bytes[13] >> 4, bytes[12]&0xf, bytes[12] >> 4,
+                bytes[11]&0xf, bytes[11] >> 4, bytes[10]&0xf, bytes[10] >> 4,
+                bytes[9]&0xf, bytes[9] >> 4, bytes[8]&0xf, bytes[8] >> 4,
+                bytes[7]&0xf, bytes[7] >> 4, bytes[6]&0xf, bytes[6] >> 4,
+                bytes[5]&0xf, bytes[5] >> 4, bytes[4]&0xf, bytes[4] >> 4,
+                bytes[3]&0xf, bytes[3] >> 4, bytes[2]&0xf, bytes[2] >> 4,
+                bytes[1]&0xf, bytes[1] >> 4, bytes[0]&0xf, bytes[0] >> 4);
+    }
 }

@@ -6,6 +6,8 @@
   /dev/urandom when built cross-compiled as then the script cannot check for
   it.
 
+- Erik Kline cleaned up ares_gethostbyaddr.c:next_lookup() somewhat
+
 Version 1.5.1 (Nov 21, 2007)
 
 * November 21 2007 (Daniel Stenberg)
