@@ -32,6 +32,7 @@ This release includes the following bugfixes:
  o resumed ftp upload no longer requires the read callback to return full
    buffers
  o no longer default-appends ;type= on FTP URLs thru proxies
+ o SSL session id caching
 
 This release includes the following known bugs:
 
