@@ -1581,7 +1581,7 @@ static CURLcode servercert(struct connectdata *conn,
                            struct ssl_connect_data *connssl,
                            bool strict)
 {
-  CURLcode retcode;
+  CURLcode retcode = CURLE_OK;
   char *str;
   long lerr;
   ASN1_TIME *certdate;
