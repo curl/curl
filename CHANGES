@@ -7,6 +7,13 @@
                                   Changelog
 
 
+Daniel S (5 Dec 2007)
+- Spacen Jasset reported a problem with doing POST (with data read with a
+  callback) over a proxy when NTLM is used as auth with the proxy. The bug
+  also concerned Digest and was limited to using callback only. Spacen worked
+  with us to provide a useful patch. I added the test case 547 and 548 to
+  verify two variations of POST over proxy with NTLM.
+
 Daniel S (3 Dec 2007)
 - Ray Pekowski filed bug report #1842029
   (http://curl.haxx.se/bug/view.cgi?id=1842029) in which he identified a
@@ -43,7 +50,7 @@ Daniel S (25 Nov 2007)
 
 Daniel S (24 Nov 2007)
 - Internal rearrangements, so that the previous struct HandleData is no more.
-  It is now known is SingleRequest and the Curl_transfer_keeper struct within
+  It is now known as SingleRequest and the Curl_transfer_keeper struct within
   that was remove entirely. This has the upside that there are less duplicate
   struct members that made it hard to see and remember what struct that was
   used to store what data. The transfer_keeper thing was once stored on a
