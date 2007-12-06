@@ -23,6 +23,10 @@ The timeout value returned in the long \fBtimeout\fP points to, is in number
 of milliseconds at this very moment. If 0, it means you should proceed
 immediately without waiting for anything. If it returns -1, there's no timeout
 at all set.
+
+Note: if libcurl returns a -1 timeout here, it just means that libcurl
+currently has no stored timeout value. You must not wait too long (more than a
+few seconds perhaps) before you call curl_multi_perform() again.
 .SH "RETURN VALUE"
 The standard CURLMcode for multi interface error codes.
 .SH "TYPICAL USAGE"
