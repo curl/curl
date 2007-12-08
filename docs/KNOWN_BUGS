@@ -43,23 +43,9 @@ may have been fixed since this was written!
   Also see #12. According to bug #1556528, even the SOCKS5 connect code does
   not do it right: http://curl.haxx.se/bug/view.cgi?id=1556528,
 
-33. Doing multi-pass HTTP authentication on a non-default port does not work.
-  This happens because the multi-pass code abuses the redirect following code
-  for doing multiple requests, and when we following redirects to an absolute
-  URL we must use the newly specified port and not the one specified in the
-  original URL. A proper fix to this would need to separate the negotiation
-  "redirect" from an actual redirect.
-
-32. (At least on Windows) If libcurl is built with c-ares and there's no DNS
-  server configured in the system, the ares_init() call fails and thus
-  curl_easy_init() fails as well. This causes weird effects for people who use
-  numerical IP addresses only.
-
 31. "curl-config --libs" will include details set in LDFLAGS when configure is
-  run that might be needed only for building libcurl. Similarly, it might
-  include options that perhaps aren't suitable both for static and dynamic
-  linking. Further, curl-config --cflags suffers from the same effects with
-  CFLAGS/CPPFLAGS.
+  run that might be needed only for building libcurl. Further, curl-config
+  --cflags suffers from the same effects with CFLAGS/CPPFLAGS.
 
 30. You need to use -g to the command line tool in order to use RFC2732-style
   IPv6 numerical addresses in URLs.
