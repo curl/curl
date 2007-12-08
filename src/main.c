@@ -3640,6 +3640,9 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
   long retry_sleep;
 
   char *env;
+
+  memset(&heads, 0, sizeof(struct OutStruct));
+
 #ifdef CURLDEBUG
   /* this sends all memory debug messages to a logfile named memdump */
   env = curlx_getenv("CURL_MEMDEBUG");
@@ -4220,7 +4223,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         /* what call to read */
         my_setopt(curl, CURLOPT_READFUNCTION, my_fread);
 
-        /* libcurl 7.12.3 business: */
+        /* the ioctl function is at this point only used to rewind files
+           that are posted when using NTLM etc */
         my_setopt(curl, CURLOPT_IOCTLDATA, &input);
         my_setopt(curl, CURLOPT_IOCTLFUNCTION, my_ioctl);
 
