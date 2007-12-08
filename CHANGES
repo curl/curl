@@ -7,6 +7,23 @@
                                   Changelog
 
 
+Daniel S (8 Dec 2007)
+- Renamed all internal static functions that had Curl_ prefixes to no longer
+  have them. The Curl_ prefix is exclusively used for library internal global
+  symbols. Static functions can be named anything, except for using Curl_ or
+  curl_ prefixes. This is for consistency and for easier maintainance and
+  overview.
+
+- Cleaned up and reformatted the TODO document to look like the FAQ and
+  CONTRIBUTE, which makes nicer web pages
+
+- Added test cases 549 and 550 that test CURLOPT_PROXY_TRANSFER_MODE.
+
+- Added keywords on a bunch of test cases
+
+- Fixed an OOM problem in the curl code that would lead to fclose on a bad
+  handle and crash
+
 Daniel S (5 Dec 2007)
 - Spacen Jasset reported a problem with doing POST (with data read with a
   callback) over a proxy when NTLM is used as auth with the proxy. The bug
