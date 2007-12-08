@@ -670,7 +670,9 @@ and \fICURLOPT_READDATA\fP options but then you must make sure to not set
 \fICURLOPT_POSTFIELDS\fP to anything but NULL. When providing data with a
 callback, you must transmit it using chunked transfer-encoding or you must set
 the size of the data with the \fICURLOPT_POSTFIELDSIZE\fP or
-\fICURLOPT_POSTFIELDSIZE_LARGE\fP option.
+\fICURLOPT_POSTFIELDSIZE_LARGE\fP option. To enable chunked encoding, you
+simply pass in the appropriate Transfer-Encoding header, see the
+post-callback.c example.
 
 You can override the default POST Content-Type: header by setting your own
 with \fICURLOPT_HTTPHEADER\fP.
