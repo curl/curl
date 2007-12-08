@@ -94,10 +94,10 @@
  * Forward declarations.
  */
 
-static CURLcode Curl_file(struct connectdata *, bool *done);
-static CURLcode Curl_file_done(struct connectdata *conn,
-                               CURLcode status, bool premature);
-static CURLcode Curl_file_connect(struct connectdata *conn, bool *done);
+static CURLcode file_do(struct connectdata *, bool *done);
+static CURLcode file_done(struct connectdata *conn,
+                          CURLcode status, bool premature);
+static CURLcode file_connect(struct connectdata *conn, bool *done);
 
 /*
  * FILE scheme handler.
@@ -106,10 +106,10 @@ static CURLcode Curl_file_connect(struct connectdata *conn, bool *done);
 const struct Curl_handler Curl_handler_file = {
   "FILE",                               /* scheme */
   ZERO_NULL,                            /* setup_connection */
-  Curl_file,                            /* do_it */
-  Curl_file_done,                       /* done */
+  file_do,                              /* do_it */
+  file_done,                            /* done */
   ZERO_NULL,                            /* do_more */
-  Curl_file_connect,                    /* connect_it */
+  file_connect,                         /* connect_it */
   ZERO_NULL,                            /* connecting */
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
@@ -120,11 +120,11 @@ const struct Curl_handler Curl_handler_file = {
 };
 
 /*
- * Curl_file_connect() gets called from Curl_protocol_connect() to allow us to
+ * file_connect() gets called from Curl_protocol_connect() to allow us to
  * do protocol-specific actions at connect-time.  We emulate a
  * connect-then-transfer protocol and "connect" to the file here
  */
-static CURLcode Curl_file_connect(struct connectdata *conn, bool *done)
+static CURLcode file_connect(struct connectdata *conn, bool *done)
 {
   struct SessionHandle *data = conn->data;
   char *real_path = curl_easy_unescape(data, data->state.path, 0, NULL);
@@ -201,7 +201,7 @@ static CURLcode Curl_file_connect(struct connectdata *conn, bool *done)
   file->fd = fd;
   if(!data->set.upload && (fd == -1)) {
     failf(data, "Couldn't open file %s", data->state.path);
-    Curl_file_done(conn, CURLE_FILE_COULDNT_READ_FILE, FALSE);
+    file_done(conn, CURLE_FILE_COULDNT_READ_FILE, FALSE);
     return CURLE_FILE_COULDNT_READ_FILE;
   }
   *done = TRUE;
@@ -209,7 +209,7 @@ static CURLcode Curl_file_connect(struct connectdata *conn, bool *done)
   return CURLE_OK;
 }
 
-static CURLcode Curl_file_done(struct connectdata *conn,
+static CURLcode file_done(struct connectdata *conn,
                                CURLcode status, bool premature)
 {
   struct FILEPROTO *file = conn->data->state.proto.file;
@@ -349,14 +349,14 @@ static CURLcode file_upload(struct connectdata *conn)
 }
 
 /*
- * Curl_file() is the protocol-specific function for the do-phase, separated
+ * file_do() is the protocol-specific function for the do-phase, separated
  * from the connect-phase above. Other protocols merely setup the transfer in
  * the do-phase, to have it done in the main transfer loop but since some
  * platforms we support don't allow select()ing etc on file handles (as
  * opposed to sockets) we instead perform the whole do-operation in this
  * function.
  */
-static CURLcode Curl_file(struct connectdata *conn, bool *done)
+static CURLcode file_do(struct connectdata *conn, bool *done)
 {
   /* This implementation ignores the host name in conformance with
      RFC 1738. Only local files (reachable via the standard file system)

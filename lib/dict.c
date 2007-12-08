@@ -87,7 +87,7 @@
  * Forward declarations.
  */
 
-static CURLcode Curl_dict(struct connectdata *conn, bool *done);
+static CURLcode dict_do(struct connectdata *conn, bool *done);
 
 /*
  * DICT protocol handler.
@@ -96,7 +96,7 @@ static CURLcode Curl_dict(struct connectdata *conn, bool *done);
 const struct Curl_handler Curl_handler_dict = {
   "DICT",                               /* scheme */
   ZERO_NULL,                            /* setup_connection */
-  Curl_dict,                            /* do_it */
+  dict_do,                              /* do_it */
   ZERO_NULL,                            /* done */
   ZERO_NULL,                            /* do_more */
   ZERO_NULL,                            /* connect_it */
@@ -142,7 +142,7 @@ static char *unescape_word(struct SessionHandle *data, const char *inp)
   return dictp;
 }
 
-static CURLcode Curl_dict(struct connectdata *conn, bool *done)
+static CURLcode dict_do(struct connectdata *conn, bool *done)
 {
   char *word;
   char *eword;

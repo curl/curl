@@ -310,10 +310,10 @@ CURLcode Curl_sendf(curl_socket_t sockfd, struct connectdata *conn,
   return res;
 }
 
-static ssize_t Curl_plain_send(struct connectdata *conn,
-                               int num,
-                               void *mem,
-                               size_t len)
+static ssize_t send_plain(struct connectdata *conn,
+                          int num,
+                          void *mem,
+                          size_t len)
 {
   curl_socket_t sockfd = conn->sock[num];
   ssize_t bytes_written = swrite(sockfd, mem, len);
@@ -368,7 +368,7 @@ CURLcode Curl_write(struct connectdata *conn,
     /* only TRUE if krb enabled */
     bytes_written = Curl_sec_send(conn, num, mem, len);
   else
-    bytes_written = Curl_plain_send(conn, num, mem, len);
+    bytes_written = send_plain(conn, num, mem, len);
 
   *written = bytes_written;
   retcode = (-1 != bytes_written)?CURLE_OK:CURLE_SEND_ERROR;

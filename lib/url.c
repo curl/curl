@@ -298,7 +298,7 @@ void Curl_freeset(struct SessionHandle * data)
     Curl_safefree(data->set.str[i]);
 }
 
-static CURLcode Curl_setstropt(char **charp, char * s)
+static CURLcode setstropt(char **charp, char * s)
 {
   /* Release the previous storage at `charp' and replace by a dynamic storage
      copy of `s'. Return CURLE_OK or CURLE_OUT_OF_MEMORY. */
@@ -334,7 +334,7 @@ CURLcode Curl_dupset(struct SessionHandle * dst, struct SessionHandle * src)
 
   /* duplicate all strings */
   for(i=(enum dupstring)0; i< STRING_LAST; i++) {
-    r = Curl_setstropt(&dst->set.str[i], src->set.str[i]);
+    r = setstropt(&dst->set.str[i], src->set.str[i]);
     if(r != CURLE_OK)
       break;
   }
@@ -743,7 +743,7 @@ CURLcode Curl_open(struct SessionHandle **curl)
     data->set.ssl.sessionid = TRUE; /* session ID caching enabled by default */
 #ifdef CURL_CA_BUNDLE
     /* This is our preferred CA cert bundle since install time */
-    res = Curl_setstropt(&data->set.str[STRING_SSL_CAFILE],
+    res = setstropt(&data->set.str[STRING_SSL_CAFILE],
                          (char *) CURL_CA_BUNDLE);
 #endif
   }
@@ -786,7 +786,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
   case CURLOPT_SSL_CIPHER_LIST:
     /* set a list of cipher we want to use in the SSL connection */
-    result = Curl_setstropt(&data->set.str[STRING_SSL_CIPHER_LIST],
+    result = setstropt(&data->set.str[STRING_SSL_CIPHER_LIST],
                             va_arg(param, char *));
     break;
 
@@ -795,14 +795,14 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * This is the path name to a file that contains random data to seed
      * the random SSL stuff with. The file is only used for reading.
      */
-    result = Curl_setstropt(&data->set.str[STRING_SSL_RANDOM_FILE],
+    result = setstropt(&data->set.str[STRING_SSL_RANDOM_FILE],
                             va_arg(param, char *));
     break;
   case CURLOPT_EGDSOCKET:
     /*
      * The Entropy Gathering Daemon socket pathname
      */
-    result = Curl_setstropt(&data->set.str[STRING_SSL_EGDSOCKET],
+    result = setstropt(&data->set.str[STRING_SSL_EGDSOCKET],
                             va_arg(param, char *));
     break;
   case CURLOPT_MAXCONNECTS:
@@ -926,7 +926,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Use this file instead of the $HOME/.netrc file
      */
-    result = Curl_setstropt(&data->set.str[STRING_NETRC_FILE],
+    result = setstropt(&data->set.str[STRING_NETRC_FILE],
                             va_arg(param, char *));
     break;
   case CURLOPT_TRANSFERTEXT:
@@ -979,7 +979,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      *
      */
     argptr = va_arg(param, char *);
-    result = Curl_setstropt(&data->set.str[STRING_ENCODING],
+    result = setstropt(&data->set.str[STRING_ENCODING],
                             (argptr && !*argptr)?
                             (char *) ALL_CONTENT_ENCODINGS: argptr);
     break;
@@ -1036,7 +1036,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     argptr = va_arg(param, char *);
 
     if(!argptr || data->set.postfieldsize == -1)
-      result = Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], argptr);
+      result = setstropt(&data->set.str[STRING_COPYPOSTFIELDS], argptr);
     else {
       /*
        *  Check that requested length does not overflow the size_t type.
@@ -1049,7 +1049,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       else {
         char * p;
 
-        (void) Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
+        (void) setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
 
         /* Allocate even when size == 0. This satisfies the need of possible
            later address compare to detect the COPYPOSTFIELDS mode, and
@@ -1079,7 +1079,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      */
     data->set.postfields = va_arg(param, void *);
     /* Release old copied data. */
-    (void) Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
+    (void) setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
     data->set.httpreq = HTTPREQ_POST;
     break;
 
@@ -1093,7 +1093,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     if(data->set.postfieldsize < bigsize &&
         data->set.postfields == data->set.str[STRING_COPYPOSTFIELDS]) {
       /* Previous CURLOPT_COPYPOSTFIELDS is no longer valid. */
-      (void) Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
+      (void) setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
       data->set.postfields = NULL;
       }
 
@@ -1110,7 +1110,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     if(data->set.postfieldsize < bigsize &&
         data->set.postfields == data->set.str[STRING_COPYPOSTFIELDS]) {
       /* Previous CURLOPT_COPYPOSTFIELDS is no longer valid. */
-      (void) Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
+      (void) setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
       data->set.postfields = NULL;
       }
 
@@ -1134,7 +1134,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       free(data->change.referer);
       data->change.referer_alloc = FALSE;
     }
-    result = Curl_setstropt(&data->set.str[STRING_SET_REFERER],
+    result = setstropt(&data->set.str[STRING_SET_REFERER],
                             va_arg(param, char *));
     data->change.referer = data->set.str[STRING_SET_REFERER];
     break;
@@ -1143,7 +1143,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * String to use in the HTTP User-Agent field
      */
-    result = Curl_setstropt(&data->set.str[STRING_USERAGENT],
+    result = setstropt(&data->set.str[STRING_USERAGENT],
                             va_arg(param, char *));
     break;
 
@@ -1166,7 +1166,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Cookie string to send to the remote server in the request.
      */
-    result = Curl_setstropt(&data->set.str[STRING_COOKIE],
+    result = setstropt(&data->set.str[STRING_COOKIE],
                             va_arg(param, char *));
     break;
 
@@ -1192,7 +1192,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Set cookie file name to dump all cookies to when we're done.
      */
-    result = Curl_setstropt(&data->set.str[STRING_COOKIEJAR],
+    result = setstropt(&data->set.str[STRING_COOKIEJAR],
                             va_arg(param, char *));
 
     /*
@@ -1296,7 +1296,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Set a custom string to use as request
      */
-    result = Curl_setstropt(&data->set.str[STRING_CUSTOMREQUEST],
+    result = setstropt(&data->set.str[STRING_CUSTOMREQUEST],
                             va_arg(param, char *));
 
     /* we don't set
@@ -1363,7 +1363,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * Setting it to NULL, means no proxy but allows the environment variables
      * to decide for us.
      */
-    result = Curl_setstropt(&data->set.str[STRING_PROXY],
+    result = setstropt(&data->set.str[STRING_PROXY],
                             va_arg(param, char *));
     break;
 
@@ -1390,7 +1390,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Use FTP PORT, this also specifies which IP address to use
      */
-    result = Curl_setstropt(&data->set.str[STRING_FTPPORT],
+    result = setstropt(&data->set.str[STRING_FTPPORT],
                             va_arg(param, char *));
     data->set.ftp_use_port = (bool)(NULL != data->set.str[STRING_FTPPORT]);
     break;
@@ -1475,7 +1475,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       free(data->change.url);
       data->change.url_alloc=FALSE;
     }
-    result = Curl_setstropt(&data->set.str[STRING_SET_URL],
+    result = setstropt(&data->set.str[STRING_SET_URL],
                             va_arg(param, char *));
     data->change.url = data->set.str[STRING_SET_URL];
     if(data->change.url)
@@ -1514,7 +1514,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * user:password to use in the operation
      */
-    result = Curl_setstropt(&data->set.str[STRING_USERPWD],
+    result = setstropt(&data->set.str[STRING_USERPWD],
                             va_arg(param, char *));
     break;
   case CURLOPT_POSTQUOTE:
@@ -1556,14 +1556,14 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * user:password needed to use the proxy
      */
-    result = Curl_setstropt(&data->set.str[STRING_PROXYUSERPWD],
+    result = setstropt(&data->set.str[STRING_PROXYUSERPWD],
                             va_arg(param, char *));
     break;
   case CURLOPT_RANGE:
     /*
      * What range of the file you want to transfer
      */
-    result = Curl_setstropt(&data->set.str[STRING_SET_RANGE],
+    result = setstropt(&data->set.str[STRING_SET_RANGE],
                             va_arg(param, char *));
     break;
   case CURLOPT_RESUME_FROM:
@@ -1661,35 +1661,35 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * String that holds file name of the SSL certificate to use
      */
-    result = Curl_setstropt(&data->set.str[STRING_CERT],
+    result = setstropt(&data->set.str[STRING_CERT],
                             va_arg(param, char *));
     break;
   case CURLOPT_SSLCERTTYPE:
     /*
      * String that holds file type of the SSL certificate to use
      */
-    result = Curl_setstropt(&data->set.str[STRING_CERT_TYPE],
+    result = setstropt(&data->set.str[STRING_CERT_TYPE],
                             va_arg(param, char *));
     break;
   case CURLOPT_SSLKEY:
     /*
      * String that holds file name of the SSL certificate to use
      */
-    result = Curl_setstropt(&data->set.str[STRING_KEY],
+    result = setstropt(&data->set.str[STRING_KEY],
                             va_arg(param, char *));
     break;
   case CURLOPT_SSLKEYTYPE:
     /*
      * String that holds file type of the SSL certificate to use
      */
-    result = Curl_setstropt(&data->set.str[STRING_KEY_TYPE],
+    result = setstropt(&data->set.str[STRING_KEY_TYPE],
                             va_arg(param, char *));
     break;
   case CURLOPT_KEYPASSWD:
     /*
      * String that holds the SSL or SSH private key password.
      */
-    result = Curl_setstropt(&data->set.str[STRING_KEY_PASSWD],
+    result = setstropt(&data->set.str[STRING_KEY_PASSWD],
                             va_arg(param, char *));
     break;
   case CURLOPT_SSLENGINE:
@@ -1719,7 +1719,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * Set what interface or address/hostname to bind the socket to when
      * performing an operation and thus what from-IP your connection will use.
      */
-    result = Curl_setstropt(&data->set.str[STRING_DEVICE],
+    result = setstropt(&data->set.str[STRING_DEVICE],
                             va_arg(param, char *));
     break;
   case CURLOPT_LOCALPORT:
@@ -1738,7 +1738,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * A string that defines the kerberos security level.
      */
-    result = Curl_setstropt(&data->set.str[STRING_KRB_LEVEL],
+    result = setstropt(&data->set.str[STRING_KRB_LEVEL],
                             va_arg(param, char *));
     data->set.krb = (bool)(NULL != data->set.str[STRING_KRB_LEVEL]);
     break;
@@ -1770,7 +1770,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Set CA info for SSL connection. Specify file name of the CA certificate
      */
-    result = Curl_setstropt(&data->set.str[STRING_SSL_CAFILE],
+    result = setstropt(&data->set.str[STRING_SSL_CAFILE],
                             va_arg(param, char *));
     break;
   case CURLOPT_CAPATH:
@@ -1779,7 +1779,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * certificates which have been prepared using openssl c_rehash utility.
      */
     /* This does not work on windows. */
-    result = Curl_setstropt(&data->set.str[STRING_SSL_CAPATH],
+    result = setstropt(&data->set.str[STRING_SSL_CAPATH],
                             va_arg(param, char *));
     break;
   case CURLOPT_TELNETOPTIONS:
@@ -1929,7 +1929,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       These former 3rd party transfer options are deprecated */
 
   case CURLOPT_FTP_ACCOUNT:
-    result = Curl_setstropt(&data->set.str[STRING_FTP_ACCOUNT],
+    result = setstropt(&data->set.str[STRING_FTP_ACCOUNT],
                             va_arg(param, char *));
     break;
 
@@ -1945,7 +1945,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
 
   case CURLOPT_FTP_ALTERNATIVE_TO_USER:
-    result = Curl_setstropt(&data->set.str[STRING_FTP_ALTERNATIVE_TO_USER],
+    result = setstropt(&data->set.str[STRING_FTP_ALTERNATIVE_TO_USER],
                             va_arg(param, char *));
     break;
 
@@ -1990,7 +1990,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Use this file instead of the $HOME/.ssh/id_dsa.pub file
      */
-    result = Curl_setstropt(&data->set.str[STRING_SSH_PUBLIC_KEY],
+    result = setstropt(&data->set.str[STRING_SSH_PUBLIC_KEY],
                             va_arg(param, char *));
     break;
 
@@ -1998,7 +1998,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Use this file instead of the $HOME/.ssh/id_dsa file
      */
-    result = Curl_setstropt(&data->set.str[STRING_SSH_PRIVATE_KEY],
+    result = setstropt(&data->set.str[STRING_SSH_PRIVATE_KEY],
                             va_arg(param, char *));
     break;
   case CURLOPT_SSH_HOST_PUBLIC_KEY_MD5:
@@ -2006,7 +2006,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * Option to allow for the MD5 of the host public key to be checked
      * for validation purposes.
      */
-    result = Curl_setstropt(&data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5],
+    result = setstropt(&data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5],
                             va_arg(param, char *));
     break;
   case CURLOPT_HTTP_TRANSFER_DECODING:

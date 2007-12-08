@@ -850,9 +850,9 @@ int Curl_ossl_close_all(struct SessionHandle *data)
   return 0;
 }
 
-static int Curl_ASN1_UTCTIME_output(struct connectdata *conn,
-                                    const char *prefix,
-                                    const ASN1_UTCTIME *tm)
+static int asn1_output(struct connectdata *conn,
+                       const char *prefix,
+                       const ASN1_UTCTIME *tm)
 {
   const char *asn1_string;
   int gmt=FALSE;
@@ -1256,8 +1256,8 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
 /* ====================================================== */
 
 static CURLcode
-Curl_ossl_connect_step1(struct connectdata *conn,
-                        int sockindex)
+ossl_connect_step1(struct connectdata *conn,
+                   int sockindex)
 {
   CURLcode retcode = CURLE_OK;
 
@@ -1443,8 +1443,8 @@ Curl_ossl_connect_step1(struct connectdata *conn,
 }
 
 static CURLcode
-Curl_ossl_connect_step2(struct connectdata *conn,
-                        int sockindex, long *timeout_ms)
+ossl_connect_step2(struct connectdata *conn,
+                   int sockindex, long *timeout_ms)
 {
   struct SessionHandle *data = conn->data;
   int err;
@@ -1607,10 +1607,10 @@ static CURLcode servercert(struct connectdata *conn,
   CRYPTO_free(str);
 
   certdate = X509_get_notBefore(connssl->server_cert);
-  Curl_ASN1_UTCTIME_output(conn, "\t start date: ", certdate);
+  asn1_output(conn, "\t start date: ", certdate);
 
   certdate = X509_get_notAfter(connssl->server_cert);
-  Curl_ASN1_UTCTIME_output(conn, "\t expire date: ", certdate);
+  asn1_output(conn, "\t expire date: ", certdate);
 
   if(data->set.ssl.verifyhost) {
     retcode = verifyhost(conn, connssl->server_cert);
@@ -1664,8 +1664,8 @@ static CURLcode servercert(struct connectdata *conn,
 
 
 static CURLcode
-Curl_ossl_connect_step3(struct connectdata *conn,
-                        int sockindex)
+ossl_connect_step3(struct connectdata *conn,
+                   int sockindex)
 {
   CURLcode retcode = CURLE_OK;
   void *ssl_sessionid=NULL;
@@ -1724,10 +1724,10 @@ Curl_ossl_connect_step3(struct connectdata *conn,
 }
 
 static CURLcode
-Curl_ossl_connect_common(struct connectdata *conn,
-                         int sockindex,
-                         bool nonblocking,
-                         bool *done)
+ossl_connect_common(struct connectdata *conn,
+                    int sockindex,
+                    bool nonblocking,
+                    bool *done)
 {
   CURLcode retcode;
   struct SessionHandle *data = conn->data;
@@ -1736,7 +1736,7 @@ Curl_ossl_connect_common(struct connectdata *conn,
   long timeout_ms;
 
   if(ssl_connect_1==connssl->connecting_state) {
-    retcode = Curl_ossl_connect_step1(conn, sockindex);
+    retcode = ossl_connect_step1(conn, sockindex);
     if(retcode)
       return retcode;
   }
@@ -1780,7 +1780,7 @@ Curl_ossl_connect_common(struct connectdata *conn,
     }
 
     /* get the timeout from step2 to avoid computing it twice. */
-    retcode = Curl_ossl_connect_step2(conn, sockindex, &timeout_ms);
+    retcode = ossl_connect_step2(conn, sockindex, &timeout_ms);
     if(retcode)
       return retcode;
 
@@ -1788,7 +1788,7 @@ Curl_ossl_connect_common(struct connectdata *conn,
 
 
   if(ssl_connect_3==connssl->connecting_state) {
-    retcode = Curl_ossl_connect_step3(conn, sockindex);
+    retcode = ossl_connect_step3(conn, sockindex);
     if(retcode)
       return retcode;
   }
@@ -1811,7 +1811,7 @@ Curl_ossl_connect_nonblocking(struct connectdata *conn,
                               int sockindex,
                               bool *done)
 {
-  return Curl_ossl_connect_common(conn, sockindex, TRUE, done);
+  return ossl_connect_common(conn, sockindex, TRUE, done);
 }
 
 CURLcode
@@ -1821,7 +1821,7 @@ Curl_ossl_connect(struct connectdata *conn,
   CURLcode retcode;
   bool done = FALSE;
 
-  retcode = Curl_ossl_connect_common(conn, sockindex, FALSE, &done);
+  retcode = ossl_connect_common(conn, sockindex, FALSE, &done);
   if(retcode)
     return retcode;
 

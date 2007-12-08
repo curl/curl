@@ -109,9 +109,9 @@
  * Forward declarations.
  */
 
-static CURLcode Curl_https_connecting(struct connectdata *conn, bool *done);
+static CURLcode https_connecting(struct connectdata *conn, bool *done);
 #ifdef USE_SSL
-static int Curl_https_getsock(struct connectdata *conn,
+static int https_getsock(struct connectdata *conn,
                               curl_socket_t *socks,
                               int numsocks);
 #endif
@@ -146,9 +146,9 @@ const struct Curl_handler Curl_handler_https = {
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
   Curl_http_connect,                    /* connect_it */
-  Curl_https_connecting,                /* connecting */
+  https_connecting,                /* connecting */
   ZERO_NULL,                            /* doing */
-  Curl_https_getsock,                   /* proto_getsock */
+  https_getsock,                   /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
   ZERO_NULL,                            /* disconnect */
   PORT_HTTPS,                           /* defport */
@@ -176,12 +176,12 @@ static char *checkheaders(struct SessionHandle *data, const char *thisheader)
 }
 
 /*
- * Curl_output_basic() sets up an Authorization: header (or the proxy version)
+ * http_output_basic() sets up an Authorization: header (or the proxy version)
  * for HTTP Basic authentication.
  *
  * Returns CURLcode.
  */
-static CURLcode Curl_output_basic(struct connectdata *conn, bool proxy)
+static CURLcode http_output_basic(struct connectdata *conn, bool proxy)
 {
   char *authorization;
   struct SessionHandle *data=conn->data;
@@ -435,11 +435,11 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
  * @returns CURLcode
  */
 static CURLcode
-Curl_http_output_auth(struct connectdata *conn,
-                      const char *request,
-                      const char *path,
-                      bool proxytunnel) /* TRUE if this is the request setting
-                                           up the proxy tunnel */
+http_output_auth(struct connectdata *conn,
+                 const char *request,
+                 const char *path,
+                 bool proxytunnel) /* TRUE if this is the request setting
+                                      up the proxy tunnel */
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
@@ -502,11 +502,11 @@ Curl_http_output_auth(struct connectdata *conn,
         if(conn->bits.proxy_user_passwd &&
            !checkheaders(data, "Proxy-authorization:")) {
           auth="Basic";
-          result = Curl_output_basic(conn, TRUE);
+          result = http_output_basic(conn, TRUE);
           if(result)
             return result;
         }
-        /* NOTE: Curl_output_basic() should set 'done' TRUE, as the other auth
+        /* NOTE: http_output_basic() should set 'done' TRUE, as the other auth
            functions work that way */
         authproxy->done = TRUE;
       }
@@ -582,7 +582,7 @@ Curl_http_output_auth(struct connectdata *conn,
           if(conn->bits.user_passwd &&
              !checkheaders(data, "Authorization:")) {
             auth="Basic";
-            result = Curl_output_basic(conn, FALSE);
+            result = http_output_basic(conn, FALSE);
             if(result)
               return result;
           }
@@ -1264,7 +1264,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
       }
 
       /* Setup the proxy-authorization header, if any */
-      result = Curl_http_output_auth(conn, (char *)"CONNECT", host_port, TRUE);
+      result = http_output_auth(conn, (char *)"CONNECT", host_port, TRUE);
 
       if(CURLE_OK == result) {
         char *host=(char *)"";
@@ -1682,7 +1682,7 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
   if(conn->protocol & PROT_HTTPS) {
     /* perform SSL initialization */
     if(data->state.used_interface == Curl_if_multi) {
-      result = Curl_https_connecting(conn, done);
+      result = https_connecting(conn, done);
       if(result)
         return result;
     }
@@ -1701,7 +1701,7 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
   return CURLE_OK;
 }
 
-static CURLcode Curl_https_connecting(struct connectdata *conn, bool *done)
+static CURLcode https_connecting(struct connectdata *conn, bool *done)
 {
   CURLcode result;
   DEBUGASSERT((conn) && (conn->protocol & PROT_HTTPS));
@@ -1717,7 +1717,7 @@ static CURLcode Curl_https_connecting(struct connectdata *conn, bool *done)
 #ifdef USE_SSLEAY
 /* This function is OpenSSL-specific. It should be made to query the generic
    SSL layer instead. */
-static int Curl_https_getsock(struct connectdata *conn,
+static int https_getsock(struct connectdata *conn,
                               curl_socket_t *socks,
                               int numsocks)
 {
@@ -1742,7 +1742,7 @@ static int Curl_https_getsock(struct connectdata *conn,
 }
 #else
 #ifdef USE_GNUTLS
-int Curl_https_getsock(struct connectdata *conn,
+int https_getsock(struct connectdata *conn,
                        curl_socket_t *socks,
                        int numsocks)
 {
@@ -1753,7 +1753,7 @@ int Curl_https_getsock(struct connectdata *conn,
 }
 #else
 #ifdef USE_NSS
-int Curl_https_getsock(struct connectdata *conn,
+int https_getsock(struct connectdata *conn,
                        curl_socket_t *socks,
                        int numsocks)
 {
@@ -1764,7 +1764,7 @@ int Curl_https_getsock(struct connectdata *conn,
 }
 #else
 #ifdef USE_QSOSSL
-int Curl_https_getsock(struct connectdata *conn,
+int https_getsock(struct connectdata *conn,
                        curl_socket_t *socks,
                        int numsocks)
 {
@@ -1979,7 +1979,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   }
 
   /* setup the authentication headers */
-  result = Curl_http_output_auth(conn, request, ppath, FALSE);
+  result = http_output_auth(conn, request, ppath, FALSE);
   if(result)
     return result;
 

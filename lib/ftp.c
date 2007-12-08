@@ -134,21 +134,21 @@ static CURLcode ftp_nb_type(struct connectdata *conn,
                             bool ascii, ftpstate newstate);
 static int ftp_need_type(struct connectdata *conn,
                          bool ascii);
-static CURLcode Curl_ftp(struct connectdata *conn, bool *done);
-static CURLcode Curl_ftp_done(struct connectdata *conn,
+static CURLcode ftp_do(struct connectdata *conn, bool *done);
+static CURLcode ftp_done(struct connectdata *conn,
                               CURLcode, bool premature);
-static CURLcode Curl_ftp_connect(struct connectdata *conn, bool *done);
-static CURLcode Curl_ftp_disconnect(struct connectdata *conn);
-static CURLcode Curl_ftp_nextconnect(struct connectdata *conn);
-static CURLcode Curl_ftp_multi_statemach(struct connectdata *conn, bool *done);
-static int Curl_ftp_getsock(struct connectdata *conn,
+static CURLcode ftp_connect(struct connectdata *conn, bool *done);
+static CURLcode ftp_disconnect(struct connectdata *conn);
+static CURLcode ftp_nextconnect(struct connectdata *conn);
+static CURLcode ftp_multi_statemach(struct connectdata *conn, bool *done);
+static int ftp_getsock(struct connectdata *conn,
                             curl_socket_t *socks,
                             int numsocks);
-static CURLcode Curl_ftp_doing(struct connectdata *conn,
+static CURLcode ftp_doing(struct connectdata *conn,
                                bool *dophase_done);
-static CURLcode Curl_ftp_setup_connection(struct connectdata * conn);
+static CURLcode ftp_setup_connection(struct connectdata * conn);
 #ifdef USE_SSL
-static CURLcode Curl_ftps_setup_connection(struct connectdata * conn);
+static CURLcode ftps_setup_connection(struct connectdata * conn);
 #endif
 
 /* easy-to-use macro: */
@@ -164,16 +164,16 @@ static CURLcode Curl_ftps_setup_connection(struct connectdata * conn);
 
 const struct Curl_handler Curl_handler_ftp = {
   "FTP",                                /* scheme */
-  Curl_ftp_setup_connection,            /* setup_connection */
-  Curl_ftp,                             /* do_it */
-  Curl_ftp_done,                        /* done */
-  Curl_ftp_nextconnect,                 /* do_more */
-  Curl_ftp_connect,                     /* connect_it */
-  Curl_ftp_multi_statemach,             /* connecting */
-  Curl_ftp_doing,                       /* doing */
-  Curl_ftp_getsock,                     /* proto_getsock */
-  Curl_ftp_getsock,                     /* doing_getsock */
-  Curl_ftp_disconnect,                  /* disconnect */
+  ftp_setup_connection,            /* setup_connection */
+  ftp_do,                          /* do_it */
+  ftp_done,                        /* done */
+  ftp_nextconnect,                 /* do_more */
+  ftp_connect,                     /* connect_it */
+  ftp_multi_statemach,             /* connecting */
+  ftp_doing,                       /* doing */
+  ftp_getsock,                     /* proto_getsock */
+  ftp_getsock,                     /* doing_getsock */
+  ftp_disconnect,                  /* disconnect */
   PORT_FTP,                             /* defport */
   PROT_FTP                              /* protocol */
 };
@@ -186,16 +186,16 @@ const struct Curl_handler Curl_handler_ftp = {
 
 const struct Curl_handler Curl_handler_ftps = {
   "FTPS",                               /* scheme */
-  Curl_ftps_setup_connection,           /* setup_connection */
-  Curl_ftp,                             /* do_it */
-  Curl_ftp_done,                        /* done */
-  Curl_ftp_nextconnect,                 /* do_more */
-  Curl_ftp_connect,                     /* connect_it */
-  Curl_ftp_multi_statemach,             /* connecting */
-  Curl_ftp_doing,                       /* doing */
-  Curl_ftp_getsock,                     /* proto_getsock */
-  Curl_ftp_getsock,                     /* doing_getsock */
-  Curl_ftp_disconnect,                  /* disconnect */
+  ftps_setup_connection,           /* setup_connection */
+  ftp_do,                          /* do_it */
+  ftp_done,                        /* done */
+  ftp_nextconnect,                 /* do_more */
+  ftp_connect,                     /* connect_it */
+  ftp_multi_statemach,             /* connecting */
+  ftp_doing,                       /* doing */
+  ftp_getsock,                     /* proto_getsock */
+  ftp_getsock,                     /* doing_getsock */
+  ftp_disconnect,                  /* disconnect */
   PORT_FTPS,                            /* defport */
   PROT_FTP | PROT_FTPS | PROT_SSL       /* protocol */
 };
@@ -810,7 +810,7 @@ static CURLcode ftp_state_pwd(struct connectdata *conn)
 }
 
 /* For the FTP "protocol connect" and "doing" phases only */
-static int Curl_ftp_getsock(struct connectdata *conn,
+static int ftp_getsock(struct connectdata *conn,
                             curl_socket_t *socks,
                             int numsocks)
 {
@@ -1589,7 +1589,7 @@ static CURLcode ftp_state_ul_setup(struct connectdata *conn,
         result=Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
 
         /* Set ->transfer so that we won't get any error in
-         * Curl_ftp_done() because we didn't transfer anything! */
+         * ftp_done() because we didn't transfer anything! */
         ftp->transfer = FTPTRANSFER_NONE;
 
         state(conn, FTP_STOP);
@@ -2148,7 +2148,7 @@ static CURLcode ftp_state_post_retr_size(struct connectdata *conn,
       result = Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
       infof(data, "File already completely downloaded\n");
 
-      /* Set ->transfer so that we won't get any error in Curl_ftp_done()
+      /* Set ->transfer so that we won't get any error in ftp_done()
        * because we didn't transfer the any file */
       ftp->transfer = FTPTRANSFER_NONE;
       state(conn, FTP_STOP);
@@ -2930,7 +2930,7 @@ static long ftp_state_timeout(struct connectdata *conn)
 
 
 /* called repeatedly until done from multi.c */
-static CURLcode Curl_ftp_multi_statemach(struct connectdata *conn,
+static CURLcode ftp_multi_statemach(struct connectdata *conn,
                                          bool *done)
 {
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
@@ -3032,14 +3032,14 @@ static CURLcode ftp_init(struct connectdata *conn)
 }
 
 /*
- * Curl_ftp_connect() should do everything that is to be considered a part of
+ * ftp_connect() should do everything that is to be considered a part of
  * the connection phase.
  *
  * The variable 'done' points to will be TRUE if the protocol-layer connect
  * phase is done when this function returns, or FALSE is not. When called as
  * a part of the easy interface, it will always be TRUE.
  */
-static CURLcode Curl_ftp_connect(struct connectdata *conn,
+static CURLcode ftp_connect(struct connectdata *conn,
                                  bool *done) /* see description above */
 {
   CURLcode result;
@@ -3107,7 +3107,7 @@ static CURLcode Curl_ftp_connect(struct connectdata *conn,
   ftpc->response = Curl_tvnow(); /* start response time-out now! */
 
   if(data->state.used_interface == Curl_if_multi)
-    result = Curl_ftp_multi_statemach(conn, done);
+    result = ftp_multi_statemach(conn, done);
   else {
     result = ftp_easy_statemach(conn);
     if(!result)
@@ -3119,14 +3119,14 @@ static CURLcode Curl_ftp_connect(struct connectdata *conn,
 
 /***********************************************************************
  *
- * Curl_ftp_done()
+ * ftp_done()
  *
  * The DONE function. This does what needs to be done after a single DO has
  * performed.
  *
  * Input argument is already checked for validity.
  */
-static CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status,
+static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
                               bool premature)
 {
   struct SessionHandle *data = conn->data;
@@ -3472,19 +3472,19 @@ static CURLcode ftp_range(struct connectdata *conn)
 
 
 /*
- * Curl_ftp_nextconnect()
+ * ftp_nextconnect()
  *
  * This function shall be called when the second FTP (data) connection is
  * connected.
  */
 
-static CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
+static CURLcode ftp_nextconnect(struct connectdata *conn)
 {
   struct SessionHandle *data=conn->data;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   CURLcode result = CURLE_OK;
 
-  /* the ftp struct is inited in Curl_ftp_connect() */
+  /* the ftp struct is inited in ftp_connect() */
   struct FTP *ftp = data->state.proto.ftp;
 
   DEBUGF(infof(data, "DO-MORE phase starts\n"));
@@ -3574,7 +3574,7 @@ CURLcode ftp_perform(struct connectdata *conn,
 
   /* run the state-machine */
   if(conn->data->state.used_interface == Curl_if_multi)
-    result = Curl_ftp_multi_statemach(conn, dophase_done);
+    result = ftp_multi_statemach(conn, dophase_done);
   else {
     result = ftp_easy_statemach(conn);
     *dophase_done = TRUE; /* with the easy interface we are done here */
@@ -3589,14 +3589,14 @@ CURLcode ftp_perform(struct connectdata *conn,
 
 /***********************************************************************
  *
- * Curl_ftp()
+ * ftp_do()
  *
  * This function is registered as 'curl_do' function. It decodes the path
  * parts etc as a wrapper to the actual DO function (ftp_perform).
  *
  * The input argument is already checked for validity.
  */
-static CURLcode Curl_ftp(struct connectdata *conn, bool *done)
+static CURLcode ftp_do(struct connectdata *conn, bool *done)
 {
   CURLcode retcode = CURLE_OK;
 
@@ -3606,7 +3606,7 @@ static CURLcode Curl_ftp(struct connectdata *conn, bool *done)
     Since connections can be re-used between SessionHandles, this might be a
     connection already existing but on a fresh SessionHandle struct so we must
     make sure we have a good 'struct FTP' to play with. For new connections,
-    the struct FTP is allocated and setup in the Curl_ftp_connect() function.
+    the struct FTP is allocated and setup in the ftp_connect() function.
   */
   Curl_reset_reqproto(conn);
   retcode = ftp_init(conn);
@@ -3789,12 +3789,12 @@ static CURLcode ftp_quit(struct connectdata *conn)
 
 /***********************************************************************
  *
- * Curl_ftp_disconnect()
+ * ftp_disconnect()
  *
  * Disconnect from an FTP server. Cleanup protocol-specific per-connection
  * resources. BLOCKING.
  */
-static CURLcode Curl_ftp_disconnect(struct connectdata *conn)
+static CURLcode ftp_disconnect(struct connectdata *conn)
 {
   struct ftp_conn *ftpc= &conn->proto.ftpc;
 
@@ -4024,7 +4024,7 @@ static CURLcode ftp_dophase_done(struct connectdata *conn,
   struct ftp_conn *ftpc = &conn->proto.ftpc;
 
   if(connected)
-    result = Curl_ftp_nextconnect(conn);
+    result = ftp_nextconnect(conn);
 
   if(result && (conn->sock[SECONDARYSOCKET] != CURL_SOCKET_BAD)) {
     /* Failure detected, close the second socket if it was created already */
@@ -4046,11 +4046,11 @@ static CURLcode ftp_dophase_done(struct connectdata *conn,
 }
 
 /* called from multi.c while DOing */
-static CURLcode Curl_ftp_doing(struct connectdata *conn,
+static CURLcode ftp_doing(struct connectdata *conn,
                                bool *dophase_done)
 {
   CURLcode result;
-  result = Curl_ftp_multi_statemach(conn, dophase_done);
+  result = ftp_multi_statemach(conn, dophase_done);
 
   if(*dophase_done) {
     result = ftp_dophase_done(conn, FALSE /* not connected */);
@@ -4070,7 +4070,7 @@ static CURLcode Curl_ftp_doing(struct connectdata *conn,
  * remote host.
  *
  * ftp->ctl_valid starts out as FALSE, and gets set to TRUE if we reach the
- * Curl_ftp_done() function without finding any major problem.
+ * ftp_done() function without finding any major problem.
  */
 static
 CURLcode ftp_regular_transfer(struct connectdata *conn,
@@ -4109,7 +4109,7 @@ CURLcode ftp_regular_transfer(struct connectdata *conn,
   return result;
 }
 
-static CURLcode Curl_ftp_setup_connection(struct connectdata * conn)
+static CURLcode ftp_setup_connection(struct connectdata * conn)
 {
   struct SessionHandle *data = conn->data;
   char * type;
@@ -4170,12 +4170,12 @@ static CURLcode Curl_ftp_setup_connection(struct connectdata * conn)
 }
 
 #ifdef USE_SSL
-static CURLcode Curl_ftps_setup_connection(struct connectdata * conn)
+static CURLcode ftps_setup_connection(struct connectdata * conn)
 {
   struct SessionHandle *data = conn->data;
 
   conn->ssl[SECONDARYSOCKET].use = data->set.ftp_ssl != CURLUSESSL_CONTROL;
-  return Curl_ftp_setup_connection(conn);
+  return ftp_setup_connection(conn);
 }
 #endif
 
