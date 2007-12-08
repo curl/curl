@@ -1,4 +1,11 @@
 <testcase>
+<info>
+<keywords>
+FTP
+NLST
+PORT
+</keywords>
+</info>
 # Server-side
 <reply>
 <servercmd>

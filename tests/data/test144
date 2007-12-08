@@ -1,4 +1,12 @@
 <testcase>
+<info>
+<keywords>
+FTP
+PORT
+NLST
+--data-binary
+</keywords>
+</info>
 # Server-side
 <reply>
 <data>

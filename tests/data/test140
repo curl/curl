@@ -1,4 +1,11 @@
 <testcase>
+<info>
+<keywords>
+FTP
+-z
+--data-binary
+</keywords>
+</info>
 # Server-side
 <reply>
 <data>

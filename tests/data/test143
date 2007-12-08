@@ -1,4 +1,11 @@
 <testcase>
+<info>
+<keywords>
+FTP
+RETR
+type=
+</keywords>
+</info>
 # Server-side
 <reply>
 <data>
