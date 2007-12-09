@@ -39,7 +39,7 @@
 
  5. HTTP
  5.1 Other HTTP versions with CONNECT
- 5.1 Better persistancy for HTTP 1.0
+ 5.2 Better persistancy for HTTP 1.0
 
  6. TELNET
  6.1 ditch stdin
@@ -254,7 +254,7 @@
  never been reported as causing trouble to anyone, but should be considered to
  use the HTTP version the user has chosen.
 
-5.1 Better persistancy for HTTP 1.0
+5.2 Better persistancy for HTTP 1.0
 
  "Better" support for persistent connections over HTTP 1.0
  http://curl.haxx.se/bug/feature.cgi?id=1089001
@@ -379,8 +379,8 @@ to provide the data to send.
 
 10.2 RSYNC
 
- (no RFCs for protocol nor URI/URL format).  An implementation should most
-  probably use an existing rsync library, such as librsync.
+ There's no RFC for protocol nor URI/URL format.  An implementation should
+ most probably use an existing rsync library, such as librsync.
 
 11. Client
 
