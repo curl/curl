@@ -17,7 +17,7 @@
  1.3 struct lifreq
  1.4 Get IP address
  1.5 c-ares ipv6
- 1.5 configure-based info in public headers
+ 1.6 configure-based info in public headers
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -136,7 +136,7 @@
  powered libcurl the default build (which of course would require that we'd
  bundle the c-ares source code in the libcurl source code releases).
 
-1.5 configure-based info in public headers
+1.6 configure-based info in public headers
 
  Make the public headers include the proper system includes based on what was
  present at the time when configure was run. Currently, the sys/select.h
