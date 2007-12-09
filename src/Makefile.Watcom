@@ -1,14 +1,8 @@
 #
 #  Watcom / OpenWatcom / Win32 makefile for cURL.
-#  G. Vanem <giva@bgnett.no>
+#  G. Vanem <gvanem@broadpark.no>
 #
 # $Id$
-
-#
-# Set to 1 to use static lib.
-# Set to 0 to use DLL and import lib.
-#
-STATIC = 0
 
 CC = wcc386
 
@@ -17,15 +11,7 @@ CFLAGS = -3r -mf -d3 -hc -zff -zgf -zq -zm -s -fr=con -w2 -fpi -oilrtfm     &
          -dSIZEOF_CURL_OFF_T=8 -dCURLDEBUG -dENABLE_IPV6 -dHAVE_WINSOCK2_H  &
          -I..\include -I..\lib
 
-!ifeq STATIC 0
-LIBCURL = ..\lib\libcurl_wc_imp.lib
-
-!else
-CFLAGS += -dCURL_STATICLIB
-LIBCURL = ..\lib\libcurl_wc.lib
-!endif
-
-OBJ_DIR = Watcom_obj
+OBJ_DIR = WC_Win32.obj
 
 OBJS = $(OBJ_DIR)\getpass.obj  $(OBJ_DIR)\homedir.obj $(OBJ_DIR)\hugehelp.obj &
        $(OBJ_DIR)\main.obj     $(OBJ_DIR)\urlglob.obj $(OBJ_DIR)\writeenv.obj &
@@ -46,7 +32,7 @@ curl.exe: $(OBJS) $(RESOURCE)
 	wlink name $@ system nt file { $(OBJS) }                   &
 	  option quiet, map, caseexact, eliminate, res=$(RESOURCE) &
 	  libpath $(%watcom)\lib386;$(%watcom)\lib386\nt           &
-	  library $(LIBCURL), clib3r.lib, ws2_32.lib
+	  library ..\lib\libcurl_wc_imp.lib, clib3r.lib, ws2_32.lib
 
 clean: .SYMBOLIC
 	- rm -f $(OBJS) $(RESOURCE)
@@ -61,7 +47,6 @@ $(RESOURCE): curl.rc
 .ERASE
 .c{$(OBJ_DIR)}.obj:
 	$(CC) $[@ $(CFLAGS) -fo=$@
-	@echo .
 
 #
 # Dependencies based on "gcc -MM .."
