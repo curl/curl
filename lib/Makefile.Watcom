@@ -1,18 +1,19 @@
 #
 #  Watcom / OpenWatcom / Win32 makefile for libcurl.
-#  G. Vanem <giva@bgnett.no>
+#  G. Vanem <gvanem@broadpark.no>
 #
 # $Id$
 
-TARGETS = ca-bundle.h libcurl_wc.lib libcurl_wc.dll libcurl_wc_imp.lib
+TARGETS = ca-bundle.h libcurl_wc.dll libcurl_wc_imp.lib
 
 CC = wcc386
 
-CFLAGS = -3r -mf -d3 -hc -zff -zgf -zq -zm -zc -s -fr=con -w2 -fpi -oilrtfm -bt=nt -bd &
-         -d+ -dWIN32 -dCURL_CA_BUNDLE=getenv("CURL_CA_BUNDLE")                     &
+CFLAGS = -3r -mf -d3 -hc -zff -zgf -zq -zm -zc -s -fr=con -w2 -fpi -oilrtfm -bt=nt &
+         -bd -d+ -dWIN32 -dCURL_CA_BUNDLE=getenv("CURL_CA_BUNDLE")                 &
          -dBUILDING_LIBCURL -dWITHOUT_MM_LIB -dHAVE_SPNEGO=1 -dENABLE_IPV6         &
          -dDEBUG_THREADING_GETADDRINFO -dDEBUG=1 -dCURLDEBUG -d_WIN32_WINNT=0x0501 &
-         -I. -I..\include -dWINBERAPI=__declspec(cdecl) -dWINLDAPAPI=__declspec(cdecl)
+         -dWINBERAPI=__declspec(cdecl) -dWINLDAPAPI=__declspec(cdecl)              &
+         -I. -I..\include
 
 #
 # Change to suite.
@@ -24,9 +25,8 @@ USE_ZLIB  = 0
 CFLAGS += -dHAVE_ZLIB_H -dHAVE_LIBZ -I$(ZLIB_ROOT)
 !endif
 
-OBJ_DIR  = Watcom_obj
+OBJ_DIR  = WC_Win32.obj
 C_ARG    = $(OBJ_DIR)\wcc386.arg
-LIB_ARG  = $(OBJ_DIR)\wlib.arg
 LINK_ARG = $(OBJ_DIR)\wlink.arg
 
 OBJS = $(OBJ_DIR)\base64.obj           $(OBJ_DIR)\connect.obj     &
@@ -70,17 +70,14 @@ $(OBJ_DIR):
 ca-bundle.h:
 	@echo /* dummy ca-bundle.h. Not used */ > $@
 
-libcurl_wc.lib: $(OBJS) $(LIB_ARG)
-	wlib -q -b -c $@ @$(LIB_ARG)
-
-libcurl_wc.dll: $(OBJS) $(RESOURCE) $(LINK_ARG)
+libcurl_wc.dll libcurl_wc_imp.lib: $(OBJS) $(RESOURCE) $(LINK_ARG)
 	wlink name libcurl_wc.dll @$(LINK_ARG)
 
 clean: .SYMBOLIC
 	- rm -f $(OBJS) $(RESOURCE)
 
 vclean realclean: clean .SYMBOLIC
-	- rm -f $(TARGETS) $(C_ARG) $(LIB_ARG) $(LINK_ARG) libcurl_wc.map
+	- rm -f $(TARGETS) $(C_ARG) $(LINK_ARG) libcurl_wc.map
 	- rmdir $(OBJ_DIR)
 
 .ERASE
@@ -94,10 +91,6 @@ $(RESOURCE): libcurl.rc
 $(C_ARG): $(__MAKEFILES__)
 	%create $^@
 	%append $^@ $(CFLAGS)
-
-$(LIB_ARG): $(__MAKEFILES__)
-	%create $^@
-	for %f in ($(OBJS)) do @%append $^@ +- %f
 
 $(LINK_ARG): $(__MAKEFILES__)
 	%create $^@
