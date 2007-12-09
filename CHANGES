@@ -7,6 +7,11 @@
                                   Changelog
 
 
+Daniel S (9 Dec 2007)
+- Andrew Moise filed bug report #1847501
+  (http://curl.haxx.se/bug/view.cgi?id=1847501) and pointed out a memcpy()
+  that should be memmove() in the convert_lineends() function.
+
 Daniel S (8 Dec 2007)
 - Renamed all internal static functions that had Curl_ prefixes to no longer
   have them. The Curl_ prefix is exclusively used for library internal global
