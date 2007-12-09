@@ -138,8 +138,8 @@
 
 1.5 configure-based info in public headers
 
- Make the curl/*.h headers include the proper system includes based on what
- was present at the time when configure was run. Currently, the sys/select.h
+ Make the public headers include the proper system includes based on what was
+ present at the time when configure was run. Currently, the sys/select.h
  header is for example included by curl/multi.h only on specific platforms we
  know MUST have it. This is error-prone. We therefore want the header files to
  adapt to configure results. Those results must be stored in a new header and
