@@ -8,6 +8,8 @@ MSVCFILES = vc/adig/adig.dep vc/adig/adig.dsp vc/vc.dsw vc/ahost/ahost.dep \
  vc/ahost/ahost.dsp vc/areslib/areslib.dep vc/areslib/areslib.dsp	   \
  vc/areslib/areslib.dsw
 
+noinst_PROGRAMS = ahost adig
+
 # adig and ahost are just sample programs and thus not mentioned with the
 # regular sources and headers
 EXTRA_DIST = CHANGES README.cares Makefile.inc adig.c ahost.c $(man_MANS) \
@@ -62,6 +64,12 @@ libcares_la_SOURCES = $(CSOURCES) $(HHEADERS)
 libcares_ladir = $(includedir)
 # what headers to install on 'make install':
 libcares_la_HEADERS = ares.h ares_version.h ares_dns.h
+
+ahost_SOURCES = ahost.c ares_getopt.c
+ahost_LDADD = $(top_builddir)/$(lib_LTLIBRARIES)
+
+adig_SOURCES = adig.c ares_getopt.c
+adig_LDADD = $(top_builddir)/$(lib_LTLIBRARIES)
 
 # Make files named *.dist replace the file without .dist extension
 dist-hook:
