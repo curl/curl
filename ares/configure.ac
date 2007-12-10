@@ -46,6 +46,8 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
     dnl when doing the debug stuff, use static library only
     AC_DISABLE_SHARED
 
+    debugbuild="yes"
+
     dnl the entire --enable-debug is a hack that lives and runs on top of
     dnl libcurl stuff so this BUILDING_LIBCURL is not THAT much uglier
     AC_DEFINE(BUILDING_LIBCURL, 1, [when building as static part of libcurl])
@@ -70,6 +72,7 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
   esac ],
        AC_MSG_RESULT(no)
 )
+AM_CONDITIONAL(DEBUGBUILD, test x$debugbuild = xyes)
 
 dnl skip libtool C++ and Fortran compiler checks
 m4_ifdef([AC_PROG_CXX], [m4_undefine([AC_PROG_CXX])])

@@ -8,7 +8,13 @@ MSVCFILES = vc/adig/adig.dep vc/adig/adig.dsp vc/vc.dsw vc/ahost/ahost.dep \
  vc/ahost/ahost.dsp vc/areslib/areslib.dep vc/areslib/areslib.dsp	   \
  vc/areslib/areslib.dsw
 
-noinst_PROGRAMS = ahost adig
+if DEBUGBUILD
+PROGS =
+else
+PROGS = ahost adig acountry
+endif
+
+noinst_PROGRAMS =$(PROGS)
 
 # adig and ahost are just sample programs and thus not mentioned with the
 # regular sources and headers
@@ -70,6 +76,9 @@ ahost_LDADD = $(top_builddir)/$(lib_LTLIBRARIES)
 
 adig_SOURCES = adig.c ares_getopt.c
 adig_LDADD = $(top_builddir)/$(lib_LTLIBRARIES)
+
+acountry_SOURCES = acountry.c ares_getopt.c
+acountry_LDADD = $(top_builddir)/$(lib_LTLIBRARIES)
 
 # Make files named *.dist replace the file without .dist extension
 dist-hook:
