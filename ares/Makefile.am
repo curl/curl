@@ -11,7 +11,7 @@ MSVCFILES = vc/adig/adig.dep vc/adig/adig.dsp vc/vc.dsw vc/ahost/ahost.dep \
 if DEBUGBUILD
 PROGS =
 else
-PROGS = ahost adig acountry
+PROGS = ahost adig
 endif
 
 noinst_PROGRAMS =$(PROGS)
@@ -76,9 +76,6 @@ ahost_LDADD = $(top_builddir)/$(lib_LTLIBRARIES)
 
 adig_SOURCES = adig.c ares_getopt.c
 adig_LDADD = $(top_builddir)/$(lib_LTLIBRARIES)
-
-acountry_SOURCES = acountry.c ares_getopt.c
-acountry_LDADD = $(top_builddir)/$(lib_LTLIBRARIES)
 
 # Make files named *.dist replace the file without .dist extension
 dist-hook:
