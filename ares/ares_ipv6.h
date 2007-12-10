@@ -22,7 +22,7 @@
 #define PF_INET6 AF_INET6
 #endif
 
-#ifndef s6_addr
+#if !defined(HAVE_STRUCT_IN6_ADDR) && !defined(s6_addr)
 struct in6_addr {
   union {
     unsigned char _S6_u8[16];
@@ -43,7 +43,7 @@ struct sockaddr_in6
 #endif
 
 #ifndef HAVE_STRUCT_ADDRINFO
-struct addrinfo 
+struct addrinfo
 {
   int              ai_flags;
   int              ai_family;

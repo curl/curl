@@ -245,7 +245,7 @@ int ares_expand_name(const unsigned char *encoded, const unsigned char *abuf,
 int ares_expand_string(const unsigned char *encoded, const unsigned char *abuf,
                      int alen, unsigned char **s, long *enclen);
 
-#ifndef s6_addr
+#if !defined(HAVE_STRUCT_IN6_ADDR) && !defined(s6_addr)
 struct in6_addr {
   union {
     unsigned char _S6_u8[16];
