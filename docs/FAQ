@@ -1,4 +1,4 @@
-Updated: July 30, 2007 (http://curl.haxx.se/docs/faq.html)
+Updated: Dec 10, 2007 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -83,6 +83,7 @@ FAQ
   5.10 How do I prevent libcurl from writing the response to stdout?
   5.11 How do I make libcurl not receive the whole HTTP response?
   5.12 Can I make libcurl fake or hide my real IP address?
+  5.13 How do I stop an ongoing transfer?
 
  6. License Issues
   6.1 I have a GPL program, can I use the libcurl library?
@@ -1033,6 +1034,18 @@ FAQ
   that makes you see and use a different IP address locally than what the
   remote server will see you coming from.
 
+  5.13 How do I stop an ongoing transfer?
+
+  There are several ways, but none of them are instant. There is no function
+  you can call from another thread or similar that will stop it immediately.
+  Instead you need to make sure that one of the callbacks you use return an
+  appropriate value that will stop the transfer.
+
+  Suitable callbacks that you can do this with include the progress callback,
+  the read callback and the write callback.
+
+  If you're using the multi interface, you also stop a transfer by removing
+  the particular easy handle from the multi stack.
 
 6. License Issues
 
