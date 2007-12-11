@@ -22,7 +22,7 @@ CFLAGS += -DWATT32 -DHAVE_AF_INET6 -DHAVE_PF_INET6 -DHAVE_FIONBIO \
           -DRECV_TYPE_ARG1='int'   -DRECV_TYPE_ARG2='void*' \
           -DRECV_TYPE_ARG3='int'   -DRECV_TYPE_ARG4='int' \
           -DRECV_TYPE_RETV='int'   -DHAVE_STRUCT_TIMEVAL \
-          -Dselect=select_s        -UHAVE_CONFIG_H
+          -Dselect=select_s        -Dsocklen_t=int -UHAVE_CONFIG_H
 
 LDFLAGS = -s
 
@@ -49,7 +49,7 @@ EX_LIBS += $(WATT32_ROOT)/lib/libwatt.a
 
 OBJECTS = $(addprefix $(OBJ_DIR)/, $(CSOURCES:.c=.o))
 
-all: $(OBJ_DIR) libcares.a ahost.exe adig.exe
+all: $(OBJ_DIR) libcares.a ahost.exe adig.exe acountry.exe
 	@echo Welcome to c-ares.
 
 libcares.a: $(OBJECTS)
@@ -61,11 +61,14 @@ ahost.exe: ahost.c $(OBJ_DIR)/ares_getopt.o $(OBJ_HACK)
 adig.exe: adig.c $(OBJ_DIR)/ares_getopt.o $(OBJ_HACK)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $^ $(EX_LIBS)
 
+acountry.exe: acountry.c $(OBJ_DIR)/ares_getopt.o $(OBJ_HACK)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $^ $(EX_LIBS)
+
 clean:
 	rm -f $(OBJECTS) libcares.a
 
 vclean realclean: clean
-	rm -f ahost.exe adig.exe depend.dj
+	rm -f ahost.exe adig.exe acountry.exe depend.dj
 	- rmdir $(OBJ_DIR)
 
 -include depend.dj
