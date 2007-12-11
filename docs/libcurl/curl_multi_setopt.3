@@ -47,10 +47,11 @@ changes. The timeout value is at what latest time the application should call
 one of the \&"performing" functions of the multi interface
 (\fIcurl_multi_socket(3)\fP, \fIcurl_multi_socket_all(3)\fP and
 \fIcurl_multi_perform(3)\fP) - to allow libcurl to keep timeouts and retries
-etc to work. Libcurl attempts to limit calling this only when the fixed future
-timeout time actually change. See also \fICURLMOPT_TIMERDATA\fP. This callback
-can be used instead of, or in addition to, \fIcurl_multi_timeout(3)\fP. (Added
-in 7.16.0)
+etc to work. A timeout value of -1 means that there is no timeout at all, and
+0 means that the timeout is already reached. Libcurl attempts to limit calling
+this only when the fixed future timeout time actually change. See also
+\fICURLMOPT_TIMERDATA\fP. This callback can be used instead of, or in addition
+to, \fIcurl_multi_timeout(3)\fP. (Added in 7.16.0)
 .IP CURLMOPT_TIMERDATA
 Pass a pointer to whatever you want passed to the
 \fBcurl_multi_timer_callback\fP's third argument, the userp pointer.  This is
