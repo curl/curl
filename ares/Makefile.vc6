@@ -76,7 +76,7 @@ OBJECTS = $(OBJ_DIR)\ares_fds.obj              \
           $(OBJ_DIR)\inet_net_pton.obj         \
           $(OBJ_DIR)\inet_ntop.obj
 
-all: $(OBJ_DIR) cares.lib cares.dll cares_imp.lib ahost.exe adig.exe
+all: $(OBJ_DIR) cares.lib cares.dll cares_imp.lib ahost.exe adig.exe acountry.exe
        @echo Welcome to c-ares library and examples
 
 $(OBJ_DIR):
@@ -130,6 +130,9 @@ ahost.exe: $(OBJ_DIR) $(OBJ_DIR)\ahost.obj $(OBJ_DIR)\ares_getopt.obj cares_imp.
 
 adig.exe: $(OBJ_DIR) $(OBJ_DIR)\adig.obj $(OBJ_DIR)\ares_getopt.obj cares_imp.lib
        link $(LDFLAGS) -out:$@ $(OBJ_DIR)\adig.obj $(OBJ_DIR)\ares_getopt.obj cares_imp.lib $(EX_LIBS)
+
+acountry.exe: $(OBJ_DIR) $(OBJ_DIR)\acountry.obj $(OBJ_DIR)\ares_getopt.obj cares_imp.lib
+       link $(LDFLAGS) -out:$@ $(OBJ_DIR)\acountry.obj $(OBJ_DIR)\ares_getopt.obj cares_imp.lib $(EX_LIBS)
 
 clean:
        - del $(OBJ_DIR)\*.obj *.ilk *.pdb *.pbt *.pbi *.pbo *._xe *.map

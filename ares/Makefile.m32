@@ -32,7 +32,7 @@ $(LIB): $(OBJLIB)
 
 all: $(LIB) demos
 
-demos: adig.exe ahost.exe
+demos: adig.exe ahost.exe acountry.exe
 
 tags:
 	etags *.[ch]
@@ -61,7 +61,7 @@ install:
 	done)
 
 clean:
-	$(RM) ares_getopt.o $(OBJLIB) $(LIB) adig.exe ahost.exe
+	$(RM) ares_getopt.o $(OBJLIB) $(LIB) adig.exe ahost.exe acountry.exe
 
 distclean: clean
 	$(RM) config.cache config.log config.status Makefile
