@@ -1,5 +1,11 @@
   Changelog for the c-ares project
 
+* December 11 2007 (Gisle Vanem)
+
+- Added another sample application; acountry.c which converts an
+  IPv4-address(es) and/or host-name(s) to country-name and country-code.
+  This uses the service of the DNSBL at countries.nerd.dk.
+
 * December 3 2007 (Daniel Stenberg)
 
 - Brad Spencer fixed the configure script to assume that there's no
@@ -66,7 +72,7 @@ Version 1.5.0 (Nov 21, 2007)
 * July 14 2007 (Daniel Stenberg)
 
 - Vlad Dinulescu fixed two outstanding valgrind reports:
- 
+
   1. In ares_query.c , in find_query_by_id we compare q->qid (which is a short
   int variable) with qid, which is declared as an int variable.  Moreover,
   DNS_HEADER_SET_QID is used to set the value of qid, but DNS_HEADER_SET_QID
@@ -152,7 +158,7 @@ Version 1.4.0 (June 8, 2007)
 
 - Brad House added ares_save_options() and ares_destroy_options() that can be
   used to keep options for later re-usal when ares_init_options() is used.
-  
+
   Problem: Calling ares_init() for each lookup can be unnecessarily resource
          intensive.  On windows, it must LoadLibrary() or search the registry
          on each call to ares_init().  On unix, it must read and parse
