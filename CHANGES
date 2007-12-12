@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel S (12 Dec 2007)
+- Gilles Blanc made the curl tool enable SO_KEEPALIVE for the connections and
+  added the --no-keep-alive option that can disable that on demand.
+
 Daniel S (9 Dec 2007)
 - Andrew Moise filed bug report #1847501
   (http://curl.haxx.se/bug/view.cgi?id=1847501) and pointed out a memcpy()

@@ -819,6 +819,11 @@ will output the data in chunks, not necessarily exactly when the data arrives.
 Using this option will disable that buffering.
 
 If this option is used twice, the second will again switch on buffering.
+.IP "--no-keep-alive"
+Disables the use of keep-alive messages on the TCP connection, as by default
+curl enables them.
+
+If this option is used twice, the second will again enable keep-alive.
 .IP "--no-sessionid"
 (SSL) Disable curl's use of SSL session-ID caching.  By default all transfers
 are done using the cache. Note that while nothing ever should get hurt by

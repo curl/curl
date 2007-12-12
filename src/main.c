@@ -481,6 +481,7 @@ struct Configurable {
   char *libcurl; /* output libcurl code to this file name */
   bool raw;
   bool post301;
+  bool nokeepalive;
   struct OutStruct *outs;
 };
 
@@ -689,6 +690,7 @@ static void help(void)
     "    --netrc-optional Use either .netrc or URL; overrides -n",
     "    --ntlm          Use HTTP NTLM authentication (H)",
     " -N/--no-buffer     Disable buffering of the output stream",
+    "    --no-keep-alive Disable keep-alive use on the connection",
     "    --no-sessionid  Disable SSL session-ID reusing (SSL)",
     " -o/--output <file> Write output to <file> instead of stdout",
     " -O/--remote-name   Write output to a file named as the remote file",
@@ -1432,6 +1434,30 @@ static int ftpcccmethod(struct Configurable *config, char *str)
   return CURLFTPSSL_CCC_PASSIVE;
 }
 
+
+static int set_so_keepalive(void *clientp, curl_socket_t curlfd,
+                            curlsocktype purpose)
+{
+  struct Configurable *config = (struct Configurable *)clientp;
+  int data = !config->nokeepalive;
+
+  switch (purpose) {
+  case CURLSOCKTYPE_IPCXN:
+    /* setsockopt()'s 5th argument is a 'socklen_t' type in POSIX, but windows
+       and other pre-POSIX systems use 'int' here! */
+    if (setsockopt(curlfd, SOL_SOCKET, SO_KEEPALIVE, &data, sizeof(data)) < 0) {
+      warnf(clientp, "Could not set SO_KEEPALIVE!\n");
+      return 1;
+    }
+    break;
+  default:
+    break;
+  }
+
+  return 0;
+}
+
+
 static ParameterError getparameter(char *flag, /* f or -long-flag */
                                    char *nextarg, /* NULL if unset */
                                    bool *usedarg, /* set to TRUE if the arg
@@ -1518,6 +1544,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$z", "libcurl",    TRUE},
     {"$#", "raw",        FALSE},
     {"$0", "post301",    FALSE},
+    {"$1", "no-keep-alive",    FALSE},
 
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
@@ -1973,6 +2000,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case '0': /* --post301 */
         config->post301 ^= TRUE;
+        break;
+      case '1': /* --no-keep-alive */
+        config->nokeepalive ^= TRUE;
         break;
       }
       break;
@@ -3604,6 +3634,7 @@ static void dumpeasycode(struct Configurable *config)
   curl_slist_free_all(easycode);
 }
 
+
 static int
 operate(struct Configurable *config, int argc, argv_item_t argv[])
 {
@@ -4496,6 +4527,10 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         /* curl 7.17.1 */
         my_setopt(curl, CURLOPT_POST301, config->post301);
+        if (!config->nokeepalive) {
+          my_setopt(curl, CURLOPT_SOCKOPTFUNCTION, set_so_keepalive);
+          my_setopt(curl, CURLOPT_SOCKOPTDATA, config);
+        }
 
         retry_numretries = config->req_retry;
 

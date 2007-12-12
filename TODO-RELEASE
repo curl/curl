@@ -1,4 +1,6 @@
 To be addressed before 7.17.2 (planned release: December 2007)
 =============================
 
-108 - 
+108 - socklen_t usage in curl/curl.h for systems without it
+
+109 - 
