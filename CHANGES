@@ -7,6 +7,15 @@
                                   Changelog
 
 
+Daniel S (13 Dec 2007)
+- David Wright filed bug report #1849764
+  (http://curl.haxx.se/bug/view.cgi?id=1849764) with an included fix. He
+  identified a problem for re-used connections that previously had sent
+  Expect: 100-continue and in some situations the subsequent POST (that didn't
+  use Expect:) still had the internal flag set for its use. David's fix (that
+  makes the setting of the flag in every single request unconditionally) is
+  fine and is now used!
+
 Daniel S (12 Dec 2007)
 - Gilles Blanc made the curl tool enable SO_KEEPALIVE for the connections and
   added the --no-keep-alive option that can disable that on demand.

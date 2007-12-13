@@ -35,6 +35,7 @@ This release includes the following bugfixes:
  o no longer default-appends ;type= on FTP URLs thru proxies
  o SSL session id caching
  o POST with callback over proxy requiring NTLM or Digest
+ o Expect: 100-continue flaw on re-used connection with POSTs
 
 This release includes the following known bugs:
 
@@ -55,6 +56,6 @@ advice from friends like these:
  Dan Fandrich, Gisle Vanem, Toby Peterson, Yang Tse, Daniel Black,
  Robin Johnson, Michal Marek, Ates Goral, Andres Garcia, Rob Crittenden,
  Emil Romanus, Alessandro Vesely, Ray Pekowski, Spacen Jasset, Andrew Moise,
- Gilles Blanc
+ Gilles Blanc, David Wright
  
         Thanks! (and sorry if I forgot to mention someone)
