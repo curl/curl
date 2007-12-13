@@ -1439,13 +1439,12 @@ static int set_so_keepalive(void *clientp, curl_socket_t curlfd,
                             curlsocktype purpose)
 {
   struct Configurable *config = (struct Configurable *)clientp;
-  int data = !config->nokeepalive;
+  int onoff = config->nokeepalive ? 0 : 1;
 
   switch (purpose) {
   case CURLSOCKTYPE_IPCXN:
-    /* setsockopt()'s 5th argument is a 'socklen_t' type in POSIX, but windows
-       and other pre-POSIX systems use 'int' here! */
-    if (setsockopt(curlfd, SOL_SOCKET, SO_KEEPALIVE, &data, sizeof(data)) < 0) {
+    if(setsockopt(curlfd, SOL_SOCKET, SO_KEEPALIVE, (void *)&onoff,
+                  sizeof(onoff)) < 0) {
       warnf(clientp, "Could not set SO_KEEPALIVE!\n");
       return 1;
     }
