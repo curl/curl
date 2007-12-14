@@ -1531,7 +1531,7 @@ if test "$OPENSSL_ENABLED" != "1" -a "$GNUTLS_ENABLED" != "1"; then
 
     dnl Check for functionPK11_CreateGenericObject
     dnl this is needed for using the PEM PKCS#11 module
-    AC_CHECK_LIB(nss3, PK11_CreateGenericObject-d,
+    AC_CHECK_LIB(nss3, PK11_CreateGenericObject,
      [
      AC_DEFINE(HAVE_PK11_CREATEGENERICOBJECT, 1, [if you have the function PK11_CreateGenericObject])
      AC_SUBST(HAVE_PK11_CREATEGENERICOBJECT, [1])
