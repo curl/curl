@@ -1153,6 +1153,9 @@ If this option is used several times, each occurrence will toggle it on/off.
 Specify user and password to use for server authentication. Overrides
 \fI-n/--netrc\fP and \fI--netrc-optional\fP.
 
+If you just give the user name (without entering a colon) curl will prompt for
+a password.
+
 If you use an SSPI-enabled curl binary and do NTLM authentication, you can
 force curl to pick up the user name and password from your environment by
 simply specifying a single colon with this option: "-u :".
