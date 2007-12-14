@@ -33,7 +33,7 @@ http
 lib549
 </tool>
  <name>
-FPT RETR over proxy with CURLOPT_PROXY_TRANSFER_MODE
+FTP RETR over proxy with CURLOPT_PROXY_TRANSFER_MODE
  </name>
 # first URL then proxy
  <command>
