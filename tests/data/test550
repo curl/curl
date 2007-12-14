@@ -29,6 +29,9 @@ hello
 <server>
 http
 </server>
+<features>
+ftp
+</features>
 <tool>
 lib549
 </tool>
