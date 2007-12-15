@@ -1,0 +1,104 @@
+# this test is meant to be exactly like 547 but using Digest instead of NTLM
+
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+POST callback
+HTTP proxy Digst auth
+</keywords>
+</info>
+# Server-side
+<reply>
+
+# as a bonus, ww use an excessive nonce length
+<data>
+HTTP/1.1 407 Authorization Required swsclose
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+Proxy-Authenticate: Digest realm="something fun to read", nonce="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+Content-Type: text/html; charset=iso-8859-1
+Connection: close
+
+This is not the real page
+</data>
+
+# This is supposed to be returned when the server gets the Digest
+# Authorization: line passed-in from the client
+<data1000>
+HTTP/1.1 200 Things are fine in proxy land swsclose
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 42
+
+Contents of that page you requested, sir.
+</data1000>
+
+<datacheck>
+HTTP/1.1 407 Authorization Required swsclose
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+Proxy-Authenticate: Digest realm="something fun to read", nonce="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+Content-Type: text/html; charset=iso-8859-1
+Connection: close
+
+HTTP/1.1 200 Things are fine in proxy land swsclose
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 42
+
+Contents of that page you requested, sir.
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# tool to use
+<tool>
+lib547
+</tool>
+<features>
+</features>
+ <name>
+HTTP proxy auth Digest with POST data from read callback
+ </name>
+ <command>
+http://test.remote.server.com/path/551 http://%HOSTIP:%HTTPPORT s1lly:pers0n
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent: curl/.*
+</strip>
+# We strip off a large chunk of the type-2 NTLM message since it depends on
+# the local host name and thus differs on different machines!
+<strippart>
+s/^(Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA).*/$1/
+</strippart>
+<protocol>
+POST http://test.remote.server.com/path/551 HTTP/1.1
+Host: test.remote.server.com
+Pragma: no-cache
+Accept: */*
+Proxy-Connection: Keep-Alive
+Content-Length: 36
+Content-Type: application/x-www-form-urlencoded
+
+this is the blurb we want to upload
+POST http://test.remote.server.com/path/551 HTTP/1.1
+Proxy-Authorization: Digest username="s1lly", realm="something fun to read", nonce="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", uri="/path/551", response="3325240726fbdaf1e61f3a0dd40b930c"
+Host: test.remote.server.com
+Pragma: no-cache
+Accept: */*
+Proxy-Connection: Keep-Alive
+Content-Length: 36
+Content-Type: application/x-www-form-urlencoded
+
+this is the blurb we want to upload
+</protocol>
+</verify>
+</testcase>
