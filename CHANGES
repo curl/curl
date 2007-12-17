@@ -7,6 +7,11 @@
                                   Changelog
 
 
+Daniel S (17 Dec 2007)
+- Mateusz Loskot pointed out that VC++ 9.0 (2008) has the pollfd struct and
+  defines in the SDK somehow differently so we have to add a define to the
+  config-win32.h file to make select.h compile nicely.
+
 Daniel S (13 Dec 2007)
 - David Wright filed bug report #1849764
   (http://curl.haxx.se/bug/view.cgi?id=1849764) with an included fix. He
