@@ -13,6 +13,10 @@ Yang Tse (18 Dec 2007)
   if no build target has been defined we will target WinXP when building
   curl/libcurl with MSVC 9.0 (VS2008).
 
+- (http://curl.haxx.se/mail/archive-2007-12/0039.html) reported and fixed
+  a file truncation problem on Windows build targets triggered when retrying
+  a download with curl.
+
 Daniel S (17 Dec 2007)
 - Mateusz Loskot pointed out that MSVC 9.0 (VS2008) has the pollfd struct and
   defines in winsock2.h somehow differently than previous versions and that

@@ -323,21 +323,19 @@ char convert_char(curl_infotype infotype, char this_char)
 #define _lseeki64(hnd,ofs,whence) lseek(hnd,ofs,whence)
 #endif
 
+#ifndef HAVE_FTRUNCATE
+#define HAVE_FTRUNCATE 1
+#endif
+
 static int ftruncate64 (int fd, curl_off_t where)
 {
-  curl_off_t curr;
-  int rc = 0;
+  if(_lseeki64(fd, where, SEEK_SET) < 0)
+    return -1;
 
-  if ((curr = _lseeki64(fd, 0, SEEK_CUR)) < 0)
-     return -1;
+  if(!SetEndOfFile((HANDLE)_get_osfhandle(fd)))
+    return -1;
 
-  if (_lseeki64(fd, where, SEEK_SET) < 0)
-     return -1;
-
-  if (write(fd, 0, 0) < 0)
-     rc = -1;
-  _lseeki64(fd, curr, SEEK_SET);
-  return rc;
+  return 0;
 }
 #define ftruncate(fd,where) ftruncate64(fd,where)
 #endif

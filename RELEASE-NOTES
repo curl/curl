@@ -37,6 +37,7 @@ This release includes the following bugfixes:
  o POST with callback over proxy requiring NTLM or Digest
  o Expect: 100-continue flaw on re-used connection with POSTs
  o build fix for MSVC 9.0 (VS2008)
+ o Windows curl builds failed file truncation when retry downloading
 
 This release includes the following known bugs:
 
