@@ -7,6 +7,12 @@
                                   Changelog
 
 
+Yang Tse (18 Dec 2007)
+- MSVC 9.0 (VS2008) does not support Windows build targets prior to WinXP,
+  and makes wrong asumptions of build target when it isn't specified. So,
+  if no build target has been defined we will target WinXP when building
+  curl/libcurl with MSVC 9.0 (VS2008).
+
 Daniel S (17 Dec 2007)
 - Mateusz Loskot pointed out that MSVC 9.0 (VS2008) has the pollfd struct and
   defines in winsock2.h somehow differently than previous versions and that

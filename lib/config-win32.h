@@ -353,6 +353,20 @@
 #define _CRT_NONSTDC_NO_DEPRECATE 1
 #endif
 
+/* VS2008 does not support Windows build targets prior to WinXP, */
+/* so, if no build target has been defined we will target WinXP. */
+#if defined(_MSC_VER) && (_MSC_VER >= 1500)
+#  ifndef _WIN32_WINNT
+#    define _WIN32_WINNT 0x0501
+#  endif
+#  ifndef WINVER
+#    define WINVER 0x0501
+#  endif
+#  if (_WIN32_WINNT < 0x0501) || (WINVER < 0x0501)
+#    error VS2008 does not support Windows build targets prior to WinXP
+#  endif
+#endif
+
 /* ---------------------------------------------------------------- */
 /*                           LDAP SUPPORT                           */
 /* ---------------------------------------------------------------- */
