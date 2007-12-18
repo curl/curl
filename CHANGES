@@ -8,9 +8,9 @@
 
 
 Daniel S (17 Dec 2007)
-- Mateusz Loskot pointed out that VC++ 9.0 (2008) has the pollfd struct and
-  defines in the SDK somehow differently so we have to add a define to the
-  config-win32.h file to make select.h compile nicely.
+- Mateusz Loskot pointed out that MSVC 9.0 (VS2008) has the pollfd struct and
+  defines in winsock2.h somehow differently than previous versions and that
+  curl 7.17.1 would fail to compile out of the box.
 
 Daniel S (13 Dec 2007)
 - David Wright filed bug report #1849764
@@ -167,6 +167,11 @@ Daniel S (12 Nov 2007)
   setup. My fix is not done like the provided patch does it, but instead I
   make sure that there's never any chance for a NULL pointer in that struct
   member.
+
+Yang Tse (10 Nov 2007)
+- Vikram Saxena (http://curl.haxx.se/mail/lib-2007-11/0096.html) pointed out
+  that the pollfd struct was being multi defined when using VS2008. This is
+  now fixed in /curl/lib/select.h
 
 Daniel S (8 Nov 2007)
 - Bug report #1823487 (http://curl.haxx.se/bug/view.cgi?id=1823487) pointed

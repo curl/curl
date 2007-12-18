@@ -353,14 +353,6 @@
 #define _CRT_NONSTDC_NO_DEPRECATE 1
 #endif
 
-/* Define to make select.h work fine on VC++ 9.0 (2008) */
-#if defined(_MSC_VER) && (_MSC_VER >= 1500)
-/* The poll struct and associated defines are present in the Windows SDK v6.0
-   that comes with this version... */
-#define HAVE_STRUCT_POLLFD 1
-#endif
-
-
 /* ---------------------------------------------------------------- */
 /*                           LDAP SUPPORT                           */
 /* ---------------------------------------------------------------- */
