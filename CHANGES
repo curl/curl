@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel Fandrich (19 Dec 2007)
+- Ensure that nroff doesn't put anything but ASCII characters into the
+  --manual text.
 
 Yang Tse (18 Dec 2007)
 - MSVC 9.0 (VS2008) does not support Windows build targets prior to WinXP,
