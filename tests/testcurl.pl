@@ -294,7 +294,7 @@ $str1066os = undef;
 
 # Make $pwd to become the path without newline. We'll use that in order to cut
 # off that path from all possible logs and error messages etc.
-$pwd = cwd();
+$pwd = getcwd();
 
 if (-d $CURLDIR) {
   if ($CVS && -d "$CURLDIR/CVS") {
