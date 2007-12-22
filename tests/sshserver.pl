@@ -11,6 +11,7 @@
 
 use strict;
 use File::Spec;
+use Cwd;
 
 my $verbose=1; # set to 1 for debugging
 my $showfiles=0;
@@ -22,8 +23,7 @@ my $conffile="curl_sshd_config";    # sshd configuration data
 my $conffile_ssh="curl_ssh_config";    # ssh configuration data
 my $knownhostsfile="curl_client_knownhosts";    # ssh knownhosts file
 
-my $path = `pwd`;
-chomp $path;
+my $path = getcwd();
 
 my $exeext;
 if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys' || $^O eq 'dos' || $^O eq 'os2') {

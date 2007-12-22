@@ -59,6 +59,7 @@
 use strict;
 #use Time::HiRes qw( gettimeofday );
 #use warnings;
+use Cwd;
 
 @INC=(@INC, $ENV{'srcdir'}, ".");
 
@@ -133,8 +134,7 @@ my $memdump="$LOGDIR/memdump";
 # the path to the script that analyzes the memory debug output file:
 my $memanalyze="$perl $srcdir/memanalyze.pl";
 
-my $pwd;          # current working directory
-chomp($pwd = `pwd`);
+my $pwd = getcwd();          # current working directory
 
 my $start;
 my $forkserver=0;
