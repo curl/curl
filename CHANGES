@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel S (25 Dec 2007)
+- Gary Maxwell filed bug report #1856628
+  (http://curl.haxx.se/bug/view.cgi?id=1856628) and provided a fix for the
+  (small) memory leak in the SSL session ID caching code. It happened when a
+  previous entry in the cache was re-used.
+
 Daniel Fandrich (19 Dec 2007)
 - Ensure that nroff doesn't put anything but ASCII characters into the
   --manual text.
