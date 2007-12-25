@@ -386,7 +386,7 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
   store->age = data->state.sessionage;    /* set current age */
   if (store->name)
     /* free it if there's one already present */
-    free(store->name)
+    free(store->name);
   store->name = clone_host;               /* clone host name */
   store->remote_port = conn->remote_port; /* port number */
 
