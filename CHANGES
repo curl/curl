@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel S (26 Dec 2007)
+- In an attempt to repeat the problem in bug report #1850730
+  (http://curl.haxx.se/bug/view.cgi?id=1850730) I wrote up test case 552. The
+  test is doing a 70K POST with a read callback and an ioctl callback over a
+  proxy requiring Digest auth. The test case code is more or less identical to
+  the test recipe code provided by Spacen Jasset (who submitted the bug
+  report).
+
 Daniel S (25 Dec 2007)
 - Gary Maxwell filed bug report #1856628
   (http://curl.haxx.se/bug/view.cgi?id=1856628) and provided a fix for the
