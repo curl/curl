@@ -39,6 +39,7 @@ This release includes the following bugfixes:
  o build fix for MSVC 9.0 (VS2008)
  o Windows curl builds failed file truncation when retry downloading
  o SSL session ID cache memory leak
+ o bad connection re-use check with environment variable-activated proxy use
 
 This release includes the following known bugs:
 
@@ -59,6 +60,7 @@ advice from friends like these:
  Dan Fandrich, Gisle Vanem, Toby Peterson, Yang Tse, Daniel Black,
  Robin Johnson, Michal Marek, Ates Goral, Andres Garcia, Rob Crittenden,
  Emil Romanus, Alessandro Vesely, Ray Pekowski, Spacen Jasset, Andrew Moise,
- Gilles Blanc, David Wright, Vikram Saxena, Mateusz Loskot, Gary Maxwell
+ Gilles Blanc, David Wright, Vikram Saxena, Mateusz Loskot, Gary Maxwell,
+ Dmitry Kurochkin
  
         Thanks! (and sorry if I forgot to mention someone)

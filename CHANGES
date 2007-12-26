@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel S (27 Dec 2007)
+- Dmitry Kurochkin mentioned a flaw
+  (http://curl.haxx.se/mail/lib-2007-12/0252.html) in detect_proxy() which
+  failed to set the bits.proxy variable properly when an environment variable
+  told libcurl to use a http proxy.
+
 Daniel S (26 Dec 2007)
 - In an attempt to repeat the problem in bug report #1850730
   (http://curl.haxx.se/bug/view.cgi?id=1850730) I wrote up test case 552. The

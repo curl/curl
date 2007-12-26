@@ -3242,7 +3242,7 @@ static char *detect_proxy(struct connectdata *conn)
         if(conn->proxytype == CURLPROXY_HTTP) {
           /* force this connection's protocol to become HTTP */
           conn->protocol = PROT_HTTP | bits;
-          conn->bits.httpproxy = TRUE;
+          conn->bits.proxy = conn->bits.httpproxy = TRUE;
         }
       }
     } /* if(!nope) - it wasn't specified non-proxy */
