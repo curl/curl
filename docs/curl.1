@@ -693,7 +693,8 @@ NOTE: this does not properly support -F and the sending of multipart
 formposts, so in those cases the output program will be missing necessary
 calls to \fIcurl_formadd(3)\fP, and possibly more.
 
-If this option is used several times, the last given file name will be used.
+If this option is used several times, the last given file name will be
+used. (Added in 7.16.1)
 .IP "--limit-rate <speed>"
 Specify the maximum transfer rate you want curl to use. This feature is useful
 if you have a limited pipe and you'd like your transfer not use your entire
