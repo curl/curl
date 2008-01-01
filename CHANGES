@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel S (1 Jan 2008)
+- Mohun Biswas pointed out that --libcurl generated a source code with an int
+  function but without a return statement. While fixing that, I also took care
+  about adding some better comments for the generated code.
+
 Daniel S (27 Dec 2007)
 - Dmitry Kurochkin mentioned a flaw
   (http://curl.haxx.se/mail/lib-2007-12/0252.html) in detect_proxy() which

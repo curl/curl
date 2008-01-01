@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -3575,6 +3575,8 @@ static const char * const srchead[]={
   " * libcurl.",
   " * If you use any *_LARGE options, make sure your compiler figure",
   " * out the correct size for the curl_off_t variable.",
+  " * Read the details for all curl_easy_setopt() options online on:",
+  " * http://curlm.haxx.se/libcurl/c/curl_easy_setopt.html",
   " ************************************************************************/",
   "[m]",
   "#include <curl/curl.h>",
@@ -3622,8 +3624,9 @@ static void dumpeasycode(struct Configurable *config)
         ptr = ptr->next;
       }
       fprintf(out,
+              "  return (int)ret;\n"
               "}\n"
-              "/* */\n");
+              "/**** End of sample code ****/\n");
       if(fopened)
         fclose(out);
     }

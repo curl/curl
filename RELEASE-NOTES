@@ -40,6 +40,7 @@ This release includes the following bugfixes:
  o Windows curl builds failed file truncation when retry downloading
  o SSL session ID cache memory leak
  o bad connection re-use check with environment variable-activated proxy use
+ o --libcurl now generates a return statement as well
 
 This release includes the following known bugs:
 
@@ -61,6 +62,6 @@ advice from friends like these:
  Robin Johnson, Michal Marek, Ates Goral, Andres Garcia, Rob Crittenden,
  Emil Romanus, Alessandro Vesely, Ray Pekowski, Spacen Jasset, Andrew Moise,
  Gilles Blanc, David Wright, Vikram Saxena, Mateusz Loskot, Gary Maxwell,
- Dmitry Kurochkin
+ Dmitry Kurochkin, Mohun Biswas
  
         Thanks! (and sorry if I forgot to mention someone)
