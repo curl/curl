@@ -93,9 +93,14 @@ int main(int argc, char **argv)
   WSAStartup(wVersionRequested, &wsaData);
 #endif
 
-  while ((ch = ares_getopt(argc, argv, "vh?")) != -1)
+  while ((ch = ares_getopt(argc, argv, "dvh?")) != -1)
     switch (ch)
       {
+      case 'd':
+#ifdef WATT32
+        dbug_init();
+#endif
+        break;
       case 'v':
         verbose++;
         break;
