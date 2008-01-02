@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel S (2 Jan 2008)
+- I fixed two cases of missing return code checks when handling chunked
+  decoding where a write error (or abort return from a callback) didn't stop
+  libcurl's processing.
+
 - I removed the socklen_t use from the public curl/curl.h header and instead
   made it an unsigned int. The type was only used in the curl_sockaddr struct
   definition (only used by the curl_opensocket_callback). On all platforms I

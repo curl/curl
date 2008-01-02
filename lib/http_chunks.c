@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -118,8 +118,11 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
 
   /* the original data is written to the client, but we go on with the
      chunk read process, to properly calculate the content length*/
-  if(data->set.http_te_skip && !k->ignorebody)
-    Curl_client_write(conn, CLIENTWRITE_BODY, datap,datalen);
+  if(data->set.http_te_skip && !k->ignorebody) {
+    result = Curl_client_write(conn, CLIENTWRITE_BODY, datap, datalen);
+    if(result)
+      return CHUNKE_WRITE_ERROR;
+  }
 
   while(length) {
     switch(ch->state) {
@@ -362,9 +365,12 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
             return(CHUNKE_BAD_CHUNK);
           }
 #endif /* CURL_DOES_CONVERSIONS */
-          if( !data->set.http_te_skip )
-            Curl_client_write(conn, CLIENTWRITE_HEADER,
-                              conn->trailer, conn->trlPos);
+          if(!data->set.http_te_skip) {
+            result = Curl_client_write(conn, CLIENTWRITE_HEADER,
+                                       conn->trailer, conn->trlPos);
+            if(result)
+              return CHUNKE_WRITE_ERROR;
+          }
         }
         ch->state = CHUNK_TRAILER;
         conn->trlPos=0;
