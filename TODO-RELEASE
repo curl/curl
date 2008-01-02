@@ -1,9 +1,6 @@
 To be addressed before 7.18.0 (planned release: January 2008)
 =============================
 
-108 - socklen_t usage in curl/curl.h for systems without it (go unsigned int)
-      http://curl.haxx.se/mail/lib-2007-12/0241.html
-
 109 - curl_easy_pause (outstanding work)
       http://curl.haxx.se/mail/lib-2007-12/0247.html
 
@@ -19,4 +16,6 @@ To be addressed before 7.18.0 (planned release: January 2008)
 113 - #1850730 and #1854175, both dealing with POST over proxy requiring proxy
       auth (to find and fix)
 
-114 - 
+114 - Ranged downloads on file:// URLs by Daniel Egger (patch failed to apply)
+      
+115 -
