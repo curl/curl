@@ -29,7 +29,6 @@ This release includes the following bugfixes:
  o SSL connections with NSS done with the multi-interface
  o setting a share no longer activates cookies
  o Negotiate now works on auth and proxy simultanouesly
- o curl.h now includes a socklen_t definition for Win32 API build targets
  o support HTTP Digest nonces up to 1023 letters
  o resumed ftp upload no longer requires the read callback to return full
    buffers
@@ -42,6 +41,7 @@ This release includes the following bugfixes:
  o SSL session ID cache memory leak
  o bad connection re-use check with environment variable-activated proxy use
  o --libcurl now generates a return statement as well
+ o socklen_t is no longer used in the public includes
 
 This release includes the following known bugs:
 

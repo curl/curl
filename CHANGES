@@ -7,6 +7,17 @@
                                   Changelog
 
 Daniel S (2 Jan 2008)
+- I removed the socklen_t use from the public curl/curl.h header and instead
+  made it an unsigned int. The type was only used in the curl_sockaddr struct
+  definition (only used by the curl_opensocket_callback). On all platforms I
+  could find information about, socklen_t is 32 unsigned bits large so I don't
+  think this will break the API or ABI. The main reason for this change is of
+  course for all the platforms that don't have a socklen_t definition in their
+  headers to build fine again. Providing our own configure magic and custom
+  definition of socklen_t on those systems proved to work but was a lot of
+  cruft, code and extra magic needed - when this very small change of type
+  seems harmless and still solves the missing socklen_t problem.
+
 - Richard Atterer brought a patch that added support for SOCKS4a proxies,
   which is an inofficial PROXY4 variant that sends the hostname to the proxy
   instead of the resolved address (which is already supported by SOCKS5).
