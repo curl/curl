@@ -1,7 +1,7 @@
 Curl and libcurl 7.17.2
 
  Public curl releases:         103
- Command line options:         123
+ Command line options:         124
  curl_easy_setopt() options:   148
  Public functions in libcurl:  55
  Public web site mirrors:      42
@@ -13,6 +13,7 @@ This release includes the following changes:
  o --data-urlencode was added
  o CURLOPT_PROXY_TRANSFER_MODE was added
  o --no-keep-alive was added
+ o --socks4a added (proxy type CURLPROXY_SOCKS4A for libcurl)
 
 This release includes the following bugfixes:
 
@@ -62,6 +63,6 @@ advice from friends like these:
  Robin Johnson, Michal Marek, Ates Goral, Andres Garcia, Rob Crittenden,
  Emil Romanus, Alessandro Vesely, Ray Pekowski, Spacen Jasset, Andrew Moise,
  Gilles Blanc, David Wright, Vikram Saxena, Mateusz Loskot, Gary Maxwell,
- Dmitry Kurochkin, Mohun Biswas
+ Dmitry Kurochkin, Mohun Biswas, Richard Atterer
  
         Thanks! (and sorry if I forgot to mention someone)

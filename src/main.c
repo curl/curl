@@ -712,6 +712,7 @@ static void help(void)
     " -s/--silent        Silent mode. Don't output anything",
     " -S/--show-error    Show error. With -s, make curl show errors when they occur",
     "    --socks4 <host[:port]> Use SOCKS4 proxy on given host + port",
+    "    --socks4a <host[:port]> Use SOCKS4a proxy on given host + port",
     "    --socks5 <host[:port]> Use SOCKS5 proxy on given host + port",
     "    --stderr <file> Where to redirect stderr. - means stdout",
     " -t/--telnet-option <OPT=val> Set telnet option",
@@ -1532,6 +1533,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$r", "ftp-method", TRUE},
     {"$s", "local-port", TRUE},
     {"$t", "socks4",     TRUE},
+    {"$T", "socks4a",    TRUE},
     {"$u", "ftp-alternative-to-user", TRUE},
     {"$v", "ftp-ssl-reqd", FALSE},
     {"$w", "no-sessionid", FALSE},
@@ -1905,6 +1907,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       case 't': /* --socks4 specifies a socks4 proxy to use */
         GetStr(&config->socksproxy, nextarg);
         config->socksver = CURLPROXY_SOCKS4;
+        break;
+      case 'T': /* --socks4a specifies a socks4a proxy to use */
+        GetStr(&config->socksproxy, nextarg);
+        config->socksver = CURLPROXY_SOCKS4A;
         break;
       case 'd': /* --tcp-nodelay option */
         config->tcp_nodelay ^= TRUE;

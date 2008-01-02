@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1726,8 +1726,9 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
           newport = (unsigned short)(num & 0xffff);
 
           if(conn->bits.tunnel_proxy ||
-              data->set.proxytype == CURLPROXY_SOCKS5 ||
-              data->set.proxytype == CURLPROXY_SOCKS4)
+             data->set.proxytype == CURLPROXY_SOCKS5 ||
+             data->set.proxytype == CURLPROXY_SOCKS4 ||
+             data->set.proxytype == CURLPROXY_SOCKS4A)
             /* proxy tunnel -> use other host info because ip_addr_str is the
                proxy address not the ftp host */
             snprintf(newhost, sizeof(newhost), "%s", conn->host.name);
@@ -1781,7 +1782,8 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
             conn->ip_addr_str);
       if(conn->bits.tunnel_proxy ||
           data->set.proxytype == CURLPROXY_SOCKS5 ||
-          data->set.proxytype == CURLPROXY_SOCKS4)
+          data->set.proxytype == CURLPROXY_SOCKS4 ||
+          data->set.proxytype == CURLPROXY_SOCKS4A)
         /* proxy tunnel -> use other host info because ip_addr_str is the
            proxy address not the ftp host */
         snprintf(newhost, sizeof(newhost), "%s", conn->host.name);
@@ -1886,7 +1888,11 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     break;
   case CURLPROXY_SOCKS4:
     result = Curl_SOCKS4(conn->proxyuser, newhost, newport,
-                         SECONDARYSOCKET, conn);
+                         SECONDARYSOCKET, conn, false);
+    break;
+  case CURLPROXY_SOCKS4A:
+    result = Curl_SOCKS4(conn->proxyuser, newhost, newport,
+                         SECONDARYSOCKET, conn, true);
     break;
   default:
     failf(data, "unknown proxytype option given");

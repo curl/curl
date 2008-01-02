@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -1070,6 +1070,14 @@ If this option is used twice, the second will again disable show error.
 .IP "--socks4 <host[:port]>"
 Use the specified SOCKS4 proxy. If the port number is not specified, it is
 assumed at port 1080. (Added in 7.15.2)
+
+This option overrides any previous use of \fI-x/--proxy\fP, as they are
+mutually exclusive.
+
+If this option is used several times, the last one will be used.
+.IP "--socks4a <host[:port]>"
+Use the specified SOCKS4a proxy. If the port number is not specified, it is
+assumed at port 1080. (Added in 7.17.2)
 
 This option overrides any previous use of \fI-x/--proxy\fP, as they are
 mutually exclusive.

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1868,7 +1868,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 
   case CURLOPT_PROXYTYPE:
     /*
-     * Set proxy type. HTTP/SOCKS4/SOCKS5
+     * Set proxy type. HTTP/SOCKS4/SOCKS4a/SOCKS5
      */
     data->set.proxytype = (curl_proxytype)va_arg(param, long);
     break;
@@ -2643,8 +2643,12 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
         /* do nothing here. handled later. */
         break;
       case CURLPROXY_SOCKS4:
-        result = Curl_SOCKS4(conn->proxyuser, conn->host.name, conn->remote_port,
-                             FIRSTSOCKET, conn);
+        result = Curl_SOCKS4(conn->proxyuser, conn->host.name,
+                             conn->remote_port, FIRSTSOCKET, conn, false);
+        break;
+      case CURLPROXY_SOCKS4A:
+        result = Curl_SOCKS4(conn->proxyuser, conn->host.name,
+                             conn->remote_port, FIRSTSOCKET, conn, true);
         break;
       default:
         failf(data, "unknown proxytype option given");

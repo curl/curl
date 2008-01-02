@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -118,16 +118,19 @@ static int blockread_all(struct connectdata *conn, /* connection data */
 *   http://socks.permeo.com/protocol/socks4.protocol
 *
 * Note :
-*   Nonsupport "SOCKS 4A (Simple Extension to SOCKS 4 Protocol)"
+*   Set protocol4a=true for  "SOCKS 4A (Simple Extension to SOCKS 4 Protocol)"
 *   Nonsupport "Identification Protocol (RFC1413)"
 */
 CURLcode Curl_SOCKS4(const char *proxy_name,
                      const char *hostname,
                      int remote_port,
                      int sockindex,
-                     struct connectdata *conn)
+                     struct connectdata *conn,
+                     bool protocol4a)
 {
-  unsigned char socksreq[262]; /* room for SOCKS4 request incl. user id */
+#define SOCKS4REQLEN 262
+  unsigned char socksreq[SOCKS4REQLEN]; /* room for SOCKS4 request incl. user
+                                           id */
   int result;
   CURLcode code;
   curl_socket_t sock = conn->sock[sockindex];
@@ -165,8 +168,8 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
   socksreq[1] = 1; /* connect */
   *((unsigned short*)&socksreq[2]) = htons((unsigned short)remote_port);
 
-  /* DNS resolve */
-  {
+  /* DNS resolve only for SOCKS4, not SOCKS4a */
+  if (!protocol4a) {
     struct Curl_dns_entry *dns;
     Curl_addrinfo *hp=NULL;
     int rc;
@@ -225,14 +228,39 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
   {
     ssize_t actualread;
     ssize_t written;
+    ssize_t hostnamelen = 0;
     int packetsize = 9 +
       (int)strlen((char*)socksreq + 8); /* size including NUL */
 
+    /* If SOCKS4a, set special invalid IP address 0.0.0.x */
+    if (protocol4a) {
+      socksreq[4] = 0;
+      socksreq[5] = 0;
+      socksreq[6] = 0;
+      socksreq[7] = 1;
+      /* If still enough room in buffer, also append hostname */
+      hostnamelen = strlen(hostname) + 1; /* length including NUL */
+      if (packetsize + hostnamelen <= SOCKS4REQLEN)
+        strcpy((char*)socksreq + packetsize, hostname);
+      else
+        hostnamelen = 0; /* Flag: hostname did not fit in buffer */
+    }
+
     /* Send request */
-    code = Curl_write(conn, sock, (char *)socksreq, packetsize, &written);
-    if((code != CURLE_OK) || (written != packetsize)) {
+    code = Curl_write(conn, sock, (char *)socksreq, packetsize + hostnamelen,
+                      &written);
+    if((code != CURLE_OK) || (written != packetsize + hostnamelen)) {
       failf(data, "Failed to send SOCKS4 connect request.");
       return CURLE_COULDNT_CONNECT;
+    }
+    if (protocol4a && hostnamelen == 0) {
+      /* SOCKS4a with very long hostname - send that name separately */
+      hostnamelen = strlen(hostname) + 1;
+      code = Curl_write(conn, sock, (char *)hostname, hostnamelen, &written);
+      if((code != CURLE_OK) || (written != hostnamelen)) {
+        failf(data, "Failed to send SOCKS4 connect request.");
+        return CURLE_COULDNT_CONNECT;
+      }
     }
 
     packetsize = 8; /* receive data size */
@@ -275,7 +303,10 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
     switch(socksreq[1])
     {
     case 90:
-      infof(data, "SOCKS4 request granted.\n");
+      if (protocol4a)
+        infof(data, "SOCKS4a request granted.\n");
+      else
+        infof(data, "SOCKS4 request granted.\n");
       break;
     case 91:
       failf(data,

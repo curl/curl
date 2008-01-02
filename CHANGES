@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel S (2 Jan 2008)
+- Richard Atterer brought a patch that added support for SOCKS4a proxies,
+  which is an inofficial PROXY4 variant that sends the hostname to the proxy
+  instead of the resolved address (which is already supported by SOCKS5).
+  --socks4a is the curl command line option for it and CURLOPT_PROXYTYPE can
+  now be set to CURLPROXY_SOCKS4A as well.
+
 Daniel S (1 Jan 2008)
 - Mohun Biswas pointed out that --libcurl generated a source code with an int
   function but without a return statement. While fixing that, I also took care
