@@ -1,22 +1,22 @@
 To be addressed before 7.18.0 (planned release: January 2008)
 =============================
 
-108 - socklen_t usage in curl/curl.h for systems without it
+108 - socklen_t usage in curl/curl.h for systems without it (go unsigned int)
       http://curl.haxx.se/mail/lib-2007-12/0241.html
 
-109 - curl_easy_pause 
+109 - curl_easy_pause (outstanding work)
       http://curl.haxx.se/mail/lib-2007-12/0247.html
 
-110 - seekfunction
+110 - seekfunction (review)
       http://curl.haxx.se/mail/lib-2007-12/0188.html
 
-111 - DNS resolve over socks5
+111 - DNS resolve over socks5 (review, apply)
       patch by Maxim Perenesenko on Dec 26 2007
 
-112 - pipelining patch(es) from Dmitry Kurochkin
+112 - pipelining patch(es) from Dmitry Kurochkin (outstanding work)
       http://curl.haxx.se/mail/lib-2007-12/0252.html
 
 113 - #1850730 and #1854175, both dealing with POST over proxy requiring proxy
-      auth
+      auth (to find and fix)
 
 114 - 
