@@ -17,5 +17,8 @@ To be addressed before 7.18.0 (planned release: January 2008)
       auth (to find and fix)
 
 114 - Ranged downloads on file:// URLs by Daniel Egger (patch failed to apply)
+
+115 - Cleanup debugging messages in test harness, introduced for new minimum
+      SSH version support for SCP, SFTP and SOCKS tests
       
-115 -
+116 -

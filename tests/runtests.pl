@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -62,6 +62,16 @@ use strict;
 use Cwd;
 
 @INC=(@INC, $ENV{'srcdir'}, ".");
+
+# Variables and subs imported from sshhelp module
+use sshhelp qw(
+    $sshexe
+    $sshconfig
+    $sshlog
+    display_sshlog
+    find_ssh
+    sshversioninfo
+    );
 
 require "getpart.pm"; # array functions
 require "valgrind.pm"; # valgrind report parser
@@ -172,6 +182,11 @@ my $skipped=0;  # number of tests skipped; reported in main loop
 my %skipped;    # skipped{reason}=counter, reasons for skip
 my @teststat;   # teststat[testnum]=reason, reasons for skip
 my %disabled_keywords;	# key words of tests to skip
+
+my $sshid;      # for socks server, ssh version id
+my $sshvernum;  # for socks server, ssh version number
+my $sshverstr;  # for socks server, ssh version string
+my $ssherror;   # for socks server, ssh version error
 
 #######################################################################
 # variables the command line options may set
@@ -294,7 +309,7 @@ sub startnew {
         die "error: exec() has returned";
     }
 
-    # Ugly hack but ssh doesn't support pid files
+    # Ugly hack but ssh client doesn't support pid files
     if ($fake) {
         if(open(OUT, ">$pidfile")) {
             print OUT $child . "\n";
@@ -1042,6 +1057,7 @@ sub runsshserver {
     my ($id, $verbose, $ipv6) = @_;
     my $ip=$HOSTIP;
     my $port = $SSHPORT;
+    my $socksport = $SOCKSPORT;
     my $pidfile = $SSHPIDFILE;
 
     # don't retry if the server doesn't work
@@ -1056,11 +1072,12 @@ sub runsshserver {
         stopserver($pid);
     }
 
-    my $flag=$debugprotocol?"-v ":"";
-    my $cmd="$perl $srcdir/sshserver.pl $flag-u $USER -l $HOSTIP -d $srcdir $port";
+    my $flag=$verbose?'-v ':'';
+    $flag .= '-d ' if($debugprotocol);
+
+    my $cmd="$perl $srcdir/sshserver.pl ${flag}-u $USER -l $ip -p $port -s $socksport";
     logmsg "TRACESSH:runsshserver: calling startnew with cmd: $cmd\n";
-    my ($sshpid, $pid2) =
-        startnew($cmd, $pidfile, 60, 0); # start the server in a new process
+    my ($sshpid, $pid2) = startnew($cmd, $pidfile, 60, 0);
 
     logmsg "TRACESSH:runsshserver: startnew returns sshpid: $sshpid pid2: $pid2\n";
 
@@ -1101,39 +1118,80 @@ sub runsocksserver {
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
-        logmsg "TRACESSH:runsocksserver: socks server previously failed to start with pidfile: $pidfile\n";
         return (0,0);
     }
 
-    my $flag=$debugprotocol?"-v ":"";
-    my $cmd="ssh -D $SOCKSPORT -N -F curl_ssh_config ${USER}\@${HOSTIP} -p ${SSHPORT} -vv >log/ssh.log 2>&1";
-    logmsg "TRACESSH:runsocksserver: calling startnew with cmd: $cmd\n";
-    my ($sshpid, $pid2) =
-        startnew($cmd, $pidfile, 15, 1); # start the server in a new process
+    my $pid = checkserver($pidfile);
+    logmsg "TRACESSH:runsocksserver: checkserver on pidfile: $pidfile returns pid: $pid\n";
+    if($pid > 0) {
+        stopserver($pid);
+    }
+    unlink($pidfile);
+
+    # The ssh server must be already running
+    if(!$run{'ssh'}) {
+        logmsg "RUN: SOCKS server cannot find running SSH server\n";
+        $doesntrun{$pidfile} = 1;
+        return (0,0);
+    }
+
+    # Find out ssh client canonical file name
+    my $ssh = find_ssh();
+    if(!$ssh) {
+        logmsg "RUN: SOCKS server cannot find $sshexe\n";
+        $doesntrun{$pidfile} = 1;
+        return (0,0);
+    }
+
+    # Find out ssh client version info
+    ($sshid, $sshvernum, $sshverstr, $ssherror) = sshversioninfo($ssh);
+    if(!$sshid) {
+        # Not an OpenSSH or SunSSH ssh client
+        logmsg "$ssherror\n" if($verbose);
+        logmsg "SCP, SFTP and SOCKS tests require OpenSSH 2.9.9 or later\n";
+        $doesntrun{$pidfile} = 1;
+        return (0,0);
+    }
+
+    # Verify minimum ssh client version
+    if((($sshid =~ /OpenSSH/) && ($sshvernum < 299)) ||
+       (($sshid =~ /SunSSH/)  && ($sshvernum < 100))) {
+        logmsg "ssh client found $ssh is $sshverstr\n";
+        logmsg "SCP, SFTP and SOCKS tests require OpenSSH 2.9.9 or later\n";
+        $doesntrun{$pidfile} = 1;
+        return (0,0);
+    }
+    logmsg "ssh client found $ssh is $sshverstr\n" if($verbose);
+
+    # Config file options for ssh client are previously set from sshserver.pl
+    if(! -e $sshconfig) {
+        logmsg "RUN: SOCKS server cannot find $sshconfig\n";
+        $doesntrun{$pidfile} = 1;
+        return (0,0);
+    }
+
+    # start our socks server
+    my $cmd="$ssh -N -F $sshconfig $ip > $sshlog 2>&1";
+    my ($sshpid, $pid2) = startnew($cmd, $pidfile, 30, 1);
 
     logmsg "TRACESSH:runsocksserver: startnew returns sshpid: $sshpid pid2: $pid2\n";
 
     if($sshpid <= 0 || !kill(0, $sshpid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the SOCKS server\n";
-        logmsg "=== Start of file log/ssh.log\n";
-        displaylogcontent("log/ssh.log");
-        logmsg "=== End of file log/ssh.log\n";
-        logmsg "TRACESSH:runsocksserver: calling stopserver with pid2: $pid2\n";
+        display_sshlog();
         stopserver("$pid2");
         $doesntrun{$pidfile} = 1;
-        logmsg "TRACESSH:runsocksserver: later dont try to start a server with pidfile: $pidfile\n";
         return (0,0);
     }
 
     # Ugly hack but ssh doesn't support pid files
     if (!verifyserver('socks',$ip,$port)) {
         logmsg "RUN: SOCKS server failed verification\n";
+        display_sshlog();
         # failed to talk to it properly. Kill the server and return failure
-        logmsg "TRACESSH:runsocksserver: calling stopserver with sshpid: $sshpid pid2: $pid2\n";
         stopserver("$sshpid $pid2");
         $doesntrun{$pidfile} = 1;
-        logmsg "TRACESSH:runsocksserver: later dont try to start a server with pidfile: $pidfile\n";
         return (0,0);
     }
     if($verbose) {
@@ -2404,36 +2462,34 @@ sub startservers {
                 printf ("* pid ssh => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'ssh'}="$pid $pid2";
             }
-	    if ($what eq "socks4" || $what eq "socks5") {
-                if (!checkcmd("ssh")) {
-                   return "failed to find SSH client for socks support";
-		}
-            	if(!$run{'socks'}) {
-		    my $sshversion=`ssh -V 2>&1`;
-                    if($sshversion =~ /OpenSSH[_-](\d+)\.(\d+)/i) {
-                        if ($1*10+$2 < 36) {
-                            # need 3.7 for socks5 - http://www.openssh.com/txt/release-3.7
-                            return "OpenSSH version ($1.$2) insufficient; need at least 3.7";
-                        }
-                    }
-                    elsif($sshversion =~ /Sun[_-]SSH[_-](\d+)\.(\d+)/i) {
-                        if ($1*10+$2 < 11) {
-                            return "SunSSH version ($1.$2) insufficient; need at least 1.1";
-                        }
-                    }
-                    else {
-                       return "Unsupported ssh client\n";
-                    }
-
-                    ($pid, $pid2) = runsocksserver("", $verbose);
+            if($what eq "socks4" || $what eq "socks5") {
+                if(!$run{'socks'}) {
+                    ($pid, $pid2) = runsocksserver("", 1);
                     printf ("TRACESSH:startservers: runsocksserver returns pid: %d pid2: %d\n", $pid, $pid2);
                     if($pid <= 0) {
                         return "failed starting socks server";
                     }
                     printf ("* pid socks => %d %d\n", $pid, $pid2) if($verbose);
                     $run{'socks'}="$pid $pid2";
-		}
-	    }
+                }
+            }
+            if($what eq "socks5") {
+                if(!$sshid) {
+                    # Not an OpenSSH or SunSSH ssh client
+                    logmsg "Not OpenSSH or SunSSH; socks5 tests need at least OpenSSH 3.7\n";
+                    return "failed starting socks5 server";
+                }
+                elsif(($sshid =~ /OpenSSH/) && ($sshvernum < 370)) {
+                    # Need OpenSSH 3.7 for socks5 - http://www.openssh.com/txt/release-3.7
+                    logmsg "$sshverstr insufficient; socks5 tests need at least OpenSSH 3.7\n";
+                    return "failed starting socks5 server";
+                }
+                elsif(($sshid =~ /SunSSH/)  && ($sshvernum < 100)) {
+                    # Need SunSSH 1.0 for socks5
+                    logmsg "$sshverstr insufficient; socks5 tests need at least SunSSH 1.0\n";
+                    return "failed starting socks5 server";
+                }
+            }
         }
         elsif($what eq "none") {
             logmsg "* starts no server\n" if ($verbose);
@@ -2880,6 +2936,8 @@ close(CMDLOG);
 
 # Tests done, stop the servers
 stopservers($verbose);
+
+unlink($SOCKSPIDFILE);
 
 my $all = $total + $skipped;
 
