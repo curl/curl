@@ -1888,11 +1888,11 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     break;
   case CURLPROXY_SOCKS4:
     result = Curl_SOCKS4(conn->proxyuser, newhost, newport,
-                         SECONDARYSOCKET, conn, false);
+                         SECONDARYSOCKET, conn, FALSE);
     break;
   case CURLPROXY_SOCKS4A:
     result = Curl_SOCKS4(conn->proxyuser, newhost, newport,
-                         SECONDARYSOCKET, conn, true);
+                         SECONDARYSOCKET, conn, TRUE);
     break;
   default:
     failf(data, "unknown proxytype option given");

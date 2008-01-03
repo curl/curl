@@ -2644,11 +2644,11 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
         break;
       case CURLPROXY_SOCKS4:
         result = Curl_SOCKS4(conn->proxyuser, conn->host.name,
-                             conn->remote_port, FIRSTSOCKET, conn, false);
+                             conn->remote_port, FIRSTSOCKET, conn, FALSE);
         break;
       case CURLPROXY_SOCKS4A:
         result = Curl_SOCKS4(conn->proxyuser, conn->host.name,
-                             conn->remote_port, FIRSTSOCKET, conn, true);
+                             conn->remote_port, FIRSTSOCKET, conn, TRUE);
         break;
       default:
         failf(data, "unknown proxytype option given");
