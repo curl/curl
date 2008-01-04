@@ -746,6 +746,9 @@ if((($sshid =~ /OpenSSH/) && ($sshvernum >= 370)) ||
 
 if(($sshid =~ /OpenSSH/) && ($sshvernum >= 390)) {
     push @cfgarr, 'ControlMaster no';
+}
+
+if(($sshid =~ /OpenSSH/) && ($sshvernum >= 420)) {
     push @cfgarr, 'ControlPath none';
 }
 
