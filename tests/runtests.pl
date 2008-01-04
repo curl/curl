@@ -2042,6 +2042,12 @@ sub singletest {
             map s/\r\n/\n/g, @actual;
         }
 
+        if($hash{'nonewline'}) {
+            # Yes, we must cut off the final newline from the final line
+            # of the protocol data
+            chomp($validstdout[$#validstdout]);
+        }
+
         $res = compare("stdout", \@actual, \@validstdout);
         if($res) {
             return 1;

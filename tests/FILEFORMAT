@@ -275,11 +275,14 @@ off the trailing newline of this given data before comparing with the one
 actually sent by the client
 Variables are substituted as in the <command> section.
 </protocol>
-<stdout [mode="text"]>
+<stdout [mode="text"] [nonewline=yes]>
 This verifies that this data was passed to stdout.
 
 Use the mode="text" attribute if the output is in text mode on platforms that
 have a text/binary difference.
+
+If 'nonewline' is set, we will cut off the trailing newline of this given data
+before comparing with the one actually received by the client
 </stdout>
 <file name="log/filename" [mode="text"]>
 The file's contents must be identical to this after the test is complete.
