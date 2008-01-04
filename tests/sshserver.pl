@@ -740,7 +740,7 @@ if(($sshid =~ /OpenSSH/) && ($sshvernum >= 370)) {
 }
 
 if((($sshid =~ /OpenSSH/) && ($sshvernum >= 370)) ||
-    ($sshid =~ /SunSSH/)) {
+   (($sshid =~ /SunSSH/) && ($sshvernum >= 120))) {
     push @cfgarr, 'ConnectTimeout 30';
 }
 
@@ -758,12 +758,12 @@ if(($sshid =~ /OpenSSH/) && ($sshvernum >= 440)) {
 }
 
 if((($sshid =~ /OpenSSH/) && ($sshvernum >= 380)) ||
-    ($sshid =~ /SunSSH/)) {
+   (($sshid =~ /SunSSH/) && ($sshvernum >= 120))) {
     push @cfgarr, 'ForwardX11Trusted no';
 }
 
 if((($sshid =~ /OpenSSH/) && ($sshvernum >= 400)) ||
-    ($sshid =~ /SunSSH/)) {
+   (($sshid =~ /SunSSH/) && ($sshvernum >= 120))) {
     push @cfgarr, 'HashKnownHosts no';
 }
 
@@ -786,7 +786,7 @@ if(($sshid =~ /OpenSSH/) && ($sshvernum >= 430)) {
 }
 
 if((($sshid =~ /OpenSSH/) && ($sshvernum >= 370)) ||
-    ($sshid =~ /SunSSH/)) {
+   (($sshid =~ /SunSSH/) && ($sshvernum >= 120))) {
     push @cfgarr, 'RekeyLimit 1G';
 }
 
@@ -795,7 +795,7 @@ if(($sshid =~ /OpenSSH/) && ($sshvernum >= 390)) {
 }
 
 if((($sshid =~ /OpenSSH/) && ($sshvernum >= 380)) ||
-    ($sshid =~ /SunSSH/)) {
+   (($sshid =~ /SunSSH/) && ($sshvernum >= 120))) {
     push @cfgarr, 'ServerAliveCountMax 3';
     push @cfgarr, 'ServerAliveInterval 0';
 }
