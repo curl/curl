@@ -76,7 +76,7 @@ int my_trace(CURL *handle, curl_infotype type,
 
   switch (type) {
   case CURLINFO_TEXT:
-    fprintf(stderr, "== Info: %s", data);
+    fprintf(stderr, "== Info: %s", (char *)data);
   default: /* in case a new one is introduced to shock us */
     return 0;
 
@@ -122,7 +122,7 @@ static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *stream)
 
 static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *stream)
 {
-  printf("%.*s", size * nmemb, (char *)ptr);
+  printf("%.*s", (int)(size * nmemb), (char *)ptr);
   (void)stream;
   return size * nmemb;
 }
@@ -185,7 +185,7 @@ int test(char *URL)
     curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
 
     res = curl_easy_perform(curl);
-    fprintf(stderr, "curl_east_perform = %d\n", res);
+    fprintf(stderr, "curl_easy_perform = %d\n", (int)res);
 
     /* always cleanup */
     curl_easy_cleanup(curl);
