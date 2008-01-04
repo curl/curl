@@ -1157,7 +1157,7 @@ sub runsocksserver {
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
-    logmsg "ssh server found $sshd is $sshdverstr" if($verbose);
+    logmsg "ssh server found $sshd is $sshdverstr\n" if($verbose);
 
     # Find out ssh client canonical file name
     my $ssh = find_ssh();
