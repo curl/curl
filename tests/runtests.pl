@@ -67,10 +67,13 @@ use Cwd;
 
 # Variables and subs imported from sshhelp module
 use sshhelp qw(
+    $sshdexe
     $sshexe
     $sshconfig
     $sshlog
+    display_sshconfig
     display_sshlog
+    find_sshd
     find_ssh
     sshversioninfo
     );
@@ -185,10 +188,10 @@ my %skipped;    # skipped{reason}=counter, reasons for skip
 my @teststat;   # teststat[testnum]=reason, reasons for skip
 my %disabled_keywords;	# key words of tests to skip
 
-my $sshid;      # for socks server, ssh version id
-my $sshvernum;  # for socks server, ssh version number
-my $sshverstr;  # for socks server, ssh version string
-my $ssherror;   # for socks server, ssh version error
+my $sshdid;      # for socks server, ssh daemon version id
+my $sshdvernum;  # for socks server, ssh daemon version number
+my $sshdverstr;  # for socks server, ssh daemon version string
+my $sshderror;   # for socks server, ssh daemon version error
 
 #######################################################################
 # variables the command line options may set
@@ -1137,6 +1140,25 @@ sub runsocksserver {
         return (0,0);
     }
 
+    # Find out ssh daemon canonical file name
+    my $sshd = find_sshd();
+    if(!$sshd) {
+        logmsg "RUN: SOCKS server cannot find $sshdexe\n";
+        $doesntrun{$pidfile} = 1;
+        return (0,0);
+    }
+
+    # Find out ssh daemon version info
+    ($sshdid, $sshdvernum, $sshdverstr, $sshderror) = sshversioninfo($sshd);
+    if(!$sshdid) {
+        # Not an OpenSSH or SunSSH ssh daemon
+        logmsg "$sshderror\n" if($verbose);
+        logmsg "SCP, SFTP and SOCKS tests require OpenSSH 2.9.9 or later\n";
+        $doesntrun{$pidfile} = 1;
+        return (0,0);
+    }
+    logmsg "ssh server found $sshd is $sshdverstr" if($verbose);
+
     # Find out ssh client canonical file name
     my $ssh = find_ssh();
     if(!$ssh) {
@@ -1146,7 +1168,7 @@ sub runsocksserver {
     }
 
     # Find out ssh client version info
-    ($sshid, $sshvernum, $sshverstr, $ssherror) = sshversioninfo($ssh);
+    my ($sshid, $sshvernum, $sshverstr, $ssherror) = sshversioninfo($ssh);
     if(!$sshid) {
         # Not an OpenSSH or SunSSH ssh client
         logmsg "$ssherror\n" if($verbose);
@@ -1165,6 +1187,13 @@ sub runsocksserver {
     }
     logmsg "ssh client found $ssh is $sshverstr\n" if($verbose);
 
+    # Verify if ssh client and ssh daemon versions match
+    if(($sshdid ne $sshid) || ($sshdvernum != $sshvernum)) {
+        # Our test harness works with mismatched versions
+        logmsg "Warning: ssh server and client versions do not match\n"
+            if($verbose);
+    }
+
     # Config file options for ssh client are previously set from sshserver.pl
     if(! -e $sshconfig) {
         logmsg "RUN: SOCKS server cannot find $sshconfig\n";
@@ -1182,6 +1211,7 @@ sub runsocksserver {
         # it is NOT alive
         logmsg "RUN: failed to start the SOCKS server\n";
         display_sshlog();
+        display_sshconfig();
         stopserver("$pid2");
         $doesntrun{$pidfile} = 1;
         return (0,0);
@@ -2476,19 +2506,19 @@ sub startservers {
                 }
             }
             if($what eq "socks5") {
-                if(!$sshid) {
-                    # Not an OpenSSH or SunSSH ssh client
+                if(!$sshdid) {
+                    # Not an OpenSSH or SunSSH ssh daemon
                     logmsg "Not OpenSSH or SunSSH; socks5 tests need at least OpenSSH 3.7\n";
                     return "failed starting socks5 server";
                 }
-                elsif(($sshid =~ /OpenSSH/) && ($sshvernum < 370)) {
+                elsif(($sshdid =~ /OpenSSH/) && ($sshdvernum < 370)) {
                     # Need OpenSSH 3.7 for socks5 - http://www.openssh.com/txt/release-3.7
-                    logmsg "$sshverstr insufficient; socks5 tests need at least OpenSSH 3.7\n";
+                    logmsg "$sshdverstr insufficient; socks5 tests need at least OpenSSH 3.7\n";
                     return "failed starting socks5 server";
                 }
-                elsif(($sshid =~ /SunSSH/)  && ($sshvernum < 100)) {
+                elsif(($sshdid =~ /SunSSH/)  && ($sshdvernum < 100)) {
                     # Need SunSSH 1.0 for socks5
-                    logmsg "$sshverstr insufficient; socks5 tests need at least SunSSH 1.0\n";
+                    logmsg "$sshdverstr insufficient; socks5 tests need at least SunSSH 1.0\n";
                     return "failed starting socks5 server";
                 }
             }
