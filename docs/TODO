@@ -94,6 +94,7 @@
  14. Next SONAME bump
  14.1 http-style HEAD output for ftp
  14.2 combine error codes
+ 14.3 extend CURLOPT_SOCKOPTFUNCTION prototype
 
  15. Next major release
  15.1 cleanup return codes
@@ -513,6 +514,13 @@ to provide the data to send.
     CURLE_TFTP_NOSUCHUSER => CURLE_TFTP_ILLEGAL
     CURLE_TFTP_NOTFOUND => CURLE_REMOTE_FILE_NOT_FOUND
     CURLE_TFTP_PERM => CURLE_REMOTE_ACCESS_DENIED
+
+14.3 extend CURLOPT_SOCKOPTFUNCTION prototype
+
+ The current prototype only provides 'purpose' that tells what the
+ connection/socket is for, but not any protocol or similar. It makes it hard
+ for applications to differentiate on TCP vs UDP and even HTTP vs FTP and
+ similar.
 
 15. Next major release
 
