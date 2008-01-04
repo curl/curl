@@ -649,7 +649,7 @@ if(! -e $knownhosts) {
 #  KeepAlive                         : OpenSSH 1.2.1 and later
 #  KbdInteractiveAuthentication      : OpenSSH 2.3.0 and later
 #  KbdInteractiveDevices             : OpenSSH 2.3.0 and later [3]
-#  LocalCommand                      : OpenSSH 4.3.0 and later
+#  LocalCommand                      : OpenSSH 4.3.0 and later [3]
 #  LocalForward                      : OpenSSH 1.2.1 and later [3]
 #  LogLevel                          : OpenSSH 1.2.1 and later
 #  MACs                              : OpenSSH 2.5.0 and later [3]
@@ -774,10 +774,6 @@ if(($sshid =~ /OpenSSH/) && ($sshvernum >= 390)) {
 if((($sshid =~ /OpenSSH/) && ($sshvernum < 380)) ||
     ($sshid =~ /SunSSH/)) {
     push @cfgarr, 'KeepAlive no';
-}
-
-if(($sshid =~ /OpenSSH/) && ($sshvernum >= 430)) {
-    push @cfgarr, 'LocalCommand';
 }
 
 if((($sshid =~ /OpenSSH/) && ($sshvernum >= 300)) ||
