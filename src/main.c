@@ -480,6 +480,8 @@ struct Configurable {
   bool raw;
   bool post301;
   bool nokeepalive;
+  bool socks5_resolve_local; /* don't use SOCKS5 proxy server to resolve
+                                domain names */
   struct OutStruct *outs;
 };
 
@@ -713,7 +715,8 @@ static void help(void)
     " -S/--show-error    Show error. With -s, make curl show errors when they occur",
     "    --socks4 <host[:port]> Use SOCKS4 proxy on given host + port",
     "    --socks4a <host[:port]> Use SOCKS4a proxy on given host + port",
-    "    --socks5 <host[:port]> Use SOCKS5 proxy on given host + port",
+    "    --socks5 <host[:port]> Use SOCKS5 proxy and let the proxy resolve names",
+    "    --socks5ip <host[:port]> Use SOCKS5 proxy on given host + port",
     "    --stderr <file> Where to redirect stderr. - means stdout",
     " -t/--telnet-option <OPT=val> Set telnet option",
     "    --trace <file>  Write a debug trace to the given file",
@@ -1514,10 +1517,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"*z", "disable-eprt", FALSE},
     {"$a", "ftp-ssl",    FALSE},
     {"$b", "ftp-pasv",   FALSE},
-    {"$c", "socks5",     TRUE},
-    {"$c", "socks",      TRUE}, /* this is how the option was documented but
-                                   we prefer the --socks5 version for explicit
-                                   version */
+    {"$c", "socks5ip",   TRUE},
+    {"$c", "socks",      TRUE}, /* this is how the option once was documented
+                                   but we prefer the --socks5 version for
+                                   explicit version */
     {"$d", "tcp-nodelay",FALSE},
     {"$e", "proxy-digest", FALSE},
     {"$f", "proxy-basic", FALSE},
@@ -1544,6 +1547,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$#", "raw",        FALSE},
     {"$0", "post301",    FALSE},
     {"$1", "no-keep-alive",    FALSE},
+    {"$2", "socks5",    TRUE},
 
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
@@ -1900,9 +1904,11 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           free(config->ftpport);
         config->ftpport = NULL;
         break;
-      case 'c': /* --socks5 specifies a socks5 proxy to use */
+      case 'c': /* --socks5ip specifies a socks5 proxy to use, but resolves
+                   the name locally and passes on the resolved address */
         GetStr(&config->socksproxy, nextarg);
         config->socksver = CURLPROXY_SOCKS5;
+        config->socks5_resolve_local = TRUE;
         break;
       case 't': /* --socks4 specifies a socks4 proxy to use */
         GetStr(&config->socksproxy, nextarg);
@@ -1911,6 +1917,12 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       case 'T': /* --socks4a specifies a socks4a proxy to use */
         GetStr(&config->socksproxy, nextarg);
         config->socksver = CURLPROXY_SOCKS4A;
+        break;
+      case '2': /* --socks5 specifies a socks5 proxy and enables name resolving
+                   with the proxy */
+        GetStr(&config->socksproxy, nextarg);
+        config->socksver = CURLPROXY_SOCKS5;
+        config->socks5_resolve_local = FALSE;
         break;
       case 'd': /* --tcp-nodelay option */
         config->tcp_nodelay ^= TRUE;
@@ -4340,7 +4352,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         my_setopt(curl, CURLOPT_SSH_PUBLIC_KEYFILE, config->pubkey);
 
         /* SSH host key md5 checking allows us to fail if we are
-         * not talking to who we think we should 
+         * not talking to who we think we should
          */
         my_setopt(curl, CURLOPT_SSH_HOST_PUBLIC_KEY_MD5, config->hostpubmd5);
 
@@ -4497,6 +4509,10 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         if(config->socksproxy) {
           my_setopt(curl, CURLOPT_PROXY, config->socksproxy);
           my_setopt(curl, CURLOPT_PROXYTYPE, config->socksver);
+          if(config->socksver==CURLPROXY_SOCKS5)
+            /* added in 7.17.2 */
+            my_setopt(curl, CURLOPT_SOCKS5_RESOLVE_LOCAL,
+                      config->socks5_resolve_local);
         }
 
         /* curl 7.13.0 */

@@ -1172,6 +1172,11 @@ typedef enum {
   /* set transfer mode (;type=<a|i>) when doing FTP via an HTTP proxy */
   CINIT(PROXY_TRANSFER_MODE, LONG, 166),
 
+  /* Set using of SOCKS5 to resolve host names locally instead of sending them
+     to the proxy to let it resolve them. Valid only if CURLOPT_PROXYTYPE ==
+     CURLPROXY_SOCKS5, otherwise ignored. */
+  CINIT(SOCKS5_RESOLVE_LOCAL, LONG, 167),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

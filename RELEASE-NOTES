@@ -1,8 +1,8 @@
 Curl and libcurl 7.17.2
 
  Public curl releases:         103
- Command line options:         124
- curl_easy_setopt() options:   148
+ Command line options:         125
+ curl_easy_setopt() options:   149
  Public functions in libcurl:  55
  Public web site mirrors:      42
  Known libcurl bindings:       36
@@ -14,6 +14,7 @@ This release includes the following changes:
  o CURLOPT_PROXY_TRANSFER_MODE was added
  o --no-keep-alive was added
  o --socks4a added (proxy type CURLPROXY_SOCKS4A for libcurl)
+ o --socks5ip added (CURLOPT_SOCKS5_RESOLVE_LOCAL for libcurl)
 
 This release includes the following bugfixes:
 
@@ -42,6 +43,7 @@ This release includes the following bugfixes:
  o bad connection re-use check with environment variable-activated proxy use
  o --libcurl now generates a return statement as well
  o socklen_t is no longer used in the public includes
+ o SOCKS5 uses now let the proxy resolve the host names by default
 
 This release includes the following known bugs:
 
@@ -63,6 +65,6 @@ advice from friends like these:
  Robin Johnson, Michal Marek, Ates Goral, Andres Garcia, Rob Crittenden,
  Emil Romanus, Alessandro Vesely, Ray Pekowski, Spacen Jasset, Andrew Moise,
  Gilles Blanc, David Wright, Vikram Saxena, Mateusz Loskot, Gary Maxwell,
- Dmitry Kurochkin, Mohun Biswas, Richard Atterer
+ Dmitry Kurochkin, Mohun Biswas, Richard Atterer, Maxim Perenesenko
  
         Thanks! (and sorry if I forgot to mention someone)

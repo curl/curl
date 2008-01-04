@@ -1084,8 +1084,19 @@ mutually exclusive.
 
 If this option is used several times, the last one will be used.
 .IP "--socks5 <host[:port]>"
-Use the specified SOCKS5 proxy. If the port number is not specified, it is
-assumed at port 1080. (Added in 7.11.1)
+Use the specified SOCKS5 proxy (and let the proxy resolve the host name). If
+the port number is not specified, it is assumed at port 1080. (Added in
+7.11.1)
+
+This option overrides any previous use of \fI-x/--proxy\fP, as they are
+mutually exclusive.
+
+If this option is used several times, the last one will be used. (This option
+was previously wrongly documented and used as --socks without the number
+appended.)
+.IP "--socks5ip <host[:port]>"
+Use the specified SOCKS5 proxy - but resolve the host name locally. If the
+port number is not specified, it is assumed at port 1080. (Added in 7.17.2)
 
 This option overrides any previous use of \fI-x/--proxy\fP, as they are
 mutually exclusive.

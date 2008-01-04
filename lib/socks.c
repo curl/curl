@@ -390,6 +390,17 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   curl_socket_t sock = conn->sock[sockindex];
   struct SessionHandle *data = conn->data;
   long timeout;
+  bool socks5_resolve_local = data->set.socks5_resolve_local;
+  const size_t hostname_len = strlen(hostname);
+  int packetsize = 0;
+
+  /* RFC1928 chapter 5 specifies max 255 chars for domain name in packet */
+  if(!socks5_resolve_local && hostname_len > 255)
+  {
+    infof(conn->data,"SOCKS5: server resolving disabled for hostnames of "
+          "length > 255 [actual len=%d]\n", hostname_len);
+    socks5_resolve_local = TRUE;
+  }
 
   /* get timeout */
   if(data->set.timeout && data->set.connecttimeout) {
@@ -553,12 +564,25 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   socksreq[0] = 5; /* version (SOCKS5) */
   socksreq[1] = 1; /* connect */
   socksreq[2] = 0; /* must be zero */
-  socksreq[3] = 1; /* IPv4 = 1 */
 
-  {
+  if(!socks5_resolve_local) {
+    packetsize = 5 + hostname_len + 2;
+
+    socksreq[3] = 3; /* ATYP: domain name = 3 */
+    socksreq[4] = (char) hostname_len; /* address length */
+    memcpy(&socksreq[5], hostname, hostname_len); /* address bytes w/o NULL */
+
+    *((unsigned short*)&socksreq[hostname_len+5]) =
+      htons((unsigned short)remote_port);
+  }
+  else {
     struct Curl_dns_entry *dns;
     Curl_addrinfo *hp=NULL;
     int rc = Curl_resolv(conn, hostname, remote_port, &dns);
+
+    packetsize = 10;
+
+    socksreq[3] = 1; /* IPv4 = 1 */
 
     if(rc == CURLRESOLV_ERROR)
       return CURLE_COULDNT_RESOLVE_HOST;
@@ -595,39 +619,75 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
             hostname);
       return CURLE_COULDNT_RESOLVE_HOST;
     }
+
+    *((unsigned short*)&socksreq[8]) = htons((unsigned short)remote_port);
   }
 
-  *((unsigned short*)&socksreq[8]) = htons((unsigned short)remote_port);
+  code = Curl_write(conn, sock, (char *)socksreq, packetsize, &written);
+  if((code != CURLE_OK) || (written != packetsize)) {
+    failf(data, "Failed to send SOCKS5 connect request.");
+    return CURLE_COULDNT_CONNECT;
+  }
 
-  {
-    const int packetsize = 10;
+  packetsize = 10; /* minimum packet size is 10 */
 
-    code = Curl_write(conn, sock, (char *)socksreq, packetsize, &written);
-    if((code != CURLE_OK) || (written != packetsize)) {
-      failf(data, "Failed to send SOCKS5 connect request.");
+  result = blockread_all(conn, sock, (char *)socksreq, packetsize,
+                           &actualread, timeout);
+  if((result != CURLE_OK) || (actualread != packetsize)) {
+    failf(data, "Failed to receive SOCKS5 connect request ack.");
+    return CURLE_COULDNT_CONNECT;
+  }
+
+  if(socksreq[0] != 5) { /* version */
+    failf(data,
+          "SOCKS5 reply has wrong version, version should be 5.");
+    return CURLE_COULDNT_CONNECT;
+  }
+  if(socksreq[1] != 0) { /* Anything besides 0 is an error */
+      failf(data,
+            "Can't complete SOCKS5 connection to %d.%d.%d.%d:%d. (%d)",
+            (unsigned char)socksreq[4], (unsigned char)socksreq[5],
+            (unsigned char)socksreq[6], (unsigned char)socksreq[7],
+            (unsigned int)ntohs(*(unsigned short*)(&socksreq[8])),
+            socksreq[1]);
       return CURLE_COULDNT_CONNECT;
-    }
+  }
 
-    result = blockread_all(conn, sock, (char *)socksreq, packetsize,
+  /* Fix: in general, returned BND.ADDR is variable length parameter by RFC
+     1928, so the reply packet should be read until the end to avoid errors at
+     subsequent protocol level.
+
+    +----+-----+-------+------+----------+----------+
+    |VER | REP |  RSV  | ATYP | BND.ADDR | BND.PORT |
+    +----+-----+-------+------+----------+----------+
+    | 1  |  1  | X'00' |  1   | Variable |    2     |
+    +----+-----+-------+------+----------+----------+
+
+     ATYP:
+     o  IP v4 address: X'01', BND.ADDR = 4 byte
+     o  domain name:  X'03', BND.ADDR = [ 1 byte length, string ]
+     o  IP v6 address: X'04', BND.ADDR = 16 byte
+     */
+
+  /* Calculate real packet size */
+  if(socksreq[3] == 3) {
+    /* domain name */
+    int addrlen = (int) socksreq[4];
+    packetsize = 5 + addrlen + 2;
+  }
+  else if(socksreq[3] == 4) {
+    /* IPv6 */
+    packetsize = 4 + 16 + 2;
+  }
+
+  /* At this point we already read first 10 bytes */
+  if(packetsize > 10) {
+    packetsize -= 10;
+    result = blockread_all(conn, sock, (char *)&socksreq[10], packetsize,
                            &actualread, timeout);
     if((result != CURLE_OK) || (actualread != packetsize)) {
       failf(data, "Failed to receive SOCKS5 connect request ack.");
       return CURLE_COULDNT_CONNECT;
-    }
-
-    if(socksreq[0] != 5) { /* version */
-      failf(data,
-            "SOCKS5 reply has wrong version, version should be 5.");
-      return CURLE_COULDNT_CONNECT;
-    }
-    if(socksreq[1] != 0) { /* Anything besides 0 is an error */
-        failf(data,
-              "Can't complete SOCKS5 connection to %d.%d.%d.%d:%d. (%d)",
-              (unsigned char)socksreq[4], (unsigned char)socksreq[5],
-              (unsigned char)socksreq[6], (unsigned char)socksreq[7],
-              (unsigned int)ntohs(*(unsigned short*)(&socksreq[8])),
-              socksreq[1]);
-        return CURLE_COULDNT_CONNECT;
     }
   }
 

@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel S (4 Jan 2008)
+- Based on Maxim Perenesenko's patch, we now do SOCKS5 operations and let the
+  proxy do the host name resolving and only if --socks5ip (or
+  CURLOPT_SOCKS5_RESOLVE_LOCAL) is used we resolve the host name locally and
+  pass on the IP address only to the proxy.
+
 Yang Tse (3 Jan 2008)
 - Modified test harness to allow SCP, SFTP and SOCKS4 tests to run with
   OpenSSH 2.9.9, SunSSH 1.0 or later versions. SOCKS5 tests need OpenSSH
