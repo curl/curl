@@ -56,12 +56,14 @@
 
 # These should be the only variables that might be needed to get edited:
 
+BEGIN {
+    @INC=(@INC, $ENV{'srcdir'}, ".");
+}
+
 use strict;
 #use Time::HiRes qw( gettimeofday );
 #use warnings;
 use Cwd;
-
-@INC=(@INC, $ENV{'srcdir'}, ".");
 
 # Variables and subs imported from sshhelp module
 use sshhelp qw(
