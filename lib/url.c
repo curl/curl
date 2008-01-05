@@ -2054,14 +2054,6 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     }
     break;
 
-  case CURLOPT_SOCKS5_RESOLVE_LOCAL:
-    /*
-     * Enable or disable using of SOCKS5 proxy server to resolve domain names
-     * instead of using platform API like gethostbyname_r etc
-     */
-    data->set.socks5_resolve_local = (bool)(0 != va_arg(param, long));
-    break;
-
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_FAILED_INIT; /* correct this */

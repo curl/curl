@@ -6,6 +6,17 @@
 
                                   Changelog
 
+Daniel S (5 Jan 2008)
+- Based on further discussion on curl-library, I reverted yesterday's SOCKS5
+  code to instead introduce support for a new proxy type called
+  CURLPROXY_SOCKS5_HOSTNAME that is used to send the host name to the proxy
+  instead of IP address and there's thus no longer any need for a new
+  curl_easy_setopt() option.
+
+  The default SOCKS5 proxy is again back to sending the IP address to the
+  proxy.  The new curl command line option for enabling sending host name to a
+  SOCKS5 proxy is now --socks5-hostname.
+
 Daniel S (4 Jan 2008)
 - Based on Maxim Perenesenko's patch, we now do SOCKS5 operations and let the
   proxy do the host name resolving and only if --socks5ip (or

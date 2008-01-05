@@ -390,7 +390,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   curl_socket_t sock = conn->sock[sockindex];
   struct SessionHandle *data = conn->data;
   long timeout;
-  bool socks5_resolve_local = data->set.socks5_resolve_local;
+  bool socks5_resolve_local = data->set.proxytype == CURLPROXY_SOCKS5;
   const size_t hostname_len = strlen(hostname);
   int packetsize = 0;
 

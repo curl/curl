@@ -499,7 +499,10 @@ typedef enum {
   CURLPROXY_SOCKS4 = 4, /* support added in 7.15.2, enum existed already
                            in 7.10 */
   CURLPROXY_SOCKS5 = 5, /* added in 7.10 */
-  CURLPROXY_SOCKS4A = 6 /* added in 7.17.2 */
+  CURLPROXY_SOCKS4A = 6, /* added in 7.17.2 */
+  CURLPROXY_SOCKS5_HOSTNAME = 7 /* Use the SOCKS5 protocol but pass along the
+                                   host name rather than the IP address. added
+                                   in 7.17.2 */
 } curl_proxytype;  /* this enum was added in 7.10 */
 
 #define CURLAUTH_NONE         0       /* nothing */
@@ -1171,11 +1174,6 @@ typedef enum {
 
   /* set transfer mode (;type=<a|i>) when doing FTP via an HTTP proxy */
   CINIT(PROXY_TRANSFER_MODE, LONG, 166),
-
-  /* Set using of SOCKS5 to resolve host names locally instead of sending them
-     to the proxy to let it resolve them. Valid only if CURLOPT_PROXYTYPE ==
-     CURLPROXY_SOCKS5, otherwise ignored. */
-  CINIT(SOCKS5_RESOLVE_LOCAL, LONG, 167),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_easy_setopt 3 "4 Jan 2008" "libcurl 7.17.2" "libcurl Manual"
+.TH curl_easy_setopt 3 "5 Jan 2008" "libcurl 7.17.2" "libcurl Manual"
 .SH NAME
 curl_easy_setopt \- set options for a curl easy handle
 .SH SYNOPSIS
@@ -431,10 +431,9 @@ specified in the proxy string \fICURLOPT_PROXY\fP.
 .IP CURLOPT_PROXYTYPE
 Pass a long with this option to set type of the proxy. Available options for
 this are \fICURLPROXY_HTTP\fP, \fICURLPROXY_SOCKS4\fP (added in 7.15.2),
-\fICURLPROXY_SOCKS5\fP and \fICURLPROXY_SOCKS4A\fP (added in 7.17.2). The HTTP
-type is default. (Added in 7.10)
-
-See also \fIURLOPT_SOCKS5_RESOLVE_LOCAL\fP.
+\fICURLPROXY_SOCKS5\fP, \fICURLPROXY_SOCKS4A\fP (added in 7.17.2) and
+\fICURLPROXY_SOCKS5_HOSTNAME\fP (added in 7.17.2). The HTTP type is
+default. (Added in 7.10)
 .IP CURLOPT_HTTPPROXYTUNNEL
 Set the parameter to non-zero to get the library to tunnel all operations
 through a given HTTP proxy. There is a big difference between using a proxy
