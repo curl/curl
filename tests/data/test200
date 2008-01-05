@@ -1,5 +1,10 @@
 <testcase>
-# Server-side
+<info>
+<keywords>
+FILE
+</keywords>
+</info>
+
 <reply>
 <data>
 foo
