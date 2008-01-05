@@ -1447,8 +1447,10 @@ static int set_so_keepalive(void *clientp, curl_socket_t curlfd,
   case CURLSOCKTYPE_IPCXN:
     if(setsockopt(curlfd, SOL_SOCKET, SO_KEEPALIVE, (void *)&onoff,
                   sizeof(onoff)) < 0) {
+      /* don't abort operation, just issue a warning */
+      SET_SOCKERRNO(0);
       warnf(clientp, "Could not set SO_KEEPALIVE!\n");
-      return 1;
+      return 0;
     }
     break;
   default:
