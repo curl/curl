@@ -1882,6 +1882,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
 
   switch(data->set.proxytype) {
   case CURLPROXY_SOCKS5:
+  case CURLPROXY_SOCKS5_HOSTNAME:
     result = Curl_SOCKS5(conn->proxyuser, conn->proxypasswd, newhost, newport,
                          SECONDARYSOCKET, conn);
     break;

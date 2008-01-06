@@ -1868,7 +1868,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 
   case CURLOPT_PROXYTYPE:
     /*
-     * Set proxy type. HTTP/SOCKS4/SOCKS4a/SOCKS5
+     * Set proxy type. HTTP/SOCKS4/SOCKS4a/SOCKS5/SOCKS5_HOSTNAME
      */
     data->set.proxytype = (curl_proxytype)va_arg(param, long);
     break;
