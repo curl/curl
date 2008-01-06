@@ -44,6 +44,7 @@ This release includes the following bugfixes:
  o bad connection re-use check with environment variable-activated proxy use
  o --libcurl now generates a return statement as well
  o socklen_t is no longer used in the public includes
+ o time zone offsets from -1400 to +1400 are now accepted by the date parser
 
 This release includes the following known bugs:
 
@@ -66,6 +67,6 @@ advice from friends like these:
  Emil Romanus, Alessandro Vesely, Ray Pekowski, Spacen Jasset, Andrew Moise,
  Gilles Blanc, David Wright, Vikram Saxena, Mateusz Loskot, Gary Maxwell,
  Dmitry Kurochkin, Mohun Biswas, Richard Atterer, Maxim Perenesenko,
- Daniel Egger
+ Daniel Egger, Jeff Johnson
  
         Thanks! (and sorry if I forgot to mention someone)

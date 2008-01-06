@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -289,11 +289,17 @@ static time_t parsedate(const char *date)
 
         if((tzoff == -1) &&
            ((end - date) == 4) &&
-           (val < 1300) &&
+           (val <= 1400) &&
            (indate< date) &&
            ((date[-1] == '+' || date[-1] == '-'))) {
-          /* four digits and a value less than 1300 and it is preceeded with
-             a plus or minus. This is a time zone indication. */
+          /* four digits and a value less than or equal to 1400 (to take into
+             account all sorts of funny time zone diffs) and it is preceeded
+             with a plus or minus. This is a time zone indication.  1400 is
+             picked since +1300 is frequently used and +1400 is mentioned as
+             an edge number in the document "ISO C 200X Proposal: Timezone
+             Functions" at http://david.tribble.com/text/c0xtimezone.html If
+             anyone has a more authoritative source for the exact maximum time
+             zone offsets, please speak up! */
           found = TRUE;
           tzoff = (val/100 * 60 + val%100)*60;
 

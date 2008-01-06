@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel S (6 Jan 2008)
+- Jeff Johnson filed bug report #1863171
+  (http://curl.haxx.se/bug/view.cgi?id=1863171) where he pointed out that
+  libcurl's date parser didn't accept a +1300 time zone which actually is used
+  fairly often (like New Zealand's Dailight Savings Time), so I modified the
+  parser to now accept up to and including -1400 to +1400.
+
 Daniel S (5 Jan 2008)
 - Based on further discussion on curl-library, I reverted yesterday's SOCKS5
   code to instead introduce support for a new proxy type called
