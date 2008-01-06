@@ -531,8 +531,8 @@ if(sshd_supports_opt('Compression','no')) {
 if(sshd_supports_opt('KeepAlive','no')) {
     push @cfgarr, 'KeepAlive no';
 }
-if(sshd_supports_opt('MaxAuthTries','0')) {
-    push @cfgarr, 'MaxAuthTries 0';
+if(sshd_supports_opt('MaxAuthTries','10')) {
+    push @cfgarr, 'MaxAuthTries 10';
 }
 if(sshd_supports_opt('PermitTunnel','no')) {
     push @cfgarr, 'PermitTunnel no';
