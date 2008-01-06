@@ -1727,6 +1727,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
 
           if(conn->bits.tunnel_proxy ||
              data->set.proxytype == CURLPROXY_SOCKS5 ||
+             data->set.proxytype == CURLPROXY_SOCKS5_HOSTNAME ||
              data->set.proxytype == CURLPROXY_SOCKS4 ||
              data->set.proxytype == CURLPROXY_SOCKS4A)
             /* proxy tunnel -> use other host info because ip_addr_str is the
@@ -1782,6 +1783,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
             conn->ip_addr_str);
       if(conn->bits.tunnel_proxy ||
           data->set.proxytype == CURLPROXY_SOCKS5 ||
+          data->set.proxytype == CURLPROXY_SOCKS5_HOSTNAME ||
           data->set.proxytype == CURLPROXY_SOCKS4 ||
           data->set.proxytype == CURLPROXY_SOCKS4A)
         /* proxy tunnel -> use other host info because ip_addr_str is the
