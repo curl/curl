@@ -2636,8 +2636,10 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
 
       switch(data->set.proxytype) {
       case CURLPROXY_SOCKS5:
-        result = Curl_SOCKS5(conn->proxyuser, conn->proxypasswd, conn->host.name,
-                             conn->remote_port, FIRSTSOCKET, conn);
+      case CURLPROXY_SOCKS5_HOSTNAME:
+        result = Curl_SOCKS5(conn->proxyuser, conn->proxypasswd,
+                             conn->host.name, conn->remote_port,
+                             FIRSTSOCKET, conn);
         break;
       case CURLPROXY_HTTP:
         /* do nothing here. handled later. */
