@@ -1,11 +1,25 @@
 To be addressed before 7.18.0 (planned release: January 2008)
 =============================
 
-109 - curl_easy_pause (outstanding work)
-      http://curl.haxx.se/mail/lib-2007-12/0247.html
+109 - curl_easy_pause (patch-3 pending, sent to list)
+      http://curl.haxx.se/mail/lib-2008-01/0059.html (patch)
 
-110 - seekfunction (review)
-      http://curl.haxx.se/mail/lib-2007-12/0188.html
+110 - seekfunction (reviewed, updated needed, lacks docs)
+      http://curl.haxx.se/mail/lib-2007-12/0188.html (patch)
+      http://curl.haxx.se/mail/lib-2008-01/0060.html (comments)
+
+114 - Ranged downloads on file:// URLs by Daniel Egger (minor work left)
+      http://curl.haxx.se/mail/lib-2008-01/0049.html (patch)
+      http://curl.haxx.se/mail/lib-2008-01/0058.html (comments)
+
+115 - Cleanup debugging messages in test harness, introduced for new minimum
+      SSH version support for SCP, SFTP and SOCKS tests
+      
+117 - Eric Landes patch for introducing the --tcp-keep* options
+      http://curl.haxx.se/mail/lib-2008-01/0038.html (review, consider)
+
+Less likely to go in 7.18.0
+===========================
 
 112 - pipelining patch(es) from Dmitry Kurochkin (outstanding work left probably
       no longer targeted for this release)
@@ -14,13 +28,5 @@ To be addressed before 7.18.0 (planned release: January 2008)
 113 - #1850730 and #1854175, both dealing with POST over proxy requiring proxy
       auth (to find and fix, response is slow which makes it unlikely to
       happen before release)
-
-114 - Ranged downloads on file:// URLs by Daniel Egger (minor work left)
-
-115 - Cleanup debugging messages in test harness, introduced for new minimum
-      SSH version support for SCP, SFTP and SOCKS tests
-      
-117 - Eric Landes patch for introducing the --tcp-keep* options
-      http://curl.haxx.se/mail/lib-2008-01/0038.html (review, consider)
 
 118 - 
