@@ -20,6 +20,7 @@ To be addressed before 7.18.0 (planned release: January 2008)
 115 - Cleanup debugging messages in test harness, introduced for new minimum
       SSH version support for SCP, SFTP and SOCKS tests
       
-116 - bug #1863171, curl_getdate() bug
+117 - Eric Landes patch for introducing the --tcp-keep* options
+      http://curl.haxx.se/mail/lib-2008-01/0038.html (review, consider)
 
-117 - 
+118 - 
