@@ -14,7 +14,7 @@ FAILURE
 ftp
 </server>
  <name>
-FTP resume upload but denied access to remote file
+FTP resume upload but denied access to local file
  </name>
  <command>
 ftp://%HOSTIP:%FTPPORT/289 -T log/illegal-nonexistent-file -C -
