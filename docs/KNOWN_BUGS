@@ -3,6 +3,12 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+49. If using --retry and the transfer timeouts (possibly due to using -m or
+  -y/-Y) the next attempt doesn't resume the transfer properly from what was
+  downloaded in the previous attempt but will truncate and restart at the
+  original position where it was at before the previous failed attempt. See
+  http://curl.haxx.se/mail/lib-2008-01/0080.html
+
 48. If a CONNECT response-headers are larger than BUFSIZE (16KB) when the
   connection is meant to be kept alive (like for NTLM proxy auth), the
   function will return prematurely and will confuse the rest of the HTTP
