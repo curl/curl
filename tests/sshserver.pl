@@ -68,6 +68,7 @@ use sshhelp qw(
     sshversioninfo
     );
 
+
 #***************************************************************************
 
 my $verbose = 1;              # set to 1 for debugging
@@ -376,16 +377,6 @@ if((! -e $hstprvkeyf) || (! -e $hstpubkeyf) ||
 
 
 #***************************************************************************
-# Increased loglevel to debug autobuild's publickey authentication
-# failures when using OpenSSH 2.9.9 or SunSSH
-#
-if((($sshdid =~ /OpenSSH/) && ($sshvernum == 299)) ||
-    ($sshdid =~ /SunSSH/)) {
-    $loglevel = 'DEBUG3';
-}
-
-
-#***************************************************************************
 # Initialize sshd config with options actually supported in OpenSSH 2.9.9
 #
 logmsg 'generating ssh server config file...' if($verbose);
@@ -619,6 +610,7 @@ if(! -e $knownhosts) {
         exit 1;
     }
 }
+
 
 #***************************************************************************
 #  ssh client configuration file options we might use and version support
