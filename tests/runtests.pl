@@ -329,7 +329,7 @@ sub startnew {
         # could/should do a while connect fails sleep a bit and loop
         sleep $timeout;
         if (checkdied($child)) {
-            logmsg "startnew: child process has failed to start\n";
+            logmsg "startnew: child process has failed to start\n" if($verbose);
             return (-1,-1);
         }
     }
@@ -348,7 +348,8 @@ sub startnew {
             }
         }
         if (checkdied($child)) {
-            logmsg "startnew: child process has died, but server might start up\n";
+            logmsg "startnew: child process has died, server might start up\n"
+                if($verbose);
             # We can't just abort waiting for the server with a
             # return (-1,-1);
             # because the server might have forked and could still start
@@ -1069,12 +1070,10 @@ sub runsshserver {
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
-        logmsg "TRACESSH:runsshserver: ssh server previously failed to start with pidfile: $pidfile\n";
         return (0,0);
     }
 
     my $pid = checkserver($pidfile);
-    logmsg "TRACESSH:runsshserver: checkserver on pidfile: $pidfile returns pid: $pid\n";
     if($pid > 0) {
         stopserver($pid);
     }
@@ -1083,28 +1082,21 @@ sub runsshserver {
     $flag .= '-d ' if($debugprotocol);
 
     my $cmd="$perl $srcdir/sshserver.pl ${flag}-u $USER -l $ip -p $port -s $socksport";
-    logmsg "TRACESSH:runsshserver: calling startnew with cmd: $cmd\n";
     my ($sshpid, $pid2) = startnew($cmd, $pidfile, 60, 0);
-
-    logmsg "TRACESSH:runsshserver: startnew returns sshpid: $sshpid pid2: $pid2\n";
 
     if($sshpid <= 0 || !kill(0, $sshpid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the SSH server\n";
-        logmsg "TRACESSH:runsshserver: calling stopserver with pid2: $pid2\n";
         stopserver("$pid2");
         $doesntrun{$pidfile} = 1;
-        logmsg "TRACESSH:runsshserver: later dont try to start a server with pidfile: $pidfile\n";
         return (0,0);
     }
 
     if (!verifyserver('ssh',$ip,$port)) {
         logmsg "RUN: SSH server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
-        logmsg "TRACESSH:runsshserver: calling stopserver with sshpid: $sshpid pid2: $pid2\n";
         stopserver("$sshpid $pid2");
         $doesntrun{$pidfile} = 1;
-        logmsg "TRACESSH:runsshserver: later dont try to start a server with pidfile: $pidfile\n";
         return (0,0);
     }
     if($verbose) {
@@ -1129,7 +1121,6 @@ sub runsocksserver {
     }
 
     my $pid = checkserver($pidfile);
-    logmsg "TRACESSH:runsocksserver: checkserver on pidfile: $pidfile returns pid: $pid\n";
     if($pid > 0) {
         stopserver($pid);
     }
@@ -1191,8 +1182,8 @@ sub runsocksserver {
 
     # Verify if ssh client and ssh daemon versions match
     if(($sshdid ne $sshid) || ($sshdvernum != $sshvernum)) {
-        # Our test harness works with mismatched versions
-        logmsg "Warning: ssh server and client versions do not match\n"
+        # Our test harness might work with slightly mismatched versions
+        logmsg "Warning: version mismatch: sshd $sshdverstr - ssh $sshverstr\n"
             if($verbose);
     }
 
@@ -1224,7 +1215,6 @@ sub runsocksserver {
     # Ugly hack but ssh doesn't support pid files
     if (!verifyserver('socks',$ip,$port)) {
         logmsg "RUN: SOCKS server failed verification\n";
-        display_sshlog();
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$sshpid $pid2");
         $doesntrun{$pidfile} = 1;
@@ -2497,7 +2487,6 @@ sub startservers {
         elsif($what eq "sftp" || $what eq "scp" || $what eq "socks4" || $what eq "socks5" ) {
             if(!$run{'ssh'}) {
                 ($pid, $pid2) = runsshserver("", $verbose);
-                printf ("TRACESSH:startservers: runsshserver returns pid: %d pid2: %d\n", $pid, $pid2);
                 if($pid <= 0) {
                     return "failed starting SSH server";
                 }
@@ -2507,7 +2496,6 @@ sub startservers {
             if($what eq "socks4" || $what eq "socks5") {
                 if(!$run{'socks'}) {
                     ($pid, $pid2) = runsocksserver("", 1);
-                    printf ("TRACESSH:startservers: runsocksserver returns pid: %d pid2: %d\n", $pid, $pid2);
                     if($pid <= 0) {
                         return "failed starting socks server";
                     }
