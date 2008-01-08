@@ -71,7 +71,9 @@ use sshhelp qw(
     $sshexe
     $sshconfig
     $sshlog
+    display_sshdconfig
     display_sshconfig
+    display_sshdlog
     display_sshlog
     find_sshd
     find_ssh
@@ -1212,6 +1214,8 @@ sub runsocksserver {
         logmsg "RUN: failed to start the SOCKS server\n";
         display_sshlog();
         display_sshconfig();
+        display_sshdlog();
+        display_sshdconfig();
         stopserver("$pid2");
         $doesntrun{$pidfile} = 1;
         return (0,0);
