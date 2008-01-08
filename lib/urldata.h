@@ -629,12 +629,18 @@ struct hostname {
  */
 
 #define KEEP_NONE  0
-#define KEEP_READ  1      /* there is or may be data to read */
-#define KEEP_WRITE 2      /* there is or may be data to write */
-#define KEEP_READ_HOLD 4  /* when set, no reading should be done but there
-                             might still be data to read */
-#define KEEP_WRITE_HOLD 8 /* when set, no writing should be done but there
-                             might still be data to write */
+#define KEEP_READ  (1<<0)     /* there is or may be data to read */
+#define KEEP_WRITE (1<<1)     /* there is or may be data to write */
+#define KEEP_READ_HOLD (1<<2) /* when set, no reading should be done but there
+                                 might still be data to read */
+#define KEEP_WRITE_HOLD (1<<3) /* when set, no writing should be done but there
+                                  might still be data to write */
+#define KEEP_READ_PAUSE (1<<4) /* reading is paused */
+#define KEEP_WRITE_PAUSE (1<<5) /* writing is paused */
+
+#define KEEP_READBITS (KEEP_READ | KEEP_READ_HOLD | KEEP_READ_PAUSE)
+#define KEEP_WRITEBITS (KEEP_WRITE | KEEP_WRITE_HOLD | KEEP_WRITE_PAUSE)
+
 
 #ifdef HAVE_LIBZ
 typedef enum {
@@ -1126,10 +1132,13 @@ struct UrlState {
                        following not keep sending user+password... This is
                        strdup() data.
                     */
-
   struct curl_ssl_session *session; /* array of 'numsessions' size */
   long sessionage;                  /* number of the most recent session */
-
+  char *tempwrite;      /* allocated buffer to keep data in when a write
+                           callback returns to make the connection paused */
+  size_t tempwritesize; /* size of the 'tempwrite' allocated buffer */
+  int tempwritetype;    /* type of the 'tempwrite' buffer as a bitmask that is
+                           used with Curl_client_write() */
   char *scratch; /* huge buffer[BUFSIZE*2] when doing upload CRLF replacing */
   bool errorbuf; /* Set to TRUE if the error buffer is already filled in.
                     This must be set to FALSE every time _easy_perform() is

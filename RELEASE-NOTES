@@ -1,9 +1,9 @@
-Curl and libcurl 7.17.2
+Curl and libcurl 7.18.0
 
  Public curl releases:         103
  Command line options:         125
  curl_easy_setopt() options:   148
- Public functions in libcurl:  55
+ Public functions in libcurl:  56
  Public web site mirrors:      42
  Known libcurl bindings:       36
  Contributors:                 597
@@ -16,6 +16,7 @@ This release includes the following changes:
    keep-alive enabled by default
  o --socks4a added (proxy type CURLPROXY_SOCKS4A for libcurl)
  o --socks5-hostname added (CURLPROXY_SOCKS5_HOSTNAME for libcurl)
+ o curl_easy_pause() added
 
 This release includes the following bugfixes:
 

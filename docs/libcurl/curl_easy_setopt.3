@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_easy_setopt 3 "5 Jan 2008" "libcurl 7.17.2" "libcurl Manual"
+.TH curl_easy_setopt 3 "5 Jan 2008" "libcurl 7.18.0" "libcurl Manual"
 .SH NAME
 curl_easy_setopt \- set options for a curl easy handle
 .SH SYNOPSIS
@@ -95,6 +95,10 @@ of bytes actually taken care of. If that amount differs from the amount passed
 to your function, it'll signal an error to the library and it will abort the
 transfer and return \fICURLE_WRITE_ERROR\fP.
 
+From 7.18.0, the function can return CURL_WRITEFUNC_PAUSE which then will
+cause writing to this connection to become paused. See
+\fIcurl_easy_pause(3)\fP for further details.
+
 This function may be called with zero bytes data if the transfered file is
 empty.
 
@@ -141,6 +145,10 @@ for the rest of the data that won't come.
 The read callback may return \fICURL_READFUNC_ABORT\fP to stop the current
 operation immediately, resulting in a \fICURLE_ABORTED_BY_CALLBACK\fP error
 code from the transfer (Added in 7.12.1)
+
+From 7.18.0, the function can return CURL_READFUNC_PAUSE which then will cause
+reading from this connection to become paused. See \fIcurl_easy_pause(3)\fP
+for further details.
 
 If you set the callback pointer to NULL, or doesn't set it at all, the default
 internal read function will be used. It is simply doing an fread() on the FILE
@@ -431,8 +439,8 @@ specified in the proxy string \fICURLOPT_PROXY\fP.
 .IP CURLOPT_PROXYTYPE
 Pass a long with this option to set type of the proxy. Available options for
 this are \fICURLPROXY_HTTP\fP, \fICURLPROXY_SOCKS4\fP (added in 7.15.2),
-\fICURLPROXY_SOCKS5\fP, \fICURLPROXY_SOCKS4A\fP (added in 7.17.2) and
-\fICURLPROXY_SOCKS5_HOSTNAME\fP (added in 7.17.2). The HTTP type is
+\fICURLPROXY_SOCKS5\fP, \fICURLPROXY_SOCKS4A\fP (added in 7.18.0) and
+\fICURLPROXY_SOCKS5_HOSTNAME\fP (added in 7.18.0). The HTTP type is
 default. (Added in 7.10)
 .IP CURLOPT_HTTPPROXYTUNNEL
 Set the parameter to non-zero to get the library to tunnel all operations
@@ -443,8 +451,8 @@ don't want this tunneling option.
 Set the parameter to 1 to get the library to resolve the host name locally
 instead of passing it to the proxy to resolve, when using a SOCKS5 proxy.
 
-Note that libcurl before 7.17.2 always resolved the host name locally even
-when SOCKS5 was used. (Added in 7.17.2)
+Note that libcurl before 7.18.0 always resolved the host name locally even
+when SOCKS5 was used. (Added in 7.18.0)
 .IP CURLOPT_INTERFACE
 Pass a char * as parameter. This set the interface name to use as outgoing
 network interface. The name can be an interface name, an IP address or a host
@@ -1080,7 +1088,7 @@ transfer mode (binary or ASCII) for FTP transfers done via an HTTP proxy, by
 appending ;type=a or ;type=i to the URL. Without this setting, or it being
 set to 0 (zero, the default), \fICURLOPT_TRANSFERTEXT\fP has no effect when
 doing FTP via a proxy. Beware that not all proxies support this feature.
-(Added in 7.17.2)
+(Added in 7.18.0)
 .IP CURLOPT_CRLF
 Convert Unix newlines to CRLF newlines on transfers.
 .IP CURLOPT_RANGE

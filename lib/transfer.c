@@ -134,6 +134,14 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
     failf(data, "operation aborted by callback\n");
     return CURLE_ABORTED_BY_CALLBACK;
   }
+  else if(nread == CURL_READFUNC_PAUSE) {
+    struct SingleRequest *k = &data->req;
+    k->keepon |= KEEP_READ_PAUSE; /* mark reading as paused */
+    return 0; /* nothing was read */
+  }
+  else if((size_t)nread > buffersize)
+    /* the read function returned a too large value */
+    return CURLE_READ_ERROR;
 
   if(!conn->bits.forbidchunk && conn->bits.upload_chunky) {
     /* if chunked Transfer-Encoding */
@@ -330,7 +338,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   /* only use the proper socket if the *_HOLD bit is not set simultaneously as
      then we are in rate limiting state in that transfer direction */
 
-  if((k->keepon & (KEEP_READ|KEEP_READ_HOLD)) == KEEP_READ) {
+  if((k->keepon & KEEP_READBITS) == KEEP_READ) {
     fd_read = conn->sockfd;
 #if defined(USE_LIBSSH2)
     if(conn->protocol & (PROT_SCP|PROT_SFTP))
@@ -339,7 +347,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   } else
     fd_read = CURL_SOCKET_BAD;
 
-  if((k->keepon & (KEEP_WRITE|KEEP_WRITE_HOLD)) == KEEP_WRITE)
+  if((k->keepon & KEEP_WRITEBITS) == KEEP_WRITE)
     fd_write = conn->writesockfd;
   else
     fd_write = CURL_SOCKET_BAD;
@@ -1425,9 +1433,11 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           else
             nread = 0; /* we're done uploading/reading */
 
-          /* the signed int typecase of nread of for systems that has
-             unsigned size_t */
-          if(nread<=0) {
+          if(!nread && (k->keepon & KEEP_READ_PAUSE)) {
+            /* this is a paused transfer */
+            break;
+          }
+          else if(nread<=0) {
             /* done */
             k->keepon &= ~KEEP_WRITE; /* we're done writing */
             writedone = TRUE;
@@ -1635,7 +1645,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   }
 
   /* Now update the "done" boolean we return */
-  *done = (bool)(0 == (k->keepon&(KEEP_READ|KEEP_WRITE)));
+  *done = (bool)(0 == (k->keepon&(KEEP_READ|KEEP_WRITE|KEEP_READ_PAUSE|KEEP_WRITE_PAUSE)));
 
   return CURLE_OK;
 }
@@ -1660,7 +1670,8 @@ int Curl_single_getsock(const struct connectdata *conn,
     /* simple check but we might need two slots */
     return GETSOCK_BLANK;
 
-  if(data->req.keepon & KEEP_READ) {
+  /* don't include HOLD and PAUSE connections */
+  if((data->req.keepon & KEEP_READBITS) == KEEP_READ) {
 
     DEBUGASSERT(conn->sockfd != CURL_SOCKET_BAD);
 
@@ -1668,7 +1679,8 @@ int Curl_single_getsock(const struct connectdata *conn,
     sock[sockindex] = conn->sockfd;
   }
 
-  if(data->req.keepon & KEEP_WRITE) {
+  /* don't include HOLD and PAUSE connections */
+  if((data->req.keepon & KEEP_WRITEBITS) == KEEP_WRITE) {
 
     if((conn->sockfd != conn->writesockfd) ||
        !(data->req.keepon & KEEP_READ)) {
@@ -1751,10 +1763,17 @@ Transfer(struct connectdata *conn)
         k->keepon |= KEEP_READ_HOLD; /* hold it */
     }
 
-    /* The *_HOLD logic is necessary since even though there might be no
-       traffic during the select interval, we still call Curl_readwrite() for
-       the timeout case and if we limit transfer speed we must make sure that
-       this function doesn't transfer anything while in HOLD status. */
+    /* pause logic. Don't check descriptors for paused connections */
+    if(k->keepon & KEEP_READ_PAUSE)
+      fd_read = CURL_SOCKET_BAD;
+    if(k->keepon & KEEP_WRITE_PAUSE)
+      fd_write = CURL_SOCKET_BAD;
+
+    /* The *_HOLD and *_PAUSE logic is necessary since even though there might
+       be no traffic during the select interval, we still call
+       Curl_readwrite() for the timeout case and if we limit transfer speed we
+       must make sure that this function doesn't transfer anything while in
+       HOLD status. */
 
     switch (Curl_socket_ready(fd_read, fd_write, 1000)) {
     case -1: /* select() error, stop reading */

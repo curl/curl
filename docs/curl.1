@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl 1 "5 Jan 2008" "Curl 7.17.2" "Curl Manual"
+.TH curl 1 "5 Jan 2008" "Curl 7.18.0" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -256,7 +256,7 @@ If this option is used several times, the ones following the first will append
 data. As described in \fI-d/--data\fP.
 .IP "--data-urlencode <data>"
 (HTTP) This posts data, similar to the other --data options with the exception
-that this performs URL encoding. (Added in 7.17.2)
+that this performs URL encoding. (Added in 7.18.0)
 
 To be CGI compliant, the <data> part should begin with a \fIname\fP followed
 by a separator and a content specification. The <data> part can be passed to
@@ -1077,7 +1077,7 @@ mutually exclusive.
 If this option is used several times, the last one will be used.
 .IP "--socks4a <host[:port]>"
 Use the specified SOCKS4a proxy. If the port number is not specified, it is
-assumed at port 1080. (Added in 7.17.2)
+assumed at port 1080. (Added in 7.18.0)
 
 This option overrides any previous use of \fI-x/--proxy\fP, as they are
 mutually exclusive.
@@ -1086,7 +1086,7 @@ If this option is used several times, the last one will be used.
 .IP "--socks5-hostname <host[:port]>"
 Use the specified SOCKS5 proxy (and let the proxy resolve the host name). If
 the port number is not specified, it is assumed at port 1080. (Added in
-7.17.2)
+7.18.0)
 
 This option overrides any previous use of \fI-x/--proxy\fP, as they are
 mutually exclusive.

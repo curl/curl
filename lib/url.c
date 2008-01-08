@@ -4433,6 +4433,13 @@ CURLcode Curl_done(struct connectdata **connp,
 
   Curl_pgrsDone(conn); /* done with the operation */
 
+  /* if the transfer was completed in a paused state there can be buffered
+     data left to write and then kill */
+  if(data->state.tempwrite) {
+    free(data->state.tempwrite);
+    data->state.tempwrite = NULL;
+  }
+
   /* for ares-using, make sure all possible outstanding requests are properly
      cancelled before we proceed */
   ares_cancel(data->state.areschannel);

@@ -1,0 +1,63 @@
+.\" $Id$
+.\"
+.TH curl_easy_pause 3 "17 Dec 2007" "libcurl 7.18.0" "libcurl Manual"
+.SH NAME
+curl_easy_pause - pause and unpause a connection
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+
+.BI "CURLcode curl_easy_pause(CURL *"handle ", int "bitmask " );"
+
+.SH DESCRIPTION
+Using this function, you can explicitly mark a running connection to get
+paused, and you can unpause a connection that was previously paused.
+
+A connection can made to pause by using this function or by letting the read
+or the write callbacks return the proper magic return code
+(\fICURL_READFUNC_PAUSE\fP and \fICURL_WRITEFUNC_PAUSE\fP).
+
+NOTE: while it may feel tempting, take care and notice that you cannot call
+this function from another thread.
+
+When this function is called to unpause reading, the chance is high that you
+will get your write callback called before this function returns.
+
+The \fBhandle\fP argument is of course identifying the handle that operates on
+the connection you want to pause or unpause.
+
+The \fBbitmask\fP argument is a set of bits that sets the new state of the
+connection. The following bits can be used:
+.IP CURLPAUSE_RECV
+Pause receiving data. There will be no data received on this conneciton until
+this function is called again without this bit set. Thus, the write callback
+(\fICURLOPT_WRITEFUNCTION\fP) won't be called.
+.IP CURLPAUSE_SEND
+Pause sending data. There will be no data sent on this connection until this
+function is called again without this bit set. Thus, the read callback
+(\fICURLOPT_READFUNCTION\fP) won't be called.
+.IP CURLPAUSE_ALL
+Convenience define that pauses both directions.
+.IP CURLPAUSE_CONT
+Convenience define that unpauses both directions
+.SH RETURN VALUE
+CURLE_OK (zero) means that the option was set properly, and a non-zero return
+code means something wrong occurred after the new state was set.  See the
+\fIlibcurl-errors(3)\fP man page for the full list with descriptions.
+.SH AVAILABILITY
+This function was added in libcurl 7.18.0. Before this version, there was no
+explicit support for pausing transfers.
+.SH "MEMORY USE"
+When pausing a read by returning the magic return code from a write callback,
+the read data is already in libcurl's internal buffers so it'll have to keep
+it in an allocated buffer until the reading is again unpaused using this
+function.
+
+If the downloaded data is compressed and is asked to get uncompressed
+automatially on download, libcurl will continue to uncompress the entire
+downloaded chunk and it will cache the data uncompressed. This has the side-
+effect that if you download something that is compressed a lot, it can result
+in a very large data amount needing to be allocated to save the data during
+the pause. This said, you should probably consider not using paused reading if
+you allow libcurl to uncompress data automatically.
+.SH "SEE ALSO"
+.BR curl_easy_cleanup "(3), " curl_easy_reset "(3)"

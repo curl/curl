@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel S (8 Jan 2008)
+- Introducing curl_easy_pause() and new magic return codes for both the read
+  and the write callbacks that now can make a connection's reading and/or
+  writing get paused.
+
 Daniel S (6 Jan 2008)
 - Jeff Johnson filed bug report #1863171
   (http://curl.haxx.se/bug/view.cgi?id=1863171) where he pointed out that

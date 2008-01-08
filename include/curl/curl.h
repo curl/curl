@@ -230,7 +230,9 @@ typedef int (*curl_progress_callback)(void *clientp,
      time for those who feel adventurous. */
 #define CURL_MAX_WRITE_SIZE 16384
 #endif
-
+/* This is a magic return code for the write callback that, when returned,
+   will signal libcurl to pause receving on the current transfer. */
+#define CURL_WRITEFUNC_PAUSE 0x10000001
 typedef size_t (*curl_write_callback)(char *buffer,
                                       size_t size,
                                       size_t nitems,
@@ -239,6 +241,9 @@ typedef size_t (*curl_write_callback)(char *buffer,
 /* This is a return code for the read callback that, when returned, will
    signal libcurl to immediately abort the current transfer. */
 #define CURL_READFUNC_ABORT 0x10000000
+/* This is a return code for the read callback that, when returned, will
+   signal libcurl to pause sending data on the current transfer. */
+#define CURL_READFUNC_PAUSE 0x10000001
 typedef size_t (*curl_read_callback)(char *buffer,
                                       size_t size,
                                       size_t nitems,
@@ -257,7 +262,7 @@ struct curl_sockaddr {
   int family;
   int socktype;
   int protocol;
-  unsigned int addrlen; /* addrlen was a socklen_t type before 7.17.2 but it
+  unsigned int addrlen; /* addrlen was a socklen_t type before 7.18.0 but it
                            turned really ugly and painful on the systems that
                            lack this type */
   struct sockaddr addr;
@@ -499,10 +504,10 @@ typedef enum {
   CURLPROXY_SOCKS4 = 4, /* support added in 7.15.2, enum existed already
                            in 7.10 */
   CURLPROXY_SOCKS5 = 5, /* added in 7.10 */
-  CURLPROXY_SOCKS4A = 6, /* added in 7.17.2 */
+  CURLPROXY_SOCKS4A = 6, /* added in 7.18.0 */
   CURLPROXY_SOCKS5_HOSTNAME = 7 /* Use the SOCKS5 protocol but pass along the
                                    host name rather than the IP address. added
-                                   in 7.17.2 */
+                                   in 7.18.0 */
 } curl_proxytype;  /* this enum was added in 7.10 */
 
 #define CURLAUTH_NONE         0       /* nothing */
@@ -1748,6 +1753,26 @@ CURL_EXTERN const char *curl_easy_strerror(CURLcode);
  * for printing meaningful error messages.
  */
 CURL_EXTERN const char *curl_share_strerror(CURLSHcode);
+
+/*
+ * NAME curl_easy_pause()
+ *
+ * DESCRIPTION
+ *
+ * The curl_easy_pause function pauses or unpauses transfers. Select the new
+ * state by setting the bitmask, use the convenience defines below.
+ *
+ */
+CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
+
+#define CURLPAUSE_RECV      (1<<0)
+#define CURLPAUSE_RECV_CONT (0)
+
+#define CURLPAUSE_SEND      (1<<2)
+#define CURLPAUSE_SEND_CONT (0)
+
+#define CURLPAUSE_ALL       (CURLPAUSE_RECV|CURLPAUSE_SEND)
+#define CURLPAUSE_CONT      (CURLPAUSE_RECV_CONT|CURLPAUSE_SEND_CONT)
 
 #ifdef  __cplusplus
 }
