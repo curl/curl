@@ -2138,7 +2138,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           }
           else {
             GetStr(&postdata, p);
-            size = strlen(postdata);
+            size = (long)strlen(postdata);
           }
 
           if(!postdata) {

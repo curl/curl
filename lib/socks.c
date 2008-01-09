@@ -239,7 +239,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
       socksreq[6] = 0;
       socksreq[7] = 1;
       /* If still enough room in buffer, also append hostname */
-      hostnamelen = strlen(hostname) + 1; /* length including NUL */
+      hostnamelen = (ssize_t)strlen(hostname) + 1; /* length including NUL */
       if (packetsize + hostnamelen <= SOCKS4REQLEN)
         strcpy((char*)socksreq + packetsize, hostname);
       else
@@ -255,7 +255,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
     }
     if (protocol4a && hostnamelen == 0) {
       /* SOCKS4a with very long hostname - send that name separately */
-      hostnamelen = strlen(hostname) + 1;
+      hostnamelen = (ssize_t)strlen(hostname) + 1;
       code = Curl_write(conn, sock, (char *)hostname, hostnamelen, &written);
       if((code != CURLE_OK) || (written != hostnamelen)) {
         failf(data, "Failed to send SOCKS4 connect request.");
@@ -390,7 +390,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   curl_socket_t sock = conn->sock[sockindex];
   struct SessionHandle *data = conn->data;
   long timeout;
-  bool socks5_resolve_local = data->set.proxytype == CURLPROXY_SOCKS5;
+  bool socks5_resolve_local = (bool)(data->set.proxytype == CURLPROXY_SOCKS5);
   const size_t hostname_len = strlen(hostname);
   int packetsize = 0;
 
