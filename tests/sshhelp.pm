@@ -126,6 +126,8 @@ $clipubkeyf   = 'curl_client_key.pub';    # client public key file
     /usr/lib/misc
     /usr/local/sbin
     /usr/freeware/bin
+    /usr/freeware/sbin
+    /usr/freeware/libexec
     /opt/ssh/sbin
     /opt/ssh/libexec
     );
