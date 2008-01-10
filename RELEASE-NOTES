@@ -46,6 +46,7 @@ This release includes the following bugfixes:
  o --libcurl now generates a return statement as well
  o socklen_t is no longer used in the public includes
  o time zone offsets from -1400 to +1400 are now accepted by the date parser
+ o allows more spaces in WWW/Proxy-Authenticate: headers
 
 This release includes the following known bugs:
 
