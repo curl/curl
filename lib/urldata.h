@@ -961,6 +961,9 @@ struct connectdata {
   size_t buf_len; /* Length of the buffer?? */
 
 
+  curl_seek_callback seek_func; /* function that seeks the input */
+  void *seek_client;            /* pointer to pass to the seek() above */
+
   /*************** Request - specific items ************/
 
   /* previously this was in the urldata struct */
@@ -1324,6 +1327,7 @@ struct UserDefined {
   bool free_referer; /* set TRUE if 'referer' points to a string we
                         allocated */
   void *postfields;  /* if POST, set the fields' values here */
+  curl_seek_callback seek_func;      /* function that seeks the input */
   curl_off_t postfieldsize; /* if POST, this might have a size to use instead
                                of strlen(), and then the data *may* be binary
                                (contain zero bytes) */
@@ -1342,6 +1346,7 @@ struct UserDefined {
                                            the address and opening the socket */
   void* opensocket_client;
 
+  void *seek_client;    /* pointer to pass to the seek callback */
   /* the 3 curl_conv_callback functions below are used on non-ASCII hosts */
   /* function to convert from the network encoding: */
   curl_conv_callback convfromnetwork;

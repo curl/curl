@@ -245,11 +245,20 @@ CURLcode Curl_readrewind(struct connectdata *conn)
      (data->set.httpreq == HTTPREQ_POST_FORM))
     ; /* do nothing */
   else {
-    if(data->set.ioctl_func) {
+    if(data->set.seek_func) {
+      int err;
+
+      err = (data->set.seek_func)(data->set.seek_client, 0, SEEK_SET);
+      if(err) {
+	failf(data, "seek callback returned error %d\n", (int)err);
+        return CURLE_SEND_FAIL_REWIND;
+      }
+    }
+    else if(data->set.ioctl_func) {
       curlioerr err;
 
-      err = (data->set.ioctl_func) (data, CURLIOCMD_RESTARTREAD,
-                            data->set.ioctl_client);
+      err = (data->set.ioctl_func)(data, CURLIOCMD_RESTARTREAD,
+                                   data->set.ioctl_client);
       infof(data, "the ioctl callback returned %d\n", (int)err);
 
       if(err) {

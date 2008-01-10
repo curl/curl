@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1793,6 +1793,8 @@ CURLcode Curl_http_done(struct connectdata *conn,
   /* set the proper values (possibly modified on POST) */
   conn->fread_func = data->set.fread_func; /* restore */
   conn->fread_in = data->set.in; /* restore */
+  conn->seek_func = data->set.seek_func; /* restore */
+  conn->seek_client = data->set.seek_client; /* restore */
 
   if(http == NULL)
     return CURLE_OK;
@@ -2186,30 +2188,41 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
     if(data->state.resume_from && !data->state.this_is_a_follow) {
       /* do we still game? */
-      curl_off_t passed=0;
 
       /* Now, let's read off the proper amount of bytes from the
-         input. If we knew it was a proper file we could've just
-         fseek()ed but we only have a stream here */
-      do {
-        size_t readthisamountnow = (size_t)(data->state.resume_from - passed);
-        size_t actuallyread;
+         input. */
+      if(conn->seek_func) {
+        curl_off_t readthisamountnow = data->state.resume_from;
 
-        if(readthisamountnow > BUFSIZE)
-          readthisamountnow = BUFSIZE;
-
-        actuallyread =
-          data->set.fread_func(data->state.buffer, 1, (size_t)readthisamountnow,
-                          data->set.in);
-
-        passed += actuallyread;
-        if(actuallyread != readthisamountnow) {
-          failf(data, "Could only read %" FORMAT_OFF_T
-                " bytes from the input",
-                passed);
+        if(conn->seek_func(conn->seek_client,
+			   readthisamountnow, SEEK_SET) != 0) {
+          failf(data, "Could not seek stream");
           return CURLE_READ_ERROR;
         }
-      } while(passed != data->state.resume_from); /* loop until done */
+      }
+      else {
+	curl_off_t passed=0;
+
+        do {
+	  size_t readthisamountnow = (size_t)(data->state.resume_from - passed);
+          size_t actuallyread;
+
+          if(readthisamountnow > BUFSIZE)
+            readthisamountnow = BUFSIZE;
+
+          actuallyread = data->set.fread_func(data->state.buffer, 1,
+                                              (size_t)readthisamountnow,
+                                              data->set.in);
+
+          passed += actuallyread;
+          if(actuallyread != readthisamountnow) {
+            failf(data, "Could only read %" FORMAT_OFF_T
+                  " bytes from the input",
+                  passed);
+            return CURLE_READ_ERROR;
+          }
+        } while(passed != data->state.resume_from); /* loop until done */
+      }
 
       /* now, decrease the size of the read */
       if(data->set.infilesize>0) {

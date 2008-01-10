@@ -685,6 +685,10 @@ CURLcode Curl_open(struct SessionHandle **curl)
     /* use fread as default function to read input */
     data->set.fread_func = (curl_read_callback)fread;
 
+    /* don't use a seek function by default */
+    data->set.seek_func = ZERO_NULL;
+    data->set.seek_client = ZERO_NULL;
+
     /* conversion callbacks for non-ASCII hosts */
     data->set.convfromnetwork = ZERO_NULL;
     data->set.convtonetwork   = ZERO_NULL;
@@ -1626,6 +1630,18 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     if(!data->set.fread_func)
       /* When set to NULL, reset to our internal default function */
       data->set.fread_func = (curl_read_callback)fread;
+    break;
+  case CURLOPT_SEEKFUNCTION:
+    /*
+     * Seek callback. Might be NULL.
+     */
+    data->set.seek_func = va_arg(param, curl_seek_callback);
+    break;
+  case CURLOPT_SEEKDATA:
+    /*
+     * Seek control callback. Might be NULL.
+     */
+    data->set.seek_client = va_arg(param, void *);
     break;
   case CURLOPT_CONV_FROM_NETWORK_FUNCTION:
     /*
@@ -4038,6 +4054,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    * the persistent connection stuff */
   conn->fread_func = data->set.fread_func;
   conn->fread_in = data->set.in;
+  conn->seek_func = data->set.seek_func;
+  conn->seek_client = data->set.seek_client;
 
   if((conn->protocol&PROT_HTTP) &&
       data->set.upload &&

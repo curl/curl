@@ -171,11 +171,32 @@ something special I/O-related needs to be done that the library can't do by
 itself. For now, rewinding the read data stream is the only action it can
 request. The rewinding of the read data stream may be necessary when doing a
 HTTP PUT or POST with a multi-pass authentication method.  (Option added in
-7.12.3)
+7.12.3).
+
+Use \fICURLOPT_SEEKFUNCTION\fP instead to provide seeking!
 .IP CURLOPT_IOCTLDATA
 Pass a pointer that will be untouched by libcurl and passed as the 3rd
 argument in the ioctl callback set with \fICURLOPT_IOCTLFUNCTION\fP.  (Option
 added in 7.12.3)
+.IP CURLOPT_SEEKFUNCTION
+Function pointer that should match the following prototype: \fIint
+function(void *instream, curl_off_t offset, int origin);\fP This function gets
+called by libcurl to seek to a certain position in the input stream and can be
+used to fast forward a file in a resumed upload (instead of reading all
+uploaded bytes with the normal read function/callback). It is also called to
+rewind a stream when doing a HTTP PUT or POST with a multi-pass authentication
+method. The function shall work like "fseek" or "lseek" and accepted SEEK_SET,
+SEEK_CUR and SEEK_END as argument for origin, although (in 7.18.0) libcurl
+only passes SEEK_SET. The callback must return 0 on success as returning
+non-zero will cause the upload operation to fail.
+
+If you forward the input arguments directly to "fseek" or "lseek", note that
+the data type for \fIoffset\fP is not the same as defined for curl_off_t on
+many systems! (Option added in 7.18.0)
+.IP CURLOPT_SEEKDATA
+Data pointer to pass to the file read function. If you use the
+\fICURLOPT_SEEKFUNCTION\fP option, this is the pointer you'll get as input. If
+you don't specify a seek callback, NULL is passed. (Option added in 7.18.0)
 .IP CURLOPT_SOCKOPTFUNCTION
 Function pointer that should match the \fIcurl_sockopt_callback\fP prototype
 found in \fI<curl/curl.h>\fP. This function gets called by libcurl after the

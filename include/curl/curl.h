@@ -244,6 +244,10 @@ typedef size_t (*curl_write_callback)(char *buffer,
 /* This is a return code for the read callback that, when returned, will
    signal libcurl to pause sending data on the current transfer. */
 #define CURL_READFUNC_PAUSE 0x10000001
+typedef int (*curl_seek_callback)(void *instream,
+                                  curl_off_t offset,
+				  int origin); /* 'whence' */
+
 typedef size_t (*curl_read_callback)(char *buffer,
                                       size_t size,
                                       size_t nitems,
@@ -1179,6 +1183,10 @@ typedef enum {
 
   /* set transfer mode (;type=<a|i>) when doing FTP via an HTTP proxy */
   CINIT(PROXY_TRANSFER_MODE, LONG, 166),
+
+  /* Callback function for seeking in the input stream */
+  CINIT(SEEKFUNCTION, FUNCTIONPOINT, 167),
+  CINIT(SEEKDATA, OBJECTPOINT, 168),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

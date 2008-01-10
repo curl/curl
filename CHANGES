@@ -7,6 +7,16 @@
                                   Changelog
 
 Daniel S (10 Jan 2008)
+- Georg Lippitsch brought CURLOPT_SEEKFUNCTION and CURLOPT_SEEKDATA to allow
+  libcurl to seek in a given input stream. This is particularly important when
+  doing upload resumes when there's already a huge part of the file present
+  remotely. Before, and still if this callback isn't used, libcurl will read
+  and through away the entire file up to the point to where the resuming
+  begins (which of course can be a slow opereration depending on file size,
+  I/O bandwidth and more). This new function will also be preferred to get
+  used instead of the CURLOPT_IOCTLFUNCTION for seeking back in a stream when
+  doing multi-stage HTTP auth with POST/PUT.
+
 - Nikitinskit Dmitriy filed bug report #1868255
   (http://curl.haxx.se/bug/view.cgi?id=1868255) with a patch. It identifies
   and fixes a problem with parsing WWW-Authenticate: headers with additional

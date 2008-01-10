@@ -3020,6 +3020,7 @@ struct InStruct {
   struct Configurable *config;
 };
 
+#if 1
 static curlioerr my_ioctl(CURL *handle, curliocmd cmd, void *userp)
 {
   struct InStruct *in=(struct InStruct *)userp;
@@ -3040,6 +3041,24 @@ static curlioerr my_ioctl(CURL *handle, curliocmd cmd, void *userp)
   }
   return CURLIOE_OK;
 }
+#else
+static int my_seek(void *stream, curl_off_t offset, int whence)
+{
+  struct InStruct *in=(struct InStruct *)stream;
+
+  /* We can't use fseek() here since it can't do 64bit seeks on Windows and
+     possibly elsewhere. We need to switch to the lseek family of tricks. For
+     that to work, we need to switch from fread() to plain read() etc */
+
+  if(-1 == fseek(in->stream, (off_t)offset, whence))
+    /* couldn't rewind, the reason is in errno but errno is just not
+       portable enough and we don't actually care that much why we failed. */
+    return 1;
+
+  return 0;
+}
+
+#endif
 
 static size_t my_fread(void *buffer, size_t sz, size_t nmemb, void *userp)
 {
@@ -4270,10 +4289,17 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         /* what call to read */
         my_setopt(curl, CURLOPT_READFUNCTION, my_fread);
 
+#if 1
         /* the ioctl function is at this point only used to rewind files
            that are posted when using NTLM etc */
         my_setopt(curl, CURLOPT_IOCTLDATA, &input);
         my_setopt(curl, CURLOPT_IOCTLFUNCTION, my_ioctl);
+#else
+        /* in 7.18.0, the SEEKFUNCTION/DATA pair is taking over what IOCTL*
+           previously provided for seeking */
+        my_setopt(curl, CURLOPT_SEEKDATA, &input);
+        my_setopt(curl, CURLOPT_SEEKFUNCTION, my_seek);
+#endif
 
         if(config->recvpersecond)
           /* tell libcurl to use a smaller sized buffer as it allows us to
