@@ -661,9 +661,15 @@ sub verifyftp {
 
 sub verifyssh {
     my ($proto, $ip, $port) = @_;
-    open(FILE, "<$SSHPIDFILE");
-    my $pid=0+<FILE>;
-    close(FILE);
+    my $pid;
+    if(open(FILE, "<$SSHPIDFILE")) {
+        $pid=0+<FILE>;
+        close(FILE);
+        logmsg "TRACESSH:verifyssh: pid from $SSHPIDFILE is $pid\n";
+    }
+    else {
+        logmsg "TRACESSH:verifyssh: cannot open file $SSHPIDFILE\n";
+    }
     return $pid;
 }
 
@@ -1077,6 +1083,7 @@ sub runsshserver {
     if($pid > 0) {
         stopserver($pid);
     }
+    unlink($pidfile);
 
     my $flag=$verbose?'-v ':'';
     $flag .= '-d ' if($debugprotocol);
@@ -1092,7 +1099,7 @@ sub runsshserver {
         return (0,0);
     }
 
-    if (!verifyserver('ssh',$ip,$port)) {
+    if (!verifyserver("ssh",$ip,$port)) {
         logmsg "RUN: SSH server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$sshpid $pid2");
@@ -1198,8 +1205,6 @@ sub runsocksserver {
     my $cmd="$ssh -N -F $sshconfig $ip > $sshlog 2>&1";
     my ($sshpid, $pid2) = startnew($cmd, $pidfile, 30, 1);
 
-    logmsg "TRACESSH:runsocksserver: startnew returns sshpid: $sshpid pid2: $pid2\n";
-
     if($sshpid <= 0 || !kill(0, $sshpid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the SOCKS server\n";
@@ -1213,7 +1218,7 @@ sub runsocksserver {
     }
 
     # Ugly hack but ssh doesn't support pid files
-    if (!verifyserver('socks',$ip,$port)) {
+    if (!verifyserver("socks",$ip,$port)) {
         logmsg "RUN: SOCKS server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$sshpid $pid2");

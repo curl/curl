@@ -830,7 +830,7 @@ if($error) {
 }
 @cfgarr = ();
 
-
+logmsg "TRACESSH:sshserver.pl: sshd will use pidfile $path/.ssh.pid";
 #***************************************************************************
 # Start the ssh server daemon without forking it
 #
