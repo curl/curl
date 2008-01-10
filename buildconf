@@ -33,6 +33,11 @@ die(){
 findtool(){
   file="$1"
 
+  if test -f "$file"; then
+    echo "$file"
+    return
+  fi
+
   old_IFS=$IFS; IFS=':'
   for path in $PATH
   do
