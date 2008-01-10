@@ -1,13 +1,6 @@
 To be addressed before 7.18.0 (planned release: January 2008)
 =============================
 
-109 - curl_easy_pause (patch-3 pending, sent to list)
-      http://curl.haxx.se/mail/lib-2008-01/0059.html (patch)
-
-110 - seekfunction (reviewed, updated needed, lacks docs)
-      http://curl.haxx.se/mail/lib-2007-12/0188.html (patch)
-      http://curl.haxx.se/mail/lib-2008-01/0060.html (comments)
-
 114 - Ranged downloads on file:// URLs by Daniel Egger (minor work left)
       http://curl.haxx.se/mail/lib-2008-01/0049.html (patch)
       http://curl.haxx.se/mail/lib-2008-01/0058.html (comments)
