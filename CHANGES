@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel S (10 Jan 2008)
+- Michal Marek made curl-config --libs not include /usr/lib64 in the output
+  (it already before skipped /usr/lib).  /usr/lib64 is the default library
+  directory on many 64bit systems and it's unlikely that anyone would use the
+  path privately on systems where it's not.
+
 - Georg Lippitsch brought CURLOPT_SEEKFUNCTION and CURLOPT_SEEKDATA to allow
   libcurl to seek in a given input stream. This is particularly important when
   doing upload resumes when there's already a huge part of the file present

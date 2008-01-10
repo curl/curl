@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2001 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2001 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -189,7 +189,7 @@ while test $# -gt 0; do
        	;;
 
     --libs)
-	if test "X@libdir@" != "X/usr/lib"; then
+	if test "X@libdir@" != "X/usr/lib" -a "X@libdir@" != "X/usr/lib64"; then
 	   CURLLIBDIR="-L@libdir@ "
 	else
 	   CURLLIBDIR=""
