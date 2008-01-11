@@ -127,6 +127,12 @@
   #define SET_BINMODE(file)   ((void)0)
 #endif
 
+#ifndef O_BINARY
+/* since O_BINARY as used in bitmasks, setting it to zero makes it usable in
+   source code but yet it doesn't ruin anything */
+#define O_BINARY 0
+#endif
+
 #ifdef MSDOS
 #include <dos.h>
 
@@ -201,6 +207,7 @@ typedef enum {
 /* Support uploading and resuming of >2GB files
  */
 #if defined(WIN32) && (SIZEOF_CURL_OFF_T > 4)
+#define lseek(x,y,z) _lseeki64(x, y, z)
 #define struct_stat struct _stati64
 #define stat(file,st) _stati64(file,st)
 #else
@@ -605,6 +612,8 @@ struct getout {
 static void help(void)
 {
   int i;
+  /* A few of these source lines are >80 columns wide, but that's only because
+     breaking the strings narrower makes this chunk look even worse! */
   static const char * const helptext[]={
     "Usage: curl [options...] <url>",
     "Options: (H) means HTTP/HTTPS only, (F) means FTP only",
@@ -1854,7 +1863,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'x': /* --krb */
         /* kerberos level string */
-        if(curlinfo->features & (CURL_VERSION_KERBEROS4 | CURL_VERSION_GSSNEGOTIATE))
+        if(curlinfo->features & (CURL_VERSION_KERBEROS4 |
+                                 CURL_VERSION_GSSNEGOTIATE))
           GetStr(&config->krblevel, nextarg);
         else
           return PARAM_LIBCURL_DOESNT_SUPPORT;
@@ -3016,41 +3026,56 @@ static size_t my_fwrite(void *buffer, size_t sz, size_t nmemb, void *stream)
 }
 
 struct InStruct {
-  FILE *stream;
+  int fd;
   struct Configurable *config;
 };
 
-#if 1
-static curlioerr my_ioctl(CURL *handle, curliocmd cmd, void *userp)
-{
-  struct InStruct *in=(struct InStruct *)userp;
-  (void)handle; /* not used in here */
+#define MAX_SEEK 2147483647
 
-  switch(cmd) {
-  case CURLIOCMD_RESTARTREAD:
-    /* mr libcurl kindly asks as to rewind the read data stream to start */
-    if(-1 == fseek(in->stream, 0, SEEK_SET))
-      /* couldn't rewind, the reason is in errno but errno is just not
-         portable enough and we don't actually care that much why we failed. */
-      return CURLIOE_FAILRESTART;
-
-    break;
-
-  default: /* ignore unknown commands */
-    return CURLIOE_UNKNOWNCMD;
-  }
-  return CURLIOE_OK;
-}
-#else
+#ifndef SIZEOF_OFF_T
+/* (Jan 11th 2008) this is a reasonably new define in the config.h so there
+   might be older handicrafted configs that don't define it properly and then
+   we assume 32bit off_t */
+#define SIZEOF_OFF_T 4
+#endif
+/*
+ * my_seek() is the CURLOPT_SEEKFUNCTION we use
+ */
 static int my_seek(void *stream, curl_off_t offset, int whence)
 {
   struct InStruct *in=(struct InStruct *)stream;
 
-  /* We can't use fseek() here since it can't do 64bit seeks on Windows and
-     possibly elsewhere. We need to switch to the lseek family of tricks. For
-     that to work, we need to switch from fread() to plain read() etc */
+#if (SIZEOF_CURL_OFF_T > SIZEOF_OFF_T) && !defined(lseek)
+  /* The sizeof check following here is only interesting if curl_off_t is
+     larger than off_t, but also not on windows-like systems for which lseek
+     is a defined macro that works around the 32bit off_t-problem and thus do
+     64bit seeks correctly anyway */
 
-  if(-1 == fseek(in->stream, (off_t)offset, whence))
+  if(offset > MAX_SEEK) {
+    /* Some precaution code to work around problems with different data sizes
+       to allow seeking >32bit even if off_t is 32bit. Should be very rare and
+       is really valid on weirdo-systems. */
+    curl_off_t left = offset;
+
+    if(whence != SEEK_SET)
+      /* this code path doesn't support other types */
+      return 1;
+
+    if(-1 == lseek(in->fd, 0, SEEK_SET))
+      /* couldn't rewind to beginning */
+      return 1;
+
+    while(left) {
+      long step = (left>MAX_SEEK ? MAX_SEEK : (long)left);
+      if(-1 == lseek(in->fd, step, SEEK_CUR))
+        /* couldn't seek forwards the desired amount */
+        return 1;
+      left -= step;
+    }
+    return 0;
+  }
+#endif
+  if(-1 == lseek(in->fd, offset, whence))
     /* couldn't rewind, the reason is in errno but errno is just not
        portable enough and we don't actually care that much why we failed. */
     return 1;
@@ -3058,15 +3083,16 @@ static int my_seek(void *stream, curl_off_t offset, int whence)
   return 0;
 }
 
-#endif
-
 static size_t my_fread(void *buffer, size_t sz, size_t nmemb, void *userp)
 {
-  size_t rc;
+  ssize_t rc;
   struct InStruct *in=(struct InStruct *)userp;
 
-  rc = fread(buffer, sz, nmemb, in->stream);
-  return rc;
+  rc = read(in->fd, buffer, sz*nmemb);
+  if(rc < 0)
+    /* since size_t is unsigned we can't return negative values fine */
+    return 0;
+  return (size_t)rc;
 }
 
 struct ProgressData {
@@ -3689,8 +3715,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
   int infilenum;
   char *uploadfile=NULL; /* a single file, never a glob */
 
-  FILE *infd = stdin;
-  bool infdfopen;
+  int infd = STDIN_FILENO;
+  bool infdopen;
   FILE *headerfilep = NULL;
   curl_off_t uploadfilesize; /* -1 means unknown */
   bool stillflags=TRUE;
@@ -4112,7 +4138,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             outs.stream = NULL; /* open when needed */
           }
         }
-        infdfopen=FALSE;
+        infdopen=FALSE;
         if(uploadfile && !curlx_strequal(uploadfile, "-")) {
           /*
            * We have specified a file to upload and it isn't "-".
@@ -4180,11 +4206,11 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
            * to be considered with one appended if implied CC
            */
 
-          infd=(FILE *) fopen(uploadfile, "rb");
-          if (!infd || stat(uploadfile, &fileinfo)) {
+          infd= open(uploadfile, O_RDONLY | O_BINARY);
+          if ((infd == -1) || stat(uploadfile, &fileinfo)) {
             helpf("Can't open '%s'!\n", uploadfile);
-            if(infd)
-              fclose(infd);
+            if(infd != -1)
+              close(infd);
 
             /* Free the list of remaining URLs and globbed upload files
              * to force curl to exit immediately
@@ -4201,13 +4227,13 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             res = CURLE_READ_ERROR;
             goto quit_urls;
           }
-          infdfopen=TRUE;
+          infdopen=TRUE;
           uploadfilesize=fileinfo.st_size;
 
         }
         else if(uploadfile && curlx_strequal(uploadfile, "-")) {
           SET_BINMODE(stdin);
-          infd = stdin;
+          infd = STDIN_FILENO;
         }
 
         if(uploadfile && config->resume_from_current)
@@ -4269,8 +4295,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           config->errors = stderr;
 
         if(!outfile && !(config->conf & CONF_GETTEXT)) {
-          /* We get the output to stdout and we have not got the ASCII/text flag,
-             then set stdout to be binary */
+          /* We get the output to stdout and we have not got the ASCII/text
+             flag, then set stdout to be binary */
           SET_BINMODE(stdout);
         }
 
@@ -4283,23 +4309,16 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         my_setopt(curl, CURLOPT_WRITEFUNCTION, my_fwrite);
 
         /* for uploads */
-        input.stream = infd;
+        input.fd = infd;
         input.config = config;
         my_setopt(curl, CURLOPT_READDATA, &input);
         /* what call to read */
         my_setopt(curl, CURLOPT_READFUNCTION, my_fread);
 
-#if 1
-        /* the ioctl function is at this point only used to rewind files
-           that are posted when using NTLM etc */
-        my_setopt(curl, CURLOPT_IOCTLDATA, &input);
-        my_setopt(curl, CURLOPT_IOCTLFUNCTION, my_ioctl);
-#else
-        /* in 7.18.0, the SEEKFUNCTION/DATA pair is taking over what IOCTL*
-           previously provided for seeking */
+        /* in 7.18.0, the CURLOPT_SEEKFUNCTION/DATA pair is taking over what
+           CURLOPT_IOCTLFUNCTION/DATA pair previously provided for seeking */
         my_setopt(curl, CURLOPT_SEEKDATA, &input);
         my_setopt(curl, CURLOPT_SEEKFUNCTION, my_seek);
-#endif
 
         if(config->recvpersecond)
           /* tell libcurl to use a smaller sized buffer as it allows us to
@@ -4371,7 +4390,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         my_setopt(curl, CURLOPT_SSLKEYTYPE, config->key_type);
         my_setopt(curl, CURLOPT_KEYPASSWD, config->key_passwd);
 
-        /* SSH private key uses the same command-line option as SSL private key */
+        /* SSH private key uses the same command-line option as SSL private
+           key */
         my_setopt(curl, CURLOPT_SSH_PRIVATE_KEYFILE, config->key);
         my_setopt(curl, CURLOPT_SSH_PUBLIC_KEYFILE, config->pubkey);
 
@@ -4780,8 +4800,8 @@ quit_urls:
         if(outfile)
           free(outfile);
 
-        if(infdfopen)
-          fclose(infd);
+        if(infdopen)
+          close(infd);
 
       } /* loop to the next URL */
 

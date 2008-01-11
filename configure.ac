@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -1893,6 +1893,7 @@ AC_CHECK_SIZEOF(curl_off_t, ,[
 AC_CHECK_SIZEOF(size_t)
 AC_CHECK_SIZEOF(long)
 AC_CHECK_SIZEOF(time_t)
+AC_CHECK_SIZEOF(off_t)
 
 AC_CHECK_TYPE(long long,
    [AC_DEFINE(HAVE_LONGLONG, 1, [if your compiler supports long long])]
