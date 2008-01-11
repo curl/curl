@@ -1,10 +1,6 @@
 To be addressed before 7.18.0 (planned release: January 2008)
 =============================
 
-114 - Ranged downloads on file:// URLs by Daniel Egger (minor work left)
-      http://curl.haxx.se/mail/lib-2008-01/0049.html (patch)
-      http://curl.haxx.se/mail/lib-2008-01/0058.html (comments)
-
 115 - Cleanup debugging messages in test harness, introduced for new minimum
       SSH version support for SCP, SFTP and SOCKS tests
       
