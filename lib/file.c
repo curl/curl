@@ -373,7 +373,7 @@ static CURLcode file_upload(struct connectdata *conn)
       }
       else {
         buf2 = buf + data->state.resume_from;
-        nread -= data->state.resume_from;
+        nread -= (size_t)data->state.resume_from;
         data->state.resume_from = 0;
       }
     }
@@ -426,6 +426,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
   curl_off_t expected_size=0;
   bool fstated=FALSE;
   ssize_t nread;
+  size_t bytestoread;
   struct SessionHandle *data = conn->data;
   char *buf = data->state.buffer;
   curl_off_t bytecount = 0;
@@ -535,10 +536,8 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
 
   while(res == CURLE_OK) {
     /* Don't fill a whole buffer if we want less than all data */
-    if (expected_size < BUFSIZE-1)
-      nread = read(fd, buf, expected_size);
-    else
-      nread = read(fd, buf, BUFSIZE-1);
+    bytestoread = (expected_size < BUFSIZE-1)?(size_t)expected_size:BUFSIZE-1;
+    nread = read(fd, buf, bytestoread);
 
     if( nread > 0)
       buf[nread] = 0;
