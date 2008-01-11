@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel S (11 Jan 2008)
+- Daniel Egger made CURLOPT_RANGE work on file:// URLs the very same way it
+  already worked for FTP:// URLs.
+
 - I made the curl tool switch from using CURLOPT_IOCTLFUNCTION to now use the
   spanking new CURLOPT_SEEKFUNCTION simply to take advantage of the improved
   performance for the upload resume cases where you want to upload the last

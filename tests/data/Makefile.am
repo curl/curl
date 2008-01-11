@@ -28,26 +28,26 @@ EXTRA_DIST = test1 test108 test117 test127 test20 test27 test34 test46	   \
  test194 test195 test196 test197 test198 test515 test516 test517 test518   \
  test210 test211 test212 test220 test221 test222 test223 test224 test206   \
  test207 test208 test209 test213 test240 test241 test242 test519 test214   \
- test215 test216 test217 test218 test199 test225 test226 test227	   \
- test228 test229 test233 test234 test235 test236 test520		   \
- test237 test238 test239 test243 test245 test246 test247 test248 test249   \
- test250 test251 test252 test253 test254 test255 test521 test522 test523   \
- test256 test257 test258 test259 test260 test261 test262 test263 test264   \
- test265 test266 test267 test268 test269 test270 test271 test272 test273   \
- test274 test275 test524 test525 test276 test277 test526 test527 test528   \
- test530 DISABLED test278 test279 test531 test280 test529 test532 test533  \
- test534 test535 test281 test537 test282 test283 test284 test538 test285   \
- test286 test307 test308 test287 test400 test288 test600 test601 test602   \
- test603 test401 test402 test290 test291 test292 test293 test403 test404   \
- test405 test604 test605 test606 test607 test608 test609 test294 test295   \
- test296 test297 test298 test610 test611 test612 test406 test407 test408   \
- test409 test613 test614 test700 test701 test702 test704 test705 test703   \
- test706 test707 test350 test351 test352 test353 test289 test540 test354   \
- test231 test1000 test1001 test1002 test1003 test1004 test1005 test1006    \
- test615 test1007 test541 test1010 test1011 test1012 test542 test543       \
- test536 test1008 test1009 test2000 test2001 test2002 test2003 test35      \
- test544 test545 test2004 test546 test1013 test1014 test1015 \
- test547 test548 test549 test550 test551 test552
+ test215 test216 test217 test218 test199 test225 test226 test227 test228   \
+ test229 test233 test234 test235 test236 test520 test237 test238 test239   \
+ test243 test245 test246 test247 test248 test249 test250 test251 test252   \
+ test253 test254 test255 test521 test522 test523 test256 test257 test258   \
+ test259 test260 test261 test262 test263 test264 test265 test266 test267   \
+ test268 test269 test270 test271 test272 test273 test274 test275 test524   \
+ test525 test276 test277 test526 test527 test528 test530 DISABLED test278  \
+ test279 test531 test280 test529 test532 test533 test534 test535 test281   \
+ test537 test282 test283 test284 test538 test285 test286 test307 test308   \
+ test287 test400 test288 test600 test601 test602 test603 test401 test402   \
+ test290 test291 test292 test293 test403 test404 test405 test604 test605   \
+ test606 test607 test608 test609 test294 test295 test296 test297 test298   \
+ test610 test611 test612 test406 test407 test408 test409 test613 test614   \
+ test700 test701 test702 test704 test705 test703 test706 test707 test350   \
+ test351 test352 test353 test289 test540 test354 test231 test1000 test1001 \
+ test1002 test1003 test1004 test1005 test1006 test615 test1007 test541	   \
+ test1010 test1011 test1012 test542 test543 test536 test1008 test1009	   \
+ test2000 test2001 test2002 test2003 test35 test544 test545 test2004	   \
+ test546 test1013 test1014 test1015 test547 test548 test549 test550	   \
+ test551 test552 test1016 test1017 test1018 test1019 test1020
 
 filecheck:
 	@mkdir test-place; \

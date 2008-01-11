@@ -49,6 +49,7 @@ This release includes the following bugfixes:
  o time zone offsets from -1400 to +1400 are now accepted by the date parser
  o allows more spaces in WWW/Proxy-Authenticate: headers
  o curl-config --libs skips /usr/lib64
+ o range support for file:// transfers
 
 This release includes the following known bugs:
 

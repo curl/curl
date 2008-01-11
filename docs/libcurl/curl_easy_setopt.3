@@ -1119,6 +1119,8 @@ transfers also support several intervals, separated with commas as in
 \fI"X-Y,N-M"\fP. Using this kind of multiple intervals will cause the HTTP
 server to send the response document in pieces (using standard MIME separation
 techniques). Pass a NULL to this option to disable the use of ranges.
+
+Ranges work on HTTP, FTP and FILE (since 7.18.0) transfers only.
 .IP CURLOPT_RESUME_FROM
 Pass a long as parameter. It contains the offset in number of bytes that you
 want the transfer to start from. Set this option to 0 to make the transfer

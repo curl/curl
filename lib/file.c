@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -70,6 +70,7 @@
 
 #endif
 
+#include "strtoofft.h"
 #include "urldata.h"
 #include <curl/curl.h>
 #include "progress.h"
@@ -118,6 +119,61 @@ const struct Curl_handler Curl_handler_file = {
   0,                                    /* defport */
   PROT_FILE                             /* protocol */
 };
+
+
+ /*
+  Check if this is a range download, and if so, set the internal variables
+  properly. This code is copied from the FTP implementation and might as
+  well be factored out.
+ */
+static CURLcode file_range(struct connectdata *conn)
+{
+  curl_off_t from, to;
+  curl_off_t totalsize=-1;
+  char *ptr;
+  char *ptr2;
+  struct SessionHandle *data = conn->data;
+
+  if(data->state.use_range && data->state.range) {
+    from=curlx_strtoofft(data->state.range, &ptr, 0);
+    while(ptr && *ptr && (isspace((int)*ptr) || (*ptr=='-')))
+      ptr++;
+    to=curlx_strtoofft(ptr, &ptr2, 0);
+    if(ptr == ptr2) {
+      /* we didn't get any digit */
+      to=-1;
+    }
+    if((-1 == to) && (from>=0)) {
+      /* X - */
+      data->state.resume_from = from;
+      DEBUGF(infof(data, "RANGE %" FORMAT_OFF_T " to end of file\n",
+                   from));
+    }
+    else if(from < 0) {
+      /* -Y */
+      totalsize = -from;
+      data->req.maxdownload = -from;
+      data->state.resume_from = from;
+      DEBUGF(infof(data, "RANGE the last %" FORMAT_OFF_T " bytes\n",
+                   totalsize));
+    }
+    else {
+      /* X-Y */
+      totalsize = to-from;
+      data->req.maxdownload = totalsize+1; /* include last byte */
+      data->state.resume_from = from;
+      DEBUGF(infof(data, "RANGE from %" FORMAT_OFF_T
+                   " getting %" FORMAT_OFF_T " bytes\n",
+                   from, data->req.maxdownload));
+    }
+    DEBUGF(infof(data, "range-download from %" FORMAT_OFF_T
+                 " to %" FORMAT_OFF_T ", totally %" FORMAT_OFF_T " bytes\n",
+                 from, to, data->req.maxdownload));
+  }
+  else
+    data->req.maxdownload = -1;
+  return CURLE_OK;
+}
 
 /*
  * file_connect() gets called from Curl_protocol_connect() to allow us to
@@ -287,8 +343,8 @@ static CURLcode file_upload(struct connectdata *conn)
     Curl_pgrsSetUploadSize(data, data->set.infilesize);
 
   /* treat the negative resume offset value as the case of "-" */
-  if(data->state.resume_from < 0){
-    if(stat(file->path, &file_stat)){
+  if(data->state.resume_from < 0) {
+    if(stat(file->path, &file_stat)) {
       fclose(fp);
       failf(data, "Can't get the size of %s", file->path);
       return CURLE_WRITE_ERROR;
@@ -434,12 +490,30 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
     return result;
   }
 
+  /* Check whether file range has been specified */
+  file_range(conn);
+
+  /* Adjust the start offset in case we want to get the N last bytes
+   * of the stream iff the filesize could be determined */
+  if(data->state.resume_from < 0) {
+    if(!fstated) {
+      failf(data, "Can't get the size of file.");
+      return CURLE_READ_ERROR;
+    }
+    else
+      data->state.resume_from += (curl_off_t)statbuf.st_size;
+  }
+
   if(data->state.resume_from <= expected_size)
     expected_size -= data->state.resume_from;
   else {
     failf(data, "failed to resume file:// transfer");
     return CURLE_BAD_DOWNLOAD_RESUME;
   }
+
+  /* A high water mark has been specified so we obey... */
+  if (data->req.maxdownload > 0)
+    expected_size = data->req.maxdownload;
 
   if(fstated && (expected_size == 0))
     return CURLE_OK;
@@ -460,15 +534,20 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
   Curl_pgrsTime(data, TIMER_STARTTRANSFER);
 
   while(res == CURLE_OK) {
-    nread = read(fd, buf, BUFSIZE-1);
+    /* Don't fill a whole buffer if we want less than all data */
+    if (expected_size < BUFSIZE-1)
+      nread = read(fd, buf, expected_size);
+    else
+      nread = read(fd, buf, BUFSIZE-1);
 
     if( nread > 0)
       buf[nread] = 0;
 
-    if(nread <= 0)
+    if (nread <= 0 || expected_size == 0)
       break;
 
     bytecount += nread;
+    expected_size -= nread;
 
     res = Curl_client_write(conn, CLIENTWRITE_BODY, buf, nread);
     if(res)
