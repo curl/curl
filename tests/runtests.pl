@@ -661,14 +661,20 @@ sub verifyftp {
 
 sub verifyssh {
     my ($proto, $ip, $port) = @_;
-    my $pid;
+    my $pid = 0;
     if(open(FILE, "<$SSHPIDFILE")) {
         $pid=0+<FILE>;
         close(FILE);
-        logmsg "TRACESSH:verifyssh: pid from $SSHPIDFILE is $pid\n";
     }
-    else {
-        logmsg "TRACESSH:verifyssh: cannot open file $SSHPIDFILE\n";
+    if($pid > 0) {
+        # if we have a pid it is actually our ssh server,
+        # since runsshserver() unlinks previous pidfile
+        if(!kill(0, $pid) {
+            logmsg "RUN: SSH server has died after starting up\n";
+            checkdied($pid)
+            unlink($SSHPIDFILE);
+            $pid = -1;
+        }
     }
     return $pid;
 }
@@ -678,9 +684,21 @@ sub verifyssh {
 
 sub verifysocks {
     my ($proto, $ip, $port) = @_;
-    open(FILE, "<$SOCKSPIDFILE");
-    my $pid=0+<FILE>;
-    close(FILE);
+    my $pid = 0;
+    if(open(FILE, "<$SOCKSPIDFILE")) {
+        $pid=0+<FILE>;
+        close(FILE);
+    }
+    if($pid > 0) {
+        # if we have a pid it is actually our socks server,
+        # since runsocksserver() unlinks previous pidfile
+        if(!kill(0, $pid) {
+            logmsg "RUN: SOCKS server has died after starting up\n";
+            checkdied($pid)
+            unlink($SOCKSPIDFILE);
+            $pid = -1;
+        }
+    }
     return $pid;
 }
 
@@ -2500,7 +2518,7 @@ sub startservers {
             }
             if($what eq "socks4" || $what eq "socks5") {
                 if(!$run{'socks'}) {
-                    ($pid, $pid2) = runsocksserver("", 1);
+                    ($pid, $pid2) = runsocksserver("", $verbose);
                     if($pid <= 0) {
                         return "failed starting socks server";
                     }
