@@ -669,7 +669,7 @@ sub verifyssh {
     if($pid > 0) {
         # if we have a pid it is actually our ssh server,
         # since runsshserver() unlinks previous pidfile
-        if(!kill(0, $pid) {
+        if(!kill(0, $pid)) {
             logmsg "RUN: SSH server has died after starting up\n";
             checkdied($pid)
             unlink($SSHPIDFILE);
@@ -692,7 +692,7 @@ sub verifysocks {
     if($pid > 0) {
         # if we have a pid it is actually our socks server,
         # since runsocksserver() unlinks previous pidfile
-        if(!kill(0, $pid) {
+        if(!kill(0, $pid)) {
             logmsg "RUN: SOCKS server has died after starting up\n";
             checkdied($pid)
             unlink($SOCKSPIDFILE);
