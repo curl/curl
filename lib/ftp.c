@@ -403,7 +403,7 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
                              int *ftpcode, /* return the ftp-code if done */
                              size_t *size) /* size of the response */
 {
-  int perline; /* count bytes per line */
+  ssize_t perline; /* count bytes per line */
   bool keepon=TRUE;
   ssize_t gotbytes;
   char *ptr;
@@ -418,8 +418,9 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
 
   ptr=buf + ftpc->nread_resp;
 
-  perline= (int)(ptr-ftpc->linestart_resp); /* number of bytes in the current
-                                              line, so far */
+  /* number of bytes in the current line, so far */
+  perline = (ssize_t)(ptr-ftpc->linestart_resp);
+
   keepon=TRUE;
 
   while((ftpc->nread_resp<BUFSIZE) && (keepon && !result)) {
@@ -479,7 +480,7 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
        * byte to a set of lines and possible just a piece of the last
        * line */
       ssize_t i;
-      int clipamount = 0;
+      ssize_t clipamount = 0;
       bool restart = FALSE;
 
       data->req.headerbytecount += gotbytes;
