@@ -671,7 +671,7 @@ sub verifyssh {
         # since runsshserver() unlinks previous pidfile
         if(!kill(0, $pid)) {
             logmsg "RUN: SSH server has died after starting up\n";
-            checkdied($pid)
+            checkdied($pid);
             unlink($SSHPIDFILE);
             $pid = -1;
         }
@@ -694,7 +694,7 @@ sub verifysocks {
         # since runsocksserver() unlinks previous pidfile
         if(!kill(0, $pid)) {
             logmsg "RUN: SOCKS server has died after starting up\n";
-            checkdied($pid)
+            checkdied($pid);
             unlink($SOCKSPIDFILE);
             $pid = -1;
         }
