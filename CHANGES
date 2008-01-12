@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel S (12 Jan 2008)
+- I re-arranged the curl --help output. All the options are now sorted on
+  their long option names and all descriptions are one-liners.
+
 - Eric Landes provided the patch (edited by me) that introduces the
   --keepalive-time to curl to set the keepalive probe interval. I also took
   the opportunity to rename the recently added no-keep-alive option to

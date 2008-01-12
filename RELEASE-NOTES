@@ -19,6 +19,7 @@ This release includes the following changes:
  o curl_easy_pause()
  o CURLOPT_SEEKFUNCTION and CURLOPT_SEEKDATA
  o --keepalive-time
+ o curl --help output was re-ordered
 
 This release includes the following bugfixes:
 
