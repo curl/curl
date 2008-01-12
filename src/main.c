@@ -104,6 +104,13 @@
 #endif
 #endif /* CURL_DOES_CONVERSIONS && HAVE_ICONV */
 
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h> /* for IPPROTO_TCP */
+#endif
+#ifdef HAVE_NETINET_TCP_H
+#include <netinet/tcp.h> /* for TCP_KEEPIDLE, TCP_KEEPINTVL */
+#endif
+
 /* The last #include file should be: */
 #ifdef CURLDEBUG
 #ifndef CURLTOOLDEBUG
@@ -486,7 +493,9 @@ struct Configurable {
   char *libcurl; /* output libcurl code to this file name */
   bool raw;
   bool post301;
-  bool nokeepalive;
+  bool nokeepalive; /* for keepalive needs */
+  long alivetime;
+
   struct OutStruct *outs;
 };
 
@@ -679,6 +688,7 @@ static void help(void)
     " -I/--head          Show document info only",
     " -j/--junk-session-cookies Ignore session cookies read from file (H)",
     "    --interface <interface> Specify network interface/address to use",
+    "    --keepalive-time <seconds> Interval between keepalive probes",
     "    --krb <level>   Enable kerberos with specified security level (F)",
     " -k/--insecure      Allow connections to SSL sites without certs (H)",
     " -K/--config        Specify which config file to read",
@@ -697,7 +707,7 @@ static void help(void)
     "    --netrc-optional Use either .netrc or URL; overrides -n",
     "    --ntlm          Use HTTP NTLM authentication (H)",
     " -N/--no-buffer     Disable buffering of the output stream",
-    "    --no-keep-alive Disable keep-alive use on the connection",
+    "    --no-keepalive  Disable keepalive use on the connection",
     "    --no-sessionid  Disable SSL session-ID reusing (SSL)",
     " -o/--output <file> Write output to <file> instead of stdout",
     " -O/--remote-name   Write output to a file named as the remote file",
@@ -1444,11 +1454,13 @@ static int ftpcccmethod(struct Configurable *config, char *str)
 }
 
 
-static int set_so_keepalive(void *clientp, curl_socket_t curlfd,
-                            curlsocktype purpose)
+static int sockoptcallback(void *clientp, curl_socket_t curlfd,
+                           curlsocktype purpose)
 {
   struct Configurable *config = (struct Configurable *)clientp;
-  int onoff = config->nokeepalive ? 0 : 1;
+  int onoff = 1; /* this callback is only used if we ask for keepalives on the
+                    connection */
+  long keepidle = config->alivetime;
 
   switch (purpose) {
   case CURLSOCKTYPE_IPCXN:
@@ -1458,6 +1470,28 @@ static int set_so_keepalive(void *clientp, curl_socket_t curlfd,
       SET_SOCKERRNO(0);
       warnf(clientp, "Could not set SO_KEEPALIVE!\n");
       return 0;
+    }
+    else {
+      if (config->alivetime) {
+#ifdef TCP_KEEPIDLE
+        if(setsockopt(curlfd, IPPROTO_TCP, TCP_KEEPIDLE, (void *)&keepidle,
+                      sizeof(keepidle)) < 0) {
+          /* don't abort operation, just issue a warning */
+          SET_SOCKERRNO(0);
+          warnf(clientp, "Could not set TCP_KEEPIDLE!\n");
+          return 0;
+        }
+#endif
+#ifdef TCP_KEEPINTVL
+        if(setsockopt(curlfd, IPPROTO_TCP, TCP_KEEPINTVL, (void *)&keepidle,
+                      sizeof(keepidle)) < 0) {
+          /* don't abort operation, just issue a warning */
+          SET_SOCKERRNO(0);
+          warnf(clientp, "Could not set TCP_KEEPINTVL!\n");
+          return 0;
+        }
+#endif
+      }
     }
     break;
   default:
@@ -1555,8 +1589,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$z", "libcurl",    TRUE},
     {"$#", "raw",        FALSE},
     {"$0", "post301",    FALSE},
-    {"$1", "no-keep-alive",    FALSE},
-    {"$2", "socks5-hostname",    TRUE},
+    {"$1", "no-keepalive",   FALSE},
+    {"$2", "socks5-hostname", TRUE},
+    {"$3", "keepalive-time",  TRUE},
 
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
@@ -2024,8 +2059,12 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       case '0': /* --post301 */
         config->post301 ^= TRUE;
         break;
-      case '1': /* --no-keep-alive */
+      case '1': /* --no-keepalive */
         config->nokeepalive ^= TRUE;
+        break;
+      case '3': /* --keepalive-time */
+        if(str2num(&config->alivetime, nextarg))
+          return PARAM_BAD_NUMERIC;
         break;
       }
       break;
@@ -4590,7 +4629,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         /* curl 7.17.1 */
         my_setopt(curl, CURLOPT_POST301, config->post301);
         if (!config->nokeepalive) {
-          my_setopt(curl, CURLOPT_SOCKOPTFUNCTION, set_so_keepalive);
+          my_setopt(curl, CURLOPT_SOCKOPTFUNCTION, sockoptcallback);
           my_setopt(curl, CURLOPT_SOCKOPTDATA, config);
         }
 

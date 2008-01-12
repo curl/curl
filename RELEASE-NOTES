@@ -1,7 +1,7 @@
 Curl and libcurl 7.18.0
 
  Public curl releases:         103
- Command line options:         125
+ Command line options:         126
  curl_easy_setopt() options:   150
  Public functions in libcurl:  56
  Public web site mirrors:      42
@@ -12,12 +12,13 @@ This release includes the following changes:
  
  o --data-urlencode
  o CURLOPT_PROXY_TRANSFER_MODE
- o --no-keep-alive - now curl does connections with keep-alive enabled by
+ o --no-keepalive - now curl does connections with keep-alive enabled by
    default
  o --socks4a added (proxy type CURLPROXY_SOCKS4A for libcurl)
  o --socks5-hostname added (CURLPROXY_SOCKS5_HOSTNAME for libcurl)
  o curl_easy_pause()
  o CURLOPT_SEEKFUNCTION and CURLOPT_SEEKDATA
+ o --keepalive-time
 
 This release includes the following bugfixes:
 
@@ -72,6 +73,6 @@ advice from friends like these:
  Emil Romanus, Alessandro Vesely, Ray Pekowski, Spacen Jasset, Andrew Moise,
  Gilles Blanc, David Wright, Vikram Saxena, Mateusz Loskot, Gary Maxwell,
  Dmitry Kurochkin, Mohun Biswas, Richard Atterer, Maxim Perenesenko,
- Daniel Egger, Jeff Johnson, Nikitinskit Dmitriy, Georg Lippitsch
+ Daniel Egger, Jeff Johnson, Nikitinskit Dmitriy, Georg Lippitsch, Eric Landes
  
         Thanks! (and sorry if I forgot to mention someone)

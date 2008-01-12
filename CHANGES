@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel S (12 Jan 2008)
+- Eric Landes provided the patch (edited by me) that introduces the
+  --keepalive-time to curl to set the keepalive probe interval. I also took
+  the opportunity to rename the recently added no-keep-alive option to
+  no-keepalive to keep a consistent naming and to avoid getting two dashes in
+  these option names. Eric also provided an update to the man page for the new
+  option.
+
 Daniel S (11 Jan 2008)
 - Daniel Egger made CURLOPT_RANGE work on file:// URLs the very same way it
   already worked for FTP:// URLs.

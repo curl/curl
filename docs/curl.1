@@ -612,6 +612,14 @@ See this online resource for further details:
 \fBhttp://curl.haxx.se/docs/sslcerts.html\fP
 
 If this option is used twice, the second time will again disable it.
+.IP "--keepalive-time <seconds>"
+This option sets the time a connection needs to remain idle before sending
+keepalive probes and the time between individual keepalive probes. It is
+currently effective on operating systems offering the TCP_KEEPIDLE and
+TCP_KEEPINTVL socket options (meaning Linux, recent AIX, HP-UX and more). This
+option has no effect if \fI--no-keepalive\fP is used. (Added in 7.18.0)
+
+If this option is used multiple times, the last occurrence sets the amount.
 .IP "--key <key>"
 (SSL/SSH) Private key file name. Allows you to provide your private key in this
 separate file.
@@ -820,11 +828,11 @@ will output the data in chunks, not necessarily exactly when the data arrives.
 Using this option will disable that buffering.
 
 If this option is used twice, the second will again switch on buffering.
-.IP "--no-keep-alive"
-Disables the use of keep-alive messages on the TCP connection, as by default
+.IP "--no-keepalive"
+Disables the use of keepalive messages on the TCP connection, as by default
 curl enables them.
 
-If this option is used twice, the second will again enable keep-alive.
+If this option is used twice, the second will again enable keepalive.
 .IP "--no-sessionid"
 (SSL) Disable curl's use of SSL session-ID caching.  By default all transfers
 are done using the cache. Note that while nothing ever should get hurt by
