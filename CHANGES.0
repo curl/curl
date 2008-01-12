@@ -10864,7 +10864,7 @@ Version 6.2
    the configure script to leave SSL alone. The previous functionality has
    been retained. Troy Engel helped test this new one.
 
-Version 6.1
+Version 6.1 (October 17 1999)
 
  Daniel (17 October 1999):
  - I ifdef'ed or commented all the zlib stuff in the sources and configure
@@ -10939,7 +10939,7 @@ Version 6.1beta
  - Made the -F option allow stdin when specifying files. By using '-' instead
    of file name, the data will be read from stdin.
 
-Version 6.0
+Version 6.0 (September 14 1999)
 
  Daniel (13 September 1999)
  - Added -X/--http-request <request> to enable any HTTP command to be sent.
@@ -11201,7 +11201,7 @@ Version 5.9.1
    with form posting where the variable shouldn't have any content, as in curl
    -F "form=" www.site.com. It was now fixed.
 
-Version 5.9
+Version 5.9 (May 22 1999)
 
  Daniel (22 May 1999)
  - I've got a bug report from Aaron Scarisbrick in which he states he has some
@@ -11939,7 +11939,7 @@ Version 4.8.1
    had nothing but header. Appearantly Solaris deals with negative sizes in
    fwrite() calls a lot better than Linux does... =B-]
 
-Version 4.8
+Version 4.8 (Aug 31, 1998)
  Daniel Stenberg
  - Continue FTP file transfer. -c is the switch. Note that you need to
    specify a file name if you wanna resume a download (you can't resume a
