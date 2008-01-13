@@ -1466,7 +1466,9 @@ static int sockoptcallback(void *clientp, curl_socket_t curlfd,
   struct Configurable *config = (struct Configurable *)clientp;
   int onoff = 1; /* this callback is only used if we ask for keepalives on the
                     connection */
-  long keepidle = config->alivetime;
+#if defined(TCP_KEEPIDLE) || defined(TCP_KEEPINTVL)
+  int keepidle = (int)config->alivetime;
+#endif
 
   switch (purpose) {
   case CURLSOCKTYPE_IPCXN:
