@@ -15,6 +15,9 @@ FILE
 <server>
 none
 </server>
+<features>
+file
+</features>
  <name>
 0-Y range on a file:// URL to stdout
  </name>
