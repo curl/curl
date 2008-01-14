@@ -73,6 +73,9 @@
 #include "ssl.h"
 #include "err.h"
 #endif /* USE_OPENSSL */
+#ifdef USE_GNUTLS
+#error Configuration error; cannot use GnuTLS *and* OpenSSL.
+#endif
 #endif /* USE_SSLEAY */
 
 #ifdef USE_GNUTLS
