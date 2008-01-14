@@ -566,7 +566,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   socksreq[2] = 0; /* must be zero */
 
   if(!socks5_resolve_local) {
-    packetsize = 5 + hostname_len + 2;
+    packetsize = (ssize_t)(5 + hostname_len + 2);
 
     socksreq[3] = 3; /* ATYP: domain name = 3 */
     socksreq[4] = (char) hostname_len; /* address length */
