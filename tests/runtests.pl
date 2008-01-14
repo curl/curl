@@ -297,7 +297,7 @@ sub startnew {
     logmsg "startnew: $cmd\n" if ($verbose);
 
     my $child = fork();
-    my $pid2;
+    my $pid2 = 0;
 
     if(not defined $child) {
         logmsg "startnew: fork() failure detected\n";
@@ -336,8 +336,7 @@ sub startnew {
 
     my $count = $timeout;
     while($count--) {
-        if(-f $pidfile) {
-            open(PID, "<$pidfile");
+        if(-f $pidfile && -s $pidfile && open(PID, "<$pidfile")) {
             $pid2 = 0 + <PID>;
             close(PID);
             if(($pid2 > 0) && kill(0, $pid2)) {
@@ -346,6 +345,8 @@ sub startnew {
                 # similar!
                 last;
             }
+            # invalidate $pid2 if not actually alive
+            $pid2 = 0;
         }
         if (checkdied($child)) {
             logmsg "startnew: child process has died, server might start up\n"
