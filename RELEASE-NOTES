@@ -52,6 +52,7 @@ This release includes the following bugfixes:
  o allows more spaces in WWW/Proxy-Authenticate: headers
  o curl-config --libs skips /usr/lib64
  o range support for file:// transfers
+ o libcurl hang with huge POST request and request-body read from callback
 
 This release includes the following known bugs:
 
@@ -74,6 +75,7 @@ advice from friends like these:
  Emil Romanus, Alessandro Vesely, Ray Pekowski, Spacen Jasset, Andrew Moise,
  Gilles Blanc, David Wright, Vikram Saxena, Mateusz Loskot, Gary Maxwell,
  Dmitry Kurochkin, Mohun Biswas, Richard Atterer, Maxim Perenesenko,
- Daniel Egger, Jeff Johnson, Nikitinskit Dmitriy, Georg Lippitsch, Eric Landes
+ Daniel Egger, Jeff Johnson, Nikitinskit Dmitriy, Georg Lippitsch, Eric Landes,
+ Joe Malicki
  
         Thanks! (and sorry if I forgot to mention someone)

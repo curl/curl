@@ -2705,8 +2705,10 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           /* set the pointer to mark that we will send the post body using the
              read callback, but only if we're not in authenticate
              negotiation  */
-          if(!conn->bits.authneg)
+          if(!conn->bits.authneg) {
             http->postdata = (char *)&http->postdata;
+            http->postsize = postsize;
+          }
         }
       }
       /* issue the request */

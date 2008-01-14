@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel S (14 Jan 2008)
+- Joe Malicki filed bug report #1871269
+  (http://curl.haxx.se/bug/view.cgi?id=1871269) and we could fix his hang-
+  problem that occurred when doing a large HTTP POST request with the
+  response-body read from a callback.
+
 Daniel S (12 Jan 2008)
 - I re-arranged the curl --help output. All the options are now sorted on
   their long option names and all descriptions are one-liners.
