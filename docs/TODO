@@ -40,6 +40,7 @@
  5. HTTP
  5.1 Other HTTP versions with CONNECT
  5.2 Better persistancy for HTTP 1.0
+ 5.3 support FF3 sqlite cookie files
 
  6. TELNET
  6.1 ditch stdin
@@ -260,6 +261,12 @@
 
  "Better" support for persistent connections over HTTP 1.0
  http://curl.haxx.se/bug/feature.cgi?id=1089001
+
+5.3 support FF3 sqlite cookie files
+
+ Firefox 3 is changing from its former format to a a sqlite database instead.
+ We should consider how (lib)curl can/should support this.
+ http://curl.haxx.se/bug/feature.cgi?id=1871388
 
 6. TELNET
 
