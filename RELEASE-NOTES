@@ -53,6 +53,7 @@ This release includes the following bugfixes:
  o curl-config --libs skips /usr/lib64
  o range support for file:// transfers
  o libcurl hang with huge POST request and request-body read from callback
+ o removed extra newlines from many error messages
 
 This release includes the following known bugs:
 

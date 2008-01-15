@@ -7,7 +7,7 @@
  *
  * Copyright (c) 1995, 1996, 1997, 1998, 1999 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
- * Copyright (c) 2004 - 2007 Daniel Stenberg
+ * Copyright (c) 2004 - 2008 Daniel Stenberg
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -362,7 +362,7 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
     tmp=0;
   }
   if(!tmp || !ptr) {
-    Curl_failf(conn->data, "Failed to decode base64 in reply.\n");
+    Curl_failf(conn->data, "Failed to decode base64 in reply");
     Curl_set_command_prot(conn, save);
     return CURLE_FTP_WEIRD_SERVER_REPLY;
   }

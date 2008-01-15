@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -436,10 +436,10 @@ static int display_error(struct connectdata *conn, PRInt32 err,
 {
   switch(err) {
   case SEC_ERROR_BAD_PASSWORD:
-    failf(conn->data, "Unable to load client key: Incorrect password\n");
+    failf(conn->data, "Unable to load client key: Incorrect password");
     return 1;
   case SEC_ERROR_UNKNOWN_CERT:
-    failf(conn->data, "Unable to load certificate %s\n", filename);
+    failf(conn->data, "Unable to load certificate %s", filename);
     return 1;
   default:
     break;
@@ -521,10 +521,10 @@ static SECStatus nss_Init_Tokens(struct connectdata * conn)
 
     if(PK11_NeedLogin(slot) && PK11_NeedUserInit(slot)) {
       if(slot == PK11_GetInternalKeySlot()) {
-        failf(conn->data, "The NSS database has not been initialized.\n");
+        failf(conn->data, "The NSS database has not been initialized");
       }
       else {
-        failf(conn->data, "The token %s has not been initialized.",
+        failf(conn->data, "The token %s has not been initialized",
               PK11_GetTokenName(slot));
       }
       PK11_FreeSlot(slot);
@@ -1057,7 +1057,7 @@ int Curl_nss_send(struct connectdata *conn,  /* connection data */
       return CURLE_OPERATION_TIMEDOUT;
     }
 
-    failf(conn->data, "SSL write: error %d\n", err);
+    failf(conn->data, "SSL write: error %d", err);
     return -1;
   }
   return rc; /* number of bytes */

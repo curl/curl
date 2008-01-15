@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -733,7 +733,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
         break;
       }
       else {
-        failf(data, "Failure initialising sftp session\n");
+        failf(data, "Failure initialising sftp session");
         state(conn, SSH_SESSION_FREE);
         sshc->actualcode = CURLE_FAILED_INIT;
         break;

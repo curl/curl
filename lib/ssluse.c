@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -426,7 +426,7 @@ int cert_stuff(struct connectdata *conn,
         key_file=cert_file;
     case SSL_FILETYPE_ASN1:
       if(SSL_CTX_use_PrivateKey_file(ctx, key_file, file_type) != 1) {
-        failf(data, "unable to set private key file: '%s' type %s\n",
+        failf(data, "unable to set private key file: '%s' type %s",
               key_file, key_type?key_type:"PEM");
         return 0;
       }
@@ -440,7 +440,7 @@ int cert_stuff(struct connectdata *conn,
           UI_METHOD *ui_method = UI_OpenSSL();
 #endif
           if(!key_file || !key_file[0]) {
-            failf(data, "no key set to load from crypto engine\n");
+            failf(data, "no key set to load from crypto engine");
             return 0;
           }
           /* the typecast below was added to please mingw32 */
@@ -451,40 +451,40 @@ int cert_stuff(struct connectdata *conn,
 #endif
                                     data->set.str[STRING_KEY_PASSWD]);
           if(!priv_key) {
-            failf(data, "failed to load private key from crypto engine\n");
+            failf(data, "failed to load private key from crypto engine");
             return 0;
           }
           if(SSL_CTX_use_PrivateKey(ctx, priv_key) != 1) {
-            failf(data, "unable to set private key\n");
+            failf(data, "unable to set private key");
             EVP_PKEY_free(priv_key);
             return 0;
           }
           EVP_PKEY_free(priv_key);  /* we don't need the handle any more... */
         }
         else {
-          failf(data, "crypto engine not set, can't load private key\n");
+          failf(data, "crypto engine not set, can't load private key");
           return 0;
         }
       }
       break;
 #else
-      failf(data, "file type ENG for private key not supported\n");
+      failf(data, "file type ENG for private key not supported");
       return 0;
 #endif
     case SSL_FILETYPE_PKCS12:
       if(!cert_done) {
-        failf(data, "file type P12 for private key not supported\n");
+        failf(data, "file type P12 for private key not supported");
         return 0;
       }
       break;
     default:
-      failf(data, "not supported file type for private key\n");
+      failf(data, "not supported file type for private key");
       return 0;
     }
 
     ssl=SSL_new(ctx);
     if(NULL == ssl) {
-      failf(data,"unable to create an SSL structure\n");
+      failf(data,"unable to create an SSL structure");
       return 0;
     }
 
@@ -1855,19 +1855,19 @@ ssize_t Curl_ossl_send(struct connectdata *conn,
          equivalent. */
       return 0;
     case SSL_ERROR_SYSCALL:
-      failf(conn->data, "SSL_write() returned SYSCALL, errno = %d\n",
+      failf(conn->data, "SSL_write() returned SYSCALL, errno = %d",
             SOCKERRNO);
       return -1;
     case SSL_ERROR_SSL:
       /*  A failure in the SSL library occurred, usually a protocol error.
           The OpenSSL error queue contains more information on the error. */
       sslerror = ERR_get_error();
-      failf(conn->data, "SSL_write() error: %s\n",
+      failf(conn->data, "SSL_write() error: %s",
             ERR_error_string(sslerror, error_buffer));
       return -1;
     }
     /* a true error */
-    failf(conn->data, "SSL_write() return error %d\n", err);
+    failf(conn->data, "SSL_write() return error %d", err);
     return -1;
   }
   return (ssize_t)rc; /* number of bytes */

@@ -131,7 +131,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
                                 buffersize, conn->fread_in);
 
   if(nread == CURL_READFUNC_ABORT) {
-    failf(data, "operation aborted by callback\n");
+    failf(data, "operation aborted by callback");
     return CURLE_ABORTED_BY_CALLBACK;
   }
   else if(nread == CURL_READFUNC_PAUSE) {
@@ -250,7 +250,7 @@ CURLcode Curl_readrewind(struct connectdata *conn)
 
       err = (data->set.seek_func)(data->set.seek_client, 0, SEEK_SET);
       if(err) {
-	failf(data, "seek callback returned error %d\n", (int)err);
+	failf(data, "seek callback returned error %d", (int)err);
         return CURLE_SEND_FAIL_REWIND;
       }
     }
@@ -263,7 +263,7 @@ CURLcode Curl_readrewind(struct connectdata *conn)
 
       if(err) {
         /* FIXME: convert to a human readable error message */
-        failf(data, "ioctl callback returned error %d\n", (int)err);
+        failf(data, "ioctl callback returned error %d", (int)err);
         return CURLE_SEND_FAIL_REWIND;
       }
     }
@@ -278,7 +278,7 @@ CURLcode Curl_readrewind(struct connectdata *conn)
       }
 
       /* no callback set or failure aboe, makes us fail at once */
-      failf(data, "necessary data rewind wasn't possible\n");
+      failf(data, "necessary data rewind wasn't possible");
       return CURLE_SEND_FAIL_REWIND;
     }
   }
@@ -1818,7 +1818,7 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
   CURLcode res;
   if(!data->change.url) {
     /* we can't do anything wihout URL */
-    failf(data, "No URL set!\n");
+    failf(data, "No URL set!");
     return CURLE_URL_MALFORMAT;
   }
 

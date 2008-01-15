@@ -331,7 +331,7 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
                     state->conn->ip_addr->ai_addr,
                     state->conn->ip_addr->ai_addrlen);
     if(sbytes < 0) {
-      failf(data, "%s\n", Curl_strerror(state->conn, SOCKERRNO));
+      failf(data, "%s", Curl_strerror(state->conn, SOCKERRNO));
     }
     Curl_safefree(filename);
     break;
@@ -353,7 +353,7 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
     break;
 
   default:
-    failf(state->conn->data, "tftp_send_first: internal error\n");
+    failf(state->conn->data, "tftp_send_first: internal error");
     break;
   }
   return res;
@@ -384,7 +384,7 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
             "Received unexpected DATA packet block %d\n", rblock);
       state->retries++;
       if(state->retries>state->retry_max) {
-        failf(data, "tftp_rx: giving up waiting for block %d\n",
+        failf(data, "tftp_rx: giving up waiting for block %d",
               state->block+1);
         return CURLE_TFTP_ILLEGAL;
       }
@@ -399,7 +399,7 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
                     (struct sockaddr *)&state->remote_addr,
                     state->remote_addrlen);
     if(sbytes < 0) {
-      failf(data, "%s\n", Curl_strerror(state->conn, SOCKERRNO));
+      failf(data, "%s", Curl_strerror(state->conn, SOCKERRNO));
       return CURLE_SEND_ERROR;
     }
 
@@ -429,7 +429,7 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
                       state->remote_addrlen);
       /* Check all sbytes were sent */
       if(sbytes<0) {
-        failf(data, "%s\n", Curl_strerror(state->conn, SOCKERRNO));
+        failf(data, "%s", Curl_strerror(state->conn, SOCKERRNO));
         return CURLE_SEND_ERROR;
       }
     }
@@ -440,7 +440,7 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
     break;
 
   default:
-    failf(data, "%s\n", "tftp_rx: internal error");
+    failf(data, "%s", "tftp_rx: internal error");
     return CURLE_TFTP_ILLEGAL; /* not really the perfect return code for
                                   this */
   }
@@ -487,7 +487,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
                         state->remote_addrlen);
         /* Check all sbytes were sent */
         if(sbytes<0) {
-          failf(data, "%s\n", Curl_strerror(state->conn, SOCKERRNO));
+          failf(data, "%s", Curl_strerror(state->conn, SOCKERRNO));
           res = CURLE_SEND_ERROR;
         }
       }
@@ -512,7 +512,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
                     state->remote_addrlen);
     /* Check all sbytes were sent */
     if(sbytes<0) {
-      failf(data, "%s\n", Curl_strerror(state->conn, SOCKERRNO));
+      failf(data, "%s", Curl_strerror(state->conn, SOCKERRNO));
       return CURLE_SEND_ERROR;
     }
     /* Update the progress meter */
@@ -538,7 +538,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
                       state->remote_addrlen);
       /* Check all sbytes were sent */
       if(sbytes<0) {
-        failf(data, "%s\n", Curl_strerror(state->conn, SOCKERRNO));
+        failf(data, "%s", Curl_strerror(state->conn, SOCKERRNO));
         return CURLE_SEND_ERROR;
       }
       /* since this was a re-send, we remain at the still byte position */
@@ -551,7 +551,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
     break;
 
   default:
-    failf(data, "%s\n", "tftp_tx: internal error");
+    failf(data, "%s", "tftp_tx: internal error");
     break;
   }
 
@@ -588,7 +588,7 @@ static CURLcode tftp_state_machine(tftp_state_data_t *state,
     break;
   default:
     DEBUGF(infof(data, "STATE: %d\n", state->state));
-    failf(data, "%s\n", "Internal state machine error");
+    failf(data, "%s", "Internal state machine error");
     res = CURLE_TFTP_ILLEGAL;
     break;
   }
@@ -650,7 +650,7 @@ static CURLcode tftp_connect(struct connectdata *conn, bool *done)
     rc = bind(state->sockfd, (struct sockaddr *)&state->local_addr,
               conn->ip_addr->ai_addrlen);
     if(rc) {
-      failf(conn->data, "bind() failed; %s\n",
+      failf(conn->data, "bind() failed; %s",
             Curl_strerror(conn, SOCKERRNO));
       return CURLE_COULDNT_CONNECT;
     }
@@ -734,7 +734,7 @@ static CURLcode tftp_do(struct connectdata *conn, bool *done)
     if(rc == -1) {
       /* bail out */
       int error = SOCKERRNO;
-      failf(data, "%s\n", Curl_strerror(conn, error));
+      failf(data, "%s", Curl_strerror(conn, error));
       event = TFTP_EVENT_ERROR;
     }
     else if(rc==0) {
@@ -759,7 +759,7 @@ static CURLcode tftp_do(struct connectdata *conn, bool *done)
 
       /* Sanity check packet length */
       if(state->rbytes < 4) {
-        failf(data, "Received too short packet\n");
+        failf(data, "Received too short packet");
         /* Not a timeout, but how best to handle it? */
         event = TFTP_EVENT_TIMEOUT;
       }
@@ -791,7 +791,7 @@ static CURLcode tftp_do(struct connectdata *conn, bool *done)
         case TFTP_EVENT_RRQ:
         case TFTP_EVENT_WRQ:
         default:
-          failf(data, "%s\n", "Internal error: Unexpected packet");
+          failf(data, "%s", "Internal error: Unexpected packet");
           break;
         }
 

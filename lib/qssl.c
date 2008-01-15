@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -108,7 +108,7 @@ static CURLcode Curl_qsossl_init_session(struct SessionHandle * data)
     break;
 
   case SSL_ERROR_IO:
-    failf(data, "SSL_Init() I/O error: %s\n", strerror(errno));
+    failf(data, "SSL_Init() I/O error: %s", strerror(errno));
     return CURLE_SSL_CONNECT_ERROR;
 
   case SSL_ERROR_BAD_CIPHER_SUITE:
@@ -125,7 +125,7 @@ static CURLcode Curl_qsossl_init_session(struct SessionHandle * data)
     return CURLE_SSL_CERTPROBLEM;
 
   default:
-    failf(data, "SSL_Init(): %s\n", SSL_Strerror(rc, NULL));
+    failf(data, "SSL_Init(): %s", SSL_Strerror(rc, NULL));
     return CURLE_SSL_CONNECT_ERROR;
   }
 
@@ -142,9 +142,9 @@ static CURLcode Curl_qsossl_create(struct connectdata * conn, int sockindex)
   h = SSL_Create(conn->sock[sockindex], SSL_ENCRYPT);
 
   if(!h) {
-    failf(conn->data, "SSL_Create() I/O error: %s\n", strerror(errno));
+    failf(conn->data, "SSL_Create() I/O error: %s", strerror(errno));
     return CURLE_SSL_CONNECT_ERROR;
-    }
+  }
 
   connssl->handle = h;
   return CURLE_OK;
@@ -232,11 +232,11 @@ static CURLcode Curl_qsossl_handshake(struct connectdata * conn, int sockindex)
     return CURLE_SSL_CERTPROBLEM;
 
   case SSL_ERROR_IO:
-    failf(data, "SSL_Handshake(): %s\n", SSL_Strerror(rc, NULL));
+    failf(data, "SSL_Handshake(): %s", SSL_Strerror(rc, NULL));
     return CURLE_SSL_CONNECT_ERROR;
 
   default:
-    failf(data, "SSL_Init(): %s\n", SSL_Strerror(rc, NULL));
+    failf(data, "SSL_Init(): %s", SSL_Strerror(rc, NULL));
     return CURLE_SSL_CONNECT_ERROR;
   }
 
@@ -282,12 +282,12 @@ static int Curl_qsossl_close_one(struct ssl_connect_data * conn,
 
   if(rc) {
     if(rc == SSL_ERROR_IO) {
-      failf(data, "SSL_Destroy() I/O error: %s\n", strerror(errno));
+      failf(data, "SSL_Destroy() I/O error: %s", strerror(errno));
       return -1;
     }
 
     /* An SSL error. */
-    failf(data, "SSL_Destroy() returned error %d\n", SSL_Strerror(rc, NULL));
+    failf(data, "SSL_Destroy() returned error %d", SSL_Strerror(rc, NULL));
     return -1;
   }
 
@@ -359,7 +359,7 @@ int Curl_qsossl_shutdown(struct connectdata * conn, int sockindex)
     nread = read(conn->sock[sockindex], buf, sizeof(buf));
 
     if(nread < 0) {
-      failf(data, "read: %s\n", strerror(errno));
+      failf(data, "read: %s", strerror(errno));
       rc = -1;
     }
 
@@ -399,12 +399,12 @@ ssize_t Curl_qsossl_send(struct connectdata * conn, int sockindex, void * mem,
         return 0;
         }
 
-      failf(conn->data, "SSL_Write() I/O error: %s\n", strerror(errno));
+      failf(conn->data, "SSL_Write() I/O error: %s", strerror(errno));
       return -1;
     }
 
     /* An SSL error. */
-    failf(conn->data, "SSL_Write() returned error %d\n",
+    failf(conn->data, "SSL_Write() returned error %d",
           SSL_Strerror(rc, NULL));
     return -1;
   }
@@ -442,11 +442,11 @@ ssize_t Curl_qsossl_recv(struct connectdata * conn, int num, char * buf,
         return -1;
         }
 
-      failf(conn->data, "SSL_Read() I/O error: %s\n", strerror(errno));
+      failf(conn->data, "SSL_Read() I/O error: %s", strerror(errno));
       return -1;
 
     default:
-      failf(conn->data, "SSL read error: %s\n", SSL_Strerror(nread, NULL));
+      failf(conn->data, "SSL read error: %s", SSL_Strerror(nread, NULL));
       return -1;
     }
   }
