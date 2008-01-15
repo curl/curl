@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel S (15 Jan 2008)
+- I made the torture test on test 530 go through. This was actually due to
+  silly code left from when we switched to let the multi handle "hold" the dns
+  cache when using the multi interface... Of course this only triggered when a
+  certain function call returned error at the correct moment.
+
 Daniel S (14 Jan 2008)
 - Joe Malicki filed bug report #1871269
   (http://curl.haxx.se/bug/view.cgi?id=1871269) and we could fix his hang-

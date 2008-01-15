@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -127,14 +127,19 @@ static void freednsentry(void *freethis);
  * Curl_global_host_cache_init() initializes and sets up a global DNS cache.
  * Global DNS cache is general badness. Do not use. This will be removed in
  * a future version. Use the share interface instead!
+ *
+ * Returns 0 on success, 1 on failure.
  */
-void Curl_global_host_cache_init(void)
+int Curl_global_host_cache_init(void)
 {
+  int rc = 0;
   if(!host_cache_initialized) {
-    Curl_hash_init(&hostname_cache, 7, Curl_hash_str, Curl_str_key_compare,
-                   freednsentry);
-    host_cache_initialized = 1;
+    rc = Curl_hash_init(&hostname_cache, 7, Curl_hash_str,
+                        Curl_str_key_compare, freednsentry);
+    if(!rc)
+      host_cache_initialized = 1;
   }
+  return rc;
 }
 
 /*

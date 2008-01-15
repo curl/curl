@@ -1443,7 +1443,6 @@ struct UserDefined {
   curl_ftpauth ftpsslauth; /* what AUTH XXX to be attempted */
   curl_ftpccc ftp_ccc;   /* FTP CCC options */
   bool no_signal;        /* do not use any signal/alarm handler */
-  bool global_dns_cache; /* subject for future removal */
   bool tcp_nodelay;      /* whether to enable TCP_NODELAY or not */
   bool ignorecl;         /* ignore content length */
   bool ftp_skip_ip;      /* skip the IP address the FTP server passes on to

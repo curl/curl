@@ -103,6 +103,7 @@
  15.3 size_t
  15.4 remove several functions
  15.5 remove CURLOPT_FAILONERROR
+ 15.6 remove CURLOPT_DNS_USE_GLOBAL_CACHE
 
 ==============================================================================
 
@@ -563,3 +564,9 @@ to provide the data to send.
 
  Remove support for CURLOPT_FAILONERROR, it has gotten too kludgy and weird
  internally. Let the app judge success or not for itself.
+
+15.6 remove CURLOPT_DNS_USE_GLOBAL_CACHE
+
+ Remove support for a global DNS cache. Anything global is silly, and we
+ already offer the share interface for the same functionality but done
+ "right".
