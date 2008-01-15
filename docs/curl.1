@@ -82,7 +82,7 @@ specified on a single command line and cannot be used between separate curl
 invokes.
 .SH "PROGRESS METER"
 curl normally displays a progress meter during operations, indicating amount
-of transfered data, transfer speeds and estimated time left etc.
+of transferred data, transfer speeds and estimated time left etc.
 
 However, since curl displays data to the terminal by default, if you invoke
 curl to do an operation and it is about to write data to the terminal, it
@@ -566,7 +566,7 @@ See also the \fI-A/--user-agent\fP and \fI-e/--referer\fP options.
 This option can be used multiple times to add/replace/remove multiple headers.
 .IP "--hostpubmd5"
 Pass a string containing 32 hexadecimal digits. The string should be the 128
-bit MD5 cheksum of the remote host's public key, curl will refuse the
+bit MD5 checksum of the remote host's public key, curl will refuse the
 connection with the host unless the md5sums match. This option is only for SCP
 and SFTP transfers. (Added in 7.17.1)
 .IP "--ignore-content-length"
@@ -645,8 +645,12 @@ If this option is used several times, the last one will be used.
 Specify which config file to read curl arguments from. The config file is a
 text file in which command line arguments can be written which then will be
 used as if they were written on the actual command line. Options and their
-parameters must be specified on the same config file line. If the parameter is
-to contain white spaces, the parameter must be enclosed within quotes.  If the
+parameters must be specified on the same config file line, separated by
+white space, colon, the equals sign or any combination thereof (however,
+the preferred separator is the equals sign). If the parameter is to contain
+white spaces, the parameter must be enclosed within quotes. Within double
+quotes, the following escape sequences are available: \\\\, \\", \\t, \\n,
+\\r and \\v. A backlash preceding any other letter is  ignored. If the
 first column of a config line is a '#' character, the rest of the line will be
 treated as a comment. Only write one option per physical line in the config
 file.
