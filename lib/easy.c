@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -466,13 +466,23 @@ CURLcode curl_easy_perform(CURL *curl)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   if( ! (data->share && data->share->hostcache) ) {
+    /* this handle is not using a shared dns cache */
 
-    if(Curl_global_host_cache_use(data) &&
-        (data->dns.hostcachetype != HCACHE_GLOBAL)) {
+    if(data->set.global_dns_cache &&
+       (data->dns.hostcachetype != HCACHE_GLOBAL)) {
+      /* global dns cache was requested but still isn't */
+      struct curl_hash *ptr;
+
       if(data->dns.hostcachetype == HCACHE_PRIVATE)
+        /* if the current cache is private, kill it first */
         Curl_hash_destroy(data->dns.hostcache);
-      data->dns.hostcache = Curl_global_host_cache_get();
-      data->dns.hostcachetype = HCACHE_GLOBAL;
+
+      ptr = Curl_global_host_cache_init();
+      if(ptr) {
+        /* only do this if the global cache init works */
+        data->dns.hostcache = ptr;
+        data->dns.hostcachetype = HCACHE_GLOBAL;
+      }
     }
 
     if(!data->dns.hostcache) {

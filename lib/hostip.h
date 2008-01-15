@@ -130,14 +130,10 @@ struct connectdata;
  * Global DNS cache is general badness. Do not use. This will be removed in
  * a future version. Use the share interface instead!
  *
- * Returns 0 on success, 1 on failure.
+ * Returns a struct curl_hash pointer on success, NULL on failure.
  */
-int Curl_global_host_cache_init(void);
+struct curl_hash *Curl_global_host_cache_init(void);
 void Curl_global_host_cache_dtor(void);
-struct curl_hash *Curl_global_host_cache_get(void);
-
-#define Curl_global_host_cache_use(__p) \
-  ((__p)->dns.hostcachetype == HCACHE_GLOBAL)
 
 struct Curl_dns_entry {
   Curl_addrinfo *addr;

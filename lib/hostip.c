@@ -128,9 +128,9 @@ static void freednsentry(void *freethis);
  * Global DNS cache is general badness. Do not use. This will be removed in
  * a future version. Use the share interface instead!
  *
- * Returns 0 on success, 1 on failure.
+ * Returns a struct curl_hash pointer on success, NULL on failure.
  */
-int Curl_global_host_cache_init(void)
+struct curl_hash *Curl_global_host_cache_init(void)
 {
   int rc = 0;
   if(!host_cache_initialized) {
@@ -139,15 +139,7 @@ int Curl_global_host_cache_init(void)
     if(!rc)
       host_cache_initialized = 1;
   }
-  return rc;
-}
-
-/*
- * Return a pointer to the global cache
- */
-struct curl_hash *Curl_global_host_cache_get(void)
-{
-  return &hostname_cache;
+  return rc?NULL:&hostname_cache;
 }
 
 /*

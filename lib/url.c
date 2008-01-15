@@ -778,14 +778,9 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
   case CURLOPT_DNS_USE_GLOBAL_CACHE:
     {
+      /* remember we want this enabled */
       long use_cache = va_arg(param, long);
-      if(use_cache) {
-        Curl_global_host_cache_init();
-        data->dns.hostcachetype = HCACHE_GLOBAL;
-      }
-      else
-        /* not global makes it private by default then */
-        data->dns.hostcachetype = HCACHE_PRIVATE;
+      data->set.global_dns_cache = (bool)(0 != use_cache);
     }
     break;
   case CURLOPT_SSL_CIPHER_LIST:
