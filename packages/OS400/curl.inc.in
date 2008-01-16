@@ -5,7 +5,7 @@
       *                            | (__| |_| |  _ <| |___
       *                             \___|\___/|_| \_\_____|
       *
-      * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+      * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
       *
       * This software is licensed as described in the file COPYING, which
       * you should have received as part of this distribution. The terms
@@ -112,6 +112,11 @@
       *
      d CURL_READFUNC_ABORT...
      d                 c                   X'10000000'
+     d CURL_READFUNC_PAUSE...
+     d                 c                   X'10000001'
+      *
+     d CURL_WRITEFUNC_PAUSE...
+     d                 c                   X'10000001'
       *
      d CURLAUTH_NONE   c                   X'00000000'
      d CURLAUTH_BASIC  c                   X'00000001'
@@ -195,6 +200,15 @@
      d                 c                   X'00000002'
      d CURL_CSELECT_ERR...
      d                 c                   X'00000004'
+      *
+     d CURLPAUSE_RECV  c                   X'00000001'
+     d CURLPAUSE_RECV_CONT...
+     d                 c                   X'00000000'
+     d CURLPAUSE_SEND  c                   X'00000004'
+     d CURLPAUSE_SEND_CONT...
+     d                 c                   X'00000000'
+     d CURLPAUSE_ALL   c                   X'00000005'
+     d CURLPAUSE_CONT  c                   X'00000000'
       *
       **************************************************************************
       *                                Types
@@ -739,6 +753,10 @@
      d                 c                   10165
      d  CURLOPT_PROXY_TRANSFER_MODE...
      d                 c                   00166
+     d  CURLOPT_SEEKFUNCTION...
+     d                 c                   20167
+     d  CURLOPT_SEEKDATA...
+     d                 c                   10168
       *
      d CURLFORMcode    s             10i 0 based(######ptr######)               Enum
      d  CURL_FORMADD_OK...
@@ -1090,6 +1108,9 @@
      d curl_read_callback...
      d                 s               *   based(######ptr######) procptr
       *
+     d curl_seek_callback...
+     d                 s               *   based(######ptr######) procptr
+      *
      d curl_sockopt_callback...
      d                 s               *   based(######ptr######) procptr
       *
@@ -1332,6 +1353,11 @@
      d curl_easy_reset...
      d                 pr                  extproc('curl_easy_reset')
      d  curl                           *   value                                CURL *
+      *
+     d curl_easy_pause...
+     d                 pr                  extproc('curl_easy_pause')
+     d  curl                           *   value                                CURL *
+     d  bitmask                      10i 0 value
       *
      d curl_multi_init...
      d                 pr              *   extproc('curl_multi_init')           CURLM *

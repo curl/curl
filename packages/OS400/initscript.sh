@@ -20,6 +20,12 @@ TOPDIR=`dirname "${SCRIPTDIR}"`
 TOPDIR=`dirname "${TOPDIR}"`
 export SCRIPTDIR TOPDIR
 
+#  Extract the SONAME from the library makefile.
+
+SONAME=`sed -e '/^VERSION=/!d' -e 's/^.* \([0-9]*\):.*$/\1/'           \
+                                                < "${TOPDIR}/lib/Makefile.am"`
+export SONAME
+
 
 ################################################################################
 #
@@ -30,7 +36,7 @@ export SCRIPTDIR TOPDIR
 TARGETLIB='CURL'                # Target OS/400 program library
 STATBNDDIR='CURL_A'             # Static binding directory.
 DYNBNDDIR='CURL'                # Dynamic binding directory.
-SRVPGM='CURL'                   # Service program.
+SRVPGM="CURL.${SONAME}"         # Service program.
 TGTCCSID='500'                  # Target CCSID of objects
 DEBUG='*ALL'                    # Debug level
 OPTIMIZE='10'                   # Optimisation level

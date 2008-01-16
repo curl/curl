@@ -28,7 +28,7 @@ fi
 
 echo '#pragma comment(user, "libcurl version '"${LIBCURL_VERSION}"'")' > os400.c
 echo '#pragma comment(date)' >> os400.c
-echo '#pragma comment(copyright, "Copyright (C) 1998-2007 Daniel Stenberg et al. OS/400 version by P. Monnerat")' >> os400.c
+echo '#pragma comment(copyright, "Copyright (C) 1998-2008 Daniel Stenberg et al. OS/400 version by P. Monnerat")' >> os400.c
 make_module     OS400           os400.c
 LINK=                           # No need to rebuild service program yet.
 MODULES=
@@ -113,12 +113,13 @@ EXPORTS=`grep '^CURL_EXTERN[ 	]'                                      \
 
 BSF="${LIBIFSNAME}/TOOLS.FILE/BNDSRC.MBR"
 
-if action_needed "${BSF}"
+if action_needed "${BSF}" Makefile.am
 then    LINK=YES
 fi
 
 if [ "${LINK}" ]
-then    echo " STRPGMEXP PGMLVL(*CURRENT) SIGNATURE('LIBCURL')" > "${BSF}"
+then    echo " STRPGMEXP PGMLVL(*CURRENT) SIGNATURE('LIBCURL_${SONAME}')" \
+            > "${BSF}"
         for EXPORT in ${EXPORTS}
         do      echo ' EXPORT    SYMBOL("'"${EXPORT}"'")' >> "${BSF}"
         done

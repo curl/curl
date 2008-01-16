@@ -183,8 +183,9 @@ _ Modules for all libcurl units.
 _ Binding directory CURL_A, to be used at calling program link time for
   statically binding the modules (specify BNDSRVPGM(QADRTTS QGLDCLNT QGLDBRDR)
   when creating a program using CURL_A).
-_ Service program CURL, to be used at calling program run-time when this program
-  has dynamically bound curl at link time.
+_ Service program CURL.<soname>, where <soname> is extracted from the
+  lib/Makefile.am VERSION variable. To be used at calling program run-time
+  when this program has dynamically bound curl at link time.
 _ Binding directory CURL. To be used to dynamically bind libcurl when linking a
   calling program.
 _ Source file H. It contains all the include members needed to compile a C/C++
