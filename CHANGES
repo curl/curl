@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Yang Tse (16 Jan 2008)
+- Improved handling of out of memory in the command line tool that afected
+  data url encoded HTTP POSTs when reading it from a file.
+
 Daniel S (16 Jan 2008)
 - Dmitry Kurochkin worked a lot on improving the HTTP Pipelining support that
   previously had a number of flaws, perhaps most notably when an application

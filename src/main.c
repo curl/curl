@@ -803,71 +803,6 @@ static void GetStr(char **string,
     *string = NULL;
 }
 
-static char *file2string(FILE *file)
-{
-  char buffer[256];
-  char *ptr;
-  char *string=NULL;
-  size_t len=0;
-  size_t stringlen;
-
-  if(file) {
-    while(fgets(buffer, sizeof(buffer), file)) {
-      ptr= strchr(buffer, '\r');
-      if(ptr)
-        *ptr=0;
-      ptr= strchr(buffer, '\n');
-      if(ptr)
-        *ptr=0;
-      stringlen=strlen(buffer);
-      if(string)
-        string = realloc(string, len+stringlen+1);
-      else
-        string = malloc(stringlen+1);
-
-      strcpy(string+len, buffer);
-
-      len+=stringlen;
-    }
-    return string;
-  }
-  else
-    return NULL; /* no string */
-}
-
-static char *file2memory(FILE *file, long *size)
-{
-  char buffer[1024];
-  char *string=NULL;
-  char *newstring=NULL;
-  size_t len=0;
-  long stringlen=0;
-
-  if(file) {
-    while((len = fread(buffer, 1, sizeof(buffer), file))) {
-      if(string) {
-        newstring = realloc(string, len+stringlen+1);
-        if(newstring)
-          string = newstring;
-        else
-          break; /* no more strings attached! :-) */
-      }
-      else
-        string = malloc(len+1);
-      memcpy(&string[stringlen], buffer, len);
-      stringlen+=len;
-    }
-    if (string) {
-      /* NUL terminate the buffer in case it's treated as a string later */
-      string[stringlen] = 0;
-    }
-    *size = stringlen;
-    return string;
-  }
-  else
-    return NULL; /* no string */
-}
-
 static void clean_getout(struct Configurable *config)
 {
   struct getout *node=config->url_list;
@@ -1308,6 +1243,82 @@ static const char *param2text(int res)
   default:
     return "unknown error";
   }
+}
+
+static ParameterError file2string(char **bufp, FILE *file)
+{
+  char buffer[256];
+  char *ptr;
+  char *string = NULL;
+  size_t stringlen = 0;
+  size_t buflen;
+
+  if(file) {
+    while(fgets(buffer, sizeof(buffer), file)) {
+      if((ptr = strchr(buffer, '\r')) != NULL)
+        *ptr = '\0';
+      if((ptr = strchr(buffer, '\n')) != NULL)
+        *ptr = '\0';
+      buflen = strlen(buffer);
+      if((ptr = realloc(string, stringlen+buflen+1)) == NULL) {
+        if(string)
+          free(string);
+        return PARAM_NO_MEM;
+      }
+      string = ptr;
+      strcpy(string+stringlen, buffer);
+      stringlen += buflen;
+    }
+  }
+  *bufp = string;
+  return PARAM_OK;
+}
+
+static ParameterError file2memory(char **bufp, size_t *size, FILE *file)
+{
+  char *newbuf;
+  char *buffer = NULL;
+  size_t alloc = 512;
+  size_t nused = 0;
+  size_t nread;
+
+  if(file) {
+    do {
+      if(!buffer || (alloc == nused)) {
+        /* size_t overflow detection for huge files */
+        if(alloc+1 > ((size_t)-1)/2) {
+          if(buffer)
+            free(buffer);
+          return PARAM_NO_MEM;
+        }
+        alloc *= 2;
+        /* allocate an extra char, reserved space, for null termination */
+        if((newbuf = realloc(buffer, alloc+1)) == NULL) {
+          if(buffer)
+            free(buffer);
+          return PARAM_NO_MEM;
+        }
+        buffer = newbuf;
+      }
+      nread = fread(buffer+nused, 1, alloc-nused, file);
+      nused += nread;
+    } while(nread);
+    /* null terminate the buffer in case it's used as a string later */
+    buffer[nused] = '\0';
+    /* free trailing slack space, if possible */
+    if(alloc != nused) {
+      if((newbuf = realloc(buffer, nused+1)) != NULL)
+        buffer = newbuf;
+    }
+    /* discard buffer if nothing was read */
+    if(!nused) {
+      free(buffer);
+      buffer = NULL; /* no string */
+    }
+  }
+  *size = nused;
+  *bufp = buffer;
+  return PARAM_OK;
 }
 
 static void cleanarg(char *str)
@@ -2158,7 +2169,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
            * the content.
            */
           char *p = strchr(nextarg, '=');
-          long size = 0;
+          size_t size = 0;
           size_t nlen;
           char is_file;
           if(!p)
@@ -2188,14 +2199,16 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
                       "an empty POST.\n", nextarg);
             }
 
-            postdata = file2memory(file, &size);
+            err = file2memory(&postdata, &size, file);
 
             if(file && (file != stdin))
               fclose(file);
+            if(err)
+              return err;
           }
           else {
             GetStr(&postdata, p);
-            size = (long)strlen(postdata);
+            size = strlen(postdata);
           }
 
           if(!postdata) {
@@ -2229,6 +2242,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           }
         }
         else if('@' == *nextarg) {
+          size_t size = 0;
           /* the data begins with a '@' letter, it means that a file name
              or - (stdin) follows */
           nextarg++; /* pass the @ */
@@ -2245,13 +2259,18 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
                     "an empty POST.\n", nextarg);
           }
 
-          if(subletter == 'b') /* forced binary */
-            postdata = file2memory(file, &config->postfieldsize);
+          if(subletter == 'b') {
+            /* forced binary */
+            err = file2memory(&postdata, &size, file);
+            config->postfieldsize = size;
+          }
           else
-            postdata = file2string(file);
+            err = file2string(&postdata, file);
 
           if(file && (file != stdin))
             fclose(file);
+          if(err)
+            return err;
 
           if(!postdata) {
             /* no data from the file, point to a zero byte string to make this
@@ -2714,11 +2733,13 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           file = stdin;
         else
           file = fopen(nextarg, "r");
-        config->writeout = file2string(file);
-        if(!config->writeout)
-          warnf(config, "Failed to read %s", file);
+        err = file2string(&config->writeout, file);
         if(file && (file != stdin))
           fclose(file);
+        if(err)
+          return err;
+        if(!config->writeout)
+          warnf(config, "Failed to read %s", file);
       }
       else
         GetStr(&config->writeout, nextarg);

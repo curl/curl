@@ -55,6 +55,7 @@ This release includes the following bugfixes:
  o libcurl hang with huge POST request and request-body read from callback
  o removed extra newlines from many error messages
  o improved pipelining
+ o improved OOM handling for data url encoded HTTP POSTs when read from a file
 
 This release includes the following known bugs:
 
