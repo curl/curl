@@ -830,6 +830,15 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                   infof(data, "HTTP 1.0, assume close after body\n");
                   conn->bits.close = TRUE;
                 }
+                else if(k->httpversion >= 11 &&
+                        !conn->bits.close) {
+                  /* If HTTP version is >= 1.1 and connection is persistent
+                     server supports pipelining. */
+                  DEBUGF(infof(data,
+                               "HTTP 1.1 or later with persistent connection, "
+                               "pipelining supported\n"));
+                  conn->server_supports_pipelining = TRUE;
+                }
 
                 switch(k->httpcode) {
                 case 204:

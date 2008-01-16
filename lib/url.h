@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -64,12 +64,11 @@ int Curl_doing_getsock(struct connectdata *conn,
                        curl_socket_t *socks,
                        int numsocks);
 
+bool Curl_isPipeliningEnabled(const struct SessionHandle *handle);
 CURLcode Curl_addHandleToPipeline(struct SessionHandle *handle,
                                   struct curl_llist *pipeline);
 int Curl_removeHandleFromPipeline(struct SessionHandle *handle,
                                   struct curl_llist *pipeline);
-bool Curl_isHandleAtHead(struct SessionHandle *handle,
-                         struct curl_llist *pipeline);
 
 void Curl_close_connections(struct SessionHandle *data);
 

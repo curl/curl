@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -189,6 +189,14 @@ static void singlesocket(struct Curl_multi *multi,
 static void add_closure(struct Curl_multi *multi,
                         struct SessionHandle *data);
 static int update_timer(struct Curl_multi *multi);
+
+static CURLcode addHandleToSendOrPendPipeline(struct SessionHandle *handle,
+                                              struct connectdata *conn);
+static int checkPendPipeline(struct connectdata *conn);
+static int moveHandleFromSendToRecvPipeline(struct SessionHandle *habdle,
+                                            struct connectdata *conn);
+static bool isHandleAtHead(struct SessionHandle *handle,
+                           struct curl_llist *pipeline);
 
 #ifdef CURLDEBUG
 static const char * const statename[]={
@@ -932,28 +940,32 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                   &async, &protocol_connect);
 
       if(CURLE_OK == easy->result) {
-        /* Add this handle to the send pipeline */
-        easy->result = Curl_addHandleToPipeline(easy->easy_handle,
-                                                easy->easy_conn->send_pipe);
+        /* Add this handle to the send or pend pipeline */
+        easy->result = addHandleToSendOrPendPipeline(easy->easy_handle,
+                                                     easy->easy_conn);
         if(CURLE_OK == easy->result) {
-          if(async)
-            /* We're now waiting for an asynchronous name lookup */
-            multistate(easy, CURLM_STATE_WAITRESOLVE);
+          if (easy->easy_handle->state.is_in_pipeline)
+            multistate(easy, CURLM_STATE_WAITDO);
           else {
-            /* after the connect has been sent off, go WAITCONNECT unless the
-               protocol connect is already done and we can go directly to
-               WAITDO! */
-            result = CURLM_CALL_MULTI_PERFORM;
-
-            if(protocol_connect)
-              multistate(easy, CURLM_STATE_WAITDO);
+            if(async)
+              /* We're now waiting for an asynchronous name lookup */
+              multistate(easy, CURLM_STATE_WAITRESOLVE);
             else {
+              /* after the connect has been sent off, go WAITCONNECT unless the
+                 protocol connect is already done and we can go directly to
+                 WAITDO! */
+              result = CURLM_CALL_MULTI_PERFORM;
+
+              if(protocol_connect)
+                multistate(easy, CURLM_STATE_WAITDO);
+              else {
 #ifndef CURL_DISABLE_HTTP
-              if(easy->easy_conn->bits.tunnel_connecting)
-                multistate(easy, CURLM_STATE_WAITPROXYCONNECT);
-              else
+                if(easy->easy_conn->bits.tunnel_connecting)
+                  multistate(easy, CURLM_STATE_WAITPROXYCONNECT);
+                else
 #endif
-                multistate(easy, CURLM_STATE_WAITCONNECT);
+                  multistate(easy, CURLM_STATE_WAITCONNECT);
+              }
             }
           }
         }
@@ -1077,12 +1089,12 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             easy->easy_conn->connectindex,
             easy->easy_conn->send_pipe->size,
             easy->easy_conn->writechannel_inuse,
-            Curl_isHandleAtHead(easy->easy_handle,
-                                easy->easy_conn->send_pipe));
+            isHandleAtHead(easy->easy_handle,
+                           easy->easy_conn->send_pipe));
 #endif
       if(!easy->easy_conn->writechannel_inuse &&
-          Curl_isHandleAtHead(easy->easy_handle,
-                              easy->easy_conn->send_pipe)) {
+         isHandleAtHead(easy->easy_handle,
+                        easy->easy_conn->send_pipe)) {
         /* Grab the channel */
         easy->easy_conn->writechannel_inuse = TRUE;
         multistate(easy, CURLM_STATE_DO);
@@ -1190,12 +1202,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       break;
 
     case CURLM_STATE_DO_DONE:
-      /* Remove ourselves from the send pipeline */
-      Curl_removeHandleFromPipeline(easy->easy_handle,
-                                    easy->easy_conn->send_pipe);
-      /* Add ourselves to the recv pipeline */
-      easy->result = Curl_addHandleToPipeline(easy->easy_handle,
-                                              easy->easy_conn->recv_pipe);
+      /* Move ourselves from the send to recv pipeline */
+      moveHandleFromSendToRecvPipeline(easy->easy_handle, easy->easy_conn);
+      /* Check if we can move pending requests to send pipe */
+      checkPendPipeline(easy->easy_conn);
       multistate(easy, CURLM_STATE_WAITPERFORM);
       result = CURLM_CALL_MULTI_PERFORM;
       break;
@@ -1206,13 +1216,13 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             easy->easy_conn->connectindex,
             easy->easy_conn->recv_pipe->size,
             easy->easy_conn->readchannel_inuse,
-            Curl_isHandleAtHead(easy->easy_handle,
-                                easy->easy_conn->recv_pipe));
+            isHandleAtHead(easy->easy_handle,
+                           easy->easy_conn->recv_pipe));
 #endif
       /* Wait for our turn to PERFORM */
       if(!easy->easy_conn->readchannel_inuse &&
-          Curl_isHandleAtHead(easy->easy_handle,
-                              easy->easy_conn->recv_pipe)) {
+         isHandleAtHead(easy->easy_handle,
+                        easy->easy_conn->recv_pipe)) {
         /* Grab the channel */
         easy->easy_conn->readchannel_inuse = TRUE;
         multistate(easy, CURLM_STATE_PERFORM);
@@ -1292,6 +1302,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         if(easy->easy_handle->req.newurl || retry) {
           Curl_removeHandleFromPipeline(easy->easy_handle,
                                         easy->easy_conn->recv_pipe);
+          /* Check if we can move pending requests to send pipe */
+          checkPendPipeline(easy->easy_conn);
           if(!retry) {
             /* if the URL is a follow-location and not just a retried request
                then figure out the URL here */
@@ -1323,6 +1335,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       /* Remove ourselves from the receive pipeline */
       Curl_removeHandleFromPipeline(easy->easy_handle,
                                     easy->easy_conn->recv_pipe);
+      /* Check if we can move pending requests to send pipe */
+      checkPendPipeline(easy->easy_conn);
       easy->easy_handle->state.is_in_pipeline = FALSE;
 
       if(easy->easy_conn->bits.stream_was_rewound) {
@@ -1390,6 +1404,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                         easy->easy_conn->send_pipe);
           Curl_removeHandleFromPipeline(easy->easy_handle,
                                         easy->easy_conn->recv_pipe);
+          /* Check if we can move pending requests to send pipe */
+          checkPendPipeline(easy->easy_conn);
         }
 
         if(disconnect_conn) {
@@ -1950,6 +1966,77 @@ static int update_timer(struct Curl_multi *multi)
   multi->timer_lastcall = multi->timetree->key;
 
   return multi->timer_cb((CURLM*)multi, timeout_ms, multi->timer_userp);
+}
+
+static CURLcode addHandleToSendOrPendPipeline(struct SessionHandle *handle,
+                                              struct connectdata *conn)
+{
+  size_t pipeLen = conn->send_pipe->size + conn->recv_pipe->size;
+  struct curl_llist *pipeline;
+
+  if(!Curl_isPipeliningEnabled(handle) ||
+     pipeLen == 0)
+    pipeline = conn->send_pipe;
+  else {
+    if(conn->server_supports_pipelining &&
+       pipeLen < MAX_PIPELINE_LENGTH)
+      pipeline = conn->send_pipe;
+    else
+      pipeline = conn->pend_pipe;
+  }
+
+  return Curl_addHandleToPipeline(handle, pipeline);
+}
+
+static int checkPendPipeline(struct connectdata *conn)
+{
+  int result = 0;
+
+  if (conn->server_supports_pipelining) {
+    size_t pipeLen = conn->send_pipe->size + conn->recv_pipe->size;
+    struct curl_llist_element *curr = conn->pend_pipe->head;
+
+    while(pipeLen < MAX_PIPELINE_LENGTH && curr) {
+      Curl_llist_move(conn->pend_pipe, curr,
+                      conn->send_pipe, conn->send_pipe->tail);
+      Curl_pgrsTime(curr->ptr, TIMER_CONNECT);
+      ++result; /* count how many handles we moved */
+      curr = conn->pend_pipe->head;
+      ++pipeLen;
+    }
+    if (result > 0)
+      conn->now = Curl_tvnow();
+  }
+
+  return result;
+}
+
+static int moveHandleFromSendToRecvPipeline(struct SessionHandle *handle,
+                                            struct connectdata *conn)
+{
+  struct curl_llist_element *curr;
+
+  curr = conn->send_pipe->head;
+  while(curr) {
+    if(curr->ptr == handle) {
+      Curl_llist_move(conn->send_pipe, curr,
+                      conn->recv_pipe, conn->recv_pipe->tail);
+      return 1; /* we moved a handle */
+    }
+    curr = curr->next;
+  }
+
+  return 0;
+}
+
+static bool isHandleAtHead(struct SessionHandle *handle,
+                           struct curl_llist *pipeline)
+{
+  struct curl_llist_element *curr = pipeline->head;
+  if(curr)
+    return (bool)(curr->ptr == handle);
+
+  return FALSE;
 }
 
 /* given a number of milliseconds from now to use to set the 'act before

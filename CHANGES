@@ -7,6 +7,12 @@
                                   Changelog
 
 Daniel S (16 Jan 2008)
+- Dmitry Kurochkin worked a lot on improving the HTTP Pipelining support that
+  previously had a number of flaws, perhaps most notably when an application
+  fired up N transfers at once as then they wouldn't pipeline at all that
+  nicely as anyone would think... Test case 530 was also updated to take the
+  improved functionality into account.
+
 - Calls to Curl_failf() are not supposed to provide a trailing newline as the
   function itself adds that. Fixed on 50 or something strings!
 

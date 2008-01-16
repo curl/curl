@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -56,5 +56,7 @@ int Curl_llist_remove_next(struct curl_llist *, struct curl_llist_element *,
                            void *);
 size_t Curl_llist_count(struct curl_llist *);
 void Curl_llist_destroy(struct curl_llist *, void *);
+int Curl_llist_move(struct curl_llist *, struct curl_llist_element *,
+                    struct curl_llist *, struct curl_llist_element *);
 
 #endif

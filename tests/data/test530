@@ -8,7 +8,8 @@ Pipelining
 # Server-side
 <reply>
 <servercmd>
-pipe: 4
+pipe: 1
+pipe: 3
 </servercmd>
 <data>
 HTTP/1.1 200 OK

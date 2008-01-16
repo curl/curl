@@ -159,7 +159,6 @@ static bool ConnectionExists(struct SessionHandle *data,
 static long ConnectionStore(struct SessionHandle *data,
                             struct connectdata *conn);
 static bool IsPipeliningPossible(const struct SessionHandle *handle);
-static bool IsPipeliningEnabled(const struct SessionHandle *handle);
 static void conn_free(struct connectdata *conn);
 
 static void signalPipeClose(struct curl_llist *pipeline);
@@ -175,8 +174,6 @@ static void flush_cookies(struct SessionHandle *data, int cleanup);
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
 #define verboseconnect(x)  do { } while (0)
 #endif
-
-#define MAX_PIPELINE_LENGTH 5
 
 #ifndef USE_ARES
 /* not for ares builds */
@@ -421,6 +418,16 @@ CURLcode Curl_close(struct SessionHandle *data)
           if(data == (struct SessionHandle *) curr->ptr) {
             fprintf(stderr,
                     "MAJOR problem we %p are still in recv pipe for %p done %d\n",
+                    data, connptr, connptr->bits.done);
+          }
+        }
+      }
+      pipeline = connptr->pend_pipe;
+      if(pipeline) {
+        for (curr = pipeline->head; curr; curr=curr->next) {
+          if(data == (struct SessionHandle *) curr->ptr) {
+            fprintf(stderr,
+                    "MAJOR problem we %p are still in pend pipe for %p done %d\n",
                     data, connptr, connptr->bits.done);
           }
         }
@@ -2105,6 +2112,7 @@ static void conn_free(struct connectdata *conn)
 
   Curl_llist_destroy(conn->send_pipe, NULL);
   Curl_llist_destroy(conn->recv_pipe, NULL);
+  Curl_llist_destroy(conn->pend_pipe, NULL);
 
   /* possible left-overs from the async name resolvers */
 #if defined(USE_ARES)
@@ -2188,9 +2196,10 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   Curl_ssl_close(conn, FIRSTSOCKET);
 
   /* Indicate to all handles on the pipe that we're dead */
-  if(IsPipeliningEnabled(data)) {
+  if(Curl_isPipeliningEnabled(data)) {
     signalPipeClose(conn->send_pipe);
     signalPipeClose(conn->recv_pipe);
+    signalPipeClose(conn->pend_pipe);
   }
 
   conn_free(conn);
@@ -2228,7 +2237,7 @@ static bool IsPipeliningPossible(const struct SessionHandle *handle)
   return FALSE;
 }
 
-static bool IsPipeliningEnabled(const struct SessionHandle *handle)
+bool Curl_isPipeliningEnabled(const struct SessionHandle *handle)
 {
   if(handle->multi && Curl_multi_canPipeline(handle->multi))
     return TRUE;
@@ -2251,9 +2260,8 @@ CURLcode Curl_addHandleToPipeline(struct SessionHandle *data,
   return CURLE_OK;
 }
 
-
 int Curl_removeHandleFromPipeline(struct SessionHandle *handle,
-                                   struct curl_llist *pipeline)
+                                  struct curl_llist *pipeline)
 {
   struct curl_llist_element *curr;
 
@@ -2282,17 +2290,6 @@ static void Curl_printPipeline(struct curl_llist *pipeline)
   }
 }
 #endif
-
-bool Curl_isHandleAtHead(struct SessionHandle *handle,
-                         struct curl_llist *pipeline)
-{
-  struct curl_llist_element *curr = pipeline->head;
-  if(curr) {
-    return (bool)(curr->ptr == handle);
-  }
-
-  return FALSE;
-}
 
 static struct SessionHandle* gethandleathead(struct curl_llist *pipeline)
 {
@@ -2369,43 +2366,6 @@ ConnectionExists(struct SessionHandle *data,
                                   from the multi */
     }
 
-    if(pipeLen > 0 && !canPipeline) {
-      /* can only happen within multi handles, and means that another easy
-         handle is using this connection */
-      continue;
-    }
-
-#ifdef CURLRES_ASYNCH
-    /* ip_addr_str is NULL only if the resolving of the name hasn't completed
-       yet and until then we don't re-use this connection */
-    if(!check->ip_addr_str) {
-      infof(data,
-            "Connection #%ld hasn't finished name resolve, can't reuse\n",
-            check->connectindex);
-      continue;
-    }
-#endif
-
-    if((check->sock[FIRSTSOCKET] == CURL_SOCKET_BAD) || check->bits.close) {
-      /* Don't pick a connection that hasn't connected yet or that is going to
-         get closed. */
-      infof(data, "Connection #%ld isn't open enough, can't reuse\n",
-            check->connectindex);
-#ifdef CURLDEBUG
-      if(check->recv_pipe->size > 0) {
-        infof(data, "BAD! Unconnected #%ld has a non-empty recv pipeline!\n",
-              check->connectindex);
-      }
-#endif
-      continue;
-    }
-
-    if(pipeLen >= MAX_PIPELINE_LENGTH) {
-      infof(data, "Connection #%ld has its pipeline full, can't reuse\n",
-            check->connectindex);
-      continue;
-    }
-
     if(canPipeline) {
       /* Make sure the pipe has only GET requests */
       struct SessionHandle* sh = gethandleathead(check->send_pipe);
@@ -2417,6 +2377,45 @@ ConnectionExists(struct SessionHandle *data,
       else if(rh) {
         if(!IsPipeliningPossible(rh))
           continue;
+      }
+
+#ifdef CURLDEBUG
+      if(pipeLen > MAX_PIPELINE_LENGTH) {
+        infof(data, "BAD! Connection #%ld has too big pipeline!\n",
+              check->connectindex);
+      }
+#endif
+    }
+    else {
+      if(pipeLen > 0) {
+        /* can only happen within multi handles, and means that another easy
+           handle is using this connection */
+        continue;
+      }
+
+#ifdef CURLRES_ASYNCH
+      /* ip_addr_str is NULL only if the resolving of the name hasn't completed
+         yet and until then we don't re-use this connection */
+      if(!check->ip_addr_str) {
+        infof(data,
+              "Connection #%ld hasn't finished name resolve, can't reuse\n",
+              check->connectindex);
+        continue;
+      }
+#endif
+
+      if((check->sock[FIRSTSOCKET] == CURL_SOCKET_BAD) || check->bits.close) {
+        /* Don't pick a connection that hasn't connected yet or that is going to
+           get closed. */
+        infof(data, "Connection #%ld isn't open enough, can't reuse\n",
+              check->connectindex);
+#ifdef CURLDEBUG
+        if(check->recv_pipe->size > 0) {
+          infof(data, "BAD! Unconnected #%ld has a non-empty recv pipeline!\n",
+                check->connectindex);
+        }
+#endif
+        continue;
       }
     }
 
@@ -2478,7 +2477,7 @@ ConnectionExists(struct SessionHandle *data,
     }
 
     if(match) {
-      if(!IsPipeliningEnabled(data)) {
+      if(!Curl_isPipeliningEnabled(data)) {
         /* The check for a dead socket makes sense only in the
            non-pipelining case */
         bool dead = SocketIsDead(check->sock[FIRSTSOCKET]);
@@ -2561,7 +2560,7 @@ static void
 ConnectionDone(struct connectdata *conn)
 {
   conn->inuse = FALSE;
-  if(!conn->send_pipe && !conn->recv_pipe)
+  if(!conn->send_pipe && !conn->recv_pipe && !conn->pend_pipe)
     conn->is_in_pipeline = FALSE;
 }
 
@@ -3555,7 +3554,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   /* Initialize the pipeline lists */
   conn->send_pipe = Curl_llist_alloc((curl_llist_dtor) llist_dtor);
   conn->recv_pipe = Curl_llist_alloc((curl_llist_dtor) llist_dtor);
-  if(!conn->send_pipe || !conn->recv_pipe)
+  conn->pend_pipe = Curl_llist_alloc((curl_llist_dtor) llist_dtor);
+  if(!conn->send_pipe || !conn->recv_pipe || !conn->pend_pipe)
     return CURLE_OUT_OF_MEMORY;
 
   /* This initing continues below, see the comment "Continue connectdata
@@ -4019,6 +4019,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     Curl_safefree(old_conn->proxypasswd);
     Curl_llist_destroy(old_conn->send_pipe, NULL);
     Curl_llist_destroy(old_conn->recv_pipe, NULL);
+    Curl_llist_destroy(old_conn->pend_pipe, NULL);
     Curl_safefree(old_conn->master_buffer);
 
     free(old_conn);          /* we don't need this anymore */
@@ -4353,26 +4354,24 @@ CURLcode Curl_connect(struct SessionHandle *data,
 
   if(CURLE_OK == code) {
     /* no error */
-    if(dns || !*asyncp)
-      /* If an address is available it means that we already have the name
-         resolved, OR it isn't async. if this is a re-used connection 'dns'
-         will be NULL here. Continue connecting from here */
-      code = SetupConnection(*in_connect, dns, protocol_done);
-    /* else
-       response will be received and treated async wise */
-  }
-
-  if(CURLE_OK != code) {
-    /* We're not allowed to return failure with memory left allocated
-       in the connectdata struct, free those here */
-    if(*in_connect) {
-      Curl_disconnect(*in_connect); /* close the connection */
-      *in_connect = NULL;           /* return a NULL */
-    }
-  }
-  else {
     if((*in_connect)->is_in_pipeline)
       data->state.is_in_pipeline = TRUE;
+    else {
+      if(dns || !*asyncp)
+        /* If an address is available it means that we already have the name
+           resolved, OR it isn't async. if this is a re-used connection 'dns'
+           will be NULL here. Continue connecting from here */
+        code = SetupConnection(*in_connect, dns, protocol_done);
+      /* else
+         response will be received and treated async wise */
+    }
+  }
+
+  if(CURLE_OK != code && *in_connect) {
+    /* We're not allowed to return failure with memory left allocated
+       in the connectdata struct, free those here */
+    Curl_disconnect(*in_connect); /* close the connection */
+    *in_connect = NULL;           /* return a NULL */
   }
 
   return code;
@@ -4426,6 +4425,7 @@ CURLcode Curl_done(struct connectdata **connp,
   if(Curl_removeHandleFromPipeline(data, conn->send_pipe) &&
      conn->writechannel_inuse)
     conn->writechannel_inuse = FALSE;
+  Curl_removeHandleFromPipeline(data, conn->pend_pipe);
 
   /* Cleanup possible redirect junk */
   if(data->req.newurl) {
