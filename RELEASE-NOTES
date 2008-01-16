@@ -56,6 +56,7 @@ This release includes the following bugfixes:
  o removed extra newlines from many error messages
  o improved pipelining
  o improved OOM handling for data url encoded HTTP POSTs when read from a file
+ o test suite could pick wrong tool(s) if more than one existed in the PATH
 
 This release includes the following known bugs:
 
@@ -79,6 +80,6 @@ advice from friends like these:
  Gilles Blanc, David Wright, Vikram Saxena, Mateusz Loskot, Gary Maxwell,
  Dmitry Kurochkin, Mohun Biswas, Richard Atterer, Maxim Perenesenko,
  Daniel Egger, Jeff Johnson, Nikitinskit Dmitriy, Georg Lippitsch, Eric Landes,
- Joe Malicki
+ Joe Malicki, Nathan Coulter
  
         Thanks! (and sorry if I forgot to mention someone)

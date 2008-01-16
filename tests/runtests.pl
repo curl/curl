@@ -373,8 +373,8 @@ sub startnew {
 #
 sub checkcmd {
     my ($cmd)=@_;
-    my @paths=("/usr/sbin", "/usr/local/sbin", "/sbin", "/usr/bin",
-               "/usr/local/bin", split(":", $ENV{'PATH'}));
+    my @paths=(split(":", $ENV{'PATH'}), "/usr/sbin", "/usr/local/sbin",
+               "/sbin", "/usr/bin", "/usr/local/bin", );
     for(@paths) {
         if( -x "$_/$cmd") {
             return "$_/$cmd";
