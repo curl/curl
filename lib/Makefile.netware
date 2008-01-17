@@ -35,7 +35,7 @@ endif
 # Edit the vars below to change NLM target settings.
 TARGET  = libcurl
 VERSION	= $(LIBCURL_VERSION)
-COPYR	= Copyright (C) 1996 - 2007, Daniel Stenberg, <daniel@haxx.se>
+COPYR	= Copyright (C) 1996 - 2008, Daniel Stenberg, <daniel@haxx.se>
 DESCR	= cURL libcurl $(LIBCURL_VERSION_STR) ($(LIBARCH)) - http://curl.haxx.se
 MTSAFE	= YES
 STACK	= 64000

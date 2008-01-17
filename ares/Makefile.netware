@@ -21,7 +21,7 @@ endif
 TARGETS = adig.nlm ahost.nlm acountry.nlm
 LTARGET = libcares.$(LIBEXT)
 VERSION	= $(LIBCARES_VERSION)
-COPYR	= Copyright (C) 1996 - 2007, Daniel Stenberg, <daniel@haxx.se>
+COPYR	= Copyright (C) 1996 - 2008, Daniel Stenberg, <daniel@haxx.se>
 DESCR	= cURL $(subst .def,,$(notdir $@)) $(LIBCARES_VERSION_STR) - http://curl.haxx.se
 MTSAFE	= YES
 STACK	= 64000
