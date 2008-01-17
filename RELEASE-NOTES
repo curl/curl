@@ -66,6 +66,7 @@ Other curl-related news:
 
  o TclCurl 7.17.1 => http://personal1.iddeo.es/andresgarci/tclcurl/english/
  o Ruby Curl::Multi 0.1 => http://curl-multi.rubyforge.org/ 
+ o curl-java 0.2.1 => http://curl.haxx.se/libcurl/java/
 
 New curl mirrors:
 
