@@ -2262,7 +2262,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           if(subletter == 'b') {
             /* forced binary */
             err = file2memory(&postdata, &size, file);
-            config->postfieldsize = size;
+            config->postfieldsize = (curl_off_t)size;
           }
           else
             err = file2string(&postdata, file);
