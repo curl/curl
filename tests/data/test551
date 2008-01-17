@@ -1,7 +1,6 @@
-# this test is meant to be exactly like 547 but using Digest instead of NTLM
-
 <testcase>
 <info>
+# this test is meant to be exactly like 547 but using Digest instead of NTLM
 <keywords>
 HTTP
 HTTP POST
