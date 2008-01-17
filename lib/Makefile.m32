@@ -21,11 +21,11 @@ ZLIB_PATH = ../../zlib-1.2.3
 endif
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8e
+OPENSSL_PATH = ../../openssl-0.9.8g
 endif
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-0.17
+LIBSSH2_PATH = ../../libssh2-0.18
 endif
 # Edit the path below to point to the base of your Novell LDAP NDK.
 ifndef LDAP_SDK
