@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Yang Tse (17 Jan 2008)
+- Don't abort tests 518 and 537 when unable to raise the open-file soft limit.
+
 Daniel S (16 Jan 2008)
 - Nathan Coulter's patch that makes runtests.pl respect the PATH when figuring
   out what valgrind to run.
