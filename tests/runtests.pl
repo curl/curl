@@ -1110,6 +1110,10 @@ sub runsshserver {
     my $cmd="$perl $srcdir/sshserver.pl ${flag}-u $USER -l $ip -p $port -s $socksport";
     my ($sshpid, $pid2) = startnew($cmd, $pidfile, 60, 0);
 
+    # on loaded systems sshserver start up can take longer than the timeout
+    # passed to startnew, when this happens startnew completes without being
+    # able to read the pidfile and consequently returns a zero pid2 above.
+
     if($sshpid <= 0 || !kill(0, $sshpid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the SSH server\n";
@@ -1118,15 +1122,22 @@ sub runsshserver {
         return (0,0);
     }
 
-    if (!verifyserver("ssh",$ip,$port)) {
+    # server verification allows some extra time for the server to start up
+    # and gives us the opportunity of recovering the pid from the pidfile,
+    # which will be assigned to pid2 ONLY if pid2 was not already positive.
+
+    my $pid3 = verifyserver("ssh",$ip,$port);
+    if(!$pid3) {
         logmsg "RUN: SSH server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$sshpid $pid2");
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
+    $pid2 = $pid3 if($pid2 <= 0);
+
     if($verbose) {
-        logmsg "RUN: SSH server is now running PID $sshpid\n";
+        logmsg "RUN: SSH server is now running PID $pid2\n";
     }
 
     return ($pid2, $sshpid);
@@ -1237,15 +1248,18 @@ sub runsocksserver {
     }
 
     # Ugly hack but ssh doesn't support pid files
-    if (!verifyserver("socks",$ip,$port)) {
+    my $pid3 = verifyserver("socks",$ip,$port);
+    if(!$pid3) {
         logmsg "RUN: SOCKS server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$sshpid $pid2");
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
+    $pid2 = $pid3 if($pid2 <= 0);
+
     if($verbose) {
-        logmsg "RUN: SOCKS server is now running PID $sshpid\n";
+        logmsg "RUN: SOCKS server is now running PID $pid2\n";
     }
 
     return ($pid2, $sshpid);
