@@ -386,7 +386,7 @@ struct Configurable {
   bool disable_eprt;
   curl_off_t resume_from;
   char *postfields;
-  long postfieldsize;
+  curl_off_t postfieldsize;
   char *referer;
   long timeout;
   long connecttimeout;
@@ -4428,7 +4428,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         switch(config->httpreq) {
         case HTTPREQ_SIMPLEPOST:
           my_setopt(curl, CURLOPT_POSTFIELDS, config->postfields);
-          my_setopt(curl, CURLOPT_POSTFIELDSIZE, config->postfieldsize);
+          my_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, config->postfieldsize);
           break;
         case HTTPREQ_POST:
           my_setopt(curl, CURLOPT_HTTPPOST, config->httppost);
