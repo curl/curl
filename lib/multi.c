@@ -780,6 +780,7 @@ static int multi_getsock(struct Curl_one_easy *easy,
   case CURLM_STATE_DOING:
     return Curl_doing_getsock(easy->easy_conn, socks, numsocks);
 
+  case CURLM_STATE_WAITPROXYCONNECT:
   case CURLM_STATE_WAITCONNECT:
     return waitconnect_getsock(easy->easy_conn, socks, numsocks);
 

@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel S (18 Jan 2008)
+- Lau Hang Kin found and fixed a problem with the multi interface when doing
+  CONNECT over a proxy. curl_multi_fdset() didn't report back the socket
+  properly during that state, due to a missing case in the switch in the
+  multi_getsock() function.
+
 Yang Tse (17 Jan 2008)
 - Don't abort tests 518 and 537 when unable to raise the open-file soft limit.
 

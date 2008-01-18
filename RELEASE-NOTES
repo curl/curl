@@ -57,6 +57,7 @@ This release includes the following bugfixes:
  o improved pipelining
  o improved OOM handling for data url encoded HTTP POSTs when read from a file
  o test suite could pick wrong tool(s) if more than one existed in the PATH
+ o curl_multi_fdset() failed to return socket while doing CONNECT over proxy
 
 This release includes the following known bugs:
 
@@ -81,6 +82,6 @@ advice from friends like these:
  Gilles Blanc, David Wright, Vikram Saxena, Mateusz Loskot, Gary Maxwell,
  Dmitry Kurochkin, Mohun Biswas, Richard Atterer, Maxim Perenesenko,
  Daniel Egger, Jeff Johnson, Nikitinskit Dmitriy, Georg Lippitsch, Eric Landes,
- Joe Malicki, Nathan Coulter
+ Joe Malicki, Nathan Coulter, Lau Hang Kin
  
         Thanks! (and sorry if I forgot to mention someone)
