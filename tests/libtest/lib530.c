@@ -32,6 +32,7 @@ int test(char *URL)
   struct timeval mp_start;
   char ml_timedout = FALSE;
   char mp_timedout = FALSE;
+  char target_url[80];
 
   if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
@@ -58,7 +59,9 @@ int test(char *URL)
       curl_global_cleanup();
       return TEST_ERR_MAJOR_BAD + i;
     }
-    curl_easy_setopt(curl[i], CURLOPT_URL, URL);
+    snprintf(target_url, sizeof(target_url), "%s%04i", URL, i + 1);
+    target_url[sizeof(target_url) - 1] = '\0';
+    curl_easy_setopt(curl[i], CURLOPT_URL, target_url);
 
     /* go verbose */
     curl_easy_setopt(curl[i], CURLOPT_VERBOSE, 1);

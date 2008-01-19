@@ -7,13 +7,21 @@ Pipelining
 </info>
 # Server-side
 <reply>
-<servercmd>
-pipe: 1
-pipe: 3
-</servercmd>
-<data>
+<data1>
 HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 47
+
+file contents should appear once for each file
+</data1>
+<data2>
+HTTP/1.1 200 OK
+</data2>
+<data3>
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+</data3>
+<data4>
 Server: test-server/fake
 Content-Length: 47
 
@@ -30,13 +38,7 @@ Server: test-server/fake
 Content-Length: 47
 
 file contents should appear once for each file
-HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
-Server: test-server/fake
-Content-Length: 47
-
-file contents should appear once for each file
-</data>
+</data4>
 </reply>
 
 # Client-side
@@ -58,19 +60,19 @@ http://%HOSTIP:%HTTPPORT/path/530
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /path/530 HTTP/1.1
+GET /path/5300001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
-GET /path/530 HTTP/1.1
+GET /path/5300002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
-GET /path/530 HTTP/1.1
+GET /path/5300003 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
-GET /path/530 HTTP/1.1
+GET /path/5300004 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
