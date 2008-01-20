@@ -507,8 +507,10 @@ if(sshd_supports_opt('SkeyAuthentication','no')) {
 #***************************************************************************
 # GSSAPI Authentication support may have not been built into sshd
 #
+my $sshd_builtwith_GSSAPI;
 if(sshd_supports_opt('GSSAPIAuthentication','no')) {
     push @cfgarr, 'GSSAPIAuthentication no';
+    $sshd_builtwith_GSSAPI = 1;
 }
 if(sshd_supports_opt('GSSAPICleanupCredentials','yes')) {
     push @cfgarr, 'GSSAPICleanupCredentials yes';
@@ -638,8 +640,8 @@ if(! -e $knownhosts) {
 #  ForwardX11Trusted                 : OpenSSH 3.8.0 and later
 #  GatewayPorts                      : OpenSSH 1.2.1 and later
 #  GlobalKnownHostsFile              : OpenSSH 1.2.1 and later
-#  GSSAPIAuthentication              : OpenSSH 3.7.0 and later [1][3]
-#  GSSAPIDelegateCredentials         : OpenSSH 3.7.0 and later [1][3]
+#  GSSAPIAuthentication              : OpenSSH 3.7.0 and later [1]
+#  GSSAPIDelegateCredentials         : OpenSSH 3.7.0 and later [1]
 #  HashKnownHosts                    : OpenSSH 4.0.0 and later
 #  Host                              : OpenSSH 1.2.1 and later
 #  HostbasedAuthentication           : OpenSSH 2.9.0 and later
@@ -765,6 +767,15 @@ if(($sshid =~ /OpenSSH/) && ($sshvernum >= 440)) {
 if((($sshid =~ /OpenSSH/) && ($sshvernum >= 380)) ||
    (($sshid =~ /SunSSH/) && ($sshvernum >= 120))) {
     push @cfgarr, 'ForwardX11Trusted no';
+}
+
+if(($sshd_builtwith_GSSAPI) && ($sshdid eq $sshid) &&
+   ($sshdvernum == $sshvernum)) {
+    push @cfgarr, 'GSSAPIAuthentication no';
+    push @cfgarr, 'GSSAPIDelegateCredentials no';
+    if($sshid =~ /SunSSH/) {
+        push @cfgarr, 'GSSAPIKeyExchange no';
+    }
 }
 
 if((($sshid =~ /OpenSSH/) && ($sshvernum >= 400)) ||
