@@ -13,6 +13,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#define ENABLE_CURLX_PRINTF
+#include "curlx.h"
+
 #include "testutil.h"
 
 #define MAIN_LOOP_HANG_TIMEOUT     90 * 1000
