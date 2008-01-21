@@ -323,10 +323,29 @@ AC_HELP_STRING([--disable-ldap],[Disable LDAP support]),
        AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
        AC_SUBST(CURL_DISABLE_LDAP, [1])
        ;;
-  *)   AC_MSG_RESULT(yes)
+  *)
+       case $host in
+         *-*-cygwin*)
+           # Force no ldap. config/build process is broken for cygwin
+           AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
+           AC_SUBST(CURL_DISABLE_LDAP, [1])
+           AC_MSG_RESULT(no)
+           ;;
+         *)
+           AC_MSG_RESULT(yes)
+       esac
        ;;
-  esac ],
-       AC_MSG_RESULT(yes)
+  esac ],[
+       case $host in
+         *-*-cygwin*)
+           # Force no ldap. config/build process is broken for cygwin
+           AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
+           AC_SUBST(CURL_DISABLE_LDAP, [1])
+           AC_MSG_RESULT(no)
+           ;;
+         *)
+           AC_MSG_RESULT(yes)
+       esac ]
 )
 AC_MSG_CHECKING([whether to support ldaps])
 AC_ARG_ENABLE(ldaps,
