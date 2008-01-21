@@ -30,7 +30,6 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # setup.h file
 
 INCLUDES = -I$(top_srcdir)/include/curl \
-           -I$(top_srcdir)/include \
            -I$(top_builddir)/lib   \
            -I$(top_srcdir)/lib 
 
@@ -40,7 +39,6 @@ EXTRA_DIST = test75.pl test307.pl test610.pl test613.pl test1013.pl
 
 # files used only in some libcurl test programs
 TESTUTIL = testutil.c testutil.h
-MPRINTF = $(top_srcdir)/lib/mprintf.c $(top_srcdir)/lib/mprintf.h
 
 # these files are used in every single test program below
 SUPPORTFILES = first.c test.h
@@ -116,7 +114,7 @@ lib527_CFLAGS = -DLIB527
 lib529_SOURCES = lib525.c $(SUPPORTFILES) $(TESTUTIL)
 lib529_CFLAGS = -DLIB529
 
-lib530_SOURCES = lib530.c $(SUPPORTFILES) $(TESTUTIL) $(MPRINTF)
+lib530_SOURCES = lib530.c $(SUPPORTFILES) $(TESTUTIL)
 lib530_CFLAGS = -DLIB530
 
 lib532_SOURCES = lib526.c $(SUPPORTFILES) $(TESTUTIL)

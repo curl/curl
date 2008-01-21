@@ -10,11 +10,15 @@
 
 #include "test.h"
 
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
-
-#define ENABLE_CURLX_PRINTF
-#include "curlx.h"
+#endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
 
 #include "testutil.h"
 
@@ -35,7 +39,7 @@ int test(char *URL)
   struct timeval mp_start;
   char ml_timedout = FALSE;
   char mp_timedout = FALSE;
-  char target_url[80];
+  char target_url[256];
 
   if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
@@ -62,7 +66,7 @@ int test(char *URL)
       curl_global_cleanup();
       return TEST_ERR_MAJOR_BAD + i;
     }
-    snprintf(target_url, sizeof(target_url), "%s%04i", URL, i + 1);
+    sprintf(target_url, "%s%04i", URL, i + 1);
     target_url[sizeof(target_url) - 1] = '\0';
     curl_easy_setopt(curl[i], CURLOPT_URL, target_url);
 
