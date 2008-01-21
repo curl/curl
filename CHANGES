@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel S (22 Jan 2008)
+- Dmitry Kurochkin removed the cancelled state for pipelining, as we agreed
+  that it is bad anyway. Starting now, removing a handle that is in used in a
+  pipeline will break the pipeline - it'll be set back up again but still...
+
 Yang Tse (21 Jan 2008)
 - Disable ldap support for cygwin builds, since it breaks whole build process.
   Fixing it will affect other platforms, so it is postponed for another release.

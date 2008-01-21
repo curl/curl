@@ -2477,7 +2477,7 @@ ConnectionExists(struct SessionHandle *data,
     }
 
     if(match) {
-      if(!Curl_isPipeliningEnabled(data)) {
+      if(!check->is_in_pipeline) {
         /* The check for a dead socket makes sense only in the
            non-pipelining case */
         bool dead = SocketIsDead(check->sock[FIRSTSOCKET]);

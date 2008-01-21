@@ -85,7 +85,6 @@ typedef enum {
   CURLM_STATE_TOOFAST,     /* wait because limit-rate exceeded */
   CURLM_STATE_DONE,        /* post data transfer operation */
   CURLM_STATE_COMPLETED,   /* operation complete */
-  CURLM_STATE_CANCELLED,   /* cancelled */
 
   CURLM_STATE_LAST /* not a true state, never use this */
 } CURLMstate;
@@ -216,7 +215,6 @@ static const char * const statename[]={
   "TOOFAST",
   "DONE",
   "COMPLETED",
-  "CANCELLED"
 };
 
 void curl_multi_dump(CURLM *multi_handle);
@@ -587,15 +585,12 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
       multi->num_alive--;
 
     if(easy->easy_handle->state.is_in_pipeline &&
-        easy->state > CURLM_STATE_DO &&
-        easy->state < CURLM_STATE_COMPLETED) {
-      /* If the handle is in a pipeline and has finished sending off its
-         request but not received its reponse yet, we need to remember the
-         fact that we want to remove this handle but do the actual removal at
-         a later time */
-      easy->easy_handle->state.cancelled = TRUE;
-      return CURLM_OK;
-    }
+        easy->state > CURLM_STATE_WAITDO &&
+        easy->state < CURLM_STATE_COMPLETED)
+      /* If the handle is in a pipeline and has started sending off its
+         request but not received its reponse yet, we need to close
+         connection. */
+      easy->easy_conn->bits.close = TRUE;
 
     /* The timer must be shut down before easy->multi is set to NULL,
        else the timenode will remain in the splay tree after
@@ -1351,22 +1346,16 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           result = CURLM_CALL_MULTI_PERFORM;
       }
 
-      if(!easy->easy_handle->state.cancelled) {
-        /* post-transfer command */
-        easy->result = Curl_done(&easy->easy_conn, CURLE_OK, FALSE);
+      /* post-transfer command */
+      easy->result = Curl_done(&easy->easy_conn, CURLE_OK, FALSE);
 
-        /* after we have DONE what we're supposed to do, go COMPLETED, and
-           it doesn't matter what the Curl_done() returned! */
-        multistate(easy, CURLM_STATE_COMPLETED);
-      }
+      /* after we have DONE what we're supposed to do, go COMPLETED, and
+         it doesn't matter what the Curl_done() returned! */
+      multistate(easy, CURLM_STATE_COMPLETED);
 
       break;
 
     case CURLM_STATE_COMPLETED:
-      if(easy->easy_handle->state.cancelled)
-        /* Go into the CANCELLED state if we were cancelled */
-        multistate(easy, CURLM_STATE_CANCELLED);
-
       /* this is a completed transfer, it is likely to still be connected */
 
       /* This node should be delinked from the list now and we should post
@@ -1374,13 +1363,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
       /* Important: reset the conn pointer so that we don't point to memory
          that could be freed anytime */
-      easy->easy_conn = NULL;
-      break;
-
-    case CURLM_STATE_CANCELLED:
-      /* Cancelled transfer, wait to be cleaned up */
-
-      /* Reset the conn pointer so we don't leave it dangling */
       easy->easy_conn = NULL;
       break;
 
@@ -1480,15 +1462,6 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
   easy=multi->easy.next;
   while(easy != &multi->easy) {
     CURLMcode result;
-
-    if(easy->easy_handle->state.cancelled &&
-        easy->state == CURLM_STATE_CANCELLED) {
-      /* Remove cancelled handles once it's safe to do so */
-      Curl_multi_rmeasy(multi_handle, easy->easy_handle);
-      easy->easy_handle = NULL;
-      easy = easy->next;
-      continue;
-    }
 
     result = multi_runsingle(multi, easy);
     if(result)

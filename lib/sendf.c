@@ -419,11 +419,6 @@ CURLcode Curl_client_write(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   size_t wrote;
 
-  if(data->state.cancelled) {
-    /* We just suck everything into a black hole */
-    return CURLE_OK;
-  }
-
   /* If reading is actually paused, we're forced to append this chunk of data
      to the already held data, but only if it is the same type as otherwise it
      can't work and it'll return error instead. */

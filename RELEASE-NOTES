@@ -58,6 +58,8 @@ This release includes the following bugfixes:
  o improved OOM handling for data url encoded HTTP POSTs when read from a file
  o test suite could pick wrong tool(s) if more than one existed in the PATH
  o curl_multi_fdset() failed to return socket while doing CONNECT over proxy
+ o curl_multi_remove_handle() on a handle that is in used for a pipeline now
+   break that pipeline
 
 This release includes the following known bugs:
 

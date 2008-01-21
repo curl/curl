@@ -1194,7 +1194,6 @@ struct UrlState {
 
   bool pipe_broke; /* TRUE if the connection we were pipelined on broke
                       and we need to restart from the beginning */
-  bool cancelled; /* TRUE if the request was cancelled */
 
 #ifndef WIN32
 /* do FTP line-end conversions on most platforms */
