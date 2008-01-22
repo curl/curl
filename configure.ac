@@ -1865,6 +1865,7 @@ AC_CHECK_HEADERS(
         utime.h \
         sys/utime.h \
         sys/poll.h \
+        poll.h \
         sys/resource.h \
         libgen.h \
         locale.h \
@@ -2127,6 +2128,8 @@ if test "$disable_poll" = "no"; then
     AC_RUN_IFELSE([
 #ifdef HAVE_SYS_POLL_H
 #include <sys/poll.h>
+#elif defined(HAVE_POLL_H)
+#include <poll.h>
 #endif
 
   int main(void)
