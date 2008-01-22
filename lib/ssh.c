@@ -733,7 +733,11 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
         break;
       }
       else {
-        failf(data, "Failure initialising sftp session");
+        char *err_msg;
+
+        (void)libssh2_session_last_error(sshc->ssh_session,
+                                         &err_msg, NULL, 0);
+        failf(data, "Failure initializing sftp session: %s", err_msg);
         state(conn, SSH_SESSION_FREE);
         sshc->actualcode = CURLE_FAILED_INIT;
         break;
