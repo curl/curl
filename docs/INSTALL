@@ -188,7 +188,7 @@ Win32
    environment variables, for example:
 
      set ZLIB_PATH=c:\zlib-1.2.3
-     set OPENSSL_PATH=c:\openssl-0.9.8e
+     set OPENSSL_PATH=c:\openssl-0.9.8g
      set LIBSSH2_PATH=c:\libssh2-0.17
 
    ATTENTION: if you want to build with libssh2 support you have to use latest
@@ -257,7 +257,7 @@ Win32
    Before running nmake define the OPENSSL_PATH environment variable with
    the root/base directory of OpenSSL, for example:
 
-     set OPENSSL_PATH=c:\openssl-0.9.8e
+     set OPENSSL_PATH=c:\openssl-0.9.8g
 
    Then run 'nmake vc-ssl' or 'nmake vc-ssl-dll' in curl's root
    directory.  'nmake vc-ssl' will create a libcurl static and dynamic
@@ -521,7 +521,7 @@ NetWare
      http://www.gknw.net/development/ossl/netware/
      for CLIB-based builds OpenSSL needs to be patched to build with BSD
      sockets (currently only a winsock-based CLIB build is supported):
-     http://www.gknw.net/development/ossl/netware/patches/v_0.9.8e/openssl-0.9.8e.diff
+     http://www.gknw.net/development/ossl/netware/patches/v_0.9.8g/openssl-0.9.8g.diff
    - optional SSH2 sources (version 0.17 or later);
 
    Set a search path to your compiler, linker and tools; on Linux make

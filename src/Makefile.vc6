@@ -22,7 +22,7 @@ ZLIB_PATH = ../../zlib-1.2.3
 !ENDIF
 
 !IFNDEF OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8e
+OPENSSL_PATH = ../../openssl-0.9.8g
 !ENDIF
 
 !IFNDEF MACHINE
