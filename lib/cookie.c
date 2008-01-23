@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -812,7 +812,7 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
 void Curl_cookie_clearall(struct CookieInfo *cookies)
 {
   if(cookies) {
-    Curl_cookie_freelist(cookies->cookies);
+    Curl_cookie_freelist(cookies->cookies, TRUE);
     cookies->cookies = NULL;
     cookies->numcookies = 0;
   }
@@ -824,16 +824,22 @@ void Curl_cookie_clearall(struct CookieInfo *cookies)
  *
  * Free a list of cookies previously returned by Curl_cookie_getlist();
  *
+ * The 'cookiestoo' argument tells this function whether to just free the
+ * list or actually also free all cookies within the list as well.
+ *
  ****************************************************************************/
 
-void Curl_cookie_freelist(struct Cookie *co)
+void Curl_cookie_freelist(struct Cookie *co, bool cookiestoo)
 {
   struct Cookie *next;
   if(co) {
     while(co) {
       next = co->next;
-      free(co); /* we only free the struct since the "members" are all
-                      just copied! */
+      if(cookiestoo)
+        freecookie(co);
+      else
+        free(co); /* we only free the struct since the "members" are all just
+                     pointed out in the main cookie list! */
       co = next;
     }
   }
@@ -867,7 +873,7 @@ void Curl_cookie_clearsess(struct CookieInfo *cookies)
       else
         prev->next = next;
 
-      free(curr);
+      freecookie(curr);
       cookies->numcookies--;
     }
     else

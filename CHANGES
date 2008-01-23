@@ -6,9 +6,16 @@
 
                                   Changelog
 
+<<<<<<< CHANGES
+Daniel S (23 Jan 2008)
+- "Igor" pointed out that CURLOPT_COOKIELIST set to "ALL" leaked memory, and so
+  did "SESS". Fixed now.
+
+=======
 Yang Tse (22 Jan 2008)
 - Check poll.h at configuration time, and use it when sys/poll.h unavailable
 
+>>>>>>> 1.1234
 Daniel S (22 Jan 2008)
 - Dmitry Kurochkin removed the cancelled state for pipelining, as we agreed
   that it is bad anyway. Starting now, removing a handle that is in used in a

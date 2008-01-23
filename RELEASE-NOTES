@@ -60,6 +60,7 @@ This release includes the following bugfixes:
  o curl_multi_fdset() failed to return socket while doing CONNECT over proxy
  o curl_multi_remove_handle() on a handle that is in used for a pipeline now
    break that pipeline
+ o CURLOPT_COOKIELIST memory leaks
 
 This release includes the following known bugs:
 
