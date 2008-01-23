@@ -158,6 +158,18 @@ char **__crt0_glob_function (char *arg)
 #endif /* __DJGPP__ */
 #endif /* MSDOS */
 
+#ifndef STDIN_FILENO
+#define STDIN_FILENO  fileno(stdin)
+#endif
+
+#ifndef STDOUT_FILENO
+#define STDOUT_FILENO  fileno(stdout)
+#endif
+
+#ifndef STDERR_FILENO
+#define STDERR_FILENO  fileno(stderr)
+#endif
+
 #define CURL_PROGRESS_STATS 0 /* default progress display */
 #define CURL_PROGRESS_BAR   1
 
