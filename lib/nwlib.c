@@ -35,8 +35,6 @@
 #include <nks/thread.h>
 #include <nks/synch.h>
 
-#include "memory.h"
-#include "memdebug.h"
 
 typedef struct
 {
