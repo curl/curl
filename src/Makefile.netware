@@ -73,7 +73,7 @@ else
 	CC = gcc
 endif
 # a native win32 awk can be downloaded from here:
-# http://www.gknw.net/development/prgtools/awk-20050424.zip
+# http://www.gknw.net/development/prgtools/awk-20070501.zip
 AWK	= awk
 CP	= cp -afv
 # RM	= rm -f
@@ -324,9 +324,9 @@ endif
 ifdef IMPORTS
 	@echo $(DL)import $(IMPORTS)$(DL) >> $@
 endif
-ifeq ($(LD),nlmconv)
-	@echo $(DL)input $(OBJS)$(DL) >> $@
+ifeq ($(findstring nlmconv,$(LD)),nlmconv)
 	@echo $(DL)input $(PRELUDE)$(DL) >> $@
+	@echo $(DL)input $(OBJS)$(DL) >> $@
 ifdef LDLIBS
 	@echo $(DL)input $(LDLIBS)$(DL) >> $@
 endif
