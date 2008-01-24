@@ -52,7 +52,7 @@ BEGIN
       VALUE "OriginalFilename", "curl.exe\0"
       VALUE "ProductName",      "The cURL executable\0"
       VALUE "ProductVersion",   CURL_VERSION "\0"
-      VALUE "LegalCopyright",   "© " LIBCURL_COPYRIGHT "\0"
+      VALUE "LegalCopyright",   "© " CURL_COPYRIGHT "\0"
       VALUE "License",          "http://curl.haxx.se/docs/copyright.html\0"
     END
   END
