@@ -22,7 +22,7 @@
 # ***************************************************************************
 # awk script which fetches curl / ares version number and string from input
 # file and writes them to STDOUT. Here you can get an awk version for Win32:
-# http://www.gknw.net/development/prgtools/awk.zip
+# http://www.gknw.net/development/prgtools/awk-20070501.zip
 #
 BEGIN {
   if (match (ARGV[1], /curlver.h/)) {
