@@ -107,6 +107,8 @@ struct httprequest {
   int pipe;       /* if non-zero, expect this many requests to do a "piped"
                      request/response */
   int rcmd;       /* doing a special command, see defines above */
+  int prot_version; /* HTTP version * 10 */
+  bool pipelining; /* true if request is pipelined */
 };
 
 int ProcessRequest(struct httprequest *req);
@@ -215,6 +217,8 @@ int ProcessRequest(struct httprequest *req)
             &prot_minor) == 4) {
     char *ptr;
 
+    req->prot_version = prot_major*10 + prot_minor;
+
     /* find the last slash */
     ptr = strrchr(doc, '/');
 
@@ -315,7 +319,7 @@ int ProcessRequest(struct httprequest *req)
                 doc, prot_major, prot_minor);
         logmsg("%s", logbuf);
 
-        if(prot_major*10+prot_minor == 10)
+        if(req->prot_version == 10)
           req->open = FALSE; /* HTTP 1.0 closes connection by default */
 
         if(!strncmp(doc, "bad", 3))
@@ -427,6 +431,19 @@ int ProcessRequest(struct httprequest *req)
   if(strstr(req->reqbuf, "Connection: close"))
     req->open = FALSE; /* close connection after this request */
 
+  if(!req->pipe &&
+     req->open &&
+     req->prot_version >= 11 &&
+     end &&
+     req->reqbuf + req->offset > end + strlen(END_OF_HEADERS) &&
+     (!strncmp(req->reqbuf, "GET", strlen("GET")) ||
+      !strncmp(req->reqbuf, "HEAD", strlen("HEAD")))) {
+    /* If we have a persistent connection, HTTP version >= 1.1
+       and GET/HEAD request, enable pipelining. */
+    req->checkindex = (end - req->reqbuf) + strlen(END_OF_HEADERS);
+    req->pipelining = TRUE;
+  }
+
   while(req->pipe) {
     /* scan for more header ends within this chunk */
     line = &req->reqbuf[req->checkindex];
@@ -512,6 +529,15 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
   int fail= FALSE;
   char *reqbuf = req->reqbuf;
 
+  char pipereq[REQBUFSIZ];
+  int pipereq_length;
+  if(req->pipelining) {
+    pipereq_length = req->offset - req->checkindex;
+    memcpy(pipereq, reqbuf + req->checkindex, pipereq_length);
+  }
+  else
+    pipereq_length = 0;
+
   /*** Init the httpreqest structure properly for the upcoming request ***/
   memset(req, 0, sizeof(struct httprequest));
 
@@ -524,7 +550,14 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
   /*** end of httprequest init ***/
 
   while (req->offset < REQBUFSIZ) {
-    ssize_t got = sread(sock, reqbuf + req->offset, REQBUFSIZ - req->offset);
+    ssize_t got;
+    if(pipereq_length) {
+      memcpy(reqbuf, pipereq, pipereq_length);
+      got = pipereq_length;
+      pipereq_length = 0;
+    }
+    else
+      got = sread(sock, reqbuf + req->offset, REQBUFSIZ - req->offset);
     if (got <= 0) {
       if (got < 0) {
         logmsg("recv() returned error: %d", SOCKERRNO);
@@ -563,7 +596,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
     reqbuf[req->offset]=0;
 
   /* dump the request to an external file */
-  storerequest(reqbuf, req->offset);
+  storerequest(reqbuf, req->pipelining ? req->checkindex : req->offset);
 
   return fail; /* success */
 }
