@@ -115,10 +115,10 @@ used.
 .IP "--anyauth"
 (HTTP) Tells curl to figure out authentication method by itself, and use the
 most secure one the remote site claims it supports. This is done by first
-doing a request and checking the response-headers, thus inducing an extra
-network round-trip. This is used instead of setting a specific authentication
-method, which you can do with \fI--basic\fP, \fI--digest\fP, \fI--ntlm\fP, and
-\fI--negotiate\fP.
+doing a request and checking the response-headers, thus possibly inducing an
+extra network round-trip. This is used instead of setting a specific
+authentication method, which you can do with \fI--basic\fP, \fI--digest\fP,
+\fI--ntlm\fP, and \fI--negotiate\fP.
 
 Note that using --anyauth is not recommended if you do uploads from stdin,
 since it may require data to be sent twice and then the client must be able to
@@ -899,7 +899,7 @@ a redirection. This option is meaningful only when using \fI-L/--location\fP
 (Added in 7.17.1)
 .IP "--proxy-anyauth"
 Tells curl to pick a suitable authentication method when communicating with
-the given proxy. This will cause an extra request/response round-trip. (Added
+the given proxy. This might cause an extra request/response round-trip. (Added
 in 7.13.2)
 
 If this option is used twice, the second will again disable the proxy use-any
