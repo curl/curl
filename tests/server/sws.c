@@ -1001,6 +1001,16 @@ int main(int argc, char *argv[])
     }
 #endif
 
+  /* full initialization for new request after connection */
+  memset(&req, 0, sizeof(req));
+  req.testno = DOCNUMBER_NOTHING;
+  req.open = TRUE;
+  req.auth_req = FALSE;
+  req.auth = FALSE;
+  req.digest = FALSE;
+  req.ntlm = FALSE;
+  req.pipelining = FALSE;
+
   do {
       if(get_request(msgsock, &req))
         /* non-zero means error, break out of loop */
