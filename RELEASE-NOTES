@@ -61,6 +61,8 @@ This release includes the following bugfixes:
  o curl_multi_remove_handle() on a handle that is in used for a pipeline now
    break that pipeline
  o CURLOPT_COOKIELIST memory leaks
+ o progress meter/callback during http proxy CONNECT requests
+ o auth for http proxy when the proxy closes connection after first response
 
 This release includes the following known bugs:
 
@@ -86,6 +88,7 @@ advice from friends like these:
  Gilles Blanc, David Wright, Vikram Saxena, Mateusz Loskot, Gary Maxwell,
  Dmitry Kurochkin, Mohun Biswas, Richard Atterer, Maxim Perenesenko,
  Daniel Egger, Jeff Johnson, Nikitinskit Dmitriy, Georg Lippitsch, Eric Landes,
- Joe Malicki, Nathan Coulter, Lau Hang Kin, Judson Bishop, Igor Franchuk
+ Joe Malicki, Nathan Coulter, Lau Hang Kin, Judson Bishop, Igor Franchuk,
+ Kevin Reed
  
         Thanks! (and sorry if I forgot to mention someone)

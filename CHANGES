@@ -6,6 +6,20 @@
 
                                   Changelog
 
+Daniel S (26 Jan 2008)
+- Kevin Reed filed bug report #1879375
+  (http://curl.haxx.se/bug/view.cgi?id=1879375) which describes how libcurl
+  got lost in this scenario: proxy tunnel (or HTTPS over proxy), ask to do any
+  proxy authentication and the proxy replies with an auth (like NTLM) and then
+  closes the connection after that initial informational response.
+
+  libcurl would not properly re-initialize the connection to the proxy and
+  continue the auth negotiation like supposed. It does now however, as it will
+  now detect if one or more authentication methods were available and asked
+  for, and will thus retry the connection and continue from there.
+
+- I made the progress callback get called properly during proxy CONNECT.
+
 Daniel S (23 Jan 2008)
 - Igor Franchuk pointed out that CURLOPT_COOKIELIST set to "ALL" leaked
   memory, and so did "SESS". Fixed now.

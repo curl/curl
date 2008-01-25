@@ -1409,8 +1409,15 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
             keepon = FALSE;
           else if(gotbytes <= 0) {
             keepon = FALSE;
-            error = SELECT_ERROR;
-            failf(data, "Proxy CONNECT aborted");
+            if(data->set.proxyauth && data->state.authproxy.avail) {
+              /* proxy auth was requested and there was proxy auth available,
+                 then deem this as "mere" proxy disconnect */
+              conn->bits.proxy_connect_closed = TRUE;
+            }
+            else {
+              error = SELECT_ERROR;
+              failf(data, "Proxy CONNECT aborted");
+            }
           }
           else {
             /*
@@ -1590,6 +1597,8 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
           }
           break;
         } /* switch */
+        if(Curl_pgrsUpdate(conn))
+          return CURLE_ABORTED_BY_CALLBACK;
       } /* while there's buffer left and loop is requested */
 
       if(error)
