@@ -808,10 +808,12 @@ PORTS
         - ia64 Linux 2.3.99
         - m68k AmigaOS 3
         - m68k Linux
+        - m68k uClinux
         - m68k OpenBSD
         - m88k dg-dgux5.4R3.00
         - s390 Linux
         - XScale/PXA250 Linux 2.4
+        - Nios II uClinux
 
 Useful URLs
 ===========
