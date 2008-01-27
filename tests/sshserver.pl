@@ -342,6 +342,7 @@ if((! -e $hstprvkeyf) || (! -e $hstpubkeyf) ||
 #  Match                            : OpenSSH 4.4.0 and later [3]
 #  MaxAuthTries                     : OpenSSH 3.9.0 and later
 #  MaxStartups                      : OpenSSH 2.2.0 and later
+#  PAMAuthenticationViaKbdInt
 #  PasswordAuthentication           : OpenSSH 1.2.1 and later
 #  PermitEmptyPasswords             : OpenSSH 1.2.1 and later
 #  PermitOpen                       : OpenSSH 4.4.0 and later [3]
@@ -536,6 +537,9 @@ if(sshd_supports_opt('KeepAlive','no')) {
 }
 if(sshd_supports_opt('MaxAuthTries','10')) {
     push @cfgarr, 'MaxAuthTries 10';
+}
+if(sshd_supports_opt('PAMAuthenticationViaKbdInt','no')) {
+    push @cfgarr, 'PAMAuthenticationViaKbdInt no';
 }
 if(sshd_supports_opt('PermitTunnel','no')) {
     push @cfgarr, 'PermitTunnel no';
