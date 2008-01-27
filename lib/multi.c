@@ -871,6 +871,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       if(easy->easy_handle->state.is_in_pipeline) {
         /* Head back to the CONNECT state */
         multistate(easy, CURLM_STATE_CONNECT);
+        easy->easy_handle->state.is_in_pipeline = FALSE;
         result = CURLM_CALL_MULTI_PERFORM;
         easy->result = CURLE_OK;
       }
@@ -1286,6 +1287,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         easy->easy_conn->bits.close = TRUE;
         Curl_removeHandleFromPipeline(easy->easy_handle,
                                       easy->easy_conn->recv_pipe);
+        easy->easy_handle->state.is_in_pipeline = FALSE;
 
         if(CURL_SOCKET_BAD != easy->easy_conn->sock[SECONDARYSOCKET]) {
           /* if we failed anywhere, we must clean up the secondary socket if
@@ -1309,6 +1311,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                         easy->easy_conn->recv_pipe);
           /* Check if we can move pending requests to send pipe */
           checkPendPipeline(easy->easy_conn);
+          easy->easy_handle->state.is_in_pipeline = FALSE;
           if(!retry) {
             /* if the URL is a follow-location and not just a retried request
                then figure out the URL here */

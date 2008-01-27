@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel S (27 Jan 2008)
+- Dmitry Kurochkin: In "real world" testing I found more bugs in
+  pipelining. Broken connection is not restored and we get into infinite
+  loop. It happens because of wrong is_in_pipeline values.
+
 Daniel S (26 Jan 2008)
 - Kevin Reed filed bug report #1879375
   (http://curl.haxx.se/bug/view.cgi?id=1879375) which describes how libcurl
