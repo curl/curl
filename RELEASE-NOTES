@@ -1,68 +1,20 @@
-Curl and libcurl 7.18.0
+Curl and libcurl 7.18.1
 
- Public curl releases:         103
+ Public curl releases:         104
  Command line options:         126
  curl_easy_setopt() options:   150
  Public functions in libcurl:  56
  Public web site mirrors:      43
  Known libcurl bindings:       36
- Contributors:                 597
+ Contributors:                 621
 
 This release includes the following changes:
  
- o --data-urlencode
- o CURLOPT_PROXY_TRANSFER_MODE
- o --no-keepalive - now curl does connections with keep-alive enabled by
-   default
- o --socks4a added (proxy type CURLPROXY_SOCKS4A for libcurl)
- o --socks5-hostname added (CURLPROXY_SOCKS5_HOSTNAME for libcurl)
- o curl_easy_pause()
- o CURLOPT_SEEKFUNCTION and CURLOPT_SEEKDATA
- o --keepalive-time
- o curl --help output was re-ordered
+ o 
 
 This release includes the following bugfixes:
 
- o curl-config --features and --protocols show the correct output when built
-   with NSS, and also when SCP, SFTP and libz are not available
- o free problem in the curl tool for users with empty home dir
- o curl.h version 7.17.1 problem when building C++ apps with MSVC
- o SFTP and SCP use persistent connections
- o segfault on bad URL
- o variable wrapping when using absolutely huge send buffer sizes
- o variable wrapping when using debug callback and the HTTP request wasn't sent
-   in one go
- o SSL connections with NSS done with the multi-interface
- o setting a share no longer activates cookies
- o Negotiate now works on auth and proxy simultanouesly
- o support HTTP Digest nonces up to 1023 letters
- o resumed ftp upload no longer requires the read callback to return full
-   buffers
- o no longer default-appends ;type= on FTP URLs thru proxies
- o SSL session id caching
- o POST with callback over proxy requiring NTLM or Digest
- o Expect: 100-continue flaw on re-used connection with POSTs
- o build fix for MSVC 9.0 (VS2008)
- o Windows curl builds failed file truncation when retry downloading
- o SSL session ID cache memory leak
- o bad connection re-use check with environment variable-activated proxy use
- o --libcurl now generates a return statement as well
- o socklen_t is no longer used in the public includes
- o time zone offsets from -1400 to +1400 are now accepted by the date parser
- o allows more spaces in WWW/Proxy-Authenticate: headers
- o curl-config --libs skips /usr/lib64
- o range support for file:// transfers
- o libcurl hang with huge POST request and request-body read from callback
- o removed extra newlines from many error messages
- o improved pipelining
- o improved OOM handling for data url encoded HTTP POSTs when read from a file
- o test suite could pick wrong tool(s) if more than one existed in the PATH
- o curl_multi_fdset() failed to return socket while doing CONNECT over proxy
- o curl_multi_remove_handle() on a handle that is in used for a pipeline now
-   break that pipeline
- o CURLOPT_COOKIELIST memory leaks
- o progress meter/callback during http proxy CONNECT requests
- o auth for http proxy when the proxy closes connection after first response
+ o 
 
 This release includes the following known bugs:
 
@@ -70,25 +22,15 @@ This release includes the following known bugs:
 
 Other curl-related news:
 
- o TclCurl 7.17.1 => http://personal1.iddeo.es/andresgarci/tclcurl/english/
- o Ruby Curl::Multi 0.1 => http://curl-multi.rubyforge.org/ 
- o curl-java 0.2.1 => http://curl.haxx.se/libcurl/java/
+ o 
 
 New curl mirrors:
 
- o http://curl.gominet.net/ is new mirror in Vizcaya, Portugal
- o http://curl.very-clever.com/ is a new mirror in Nuremberg, Germany
+ o 
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dan Fandrich, Gisle Vanem, Toby Peterson, Yang Tse, Daniel Black,
- Robin Johnson, Michal Marek, Ates Goral, Andres Garcia, Rob Crittenden,
- Emil Romanus, Alessandro Vesely, Ray Pekowski, Spacen Jasset, Andrew Moise,
- Gilles Blanc, David Wright, Vikram Saxena, Mateusz Loskot, Gary Maxwell,
- Dmitry Kurochkin, Mohun Biswas, Richard Atterer, Maxim Perenesenko,
- Daniel Egger, Jeff Johnson, Nikitinskit Dmitriy, Georg Lippitsch, Eric Landes,
- Joe Malicki, Nathan Coulter, Lau Hang Kin, Judson Bishop, Igor Franchuk,
- Kevin Reed
  
+
         Thanks! (and sorry if I forgot to mention someone)
