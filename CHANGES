@@ -6,6 +6,8 @@
 
                                   Changelog
 
+Version 7.18.0 (28 January 2008)
+
 Daniel S (27 Jan 2008)
 - Dmitry Kurochkin: In "real world" testing I found more bugs in
   pipelining. Broken connection is not restored and we get into infinite
