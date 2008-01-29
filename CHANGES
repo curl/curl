@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel S (29 Jan 2008)
+- Michal Marek fixed minor mistake in test case 553 that prevented it from
+  working on other IP-addresses or port numbers.
+
 Version 7.18.0 (28 January 2008)
 
 Daniel S (27 Jan 2008)
