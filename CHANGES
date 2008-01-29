@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel S (29 Jan 2008)
+- Dmitry Kurochkin fixed Curl_done() for pipelining, as it could previously
+  crash!
+
 - Michal Marek fixed minor mistake in test case 553 that prevented it from
   working on other IP-addresses or port numbers.
 

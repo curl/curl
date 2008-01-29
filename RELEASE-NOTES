@@ -14,7 +14,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o 
+ o improved pipelining
 
 This release includes the following known bugs:
 
@@ -31,6 +31,6 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Michal Marek
+ Michal Marek, Dmitry Kurochkin
 
         Thanks! (and sorry if I forgot to mention someone)
