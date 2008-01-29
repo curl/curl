@@ -225,6 +225,8 @@ int test(char *URL)
   curl_easy_setopt(p.curl, CURLOPT_SSL_VERIFYPEER, FALSE);
   curl_easy_setopt(p.curl, CURLOPT_SSL_VERIFYHOST, 1);
 
+  curl_easy_setopt(p.curl, CURLOPT_VERBOSE, 1);
+
   if ((multi = curl_multi_init()) == NULL) {
     fprintf(stderr, "curl_multi_init() failed\n");
     curl_easy_cleanup(p.curl);
