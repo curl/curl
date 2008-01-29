@@ -1,8 +1,8 @@
 #########################################################################
 # $Id$
 #
-## Makefile for building curl.exe with MingW32 (GCC-3.2) and
-## optionally OpenSSL (0.9.8), libssh2 (0.17), zlib (1.2.3)
+## Makefile for building curl.exe with MingW32 (GCC-3.2)
+## and optionally OpenSSL (0.9.8), libssh2 (0.18), zlib (1.2.3)
 ##
 ## Usage:
 ## mingw32-make -f Makefile.m32 [SSL=1] [SSH2=1] [ZLIB=1] [SSPI=1] [IPV6=1] [DYN=1]
@@ -40,7 +40,7 @@ CFLAGS = -g -O2
 LDFLAGS = -s
 RC = windres
 RCFLAGS = --include-dir=../include -O COFF -i
-RM = del /q /f
+RM = del /q /f > NUL 2>&1
 CP = copy
 
 # We may need these someday
@@ -114,11 +114,13 @@ curl_OBJECTS := $(patsubst %.c,%.o,$(strip $(CURL_SOURCES)))
 # curlx_OBJECTS := $(patsubst %.c,%.o,$(notdir $(strip $(CURLX_ONES))))
 # vpath %.c ../lib
 
+RESOURCE = curl.res
+
 .SUFFIXES: .rc .res
 
 all: curl.exe
 
-curl.exe: curl.res $(curl_OBJECTS) $(curl_DEPENDENCIES)
+curl.exe: $(RESOURCE) $(curl_OBJECTS) $(curl_DEPENDENCIES)
 	-$(RM) $@
 	$(LINK) $< $(curl_OBJECTS) $(curl_LDADD)
 
@@ -141,7 +143,7 @@ clean:
 ifeq "$(wildcard hugehelp.c.cvs)" "hugehelp.c.cvs"
 	-$(RM) hugehelp.c
 endif
-	-$(RM) $(curl_OBJECTS)
+	-$(RM) $(curl_OBJECTS) $(RESOURCE)
 
 distrib: clean
 	-$(RM) $(curl_PROGRAMS)

@@ -1,8 +1,8 @@
 #########################################################################
 # $Id$
 #
-## Makefile for building libcurl.a with MingW32 (GCC-3.2) and
-## optionally OpenSSL (0.9.8), libssh2 (0.17), zlib (1.2.3)
+## Makefile for building libcurl.a with MingW32 (GCC-3.2)
+## and optionally OpenSSL (0.9.8), libssh2 (0.18), zlib (1.2.3)
 ##
 ## Usage:
 ## mingw32-make -f Makefile.m32 [SSL=1] [SSH2=1] [ZLIB=1] [SSPI=1] [IPV6=1] [DYN=1]
@@ -41,7 +41,7 @@ LDFLAGS = -s
 RANLIB = ranlib
 RC = windres
 RCFLAGS = --include-dir=../include -DCURLDEBUG=0 -O COFF -i
-RM = del /q /f
+RM = del /q /f > NUL 2>&1
 STRIP = strip -g
 
 ########################################################
