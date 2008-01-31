@@ -311,6 +311,7 @@ if((! -e $hstprvkeyf) || (! -e $hstpubkeyf) ||
 #  AllowTcpForwarding               : OpenSSH 2.3.0 and later
 #  AllowUsers                       : OpenSSH 1.2.1 and later
 #  AuthorizedKeysFile               : OpenSSH 2.9.9 and later
+#  AuthorizedKeysFile2              : OpenSSH 2.9.9 and later
 #  Banner                           : OpenSSH 2.5.0 and later
 #  ChallengeResponseAuthentication  : OpenSSH 2.5.0 and later
 #  Ciphers                          : OpenSSH 2.1.0 and later [3]
@@ -328,6 +329,7 @@ if((! -e $hstprvkeyf) || (! -e $hstpubkeyf) ||
 #  HostKey                          : OpenSSH 1.2.1 and later
 #  IgnoreRhosts                     : OpenSSH 1.2.1 and later
 #  IgnoreUserKnownHosts             : OpenSSH 1.2.1 and later
+#  KbdInteractiveAuthentication     : OpenSSH 2.3.0 and later
 #  KeepAlive                        : OpenSSH 1.2.1 and later
 #  KerberosAuthentication           : OpenSSH 1.2.1 and later [1]
 #  KerberosGetAFSToken              : OpenSSH 3.8.0 and later [1]
@@ -338,11 +340,12 @@ if((! -e $hstprvkeyf) || (! -e $hstpubkeyf) ||
 #  ListenAddress                    : OpenSSH 1.2.1 and later
 #  LoginGraceTime                   : OpenSSH 1.2.1 and later
 #  LogLevel                         : OpenSSH 1.2.1 and later
+#  LookupClientHostnames            :  SunSSH 1.0.0 and later
 #  MACs                             : OpenSSH 2.5.0 and later [3]
 #  Match                            : OpenSSH 4.4.0 and later [3]
 #  MaxAuthTries                     : OpenSSH 3.9.0 and later
 #  MaxStartups                      : OpenSSH 2.2.0 and later
-#  PAMAuthenticationViaKbdInt
+#  PAMAuthenticationViaKbdInt       : OpenSSH 2.9.0 and later [2]
 #  PasswordAuthentication           : OpenSSH 1.2.1 and later
 #  PermitEmptyPasswords             : OpenSSH 1.2.1 and later
 #  PermitOpen                       : OpenSSH 4.4.0 and later [3]
@@ -355,6 +358,7 @@ if((! -e $hstprvkeyf) || (! -e $hstpubkeyf) ||
 #  PrintMotd                        : OpenSSH 1.2.1 and later
 #  Protocol                         : OpenSSH 2.1.0 and later
 #  PubkeyAuthentication             : OpenSSH 2.5.0 and later
+#  RhostsAuthentication             : OpenSSH 1.2.1 and later
 #  RhostsRSAAuthentication          : OpenSSH 1.2.1 and later
 #  RSAAuthentication                : OpenSSH 1.2.1 and later
 #  ServerKeyBits                    : OpenSSH 1.2.1 and later
@@ -367,6 +371,7 @@ if((! -e $hstprvkeyf) || (! -e $hstpubkeyf) ||
 #  UseLogin                         : OpenSSH 1.2.1 and later
 #  UsePAM                           : OpenSSH 3.7.0 and later [1][2]
 #  UsePrivilegeSeparation           : OpenSSH 3.2.2 and later
+#  VerifyReverseMapping             : OpenSSH 3.1.0 and later
 #  X11DisplayOffset                 : OpenSSH 1.2.1 and later [3]
 #  X11Forwarding                    : OpenSSH 1.2.1 and later
 #  X11UseLocalhost                  : OpenSSH 3.1.0 and later
@@ -391,6 +396,7 @@ push @cfgarr, 'DenyGroups';
 push @cfgarr, 'AllowGroups';
 push @cfgarr, '#';
 push @cfgarr, "AuthorizedKeysFile $path/$clipubkeyf";
+push @cfgarr, "AuthorizedKeysFile2 $path/$clipubkeyf";
 push @cfgarr, "HostKey $path/$hstprvkeyf";
 push @cfgarr, "PidFile $path/.ssh.pid";
 push @cfgarr, '#';
@@ -527,13 +533,19 @@ if(sshd_supports_opt('AcceptEnv','')) {
 }
 if(sshd_supports_opt('AddressFamily','any')) {
     # Address family must be specified before ListenAddress
-    splice @cfgarr, 13, 0, 'AddressFamily any';
+    splice @cfgarr, 14, 0, 'AddressFamily any';
 }
 if(sshd_supports_opt('Compression','no')) {
     push @cfgarr, 'Compression no';
 }
+if(sshd_supports_opt('KbdInteractiveAuthentication','no')) {
+    push @cfgarr, 'KbdInteractiveAuthentication no';
+}
 if(sshd_supports_opt('KeepAlive','no')) {
     push @cfgarr, 'KeepAlive no';
+}
+if(sshd_supports_opt('LookupClientHostnames','no')) {
+    push @cfgarr, 'LookupClientHostnames no';
 }
 if(sshd_supports_opt('MaxAuthTries','10')) {
     push @cfgarr, 'MaxAuthTries 10';
@@ -547,6 +559,9 @@ if(sshd_supports_opt('PermitTunnel','no')) {
 if(sshd_supports_opt('PermitUserEnvironment','no')) {
     push @cfgarr, 'PermitUserEnvironment no';
 }
+if(sshd_supports_opt('RhostsAuthentication','no')) {
+    push @cfgarr, 'RhostsAuthentication no';
+}
 if(sshd_supports_opt('TCPKeepAlive','no')) {
     push @cfgarr, 'TCPKeepAlive no';
 }
@@ -558,6 +573,9 @@ if(sshd_supports_opt('UsePAM','no')) {
 }
 if(sshd_supports_opt('UsePrivilegeSeparation','no')) {
     push @cfgarr, 'UsePrivilegeSeparation no';
+}
+if(sshd_supports_opt('VerifyReverseMapping','no')) {
+    push @cfgarr, 'VerifyReverseMapping no';
 }
 if(sshd_supports_opt('X11UseLocalhost','yes')) {
     push @cfgarr, 'X11UseLocalhost yes';
