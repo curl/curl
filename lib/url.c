@@ -3538,7 +3538,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
   conn->bits.user_passwd = (bool)(NULL != data->set.str[STRING_USERPWD]);
   conn->bits.proxy_user_passwd = (bool)(NULL != data->set.str[STRING_PROXYUSERPWD]);
-  conn->bits.no_body = data->set.opt_no_body;
   conn->bits.tunnel_proxy = data->set.tunnel_thru_httpproxy;
   conn->bits.ftp_use_epsv = data->set.ftp_use_epsv;
   conn->bits.ftp_use_eprt = data->set.ftp_use_eprt;
@@ -4007,9 +4006,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     else
       free(old_conn->host.rawalloc); /* free the newly allocated name buffer */
 
-    /* get the newly set value, not the old one */
-    conn->bits.no_body = old_conn->bits.no_body;
-
     /* re-use init */
     conn->bits.reuse = TRUE; /* yes, we're re-using here */
 
@@ -4052,18 +4048,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   conn->fread_in = data->set.in;
   conn->seek_func = data->set.seek_func;
   conn->seek_client = data->set.seek_client;
-
-  if((conn->protocol&PROT_HTTP) &&
-      data->set.upload &&
-      (data->set.infilesize == -1) &&
-      (data->set.httpversion != CURL_HTTP_VERSION_1_0)) {
-    /* HTTP, upload, unknown file size and not HTTP 1.0 */
-    conn->bits.upload_chunky = TRUE;
-  }
-  else {
-    /* else, no chunky upload */
-    conn->bits.upload_chunky = FALSE;
-  }
 
 #ifndef USE_ARES
   /*************************************************************
@@ -4542,8 +4526,8 @@ static CURLcode do_init(struct connectdata *conn)
  */
 static void do_complete(struct connectdata *conn)
 {
-  conn->bits.chunk=FALSE;
-  conn->bits.trailerhdrpresent=FALSE;
+  conn->data->req.chunk=FALSE;
+  conn->data->req.trailerhdrpresent=FALSE;
 
   conn->data->req.maxfd = (conn->sockfd>conn->writesockfd?
                                conn->sockfd:conn->writesockfd)+1;

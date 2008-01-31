@@ -1473,7 +1473,7 @@ static CURLcode ftp_state_post_mdtm(struct connectdata *conn)
   /* If we have selected NOBODY and HEADER, it means that we only want file
      information. Which in FTP can't be much more than the file size and
      date. */
-  if(conn->bits.no_body && ftpc->file &&
+  if(data->set.opt_no_body && ftpc->file &&
      ftp_need_type(conn, data->set.prefer_ascii)) {
     /* The SIZE command is _not_ RFC 959 specified, and therefor many servers
        may not support it! It is however the only way we have to get a file's
@@ -2007,7 +2007,7 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
       /* If we asked for a time of the file and we actually got one as well,
          we "emulate" a HTTP-style header in our output. */
 
-      if(conn->bits.no_body &&
+      if(data->set.opt_no_body &&
          ftpc->file &&
          data->set.get_filetime &&
          (data->info.filetime>=0) ) {
@@ -3575,7 +3575,7 @@ CURLcode ftp_perform(struct connectdata *conn,
 
   DEBUGF(infof(conn->data, "DO phase starts\n"));
 
-  if(conn->bits.no_body) {
+  if(conn->data->set.opt_no_body) {
     /* requested no body means no transfer... */
     struct FTP *ftp = conn->data->state.proto.ftp;
     ftp->transfer = FTPTRANSFER_INFO;

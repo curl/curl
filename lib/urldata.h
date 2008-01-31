@@ -552,7 +552,6 @@ struct FILEPROTO {
 struct ConnectBits {
   bool close; /* if set, we close the connection after this request */
   bool reuse; /* if set, this is a re-used connection */
-  bool chunk; /* if set, this is a chunked transfer-encoding */
   bool proxy; /* if set, this transfer is done through a proxy - any type */
   bool httpproxy;    /* if set, this transfer is done through a http proxy */
   bool user_passwd;    /* do we use user+password for this connection? */
@@ -564,14 +563,6 @@ struct ConnectBits {
   bool do_more; /* this is set TRUE if the ->curl_do_more() function is
                    supposed to be called, after ->curl_do() */
 
-  bool upload_chunky; /* set TRUE if we are doing chunked transfer-encoding
-                         on upload */
-  bool getheader;     /* TRUE if header parsing is wanted */
-
-  bool forbidchunk;   /* used only to explicitly forbid chunk-upload for
-                         specific upload buffers. See readmoredata() in
-                         http.c for details. */
-
   bool tcpconnect;    /* the TCP layer (or simimlar) is connected, this is set
                          the first time on the first connect function call */
   bool protoconnstart;/* the protocol layer has STARTED its operation after
@@ -579,7 +570,6 @@ struct ConnectBits {
 
   bool retry;         /* this connection is about to get closed and then
                          re-attempted at another connection. */
-  bool no_body;       /* CURLOPT_NO_BODY (or similar) was set */
   bool tunnel_proxy;  /* if CONNECT is used to "tunnel" through the proxy.
                          This is implicit when SSL-protocols are used through
                          proxies, but can also be enabled explicitly by
@@ -603,9 +593,6 @@ struct ConnectBits {
                          requests */
   bool netrc;         /* name+password provided by netrc */
 
-  bool trailerhdrpresent; /* Set when Trailer: header found in HTTP response.
-                             Required to determine whether to look for trailers
-                             in case of Transfer-Encoding: chunking */
   bool done;          /* set to FALSE when Curl_do() is called and set to TRUE
                          when Curl_done() is called, to prevent Curl_done() to
                          get invoked twice when the multi interface is
@@ -773,6 +760,18 @@ struct SingleRequest {
       and the 'upload_present' contains the number of bytes available at this
       position */
   char *upload_fromhere;
+
+  bool chunk; /* if set, this is a chunked transfer-encoding */
+  bool upload_chunky; /* set TRUE if we are doing chunked transfer-encoding
+                         on upload */
+  bool getheader;     /* TRUE if header parsing is wanted */
+
+  bool forbidchunk;   /* used only to explicitly forbid chunk-upload for
+                         specific upload buffers. See readmoredata() in
+                         http.c for details. */
+  bool trailerhdrpresent; /* Set when Trailer: header found in HTTP response.
+                             Required to determine whether to look for trailers
+                             in case of Transfer-Encoding: chunking */
 };
 
 /*

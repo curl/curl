@@ -454,7 +454,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
   /* If we have selected NOBODY and HEADER, it means that we only want file
      information. Which for FILE can't be much more than the file size and
      date. */
-  if(conn->bits.no_body && data->set.include_header && fstated) {
+  if(data->set.opt_no_body && data->set.include_header && fstated) {
     CURLcode result;
     snprintf(buf, sizeof(data->state.buffer),
              "Content-Length: %" FORMAT_OFF_T "\r\n", expected_size);

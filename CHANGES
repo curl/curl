@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel S (31 Jan 2008)
+- Dmitry Kurochkin moved several struct fields from the connectdata struct to
+  the SingleRequest one to make pipelining better. It is a bit tricky to keep
+  them in the right place, to keep things related to the actual request or to
+  the actual connection in the right place.
+
 Daniel S (29 Jan 2008)
 - Dmitry Kurochkin fixed Curl_done() for pipelining, as it could previously
   crash!

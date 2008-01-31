@@ -842,7 +842,7 @@ static size_t readmoredata(char *buffer,
     return 0;
 
   /* make sure that a HTTP request is never sent away chunked! */
-  conn->bits.forbidchunk = (bool)(http->sending == HTTPSEND_REQUEST);
+  conn->data->req.forbidchunk = (bool)(http->sending == HTTPSEND_REQUEST);
 
   if(http->postsize <= (curl_off_t)fullsize) {
     memcpy(buffer, http->postdata, (size_t)http->postsize);
@@ -1957,7 +1957,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   if(data->set.str[STRING_CUSTOMREQUEST])
     request = data->set.str[STRING_CUSTOMREQUEST];
   else {
-    if(conn->bits.no_body)
+    if(data->set.opt_no_body)
       request = (char *)"HEAD";
     else {
       DEBUGASSERT((httpreq > HTTPREQ_NONE) && (httpreq < HTTPREQ_LAST));
@@ -2025,13 +2025,23 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   ptr = checkheaders(data, "Transfer-Encoding:");
   if(ptr) {
     /* Some kind of TE is requested, check if 'chunked' is chosen */
-    conn->bits.upload_chunky =
+    data->req.upload_chunky =
       Curl_compareheader(ptr, "Transfer-Encoding:", "chunked");
   }
   else {
-    if(httpreq == HTTPREQ_GET)
-      conn->bits.upload_chunky = FALSE;
-    if(conn->bits.upload_chunky)
+    if((conn->protocol&PROT_HTTP) &&
+        data->set.upload &&
+        (data->set.infilesize == -1) &&
+        (data->set.httpversion != CURL_HTTP_VERSION_1_0)) {
+      /* HTTP, upload, unknown file size and not HTTP 1.0 */
+      data->req.upload_chunky = TRUE;
+    }
+    else {
+      /* else, no chunky upload */
+      data->req.upload_chunky = FALSE;
+    }
+
+    if(data->req.upload_chunky)
       te = "Transfer-Encoding: chunked\r\n";
   }
 
@@ -2494,7 +2504,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
       http->sending = HTTPSEND_BODY;
 
-      if(!conn->bits.upload_chunky) {
+      if(!data->req.upload_chunky) {
         /* only add Content-Length if not uploading chunked */
         result = add_bufferf(req_buffer,
                              "Content-Length: %" FORMAT_OFF_T "\r\n",
@@ -2566,7 +2576,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       else
         postsize = data->set.infilesize;
 
-      if((postsize != -1) && !conn->bits.upload_chunky) {
+      if((postsize != -1) && !data->req.upload_chunky) {
         /* only add Content-Length if not uploading chunked */
         result = add_bufferf(req_buffer,
                              "Content-Length: %" FORMAT_OFF_T "\r\n",
@@ -2612,7 +2622,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           data->set.postfieldsize:
           (data->set.postfields? (curl_off_t)strlen(data->set.postfields):0);
 
-      if(!conn->bits.upload_chunky) {
+      if(!data->req.upload_chunky) {
         /* We only set Content-Length and allow a custom Content-Length if
            we don't upload data chunked, as RFC2616 forbids us to set both
            kinds of headers (Transfer-Encoding: chunked and Content-Length) */
@@ -2662,7 +2672,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           if(result)
             return result;
 
-          if(!conn->bits.upload_chunky) {
+          if(!data->req.upload_chunky) {
             /* We're not sending it 'chunked', append it to the request
                already now to reduce the number if send() calls */
             result = add_buffer(req_buffer, data->set.postfields,
