@@ -10,7 +10,7 @@ Curl and libcurl 7.18.1
 
 This release includes the following changes:
  
- o 
+ o added support for HttpOnly cookies
 
 This release includes the following bugfixes:
 
@@ -31,6 +31,6 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Michal Marek, Dmitry Kurochkin
+ Michal Marek, Dmitry Kurochkin, Niklas Angebrand
 
         Thanks! (and sorry if I forgot to mention someone)

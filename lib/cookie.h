@@ -50,6 +50,7 @@ struct Cookie {
 
   bool secure;       /* whether the 'secure' keyword was used */
   bool livecookie;   /* updated from a server, not a stored file */
+  bool httponly;     /* true if the httponly directive is present */
 };
 
 struct CookieInfo {

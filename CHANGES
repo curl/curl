@@ -7,6 +7,14 @@
                                   Changelog
 
 Daniel S (31 Jan 2008)
+- Niklas Angebrand made the cookie support in libcurl properly deal with the
+  "HttpOnly" feature introduced by Microsoft and apparently also supported by
+  Firefox: http://msdn2.microsoft.com/en-us/library/ms533046.aspx . HttpOnly
+  is now supported when received from servers in HTTP headers, when written to
+  cookie jars and when read from existing cookie jars.
+
+  I modified test case 31 and 46 to also do some basic HttpOnly testing.
+
 - Dmitry Kurochkin moved several struct fields from the connectdata struct to
   the SingleRequest one to make pipelining better. It is a bit tricky to keep
   them in the right place, to keep things related to the actual request or to

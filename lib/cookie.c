@@ -367,8 +367,12 @@ Curl_cookie_add(struct SessionHandle *data,
       else {
         if(sscanf(ptr, "%" MAX_COOKIE_LINE_TXT "[^;\r\n]",
                   what)) {
-          if(strequal("secure", what))
+          if(strequal("secure", what)) {
             co->secure = TRUE;
+          }
+          else if (strequal("httponly", what)) {
+            co->httponly = TRUE;
+          }
           /* else,
              unsupported keyword without assign! */
 
@@ -432,6 +436,19 @@ Curl_cookie_add(struct SessionHandle *data,
     char *firstptr;
     char *tok_buf;
     int fields;
+
+    /* IE introduced HTTP-only cookies to prevent XSS attacks. Cookies 
+       marked with httpOnly after the domain name are not accessible  
+       from javascripts, but since curl does not operate at javascript  
+       level, we include them anyway. In Firefox's cookie files, these 
+       lines are preceeded with #HttpOnly_ and then everything is
+       as usual, so we skip 10 characters of the line..
+    */
+    if (strncmp(lineptr, "#HttpOnly_", 10) == 0) {
+      lineptr += 10;
+      co->httponly = TRUE;
+    }
+
 
     if(lineptr[0]=='#') {
       /* don't even try the comments */
@@ -918,6 +935,7 @@ void Curl_cookie_cleanup(struct CookieInfo *c)
 static char *get_netscape_format(const struct Cookie *co)
 {
   return aprintf(
+    "%s"     /* httponly preamble */
     "%s%s\t" /* domain */
     "%s\t"   /* tailmatch */
     "%s\t"   /* path */
@@ -925,6 +943,7 @@ static char *get_netscape_format(const struct Cookie *co)
     "%" FORMAT_OFF_T "\t"   /* expires */
     "%s\t"   /* name */
     "%s",    /* value */
+    co->httponly?"#HttpOnly_":"",
     /* Make sure all domains are prefixed with a dot if they allow
        tailmatching. This is Mozilla-style. */
     (co->tailmatch && co->domain && co->domain[0] != '.')? ".":"",
