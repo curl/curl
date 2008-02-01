@@ -22,9 +22,9 @@ do
      esac
 
      if test ! -d "$pathcomp"; then
-        echo "mkdir $pathcomp" 1>&2
+        echo "mkdir -m0755 $pathcomp" 1>&2
 
-        mkdir "$pathcomp" || lasterr=$?
+        mkdir -m0755 "$pathcomp" || lasterr=$?
 
         if test ! -d "$pathcomp"; then
   	  errstatus=$lasterr
