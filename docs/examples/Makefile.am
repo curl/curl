@@ -33,5 +33,5 @@ noinst_PROGRAMS = 10-at-a-time anyauthput cookie_interface \
 COMPLICATED_EXAMPLES = \
  curlgtk.c curlx.c htmltitle.cc cacertinmem.c ftpuploadresume.c \
  ghiper.c hiperfifo.c htmltidy.c multithread.c \
- opensslthreadlock.c sampleconv.c synctime.c
+ opensslthreadlock.c sampleconv.c synctime.c threaded-ssl.c
 
