@@ -387,9 +387,6 @@ CURLcode Curl_close(struct SessionHandle *data)
   /* only for debugging, scan through all connections and see if there's a
      pipe reference still identifying this handle */
 
-  if(data->state.is_in_pipeline)
-    fprintf(stderr, "CLOSED when in pipeline!\n");
-
   if(data->state.connc && data->state.connc->type == CONNCACHE_MULTI) {
     struct conncache *c = data->state.connc;
     long i;
@@ -2477,9 +2474,9 @@ ConnectionExists(struct SessionHandle *data,
     }
 
     if(match) {
-      if(!check->is_in_pipeline) {
-        /* The check for a dead socket makes sense only in the
-           non-pipelining case */
+      if(pipeLen == 0) {
+        /* The check for a dead socket makes sense only if there
+           are no handles in pipeline */
         bool dead = SocketIsDead(check->sock[FIRSTSOCKET]);
         if(dead) {
           check->data = data;
@@ -2494,10 +2491,6 @@ ConnectionExists(struct SessionHandle *data,
 
       check->inuse = TRUE; /* mark this as being in use so that no other
                               handle in a multi stack may nick it */
-      if(canPipeline) {
-        /* Mark the connection as being in a pipeline */
-        check->is_in_pipeline = TRUE;
-      }
 
       *usethis = check;
       return TRUE; /* yes, we found one to use! */
@@ -2560,8 +2553,6 @@ static void
 ConnectionDone(struct connectdata *conn)
 {
   conn->inuse = FALSE;
-  if(!conn->send_pipe && !conn->recv_pipe && !conn->pend_pipe)
-    conn->is_in_pipeline = FALSE;
 }
 
 /*
@@ -4338,8 +4329,10 @@ CURLcode Curl_connect(struct SessionHandle *data,
 
   if(CURLE_OK == code) {
     /* no error */
-    if((*in_connect)->is_in_pipeline)
-      data->state.is_in_pipeline = TRUE;
+    if((*in_connect)->send_pipe->size +
+       (*in_connect)->recv_pipe->size != 0)
+      /* pipelining */
+      *protocol_done = TRUE;
     else {
       if(dns || !*asyncp)
         /* If an address is available it means that we already have the name

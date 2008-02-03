@@ -950,7 +950,6 @@ struct connectdata {
                               handle */
   bool writechannel_inuse; /* whether the write channel is in use by an easy
                               handle */
-  bool is_in_pipeline;     /* TRUE if this connection is in a pipeline */
   bool server_supports_pipelining; /* TRUE if server supports pipelining,
                                       set after first response */
 
@@ -1134,8 +1133,6 @@ struct UrlState {
   curl_off_t current_speed;  /* the ProgressShow() funcion sets this,
                                 bytes / second */
   bool this_is_a_follow; /* this is a followed Location: request */
-
-  bool is_in_pipeline; /* Indicates whether this handle is part of a pipeline */
 
   char *first_host; /* if set, this should be the host name that we will
                        sent authorization to, no else. Used to make Location:

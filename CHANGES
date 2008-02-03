@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel S (3 Feb 2008)
+- Dmitry Kurochkin cleaned up the pipelining code and removed the need for and
+  use of the "is_in_pipeline" struct field.
+
+- I wrote up and added the threaded-ssl.c example source code that shows how
+  to do multi-threaded downloads of HTTPS files with a libcurl that is built
+  with OpenSSL. It uses pthreads for the threading.
+
 Daniel S (31 Jan 2008)
 - Niklas Angebrand made the cookie support in libcurl properly deal with the
   "HttpOnly" feature introduced by Microsoft and apparently also supported by
