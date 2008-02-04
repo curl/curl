@@ -328,9 +328,14 @@ ifeq ($(POSIXFL),1)
 	@echo $(DL)flag_on 4194304$(DL) >> $@
 endif
 	@echo $(DL)pseudopreemption$(DL) >> $@
+ifeq ($(findstring posixpre,$(PRELUDE)),posixpre)
+	@echo $(DL)start POSIX_Start$(DL) >> $@
+	@echo $(DL)exit POSIX_Stop$(DL) >> $@
+else
 	@echo $(DL)start _LibCPrelude$(DL) >> $@
 	@echo $(DL)exit _LibCPostlude$(DL) >> $@
 	@echo $(DL)check _LibCCheckUnload$(DL) >> $@
+endif
 	@echo $(DL)import @$(SDK_LIBC)/imports/libc.imp$(DL) >> $@
 	@echo $(DL)import @$(SDK_LIBC)/imports/netware.imp$(DL) >> $@
 ifndef DISABLE_LDAP
