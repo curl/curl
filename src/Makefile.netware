@@ -41,7 +41,10 @@ MTSAFE	= YES
 STACK	= 64000
 SCREEN	= $(TARGET) commandline utility
 # Comment the line below if you dont want to load protected automatically.
-#LDRING	= 3
+# LDRING = 3
+
+# Uncomment the next line to enable linking with POSIX semantics.
+# POSIXFL = 1
 
 # Edit the var below to point to your lib architecture.
 ifndef LIBARCH
@@ -99,7 +102,11 @@ CFLAGS	+= -gccinc -inline off -opt nointrinsics -proc 586
 CFLAGS	+= -relax_pointers
 #CFLAGS	+= -w on
 ifeq ($(LIBARCH),LIBC)
+ifeq ($(POSIXFL),1)
+	PRELUDE = $(SDK_LIBC)/imports/posixpre.o
+else
 	PRELUDE = $(SDK_LIBC)/imports/libcpre.o
+endif
 	CFLAGS += -align 4
 else
 	# PRELUDE = $(SDK_CLIB)/imports/clibpre.o
@@ -115,7 +122,11 @@ LIBEXT	= a
 CFLAGS	+= -fno-builtin -fpcc-struct-return -fno-strict-aliasing
 CFLAGS	+= -Wall # -pedantic
 ifeq ($(LIBARCH),LIBC)
+ifeq ($(POSIXFL),1)
+	PRELUDE = $(SDK_LIBC)/imports/posixpre.gcc.o
+else
 	PRELUDE = $(SDK_LIBC)/imports/libcpre.gcc.o
+endif
 else
 	# PRELUDE = $(SDK_CLIB)/imports/clibpre.gcc.o
 	# to avoid the __init_* / __deinit_* whoes dont use prelude from NDK
@@ -300,6 +311,9 @@ ifndef DISABLE_LDAP
 endif
 	@echo $(DL)module clib$(DL) >> $@
 else
+ifeq ($(POSIXFL),1)
+	@echo $(DL)flag_on 4194304$(DL) >> $@
+endif
 	@echo $(DL)flag_on 64$(DL) >> $@
 	@echo $(DL)pseudopreemption$(DL) >> $@
 	@echo $(DL)start _LibCPrelude$(DL) >> $@
