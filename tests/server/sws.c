@@ -529,30 +529,37 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
   int fail= FALSE;
   char *reqbuf = req->reqbuf;
 
-  char pipereq[REQBUFSIZ];
-  int pipereq_length;
+  char *pipereq;
+  int pipereq_length = 0;
+
   if(req->pipelining) {
+    pipereq = reqbuf + req->checkindex;
     pipereq_length = req->offset - req->checkindex;
-    memcpy(pipereq, reqbuf + req->checkindex, pipereq_length);
   }
-  else
-    pipereq_length = 0;
 
   /*** Init the httpreqest structure properly for the upcoming request ***/
-  memset(req, 0, sizeof(struct httprequest));
 
-  /* here's what should not be 0 from the start */
-  req->testno = DOCNUMBER_NOTHING; /* safe default */
-  req->open = TRUE; /* connection should remain open and wait for more
-                       commands */
+  req->checkindex = 0;
+  req->offset = 0;
+  req->testno = DOCNUMBER_NOTHING;
+  req->partno = 0;
+  req->open = TRUE;
+  req->auth_req = FALSE;
+  req->auth = FALSE;
+  req->cl = 0;
+  req->digest = FALSE;
+  req->ntlm = FALSE;
   req->pipe = 0;
+  req->rcmd = RCMD_NORMALREQ;
+  req->prot_version = 0;
+  req->pipelining = FALSE;
 
   /*** end of httprequest init ***/
 
   while (req->offset < REQBUFSIZ) {
     ssize_t got;
     if(pipereq_length) {
-      memcpy(reqbuf, pipereq, pipereq_length);
+      memmove(reqbuf, pipereq, pipereq_length); 
       got = pipereq_length;
       pipereq_length = 0;
     }
@@ -1001,17 +1008,13 @@ int main(int argc, char *argv[])
     }
 #endif
 
-  /* full initialization for new request after connection */
-  memset(&req, 0, sizeof(req));
-  req.testno = DOCNUMBER_NOTHING;
-  req.open = TRUE;
-  req.auth_req = FALSE;
-  req.auth = FALSE;
-  req.digest = FALSE;
-  req.ntlm = FALSE;
-  req.pipelining = FALSE;
+    /* initialization of httprequest struct is done in get_request(), but due
+       to pipelining treatment the pipelining struct field must be initialized
+       previously to FALSE every time a new connection arrives. */
 
-  do {
+    req.pipelining = FALSE;
+
+    do {
       if(get_request(msgsock, &req))
         /* non-zero means error, break out of loop */
         break;
