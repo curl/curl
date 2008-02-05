@@ -132,6 +132,7 @@ const char *serverlogfile = DEFAULT_LOGFILE;
 #define MAXDOCNAMELEN_TXT "139999"
 
 #define REQUEST_KEYWORD_SIZE 256
+#define REQUEST_KEYWORD_SIZE_TXT "255"
 
 #define CMD_AUTH_REQUIRED "auth_required"
 
@@ -210,7 +211,8 @@ int ProcessRequest(struct httprequest *req)
   /* try to figure out the request characteristics as soon as possible, but
      only once! */
   if((req->testno == DOCNUMBER_NOTHING) &&
-     sscanf(line, "%" REQBUFSIZ_TXT"s %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
+     sscanf(line,
+            "%" REQUEST_KEYWORD_SIZE_TXT"s %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
             request,
             doc,
             &prot_major,
@@ -528,6 +530,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
 {
   int fail = 0;
   char *reqbuf = req->reqbuf;
+  ssize_t got = 0;
 
   char *pipereq;
   int pipereq_length = 0;
@@ -556,15 +559,14 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
 
   /*** end of httprequest init ***/
 
-  while (req->offset < REQBUFSIZ) {
-    ssize_t got;
+  while (req->offset < REQBUFSIZ-1) {
     if(pipereq_length) {
       memmove(reqbuf, pipereq, pipereq_length); 
       got = pipereq_length;
       pipereq_length = 0;
     }
     else
-      got = sread(sock, reqbuf + req->offset, REQBUFSIZ - req->offset);
+      got = sread(sock, reqbuf + req->offset, REQBUFSIZ-1 - req->offset);
     if (got <= 0) {
       if (got < 0) {
         logmsg("recv() returned error: %d", SOCKERRNO);
@@ -592,11 +594,17 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
     }
   }
 
-  if (req->offset >= REQBUFSIZ) {
-    logmsg("Request buffer overflow, closing connection");
+  if((req->offset == REQBUFSIZ-1) && (got > 0)) {
+    logmsg("Request would overflow buffer, closing connection");
+    /* dump request received so far to external file anyway */
     reqbuf[REQBUFSIZ-1] = '\0';
     fail = 1;
-    /* dump the request to an external file anyway */
+  }
+  else if(req->offset > REQBUFSIZ-1) {
+    logmsg("Request buffer overflow, closing connection");
+    /* dump request received so far to external file anyway */
+    reqbuf[REQBUFSIZ-1] = '\0';
+    fail = 1;
   }
   else
     reqbuf[req->offset] = '\0';
