@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -83,9 +83,9 @@
 
 long prevtestno=-1; /* previous test number we served */
 long prevpartno=-1; /* previous part number we served */
-bool prevbounce;    /* instructs the server to increase the part number for
-                       a test in case the identical testno+partno request
-                       shows up again */
+bool prevbounce=FALSE; /* instructs the server to increase the part number for
+                          a test in case the identical testno+partno request
+                          shows up again */
 
 #define RCMD_NORMALREQ 0 /* default request, use the tests file normally */
 #define RCMD_IDLE      1 /* told to sit idle */
@@ -97,7 +97,7 @@ struct httprequest {
   int offset;     /* size of the incoming request */
   long testno;     /* test number found in the request */
   long partno;     /* part number found in the request */
-  int open;       /* keep connection open info, as found in the request */
+  bool open;      /* keep connection open info, as found in the request */
   bool auth_req;  /* authentication required, don't wait for body unless
                      there's an Authorization header */
   bool auth;      /* Authorization header present in the incoming request */
@@ -196,7 +196,7 @@ static void sigpipe_handler(int sig)
 int ProcessRequest(struct httprequest *req)
 {
   char *line=&req->reqbuf[req->checkindex];
-  char chunked=FALSE;
+  bool chunked = FALSE;
   static char request[REQUEST_KEYWORD_SIZE];
   static char doc[MAXDOCNAMELEN];
   char logbuf[256];
@@ -526,7 +526,7 @@ void storerequest(char *reqbuf, ssize_t totalsize)
 /* return 0 on success, non-zero on failure */
 static int get_request(curl_socket_t sock, struct httprequest *req)
 {
-  int fail= FALSE;
+  int fail = 0;
   char *reqbuf = req->reqbuf;
 
   char *pipereq;
@@ -571,7 +571,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
         return DOCNUMBER_INTERNAL;
       }
       logmsg("Connection closed by client");
-      reqbuf[req->offset]=0;
+      reqbuf[req->offset] = '\0';
 
       /* dump the request receivied so far to the external file */
       storerequest(reqbuf, req->offset);
@@ -581,8 +581,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
     logmsg("Read %d bytes", got);
 
     req->offset += got;
-
-    reqbuf[req->offset] = 0;
+    reqbuf[req->offset] = '\0';
 
     if(ProcessRequest(req)) {
       if(req->pipe--) {
@@ -595,17 +594,17 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
 
   if (req->offset >= REQBUFSIZ) {
     logmsg("Request buffer overflow, closing connection");
-    reqbuf[REQBUFSIZ-1]=0;
-    fail = TRUE;
+    reqbuf[REQBUFSIZ-1] = '\0';
+    fail = 1;
     /* dump the request to an external file anyway */
   }
   else
-    reqbuf[req->offset]=0;
+    reqbuf[req->offset] = '\0';
 
   /* dump the request to an external file */
   storerequest(reqbuf, req->pipelining ? req->checkindex : req->offset);
 
-  return fail; /* success */
+  return fail; /* return 0 on success */
 }
 
 /* returns -1 on failure */
@@ -619,7 +618,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   char *cmd=NULL;
   size_t cmdsize=0;
   FILE *dump;
-  int persistant = TRUE;
+  bool persistant = TRUE;
   size_t responsesize;
   int error;
 
@@ -814,7 +813,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   return 0;
 }
 
-char use_ipv6=FALSE;
+bool use_ipv6=FALSE;
 
 int main(int argc, char *argv[])
 {
@@ -1025,6 +1024,11 @@ int main(int argc, char *argv[])
            (req.partno == prevpartno)) {
           req.partno++;
           logmsg("BOUNCE part number to %ld", req.partno);
+        }
+        else {
+          prevbounce = FALSE;
+          prevtestno = -1;
+          prevpartno = -1;
         }
       }
 
