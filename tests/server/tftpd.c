@@ -505,19 +505,24 @@ int main(int argc, char **argv)
   if(rc < 0) {
     perror("binding stream socket");
     logmsg("Error binding socket");
+    sclose(sock);
     return 1;
   }
 
   pidfile = fopen(pidname, "w");
   if(pidfile) {
-    fprintf(pidfile, "%d\n", (int)getpid());
+    long pid = (long)getpid();
+    fprintf(pidfile, "%ld\n", pid);
     fclose(pidfile);
+    logmsg("Wrote pid %ld to %s", pid, pidname);
   }
   else {
     error = ERRNO;
     logmsg("fopen() failed with error: %d %s", error, strerror(error));
     logmsg("Error opening file: %s", pidname);
     logmsg("Couldn't write pid file");
+    sclose(sock);
+    return 1;
   }
 
   logmsg("Running IPv%d version on port UDP/%d",
@@ -662,7 +667,7 @@ static int validate_access(struct testcase *test,
 
   if(!strncmp("verifiedserver", filename, 15)) {
     char weare[128];
-    size_t count = sprintf(weare, "WE ROOLZ: %d\r\n", (int)getpid());
+    size_t count = sprintf(weare, "WE ROOLZ: %ld\r\n", (long)getpid());
 
     logmsg("Are-we-friendly question received");
     test->buffer = strdup(weare);

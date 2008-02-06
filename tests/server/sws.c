@@ -670,7 +670,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     case DOCNUMBER_WERULEZ:
       /* we got a "friends?" question, reply back that we sure are */
       logmsg("Identifying ourselves as friends");
-      sprintf(msgbuf, "WE ROOLZ: %d\r\n", (int)getpid());
+      sprintf(msgbuf, "WE ROOLZ: %ld\r\n", (long)getpid());
       msglen = strlen(msgbuf);
       sprintf(weare, "HTTP/1.1 200 OK\r\nContent-Length: %d\r\n\r\n%s",
               msglen, msgbuf);
@@ -948,8 +948,10 @@ int main(int argc, char *argv[])
 
   pidfile = fopen(pidname, "w");
   if(pidfile) {
-    fprintf(pidfile, "%d\n", (int)getpid());
+    long pid = (long)getpid();
+    fprintf(pidfile, "%ld\n", pid);
     fclose(pidfile);
+    logmsg("Wrote pid %ld to %s", pid, pidname);
   }
   else {
     error = ERRNO;

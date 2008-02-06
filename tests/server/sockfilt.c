@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -671,10 +671,10 @@ int main(int argc, char *argv[])
 
   pidfile = fopen(pidname, "w");
   if(pidfile) {
-    int pid = (int)getpid();
-    fprintf(pidfile, "%d\n", pid);
+    long pid = (long)getpid();
+    fprintf(pidfile, "%ld\n", pid);
     fclose(pidfile);
-    logmsg("Wrote pid %d to %s", pid, pidname);
+    logmsg("Wrote pid %ld to %s", pid, pidname);
   }
   else {
     error = ERRNO;
