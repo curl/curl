@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Yang Tse (6 Feb 2008)
+- Fix an issue in strdup replacement function when dealing with absolutely
+  huge strings. Only systems without a standard strdup would be affected.
+
 Daniel S (3 Feb 2008)
 - Dmitry Kurochkin cleaned up the pipelining code and removed the need for and
   use of the "is_in_pipeline" struct field.

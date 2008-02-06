@@ -15,6 +15,7 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o improved pipelining
+ o improved strdup replacement
 
 This release includes the following known bugs:
 
