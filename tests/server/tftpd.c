@@ -665,7 +665,7 @@ static int validate_access(struct testcase *test,
 
   logmsg("trying to get file: %s mode %x", filename, mode);
 
-  if(!strncmp("verifiedserver", filename, 15)) {
+  if(!strncmp("verifiedserver", filename, 14)) {
     char weare[128];
     size_t count = sprintf(weare, "WE ROOLZ: %ld\r\n", (long)getpid());
 
