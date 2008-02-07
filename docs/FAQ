@@ -1,4 +1,4 @@
-Updated: Dec 10, 2007 (http://curl.haxx.se/docs/faq.html)
+Updated: Feb 7, 2008 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -18,6 +18,7 @@ FAQ
   1.8 I have a problem who do I mail?
   1.9 Where do I buy commercial support for curl?
   1.10 How many are using curl?
+  1.11 Why don't you update ca-bundle.crt
 
  2. Install Related Problems
   2.1 configure doesn't find OpenSSL even when it is installed
@@ -296,7 +297,7 @@ FAQ
   as used by numerous applications that include libcurl binaries in their
   distribution packages (like Adobe Acrobat Reader and Google Earth).
 
-  More than 70 known named companies use curl in commercial environments and
+  More than 80 known named companies use curl in commercial environments and
   products. More than 100 known named open source projects depend on
   (lib)curl.
 
@@ -316,6 +317,34 @@ FAQ
   http://curl.haxx.se/libcurl/using/apps.html
   http://counter.li.org/estimates.php
   http://news.netcraft.com/archives/2005/03/14/fedora_makes_rapid_progress.html
+
+  1.11 Why don't you update ca-bundle.crt
+
+  The ca-bundle.crt file is to be treated as an example file these days, as it
+  is very outdated (it being last modified year 2000 should tell) and should
+  be replaced with a much more modern and up-to-date version by anyone who
+  wants to verify peers.
+
+  In the cURL project we've decided not to attempt to keep this file updated
+  since deciding what to add to a ca cert bundle is an undertaking we've not
+  been ready to accept.
+
+  Today, with many services performed over HTTPS, every operating system
+  should come with a default ca cert bundle that can be deemed somewhat
+  trustworthy and that collection (if reasonably updated) should be deemed to
+  be a lot better than this old file.
+
+  If you want the most recent collection of ca certs that Mozilla Firefox uses
+  (which should be seen as the effictive successor of Netscape 4.72 from where
+  this particular bundle originates from), we recommend that you extract the
+  collection yourself from Mozilla Firefox, or by using our service setup for
+  this purpose: http://curl.haxx.se/docs/caextract.html
+
+  Due to the licensing of that particular file, we've decided to not simply
+  include that in the curl package/tree. It is of course arguable whether the
+  cacerts themselves actually are licensed under the Firefox's licenses but
+  until proven otherwise we will assume so and thus we avoid putting them in
+  any curl release/tarball.
 
 
 2. Install Related Problems

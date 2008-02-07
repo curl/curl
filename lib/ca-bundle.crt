@@ -1,18 +1,40 @@
 ##
 ## $Id$
 ##
-##  ca-bundle.crt -- Bundle of CA Root Certificates
-##  Last Modified: Thu Mar  2 09:32:46 CET 2000
+## Last Modified: Thu Mar  2 09:32:46 CET 2000
+## (although we removed a cert from it in March 2003)
 ##
-##  This is a bundle of X.509 certificates of public
-##  Certificate Authorities (CA). These were automatically
-##  extracted from Netscape Communicator 4.72's certificate database
-##  (the file `cert7.db'). It contains the certificates in both
-##  plain text and PEM format and therefore can be directly used
-##  with an Apache+mod_ssl webserver for SSL client authentication.
-##  Just configure this file as the SSLCACertificateFile.
+## This is a bundle of X.509 certificates of public Certificate Authorities
+## (CA). These were automatically extracted from Netscape Communicator 4.72's
+## certificate database (the file `cert7.db').
 ##
-##  (SKIPME)
+## This file is to be treated as an example file these days, as it is very
+## outdated (it being last modified year 2000 should tell) and should be
+## replaced with a much more modern and up-to-date version.
+##
+## In the cURL project we've decided not to attempt to keep this file updated
+## since deciding what to add to a ca cert bundle is an undertaking we've not
+## been ready to accept.
+##
+## Today, with many services performed over HTTPS, every operating system
+## should come with a default ca cert bundle that can be deemed somewhat
+## trustworthy and that collection (if reasonably updated) should be deemed to
+## be a lot better than this old file.
+##
+## If you want the most recent collection of ca certs that Mozilla Firefox
+## uses (which should be seen as the effictive successor of Netscape 4.72 from
+## where this particular bundle originates from), we recommend that you
+## extract the collection yourself from Mozilla Firefox, or by using our
+## service setup for this purpose: http://curl.haxx.se/docs/caextract.html
+##
+## Due to the licensing of that particular file, we've decided to not simply
+## include that in the curl package/tree. It is of course arguable whether the
+## cacerts themselves actually are licensed under the Firefox's licenses but
+## until proven otherwise we will assume so and thus we avoid putting them in
+## any curl release/tarball.
+##
+## For more details on CA certs, how to use them with curl and a little about
+## what they're good for, see http://curl.haxx.se/docs/sslcerts.html
 ##
 
 ABAecom (sub., Am. Bankers Assn.) Root CA
