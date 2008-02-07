@@ -102,6 +102,66 @@ singleipconnect(struct connectdata *conn,
                 bool *connected);
 
 /*
+ * Curl_timeleft() returns the amount of milliseconds left allowed for the
+ * transfer/connection. If the value is negative, the timeout time has already
+ * elapsed.
+ *
+ * If 'nowp' is non-NULL, it points to the current time.
+ * 'duringconnect' is FALSE if not during a connect, as then of course the
+ * connect timeout is not taken into account!
+ */
+long Curl_timeleft(struct connectdata *conn,
+                   struct timeval *nowp,
+                   bool duringconnect)
+{
+  struct SessionHandle *data = conn->data;
+  int timeout_set = 0;
+  long timeout_ms = duringconnect?DEFAULT_CONNECT_TIMEOUT:0;
+  struct timeval now;
+
+  /* if a timeout is set, use the most restrictive one */
+
+  if(data->set.timeout > 0)
+    timeout_set |= 1;
+  if(duringconnect && (data->set.connecttimeout > 0))
+    timeout_set |= 2;
+
+  switch (timeout_set) {
+  case 1:
+    timeout_ms = data->set.timeout;
+    break;
+  case 2:
+    timeout_ms = data->set.connecttimeout;
+    break;
+  case 3:
+    if(data->set.timeout < data->set.connecttimeout)
+      timeout_ms = data->set.timeout;
+    else
+      timeout_ms = data->set.connecttimeout;
+    break;
+  default:
+    /* use the default */
+    if(!duringconnect)
+      /* if we're not during connect, there's no default timeout so if we're
+         at zero we better just return zero and not make it a negative number
+         by the math below */
+      return 0;
+    break;
+  }
+
+  if(!nowp) {
+    now = Curl_tvnow();
+    nowp = &now;
+  }
+
+  /* substract elapsed time */
+  timeout_ms -= Curl_tvdiff(*nowp, data->progress.t_startsingle);
+
+  return timeout_ms;
+}
+
+
+/*
  * Curl_nonblock() set the given socket to either blocking or non-blocking
  * mode based on the 'nonblock' boolean argument. This function is highly
  * portable.
@@ -533,40 +593,31 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   CURLcode code = CURLE_OK;
   curl_socket_t sockfd = conn->sock[sockindex];
   long allow = DEFAULT_CONNECT_TIMEOUT;
-  long allow_total = 0;
-  long has_passed;
 
   DEBUGASSERT(sockindex >= FIRSTSOCKET && sockindex <= SECONDARYSOCKET);
 
   *connected = FALSE; /* a very negative world view is best */
 
-  /* Evaluate in milliseconds how much time that has passed */
-  has_passed = Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle);
-
-  /* subtract the most strict timeout of the ones */
-  if(data->set.timeout && data->set.connecttimeout) {
-    if(data->set.timeout < data->set.connecttimeout)
-      allow_total = allow = data->set.timeout;
-    else
-      allow = data->set.connecttimeout;
-  }
-  else if(data->set.timeout) {
-    allow_total = allow = data->set.timeout;
-  }
-  else if(data->set.connecttimeout) {
-    allow = data->set.connecttimeout;
-  }
-
-  if(has_passed > allow ) {
-    /* time-out, bail out, go home */
-    failf(data, "Connection time-out after %ld ms", has_passed);
-    return CURLE_OPERATION_TIMEDOUT;
-  }
   if(conn->bits.tcpconnect) {
     /* we are connected already! */
+    long allow_total = 0;
+
+    /* subtract the most strict timeout of the ones */
+    if(data->set.timeout)
+      allow_total = data->set.timeout;
+
     Curl_expire(data, allow_total);
     *connected = TRUE;
     return CURLE_OK;
+  }
+
+  /* figure out how long time we have left to connect */
+  allow = Curl_timeleft(conn, NULL, TRUE);
+
+  if(allow < 0) {
+    /* time-out, bail out, go home */
+    failf(data, "Connection time-out");
+    return CURLE_OPERATION_TIMEDOUT;
   }
 
   Curl_expire(data, allow);
@@ -821,7 +872,6 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   int num_addr;
   Curl_addrinfo *ai;
   Curl_addrinfo *curr_addr;
-  int timeout_set = 0;
 
   struct timeval after;
   struct timeval before = Curl_tvnow();
@@ -834,39 +884,13 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 
   *connected = FALSE; /* default to not connected */
 
-  /* if a timeout is set, use the most restrictive one */
+  /* get the timeout left */
+  timeout_ms = Curl_timeleft(conn, &before, TRUE);
 
-  if(data->set.timeout > 0)
-    timeout_set += 1;
-  if(data->set.connecttimeout > 0)
-    timeout_set += 2;
-
-  switch (timeout_set) {
-  case 1:
-    timeout_ms = data->set.timeout;
-    break;
-  case 2:
-    timeout_ms = data->set.connecttimeout;
-    break;
-  case 3:
-    if(data->set.timeout < data->set.connecttimeout)
-      timeout_ms = data->set.timeout;
-    else
-      timeout_ms = data->set.connecttimeout;
-    break;
-  default:
-    timeout_ms = DEFAULT_CONNECT_TIMEOUT;
-    break;
-  }
-
-  if(timeout_set > 0) {
-    /* if a timeout was already set, substract elapsed time */
-    timeout_ms -= Curl_tvdiff(before, data->progress.t_startsingle);
-    if(timeout_ms < 0) {
-      /* a precaution, no need to continue if time already is up */
-      failf(data, "Connection time-out");
-      return CURLE_OPERATION_TIMEDOUT;
-    }
+  if(timeout_ms < 0) {
+    /* a precaution, no need to continue if time already is up */
+    failf(data, "Connection time-out");
+    return CURLE_OPERATION_TIMEDOUT;
   }
   Curl_expire(data, timeout_ms);
 

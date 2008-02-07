@@ -300,43 +300,14 @@ static bool isBadFtpString(const char *string)
  */
 static CURLcode AllowServerConnect(struct connectdata *conn)
 {
-  long timeout_ms;
   struct SessionHandle *data = conn->data;
   curl_socket_t sock = conn->sock[SECONDARYSOCKET];
-  int timeout_set = 0;
+  long timeout_ms = Curl_timeleft(conn, NULL, TRUE);
 
-  /* if a timeout is set, use the most restrictive one */
-
-  if(data->set.timeout > 0)
-    timeout_set += 1;
-  if(data->set.connecttimeout > 0)
-    timeout_set += 2;
-
-  switch (timeout_set) {
-  case 1:
-    timeout_ms = data->set.timeout;
-    break;
-  case 2:
-    timeout_ms = data->set.connecttimeout;
-    break;
-  case 3:
-    if(data->set.timeout < data->set.connecttimeout)
-      timeout_ms = data->set.timeout;
-    else
-      timeout_ms = data->set.connecttimeout;
-    break;
-  default:
-    timeout_ms = 60000; /* 60 seconds default timeout */
-    break;
-  }
-
-  if(timeout_set > 0) {
-    /* if a timeout was already set, substract elapsed time */
-    timeout_ms -= Curl_tvdiff(Curl_tvnow(), conn->now);
-    if(timeout_ms < 0) {
-      failf(data, "Timed out before server could connect to us");
-      return CURLE_OPERATION_TIMEDOUT;
-    }
+  if(timeout_ms < 0) {
+    /* if a timeout was already reached, bail out */
+    failf(data, "Timed out before server could connect to us");
+    return CURLE_OPERATION_TIMEDOUT;
   }
 
   switch (Curl_socket_ready(sock, CURL_SOCKET_BAD, (int)timeout_ms)) {

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -154,23 +154,7 @@ static CURLcode handshake(struct connectdata *conn,
     rc = gnutls_handshake(session);
 
     if((rc == GNUTLS_E_AGAIN) || (rc == GNUTLS_E_INTERRUPTED)) {
-      long timeout_ms = DEFAULT_CONNECT_TIMEOUT;
-      long has_passed;
-
-      if(duringconnect && data->set.connecttimeout)
-        timeout_ms = data->set.connecttimeout;
-
-      if(data->set.timeout) {
-        /* get the strictest timeout of the ones converted to milliseconds */
-        if(data->set.timeout < timeout_ms)
-          timeout_ms = data->set.timeout;
-      }
-
-      /* Evaluate in milliseconds how much time that has passed */
-      has_passed = Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle);
-
-      /* subtract the passed time */
-      timeout_ms -= has_passed;
+      long timeout_ms = Curl_connecttimeleft(conn, NULL, duringconnect);
 
       if(timeout_ms < 0) {
         /* a precaution, no need to continue if time already is up */

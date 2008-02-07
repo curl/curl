@@ -114,7 +114,7 @@ typedef enum {
   TFTP_ERR_ILLEGAL,
   TFTP_ERR_UNKNOWNID,
   TFTP_ERR_EXISTS,
-  TFTP_ERR_NOSUCHUSER,	/* This will never be triggered by this code */
+  TFTP_ERR_NOSUCHUSER,  /* This will never be triggered by this code */
 
   /* The remaining error codes are internal to curl */
   TFTP_ERR_NONE = -100,
@@ -194,12 +194,14 @@ static void tftp_set_timeouts(tftp_state_data_t *state)
 
   struct SessionHandle *data = state->conn->data;
   time_t maxtime, timeout;
+  long timeout_ms;
 
   time(&state->start_time);
+
   if(state->state == TFTP_STATE_START) {
     /* Compute drop-dead time */
-    maxtime = (time_t)(data->set.connecttimeout/1000L?
-                       data->set.connecttimeout/1000L:30);
+    timeout_ms = Curl_timeleft(state->conn, NULL, TRUE);
+    maxtime = (time_t)(timeout_ms + 500) / 1000;
     state->max_time = state->start_time+maxtime;
 
     /* Set per-block timeout to total */
@@ -219,10 +221,13 @@ static void tftp_set_timeouts(tftp_state_data_t *state)
 
   }
   else {
-
     /* Compute drop-dead time */
-    maxtime = (time_t)(data->set.timeout/1000L?
-                       data->set.timeout/1000L:3600);
+    timeout_ms = Curl_timeleft(state->conn, NULL, TRUE);
+    if(timeout_ms > 0)
+      maxtime = (time_t)(timeout_ms + 500) / 1000;
+    else
+      maxtime = 3600;
+
     state->max_time = state->start_time+maxtime;
 
     /* Set per-block timeout to 10% of total */

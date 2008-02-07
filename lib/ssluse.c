@@ -1448,40 +1448,17 @@ ossl_connect_step2(struct connectdata *conn,
 {
   struct SessionHandle *data = conn->data;
   int err;
-  long has_passed;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
   DEBUGASSERT(ssl_connect_2 == connssl->connecting_state
              || ssl_connect_2_reading == connssl->connecting_state
              || ssl_connect_2_writing == connssl->connecting_state);
 
-  /* Find out if any timeout is set. If not, use 300 seconds.
-     Otherwise, figure out the most strict timeout of the two possible one
-     and then how much time that has elapsed to know how much time we
-     allow for the connect call */
-  if(data->set.timeout && data->set.connecttimeout) {
-    /* get the most strict timeout of the ones converted to milliseconds */
-    if(data->set.timeout<data->set.connecttimeout)
-      *timeout_ms = data->set.timeout;
-    else
-      *timeout_ms = data->set.connecttimeout;
-  }
-  else if(data->set.timeout)
-    *timeout_ms = data->set.timeout;
-  else if(data->set.connecttimeout)
-    *timeout_ms = data->set.connecttimeout;
-  else
-    /* no particular time-out has been set */
-    *timeout_ms = DEFAULT_CONNECT_TIMEOUT;
-
-  /* Evaluate in milliseconds how much time that has passed */
-  has_passed = Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle);
-
-  /* subtract the passed time */
-  *timeout_ms -= has_passed;
+  /* Find out how much more time we're allowed */
+  *timeout_ms = Curl_timeleft(conn, NULL, TRUE);
 
   if(*timeout_ms < 0) {
-    /* a precaution, no need to continue if time already is up */
+    /* no need to continue if time already is up */
     failf(data, "SSL connection timeout");
     return CURLE_OPERATION_TIMEDOUT;
   }
