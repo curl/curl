@@ -11,6 +11,7 @@ Curl and libcurl 7.18.1
 This release includes the following changes:
  
  o added support for HttpOnly cookies
+ o 'make ca-bundle' downloads and generates an updated ca bundle file
 
 This release includes the following bugfixes:
 

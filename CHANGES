@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel S (8 Feb 2008)
+- Günter Knauf added lib/mk-ca-bundle.pl which gets the Firefox ca bundle and
+  creates a suitable ca-bundle.crt file in PEM format for use with curl. The
+  recommended way to run it is to use 'make ca-bundle' in the build tree root.
+
 Daniel Fandrich (7 Feb 2007)
 - Added tests 1022 and 1023 to validate output of curl-config --version and
   --vernum
