@@ -15,7 +15,7 @@ isn't included in the bundle or if the remote host is an impostor
 impersonating your favorite site, and you want to transfer files from this
 server, do one of the following:
 
- 1. Tell libcurl to *not* verify the peer. With libcurl you disable with with
+ 1. Tell libcurl to *not* verify the peer. With libcurl you disable this with
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);
 
     With the curl command line tool, you disable this with -k/--insecure.
