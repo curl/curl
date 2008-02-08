@@ -44,24 +44,31 @@ use Cwd;
 use sshhelp qw(
     $sshdexe
     $sshexe
+    $sftpsrvexe
     $sftpexe
     $sshkeygenexe
     $sshdconfig
     $sshconfig
+    $sftpconfig
     $knownhosts
     $sshdlog
     $sshlog
+    $sftplog
+    $sftpcmds
     $hstprvkeyf
     $hstpubkeyf
     $cliprvkeyf
     $clipubkeyf
     display_sshdconfig
     display_sshconfig
+    display_sftpconfig
     display_sshdlog
     display_sshlog
+    display_sftplog
     dump_array
     find_sshd
     find_ssh
+    find_sftpsrv
     find_sftp
     find_sshkeygen
     logmsg
@@ -193,12 +200,23 @@ if((($sshdid =~ /OpenSSH/) && ($sshdvernum < 299)) ||
 #***************************************************************************
 # Find out sftp server plugin canonical file name
 #
+my $sftpsrv = find_sftpsrv();
+if(!$sftpsrv) {
+    logmsg "cannot find $sftpsrvexe";
+    exit 1;
+}
+logmsg "sftp server plugin found $sftpsrv" if($verbose);
+
+
+#***************************************************************************
+# Find out sftp client canonical file name
+#
 my $sftp = find_sftp();
 if(!$sftp) {
     logmsg "cannot find $sftpexe";
     exit 1;
 }
-logmsg "sftp server plugin found $sftp" if($verbose);
+logmsg "sftp client found $sftp" if($verbose);
 
 
 #***************************************************************************
@@ -428,7 +446,7 @@ push @cfgarr, 'RhostsRSAAuthentication no';
 push @cfgarr, 'RSAAuthentication no';
 push @cfgarr, 'ServerKeyBits 768';
 push @cfgarr, 'StrictModes no';
-push @cfgarr, "Subsystem sftp $sftp";
+push @cfgarr, "Subsystem sftp $sftpsrv -f AUTH -l $loglevel";
 push @cfgarr, 'SyslogFacility AUTH';
 push @cfgarr, 'UseLogin no';
 push @cfgarr, 'X11Forwarding no';
@@ -861,12 +879,55 @@ if($error) {
     logmsg $error;
     exit 1;
 }
+
+
+#***************************************************************************
+# Initialize client sftp config with options actually supported.
+#
+logmsg 'generating sftp client config file...' if($verbose);
+splice @cfgarr, 1, 1, "# $sshverstr sftp client configuration file for curl testing";
+#
+for(my $i = scalar(@cfgarr) - 1; $i > 0; $i--) {
+    if($cfgarr[$i] =~ /^DynamicForward/) {
+        splice @cfgarr, $i, 1;
+        next;
+    }
+    if($cfgarr[$i] =~ /^ClearAllForwardings/) {
+        splice @cfgarr, $i, 1, "ClearAllForwardings yes";
+        next;
+    }
+}
+
+
+#***************************************************************************
+# Write out resulting sftp client configuration file for curl's tests
+#
+$error = dump_array($sftpconfig, @cfgarr);
+if($error) {
+    logmsg $error;
+    exit 1;
+}
+@cfgarr = ();
+
+
+#***************************************************************************
+# Generate client sftp commands batch file for sftp server verification
+#
+logmsg 'generating sftp client commands file...' if($verbose);
+push @cfgarr, 'pwd';
+push @cfgarr, 'quit';
+$error = dump_array($sftpcmds, @cfgarr);
+if($error) {
+    logmsg $error;
+    exit 1;
+}
 @cfgarr = ();
 
 
 #***************************************************************************
 # Start the ssh server daemon without forking it
 #
+logmsg "SCP/SFTP server listening on port $port" if($verbose);
 my $rc = system "$sshd -e -D -f $sshdconfig > $sshdlog 2>&1";
 if($rc == -1) {
     logmsg "$sshd failed with: $!";
@@ -884,7 +945,7 @@ elsif($verbose && ($rc >> 8)) {
 # Clean up once the server has stopped
 #
 unlink($hstprvkeyf, $hstpubkeyf, $cliprvkeyf, $clipubkeyf, $knownhosts);
-unlink($sshdconfig, $sshconfig);
+unlink($sshdconfig, $sshconfig, $sftpconfig);
 
 
 exit 0;

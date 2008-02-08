@@ -37,13 +37,17 @@ use vars qw(
     @EXPORT_OK
     $sshdexe
     $sshexe
+    $sftpsrvexe
     $sftpexe
     $sshkeygenexe
     $sshdconfig
     $sshconfig
+    $sftpconfig
     $knownhosts
     $sshdlog
     $sshlog
+    $sftplog
+    $sftpcmds
     $hstprvkeyf
     $hstpubkeyf
     $cliprvkeyf
@@ -64,24 +68,31 @@ use vars qw(
 @EXPORT_OK = qw(
     $sshdexe
     $sshexe
+    $sftpsrvexe
     $sftpexe
     $sshkeygenexe
     $sshdconfig
     $sshconfig
+    $sftpconfig
     $knownhosts
     $sshdlog
     $sshlog
+    $sftplog
+    $sftpcmds
     $hstprvkeyf
     $hstpubkeyf
     $cliprvkeyf
     $clipubkeyf
     display_sshdconfig
     display_sshconfig
+    display_sftpconfig
     display_sshdlog
     display_sshlog
+    display_sftplog
     dump_array
     find_sshd
     find_ssh
+    find_sftpsrv
     find_sftp
     find_sshkeygen
     logmsg
@@ -94,12 +105,16 @@ use vars qw(
 #
 $sshdexe      = 'sshd'        .exe_ext(); # base name and ext of ssh daemon
 $sshexe       = 'ssh'         .exe_ext(); # base name and ext of ssh client
-$sftpexe      = 'sftp-server' .exe_ext(); # base name and ext of sftp-server
+$sftpsrvexe   = 'sftp-server' .exe_ext(); # base name and ext of sftp-server
+$sftpexe      = 'sftp'        .exe_ext(); # base name and ext of sftp client
 $sshkeygenexe = 'ssh-keygen'  .exe_ext(); # base name and ext of ssh-keygen
 $sshdconfig   = 'curl_sshd_config';       # ssh daemon config file
 $sshconfig    = 'curl_ssh_config';        # ssh client config file
+$sftpconfig   = 'curl_sftp_config';       # sftp client config file
 $sshdlog      = 'log/sshd.log';           # ssh daemon log file
 $sshlog       = 'log/ssh.log';            # ssh client log file
+$sftplog      = 'log/sftp.log';           # sftp client log file
+$sftpcmds     = 'curl_sftp_cmds';         # sftp client commands batch file
 $knownhosts   = 'curl_client_knownhosts'; # ssh knownhosts file
 $hstprvkeyf   = 'curl_host_dsa_key';      # host private key file
 $hstpubkeyf   = 'curl_host_dsa_key.pub';  # host public key file
@@ -214,6 +229,14 @@ sub display_sshconfig {
 
 
 #***************************************************************************
+# Display contents of the sftp client config file
+#
+sub display_sftpconfig {
+    display_file($sftpconfig);
+}
+
+
+#***************************************************************************
 # Display contents of the ssh daemon log file
 #
 sub display_sshdlog {
@@ -226,6 +249,14 @@ sub display_sshdlog {
 #
 sub display_sshlog {
     display_file($sshlog);
+}
+
+
+#***************************************************************************
+# Display contents of the sftp client log file
+#
+sub display_sftplog {
+    display_file($sftplog);
 }
 
 
@@ -275,6 +306,14 @@ sub find_ssh {
 
 #***************************************************************************
 # Find sftp-server plugin and return canonical filename
+#
+sub find_sftpsrv {
+    return find_sfile($sftpsrvexe);
+}
+
+
+#***************************************************************************
+# Find sftp client and return canonical filename
 #
 sub find_sftp {
     return find_sfile($sftpexe);

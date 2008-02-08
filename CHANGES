@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Yang Tse (8 Feb 2008)
+- Improved test harness SCP/SFTP start up server verification, doing a real
+  connection to the sftp server, authenticating and running a simple sftp
+  pwd command using the test harness generated configuration and key files.
+
 Daniel S (8 Feb 2008)
 - Günter Knauf added lib/mk-ca-bundle.pl which gets the Firefox ca bundle and
   creates a suitable ca-bundle.crt file in PEM format for use with curl. The

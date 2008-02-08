@@ -69,14 +69,21 @@ use Cwd;
 use sshhelp qw(
     $sshdexe
     $sshexe
+    $sftpexe
     $sshconfig
+    $sftpconfig
     $sshlog
+    $sftplog
+    $sftpcmds
     display_sshdconfig
     display_sshconfig
+    display_sftpconfig
     display_sshdlog
     display_sshlog
+    display_sftplog
     find_sshd
     find_ssh
+    find_sftp
     sshversioninfo
     );
 
@@ -658,7 +665,9 @@ sub verifyftp {
 }
 
 #######################################################################
-# STUB for verifying scp/sftp
+# Verify that the ssh server has written out its pidfile, recovering
+# the pid from the file and returning it if a process with that pid is
+# actually alive.
 
 sub verifyssh {
     my ($proto, $ip, $port) = @_;
@@ -679,6 +688,37 @@ sub verifyssh {
     }
     return $pid;
 }
+
+#######################################################################
+# Verify that we can connect to the sftp server, properly authenticate
+# with generated config and key files and run a simple remote pwd.
+
+sub verifysftp {
+    my ($proto, $ip, $port) = @_;
+    my $verified = 0;
+    # Find out sftp client canonical file name
+    my $sftp = find_sftp();
+    if(!$sftp) {
+        logmsg "RUN: SFTP server cannot find $sftpexe\n";
+        return -1;
+    }
+    # Connect to sftp server, authenticate and run a remote pwd
+    # command using our generated configuration and key files
+    my $cmd = "$sftp -b $sftpcmds -F $sftpconfig $ip > $sftplog 2>&1";
+    my $res = runclient($cmd);
+    # Search for pwd command response in log file
+    if(open(SFTPLOGFILE, "<$sftplog")) {
+        while(<SFTPLOGFILE>) {
+            if(/^Remote working directory: /) {
+                $verified = 1;
+                last;
+            }
+        }
+        close(SFTPLOGFILE);
+    }
+    return $verified;
+}
+
 
 #######################################################################
 # STUB for verifying socks
@@ -716,6 +756,7 @@ my %protofunc = ('http' => \&verifyhttp,
                  'ftps' => \&verifyftp,
                  'tftp' => \&verifyftp,
                  'ssh' => \&verifyssh,
+                 'sftp' => \&verifysftp,
                  'socks' => \&verifysocks);
 
 sub verifyserver {
@@ -1122,19 +1163,35 @@ sub runsshserver {
         return (0,0);
     }
 
-    # server verification allows some extra time for the server to start up
-    # and gives us the opportunity of recovering the pid from the pidfile,
-    # which will be assigned to pid2 ONLY if pid2 was not already positive.
+    # ssh server verification allows some extra time for the server to start up
+    # and gives us the opportunity of recovering the pid from the pidfile, when
+    # this verification succeeds the recovered pid is assigned to pid2.
 
     my $pid3 = verifyserver("ssh",$ip,$port);
     if(!$pid3) {
         logmsg "RUN: SSH server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
+        # failed to fetch server pid. Kill the server and return failure
         stopserver("$sshpid $pid2");
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
-    $pid2 = $pid3 if($pid2 <= 0);
+    $pid2 = $pid3;
+
+    # once it is known that the ssh server is alive, sftp server verification
+    # is performed actually connecting to it, authenticating and performing a
+    # very simple remote command.
+
+    if(!verifyserver("sftp",$ip,$port)) {
+        logmsg "RUN: SFTP server failed verification\n";
+        # failed to talk to it properly. Kill the server and return failure
+        display_sftplog();
+        display_sftpconfig();
+        display_sshdlog();
+        display_sshdconfig();
+        stopserver("$sshpid $pid2");
+        $doesntrun{$pidfile} = 1;
+        return (0,0);
+    }
 
     if($verbose) {
         logmsg "RUN: SSH server is now running PID $pid2\n";
