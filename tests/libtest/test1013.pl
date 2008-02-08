@@ -1,8 +1,9 @@
 #!/usr/bin/env perl
-# Determine if curl-config --protocols matches the curl --version protocols
+# Determine if curl-config --protocols/--features matches the
+# curl --version protocols/features
 if ( $#ARGV != 2 ) 
 {
-	print "Usage: $0 curl-config-script curl-features-file features|protocols\n";
+	print "Usage: $0 curl-config-script curl-version-output-file features|protocols\n";
 	exit 3;
 }
 

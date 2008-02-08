@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Fandrich (7 Feb 2007)
+- Added tests 1022 and 1023 to validate output of curl-config --version and
+  --vernum
+
 Daniel S (7 Feb 2008)
 - Refactored a lot of timeout code into a few functions in an attempt to make
   them all use the same (hopefully correct) logic to make it less error-prone
