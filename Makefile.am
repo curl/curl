@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2005, 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -131,3 +131,8 @@ install-data-hook:
 uninstall-hook:
 	cd include && $(MAKE) uninstall
 	cd docs && $(MAKE) uninstall
+
+ca-bundle: lib/mk-ca-bundle.pl
+	@echo "generate a fresh ca-bundle.crt"
+	@mv lib/ca-bundle.crt lib/ca-bundle.crt.old
+	@perl $< -l -u lib/ca-bundle.crt
