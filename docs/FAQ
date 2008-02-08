@@ -320,10 +320,10 @@ FAQ
 
   1.11 Why don't you update ca-bundle.crt
 
-  The ca-bundle.crt file is to be treated as an example file these days, as it
-  is very outdated (it being last modified year 2000 should tell) and should
-  be replaced with a much more modern and up-to-date version by anyone who
-  wants to verify peers.
+  The bundled ca-bundle.crt file is to be treated as an example file these
+  days, as it is very outdated (it being last modified year 2000 should tell)
+  and should be replaced with a much more modern and up-to-date version by
+  anyone who wants to verify peers.
 
   In the cURL project we've decided not to attempt to keep this file updated
   since deciding what to add to a ca cert bundle is an undertaking we've not
@@ -337,8 +337,9 @@ FAQ
   If you want the most recent collection of ca certs that Mozilla Firefox uses
   (which should be seen as the effictive successor of Netscape 4.72 from where
   this particular bundle originates from), we recommend that you extract the
-  collection yourself from Mozilla Firefox, or by using our service setup for
-  this purpose: http://curl.haxx.se/docs/caextract.html
+  collection yourself from Mozilla Firefox (by running 'make ca-bundle), or by
+  using our online service setup for this purpose:
+  http://curl.haxx.se/docs/caextract.html
 
   Due to the licensing of that particular file, we've decided to not simply
   include that in the curl package/tree. It is of course arguable whether the
