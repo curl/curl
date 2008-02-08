@@ -110,8 +110,10 @@ static int _Curl_gtls_init(void)
 
 int Curl_gtls_cleanup(void)
 {
-  if(gtls_inited)
+  if(gtls_inited) {
     gnutls_global_deinit();
+    gtls_inited = FALSE;
+  }
   return 1;
 }
 

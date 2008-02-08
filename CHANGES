@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel S (8 Feb 2008)
+- Mike Hommey filed and fixed bug report #1889856
+  (http://curl.haxx.se/bug/view.cgi?id=1889856): When using the gnutls ssl
+  layer, cleaning-up and reinitializing curl ends up with https requests
+  failing with "ASN1 parser: Element was not found" errors. Obviously a
+  regression added in 7.16.3.
+
 Yang Tse (8 Feb 2008)
 - Improved test harness SCP/SFTP start up server verification, doing a real
   connection to the sftp server, authenticating and running a simple sftp
