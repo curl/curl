@@ -143,7 +143,7 @@ while (<TXT>) {
     print CRT "\n";
     print CRT "$val\n";
     print CRT ("=" x length($val) . "\n");
-    close(CRT) or die "Couldn't close $file: $!";
+    close(CRT) or die "Couldn't close $crt: $!";
     open(TMP, ">$tmp") or die "Couldn't open $tmp: $!";
     print TMP "$val\n";
     print TMP "-----BEGIN CERTIFICATE-----\n";
