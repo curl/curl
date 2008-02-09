@@ -14,7 +14,7 @@ HTTP/1.1 200 OK swsclose
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
-<html>result</html>
+_data_result_data_
 </data>
 <postcmd>
 wait 10

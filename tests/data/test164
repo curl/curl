@@ -1,7 +1,8 @@
 <testcase>
 # Server-side
 # This particular response is an exact excerpt from an actual Apache
-# server when asked for a 0-10,12-15 range.
+# server when asked for a 0-10,12-15 range (except gt/lt changed to {}
+# to avoid XML escaping problems).
 <reply>
 <data>
 HTTP/1.1 206 Partial Content swsclose
@@ -17,15 +18,15 @@ Content-Type: multipart/byteranges; boundary=408a326132c
 Content-type: text/html
 Content-range: bytes 0-10/3781
 
-<html>
-<hea
+{html}
+{hea
 
 --408a326132c
 Content-type: text/html
 Content-range: bytes 12-15/3781
 
->
-<t
+}
+{t
 
 --408a326132c--
 </data>
