@@ -1,4 +1,12 @@
 <testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+persistent connection
+</keywords>
+</info>
+
 # Server-side
 <reply>
 <data>
@@ -15,9 +23,6 @@ moo
 <server>
 http
 </server>
-<features>
-SSL
-</features>
  <name>
 HTTP GET two URLs over a single proxy with persistent connection
  </name>

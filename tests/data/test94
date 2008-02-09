@@ -2,6 +2,7 @@
 <info>
 <keywords>
 HTTPS
+HTTP GET
 HTTP CONNECT
 HTTP proxy
 FAILURE

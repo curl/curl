@@ -3,9 +3,10 @@
 <keywords>
 FTP
 RETR
-persistant connection
+persistent connection
 </keywords>
 </info>
+
 # Server-side
 <reply>
 <data>
@@ -19,7 +20,7 @@ this is file contents
 ftp
 </server>
  <name>
-persistant FTP with different paths
+persistent FTP with different paths
  </name>
  <command>
 ftp://%HOSTIP:%FTPPORT/first/dir/here/146 ftp://%HOSTIP:%FTPPORT/146

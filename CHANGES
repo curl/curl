@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Fandrich (8 Feb 2007)
+- Added key words to all SSL-using tests so they can be skipped if necessary.
+  Removed a few unnecessary requires SSL statements.
+
 Daniel S (8 Feb 2008)
 - Mike Hommey filed and fixed bug report #1889856
   (http://curl.haxx.se/bug/view.cgi?id=1889856): When using the gnutls ssl

@@ -1,4 +1,12 @@
 <testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+followlocation
+</keywords>
+
+</info>
 # Server-side
 <reply>
 <data>
@@ -35,9 +43,6 @@ moo
 <server>
 http
 </server>
-<features>
-SSL
-</features>
  <name>
 HTTP replace Host: when following Location: to new host
  </name>
