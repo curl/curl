@@ -104,7 +104,7 @@ EOT
 close(CRT) or die "Couldn't close $crt: $!";
 
 my $certnum;
-open(TXT,"$txt") or die "Couldn't open $file: $!";
+open(TXT,"$txt") or die "Couldn't open $txt: $!";
 while (<TXT>) {
   if (/\*\*\*\*\* BEGIN LICENSE BLOCK \*\*\*\*\*/) {
     open(CRT, ">>$crt") or die "Couldn't open $crt: $!";
