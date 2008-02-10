@@ -18,6 +18,7 @@ This release includes the following bugfixes:
  o improved pipelining
  o improved strdup replacement
  o GnuTLS-built libcurl failed when doing global cleanup and reinit
+ o error message problem when unable to resolve a host on Windows
 
 This release includes the following known bugs:
 

@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Yang Tse (10 Feb 2008)
+- Bug report #1888932 (http://curl.haxx.se/bug/view.cgi?id=1888932) points out
+  and provides test program that demonstrates that libcurl might not set error
+  description message for error CURLE_COULDNT_RESOLVE_HOST for Windows threaded
+  name resolver builds. Fixed now.
+
 Daniel Fandrich (8 Feb 2007)
 - Added key words to all SSL-using tests so they can be skipped if necessary.
   Removed a few unnecessary requires SSL statements.

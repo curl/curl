@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -682,6 +682,8 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
 CURLcode Curl_is_resolved(struct connectdata *conn,
                           struct Curl_dns_entry **entry)
 {
+  struct SessionHandle *data = conn->data;
+
   *entry = NULL;
 
   if(conn->async.done) {
@@ -689,6 +691,8 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
     Curl_destroy_thread_data(&conn->async);
     if(!conn->async.dns) {
       TRACE(("Curl_is_resolved(): CURLE_COULDNT_RESOLVE_HOST\n"));
+      failf(data, "Could not resolve host: %s; %s",
+            conn->host.name, Curl_strerror(conn, conn->async.status));
       return CURLE_COULDNT_RESOLVE_HOST;
     }
     *entry = conn->async.dns;
