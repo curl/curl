@@ -134,5 +134,4 @@ uninstall-hook:
 
 ca-bundle: lib/mk-ca-bundle.pl
 	@echo "generate a fresh ca-bundle.crt"
-	@-mv -vbVt lib/ca-bundle.crt lib/ca-bundle.crt.old
-	@perl $< -l -u lib/ca-bundle.crt
+	@perl $< -b -l -u lib/ca-bundle.crt
