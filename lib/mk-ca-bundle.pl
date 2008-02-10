@@ -39,11 +39,12 @@ my $url = 'http://lxr.mozilla.org/seamonkey/source/security/nss/lib/ckfw/builtin
 # If the OpenSSL commandline is not in search path you can configure it here!
 my $openssl = 'openssl';
 
-getopts('hilnuv');
+getopts('bhilnuv');
 
 if ($opt_h) {
   $0 =~ s/\\/\//g;
-  printf("Usage:\t%s [-i] [-l] [-n] [-u] [-v] [<outputfile>]\n", substr($0, rindex($0, '/') + 1));
+  printf("Usage:\t%s [-b] [-i] [-l] [-n] [-u] [-v] [<outputfile>]\n", substr($0, rindex($0, '/') + 1));
+  print "\t-b\tbackup an existing version of ca-bundle.crt\n";
   print "\t-i\tprint version info about used modules\n";
   print "\t-l\tprint license info about certdata.txt\n";
   print "\t-n\tno download of certdata.txt (to use existing)\n";
@@ -79,6 +80,14 @@ if (!$opt_n) {
 }
 
 die "File '$txt' doesnt exist - dont use -n switch to download the file!\n" if (!-e $txt);
+
+if ($opt_b && -e $crt) {
+  my $bk = 1;
+  while (-e "$crt.~$bk~") {
+    $bk++;
+  }
+  rename $crt, "$crt.~$bk~";
+}
 
 my $currentdate = scalar gmtime() . " UTC";
 open(CRT,">$crt") or die "Couldn't open $crt: $!";
