@@ -342,6 +342,10 @@ if((! -e $hstprvkeyf) || (! -e $hstpubkeyf) ||
 #  GatewayPorts                     : OpenSSH 2.1.0 and later
 #  GSSAPIAuthentication             : OpenSSH 3.7.0 and later [1]
 #  GSSAPICleanupCredentials         : OpenSSH 3.8.0 and later [1]
+#  GSSAPIKeyExchange                :  SunSSH 1.0.0 and later [1]
+#  GSSAPIStoreDelegatedCredentials  :  SunSSH 1.0.0 and later [1]
+#  GSSCleanupCreds                  :  SunSSH 1.0.0 and later [1]
+#  GSSUseSessionCredCache           :  SunSSH 1.0.0 and later [1]
 #  HostbasedAuthentication          : OpenSSH 2.9.0 and later
 #  HostbasedUsesNameFromPacketOnly  : OpenSSH 2.9.0 and later
 #  HostKey                          : OpenSSH 1.2.1 and later
@@ -539,6 +543,18 @@ if(sshd_supports_opt('GSSAPIAuthentication','no')) {
 }
 if(sshd_supports_opt('GSSAPICleanupCredentials','yes')) {
     push @cfgarr, 'GSSAPICleanupCredentials yes';
+}
+if(sshd_supports_opt('GSSAPIKeyExchange','no')) {
+    push @cfgarr, 'GSSAPIKeyExchange no';
+}
+if(sshd_supports_opt('GSSAPIStoreDelegatedCredentials','no')) {
+    push @cfgarr, 'GSSAPIStoreDelegatedCredentials no';
+}
+if(sshd_supports_opt('GSSCleanupCreds','yes')) {
+    push @cfgarr, 'GSSCleanupCreds yes';
+}
+if(sshd_supports_opt('GSSUseSessionCredCache','no')) {
+    push @cfgarr, 'GSSUseSessionCredCache no';
 }
 push @cfgarr, '#';
 
