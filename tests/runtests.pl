@@ -1805,10 +1805,6 @@ sub singletest {
     }
 
     if(!$why) {
-        $why = serverfortest($testnum);
-    }
-
-    if(!$why) {
         my @keywords = getpart("info", "keywords");
         my $k;
         for $k (@keywords) {
@@ -1817,6 +1813,10 @@ sub singletest {
             	$why = "disabled by keyword";
             }
         }
+    }
+
+    if(!$why) {
+        $why = serverfortest($testnum);
     }
 
     if(!$why) {
