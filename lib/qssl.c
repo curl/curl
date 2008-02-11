@@ -175,8 +175,13 @@ static CURLcode Curl_qsossl_handshake(struct connectdata * conn, int sockindex)
   /* figure out how long time we should wait at maximum */
   timeout_ms = Curl_timeleft(conn, NULL, TRUE);
 
-  /* SSL_Handshake() timeout resolution is second, so round up. */
+  if(timeout_ms < 0) {
+    /* time-out, bail out, go home */
+    failf(data, "Connection time-out");
+    return CURLE_OPERATION_TIMEDOUT;
+  }
 
+  /* SSL_Handshake() timeout resolution is second, so round up. */
   h->timeout = (timeout_ms + 1000 - 1) / 1000;
 
   /* Set-up protocol. */
@@ -429,7 +434,7 @@ ssize_t Curl_qsossl_recv(struct connectdata * conn, int num, char * buf,
     case SSL_ERROR_IO:
       switch (errno) {
       case EWOULDBLOCK:
-	*wouldblock = TRUE;
+        *wouldblock = TRUE;
         return -1;
         }
 

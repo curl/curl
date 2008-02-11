@@ -140,6 +140,12 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
   /* get timeout */
   timeout = Curl_timeleft(conn, NULL, TRUE);
 
+  if(timeout < 0) {
+    /* time-out, bail out, go home */
+    failf(data, "Connection time-out");
+    return CURLE_OPERATION_TIMEDOUT;
+  }
+
   Curl_nonblock(sock, FALSE);
 
   /*
@@ -393,6 +399,12 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
 
   /* get timeout */
   timeout = Curl_timeleft(conn, NULL, TRUE);
+
+  if(timeout < 0) {
+    /* time-out, bail out, go home */
+    failf(data, "Connection time-out");
+    return CURLE_OPERATION_TIMEDOUT;
+  }
 
   Curl_nonblock(sock, TRUE);
 

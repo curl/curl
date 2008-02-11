@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel S (11 Feb 2008)
+- Yang Tse pointed out a few remaining quirks from my timeout refactoring from
+  Feb 7 that didn't abort properly on timeouts. These are actually old
+  problems but now they should be fixed.
+
 Yang Tse (10 Feb 2008)
 - Bug report #1888932 (http://curl.haxx.se/bug/view.cgi?id=1888932) points out
   and provides test program that demonstrates that libcurl might not set error
