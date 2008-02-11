@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 # ***************************************************************************
 # *                                  _   _ ____  _
 # *  Project                     ___| | | |  _ \| |
@@ -66,7 +66,6 @@ if ($opt_i) {
 }
 
 my $crt = $ARGV[0] || 'ca-bundle.crt';
-my $tmp = 'mytmpfile.txt';
 my $txt = substr($url, rindex($url, '/') + 1);
 $txt =~ s/\?.*//;
 
@@ -164,10 +163,9 @@ while (<TXT>) {
     }
     close(CRT) or die "Couldn't close $crt: $!";
     if ($opt_t) {
-      open(TMP, ">$tmp") or die "Couldn't open $tmp: $!";
+      open(TMP, "|$openssl x509 -md5 -fingerprint -text -inform PEM >> $crt") or die "Couldn't open openssl pipe: $!";
       print TMP $pem;
-      close(TMP) or die "Couldn't close $tmp: $!";
-      system("$openssl x509 -md5 -fingerprint -text -in $tmp -inform PEM >> $crt");
+      close(TMP) or die "Couldn't close openssl pipe: $!";
     }
     print "Parsing: $caname\n" if ($opt_v);
     $certnum ++;
@@ -175,7 +173,6 @@ while (<TXT>) {
 }
 close(TXT) or die "Couldn't close $txt: $!";
 unlink $txt if ($opt_u);
-unlink $tmp;
 print "Done ($certnum CA certs processed).\n" if (!$opt_q);
 
 exit;
