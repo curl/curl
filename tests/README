@@ -54,6 +54,19 @@ Run:
   3 to 9. Any test numbers starting with ! are disabled, as are any test
   numbers found in the file data/DISABLED (one per line).
 
+shell startup scripts:
+  Tests which use the ssh test server, SCP/SFTP/SOCKS tests, might get badly
+  influenced by the output of system wide or user specific shell startup scripts,
+  .bashrc, .profile, /etc/csh.cshrc, .login, /etc/bashrc, etc. which output text
+  messages or escape sequences on user login.  When this shell startup messages
+  or escape sequences are output they might corrupt the expected stream of data
+  which flows to the sftp-server or from the ssh client which can result in bad
+  test behaviour or even prevent the test server from running.
+
+  If the test suite ssh or sftp server fails to start up and logs the message
+  'Received message too long' then you are certainly suffering the unwanted
+  output of a shell startup script.  Locate, cleanup or adjust the shell script.
+
 Memory:
   The test script will check that all allocated memory is freed properly IF
   curl has been built with the CURLDEBUG define set. The script will
