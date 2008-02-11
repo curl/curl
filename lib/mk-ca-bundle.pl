@@ -26,28 +26,32 @@
 # then parses certdata.txt and extracts CA Root Certificates into PEM format.
 # These are then processed with the OpenSSL commandline tool to produce the
 # final ca-bundle.crt file.
-# The script is based on the parse-certs script writtten by Roland Krikava.
+# The script is based on the parse-certs script written by Roland Krikava.
 # This Perl script works on almost any platform since its only external
-# dependency is the OpenSSL commandline tool.
+# dependency is the OpenSSL commandline tool for optional text listing.
 # Hacked by Guenter Knauf.
 #
 use Getopt::Std;
 use MIME::Base64;
 use LWP::UserAgent;
+use strict;
+use vars qw($opt_b $opt_h $opt_i $opt_l $opt_n $opt_q $opt_t $opt_u $opt_v);  
 
 my $url = 'http://lxr.mozilla.org/seamonkey/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1';
 # If the OpenSSL commandline is not in search path you can configure it here!
 my $openssl = 'openssl';
 
-getopts('bhilnuv');
+getopts('bhilnqtuv');
 
 if ($opt_h) {
   $0 =~ s/\\/\//g;
-  printf("Usage:\t%s [-b] [-i] [-l] [-n] [-u] [-v] [<outputfile>]\n", substr($0, rindex($0, '/') + 1));
+  printf("Usage:\t%s [-b] [-i] [-l] [-n] [-q] [-t] [-u] [-v] [<outputfile>]\n", substr($0, rindex($0, '/') + 1));
   print "\t-b\tbackup an existing version of ca-bundle.crt\n";
   print "\t-i\tprint version info about used modules\n";
   print "\t-l\tprint license info about certdata.txt\n";
   print "\t-n\tno download of certdata.txt (to use existing)\n";
+  print "\t-q\tbe really quiet (no progress output at all)\n";
+  print "\t-t\tinclude plain text listing of certificates\n";
   print "\t-u\tunlink (remove) certdata.txt after processing\n";
   print "\t-v\tbe verbose and print out processed CAs\n";
   exit;
@@ -65,8 +69,9 @@ my $crt = $ARGV[0] || 'ca-bundle.crt';
 my $tmp = 'mytmpfile.txt';
 my $txt = substr($url, rindex($url, '/') + 1);
 $txt =~ s/\?.*//;
-if (!$opt_n) {
-  print "Downloading '$txt' ...\n" if ($opt_v);
+
+if (!$opt_n || !-e $txt) {
+  print "Downloading '$txt' ...\n" if (!$opt_q);
   my $ua  = new LWP::UserAgent;
   my $req = new HTTP::Request('GET', $url);
   my $res = $ua->request($req);
@@ -79,31 +84,30 @@ if (!$opt_n) {
   }
 }
 
-die "File '$txt' doesnt exist - dont use -n switch to download the file!\n" if (!-e $txt);
-
 if ($opt_b && -e $crt) {
   my $bk = 1;
-  while (-e "$crt.~$bk~") {
+  while (-e "$crt.~${bk}~") {
     $bk++;
   }
-  rename $crt, "$crt.~$bk~";
+  rename $crt, "$crt.~${bk}~";
 }
 
+my $format = $opt_t ? "plain text and " : "";
 my $currentdate = scalar gmtime() . " UTC";
 open(CRT,">$crt") or die "Couldn't open $crt: $!";
 print CRT <<EOT;
 ##
 ## $crt -- Bundle of CA Root Certificates
 ##
-## Converted at: $currentdate
+## Converted at: ${currentdate}
 ##
 ## This is a bundle of X.509 certificates of public Certificate Authorities
 ## (CA). These were automatically extracted from Mozilla's root certificates
 ## file (certdata.txt).  This file can be found in the mozilla source tree:
 ## '/mozilla/security/nss/lib/ckfw/builtins/certdata.txt'
 ##
-## It contains the certificates in both plain text and PEM format
-## and therefore can be directly used with curl / libcurl, or with an
+## It contains the certificates in ${format}PEM format and therefore
+## can be directly used with curl / libcurl, or with an
 ## Apache+mod_ssl webserver for SSL client authentication.
 ## Just configure this file as the SSLCACertificateFile.
 ##
@@ -112,7 +116,9 @@ EOT
 
 close(CRT) or die "Couldn't close $crt: $!";
 
-my $certnum;
+print "Processing  '$txt' ...\n" if (!$opt_q);
+my $caname;
+my $certnum = 0;
 open(TXT,"$txt") or die "Couldn't open $txt: $!";
 while (<TXT>) {
   if (/\*\*\*\*\* BEGIN LICENSE BLOCK \*\*\*\*\*/) {
@@ -126,8 +132,7 @@ while (<TXT>) {
     }
     close(CRT) or die "Couldn't close $crt: $!";
   }
-  next if /^#/;
-  next if /^\s*$/;
+  next if /^#|^\s*$/;
   chomp;
   if (/^CVS_ID\s+\"(.*)\"/) {
     open(CRT, ">>$crt") or die "Couldn't open $crt: $!";
@@ -135,7 +140,7 @@ while (<TXT>) {
     close(CRT) or die "Couldn't close $crt: $!";
   }
   if (/^CKA_LABEL\s+[A-Z0-9]+\s+\"(.*)\"/) {
-    $val = $1;
+    $caname = $1;
   }
   if (/^CKA_VALUE MULTILINE_OCTAL/) {
     my $data;
@@ -148,26 +153,30 @@ while (<TXT>) {
         $data .= chr(oct);
       }
     }
+    my $pem = "-----BEGIN CERTIFICATE-----\n"
+            . MIME::Base64::encode($data)
+            . "-----END CERTIFICATE-----\n";
     open(CRT, ">>$crt") or die "Couldn't open $crt: $!";
-    print CRT "\n";
-    print CRT "$val\n";
-    print CRT ("=" x length($val) . "\n");
+    print CRT "\n$caname\n";
+    print CRT ("=" x length($caname) . "\n");
+    if (!$opt_t) {
+      print CRT $pem;
+    }
     close(CRT) or die "Couldn't close $crt: $!";
-    open(TMP, ">$tmp") or die "Couldn't open $tmp: $!";
-    print TMP "$val\n";
-    print TMP "-----BEGIN CERTIFICATE-----\n";
-    print TMP MIME::Base64::encode($data);
-    print TMP "-----END CERTIFICATE-----\n";
-    close(TMP) or die "Couldn't close $tmp: $!";
-    system("$openssl x509 -md5 -fingerprint -text -in $tmp -inform PEM >> $crt");
-    print "Parsing: $val\n" if ($opt_v);
+    if ($opt_t) {
+      open(TMP, ">$tmp") or die "Couldn't open $tmp: $!";
+      print TMP $pem;
+      close(TMP) or die "Couldn't close $tmp: $!";
+      system("$openssl x509 -md5 -fingerprint -text -in $tmp -inform PEM >> $crt");
+    }
+    print "Parsing: $caname\n" if ($opt_v);
     $certnum ++;
   }
 }
 close(TXT) or die "Couldn't close $txt: $!";
 unlink $txt if ($opt_u);
 unlink $tmp;
-print "Done ($certnum CA certs processed).\n";
+print "Done ($certnum CA certs processed).\n" if (!$opt_q);
 
 exit;
 
