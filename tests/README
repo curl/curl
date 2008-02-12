@@ -10,9 +10,7 @@ Requires:
   perl (and a unix-style shell)
   diff (when a test fail, a diff is shown)
   stunnel (for HTTPS and FTPS tests)
-  sshd (for SCP and SFTP tests; OpenSSH ver. 3.8 is known to work)
-  ssh (for SOCKS4 and SOCK5 tests; OpenSSH ver. 4.5 is known to work.
-       OpenSSH version 3.7 or greater is needed for SOCKS5)
+  OpenSSH or SunSSH (for SCP, SFTP and SOCKS4/5 tests)
 
 TCP ports used by default:
 
@@ -54,11 +52,11 @@ Run:
   3 to 9. Any test numbers starting with ! are disabled, as are any test
   numbers found in the file data/DISABLED (one per line).
 
-shell startup scripts:
-  Tests which use the ssh test server, SCP/SFTP/SOCKS tests, might get badly
+Shell startup scripts:
+  Tests which use the ssh test server, SCP/SFTP/SOCKS tests, might be badly
   influenced by the output of system wide or user specific shell startup scripts,
   .bashrc, .profile, /etc/csh.cshrc, .login, /etc/bashrc, etc. which output text
-  messages or escape sequences on user login.  When this shell startup messages
+  messages or escape sequences on user login.  When these shell startup messages
   or escape sequences are output they might corrupt the expected stream of data
   which flows to the sftp-server or from the ssh client which can result in bad
   test behaviour or even prevent the test server from running.
