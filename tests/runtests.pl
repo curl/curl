@@ -795,7 +795,6 @@ sub verifyserver {
 sub runhttpserver {
     my ($verbose, $ipv6) = @_;
     my $RUNNING;
-    my $pid;
     my $pidfile = $HTTPPIDFILE;
     my $port = $HTTPPORT;
     my $ip = $HOSTIP;
@@ -815,11 +814,11 @@ sub runhttpserver {
         return (0,0);
     }
 
-    $pid = checkserver($pidfile);
-
+    my $pid = checkserver($pidfile);
     if($pid > 0) {
         stopserver($pid);
     }
+    unlink($pidfile);
 
     my $flag=$debugprotocol?"-v ":"";
     my $dir=$ENV{'srcdir'};
@@ -834,18 +833,21 @@ sub runhttpserver {
     if($httppid <= 0 || !kill(0, $httppid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the HTTP$nameext server\n";
+        stopserver("$pid2");
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
 
     # Server is up. Verify that we can speak to it.
-    if(!verifyserver("http", $ip, $port)) {
+    my $pid3 = verifyserver("http", $ip, $port);
+    if(!$pid3) {
         logmsg "RUN: HTTP$nameext server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$httppid $pid2");
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
+    $pid2 = $pid3;
 
     if($verbose) {
         logmsg "RUN: HTTP$nameext server is now running PID $httppid\n";
@@ -880,12 +882,12 @@ sub runhttpsserver {
         return (0,0);
     }
 
-    my $pid=checkserver($pidfile);
-
+    my $pid = checkserver($pidfile);
     if($pid > 0) {
         # kill previous stunnel!
         stopserver($pid);
     }
+    unlink($pidfile);
 
     my $flag=$debugprotocol?"-v ":"";
     my $cmd="$perl $srcdir/httpsserver.pl $flag -p https -s \"$stunnel\" -d $srcdir -r $HTTPPORT $HTTPSPORT";
@@ -901,13 +903,15 @@ sub runhttpsserver {
     }
 
     # Server is up. Verify that we can speak to it.
-    if(!verifyserver("https", $ip, $HTTPSPORT)) {
+    my $pid3 = verifyserver("https", $ip, $HTTPSPORT);
+    if(!$pid3) {
         logmsg "RUN: HTTPS server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$httpspid $pid2");
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
+    $pid2 = $pid3;
 
     if($verbose) {
         logmsg "RUN: HTTPS server is now running PID $httpspid\n";
@@ -946,9 +950,10 @@ sub runftpserver {
     }
 
     my $pid = checkserver($pidfile);
-    if($pid >= 0) {
+    if($pid > 0) {
         stopserver($pid);
     }
+    unlink($pidfile);
 
     # start our server:
     my $flag=$debugprotocol?"-v ":"";
@@ -963,27 +968,28 @@ sub runftpserver {
     } else {
         $addr = $HOSTIP;
     }
+
     $cmd="$perl $srcdir/ftpserver.pl --pidfile $pidfile $flag --port $port --addr \"$addr\"";
-
-    unlink($pidfile);
-
     my ($ftppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($ftppid <= 0 || !kill(0, $ftppid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the FTP$id$nameext server\n";
+        stopserver("$pid2");
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
 
     # Server is up. Verify that we can speak to it.
-    if(!verifyserver("ftp", $ip, $port)) {
+    my $pid3 = verifyserver("ftp", $ip, $port);
+    if(!$pid3) {
         logmsg "RUN: FTP$id$nameext server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$ftppid $pid2");
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
+    $pid2 = $pid3;
 
     if($verbose) {
         logmsg "RUN: FTP$id$nameext server is now running PID $ftppid\n";
@@ -1018,12 +1024,12 @@ sub runftpsserver {
         return (0,0);
     }
 
-    my $pid=checkserver($pidfile);
-
+    my $pid = checkserver($pidfile);
     if($pid > 0) {
         # kill previous stunnel!
         stopserver($pid);
     }
+    unlink($pidfile);
 
     my $flag=$debugprotocol?"-v ":"";
     my $cmd="$perl $srcdir/httpsserver.pl $flag -p ftps -s \"$stunnel\" -d $srcdir -r $FTPPORT $FTPSPORT";
@@ -1039,13 +1045,15 @@ sub runftpsserver {
     }
 
     # Server is up. Verify that we can speak to it.
-    if(!verifyserver("ftps", $ip, $FTPSPORT)) {
+    my $pid3 = verifyserver("ftps", $ip, $FTPSPORT);
+    if(!$pid3) {
         logmsg "RUN: FTPS server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$ftpspid $pid2");
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
+    $pid2 = $pid3;
 
     if($verbose) {
         logmsg "RUN: FTPS server is now running PID $ftpspid\n";
@@ -1084,9 +1092,10 @@ sub runtftpserver {
     }
 
     my $pid = checkserver($pidfile);
-    if($pid >= 0) {
+    if($pid > 0) {
         stopserver($pid);
     }
+    unlink($pidfile);
 
     # start our server:
     my $flag=$debugprotocol?"-v ":"";
@@ -1097,27 +1106,28 @@ sub runtftpserver {
     if($ipv6) {
         $flag .="--ipv6 ";
     }
+
     $cmd="./server/tftpd --pidfile $pidfile $flag $port";
-
-    unlink($pidfile);
-
     my ($tftppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($tftppid <= 0 || !kill(0, $tftppid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the TFTP$id$nameext server\n";
+        stopserver("$pid2");
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
 
     # Server is up. Verify that we can speak to it.
-    if(!verifyserver("tftp", $ip, $port)) {
+    my $pid3 = verifyserver("tftp", $ip, $port);
+    if(!$pid3) {
         logmsg "RUN: TFTP$id$nameext server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$tftppid $pid2");
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
+    $pid2 = $pid3;
 
     if($verbose) {
         logmsg "RUN: TFTP$id$nameext server is now running PID $tftppid\n";
@@ -1318,7 +1328,7 @@ sub runsocksserver {
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
-    $pid2 = $pid3 if($pid2 <= 0);
+    $pid2 = $pid3;
 
     if($verbose) {
         logmsg "RUN: SOCKS server is now running PID $pid2\n";
