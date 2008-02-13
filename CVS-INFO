@@ -12,8 +12,8 @@ inner sanctum.
 
 Compile and build instructions follow below.
 
-  CHANGES.0     contains ancient changes.
-  CHANGES.$year contains changes for the particular year.
+  CHANGES.0     contains ancient changes
+  CHANGES       contains the most recent changes
 
   Makefile.dist is included as the root Makefile in distribution archives
 
@@ -49,9 +49,8 @@ installed:
 
    If you don't have nroff and perl and you for some reason don't want to
    install them, you can rename the source file src/hugehelp.c.cvs to
-   src/hugehelp.c and avoid having to generate this file. This will of course
-   give you an older version of the file that isn't up-to-date. That file was
-   checked in once and won't be updated very regularly.
+   src/hugehelp.c and avoid having to generate this file. This will give you
+   a stubbed version of the file that doesn't contain actual content.
 
 MAC OS X
 
