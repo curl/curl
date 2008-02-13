@@ -911,7 +911,7 @@ sub runhttpsserver {
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
-    $pid2 = $pid3;
+    # Here pid3 is actually the pid returned by the unsecure-http server.
 
     if($verbose) {
         logmsg "RUN: HTTPS server is now running PID $httpspid\n";
@@ -1053,7 +1053,7 @@ sub runftpsserver {
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
-    $pid2 = $pid3;
+    # Here pid3 is actually the pid returned by the unsecure-ftp server.
 
     if($verbose) {
         logmsg "RUN: FTPS server is now running PID $ftpspid\n";
