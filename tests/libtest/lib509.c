@@ -331,11 +331,14 @@ int test(char *URL)
   return i;
 }
 #endif /* YASSL_VERSION */
-#else /* USE_SSLEAY */
+#endif /* USE_SSLEAY */
+
+#if !defined(USE_SSLEAY) || defined(YASSL_VERSION)
 
 int test(char *URL)
 {
   (void)URL;
+
   if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
