@@ -1,4 +1,25 @@
-To be addressed before 7.18.0 (planned release: January 2008)
+To be addressed before 7.18.1 (planned release: April 2008)
 =============================
 
-118 - 
+118 - Gautam Kachroo's issue with proxies and ssl, when libcurl uses SSL even
+      though not really in a state for it. The patch breaks test case 509, but
+      it also seems the test 509 already is more or less broken before this
+      patch because it never completes the asynch openssl handshake as it
+      should. The most recent patch in here:
+      http://curl.haxx.se/mail/lib-2008-01/0323.html
+
+119 - Christian Buchner's mentioned race condition in win32 gethostbyname_thread
+      http://curl.haxx.se/mail/lib-2008-02/0000.html
+
+120 - Removal / updating of the ca-bundle
+      http://daniel.haxx.se/blog/2008/02/12/ca-cert-bundle-or-not/
+      http://curl.haxx.se/bug/view.cgi?id=1889593
+
+121 - Kaspar Brand's and Guenter Knauf's work on the TLS extension Server Name
+      Indication (RFC 4366) http://curl.haxx.se/mail/lib-2008-02/0050.html
+
+122 - Progress callback not called during failed socket connect with the multi
+      interface as reported in the bug #1891355:
+      http://curl.haxx.se/bug/view.cgi?id=1891355
+
+123 - 
