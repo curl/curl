@@ -18,8 +18,9 @@ noinst_PROGRAMS =$(PROGS)
 
 # adig and ahost are just sample programs and thus not mentioned with the
 # regular sources and headers
-EXTRA_DIST = CHANGES README.cares Makefile.inc adig.c ahost.c $(man_MANS) \
- $(MSVCFILES) AUTHORS config-win32.h RELEASE-NOTES libcares.pc.in
+EXTRA_DIST = AUTHORS CHANGES README.cares Makefile.inc Makefile.dj \
+ Makefile.m32 Makefile.netware Makefile.vc6 adig.c ahost.c $(man_MANS) \
+ $(MSVCFILES) config-win32.h RELEASE-NOTES libcares.pc.in
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libcares.pc
