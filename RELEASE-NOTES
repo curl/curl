@@ -4,7 +4,7 @@ Curl and libcurl 7.18.1
  Command line options:         126
  curl_easy_setopt() options:   150
  Public functions in libcurl:  56
- Public web site mirrors:      43
+ Public web site mirrors:      39
  Known libcurl bindings:       36
  Contributors:                 621
 
@@ -31,7 +31,7 @@ Other curl-related news:
 
 New curl mirrors:
 
- o 
+ o http://curl.cuendet.com/ is a new mirror in Atlanta, USA
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
