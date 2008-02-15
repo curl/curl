@@ -41,7 +41,7 @@ my $url = 'http://lxr.mozilla.org/seamonkey/source/security/nss/lib/ckfw/builtin
 # If the OpenSSL commandline is not in search path you can configure it here!
 my $openssl = 'openssl';
 
-my $version = '$Revision$';
+my $version = $1 if ('$Revision$' =~ /\s(\d+\.\d+)\s/);
 
 getopts('bhilnqtuv');
 
