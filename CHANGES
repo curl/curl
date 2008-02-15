@@ -7,6 +7,13 @@
                                   Changelog
 
 Daniel S (15 Feb 2008)
+- Made the gnutls code path not even try to get the server cert if no peer
+  verification is requested. Previously it would even return failure if gnutls
+  failed to get the server cert even though no verification was asked for.
+  Public server showing the problem: https://www.net222.caisse-epargne.fr
+
+- Fix my Curl_timeleft() leftover mistake in the gnutls code
+
 - Pooyan McSporran found and fixed a flaw where you first would do a normal
   http request and then you'd reuse the handle and replace the Accept: header,
   as then libcurl would send two Accept: headers!

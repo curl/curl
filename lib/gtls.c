@@ -156,7 +156,7 @@ static CURLcode handshake(struct connectdata *conn,
     rc = gnutls_handshake(session);
 
     if((rc == GNUTLS_E_AGAIN) || (rc == GNUTLS_E_INTERRUPTED)) {
-      long timeout_ms = Curl_connecttimeleft(conn, NULL, duringconnect);
+      long timeout_ms = Curl_timeleft(conn, NULL, duringconnect);
 
       if(timeout_ms < 0) {
         /* a precaution, no need to continue if time already is up */
@@ -336,38 +336,42 @@ Curl_gtls_connect(struct connectdata *conn,
 
   chainp = gnutls_certificate_get_peers(session, &cert_list_size);
   if(!chainp) {
-    if(data->set.ssl.verifyhost) {
+    if(data->set.ssl.verifypeer) {
       failf(data, "failed to get server cert");
       return CURLE_PEER_FAILED_VERIFICATION;
     }
     infof(data, "\t common name: WARNING couldn't obtain\n");
   }
 
-  /* This function will try to verify the peer's certificate and return its
-     status (trusted, invalid etc.). The value of status should be one or more
-     of the gnutls_certificate_status_t enumerated elements bitwise or'd. To
-     avoid denial of service attacks some default upper limits regarding the
-     certificate key size and chain size are set. To override them use
-     gnutls_certificate_set_verify_limits(). */
+  if(data->set.ssl.verifypeer) {
+    /* This function will try to verify the peer's certificate and return its
+       status (trusted, invalid etc.). The value of status should be one or
+       more of the gnutls_certificate_status_t enumerated elements bitwise
+       or'd. To avoid denial of service attacks some default upper limits
+       regarding the certificate key size and chain size are set. To override
+       them use gnutls_certificate_set_verify_limits(). */
 
-  rc = gnutls_certificate_verify_peers2(session, &verify_status);
-  if(rc < 0) {
-    failf(data, "server cert verify failed: %d", rc);
-    return CURLE_SSL_CONNECT_ERROR;
-  }
+    rc = gnutls_certificate_verify_peers2(session, &verify_status);
+    if(rc < 0) {
+      failf(data, "server cert verify failed: %d", rc);
+      return CURLE_SSL_CONNECT_ERROR;
+    }
 
-  /* verify_status is a bitmask of gnutls_certificate_status bits */
-  if(verify_status & GNUTLS_CERT_INVALID) {
-    if(data->set.ssl.verifypeer) {
-      failf(data, "server certificate verification failed. CAfile: %s",
-            data->set.ssl.CAfile?data->set.ssl.CAfile:"none");
-      return CURLE_SSL_CACERT;
+    /* verify_status is a bitmask of gnutls_certificate_status bits */
+    if(verify_status & GNUTLS_CERT_INVALID) {
+      if(data->set.ssl.verifypeer) {
+        failf(data, "server certificate verification failed. CAfile: %s",
+              data->set.ssl.CAfile?data->set.ssl.CAfile:"none");
+        return CURLE_SSL_CACERT;
+      }
+      else
+        infof(data, "\t server certificate verification FAILED\n");
     }
     else
-      infof(data, "\t server certificate verification FAILED\n");
+      infof(data, "\t server certificate verification OK\n");
   }
   else
-      infof(data, "\t server certificate verification OK\n");
+    infof(data, "\t server certificate verification SKIPPED\n");
 
   /* initialize an X.509 certificate structure. */
   gnutls_x509_crt_init(&x509_cert);

@@ -20,6 +20,8 @@ This release includes the following bugfixes:
  o GnuTLS-built libcurl failed when doing global cleanup and reinit
  o error message problem when unable to resolve a host on Windows
  o Accept: header replacing
+ o not verificating server certs with gnutls still failed if gnutls had problems
+   with the cert
 
 This release includes the following known bugs:
 
