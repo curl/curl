@@ -3682,7 +3682,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       result = setup_range(data);
       if(result) {
         DEBUGASSERT(conn->handler->done);
-        conn->handler->done(conn, result, FALSE);
+        /* we ignore the return code for the protocol-specific DONE */
+        (void)conn->handler->done(conn, result, FALSE);
         return result;
       }
 
