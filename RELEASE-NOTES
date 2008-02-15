@@ -19,6 +19,7 @@ This release includes the following bugfixes:
  o improved strdup replacement
  o GnuTLS-built libcurl failed when doing global cleanup and reinit
  o error message problem when unable to resolve a host on Windows
+ o Accept: header replacing
 
 This release includes the following known bugs:
 
@@ -36,6 +37,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Michal Marek, Dmitry Kurochkin, Niklas Angebrand, Günter Knauf, Yang Tse,
- Dan Fandrich, Mike Hommey
+ Dan Fandrich, Mike Hommey, Pooyan McSporran
 
         Thanks! (and sorry if I forgot to mention someone)

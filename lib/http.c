@@ -2182,8 +2182,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
      (conn->bits.httpproxy && !conn->bits.tunnel_proxy) )?
     "Pragma: no-cache\r\n":NULL;
 
-  if(!checkheaders(data, "Accept:"))
-    http->p_accept = "Accept: */*\r\n";
+  http->p_accept = checkheaders(data, "Accept:")?NULL:"Accept: */*\r\n";
 
   if(( (HTTPREQ_POST == httpreq) ||
        (HTTPREQ_POST_FORM == httpreq) ||

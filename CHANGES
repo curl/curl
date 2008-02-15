@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel S (15 Feb 2008)
+- Pooyan McSporran found and fixed a flaw where you first would do a normal
+  http request and then you'd reuse the handle and replace the Accept: header,
+  as then libcurl would send two Accept: headers!
+
 Daniel S (11 Feb 2008)
 - Yang Tse pointed out a few remaining quirks from my timeout refactoring from
   Feb 7 that didn't abort properly on timeouts. These are actually old
