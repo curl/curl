@@ -628,6 +628,10 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
       state(conn, SSH_AUTH_DONE);
     }
     else {
+      char *err_msg;
+      (void)libssh2_session_last_error(sshc->ssh_session,
+                                       &err_msg, NULL, 0);
+      infof(data, "SSH public key authentication failed: %s\n", err_msg);
       state(conn, SSH_AUTH_PASS_INIT);
     }
     break;
