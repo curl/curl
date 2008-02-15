@@ -41,11 +41,26 @@ my $url = 'http://lxr.mozilla.org/seamonkey/source/security/nss/lib/ckfw/builtin
 # If the OpenSSL commandline is not in search path you can configure it here!
 my $openssl = 'openssl';
 
+my $version = '$Revision$';
+
 getopts('bhilnqtuv');
 
+if ($opt_i) {
+  print ("=" x 78 . "\n");
+  print "Script Version            : $version\n";
+  print "Perl Version              : $]\n";
+  print "Operating System Name     : $^O\n";
+  print "Getopt::Std.pm Version    : ${Getopt::Std::VERSION}\n";
+  print "MIME::Base64.pm Version   : ${MIME::Base64::VERSION}\n";
+  print "LWP::UserAgent.pm Version : ${LWP::UserAgent::VERSION}\n";
+  print "LWP.pm Version            : ${LWP::VERSION}\n";
+  print ("=" x 78 . "\n");
+}
+
+$0 =~ s/\\/\//g;
+$0 = substr($0, rindex($0, '/') + 1);
 if ($opt_h) {
-  $0 =~ s/\\/\//g;
-  printf("Usage:\t%s [-b] [-i] [-l] [-n] [-q] [-t] [-u] [-v] [<outputfile>]\n", substr($0, rindex($0, '/') + 1));
+  printf("Usage:\t%s [-b] [-i] [-l] [-n] [-q] [-t] [-u] [-v] [<outputfile>]\n", $0);
   print "\t-b\tbackup an existing version of ca-bundle.crt\n";
   print "\t-i\tprint version info about used modules\n";
   print "\t-l\tprint license info about certdata.txt\n";
@@ -57,21 +72,13 @@ if ($opt_h) {
   exit;
 }
 
-if ($opt_i) {
-  print "Perl Version              : $]\n";
-  print "Operating System Name     : $^O\n";
-  printf("MIME::Base64.pm Version   : %s\n", $MIME::Base64::VERSION);
-  printf("LWP::UserAgent.pm Version : %s\n", $LWP::UserAgent::VERSION);
-  print ("=" x 78 . "\n");
-}
-
 my $crt = $ARGV[0] || 'ca-bundle.crt';
 my $txt = substr($url, rindex($url, '/') + 1);
 $txt =~ s/\?.*//;
 
 if (!$opt_n || !-e $txt) {
   print "Downloading '$txt' ...\n" if (!$opt_q);
-  my $ua  = new LWP::UserAgent;
+  my $ua  = new LWP::UserAgent(agent => "$0/$version");
   my $req = new HTTP::Request('GET', $url);
   my $res = $ua->request($req);
   if ($res->is_success) {
@@ -106,8 +113,8 @@ print CRT <<EOT;
 ## '/mozilla/security/nss/lib/ckfw/builtins/certdata.txt'
 ##
 ## It contains the certificates in ${format}PEM format and therefore
-## can be directly used with curl / libcurl, or with an
-## Apache+mod_ssl webserver for SSL client authentication.
+## can be directly used with curl / libcurl / php_curl, or with
+## an Apache+mod_ssl webserver for SSL client authentication.
 ## Just configure this file as the SSLCACertificateFile.
 ##
 
