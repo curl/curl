@@ -225,7 +225,7 @@ Curl_gtls_connect(struct connectdata *conn,
   size_t size;
   unsigned int algo;
   unsigned int bits;
-  time_t clock;
+  time_t certclock;
   const char *ptr;
   void *ssl_sessionid;
   size_t ssl_idsize;
@@ -344,6 +344,10 @@ Curl_gtls_connect(struct connectdata *conn,
   }
 
   if(data->set.ssl.verifypeer) {
+
+    gnutls_certificate_set_verify_limits(conn->ssl[sockindex].cred,
+                                         40200, 38);
+
     /* This function will try to verify the peer's certificate and return its
        status (trusted, invalid etc.). The value of status should be one or
        more of the gnutls_certificate_status_t enumerated elements bitwise
@@ -413,14 +417,14 @@ Curl_gtls_connect(struct connectdata *conn,
     infof(data, "\t common name: %s (matched)\n", certbuf);
 
   /* Check for time-based validity */
-  clock = gnutls_x509_crt_get_expiration_time(x509_cert);
+  certclock = gnutls_x509_crt_get_expiration_time(x509_cert);
 
-  if(clock == (time_t)-1) {
+  if(certclock == (time_t)-1) {
     failf(data, "server cert expiration date verify failed");
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  if(clock < time(NULL)) {
+  if(certclock < time(NULL)) {
     if(data->set.ssl.verifypeer) {
       failf(data, "server certificate expiration date has passed.");
       return CURLE_PEER_FAILED_VERIFICATION;
@@ -431,14 +435,14 @@ Curl_gtls_connect(struct connectdata *conn,
   else
     infof(data, "\t server certificate expiration date OK\n");
 
-  clock = gnutls_x509_crt_get_activation_time(x509_cert);
+  certclock = gnutls_x509_crt_get_activation_time(x509_cert);
 
-  if(clock == (time_t)-1) {
+  if(certclock == (time_t)-1) {
     failf(data, "server cert activation date verify failed");
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  if(clock > time(NULL)) {
+  if(certclock > time(NULL)) {
     if(data->set.ssl.verifypeer) {
       failf(data, "server certificate not activated yet.");
       return CURLE_PEER_FAILED_VERIFICATION;
@@ -474,11 +478,11 @@ Curl_gtls_connect(struct connectdata *conn,
   gnutls_x509_crt_get_dn(x509_cert, certbuf, &size);
   infof(data, "\t subject: %s\n", certbuf);
 
-  clock = gnutls_x509_crt_get_activation_time(x509_cert);
-  showtime(data, "start date", clock);
+  certclock = gnutls_x509_crt_get_activation_time(x509_cert);
+  showtime(data, "start date", certclock);
 
-  clock = gnutls_x509_crt_get_expiration_time(x509_cert);
-  showtime(data, "expire date", clock);
+  certclock = gnutls_x509_crt_get_expiration_time(x509_cert);
+  showtime(data, "expire date", certclock);
 
   size = sizeof(certbuf);
   gnutls_x509_crt_get_issuer_dn(x509_cert, certbuf, &size);
@@ -543,16 +547,16 @@ void Curl_gtls_close_all(struct SessionHandle *data)
 }
 
 static void close_one(struct connectdata *conn,
-                      int index)
+                      int idx)
 {
-  if(conn->ssl[index].session) {
-    gnutls_bye(conn->ssl[index].session, GNUTLS_SHUT_RDWR);
-    gnutls_deinit(conn->ssl[index].session);
-    conn->ssl[index].session = NULL;
+  if(conn->ssl[idx].session) {
+    gnutls_bye(conn->ssl[idx].session, GNUTLS_SHUT_RDWR);
+    gnutls_deinit(conn->ssl[idx].session);
+    conn->ssl[idx].session = NULL;
   }
-  if(conn->ssl[index].cred) {
-    gnutls_certificate_free_credentials(conn->ssl[index].cred);
-    conn->ssl[index].cred = NULL;
+  if(conn->ssl[idx].cred) {
+    gnutls_certificate_free_credentials(conn->ssl[idx].cred);
+    conn->ssl[idx].cred = NULL;
   }
 }
 
