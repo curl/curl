@@ -316,13 +316,13 @@ ifeq ($(LIBARCH),CLIB)
 	@echo $(DL)import @$(SDK_CLIB)/imports/threads.imp$(DL) >> $@
 	@echo $(DL)import @$(SDK_CLIB)/imports/nlmlib.imp$(DL) >> $@
 	@echo $(DL)import @$(SDK_CLIB)/imports/socklib.imp$(DL) >> $@
+	@echo $(DL)module clib$(DL) >> $@
 ifndef DISABLE_LDAP
 	@echo $(DL)import @$(SDK_LDAP)/clib/imports/ldapsdk.imp$(DL) >> $@
 	@echo $(DL)import @$(SDK_LDAP)/clib/imports/ldapssl.imp$(DL) >> $@
 	@echo $(DL)import @$(SDK_LDAP)/clib/imports/ldapx.imp$(DL) >> $@
-	@echo $(DL)module ldapsdk ldapssl ldapx$(DL) >> $@
+	@echo $(DL)module ldapsdk ldapssl$(DL) >> $@
 endif
-	@echo $(DL)module clib$(DL) >> $@
 else
 ifeq ($(POSIXFL),1)
 	@echo $(DL)flag_on 4194304$(DL) >> $@
@@ -338,13 +338,13 @@ else
 endif
 	@echo $(DL)import @$(SDK_LIBC)/imports/libc.imp$(DL) >> $@
 	@echo $(DL)import @$(SDK_LIBC)/imports/netware.imp$(DL) >> $@
+	@echo $(DL)module libc$(DL) >> $@
 ifndef DISABLE_LDAP
 	@echo $(DL)import @$(SDK_LDAP)/libc/imports/lldapsdk.imp$(DL) >> $@
 	@echo $(DL)import @$(SDK_LDAP)/libc/imports/lldapssl.imp$(DL) >> $@
 	@echo $(DL)import @$(SDK_LDAP)/libc/imports/lldapx.imp$(DL) >> $@
-	@echo $(DL)module lldapsdk lldapssl lldapx$(DL) >> $@
+	@echo $(DL)module lldapsdk lldapssl$(DL) >> $@
 endif
-	@echo $(DL)module libc$(DL) >> $@
 endif
 ifdef MODULES
 	@echo $(DL)module $(MODULES)$(DL) >> $@
