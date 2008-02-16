@@ -344,10 +344,6 @@ Curl_gtls_connect(struct connectdata *conn,
   }
 
   if(data->set.ssl.verifypeer) {
-
-    gnutls_certificate_set_verify_limits(conn->ssl[sockindex].cred,
-                                         40200, 38);
-
     /* This function will try to verify the peer's certificate and return its
        status (trusted, invalid etc.). The value of status should be one or
        more of the gnutls_certificate_status_t enumerated elements bitwise
