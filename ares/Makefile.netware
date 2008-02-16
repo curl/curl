@@ -269,8 +269,9 @@ ifdef IMPORTS
 	@echo $(DL)import $(IMPORTS)$(DL) >> $@
 endif
 ifeq ($(LD),nlmconv)
-	@echo $(DL)input $(OBJEXE)$(DL) >> $@
 	@echo $(DL)input $(PRELUDE)$(DL) >> $@
+	@echo $(DL)input $(OBJEXE)$(DL) >> $@
+	@echo $(DL)input $(@:.def=.o)$(DL) >> $@
 	@echo $(DL)output $(notdir $(@:.def=.nlm))$(DL) >> $@
 endif
 
