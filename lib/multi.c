@@ -615,8 +615,11 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
        (easy->easy_conn->data == easy->easy_handle)) {
 
       /* Curl_done() clears the conn->data field to lose the association
-         between the easy handle and the connection */
-      Curl_done(&easy->easy_conn, easy->result, premature);
+         between the easy handle and the connection
+
+         Note that this ignores the return code simply because there's nothing
+         really useful to do with it anyway! */
+      (void)Curl_done(&easy->easy_conn, easy->result, premature);
 
       if(easy->easy_conn)
         /* the connection is still alive, set back the association to enable
