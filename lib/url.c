@@ -4445,8 +4445,15 @@ CURLcode Curl_done(struct connectdata **connp,
 
      if conn->bits.close is TRUE, it means that the connection should be
      closed in spite of all our efforts to be nice, due to protocol
-     restrictions in our or the server's end */
-  if(data->set.reuse_forbid || conn->bits.close) {
+     restrictions in our or the server's end
+
+     if premature is TRUE, it means this connection was said to be DONE before
+     the entire request operation is complete and thus we can't know in what
+     state it is for re-using, so we're forced to close it. In a perfect world
+     we can add code that keep track of if we really must close it here or not,
+     but currently we have no such detail knowledge.
+  */
+  if(data->set.reuse_forbid || conn->bits.close || premature) {
     CURLcode res2 = Curl_disconnect(conn); /* close the connection */
 
     /* If we had an error already, make sure we return that one. But
