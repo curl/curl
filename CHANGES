@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel S (17 Feb 2008)
+- Jerome Muffat-Meridol helped me fix Curl_done() to close the current
+  connection by force when it was called before the entire request is
+  completed, simply because we can't know if the connection really can be
+  re-used safely at that point.
+
+- Based on the same debugging logic, I've also made Curl_http_done() not
+  return CURLE_GOT_NOTHING if called "prematurely". This should have no real
+  effect to anything but the code makes more sense like this.
+  
 Daniel S (15 Feb 2008)
 - Made the gnutls code path not even try to get the server cert if no peer
   verification is requested. Previously it would even return failure if gnutls
