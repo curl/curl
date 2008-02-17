@@ -1832,7 +1832,9 @@ CURLcode Curl_http_done(struct connectdata *conn,
   if(status != CURLE_OK)
     return (status);
 
-  if(!conn->bits.retry &&
+  if(!premature && /* this check is pointless is the DONE is done before the
+                      entire operation is complete */
+     !conn->bits.retry &&
      ((http->readbytecount +
        data->req.headerbytecount -
        data->req.deductheadercount)) <= 0) {
