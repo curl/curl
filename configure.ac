@@ -2002,6 +2002,7 @@ AC_CHECK_FUNCS( strtoll \
                 strlcat \
                 getpwuid \
                 geteuid \
+                getppid \
                 utime \
                 sigsetjmp \
                 basename \

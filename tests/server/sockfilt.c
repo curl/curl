@@ -181,6 +181,13 @@ static int juggle(curl_socket_t *sockfdp,
   unsigned char buffer[17010];
   char data[16];
 
+#ifdef HAVE_GETPPID
+  /* As a last resort, quit if sockfilt process becomes orphan. Just in case
+     parent ftpserver process has died without killing its sockfilt children */
+  if(getppid() <= 1)
+    return FALSE;
+#endif
+
   timeout.tv_sec = 120;
   timeout.tv_usec = 0;
 
