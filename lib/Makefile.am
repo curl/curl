@@ -30,7 +30,7 @@ DOCS = README.encoding README.memoryleak README.ares README.curlx	\
 
 EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 Makefile.riscos	\
  $(DSP) curllib.dsw config-win32.h config-win32ce.h config-riscos.h	\
- config-mac.h config.h.in ca-bundle.crt makefile.dj config.dos		\
+ config-mac.h config.h.in makefile.dj config.dos		\
  libcurl.framework.make libcurl.plist libcurl.rc config-amigaos.h	\
  amigaos.c amigaos.h makefile.amiga Makefile.netware nwlib.c nwos.c	\
  libcurl.imp msvcproj.head msvcproj.foot config-win32ce.h		\
@@ -111,14 +111,8 @@ $(top_builddir)/lib/ca-bundle.h: Makefile.in Makefile
 if CABUNDLE
 	echo '#define CURL_CA_BUNDLE @CURL_CA_BUNDLE@' >> $@
 else
-	echo '#undef CURL_CA_BUNDLE /* unknown */' >> $@
+	echo '#undef CURL_CA_BUNDLE /* unknown default path */' >> $@
 endif
-
-install-data-hook:
-	@if test -n "@CURL_CA_BUNDLE@"; then \
-	  $(mkinstalldirs) `dirname $(DESTDIR)@CURL_CA_BUNDLE@`; \
-	  @INSTALL_DATA@ $(srcdir)/ca-bundle.crt $(DESTDIR)@CURL_CA_BUNDLE@; \
-        fi
 
 # this hook is mainly for non-unix systems to build even if configure
 # isn't run

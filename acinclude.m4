@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -2489,5 +2489,52 @@ AC_DEFUN([CURL_CHECK_NATIVE_WINDOWS], [
         [Define to 1 if you are building a native Windows target.])
       ;;
   esac
+])
+
+
+dnl CURL_CHECK_CA_BUNDLE
+dnl -------------------------------------------------
+dnl Check if a default ca-bundle should be used
+dnl
+dnl regarding the paths this will scan:
+dnl /etc/ssl/certs/ca-certificates.crt Debian systems
+dnl /etc/pki/tls/certs/ca-bundle.crt Redhat and Mandriva
+dnl /usr/share/ssl/certs/ca-bundle.crt old(er) Redhat
+
+AC_DEFUN([CURL_CHECK_CA_BUNDLE], [
+
+  AC_MSG_CHECKING([default CA cert bundle])
+
+  AC_ARG_WITH(ca-bundle,
+AC_HELP_STRING([--with-ca-bundle=FILE], [File name to use as CA bundle])
+AC_HELP_STRING([--without-ca-bundle], [Don't use a default CA bundle]),
+  [ ca="$withval" ],
+  [
+    dnl the path we previously would have installed the curl ca bundle
+    dnl to, and thus we now check for an already existing cert in that place
+    dnl in case we find no other
+    if test "x$prefix" != xNONE; then
+      cac="\${prefix}/share/curl/curl-ca-bundle.crt"
+    else
+      cac="$ac_default_prefix/share/curl/curl-ca-bundle.crt"
+    fi
+
+    for a in /etc/ssl/certs/ca-certificates.crt \
+             /etc/pki/tls/certs/ca-bundle.crt \
+             /usr/share/ssl/certs/ca-bundle.crt \
+             "$cac"; do
+      if test -f $a; then
+        ca="$a"
+        break
+      fi
+    done
+    ]
+  )
+
+  if test "x$ca" != "xno"; then
+    CURL_CA_BUNDLE='"'$ca'"'
+    AC_SUBST(CURL_CA_BUNDLE)
+  fi
+  AC_MSG_RESULT([$ca])
 ])
 

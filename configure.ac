@@ -1610,28 +1610,7 @@ dnl **********************************************************************
 dnl Check for the CA bundle
 dnl **********************************************************************
 
-if test X"$SSL_ENABLED" != "X"; then
-
-  AC_MSG_CHECKING([CA cert bundle install path])
-
-  AC_ARG_WITH(ca-bundle,
-AC_HELP_STRING([--with-ca-bundle=FILE], [File name to install the CA bundle as])
-AC_HELP_STRING([--without-ca-bundle], [Don't install the CA bundle]),
-    [ ca="$withval" ],
-    [
-      if test "x$prefix" != xNONE; then
-        ca="\${prefix}/share/curl/curl-ca-bundle.crt"
-      else
-        ca="$ac_default_prefix/share/curl/curl-ca-bundle.crt"
-      fi
-    ] )
-
-    if test "x$ca" != "xno"; then
-      CURL_CA_BUNDLE='"'$ca'"'
-      AC_SUBST(CURL_CA_BUNDLE)
-    fi
-    AC_MSG_RESULT([$ca])
-fi dnl only done if some kind of SSL was enabled
+CURL_CHECK_CA_BUNDLE
 
 AM_CONDITIONAL(CABUNDLE, test x$ca != xno)
 

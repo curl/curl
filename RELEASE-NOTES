@@ -12,6 +12,7 @@ This release includes the following changes:
  
  o added support for HttpOnly cookies
  o 'make ca-bundle' downloads and generates an updated ca bundle file
+ o we no longer distribute or install a ca cert bundle
 
 This release includes the following bugfixes:
 

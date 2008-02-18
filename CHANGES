@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel S (18 Feb 2008)
+- We're no longer providing a very old ca-bundle in the curl tarball. You can
+  get a fresh one downloaded and created with 'make ca-bundle' or you can get
+  one from here => http://curl.haxx.se/docs/caextract.html if you want a fresh
+  new one extracted from Mozilla's recent list of ca certs.
+
+  The configure option --with-ca-bundle now lets you specify what file to use
+  as default ca bundle for your build. If not specified, the configure script
+  will check a few known standard places for a global ca cert to use.
+
 Daniel S (17 Feb 2008)
 - Jerome Muffat-Meridol helped me fix Curl_done() to close the current
   connection by force when it was called before the entire request is

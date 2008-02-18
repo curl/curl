@@ -1,17 +1,21 @@
                       Peer SSL Certificate Verification
                       =================================
 
-libcurl performs peer SSL certificate verification by default. This is done by
-installing a default CA cert bundle on 'make install' (or similar), that CA
-bundle package is used by default on operations against SSL servers.
+libcurl performs peer SSL certificate verification by default.  This is done
+by using CA cert bundle that the SSL library can use to make sure the peer's
+server certificate is valid.
 
 If you communicate with HTTPS or FTPS servers using certificates that are
 signed by CAs present in the bundle, you can be sure that the remote server
 really is the one it claims to be.
 
-If the remote server uses a self-signed certificate, if you don't install
-curl's CA cert bundle, if the server uses a certificate signed by a CA that
-isn't included in the bundle or if the remote host is an impostor
+Until 7.18.0, curl bundled a severely outdated ca bundle file that was
+installed by default. These days, the curl archives include no ca certs at
+all. You need to get them elsewhere. See below for example.
+
+If the remote server uses a self-signed certificate, if you don't install a CA
+cert bundle, if the server uses a certificate signed by a CA that isn't
+included in the bundle you use or if the remote host is an impostor
 impersonating your favorite site, and you want to transfer files from this
 server, do one of the following:
 
@@ -27,10 +31,8 @@ server, do one of the following:
     With the curl command line tool: --cacert [file]
 
  3. Add the CA cert for your server to the existing default CA cert bundle.
-    The default path of the CA bundle installed with the curl package is:
-    /usr/local/share/curl/curl-ca-bundle.crt, which can be changed by running
-    configure with the --with-ca-bundle option pointing out the path of your
-    choice.
+    The default path of the CA bundle used can be changed by running configure
+    with the --with-ca-bundle option pointing out the path of your choice.
 
     To do this, you need to get the CA cert for your server in PEM format and
     then append that to your CA cert bundle.
@@ -48,8 +50,6 @@ server, do one of the following:
      o Append the 'outcert.pem' to the CA cert bundle or use it stand-alone
        as described below.
 
-     (Thanks to Frankie V for this description)
-
     If you use the 'openssl' tool, this is one way to get extract the CA cert
     for a particular server:
 
@@ -63,8 +63,6 @@ server, do one of the following:
      o If you want to trust the certificate, you can append it to your
        cert_bundle or use it stand-alone as described. Just remember that the
        security is no better than the way you obtained the certificate.
-
-     (Thanks to Doug Kaufman for this description)
 
  4. If you're using the curl command line tool, you can specify your own CA
     cert path by setting the environment variable CURL_CA_BUNDLE to the path
