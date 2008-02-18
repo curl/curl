@@ -112,8 +112,8 @@
 static CURLcode https_connecting(struct connectdata *conn, bool *done);
 #ifdef USE_SSL
 static int https_getsock(struct connectdata *conn,
-                              curl_socket_t *socks,
-                              int numsocks);
+                         curl_socket_t *socks,
+                         int numsocks);
 #endif
 
 /*
@@ -146,9 +146,9 @@ const struct Curl_handler Curl_handler_https = {
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
   Curl_http_connect,                    /* connect_it */
-  https_connecting,                /* connecting */
+  https_connecting,                     /* connecting */
   ZERO_NULL,                            /* doing */
-  https_getsock,                   /* proto_getsock */
+  https_getsock,                        /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
   ZERO_NULL,                            /* disconnect */
   PORT_HTTPS,                           /* defport */
@@ -1727,8 +1727,8 @@ static CURLcode https_connecting(struct connectdata *conn, bool *done)
 /* This function is OpenSSL-specific. It should be made to query the generic
    SSL layer instead. */
 static int https_getsock(struct connectdata *conn,
-                              curl_socket_t *socks,
-                              int numsocks)
+                         curl_socket_t *socks,
+                         int numsocks)
 {
   if(conn->protocol & PROT_HTTPS) {
     struct ssl_connect_data *connssl = &conn->ssl[FIRSTSOCKET];
@@ -1751,9 +1751,9 @@ static int https_getsock(struct connectdata *conn,
 }
 #else
 #ifdef USE_GNUTLS
-int https_getsock(struct connectdata *conn,
-                       curl_socket_t *socks,
-                       int numsocks)
+static int https_getsock(struct connectdata *conn,
+                         curl_socket_t *socks,
+                         int numsocks)
 {
   (void)conn;
   (void)socks;
@@ -1762,9 +1762,9 @@ int https_getsock(struct connectdata *conn,
 }
 #else
 #ifdef USE_NSS
-int https_getsock(struct connectdata *conn,
-                       curl_socket_t *socks,
-                       int numsocks)
+static int https_getsock(struct connectdata *conn,
+                         curl_socket_t *socks,
+                         int numsocks)
 {
   (void)conn;
   (void)socks;
@@ -1773,9 +1773,9 @@ int https_getsock(struct connectdata *conn,
 }
 #else
 #ifdef USE_QSOSSL
-int https_getsock(struct connectdata *conn,
-                       curl_socket_t *socks,
-                       int numsocks)
+static int https_getsock(struct connectdata *conn,
+                         curl_socket_t *socks,
+                         int numsocks)
 {
   (void)conn;
   (void)socks;
@@ -2759,9 +2759,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       else
         /* HTTP GET/HEAD download: */
         result = Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
-                               &http->readbytecount,
-                               http->postdata?FIRSTSOCKET:-1,
-                               http->postdata?&http->writebytecount:NULL);
+                                     &http->readbytecount,
+                                     http->postdata?FIRSTSOCKET:-1,
+                                     http->postdata?&http->writebytecount:NULL);
     }
     if(result)
       return result;
