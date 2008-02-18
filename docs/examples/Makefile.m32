@@ -1,0 +1,135 @@
+#########################################################################
+# $Id$
+#
+## Makefile for building curl examples with MingW32
+## and optionally OpenSSL (0.9.8), libssh2 (0.18), zlib (1.2.3)
+##
+## Usage:
+## mingw32-make -f Makefile.m32 [SSL=1] [SSH2=1] [ZLIB=1] [SSPI=1] [IPV6=1] [DYN=1]
+##
+## Hint: you can also set environment vars to control the build, f.e.:
+## set ZLIB_PATH=c:/zlib-1.2.3
+## set ZLIB=1
+##
+#########################################################################
+
+# Edit the path below to point to the base of your Zlib sources.
+ifndef ZLIB_PATH
+ZLIB_PATH = ../../zlib-1.2.3
+endif
+# Edit the path below to point to the base of your OpenSSL package.
+ifndef OPENSSL_PATH
+OPENSSL_PATH = ../../openssl-0.9.8g
+endif
+# Edit the path below to point to the base of your LibSSH2 package.
+ifndef LIBSSH2_PATH
+LIBSSH2_PATH = ../../libssh2-0.18
+endif
+# Edit the path below to point to the base of your Novell LDAP NDK.
+ifndef LDAP_SDK
+LDAP_SDK = c:/novell/ndk/cldapsdk/win32
+endif
+
+PROOT = ../..
+ARES_LIB = $(PROOT)/ares
+
+SSL = 1
+ZLIB = 1
+
+CC = gcc
+CFLAGS = -g -O2 -Wall
+# comment LDFLAGS below to keep debug info
+LDFLAGS = -s
+RC = windres
+RCFLAGS = --include-dir=$(PROOT)/include -O COFF -i
+RM = del /q /f > NUL 2>&1
+CP = copy
+
+########################################################
+## Nothing more to do below this line!
+
+INCLUDES = -I. -I$(PROOT) -I$(PROOT)/include -I$(PROOT)/lib
+LINK = $(CC) $(LDFLAGS) -o $@
+
+curl_PROGRAMS = curl.exe
+ifdef DYN
+  curl_DEPENDENCIES = $(PROOT)/lib/libcurldll.a $(PROOT)/lib/libcurl.dll
+  curl_LDADD = -L$(PROOT)/lib -lcurldll
+else
+  curl_DEPENDENCIES = $(PROOT)/lib/libcurl.a
+  curl_LDADD = -L$(PROOT)/lib -lcurl
+  CFLAGS += -DCURL_STATICLIB
+endif
+ifdef ARES
+  ifndef DYN
+    curl_DEPENDENCIES += $(ARES_LIB)/libcares.a
+  endif
+  CFLAGS += -DUSE_ARES
+  curl_LDADD += -L$(ARES_LIB) -lcares
+endif
+ifdef SSH2
+  CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
+  curl_LDADD += -L$(LIBSSH2_PATH)/win32 -lssh2
+endif
+ifdef SSL
+  INCLUDES += -I"$(OPENSSL_PATH)/outinc"
+  CFLAGS += -DUSE_SSLEAY -DHAVE_OPENSSL_ENGINE_H
+  ifdef DYN
+    curl_LDADD += -L$(OPENSSL_PATH)/out -leay32 -lssl32
+  else
+    curl_LDADD += -L$(OPENSSL_PATH)/out -lssl -lcrypto -lgdi32
+  endif
+endif
+ifdef ZLIB
+  INCLUDES += -I"$(ZLIB_PATH)"
+  CFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
+  curl_LDADD += -L$(ZLIB_PATH) -lz
+endif
+ifdef SSPI
+  CFLAGS += -DUSE_WINDOWS_SSPI
+endif
+ifdef IPV6
+  CFLAGS += -DENABLE_IPV6
+endif
+ifdef LDAPS
+  CFLAGS += -DHAVE_LDAP_SSL
+endif
+ifdef USE_LDAP_NOVELL
+  CFLAGS += -DCURL_HAS_NOVELL_LDAPSDK
+  curl_LDADD += -L"$(LDAP_SDK)/lib/mscvc" -lldapsdk -lldapssl -lldapx
+endif
+ifdef USE_LDAP_OPENLDAP
+  CFLAGS += -DCURL_HAS_OPENLDAP_LDAPSDK
+  curl_LDADD += -L"$(LDAP_SDK)/lib" -lldap -llber
+endif
+ifndef USE_LDAP_NOVELL
+ifndef USE_LDAP_OPENLDAP
+curl_LDADD += -lwldap32
+endif
+endif
+curl_LDADD += -lws2_32 -lwinmm
+COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
+
+# Makefile.inc provides the noinst_PROGRAMS and COMPLICATED_EXAMPLES defines
+include Makefile.inc
+
+example_PROGRAMS := $(patsubst %,%.exe,$(strip $(noinst_PROGRAMS)))
+
+.SUFFIXES: .rc .res .o .exe
+
+
+all: $(example_PROGRAMS)
+
+.o.exe: $(curl_DEPENDENCIES)
+	$(LINK) $< $(curl_LDADD)
+
+.c.o:
+	$(COMPILE) -c $<
+
+.rc.res:
+	$(RC) $(RCFLAGS) $< -o $@
+
+clean:
+	$(RM) $(example_PROGRAMS)
+
+
