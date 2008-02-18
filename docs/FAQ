@@ -1,4 +1,4 @@
-Updated: Feb 7, 2008 (http://curl.haxx.se/docs/faq.html)
+Updated: Feb 18, 2008 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -320,32 +320,26 @@ FAQ
 
   1.11 Why don't you update ca-bundle.crt
 
-  The bundled ca-bundle.crt file is to be treated as an example file these
-  days, as it is very outdated (it being last modified year 2000 should tell)
-  and should be replaced with a much more modern and up-to-date version by
-  anyone who wants to verify peers.
+  The ca-bundle.crt file that used to be bundled with curl was very outdated
+  (it being last modified year 2000 should tell) and must be replaced with a
+  much more modern and up-to-date version by anyone who wants to verify peers
+  anyway. It is no longer provided, the last curl release that shipped it was
+  curl 7.18.0.
 
   In the cURL project we've decided not to attempt to keep this file updated
-  since deciding what to add to a ca cert bundle is an undertaking we've not
-  been ready to accept.
+  (or even present anymore) since deciding what to add to a ca cert bundle is
+  an undertaking we've not been ready to accept, and the one we can get from
+  Mozilla is perfectly fine so there's no need to duplicate that work.
 
   Today, with many services performed over HTTPS, every operating system
   should come with a default ca cert bundle that can be deemed somewhat
   trustworthy and that collection (if reasonably updated) should be deemed to
-  be a lot better than this old file.
+  be a lot better than a private curl version.
 
-  If you want the most recent collection of ca certs that Mozilla Firefox uses
-  (which should be seen as the effictive successor of Netscape 4.72 from where
-  this particular bundle originates from), we recommend that you extract the
-  collection yourself from Mozilla Firefox (by running 'make ca-bundle), or by
-  using our online service setup for this purpose:
-  http://curl.haxx.se/docs/caextract.html
-
-  Due to the licensing of that particular file, we've decided to not simply
-  include that in the curl package/tree. It is of course arguable whether the
-  cacerts themselves actually are licensed under the Firefox's licenses but
-  until proven otherwise we will assume so and thus we avoid putting them in
-  any curl release/tarball.
+  If you want the most recent collection of ca certs that Mozilla Firefox
+  uses, we recommend that you extract the collection yourself from Mozilla
+  Firefox (by running 'make ca-bundle), or by using our online service setup
+  for this purpose: http://curl.haxx.se/docs/caextract.html
 
 
 2. Install Related Problems
