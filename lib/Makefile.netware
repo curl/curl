@@ -331,6 +331,7 @@ endif
 ifeq ($(findstring posixpre,$(PRELUDE)),posixpre)
 	@echo $(DL)start POSIX_Start$(DL) >> $@
 	@echo $(DL)exit POSIX_Stop$(DL) >> $@
+	@echo $(DL)check POSIX_CheckUnload$(DL) >> $@
 else
 	@echo $(DL)start _LibCPrelude$(DL) >> $@
 	@echo $(DL)exit _LibCPostlude$(DL) >> $@
