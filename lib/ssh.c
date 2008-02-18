@@ -132,7 +132,7 @@ static LIBSSH2_ALLOC_FUNC(libssh2_malloc);
 static LIBSSH2_REALLOC_FUNC(libssh2_realloc);
 static LIBSSH2_FREE_FUNC(libssh2_free);
 
-static int get_pathname(const char **cpp, char **path);
+static CURLcode get_pathname(const char **cpp, char **path);
 
 static CURLcode ssh_connect(struct connectdata *conn, bool *done);
 static CURLcode ssh_multi_statemach(struct connectdata *conn, bool *done);
@@ -858,14 +858,14 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
        * also, every command takes at least one argument so we get that
        * first argument right now
        */
-      err = get_pathname(&cp, &sshc->quote_path1);
-      if(err) {
-        if(err == CURLE_OUT_OF_MEMORY)
+      result = get_pathname(&cp, &sshc->quote_path1);
+      if(result) {
+        if(result == CURLE_OUT_OF_MEMORY)
           failf(data, "Out of memory");
         else
           failf(data, "Syntax error: Bad first parameter");
         state(conn, SSH_SFTP_CLOSE);
-        sshc->actualcode = err;
+        sshc->actualcode = result;
         break;
       }
 
@@ -882,9 +882,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
 
         /* sshc->quote_path1 contains the mode to set */
         /* get the destination */
-        err = get_pathname(&cp, &sshc->quote_path2);
-        if(err) {
-          if(err == CURLE_OUT_OF_MEMORY)
+        result = get_pathname(&cp, &sshc->quote_path2);
+        if(result) {
+          if(result == CURLE_OUT_OF_MEMORY)
             failf(data, "Out of memory");
           else
             failf(data, "Syntax error in chgrp/chmod/chown: "
@@ -892,7 +892,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
           Curl_safefree(sshc->quote_path1);
           sshc->quote_path1 = NULL;
           state(conn, SSH_SFTP_CLOSE);
-          sshc->actualcode = err;
+          sshc->actualcode = result;
           break;
         }
         memset(&sshc->quote_attrs, 0, sizeof(LIBSSH2_SFTP_ATTRIBUTES));
@@ -904,9 +904,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
         /* symbolic linking */
         /* sshc->quote_path1 is the source */
         /* get the destination */
-        err = get_pathname(&cp, &sshc->quote_path2);
-        if(err) {
-          if(err == CURLE_OUT_OF_MEMORY)
+        result = get_pathname(&cp, &sshc->quote_path2);
+        if(result) {
+          if(result == CURLE_OUT_OF_MEMORY)
             failf(data, "Out of memory");
           else
             failf(data,
@@ -914,7 +914,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
           Curl_safefree(sshc->quote_path1);
           sshc->quote_path1 = NULL;
           state(conn, SSH_SFTP_CLOSE);
-          sshc->actualcode = err;
+          sshc->actualcode = result;
           break;
         }
         state(conn, SSH_SFTP_QUOTE_SYMLINK);
@@ -929,16 +929,16 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
         /* rename file */
         /* first param is the source path */
         /* second param is the dest. path */
-        err = get_pathname(&cp, &sshc->quote_path2);
-        if(err) {
-          if(err == CURLE_OUT_OF_MEMORY)
+        result = get_pathname(&cp, &sshc->quote_path2);
+        if(result) {
+          if(result == CURLE_OUT_OF_MEMORY)
             failf(data, "Out of memory");
           else
             failf(data, "Syntax error in rename: Bad second parameter");
           Curl_safefree(sshc->quote_path1);
           sshc->quote_path1 = NULL;
           state(conn, SSH_SFTP_CLOSE);
-          sshc->actualcode = err;
+          sshc->actualcode = result;
           break;
         }
         state(conn, SSH_SFTP_QUOTE_RENAME);
@@ -1875,8 +1875,10 @@ static CURLcode ssh_init(struct connectdata *conn)
  */
 static CURLcode ssh_connect(struct connectdata *conn, bool *done)
 {
-  struct ssh_conn *ssh;
+#ifdef CURL_LIBSSH2_DEBUG
   curl_socket_t sock;
+#endif
+  struct ssh_conn *ssh;
   CURLcode result;
   struct SessionHandle *data = conn->data;
 
@@ -1901,8 +1903,9 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
   if(conn->passwd) {
     infof(data, "Password: %s\n", conn->passwd);
   }
-#endif /* CURL_LIBSSH2_DEBUG */
   sock = conn->sock[FIRSTSOCKET];
+#endif /* CURL_LIBSSH2_DEBUG */
+
   ssh->ssh_session = libssh2_session_init_ex(libssh2_malloc, libssh2_free,
                                              libssh2_realloc, conn);
   if(ssh->ssh_session == NULL) {
@@ -2259,7 +2262,7 @@ ssize_t Curl_sftp_recv(struct connectdata *conn, int sockindex,
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-static int
+static CURLcode
 get_pathname(const char **cpp, char **path)
 {
   const char *cp = *cpp, *end;
@@ -2321,7 +2324,7 @@ get_pathname(const char **cpp, char **path)
     memcpy(*path, cp, end - cp);
     (*path)[end - cp] = '\0';
   }
-  return (0);
+  return CURLE_OK;
 
   fail:
     Curl_safefree(*path);
