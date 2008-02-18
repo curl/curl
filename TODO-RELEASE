@@ -11,10 +11,6 @@ To be addressed before 7.18.1 (planned release: April 2008)
 119 - Christian Buchner's mentioned race condition in win32 gethostbyname_thread
       http://curl.haxx.se/mail/lib-2008-02/0000.html
 
-120 - Removal / updating of the ca-bundle
-      http://daniel.haxx.se/blog/2008/02/12/ca-cert-bundle-or-not/
-      http://curl.haxx.se/bug/view.cgi?id=1889593
-
 121 - Kaspar Brand's and Guenter Knauf's work on the TLS extension Server Name
       Indication (RFC 4366) http://curl.haxx.se/mail/lib-2008-02/0050.html
 
