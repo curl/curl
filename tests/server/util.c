@@ -165,31 +165,60 @@ char *test2file(long testno)
   return filename;
 }
 
-void go_sleep(long ms)
+/*
+ * Portable function used for waiting a specific amount of ms.
+ * Waiting indefinitely with this function is not allowed, a
+ * zero or negative timeout value will return immediately.
+ *
+ * Return values:
+ *   -1 = system call error, or invalid timeout value
+ *    0 = specified timeout has elapsed
+ */
+int wait_ms(int timeout_ms)
 {
-#ifdef HAVE_POLL_FINE
-  /* portable subsecond "sleep" */
-  poll((void *)0, 0, (int)ms);
-#else
-  /* systems without poll() need other solutions */
-
-#ifdef WIN32
-  /* Windows offers a millisecond sleep */
-  Sleep(ms);
-#elif defined(MSDOS)
-  delay(ms);
-#else
-  /* Other systems must use select() for this */
-  struct timeval timeout;
-
-  timeout.tv_sec = ms/1000;
-  ms = ms%1000;
-  timeout.tv_usec = ms * 1000;
-
-  select(0, NULL,  NULL, NULL, &timeout);
+#if !defined(MSDOS) && !defined(USE_WINSOCK)
+#ifndef HAVE_POLL_FINE
+  struct timeval pending_tv;
 #endif
-
+  struct timeval initial_tv;
+  int pending_ms;
+  int error;
 #endif
+  int r = 0;
+
+  if(!timeout_ms)
+    return 0;
+  if(timeout_ms < 0) {
+    SET_SOCKERRNO(EINVAL);
+    return -1;
+  }
+#if defined(MSDOS)
+  delay(timeout_ms);
+#elif defined(USE_WINSOCK)
+  Sleep(timeout_ms);
+#else
+  pending_ms = timeout_ms;
+  initial_tv = curlx_tvnow();
+  do {
+#if defined(HAVE_POLL_FINE)
+    r = poll(NULL, 0, pending_ms);
+#else
+    pending_tv.tv_sec = pending_ms / 1000;
+    pending_tv.tv_usec = (pending_ms % 1000) * 1000;
+    r = select(0, NULL, NULL, NULL, &pending_tv);
+#endif /* HAVE_POLL_FINE */
+    if(r != -1)
+      break;
+    error = SOCKERRNO;
+    if(error == EINVAL)
+      break;
+    pending_ms = timeout_ms - (int)curlx_tvdiff(curlx_tvnow(), initial_tv);
+    if(pending_ms <= 0)
+      break;
+  } while(r == -1);
+#endif /* USE_WINSOCK */
+  if(r)
+    r = -1;
+  return r;
 }
-
 
