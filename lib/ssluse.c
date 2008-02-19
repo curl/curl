@@ -1324,6 +1324,10 @@ ossl_connect_step1(struct connectdata *conn,
   */
   SSL_CTX_set_options(connssl->ctx, SSL_OP_ALL);
 
+  /* disable SSLv2 in the default case (i.e. allow SSLv3 and TLSv1) */
+  if(data->set.ssl.version == CURL_SSLVERSION_DEFAULT)
+    SSL_CTX_set_options(connssl->ctx, SSL_OP_NO_SSLv2);
+
 #if 0
   /*
    * Not sure it's needed to tell SSL_connect() that socket is

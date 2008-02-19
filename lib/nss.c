@@ -873,7 +873,7 @@ CURLcode Curl_nss_connect(struct connectdata * conn, int sockindex)
   switch (data->set.ssl.version) {
   default:
   case CURL_SSLVERSION_DEFAULT:
-    ssl2 = ssl3 = tlsv1 = PR_TRUE;
+    ssl3 = tlsv1 = PR_TRUE;
     break;
   case CURL_SSLVERSION_TLSv1:
     tlsv1 = PR_TRUE;
@@ -891,6 +891,9 @@ CURLcode Curl_nss_connect(struct connectdata * conn, int sockindex)
   if(SSL_OptionSet(model, SSL_ENABLE_SSL3, ssl3) != SECSuccess)
     goto error;
   if(SSL_OptionSet(model, SSL_ENABLE_TLS, tlsv1) != SECSuccess)
+    goto error;
+
+  if(SSL_OptionSet(model, SSL_V2_COMPATIBLE_HELLO, ssl2) != SECSuccess)
     goto error;
 
   if(data->set.ssl.cipher_list) {

@@ -1379,10 +1379,9 @@ Pass a long as parameter to control what version of SSL/TLS to attempt to use.
 The available options are:
 .RS
 .IP CURL_SSLVERSION_DEFAULT
-The default action. When libcurl built with OpenSSL or NSS, this will attempt
-to figure out the remote SSL protocol version. Unfortunately there are a lot of
-ancient and broken servers in use which cannot handle this technique and will
-fail to connect. When libcurl is built with GnuTLS, this will mean SSLv3.
+The default action. This will attempt to figure out the remote SSL protocol
+version, i.e. either SSLv3 or TLSv1 (but not SSLv2, which became disabled
+by default with 7.18.1).
 .IP CURL_SSLVERSION_TLSv1
 Force TLSv1
 .IP CURL_SSLVERSION_SSLv2

@@ -90,7 +90,7 @@ static CURLcode Curl_qsossl_init_session(struct SessionHandle * data)
   memset((char *) &initappstr, 0, sizeof initappstr);
   initappstr.applicationID = certname;
   initappstr.applicationIDLen = strlen(certname);
-  initappstr.protocol = SSL_VERSION_CURRENT;
+  initappstr.protocol = TLSV1_SSLV3;
   initappstr.sessionType = SSL_REGISTERED_AS_CLIENT;
   rc = SSL_Init_Application(&initappstr);
 
@@ -190,7 +190,7 @@ static CURLcode Curl_qsossl_handshake(struct connectdata * conn, int sockindex)
 
   default:
   case CURL_SSLVERSION_DEFAULT:
-    h->protocol = SSL_VERSION_CURRENT;
+    h->protocol = TLSV1_SSLV3;
     break;
 
   case CURL_SSLVERSION_TLSv1:
