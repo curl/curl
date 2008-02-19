@@ -14,7 +14,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#ifdef WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 
 /*
  * This example shows an FTP upload, with a rename of the file just after
@@ -32,8 +36,7 @@ int main(int argc, char **argv)
 {
   CURL *curl;
   CURLcode res;
-  FILE * hd_src ;
-  int hd ;
+  FILE *hd_src;
   struct stat file_info;
 
   struct curl_slist *headerlist=NULL;
@@ -41,13 +44,13 @@ int main(int argc, char **argv)
   static const char buf_2 [] = "RNTO " RENAME_FILE_TO;
 
   /* get the file size of the local file */
-  hd = open(LOCAL_FILE, O_RDONLY) ;
-  fstat(hd, &file_info);
-  close(hd) ;
+  if (stat(LOCAL_FILE, &file_info)) {
+    printf("Couldnt open '%s': %s\n", LOCAL_FILE, strerror(errno));
+    exit(1);
+  }
+  printf("Local file size: %ld bytes.\n", file_info.st_size);
 
-  /* get a FILE * of the same file, could also be made with
-     fdopen() from the previous descriptor, but hey this is just
-     an example! */
+  /* get a FILE * of the same file */
   hd_src = fopen(LOCAL_FILE, "rb");
 
   /* In windows, this will init the winsock stuff */
