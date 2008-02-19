@@ -160,9 +160,9 @@ enum sockmode {
   if sockfd is CURL_SOCKET_BAD, listendfd is a listening socket we must
   accept()
 */
-static int juggle(curl_socket_t *sockfdp,
-                  curl_socket_t listenfd,
-                  enum sockmode *mode)
+static bool juggle(curl_socket_t *sockfdp,
+                   curl_socket_t listenfd,
+                   enum sockmode *mode)
 {
   struct timeval timeout;
   fd_set fds_read;
@@ -308,17 +308,11 @@ static int juggle(curl_socket_t *sockfdp,
 
         buffer_len = (ssize_t)strtol((char *)buffer, NULL, 16);
         if (buffer_len > (ssize_t)sizeof(buffer)) {
-          logmsg("Buffer size %d too small for data size %d", 
-                   (int)sizeof(buffer), buffer_len);
+          logmsg("ERROR: Buffer size (%ld bytes) too small for data size "
+                 "(%ld bytes)", (long)sizeof(buffer), (long)buffer_len);
           return FALSE;
         }
         logmsg("> %d bytes data, server => client", buffer_len);
-
-        if(buffer_len > (ssize_t)sizeof(buffer)) {
-          logmsg("ERROR: %d bytes of data does not fit within the %d "
-                 "bytes buffer", buffer_len, sizeof(buffer));
-          return FALSE;
-        }
 
         /*
          * To properly support huge data chunks, we need to repeat the call
