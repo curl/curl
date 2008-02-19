@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel Fandrich (19 Feb 2007)
+- Added test309 to test HTTP redirect to HTTPS URL
+
 Daniel S (18 Feb 2008)
 - We're no longer providing a very old ca-bundle in the curl tarball. You can
   get a fresh one downloaded and created with 'make ca-bundle' or you can get
