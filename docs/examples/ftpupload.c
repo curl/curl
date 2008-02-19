@@ -44,7 +44,7 @@ int main(int argc, char **argv)
   static const char buf_2 [] = "RNTO " RENAME_FILE_TO;
 
   /* get the file size of the local file */
-  if (stat(LOCAL_FILE, &file_info)) {
+  if(stat(LOCAL_FILE, &file_info)) {
     printf("Couldnt open '%s': %s\n", LOCAL_FILE, strerror(errno));
     exit(1);
   }
