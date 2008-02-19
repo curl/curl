@@ -277,20 +277,20 @@ static CURLcode libssh2_session_error_to_CURLE(int err)
 
 static LIBSSH2_ALLOC_FUNC(libssh2_malloc)
 {
+  (void)abstract; /* arg not used */
   return malloc(count);
-  (void)abstract;
 }
 
 static LIBSSH2_REALLOC_FUNC(libssh2_realloc)
 {
+  (void)abstract; /* arg not used */
   return realloc(ptr, count);
-  (void)abstract;
 }
 
 static LIBSSH2_FREE_FUNC(libssh2_free)
 {
+  (void)abstract; /* arg not used */
   free(ptr);
-  (void)abstract;
 }
 
 /*
