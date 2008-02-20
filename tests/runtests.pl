@@ -2318,7 +2318,7 @@ sub singletest {
     }
     else {
         if(!$short) {
-            printf "\ncurl returned $cmdres, %s was expected\n", $errorcode;
+            printf "\ncurl returned $cmdres, %d was expected\n", $errorcode;
         }
         logmsg " exit FAILED\n";
         return 1;
