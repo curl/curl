@@ -1022,6 +1022,8 @@ CURLcode Curl_nss_connect(struct connectdata * conn, int sockindex)
     goto error;
   }
 
+  connssl->state = ssl_connection_complete;
+
   display_conn_info(conn, connssl->handle);
 
   return CURLE_OK;

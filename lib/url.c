@@ -2439,10 +2439,17 @@ ConnectionExists(struct SessionHandle *data,
              ssl options as well */
           if(!Curl_ssl_config_matches(&needle->ssl_config,
                                       &check->ssl_config)) {
-            infof(data,
-                  "Connection #%ld has different SSL parameters, "
-                  "can't reuse\n",
-                  check->connectindex );
+            DEBUGF(infof(data,
+                         "Connection #%ld has different SSL parameters, "
+                         "can't reuse\n",
+                         check->connectindex));
+            continue;
+          }
+          else if(check->ssl[FIRSTSOCKET].state != ssl_connection_complete) {
+            DEBUGF(infof(data,
+                         "Connection #%ld has not started ssl connect, "
+                         "can't reuse\n",
+                         check->connectindex));
             continue;
           }
         }

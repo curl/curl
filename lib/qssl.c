@@ -258,8 +258,11 @@ CURLcode Curl_qsossl_connect(struct connectdata * conn, int sockindex)
       SSL_Destroy(connssl->handle);
       connssl->handle = NULL;
       connssl->use = FALSE;
+      connssl->state = ssl_connection_none;
     }
   }
+  if (rc == CURLE_OK)
+    connssl->state = ssl_connection_complete;
 
   return rc;
 }

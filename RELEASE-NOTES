@@ -27,6 +27,7 @@ This release includes the following bugfixes:
    problems with the cert
  o when using the multi interface and a handle is removed while still having
    a transfer going on, the connection is now closed by force
+ o bad re-use of SSL connections in non-complete state
 
 This release includes the following known bugs:
 
@@ -45,6 +46,6 @@ advice from friends like these:
 
  Michal Marek, Dmitry Kurochkin, Niklas Angebrand, Günter Knauf, Yang Tse,
  Dan Fandrich, Mike Hommey, Pooyan McSporran, Jerome Muffat-Meridol,
- Kaspar Brand
+ Kaspar Brand, Gautam Kachroo
 
         Thanks! (and sorry if I forgot to mention someone)

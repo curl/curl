@@ -355,7 +355,7 @@ CURLcode Curl_write(struct connectdata *conn,
   CURLcode retcode;
   int num = (sockfd == conn->sock[SECONDARYSOCKET]);
 
-  if(conn->ssl[num].use)
+  if(conn->ssl[num].state == ssl_connection_complete)
     /* only TRUE if SSL enabled */
     bytes_written = Curl_ssl_send(conn, num, mem, len);
 #ifdef USE_LIBSSH2
@@ -567,7 +567,7 @@ int Curl_read(struct connectdata *conn, /* connection data */
     buffertofill = buf;
   }
 
-  if(conn->ssl[num].use) {
+  if(conn->ssl[num].state == ssl_connection_complete) {
     nread = Curl_ssl_recv(conn, num, buffertofill, bytesfromsocket);
 
     if(nread == -1) {

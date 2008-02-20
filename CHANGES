@@ -7,6 +7,12 @@
                                   Changelog
 
 Daniel S (20 Feb 2008)
+- Based on initial work done by Gautam Kachroo to address a bug, we now keep
+  better control at the exact state of the connection's SSL status so that we
+  know exactly when it has completed the SSL negotiation or not so that there
+  won't be accidental re-uses of connections that are wrongly believed to be
+  in SSL-completed-negotiate state.
+
 - We no longer support setting the CURLOPT_URL option from inside a callback
   such as the CURLOPT_SSL_CTX_FUNCTION one treat that as if it was a Location:
   following. The patch that introduced this feature was done for 7.11.0, but
