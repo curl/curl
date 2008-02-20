@@ -501,7 +501,7 @@ Curl_gtls_connect(struct connectdata *conn,
   ptr = gnutls_mac_get_name(gnutls_mac_get(session));
   infof(data, "\t MAC: %s\n", ptr);
 
-  connssl->state = ssl_connection_complete;
+  conn->ssl[sockindex].state = ssl_connection_complete;
 
   if(!ssl_sessionid) {
     /* this session was not previously in the cache, add it now */
