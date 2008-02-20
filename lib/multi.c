@@ -860,11 +860,13 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   CURLMcode result = CURLM_OK;
   struct SingleRequest *k;
 
-  do {
-    bool disconnect_conn = FALSE;
+  if(!GOOD_EASY_HANDLE(easy->easy_handle))
+    return CURLM_BAD_EASY_HANDLE;
 
-    if(!GOOD_EASY_HANDLE(easy->easy_handle))
-      return CURLM_BAD_EASY_HANDLE;
+  do {
+    /* this is a do-while loop just to allow a break to skip to the end
+       of it */
+    bool disconnect_conn = FALSE;
 
     /* Handle the case when the pipe breaks, i.e., the connection
        we're using gets cleaned up and we're left with nothing. */
@@ -885,40 +887,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     }
 
     if(easy->state > CURLM_STATE_CONNECT &&
-        easy->state < CURLM_STATE_COMPLETED) {
+       easy->state < CURLM_STATE_COMPLETED)
       /* Make sure we set the connection's current owner */
       easy->easy_conn->data = easy->easy_handle;
-    }
-
-    if(CURLM_STATE_WAITCONNECT <= easy->state &&
-        easy->state <= CURLM_STATE_DO &&
-        easy->easy_handle->change.url_changed) {
-      char *gotourl;
-      Curl_posttransfer(easy->easy_handle);
-
-      easy->result = Curl_done(&easy->easy_conn, CURLE_OK, FALSE);
-      /* We make sure that the pipe broken flag is reset
-         because in this case, it isn't an actual break */
-      easy->easy_handle->state.pipe_broke = FALSE;
-      if(CURLE_OK == easy->result) {
-        gotourl = strdup(easy->easy_handle->change.url);
-        if(gotourl) {
-          easy->easy_handle->change.url_changed = FALSE;
-          easy->result = Curl_follow(easy->easy_handle, gotourl, FALSE);
-          if(CURLE_OK == easy->result)
-            multistate(easy, CURLM_STATE_CONNECT);
-          else
-            free(gotourl);
-        }
-        else {
-          easy->result = CURLE_OUT_OF_MEMORY;
-          multistate(easy, CURLM_STATE_COMPLETED);
-          break;
-        }
-      }
-    }
-
-    easy->easy_handle->change.url_changed = FALSE;
 
     switch(easy->state) {
     case CURLM_STATE_INIT:
@@ -1403,9 +1374,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         multistate(easy, CURLM_STATE_COMPLETED);
       }
     }
-
-  } while(easy->easy_handle->change.url_changed);
-
+  } while(0);
   if((CURLM_STATE_COMPLETED == easy->state) && !easy->msg) {
     if(easy->easy_handle->dns.hostcachetype == HCACHE_MULTI) {
       /* clear out the usage of the shared DNS cache */

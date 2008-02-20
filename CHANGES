@@ -6,6 +6,17 @@
 
                                   Changelog
 
+Daniel S (20 Feb 2008)
+- We no longer support setting the CURLOPT_URL option from inside a callback
+  such as the CURLOPT_SSL_CTX_FUNCTION one treat that as if it was a Location:
+  following. The patch that introduced this feature was done for 7.11.0, but
+  this code and functionality has been broken since about 7.15.4 (March 2006)
+  with the introduction of non-blocking OpenSSL "connects".
+
+  It was a hack to begin with and since it doesn't work and hasn't worked
+  correctly for a long time and nobody has even noticed, I consider it a very
+  suitable subject for plain removal. And so it was done.
+
 Daniel Fandrich (19 Feb 2007)
 - Added test309 to test HTTP redirect to HTTPS URL
 

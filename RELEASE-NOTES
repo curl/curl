@@ -13,6 +13,8 @@ This release includes the following changes:
  o added support for HttpOnly cookies
  o 'make ca-bundle' downloads and generates an updated ca bundle file
  o we no longer distribute or install a ca cert bundle
+ o SSLv2 is now disabled by default for SSL operations
+ o the test509-style setting URL in callback is officially no longer supported
 
 This release includes the following bugfixes:
 
@@ -42,6 +44,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Michal Marek, Dmitry Kurochkin, Niklas Angebrand, Günter Knauf, Yang Tse,
- Dan Fandrich, Mike Hommey, Pooyan McSporran, Jerome Muffat-Meridol
+ Dan Fandrich, Mike Hommey, Pooyan McSporran, Jerome Muffat-Meridol,
+ Kaspar Brand
 
         Thanks! (and sorry if I forgot to mention someone)

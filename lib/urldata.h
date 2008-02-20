@@ -1250,10 +1250,6 @@ struct UrlState {
 struct DynamicStatic {
   char *url;        /* work URL, copied from UserDefined */
   bool url_alloc;   /* URL string is malloc()'ed */
-  bool url_changed; /* set on CURL_OPT_URL, used to detect if the URL was
-                       changed after the connect phase, as we allow callback
-                       to change it and if so, we reconnect to use the new
-                       URL instead */
   char *referer;    /* referer string */
   bool referer_alloc; /* referer sting is malloc()ed */
   struct curl_slist *cookielist; /* list of cookie files set by

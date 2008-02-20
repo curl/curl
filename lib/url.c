@@ -1481,8 +1481,6 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     result = setstropt(&data->set.str[STRING_SET_URL],
                             va_arg(param, char *));
     data->change.url = data->set.str[STRING_SET_URL];
-    if(data->change.url)
-      data->change.url_changed = TRUE;
     break;
   case CURLOPT_PORT:
     /*
