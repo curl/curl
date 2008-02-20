@@ -1,13 +1,6 @@
 To be addressed before 7.18.1 (planned release: April 2008)
 =============================
 
-118 - Gautam Kachroo's issue with proxies and ssl, when libcurl uses SSL even
-      though not really in a state for it. The patch breaks test case 509, but
-      it also seems the test 509 already is more or less broken before this
-      patch because it never completes the asynch openssl handshake as it
-      should. The most recent patch in here:
-      http://curl.haxx.se/mail/lib-2008-01/0323.html
-
 119 - Christian Buchner's mentioned race condition in win32 gethostbyname_thread
       http://curl.haxx.se/mail/lib-2008-02/0000.html
 
