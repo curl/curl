@@ -23,6 +23,10 @@ Daniel S (20 Feb 2008)
   correctly for a long time and nobody has even noticed, I consider it a very
   suitable subject for plain removal. And so it was done.
 
+Guenter Knauf (19 Feb 2007)
+- We do no longer support SSLv2 by default since it has known flaws.
+  Kaspar Brand provided a patch for all supported SSL toolkits.
+ 
 Daniel Fandrich (19 Feb 2007)
 - Added test309 to test HTTP redirect to HTTPS URL
 
