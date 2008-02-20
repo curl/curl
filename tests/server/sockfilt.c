@@ -164,6 +164,7 @@ static bool juggle(curl_socket_t *sockfdp,
                    curl_socket_t listenfd,
                    enum sockmode *mode)
 {
+  struct timeval initial_tv;
   struct timeval timeout;
   fd_set fds_read;
   fd_set fds_write;
@@ -175,6 +176,8 @@ static bool juggle(curl_socket_t *sockfdp,
   ssize_t nread_socket;
   ssize_t bytes_written;
   ssize_t buffer_len;
+  long pending_ms;
+  long timeout_ms = 120 * 1000;
 
  /* 'buffer' is this excessively large only to be able to support things like
     test 1003 which tests exceedingly large server response lines */
@@ -187,9 +190,6 @@ static bool juggle(curl_socket_t *sockfdp,
   if(getppid() <= 1)
     return FALSE;
 #endif
-
-  timeout.tv_sec = 120;
-  timeout.tv_usec = 0;
 
   FD_ZERO(&fds_read);
   FD_ZERO(&fds_write);
@@ -246,9 +246,23 @@ static bool juggle(curl_socket_t *sockfdp,
 
   } /* switch(*mode) */
 
+  pending_ms = timeout_ms;
+  initial_tv = curlx_tvnow();
+
   do {
-    rc = select(maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
-  } while((rc == -1) && (SOCKERRNO == EINTR));
+    timeout.tv_sec = pending_ms / 1000;
+    timeout.tv_usec = (pending_ms % 1000) * 1000;
+    rc = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
+    if(rc != -1)
+      break;
+    if(SOCKERRNO != EINTR)
+      break;
+    pending_ms = timeout_ms - curlx_tvdiff(curlx_tvnow(), initial_tv);
+    if(pending_ms <= 0) {
+      rc = 0;
+      break;
+    }
+  } while(rc == -1);
 
   switch(rc) {
   case -1:
