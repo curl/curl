@@ -32,6 +32,22 @@
 #define REMOTE_URL      "ftp://localhost/"  UPLOAD_FILE_AS
 #define RENAME_FILE_TO  "renamed-and-fine.txt"
 
+/* NOTE: if you want this example to work on Windows with libcurl as a
+   DLL, you MUST also provide a read callback with
+   CURLOPT_READFUNCTION. Failing to do so will give you a crash since a
+   DLL may not use the variable's memory when passed in to it from an app
+   like this. */
+static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *stream)
+{
+  /* in real-world cases, this would probably get this data differently
+     as this fread() stuff is exactly what the library already would do
+     by default internally */
+  size_t retcode = fread(ptr, size, nmemb, stream);
+
+  fprintf(stderr, "*** We read %d bytes from file\n", retcode);
+  return retcode;
+}
+
 int main(int argc, char **argv)
 {
   CURL *curl;
@@ -63,6 +79,9 @@ int main(int argc, char **argv)
     headerlist = curl_slist_append(headerlist, buf_1);
     headerlist = curl_slist_append(headerlist, buf_2);
 
+    /* we want to use our own read function */
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+
     /* enable uploading */
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1) ;
 
@@ -74,12 +93,6 @@ int main(int argc, char **argv)
 
     /* now specify which file to upload */
     curl_easy_setopt(curl, CURLOPT_READDATA, hd_src);
-
-    /* NOTE: if you want this example to work on Windows with libcurl as a
-       DLL, you MUST also provide a read callback with
-       CURLOPT_READFUNCTION. Failing to do so will give you a crash since a
-       DLL may not use the variable's memory when passed in to it from an app
-       like this. */
 
     /* Set the size of the file to upload (optional).  If you give a *_LARGE
        option you MUST make sure that the type of the passed-in argument is a
