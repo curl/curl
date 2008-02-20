@@ -28,6 +28,7 @@ This release includes the following bugfixes:
  o when using the multi interface and a handle is removed while still having
    a transfer going on, the connection is now closed by force
  o bad re-use of SSL connections in non-complete state
+ o test case 405 failures with GnuTLS builds
 
 This release includes the following known bugs:
 

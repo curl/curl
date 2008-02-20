@@ -7,6 +7,8 @@
                                   Changelog
 
 Daniel S (20 Feb 2008)
+- Fixed test case 405 to not fail when libcurl is built with GnuTLS
+
 - Based on initial work done by Gautam Kachroo to address a bug, we now keep
   better control at the exact state of the connection's SSL status so that we
   know exactly when it has completed the SSL negotiation or not so that there
