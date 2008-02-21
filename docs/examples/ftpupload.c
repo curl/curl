@@ -14,6 +14,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <errno.h>
 #ifdef WIN32
 #include <io.h>
 #else
@@ -61,7 +62,7 @@ int main(int argc, char **argv)
   /* get the file size of the local file */
   if(stat(LOCAL_FILE, &file_info)) {
     printf("Couldnt open '%s': %s\n", LOCAL_FILE, strerror(errno));
-    exit(1);
+    return 1;
   }
   printf("Local file size: %ld bytes.\n", file_info.st_size);
 
