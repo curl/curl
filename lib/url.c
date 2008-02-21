@@ -4392,8 +4392,13 @@ CURLcode Curl_done(struct connectdata **connp,
                    bool premature)
 {
   CURLcode result;
-  struct connectdata *conn = *connp;
-  struct SessionHandle *data = conn->data;
+  struct connectdata *conn;
+  struct SessionHandle *data;
+
+  DEBUGASSERT(*connp);
+
+  conn = *connp;
+  data = conn->data;
 
   Curl_expire(data, 0); /* stop timer */
 
