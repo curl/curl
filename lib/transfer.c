@@ -2389,8 +2389,12 @@ CURLcode Curl_perform(struct SessionHandle *data)
         if(CURLE_OK == res)
           res = res2;
       }
-      else
-        /* Curl_do() failed, clean up left-overs in the done-call */
+      else if(conn)
+        /* Curl_do() failed, clean up left-overs in the done-call, but note
+           that at some cases the conn pointer is NULL when Curl_do() failed
+           and the connection cache is very small so only call Curl_done() if
+           conn is still "alive".
+        */
         res2 = Curl_done(&conn, res, FALSE);
 
       /*

@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel S (21 Feb 2008)
+- Zmey Petroff found a crash when libcurl accessed a NULL pointer, which
+  happened if you set the connection cache size to 1 and for example failed to
+  login to an FTP site. Bug report #1896698
+  (http://curl.haxx.se/bug/view.cgi?id=1896698)
+
 Daniel S (20 Feb 2008)
 - Fixed test case 405 to not fail when libcurl is built with GnuTLS
 
