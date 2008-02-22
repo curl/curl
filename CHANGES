@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel S (22 Feb 2008)
+- Georg Lippitsch made the src/Makefile.vc6 makefile use the same memory model
+  options as the lib/Makefile.vc6 already did.
+
 Daniel S (21 Feb 2008)
 - Zmey Petroff found a crash when libcurl accessed a NULL pointer, which
   happened if you set the connection cache size to 1 and for example failed to

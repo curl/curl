@@ -61,13 +61,22 @@ SSL_LFLAGS     = /LIBPATH:"$(OPENSSL_PATH)/out32"
 SSL_IMP_LFLAGS = /LIBPATH:"$(OPENSSL_PATH)/out32dll"
 SSL_LIBS       = libeay32.lib ssleay32.lib gdi32.lib user32.lib advapi32.lib
 
+# Runtime library configuration
+RTLIB   = /MD
+RTLIBD  = /MDd
+
+!IF "$(RTLIBCFG)" == "static"
+RTLIB  = /MT
+RTLIBD = /MTd
+!ENDIF
+
 ## Release
-CCR   = cl.exe /MD /O2 /DNDEBUG
+CCR   = cl.exe $(RTLIB) /O2 /DNDEBUG
 LINKR = link.exe /incremental:no /libpath:"../lib"
 RCR   = rc.exe /dCURLDEBUG=0
 
 ## Debug
-CCD   = cl.exe /MDd /Gm /ZI /Od /D_DEBUG /GZ
+CCD   = cl.exe $(RTLIBD) /Gm /ZI /Od /D_DEBUG /GZ
 LINKD = link.exe /incremental:yes /debug /libpath:"../lib"
 RCD   = rc.exe /dCURLDEBUG=1
 
