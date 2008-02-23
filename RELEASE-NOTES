@@ -15,6 +15,7 @@ This release includes the following changes:
  o we no longer distribute or install a ca cert bundle
  o SSLv2 is now disabled by default for SSL operations
  o the test509-style setting URL in callback is officially no longer supported
+ o support a full chain of certificates in a given PKCS12 certificate
 
 This release includes the following bugfixes:
 
@@ -48,6 +49,6 @@ advice from friends like these:
 
  Michal Marek, Dmitry Kurochkin, Niklas Angebrand, Günter Knauf, Yang Tse,
  Dan Fandrich, Mike Hommey, Pooyan McSporran, Jerome Muffat-Meridol,
- Kaspar Brand, Gautam Kachroo, Zmey Petroff, Georg Lippitsch
+ Kaspar Brand, Gautam Kachroo, Zmey Petroff, Georg Lippitsch, Sam Listopad
 
         Thanks! (and sorry if I forgot to mention someone)

@@ -364,6 +364,8 @@ int cert_stuff(struct connectdata *conn,
       FILE *f;
       PKCS12 *p12;
       EVP_PKEY *pri;
+      STACK_OF(X509) *ca = NULL;
+      int i;
 
       f = fopen(cert_file,"rb");
       if(!f) {
@@ -373,10 +375,15 @@ int cert_stuff(struct connectdata *conn,
       p12 = d2i_PKCS12_fp(f, NULL);
       fclose(f);
 
+      if(!p12) {
+        failf(data, "error reading PKCS12 file '%s'", cert_file );
+        return 0;
+      }
+
       PKCS12_PBE_add();
 
       if(!PKCS12_parse(p12, data->set.str[STRING_KEY_PASSWD], &pri, &x509,
-                        NULL)) {
+                        &ca)) {
         failf(data,
               "could not parse PKCS12 file, check password, OpenSSL error %s",
               ERR_error_string(ERR_get_error(), NULL) );
@@ -399,6 +406,32 @@ int cert_stuff(struct connectdata *conn,
         EVP_PKEY_free(pri);
         X509_free(x509);
         return 0;
+      }
+
+      if (!SSL_CTX_check_private_key (ctx)) {
+        failf(data, "private key from PKCS12 file '%s' "
+              "does not match certificate in same file", cert_file);
+        EVP_PKEY_free(pri);
+        X509_free(x509);
+        return 0;
+      }
+      /* Set Certificate Verification chain */
+      if (ca && sk_num(ca)) {
+        for (i = 0; i < sk_X509_num(ca); i++) {
+          if (!SSL_CTX_add_extra_chain_cert(ctx,sk_X509_value(ca, i))) {
+            failf(data, "cannot add certificate to certificate chain");
+            EVP_PKEY_free(pri);
+            X509_free(x509);
+            return 0;
+          }
+          if (!SSL_CTX_add_client_CA(ctx, sk_X509_value(ca, i))) {
+            failf(data, "cannot add certificate to client CA list",
+                  cert_file);
+            EVP_PKEY_free(pri);
+            X509_free(x509);
+            return 0;
+          }
+        }
       }
 
       EVP_PKEY_free(pri);

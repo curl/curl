@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel S (23 Feb 2008)
+- Sam Listopad provided a patch in feature-request #1900014
+  http://curl.haxx.se/bug/feature.cgi?id=1900014 that makes libcurl (built to
+  use OpenSSL) support a full chain of certificates in a given PKCS12
+  certificate.
+
 Daniel S (22 Feb 2008)
 - Georg Lippitsch made the src/Makefile.vc6 makefile use the same memory model
   options as the lib/Makefile.vc6 already did.
