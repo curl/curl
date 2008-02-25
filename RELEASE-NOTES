@@ -31,6 +31,7 @@ This release includes the following bugfixes:
  o bad re-use of SSL connections in non-complete state
  o test case 405 failures with GnuTLS builds
  o crash when connection cache size is 1 and Curl_do() failed
+ o GnuTLS-built libcurl can now be forced to prefer SSLv3
 
 This release includes the following known bugs:
 

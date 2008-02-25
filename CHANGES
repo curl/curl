@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel S (25 Feb 2008)
+- Kaspar Brand made GnuTLS-built libcurl properly acknowledge the option that
+  forces it to prefer SSLv3.
+
 Daniel S (23 Feb 2008)
 - Sam Listopad provided a patch in feature-request #1900014
   http://curl.haxx.se/bug/feature.cgi?id=1900014 that makes libcurl (built to
