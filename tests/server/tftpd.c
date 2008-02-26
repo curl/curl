@@ -417,13 +417,11 @@ int main(int argc, char **argv)
   struct tftphdr *tp;
   int n = 0;
   int arg = 1;
-  FILE *pidfile;
   char *pidname= (char *)".tftpd.pid";
   unsigned short port = DEFAULT_PORT;
   curl_socket_t sock;
   int flag;
   int rc;
-  int error;
   struct testcase test;
 
   while(argc>arg) {
@@ -509,18 +507,7 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  pidfile = fopen(pidname, "w");
-  if(pidfile) {
-    long pid = (long)getpid();
-    fprintf(pidfile, "%ld\n", pid);
-    fclose(pidfile);
-    logmsg("Wrote pid %ld to %s", pid, pidname);
-  }
-  else {
-    error = ERRNO;
-    logmsg("fopen() failed with error: %d %s", error, strerror(error));
-    logmsg("Error opening file: %s", pidname);
-    logmsg("Couldn't write pid file");
+  if(!write_pidfile(pidname)) {
     sclose(sock);
     return 1;
   }

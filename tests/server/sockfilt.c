@@ -98,6 +98,17 @@ static volatile int sigpipe;  /* Why? It's not used */
 
 const char *serverlogfile = (char *)DEFAULT_LOGFILE;
 
+bool use_ipv6 = FALSE;
+unsigned short port = DEFAULT_PORT;
+unsigned short connectport = 0; /* if non-zero, we activate this mode */
+
+enum sockmode {
+  PASSIVE_LISTEN,    /* as a server waiting for connections */
+  PASSIVE_CONNECT,   /* as a server, connected to a client */
+  ACTIVE,            /* as a client, connected to a server */
+  ACTIVE_DISCONNECT  /* as a client, disconnected from server */
+};
+
 static void lograw(unsigned char *buffer, ssize_t len)
 {
   char data[120];
@@ -142,17 +153,6 @@ static void sigpipe_handler(int sig)
   sigpipe = 1;
 }
 #endif
-
-bool use_ipv6=FALSE;
-unsigned short port = DEFAULT_PORT;
-unsigned short connectport = 0; /* if non-zero, we activate this mode */
-
-enum sockmode {
-  PASSIVE_LISTEN,    /* as a server waiting for connections */
-  PASSIVE_CONNECT,   /* as a server, connected to a client */
-  ACTIVE,            /* as a client, connected to a server */
-  ACTIVE_DISCONNECT  /* as a client, disconnected from server */
-};
 
 /*
   sockfdp is a pointer to an established stream or CURL_SOCKET_BAD
@@ -519,7 +519,6 @@ int main(int argc, char *argv[])
 #endif /* ENABLE_IPV6 */
   curl_socket_t sock;
   curl_socket_t msgsock;
-  FILE *pidfile;
   char *pidname= (char *)".sockfilt.pid";
   int rc;
   int error;
@@ -682,18 +681,7 @@ int main(int argc, char *argv[])
   else
     logmsg("Listening on port %d", port);
 
-  pidfile = fopen(pidname, "w");
-  if(pidfile) {
-    long pid = (long)getpid();
-    fprintf(pidfile, "%ld\n", pid);
-    fclose(pidfile);
-    logmsg("Wrote pid %ld to %s", pid, pidname);
-  }
-  else {
-    error = ERRNO;
-    logmsg("fopen() failed with error: %d %s", error, strerror(error));
-    logmsg("Error opening file: %s", pidname);
-    logmsg("Couldn't write pid file");
+  if(!write_pidfile(pidname)) {
     sclose(sock);
     return 1;
   }

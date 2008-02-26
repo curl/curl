@@ -832,11 +832,9 @@ int main(int argc, char *argv[])
   curl_socket_t sock, msgsock;
   int flag;
   unsigned short port = DEFAULT_PORT;
-  FILE *pidfile;
   char *pidname= (char *)".http.pid";
   struct httprequest req;
   int rc;
-  int error;
   int arg=1;
 #ifdef CURL_SWS_FORK_ENABLED
   bool use_fork = FALSE;
@@ -946,18 +944,7 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  pidfile = fopen(pidname, "w");
-  if(pidfile) {
-    long pid = (long)getpid();
-    fprintf(pidfile, "%ld\n", pid);
-    fclose(pidfile);
-    logmsg("Wrote pid %ld to %s", pid, pidname);
-  }
-  else {
-    error = ERRNO;
-    logmsg("fopen() failed with error: %d %s", error, strerror(error));
-    logmsg("Error opening file: %s", pidname);
-    logmsg("Couldn't write pid file");
+  if(!write_pidfile(pidname)) {
     sclose(sock);
     return 1;
   }

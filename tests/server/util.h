@@ -51,4 +51,6 @@ char *test2file(long testno);
 
 int wait_ms(int timeout_ms);
 
+bool write_pidfile(const char *filename);
+
 #endif  /* __SERVER_UTIL_H */

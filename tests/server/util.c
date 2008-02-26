@@ -222,3 +222,19 @@ int wait_ms(int timeout_ms)
   return r;
 }
 
+bool write_pidfile(const char *filename)
+{
+  FILE *pidfile;
+  long pid;
+
+  pid = (long)getpid();
+  pidfile = fopen(filename, "w");
+  if(!pidfile) {
+    logmsg("Couldn't write pid file: %s %s", filename, strerror(ERRNO));
+    return FALSE;
+  }
+  fprintf(pidfile, "%ld\n", pid);
+  fclose(pidfile);
+  logmsg("Wrote pid %ld to %s", pid, filename);
+  return true;
+}
