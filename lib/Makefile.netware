@@ -74,6 +74,7 @@ ifdef METROWERKS
 else
 	CC = gcc
 endif
+PERL	= perl
 # a native win32 awk can be downloaded from here:
 # http://www.gknw.net/development/prgtools/awk-20070501.zip
 AWK	= awk
@@ -170,6 +171,7 @@ ifdef WITH_SSL
 	LDLIBS += $(OPENSSL_PATH)/out_nw_$(LIBARCH_L)/ssl.$(LIBEXT)
 	LDLIBS += $(OPENSSL_PATH)/out_nw_$(LIBARCH_L)/crypto.$(LIBEXT)
 	IMPORTS += GetProcessSwitchCount RunningProcess
+	INSTDEP += ca-bundle.crt
 endif
 ifdef WITH_ZLIB
 	INCLUDES += -I$(ZLIB_PATH)
@@ -241,7 +243,7 @@ dist: all
 	-$(RM) $(OBJDIR)/*.o $(OBJDIR)/$(TARGET).map $(OBJDIR)/$(TARGET).ncv
 	-$(RM) $(OBJDIR)/$(TARGET).def $(OBJDIR)/version.inc $(XDCDATA)
 
-install: $(INSTDIR) all
+install: $(INSTDIR) all $(INSTDEP)
 	@$(CP) $(TARGET).nlm $(INSTDIR)
 	@$(CP) $(TARGET).$(LIBEXT) $(INSTDIR)
 	@$(CP) ../CHANGES $(INSTDIR)
@@ -249,7 +251,7 @@ install: $(INSTDIR) all
 	@$(CP) ../README $(INSTDIR)
 	@$(CP) ../RELEASE-NOTES $(INSTDIR)
 ifdef WITH_SSL
-	@$(CP) ca-bundle.crt $(INSTDIR)
+	@-$(CP) ca-bundle.crt $(INSTDIR)/ca-bundle.crt
 endif
 
 clean:
@@ -260,10 +262,10 @@ distclean: clean
 	-$(RM) -r $(TARGET).$(LIBEXT) $(TARGET).nlm
 
 $(INSTDIR):
-	@mkdir $(INSTDIR)
+	@mkdir $@
 
 $(OBJDIR):
-	@mkdir $(OBJDIR)
+	@mkdir $@
 
 $(TARGET).$(LIBEXT): $(OBJS)
 	@echo Creating $@
@@ -573,5 +575,9 @@ endif
 
 $(ARES_LIB)/libcares.$(LIBEXT):
 	$(MAKE) -C $(ARES_LIB) -f Makefile.netware lib
+
+ca-bundle.crt: mk-ca-bundle.pl
+	@echo Creating $@
+	@-$(PERL) $< -b -n $@
 
 
