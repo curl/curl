@@ -1299,6 +1299,13 @@ ossl_connect_step1(struct connectdata *conn,
   void *ssl_sessionid=NULL;
   curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+#ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
+#ifdef ENABLE_IPV6
+  struct in6_addr addr;
+#else
+  struct in_addr addr;
+#endif
+#endif
 
   DEBUGASSERT(ssl_connect_1 == connssl->connecting_state);
 
@@ -1455,6 +1462,16 @@ ossl_connect_step1(struct connectdata *conn,
   SSL_set_connect_state(connssl->handle);
 
   connssl->server_cert = 0x0;
+
+#ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
+  if ((0 == Curl_inet_pton(AF_INET, conn->host.name, &addr)) &&
+#ifdef ENABLE_IPV6
+      (0 == Curl_inet_pton(AF_INET6, conn->host.name, &addr)) &&
+#endif
+      !SSL_set_tlsext_host_name(connssl->handle, conn->host.name))
+    infof(data, "WARNING: failed to configure server name indication (SNI) "
+          "TLS extension\n");
+#endif
 
   /* Check if there's a cached ID we can/should use here! */
   if(!Curl_ssl_getsessionid(conn, &ssl_sessionid, NULL)) {

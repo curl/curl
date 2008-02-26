@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Guenter Knauf (26 Feb 2008)
+- Kaspar Brand provided a patch to support server name indication (RFC 4366).
+
 Daniel S (25 Feb 2008)
 - Kaspar Brand made GnuTLS-built libcurl properly acknowledge the option that
   forces it to prefer SSLv3.
@@ -45,11 +48,11 @@ Daniel S (20 Feb 2008)
   correctly for a long time and nobody has even noticed, I consider it a very
   suitable subject for plain removal. And so it was done.
 
-Guenter Knauf (19 Feb 2007)
+Guenter Knauf (19 Feb 2008)
 - We do no longer support SSLv2 by default since it has known flaws.
   Kaspar Brand provided a patch for all supported SSL toolkits.
  
-Daniel Fandrich (19 Feb 2007)
+Daniel Fandrich (19 Feb 2008)
 - Added test309 to test HTTP redirect to HTTPS URL
 
 Daniel S (18 Feb 2008)
