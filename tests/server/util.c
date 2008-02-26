@@ -236,5 +236,5 @@ bool write_pidfile(const char *filename)
   fprintf(pidfile, "%ld\n", pid);
   fclose(pidfile);
   logmsg("Wrote pid %ld to %s", pid, filename);
-  return true;
+  return TRUE;
 }
