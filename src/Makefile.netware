@@ -234,6 +234,7 @@ $(OBJDIR)/version.inc: $(CURL_INC)/curl/curlver.h $(OBJDIR)
 
 install: $(INSTDIR) all
 	@-$(CP) ../docs/$(TARGET).pdf $(INSTDIR)
+	@-$(CP) ../docs/$(TARGET).html $(INSTDIR)
 	@$(CP) $(TARGET).nlm $(INSTDIR)
 
 clean:
