@@ -239,10 +239,6 @@ $(OBJDIR)/version.inc: ../include/curl/curlver.h $(OBJDIR)
 	@echo Creating $@
 	@$(AWK) -f ../packages/NetWare/get_ver.awk $< > $@
 
-dist: all
-	-$(RM) $(OBJDIR)/*.o $(OBJDIR)/$(TARGET).map $(OBJDIR)/$(TARGET).ncv
-	-$(RM) $(OBJDIR)/$(TARGET).def $(OBJDIR)/version.inc $(XDCDATA)
-
 install: $(INSTDIR) all $(INSTDEP)
 	@$(CP) $(TARGET).nlm $(INSTDIR)
 	@$(CP) $(TARGET).$(LIBEXT) $(INSTDIR)
@@ -259,7 +255,8 @@ clean:
 	-$(RM) -r $(OBJDIR)
 
 distclean: clean
-	-$(RM) -r $(TARGET).$(LIBEXT) $(TARGET).nlm
+	-$(RM) $(TARGET).$(LIBEXT) $(TARGET).nlm
+	-$(RM) certdata.txt ca-bundle.crt
 
 $(INSTDIR):
 	@mkdir $@

@@ -75,6 +75,7 @@ ifdef METROWERKS
 else
 	CC = gcc
 endif
+PERL	= perl
 # a native win32 awk can be downloaded from here:
 # http://www.gknw.net/development/prgtools/awk-20070501.zip
 AWK	= awk
@@ -231,10 +232,6 @@ $(OBJDIR)/version.inc: $(CURL_INC)/curl/curlver.h $(OBJDIR)
 	@echo Creating $@
 	@$(AWK) -f ../packages/NetWare/get_ver.awk $< > $@
 
-dist: all
-	-$(RM) $(OBJDIR)/*.o $(OBJDIR)/$(TARGET).map $(OBJDIR)/$(TARGET).ncv
-	-$(RM) $(OBJDIR)/$(TARGET).def $(OBJDIR)/version.inc $(XDCDATA)
-
 install: $(INSTDIR) all
 	@-$(CP) ../docs/$(TARGET).pdf $(INSTDIR)
 	@$(CP) $(TARGET).nlm $(INSTDIR)
@@ -247,13 +244,13 @@ endif
 	-$(RM) -r $(OBJDIR)
 
 distclean: clean
-	-$(RM) -r $(TARGET).nlm
+	-$(RM) $(TARGET).nlm
 
 $(INSTDIR):
-	@mkdir $(INSTDIR)
+	@mkdir $@
 
 $(OBJDIR):
-	@mkdir $(OBJDIR)
+	@mkdir $@
 
 $(TARGET).nlm: $(OBJS) $(OBJX) $(OBJDIR)/$(TARGET).def $(XDCDATA)
 	@echo Linking $@
