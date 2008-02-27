@@ -65,7 +65,7 @@ void dump(const char *text,
 
 static
 int my_trace(CURL *handle, curl_infotype type,
-             unsigned char *data, size_t size,
+             char *data, size_t size,
              void *userp)
 {
   struct data *config = (struct data *)userp;
@@ -98,7 +98,7 @@ int my_trace(CURL *handle, curl_infotype type,
     break;
   }
 
-  dump(text, stderr, data, size, config->trace_ascii);
+  dump(text, stderr, (unsigned char *)data, size, config->trace_ascii);
   return 0;
 }
 

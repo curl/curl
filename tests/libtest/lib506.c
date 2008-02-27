@@ -107,10 +107,10 @@ static void *fire(void *ptr)
 
   headers = sethost(NULL);
   curl_easy_setopt(curl, CURLOPT_VERBOSE,    1);
-  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, (void*)headers);
-  curl_easy_setopt(curl, CURLOPT_URL,        (void*)tdata->url);
+  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+  curl_easy_setopt(curl, CURLOPT_URL,        tdata->url);
   printf( "CURLOPT_SHARE\n" );
-  curl_easy_setopt(curl, CURLOPT_SHARE, (void*)tdata->share);
+  curl_easy_setopt(curl, CURLOPT_SHARE, tdata->share);
 
   printf( "PERFORM\n" );
   code = curl_easy_perform(curl);
@@ -222,7 +222,7 @@ int test(char *URL)
 
   url = suburl( URL, i );
   headers = sethost( NULL );
-  curl_easy_setopt( curl, CURLOPT_HTTPHEADER, (void*)headers );
+  curl_easy_setopt( curl, CURLOPT_HTTPHEADER, headers );
   curl_easy_setopt( curl, CURLOPT_URL,        url );
   printf( "CURLOPT_SHARE\n" );
   curl_easy_setopt( curl, CURLOPT_SHARE,      share );

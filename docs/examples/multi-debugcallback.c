@@ -74,7 +74,7 @@ void dump(const char *text,
 
 static
 int my_trace(CURL *handle, curl_infotype type,
-             unsigned char *data, size_t size,
+             char *data, size_t size,
              void *userp)
 {
   const char *text;

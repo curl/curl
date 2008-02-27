@@ -26,7 +26,7 @@ struct FtpFile {
   FILE *stream;
 };
 
-static int my_fwrite(void *buffer, size_t size, size_t nmemb, void *stream)
+static size_t my_fwrite(void *buffer, size_t size, size_t nmemb, void *stream)
 {
   struct FtpFile *out=(struct FtpFile *)stream;
   if(out && !out->stream) {
