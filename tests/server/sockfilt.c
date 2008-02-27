@@ -192,7 +192,7 @@ static ssize_t fullwrite(int filedes, const void *buffer, size_t nbytes)
  * read_stdin tries to read from stdin nbytes into the given buffer. This is a
  * blocking function that will only return TRUE when nbytes have actually been
  * read or FALSE when an unrecoverable error has been detected. Failure of this
- * function is an indication that the whole program should terminate.
+ * function is an indication that the sockfilt process should terminate.
  */
 
 static bool read_stdin(void *buffer, size_t nbytes)
@@ -209,7 +209,7 @@ static bool read_stdin(void *buffer, size_t nbytes)
  * write_stdout tries to write to stdio nbytes from the given buffer. This is a
  * blocking function that will only return TRUE when nbytes have actually been
  * written or FALSE when an unrecoverable error has been detected. Failure of
- * this function is an indication that the whole program should terminate.
+ * this function is an indication that the sockfilt process should terminate.
  */
 
 static bool write_stdout(const void *buffer, size_t nbytes)
