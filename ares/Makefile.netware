@@ -14,7 +14,7 @@ NDKBASE	= c:/novell
 endif
 
 ifndef INSTDIR
-INSTDIR	= ../curl-$(LIBCURL_VERSION_STR)-bin-nw
+INSTDIR	= ../ares-$(LIBCARES_VERSION_STR)-bin-nw
 endif
 
 # Edit the vars below to change NLM target settings.
@@ -63,14 +63,15 @@ else
 	CC = gcc
 endif
 # a native win32 awk can be downloaded from here:
-# http://www.gknw.net/development/prgtools/awk-20050424.zip
+# http://www.gknw.net/development/prgtools/awk-20070501.zip
 AWK	= awk
 YACC	= bison -y
 CP	= cp -afv
+MKDIR	= mkdir
 # RM	= rm -f
 # if you want to mark the target as MTSAFE you will need a tool for
 # generating the xdc data for the linker; here's a minimal tool:
-# http://www.gknw.com/development/prgtools/mkxdc.zip
+# http://www.gknw.net/development/prgtools/mkxdc.zip
 MPKXDC	= mkxdc
 
 # Global flags for all compilers
@@ -161,10 +162,6 @@ nlm: prebuild $(TARGETS)
 
 prebuild: $(OBJDIR) $(OBJDIR)/version.inc config.h arpa/nameser.h
 
-dist: all
-	-$(RM) $(OBJLIB) $(OBJDIR)/*.map $(OBJDIR)/*.ncv
-	-$(RM) $(OBJDIR)/*.def $(OBJDIR)/*.xdc $(OBJDIR)/version.inc
-
 install: $(INSTDIR) all
 	@$(CP) *.nlm $(INSTDIR)
 	@$(CP) ../CHANGES $(INSTDIR)
@@ -190,11 +187,8 @@ endif
 	@-$(RM) $@
 	@$(LD) $(LDFLAGS) $<
 
-$(INSTDIR):
-	@mkdir $(INSTDIR)
-
-$(OBJDIR):
-	@mkdir $(OBJDIR)
+$(OBJDIR) $(INSTDIR):
+	@$(MKDIR) $@
 
 $(OBJDIR)/%.o: %.c
 #	@echo Compiling $<
@@ -202,7 +196,7 @@ $(OBJDIR)/%.o: %.c
 
 $(OBJDIR)/version.inc: ares_version.h $(OBJDIR)
 	@echo Creating $@
-	@$(AWK) -f ../packages/NetWare/get_ver.awk $< > $@
+	@$(AWK) -f get_ver.awk $< > $@
 
 $(OBJDIR)/%.xdc: Makefile.netware
 	@echo Creating $@
