@@ -80,6 +80,7 @@ PERL	= perl
 # http://www.gknw.net/development/prgtools/awk-20070501.zip
 AWK	= awk
 CP	= cp -afv
+MKDIR	= mkdir
 # RM	= rm -f
 # if you want to mark the target as MTSAFE you will need a tool for
 # generating the xdc data for the linker; here's a minimal tool:
@@ -247,11 +248,8 @@ endif
 distclean: clean
 	-$(RM) $(TARGET).nlm
 
-$(INSTDIR):
-	@mkdir $@
-
-$(OBJDIR):
-	@mkdir $@
+$(OBJDIR) $(INSTDIR):
+	@$(MKDIR) $@
 
 $(TARGET).nlm: $(OBJS) $(OBJX) $(OBJDIR)/$(TARGET).def $(XDCDATA)
 	@echo Linking $@

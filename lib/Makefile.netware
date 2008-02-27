@@ -80,6 +80,7 @@ PERL	= perl
 AWK	= awk
 YACC	= bison -y
 CP	= cp -afv
+MKDIR	= mkdir
 # RM	= rm -f
 # if you want to mark the target as MTSAFE you will need a tool for
 # generating the xdc data for the linker; here's a minimal tool:
@@ -258,11 +259,8 @@ distclean: clean
 	-$(RM) $(TARGET).$(LIBEXT) $(TARGET).nlm
 	-$(RM) certdata.txt ca-bundle.crt
 
-$(INSTDIR):
-	@mkdir $@
-
-$(OBJDIR):
-	@mkdir $@
+$(OBJDIR) $(INSTDIR):
+	@$(MKDIR) $@
 
 $(TARGET).$(LIBEXT): $(OBJS)
 	@echo Creating $@
