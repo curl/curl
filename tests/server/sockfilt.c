@@ -280,6 +280,7 @@ static bool juggle(curl_socket_t *sockfdp,
   ssize_t nread_socket;
   ssize_t bytes_written;
   ssize_t buffer_len;
+  int error;
 
  /* 'buffer' is this excessively large only to be able to support things like
     test 1003 which tests exceedingly large server response lines */
@@ -358,10 +359,13 @@ static bool juggle(curl_socket_t *sockfdp,
 
     rc = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
 
-  } while((rc == -1) && (SOCKERRNO == EINTR));
+  } while((rc == -1) && ((error = SOCKERRNO) == EINTR));
 
-  if(rc < 0)
+  if(rc < 0) {
+    logmsg("select() failed with error: (%d) %s",
+           error, strerror(error));
     return FALSE;
+  }
 
   if(rc == 0)
     /* timeout */
@@ -620,8 +624,9 @@ int main(int argc, char *argv[])
 #ifdef ENABLE_IPV6
   struct sockaddr_in6 me6;
 #endif /* ENABLE_IPV6 */
-  curl_socket_t sock;
-  curl_socket_t msgsock;
+  curl_socket_t sock = CURL_SOCKET_BAD;
+  curl_socket_t msgsock = CURL_SOCKET_BAD;
+  int wrotepidfile = 0;
   char *pidname= (char *)".sockfilt.pid";
   int rc;
   int error;
@@ -732,7 +737,7 @@ int main(int argc, char *argv[])
     error = SOCKERRNO;
     logmsg("Error creating socket: (%d) %s",
            error, strerror(error));
-    return 1;
+    goto sockfilt_cleanup;
   }
 
   if(connectport) {
@@ -767,8 +772,7 @@ int main(int argc, char *argv[])
       error = SOCKERRNO;
       logmsg("Error connecting to port %d: (%d) %s",
              port, error, strerror(error));
-      sclose(sock);
-      return 1;
+      goto sockfilt_cleanup;
     }
     logmsg("====> Client connect");
     msgsock = sock; /* use this as stream */
@@ -777,7 +781,7 @@ int main(int argc, char *argv[])
     /* passive daemon style */
     sock = sockdaemon(sock, &port);
     if(CURL_SOCKET_BAD == sock)
-      return 1;
+      goto sockfilt_cleanup;
     msgsock = CURL_SOCKET_BAD; /* no stream socket yet */
   }
 
@@ -789,17 +793,24 @@ int main(int argc, char *argv[])
   else
     logmsg("Listening on port %d", port);
 
-  if(!write_pidfile(pidname)) {
-    sclose(sock);
-    return 1;
-  }
+  wrotepidfile = write_pidfile(pidname);
+  if(!wrotepidfile)
+    goto sockfilt_cleanup;
 
   while(juggle(&msgsock, sock, &mode));
 
+sockfilt_cleanup:
+
+  if((msgsock != sock) && (msgsock != CURL_SOCKET_BAD))
+    sclose(msgsock);
+
+  if(sock != CURL_SOCKET_BAD)
   sclose(sock);
+
+  if(wrotepidfile)
   unlink(pidname);
 
-  logmsg("sockfilt exits");
+  logmsg("============> sockfilt quits");
   return 0;
 }
 
