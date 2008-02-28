@@ -46,6 +46,40 @@
  *
  * (Source originally based on sws.c)
  */
+
+/*
+ * Signal handling notes for sockfilt
+ * ----------------------------------
+ *
+ * This program is a single-threaded process.
+ *
+ * This program is intended to be highly portable and as such it must be kept as
+ * simple as possible, due to this the only signal handling mechanisms used will
+ * be those of ANSI C, and used only in the most basic form which is good enough
+ * for the purpose of this program.
+ *
+ * For the above reason and the specific needs of this program signals SIGHUP,
+ * SIGPIPE and SIGALRM will be simply ignored on systems where this can be done.
+ * If possible, signals SIGINT and SIGTERM will be handled by this program as an
+ * indication to cleanup and finish execution as soon as possible.  This will be
+ * achieved with a single signal handler 'exit_signal_handler' for both signals.
+ *
+ * The 'exit_signal_handler' upon the first SIGINT or SIGTERM received signal
+ * will just set to one the global var 'got_exit_signal' storing in global var
+ * 'exit_signal' the signal that triggered this change.
+ *
+ * Nothing fancy that could introduce problems is used, the program at certain
+ * points in its normal flow checks if var 'got_exit_signal' is set and in case
+ * this is true it just makes its way out of loops and functions in structured
+ * and well behaved manner to achieve proper program cleanup and termination.
+ *
+ * Even with the above mechanism implemented it is worthwile to note that other
+ * signals might still be received, or that there might be systems on which it
+ * is not possible to trap and ignore some of the above signals.  This implies
+ * that for increased portability and reliability the program must be coded as
+ * if no signal was being ignored or handled at all.  Enjoy it!
+ */
+
 #include "setup.h" /* portability help from the lib directory */
 
 #ifdef HAVE_SIGNAL_H
@@ -85,10 +119,6 @@
 #define DEFAULT_LOGFILE "log/sockfilt.log"
 #endif
 
-#ifdef SIGPIPE
-static volatile int sigpipe;  /* Why? It's not used */
-#endif
-
 const char *serverlogfile = (char *)DEFAULT_LOGFILE;
 
 bool verbose = FALSE;
@@ -102,6 +132,103 @@ enum sockmode {
   ACTIVE,            /* as a client, connected to a server */
   ACTIVE_DISCONNECT  /* as a client, disconnected from server */
 };
+
+/* do-nothing macro replacement for systems which lack siginterrupt() */
+
+#ifndef HAVE_SIGINTERRUPT
+#define siginterrupt(x,y) do {} while(0)
+#endif
+
+/* vars used to keep around previous signal handlers */
+
+typedef RETSIGTYPE (*SIGHANDLER_T)(int);
+
+static SIGHANDLER_T old_sighup_handler  = SIG_ERR;
+static SIGHANDLER_T old_sigpipe_handler = SIG_ERR;
+static SIGHANDLER_T old_sigalrm_handler = SIG_ERR;
+static SIGHANDLER_T old_sigint_handler  = SIG_ERR;
+static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
+
+/* var which if set indicates that the program should finish execution */
+
+SIG_ATOMIC_T got_exit_signal = 0;
+
+/* if next is set indicates the first signal handled in exit_signal_handler */
+
+static volatile int exit_signal = 0;
+
+/* signal handler that will be triggered to indicate that the program
+  should finish its execution in a controlled manner as soon as possible.
+  The first time this is called it will set got_exit_signal to one and
+  store in exit_signal the signal that triggered its execution. */
+
+static RETSIGTYPE exit_signal_handler(int signum)
+{
+  int old_errno = ERRNO;
+  if(got_exit_signal == 0) {
+    got_exit_signal = 1;
+    exit_signal = signum;
+  }
+  (void)signal(signum, exit_signal_handler);
+  SET_ERRNO(old_errno);
+}
+
+static void install_signal_handlers(void)
+{
+#ifdef SIGHUP
+  /* ignore SIGHUP signal */
+  if((old_sighup_handler = signal(SIGHUP, SIG_IGN)) == SIG_ERR)
+    logmsg("cannot install SIGHUP handler: 5s", strerror(ERRNO));
+#endif
+#ifdef SIGPIPE
+  /* ignore SIGPIPE signal */
+  if((old_sigpipe_handler = signal(SIGPIPE, SIG_IGN)) == SIG_ERR)
+    logmsg("cannot install SIGPIPE handler: 5s", strerror(ERRNO));
+#endif
+#ifdef SIGALRM
+  /* ignore SIGALRM signal */
+  if((old_sigalrm_handler = signal(SIGALRM, SIG_IGN)) == SIG_ERR)
+    logmsg("cannot install SIGALRM handler: 5s", strerror(ERRNO));
+#endif
+#ifdef SIGINT
+  /* handle SIGINT signal with our exit_signal_handler */
+  if((old_sigint_handler = signal(SIGINT, exit_signal_handler)) == SIG_ERR)
+    logmsg("cannot install SIGINT handler: 5s", strerror(ERRNO));
+  else
+    siginterrupt(SIGINT, 1);
+#endif
+#ifdef SIGTERM
+  /* handle SIGTERM signal with our exit_signal_handler */
+  if((old_sigterm_handler = signal(SIGTERM, exit_signal_handler)) == SIG_ERR)
+    logmsg("cannot install SIGTERM handler: 5s", strerror(ERRNO));
+  else
+    siginterrupt(SIGTERM, 1);
+#endif
+}
+
+static void restore_signal_handlers(void)
+{
+#ifdef SIGHUP
+  if(SIG_ERR != old_sighup_handler)
+    (void)signal(SIGHUP, old_sighup_handler);
+#endif
+#ifdef SIGPIPE
+  if(SIG_ERR != old_sigpipe_handler)
+    (void)signal(SIGPIPE, old_sigpipe_handler);
+#endif
+#ifdef SIGALRM
+  if(SIG_ERR != old_sigalrm_handler)
+    (void)signal(SIGALRM, old_sigalrm_handler);
+#endif
+#ifdef SIGINT
+  if(SIG_ERR != old_sigint_handler)
+    (void)signal(SIGINT, old_sigint_handler);
+#endif
+#ifdef SIGTERM
+  if(SIG_ERR != old_sigterm_handler)
+    (void)signal(SIGTERM, old_sigterm_handler);
+#endif
+}
 
 /*
  * fullread is a wrapper around the read() function. This will repeat the call
@@ -118,6 +245,11 @@ static ssize_t fullread(int filedes, void *buffer, size_t nbytes)
 
   do {
     rc = read(filedes, (unsigned char *)buffer + nread, nbytes - nread);
+
+    if(got_exit_signal) {
+      logmsg("signalled to die");
+      return -1;
+    }
 
     if(rc < 0) {
       error = ERRNO;
@@ -157,6 +289,11 @@ static ssize_t fullwrite(int filedes, const void *buffer, size_t nbytes)
 
   do {
     wc = write(filedes, (unsigned char *)buffer + nwrite, nbytes - nwrite);
+
+    if(got_exit_signal) {
+      logmsg("signalled to die");
+      return -1;
+    }
 
     if(wc < 0) {
       error = ERRNO;
@@ -252,14 +389,6 @@ static void lograw(unsigned char *buffer, ssize_t len)
     logmsg("'%s'", data);
 }
 
-#ifdef SIGPIPE
-static void sigpipe_handler(int sig)
-{
-  (void)sig; /* prevent warning */
-  sigpipe = 1;
-}
-#endif
-
 /*
   sockfdp is a pointer to an established stream or CURL_SOCKET_BAD
 
@@ -286,6 +415,11 @@ static bool juggle(curl_socket_t *sockfdp,
     test 1003 which tests exceedingly large server response lines */
   unsigned char buffer[17010];
   char data[16];
+
+  if(got_exit_signal) {
+    logmsg("signalled to die, exiting...");
+    return FALSE;
+  }
 
 #ifdef HAVE_GETPPID
   /* As a last resort, quit if sockfilt process becomes orphan. Just in case
@@ -358,6 +492,11 @@ static bool juggle(curl_socket_t *sockfdp,
   do {
 
     rc = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
+
+    if(got_exit_signal) {
+      logmsg("signalled to die, exiting...");
+      return FALSE;
+    }
 
   } while((rc == -1) && ((error = SOCKERRNO) == EINTR));
 
@@ -549,6 +688,11 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
           sclose(sock);
           return CURL_SOCKET_BAD;
         }
+        if(got_exit_signal) {
+          logmsg("signalled to die, exiting...");
+          sclose(sock);
+          return CURL_SOCKET_BAD;
+        }
         totdelay += delay;
         delay *= 2; /* double the sleep for next attempt */
       }
@@ -712,17 +856,9 @@ int main(int argc, char *argv[])
 #ifdef WIN32
   win32_init();
   atexit(win32_cleanup);
-#else
+#endif
 
-#ifdef SIGPIPE
-#ifdef HAVE_SIGNAL
-  signal(SIGPIPE, sigpipe_handler);
-#endif
-#ifdef HAVE_SIGINTERRUPT
-  siginterrupt(SIGPIPE, 1);
-#endif
-#endif
-#endif
+  install_signal_handlers();
 
 #ifdef ENABLE_IPV6
   if(!use_ipv6)
@@ -805,10 +941,22 @@ sockfilt_cleanup:
     sclose(msgsock);
 
   if(sock != CURL_SOCKET_BAD)
-  sclose(sock);
+    sclose(sock);
 
   if(wrotepidfile)
-  unlink(pidname);
+    unlink(pidname);
+
+  restore_signal_handlers();
+
+  if(got_exit_signal) {
+    logmsg("============> sockfilt exits with signal (%d)", exit_signal);
+    /*
+     * To properly set the return status of the process we
+     * must raise the same signal SIGINT or SIGTERM that we
+     * caught and let the old handler take care of it.
+     */
+    raise(exit_signal);
+  }
 
   logmsg("============> sockfilt quits");
   return 0;
