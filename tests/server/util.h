@@ -22,7 +22,6 @@
  *
  * $Id$
  ***************************************************************************/
-#include "setup.h" /* portability help from the lib directory */
 
 void logmsg(const char *msg, ...);
 
@@ -52,6 +51,6 @@ char *test2file(long testno);
 
 int wait_ms(int timeout_ms);
 
-bool write_pidfile(const char *filename);
+int write_pidfile(const char *filename);
 
 #endif  /* __SERVER_UTIL_H */
