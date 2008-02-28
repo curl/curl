@@ -48,16 +48,9 @@
  */
 #include "setup.h" /* portability help from the lib directory */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
+#ifdef HAVE_SIGNAL_H
 #include <signal.h>
-#include <time.h>
-#include <ctype.h>
-#include <sys/time.h>
-#include <sys/types.h>
-
+#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif

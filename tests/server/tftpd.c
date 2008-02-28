@@ -49,18 +49,13 @@
  */
 
 #include "setup.h" /* portability help from the lib directory */
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
+
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
-#ifdef HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
-
+#ifdef HAVE_SIGNAL_H
 #include <signal.h>
-
+#endif
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
@@ -84,12 +79,9 @@
 #endif
 
 #include <setjmp.h>
-#include <stdio.h>
-#include <errno.h>
-#include <ctype.h>
-#include <string.h>
-#include <stdlib.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #ifdef HAVE_PWD_H
 #include <pwd.h>
 #endif

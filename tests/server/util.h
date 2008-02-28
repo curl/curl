@@ -22,6 +22,7 @@
  *
  * $Id$
  ***************************************************************************/
+#include "setup.h" /* portability help from the lib directory */
 
 void logmsg(const char *msg, ...);
 
