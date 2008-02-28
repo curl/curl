@@ -41,7 +41,7 @@ MACHINE  = X86
 # It can be downloaded from:
 # http://www.microsoft.com/msdownload/platformsdk/sdkupdate/
 
-# USE_WINDOWS_SSPI = 1
+# WINDOWS_SSPI = 1
 
 !IFDEF WINDOWS_SSPI
 !IFNDEF WINDOWS_SDK_PATH
