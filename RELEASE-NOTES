@@ -32,6 +32,7 @@ This release includes the following bugfixes:
  o test case 405 failures with GnuTLS builds
  o crash when connection cache size is 1 and Curl_do() failed
  o GnuTLS-built libcurl can now be forced to prefer SSLv3
+ o crash when doing Negotiate again on a re-used connection
 
 This release includes the following known bugs:
 
@@ -50,6 +51,7 @@ advice from friends like these:
 
  Michal Marek, Dmitry Kurochkin, Niklas Angebrand, Günter Knauf, Yang Tse,
  Dan Fandrich, Mike Hommey, Pooyan McSporran, Jerome Muffat-Meridol,
- Kaspar Brand, Gautam Kachroo, Zmey Petroff, Georg Lippitsch, Sam Listopad
+ Kaspar Brand, Gautam Kachroo, Zmey Petroff, Georg Lippitsch, Sam Listopad,
+ Anatoli Tubman
 
         Thanks! (and sorry if I forgot to mention someone)

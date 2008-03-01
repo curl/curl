@@ -2358,6 +2358,14 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                   te
                 );
 
+    /*
+     * Free userpwd now --- cannot reuse this for Negotiate and possibly NTLM
+     * with basic and digest, it will be freed anyway by the next request
+     */
+
+    Curl_safefree (conn->allocptr.userpwd);
+    conn->allocptr.userpwd = NULL;
+
     if(result)
       return result;
 

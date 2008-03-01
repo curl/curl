@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -255,7 +255,6 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
 {
   struct negotiatedata *neg_ctx = proxy?&conn->data->state.proxyneg:
     &conn->data->state.negotiate;
-  OM_uint32 minor_status;
   char *encoded = NULL;
   int len;
 
@@ -309,7 +308,7 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
     aprintf("%sAuthorization: %s %s\r\n", proxy ? "Proxy-" : "",
             neg_ctx->protocol, encoded);
   free(encoded);
-  gss_release_buffer(&minor_status, &neg_ctx->output_token);
+  Curl_cleanup_negotiate (conn->data);
   return (conn->allocptr.userpwd == NULL) ? CURLE_OUT_OF_MEMORY : CURLE_OK;
 }
 

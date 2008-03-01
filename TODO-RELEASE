@@ -6,8 +6,6 @@ To be addressed before 7.18.1 (planned release: April 2008)
 
 123 - Mike Protts' SFTP resume download
 
-124 - Anatoli Tubman's fix for a Negotiate: crash
-
 125 - Michal Marek's typechecker-gcc work
 
 126 -

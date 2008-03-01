@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel S (1 Mar 2008)
+- Anatoli Tubman found and fixed a crash with Negotiate authentication used on
+  a re-used connection where both requests used Negotiate.
+
 Guenter Knauf (26 Feb 2008)
 - Kaspar Brand provided a patch to support server name indication (RFC 4366).
 
