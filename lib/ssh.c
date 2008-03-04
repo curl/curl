@@ -844,7 +844,6 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
       break;
     }
     else if(sshc->quote_item->data) {
-      fprintf(stderr, "data: %s\n", sshc->quote_item->data);
       /*
        * the arguments following the command must be separated from the
        * command with a space so we can check for it unconditionally
@@ -1195,10 +1194,31 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
      *          If this is not done the destination file will be named the
      *          same name as the last directory in the path.
      */
+
+    if(data->state.resume_from != 0) {
+      LIBSSH2_SFTP_ATTRIBUTES attrs;
+      if(data->state.resume_from< 0) {
+        rc = libssh2_sftp_stat(sshc->sftp_session, sftp_scp->path, &attrs);
+        if(rc == LIBSSH2_ERROR_EAGAIN) {
+          break;
+        }
+        else if(rc) {
+          data->state.resume_from = 0;
+        }
+        else {
+          data->state.resume_from = attrs.filesize;
+        }
+      }
+    }
+
     sshc->sftp_handle =
       libssh2_sftp_open(sshc->sftp_session, sftp_scp->path,
+                        /* If we have restart position then open for append */
+                        (data->state.resume_from > 0)?
+                        LIBSSH2_FXF_WRITE|LIBSSH2_FXF_APPEND:
                         LIBSSH2_FXF_WRITE|LIBSSH2_FXF_CREAT|LIBSSH2_FXF_TRUNC,
                         data->set.new_file_perms);
+
     if(!sshc->sftp_handle) {
       if(libssh2_session_last_errno(sshc->ssh_session) ==
          LIBSSH2_ERROR_EAGAIN) {
@@ -1228,6 +1248,56 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
       }
     }
 
+    /* If we have restart point then we need to seek to the correct position. */
+    if(data->state.resume_from > 0) {
+      /* Let's read off the proper amount of bytes from the input. */
+      if(conn->seek_func) {
+        curl_off_t readthisamountnow = data->state.resume_from;
+
+        if(conn->seek_func(conn->seek_client,
+                           readthisamountnow, SEEK_SET) != 0) {
+          failf(data, "Could not seek stream");
+          return CURLE_FTP_COULDNT_USE_REST;
+        }
+      }
+      else {
+        curl_off_t passed=0;
+        curl_off_t readthisamountnow;
+        curl_off_t actuallyread;
+        do {
+          readthisamountnow = (data->state.resume_from - passed);
+
+          if(readthisamountnow > BUFSIZE)
+            readthisamountnow = BUFSIZE;
+
+          actuallyread =
+            (curl_off_t) conn->fread_func(data->state.buffer, 1,
+                                          (size_t)readthisamountnow,
+                                          conn->fread_in);
+
+          passed += actuallyread;
+          if((actuallyread <= 0) || (actuallyread > readthisamountnow)) {
+            /* this checks for greater-than only to make sure that the
+               CURL_READFUNC_ABORT return code still aborts */
+             failf(data, "Failed to read data");
+            return CURLE_FTP_COULDNT_USE_REST;
+          }
+        } while(passed < data->state.resume_from);
+      }
+
+      /* now, decrease the size of the read */
+      if(data->set.infilesize>0) {
+        data->set.infilesize -= data->state.resume_from;
+        data->req.size = data->set.infilesize;
+        Curl_pgrsSetUploadSize(data, data->set.infilesize);
+      }
+
+      libssh2_sftp_seek(sshc->sftp_handle, data->state.resume_from);
+    }
+    if(data->set.infilesize>0) {
+      data->req.size = data->set.infilesize;
+      Curl_pgrsSetUploadSize(data, data->set.infilesize);
+    }
     /* upload data */
     result = Curl_setup_transfer(conn, -1, -1, FALSE, NULL,
                                  FIRSTSOCKET, NULL);
@@ -1552,11 +1622,49 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
       data->req.maxdownload = attrs.filesize;
       Curl_pgrsSetDownloadSize(data, attrs.filesize);
     }
-  }
 
+    /* We can resume if we can seek to the resume position */
+    if(data->state.resume_from) {
+      if(data->state.resume_from< 0) {
+        /* We're supposed to download the last abs(from) bytes */
+        if((curl_off_t)attrs.filesize < -data->state.resume_from) {
+          failf(data, "Offset (%"
+                FORMAT_OFF_T ") was beyond file size (%" FORMAT_OFF_T ")",
+                data->state.resume_from, attrs.filesize);
+          return CURLE_BAD_DOWNLOAD_RESUME;
+        }
+        /* download from where? */
+        data->state.resume_from = attrs.filesize - data->state.resume_from;
+      }
+      else {
+        if((curl_off_t)attrs.filesize < data->state.resume_from) {
+          failf(data, "Offset (%" FORMAT_OFF_T
+                ") was beyond file size (%" FORMAT_OFF_T ")",
+                data->state.resume_from, attrs.filesize);
+          return CURLE_BAD_DOWNLOAD_RESUME;
+        }
+      }
+      /* Does a completed file need to be seeked and started or closed ? */
+      /* Now store the number of bytes we are expected to download */
+      data->req.size = attrs.filesize - data->state.resume_from;
+      data->req.maxdownload = attrs.filesize - data->state.resume_from;
+      Curl_pgrsSetDownloadSize(data,
+                               attrs.filesize - data->state.resume_from);
+      libssh2_sftp_seek(sshc->sftp_handle, data->state.resume_from);
+    }
+  }
   /* Setup the actual download */
-  result = Curl_setup_transfer(conn, FIRSTSOCKET, data->req.size,
+  if(data->req.size == 0) {
+    /* no data to transfer */
+    result = Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+    infof(data, "File already completely downloaded\n");
+    state(conn, SSH_STOP);
+    break;
+  }
+  else {
+    result = Curl_setup_transfer(conn, FIRSTSOCKET, data->req.size,
                                FALSE, NULL, -1, NULL);
+  }
   if(result) {
     state(conn, SSH_SFTP_CLOSE);
     sshc->actualcode = result;
