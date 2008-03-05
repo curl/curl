@@ -907,7 +907,7 @@ int main(int argc, char *argv[])
     if(rc) {
       error = SOCKERRNO;
       logmsg("Error connecting to port %d: (%d) %s",
-             port, error, strerror(error));
+             connectport, error, strerror(error));
       goto sockfilt_cleanup;
     }
     logmsg("====> Client connect");
