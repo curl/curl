@@ -45,15 +45,18 @@ socket callback function set with the CURLMOPT_SOCKETFUNCTION option to
 \fIcurl_multi_setopt(3)\fP. They update the status with changes since the
 previous time this function was called.
 
-To force libcurl to (re-)check all its internal sockets and transfers instead
-of just a single one, you call \fBcurl_multi_socket_all(3)\fP. This is
-typically done as the first function call before the application has any
-knowledge about what sockets libcurl uses.
+Force libcurl to (re-)check all its internal sockets and transfers instead of
+just a single one by calling \fBcurl_multi_socket_all(3)\fP. This is typically
+done as the first function call before the application has any knowledge about
+what sockets libcurl uses.
 
-Applications should call \fBcurl_multi_timeout(3)\fP to figure out how long to
-wait for socket actions \- at most \- before doing the timeout action: call
-the \fBcurl_multi_socket(3)\fP function with the \fBsockfd\fP argument set to
-CURL_SOCKET_TIMEOUT.
+Get the timeout time - how long to wait for socket actions at most before
+doing the timeout action: call the \fBcurl_multi_socket(3)\fP function with
+the \fBsockfd\fP argument set to CURL_SOCKET_TIMEOUT, by setting the
+\fICURLMOPT_TIMERFUNCTION\fP option with \fIcurl_multi_setopt(3)\fP. You can
+also use the \fIcurl_multi_timeout(3)\fP function to poll the value at any
+given time, but for an event-based system using the callback is far better
+than relying on polling the timeout value.
 
 Usage of \fIcurl_multi_socket(3)\fP is depricated, whereas the function is
 equivalent to \fIcurl_multi_socket_action(3)\fP, when \fBev_bitmask\fP is set 
