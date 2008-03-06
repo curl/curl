@@ -977,18 +977,18 @@ if test x"$want_gss" = xyes; then
       gnu_gss=yes
     ],
     [
-      dnl not found, check Heimdal
-      AC_CHECK_HEADER(gssapi.h,
+      dnl not found, check MIT
+      AC_CHECK_HEADER(gssapi/gssapi.h,
         [
           dnl found in the given dirs
-          AC_DEFINE(HAVE_GSSHEIMDAL, 1, [if you have the Heimdal gssapi libraries])
+          AC_DEFINE(HAVE_GSSMIT, 1, [if you have the MIT gssapi libraries])
         ],
         [
-          dnl not found, check in gssapi/ subdir
-          AC_CHECK_HEADER(gssapi/gssapi.h,
+          dnl not found, check for Heimdal
+          AC_CHECK_HEADER(gssapi.h,
             [
               dnl found
-              AC_DEFINE(HAVE_GSSMIT, 1, [if you have the MIT gssapi libraries])
+              AC_DEFINE(HAVE_GSSHEIMDAL, 1, [if you have the Heimdal gssapi libraries])
             ],
             [
               dnl no header found, disabling GSS

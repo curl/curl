@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Michal Marek (6 Mar 2008)
+- Fix the gssapi configure check to detect newer MIT Kerberos (patch by
+  Michael Calmer)
+
 Yang Tse (6 Mar 2008)
 - Fix regression on Curl_socket_ready() and Curl_poll() so that these will
   again fail on select/poll errors different than EINTR.
