@@ -1957,13 +1957,11 @@ sub singletest {
         unlink($memdump);
     }
 
+    # create a (possibly-empty) file before starting the test
     my @inputfile=getpart("client", "file");
-    if(@inputfile) {
-        # we need to generate a file before this test is invoked
-        my %fileattr = getpartattr("client", "file");
-
-        my $filename=$fileattr{'name'};
-
+    my %fileattr = getpartattr("client", "file");
+    my $filename=$fileattr{'name'};
+    if(@inputfile || $filename) {
         if(!$filename) {
             logmsg "ERROR: section client=>file has no name attribute\n";
             return -1;

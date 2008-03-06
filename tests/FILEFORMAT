@@ -36,7 +36,7 @@ statistical/informational purposes.
 <reply>
 <data [nocheck="1"] [sendzero="yes"] [base64="yes"]>
 data to be sent to the client on its request and later verified that it arrived
-safely. Set the nocheck=1 to prevent the test script to verify the arrival
+safely. Set nocheck="1" to prevent the test script from verifying the arrival
 of this data.
 
 If the data contains 'swsclose' anywhere within the start and end tag, and
