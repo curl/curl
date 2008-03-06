@@ -34,6 +34,7 @@ This release includes the following bugfixes:
  o crash when connection cache size is 1 and Curl_do() failed
  o GnuTLS-built libcurl can now be forced to prefer SSLv3
  o crash when doing Negotiate again on a re-used connection
+ o select/poll regression
 
 This release includes the following known bugs:
 

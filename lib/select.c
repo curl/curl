@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -68,9 +68,9 @@
 #define elapsed_ms  (int)curlx_tvdiff(curlx_tvnow(), initial_tv)
 
 #ifdef CURL_ACKNOWLEDGE_EINTR
-#define error_is_EINTR  (error == EINTR)
+#define error_not_EINTR (1)
 #else
-#define error_is_EINTR  (0)
+#define error_not_EINTR (error != EINTR)
 #endif
 
 /*
@@ -129,7 +129,7 @@ static int wait_ms(int timeout_ms)
     if(r != -1)
       break;
     error = SOCKERRNO;
-    if((error == EINVAL) || error_is_EINTR)
+    if(error && error_not_EINTR)
       break;
     pending_ms = timeout_ms - elapsed_ms;
     if(pending_ms <= 0)
@@ -219,7 +219,7 @@ int Curl_socket_ready(curl_socket_t readfd, curl_socket_t writefd,
     if(r != -1)
       break;
     error = SOCKERRNO;
-    if((error == EINVAL) || error_is_EINTR)
+    if(error && error_not_EINTR)
       break;
     if(timeout_ms > 0) {
       pending_ms = timeout_ms - elapsed_ms;
@@ -288,7 +288,7 @@ int Curl_socket_ready(curl_socket_t readfd, curl_socket_t writefd,
     if(r != -1)
       break;
     error = SOCKERRNO;
-    if((error == EINVAL) || (error == EBADF) || error_is_EINTR)
+    if(error && error_not_EINTR)
       break;
     if(timeout_ms > 0) {
       pending_ms = timeout_ms - elapsed_ms;
@@ -389,7 +389,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
     if(r != -1)
       break;
     error = SOCKERRNO;
-    if((error == EINVAL) || error_is_EINTR)
+    if(error && error_not_EINTR)
       break;
     if(timeout_ms > 0) {
       pending_ms = timeout_ms - elapsed_ms;
@@ -438,7 +438,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
     if(r != -1)
       break;
     error = SOCKERRNO;
-    if((error == EINVAL) || (error == EBADF) || error_is_EINTR)
+    if(error && error_not_EINTR)
       break;
     if(timeout_ms > 0) {
       pending_ms = timeout_ms - elapsed_ms;
