@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Fandrich (5 Mar 2008)
+- Fixed the test harness so it will write out zero-length data files.
+
+- Added tests 616 and 617 to see how SFTP and SCP cope with zero-length
+  files, as questioned by Mike Protts. SFTP does for me but SCP doesn't
+  so test 617 is disabled for now.
+
 Daniel S (4 Mar 2008)
 - Mike Protts brought a patch that makes resumed transfers work with SFTP.
 
