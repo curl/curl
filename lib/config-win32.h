@@ -353,6 +353,16 @@
 #define _CRT_NONSTDC_NO_DEPRECATE 1
 #endif
 
+/* VS2005 and later dafault size for time_t is 64-bit, unless */
+/* _USE_32BIT_TIME_T has been defined to get a 32-bit time_t. */
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+#  ifndef _USE_32BIT_TIME_T
+#    define SIZEOF_TIME_T 8
+#  else
+#    define SIZEOF_TIME_T 4
+#  endif
+#endif
+
 /* VS2008 does not support Windows build targets prior to WinXP, */
 /* so, if no build target has been defined we will target WinXP. */
 #if defined(_MSC_VER) && (_MSC_VER >= 1500)
