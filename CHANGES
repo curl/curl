@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel Stenberg (9 Mar 2008)
+- Brian Ulm reported a crash when doing a second SFTP transfer on a re-used
+  easy handle if curl_easy_reset() was used between them. I fixed it and Brian
+  verified that it cured his problem.
+
+- Brian Ulm reported that if you first tried to download a non-existing SFTP
+  file and then fetched an existing one and re-used the handle, libcurl would
+  still report the second one as non-existing as well! I fixed it abd Brian
+  verified that it cured his problem.
+
 Michal Marek (6 Mar 2008)
 - Fix the gssapi configure check to detect newer MIT Kerberos (patch by
   Michael Calmer)

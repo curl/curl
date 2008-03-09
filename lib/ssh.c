@@ -1663,7 +1663,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
   }
   else {
     result = Curl_setup_transfer(conn, FIRSTSOCKET, data->req.size,
-                               FALSE, NULL, -1, NULL);
+                                 FALSE, NULL, -1, NULL);
   }
   if(result) {
     state(conn, SSH_SFTP_CLOSE);
@@ -1966,6 +1966,9 @@ static CURLcode ssh_init(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
   struct SSHPROTO *ssh;
+
+  conn->proto.sshc.actualcode = CURLE_OK; /* reset error code */
+
   if(data->state.proto.ssh)
     return CURLE_OK;
 
@@ -2108,6 +2111,18 @@ static CURLcode ssh_do(struct connectdata *conn, bool *done)
   struct SessionHandle *data = conn->data;
 
   *done = FALSE; /* default to false */
+
+  /*
+    Since connections can be re-used between SessionHandles, this might be a
+    connection already existing but on a fresh SessionHandle struct so we must
+    make sure we have a good 'struct SSHPROTO' to play with. For new
+    connections, the struct SSHPROTO is allocated and setup in the
+    ssh_connect() function.
+  */
+  Curl_reset_reqproto(conn);
+  res = ssh_init(conn);
+  if(res)
+    return res;
 
   data->req.size = -1; /* make sure this is unknown at this point */
 
