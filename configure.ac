@@ -1010,18 +1010,23 @@ if test x"$want_gss" = xyes; then
 
   if test -n "$gnu_gss"; then
     curl_gss_msg="enabled (GNU GSS)"
-    LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR -lgss"
+    LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
+    LIBS="$LIBS -lgss"
   elif test -z "$GSSAPI_LIB_DIR"; then
      if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
-        gss_ldflags=`$GSSAPI_ROOT/bin/krb5-config --libs gssapi`
-        LDFLAGS="$LDFLAGS $gss_ldflags"
+        dnl krb5-config doesn't have --libs-only-L or similar, put everything
+        dnl into LIBS
+        gss_libs=`$GSSAPI_ROOT/bin/krb5-config --libs gssapi`
+        LIBS="$LIBS $gss_libs"
      elif test "$GSSAPI_ROOT" != "yes"; then
-        LDFLAGS="$LDFLAGS -L$GSSAPI_ROOT/lib$libsuff -lgssapi"
+        LDFLAGS="$LDFLAGS -L$GSSAPI_ROOT/lib$libsuff"
+        LIBS="$LIBS -lgssapi"
      else
-        LDFLAGS="$LDFLAGS -lgssapi"
+        LIBS="$LIBS -lgssapi"
      fi
   else
-     LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR -lgssapi"
+     LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
+     LIBS="$LIBS -lgssapi"
   fi
 else
   CPPFLAGS="$save_CPPFLAGS"
