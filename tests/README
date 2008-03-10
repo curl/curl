@@ -8,7 +8,7 @@ The cURL Test Suite
 
 Requires:
   perl (and a unix-style shell)
-  diff (when a test fail, a diff is shown)
+  diff (when a test fails, a diff is shown)
   stunnel (for HTTPS and FTPS tests)
   OpenSSH or SunSSH (for SCP, SFTP and SOCKS4/5 tests)
 
