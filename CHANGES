@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Fandrich (10 Mar 2008)
+- Added tests 618-621 to test SFTP/SCP transfers of more than one file
+  (test 620 tests the just-fixed problem reported by Brian Ulm).
+
 Daniel Stenberg (9 Mar 2008)
 - Brian Ulm reported a crash when doing a second SFTP transfer on a re-used
   easy handle if curl_easy_reset() was used between them. I fixed it and Brian

@@ -1,0 +1,39 @@
+<testcase>
+<info>
+<keywords>
+SCP
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+scp
+</server>
+ <name>
+SCP retrieval of two files
+ </name>
+ <command>
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%PWD/log/file619.txt scp://%HOSTIP:%SSHPORT%PWD/log/file619.txt
+</command>
+<file name="log/file619.txt">
+Test data
+for ssh test
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<valgrind>
+disable
+</valgrind>
+<stdout>
+Test data
+for ssh test
+Test data
+for ssh test
+</stdout>
+</verify>
+</testcase>
