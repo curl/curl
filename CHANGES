@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Michal Marek (11 Mar 2008)
+- Added a type checking macro for curl_easy_setopt(), needs gcc-4.3 and only
+  works in C mode atm (http://curl.haxx.se/mail/lib-2008-02/0267.html ,
+  http://curl.haxx.se/mail/lib-2008-02/0292.html )
+
 Daniel Fandrich (10 Mar 2008)
 - Added tests 618-621 to test SFTP/SCP transfers of more than one file
   (test 620 tests the just-fixed problem reported by Brian Ulm).

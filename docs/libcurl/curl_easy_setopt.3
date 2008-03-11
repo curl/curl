@@ -1374,6 +1374,11 @@ operations.
 
 If the crypto device cannot be set, \fICURLE_SSL_ENGINE_SETFAILED\fP is
 returned.
+
+Note that even though this option doesn't need any parameter, in some
+configurations \fIcurl_easy_setopt\fP might be defined as a macro taking
+exactly three arguments. Therefore, it's recommended to pass a dummy value as
+parameter.
 .IP CURLOPT_SSLVERSION
 Pass a long as parameter to control what version of SSL/TLS to attempt to use.
 The available options are:

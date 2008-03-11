@@ -348,6 +348,7 @@ CURL *curl_easy_init(void)
  * easy handle.
  */
 
+#undef curl_easy_setopt
 CURLcode curl_easy_setopt(CURL *curl, CURLoption tag, ...)
 {
   va_list arg;

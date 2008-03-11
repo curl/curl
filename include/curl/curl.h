@@ -1791,4 +1791,9 @@ CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
 #include "easy.h" /* nothing in curl is fun without the easy stuff */
 #include "multi.h"
 
+/* the typechecker doesn't work in C++ (yet) */
+#if (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 3)) && !defined(__cplusplus)
+#include "typecheck-gcc.h"
+#endif /* gcc >= 4.3 && !__cplusplus */
+
 #endif /* __CURL_CURL_H */
