@@ -7,6 +7,12 @@
                                   Changelog
 
 Daniel Stenberg (11 Mar 2008)
+- Dmitry Popov filed bug report #1911069
+  (http://curl.haxx.se/bug/view.cgi?id=1911069) that identified a race
+  condition in the name resolver code when the DNS cache is shared between
+  multiple easy handles, each running in simultaneous threads that could cause
+  crashes.
+
 - Added a macro for curl_easy_setopt() that accepts three arguments and simply
   does nothing with them, just to make sure libcurl users always use three
   arguments to this function. Due to its use of ... for the third argument, it

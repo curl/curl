@@ -268,6 +268,9 @@ void Curl_hostcache_prune(struct SessionHandle *data)
     Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 }
 
+/*
+ * Check if the entry should be pruned. Assumes a locked cache.
+ */
 static int
 remove_entry_if_stale(struct SessionHandle *data, struct Curl_dns_entry *dns)
 {
@@ -284,18 +287,9 @@ remove_entry_if_stale(struct SessionHandle *data, struct Curl_dns_entry *dns)
   if( !hostcache_timestamp_remove(&user,dns) )
     return 0;
 
-  /* ok, we do need to clear the cache. although we need to remove just a
-     single entry we clean the entire hash, as no explicit delete function
-     is provided */
-  if(data->share)
-    Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
-
   Curl_hash_clean_with_criterium(data->dns.hostcache,
                                  (void *) &user,
                                  hostcache_timestamp_remove);
-
-  if(data->share)
-    Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 
   return 1;
 }
@@ -397,7 +391,7 @@ int Curl_resolv(struct connectdata *conn,
   size_t entry_len;
   struct SessionHandle *data = conn->data;
   CURLcode result;
-  int rc;
+  int rc = CURLRESOLV_ERROR; /* default to failure */
   *entry = NULL;
 
 #ifdef HAVE_SIGSETJMP
@@ -407,7 +401,7 @@ int Curl_resolv(struct connectdata *conn,
     if(sigsetjmp(curl_jmpenv, 1)) {
       /* this is coming from a siglongjmp() */
       failf(data, "name lookup timed out");
-      return CURLRESOLV_ERROR;
+      return rc;
     }
   }
 #endif
@@ -416,7 +410,7 @@ int Curl_resolv(struct connectdata *conn,
   entry_id = create_hostcache_id(hostname, port);
   /* If we can't create the entry id, fail */
   if(!entry_id)
-    return CURLRESOLV_ERROR;
+    return rc;
 
   entry_len = strlen(entry_id);
 
@@ -426,18 +420,20 @@ int Curl_resolv(struct connectdata *conn,
   /* See if its already in our dns cache */
   dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len+1);
 
+  /* See whether the returned entry is stale. Done before we release lock */
+  if( remove_entry_if_stale(data, dns) )
+    dns = NULL; /* the memory deallocation is being handled by the hash */
+
+  if(dns) {
+    dns->inuse++; /* we use it! */
+    rc = CURLRESOLV_RESOLVED;
+  }
+
   if(data->share)
     Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 
   /* free the allocated entry_id again */
   free(entry_id);
-
-  /* See whether the returned entry is stale. Deliberately done after the
-     locked block */
-  if( remove_entry_if_stale(data,dns) )
-    dns = NULL; /* the memory deallocation is being handled by the hash */
-
-  rc = CURLRESOLV_ERROR; /* default to failure */
 
   if(!dns) {
     /* The entry was not in the cache. Resolve it to IP address */
@@ -485,14 +481,6 @@ int Curl_resolv(struct connectdata *conn,
       else
         rc = CURLRESOLV_RESOLVED;
     }
-  }
-  else {
-    if(data->share)
-      Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
-    dns->inuse++; /* we use it! */
-    if(data->share)
-      Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
-    rc = CURLRESOLV_RESOLVED;
   }
 
   *entry = dns;

@@ -42,6 +42,8 @@ This release includes the following bugfixes:
  o better MIT kerberos configure check
  o curl_easy_reset() + SFTP re-used connection download crash
  o SFTP non-existing file + SFTP existing file error
+ o sharing DNS cache between easy handles running in multiple threads could
+   lead to crash
 
 This release includes the following known bugs:
 
@@ -61,6 +63,6 @@ advice from friends like these:
  Michal Marek, Dmitry Kurochkin, Niklas Angebrand, Günter Knauf, Yang Tse,
  Dan Fandrich, Mike Hommey, Pooyan McSporran, Jerome Muffat-Meridol,
  Kaspar Brand, Gautam Kachroo, Zmey Petroff, Georg Lippitsch, Sam Listopad,
- Anatoli Tubman, Mike Protts, Michael Calmer, Brian Ulm
+ Anatoli Tubman, Mike Protts, Michael Calmer, Brian Ulm, Dmitry Popov
 
         Thanks! (and sorry if I forgot to mention someone)
