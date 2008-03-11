@@ -20,6 +20,7 @@ This release includes the following changes:
  o added a type checking macro for curl_easy_setopt(), watch out for new
    warnings in code using libcurl (needs gcc-4.3 and currently only works
    in C mode)
+ o curl_easy_setopt() uses are now checked to use three arguments
 
 This release includes the following bugfixes:
 

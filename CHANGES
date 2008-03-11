@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (11 Mar 2008)
+- Added a macro for curl_easy_setopt() that accepts three arguments and simply
+  does nothing with them, just to make sure libcurl users always use three
+  arguments to this function. Due to its use of ... for the third argument, it
+  is otherwise hard to detect abuse.
+
 Michal Marek (11 Mar 2008)
 - Added a type checking macro for curl_easy_setopt(), needs gcc-4.3 and only
   works in C mode atm (http://curl.haxx.se/mail/lib-2008-02/0267.html ,

@@ -1792,8 +1792,16 @@ CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
 #include "multi.h"
 
 /* the typechecker doesn't work in C++ (yet) */
-#if (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 3)) && !defined(__cplusplus)
+#if (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 3)) && \
+    !defined(__cplusplus)
 #include "typecheck-gcc.h"
+#else
+#if defined(__STDC__) && (__STDC__ >= 1) 
+/* This preprocessor magic that replaces a call with the exact same call is
+   only done to make sure application authors use exactly three arguments
+   to this function. */
+#define curl_easy_setopt(handle,opt,param) curl_easy_setopt(handle,opt,param)
+#endif /* __STDC__ >= 1 */
 #endif /* gcc >= 4.3 && !__cplusplus */
 
 #endif /* __CURL_CURL_H */
