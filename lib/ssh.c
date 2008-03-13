@@ -1226,10 +1226,11 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
       }
       else {
         err = libssh2_sftp_last_error(sshc->sftp_session);
-        failf(data, "Upload failed: %s", sftp_libssh2_strerror(err));
         if(sshc->secondCreateDirs) {
           state(conn, SSH_SFTP_CLOSE);
           sshc->actualcode = sftp_libssh2_error_to_CURLE(err);
+          failf(data, "Creating the dir/file failed: %s",
+                sftp_libssh2_strerror(err));
           break;
         }
         else if(((err == LIBSSH2_FX_NO_SUCH_FILE) ||
@@ -1244,6 +1245,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
         }
         state(conn, SSH_SFTP_CLOSE);
         sshc->actualcode = sftp_libssh2_error_to_CURLE(err);
+        failf(data, "Upload failed: %s", sftp_libssh2_strerror(err));
         break;
       }
     }
@@ -1966,8 +1968,10 @@ static CURLcode ssh_init(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
   struct SSHPROTO *ssh;
+  struct ssh_conn *sshc = &conn->proto.sshc;
 
-  conn->proto.sshc.actualcode = CURLE_OK; /* reset error code */
+  sshc->actualcode = CURLE_OK; /* reset error code */
+  sshc->secondCreateDirs =0;   /* reset the create dir attempt state variable */
 
   if(data->state.proto.ssh)
     return CURLE_OK;
