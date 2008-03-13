@@ -409,9 +409,10 @@ has been provided, this data is sent off using the ACCT command. (Added in
 
 If this option is used twice, the second will override the previous use.
 .IP "--ftp-create-dirs"
-(FTP) When an FTP or SFTP URL/operation uses a path that doesn't currently exist on
-the server, the standard behavior of curl is to fail. Using this option, curl
-will instead attempt to create missing directories.
+(FTP/SFTP) When an FTP or SFTP URL/operation uses a path that doesn't
+currently exist on the server, the standard behavior of curl is to
+fail. Using this option, curl will instead attempt to create missing
+directories.
 
 If this option is used twice, the second will again disable directory creation.
 .IP "--ftp-method [method]"
