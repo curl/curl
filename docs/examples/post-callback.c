@@ -75,7 +75,7 @@ int main(void)
     */
 #ifdef USE_CHUNKED
     {
-      curl_slist *chunk = NULL;
+      struct curl_slist *chunk = NULL;
 
       chunk = curl_slist_append(chunk, "Transfer-Encoding: chunked");
       res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
@@ -98,7 +98,7 @@ int main(void)
     /* A less good option would be to enforce HTTP 1.0, but that might also
        have other implications. */
     {
-      curl_slist *chunk = NULL;
+      struct curl_slist *chunk = NULL;
 
       chunk = curl_slist_append(chunk, "Expect:");
       res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
