@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel Stenberg (13 Mar 2008)
+- Brian Ulm figured out that if you did an SFTP upload with
+  CURLOPT_FTP_CREATE_MISSING_DIRS to create a directory, and then re-used the
+  handle and uploaded another file to another directory that needed to be
+  created, the second upload would fail. Another case of a state variable that
+  wasn't properly reset between requests.
+
+- I rewrote the 100-continue code to use a single state variable instead of
+  the previous two ones. I think it made the logic somewhat clearer.
+
 Daniel Stenberg (11 Mar 2008)
 - Dmitry Popov filed bug report #1911069
   (http://curl.haxx.se/bug/view.cgi?id=1911069) that identified a race
@@ -34,7 +44,7 @@ Daniel Stenberg (9 Mar 2008)
 
 - Brian Ulm reported that if you first tried to download a non-existing SFTP
   file and then fetched an existing one and re-used the handle, libcurl would
-  still report the second one as non-existing as well! I fixed it abd Brian
+  still report the second one as non-existing as well! I fixed it and Brian
   verified that it cured his problem.
 
 Michal Marek (6 Mar 2008)

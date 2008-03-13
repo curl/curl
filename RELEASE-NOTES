@@ -44,6 +44,7 @@ This release includes the following bugfixes:
  o SFTP non-existing file + SFTP existing file error
  o sharing DNS cache between easy handles running in multiple threads could
    lead to crash
+ o SFTP upload with CURLOPT_FTP_CREATE_MISSING_DIRS on re-used connection
 
 This release includes the following known bugs:
 
