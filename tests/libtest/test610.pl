@@ -1,24 +1,33 @@
 #!/usr/bin/env perl
-# Create and remove directories and check their existence
-if ( $#ARGV != 1 ) 
+# Perform simple file and directory manipulation in a portable way
+if ( $#ARGV <= 0 ) 
 {
-	print "Usage: $0 mkdir|rmdir|gone path\n";
+	print "Usage: $0 mkdir|rmdir|unlink|move|gone path1 [path2] [more commands...]\n";
 	exit 1;
 }
-if ($ARGV[0] eq "mkdir")
-{
-	mkdir $ARGV[1] || die "$!";
-	exit 0;
+
+use File::Copy;
+while(@ARGV) {
+	my $cmd = shift @ARGV;
+	my $arg = shift @ARGV;
+	if ($cmd eq "mkdir") {
+		mkdir $arg || die "$!";
+	}
+	elsif ($cmd eq "rmdir") {
+		rmdir $arg || die "$!";
+	}
+	elsif ($cmd eq "rm") {
+		unlink $arg || die "$!";
+	}
+	elsif ($cmd eq "move") {
+		my $arg2 = shift @ARGV;
+		move($arg,$arg2) || die "$!";
+	}
+	elsif ($cmd eq "gone") {
+		! -e $arg || die "Path $arg exists";
+	} else {
+		print "Unsupported command $cmd\n";
+		exit 1;
+	}
 }
-elsif ($ARGV[0] eq "rmdir")
-{
-	rmdir $ARGV[1] || die "$!";
-	exit 0;
-}
-elsif ($ARGV[0] eq "gone")
-{
-	! -e $ARGV[1] || die "Path $ARGV[1] exists";
-	exit 0;
-}
-print "Unsupported command $ARGV[0]\n";
-exit 1;
+exit 0;
