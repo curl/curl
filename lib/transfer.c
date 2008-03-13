@@ -412,7 +412,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
         if((k->bytecount == 0) && (k->writebytecount == 0)) {
           Curl_pgrsTime(data, TIMER_STARTTRANSFER);
-          if(k->wait100_after_headers)
+          if(k->exp100 > EXP100_SEND_DATA)
             /* set time stamp to compare with when waiting for the 100 */
             k->start100 = Curl_tvnow();
         }
@@ -584,10 +584,10 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                  */
                 k->header = TRUE;
                 k->headerline = 0; /* restart the header line counter */
-                /* if we did wait for this do enable write now! */
-                if(k->write_after_100_header) {
 
-                  k->write_after_100_header = FALSE;
+                /* if we did wait for this do enable write now! */
+                if(k->exp100) {
+                  k->exp100 = EXP100_SEND_DATA;
                   k->keepon |= KEEP_WRITE;
                 }
               }
@@ -614,7 +614,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                  * seems to cause a problem => abort the write operations
                  * (or prevent them from starting).
                  */
-                k->write_after_100_header = FALSE;
+                k->exp100 = EXP100_FAILED;
                 k->keepon &= ~KEEP_WRITE;
               }
 
@@ -1429,13 +1429,12 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                protocol agnostic. */
             int fillcount;
 
-            if(k->wait100_after_headers &&
+            if((k->exp100 == EXP100_SENDING_REQUEST) &&
                (data->state.proto.http->sending == HTTPSEND_BODY)) {
               /* If this call is to send body data, we must take some action:
                  We have sent off the full HTTP 1.1 request, and we shall now
                  go into the Expect: 100 state and await such a header */
-              k->wait100_after_headers = FALSE; /* headers sent */
-              k->write_after_100_header = TRUE; /* wait for the header */
+              k->exp100 = EXP100_AWAITING_CONTINUE; /* wait for the header */
               k->keepon &= ~KEEP_WRITE;         /* disable writing */
               k->start100 = Curl_tvnow();       /* timeout count starts now */
               didwhat &= ~KEEP_WRITE;  /* we didn't write anything actually */
@@ -1578,9 +1577,9 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   }
   else {
     /* no read no write, this is a timeout? */
-    if(k->write_after_100_header) {
+    if(k->exp100 == EXP100_AWAITING_CONTINUE) {
       /* This should allow some time for the header to arrive, but only a
-         very short time as otherwise it'll be too much wasted times too
+         very short time as otherwise it'll be too much wasted time too
          often. */
 
       /* Quoting RFC2616, section "8.2.3 Use of the 100 (Continue) Status":
@@ -1595,7 +1594,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
       long ms = Curl_tvdiff(k->now, k->start100);
       if(ms > CURL_TIMEOUT_EXPECT_100) {
         /* we've waited long enough, continue anyway */
-        k->write_after_100_header = FALSE;
+        k->exp100 = EXP100_SEND_DATA;
         k->keepon |= KEEP_WRITE;
       }
     }
@@ -2502,21 +2501,23 @@ Curl_setup_transfer(
          Thus, we must check if the request has been sent before we set the
          state info where we wait for the 100-return code
       */
-      if(data->state.expect100header &&
-          (data->state.proto.http->sending == HTTPSEND_BODY)) {
+      if((data->state.expect100header) &&
+         (data->state.proto.http->sending == HTTPSEND_BODY)) {
         /* wait with write until we either got 100-continue or a timeout */
-        k->write_after_100_header = TRUE;
+        k->exp100 = EXP100_AWAITING_CONTINUE;
         k->start100 = k->start;
       }
       else {
         if(data->state.expect100header)
           /* when we've sent off the rest of the headers, we must await a
-             100-continue */
-          k->wait100_after_headers = TRUE;
+             100-continue but first finish sending the request */
+          k->exp100 = EXP100_SENDING_REQUEST;
+
+        /* enable the write bit when we're not waiting for continue */
         k->keepon |= KEEP_WRITE;
       }
-    }
-  }
+    } /* if(conn->writesockfd != CURL_SOCKET_BAD) */
+  } /* if(k->getheader || !data->set.opt_no_body) */
 
   return CURLE_OK;
 }
