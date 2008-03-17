@@ -35,7 +35,7 @@
  * need to extend the appropriate _curl_*_option macro
  */
 #define curl_easy_setopt(handle, option, value)                               \
-({                                                                            \
+__extension__ ({                                                              \
   __typeof__ (option) _curl_opt = option;                                     \
   if (__builtin_constant_p(_curl_opt)) {                                      \
     if (_curl_is_long_option(_curl_opt) && !_curl_is_long(value))             \
@@ -96,45 +96,45 @@
   __attribute__((noinline)) id(void) { __asm__(""); }
 
 _CURL_WARNING(_curl_easy_setopt_err_long,
-  "curl_easy_setopt expects a long argument for this option");
+  "curl_easy_setopt expects a long argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_curl_off_t,
-  "curl_easy_setopt expects a curl_off_t argument for this option");
+  "curl_easy_setopt expects a curl_off_t argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_string,
-  "curl_easy_setopt expects a string (char* or char[]) argument for this option");
+  "curl_easy_setopt expects a string (char* or char[]) argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_write_callback,
-  "curl_easy_setopt expects a curl_write_callback argument for this option");
+  "curl_easy_setopt expects a curl_write_callback argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_read_cb,
-  "curl_easy_setopt expects a curl_read_callback argument for this option");
+  "curl_easy_setopt expects a curl_read_callback argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_ioctl_cb,
-  "curl_easy_setopt expects a curl_ioctl_callback argument for this option");
+  "curl_easy_setopt expects a curl_ioctl_callback argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_sockopt_cb,
-  "curl_easy_setopt expects a curl_sockopt_callback argument for this option");
+  "curl_easy_setopt expects a curl_sockopt_callback argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_opensocket_cb,
-  "curl_easy_setopt expects a curl_opensocket_callback argument for this option");
+  "curl_easy_setopt expects a curl_opensocket_callback argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_progress_cb,
-  "curl_easy_setopt expects a curl_progress_callback argument for this option");
+  "curl_easy_setopt expects a curl_progress_callback argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_debug_cb,
-  "curl_easy_setopt expects a curl_debug_callback argument for this option");
+  "curl_easy_setopt expects a curl_debug_callback argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_ssl_ctx_cb,
-  "curl_easy_setopt expects a curl_ssl_ctx_callback argument for this option");
+  "curl_easy_setopt expects a curl_ssl_ctx_callback argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_conv_cb,
-  "curl_easy_setopt expects a curl_conv_callback argument for this option");
+  "curl_easy_setopt expects a curl_conv_callback argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_seek_cb,
-  "curl_easy_setopt expects a curl_seek_callback argument for this option");
+  "curl_easy_setopt expects a curl_seek_callback argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_cb_data,
-  "curl_easy_setopt expects a private data pointer as argument for this option");
+  "curl_easy_setopt expects a private data pointer as argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_error_buffer,
-  "curl_easy_setopt expects a char buffer of CURL_ERROR_SIZE as argument for this option");
+  "curl_easy_setopt expects a char buffer of CURL_ERROR_SIZE as argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_FILE,
-  "curl_easy_setopt expects a FILE* argument for this option");
+  "curl_easy_setopt expects a FILE* argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_postfields,
-  "curl_easy_setopt expects a void* or char* argument for this option");
+  "curl_easy_setopt expects a void* or char* argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_curl_httpost,
-  "curl_easy_setopt expects a struct curl_httppost* argument for this option");
+  "curl_easy_setopt expects a struct curl_httppost* argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_curl_slist,
-  "curl_easy_setopt expects a struct curl_slist* argument for this option");
+  "curl_easy_setopt expects a struct curl_slist* argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_CURLSH,
-  "curl_easy_setopt expects a CURLSH* argument for this option");
+  "curl_easy_setopt expects a CURLSH* argument for this option")
 
 /* groups of options that take the same type of argument */
 
