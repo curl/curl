@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Michal Marek (18 Mar 2008)
+- Added curl_easy_getinfo typechecker.
+
+- Added macros for curl_share_setopt and curl_multi_setopt to check at least
+  the correct number of arguments.
+
 Daniel Fandrich (13 Mar 2008)
 - Added tests 622-625 to test SFTP/SCP uploads. Test 625 was an attempt to
   reproduce the --ftp-create-dirs problem reported by Brian Ulm, but that

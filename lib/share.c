@@ -46,6 +46,7 @@ curl_share_init(void)
   return share;
 }
 
+#undef curl_share_setopt
 CURLSHcode
 curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
 {

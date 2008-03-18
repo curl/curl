@@ -1778,6 +1778,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   return result;
 }
 
+#undef curl_multi_setopt
 CURLMcode curl_multi_setopt(CURLM *multi_handle,
                             CURLMoption option, ...)
 {

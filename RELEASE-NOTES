@@ -17,10 +17,11 @@ This release includes the following changes:
  o the test509-style setting URL in callback is officially no longer supported
  o support a full chain of certificates in a given PKCS12 certificate
  o resumed transfers work with SFTP
- o added a type checking macro for curl_easy_setopt(), watch out for new
-   warnings in code using libcurl (needs gcc-4.3 and currently only works
-   in C mode)
- o curl_easy_setopt() uses are now checked to use three arguments
+ o added type checking macros for curl_easy_setopt() and curl_easy_getinfo(),
+   watch out for new warnings in code using libcurl (needs gcc-4.3 and
+   currently only works in C mode)
+ o curl_easy_setopt(), curl_easy_getinfo(), curl_share_setopt() and
+   curl_multi_setopt() uses are now checked to use exactly three arguments
 
 This release includes the following bugfixes:
 

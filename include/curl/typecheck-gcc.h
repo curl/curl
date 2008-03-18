@@ -76,10 +76,10 @@ __extension__ ({                                                              \
     if (_curl_is_postfields_option(_curl_opt) && !_curl_is_postfields(value)) \
       _curl_easy_setopt_err_postfields();                                     \
     if ((_curl_opt) == CURLOPT_HTTPPOST &&                                    \
-            !_curl_is_ptr((value), struct curl_httppost))                     \
+            !_curl_is_arr((value), struct curl_httppost))                     \
       _curl_easy_setopt_err_curl_httpost();                                   \
     if (_curl_is_slist_option(_curl_opt) &&                                   \
-            !_curl_is_ptr((value), struct curl_slist))                        \
+            !_curl_is_arr((value), struct curl_slist))                        \
       _curl_easy_setopt_err_curl_slist();                                     \
     if ((_curl_opt) == CURLOPT_SHARE && !_curl_is_ptr((value), CURLSH))       \
       _curl_easy_setopt_err_CURLSH();                                         \
@@ -87,10 +87,37 @@ __extension__ ({                                                              \
   curl_easy_setopt(handle, _curl_opt, value);                                 \
 })
 
+/* wraps curl_easy_getinfo() with typechecking */
+/* FIXME: don't allow const pointers */
+#define curl_easy_getinfo(handle, info, arg)                                  \
+__extension__ ({                                                              \
+  __typeof__ (info) _curl_info = info;                                        \
+  if (__builtin_constant_p(_curl_info)) {                                     \
+    if (_curl_is_string_info(_curl_info) && !_curl_is_arr((arg), char *))     \
+      _curl_easy_getinfo_err_string();                                        \
+    if (_curl_is_long_info(_curl_info) && !_curl_is_arr((arg), long))         \
+      _curl_easy_getinfo_err_long();                                          \
+    if (_curl_is_double_info(_curl_info) && !_curl_is_arr((arg), double))     \
+      _curl_easy_getinfo_err_double();                                        \
+    if (_curl_is_slist_info(_curl_info) &&                                    \
+           !_curl_is_arr((arg), struct curl_slist *))                         \
+      _curl_easy_getinfo_err_curl_slist();                                    \
+  }                                                                           \
+  curl_easy_getinfo(handle, _curl_info, arg);                                 \
+})
+
+/* TODO: typechecking for curl_share_setopt() and curl_multi_setopt(),
+ * for now just make sure that the functions are called with three
+ * arguments
+ */
+#define curl_share_setopt(share,opt,param) curl_share_setopt(share,opt,param)
+#define curl_multi_setopt(handle,opt,param) curl_multi_setopt(handle,opt,param)
+
+
 /* the actual warnings, triggered by calling the _curl_easy_setopt_err*
  * functions */
 
-/* To define a new warning, use _CURL_WARNING(identifier, "message"); */
+/* To define a new warning, use _CURL_WARNING(identifier, "message") */
 #define _CURL_WARNING(id, message)                                            \
   static void __attribute__((warning(message))) __attribute__((unused))       \
   __attribute__((noinline)) id(void) { __asm__(""); }
@@ -136,7 +163,16 @@ _CURL_WARNING(_curl_easy_setopt_err_curl_slist,
 _CURL_WARNING(_curl_easy_setopt_err_CURLSH,
   "curl_easy_setopt expects a CURLSH* argument for this option")
 
-/* groups of options that take the same type of argument */
+_CURL_WARNING(_curl_easy_getinfo_err_string,
+  "curl_easy_getinfo expects a pointer to char * for this info")
+_CURL_WARNING(_curl_easy_getinfo_err_long,
+  "curl_easy_getinfo expects a pointer to long for this info")
+_CURL_WARNING(_curl_easy_getinfo_err_double,
+  "curl_easy_getinfo expects a pointer to double for this info")
+_CURL_WARNING(_curl_easy_getinfo_err_curl_slist,
+  "curl_easy_getinfo expects a pointer to struct curl_slist * for this info")
+
+/* groups of curl_easy_setops options that take the same type of argument */
 
 /* To add a new option to one of the groups, just add
  *   (option) == CURLOPT_SOMETHING
@@ -230,13 +266,34 @@ _CURL_WARNING(_curl_easy_setopt_err_CURLSH,
    (option) == CURLOPT_TELNETOPTIONS ||                                       \
    0)
 
+/* groups of curl_easy_getinfo infos that take the same type of argument */
+
+/* evaluates to true if info expects a pointer to char * argument */
+#define _curl_is_string_info(info)                                            \
+  (CURLINFO_STRING < (info) && (info) < CURLINFO_LONG)
+
+/* evaluates to true if info expects a pointer to long argument */
+#define _curl_is_long_info(info)                                              \
+  (CURLINFO_LONG < (info) && (info) < CURLINFO_DOUBLE)
+
+/* evaluates to true if info expects a pointer to double argument */
+#define _curl_is_double_info(info)                                            \
+  (CURLINFO_DOUBLE < (info) && (info) < CURLINFO_SLIST)
+
+/* evaluates to true if info expects a pointer to struct curl_slist * argument */
+#define _curl_is_slist_info(info)                                             \
+  (CURLINFO_SLIST < (info))
+
+
 /* typecheck helpers -- check whether given expression has requested type*/
 
-/* For pointers, you can use the _curl_is_ptr macro, otherwise define a new
- * macro. Search for __builtin_types_compatible_p in the GCC manual.  NOTE:
- * these macros MUST NOT EVALUATE their arguments! The argument is the actual
- * expression passed to the curl_easy_setopt macro. This means that you can
- * only apply the sizeof and __typeof__ operators, no == or whatsoever.
+/* For pointers, you can use the _curl_is_ptr/_curl_is_arr macros,
+ * otherwise define a new macro. Search for __builtin_types_compatible_p
+ * in the GCC manual.
+ * NOTE: these macros MUST NOT EVALUATE their arguments! The argument is
+ * the actual expression passed to the curl_easy_setopt macro. This
+ * means that you can only apply the sizeof and __typeof__ operators, no
+ * == or whatsoever.
  */
 
 /* XXX: should evaluate to true iff expr is a pointer */
