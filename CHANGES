@@ -8,7 +8,7 @@
 
 Daniel Fandrich (18 Mar 2008)
 - Added test 626 to reproduce an infinite loop when given an invalid
-  SFTP quote command reported by Vincent Le Normand, but left it disabled.
+  SFTP quote command reported by Vincent Le Normand, and fixed it.
 
 Michal Marek (18 Mar 2008)
 - Added curl_easy_getinfo typechecker.

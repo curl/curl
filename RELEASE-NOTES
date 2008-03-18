@@ -46,6 +46,7 @@ This release includes the following bugfixes:
  o sharing DNS cache between easy handles running in multiple threads could
    lead to crash
  o SFTP upload with CURLOPT_FTP_CREATE_MISSING_DIRS on re-used connection
+ o SFTP infinite loop when given an invalid quote command
 
 This release includes the following known bugs:
 

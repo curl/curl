@@ -956,14 +956,14 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
         break;
       }
 
-      if(sshc->quote_path1) {
-        Curl_safefree(sshc->quote_path1);
-        sshc->quote_path1 = NULL;
-      }
-      if(sshc->quote_path2) {
-        Curl_safefree(sshc->quote_path2);
-        sshc->quote_path2 = NULL;
-      }
+      failf(data, "Unknown SFTP command");
+      Curl_safefree(sshc->quote_path1);
+      sshc->quote_path1 = NULL;
+      Curl_safefree(sshc->quote_path2);
+      sshc->quote_path2 = NULL;
+      state(conn, SSH_SFTP_CLOSE);
+      sshc->actualcode = CURLE_QUOTE_ERROR;
+      break;
     }
   }
   if(!sshc->quote_item) {

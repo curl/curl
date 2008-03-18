@@ -32,9 +32,9 @@ Test file for rename test
 #
 # Verify data after the test has been "shot"
 <verify>
-<file name="log/file626-renamed.txt">
-Test file for rename test
-</file>
+<errorcode>
+21
+</errorcode>
 <valgrind>
 disable
 </valgrind>
