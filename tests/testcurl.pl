@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -43,6 +43,7 @@
 # --crosscompile           This is a crosscompile
 # --desc=[desc]            Description of your test system
 # --email=[email]          Set email address to report as
+# --extvercmd=[command]    Command to use for displaying version with cross compiles.
 # --mktarball=[command]    Command to run after completed test
 # --name=[name]            Set name to report as
 # --nocvsup                Don't update from CVS even though it is a CVS tree
@@ -65,7 +66,7 @@ use vars qw($version $fixed $infixed $CURLDIR $CVS $pwd $build $buildlog
             $buildlogname $configurebuild $targetos $confsuffix $binext
             $libext);
 use vars qw($name $email $desc $confopts $runtestopts $setupfile $mktarball
-            $nocvsup $nobuildconf $crosscompile $timestamp);
+            $extvercmd $nocvsup $nobuildconf $crosscompile $timestamp);
 
 # version of this script
 $version='$Revision$';
@@ -82,6 +83,9 @@ while ($ARGV[0]) {
   }
   elsif ($ARGV[0] =~ /--setup=/) {
     $setupfile = (split(/=/, shift @ARGV))[1];
+  }
+  elsif ($ARGV[0] =~ /--extvercmd=/) {
+    $extvercmd = (split(/=/, shift @ARGV))[1];
   }
   elsif ($ARGV[0] =~ /--mktarball=/) {
     $mktarball = (split(/=/, shift @ARGV))[1];
@@ -578,14 +582,10 @@ else {
   mydie "curl was not created (curl$binext)";
 }
 
-if ($targetos =~ /netware/) {
-  if (-f '../../curlver') {
-    system('../../curlver');
-  }
-}
-elsif(!$crosscompile) {
-  logit "display curl$binext --version output";
-  open(F, "./src/curl$binext --version|");
+if (!$crosscompile || (($extvercmd ne '') && (-x $extvercmd))) {
+  logit "display curl${binext} --version output";
+  my $cmd = ($extvercmd ne '' ? $extvercmd.' ' : '')."./src/curl${binext} --version|";
+  open(F, $cmd);
   while(<F>) {
       print;
       print LOG;
@@ -629,7 +629,7 @@ if ($configurebuild && !$crosscompile) {
 }
 
 # create a tarball if we got that option.
-if (($mktarball ne '') && (-f $mktarball)) {
+if (($mktarball ne '') && (-x $mktarball)) {
   system($mktarball);
 }
 
