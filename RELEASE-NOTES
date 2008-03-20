@@ -49,6 +49,7 @@ This release includes the following bugfixes:
    lead to crash
  o SFTP upload with CURLOPT_FTP_CREATE_MISSING_DIRS on re-used connection
  o SFTP infinite loop when given an invalid quote command
+ o curl-config erroneously reported LDAPS support with missing LDAP libraries
 
 This release includes the following known bugs:
 

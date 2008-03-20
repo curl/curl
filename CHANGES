@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Fandrich (20 Mar 2008)
+- Fixed a problem where curl-config --protocols could erroneously show LDAPS
+  support when curl didn't even have regular LDAP support.  It looks like
+  this could happen when the --enable-ldaps configure switch is given but
+  configure couldn't find the LDAP headers or libraries.
+
 Michal Marek (20 Mar 2008)
 - Added --with-ca-path=DIRECTORY configure option to use an openSSL CApath by
   default instead of a ca bundle. The configure script will also look for a
