@@ -113,6 +113,11 @@ if CABUNDLE
 else
 	echo '#undef CURL_CA_BUNDLE /* unknown default path */' >> $@
 endif
+if CAPATH
+	echo '#define CURL_CA_PATH @CURL_CA_PATH@' >> $@
+else
+	echo '#undef CURL_CA_PATH /* unknown default path */' >>$@
+endif
 
 # this hook is mainly for non-unix systems to build even if configure
 # isn't run

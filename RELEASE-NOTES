@@ -22,6 +22,8 @@ This release includes the following changes:
    currently only works in C mode)
  o curl_easy_setopt(), curl_easy_getinfo(), curl_share_setopt() and
    curl_multi_setopt() uses are now checked to use exactly three arguments
+ o --with-ca-path=DIR configure option allows to set an openSSL CApath instead
+   of a default ca bundle.
 
 This release includes the following bugfixes:
 

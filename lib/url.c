@@ -746,10 +746,12 @@ CURLcode Curl_open(struct SessionHandle **curl)
     data->set.ssl.verifypeer = TRUE;
     data->set.ssl.verifyhost = 2;
     data->set.ssl.sessionid = TRUE; /* session ID caching enabled by default */
-#ifdef CURL_CA_BUNDLE
-    /* This is our preferred CA cert bundle since install time */
+    /* This is our preferred CA cert bundle/path since install time */
+#if defined(CURL_CA_BUNDLE)
     res = setstropt(&data->set.str[STRING_SSL_CAFILE],
                          (char *) CURL_CA_BUNDLE);
+#elif defined(CURL_CA_PATH)
+    res = setstropt(&data->set.str[STRING_SSL_CAPATH], (char *) CURL_CA_PATH);
 #endif
   }
 

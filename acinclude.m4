@@ -2500,41 +2500,97 @@ dnl regarding the paths this will scan:
 dnl /etc/ssl/certs/ca-certificates.crt Debian systems
 dnl /etc/pki/tls/certs/ca-bundle.crt Redhat and Mandriva
 dnl /usr/share/ssl/certs/ca-bundle.crt old(er) Redhat
+dnl /etc/ssl/certs/ (ca path) SUSE
 
 AC_DEFUN([CURL_CHECK_CA_BUNDLE], [
 
-  AC_MSG_CHECKING([default CA cert bundle])
+  AC_MSG_CHECKING([default CA cert bundle/path])
 
   AC_ARG_WITH(ca-bundle,
 AC_HELP_STRING([--with-ca-bundle=FILE], [File name to use as CA bundle])
 AC_HELP_STRING([--without-ca-bundle], [Don't use a default CA bundle]),
-  [ ca="$withval" ],
   [
-    dnl the path we previously would have installed the curl ca bundle
-    dnl to, and thus we now check for an already existing cert in that place
-    dnl in case we find no other
-    if test "x$prefix" != xNONE; then
-      cac="\${prefix}/share/curl/curl-ca-bundle.crt"
-    else
-      cac="$ac_default_prefix/share/curl/curl-ca-bundle.crt"
+    want_ca="$withval"
+    if test "x$want_ca" = "xyes"; then
+      AC_MSG_ERROR([--with-ca-bundle=FILE requires a path to the CA bundle])
     fi
+  ],
+  [ want_ca="unset" ])
+  AC_ARG_WITH(ca-path,
+AC_HELP_STRING([--with-ca-path=DIRECTORY], [Directory to use as CA path])
+AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
+  [
+    want_capath="$withval"
+    if test "x$want_capath" = "xyes"; then
+      AC_MSG_ERROR([--with-ca-path=DIRECTORY requires a path to the CA path directory])
+    fi
+  ],
+  [ want_capath="unset"])
 
-    for a in /etc/ssl/certs/ca-certificates.crt \
-             /etc/pki/tls/certs/ca-bundle.crt \
-             /usr/share/ssl/certs/ca-bundle.crt \
-             "$cac"; do
-      if test -f $a; then
-        ca="$a"
-        break
+  if test "x$want_ca" != "xno" -a "x$want_ca" != "xunset" -a \
+          "x$want_capath" != "xno" -a "x$want_capath" != "xunset"; then
+    dnl both given
+    AC_MSG_ERROR([Can't specify both --with-ca-bundle and --with-ca-path.])
+  elif test "x$want_ca" != "xno" -a "x$want_ca" != "xunset"; then
+    dnl --with-ca-bundle given
+    ca="$want_ca"
+    capath="no"
+  elif test "x$want_capath" != "xno" -a "x$want_capath" != "xunset"; then
+    dnl --with-ca-path given
+    if test "x$OPENSSL_ENABLED" != "x1"; then
+      AC_MSG_ERROR([--with-ca-path only works with openSSL])
+    fi
+    capath="$want_capath"
+    ca="no"
+  else
+    dnl neither of --with-ca-* given
+    dnl first try autodetecting a CA bundle , then a CA path
+    dnl both autodetections can be skipped by --without-ca-*
+    ca="no"
+    capath="no"
+    if test "x$want_ca" = "xunset"; then
+      dnl the path we previously would have installed the curl ca bundle
+      dnl to, and thus we now check for an already existing cert in that place
+      dnl in case we find no other
+      if test "x$prefix" != xNONE; then
+        cac="${prefix}/share/curl/curl-ca-bundle.crt"
+      else
+        cac="$ac_default_prefix/share/curl/curl-ca-bundle.crt"
       fi
-    done
-    ]
-  )
+
+      for a in /etc/ssl/certs/ca-certificates.crt \
+               /etc/pki/tls/certs/ca-bundle.crt \
+               /usr/share/ssl/certs/ca-bundle.crt \
+               "$cac"; do
+        if test -f "$a"; then
+          ca="$a"
+          break
+        fi
+      done
+    fi
+    if test "x$want_capath" = "xunset" -a "x$ca" = "xno" -a \
+            "x$OPENSSL_ENABLED" = "x1"; then
+      for a in /etc/ssl/certs/; do
+        if test -d "$a" && ls "$a"/[[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]].0 >/dev/null 2>/dev/null; then
+          capath="$a"
+          break
+        fi
+      done
+    fi
+  fi
+        
+    
 
   if test "x$ca" != "xno"; then
     CURL_CA_BUNDLE='"'$ca'"'
     AC_SUBST(CURL_CA_BUNDLE)
+    AC_MSG_RESULT([$ca])
+  elif test "x$capath" != "xno"; then
+    CURL_CA_PATH="\"$capath\""
+    AC_SUBST(CURL_CA_PATH)
+    AC_MSG_RESULT([$capath (capath)])
+  else
+    AC_MSG_RESULT([no])
   fi
-  AC_MSG_RESULT([$ca])
 ])
 

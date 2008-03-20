@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Michal Marek (20 Mar 2008)
+- Added --with-ca-path=DIRECTORY configure option to use an openSSL CApath by
+  default instead of a ca bundle. The configure script will also look for a
+  ca path if no ca bundle is found and no option given.
+
+- Fixed detection of previously installed curl-ca-bundle.crt
+
 Daniel Fandrich (18 Mar 2008)
 - Added test 626 to reproduce an infinite loop when given an invalid
   SFTP quote command reported by Vincent Le Normand, and fixed it.

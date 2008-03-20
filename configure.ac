@@ -1618,6 +1618,7 @@ dnl **********************************************************************
 CURL_CHECK_CA_BUNDLE
 
 AM_CONDITIONAL(CABUNDLE, test x$ca != xno)
+AM_CONDITIONAL(CAPATH, test x$capath != xno)
 
 dnl **********************************************************************
 dnl Check for the presence of IDN libraries and headers
@@ -2488,7 +2489,8 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   Built-in manual: ${curl_manual_msg}
   Verbose errors:  ${curl_verbose_msg}
   SSPI support:    ${curl_sspi_msg}
-  ca cert path:    ${ca}
+  ca cert bundle:  ${ca}
+  ca cert path:    ${capath}
   LDAP support:    ${curl_ldap_msg}
   LDAPS support:   ${curl_ldaps_msg}
 ])
