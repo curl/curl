@@ -1,7 +1,21 @@
 To be addressed before 7.18.1 (planned release: April 2008)
 =============================
 
-119 - Christian Buchner's mentioned race condition in win32 gethostbyname_thread
-      http://curl.haxx.se/mail/lib-2008-02/0000.html
+[feature freeze entered, no new features!]
 
-126 -
+126 - scp download 0 bytes, test case 617
+
+127 - Dan Petitt's Progress During Large Posts problem
+
+128 - Phil Blundell's ares and ipv6 fix
+
+129 - Pierre Reiss' libcurl + https + multi = lost information
+
+To be addressed before 7.18.2 (planned release: June 2008)
+=============================
+
+130 - Vincent Le Normand's SFTP patch for touch
+
+131 - Scott Barrett's Support for CURLOPT_NOBODY with SFTP
+
+132 - 
