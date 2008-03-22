@@ -3,8 +3,6 @@ To be addressed before 7.18.1 (planned release: April 2008)
 
 [feature freeze entered, no new features!]
 
-126 - scp download 0 bytes, test case 617
-
 127 - Dan Petitt's Progress During Large Posts problem
 
 128 - Phil Blundell's ares and ipv6 fix

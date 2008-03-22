@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Stenberg (22 Mar 2008)
+- Fixed the problem with doing a zero byte SCP transfer, verified with test
+  case 617 (which was added by Daniel Fandrich 5 Mar 2008).
+
 Daniel Fandrich (20 Mar 2008)
 - Fixed a problem where curl-config --protocols could erroneously show LDAPS
   support when curl didn't even have regular LDAP support.  It looks like

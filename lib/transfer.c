@@ -397,18 +397,26 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             bytestoread = (size_t)totalleft;
         }
 
-        /* receive data from the network! */
-        readrc = Curl_read(conn, conn->sockfd, k->buf, bytestoread, &nread);
+        if(bytestoread) {
+          /* receive data from the network! */
+          readrc = Curl_read(conn, conn->sockfd, k->buf, bytestoread, &nread);
 
-        /* subzero, this would've blocked */
-        if(0 > readrc)
-          break; /* get out of loop */
+          /* subzero, this would've blocked */
+          if(0 > readrc)
+            break; /* get out of loop */
 
-        /* get the CURLcode from the int */
-        result = (CURLcode)readrc;
+          /* get the CURLcode from the int */
+          result = (CURLcode)readrc;
 
-        if(result>0)
-          return result;
+          if(result>0)
+            return result;
+        }
+        else {
+          /* read nothing but since we wanted nothing we consider this an OK
+             situation to proceed from */
+          nread = 0;
+          result = CURLE_OK;
+        }
 
         if((k->bytecount == 0) && (k->writebytecount == 0)) {
           Curl_pgrsTime(data, TIMER_STARTTRANSFER);
