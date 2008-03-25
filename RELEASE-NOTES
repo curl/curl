@@ -32,7 +32,7 @@ This release includes the following bugfixes:
  o GnuTLS-built libcurl failed when doing global cleanup and reinit
  o error message problem when unable to resolve a host on Windows
  o Accept: header replacing
- o not verificating server certs with GnuTLS still failed if gnutls had
+ o not verifying server certs with GnuTLS still failed if gnutls had
    problems with the cert
  o when using the multi interface and a handle is removed while still having
    a transfer going on, the connection is now closed by force
