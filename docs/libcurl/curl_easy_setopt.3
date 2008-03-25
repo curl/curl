@@ -310,6 +310,9 @@ Pass a pointer to whatever you want passed in to your
 \fICURLOPT_DEBUGFUNCTION\fP in the last void * argument. This pointer is not
 used by libcurl, it is only passed to the callback.
 .IP CURLOPT_SSL_CTX_FUNCTION
+This option does only function for libcurl powered by OpenSSL. If libcurl was
+built against another SSL library, this functionality is absent.
+
 Function pointer that should match the following prototype: \fBCURLcode
 sslctxfun(CURL *curl, void *sslctx, void *parm);\fP This function gets called
 by libcurl just before the initialization of an SSL connection after having
