@@ -1769,6 +1769,11 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      */
     data->set.ssl.verifyhost = va_arg(param, long);
     break;
+#ifdef USE_SSLEAY
+    /* since these two options are only possible to use on an OpenSSL-
+       powered libcurl we #ifdef them on this condition so that libcurls
+       built against other SSL libs will return a proper error when trying
+       to set this option! */
   case CURLOPT_SSL_CTX_FUNCTION:
     /*
      * Set a SSL_CTX callback
@@ -1781,6 +1786,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      */
     data->set.ssl.fsslctxp = va_arg(param, void *);
     break;
+#endif
   case CURLOPT_CAINFO:
     /*
      * Set CA info for SSL connection. Specify file name of the CA certificate
