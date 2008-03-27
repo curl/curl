@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (27 Mar 2008)
+- As found out and reported by Dan Petitt, libcurl didn't show progress/call
+  the progress callback for the first (potentially huge) piece of body data
+  sent together with the POST request headers in the initial send().
+
 Daniel Stenberg (25 Mar 2008)
 - Made setting the CURLOPT_SSL_CTX_FUNCTION option return a failure in case
   libcurl wasn't built to use OpenSSL as that is a prerequisite for this

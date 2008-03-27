@@ -485,7 +485,7 @@ http_output_auth(struct connectdata *conn,
       if(result)
         return result;
       authproxy->done = TRUE;
-    } 
+    }
     else
 #endif
 #ifdef USE_NTLM
@@ -1929,6 +1929,10 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   Curl_HttpReq httpreq = data->set.httpreq;
   char *addcookies = NULL;
   curl_off_t included_body = 0;
+  const char *httpstring;
+  send_buffer *req_buffer;
+  curl_off_t postsize; /* off_t type to be able to hold a large file size */
+
 
   /* Always consider the DO phase done after this function call, even if there
      may be parts of the request that is not yet sent, since we can deal with
@@ -2215,16 +2219,16 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         curl_off_t readthisamountnow = data->state.resume_from;
 
         if(conn->seek_func(conn->seek_client,
-			   readthisamountnow, SEEK_SET) != 0) {
+                           readthisamountnow, SEEK_SET) != 0) {
           failf(data, "Could not seek stream");
           return CURLE_READ_ERROR;
         }
       }
       else {
-	curl_off_t passed=0;
+        curl_off_t passed=0;
 
         do {
-	  size_t readthisamountnow = (size_t)(data->state.resume_from - passed);
+          size_t readthisamountnow = (size_t)(data->state.resume_from - passed);
           size_t actuallyread;
 
           if(readthisamountnow > BUFSIZE)
@@ -2299,36 +2303,31 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     }
   }
 
-  {
-    /* Use 1.1 unless the use specificly asked for 1.0 */
-    const char *httpstring=
-      data->set.httpversion==CURL_HTTP_VERSION_1_0?"1.0":"1.1";
+  /* Use 1.1 unless the use specificly asked for 1.0 */
+  httpstring= data->set.httpversion==CURL_HTTP_VERSION_1_0?"1.0":"1.1";
 
-    send_buffer *req_buffer;
-    curl_off_t postsize; /* off_t type to be able to hold a large file size */
+  /* initialize a dynamic send-buffer */
+  req_buffer = add_buffer_init();
 
-    /* initialize a dynamic send-buffer */
-    req_buffer = add_buffer_init();
+  if(!req_buffer)
+    return CURLE_OUT_OF_MEMORY;
 
-    if(!req_buffer)
-      return CURLE_OUT_OF_MEMORY;
-
-    /* add the main request stuff */
-    result =
-      add_bufferf(req_buffer,
-                  "%s " /* GET/HEAD/POST/PUT */
-                  "%s%s HTTP/%s\r\n" /* path + HTTP version */
-                  "%s" /* proxyuserpwd */
-                  "%s" /* userpwd */
-                  "%s" /* range */
-                  "%s" /* user agent */
-                  "%s" /* host */
-                  "%s" /* pragma */
-                  "%s" /* accept */
-                  "%s" /* accept-encoding */
-                  "%s" /* referer */
-                  "%s" /* Proxy-Connection */
-                  "%s",/* transfer-encoding */
+  /* add the main request stuff */
+  result =
+    add_bufferf(req_buffer,
+                "%s " /* GET/HEAD/POST/PUT */
+                "%s%s HTTP/%s\r\n" /* path + HTTP version */
+                "%s" /* proxyuserpwd */
+                "%s" /* userpwd */
+                "%s" /* range */
+                "%s" /* user agent */
+                "%s" /* host */
+                "%s" /* pragma */
+                "%s" /* accept */
+                "%s" /* accept-encoding */
+                "%s" /* referer */
+                "%s" /* Proxy-Connection */
+                "%s",/* transfer-encoding */
 
                 request,
                 ppath,
@@ -2348,211 +2347,148 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                 (data->set.str[STRING_ENCODING] &&
                  *data->set.str[STRING_ENCODING] &&
                  conn->allocptr.accept_encoding)?
-                  conn->allocptr.accept_encoding:"",
-                  (data->change.referer && conn->allocptr.ref)?
-                  conn->allocptr.ref:"" /* Referer: <data> */,
-                  (conn->bits.httpproxy &&
-                   !conn->bits.tunnel_proxy &&
-                   !checkheaders(data, "Proxy-Connection:"))?
-                  "Proxy-Connection: Keep-Alive\r\n":"",
-                  te
-                );
+                conn->allocptr.accept_encoding:"",
+                (data->change.referer && conn->allocptr.ref)?
+                conn->allocptr.ref:"" /* Referer: <data> */,
+                (conn->bits.httpproxy &&
+                 !conn->bits.tunnel_proxy &&
+                 !checkheaders(data, "Proxy-Connection:"))?
+                "Proxy-Connection: Keep-Alive\r\n":"",
+                te
+      );
 
-    /*
-     * Free userpwd now --- cannot reuse this for Negotiate and possibly NTLM
-     * with basic and digest, it will be freed anyway by the next request
-     */
+  /*
+   * Free userpwd now --- cannot reuse this for Negotiate and possibly NTLM
+   * with basic and digest, it will be freed anyway by the next request
+   */
 
-    Curl_safefree (conn->allocptr.userpwd);
-    conn->allocptr.userpwd = NULL;
+  Curl_safefree (conn->allocptr.userpwd);
+  conn->allocptr.userpwd = NULL;
 
-    if(result)
-      return result;
+  if(result)
+    return result;
 
 #if !defined(CURL_DISABLE_COOKIES)
-    if(data->cookies || addcookies) {
-      struct Cookie *co=NULL; /* no cookies from start */
-      int count=0;
+  if(data->cookies || addcookies) {
+    struct Cookie *co=NULL; /* no cookies from start */
+    int count=0;
 
-      if(data->cookies) {
-        Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
-        co = Curl_cookie_getlist(data->cookies,
-                                 conn->allocptr.cookiehost?
-                                 conn->allocptr.cookiehost:host,
-                                 data->state.path,
-                                 (bool)(conn->protocol&PROT_HTTPS?TRUE:FALSE));
-        Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
-      }
-      if(co) {
-        struct Cookie *store=co;
-        /* now loop through all cookies that matched */
-        while(co) {
-          if(co->value) {
-            if(0 == count) {
-              result = add_bufferf(req_buffer, "Cookie: ");
-              if(result)
-                break;
-            }
-            result = add_bufferf(req_buffer,
-                                 "%s%s=%s", count?"; ":"",
-                                 co->name, co->value);
+    if(data->cookies) {
+      Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
+      co = Curl_cookie_getlist(data->cookies,
+                               conn->allocptr.cookiehost?
+                               conn->allocptr.cookiehost:host,
+                               data->state.path,
+                               (bool)(conn->protocol&PROT_HTTPS?TRUE:FALSE));
+      Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
+    }
+    if(co) {
+      struct Cookie *store=co;
+      /* now loop through all cookies that matched */
+      while(co) {
+        if(co->value) {
+          if(0 == count) {
+            result = add_bufferf(req_buffer, "Cookie: ");
             if(result)
               break;
-            count++;
           }
-          co = co->next; /* next cookie please */
-        }
-        Curl_cookie_freelist(store, FALSE); /* free the cookie list */
-      }
-      if(addcookies && (CURLE_OK == result)) {
-        if(!count)
-          result = add_bufferf(req_buffer, "Cookie: ");
-        if(CURLE_OK == result) {
-          result = add_bufferf(req_buffer, "%s%s",
-                               count?"; ":"",
-                               addcookies);
+          result = add_bufferf(req_buffer,
+                               "%s%s=%s", count?"; ":"",
+                               co->name, co->value);
+          if(result)
+            break;
           count++;
         }
+        co = co->next; /* next cookie please */
       }
-      if(count && (CURLE_OK == result))
-        result = add_buffer(req_buffer, "\r\n", 2);
-
-      if(result)
-        return result;
+      Curl_cookie_freelist(store, FALSE); /* free the cookie list */
     }
-#endif
-
-    if(data->set.timecondition) {
-      struct tm *tm;
-
-      /* The If-Modified-Since header family should have their times set in
-       * GMT as RFC2616 defines: "All HTTP date/time stamps MUST be
-       * represented in Greenwich Mean Time (GMT), without exception. For the
-       * purposes of HTTP, GMT is exactly equal to UTC (Coordinated Universal
-       * Time)." (see page 20 of RFC2616).
-       */
-
-#ifdef HAVE_GMTIME_R
-      /* thread-safe version */
-      struct tm keeptime;
-      tm = (struct tm *)gmtime_r(&data->set.timevalue, &keeptime);
-#else
-      tm = gmtime(&data->set.timevalue);
-#endif
-
-      /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
-      snprintf(buf, BUFSIZE-1,
-               "%s, %02d %s %4d %02d:%02d:%02d GMT",
-               Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
-               tm->tm_mday,
-               Curl_month[tm->tm_mon],
-               tm->tm_year + 1900,
-               tm->tm_hour,
-               tm->tm_min,
-               tm->tm_sec);
-
-      switch(data->set.timecondition) {
-      case CURL_TIMECOND_IFMODSINCE:
-      default:
-        result = add_bufferf(req_buffer,
-                             "If-Modified-Since: %s\r\n", buf);
-        break;
-      case CURL_TIMECOND_IFUNMODSINCE:
-        result = add_bufferf(req_buffer,
-                             "If-Unmodified-Since: %s\r\n", buf);
-        break;
-      case CURL_TIMECOND_LASTMOD:
-        result = add_bufferf(req_buffer,
-                             "Last-Modified: %s\r\n", buf);
-        break;
+    if(addcookies && (CURLE_OK == result)) {
+      if(!count)
+        result = add_bufferf(req_buffer, "Cookie: ");
+      if(CURLE_OK == result) {
+        result = add_bufferf(req_buffer, "%s%s",
+                             count?"; ":"",
+                             addcookies);
+        count++;
       }
-      if(result)
-        return result;
     }
+    if(count && (CURLE_OK == result))
+      result = add_buffer(req_buffer, "\r\n", 2);
 
-    result = add_custom_headers(conn, req_buffer);
     if(result)
       return result;
+  }
+#endif
 
-    http->postdata = NULL;  /* nothing to post at this point */
-    Curl_pgrsSetUploadSize(data, 0); /* upload size is 0 atm */
+  if(data->set.timecondition) {
+    struct tm *tm;
 
-    /* If 'authdone' is FALSE, we must not set the write socket index to the
-       Curl_transfer() call below, as we're not ready to actually upload any
-       data yet. */
+    /* The If-Modified-Since header family should have their times set in
+     * GMT as RFC2616 defines: "All HTTP date/time stamps MUST be
+     * represented in Greenwich Mean Time (GMT), without exception. For the
+     * purposes of HTTP, GMT is exactly equal to UTC (Coordinated Universal
+     * Time)." (see page 20 of RFC2616).
+     */
 
-    switch(httpreq) {
+#ifdef HAVE_GMTIME_R
+    /* thread-safe version */
+    struct tm keeptime;
+    tm = (struct tm *)gmtime_r(&data->set.timevalue, &keeptime);
+#else
+    tm = gmtime(&data->set.timevalue);
+#endif
 
-    case HTTPREQ_POST_FORM:
-      if(!http->sendit || conn->bits.authneg) {
-        /* nothing to post! */
-        result = add_bufferf(req_buffer, "Content-Length: 0\r\n\r\n");
-        if(result)
-          return result;
+    /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
+    snprintf(buf, BUFSIZE-1,
+             "%s, %02d %s %4d %02d:%02d:%02d GMT",
+             Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
+             tm->tm_mday,
+             Curl_month[tm->tm_mon],
+             tm->tm_year + 1900,
+             tm->tm_hour,
+             tm->tm_min,
+             tm->tm_sec);
 
-        result = add_buffer_send(req_buffer, conn,
-                                 &data->info.request_size, 0, FIRSTSOCKET);
-        if(result)
-          failf(data, "Failed sending POST request");
-        else
-          /* setup variables for the upcoming transfer */
-          result = Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
-                                       &http->readbytecount,
-                                       -1, NULL);
-        break;
-      }
+    switch(data->set.timecondition) {
+    case CURL_TIMECOND_IFMODSINCE:
+    default:
+      result = add_bufferf(req_buffer,
+                           "If-Modified-Since: %s\r\n", buf);
+      break;
+    case CURL_TIMECOND_IFUNMODSINCE:
+      result = add_bufferf(req_buffer,
+                           "If-Unmodified-Since: %s\r\n", buf);
+      break;
+    case CURL_TIMECOND_LASTMOD:
+      result = add_bufferf(req_buffer,
+                           "Last-Modified: %s\r\n", buf);
+      break;
+    }
+    if(result)
+      return result;
+  }
 
-      if(Curl_FormInit(&http->form, http->sendit)) {
-        failf(data, "Internal HTTP POST error!");
-        return CURLE_HTTP_POST_ERROR;
-      }
+  result = add_custom_headers(conn, req_buffer);
+  if(result)
+    return result;
 
-      /* set the read function to read from the generated form data */
-      conn->fread_func = (curl_read_callback)Curl_FormReader;
-      conn->fread_in = &http->form;
+  http->postdata = NULL;  /* nothing to post at this point */
+  Curl_pgrsSetUploadSize(data, 0); /* upload size is 0 atm */
 
-      http->sending = HTTPSEND_BODY;
+  /* If 'authdone' is FALSE, we must not set the write socket index to the
+     Curl_transfer() call below, as we're not ready to actually upload any
+     data yet. */
 
-      if(!data->req.upload_chunky) {
-        /* only add Content-Length if not uploading chunked */
-        result = add_bufferf(req_buffer,
-                             "Content-Length: %" FORMAT_OFF_T "\r\n",
-                             http->postsize);
-        if(result)
-          return result;
-      }
+  switch(httpreq) {
 
-      result = expect100(data, req_buffer);
+  case HTTPREQ_POST_FORM:
+    if(!http->sendit || conn->bits.authneg) {
+      /* nothing to post! */
+      result = add_bufferf(req_buffer, "Content-Length: 0\r\n\r\n");
       if(result)
         return result;
 
-      {
-
-        /* Get Content-Type: line from Curl_formpostheader.
-        */
-        char *contentType;
-        size_t linelength=0;
-        contentType = Curl_formpostheader((void *)&http->form,
-                                          &linelength);
-        if(!contentType) {
-          failf(data, "Could not get Content-Type header line!");
-          return CURLE_HTTP_POST_ERROR;
-        }
-
-        result = add_buffer(req_buffer, contentType, linelength);
-        if(result)
-          return result;
-      }
-
-      /* make the request end in a true CRLF */
-      result = add_buffer(req_buffer, "\r\n", 2);
-      if(result)
-        return result;
-
-      /* set upload size to the progress meter */
-      Curl_pgrsSetUploadSize(data, http->postsize);
-
-      /* fire away the whole request to the server */
       result = add_buffer_send(req_buffer, conn,
                                &data->info.request_size, 0, FIRSTSOCKET);
       if(result)
@@ -2561,220 +2497,290 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         /* setup variables for the upcoming transfer */
         result = Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
                                      &http->readbytecount,
-                                     FIRSTSOCKET,
-                                     &http->writebytecount);
-
-      if(result) {
-        Curl_formclean(&http->sendit); /* free that whole lot */
-        return result;
-      }
-#ifdef CURL_DOES_CONVERSIONS
-/* time to convert the form data... */
-      result = Curl_formconvert(data, http->sendit);
-      if(result) {
-        Curl_formclean(&http->sendit); /* free that whole lot */
-        return result;
-      }
-#endif /* CURL_DOES_CONVERSIONS */
+                                     -1, NULL);
       break;
-
-    case HTTPREQ_PUT: /* Let's PUT the data to the server! */
-
-      if(conn->bits.authneg)
-        postsize = 0;
-      else
-        postsize = data->set.infilesize;
-
-      if((postsize != -1) && !data->req.upload_chunky) {
-        /* only add Content-Length if not uploading chunked */
-        result = add_bufferf(req_buffer,
-                             "Content-Length: %" FORMAT_OFF_T "\r\n",
-                             postsize );
-        if(result)
-          return result;
-      }
-
-      result = expect100(data, req_buffer);
-      if(result)
-        return result;
-
-      result = add_buffer(req_buffer, "\r\n", 2); /* end of headers */
-      if(result)
-        return result;
-
-      /* set the upload size to the progress meter */
-      Curl_pgrsSetUploadSize(data, postsize);
-
-      /* this sends the buffer and frees all the buffer resources */
-      result = add_buffer_send(req_buffer, conn,
-                               &data->info.request_size, 0, FIRSTSOCKET);
-      if(result)
-        failf(data, "Failed sending PUT request");
-      else
-        /* prepare for transfer */
-        result = Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
-                                     &http->readbytecount,
-                                     postsize?FIRSTSOCKET:-1,
-                                     postsize?&http->writebytecount:NULL);
-      if(result)
-        return result;
-      break;
-
-    case HTTPREQ_POST:
-      /* this is the simple POST, using x-www-form-urlencoded style */
-
-      if(conn->bits.authneg)
-        postsize = 0;
-      else
-        /* figure out the size of the postfields */
-        postsize = (data->set.postfieldsize != -1)?
-          data->set.postfieldsize:
-          (data->set.postfields? (curl_off_t)strlen(data->set.postfields):0);
-
-      if(!data->req.upload_chunky) {
-        /* We only set Content-Length and allow a custom Content-Length if
-           we don't upload data chunked, as RFC2616 forbids us to set both
-           kinds of headers (Transfer-Encoding: chunked and Content-Length) */
-
-        if(!checkheaders(data, "Content-Length:")) {
-          /* we allow replacing this header, although it isn't very wise to
-             actually set your own */
-          result = add_bufferf(req_buffer,
-                               "Content-Length: %" FORMAT_OFF_T"\r\n",
-                               postsize);
-          if(result)
-            return result;
-        }
-      }
-
-      if(!checkheaders(data, "Content-Type:")) {
-        result = add_bufferf(req_buffer,
-                             "Content-Type: application/x-www-form-urlencoded\r\n");
-        if(result)
-          return result;
-      }
-
-      /* For really small posts we don't use Expect: headers at all, and for
-         the somewhat bigger ones we allow the app to disable it. Just make
-         sure that the expect100header is always set to the preferred value
-         here. */
-      if(postsize > TINY_INITIAL_POST_SIZE) {
-        result = expect100(data, req_buffer);
-        if(result)
-          return result;
-      }
-      else
-        data->state.expect100header = FALSE;
-
-      if(data->set.postfields) {
-
-        if(!data->state.expect100header &&
-           (postsize < MAX_INITIAL_POST_SIZE))  {
-          /* if we don't use expect: 100  AND
-             postsize is less than MAX_INITIAL_POST_SIZE
-
-             then append the post data to the HTTP request header. This limit
-             is no magic limit but only set to prevent really huge POSTs to
-             get the data duplicated with malloc() and family. */
-
-          result = add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
-          if(result)
-            return result;
-
-          if(!data->req.upload_chunky) {
-            /* We're not sending it 'chunked', append it to the request
-               already now to reduce the number if send() calls */
-            result = add_buffer(req_buffer, data->set.postfields,
-                                (size_t)postsize);
-            included_body = postsize;
-          }
-          else {
-            /* Append the POST data chunky-style */
-            result = add_bufferf(req_buffer, "%x\r\n", (int)postsize);
-            if(CURLE_OK == result)
-              result = add_buffer(req_buffer, data->set.postfields,
-                                  (size_t)postsize);
-            if(CURLE_OK == result)
-              result = add_buffer(req_buffer,
-                                  "\x0d\x0a\x30\x0d\x0a\x0d\x0a", 7);
-                                  /* CR  LF   0  CR  LF  CR  LF */
-            included_body = postsize + 7;
-          }
-          if(result)
-            return result;
-        }
-        else {
-          /* A huge POST coming up, do data separate from the request */
-          http->postsize = postsize;
-          http->postdata = data->set.postfields;
-
-          http->sending = HTTPSEND_BODY;
-
-          conn->fread_func = (curl_read_callback)readmoredata;
-          conn->fread_in = (void *)conn;
-
-          /* set the upload size to the progress meter */
-          Curl_pgrsSetUploadSize(data, http->postsize);
-
-          result = add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
-          if(result)
-            return result;
-        }
-      }
-      else {
-        result = add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
-        if(result)
-          return result;
-
-        if(data->set.postfieldsize) {
-          /* set the upload size to the progress meter */
-          Curl_pgrsSetUploadSize(data, postsize?postsize:-1);
-
-          /* set the pointer to mark that we will send the post body using the
-             read callback, but only if we're not in authenticate
-             negotiation  */
-          if(!conn->bits.authneg) {
-            http->postdata = (char *)&http->postdata;
-            http->postsize = postsize;
-          }
-        }
-      }
-      /* issue the request */
-      result = add_buffer_send(req_buffer, conn, &data->info.request_size,
-                               (size_t)included_body, FIRSTSOCKET);
-
-      if(result)
-        failf(data, "Failed sending HTTP POST request");
-      else
-        result =
-          Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
-                              &http->readbytecount,
-                              http->postdata?FIRSTSOCKET:-1,
-                              http->postdata?&http->writebytecount:NULL);
-      break;
-
-    default:
-      result = add_buffer(req_buffer, "\r\n", 2);
-      if(result)
-        return result;
-
-      /* issue the request */
-      result = add_buffer_send(req_buffer, conn,
-                               &data->info.request_size, 0, FIRSTSOCKET);
-
-      if(result)
-        failf(data, "Failed sending HTTP request");
-      else
-        /* HTTP GET/HEAD download: */
-        result = Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
-                                     &http->readbytecount,
-                                     http->postdata?FIRSTSOCKET:-1,
-                                     http->postdata?&http->writebytecount:NULL);
     }
+
+    if(Curl_FormInit(&http->form, http->sendit)) {
+      failf(data, "Internal HTTP POST error!");
+      return CURLE_HTTP_POST_ERROR;
+    }
+
+    /* set the read function to read from the generated form data */
+    conn->fread_func = (curl_read_callback)Curl_FormReader;
+    conn->fread_in = &http->form;
+
+    http->sending = HTTPSEND_BODY;
+
+    if(!data->req.upload_chunky) {
+      /* only add Content-Length if not uploading chunked */
+      result = add_bufferf(req_buffer,
+                           "Content-Length: %" FORMAT_OFF_T "\r\n",
+                           http->postsize);
+      if(result)
+        return result;
+    }
+
+    result = expect100(data, req_buffer);
     if(result)
       return result;
+
+    {
+
+      /* Get Content-Type: line from Curl_formpostheader.
+       */
+      char *contentType;
+      size_t linelength=0;
+      contentType = Curl_formpostheader((void *)&http->form,
+                                        &linelength);
+      if(!contentType) {
+        failf(data, "Could not get Content-Type header line!");
+        return CURLE_HTTP_POST_ERROR;
+      }
+
+      result = add_buffer(req_buffer, contentType, linelength);
+      if(result)
+        return result;
+    }
+
+    /* make the request end in a true CRLF */
+    result = add_buffer(req_buffer, "\r\n", 2);
+    if(result)
+      return result;
+
+    /* set upload size to the progress meter */
+    Curl_pgrsSetUploadSize(data, http->postsize);
+
+    /* fire away the whole request to the server */
+    result = add_buffer_send(req_buffer, conn,
+                             &data->info.request_size, 0, FIRSTSOCKET);
+    if(result)
+      failf(data, "Failed sending POST request");
+    else
+      /* setup variables for the upcoming transfer */
+      result = Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
+                                   &http->readbytecount,
+                                   FIRSTSOCKET,
+                                   &http->writebytecount);
+
+    if(result) {
+      Curl_formclean(&http->sendit); /* free that whole lot */
+      return result;
+    }
+#ifdef CURL_DOES_CONVERSIONS
+/* time to convert the form data... */
+    result = Curl_formconvert(data, http->sendit);
+    if(result) {
+      Curl_formclean(&http->sendit); /* free that whole lot */
+      return result;
+    }
+#endif /* CURL_DOES_CONVERSIONS */
+    break;
+
+  case HTTPREQ_PUT: /* Let's PUT the data to the server! */
+
+    if(conn->bits.authneg)
+      postsize = 0;
+    else
+      postsize = data->set.infilesize;
+
+    if((postsize != -1) && !data->req.upload_chunky) {
+      /* only add Content-Length if not uploading chunked */
+      result = add_bufferf(req_buffer,
+                           "Content-Length: %" FORMAT_OFF_T "\r\n",
+                           postsize );
+      if(result)
+        return result;
+    }
+
+    result = expect100(data, req_buffer);
+    if(result)
+      return result;
+
+    result = add_buffer(req_buffer, "\r\n", 2); /* end of headers */
+    if(result)
+      return result;
+
+    /* set the upload size to the progress meter */
+    Curl_pgrsSetUploadSize(data, postsize);
+
+    /* this sends the buffer and frees all the buffer resources */
+    result = add_buffer_send(req_buffer, conn,
+                             &data->info.request_size, 0, FIRSTSOCKET);
+    if(result)
+      failf(data, "Failed sending PUT request");
+    else
+      /* prepare for transfer */
+      result = Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
+                                   &http->readbytecount,
+                                   postsize?FIRSTSOCKET:-1,
+                                   postsize?&http->writebytecount:NULL);
+    if(result)
+      return result;
+    break;
+
+  case HTTPREQ_POST:
+    /* this is the simple POST, using x-www-form-urlencoded style */
+
+    if(conn->bits.authneg)
+      postsize = 0;
+    else
+      /* figure out the size of the postfields */
+      postsize = (data->set.postfieldsize != -1)?
+        data->set.postfieldsize:
+        (data->set.postfields? (curl_off_t)strlen(data->set.postfields):0);
+
+        if(!data->req.upload_chunky) {
+          /* We only set Content-Length and allow a custom Content-Length if
+             we don't upload data chunked, as RFC2616 forbids us to set both
+             kinds of headers (Transfer-Encoding: chunked and Content-Length) */
+
+          if(!checkheaders(data, "Content-Length:")) {
+            /* we allow replacing this header, although it isn't very wise to
+               actually set your own */
+            result = add_bufferf(req_buffer,
+                                 "Content-Length: %" FORMAT_OFF_T"\r\n",
+                                 postsize);
+            if(result)
+              return result;
+          }
+        }
+
+        if(!checkheaders(data, "Content-Type:")) {
+          result = add_bufferf(req_buffer,
+                               "Content-Type: application/x-www-form-urlencoded\r\n");
+          if(result)
+            return result;
+        }
+
+        /* For really small posts we don't use Expect: headers at all, and for
+           the somewhat bigger ones we allow the app to disable it. Just make
+           sure that the expect100header is always set to the preferred value
+           here. */
+        if(postsize > TINY_INITIAL_POST_SIZE) {
+          result = expect100(data, req_buffer);
+          if(result)
+            return result;
+        }
+        else
+          data->state.expect100header = FALSE;
+
+        if(data->set.postfields) {
+
+          if(!data->state.expect100header &&
+             (postsize < MAX_INITIAL_POST_SIZE))  {
+            /* if we don't use expect: 100  AND
+               postsize is less than MAX_INITIAL_POST_SIZE
+
+               then append the post data to the HTTP request header. This limit
+               is no magic limit but only set to prevent really huge POSTs to
+               get the data duplicated with malloc() and family. */
+
+            result = add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
+            if(result)
+              return result;
+
+            if(!data->req.upload_chunky) {
+              /* We're not sending it 'chunked', append it to the request
+                 already now to reduce the number if send() calls */
+              result = add_buffer(req_buffer, data->set.postfields,
+                                  (size_t)postsize);
+              included_body = postsize;
+            }
+            else {
+              /* Append the POST data chunky-style */
+              result = add_bufferf(req_buffer, "%x\r\n", (int)postsize);
+              if(CURLE_OK == result)
+                result = add_buffer(req_buffer, data->set.postfields,
+                                    (size_t)postsize);
+              if(CURLE_OK == result)
+                result = add_buffer(req_buffer,
+                                    "\x0d\x0a\x30\x0d\x0a\x0d\x0a", 7);
+              /* CR  LF   0  CR  LF  CR  LF */
+              included_body = postsize + 7;
+            }
+            if(result)
+              return result;
+          }
+          else {
+            /* A huge POST coming up, do data separate from the request */
+            http->postsize = postsize;
+            http->postdata = data->set.postfields;
+
+            http->sending = HTTPSEND_BODY;
+
+            conn->fread_func = (curl_read_callback)readmoredata;
+            conn->fread_in = (void *)conn;
+
+            /* set the upload size to the progress meter */
+            Curl_pgrsSetUploadSize(data, http->postsize);
+
+            result = add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
+            if(result)
+              return result;
+          }
+        }
+        else {
+          result = add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
+          if(result)
+            return result;
+
+          if(data->set.postfieldsize) {
+            /* set the upload size to the progress meter */
+            Curl_pgrsSetUploadSize(data, postsize?postsize:-1);
+
+            /* set the pointer to mark that we will send the post body using the
+               read callback, but only if we're not in authenticate
+               negotiation  */
+            if(!conn->bits.authneg) {
+              http->postdata = (char *)&http->postdata;
+              http->postsize = postsize;
+            }
+          }
+        }
+        /* issue the request */
+        result = add_buffer_send(req_buffer, conn, &data->info.request_size,
+                                 (size_t)included_body, FIRSTSOCKET);
+
+        if(result)
+          failf(data, "Failed sending HTTP POST request");
+        else
+          result =
+            Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
+                                &http->readbytecount,
+                                http->postdata?FIRSTSOCKET:-1,
+                                http->postdata?&http->writebytecount:NULL);
+        break;
+
+  default:
+    result = add_buffer(req_buffer, "\r\n", 2);
+    if(result)
+      return result;
+
+    /* issue the request */
+    result = add_buffer_send(req_buffer, conn,
+                             &data->info.request_size, 0, FIRSTSOCKET);
+
+    if(result)
+      failf(data, "Failed sending HTTP request");
+    else
+      /* HTTP GET/HEAD download: */
+      result = Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
+                                   &http->readbytecount,
+                                   http->postdata?FIRSTSOCKET:-1,
+                                   http->postdata?&http->writebytecount:NULL);
+  }
+  if(result)
+    return result;
+
+  if(http->writebytecount) {
+    /* if a request-body has been sent off, we make sure this progress is noted
+       properly */
+    Curl_pgrsSetUploadCounter(data, http->writebytecount);
+    if(Curl_pgrsUpdate(conn))
+      result = CURLE_ABORTED_BY_CALLBACK;
   }
 
-  return CURLE_OK;
+  return result;
 }
 #endif
