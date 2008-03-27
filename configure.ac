@@ -1380,7 +1380,7 @@ if test X"$OPT_LIBSSH2" != Xno; then
   yes)
     dnl --with-libssh2 (without path) used
     PREFIX_LIBSSH2=/usr/local/lib
-    LIB_LIBSSH2="$PREFIX_LIBSSH2/lib$libsuff"
+    LIB_LIBSSH2="$PREFIX_LIBSSH2$libsuff"
     ;;
   off)
     dnl no --with-libssh2 option given, just check default places
