@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Stenberg (28 Mar 2008)
+- Stephen Collyer pointed out that configure --with-libssh2 without a given
+  path didn't work properly.
+
 Daniel Stenberg (27 Mar 2008)
 - As found out and reported by Dan Petitt, libcurl didn't show progress/call
   the progress callback for the first (potentially huge) piece of body data

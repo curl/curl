@@ -53,6 +53,7 @@ This release includes the following bugfixes:
  o SCP infinite loop when downloading a zero byte file
  o setting the CURLOPT_SSL_CTX_FUNCTION with libcurl built without OpenSSL
    now makes curl_easy_setopt() properly return failure
+ o configure --with-libssh2 (with no given path)
 
 This release includes the following known bugs:
 
@@ -73,6 +74,6 @@ advice from friends like these:
  Dan Fandrich, Mike Hommey, Pooyan McSporran, Jerome Muffat-Meridol,
  Kaspar Brand, Gautam Kachroo, Zmey Petroff, Georg Lippitsch, Sam Listopad,
  Anatoli Tubman, Mike Protts, Michael Calmer, Brian Ulm, Dmitry Popov,
- Jes Badwal, Dan Petitt
+ Jes Badwal, Dan Petitt, Stephen Collyer
 
         Thanks! (and sorry if I forgot to mention someone)
