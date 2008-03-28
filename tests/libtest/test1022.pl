@@ -28,7 +28,7 @@ if ( $what eq "version" ) {
 }
 else {
 	# Convert hex version to decimal for comparison's sake
-	/^([[:xdigit:]]{2})([[:xdigit:]]{2})([[:xdigit:]]{2})$/ ;
+	/^(..)(..)(..)$/ ;
 	$curlconfigversion = hex($1) . "." . hex($2) . "." . hex($3);
 
 	# Strip off the -CVS from the curl version if it's there
