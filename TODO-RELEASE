@@ -1,14 +1,11 @@
-To be addressed before 7.18.1 (planned release: April 2008)
-=============================
-
-[feature freeze entered, no new features!]
-
-128 - Phil Blundell's ares and ipv6 fix
-
-129 - Pierre Reiss' libcurl + https + multi = lost information
-
 To be addressed before 7.18.2 (planned release: June 2008)
 =============================
+
+128 - Phil Blundell's ares and ipv6 fix (feedback lacking)
+
+129 - Pierre Reiss' libcurl + https + multi = lost information (awaiting
+     better example/clarification on how to figure out when the claimed
+     problem occurs)
 
 130 - Vincent Le Normand's SFTP patch for touch
 
