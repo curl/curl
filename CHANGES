@@ -6,6 +6,8 @@
 
                                   Changelog
 
+Version 7.18.1 (30 March 2008)
+
 Daniel Stenberg (28 Mar 2008)
 - Stephen Collyer pointed out that configure --with-libssh2 without a given
   path didn't work properly.
