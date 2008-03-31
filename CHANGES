@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Fandrich (30 Mar 2008)
+- Changed the makefile so the doc/examples/ programs are never built in a
+  normal build/install (only with the 'make check' target), so that a
+  build failure in the examples isn't fatal.
+
 Version 7.18.1 (30 March 2008)
 
 Daniel Stenberg (28 Mar 2008)

@@ -1,5 +1,5 @@
 # These are all libcurl example programs to be test compiled
-noinst_PROGRAMS = 10-at-a-time anyauthput cookie_interface \
+check_PROGRAMS = 10-at-a-time anyauthput cookie_interface \
   debug fileupload fopen ftpget ftpgetresp ftpupload \
   getinfo getinmemory http-post httpput \
   https multi-app multi-debugcallback multi-double \

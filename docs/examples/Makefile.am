@@ -21,7 +21,7 @@ CPPFLAGS = -DCURL_NO_OLDIES $(STATICCPPFLAGS)
 # Dependencies
 LDADD = $(LIBDIR)/libcurl.la
 
-# Makefile.inc provides the noinst_PROGRAMS and COMPLICATED_EXAMPLES defines
+# Makefile.inc provides the check_PROGRAMS and COMPLICATED_EXAMPLES defines
 include Makefile.inc
 
 

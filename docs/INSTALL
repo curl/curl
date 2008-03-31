@@ -709,8 +709,8 @@ REDUCING SIZE
    size of libcurl for embedded applications where binary size is an
    important factor.  First, be sure to set the CFLAGS variable when
    configuring with any relevant compiler optimization flags to reduce the
-   size of the binary.  For gcc, this would mean at minimum the -Os option
-   and probably the -march=X option as well, e.g.:
+   size of the binary.  For gcc, this would mean at minimum the -Os option,
+   potentially the -march=X and -mdynamic-no-pic options as well, e.g.:
 
       ./configure CFLAGS='-Os' ...
 

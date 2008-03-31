@@ -110,10 +110,10 @@ endif
 curl_LDADD += -lws2_32 -lwinmm
 COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
 
-# Makefile.inc provides the noinst_PROGRAMS and COMPLICATED_EXAMPLES defines
+# Makefile.inc provides the check_PROGRAMS and COMPLICATED_EXAMPLES defines
 include Makefile.inc
 
-example_PROGRAMS := $(patsubst %,%.exe,$(strip $(noinst_PROGRAMS)))
+example_PROGRAMS := $(patsubst %,%.exe,$(strip $(check_PROGRAMS)))
 
 .SUFFIXES: .rc .res .o .exe
 

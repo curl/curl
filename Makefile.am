@@ -72,7 +72,7 @@ test-torture:
 endif
 
 examples:
-	@(cd docs/examples; $(MAKE) all)
+	@(cd docs/examples; $(MAKE) check)
 
 #
 # Build source and binary rpms. For rpm-3.0 and above, the ~/.rpmmacros
