@@ -11,7 +11,5 @@ To be addressed before 7.18.2 (planned release: June 2008)
 
 131 - Scott Barrett's Support for CURLOPT_NOBODY with SFTP
 
-132 - Xponaut's CURLFORM_STREAM option to curl_formadd()
-
 133 - 
 
