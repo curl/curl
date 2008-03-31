@@ -520,6 +520,11 @@ endif
 ifdef OLD_NOVELLSDK
 	@echo $(DL)#define socklen_t int$(DL) >> $@
 endif
+ifdef CABUNDLE
+	@echo $(DL)#define CURL_CA_BUNDLE "$(CABUNDLE)"$(DL) >> $@
+else
+	@echo $(DL)#define CURL_CA_BUNDLE getenv("CURL_CA_BUNDLE")$(DL) >> $@
+endif
 
 FORCE: ;
 
@@ -528,6 +533,9 @@ info: $(OBJDIR)/version.inc
 	@echo libarchitecture: $(LIBARCH)
 	@echo curl version:    $(LIBCURL_VERSION_STR)
 	@echo compiler/linker: $(CC) / $(LD)
+ifdef CABUNDLE
+	@echo ca-bundle path:  $(CABUNDLE)
+endif
 ifdef WITH_SSL
 	@echo SSL support:     enabled (OpenSSL)
 else
