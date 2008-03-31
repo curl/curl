@@ -1623,9 +1623,6 @@ dnl **********************************************************************
 
 CURL_CHECK_CA_BUNDLE
 
-AM_CONDITIONAL(CABUNDLE, test x$ca != xno)
-AM_CONDITIONAL(CAPATH, test x$capath != xno)
-
 dnl **********************************************************************
 dnl Check for the presence of IDN libraries and headers
 dnl **********************************************************************

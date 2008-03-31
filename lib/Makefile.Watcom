@@ -4,7 +4,7 @@
 #
 # $Id$
 
-TARGETS = ca-bundle.h libcurl_wc.dll libcurl_wc_imp.lib
+TARGETS = libcurl_wc.dll libcurl_wc_imp.lib
 
 CC = wcc386
 
@@ -66,9 +66,6 @@ all: $(OBJ_DIR) $(C_ARG) $(TARGETS) .SYMBOLIC
 
 $(OBJ_DIR):
 	mkdir $(OBJ_DIR)
-
-ca-bundle.h:
-	@echo /* dummy ca-bundle.h. Not used */ > $@
 
 libcurl_wc.dll libcurl_wc_imp.lib: $(OBJS) $(RESOURCE) $(LINK_ARG)
 	wlink name libcurl_wc.dll @$(LINK_ARG)
@@ -168,7 +165,7 @@ $(OBJ_DIR)\url.obj: url.c setup.h config-win32.h setup_once.h urldata.h cookie.h
   transfer.h sendf.h progress.h strequal.h strerror.h escape.h strtok.h &
   share.h content_encoding.h http_digest.h http_negotiate.h select.h &
   multiif.h ftp.h dict.h telnet.h tftp.h http.h file.h curl_ldap.h url.h &
-  connect.h inet_ntop.h http_ntlm.h .\ca-bundle.h &
+  connect.h inet_ntop.h http_ntlm.h &
   ..\include\curl\mprintf.h memory.h memdebug.h .\memory.h
 $(OBJ_DIR)\dict.obj: dict.c setup.h config-win32.h setup_once.h urldata.h cookie.h &
   ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &

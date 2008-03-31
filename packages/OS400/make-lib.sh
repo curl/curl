@@ -9,21 +9,6 @@ SCRIPTDIR=`dirname "${0}"`
 cd "${TOPDIR}/lib"
 
 
-#       Create ca-bundle.h file.
-
-if action_needed "ca-bundle.h"
-then    echo "/* This file is generated automatically */" > ca-bundle.h
-        echo "#ifndef CURL_CA_BUNDLE" >> ca-bundle.h
-
-        if [ "${CABUNDLE}" ]
-        then    echo '#define CURL_CA_BUNDLE @CURL_CA_BUNDLE@' >> ca-bundle.h
-        else    echo '#undef CURL_CA_BUNDLE /* unknown */' >> ca-bundle.h
-        fi
-
-        echo "#endif" >> ca-bundle.h
-fi
-
-
 #      Create and compile the identification source file.
 
 echo '#pragma comment(user, "libcurl version '"${LIBCURL_VERSION}"'")' > os400.c

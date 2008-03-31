@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Michal Marek (31 Mar 2008)
+- Removed the generated ca-bundle.h file. The verbatim value of $ca and
+  $capath is known to configure, so it can be defined in config.h instead.
+
 Daniel Stenberg (31 Mar 2008)
 - Added CURLFORM_STREAM as a supported option to curl_formadd() to allow an
   application to provide data for a multipart with the read callback. Note

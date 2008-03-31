@@ -137,7 +137,6 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
 #include "inet_ntop.h"
 #include "http_ntlm.h"
 #include "socks.h"
-#include <ca-bundle.h>
 
 #if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)
 #include "inet_ntoa_r.h"

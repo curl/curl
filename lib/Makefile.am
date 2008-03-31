@@ -101,30 +101,6 @@ libcurl_la_SOURCES = $(CSOURCES) $(HHEADERS)
 WIN32SOURCES = $(CSOURCES)
 WIN32HEADERS = $(HHEADERS) config-win32.h
 
-BUILT_SOURCES = $(top_builddir)/lib/ca-bundle.h
-
-$(top_builddir)/lib/ca-bundle.h: Makefile.in Makefile
-	@if test -f $@; then \
-	  chmod 0644 $@; \
-	fi
-	echo "/* This file is generated automatically */" > $@
-if CABUNDLE
-	echo '#define CURL_CA_BUNDLE @CURL_CA_BUNDLE@' >> $@
-else
-	echo '#undef CURL_CA_BUNDLE /* unknown default path */' >> $@
-endif
-if CAPATH
-	echo '#define CURL_CA_PATH @CURL_CA_PATH@' >> $@
-else
-	echo '#undef CURL_CA_PATH /* unknown default path */' >>$@
-endif
-
-# this hook is mainly for non-unix systems to build even if configure
-# isn't run
-dist-hook:
-	chmod 0644 $(distdir)/ca-bundle.h
-	echo "/* ca bundle path set in here*/" > $(distdir)/ca-bundle.h
-
 DSPOUT = | awk '{printf("%s\r\n", $$0)}' >> $(DSP)
 VCPROJOUT = | awk '{printf("%s\r\n", $$0)}' >> $(VCPROJ)
 
