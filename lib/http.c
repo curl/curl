@@ -2506,9 +2506,14 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       return CURLE_HTTP_POST_ERROR;
     }
 
-    /* set the read function to read from the generated form data */
-    http->form.fread_func = conn->fread_func; /* get the previously set callback
-                                                 function pointer */
+    /* Get the currently set callback function pointer and store that in the
+       form struct since we might want the actual user-provided callback later
+       on. The conn->fread_func pointer itself will be changed for the
+       multipart case to the function that returns a multipart formatted
+       stream. */
+    http->form.fread_func = conn->fread_func;
+
+    /* Set the read function to read from the generated form data */
     conn->fread_func = (curl_read_callback)Curl_FormReader;
     conn->fread_in = &http->form;
 
