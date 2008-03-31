@@ -6,11 +6,11 @@ Curl and libcurl 7.18.2
  Public functions in libcurl:  56
  Public web site mirrors:      39
  Known libcurl bindings:       36
- Contributors:                 621
+ Contributors:                 636
 
 This release includes the following changes:
  
- o 
+ o CURLFORM_STREAM was added
 
 This release includes the following bugfixes:
 

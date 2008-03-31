@@ -8,7 +8,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,8 +27,10 @@
 enum formtype {
   FORM_DATA,    /* form metadata (convert to network encoding if necessary) */
   FORM_CONTENT, /* form content  (never convert) */
-  FORM_FILE     /* 'line' points to a file name we should read from 
-                    to create the form data (never convert) */
+  FORM_CALLBACK, /* 'line' points to the custom pointer we pass to the callback
+                  */
+  FORM_FILE     /* 'line' points to a file name we should read from
+                   to create the form data (never convert) */
 };
 
 /* plain and simple linked list with lines to send */
@@ -44,6 +46,7 @@ struct Form {
   size_t sent;           /* number of bytes of the current line that has
                             already been sent in a previous invoke */
   FILE *fp;              /* file to read from */
+  curl_read_callback fread_func; /* fread callback pointer */
 };
 
 /* used by FormAdd for temporary storage */
@@ -62,6 +65,7 @@ typedef struct FormInfo {
   char *showfilename; /* The file name to show. If not set, the actual
                          file name will be used */
   bool showfilename_alloc;
+  char *userp;        /* pointer for the read callback */
   struct curl_slist* contentheader;
   struct FormInfo *more;
 } FormInfo;

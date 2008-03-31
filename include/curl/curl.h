@@ -211,10 +211,16 @@ struct curl_httppost {
                                        do not free in formfree */
 #define HTTPPOST_BUFFER (1<<4)      /* upload file from buffer */
 #define HTTPPOST_PTRBUFFER (1<<5)   /* upload file from pointer contents */
+#define HTTPPOST_CALLBACK (1<<6)    /* upload fiel contents by using the
+                                       regular read callback to get the data
+                                       and pass the given pointer as custom
+                                       pointer */
 
   char *showfilename;               /* The file name to show. If not set, the
                                        actual file name will be used (if this
                                        is a file part) */
+  void *userp;                      /* custom pointer used for
+                                       HTTPPOST_CALLBACK posts */
 };
 
 typedef int (*curl_progress_callback)(void *clientp,
@@ -246,7 +252,7 @@ typedef size_t (*curl_write_callback)(char *buffer,
 #define CURL_READFUNC_PAUSE 0x10000001
 typedef int (*curl_seek_callback)(void *instream,
                                   curl_off_t offset,
-				  int origin); /* 'whence' */
+                                  int origin); /* 'whence' */
 
 typedef size_t (*curl_read_callback)(char *buffer,
                                       size_t size,
@@ -1313,6 +1319,8 @@ typedef enum {
   CFINIT(END),
   CFINIT(OBSOLETE2),
 
+  CFINIT(STREAM),
+
   CURLFORM_LASTENTRY /* the last unusued */
 } CURLformoption;
 
@@ -1796,7 +1804,7 @@ CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
     !defined(__cplusplus)
 #include "typecheck-gcc.h"
 #else
-#if defined(__STDC__) && (__STDC__ >= 1) 
+#if defined(__STDC__) && (__STDC__ >= 1)
 /* This preprocessor magic that replaces a call with the exact same call is
    only done to make sure application authors pass exactly three arguments
    to these functions. */

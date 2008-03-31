@@ -2507,6 +2507,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     }
 
     /* set the read function to read from the generated form data */
+    http->form.fread_func = conn->fread_func; /* get the previously set callback
+                                                 function pointer */
     conn->fread_func = (curl_read_callback)Curl_FormReader;
     conn->fread_in = &http->form;
 

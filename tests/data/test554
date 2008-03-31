@@ -1,0 +1,68 @@
+<testcase>
+#
+# Server-side
+<reply>
+<data mode="text">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Connection: close
+Content-Type: text/html
+
+hello
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib554
+</tool>
+
+ <name>
+HTTP multi-part formpost using read callback for the file part
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/554
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/^------------------------------[a-z0-9]*/------------------------------/
+s/boundary=----------------------------[a-z0-9]*/boundary=----------------------------/
+</strippart>
+# Note that the stripping above removes 12 bytes from every occurance of the
+# boundary string and since 4 of them are in the body contents, we see
+# 415 - (4*12) here == 367 bytes.
+<protocol>
+POST /554 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 415
+Expect: 100-continue
+Content-Type: multipart/form-data; boundary=----------------------------
+
+------------------------------
+Content-Disposition: form-data; name="sendfile"; filename="postit2.c"
+
+this is what we post to the silly web server
+
+------------------------------
+Content-Disposition: form-data; name="filename"
+
+postit2.c
+------------------------------
+Content-Disposition: form-data; name="submit"
+
+send
+--------------------------------
+</protocol>
+</verify>
+</testcase>

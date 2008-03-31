@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (31 Mar 2008)
+- Added CURLFORM_STREAM as a supported option to curl_formadd() to allow an
+  application to provide data for a multipart with the read callback. Note
+  that the size needs to be provided with CURLFORM_CONTENTSLENGTH when the
+  stream option is used. This feature is verified by the new test case
+  554. This feature was sponsored by Xponaut.
+
 Daniel Fandrich (30 Mar 2008)
 - Changed the makefile so the doc/examples/ programs are never built in a
   normal build/install (only with the 'make check' target), so that a
