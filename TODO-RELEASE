@@ -1,15 +1,15 @@
 To be addressed before 7.18.2 (planned release: June 2008)
 =============================
 
-128 - Phil Blundell's ares and ipv6 fix (feedback lacking)
-
 129 - Pierre Reiss' libcurl + https + multi = lost information (awaiting
      better example/clarification on how to figure out when the claimed
      problem occurs)
 
-130 - Vincent Le Normand's SFTP patch for touch
+130 - Vincent Le Normand's SFTP patch for touch (lacking feedback)
 
 131 - Scott Barrett's Support for CURLOPT_NOBODY with SFTP
 
-133 - 
+133 - Setting CURLOPT_NOBODY to "false" causes cURL to wait for content if a
+      content-length header is read
 
+134 - 
