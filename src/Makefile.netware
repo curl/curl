@@ -251,7 +251,7 @@ distclean: clean
 $(OBJDIR) $(INSTDIR):
 	@$(MKDIR) $@
 
-$(TARGET).nlm: $(OBJS) $(OBJX) $(OBJDIR)/$(TARGET).def $(XDCDATA)
+$(TARGET).nlm: $(OBJS) $(OBJDIR)/$(TARGET).def $(XDCDATA)
 	@echo Linking $@
 	@-$(RM) $@
 	@$(LD) $(LDFLAGS) $(OBJDIR)/$(TARGET).def
