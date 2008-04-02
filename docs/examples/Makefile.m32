@@ -51,7 +51,6 @@ CP = copy
 INCLUDES = -I. -I$(PROOT) -I$(PROOT)/include -I$(PROOT)/lib
 LINK = $(CC) $(LDFLAGS) -o $@
 
-curl_PROGRAMS = curl.exe
 ifdef DYN
   curl_DEPENDENCIES = $(PROOT)/lib/libcurldll.a $(PROOT)/lib/libcurl.dll
   curl_LDADD = -L$(PROOT)/lib -lcurldll
