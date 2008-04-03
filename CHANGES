@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel Stenberg (3 Apr 2008)
+- Scott Barrett added support for CURLOPT_NOBODY over SFTP
+
 Daniel Fandrich (3 Apr 2008)
 - Made sure that curl_global_init is called in all the multithreaded
   example programs.

@@ -11,6 +11,7 @@ Curl and libcurl 7.18.2
 This release includes the following changes:
  
  o CURLFORM_STREAM was added
+ o CURLOPT_NOBODY is now supported over SFTP
 
 This release includes the following bugfixes:
 
@@ -31,6 +32,6 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- 
+ Michal Marek, Daniel Fandrich, Scott Barrett
 
         Thanks! (and sorry if I forgot to mention someone)

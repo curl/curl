@@ -1180,7 +1180,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
     if(data->set.upload)
       state(conn, SSH_SFTP_UPLOAD_INIT);
     else {
-      if(sftp_scp->path[strlen(sftp_scp->path)-1] == '/')
+      if(data->set.opt_no_body)
+        state(conn, SSH_STOP);
+      else if(sftp_scp->path[strlen(sftp_scp->path)-1] == '/')
         state(conn, SSH_SFTP_READDIR_INIT);
       else
         state(conn, SSH_SFTP_DOWNLOAD_INIT);

@@ -7,8 +7,6 @@ To be addressed before 7.18.2 (planned release: June 2008)
 
 130 - Vincent Le Normand's SFTP patch for touch (lacking feedback)
 
-131 - Scott Barrett's Support for CURLOPT_NOBODY with SFTP
-
 133 - Setting CURLOPT_NOBODY to "false" causes cURL to wait for content if a
       content-length header is read
 
