@@ -858,9 +858,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * Do not include the body part in the output data stream.
      */
     data->set.opt_no_body = (bool)(0 != va_arg(param, long));
-    if(data->set.opt_no_body)
-      /* in HTTP lingo, this means using the HEAD request */
-      data->set.httpreq = HTTPREQ_HEAD;
+
+    /* in HTTP lingo, no body means using the HEAD request and if unset there
+       really is no perfect method that is the "opposite" of HEAD but in
+       reality most people probably think GET then. The important thing is
+       that we can't let it remain HEAD if the opt_no_body is set FALSE since
+       then we'll behave wrong when getting HTTP. */
+    data->set.httpreq = data->set.opt_no_body?HTTPREQ_HEAD:HTTPREQ_GET;
     break;
   case CURLOPT_FAILONERROR:
     /*

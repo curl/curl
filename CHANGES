@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel Stenberg (3 Apr 2008)
+- Setting CURLOPT_NOBODY to FALSE will now switch the HTTP request method to
+  GET simply because previously when you set CURLOPT_NOBODY to TRUE first and
+  then FALSE you'd end up in a broken state where a HTTP request would do a
+  HEAD by still act a lot like for a GET and hang waiting for the content etc.
+
 - Scott Barrett added support for CURLOPT_NOBODY over SFTP
 
 Daniel Fandrich (3 Apr 2008)

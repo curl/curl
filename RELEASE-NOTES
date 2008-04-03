@@ -15,7 +15,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o 
+ o CURLOPT_NOBODY first set to TRUE and then FALSE for HTTP no longer causes
+   the confusion that could lead to a hung transfer
 
 This release includes the following known bugs:
 
