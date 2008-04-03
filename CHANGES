@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Fandrich (3 Apr 2008)
+- Made sure that curl_global_init is called in all the multithreaded
+  example programs.
+
 Michal Marek (31 Mar 2008)
 - Removed the generated ca-bundle.h file. The verbatim value of $ca and
   $capath is known to configure, so it can be defined in config.h instead.

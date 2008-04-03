@@ -29,7 +29,7 @@ size_t my_read_func(void *ptr, size_t size, size_t nmemb, FILE *stream)
   return fread(ptr, size, nmemb, stream);
 }
 
-int my_progress_func(GtkWidget *Bar,
+int my_progress_func(GtkWidget *bar,
                      double t, /* dltotal */
                      double d, /* dlnow */
                      double ultotal,
@@ -37,7 +37,7 @@ int my_progress_func(GtkWidget *Bar,
 {
 /*  printf("%d / %d (%g %%)\n", d, t, d*100.0/t);*/
   gdk_threads_enter();
-  gtk_progress_set_value(GTK_PROGRESS(Bar), d*100.0/t);
+  gtk_progress_set_value(GTK_PROGRESS(bar), d*100.0/t);
   gdk_threads_leave();
   return 0;
 }
@@ -76,6 +76,9 @@ int main(int argc, char **argv)
 {
   GtkWidget *Window, *Frame, *Frame2;
   GtkAdjustment *adj;
+
+  /* Must initialize libcurl before any threads are started */
+  curl_global_init(CURL_GLOBAL_ALL);
 
   /* Init thread */
   g_thread_init(NULL);

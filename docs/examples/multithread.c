@@ -15,6 +15,8 @@
 #include <pthread.h>
 #include <curl/curl.h>
 
+#define NUMT 4
+
 /*
   List of URLs to fetch.
 
@@ -24,14 +26,14 @@
   http://www.openssl.org/docs/crypto/threads.html#DESCRIPTION
 
 */
-const char *urls[]= {
+const char * const urls[NUMT]= {
   "http://curl.haxx.se/",
   "ftp://cool.haxx.se/",
   "http://www.contactor.se/",
   "www.haxx.se"
 };
 
-void *pull_one_url(void *url)
+static void *pull_one_url(void *url)
 {
   CURL *curl;
 
@@ -52,10 +54,14 @@ void *pull_one_url(void *url)
 
 int main(int argc, char **argv)
 {
-  pthread_t tid[4];
+  pthread_t tid[NUMT];
   int i;
   int error;
-  for(i=0; i< 4; i++) {
+
+  /* Must initialize libcurl before any threads are started */
+  curl_global_init(CURL_GLOBAL_ALL);
+
+  for(i=0; i< NUMT; i++) {
     error = pthread_create(&tid[i],
                            NULL, /* default attributes please */
                            pull_one_url,
@@ -67,7 +73,7 @@ int main(int argc, char **argv)
   }
 
   /* now wait for all threads to terminate */
-  for(i=0; i< 4; i++) {
+  for(i=0; i< NUMT; i++) {
     error = pthread_join(tid[i], NULL);
     fprintf(stderr, "Thread %d terminated\n", i);
   }
