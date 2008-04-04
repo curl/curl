@@ -4,6 +4,8 @@
 
 - Eino Tuominen improved the code when a file is used to seed the randomizer.
 
+- Alexey Simak made adig support NAPTR records
+
 * December 11 2007 (Gisle Vanem)
 
 - Added another sample application; acountry.c which converts an
