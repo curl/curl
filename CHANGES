@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel Fandrich (3 Apr 2008)
+- Added test627 to test SFTP with CURLOPT_NOBODY
+
 Daniel Stenberg (3 Apr 2008)
 - Setting CURLOPT_NOBODY to FALSE will now switch the HTTP request method to
   GET simply because previously when you set CURLOPT_NOBODY to TRUE first and
