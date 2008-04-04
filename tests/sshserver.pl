@@ -606,12 +606,11 @@ if(sshd_supports_opt('UsePAM','no')) {
     push @cfgarr, 'UsePAM no';
 }
 
-if($sshdid =~ /SunSSH/) {
+if($sshdid =~ /OpenSSH/) {
     # http://bugs.opensolaris.org/bugdatabase/view_bug.do?bug_id=6492415
-    push @cfgarr, '# UsePrivilegeSeparation yes';
-}
-elsif(sshd_supports_opt('UsePrivilegeSeparation','no')) {
-    push @cfgarr, 'UsePrivilegeSeparation no';
+    if(sshd_supports_opt('UsePrivilegeSeparation','no')) {
+        push @cfgarr, 'UsePrivilegeSeparation no';
+    }
 }
 
 if(sshd_supports_opt('VerifyReverseMapping','no')) {
