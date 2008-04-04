@@ -605,9 +605,15 @@ if(sshd_supports_opt('UseDNS','no')) {
 if(sshd_supports_opt('UsePAM','no')) {
     push @cfgarr, 'UsePAM no';
 }
-if(sshd_supports_opt('UsePrivilegeSeparation','no')) {
+
+if($sshdid =~ /SunSSH/) {
+    # http://bugs.opensolaris.org/bugdatabase/view_bug.do?bug_id=6492415
+    push @cfgarr, '# UsePrivilegeSeparation yes';
+}
+elsif(sshd_supports_opt('UsePrivilegeSeparation','no')) {
     push @cfgarr, 'UsePrivilegeSeparation no';
 }
+
 if(sshd_supports_opt('VerifyReverseMapping','no')) {
     push @cfgarr, 'VerifyReverseMapping no';
 }
@@ -687,6 +693,7 @@ if(! -e $knownhosts) {
 #  ConnectTimeout                    : OpenSSH 3.7.0 and later
 #  ControlMaster                     : OpenSSH 3.9.0 and later
 #  ControlPath                       : OpenSSH 3.9.0 and later
+#  DisableBanner                     :  SunSSH 1.2.0 and later
 #  DynamicForward                    : OpenSSH 2.9.0 and later
 #  EnableSSHKeysign                  : OpenSSH 3.6.0 and later
 #  EscapeChar                        : OpenSSH 1.2.1 and later [3]
@@ -706,6 +713,7 @@ if(! -e $knownhosts) {
 #  HostName                          : OpenSSH 1.2.1 and later
 #  IdentitiesOnly                    : OpenSSH 3.9.0 and later
 #  IdentityFile                      : OpenSSH 1.2.1 and later
+#  IgnoreIfUnknown                   :  SunSSH 1.2.0 and later
 #  KeepAlive                         : OpenSSH 1.2.1 and later
 #  KbdInteractiveAuthentication      : OpenSSH 2.3.0 and later
 #  KbdInteractiveDevices             : OpenSSH 2.3.0 and later [3]
@@ -812,6 +820,10 @@ if(($sshid =~ /OpenSSH/) && ($sshvernum >= 420)) {
     push @cfgarr, 'ControlPath none';
 }
 
+if(($sshid =~ /SunSSH/) && ($sshvernum >= 120)) {
+    push @cfgarr, 'DisableBanner yes';
+}
+
 if(($sshid =~ /OpenSSH/) && ($sshvernum >= 360)) {
     push @cfgarr, 'EnableSSHKeysign no';
 }
@@ -841,6 +853,10 @@ if((($sshid =~ /OpenSSH/) && ($sshvernum >= 400)) ||
 
 if(($sshid =~ /OpenSSH/) && ($sshvernum >= 390)) {
     push @cfgarr, 'IdentitiesOnly yes';
+}
+
+if(($sshid =~ /SunSSH/) && ($sshvernum >= 120)) {
+    push @cfgarr, 'IgnoreIfUnknown no';
 }
 
 if((($sshid =~ /OpenSSH/) && ($sshvernum < 380)) ||
