@@ -109,6 +109,10 @@ SOURCE=..\..\ares_expand_name.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\ares_expand_string.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\ares_fds.c
 # End Source File
 # Begin Source File

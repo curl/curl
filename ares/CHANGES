@@ -6,6 +6,9 @@
 
 - Alexey Simak made adig support NAPTR records
 
+- Alexey Simak fixed the VC dsp file by adding the missing source file
+  ares_expand_string.c
+
 * December 11 2007 (Gisle Vanem)
 
 - Added another sample application; acountry.c which converts an
