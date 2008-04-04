@@ -1,5 +1,9 @@
   Changelog for the c-ares project
 
+* April 4 2008 (Daniel Stenberg)
+
+- Eino Tuominen improved the code when a file is used to seed the randomizer.
+
 * December 11 2007 (Gisle Vanem)
 
 - Added another sample application; acountry.c which converts an
