@@ -488,7 +488,7 @@ main(int argc, char *argv[])
     handle = url_fopen(url, "r");
     if(!handle)
     {
-        printf("couldn't url_fopen()\n");
+        printf("couldn't url_fopen() %s\n", url);
         fclose(outf);
         return 2;
     }
@@ -514,7 +514,7 @@ main(int argc, char *argv[])
 
     handle = url_fopen("testfile", "r");
     if(!handle) {
-        printf("couldn't url_fopen()\n");
+        printf("couldn't url_fopen() testfile\n");
         fclose(outf);
         return 2;
     }
@@ -539,7 +539,7 @@ main(int argc, char *argv[])
 
     handle = url_fopen("testfile", "r");
     if(!handle) {
-        printf("couldn't url_fopen()\n");
+        printf("couldn't url_fopen() testfile\n");
         fclose(outf);
         return 2;
     }
