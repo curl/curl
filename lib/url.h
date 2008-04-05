@@ -72,20 +72,11 @@ int Curl_removeHandleFromPipeline(struct SessionHandle *handle,
 
 void Curl_close_connections(struct SessionHandle *data);
 
-#if 0
-CURLcode Curl_protocol_fdset(struct connectdata *conn,
-                             fd_set *read_fd_set,
-                             fd_set *write_fd_set,
-                             int *max_fdp);
-CURLcode Curl_doing_fdset(struct connectdata *conn,
-                          fd_set *read_fd_set,
-                          fd_set *write_fd_set,
-                          int *max_fdp);
-#endif
-
 /* Called on connect, and if there's already a protocol-specific struct
    allocated for a different connection, this frees it that it can be setup
    properly later on. */
 void Curl_reset_reqproto(struct connectdata *conn);
+
+#define CURL_DEFAULT_PROXY_PORT 1080 /* default proxy port unless specified */
 
 #endif

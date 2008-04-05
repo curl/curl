@@ -719,7 +719,7 @@ CURLcode Curl_open(struct SessionHandle **curl)
     /* Set the default size of the SSL session ID cache */
     data->set.ssl.numsessions = 5;
 
-    data->set.proxyport = 1080;
+    data->set.proxyport = CURL_DEFAULT_PROXY_PORT; /* from url.h */
     data->set.proxytype = CURLPROXY_HTTP; /* defaults to HTTP proxy */
     data->set.httpauth = CURLAUTH_BASIC;  /* defaults to basic */
     data->set.proxyauth = CURLAUTH_BASIC; /* defaults to basic */
