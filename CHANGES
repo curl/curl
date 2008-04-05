@@ -7,6 +7,8 @@
                                   Changelog
 
 Daniel Stenberg (5 Apr 2008)
+- Alexey Simak fixed curl_easy_reset() to reset the max redirect limit properly
+
 - Based on the Debian bug report #474224 that complained about the FTP error
   message when libcurl doesn't get a 220 back immediately on connect, I now
   changed it to be more specific on what the problem is. Also worth noticing:

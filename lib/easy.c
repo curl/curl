@@ -715,9 +715,9 @@ void curl_easy_reset(CURL *curl)
   /* use fread as default function to read input */
   data->set.fread_func = (curl_read_callback)fread;
 
-  data->set.infilesize = -1; /* we don't know any size */
-  data->set.postfieldsize = -1;
-
+  data->set.infilesize = -1;      /* we don't know any size */
+  data->set.postfieldsize = -1;   /* unknown size */
+  data->set.maxredirs = -1;       /* allow any amount by default */
   data->state.current_speed = -1; /* init to negative == impossible */
 
   data->set.httpreq = HTTPREQ_GET; /* Default HTTP request */
@@ -733,7 +733,7 @@ void curl_easy_reset(CURL *curl)
   /* Set the default size of the SSL session ID cache */
   data->set.ssl.numsessions = 5;
 
-  data->set.proxyport = 1080;
+  data->set.proxyport = CURL_DEFAULT_PROXY_PORT; /* from url.h */
   data->set.proxytype = CURLPROXY_HTTP; /* defaults to HTTP proxy */
   data->set.httpauth = CURLAUTH_BASIC;  /* defaults to basic */
   data->set.proxyauth = CURLAUTH_BASIC; /* defaults to basic */
