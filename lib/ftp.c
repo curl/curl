@@ -2563,7 +2563,8 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
     switch(ftpc->state) {
     case FTP_WAIT220:
       if(ftpcode != 220) {
-        failf(data, "This doesn't seem like a nice ftp-server response");
+        failf(data, "Got a %03d ftp-server response when 220 was expected",
+              ftpcode);
         return CURLE_FTP_WEIRD_SERVER_REPLY;
       }
 

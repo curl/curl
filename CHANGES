@@ -6,6 +6,17 @@
 
                                   Changelog
 
+Daniel Stenberg (5 Apr 2008)
+- Based on the Debian bug report #474224 that complained about the FTP error
+  message when libcurl doesn't get a 220 back immediately on connect, I now
+  changed it to be more specific on what the problem is. Also worth noticing:
+  while the bug report contains an example where the response is:
+
+    421 There are too many connected users, please try again later
+
+  we cannot assume that the error message will always be this readable nor
+  that it fits within a particular boundary etc.
+
 Daniel Fandrich (3 Apr 2008)
 - Added test627 to test SFTP with CURLOPT_NOBODY
 
