@@ -159,7 +159,7 @@ static void host_callback(void *arg, int status, int timeouts,
 {
   struct host_query *hquery = (struct host_query *) arg;
   ares_channel channel = hquery->channel;
-  struct hostent *host;
+  struct hostent *host = NULL;
 
   hquery->timeouts += timeouts;
   if (status == ARES_SUCCESS)
