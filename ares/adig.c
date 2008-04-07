@@ -304,6 +304,8 @@ static void callback(void *arg, int status, int timeouts,
   unsigned int qdcount, ancount, nscount, arcount, i;
   const unsigned char *aptr;
 
+  (void) timeouts;
+
   /* Display the query name if given. */
   if (name)
     printf("Answer for query %s:\n", name);
