@@ -608,32 +608,32 @@ static const unsigned char *display_rr(const unsigned char *aptr,
 
     case T_NAPTR:
 
-      printf("\t%d", DNS__16BIT(aptr)); // order
-      printf(" %d\n", DNS__16BIT(aptr + 2)); // preference
+      printf("\t%d", DNS__16BIT(aptr)); /* order */
+      printf(" %d\n", DNS__16BIT(aptr + 2)); /* preference */
 
       p = aptr + 4;
-      status = ares_expand_string(p, abuf, alen, &name, &len);
+      status = ares_expand_string(p, abuf, alen, &(unsigned char *)name, &len);
       if (status != ARES_SUCCESS)
         return NULL;
       printf("\t\t\t\t\t\t%s\n", name);
       ares_free_string(name);
       p += len;
 
-      status = ares_expand_string(p, abuf, alen, &name, &len);
+      status = ares_expand_string(p, abuf, alen, &(unsigned char *)name, &len);
       if (status != ARES_SUCCESS)
         return NULL;
       printf("\t\t\t\t\t\t%s\n", name);
       ares_free_string(name);
       p += len;
 
-      status = ares_expand_string(p, abuf, alen, &name, &len);
+      status = ares_expand_string(p, abuf, alen, &(unsigned char *)name, &len);
       if (status != ARES_SUCCESS)
         return NULL;
       printf("\t\t\t\t\t\t%s\n", name);
       ares_free_string(name);
       p += len;
 
-      status = ares_expand_string(p, abuf, alen, &name, &len);
+      status = ares_expand_string(p, abuf, alen, &(unsigned char *)name, &len);
       if (status != ARES_SUCCESS)
         return NULL;
       printf("\t\t\t\t\t\t%s", name);
