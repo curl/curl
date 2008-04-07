@@ -18,6 +18,7 @@ This release includes the following bugfixes:
  o CURLOPT_NOBODY first set to TRUE and then FALSE for HTTP no longer causes
    the confusion that could lead to a hung transfer
  o curl_easy_reset() resets the max redirect limit properly
+ o configure now correctly recognizes Heimdal and MIT gssapi libraries
 
 This release includes the following known bugs:
 
@@ -34,6 +35,7 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Michal Marek, Daniel Fandrich, Scott Barrett, Alexey Simak
+ Michal Marek, Daniel Fandrich, Scott Barrett, Alexey Simak, Daniel Black,
+ Rafa Muyo
 
         Thanks! (and sorry if I forgot to mention someone)

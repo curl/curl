@@ -6,6 +6,15 @@
 
                                   Changelog
 
+Michal Marek (7 Apr 2008)
+- Fix the MIT / Heimdal check for good:
+  Define HAVE_GSSMIT if <gssapi/{gssapi.h,gssapi_generic.h,gssapi_krb5.h}> are
+  available, otherwise define HAVE_GSSHEIMDAL if <gssapi.h> is available.
+  
+  Only define GSS_C_NT_HOSTBASED_SERVICE to gss_nt_service_name if
+  GSS_C_NT_HOSTBASED_SERVICE isn't declared by the gssapi headers. This should
+  avoid breakage in case we wrongly recognize Heimdal as MIT again.
+
 Daniel Stenberg (5 Apr 2008)
 - Alexey Simak fixed curl_easy_reset() to reset the max redirect limit properly
 

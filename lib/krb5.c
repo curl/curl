@@ -36,7 +36,7 @@
 #ifndef CURL_DISABLE_FTP
 #ifdef HAVE_GSSAPI
 
-#ifdef HAVE_GSSMIT
+#ifdef HAVE_OLD_GSSMIT
 #define GSS_C_NT_HOSTBASED_SERVICE gss_nt_service_name
 #endif
 
