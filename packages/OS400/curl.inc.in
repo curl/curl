@@ -109,6 +109,8 @@
      d                 c                   X'00000010'
      d HTTPPOST_PTRBUFFER...
      d                 c                   X'00000020'
+     d HTTPPOST_CALLBACK...
+     d                 c                   X'00000040'
       *
      d CURL_READFUNC_ABORT...
      d                 c                   X'10000000'
@@ -815,6 +817,8 @@
      d                 c                   17
      d  CURLFORM_OBSOLETE2...
      d                 c                   18
+     d  CURLFORM_STREAM...
+     d                 c                   19
       *
      d CURLINFO        s             10i 0 based(######ptr######)               Enum
      d  CURLINFO_EFFECTIVE_URL...                                               CURLINFO_STRING + 1
@@ -1035,6 +1039,7 @@
      d  more                           *                                        curl_httppost *
      d  flags                        10i 0                                      long
      d  showfilename                   *                                        char *
+     d  userp                          *                                        void *
       *
      d curl_sockaddr   ds                  based(######ptr######)
      d                                     qualified

@@ -867,6 +867,12 @@ curl_formadd_ccsid(struct curl_httppost * * httppost,
 
       break;
 
+    case CURLFORM_STREAM:
+      if (!forms)
+        value = (char *) va_arg(arg, void *);
+
+      break;
+
     case CURLFORM_CONTENTTYPE:
       /* If a previous content has been encountered, convert it now. */
 

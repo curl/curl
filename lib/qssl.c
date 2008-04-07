@@ -90,7 +90,7 @@ static CURLcode Curl_qsossl_init_session(struct SessionHandle * data)
   memset((char *) &initappstr, 0, sizeof initappstr);
   initappstr.applicationID = certname;
   initappstr.applicationIDLen = strlen(certname);
-  initappstr.protocol = TLSV1_SSLV3;
+  initappstr.protocol = SSL_VERSION_CURRENT;    /* TLSV1 compat. SSLV[23]. */
   initappstr.sessionType = SSL_REGISTERED_AS_CLIENT;
   rc = SSL_Init_Application(&initappstr);
 
@@ -190,7 +190,7 @@ static CURLcode Curl_qsossl_handshake(struct connectdata * conn, int sockindex)
 
   default:
   case CURL_SSLVERSION_DEFAULT:
-    h->protocol = TLSV1_SSLV3;
+    h->protocol = SSL_VERSION_CURRENT;          /* TLSV1 compat. SSLV[23]. */
     break;
 
   case CURL_SSLVERSION_TLSv1:
@@ -228,11 +228,11 @@ static CURLcode Curl_qsossl_handshake(struct connectdata * conn, int sockindex)
     return CURLE_SSL_CERTPROBLEM;
 
   case SSL_ERROR_IO:
-    failf(data, "SSL_Handshake(): %s", SSL_Strerror(rc, NULL));
+    failf(data, "SSL_Handshake() I/O error: %s", strerror(errno));
     return CURLE_SSL_CONNECT_ERROR;
 
   default:
-    failf(data, "SSL_Init(): %s", SSL_Strerror(rc, NULL));
+    failf(data, "SSL_Handshake(): %s", SSL_Strerror(rc, NULL));
     return CURLE_SSL_CONNECT_ERROR;
   }
 
