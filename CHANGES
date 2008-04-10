@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Fandrich (9 Apr 2008)
+- Added test case 1024 to test a scenario similar to the one reported
+  by Ben Combee where libcurl would send the wrong cookie to a redirected
+  server.  libcurl was doing the right thing in this test case.
+
 Michal Marek (7 Apr 2008)
 - Fix the MIT / Heimdal check for good:
   Define HAVE_GSSMIT if <gssapi/{gssapi.h,gssapi_generic.h,gssapi_krb5.h}> are
