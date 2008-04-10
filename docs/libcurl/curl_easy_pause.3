@@ -14,7 +14,10 @@ paused, and you can unpause a connection that was previously paused.
 
 A connection can made to pause by using this function or by letting the read
 or the write callbacks return the proper magic return code
-(\fICURL_READFUNC_PAUSE\fP and \fICURL_WRITEFUNC_PAUSE\fP).
+(\fICURL_READFUNC_PAUSE\fP and \fICURL_WRITEFUNC_PAUSE\fP). A write callback
+that returns pause signals to the library that it couldn't take care of any
+data at all, and that data will then be delivered again to the callback when
+the writing is later unpaused.
 
 NOTE: while it may feel tempting, take care and notice that you cannot call
 this function from another thread.
