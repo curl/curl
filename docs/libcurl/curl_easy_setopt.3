@@ -856,6 +856,10 @@ option and thus you need to concatenate them all in one single string. Set
 multiple cookies in one string like this: "name1=content1; name2=content2;"
 etc.
 
+Note that this option sets the cookie header explictly in the outgoing
+request(s). If multiple requests are done due to authentication, followed
+redirections or similar, they will all get this cookie passed on.
+
 Using this option multiple times will only make the latest string override the
 previous ones.
 .IP CURLOPT_COOKIEFILE
