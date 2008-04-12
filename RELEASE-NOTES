@@ -19,6 +19,7 @@ This release includes the following bugfixes:
    the confusion that could lead to a hung transfer
  o curl_easy_reset() resets the max redirect limit properly
  o configure now correctly recognizes Heimdal and MIT gssapi libraries
+ o malloc() failure check in Negotiate
 
 This release includes the following known bugs:
 
@@ -36,6 +37,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Michal Marek, Daniel Fandrich, Scott Barrett, Alexey Simak, Daniel Black,
- Rafa Muyo
+ Rafa Muyo, Andre Guibert de Bruet
 
         Thanks! (and sorry if I forgot to mention someone)

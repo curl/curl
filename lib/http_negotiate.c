@@ -116,6 +116,8 @@ log_gss_error(struct connectdata *conn, OM_uint32 error_status, char *prefix)
   infof(conn->data, "%s", buf);
 }
 
+/* returning zero (0) means success, everything else is treated as "failure"
+   with no care exactly what the failure was */
 int Curl_input_negotiate(struct connectdata *conn, bool proxy,
                          const char *header)
 {
@@ -185,9 +187,13 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
         unsigned char * mechToken         = NULL;
         size_t          mechTokenLength   = 0;
 
-        spnegoToken = malloc(input_token.length);
         if(input_token.value == NULL)
-          return ENOMEM;
+          return CURLE_OUT_OF_MEMORY;
+
+        spnegoToken = malloc(input_token.length);
+        if(spnegoToken == NULL)
+          return CURLE_OUT_OF_MEMORY;
+
         spnegoTokenLength = input_token.length;
 
         object = OBJ_txt2obj ("1.2.840.113554.1.2.2", 1);

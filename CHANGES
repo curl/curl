@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Stenberg (12 Apr 2008)
+- Andre Guibert de Bruet found and fixed a case where malloc() was called but
+  was not checked for a NULL return, in the Negotiate code.
+
 Daniel Fandrich (9 Apr 2008)
 - Added test cases 1024 & 1025 to test a scenario similar to the one reported
   by Ben Combee where libcurl would send the wrong cookie to a redirected
