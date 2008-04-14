@@ -1801,7 +1801,7 @@ CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
 
 /* the typechecker doesn't work in C++ (yet) */
 #if (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 3)) && \
-    !defined(__cplusplus)
+    !defined(__cplusplus) && !defined(CURL_DISABLE_TYPECHECK)
 #include "typecheck-gcc.h"
 #else
 #if defined(__STDC__) && (__STDC__ >= 1)

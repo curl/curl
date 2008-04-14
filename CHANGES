@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Michal Marek (14 Apr 2008)
+- allow disabling the typechecker by defining CURL_DISABLE_TYPECHECK, as
+  discussed in http://curl.haxx.se/mail/lib-2008-04/0291.html
+
 Daniel Stenberg (14 Apr 2008)
 - Stefan Krause reported a case where the OpenSSL handshake phase wasn't
   properly acknowledging the timeout values, like if you pulled the network
