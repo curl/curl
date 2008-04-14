@@ -6,6 +6,11 @@
 
                                   Changelog
 
+
+Daniel Stenberg (14 Apr 2008)
+- Brock Noland reported that curl behaved differently depending on which order
+  you used -i and -I.
+
 Daniel Stenberg (12 Apr 2008)
 - Andre Guibert de Bruet found and fixed a case where malloc() was called but
   was not checked for a NULL return, in the Negotiate code.

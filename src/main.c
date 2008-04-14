@@ -200,7 +200,9 @@ typedef enum {
 #define CONF_AUTO_REFERER (1<<4) /* the automatic referer-system please! */
 #define CONF_HEADER   (1<<8) /* throw the header out too */
 #define CONF_NOPROGRESS (1<<10) /* shut off the progress meter */
-#define CONF_NOBODY   (1<<11) /* use HEAD to get http document */
+#define CONF_NOBODY   (1<<11) /* get meta-data (headers) about the file
+                                 without transferring the body, use HEAD to
+                                 get http document */
 #define CONF_FAILONERROR (1<<12) /* no output on http error codes >= 300 */
 #define CONF_DIRLISTONLY (1<<16) /* request nonverbose directory listing */
 #define CONF_FTPAPPEND (1<<20) /* Append instead of overwrite on upload! */
@@ -2452,22 +2454,13 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
     case 'I':
       /*
-       * This is a bit tricky. We either SET both bits, or we clear both
-       * bits. Let's not make any other outcomes from this.
+       * CONF_BODY will imply CONF_HEADER later on
        */
-      if((CONF_HEADER|CONF_NOBODY) !=
-         (config->conf&(CONF_HEADER|CONF_NOBODY)) ) {
-        /* one of them weren't set, set both */
-        config->conf |= (CONF_HEADER|CONF_NOBODY);
-        if(SetHTTPrequest(config, HTTPREQ_HEAD, &config->httpreq))
-          return PARAM_BAD_USE;
-      }
-      else {
-        /* both were set, clear both */
-        config->conf &= ~(CONF_HEADER|CONF_NOBODY);
-        if(SetHTTPrequest(config, HTTPREQ_GET, &config->httpreq))
-          return PARAM_BAD_USE;
-      }
+      config->conf ^= CONF_NOBODY;
+      if(SetHTTPrequest(config,
+                        (config->conf & CONF_NOBODY)?HTTPREQ_HEAD:HTTPREQ_GET,
+                        &config->httpreq))
+        return PARAM_BAD_USE;
       break;
     case 'k': /* allow insecure SSL connects */
       config->insecure_ok ^= TRUE;
@@ -4411,9 +4404,14 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         my_setopt(curl, CURLOPT_INFILESIZE_LARGE, uploadfilesize);
         my_setopt(curl, CURLOPT_URL, url);     /* what to fetch */
         my_setopt(curl, CURLOPT_PROXY, config->proxy); /* proxy to use */
-        my_setopt(curl, CURLOPT_HEADER, config->conf&CONF_HEADER);
         my_setopt(curl, CURLOPT_NOPROGRESS, config->conf&CONF_NOPROGRESS);
-        my_setopt(curl, CURLOPT_NOBODY, config->conf&CONF_NOBODY);
+        if(config->conf&CONF_NOBODY) {
+          my_setopt(curl, CURLOPT_NOBODY, 1);
+          my_setopt(curl, CURLOPT_HEADER, 1);
+        }
+        else
+          my_setopt(curl, CURLOPT_HEADER, config->conf&CONF_HEADER);
+
         my_setopt(curl, CURLOPT_FAILONERROR,
                   config->conf&CONF_FAILONERROR);
         my_setopt(curl, CURLOPT_UPLOAD, uploadfile?TRUE:FALSE);

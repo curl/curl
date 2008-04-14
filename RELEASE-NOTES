@@ -20,6 +20,7 @@ This release includes the following bugfixes:
  o curl_easy_reset() resets the max redirect limit properly
  o configure now correctly recognizes Heimdal and MIT gssapi libraries
  o malloc() failure check in Negotiate
+ o -i and -I together now work the same no matter what order they're used
 
 This release includes the following known bugs:
 
@@ -37,6 +38,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Michal Marek, Daniel Fandrich, Scott Barrett, Alexey Simak, Daniel Black,
- Rafa Muyo, Andre Guibert de Bruet
+ Rafa Muyo, Andre Guibert de Bruet, Brock Noland
 
         Thanks! (and sorry if I forgot to mention someone)
