@@ -8,6 +8,10 @@
 
 
 Daniel Stenberg (14 Apr 2008)
+- Sandor Feldi reported bug #1942022
+  (http://curl.haxx.se/bug/view.cgi?id=1942022) pointing out a mistake in the
+  lib/Makefile.vc[68] makefiles' release-ssl-dll target.
+
 - Brock Noland reported that curl behaved differently depending on which order
   you used -i and -I.
 
