@@ -8,6 +8,10 @@
 
 
 Daniel Stenberg (14 Apr 2008)
+- Stefan Krause reported a case where the OpenSSL handshake phase wasn't
+  properly acknowledging the timeout values, like if you pulled the network
+  plug in the midst of it.
+
 - Andre Guibert de Bruet fixed a second case of not checking the malloc()
   return code in the Negotiate code.
 

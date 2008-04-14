@@ -1497,8 +1497,7 @@ ossl_connect_step1(struct connectdata *conn,
 }
 
 static CURLcode
-ossl_connect_step2(struct connectdata *conn,
-                   int sockindex, long *timeout_ms)
+ossl_connect_step2(struct connectdata *conn, int sockindex)
 {
   struct SessionHandle *data = conn->data;
   int err;
@@ -1507,15 +1506,6 @@ ossl_connect_step2(struct connectdata *conn,
   DEBUGASSERT(ssl_connect_2 == connssl->connecting_state
              || ssl_connect_2_reading == connssl->connecting_state
              || ssl_connect_2_writing == connssl->connecting_state);
-
-  /* Find out how much more time we're allowed */
-  *timeout_ms = Curl_timeleft(conn, NULL, TRUE);
-
-  if(*timeout_ms < 0) {
-    /* no need to continue if time already is up */
-    failf(data, "SSL connection timeout");
-    return CURLE_OPERATION_TIMEDOUT;
-  }
 
   err = SSL_connect(connssl->handle);
 
@@ -1767,6 +1757,14 @@ ossl_connect_common(struct connectdata *conn,
   long timeout_ms;
 
   if(ssl_connect_1==connssl->connecting_state) {
+    /* Find out how much more time we're allowed */
+    timeout_ms = Curl_timeleft(conn, NULL, TRUE);
+
+    if(timeout_ms < 0) {
+      /* no need to continue if time already is up */
+      failf(data, "SSL connection timeout");
+      return CURLE_OPERATION_TIMEDOUT;
+    }
     retcode = ossl_connect_step1(conn, sockindex);
     if(retcode)
       return retcode;
@@ -1776,6 +1774,15 @@ ossl_connect_common(struct connectdata *conn,
   while(ssl_connect_2 == connssl->connecting_state ||
         ssl_connect_2_reading == connssl->connecting_state ||
         ssl_connect_2_writing == connssl->connecting_state) {
+
+    /* check allowed time left */
+    timeout_ms = Curl_timeleft(conn, NULL, TRUE);
+
+    if(timeout_ms < 0) {
+      /* no need to continue if time already is up */
+      failf(data, "SSL connection timeout");
+      return CURLE_OPERATION_TIMEDOUT;
+    }
 
     /* if ssl is expecting something, check if it's available. */
     if(connssl->connecting_state == ssl_connect_2_reading
@@ -1812,7 +1819,7 @@ ossl_connect_common(struct connectdata *conn,
     }
 
     /* get the timeout from step2 to avoid computing it twice. */
-    retcode = ossl_connect_step2(conn, sockindex, &timeout_ms);
+    retcode = ossl_connect_step2(conn, sockindex);
     if(retcode)
       return retcode;
 
