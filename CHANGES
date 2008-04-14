@@ -8,6 +8,9 @@
 
 
 Daniel Stenberg (14 Apr 2008)
+- Andre Guibert de Bruet fixed a second case of not checking the malloc()
+  return code in the Negotiate code.
+
 - Sandor Feldi reported bug #1942022
   (http://curl.haxx.se/bug/view.cgi?id=1942022) pointing out a mistake in the
   lib/Makefile.vc[68] makefiles' release-ssl-dll target.

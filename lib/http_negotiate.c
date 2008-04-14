@@ -211,8 +211,10 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
         }
         else {
           free(input_token.value);
-          input_token.value = NULL;
           input_token.value = malloc(mechTokenLength);
+          if (input_token.value == NULL)
+            return CURLE_OUT_OF_MEMORY;
+
           memcpy(input_token.value, mechToken,mechTokenLength);
           input_token.length = mechTokenLength;
           free(mechToken);
