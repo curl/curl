@@ -1,10 +1,4 @@
 To be addressed before 7.18.2 (planned release: June 2008)
 =============================
 
-129 - Pierre Reiss' libcurl + https + multi = lost information (awaiting
-     better example/clarification on how to figure out when the claimed
-     problem occurs)
-
-130 - Vincent Le Normand's SFTP patch for touch (lacking feedback)
-
 134 - 
