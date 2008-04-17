@@ -60,7 +60,7 @@ static curlioerr ioctlcallback(CURL *handle,
 
 int test(char *URL)
 {
-  CURLcode res;
+  int res;
   CURL *curl;
   int counter=0;
   CURLM *m;
@@ -142,6 +142,6 @@ int test(char *URL)
 
   curl_global_cleanup();
 
-  return (int)res;
+  return res;
 }
 
