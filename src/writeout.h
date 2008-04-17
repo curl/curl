@@ -23,6 +23,6 @@
  * $Id$
  ***************************************************************************/
 
-void ourWriteOut(CURL *curl, char *out);
+void ourWriteOut(CURL *curl, const char *out);
 
 #endif

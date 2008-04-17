@@ -104,6 +104,8 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
+/* Default proxy timeout in milliseconds */
+#define PROXY_TIMEOUT (3600*1000)
 
 /*
  * Forward declarations.
@@ -1221,7 +1223,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
   CURLcode result;
   int res;
   long timeout =
-    data->set.timeout?data->set.timeout:3600000; /* in milliseconds */
+    data->set.timeout?data->set.timeout:PROXY_TIMEOUT; /* in milliseconds */
   curl_socket_t tunnelsocket = conn->sock[sockindex];
   curl_off_t cl=0;
   bool closeConnection = FALSE;

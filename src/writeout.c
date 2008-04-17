@@ -93,10 +93,10 @@ static const struct variable replacements[]={
   {NULL, VAR_NONE}
 };
 
-void ourWriteOut(CURL *curl, char *writeinfo)
+void ourWriteOut(CURL *curl, const char *writeinfo)
 {
   FILE *stream = stdout;
-  char *ptr=writeinfo;
+  const char *ptr=writeinfo;
   char *stringp;
   long longinfo;
   double doubleinfo;

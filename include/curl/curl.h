@@ -99,7 +99,7 @@ typedef void CURL;
 
 #ifdef CURL_HIDDEN_SYMBOLS
 /*
- * This definition is used to make external definitions visibile in the
+ * This definition is used to make external definitions visible in the
  * shared library when symbols are hidden by default.  It makes no
  * difference when compiling applications whether this is set or not,
  * only when compiling the library.
@@ -115,7 +115,7 @@ typedef void CURL;
  * platforms. We also provide a CURL_FORMAT_OFF_T define to use in *printf
  * format strings when outputting a variable of type curl_off_t.
  *
- * Note: "pocc -Ze" is MSVC compatibily mode and this sets _MSC_VER!
+ * Note: "pocc -Ze" is MSVC compatibility mode and this sets _MSC_VER!
  */
 
 #if (defined(_MSC_VER) && !defined(__POCC__)) || (defined(__LCC__) && defined(WIN32))
@@ -211,7 +211,7 @@ struct curl_httppost {
                                        do not free in formfree */
 #define HTTPPOST_BUFFER (1<<4)      /* upload file from buffer */
 #define HTTPPOST_PTRBUFFER (1<<5)   /* upload file from pointer contents */
-#define HTTPPOST_CALLBACK (1<<6)    /* upload fiel contents by using the
+#define HTTPPOST_CALLBACK (1<<6)    /* upload file contents by using the
                                        regular read callback to get the data
                                        and pass the given pointer as custom
                                        pointer */
@@ -237,7 +237,7 @@ typedef int (*curl_progress_callback)(void *clientp,
 #define CURL_MAX_WRITE_SIZE 16384
 #endif
 /* This is a magic return code for the write callback that, when returned,
-   will signal libcurl to pause receving on the current transfer. */
+   will signal libcurl to pause receiving on the current transfer. */
 #define CURL_WRITEFUNC_PAUSE 0x10000001
 typedef size_t (*curl_write_callback)(char *buffer,
                                       size_t size,
@@ -678,7 +678,7 @@ typedef enum {
 
   /* If the CURLOPT_INFILE is used, this can be used to inform libcurl about
    * how large the file being sent really is. That allows better error
-   * checking and better verifies that the upload was succcessful. -1 means
+   * checking and better verifies that the upload was successful. -1 means
    * unknown size.
    *
    * For large file support, there is also a _LARGE version of the key
@@ -690,7 +690,7 @@ typedef enum {
   /* POST static input fields. */
   CINIT(POSTFIELDS, OBJECTPOINT, 15),
 
-  /* Set the referer page (needed by some CGIs) */
+  /* Set the referrer page (needed by some CGIs) */
   CINIT(REFERER, OBJECTPOINT, 16),
 
   /* Set the FTP PORT string (interface name, named or numerical IP address)
@@ -749,7 +749,7 @@ typedef enum {
      "cookie awareness" */
   CINIT(COOKIEFILE, OBJECTPOINT, 31),
 
-  /* What version to specifly try to use.
+  /* What version to specifically try to use.
      See CURL_SSLVERSION defines below. */
   CINIT(SSLVERSION, LONG, 32),
 
@@ -810,7 +810,7 @@ typedef enum {
   /* Data passed to the progress callback */
   CINIT(PROGRESSDATA, OBJECTPOINT, 57),
 
-  /* We want the referer field set automatically when following locations */
+  /* We want the referrer field set automatically when following locations */
   CINIT(AUTOREFERER, LONG, 58),
 
   /* Port of the proxy, can be set in the proxy string as well with:
@@ -907,7 +907,7 @@ typedef enum {
      CURL_HTTP_VERSION* enums set below. */
   CINIT(HTTP_VERSION, LONG, 84),
 
-  /* Specificly switch on or off the FTP engine's use of the EPSV command. By
+  /* Specifically switch on or off the FTP engine's use of the EPSV command. By
      default, that one will always be attempted before the more traditional
      PASV command. */
   CINIT(FTP_USE_EPSV, LONG, 85),
@@ -977,11 +977,11 @@ typedef enum {
   CINIT(HTTP200ALIASES, OBJECTPOINT, 104),
 
   /* Continue to send authentication (user+password) when following locations,
-     even when hostname changed. This can potentionally send off the name
+     even when hostname changed. This can potentially send off the name
      and password to whatever host the server decides. */
   CINIT(UNRESTRICTED_AUTH, LONG, 105),
 
-  /* Specificly switch on or off the FTP engine's use of the EPRT command ( it
+  /* Specifically switch on or off the FTP engine's use of the EPRT command ( it
      also disables the LPRT attempt). By default, those ones will always be
      attempted before the good old traditional PORT command. */
   CINIT(FTP_USE_EPRT, LONG, 106),
@@ -1162,7 +1162,7 @@ typedef enum {
   CINIT(CONNECTTIMEOUT_MS, LONG, 156),
 
   /* set to zero to disable the libcurl's decoding and thus pass the raw body
-     data to the appliction even when it is encoded/compressed */
+     data to the application even when it is encoded/compressed */
   CINIT(HTTP_TRANSFER_DECODING, LONG, 157),
   CINIT(HTTP_CONTENT_DECODING, LONG, 158),
 
@@ -1321,7 +1321,7 @@ typedef enum {
 
   CFINIT(STREAM),
 
-  CURLFORM_LASTENTRY /* the last unusued */
+  CURLFORM_LASTENTRY /* the last unused */
 } CURLformoption;
 
 #undef CFINIT /* done */
@@ -1367,7 +1367,7 @@ typedef enum {
  *
  * DESCRIPTION
  *
- * Pretty advanved function for building multi-part formposts. Each invoke
+ * Pretty advanced function for building multi-part formposts. Each invoke
  * adds one part that together construct a full post. Then use
  * CURLOPT_HTTPPOST to send it off to libcurl.
  */
@@ -1622,7 +1622,7 @@ typedef enum {
 /* Different data locks for a single share */
 typedef enum {
   CURL_LOCK_DATA_NONE = 0,
-  /*  CURL_LOCK_DATA_SHARE is used internaly to say that
+  /*  CURL_LOCK_DATA_SHARE is used internally to say that
    *  the locking is just made to change the internal state of the share
    *  itself.
    */
@@ -1664,7 +1664,7 @@ typedef enum {
 typedef enum {
   CURLSHOPT_NONE,  /* don't use */
   CURLSHOPT_SHARE,   /* specify a data type to share */
-  CURLSHOPT_UNSHARE, /* specify shich data type to stop sharing */
+  CURLSHOPT_UNSHARE, /* specify which data type to stop sharing */
   CURLSHOPT_LOCKFUNC,   /* pass in a 'curl_lock_function' pointer */
   CURLSHOPT_UNLOCKFUNC, /* pass in a 'curl_unlock_function' pointer */
   CURLSHOPT_USERDATA,   /* pass in a user data pointer used in the lock/unlock
@@ -1689,7 +1689,7 @@ typedef enum {
 } CURLversion;
 
 /* The 'CURLVERSION_NOW' is the symbolic name meant to be used by
-   basicly all programs ever, that want to get version information. It is
+   basically all programs ever that want to get version information. It is
    meant to be a built-in version number for what kind of struct the caller
    expects. If the struct ever changes, we redefine the NOW to another enum
    from above. */

@@ -110,6 +110,9 @@
 #define NIFLAGS NI_NUMERICHOST | NI_NUMERICSERV
 #endif
 
+/* Default response timeout in milliseconds */
+#define RESP_TIMEOUT (3600*1000)
+
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
 #define ftp_pasv_verbose(a,b,c,d)  do { } while(0)
 #endif
@@ -3053,7 +3056,7 @@ static CURLcode ftp_connect(struct connectdata *conn,
   /* We always support persistant connections on ftp */
   conn->bits.close = FALSE;
 
-  ftpc->response_time = 3600000; /* set default response time-out */
+  ftpc->response_time = RESP_TIMEOUT; /* set default response time-out */
 
 #ifndef CURL_DISABLE_HTTP
   if(conn->bits.tunnel_proxy && conn->bits.httpproxy) {
@@ -3230,7 +3233,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
      */
     long old_time = ftpc->response_time;
 
-    ftpc->response_time = 60000; /* give it only a minute for now */
+    ftpc->response_time = 60*1000; /* give it only a minute for now */
 
     result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
 

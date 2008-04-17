@@ -184,7 +184,7 @@ static bool ttyecho(bool enable, int fd)
   static struct_term noecho;
 #endif
   if(!enable) {
-  /* dissable echo by extracting the current 'withecho' mode and remove the
+  /* disable echo by extracting the current 'withecho' mode and remove the
      ECHO bit and set back the struct */
 #ifdef HAVE_TERMIOS_H
     tcgetattr(fd, &withecho);

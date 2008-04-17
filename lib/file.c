@@ -68,7 +68,7 @@
 #include <fcntl.h>
 #endif
 
-#endif
+#endif /* WIN32 */
 
 #include "strtoofft.h"
 #include "urldata.h"
@@ -90,6 +90,9 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
+#if defined(WIN32) || defined(MSDOS) || defined(__EMX__)
+#define MSDOS_FILESYSTEM 1
+#endif
 
 /*
  * Forward declarations.
@@ -186,7 +189,7 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
   char *real_path = curl_easy_unescape(data, data->state.path, 0, NULL);
   struct FILEPROTO *file;
   int fd;
-#if defined(WIN32) || defined(MSDOS) || defined(__EMX__)
+#ifdef MSDOS_FILESYSTEM
   int i;
   char *actual_path;
 #endif
@@ -217,7 +220,7 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
     file->fd = -1;
   }
 
-#if defined(WIN32) || defined(MSDOS) || defined(__EMX__)
+#ifdef MSDOS_FILESYSTEM
   /* If the first character is a slash, and there's
      something that looks like a drive at the beginning of
      the path, skip the slash.  If we remove the initial
@@ -279,7 +282,7 @@ static CURLcode file_done(struct connectdata *conn,
   return CURLE_OK;
 }
 
-#if defined(WIN32) || defined(MSDOS) || defined(__EMX__)
+#ifdef MSDOS_FILESYSTEM
 #define DIRSEP '\\'
 #else
 #define DIRSEP '/'
@@ -319,13 +322,13 @@ static CURLcode file_upload(struct connectdata *conn)
   else {
     int fd;
 
-#if defined(WIN32) || defined(MSDOS) || defined(__EMX__)
+#ifdef MSDOS_FILESYSTEM
     fd = open(file->path, O_WRONLY|O_CREAT|O_TRUNC|O_BINARY,
               conn->data->set.new_file_perms);
-#else /* !(WIN32 || MSDOS || __EMX__) */
+#else
     fd = open(file->path, O_WRONLY|O_CREAT|O_TRUNC,
               conn->data->set.new_file_perms);
-#endif /* !(WIN32 || MSDOS || __EMX__) */
+#endif
     if(fd < 0) {
       failf(data, "Can't open %s for writing", file->path);
       return CURLE_WRITE_ERROR;
