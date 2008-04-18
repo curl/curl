@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel Fandrich (18 Apr 2008)
+- Added test cases 1026 and 1027 to do some rudimentary tests on the --manual
+  and --help options.
+
 Michal Marek (14 Apr 2008)
 - allow disabling the typechecker by defining CURL_DISABLE_TYPECHECK, as
   discussed in http://curl.haxx.se/mail/lib-2008-04/0291.html
