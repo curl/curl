@@ -2000,6 +2000,8 @@ AC_CHECK_FUNCS( strtoll \
                 strcasecmp \
                 stricmp \
                 strcmpi \
+                fflush \
+                fsync \
                 gethostbyaddr \
                 gettimeofday \
                 inet_addr \

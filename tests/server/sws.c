@@ -470,6 +470,7 @@ int ProcessRequest(struct httprequest *req)
 /* store the entire request in a file */
 void storerequest(char *reqbuf, ssize_t totalsize)
 {
+  int res;
   int error;
   ssize_t written;
   ssize_t writeleft;
@@ -504,18 +505,41 @@ void storerequest(char *reqbuf, ssize_t totalsize)
       writeleft -= written;
   } while ((writeleft > 0) && ((error = ERRNO) == EINTR));
 
-  fclose(dump);  /* close it ASAP */
-
   if (writeleft > 0) {
     logmsg("Error writing file %s error: %d %s",
            REQUEST_DUMP, error, strerror(error));
     logmsg("Wrote only (%d bytes) of (%d bytes) request input to %s",
            totalsize-writeleft, totalsize, REQUEST_DUMP);
   }
-  else {
+
+#ifdef HAVE_FFLUSH
+  do {
+    res = fflush(dump);
+  } while(res && ((error = ERRNO) == EINTR));
+  if(res)
+    logmsg("Error flushing file %s error: %d %s",
+           REQUEST_DUMP, error, strerror(error));
+#endif
+
+#ifdef HAVE_FSYNC
+  do {
+    res = fsync(fileno(dump));
+  } while(res && ((error = ERRNO) == EINTR));
+  if(res)
+    logmsg("Error syncing file %s error: %d %s",
+           REQUEST_DUMP, error, strerror(error));
+#endif
+
+  do {
+    res = fclose(dump);
+  } while(res && ((error = ERRNO) == EINTR));
+  if(res)
+    logmsg("Error closing file %s error: %d %s",
+           REQUEST_DUMP, error, strerror(error));
+
+  if(!writeleft)
     logmsg("Wrote request (%d bytes) input to " REQUEST_DUMP,
            totalsize);
-  }
 }
 
 /* return 0 on success, non-zero on failure */
@@ -620,8 +644,10 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   size_t cmdsize=0;
   FILE *dump;
   bool persistant = TRUE;
+  bool sendfailure = FALSE;
   size_t responsesize;
   int error;
+  int res;
 
   static char weare[256];
 
@@ -761,9 +787,8 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
       num = 200;
     written = swrite(sock, buffer, num);
     if (written < 0) {
-      fclose(dump);
-      logmsg("Sending response failed and we bailed out!");
-      return -1;
+      sendfailure = TRUE;
+      break;
     }
     else {
       logmsg("Sent off %d bytes", written);
@@ -775,7 +800,36 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     buffer += written;
   } while(count>0);
 
-  fclose(dump);
+#ifdef HAVE_FFLUSH
+  do {
+    res = fflush(dump);
+  } while(res && ((error = ERRNO) == EINTR));
+  if(res)
+    logmsg("Error flushing file %s error: %d %s",
+           RESPONSE_DUMP, error, strerror(error));
+#endif
+
+#ifdef HAVE_FSYNC
+  do {
+    res = fsync(fileno(dump));
+  } while(res && ((error = ERRNO) == EINTR));
+  if(res)
+    logmsg("Error syncing file %s error: %d %s",
+           RESPONSE_DUMP, error, strerror(error));
+#endif
+
+  do {
+    res = fclose(dump);
+  } while(res && ((error = ERRNO) == EINTR));
+  if(res)
+    logmsg("Error closing file %s error: %d %s",
+           RESPONSE_DUMP, error, strerror(error));
+
+  if(sendfailure) {
+    logmsg("Sending response failed. Only (%d bytes) of (%d bytes) were sent",
+           responsesize-count, responsesize);
+    return -1;
+  }
 
   logmsg("Response sent (%d bytes) and written to " RESPONSE_DUMP,
          responsesize);
