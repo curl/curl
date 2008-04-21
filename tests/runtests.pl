@@ -2102,12 +2102,14 @@ sub singletest {
     chomp $cmd;
     subVariables \$cmd;
     if($cmd) {
+	logmsg "postcheck $cmd\n" if($verbose);
 	my $rc = runclient("$cmd");
-	if($rc != 0) {
+	# Must run the postcheck command in torture mode in order
+	# to clean up, but the result can't be relied upon.
+	if($rc != 0 && !$torture) {
 	    logmsg " postcheck FAILED\n";
 	    return 1;
 	}
-	logmsg "postchecked $cmd\n" if($verbose);
     }
 
     # remove the special FTP command file after each test!
