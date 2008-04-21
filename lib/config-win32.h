@@ -136,6 +136,12 @@
 /* Define if you don't have vprintf but do have _doprnt.  */
 /* #define HAVE_DOPRNT 1 */
 
+/* Define if you have the fflush function.  */
+#define HAVE_FFLUSH 1
+
+/* Define if you have the fsync function.  */
+/* #define HAVE_FSYNC 1 */
+
 /* Define if you have the gethostbyaddr function.  */
 #define HAVE_GETHOSTBYADDR 1
 
