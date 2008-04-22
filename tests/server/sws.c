@@ -620,7 +620,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   ssize_t written;
   size_t count;
   const char *buffer;
-  char *ptr;
+  char *ptr=NULL;
   FILE *stream;
   char *cmd=NULL;
   size_t cmdsize=0;
@@ -792,6 +792,10 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   if(sendfailure) {
     logmsg("Sending response failed. Only (%d bytes) of (%d bytes) were sent",
            responsesize-count, responsesize);
+    if(ptr)
+      free(ptr);
+    if(cmd)
+      free(cmd);
     return -1;
   }
 
