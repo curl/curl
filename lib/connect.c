@@ -93,6 +93,11 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
+#ifdef __SYMBIAN32__
+/* This isn't actually supported under Symbian OS */
+#undef SO_NOSIGPIPE
+#endif
+
 static bool verifyconnect(curl_socket_t sockfd, int *error);
 
 static curl_socket_t

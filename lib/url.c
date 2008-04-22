@@ -150,6 +150,10 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
 /* The last #include file should be: */
 #include "memdebug.h"
 
+#ifdef __SYMBIAN32__
+#undef SIGALRM
+#endif
+
 /* Local static prototypes */
 static long ConnectionKillOne(struct SessionHandle *data);
 static bool ConnectionExists(struct SessionHandle *data,

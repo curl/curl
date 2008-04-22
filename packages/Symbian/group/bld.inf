@@ -1,0 +1,7 @@
+//
+// libcurl and curl bld.inf file for Symbian OS
+//
+
+PRJ_MMPFILES
+		libcurl.mmp
+		curl.mmp

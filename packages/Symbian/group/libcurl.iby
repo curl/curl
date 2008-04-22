@@ -1,0 +1,12 @@
+//
+// libcurl file transfer DLL
+//
+
+#ifndef LIBCURL_IBY
+#define LIBCURL_IBY
+
+#include <openenv.iby>
+
+file=ABI_DIR\BUILD_DIR\libcurl.dll        System\Libs\libcurl.dll
+
+#endif

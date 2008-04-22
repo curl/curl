@@ -36,7 +36,7 @@
  * Define WIN32 when build target is Win32 API
  */
 
-#if (defined(_WIN32) || defined(__WIN32__)) && !defined(WIN32)
+#if (defined(_WIN32) || defined(__WIN32__)) && !defined(WIN32) && !defined(__SYMBIAN32__)
 #define WIN32
 #endif
 
@@ -63,6 +63,10 @@
 
 #ifdef __AMIGA__
 #include "amigaos.h"
+#endif
+
+#ifdef __SYMBIAN32__
+#include "config-symbian.h"
 #endif
 
 #ifdef __OS400__
@@ -266,6 +270,10 @@
 /* Minix 3 versions up to at least 3.1.3 are missing these prototypes */
 extern char * strtok_r(char *s, const char *delim, char **last);
 extern struct tm * gmtime_r(const time_t * const timep, struct tm *tmp);
+#endif
+
+#ifdef __SYMBIAN32__
+#undef HAVE_ALARM
 #endif
 
 #define DIR_CHAR      "/"

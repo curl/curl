@@ -1,0 +1,13 @@
+// 
+// curl file transfer utility command-line utility
+// 
+
+#ifndef CURL_IBY
+#define CURL_IBY
+
+#include <openenv.iby>
+#include <libcurl.iby>
+
+file=ABI_DIR\BUILD_DIR\curl.exe            System\Programs\curl.exe
+
+#endif // CURL_IBY

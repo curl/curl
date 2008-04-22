@@ -124,6 +124,15 @@
 #include "memdebug.h"
 #endif
 
+#if defined(NETWARE)
+#define PRINT_LINES_PAUSE 23
+#endif
+
+#if defined(__SYMBIAN32__)
+#define PRINT_LINES_PAUSE 16
+#define pressanykey() getchar()
+#endif
+
 #define DEFAULT_MAXREDIRS  50L
 
 #if defined(O_BINARY) && defined(HAVE_SETMODE)
@@ -787,8 +796,8 @@ static void help(void)
   };
   for(i=0; helptext[i]; i++) {
     puts(helptext[i]);
-#ifdef NETWARE
-    if (i && ((i % 23) == 0))
+#ifdef PRINT_LINES_PAUSE
+    if (i && ((i % PRINT_LINES_PAUSE) == 0))
       pressanykey();
 #endif
   }
@@ -4988,6 +4997,10 @@ int main(int argc, char *argv[])
   checkfds();
 
   res = operate(&config, argc, argv);
+#ifdef __SYMBIAN32__
+  if (config.showerror)
+    pressanykey();
+#endif
   free_config_fields(&config);
 
 #ifdef __NOVELL_LIBC__

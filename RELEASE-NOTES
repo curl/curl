@@ -12,6 +12,7 @@ This release includes the following changes:
  
  o CURLFORM_STREAM was added
  o CURLOPT_NOBODY is now supported over SFTP
+ o curl can now run on Symbian OS
 
 This release includes the following bugfixes:
 
@@ -21,7 +22,7 @@ This release includes the following bugfixes:
  o configure now correctly recognizes Heimdal and MIT gssapi libraries
  o malloc() failure check in Negotiate
  o -i and -I together now work the same no matter what order they're used
- * the typechecker can be bypassed by defining CURL_DISABLE_TYPECHECK
+ o the typechecker can be bypassed by defining CURL_DISABLE_TYPECHECK
 
 This release includes the following known bugs:
 

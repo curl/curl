@@ -7,6 +7,9 @@
                                   Changelog
 
 
+Daniel Fandrich (22 Apr 2008)
+- Added support for running on Symbian OS.
+
 Daniel Fandrich (18 Apr 2008)
 - Added test cases 1026 and 1027 to do some rudimentary tests on the --manual
   and --help options.

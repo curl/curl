@@ -655,6 +655,17 @@ Minix
      make
 
 
+Symbian OS
+==========
+   The Symbian OS port uses the Symbian build system to compile.  From the
+   packages/Symbian/group/ directory, run:
+
+      bldmake bldfiles
+      abld build
+
+   to compile and install curl and libcurl.
+
+
 CROSS COMPILE
 =============
    (This section was graciously brought to us by Jim Duey, with additions by
@@ -785,6 +796,7 @@ PORTS
         - StrongARM (and other ARM) RISC OS 3.1, 4.02
         - StrongARM/ARM7/ARM9 Linux 2.4, 2.6
         - StrongARM NetBSD 1.4.1
+        - Symbian OS (P.I.P.S.)
         - TPF
         - Ultrix 4.3a
         - UNICOS 9.0
