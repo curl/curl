@@ -512,24 +512,6 @@ void storerequest(char *reqbuf, ssize_t totalsize)
            totalsize-writeleft, totalsize, REQUEST_DUMP);
   }
 
-#ifdef HAVE_FFLUSH
-  do {
-    res = fflush(dump);
-  } while(res && ((error = ERRNO) == EINTR));
-  if(res)
-    logmsg("Error flushing file %s error: %d %s",
-           REQUEST_DUMP, error, strerror(error));
-#endif
-
-#ifdef HAVE_FSYNC
-  do {
-    res = fsync(fileno(dump));
-  } while(res && ((error = ERRNO) == EINTR));
-  if(res)
-    logmsg("Error syncing file %s error: %d %s",
-           REQUEST_DUMP, error, strerror(error));
-#endif
-
   do {
     res = fclose(dump);
   } while(res && ((error = ERRNO) == EINTR));
@@ -799,24 +781,6 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     count -= written;
     buffer += written;
   } while(count>0);
-
-#ifdef HAVE_FFLUSH
-  do {
-    res = fflush(dump);
-  } while(res && ((error = ERRNO) == EINTR));
-  if(res)
-    logmsg("Error flushing file %s error: %d %s",
-           RESPONSE_DUMP, error, strerror(error));
-#endif
-
-#ifdef HAVE_FSYNC
-  do {
-    res = fsync(fileno(dump));
-  } while(res && ((error = ERRNO) == EINTR));
-  if(res)
-    logmsg("Error syncing file %s error: %d %s",
-           RESPONSE_DUMP, error, strerror(error));
-#endif
 
   do {
     res = fclose(dump);

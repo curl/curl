@@ -75,12 +75,6 @@
 /* Define if you have the setmode function. */
 #define HAVE_SETMODE 1
 
-/* Define if you have the fflush function.  */
-#define HAVE_FFLUSH 1
-
-/* Define if you have the fsync function.  */
-/* #define HAVE_FSYNC 1 */
-
 /* Define if you have the ftruncate function.  */
 #define HAVE_FTRUNCATE 1
 
