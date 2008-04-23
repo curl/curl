@@ -71,9 +71,6 @@ http://%HOSTIP:%HTTPPORT/1001 -u auser:apasswd --digest -T log/1001 -x  http://%
 <file name="log/1001">
 test
 </file>
-<postcheck>
-%SRCDIR/libtest/delay.pl 1
-</postcheck>
 </client>
 
 # Verify data after the test has been "shot"
