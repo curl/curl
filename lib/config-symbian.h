@@ -645,11 +645,12 @@
 
 /* cpu-machine-OS */
 #ifdef __WINS__
-#define OS "i386-pc-epoc"
+#define OS "i386-pc-epoc32"
 #elif __MARM__
-#define OS "arm-unknown-epoc"
+#define OS "arm-unknown-epoc32"
 #else
-#define OS "unknown-unknown-epoc"
+/* This won't happen on any current Symbian version */
+#define OS "unknown-unknown-epoc32"
 #endif
 
 /* Name of package */
