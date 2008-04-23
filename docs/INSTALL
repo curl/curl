@@ -663,7 +663,9 @@ Symbian OS
       bldmake bldfiles
       abld build
 
-   to compile and install curl and libcurl.
+   to compile and install curl and libcurl. If your Symbian SDK doesn't
+   include support for P.I.P.S., you will need to contact your SDK vendor
+   to obtain that first.
 
 
 CROSS COMPILE
