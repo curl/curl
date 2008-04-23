@@ -120,6 +120,7 @@ my $SERVERIN="$LOGDIR/server.input"; # what curl sent the server
 my $SERVER2IN="$LOGDIR/server2.input"; # what curl sent the second server
 my $CURLLOG="$LOGDIR/curl.log"; # all command lines run
 my $FTPDCMD="$LOGDIR/ftpserver.cmd"; # copy ftp server instructions here
+my $SERVERLOGS_LOCK="$LOGDIR/serverlogs.lock"; # server logs advisor read lock
 
 # Normally, all test cases should be run, but at times it is handy to
 # simply run a particular one:
@@ -201,6 +202,10 @@ my $sshdid;      # for socks server, ssh daemon version id
 my $sshdvernum;  # for socks server, ssh daemon version number
 my $sshdverstr;  # for socks server, ssh daemon version string
 my $sshderror;   # for socks server, ssh daemon version error
+
+my $EXP_big_delay = 300;
+my $EXP_max_delay = 0;
+my $EXP_max_testn = 0;
 
 #######################################################################
 # variables the command line options may set
@@ -2096,6 +2101,27 @@ sub singletest {
         }
     }
 
+    # If a server logs advisor read lock file exists, it is an indication
+    # that the server has not yet finished writing out all its log files,
+    # including server request log files used for protocol verification.
+    # So, if the lock file exists the script waits here a certain amount
+    # of time until the server removes it, or the given time expires.
+    # Test harness ssh server does not have this synchronization mechanism,
+    # this implies that some ssh server based tests might need a small delay
+    # in the postcheck section to avoid false test failures.
+
+    my $lockretry = ($testnum == 190) ? 10 : $EXP_big_delay ;
+    while((-f $SERVERLOGS_LOCK) && $lockretry--) {
+        sleep(1);
+    }
+
+    if($testnum != 190) {
+        if($EXP_big_delay - $lockretry > $EXP_max_delay) {
+            $EXP_max_delay = $EXP_big_delay - $lockretry;
+            $EXP_max_testn = $testnum;
+        }
+    }
+
     # run the postcheck command
     my @postcheck= getpart("client", "postcheck");
     $cmd = $postcheck[0];
@@ -3120,6 +3146,9 @@ if($skipped) {
         logmsg ")\n";
     }
 }
+
+logmsg "EXPERIMENTAL: lock max delay ($EXP_max_delay seconds) for test # $EXP_max_testn \n";
+
 if($total && ($ok != $total)) {
     exit 1;
 }

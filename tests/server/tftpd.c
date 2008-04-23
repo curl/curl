@@ -415,6 +415,7 @@ int main(int argc, char **argv)
   int flag;
   int rc;
   struct testcase test;
+  int result = 0;
 
   while(argc>arg) {
     if(!strcmp("--version", argv[arg])) {
@@ -518,20 +519,25 @@ int main(int argc, char **argv)
                  (struct sockaddr *)&from, &fromlen);
     if (n < 0) {
       logmsg("recvfrom:\n");
-      return 3;
+      result = 3;
+      break;
     }
+
+    set_advisor_read_lock(SERVERLOGS_LOCK);
 
     from.sin_family = AF_INET;
 
     peer = socket(AF_INET, SOCK_DGRAM, 0);
     if (peer < 0) {
       logmsg("socket:\n");
-      return 2;
+      result = 2;
+      break;
     }
 
     if (connect(peer, (struct sockaddr *)&from, sizeof(from)) < 0) {
       logmsg("connect: fail\n");
-      return 1;
+      result = 1;
+      break;
     }
     maxtimeout = 5*TIMEOUT;
 
@@ -545,8 +551,14 @@ int main(int argc, char **argv)
         free(test.buffer);
     }
     sclose(peer);
+
+    clear_advisor_read_lock(SERVERLOGS_LOCK);
+
   } while(1);
-  return 0;
+
+  clear_advisor_read_lock(SERVERLOGS_LOCK);
+
+  return result;
 }
 
 struct formats {
@@ -734,8 +746,10 @@ static void timer(int signum)
   logmsg("alarm!");
 
   timeout += rexmtval;
-  if (timeout >= maxtimeout)
+  if(timeout >= maxtimeout) {
+    clear_advisor_read_lock(SERVERLOGS_LOCK);
     exit(1);
+  }
 #ifdef HAVE_SIGSETJMP
   siglongjmp(timeoutbuf, 1);
 #endif

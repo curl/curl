@@ -988,6 +988,8 @@ int main(int argc, char *argv[])
       break;
     }
 
+    set_advisor_read_lock(SERVERLOGS_LOCK);
+
 #ifdef CURL_SWS_FORK_ENABLED
     if(use_fork) {
       /* The fork enabled version just forks off the child and don't care
@@ -1063,6 +1065,8 @@ int main(int argc, char *argv[])
     logmsg("====> Client disconnect");
     sclose(msgsock);
 
+    clear_advisor_read_lock(SERVERLOGS_LOCK);
+
     if (req.testno == DOCNUMBER_QUIT)
       break;
 #ifdef CURL_SWS_FORK_ENABLED
@@ -1071,6 +1075,8 @@ int main(int argc, char *argv[])
   }
 
   sclose(sock);
+
+  clear_advisor_read_lock(SERVERLOGS_LOCK);
 
   return 0;
 }
