@@ -17,7 +17,7 @@ SYSTEMINCLUDE ..\..\..\include ..\..\..\lib ..\..\..\include\curl \
 LIBRARY       euser.lib libc.lib libcurl.lib
 STATICLIBRARY libcrt0.lib
 
-CAPABILITY ALL -Tcb
+CAPABILITY NetworkServices
 
 EPOCSTACKSIZE 0x18000
 

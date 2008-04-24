@@ -27,6 +27,7 @@ SYSTEMINCLUDE ..\..\..\include ..\..\..\include\curl \
 			\epoc32\include\stdapis \epoc32\include
 
 LIBRARY       euser.lib libc.lib
-CAPABILITY ALL -Tcb
+
+CAPABILITY NetworkServices
 
 EPOCALLOWDLLDATA

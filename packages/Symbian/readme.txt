@@ -29,10 +29,10 @@ Failure to do so may mean that some of your options won't be correctly
 processed.
 
 Symbian OS does not provide for redirecting the standard I/O streams, so
-stdin always comes from the keyboard and stdout always goes to the
-console; stderr is thrown away.  The standard curl options -o, --stderr
-and --trace-ascii can be used to redirect output to a file (or stdout)
-instead.
+stdin always comes from the keyboard, stdout always goes to the
+console, and stderr goes to the epocwind.out file (on the emulator).
+The standard curl options -o, --stderr and --trace-ascii can be used to
+redirect output to a file (or stdout) instead.
 
 P.I.P.S. doesn't inherit the current working directory at startup, so you
 may need to use the -o option to specify a specific location to store a
