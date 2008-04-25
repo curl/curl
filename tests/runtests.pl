@@ -203,9 +203,8 @@ my $sshdvernum;  # for socks server, ssh daemon version number
 my $sshdverstr;  # for socks server, ssh daemon version string
 my $sshderror;   # for socks server, ssh daemon version error
 
-my $EXP_big_delay = 300;
-my $EXP_max_delay = 0;
-my $EXP_max_testn = 0;
+my $defserverlogslocktimeout = 20; # timeout to await server logs lock removal
+my $defpostcommanddelay = 0; # delay between command and postcheck sections
 
 #######################################################################
 # variables the command line options may set
@@ -1991,6 +1990,22 @@ sub singletest {
         }
     }
 
+    my $serverlogslocktimeout = $defserverlogslocktimeout;
+    if($cmdhash{'timeout'}) {
+        # test is allowed to override default server logs lock timeout
+        if($cmdhash{'timeout'} =~ /(\d+)/) {
+            $serverlogslocktimeout = $1 if($1 >= 0);
+        }
+    }
+
+    my $postcommanddelay = $defpostcommanddelay;
+    if($cmdhash{'delay'}) {
+        # test is allowed to specify a delay after command is executed
+        if($cmdhash{'delay'} =~ /(\d+)/) {
+            $postcommanddelay = $1 if($1 > 0);
+        }
+    }
+
     my $cmdargs;
     if(!$tool) {
         # run curl, add -v for debug information output
@@ -2106,21 +2121,24 @@ sub singletest {
     # including server request log files used for protocol verification.
     # So, if the lock file exists the script waits here a certain amount
     # of time until the server removes it, or the given time expires.
-    # Test harness ssh server does not have this synchronization mechanism,
-    # this implies that some ssh server based tests might need a small delay
-    # in the postcheck section to avoid false test failures.
 
-    my $lockretry = ($testnum == 190) ? 10 : $EXP_big_delay ;
-    while((-f $SERVERLOGS_LOCK) && $lockretry--) {
-        sleep(1);
-    }
-
-    if($testnum != 190) {
-        if($EXP_big_delay - $lockretry > $EXP_max_delay) {
-            $EXP_max_delay = $EXP_big_delay - $lockretry;
-            $EXP_max_testn = $testnum;
+    if($serverlogslocktimeout) {
+        my $lockretry = $serverlogslocktimeout * 4;
+        while((-f $SERVERLOGS_LOCK) && $lockretry--) {
+            select(undef, undef, undef, 0.25);
+        }
+        if(($lockretry < 0) &&
+           ($serverlogslocktimeout >= $defserverlogslocktimeout)) {
+            logmsg "Warning: server logs lock timeout ",
+                   "($serverlogslocktimeout seconds) expired\n";
         }
     }
+
+    # Test harness ssh server does not have this synchronization mechanism,
+    # this implies that some ssh server based tests might need a small delay
+    # once that the client command has run to avoid false test failures.
+
+    sleep($postcommanddelay) if($postcommanddelay);
 
     # run the postcheck command
     my @postcheck= getpart("client", "postcheck");
@@ -2224,22 +2242,8 @@ sub singletest {
     }
 
     if(@protocol) {
-        my @out;
-        my $retry = 5;
-
-        # Verify the sent request. Sometimes, like in test 513 on some hosts,
-        # curl will return back faster than the server writes down the request
-        # to its file, so we might need to wait here for a while to see if the
-        # file gets written a bit later.
-
-        while($retry--) {
-            @out = loadarray($SERVERIN);
-
-            if(!$out[0]) {
-                # nothing there yet, wait a while and try again
-                sleep(1);
-            }
-        }
+        # Verify the sent request
+        my @out = loadarray($SERVERIN);
 
         # what to cut off from the live protocol sent by curl
         my @strip = getpart("verify", "strip");
@@ -3146,8 +3150,6 @@ if($skipped) {
         logmsg ")\n";
     }
 }
-
-logmsg "EXPERIMENTAL: lock max delay ($EXP_max_delay seconds) for test # $EXP_max_testn \n";
 
 if($total && ($ok != $total)) {
     exit 1;

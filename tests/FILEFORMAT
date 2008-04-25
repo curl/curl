@@ -200,7 +200,7 @@ command is run. They are cleared again after the command has been run.
 Variables are first substituted as in the <command> section.
 </setenv>
 
-<command [option="no-output"]>
+<command [option="no-output"] [timeout="secs"] [delay="secs"]>
 command line to run, there's a bunch of %variables that get replaced
 accordingly.
 
@@ -216,6 +216,19 @@ is being run, if the proxy host name is said to start with 'test'.
 Set option="no-output" to prevent the test script to slap on the --output
 argument that directs the output to a file. The --output is also not added if
 the verify/stdout section is used.
+
+Set timeout="secs" to override default server logs advisor read lock timeout.
+This timeout is used by the test harness, once that the command has completed
+execution, to wait for the test server to write out server side log files and
+remove the lock that advised not to read them. The "secs" parameter is the not
+negative integer number of seconds for the timeout. This 'timeout' attribute
+is documented for completeness sake, but is deep test harness stuff and only
+needed for very singular and specific test cases. Avoid using it.
+
+Set delay="secs" to introduce a time delay once that the command has completed
+execution and before the <postcheck> section runs. The "secs" parameter is the
+not negative integer number of seconds for the delay. This 'delay' attribute
+is intended for very specific test cases, and normally not needed.
 
 Available substitute variables include:
 %CLIENTIP   - IPv4 address of the client running curl

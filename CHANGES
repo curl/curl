@@ -7,8 +7,16 @@
                                   Changelog
 
 
+Yang Tse (25 Apr 2008)
+- Added 'timeout' and 'delay' attributes support for the test harness
+  <command> subsection.
+
 Daniel Fandrich (24 Apr 2008)
 - Made --stderr able to redirect all stderr messages.
+
+Yang Tse (23 Apr 2008)
+- Improve synchronization between test harness runtests.pl script
+  and test harness servers to minimize risk of false test failures.
 
 Daniel Fandrich (22 Apr 2008)
 - Added support for running on Symbian OS.
