@@ -7,6 +7,9 @@
                                   Changelog
 
 
+Daniel Fandrich (24 Apr 2008)
+- Made --stderr able to redirect all stderr messages.
+
 Daniel Fandrich (22 Apr 2008)
 - Added support for running on Symbian OS.
 

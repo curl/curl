@@ -610,16 +610,16 @@ static int SetHTTPrequest(struct Configurable *config,
   return 1;
 }
 
-static void helpf(const char *fmt, ...)
+static void helpf(FILE *errors, const char *fmt, ...)
 {
   va_list ap;
   if(fmt) {
     va_start(ap, fmt);
-    fputs("curl: ", stderr); /* prefix it */
-    vfprintf(stderr, fmt, ap);
+    fputs("curl: ", errors); /* prefix it */
+    vfprintf(errors, fmt, ap);
     va_end(ap);
   }
-  fprintf(stderr, "curl: try 'curl --help' "
+  fprintf(errors, "curl: try 'curl --help' "
 #ifdef USE_MANUAL
           "or 'curl --manual' "
 #endif
@@ -815,7 +815,7 @@ static curl_version_info_data *curlinfo;
 static int parseconfig(const char *filename,
                        struct Configurable *config);
 static char *my_get_line(FILE *fp);
-static int create_dir_hierarchy(const char *outfile);
+static int create_dir_hierarchy(const char *outfile, FILE *errors);
 
 static void GetStr(char **string,
                    char *value)
@@ -1027,7 +1027,7 @@ static int formparse(struct Configurable *config,
     /* Allocate the contents */
     contents = strdup(contp+1);
     if(!contents) {
-      fprintf(stderr, "out of memory\n");
+      fprintf(config->errors, "out of memory\n");
       return 1;
     }
     contp = contents;
@@ -1151,7 +1151,7 @@ static int formparse(struct Configurable *config,
           (struct curl_forms *)malloc((count+1)*sizeof(struct curl_forms));
         if (!forms)
         {
-          fprintf(stderr, "Error building form post!\n");
+          fprintf(config->errors, "Error building form post!\n");
           free(contents);
           FreeMultiInfo (multi_start);
           return 4;
@@ -3866,7 +3866,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
   /* inits */
   if (main_init() != CURLE_OK) {
-    helpf("error initializing curl library\n");
+    helpf(config->errors, "error initializing curl library\n");
     return CURLE_FAILED_INIT;
   }
   config->postfieldsize = -1;
@@ -3892,7 +3892,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
   }
 
   if ((argc < 2)  && !config->url_list) {
-    helpf(NULL);
+    helpf(config->errors, NULL);
     return CURLE_FAILED_INIT;
   }
 
@@ -3917,7 +3917,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         if(res) {
           const char *reason = param2text(res);
           if(res != PARAM_HELP_REQUESTED)
-            helpf("option %s: %s\n", origopt, reason);
+            helpf(config->errors, "option %s: %s\n", origopt, reason);
           clean_getout(config);
           return CURLE_FAILED_INIT;
         }
@@ -3941,7 +3941,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
   if((!config->url_list || !config->url_list->url) && !config->list_engines) {
     clean_getout(config);
-    helpf("no URL specified!\n");
+    helpf(config->errors, "no URL specified!\n");
     return CURLE_FAILED_INIT;
   }
   if(NULL == config->useragent) {
@@ -4085,8 +4085,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
     if(!config->globoff && infiles) {
       /* Unless explicitly shut off */
       res = glob_url(&inglob, infiles, &infilenum,
-                     config->showerror?
-                     (config->errors?config->errors:stderr):NULL);
+                     config->showerror?config->errors:NULL);
       if(res != CURLE_OK) {
         clean_getout(config);
         if(outfiles)
@@ -4111,8 +4110,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         /* Unless explicitly shut off, we expand '{...}' and '[...]'
            expressions and return total number of URLs in pattern set */
         res = glob_url(&urls, dourl, &urlnum,
-                       config->showerror?
-                       (config->errors?config->errors:stderr):NULL);
+                       config->showerror?config->errors:NULL);
         if(res != CURLE_OK) {
           break;
         }
@@ -4154,7 +4152,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
               outfile = *pc ? strdup(pc): NULL;
             }
             if(!outfile || !*outfile) {
-              helpf("Remote file name has no length!\n");
+              helpf(config->errors, "Remote file name has no length!\n");
               res = CURLE_WRITE_ERROR;
               free(url);
               break;
@@ -4189,7 +4187,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
              file output call */
 
           if(config->create_dirs &&
-             (-1 == create_dir_hierarchy(outfile)))
+             (-1 == create_dir_hierarchy(outfile, config->errors)))
             return CURLE_WRITE_ERROR;
 
           if(config->resume_from_current) {
@@ -4214,7 +4212,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             /* open file for output: */
             outs.stream=(FILE *) fopen(outfile, config->resume_from?"ab":"wb");
             if (!outs.stream) {
-              helpf("Can't open '%s'!\n", outfile);
+              helpf(config->errors, "Can't open '%s'!\n", outfile);
               return CURLE_WRITE_ERROR;
             }
           }
@@ -4259,7 +4257,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             if(filep) {
               char *urlbuffer=(char *)malloc(strlen(url) + strlen(filep) + 3);
               if(!urlbuffer) {
-                helpf("out of memory\n");
+                helpf(config->errors, "out of memory\n");
                 return CURLE_OUT_OF_MEMORY;
               }
               if(ptr)
@@ -4292,7 +4290,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
           infd= open(uploadfile, O_RDONLY | O_BINARY);
           if ((infd == -1) || stat(uploadfile, &fileinfo)) {
-            helpf("Can't open '%s'!\n", uploadfile);
+            helpf(config->errors, "Can't open '%s'!\n", uploadfile);
             if(infd != -1)
               close(infd);
 
@@ -4330,7 +4328,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           config->conf |= CONF_NOPROGRESS|CONF_ISATTY;
 
         if (urlnum > 1 && !(config->conf&CONF_MUTE)) {
-          fprintf(stderr, "\n[%d/%d]: %s --> %s\n",
+          fprintf(config->errors, "\n[%d/%d]: %s --> %s\n",
                   i+1, urlnum, url, outfile ? outfile : "<stdout>");
           if (separator)
             printf("%s%s\n", CURLseparator, url);
@@ -4360,7 +4358,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
            */
           urlbuffer=(char *)malloc(strlen(url) + strlen(httpgetfields) + 3);
           if(!urlbuffer) {
-            helpf("out of memory\n");
+            helpf(config->errors, "out of memory\n");
             return CURLE_OUT_OF_MEMORY;
           }
           if (pc)
@@ -4776,7 +4774,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
                 /* We have written data to a output file, we truncate file
                  */
                 if(!(config->conf&CONF_MUTE))
-                  fprintf(stderr, "Throwing away %Od bytes\n", outs.bytes);
+                  fprintf(config->errors, "Throwing away %Od bytes\n", outs.bytes);
                 fflush(outs.stream);
                 /* truncate file at the position where we started appending */
 #ifdef HAVE_FTRUNCATE
@@ -5040,20 +5038,54 @@ static char *my_get_line(FILE *fp)
    return retval;
 }
 
+static void show_dir_errno(FILE *errors, const char *name)
+{
+  switch (ERRNO) {
+#ifdef EACCES
+  case EACCES:
+    fprintf(errors,"You don't have permission to create %s.\n", name);
+    break;
+#endif
+#ifdef ENAMETOOLONG
+  case ENAMETOOLONG:
+    fprintf(errors,"The directory name %s is too long.\n", name);
+    break;
+#endif
+#ifdef EROFS
+  case EROFS:
+    fprintf(errors,"%s resides on a read-only file system.\n", name);
+    break;
+#endif
+#ifdef ENOSPC
+  case ENOSPC:
+    fprintf(errors,"No space left on the file system that will "
+	    "contain the directory %s.\n", name);
+    break;
+#endif
+#ifdef EDQUOT
+  case EDQUOT:
+    fprintf(errors,"Cannot create directory %s because you "
+	    "exceeded your quota.\n", name);
+    break;
+#endif
+  default :
+    fprintf(errors,"Error creating directory %s.\n", name);
+    break;
+  }
+}
 
 /* Create the needed directory hierarchy recursively in order to save
    multi-GETs in file output, ie:
    curl "http://my.site/dir[1-5]/file[1-5].txt" -o "dir#1/file#2.txt"
    should create all the dir* automagically
 */
-static int create_dir_hierarchy(const char *outfile)
+static int create_dir_hierarchy(const char *outfile, FILE *errors)
 {
   char *tempdir;
   char *tempdir2;
   char *outdup;
   char *dirbuildup;
   int result=0;
-  int error;
 
   outdup = strdup(outfile);
   if(!outdup)
@@ -5084,42 +5116,7 @@ static int create_dir_hierarchy(const char *outfile)
       if (access(dirbuildup, F_OK) == -1) {
         result = mkdir(dirbuildup,(mode_t)0000750);
         if (-1 == result) {
-          error = ERRNO;
-          switch (error) {
-#ifdef EACCES
-          case EACCES:
-            fprintf(stderr,"You don't have permission to create %s.\n",
-                    dirbuildup);
-            break;
-#endif
-#ifdef ENAMETOOLONG
-          case ENAMETOOLONG:
-            fprintf(stderr,"The directory name %s is too long.\n",
-                    dirbuildup);
-            break;
-#endif
-#ifdef EROFS
-          case EROFS:
-            fprintf(stderr,"%s resides on a read-only file system.\n",
-                    dirbuildup);
-            break;
-#endif
-#ifdef ENOSPC
-          case ENOSPC:
-            fprintf(stderr,"No space left on the file system that will "
-                    "contain the directory %s.\n", dirbuildup);
-            break;
-#endif
-#ifdef EDQUOT
-          case EDQUOT:
-            fprintf(stderr,"Cannot create directory %s because you "
-                    "exceeded your quota.\n", dirbuildup);
-            break;
-#endif
-          default :
-            fprintf(stderr,"Error creating directory %s.\n", dirbuildup);
-            break;
-          }
+          show_dir_errno(errors, dirbuildup);
           break; /* get out of loop */
         }
       }
