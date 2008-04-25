@@ -45,7 +45,7 @@ All screen output disappears after curl exits, so after a transfer completes,
 curl waits by default for Enter to pressed before exiting.  This behaviour
 is suppressed when the -s option is given.
 
-The "home directory" in Symbian is C:\Private\10206442\. The .curlrc is read
+The "home directory" in Symbian is C:\Private\f0206442\. The .curlrc is read
 from this directory on startup.
 
 libcurl notes

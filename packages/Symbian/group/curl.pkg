@@ -1,0 +1,26 @@
+; curl package defintion file
+; Use with makesis to create a Symbian .sis package
+
+;Language - standard language definitions
+&EN
+
+;Header - standard sis file header including version number
+;Version scheme: curl's major, curl's minor, curl's subminor*100 + build number
+; e.g. The third Symbian package of curl ver. 7.18.2 would have a SIS package
+; version of 7, 18, 203
+#{"curl"}, (0xF0206442), 7, 18, <please_update_version>, TYPE=SA
+
+; Vendor name
+%{"Standard libcurl package"}
+:"Standard libcurl package"
+
+; Embedded component
+@"libcurl.sis",(0xF0206D00)
+
+; A dependency on P.I.P.S. and the stdio server are probably good to have here
+;(0x20009A80), *, *, *, {"P.I.P.S. for Series 60 3rd ed."}
+;(0x20009A81), *, *, *, {"P.I.P.S. for UIQ 3"}
+;(0x20009AA2), *, *, *, {"Symbian OS STDIOSERVER"}
+
+;Files - standard file specifications
+"epoc32\release\armv5\urel\curl.exe" - "$:\sys\bin\curl.exe"

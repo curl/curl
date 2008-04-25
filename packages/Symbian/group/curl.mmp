@@ -4,7 +4,7 @@
 
 TARGET        curl.exe
 TARGETTYPE    exe
-UID           0x00000000 0x10206442
+UID           0x00000000 0xF0206442
 
 SOURCEPATH	..\..\..\src
 SOURCE \
