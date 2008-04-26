@@ -7,6 +7,15 @@
                                   Changelog
 
 
+Daniel Stenberg (26 Apr 2008)
+- Reverted back to use automake 1.9.6 in the next release (from automake
+  1.10.1) since it *still* suffers from Solaris-related bugs. Our previous
+  automake 1.10 problem was reported in bug #1701360
+  (http://curl.haxx.se/bug/view.cgi?id=1701360) and this recent problem was
+  bug #1944825 (http://curl.haxx.se/bug/view.cgi?id=1944825). I have not
+  personally approached the automake team about either one of these but I
+  figure we need a Solaris 10 guy to do it!
+  
 Yang Tse (25 Apr 2008)
 - Added 'timeout' and 'delay' attributes support for the test harness
   <command> subsection.
