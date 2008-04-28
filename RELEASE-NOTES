@@ -23,6 +23,8 @@ This release includes the following bugfixes:
  o malloc() failure check in Negotiate
  o -i and -I together now work the same no matter what order they're used
  o the typechecker can be bypassed by defining CURL_DISABLE_TYPECHECK
+ o a pointer mixup could make the FTP code send bad user+password under rare
+   circumstances (found when using curlftpfs)
 
 This release includes the following known bugs:
 
@@ -30,7 +32,9 @@ This release includes the following known bugs:
 
 Other curl-related news:
 
- o 
+ o pycurl 7.18.1 was released: http://pycurl.sf.net/
+ o brand new curl Haskell binding:
+   http://hackage.haskell.org/cgi-bin/hackage-scripts/package/curl
 
 New curl mirrors:
 
@@ -41,6 +45,6 @@ advice from friends like these:
 
  Michal Marek, Daniel Fandrich, Scott Barrett, Alexey Simak, Daniel Black,
  Rafa Muyo, Andre Guibert de Bruet, Brock Noland, Sandor Feldi, Stefan Krause,
- David Shaw
+ David Shaw, Norbert Frese
 
         Thanks! (and sorry if I forgot to mention someone)

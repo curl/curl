@@ -7,6 +7,14 @@
                                   Changelog
 
 
+Daniel Stenberg (28 Apr 2008)
+- Norbert Frese filed bug report #1951588: "Problem with curlftpfs and
+  libcurl" (http://curl.haxx.se/bug/view.cgi?id=1951588) which seems to be an
+  identical report to what Denis Golovan reported in
+  http://curl.haxx.se/mail/lib-2008-02/0108.html The FTP code didn't reset the
+  user/password pointers properly even though there might've been a new
+  struct/cconnection getting used.
+
 Daniel Stenberg (26 Apr 2008)
 - Reverted back to use automake 1.9.6 in the next release (from automake
   1.10.1) since it *still* suffers from Solaris-related bugs. Our previous
