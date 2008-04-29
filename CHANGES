@@ -7,6 +7,9 @@
                                   Changelog
 
 
+Daniel Fandrich (28 Apr 2008)
+- Added test 1028 to test an HTTP redirect to a FTP URL.
+
 Daniel Stenberg (28 Apr 2008)
 - Norbert Frese filed bug report #1951588: "Problem with curlftpfs and
   libcurl" (http://curl.haxx.se/bug/view.cgi?id=1951588) which seems to be an
