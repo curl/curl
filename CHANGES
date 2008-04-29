@@ -7,6 +7,9 @@
                                   Changelog
 
 
+Yang Tse (29 Apr 2008)
+- Improved easy interface resolving timeout handling in c-ares enabled builds
+
 Daniel Fandrich (28 Apr 2008)
 - Added test 1028 to test an HTTP redirect to a FTP URL.
 
