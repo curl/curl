@@ -13,6 +13,7 @@ This release includes the following changes:
  o CURLFORM_STREAM was added
  o CURLOPT_NOBODY is now supported over SFTP
  o curl can now run on Symbian OS
+ o curl -w redirect_url and CURLINFO_REDIRECT_URL
 
 This release includes the following bugfixes:
 

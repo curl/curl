@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -61,6 +61,7 @@ typedef enum {
   VAR_REDIRECT_TIME,
   VAR_REDIRECT_COUNT,
   VAR_FTP_ENTRY_PATH,
+  VAR_REDIRECT_URL,
   VAR_NUM_OF_VARS /* must be the last */
 } replaceid;
 
@@ -73,6 +74,7 @@ struct variable {
 static const struct variable replacements[]={
   {"url_effective", VAR_EFFECTIVE_URL},
   {"http_code", VAR_HTTP_CODE},
+  {"response_code", VAR_HTTP_CODE},
   {"http_connect", VAR_HTTP_CODE_PROXY},
   {"time_total", VAR_TOTAL_TIME},
   {"time_namelookup", VAR_NAMELOOKUP_TIME},
@@ -90,6 +92,7 @@ static const struct variable replacements[]={
   {"time_redirect", VAR_REDIRECT_TIME},
   {"num_redirects", VAR_REDIRECT_COUNT},
   {"ftp_entry_path", VAR_FTP_ENTRY_PATH},
+  {"redirect_url", VAR_REDIRECT_URL},
   {NULL, VAR_NONE}
 };
 
@@ -219,6 +222,12 @@ void ourWriteOut(CURL *curl, const char *writeinfo)
               case VAR_FTP_ENTRY_PATH:
                 if((CURLE_OK ==
                     curl_easy_getinfo(curl, CURLINFO_FTP_ENTRY_PATH, &stringp))
+                   && stringp)
+                  fputs(stringp, stream);
+                break;
+              case VAR_REDIRECT_URL:
+                if((CURLE_OK ==
+                    curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &stringp))
                    && stringp)
                   fputs(stringp, stream);
                 break;

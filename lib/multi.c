@@ -1262,6 +1262,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       else if(TRUE == done) {
         char *newurl;
         bool retry = Curl_retry_request(easy->easy_conn, &newurl);
+        followtype follow=FOLLOW_NONE;
 
         /* call this even if the readwrite function returned error */
         Curl_posttransfer(easy->easy_handle);
@@ -1278,10 +1279,13 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                then figure out the URL here */
             newurl = easy->easy_handle->req.newurl;
             easy->easy_handle->req.newurl = NULL;
+            follow = FOLLOW_REDIR;
           }
+          else
+            follow = FOLLOW_RETRY;
           easy->result = Curl_done(&easy->easy_conn, CURLE_OK, FALSE);
           if(easy->result == CURLE_OK)
-            easy->result = Curl_follow(easy->easy_handle, newurl, retry);
+            easy->result = Curl_follow(easy->easy_handle, newurl, follow);
           if(CURLE_OK == easy->result) {
             multistate(easy, CURLM_STATE_CONNECT);
             result = CURLM_CALL_MULTI_PERFORM;

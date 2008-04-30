@@ -250,7 +250,7 @@ CURLcode Curl_readrewind(struct connectdata *conn)
 
       err = (data->set.seek_func)(data->set.seek_client, 0, SEEK_SET);
       if(err) {
-	failf(data, "seek callback returned error %d", (int)err);
+        failf(data, "seek callback returned error %d", (int)err);
         return CURLE_SEND_FAIL_REWIND;
       }
     }
@@ -1113,34 +1113,37 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             }
             else if((k->httpcode >= 300 && k->httpcode < 400) &&
                      checkprefix("Location:", k->p)) {
-              if(data->set.http_follow_location) {
-                /* this is the URL that the server advices us to get instead */
-                char *ptr;
-                char *start=k->p;
-                char backup;
+              /* this is the URL that the server advices us to use instead */
+              char *ptr;
+              char *start=k->p;
+              char backup;
 
-                start += 9; /* pass "Location:" */
+              start += 9; /* pass "Location:" */
 
-                /* Skip spaces and tabs. We do this to support multiple
-                   white spaces after the "Location:" keyword. */
-                while(*start && ISSPACE(*start ))
-                  start++;
+              /* Skip spaces and tabs. We do this to support multiple
+                 white spaces after the "Location:" keyword. */
+              while(*start && ISSPACE(*start ))
+                start++;
 
-                /* Scan through the string from the end to find the last
-                   non-space. k->end_ptr points to the actual terminating zero
-                   letter, move pointer one letter back and start from
-                   there. This logic strips off trailing whitespace, but keeps
-                   any embedded whitespace. */
-                ptr = k->end_ptr-1;
-                while((ptr>=start) && ISSPACE(*ptr))
-                  ptr--;
-                ptr++;
+              /* Scan through the string from the end to find the last
+                 non-space. k->end_ptr points to the actual terminating zero
+                 letter, move pointer one letter back and start from
+                 there. This logic strips off trailing whitespace, but keeps
+                 any embedded whitespace. */
+              ptr = k->end_ptr-1;
+              while((ptr>=start) && ISSPACE(*ptr))
+                ptr--;
+              ptr++;
 
-                backup = *ptr; /* store the ending letter */
-                if(ptr != start) {
-                  *ptr = '\0';   /* zero terminate */
-                  data->req.newurl = strdup(start); /* clone string */
-                  *ptr = backup; /* restore ending letter */
+              backup = *ptr; /* store the ending letter */
+              if(ptr != start) {
+                *ptr = '\0';   /* zero terminate */
+                data->req.location = strdup(start); /* clone string */
+                *ptr = backup; /* restore ending letter */
+                if(!data->req.location)
+                  return CURLE_OUT_OF_MEMORY;
+                if(data->set.http_follow_location) {
+                  data->req.newurl = strdup(data->req.location); /* clone */
                   if(!data->req.newurl)
                     return CURLE_OUT_OF_MEMORY;
                 }
@@ -1969,16 +1972,16 @@ CURLcode Curl_follow(struct SessionHandle *data,
                      char *newurl, /* this 'newurl' is the Location: string,
                                       and it must be malloc()ed before passed
                                       here */
-                     bool retry) /* set TRUE if this is a request retry as
-                                    opposed to a real redirect following */
+                     followtype type) /* see transfer.h */
 {
   /* Location: redirect */
   char prot[16]; /* URL protocol string storage */
   char letter;   /* used for a silly sscanf */
   size_t newlen;
   char *newest;
+  bool disallowport = FALSE;
 
-  if(!retry) {
+  if(type == FOLLOW_REDIR) {
     if((data->set.maxredirs != -1) &&
         (data->set.followlocation >= data->set.maxredirs)) {
       failf(data,"Maximum (%d) redirects followed", data->set.maxredirs);
@@ -1989,19 +1992,19 @@ CURLcode Curl_follow(struct SessionHandle *data,
     data->state.this_is_a_follow = TRUE;
 
     data->set.followlocation++; /* count location-followers */
-  }
 
-  if(data->set.http_auto_referer) {
-    /* We are asked to automatically set the previous URL as the
-       referer when we get the next URL. We pick the ->url field,
-       which may or may not be 100% correct */
+    if(data->set.http_auto_referer) {
+      /* We are asked to automatically set the previous URL as the referer
+         when we get the next URL. We pick the ->url field, which may or may
+         not be 100% correct */
 
-    if(data->change.referer_alloc)
-      /* If we already have an allocated referer, free this first */
-      free(data->change.referer);
+      if(data->change.referer_alloc)
+        /* If we already have an allocated referer, free this first */
+        free(data->change.referer);
 
-    data->change.referer = strdup(data->change.url);
-    data->change.referer_alloc = TRUE; /* yes, free this later */
+      data->change.referer = strdup(data->change.url);
+      data->change.referer_alloc = TRUE; /* yes, free this later */
+    }
   }
 
   if(2 != sscanf(newurl, "%15[^?&/:]://%c", prot, &letter)) {
@@ -2141,7 +2144,7 @@ CURLcode Curl_follow(struct SessionHandle *data,
   }
   else {
     /* This is an absolute URL, don't allow the custom port number */
-    data->state.allow_port = FALSE;
+    disallowport = TRUE;
 
     if(strchr(newurl, ' ')) {
       /* This new URL contains at least one space, this is a mighty stupid
@@ -2158,6 +2161,16 @@ CURLcode Curl_follow(struct SessionHandle *data,
     }
 
   }
+
+  if(type == FOLLOW_FAKE) {
+    /* we're only figuring out the new url if we would've followed locations
+       but now we're done so we can get out! */
+    data->info.wouldredirect = newurl;
+    return CURLE_OK;
+  }
+
+  if(disallowport)
+    data->state.allow_port = FALSE;
 
   if(data->change.url_alloc)
     free(data->change.url);
@@ -2289,7 +2302,9 @@ connect_host(struct SessionHandle *data,
   return res;
 }
 
-/* Returns TRUE and sets '*url' if a request retry is wanted */
+/* Returns TRUE and sets '*url' if a request retry is wanted.
+
+   NOTE: that the *url is malloc()ed. */
 bool Curl_retry_request(struct connectdata *conn,
                         char **url)
 {
@@ -2335,7 +2350,7 @@ CURLcode Curl_perform(struct SessionHandle *data)
   CURLcode res2;
   struct connectdata *conn=NULL;
   char *newurl = NULL; /* possibly a new URL to follow to! */
-  bool retry = FALSE;
+  int follow = FOLLOW_NONE;
 
   data->state.used_interface = Curl_if_easy;
 
@@ -2366,14 +2381,29 @@ CURLcode Curl_perform(struct SessionHandle *data)
       if(res == CURLE_OK) {
         res = Transfer(conn); /* now fetch that URL please */
         if(res == CURLE_OK) {
-          retry = Curl_retry_request(conn, &newurl);
+          bool retry = Curl_retry_request(conn, &newurl);
 
-          if(!retry)
+          if(retry)
+            follow = FOLLOW_RETRY;
+          else {
             /*
              * We must duplicate the new URL here as the connection data may
-             * be free()ed in the Curl_done() function.
+             * be free()ed in the Curl_done() function. We prefer the newurl
+             * one since that's used for redirects or just further requests
+             * for retries or multi-stage HTTP auth methods etc.
              */
-            newurl = data->req.newurl?strdup(data->req.newurl):NULL;
+            if(data->req.newurl) {
+              follow = FOLLOW_REDIR;
+              newurl = strdup(data->req.newurl);
+            }
+            else if(data->req.location) {
+              follow = FOLLOW_FAKE;
+              newurl = strdup(data->req.location);
+            }
+          }
+
+          /* in the above cases where 'newurl' gets assigned, we have a fresh
+           * allocated memory pointed to */
         }
         else {
           /* The transfer phase returned error, we mark the connection to get
@@ -2409,11 +2439,17 @@ CURLcode Curl_perform(struct SessionHandle *data)
        * in 'Curl_done' or other functions.
        */
 
-      if((res == CURLE_OK) && newurl) {
-        res = Curl_follow(data, newurl, retry);
+      if((res == CURLE_OK) && follow) {
+        res = Curl_follow(data, newurl, follow);
         if(CURLE_OK == res) {
+          /* if things went fine, Curl_follow() freed or otherwise took
+             responsibility for the newurl pointer */
           newurl = NULL;
-          continue;
+          if(follow >= FOLLOW_RETRY) {
+            follow = FOLLOW_NONE;
+            continue;
+          }
+          /* else we break out of the loop below */
         }
       }
     }

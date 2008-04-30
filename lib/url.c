@@ -494,6 +494,7 @@ CURLcode Curl_close(struct SessionHandle *data)
   Curl_digest_cleanup(data);
 
   Curl_safefree(data->info.contenttype);
+  Curl_safefree(data->info.wouldredirect);
 
   /* this destroys the channel and we cannot use it anymore after this */
   ares_destroy(data->state.areschannel);
@@ -4439,6 +4440,10 @@ CURLcode Curl_done(struct connectdata **connp,
   if(data->req.newurl) {
     free(data->req.newurl);
     data->req.newurl = NULL;
+  }
+  if(data->req.location) {
+    free(data->req.location);
+    data->req.location = NULL;
   }
 
   if(conn->dns_entry) {

@@ -760,8 +760,10 @@ struct SingleRequest {
   bool ignorecl;    /* This HTTP response has no body so we ignore the Content-
                        Length: header */
 
-  char *newurl; /* This can only be set if a Location: was in the
-                   document headers */
+  char *location;   /* This points to an allocated version of the Location:
+                       header data */
+  char *newurl;     /* Set to the new URL to use when a redirect or a retry is
+                       wanted */
 
   /* 'upload_present' is used to keep a byte counter of how much data there is
      still left in the buffer, aimed for upload. */
@@ -1021,21 +1023,19 @@ struct connectdata {
  */
 struct PureInfo {
   int httpcode;  /* Recent HTTP or FTP response code */
-  int httpproxycode;
-  int httpversion;
+  int httpproxycode; /* response code from proxy when received separate */
+  int httpversion; /* the http version number X.Y = X*10+Y */
   long filetime; /* If requested, this is might get set. Set to -1 if the time
                     was unretrievable. We cannot have this of type time_t,
                     since time_t is unsigned on several platforms such as
                     OpenVMS. */
   long header_size;  /* size of read header(s) in bytes */
   long request_size; /* the amount of bytes sent in the request(s) */
-
-  long proxyauthavail;
-  long httpauthavail;
-
+  long proxyauthavail; /* what proxy auth types were announced */
+  long httpauthavail;  /* what host auth types were announced */
   long numconnects; /* how many new connection did libcurl created */
-
   char *contenttype; /* the content type of the object */
+  char *wouldredirect; /* URL this would've been redirected to if asked to */
 };
 
 

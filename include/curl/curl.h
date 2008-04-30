@@ -1587,9 +1587,10 @@ typedef enum {
   CURLINFO_COOKIELIST       = CURLINFO_SLIST  + 28,
   CURLINFO_LASTSOCKET       = CURLINFO_LONG   + 29,
   CURLINFO_FTP_ENTRY_PATH   = CURLINFO_STRING + 30,
+  CURLINFO_REDIRECT_URL     = CURLINFO_STRING + 31,
   /* Fill in new entries below here! */
 
-  CURLINFO_LASTONE          = 30
+  CURLINFO_LASTONE          = 31
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as

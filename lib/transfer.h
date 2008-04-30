@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,7 +26,20 @@ CURLcode Curl_perform(struct SessionHandle *data);
 CURLcode Curl_pretransfer(struct SessionHandle *data);
 CURLcode Curl_second_connect(struct connectdata *conn);
 CURLcode Curl_posttransfer(struct SessionHandle *data);
-CURLcode Curl_follow(struct SessionHandle *data, char *newurl, bool retry);
+
+typedef enum {
+  FOLLOW_NONE,  /* not used within the function, just a placeholder to
+                   allow initing to this */
+  FOLLOW_FAKE,  /* only records stuff, not actually following */
+  FOLLOW_RETRY, /* set if this is a request retry as opposed to a real
+                          redirect following */
+  FOLLOW_REDIR, /* a full true redirect */
+  FOLLOW_LAST   /* never used */
+} followtype;
+
+CURLcode Curl_follow(struct SessionHandle *data, char *newurl, followtype type);
+
+
 CURLcode Curl_readwrite(struct connectdata *conn, bool *done);
 int Curl_single_getsock(const struct connectdata *conn,
                         curl_socket_t *socks,

@@ -7,6 +7,15 @@
                                   Changelog
 
 
+Daniel Stenberg (29 Apr 2008)
+- To make it easier for applications that want lots of magic stuff done on
+  redirections and thus cannot use CURLOPT_FOLLOWLOCATION easily, we now
+  introduce the new CURLINFO_REDIRECT_URL option that lets applications
+  extract the URL libcurl would've redirected to if it had been told to. This
+  then enables the application to continue to that URL as it thinks is
+  suitable, without having to re-implement the magic of creating the new URL
+  from the Location: header etc. Test 1029 verifies it.
+
 Yang Tse (29 Apr 2008)
 - Improved easy interface resolving timeout handling in c-ares enabled builds
 
