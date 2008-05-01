@@ -7,6 +7,11 @@
                                   Changelog
 
 
+Daniel Stenberg (1 May 2008)
+- Bart Whiteley provided a patch that made libcurl work properly when an app
+  uses the CURLOPT_OPENSOCKETFUNCTION callback to create a unix domain socket
+  to a http server.
+
 Daniel Stenberg (29 Apr 2008)
 - To make it easier for applications that want lots of magic stuff done on
   redirections and thus cannot use CURLOPT_FOLLOWLOCATION easily, we now

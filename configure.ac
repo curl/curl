@@ -1861,6 +1861,7 @@ AC_CHECK_HEADERS(
         arpa/inet.h \
         net/if.h \
         netinet/in.h \
+        sys/un.h \
         netinet/tcp.h \
         netdb.h \
         sys/sockio.h \
@@ -1906,6 +1907,9 @@ dnl default includes
 #endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#ifdef HAVE_SYS_UN_H
+#include <sys/un.h>
 #endif
 ]
 )

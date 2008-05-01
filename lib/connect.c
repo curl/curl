@@ -34,6 +34,9 @@
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h> /* <netinet/tcp.h> may need it */
 #endif
+#ifdef HAVE_SYS_UN_H
+#include <sys/un.h> /* for sockaddr_un */
+#endif
 #ifdef HAVE_NETINET_TCP_H
 #include <netinet/tcp.h> /* for TCP_NODELAY */
 #endif
@@ -766,13 +769,24 @@ singleipconnect(struct connectdata *conn,
 
   /* FIXME: do we have Curl_printable_address-like with struct sockaddr* as
      argument? */
-  iptoprint = &((const struct sockaddr_in*)(&addr->addr))->sin_addr;
-#ifdef ENABLE_IPV6
-  if(addr->family==AF_INET6)
-    iptoprint= &((const struct sockaddr_in6*)(&addr->addr))->sin6_addr;
+#if defined(HAVE_SYS_UN_H) && defined(AF_UNIX)
+  if(addr->family==AF_UNIX)
+    infof(data, "  Trying %s... ",
+          ((const struct sockaddr_un*)(&addr->addr))->sun_path);
+  else
 #endif
-  Curl_inet_ntop(addr->family, iptoprint, addr_buf, sizeof(addr_buf));
-  infof(data, "  Trying %s... ", addr_buf);
+  {
+#ifdef ENABLE_IPV6
+    if(addr->family==AF_INET6)
+      iptoprint= &((const struct sockaddr_in6*)(&addr->addr))->sin6_addr;
+    else
+#endif
+      iptoprint = &((const struct sockaddr_in*)(&addr->addr))->sin_addr;
+
+    if(Curl_inet_ntop(addr->family, iptoprint, addr_buf,
+                      sizeof(addr_buf)) != NULL)
+      infof(data, "  Trying %s... ", addr_buf);
+  }
 
   if(data->set.tcp_nodelay)
     tcpnodelay(conn, sockfd);
