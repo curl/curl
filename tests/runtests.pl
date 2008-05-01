@@ -2180,6 +2180,9 @@ sub singletest {
         # verify redirected stdout
         my @actual = loadarray($STDOUT);
 
+        # variable-replace in the stdout we have from the test case file
+        @validstdout = fixarray(@validstdout);
+
         # get all attributes
         my %hash = getpartattr("verify", "stdout");
 
