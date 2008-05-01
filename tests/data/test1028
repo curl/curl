@@ -79,7 +79,7 @@ Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/html
 Funny-head: yesyes
-Location: ftp://127.0.0.1:8992/10280002
+Location: ftp://%HOSTIP:%FTPPORT/10280002
 Content-Length: 0
 Connection: close
 
