@@ -30,6 +30,10 @@ HTTP Location: and 'redirect_url' check
  <command>
 http://%HOSTIP:%HTTPPORT/we/want/our/1029 -w '%{redirect_url}\n'
 </command>
+# The stdout section doesn't do variable substitution, so we must assert this
+<precheck>
+perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' ne '127.0.0.1' || '%HTTPPORT' ne '8990' );"
+</precheck>
 </client>
 
 # Verify data after the test has been "shot"
