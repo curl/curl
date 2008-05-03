@@ -238,9 +238,10 @@ CURLcode Curl_readrewind(struct connectdata *conn)
 
   conn->bits.rewindaftersend = FALSE; /* we rewind now */
 
-  /* explicitly switch of sending data on this transfer now since we are about
-     to restart a new transfer and thus we want to avoid inadvertently sending
-     more data on the existing connection until the next request starts */
+  /* explicitly switch off sending data on this connection now since we are
+     about to restart a new transfer and thus we want to avoid inadvertently
+     sending more data on the existing connection until the next transfer
+     starts */
   data->req.keepon &= ~KEEP_WRITE;
 
   /* We have sent away data. If not using CURLOPT_POSTFIELDS or
