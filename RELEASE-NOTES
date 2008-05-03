@@ -28,6 +28,7 @@ This release includes the following bugfixes:
    circumstances (found when using curlftpfs)
  o CURLOPT_OPENSOCKETFUNCTION can now be used to create a unix domain socket
  o CURLOPT_TCP_NODELAY crash due to getprotobyname() use
+ o libcurl sometimes sent body twice when using CURLAUTH_ANY
 
 This release includes the following known bugs:
 
@@ -48,6 +49,6 @@ advice from friends like these:
 
  Michal Marek, Daniel Fandrich, Scott Barrett, Alexey Simak, Daniel Black,
  Rafa Muyo, Andre Guibert de Bruet, Brock Noland, Sandor Feldi, Stefan Krause,
- David Shaw, Norbert Frese, Bart Whiteley, Jean-Francois Bertrand
+ David Shaw, Norbert Frese, Bart Whiteley, Jean-Francois Bertrand, Ben Van Hof
 
         Thanks! (and sorry if I forgot to mention someone)

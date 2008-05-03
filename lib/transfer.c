@@ -228,15 +228,20 @@ checkhttpprefix(struct SessionHandle *data,
 }
 
 /*
- * Curl_readrewind() rewinds the read stream. This typically (so far) only
- * used for HTTP POST/PUT with multi-pass authentication when a sending was
- * denied and a resend is necessary.
+ * Curl_readrewind() rewinds the read stream. This is typically used for HTTP
+ * POST/PUT with multi-pass authentication when a sending was denied and a
+ * resend is necessary.
  */
 CURLcode Curl_readrewind(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
 
   conn->bits.rewindaftersend = FALSE; /* we rewind now */
+
+  /* explicitly switch of sending data on this transfer now since we are about
+     to restart a new transfer and thus we want to avoid inadvertently sending
+     more data on the existing connection until the next request starts */
+  data->req.keepon &= ~KEEP_WRITE;
 
   /* We have sent away data. If not using CURLOPT_POSTFIELDS or
      CURLOPT_HTTPPOST, call app to rewind

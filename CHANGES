@@ -8,6 +8,14 @@
 
 
 Daniel Stenberg (3 May 2008)
+- Ben Van Hof filed bug report #1945240: "libcurl sometimes sends body twice
+  when using CURL_AUTH_ANY" (http://curl.haxx.se/bug/view.cgi?id=1945240).
+  The problem was that when libcurl rewound a stream meant for upload when it
+  would prepare for a second request, it could accidentally continue the
+  sending of the rewound data on the first request instead of on the second.
+  Ben also provided test case 1030 that verifies this fix.
+
+Daniel Stenberg (3 May 2008)
 - Jean-Francois Bertrand reported a libcurl crash with CURLOPT_TCP_NODELAY
   since libcurl used getprotobyname() and that isn't thread-safe. We now
   switched to use IPPROTO_TCP unconditionally, but perhaps the proper fix is
