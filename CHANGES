@@ -7,6 +7,13 @@
                                   Changelog
 
 
+Daniel Stenberg (3 May 2008)
+- Jean-Francois Bertrand reported a libcurl crash with CURLOPT_TCP_NODELAY
+  since libcurl used getprotobyname() and that isn't thread-safe. We now
+  switched to use IPPROTO_TCP unconditionally, but perhaps the proper fix is
+  to detect the thread-safe version of the function and use that.
+  http://curl.haxx.se/mail/lib-2008-05/0011.html
+
 Daniel Stenberg (1 May 2008)
 - Bart Whiteley provided a patch that made libcurl work properly when an app
   uses the CURLOPT_OPENSOCKETFUNCTION callback to create a unix domain socket

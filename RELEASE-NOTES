@@ -26,7 +26,8 @@ This release includes the following bugfixes:
  o the typechecker can be bypassed by defining CURL_DISABLE_TYPECHECK
  o a pointer mixup could make the FTP code send bad user+password under rare
    circumstances (found when using curlftpfs)
- o the CURLOPT_OPENSOCKETFUNCTION can now be used to create a unix domain socket
+ o CURLOPT_OPENSOCKETFUNCTION can now be used to create a unix domain socket
+ o CURLOPT_TCP_NODELAY crash due to getprotobyname() use
 
 This release includes the following known bugs:
 
@@ -47,6 +48,6 @@ advice from friends like these:
 
  Michal Marek, Daniel Fandrich, Scott Barrett, Alexey Simak, Daniel Black,
  Rafa Muyo, Andre Guibert de Bruet, Brock Noland, Sandor Feldi, Stefan Krause,
- David Shaw, Norbert Frese, Bart Whiteley
+ David Shaw, Norbert Frese, Bart Whiteley, Jean-Francois Bertrand
 
         Thanks! (and sorry if I forgot to mention someone)
