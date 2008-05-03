@@ -340,9 +340,13 @@ static CURLcode perhapsrewind(struct connectdata *conn)
      */
     conn->bits.close = TRUE;
     data->req.size = 0; /* don't download any more than 0 bytes */
+
+    /* There still is data left to send, but this connection is marked for
+       closure so we can safely do the rewind right now */
   }
 
   if(bytessent)
+    /* we rewind now at once since if we already sent something */
     return Curl_readrewind(conn);
 
   return CURLE_OK;
@@ -1606,10 +1610,20 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
       if(error)
         return CURLE_RECV_ERROR;
 
-      if(data->info.httpproxycode != 200)
+      if(data->info.httpproxycode != 200) {
         /* Deal with the possibly already received authenticate
            headers. 'newurl' is set to a new URL if we must loop. */
-        Curl_http_auth_act(conn);
+        result = Curl_http_auth_act(conn);
+        if(result)
+          return result;
+
+        if(conn->bits.close)
+          /* the connection has been marked for closure, most likely in the
+             Curl_http_auth_act() function and thus we can kill it at once
+             below
+          */
+          closeConnection = TRUE;
+      }
 
       if(closeConnection && data->req.newurl) {
         /* Connection closed by server. Don't use it anymore */
