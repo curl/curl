@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel Stenberg (4 May 2008)
+- Yuriy Sosov pointed out a configure fix for detecting c-ares when that is
+  built debug-enabled.
+
 Daniel Stenberg (3 May 2008)
 - Ben Van Hof filed bug report #1945240: "libcurl sometimes sends body twice
   when using CURL_AUTH_ANY" (http://curl.haxx.se/bug/view.cgi?id=1945240).

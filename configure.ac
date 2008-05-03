@@ -2270,6 +2270,8 @@ AC_HELP_STRING([--disable-ares],[Disable c-ares for name lookups]),
 void curl_dofree() { }
 void curl_sclose() { }
 void curl_domalloc() { }
+void curl_docalloc() { }
+void curl_socket() { }
 
 int main(void)
 {
