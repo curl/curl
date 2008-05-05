@@ -1,4 +1,16 @@
 To be addressed before 7.18.2 (planned release: June 2008)
 =============================
 
-134 - 
+134 - patch for unordered body and header in re-authentication by
+      Jari Urpalainen
+
+135 - Busy looping bug in multi_socket interface by
+      Christopher Palow
+
+136 - adding easy handles when using curl_multi_socket* by
+      Markus Koetter
+
+137 - Working with curl connections as with sockets by
+      "tetetest tetetest"
+
+138 -
