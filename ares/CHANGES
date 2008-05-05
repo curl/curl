@@ -1,5 +1,9 @@
   Changelog for the c-ares project
 
+* May 5 2008 (Yang Tse)
+
+- Improved parsing of resolver configuration files.
+
 * April 4 2008 (Daniel Stenberg)
 
 - Eino Tuominen improved the code when a file is used to seed the randomizer.

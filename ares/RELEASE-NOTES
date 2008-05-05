@@ -1,9 +1,9 @@
 This is what's new and changed in the c-ares 1.5.2 release:
 
- o 
+ o improved parsing of resolver configuration files
 
 Thanks go to these friendly people for their efforts and contributions:
 
- 
+ Yang Tse
 
 Have fun!

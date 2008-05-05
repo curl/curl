@@ -1245,16 +1245,61 @@ static int set_options(ares_channel channel, const char *str)
 static char *try_config(char *s, const char *opt)
 {
   size_t len;
+  ssize_t i;
+  ssize_t j;
+  char *p;
 
-  len = strlen(opt);
-  if (strncmp(s, opt, len) != 0 || !ISSPACE(s[len]))
+  if (!s || !opt)
+    /* no line or no option */
     return NULL;
-  s += len;
-  while (ISSPACE(*s))
-    s++;
-  return s;
-}
 
+  /* trim line comment */
+  for (i = 0; s[i] && s[i] != '#'; ++i);
+  s[i] = '\0';
+
+  /* trim trailing whitespace */
+  for (j = i-1; j >= 0 && ISSPACE(s[j]); --j);
+  s[++j] = '\0';
+
+  /* skip leading whitespace */
+  for (i = 0; s[i] && ISSPACE(s[i]); ++i);
+  p = &s[i];
+
+  if (!*p)
+    /* empty line */
+    return NULL;
+
+  if ((len = strlen(opt)) == 0)
+    /* empty option */
+    return NULL;
+
+  if (strncmp(p, opt, len) != 0)
+    /* line and option do not match */
+    return NULL;
+
+  /* skip over given option name */
+  p += len;
+
+  if (!*p)
+    /* no option value */
+    return NULL;
+
+  if ((opt[len-1] != ':') && (opt[len-1] != '=') && !ISSPACE(*p))
+    /* whitespace between option name and value is mandatory
+       for given option names which do not end with ':' or '=' */
+    return NULL;
+
+  /* skip over whitespace */
+  while (*p && ISSPACE(*p))
+    p++;
+
+  if (!*p)
+    /* no option value */
+    return NULL;
+
+  /* return pointer to option value */
+  return p;
+}
 #endif
 
 static const char *try_option(const char *p, const char *q, const char *opt)
