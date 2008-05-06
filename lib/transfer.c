@@ -2356,7 +2356,7 @@ CURLcode Curl_perform(struct SessionHandle *data)
   CURLcode res2;
   struct connectdata *conn=NULL;
   char *newurl = NULL; /* possibly a new URL to follow to! */
-  int follow = FOLLOW_NONE;
+  followtype follow = FOLLOW_NONE;
 
   data->state.used_interface = Curl_if_easy;
 
