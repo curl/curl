@@ -38,7 +38,7 @@ if(!-f "configure") {
     `./buildconf`;
 }
 print "adding $version in the configure.ac file\n";
-`sed -e 's/AM_INIT_AUTOMAKE(c-ares, CVS)/AM_INIT_AUTOMAKE(c-ares, $version)/' < configure.ac > configure.ac-rel`;
+`sed -e 's/AC_INIT.*/AC_INIT([c-ares], [$version])/' < configure.ac > configure.ac-rel`;
 
 # now make a new configure script with this
 print "makes a new configure script\n";
