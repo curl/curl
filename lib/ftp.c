@@ -622,9 +622,13 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
   struct timeval now = Curl_tvnow();
   size_t nread;
   int cache_skip=0;
+  int value_to_be_ignored=0;
 
   if(ftpcode)
     *ftpcode = 0; /* 0 for errors */
+  else
+    /* make the pointer point to something for the rest of this function */
+    ftpcode = &value_to_be_ignored;
 
   *nreadp=0;
 
