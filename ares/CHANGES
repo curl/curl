@@ -2,6 +2,10 @@
 
 * May 7 2008 (Daniel Stenberg)
 
+- Sebastian made c-ares able to return all PTR-records when doing reverse
+  lookups. It is not common practice to have multiple PTR-Records for a single
+  IP, but its perfectly legal and some sites have those.
+
 - Doug Goldstein provided a configure patch: updates autoconf 2.13 usage to
   autoconf 2.57 usage (which is the version you have specified as the minimum
   version). It's a minor change but it does clean up some warnings with newer
