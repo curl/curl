@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Yang Tse (7 May 2008)
+- Christopher Palow provided the patch (edited by me) that introduces the
+  use of microsecond resolution keys for internal splay trees.
+
 Daniel Stenberg (4 May 2008)
 - Yuriy Sosov pointed out a configure fix for detecting c-ares when that is
   built debug-enabled.

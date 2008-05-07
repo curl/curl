@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1997 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1997 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,24 +23,26 @@
 
 #include "setup.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "splay.h"
 
-#define compare(i,j) ((i)-(j))
-
-/* Set this to a key value that will *NEVER* appear otherwise */
-#define KEY_NOTUSED -1
+/*
+ * This macro compares two node keys i and j and returns:
+ *
+ *  negative value: when i is smaller than j
+ *  zero          : when i is equal   to   j
+ *  positive when : when i is larger  than j
+ */
+#define compare(i,j) Curl_splaycomparekeys((i),(j))
 
 /*
  * Splay using the key i (which may or may not be in the tree.) The starting
  * root is t.
  */
-struct Curl_tree *Curl_splay(int i, struct Curl_tree *t)
+struct Curl_tree *Curl_splay(struct timeval i,
+                             struct Curl_tree *t)
 {
   struct Curl_tree N, *l, *r, *y;
-  int comp;
+  long comp;
 
   if(t == NULL)
     return t;
@@ -93,10 +95,12 @@ struct Curl_tree *Curl_splay(int i, struct Curl_tree *t)
 
 /* Insert key i into the tree t.  Return a pointer to the resulting tree or
    NULL if something went wrong. */
-struct Curl_tree *Curl_splayinsert(int i,
+struct Curl_tree *Curl_splayinsert(struct timeval i,
                                    struct Curl_tree *t,
                                    struct Curl_tree *node)
 {
+  static struct timeval KEY_NOTUSED = {-1,-1}; /* key that will *NEVER* appear */
+
   if(node == NULL)
     return t;
 
@@ -149,7 +153,8 @@ struct Curl_tree *Curl_splayinsert(int i,
 
    Function not used in libcurl.
 */
-struct Curl_tree *Curl_splayremove(int i, struct Curl_tree *t,
+struct Curl_tree *Curl_splayremove(struct timeval i,
+                                   struct Curl_tree *t,
                                    struct Curl_tree **removed)
 {
   struct Curl_tree *x;
@@ -163,7 +168,7 @@ struct Curl_tree *Curl_splayremove(int i, struct Curl_tree *t,
   if(compare(i, t->key) == 0) {               /* found it */
 
     /* FIRST! Check if there is a list with identical sizes */
-    if((x = t->same)) {
+    if((x = t->same) != NULL) {
       /* there is, pick one from the list */
 
       /* 'x' is the new root node */
@@ -193,8 +198,9 @@ struct Curl_tree *Curl_splayremove(int i, struct Curl_tree *t,
 #endif
 
 /* Finds and deletes the best-fit node from the tree. Return a pointer to the
-   resulting tree.  best-fit means the node with the given or lower number */
-struct Curl_tree *Curl_splaygetbest(int i, struct Curl_tree *t,
+   resulting tree.  best-fit means the node with the given or lower key */
+struct Curl_tree *Curl_splaygetbest(struct timeval i,
+                                    struct Curl_tree *t,
                                     struct Curl_tree **removed)
 {
   struct Curl_tree *x;
@@ -217,7 +223,7 @@ struct Curl_tree *Curl_splaygetbest(int i, struct Curl_tree *t,
   }
 
   if(compare(i, t->key) >= 0) {               /* found it */
-    /* FIRST! Check if there is a list with identical sizes */
+    /* FIRST! Check if there is a list with identical keys */
     x = t->same;
     if(x) {
       /* there is, pick one from the list */
@@ -263,12 +269,13 @@ int Curl_splayremovebyaddr(struct Curl_tree *t,
                            struct Curl_tree *removenode,
                            struct Curl_tree **newroot)
 {
+  static struct timeval KEY_NOTUSED = {-1,-1}; /* key that will *NEVER* appear */
   struct Curl_tree *x;
 
   if(!t || !removenode)
     return 1;
 
-  if(KEY_NOTUSED == removenode->key) {
+  if(compare(KEY_NOTUSED, removenode->key) == 0) {
     /* Key set to NOTUSED means it is a subnode within a 'same' linked list
        and thus we can unlink it easily. The 'smaller' link of a subnode
        links to the parent node. */
@@ -341,7 +348,11 @@ void Curl_splayprint(struct Curl_tree * t, int d, char output)
       printf("  ");
 
   if(output) {
-    printf("%d[%d]", t->key, i);
+#ifdef TEST_SPLAY
+    printf("%ld[%d]", t->key.tv_usec, i);
+#else
+    printf("%ld.%ld[%d]", t->key.tv_sec, t->key.tv_usec, i);
+#endif
   }
 
   for(count=0, node = t->same; node; node = node->same, count++)
@@ -382,18 +393,19 @@ int main(int argc, argv_item_t argv[])
   root = NULL;              /* the empty tree */
 
   for (i = 0; i < MAX; i++) {
-    int key;
+    struct timeval key;
     ptrs[i] = t = (struct Curl_tree *)malloc(sizeof(struct Curl_tree));
 
+    key.tv_sec = 0;
 #ifdef TEST2
-    key = sizes[i];
+    key.tv_usec = sizes[i];
 #elif defined(TEST1)
-    key = (541*i)%1023;
+    key.tv_usec = (541*i)%1023;
 #elif defined(TEST3)
-    key = 100;
+    key.tv_usec = 100;
 #endif
 
-    t->payload = (void *)key; /* for simplicity */
+    t->payload = (void *)key.tv_usec; /* for simplicity */
     if(!t) {
       puts("out of memory!");
       return 0;
@@ -412,8 +424,8 @@ int main(int argc, argv_item_t argv[])
     struct Curl_tree *r;
     printf("Tree look:\n");
     Curl_splayprint(root, 0, 1);
-    printf("remove pointer %d, payload %d\n", rem,
-           (int)((struct Curl_tree *)ptrs[rem])->payload);
+    printf("remove pointer %d, payload %ld\n", rem,
+           (long)((struct Curl_tree *)ptrs[rem])->payload);
     rc = Curl_splayremovebyaddr(root, (struct Curl_tree *)ptrs[rem], &root);
     if(rc)
       /* failed! */

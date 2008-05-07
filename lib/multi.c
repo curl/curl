@@ -23,9 +23,6 @@
 
 #include "setup.h"
 
-#include <stdlib.h>
-#include <string.h>
-
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -177,8 +174,8 @@ struct Curl_multi {
   /* timer callback and user data pointer for the *socket() API */
   curl_multi_timer_callback timer_cb;
   void *timer_userp;
-  time_t timer_lastcall; /* the fixed time for the timeout for the previous
-                            callback */
+  struct timeval timer_lastcall; /* the fixed time for the timeout for the
+                                    previous callback */
 };
 
 static bool multi_conn_using(struct Curl_multi *multi,
@@ -1446,9 +1443,8 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
    */
   do {
     struct timeval now = Curl_tvnow();
-    int key = now.tv_sec; /* drop the usec part */
 
-    multi->timetree = Curl_splaygetbest(key, multi->timetree, &t);
+    multi->timetree = Curl_splaygetbest(now, multi->timetree, &t);
     if(t) {
       struct SessionHandle *d = t->payload;
       struct timeval* tv = &d->state.expiretime;
@@ -1746,7 +1742,6 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
    * handle we deal with.
    */
   do {
-    int key;
     struct timeval now;
 
     /* the first loop lap 'data' can be NULL */
@@ -1763,9 +1758,8 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
        extracts a matching node if there is one */
 
     now = Curl_tvnow();
-    key = now.tv_sec; /* drop the usec part */
 
-    multi->timetree = Curl_splaygetbest(key, multi->timetree, &t);
+    multi->timetree = Curl_splaygetbest(now, multi->timetree, &t);
     if(t) {
       /* assign 'data' to be the easy handle we just removed from the splay
          tree */
@@ -1858,17 +1852,19 @@ CURLMcode curl_multi_socket_all(CURLM *multi_handle, int *running_handles)
 static CURLMcode multi_timeout(struct Curl_multi *multi,
                                long *timeout_ms)
 {
+  static struct timeval tv_zero = {0,0};
+
   if(multi->timetree) {
     /* we have a tree of expire times */
     struct timeval now = Curl_tvnow();
 
     /* splay the lowest to the bottom */
-    multi->timetree = Curl_splay(0, multi->timetree);
+    multi->timetree = Curl_splay(tv_zero, multi->timetree);
 
-    /* At least currently, the splay key is a time_t for the expire time */
-    *timeout_ms = (multi->timetree->key - now.tv_sec) * 1000 -
-      now.tv_usec/1000;
-    if(*timeout_ms < 0)
+    if(Curl_splaycomparekeys(multi->timetree->key, now) > 0)
+      /* some time left before expiration */
+      *timeout_ms = curlx_tvdiff(multi->timetree->key, now);
+    else
       /* 0 means immediately */
       *timeout_ms = 0;
   }
@@ -1908,7 +1904,7 @@ static int update_timer(struct Curl_multi *multi)
    * timeout we got the (relative) time-out time for. We can thus easily check
    * if this is the same (fixed) time as we got in a previous call and then
    * avoid calling the callback again. */
-  if(multi->timetree->key == multi->timer_lastcall)
+  if(Curl_splaycomparekeys(multi->timetree->key, multi->timer_lastcall) == 0)
     return 0;
 
   multi->timer_lastcall = multi->timetree->key;
@@ -2002,7 +1998,7 @@ void Curl_expire(struct SessionHandle *data, long milli)
 
   if(!milli) {
     /* No timeout, clear the time data. */
-    if(nowp->tv_sec) {
+    if(nowp->tv_sec || nowp->tv_usec) {
       /* Since this is an cleared time, we must remove the previous entry from
          the splay tree */
       rc = Curl_splayremovebyaddr(multi->timetree,
@@ -2030,7 +2026,7 @@ void Curl_expire(struct SessionHandle *data, long milli)
       set.tv_usec -= 1000000;
     }
 
-    if(nowp->tv_sec) {
+    if(nowp->tv_sec || nowp->tv_usec) {
       /* This means that the struct is added as a node in the splay tree.
          Compare if the new time is earlier, and only remove-old/add-new if it
          is. */
@@ -2054,7 +2050,7 @@ void Curl_expire(struct SessionHandle *data, long milli)
           (long)nowp->tv_sec, (long)nowp->tv_usec, milli);
 #endif
     data->state.timenode.payload = data;
-    multi->timetree = Curl_splayinsert((int)nowp->tv_sec,
+    multi->timetree = Curl_splayinsert(*nowp,
                                        multi->timetree,
                                        &data->state.timenode);
   }
