@@ -1,5 +1,12 @@
   Changelog for the c-ares project
 
+* May 7 2008 (Daniel Stenberg)
+
+- Doug Goldstein provided a configure patch: updates autoconf 2.13 usage to
+  autoconf 2.57 usage (which is the version you have specified as the minimum
+  version). It's a minor change but it does clean up some warnings with newer
+  autoconf (specifically 2.62).
+
 * May 5 2008 (Yang Tse)
 
 - Improved parsing of resolver configuration files.

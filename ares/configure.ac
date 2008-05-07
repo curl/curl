@@ -1,11 +1,9 @@
-
-dnl Process this file with autoconf to produce a configure script.
+AC_INIT([c-ares],[1.5.1],[daniel@haxx.se])
 AC_PREREQ(2.57)
-AC_INIT(ares_init.c)
 AC_CONFIG_SRCDIR([ares_ipv6.h])
-AM_CONFIG_HEADER(config.h)
+AM_CONFIG_HEADER([config.h])
 AM_MAINTAINER_MODE
-AM_INIT_AUTOMAKE(c-ares, CVS)
+AM_INIT_AUTOMAKE
 
 dnl
 dnl Detect the canonical host and target build environment
@@ -17,6 +15,8 @@ AC_DEFINE_UNQUOTED(OS, "${host}", [cpu-machine-OS])
 
 AC_AIX
 AC_PROG_CC
+AC_PROG_CC_STDC
+AM_PROG_CC_C_O
 AC_PROG_INSTALL
 
 case $host_os in
@@ -851,4 +851,5 @@ if test -n "$RANDOM_FILE" && test X"$RANDOM_FILE" != Xno ; then
         [a suitable file/device to read random data from])
 fi
 
-AC_OUTPUT(Makefile libcares.pc)
+AC_CONFIG_FILES([Makefile libcares.pc])
+AC_OUTPUT
