@@ -29,6 +29,9 @@
 #include <unistd.h>
 #endif
 #endif
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
