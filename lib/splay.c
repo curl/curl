@@ -349,9 +349,9 @@ void Curl_splayprint(struct Curl_tree * t, int d, char output)
 
   if(output) {
 #ifdef TEST_SPLAY
-    printf("%ld[%d]", t->key.tv_usec, i);
+    printf("%ld[%d]", (long)t->key.tv_usec, i);
 #else
-    printf("%ld.%ld[%d]", t->key.tv_sec, t->key.tv_usec, i);
+    printf("%ld.%ld[%d]", (long)t->key.tv_sec, (long)t->key.tv_usec, i);
 #endif
   }
 
