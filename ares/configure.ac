@@ -383,6 +383,7 @@ AC_CHECK_HEADERS(
        netinet/tcp.h \
        net/if.h \
        errno.h \
+       strings.h \
        stdbool.h \
        arpa/nameser.h \
        arpa/nameser_compat.h \
