@@ -7,6 +7,11 @@
                                   Changelog
 
 
+Daniel Stenberg (9 May 2008)
+- Stefan Krause reported a busy-looping case when using the multi interface
+  and doing CONNECT to a proxy. The app would then busy-loop until the proxy
+  completed its response.
+
 Michal Marek (9 May 2008)
 - Make Curl_write and it's callees accept a const pointer, in preparation
   of tetetest's patch for curl_easy_send()

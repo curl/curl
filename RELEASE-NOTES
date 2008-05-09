@@ -32,6 +32,7 @@ This release includes the following bugfixes:
  o configure detecting debug-enabled c-ares
  o microsecond resolution keys for internal splay trees
  o krb4 and krb5 ftp segfault
+ o multi interface busy loop for CONNECT requests
 
 This release includes the following known bugs:
 
