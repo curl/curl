@@ -106,7 +106,7 @@ ifndef USE_LDAP_OPENLDAP
 curl_LDADD += -lwldap32
 endif
 endif
-curl_LDADD += -lws2_32 -lwinmm
+curl_LDADD += -lws2_32
 COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
 
 # Makefile.inc provides the check_PROGRAMS and COMPLICATED_EXAMPLES defines

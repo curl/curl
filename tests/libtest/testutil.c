@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,68 +25,69 @@
 
 #include "testutil.h"
 
-#ifndef HAVE_GETTIMEOFDAY
+#if defined(WIN32) && !defined(MSDOS)
 
-#ifdef WIN32
-#include <mmsystem.h>
-
-static int gettimeofday(struct timeval *tp, void *nothing)
-{
-#ifdef WITHOUT_MM_LIB
-  SYSTEMTIME st;
-  time_t tt;
-  struct tm tmtm;
-  /* mktime converts local to UTC */
-  GetLocalTime (&st);
-  tmtm.tm_sec = st.wSecond;
-  tmtm.tm_min = st.wMinute;
-  tmtm.tm_hour = st.wHour;
-  tmtm.tm_mday = st.wDay;
-  tmtm.tm_mon = st.wMonth - 1;
-  tmtm.tm_year = st.wYear - 1900;
-  tmtm.tm_isdst = -1;
-  tt = mktime (&tmtm);
-  tp->tv_sec = tt;
-  tp->tv_usec = st.wMilliseconds * 1000;
-#else
-  /**
-   ** The earlier time calculations using GetLocalTime
-   ** had a time resolution of 10ms.The timeGetTime, part
-   ** of multimedia apis offer a better time resolution
-   ** of 1ms.Need to link against winmm.lib for this
-   **/
-  unsigned long Ticks = 0;
-  unsigned long Sec =0;
-  unsigned long Usec = 0;
-  Ticks = timeGetTime();
-
-  Sec = Ticks/1000;
-  Usec = (Ticks - (Sec*1000))*1000;
-  tp->tv_sec = Sec;
-  tp->tv_usec = Usec;
-#endif /* WITHOUT_MM_LIB */
-  (void)nothing;
-  return 0;
-}
-#else /* WIN32 */
-/* non-win32 version of Curl_gettimeofday() */
-static int gettimeofday(struct timeval *tp, void *nothing)
-{
-  (void)nothing; /* we don't support specific time-zones */
-  tp->tv_sec = (long)time(NULL);
-  tp->tv_usec = 0;
-  return 0;
-}
-#endif /* WIN32 */
-#endif /* HAVE_GETTIMEOFDAY */
-
-/* Return the current time in a timeval struct */
 struct timeval tutil_tvnow(void)
 {
+  /*
+  ** GetTickCount() is available on _all_ Windows versions from W95 up
+  ** to nowadays. Returns milliseconds elapsed since last system boot,
+  ** increases monotonically and wraps once 49.7 days have elapsed.
+  */
+  struct timeval now;
+  DWORD milliseconds = GetTickCount();
+  now.tv_sec = milliseconds / 1000;
+  now.tv_usec = (milliseconds % 1000) * 1000;
+  return now;
+}
+
+#elif defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_MONOTONIC)
+
+struct timeval tutil_tvnow(void)
+{
+  /*
+  ** clock_gettime() is granted to be increased monotonically when the
+  ** monotonic clock is queried. Time starting point is unspecified, it
+  ** could be the system start-up time, the Epoch, or something else,
+  ** in any case the time starting point does not change once that the
+  ** system has started up.
+  */
+  struct timeval now;
+  struct timespec tsnow;
+  (void)clock_gettime(CLOCK_MONOTONIC, &tsnow)
+  now.tv_sec = tsnow.tv_sec;
+  now.tv_usec = tsnow.tv_nsec / 1000;
+  return now;
+}
+
+#elif defined(HAVE_GETTIMEOFDAY)
+
+struct timeval tutil_tvnow(void)
+{
+  /*
+  ** gettimeofday() is not granted to be increased monotonically, due to
+  ** clock drifting and external source time synchronization it can jump
+  ** forward or backward in time.
+  */
   struct timeval now;
   (void)gettimeofday(&now, NULL);
   return now;
 }
+
+#else
+
+struct timeval tutil_tvnow(void)
+{
+  /*
+  ** time() returns the value of time in seconds since the Epoch.
+  */
+  struct timeval now;
+  now.tv_sec = (long)time(NULL);
+  now.tv_usec = 0;
+  return now;
+}
+
+#endif
 
 /*
  * Make sure that the first argument is the more recent time, as otherwise

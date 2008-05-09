@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Yang Tse (9 May 2008)
+- Internal time differences now use monotonic time source if available.
+  This also implies the removal of the winmm.lib dependency for WIN32.
+
 Daniel Stenberg (9 May 2008)
 - Stefan Krause reported a busy-looping case when using the multi interface
   and doing CONNECT to a proxy. The app would then busy-loop until the proxy

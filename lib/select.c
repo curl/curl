@@ -184,7 +184,7 @@ int Curl_socket_ready(curl_socket_t readfd, curl_socket_t writefd,
     return r;
   }
 
-  /* Avoid initial timestamp, avoid gettimeofday() call, when elapsed
+  /* Avoid initial timestamp, avoid curlx_tvnow() call, when elapsed
      time in this function does not need to be measured. This happens
      when function is called with a zero timeout or a negative timeout
      value indicating a blocking call should be performed. */
@@ -368,7 +368,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
     return r;
   }
 
-  /* Avoid initial timestamp, avoid gettimeofday() call, when elapsed
+  /* Avoid initial timestamp, avoid curlx_tvnow() call, when elapsed
      time in this function does not need to be measured. This happens
      when function is called with a zero timeout or a negative timeout
      value indicating a blocking call should be performed. */

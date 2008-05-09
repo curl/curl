@@ -239,7 +239,7 @@ Linker Links
 checked.
 
 3- Include in the white space immediately below the box referred in 2 -lcurl
--lws2_32 -lwinmm.
+-lws2_32.
 
 SSL Files
 ---------
