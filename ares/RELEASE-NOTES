@@ -1,6 +1,7 @@
 This is what's new and changed in the c-ares 1.5.2 release:
 
  o improved parsing of resolver configuration files
+ o use monotonic time source if available
 
 Thanks go to these friendly people for their efforts and contributions:
 

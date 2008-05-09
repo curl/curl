@@ -384,6 +384,7 @@ AC_CHECK_HEADERS(
        errno.h \
        strings.h \
        stdbool.h \
+       time.h \
        arpa/nameser.h \
        arpa/nameser_compat.h \
        arpa/inet.h,
@@ -643,6 +644,7 @@ AC_CHECK_MEMBER(struct addrinfo.ai_flags,
 
 AC_CHECK_FUNCS( bitncmp \
                 gettimeofday \
+                clock_gettime \
                 if_indextoname,
 dnl if found
 [],

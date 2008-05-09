@@ -62,6 +62,7 @@ OBJECTS = $(OBJ_DIR)\ares_fds.obj              \
           $(OBJ_DIR)\ares_init.obj             \
           $(OBJ_DIR)\ares_llist.obj            \
           $(OBJ_DIR)\ares_timeout.obj          \
+          $(OBJ_DIR)\ares__timeval.obj         \
           $(OBJ_DIR)\ares_destroy.obj          \
           $(OBJ_DIR)\ares_mkquery.obj          \
           $(OBJ_DIR)\ares_version.obj          \
@@ -122,7 +123,6 @@ $(DEF_FILE): $(OBJECTS) Makefile.VC6
        @echo   ares_inet_pton         >> $@
        @echo   ares_writev            >> $@
        @echo   ares_getnameinfo       >> $@
-       @echo   ares_gettimeofday      >> $@
        @echo   ares_parse_aaaa_reply  >> $@
 
 ahost.exe: $(OBJ_DIR) $(OBJ_DIR)\ahost.obj $(OBJ_DIR)\ares_getopt.obj cares_imp.lib
@@ -191,6 +191,9 @@ $(OBJ_DIR)\ares_init.obj: ares_init.c setup.h setup_once.h nameser.h ares.h    \
   ares_private.h ares_ipv6.h inet_net_pton.h
 
 $(OBJ_DIR)\ares_timeout.obj: ares_timeout.c setup.h setup_once.h ares.h        \
+  ares_private.h ares_ipv6.h
+
+$(OBJ_DIR)\ares__timeval.obj: ares__timeval.c setup.h setup_once.h ares.h      \
   ares_private.h ares_ipv6.h
 
 $(OBJ_DIR)\ares_destroy.obj: ares_destroy.c setup.h setup_once.h ares.h        \

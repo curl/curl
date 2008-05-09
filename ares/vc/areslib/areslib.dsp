@@ -97,6 +97,10 @@ SOURCE=..\..\ares__read_line.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\ares__timeval.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\ares_cancel.c
 # End Source File
 # Begin Source File

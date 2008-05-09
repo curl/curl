@@ -1,5 +1,9 @@
   Changelog for the c-ares project
 
+* May 9 2008 (Yang Tse)
+
+- Use monotonic time source if available, for private function ares__tvnow()
+
 * May 7 2008 (Daniel Stenberg)
 
 - Sebastian made c-ares able to return all PTR-records when doing reverse
