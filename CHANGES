@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Michal Marek (9 May 2008)
+- Make Curl_write and it's callees accept a const pointer, in preparation
+  of tetetest's patch for curl_easy_send()
+
 Daniel Stenberg (7 May 2008)
 - Liam Healy filed the debian bug report #480044
   (http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=480044) identifying a

@@ -151,17 +151,20 @@ krb4_overhead(void *app_data, int level, int len)
 }
 
 static int
-krb4_encode(void *app_data, void *from, int length, int level, void **to,
+krb4_encode(void *app_data, const void *from, int length, int level, void **to,
             struct connectdata *conn)
 {
   struct krb4_data *d = app_data;
   *to = malloc(length + 31);
   if(level == prot_safe)
-    return krb_mk_safe(from, *to, length, &d->key,
+    /* NOTE that the void* cast is safe, krb_mk_safe/priv don't modify the
+     * input buffer
+     */
+    return krb_mk_safe((void*)from, *to, length, &d->key,
                        (struct sockaddr_in *)LOCAL_ADDR,
                        (struct sockaddr_in *)REMOTE_ADDR);
   else if(level == prot_private)
-    return krb_mk_priv(from, *to, length, d->schedule, &d->key,
+    return krb_mk_priv((void*)from, *to, length, d->schedule, &d->key,
                        (struct sockaddr_in *)LOCAL_ADDR,
                        (struct sockaddr_in *)REMOTE_ADDR);
   else

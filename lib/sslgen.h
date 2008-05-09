@@ -44,7 +44,7 @@ CURLcode Curl_ssl_set_engine(struct SessionHandle *data, const char *engine);
 CURLcode Curl_ssl_set_engine_default(struct SessionHandle *data);
 ssize_t Curl_ssl_send(struct connectdata *conn,
                       int sockindex,
-                      void *mem,
+                      const void *mem,
                       size_t len);
 ssize_t Curl_ssl_recv(struct connectdata *conn, /* connection data */
                       int sockindex,            /* socketindex */

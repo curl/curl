@@ -578,7 +578,7 @@ struct curl_slist *Curl_ssl_engines_list(struct SessionHandle *data)
 /* return number of sent (non-SSL) bytes */
 ssize_t Curl_ssl_send(struct connectdata *conn,
                       int sockindex,
-                      void *mem,
+                      const void *mem,
                       size_t len)
 {
 #ifdef USE_SSLEAY

@@ -237,7 +237,7 @@ Curl_sec_read(struct connectdata *conn, int fd, void *buffer, int length)
 }
 
 static int
-sec_send(struct connectdata *conn, int fd, char *from, int length)
+sec_send(struct connectdata *conn, int fd, const char *from, int length)
 {
   int bytes;
   void *buf;
@@ -292,7 +292,7 @@ Curl_sec_fflush_fd(struct connectdata *conn, int fd)
 }
 
 int
-Curl_sec_write(struct connectdata *conn, int fd, char *buffer, int length)
+Curl_sec_write(struct connectdata *conn, int fd, const char *buffer, int length)
 {
   int len = conn->buffer_size;
   int tx = 0;
@@ -315,7 +315,7 @@ Curl_sec_write(struct connectdata *conn, int fd, char *buffer, int length)
 }
 
 ssize_t
-Curl_sec_send(struct connectdata *conn, int num, char *buffer, int length)
+Curl_sec_send(struct connectdata *conn, int num, const char *buffer, int length)
 {
   curl_socket_t fd = conn->sock[num];
   return (ssize_t)Curl_sec_write(conn, fd, buffer, length);

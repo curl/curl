@@ -312,7 +312,7 @@ CURLcode Curl_sendf(curl_socket_t sockfd, struct connectdata *conn,
 
 static ssize_t send_plain(struct connectdata *conn,
                           int num,
-                          void *mem,
+                          const void *mem,
                           size_t len)
 {
   curl_socket_t sockfd = conn->sock[num];
@@ -347,7 +347,7 @@ static ssize_t send_plain(struct connectdata *conn,
  */
 CURLcode Curl_write(struct connectdata *conn,
                     curl_socket_t sockfd,
-                    void *mem,
+                    const void *mem,
                     size_t len,
                     ssize_t *written)
 {

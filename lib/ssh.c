@@ -2199,7 +2199,7 @@ static CURLcode scp_done(struct connectdata *conn, CURLcode status,
 
 /* return number of received (decrypted) bytes */
 ssize_t Curl_scp_send(struct connectdata *conn, int sockindex,
-                      void *mem, size_t len)
+                      const void *mem, size_t len)
 {
   ssize_t nwrite;
   (void)sockindex; /* we only support SCP on the fixed known primary socket */
@@ -2347,7 +2347,7 @@ static CURLcode sftp_done(struct connectdata *conn, CURLcode status,
 
 /* return number of sent bytes */
 ssize_t Curl_sftp_send(struct connectdata *conn, int sockindex,
-                       void *mem, size_t len)
+                       const void *mem, size_t len)
 {
   ssize_t nwrite;   /* libssh2_sftp_write() used to return size_t in 0.14
                        but is changed to ssize_t in 0.15. These days we don't

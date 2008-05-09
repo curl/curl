@@ -1872,7 +1872,7 @@ Curl_ossl_connect(struct connectdata *conn,
 /* return number of sent (non-SSL) bytes */
 ssize_t Curl_ossl_send(struct connectdata *conn,
                        int sockindex,
-                       void *mem,
+                       const void *mem,
                        size_t len)
 {
   /* SSL_write() is said to return 'int' while write() and send() returns
