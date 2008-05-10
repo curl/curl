@@ -260,6 +260,11 @@ fi
 dnl socket lib?
 AC_CHECK_FUNC(connect, , [ AC_CHECK_LIB(socket, connect) ])
 
+dnl **********************************************************************
+dnl Check for libraries needed for function clock_gettime
+dnl **********************************************************************
+CURL_CHECK_LIBS_CLOCK_GETTIME
+
 AC_MSG_CHECKING([whether to use libgcc])
 AC_ARG_ENABLE(libgcc,
 AC_HELP_STRING([--enable-libgcc],[use libgcc when linking]),
@@ -644,7 +649,6 @@ AC_CHECK_MEMBER(struct addrinfo.ai_flags,
 
 AC_CHECK_FUNCS( bitncmp \
                 gettimeofday \
-                clock_gettime \
                 if_indextoname,
 dnl if found
 [],

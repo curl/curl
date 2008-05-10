@@ -568,6 +568,11 @@ dnl socket lib?
 AC_CHECK_FUNC(connect, , [ AC_CHECK_LIB(socket, connect) ])
 
 dnl **********************************************************************
+dnl Check for libraries needed for function clock_gettime
+dnl **********************************************************************
+CURL_CHECK_LIBS_CLOCK_GETTIME
+
+dnl **********************************************************************
 dnl The preceding library checks are all potentially useful for test
 dnl servers (for providing networking support).  Save the list of required
 dnl libraries at this point for use while linking those test servers.
@@ -1976,7 +1981,6 @@ AC_CHECK_FUNCS( strtoll \
                 strcmpi \
                 gethostbyaddr \
                 gettimeofday \
-                clock_gettime \
                 inet_addr \
                 inet_ntoa \
                 inet_pton \
