@@ -54,7 +54,7 @@ struct timeval tutil_tvnow(void)
   */
   struct timeval now;
   struct timespec tsnow;
-  (void)clock_gettime(CLOCK_MONOTONIC, &tsnow)
+  (void)clock_gettime(CLOCK_MONOTONIC, &tsnow);
   now.tv_sec = tsnow.tv_sec;
   now.tv_usec = tsnow.tv_nsec / 1000;
   return now;
