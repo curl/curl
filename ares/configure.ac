@@ -261,9 +261,10 @@ dnl socket lib?
 AC_CHECK_FUNC(connect, , [ AC_CHECK_LIB(socket, connect) ])
 
 dnl **********************************************************************
-dnl Check for libraries needed for function clock_gettime
+dnl In case that function clock_gettime with monotonic timer is available,
+dnl check for additional required libraries.
 dnl **********************************************************************
-CURL_CHECK_LIBS_CLOCK_GETTIME
+CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC
 
 AC_MSG_CHECKING([whether to use libgcc])
 AC_ARG_ENABLE(libgcc,

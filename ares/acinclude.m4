@@ -1283,29 +1283,16 @@ AC_DEFUN([TYPE_IN_ADDR_T],
   ]) dnl AC_CHECK_TYPE
 ]) dnl AC_DEFUN
 
-dnl CURL_CHECK_LIBS_CLOCK_GETTIME
+dnl CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC
 dnl -------------------------------------------------
-dnl Check for libraries needed for clock_gettime,
-dnl and prepended to LIBS any needed libraries.
+dnl Check if monotonic clock_gettime is available.
 
-AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME], [
+AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
   AC_REQUIRE([AC_HEADER_TIME])dnl
   AC_CHECK_HEADERS(sys/types.h sys/time.h time.h)
-  #
-  AC_MSG_CHECKING([for clock_gettime in libraries])
-  #
-  curl_cv_save_LIBS="$LIBS"
-  curl_cv_gclk_LIBS="unknown"
-  #
-  for x_xlibs in '' '-lrt' '-lposix4' ; do
-    if test -z "$x_xlibs"; then
-      LIBS="$curl_cv_save_LIBS"
-    else
-      LIBS="$x_xlibs $curl_cv_save_LIBS"
-    fi
-    AC_LINK_IFELSE([
-      AC_LANG_PROGRAM([
-#undef inline
+  AC_MSG_CHECKING([for monotonic clock_gettime])
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -1319,43 +1306,98 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME], [
 #include <time.h>
 #endif
 #endif
-      ],[
-        (void)clock_gettime(0, 0);
-      ])
     ],[
-       curl_cv_gclk_LIBS="$x_xlibs"
-       break
+      struct timespec ts;
+      (void)clock_gettime(CLOCK_MONOTONIC, &ts);
     ])
-  done
+  ],[
+    AC_MSG_RESULT([yes])
+    ac_cv_func_clock_gettime="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    ac_cv_func_clock_gettime="no"
+  ])
+  dnl Definition of HAVE_CLOCK_GETTIME_MONOTONIC is intentionally
+  dnl postponed until library linking checks for clock_gettime pass.
+]) dnl AC_DEFUN
+
+dnl CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC
+dnl -------------------------------------------------
+dnl If monotonic clock_gettime is available then,
+dnl check and prepended to LIBS any needed libraries.
+
+AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
+  AC_REQUIRE([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC])dnl
   #
-  LIBS="$curl_cv_save_LIBS"
-  #
-  case X-"$curl_cv_gclk_LIBS" in
-    X-unknown)
-      AC_MSG_RESULT([cannot find clock_gettime])
-      ac_cv_func_clock_gettime="no"
-      ;;
-    X-)
-      AC_MSG_RESULT([no additional lib required])
-      ac_cv_func_clock_gettime="yes"
-      ;;
-    *)
-      if test -z "$curl_cv_save_LIBS"; then
-        LIBS="$curl_cv_gclk_LIBS"
+  if test "$ac_cv_func_clock_gettime" = "yes"; then
+    #
+    AC_MSG_CHECKING([for clock_gettime in libraries])
+    #
+    curl_cv_save_LIBS="$LIBS"
+    curl_cv_gclk_LIBS="unknown"
+    #
+    for x_xlibs in '' '-lrt' '-lposix4' ; do
+      if test -z "$x_xlibs"; then
+        LIBS="$curl_cv_save_LIBS"
       else
-        LIBS="$curl_cv_gclk_LIBS $curl_cv_save_LIBS"
+        LIBS="$x_xlibs $curl_cv_save_LIBS"
       fi
-      AC_MSG_RESULT([$curl_cv_gclk_LIBS])
-      ac_cv_func_clock_gettime="yes"
-      ;;
-  esac
-  #
-  case "$ac_cv_func_clock_gettime" in
-    yes)
-      AC_DEFINE_UNQUOTED(HAVE_CLOCK_GETTIME, 1,
-        [Define to 1 if you have the clock_gettime function.])
-      ;;
-  esac
+      AC_LINK_IFELSE([
+        AC_LANG_PROGRAM([
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#ifdef TIME_WITH_SYS_TIME
+#include <time.h>
+#endif
+#else
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
+#endif
+        ],[
+          struct timespec ts;
+          (void)clock_gettime(CLOCK_MONOTONIC, &ts);
+        ])
+      ],[
+         curl_cv_gclk_LIBS="$x_xlibs"
+         break
+      ])
+    done
+    #
+    LIBS="$curl_cv_save_LIBS"
+    #
+    case X-"$curl_cv_gclk_LIBS" in
+      X-unknown)
+        AC_MSG_RESULT([cannot find clock_gettime])
+        AC_MSG_WARN([HAVE_CLOCK_GETTIME_MONOTONIC will not be defined])
+        ac_cv_func_clock_gettime="no"
+        ;;
+      X-)
+        AC_MSG_RESULT([no additional lib required])
+        ac_cv_func_clock_gettime="yes"
+        ;;
+      *)
+        if test -z "$curl_cv_save_LIBS"; then
+          LIBS="$curl_cv_gclk_LIBS"
+        else
+          LIBS="$curl_cv_gclk_LIBS $curl_cv_save_LIBS"
+        fi
+        AC_MSG_RESULT([$curl_cv_gclk_LIBS])
+        ac_cv_func_clock_gettime="yes"
+        ;;
+    esac
+    #
+    case "$ac_cv_func_clock_gettime" in
+      yes)
+        AC_DEFINE_UNQUOTED(HAVE_CLOCK_GETTIME_MONOTONIC, 1,
+          [Define to 1 if you have the clock_gettime function and monotonic timer.])
+        ;;
+    esac
+    #
+  fi
   #
 ]) dnl AC_DEFUN
 

@@ -41,7 +41,7 @@ struct timeval cutil_tvnow(void)
   return now;
 }
 
-#elif defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_MONOTONIC)
+#elif defined(HAVE_CLOCK_GETTIME_MONOTONIC)
 
 struct timeval cutil_tvnow(void)
 {
