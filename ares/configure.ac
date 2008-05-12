@@ -76,12 +76,16 @@ AM_CONDITIONAL(DEBUGBUILD, test x$debugbuild = xyes)
 dnl skip libtool C++ and Fortran compiler checks
 m4_ifdef([AC_PROG_CXX], [m4_undefine([AC_PROG_CXX])])
 m4_defun([AC_PROG_CXX],[])
+m4_ifdef([AC_PROG_CXXCPP], [m4_undefine([AC_PROG_CXXCPP])])
+m4_defun([AC_PROG_CXXCPP],[true])
 m4_ifdef([AC_PROG_F77], [m4_undefine([AC_PROG_F77])])
 m4_defun([AC_PROG_F77],[])
 
 dnl skip libtool C++ and Fortran linker checks
 m4_ifdef([AC_LIBTOOL_CXX], [m4_undefine([AC_LIBTOOL_CXX])])
 m4_defun([AC_LIBTOOL_CXX],[])
+m4_ifdef([AC_LIBTOOL_CXXCPP], [m4_undefine([AC_LIBTOOL_CXXCPP])])
+m4_defun([AC_LIBTOOL_CXXCPP],[true])
 m4_ifdef([AC_LIBTOOL_F77], [m4_undefine([AC_LIBTOOL_F77])])
 m4_defun([AC_LIBTOOL_F77],[])
 
