@@ -21,3 +21,4 @@ depcomp
 libcares.la
 missing
 ares_version.h.dist
+libcares.pc
