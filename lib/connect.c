@@ -92,6 +92,7 @@
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "inet_ntop.h"
 #include "inet_pton.h"
+#include "sslgen.h" /* for Curl_ssl_check_cxn() */
 
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -974,6 +975,49 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     *sockconn = sockfd;    /* the socket descriptor we've connected */
 
   data->info.numconnects++; /* to track the number of connections made */
+
+  return CURLE_OK;
+}
+
+/*
+ * Used to extract socket and connectdata struct for the most recent
+ * transfer on the given SessionHandle.
+ *
+ * The socket 'long' will be -1 in case of failure!
+ */
+CURLcode Curl_getconnectinfo(struct SessionHandle *data,
+                             long *param_longp,
+                             struct connectdata **connp)
+{
+  if((data->state.lastconnect != -1) &&
+     (data->state.connc->connects[data->state.lastconnect] != NULL)) {
+    struct connectdata *c =
+      data->state.connc->connects[data->state.lastconnect];
+    if(connp)
+      /* only store this if the caller cares for it */
+      *connp = c;
+    *param_longp = c->sock[FIRSTSOCKET];
+    /* we have a socket connected, let's determine if the server shut down */
+    /* determine if ssl */
+    if(c->ssl[FIRSTSOCKET].use) {
+      /* use the SSL context */
+      if(!Curl_ssl_check_cxn(c))
+        *param_longp = -1;   /* FIN received */
+    }
+/* Minix 3.1 doesn't support any flags on recv; just assume socket is OK */
+#ifdef MSG_PEEK
+    else {
+      /* use the socket */
+      char buf;
+      if(recv((RECV_TYPE_ARG1)c->sock[FIRSTSOCKET], (RECV_TYPE_ARG2)&buf,
+              (RECV_TYPE_ARG3)1, (RECV_TYPE_ARG4)MSG_PEEK) == 0) {
+        *param_longp = -1;   /* FIN received */
+      }
+    }
+#endif
+  }
+  else
+    *param_longp = -1;
 
   return CURLE_OK;
 }

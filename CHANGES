@@ -7,6 +7,12 @@
                                   Changelog
 
 
+Daniel Stenberg (9 May 2008)
+- Introducing curl_easy_send() and curl_easy_recv(). They can be used to send
+  and receive data over a connection previously setup with curl_easy_perform()
+  and its CURLOPT_CONNECT_ONLY option. The sendrecv.c example was added to
+  show how they can be used.
+
 Yang Tse (9 May 2008)
 - Internal time differences now use monotonic time source if available.
   This also implies the removal of the winmm.lib dependency for WIN32.

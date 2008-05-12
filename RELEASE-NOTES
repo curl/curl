@@ -3,8 +3,8 @@ Curl and libcurl 7.18.2
  Public curl releases:         105
  Command line options:         126
  curl_easy_setopt() options:   150
- Public functions in libcurl:  56
- Public web site mirrors:      39
+ Public functions in libcurl:  58
+ Public web site mirrors:      37
  Known libcurl bindings:       36
  Contributors:                 636
 
@@ -14,6 +14,7 @@ This release includes the following changes:
  o CURLOPT_NOBODY is now supported over SFTP
  o curl can now run on Symbian OS
  o curl -w redirect_url and CURLINFO_REDIRECT_URL
+ o added curl_easy_send() and curl_easy_recv()
 
 This release includes the following bugfixes:
 

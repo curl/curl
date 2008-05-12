@@ -261,6 +261,9 @@ curl_easy_strerror(CURLcode error)
   case CURLE_SSH:
     return "Error in the SSH layer";
 
+  case CURLE_AGAIN:
+    return "Socket not ready for send/recv";
+
     /* error codes not used by current libcurl */
   case CURLE_OBSOLETE4:
   case CURLE_OBSOLETE10:

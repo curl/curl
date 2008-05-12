@@ -447,6 +447,8 @@ typedef enum {
 
   CURLE_SSL_SHUTDOWN_FAILED,     /* 80 - Failed to shut down the SSL
                                     connection */
+  CURLE_AGAIN,                   /* 81 - socket is not ready for send/recv,
+                                    wait till it's ready and try again */
   CURL_LAST /* never use! */
 } CURLcode;
 

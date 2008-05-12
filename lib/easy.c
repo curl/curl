@@ -83,6 +83,7 @@
 #include "easyif.h"
 #include "select.h"
 #include "sendf.h" /* for failf function prototype */
+#include "connect.h" /* for Curl_getconnectinfo */
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -1056,3 +1057,98 @@ CURLcode Curl_convert_from_utf8(struct SessionHandle *data,
 }
 
 #endif /* CURL_DOES_CONVERSIONS */
+
+static CURLcode easy_connection(struct SessionHandle *data,
+                                curl_socket_t *sfd,
+                                struct connectdata **connp)
+{
+  CURLcode ret;
+  long sockfd;
+
+  if(data == NULL)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  /* only allow these to be called on handles with CURLOPT_CONNECT_ONLY */
+  if(!data->set.connect_only) {
+    failf(data, "CONNECT_ONLY is required!");
+    return CURLE_UNSUPPORTED_PROTOCOL;
+  }
+
+  ret = Curl_getconnectinfo(data, &sockfd, connp);
+  if(ret != CURLE_OK)
+    return ret;
+
+  if(sockfd == -1) {
+    failf(data, "Failed to get recent socket");
+    return CURLE_UNSUPPORTED_PROTOCOL;
+  }
+
+  *sfd = (curl_socket_t)sockfd; /* we know that this is actually a socket
+                                   descriptor so the typecast is fine here */
+
+  return CURLE_OK;
+}
+
+/*
+ * Receives data from the connected socket. Use after successful
+ * curl_easy_perform() with CURLOPT_CONNECT_ONLY option.
+ * Returns CURLE_OK on success, error code on error.
+ */
+CURLcode curl_easy_recv(CURL *curl, void *buffer, size_t buflen, size_t *n)
+{
+  curl_socket_t sfd;
+  CURLcode ret;
+  int ret1;
+  ssize_t n1;
+  struct connectdata *c;
+  struct SessionHandle *data = (struct SessionHandle *)curl;
+
+  ret = easy_connection(data, &sfd, &c);
+  if(ret)
+    return ret;
+
+  *n = 0;
+  ret1 = Curl_read(c, sfd, buffer, buflen, &n1);
+
+  if(ret1 == -1)
+    return CURLE_AGAIN;
+
+  if(n1 == -1)
+    return CURLE_RECV_ERROR;
+
+  *n = (size_t)n1;
+
+  return CURLE_OK;
+}
+
+/*
+ * Sends data over the connected socket. Use after successful
+ * curl_easy_perform() with CURLOPT_CONNECT_ONLY option.
+ */
+CURLcode curl_easy_send(CURL *curl, const void *buffer, size_t buflen,
+                        size_t *n)
+{
+  curl_socket_t sfd;
+  CURLcode ret;
+  ssize_t n1;
+  struct connectdata *c = NULL;
+  struct SessionHandle *data = (struct SessionHandle *)curl;
+
+  ret = easy_connection(data, &sfd, &c);
+  if(ret)
+    return ret;
+
+  *n = 0;
+  ret = Curl_write(c, sfd, buffer, buflen, &n1);
+
+  if(n1 == -1)
+    return CURLE_SEND_ERROR;
+
+  /* detect EAGAIN */
+  if((CURLE_OK == ret) && (0 == n1))
+    return CURLE_AGAIN;
+
+  *n = (size_t)n1;
+
+  return ret;
+}
