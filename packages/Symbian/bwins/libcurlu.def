@@ -55,4 +55,6 @@ EXPORTS
 	curl_unescape @ 54 NONAME
 	curl_version @ 55 NONAME
 	curl_version_info @ 56 NONAME
+	curl_easy_recv @ 57 NONAME
+	curl_easy_send @ 58 NONAME
 

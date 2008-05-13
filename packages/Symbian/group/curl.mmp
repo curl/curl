@@ -6,13 +6,13 @@ TARGET        curl.exe
 TARGETTYPE    exe
 UID           0x00000000 0xF0206442
 
-SOURCEPATH	..\..\..\src
+SOURCEPATH  ../../../src
 SOURCE \
     main.c hugehelp.c urlglob.c writeout.c writeenv.c \
-	getpass.c homedir.c curlutil.c
+    getpass.c homedir.c curlutil.c
 
-SYSTEMINCLUDE ..\..\..\include ..\..\..\lib ..\..\..\include\curl \
-			\epoc32\include \epoc32\include\stdapis
+SYSTEMINCLUDE ../../../include ../../../lib ../../../include/curl \
+            /epoc32/include /epoc32/include/stdapis
 
 LIBRARY       euser.lib libc.lib libcurl.lib
 STATICLIBRARY libcrt0.lib

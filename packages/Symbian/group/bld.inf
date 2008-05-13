@@ -3,5 +3,5 @@
 //
 
 PRJ_MMPFILES
-		libcurl.mmp
-		curl.mmp
+        libcurl.mmp
+        curl.mmp

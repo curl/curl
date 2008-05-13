@@ -34,38 +34,39 @@ console, and stderr goes to the epocwind.out file (on the emulator).
 The standard curl options -o, --stderr and --trace-ascii can be used to
 redirect output to a file (or stdout) instead.
 
-P.I.P.S. doesn't inherit the current working directory at startup, so you
-may need to use the -o option to specify a specific location to store a
-downloaded file.
+P.I.P.S. doesn't inherit the current working directory at startup, so the
+-O option probably won't work as expected, and giving the complete paths
+to files will be necessary.
 
 P.I.P.S. provides no way to disable echoing of characters as they are
 entered, so passwords typed in on the console will be visible.
 
 All screen output disappears after curl exits, so after a transfer completes,
-curl waits by default for Enter to pressed before exiting.  This behaviour
+curl waits by default for Enter to be pressed before exiting.  This behaviour
 is suppressed when the -s option is given.
 
-The "home directory" in Symbian is C:\Private\f0206442\. The .curlrc is read
-from this directory on startup.
+curl's "home directory" in Symbian is C:\Private\f0206442\. The .curlrc file
+is read from this directory on startup.
 
 libcurl notes
 -------------
-libcurl uses writeable static data, so the EPOCALLOWDLLDATA option is
+libcurl uses writable static data, so the EPOCALLOWDLLDATA option is
 used in its MMP file, with the corresponding additional memory usage
 and limitations on the Windows emulator.
 
-curl_global_init() *must* be called before any libcurl functions that could
-allocate memory (like curl_getenv()).
+curl_global_init() *must* be called (either explicitly or implicitly through
+calling certain other libcurl functions) before any libcurl functions
+that could allocate memory (like curl_getenv()).
 
 P.I.P.S. doesn't support signals or the alarm() call, so some timeouts
 (such as the connect timeout) are not honoured.
 
-P.I.P.S. causes a USER:87 panic if a timeout much longer than half an hour
-is selected. 
+P.I.P.S. causes a USER:87 panic if certain timeouts much longer than
+half an hour are selected.
 
-SSL/TLS encryption is not supported.
+SSL/TLS encryption is not supported, nor are LDAP, SCP or SFTP URLs.
 
 
 Dan Fandrich
 dan@coneharvesters.com
-April 2008
+May 2008
