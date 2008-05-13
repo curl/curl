@@ -7,6 +7,9 @@
                                   Changelog
 
 
+Daniel Stenberg (13 May 2008)
+- Added test case 556 that uses curl_easy_send() and curl_easy_recv()
+
 Daniel Stenberg (9 May 2008)
 - Introducing curl_easy_send() and curl_easy_recv(). They can be used to send
   and receive data over a connection previously setup with curl_easy_perform()
