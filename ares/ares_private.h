@@ -4,6 +4,7 @@
 /* $Id$ */
 
 /* Copyright 1998 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2004-2008 by Daniel Stenberg
  *
  * Permission to use, copy, modify, and distribute this
  * software and its documentation for any purpose and without
@@ -48,7 +49,7 @@
 #include <time.h>
 #endif
 
-#define DEFAULT_TIMEOUT         5
+#define DEFAULT_TIMEOUT         5000 /* milliseconds */
 #define DEFAULT_TRIES           4
 #ifndef INADDR_NONE
 #define INADDR_NONE 0xffffffff
@@ -149,7 +150,7 @@ struct server_state {
 struct query {
   /* Query ID from qbuf, for faster lookup, and current timeout */
   unsigned short qid;
-  time_t timeout;
+  struct timeval timeout;
 
   /*
    * Links for the doubly-linked lists in which we insert a query.
@@ -217,7 +218,7 @@ typedef struct rc4_key
 struct ares_channeldata {
   /* Configuration data */
   int flags;
-  int timeout;
+  int timeout; /* in milliseconds */
   int tries;
   int ndots;
   int udp_port;
@@ -242,7 +243,8 @@ struct ares_channeldata {
   /* Generation number to use for the next TCP socket open/close */
   int tcp_connection_generation;
 
-  /* The time at which we last called process_timeouts() */
+  /* The time at which we last called process_timeouts(). Uses integer seconds
+     just to draw the line somewhere. */
   time_t last_timeout_processed;
 
   /* Circular, doubly-linked list of queries, bucketed various ways.... */
@@ -259,8 +261,18 @@ struct ares_channeldata {
   void *sock_state_cb_data;
 };
 
+/* return true if now is exactly check time or later */
+int ares__timedout(struct timeval *now,
+                   struct timeval *check);
+/* add the specific number of milliseconds to the time in the first argument */
+int ares__timeadd(struct timeval *now,
+                  int millisecs);
+/* return time offset between now and (future) check, in milliseconds */
+int ares__timeoffset(struct timeval *now,
+                     struct timeval *check);
 void ares__rc4(rc4_key* key,unsigned char *buffer_ptr, int buffer_len);
-void ares__send_query(ares_channel channel, struct query *query, time_t now);
+void ares__send_query(ares_channel channel, struct query *query,
+                      struct timeval *now);
 void ares__close_sockets(ares_channel channel, struct server_state *server);
 int ares__get_hostent(FILE *fp, int family, struct hostent **host);
 int ares__read_line(FILE *fp, char **buf, int *bufsize);

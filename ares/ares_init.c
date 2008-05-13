@@ -1,6 +1,7 @@
 /* $Id$ */
 
 /* Copyright 1998 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2007-2008 by Daniel Stenberg
  *
  * Permission to use, copy, modify, and distribute this
  * software and its documentation for any purpose and without
@@ -254,13 +255,16 @@ int ares_save_options(ares_channel channel, struct ares_options *options,
   if (!ARES_CONFIG_CHECK(channel))
     return ARES_ENODATA;
 
-  (*optmask) = (ARES_OPT_FLAGS|ARES_OPT_TIMEOUT|ARES_OPT_TRIES|ARES_OPT_NDOTS|
+  (*optmask) = (ARES_OPT_FLAGS|ARES_OPT_TRIES|ARES_OPT_NDOTS|
                 ARES_OPT_UDP_PORT|ARES_OPT_TCP_PORT|ARES_OPT_SOCK_STATE_CB|
                 ARES_OPT_SERVERS|ARES_OPT_DOMAINS|ARES_OPT_LOOKUPS|
-                ARES_OPT_SORTLIST);
+                ARES_OPT_SORTLIST|ARES_OPT_TIMEOUTMS);
 
   /* Copy easy stuff */
   options->flags   = channel->flags;
+
+  /* We return full millisecond resolution but that's only because we don't
+     set the ARES_OPT_TIMEOUT anymore, only the new ARES_OPT_TIMEOUTMS */
   options->timeout = channel->timeout;
   options->tries   = channel->tries;
   options->ndots   = channel->ndots;
@@ -328,8 +332,10 @@ static int init_by_options(ares_channel channel,
   /* Easy stuff. */
   if ((optmask & ARES_OPT_FLAGS) && channel->flags == -1)
     channel->flags = options->flags;
-  if ((optmask & ARES_OPT_TIMEOUT) && channel->timeout == -1)
+  if ((optmask & ARES_OPT_TIMEOUTMS) && channel->timeout == -1)
     channel->timeout = options->timeout;
+  else if ((optmask & ARES_OPT_TIMEOUT) && channel->timeout == -1)
+    channel->timeout = options->timeout * 1000;
   if ((optmask & ARES_OPT_TRIES) && channel->tries == -1)
     channel->tries = options->tries;
   if ((optmask & ARES_OPT_NDOTS) && channel->ndots == -1)

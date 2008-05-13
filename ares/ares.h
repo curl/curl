@@ -1,6 +1,7 @@
 /* $Id$ */
 
 /* Copyright 1998 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2007 by Daniel Stenberg
  *
  * Permission to use, copy, modify, and distribute this
  * software and its documentation for any purpose and without
@@ -112,6 +113,7 @@ extern "C" {
 #define ARES_OPT_SORTLIST       (1 << 10)
 #define ARES_OPT_SOCK_SNDBUF    (1 << 11)
 #define ARES_OPT_SOCK_RCVBUF    (1 << 12)
+#define ARES_OPT_TIMEOUTMS      (1 << 13)
 
 /* Nameinfo flag values */
 #define ARES_NI_NOFQDN                  (1 << 0)
@@ -179,7 +181,7 @@ struct apattern;
 
 struct ares_options {
   int flags;
-  int timeout;
+  int timeout; /* in seconds or milliseconds, depending on options */
   int tries;
   int ndots;
   unsigned short udp_port;

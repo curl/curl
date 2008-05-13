@@ -39,7 +39,7 @@ void ares_send(ares_channel channel, const unsigned char *qbuf, int qlen,
 {
   struct query *query;
   int i;
-  time_t now;
+  struct timeval now;
 
   /* Verify that the query is at least long enough to hold the header. */
   if (qlen < HFIXEDSZ || qlen >= (1 << 16))
@@ -74,7 +74,7 @@ void ares_send(ares_channel channel, const unsigned char *qbuf, int qlen,
 
   /* Compute the query ID.  Start with no timeout. */
   query->qid = (unsigned short)DNS_HEADER_QID(qbuf);
-  query->timeout = 0;
+  query->timeout.tv_sec = query->timeout.tv_usec = 0;
 
   /* Form the TCP query buffer by prepending qlen (as two
    * network-order bytes) to qbuf.
@@ -107,17 +107,17 @@ void ares_send(ares_channel channel, const unsigned char *qbuf, int qlen,
   ares__init_list_node(&(query->queries_by_timeout), query);
   ares__init_list_node(&(query->queries_to_server),  query);
   ares__init_list_node(&(query->all_queries),        query);
-       
+
   /* Chain the query into the list of all queries. */
   ares__insert_in_list(&(query->all_queries), &(channel->all_queries));
   /* Keep track of queries bucketed by qid, so we can process DNS
    * responses quickly.
    */
   ares__insert_in_list(
-      &(query->queries_by_qid),
-      &(channel->queries_by_qid[query->qid % ARES_QID_TABLE_SIZE]));
+    &(query->queries_by_qid),
+    &(channel->queries_by_qid[query->qid % ARES_QID_TABLE_SIZE]));
 
   /* Perform the first query action. */
-  time(&now);
-  ares__send_query(channel, query, now);
+  now = ares__tvnow();
+  ares__send_query(channel, query, &now);
 }

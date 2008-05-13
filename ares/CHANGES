@@ -1,5 +1,10 @@
   Changelog for the c-ares project
 
+* May 13 2008 (Daniel Stenberg)
+
+- Introducing millisecond resolution support for the timeout option. See
+  ares_init_options()'s ARES_OPT_TIMEOUTMS.
+
 * May 9 2008 (Yang Tse)
 
 - Use monotonic time source if available, for private function ares__tvnow()
