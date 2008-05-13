@@ -6,7 +6,7 @@ man_MANS = $(MANPAGES)
 
 MSVCFILES = vc/adig/adig.dep vc/adig/adig.dsp vc/vc.dsw vc/ahost/ahost.dep \
  vc/ahost/ahost.dsp vc/areslib/areslib.dep vc/areslib/areslib.dsp	   \
- vc/areslib/areslib.dsw
+ vc/areslib/areslib.dsw vc/acountry/acountry.dsp
 
 if DEBUGBUILD
 PROGS =
