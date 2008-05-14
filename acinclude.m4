@@ -112,7 +112,7 @@ AC_DEFUN([CURL_CHECK_HEADER_WINSOCK2], [
 #include <windows.h>
 #include <winsock2.h>
       ],[
-#ifdef __CYGWIN__
+#if defined(__CYGWIN__) || defined(_WIN32_WCE)
         HAVE_WINSOCK2_H shall not be defined.
 #else
         int dummy=2*IPPROTO_ESP;
@@ -150,7 +150,7 @@ AC_DEFUN([CURL_CHECK_HEADER_WS2TCPIP], [
 #include <winsock2.h>
 #include <ws2tcpip.h>
       ],[
-#ifdef __CYGWIN__
+#if defined(__CYGWIN__) || defined(_WIN32_WCE)
         HAVE_WS2TCPIP_H shall not be defined.
 #else
         int dummy=2*IP_PKTINFO;
