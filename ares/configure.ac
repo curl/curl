@@ -124,6 +124,28 @@ dnl **********************************************************************
 CURL_DETECT_ICC([CFLAGS="$CFLAGS -we 147"])
 
 dnl **********************************************************************
+dnl Make sure that our checks for headers windows.h winsock.h winsock2.h 
+dnl and ws2tcpip.h take precedence over any other further checks which 
+dnl could be done later using AC_CHECK_HEADER or AC_CHECK_HEADERS for
+dnl this specific header files. And do them before its results are used.
+dnl **********************************************************************
+
+CURL_CHECK_HEADER_WINDOWS
+CURL_CHECK_NATIVE_WINDOWS
+case X-"$ac_cv_native_windows" in
+  X-yes)
+    CURL_CHECK_HEADER_WINSOCK
+    CURL_CHECK_HEADER_WINSOCK2
+    CURL_CHECK_HEADER_WS2TCPIP
+    ;;
+  *)
+    ac_cv_header_winsock_h="no"
+    ac_cv_header_winsock2_h="no"
+    ac_cv_header_ws2tcpip_h="no"
+    ;;
+esac
+
+dnl **********************************************************************
 dnl platform/compiler/architecture specific checks/flags
 dnl **********************************************************************
 
@@ -364,18 +386,6 @@ dnl **********************************************************************
 
 dnl Checks for header files.
 AC_HEADER_STDC
-
-dnl **********************************************************************
-dnl Make sure that our checks for headers windows.h winsock.h winsock2.h 
-dnl and ws2tcpip.h take precedence over any other further checks which 
-dnl could be done later using AC_CHECK_HEADER or AC_CHECK_HEADERS for
-dnl this specific header files. And do them before its results are used.
-dnl **********************************************************************
-
-CURL_CHECK_HEADER_WINDOWS
-CURL_CHECK_HEADER_WINSOCK
-CURL_CHECK_HEADER_WINSOCK2
-CURL_CHECK_HEADER_WS2TCPIP
 
 CURL_CHECK_HEADER_MALLOC
 

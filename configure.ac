@@ -220,12 +220,23 @@ dnl this specific header files. And do them before its results are used.
 dnl **********************************************************************
 
 CURL_CHECK_HEADER_WINDOWS
-CURL_CHECK_HEADER_WINSOCK
-CURL_CHECK_HEADER_WINSOCK2
-CURL_CHECK_HEADER_WS2TCPIP
-
-CURL_CHECK_HEADER_WINLDAP
-CURL_CHECK_HEADER_WINBER
+CURL_CHECK_NATIVE_WINDOWS
+case X-"$ac_cv_native_windows" in
+  X-yes)
+    CURL_CHECK_HEADER_WINSOCK
+    CURL_CHECK_HEADER_WINSOCK2
+    CURL_CHECK_HEADER_WS2TCPIP
+    CURL_CHECK_HEADER_WINLDAP
+    CURL_CHECK_HEADER_WINBER
+    ;;
+  *)
+    ac_cv_header_winsock_h="no"
+    ac_cv_header_winsock2_h="no"
+    ac_cv_header_ws2tcpip_h="no"
+    ac_cv_header_winldap_h="no"
+    ac_cv_header_winber_h="no"
+    ;;
+esac
 
 dnl **********************************************************************
 dnl platform/compiler/architecture specific checks/flags
