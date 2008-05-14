@@ -20,6 +20,7 @@ Signed, which is required in order to install them on most phones.
 
 Following are some things to keep in mind when using this port.
 
+
 curl notes
 ----------
 When starting curl in the Windows emulator from the Windows command-line,
@@ -39,14 +40,17 @@ P.I.P.S. doesn't inherit the current working directory at startup, so the
 to files will be necessary.
 
 P.I.P.S. provides no way to disable echoing of characters as they are
-entered, so passwords typed in on the console will be visible.
+entered, so passwords typed in on the console will be visible.  It also
+line buffers keyboard input so interactive telnet sessions are not very
+feasible.
 
-All screen output disappears after curl exits, so after a transfer completes,
+All screen output disappears after curl exits, so after a command completes,
 curl waits by default for Enter to be pressed before exiting.  This behaviour
 is suppressed when the -s option is given.
 
 curl's "home directory" in Symbian is C:\Private\f0206442\. The .curlrc file
 is read from this directory on startup.
+
 
 libcurl notes
 -------------
@@ -65,6 +69,10 @@ P.I.P.S. causes a USER:87 panic if certain timeouts much longer than
 half an hour are selected.
 
 SSL/TLS encryption is not supported, nor are LDAP, SCP or SFTP URLs.
+
+Debug builds are not supported (i.e. --enable-debug) because they cause
+additional symbol exports in the library which are not frozen in the .def
+files.
 
 
 Dan Fandrich
