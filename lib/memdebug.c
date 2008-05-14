@@ -1,4 +1,3 @@
-#ifdef CURLDEBUG
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -24,6 +23,7 @@
 
 #include "setup.h"
 
+#ifdef CURLDEBUG
 #include <curl/curl.h>
 
 #ifdef HAVE_SYS_SOCKET_H

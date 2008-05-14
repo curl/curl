@@ -790,3 +790,9 @@
 
 /* the signed version of size_t */
 /* #undef ssize_t */
+
+/* Enabling curl debug mode when building in Symbian debug mode would work */
+/* except that debug mode introduces new exports that must be frozen. */
+#ifdef _DEBUG
+/* #define CURLDEBUG */
+#endif
