@@ -2297,8 +2297,6 @@ AC_HELP_STRING([--disable-verbose],[Disable verbose strings]),
        AC_MSG_RESULT(yes)
 )
 
-CURL_CHECK_NATIVE_WINDOWS
-
 dnl ************************************************************
 dnl enable SSPI support
 dnl
