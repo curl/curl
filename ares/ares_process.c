@@ -110,7 +110,7 @@ int ares__timedout(struct timeval *now,
 
   if(secs > 0)
     return 1; /* yes, timed out */
-  if(secs < -1)
+  if(secs < 0)
     return 0; /* nope, not timed out */
 
   /* if the full seconds were identical, check the sub second parts */

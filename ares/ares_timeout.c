@@ -64,8 +64,8 @@ struct timeval *ares_timeout(ares_channel channel, struct timeval *maxtv,
     }
 
   if(min_offset != -1) {
-    nextstop = now;
-    ares__timeadd(&now, min_offset);
+    nextstop.tv_sec = min_offset/1000;
+    nextstop.tv_usec = (min_offset%1000)*1000;
   }
 
   /* If we found a minimum timeout and it's sooner than the one specified in
