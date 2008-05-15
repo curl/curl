@@ -4,9 +4,8 @@ lib_LTLIBRARIES = libcares.la
 
 man_MANS = $(MANPAGES)
 
-MSVCFILES = vc/adig/adig.dep vc/adig/adig.dsp vc/vc.dsw vc/ahost/ahost.dep \
- vc/ahost/ahost.dsp vc/areslib/areslib.dep vc/areslib/areslib.dsp	   \
- vc/areslib/areslib.dsw vc/acountry/acountry.dsp
+MSVCFILES = vc/vc.dsw vc/acountry/acountry.dsp vc/adig/adig.dsp \
+ vc/ahost/ahost.dsp vc/areslib/areslib.dsp vc/areslib/areslib.dsw
 
 if DEBUGBUILD
 PROGS =
