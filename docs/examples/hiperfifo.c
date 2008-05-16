@@ -95,6 +95,7 @@ typedef struct _SockInfo {
 static int multi_timer_cb(CURLM *multi, long timeout_ms, GlobalInfo *g)
 {
   struct timeval timeout;
+  (void)multi; /* unused */
 
   timeout.tv_sec = timeout_ms/1000;
   timeout.tv_usec = (timeout_ms%1000)*1000;
@@ -103,12 +104,11 @@ static int multi_timer_cb(CURLM *multi, long timeout_ms, GlobalInfo *g)
   return 0;
 }
 
-
-
 /* Die if we get a bad CURLMcode somewhere */
-void mcode_or_die(char *where, CURLMcode code) {
+static void mcode_or_die(const char *where, CURLMcode code)
+{
   if ( CURLM_OK != code ) {
-    char *s;
+    const char *s;
     switch (code) {
       case     CURLM_CALL_MULTI_PERFORM: s="CURLM_CALL_MULTI_PERFORM"; break;
       case     CURLM_OK:                 s="CURLM_OK";                 break;
@@ -176,6 +176,7 @@ static void event_cb(int fd, short kind, void *userp)
 {
   GlobalInfo *g = (GlobalInfo*) userp;
   CURLMcode rc;
+  (void)kind; /* unused */
 
   do {
     rc = curl_multi_socket(g->multi, fd, &g->still_running);
@@ -195,10 +196,10 @@ static void event_cb(int fd, short kind, void *userp)
 /* Called by libevent when our timeout expires */
 static void timer_cb(int fd, short kind, void *userp)
 {
-  (void)fd;
-  (void)kind;
   GlobalInfo *g = (GlobalInfo *)userp;
   CURLMcode rc;
+  (void)fd;
+  (void)kind;
 
   do {
     rc = curl_multi_socket(g->multi, CURL_SOCKET_TIMEOUT, &g->still_running);
@@ -289,16 +290,21 @@ static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *data)
 
 
 /* CURLOPT_PROGRESSFUNCTION */
-int prog_cb (void *p, double dltotal, double dlnow, double ult, double uln)
+static int prog_cb (void *p, double dltotal, double dlnow, double ult,
+                    double uln)
 {
   ConnInfo *conn = (ConnInfo *)p;
+  (void)ult;
+  (void)uln;
+
   fprintf(MSG_OUT, "Progress: %s (%g/%g)\n", conn->url, dlnow, dltotal);
   return 0;
 }
 
 
 /* Create a new easy handle, and add it to the global curl_multi */
-void new_conn(char *url, GlobalInfo *g ) {
+static void new_conn(char *url, GlobalInfo *g )
+{
   ConnInfo *conn;
   CURLMcode rc;
 
@@ -333,14 +339,15 @@ void new_conn(char *url, GlobalInfo *g ) {
   check_run_count(g);
 }
 
-
-
 /* This gets called whenever data is received from the fifo */
-void fifo_cb(int fd, short event, void *arg) {
+static void fifo_cb(int fd, short event, void *arg)
+{
   char s[1024];
   long int rv=0;
   int n=0;
   GlobalInfo *g = (GlobalInfo *)arg;
+  (void)fd; /* unused */
+  (void)event; /* unused */
 
   do {
     s[0]='\0';
@@ -352,13 +359,12 @@ void fifo_cb(int fd, short event, void *arg) {
   } while ( rv != EOF);
 }
 
-
-
 /* Create a named pipe and tell libevent to monitor it */
-int init_fifo (GlobalInfo *g) {
+static int init_fifo (GlobalInfo *g)
+{
   struct stat st;
   static const char *fifo = "hiper.fifo";
-  int socket;
+  int sockfd;
 
   fprintf(MSG_OUT, "Creating named pipe \"%s\"\n", fifo);
   if (lstat (fifo, &st) == 0) {
@@ -373,25 +379,25 @@ int init_fifo (GlobalInfo *g) {
     perror("mkfifo");
     exit (1);
   }
-  socket = open(fifo, O_RDWR | O_NONBLOCK, 0);
-  if (socket == -1) {
-     perror("open");
-     exit (1);
+  sockfd = open(fifo, O_RDWR | O_NONBLOCK, 0);
+  if (sockfd == -1) {
+    perror("open");
+    exit (1);
   }
-  g->input = fdopen(socket, "r");
+  g->input = fdopen(sockfd, "r");
 
   fprintf(MSG_OUT, "Now, pipe some URL's into > %s\n", fifo);
-  event_set(&g->fifo_event, socket, EV_READ | EV_PERSIST, fifo_cb, g);
+  event_set(&g->fifo_event, sockfd, EV_READ | EV_PERSIST, fifo_cb, g);
   event_add(&g->fifo_event, NULL);
   return (0);
 }
-
-
 
 int main(int argc, char **argv)
 {
   GlobalInfo g;
   CURLMcode rc;
+  (void)argc;
+  (void)argv;
 
   memset(&g, 0, sizeof(GlobalInfo));
   event_init();
