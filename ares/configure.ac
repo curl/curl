@@ -106,7 +106,7 @@ AC_PROG_LIBTOOL
 
 AC_MSG_CHECKING([if we need -no-undefined])
 case $host in
-  *-*-cygwin | *-*-mingw* | *-*-pw32*)
+  *-*-cygwin* | *-*-mingw* | *-*-pw32* | *-*-cegcc*)
     need_no_undefined=yes
     ;;
   *)

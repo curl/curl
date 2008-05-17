@@ -224,7 +224,7 @@ AC_DEFUN([CURL_CHECK_HEADER_WINLDAP], [
 #endif
 #include <winldap.h>
       ],[
-#ifdef __CYGWIN__
+#if defined(__CYGWIN__) || defined(__CEGCC__)
         HAVE_WINLDAP_H shall not be defined.
 #else
         LDAP *ldp = ldap_init("dummy", LDAP_PORT);
@@ -265,7 +265,7 @@ AC_DEFUN([CURL_CHECK_HEADER_WINBER], [
 #include <winldap.h>
 #include <winber.h>
       ],[
-#ifdef __CYGWIN__
+#if defined(__CYGWIN__) || defined(__CEGCC__)
         HAVE_WINBER_H shall not be defined.
 #else
         BERVAL *bvp = NULL;
