@@ -226,20 +226,44 @@ fi
 
 if test "$HAVE_GETHOSTBYNAME" != "1"
 then
-  dnl This is for Msys/Mingw
-  AC_MSG_CHECKING([for gethostbyname in ws2_32])
-  my_ac_save_LIBS=$LIBS
-  LIBS="-lws2_32 $LIBS"
-  AC_TRY_LINK([#include <winsock2.h>],
-               [gethostbyname("www.dummysite.com");],
-               [ dnl worked!
-               ws2="yes"
-               AC_MSG_RESULT([yes])
-               HAVE_GETHOSTBYNAME="1"],
-               [ dnl failed, restore LIBS
-               LIBS=$my_ac_save_LIBS
-               AC_MSG_RESULT(no)]
-             )
+  dnl This is for winsock systems
+  if test "$ac_cv_header_windows_h" = "yes"; then
+      if test "$ac_cv_header_winsock_h" = "yes"; then
+      winsock_LIB="-lwinsock"
+      fi
+    if test "$ac_cv_header_winsock2_h" = "yes"; then
+      winsock_LIB="-lws2_32"
+    fi
+    if test ! -z "$winsock_LIB"; then
+      my_ac_save_LIBS=$LIBS
+      LIBS="$winsock_LIB $LIBS"
+      AC_MSG_CHECKING([for gethostbyname in $winsock_LIB])
+      AC_TRY_LINK([
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#endif
+#endif
+        ],[
+          gethostbyname("www.dummysite.com");
+        ],[
+          AC_MSG_RESULT([yes])
+          HAVE_GETHOSTBYNAME="1"
+        ],[
+          AC_MSG_RESULT([no])
+          winsock_LIB=""
+          LIBS=$my_ac_save_LIBS
+      ])
+    fi
+  fi
 fi
 
 if test "$HAVE_GETHOSTBYNAME" != "1"
