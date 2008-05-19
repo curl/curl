@@ -242,14 +242,20 @@ dnl an equivalent type if socklen_t not available
 
 AC_DEFUN([CURL_CHECK_TYPE_SOCKLEN_T], [
   AC_REQUIRE([CURL_CHECK_HEADER_WS2TCPIP])dnl
-  AC_CHECK_TYPE([socklen_t], ,[
-    AC_CACHE_CHECK([for socklen_t equivalent], 
+  AC_CHECK_TYPE([socklen_t], [
+    dnl socklen_t is available
+    AC_DEFINE_UNQUOTED(HAVE_SOCKLEN_T, 1,
+      [Define to 1 if socklen_t is available or a equivalent is defined.])
+  ],[
+    dnl socklen_t not available
+    AC_CACHE_CHECK([for socklen_t equivalent],
       [curl_cv_socklen_t_equiv], [
       curl_cv_socklen_t_equiv="unknown"
-      for arg2 in "struct sockaddr" void; do
-        for t in int size_t unsigned long "unsigned long"; do
-          AC_COMPILE_IFELSE([
-            AC_LANG_PROGRAM([
+      for arg1 in 'int' 'SOCKET'; do
+        for arg2 in "struct sockaddr" void; do
+          for t in int size_t unsigned long "unsigned long"; do
+            AC_COMPILE_IFELSE([
+              AC_LANG_PROGRAM([
 #undef inline
 #ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
@@ -263,6 +269,7 @@ AC_DEFUN([CURL_CHECK_TYPE_SOCKLEN_T], [
 #include <winsock.h>
 #endif
 #endif
+#define GETPEERNCALLCONV PASCAL
 #else
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -270,16 +277,18 @@ AC_DEFUN([CURL_CHECK_TYPE_SOCKLEN_T], [
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+#define GETPEERNCALLCONV
 #endif
-              int getpeername (int, $arg2 *, $t *);
+                extern int GETPEERNCALLCONV getpeername ($arg1, $arg2 *, $t *);
+              ],[
+                $t len=0;
+                getpeername(0,0,&len);
+              ])
             ],[
-              $t len=0;
-              getpeername(0,0,&len);
+               curl_cv_socklen_t_equiv="$t"
+               break 3
             ])
-          ],[
-             curl_cv_socklen_t_equiv="$t"
-             break 2
-          ])
+          done
         done
       done
     ])
@@ -290,6 +299,8 @@ AC_DEFUN([CURL_CHECK_TYPE_SOCKLEN_T], [
       *)
         AC_DEFINE_UNQUOTED(socklen_t, $curl_cv_socklen_t_equiv,
           [type to use in place of socklen_t if not defined])
+        AC_DEFINE_UNQUOTED(HAVE_SOCKLEN_T, 1,
+          [Define to 1 if socklen_t is available or a equivalent is defined.])
         ;;
     esac
   ],[
