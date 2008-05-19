@@ -111,6 +111,9 @@
  * Forward declarations.
  */
 
+static int http_getsock_do(struct connectdata *conn,
+                           curl_socket_t *socks,
+                           int numsocks);
 static CURLcode https_connecting(struct connectdata *conn, bool *done);
 #ifdef USE_SSL
 static int https_getsock(struct connectdata *conn,
@@ -131,7 +134,7 @@ const struct Curl_handler Curl_handler_http = {
   ZERO_NULL,                            /* connecting */
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
-  ZERO_NULL,                            /* doing_getsock */
+  http_getsock_do,                      /* doing_getsock */
   ZERO_NULL,                            /* disconnect */
   PORT_HTTP,                            /* defport */
   PROT_HTTP,                            /* protocol */
@@ -151,7 +154,7 @@ const struct Curl_handler Curl_handler_https = {
   https_connecting,                     /* connecting */
   ZERO_NULL,                            /* doing */
   https_getsock,                        /* proto_getsock */
-  ZERO_NULL,                            /* doing_getsock */
+  http_getsock_do,                      /* doing_getsock */
   ZERO_NULL,                            /* disconnect */
   PORT_HTTPS,                           /* defport */
   PROT_HTTP | PROT_HTTPS | PROT_SSL     /* protocol */
@@ -1724,6 +1727,19 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
   }
 
   return CURLE_OK;
+}
+
+/* this returns the socket to wait for in the DO and DOING state for the multi
+   interface and then we're always _sending_ a request and thus we wait for
+   the single socket to become writable only */
+static int http_getsock_do(struct connectdata *conn,
+                           curl_socket_t *socks,
+                           int numsocks)
+{
+  /* write mode */
+  (void)numsocks; /* unused, we trust it to be at least 1 */
+  socks[0] = conn->sock[FIRSTSOCKET];
+  return GETSOCK_WRITESOCK(0);
 }
 
 static CURLcode https_connecting(struct connectdata *conn, bool *done)
