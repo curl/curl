@@ -116,10 +116,14 @@ static void mcode_or_die(const char *where, CURLMcode code)
       case     CURLM_BAD_EASY_HANDLE:    s="CURLM_BAD_EASY_HANDLE";    break;
       case     CURLM_OUT_OF_MEMORY:      s="CURLM_OUT_OF_MEMORY";      break;
       case     CURLM_INTERNAL_ERROR:     s="CURLM_INTERNAL_ERROR";     break;
-      case     CURLM_BAD_SOCKET:         s="CURLM_BAD_SOCKET";         break;
       case     CURLM_UNKNOWN_OPTION:     s="CURLM_UNKNOWN_OPTION";     break;
       case     CURLM_LAST:               s="CURLM_LAST";               break;
       default: s="CURLM_unknown";
+        break;
+    case     CURLM_BAD_SOCKET:         s="CURLM_BAD_SOCKET";
+      fprintf(MSG_OUT, "ERROR: %s returns %s\n", where, s);
+      /* ignore this error */
+      return;
     }
     fprintf(MSG_OUT, "ERROR: %s returns %s\n", where, s);
     exit(code);
@@ -213,9 +217,11 @@ static void timer_cb(int fd, short kind, void *userp)
 /* Clean up the SockInfo structure */
 static void remsock(SockInfo *f)
 {
-  if (!f) { return; }
-  if (f->evset) { event_del(&f->ev); }
-  free(f);
+  if (f) {
+    if (f->evset)
+      event_del(&f->ev);
+    free(f);
+  }
 }
 
 
@@ -229,8 +235,9 @@ static void setsock(SockInfo*f, curl_socket_t s, CURL*e, int act, GlobalInfo*g)
   f->sockfd = s;
   f->action = act;
   f->easy = e;
-  if (f->evset) { event_del(&f->ev); }
-  event_set( &f->ev, f->sockfd, kind, event_cb, g);
+  if (f->evset)
+    event_del(&f->ev);
+  event_set(&f->ev, f->sockfd, kind, event_cb, g);
   f->evset=1;
   event_add(&f->ev, NULL);
 }
@@ -246,8 +253,6 @@ static void addsock(curl_socket_t s, CURL *easy, int action, GlobalInfo *g) {
   curl_multi_assign(g->multi, s, fdp);
 }
 
-
-
 /* CURLMOPT_SOCKETFUNCTION */
 static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 {
@@ -260,16 +265,16 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
   if (what == CURL_POLL_REMOVE) {
     fprintf(MSG_OUT, "\n");
     remsock(fdp);
-  } else {
+  }
+  else {
     if (!fdp) {
-      fprintf(MSG_OUT, "Adding data: %s%s\n",
-             what&CURL_POLL_IN?"READ":"",
-             what&CURL_POLL_OUT?"WRITE":"" );
+      fprintf(MSG_OUT, "Adding data: %s\n", whatstr[what]);
       addsock(s, e, what, g);
     }
     else {
       fprintf(MSG_OUT,
-        "Changing action from %d to %d\n", fdp->action, what);
+              "Changing action from %s to %s\n",
+              whatstr[fdp->action], whatstr[what]);
       setsock(fdp, s, e, what, g);
     }
   }
@@ -322,7 +327,7 @@ static void new_conn(char *url, GlobalInfo *g )
   curl_easy_setopt(conn->easy, CURLOPT_URL, conn->url);
   curl_easy_setopt(conn->easy, CURLOPT_WRITEFUNCTION, write_cb);
   curl_easy_setopt(conn->easy, CURLOPT_WRITEDATA, &conn);
-  curl_easy_setopt(conn->easy, CURLOPT_VERBOSE, 0);
+  curl_easy_setopt(conn->easy, CURLOPT_VERBOSE, 1);
   curl_easy_setopt(conn->easy, CURLOPT_ERRORBUFFER, conn->error);
   curl_easy_setopt(conn->easy, CURLOPT_PRIVATE, conn);
   curl_easy_setopt(conn->easy, CURLOPT_NOPROGRESS, 0);
