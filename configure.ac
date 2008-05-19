@@ -1992,7 +1992,7 @@ TYPE_SIG_ATOMIC_T
 
 AC_TYPE_SIGNAL
 
-AC_FUNC_SELECT_ARGTYPES
+CURL_CHECK_FUNC_SELECT
 
 CURL_CHECK_FUNC_RECV
 
@@ -2013,7 +2013,6 @@ case $host in
 esac
 AC_CHECK_FUNCS( strtoll \
                 socket \
-                select \
                 strdup \
                 strstr \
                 strcasestr \
@@ -2066,37 +2065,6 @@ if test "x$skipcheck" != "xyes"; then
                )
 fi
 )
-
-dnl For some reason, the check above doesn't properly detect select() with
-dnl Msys/Mingw
-if test "$ac_cv_func_select" = "no"; then
-  AC_MSG_CHECKING([for select in $winsock_LIB])
-  AC_TRY_LINK([
-#undef inline
-#ifdef HAVE_WINDOWS_H
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#ifdef HAVE_WINSOCK2_H
-#include <winsock2.h>
-#else
-#ifdef HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
-#endif
-#endif
-    ],[
-      select(0,(fd_set *)NULL,(fd_set *)NULL,(fd_set *)NULL,(struct timeval *)NULL);
-    ],[
-      AC_MSG_RESULT([yes])
-      HAVE_SELECT="1"
-      AC_DEFINE_UNQUOTED(HAVE_SELECT, 1,
-        [Define to 1 if you have the select function.])
-    ],[
-      AC_MSG_ERROR([You can't compile without a select])
-  ])
-fi
 
 dnl sigsetjmp() might be a macro and no function so if it isn't found already
 dnl we make an extra check here!

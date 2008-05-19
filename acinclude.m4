@@ -1978,6 +1978,204 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
   #
 ]) dnl AC_DEFUN
 
+
+dnl CURL_CHECK_FUNC_SELECT
+dnl -------------------------------------------------
+dnl Test if the socket select() function is available,
+dnl and check its return type and the types of its
+dnl arguments. If the function succeeds HAVE_SELECT
+dnl will be defined, defining the types of the
+dnl arguments in SELECT_TYPE_ARG1, SELECT_TYPE_ARG234
+dnl and SELECT_TYPE_ARG5, defining the type of the
+dnl function return value in SELECT_TYPE_RETV, and
+dnl also defining the type qualifier of fifth argument
+dnl in SELECT_QUAL_ARG5.
+
+AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
+  AC_REQUIRE([CURL_CHECK_STRUCT_TIMEVAL])dnl
+  AC_CHECK_HEADERS(sys/select.h sys/socket.h)
+  #
+  AC_MSG_CHECKING([for select])
+  AC_TRY_LINK([
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#endif
+#endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#ifdef TIME_WITH_SYS_TIME
+#include <time.h>
+#endif
+#else
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
+#endif
+#ifndef HAVE_WINDOWS_H
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#endif
+    ],[
+      select(0, 0, 0, 0, 0);
+    ],[
+      AC_MSG_RESULT([yes])
+      curl_cv_select="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      curl_cv_select="no"
+  ])
+  #
+  if test "$curl_cv_select" = "yes"; then
+    AC_CACHE_CHECK([types of args and return type for select],
+      [curl_cv_func_select_args], [
+      curl_cv_func_select_args="unknown"
+      for sel_retv in 'int' 'ssize_t'; do
+        for sel_arg1 in 'int' 'ssize_t' 'size_t' 'unsigned long int' 'unsigned int'; do
+          for sel_arg234 in 'fd_set *' 'int *' 'void *'; do
+            for sel_arg5 in 'struct timeval *' 'const struct timeval *'; do
+              AC_COMPILE_IFELSE([
+                AC_LANG_PROGRAM([
+#undef inline
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#endif
+#define SELECTCALLCONV PASCAL
+#endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#ifdef TIME_WITH_SYS_TIME
+#include <time.h>
+#endif
+#else
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
+#endif
+#ifndef HAVE_WINDOWS_H
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#define SELECTCALLCONV
+#endif
+#ifndef HAVE_STRUCT_TIMEVAL
+                  struct timeval {
+                    long tv_sec;
+                    long tv_usec;
+                  };
+#endif
+                  extern $sel_retv SELECTCALLCONV select($sel_arg1,
+                                                         $sel_arg234,
+                                                         $sel_arg234,
+                                                         $sel_arg234,
+                                                         $sel_arg5);
+                ],[
+                  $sel_arg1   nfds=0;
+                  $sel_arg234 rfds=0;
+                  $sel_arg234 wfds=0;
+                  $sel_arg234 efds=0;
+                  $sel_retv res = select(nfds, rfds, wfds, efds, 0);
+                ])
+              ],[
+                 curl_cv_func_select_args="$sel_arg1,$sel_arg234,$sel_arg5,$sel_retv"
+                 break 4
+              ])
+            done
+          done
+        done
+      done
+    ]) # AC_CACHE_CHECK
+    if test "$curl_cv_func_select_args" = "unknown"; then
+      AC_MSG_WARN([Cannot find proper types to use for select args])
+      AC_MSG_WARN([HAVE_SELECT will not be defined])
+    else
+      select_prev_IFS=$IFS; IFS=','
+      set dummy `echo "$curl_cv_func_select_args" | sed 's/\*/\*/g'`
+      IFS=$select_prev_IFS
+      shift
+      #
+      sel_qual_type_arg5=$[3]
+      #
+      AC_DEFINE_UNQUOTED(SELECT_TYPE_ARG1, $[1],
+        [Define to the type of arg 1 for select.])
+      AC_DEFINE_UNQUOTED(SELECT_TYPE_ARG234, $[2],
+        [Define to the type of args 2, 3 and 4 for select.])
+      AC_DEFINE_UNQUOTED(SELECT_TYPE_RETV, $[4],
+        [Define to the function return type for select.])
+      #
+      prev_sh_opts=$-
+      #
+      case $prev_sh_opts in
+        *f*)
+          ;;
+        *)
+          set -f
+          ;;
+      esac
+      #
+      case "$sel_qual_type_arg5" in
+        const*)
+          sel_qual_arg5=const
+          sel_type_arg5=`echo $sel_qual_type_arg5 | sed 's/^const //'`
+        ;;
+        *)
+          sel_qual_arg5=
+          sel_type_arg5=$sel_qual_type_arg5
+        ;;
+      esac
+      #
+      AC_DEFINE_UNQUOTED(SELECT_QUAL_ARG5, $sel_qual_arg5,
+        [Define to the type qualifier of arg 5 for select.])
+      AC_DEFINE_UNQUOTED(SELECT_TYPE_ARG5, $sel_type_arg5,
+        [Define to the type of arg 5 for select.])
+      #
+      case $prev_sh_opts in
+        *f*)
+          ;;
+        *)
+          set +f
+          ;;
+      esac
+      #
+      AC_DEFINE_UNQUOTED(HAVE_SELECT, 1,
+        [Define to 1 if you have the select function.])
+      ac_cv_func_select="yes"
+    fi
+  fi
+]) # AC_DEFUN
+
+
 dnl ************************************************************
 dnl check for "localhost", if it doesn't exist, we can't do the
 dnl gethostbyname_r tests!
