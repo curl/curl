@@ -35,6 +35,7 @@ This release includes the following bugfixes:
  o krb4 and krb5 ftp segfault
  o multi interface busy loop for CONNECT requests
  o internal time differences now use monotonic time source if available
+ o several curl_multi_socket() fixes
 
 This release includes the following known bugs:
 

@@ -7,6 +7,23 @@
                                   Changelog
 
 
+Daniel Stenberg (19 May 2008)
+- When trying to repeat a multi interface problem I fell over a few multi
+  interface problems:
+
+  o with pipelining disabled, the state should never be set to WAITDO but
+    rather go straight to DO
+
+  o we had multiple states for which the internal function returned no socket
+    at all to wait for, with the effect that libcurl calls the socket callback
+    (when curl_multi_socket() is used) with REMOVE prematurely (as it would be
+    added again within very shortly)
+
+  o when in DO and DOING states, the HTTP and HTTPS protocol handler functions
+    didn't return that the socket should be waited for writing, but instead it
+    was treated as if no socket was needing monitoring so again REMOVE was
+    called prematurely.
+
 Daniel Stenberg (13 May 2008)
 - Added test case 556 that uses curl_easy_send() and curl_easy_recv()
 
