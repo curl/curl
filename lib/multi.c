@@ -772,10 +772,19 @@ static int multi_getsock(struct Curl_one_easy *easy,
   }
 
   switch(easy->state) {
-  case CURLM_STATE_TOOFAST:  /* returns 0, so will not select. */
   default:
+#if 0 /* switch back on these cases to get the compiler to check for all enums
+         to be present */
+  case CURLM_STATE_TOOFAST:  /* returns 0, so will not select. */
+  case CURLM_STATE_COMPLETED:
+  case CURLM_STATE_INIT:
+  case CURLM_STATE_CONNECT:
+  case CURLM_STATE_WAITDO:
+  case CURLM_STATE_DONE:
+  case CURLM_STATE_LAST:
     /* this will get called with CURLM_STATE_COMPLETED when a handle is
        removed */
+#endif
     return 0;
 
   case CURLM_STATE_WAITRESOLVE:
@@ -784,6 +793,7 @@ static int multi_getsock(struct Curl_one_easy *easy,
   case CURLM_STATE_PROTOCONNECT:
     return Curl_protocol_getsock(easy->easy_conn, socks, numsocks);
 
+  case CURLM_STATE_DO:
   case CURLM_STATE_DOING:
     return Curl_doing_getsock(easy->easy_conn, socks, numsocks);
 
@@ -794,6 +804,8 @@ static int multi_getsock(struct Curl_one_easy *easy,
   case CURLM_STATE_DO_MORE:
     return domore_getsock(easy->easy_conn, socks, numsocks);
 
+  case CURLM_STATE_DO_DONE: /* since is set after DO is completed, we switch
+                               to waiting for the same as the *PERFORM states */
   case CURLM_STATE_PERFORM:
   case CURLM_STATE_WAITPERFORM:
     return Curl_single_getsock(easy->easy_conn, socks, numsocks);
@@ -925,11 +937,12 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           else {
             /* after the connect has been sent off, go WAITCONNECT unless the
                protocol connect is already done and we can go directly to
-               WAITDO! */
+               WAITDO or DO! */
             result = CURLM_CALL_MULTI_PERFORM;
 
             if(protocol_connect)
-              multistate(easy, CURLM_STATE_WAITDO);
+              multistate(easy, multi->pipelining_enabled?
+                         CURLM_STATE_WAITDO:CURLM_STATE_DO);
             else {
 #ifndef CURL_DISABLE_HTTP
               if(easy->easy_conn->bits.tunnel_connecting)
@@ -965,7 +978,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           /* call again please so that we get the next socket setup */
           result = CURLM_CALL_MULTI_PERFORM;
           if(protocol_connect)
-            multistate(easy, CURLM_STATE_WAITDO);
+            multistate(easy, multi->pipelining_enabled?
+                       CURLM_STATE_WAITDO:CURLM_STATE_DO);
           else {
 #ifndef CURL_DISABLE_HTTP
             if(easy->easy_conn->bits.tunnel_connecting)
@@ -1028,8 +1042,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             multistate(easy, CURLM_STATE_PROTOCONNECT);
         }
         else {
-          /* after the connect has completed, go WAITDO */
-          multistate(easy, CURLM_STATE_WAITDO);
+          /* after the connect has completed, go WAITDO or DO */
+          multistate(easy, multi->pipelining_enabled?
+                     CURLM_STATE_WAITDO:CURLM_STATE_DO);
 
           result = CURLM_CALL_MULTI_PERFORM;
         }
@@ -1041,8 +1056,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       easy->result = Curl_protocol_connecting(easy->easy_conn,
                                               &protocol_connect);
       if((easy->result == CURLE_OK) && protocol_connect) {
-        /* after the connect has completed, go WAITDO */
-        multistate(easy, CURLM_STATE_WAITDO);
+        /* after the connect has completed, go WAITDO or DO */
+        multistate(easy, multi->pipelining_enabled?
+                   CURLM_STATE_WAITDO:CURLM_STATE_DO);
         result = CURLM_CALL_MULTI_PERFORM;
       }
       else if(easy->result) {
@@ -1712,34 +1728,39 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
       Curl_hash_pick(multi->sockhash, (char *)&s, sizeof(s));
 
     if(!entry)
-      /* unmatched socket, major problemo! */
-      return CURLM_BAD_SOCKET; /* better return code? */
+      /* Unmatched socket, we can't act on it but we ignore this fact.  In
+         real-world tests it has been proved that libevent can in fact give
+         the application actions even though the socket was just previously
+         asked to get removed, so thus we better survive stray socket actions
+         and just move on. */
+      ;
+    else {
+      data = entry->easy;
 
-    data = entry->easy;
+      if(data->magic != CURLEASY_MAGIC_NUMBER)
+        /* bad bad bad bad bad bad bad */
+        return CURLM_INTERNAL_ERROR;
 
-    if(data->magic != CURLEASY_MAGIC_NUMBER)
-      /* bad bad bad bad bad bad bad */
-      return CURLM_INTERNAL_ERROR;
+      if(data->set.one_easy->easy_conn)  /* set socket event bitmask */
+        data->set.one_easy->easy_conn->cselect_bits = ev_bitmask;
 
-    if(data->set.one_easy->easy_conn)  /* set socket event bitmask */
-      data->set.one_easy->easy_conn->cselect_bits = ev_bitmask;
+      result = multi_runsingle(multi, data->set.one_easy);
 
-    result = multi_runsingle(multi, data->set.one_easy);
+      if(data->set.one_easy->easy_conn)
+        data->set.one_easy->easy_conn->cselect_bits = 0;
 
-    if(data->set.one_easy->easy_conn)
-      data->set.one_easy->easy_conn->cselect_bits = 0;
+      if(CURLM_OK >= result)
+        /* get the socket(s) and check if the state has been changed since
+           last */
+        singlesocket(multi, data->set.one_easy);
 
-    if(CURLM_OK >= result)
-      /* get the socket(s) and check if the state has been changed since
-         last */
-      singlesocket(multi, data->set.one_easy);
+      /* Now we fall-through and do the timer-based stuff, since we don't want
+         to force the user to have to deal with timeouts as long as at least
+         one connection in fact has traffic. */
 
-    /* Now we fall-through and do the timer-based stuff, since we don't want
-       to force the user to have to deal with timeouts as long as at least one
-       connection in fact has traffic. */
-
-    data = NULL; /* set data to NULL again to avoid calling multi_runsingle()
-                    in case there's no need to */
+      data = NULL; /* set data to NULL again to avoid calling
+                      multi_runsingle() in case there's no need to */
+    }
   }
 
   /*
