@@ -506,7 +506,14 @@ then
   dnl This is for winsock systems
   if test "$ac_cv_header_windows_h" = "yes"; then
     if test "$ac_cv_header_winsock_h" = "yes"; then
-      winsock_LIB="-lwinsock"
+      case $host in
+        *-*-mingw32ce*)
+          winsock_LIB="-lwinsock"
+          ;;
+        *)
+          winsock_LIB="-lwsock32"
+          ;;
+      esac
     fi
     if test "$ac_cv_header_winsock2_h" = "yes"; then
       winsock_LIB="-lws2_32"
