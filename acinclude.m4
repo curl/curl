@@ -581,8 +581,8 @@ AC_DEFUN([CURL_CHECK_LIBS_WINLDAP], [
         ber_free(bep, 1);
       ])
     ],[
-       curl_cv_ldap_LIBS="$x_nlibs"
-       break
+      curl_cv_ldap_LIBS="$x_nlibs"
+      break
     ])
   done
   #
@@ -688,8 +688,8 @@ AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
         ber_free(bep, 1);
       ])
     ],[
-       curl_cv_ldap_LIBS="$x_nlibs"
-       break
+      curl_cv_ldap_LIBS="$x_nlibs"
+      break
     ])
   done
   #
@@ -877,32 +877,35 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
   #
   AC_MSG_CHECKING([for getnameinfo])
   AC_LINK_IFELSE([
-      AC_LANG_FUNC_LINK_TRY([getnameinfo])
-    ],[
-      AC_MSG_RESULT([yes])
-      curl_cv_getnameinfo="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      curl_cv_getnameinfo="no"
+    AC_LANG_FUNC_LINK_TRY([getnameinfo])
+  ],[
+    AC_MSG_RESULT([yes])
+    curl_cv_getnameinfo="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    curl_cv_getnameinfo="no"
   ])
   #
   if test "$curl_cv_getnameinfo" != "yes"; then
     AC_MSG_CHECKING([deeper for getnameinfo])
-    AC_TRY_LINK([
+    AC_LINK_IFELSE([
+      AC_LANG_PROGRAM([
       ],[
         getnameinfo();
-      ],[
-        AC_MSG_RESULT([yes])
-        curl_cv_getnameinfo="yes"
-      ],[
-        AC_MSG_RESULT([but still no])
-        curl_cv_getnameinfo="no"
+      ])
+    ],[
+      AC_MSG_RESULT([yes])
+      curl_cv_getnameinfo="yes"
+    ],[
+      AC_MSG_RESULT([but still no])
+      curl_cv_getnameinfo="no"
     ])
   fi
   #
   if test "$curl_cv_getnameinfo" != "yes"; then
     AC_MSG_CHECKING([deeper and deeper for getnameinfo])
-    AC_TRY_LINK([
+    AC_LINK_IFELSE([
+      AC_LANG_PROGRAM([
 #undef inline
 #ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
@@ -928,12 +931,13 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
 #endif
       ],[
         getnameinfo(0, 0, 0, 0, 0, 0, 0);
-      ],[ 
-        AC_MSG_RESULT([yes])
-        curl_cv_getnameinfo="yes"
-      ],[
-        AC_MSG_RESULT([but still no])
-        curl_cv_getnameinfo="no"
+      ])
+    ],[
+      AC_MSG_RESULT([yes])
+      curl_cv_getnameinfo="yes"
+    ],[
+      AC_MSG_RESULT([but still no])
+      curl_cv_getnameinfo="no"
     ])
   fi
   #
@@ -1207,7 +1211,8 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
   AC_CHECK_HEADERS(sys/types.h sys/socket.h)
   #
   AC_MSG_CHECKING([for recv])
-  AC_TRY_LINK([
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([
 #undef inline 
 #ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
@@ -1231,12 +1236,13 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
 #endif
     ],[
       recv(0, 0, 0, 0);
-    ],[ 
-      AC_MSG_RESULT([yes])
-      curl_cv_recv="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      curl_cv_recv="no"
+    ])
+  ],[
+    AC_MSG_RESULT([yes])
+    curl_cv_recv="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    curl_cv_recv="no"
   ])
   #
   if test "$curl_cv_recv" = "yes"; then
@@ -1337,7 +1343,8 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
   AC_CHECK_HEADERS(sys/types.h sys/socket.h)
   #
   AC_MSG_CHECKING([for send])
-  AC_TRY_LINK([
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([
 #undef inline 
 #ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
@@ -1361,12 +1368,13 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
 #endif
     ],[
       send(0, 0, 0, 0);
-    ],[ 
-      AC_MSG_RESULT([yes])
-      curl_cv_send="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      curl_cv_send="no"
+    ])
+  ],[
+    AC_MSG_RESULT([yes])
+    curl_cv_send="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    curl_cv_send="no"
   ])
   #
   if test "$curl_cv_send" = "yes"; then
@@ -1609,18 +1617,20 @@ AC_DEFUN([TYPE_SIG_ATOMIC_T], [
     yes)
       #
       AC_MSG_CHECKING([if sig_atomic_t is already defined as volatile])
-      AC_TRY_LINK([
+      AC_LINK_IFELSE([
+        AC_LANG_PROGRAM([
 #ifdef HAVE_SIGNAL_H
 #include <signal.h>
 #endif
         ],[
           static volatile sig_atomic_t dummy = 0;
-        ],[ 
-          AC_MSG_RESULT([no])
-          ac_cv_sig_atomic_t_volatile="no"
-        ],[
-          AC_MSG_RESULT([yes])
-          ac_cv_sig_atomic_t_volatile="yes"
+        ])
+      ],[
+        AC_MSG_RESULT([no])
+        ac_cv_sig_atomic_t_volatile="no"
+      ],[
+        AC_MSG_RESULT([yes])
+        ac_cv_sig_atomic_t_volatile="yes"
       ])
       #
       if test "$ac_cv_sig_atomic_t_volatile" = "yes"; then
@@ -1786,7 +1796,8 @@ AC_DEFUN([TYPE_IN_ADDR_T],
       [
          curl_cv_in_addr_t_equiv=
          for t in "unsigned long" int size_t unsigned long; do
-            AC_TRY_COMPILE([
+            AC_LINK_IFELSE([
+              AC_LANG_PROGRAM([
 #undef inline
 #ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
@@ -1814,11 +1825,12 @@ AC_DEFUN([TYPE_IN_ADDR_T],
 #include <arpa/inet.h>
 #endif
 #endif
+              ],[
+                $t data = inet_addr ("1.2.3.4");
+              ])
             ],[
-               $t data = inet_addr ("1.2.3.4");
-            ],[
-               curl_cv_in_addr_t_equiv="$t"
-               break
+              curl_cv_in_addr_t_equiv="$t"
+              break
             ])
          done
 
@@ -1939,8 +1951,8 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
           (void)clock_gettime(CLOCK_MONOTONIC, &ts);
         ])
       ],[
-         curl_cv_gclk_LIBS="$x_xlibs"
-         break
+        curl_cv_gclk_LIBS="$x_xlibs"
+        break
       ])
     done
     #
@@ -1996,7 +2008,8 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
   AC_CHECK_HEADERS(sys/select.h sys/socket.h)
   #
   AC_MSG_CHECKING([for select])
-  AC_TRY_LINK([
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([
 #undef inline
 #ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
@@ -2034,12 +2047,13 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
 #endif
     ],[
       select(0, 0, 0, 0, 0);
-    ],[
-      AC_MSG_RESULT([yes])
-      curl_cv_select="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      curl_cv_select="no"
+    ])
+  ],[
+    AC_MSG_RESULT([yes])
+    curl_cv_select="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    curl_cv_select="no"
   ])
   #
   if test "$curl_cv_select" = "yes"; then

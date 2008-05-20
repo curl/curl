@@ -25,7 +25,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.57)
 
 dnl We don't know the version number "statically" so we use a dash here
-AC_INIT(curl, [-], [a suitable curl mailing list => http://curl.haxx.se/mail/])
+AC_INIT([curl], [-], [a suitable curl mailing list => http://curl.haxx.se/mail/])
 
 dnl configure script copyright
 AC_COPYRIGHT([Copyright (c) 1998 - 2008 Daniel Stenberg, <daniel@haxx.se>
@@ -2250,27 +2250,26 @@ AC_HELP_STRING([--disable-ares],[Disable c-ares for name lookups]),
          dnl out and don't use the "embedded" ares dir (in which case we don't
          dnl check it because it might not have been built yet)
          AC_MSG_CHECKING([that c-ares is good and recent enough])
-         AC_LINK_IFELSE( [
+         AC_LINK_IFELSE([
+           AC_LANG_PROGRAM([
 #include <ares.h>
-/* provide a set of dummy functions in case c-ares was built with debug */
-void curl_dofree() { }
-void curl_sclose() { }
-void curl_domalloc() { }
-void curl_docalloc() { }
-void curl_socket() { }
-
-int main(void)
-{
-  ares_channel channel;
-  ares_cancel(channel); /* added in 1.2.0 */
-  ares_process_fd(channel, 0, 0); /* added in 1.4.0 */
-  return 0;
-}
-],
-          AC_MSG_RESULT(yes),
-          AC_MSG_RESULT(no)
-          AC_MSG_ERROR([c-ares library defective or too old])
-          )
+             /* set of dummy functions in case c-ares was built with debug */
+             void curl_dofree() { }
+             void curl_sclose() { }
+             void curl_domalloc() { }
+             void curl_docalloc() { }
+             void curl_socket() { }
+           ],[
+             ares_channel channel;
+             ares_cancel(channel); /* added in 1.2.0 */
+             ares_process_fd(channel, 0, 0); /* added in 1.4.0 */
+           ])
+         ],[
+           AC_MSG_RESULT([yes])
+         ],[
+           AC_MSG_RESULT([no])
+           AC_MSG_ERROR([c-ares library defective or too old])
+         ])
        fi
        ;;
   esac ],
