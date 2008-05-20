@@ -489,16 +489,18 @@ then
   AC_MSG_CHECKING([for gethostbyname with both nsl and socket libs])
   my_ac_save_LIBS=$LIBS
   LIBS="-lnsl -lsocket $LIBS"
-  AC_TRY_LINK( ,
-             [gethostbyname();],
-             [ dnl found it!
-             HAVE_GETHOSTBYNAME="1"
-             AC_MSG_RESULT([yes])],
-             [ dnl failed!
-             AC_MSG_RESULT([no])
-             dnl restore LIBS
-             LIBS=$my_ac_save_LIBS]
-             )
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+    ]],[[
+      gethostbyname();
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    HAVE_GETHOSTBYNAME="1"
+  ],[
+    AC_MSG_RESULT([no])
+    LIBS=$my_ac_save_LIBS
+  ])
 fi
 
 if test "$HAVE_GETHOSTBYNAME" != "1"
@@ -522,7 +524,8 @@ then
       my_ac_save_LIBS=$LIBS
       LIBS="$winsock_LIB $LIBS"
       AC_MSG_CHECKING([for gethostbyname in $winsock_LIB])
-      AC_TRY_LINK([
+      AC_LINK_IFELSE([
+        AC_LANG_PROGRAM([[
 #ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -536,15 +539,16 @@ then
 #endif
 #endif
 #endif
-        ],[
+        ]],[[
           gethostbyname("www.dummysite.com");
-        ],[
-          AC_MSG_RESULT([yes])
-          HAVE_GETHOSTBYNAME="1"
-        ],[
-          AC_MSG_RESULT([no])
-          winsock_LIB=""
-          LIBS=$my_ac_save_LIBS
+        ]])
+      ],[
+        AC_MSG_RESULT([yes])
+        HAVE_GETHOSTBYNAME="1"
+      ],[
+        AC_MSG_RESULT([no])
+        winsock_LIB=""
+        LIBS=$my_ac_save_LIBS
       ])
     fi
   fi
@@ -554,30 +558,38 @@ if test "$HAVE_GETHOSTBYNAME" != "1"
 then
   dnl This is for Minix 3.1
   AC_MSG_CHECKING([for gethostbyname for Minix 3])
-  AC_TRY_LINK([
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
 /* Older Minix versions may need <net/gen/netdb.h> here instead */
-#include <netdb.h>],
-               [gethostbyname("www.dummysite.com");],
-               [ dnl worked!
-               AC_MSG_RESULT([yes])
-               HAVE_GETHOSTBYNAME="1"],
-               AC_MSG_RESULT(no)
-             )
+#include <netdb.h>
+    ]],[[
+      gethostbyname("www.dummysite.com");
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    HAVE_GETHOSTBYNAME="1"
+  ],[
+    AC_MSG_RESULT([no])
+  ])
 fi
 
 if test "$HAVE_GETHOSTBYNAME" != "1"
 then
   dnl This is for eCos with a stubbed DNS implementation
   AC_MSG_CHECKING([for gethostbyname for eCos])
-  AC_TRY_LINK([
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
 #include <stdio.h>
-#include <netdb.h>],
-               [gethostbyname("www.dummysite.com");],
-               [ dnl worked!
-               AC_MSG_RESULT([yes])
-               HAVE_GETHOSTBYNAME="1"],
-               AC_MSG_RESULT(no)
-             )
+#include <netdb.h>
+    ]],[[
+      gethostbyname("www.dummysite.com");
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    HAVE_GETHOSTBYNAME="1"
+  ],[
+    AC_MSG_RESULT([no])
+  ])
 fi
 
 if test "$HAVE_GETHOSTBYNAME" != "1"
@@ -1280,21 +1292,23 @@ if test X"$OPT_SSL" != Xno; then
     dnl and acting like OpenSSL.
 
     AC_MSG_CHECKING([for yaSSL using OpenSSL compatibility mode])
-    AC_TRY_COMPILE([
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
 #include <openssl/ssl.h>
-      ],[
+      ]],[[
 #if defined(YASSL_VERSION) && defined(OPENSSL_VERSION_NUMBER)
         int dummy = SSL_ERROR_NONE;
 #else
         Not the yaSSL OpenSSL compatibility header.
 #endif
-      ],[
-        AC_MSG_RESULT([yes])
-        AC_DEFINE_UNQUOTED(USE_YASSLEMUL, 1,
-          [Define to 1 if using yaSSL in OpenSSL compatibility mode.])
-        curl_ssl_msg="enabled (OpenSSL emulation by yaSSL)"
-      ],[
-        AC_MSG_RESULT([no])
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      AC_DEFINE_UNQUOTED(USE_YASSLEMUL, 1,
+        [Define to 1 if using yaSSL in OpenSSL compatibility mode.])
+      curl_ssl_msg="enabled (OpenSSL emulation by yaSSL)"
+    ],[
+      AC_MSG_RESULT([no])
     ])
   fi
 
@@ -2070,13 +2084,19 @@ dnl sigsetjmp() might be a macro and no function so if it isn't found already
 dnl we make an extra check here!
 if test "$ac_cv_func_sigsetjmp" != "yes"; then
   AC_MSG_CHECKING([for sigsetjmp defined as macro])
-  AC_TRY_LINK( [#include <setjmp.h>],
-               [sigjmp_buf jmpenv;
-                sigsetjmp(jmpenv, 1);],
-               AC_MSG_RESULT(yes)
-               AC_DEFINE(HAVE_SIGSETJMP, 1, [If you have sigsetjmp]),
-               AC_MSG_RESULT(no)
-               )
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+#include <setjmp.h>
+    ]],[[
+      sigjmp_buf jmpenv;
+      sigsetjmp(jmpenv, 1);
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    AC_DEFINE(HAVE_SIGSETJMP, 1, [If you have sigsetjmp])
+  ],[
+    AC_MSG_RESULT([no])
+  ])
 fi
 
 AC_CHECK_DECL(basename, ,

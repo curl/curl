@@ -1652,20 +1652,20 @@ dnl
 dnl There are two known platforms (AIX 3.x and SunOS 4.1.x) where the
 dnl O_NONBLOCK define is found but does not work. This condition is attempted
 dnl to get caught in this script by using an excessive number of #ifdefs...
-dnl
-AC_DEFUN([CURL_CHECK_NONBLOCKING_SOCKET],
-[
-  AC_MSG_CHECKING([non-blocking sockets style])
 
-  AC_TRY_COMPILE([
+AC_DEFUN([CURL_CHECK_NONBLOCKING_SOCKET], [
+  AC_MSG_CHECKING([non-blocking sockets style])
+  nonblock="unknown"
+  #
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
 /* headers for O_NONBLOCK test */
 #include <sys/types.h>
 #include <unistd.h>
 #include <fcntl.h>
-],[
-/* try to compile O_NONBLOCK */
-
-#if defined(sun) || defined(__sun__) || defined(__SUNPRO_C) || defined(__SUNPRO_CC)
+/* */
+#if defined(sun) || defined(__sun__) || \
+    defined(__SUNPRO_C) || defined(__SUNPRO_CC)
 # if defined(__SVR4) || defined(__srv4__)
 #  define PLATFORM_SOLARIS
 # else
@@ -1675,36 +1675,44 @@ AC_DEFUN([CURL_CHECK_NONBLOCKING_SOCKET],
 #if (defined(_AIX) || defined(__xlC__)) && !defined(_AIX41)
 # define PLATFORM_AIX_V3
 #endif
-
+/* */
 #if defined(PLATFORM_SUNOS4) || defined(PLATFORM_AIX_V3) || defined(__BEOS__)
 #error "O_NONBLOCK does not work on this platform"
 #endif
-  int socket;
-  int flags = fcntl(socket, F_SETFL, flags | O_NONBLOCK);
-],[
-dnl the O_NONBLOCK test was fine
-nonblock="O_NONBLOCK"
-AC_DEFINE(HAVE_O_NONBLOCK, 1, [use O_NONBLOCK for non-blocking sockets])
-],[
-dnl the code was bad, try a different program now, test 2
-
-  AC_TRY_COMPILE([
+    ]],[[
+      /* O_NONBLOCK source test */
+      int socket;
+      int flags = fcntl(socket, F_SETFL, flags | O_NONBLOCK);
+    ]])
+  ],[
+    dnl the O_NONBLOCK test was fine
+    nonblock="O_NONBLOCK"
+    AC_DEFINE(HAVE_O_NONBLOCK, 1,
+      [use O_NONBLOCK for non-blocking sockets])
+  ])
+  #
+  if test "$nonblock" = "unknown"; then
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
 /* headers for FIONBIO test */
 #include <unistd.h>
 #include <stropts.h>
-],[
-/* FIONBIO source test (old-style unix) */
- int socket;
- int flags = ioctl(socket, FIONBIO, &flags);
-],[
-dnl FIONBIO test was good
-nonblock="FIONBIO"
-AC_DEFINE(HAVE_FIONBIO, 1, [use FIONBIO for non-blocking sockets])
-],[
-dnl FIONBIO test was also bad
-dnl the code was bad, try a different program now, test 3
-
-  AC_TRY_COMPILE([
+      ]],[[
+        /* FIONBIO source test (old-style unix) */
+        int socket;
+        int flags = ioctl(socket, FIONBIO, &flags);
+      ]])
+    ],[
+      dnl FIONBIO test was good
+      nonblock="FIONBIO"
+      AC_DEFINE(HAVE_FIONBIO, 1,
+        [use FIONBIO for non-blocking sockets])
+    ])
+  fi
+  #
+  if test "$nonblock" = "unknown"; then
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
 /* headers for ioctlsocket test (Windows) */
 #undef inline
 #ifdef HAVE_WINDOWS_H
@@ -1720,65 +1728,63 @@ dnl the code was bad, try a different program now, test 3
 #endif
 #endif
 #endif
-],[
-/* ioctlsocket source code */
- SOCKET sd;
- unsigned long flags = 0;
- sd = socket(0, 0, 0);
- ioctlsocket(sd, FIONBIO, &flags);
-],[
-dnl ioctlsocket test was good
-nonblock="ioctlsocket"
-AC_DEFINE(HAVE_IOCTLSOCKET, 1, [use ioctlsocket() for non-blocking sockets])
-],[
-dnl ioctlsocket didnt compile!, go to test 4
-
-  AC_TRY_LINK([
+      ]],[[
+        /* ioctlsocket source code (Windows) */
+        SOCKET sd;
+        unsigned long flags = 0;
+        sd = socket(0, 0, 0);
+        ioctlsocket(sd, FIONBIO, &flags);
+      ]])
+    ],[
+      dnl ioctlsocket test was good
+      nonblock="ioctlsocket"
+      AC_DEFINE(HAVE_IOCTLSOCKET, 1,
+        [use ioctlsocket() for non-blocking sockets])
+    ])
+  fi
+  #
+  if test "$nonblock" = "unknown"; then
+    AC_LINK_IFELSE([
+      AC_LANG_PROGRAM([[
 /* headers for IoctlSocket test (Amiga?) */
 #include <sys/ioctl.h>
-],[
-/* IoctlSocket source code */
- int socket;
- int flags = IoctlSocket(socket, FIONBIO, (long)1);
-],[
-dnl ioctlsocket test was good
-nonblock="IoctlSocket"
-AC_DEFINE(HAVE_IOCTLSOCKET_CASE, 1, [use Ioctlsocket() for non-blocking sockets])
-],[
-dnl Ioctlsocket didnt compile, do test 5!
-  AC_TRY_COMPILE([
+      ]],[[
+        /* IoctlSocket source code (Amiga?) */
+        int socket;
+        int flags = IoctlSocket(socket, FIONBIO, (long)1);
+      ]])
+    ],[
+      dnl Ioctlsocket test was good
+      nonblock="IoctlSocket"
+      AC_DEFINE(HAVE_IOCTLSOCKET_CASE, 1,
+        [use Ioctlsocket() for non-blocking sockets])
+    ])
+  fi
+  #
+  if test "$nonblock" = "unknown"; then
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
 /* headers for SO_NONBLOCK test (BeOS) */
 #include <socket.h>
-],[
-/* SO_NONBLOCK source code */
- long b = 1;
- int socket;
- int flags = setsockopt(socket, SOL_SOCKET, SO_NONBLOCK, &b, sizeof(b));
-],[
-dnl the SO_NONBLOCK test was good
-nonblock="SO_NONBLOCK"
-AC_DEFINE(HAVE_SO_NONBLOCK, 1, [use SO_NONBLOCK for non-blocking sockets])
-],[
-dnl test 5 didnt compile!
-nonblock="nada"
-AC_DEFINE(HAVE_DISABLED_NONBLOCKING, 1, [disabled non-blocking sockets])
-])
-dnl end of fifth test
-
-])
-dnl end of forth test
-
-])
-dnl end of third test
-
-])
-dnl end of second test
-
-])
-dnl end of non-blocking try-compile test
+      ]],[[
+        /* SO_NONBLOCK source code (BeOS) */
+        long b = 1;
+        int socket;
+        int flags = setsockopt(socket, SOL_SOCKET, SO_NONBLOCK, &b, sizeof(b));
+      ]])
+    ],[
+      dnl the SO_NONBLOCK test was good
+      nonblock="SO_NONBLOCK"
+      AC_DEFINE(HAVE_SO_NONBLOCK, 1,
+        [use SO_NONBLOCK for non-blocking sockets])
+    ])
+  fi
+  #
   AC_MSG_RESULT($nonblock)
-
-  if test "$nonblock" = "nada"; then
+  #
+  if test "$nonblock" = "unknown"; then
+    AC_DEFINE(HAVE_DISABLED_NONBLOCKING, 1,
+      [disabled non-blocking sockets])
     AC_MSG_WARN([non-block sockets disabled])
   fi
 ])
@@ -2407,165 +2413,301 @@ AC_DEFUN([CURL_CHECK_INET_NTOA_R],
 	AC_MSG_RESULT(no))])])
 ])
 
-AC_DEFUN([CURL_CHECK_GETHOSTBYADDR_R],
-[
-  dnl check for number of arguments to gethostbyaddr_r. it might take
-  dnl either 5, 7, or 8 arguments.
-  AC_CHECK_FUNCS(gethostbyaddr_r,[
-    AC_MSG_CHECKING(if gethostbyaddr_r takes 5 arguments)
-    AC_TRY_COMPILE([
+
+dnl CURL_CHECK_GETHOSTBYADDR_R
+dnl -------------------------------------------------
+dnl check number of arguments for gethostbyaddr_r, it
+dnl might take either 5, 7, or 8 arguments.
+
+AC_DEFUN([CURL_CHECK_GETHOSTBYADDR_R], [
+  #
+  AC_MSG_CHECKING([for gethostbyaddr_r])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([gethostbyaddr_r])
+  ],[
+    AC_MSG_RESULT([yes])
+    tmp_cv_gethostbyaddr_r="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tmp_cv_gethostbyaddr_r="no"
+  ])
+  #
+  if test "$tmp_cv_gethostbyaddr_r" != "yes"; then
+    AC_MSG_CHECKING([deeper for gethostbyaddr_r])
+    AC_LINK_IFELSE([
+      AC_LANG_PROGRAM([[
+      ]],[[
+        gethostbyaddr_r();
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tmp_cv_gethostbyaddr_r="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tmp_cv_gethostbyaddr_r="no"
+    ])
+  fi
+  #
+  if test "$tmp_cv_gethostbyaddr_r" = "yes"; then
+
+    ac_cv_gethostbyaddr_r_args="unknown"
+
+    AC_MSG_CHECKING([if gethostbyaddr_r takes 5 arguments])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
 #include <sys/types.h>
-#include <netdb.h>],[
-char * address;
-int length;
-int type;
-struct hostent h;
-struct hostent_data hdata;
-int rc;
-rc = gethostbyaddr_r(address, length, type, &h, &hdata);],[
-      AC_MSG_RESULT(yes)
+#include <netdb.h>
+      ]],[[
+        char * address;
+        int length;
+        int type;
+        struct hostent h;
+        struct hostent_data hdata;
+        int rc;
+        rc = gethostbyaddr_r(address, length, type, &h, &hdata);
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
       AC_DEFINE(HAVE_GETHOSTBYADDR_R_5, 1, [gethostbyaddr_r() takes 5 args])
-      ac_cv_gethostbyaddr_args=5],[
-      AC_MSG_RESULT(no)
-      AC_MSG_CHECKING(if gethostbyaddr_r with -D_REENTRANT takes 5 arguments)
-      AC_TRY_COMPILE([
+      ac_cv_gethostbyaddr_r_args="5"
+    ],[
+      AC_MSG_RESULT([no])
+    ])
+
+    if test "$ac_cv_gethostbyaddr_r_args" = "unknown"; then
+      AC_MSG_CHECKING([if gethostbyaddr_r with -D_REENTRANT takes 5 arguments])
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
 #define _REENTRANT
 #include <sys/types.h>
-#include <netdb.h>],[
-char * address;
-int length;
-int type;
-struct hostent h;
-struct hostent_data hdata;
-int rc;
-rc = gethostbyaddr_r(address, length, type, &h, &hdata);],[
-	AC_MSG_RESULT(yes)
-	AC_DEFINE(HAVE_GETHOSTBYADDR_R_5, 1, [gethostbyaddr_r() takes 5 args])
+#include <netdb.h>
+        ]],[[
+          char * address;
+          int length;
+          int type;
+          struct hostent h;
+          struct hostent_data hdata;
+          int rc;
+          rc = gethostbyaddr_r(address, length, type, &h, &hdata);
+        ]])
+      ],[
+        AC_MSG_RESULT([yes])
+        AC_DEFINE(HAVE_GETHOSTBYADDR_R_5, 1, [gethostbyaddr_r() takes 5 args])
 	AC_DEFINE(NEED_REENTRANT, 1, [need REENTRANT])
-	ac_cv_gethostbyaddr_args=5],[
-	AC_MSG_RESULT(no)
-	AC_MSG_CHECKING(if gethostbyaddr_r takes 7 arguments)
-	AC_TRY_COMPILE([
-#include <sys/types.h>
-#include <netdb.h>],[
-char * address;
-int length;
-int type;
-struct hostent h;
-char buffer[8192];
-int h_errnop;
-struct hostent * hp;
+        ac_cv_gethostbyaddr_r_args="5"
+      ],[
+        AC_MSG_RESULT([no])
+      ])
+    fi
 
-hp = gethostbyaddr_r(address, length, type, &h,
-                     buffer, 8192, &h_errnop);],[
-	  AC_MSG_RESULT(yes)
-	  AC_DEFINE(HAVE_GETHOSTBYADDR_R_7, 1, [gethostbyaddr_r() takes 7 args] )
-	  ac_cv_gethostbyaddr_args=7],[
-	  AC_MSG_RESULT(no)
-	  AC_MSG_CHECKING(if gethostbyaddr_r takes 8 arguments)
-	  AC_TRY_COMPILE([
+    if test "$ac_cv_gethostbyaddr_r_args" = "unknown"; then
+      AC_MSG_CHECKING([if gethostbyaddr_r takes 7 arguments])
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
 #include <sys/types.h>
-#include <netdb.h>],[
-char * address;
-int length;
-int type;
-struct hostent h;
-char buffer[8192];
-int h_errnop;
-struct hostent * hp;
-int rc;
+#include <netdb.h>
+        ]],[[
+          char * address;
+          int length;
+          int type;
+          struct hostent h;
+          char buffer[8192];
+          int h_errnop;
+          struct hostent * hp;
+          hp = gethostbyaddr_r(address, length, type, &h,
+                               buffer, 8192, &h_errnop);
+        ]])
+      ],[
+        AC_MSG_RESULT([yes])
+        AC_DEFINE(HAVE_GETHOSTBYADDR_R_7, 1, [gethostbyaddr_r() takes 7 args])
+        ac_cv_gethostbyaddr_r_args="7"
+      ],[
+        AC_MSG_RESULT([no])
+      ])
+    fi
 
-rc = gethostbyaddr_r(address, length, type, &h,
-                     buffer, 8192, &hp, &h_errnop);],[
-	    AC_MSG_RESULT(yes)
-	    AC_DEFINE(HAVE_GETHOSTBYADDR_R_8, 1, [gethostbyaddr_r() takes 8 args])
-	    ac_cv_gethostbyaddr_args=8],[
-	    AC_MSG_RESULT(no)
-	    have_missing_r_funcs="$have_missing_r_funcs gethostbyaddr_r"])])])])])
+    if test "$ac_cv_gethostbyaddr_r_args" = "unknown"; then
+      AC_MSG_CHECKING([if gethostbyaddr_r takes 8 arguments])
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+#include <sys/types.h>
+#include <netdb.h>
+        ]],[[
+          char * address;
+          int length;
+          int type;
+          struct hostent h;
+          char buffer[8192];
+          int h_errnop;
+          struct hostent * hp;
+          int rc;
+          rc = gethostbyaddr_r(address, length, type, &h,
+                               buffer, 8192, &hp, &h_errnop);
+        ]])
+      ],[
+        AC_MSG_RESULT([yes])
+        AC_DEFINE(HAVE_GETHOSTBYADDR_R_8, 1, [gethostbyaddr_r() takes 8 args])
+        ac_cv_gethostbyaddr_r_args="8"
+      ],[
+        AC_MSG_RESULT([no])
+      ])
+    fi
+
+    if test "$ac_cv_gethostbyaddr_r_args" = "unknown"; then
+      AC_MSG_ERROR([couldn't figure out how to use gethostbyaddr_r()])
+    else
+      AC_DEFINE_UNQUOTED(HAVE_GETHOSTBYADDR_R, 1,
+        [Define to 1 if you have the gethostbyaddr_r function.])
+      ac_cv_func_gethostbyaddr_r="yes"
+    fi
+
+  fi
 ])
 
-AC_DEFUN([CURL_CHECK_GETHOSTBYNAME_R],
-[
-  dnl check for number of arguments to gethostbyname_r. it might take
-  dnl either 3, 5, or 6 arguments.
-  AC_CHECK_FUNCS(gethostbyname_r,[
-    AC_MSG_CHECKING([if gethostbyname_r takes 3 arguments])
-    AC_TRY_COMPILE([
-#include <string.h>
-#include <sys/types.h>
-#include <netdb.h>
-#undef NULL
-#define NULL (void *)0
 
-int
-gethostbyname_r(const char *, struct hostent *, struct hostent_data *);],[
-struct hostent_data data;
-gethostbyname_r(NULL, NULL, NULL);],[
-      AC_MSG_RESULT(yes)
-      AC_DEFINE(HAVE_GETHOSTBYNAME_R_3, 1, [gethostbyname_r() takes 3 args])
-      ac_cv_gethostbyname_args=3],[
-      AC_MSG_RESULT(no)
-      AC_MSG_CHECKING([if gethostbyname_r with -D_REENTRANT takes 3 arguments])
-      AC_TRY_COMPILE([
-#define _REENTRANT
+dnl CURL_CHECK_GETHOSTBYNAME_R
+dnl -------------------------------------------------
+dnl check number of arguments for gethostbyname_r, it
+dnl might take either 3, 5, or 6 arguments.
 
-#include <string.h>
-#include <sys/types.h>
-#include <netdb.h>
-#undef NULL
-#define NULL (void *)0
-
-int
-gethostbyname_r(const char *,struct hostent *, struct hostent_data *);],[
-struct hostent_data data;
-gethostbyname_r(NULL, NULL, NULL);],[
-	AC_MSG_RESULT(yes)
-	AC_DEFINE(HAVE_GETHOSTBYNAME_R_3, 1, [gethostbyname_r() takes 3 args])
-	AC_DEFINE(NEED_REENTRANT, 1, [needs REENTRANT])
-	ac_cv_gethostbyname_args=3],[
-	AC_MSG_RESULT(no)
-	AC_MSG_CHECKING([if gethostbyname_r takes 5 arguments])
-	AC_TRY_COMPILE([
-#include <sys/types.h>
-#include <netdb.h>
-#undef NULL
-#define NULL (void *)0
-
-struct hostent *
-gethostbyname_r(const char *, struct hostent *, char *, int, int *);],[
-gethostbyname_r(NULL, NULL, NULL, 0, NULL);],[
-	  AC_MSG_RESULT(yes)
-	  AC_DEFINE(HAVE_GETHOSTBYNAME_R_5, 1, [gethostbyname_r() takes 5 args])
-          ac_cv_gethostbyname_args=5],[
-	  AC_MSG_RESULT(no)
-	  AC_MSG_CHECKING([if gethostbyname_r takes 6 arguments])
-	  AC_TRY_COMPILE([
-#include <sys/types.h>
-#include <netdb.h>
-#undef NULL
-#define NULL (void *)0
-
-int
-gethostbyname_r(const char *, struct hostent *, char *, size_t,
-struct hostent **, int *);],[
-gethostbyname_r(NULL, NULL, NULL, 0, NULL, NULL);],[
-	    AC_MSG_RESULT(yes)
-	    AC_DEFINE(HAVE_GETHOSTBYNAME_R_6, 1, [gethostbyname_r() takes 6 args])
-            ac_cv_gethostbyname_args=6],[
-	    AC_MSG_RESULT(no)
-	    have_missing_r_funcs="$have_missing_r_funcs gethostbyname_r"],
-	    [ac_cv_gethostbyname_args=0])],
-	  [ac_cv_gethostbyname_args=0])],
-	[ac_cv_gethostbyname_args=0])],
-      [ac_cv_gethostbyname_args=0])])
-
-if test "$ac_cv_func_gethostbyname_r" = "yes"; then
-  if test "$ac_cv_gethostbyname_args" = "0"; then
-    dnl there's a gethostbyname_r() function, but we don't know how
-    dnl many arguments it wants!
-    AC_MSG_ERROR([couldn't figure out how to use gethostbyname_r()])
+AC_DEFUN([CURL_CHECK_GETHOSTBYNAME_R], [
+  #
+  AC_MSG_CHECKING([for gethostbyname_r])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([gethostbyname_r])
+  ],[
+    AC_MSG_RESULT([yes])
+    tmp_cv_gethostbyname_r="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tmp_cv_gethostbyname_r="no"
+  ])
+  #
+  if test "$tmp_cv_gethostbyname_r" != "yes"; then
+    AC_MSG_CHECKING([deeper for gethostbyname_r])
+    AC_LINK_IFELSE([
+      AC_LANG_PROGRAM([[
+      ]],[[
+        gethostbyname_r();
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tmp_cv_gethostbyname_r="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tmp_cv_gethostbyname_r="no"
+    ])
   fi
-fi
+  #
+  if test "$tmp_cv_gethostbyname_r" = "yes"; then
+
+    ac_cv_gethostbyname_r_args="unknown"
+
+    AC_MSG_CHECKING([if gethostbyname_r takes 3 arguments])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+#include <string.h>
+#include <sys/types.h>
+#include <netdb.h>
+#undef NULL
+#define NULL (void *)0
+        int
+        gethostbyname_r(const char *, struct hostent *,
+                        struct hostent_data *);
+      ]],[[
+        struct hostent_data data;
+        gethostbyname_r(NULL, NULL, NULL);
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      AC_DEFINE(HAVE_GETHOSTBYNAME_R_3, 1, [gethostbyname_r() takes 3 args])
+      ac_cv_gethostbyname_r_args="3"
+    ],[
+      AC_MSG_RESULT([no])
+    ])
+
+    if test "$ac_cv_gethostbyname_r_args" = "unknown"; then
+      AC_MSG_CHECKING([if gethostbyname_r with -D_REENTRANT takes 3 arguments])
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+#define _REENTRANT
+#include <string.h>
+#include <sys/types.h>
+#include <netdb.h>
+#undef NULL
+#define NULL (void *)0
+          int
+          gethostbyname_r(const char *, struct hostent *,
+                          struct hostent_data *);
+        ]],[[
+          struct hostent_data data;
+          gethostbyname_r(NULL, NULL, NULL);
+        ]])
+      ],[
+        AC_MSG_RESULT([yes])
+        AC_DEFINE(HAVE_GETHOSTBYNAME_R_3, 1, [gethostbyname_r() takes 3 args])
+	AC_DEFINE(NEED_REENTRANT, 1, [need REENTRANT])
+        ac_cv_gethostbyname_r_args="3"
+      ],[
+        AC_MSG_RESULT([no])
+      ])
+    fi
+
+    if test "$ac_cv_gethostbyname_r_args" = "unknown"; then
+      AC_MSG_CHECKING([if gethostbyname_r takes 5 arguments])
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+#include <sys/types.h>
+#include <netdb.h>
+#undef NULL
+#define NULL (void *)0
+          struct hostent *
+          gethostbyname_r(const char *, struct hostent *,
+                          char *, int, int *);
+        ]],[[
+          gethostbyname_r(NULL, NULL, NULL, 0, NULL);
+        ]])
+      ],[
+        AC_MSG_RESULT([yes])
+        AC_DEFINE(HAVE_GETHOSTBYNAME_R_5, 1, [gethostbyname_r() takes 5 args])
+        ac_cv_gethostbyname_r_args="5"
+      ],[
+        AC_MSG_RESULT([no])
+      ])
+    fi
+
+    if test "$ac_cv_gethostbyname_r_args" = "unknown"; then
+      AC_MSG_CHECKING([if gethostbyname_r takes 6 arguments])
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+#include <sys/types.h>
+#include <netdb.h>
+#undef NULL
+#define NULL (void *)0
+          int
+          gethostbyname_r(const char *, struct hostent *,
+                          char *, size_t, struct hostent **, int *);
+        ]],[[
+          gethostbyname_r(NULL, NULL, NULL, 0, NULL, NULL);
+        ]])
+      ],[
+        AC_MSG_RESULT([yes])
+        AC_DEFINE(HAVE_GETHOSTBYNAME_R_6, 1, [gethostbyname_r() takes 6 args])
+        ac_cv_gethostbyname_r_args="6"
+      ],[
+        AC_MSG_RESULT([no])
+      ])
+    fi
+
+    if test "$ac_cv_gethostbyname_r_args" = "unknown"; then
+      AC_MSG_ERROR([couldn't figure out how to use gethostbyname_r()])
+    else
+      AC_DEFINE_UNQUOTED(HAVE_GETHOSTBYNAME_R, 1,
+        [Define to 1 if you have the gethostbyname_r function.])
+      ac_cv_func_gethostbyname_r="yes"
+    fi
+
+  fi
 ])
 
 
