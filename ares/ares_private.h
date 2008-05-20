@@ -279,7 +279,9 @@ int ares__read_line(FILE *fp, char **buf, int *bufsize);
 void ares__free_query(struct query *query);
 short ares__generate_new_id(rc4_key* key);
 struct timeval ares__tvnow(void);
+#if 0 /* Not used */
 long ares__tvdiff(struct timeval t1, struct timeval t2);
+#endif
 
 #define ARES_SWAP_BYTE(a,b) \
   { unsigned char swapByte = *(a);  *(a) = *(b);  *(b) = swapByte; }

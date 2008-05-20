@@ -81,6 +81,7 @@ struct timeval ares__tvnow(void)
 
 #endif
 
+#if 0 /* Not used */
 /*
  * Make sure that the first argument is the more recent time, as otherwise
  * we'll get a weird negative time-diff back...
@@ -92,4 +93,5 @@ long ares__tvdiff(struct timeval newer, struct timeval older)
   return (newer.tv_sec-older.tv_sec)*1000+
     (newer.tv_usec-older.tv_usec)/1000;
 }
+#endif
 
