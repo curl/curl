@@ -33,7 +33,8 @@
  * Define WIN32 when build target is Win32 API
  */
 
-#if (defined(_WIN32) || defined(__WIN32__)) && !defined(WIN32) && !defined(__SYMBIAN32__)
+#if (defined(_WIN32) || defined(__WIN32__)) && \
+     !defined(WIN32) && !defined(__SYMBIAN32__)
 #define WIN32
 #endif
 
@@ -62,7 +63,8 @@
 /* HP-UX systems version 9, 10 and 11 lack sys/select.h and so does oldish
    libc5-based Linux systems. Only include it on system that are known to
    require it! */
-#if defined(_AIX) || defined(__NOVELL_LIBC__) || defined(__NetBSD__) || defined(__minix) || defined(__SYMBIAN32__)
+#if defined(_AIX) || defined(__NOVELL_LIBC__) || defined(__NetBSD__) || \
+    defined(__minix) || defined(__SYMBIAN32__)
 #include <sys/select.h>
 #endif
 
@@ -89,7 +91,8 @@ typedef void CURL;
  * Decorate exportable functions for Win32 and Symbian OS DLL linking.
  * This avoids using a .def file for building libcurl.dll.
  */
-#if (defined(WIN32) || defined(_WIN32) || defined(__SYMBIAN32__)) && !defined(CURL_STATICLIB)
+#if (defined(WIN32) || defined(_WIN32) || defined(__SYMBIAN32__)) && \
+     !defined(CURL_STATICLIB)
 #if defined(BUILDING_LIBCURL)
 #define CURL_EXTERN  __declspec(dllexport)
 #else
@@ -118,7 +121,8 @@ typedef void CURL;
  * Note: "pocc -Ze" is MSVC compatibility mode and this sets _MSC_VER!
  */
 
-#if (defined(_MSC_VER) && !defined(__POCC__)) || (defined(__LCC__) && defined(WIN32))
+#if (defined(_MSC_VER) && !defined(__POCC__)) || (defined(__LCC__) && \
+     defined(WIN32))
 /* MSVC */
 #ifdef _WIN32_WCE
   typedef long curl_off_t;
@@ -1379,9 +1383,11 @@ CURL_EXTERN CURLFORMcode curl_formadd(struct curl_httppost **httppost,
 
 /*
  * callback function for curl_formget()
- * The void *arg pointer will be the one passed as second argument to curl_formget().
+ * The void *arg pointer will be the one passed as second argument to
+ *   curl_formget().
  * The character buffer passed to it must not be freed.
- * Should return the buffer length passed to it as the argument "len" on success.
+ * Should return the buffer length passed to it as the argument "len" on
+ *   success.
  */
 typedef size_t (*curl_formget_callback)(void *arg, const char *buf, size_t len);
 

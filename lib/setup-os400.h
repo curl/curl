@@ -137,4 +137,20 @@ extern OM_uint32 Curl_gss_delete_sec_context_a(OM_uint32 * minor_status,
 #define ldap_first_attribute    Curl_ldap_first_attribute_a
 #define ldap_next_attribute     Curl_ldap_next_attribute_a
 
+/* Some socket functions must be wrapped to process textual addresses
+   like AF_UNIX. */
+
+extern int Curl_os400_connect(int sd, struct sockaddr * destaddr, int addrlen);
+extern int Curl_os400_bind(int sd, struct sockaddr * localaddr, int addrlen);
+extern int Curl_os400_sendto(int sd, char * buffer, int buflen, int flags,
+            struct sockaddr * dstaddr, int addrlen);
+extern int Curl_os400_recvfrom(int sd, char * buffer, int buflen, int flags,
+                                struct sockaddr * fromaddr, int * addrlen);
+
+#define connect                 Curl_os400_connect
+#define bind                    Curl_os400_bind
+#define sendto                  Curl_os400_sendto
+#define recvfrom                Curl_os400_recvfrom
+
+
 #endif /* __SETUP_OS400_H */

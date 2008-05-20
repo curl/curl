@@ -382,6 +382,8 @@
      d                 c                   79
      d  CURLE_SSL_SHUTDOWN_FAILED...
      d                 c                   80
+     d  CURLE_AGAIN...
+     d                 c                   81
       *
      d curlioerr       s             10i 0 based(######ptr######)               Enum
      d  CURLIOE_OK     c                   0
@@ -872,15 +874,17 @@
      d  CURLINFO_OS_ERRNO...                                                    CURLINFO_LONG   + 25
      d                 c                   X'00200019'
      d  CURLINFO_NUM_CONNECTS...                                                CURLINFO_LONG   + 26
-     d                 c                   X'00200020'
+     d                 c                   X'0020001A'
      d  CURLINFO_SSL_ENGINES...                                                 CURLINFO_SLIST  + 27
-     d                 c                   X'00400021'
+     d                 c                   X'0040001B'
      d  CURLINFO_COOKIELIST...                                                  CURLINFO_SLIST  + 28
-     d                 c                   X'00400022'
+     d                 c                   X'0040001C'
      d  CURLINFO_LASTSOCKET...                                                  CURLINFO_LONG   + 29
-     d                 c                   X'00200023'
+     d                 c                   X'0020001D'
      d  CURLINFO_FTP_ENTRY_PATH...                                              CURLINFO_STRING + 30
-     d                 c                   X'00100024'
+     d                 c                   X'0010001E'
+     d  CURLINFO_REDIRECT_URL...                                                CURLINFO_STRING + 31
+     d                 c                   X'0010001F'
      d  CURLINFO_HTTP_CODE...                                                   Old ...RESPONSE_CODE
      d                 c                   X'00200002'
       *
@@ -1113,6 +1117,9 @@
      d curl_read_callback...
      d                 s               *   based(######ptr######) procptr
       *
+     d curl_write_callback...
+     d                 s               *   based(######ptr######) procptr
+      *
      d curl_seek_callback...
      d                 s               *   based(######ptr######) procptr
       *
@@ -1164,7 +1171,7 @@
      d curl_strnequal  pr            10i 0 extproc('curl_strnequal')
      d  s1                             *   value options(*string)
      d  s2                             *   value options(*string)
-     d  n                            10i 0 value
+     d  n                            10u 0 value
       *
      d curl_formget    pr            10i 0 extproc('curl_formget')
      d  form                           *   value                                curl_httppost *
@@ -1358,6 +1365,22 @@
      d curl_easy_reset...
      d                 pr                  extproc('curl_easy_reset')
      d  curl                           *   value                                CURL *
+      *
+     d curl_easy_recv...
+     d                 pr                  extproc('curl_easy_recv')
+     d                                     like(CURLcode)
+     d  curl                           *   value                                CURL *
+     d  buffer                         *   value                                void *
+     d  buflen                       10u 0 value                                size_t
+     d  n                            10u 0                                      size_t *
+      *
+     d curl_easy_send...
+     d                 pr                  extproc('curl_easy_send')
+     d                                     like(CURLcode)
+     d  curl                           *   value                                CURL *
+     d  buffer                         *   value                                const void *
+     d  buflen                       10u 0 value                                size_t
+     d  n                            10u 0                                      size_t *
       *
      d curl_easy_pause...
      d                 pr                  extproc('curl_easy_pause')

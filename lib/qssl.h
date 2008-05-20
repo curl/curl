@@ -38,7 +38,7 @@ int Curl_qsossl_shutdown(struct connectdata * conn, int sockindex);
 
 ssize_t Curl_qsossl_send(struct connectdata * conn,
                          int sockindex,
-                         void * mem,
+                         const void * mem,
                          size_t len);
 ssize_t Curl_qsossl_recv(struct connectdata * conn, /* connection data */
                          int num,                   /* socketindex */

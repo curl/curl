@@ -24,12 +24,14 @@
 
 /* OS/400 additional support. */
 
-#include "config-os400.h"	/* Not setup.h: we only need some defines. */
+#include "config-os400.h"       /* Not setup.h: we only need some defines. */
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/un.h>
 
 #include <stdlib.h>
+#include <stddef.h>
 #include <string.h>
 #include <pthread.h>
 #include <netdb.h>
@@ -965,3 +967,145 @@ Curl_ldap_next_attribute_a(void * ld,
 }
 
 #endif /* CURL_DISABLE_LDAP */
+
+
+static int
+convert_sockaddr(struct sockaddr_storage * dstaddr,
+                                const struct sockaddr * srcaddr, int srclen)
+
+{
+  const struct sockaddr_un * srcu;
+  struct sockaddr_un * dstu;
+  unsigned int i;
+  unsigned int dstsize;
+
+  /* Convert a socket address into job CCSID, if needed. */
+
+  if (!srcaddr || srclen < offsetof(struct sockaddr, sa_family) +
+      sizeof srcaddr->sa_family || srclen > sizeof *dstaddr) {
+    errno = EINVAL;
+    return -1;
+    }
+
+  memcpy((char *) dstaddr, (char *) srcaddr, srclen);
+
+  switch (srcaddr->sa_family) {
+
+  case AF_UNIX:
+    srcu = (const struct sockaddr_un *) srcaddr;
+    dstu = (struct sockaddr_un *) dstaddr;
+    dstsize = sizeof *dstaddr - offsetof(struct sockaddr_un, sun_path);
+    srclen -= offsetof(struct sockaddr_un, sun_path);
+    i = QadrtConvertA2E(dstu->sun_path, srcu->sun_path, dstsize - 1, srclen);
+    dstu->sun_path[i] = '\0';
+    i += offsetof(struct sockaddr_un, sun_path);
+    srclen = i;
+    }
+
+  return srclen;
+}
+
+
+int
+Curl_os400_connect(int sd, struct sockaddr * destaddr, int addrlen)
+
+{
+  int i;
+  struct sockaddr_storage laddr;
+
+  i = convert_sockaddr(&laddr, destaddr, addrlen);
+
+  if (i < 0)
+    return -1;
+
+  return connect(sd, (struct sockaddr *) &laddr, i);
+}
+
+
+int
+Curl_os400_bind(int sd, struct sockaddr * localaddr, int addrlen)
+
+{
+  int i;
+  struct sockaddr_storage laddr;
+
+  i = convert_sockaddr(&laddr, localaddr, addrlen);
+
+  if (i < 0)
+    return -1;
+
+  return bind(sd, (struct sockaddr *) &laddr, i);
+}
+
+
+int
+Curl_os400_sendto(int sd, char * buffer, int buflen, int flags,
+                                struct sockaddr * dstaddr, int addrlen)
+
+{
+  int i;
+  struct sockaddr_storage laddr;
+
+  i = convert_sockaddr(&laddr, dstaddr, addrlen);
+
+  if (i < 0)
+    return -1;
+
+  return sendto(sd, buffer, buflen, flags, (struct sockaddr *) &laddr, i);
+}
+
+
+int
+Curl_os400_recvfrom(int sd, char * buffer, int buflen, int flags,
+                                struct sockaddr * fromaddr, int * addrlen)
+
+{
+  int i;
+  int rcvlen;
+  int laddrlen;
+  const struct sockaddr_un * srcu;
+  struct sockaddr_un * dstu;
+  struct sockaddr_storage laddr;
+
+  if (!fromaddr || !addrlen || *addrlen <= 0)
+    return recvfrom(sd, buffer, buflen, flags, fromaddr, addrlen);
+
+  laddrlen = sizeof laddr;
+  laddr.ss_family = AF_UNSPEC;          /* To detect if unused. */
+  rcvlen = recvfrom(sd, buffer, buflen, flags,
+                    (struct sockaddr *) &laddr, &laddrlen);
+
+  if (rcvlen < 0)
+    return rcvlen;
+
+  switch (laddr.ss_family) {
+
+  case AF_UNIX:
+    srcu = (const struct sockaddr_un *) &laddr;
+    dstu = (struct sockaddr_un *) fromaddr;
+    i = *addrlen - offsetof(struct sockaddr_un, sun_path);
+    laddrlen -= offsetof(struct sockaddr_un, sun_path);
+    i = QadrtConvertE2A(dstu->sun_path, srcu->sun_path, i, laddrlen);
+    laddrlen = i + offsetof(struct sockaddr_un, sun_path);
+
+    if (laddrlen < *addrlen)
+      dstu->sun_path[i] = '\0';
+
+    break;
+
+  case AF_UNSPEC:
+    break;
+
+  default:
+    if (laddrlen > *addrlen)
+      laddrlen = *addrlen;
+
+    if (laddrlen)
+      memcpy((char *) fromaddr, (char *) &laddr, laddrlen);
+
+    break;
+    }
+
+  *addrlen = laddrlen;
+  return rcvlen;
+}

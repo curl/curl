@@ -372,15 +372,15 @@ int Curl_qsossl_shutdown(struct connectdata * conn, int sockindex)
 }
 
 
-ssize_t Curl_qsossl_send(struct connectdata * conn, int sockindex, void * mem,
-                         size_t len)
+ssize_t Curl_qsossl_send(struct connectdata * conn, int sockindex,
+                         const void * mem, size_t len)
 
 {
   /* SSL_Write() is said to return 'int' while write() and send() returns
      'size_t' */
   int rc;
 
-  rc = SSL_Write(conn->ssl[sockindex].handle, mem, (int) len);
+  rc = SSL_Write(conn->ssl[sockindex].handle, (void *) mem, (int) len);
 
   if(rc < 0) {
     switch(rc) {

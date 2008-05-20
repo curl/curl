@@ -322,6 +322,9 @@
 /* Define if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H
 
+/* Define if you have the <sys/un.h> header file. */
+#define HAVE_SYS_UN_H
+
 /* Define if you have the <sys/ioctl.h> header file. */
 #define HAVE_SYS_IOCTL_H
 
@@ -378,6 +381,9 @@
 #endif
 
 #define SIZEOF_CURL_OFF_T 8
+
+/* Define this if you have struct sockaddr_storage */
+#define HAVE_STRUCT_SOCKADDR_STORAGE
 
 /* Define if you have the ANSI C header files. */
 #define STDC_HEADERS
