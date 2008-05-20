@@ -7,19 +7,19 @@ dnl Check for compilable and valid windows.h header
 AC_DEFUN([CURL_CHECK_HEADER_WINDOWS], [
   AC_CACHE_CHECK([for windows.h], [ac_cv_header_windows_h], [
     AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([
+      AC_LANG_PROGRAM([[
 #undef inline
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
-      ],[
+      ]],[[
 #if defined(__CYGWIN__) || defined(__CEGCC__)
         HAVE_WINDOWS_H shall not be defined.
 #else
         int dummy=2*WINVER;
 #endif
-      ])
+      ]])
     ],[
       ac_cv_header_windows_h="yes"
     ],[
@@ -48,14 +48,14 @@ AC_DEFUN([CURL_CHECK_NATIVE_WINDOWS], [
       ac_cv_native_windows="no"
     else
       AC_COMPILE_IFELSE([
-        AC_LANG_PROGRAM([
-        ],[
+        AC_LANG_PROGRAM([[
+        ]],[[
 #if defined(__MINGW32__) || defined(__MINGW32CE__)
           int dummy=1;
 #else
           Not a native Windows build target.
 #endif
-        ])
+        ]])
       ],[
         ac_cv_native_windows="yes"
       ],[
@@ -80,20 +80,20 @@ AC_DEFUN([CURL_CHECK_HEADER_WINSOCK], [
   AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
   AC_CACHE_CHECK([for winsock.h], [ac_cv_header_winsock_h], [
     AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([
+      AC_LANG_PROGRAM([[
 #undef inline
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
 #include <winsock.h>
-      ],[
+      ]],[[
 #if defined(__CYGWIN__) || defined(__CEGCC__)
         HAVE_WINSOCK_H shall not be defined.
 #else
         int dummy=WSACleanup();
 #endif
-      ])
+      ]])
     ],[
       ac_cv_header_winsock_h="yes"
     ],[
@@ -117,20 +117,20 @@ AC_DEFUN([CURL_CHECK_HEADER_WINSOCK2], [
   AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
   AC_CACHE_CHECK([for winsock2.h], [ac_cv_header_winsock2_h], [
     AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([
+      AC_LANG_PROGRAM([[
 #undef inline
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
 #include <winsock2.h>
-      ],[
+      ]],[[
 #if defined(__CYGWIN__) || defined(__CEGCC__) || defined(__MINGW32CE__)
         HAVE_WINSOCK2_H shall not be defined.
 #else
         int dummy=2*IPPROTO_ESP;
 #endif
-      ])
+      ]])
     ],[
       ac_cv_header_winsock2_h="yes"
     ],[
@@ -154,7 +154,7 @@ AC_DEFUN([CURL_CHECK_HEADER_WS2TCPIP], [
   AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
   AC_CACHE_CHECK([for ws2tcpip.h], [ac_cv_header_ws2tcpip_h], [
     AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([
+      AC_LANG_PROGRAM([[
 #undef inline
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -162,13 +162,13 @@ AC_DEFUN([CURL_CHECK_HEADER_WS2TCPIP], [
 #include <windows.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
-      ],[
+      ]],[[
 #if defined(__CYGWIN__) || defined(__CEGCC__) || defined(__MINGW32CE__)
         HAVE_WS2TCPIP_H shall not be defined.
 #else
         int dummy=2*IP_PKTINFO;
 #endif
-      ])
+      ]])
     ],[
       ac_cv_header_ws2tcpip_h="yes"
     ],[
@@ -192,14 +192,14 @@ dnl and check if it is needed even with stdlib.h
 AC_DEFUN([CURL_CHECK_HEADER_MALLOC], [
   AC_CACHE_CHECK([for malloc.h], [ac_cv_header_malloc_h], [
     AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([
+      AC_LANG_PROGRAM([[
 #include <malloc.h>
-      ],[
+      ]],[[
         void *p = malloc(10);
         void *q = calloc(10,10);
         free(p);
         free(q);
-      ])
+      ]])
     ],[
       ac_cv_header_malloc_h="yes"
     ],[
@@ -211,14 +211,14 @@ AC_DEFUN([CURL_CHECK_HEADER_MALLOC], [
       [Define to 1 if you have the malloc.h header file.])
     #
     AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([
+      AC_LANG_PROGRAM([[
 #include <stdlib.h>
-      ],[
+      ]],[[
         void *p = malloc(10);
         void *q = calloc(10,10);
         free(p);
         free(q);
-      ])
+      ]])
     ],[
       curl_cv_need_header_malloc_h="no"
     ],[
@@ -255,7 +255,7 @@ AC_DEFUN([CURL_CHECK_TYPE_SOCKLEN_T], [
         for arg2 in "struct sockaddr" void; do
           for t in int size_t unsigned long "unsigned long"; do
             AC_COMPILE_IFELSE([
-              AC_LANG_PROGRAM([
+              AC_LANG_PROGRAM([[
 #undef inline
 #ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
@@ -280,10 +280,10 @@ AC_DEFUN([CURL_CHECK_TYPE_SOCKLEN_T], [
 #define GETPEERNCALLCONV
 #endif
                 extern int GETPEERNCALLCONV getpeername ($arg1, $arg2 *, $t *);
-              ],[
+              ]],[[
                 $t len=0;
                 getpeername(0,0,&len);
-              ])
+              ]])
             ],[
                curl_cv_socklen_t_equiv="$t"
                break 3
@@ -358,10 +358,10 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
   if test "$curl_cv_getnameinfo" != "yes"; then
     AC_MSG_CHECKING([deeper for getnameinfo])
     AC_LINK_IFELSE([
-      AC_LANG_PROGRAM([
-      ],[
+      AC_LANG_PROGRAM([[
+      ]],[[
         getnameinfo();
-      ])
+      ]])
     ],[
       AC_MSG_RESULT([yes])
       curl_cv_getnameinfo="yes"
@@ -374,7 +374,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
   if test "$curl_cv_getnameinfo" != "yes"; then
     AC_MSG_CHECKING([deeper and deeper for getnameinfo])
     AC_LINK_IFELSE([
-      AC_LANG_PROGRAM([
+      AC_LANG_PROGRAM([[
 #undef inline
 #ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
@@ -398,9 +398,9 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
 #include <netdb.h>
 #endif
 #endif
-      ],[
+      ]],[[
         getnameinfo(0, 0, 0, 0, 0, 0, 0);
-      ])
+      ]])
     ],[
       AC_MSG_RESULT([yes])
       curl_cv_getnameinfo="yes"
@@ -419,7 +419,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
           for gni_arg46 in 'size_t' 'int' 'socklen_t' 'unsigned int' 'DWORD'; do
             for gni_arg7 in 'int' 'unsigned int'; do
               AC_COMPILE_IFELSE([
-                AC_LANG_PROGRAM([
+                AC_LANG_PROGRAM([[
 #undef inline 
 #ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
@@ -453,13 +453,13 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
                                          char *, $gni_arg46,
                                          char *, $gni_arg46,
                                          $gni_arg7);
-                ],[
+                ]],[[
                   $gni_arg2 salen=0;
                   $gni_arg46 hostlen=0;
                   $gni_arg46 servlen=0;
                   $gni_arg7 flags=0;
                   int res = getnameinfo(0, salen, 0, hostlen, 0, servlen, flags);
-                ])
+                ]])
               ],[
                  curl_cv_func_getnameinfo_args="$gni_arg1,$gni_arg2,$gni_arg46,$gni_arg7"
                  break 4
@@ -580,7 +580,7 @@ AC_DEFUN([CURL_CHECK_NI_WITHSCOPEID], [
   AC_CACHE_CHECK([for working NI_WITHSCOPEID], 
     [ac_cv_working_ni_withscopeid], [
     AC_RUN_IFELSE([
-      AC_LANG_PROGRAM([
+      AC_LANG_PROGRAM([[
 #ifdef HAVE_STDIO_H
 #include <stdio.h>
 #endif
@@ -599,7 +599,7 @@ AC_DEFUN([CURL_CHECK_NI_WITHSCOPEID], [
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-      ],[
+      ]],[[
 #if defined(NI_WITHSCOPEID) && defined(HAVE_GETNAMEINFO)
 #ifdef HAVE_STRUCT_SOCKADDR_STORAGE
         struct sockaddr_storage sa;
@@ -630,7 +630,7 @@ AC_DEFUN([CURL_CHECK_NI_WITHSCOPEID], [
 #else
         return 4; /* Error, NI_WITHSCOPEID not defined or no getnameinfo() */
 #endif
-      ]) # AC_LANG_PROGRAM
+      ]]) # AC_LANG_PROGRAM
     ],[
       # Exit code == 0. Program worked.
       ac_cv_working_ni_withscopeid="yes"
@@ -641,13 +641,13 @@ AC_DEFUN([CURL_CHECK_NI_WITHSCOPEID], [
       # Program is not run when cross-compiling. So we assume
       # NI_WITHSCOPEID will work if we are able to compile it.
       AC_COMPILE_IFELSE([
-        AC_LANG_PROGRAM([
+        AC_LANG_PROGRAM([[
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
-        ],[
+        ]],[[
           unsigned int dummy= NI_NUMERICHOST | NI_NUMERICSERV | NI_WITHSCOPEID;
-        ])
+        ]])
       ],[
         ac_cv_working_ni_withscopeid="yes"
       ],[
@@ -681,7 +681,7 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
   #
   AC_MSG_CHECKING([for recv])
   AC_LINK_IFELSE([
-    AC_LANG_PROGRAM([
+    AC_LANG_PROGRAM([[
 #undef inline 
 #ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
@@ -703,9 +703,9 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
 #include <sys/socket.h>
 #endif
 #endif
-    ],[
+    ]],[[
       recv(0, 0, 0, 0);
-    ])
+    ]])
   ],[
     AC_MSG_RESULT([yes])
     curl_cv_recv="yes"
@@ -724,7 +724,7 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
             for recv_arg3 in 'size_t' 'int' 'socklen_t' 'unsigned int'; do
               for recv_arg4 in 'int' 'unsigned int'; do
                 AC_COMPILE_IFELSE([
-                  AC_LANG_PROGRAM([
+                  AC_LANG_PROGRAM([[
 #undef inline 
 #ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
@@ -749,13 +749,13 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
 #define RECVCALLCONV
 #endif
                     extern $recv_retv RECVCALLCONV recv($recv_arg1, $recv_arg2, $recv_arg3, $recv_arg4);
-                  ],[
+                  ]],[[
                     $recv_arg1 s=0;
                     $recv_arg2 buf=0;
                     $recv_arg3 len=0;
                     $recv_arg4 flags=0;
                     $recv_retv res = recv(s, buf, len, flags);
-                  ])
+                  ]])
                 ],[
                    curl_cv_func_recv_args="$recv_arg1,$recv_arg2,$recv_arg3,$recv_arg4,$recv_retv"
                    break 5
@@ -813,7 +813,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
   #
   AC_MSG_CHECKING([for send])
   AC_LINK_IFELSE([
-    AC_LANG_PROGRAM([
+    AC_LANG_PROGRAM([[
 #undef inline 
 #ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
@@ -835,9 +835,9 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
 #include <sys/socket.h>
 #endif
 #endif
-    ],[
+    ]],[[
       send(0, 0, 0, 0);
-    ])
+    ]])
   ],[
     AC_MSG_RESULT([yes])
     curl_cv_send="yes"
@@ -856,7 +856,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
             for send_arg3 in 'size_t' 'int' 'socklen_t' 'unsigned int'; do
               for send_arg4 in 'int' 'unsigned int'; do
                 AC_COMPILE_IFELSE([
-                  AC_LANG_PROGRAM([
+                  AC_LANG_PROGRAM([[
 #undef inline 
 #ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
@@ -881,12 +881,12 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
 #define SENDCALLCONV
 #endif
                     extern $send_retv SENDCALLCONV send($send_arg1, $send_arg2, $send_arg3, $send_arg4);
-                  ],[
+                  ]],[[
                     $send_arg1 s=0;
                     $send_arg3 len=0;
                     $send_arg4 flags=0;
                     $send_retv res = send(s, 0, len, flags);
-                  ])
+                  ]])
                 ],[
                    curl_cv_func_send_args="$send_arg1,$send_arg2,$send_arg3,$send_arg4,$send_retv"
                    break 5
@@ -968,7 +968,7 @@ AC_DEFUN([CURL_CHECK_MSG_NOSIGNAL], [
   AC_CHECK_HEADERS(sys/types.h sys/socket.h)
   AC_CACHE_CHECK([for MSG_NOSIGNAL], [ac_cv_msg_nosignal], [
     AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([
+      AC_LANG_PROGRAM([[
 #undef inline 
 #ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
@@ -990,9 +990,9 @@ AC_DEFUN([CURL_CHECK_MSG_NOSIGNAL], [
 #include <sys/socket.h>
 #endif
 #endif
-      ],[
+      ]],[[
         int flag=MSG_NOSIGNAL;
-      ])
+      ]])
     ],[
       ac_cv_msg_nosignal="yes"
     ],[
@@ -1019,7 +1019,7 @@ AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
   AC_CHECK_HEADERS(sys/types.h sys/time.h time.h)
   AC_CACHE_CHECK([for struct timeval], [ac_cv_struct_timeval], [
     AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([
+      AC_LANG_PROGRAM([[
 #undef inline 
 #ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
@@ -1047,11 +1047,11 @@ AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
 #include <time.h>
 #endif
 #endif
-      ],[
+      ]],[[
         struct timeval ts;
         ts.tv_sec  = 0;
         ts.tv_usec = 0;
-      ])
+      ]])
     ],[
       ac_cv_struct_timeval="yes"
     ],[
@@ -1087,13 +1087,13 @@ AC_DEFUN([TYPE_SIG_ATOMIC_T], [
       #
       AC_MSG_CHECKING([if sig_atomic_t is already defined as volatile])
       AC_LINK_IFELSE([
-        AC_LANG_PROGRAM([
+        AC_LANG_PROGRAM([[
 #ifdef HAVE_SIGNAL_H
 #include <signal.h>
 #endif
-        ],[
+        ]],[[
           static volatile sig_atomic_t dummy = 0;
-        ])
+        ]])
       ],[
         AC_MSG_RESULT([no])
         ac_cv_sig_atomic_t_volatile="no"
@@ -1266,7 +1266,7 @@ AC_DEFUN([TYPE_IN_ADDR_T],
          curl_cv_in_addr_t_equiv=
          for t in "unsigned long" int size_t unsigned long; do
             AC_LINK_IFELSE([
-              AC_LANG_PROGRAM([
+              AC_LANG_PROGRAM([[
 #undef inline
 #ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
@@ -1294,9 +1294,9 @@ AC_DEFUN([TYPE_IN_ADDR_T],
 #include <arpa/inet.h>
 #endif
 #endif
-              ],[
+              ]],[[
                 $t data = inet_addr ("1.2.3.4");
-              ])
+              ]])
             ],[
               curl_cv_in_addr_t_equiv="$t"
               break
@@ -1350,7 +1350,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
   AC_CHECK_HEADERS(sys/types.h sys/time.h time.h)
   AC_MSG_CHECKING([for monotonic clock_gettime])
   AC_COMPILE_IFELSE([
-    AC_LANG_PROGRAM([
+    AC_LANG_PROGRAM([[
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -1364,10 +1364,10 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
 #include <time.h>
 #endif
 #endif
-    ],[
+    ]],[[
       struct timespec ts;
       (void)clock_gettime(CLOCK_MONOTONIC, &ts);
-    ])
+    ]])
   ],[
     AC_MSG_RESULT([yes])
     ac_cv_func_clock_gettime="yes"
@@ -1401,7 +1401,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
         LIBS="$x_xlibs $curl_cv_save_LIBS"
       fi
       AC_LINK_IFELSE([
-        AC_LANG_PROGRAM([
+        AC_LANG_PROGRAM([[
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -1415,10 +1415,10 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
 #include <time.h>
 #endif
 #endif
-        ],[
+        ]],[[
           struct timespec ts;
           (void)clock_gettime(CLOCK_MONOTONIC, &ts);
-        ])
+        ]])
       ],[
         curl_cv_gclk_LIBS="$x_xlibs"
         break
@@ -1669,28 +1669,28 @@ AC_DEFUN([CARES_CHECK_GETSERVBYPORT_R], [
   ac_func_getservbyport_r="unknown"
 
   AC_LINK_IFELSE([
-    AC_LANG_PROGRAM([
+    AC_LANG_PROGRAM([[
 #include <netdb.h>
-    ],[
+    ]],[[
       int p1, p5;
       char *p2, p4[4096];
       struct servent *p3, *p6;
       getservbyport_r(p1, p2, p3, p4, p5, &p6);
-    ])
+    ]])
   ],[
     ac_func_getservbyport_r="6"
   ])
 
   if test "$ac_func_getservbyport_r" = "unknown"; then
     AC_LINK_IFELSE([
-      AC_LANG_PROGRAM([
+      AC_LANG_PROGRAM([[
 #include <netdb.h>
-      ],[
+      ]],[[
         int p1, p5;
         char *p2, p4[4096];
         struct servent *p3;
         getservbyport_r(p1, p2, p3, p4, p5);
-      ])
+      ]])
     ],[
       ac_func_getservbyport_r="5"
     ])
@@ -1698,15 +1698,15 @@ AC_DEFUN([CARES_CHECK_GETSERVBYPORT_R], [
 
   if test "$ac_func_getservbyport_r" = "unknown"; then
     AC_LINK_IFELSE([
-      AC_LANG_PROGRAM([
+      AC_LANG_PROGRAM([[
 #include <netdb.h>
-      ],[
+      ]],[[
         int p1;
         char *p2;
         struct servent *p3;
         struct servent_data p4;
         getservbyport_r(p1, p2, p3, &p4);
-      ])
+      ]])
     ],[
       ac_func_getservbyport_r="4"
     ])

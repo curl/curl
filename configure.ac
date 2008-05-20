@@ -2251,7 +2251,7 @@ AC_HELP_STRING([--disable-ares],[Disable c-ares for name lookups]),
          dnl check it because it might not have been built yet)
          AC_MSG_CHECKING([that c-ares is good and recent enough])
          AC_LINK_IFELSE([
-           AC_LANG_PROGRAM([
+           AC_LANG_PROGRAM([[
 #include <ares.h>
              /* set of dummy functions in case c-ares was built with debug */
              void curl_dofree() { }
@@ -2259,11 +2259,11 @@ AC_HELP_STRING([--disable-ares],[Disable c-ares for name lookups]),
              void curl_domalloc() { }
              void curl_docalloc() { }
              void curl_socket() { }
-           ],[
+           ]],[[
              ares_channel channel;
              ares_cancel(channel); /* added in 1.2.0 */
              ares_process_fd(channel, 0, 0); /* added in 1.4.0 */
-           ])
+           ]])
          ],[
            AC_MSG_RESULT([yes])
          ],[
