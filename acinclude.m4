@@ -2443,7 +2443,7 @@ AC_DEFUN([CURL_CHECK_GETHOSTBYADDR_R], [
       AC_MSG_RESULT([yes])
       tmp_cv_gethostbyaddr_r="yes"
     ],[
-      AC_MSG_RESULT([no])
+      AC_MSG_RESULT([but still no])
       tmp_cv_gethostbyaddr_r="no"
     ])
   fi
@@ -2554,13 +2554,17 @@ AC_DEFUN([CURL_CHECK_GETHOSTBYADDR_R], [
     fi
 
     if test "$ac_cv_gethostbyaddr_r_args" = "unknown"; then
-      AC_MSG_ERROR([couldn't figure out how to use gethostbyaddr_r()])
+      AC_MSG_WARN([Cannot find out how to use gethostbyaddr_r])
+      AC_MSG_WARN([HAVE_GETHOSTBYADDR_R will not be defined])
+      ac_cv_func_gethostbyaddr_r="no"
     else
       AC_DEFINE_UNQUOTED(HAVE_GETHOSTBYADDR_R, 1,
         [Define to 1 if you have the gethostbyaddr_r function.])
       ac_cv_func_gethostbyaddr_r="yes"
     fi
 
+  else
+    ac_cv_func_gethostbyaddr_r="no"
   fi
 ])
 
@@ -2594,7 +2598,7 @@ AC_DEFUN([CURL_CHECK_GETHOSTBYNAME_R], [
       AC_MSG_RESULT([yes])
       tmp_cv_gethostbyname_r="yes"
     ],[
-      AC_MSG_RESULT([no])
+      AC_MSG_RESULT([but still no])
       tmp_cv_gethostbyname_r="no"
     ])
   fi
@@ -2700,13 +2704,17 @@ AC_DEFUN([CURL_CHECK_GETHOSTBYNAME_R], [
     fi
 
     if test "$ac_cv_gethostbyname_r_args" = "unknown"; then
-      AC_MSG_ERROR([couldn't figure out how to use gethostbyname_r()])
+      AC_MSG_WARN([Cannot find out how to use gethostbyname_r])
+      AC_MSG_WARN([HAVE_GETHOSTBYNAME_R will not be defined])
+      ac_cv_func_gethostbyname_r="no"
     else
       AC_DEFINE_UNQUOTED(HAVE_GETHOSTBYNAME_R, 1,
         [Define to 1 if you have the gethostbyname_r function.])
       ac_cv_func_gethostbyname_r="yes"
     fi
 
+  else
+    ac_cv_func_gethostbyname_r="no"
   fi
 ])
 
