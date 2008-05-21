@@ -91,7 +91,7 @@
 #include "memdebug.h"
 
 #if defined(WIN32) || defined(MSDOS) || defined(__EMX__) || defined(__SYMBIAN32__)
-#define MSDOS_FILESYSTEM 1
+#define DOS_FILESYSTEM 1
 #endif
 
 /*
@@ -189,7 +189,7 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
   char *real_path = curl_easy_unescape(data, data->state.path, 0, NULL);
   struct FILEPROTO *file;
   int fd;
-#ifdef MSDOS_FILESYSTEM
+#ifdef DOS_FILESYSTEM
   int i;
   char *actual_path;
 #endif
@@ -220,7 +220,7 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
     file->fd = -1;
   }
 
-#ifdef MSDOS_FILESYSTEM
+#ifdef DOS_FILESYSTEM
   /* If the first character is a slash, and there's
      something that looks like a drive at the beginning of
      the path, skip the slash.  If we remove the initial
@@ -282,7 +282,7 @@ static CURLcode file_done(struct connectdata *conn,
   return CURLE_OK;
 }
 
-#ifdef MSDOS_FILESYSTEM
+#ifdef DOS_FILESYSTEM
 #define DIRSEP '\\'
 #else
 #define DIRSEP '/'
@@ -322,7 +322,7 @@ static CURLcode file_upload(struct connectdata *conn)
   else {
     int fd;
 
-#ifdef MSDOS_FILESYSTEM
+#ifdef DOS_FILESYSTEM
     fd = open(file->path, O_WRONLY|O_CREAT|O_TRUNC|O_BINARY,
               conn->data->set.new_file_perms);
 #else
