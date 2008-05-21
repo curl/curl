@@ -113,9 +113,6 @@
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
-#define _MPRINTF_REPLACE /* use our functions only */
-#include <curl/mprintf.h>
-
 /* The last #include file should be: */
 #ifdef CURLDEBUG
 #include "memdebug.h"
