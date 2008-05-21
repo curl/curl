@@ -26,7 +26,7 @@
 /* Define if you can safely include both <sys/time.h> and <time.h>.  */
 #define TIME_WITH_SYS_TIME 1
 
-/* Define this to 'int' if socklen_t is not an available typedefed type */
+/* Type to use in place of socklen_t when system does not provide it.  */
 #define socklen_t size_t
 
 /* The number of bytes in a long double.  */

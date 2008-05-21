@@ -44,7 +44,7 @@
 /* Define this to 'int' if ssize_t is not an available typedefed type */
 #undef ssize_t
 
-/* Define this to 'int' if socklen_t is not an available typedefed type */
+/* Type to use in place of socklen_t when system does not provide it. */
 #undef socklen_t
 
 /* Define this as a suitable file to read random data from */
@@ -380,9 +380,6 @@
 
 /* Define to `unsigned' if <sys/types.h> does not define. */
 #undef size_t
-
-/* type to use in place of socklen_t if not defined */
-#undef socklen_t
 
 /* Define to `int' if <sys/types.h> does not define. */
 #undef ssize_t

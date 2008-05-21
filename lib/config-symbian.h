@@ -785,7 +785,7 @@
 /* Define to `unsigned int' if <sys/types.h> does not define. */
 /* #undef size_t */
 
-/* type to use in place of socklen_t if not defined */
+/* Type to use in place of socklen_t when system does not provide it. */
 /* #undef socklen_t */
 
 /* the signed version of size_t */
