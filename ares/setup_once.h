@@ -100,11 +100,10 @@ struct timeval {
  * definition is present the other one also is available.
  */
 
-#if defined(WIN32) && !defined(HAVE_SOCKLEN_T)
+#if defined(WIN32) && !defined(HAVE_CONFIG_H)
 #  if ( defined(_MSC_VER) && !defined(INET_ADDRSTRLEN) ) || \
       (!defined(_MSC_VER) && !defined(HAVE_WS2TCPIP_H) )
 #    define socklen_t int
-#    define HAVE_SOCKLEN_T
 #  endif
 #endif
 

@@ -244,8 +244,6 @@ AC_DEFUN([CURL_CHECK_TYPE_SOCKLEN_T], [
   AC_REQUIRE([CURL_CHECK_HEADER_WS2TCPIP])dnl
   AC_CHECK_TYPE([socklen_t], [
     dnl socklen_t is available
-    AC_DEFINE_UNQUOTED(HAVE_SOCKLEN_T, 1,
-      [Define to 1 if socklen_t is available or a equivalent is defined.])
   ],[
     dnl socklen_t not available
     AC_CACHE_CHECK([for socklen_t equivalent],
@@ -299,8 +297,6 @@ AC_DEFUN([CURL_CHECK_TYPE_SOCKLEN_T], [
       *)
         AC_DEFINE_UNQUOTED(socklen_t, $curl_cv_socklen_t_equiv,
           [Type to use in place of socklen_t when system does not provide it.])
-        AC_DEFINE_UNQUOTED(HAVE_SOCKLEN_T, 1,
-          [Define to 1 if socklen_t is available or a equivalent is defined.])
         ;;
     esac
   ],[
