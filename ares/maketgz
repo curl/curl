@@ -38,11 +38,11 @@ if(!-f "configure") {
     `./buildconf`;
 }
 print "adding $version in the configure.ac file\n";
-`sed -e 's/AC_INIT.*/AC_INIT([c-ares], [$version])/' < configure.ac > configure.ac-rel`;
+`sed -e 's/AC_INIT.*/AC_INIT([c-ares], [$version])/' < configure.ac > configure.ac.dist`;
 
 # now make a new configure script with this
 print "makes a new configure script\n";
-`autoconf configure.ac-rel >configure`;
+`autoconf configure.ac.dist >configure`;
 
 # now run this new configure to get a fine makefile
 print "running configure\n";
@@ -53,6 +53,6 @@ print "running make dist\n";
 `make dist`;
 
 print "removing temporary configure.ac file\n";
-`rm configure.ac-rel`;
+`rm configure.ac.dist`;
 
 print "NOTE: now cvs tag this release!\n";
