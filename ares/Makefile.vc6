@@ -138,7 +138,8 @@ clean:
        - del $(OBJ_DIR)\*.obj *.ilk *.pdb *.pbt *.pbi *.pbo *._xe *.map
 
 vclean realclean: clean
-       - del $(DEF_FILE) cares.lib cares_imp.* cares.dll ahost.exe adig.exe
+       - del $(DEF_FILE) cares.lib cares_imp.* cares.dll
+       - del ahost.exe adig.exe acountry.exe
        - rd $(OBJ_DIR)
 
 .c{$(OBJ_DIR)}.obj:
