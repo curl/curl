@@ -50,13 +50,13 @@ int test(char *URL)
   }
 
   /* enable verbose */
-  curl_easy_setopt(curl, CURLOPT_VERBOSE, TRUE) ;
+  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* enable NOBODY */
-  curl_easy_setopt(curl, CURLOPT_NOBODY, TRUE) ;
+  curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
 
   /* disable HEADER */
-  curl_easy_setopt(curl, CURLOPT_HEADER, FALSE) ;
+  curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
 
   /* specify target */
   curl_easy_setopt(curl,CURLOPT_URL, URL);

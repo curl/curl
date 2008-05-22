@@ -74,7 +74,7 @@ int test(char *URL)
     curl_easy_setopt(curl[i], CURLOPT_URL, URL);
 
     /* go verbose */
-    curl_easy_setopt(curl[i], CURLOPT_VERBOSE, 1);
+    curl_easy_setopt(curl[i], CURLOPT_VERBOSE, 1L);
   }
 
   if ((m = curl_multi_init()) == NULL) {
@@ -142,7 +142,7 @@ int test(char *URL)
              the handle first too */
           curl_easy_reset(curl[0]);
           curl_easy_setopt(curl[0], CURLOPT_URL, URL);
-          curl_easy_setopt(curl[0], CURLOPT_VERBOSE, 1);
+          curl_easy_setopt(curl[0], CURLOPT_VERBOSE, 1L);
 
           /* re-add it */
           res = (int)curl_multi_add_handle(m, curl[0]);

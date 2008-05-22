@@ -106,7 +106,7 @@ static void *fire(void *ptr)
   }
 
   headers = sethost(NULL);
-  curl_easy_setopt(curl, CURLOPT_VERBOSE,    1);
+  curl_easy_setopt(curl, CURLOPT_VERBOSE,    1L);
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
   curl_easy_setopt(curl, CURLOPT_URL,        tdata->url);
   printf( "CURLOPT_SHARE\n" );

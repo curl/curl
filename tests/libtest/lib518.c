@@ -483,7 +483,7 @@ int test(char *URL)
   }
 
   curl_easy_setopt(curl, CURLOPT_URL, URL);
-  curl_easy_setopt(curl, CURLOPT_HEADER, TRUE);
+  curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
 
   res = curl_easy_perform(curl);
 

@@ -35,13 +35,13 @@ int test(char *URL)
   curl_easy_setopt(curl, CURLOPT_URL, URL);
 
 #ifdef LIB545
-  curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, sizeof teststring - 1);
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long) sizeof teststring - 1);
 #endif
 
   curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, teststring);
 
-  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1); /* show verbose for debug */
-  curl_easy_setopt(curl, CURLOPT_HEADER, 1); /* include header */
+  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); /* show verbose for debug */
+  curl_easy_setopt(curl, CURLOPT_HEADER, 1L); /* include header */
 
   /* Update the original data to detect non-copy. */
   strcpy(teststring, "FAIL");

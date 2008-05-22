@@ -26,8 +26,8 @@ int test(char *URL)
     curl = curl_easy_init();
     if(curl) {
 
-      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
-      curl_easy_setopt(curl, CURLOPT_HEADER, 1);
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+      curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
 
       curl2 = curl_easy_duphandle(curl);
       if(curl2) {

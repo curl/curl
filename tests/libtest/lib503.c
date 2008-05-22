@@ -52,8 +52,8 @@ int test(char *URL)
   curl_easy_setopt(c, CURLOPT_URL, URL);
   curl_easy_setopt(c, CURLOPT_USERPWD, "test:ing");
   curl_easy_setopt(c, CURLOPT_PROXYUSERPWD, "test:ing");
-  curl_easy_setopt(c, CURLOPT_HTTPPROXYTUNNEL, 1);
-  curl_easy_setopt(c, CURLOPT_HEADER, 1);
+  curl_easy_setopt(c, CURLOPT_HTTPPROXYTUNNEL, 1L);
+  curl_easy_setopt(c, CURLOPT_HEADER, 1L);
 
   if ((m = curl_multi_init()) == NULL) {
     fprintf(stderr, "curl_multi_init() failed\n");

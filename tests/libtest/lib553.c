@@ -60,10 +60,10 @@ int test(char *URL)
 
   curl_easy_setopt(curl, CURLOPT_URL, URL);
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
-  curl_easy_setopt(curl, CURLOPT_POST, 1);
-  curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, POSTLEN);
-  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
-  curl_easy_setopt(curl, CURLOPT_HEADER, 1);
+  curl_easy_setopt(curl, CURLOPT_POST, 1L);
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)POSTLEN);
+  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
   curl_easy_setopt(curl, CURLOPT_READFUNCTION, myreadfunc);
   res = curl_easy_perform(curl);
   curl_easy_cleanup(curl);

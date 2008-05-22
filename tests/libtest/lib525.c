@@ -71,13 +71,13 @@ int test(char *URL)
   }
 
   /* enable uploading */
-  curl_easy_setopt(curl, CURLOPT_UPLOAD, TRUE) ;
+  curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
   /* specify target */
   curl_easy_setopt(curl,CURLOPT_URL, URL);
 
   /* go verbose */
-  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
+  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* use active FTP */
   curl_easy_setopt(curl, CURLOPT_FTPPORT, "-");

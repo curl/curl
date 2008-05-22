@@ -32,11 +32,11 @@ int test(char *URL)
 
   curl_easy_setopt(curl, CURLOPT_PROXY, libtest_arg2);
   curl_easy_setopt(curl, CURLOPT_URL, URL);
-  curl_easy_setopt(curl, CURLOPT_PROXY_TRANSFER_MODE, 1);
-  curl_easy_setopt(curl, CURLOPT_VERBOSE, TRUE);
+  curl_easy_setopt(curl, CURLOPT_PROXY_TRANSFER_MODE, 1L);
+  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
   if(libtest_arg3)
     /* enable ascii/text mode */
-    curl_easy_setopt(curl, CURLOPT_TRANSFERTEXT, TRUE);
+    curl_easy_setopt(curl, CURLOPT_TRANSFERTEXT, 1L);
 
   res = curl_easy_perform(curl);
 

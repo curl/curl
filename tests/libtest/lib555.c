@@ -80,8 +80,8 @@ int test(char *URL)
   }
 
   curl_easy_setopt(curl, CURLOPT_URL, URL);
-  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
-  curl_easy_setopt(curl, CURLOPT_HEADER, TRUE);
+  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
 
   /* read the POST data from a callback */
   curl_easy_setopt(curl, CURLOPT_IOCTLFUNCTION, ioctlcallback);
@@ -91,11 +91,11 @@ int test(char *URL)
   /* We CANNOT do the POST fine without setting the size (or choose chunked)! */
   curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(UPLOADTHIS));
 
-  curl_easy_setopt(curl, CURLOPT_POST, 1);
+  curl_easy_setopt(curl, CURLOPT_POST, 1L);
   curl_easy_setopt(curl, CURLOPT_PROXY, libtest_arg2);
   curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, libtest_arg3);
   curl_easy_setopt(curl, CURLOPT_PROXYAUTH,
-                   CURLAUTH_NTLM | CURLAUTH_DIGEST | CURLAUTH_BASIC );
+                   (long) (CURLAUTH_NTLM | CURLAUTH_DIGEST | CURLAUTH_BASIC) );
 
   if ((m = curl_multi_init()) == NULL) {
     fprintf(stderr, "curl_multi_init() failed\n");

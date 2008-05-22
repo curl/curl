@@ -74,7 +74,7 @@ int test(char *URL)
   curl_easy_setopt(curl, CURLOPT_URL, URL);
 
   /* Now specify we want to POST data */
-  curl_easy_setopt(curl, CURLOPT_POST, TRUE);
+  curl_easy_setopt(curl, CURLOPT_POST, 1L);
 
   /* we want to use our own read function */
   curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
@@ -83,10 +83,10 @@ int test(char *URL)
   curl_easy_setopt(curl, CURLOPT_INFILE, &pooh);
 
   /* get verbose debug output please */
-  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
+  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* include headers in the output */
-  curl_easy_setopt(curl, CURLOPT_HEADER, TRUE);
+  curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
 
   /* enforce chunked transfer by setting the header */
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist);

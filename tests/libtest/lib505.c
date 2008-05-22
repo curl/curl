@@ -116,10 +116,10 @@ int test(char *URL)
   headerlist = hl;
 
   /* enable uploading */
-  curl_easy_setopt(curl, CURLOPT_UPLOAD, TRUE) ;
+  curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
   /* enable verbose */
-  curl_easy_setopt(curl, CURLOPT_VERBOSE, TRUE) ;
+  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* specify target */
   curl_easy_setopt(curl,CURLOPT_URL, URL);

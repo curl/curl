@@ -55,7 +55,7 @@ int test(char *URL)
      proxy port */
   curl_easy_setopt(c, CURLOPT_PROXY, libtest_arg2);
   curl_easy_setopt(c, CURLOPT_URL, URL);
-  curl_easy_setopt(c, CURLOPT_VERBOSE, 1);
+  curl_easy_setopt(c, CURLOPT_VERBOSE, 1L);
 
   if ((m = curl_multi_init()) == NULL) {
     fprintf(stderr, "curl_multi_init() failed\n");

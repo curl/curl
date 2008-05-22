@@ -76,8 +76,8 @@ int test(char *URL)
   }
 
   curl_easy_setopt(curl, CURLOPT_URL, URL);
-  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
-  curl_easy_setopt(curl, CURLOPT_HEADER, TRUE);
+  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
 #ifdef LIB548
   /* set the data to POST with a mere pointer to a zero-terminated string */
   curl_easy_setopt(curl, CURLOPT_POSTFIELDS, UPLOADTHIS);
@@ -88,13 +88,13 @@ int test(char *URL)
   curl_easy_setopt(curl, CURLOPT_READFUNCTION, readcallback);
   curl_easy_setopt(curl, CURLOPT_READDATA, &counter);
   /* We CANNOT do the POST fine without setting the size (or choose chunked)! */
-  curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(UPLOADTHIS));
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(UPLOADTHIS));
 #endif
-  curl_easy_setopt(curl, CURLOPT_POST, 1);
+  curl_easy_setopt(curl, CURLOPT_POST, 1L);
   curl_easy_setopt(curl, CURLOPT_PROXY, libtest_arg2);
   curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, libtest_arg3);
   curl_easy_setopt(curl, CURLOPT_PROXYAUTH,
-                   CURLAUTH_NTLM | CURLAUTH_DIGEST | CURLAUTH_BASIC );
+                   (long) (CURLAUTH_NTLM | CURLAUTH_DIGEST | CURLAUTH_BASIC) );
 
   res = curl_easy_perform(curl);
 

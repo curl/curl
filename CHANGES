@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel Fandrich (22 May 2008)
+- Made sure to pass longs in to curl_easy_setopt where necessary in the
+  example programs and libtest code.
+
 Daniel Stenberg (19 May 2008)
 - When trying to repeat a multi interface problem I fell over a few multi
   interface problems:
