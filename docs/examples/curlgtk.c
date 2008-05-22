@@ -58,7 +58,7 @@ void *my_thread(void *ptr)
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, outfile);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, my_write_func);
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, my_read_func);
-    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, FALSE);
+    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
     curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, my_progress_func);
     curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, Bar);
 

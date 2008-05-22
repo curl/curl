@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     /* what URL that receives this POST */
     curl_easy_setopt(curl, CURLOPT_URL,
                      "http://www.fillinyoururl.com/upload.cgi");
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
     curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);

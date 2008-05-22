@@ -116,7 +116,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_DEBUGDATA, &config);
 
     /* the DEBUGFUNCTION has no effect until we enable VERBOSE */
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
     curl_easy_setopt(curl, CURLOPT_URL, "curl.haxx.se");
     res = curl_easy_perform(curl);

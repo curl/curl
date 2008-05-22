@@ -26,7 +26,7 @@ int main(void)
 
     /* if we don't provide POSTFIELDSIZE, libcurl will strlen() by
        itself */
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(postthis));
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(postthis));
 
     res = curl_easy_perform(curl);
 

@@ -75,8 +75,8 @@ int main(int argc, char **argv )
     curl = curl_easy_init();
     curl_easy_setopt(curl, CURLOPT_URL, argv[1]);
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curl_errbuf);
-    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, no);
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, yes);
+    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
 
     tdoc = tidyCreate();

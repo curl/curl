@@ -31,7 +31,7 @@ int main(void)
      * default bundle, then the CURLOPT_CAPATH option might come handy for
      * you.
      */
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 #endif
 
 #ifdef SKIP_HOSTNAME_VERFICATION
@@ -41,7 +41,7 @@ int main(void)
      * subjectAltName) fields, libcurl will refuse to connect. You can skip
      * this check, but this will make the connection less secure.
      */
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 #endif
 
     res = curl_easy_perform(curl);

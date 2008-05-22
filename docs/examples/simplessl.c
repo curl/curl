@@ -77,7 +77,7 @@ int main(int argc, char **argv)
           fprintf(stderr,"can't set crypto engine\n");
           break;
         }
-        if (curl_easy_setopt(curl, CURLOPT_SSLENGINE_DEFAULT,1) != CURLE_OK)
+        if (curl_easy_setopt(curl, CURLOPT_SSLENGINE_DEFAULT,1L) != CURLE_OK)
         { /* set the crypto engine as default */
           /* only needed for the first time you load
              a engine in a curl object... */
@@ -108,7 +108,7 @@ int main(int argc, char **argv)
       curl_easy_setopt(curl,CURLOPT_CAINFO,pCACertFile);
 
       /* disconnect if we can't validate server's cert */
-      curl_easy_setopt(curl,CURLOPT_SSL_VERIFYPEER,1);
+      curl_easy_setopt(curl,CURLOPT_SSL_VERIFYPEER,1L);
 
       res = curl_easy_perform(curl);
       break;                   /* we are done... */

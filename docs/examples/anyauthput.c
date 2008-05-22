@@ -110,7 +110,7 @@ int main(int argc, char **argv)
     curl_easy_setopt(curl, CURLOPT_IOCTLDATA, (void*)hd);
 
     /* enable "uploading" (which means PUT when doing HTTP) */
-    curl_easy_setopt(curl, CURLOPT_UPLOAD, TRUE) ;
+    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L) ;
 
     /* specify target URL, and note that this URL should also include a file
        name, not only a directory (as you can do with GTP uploads) */
@@ -118,12 +118,13 @@ int main(int argc, char **argv)
 
     /* and give the size of the upload, this supports large file sizes
        on systems that have general support for it */
-    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, file_info.st_size);
+    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE,
+    			(curl_off_t)file_info.st_size);
 
     /* tell libcurl we can use "any" auth, which lets the lib pick one, but it
        also costs one extra round-trip and possibly sending of all the PUT
        data twice!!! */
-    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_ANY);
 
     /* set user name and password for the authentication */
     curl_easy_setopt(curl, CURLOPT_USERPWD, "user:password");

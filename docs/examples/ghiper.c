@@ -325,16 +325,16 @@ static void new_conn(char *url, GlobalInfo *g )
   curl_easy_setopt(conn->easy, CURLOPT_URL, conn->url);
   curl_easy_setopt(conn->easy, CURLOPT_WRITEFUNCTION, write_cb);
   curl_easy_setopt(conn->easy, CURLOPT_WRITEDATA, &conn);
-  curl_easy_setopt(conn->easy, CURLOPT_VERBOSE, SHOW_VERBOSE);
+  curl_easy_setopt(conn->easy, CURLOPT_VERBOSE, (long)SHOW_VERBOSE);
   curl_easy_setopt(conn->easy, CURLOPT_ERRORBUFFER, conn->error);
   curl_easy_setopt(conn->easy, CURLOPT_PRIVATE, conn);
-  curl_easy_setopt(conn->easy, CURLOPT_NOPROGRESS, SHOW_PROGRESS?0:1);
+  curl_easy_setopt(conn->easy, CURLOPT_NOPROGRESS, SHOW_PROGRESS?0L:1L);
   curl_easy_setopt(conn->easy, CURLOPT_PROGRESSFUNCTION, prog_cb);
   curl_easy_setopt(conn->easy, CURLOPT_PROGRESSDATA, conn);
-  curl_easy_setopt(conn->easy, CURLOPT_FOLLOWLOCATION, 1);
-  curl_easy_setopt(conn->easy, CURLOPT_CONNECTTIMEOUT, 30);
-  curl_easy_setopt(conn->easy, CURLOPT_LOW_SPEED_LIMIT, 1);
-  curl_easy_setopt(conn->easy, CURLOPT_LOW_SPEED_TIME, 30);
+  curl_easy_setopt(conn->easy, CURLOPT_FOLLOWLOCATION, 1L);
+  curl_easy_setopt(conn->easy, CURLOPT_CONNECTTIMEOUT, 30L);
+  curl_easy_setopt(conn->easy, CURLOPT_LOW_SPEED_LIMIT, 1L);
+  curl_easy_setopt(conn->easy, CURLOPT_LOW_SPEED_TIME, 30L);
 
   MSG_OUT("Adding easy %p to multi %p (%s)\n", conn->easy, g->multi, url);
   rc =curl_multi_add_handle(g->multi, conn->easy);

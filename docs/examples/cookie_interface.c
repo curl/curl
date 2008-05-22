@@ -54,7 +54,7 @@ main(void)
     char nline[256];
 
     curl_easy_setopt(curl, CURLOPT_URL, "http://www.google.com/"); /* google.com sets "PREF" cookie */
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, ""); /* just to start the cookie engine */
     res = curl_easy_perform(curl);
     if (res != CURLE_OK) {

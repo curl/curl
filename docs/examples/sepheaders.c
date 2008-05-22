@@ -39,7 +39,7 @@ int main(int argc, char **argv)
   curl_easy_setopt(curl_handle, CURLOPT_URL, "http://curl.haxx.se");
 
   /* no progress meter please */
-  curl_easy_setopt(curl_handle, CURLOPT_NOPROGRESS, 1);
+  curl_easy_setopt(curl_handle, CURLOPT_NOPROGRESS, 1L);
 
   /* send all data to this function  */
   curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_data);
@@ -57,7 +57,7 @@ int main(int argc, char **argv)
   }
 
   /* we want the headers to this file handle */
-  curl_easy_setopt(curl_handle,   CURLOPT_WRITEHEADER ,headerfile);
+  curl_easy_setopt(curl_handle,   CURLOPT_WRITEHEADER, headerfile);
 
   /*
    * Notice here that if you want the actual data sent anywhere else but

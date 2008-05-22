@@ -236,7 +236,7 @@ url_fopen(const char *url,const char *operation)
 
         curl_easy_setopt(file->handle.curl, CURLOPT_URL, url);
         curl_easy_setopt(file->handle.curl, CURLOPT_WRITEDATA, file);
-        curl_easy_setopt(file->handle.curl, CURLOPT_VERBOSE, 0);
+        curl_easy_setopt(file->handle.curl, CURLOPT_VERBOSE, 0L);
         curl_easy_setopt(file->handle.curl, CURLOPT_WRITEFUNCTION, write_callback);
 
         if(!multi_handle)

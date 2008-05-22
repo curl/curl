@@ -100,7 +100,7 @@ static bool init(CURL *&conn, char *url)
     return false;
   }
 
-  code = curl_easy_setopt(conn, CURLOPT_FOLLOWLOCATION, 1);
+  code = curl_easy_setopt(conn, CURLOPT_FOLLOWLOCATION, 1L);
   if (code != CURLE_OK)
   {
     fprintf(stderr, "Failed to set redirect option [%s]\n", errorBuffer);

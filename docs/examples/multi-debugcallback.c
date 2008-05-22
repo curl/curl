@@ -121,7 +121,7 @@ int main(int argc, char **argv)
   curl_easy_setopt(http_handle, CURLOPT_URL, "http://www.haxx.se/");
 
   curl_easy_setopt(http_handle, CURLOPT_DEBUGFUNCTION, my_trace);
-  curl_easy_setopt(http_handle, CURLOPT_VERBOSE, TRUE);
+  curl_easy_setopt(http_handle, CURLOPT_VERBOSE, 1L);
 
   /* init a multi stack */
   multi_handle = curl_multi_init();

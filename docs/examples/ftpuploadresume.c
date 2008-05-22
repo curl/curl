@@ -77,7 +77,7 @@ int upload(CURL *curlhandle, const char * remotepath, const char * localpath,
 		return 0;
 	}
 
-	curl_easy_setopt(curlhandle, CURLOPT_UPLOAD, 1);
+	curl_easy_setopt(curlhandle, CURLOPT_UPLOAD, 1L);
 
 	curl_easy_setopt(curlhandle, CURLOPT_URL, remotepath);
 
@@ -93,9 +93,9 @@ int upload(CURL *curlhandle, const char * remotepath, const char * localpath,
 	curl_easy_setopt(curlhandle, CURLOPT_READDATA, f);
 
 	curl_easy_setopt(curlhandle, CURLOPT_FTPPORT, "-"); /* disable passive mode */
-	curl_easy_setopt(curlhandle, CURLOPT_FTP_CREATE_MISSING_DIRS, 1);
+	curl_easy_setopt(curlhandle, CURLOPT_FTP_CREATE_MISSING_DIRS, 1L);
 
-	curl_easy_setopt(curlhandle, CURLOPT_VERBOSE, 1);
+	curl_easy_setopt(curlhandle, CURLOPT_VERBOSE, 1L);
 
 	for (c = 0; (r != CURLE_OK) && (c < tries); c++) {
 		/* are we resuming? */
@@ -110,22 +110,22 @@ int upload(CURL *curlhandle, const char * remotepath, const char * localpath,
 			 * because HEADER will dump the headers to stdout
 			 * without it.
 			 */
-			curl_easy_setopt(curlhandle, CURLOPT_NOBODY, 1);
-			curl_easy_setopt(curlhandle, CURLOPT_HEADER, 1);
+			curl_easy_setopt(curlhandle, CURLOPT_NOBODY, 1L);
+			curl_easy_setopt(curlhandle, CURLOPT_HEADER, 1L);
 
 			r = curl_easy_perform(curlhandle);
 			if (r != CURLE_OK)
 				continue;
 
-			curl_easy_setopt(curlhandle, CURLOPT_NOBODY, 0);
-			curl_easy_setopt(curlhandle, CURLOPT_HEADER, 0);
+			curl_easy_setopt(curlhandle, CURLOPT_NOBODY, 0L);
+			curl_easy_setopt(curlhandle, CURLOPT_HEADER, 0L);
 
 			fseek(f, uploaded_len, SEEK_SET);
 
-			curl_easy_setopt(curlhandle, CURLOPT_APPEND, 1);
+			curl_easy_setopt(curlhandle, CURLOPT_APPEND, 1L);
 		}
 		else { /* no */
-			curl_easy_setopt(curlhandle, CURLOPT_APPEND, 0);
+			curl_easy_setopt(curlhandle, CURLOPT_APPEND, 0L);
 		}
 
 		r = curl_easy_perform(curlhandle);

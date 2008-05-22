@@ -55,7 +55,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL,
                      "http://receivingsite.com.pooh/index.cgi");
     /* Now specify we want to POST data */
-    curl_easy_setopt(curl, CURLOPT_POST, 1);
+    curl_easy_setopt(curl, CURLOPT_POST, 1L);
 
     /* we want to use our own read function */
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
@@ -64,7 +64,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_READDATA, &pooh);
 
     /* get verbose debug output please */
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
     /*
       If you use POST to a HTTP 1.1 server, you can send data without knowing
@@ -85,7 +85,7 @@ int main(void)
 #else
     /* Set the expected POST size. If you want to POST large amounts of data,
        consider CURLOPT_POSTFIELDSIZE_LARGE */
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, pooh.sizeleft);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (curl_off_t)pooh.sizeleft);
 #endif
 
 #ifdef DISABLE_EXPECT

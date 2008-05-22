@@ -438,7 +438,7 @@ int main(int argc, char **argv) {
   /* Now specify the POST binary data */
 
   curl_easy_setopt(p.curl, CURLOPT_POSTFIELDS, binaryptr);
-  curl_easy_setopt(p.curl, CURLOPT_POSTFIELDSIZE,tabLength);
+  curl_easy_setopt(p.curl, CURLOPT_POSTFIELDSIZE,(long)tabLength);
 
   /* pass our list of custom made headers */
 
@@ -477,7 +477,7 @@ int main(int argc, char **argv) {
   /* Now specify the POST binary data */
 
   curl_easy_setopt(p.curl, CURLOPT_POSTFIELDS, binaryptr);
-  curl_easy_setopt(p.curl, CURLOPT_POSTFIELDSIZE,tabLength);
+  curl_easy_setopt(p.curl, CURLOPT_POSTFIELDSIZE,(long)tabLength);
 
 
   /* Perform the request, res will get the return code */
