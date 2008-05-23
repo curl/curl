@@ -17,9 +17,9 @@ noinst_PROGRAMS =$(PROGS)
 
 # adig and ahost are just sample programs and thus not mentioned with the
 # regular sources and headers
-EXTRA_DIST = AUTHORS CHANGES README.cares Makefile.inc Makefile.dj \
- Makefile.m32 Makefile.netware Makefile.vc6 adig.c ahost.c $(man_MANS) \
- $(MSVCFILES) config-win32.h RELEASE-NOTES libcares.pc.in
+EXTRA_DIST = AUTHORS CHANGES README.cares Makefile.inc Makefile.dj	   \
+ Makefile.m32 Makefile.netware Makefile.vc6 $(man_MANS) $(MSVCFILES)	   \
+ config-win32.h RELEASE-NOTES libcares.pc.in buildconf get_ver.awk maketgz
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libcares.pc
@@ -71,13 +71,13 @@ libcares_ladir = $(includedir)
 # what headers to install on 'make install':
 libcares_la_HEADERS = ares.h ares_version.h ares_dns.h
 
-ahost_SOURCES = ahost.c ares_getopt.c
+ahost_SOURCES = ahost.c ares_getopt.c ares_getopt.h
 ahost_LDADD = $(top_builddir)/$(lib_LTLIBRARIES)
 
-adig_SOURCES = adig.c ares_getopt.c
+adig_SOURCES = adig.c ares_getopt.c ares_getopt.h
 adig_LDADD = $(top_builddir)/$(lib_LTLIBRARIES)
 
-acountry_SOURCES = acountry.c ares_getopt.c
+acountry_SOURCES = acountry.c ares_getopt.c ares_getopt.h
 acountry_LDADD = $(top_builddir)/$(lib_LTLIBRARIES)
 
 # Make files named *.dist replace the file without .dist extension
