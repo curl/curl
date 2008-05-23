@@ -39,12 +39,14 @@
 
  5. HTTP
  5.1 Other HTTP versions with CONNECT
- 5.2 Better persistancy for HTTP 1.0
+ 5.2 Better persistency for HTTP 1.0
  5.3 support FF3 sqlite cookie files
 
  6. TELNET
  6.1 ditch stdin
  6.2 ditch telnet-specific select
+ 6.3 feature negotiation debug data
+ 6.4 send data in chunks
 
  7. SSL
  7.1 Disable specific versions
@@ -53,19 +55,19 @@
  7.4 Evaluate SSL patches
  7.5 Cache OpenSSL contexts
  7.6 Export session ids
- 7.7 Provide callback for cert verfication
+ 7.7 Provide callback for cert verification
  7.8 Support other SSL libraries
  7.9  Support SRP on the TLS layer
  7.10 improve configure --with-ssl
 
  8. GnuTLS
  8.1 Make NTLM work without OpenSSL functions
- 8.2 SSl engine stuff
+ 8.2 SSL engine stuff
  8.3 SRP
  8.4 non-blocking
  8.5 check connection
 
- 9. LDAP
+ 9. Other protocols
  9.1 ditch ldap-specific select
 
  10. New protocols
@@ -82,6 +84,8 @@
  11.6 simultaneous parallel transfers
  11.7 provide formpost headers
  11.8 url-specific options
+ 11.9 metalink support
+ 11.10 warning when setting an option
 
  12. Build
  12.1 roffit
@@ -111,7 +115,7 @@
 
 1.1 Zero-copy interface
 
- Introdue another callback interface for upload/download that makes one less
+ Introduce another callback interface for upload/download that makes one less
  copy of data and thus a faster operation.
  [http://curl.haxx.se/dev/no_copy_callbacks.txt]
 
@@ -258,7 +262,7 @@
  never been reported as causing trouble to anyone, but should be considered to
  use the HTTP version the user has chosen.
 
-5.2 Better persistancy for HTTP 1.0
+5.2 Better persistency for HTTP 1.0
 
  "Better" support for persistent connections over HTTP 1.0
  http://curl.haxx.se/bug/feature.cgi?id=1089001
@@ -282,6 +286,16 @@ to provide the data to send.
  Move the telnet support's network select() loop go away and merge the code
  into the main transfer loop. Until this is done, the multi interface won't
  work for telnet.
+
+6.3 feature negotiation debug data
+
+  Add telnet feature negotiation data to the debug callback as header data.
+
+6.4 send data in chunks
+
+  Currently, telnet sends data one byte at a time.  This is fine for interactive
+  use, but inefficient for any other.  Sent data should be sent in larger
+  chunks.
 
 7. SSL
 
@@ -324,7 +338,7 @@ to provide the data to send.
  the state from such a buffer at a later date - this is used by mod_ssl for
  apache to implement and SSL session ID cache".
 
-7.7 Provide callback for cert verfication
+7.7 Provide callback for cert verification
 
  OpenSSL supports a callback for customised verification of the peer
  certificate, but this doesn't seem to be exposed in the libcurl APIs. Could
@@ -355,7 +369,7 @@ to provide the data to send.
  hey... Another option is to get available DES and MD4 source code from the
  cryptopp library. They are fine license-wise, but are C++.
 
-8.2 SSl engine stuff
+8.2 SSL engine stuff
 
  Is this even possible?
 
@@ -373,13 +387,17 @@ to provide the data to send.
  Add a way to check if the connection seems to be alive, to correspond to the
  SSL_peak() way we use with OpenSSL.
 
-9. LDAP
+9. Other protocols
 
 9.1 ditch ldap-specific select
 
  * Look over the implementation. The looping will have to "go away" from the
    lib/ldap.c source file and get moved to the main network code so that the
    multi interface and friends will work for LDAP as well.
+
+9.2 stop TFTP blocking
+
+  Stop TFTP from being blocking and doing its own read loop in tftp_do.
 
 10. New protocols
 
@@ -467,6 +485,17 @@ to provide the data to send.
  (More details: http://curl.haxx.se/mail/archive-2004-07/0133.html)
 
  The example would do a POST-GET-POST combination on a single command line.
+
+11.9 metalink support
+
+ Add metalink support to curl (http://www.metalinker.org/). This is most useful
+ with simultaneous parallel transfers (11.6) but not necessary.
+
+11.10 warning when setting an option
+
+  Display a warning when libcurl returns an error when setting an option.
+  This can be useful to tell when support for a particular feature hasn't been
+  compiled into the library.
 
 12. Build
 
