@@ -270,6 +270,12 @@ of bytes actually taken care of, or return -1 to signal error to the library
 (it will cause it to abort the transfer with a \fICURLE_WRITE_ERROR\fP return
 code).
 
+If this option is not set, or if it is set to NULL, but
+\fICURLOPT_HEADERDATA\fP (\fICURLOPT_WRITEHEADER\fP) is set to anything but
+NULL, the function used to accept response data will be used instead. That is,
+it will be the function specified with \fICURLOPT_WRITEFUNCTION\fP, or if it
+is not specified or NULL - the default, stream-writing function.
+
 Since 7.14.1: When a server sends a chunked encoded transfer, it may contain a
 trailer. That trailer is identical to a HTTP header and if such a trailer is
 received it is passed to the application using this callback as well. There
