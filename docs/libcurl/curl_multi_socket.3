@@ -46,9 +46,8 @@ socket callback function set with the CURLMOPT_SOCKETFUNCTION option to
 previous time this function was called.
 
 Force libcurl to (re-)check all its internal sockets and transfers instead of
-just a single one by calling \fBcurl_multi_socket_all(3)\fP. This is typically
-done as the first function call before the application has any knowledge about
-what sockets libcurl uses.
+just a single one by calling \fBcurl_multi_socket_all(3)\fP. Note that there
+should rarely be reasons to use this function!
 
 Get the timeout time - how long to wait for socket actions at most before
 doing the timeout action: call the \fBcurl_multi_socket(3)\fP function with
@@ -125,22 +124,20 @@ function returns OK.
 3. Set the timeout callback with CURLMOPT_TIMERFUNCTION, to get to know what
 timeout value to use when waiting for socket activities.
 
-4. Add easy handles
+4. Add easy handles with curl_multi_add_handle()
 
-5. Call curl_multi_socket_all() first once
-
-6. Provide some means to manage the sockets libcurl is using, so you can check
+5. Provide some means to manage the sockets libcurl is using, so you can check
 them for activity. This can be done through your application code, or by way
 of an external library such as libevent or glib.
 
-7. Wait for activity on any of libcurl's sockets, use the timeout value your
+6. Wait for activity on any of libcurl's sockets, use the timeout value your
 callback has been told
 
-8, When activity is detected, call curl_multi_socket_action() for the
+7, When activity is detected, call curl_multi_socket_action() for the
 socket(s) that got action. If no activity is detected and the timeout expires,
-call \fIcurl_multi_socket(3)\fP with \fICURL_SOCKET_TIMEOUT\fP
+call \fIcurl_multi_socket_action(3)\fP with \fICURL_SOCKET_TIMEOUT\fP
 
-9. Go back to step 7.
+8. Go back to step 6.
 .SH AVAILABILITY
 This function was added in libcurl 7.15.4, although deemed stable since
 7.16.0.
