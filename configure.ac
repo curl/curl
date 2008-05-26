@@ -594,6 +594,15 @@ fi
 
 if test "$HAVE_GETHOSTBYNAME" != "1"
 then
+  dnl gethostbyname in the network lib - for Haiku OS
+  AC_CHECK_LIB(network, gethostbyname,
+               [HAVE_GETHOSTBYNAME="1"
+               LIBS="$LIBS -lnetwork"
+               ])
+fi
+
+if test "$HAVE_GETHOSTBYNAME" != "1"
+then
   dnl gethostbyname in the net lib - for BeOS
   AC_CHECK_LIB(net, gethostbyname,
                [HAVE_GETHOSTBYNAME="1"

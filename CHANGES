@@ -7,6 +7,9 @@
                                   Changelog
 
 
+Daniel Stenberg (26 May 2008)
+- Andreas Faerber and Scott McCreary made (lib)curl build for the Haiku OS. 
+
 Yang Tse (26 May 2008)
 - David Rosenstrauch reported that header files spnegohelp.h and
   openssl/objects.h were needed to compile SPNEGO support.

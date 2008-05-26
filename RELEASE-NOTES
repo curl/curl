@@ -36,6 +36,7 @@ This release includes the following bugfixes:
  o multi interface busy loop for CONNECT requests
  o internal time differences now use monotonic time source if available
  o several curl_multi_socket() fixes
+ o builds fine for Haiku OS
 
 This release includes the following known bugs:
 
@@ -58,6 +59,6 @@ advice from friends like these:
  Rafa Muyo, Andre Guibert de Bruet, Brock Noland, Sandor Feldi, Stefan Krause,
  David Shaw, Norbert Frese, Bart Whiteley, Jean-Francois Bertrand, Ben Van Hof,
  Yuriy Sosov, Christopher Palow, Yang Tse, Liam Healy, Nikolai Kondrashov,
- David Rosenstrauch
+ David Rosenstrauch, Andreas Faerber, Scott McCreary
 
         Thanks! (and sorry if I forgot to mention someone)
