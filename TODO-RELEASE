@@ -4,11 +4,14 @@ To be addressed before 7.18.2 (planned release: June 2008)
 142 - Jeff Weber's reported (and verified) memory leaks on SCP and SFTP
       uploads that are aborted due to timeout.
       http://curl.haxx.se/mail/lib-2008-05/0187.html
+      Fixed?
 
 143 - Emil Romanus's reported (and verified) problems with HTTP pipelining
       when using the multi_socket API:
       http://curl.haxx.se/mail/lib-2008-05/0210.html
+      Possibly postponed for 7.18.3
 
+144 - Help apps use 64bit/LFS libcurl!
 
 To be addressed before 7.18.3 (planned release: August 2008)
 =============================
@@ -20,5 +23,5 @@ To be addressed before 7.18.3 (planned release: August 2008)
 141 - The sponsored feature CURLINFO_PRIMARY_IP that returns the IP address
       as a string for the most recently used connection.
 
-144 -
+145 -
 
