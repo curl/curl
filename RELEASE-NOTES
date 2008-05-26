@@ -37,6 +37,7 @@ This release includes the following bugfixes:
  o internal time differences now use monotonic time source if available
  o several curl_multi_socket() fixes
  o builds fine for Haiku OS
+ o follow redirect with only a new query string
 
 This release includes the following known bugs:
 

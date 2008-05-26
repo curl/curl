@@ -2044,14 +2044,18 @@ CURLcode Curl_follow(struct SessionHandle *data,
       if(pathsep)
         *pathsep=0;
 
-      /* we have a relative path to append to the last slash if
-         there's one available */
-      pathsep = strrchr(protsep, '/');
-      if(pathsep)
-        *pathsep=0;
+      /* we have a relative path to append to the last slash if there's one
+         available, or if the new URL is just a query string (starts with a
+         '?')  we append the new one at the end of the entire currently worked
+         out URL */
+      if(useurl[0] != '?') {
+        pathsep = strrchr(protsep, '/');
+        if(pathsep)
+          *pathsep=0;
+      }
 
-      /* Check if there's any slash after the host name, and if so,
-         remember that position instead */
+      /* Check if there's any slash after the host name, and if so, remember
+         that position instead */
       pathsep = strchr(protsep, '/');
       if(pathsep)
         protsep = pathsep+1;
@@ -2129,7 +2133,7 @@ CURLcode Curl_follow(struct SessionHandle *data,
     memcpy(newest, url_clone, urllen);
 
     /* check if we need to append a slash */
-    if(('/' == useurl[0]) || (protsep && !*protsep))
+    if(('/' == useurl[0]) || (protsep && !*protsep) || ('?' == useurl[0]))
       ;
     else
       newest[urllen++]='/';

@@ -8,6 +8,11 @@
 
 
 Daniel Stenberg (26 May 2008)
+- Bug report #1973352 (http://curl.haxx.se/bug/view.cgi?id=1973352) identified
+  how the HTTP redirect following code didn't properly follow to a new URL if
+  the new url was but a query string such as "Location: ?moo=foo". Test case
+  1031 was added to verify this fix.
+
 - Andreas Faerber and Scott McCreary made (lib)curl build for the Haiku OS. 
 
 Yang Tse (26 May 2008)
