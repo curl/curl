@@ -66,10 +66,6 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-#ifndef min
-#define min(a, b)   ((a) < (b) ? (a) : (b))
-#endif
-
 #define SSL_DIR "/etc/pki/nssdb"
 
 /* enough to fit the string "PEM Token #[0|1]" */

@@ -10,7 +10,7 @@
  * Copyright (c) 1998, 1999 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
  *
- * Copyright (C) 2001 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2001 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * All rights reserved.
  *
@@ -69,8 +69,6 @@
 
 /* The last #include file should be: */
 #include "memdebug.h"
-
-#define min(a, b)   ((a) < (b) ? (a) : (b))
 
 static const struct {
   enum protection_level level;
@@ -179,7 +177,8 @@ sec_get_data(struct connectdata *conn,
 static size_t
 buffer_read(struct krb4buffer *buf, void *data, size_t len)
 {
-  len = min(len, buf->size - buf->index);
+  if(buf->size - buf->index < len)
+    len = buf->size - buf->index;
   memcpy(data, (char*)buf->data + buf->index, len);
   buf->index += len;
   return len;

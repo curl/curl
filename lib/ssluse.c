@@ -70,10 +70,6 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-#ifndef min
-#define min(a, b)   ((a) < (b) ? (a) : (b))
-#endif
-
 #if OPENSSL_VERSION_NUMBER >= 0x0090581fL
 #define HAVE_SSL_GET1_SESSION 1
 #else
