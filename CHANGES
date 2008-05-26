@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Yang Tse (26 May 2008)
+- David Rosenstrauch reported that header files spnegohelp.h and
+  openssl/objects.h were needed to compile SPNEGO support.
+
 Daniel Fandrich (22 May 2008)
 - Made sure to pass longs in to curl_easy_setopt where necessary in the
   example programs and libtest code.
