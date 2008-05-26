@@ -142,6 +142,8 @@ static void callback(void *arg, int status, int timeouts, struct hostent *host)
 {
   char **p;
 
+  (void)timeouts;
+
   if (status != ARES_SUCCESS)
     {
       fprintf(stderr, "%s: %s\n", (char *) arg, ares_strerror(status));
