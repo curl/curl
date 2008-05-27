@@ -3,6 +3,10 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+55. libcurl fails to build with MIT Kerberos for Windows (KfW) due to KfW's
+  library header files exporting symbols/macros that should be kept private
+  to the KfW library. See ticket #5601 at http://krbdev.mit.edu/rt/
+
 54. User names embedded in URLs without a password are parsed incorrectly--the
   host name is treated as part of the user name and the port number becomes the
   password.  This can be observed test 279.
