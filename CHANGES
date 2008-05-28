@@ -8,6 +8,11 @@
 
 
 Daniel Stenberg (28 May 2008)
+- Emil Romanus found a problem and helped me repeat it. It occured when using
+  the curl_multi_socket() API with HTTP pipelining enabled and could lead to
+  the pipeline basically stalling for a very long period of time until it took
+  off again.
+
 - Jeff Weber reported memory leaks with aborted SCP and SFTP transfers and
   provided excellent repeat recipes. I fixed the cases I managed to reproduce
   but Jeff still got some (SCP) problems even after these fixes:
