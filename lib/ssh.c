@@ -1698,6 +1698,20 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
     break;
 
   case SSH_SFTP_SHUTDOWN:
+    /* during times we get here due to a broken transfer and then the
+       sftp_handle might not have been taken down so make sure that is done
+       before we proceed */
+
+    if(sshc->sftp_handle) {
+      rc = libssh2_sftp_close(sshc->sftp_handle);
+      if(rc == LIBSSH2_ERROR_EAGAIN) {
+        break;
+      }
+      else if(rc < 0) {
+        infof(data, "Failed to close libssh2 file\n");
+      }
+      sshc->sftp_handle = NULL;
+    }
     if(sshc->sftp_session) {
       rc = libssh2_sftp_shutdown(sshc->sftp_session);
       if(rc == LIBSSH2_ERROR_EAGAIN) {
@@ -1893,6 +1907,20 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
     break;
 
   case SSH_SESSION_DISCONNECT:
+    /* during weird times when we've been prematurely aborted, the channel
+       is still alive when we reach this state and we MUST kill the channel
+       properly first */
+    if(sshc->ssh_channel) {
+      rc = libssh2_channel_free(sshc->ssh_channel);
+      if(rc == LIBSSH2_ERROR_EAGAIN) {
+        break;
+      }
+      else if(rc < 0) {
+        infof(data, "Failed to free libssh2 scp subsystem\n");
+      }
+      sshc->ssh_channel = NULL;
+    }
+
     if(sshc->ssh_session) {
       rc = libssh2_session_disconnect(sshc->ssh_session, "Shutdown");
       if(rc == LIBSSH2_ERROR_EAGAIN) {
@@ -2152,23 +2180,25 @@ static CURLcode scp_disconnect(struct connectdata *conn)
   Curl_safefree(conn->data->state.proto.ssh);
   conn->data->state.proto.ssh = NULL;
 
-  state(conn, SSH_SESSION_DISCONNECT);
+  if(conn->proto.sshc.ssh_session) {
+    /* only if there's a session still around to use! */
 
-  result = ssh_easy_statemach(conn);
+    state(conn, SSH_SESSION_DISCONNECT);
+
+    result = ssh_easy_statemach(conn);
+  }
 
   return result;
 }
 
-static CURLcode scp_done(struct connectdata *conn, CURLcode status,
-                         bool premature)
+/* generic done function for both SCP and SFTP called from their specific
+   done functions */
+static CURLcode ssh_done(struct connectdata *conn, CURLcode status)
 {
   CURLcode result = CURLE_OK;
   bool done = FALSE;
-  (void)premature; /* not used */
-  (void)status; /* unused */
 
   if(status == CURLE_OK) {
-    state(conn, SSH_SCP_DONE);
     /* run the state-machine */
     if(conn->data->state.used_interface == Curl_if_multi) {
       result = ssh_multi_statemach(conn, &done);
@@ -2185,12 +2215,25 @@ static CURLcode scp_done(struct connectdata *conn, CURLcode status,
 
   if(done) {
     struct SSHPROTO *sftp_scp = conn->data->state.proto.ssh;
+
     Curl_safefree(sftp_scp->path);
     sftp_scp->path = NULL;
     Curl_pgrsDone(conn);
   }
 
   return result;
+}
+
+
+static CURLcode scp_done(struct connectdata *conn, CURLcode status,
+                         bool premature)
+{
+  (void)premature; /* not used */
+
+  if(status == CURLE_OK)
+    state(conn, SSH_SCP_DONE);
+
+  return ssh_done(conn, status);
 
 }
 
@@ -2295,8 +2338,11 @@ static CURLcode sftp_disconnect(struct connectdata *conn)
   Curl_safefree(conn->data->state.proto.ssh);
   conn->data->state.proto.ssh = NULL;
 
-  state(conn, SSH_SFTP_SHUTDOWN);
-  result = ssh_easy_statemach(conn);
+  if(conn->proto.sshc.ssh_session) {
+    /* only if there's a session still around to use! */
+    state(conn, SSH_SFTP_SHUTDOWN);
+    result = ssh_easy_statemach(conn);
+  }
 
   DEBUGF(infof(conn->data, "SSH DISCONNECT is done\n"));
 
@@ -2307,11 +2353,7 @@ static CURLcode sftp_disconnect(struct connectdata *conn)
 static CURLcode sftp_done(struct connectdata *conn, CURLcode status,
                                bool premature)
 {
-  CURLcode result = CURLE_OK;
-  bool done = FALSE;
   struct ssh_conn *sshc = &conn->proto.sshc;
-
-  (void)status; /* unused */
 
   if(status == CURLE_OK) {
     /* Before we shut down, see if there are any post-quote commands to send: */
@@ -2321,25 +2363,8 @@ static CURLcode sftp_done(struct connectdata *conn, CURLcode status,
     }
     else
       state(conn, SSH_SFTP_CLOSE);
-
-    /* run the state-machine */
-    if(conn->data->state.used_interface == Curl_if_multi)
-      result = ssh_multi_statemach(conn, &done);
-    else {
-      result = ssh_easy_statemach(conn);
-      done = TRUE;
-    }
   }
-  else {
-    result = status;
-    done = TRUE;
-  }
-
-  if(done) {
-    Curl_pgrsDone(conn);
-  }
-
-  return result;
+  return ssh_done(conn, status);
 }
 
 /* return number of sent bytes */

@@ -38,6 +38,7 @@ This release includes the following bugfixes:
  o several curl_multi_socket() fixes
  o builds fine for Haiku OS
  o follow redirect with only a new query string
+ o SCP and SFTP memory leaks on aborted transfers
 
 This release includes the following known bugs:
 
@@ -60,6 +61,6 @@ advice from friends like these:
  Rafa Muyo, Andre Guibert de Bruet, Brock Noland, Sandor Feldi, Stefan Krause,
  David Shaw, Norbert Frese, Bart Whiteley, Jean-Francois Bertrand, Ben Van Hof,
  Yuriy Sosov, Christopher Palow, Yang Tse, Liam Healy, Nikolai Kondrashov,
- David Rosenstrauch, Andreas Faerber, Scott McCreary
+ David Rosenstrauch, Andreas Faerber, Scott McCreary, Jeff Weber
 
         Thanks! (and sorry if I forgot to mention someone)

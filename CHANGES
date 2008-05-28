@@ -7,6 +7,12 @@
                                   Changelog
 
 
+Daniel Stenberg (28 May 2008)
+- Jeff Weber reported memory leaks with aborted SCP and SFTP transfers and
+  provided excellent repeat recipes. I fixed the cases I managed to reproduce
+  but Jeff still got some (SCP) problems even after these fixes:
+  http://curl.haxx.se/mail/lib-2008-05/0342.html
+
 Daniel Stenberg (26 May 2008)
 - Bug report #1973352 (http://curl.haxx.se/bug/view.cgi?id=1973352) identified
   how the HTTP redirect following code didn't properly follow to a new URL if
