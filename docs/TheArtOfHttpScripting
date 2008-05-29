@@ -1,5 +1,5 @@
 Online:  http://curl.haxx.se/docs/httpscripting.html
-Date:    December 9, 2004
+Date:    May 28, 2008
 
                 The Art Of Scripting HTTP Requests Using Curl
                 =============================================
@@ -137,6 +137,10 @@ Date:    December 9, 2004
   you need to replace that space with %20 etc. Failing to comply with this
   will most likely cause your data to be received wrongly and messed up.
 
+  Recent curl versions can in fact url-encode POST data for you, like this:
+
+        curl --data-urlencode "name=I am Daniel" www.example.com
+
  4.3 File Upload POST
 
   Back in late 1995 they defined an additional way to post data over HTTP. It
@@ -202,14 +206,14 @@ Date:    December 9, 2004
 
         curl -T uploadfile www.uploadhttp.com/receive.cgi
 
-6. Authentication
+6. HTTP Authentication
 
- Authentication is the ability to tell the server your username and password
- so that it can verify that you're allowed to do the request you're doing. The
- Basic authentication used in HTTP (which is the type curl uses by default) is
- *plain* *text* based, which means it sends username and password only
- slightly obfuscated, but still fully readable by anyone that sniffs on the
- network between you and the remote server.
+ HTTP Authentication is the ability to tell the server your username and
+ password so that it can verify that you're allowed to do the request you're
+ doing. The Basic authentication used in HTTP (which is the type curl uses by
+ default) is *plain* *text* based, which means it sends username and password
+ only slightly obfuscated, but still fully readable by anyone that sniffs on
+ the network between you and the remote server.
 
  To tell curl to use a user and password for authentication:
 
@@ -236,6 +240,10 @@ Date:    December 9, 2004
  when listing the running processes of the system. Thus, other users may be
  able to watch your passwords if you pass them as plain command line
  options. There are ways to circumvent this.
+
+ It is worth noting that while this is how HTTP Authentication works, very
+ many web sites will not use this concept when they provide logins etc. See
+ the Web Login chapter further below for more details on that.
 
 7. Referer
 
@@ -407,7 +415,37 @@ Date:    December 9, 2004
 
         curl -H "Destination: http://moo.com/nowhere" http://url.com
 
-13. Debug
+13. Web Login
+
+ While not strictly just HTTP related, it still cause a lot of people problems
+ so here's the executive run-down of how the vast majority of all login forms
+ work and how to login to them using curl.
+
+ It can also be noted that to do this properly in an automated fashion, you
+ will most certainly need to script things and do multiple curl invokes etc.
+
+ First, servers mostly use cookies to track the logged-in status of the
+ client, so you will need to capture the cookies you receive in the
+ responses. Then, many sites also set a special cookie on the login page (to
+ make sure you got there through their login page) so you should make a habit
+ of first getting the login-form page to capture the cookies set there.
+
+ Some web-based login systems features various amounts of javascript, and
+ sometimes they use such code to set or modify cookie contents. Possibly they
+ do that to prevent programmed logins, like this manual describes how to...
+ Anyway, if reading the code isn't enough to let you repeat the behavior
+ manually, capturing the HTTP requests done by your browers and analyzing the
+ sent cookies is usually a working method to work out how to shortcut the
+ javascript need.
+
+ In the actual <form> tag for the login, lots of sites fill-in random/session
+ or otherwise secretly generated hidden tags and you may need to first capture
+ the HTML code for the login form and extract all the hidden fields to be able
+ to do a proper login POST. Remember that the contents need to be URL encoded
+ when sent in a normal POST.
+
+
+14. Debug
 
  Many times when you run curl on a site, you'll notice that the site doesn't
  seem to respond the same way to your curl requests as it does to your
@@ -437,7 +475,7 @@ Date:    December 9, 2004
  such as ethereal or tcpdump and check what headers that were sent and
  received by the browser. (HTTPS makes this technique inefficient.)
 
-14. References
+15. References
 
  RFC 2616 is a must to read if you want in-depth understanding of the HTTP
  protocol.
