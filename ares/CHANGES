@@ -1,5 +1,9 @@
   Changelog for the c-ares project
 
+* May 30 2008 (Yang Tse)
+
+- Brad House fixed a missing header file inclusion in adig sample program.
+
 Version 1.5.2 (May 29, 2008)
 
 * May 13 2008 (Daniel Stenberg)
