@@ -8,8 +8,8 @@
 !
 ! With the exception of CURLE_OK, all of the messages are at 
 ! the error severity level.  With the exception of 
-! FTP_USER_PWD_INCORRECT, which is a shortened form of 
-! FTP_USER_PASSWORD_INCORRECT, these are the same names as the 
+! PEER_FAILED_VERIF, which is a shortened form of 
+! PEER_FAILED_VERIFICATION, these are the same names as the 
 ! CURLE_ ones in include/curl.h.  The Message Utility manual states
 ! "The combined length of the prefix and the message symbol name cannot 
 ! exceed 31 characters."  With a prefix of five that leaves us with 26
@@ -27,76 +27,76 @@ OK		<normal successful completion>
 UNSUPPORTED_PROTOCOL	<unsupported protocol>
 FAILED_INIT		<failed init>
 URL_MALFORMAT		<URL malformat>
-URL_MALFORMAT_USER	<URL malformat user>
+OBSOLETE4		<obsolete error code>
 COULDNT_RESOLVE_PROXY	<could not resolve proxy>
 COULDNT_RESOLVE_HOST	<could not resolve host>
 COULDNT_CONNECT		<could not connect>
 FTP_WEIRD_SERVER_REPLY	<FTP weird server reply>
 FTP_ACCESS_DENIED	<FTP access denied>
-FTP_USER_PWD_INCORRECT	<FTP user password incorrect>
+OBSOLETE10		<obsolete error code>
 FTP_WEIRD_PASS_REPLY	<FTP weird PASS reply>
-FTP_WEIRD_USER_REPLY	<FTP weird USER reply>
+OBSOLETE12		<obsolete error code>
 FTP_WEIRD_PASV_REPLY	<FTP weird PASV reply>
 FTP_WEIRD_227_FORMAT	<FTP weird 227 format>
 FTP_CANT_GET_HOST	<FTP can not get host>
-FTP_CANT_RECONNECT	<FTP can not reconnect>
-FTP_COULDNT_SET_BINARY	<FTP could not set binary>
+OBSOLETE16		<obsolete error code>
+FTP_COULDNT_SET_TYPE	<FTP could not set type>
 PARTIAL_FILE		<partial file>
 FTP_COULDNT_RETR_FILE	<FTP could not RETR file>
-FTP_WRITE_ERROR		<FTP write error>
-FTP_QUOTE_ERROR		<FTP quote error>
+OBSOLETE20		<obsolete error code>
+QUOTE_ERROR		<quote command error>
 HTTP_RETURNED_ERROR	<HTTP returned error>
 WRITE_ERROR		<write error>
-MALFORMAT_USER		<user name is illegally specified>
-FTP_COULDNT_STOR_FILE	<FTP could not STOR file>
+OBSOLETE24    		<obsolete error code>
+UPLOAD_FAILED		<failed upload command>
 READ_ERROR		<read error, could not open/read file>
 OUT_OF_MEMORY		<out of memory>
 OPERATION_TIMEOUTED	<operation timed out, timeout time was reached>
-FTP_COULDNT_SET_ASCII	<FTP could not set ASCII, TYPE A failed>
+OBSOLETE29		<obsolete error code>
 FTP_PORT_FAILED		<FTP PORT operation failed>
 FTP_COULDNT_USE_REST	<FTP REST command failed>
-FTP_COULDNT_GET_SIZE	<FTP SIZE command failed>
-HTTP_RANGE_ERROR	<HTTP RANGE error>
+OBSOLETE32		<obsolete error code>
+RANGE_ERROR		<RANGE command error>
 HTTP_POST_ERROR		<HTTP POST error>
 SSL_CONNECT_ERROR	<SSL connect error>
 BAD_DOWNLOAD_RESUME	<bad download resume>
 FILE_COULDNT_READ_FILE	<FILE could not read file>
 LDAP_CANNOT_BIND	<LDAP cannot bind>
 LDAP_SEARCH_FAILED	<LDAP search failed>
-LIBRARY_NOT_FOUND	<library not found>
+OBSOLETE40		<obsolete error code>
 FUNCTION_NOT_FOUND	<function not found>
 ABORTED_BY_CALLBACK	<aborted by callback>
 BAD_FUNCTION_ARGUMENT	<bad function argument>
-BAD_CALLING_ORDER	<bad calling order>
+OBSOLETE44		<obsolete error code>
 INTERFACE_FAILED	<CURLOPT_INTERFACE failed>
-BAD_PASSWORD_ENTERED	<bad password entered, my_getpass() returns fail>
+OBSOLETE46		<obsolete error code>
 TOO_MANY_REDIRECTS	<too many redirects>
 UNKNOWN_TELNET_OPTION	<unknown TELNET option>
 TELNET_OPTION_SYNTAX	<malformed TELNET option syntax>
-OBSOLETE		<obsolete, removed after 7.7.3>
-SSL_PEER_CERTIFICATE	<SSL peer certificate was not OK>
+OBSOLETE50		<obsolete error code>
+PEER_FAILED_VERIF	<peer certificate or fingerprint failed>
 GOT_NOTHING		<got nothing>
 SSL_ENGINE_NOTFOUND	<SSL crypto engine not found>
 SSL_ENGINE_SETFAILED	<SSL can not set SSL crypto engine as default>
 SEND_ERROR		<SEND error, failure sending network data>
 RECV_ERROR		<RECV error, failure receiving network data>
-SHARE_IN_USE		<share is in use>
+OBSOLETE57  		<obsolete error code>
 SSL_CERTPROBLEM		<SSL problem with the local certificate>
 SSL_CIPHER              <SSL CIPHER, could not use specified cipher>
 SSL_CACERT		<SSL CACERT, problem with the CA cert (path?)>
 BAD_CONTENT_ENCODING	<unrecognized transfer encoding>
 LDAP_INVALID_URL	<LDAP invalid url>
 FILESIZE_EXCEEDED	<maximum file size exceeded>
-FTP_SSL_FAILED		<requested FTP SSL level failed>
+USE_SSL_FAILED		<requested FTP SSL level failed>
 SEND_FAIL_REWIND	<sending data requires a rewind that failed>
 SSL_ENGINE_INITFAILED	<failed to initialise ENGINE>
 LOGIN_DENIED		<user or password not accepted. failed to login>
 TFTP_NOTFOUND		<file not found on server>
 TFTP_PERM		<permission problem on server>
-TFTP_DISKFULL		<out of disk space on server>
+REMOTE_DISK_FULL	<out of disk space on server>
 TFTP_ILLEGAL		<illegal TFTP operation>
 TFTP_UNKNOWNID		<unknown transfer ID>
-TFTP_EXISTS		<file already exists>
+REMOTE_FILE_EXISTS	<file already exists>
 TFTP_NOSUCHUSER		<no such user>
 CONV_FAILED		<conversion failed>
 CONV_REQD		<caller must register conversion callbacks>
@@ -104,6 +104,7 @@ SSL_CACERT_BADFILE	<could not load CACERT file>
 REMOTE_FILE_NOT_FOUND	<remote file not found>
 SSH			<unspecified error from the SSH layer>
 SSL_SHUTDOWN_FAILED	<failed to shut down the SSL connection>
+AGAIN			<socket not ready, wait and try again>
 CURL_LAST		<CURLMSG.MSG is out of sync with the source code>
 
 .END
