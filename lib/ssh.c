@@ -2175,7 +2175,7 @@ static CURLcode ssh_do(struct connectdata *conn, bool *done)
    disconnecting operations that takes a while */
 static CURLcode scp_disconnect(struct connectdata *conn)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
 
   Curl_safefree(conn->data->state.proto.ssh);
   conn->data->state.proto.ssh = NULL;
@@ -2331,7 +2331,7 @@ static CURLcode sftp_doing(struct connectdata *conn,
    disconnecting operations that takes a while */
 static CURLcode sftp_disconnect(struct connectdata *conn)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
 
   DEBUGF(infof(conn->data, "SSH DISCONNECT starts now\n"));
 
