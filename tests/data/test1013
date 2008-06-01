@@ -31,7 +31,7 @@ Compare curl --version with curl-config --protocols
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
-2
+0
 </errorcode>
 </verify>
 </testcase>
