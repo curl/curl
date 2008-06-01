@@ -7,6 +7,11 @@
                                   Changelog
 
 
+Marty Kuhrt (1 Jun 2008)
+- Updated main.c to return CURLE_OK if PARAM_HELP_REQUESTED was returned
+  from getparameter instead of CURLE_FAILED_INIT.  No point in returning
+  an error if --help or --version were requested.
+
 Daniel Stenberg (28 May 2008)
 - Emil Romanus found a problem and helped me repeat it. It occured when using
   the curl_multi_socket() API with HTTP pipelining enabled and could lead to
