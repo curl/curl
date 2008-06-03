@@ -40,6 +40,7 @@ This release includes the following bugfixes:
  o follow redirect with only a new query string
  o SCP and SFTP memory leaks on aborted transfers
  o curl_multi_socket() and HTTP pipelining transfer stalls
+ o lost telnet data on an EWOULDBLOCK condition
 
 This release includes the following known bugs:
 

@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel Fandrich (3 Jun 2008)
+- Fixed a problem where telnet data would be lost if an EWOULDBLOCK
+  condition were encountered.
+
 Marty Kuhrt (1 Jun 2008)
 - Updated main.c to return CURLE_OK if PARAM_HELP_REQUESTED was returned
   from getparameter instead of CURLE_FAILED_INIT.  No point in returning
