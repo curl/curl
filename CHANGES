@@ -7,6 +7,8 @@
                                   Changelog
 
 
+Version 7.18.2 (4 June 2008)
+
 Daniel Fandrich (3 Jun 2008)
 - Fixed a problem where telnet data would be lost if an EWOULDBLOCK
   condition were encountered.
