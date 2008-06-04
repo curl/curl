@@ -1,46 +1,20 @@
-Curl and libcurl 7.18.2
+Curl and libcurl 7.18.3
 
- Public curl releases:         105
+ Public curl releases:         106
  Command line options:         126
  curl_easy_setopt() options:   150
  Public functions in libcurl:  58
  Public web site mirrors:      37
  Known libcurl bindings:       36
- Contributors:                 636
+ Contributors:                 654
 
 This release includes the following changes:
  
- o CURLFORM_STREAM was added
- o CURLOPT_NOBODY is now supported over SFTP
- o curl can now run on Symbian OS
- o curl -w redirect_url and CURLINFO_REDIRECT_URL
- o added curl_easy_send() and curl_easy_recv()
+ o 
 
 This release includes the following bugfixes:
 
- o CURLOPT_NOBODY first set to TRUE and then FALSE for HTTP no longer causes
-   the confusion that could lead to a hung transfer
- o curl_easy_reset() resets the max redirect limit properly
- o configure now correctly recognizes Heimdal and MIT gssapi libraries
- o malloc() failure check in Negotiate
- o -i and -I together now work the same no matter what order they're used
- o the typechecker can be bypassed by defining CURL_DISABLE_TYPECHECK
- o a pointer mixup could make the FTP code send bad user+password under rare
-   circumstances (found when using curlftpfs)
- o CURLOPT_OPENSOCKETFUNCTION can now be used to create a unix domain socket
- o CURLOPT_TCP_NODELAY crash due to getprotobyname() use
- o libcurl sometimes sent body twice when using CURLAUTH_ANY
- o configure detecting debug-enabled c-ares
- o microsecond resolution keys for internal splay trees
- o krb4 and krb5 ftp segfault
- o multi interface busy loop for CONNECT requests
- o internal time differences now use monotonic time source if available
- o several curl_multi_socket() fixes
- o builds fine for Haiku OS
- o follow redirect with only a new query string
- o SCP and SFTP memory leaks on aborted transfers
- o curl_multi_socket() and HTTP pipelining transfer stalls
- o lost telnet data on an EWOULDBLOCK condition
+ o 
 
 This release includes the following known bugs:
 
@@ -48,9 +22,7 @@ This release includes the following known bugs:
 
 Other curl-related news:
 
- o pycurl 7.18.1 was released: http://pycurl.sf.net/
- o brand new curl Haskell binding:
-   http://hackage.haskell.org/cgi-bin/hackage-scripts/package/curl
+ o 
 
 New curl mirrors:
 
@@ -59,10 +31,6 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Michal Marek, Daniel Fandrich, Scott Barrett, Alexey Simak, Daniel Black,
- Rafa Muyo, Andre Guibert de Bruet, Brock Noland, Sandor Feldi, Stefan Krause,
- David Shaw, Norbert Frese, Bart Whiteley, Jean-Francois Bertrand, Ben Van Hof,
- Yuriy Sosov, Christopher Palow, Yang Tse, Liam Healy, Nikolai Kondrashov,
- David Rosenstrauch, Andreas Faerber, Scott McCreary, Jeff Weber, Emil Romanus
+
 
         Thanks! (and sorry if I forgot to mention someone)
