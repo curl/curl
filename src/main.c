@@ -667,7 +667,7 @@ static void help(void)
     "    --cert-type <type> Certificate file type (DER/PEM/ENG) (SSL)",
     "    --ciphers <list> SSL ciphers to use (SSL)",
     "    --compressed    Request compressed response (using deflate or gzip)",
-    " -K/--config        Specify which config file to read",
+    " -K/--config <file> Specify which config file to read",
     "    --connect-timeout <seconds> Maximum time allowed for connection",
     " -C/--continue-at <offset> Resumed transfer offset",
     " -b/--cookie <name=string/file> Cookie string or file to read cookies from (H)",
@@ -691,7 +691,7 @@ static void help(void)
     " -F/--form <name=content> Specify HTTP multipart POST data (H)",
     "    --form-string <name=string> Specify HTTP multipart POST data (H)",
     "    --ftp-account <data> Account data to send when requested by server (F)",
-    "    --ftp-alternative-to-user String to replace \"USER [name]\" (F)",
+    "    --ftp-alternative-to-user <cmd> String to replace \"USER [name]\" (F)",
     "    --ftp-create-dirs Create the remote dirs if not present (F)",
     "    --ftp-method [multicwd/nocwd/singlecwd] Control CWD usage (F)",
     "    --ftp-pasv      Use PASV/EPSV instead of PORT (F)",
@@ -719,7 +719,7 @@ static void help(void)
     "    --keepalive-time <seconds> Interval between keepalive probes",
     "    --key <key>     Private key file name (SSL/SSH)",
     "    --key-type <type> Private key file type (DER/PEM/ENG) (SSL)",
-    "    --krb <level>   Enable kerberos with specified security level (F)",
+    "    --krb <level>   Enable Kerberos with specified security level (F)",
     "    --libcurl <file> Dump libcurl equivalent code of this command line",
     "    --limit-rate <rate> Limit transfer speed to this rate",
     " -l/--list-only     List only names of an FTP directory (F)",
@@ -790,7 +790,7 @@ static void help(void)
 #ifdef MSDOS
     "    --wdebug        Turn on Watt-32 debugging under DJGPP",
 #endif
-    " -w/--write-out [format] What to output after completion",
+    " -w/--write-out <format> What to output after completion",
     " -q                 If used as the first parameter disables .curlrc",
     NULL
   };
@@ -1696,7 +1696,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"R", "remote-time", FALSE},
     {"s", "silent",      FALSE},
     {"S", "show-error",  FALSE},
-    {"t", "telnet-options", TRUE},
+    {"t", "telnet-options", TRUE}, /* this is documented as telnet-option */
     {"T", "upload-file", TRUE},
     {"u", "user",        TRUE},
     {"U", "proxy-user",  TRUE},
