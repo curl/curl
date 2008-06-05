@@ -2,10 +2,11 @@ Curl on Symbian OS
 ==================
 This is a basic port of curl and libcurl to Symbian OS.  The port is
 a straightforward one using Symbian's P.I.P.S. POSIX compatibility
-layer. A more complete port would involve writing a Symbian C++ binding,
-or wrapping libcurl as a Symbian application server with a C++ API to
-handle requests from client applications and creating a GUI application
-to allow file transfers.  The author has no current plans to do so.
+layer, which was first available for OS version 9.1. A more complete
+port would involve writing a Symbian C++ binding, or wrapping libcurl
+as a Symbian application server with a C++ API to handle requests
+from client applications as well as creating a GUI application to allow
+file transfers.  The author has no current plans to do so.
 
 This means that integration with standard Symbian OS programs can be
 tricky, since libcurl isn't designed with Symbian's native asynchronous 
@@ -77,4 +78,4 @@ files.
 
 Dan Fandrich
 dan@coneharvesters.com
-May 2008
+June 2008
