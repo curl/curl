@@ -10,7 +10,7 @@ Curl and libcurl 7.18.3
 
 This release includes the following changes:
  
- o 
+ o Added CURLINFO_PRIMARY_IP
 
 This release includes the following bugfixes:
 
@@ -31,6 +31,6 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-
+ Lenny Rachitsky
 
         Thanks! (and sorry if I forgot to mention someone)

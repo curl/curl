@@ -210,6 +210,10 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
        option had been enabled! */
     *param_charp = data->info.wouldredirect;
     break;
+  case CURLINFO_PRIMARY_IP:
+    /* Return the ip address of the most recent (primary) connection */
+    *param_charp = data->info.ip;
+    break;
   default:
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }

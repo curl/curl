@@ -775,9 +775,12 @@ singleipconnect(struct connectdata *conn,
   /* FIXME: do we have Curl_printable_address-like with struct sockaddr* as
      argument? */
 #if defined(HAVE_SYS_UN_H) && defined(AF_UNIX)
-  if(addr->family==AF_UNIX)
+  if(addr->family==AF_UNIX) {
     infof(data, "  Trying %s... ",
           ((const struct sockaddr_un*)(&addr->addr))->sun_path);
+    snprintf(data->info.ip, MAX_IPADR_LEN, "%s",
+             ((const struct sockaddr_un*)(&addr->addr))->sun_path);
+  }
   else
 #endif
   {
@@ -789,8 +792,10 @@ singleipconnect(struct connectdata *conn,
       iptoprint = &((const struct sockaddr_in*)(&addr->addr))->sin_addr;
 
     if(Curl_inet_ntop(addr->family, iptoprint, addr_buf,
-                      sizeof(addr_buf)) != NULL)
+                      sizeof(addr_buf)) != NULL) {
       infof(data, "  Trying %s... ", addr_buf);
+      snprintf(data->info.ip, MAX_IPADR_LEN, "%s", addr_buf);
+    }
   }
 
   if(data->set.tcp_nodelay)

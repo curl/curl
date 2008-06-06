@@ -159,6 +159,12 @@ counted).  Combined with \fICURLINFO_REDIRECT_COUNT\fP you are able to know
 how many times libcurl successfully reused existing connection(s) or not.  See
 the Connection Options of \fIcurl_easy_setopt(3)\fP to see how libcurl tries
 to make persistent connections to save time.  (Added in 7.12.3)
+.IP CURLINFO_PRIMARY_IP
+Pass a pointer to a char pointer to receive the pointer to a zero-terminated
+string holding the IP address of the most recent connection done with this
+\fBcurl\fP handle. This string may be IPv6 if that's enabled. Note that you
+get a pointer to a memory area that will be re-used at next request so you
+need to copy the string if you want to keep the information. (Added in 7.18.3)
 .IP CURLINFO_COOKIELIST
 Pass a pointer to a 'struct curl_slist *' to receive a linked-list of all
 cookies cURL knows (expired ones, too). Don't forget to

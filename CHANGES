@@ -7,6 +7,12 @@
                                   Changelog
 
 
+Daniel Stenberg (6 Jun 2008)
+- Added CURLINFO_PRIMARY_IP as a new information retrievable with
+  curl_easy_getinfo. It returns a pointer to a string with the most recently
+  used IP address. Modified test case 500 to also verify this feature. The
+  implementing of this feature was sponsored by Lenny Rachitsky at NeuStar.
+
 Version 7.18.2 (4 June 2008)
 
 Daniel Fandrich (3 Jun 2008)

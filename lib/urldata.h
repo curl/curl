@@ -48,6 +48,8 @@
 #define CURL_DEFAULT_USER "anonymous"
 #define CURL_DEFAULT_PASSWORD "ftp@example.com"
 
+#define MAX_IPADR_LEN (4*9) /* should be enough to hold the longest ipv6 one */
+
 #include "cookie.h"
 #include "formdata.h"
 
@@ -1036,6 +1038,9 @@ struct PureInfo {
   long numconnects; /* how many new connection did libcurl created */
   char *contenttype; /* the content type of the object */
   char *wouldredirect; /* URL this would've been redirected to if asked to */
+  char ip[MAX_IPADR_LEN]; /* this buffer gets the numerical ip version stored
+                             at the connect *attempt* so it will get the last
+                             tried connect IP even on failures */
 };
 
 
