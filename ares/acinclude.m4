@@ -50,7 +50,8 @@ AC_DEFUN([CURL_CHECK_NATIVE_WINDOWS], [
       AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
         ]],[[
-#if defined(__MINGW32__) || defined(__MINGW32CE__)
+#if defined(__MINGW32__) || defined(__MINGW32CE__) || \
+   (defined(_MSC_VER) && (defined(_WIN32) || defined(_WIN64)))
           int dummy=1;
 #else
           Not a native Windows build target.
