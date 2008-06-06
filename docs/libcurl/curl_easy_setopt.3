@@ -1469,7 +1469,7 @@ This option makes sense only when used in combination with the
 A specific error code (CURLE_SSL_CRL_BADFILE) is defined with the option. It
 is returned when the SSL exchange fails because the CRL file cannot be loaded.
 Note that a failure in certificate verification due to a revocation information
-found in the CRL does not trigger this specific error.
+found in the CRL does not trigger this specific error. (Added in 7.18.3)
 .IP CURLOPT_RANDOM_FILE
 Pass a char * to a zero terminated file name. The file will be used to read
 from to seed the random engine for SSL. The more random the specified file is,
