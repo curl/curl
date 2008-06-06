@@ -723,6 +723,43 @@ static void display_conn_info(struct connectdata *conn, PRFileDesc *sock)
 
 /**
  *
+ * Check that the Peer certificate's issuer certificate matches the one found
+ * by issuer_nickname.  This is not exactly the way OpenSSL and GNU TLS do the
+ * issuer check, so we provide comments that mimic the OpenSSL
+ * X509_check_issued function (in x509v3/v3_purp.c)
+ */
+static SECStatus check_issuer_cert(struct connectdata *conn, PRFileDesc *sock, char* issuer_nickname)
+{
+  CERTCertificate *cert,*cert_issuer,*issuer;
+  SECStatus res=SECSuccess;
+  void *proto_win = NULL;
+
+  /*
+  PRArenaPool   *tmpArena = NULL;
+  CERTAuthKeyID *authorityKeyID = NULL;
+  SECITEM       *caname = NULL;
+  */
+
+  cert = SSL_PeerCertificate(sock);
+  cert_issuer = CERT_FindCertIssuer(cert,PR_Now(),certUsageObjectSigner);
+
+  proto_win = SSL_RevealPinArg(sock);
+  issuer = NULL;
+  issuer = PK11_FindCertFromNickname(issuer_nickname, proto_win);
+
+  if ((!cert_issuer) || (!issuer))
+    res = SECFailure;
+  else if (CERT_CompareCerts(cert_issuer,issuer)==PR_FALSE)
+    res = SECFailure;
+
+  CERT_DestroyCertificate(cert);
+  CERT_DestroyCertificate(issuer);
+  CERT_DestroyCertificate(cert_issuer);
+  return res;
+}
+
+/**
+ *
  * Callback to pick the SSL client certificate.
  */
 static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
@@ -853,7 +890,7 @@ int Curl_nss_close_all(struct SessionHandle *data)
   return 0;
 }
 
-CURLcode Curl_nss_connect(struct connectdata * conn, int sockindex)
+CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 {
   PRInt32 err;
   PRFileDesc *model = NULL;
@@ -1046,6 +1083,7 @@ CURLcode Curl_nss_connect(struct connectdata * conn, int sockindex)
     }
     else {
       strncpy(nickname, data->set.str[STRING_CERT], PATH_MAX);
+      nickname[PATH_MAX-1]=0; /* make sure this is zero terminated */
     }
     if(nss_Init_Tokens(conn) != SECSuccess) {
       free(nickname);
@@ -1061,7 +1099,7 @@ CURLcode Curl_nss_connect(struct connectdata * conn, int sockindex)
     connssl->client_nickname = strdup(nickname);
     if(SSL_GetClientAuthDataHook(model,
                                  (SSLGetClientAuthData) SelectClientCert,
-                                 (void *)connssl->client_nickname) !=
+                                 (void *)connssl) !=
        SECSuccess) {
       curlerr = CURLE_SSL_CERTPROBLEM;
       goto error;
@@ -1073,6 +1111,7 @@ CURLcode Curl_nss_connect(struct connectdata * conn, int sockindex)
   }
   else
     connssl->client_nickname = NULL;
+
 
   /* Import our model socket  onto the existing file descriptor */
   connssl->handle = PR_ImportTCPSocket(sockfd);
@@ -1098,6 +1137,32 @@ CURLcode Curl_nss_connect(struct connectdata * conn, int sockindex)
   connssl->state = ssl_connection_complete;
 
   display_conn_info(conn, connssl->handle);
+
+  if (data->set.str[STRING_SSL_ISSUERCERT]) {
+    char *n;
+    char *nickname;
+    nickname = (char *)malloc(PATH_MAX);
+    if(is_file(data->set.str[STRING_SSL_ISSUERCERT])) {
+      n = strrchr(data->set.str[STRING_SSL_ISSUERCERT], '/');
+      if (n) {
+        n++; /* skip last slash */
+        snprintf(nickname, PATH_MAX, "PEM Token #%ld:%s", 1, n);
+      }
+    }
+    else {
+      strncpy(nickname, data->set.str[STRING_SSL_ISSUERCERT], PATH_MAX);
+      nickname[PATH_MAX-1]=0; /* make sure this is zero terminated */
+    }
+    if (check_issuer_cert(conn,connssl->handle,nickname)==SECFailure) {
+      infof(data,"SSL certificate issuer check failed\n");
+      free(nickname);
+      curlerr = CURLE_SSL_ISSUER_ERROR;
+      goto error;
+    }
+    else {
+      infof("SSL certificate issuer check ok\n");
+    }
+  }
 
   return CURLE_OK;
 

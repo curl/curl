@@ -143,6 +143,32 @@ static void showtime(struct SessionHandle *data,
   infof(data, "%s", data->state.buffer);
 }
 
+static gnutls_datum load_file (const char *file)
+{
+  FILE *f;
+  gnutls_datum loaded_file = { NULL, 0 };
+  long filelen;
+  void *ptr;
+
+  if (!(f = fopen(file, "r"))
+      || fseek(f, 0, SEEK_END) != 0
+      || (filelen = ftell(f)) < 0
+      || fseek(f, 0, SEEK_SET) != 0
+      || !(ptr = malloc((size_t)filelen))
+      || fread(ptr, 1, (size_t)filelen, f) < (size_t)filelen) {
+    return loaded_file;
+  }
+
+  loaded_file.data = ptr;
+  loaded_file.size = (unsigned int)filelen;
+  return loaded_file;
+}
+
+static void unload_file(gnutls_datum data) {
+  free(data.data);
+}
+
+
 /* this function does a BLOCKING SSL/TLS (re-)handshake */
 static CURLcode handshake(struct connectdata *conn,
                           gnutls_session session,
@@ -221,7 +247,8 @@ Curl_gtls_connect(struct connectdata *conn,
   unsigned int cert_list_size;
   const gnutls_datum *chainp;
   unsigned int verify_status;
-  gnutls_x509_crt x509_cert;
+  gnutls_x509_crt x509_cert,x509_issuer;
+  gnutls_datum issuerp;
   char certbuf[256]; /* big enough? */
   size_t size;
   unsigned int algo;
@@ -375,7 +402,9 @@ Curl_gtls_connect(struct connectdata *conn,
 
   chainp = gnutls_certificate_get_peers(session, &cert_list_size);
   if(!chainp) {
-    if(data->set.ssl.verifypeer) {
+    if(data->set.ssl.verifypeer ||
+       data->set.ssl.verifyhost ||
+       data->set.ssl.issuercert) {
       failf(data, "failed to get server cert");
       return CURLE_PEER_FAILED_VERIFICATION;
     }
@@ -399,8 +428,9 @@ Curl_gtls_connect(struct connectdata *conn,
     /* verify_status is a bitmask of gnutls_certificate_status bits */
     if(verify_status & GNUTLS_CERT_INVALID) {
       if(data->set.ssl.verifypeer) {
-        failf(data, "server certificate verification failed. CAfile: %s",
-              data->set.ssl.CAfile?data->set.ssl.CAfile:"none");
+        failf(data, "server certificate verification failed. CAfile: %s "
+	      "CRLfile: %s", data->set.ssl.CAfile?data->set.ssl.CAfile:"none",
+	      data->set.ssl.CRLfile?data->set.ssl.CRLfile:"none");
         return CURLE_SSL_CACERT;
       }
       else
@@ -418,6 +448,21 @@ Curl_gtls_connect(struct connectdata *conn,
   /* convert the given DER or PEM encoded Certificate to the native
      gnutls_x509_crt_t format */
   gnutls_x509_crt_import(x509_cert, chainp, GNUTLS_X509_FMT_DER);
+
+  if (data->set.ssl.issuercert) {
+    gnutls_x509_crt_init(&x509_issuer);
+    issuerp = load_file(data->set.ssl.issuercert);
+    gnutls_x509_crt_import(x509_issuer, &issuerp, GNUTLS_X509_FMT_PEM);
+    rc = gnutls_x509_crt_check_issuer(x509_cert,x509_issuer);
+    unload_file(issuerp);
+    if (rc <= 0) {
+      failf(data, "server certificate issuer check failed (IssuerCert: %s)",
+	    data->set.ssl.issuercert?data->set.ssl.issuercert:"none");
+      return CURLE_SSL_ISSUER_ERROR;
+    }
+    infof(data,"\t server certificate issuer check OK (Issuer Cert: %s)\n",
+	  data->set.ssl.issuercert?data->set.ssl.issuercert:"none");
+  }
 
   size=sizeof(certbuf);
   rc = gnutls_x509_crt_get_dn_by_oid(x509_cert, GNUTLS_OID_X520_COMMON_NAME,

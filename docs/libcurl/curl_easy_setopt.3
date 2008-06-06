@@ -1443,6 +1443,22 @@ bundle is assumed to be stored, as established at build time.
 
 When built against NSS this is the directory that the NSS certificate
 database resides in.
+.IP CURLOPT_ISSUERCERT
+Pass a char * to a zero terminated string naming a file holding a CA
+certificate in PEM format. If the option is set, an additional check against
+the peer certificate is performed to verify the issuer is indeed the one
+associated with the certificate provided by the option. This additional check
+is useful in multi-level PKI where one need to enforce the peer certificate is
+from a specific branch of the tree.
+
+This option makes sense only when used in combination with the
+\fICURLOPT_SSL_VERIFYPEER\fP option. Otherwise, the result of the check is not
+considered as failure.
+
+A specific error code (CURLE_SSL_ISSUER_ERROR) is defined with the option,
+which is returned if the setup of the SSL/TLS session has failed due to a
+mismatch with the issuer of peer certificate (\fICURLOPT_SSL_VERIFYPEER\fP has
+to be set too for the check to fail). (Added in 7.18.3)
 .IP CURLOPT_CAPATH
 Pass a char * to a zero terminated string naming a directory holding multiple
 CA certificates to verify the peer with. The certificate directory must be

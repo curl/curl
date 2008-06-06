@@ -1819,6 +1819,14 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     result = setstropt(&data->set.str[STRING_SSL_CRLFILE],
                        va_arg(param, char *));
     break;
+  case CURLOPT_ISSUERCERT:
+    /*
+     * Set Issuer certificate file
+     * to check certificates issuer
+     */
+    result = setstropt(&data->set.str[STRING_SSL_ISSUERCERT],
+                       va_arg(param, char *));
+    break;
   case CURLOPT_TELNETOPTIONS:
     /*
      * Set a linked list of telnet options
@@ -3960,6 +3968,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   data->set.ssl.CApath = data->set.str[STRING_SSL_CAPATH];
   data->set.ssl.CAfile = data->set.str[STRING_SSL_CAFILE];
   data->set.ssl.CRLfile = data->set.str[STRING_SSL_CRLFILE];
+  data->set.ssl.issuercert = data->set.str[STRING_SSL_ISSUERCERT];
   data->set.ssl.random_file = data->set.str[STRING_SSL_RANDOM_FILE];
   data->set.ssl.egdsocket = data->set.str[STRING_SSL_EGDSOCKET];
   data->set.ssl.cipher_list = data->set.str[STRING_SSL_CIPHER_LIST];

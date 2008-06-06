@@ -225,6 +225,9 @@ curl_easy_strerror(CURLcode error)
   case CURLE_SSL_CRL_BADFILE:
     return "Failed to load CRL file (path? access rights?, format?)";
 
+  case CURLE_SSL_ISSUER_ERROR:
+    return "Issuer check against peer certificate failed";
+
   case CURLE_SEND_FAIL_REWIND:
     return "Send failed since rewinding of the data stream failed";
 

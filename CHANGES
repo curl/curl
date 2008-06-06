@@ -8,6 +8,9 @@
 
 
 Daniel Stenberg (6 Jun 2008)
+- Axel Tillequin and Arnaud Ebalard added support for CURLOPT_ISSUERCERT, for
+  OpenSSL, NSS and GnuTLS-built libcurls.
+
 - Axel Tillequin and Arnaud Ebalard added support for CURLOPT_CRLFILE, for
   OpenSSL, NSS and GnuTLS-built libcurls.
 

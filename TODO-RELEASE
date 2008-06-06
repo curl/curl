@@ -3,8 +3,6 @@ To be addressed before 7.18.3 (planned release: August 2008)
 
 139 - Christopher Palow's CURLM_EASY_HANDLE_EXISTS patch
 
-140 - Arnaud Ebalard and Axel Tillequin's CRL support and issuer check patches
-
 144 - Help apps use 64bit/LFS libcurl!
 
 145 -

@@ -1629,6 +1629,9 @@ static CURLcode servercert(struct connectdata *conn,
   long lerr;
   ASN1_TIME *certdate;
   struct SessionHandle *data = conn->data;
+  X509 *issuer;
+  FILE *fp;
+
   connssl->server_cert = SSL_get_peer_certificate(connssl->handle);
   if(!connssl->server_cert) {
     if(strict)
@@ -1678,6 +1681,41 @@ static CURLcode servercert(struct connectdata *conn,
     /* We could do all sorts of certificate verification stuff here before
        deallocating the certificate. */
 
+    /* e.g. match issuer name with provided issuer certificate */
+    if (data->set.str[STRING_SSL_ISSUERCERT]) {
+      if (! (fp=fopen(data->set.str[STRING_SSL_ISSUERCERT],"r"))) {
+        if (strict)
+	  failf(data, "SSL: Unable to open issuer cert (%s)\n",
+		data->set.str[STRING_SSL_ISSUERCERT]);
+	X509_free(connssl->server_cert);
+	connssl->server_cert = NULL;
+	return CURLE_SSL_ISSUER_ERROR;
+      }
+      issuer = PEM_read_X509(fp,NULL,NULL,NULL);
+      if (!issuer) {
+        if (strict)
+	  failf(data, "SSL: Unable to read issuer cert (%s)\n",
+		data->set.str[STRING_SSL_ISSUERCERT]);
+	X509_free(connssl->server_cert);
+	X509_free(issuer);
+	fclose(fp);
+	return CURLE_SSL_ISSUER_ERROR;
+      }
+      fclose(fp);
+      if (X509_check_issued(issuer,connssl->server_cert) != X509_V_OK) {
+        if (strict)
+	  failf(data, "SSL: Certificate issuer check failed (%s)\n",
+		data->set.str[STRING_SSL_ISSUERCERT]);
+	X509_free(connssl->server_cert);
+	X509_free(issuer);
+	connssl->server_cert = NULL;
+        return CURLE_SSL_ISSUER_ERROR;
+      }
+      infof(data, "\t SSL certificate issuer check ok (%s)\n",
+	    data->set.str[STRING_SSL_ISSUERCERT]);
+      X509_free(issuer);
+    }
+
     lerr = data->set.ssl.certverifyresult=
       SSL_get_verify_result(connssl->handle);
     if(data->set.ssl.certverifyresult != X509_V_OK) {
@@ -1690,12 +1728,12 @@ static CURLcode servercert(struct connectdata *conn,
         retcode = CURLE_PEER_FAILED_VERIFICATION;
       }
       else
-        infof(data, "SSL certificate verify result: %s (%ld),"
+        infof(data, "\t SSL certificate verify result: %s (%ld),"
               " continuing anyway.\n",
               X509_verify_cert_error_string(lerr), lerr);
     }
     else
-      infof(data, "SSL certificate verify ok.\n");
+      infof(data, "\t SSL certificate verify ok.\n");
   }
 
   X509_free(connssl->server_cert);
