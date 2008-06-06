@@ -313,16 +313,20 @@ nss_load_cert(const char *filename, PRBool cacert)
     return 0;
   }
 
-  PK11_SETATTRS(attrs, CKA_CLASS, &objClass, sizeof(objClass) ); attrs++;
-  PK11_SETATTRS(attrs, CKA_TOKEN, &cktrue, sizeof(CK_BBOOL) ); attrs++;
+  PK11_SETATTRS(attrs, CKA_CLASS, &objClass, sizeof(objClass) );
+  attrs++;
+  PK11_SETATTRS(attrs, CKA_TOKEN, &cktrue, sizeof(CK_BBOOL) );
+  attrs++;
   PK11_SETATTRS(attrs, CKA_LABEL, (unsigned char *)filename,
-                strlen(filename)+1); attrs++;
+                strlen(filename)+1);
+  attrs++;
   if(cacert) {
-    PK11_SETATTRS(attrs, CKA_TRUST, &cktrue, sizeof(CK_BBOOL) ); attrs++;
+    PK11_SETATTRS(attrs, CKA_TRUST, &cktrue, sizeof(CK_BBOOL) );
   }
   else {
-    PK11_SETATTRS(attrs, CKA_TRUST, &ckfalse, sizeof(CK_BBOOL) ); attrs++;
+    PK11_SETATTRS(attrs, CKA_TRUST, &ckfalse, sizeof(CK_BBOOL) );
   }
+  attrs++;
 
   /* This load the certificate in our PEM module into the appropriate
    * slot.
@@ -382,38 +386,49 @@ static int nss_load_crl(char* crlfilename, PRBool ascii)
   }
   crlDER.data = NULL;
   prstat = PR_GetOpenFileInfo(infile,&info);
-  if (prstat!=PR_SUCCESS) return 0;
+  if (prstat!=PR_SUCCESS)
+    return 0;
   if (ascii) {
     SECItem filedata;
     char *asc,*body;
     filedata.data = NULL;
-    if (!SECITEM_AllocItem(NULL,&filedata,info.size)) return 0;
-    nb = PR_Read(infile,filedata.data,info.size);
-    if (nb!=info.size) return 0;
-    asc = (char*)filedata.data;
-    if (!asc) {
+    if (!SECITEM_AllocItem(NULL,&filedata,info.size))
       return 0;
-    }
-    if ((body=strstr(asc,"-----BEGIN")) != NULL) {
+    nb = PR_Read(infile,filedata.data,info.size);
+    if (nb!=info.size)
+      return 0;
+    asc = (char*)filedata.data;
+    if (!asc)
+      return 0;
+
+    body=strstr(asc,"-----BEGIN");
+    if (body != NULL) {
       char *trailer=NULL;
       asc = body;
       body = PORT_Strchr(asc,'\n');
-      if (!body) body = PORT_Strchr(asc,'\r');
-      if (body) trailer = strstr(++body,"-----END");
-      if (trailer!=NULL) *trailer='\0';
-      else return 0;
+      if (!body)
+        body = PORT_Strchr(asc,'\r');
+      if (body)
+        trailer = strstr(++body,"-----END");
+      if (trailer!=NULL)
+        *trailer='\0';
+      else
+        return 0;
     }
     else {
       body = asc;
     }
     rv = ATOB_ConvertAsciiToItem(&crlDER,body);
     PORT_Free(filedata.data);
-    if (rv) return 0;
+    if (rv)
+      return 0;
   }
   else {
-    if (!SECITEM_AllocItem(NULL,&crlDER,info.size)) return 0;
+    if (!SECITEM_AllocItem(NULL,&crlDER,info.size))
+      return 0;
     nb = PR_Read(infile,crlDER.data,info.size);
-    if (nb!=info.size) return 0;
+    if (nb!=info.size)
+      return 0;
   }
 
   slot = PK11_GetInternalKeySlot();
@@ -686,10 +701,10 @@ static void display_conn_info(struct connectdata *conn, PRFileDesc *sock)
   PRTime notBefore, notAfter;
 
   if(SSL_GetChannelInfo(sock, &channel, sizeof channel) ==
-    SECSuccess && channel.length == sizeof channel &&
-    channel.cipherSuite) {
+     SECSuccess && channel.length == sizeof channel &&
+     channel.cipherSuite) {
     if(SSL_GetCipherSuiteInfo(channel.cipherSuite,
-      &suite, sizeof suite) == SECSuccess) {
+                              &suite, sizeof suite) == SECSuccess) {
       infof(conn->data, "SSL connection using %s\n", suite.cipherSuiteName);
     }
   }
@@ -728,7 +743,8 @@ static void display_conn_info(struct connectdata *conn, PRFileDesc *sock)
  * issuer check, so we provide comments that mimic the OpenSSL
  * X509_check_issued function (in x509v3/v3_purp.c)
  */
-static SECStatus check_issuer_cert(struct connectdata *conn, PRFileDesc *sock, char* issuer_nickname)
+static SECStatus check_issuer_cert(struct connectdata *conn, PRFileDesc *sock,
+                                   char* issuer_nickname)
 {
   CERTCertificate *cert,*cert_issuer,*issuer;
   SECStatus res=SECSuccess;
@@ -1046,8 +1062,8 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
           rc = nss_load_cert(fullpath, PR_TRUE);
           /* FIXME: check this return value! */
         }
-      /* This is purposefully tolerant of errors so non-PEM files
-       * can be in the same directory */
+        /* This is purposefully tolerant of errors so non-PEM files
+         * can be in the same directory */
       } while(entry != NULL);
       PR_CloseDir(dir);
     }
