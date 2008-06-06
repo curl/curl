@@ -1452,6 +1452,24 @@ in combination with the \fICURLOPT_SSL_VERIFYPEER\fP option.  If
 indicate an accessible path.  The \fICURLOPT_CAPATH\fP function apparently
 does not work in Windows due to some limitation in openssl. This option is
 OpenSSL-specific and does nothing if libcurl is built to use GnuTLS.
+.IP CURLOPT_CRLFILE
+Pass a char * to a zero terminated string naming a file with the concatenation
+of CRL (in PEM format) to use in the certificate validation that occurs during
+the SSL exchange.
+
+When curl is built to use NSS or GnuTLS, there is no way to influence the use
+of CRL passed to help in the verification process. When libcurl is built with
+OpenSSL support, X509_V_FLAG_CRL_CHECK and X509_V_FLAG_CRL_CHECK_ALL are both
+set, requiring CRL check against all the elements of the certificate chain if
+a CRL file is passed.
+
+This option makes sense only when used in combination with the
+\fICURLOPT_SSL_VERIFYPEER\fP option.
+
+A specific error code (CURLE_SSL_CRL_BADFILE) is defined with the option. It
+is returned when the SSL exchange fails because the CRL file cannot be loaded.
+Note that a failure in certificate verification due to a revocation information
+found in the CRL does not trigger this specific error.
 .IP CURLOPT_RANDOM_FILE
 Pass a char * to a zero terminated file name. The file will be used to read
 from to seed the random engine for SSL. The more random the specified file is,

@@ -212,6 +212,7 @@ struct ssl_config_data {
                             2: CN must match hostname */
   char *CApath;          /* certificate dir (doesn't work on windows) */
   char *CAfile;          /* cerficate to verify peer against */
+  char *CRLfile;         /* CRL to check cerficate revocation */
   char *random_file;     /* path to file containing "random" data */
   char *egdsocket;       /* path to file containing the EGD daemon socket */
   char *cipher_list;     /* list of ciphers to use */
@@ -1317,6 +1318,7 @@ enum dupstring {
   STRING_USERAGENT,       /* User-Agent string */
   STRING_USERPWD,         /* <user:password>, if used */
   STRING_SSH_HOST_PUBLIC_KEY_MD5, /* md5 of host public key in ascii hex */
+  STRING_SSL_CRLFILE,     /* crl file to check certificate */
 
   /* -- end of strings -- */
   STRING_LAST /* not used, just an end-of-list marker */

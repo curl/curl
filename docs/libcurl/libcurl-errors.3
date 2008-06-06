@@ -212,6 +212,8 @@ Failed to shut down the SSL connection
 Socket is not ready for send/recv wait till it's ready and try again. This
 return code is only returned from \fIcurl_easy_recv(3)\fP and
 \fIcurl_easy_send(3)\fP (Added in 7.18.2)
+.IP "CURLE_SSL_CRL_BADFILE (82)"
+Failed to load CRL file (Added in 7.18.3)
 .IP "CURLE_OBSOLETE*"
 These error codes will never be returned. They used to be used in an old libcurl
 version and are currently unused.

@@ -452,7 +452,10 @@ typedef enum {
   CURLE_SSL_SHUTDOWN_FAILED,     /* 80 - Failed to shut down the SSL
                                     connection */
   CURLE_AGAIN,                   /* 81 - socket is not ready for send/recv,
-                                    wait till it's ready and try again */
+                                    wait till it's ready and try again (Added
+                                    in 7.18.2) */
+  CURLE_SSL_CRL_BADFILE,         /* 82 - could not load CRL file, missing or
+                                    wrong format (Added in 7.18.3) */
   CURL_LAST /* never use! */
 } CURLcode;
 
@@ -1199,6 +1202,9 @@ typedef enum {
   /* Callback function for seeking in the input stream */
   CINIT(SEEKFUNCTION, FUNCTIONPOINT, 167),
   CINIT(SEEKDATA, OBJECTPOINT, 168),
+
+  /* CRL file */
+  CINIT(CRLFILE, OBJECTPOINT, 169),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

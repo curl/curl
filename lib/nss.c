@@ -59,6 +59,9 @@
 #include <sslproto.h>
 #include <prtypes.h>
 #include <pk11pub.h>
+#include <prio.h>
+#include <secitem.h>
+#include <secport.h>
 
 #include "memory.h"
 #include "easyif.h" /* for Curl_convert_from_utf8 prototype */
@@ -359,6 +362,69 @@ done:
 
   free(nickname);
 
+  return 1;
+}
+
+static int nss_load_crl(char* crlfilename, PRBool ascii)
+{
+  PRFileDesc *infile;
+  PRStatus    prstat;
+  PRFileInfo  info;
+  PRInt32     nb;
+  int rv;
+  SECItem crlDER;
+  CERTSignedCrl *crl=NULL;
+  PK11SlotInfo *slot=NULL;
+
+  infile = PR_Open(crlfilename,PR_RDONLY,0);
+  if (!infile) {
+    return 0;
+  }
+  crlDER.data = NULL;
+  prstat = PR_GetOpenFileInfo(infile,&info);
+  if (prstat!=PR_SUCCESS) return 0;
+  if (ascii) {
+    SECItem filedata;
+    char *asc,*body;
+    filedata.data = NULL;
+    if (!SECITEM_AllocItem(NULL,&filedata,info.size)) return 0;
+    nb = PR_Read(infile,filedata.data,info.size);
+    if (nb!=info.size) return 0;
+    asc = (char*)filedata.data;
+    if (!asc) {
+      return 0;
+    }
+    if ((body=strstr(asc,"-----BEGIN")) != NULL) {
+      char *trailer=NULL;
+      asc = body;
+      body = PORT_Strchr(asc,'\n');
+      if (!body) body = PORT_Strchr(asc,'\r');
+      if (body) trailer = strstr(++body,"-----END");
+      if (trailer!=NULL) *trailer='\0';
+      else return 0;
+    }
+    else {
+      body = asc;
+    }
+    rv = ATOB_ConvertAsciiToItem(&crlDER,body);
+    PORT_Free(filedata.data);
+    if (rv) return 0;
+  }
+  else {
+    if (!SECITEM_AllocItem(NULL,&crlDER,info.size)) return 0;
+    nb = PR_Read(infile,crlDER.data,info.size);
+    if (nb!=info.size) return 0;
+  }
+
+  slot = PK11_GetInternalKeySlot();
+  crl  = PK11_ImportCRL(slot,&crlDER,
+                        NULL,SEC_CRL_TYPE,
+                        NULL,CRL_IMPORT_DEFAULT_OPTIONS,
+                        NULL,(CRL_DECODE_DEFAULT_OPTIONS|
+			      CRL_DECODE_DONT_COPY_DER));
+  if (slot) PK11_FreeSlot(slot);
+  if (!crl) return 0;
+  SEC_DestroyCrl(crl);
   return 1;
 }
 
@@ -954,6 +1020,17 @@ CURLcode Curl_nss_connect(struct connectdata * conn, int sockindex)
         "  CApath: %s\n",
         data->set.ssl.CAfile ? data->set.ssl.CAfile : "none",
         data->set.ssl.CApath ? data->set.ssl.CApath : "none");
+
+  if (data->set.ssl.CRLfile) {
+    int rc = nss_load_crl(data->set.ssl.CRLfile, PR_FALSE);
+    if (!rc) {
+      curlerr = CURLE_SSL_CRL_BADFILE;
+      goto error;
+    }
+    infof(data,
+          "  CRLfile: %s\n",
+          data->set.ssl.CRLfile ? data->set.ssl.CRLfile : "none");
+  }
 
   if(data->set.str[STRING_CERT]) {
     char *n;

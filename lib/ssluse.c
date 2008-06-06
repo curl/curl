@@ -1293,6 +1293,7 @@ ossl_connect_step1(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   SSL_METHOD_QUAL SSL_METHOD *req_method=NULL;
   void *ssl_sessionid=NULL;
+  X509_LOOKUP *lookup=NULL;
   curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
@@ -1429,6 +1430,31 @@ ossl_connect_step1(struct connectdata *conn,
           data->set.str[STRING_SSL_CAPATH] ? data->set.str[STRING_SSL_CAPATH]:
           "none");
   }
+
+  if (data->set.str[STRING_SSL_CRLFILE]) {
+    /* tell SSL where to find CRL file that is used to check certificate
+     * revocation */
+    lookup=X509_STORE_add_lookup(connssl->ctx->cert_store,X509_LOOKUP_file());
+    if ( !lookup ||
+         (X509_load_crl_file(lookup,data->set.str[STRING_SSL_CRLFILE],
+			     X509_FILETYPE_PEM)!=1) ) {
+      failf(data,"error loading CRL file :\n"
+            "  CRLfile: %s\n",
+            data->set.str[STRING_SSL_CRLFILE]?
+            data->set.str[STRING_SSL_CRLFILE]: "none");
+      return CURLE_SSL_CRL_BADFILE;
+    }
+    else {
+      /* Everything is fine. */
+      infof(data, "successfully load CRL file:\n");
+      X509_STORE_set_flags(connssl->ctx->cert_store,
+			   X509_V_FLAG_CRL_CHECK|X509_V_FLAG_CRL_CHECK_ALL);
+    }
+    infof(data,
+          "  CRLfile: %s\n", data->set.str[STRING_SSL_CRLFILE] ?
+	  data->set.str[STRING_SSL_CRLFILE]: "none");
+  }
+
   /* SSL always tries to verify the peer, this only says whether it should
    * fail to connect if the verification fails, or if it should continue
    * anyway. In the latter case the result of the verification is checked with

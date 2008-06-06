@@ -5,9 +5,6 @@ To be addressed before 7.18.3 (planned release: August 2008)
 
 140 - Arnaud Ebalard and Axel Tillequin's CRL support and issuer check patches
 
-141 - The sponsored feature CURLINFO_PRIMARY_IP that returns the IP address
-      as a string for the most recently used connection.
-
 144 - Help apps use 64bit/LFS libcurl!
 
 145 -

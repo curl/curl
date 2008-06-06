@@ -8,6 +8,9 @@
 
 
 Daniel Stenberg (6 Jun 2008)
+- Axel Tillequin and Arnaud Ebalard added support for CURLOPT_CRLFILE, for
+  OpenSSL, NSS and GnuTLS-built libcurls.
+
 - Added CURLINFO_PRIMARY_IP as a new information retrievable with
   curl_easy_getinfo. It returns a pointer to a string with the most recently
   used IP address. Modified test case 500 to also verify this feature. The

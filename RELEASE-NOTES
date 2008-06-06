@@ -2,7 +2,7 @@ Curl and libcurl 7.18.3
 
  Public curl releases:         106
  Command line options:         126
- curl_easy_setopt() options:   150
+ curl_easy_setopt() options:   151
  Public functions in libcurl:  58
  Public web site mirrors:      37
  Known libcurl bindings:       36
@@ -11,6 +11,7 @@ Curl and libcurl 7.18.3
 This release includes the following changes:
  
  o Added CURLINFO_PRIMARY_IP
+ o Added CURLOPT_CRLFILE
 
 This release includes the following bugfixes:
 
@@ -31,6 +32,6 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Lenny Rachitsky
+ Lenny Rachitsky, Axel Tillequin, Arnaud Ebalard
 
         Thanks! (and sorry if I forgot to mention someone)
