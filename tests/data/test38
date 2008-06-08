@@ -28,7 +28,7 @@ http
 HTTP resume request without server supporting it
  </name>
  <command option="no-output">
-http://%HOSTIP:%HTTPPORT/want/38 -C - -i -o log/fewl.txt
+http://%HOSTIP:%HTTPPORT/want/38 -C - --no-include -o log/fewl.txt
 </command>
 <file name="log/fewl.txt">
 This text is here to simulate a partly downloaded file to resume

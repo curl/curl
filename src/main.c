@@ -200,32 +200,6 @@ typedef enum {
   HTTPREQ_LAST
 } HttpReq;
 
-/* Just a set of bits */
-#ifndef CONF_DEFAULT
-#define CONF_DEFAULT  0
-#endif
-
-#define CONF_ISATTY (1<<0) /* output to tty! */
-#define CONF_AUTO_REFERER (1<<4) /* the automatic referer-system please! */
-#define CONF_HEADER   (1<<8) /* throw the header out too */
-#define CONF_NOPROGRESS (1<<10) /* shut off the progress meter */
-#define CONF_NOBODY   (1<<11) /* get meta-data (headers) about the file
-                                 without transferring the body, use HEAD to
-                                 get http document */
-#define CONF_FAILONERROR (1<<12) /* no output on http error codes >= 300 */
-#define CONF_DIRLISTONLY (1<<16) /* request nonverbose directory listing */
-#define CONF_FTPAPPEND (1<<20) /* Append instead of overwrite on upload! */
-#define CONF_NETRC    (1<<22)  /* read user+password from .netrc */
-#define CONF_FOLLOWLOCATION (1<<23) /* use Location: Luke! */
-#define CONF_GETTEXT  (1<<24) /* use ASCII/text for transfer */
-#define CONF_MUTE     (1<<28) /* force NOPROGRESS */
-
-#define CONF_NETRC_OPT (1<<29)  /* read user+password from either
-                                 * .netrc or URL*/
-#define CONF_UNRESTRICTED_AUTH (1<<30)
-/* Send authentication (user+password) when following
- * locations, even when hostname changed */
-
 #ifdef WIN32
 #include <direct.h>
 #define F_OK 0
@@ -380,9 +354,10 @@ static int ftruncate64 (int fd, curl_off_t where)
 #endif
 
 typedef enum {
-    TRACE_BIN,   /* tcpdump inspired look */
-    TRACE_ASCII, /* like *BIN but without the hex output */
-    TRACE_PLAIN  /* -v/--verbose type */
+  TRACE_NONE,  /* no trace/verbose output at all! */
+  TRACE_BIN,   /* tcpdump inspired look */
+  TRACE_ASCII, /* like *BIN but without the hex output */
+  TRACE_PLAIN  /* -v/--verbose type */
 } trace;
 
 struct OutStruct {
@@ -431,7 +406,22 @@ struct Configurable {
   char *proxyuserpwd;
   char *proxy;
   bool proxytunnel;
-  long conf;
+  bool ftp_append;         /* APPE on ftp */
+  bool mute;               /* shutup */
+  bool use_ascii;          /* select ascii or text transfer */
+  bool autoreferer;        /* automatically set referer */
+  bool failonerror;        /* fail on (HTTP) errors */
+  bool include_headers;    /* send headers to data output */
+  bool no_body;            /* don't get the body */
+  bool dirlistonly;        /* only get the FTP dir list */
+  bool followlocation;     /* follow http redirects */
+  bool unrestricted_auth;  /* Continue to send authentication (user+password)
+                              when following ocations, even when hostname
+                              changed */
+  bool netrc_opt;
+  bool netrc;
+  bool noprogress;
+  bool isatty;             /* updated internally only if the output is a tty */
   struct getout *url_list; /* point to the first node */
   struct getout *url_last; /* point to the last/current node */
   struct getout *url_get;  /* point to the node to fill in URL */
@@ -521,6 +511,8 @@ struct Configurable {
   bool nokeepalive; /* for keepalive needs */
   long alivetime;
 
+  int default_node_flags; /* default flags to seach for each 'node', which is
+                             basically each given URL to transfer */
   struct OutStruct *outs;
 };
 
@@ -529,7 +521,7 @@ struct Configurable {
 /* produce this text message to the user unless mute was selected */
 static void warnf(struct Configurable *config, const char *fmt, ...)
 {
-  if(!(config->conf & CONF_MUTE)) {
+  if(!config->mute) {
     va_list ap;
     int len;
     char *ptr;
@@ -863,6 +855,8 @@ static struct getout *new_getout(struct Configurable *config)
 
     /* move the last pointer */
     config->url_last = node;
+
+    node->flags = config->default_node_flags;
   }
   return node;
 }
@@ -1562,6 +1556,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
   bool longopt=FALSE;
   bool singleopt=FALSE; /* when true means '-o foo' used '-ofoo' */
   ParameterError err;
+  bool toggle=TRUE; /* how to switch boolean options, on or off. Controlled
+                       by using --OPTION or --no-OPTION */
 
   /* single-letter,
      long-name,
@@ -1576,6 +1572,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"*c", "connect-timeout", TRUE},
     {"*d", "ciphers",    TRUE},
     {"*e", "disable-epsv", FALSE},
+    {"*E", "epsv", FALSE}, /* made like this to make --no-epsv and --epsv to
+                              work although --disable-epsv is the documented
+                              option */
 #ifdef USE_ENVIRONMENT
     {"*f", "environment", FALSE},
 #endif
@@ -1602,6 +1601,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"*x", "krb4" ,       TRUE}, /* this is the previous name */
     {"*y", "max-filesize", TRUE},
     {"*z", "disable-eprt", FALSE},
+    {"*Z", "eprt", FALSE}, /* made like this to make --no-eprt and --eprt to
+                              work although --disable-eprt is the documented
+                              option */
     {"$a", "ftp-ssl",    FALSE},
     {"$b", "ftp-pasv",   FALSE},
     {"$c", "socks5",   TRUE},
@@ -1626,14 +1628,14 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$T", "socks4a",    TRUE},
     {"$u", "ftp-alternative-to-user", TRUE},
     {"$v", "ftp-ssl-reqd", FALSE},
-    {"$w", "no-sessionid", FALSE},
+    {"$w", "sessionid", FALSE}, /* listed as --no-sessionid in the help */
     {"$x", "ftp-ssl-control", FALSE},
     {"$y", "ftp-ssl-ccc", FALSE},
     {"$j", "ftp-ssl-ccc-mode", TRUE},
     {"$z", "libcurl",    TRUE},
     {"$#", "raw",        FALSE},
     {"$0", "post301",    FALSE},
-    {"$1", "no-keepalive",   FALSE},
+    {"$1", "keepalive",   FALSE}, /* listed as --no-keepalive in the help */
     {"$2", "socks5-hostname", TRUE},
     {"$3", "keepalive-time",  TRUE},
 
@@ -1684,9 +1686,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"M", "manual",      FALSE},
     {"n", "netrc",       FALSE},
     {"no", "netrc-optional", FALSE},
-    {"N", "no-buffer",   FALSE},
+    {"N", "buffer",   FALSE}, /* listed as --no-buffer in the help */
     {"o", "output",      TRUE},
-    {"O", "remote-name", FALSE},
+    {"O",  "remote-name", FALSE},
+    {"Oa", "remote-name-all", FALSE},
     {"p", "proxytunnel", FALSE},
     {"P", "ftpport",     TRUE}, /* older version */
     {"P", "ftp-port",    TRUE},
@@ -1718,6 +1721,13 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     char *word=('-' == flag[0])?flag+2:flag;
     size_t fnam=strlen(word);
     int numhits=0;
+
+    if(!strncmp(word, "no-", 3)) {
+      /* disable this option but ignore the "no-" part when looking for it */
+      word += 3;
+      toggle = FALSE;
+    }
+
     for(j=0; j< sizeof(aliases)/sizeof(aliases[0]); j++) {
       if(curlx_strnequal(aliases[j].lname, word, fnam)) {
         longopt = TRUE;
@@ -1778,15 +1788,17 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     if(hit < 0) {
       return PARAM_OPTION_UNKNOWN;
     }
-    if(!longopt && aliases[hit].extraparam && parse[1]) {
-      nextarg=(char *)&parse[1]; /* this is the actual extra parameter */
-      singleopt=TRUE;   /* don't loop anymore after this */
+    if(aliases[hit].extraparam) {
+      /* this option requires an extra parameter */
+      if(!longopt && parse[1]) {
+        nextarg=(char *)&parse[1]; /* this is the actual extra parameter */
+        singleopt=TRUE;   /* don't loop anymore after this */
+      }
+      else if(!nextarg)
+        return PARAM_REQUIRES_PARAMETER;
+      else
+        *usedarg = TRUE; /* mark it as used */
     }
-    else if(!nextarg && aliases[hit].extraparam) {
-      return PARAM_REQUIRES_PARAMETER;
-    }
-    else if(nextarg && aliases[hit].extraparam)
-      *usedarg = TRUE; /* mark it as used */
 
     switch(letter) {
     case '*': /* options without a short option */
@@ -1805,11 +1817,14 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         GetStr(&config->cipher_list, nextarg);
         break;
       case 'e': /* --disable-epsv */
-        config->disable_epsv ^= TRUE;
+        config->disable_epsv = toggle;
+        break;
+      case 'E': /* --epsv */
+        config->disable_epsv = !toggle;
         break;
 #ifdef USE_ENVIRONMENT
       case 'f':
-        config->writeenv ^= TRUE;
+        config->writeenv = toggle;
         break;
 #endif
       case 'g': /* --trace */
@@ -1863,33 +1878,49 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
 
       case 'j': /* --compressed */
-        config->encoding ^= TRUE;
+        config->encoding = toggle;
         break;
 
       case 'k': /* --digest */
-        config->authtype = CURLAUTH_DIGEST;
+        if(toggle)
+          config->authtype |= CURLAUTH_DIGEST;
+        else
+          config->authtype &= ~CURLAUTH_DIGEST;
         break;
 
       case 'l': /* --negotiate */
-        if(curlinfo->features & CURL_VERSION_GSSNEGOTIATE)
-          config->authtype = CURLAUTH_GSSNEGOTIATE;
+        if(toggle) {
+          if(curlinfo->features & CURL_VERSION_GSSNEGOTIATE)
+            config->authtype |= CURLAUTH_GSSNEGOTIATE;
+          else
+            return PARAM_LIBCURL_DOESNT_SUPPORT;
+        }
         else
-          return PARAM_LIBCURL_DOESNT_SUPPORT;
+          config->authtype &= ~CURLAUTH_GSSNEGOTIATE;
         break;
 
       case 'm': /* --ntlm */
-        if(curlinfo->features & CURL_VERSION_NTLM)
-          config->authtype = CURLAUTH_NTLM;
+        if(toggle) {
+          if(curlinfo->features & CURL_VERSION_NTLM)
+            config->authtype |= CURLAUTH_NTLM;
+          else
+            return PARAM_LIBCURL_DOESNT_SUPPORT;
+        }
         else
-          return PARAM_LIBCURL_DOESNT_SUPPORT;
+          config->authtype &= ~CURLAUTH_NTLM;
         break;
 
       case 'n': /* --basic for completeness */
-        config->authtype = CURLAUTH_BASIC;
+        if(toggle)
+          config->authtype |= CURLAUTH_BASIC;
+        else
+          config->authtype &= ~CURLAUTH_BASIC;
         break;
 
       case 'o': /* --anyauth, let libcurl pick it */
-        config->authtype = CURLAUTH_ANY;
+        if(toggle)
+          config->authtype = CURLAUTH_ANY;
+        /* --no-anyauth simply doesn't touch it */
         break;
 
 #ifdef MSDOS
@@ -1898,7 +1929,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
 #endif
       case 'q': /* --ftp-create-dirs */
-        config->ftp_create_dirs ^= TRUE;
+        config->ftp_create_dirs = toggle;
         break;
 
       case 'r': /* --create-dirs */
@@ -1913,7 +1944,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 
       case 't': /* --proxy-ntlm */
         if(curlinfo->features & CURL_VERSION_NTLM)
-          config->proxyntlm ^= TRUE;
+          config->proxyntlm = toggle;
         else
           return PARAM_LIBCURL_DOESNT_SUPPORT;
         break;
@@ -1953,7 +1984,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           return PARAM_BAD_NUMERIC;
         break;
       case 'z': /* --disable-eprt */
-        config->disable_eprt ^= TRUE;
+        config->disable_eprt = toggle;
+        break;
+      case 'Z': /* --eprt */
+        config->disable_eprt = !toggle;
         break;
 
       default: /* the URL! */
@@ -1986,7 +2020,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     case '$': /* more options without a short option */
       switch(subletter) {
       case 'a': /* --ftp-ssl */
-        config->ftp_ssl ^= TRUE;
+        config->ftp_ssl = toggle;
         break;
       case 'b': /* --ftp-pasv */
         if(config->ftpport)
@@ -2012,13 +2046,13 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         config->socksver = CURLPROXY_SOCKS5_HOSTNAME;
         break;
       case 'd': /* --tcp-nodelay option */
-        config->tcp_nodelay ^= TRUE;
+        config->tcp_nodelay = toggle;
         break;
       case 'e': /* --proxy-digest */
-        config->proxydigest ^= TRUE;
+        config->proxydigest = toggle;
         break;
       case 'f': /* --proxy-basic */
-        config->proxybasic ^= TRUE;
+        config->proxybasic = toggle;
         break;
       case 'g': /* --retry */
         if(str2num(&config->req_retry, nextarg))
@@ -2035,7 +2069,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 
       case 'k': /* --proxy-negotiate */
         if(curlinfo->features & CURL_VERSION_GSSNEGOTIATE)
-          config->proxynegotiate ^= TRUE;
+          config->proxynegotiate = toggle;
         else
           return PARAM_LIBCURL_DOESNT_SUPPORT;
         break;
@@ -2043,16 +2077,16 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         GetStr(&config->ftp_account, nextarg);
         break;
       case 'n': /* --proxy-anyauth */
-        config->proxyanyauth ^= TRUE;
+        config->proxyanyauth = toggle;
         break;
       case 'o': /* --trace-time */
-        config->tracetime ^= TRUE;
+        config->tracetime = toggle;
         break;
       case 'p': /* --ignore-content-length */
-        config->ignorecl ^= TRUE;
+        config->ignorecl = toggle;
         break;
       case 'q': /* --ftp-skip-pasv-ip */
-        config->ftp_skip_ip ^= TRUE;
+        config->ftp_skip_ip = toggle;
         break;
       case 'r': /* --ftp-method (undocumented at this point) */
         config->ftp_filemethod = ftpfilemethod(config, nextarg);
@@ -2077,16 +2111,16 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         GetStr(&config->ftp_alternative_to_user, nextarg);
         break;
       case 'v': /* --ftp-ssl-reqd */
-        config->ftp_ssl_reqd ^= TRUE;
+        config->ftp_ssl_reqd = toggle;
         break;
       case 'w': /* --no-sessionid */
-        config->disable_sessionid ^= TRUE;
+        config->disable_sessionid = !toggle;
         break;
       case 'x': /* --ftp-ssl-control */
-        config->ftp_ssl_control ^= TRUE;
+        config->ftp_ssl_control = toggle;
         break;
       case 'y': /* --ftp-ssl-ccc */
-        config->ftp_ssl_ccc ^= TRUE;
+        config->ftp_ssl_ccc = toggle;
         if(!config->ftp_ssl_ccc_mode)
             config->ftp_ssl_ccc_mode = CURLFTPSSL_CCC_PASSIVE;
         break;
@@ -2098,13 +2132,13 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         GetStr(&config->libcurl, nextarg);
         break;
       case '#': /* --raw */
-        config->raw ^= TRUE;
+        config->raw = toggle;
         break;
       case '0': /* --post301 */
-        config->post301 ^= TRUE;
+        config->post301 = toggle;
         break;
       case '1': /* --no-keepalive */
-        config->nokeepalive ^= TRUE;
+        config->nokeepalive = !toggle;
         break;
       case '3': /* --keepalive-time */
         if(str2num(&config->alivetime, nextarg))
@@ -2113,7 +2147,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       }
       break;
     case '#': /* --progress-bar */
-      config->progressmode ^= CURL_PROGRESS_BAR;
+      config->progressmode = toggle?CURL_PROGRESS_BAR:0;
       break;
     case '0':
       /* HTTP version 1.0 */
@@ -2141,7 +2175,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
     case 'a':
       /* This makes the FTP sessions use APPE instead of STOR */
-      config->conf ^= CONF_FTPAPPEND;
+      config->ftp_append = toggle;
       break;
     case 'A':
       /* This specifies the User-Agent name */
@@ -2161,7 +2195,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
     case 'B':
       /* use ASCII/text when transfering */
-      config->conf ^= CONF_GETTEXT;
+      config->use_ascii = toggle;
       break;
     case 'c':
       /* get the file name to dump all cookies in */
@@ -2349,9 +2383,11 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         if(ptr) {
           /* Automatic referer requested, this may be combined with a
              set initial one */
-          config->conf |= CONF_AUTO_REFERER;
+          config->autoreferer = TRUE;
           *ptr = 0; /* zero terminate here */
         }
+        else
+          config->autoreferer = FALSE;
         GetStr(&config->referer, nextarg);
       }
       break;
@@ -2423,7 +2459,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
     case 'f':
       /* fail hard on errors  */
-      config->conf ^= CONF_FAILONERROR;
+      config->failonerror = toggle;
       break;
     case 'F':
       /* "form data" simulation, this is a little advanced so lets do our best
@@ -2439,7 +2475,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
 
     case 'g': /* g disables URLglobbing */
-      config->globoff ^= TRUE;
+      config->globoff = toggle;
       break;
 
     case 'G': /* HTTP GET */
@@ -2447,8 +2483,12 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
 
     case 'h': /* h for help */
-      help();
-      return PARAM_HELP_REQUESTED;
+      if(toggle) {
+        help();
+        return PARAM_HELP_REQUESTED;
+      }
+      /* we now actually support --no-help too! */
+      break;
     case 'H':
       /* A custom header to append to a list */
       err = add2list(&config->headers, nextarg);
@@ -2456,23 +2496,24 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         return err;
       break;
     case 'i':
-      config->conf ^= CONF_HEADER; /* include the HTTP header as well */
+      config->include_headers = toggle; /* include the headers as well in the
+                                           general output stream */
       break;
     case 'j':
-      config->cookiesession ^= TRUE;
+      config->cookiesession = toggle;
       break;
     case 'I':
       /*
-       * CONF_BODY will imply CONF_HEADER later on
+       * no_body will imply include_headers later on
        */
-      config->conf ^= CONF_NOBODY;
+      config->no_body = toggle;
       if(SetHTTPrequest(config,
-                        (config->conf & CONF_NOBODY)?HTTPREQ_HEAD:HTTPREQ_GET,
+                        (config->no_body)?HTTPREQ_HEAD:HTTPREQ_GET,
                         &config->httpreq))
         return PARAM_BAD_USE;
       break;
     case 'k': /* allow insecure SSL connects */
-      config->insecure_ok ^= TRUE;
+      config->insecure_ok = toggle;
       break;
     case 'K': /* parse config file */
       if(parseconfig(nextarg, config))
@@ -2480,15 +2521,15 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
               nextarg);
       break;
     case 'l':
-      config->conf ^= CONF_DIRLISTONLY; /* only list the names of the FTP dir */
+      config->dirlistonly = toggle; /* only list the names of the FTP dir */
       break;
     case 'L':
-      config->conf ^= CONF_FOLLOWLOCATION; /* Follow Location: HTTP headers */
+      config->followlocation = toggle; /* Follow Location: HTTP headers */
       switch (subletter) {
       case 't':
         /* Continue to send authentication (user+password) when following
          * locations, even when hostname changed */
-        config->conf ^= CONF_UNRESTRICTED_AUTH;
+        config->unrestricted_auth = toggle;
         break;
       }
       break;
@@ -2498,33 +2539,41 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         return PARAM_BAD_NUMERIC;
       break;
     case 'M': /* M for manual, huge help */
+      if(toggle) { /* --no-manual shows no manual... */
 #ifdef USE_MANUAL
-      hugehelp();
-      return PARAM_HELP_REQUESTED;
+        hugehelp();
+        return PARAM_HELP_REQUESTED;
 #else
-      warnf(config,
-            "built-in manual was disabled at build-time!\n");
-      return PARAM_OPTION_UNKNOWN;
+        warnf(config,
+              "built-in manual was disabled at build-time!\n");
+        return PARAM_OPTION_UNKNOWN;
 #endif
+      }
+      break;
     case 'n':
       switch(subletter) {
       case 'o': /* CA info PEM file */
         /* use .netrc or URL */
-        config->conf ^= CONF_NETRC_OPT;
+        config->netrc_opt = toggle;
         break;
       default:
         /* pick info from .netrc, if this is used for http, curl will
            automatically enfore user+password with the request */
-        config->conf ^= CONF_NETRC;
+        config->netrc = toggle;
         break;
       }
       break;
     case 'N':
       /* disable the output I/O buffering */
-      config->nobuffer ^= 1;
+      config->nobuffer = !toggle;
       break;
-    case 'o':
-    case 'O':
+    case 'O': /* --remote-name */
+      if(subletter == 'a') { /* --remote-name-all */
+        config->default_node_flags = toggle?GETOUT_USEREMOTE:0;
+        break;
+      }
+    /* fall-through! */
+    case 'o': /* --output */
       /* output file */
       {
         struct getout *url;
@@ -2546,11 +2595,16 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 
         if(url) {
           /* fill in the outfile */
-          if('o' == letter)
+          if('o' == letter) {
             GetStr(&url->outfile, nextarg);
+            url->flags &= ~GETOUT_USEREMOTE; /* switch off */
+          }
           else {
             url->outfile=NULL; /* leave it */
-            url->flags |= GETOUT_USEREMOTE;
+            if(toggle)
+              url->flags |= GETOUT_USEREMOTE;  /* switch on */
+            else
+              url->flags &= ~GETOUT_USEREMOTE; /* switch off */
           }
           url->flags |= GETOUT_OUTFILE;
         }
@@ -2566,7 +2620,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
     case 'p':
       /* proxy tunnel for non-http protocols */
-      config->proxytunnel ^= TRUE;
+      config->proxytunnel = toggle;
       break;
 
     case 'q': /* if used first, already taken care of, we do it like
@@ -2628,16 +2682,19 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
     case 'R':
       /* use remote file's time */
-      config->remote_time ^= TRUE;
+      config->remote_time = toggle;
       break;
     case 's':
       /* don't show progress meter, don't show errors : */
-      config->conf ^= (CONF_MUTE|CONF_NOPROGRESS);
-      config->showerror ^= TRUE; /* toggle off */
+      if(toggle)
+        config->mute = config->noprogress = TRUE;
+      else
+        config->mute = config->noprogress = FALSE;
+      config->showerror = !toggle; /* toggle off */
       break;
     case 'S':
       /* show errors */
-      config->showerror ^= TRUE; /* toggle on if used with -s */
+      config->showerror = toggle; /* toggle on if used with -s */
       break;
     case 't':
       /* Telnet options */
@@ -2689,16 +2746,25 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       checkpasswd("proxy", &config->proxyuserpwd);
       break;
     case 'v':
-      /* the '%' thing here will cause the trace get sent to stderr */
-      GetStr(&config->trace_dump, (char *)"%");
-      if(config->tracetype && (config->tracetype != TRACE_PLAIN))
-        warnf(config,
-              "-v/--verbose overrides an earlier trace/verbose option\n");
-      config->tracetype = TRACE_PLAIN;
+      if(toggle) {
+        /* the '%' thing here will cause the trace get sent to stderr */
+        GetStr(&config->trace_dump, (char *)"%");
+        if(config->tracetype && (config->tracetype != TRACE_PLAIN))
+          warnf(config,
+                "-v/--verbose overrides an earlier trace/verbose option\n");
+        config->tracetype = TRACE_PLAIN;
+      }
+      else
+        /* verbose is disabled here */
+        config->tracetype = TRACE_NONE;
       break;
     case 'V':
     {
       const char * const *proto;
+
+      if(!toggle)
+        /* --no-version yields no output! */
+        break;
 
       printf(CURL_ID "%s\n", curl_version());
       if (curlinfo->protocols) {
@@ -3442,7 +3508,7 @@ int my_trace(CURL *handle, curl_infotype type,
            to stderr or stdout, we don't display the alert about the data not
            being shown as the data _is_ shown then just not via this
            function */
-        if(!(config->conf&CONF_ISATTY) ||
+        if(!config->isatty ||
            ((config->trace_stream != stderr) &&
             (config->trace_stream != stdout))) {
           if(!newl)
@@ -3871,7 +3937,6 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
   }
   config->postfieldsize = -1;
   config->showerror=TRUE;
-  config->conf=CONF_DEFAULT;
   config->use_httpget=FALSE;
   config->create_dirs=FALSE;
   config->lastrecvtime = cutil_tvnow();
@@ -3997,7 +4062,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
       free(config->postfields);
       config->postfields = NULL;
       if(SetHTTPrequest(config,
-                        (config->conf&CONF_NOBODY?HTTPREQ_HEAD:HTTPREQ_GET),
+                        (config->no_body?HTTPREQ_HEAD:HTTPREQ_GET),
                         &config->httpreq)) {
         free(httpgetfields);
         return PARAM_BAD_USE;
@@ -4328,9 +4393,9 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
            && outs.stream && isatty(fileno(outs.stream)))
           /* we send the output to a tty, therefore we switch off the progress
              meter */
-          config->conf |= CONF_NOPROGRESS|CONF_ISATTY;
+          config->noprogress = config->isatty = TRUE;
 
-        if (urlnum > 1 && !(config->conf&CONF_MUTE)) {
+        if (urlnum > 1 && !(config->mute)) {
           fprintf(config->errors, "\n[%d/%d]: %s --> %s\n",
                   i+1, urlnum, url, outfile ? outfile : "<stdout>");
           if (separator)
@@ -4379,7 +4444,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         if(!config->errors)
           config->errors = stderr;
 
-        if(!outfile && !(config->conf & CONF_GETTEXT)) {
+        if(!outfile && !config->use_ascii) {
           /* We get the output to stdout and we have not got the ASCII/text
              flag, then set stdout to be binary */
           SET_BINMODE(stdout);
@@ -4414,33 +4479,29 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         my_setopt(curl, CURLOPT_INFILESIZE_LARGE, uploadfilesize);
         my_setopt(curl, CURLOPT_URL, url);     /* what to fetch */
         my_setopt(curl, CURLOPT_PROXY, config->proxy); /* proxy to use */
-        my_setopt(curl, CURLOPT_NOPROGRESS, config->conf&CONF_NOPROGRESS);
-        if(config->conf&CONF_NOBODY) {
+        my_setopt(curl, CURLOPT_NOPROGRESS, config->noprogress);
+        if(config->no_body) {
           my_setopt(curl, CURLOPT_NOBODY, 1);
           my_setopt(curl, CURLOPT_HEADER, 1);
         }
         else
-          my_setopt(curl, CURLOPT_HEADER, config->conf&CONF_HEADER);
+          my_setopt(curl, CURLOPT_HEADER, config->include_headers);
 
-        my_setopt(curl, CURLOPT_FAILONERROR,
-                  config->conf&CONF_FAILONERROR);
+        my_setopt(curl, CURLOPT_FAILONERROR, config->failonerror);
         my_setopt(curl, CURLOPT_UPLOAD, uploadfile?TRUE:FALSE);
-        my_setopt(curl, CURLOPT_DIRLISTONLY,
-                  config->conf&CONF_DIRLISTONLY);
-        my_setopt(curl, CURLOPT_APPEND, config->conf&CONF_FTPAPPEND);
+        my_setopt(curl, CURLOPT_DIRLISTONLY, config->dirlistonly);
+        my_setopt(curl, CURLOPT_APPEND, config->ftp_append);
 
-        if (config->conf&CONF_NETRC_OPT)
+        if (config->netrc_opt)
           my_setopt(curl, CURLOPT_NETRC, CURL_NETRC_OPTIONAL);
-        else if (config->conf&CONF_NETRC)
+        else if (config->netrc)
           my_setopt(curl, CURLOPT_NETRC, CURL_NETRC_REQUIRED);
         else
           my_setopt(curl, CURLOPT_NETRC, CURL_NETRC_IGNORED);
 
-        my_setopt(curl, CURLOPT_FOLLOWLOCATION,
-                  config->conf&CONF_FOLLOWLOCATION);
-        my_setopt(curl, CURLOPT_UNRESTRICTED_AUTH,
-                  config->conf&CONF_UNRESTRICTED_AUTH);
-        my_setopt(curl, CURLOPT_TRANSFERTEXT, config->conf&CONF_GETTEXT);
+        my_setopt(curl, CURLOPT_FOLLOWLOCATION, config->followlocation);
+        my_setopt(curl, CURLOPT_UNRESTRICTED_AUTH, config->unrestricted_auth);
+        my_setopt(curl, CURLOPT_TRANSFERTEXT, config->use_ascii);
         my_setopt(curl, CURLOPT_USERPWD, config->userpwd);
         my_setopt(curl, CURLOPT_PROXYUSERPWD, config->proxyuserpwd);
         my_setopt(curl, CURLOPT_RANGE, config->range);
@@ -4459,8 +4520,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           break;
         }
         my_setopt(curl, CURLOPT_REFERER, config->referer);
-        my_setopt(curl, CURLOPT_AUTOREFERER,
-                  config->conf&CONF_AUTO_REFERER);
+        my_setopt(curl, CURLOPT_AUTOREFERER, config->autoreferer);
         my_setopt(curl, CURLOPT_USERAGENT, config->useragent);
         my_setopt(curl, CURLOPT_FTPPORT, config->ftpport);
         my_setopt(curl, CURLOPT_LOW_SPEED_LIMIT,
@@ -4507,8 +4567,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           my_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1);
         }
 
-        if((config->conf&CONF_NOBODY) ||
-           config->remote_time) {
+        if(config->no_body || config->remote_time) {
           /* no body or use remote time */
           my_setopt(curl, CURLOPT_FILETIME, TRUE);
         }
@@ -4540,7 +4599,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         progressbarinit(&progressbar, config);
         if((config->progressmode == CURL_PROGRESS_BAR) &&
-           !(config->conf&(CONF_NOPROGRESS|CONF_MUTE))) {
+           !config->noprogress && !config->mute) {
           /* we want the alternative style, then we have to implement it
              ourselves! */
           my_setopt(curl, CURLOPT_PROGRESSFUNCTION, myprogress);
@@ -4575,8 +4634,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         if(config->authtype)
           my_setopt(curl, CURLOPT_HTTPAUTH, config->authtype);
 
-        /* new in curl 7.9.7 */
-        if(config->trace_dump) {
+        if(config->tracetype != TRACE_NONE) {
           my_setopt(curl, CURLOPT_DEBUGFUNCTION, my_trace);
           my_setopt(curl, CURLOPT_DEBUGDATA, config);
           my_setopt(curl, CURLOPT_VERBOSE, TRUE);
@@ -4776,8 +4834,9 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
               if(outs.bytes && outs.filename) {
                 /* We have written data to a output file, we truncate file
                  */
-                if(!(config->conf&CONF_MUTE))
-                  fprintf(config->errors, "Throwing away %Od bytes\n", outs.bytes);
+                if(!config->mute)
+                  fprintf(config->errors, "Throwing away %Od bytes\n",
+                          outs.bytes);
                 fflush(outs.stream);
                 /* truncate file at the position where we started appending */
 #ifdef HAVE_FTRUNCATE
@@ -5062,13 +5121,13 @@ static void show_dir_errno(FILE *errors, const char *name)
 #ifdef ENOSPC
   case ENOSPC:
     fprintf(errors,"No space left on the file system that will "
-	    "contain the directory %s.\n", name);
+            "contain the directory %s.\n", name);
     break;
 #endif
 #ifdef EDQUOT
   case EDQUOT:
     fprintf(errors,"Cannot create directory %s because you "
-	    "exceeded your quota.\n", name);
+            "exceeded your quota.\n", name);
     break;
 #endif
   default :

@@ -29,7 +29,7 @@ http
 HTTP resume request over proxy with auth without server supporting it
  </name>
  <command option="no-output">
--x http://%HOSTIP:%HTTPPORT http://%HOSTIP:%HTTPPORT/want/256 -C - -i -o log/fewl.txt -U daniel:stenberg
+-x http://%HOSTIP:%HTTPPORT http://%HOSTIP:%HTTPPORT/want/256 -C - --no-include -o log/fewl.txt -U daniel:stenberg
 </command>
 <file name="log/fewl.txt">
 This text is here to simulate a partly downloaded file to resume

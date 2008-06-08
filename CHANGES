@@ -7,6 +7,19 @@
                                   Changelog
 
 
+Daniel Stenberg (8 Jun 2008)
+- curl the tool now deals with its command line options somewhat differently!
+  All boolean options (such as -O, -I, -v etc), both short and long versions,
+  now always switch on/enable the option named. Using the same option multiple
+  times thus make no difference. To switch off one of those options, you need
+  to use the long version of the option and type --no-OPTION. Like to disable
+  verbose mode you use --no-verbose!
+
+- Added --remote-name-all to curl, which if used changes the default for all
+  given URLs to be dealt with as if -O is used. So if you want to disable that
+  for a specific URL after --remote-name-all has been used, you muse use -o -
+  or --no-remote-name.
+
 Daniel Stenberg (6 Jun 2008)
 - Axel Tillequin and Arnaud Ebalard added support for CURLOPT_ISSUERCERT, for
   OpenSSL, NSS and GnuTLS-built libcurls.

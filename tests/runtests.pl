@@ -583,7 +583,7 @@ sub stopserver {
 
 sub verifyhttp {
     my ($proto, $ip, $port) = @_;
-    my $cmd = "$CURL -m$server_response_maxtime -o log/verifiedserver -ksvg \"$proto://$ip:$port/verifiedserver\" 2>log/verifyhttp";
+    my $cmd = "$CURL --max-time $server_response_maxtime --output log/verifiedserver --insecure --silent --verbose --globoff \"$proto://$ip:$port/verifiedserver\" 2>log/verifyhttp";
     my $pid;
 
     # verify if our/any server is running on this port
@@ -636,9 +636,9 @@ sub verifyftp {
     my $time=time();
     my $extra;
     if($proto eq "ftps") {
-    	$extra = "-k --ftp-ssl-control ";
+    	$extra = "--insecure --ftp-ssl-control ";
     }
-    my $cmd="$CURL -m$server_response_maxtime --silent -vg $extra\"$proto://$ip:$port/verifiedserver\" 2>log/verifyftp";
+    my $cmd="$CURL --max-time $server_response_maxtime --silent --verbose --globoff $extra\"$proto://$ip:$port/verifiedserver\" 2>log/verifyftp";
     # check if this is our server running on this port:
     my @data=runclientoutput($cmd);
     logmsg "RUN: $cmd\n" if($verbose);
@@ -2008,8 +2008,8 @@ sub singletest {
 
     my $cmdargs;
     if(!$tool) {
-        # run curl, add -v for debug information output
-        $cmdargs ="$out --include -v --trace-time $cmd";
+        # run curl, add --verbose for debug information output
+        $cmdargs ="$out --include --verbose --trace-time $cmd";
     }
     else {
         $cmdargs = " $cmd"; # $cmd is the command line for the test file

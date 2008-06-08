@@ -1,7 +1,7 @@
 Curl and libcurl 7.18.3
 
  Public curl releases:         106
- Command line options:         126
+ Command line options:         127
  curl_easy_setopt() options:   152
  Public functions in libcurl:  58
  Public web site mirrors:      37
@@ -13,6 +13,8 @@ This release includes the following changes:
  o Added CURLINFO_PRIMARY_IP
  o Added CURLOPT_CRLFILE and CURLE_SSL_CRL_BADFILE
  o Added CURLOPT_ISSUERCERT and CURLE_SSL_ISSUER_ERROR
+ o curl's option parser for boolean options reworked
+ o Added --remote-name-all
 
 This release includes the following bugfixes:
 
