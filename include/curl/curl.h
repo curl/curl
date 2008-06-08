@@ -455,9 +455,9 @@ typedef enum {
                                     wait till it's ready and try again (Added
                                     in 7.18.2) */
   CURLE_SSL_CRL_BADFILE,         /* 82 - could not load CRL file, missing or
-                                    wrong format (Added in 7.18.3) */
+                                    wrong format (Added in 7.19.0) */
   CURLE_SSL_ISSUER_ERROR,        /* 83 - Issuer check failed.  (Added in
-                                    7.18.3) */
+                                    7.19.0) */
   CURL_LAST /* never use! */
 } CURLcode;
 

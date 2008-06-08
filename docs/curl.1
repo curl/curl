@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl 1 "5 June 2008" "Curl 7.18.3" "Curl Manual"
+.TH curl 1 "5 June 2008" "Curl 7.19.0" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -103,7 +103,7 @@ In general, all boolean options are enabled with --option and yet again
 disabled with --\fBno-\fPoption. That is, you use the exact same option name
 but prefix it with "no-". However, in this list we mostly only list and show
 the --option version of them. (This concept with --no options was added in
-7.18.3. Previously most options were toggled on/off on repeated use of the
+7.19.0. Previously most options were toggled on/off on repeated use of the
 same command line option.)
 .IP "-a/--append"
 (FTP) When used in an FTP upload, this will tell curl to append to the target
@@ -289,14 +289,14 @@ away. EPRT and LPRT are extensions to the original FTP protocol, may not work
 on all servers but enable more functionality in a better way than the
 traditional PORT command.
 
-Since curl 7.18.3, \fB--eprt\fP can be used to explicitly enable EPRT again
+Since curl 7.19.0, \fB--eprt\fP can be used to explicitly enable EPRT again
 and \fB--no-eprt\fP is an alias for \fB--disable-eprt\fP.
 .IP "--disable-epsv"
 (FTP) Tell curl to disable the use of the EPSV command when doing passive FTP
 transfers. Curl will normally always first attempt to use EPSV before PASV,
 but with this option, it will not try using EPSV.
 
-Since curl 7.18.3, \fB--epsv\fP can be used to explicitly enable EPRT again
+Since curl 7.19.0, \fB--epsv\fP can be used to explicitly enable EPRT again
 and \fB--no-epsv\fP is an alias for \fB--disable-epsv\fP.
 .IP "-D/--dump-header <file>"
 Write the protocol headers to the specified file.

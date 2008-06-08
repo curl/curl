@@ -8,6 +8,9 @@
 
 
 Daniel Stenberg (8 Jun 2008)
+- Due to the three new libcurl changes and the massive command line option
+  change I decided we'll mark it by bumping the next release number to 7.19.0!
+
 - curl the tool now deals with its command line options somewhat differently!
   All boolean options (such as -O, -I, -v etc), both short and long versions,
   now always switch on/enable the option named. Using the same option multiple
