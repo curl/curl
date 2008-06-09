@@ -224,6 +224,8 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_slist,
    (option) == CURLOPT_SSH_HOST_PUBLIC_KEY_MD5 ||                             \
    (option) == CURLOPT_SSH_PUBLIC_KEYFILE ||                                  \
    (option) == CURLOPT_SSH_PRIVATE_KEYFILE ||                                 \
+   (option) == CURLOPT_CRLFILE ||                                             \
+   (option) == CURLOPT_ISSUERCERT ||                                          \
    0)
 
 /* evaluates to true if option takes a curl_write_callback argument */
