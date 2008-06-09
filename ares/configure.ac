@@ -930,5 +930,8 @@ if test -n "$RANDOM_FILE" && test X"$RANDOM_FILE" != Xno ; then
         [a suitable file/device to read random data from])
 fi
 
+CARES_PRIVATE_LIBS="$LIBS"
+AC_SUBST(CARES_PRIVATE_LIBS)
+
 AC_CONFIG_FILES([Makefile libcares.pc])
 AC_OUTPUT

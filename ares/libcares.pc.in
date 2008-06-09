@@ -3,7 +3,7 @@
 #               / __|____ / _` | '__/ _ \/ __|
 #              | (_|_____| (_| | | |  __/\__ \
 #               \___|     \__,_|_|  \___||___/
-# $id: $
+# $Id$
 #
 prefix=@prefix@
 exec_prefix=@exec_prefix@
@@ -18,3 +18,4 @@ Requires:
 Requires.private: 
 Cflags: -I${includedir}
 Libs: -L${libdir} -lcares
+Libs.private: @CARES_PRIVATE_LIBS@

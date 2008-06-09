@@ -1,10 +1,11 @@
 This is what's new and changed in the c-ares 1.5.3 release:
 
- o adig sample application compilation failure on some systems
+ o fix adig sample application compilation failure on some systems
+ o fix pkg-config reporting of private libraries needed for static linking
 
 Thanks go to these friendly people for their efforts and contributions:
 
- Brad House
+ Brad House, Yang Tse
  and obviously Daniel Stenberg
 
 Have fun!

@@ -1,5 +1,10 @@
   Changelog for the c-ares project
 
+* Jun 9 2008 (Yang Tse)
+
+- Make libcares.pc generated file for pkg-config include information relative
+  to the libraries needed for the static linking of c-ares.
+
 * May 30 2008 (Yang Tse)
 
 - Brad House fixed a missing header file inclusion in adig sample program.
