@@ -607,9 +607,9 @@ Curl_gtls_connect(struct connectdata *conn,
 
 /* return number of sent (non-SSL) bytes */
 ssize_t Curl_gtls_send(struct connectdata *conn,
-                   int sockindex,
-                   void *mem,
-                   size_t len)
+                       int sockindex,
+                       const void *mem,
+                       size_t len)
 {
   ssize_t rc = gnutls_record_send(conn->ssl[sockindex].session, mem, len);
 
