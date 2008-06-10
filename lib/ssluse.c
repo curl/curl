@@ -108,6 +108,13 @@
 #define SSL_METHOD_QUAL
 #endif
 
+#if OPENSSL_VERSION_NUMBER >= 0x00907000L
+/* 0.9.6 didn't have X509_STORE_set_flags() */
+#define HAVE_X509_STORE_SET_FLAGS 1
+#else
+#define X509_STORE_set_flags(x,y)
+#endif
+
 /*
  * Number of bytes to read from the random number seed file. This must be
  * a finite value (because some entropy "files" like /dev/urandom have

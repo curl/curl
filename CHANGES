@@ -7,6 +7,11 @@
                                   Changelog
 
 
+Daniel Stenberg (10 Jun 2008)
+- I made the OpenSSL code build again with OpenSSL 0.9.6. The CRLFILE
+  functionality killed it due to its unconditional use of
+  X509_STORE_set_flags...
+
 Daniel Stenberg (8 Jun 2008)
 - Due to the three new libcurl changes and the massive command line option
   change I decided we'll mark it by bumping the next release number to 7.19.0!
