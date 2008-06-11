@@ -1698,7 +1698,7 @@ static CURLcode servercert(struct connectdata *conn,
 	connssl->server_cert = NULL;
 	return CURLE_SSL_ISSUER_ERROR;
       }
-      issuer = PEM_read_X509(fp,NULL,NULL,NULL);
+      issuer = PEM_read_X509(fp,NULL,ZERO_NULL,NULL);
       if (!issuer) {
         if (strict)
 	  failf(data, "SSL: Unable to read issuer cert (%s)\n",
