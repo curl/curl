@@ -743,7 +743,8 @@ static void display_conn_info(struct connectdata *conn, PRFileDesc *sock)
  * issuer check, so we provide comments that mimic the OpenSSL
  * X509_check_issued function (in x509v3/v3_purp.c)
  */
-static SECStatus check_issuer_cert(struct connectdata *conn, PRFileDesc *sock,
+static SECStatus check_issuer_cert(struct connectdata *conn,
+                                   PRFileDesc *sock,
                                    char* issuer_nickname)
 {
   CERTCertificate *cert,*cert_issuer,*issuer;

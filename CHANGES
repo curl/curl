@@ -7,6 +7,28 @@
                                   Changelog
 
 
+Daniel Stenberg (11 Jun 2008)
+- I did a cleanup of the internal generic SSL layer and how the various SSL
+  libraries are supported. Starting now, each underlying SSL library support
+  code does a set of defines for the 16 functions the generic layer (sslgen.c)
+  uses (all these new function defines use the prefix "curlssl_"). This
+  greatly simplified the generic layer in readability by involving much less
+  #ifdefs and other preprocessor stuff and should make it easier for people to
+  make libcurl work with new SSL libraries.
+
+  Hopefully I can later on document these 16 functions somewhat as well.
+
+  I also made most of the internal SSL-dependent functions (using Curl_ssl_
+  prefix) #defined to nothing when no SSL support is requested - previously
+  they would unnecessarily call mostly empty functions.
+
+  I've built libcurl with OpenSSL and GnuTLS and without SSL to test this and
+  I've also tried building with NSS but the NSS support is a mystery to me and
+  I failed to build libcurl with the NSS libraries I have installed. We really
+  should A) improve our configure script to detect unsuitable NSS versions
+  already at configure time and B) document our requirements better for the
+  SSL libraries.
+
 Daniel Stenberg (10 Jun 2008)
 - I made the OpenSSL code build again with OpenSSL 0.9.6. The CRLFILE
   functionality killed it due to its unconditional use of

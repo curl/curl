@@ -1936,6 +1936,16 @@ Curl_ossl_connect(struct connectdata *conn,
   return CURLE_OK;
 }
 
+bool Curl_ossl_data_pending(const struct connectdata *conn,
+                            int connindex)
+{
+  if(conn->ssl[connindex].handle)
+    /* SSL is in use */
+    return (bool)(0 != SSL_pending(conn->ssl[connindex].handle));
+  else
+    return FALSE;
+}
+
 /* return number of sent (non-SSL) bytes */
 ssize_t Curl_ossl_send(struct connectdata *conn,
                        int sockindex,
