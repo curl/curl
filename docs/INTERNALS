@@ -59,6 +59,19 @@ Portability
  Windows CE   ?
  TPF          ?
 
+ When writing code (mostly for generating stuff included in release tarballs)
+ we use a few "build tools" and we make sure that we remain functional with
+ these versions:
+
+ GNU Libtool  1.4.2
+ GNU Autoconf 2.57
+ GNU Automake 1.7 (we currently avoid 1.10 due to Solaris-related bugs)
+ GNU M4       1.4
+ perl         4
+ roffit       0.5
+ groff        ? (any version that supports "groff -Tps -man [in] [out]")
+ ps2pdf (gs)  ?
+
 Windows vs Unix
 ===============
 
