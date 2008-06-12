@@ -22,6 +22,43 @@ CVS
  Tagging shall be used extensively, and by the time we release new archives we
  should tag the sources with a name similar to the released version number.
 
+Portability
+===========
+
+ We write curl and libcurl to compile with C89 compilers.  On 32bit and up
+ machines. Most of libcurl assumes more or less POSIX compliance but that's
+ not a requirement.
+
+ We write libcurl to build and work with lots of third party tools, and we
+ want it to remain functional and buildable with these and later versions
+ (older versions may still work but is not what we work hard to maintain):
+
+ OpenSSL      0.9.6
+ GnuTLS       1.2
+ zlib         1.1.4
+ libssh2      0.16
+ c-ares       1.5.0
+ libidn       0.4.1
+ *yassl       1.4.0 (http://curl.haxx.se/mail/lib-2008-02/0093.html)
+ openldap     2.0
+ MIT krb5 lib 1.2.4
+ qsossl       V5R2M0
+ Heimdal      ?
+ NSS          ?
+
+ * = only partly functional, but that's due to bugs in the third party lib, not
+     because of libcurl code
+
+ On systems where configure runs, we aim at working on them all - if they have
+ a suitable C compiler. On systems that don't run configure, we strive to keep
+ curl running fine on:
+
+ Windows      98
+ AS/400       V5R2M0
+ Symbian      9.1
+ Windows CE   ?
+ TPF          ?
+
 Windows vs Unix
 ===============
 
