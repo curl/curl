@@ -1177,7 +1177,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
       goto error;
     }
     else {
-      infof("SSL certificate issuer check ok\n");
+      infof(data, "SSL certificate issuer check ok\n");
     }
   }
 
