@@ -2698,7 +2698,7 @@ sub serverfortest {
 	chomp $proto;
 	if (! grep /^$proto$/, @protocols) {
 	    if (substr($proto,0,5) ne "socks") {
-		    return "curl lacks any $proto support";
+		    return "curl lacks $proto support";
 	    }
 	}
     }
