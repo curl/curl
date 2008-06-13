@@ -6,6 +6,8 @@
 
                                   Changelog
 
+Daniel Fandrich (12 Jun 2008)
+- Fixed curl-config --ca which wasn't being exported by configure.
 
 Daniel Stenberg (11 Jun 2008)
 - I did a cleanup of the internal generic SSL layer and how the various SSL
