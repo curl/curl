@@ -62,6 +62,7 @@
 #include <prio.h>
 #include <secitem.h>
 #include <secport.h>
+#include <certdb.h>
 
 #include "memory.h"
 #include "easyif.h" /* for Curl_convert_from_utf8 prototype */
@@ -766,7 +767,8 @@ static SECStatus check_issuer_cert(struct connectdata *conn,
 
   if ((!cert_issuer) || (!issuer))
     res = SECFailure;
-  else if (CERT_CompareCerts(cert_issuer,issuer)==PR_FALSE)
+  else if (SECITEM_CompareItem(&cert_issuer->derCert,
+                               &issuer->derCert)!=SECEqual)
     res = SECFailure;
 
   CERT_DestroyCertificate(cert);
