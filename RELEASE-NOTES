@@ -19,6 +19,7 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o Fixed curl-config --ca
+ o Fixed the multi interface connection re-use with NSS-built libcurl
 
 This release includes the following known bugs:
 
@@ -35,6 +36,7 @@ New curl mirrors:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Lenny Rachitsky, Axel Tillequin, Arnaud Ebalard
+ Lenny Rachitsky, Axel Tillequin, Arnaud Ebalard, Yang Tse, Dan Fandrich,
+ Rob Crittenden
 
         Thanks! (and sorry if I forgot to mention someone)

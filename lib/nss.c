@@ -925,6 +925,9 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 
   curlerr = CURLE_SSL_CONNECT_ERROR;
 
+  if (connssl->state == ssl_connection_complete)
+    return CURLE_OK;
+
   /* FIXME. NSS doesn't support multiple databases open at the same time. */
   if(!initialized) {
     initialized = 1;

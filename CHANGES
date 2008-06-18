@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (18 Jun 2008)
+- Rob Crittenden brought a fix for the NSS layer that makes libcurl no longer
+  always fire up a new connection rather than using the existing one when the
+  multi interface is used. Original bug report:
+  https://bugzilla.redhat.com/show_bug.cgi?id=450140
+
 Yang Tse (18 Jun 2008)
 - Internal configure script improvement. No longer break out of shell "for"
   statements from inside AC_FOO_IFELSE macros, otherwise temporary macro files
