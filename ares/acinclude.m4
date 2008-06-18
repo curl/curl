@@ -251,8 +251,9 @@ AC_DEFUN([CURL_CHECK_TYPE_SOCKLEN_T], [
       for arg1 in 'int' 'SOCKET'; do
         for arg2 in "struct sockaddr" void; do
           for t in int size_t unsigned long "unsigned long"; do
-            AC_COMPILE_IFELSE([
-              AC_LANG_PROGRAM([[
+            if test "$curl_cv_socklen_t_equiv" = "unknown"; then
+              AC_COMPILE_IFELSE([
+                AC_LANG_PROGRAM([[
 #undef inline
 #ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
@@ -276,15 +277,15 @@ AC_DEFUN([CURL_CHECK_TYPE_SOCKLEN_T], [
 #endif
 #define GETPEERNCALLCONV
 #endif
-                extern int GETPEERNCALLCONV getpeername ($arg1, $arg2 *, $t *);
-              ]],[[
-                $t len=0;
-                getpeername(0,0,&len);
-              ]])
-            ],[
-               curl_cv_socklen_t_equiv="$t"
-               break 3
-            ])
+                  extern int GETPEERNCALLCONV getpeername($arg1, $arg2 *, $t *);
+                ]],[[
+                  $t len=0;
+                  getpeername(0,0,&len);
+                ]])
+              ],[
+                curl_cv_socklen_t_equiv="$t"
+              ])
+            fi
           done
         done
       done
@@ -413,8 +414,9 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
         for gni_arg2 in 'socklen_t' 'size_t' 'int'; do
           for gni_arg46 in 'size_t' 'int' 'socklen_t' 'unsigned int' 'DWORD'; do
             for gni_arg7 in 'int' 'unsigned int'; do
-              AC_COMPILE_IFELSE([
-                AC_LANG_PROGRAM([[
+              if test "$curl_cv_func_getnameinfo_args" = "unknown"; then
+                AC_COMPILE_IFELSE([
+                  AC_LANG_PROGRAM([[
 #undef inline 
 #ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
@@ -444,21 +446,21 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
 #endif
 #define GNICALLCONV
 #endif
-                  extern int GNICALLCONV getnameinfo($gni_arg1, $gni_arg2,
-                                         char *, $gni_arg46,
-                                         char *, $gni_arg46,
-                                         $gni_arg7);
-                ]],[[
-                  $gni_arg2 salen=0;
-                  $gni_arg46 hostlen=0;
-                  $gni_arg46 servlen=0;
-                  $gni_arg7 flags=0;
-                  int res = getnameinfo(0, salen, 0, hostlen, 0, servlen, flags);
-                ]])
-              ],[
-                 curl_cv_func_getnameinfo_args="$gni_arg1,$gni_arg2,$gni_arg46,$gni_arg7"
-                 break 4
-              ])
+                    extern int GNICALLCONV getnameinfo($gni_arg1, $gni_arg2,
+                                           char *, $gni_arg46,
+                                           char *, $gni_arg46,
+                                           $gni_arg7);
+                  ]],[[
+                    $gni_arg2 salen=0;
+                    $gni_arg46 hostlen=0;
+                    $gni_arg46 servlen=0;
+                    $gni_arg7 flags=0;
+                    int res = getnameinfo(0, salen, 0, hostlen, 0, servlen, flags);
+                  ]])
+                ],[
+                  curl_cv_func_getnameinfo_args="$gni_arg1,$gni_arg2,$gni_arg46,$gni_arg7"
+                ])
+              fi
             done
           done
         done
@@ -718,8 +720,9 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
           for recv_arg2 in 'char *' 'void *'; do
             for recv_arg3 in 'size_t' 'int' 'socklen_t' 'unsigned int'; do
               for recv_arg4 in 'int' 'unsigned int'; do
-                AC_COMPILE_IFELSE([
-                  AC_LANG_PROGRAM([[
+                if test "$curl_cv_func_recv_args" = "unknown"; then
+                  AC_COMPILE_IFELSE([
+                    AC_LANG_PROGRAM([[
 #undef inline 
 #ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
@@ -743,18 +746,19 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
 #endif
 #define RECVCALLCONV
 #endif
-                    extern $recv_retv RECVCALLCONV recv($recv_arg1, $recv_arg2, $recv_arg3, $recv_arg4);
-                  ]],[[
-                    $recv_arg1 s=0;
-                    $recv_arg2 buf=0;
-                    $recv_arg3 len=0;
-                    $recv_arg4 flags=0;
-                    $recv_retv res = recv(s, buf, len, flags);
-                  ]])
-                ],[
-                   curl_cv_func_recv_args="$recv_arg1,$recv_arg2,$recv_arg3,$recv_arg4,$recv_retv"
-                   break 5
-                ])
+                      extern $recv_retv RECVCALLCONV
+                      recv($recv_arg1, $recv_arg2, $recv_arg3, $recv_arg4);
+                    ]],[[
+                      $recv_arg1 s=0;
+                      $recv_arg2 buf=0;
+                      $recv_arg3 len=0;
+                      $recv_arg4 flags=0;
+                      $recv_retv res = recv(s, buf, len, flags);
+                    ]])
+                  ],[
+                    curl_cv_func_recv_args="$recv_arg1,$recv_arg2,$recv_arg3,$recv_arg4,$recv_retv"
+                  ])
+                fi
               done
             done
           done
@@ -850,8 +854,9 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
           for send_arg2 in 'char *' 'void *' 'const char *' 'const void *'; do
             for send_arg3 in 'size_t' 'int' 'socklen_t' 'unsigned int'; do
               for send_arg4 in 'int' 'unsigned int'; do
-                AC_COMPILE_IFELSE([
-                  AC_LANG_PROGRAM([[
+                if test "$curl_cv_func_send_args" = "unknown"; then
+                  AC_COMPILE_IFELSE([
+                    AC_LANG_PROGRAM([[
 #undef inline 
 #ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
@@ -875,17 +880,18 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
 #endif
 #define SENDCALLCONV
 #endif
-                    extern $send_retv SENDCALLCONV send($send_arg1, $send_arg2, $send_arg3, $send_arg4);
-                  ]],[[
-                    $send_arg1 s=0;
-                    $send_arg3 len=0;
-                    $send_arg4 flags=0;
-                    $send_retv res = send(s, 0, len, flags);
-                  ]])
-                ],[
-                   curl_cv_func_send_args="$send_arg1,$send_arg2,$send_arg3,$send_arg4,$send_retv"
-                   break 5
-                ])
+                      extern $send_retv SENDCALLCONV
+                      send($send_arg1, $send_arg2, $send_arg3, $send_arg4);
+                    ]],[[
+                      $send_arg1 s=0;
+                      $send_arg3 len=0;
+                      $send_arg4 flags=0;
+                      $send_retv res = send(s, 0, len, flags);
+                    ]])
+                  ],[
+                    curl_cv_func_send_args="$send_arg1,$send_arg2,$send_arg3,$send_arg4,$send_retv"
+                  ])
+                fi
               done
             done
           done
@@ -1258,16 +1264,17 @@ dnl TYPE_IN_ADDR_T
 dnl -------------------------------------------------
 dnl Check for in_addr_t: it is used to receive the return code of inet_addr()
 dnl and a few other things.
-AC_DEFUN([TYPE_IN_ADDR_T],
-[
-   AC_CHECK_TYPE([in_addr_t], ,[
-      AC_MSG_CHECKING([for in_addr_t equivalent])
-      AC_CACHE_VAL([curl_cv_in_addr_t_equiv],
-      [
-         curl_cv_in_addr_t_equiv=
-         for t in "unsigned long" int size_t unsigned long; do
-            AC_LINK_IFELSE([
-              AC_LANG_PROGRAM([[
+
+AC_DEFUN([TYPE_IN_ADDR_T], [
+  AC_CHECK_TYPE([in_addr_t], ,[
+    dnl in_addr_t not available
+    AC_CACHE_CHECK([for in_addr_t equivalent],
+      [curl_cv_in_addr_t_equiv], [
+      curl_cv_in_addr_t_equiv="unknown"
+      for t in "unsigned long" int size_t unsigned long; do
+        if test "$curl_cv_in_addr_t_equiv" = "unknown"; then
+          AC_LINK_IFELSE([
+            AC_LANG_PROGRAM([[
 #undef inline
 #ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
@@ -1295,23 +1302,25 @@ AC_DEFUN([TYPE_IN_ADDR_T],
 #include <arpa/inet.h>
 #endif
 #endif
-              ]],[[
-                $t data = inet_addr ("1.2.3.4");
-              ]])
-            ],[
-              curl_cv_in_addr_t_equiv="$t"
-              break
-            ])
-         done
-
-         if test "x$curl_cv_in_addr_t_equiv" = x; then
-            AC_MSG_ERROR([Cannot find a type to use in place of in_addr_t])
-         fi
-      ])
-      AC_MSG_RESULT($curl_cv_in_addr_t_equiv)
-      AC_DEFINE_UNQUOTED(in_addr_t, $curl_cv_in_addr_t_equiv,
-			[type to use in place of in_addr_t if not defined])],
-      [
+            ]],[[
+              $t data = inet_addr ("1.2.3.4");
+            ]])
+          ],[
+            curl_cv_in_addr_t_equiv="$t"
+          ])
+        fi
+      done
+    ])
+    case "$curl_cv_in_addr_t_equiv" in
+      unknown)
+        AC_MSG_ERROR([Cannot find a type to use in place of in_addr_t])
+        ;;
+      *)
+        AC_DEFINE_UNQUOTED(in_addr_t, $curl_cv_in_addr_t_equiv,
+          [Type to use in place of in_addr_t when system does not provide it.])
+        ;;
+    esac
+  ],[
 #undef inline
 #ifdef HAVE_WINDOWS_H
 #ifndef WIN32_LEAN_AND_MEAN
@@ -1341,6 +1350,7 @@ AC_DEFUN([TYPE_IN_ADDR_T],
 #endif
   ]) dnl AC_CHECK_TYPE
 ]) dnl AC_DEFUN
+
 
 dnl CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC
 dnl -------------------------------------------------
@@ -1380,6 +1390,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
   dnl postponed until library linking checks for clock_gettime pass.
 ]) dnl AC_DEFUN
 
+
 dnl CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC
 dnl -------------------------------------------------
 dnl If monotonic clock_gettime is available then,
@@ -1396,13 +1407,14 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
     curl_cv_gclk_LIBS="unknown"
     #
     for x_xlibs in '' '-lrt' '-lposix4' ; do
-      if test -z "$x_xlibs"; then
-        LIBS="$curl_cv_save_LIBS"
-      else
-        LIBS="$x_xlibs $curl_cv_save_LIBS"
-      fi
-      AC_LINK_IFELSE([
-        AC_LANG_PROGRAM([[
+      if test "$curl_cv_gclk_LIBS" = "unknown"; then
+        if test -z "$x_xlibs"; then
+          LIBS="$curl_cv_save_LIBS"
+        else
+          LIBS="$x_xlibs $curl_cv_save_LIBS"
+        fi
+        AC_LINK_IFELSE([
+          AC_LANG_PROGRAM([[
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -1416,14 +1428,14 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
 #include <time.h>
 #endif
 #endif
-        ]],[[
-          struct timespec ts;
-          (void)clock_gettime(CLOCK_MONOTONIC, &ts);
-        ]])
-      ],[
-        curl_cv_gclk_LIBS="$x_xlibs"
-        break
-      ])
+          ]],[[
+            struct timespec ts;
+            (void)clock_gettime(CLOCK_MONOTONIC, &ts);
+          ]])
+        ],[
+          curl_cv_gclk_LIBS="$x_xlibs"
+        ])
+      fi
     done
     #
     LIBS="$curl_cv_save_LIBS"
@@ -1459,6 +1471,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
   fi
   #
 ]) dnl AC_DEFUN
+
 
 dnl **********************************************************************
 dnl CURL_DETECT_ICC ([ACTION-IF-YES])

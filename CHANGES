@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Yang Tse (18 Jun 2008)
+- Internal configure script improvement. No longer break out of shell "for"
+  statements from inside AC_FOO_IFELSE macros, otherwise temporary macro files
+  are not properly removed.
+
 Daniel Fandrich (12 Jun 2008)
 - Fixed curl-config --ca which wasn't being exported by configure.
 
