@@ -1,0 +1,33 @@
+<testcase>
+<info>
+<keywords>
+SFTP
+FAILURE
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+sftp
+</server>
+ <name>
+SFTP invalid user login (password authentication)
+ </name>
+ <command>
+-u not-a-valid-user: sftp://%HOSTIP:%SSHPORT%PWD/irrelevant-file
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+67
+</errorcode>
+<valgrind>
+disable
+</valgrind>
+</verify>
+</testcase>

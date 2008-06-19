@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel Fandrich (18 Jun 2008)
+- Added SSH failure test cases 628-632
+
 Daniel Stenberg (18 Jun 2008)
 - Rob Crittenden brought a fix for the NSS layer that makes libcurl no longer
   always fire up a new connection rather than using the existing one when the
