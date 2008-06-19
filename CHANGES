@@ -9,6 +9,8 @@
 Daniel Fandrich (18 Jun 2008)
 - Added SSH failure test cases 628-632
 
+- Fixed a memory leak in the command-line tool that caused a valgrind error.
+
 Daniel Stenberg (18 Jun 2008)
 - Rob Crittenden brought a fix for the NSS layer that makes libcurl no longer
   always fire up a new connection rather than using the existing one when the

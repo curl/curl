@@ -3646,6 +3646,8 @@ static void free_config_fields(struct Configurable *config)
     free(config->pubkey);
   if (config->referer)
     free(config->referer);
+  if (config->hostpubmd5)
+    free(config->hostpubmd5);
 
   curl_slist_free_all(config->quote); /* checks for config->quote == NULL */
   curl_slist_free_all(config->prequote);
