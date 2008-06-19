@@ -583,7 +583,7 @@ sub stopserver {
 
 sub verifyhttp {
     my ($proto, $ip, $port) = @_;
-    my $cmd = "$CURL --max-time $server_response_maxtime --output log/verifiedserver --insecure --silent --verbose --globoff \"$proto://$ip:$port/verifiedserver\" 2>log/verifyhttp";
+    my $cmd = "$CURL --max-time $server_response_maxtime --output $LOGDIR/verifiedserver --insecure --silent --verbose --globoff \"$proto://$ip:$port/verifiedserver\" 2>$LOGDIR/verifyhttp";
     my $pid;
 
     # verify if our/any server is running on this port
@@ -594,7 +594,7 @@ sub verifyhttp {
     my $data;
 
     if($res && $verbose) {
-        open(ERR, "<log/verifyhttp");
+        open(ERR, "<$LOGDIR/verifyhttp");
         my @e = <ERR>;
         close(ERR);
         logmsg "RUN: curl command returned $res\n";
@@ -604,7 +604,7 @@ sub verifyhttp {
             }
         }
     }
-    open(FILE, "<log/verifiedserver");
+    open(FILE, "<$LOGDIR/verifiedserver");
     my @file=<FILE>;
     close(FILE);
     $data=$file[0]; # first line
@@ -638,7 +638,7 @@ sub verifyftp {
     if($proto eq "ftps") {
     	$extra = "--insecure --ftp-ssl-control ";
     }
-    my $cmd="$CURL --max-time $server_response_maxtime --silent --verbose --globoff $extra\"$proto://$ip:$port/verifiedserver\" 2>log/verifyftp";
+    my $cmd="$CURL --max-time $server_response_maxtime --silent --verbose --globoff $extra\"$proto://$ip:$port/verifiedserver\" 2>$LOGDIR/verifyftp";
     # check if this is our server running on this port:
     my @data=runclientoutput($cmd);
     logmsg "RUN: $cmd\n" if($verbose);
@@ -1538,7 +1538,7 @@ sub checksystem {
                 # debug is a listed "feature", use that knowledge
                 $curl_debug = 1;
                 # set the NETRC debug env
-                $ENV{'CURL_DEBUG_NETRC'} = 'log/netrc';
+                $ENV{'CURL_DEBUG_NETRC'} = "$LOGDIR/netrc";
             }
             if($feat =~ /SSL/i) {
                 # ssl enabled
@@ -2040,7 +2040,7 @@ sub singletest {
 
     my $usevalgrind = $valgrind && ((getpart("verify", "valgrind"))[0] !~ /disable/);
     if($usevalgrind) {
-        $CMDLINE = "$valgrind ".$valgrind_tool."--leak-check=yes --num-callers=16 ${valgrind_logfile}=log/valgrind$testnum $CMDLINE";
+        $CMDLINE = "$valgrind ".$valgrind_tool."--leak-check=yes --num-callers=16 ${valgrind_logfile}=$LOGDIR/valgrind$testnum $CMDLINE";
     }
 
     $CMDLINE .= "$cmdargs >>$STDOUT 2>>$STDERR";
@@ -2071,7 +2071,7 @@ sub singletest {
     }
 
     if($gdbthis) {
-        open(GDBCMD, ">log/gdbcmd");
+        open(GDBCMD, ">$LOGDIR/gdbcmd");
         print GDBCMD "set args $cmdargs\n";
         print GDBCMD "show args\n";
         close(GDBCMD);
@@ -2079,10 +2079,10 @@ sub singletest {
     # run the command line we built
     if ($torture) {
         $cmdres = torture($CMDLINE,
-                       "$gdb --directory libtest $DBGCURL -x log/gdbcmd");
+                       "$gdb --directory libtest $DBGCURL -x $LOGDIR/gdbcmd");
     }
     elsif($gdbthis) {
-        runclient("$gdb --directory libtest $DBGCURL -x log/gdbcmd");
+        runclient("$gdb --directory libtest $DBGCURL -x $LOGDIR/gdbcmd");
         $cmdres=0; # makes it always continue after a debugged run
     }
     else {
@@ -2108,11 +2108,11 @@ sub singletest {
         logmsg "core dumped\n";
         if(0 && $gdb) {
             logmsg "running gdb for post-mortem analysis:\n";
-            open(GDBCMD, ">log/gdbcmd2");
+            open(GDBCMD, ">$LOGDIR/gdbcmd2");
             print GDBCMD "bt\n";
             close(GDBCMD);
-            runclient("$gdb --directory libtest -x log/gdbcmd2 -batch $DBGCURL core ");
-     #       unlink("log/gdbcmd2");
+            runclient("$gdb --directory libtest -x $LOGDIR/gdbcmd2 -batch $DBGCURL core ");
+     #       unlink("$LOGDIR/gdbcmd2");
         }
     }
 
@@ -2423,7 +2423,7 @@ sub singletest {
             if(!$src) {
                 $src=".";
             }
-            my @e = valgrindparse($src, $feature{'SSL'}, "log/$l");
+            my @e = valgrindparse($src, $feature{'SSL'}, "$LOGDIR/$l");
             if($e[0]) {
                 logmsg " valgrind ERROR ";
                 logmsg @e;
@@ -3015,7 +3015,7 @@ sub displaylogs {
     my @logs = readdir(DIR);
     closedir(DIR);
 
-    logmsg "== Contents of files in the log/ dir after test $testnum\n";
+    logmsg "== Contents of files in the $LOGDIR/ dir after test $testnum\n";
     foreach my $log (sort @logs) {
         if($log =~ /\.(\.|)$/) {
             next; # skip "." and ".."
