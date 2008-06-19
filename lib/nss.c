@@ -43,6 +43,7 @@
 #include "strequal.h"
 #include "select.h"
 #include "sslgen.h"
+#include "strequal.h" 
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */
 #include <curl/mprintf.h>
@@ -203,7 +204,7 @@ static SECStatus set_ciphers(struct SessionHandle *data, PRFileDesc * model,
     found = PR_FALSE;
 
     for(i=0; i<ciphernum; i++) {
-      if(!strcasecmp(cipher, cipherlist[i].name)) {
+      if(strequal(cipher, cipherlist[i].name)) {
         cipher_state[i] = PR_TRUE;
         found = PR_TRUE;
         break;
