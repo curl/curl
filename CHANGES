@@ -7,6 +7,13 @@
                                   Changelog
 
 Daniel Stenberg (19 Jun 2008)
+- Christopher Palow fixed a curl_multi_socket() issue which previous caused
+  libcurl to not tell the app properly when a socket was closed (when the name
+  resolve done by c-ares is done) and then immediately re-created and put to
+  use again (for the actual connection). Since the closure will make the
+  "watch status" get lost in several event-based systems libcurl will need to
+  tell the app about this close/re-create case.
+
 - Dengminwen found a bug in the connection re-use function when using the
   multi interface with pipelining enabled as it would wrongly check for,
   detect and close "dead connections" even though that connection was already

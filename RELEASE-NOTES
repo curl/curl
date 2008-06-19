@@ -21,6 +21,7 @@ This release includes the following bugfixes:
  o Fixed curl-config --ca
  o Fixed the multi interface connection re-use with NSS-built libcurl
  o connection re-use when using the multi interface with pipelining enabled
+ o curl_multi_socket() socket callback fix for close/re-create sockets case
 
 This release includes the following known bugs:
 
@@ -38,6 +39,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Lenny Rachitsky, Axel Tillequin, Arnaud Ebalard, Yang Tse, Dan Fandrich,
- Rob Crittenden, Dengminwen
+ Rob Crittenden, Dengminwen, Christopher Palow
 
         Thanks! (and sorry if I forgot to mention someone)
