@@ -93,12 +93,6 @@ typedef struct {
   PRInt32 version; /* protocol version valid for this cipher */
 } cipher_s;
 
-#ifdef NSS_ENABLE_ECC
-#define ciphernum 48
-#else
-#define ciphernum 23
-#endif
-
 #define PK11_SETATTRS(x,id,v,l) (x)->type = (id); \
                      (x)->pValue=(v); (x)->ulValueLen = (l)
 
@@ -106,7 +100,8 @@ typedef struct {
 
 enum sslversion { SSL2 = 1, SSL3 = 2, TLS = 4 };
 
-static const cipher_s cipherlist[ciphernum] = {
+#define NUM_OF_CIPHERS sizeof(cipherlist)/sizeof(cipherlist[0])
+static const cipher_s cipherlist[] = {
   /* SSL2 cipher suites */
   {"rc4", SSL_EN_RC4_128_WITH_MD5, SSL2},
   {"rc4export", SSL_EN_RC4_128_EXPORT40_WITH_MD5, SSL2},
@@ -172,8 +167,8 @@ SECMODModule* mod = NULL;
 static SECStatus set_ciphers(struct SessionHandle *data, PRFileDesc * model,
                              char *cipher_list)
 {
-  int i;
-  PRBool cipher_state[ciphernum];
+  unsigned int i;
+  PRBool cipher_state[NUM_OF_CIPHERS];
   PRBool found;
   char *cipher;
   SECStatus rv;
@@ -187,7 +182,7 @@ static SECStatus set_ciphers(struct SessionHandle *data, PRFileDesc * model,
   }
 
   /* Set every entry in our list to false */
-  for(i=0; i<ciphernum; i++) {
+  for(i=0; i<NUM_OF_CIPHERS; i++) {
     cipher_state[i] = PR_FALSE;
   }
 
@@ -203,7 +198,7 @@ static SECStatus set_ciphers(struct SessionHandle *data, PRFileDesc * model,
 
     found = PR_FALSE;
 
-    for(i=0; i<ciphernum; i++) {
+    for(i=0; i<NUM_OF_CIPHERS; i++) {
       if(strequal(cipher, cipherlist[i].name)) {
         cipher_state[i] = PR_TRUE;
         found = PR_TRUE;
@@ -222,7 +217,7 @@ static SECStatus set_ciphers(struct SessionHandle *data, PRFileDesc * model,
   }
 
   /* Finally actually enable the selected ciphers */
-  for(i=0; i<ciphernum; i++) {
+  for(i=0; i<NUM_OF_CIPHERS; i++) {
     rv = SSL_CipherPrefSet(model, cipherlist[i].num, cipher_state[i]);
     if(rv != SECSuccess) {
       failf(data, "Unknown cipher in cipher list");
