@@ -2511,9 +2511,10 @@ ConnectionExists(struct SessionHandle *data,
     }
 
     if(match) {
-      if(pipeLen == 0) {
-        /* The check for a dead socket makes sense only if there
-           are no handles in pipeline */
+      if(!pipeLen && !check->inuse) {
+        /* The check for a dead socket makes sense only if there are no
+           handles in pipeline and the connection isn't already marked in
+           use */
         bool dead = SocketIsDead(check->sock[FIRSTSOCKET]);
         if(dead) {
           check->data = data;
