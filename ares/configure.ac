@@ -124,28 +124,6 @@ dnl **********************************************************************
 CURL_DETECT_ICC([CFLAGS="$CFLAGS -we 147"])
 
 dnl **********************************************************************
-dnl Make sure that our checks for headers windows.h winsock.h winsock2.h 
-dnl and ws2tcpip.h take precedence over any other further checks which 
-dnl could be done later using AC_CHECK_HEADER or AC_CHECK_HEADERS for
-dnl this specific header files. And do them before its results are used.
-dnl **********************************************************************
-
-CURL_CHECK_HEADER_WINDOWS
-CURL_CHECK_NATIVE_WINDOWS
-case X-"$ac_cv_native_windows" in
-  X-yes)
-    CURL_CHECK_HEADER_WINSOCK
-    CURL_CHECK_HEADER_WINSOCK2
-    CURL_CHECK_HEADER_WS2TCPIP
-    ;;
-  *)
-    ac_cv_header_winsock_h="no"
-    ac_cv_header_winsock2_h="no"
-    ac_cv_header_ws2tcpip_h="no"
-    ;;
-esac
-
-dnl **********************************************************************
 dnl platform/compiler/architecture specific checks/flags
 dnl **********************************************************************
 
@@ -180,6 +158,42 @@ case $host in
     fi
     ;;
   #
+esac
+
+CURL_CHECK_DEF([__xlc__])
+if test "$curl_cv_have_def___xlc__" = "yes"; then
+  dnl Force xlc to stop after the compilation phase, and not
+  dnl generate object code file when compilation has errors.
+  CFLAGS="$CFLAGS -qhalt=e"
+fi
+
+CURL_CHECK_COMPILER_HALT_ON_ERROR
+CURL_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE
+
+dnl **********************************************************************
+dnl Compilation based checks should not be done before this point.
+dnl **********************************************************************
+
+dnl **********************************************************************
+dnl Make sure that our checks for headers windows.h winsock.h winsock2.h 
+dnl and ws2tcpip.h take precedence over any other further checks which 
+dnl could be done later using AC_CHECK_HEADER or AC_CHECK_HEADERS for
+dnl this specific header files. And do them before its results are used.
+dnl **********************************************************************
+
+CURL_CHECK_HEADER_WINDOWS
+CURL_CHECK_NATIVE_WINDOWS
+case X-"$ac_cv_native_windows" in
+  X-yes)
+    CURL_CHECK_HEADER_WINSOCK
+    CURL_CHECK_HEADER_WINSOCK2
+    CURL_CHECK_HEADER_WS2TCPIP
+    ;;
+  *)
+    ac_cv_header_winsock_h="no"
+    ac_cv_header_winsock2_h="no"
+    ac_cv_header_ws2tcpip_h="no"
+    ;;
 esac
 
 dnl **********************************************************************
@@ -431,9 +445,6 @@ if test "x$RECENTAIX" = "xyes"; then
          dnl the optimizer assumes that pointers can only point to
          dnl an object of the same type.
          CFLAGS="$CFLAGS -qnoansialias"
-         dnl Force AIX xlc to stop after the compilation phase, and not
-         dnl generate object code, when the source compiles with errors.
-         CFLAGS="$CFLAGS -qhalt=e"
        )
 fi
 

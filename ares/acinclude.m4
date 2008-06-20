@@ -1,5 +1,93 @@
 
 
+dnl CURL_CHECK_COMPILER_HALT_ON_ERROR
+dnl -------------------------------------------------
+dnl Verifies if the compiler actually halts after the
+dnl compilation phase without generating any object
+dnl code file, when the source compiles with errors.
+
+AC_DEFUN([CURL_CHECK_COMPILER_HALT_ON_ERROR], [
+  AC_MSG_CHECKING([if compiler halts on compilation errors])
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+    ]],[[
+      force compilation error
+    ]])
+  ],[
+    AC_MSG_RESULT([no])
+    AC_MSG_ERROR([compiler does not halt on compilation errors.])
+  ],[
+    AC_MSG_RESULT([yes])
+  ])
+])
+
+
+dnl CURL_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE
+dnl -------------------------------------------------
+dnl Verifies if the compiler actually halts after the
+dnl compilation phase without generating any object
+dnl code file, when the source code tries to define a
+dnl type for a constant array with negative dimension.
+
+AC_DEFUN([CURL_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE], [
+  AC_REQUIRE([CURL_CHECK_COMPILER_HALT_ON_ERROR])dnl
+  AC_MSG_CHECKING([if compiler halts on negative sized arrays])
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+      typedef char bad_t[sizeof(char) == sizeof(int) ? -1 : -1 ];
+    ]],[[
+      bad_t dummy;
+    ]])
+  ],[
+    AC_MSG_RESULT([no])
+    AC_MSG_ERROR([compiler does not halt on negative sized arrays.])
+  ],[
+    AC_MSG_RESULT([yes])
+  ])
+])
+
+
+dnl CURL_CHECK_DEF(SYMBOL, [INCLUDES], [SILENT])
+dnl -------------------------------------------------
+dnl Use the C preprocessor to find out if the given object-style symbol
+dnl is defined and get its expansion. This macro will not use default
+dnl includes even if no INCLUDES argument is given. This macro will run
+dnl silently when invoked with three arguments.
+
+AC_DEFUN([CURL_CHECK_DEF], [
+  AS_VAR_PUSHDEF([ac_HaveDef], [curl_cv_have_def_$1])dnl
+  AS_VAR_PUSHDEF([ac_Def], [curl_cv_def_$1])dnl
+  ifelse($3,,[AC_MSG_CHECKING([for preprocessor definition of $1])])
+  tmp_exp=""
+  AC_PREPROC_IFELSE([
+    AC_LANG_SOURCE(
+ifelse($2,,,[$2])[[
+#ifdef $1
+CURL_DEF_TOKEN $1
+#endif
+    ]])
+  ],[
+    tmp_exp=`eval "$ac_cpp conftest.$ac_ext" 2>/dev/null | \
+      "$GREP" CURL_DEF_TOKEN 2>/dev/null | \
+      "$SED" 's/.*CURL_DEF_TOKEN[[ ]]//' 2>/dev/null | \
+      "$SED" 'q' 2>/dev/null`
+    if test "$tmp_exp" = "$1"; then
+      tmp_exp=""
+    fi
+  ])
+  if test -z "$tmp_exp"; then
+    AS_VAR_SET([ac_HaveDef], [no])
+    ifelse($3,,[AC_MSG_RESULT([no])])
+  else
+    AS_VAR_SET([ac_HaveDef], [yes])
+    AS_VAR_SET([ac_Def], [$tmp_exp])
+    ifelse($3,,[AC_MSG_RESULT([$tmp_exp])])
+  fi
+  AS_VAR_POPDEF([ac_Def])dnl
+  AS_VAR_POPDEF([ac_HaveDef])dnl
+])
+
+
 dnl CURL_CHECK_HEADER_WINDOWS
 dnl -------------------------------------------------
 dnl Check for compilable and valid windows.h header 

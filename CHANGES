@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Yang Tse (20 Jun 2008)
+- Modified configuration script to actually verify if the compiler is good
+  enough at detecting compilation errors or at least it has been properly
+  configured to do so. Configuration heavily depends on this capability, so
+  if this compiler sanity check fails the configuration process will now fail.
+
 Daniel Stenberg (20 Jun 2008)
 - Phil Pellouchoud found a case where libcurl built with NSS failed to
   handshake with a SSLv2 server, and it turned out to be because it didn't
