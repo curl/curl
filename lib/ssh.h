@@ -37,8 +37,6 @@ ssize_t Curl_sftp_send(struct connectdata *conn, int sockindex,
                        const void *mem, size_t len);
 ssize_t Curl_sftp_recv(struct connectdata *conn, int sockindex,
                        char *mem, size_t len);
-bool Curl_ssh_enabled(struct connectdata *conn,
-                      int prot);
 
 #define Curl_ssh_enabled(conn,prot) (conn->protocol & prot)
 
