@@ -7,6 +7,12 @@
                                   Changelog
 
 Daniel Stenberg (20 Jun 2008)
+- Phil Pellouchoud found a case where libcurl built with NSS failed to
+  handshake with a SSLv2 server, and it turned out to be because it didn't
+  recognize the cipher named "rc4-md5". In our list that cipher was named
+  plainly "rc4". I've now added rc4-md5 to work as an alias as Phil reported
+  that it made things work for him again.
+
 - Hans-Jurgen May pointed out that trying SCP or SFTP over a SOCKS proxy
   crashed libcurl. This is now addressed by making sure we use "plain send"
   internally when doing the socks handshake instead of the Curl_write()

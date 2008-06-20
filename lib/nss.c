@@ -104,6 +104,7 @@ enum sslversion { SSL2 = 1, SSL3 = 2, TLS = 4 };
 static const cipher_s cipherlist[] = {
   /* SSL2 cipher suites */
   {"rc4", SSL_EN_RC4_128_WITH_MD5, SSL2},
+  {"rc4-md5", SSL_EN_RC4_128_WITH_MD5, SSL2},
   {"rc4export", SSL_EN_RC4_128_EXPORT40_WITH_MD5, SSL2},
   {"rc2", SSL_EN_RC2_128_CBC_WITH_MD5, SSL2},
   {"rc2export", SSL_EN_RC2_128_CBC_EXPORT40_WITH_MD5, SSL2},

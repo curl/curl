@@ -23,6 +23,7 @@ This release includes the following bugfixes:
  o connection re-use when using the multi interface with pipelining enabled
  o curl_multi_socket() socket callback fix for close/re-create sockets case
  o SCP or SFTP over socks proxy crashed
+ o RC4-MD5 cipher now works with NSS-built libcurl
 
 This release includes the following known bugs:
 
@@ -40,6 +41,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Lenny Rachitsky, Axel Tillequin, Arnaud Ebalard, Yang Tse, Dan Fandrich,
- Rob Crittenden, Dengminwen, Christopher Palow, Hans-Jürgen May
+ Rob Crittenden, Dengminwen, Christopher Palow, Hans-Jurgen May,
+ Phil Pellouchoud
 
         Thanks! (and sorry if I forgot to mention someone)
