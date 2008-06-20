@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel Stenberg (20 Jun 2008)
+- Hans-Jurgen May pointed out that trying SCP or SFTP over a SOCKS proxy
+  crashed libcurl. This is now addressed by making sure we use "plain send"
+  internally when doing the socks handshake instead of the Curl_write()
+  function which is designed to use the "target" protocol. That's then SCP or
+  SFTP in this case. I also took the opportunity and cleaned up some ssh-
+  related #ifdefs in the code for readability.
+
 Daniel Stenberg (19 Jun 2008)
 - Christopher Palow fixed a curl_multi_socket() issue which previously caused
   libcurl to not tell the app properly when a socket was closed (when the name

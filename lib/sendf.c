@@ -356,19 +356,38 @@ CURLcode Curl_write(struct connectdata *conn,
   int num = (sockfd == conn->sock[SECONDARYSOCKET]);
 
   if(conn->ssl[num].state == ssl_connection_complete)
-    /* only TRUE if SSL enabled */
     bytes_written = Curl_ssl_send(conn, num, mem, len);
-#ifdef USE_LIBSSH2
-  else if(conn->protocol & PROT_SCP)
+  else if(Curl_ssh_enabled(conn, PROT_SCP))
     bytes_written = Curl_scp_send(conn, num, mem, len);
-  else if(conn->protocol & PROT_SFTP)
+  else if(Curl_ssh_enabled(conn, PROT_SFTP))
     bytes_written = Curl_sftp_send(conn, num, mem, len);
-#endif /* !USE_LIBSSH2 */
   else if(conn->sec_complete)
-    /* only TRUE if krb enabled */
     bytes_written = Curl_sec_send(conn, num, mem, len);
   else
     bytes_written = send_plain(conn, num, mem, len);
+
+  *written = bytes_written;
+  retcode = (-1 != bytes_written)?CURLE_OK:CURLE_SEND_ERROR;
+
+  return retcode;
+}
+
+/*
+ * Curl_write_plain() is an internal write function that sends data to the
+ * server using plain sockets only. Otherwise meant to have the exact same
+ * proto as Curl_write()
+ */
+CURLcode Curl_write_plain(struct connectdata *conn,
+                          curl_socket_t sockfd,
+                          const void *mem,
+                          size_t len,
+                          ssize_t *written)
+{
+  ssize_t bytes_written;
+  CURLcode retcode;
+  int num = (sockfd == conn->sock[SECONDARYSOCKET]);
+
+  bytes_written = send_plain(conn, num, mem, len);
 
   *written = bytes_written;
   retcode = (-1 != bytes_written)?CURLE_OK:CURLE_SEND_ERROR;
@@ -574,8 +593,7 @@ int Curl_read(struct connectdata *conn, /* connection data */
       return -1; /* -1 from Curl_ssl_recv() means EWOULDBLOCK */
     }
   }
-#ifdef USE_LIBSSH2
-  else if(conn->protocol & (PROT_SCP|PROT_SFTP)) {
+  else if(Curl_ssh_enabled(conn, (PROT_SCP|PROT_SFTP))) {
     if(conn->protocol & PROT_SCP)
       nread = Curl_scp_recv(conn, num, buffertofill, bytesfromsocket);
     else if(conn->protocol & PROT_SFTP)
@@ -589,7 +607,6 @@ int Curl_read(struct connectdata *conn, /* connection data */
       /* since it is negative and not EGAIN, it was a protocol-layer error */
       return CURLE_RECV_ERROR;
   }
-#endif /* !USE_LIBSSH2 */
   else {
     if(conn->sec_complete)
       nread = Curl_sec_read(conn, sockfd, buffertofill,
