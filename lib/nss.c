@@ -1195,7 +1195,7 @@ error:
 /* return number of sent (non-SSL) bytes */
 int Curl_nss_send(struct connectdata *conn,  /* connection data */
                   int sockindex,             /* socketindex */
-                  void *mem,                 /* send this data */
+                  const void *mem,           /* send this data */
                   size_t len)                /* amount to write */
 {
   PRInt32 err;

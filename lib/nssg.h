@@ -45,7 +45,7 @@ void Curl_nss_cleanup(void);
 
 int Curl_nss_send(struct connectdata *conn,
                   int sockindex,
-                  void *mem,
+                  const void *mem,
                   size_t len);
 ssize_t Curl_nss_recv(struct connectdata *conn, /* connection data */
                       int num,                  /* socketindex */
