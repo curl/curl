@@ -47,8 +47,8 @@ LIBCURL_LIBS = @LIBCURL_LIBS@
 # we use srcdir/lib for the lib-private header files
 
 INCLUDES = -I$(top_srcdir)/include \
-           -I$(top_builddir)/lib
-
+           -I$(top_builddir)/lib   \
+	   -I$(top_srcdir)/lib
 
 VERSION=-version-info 5:0:1
 
