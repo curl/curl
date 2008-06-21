@@ -5,6 +5,7 @@ HTTP
 HTTP FORMPOST
 HTTP proxy
 HTTP proxy Digest auth
+--proxy-anyauth
 </keywords>
 </info>
 # Server-side

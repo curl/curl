@@ -5,6 +5,7 @@ FTP
 EPSV
 TYPE A
 RETR
+type=
 </keywords>
 </info>
 # Server-side

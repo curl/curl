@@ -6,6 +6,7 @@ HTTP GET
 HTTP proxy
 HTTP proxy NTLM auth
 CONNECT
+--proxy-anyauth
 </keywords>
 </info>
 # Server-side
