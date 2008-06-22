@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (22 Jun 2008)
+- Eduard Bloch filed the debian bug report #487567
+  (http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=487567) pointing out that
+  libcurl used Content-Range: instead of Range when doing a range request with
+  --head (CURLOPT_NOBODY). This is now fixed and test case 1032 was added to
+  verify.
+  
 Daniel Fandrich (21 Jun 2008)
 - Stopped using ranges in scanf character sequences (e.g. %[a-z]) since that
   is not ANSI C, just a common extension.  This caused problems on

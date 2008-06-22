@@ -2298,7 +2298,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
      * or uploading and we always let customized headers override our internal
      * ones if any such are specified.
      */
-    if((httpreq == HTTPREQ_GET) &&
+    if(((httpreq == HTTPREQ_GET) || (httpreq == HTTPREQ_HEAD)) &&
        !checkheaders(data, "Range:")) {
       /* if a line like this was already allocated, free the previous one */
       if(conn->allocptr.rangeline)

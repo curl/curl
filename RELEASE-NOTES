@@ -24,6 +24,7 @@ This release includes the following bugfixes:
  o curl_multi_socket() socket callback fix for close/re-create sockets case
  o SCP or SFTP over socks proxy crashed
  o RC4-MD5 cipher now works with NSS-built libcurl
+ o range requests with --head are now done correctly
 
 This release includes the following known bugs:
 
@@ -42,6 +43,6 @@ advice from friends like these:
 
  Lenny Rachitsky, Axel Tillequin, Arnaud Ebalard, Yang Tse, Dan Fandrich,
  Rob Crittenden, Dengminwen, Christopher Palow, Hans-Jurgen May,
- Phil Pellouchoud
+ Phil Pellouchoud, Eduard Bloch
 
         Thanks! (and sorry if I forgot to mention someone)
