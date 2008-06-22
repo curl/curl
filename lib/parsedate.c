@@ -84,8 +84,6 @@
 
 #include <curl/curl.h>
 
-static time_t parsedate(const char *date);
-
 const char * const Curl_wkday[] =
 {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
 static const char * const weekday[] =
@@ -248,7 +246,7 @@ static time_t parsedate(const char *date)
       /* a name coming up */
       char buf[32]="";
       size_t len;
-      sscanf(date, "%31[A-Za-z]", buf);
+      sscanf(date, "%31[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz]", buf);
       len = strlen(buf);
 
       if(wdaynum == -1) {

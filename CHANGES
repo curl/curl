@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Fandrich (21 Jun 2008)
+- Stopped using ranges in scanf character sequences (e.g. %[a-z]) since that
+  is not ANSI C, just a common extension.  This caused problems on
+  at least Open Watcom C.
+
 Yang Tse (20 Jun 2008)
 - Modified configuration script to actually verify if the compiler is good
   enough at detecting compilation errors or at least it has been properly

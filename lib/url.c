@@ -3839,7 +3839,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    * The conn->host.name is currently [user:passwd@]host[:port] where host
    * could be a hostname, IPv4 address or IPv6 address.
    *************************************************************/
-  if((1 == sscanf(conn->host.name, "[%*39[0-9a-fA-F:.]%c", &endbracket)) &&
+  if((1 == sscanf(conn->host.name, "[%*39[0123456789abcdefABCDEF:.]%c", &endbracket)) &&
      (']' == endbracket)) {
     /* this is a RFC2732-style specified IP-address */
     conn->bits.ipv6_ip = TRUE;
