@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Fandrich (25 Jun 2008)
+- Honour --stderr with the -v option.
+
+- Fixed a file handle leak in the command line client if more than one
+  --stderr option was given.
+
 Daniel Stenberg (22 Jun 2008)
 - Eduard Bloch filed the debian bug report #487567
   (http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=487567) pointing out that

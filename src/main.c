@@ -1950,7 +1950,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
 
       case 'u': /* --crlf */
-        /* LF -> CRLF conversinon? */
+        /* LF -> CRLF conversion? */
         config->crlf = TRUE;
         break;
 
@@ -1960,6 +1960,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           if(!newfile)
             warnf(config, "Failed to open %s!\n", nextarg);
           else {
+            if(config->errors_fopened)
+              fclose(config->errors);
             config->errors = newfile;
             config->errors_fopened = TRUE;
           }
@@ -3449,7 +3451,7 @@ int my_trace(CURL *handle, curl_infotype type,
       config->trace_stream = stdout;
     else if(curlx_strequal("%", config->trace_dump))
       /* Ok, this is somewhat hackish but we do it undocumented for now */
-      config->trace_stream = stderr;
+      config->trace_stream = config->errors;  /* aka stderr */
     else {
       config->trace_stream = fopen(config->trace_dump, "w");
       config->trace_fopened = TRUE;
