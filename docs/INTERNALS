@@ -43,8 +43,8 @@ Portability
  openldap     2.0
  MIT krb5 lib 1.2.4
  qsossl       V5R2M0
+ NSS          3.11.x
  Heimdal      ?
- NSS          ?
 
  * = only partly functional, but that's due to bugs in the third party lib, not
      because of libcurl code
