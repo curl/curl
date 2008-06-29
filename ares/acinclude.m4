@@ -1446,12 +1446,15 @@ dnl Check if monotonic clock_gettime is available.
 
 AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
   AC_REQUIRE([AC_HEADER_TIME])dnl
-  AC_CHECK_HEADERS(sys/types.h sys/time.h time.h)
+  AC_CHECK_HEADERS(sys/types.h unistd.h sys/time.h time.h)
   AC_MSG_CHECKING([for monotonic clock_gettime])
   AC_COMPILE_IFELSE([
     AC_LANG_PROGRAM([[
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
 #endif
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -1464,8 +1467,14 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
 #endif
 #endif
     ]],[[
+#if defined(_POSIX_MONOTONIC_CLOCK) && (_POSIX_MONOTONIC_CLOCK > 0)
+      dnl The monotonic clock will not be used unless the feature test macro is
+      dnl defined with a value greater than zero indicating _always_ supported.
       struct timespec ts;
       (void)clock_gettime(CLOCK_MONOTONIC, &ts);
+#else
+      HAVE_CLOCK_GETTIME_MONOTONIC shall not be defined.
+#endif
     ]])
   ],[
     AC_MSG_RESULT([yes])
@@ -1505,6 +1514,9 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
           AC_LANG_PROGRAM([[
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
 #endif
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -1548,6 +1560,46 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
         ac_cv_func_clock_gettime="yes"
         ;;
     esac
+    #
+    dnl only do runtime verification when not cross-compiling
+    if test "x$cross_compiling" != "xyes" &&
+      test "$ac_cv_func_clock_gettime" = "yes"; then
+      AC_MSG_CHECKING([if monotonic clock_gettime works])
+      AC_RUN_IFELSE([
+        AC_LANG_PROGRAM([[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#ifdef TIME_WITH_SYS_TIME
+#include <time.h>
+#endif
+#else
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
+#endif
+        ]],[[
+#if defined(_POSIX_MONOTONIC_CLOCK) && (_POSIX_MONOTONIC_CLOCK > 0)
+          struct timespec ts;
+          if (0 == clock_gettime(CLOCK_MONOTONIC, &ts))
+            exit(0);
+#endif
+          exit(1);
+        ]])
+      ],[
+        AC_MSG_RESULT([yes])
+      ],[
+        AC_MSG_RESULT([no])
+        AC_MSG_WARN([HAVE_CLOCK_GETTIME_MONOTONIC will not be defined])
+        ac_cv_func_clock_gettime="no"
+        LIBS="$curl_cv_save_LIBS"
+      ])
+    fi
     #
     case "$ac_cv_func_clock_gettime" in
       yes)

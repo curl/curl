@@ -25,6 +25,7 @@ This release includes the following bugfixes:
  o SCP or SFTP over socks proxy crashed
  o RC4-MD5 cipher now works with NSS-built libcurl
  o range requests with --head are now done correctly
+ o configure script misdetected monotonic clock availability
 
 This release includes the following known bugs:
 
@@ -43,6 +44,6 @@ advice from friends like these:
 
  Lenny Rachitsky, Axel Tillequin, Arnaud Ebalard, Yang Tse, Dan Fandrich,
  Rob Crittenden, Dengminwen, Christopher Palow, Hans-Jurgen May,
- Phil Pellouchoud, Eduard Bloch
+ Phil Pellouchoud, Eduard Bloch, John Lightsey
 
         Thanks! (and sorry if I forgot to mention someone)

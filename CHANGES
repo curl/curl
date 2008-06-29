@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Yang Tse (29 Jun 2008)
+- John Lightsey filed bug report #1999181: "CLOCK_MONOTONIC always fails on
+  some systems" (http://curl.haxx.se/bug/view.cgi?id=1999181). The problem was
+  that the configure script did not use the _POSIX_MONOTONIC_CLOCK feature test
+  macro when checking monotonic clock availability. This is now fixed and the
+  monotonic clock will not be used unless the feature test macro is defined
+  with a value greater than zero indicating always supported.
+
 Daniel Fandrich (25 Jun 2008)
 - Honour --stderr with the -v option.
 
