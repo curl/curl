@@ -1447,7 +1447,7 @@ dnl Check if monotonic clock_gettime is available.
 AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
   AC_REQUIRE([AC_HEADER_TIME])dnl
   AC_CHECK_HEADERS(sys/types.h unistd.h sys/time.h time.h)
-  AC_MSG_CHECKING([for monotonic clock_gettime])
+  AC_MSG_CHECKING([for POSIX always supported monotonic clock_gettime])
   AC_COMPILE_IFELSE([
     AC_LANG_PROGRAM([[
 #ifdef HAVE_SYS_TYPES_H
