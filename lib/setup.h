@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -139,16 +139,18 @@
 
 #ifndef SIZEOF_CURL_OFF_T
 /* If we don't know the size here, we assume a conservative size: 4. When
-   building libcurl, the actual size of this variable should be define in the
+   building libcurl, the actual size of this variable should be defined in the
    config*.h file. */
 #define SIZEOF_CURL_OFF_T 4
 #endif
 
-/* We set up our internal prefered (CURL_)FORMAT_OFF_T here */
+/* We set up our internal prefered (CURL_)FORMAT_OFF_T[U] here */
 #if SIZEOF_CURL_OFF_T > 4
 #define FORMAT_OFF_T "lld"
+#define FORMAT_OFF_TU "llu" /* the unsigned version */
 #else
 #define FORMAT_OFF_T "ld"
+#define FORMAT_OFF_TU "lu" /* thus unsigned version */
 #endif /* SIZEOF_CURL_OFF_T */
 
 #ifndef _REENTRANT

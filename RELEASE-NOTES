@@ -26,6 +26,7 @@ This release includes the following bugfixes:
  o RC4-MD5 cipher now works with NSS-built libcurl
  o range requests with --head are now done correctly
  o configure script misdetected monotonic clock availability
+ o range numbers could be made to wrongly get output as signed
 
 This release includes the following known bugs:
 
@@ -44,6 +45,7 @@ advice from friends like these:
 
  Lenny Rachitsky, Axel Tillequin, Arnaud Ebalard, Yang Tse, Dan Fandrich,
  Rob Crittenden, Dengminwen, Christopher Palow, Hans-Jurgen May,
- Phil Pellouchoud, Eduard Bloch, John Lightsey
+ Phil Pellouchoud, Eduard Bloch, John Lightsey, Stephen Collyer, Tor Arntsen
+
 
         Thanks! (and sorry if I forgot to mention someone)

@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (30 Jun 2008)
+- Made the internal printf() support %llu properly to print unsigned long longs.
+
+- Stephen Collyer and Tor Arntsen helped identify a flaw in the range code
+  which output the range using a signed variable where it should rather use
+  unsigned.
+
 Yang Tse (29 Jun 2008)
 - John Lightsey filed bug report #1999181: "CLOCK_MONOTONIC always fails on
   some systems" (http://curl.haxx.se/bug/view.cgi?id=1999181). The problem was
