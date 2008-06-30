@@ -9,7 +9,7 @@
 ABI - Application Binary Interface
 
   First, allow me to define the word for this context: ABI describes the
-  low-level interface between an application program a library. Calling
+  low-level interface between an application program and a library. Calling
   conventions, function arguments, return values, struct sizes/defines and
   more.
 
