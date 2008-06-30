@@ -1,17 +1,24 @@
-/****************************************************************************
+/***************************************************************************
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
+ *                             \___|\___/|_| \_\_____|
+ *
+ * Copyright (C) 1999 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at http://curl.haxx.se/docs/copyright.html.
+ *
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
  *
  * $Id$
- *
- *************************************************************************
- *
- * Permission to use, copy, modify, and distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
- * MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE AUTHORS AND
- * CONTRIBUTORS ACCEPT NO RESPONSIBILITY IN ANY CONCEIVABLE MANNER.
  *
  * Purpose:
  *  A merge of Bjorn Reese's format() function and Daniel's dsprintf()
@@ -28,7 +35,6 @@
  * took on from here is named 'Trio' and you find more details on the trio web
  * page at http://daniel.haxx.se/trio/
  */
-
 
 #include "setup.h"
 #include <stdio.h>
@@ -559,10 +565,12 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
           vto[i].data.lnum = va_arg(arglist, LONG_LONG);
         else
 #endif
+        {
           if(vto[i].flags & FLAGS_LONG)
             vto[i].data.num = va_arg(arglist, long);
-        else
-          vto[i].data.num = va_arg(arglist, int);
+          else
+            vto[i].data.num = va_arg(arglist, int);
+        }
         break;
 
       case FORMAT_DOUBLE:
@@ -700,7 +708,12 @@ static int dprintf_formatf(
 
     switch (p->type) {
     case FORMAT_INT:
-      num = p->data.num;
+#ifdef ENABLE_64BIT
+      if(p->flags & FLAGS_LONGLONG)
+        num = p->data.lnum;
+      else
+#endif
+        num = p->data.num;
       if(p->flags & FLAGS_CHAR) {
         /* Character.  */
         if(!(p->flags & FLAGS_LEFT))
