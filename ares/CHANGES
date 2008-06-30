@@ -1,5 +1,18 @@
   Changelog for the c-ares project
 
+* Jun 30 2008 (Daniel Stenberg)
+
+- As was pointed out to me by Andreas Schuldei, the MAXHOSTNAMELEN define is
+  not posix or anything and thus c-ares failed to build on hurd (and possibly
+  elsewhere). The define was also somewhat artificially used in the windows
+  port. Now, I instead rewrote the use of gethostbyname to enlarge the host
+  name buffer in case of need and totally avoid the use of the MAXHOSTNAMELEN
+  define. I thus also removed the defien from the namser.h file where it was
+  once added for the windows build.
+
+  I also fixed init_by_defaults() function to not leak memory in case if
+  error.
+
 * Jun 9 2008 (Yang Tse)
 
 - Make libcares.pc generated file for pkg-config include information relative

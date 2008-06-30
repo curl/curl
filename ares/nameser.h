@@ -13,8 +13,6 @@
 
 #ifndef NETWARE
 
-#define MAXHOSTNAMELEN 256
-
 /* Structure for scatter/gather I/O.  */
 struct iovec
 {

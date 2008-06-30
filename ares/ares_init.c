@@ -912,7 +912,8 @@ okay:
 
 static int init_by_defaults(ares_channel channel)
 {
-  char hostname[MAXHOSTNAMELEN + 1];
+  char *hostname = NULL;
+  int rc = ARES_SUCCESS;
 
   if (channel->flags == -1)
     channel->flags = 0;
@@ -927,53 +928,103 @@ static int init_by_defaults(ares_channel channel)
   if (channel->tcp_port == -1)
     channel->tcp_port = htons(NAMESERVER_PORT);
 
-  if (channel->nservers == -1)
-    {
-      /* If nobody specified servers, try a local named. */
-      channel->servers = malloc(sizeof(struct server_state));
-      if (!channel->servers)
-        return ARES_ENOMEM;
-      channel->servers[0].addr.s_addr = htonl(INADDR_LOOPBACK);
-      channel->nservers = 1;
+  if (channel->nservers == -1) {
+    /* If nobody specified servers, try a local named. */
+    channel->servers = malloc(sizeof(struct server_state));
+    if (!channel->servers) {
+      rc = ARES_ENOMEM;
+      goto error;
+    }
+    channel->servers[0].addr.s_addr = htonl(INADDR_LOOPBACK);
+    channel->nservers = 1;
+  }
+
+#ifdef ENAMETOOLONG
+#define toolong(x) (x == -1) && ((ENAMETOOLONG == errno) || (EINVAL == errno))
+#else
+#define toolong(x) (x == -1) && (EINVAL == errno)
+#endif
+
+  if (channel->ndomains == -1) {
+    /* Derive a default domain search list from the kernel hostname,
+     * or set it to empty if the hostname isn't helpful.
+     */
+    size_t len = 64;
+    int res;
+
+    hostname = (char *)malloc(len);
+    if(!hostname) {
+      rc = ARES_ENOMEM;
+      goto error;
     }
 
-  if (channel->ndomains == -1)
-    {
-      /* Derive a default domain search list from the kernel hostname,
-       * or set it to empty if the hostname isn't helpful.
-       */
-      if (gethostname(hostname, sizeof(hostname)) == -1
-          || !strchr(hostname, '.'))
-        {
-          channel->ndomains = 0;
+    do {
+      res = gethostname(hostname, len);
+
+      if(toolong(res)) {
+        char *p;
+        len *= 2;
+        p = realloc(hostname, len);
+        if(!p) {
+          rc = ARES_ENOMEM;
+          goto error;
         }
-      else
-        {
-          channel->domains = malloc(sizeof(char *));
-          if (!channel->domains)
-            return ARES_ENOMEM;
-          channel->ndomains = 0;
-          channel->domains[0] = strdup(strchr(hostname, '.') + 1);
-          if (!channel->domains[0])
-            return ARES_ENOMEM;
-          channel->ndomains = 1;
-        }
-    }
+        hostname = p;
+        continue;
+      }
+      else if(res) {
+        rc = ARES_EBADNAME;
+        goto error;
+      }
 
-  if (channel->nsort == -1)
-    {
-      channel->sortlist = NULL;
-      channel->nsort = 0;
-    }
+    } while(0);
 
-  if (!channel->lookups)
-    {
-      channel->lookups = strdup("fb");
-      if (!channel->lookups)
-        return ARES_ENOMEM;
-    }
+    channel->ndomains = 0; /* default to none */
+    if (strchr(hostname, '.'))  {
+      /* a dot was found */
 
-  return ARES_SUCCESS;
+      channel->domains = malloc(sizeof(char *));
+      if (!channel->domains) {
+        rc = ARES_ENOMEM;
+        goto error;
+      }
+      channel->domains[0] = strdup(strchr(hostname, '.') + 1);
+      if (!channel->domains[0]) {
+        rc = ARES_ENOMEM;
+        goto error;
+      }
+      channel->ndomains = 1;
+    }
+  }
+
+  if (channel->nsort == -1) {
+    channel->sortlist = NULL;
+    channel->nsort = 0;
+  }
+
+  if (!channel->lookups) {
+    channel->lookups = strdup("fb");
+    if (!channel->lookups)
+      rc = ARES_ENOMEM;
+  }
+
+  error:
+  if(rc) {
+    if(channel->servers)
+      free(channel->servers);
+
+    if(channel->domains && channel->domains[0])
+      free(channel->domains[0]);
+    if(channel->domains)
+      free(channel->domains);
+    if(channel->lookups)
+      free(channel->lookups);
+  }
+
+  if(hostname)
+    free(hostname);
+
+  return rc;
 }
 
 #ifndef WIN32
