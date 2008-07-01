@@ -162,7 +162,9 @@ esac
 
 AC_MSG_CHECKING([whether we are using the IBM C compiler])
 CURL_CHECK_DEF([__IBMC__], [], [silent])
-if test "$curl_cv_have_def___IBMC__" = "yes"; then
+CURL_CHECK_DEF([__IBMCPP__], [], [silent])
+if test "$curl_cv_have_def___IBMC__" = "yes" ||
+  test "$curl_cv_have_def___IBMCPP__" = "yes"; then
   AC_MSG_RESULT([yes])
   dnl Ensure that compiler optimizations are always thread-safe.
   CFLAGS="$CFLAGS -qthreaded"
