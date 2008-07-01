@@ -160,11 +160,22 @@ case $host in
   #
 esac
 
-CURL_CHECK_DEF([__xlc__])
-if test "$curl_cv_have_def___xlc__" = "yes"; then
-  dnl Force xlc to stop after the compilation phase, and not
-  dnl generate object code file when compilation has errors.
+AC_MSG_CHECKING([whether we are using the IBM C compiler])
+CURL_CHECK_DEF([__IBMC__], [], [silent])
+if test "$curl_cv_have_def___IBMC__" = "yes"; then
+  AC_MSG_RESULT([yes])
+  dnl Ensure that compiler optimizations are always thread-safe.
+  CFLAGS="$CFLAGS -qthreaded"
+  dnl Disable type based strict aliasing optimizations, using worst
+  dnl case aliasing assumptions when compiling. Type based aliasing
+  dnl would restrict the lvalues that could be safely used to access
+  dnl a data object.
+  CFLAGS="$CFLAGS -qnoansialias"
+  dnl Force compiler to stop after the compilation phase, without
+  dnl generating an object code file when compilation has errors.
   CFLAGS="$CFLAGS -qhalt=e"
+else
+  AC_MSG_RESULT([no])
 fi
 
 CURL_CHECK_COMPILER_HALT_ON_ERROR
@@ -429,23 +440,6 @@ if test "x$RECENTAIX" = "xyes"; then
 
   AC_DEFINE(_THREAD_SAFE, 1, [define this if you need it to compile thread-safe code])
 
-  dnl check if this is the IBM xlc compiler
-  dnl Details thanks to => http://predef.sourceforge.net/
-  AC_MSG_CHECKING([if this is the xlc compiler])
-  AC_EGREP_CPP([^__xlC__], [__xlC__],
-         dnl action if the text is found, this it has not been replaced by the
-         dnl cpp
-         XLC="no"
-         AC_MSG_RESULT([no]),
-         dnl the text was not found, it was replaced by the cpp
-         XLC="yes"
-         AC_MSG_RESULT([yes])
-         CFLAGS="$CFLAGS -qthreaded"
-         dnl AIX xlc has to have strict aliasing turned off. If not,
-         dnl the optimizer assumes that pointers can only point to
-         dnl an object of the same type.
-         CFLAGS="$CFLAGS -qnoansialias"
-       )
 fi
 
 
