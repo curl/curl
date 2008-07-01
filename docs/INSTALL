@@ -787,6 +787,7 @@ PORTS
         - Pocket PC/Win CE 3.0
         - Power AIX 3.2.5, 4.2, 4.3.1, 4.3.2, 5.1, 5.2
         - PowerPC Darwin 1.0
+        - PowerPC INTEGRITY
         - PowerPC Linux
         - PowerPC Mac OS 9
         - PowerPC Mac OS X
@@ -799,6 +800,7 @@ PORTS
         - StrongARM (and other ARM) RISC OS 3.1, 4.02
         - StrongARM/ARM7/ARM9 Linux 2.4, 2.6
         - StrongARM NetBSD 1.4.1
+        - ARM INTEGRITY
         - Symbian OS (P.I.P.S.)
         - TPF
         - Ultrix 4.3a

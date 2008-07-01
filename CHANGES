@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Stenberg (1 Jul 2008)
+- Rolland Dudemaine provided fixes to get libcurl to build for the INTEGRITY
+  operating system.
+
 Daniel Stenberg (30 Jun 2008)
 - Made the internal printf() support %llu properly to print unsigned long longs.
 

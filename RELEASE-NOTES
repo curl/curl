@@ -15,6 +15,7 @@ This release includes the following changes:
  o Added CURLOPT_ISSUERCERT and CURLE_SSL_ISSUER_ERROR
  o curl's option parser for boolean options reworked
  o Added --remote-name-all
+ o Now builds for the INTEGRITY operating system
 
 This release includes the following bugfixes:
 
@@ -45,7 +46,8 @@ advice from friends like these:
 
  Lenny Rachitsky, Axel Tillequin, Arnaud Ebalard, Yang Tse, Dan Fandrich,
  Rob Crittenden, Dengminwen, Christopher Palow, Hans-Jurgen May,
- Phil Pellouchoud, Eduard Bloch, John Lightsey, Stephen Collyer, Tor Arntsen
+ Phil Pellouchoud, Eduard Bloch, John Lightsey, Stephen Collyer, Tor Arntsen,
+ Rolland Dudemaine
 
 
         Thanks! (and sorry if I forgot to mention someone)
