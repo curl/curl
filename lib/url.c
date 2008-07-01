@@ -3173,7 +3173,7 @@ static CURLcode setup_connection_internals(struct SessionHandle *data,
 
   /* The protocol was not found in the table, but we don't have to assign it
      to anything since it is already assigned to a dummy-struct in the
-     CreateConnection() function when the connectdata struct is allocated. */
+     create_conn() function when the connectdata struct is allocated. */
   failf(data, "Protocol %s not supported or disabled in " LIBCURL_NAME,
         conn->protostr);
   return CURLE_UNSUPPORTED_PROTOCOL;
@@ -3453,7 +3453,7 @@ static CURLcode parse_proxy_auth(struct SessionHandle *data,
 }
 
 /**
- * CreateConnection() sets up a new connectdata struct, or re-uses an already
+ * create_conn() sets up a new connectdata struct, or re-uses an already
  * existing one, and resolves host name.
  *
  * if this function returns CURLE_OK and *async is set to TRUE, the resolve
@@ -3466,12 +3466,12 @@ static CURLcode parse_proxy_auth(struct SessionHandle *data,
  *        connection is re-used it will be NULL.
  * @param async is set TRUE/FALSE depending on the nature of this lookup
  * @return CURLcode
- * @see SetupConnection()
+ * @see setup_conn()
  *
  * *NOTE* this function assigns the conn->data pointer!
  */
 
-static CURLcode CreateConnection(struct SessionHandle *data,
+static CURLcode create_conn(struct SessionHandle *data,
                                  struct connectdata **in_connect,
                                  struct Curl_dns_entry **addr,
                                  bool *async)
@@ -4246,16 +4246,16 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   return result;
 }
 
-/* SetupConnection() is called after the name resolve initiated in
- * CreateConnection() is all done.
+/* setup_conn() is called after the name resolve initiated in
+ * create_conn() is all done.
  *
  * NOTE: the argument 'hostaddr' is NULL when this function is called for a
  * re-used connection.
  *
- * conn->data MUST already have been setup fine (in CreateConnection)
+ * conn->data MUST already have been setup fine (in create_conn)
  */
 
-static CURLcode SetupConnection(struct connectdata *conn,
+static CURLcode setup_conn(struct connectdata *conn,
                                 struct Curl_dns_entry *hostaddr,
                                 bool *protocol_done)
 {
@@ -4366,7 +4366,7 @@ CURLcode Curl_connect(struct SessionHandle *data,
   *asyncp = FALSE; /* assume synchronous resolves by default */
 
   /* call the stuff that needs to be called */
-  code = CreateConnection(data, in_connect, &dns, asyncp);
+  code = create_conn(data, in_connect, &dns, asyncp);
 
   if(CURLE_OK == code) {
     /* no error */
@@ -4379,7 +4379,7 @@ CURLcode Curl_connect(struct SessionHandle *data,
         /* If an address is available it means that we already have the name
            resolved, OR it isn't async. if this is a re-used connection 'dns'
            will be NULL here. Continue connecting from here */
-        code = SetupConnection(*in_connect, dns, protocol_done);
+        code = setup_conn(*in_connect, dns, protocol_done);
       /* else
          response will be received and treated async wise */
     }
@@ -4405,7 +4405,7 @@ CURLcode Curl_async_resolved(struct connectdata *conn,
 {
 #if defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME) || \
     defined(USE_THREADING_GETADDRINFO)
-  CURLcode code = SetupConnection(conn, conn->async.dns, protocol_done);
+  CURLcode code = setup_conn(conn, conn->async.dns, protocol_done);
 
   if(code)
     /* We're not allowed to return failure with memory left allocated
