@@ -39,7 +39,8 @@
  */
 #if !defined(WIN32) && !defined(__BEOS__) && !defined(__CYGWIN__) && \
     !defined(__riscos__) && !defined(__INTERIX) && !defined(NETWARE) && \
-    !defined(__AMIGA__) && !defined(__minix) && !defined(__SYMBIAN32__)
+    !defined(__AMIGA__) && !defined(__minix) && !defined(__SYMBIAN32__) && \
+    !defined(__WATCOMC__)
 
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
