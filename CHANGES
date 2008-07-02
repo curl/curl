@@ -13,6 +13,8 @@ Yang Tse (2 Jul 2008)
   will fallback to gettimeofday when the monotonic clock is unavailable at
   run-time.
 
+- The configure process will now halt when sed or grep are unavailable.
+
 Daniel Stenberg (1 Jul 2008)
 - Rolland Dudemaine provided fixes to get libcurl to build for the INTEGRITY
   operating system.

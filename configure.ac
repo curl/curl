@@ -36,13 +36,20 @@ AC_CONFIG_SRCDIR([lib/urldata.h])
 AM_CONFIG_HEADER(lib/config.h src/config.h)
 AM_MAINTAINER_MODE
 
-dnl SED is needed by some of the tools
-AC_PATH_PROG( SED, sed, sed-was-not-found-by-configure,
-              $PATH:/usr/bin:/usr/local/bin)
-AC_SUBST(SED)
+dnl sed is mandatory for configure process
+AC_PATH_PROG([SED], [sed], [not found],
+  [$PATH:/usr/bin:/usr/local/bin])
+AC_SUBST([SED])
+if test -z "$SED" || test "$SED" = "not found"; then
+  AC_MSG_ERROR([Cannot continue without sed.])
+fi
 
-if test "x$SED" = "xsed-was-not-found-by-configure"; then
-  AC_MSG_WARN([sed was not found, this may ruin your chances to build fine])
+dnl grep is mandatory for configure process
+AC_PATH_PROG([GREP], [grep], [not found],
+  [$PATH:/usr/bin:/usr/local/bin])
+AC_SUBST([GREP])
+if test -z "$GREP" || test "$GREP" = "not found"; then
+  AC_MSG_ERROR([Cannot continue without grep.])
 fi
 
 dnl AR is used by libtool, and try the odd Solaris path too

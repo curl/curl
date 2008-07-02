@@ -5,6 +5,22 @@ AM_CONFIG_HEADER([config.h])
 AM_MAINTAINER_MODE
 AM_INIT_AUTOMAKE
 
+dnl sed is mandatory for configure process
+AC_PATH_PROG([SED], [sed], [not found],
+  [$PATH:/usr/bin:/usr/local/bin])
+AC_SUBST([SED])
+if test -z "$SED" || test "$SED" = "not found"; then
+  AC_MSG_ERROR([Cannot continue without sed.])
+fi
+
+dnl grep is mandatory for configure process
+AC_PATH_PROG([GREP], [grep], [not found],
+  [$PATH:/usr/bin:/usr/local/bin])
+AC_SUBST([GREP])
+if test -z "$GREP" || test "$GREP" = "not found"; then
+  AC_MSG_ERROR([Cannot continue without grep.])
+fi
+
 dnl
 dnl Detect the canonical host and target build environment
 dnl
