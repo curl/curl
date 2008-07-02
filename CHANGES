@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Yang Tse (2 Jul 2008)
+- The previously committed fix for bug report #1999181 prevented using the
+  monotonic clock on any system without an always supported POSIX compliant
+  implementation. Now the POSIX compliant configuration check is removed and
+  will fallback to gettimeofday when the monotonic clock is unavailable at
+  run-time.
+
 Daniel Stenberg (1 Jul 2008)
 - Rolland Dudemaine provided fixes to get libcurl to build for the INTEGRITY
   operating system.

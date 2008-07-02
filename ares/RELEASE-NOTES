@@ -2,6 +2,7 @@ This is what's new and changed in the c-ares 1.5.3 release:
 
  o fix adig sample application compilation failure on some systems
  o fix pkg-config reporting of private libraries needed for static linking
+ o fallback to gettimeofday when monotonic clock is unavailable at run-time
 
 Thanks go to these friendly people for their efforts and contributions:
 

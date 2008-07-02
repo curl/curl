@@ -1446,15 +1446,12 @@ dnl Check if monotonic clock_gettime is available.
 
 AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
   AC_REQUIRE([AC_HEADER_TIME])dnl
-  AC_CHECK_HEADERS(sys/types.h unistd.h sys/time.h time.h)
-  AC_MSG_CHECKING([for POSIX always supported monotonic clock_gettime])
+  AC_CHECK_HEADERS(sys/types.h sys/time.h time.h)
+  AC_MSG_CHECKING([for monotonic clock_gettime])
   AC_COMPILE_IFELSE([
     AC_LANG_PROGRAM([[
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
 #endif
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -1467,16 +1464,8 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
 #endif
 #endif
     ]],[[
-#if defined(_POSIX_MONOTONIC_CLOCK) && (_POSIX_MONOTONIC_CLOCK > 0)
-      /*
-      The monotonic clock will not be used unless the feature test macro is
-      defined with a value greater than zero indicating _always_ supported.
-      */
       struct timespec ts;
       (void)clock_gettime(CLOCK_MONOTONIC, &ts);
-#else
-      HAVE_CLOCK_GETTIME_MONOTONIC shall not be defined.
-#endif
     ]])
   ],[
     AC_MSG_RESULT([yes])
@@ -1485,8 +1474,8 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
     AC_MSG_RESULT([no])
     ac_cv_func_clock_gettime="no"
   ])
-  dnl Definition of HAVE_CLOCK_GETTIME_MONOTONIC is intentionally
-  dnl postponed until library linking checks for clock_gettime pass.
+  dnl Definition of HAVE_CLOCK_GETTIME_MONOTONIC is intentionally postponed
+  dnl until library linking and run-time checks for clock_gettime succeed.
 ]) dnl AC_DEFUN
 
 
@@ -1516,9 +1505,6 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
           AC_LANG_PROGRAM([[
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
 #endif
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -1572,9 +1558,6 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #ifdef TIME_WITH_SYS_TIME
@@ -1586,12 +1569,11 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
 #endif
 #endif
         ]],[[
-#if defined(_POSIX_MONOTONIC_CLOCK) && (_POSIX_MONOTONIC_CLOCK > 0)
           struct timespec ts;
           if (0 == clock_gettime(CLOCK_MONOTONIC, &ts))
             exit(0);
-#endif
-          exit(1);
+          else
+            exit(1);
         ]])
       ],[
         AC_MSG_RESULT([yes])

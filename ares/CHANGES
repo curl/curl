@@ -1,5 +1,8 @@
   Changelog for the c-ares project
 
+* Jul 2 2008 (Yang Tse)
+- Fallback to gettimeofday when monotonic clock is unavailable at run-time.
+
 * Jun 30 2008 (Daniel Stenberg)
 
 - As was pointed out to me by Andreas Schuldei, the MAXHOSTNAMELEN define is

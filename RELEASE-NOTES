@@ -26,7 +26,7 @@ This release includes the following bugfixes:
  o SCP or SFTP over socks proxy crashed
  o RC4-MD5 cipher now works with NSS-built libcurl
  o range requests with --head are now done correctly
- o configure script misdetected monotonic clock availability
+ o fallback to gettimeofday when monotonic clock is unavailable at run-time
  o range numbers could be made to wrongly get output as signed
 
 This release includes the following known bugs:
