@@ -3,10 +3,11 @@ This is what's new and changed in the c-ares 1.5.3 release:
  o fix adig sample application compilation failure on some systems
  o fix pkg-config reporting of private libraries needed for static linking
  o fallback to gettimeofday when monotonic clock is unavailable at run-time
+ o ares_gethostbyname() fallback from AAA to A records with CNAME present
 
 Thanks go to these friendly people for their efforts and contributions:
 
- Brad House, Yang Tse
+ Brad House, Yang Tse, Phil Blundell
  and obviously Daniel Stenberg
 
 Have fun!
