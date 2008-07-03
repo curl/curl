@@ -176,6 +176,15 @@ static void host_callback(void *arg, int status, int timeouts,
       else if (hquery->family == AF_INET6)
         {
           status = ares_parse_aaaa_reply(abuf, alen, &host, NULL, NULL);
+          if (status == ARES_ENODATA)
+            {
+              /* The query returned something (e.g. CNAME) but there were no
+                 AAAA records.  Try looking up A instead.  */
+              hquery->family = AF_INET;
+              ares_search(hquery->channel, hquery->name, C_IN, T_A, host_callback,
+                          hquery);
+              return;
+            }
           if (host && channel->nsort)
             sort6_addresses(host, channel->sortlist, channel->nsort);
         }

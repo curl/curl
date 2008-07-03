@@ -1,5 +1,14 @@
   Changelog for the c-ares project
 
+* Jul 3 2008 (Daniel Stenberg)
+- Phil Blundell: If you ask ares_gethostbyname() to do an AF_INET6 lookup and
+  the target host has only A records, it automatically falls back to an
+  AF_INET lookup and gives you the A results.  However, if the target host has
+  a CNAME record, this behaviour is defeated since the original query does
+  return some data even though ares_parse_aaa_reply() doesn't consider it
+  relevant. Here's a small patch to make it behave the same with and without
+  the CNAME.
+
 * Jul 2 2008 (Yang Tse)
 - Fallback to gettimeofday when monotonic clock is unavailable at run-time.
 
