@@ -1241,8 +1241,12 @@ The time, in seconds, it took from the start until the name resolving was
 completed.
 .TP
 .B time_connect
-The time, in seconds, it took from the start until the connect to the remote
-host (or proxy) was completed.
+The time, in seconds, it took from the start until the TCP connect to the
+remote host (or proxy) was completed.
+.TP
+.B time_appconnect
+The time, in seconds, it took from the start until the SSL/SSH/etc
+connect/handshake to the remote host was completed. (Added in 7.19.0)
 .TP
 .B time_pretransfer
 The time, in seconds, it took from the start until the file transfer is just

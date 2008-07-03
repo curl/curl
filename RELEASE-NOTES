@@ -16,6 +16,7 @@ This release includes the following changes:
  o curl's option parser for boolean options reworked
  o Added --remote-name-all
  o Now builds for the INTEGRITY operating system
+ o Added CURLINFO_APPCONNECT_TIME
 
 This release includes the following bugfixes:
 

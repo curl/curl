@@ -4328,6 +4328,7 @@ static CURLcode setup_conn(struct connectdata *conn,
     }
     else {
       Curl_pgrsTime(data, TIMER_CONNECT); /* we're connected already */
+      Curl_pgrsTime(data, TIMER_APPCONNECT); /* we're connected already */
       conn->bits.tcpconnect = TRUE;
       *protocol_done = TRUE;
       if(data->set.verbose)

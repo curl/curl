@@ -1608,9 +1608,10 @@ typedef enum {
   CURLINFO_FTP_ENTRY_PATH   = CURLINFO_STRING + 30,
   CURLINFO_REDIRECT_URL     = CURLINFO_STRING + 31,
   CURLINFO_PRIMARY_IP       = CURLINFO_STRING + 32,
+  CURLINFO_APPCONNECT_TIME  = CURLINFO_DOUBLE + 33,
   /* Fill in new entries below here! */
 
-  CURLINFO_LASTONE          = 32
+  CURLINFO_LASTONE          = 33
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as

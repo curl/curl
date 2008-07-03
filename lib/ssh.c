@@ -715,6 +715,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
      */
     infof(data, "Authentication complete\n");
 
+    Curl_pgrsTime(conn->data, TIMER_APPCONNECT); /* SSH is connected */
+
     conn->sockfd = sock;
     conn->writesockfd = CURL_SOCKET_BAD;
 

@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel Stenberg (3 Jul 2008)
+- Introcuding a new timestamp for curl_easy_getinfo():
+  CURLINFO_APPCONNECT_TIME. This is set with the "application layer"
+  handshake/connection is completed. Which typically is SSL, TLS or SSH and by
+  using this you can figure out the application layer's own connect time. You
+  can extract the time stamp using curl's -w option and the new variable named
+  'time_appconnect'. This feature was sponsored by Lenny Rachitsky at NeuStar.
+
 Daniel Fandrich (2 Jul 2008)
 - Support Open Watcom C on Linux (as well as Windows).
 

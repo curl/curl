@@ -45,6 +45,7 @@ typedef enum {
   VAR_TOTAL_TIME,
   VAR_NAMELOOKUP_TIME,
   VAR_CONNECT_TIME,
+  VAR_APPCONNECT_TIME,
   VAR_PRETRANSFER_TIME,
   VAR_STARTTRANSFER_TIME,
   VAR_SIZE_DOWNLOAD,
@@ -79,6 +80,7 @@ static const struct variable replacements[]={
   {"time_total", VAR_TOTAL_TIME},
   {"time_namelookup", VAR_NAMELOOKUP_TIME},
   {"time_connect", VAR_CONNECT_TIME},
+  {"time_appconnect", VAR_APPCONNECT_TIME},
   {"time_pretransfer", VAR_PRETRANSFER_TIME},
   {"time_starttransfer", VAR_STARTTRANSFER_TIME},
   {"size_header", VAR_HEADER_SIZE},
@@ -183,14 +185,22 @@ void ourWriteOut(CURL *curl, const char *writeinfo)
                    curl_easy_getinfo(curl, CURLINFO_CONNECT_TIME, &doubleinfo))
                   fprintf(stream, "%.3f", doubleinfo);
                 break;
+              case VAR_APPCONNECT_TIME:
+                if(CURLE_OK ==
+                   curl_easy_getinfo(curl, CURLINFO_APPCONNECT_TIME,
+                                     &doubleinfo))
+                  fprintf(stream, "%.3f", doubleinfo);
+                break;
               case VAR_PRETRANSFER_TIME:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_PRETRANSFER_TIME, &doubleinfo))
+                   curl_easy_getinfo(curl, CURLINFO_PRETRANSFER_TIME,
+                                     &doubleinfo))
                   fprintf(stream, "%.3f", doubleinfo);
                 break;
               case VAR_STARTTRANSFER_TIME:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_STARTTRANSFER_TIME, &doubleinfo))
+                   curl_easy_getinfo(curl, CURLINFO_STARTTRANSFER_TIME,
+                                     &doubleinfo))
                   fprintf(stream, "%.3f", doubleinfo);
                 break;
               case VAR_SIZE_UPLOAD:

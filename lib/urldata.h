@@ -1067,6 +1067,7 @@ struct Progress {
 
   double t_nslookup;
   double t_connect;
+  double t_appconnect;
   double t_pretransfer;
   double t_starttransfer;
   double t_redirect;

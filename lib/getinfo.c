@@ -137,6 +137,9 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
   case CURLINFO_CONNECT_TIME:
     *param_doublep = data->progress.t_connect;
     break;
+  case CURLINFO_APPCONNECT_TIME:
+    *param_doublep = data->progress.t_appconnect;
+    break;
   case CURLINFO_PRETRANSFER_TIME:
     *param_doublep =  data->progress.t_pretransfer;
     break;

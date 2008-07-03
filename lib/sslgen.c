@@ -60,6 +60,7 @@
 #include "strequal.h"
 #include "url.h"
 #include "memory.h"
+#include "progress.h"
 /* The last #include file should be: */
 #include "memdebug.h"
 
@@ -178,11 +179,17 @@ void Curl_ssl_cleanup(void)
 CURLcode
 Curl_ssl_connect(struct connectdata *conn, int sockindex)
 {
+  CURLcode res;
   /* mark this is being ssl-enabled from here on. */
   conn->ssl[sockindex].use = TRUE;
   conn->ssl[sockindex].state = ssl_connection_negotiating;
 
-  return curlssl_connect(conn, sockindex);
+  res = curlssl_connect(conn, sockindex);
+
+  if(!res)
+    Curl_pgrsTime(conn->data, TIMER_APPCONNECT); /* SSL is connected */
+
+  return res;
 }
 
 CURLcode
@@ -192,7 +199,7 @@ Curl_ssl_connect_nonblocking(struct connectdata *conn, int sockindex,
 #ifdef curlssl_connect_nonblocking
   /* mark this is being ssl requested from here on. */
   conn->ssl[sockindex].use = TRUE;
-  return Curl_ossl_connect_nonblocking(conn, sockindex, done);
+  return curlssl_connect_nonblocking(conn, sockindex, done);
 #else
   *done = TRUE; /* fallback to BLOCKING */
   conn->ssl[sockindex].use = TRUE;
