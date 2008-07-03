@@ -29,6 +29,7 @@ This release includes the following bugfixes:
  o range requests with --head are now done correctly
  o fallback to gettimeofday when monotonic clock is unavailable at run-time
  o range numbers could be made to wrongly get output as signed
+ o unexpected 1xx responses hung transfers
 
 This release includes the following known bugs:
 
@@ -48,7 +49,7 @@ advice from friends like these:
  Lenny Rachitsky, Axel Tillequin, Arnaud Ebalard, Yang Tse, Dan Fandrich,
  Rob Crittenden, Dengminwen, Christopher Palow, Hans-Jurgen May,
  Phil Pellouchoud, Eduard Bloch, John Lightsey, Stephen Collyer, Tor Arntsen,
- Rolland Dudemaine
+ Rolland Dudemaine, Phil Blundell
 
 
         Thanks! (and sorry if I forgot to mention someone)

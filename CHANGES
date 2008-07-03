@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel Stenberg (3 Jul 2008)
+- Phil Blundell provided a fix for libcurl's treatment of unexpected 1xx
+  response codes. Previously libcurl would hang on such occurances. I added
+  test case 1033 to verify.
+
 - Introcuding a new timestamp for curl_easy_getinfo():
   CURLINFO_APPCONNECT_TIME. This is set with the "application layer"
   handshake/connection is completed. Which typically is SSL, TLS or SSH and by

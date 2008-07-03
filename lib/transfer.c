@@ -587,7 +587,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               k->p++; /* pass the \n byte */
 #endif /* CURL_DOES_CONVERSIONS */
 
-            if(100 == k->httpcode) {
+            if(100 <= k->httpcode && 199 >= k->httpcode) {
               /*
                * We have made a HTTP PUT or POST and this is 1.1-lingo
                * that tells us that the server is OK with this and ready
@@ -661,7 +661,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             data->req.headerbytecount += (long)headerlen;
 
             data->req.deductheadercount =
-              (100 == k->httpcode)?data->req.headerbytecount:0;
+              (100 <= k->httpcode && 199 >= k->httpcode)?data->req.headerbytecount:0;
 
             if(data->state.resume_from &&
                (data->set.httpreq==HTTPREQ_GET) &&
