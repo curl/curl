@@ -5,21 +5,53 @@ AM_CONFIG_HEADER([config.h])
 AM_MAINTAINER_MODE
 AM_INIT_AUTOMAKE
 
-dnl sed is mandatory for configure process
-AC_PATH_PROG([SED], [sed], [not found],
+dnl SED is mandatory for configure process and libtool.
+dnl Set it now and prevent it from being changed later.
+AC_PATH_PROG([SED], [sed], [not_found],
   [$PATH:/usr/bin:/usr/local/bin])
+if test -z "$SED" || test "$SED" = "not_found"; then
+  AC_MSG_ERROR([sed not found in PATH. Cannot continue without sed.])
+fi
+ac_cv_prog_sed="$SED"
+ac_cv_prog_SED="$SED"
 AC_SUBST([SED])
-if test -z "$SED" || test "$SED" = "not found"; then
-  AC_MSG_ERROR([Cannot continue without sed.])
-fi
 
-dnl grep is mandatory for configure process
-AC_PATH_PROG([GREP], [grep], [not found],
+dnl GREP is mandatory for configure process and libtool.
+dnl Set it now and prevent it from being changed later.
+AC_PATH_PROG([GREP], [grep], [not_found],
   [$PATH:/usr/bin:/usr/local/bin])
-AC_SUBST([GREP])
-if test -z "$GREP" || test "$GREP" = "not found"; then
-  AC_MSG_ERROR([Cannot continue without grep.])
+if test -z "$GREP" || test "$GREP" = "not_found"; then
+  AC_MSG_ERROR([grep not found in PATH. Cannot continue without grep.])
 fi
+ac_cv_prog_grep="$GREP"
+ac_cv_prog_GREP="$GREP"
+AC_SUBST([GREP])
+
+dnl EGREP is mandatory for configure process and libtool.
+dnl Set it now and prevent it from being changed later.
+if echo a | ($GREP -E '(a|b)') >/dev/null 2>&1; then
+  AC_MSG_CHECKING([for egrep])
+  EGREP="$GREP -E"
+  AC_MSG_RESULT([$EGREP])
+else
+  AC_PATH_PROG([EGREP], [egrep], [not_found],
+    [$PATH:/usr/bin:/usr/local/bin])
+fi
+if test -z "$EGREP" || test "$EGREP" = "not_found"; then
+  AC_MSG_ERROR([egrep not found in PATH. Cannot continue without egrep.])
+fi
+ac_cv_prog_egrep="$EGREP"
+ac_cv_prog_EGREP="$EGREP"
+AC_SUBST([EGREP])
+
+dnl AR is mandatory for configure process and libtool.
+dnl This is target dependant, so check it as a tool.
+AC_PATH_TOOL([AR], [ar], [not_found],
+  [$PATH:/usr/bin:/usr/local/bin])
+if test -z "$AR" || test "$AR" = "not_found"; then
+  AC_MSG_ERROR([ar not found in PATH. Cannot continue without ar.])
+fi
+AC_SUBST([AR])
 
 dnl
 dnl Detect the canonical host and target build environment
