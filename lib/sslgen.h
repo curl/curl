@@ -63,7 +63,7 @@ int Curl_ssl_check_cxn(struct connectdata *conn);
 #else
 /* When SSL support is not present, just define away these function calls */
 #define Curl_ssl_init() 1
-#define Curl_ssl_cleanup()
+#define Curl_ssl_cleanup() do { } while (0)
 #define Curl_ssl_connect(x,y) CURLE_FAILED_INIT
 #define Curl_ssl_connect_nonblocking(x,y,z) (z=z, CURLE_FAILED_INIT)
 #define Curl_ssl_close_all(x)
