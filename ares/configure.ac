@@ -1,9 +1,12 @@
-AC_INIT([c-ares],[1.5.1],[daniel@haxx.se])
 AC_PREREQ(2.57)
+
+dnl Version not hardcoded here. Fetched later from ares_version.h
+AC_INIT([c-ares], [-],
+  [c-ares mailing list => http://cool.haxx.se/mailman/listinfo/c-ares])
+
 AC_CONFIG_SRCDIR([ares_ipv6.h])
 AM_CONFIG_HEADER([config.h])
 AM_MAINTAINER_MODE
-AM_INIT_AUTOMAKE
 
 dnl SED is mandatory for configure process and libtool.
 dnl Set it now and prevent it from being changed later.
@@ -52,6 +55,12 @@ if test -z "$AR" || test "$AR" = "not_found"; then
   AC_MSG_ERROR([ar not found in PATH. Cannot continue without ar.])
 fi
 AC_SUBST([AR])
+
+dnl Fetch c-ares version from ares_version.h
+VERSION=`$SED -ne 's/^#define ARES_VERSION_STR "\(.*\)"/\1/p' ${srcdir}/ares_version.h`
+AM_INIT_AUTOMAKE([c-ares], [$VERSION])
+AC_MSG_CHECKING([c-ares version])
+AC_MSG_RESULT([$VERSION])
 
 dnl
 dnl Detect the canonical host and target build environment

@@ -38,7 +38,7 @@ if(!-f "configure") {
     `./buildconf`;
 }
 print "adding $version in the configure.ac file\n";
-`sed -e 's/AC_INIT.*/AC_INIT([c-ares], [$version])/' < configure.ac > configure.ac.dist`;
+`sed -e 's/AC_INIT.*/AC_INIT([c-ares], [$version],/' < configure.ac > configure.ac.dist`;
 
 # now make a new configure script with this
 print "makes a new configure script\n";
@@ -54,5 +54,7 @@ print "running make dist\n";
 
 print "removing temporary configure.ac file\n";
 `rm configure.ac.dist`;
+print "removing temporary ares_version.h file\n";
+`rm ares_version.h.dist`;
 
 print "NOTE: now cvs tag this release!\n";
