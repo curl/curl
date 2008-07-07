@@ -384,6 +384,10 @@
      d                 c                   80
      d  CURLE_AGAIN...
      d                 c                   81
+     d  CURLE_SSL_CRL_BADFILE...
+     d                 c                   82
+     d  CURLE_SSL_ISSUER_ERROR...
+     d                 c                   83
       *
      d curlioerr       s             10i 0 based(######ptr######)               Enum
      d  CURLIOE_OK     c                   0
@@ -761,6 +765,10 @@
      d                 c                   20167
      d  CURLOPT_SEEKDATA...
      d                 c                   10168
+     d  CURLOPT_CRLFILE...
+     d                 c                   10169
+     d  CURLOPT_ISSUERCERT...
+     d                 c                   10170
       *
      d CURLFORMcode    s             10i 0 based(######ptr######)               Enum
      d  CURL_FORMADD_OK...
@@ -885,6 +893,10 @@
      d                 c                   X'0010001E'
      d  CURLINFO_REDIRECT_URL...                                                CURLINFO_STRING + 31
      d                 c                   X'0010001F'
+     d  CURLINFO_PRIMARY_IP...                                                  CURLINFO_STRING + 32
+     d                 c                   X'00100020'
+     d  CURLINFO_APPCONNECT_TIME...                                             CURLINFO_DOUBLE + 33
+     d                 c                   X'00300021'
      d  CURLINFO_HTTP_CODE...                                                   Old ...RESPONSE_CODE
      d                 c                   X'00200002'
       *

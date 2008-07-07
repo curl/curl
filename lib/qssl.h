@@ -51,9 +51,9 @@ size_t Curl_qsossl_version(char * buffer, size_t size);
 int Curl_qsossl_check_cxn(struct connectdata * cxn);
 
 /* API setup for QsoSSL */
-#define curlssl_init Curl_qossl_init
-#define curlssl_cleanup Curl_qossl_cleanup
-#define curlssl_connect Curl_qossl_connect
+#define curlssl_init Curl_qsossl_init
+#define curlssl_cleanup Curl_qsossl_cleanup
+#define curlssl_connect Curl_qsossl_connect
 
 /*  No session handling for QsoSSL */
 #define curlssl_session_free(x)
