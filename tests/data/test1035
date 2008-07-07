@@ -4,6 +4,7 @@
 HTTP
 HTTP GET
 IDN
+FAILURE
 </keywords>
 </info>
 
@@ -11,7 +12,7 @@ IDN
 # Server-side
 <reply>
 <data>
-HTTP/1.1 200 OK
+HTTP/1.0 503 Service Unavailable
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/html
@@ -33,10 +34,10 @@ idn
 CHARSET=ISO8859-1
 </setenv>
  <name>
-HTTP over proxy with IDN host name
+HTTP over proxy with too long IDN host name
  </name>
  <command>
-http://www.åäö.se/page/165 -x %HOSTIP:%HTTPPORT
+http://too-long-IDN-name-cürl-rüles-la-la-la-dee-da-flooby-nooby.local/page/1035 -x %HOSTIP:%HTTPPORT
 </command>
 </client>
 
@@ -47,8 +48,8 @@ http://www.åäö.se/page/165 -x %HOSTIP:%HTTPPORT
 ^User-Agent:.*
 </strip>
 <protocol>
-GET http://www.xn--4cab6c.se/page/165 HTTP/1.1
-Host: www.xn--4cab6c.se
+GET http://too-long-IDN-name-cürl-rüles-la-la-la-dee-da-flooby-nooby.local/page/1035 HTTP/1.1
+Host: too-long-IDN-name-cürl-rüles-la-la-la-dee-da-flooby-nooby.local
 Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive

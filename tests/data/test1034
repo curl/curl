@@ -4,6 +4,7 @@
 HTTP
 HTTP GET
 IDN
+FAILURE
 </keywords>
 </info>
 
@@ -11,7 +12,7 @@ IDN
 # Server-side
 <reply>
 <data>
-HTTP/1.1 200 OK
+HTTP/1.0 503 Service Unavailable
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/html
@@ -30,13 +31,16 @@ http
 idn
 </features>
 <setenv>
-CHARSET=ISO8859-1
+CHARSET=UTF-8
 </setenv>
  <name>
-HTTP over proxy with IDN host name
+HTTP over proxy with malformatted IDN host name
  </name>
+
+# This host name contains an invalid UTF-8 byte sequence that can't be
+# converted into an IDN name
  <command>
-http://www.едц.se/page/165 -x %HOSTIP:%HTTPPORT
+http://invalid-utf8-вђ.local/page/1034 -x %HOSTIP:%HTTPPORT
 </command>
 </client>
 
@@ -47,8 +51,8 @@ http://www.едц.se/page/165 -x %HOSTIP:%HTTPPORT
 ^User-Agent:.*
 </strip>
 <protocol>
-GET http://www.xn--4cab6c.se/page/165 HTTP/1.1
-Host: www.xn--4cab6c.se
+GET http://invalid-utf8-вђ.local/page/1034 HTTP/1.1
+Host: invalid-utf8-вђ.local
 Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive

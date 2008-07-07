@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel Fandrich (7 Jul 2008)
+- Added test cases 1034 & 1035 to test IDN name conversion failures.
+
 Daniel Stenberg (7 Jul 2008)
 - Scott Barrett provided a test case for a segfault in the FTP code and the
   fix for it. It occured when you did a FTP transfer using
