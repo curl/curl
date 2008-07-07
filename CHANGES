@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel Stenberg (7 Jul 2008)
+- Scott Barrett provided a test case for a segfault in the FTP code and the
+  fix for it. It occured when you did a FTP transfer using
+  CURLFTPMETHOD_SINGLECWD and then did another one on the same easy handle but
+  switched to CURLFTPMETHOD_NOCWD. Due to the "dir depth" variable not being
+  cleared properly.  Scott's test case is now known as test 539 and it
+  verifies the fix.
+
 Daniel Stenberg (3 Jul 2008)
 - Phil Blundell provided a fix for libcurl's treatment of unexpected 1xx
   response codes. Previously libcurl would hang on such occurances. I added

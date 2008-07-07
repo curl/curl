@@ -48,7 +48,8 @@ noinst_PROGRAMS = lib500 lib501 lib502 lib503 lib504 lib505 lib506	\
   lib507 lib508 lib510 lib511 lib512 lib513 lib514 lib515 lib516	\
   lib517 lib518 lib519 lib520 lib521 lib523 lib524 lib525 lib526 lib527	\
   lib529 lib530 lib532 lib533 lib536 lib537 lib540 lib541 lib542 lib543 \
-  lib544 lib545 lib547 lib548 lib549 lib552 lib553 lib554 lib555 lib556
+  lib544 lib545 lib547 lib548 lib549 lib552 lib553 lib554 lib555 lib556 \
+  lib539
 
 # Dependencies (may need to be overriden)
 LDADD = $(LIBDIR)/libcurl.la
@@ -123,6 +124,8 @@ lib533_SOURCES = lib533.c $(SUPPORTFILES) $(TESTUTIL)
 lib536_SOURCES = lib536.c $(SUPPORTFILES) $(TESTUTIL)
 
 lib537_SOURCES = lib537.c $(SUPPORTFILES)
+
+lib539_SOURCES = lib539.c $(SUPPORTFILES)
 
 lib540_SOURCES = lib540.c $(SUPPORTFILES)
 

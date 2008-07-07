@@ -279,6 +279,7 @@ static void freedirs(struct ftp_conn *ftpc)
     }
     free(ftpc->dirs);
     ftpc->dirs = NULL;
+    ftpc->dirdepth = 0;
   }
   if(ftpc->file) {
     free(ftpc->file);
