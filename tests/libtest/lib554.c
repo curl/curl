@@ -44,10 +44,13 @@ int test(char *URL)
   struct curl_httppost *lastptr=NULL;
   struct WriteThis pooh;
 
+  if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    fprintf(stderr, "curl_global_init() failed\n");
+    return TEST_ERR_MAJOR_BAD;
+  }
+
   pooh.readptr = data;
   pooh.sizeleft = strlen(data);
-
-  curl_global_init(CURL_GLOBAL_ALL);
 
   /* Fill in the file upload field */
   formrc = curl_formadd(&formpost,
@@ -81,13 +84,9 @@ int test(char *URL)
   if(formrc)
     printf("curl_formadd(3) = %d\n", (int)formrc);
 
-  if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
-    return TEST_ERR_MAJOR_BAD;
-  }
-
   if ((curl = curl_easy_init()) == NULL) {
     fprintf(stderr, "curl_easy_init() failed\n");
+    curl_formfree(formpost);
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
