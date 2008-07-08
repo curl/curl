@@ -16,6 +16,10 @@ ifeq ($(USE_SSL),1)
   LIBS += $(OPENSSL_ROOT)/lib/libssl.a $(OPENSSL_ROOT)/lib/libcrypt.a
 endif
 
+ifeq ($(USE_IDNA),1)
+  LIBS += $(LIBIDN_ROOT)/lib/dj_obj/libidn.a -liconv
+endif
+
 LIBS += $(WATT32_ROOT)/lib/libwatt.a $(ZLIB_ROOT)/libz.a
 
 CSOURCES = fopen.c ftpget.c ftpgetresp.c ftpupload.c getinmemory.c  \
@@ -23,7 +27,7 @@ CSOURCES = fopen.c ftpget.c ftpgetresp.c ftpupload.c getinmemory.c  \
            multi-post.c multi-single.c persistant.c post-callback.c \
            postit2.c sepheaders.c simple.c simplepost.c simplessl.c \
            multi-debugcallback.c fileupload.c getinfo.c anyauthput.c \
-           10-at-a-time.c # ftpuploadresume.c cookie_interface.c
+           10-at-a-time.c sendrecv.c cookie_interface.c # ftpuploadresume.c
 
 PROGRAMS = $(CSOURCES:.c=.exe)
 
