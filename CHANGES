@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel Fandrich (9 Jul 2008)
+- Fixed an OOM handling problem that cause test 11 to fail the torture test.
+
 Daniel Fandrich (8 Jul 2008)
 - Fixed test 554 to pass the torture test.
 

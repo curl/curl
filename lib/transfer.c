@@ -2398,17 +2398,21 @@ CURLcode Curl_perform(struct SessionHandle *data)
             if(data->req.newurl) {
               follow = FOLLOW_REDIR;
               newurl = strdup(data->req.newurl);
+              if (!newurl)
+                res = CURLE_OUT_OF_MEMORY;
             }
             else if(data->req.location) {
               follow = FOLLOW_FAKE;
               newurl = strdup(data->req.location);
+              if (!newurl)
+                res = CURLE_OUT_OF_MEMORY;
             }
           }
 
           /* in the above cases where 'newurl' gets assigned, we have a fresh
            * allocated memory pointed to */
         }
-        else {
+        if(res != CURLE_OK) {
           /* The transfer phase returned error, we mark the connection to get
            * closed to prevent being re-used. This is becasue we can't
            * possibly know if the connection is in a good shape or not now. */
