@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (9 Jul 2008)
+- Andreas Schuldei improved Phil Blundell's patch for IPv6 using c-ares, and I
+  edited it slightly. Now you should be able to use IPv6 addresses fine even
+  with libcurl built to use c-ares.
+
 Daniel Fandrich (9 Jul 2008)
 - Fixed an OOM handling problem that cause test 11 to fail the torture test.
 

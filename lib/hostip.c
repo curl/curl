@@ -545,7 +545,8 @@ Curl_addrinfo *Curl_addrinfo_copy(const void *org, int port)
 #endif /* CURLRES_ADDRINFO_COPY */
 
 /***********************************************************************
- * Only for plain-ipv4 and c-ares builds
+ * Only for plain-ipv4 and c-ares builds (NOTE: c-ares builds can be IPv6
+ * enabled)
  **********************************************************************/
 
 #if defined(CURLRES_IPV4) || defined(CURLRES_ARES)
@@ -630,6 +631,118 @@ Curl_addrinfo *Curl_ip2addr(in_addr_t num, const char *hostname, int port)
 
   return ai;
 }
+
+/*
+ * Curl_he2ai() translates from a hostent struct to a Curl_addrinfo struct.
+ * The Curl_addrinfo is meant to work like the addrinfo struct does for IPv6
+ * stacks, but for all hosts and environments.
+ *
+ *   Curl_addrinfo defined in "lib/hostip.h"
+ *
+ *     struct Curl_addrinfo {
+ *       int                   ai_flags;
+ *       int                   ai_family;
+ *       int                   ai_socktype;
+ *       int                   ai_protocol;
+ *       socklen_t             ai_addrlen;   * Follow rfc3493 struct addrinfo *
+ *       char                 *ai_canonname;
+ *       struct sockaddr      *ai_addr;
+ *       struct Curl_addrinfo *ai_next;
+ *     };
+ *
+ *   hostent defined in <netdb.h>
+ *
+ *     struct hostent {
+ *       char    *h_name;
+ *       char    **h_aliases;
+ *       int     h_addrtype;
+ *       int     h_length;
+ *       char    **h_addr_list;
+ *     };
+ *
+ *   for backward compatibility:
+ *
+ *     #define h_addr  h_addr_list[0]
+ */
+
+Curl_addrinfo *Curl_he2ai(const struct hostent *he, int port)
+{
+  Curl_addrinfo *ai;
+  Curl_addrinfo *prevai = NULL;
+  Curl_addrinfo *firstai = NULL;
+  struct sockaddr_in *addr;
+#ifdef CURLRES_IPV6
+  struct sockaddr_in6 *addr6;
+#endif /* CURLRES_IPV6 */
+  int i;
+  struct in_addr *curr;
+
+  if(!he)
+    /* no input == no output! */
+    return NULL;
+
+  for(i=0; (curr = (struct in_addr *)he->h_addr_list[i]) != NULL; i++) {
+
+    int ss_size;
+#ifdef CURLRES_IPV6
+    if (he->h_addrtype == AF_INET6)
+      ss_size = sizeof (struct sockaddr_in6);
+    else
+#endif /* CURLRES_IPV6 */
+      ss_size = sizeof (struct sockaddr_in);
+
+    ai = calloc(1, sizeof(Curl_addrinfo) + ss_size);
+
+    if(!ai)
+      break;
+
+    if(!firstai)
+      /* store the pointer we want to return from this function */
+      firstai = ai;
+
+    if(prevai)
+      /* make the previous entry point to this */
+      prevai->ai_next = ai;
+
+    ai->ai_family = he->h_addrtype;
+
+    /* we return all names as STREAM, so when using this address for TFTP
+       the type must be ignored and conn->socktype be used instead! */
+    ai->ai_socktype = SOCK_STREAM;
+
+    ai->ai_addrlen = ss_size;
+    /* make the ai_addr point to the address immediately following this struct
+       and use that area to store the address */
+    ai->ai_addr = (struct sockaddr *) ((char*)ai + sizeof(Curl_addrinfo));
+
+    /* need to free this eventually */
+    ai->ai_canonname = strdup(he->h_name);
+
+    /* leave the rest of the struct filled with zero */
+
+    switch (ai->ai_family) {
+    case AF_INET:
+      addr = (struct sockaddr_in *)ai->ai_addr; /* storage area for this info */
+
+      memcpy((char *)&(addr->sin_addr), curr, sizeof(struct in_addr));
+      addr->sin_family = (unsigned short)(he->h_addrtype);
+      addr->sin_port = htons((unsigned short)port);
+      break;
+
+#ifdef CURLRES_IPV6
+    case AF_INET6:
+      addr6 = (struct sockaddr_in6 *)ai->ai_addr; /* storage area for this info */
+
+      memcpy((char *)&(addr6->sin6_addr), curr, sizeof(struct in6_addr));
+      addr6->sin6_family = (unsigned short)(he->h_addrtype);
+      addr6->sin6_port = htons((unsigned short)port);
+      break;
+#endif /* CURLRES_IPV6 */
+    }
+
+    prevai = ai;
+  }
+  return firstai;
+}
+
 #endif /* CURLRES_IPV4 || CURLRES_ARES */
-
-

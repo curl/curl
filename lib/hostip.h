@@ -104,6 +104,10 @@
  */
 #ifdef CURLRES_IPV6
 typedef struct addrinfo Curl_addrinfo;
+#ifdef CURLRES_ARES
+Curl_addrinfo *Curl_ip2addr6(struct in6_addr *in,
+			     const char *hostname, int port);
+#endif
 #else
 /* OK, so some ipv4-only include tree probably have the addrinfo struct, but
    to work even on those that don't, we provide our own look-alike! */
