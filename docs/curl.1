@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl 1 "5 June 2008" "Curl 7.19.0" "Curl Manual"
+.TH curl 1 "10 July 2008" "Curl 7.19.0" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -853,6 +853,11 @@ The remote file name to use for saving is extracted from the given URL,
 nothing else.
 
 You may use this option as many times as you have number of URLs.
+.IP "--remote-name-all"
+This option changes the default action for all given URLs to be dealt with as
+if \fI-O/--remote-name\fP were used for each one. So if you want to disable
+that for a specific URL after \fI--remote-name-all\fP has been used, you muse
+use "-o -" or \fI--no-remote-name\fP. (Added in 7.19.0)
 .IP "--pass <phrase>"
 (SSL/SSH) Pass phrase for the private key
 
