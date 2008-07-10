@@ -505,6 +505,12 @@ Pass a long, this sets the timeout in seconds. Name resolves will be kept in
 memory for this number of seconds. Set to zero (0) to completely disable
 caching, or set to -1 to make the cached entries remain forever. By default,
 libcurl caches this info for 60 seconds.
+
+NOTE: the name resolve functions of various libc implementations don't re-read
+name server information unless explicitly told so (by for example calling
+\fIres_init(3)\fP. This may cause libcurl to keep using the older server even
+if DHCP has updated the server info, and this may look like a DNS cache issue
+to the casual libcurl-app user.
 .IP CURLOPT_DNS_USE_GLOBAL_CACHE
 Pass a long. If the value is non-zero, it tells curl to use a global DNS cache
 that will survive between easy handle creations and deletions. This is not
