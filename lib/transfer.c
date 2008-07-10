@@ -2386,8 +2386,11 @@ CURLcode Curl_perform(struct SessionHandle *data)
         if(res == CURLE_OK) {
           bool retry = Curl_retry_request(conn, &newurl);
 
-          if(retry)
+          if(retry) {
             follow = FOLLOW_RETRY;
+            if (!newurl)
+              res = CURLE_OUT_OF_MEMORY;
+          }
           else {
             /*
              * We must duplicate the new URL here as the connection data may
