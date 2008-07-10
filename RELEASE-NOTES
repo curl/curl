@@ -32,6 +32,7 @@ This release includes the following bugfixes:
  o unexpected 1xx responses hung transfers
  o FTP transfers segfault when using different CURLOPT_FTP_FILEMETHOD
  o c-ares powered libcurls can resolve/use IPv6 addresses
+ o poll not working on Windows Vista due to POLLPRI being incorrectly used
 
 This release includes the following known bugs:
 
@@ -51,7 +52,8 @@ advice from friends like these:
  Lenny Rachitsky, Axel Tillequin, Arnaud Ebalard, Yang Tse, Dan Fandrich,
  Rob Crittenden, Dengminwen, Christopher Palow, Hans-Jurgen May,
  Phil Pellouchoud, Eduard Bloch, John Lightsey, Stephen Collyer, Tor Arntsen,
- Rolland Dudemaine, Phil Blundell, Scott Barrett, Andreas Schuldei
+ Rolland Dudemaine, Phil Blundell, Scott Barrett, Andreas Schuldei,
+ Peter Lamberg
 
 
         Thanks! (and sorry if I forgot to mention someone)

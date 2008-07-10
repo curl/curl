@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Yang Tse (10 Jul 2008)
+- Peter Lamberg filed bug report #2015126: "poll gives WSAEINVAL when POLLPRI
+  is set in fdset.events" (http://curl.haxx.se/bug/view.cgi?id=2015126) which
+  exactly pinpointed the problem only triggered on Windows Vista, provided
+  reference to docs and also a fix. There is much work behind Peter Lamberg's
+  excellent bug report. Thank You!
+
 Daniel Fandrich (9 Jul 2008)
 - Added tests 1036 and 1037 to verify resumed ftp downloads with -C -
 
