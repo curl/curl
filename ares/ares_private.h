@@ -268,8 +268,8 @@ int ares__timedout(struct timeval *now,
 int ares__timeadd(struct timeval *now,
                   int millisecs);
 /* return time offset between now and (future) check, in milliseconds */
-int ares__timeoffset(struct timeval *now,
-                     struct timeval *check);
+long ares__timeoffset(struct timeval *now,
+                      struct timeval *check);
 void ares__rc4(rc4_key* key,unsigned char *buffer_ptr, int buffer_len);
 void ares__send_query(ares_channel channel, struct query *query,
                       struct timeval *now);
