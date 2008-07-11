@@ -997,27 +997,34 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
     break;
 
   case SSH_SFTP_QUOTE_STAT:
-    rc = libssh2_sftp_stat(sshc->sftp_session, sshc->quote_path2,
-                           &sshc->quote_attrs);
-    if(rc == LIBSSH2_ERROR_EAGAIN) {
-      break;
-    }
-    else if(rc != 0) { /* get those attributes */
-      err = libssh2_sftp_last_error(sshc->sftp_session);
-      Curl_safefree(sshc->quote_path1);
-      sshc->quote_path1 = NULL;
-      Curl_safefree(sshc->quote_path2);
-      sshc->quote_path2 = NULL;
-      failf(data, "Attempt to get SFTP stats failed: %s",
-            sftp_libssh2_strerror(err));
-      state(conn, SSH_SFTP_CLOSE);
-      sshc->actualcode = CURLE_QUOTE_ERROR;
-      break;
+    if(!curl_strnequal(sshc->quote_item->data, "chmod", 5)) {
+      /* Since chown and chgrp only set owner OR group but libssh2 wants to
+       * set them both at once, we need to obtain the current ownership first.
+       * This takes an extra protocol round trip.
+       */
+      rc = libssh2_sftp_stat(sshc->sftp_session, sshc->quote_path2,
+			     &sshc->quote_attrs);
+      if(rc == LIBSSH2_ERROR_EAGAIN) {
+	break;
+      }
+      else if(rc != 0) { /* get those attributes */
+	err = libssh2_sftp_last_error(sshc->sftp_session);
+	Curl_safefree(sshc->quote_path1);
+	sshc->quote_path1 = NULL;
+	Curl_safefree(sshc->quote_path2);
+	sshc->quote_path2 = NULL;
+	failf(data, "Attempt to get SFTP stats failed: %s",
+	      sftp_libssh2_strerror(err));
+	state(conn, SSH_SFTP_CLOSE);
+	sshc->actualcode = CURLE_QUOTE_ERROR;
+	break;
+      }
     }
 
     /* Now set the new attributes... */
     if(curl_strnequal(sshc->quote_item->data, "chgrp", 5)) {
       sshc->quote_attrs.gid = strtol(sshc->quote_path1, NULL, 10);
+      sshc->quote_attrs.flags = LIBSSH2_SFTP_ATTR_UIDGID;
       if(sshc->quote_attrs.gid == 0 && !ISDIGIT(sshc->quote_path1[0])) {
         Curl_safefree(sshc->quote_path1);
         sshc->quote_path1 = NULL;
@@ -1031,6 +1038,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
     }
     else if(curl_strnequal(sshc->quote_item->data, "chmod", 5)) {
       sshc->quote_attrs.permissions = strtol(sshc->quote_path1, NULL, 8);
+      sshc->quote_attrs.flags = LIBSSH2_SFTP_ATTR_PERMISSIONS;
       /* permissions are octal */
       if(sshc->quote_attrs.permissions == 0 &&
          !ISDIGIT(sshc->quote_path1[0])) {
@@ -1046,6 +1054,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
     }
     else if(curl_strnequal(sshc->quote_item->data, "chown", 5)) {
       sshc->quote_attrs.uid = strtol(sshc->quote_path1, NULL, 10);
+      sshc->quote_attrs.flags = LIBSSH2_SFTP_ATTR_UIDGID;
       if(sshc->quote_attrs.uid == 0 && !ISDIGIT(sshc->quote_path1[0])) {
         Curl_safefree(sshc->quote_path1);
         sshc->quote_path1 = NULL;

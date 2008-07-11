@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Fandrich (10 Jul 2008)
+- Changed slightly the SFTP quote commands chmod, chown and chgrp to only
+  set the attribute that has changed instead of all possible ones. Hopefully,
+  this will solve the "Permission denied" problem that Nagarajan Sreenivasan
+  reported when setting some modes, but regardless, it saves a protocol
+  round trip in the chmod case.
+
 Yang Tse (10 Jul 2008)
 - Peter Lamberg filed bug report #2015126: "poll gives WSAEINVAL when POLLPRI
   is set in fdset.events" (http://curl.haxx.se/bug/view.cgi?id=2015126) which
