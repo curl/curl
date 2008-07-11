@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (11 Jul 2008)
+- Daniel Fandrich found out we didn't pass on the user-agent properly when
+  doing "proxy-tunnels" with non-HTTP prototols and that was simply because
+  the code assumed the user-agent was only needed for HTTP.
+
 Daniel Fandrich (10 Jul 2008)
 - Changed slightly the SFTP quote commands chmod, chown and chgrp to only
   set the attribute that has changed instead of all possible ones. Hopefully,

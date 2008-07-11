@@ -4278,10 +4278,12 @@ static CURLcode setup_conn(struct connectdata *conn,
      lingering set from a previous invoke */
   conn->bits.proxy_connect_closed = FALSE;
 
-  /*************************************************************
-   * Set user-agent for HTTP
-   *************************************************************/
-  if((conn->protocol&PROT_HTTP) && data->set.str[STRING_USERAGENT]) {
+  /*
+   * Set user-agent. Used for HTTP, but since we can attempt to tunnel
+   * basically anything through a http proxy we can't limit this based on
+   * protocol.
+   */
+  if(data->set.str[STRING_USERAGENT]) {
     Curl_safefree(conn->allocptr.uagent);
     conn->allocptr.uagent =
       aprintf("User-Agent: %s\r\n", data->set.str[STRING_USERAGENT]);

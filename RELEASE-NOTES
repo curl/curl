@@ -33,6 +33,7 @@ This release includes the following bugfixes:
  o FTP transfers segfault when using different CURLOPT_FTP_FILEMETHOD
  o c-ares powered libcurls can resolve/use IPv6 addresses
  o poll not working on Windows Vista due to POLLPRI being incorrectly used
+ o user-agent in CONNECT with non-HTTP protocols
 
 This release includes the following known bugs:
 
