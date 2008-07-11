@@ -550,6 +550,7 @@ sub PASV_command {
     if($prev > 0) {
         print "kill existing server: $prev\n" if($verbose);
         kill(9, $prev);
+        waitpid($prev, 0);
     }
 
     # We fire up a new sockfilt to do the data transfer for us.
