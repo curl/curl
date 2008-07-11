@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Yang Tse (11 Jul 2008)
+- Added missing multiple header inclusion prevention definition for header
+  file content_encoding.h
+
 Daniel Fandrich (11 Jul 2008)
 - Fixed test 553 to pass the torture test.
 
