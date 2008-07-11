@@ -13,6 +13,9 @@ Daniel Fandrich (10 Jul 2008)
   reported when setting some modes, but regardless, it saves a protocol
   round trip in the chmod case.
 
+- Added test cases 1038 and 1039 to test Adrian Kreher's report that ftp
+  uploads with -C - didn't resume properly, but the tests pass.
+
 Yang Tse (10 Jul 2008)
 - Peter Lamberg filed bug report #2015126: "poll gives WSAEINVAL when POLLPRI
   is set in fdset.events" (http://curl.haxx.se/bug/view.cgi?id=2015126) which
