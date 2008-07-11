@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel Fandrich (11 Jul 2008)
+- Fixed test 553 to pass the torture test.
+
 Daniel Stenberg (11 Jul 2008)
 - Daniel Fandrich found out we didn't pass on the user-agent properly when
   doing "proxy-tunnels" with non-HTTP prototols and that was simply because

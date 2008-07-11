@@ -146,10 +146,10 @@ static curlioerr ioctl_callback(CURL * handle, int cmd, void *clientp)
 int test(char *URL)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode res = CURLE_OUT_OF_MEMORY;
   struct data config;
   size_t i;
-  char fill[] = "test data";
+  static const char fill[] = "test data";
 
   config.trace_ascii = 1; /* enable ascii tracing */
 
@@ -190,5 +190,6 @@ int test(char *URL)
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
-  return 0;
+  curl_global_cleanup();
+  return (int)res;
 }
