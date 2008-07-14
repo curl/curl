@@ -165,6 +165,14 @@
 #define _REENTRANT
 #endif
 
+#ifdef HAVE_EXTRA_STRICMP_H
+#  include <extra/stricmp.h>
+#endif
+
+#ifdef HAVE_EXTRA_STRDUP_H
+#  include <extra/strdup.h>
+#endif
+
 #include <stdio.h>
 #ifdef HAVE_ASSERT_H
 #include <assert.h>

@@ -71,5 +71,5 @@
 #define SEND_TYPE_ARG4 int
 #define SEND_TYPE_RETV ssize_t
 
-#include <extra/stricmp.h>
-#include <extra/strdup.h>
+#define HAVE_EXTRA_STRICMP_H 1
+#define HAVE_EXTRA_STRDUP_H  1
