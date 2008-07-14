@@ -173,6 +173,15 @@
 #  include <extra/strdup.h>
 #endif
 
+#ifdef TPF
+#  include <strings.h>    /* for bzero, strcasecmp, and strncasecmp */
+#  include <string.h>     /* for strcpy and strlen */
+#  include <stdlib.h>     /* for rand and srand */
+#  include <sys/socket.h> /* for select and ioctl*/
+#  include <netdb.h>      /* for in_addr_t definition */
+#  include <tpf/sysapi.h> /* for tpf_process_signals */
+#endif
+
 #include <stdio.h>
 #ifdef HAVE_ASSERT_H
 #include <assert.h>

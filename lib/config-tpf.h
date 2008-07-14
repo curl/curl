@@ -728,15 +728,5 @@
 #define CURL_ICONV_CODESET_OF_HOST "IBM-1047"
 #endif
 
-/* ---------------------------------------------------------------- */
-/*                          HEADER FILES                            */
-/* ---------------------------------------------------------------- */
-
-#include <strings.h>    /* for bzero, strcasecmp, and strncasecmp */
-#include <string.h>     /* for strcpy and strlen */
-#include <stdlib.h>     /* for rand and srand */
-#include <sys/socket.h> /* for select and ioctl*/
-#include <netdb.h>      /* for in_addr_t definition */
-#include <tpf/sysapi.h> /* for tpf_process_signals */
 
 #endif /* __LIBCONFIGTPF_H */
