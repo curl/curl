@@ -133,10 +133,6 @@
   #define HAVE_SYS_TIME_H 1
 #endif
 
-#include <stdlib.h>
-#include <string.h>
-#include <tcp.h>    /* Watt-32 API */
-
 #undef word
 #undef byte
 
