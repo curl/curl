@@ -351,24 +351,6 @@
 #define CURL_DISABLE_TELNET 1
 #define CURL_DISABLE_LDAP 1
 
-#ifdef HAVE_WINDOWS_H
-#  ifndef WIN32_LEAN_AND_MEAN
-#    define WIN32_LEAN_AND_MEAN
-#  endif
-#  include <windows.h>
-#  ifdef HAVE_WINSOCK2_H
-#    include <winsock2.h>
-#    ifdef HAVE_WS2TCPIP_H
-#       include <ws2tcpip.h>
-#    endif
-#  else
-#    ifdef HAVE_WINSOCK_H
-#      include <winsock.h>
-#    endif
-#  endif
-#  include <process.h>
-#endif
-
 #define ENOSPC 1
 #define ENOMEM 2
 #define EAGAIN 3
