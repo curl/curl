@@ -332,10 +332,12 @@ Win32
    CURL_DISABLE_DICT     disables DICT
    CURL_DISABLE_FILE     disables FILE
    CURL_DISABLE_TFTP     disables TFTP
+   CURL_DISABLE_HTTP     disables HTTP
 
    If you want to set any of these defines you have the following
    possibilities:
 
+   - Modify lib/config-win32.h
    - Modify lib/setup.h
    - Modify lib/Makefile.vc6
    - Add defines to Project/Settings/C/C++/General/Preprocessor Definitions
