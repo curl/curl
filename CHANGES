@@ -13,6 +13,8 @@ Yang Tse (14 Jul 2008)
 
 - Removed inclusion of remaining system header files from configuration files.
 
+- Move _REENTRANT definition earlier in lib/setup.h
+
 Yang Tse (11 Jul 2008)
 - Added missing multiple header inclusion prevention definition for header
   file content_encoding.h

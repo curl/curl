@@ -74,6 +74,16 @@
 #endif /* HAVE_CONFIG_H */
 
 /*
+ * Solaris needs _REENTRANT set for a few function prototypes and
+ * things to appear in the system header files. Unixware needs it
+ * to build proper reentrant code. Others may also need it.
+ */
+
+#ifndef _REENTRANT
+#  define _REENTRANT
+#endif
+
+/*
  * Disable other protocols when http is the only one desired.
  */
 
@@ -156,14 +166,6 @@
 #define FORMAT_OFF_T "ld"
 #define FORMAT_OFF_TU "lu" /* thus unsigned version */
 #endif /* SIZEOF_CURL_OFF_T */
-
-#ifndef _REENTRANT
-/* Solaris needs _REENTRANT set for a few function prototypes and things to
-   appear in the #include files. We need to #define it before all #include
-   files. Unixware needs it to build proper reentrant code. Others may also
-   need it. */
-#define _REENTRANT
-#endif
 
 #ifdef HAVE_EXTRA_STRICMP_H
 #  include <extra/stricmp.h>
