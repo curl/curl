@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Fandrich (14 Jul 2008)
+- Added test1040 and test1041 to test -C - on HTTP. Test 1041 failed so it's
+  added to DISABLED.
+
 Yang Tse (14 Jul 2008)
 - HTTP_ONLY definition check in lib/setup.h is now done once that configuration
   file has been included. In this way if symbol is defined in the config file
