@@ -15,7 +15,7 @@
 
 #include "setup.h"
 
-#include <curl.h>
+#include <curl/curl.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

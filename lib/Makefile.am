@@ -43,13 +43,18 @@ CLEANFILES = $(DSP) $(VCPROJ)
 lib_LTLIBRARIES = libcurl.la
 LIBCURL_LIBS = @LIBCURL_LIBS@
 
-# we use srcdir/include for the static global include files
-# we use builddir/lib for the generated lib/config.h file to get found
-# we use srcdir/lib for the lib-private header files
+# Specify our include paths here, and do it relative to $(top_srcdir) and
+# $(top_builddir), to ensure that these paths which belong to the library
+# being currently built and tested are searched before the library which
+# might possibly already be installed in the system.
+#
+# $(top_srcdir)/include is for libcurl's external include files
+# $(top_builddir)/lib is for libcurl's generated lib/config.h file
+# $(top_srcdir)/lib is for libcurl's lib/setup.h and other "private" files
 
 INCLUDES = -I$(top_srcdir)/include \
            -I$(top_builddir)/lib   \
-	   -I$(top_srcdir)/lib
+           -I$(top_srcdir)/lib
 
 VERSION=-version-info 5:0:1
 

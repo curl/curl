@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -22,10 +22,16 @@
 ###########################################################################
 AUTOMAKE_OPTIONS = foreign nostdinc
 
-# we use srcdir/src for "private" includes
-# we use srcdir/include for the static global include files
-# we use builddir/src for the generated include files to get found
-# we use srcdir/lib for the header files we "borrow" from the lib
+# Specify our include paths here, and do it relative to $(top_srcdir) and
+# $(top_builddir), to ensure that these paths which belong to the library
+# being currently built and tested are searched before the library which
+# might possibly already be installed in the system.
+#
+# $(top_srcdir)/include is for libcurl's external include files
+# $(top_builddir)/lib is for libcurl's generated lib/config.h file
+# $(top_builddir)/src is for curl's generated src/config.h file
+# $(top_srcdir)/lib is for libcurl's lib/setup.h and other "borrowed" files
+# $(top_srcdir)/src is for curl's src/setup.h and "curl-private" files
 
 INCLUDES = -I$(top_srcdir)/include \
            -I$(top_builddir)/lib   \

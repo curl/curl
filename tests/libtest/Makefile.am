@@ -22,14 +22,16 @@
 ###########################################################################
 AUTOMAKE_OPTIONS = foreign nostdinc
 
-# $(top_srcdir)/include/curl is for the main curl include files, to make it
-# easier to include this specific set of curl headers, and NOT the ones
-# possibly already installed in the system.
-# -I$(top_srcdir)/lib is for the setup.h file, included by test.h
-# -I$(top_builddir)/lib is for the config.h file, possibly included by the
-# setup.h file
+# Specify our include paths here, and do it relative to $(top_srcdir) and
+# $(top_builddir), to ensure that these paths which belong to the library
+# being currently built and tested are searched before the library which
+# might possibly already be installed in the system.
+#
+# $(top_srcdir)/include is for libcurl's external include files
+# $(top_builddir)/lib is for libcurl's generated lib/config.h file
+# $(top_srcdir)/lib is for libcurl's lib/setup.h and other "borrowed" files
 
-INCLUDES = -I$(top_srcdir)/include/curl \
+INCLUDES = -I$(top_srcdir)/include \
            -I$(top_builddir)/lib   \
            -I$(top_srcdir)/lib 
 

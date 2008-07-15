@@ -13,7 +13,7 @@
 #include <ctype.h>
 #include <errno.h>
 
-#include <mprintf.h>
+#include <curl/mprintf.h>
 
 const char *HOSTHEADER = "Host: www.host.foo.com";
 const char *JAR = "log/jar506";
