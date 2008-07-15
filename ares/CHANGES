@@ -1,5 +1,13 @@
   Changelog for the c-ares project
 
+* Jul 15 2008 (Yang Tse)
+- Introduce definition of _REENTRANT symbol in setup.h to improve library
+  usability.  Previously the configure process only used the AC_SYS_LARGEFILE
+  macro for debug builds, now it is also used for non-debug ones enabling the
+  use of configure options --enable-largefile and --disable-largefile which
+  might be needed for library compatibility.  Remove checking the size of
+  curl_off_t, it is no longer needed.
+
 * Jul 3 2008 (Daniel Stenberg)
 - Phil Blundell: If you ask ares_gethostbyname() to do an AF_INET6 lookup and
   the target host has only A records, it automatically falls back to an
