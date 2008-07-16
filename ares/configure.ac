@@ -231,6 +231,22 @@ else
   AC_MSG_RESULT([no])
 fi
 
+AC_MSG_CHECKING([whether we are using the DEC/Compaq C compiler])
+CURL_CHECK_DEF([__DECC], [], [silent])
+CURL_CHECK_DEF([__DECC_VER], [], [silent])
+if test "$curl_cv_have_def___DECC" = "yes" ||
+  test "$curl_cv_have_def___DECC_VER" = "yes"; then
+  AC_MSG_RESULT([yes])
+  dnl Select strict ANSI C compiler mode
+  CFLAGS="$CFLAGS -std1"
+  dnl Generate verbose messages for errors and warnings
+  CFLAGS="$CFLAGS -verbose"
+  dnl Generate warnings for missing function prototypes
+  CFLAGS="$CFLAGS -warnprotos"
+else
+  AC_MSG_RESULT([no])
+fi
+
 CURL_CHECK_COMPILER_HALT_ON_ERROR
 CURL_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE
 
