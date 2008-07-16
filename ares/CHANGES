@@ -1,5 +1,9 @@
   Changelog for the c-ares project
 
+* Jul 16 2008 (Yang Tse)
+- Improved configure detection of number of arguments for getservbyport_r.
+  Detection is now based on compilation checks instead of linker ones.
+
 * Jul 15 2008 (Yang Tse)
 - Introduce definition of _REENTRANT symbol in setup.h to improve library
   usability.  Previously the configure process only used the AC_SYS_LARGEFILE

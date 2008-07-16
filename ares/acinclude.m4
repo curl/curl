@@ -1803,68 +1803,116 @@ dnl Test if the getservbyport_r function is available,
 dnl and find out how many parameters it takes.
 
 AC_DEFUN([CARES_CHECK_GETSERVBYPORT_R], [
-  AC_MSG_CHECKING([how many arguments getservbyport_r takes])
-  ac_func_getservbyport_r="unknown"
-
+  AC_CHECK_HEADERS(sys/types.h netdb.h)
+  #
+  AC_MSG_CHECKING([for getservbyport_r])
   AC_LINK_IFELSE([
-    AC_LANG_PROGRAM([[
-#include <netdb.h>
-    ]],[[
-      int p1, p5;
-      char *p2, p4[4096];
-      struct servent *p3, *p6;
-      getservbyport_r(p1, p2, p3, p4, p5, &p6);
-    ]])
+    AC_LANG_FUNC_LINK_TRY([getservbyport_r])
   ],[
-    ac_func_getservbyport_r="6"
+    AC_MSG_RESULT([yes])
+    cares_cv_getservbyport_r="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    cares_cv_getservbyport_r="no"
   ])
-
-  if test "$ac_func_getservbyport_r" = "unknown"; then
+  #
+  if test "$cares_cv_getservbyport_r" != "yes"; then
+    AC_MSG_CHECKING([deeper for getservbyport_r])
     AC_LINK_IFELSE([
       AC_LANG_PROGRAM([[
+      ]],[[
+        getservbyport_r();
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      cares_cv_getservbyport_r="yes"
+    ],[
+      AC_MSG_RESULT([but still no])
+      cares_cv_getservbyport_r="no"
+    ])
+  fi
+  #
+  if test "$cares_cv_getservbyport_r" = "yes"; then
+    AC_MSG_CHECKING([how many arguments getservbyport_r takes])
+    cares_cv_getservbyport_r_nargs="unknown"
+    #
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
+#endif
       ]],[[
         int p1, p5;
         char *p2, p4[4096];
-        struct servent *p3;
-        getservbyport_r(p1, p2, p3, p4, p5);
+        struct servent *p3, *p6;
+        getservbyport_r(p1, p2, p3, p4, p5, &p6);
       ]])
     ],[
-      ac_func_getservbyport_r="5"
+      cares_cv_getservbyport_r_nargs="6"
     ])
-  fi
-
-  if test "$ac_func_getservbyport_r" = "unknown"; then
-    AC_LINK_IFELSE([
-      AC_LANG_PROGRAM([[
+    #
+    if test "$cares_cv_getservbyport_r_nargs" = "unknown"; then
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
-      ]],[[
-        int p1;
-        char *p2;
-        struct servent *p3;
-        struct servent_data p4;
-        getservbyport_r(p1, p2, p3, &p4);
-      ]])
-    ],[
-      ac_func_getservbyport_r="4"
-    ])
-  fi
-
-  if test "$ac_func_getservbyport_r" = "unknown"; then
-    AC_MSG_RESULT([not found])
-  else
-    AC_MSG_RESULT($ac_func_getservbyport_r)
-    AC_DEFINE(HAVE_GETSERVBYPORT_R, 1,
-      [Specifies whether getservbyport_r is present])
-    AC_DEFINE_UNQUOTED(GETSERVBYPORT_R_ARGS, $ac_func_getservbyport_r,
-      [Specifies the number of arguments to getservbyport_r])
-    if test "$ac_func_getservbyport_r" = "4" ; then
-      AC_DEFINE(GETSERVBYPORT_R_BUFSIZE, sizeof(struct servent_data),
-        [Specifies the size of the buffer to pass to getservbyport_r])
-    else
-      AC_DEFINE(GETSERVBYPORT_R_BUFSIZE, 4096,
-        [Specifies the size of the buffer to pass to getservbyport_r])
+#endif
+        ]],[[
+          int p1, p5;
+          char *p2, p4[4096];
+          struct servent *p3;
+          getservbyport_r(p1, p2, p3, p4, p5);
+        ]])
+      ],[
+        cares_cv_getservbyport_r_nargs="5"
+      ])
     fi
+    #
+    if test "$cares_cv_getservbyport_r_nargs" = "unknown"; then
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
+        ]],[[
+          int p1;
+          char *p2;
+          struct servent *p3;
+          struct servent_data p4;
+          getservbyport_r(p1, p2, p3, &p4);
+        ]])
+      ],[
+        cares_cv_getservbyport_r_nargs="4"
+      ])
+    fi
+    #
+    AC_MSG_RESULT([$cares_cv_getservbyport_r_nargs])
+    #
+    if test "$cares_cv_getservbyport_r_nargs" = "unknown"; then
+      AC_MSG_WARN([HAVE_GETSERVBYPORT_R will not be defined])
+    else
+      AC_DEFINE(HAVE_GETSERVBYPORT_R, 1,
+        [Specifies whether getservbyport_r is present])
+      AC_DEFINE_UNQUOTED(GETSERVBYPORT_R_ARGS, $cares_cv_getservbyport_r_nargs,
+        [Specifies the number of arguments to getservbyport_r])
+      if test "$cares_cv_getservbyport_r_nargs" = "4" ; then
+        AC_DEFINE(GETSERVBYPORT_R_BUFSIZE, sizeof(struct servent_data),
+          [Specifies the size of the buffer to pass to getservbyport_r])
+      else
+        AC_DEFINE(GETSERVBYPORT_R_BUFSIZE, 4096,
+          [Specifies the size of the buffer to pass to getservbyport_r])
+      fi
+    fi
+    #
   fi
 ])
 
