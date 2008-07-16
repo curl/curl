@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Yang Tse (16 Jul 2008)
+- Configure process now checks availability of recvfrom() socket function and
+  finds out its return type and the types of its arguments. Added definitions
+  for non-configure systems config files, and introduced macro sreadfrom which
+  will be used on udp sockets as a recvfrom() wrapper.
+
 Yang Tse (15 Jul 2008)
 - Added description/comment to include paths used in several Makefile.am files.
   Added automake option nostdinc to test servers makefile and modified libcurl

@@ -288,6 +288,13 @@ ifeq ($(LIBARCH),CLIB)
 	@echo $(DL)#define RECV_TYPE_ARG3 int$(DL) >> $@
 	@echo $(DL)#define RECV_TYPE_ARG4 int$(DL) >> $@
 	@echo $(DL)#define RECV_TYPE_RETV int$(DL) >> $@
+	@echo $(DL)#define RECVFROM_TYPE_ARG1 int$(DL) >> $@
+	@echo $(DL)#define RECVFROM_TYPE_ARG2 char *$(DL) >> $@
+	@echo $(DL)#define RECVFROM_TYPE_ARG3 int$(DL) >> $@
+	@echo $(DL)#define RECVFROM_TYPE_ARG4 int$(DL) >> $@
+	@echo $(DL)#define RECVFROM_TYPE_ARG5 struct sockaddr *$(DL) >> $@
+	@echo $(DL)#define RECVFROM_TYPE_ARG6 int *$(DL) >> $@
+	@echo $(DL)#define RECVFROM_TYPE_RETV int$(DL) >> $@
 	@echo $(DL)#define SEND_QUAL_ARG2$(DL) >> $@
 	@echo $(DL)#define SEND_TYPE_ARG1 int$(DL) >> $@
 	@echo $(DL)#define SEND_TYPE_ARG2 char *$(DL) >> $@
@@ -324,6 +331,13 @@ else
 	@echo $(DL)#define RECV_TYPE_ARG3 size_t$(DL) >> $@
 	@echo $(DL)#define RECV_TYPE_ARG4 int$(DL) >> $@
 	@echo $(DL)#define RECV_TYPE_RETV ssize_t$(DL) >> $@
+	@echo $(DL)#define RECVFROM_TYPE_ARG1 int$(DL) >> $@
+	@echo $(DL)#define RECVFROM_TYPE_ARG2 void *$(DL) >> $@
+	@echo $(DL)#define RECVFROM_TYPE_ARG3 size_t$(DL) >> $@
+	@echo $(DL)#define RECVFROM_TYPE_ARG4 int$(DL) >> $@
+	@echo $(DL)#define RECVFROM_TYPE_ARG5 struct sockaddr *$(DL) >> $@
+	@echo $(DL)#define RECVFROM_TYPE_ARG6 int *$(DL) >> $@
+	@echo $(DL)#define RECVFROM_TYPE_RETV ssize_t$(DL) >> $@
 	@echo $(DL)#define SEND_QUAL_ARG2$(DL) >> $@
 	@echo $(DL)#define SEND_TYPE_ARG1 int$(DL) >> $@
 	@echo $(DL)#define SEND_TYPE_ARG2 void *$(DL) >> $@
@@ -349,6 +363,7 @@ endif
 	@echo $(DL)#define HAVE_MALLOC_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_NETINET_IN_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_RECV 1$(DL) >> $@
+	@echo $(DL)#define HAVE_RECVFROM 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SELECT 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SEND 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SETJMP_H 1$(DL) >> $@

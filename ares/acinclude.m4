@@ -1049,6 +1049,152 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
 ]) # AC_DEFUN
 
 
+dnl CURL_CHECK_FUNC_RECVFROM
+dnl -------------------------------------------------
+dnl Test if the socket recvfrom() function is available,
+dnl and check its return type and the types of its
+dnl arguments. If the function succeeds HAVE_RECVFROM
+dnl will be defined, defining the types of the arguments
+dnl in RECVFROM_TYPE_ARG1, RECVFROM_TYPE_ARG2, and so on
+dnl to RECVFROM_TYPE_ARG6, defining also the type of the
+dnl function return value in RECVFROM_TYPE_RETV.
+
+AC_DEFUN([CURL_CHECK_FUNC_RECVFROM], [
+  AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK])dnl
+  AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
+  AC_CHECK_HEADERS(sys/types.h sys/socket.h)
+  #
+  AC_MSG_CHECKING([for recvfrom])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+#undef inline 
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#endif
+#else
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#endif
+    ]],[[
+      recvfrom(0, 0, 0, 0, 0, 0);
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    curl_cv_recvfrom="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    curl_cv_recvfrom="no"
+  ])
+  #
+  if test "$curl_cv_recvfrom" = "yes"; then
+    AC_CACHE_CHECK([types of args and return type for recvfrom],
+      [curl_cv_func_recvfrom_args], [
+      curl_cv_func_recvfrom_args="unknown"
+      for recvfrom_retv in 'int' 'ssize_t'; do
+        for recvfrom_arg1 in 'int' 'ssize_t' 'SOCKET'; do
+          for recvfrom_arg2 in 'char *' 'void *'; do
+            for recvfrom_arg3 in 'size_t' 'int' 'socklen_t' 'unsigned int'; do
+              for recvfrom_arg4 in 'int' 'unsigned int'; do
+                for recvfrom_arg5 in 'struct sockaddr *' 'void *'; do
+                  for recvfrom_arg6 in 'socklen_t *' 'int *' 'unsigned int *' 'size_t *'; do
+                    if test "$curl_cv_func_recvfrom_args" = "unknown"; then
+                      AC_COMPILE_IFELSE([
+                        AC_LANG_PROGRAM([[
+#undef inline 
+#ifdef HAVE_WINDOWS_H
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#endif
+#define RECVFROMCALLCONV PASCAL
+#else
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#define RECVFROMCALLCONV
+#endif
+                          extern $recvfrom_retv RECVFROMCALLCONV
+                          recvfrom($recvfrom_arg1, $recvfrom_arg2,
+                                   $recvfrom_arg3, $recvfrom_arg4,
+                                   $recvfrom_arg5, $recvfrom_arg6);
+                        ]],[[
+                          $recvfrom_arg1 s=0;
+                          $recvfrom_arg2 buf=0;
+                          $recvfrom_arg3 len=0;
+                          $recvfrom_arg4 flags=0;
+                          $recvfrom_arg5 addr=0;
+                          $recvfrom_arg6 addrlen=0;
+                          $recvfrom_retv res=0;
+                          res = recvfrom(s, buf, len, flags, addr, addrlen);
+                        ]])
+                      ],[
+                        curl_cv_func_recvfrom_args="$recvfrom_arg1,$recvfrom_arg2,$recvfrom_arg3,$recvfrom_arg4,$recvfrom_arg5,$recvfrom_arg6,$recvfrom_retv"
+                      ])
+                    fi
+                  done
+                done
+              done
+            done
+          done
+        done
+      done
+    ]) # AC_CACHE_CHECK
+    if test "$curl_cv_func_recvfrom_args" = "unknown"; then
+      AC_MSG_ERROR([Cannot find proper types to use for recvfrom args])
+    else
+      recvfrom_prev_IFS=$IFS; IFS=','
+      set dummy `echo "$curl_cv_func_recvfrom_args" | sed 's/\*/\*/g'`
+      IFS=$recvfrom_prev_IFS
+      shift
+      #
+      AC_DEFINE_UNQUOTED(RECVFROM_TYPE_ARG1, $[1],
+        [Define to the type of arg 1 for recvfrom.])
+      AC_DEFINE_UNQUOTED(RECVFROM_TYPE_ARG2, $[2],
+        [Define to the type of arg 2 for recvfrom.])
+      AC_DEFINE_UNQUOTED(RECVFROM_TYPE_ARG3, $[3],
+        [Define to the type of arg 3 for recvfrom.])
+      AC_DEFINE_UNQUOTED(RECVFROM_TYPE_ARG4, $[4],
+        [Define to the type of arg 4 for recvfrom.])
+      AC_DEFINE_UNQUOTED(RECVFROM_TYPE_ARG5, $[5],
+        [Define to the type of arg 5 for recvfrom.])
+      AC_DEFINE_UNQUOTED(RECVFROM_TYPE_ARG6, $[6],
+        [Define to the type of arg 6 for recvfrom.])
+      AC_DEFINE_UNQUOTED(RECVFROM_TYPE_RETV, $[7],
+        [Define to the function return type for recvfrom.])
+      #
+      AC_DEFINE_UNQUOTED(HAVE_RECVFROM, 1,
+        [Define to 1 if you have the recvfrom function.])
+      ac_cv_func_recvfrom="yes"
+    fi
+  else
+    AC_MSG_ERROR([Unable to link function recvfrom])
+  fi
+]) # AC_DEFUN
+
+
 dnl CURL_CHECK_MSG_NOSIGNAL
 dnl -------------------------------------------------
 dnl Check for MSG_NOSIGNAL

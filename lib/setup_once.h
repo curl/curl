@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -196,6 +196,37 @@ struct timeval {
   /* */
 #endif
 #endif /* HAVE_SEND */
+
+
+#if defined(HAVE_RECVFROM)
+/*
+ * Currently recvfrom is only used on udp sockets.
+ */
+#if !defined(RECVFROM_TYPE_ARG1) || \
+    !defined(RECVFROM_TYPE_ARG2) || \
+    !defined(RECVFROM_TYPE_ARG3) || \
+    !defined(RECVFROM_TYPE_ARG4) || \
+    !defined(RECVFROM_TYPE_ARG5) || \
+    !defined(RECVFROM_TYPE_ARG6) || \
+    !defined(RECVFROM_TYPE_RETV)
+  /* */
+  Error Missing_definition_of_return_and_arguments_types_of_recvfrom
+  /* */
+#else
+#define sreadfrom(s,b,bl,f,fl) (ssize_t)recvfrom((RECVFROM_TYPE_ARG1)(s),  \
+                                                 (RECVFROM_TYPE_ARG2)(b),  \
+                                                 (RECVFROM_TYPE_ARG3)(bl), \
+                                                 (RECVFROM_TYPE_ARG4)(0),  \
+                                                 (RECVFROM_TYPE_ARG5)(f),  \
+                                                 (RECVFROM_TYPE_ARG6)(fl))
+#endif
+#else /* HAVE_RECVFROM */
+#ifndef sreadfrom
+  /* */
+  Error Missing_definition_of_macro_sreadfrom
+  /* */
+#endif
+#endif /* HAVE_RECVFROM */
 
 
 /*

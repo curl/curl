@@ -4,6 +4,11 @@
 - Improved configure detection of number of arguments for getservbyport_r.
   Detection is now based on compilation checks instead of linker ones.
 
+- Configure process now checks availability of recvfrom() socket function and
+  finds out its return type and the types of its arguments. Added definitions
+  for non-configure systems config files, and introduced macro sreadfrom which
+  will be used on udp sockets as a recvfrom() wrapper.
+
 * Jul 15 2008 (Yang Tse)
 - Introduce definition of _REENTRANT symbol in setup.h to improve library
   usability.  Previously the configure process only used the AC_SYS_LARGEFILE

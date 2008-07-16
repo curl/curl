@@ -35,6 +35,7 @@
 #define HAVE_NET_IF_H          1
 #define HAVE_PROCESS_H         1
 #define HAVE_RECV              1
+#define HAVE_RECVFROM          1
 #define HAVE_SELECT            1
 #define HAVE_SEND              1
 #define HAVE_SETJMP_H          1
@@ -63,8 +64,8 @@
 #define STDC_HEADERS           1
 #define TIME_WITH_SYS_TIME     1
 
-/* Qualifiers for send() and recv().
- */
+/* Qualifiers for send(), recv() and recv(). */
+
 #define SEND_TYPE_ARG1         int
 #define SEND_QUAL_ARG2         const
 #define SEND_TYPE_ARG2         void *
@@ -78,6 +79,13 @@
 #define RECV_TYPE_ARG4         int
 #define RECV_TYPE_RETV         int
 
+#define RECVFROM_TYPE_ARG1     int
+#define RECVFROM_TYPE_ARG2     void *
+#define RECVFROM_TYPE_ARG3     int
+#define RECVFROM_TYPE_ARG4     int
+#define RECVFROM_TYPE_ARG5     struct sockaddr *
+#define RECVFROM_TYPE_ARG6     int *
+#define RECVFROM_TYPE_RETV     int
 
 #define BSD
 

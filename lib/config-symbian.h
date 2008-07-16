@@ -415,6 +415,9 @@
 /* Define to 1 if you have the recv function. */
 #define HAVE_RECV 1
 
+/* Define to 1 if you have the recvfrom function. */
+#define HAVE_RECVFROM 1
+
 /* Define to 1 if you have the <rsa.h> header file. */
 /* #undef HAVE_RSA_H */
 
@@ -679,6 +682,14 @@
 #define RECV_TYPE_ARG3 size_t
 #define RECV_TYPE_ARG4 int
 #define RECV_TYPE_RETV ssize_t
+
+#define RECVFROM_TYPE_ARG1 int
+#define RECVFROM_TYPE_ARG2 void*
+#define RECVFROM_TYPE_ARG3 size_t
+#define RECVFROM_TYPE_ARG4 int
+#define RECVFROM_TYPE_ARG5 struct sockaddr *
+#define RECVFROM_TYPE_ARG6 size_t *
+#define RECVFROM_TYPE_RETV ssize_t
 
 #define SEND_TYPE_ARG1 int
 #define SEND_QUAL_ARG2 const
