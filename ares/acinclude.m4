@@ -1058,6 +1058,8 @@ dnl will be defined, defining the types of the arguments
 dnl in RECVFROM_TYPE_ARG1, RECVFROM_TYPE_ARG2, and so on
 dnl to RECVFROM_TYPE_ARG6, defining also the type of the
 dnl function return value in RECVFROM_TYPE_RETV.
+dnl Notice that the types returned for pointer arguments
+dnl will actually be the type pointed by the pointer.
 
 AC_DEFUN([CURL_CHECK_FUNC_RECVFROM], [
   AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK])dnl
@@ -1170,20 +1172,47 @@ AC_DEFUN([CURL_CHECK_FUNC_RECVFROM], [
       IFS=$recvfrom_prev_IFS
       shift
       #
+      recvfrom_ptrt_arg2=$[2]
+      recvfrom_ptrt_arg5=$[5]
+      recvfrom_ptrt_arg6=$[6]
+      #
       AC_DEFINE_UNQUOTED(RECVFROM_TYPE_ARG1, $[1],
         [Define to the type of arg 1 for recvfrom.])
-      AC_DEFINE_UNQUOTED(RECVFROM_TYPE_ARG2, $[2],
-        [Define to the type of arg 2 for recvfrom.])
       AC_DEFINE_UNQUOTED(RECVFROM_TYPE_ARG3, $[3],
         [Define to the type of arg 3 for recvfrom.])
       AC_DEFINE_UNQUOTED(RECVFROM_TYPE_ARG4, $[4],
         [Define to the type of arg 4 for recvfrom.])
-      AC_DEFINE_UNQUOTED(RECVFROM_TYPE_ARG5, $[5],
-        [Define to the type of arg 5 for recvfrom.])
-      AC_DEFINE_UNQUOTED(RECVFROM_TYPE_ARG6, $[6],
-        [Define to the type of arg 6 for recvfrom.])
       AC_DEFINE_UNQUOTED(RECVFROM_TYPE_RETV, $[7],
         [Define to the function return type for recvfrom.])
+      #
+      prev_sh_opts=$-
+      #
+      case $prev_sh_opts in
+        *f*)
+          ;;
+        *)
+          set -f
+          ;;
+      esac
+      #
+      recvfrom_type_arg2=`echo $recvfrom_ptrt_arg2 | sed 's/ \*//'`
+      recvfrom_type_arg5=`echo $recvfrom_ptrt_arg5 | sed 's/ \*//'`
+      recvfrom_type_arg6=`echo $recvfrom_ptrt_arg6 | sed 's/ \*//'`
+      #
+      AC_DEFINE_UNQUOTED(RECVFROM_TYPE_ARG2, $recvfrom_type_arg2,
+        [Define to the type pointed by arg 2 for recvfrom.])
+      AC_DEFINE_UNQUOTED(RECVFROM_TYPE_ARG5, $recvfrom_type_arg5,
+        [Define to the type pointed by arg 5 for recvfrom.])
+      AC_DEFINE_UNQUOTED(RECVFROM_TYPE_ARG6, $recvfrom_type_arg6,
+        [Define to the type pointed by arg 6 for recvfrom.])
+      #
+      case $prev_sh_opts in
+        *f*)
+          ;;
+        *)
+          set +f
+          ;;
+      esac
       #
       AC_DEFINE_UNQUOTED(HAVE_RECVFROM, 1,
         [Define to 1 if you have the recvfrom function.])

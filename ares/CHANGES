@@ -1,5 +1,9 @@
   Changelog for the c-ares project
 
+* Jul 17 2008 (Yang Tse)
+- RECVFROM_TYPE_ARG2, RECVFROM_TYPE_ARG5 and RECVFROM_TYPE_ARG6 are now defined
+  to the data type pointed by its respective argument and not the pointer type.
+
 * Jul 16 2008 (Yang Tse)
 - Improved configure detection of number of arguments for getservbyport_r.
   Detection is now based on compilation checks instead of linker ones.

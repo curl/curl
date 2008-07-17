@@ -684,11 +684,11 @@
 #define RECV_TYPE_RETV ssize_t
 
 #define RECVFROM_TYPE_ARG1 int
-#define RECVFROM_TYPE_ARG2 void*
+#define RECVFROM_TYPE_ARG2 void
 #define RECVFROM_TYPE_ARG3 size_t
 #define RECVFROM_TYPE_ARG4 int
-#define RECVFROM_TYPE_ARG5 struct sockaddr *
-#define RECVFROM_TYPE_ARG6 size_t *
+#define RECVFROM_TYPE_ARG5 struct sockaddr
+#define RECVFROM_TYPE_ARG6 size_t
 #define RECVFROM_TYPE_RETV ssize_t
 
 #define SEND_TYPE_ARG1 int

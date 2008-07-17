@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Yang Tse (17 Jul 2008)
+- RECVFROM_TYPE_ARG2, RECVFROM_TYPE_ARG5 and RECVFROM_TYPE_ARG6 are now defined
+  to the data type pointed by its respective argument and not the pointer type.
+
 Yang Tse (16 Jul 2008)
 - Configure process now checks availability of recvfrom() socket function and
   finds out its return type and the types of its arguments. Added definitions

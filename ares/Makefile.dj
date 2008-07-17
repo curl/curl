@@ -24,10 +24,10 @@ CFLAGS += -DWATT32 -DHAVE_AF_INET6 -DHAVE_PF_INET6 -DHAVE_IOCTLSOCKET \
           -DRECV_TYPE_ARG3='int'   -DRECV_TYPE_ARG4='int' \
           -DRECV_TYPE_RETV='int'   -DHAVE_STRUCT_TIMEVAL \
           -Dselect=select_s        -Dsocklen_t=int -UHAVE_CONFIG_H \
-          -DRECVFROM_TYPE_ARG1='int'  -DRECVFROM_TYPE_ARG2='void*' \
-          -DRECVFROM_TYPE_ARG3='int'  -DRECVFROM_TYPE_ARG4='int' \
-          -DRECVFROM_TYPE_ARG6='int*' -DRECVFROM_TYPE_RETV='int' \
-          -DRECVFROM_TYPE_ARG5='struct sockaddr*' -DHAVE_RECVFROM
+          -DRECVFROM_TYPE_ARG1='int' -DRECVFROM_TYPE_ARG2='void' \
+          -DRECVFROM_TYPE_ARG3='int' -DRECVFROM_TYPE_ARG4='int' \
+          -DRECVFROM_TYPE_ARG6='int' -DRECVFROM_TYPE_RETV='int' \
+          -DRECVFROM_TYPE_ARG5='struct sockaddr' -DHAVE_RECVFROM
 
 LDFLAGS = -s
 

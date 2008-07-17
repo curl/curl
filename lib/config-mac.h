@@ -65,11 +65,11 @@
 
 #define HAVE_RECVFROM 1
 #define RECVFROM_TYPE_ARG1 int
-#define RECVFROM_TYPE_ARG2 void *
+#define RECVFROM_TYPE_ARG2 void
 #define RECVFROM_TYPE_ARG3 size_t
 #define RECVFROM_TYPE_ARG4 int
-#define RECVFROM_TYPE_ARG5 struct sockaddr *
-#define RECVFROM_TYPE_ARG6 int *
+#define RECVFROM_TYPE_ARG5 struct sockaddr
+#define RECVFROM_TYPE_ARG6 int
 #define RECVFROM_TYPE_RETV ssize_t
 
 #define HAVE_SEND 1

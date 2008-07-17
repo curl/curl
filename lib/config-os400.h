@@ -462,8 +462,8 @@
 /* Define to the type of arg 1 for recvfrom. */
 #define RECVFROM_TYPE_ARG1 int
 
-/* Define to the type of arg 2 for recvfrom. */
-#define RECVFROM_TYPE_ARG2 char *
+/* Define to the type pointed by arg 2 for recvfrom. */
+#define RECVFROM_TYPE_ARG2 char
 
 /* Define to the type of arg 3 for recvfrom. */
 #define RECVFROM_TYPE_ARG3 int
@@ -471,11 +471,11 @@
 /* Define to the type of arg 4 for recvfrom. */
 #define RECVFROM_TYPE_ARG4 int
 
-/* Define to the type of arg 5 for recvfrom. */
-#define RECVFROM_TYPE_ARG5 struct sockaddr *
+/* Define to the type pointed by arg 5 for recvfrom. */
+#define RECVFROM_TYPE_ARG5 struct sockaddr
 
-/* Define to the type of arg 6 for recvfrom. */
-#define RECVFROM_TYPE_ARG6 int *
+/* Define to the type pointed by arg 6 for recvfrom. */
+#define RECVFROM_TYPE_ARG6 int
 
 /* Define to the function return type for recvfrom. */
 #define RECVFROM_TYPE_RETV int

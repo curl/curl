@@ -133,11 +133,11 @@
 
 #define HAVE_RECVFROM 1
 #define RECVFROM_TYPE_ARG1 long
-#define RECVFROM_TYPE_ARG2 char *
+#define RECVFROM_TYPE_ARG2 char
 #define RECVFROM_TYPE_ARG3 long
 #define RECVFROM_TYPE_ARG4 long
-#define RECVFROM_TYPE_ARG5 struct sockaddr *
-#define RECVFROM_TYPE_ARG6 long *
+#define RECVFROM_TYPE_ARG5 struct sockaddr
+#define RECVFROM_TYPE_ARG6 long
 #define RECVFROM_TYPE_RETV long
 
 #define HAVE_SEND 1
