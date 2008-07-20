@@ -1111,7 +1111,7 @@ AC_DEFUN([CURL_CHECK_FUNC_RECVFROM], [
             for recvfrom_arg3 in 'size_t' 'int' 'socklen_t' 'unsigned int'; do
               for recvfrom_arg4 in 'int' 'unsigned int'; do
                 for recvfrom_arg5 in 'struct sockaddr *' 'void *'; do
-                  for recvfrom_arg6 in 'socklen_t *' 'int *' 'unsigned int *' 'size_t *'; do
+                  for recvfrom_arg6 in 'socklen_t *' 'int *' 'unsigned int *' 'size_t *' 'void *'; do
                     if test "$curl_cv_func_recvfrom_args" = "unknown"; then
                       AC_COMPILE_IFELSE([
                         AC_LANG_PROGRAM([[
