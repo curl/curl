@@ -132,7 +132,7 @@ static int maxtimeout = 5*TIMEOUT;
 static char buf[PKTSIZE];
 static char ackbuf[PKTSIZE];
 static struct sockaddr_in from;
-static socklen_t fromlen;
+static RECVFROM_ARG6_T fromlen;
 
 struct bf {
   int counter;            /* size of data in buffer, or flag */
@@ -355,7 +355,7 @@ static int synchnet(curl_socket_t f /* socket to flush */)
   int j = 0;
   char rbuf[PKTSIZE];
   struct sockaddr_in fromaddr;
-  socklen_t fromaddrlen;
+  RECVFROM_ARG6_T fromaddrlen;
 
   while (1) {
 #if defined(HAVE_IOCTLSOCKET)
@@ -365,9 +365,8 @@ static int synchnet(curl_socket_t f /* socket to flush */)
 #endif
     if (i) {
       j++;
-      fromaddrlen = sizeof fromaddr;
-      (void) recvfrom(f, rbuf, sizeof (rbuf), 0,
-                      (struct sockaddr *)&fromaddr, &fromaddrlen);
+      fromaddrlen = (RECVFROM_ARG6_T)sizeof(fromaddr);
+      (void)sreadfrom(f, rbuf, sizeof(rbuf), &fromaddr, &fromaddrlen);
     }
     else
       break;
@@ -407,7 +406,7 @@ int main(int argc, char **argv)
 #endif /* ENABLE_IPV6 */
 
   struct tftphdr *tp;
-  int n = 0;
+  ssize_t n = 0;
   int arg = 1;
   char *pidname= (char *)".tftpd.pid";
   unsigned short port = DEFAULT_PORT;
@@ -514,9 +513,8 @@ int main(int argc, char **argv)
          , port );
 
   do {
-    fromlen = sizeof(from);
-    n = recvfrom(sock, buf, sizeof (buf), 0,
-                 (struct sockaddr *)&from, &fromlen);
+    fromlen = (RECVFROM_ARG6_T)sizeof(from);
+    n = sreadfrom(sock, buf, sizeof(buf), &from, &fromlen);
     if (n < 0) {
       logmsg("recvfrom:\n");
       result = 3;

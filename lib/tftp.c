@@ -141,7 +141,7 @@ typedef struct tftp_state_data {
   struct Curl_sockaddr_storage   local_addr;
   struct Curl_sockaddr_storage   remote_addr;
   socklen_t       remote_addrlen;
-  int             rbytes;
+  ssize_t         rbytes;
   int             sbytes;
   tftp_packet_t   rpacket;
   tftp_packet_t   spacket;
@@ -420,7 +420,7 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
     }
 
     /* Check if completed (That is, a less than full packet is received) */
-    if(state->rbytes < (int)sizeof(state->spacket)){
+    if(state->rbytes < sizeof(state->spacket)){
       state->state = TFTP_STATE_FIN;
     }
     else {
@@ -717,7 +717,7 @@ static CURLcode tftp_do(struct connectdata *conn, bool *done)
   CURLcode              code;
   int                   rc;
   struct Curl_sockaddr_storage fromaddr;
-  socklen_t             fromlen;
+  RECVFROM_ARG6_T       fromlen;
   int                   check_time = 0;
   struct SingleRequest *k = &data->req;
 
@@ -764,10 +764,10 @@ static CURLcode tftp_do(struct connectdata *conn, bool *done)
     else {
 
       /* Receive the packet */
-      fromlen=sizeof(fromaddr);
-      state->rbytes = recvfrom(state->sockfd,
-                               (void *)&state->rpacket, sizeof(state->rpacket),
-                               0, (struct sockaddr *)&fromaddr, &fromlen);
+      fromlen = (RECVFROM_ARG6_T)sizeof(fromaddr);
+      state->rbytes = sreadfrom(state->sockfd,
+                                &state->rpacket, sizeof(state->rpacket),
+                                &fromaddr, &fromlen);
       if(state->remote_addrlen==0) {
         memcpy(&state->remote_addr, &fromaddr, fromlen);
         state->remote_addrlen = fromlen;
