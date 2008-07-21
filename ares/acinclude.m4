@@ -2032,14 +2032,18 @@ AC_DEFUN([CARES_CHECK_GETSERVBYPORT_R], [
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
+        extern int
+        getservbyport_r(int, const char*, struct servent*,
+                        struct servent_data*);
       ]],[[
-        int p1, p5;
-        char *p2, p4[4096];
-        struct servent *p3, *p6;
-        getservbyport_r(p1, p2, p3, p4, p5, &p6);
+        int p1, res;
+        char *p2;
+        struct servent *p3;
+        struct servent_data *p4;
+        res = getservbyport_r(p1, p2, p3, p4);
       ]])
     ],[
-      cares_cv_getservbyport_r_nargs="6"
+      cares_cv_getservbyport_r_nargs="4"
     ])
     #
     if test "$cares_cv_getservbyport_r_nargs" = "unknown"; then
@@ -2051,11 +2055,14 @@ AC_DEFUN([CARES_CHECK_GETSERVBYPORT_R], [
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
+          extern struct servent*
+          getservbyport_r(int, const char*, struct servent*,
+                          char*, int);
         ]],[[
           int p1, p5;
           char *p2, p4[4096];
-          struct servent *p3;
-          getservbyport_r(p1, p2, p3, p4, p5);
+          struct servent *p3, res;
+          res = getservbyport_r(p1, p2, p3, p4, p5);
         ]])
       ],[
         cares_cv_getservbyport_r_nargs="5"
@@ -2071,15 +2078,18 @@ AC_DEFUN([CARES_CHECK_GETSERVBYPORT_R], [
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
+          extern int
+          getservbyport_r(int, const char*, struct servent*,
+                          char*, size_t, struct servent**);
         ]],[[
-          int p1;
-          char *p2;
-          struct servent *p3;
-          struct servent_data p4;
-          getservbyport_r(p1, p2, p3, &p4);
+          int p1, res;
+          size_t p5;
+          char *p2, p4[4096];
+          struct servent *p3, *p6;
+          res = getservbyport_r(p1, p2, p3, p4, p5, &p6);
         ]])
       ],[
-        cares_cv_getservbyport_r_nargs="4"
+        cares_cv_getservbyport_r_nargs="6"
       ])
     fi
     #
