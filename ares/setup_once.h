@@ -223,7 +223,7 @@ struct timeval {
 
 
 #ifdef RECVFROM_TYPE_ARG6_IS_VOID
-#  define RECVFROM_ARG6_T unsigned int
+#  define RECVFROM_ARG6_T int
 #else
 #  define RECVFROM_ARG6_T RECVFROM_TYPE_ARG6
 #endif
