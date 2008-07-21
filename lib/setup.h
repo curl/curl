@@ -272,6 +272,9 @@
 #ifdef word
 #undef word
 #endif
+#ifdef byte
+#undef byte
+#endif
 
 #else /* MSDOS */
 
