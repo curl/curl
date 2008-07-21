@@ -1,5 +1,10 @@
   Changelog for the c-ares project
 
+* Jul 20 2008 (Yang Tse)
+- when recvfrom prototype uses a void pointer for arguments 2, 5 or 6 this will
+  now cause the definition, as appropriate, of RECVFROM_TYPE_ARG2_IS_VOID,
+  RECVFROM_TYPE_ARG5_IS_VOID or RECVFROM_TYPE_ARG6_IS_VOID.
+
 * Jul 17 2008 (Yang Tse)
 - RECVFROM_TYPE_ARG2, RECVFROM_TYPE_ARG5 and RECVFROM_TYPE_ARG6 are now defined
   to the data type pointed by its respective argument and not the pointer type.

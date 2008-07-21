@@ -1206,6 +1206,19 @@ AC_DEFUN([CURL_CHECK_FUNC_RECVFROM], [
       AC_DEFINE_UNQUOTED(RECVFROM_TYPE_ARG6, $recvfrom_type_arg6,
         [Define to the type pointed by arg 6 for recvfrom.])
       #
+      if test "$recvfrom_type_arg2" = "void"; then
+        AC_DEFINE_UNQUOTED(RECVFROM_TYPE_ARG2_IS_VOID, 1,
+          [Define to 1 if the type pointed by arg 2 for recvfrom is void.])
+      fi
+      if test "$recvfrom_type_arg5" = "void"; then
+        AC_DEFINE_UNQUOTED(RECVFROM_TYPE_ARG5_IS_VOID, 1,
+          [Define to 1 if the type pointed by arg 5 for recvfrom is void.])
+      fi
+      if test "$recvfrom_type_arg6" = "void"; then
+        AC_DEFINE_UNQUOTED(RECVFROM_TYPE_ARG6_IS_VOID, 1,
+          [Define to 1 if the type pointed by arg 6 for recvfrom is void.])
+      fi
+      #
       case $prev_sh_opts in
         *f*)
           ;;

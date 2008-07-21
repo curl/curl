@@ -71,6 +71,7 @@
 #define RECVFROM_TYPE_ARG5 struct sockaddr
 #define RECVFROM_TYPE_ARG6 int
 #define RECVFROM_TYPE_RETV ssize_t
+#define RECVFROM_TYPE_ARG2_IS_VOID 1
 
 #define HAVE_SEND 1
 #define SEND_TYPE_ARG1 int

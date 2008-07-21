@@ -439,6 +439,9 @@
 /* Define to the type pointed by arg 2 for recvfrom. */
 #define RECVFROM_TYPE_ARG2 void
 
+/* Define to 1 if the type pointed by arg 2 for recvfrom is void. */
+#define RECVFROM_TYPE_ARG2_IS_VOID 1
+
 /* Define to the type of arg 3 for recvfrom. */
 #define RECVFROM_TYPE_ARG3 size_t
 
