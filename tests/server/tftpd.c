@@ -119,7 +119,7 @@ static void mysignal(int, void (*func)(int));
 #define PKTSIZE SEGSIZE+4
 
 struct formats;
-static int tftp(struct testcase *test, struct tftphdr *tp, int size);
+static int tftp(struct testcase *test, struct tftphdr *tp, ssize_t size);
 static void nak(int error);
 static void sendtftp(struct testcase *test, struct formats *pf);
 static void recvtftp(struct testcase *test, struct formats *pf);
@@ -571,7 +571,7 @@ struct formats {
 /*
  * Handle initial connection protocol.
  */
-static int tftp(struct testcase *test, struct tftphdr *tp, int size)
+static int tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
 {
   char *cp;
   int first = 1, ecode;
