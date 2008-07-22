@@ -2626,7 +2626,6 @@ AC_DEFUN([CURL_CHECK_LOCALTIME_R],
       AC_MSG_CHECKING(whether localtime_r with -D_REENTRANT is declared)
       AC_EGREP_CPP(localtime_r,[
 #undef _REENTRANT
-#undef _REENTRANT
 #define _REENTRANT
 #include <time.h>],[
         AC_DEFINE(NEED_REENTRANT, 1, [need REENTRANT defined])
