@@ -506,3 +506,15 @@
 
 /* Use the system keyring as the default CA bundle. */
 #define CURL_CA_BUNDLE  "/QIBM/UserData/ICSS/Cert/Server/DEFAULT.KDB"
+
+/* ---------------------------------------------------------------- */
+/*                       ADDITIONAL DEFINITIONS                     */
+/* ---------------------------------------------------------------- */
+
+/* The following must be defined BEFORE system header files inclusion. */
+
+#define __ptr128                       /* No teraspace. */
+#define qadrt_use_fputc_inline         /* Generate fputc() wrapper inline. */
+#define qadrt_use_fread_inline         /* Generate fread() wrapper inline. */
+#define qadrt_use_fwrite_inline        /* Generate fwrite() wrapper inline. */
+

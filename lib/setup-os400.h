@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,13 +22,6 @@
  *
  * $Id$
  ***************************************************************************/
-
-/* The following must be defined BEFORE common header files inclusion. */
-
-#define __ptr128                        /* No teraspace. */
-#define qadrt_use_fputc_inline          /* Generate fputc() wrapper inline. */
-#define qadrt_use_fread_inline          /* Generate fread() wrapper inline. */
-#define qadrt_use_fwrite_inline         /* Generate fwrite() wrapper inline. */
 
 
 /* OS/400 netdb.h does not define NI_MAXHOST. */

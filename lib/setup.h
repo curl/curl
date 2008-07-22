@@ -61,8 +61,7 @@
 #endif
 
 #ifdef __OS400__
-#include "config-os400.h"
-#include "setup-os400.h"
+#  include "config-os400.h"
 #endif
 
 #ifdef TPF
@@ -94,6 +93,14 @@
 #  define CURL_DISABLE_TELNET
 #  define CURL_DISABLE_DICT
 #  define CURL_DISABLE_FILE
+#endif
+
+/*
+ * OS/400 setup file includes some system headers.
+ */
+
+#ifdef __OS400__
+#  include "setup-os400.h"
 #endif
 
 /*
