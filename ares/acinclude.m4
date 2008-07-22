@@ -88,6 +88,31 @@ CURL_DEF_TOKEN $1
 ])
 
 
+dnl CONFIGURE_WITH_REENTRANT
+dnl -------------------------------------------------
+dnl This macro ensures that configuration tests done
+dnl after this will execute with preprocessor symbol
+dnl _REENTRANT defined. This macro also ensures that
+dnl the generated config file will equally define it.
+
+AC_DEFUN([CONFIGURE_WITH_REENTRANT], [
+AC_BEFORE([$0], [AC_PREPROC_IFELSE])dnl
+AC_BEFORE([$0], [AC_COMPILE_IFELSE])dnl
+AC_BEFORE([$0], [AC_LINK_IFELSE])dnl
+AC_BEFORE([$0], [AC_RUN_IFELSE])dnl
+AH_VERBATIM([_REENTRANT],
+[/* Define _REENTRANT if not already defined */
+@%:@ifndef _REENTRANT
+@%:@ define _REENTRANT
+@%:@endif])
+cat >>confdefs.h <<_ACEOF
+[@%:@ifndef _REENTRANT
+@%:@ define _REENTRANT
+@%:@endif]
+_ACEOF
+])
+
+
 dnl CURL_CHECK_HEADER_WINDOWS
 dnl -------------------------------------------------
 dnl Check for compilable and valid windows.h header 

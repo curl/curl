@@ -141,6 +141,9 @@ AC_AIX
 dnl Checks for programs.
 AC_PROG_CC
 
+dnl Our configure and build reentrant settings
+CONFIGURE_WITH_REENTRANT
+
 dnl check for how to do large files
 AC_SYS_LARGEFILE
 
