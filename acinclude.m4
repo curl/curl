@@ -2594,16 +2594,19 @@ AC_DEFUN([CURL_CHECK_LOCALTIME_R],
   AC_CHECK_FUNCS(localtime_r,[
     AC_MSG_CHECKING(whether localtime_r is declared)
     AC_EGREP_CPP(localtime_r,[
+#undef _REENTRANT
 #include <time.h>],[
       AC_MSG_RESULT(yes)],[
       AC_MSG_RESULT(no)
       AC_MSG_CHECKING(whether localtime_r with -D_REENTRANT is declared)
       AC_EGREP_CPP(localtime_r,[
+#undef _REENTRANT
+#undef _REENTRANT
 #define _REENTRANT
 #include <time.h>],[
-	AC_DEFINE(NEED_REENTRANT)
-	AC_MSG_RESULT(yes)],
-	AC_MSG_RESULT(no))])])
+        AC_DEFINE(NEED_REENTRANT, 1, [need REENTRANT defined])
+        AC_MSG_RESULT(yes)],
+        AC_MSG_RESULT(no))])])
 ])
 
 dnl
@@ -2634,16 +2637,18 @@ AC_DEFUN([CURL_CHECK_STRERROR_R],
 
     AC_MSG_CHECKING(whether strerror_r is declared)
     AC_EGREP_CPP(strerror_r,[
+#undef _REENTRANT
 #include <string.h>],[
       AC_MSG_RESULT(yes)],[
       AC_MSG_RESULT(no)
       AC_MSG_CHECKING(whether strerror_r with -D_REENTRANT is declared)
       AC_EGREP_CPP(strerror_r,[
+#undef _REENTRANT
 #define _REENTRANT
 #include <string.h>],[
-	CPPFLAGS="-D_REENTRANT $CPPFLAGS"
-	AC_MSG_RESULT(yes)],
-	AC_MSG_RESULT(no)
+        AC_DEFINE(NEED_REENTRANT, 1, [need REENTRANT defined])
+        AC_MSG_RESULT(yes)],
+        AC_MSG_RESULT(no)
         AC_DEFINE(HAVE_NO_STRERROR_R_DECL, 1, [we have no strerror_r() proto])
        ) dnl with _THREAD_SAFE
     ]) dnl plain cpp for it
@@ -2721,18 +2726,20 @@ AC_DEFUN([CURL_CHECK_INET_NTOA_R],
   AC_CHECK_FUNCS(inet_ntoa_r,[
     AC_MSG_CHECKING(whether inet_ntoa_r is declared)
     AC_EGREP_CPP(inet_ntoa_r,[
+#undef _REENTRANT
 #include <arpa/inet.h>],[
       AC_DEFINE(HAVE_INET_NTOA_R_DECL, 1, [inet_ntoa_r() is declared])
       AC_MSG_RESULT(yes)],[
       AC_MSG_RESULT(no)
       AC_MSG_CHECKING(whether inet_ntoa_r with -D_REENTRANT is declared)
       AC_EGREP_CPP(inet_ntoa_r,[
+#undef _REENTRANT
 #define _REENTRANT
 #include <arpa/inet.h>],[
-	AC_DEFINE(HAVE_INET_NTOA_R_DECL, 1, [inet_ntoa_r() is declared])
-	AC_DEFINE(NEED_REENTRANT, 1, [need REENTRANT defined])
-	AC_MSG_RESULT(yes)],
-	AC_MSG_RESULT(no))])])
+        AC_DEFINE(HAVE_INET_NTOA_R_DECL, 1, [inet_ntoa_r() is declared])
+        AC_DEFINE(NEED_REENTRANT, 1, [need REENTRANT defined])
+        AC_MSG_RESULT(yes)],
+        AC_MSG_RESULT(no))])])
 ])
 
 
@@ -2777,6 +2784,7 @@ AC_DEFUN([CURL_CHECK_GETHOSTBYADDR_R], [
     AC_MSG_CHECKING([if gethostbyaddr_r takes 5 arguments])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
+#undef _REENTRANT
 #include <sys/types.h>
 #include <netdb.h>
       ]],[[
@@ -2800,6 +2808,7 @@ AC_DEFUN([CURL_CHECK_GETHOSTBYADDR_R], [
       AC_MSG_CHECKING([if gethostbyaddr_r with -D_REENTRANT takes 5 arguments])
       AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
+#undef _REENTRANT
 #define _REENTRANT
 #include <sys/types.h>
 #include <netdb.h>
@@ -2815,7 +2824,7 @@ AC_DEFUN([CURL_CHECK_GETHOSTBYADDR_R], [
       ],[
         AC_MSG_RESULT([yes])
         AC_DEFINE(HAVE_GETHOSTBYADDR_R_5, 1, [gethostbyaddr_r() takes 5 args])
-	AC_DEFINE(NEED_REENTRANT, 1, [need REENTRANT])
+        AC_DEFINE(NEED_REENTRANT, 1, [need REENTRANT])
         ac_cv_gethostbyaddr_r_args="5"
       ],[
         AC_MSG_RESULT([no])
@@ -2826,6 +2835,7 @@ AC_DEFUN([CURL_CHECK_GETHOSTBYADDR_R], [
       AC_MSG_CHECKING([if gethostbyaddr_r takes 7 arguments])
       AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
+#undef _REENTRANT
 #include <sys/types.h>
 #include <netdb.h>
         ]],[[
@@ -2849,9 +2859,39 @@ AC_DEFUN([CURL_CHECK_GETHOSTBYADDR_R], [
     fi
 
     if test "$ac_cv_gethostbyaddr_r_args" = "unknown"; then
+      AC_MSG_CHECKING([if gethostbyaddr_r with -D_REENTRANT takes 7 arguments])
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+#undef _REENTRANT
+#define _REENTRANT
+#include <sys/types.h>
+#include <netdb.h>
+        ]],[[
+          char * address;
+          int length;
+          int type;
+          struct hostent h;
+          char buffer[8192];
+          int h_errnop;
+          struct hostent * hp;
+          hp = gethostbyaddr_r(address, length, type, &h,
+                               buffer, 8192, &h_errnop);
+        ]])
+      ],[
+        AC_MSG_RESULT([yes])
+        AC_DEFINE(HAVE_GETHOSTBYADDR_R_7, 1, [gethostbyaddr_r() takes 7 args])
+        AC_DEFINE(NEED_REENTRANT, 1, [need REENTRANT])
+        ac_cv_gethostbyaddr_r_args="7"
+      ],[
+        AC_MSG_RESULT([no])
+      ])
+    fi
+
+    if test "$ac_cv_gethostbyaddr_r_args" = "unknown"; then
       AC_MSG_CHECKING([if gethostbyaddr_r takes 8 arguments])
       AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
+#undef _REENTRANT
 #include <sys/types.h>
 #include <netdb.h>
         ]],[[
@@ -2869,6 +2909,36 @@ AC_DEFUN([CURL_CHECK_GETHOSTBYADDR_R], [
       ],[
         AC_MSG_RESULT([yes])
         AC_DEFINE(HAVE_GETHOSTBYADDR_R_8, 1, [gethostbyaddr_r() takes 8 args])
+        ac_cv_gethostbyaddr_r_args="8"
+      ],[
+        AC_MSG_RESULT([no])
+      ])
+    fi
+
+    if test "$ac_cv_gethostbyaddr_r_args" = "unknown"; then
+      AC_MSG_CHECKING([if gethostbyaddr_r with -D_REENTRANT takes 8 arguments])
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+#undef _REENTRANT
+#define _REENTRANT
+#include <sys/types.h>
+#include <netdb.h>
+        ]],[[
+          char * address;
+          int length;
+          int type;
+          struct hostent h;
+          char buffer[8192];
+          int h_errnop;
+          struct hostent * hp;
+          int rc;
+          rc = gethostbyaddr_r(address, length, type, &h,
+                               buffer, 8192, &hp, &h_errnop);
+        ]])
+      ],[
+        AC_MSG_RESULT([yes])
+        AC_DEFINE(HAVE_GETHOSTBYADDR_R_8, 1, [gethostbyaddr_r() takes 8 args])
+        AC_DEFINE(NEED_REENTRANT, 1, [need REENTRANT])
         ac_cv_gethostbyaddr_r_args="8"
       ],[
         AC_MSG_RESULT([no])
@@ -2932,6 +3002,7 @@ AC_DEFUN([CURL_CHECK_GETHOSTBYNAME_R], [
     AC_MSG_CHECKING([if gethostbyname_r takes 3 arguments])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
+#undef _REENTRANT
 #include <string.h>
 #include <sys/types.h>
 #include <netdb.h>
@@ -2956,6 +3027,7 @@ AC_DEFUN([CURL_CHECK_GETHOSTBYNAME_R], [
       AC_MSG_CHECKING([if gethostbyname_r with -D_REENTRANT takes 3 arguments])
       AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
+#undef _REENTRANT
 #define _REENTRANT
 #include <string.h>
 #include <sys/types.h>
@@ -2972,7 +3044,7 @@ AC_DEFUN([CURL_CHECK_GETHOSTBYNAME_R], [
       ],[
         AC_MSG_RESULT([yes])
         AC_DEFINE(HAVE_GETHOSTBYNAME_R_3, 1, [gethostbyname_r() takes 3 args])
-	AC_DEFINE(NEED_REENTRANT, 1, [need REENTRANT])
+        AC_DEFINE(NEED_REENTRANT, 1, [need REENTRANT])
         ac_cv_gethostbyname_r_args="3"
       ],[
         AC_MSG_RESULT([no])
@@ -2983,6 +3055,7 @@ AC_DEFUN([CURL_CHECK_GETHOSTBYNAME_R], [
       AC_MSG_CHECKING([if gethostbyname_r takes 5 arguments])
       AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
+#undef _REENTRANT
 #include <sys/types.h>
 #include <netdb.h>
 #undef NULL
@@ -3003,9 +3076,36 @@ AC_DEFUN([CURL_CHECK_GETHOSTBYNAME_R], [
     fi
 
     if test "$ac_cv_gethostbyname_r_args" = "unknown"; then
+      AC_MSG_CHECKING([if gethostbyname_r with -D_REENTRANT takes 5 arguments])
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+#undef _REENTRANT
+#define _REENTRANT
+#include <sys/types.h>
+#include <netdb.h>
+#undef NULL
+#define NULL (void *)0
+          struct hostent *
+          gethostbyname_r(const char *, struct hostent *,
+                          char *, int, int *);
+        ]],[[
+          gethostbyname_r(NULL, NULL, NULL, 0, NULL);
+        ]])
+      ],[
+        AC_MSG_RESULT([yes])
+        AC_DEFINE(HAVE_GETHOSTBYNAME_R_5, 1, [gethostbyname_r() takes 5 args])
+        AC_DEFINE(NEED_REENTRANT, 1, [need REENTRANT])
+        ac_cv_gethostbyname_r_args="5"
+      ],[
+        AC_MSG_RESULT([no])
+      ])
+    fi
+
+    if test "$ac_cv_gethostbyname_r_args" = "unknown"; then
       AC_MSG_CHECKING([if gethostbyname_r takes 6 arguments])
       AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
+#undef _REENTRANT
 #include <sys/types.h>
 #include <netdb.h>
 #undef NULL
@@ -3019,6 +3119,32 @@ AC_DEFUN([CURL_CHECK_GETHOSTBYNAME_R], [
       ],[
         AC_MSG_RESULT([yes])
         AC_DEFINE(HAVE_GETHOSTBYNAME_R_6, 1, [gethostbyname_r() takes 6 args])
+        ac_cv_gethostbyname_r_args="6"
+      ],[
+        AC_MSG_RESULT([no])
+      ])
+    fi
+
+    if test "$ac_cv_gethostbyname_r_args" = "unknown"; then
+      AC_MSG_CHECKING([if gethostbyname_r with -D_REENTRANT takes 6 arguments])
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+#undef _REENTRANT
+#define _REENTRANT
+#include <sys/types.h>
+#include <netdb.h>
+#undef NULL
+#define NULL (void *)0
+          int
+          gethostbyname_r(const char *, struct hostent *,
+                          char *, size_t, struct hostent **, int *);
+        ]],[[
+          gethostbyname_r(NULL, NULL, NULL, 0, NULL, NULL);
+        ]])
+      ],[
+        AC_MSG_RESULT([yes])
+        AC_DEFINE(HAVE_GETHOSTBYNAME_R_6, 1, [gethostbyname_r() takes 6 args])
+        AC_DEFINE(NEED_REENTRANT, 1, [need REENTRANT])
         ac_cv_gethostbyname_r_args="6"
       ],[
         AC_MSG_RESULT([no])
