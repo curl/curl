@@ -6,6 +6,15 @@
 
                                   Changelog
 
+Daniel Stenberg (23 Jul 2008)
+- I went over the curl_easy_setopt man page and replaced most references to
+  non-zero with the fixed value of 1. We should strive at making options
+  support '1' for enabling them mentioned explicitly, as that then will allow
+  us for to extend them in the future without breaking older programs.
+
+  Possibly we should even introduce a fancy define to use instead of '1' all
+  over...
+
 Yang Tse (21 Jul 2008)
 - Use the sreadfrom() wrapper to replace recvfrom() in our code.
 
