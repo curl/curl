@@ -276,7 +276,7 @@ yassl
 
  Required actions unknown
 
-When using multiple threads you should set the CURLOPT_NOSIGNAL option to TRUE
+When using multiple threads you should set the CURLOPT_NOSIGNAL option to 1
 for all handles. Everything will or might work fine except that timeouts are
 not honored during the DNS lookup - which you can work around by building
 libcurl with c-ares support. c-ares is a library that provides asynchronous
@@ -293,12 +293,12 @@ actually does, or the remote server might return non-standard replies that
 confuse the library which then confuses your program.
 
 There's one golden rule when these things occur: set the CURLOPT_VERBOSE
-option to TRUE. It'll cause the library to spew out the entire protocol
+option to 1. It'll cause the library to spew out the entire protocol
 details it sends, some internal info and some received protocol data as well
 (especially when using FTP). If you're using HTTP, adding the headers in the
 received output to study is also a clever way to get a better understanding
 why the server behaves the way it does. Include headers in the normal body
-output with CURLOPT_HEADER set TRUE.
+output with CURLOPT_HEADER set 1.
 
 Of course there are bugs left. We need to get to know about them to be able
 to fix them, so we're quite dependent on your bug reports! When you do report
@@ -343,7 +343,7 @@ between the application and the callback.
 
 Tell libcurl that we want to upload:
 
- curl_easy_setopt(easyhandle, CURLOPT_UPLOAD, TRUE);
+ curl_easy_setopt(easyhandle, CURLOPT_UPLOAD, 1L);
 
 A few protocols won't behave properly when uploads are done without any prior
 knowledge of the expected file size. So, set the upload file size using the
@@ -398,7 +398,7 @@ use for a particular host. As an extension to the normal functionality,
 libcurl also supports this file for non-FTP protocols such as HTTP. To make
 curl use this file, use the CURLOPT_NETRC option:
 
- curl_easy_setopt(easyhandle, CURLOPT_NETRC, TRUE);
+ curl_easy_setopt(easyhandle, CURLOPT_NETRC, 1L);
 
 And a very basic example of how such a .netrc file may look like:
 
@@ -486,7 +486,7 @@ then passing that list to libcurl.
  curl_easy_setopt(easyhandle, CURLOPT_POSTFIELDS, binaryptr);
 
  /* set the size of the postfields data */
- curl_easy_setopt(easyhandle, CURLOPT_POSTFIELDSIZE, 23);
+ curl_easy_setopt(easyhandle, CURLOPT_POSTFIELDSIZE, 23L);
 
  /* pass our list of custom made headers */
  curl_easy_setopt(easyhandle, CURLOPT_HTTPHEADER, headers);
@@ -563,7 +563,7 @@ curl to go back to a plain GET request if you intend to do such a one as your
 next request. You force an easyhandle to back to GET by using the
 CURLOPT_HTTPGET option:
 
- curl_easy_setopt(easyhandle, CURLOPT_HTTPGET, TRUE);
+ curl_easy_setopt(easyhandle, CURLOPT_HTTPGET, 1L);
 
 Just setting CURLOPT_POSTFIELDS to "" or NULL will *not* stop libcurl from
 doing a POST. It will just make it POST without any data to send!
@@ -575,7 +575,7 @@ that can be switched on and then makes it presents a progress meter in your
 terminal.
 
 Switch on the progress meter by, oddly enough, set CURLOPT_NOPROGRESS to
-FALSE. This option is set to TRUE by default.
+zero. This option is set to 1 by default.
 
 For most applications however, the built-in progress meter is useless and
 what instead is interesting is the ability to specify a progress
@@ -725,7 +725,7 @@ rarely allowed.
 
 Tell libcurl to use proxy tunneling like this:
 
- curl_easy_setopt(easyhandle, CURLOPT_HTTPPROXYTUNNEL, TRUE);
+ curl_easy_setopt(easyhandle, CURLOPT_HTTPPROXYTUNNEL, 1L);
 
 In fact, there might even be times when you want to do plain HTTP
 operations using a tunnel like this, as it then enables you to operate on
@@ -790,9 +790,9 @@ just a matter of thinking again.
 To force your upcoming request to not use an already existing connection (it
 will even close one first if there happens to be one alive to the same host
 you're about to operate on), you can do that by setting CURLOPT_FRESH_CONNECT
-to TRUE. In a similar spirit, you can also forbid the upcoming request to be
+to 1. In a similar spirit, you can also forbid the upcoming request to be
 "lying" around and possibly get re-used after the request by setting
-CURLOPT_FORBID_REUSE to TRUE.
+CURLOPT_FORBID_REUSE to 1.
 
 .SH "HTTP Headers Used by libcurl"
 When you use libcurl to do HTTP requests, it'll pass along a series of headers
@@ -935,7 +935,7 @@ error code (CURLE_QUOTE_ERROR). Note that if you use CURLOPT_QUOTE to send
 commands before a transfer, no transfer will actually take place when a quote
 command has failed.
 
-If you set the CURLOPT_HEADER to true, you will tell libcurl to get
+If you set the CURLOPT_HEADER to 1, you will tell libcurl to get
 information about the target file and output "headers" about it. The headers
 will be in "HTTP-style", looking like they do in HTTP.
 
@@ -1015,7 +1015,7 @@ work it tries PASV instead. (EPSV is an extension to the original FTP spec
 and does not exist nor work on all FTP servers.)
 
 You can prevent libcurl from first trying the EPSV command by setting
-CURLOPT_FTP_USE_EPSV to FALSE.
+CURLOPT_FTP_USE_EPSV to zero.
 
 In some cases, you will prefer to have the server connect back to you for the
 second connection. This might be when the server is perhaps behind a firewall
@@ -1029,14 +1029,14 @@ from.
 
 When doing the "PORT" approach, libcurl will attempt to use the EPRT and the
 LPRT before trying PORT, as they work with more protocols. You can disable
-this behavior by setting CURLOPT_FTP_USE_EPRT to FALSE.
+this behavior by setting CURLOPT_FTP_USE_EPRT to zero.
 
 .SH "Headers Equal Fun"
 
 Some protocols provide "headers", meta-data separated from the normal
 data. These headers are by default not included in the normal data stream,
 but you can make them appear in the data stream by setting CURLOPT_HEADER to
-TRUE.
+1.
 
 What might be even more useful, is libcurl's ability to separate the headers
 from the data and thus make the callbacks differ. You can for example set a

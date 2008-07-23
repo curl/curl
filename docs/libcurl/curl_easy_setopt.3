@@ -251,7 +251,7 @@ If you transfer data with the multi interface, this function will not be
 called during periods of idleness unless you call the appropriate libcurl
 function that performs transfers.
 
-\fICURLOPT_NOPROGRESS\fP must be set to FALSE to make this function actually
+\fICURLOPT_NOPROGRESS\fP must be set to 0 to make this function actually
 get called.
 .IP CURLOPT_PROGRESSDATA
 Pass a pointer that will be untouched by libcurl and passed as the first
@@ -502,7 +502,7 @@ value to something too low might cause unnecessary connection setup
 failures. (Added in 7.15.2)
 .IP CURLOPT_DNS_CACHE_TIMEOUT
 Pass a long, this sets the timeout in seconds. Name resolves will be kept in
-memory for this number of seconds. Set to zero (0) to completely disable
+memory for this number of seconds. Set to zero to completely disable
 caching, or set to -1 to make the cached entries remain forever. By default,
 libcurl caches this info for 60 seconds.
 
@@ -1003,7 +1003,7 @@ overwrite it. This is only useful when uploading to an ftp site.
 Pass a long. If the value is 1, it tells curl to use the EPRT (and
 LPRT) command when doing active FTP downloads (which is enabled by
 \fICURLOPT_FTPPORT\fP). Using EPRT means that it will first attempt to use
-EPRT and then LPRT before using PORT, but if you pass FALSE (zero) to this
+EPRT and then LPRT before using PORT, but if you pass zero to this
 option, it will not try using EPRT or LPRT, only plain PORT. (Added in 7.10.5)
 
 If the server is an IPv6 host, this option will have no effect as of 7.12.3.
@@ -1011,7 +1011,7 @@ If the server is an IPv6 host, this option will have no effect as of 7.12.3.
 Pass a long. If the value is 1, it tells curl to use the EPSV command
 when doing passive FTP downloads (which it always does by default). Using EPSV
 means that it will first attempt to use EPSV before using PASV, but if you
-pass FALSE (zero) to this option, it will not try using EPSV, only plain PASV.
+pass zero to this option, it will not try using EPSV, only plain PASV.
 
 If the server is an IPv6 host, this option will have no effect as of 7.12.3.
 .IP CURLOPT_FTP_CREATE_MISSING_DIRS
