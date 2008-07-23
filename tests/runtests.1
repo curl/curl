@@ -87,10 +87,14 @@ Many tests have conditions that must be met before the test case can run
 fine. They could depend on built-in features in libcurl or features present in
 the operating system or even in third-party libraries that curl may or may not
 use.
-
-The test script checks this by itself, why it is safe to attempt to run all
-tests. They who cannot be run due to failed requirements, will simply be
-skipped and you'll get a report about it when all test cases have completed.
+.P
+The test script checks most of these by itself to determine when it is
+safe to attempt to run each test.  Those which cannot be run due to
+failed requirements will simply be skipped and listed at the completion
+of all test cases.  In some unusual configurations, the test script
+cannot make the correct determination for all tests.  In these cases,
+the problematic tests can be skipped using the "!keyword" skip feature
+documented earlier.
 .SH "WRITING TESTS"
 The simplest way to write test cases is to start with a similar existing test,
 save it with a new number and then adjust it to fit. There's an attempt to
