@@ -2059,16 +2059,16 @@ AC_DEFUN([CARES_CHECK_GETSERVBYPORT_R], [
 #endif
         extern int
         getservbyport_r(int, const char*, struct servent*,
-                        struct servent_data*);
+                        char*, size_t, struct servent**);
       ]],[[
         int p1, res;
-        char *p2;
-        struct servent *p3;
-        struct servent_data *p4;
-        res = getservbyport_r(p1, p2, p3, p4);
+        size_t p5;
+        char *p2, p4[4096];
+        struct servent *p3, *p6;
+        res = getservbyport_r(p1, p2, p3, p4, p5, &p6);
       ]])
     ],[
-      cares_cv_getservbyport_r_nargs="4"
+      cares_cv_getservbyport_r_nargs="6"
     ])
     #
     if test "$cares_cv_getservbyport_r_nargs" = "unknown"; then
@@ -2105,16 +2105,16 @@ AC_DEFUN([CARES_CHECK_GETSERVBYPORT_R], [
 #endif
           extern int
           getservbyport_r(int, const char*, struct servent*,
-                          char*, size_t, struct servent**);
+                          struct servent_data*);
         ]],[[
           int p1, res;
-          size_t p5;
-          char *p2, p4[4096];
-          struct servent *p3, *p6;
-          res = getservbyport_r(p1, p2, p3, p4, p5, &p6);
+          char *p2;
+          struct servent *p3;
+          struct servent_data *p4;
+          res = getservbyport_r(p1, p2, p3, p4);
         ]])
       ],[
-        cares_cv_getservbyport_r_nargs="6"
+        cares_cv_getservbyport_r_nargs="4"
       ])
     fi
     #
