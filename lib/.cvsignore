@@ -8,3 +8,4 @@ config.h
 stamp-*
 getdate.c
 curllib.dsp
+curllib.vcproj
