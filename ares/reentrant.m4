@@ -75,6 +75,81 @@ AC_DEFUN([CHECK_NEED_REENTRANT_STRERROR_R], [
 ])
 
 
+dnl CHECK_NEED_REENTRANT_STRTOK_R
+dnl -------------------------------------------------
+dnl Checks if the preprocessor _REENTRANT definition
+dnl makes function strtok_r compiler visible.
+
+AC_DEFUN([CHECK_NEED_REENTRANT_STRTOK_R], [
+  #
+  AC_MSG_NOTICE([DEBUG:])
+  AC_MSG_NOTICE([DEBUG:])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([strtok_r])
+  ],[
+    AC_MSG_NOTICE([DEBUG: strtok_r links... yes])
+    tmp_strtok_r="yes"
+  ],[
+    AC_MSG_NOTICE([DEBUG: strtok_r links... no])
+    tmp_strtok_r="no"
+  ])
+  #
+  if test "$tmp_strtok_r" = "yes"; then
+    AC_EGREP_CPP([strtok_r],[
+#include <sys/types.h>
+#include <string.h>
+    ],[
+      AC_MSG_NOTICE([DEBUG: strtok_r proto... without our definition])
+      tmp_strtok_r="proto_wout_def"
+    ],[
+      AC_EGREP_CPP([strtok_r],[
+#define _REENTRANT
+#include <sys/types.h>
+#include <string.h>
+      ],[
+        AC_MSG_NOTICE([DEBUG: strtok_r proto... with our _reentrant])
+        tmp_strtok_r="proto_with_def"
+      ],[
+        AC_MSG_NOTICE([DEBUG: strtok_r proto... not found])
+      ])
+    ])
+  fi
+  #
+  if test "$tmp_strtok_r" = "proto_wout_def"; then
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+#include <sys/types.h>
+#include <string.h>
+      ]],[[
+        strtok_r(0, 0, 0);
+      ]])
+    ],[
+      AC_MSG_NOTICE([DEBUG: strtok_r proto wout finds... 3 args])
+      tmp_strtok_r="done"
+    ])
+  fi
+  #
+  if test "$tmp_strtok_r" = "proto_with_def"; then
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+#define _REENTRANT
+#include <sys/types.h>
+#include <string.h>
+      ]],[[
+        strtok_r(0, 0, 0);
+      ]])
+    ],[
+      AC_MSG_NOTICE([DEBUG: strtok_r proto with finds... 3 args])
+      tmp_strtok_r="needs_reentrant"
+    ])
+  fi
+  #
+  if test "$tmp_strtok_r" = "needs_reentrant"; then
+    ac_cv_need_reentrant="yes"
+  fi
+])
+
+
 dnl CHECK_NEED_REENTRANT_LOCALTIME_R
 dnl -------------------------------------------------
 dnl Checks if the preprocessor _REENTRANT definition
@@ -596,6 +671,107 @@ AC_DEFUN([CHECK_NEED_REENTRANT_GETHOSTBYNAME_R], [
 ])
 
 
+dnl CHECK_NEED_REENTRANT_GETPROTOBYNAME_R
+dnl -------------------------------------------------
+dnl Checks if the preprocessor _REENTRANT definition
+dnl makes function getprotobyname_r compiler visible.
+
+AC_DEFUN([CHECK_NEED_REENTRANT_GETPROTOBYNAME_R], [
+  #
+  AC_MSG_NOTICE([DEBUG:])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([getprotobyname_r])
+  ],[
+    AC_MSG_NOTICE([DEBUG: getprotobyname_r links... yes])
+    tmp_getprotobyname_r="yes"
+  ],[
+    AC_MSG_NOTICE([DEBUG: getprotobyname_r links... no])
+    tmp_getprotobyname_r="no"
+  ])
+  #
+  if test "$tmp_getprotobyname_r" = "yes"; then
+    AC_EGREP_CPP([getprotobyname_r],[
+#include <sys/types.h>
+#include <netdb.h>
+    ],[
+      AC_MSG_NOTICE([DEBUG: getprotobyname_r proto... without our definition])
+      tmp_getprotobyname_r="proto_wout_def"
+    ],[
+      AC_EGREP_CPP([getprotobyname_r],[
+#define _REENTRANT
+#include <sys/types.h>
+#include <netdb.h>
+      ],[
+        AC_MSG_NOTICE([DEBUG: getprotobyname_r proto... with our _reentrant])
+        tmp_getprotobyname_r="proto_with_def"
+      ],[
+        AC_MSG_NOTICE([DEBUG: getprotobyname_r proto... not found])
+      ])
+    ])
+  fi
+  #
+  if test "$tmp_getprotobyname_r" = "proto_wout_def"; then
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+#include <sys/types.h>
+#include <netdb.h>
+      ]],[[
+        getprotobyname_r(0, 0, 0, 0);
+      ]])
+    ],[
+      AC_MSG_NOTICE([DEBUG: getprotobyname_r proto wout finds... 4 args])
+      tmp_getprotobyname_r="done"
+    ])
+  fi
+  if test "$tmp_getprotobyname_r" = "proto_wout_def"; then
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+#include <sys/types.h>
+#include <netdb.h>
+      ]],[[
+        getprotobyname_r(0, 0, 0, 0, 0);
+      ]])
+    ],[
+      AC_MSG_NOTICE([DEBUG: getprotobyname_r proto wout finds... 5 args])
+      tmp_getprotobyname_r="done"
+    ])
+  fi
+  #
+  if test "$tmp_getprotobyname_r" = "proto_with_def"; then
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+#define _REENTRANT
+#include <sys/types.h>
+#include <netdb.h>
+      ]],[[
+        getprotobyname_r(0, 0, 0, 0);
+      ]])
+    ],[
+      AC_MSG_NOTICE([DEBUG: getprotobyname_r proto with finds... 4 args])
+      tmp_getprotobyname_r="needs_reentrant"
+    ])
+  fi
+  if test "$tmp_getprotobyname_r" = "proto_with_def"; then
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+#define _REENTRANT
+#include <sys/types.h>
+#include <netdb.h>
+      ]],[[
+        getprotobyname_r(0, 0, 0, 0, 0);
+      ]])
+    ],[
+      AC_MSG_NOTICE([DEBUG: getprotobyname_r proto with finds... 5 args])
+      tmp_getprotobyname_r="needs_reentrant"
+    ])
+  fi
+  #
+  if test "$tmp_getprotobyname_r" = "needs_reentrant"; then
+    ac_cv_need_reentrant="yes"
+  fi
+])
+
+
 dnl CHECK_NEED_REENTRANT_GETSERVBYPORT_R
 dnl -------------------------------------------------
 dnl Checks if the preprocessor _REENTRANT definition
@@ -735,6 +911,9 @@ AC_DEFUN([CHECK_NEED_REENTRANT_FUNCTIONS_R], [
     CHECK_NEED_REENTRANT_STRERROR_R
   fi
   if test "$ac_cv_need_reentrant" = "no"; then
+    CHECK_NEED_REENTRANT_STRTOK_R
+  fi
+  if test "$ac_cv_need_reentrant" = "no"; then
     CHECK_NEED_REENTRANT_LOCALTIME_R
   fi
   if test "$ac_cv_need_reentrant" = "no"; then
@@ -748,6 +927,9 @@ AC_DEFUN([CHECK_NEED_REENTRANT_FUNCTIONS_R], [
   fi
   if test "$ac_cv_need_reentrant" = "no"; then
     CHECK_NEED_REENTRANT_GETHOSTBYNAME_R
+  fi
+  if test "$ac_cv_need_reentrant" = "no"; then
+    CHECK_NEED_REENTRANT_GETPROTOBYNAME_R
   fi
   if test "$ac_cv_need_reentrant" = "no"; then
     CHECK_NEED_REENTRANT_GETSERVBYPORT_R
@@ -756,11 +938,13 @@ AC_DEFUN([CHECK_NEED_REENTRANT_FUNCTIONS_R], [
 
 AC_DEFUN([CHECK_NEED_REENTRANT_FUNCTIONS_R_DEBUG], [
     CHECK_NEED_REENTRANT_STRERROR_R
+    CHECK_NEED_REENTRANT_STRTOK_R
     CHECK_NEED_REENTRANT_LOCALTIME_R
     CHECK_NEED_REENTRANT_GMTIME_R
     CHECK_NEED_REENTRANT_INET_NTOA_R
     CHECK_NEED_REENTRANT_GETHOSTBYADDR_R
     CHECK_NEED_REENTRANT_GETHOSTBYNAME_R
+    CHECK_NEED_REENTRANT_GETPROTOBYNAME_R
     CHECK_NEED_REENTRANT_GETSERVBYPORT_R
 ])
 
