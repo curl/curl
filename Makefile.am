@@ -21,6 +21,8 @@
 # $Id$
 ###########################################################################
 
+ACLOCAL_AMFLAGS = -I .
+
 AUTOMAKE_OPTIONS = foreign
 
 EXTRA_DIST = CHANGES COPYING maketgz reconf Makefile.dist curl-config.in \

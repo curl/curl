@@ -1,3 +1,5 @@
+ACLOCAL_AMFLAGS = -I .
+
 AUTOMAKE_OPTIONS = foreign
 
 lib_LTLIBRARIES = libcares.la

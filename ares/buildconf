@@ -1,6 +1,7 @@
 #!/bin/sh
 
 ${LIBTOOLIZE:-libtoolize} --copy --automake --force
+ACLOCAL_FLAGS="-I . $ACLOCAL_FLAGS"
 ${ACLOCAL:-aclocal} $ACLOCAL_FLAGS
 ${AUTOHEADER:-autoheader}
 ${AUTOCONF:-autoconf}
