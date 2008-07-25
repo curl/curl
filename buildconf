@@ -209,7 +209,7 @@ PERL=`findtool ${PERL:-perl}`
 echo "buildconf: running libtoolize"
 $libtoolize --copy --automake --force || die "The libtoolize command failed"
 echo "buildconf: running aclocal"
-ACLOCAL_FLAGS="-I . $ACLOCAL_FLAGS"
+ACLOCAL_FLAGS="-I m4 $ACLOCAL_FLAGS"
 ${ACLOCAL:-aclocal} $ACLOCAL_FLAGS || die "The aclocal command line failed"
 if test -n "$PERL"; then
   echo "buildconf: running aclocal hack to convert all mv to mv -f"

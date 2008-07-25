@@ -21,7 +21,7 @@
 # $Id$
 ###########################################################################
 
-ACLOCAL_AMFLAGS = -I .
+ACLOCAL_AMFLAGS = -I m4
 
 AUTOMAKE_OPTIONS = foreign
 
