@@ -132,16 +132,21 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
 
   if(nread == CURL_READFUNC_ABORT) {
     failf(data, "operation aborted by callback");
+    *nreadp = 0;
     return CURLE_ABORTED_BY_CALLBACK;
   }
   else if(nread == CURL_READFUNC_PAUSE) {
     struct SingleRequest *k = &data->req;
-    k->keepon |= KEEP_READ_PAUSE; /* mark reading as paused */
+    /* CURL_READFUNC_PAUSE pauses read callbacks that feed socket writes */
+    k->keepon |= KEEP_WRITE_PAUSE; /* mark socket send as paused */
+    *nreadp = 0;
     return CURLE_OK; /* nothing was read */
   }
-  else if((size_t)nread > buffersize)
+  else if((size_t)nread > buffersize) {
     /* the read function returned a too large value */
+    *nreadp = 0;
     return CURLE_READ_ERROR;
+  }
 
   if(!data->req.forbidchunk && data->req.upload_chunky) {
     /* if chunked Transfer-Encoding */
@@ -1464,7 +1469,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         else
           nread = 0; /* we're done uploading/reading */
 
-        if(!nread && (k->keepon & KEEP_READ_PAUSE)) {
+        if(!nread && (k->keepon & KEEP_WRITE_PAUSE)) {
           /* this is a paused transfer */
           break;
         }

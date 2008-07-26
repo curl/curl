@@ -34,6 +34,7 @@ This release includes the following bugfixes:
  o c-ares powered libcurls can resolve/use IPv6 addresses
  o poll not working on Windows Vista due to POLLPRI being incorrectly used
  o user-agent in CONNECT with non-HTTP protocols
+ o CURL_READFUNC_PAUSE problems fixed
 
 This release includes the following known bugs:
 
@@ -54,7 +55,7 @@ advice from friends like these:
  Rob Crittenden, Dengminwen, Christopher Palow, Hans-Jurgen May,
  Phil Pellouchoud, Eduard Bloch, John Lightsey, Stephen Collyer, Tor Arntsen,
  Rolland Dudemaine, Phil Blundell, Scott Barrett, Andreas Schuldei,
- Peter Lamberg
+ Peter Lamberg, David Bau
 
 
         Thanks! (and sorry if I forgot to mention someone)

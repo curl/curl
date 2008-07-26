@@ -6,6 +6,18 @@
 
                                   Changelog
 
+Daniel Stenberg (26 Jul 2008)
+- David Bau filed bug report #2026240 "CURL_READFUNC_PAUSE leads to buffer
+  overrun" (http://curl.haxx.se/bug/view.cgi?id=2026240) identifying two
+  problems, and providing the fix for them:
+
+  - CURL_READFUNC_PAUSE did in fact not pause the _sending_ of data that it is
+    designed for but paused _receiving_ of data!
+
+  - libcurl didn't internally set the read counter to zero when this return
+    code was detected, which would potentially lead to junk getting sent to
+    the server.
+
 Daniel Fandrich (26 Jul 2008)
 - Added test 1044 to test large file support in ftp with -I.
 
