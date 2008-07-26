@@ -83,7 +83,6 @@ dnl makes function strtok_r compiler visible.
 AC_DEFUN([CHECK_NEED_REENTRANT_STRTOK_R], [
   #
   AC_MSG_NOTICE([DEBUG:])
-  AC_MSG_NOTICE([DEBUG:])
   AC_LINK_IFELSE([
     AC_LANG_FUNC_LINK_TRY([strtok_r])
   ],[
@@ -716,6 +715,19 @@ AC_DEFUN([CHECK_NEED_REENTRANT_GETPROTOBYNAME_R], [
 #include <sys/types.h>
 #include <netdb.h>
       ]],[[
+        getprotobyname_r(0, 0, 0);
+      ]])
+    ],[
+      AC_MSG_NOTICE([DEBUG: getprotobyname_r proto wout finds... 3 args])
+      tmp_getprotobyname_r="done"
+    ])
+  fi
+  if test "$tmp_getprotobyname_r" = "proto_wout_def"; then
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+#include <sys/types.h>
+#include <netdb.h>
+      ]],[[
         getprotobyname_r(0, 0, 0, 0);
       ]])
     ],[
@@ -737,6 +749,20 @@ AC_DEFUN([CHECK_NEED_REENTRANT_GETPROTOBYNAME_R], [
     ])
   fi
   #
+  if test "$tmp_getprotobyname_r" = "proto_with_def"; then
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+#define _REENTRANT
+#include <sys/types.h>
+#include <netdb.h>
+      ]],[[
+        getprotobyname_r(0, 0, 0);
+      ]])
+    ],[
+      AC_MSG_NOTICE([DEBUG: getprotobyname_r proto with finds... 3 args])
+      tmp_getprotobyname_r="needs_reentrant"
+    ])
+  fi
   if test "$tmp_getprotobyname_r" = "proto_with_def"; then
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
