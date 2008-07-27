@@ -40,13 +40,15 @@
 #endif /* HAVE_CONFIG_H */
 
 /*
- * Solaris needs _REENTRANT set for a few function prototypes and
+ * HP-UX needs _REENTRANT set for a few function prototypes and
  * things to appear in the system header files. Unixware needs it
  * to build proper reentrant code. Others may also need it.
  */
 
-#ifndef _REENTRANT
-#  define _REENTRANT
+#ifdef NEED_REENTRANT
+#  ifndef _REENTRANT
+#    define _REENTRANT
+#  endif
 #endif
 
 /*

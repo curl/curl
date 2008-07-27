@@ -72,11 +72,16 @@
 
 #endif /* HAVE_CONFIG_H */
 
-#if defined(CURLDEBUG) && defined(CURLTOOLDEBUG)
-/* This is an ugly hack for CURLDEBUG conditions only. We need to include
-   the file here, since it might set the _FILE_OFFSET_BITS define, which must
-   be set BEFORE all normal system headers. */
-#include "../lib/setup.h"
+/*
+ * HP-UX needs _REENTRANT set for a few function prototypes and
+ * things to appear in the system header files. Unixware needs it
+ * to build proper reentrant code. Others may also need it.
+ */
+
+#ifdef NEED_REENTRANT
+#  ifndef _REENTRANT
+#    define _REENTRANT
+#  endif
 #endif
 
 /* 
