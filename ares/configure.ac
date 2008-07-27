@@ -15,6 +15,7 @@ AC_PATH_PROG([SED], [sed], [not_found],
 if test -z "$SED" || test "$SED" = "not_found"; then
   AC_MSG_ERROR([sed not found in PATH. Cannot continue without sed.])
 fi
+AC_SUBST([SED])
 
 dnl GREP is mandatory for configure process and libtool.
 dnl Set it now, allowing it to be changed later.
@@ -23,6 +24,7 @@ AC_PATH_PROG([GREP], [grep], [not_found],
 if test -z "$GREP" || test "$GREP" = "not_found"; then
   AC_MSG_ERROR([grep not found in PATH. Cannot continue without grep.])
 fi
+AC_SUBST([GREP])
 
 dnl EGREP is mandatory for configure process and libtool.
 dnl Set it now, allowing it to be changed later.
@@ -37,6 +39,7 @@ fi
 if test -z "$EGREP" || test "$EGREP" = "not_found"; then
   AC_MSG_ERROR([egrep not found in PATH. Cannot continue without egrep.])
 fi
+AC_SUBST([EGREP])
 
 dnl AR is mandatory for configure process and libtool.
 dnl This is target dependant, so check it as a tool.
@@ -45,6 +48,7 @@ AC_PATH_TOOL([AR], [ar], [not_found],
 if test -z "$AR" || test "$AR" = "not_found"; then
   AC_MSG_ERROR([ar not found in PATH. Cannot continue without ar.])
 fi
+AC_SUBST([AR])
 
 dnl Fetch c-ares version from ares_version.h
 VERSION=`$SED -ne 's/^#define ARES_VERSION_STR "\(.*\)"/\1/p' ${srcdir}/ares_version.h`
