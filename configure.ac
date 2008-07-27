@@ -150,7 +150,7 @@ dnl Checks for programs.
 AC_PROG_CC
 
 dnl Our configure and build reentrant settings
-CONFIGURE_REENTRANT
+CURL_CONFIGURE_REENTRANT
 
 dnl check for how to do large files
 AC_SYS_LARGEFILE
