@@ -6,7 +6,6 @@ dnl Checks if the preprocessor _REENTRANT definition
 dnl makes function gmtime_r compiler visible.
 
 AC_DEFUN([CARES_CHECK_NEED_REENTRANT_GMTIME_R], [
-  #
   AC_LINK_IFELSE([
     AC_LANG_FUNC_LINK_TRY([gmtime_r])
   ],[
@@ -14,7 +13,6 @@ AC_DEFUN([CARES_CHECK_NEED_REENTRANT_GMTIME_R], [
   ],[
     tmp_gmtime_r="no"
   ])
-  #
   if test "$tmp_gmtime_r" = "yes"; then
     AC_EGREP_CPP([gmtime_r],[
 #include <sys/types.h>
@@ -140,7 +138,6 @@ dnl Checks if the preprocessor _REENTRANT definition
 dnl makes function inet_ntoa_r compiler visible.
 
 AC_DEFUN([CARES_CHECK_NEED_REENTRANT_INET_NTOA_R], [
-  #
   AC_LINK_IFELSE([
     AC_LANG_FUNC_LINK_TRY([inet_ntoa_r])
   ],[
@@ -178,7 +175,6 @@ dnl Checks if the preprocessor _REENTRANT definition
 dnl makes function gethostbyaddr_r compiler visible.
 
 AC_DEFUN([CARES_CHECK_NEED_REENTRANT_GETHOSTBYADDR_R], [
-  #
   AC_LINK_IFELSE([
     AC_LANG_FUNC_LINK_TRY([gethostbyaddr_r])
   ],[
@@ -285,7 +281,6 @@ AC_DEFUN([CARES_CHECK_NEED_REENTRANT_GETSERVBYPORT_R], [
   ],[
     tmp_getservbyport_r="no"
   ])
-  #
   if test "$tmp_getservbyport_r" = "yes"; then
     AC_EGREP_CPP([getservbyport_r],[
 #include <sys/types.h>
@@ -379,6 +374,7 @@ dnl that it is defined equally for further configure
 dnl tests and generated config file.
 
 AC_DEFUN([CARES_CONFIGURE_REENTRANT], [
+  AC_PREREQ([2.57])dnl
   #
   AC_MSG_CHECKING([if _REENTRANT is already defined])
   AC_COMPILE_IFELSE([
