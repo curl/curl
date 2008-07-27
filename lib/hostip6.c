@@ -233,40 +233,41 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   char sbuf[NI_MAXSERV];
   char *sbufptr = NULL;
   char addrbuf[128];
-  curl_socket_t s;
   int pf;
   struct SessionHandle *data = conn->data;
 
   *waitp=0; /* don't wait, we have the response now */
 
-  /* see if we have an IPv6 stack */
-  s = socket(PF_INET6, SOCK_DGRAM, 0);
-  if(s == CURL_SOCKET_BAD) {
-    /* Some non-IPv6 stacks have been found to make very slow name resolves
-     * when PF_UNSPEC is used, so thus we switch to a mere PF_INET lookup if
-     * the stack seems to be a non-ipv6 one. */
-
+  /*
+   * Check if a limited name resolve has been requested.
+   */
+  switch(data->set.ip_version) {
+  case CURL_IPRESOLVE_V4:
     pf = PF_INET;
+    break;
+  case CURL_IPRESOLVE_V6:
+    pf = PF_INET6;
+    break;
+  default:
+    pf = PF_UNSPEC;
+    break;
   }
-  else {
-    /* This seems to be an IPv6-capable stack, use PF_UNSPEC for the widest
-     * possible checks. And close the socket again.
-     */
-    sclose(s);
 
-    /*
-     * Check if a more limited name resolve has been requested.
-     */
-    switch(data->set.ip_version) {
-    case CURL_IPRESOLVE_V4:
+  if (pf != PF_INET) {
+    /* see if we have an IPv6 stack */
+    curl_socket_t s = socket(PF_INET6, SOCK_DGRAM, 0);
+    if(s == CURL_SOCKET_BAD) {
+      /* Some non-IPv6 stacks have been found to make very slow name resolves
+       * when PF_UNSPEC is used, so thus we switch to a mere PF_INET lookup if
+       * the stack seems to be a non-ipv6 one. */
+
       pf = PF_INET;
-      break;
-    case CURL_IPRESOLVE_V6:
-      pf = PF_INET6;
-      break;
-    default:
-      pf = PF_UNSPEC;
-      break;
+    }
+    else {
+      /* This seems to be an IPv6-capable stack, use PF_UNSPEC for the widest
+       * possible checks. And close the socket again.
+       */
+      sclose(s);
     }
   }
 
