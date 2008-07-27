@@ -25,7 +25,7 @@
 .SH NAME
 runtests.pl \- run one or more test cases
 .SH SYNOPSIS
-.B runtests.pl [options] [test number]
+.B runtests.pl [options] [test number] [!test number] [key word] [!key word]
 .SH DESCRIPTION
 \fIruntests.pl\fP runs one, several or all the existing test cases in curl's
 test suite. It is often called from the root Makefile of the curl package with
@@ -39,7 +39,10 @@ the numbers with a leading exclamation point, like "!66".
 .P
 It is also possible to specify tests to skip based on a key word describing
 the test. These are specified with a leading exclamation point and the
-key word or phrase, like "!HTTP NTLM auth".
+key word or phrase, like "!HTTP NTLM auth".  Likewise, tests to run can
+be specified simply by specifying the unadorned key words, like "FTPS".
+Remember that the exclamation marks and spaces will need to be quoted somehow
+when entered at many command shells.
 .SH OPTIONS
 .IP "-a"
 Continue running the rest of the test cases even if one test fails. By

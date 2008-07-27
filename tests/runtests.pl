@@ -45,7 +45,7 @@
 # to do with cookies, those that set environment variables, or those that
 # do more than touch the file system in a <precheck> or <postcheck>
 # section). These can be added to the $TESTCASES line below,
-# e.g. $TESTCASES="!8 !31 !63..."
+# e.g. $TESTCASES="!8 !31 !63 !cookies..."
 #
 # Finally, to properly support -g and -n, checktestcmd needs to change
 # to check the remote system's PATH, and the places in the code where
@@ -197,6 +197,7 @@ my $skipped=0;  # number of tests skipped; reported in main loop
 my %skipped;    # skipped{reason}=counter, reasons for skip
 my @teststat;   # teststat[testnum]=reason, reasons for skip
 my %disabled_keywords;	# key words of tests to skip
+my %enabled_keywords;	# key words of tests to run
 
 my $sshdid;      # for socks server, ssh daemon version id
 my $sshdvernum;  # for socks server, ssh daemon version number
@@ -1820,13 +1821,20 @@ sub singletest {
 
     if(!$why) {
         my @keywords = getpart("info", "keywords");
+	my $match;
         my $k;
         for $k (@keywords) {
             chomp $k;
             if ($disabled_keywords{$k}) {
             	$why = "disabled by keyword";
+            } elsif ($enabled_keywords{$k}) {
+            	$match = 1;
             }
         }
+
+	if(!$why && !$match && %enabled_keywords) {
+	  $why = "disabled by missing keyword";
+	}
     }
 
     if(!$why) {
@@ -2781,7 +2789,7 @@ while(@ARGV) {
     elsif($ARGV[0] eq "-h") {
         # show help text
         print <<EOHELP
-Usage: runtests.pl [options] [test number(s)]
+Usage: runtests.pl [options] [test selection(s)]
   -a       continue even if a test fails
   -bN      use base port number N for test servers (default $base)
   -c path  use this curl executable
@@ -2797,7 +2805,8 @@ Usage: runtests.pl [options] [test number(s)]
   -v       verbose output
   [num]    like "5 6 9" or " 5 to 22 " to run those tests only
   [!num]   like "!5 !6 !9" to disable those tests
-  [!keyword] like "!cookies !IPv6" to disable tests with those key words
+  [keyword] like "IPv6" to select only tests containing the key word
+  [!keyword] like "!cookies" to disable any tests containing the key word
 EOHELP
     ;
         exit;
@@ -2823,6 +2832,9 @@ EOHELP
     }
     elsif($ARGV[0] =~ /^!(.+)/) {
         $disabled_keywords{$1}=$1;
+    }
+    elsif($ARGV[0] =~ /^([-[{a-zA-Z].*)/) {
+        $enabled_keywords{$1}=$1;
     }
     else {
     	print "Unknown option: $ARGV[0]\n";
@@ -2940,7 +2952,7 @@ if ( $TESTCASES eq "all") {
     for(@cmds) {
         $_ =~ s/[a-z\/\.]*//g;
     }
-    # the the numbers from low to high
+    # sort the numbers from low to high
     foreach my $n (sort { $a <=> $b } @cmds) {
         if($disabled{$n}) {
             # skip disabled test cases

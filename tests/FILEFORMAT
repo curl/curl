@@ -28,8 +28,11 @@ Main sections are 'info', 'reply', 'client' and 'verify'.
 <info>
 <keywords>
 A newline-separated list of keywords describing what this test case uses and
-tests. Try to use an already used keyword. These keywords will be used for
-statistical/informational purposes.
+tests. Try to use an already used keyword.  These keywords will be used for
+statistical/informational purposes and for choosing or skipping classes
+of tests.  "Keywords" must begin with an alphabetic character, "-", "["
+or "{" and may actually consist of multiple words separated by spaces
+which are treated together as a single identifier.
 </keywords>
 </info>
 

@@ -21,6 +21,11 @@ Daniel Stenberg (26 Jul 2008)
 Daniel Fandrich (26 Jul 2008)
 - Added test 1044 to test large file support in ftp with -I.
 
+- Eliminate a unnecessary socket creation in Curl_getaddrinfo for an IPv4
+  address in an IPv6 capable libcurl.
+
+- Added feature in runtests.pl to select tests based on key word.
+
 Daniel Fandrich (23 Jul 2008)
 - Changed the long logfile elision code in runtests.pl to properly handle
   lines ending in \r.
