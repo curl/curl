@@ -1,7 +1,12 @@
 #!/bin/sh
 
+if test -z "$ACLOCAL_FLAGS"; then
+  ACLOCAL_FLAGS="-I m4"
+else
+  ACLOCAL_FLAGS="$ACLOCAL_FLAGS -I m4"
+fi
+
 ${LIBTOOLIZE:-libtoolize} --copy --automake --force
-ACLOCAL_FLAGS="-I m4 $ACLOCAL_FLAGS"
 ${ACLOCAL:-aclocal} $ACLOCAL_FLAGS
 ${AUTOHEADER:-autoheader}
 ${AUTOCONF:-autoconf}

@@ -206,15 +206,20 @@ PERL=`findtool ${PERL:-perl}`
 
 # run the correct scripts now
 
+if test -z "$ACLOCAL_FLAGS"; then
+  ACLOCAL_FLAGS="-I m4"
+else
+  ACLOCAL_FLAGS="$ACLOCAL_FLAGS -I m4"
+fi
+
 tmp_host_type=`uname -a | sed '/SunOS/s/.*\(SunOS\).*/\1/'`
 if test "x$tmp_host_type" = "xSunOS"; then
-ACLOCAL_FLAGS="--verbose $ACLOCAL_FLAGS"
+  ACLOCAL_FLAGS="$ACLOCAL_FLAGS --verbose"
 fi
 
 echo "buildconf: running libtoolize"
 $libtoolize --copy --automake --force || die "The libtoolize command failed"
 echo "buildconf: running aclocal"
-ACLOCAL_FLAGS="-I m4 $ACLOCAL_FLAGS"
 ${ACLOCAL:-aclocal} $ACLOCAL_FLAGS || die "The aclocal command line failed"
 if test -n "$PERL"; then
   echo "buildconf: running aclocal hack to convert all mv to mv -f"
