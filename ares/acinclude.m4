@@ -57,6 +57,12 @@ dnl silently when invoked with three arguments.
 AC_DEFUN([CURL_CHECK_DEF], [
   AS_VAR_PUSHDEF([ac_HaveDef], [curl_cv_have_def_$1])dnl
   AS_VAR_PUSHDEF([ac_Def], [curl_cv_def_$1])dnl
+  if test -z "$SED"; then
+    AC_MSG_ERROR([SED not set. Cannot continue without SED being set.])
+  fi
+  if test -z "$GREP"; then
+    AC_MSG_ERROR([GREP not set. Cannot continue without GREP being set.])
+  fi
   ifelse($3,,[AC_MSG_CHECKING([for preprocessor definition of $1])])
   tmp_exp=""
   AC_PREPROC_IFELSE([
