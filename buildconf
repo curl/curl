@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -205,6 +205,11 @@ PERL=`findtool ${PERL:-perl}`
 # ------------------------------------------------------------
 
 # run the correct scripts now
+
+tmp_host_type=`uname -a | sed '/SunOS/s/.*\(SunOS\).*/\1/'`
+if test "x$tmp_host_type" = "xSunOS"; then
+ACLOCAL_FLAGS="--verbose $ACLOCAL_FLAGS"
+fi
 
 echo "buildconf: running libtoolize"
 $libtoolize --copy --automake --force || die "The libtoolize command failed"
