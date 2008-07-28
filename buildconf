@@ -44,6 +44,18 @@ findtool(){
 }
 
 #--------------------------------------------------------------------------
+# Ensure that buildconf runs from the subdirectory where configure.ac lives
+#
+if test ! -f configure.ac ||
+  test ! -f src/main.c ||
+  test ! -f lib/urldata.h ||
+  test ! -f include/curl/curl.h; then
+  echo "Can not run buildconf from outside of curl's source subdirectory!"
+  echo "Change to the subdirectory where buildconf is found, and try again."
+  exit 1
+fi
+
+#--------------------------------------------------------------------------
 # autoconf 2.57 or newer
 #
 need_autoconf="2.57"
