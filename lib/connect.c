@@ -340,9 +340,7 @@ static CURLcode bindlocal(struct connectdata *conn,
       if(h) {
         if(in == CURL_INADDR_NONE)
           /* convert the resolved address, sizeof myhost >= INET_ADDRSTRLEN */
-          Curl_inet_ntop(h->addr->ai_addr->sa_family,
-                         &((struct sockaddr_in*)h->addr->ai_addr)->sin_addr,
-                         myhost, sizeof myhost);
+          Curl_printable_address(h->addr, myhost, sizeof myhost);
         else
           /* we know data->set.device is shorter than the myhost array */
           strcpy(myhost, dev);
