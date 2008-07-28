@@ -1,0 +1,48 @@
+<testcase>
+<info>
+<keywords>
+TFTP
+TFTP RRQ
+--interface
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+a chunk of
+data
+returned
+ to client
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+tftp
+</server>
+ <name>
+TFTP retrieve with localhost --interface
+ </name>
+ <command>
+tftp://%HOSTIP:%TFTPPORT//1049 --trace-ascii log/traceit --interface 127.0.0.1
+</command>
+# When bound to localhost, one may connect only to a local test server
+<precheck>
+perl -e "print 'Test requires default test server host address' if ( '%HOSTIP' ne '127.0.0.1' );"
+</precheck>
+</client>
+
+#
+# Verify pseudo protocol after the test has been "shot"
+<verify>
+<protocol>
+opcode: 1
+filename: /1049
+mode: octet
+</protocol>
+</verify>
+</testcase>

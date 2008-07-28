@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Fandrich (28 Jul 2008)
+- Fixed display of the interface bind address in the trace output when it's
+  an IPv6 address.
+
+- Added test cases 1045 through 1049 as simple tests of --interface using the
+  localhost interface.
+
 Daniel Stenberg (26 Jul 2008)
 - David Bau filed bug report #2026240 "CURL_READFUNC_PAUSE leads to buffer
   overrun" (http://curl.haxx.se/bug/view.cgi?id=2026240) identifying two
