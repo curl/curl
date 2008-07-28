@@ -5,6 +5,8 @@ if test -z "$ACLOCAL_FLAGS"; then
 else
   ACLOCAL_FLAGS="$ACLOCAL_FLAGS -I m4"
 fi
+export ACLOCAL_FLAGS
+echo "cares buildconf: using ACLOCAL_FLAGS: $ACLOCAL_FLAGS"
 
 ${LIBTOOLIZE:-libtoolize} --copy --automake --force
 ${ACLOCAL:-aclocal} $ACLOCAL_FLAGS
