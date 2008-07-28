@@ -1,9 +1,8 @@
 To be addressed before 7.19.0 (planned release: August 2008)
 =============================
 
-139 - Christopher Palow's CURLM_EASY_HANDLE_EXISTS patch
-
 144 - Help apps use 64bit/LFS libcurl!
 
-145 -
+145 - Phil Blundell's CURLOPT_SCOPE patch/work
 
+146 -
