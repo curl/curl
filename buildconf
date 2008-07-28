@@ -202,9 +202,81 @@ fi
 #
 PERL=`findtool ${PERL:-perl}`
 
-# ------------------------------------------------------------
+#--------------------------------------------------------------------------
+# Remove files generated on previous buildconf/configure run.
+#
+for fname in aclocal.m4 \
+             aclocal.m4.bak \
+             config.guess \
+             config.log \
+             config.status \
+             config.sub \
+             configure \
+             depcomp \
+             libtool \
+             ltmain.sh \
+             Makefile \
+             Makefile.in ; do
+  if test -f "$fname" ; then
+    rm -f "$fname"
+  fi
+done
+if test -d autom4te.cache; then
+  rm -f -r autom4te.cache
+fi
+if test -d docs/examples/.deps; then
+  rm -f -r docs/examples/.deps
+fi
+if test -d lib/.deps; then
+  rm -f -r lib/.deps
+fi
+if test -d src/.deps; then
+  rm -f -r src/.deps
+fi
+if test -d tests/libtest/.deps; then
+  rm -f -r tests/libtest/.deps
+fi
+if test -d tests/server/.deps; then
+  rm -f -r tests/server/.deps
+fi
 
+#--------------------------------------------------------------------------
+# Remove files generated in ares subdir on previous buildconf/configure run.
+#
+if test -d ares; then
+  cd ares
+  for fname in aclocal.m4 \
+               aclocal.m4.bak \
+               compile \
+               config.h \
+               config.h.in \
+               config.guess \
+               config.log \
+               config.status \
+               config.sub \
+               configure \
+               depcomp \
+               libtool \
+               ltmain.sh \
+               missing \
+               Makefile \
+               Makefile.in ; do
+    if test -f "$fname" ; then
+      rm -f "$fname"
+    fi
+  done
+  if test -d autom4te.cache; then
+    rm -f -r autom4te.cache
+  fi
+  if test -d .deps; then
+    rm -f -r .deps
+  fi
+  cd ..
+fi
+
+#--------------------------------------------------------------------------
 # run the correct scripts now
+#
 
 if test -z "$ACLOCAL_FLAGS"; then
   ACLOCAL_FLAGS="-I m4"
@@ -216,6 +288,9 @@ tmp_host_type=`uname -a | sed '/SunOS/s/.*\(SunOS\).*/\1/'`
 if test "x$tmp_host_type" = "xSunOS"; then
   ACLOCAL_FLAGS="$ACLOCAL_FLAGS --verbose"
 fi
+
+export ACLOCAL_FLAGS
+echo "buildconf: using ACLOCAL_FLAGS: $ACLOCAL_FLAGS"
 
 echo "buildconf: running libtoolize"
 $libtoolize --copy --automake --force || die "The libtoolize command failed"
