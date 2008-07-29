@@ -1,7 +1,5 @@
 AUTOMAKE_OPTIONS = foreign
 
-ACLOCAL_AMFLAGS = -I m4
-
 lib_LTLIBRARIES = libcares.la
 
 man_MANS = $(MANPAGES)

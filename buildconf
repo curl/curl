@@ -253,7 +253,7 @@ if test -d tests/server/.deps; then
 fi
 
 #--------------------------------------------------------------------------
-# Remove files generated in ares subdir on previous buildconf/configure run.
+# Remove files generated in c-ares subdir on previous buildconf/configure run.
 #
 if test -d ares; then
   cd ares
@@ -290,19 +290,10 @@ fi
 # run the correct scripts now
 #
 
-if test -z "$ACLOCAL_FLAGS"; then
-  ACLOCAL_FLAGS="-I m4"
-else
-  ACLOCAL_FLAGS="$ACLOCAL_FLAGS -I m4"
-fi
-
 tmp_host_type=`uname -a | sed '/SunOS/s/.*\(SunOS\).*/\1/'`
 if test "x$tmp_host_type" = "xSunOS"; then
   ACLOCAL_FLAGS="$ACLOCAL_FLAGS --verbose"
 fi
-
-export ACLOCAL_FLAGS
-echo "buildconf: using ACLOCAL_FLAGS: $ACLOCAL_FLAGS"
 
 echo "buildconf: running libtoolize"
 $libtoolize --copy --automake --force || die "The libtoolize command failed"
