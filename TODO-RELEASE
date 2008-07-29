@@ -2,6 +2,13 @@ To be addressed before 7.19.0 (planned release: August 2008)
 =============================
 
 144 - Help apps use 64bit/LFS libcurl!
+      http://curl.haxx.se/mail/lib-2008-07/0120.html  Patch (first version) of
+      64-bit curl_off_t no longer gated to off_t was sent to the mailing list
+      2008-07-14.  After all the changes done afterwards in CVS its sure it
+      doesn't apply clean as is.  A second version patch has to be generated.
+      This second patch version should also address the problem the first one
+      has of not working when building outside of the source tree.
+      #148 blocks this.
 
 145 - Phil Blundell's CURLOPT_SCOPE patch/work
 
@@ -11,4 +18,22 @@ To be addressed before 7.19.0 (planned release: August 2008)
 147 - PHP's bug report #43158 (http://bugs.php.net/bug.php?id=43158) identifies
       a true bug in libcurl built with OpenSSL.
 
-148 -
+148 - Introduction of m4/reentrant.m4 is triggering some problems on Solaris
+      systems. The problem manifests when buildconf runs aclocal, at some point
+      aclocal fails when using GNU m4 version 1.4.5 it runs out of memory.  If
+      GNU m4 version 1.4.11 is used everything works.  Lots of tests have been
+      done which have allowed to discard many possible pitfalls on our side.
+      As of right now my main suspect is which 'sed' binary is being used by
+      aclocal, if it is a broken sed, aclocal might be feeding garbage to m4.
+      As a consecuence of al this tries and tests the inclusion method of
+      m4/reentrant.m4 has been changed several times, and should finally be
+      changed back to the proper '-I m4' method which was used initially and
+      that didn't fail on other systems.
+
+149 - The introduction of the sreadfrom macro has proven usefull on all systems
+      except on HP-UX. For this release I will back out its use in lib/tftp.c
+      and test/server/tftpd.c leaving it in the same functional state as it was.
+      The rest of things will be kept in as thay are needed to properly fix it
+      in another release (autoconf work required).
+
+150 -
