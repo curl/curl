@@ -53,8 +53,12 @@ UNIX
 
         ./configure --with-ssl
 
-   If you have OpenSSL installed somewhere else (for example, /opt/OpenSSL,)
-   you can run configure like this:
+   If you have OpenSSL installed somewhere else (for example, /opt/OpenSSL)
+   and you have pkg-config installed, set the pkg-config path first, like this:
+
+        env PKG_CONFIG_PATH=/opt/OpenSSL/lib/pkgconfig ./configure --with-ssl
+
+   Without pkg-config installed, use this:
 
         ./configure --with-ssl=/opt/OpenSSL
 
@@ -70,20 +74,20 @@ UNIX
 
      (with the Bourne shell and its clones):
 
-       CPPFLAGS="-I/path/to/ssl/include" LDFLAGS="-L/path/to/ssl/lib" \
+        CPPFLAGS="-I/path/to/ssl/include" LDFLAGS="-L/path/to/ssl/lib" \
            ./configure
 
      (with csh, tcsh and their clones):
 
-       env CPPFLAGS="-I/path/to/ssl/include" LDFLAGS="-L/path/to/ssl/lib" \
-       ./configure
+        env CPPFLAGS="-I/path/to/ssl/include" LDFLAGS="-L/path/to/ssl/lib" \
+           ./configure
 
    If you have shared SSL libs installed in a directory where your run-time
    linker doesn't find them (which usually causes configure failures), you can
    provide the -R option to ld on some operating systems to set a hard-coded
    path to the run-time linker:
 
-        LDFLAGS=-R/usr/local/ssl/lib ./configure --with-ssl
+        env LDFLAGS=-R/usr/local/ssl/lib ./configure --with-ssl
 
    MORE OPTIONS
    ------------
@@ -128,7 +132,7 @@ UNIX
      To build with GnuTLS support instead of OpenSSL for SSL/TLS, note that
      you need to use both --without-ssl and --with-gnutls.
 
-     To build with yassl support instead of OpenSSL or GunTLS, you must build
+     To build with yassl support instead of OpenSSL or GnuTLS, you must build
      yassl with its OpenSSL emulation enabled and point to that directory root
      with configure --with-ssl.
 
@@ -148,8 +152,8 @@ UNIX
 
    The Open Watcom C compiler on Linux requires configuring with the variables:
 
-     CC=owcc AR="$WATCOM/binl/wlib" AR_FLAGS=-q RANLIB=/bin/true \
-     STRIP="$WATCOM/binl/wstrip" CFLAGS=-Wextra
+       ./configure CC=owcc AR="$WATCOM/binl/wlib" AR_FLAGS=-q \
+           RANLIB=/bin/true STRIP="$WATCOM/binl/wstrip" CFLAGS=-Wextra
 
 
 Win32
