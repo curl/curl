@@ -62,12 +62,15 @@ filecheck:
 	rm test-place/*~; \
 	for f in $(EXTRA_DIST); do \
 	  if test -f "$(top_srcdir)/tests/data/$$f"; then \
-	    rm -f test-place/$$f; \
+	    rm -f "test-place/$$f"; \
 	  else \
 	    echo "$$f is listed but missing!"; \
 	  fi \
 	done; \
 	echo "Local files not present in EXTRA_DIST:" ; \
 	ls test-place; \
-	rm -rf test-place
+	! ls test-place | grep . >/dev/null ; \
+	RC=$$? ; \
+	rm -rf test-place ; \
+	exit $$RC
 
