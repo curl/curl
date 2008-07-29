@@ -28,12 +28,8 @@ tftp
 TFTP retrieve with localhost --interface
  </name>
  <command>
-tftp://%HOSTIP:%TFTPPORT//1049 --trace-ascii log/traceit --interface 127.0.0.1
+tftp://%HOSTIP:%TFTPPORT//1049 --trace-ascii log/traceit --interface %CLIENTIP
 </command>
-# When bound to localhost, one may connect only to a local test server
-<precheck>
-perl -e "print 'Test requires default test server host address' if ( '%HOSTIP' ne '127.0.0.1' );"
-</precheck>
 </client>
 
 #

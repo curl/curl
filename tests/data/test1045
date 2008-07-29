@@ -32,12 +32,8 @@ http
 HTTP GET with localhost --interface
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1045 --interface 127.0.0.1
+http://%HOSTIP:%HTTPPORT/1045 --interface %CLIENTIP
 </command>
-# When bound to localhost, one may connect only to a local test server
-<precheck>
-perl -e "print 'Test requires default test server host address' if ( '%HOSTIP' ne '127.0.0.1' );"
-</precheck>
 </client>
 
 #

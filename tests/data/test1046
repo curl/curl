@@ -38,9 +38,9 @@ HTTP-IPv6 GET with localhost --interface
  <command>
 -g "http://%HOST6IP:%HTTP6PORT/1046" --interface ::1
 </command>
-# When bound to ip6-localhost, one may connect only to a local test server
+# --interface doesn't accept an address surrounded by [] so %CLIENT6IP is out
 <precheck>
-perl -e "print 'Test requires default test server host address' if ( '%HOST6IP' ne '[::1]' );"
+perl -e "print 'Test requires default test server host address' if ( '%CLIENT6IP' ne '[::1]' );"
 </precheck>
 </client>
 

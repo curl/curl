@@ -13,6 +13,8 @@ Daniel Fandrich (28 Jul 2008)
 - Added test cases 1045 through 1049 as simple tests of --interface using the
   localhost interface.
 
+- Added test case 1050 to test --ftp-port with an IPv6 address
+
 Daniel Stenberg (26 Jul 2008)
 - David Bau filed bug report #2026240 "CURL_READFUNC_PAUSE leads to buffer
   overrun" (http://curl.haxx.se/bug/view.cgi?id=2026240) identifying two

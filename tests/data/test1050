@@ -1,14 +1,13 @@
 <testcase>
+# Similar to test 253
 <info>
 <keywords>
-FTP
-PASV
-LIST
---interface
+FTP-ipv6
+IPv6
+EPRT
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 # When doing LIST, we get the default list output hard-coded in the test
@@ -28,28 +27,37 @@ dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr
 </datacheck>
 </reply>
 
-#
 # Client-side
 <client>
+<features>
+ipv6
+</features>
 <server>
-ftp
+ftp-ipv6
 </server>
  <name>
-FTP dir list PASV with localhost --interface
+FTP-IPv6 dir list, EPRT with specified IP
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/ --interface %CLIENTIP
+-g "ftp://%HOST6IP:%FTP6PORT/" -P ::1
 </command>
+# --interface doesn't accept an address surrounded by [] so %CLIENT6IP is out
+<precheck>
+perl -e "print 'Test requires default test server host address' if ( '%CLIENT6IP' ne '[::1]' );"
+</precheck>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
+# Strip all valid kinds of EPRT that curl can send
+<strippart>
+s/^(EPRT \|2\|::1\|)(.*)/$1/
+</strippart>
 <protocol>
 USER anonymous
 PASS ftp@example.com
 PWD
-EPSV
+EPRT |2|::1|
 TYPE A
 LIST
 QUIT
