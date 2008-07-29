@@ -9,3 +9,4 @@ stamp-*
 getdate.c
 curllib.dsp
 curllib.vcproj
+*.dist
