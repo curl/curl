@@ -27,20 +27,24 @@ die(){
 	exit
 }
 
-# this works as 'which' but we use a different name to make it more obvious we
-# aren't using 'which'! ;-)
+#--------------------------------------------------------------------------
+# findtool works as 'which' but we use a different name to make it more
+# obvious we aren't using 'which'! ;-)
+#
 findtool(){
   file="$1"
 
-  IFS=":"
+  old_IFS=$IFS; IFS=':'
   for path in $PATH
   do
+    IFS=$old_IFS
     # echo "checks for $file in $path" >&2
     if test -f "$path/$file"; then
       echo "$path/$file"
       return
     fi
   done
+  IFS=$old_IFS
 }
 
 #--------------------------------------------------------------------------
@@ -293,6 +297,21 @@ fi
 tmp_host_type=`uname -a | sed '/SunOS/s/.*\(SunOS\).*/\1/'`
 if test "x$tmp_host_type" = "xSunOS"; then
   ACLOCAL_FLAGS="$ACLOCAL_FLAGS --verbose"
+
+  echo "buildconf: PATH: $PATH"
+
+  # show all available sed's in PATH order
+  old_IFS=$IFS; IFS=':'
+  for path in $PATH
+  do
+    IFS=$old_IFS
+    if test -f "$path/sed"; then
+      echo "buildconf: sed: $path/sed"
+    fi
+  done
+  IFS=$old_IFS
+  echo "buildconf: SED: $SED"
+
 fi
 
 echo "buildconf: running libtoolize"
