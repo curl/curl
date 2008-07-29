@@ -5,4 +5,10 @@ To be addressed before 7.19.0 (planned release: August 2008)
 
 145 - Phil Blundell's CURLOPT_SCOPE patch/work
 
-146 -
+146 - Yehoshua Hershberg's re-using of connections that failed with
+      CURLE_PEER_FAILED_VERIFICATION
+
+147 - PHP's bug report #43158 (http://bugs.php.net/bug.php?id=43158) identifies
+      a true bug in libcurl built with OpenSSL.
+
+148 -
