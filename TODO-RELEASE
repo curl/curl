@@ -29,6 +29,7 @@ To be addressed before 7.19.0 (planned release: August 2008)
       m4/reentrant.m4 has been changed several times, and should finally be
       changed back to the proper '-I m4' method which was used initially and
       that didn't fail on other systems.
+      http://curl.haxx.se/mail/lib-2008-07/0210.html
 
 149 - The introduction of the sreadfrom macro has proven usefull on all systems
       except on HP-UX. For this release I will back out its use in lib/tftp.c
