@@ -3,6 +3,13 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+56. When libcurl sends CURLOPT_POSTQUOTE commands when connected to a SFTP
+  server using the multi interface, the commands are not being sent correctly
+  and instead the connection is "cancelled" (the operation is considered done)
+  prematurely. There is a half-baked (busy-looping) patch provided in the bug
+  report but it cannot be accepted as-is. See
+  http://curl.haxx.se/bug/view.cgi?id=2006544
+
 55. libcurl fails to build with MIT Kerberos for Windows (KfW) due to KfW's
   library header files exporting symbols/macros that should be kept private
   to the KfW library. See ticket #5601 at http://krbdev.mit.edu/rt/
