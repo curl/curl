@@ -312,6 +312,18 @@ if test "x$tmp_host_type" = "xSunOS"; then
   IFS=$old_IFS
   echo "buildconf: SED: $SED"
 
+  echo "buildconf: Feeding acinclude.m4 with reentrant.m4"
+
+  sed 's/m4_include.*m4.*reentrant.m4.*//' acinclude.m4 > acinclude.2
+  mv acinclude.2 acinclude.m4
+  cat m4/reentrant.m4 >> acinclude.m4
+  rm -f m4/reentrant.m4
+
+  sed 's/m4_include.*m4.*reentrant.m4.*//' ares/acinclude.m4 > ares/acinclude.2
+  mv ares/acinclude.2 ares/acinclude.m4
+  cat ares/m4/reentrant.m4 >> ares/acinclude.m4
+  rm -f ares/m4/reentrant.m4
+
 fi
 
 echo "buildconf: running libtoolize"
