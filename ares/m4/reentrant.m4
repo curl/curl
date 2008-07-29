@@ -354,9 +354,9 @@ AC_DEFUN([CARES_CONFIGURE_FROM_NOW_ON_WITH_REENTRANT], [
 AC_DEFINE(NEED_REENTRANT, 1,
   [Define to 1 if _REENTRANT preprocessor symbol must be defined.])
 cat >>confdefs.h <<_ACEOF
-[#ifndef _REENTRANT
+#ifndef _REENTRANT
 # define _REENTRANT
-#endif]
+#endif
 _ACEOF
 ])
 
