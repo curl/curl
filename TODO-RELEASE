@@ -12,8 +12,6 @@ To be addressed before 7.19.0 (planned release: August 2008)
       UPDATE:
        * #148 no longer blocks this.
 
-145 - Phil Blundell's CURLOPT_SCOPE patch/work
-
 146 - Yehoshua Hershberg's re-using of connections that failed with
       CURLE_PEER_FAILED_VERIFICATION
 
