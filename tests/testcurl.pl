@@ -395,6 +395,7 @@ if ($CVS) {
     open(F, "./buildconf 2>&1 |") or die;
     open(LOG, ">$buildlog") or die;
     while (<F>) {
+      next if /warning: underquoted definition of/;
       print;
       print LOG;
     }
