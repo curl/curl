@@ -10,6 +10,11 @@ Daniel Fandrich (29 Jul 2008)
 - Fixed --use-ascii to properly convert text files on Symbian OS, MS-DOS
   and OS/2.
 
+- Added test case 1051 to test Location: following with PUT, as reported
+  by Ben Sutcliffe.  The test when run manually shows a problem in curl,
+  but the test harness web server doesn't run the test correctly so it's
+  disabled for now.
+
 Daniel Fandrich (28 Jul 2008)
 - Fixed display of the interface bind address in the trace output when it's
   an IPv6 address.
