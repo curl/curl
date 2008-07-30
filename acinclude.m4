@@ -3529,13 +3529,3 @@ AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
     AC_MSG_RESULT([no])
   fi
 ])
-
-
-dnl Tests done using 'aclocal -I m4' in buildconf and 'ACLOCAL_AMFLAGS = -I m4'
-dnl in top Makefile.am triggered a problem that prevented aclocal from running
-dnl successfully on SunOS 5.10 with GNU m4 1.4.5 and GNU Autoconf 2.61
-dnl We actually don't need all the bells and whistles that the above mechanism
-dnl provides. We only need to include our m4/reentrant.m4 file here.
-
-m4_include([m4/reentrant.m4])
-

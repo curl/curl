@@ -305,46 +305,12 @@ fi
 tmp_host_type=`uname -a | sed '/SunOS/s/.*\(SunOS\).*/\1/'`
 if test "x$tmp_host_type" = "xSunOS"; then
   ACLOCAL_FLAGS="$ACLOCAL_FLAGS --verbose"
-
-  echo "buildconf: PATH: $PATH"
-
-  # show all available sed's in PATH order
-  old_IFS=$IFS; IFS=':'
-  for path in $PATH
-  do
-    IFS=$old_IFS
-    if test -f "$path/sed"; then
-      echo "buildconf: sed: $path/sed"
-    fi
-    if test -f "$path/gsed"; then
-      echo "buildconf: sed: $path/gsed"
-      if test -z "$SED"; then
-        SED="$path/gsed"
-        export SED
-      fi
-    fi
-  done
-  IFS=$old_IFS
-  echo "buildconf: SED: $SED"
-
-  echo "buildconf: Feeding acinclude.m4 with reentrant.m4"
-
-  sed 's/m4_include.*m4.*reentrant.m4.*//' acinclude.m4 > acinclude.2
-  mv acinclude.2 acinclude.m4
-  cat m4/reentrant.m4 >> acinclude.m4
-  rm -f m4/reentrant.m4
-
-  sed 's/m4_include.*m4.*reentrant.m4.*//' ares/acinclude.m4 > ares/acinclude.2
-  mv ares/acinclude.2 ares/acinclude.m4
-  cat ares/m4/reentrant.m4 >> ares/acinclude.m4
-  rm -f ares/m4/reentrant.m4
-
 fi
 
 echo "buildconf: running libtoolize"
 $libtoolize --copy --automake --force || die "The libtoolize command failed"
 echo "buildconf: running aclocal"
-${ACLOCAL:-aclocal} $ACLOCAL_FLAGS || die "The aclocal command line failed"
+${ACLOCAL:-aclocal} -I m4 $ACLOCAL_FLAGS || die "The aclocal command line failed"
 if test -n "$PERL"; then
   echo "buildconf: running aclocal hack to convert all mv to mv -f"
   $PERL -i.bak -pe 's/\bmv +([^-\s])/mv -f $1/g' aclocal.m4
