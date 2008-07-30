@@ -22,6 +22,9 @@
 #***************************************************************************
 
 
+# serial 1.12
+
+
 dnl CURL_CHECK_NEED_REENTRANT_GMTIME_R
 dnl -------------------------------------------------
 dnl Checks if the preprocessor _REENTRANT definition
