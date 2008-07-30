@@ -515,8 +515,8 @@ int main(int argc, char **argv)
 
   do {
     fromlen = sizeof(from);
-    n = (ssize_t)sreadfrom(sock, buf, sizeof(buf), 0,
-                           (struct sockaddr *)&from, &fromlen);
+    n = (ssize_t)recvfrom(sock, buf, sizeof(buf), 0,
+                          (struct sockaddr *)&from, &fromlen);
     if (n < 0) {
       logmsg("recvfrom:\n");
       result = 3;
