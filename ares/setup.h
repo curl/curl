@@ -3,7 +3,7 @@
 
 /* $Id$ */
 
-/* Copyright (C) 2004 - 2007 by Daniel Stenberg et al
+/* Copyright (C) 2004 - 2008 by Daniel Stenberg et al
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
