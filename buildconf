@@ -81,6 +81,14 @@ fi
 
 echo "buildconf: autoconf version $ac_version (ok)"
 
+am4te_version=`${AUTOM4TE:-autom4te} --version 2>/dev/null|head -n 1| sed -e 's/autom4te\(.*\)/\1/' -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
+if test -z "$am4te_version"; then
+  echo "buildconf: autom4te not found. Weird autoconf installation!"
+  exit 1
+else
+  echo "buildconf: autom4te version $am4te_version"
+fi
+
 #--------------------------------------------------------------------------
 # autoheader 2.50 or newer
 #
@@ -124,12 +132,12 @@ fi
 
 echo "buildconf: automake version $am_version (ok)"
 
-ac=`findtool ${ACLOCAL:-aclocal}`
-if test -z "$ac"; then
+acloc_version=`${ACLOCAL:-aclocal} --version 2>/dev/null|head -n 1| sed -e 's/^.* \([0-9]\)/\1/' -e 's/[a-z]* *$//' -e 's/\(.*\)\(-p.*\)/\1/'`
+if test -z "$acloc_version"; then
   echo "buildconf: aclocal not found. Weird automake installation!"
   exit 1
 else
-  echo "buildconf: aclocal found"
+  echo "buildconf: aclocal version $acloc_version"
 fi
 
 #--------------------------------------------------------------------------
@@ -307,6 +315,13 @@ if test "x$tmp_host_type" = "xSunOS"; then
     IFS=$old_IFS
     if test -f "$path/sed"; then
       echo "buildconf: sed: $path/sed"
+    fi
+    if test -f "$path/gsed"; then
+      echo "buildconf: sed: $path/gsed"
+      if test -z "$SED"; then
+        SED="$path/gsed"
+        export SED
+      fi
     fi
   done
   IFS=$old_IFS
