@@ -9,6 +9,8 @@ To be addressed before 7.19.0 (planned release: August 2008)
       This second patch version should also address the problem the first one
       has of not working when building outside of the source tree.
       #148 blocks this.
+      UPDATE:
+       * #148 no longer blocks this.
 
 145 - Phil Blundell's CURLOPT_SCOPE patch/work
 
