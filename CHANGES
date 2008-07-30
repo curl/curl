@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel Stenberg (30 Jul 2008)
+- PHP's bug report #43158 (http://bugs.php.net/bug.php?id=43158) identifies a
+  true bug in libcurl built with OpenSSL. It made curl_easy_getinfo() more or
+  less always return 0 for CURLINFO_SSL_VERIFYRESULT because the function that
+  would set it to something non-zero would return before the assign in almost
+  all error cases. The internal variable is now set to non-zero from the start
+  of the function only to get cleared later on if things work out fine.
+
+- Made the curl tool's -w option support the %{ssl_verify_result} variable
+
 Daniel Fandrich (30 Jul 2008)
 - Added test cases 1052 through 1055 to test uploading data from files
   during redirects.  Test cases 1052 and 1055 show problems (maybe the same

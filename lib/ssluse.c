@@ -1444,7 +1444,7 @@ ossl_connect_step1(struct connectdata *conn,
     lookup=X509_STORE_add_lookup(connssl->ctx->cert_store,X509_LOOKUP_file());
     if ( !lookup ||
          (X509_load_crl_file(lookup,data->set.str[STRING_SSL_CRLFILE],
-			     X509_FILETYPE_PEM)!=1) ) {
+                             X509_FILETYPE_PEM)!=1) ) {
       failf(data,"error loading CRL file :\n"
             "  CRLfile: %s\n",
             data->set.str[STRING_SSL_CRLFILE]?
@@ -1455,11 +1455,11 @@ ossl_connect_step1(struct connectdata *conn,
       /* Everything is fine. */
       infof(data, "successfully load CRL file:\n");
       X509_STORE_set_flags(connssl->ctx->cert_store,
-			   X509_V_FLAG_CRL_CHECK|X509_V_FLAG_CRL_CHECK_ALL);
+                           X509_V_FLAG_CRL_CHECK|X509_V_FLAG_CRL_CHECK_ALL);
     }
     infof(data,
           "  CRLfile: %s\n", data->set.str[STRING_SSL_CRLFILE] ?
-	  data->set.str[STRING_SSL_CRLFILE]: "none");
+          data->set.str[STRING_SSL_CRLFILE]: "none");
   }
 
   /* SSL always tries to verify the peer, this only says whether it should
@@ -1639,6 +1639,8 @@ static CURLcode servercert(struct connectdata *conn,
   X509 *issuer;
   FILE *fp;
 
+  data->set.ssl.certverifyresult = !X509_V_OK;
+
   connssl->server_cert = SSL_get_peer_certificate(connssl->handle);
   if(!connssl->server_cert) {
     if(strict)
@@ -1692,34 +1694,34 @@ static CURLcode servercert(struct connectdata *conn,
     if (data->set.str[STRING_SSL_ISSUERCERT]) {
       if (! (fp=fopen(data->set.str[STRING_SSL_ISSUERCERT],"r"))) {
         if (strict)
-	  failf(data, "SSL: Unable to open issuer cert (%s)\n",
-		data->set.str[STRING_SSL_ISSUERCERT]);
-	X509_free(connssl->server_cert);
-	connssl->server_cert = NULL;
-	return CURLE_SSL_ISSUER_ERROR;
+          failf(data, "SSL: Unable to open issuer cert (%s)\n",
+                data->set.str[STRING_SSL_ISSUERCERT]);
+        X509_free(connssl->server_cert);
+        connssl->server_cert = NULL;
+        return CURLE_SSL_ISSUER_ERROR;
       }
       issuer = PEM_read_X509(fp,NULL,ZERO_NULL,NULL);
       if (!issuer) {
         if (strict)
-	  failf(data, "SSL: Unable to read issuer cert (%s)\n",
-		data->set.str[STRING_SSL_ISSUERCERT]);
-	X509_free(connssl->server_cert);
-	X509_free(issuer);
-	fclose(fp);
-	return CURLE_SSL_ISSUER_ERROR;
+          failf(data, "SSL: Unable to read issuer cert (%s)\n",
+                data->set.str[STRING_SSL_ISSUERCERT]);
+        X509_free(connssl->server_cert);
+        X509_free(issuer);
+        fclose(fp);
+        return CURLE_SSL_ISSUER_ERROR;
       }
       fclose(fp);
       if (X509_check_issued(issuer,connssl->server_cert) != X509_V_OK) {
         if (strict)
-	  failf(data, "SSL: Certificate issuer check failed (%s)\n",
-		data->set.str[STRING_SSL_ISSUERCERT]);
-	X509_free(connssl->server_cert);
-	X509_free(issuer);
-	connssl->server_cert = NULL;
+          failf(data, "SSL: Certificate issuer check failed (%s)\n",
+                data->set.str[STRING_SSL_ISSUERCERT]);
+        X509_free(connssl->server_cert);
+        X509_free(issuer);
+        connssl->server_cert = NULL;
         return CURLE_SSL_ISSUER_ERROR;
       }
       infof(data, "\t SSL certificate issuer check ok (%s)\n",
-	    data->set.str[STRING_SSL_ISSUERCERT]);
+            data->set.str[STRING_SSL_ISSUERCERT]);
       X509_free(issuer);
     }
 
@@ -1728,7 +1730,7 @@ static CURLcode servercert(struct connectdata *conn,
     if(data->set.ssl.certverifyresult != X509_V_OK) {
       if(data->set.ssl.verifypeer) {
         /* We probably never reach this, because SSL_connect() will fail
-           and we return earlyer if verifypeer is set? */
+           and we return earlier if verifypeer is set? */
         if(strict)
           failf(data, "SSL certificate verify result: %s (%ld)",
                 X509_verify_cert_error_string(lerr), lerr);
