@@ -40,7 +40,7 @@
 #endif /* HAVE_CONFIG_H */
 
 /*
- * HP-UX needs _REENTRANT set for a few function prototypes and
+ * Tru64 needs _REENTRANT set for a few function prototypes and
  * things to appear in the system header files. Unixware needs it
  * to build proper reentrant code. Others may also need it.
  */
