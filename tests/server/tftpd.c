@@ -132,7 +132,7 @@ static int maxtimeout = 5*TIMEOUT;
 static char buf[PKTSIZE];
 static char ackbuf[PKTSIZE];
 static struct sockaddr_in from;
-static RECVFROM_ARG6_T fromlen;
+static socklen_t fromlen;
 
 struct bf {
   int counter;            /* size of data in buffer, or flag */
@@ -355,7 +355,7 @@ static int synchnet(curl_socket_t f /* socket to flush */)
   int j = 0;
   char rbuf[PKTSIZE];
   struct sockaddr_in fromaddr;
-  RECVFROM_ARG6_T fromaddrlen;
+  socklen_t fromaddrlen;
 
   while (1) {
 #if defined(HAVE_IOCTLSOCKET)
@@ -365,8 +365,9 @@ static int synchnet(curl_socket_t f /* socket to flush */)
 #endif
     if (i) {
       j++;
-      fromaddrlen = (RECVFROM_ARG6_T)sizeof(fromaddr);
-      (void)sreadfrom(f, rbuf, sizeof(rbuf), &fromaddr, &fromaddrlen);
+      fromaddrlen = sizeof(fromaddr);
+      (void)recvfrom(f, rbuf, sizeof(rbuf), 0,
+                     (struct sockaddr *)&fromaddr, &fromaddrlen);
     }
     else
       break;
@@ -513,8 +514,9 @@ int main(int argc, char **argv)
          , port );
 
   do {
-    fromlen = (RECVFROM_ARG6_T)sizeof(from);
-    n = sreadfrom(sock, buf, sizeof(buf), &from, &fromlen);
+    fromlen = sizeof(from);
+    n = (ssize_t)sreadfrom(sock, buf, sizeof(buf), 0,
+                           (struct sockaddr *)&from, &fromlen);
     if (n < 0) {
       logmsg("recvfrom:\n");
       result = 3;

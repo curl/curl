@@ -717,7 +717,7 @@ static CURLcode tftp_do(struct connectdata *conn, bool *done)
   CURLcode              code;
   int                   rc;
   struct Curl_sockaddr_storage fromaddr;
-  RECVFROM_ARG6_T       fromlen;
+  socklen_t             fromlen;
   int                   check_time = 0;
   struct SingleRequest *k = &data->req;
 
@@ -764,10 +764,13 @@ static CURLcode tftp_do(struct connectdata *conn, bool *done)
     else {
 
       /* Receive the packet */
-      fromlen = (RECVFROM_ARG6_T)sizeof(fromaddr);
-      state->rbytes = sreadfrom(state->sockfd,
-                                &state->rpacket, sizeof(state->rpacket),
-                                &fromaddr, &fromlen);
+      fromlen = sizeof(fromaddr);
+      state->rbytes = (ssize_t)recvfrom(state->sockfd,
+                                        (void *)&state->rpacket,
+                                        sizeof(state->rpacket),
+                                        0,
+                                        (struct sockaddr *)&fromaddr,
+                                        &fromlen);
       if(state->remote_addrlen==0) {
         memcpy(&state->remote_addr, &fromaddr, fromlen);
         state->remote_addrlen = fromlen;
