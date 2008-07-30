@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Fandrich (29 Jul 2008)
+- Fixed --use-ascii to properly convert text files on Symbian OS, MS-DOS
+  and OS/2.
+
 Daniel Fandrich (28 Jul 2008)
 - Fixed display of the interface bind address in the trace output when it's
   an IPv6 address.

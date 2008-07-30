@@ -36,6 +36,7 @@ This release includes the following bugfixes:
  o poll not working on Windows Vista due to POLLPRI being incorrectly used
  o user-agent in CONNECT with non-HTTP protocols
  o CURL_READFUNC_PAUSE problems fixed
+ o --use-ascii now works on Symbian OS, MS-DOS and OS/2
 
 This release includes the following known bugs:
 
