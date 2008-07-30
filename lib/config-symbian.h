@@ -602,7 +602,7 @@
 #define HAVE_VARIADIC_MACROS_C99 1
 
 /* Define to 1 if compiler supports old gcc variadic macro style. */
-#define HAVE_VARIADIC_MACROS_GCC 1
+/*#define HAVE_VARIADIC_MACROS_GCC 1*/
 
 /* Define to 1 if you have the winber.h header file. */
 /* #undef HAVE_WINBER_H */

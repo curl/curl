@@ -30,15 +30,14 @@ e.g. \epoc32\release\winscw\udeb\curl -- -v http://localhost/
 Failure to do so may mean that some of your options won't be correctly
 processed.
 
-Symbian OS does not provide for redirecting the standard I/O streams, so
-stdin always comes from the keyboard, stdout always goes to the
-console, and stderr goes to the epocwind.out file (on the emulator).
-The standard curl options -o, --stderr and --trace-ascii can be used to
+Symbian's ESHELL allows for redirecting stdin and stdout to files, but
+stderr goes to the epocwind.out file (on the emulator).  The standard
+curl options -o, --stderr and --trace-ascii can be used to
 redirect output to a file (or stdout) instead.
 
-P.I.P.S. doesn't inherit the current working directory at startup, so the
--O option probably won't work as expected, and giving the complete paths
-to files will be necessary.
+P.I.P.S. doesn't inherit the current working directory at startup from
+the shell, so relative path names are always relative to
+C:\Private\f0206442\.
 
 P.I.P.S. provides no way to disable echoing of characters as they are
 entered, so passwords typed in on the console will be visible.  It also
@@ -78,4 +77,4 @@ files.
 
 Dan Fandrich
 dan@coneharvesters.com
-June 2008
+July 2008
