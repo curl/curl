@@ -6,14 +6,18 @@
 
                                   Changelog
 
+Daniel Fandrich (30 Jul 2008)
+- Added test cases 1052 through 1055 to test uploading data from files
+  during redirects.  Test cases 1052 and 1055 show problems (maybe the same
+  root cause as 1051) and are disabled.
+
 Daniel Fandrich (29 Jul 2008)
 - Fixed --use-ascii to properly convert text files on Symbian OS, MS-DOS
   and OS/2.
 
 - Added test case 1051 to test Location: following with PUT, as reported
-  by Ben Sutcliffe.  The test when run manually shows a problem in curl,
-  but the test harness web server doesn't run the test correctly so it's
-  disabled for now.
+  by Ben Sutcliffe.  The test when run manually shows a problem in curl
+  so it's disabled.
 
 Daniel Fandrich (28 Jul 2008)
 - Fixed display of the interface bind address in the trace output when it's

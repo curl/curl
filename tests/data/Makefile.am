@@ -54,7 +54,7 @@ EXTRA_DIST = test1 test108 test117 test127 test20 test27 test34 test46	   \
  test556 test1031 test628 test629 test630 test631 test632 test1032         \
  test1033 test539 test1034 test1035 test1036 test1037 test1038 test1039    \
  test1040 test1041 test1042 test1043 test1044 test1045 test1046 test1047   \
- test1048 test1049 test1050 test1051
+ test1048 test1049 test1050 test1051 test1052 test1053 test1054 test1055
 
 filecheck:
 	@mkdir test-place; \
