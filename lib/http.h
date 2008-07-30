@@ -35,6 +35,8 @@ bool Curl_compareheader(const char *headerline,  /* line to check */
                         const char *header,   /* header keyword _with_ colon */
                         const char *content); /* content string to find */
 
+char *Curl_copy_header_value(const char *h);
+
 /* ftp can use this as well */
 CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                            int tunnelsocket,

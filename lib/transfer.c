@@ -109,6 +109,7 @@
 
 #define CURL_TIMEOUT_EXPECT_100 1000 /* counting ms here */
 
+
 /*
  * This function will call the read callback to fill our buffer with data
  * to upload.
@@ -927,42 +928,17 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                     ", closing after transfer\n", contentlength);
             }
           }
-          /* check for Content-Type: header lines to get the mime-type */
+          /* check for Content-Type: header lines to get the MIME-type */
           else if(checkprefix("Content-Type:", k->p)) {
-            char *start;
-            char *end;
-            size_t len;
-
-            /* Find the first non-space letter */
-            for(start=k->p+13;
-                *start && ISSPACE(*start);
-                start++)
-              ;  /* empty loop */
-
-            /* data is now in the host encoding so
-               use '\r' and '\n' instead of 0x0d and 0x0a */
-            end = strchr(start, '\r');
-            if(!end)
-              end = strchr(start, '\n');
-
-            if(end) {
-              /* skip all trailing space letters */
-              for(; ISSPACE(*end) && (end > start); end--)
-                ;  /* empty loop */
-
-              /* get length of the type */
-              len = end-start+1;
-
-              /* allocate memory of a cloned copy */
+            char *contenttype = Curl_copy_header_value(k->p);
+            if (!contenttype)
+              return CURLE_OUT_OF_MEMORY;
+            if (!*contenttype)
+              /* ignore empty data */
+              free(contenttype);
+            else {
               Curl_safefree(data->info.contenttype);
-
-              data->info.contenttype = malloc(len + 1);
-              if(NULL == data->info.contenttype)
-                return CURLE_OUT_OF_MEMORY;
-
-              /* copy the content-type string */
-              memcpy(data->info.contenttype, start, len);
-              data->info.contenttype[len] = 0; /* zero terminate */
+              data->info.contenttype = contenttype;
             }
           }
 #ifndef CURL_DISABLE_HTTP
@@ -1123,36 +1099,19 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           }
           else if((k->httpcode >= 300 && k->httpcode < 400) &&
                   checkprefix("Location:", k->p)) {
-            /* this is the URL that the server advices us to use instead */
-            char *ptr;
-            char *start=k->p;
-            char backup;
+            /* this is the URL that the server advises us to use instead */
+            char *location = Curl_copy_header_value(k->p);
+            if (!location)
+              return CURLE_OUT_OF_MEMORY;
+            if (!*location)
+              /* ignore empty data */
+              free(location);
+            else {
+              DEBUGASSERT(!data->req.location);
+              data->req.location = location;
 
-            start += 9; /* pass "Location:" */
-
-            /* Skip spaces and tabs. We do this to support multiple
-               white spaces after the "Location:" keyword. */
-            while(*start && ISSPACE(*start ))
-              start++;
-
-            /* Scan through the string from the end to find the last
-               non-space. k->end_ptr points to the actual terminating zero
-               letter, move pointer one letter back and start from
-               there. This logic strips off trailing whitespace, but keeps
-               any embedded whitespace. */
-            ptr = k->end_ptr-1;
-            while((ptr>=start) && ISSPACE(*ptr))
-              ptr--;
-            ptr++;
-
-            backup = *ptr; /* store the ending letter */
-            if(ptr != start) {
-              *ptr = '\0';   /* zero terminate */
-              data->req.location = strdup(start); /* clone string */
-              *ptr = backup; /* restore ending letter */
-              if(!data->req.location)
-                return CURLE_OUT_OF_MEMORY;
               if(data->set.http_follow_location) {
+                DEBUGASSERT(!data->req.newurl);
                 data->req.newurl = strdup(data->req.location); /* clone */
                 if(!data->req.newurl)
                   return CURLE_OUT_OF_MEMORY;

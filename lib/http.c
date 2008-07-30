@@ -181,6 +181,60 @@ static char *checkheaders(struct SessionHandle *data, const char *thisheader)
 }
 
 /*
+ * Strip off leading and trailing whitespace from the value in the
+ * given HTTP header line and return a strdupped copy. Returns NULL in
+ * case of allocation failure. Returns an empty string if the header value
+ * consists entirely of whitespace.
+ */
+char *Curl_copy_header_value(const char *h)
+{
+  const char *start;
+  const char *end;
+  char *value;
+  size_t len;
+
+  DEBUGASSERT(h);
+
+  /* Find the end of the header name */
+  while (*h && (*h != ':'))
+    ++h;
+
+  if (*h)
+    /* Skip over colon */
+    ++h;
+
+  /* Find the first non-space letter */
+  for(start=h;
+      *start && ISSPACE(*start);
+      start++)
+    ;  /* empty loop */
+
+  /* data is in the host encoding so
+     use '\r' and '\n' instead of 0x0d and 0x0a */
+  end = strchr(start, '\r');
+  if(!end)
+    end = strchr(start, '\n');
+  if(!end)
+    end = strchr(start, '\0');
+
+  /* skip all trailing space letters */
+  for(; ISSPACE(*end) && (end > start); end--)
+    ;  /* empty loop */
+
+  /* get length of the type */
+  len = end-start+1;
+
+  value = malloc(len + 1);
+  if(!value)
+    return NULL;
+
+  memcpy(value, start, len);
+  value[len] = 0; /* zero terminate */
+
+  return value;
+}
+
+/*
  * http_output_basic() sets up an Authorization: header (or the proxy version)
  * for HTTP Basic authentication.
  *
@@ -668,6 +722,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
       /* if exactly this is wanted, go */
       int neg = Curl_input_negotiate(conn, (bool)(httpcode == 407), start);
       if(neg == 0) {
+        DEBUGASSERT(!data->req.newurl);
         data->req.newurl = strdup(data->change.url);
         data->state.authproblem = (data->req.newurl == NULL);
       }
@@ -2094,23 +2149,18 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
        custom Host: header if this is NOT a redirect, as setting Host: in the
        redirected request is being out on thin ice. Except if the host name
        is the same as the first one! */
-    char *start = ptr+strlen("Host:");
-    while(*start && ISSPACE(*start ))
-      start++;
-    ptr = start; /* start host-scanning here */
-
-    /* scan through the string to find the end (space or colon) */
-    while(*ptr && !ISSPACE(*ptr) && !(':'==*ptr))
-      ptr++;
-
-    if(ptr != start) {
-      size_t len=ptr-start;
+    char *cookiehost = Curl_copy_header_value(ptr);
+    if (!cookiehost)
+      return CURLE_OUT_OF_MEMORY;
+    if (!*cookiehost)
+      /* ignore empty data */
+      free(cookiehost);
+    else {
+      char *colon = strchr(cookiehost, ':');
+      if (colon)
+        *colon = 0; /* The host must not include an embedded port number */
       Curl_safefree(conn->allocptr.cookiehost);
-      conn->allocptr.cookiehost = malloc(len+1);
-      if(!conn->allocptr.cookiehost)
-        return CURLE_OUT_OF_MEMORY;
-      memcpy(conn->allocptr.cookiehost, start, len);
-      conn->allocptr.cookiehost[len]=0;
+      conn->allocptr.cookiehost = cookiehost;
     }
 #endif
 
