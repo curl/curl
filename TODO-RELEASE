@@ -30,6 +30,16 @@ To be addressed before 7.19.0 (planned release: August 2008)
       changed back to the proper '-I m4' method which was used initially and
       that didn't fail on other systems.
       http://curl.haxx.se/mail/lib-2008-07/0210.html
+      UPDATE:
+       * sed cannot be the culprit aclocal and autom4te are perl scripts and
+         don't use 'sed'.
+       * autom4te matches autoconf version and aclocal matches automake's.
+       * Even when directly copying into acinclude.m4 the contents of file
+         reentrant.m4 and having the '-I m4' thing disabled the problem
+         persists.
+       * Reinstated the 'aclocal -I m4' in buildconf and 'ACLOCAL_AMFLAGS =
+         -I m4' way of including our local m4/reentrant.m4 file. This even
+         takes care of including the file in the distribution tarball.
 
 149 - The introduction of the sreadfrom macro has proven usefull on all systems
       except on HP-UX. For this release I will back out its use in lib/tftp.c
