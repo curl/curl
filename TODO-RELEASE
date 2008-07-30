@@ -17,9 +17,6 @@ To be addressed before 7.19.0 (planned release: August 2008)
 146 - Yehoshua Hershberg's re-using of connections that failed with
       CURLE_PEER_FAILED_VERIFICATION
 
-147 - PHP's bug report #43158 (http://bugs.php.net/bug.php?id=43158) identifies
-      a true bug in libcurl built with OpenSSL.
-
 148 - Introduction of m4/reentrant.m4 is triggering some problems on Solaris
       systems. The problem manifests when buildconf runs aclocal, at some point
       aclocal fails when using GNU m4 version 1.4.5 it runs out of memory.  If
