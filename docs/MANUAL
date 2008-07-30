@@ -496,7 +496,7 @@ CONFIG FILE
   with = or :. Comments can be used within the file. If the first letter on a
   line is a '#'-letter the rest of the line is treated as a comment.
 
-  If you want the parameter to contain spaces, you must inclose the entire
+  If you want the parameter to contain spaces, you must enclose the entire
   parameter within double quotes ("). Within those quotes, you specify a
   quote as \".
 
@@ -567,7 +567,7 @@ FTP and PATH NAMES
 FTP and firewalls
 
   The FTP protocol requires one of the involved parties to open a second
-  connction as soon as data is about to get transfered. There are two ways to
+  connection as soon as data is about to get transfered. There are two ways to
   do this.
 
   The default way for curl is to issue the PASV command which causes the
@@ -885,6 +885,25 @@ MULTIPLE TRANSFERS WITH A SINGLE COMMAND LINE
   You can also upload multiple files in a similar fashion:
 
     curl -T local1 ftp://ftp.com/moo.exe -T local2 ftp://ftp.com/moo2.txt
+
+IPv6
+
+  curl will connect to a server with IPv6 when a host lookup returns an IPv6
+  address and fall back to IPv4 if the connection fails. The --ipv4 and --ipv6
+  options can specify which address to use when both are available. IPv6
+  addresses can also be specified directly in URLs using the syntax:
+
+    http://[2001:1890:1112:1::20]/overview.html
+
+  When this style is used, the -g option must be given to stop curl from
+  interpreting the square brackets as special globbing characters.  Link local
+  and site local addresses including a scope identifier, such as fe80::1234%1,
+  may also be used, but the scope portion must be numeric and the percent
+  character must be URL escaped. The previous example in an SFTP URL might
+  look like:
+
+    sftp://[fe80::1234%251]/
+
 
 MAILING LISTS
 
