@@ -19,6 +19,7 @@ This release includes the following changes:
  o Added CURLINFO_APPCONNECT_TIME
  o Added test selection by key word in runtests.pl
  o the curl tool's -w option support the %{ssl_verify_result} variable
+ o Added CURLOPT_SCOPE and scope parsing of the URL according to RFC4007
 
 This release includes the following bugfixes:
 

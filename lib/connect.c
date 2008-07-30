@@ -773,6 +773,13 @@ singleipconnect(struct connectdata *conn,
 
   *connected = FALSE; /* default is not connected */
 
+#ifdef CURLRES_IPV6
+  if (conn->scope && (addr->family == AF_INET6)) {
+    struct sockaddr_in6 *in6 = (struct sockaddr_in6 *)&addr->addr;
+    in6->sin6_scope_id = conn->scope;
+  }
+#endif
+
   /* FIXME: do we have Curl_printable_address-like with struct sockaddr* as
      argument? */
 #if defined(HAVE_SYS_UN_H) && defined(AF_UNIX)

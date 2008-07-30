@@ -1211,6 +1211,9 @@ typedef enum {
   /* Issuer certificate */
   CINIT(ISSUERCERT, OBJECTPOINT, 170),
 
+  /* (IPv6) Address scope */
+  CINIT(ADDRESS_SCOPE, LONG, 171),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

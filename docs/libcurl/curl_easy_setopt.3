@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_easy_setopt 3 "5 Jan 2008" "libcurl 7.19.0" "libcurl Manual"
+.TH curl_easy_setopt 3 "30 Jul 2008" "libcurl 7.19.0" "libcurl Manual"
 .SH NAME
 curl_easy_setopt \- set options for a curl easy handle
 .SH SYNOPSIS
@@ -547,6 +547,9 @@ notably telnet or rlogin) small segments may need to be sent
 without delay. This is less efficient than sending larger amounts of
 data at a time, and can contribute to congestion on the network if
 overdone.
+.IP CURLOPT_ADDRESS_SCOPE
+Pass a long specifying the scope_id value to use when connecting to IPv6
+link-local or site-local addresses.
 .SH NAMES and PASSWORDS OPTIONS (Authentication)
 .IP CURLOPT_NETRC
 This parameter controls the preference of libcurl between using user names and

@@ -903,6 +903,8 @@ struct connectdata {
      set. */
   char *ip_addr_str;
 
+  unsigned int scope;    /* address scope for IPv6 */
+
   char protostr[16];  /* store the protocol string in this buffer */
   int socktype;  /* SOCK_STREAM or SOCK_DGRAM */
 
@@ -1478,6 +1480,7 @@ struct UserDefined {
   bool proxy_transfer_mode; /* set transfer mode (;type=<a|i>) when doing FTP
                                via an HTTP proxy */
   char *str[STRING_LAST]; /* array of strings, pointing to allocated memory */
+  unsigned int scope;    /* address scope for IPv6 */
 };
 
 struct Names {

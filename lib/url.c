@@ -2091,6 +2091,15 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     }
     break;
 
+  case CURLOPT_ADDRESS_SCOPE:
+    /*
+     * We always get longs when passed plain numericals, but for this value we
+     * know that an unsigned int will always hold the value so we blindly
+     * typecast to this type
+     */
+    data->set.scope = (unsigned int) va_arg(param, long);
+    break;
+
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_FAILED_INIT; /* correct this */
@@ -3079,6 +3088,24 @@ static CURLcode ParseURLAndFillConnection(struct SessionHandle *data,
     memmove(&path[1], path, strlen(path)+1);
     path[0] = '/';
   }
+
+  if (conn->host.name[0] == '[' && !data->state.this_is_a_follow) {
+    /* This looks like an IPv6 address literal.  See if there is an address
+       scope.  */
+    char *percent = strstr (conn->host.name, "%25");
+    if (percent) {
+      char *endp;
+      conn->scope = strtoul (percent + 3, &endp, 10);
+      if (*endp == ']') {
+        /* The address scope was well formed.  Knock it out of the hostname.  */
+        strcpy (percent, "]");
+      }
+    }
+  }
+
+  if (data->set.scope)
+    /* Override any scope that was set above.  */
+    conn->scope = data->set.scope;
 
   /*
    * So if the URL was A://B/C,
