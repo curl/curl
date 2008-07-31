@@ -3863,15 +3863,14 @@ static CURLcode create_conn(struct SessionHandle *data,
    * The conn->host.name is currently [user:passwd@]host[:port] where host
    * could be a hostname, IPv4 address or IPv6 address.
    *************************************************************/
-  if((1 == sscanf(conn->host.name, "[%*39[0123456789abcdefABCDEF:.]%c", &endbracket)) &&
+  if((1 == sscanf(conn->host.name, "[%*39[0123456789abcdefABCDEF:.%]%c", &endbracket)) &&
      (']' == endbracket)) {
     /* this is a RFC2732-style specified IP-address */
     conn->bits.ipv6_ip = TRUE;
 
-    conn->host.name++; /* pass the starting bracket */
+    conn->host.name++; /* skip over the starting bracket */
     tmp = strchr(conn->host.name, ']');
-    *tmp = 0; /* zero terminate */
-    tmp++; /* pass the ending bracket */
+    *tmp++ = 0; /* zero terminate, killing the bracket */
     if(':' != *tmp)
       tmp = NULL; /* no port number available */
   }
@@ -3887,9 +3886,18 @@ static CURLcode create_conn(struct SessionHandle *data,
     if(conn->bits.httpproxy) {
       /* we need to create new URL with the new port number */
       char *url;
+      bool isftp = strequal("ftp", conn->protostr) || 
+                   strequal("ftps", conn->protostr);
 
-      url = aprintf("%s://%s:%d%s", conn->protostr, conn->host.name,
-                    conn->remote_port, data->state.path);
+      /*
+       * This synthesized URL isn't always right--suffixes like ;type=A
+       * are stripped off. It would be better to work directly from the
+       * original URL and simply replace the port part of it.
+       */
+      url = aprintf("%s://%s%s%s:%d%s%s", conn->protostr,
+             conn->bits.ipv6_ip?"[":"", conn->host.name,
+             conn->bits.ipv6_ip?"]":"", conn->remote_port, 
+             isftp?"/":"", data->state.path);
       if(!url)
         return CURLE_OUT_OF_MEMORY;
 
