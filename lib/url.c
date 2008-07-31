@@ -3089,16 +3089,19 @@ static CURLcode ParseURLAndFillConnection(struct SessionHandle *data,
     path[0] = '/';
   }
 
-  if (conn->host.name[0] == '[' && !data->state.this_is_a_follow) {
+  if (conn->host.name[0] == '[') {
     /* This looks like an IPv6 address literal.  See if there is an address
        scope.  */
     char *percent = strstr (conn->host.name, "%25");
     if (percent) {
       char *endp;
-      conn->scope = strtoul (percent + 3, &endp, 10);
+      unsigned int scope = strtoul (percent + 3, &endp, 10);
       if (*endp == ']') {
         /* The address scope was well formed.  Knock it out of the hostname.  */
-        strcpy (percent, "]");
+        memmove(percent, endp, strlen(endp)+1);
+        if (!data->state.this_is_a_follow)
+          /* Don't honour a scope given in a Location: header */
+          conn->scope = scope;
       }
     }
   }
