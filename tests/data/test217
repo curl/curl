@@ -1,4 +1,16 @@
 <testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP CONNECT
+HTTP proxy
+proxytunnel
+followlocation
+--write-out
+</keywords>
+</info>
+
 # Server-side
 <reply>
 

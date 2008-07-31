@@ -5,6 +5,7 @@ HTTP
 HTTP GET
 Content-Range
 Resume
+followlocation
 </keywords>
 </info>
 

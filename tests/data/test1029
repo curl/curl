@@ -5,8 +5,10 @@ HTTP
 HTTP GET
 redirect_url
 followlocation
+--write-out
 </keywords>
 </info>
+
 # Server-side
 <reply>
 <data nocheck="1">

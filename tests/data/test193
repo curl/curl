@@ -1,4 +1,13 @@
 <testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+followlocation
+--write-out
+</keywords>
+</info>
+
 #
 # Server-side
 <reply>
