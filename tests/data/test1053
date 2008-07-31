@@ -5,7 +5,7 @@
 HTTP
 HTTP FORMPOST
 HTTP file upload
-followredirect
+followlocation
 </keywords>
 </info>
 
@@ -51,7 +51,7 @@ blablabla
 http
 </server>
  <name>
-HTTP RFC1867-type formposting from file with Location following
+HTTP RFC1867-type formposting from file with Location: following
  </name>
  <command>
 http://%HOSTIP:%HTTPPORT/we/want/1053 -L -F name=daniel -F tool=curl -F file=@log/test1053.txt
