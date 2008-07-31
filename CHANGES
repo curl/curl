@@ -27,6 +27,8 @@ Daniel Fandrich (30 Jul 2008)
   during redirects.  Test cases 1052 and 1055 show problems (maybe the same
   root cause as 1051) and are disabled.
 
+- Fixed a couple of buffer overflows in the MS-DOS port of the curl tool.
+
 Daniel Fandrich (29 Jul 2008)
 - Fixed --use-ascii to properly convert text files on Symbian OS, MS-DOS
   and OS/2.

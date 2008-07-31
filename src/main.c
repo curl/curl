@@ -154,8 +154,8 @@
 #ifdef MSDOS
 #include <dos.h>
 
-const char *msdosify(const char *);
-char *rename_if_dos_device_name(char *);
+static const char *msdosify(const char *);
+static char *rename_if_dos_device_name(char *);
 
 #ifdef DJGPP
 /* we want to glob our own argv[] */
@@ -811,7 +811,7 @@ static char *my_get_line(FILE *fp);
 static int create_dir_hierarchy(const char *outfile, FILE *errors);
 
 static void GetStr(char **string,
-                   char *value)
+                   const char *value)
 {
   if(*string)
     free(*string);
@@ -962,7 +962,7 @@ static void list_engines (const struct curl_slist *engines)
  *
  * formparse()
  *
- * Reads a 'name=value' paramter and builds the appropriate linked list.
+ * Reads a 'name=value' parameter and builds the appropriate linked list.
  *
  * Specify files to upload with 'name=@filename'. Supports specified
  * given Content-Type of the files. Such as ';type=<content-type>'.
@@ -999,7 +999,7 @@ static void list_engines (const struct curl_slist *engines)
 #define FORM_TYPE_SEPARATOR ';'
 
 static int formparse(struct Configurable *config,
-                     char *input,
+                     const char *input,
                      struct curl_httppost **httppost,
                      struct curl_httppost **last_post,
                      bool literal_value)
@@ -1367,7 +1367,7 @@ static void cleanarg(char *str)
  * data.
  */
 
-static int str2num(long *val, char *str)
+static int str2num(long *val, const char *str)
 {
   int retcode = 0;
   if(str && ISDIGIT(*str))
@@ -1385,7 +1385,7 @@ static int str2num(long *val, char *str)
  * @param str  the buffer containing the offset
  * @return zero if successful, non-zero if failure.
  */
-static int str2offset(curl_off_t *val, char *str)
+static int str2offset(curl_off_t *val, const char *str)
 {
 #if SIZEOF_CURL_OFF_T > 4
   /* Ugly, but without going through a bunch of rigmarole, we don't have the
@@ -1457,7 +1457,7 @@ static void checkpasswd(const char *kind, /* for what purpose */
 }
 
 static ParameterError add2list(struct curl_slist **list,
-                               char *ptr)
+                               const char *ptr)
 {
   struct curl_slist *newlist = curl_slist_append(*list, ptr);
   if(newlist)
@@ -1468,7 +1468,7 @@ static ParameterError add2list(struct curl_slist **list,
   return PARAM_OK;
 }
 
-static int ftpfilemethod(struct Configurable *config, char *str)
+static int ftpfilemethod(struct Configurable *config, const char *str)
 {
   if(curlx_strequal("singlecwd", str))
     return CURLFTPMETHOD_SINGLECWD;
@@ -1480,7 +1480,7 @@ static int ftpfilemethod(struct Configurable *config, char *str)
   return CURLFTPMETHOD_MULTICWD;
 }
 
-static int ftpcccmethod(struct Configurable *config, char *str)
+static int ftpcccmethod(struct Configurable *config, const char *str)
 {
   if(curlx_strequal("passive", str))
     return CURLFTPSSL_CCC_PASSIVE;
@@ -2230,7 +2230,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
            * Case 2: we first load the file using that name and then encode
            * the content.
            */
-          char *p = strchr(nextarg, '=');
+          const char *p = strchr(nextarg, '=');
           size_t size = 0;
           size_t nlen;
           char is_file;
@@ -2899,6 +2899,47 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
   return PARAM_OK;
 }
 
+/*
+ * Copies the string from line to the buffer at param, unquoting
+ * backslash-quoted characters and NUL-terminating the output string.
+ * Stops at the first non-backslash-quoted double quote character or the
+ * end of the input string. param must be at least as long as the input
+ * string.  Returns the pointer after the last handled input character.
+ */
+static const char *unslashquote(const char *line, char *param)
+{
+  while(*line && (*line != '\"')) {
+    if(*line == '\\') {
+      char out;
+      line++;
+
+      /* default is to output the letter after the backslash */
+      switch(out = *line) {
+      case '\0':
+	continue; /* this'll break out of the loop */
+      case 't':
+	out='\t';
+	break;
+      case 'n':
+	out='\n';
+	break;
+      case 'r':
+	out='\r';
+	break;
+      case 'v':
+	out='\v';
+	break;
+      }
+      *param++=out;
+      line++;
+    }
+    else
+      *param++=*line++;
+  }
+  *param=0; /* always zero terminate */
+  return line;
+}
+
 /* return 0 on everything-is-fine, and non-zero otherwise */
 static int parseconfig(const char *filename,
                        struct Configurable *config)
@@ -2908,6 +2949,7 @@ static int parseconfig(const char *filename,
   char filebuffer[512];
   bool usedarg;
   char *home;
+  int rc = 0;
 
   if(!filename || !*filename) {
     /* NULL or no file name attempts to load .curlrc from the homedir! */
@@ -2991,7 +3033,7 @@ static int parseconfig(const char *filename,
       line = aline;
       alloced_param=FALSE;
 
-      /* lines with # in the fist column is a comment! */
+      /* line with # in the first non-blank column is a comment! */
       while(*line && ISSPACE(*line))
         line++;
 
@@ -3025,43 +3067,17 @@ static int parseconfig(const char *filename,
 
       /* the parameter starts here (unless quoted) */
       if(*line == '\"') {
-        char *ptr;
-        /* quoted parameter, do the qoute dance */
+        /* quoted parameter, do the quote dance */
         line++;
-        param=strdup(line); /* parameter */
-        alloced_param=TRUE;
-
-        ptr=param;
-        while(*line && (*line != '\"')) {
-          if(*line == '\\') {
-            char out;
-            line++;
-
-            /* default is to output the letter after the backslah */
-            switch(out = *line) {
-            case '\0':
-              continue; /* this'll break out of the loop */
-            case 't':
-              out='\t';
-              break;
-            case 'n':
-              out='\n';
-              break;
-            case 'r':
-              out='\r';
-              break;
-            case 'v':
-              out='\v';
-              break;
-            }
-            *ptr++=out;
-            line++;
-          }
-          else
-            *ptr++=*line++;
+        param=malloc(strlen(line)+1); /* parameter */
+        if (!param) {
+          /* out of memory */
+          free(aline);
+          rc = 1;
+          break;
         }
-        *ptr=0; /* always zero terminate */
-
+        alloced_param=TRUE;
+        line = (char*) unslashquote(line, param);
       }
       else {
         param=line; /* parameter starts here */
@@ -3111,8 +3127,8 @@ static int parseconfig(const char *filename,
       fclose(file);
   }
   else
-    return 1; /* couldn't open the file */
-  return 0;
+    rc = 1; /* couldn't open the file */
+  return rc;
 }
 
 static void go_sleep(long ms)
@@ -3361,8 +3377,8 @@ void progressbarinit(struct ProgressData *bar,
 
 
 static
-void dump(char *timebuf, const char *text,
-          FILE *stream, unsigned char *ptr, size_t size,
+void dump(const char *timebuf, const char *text,
+          FILE *stream, const unsigned char *ptr, size_t size,
           trace tracetype, curl_infotype infotype)
 {
   size_t i;
@@ -5079,6 +5095,11 @@ int main(int argc, char *argv[])
 #endif
 }
 
+/*
+ * Reads a line from the given file, ensuring is NUL terminated.
+ * The pointer must be freed by the caller.
+ * NULL is returned on an out of memory condition.
+ */
 static char *my_get_line(FILE *fp)
 {
    char buf[4096];
@@ -5227,10 +5248,10 @@ static char *basename(char *path)
 /* The following functions are taken with modification from the DJGPP
  * port of tar 1.12. They use algorithms originally from DJTAR. */
 
-const char *
+static const char *
 msdosify (const char *file_name)
 {
-  static char dos_name[PATH_MAX];
+  static char dos_name[PATH_MAX*2];
   static const char illegal_chars_dos[] = ".+, ;=[]|<>\\\":?*";
   static const char *illegal_chars_w95 = &illegal_chars_dos[8];
   int idx, dot_idx;
@@ -5317,7 +5338,7 @@ msdosify (const char *file_name)
   return dos_name;
 }
 
-char *
+static char *
 rename_if_dos_device_name (char *file_name)
 {
   /* We could have a file whose name is a device on MS-DOS.  Trying to
@@ -5327,7 +5348,8 @@ rename_if_dos_device_name (char *file_name)
   struct stat st_buf;
   char fname[PATH_MAX];
 
-  strcpy (fname, file_name);
+  strncpy(fname, file_name, PATH_MAX-1);
+  fname[PATH_MAX-2] = 0;  /* Leave room for an extra _ */
   base = basename (fname);
   if (((stat(base, &st_buf)) == 0) && (S_ISCHR(st_buf.st_mode))) {
     size_t blen = strlen (base);
