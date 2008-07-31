@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Fandrich (31 Jul 2008)
+- Fixed parsing of an IPv6 proxy address to support a scope identifier,
+  as well as IPv4 addresses in IPv6 format. Also, better handle the case
+  of a malformatted IPv6 address (avoid empty and NULL strings).
+
 Daniel Stenberg (30 Jul 2008)
 - Phil Blundell added the CURLOPT_SCOPE option, as well as adjusted the URL
   parser to allow numerical IPv6-addresses to be specified with the scope

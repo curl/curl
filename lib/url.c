@@ -3102,7 +3102,8 @@ static CURLcode ParseURLAndFillConnection(struct SessionHandle *data,
         if (!data->state.this_is_a_follow)
           /* Don't honour a scope given in a Location: header */
           conn->scope = scope;
-      }
+      } else
+        infof(data, "Invalid IPv6 address format\n");
     }
   }
 
@@ -3406,13 +3407,14 @@ static CURLcode parse_proxy(struct SessionHandle *data,
   /* detect and extract RFC2732-style IPv6-addresses */
   if(*proxyptr == '[') {
     char *ptr = ++proxyptr; /* advance beyond the initial bracket */
-    while(*ptr && (ISXDIGIT(*ptr) || (*ptr == ':')))
+    while(*ptr && (ISXDIGIT(*ptr) || (*ptr == ':') || (*ptr == '%') || (*ptr == '.')))
       ptr++;
     if(*ptr == ']') {
       /* yeps, it ended nicely with a bracket as well */
-      *ptr = 0;
-      portptr = ptr+1;
-    }
+      *ptr++ = 0;
+    } else
+      infof(data, "Invalid IPv6 address format\n");
+    portptr = ptr;
     /* Note that if this didn't end with a bracket, we still advanced the
      * proxyptr first, but I can't see anything wrong with that as no host
      * name nor a numeric can legally start with a bracket.

@@ -904,6 +904,9 @@ IPv6
 
     sftp://[fe80::1234%251]/
 
+  IPv6 addresses provided other than in URLs (e.g. to the --proxy, --interface
+  or --ftp-port options) should not be URL encoded.
+
 
 MAILING LISTS
 
