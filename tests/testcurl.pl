@@ -391,7 +391,7 @@ if ($CVS) {
     unlink "autom4te.cache";
 
     # generate the build files
-    logit "invoke buildconf, but filter off the silly aclocal warnings";
+    logit "invoke buildconf, but filter off aclocal underquoted definition warnings";
     open(F, "./buildconf 2>&1 |") or die;
     open(LOG, ">$buildlog") or die;
     while (<F>) {
