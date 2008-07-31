@@ -38,16 +38,6 @@ To be addressed before 7.19.0 (planned release: August 2008)
          -I m4' way of including our local m4/reentrant.m4 file. This even
          takes care of including the file in the distribution tarball.
 
-149 - The introduction of the sreadfrom macro has proven usefull on all systems
-      except on HP-UX. For this release I will back out its use in lib/tftp.c
-      and test/server/tftpd.c leaving it in the same functional state as it was.
-      The rest of things will be kept in as thay are needed to properly fix it
-      in another release (autoconf work required).
-      UPDATE:
-       * The use of the sreadfrom() wrapper to replace recvfrom() in our code
-         has been undone.
-       * Awaiting autobuild results before updating or closing this issue.
-
 150 - PUT with -C - sends garbage in the Content-Range: header (test case 1041)
 
 151 - PUT with -L hangs after receiving a redirect (test case 1051, but the
