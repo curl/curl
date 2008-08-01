@@ -6,7 +6,7 @@ This is what's new and changed in the c-ares 1.5.3 release:
  o ares_gethostbyname() fallback from AAA to A records with CNAME present
  o allow --enable-largefile and --disable-largefile configurations
  o configure process no longer needs nor checks size of curl_off_t
- o library will now be built with _REENTRANT symbol defined
+ o library will now be built with _REENTRANT symbol defined if needed
  o Improved configure detection of number of arguments for getservbyport_r
 
 Thanks go to these friendly people for their efforts and contributions:

@@ -1,7 +1,15 @@
   Changelog for the c-ares project
 
+* Aug 01 2008 (Yang Tse)
+- Configure process now checks if the preprocessor _REENTRANT symbol is already
+  defined. If it isn't currently defined a set of checks are performed to test
+  if its definition is required to make visible to the compiler a set of *_r
+  functions. Finally, if _REENTRANT is already defined or needed it takes care
+  of making adjustments necessary to ensure that it is defined equally for the
+  configure process tests and generated config file.
+
 * Jul 20 2008 (Yang Tse)
-- when recvfrom prototype uses a void pointer for arguments 2, 5 or 6 this will
+- When recvfrom prototype uses a void pointer for arguments 2, 5 or 6 this will
   now cause the definition, as appropriate, of RECVFROM_TYPE_ARG2_IS_VOID,
   RECVFROM_TYPE_ARG5_IS_VOID or RECVFROM_TYPE_ARG6_IS_VOID.
 
@@ -16,7 +24,7 @@
 - Configure process now checks availability of recvfrom() socket function and
   finds out its return type and the types of its arguments. Added definitions
   for non-configure systems config files, and introduced macro sreadfrom which
-  will be used on udp sockets as a recvfrom() wrapper.
+  will be used on udp sockets as a recvfrom() wrapper in the future.
 
 * Jul 15 2008 (Yang Tse)
 - Introduce definition of _REENTRANT symbol in setup.h to improve library
