@@ -22,7 +22,7 @@
  *
  * $Id$
  ***************************************************************************/
-int Curl_parsenetrc(char *host,
+int Curl_parsenetrc(const char *host,
                     char *login,
                     char *password,
                     char *filename);

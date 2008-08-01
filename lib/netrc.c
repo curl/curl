@@ -72,7 +72,7 @@ enum {
 #define PASSWORDSIZE 64
 
 /* returns -1 on failure, 0 if the host is found, 1 is the host isn't found */
-int Curl_parsenetrc(char *host,
+int Curl_parsenetrc(const char *host,
                     char *login,
                     char *password,
                     char *netrcfile)
