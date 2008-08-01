@@ -792,23 +792,27 @@ AC_CHECK_MEMBER(struct addrinfo.ai_flags,
 )
 
 
-AC_CHECK_FUNCS( bitncmp \
-                gettimeofday \
-                if_indextoname,
-dnl if found
-[],
-dnl if not found, $ac_func is the name we check for
-func="$ac_func"
-AC_MSG_CHECKING([deeper for $func])
-AC_TRY_LINK( [],
-             [ $func ();],
-             AC_MSG_RESULT(yes!)
-             eval "ac_cv_func_$func=yes"
-             def=`echo "HAVE_$func" | tr 'a-z' 'A-Z'`
-             AC_DEFINE_UNQUOTED($def, 1, [If you have $func]),
-             AC_MSG_RESULT(but still no)
-             )
-)
+AC_CHECK_FUNCS([bitncmp \
+  gettimeofday \
+  if_indextoname
+],[
+],[
+  func="$ac_func"
+  AC_MSG_CHECKING([deeper for $func])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+    ]],[[
+      $func ();
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    eval "ac_cv_func_$func=yes"
+    AC_DEFINE_UNQUOTED([AS_TR_CPP([HAVE_$func])], [1],
+      [Define to 1 if you have the $func function.])
+  ],[
+    AC_MSG_RESULT([but still no])
+  ])
+])
 
 
 dnl check for inet_pton
