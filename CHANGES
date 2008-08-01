@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Fandrich (1 Aug 2008)
+- Added support for --append on SFTP uploads. Unfortunately, OpenSSH doesn't
+  support this so it goes untested.
+
 Yang Tse (1 Aug 2008)
 - Configure process now checks if the preprocessor _REENTRANT symbol is already
   defined. If it isn't currently defined a set of checks are performed to test

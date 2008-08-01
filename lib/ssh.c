@@ -1198,6 +1198,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
     break;
 
   case SSH_SFTP_UPLOAD_INIT:
+  {
+    unsigned long flags;
     /*
      * NOTE!!!  libssh2 requires that the destination path is a full path
      *          that includes the destination file and name OR ends in a "/"
@@ -1221,13 +1223,19 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
       }
     }
 
+    if(data->set.ftp_append)
+      /* Try to open for append, but create if nonexisting */
+      flags = LIBSSH2_FXF_WRITE|LIBSSH2_FXF_CREAT|LIBSSH2_FXF_APPEND;
+    else if (data->state.resume_from > 0)
+      /* If we have restart position then open for append */
+      flags = LIBSSH2_FXF_WRITE|LIBSSH2_FXF_APPEND;
+    else
+      /* Clear file before writing (normal behaviour) */
+      flags = LIBSSH2_FXF_WRITE|LIBSSH2_FXF_CREAT|LIBSSH2_FXF_TRUNC;
+
     sshc->sftp_handle =
       libssh2_sftp_open(sshc->sftp_session, sftp_scp->path,
-                        /* If we have restart position then open for append */
-                        (data->state.resume_from > 0)?
-                        LIBSSH2_FXF_WRITE|LIBSSH2_FXF_APPEND:
-                        LIBSSH2_FXF_WRITE|LIBSSH2_FXF_CREAT|LIBSSH2_FXF_TRUNC,
-                        data->set.new_file_perms);
+                        flags, data->set.new_file_perms);
 
     if(!sshc->sftp_handle) {
       if(libssh2_session_last_errno(sshc->ssh_session) ==
@@ -1322,6 +1330,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
       state(conn, SSH_STOP);
     }
     break;
+  }
 
   case SSH_SFTP_CREATE_DIRS_INIT:
     if(strlen(sftp_scp->path) > 1) {

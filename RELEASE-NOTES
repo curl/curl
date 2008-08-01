@@ -20,6 +20,7 @@ This release includes the following changes:
  o Added test selection by key word in runtests.pl
  o the curl tool's -w option support the %{ssl_verify_result} variable
  o Added CURLOPT_SCOPE and scope parsing of the URL according to RFC4007
+ o Support --append on SFTP uploads (not with OpenSSH, though)
 
 This release includes the following bugfixes:
 

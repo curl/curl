@@ -48,6 +48,9 @@ SIMPLE USAGE
         curl -u username: --key ~/.ssh/id_dsa --pubkey ~/.ssh/id_dsa.pub \
         	scp://shell.example.com/~/personal.txt
 
+  Get the main page from an IPv6 web server:
+
+        curl -g "http://[2001:1890:1112:1::20]/"
 
 DOWNLOAD TO A FILE
 
@@ -85,6 +88,13 @@ USING PASSWORDS
    Note that using FTPS:// as prefix is the "implicit" way as described in the
    standards while the recommended "explicit" way is done by using FTP:// and
    the --ftp-ssl option.
+
+ SFTP / SCP
+
+   This is similar to FTP, but you can specify a private key to use instead of
+   a password. Note that the private key may itself be protected by a password
+   that is unrelated to the login password of the remote system.  If you
+   provide a private key file you must also provide a public key file.
 
  HTTP
 
@@ -154,9 +164,9 @@ RANGES
 
 UPLOADING
 
- FTP
+ FTP / FTPS / SFTP / SCP
 
-  Upload all data on stdin to a specified ftp site:
+  Upload all data on stdin to a specified server:
 
         curl -T - ftp://ftp.upload.com/myfile
 
@@ -169,7 +179,7 @@ UPLOADING
  
         curl -T uploadfile -u user:passwd ftp://ftp.upload.com/
 
-  Upload a local file to get appended to the remote file using ftp:
+  Upload a local file to get appended to the remote file:
 
         curl -T localfile -a ftp://ftp.upload.com/remotefile
 
@@ -331,7 +341,7 @@ REFERRER
 
         curl -e www.coolsite.com http://www.showme.com/
 
-  NOTE: The referer field is defined in the HTTP spec to be a full URL.
+  NOTE: The Referer: [sic] field is defined in the HTTP spec to be a full URL.
 
 USER AGENT
 
@@ -563,6 +573,14 @@ FTP and PATH NAMES
         curl ftp://user:passwd@my.site.com//README
 
   (I.e with an extra slash in front of the file name.)
+
+SFTP and SCP and PATH NAMES
+
+  With sftp: and scp: URLs, the path name given is the absolute name on the
+  server. To access a file relative to the remote user's home directory,
+  prefix the file with /~/ , such as:
+
+        curl -u $USER sftp://home.example.com/~/.bashrc
 
 FTP and firewalls
 
@@ -875,7 +893,8 @@ MULTIPLE TRANSFERS WITH A SINGLE COMMAND LINE
   As is mentioned above, you can download multiple files with one command line
   by simply adding more URLs. If you want those to get saved to a local file
   instead of just printed to stdout, you need to add one save option for each
-  URL you specify. Note that this also goes for the -O option.
+  URL you specify. Note that this also goes for the -O option (but not
+  --remote-name-all).
 
   For example: get two files and use -O for the first and a custom file
   name for the second:

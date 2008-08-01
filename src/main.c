@@ -651,7 +651,7 @@ static void help(void)
     "Usage: curl [options...] <url>",
     "Options: (H) means HTTP/HTTPS only, (F) means FTP only",
     "    --anyauth       Pick \"any\" authentication method (H)",
-    " -a/--append        Append to target file when uploading (F)",
+    " -a/--append        Append to target file when uploading (F/SFTP)",
     "    --basic         Use HTTP Basic Authentication (H)",
     "    --cacert <file> CA certificate to verify peer against (SSL)",
     "    --capath <directory> CA directory to verify peer against (SSL)",
