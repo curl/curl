@@ -1092,7 +1092,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
           done
         done
       done
-    ]) # AC_CACHE_CHECK
+    ]) # AC-CACHE-CHECK
     if test "$curl_cv_func_getnameinfo_args" = "unknown"; then
       AC_MSG_WARN([Cannot find proper types to use for getnameinfo args])
       AC_MSG_WARN([HAVE_GETNAMEINFO will not be defined])
@@ -1150,7 +1150,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
       ac_cv_func_getnameinfo="yes"
     fi
   fi
-]) # AC_DEFUN
+])
 
 
 dnl TYPE_SOCKADDR_STORAGE
@@ -1254,7 +1254,7 @@ AC_DEFUN([CURL_CHECK_NI_WITHSCOPEID], [
 #else
         return 4; /* Error, NI_WITHSCOPEID not defined or no getnameinfo() */
 #endif
-      ]]) # AC_LANG_PROGRAM
+      ]]) # AC-LANG-PROGRAM
     ],[
       # Exit code == 0. Program worked.
       ac_cv_working_ni_withscopeid="yes"
@@ -1276,16 +1276,16 @@ AC_DEFUN([CURL_CHECK_NI_WITHSCOPEID], [
         ac_cv_working_ni_withscopeid="yes"
       ],[
         ac_cv_working_ni_withscopeid="no"
-      ]) # AC_COMPILE_IFELSE
-    ]) # AC_RUN_IFELSE
-  ]) # AC_CACHE_CHECK
+      ]) # AC-COMPILE-IFELSE
+    ]) # AC-RUN-IFELSE
+  ]) # AC-CACHE-CHECK
   case "$ac_cv_working_ni_withscopeid" in
     yes)
       AC_DEFINE(HAVE_NI_WITHSCOPEID, 1,
         [Define to 1 if NI_WITHSCOPEID exists and works.])
       ;;
   esac
-]) # AC_DEFUN
+])
 
 
 dnl CURL_CHECK_FUNC_RECV
@@ -1391,7 +1391,7 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
           done
         done
       done
-    ]) # AC_CACHE_CHECK
+    ]) # AC-CACHE-CHECK
     if test "$curl_cv_func_recv_args" = "unknown"; then
       AC_MSG_ERROR([Cannot find proper types to use for recv args])
     else
@@ -1418,7 +1418,7 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
   else
     AC_MSG_ERROR([Unable to link function recv])
   fi
-]) # AC_DEFUN
+])
 
 
 dnl CURL_CHECK_FUNC_SEND
@@ -1524,7 +1524,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
           done
         done
       done
-    ]) # AC_CACHE_CHECK
+    ]) # AC-CACHE-CHECK
     if test "$curl_cv_func_send_args" = "unknown"; then
       AC_MSG_ERROR([Cannot find proper types to use for send args])
     else
@@ -1585,7 +1585,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
   else
     AC_MSG_ERROR([Unable to link function send])
   fi
-]) # AC_DEFUN
+])
 
 
 dnl CURL_CHECK_FUNC_RECVFROM
@@ -1702,7 +1702,7 @@ AC_DEFUN([CURL_CHECK_FUNC_RECVFROM], [
           done
         done
       done
-    ]) # AC_CACHE_CHECK
+    ]) # AC-CACHE-CHECK
     if test "$curl_cv_func_recvfrom_args" = "unknown"; then
       AC_MSG_ERROR([Cannot find proper types to use for recvfrom args])
     else
@@ -1773,7 +1773,7 @@ AC_DEFUN([CURL_CHECK_FUNC_RECVFROM], [
   else
     AC_MSG_ERROR([Unable to link function recvfrom])
   fi
-]) # AC_DEFUN
+])
 
 
 dnl CURL_CHECK_MSG_NOSIGNAL
@@ -1821,7 +1821,7 @@ AC_DEFUN([CURL_CHECK_MSG_NOSIGNAL], [
         [Define to 1 if you have the MSG_NOSIGNAL flag.])
       ;;
   esac
-]) # AC_DEFUN
+])
 
 
 dnl CURL_CHECK_STRUCT_TIMEVAL
@@ -1880,7 +1880,7 @@ AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
         [Define to 1 if you have the timeval struct.])
       ;;
   esac
-]) # AC_DEFUN
+])
 
 
 dnl TYPE_SIG_ATOMIC_T
@@ -1924,7 +1924,7 @@ AC_DEFUN([TYPE_SIG_ATOMIC_T], [
       fi
       ;;
   esac
-]) # AC_DEFUN
+])
 
 
 dnl CURL_CHECK_NONBLOCKING_SOCKET
@@ -2163,8 +2163,8 @@ AC_DEFUN([TYPE_IN_ADDR_T], [
 #include <arpa/inet.h>
 #endif
 #endif
-  ]) dnl AC_CHECK_TYPE
-]) dnl AC_DEFUN
+  ])
+])
 
 
 dnl CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC
@@ -2203,7 +2203,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
   ])
   dnl Definition of HAVE_CLOCK_GETTIME_MONOTONIC is intentionally postponed
   dnl until library linking and run-time checks for clock_gettime succeed.
-]) dnl AC_DEFUN
+])
 
 
 dnl CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC
@@ -2321,7 +2321,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
     #
   fi
   #
-]) dnl AC_DEFUN
+])
 
 
 dnl CURL_CHECK_FUNC_SELECT
@@ -2463,7 +2463,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
           done
         done
       done
-    ]) # AC_CACHE_CHECK
+    ]) # AC-CACHE-CHECK
     if test "$curl_cv_func_select_args" = "unknown"; then
       AC_MSG_WARN([Cannot find proper types to use for select args])
       AC_MSG_WARN([HAVE_SELECT will not be defined])
@@ -2521,7 +2521,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
       ac_cv_func_select="yes"
     fi
   fi
-]) # AC_DEFUN
+])
 
 
 dnl ************************************************************
@@ -3282,7 +3282,9 @@ AC_DEFUN([CURL_CC_DEBUG_OPTS],
     done
     CFLAGS=$NEWFLAGS
 
-]) dnl end of AC_DEFUN()
+]) # AC-DEFUN
+
+
 
 # This is only a temporary fix. This macro is here to replace the broken one
 # delivered by the automake project (including the 1.9.6 release). As soon as
