@@ -42,6 +42,7 @@ This release includes the following bugfixes:
  o CURLINFO_SSL_VERIFYRESULT is fixed
  o FTP URLs and IPv6 URLs mangled when sent to proxy with CURLOPT_PORT set
  o a user name in a proxy URL without a password was parsed incorrectly
+ o library will now be built with _REENTRANT symbol defined only if needed
 
 This release includes the following known bugs:
 

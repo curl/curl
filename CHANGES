@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Yang Tse (1 Aug 2008)
+- Configure process now checks if the preprocessor _REENTRANT symbol is already
+  defined. If it isn't currently defined a set of checks are performed to test
+  if its definition is required to make visible to the compiler a set of *_r
+  functions. Finally, if _REENTRANT is already defined or needed it takes care
+  of making adjustments necessary to ensure that it is defined equally for the
+  configure process tests and generated config file.
+
 Daniel Fandrich (31 Jul 2008)
 - Fixed parsing of an IPv6 proxy address to support a scope identifier,
   as well as IPv4 addresses in IPv6 format. Also, better handle the case
