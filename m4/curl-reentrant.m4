@@ -21,8 +21,14 @@
 # $Id$
 #***************************************************************************
 
+# File version for 'aclocal' use.
+# serial 1.1
 
-# serial 1.12
+dnl Note 1
+dnl ------
+dnl None of the CURL_CHECK_NEED_REENTRANT_* macros shall use HAVE_FOO_H to
+dnl conditionally include header files. These macros are used early in the
+dnl configure process much before header file availability is known.
 
 
 dnl CURL_CHECK_NEED_REENTRANT_GMTIME_R
@@ -376,13 +382,13 @@ dnl and that in turn setup.h will define _REENTRANT.
 dnl Internal macro for CURL_CONFIGURE_REENTRANT.
 
 AC_DEFUN([CURL_CONFIGURE_FROM_NOW_ON_WITH_REENTRANT], [
-AC_DEFINE([NEED_REENTRANT], [1],
+AC_DEFINE(NEED_REENTRANT, 1,
   [Define to 1 if _REENTRANT preprocessor symbol must be defined.])
-cat >>confdefs.h <<_ACEOF
+cat >>confdefs.h <<_EOF
 #ifndef _REENTRANT
-#define _REENTRANT
+#  define _REENTRANT
 #endif
-_ACEOF
+_EOF
 ])
 
 
