@@ -306,7 +306,6 @@ tmp_host_type=`uname -a | sed '/SunOS/s/.*\(SunOS\).*/\1/'`
 if test "x$tmp_host_type" = "xSunOS"; then
   ACLOCAL_FLAGS="$ACLOCAL_FLAGS --verbose"
 fi
-ACLOCAL_FLAGS="$ACLOCAL_FLAGS --verbose"
 
 echo "buildconf: running libtoolize"
 $libtoolize --copy --automake --force || die "The libtoolize command failed"
