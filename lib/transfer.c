@@ -351,7 +351,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
   curl_socket_t fd_read;
   curl_socket_t fd_write;
-  curl_off_t contentlength;
   int select_res = conn->cselect_bits;
 
   conn->cselect_bits = 0;
@@ -593,6 +592,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               k->p++; /* pass the \n byte */
 #endif /* CURL_DOES_CONVERSIONS */
 
+#ifndef CURL_DISABLE_HTTP
             if(100 <= k->httpcode && 199 >= k->httpcode) {
               /*
                * We have made a HTTP PUT or POST and this is 1.1-lingo
@@ -637,7 +637,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               k->keepon &= ~KEEP_WRITE;
             }
 
-#ifndef CURL_DISABLE_HTTP
             /*
              * When all the headers have been parsed, see if we should give
              * up and return an error.
@@ -753,6 +752,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             continue;
           }
 
+#ifndef CURL_DISABLE_HTTP
           /*
            * Checks for special headers coming up.
            */
@@ -889,6 +889,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               break;
             }
           }
+#endif /* CURL_DISABLE_HTTP */
 
 #ifdef CURL_DOES_CONVERSIONS
           /* convert from the network encoding */
@@ -899,13 +900,14 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           /* Curl_convert_from_network calls failf if unsuccessful */
 #endif /* CURL_DOES_CONVERSIONS */
 
+#ifndef CURL_DISABLE_HTTP
           /* Check for Content-Length: header lines to get size. Ignore
              the header completely if we get a 416 response as then we're
              resuming a document that we don't get, and this header contains
              info about the true size of the document we didn't get now. */
           if(!k->ignorecl && !data->set.ignorecl &&
              checkprefix("Content-Length:", k->p)) {
-            contentlength = curlx_strtoofft(k->p+15, NULL, 10);
+            curl_off_t contentlength = curlx_strtoofft(k->p+15, NULL, 10);
             if(data->set.max_filesize &&
                contentlength > data->set.max_filesize) {
               failf(data, "Maximum file size exceeded");
@@ -941,7 +943,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               data->info.contenttype = contenttype;
             }
           }
-#ifndef CURL_DISABLE_HTTP
           else if((k->httpversion == 10) &&
                   conn->bits.httpproxy &&
                   Curl_compareheader(k->p,
