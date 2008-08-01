@@ -14,6 +14,9 @@ Yang Tse (1 Aug 2008)
   of making adjustments necessary to ensure that it is defined equally for the
   configure process tests and generated config file.
 
+- Removed definition of CURL_CHECK_WORKING_RESOLVER from acinclude.m4 it has
+  not been in use since revision 1.81 of configure.in 6 years, 9 months ago.
+
 Daniel Fandrich (31 Jul 2008)
 - Fixed parsing of an IPv6 proxy address to support a scope identifier,
   as well as IPv4 addresses in IPv6 format. Also, better handle the case
