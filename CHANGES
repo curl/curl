@@ -15,6 +15,11 @@ Daniel Fandrich (31 Jul 2008)
   being mangled when passed to proxies when CURLOPT_PORT is also set
   (reported by Pramod Sharma).
 
+- User names embedded in proxy URLs without a password were parsed
+  incorrectly--the host name is treated as part of the user name and the
+  port number becomes the password.  This can be observed in test 279
+  (was KNOWN_ISSUE #54).
+
 Daniel Stenberg (30 Jul 2008)
 - Phil Blundell added the CURLOPT_SCOPE option, as well as adjusted the URL
   parser to allow numerical IPv6-addresses to be specified with the scope

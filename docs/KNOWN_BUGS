@@ -14,10 +14,6 @@ may have been fixed since this was written!
   library header files exporting symbols/macros that should be kept private
   to the KfW library. See ticket #5601 at http://krbdev.mit.edu/rt/
 
-54. User names embedded in URLs without a password are parsed incorrectly--the
-  host name is treated as part of the user name and the port number becomes the
-  password.  This can be observed test 279.
-
 53. SFTP busy-loop problem. When doing SFTP uploads, we can see that libcurl
   occasionally will busy-loop while waiting for certain network conditions.
   Reported by Pavel Shalagin, explained somewhat by Daniel Stenberg here:

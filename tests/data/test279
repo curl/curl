@@ -7,6 +7,7 @@ HTTP proxy
 HTTP proxy Basic auth
 </keywords>
 </info>
+
 # Server-side
 <reply>
 <data>
@@ -39,7 +40,7 @@ http://we.want.that.site.com/279 -x http://f%61ke@%HOSTIP:%HTTPPORT
 </strip>
 <protocol>
 GET http://we.want.that.site.com/279 HTTP/1.1
-Proxy-Authorization: Basic ZmFrZUAxMjcuMC4wLjE6ODk5MA0=
+Proxy-Authorization: Basic ZmFrZTo=
 Host: we.want.that.site.com
 Pragma: no-cache
 Accept: */*

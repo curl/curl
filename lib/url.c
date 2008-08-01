@@ -3396,7 +3396,7 @@ static CURLcode parse_proxy(struct SessionHandle *data,
     proxypasswd[0] = 0;
 
     if(1 <= sscanf(proxyptr,
-                   "%" MAX_CURL_USER_LENGTH_TXT"[^:]:"
+                   "%" MAX_CURL_USER_LENGTH_TXT"[^:@]:"
                    "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^@]",
                    proxyuser, proxypasswd)) {
       CURLcode res = CURLE_OK;
