@@ -2082,60 +2082,66 @@ case $host in
      AC_MSG_NOTICE([skip check for pipe on msdosdjgpp])
     ;;
 esac
-AC_CHECK_FUNCS( strtoll \
-                socket \
-                strdup \
-                strstr \
-                strcasestr \
-                strtok_r \
-                uname \
-                strcasecmp \
-                stricmp \
-                strcmpi \
-                gethostbyaddr \
-                gettimeofday \
-                inet_addr \
-                inet_ntoa \
-                inet_pton \
-                perror \
-                closesocket \
-                siginterrupt \
-                sigaction \
-                signal \
-                getpass_r \
-                strlcat \
-                getpwuid \
-                geteuid \
-                getppid \
-                utime \
-                sigsetjmp \
-                basename \
-                setlocale \
-                ftruncate \
-                pipe \
-                poll \
-                getprotobyname \
-                getrlimit \
-                setrlimit \
-                fork \
-                setmode,
-dnl if found
-[],
-dnl if not found, $ac_func is the name we check for
-func="$ac_func"
-eval skipcheck=\$skipcheck_$func
-if test "x$skipcheck" != "xyes"; then
-  AC_MSG_CHECKING([deeper for $func])
-  AC_TRY_LINK( [],
-               [ $func ();],
-               AC_MSG_RESULT(yes!)
-               eval "ac_cv_func_$func=yes"
-               def=`echo "HAVE_$func" | tr 'a-z' 'A-Z'`
-               AC_DEFINE_UNQUOTED($def, 1, [If you have $func]),
-               AC_MSG_RESULT(but still no)
-               )
-fi
-)
+
+AC_CHECK_FUNCS([basename \
+  closesocket \
+  fork \
+  ftruncate \
+  geteuid \
+  gethostbyaddr \
+  getpass_r \
+  getppid \
+  getprotobyname \
+  getpwuid \
+  getrlimit \
+  gettimeofday \
+  inet_addr \
+  inet_ntoa \
+  inet_pton \
+  perror \
+  pipe \
+  poll \
+  setlocale \
+  setmode \
+  setrlimit \
+  sigaction \
+  siginterrupt \
+  signal \
+  sigsetjmp \
+  socket \
+  strcasecmp \
+  strcasestr \
+  strcmpi \
+  strdup \
+  stricmp \
+  strlcat \
+  strstr \
+  strtok_r \
+  strtoll \
+  uname \
+  utime
+],[
+],[
+  func="$ac_func"
+  eval skipcheck=\$skipcheck_$func
+  if test "x$skipcheck" != "xyes"; then
+    AC_MSG_CHECKING([deeper for $func])
+    AC_LINK_IFELSE([
+      AC_LANG_PROGRAM([[
+      ]],[[
+        $func ();
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      eval "ac_cv_func_$func=yes"
+      AC_DEFINE_UNQUOTED([AS_TR_CPP([HAVE_$func])], [1],
+        [Define to 1 if you have the $func function.])
+    ],[
+      AC_MSG_RESULT([but still no])
+    ])
+  fi
+])
+
 
 dnl sigsetjmp() might be a macro and no function so if it isn't found already
 dnl we make an extra check here!
