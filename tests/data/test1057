@@ -1,0 +1,51 @@
+<testcase>
+<info>
+<keywords>
+FTP
+EPSV
+RETR
+Range
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+456789abcdef
+</data>
+<datacheck nonewline="yes">
+456789abcdef
+</datacheck>
+<size>
+64
+</size>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP retrieve a byte-range relative to end of file
+ </name>
+ <command>
+-r -12 ftp://%HOSTIP:%FTPPORT/1057
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+EPSV
+TYPE I
+SIZE 1057
+REST 52
+RETR 1057
+QUIT
+</protocol>
+</verify>
+</testcase>
