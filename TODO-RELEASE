@@ -17,25 +17,13 @@ To be addressed before 7.19.0 (planned release: August 2008)
 148 - Introduction of m4/reentrant.m4 is triggering some problems on Solaris
       systems. The problem manifests when buildconf runs aclocal, at some point
       aclocal fails when using GNU m4 version 1.4.5 it runs out of memory.  If
-      GNU m4 version 1.4.11 is used everything works.  Lots of tests have been
-      done which have allowed to discard many possible pitfalls on our side.
-      As of right now my main suspect is which 'sed' binary is being used by
-      aclocal, if it is a broken sed, aclocal might be feeding garbage to m4.
-      As a consecuence of al this tries and tests the inclusion method of
-      m4/reentrant.m4 has been changed several times, and should finally be
-      changed back to the proper '-I m4' method which was used initially and
-      that didn't fail on other systems.
-      http://curl.haxx.se/mail/lib-2008-07/0210.html
+      GNU m4 version 1.4.11 is used everything works.
+      Start of thread: http://curl.haxx.se/mail/lib-2008-07/0210.html
       UPDATE:
-       * sed cannot be the culprit aclocal and autom4te are perl scripts and
-         don't use 'sed'.
-       * autom4te matches autoconf version and aclocal matches automake's.
-       * Even when directly copying into acinclude.m4 the contents of file
-         reentrant.m4 and having the '-I m4' thing disabled the problem
-         persists.
-       * Reinstated the 'aclocal -I m4' in buildconf and 'ACLOCAL_AMFLAGS =
-         -I m4' way of including our local m4/reentrant.m4 file. This even
-         takes care of including the file in the distribution tarball.
+       * Rebooting the problematic system, releasing allocated memory and swap,
+         has allowed buildconf and configure to complete sucessfully. Further
+         tests on the system might allow determination of the problem origin.
+         Solaris AutoBuilds suceeded on August 2 and 3.
 
 150 - PUT with -C - sends garbage in the Content-Range: header (test case 1041)
 
