@@ -6,6 +6,14 @@
 
                                   Changelog
 
+
+Daniel Stenberg (4 Aug 2008)
+- Test case 1041 (added by Daniel Fandrich April 14th) proved a bug where PUT
+  with -C - sent garbage in the Content-Range: header. I fixed this problem by
+  making sure libcurl always sets the size of the _entire_ upload if an app
+  attemps to do resumed uploads since libcurl simply cannot know the size of
+  what is currently at the server end. Test 1041 is no longer disabled.
+
 Yang Tse (2 Aug 2008)
 - No longer test availability of the gdi32 library, nor use it for linking, even
   when we have been doing this since revision 1.47 of configure.ac 4 years and

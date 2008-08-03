@@ -2363,7 +2363,17 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       if(conn->allocptr.rangeline)
         free(conn->allocptr.rangeline);
 
-      if(data->state.resume_from) {
+      if(data->set.set_resume_from < 0) {
+        /* Upload resume was asked for, but we don't know the size of the
+           remote part so we tell the server (and act accordingly) that we
+           upload the whole file (again) */
+        conn->allocptr.rangeline =
+          aprintf("Content-Range: bytes 0-%" FORMAT_OFF_T
+                  "/%" FORMAT_OFF_T "\r\n",
+                  data->set.infilesize - 1, data->set.infilesize);
+
+      }
+      else if(data->state.resume_from) {
         /* This is because "resume" was selected */
         curl_off_t total_expected_size=
           data->state.resume_from + data->set.infilesize;

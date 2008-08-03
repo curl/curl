@@ -45,6 +45,7 @@ This release includes the following bugfixes:
  o a user name in a proxy URL without a password was parsed incorrectly
  o library will now be built with _REENTRANT symbol defined only if needed
  o no longer link with gdi32 on Windows cross-compiled targets
+ o PUT with -C - sent bad Content-Range: header
 
 This release includes the following known bugs:
 

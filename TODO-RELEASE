@@ -25,8 +25,6 @@ To be addressed before 7.19.0 (planned release: August 2008)
          tests on the system might allow determination of the problem origin.
          Solaris AutoBuilds suceeded on August 2 and 3.
 
-150 - PUT with -C - sends garbage in the Content-Range: header (test case 1041)
-
 151 - PUT with -L hangs after receiving a redirect (test case 1051, but the
       test harness has a problem with this, too)
 
