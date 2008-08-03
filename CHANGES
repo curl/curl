@@ -43,10 +43,10 @@ Daniel Fandrich (31 Jul 2008)
   (was KNOWN_ISSUE #54).
 
 Daniel Stenberg (30 Jul 2008)
-- Phil Blundell added the CURLOPT_SCOPE option, as well as adjusted the URL
-  parser to allow numerical IPv6-addresses to be specified with the scope
-  given, as per RFC4007 - with a percent letter that itself needs to be URL
-  escaped. For example, for an address of fe80::1234%1 the HTTP URL is:
+- Phil Blundell added the CURLOPT_ADDRESS_SCOPE option, as well as adjusted
+  the URL parser to allow numerical IPv6-addresses to be specified with the
+  scope given, as per RFC4007 - with a percent letter that itself needs to be
+  URL escaped. For example, for an address of fe80::1234%1 the HTTP URL is:
   "http://[fe80::1234%251]/"
 
 - PHP's bug report #43158 (http://bugs.php.net/bug.php?id=43158) identifies a
