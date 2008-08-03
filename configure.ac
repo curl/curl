@@ -1116,24 +1116,25 @@ if test x"$want_gss" = xyes; then
         AC_DEFINE(HAVE_GSSMIT, 1, [if you have the MIT gssapi libraries])
         dnl check if we have a really old MIT kerberos (<= 1.2)
         AC_MSG_CHECKING([if gssapi headers declare GSS_C_NT_HOSTBASED_SERVICE])
-        AC_TRY_COMPILE([
+        AC_COMPILE_IFELSE([
+          AC_LANG_PROGRAM([[
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
 #include <gssapi/gssapi_krb5.h>
-          ],[
+          ]],[[
             gss_import_name(
                             (OM_uint32 *)0,
                             (gss_buffer_t)0,
                             GSS_C_NT_HOSTBASED_SERVICE,
                             (gss_name_t *)0);
-          ],[
-            AC_MSG_RESULT([yes])
-          ],[
-            AC_MSG_RESULT([no])
-            AC_DEFINE(HAVE_OLD_GSSMIT, 1, [if you have an old MIT gssapi library, lacking GSS_C_NT_HOSTBASED_SERVICE])
-          ]
-         )
-
+          ]])
+        ],[
+          AC_MSG_RESULT([yes])
+        ],[
+          AC_MSG_RESULT([no])
+          AC_DEFINE(HAVE_OLD_GSSMIT, 1,
+            [if you have an old MIT gssapi library, lacking GSS_C_NT_HOSTBASED_SERVICE])
+        ])
       fi
     ]
   )
