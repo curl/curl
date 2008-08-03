@@ -30,7 +30,7 @@ in the request
 http
 </server>
  <name>
-HTTP range support
+HTTP range relative to end of file
  </name>
  <command>
 http://%HOSTIP:%HTTPPORT/want/1058 -r -101
