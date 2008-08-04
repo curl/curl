@@ -1,6 +1,14 @@
   Changelog for the c-ares project
 
-* Aug 01 2008 (Yang Tse)
+* Aug 4 2008 (Yang Tse)
+- Autoconf 2.62 has changed the behaviour of the AC_AIX macro which we use.
+  Prior versions of autoconf defined _ALL_SOURCE if _AIX was defined. 2.62
+  version of AC_AIX defines _ALL_SOURCE and other four preprocessor symbols
+  no matter if the system is AIX or not. To keep the traditional behaviour,
+  and an uniform one across autoconf versions AC_AIX is replaced with our
+  own internal macro CARES_CHECK_AIX_ALL_SOURCE.
+
+* Aug 1 2008 (Yang Tse)
 - Configure process now checks if the preprocessor _REENTRANT symbol is already
   defined. If it isn't currently defined a set of checks are performed to test
   if its definition is required to make visible to the compiler a set of *_r

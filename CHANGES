@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Yang Tse (4 Aug 2008)
+- Autoconf 2.62 has changed the behaviour of the AC_AIX macro which we use.
+  Prior versions of autoconf defined _ALL_SOURCE if _AIX was defined. 2.62
+  version of AC_AIX defines _ALL_SOURCE and other four preprocessor symbols
+  no matter if the system is AIX or not. To keep the traditional behaviour,
+  and an uniform one across autoconf versions AC_AIX is replaced with our
+  own internal macro CURL_CHECK_AIX_ALL_SOURCE.
+
 
 Daniel Stenberg (4 Aug 2008)
 - Test case 1041 (added by Daniel Fandrich April 14th) proved a bug where PUT

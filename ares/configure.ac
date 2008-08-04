@@ -64,10 +64,12 @@ AC_CANONICAL_HOST
 dnl Get system canonical name
 AC_DEFINE_UNQUOTED(OS, "${host}", [cpu-machine-OS])
 
-AC_AIX
 AC_PROG_CC
 AM_PROG_CC_C_O
 AC_PROG_INSTALL
+
+dnl This defines _ALL_SOURCE for AIX
+CARES_CHECK_AIX_ALL_SOURCE
 
 dnl Our configure and build reentrant settings
 CARES_CONFIGURE_REENTRANT

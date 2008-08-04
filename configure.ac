@@ -129,11 +129,11 @@ AC_CANONICAL_HOST
 dnl Get system canonical name
 AC_DEFINE_UNQUOTED(OS, "${host}", [cpu-machine-OS])
 
-dnl Check for AIX weirdos
-AC_AIX
-
 dnl Checks for programs.
 AC_PROG_CC
+
+dnl This defines _ALL_SOURCE for AIX
+CURL_CHECK_AIX_ALL_SOURCE
 
 dnl Our configure and build reentrant settings
 CURL_CONFIGURE_REENTRANT

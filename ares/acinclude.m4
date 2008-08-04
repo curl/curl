@@ -47,7 +47,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE], [
 ])
 
 
-dnl CURL_CHECK_DEF(SYMBOL, [INCLUDES], [SILENT])
+dnl CURL_CHECK_DEF (SYMBOL, [INCLUDES], [SILENT])
 dnl -------------------------------------------------
 dnl Use the C preprocessor to find out if the given object-style symbol
 dnl is defined and get its expansion. This macro will not use default
@@ -91,6 +91,34 @@ CURL_DEF_TOKEN $1
   fi
   AS_VAR_POPDEF([ac_Def])dnl
   AS_VAR_POPDEF([ac_HaveDef])dnl
+])
+
+
+dnl CARES_CHECK_AIX_ALL_SOURCE
+dnl -------------------------------------------------
+dnl Provides a replacement of traditional AC_AIX with
+dnl an uniform behaviour across all autoconf versions,
+dnl and with our own placement rules.
+
+AC_DEFUN([CARES_CHECK_AIX_ALL_SOURCE], [
+  AH_VERBATIM([_ALL_SOURCE],
+    [/* Define to 1 if OS is AIX. */
+#ifndef _ALL_SOURCE
+#  undef _ALL_SOURCE
+#endif])
+  AC_BEFORE([$0], [AC_SYS_LARGEFILE])dnl
+  AC_BEFORE([$0], [CARES_CONFIGURE_REENTRANT])dnl
+  AC_MSG_CHECKING([if OS is AIX (to define _ALL_SOURCE)])
+  AC_EGREP_CPP([yes_this_is_aix],[
+#ifdef _AIX
+   yes_this_is_aix
+#endif
+  ],[
+    AC_MSG_RESULT([yes])
+    AC_DEFINE(_ALL_SOURCE)
+  ],[
+    AC_MSG_RESULT([no])
+  ])
 ])
 
 
