@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (5 Aug 2008)
+- Yehoshua Hershberg found a problem that would make libcurl re-use a
+  connection with the multi interface even if a previous use of it caused a
+  CURLE_PEER_FAILED_VERIFICATION to get returned. I now make sure that failed
+  SSL connections properly close the connections.
+
 Daniel Stenberg (4 Aug 2008)
 - Test cases 1051, 1052 and 1055 were added by Daniel Fandrich on July 30 and
   proved how PUT and POST with a redirect could lead to a "hang" due to the

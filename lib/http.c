@@ -1815,8 +1815,11 @@ static CURLcode https_connecting(struct connectdata *conn, bool *done)
 
   /* perform SSL initialization for this socket */
   result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, done);
-  if(result)
+  if(result) {
+    conn->bits.close = TRUE; /* a failed connection is marked for closure
+                                to prevent (bad) re-use or similar */
     return result;
+  }
 
   return CURLE_OK;
 }

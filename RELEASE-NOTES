@@ -47,6 +47,7 @@ This release includes the following bugfixes:
  o no longer link with gdi32 on Windows cross-compiled targets
  o HTTP PUT with -C - sent bad Content-Range: header
  o HTTP PUT or POST with redirect could lead to hang
+ o re-use of connections with failed SSL connects in the multi interface
 
 This release includes the following known bugs:
 
@@ -67,7 +68,7 @@ advice from friends like these:
  Rob Crittenden, Dengminwen, Christopher Palow, Hans-Jurgen May,
  Phil Pellouchoud, Eduard Bloch, John Lightsey, Stephen Collyer, Tor Arntsen,
  Rolland Dudemaine, Phil Blundell, Scott Barrett, Andreas Schuldei,
- Peter Lamberg, David Bau, Pramod Sharma
+ Peter Lamberg, David Bau, Pramod Sharma, Yehoshua Hershberg
 
 
         Thanks! (and sorry if I forgot to mention someone)
