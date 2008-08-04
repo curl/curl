@@ -8,10 +8,11 @@ This is what's new and changed in the c-ares 1.5.3 release:
  o configure process no longer needs nor checks size of curl_off_t
  o library will now be built with _REENTRANT symbol defined if needed
  o Improved configure detection of number of arguments for getservbyport_r
+ o Improved query-ID randomness
 
 Thanks go to these friendly people for their efforts and contributions:
 
- Brad House, Yang Tse, Phil Blundell
+ Brad House, Yang Tse, Phil Blundell, Tofu Linden
  and obviously Daniel Stenberg
 
 Have fun!
