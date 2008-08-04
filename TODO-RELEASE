@@ -9,7 +9,11 @@ To be addressed before 7.19.0 (planned release: August 2008)
        * #148 no longer blocks this.
       UPDATE:
        * Second version of the patch addressing building outside of CVS tree
-         submitted to the mailing list 2008-07-31. Awaiting Ok to commit.
+         submitted to the mailing list 2008-07-31.
+      UPDATE:
+       * Third version of the patch fixing a failure to chose a proper data
+         type submitted to the mailing list 2008-08-04.
+
 
 146 - Yehoshua Hershberg's re-using of connections that failed with
       CURLE_PEER_FAILED_VERIFICATION
