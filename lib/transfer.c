@@ -1116,6 +1116,12 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 data->req.newurl = strdup(data->req.location); /* clone */
                 if(!data->req.newurl)
                   return CURLE_OUT_OF_MEMORY;
+
+                /* some cases of POST and PUT etc needs to rewind the data
+                   stream at this point */
+                result = Curl_http_perhapsrewind(conn);
+                if(result)
+                  return result;
               }
             }
           }
@@ -1570,6 +1576,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         /* we've waited long enough, continue anyway */
         k->exp100 = EXP100_SEND_DATA;
         k->keepon |= KEEP_WRITE;
+        infof(data, "Done waiting for 100-continue\n");
       }
     }
   }

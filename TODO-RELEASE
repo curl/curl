@@ -29,7 +29,4 @@ To be addressed before 7.19.0 (planned release: August 2008)
          tests on the system might allow determination of the problem origin.
          Solaris AutoBuilds suceeded on August 2 and 3.
 
-151 - PUT with -L hangs after receiving a redirect (test case 1051, but the
-      test harness has a problem with this, too)
-
 152 - 

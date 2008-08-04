@@ -309,7 +309,7 @@ static bool pickoneauth(struct auth *pick)
 }
 
 /*
- * perhapsrewind()
+ * Curl_http_perhapsrewind()
  *
  * If we are doing POST or PUT {
  *   If we have more data to send {
@@ -331,17 +331,28 @@ static bool pickoneauth(struct auth *pick)
  *   }
  * }
  */
-static CURLcode perhapsrewind(struct connectdata *conn)
+CURLcode Curl_http_perhapsrewind(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
   struct HTTP *http = data->state.proto.http;
   curl_off_t bytessent;
   curl_off_t expectsend = -1; /* default is unknown */
 
-  if(!http)
+  if(!http || !(conn->protocol & PROT_HTTP))
     /* If this is still NULL, we have not reach very far and we can
-       safely skip this rewinding stuff */
+       safely skip this rewinding stuff, or this is attempted to get used
+       when HTTP isn't activated */
     return CURLE_OK;
+
+  infof(data, "now in %s\n", __func__);
+
+  switch(data->set.httpreq) {
+  case HTTPREQ_GET:
+  case HTTPREQ_HEAD:
+    return CURLE_OK;
+  default:
+    break;
+  }
 
   bytessent = http->writebytecount;
 
@@ -453,7 +464,7 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
     if((data->set.httpreq != HTTPREQ_GET) &&
        (data->set.httpreq != HTTPREQ_HEAD) &&
        !conn->bits.rewindaftersend) {
-      code = perhapsrewind(conn);
+      code = Curl_http_perhapsrewind(conn);
       if(code)
         return code;
     }

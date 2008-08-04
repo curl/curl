@@ -27,12 +27,12 @@ Content-Length: 51
 If this is received, the location following worked
 </data2>
 <datacheck>
-HTTP/1.0 301 Redirect
+HTTP/1.0 301 Redirect swsclose
 Date: Thu, 29 Jul 2008 14:49:00 GMT
 Server: test-server/fake
 Location: data/10520002.txt?coolsite=yes
 Content-Length: 0
-Connection: Keep-Alive
+Connection: close
 
 HTTP/1.0 200 Followed here fine swsclose
 Date: Thu, 29 Jul 2008 14:49:00 GMT
@@ -72,13 +72,27 @@ the
 <strip>
 ^User-Agent:.*
 </strip>
+
+# The primary reason libcurl sends the data part twice in this test is that
+# the test HTTP server is blocking until it has read the entire request,
+# including the full request-body before it responds. So in this test the
+# server says 301 and 200 _after_ the entire PUT body has been sent.
 <protocol>
-PUT /want/1052 HTTP/1.1
+PUT /want/1052 HTTP/1.0
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 78
 
-PUT /want/data/10520002.txt?coolsite=yes HTTP/1.1
+Weird
+     file
+         to
+   upload
+for
+   testing
+the
+   PUT
+      feature
+PUT /want/data/10520002.txt?coolsite=yes HTTP/1.0
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 78

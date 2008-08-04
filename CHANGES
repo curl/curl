@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (4 Aug 2008)
+- Test cases 1051, 1052 and 1055 were added by Daniel Fandrich on July 30 and
+  proved how PUT and POST with a redirect could lead to a "hang" due to the
+  data stream not being rewound properly when it had to in order to get sent
+  properly (again) to the subsequent URL. This is now fixed and these test
+  cases are no longer disabled.
+
 Yang Tse (4 Aug 2008)
 - Autoconf 2.62 has changed the behaviour of the AC_AIX macro which we use.
   Prior versions of autoconf defined _ALL_SOURCE if _AIX was defined. 2.62
@@ -14,9 +21,8 @@ Yang Tse (4 Aug 2008)
   and an uniform one across autoconf versions AC_AIX is replaced with our
   own internal macro CURL_CHECK_AIX_ALL_SOURCE.
 
-
 Daniel Stenberg (4 Aug 2008)
-- Test case 1041 (added by Daniel Fandrich April 14th) proved a bug where PUT
+- Test case 1041 (added by Daniel Fandrich July 14th) proved a bug where PUT
   with -C - sent garbage in the Content-Range: header. I fixed this problem by
   making sure libcurl always sets the size of the _entire_ upload if an app
   attemps to do resumed uploads since libcurl simply cannot know the size of
