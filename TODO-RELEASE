@@ -14,15 +14,4 @@ To be addressed before 7.19.0 (planned release: August 2008)
        * Third version of the patch fixing a failure to chose a proper data
          type submitted to the mailing list 2008-08-04.
 
-148 - Introduction of m4/reentrant.m4 is triggering some problems on Solaris
-      systems. The problem manifests when buildconf runs aclocal, at some point
-      aclocal fails when using GNU m4 version 1.4.5 it runs out of memory.  If
-      GNU m4 version 1.4.11 is used everything works.
-      Start of thread: http://curl.haxx.se/mail/lib-2008-07/0210.html
-      UPDATE:
-       * Rebooting the problematic system, releasing allocated memory and swap,
-         has allowed buildconf and configure to complete sucessfully. Further
-         tests on the system might allow determination of the problem origin.
-         Solaris AutoBuilds suceeded on August 2 and 3.
-
 152 - 
