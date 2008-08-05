@@ -48,6 +48,25 @@ findtool(){
 }
 
 #--------------------------------------------------------------------------
+# removethis() removes all files and subdirectories with the given name,
+# inside and below the current subdirectory at invocation time.
+#
+removethis(){
+  if test "$#" = "1"; then
+    find . -depth -name $1 -print > buildconf.tmp.$$
+    while read fdname
+    do
+      if test -f "$fdname"; then
+        rm -f "$fdname"
+      elif test -d "$fdname"; then
+        rm -f -r "$fdname"
+      fi
+    done < buildconf.tmp.$$
+    rm -f buildconf.tmp.$$
+  fi
+}
+
+#--------------------------------------------------------------------------
 # Ensure that buildconf runs from the subdirectory where configure.ac lives
 #
 if test ! -f configure.ac ||
@@ -85,8 +104,12 @@ am4te_version=`${AUTOM4TE:-autom4te} --version 2>/dev/null|head -n 1| sed -e 's/
 if test -z "$am4te_version"; then
   echo "buildconf: autom4te not found. Weird autoconf installation!"
   exit 1
+fi
+if test "$am4te_version" = "$ac_version"; then
+  echo "buildconf: autom4te version $am4te_version (ok)"
 else
-  echo "buildconf: autom4te version $am4te_version"
+  echo "buildconf: autom4te version $am4te_version (ERROR: does not match autoconf version)"
+  exit 1
 fi
 
 #--------------------------------------------------------------------------
@@ -136,8 +159,12 @@ acloc_version=`${ACLOCAL:-aclocal} --version 2>/dev/null|head -n 1| sed -e 's/^.
 if test -z "$acloc_version"; then
   echo "buildconf: aclocal not found. Weird automake installation!"
   exit 1
+fi
+if test "$acloc_version" = "$am_version"; then
+  echo "buildconf: aclocal version $acloc_version (ok)"
 else
-  echo "buildconf: aclocal version $acloc_version"
+  echo "buildconf: aclocal version $acloc_version (ERROR: does not match automake version)"
+  exit 1
 fi
 
 #--------------------------------------------------------------------------
@@ -229,88 +256,44 @@ PERL=`findtool ${PERL:-perl}`
 #--------------------------------------------------------------------------
 # Remove files generated on previous buildconf/configure run.
 #
-for fname in aclocal.m4 \
-             aclocal.m4.bak \
-             config.guess \
-             config.log \
-             config.status \
-             config.sub \
-             configure \
-             depcomp \
-             libtool \
-             ltmain.sh \
-             Makefile \
-             Makefile.in ; do
-  if test -f "$fname" ; then
-    rm -f "$fname"
-  fi
+for fname in .deps \
+    Makefile \
+    Makefile.in \
+    aclocal.m4 \
+    aclocal.m4.bak \
+    autom4te.cache \
+    compile \
+    config.guess \
+    config.h \
+    config.h.in \
+    config.log \
+    config.status \
+    config.sub \
+    configure \
+    curl-config \
+    depcomp \
+    libcares.pc \
+    libcurl.pc \
+    libtool \
+    libtool.m4 \
+    ltmain.sh \
+    missing \
+    stamp-h1 \
+    stamp-h2 \
+    stamp-h3 ; do
+  removethis "$fname"
 done
-if test -d autom4te.cache; then
-  rm -f -r autom4te.cache
-fi
-if test -d docs/examples/.deps; then
-  rm -f -r docs/examples/.deps
-fi
-if test -d lib/.deps; then
-  rm -f -r lib/.deps
-fi
-if test -d src/.deps; then
-  rm -f -r src/.deps
-fi
-if test -d tests/libtest/.deps; then
-  rm -f -r tests/libtest/.deps
-fi
-if test -d tests/server/.deps; then
-  rm -f -r tests/server/.deps
-fi
-
-#--------------------------------------------------------------------------
-# Remove files generated in c-ares subdir on previous buildconf/configure run.
-#
-if test -d ares; then
-  cd ares
-  for fname in aclocal.m4 \
-               aclocal.m4.bak \
-               compile \
-               config.h \
-               config.h.in \
-               config.guess \
-               config.log \
-               config.status \
-               config.sub \
-               configure \
-               depcomp \
-               libtool \
-               ltmain.sh \
-               missing \
-               Makefile \
-               Makefile.in ; do
-    if test -f "$fname" ; then
-      rm -f "$fname"
-    fi
-  done
-  if test -d autom4te.cache; then
-    rm -f -r autom4te.cache
-  fi
-  if test -d .deps; then
-    rm -f -r .deps
-  fi
-  cd ..
-fi
 
 #--------------------------------------------------------------------------
 # run the correct scripts now
 #
 
-tmp_host_type=`uname -a | sed '/SunOS/s/.*\(SunOS\).*/\1/'`
-if test "x$tmp_host_type" = "xSunOS"; then
-  ACLOCAL_FLAGS="$ACLOCAL_FLAGS --verbose"
-fi
-
 echo "buildconf: running libtoolize"
 $libtoolize --copy --automake --force || die "The libtoolize command failed"
+
 echo "buildconf: running aclocal"
 ${ACLOCAL:-aclocal} -I m4 $ACLOCAL_FLAGS || die "The aclocal command line failed"
+
 if test -n "$PERL"; then
   echo "buildconf: running aclocal hack to convert all mv to mv -f"
   $PERL -i.bak -pe 's/\bmv +([^-\s])/mv -f $1/g' aclocal.m4
@@ -318,10 +301,13 @@ else
   echo "buildconf: perl not found"
   exit 1
 fi
+
 echo "buildconf: running autoheader"
 ${AUTOHEADER:-autoheader} || die "The autoheader command failed"
+
 echo "buildconf: cp lib/config.h.in src/config.h.in"
 cp lib/config.h.in src/config.h.in
+
 echo "buildconf: running autoconf"
 ${AUTOCONF:-autoconf}     || die "The autoconf command failed"
 

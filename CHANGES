@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Yang Tse (5 Aug 2008)
+- Changes done to buildconf script. Validate that autom4te and autoconf, as
+  well as aclocal and automake, versions match. Improve removal of previous
+  run generated files. Remove verbose debug logging of aclocal on Solaris.
+
 Daniel Stenberg (5 Aug 2008)
 - Yehoshua Hershberg found a problem that would make libcurl re-use a
   connection with the multi interface even if a previous use of it caused a
