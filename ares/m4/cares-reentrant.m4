@@ -15,8 +15,8 @@
 #
 #***************************************************************************
 
-# File version for 'aclocal' use.
-# serial 1.1
+# File version for 'aclocal' use. Keep it a single number.
+# serial 2
 
 dnl Note 1
 dnl ------
@@ -399,7 +399,7 @@ dnl that it is defined equally for further configure
 dnl tests and generated config file.
 
 AC_DEFUN([CARES_CONFIGURE_REENTRANT], [
-  AC_PREREQ([2.57])dnl
+  AC_PREREQ([2.50])dnl
   #
   AC_MSG_CHECKING([if _REENTRANT is already defined])
   AC_COMPILE_IFELSE([
