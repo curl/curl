@@ -344,8 +344,6 @@ CURLcode Curl_http_perhapsrewind(struct connectdata *conn)
        when HTTP isn't activated */
     return CURLE_OK;
 
-  infof(data, "now in %s\n", __func__);
-
   switch(data->set.httpreq) {
   case HTTPREQ_GET:
   case HTTPREQ_HEAD:
