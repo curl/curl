@@ -106,49 +106,6 @@ static bool init_resolve_thread(struct connectdata *conn,
   #define THREAD_NAME "getaddrinfo_thread"
 #endif
 
-#if defined(DEBUG_THREADING_GETHOSTBYNAME) || \
-    defined(DEBUG_THREADING_GETADDRINFO)
-/* If this is defined, provide tracing */
-#define TRACE(args)  \
- do { trace_it("%u: ", __LINE__); trace_it args; } while(0)
-
-static void trace_it (const char *fmt, ...)
-{
-  static int do_trace = -1;
-  va_list args;
-
-  if(do_trace == -1) {
-    const char *env = getenv("CURL_TRACE");
-    do_trace = (env && atoi(env) > 0);
-  }
-  if(!do_trace)
-    return;
-  va_start (args, fmt);
-  vfprintf (stderr, fmt, args);
-  fflush (stderr);
-  va_end (args);
-}
-#else
-#define TRACE(x)
-#endif
-
-#ifdef DEBUG_THREADING_GETADDRINFO
-static void dump_addrinfo (struct connectdata *conn, const struct addrinfo *ai)
-{
-  TRACE(("dump_addrinfo:\n"));
-  for ( ; ai; ai = ai->ai_next) {
-    char  buf [INET6_ADDRSTRLEN];
-
-    trace_it("    fam %2d, CNAME %s, ",
-             ai->ai_family, ai->ai_canonname ? ai->ai_canonname : "<none>");
-    if(Curl_printable_address(ai, buf, sizeof(buf)))
-      trace_it("%s\n", buf);
-    else
-      trace_it("failed; %s\n", Curl_strerror(conn, SOCKERRNO));
-  }
-}
-#endif
-
 struct thread_data {
   HANDLE thread_hnd;
   unsigned thread_id;
@@ -312,8 +269,6 @@ static unsigned __stdcall gethostbyname_thread (void *arg)
     else {
       rc = Curl_addrinfo4_callback(conn, SOCKERRNO, NULL);
     }
-    TRACE(("Winsock-error %d, addr %s\n", conn->async.status,
-           he ? inet_ntoa(*(struct in_addr*)he->h_addr) : "unknown"));
     release_thread_sync(&tsd);
   }
 
@@ -371,14 +326,10 @@ static unsigned __stdcall getaddrinfo_thread (void *arg)
     SetEvent(td->event_resolved);
 
     if(rc == 0) {
-#ifdef DEBUG_THREADING_GETADDRINFO
-      dump_addrinfo (conn, res);
-#endif
       rc = Curl_addrinfo6_callback(conn, CURL_ASYNC_SUCCESS, res);
     }
     else {
       rc = Curl_addrinfo6_callback(conn, SOCKERRNO, NULL);
-      TRACE(("Winsock-error %d, no address\n", conn->async.status));
     }
     release_thread_sync(&tsd);
   }
@@ -536,11 +487,8 @@ static bool init_resolve_thread (struct connectdata *conn,
 #endif
 
   if(!td->thread_hnd) {
-#ifdef _WIN32_WCE
-     TRACE(("CreateThread() failed; %s\n", Curl_strerror(conn, ERRNO)));
-#else
+#ifndef _WIN32_WCE
      SET_ERRNO(errno);
-     TRACE(("_beginthreadex() failed; %s\n", Curl_strerror(conn, ERRNO)));
 #endif
      Curl_destroy_thread_data(&conn->async);
      return FALSE;
@@ -580,7 +528,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
   struct thread_data   *td = (struct thread_data*) conn->async.os_specific;
   struct SessionHandle *data = conn->data;
   long   timeout;
-  DWORD  status, ticks;
+  DWORD  status;
   CURLcode rc;
 
   DEBUGASSERT(conn && td);
@@ -591,7 +539,6 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
     conn->data->set.connecttimeout ? conn->data->set.connecttimeout :
     conn->data->set.timeout ? conn->data->set.timeout :
     CURL_TIMEOUT_RESOLVE * 1000; /* default name resolve timeout */
-  ticks = GetTickCount();
 
   /* wait for the thread to resolve the name */
   status = WaitForSingleObject(td->event_resolved, timeout);
@@ -614,7 +561,6 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
       TerminateThread(td->thread_hnd, 0);
       conn->async.done = TRUE;
       td->thread_status = (DWORD)-1;
-      TRACE(("%s() thread stuck?!, ", THREAD_NAME));
     }
     else {
       /* Thread finished before timeout; propagate Winsock error to this
@@ -623,17 +569,12 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
        */
       SET_SOCKERRNO(conn->async.status);
       GetExitCodeThread(td->thread_hnd, &td->thread_status);
-      TRACE(("%s() status %lu, thread retval %lu, ",
-             THREAD_NAME, status, td->thread_status));
     }
   }
   else {
     conn->async.done = TRUE;
     td->thread_status = (DWORD)-1;
-    TRACE(("%s() timeout, ", THREAD_NAME));
   }
-
-  TRACE(("elapsed %lu ms\n", GetTickCount()-ticks));
 
   if(entry)
     *entry = conn->async.dns;
@@ -690,13 +631,11 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
     /* we're done */
     Curl_destroy_thread_data(&conn->async);
     if(!conn->async.dns) {
-      TRACE(("Curl_is_resolved(): CURLE_COULDNT_RESOLVE_HOST\n"));
       failf(data, "Could not resolve host: %s; %s",
             conn->host.name, Curl_strerror(conn, conn->async.status));
       return CURLE_COULDNT_RESOLVE_HOST;
     }
     *entry = conn->async.dns;
-    TRACE(("resolved okay, dns %p\n", *entry));
   }
   return CURLE_OK;
 }
