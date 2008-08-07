@@ -257,7 +257,6 @@ PERL=`findtool ${PERL:-perl}`
 # Remove files generated on previous buildconf/configure run.
 #
 for fname in .deps \
-    Makefile \
     Makefile.in \
     aclocal.m4 \
     aclocal.m4.bak \
@@ -277,7 +276,6 @@ for fname in .deps \
     libtool \
     libtool.m4 \
     ltmain.sh \
-    missing \
     stamp-h1 \
     stamp-h2 \
     stamp-h3 ; do
