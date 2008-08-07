@@ -1,3 +1,4 @@
 Makefile
 Makefile.in
-*.dist
+curlbuild.h
+stamp-*

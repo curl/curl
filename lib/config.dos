@@ -60,7 +60,6 @@
 
 #define RETSIGTYPE             void
 #define SIZEOF_LONG_DOUBLE     16
-#define SIZEOF_CURL_OFF_T      4   /* no huge file support */
 #define STDC_HEADERS           1
 #define TIME_WITH_SYS_TIME     1
 

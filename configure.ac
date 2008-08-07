@@ -33,7 +33,7 @@ This configure script may be copied, distributed and modified under the
 terms of the curl license; see COPYING for more details])
 
 AC_CONFIG_SRCDIR([lib/urldata.h])
-AM_CONFIG_HEADER(lib/config.h src/config.h)
+AM_CONFIG_HEADER(lib/config.h src/config.h include/curl/curlbuild.h)
 AM_MAINTAINER_MODE
 
 dnl SED is mandatory for configure process and libtool.
@@ -131,6 +131,9 @@ AC_DEFINE_UNQUOTED(OS, "${host}", [cpu-machine-OS])
 
 dnl Checks for programs.
 AC_PROG_CC
+
+dnl Our curl_off_t internal and external configure settings
+CURL_CONFIGURE_CURL_OFF_T
 
 dnl This defines _ALL_SOURCE for AIX
 CURL_CHECK_AIX_ALL_SOURCE
@@ -1993,10 +1996,6 @@ AC_HEADER_TIME
 CURL_CHECK_STRUCT_TIMEVAL
 CURL_VERIFY_RUNTIMELIBS
 
-AC_CHECK_SIZEOF(curl_off_t, ,[
-#include <stdio.h>
-#include "$srcdir/include/curl/curl.h"
-])
 AC_CHECK_SIZEOF(size_t)
 AC_CHECK_SIZEOF(long)
 AC_CHECK_SIZEOF(time_t)

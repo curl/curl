@@ -23,11 +23,17 @@
  * $Id$
  ***************************************************************************/
 
-/* If you have problems, all libcurl docs and details are found here:
-   http://curl.haxx.se/libcurl/
-*/
+/*
+ * If you have libcurl problems, all docs and details are found here:
+ *   http://curl.haxx.se/libcurl/
+ *
+ * curl-library mailing list subscription and unsubscription web interface:
+ *   http://cool.haxx.se/mailman/listinfo/curl-library/
+ */
 
-#include "curlver.h" /* the libcurl version defines */
+#include "curlver.h"         /* libcurl version defines   */
+#include "curl/curlbuild.h"  /* libcurl build definitions */
+#include "curlrules.h"       /* libcurl rules enforcement */
 
 /*
  * Define WIN32 when build target is Win32 API
@@ -111,74 +117,6 @@ typedef void CURL;
 #else
 #define CURL_EXTERN
 #endif
-#endif
-
-/*
- * We want the typedef curl_off_t setup for large file support on all
- * platforms. We also provide a CURL_FORMAT_OFF_T define to use in *printf
- * format strings when outputting a variable of type curl_off_t.
- *
- * Note: "pocc -Ze" is MSVC compatibility mode and this sets _MSC_VER!
- */
-
-#if (defined(_MSC_VER) && !defined(__POCC__)) || (defined(__LCC__) && \
-     defined(WIN32))
-/* MSVC */
-#ifdef _WIN32_WCE
-  typedef long curl_off_t;
-#define CURL_FORMAT_OFF_T "%ld"
-#else
-  typedef signed __int64 curl_off_t;
-#define CURL_FORMAT_OFF_T "%I64d"
-#endif
-#else /* (_MSC_VER && !__POCC__) || (__LCC__ && WIN32) */
-#if (defined(__GNUC__) && defined(WIN32)) || defined(__WATCOMC__)
-/* gcc on windows or Watcom */
-  typedef long long curl_off_t;
-#define CURL_FORMAT_OFF_T "%I64d"
-#else /* GCC or Watcom on Windows  */
-#if defined(__ILEC400__)
-/* OS400 C compiler. */
-  typedef long long curl_off_t;
-#define CURL_FORMAT_OFF_T "%lld"
-#else /* OS400 C compiler. */
-
-/* "normal" POSIX approach, do note that this does not necessarily mean that
-   the type is >32 bits, see the SIZEOF_CURL_OFF_T define for that! */
-  typedef off_t curl_off_t;
-
-/* Check a range of defines to detect large file support. On Linux it seems
-   none of these are set by default, so if you don't explicitly switches on
-   large file support, this define will be made for "small file" support. */
-#ifndef _FILE_OFFSET_BITS
-#define _FILE_OFFSET_BITS 0 /* to prevent warnings in the check below */
-#define UNDEF_FILE_OFFSET_BITS
-#endif
-#ifndef FILESIZEBITS
-#define FILESIZEBITS 0 /* to prevent warnings in the check below */
-#define UNDEF_FILESIZEBITS
-#endif
-
-#if defined(_LARGE_FILES) || (_FILE_OFFSET_BITS > 32) || (FILESIZEBITS > 32) \
-   || defined(_LARGEFILE_SOURCE) || defined(_LARGEFILE64_SOURCE)
-  /* For now, we assume at least one of these to be set for large files to
-     work! */
-#define CURL_FORMAT_OFF_T "%lld"
-#else /* LARGE_FILE support */
-#define CURL_FORMAT_OFF_T "%ld"
-#endif
-#endif /* OS400 C compiler. */
-#endif /* GCC or Watcom on Windows */
-#endif /* (_MSC_VER && !__POCC__) || (__LCC__ && WIN32) */
-
-#ifdef UNDEF_FILE_OFFSET_BITS
-/* this was defined above for our checks, undefine it again */
-#undef _FILE_OFFSET_BITS
-#endif
-
-#ifdef UNDEF_FILESIZEBITS
-/* this was defined above for our checks, undefine it again */
-#undef FILESIZEBITS
 #endif
 
 #ifndef curl_socket_typedef

@@ -374,13 +374,11 @@
 
 #define HAVE_LL
 
-/* The size of `curl_off_t', as computed by sizeof. */
+/*  */
 
 #ifndef _LARGE_FILES
 #define _LARGE_FILES
 #endif
-
-#define SIZEOF_CURL_OFF_T 8
 
 /* Define this if you have struct sockaddr_storage */
 #define HAVE_STRUCT_SOCKADDR_STORAGE

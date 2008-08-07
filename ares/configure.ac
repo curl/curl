@@ -122,6 +122,7 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
        AC_MSG_RESULT(no)
 )
 AM_CONDITIONAL(DEBUGBUILD, test x$debugbuild = xyes)
+AM_CONDITIONAL(CURLDEBUG, test x$debugbuild = xyes)
 
 dnl skip libtool C++ and Fortran compiler checks
 m4_ifdef([AC_PROG_CXX], [m4_undefine([AC_PROG_CXX])])

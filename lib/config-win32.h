@@ -324,21 +324,6 @@
 /* The number of bytes in a long long.  */
 /* #define SIZEOF_LONG_LONG 8 */
 
-/* Undef SIZEOF_CURL_OFF_T if already defined. */
-#ifdef SIZEOF_CURL_OFF_T
-#undef SIZEOF_CURL_OFF_T
-#endif
-
-/* Define SIZEOF_CURL_OFF_T as computed by sizeof(curl_off_t) */
-/* Borland/PellesC/SalfordC lacks _lseeki64(), so we don't support
- * >2GB files.
- */
-#if defined(__BORLANDC__) || defined(__POCC__) || defined(__SALFORDC__)
-#define SIZEOF_CURL_OFF_T 4
-#else
-#define SIZEOF_CURL_OFF_T 8
-#endif
-
 /* ---------------------------------------------------------------- */
 /*                          STRUCT RELATED                          */
 /* ---------------------------------------------------------------- */

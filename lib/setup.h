@@ -72,6 +72,15 @@
 
 #endif /* HAVE_CONFIG_H */
 
+/* ================================================================ */
+/* Definition of preprocessor macros/symbols which modify compiler  */
+/* behaviour or generated code characteristics must be done here,   */
+/* as appropriate, before any system header file is included. It is */
+/* also possible to have them defined in the config file included   */
+/* before this point. As a result of all this we frown inclusion of */
+/* system header files in our config files, avoid this at any cost. */
+/* ================================================================ */
+
 /*
  * Tru64 needs _REENTRANT set for a few function prototypes and
  * things to appear in the system header files. Unixware needs it
@@ -82,6 +91,57 @@
 #  ifndef _REENTRANT
 #    define _REENTRANT
 #  endif
+#endif
+
+/* ================================================================ */
+/*  If you need to include a system header file for your platform,  */
+/*  please, do it beyond the point further indicated in this file.  */
+/* ================================================================ */
+
+/*
+ * libcurl's external interface definitions are also used internally,
+ * and might also include required system header files to define them.
+ */
+
+#include <curl/curlbuild.h>
+
+/*
+ * Compile time sanity checks must also be done when building the library.
+ */
+
+#include <curl/curlrules.h>
+
+/*
+ * Set up internal curl_off_t size macro
+ */
+
+#ifdef SIZEOF_CURL_OFF_T
+#  error "SIZEOF_CURL_OFF_T shall not be defined before this point!"
+   Error Compilation_aborted_SIZEOF_CURL_OFF_T_already_defined
+#else
+#  define SIZEOF_CURL_OFF_T CURL_SIZEOF_CURL_OFF_T
+#endif
+
+/*
+ * Set up internal curl_off_t formatting string directive
+ */
+
+#ifdef FORMAT_OFF_T
+#  error "FORMAT_OFF_T shall not be defined before this point!"
+   Error Compilation_aborted_FORMAT_OFF_T_already_defined
+#else
+#  define FORMAT_OFF_T CURL_FMT_OFF_T
+#endif
+
+/*
+ * Set up internal unsigned curl_off_t formatting string directive
+ */
+
+#ifdef FORMAT_OFF_TU
+#  error "FORMAT_OFF_TU shall not be defined before this point!"
+   Error Compilation_aborted_FORMAT_OFF_TU_already_defined
+#else
+#  define FORMAT_OFF_TU CURL_FMT_OFF_TU
 #endif
 
 /*
@@ -96,6 +156,11 @@
 #  define CURL_DISABLE_DICT
 #  define CURL_DISABLE_FILE
 #endif
+
+/* ================================================================ */
+/* No system header file shall be included in this file before this */
+/* point. The only allowed ones are those included from curlbuild.h */
+/* ================================================================ */
 
 /*
  * OS/400 setup file includes some system headers.
@@ -159,22 +224,6 @@
 #define ENABLE_64BIT
 #endif /* _MSC_VER */
 #endif /* HAVE_LONGLONG */
-
-#ifndef SIZEOF_CURL_OFF_T
-/* If we don't know the size here, we assume a conservative size: 4. When
-   building libcurl, the actual size of this variable should be defined in the
-   config*.h file. */
-#define SIZEOF_CURL_OFF_T 4
-#endif
-
-/* We set up our internal prefered (CURL_)FORMAT_OFF_T[U] here */
-#if SIZEOF_CURL_OFF_T > 4
-#define FORMAT_OFF_T "lld"
-#define FORMAT_OFF_TU "llu" /* the unsigned version */
-#else
-#define FORMAT_OFF_T "ld"
-#define FORMAT_OFF_TU "lu" /* thus unsigned version */
-#endif /* SIZEOF_CURL_OFF_T */
 
 #ifdef HAVE_EXTRA_STRICMP_H
 #  include <extra/stricmp.h>

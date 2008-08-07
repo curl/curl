@@ -3533,3 +3533,261 @@ AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
 ])
 
 
+dnl CURL_DEFINE_UNQUOTED (VARIABLE, [VALUE])
+dnl -------------------------------------------------
+dnl Like AC_DEFINE_UNQUOTED this macro will define a C preprocessor
+dnl symbol that can be further used in custom template configuration
+dnl files. This macro, unlike AC_DEFINE_UNQUOTED, does not use a third
+dnl argument for the description. Symbol definitions done with this
+dnl macro are intended to be exclusively used in handcrafted *.h.in
+dnl template files. Contrary to what AC_DEFINE_UNQUOTED does, this one
+dnl prevents autoheader generation and insertion of symbol template
+dnl stub and definition into the first configuration header file. Do
+dnl not use this macro as a replacement for AC_DEFINE_UNQUOTED, each
+dnl one serves different functional needs.
+
+AC_DEFUN([CURL_DEFINE_UNQUOTED], [
+cat >>confdefs.h <<_EOF
+[@%:@define] $1 ifelse($#, 2, [$2], 1)
+_EOF
+])
+
+
+dnl CURL_INCLUDES_INTTYPES
+dnl -------------------------------------------------
+dnl Set up variable with list of headers that must be
+dnl included when inttypes.h is to be included.
+
+AC_DEFUN([CURL_INCLUDES_INTTYPES], [
+curl_includes_inttypes="\
+/* includes start */
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+#ifdef HAVE_STDINT_H
+# include <stdint.h>
+#endif
+#ifdef HAVE_INTTYPES_H
+# include <inttypes.h>
+#endif
+/* includes end */"
+  AC_CHECK_HEADERS(
+    sys/types.h stdint.h inttypes.h,
+    [], [], [$curl_includes_inttypes])
+])
+
+
+dnl DO_CURL_OFF_T_CHECK(TYPE, SIZE)
+dnl -------------------------------------------------
+dnl Internal macro for CURL_CONFIGURE_CURL_OFF_T
+
+AC_DEFUN([DO_CURL_OFF_T_CHECK], [
+  AC_REQUIRE([CURL_INCLUDES_INTTYPES])dnl
+  if test "$x_typeof" = "unknown"; then
+    tmp_includes=""
+    tmp_source=""
+    tmp_fmt=""
+    case AS_TR_SH([$1]) in
+      int64_t)
+        tmp_includes="$curl_includes_inttypes"
+        tmp_source="char f@<:@@:>@ = PRId64;"
+        tmp_fmt="PRId64"
+        ;;
+      int32_t)
+        tmp_includes="$curl_includes_inttypes"
+        tmp_source="char f@<:@@:>@ = PRId32;"
+        tmp_fmt="PRId32"
+        ;;
+      int16_t)
+        tmp_includes="$curl_includes_inttypes"
+        tmp_source="char f@<:@@:>@ = PRId16;"
+        tmp_fmt="PRId16"
+        ;;
+    esac
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $tmp_includes
+        typedef $1 curl_off_t;
+        typedef char dummy_arr[sizeof(curl_off_t) == $2 ? 1 : -1];
+      ]],[[
+        $tmp_source
+        curl_off_t dummy;
+      ]])
+    ],[
+      if test -z "$tmp_fmt"; then
+        x_typeof="$1"
+        x_sizeof="$2"
+      else
+        CURL_CHECK_DEF([$tmp_fmt], [$curl_includes_inttypes], [silent])
+        AS_VAR_PUSHDEF([tmp_HaveDef], [curl_cv_have_def_$tmp_fmt])dnl
+        AS_VAR_PUSHDEF([tmp_Def], [curl_cv_def_$tmp_fmt])dnl
+        if test AS_VAR_GET([tmp_HaveDef]) = "yes"; then
+          x_format=AS_VAR_GET([tmp_Def])
+          x_typeof="$1"
+          x_sizeof="$2"
+        fi
+        AS_VAR_POPDEF([tmp_Def])dnl
+        AS_VAR_POPDEF([tmp_HaveDef])dnl
+      fi
+    ])
+  fi
+])
+
+
+dnl CURL_CONFIGURE_CURL_OFF_T
+dnl -------------------------------------------------
+dnl Find out suitable curl_off_t data type definition and associated
+dnl items, and make the appropriate definitions used in template file
+dnl include/curl/curlbuild.h.in to properly configure the library.
+
+AC_DEFUN([CURL_CONFIGURE_CURL_OFF_T], [
+  AC_REQUIRE([CURL_INCLUDES_INTTYPES])dnl
+  #
+  AC_BEFORE([$0],[AC_SYS_LARGEFILE])dnl
+  AC_BEFORE([$0],[CURL_CONFIGURE_REENTRANT])dnl
+  AC_BEFORE([$0],[CURL_CHECK_AIX_ALL_SOURCE])dnl
+  #
+  if test -z "$SED"; then
+    AC_MSG_ERROR([SED not set. Cannot continue without SED being set.])
+  fi
+  #
+  AC_CHECK_SIZEOF(long)
+  AC_CHECK_SIZEOF(void*)
+  #
+  if test -z "$ac_cv_sizeof_long" ||
+     test "$ac_cv_sizeof_long" -eq "0"; then
+    AC_MSG_ERROR([cannot find out size of long.])
+  fi
+  if test -z "$ac_cv_sizeof_voidp" ||
+     test "$ac_cv_sizeof_voidp" -eq "0"; then
+    AC_MSG_ERROR([cannot find out size of void*.])
+  fi
+  #
+  x_LP64_long=""
+  x_LP32_long=""
+  x_LP16_long=""
+  #
+  if test "$ac_cv_sizeof_long" -eq "8" &&
+     test "$ac_cv_sizeof_voidp" -ge "8"; then
+    x_LP64_long="long"
+  elif test "$ac_cv_sizeof_long" -eq "4" &&
+       test "$ac_cv_sizeof_voidp" -ge "4"; then
+    x_LP32_long="long"
+  elif test "$ac_cv_sizeof_long" -eq "2" &&
+       test "$ac_cv_sizeof_voidp" -ge "2"; then
+    x_LP16_long="long"
+  fi
+  #
+  dnl DO_CURL_OFF_T_CHECK results are stored in next 3 vars
+  #
+  x_typeof="unknown"
+  x_sizeof="unknown"
+  x_format="unknown"
+  u_format="unknown"
+  #
+  if test "$x_typeof" = "unknown"; then
+    AC_MSG_CHECKING([for 64-bit curl_off_t data type])
+    for t8 in          \
+      "$x_LP64_long"   \
+      'signed __int64' \
+      'int64_t'        \
+      'long long'      \
+      '__longlong'     \
+      '__longlong_t'   ; do
+      DO_CURL_OFF_T_CHECK([$t8], [8])
+    done
+    AC_MSG_RESULT([$x_typeof])
+  fi
+  if test "$x_typeof" = "unknown"; then
+    AC_MSG_CHECKING([for 32-bit curl_off_t data type])
+    for t4 in          \
+      "$x_LP32_long"   \
+      'signed __int32' \
+      'int32_t'        \
+      'int'            ; do
+      DO_CURL_OFF_T_CHECK([$t4], [4])
+    done 
+    AC_MSG_RESULT([$x_typeof])
+  fi
+  if test "$x_typeof" = "unknown"; then
+    AC_MSG_CHECKING([for 16-bit curl_off_t data type])
+    for t2 in          \
+      "$x_LP16_long"   \
+      'signed __int16' \
+      'int16_t'        \
+      'int'            ; do
+      DO_CURL_OFF_T_CHECK([$t2], [2])
+    done
+    AC_MSG_RESULT([$x_typeof])
+  fi
+  if test "$x_typeof" = "unknown"; then
+    AC_MSG_ERROR([cannot find data type for curl_off_t.])
+  fi
+  #
+  AC_MSG_CHECKING([size of curl_off_t])
+  AC_MSG_RESULT([$x_sizeof])
+  #
+  AC_MSG_CHECKING([formatting string directive for curl_off_t])
+  if test "$x_format" != "unknown"; then
+    x_pull_headers="yes"
+    x_format=`echo "$x_format" | "$SED" 's/[["]]//g'`
+    u_format=`echo "$x_format" | "$SED" 's/i$/u/'`
+    u_format=`echo "$u_format" | "$SED" 's/d$/u/'`
+    u_format=`echo "$u_format" | "$SED" 's/D$/U/'`
+  else
+    x_pull_headers="no"
+    case AS_TR_SH([$x_typeof]) in
+      long_long | __longlong | __longlong_t)
+        x_format="lld"
+        u_format="llu"
+        ;;
+      long)
+        x_format="ld"
+        u_format="lu"
+        ;;
+      int)
+        x_format="d"
+        u_format="u"
+        ;;
+      signed___int64)
+        x_format="I64d"
+        u_format="I64u"
+        ;;
+      signed___int32)
+        x_format="I32d"
+        u_format="I32u"
+        ;;
+      signed___int16)
+        x_format="I16d"
+        u_format="I16u"
+        ;;
+      *)
+        AC_MSG_ERROR([cannot find print format string for curl_off_t.])
+        ;;
+    esac
+  fi
+  AC_MSG_RESULT(["$x_format"])
+  #
+  AC_MSG_CHECKING([formatting string directive for unsigned curl_off_t])
+  AC_MSG_RESULT(["$u_format"])
+  #
+  if test "$x_pull_headers" = "yes"; then
+    if test "x$ac_cv_header_sys_types_h" = "xyes"; then
+      CURL_DEFINE_UNQUOTED([CURL_PULL_SYS_TYPES_H])
+    fi
+    if test "x$ac_cv_header_stdint_h" = "xyes"; then
+      CURL_DEFINE_UNQUOTED([CURL_PULL_STDINT_H])
+    fi
+    if test "x$ac_cv_header_inttypes_h" = "xyes"; then
+      CURL_DEFINE_UNQUOTED([CURL_PULL_INTTYPES_H])
+    fi
+  fi
+  #
+  CURL_DEFINE_UNQUOTED([CURL_OFF_T], [$x_typeof])
+  CURL_DEFINE_UNQUOTED([CURL_FMT_OFF_T], ["$x_format"])
+  CURL_DEFINE_UNQUOTED([CURL_FMT_OFF_TU], ["$u_format"])
+  CURL_DEFINE_UNQUOTED([CURL_FORMAT_OFF_T], ["%$x_format"])
+  CURL_DEFINE_UNQUOTED([CURL_SIZEOF_CURL_OFF_T], [$x_sizeof])
+  #
+])
+

@@ -187,10 +187,6 @@ int fileno( FILE *stream);
 #include <sys/timeval.h>
 #endif
 
-#ifndef SIZEOF_CURL_OFF_T
-#define SIZEOF_CURL_OFF_T sizeof(curl_off_t)
-#endif
-
 #ifndef UNPRINTABLE_CHAR
 /* define what to use for unprintable characters */
 #define UNPRINTABLE_CHAR '.'

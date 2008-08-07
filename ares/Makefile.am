@@ -1,6 +1,30 @@
-AUTOMAKE_OPTIONS = foreign
+AUTOMAKE_OPTIONS = foreign nostdinc
 
 ACLOCAL_AMFLAGS = -I m4
+
+# Specify our include paths here, and do it relative to $(top_srcdir) and
+# $(top_builddir), to ensure that these paths which belong to the library
+# being currently built and tested are searched before the library which
+# might possibly already be installed in the system.
+#
+# When using the low-level hard-hacking memory leak tracking code from
+# libcurl the generated curl/curlbuild.h file must also be reachable.
+# Using the libcurl lowlevel code from within c-ares library is ugly and
+# only works when c-ares is built and linked with a similarly debug-build
+# libcurl, but we do this anyway for convenience.
+#
+# $(top_builddir)/../include is for libcurl's generated curl/curlbuild.h file
+# $(top_builddir) is for c-ares's generated config.h file
+# $(top_srcdir) is for c-ares's lib/setup.h and other "c-ares-private" files
+
+if CURLDEBUG
+INCLUDES = -I$(top_builddir)/../include \
+           -I$(top_builddir)            \
+           -I$(top_srcdir)
+else
+INCLUDES = -I$(top_builddir) \
+           -I$(top_srcdir)
+endif
 
 lib_LTLIBRARIES = libcares.la
 

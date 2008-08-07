@@ -7,7 +7,7 @@
 Include files for libcurl, external users.
 
 They're all placed in the curl subdirectory here for better fit in any kind
-of environment. You should include files from here using...
+of environment. You must include files from here using...
 
         #include <curl/curl.h>
 
@@ -16,14 +16,31 @@ curl subdirectory. It makes it more likely to survive future modifications.
 
 NOTE FOR LIBCURL HACKERS
 
-All the include files in this tree are written and intended to be installed on
-a system that may serve multiple platforms and multiple applications, all
-using libcurl (possibly even different libcurl installations using different
-versions). Therefore, all header files in here must obey these rules:
+The following notes apply to libcurl version 7.19.0 and later.
 
-* They cannot depend on or use configure-generated results from libcurl's or
-  curl's directories. Other applications may not run configure as (lib)curl
-  does, and using platform dependent info here may break other platforms.
+* The distributed curl/curlbuild.h file is only intended to be used on systems
+  which can not run the also distributed configure script.
+
+* The distributed curlbuild.h file is generated as a copy of curlbuild.h.dist
+  when the libcurl source code distribution archive file is originally created.
+
+* If you check out from CVS on a non-configure platform, you must run the
+  appropriate buildconf* script to set up curlbuild.h and other local files
+  before being able of compiling the library.
+
+* On systems capable of running the configure script, the configure process
+  will overwrite the distributed include/curl/curlbuild.h file with one that
+  is suitable and specific to the library being configured and built, which
+  is generated from the include/curl/curlbuild.h.in template file.
+
+* If you intend to distribute an already compiled libcurl library you _MUST_
+  also distribute along with it the generated curl/curlbuild.h which has been
+  used to compile it. Otherwise the library will be of no use for the users of
+  the library that you have built. It is _your_ responsability to provide this
+  file. No one at the cURL project can know how you have built the library.
+
+* File curl/curlbuild.h includes platform and configuration dependant info,
+  and must not be modified by anyone. Configure script generates it for you.
 
 * We cannot assume anything else but very basic compiler features being
   present. While libcurl requires an ANSI C compiler to build, some of the

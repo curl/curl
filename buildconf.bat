@@ -8,3 +8,6 @@ copy src\hugehelp.c.cvs src\hugehelp.c
 
 REM create Makefile
 copy Makefile.dist Makefile
+
+REM create curlbuild.h
+copy include\curl\curlbuild.h.dist include\curl\curlbuild.h

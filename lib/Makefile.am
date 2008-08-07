@@ -48,12 +48,14 @@ LIBCURL_LIBS = @LIBCURL_LIBS@
 # being currently built and tested are searched before the library which
 # might possibly already be installed in the system.
 #
+# $(top_builddir)/include is for libcurl's generated curl/curlbuild.h file
 # $(top_srcdir)/include is for libcurl's external include files
 # $(top_builddir)/lib is for libcurl's generated lib/config.h file
 # $(top_srcdir)/lib is for libcurl's lib/setup.h and other "private" files
 
-INCLUDES = -I$(top_srcdir)/include \
-           -I$(top_builddir)/lib   \
+INCLUDES = -I$(top_builddir)/include \
+           -I$(top_srcdir)/include   \
+           -I$(top_builddir)/lib     \
            -I$(top_srcdir)/lib
 
 VERSION=-version-info 5:0:1

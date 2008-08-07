@@ -21,6 +21,7 @@ This release includes the following changes:
  o the curl tool's -w option support the %{ssl_verify_result} variable
  o Added CURLOPT_ADDRESS_SCOPE and scope parsing of the URL according to RFC4007
  o Support --append on SFTP uploads (not with OpenSSH, though)
+ o Added curlbuild.h and curlrules.h to the external library interface
 
 This release includes the following bugfixes:
 

@@ -307,14 +307,6 @@
 /* The number of bytes in a long long.  */
 /* #define SIZEOF_LONG_LONG 8 */
 
-/* Undef SIZEOF_CURL_OFF_T if already defined. */
-#ifdef SIZEOF_CURL_OFF_T
-#undef SIZEOF_CURL_OFF_T
-#endif
-
-/* Define SIZEOF_CURL_OFF_T as computed by sizeof(curl_off_t) */
-#define SIZEOF_CURL_OFF_T 4
-
 /* ---------------------------------------------------------------- */
 /*                          STRUCT RELATED                          */
 /* ---------------------------------------------------------------- */
