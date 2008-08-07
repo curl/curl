@@ -585,6 +585,6 @@ ca-bundle.crt: mk-ca-bundle.pl
 	@-$(PERL) $< -b -n $@
 
 $(CURL_INC)/curl/curlbuild.h: $(CURL_INC)/curl/curlbuild.h.dist
-	@cp $< $@
+	@$(CP) $< $@
 
  
