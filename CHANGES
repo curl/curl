@@ -20,6 +20,9 @@ Yang Tse (7 Aug 2008)
 
 - Skip data type check in DO_CURL_OFF_T_CHECK macro when argument is empty.
 
+- Adjusted testcurl.pl to copy checked out curlbuild.h.dist as curlbuild.h
+  for non-configure targets when the host system doesn't run buildconf.bat.
+
 - Prevent buildconf from removing 'Makefile' and 'missing' files. This would
   blow away our CVS checked files 'missing' and 'hiper/Makefile'.
 

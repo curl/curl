@@ -489,6 +489,7 @@ if ($configurebuild) {
   elsif (($^O eq 'linux') || ($targetos =~ /netware/)) {
     system("cp -afr ../$CURLDIR/* ."); 
     system("cp -af ../$CURLDIR/Makefile.dist Makefile"); 
+    system("cp -af ../$CURLDIR/include/curl/curlbuild.h.dist include/curl/curlbuild.h");
     system("$make -i -C lib -f Makefile.$targetos prebuild");
     system("$make -i -C src -f Makefile.$targetos prebuild");
   }
