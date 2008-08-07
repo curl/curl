@@ -74,7 +74,9 @@ dnl -------------------------------------------------
 dnl Use the C preprocessor to find out if the given object-style symbol
 dnl is defined and get its expansion. This macro will not use default
 dnl includes even if no INCLUDES argument is given. This macro will run
-dnl silently when invoked with three arguments.
+dnl silently when invoked with three arguments. If the expansion would
+dnl result in a set of double-quoted strings the returned expansion will
+dnl actually be a single double-quoted string concatenating all them.
 
 AC_DEFUN([CURL_CHECK_DEF], [
   AS_VAR_PUSHDEF([ac_HaveDef], [curl_cv_have_def_$1])dnl
@@ -98,7 +100,7 @@ CURL_DEF_TOKEN $1
     tmp_exp=`eval "$ac_cpp conftest.$ac_ext" 2>/dev/null | \
       "$GREP" CURL_DEF_TOKEN 2>/dev/null | \
       "$SED" 's/.*CURL_DEF_TOKEN[[ ]]//' 2>/dev/null | \
-      "$SED" 'q' 2>/dev/null`
+      "$SED" 's/[["]][[ ]]*[["]]//g' 2>/dev/null`
     if test "$tmp_exp" = "$1"; then
       tmp_exp=""
     fi
