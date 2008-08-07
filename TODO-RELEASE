@@ -2,16 +2,8 @@ To be addressed before 7.19.0 (planned release: August 2008)
 =============================
 
 144 - Help apps use 64bit/LFS libcurl!
-      http://curl.haxx.se/mail/lib-2008-07/0120.html  Patch (first version) of
-      64-bit curl_off_t no longer gated to off_t was sent to the mailing list
-      2008-07-14.
-      UPDATE:
-       * #148 no longer blocks this.
-      UPDATE:
-       * Second version of the patch addressing building outside of CVS tree
-         submitted to the mailing list 2008-07-31.
-      UPDATE:
-       * Third version of the patch fixing a failure to chose a proper data
-         type submitted to the mailing list 2008-08-04.
+      64-bit curl_off_t no longer gated to off_t patch already committed.
+      TODO:
+       * Test it on the broadest combination of platforms and compilers.
 
 152 - 
