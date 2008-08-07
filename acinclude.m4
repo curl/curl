@@ -3579,13 +3579,13 @@ curl_includes_inttypes="\
 ])
 
 
-dnl DO_CURL_OFF_T_CHECK(TYPE, SIZE)
+dnl DO_CURL_OFF_T_CHECK (TYPE, SIZE)
 dnl -------------------------------------------------
 dnl Internal macro for CURL_CONFIGURE_CURL_OFF_T
 
 AC_DEFUN([DO_CURL_OFF_T_CHECK], [
   AC_REQUIRE([CURL_INCLUDES_INTTYPES])dnl
-  if test "$x_typeof" = "unknown"; then
+  if test "$x_typeof" = "unknown" && test ! -z "$1"; then
     tmp_includes=""
     tmp_source=""
     tmp_fmt=""
