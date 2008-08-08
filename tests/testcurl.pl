@@ -492,16 +492,6 @@ if ($configurebuild) {
     # lib/Makefile.netware now copies curlbuild.h.dist as curlbuild.h
     system("$make -i -C lib -f Makefile.$targetos prebuild");
     system("$make -i -C src -f Makefile.$targetos prebuild");
-    # peek compiler predefined symbols...
-    system("echo | gcc -m32 -E -dM - >predef.txt");
-    logit "display predef.txt";
-    if(open(F, "predef.txt")) {
-        while (<F>) {
-            print;
-        }
-        close(F);
-    }
-    #
   }
 }
 
