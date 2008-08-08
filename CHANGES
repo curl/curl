@@ -10,6 +10,8 @@ Daniel Fandrich (7 Aug 2008)
 - Fixed an uninitialized variable in multi_runsingle() that could cause a
   request to prematurely end.
 
+- Added test1059 to test the FTP proxy tunnel problem fixed July 11.
+
 Yang Tse (7 Aug 2008)
 - Added curlbuild.h and curlrules.h header files to libcurl's public headers.
   File curlbuild.h is a generated file on configure-capable systems. This is
