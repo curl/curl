@@ -230,7 +230,7 @@ nlm: prebuild $(TARGET).nlm
 
 lib: prebuild $(TARGET).$(LIBEXT)
 
-prebuild: $(OBJDIR) $(CURL_INC)/curl/curlbuild.h $(OBJDIR)/version.inc config.h
+prebuild: $(OBJDIR) $(OBJDIR)/version.inc config.h
 
 $(OBJDIR)/%.o: %.c
 #	@echo Compiling $<
@@ -583,8 +583,5 @@ $(ARES_LIB)/libcares.$(LIBEXT):
 ca-bundle.crt: mk-ca-bundle.pl
 	@echo Creating $@
 	@-$(PERL) $< -b -n $@
-
-$(CURL_INC)/curl/curlbuild.h: $(CURL_INC)/curl/curlbuild.h.dist
-	@$(CP) $< $@
 
  
