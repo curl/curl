@@ -239,6 +239,13 @@
 #    define CURL_SIZEOF_CURL_OFF_T 8
 #  endif
 
+#elif defined(__MWERKS__)
+#  define CURL_OFF_T             long long
+#  define CURL_FMT_OFF_T         "lld"
+#  define CURL_FMT_OFF_TU        "llu"
+#  define CURL_FORMAT_OFF_T      "%lld"
+#  define CURL_SIZEOF_CURL_OFF_T 8
+
 #elif defined(_WIN32_WCE)
 #  define CURL_OFF_T             signed __int64
 #  define CURL_FMT_OFF_T         "I64d"
@@ -336,6 +343,25 @@
 #      define CURL_FORMAT_OFF_T      "%ld"
 #      define CURL_SIZEOF_CURL_OFF_T 4
 #    endif
+#  endif
+
+/* ===================================== */
+/*    KEEP GENERIC GCC THE LAST ENTRY    */
+/* ===================================== */
+
+#elif defined(__GNUC__)
+#  if defined(__i386__)
+#    define CURL_OFF_T             long long
+#    define CURL_FMT_OFF_T         "lld"
+#    define CURL_FMT_OFF_TU        "llu"
+#    define CURL_FORMAT_OFF_T      "%lld"
+#    define CURL_SIZEOF_CURL_OFF_T 8
+#  elif defined(__x86_64__)
+#    define CURL_OFF_T             long
+#    define CURL_FMT_OFF_T         "ld"
+#    define CURL_FMT_OFF_TU        "lu"
+#    define CURL_FORMAT_OFF_T      "%ld"
+#    define CURL_SIZEOF_CURL_OFF_T 8
 #  endif
 
 #else
