@@ -871,7 +871,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   bool async;
   bool protocol_connect = FALSE;
   bool dophase_done;
-  bool done;
+  bool done = FALSE;
   CURLMcode result = CURLM_OK;
   struct SingleRequest *k;
 
