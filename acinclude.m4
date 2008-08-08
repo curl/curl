@@ -101,12 +101,12 @@ CURL_DEF_TOKEN $1
     echo " " >&6
     echo "DEBUG: preproc IF-ACTION branch for $1 -----" >&6
     echo "DEBUG: ------- preproc source follows: " >&6
-    sed 's/^/| /' conftest.$ac_ext >&6
+    sed 's/^/cpp-src> /' conftest.$ac_ext >&6
     (eval "$ac_cpp conftest.$ac_ext") 2>conftest.yang2 1>conftest.yang1
     echo "DEBUG: ------- preproc STDOUT follows: " >&6
-    sed 's/^/| /' conftest.yang1 >&6
+    sed 's/^/cpp-out> /' conftest.yang1 >&6
     echo "DEBUG: ------- preproc STDERR follows: " >&6
-    sed 's/^/| /' conftest.yang2 >&6
+    sed 's/^/cpp-err> /' conftest.yang2 >&6
     echo "DEBUG: ------- preproc STDERR ends in above line. " >&6
     echo "DEBUG: ------- shell tmp_exp follows: " >&6
 
@@ -129,12 +129,12 @@ CURL_DEF_TOKEN $1
     echo " " >&6
     echo "DEBUG: preproc ELSE-ACTION branch for $1 -----" >&6
     echo "DEBUG: ------- preproc source follows: " >&6
-    sed 's/^/| /' conftest.$ac_ext >&6
+    sed 's/^/cpp-src> /' conftest.$ac_ext >&6
     (eval "$ac_cpp conftest.$ac_ext") 2>conftest.yang2 1>conftest.yang1
     echo "DEBUG: ------- preproc STDOUT follows: " >&6
-    sed 's/^/| /' conftest.yang1 >&6
+    sed 's/^/cpp-out> /' conftest.yang1 >&6
     echo "DEBUG: ------- preproc STDERR follows: " >&6
-    sed 's/^/| /' conftest.yang2 >&6
+    sed 's/^/cpp-err> /' conftest.yang2 >&6
     echo "DEBUG: ------- preproc STDERR ends in above line. " >&6
 
   ])
@@ -3623,6 +3623,10 @@ dnl Internal macro for CURL_CONFIGURE_CURL_OFF_T
 AC_DEFUN([DO_CURL_OFF_T_CHECK], [
   AC_REQUIRE([CURL_INCLUDES_INTTYPES])dnl
   if test "$x_typeof" = "unknown" && test ! -z "$1"; then
+
+    echo " " >&6
+    echo "DEBUG: ===== doing DO-CURL-OFF-T-CHECK for $1 with size $2 =====" >&6
+
     tmp_includes=""
     tmp_source=""
     tmp_fmt=""
@@ -3653,6 +3657,9 @@ AC_DEFUN([DO_CURL_OFF_T_CHECK], [
         curl_off_t dummy;
       ]])
     ],[
+      echo "DEBUG: ===== generated source which compiled OK follows: " >&6
+      sed 's/^/cc-ok> /' conftest.$ac_ext >&6
+
       if test -z "$tmp_fmt"; then
         x_typeof="$1"
         x_sizeof="$2"
@@ -3668,6 +3675,10 @@ AC_DEFUN([DO_CURL_OFF_T_CHECK], [
         AS_VAR_POPDEF([tmp_Def])dnl
         AS_VAR_POPDEF([tmp_HaveDef])dnl
       fi
+    ],[
+      echo "DEBUG: ===== generated source which failed compilation follows:" >&6
+      sed 's/^/cc-fail> /' conftest.$ac_ext >&6
+
     ])
   fi
 ])
