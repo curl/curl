@@ -97,14 +97,51 @@ CURL_DEF_TOKEN $1
 #endif
     ]])
   ],[
+
+    echo " " >&6
+    echo "DEBUG: preproc IF-ACTION branch for $1 -----" >&6
+    echo "DEBUG: ------- preproc source follows: " >&6
+    sed 's/^/| /' conftest.$ac_ext >&6
+    (eval "$ac_cpp conftest.$ac_ext") 2>conftest.yang2 1>conftest.yang1
+    echo "DEBUG: ------- preproc STDOUT follows: " >&6
+    sed 's/^/| /' conftest.yang1 >&6
+    echo "DEBUG: ------- preproc STDERR follows: " >&6
+    sed 's/^/| /' conftest.yang2 >&6
+    echo "DEBUG: ------- preproc STDERR ends in above line. " >&6
+    echo "DEBUG: ------- shell tmp_exp follows: " >&6
+
     tmp_exp=`eval "$ac_cpp conftest.$ac_ext" 2>/dev/null | \
       "$GREP" CURL_DEF_TOKEN 2>/dev/null | \
       "$SED" 's/.*CURL_DEF_TOKEN[[ ]]//' 2>/dev/null | \
       "$SED" 's/[["]][[ ]]*[["]]//g' 2>/dev/null`
+
+    echo "DEBUG: $tmp_exp"  >&6
+
     if test "$tmp_exp" = "$1"; then
       tmp_exp=""
+      echo "DEBUG: $tmp_exp"  >&6
     fi
+
+    echo "DEBUG: ------- shell tmp_exp ends in above line. " >&6
+
+  ],[
+
+    echo " " >&6
+    echo "DEBUG: preproc ELSE-ACTION branch for $1 -----" >&6
+    echo "DEBUG: ------- preproc source follows: " >&6
+    sed 's/^/| /' conftest.$ac_ext >&6
+    (eval "$ac_cpp conftest.$ac_ext") 2>conftest.yang2 1>conftest.yang1
+    echo "DEBUG: ------- preproc STDOUT follows: " >&6
+    sed 's/^/| /' conftest.yang1 >&6
+    echo "DEBUG: ------- preproc STDERR follows: " >&6
+    sed 's/^/| /' conftest.yang2 >&6
+    echo "DEBUG: ------- preproc STDERR ends in above line. " >&6
+
   ])
+
+  rm -f conftest.yang1
+  rm -f conftest.yang2
+
   if test -z "$tmp_exp"; then
     AS_VAR_SET([ac_HaveDef], [no])
     ifelse($3,,[AC_MSG_RESULT([no])])
