@@ -24,6 +24,9 @@ Content-Length: 0
 #
 # Client-side
 <client>
+<features>
+ftp
+</features>
 <server>
 http
 </server>
