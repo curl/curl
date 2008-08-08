@@ -3728,7 +3728,7 @@ AC_DEFUN([CURL_CONFIGURE_CURL_OFF_T], [
     AC_MSG_CHECKING([for 64-bit curl_off_t data type])
     for t8 in          \
       "$x_LP64_long"   \
-      'signed __int64' \
+      '__int64'        \
       'int64_t'        \
       'long long'      \
       '__longlong'     \
@@ -3741,7 +3741,7 @@ AC_DEFUN([CURL_CONFIGURE_CURL_OFF_T], [
     AC_MSG_CHECKING([for 32-bit curl_off_t data type])
     for t4 in          \
       "$x_LP32_long"   \
-      'signed __int32' \
+      '__int32'        \
       'int32_t'        \
       'int'            ; do
       DO_CURL_OFF_T_CHECK([$t4], [4])
@@ -3752,7 +3752,7 @@ AC_DEFUN([CURL_CONFIGURE_CURL_OFF_T], [
     AC_MSG_CHECKING([for 16-bit curl_off_t data type])
     for t2 in          \
       "$x_LP16_long"   \
-      'signed __int16' \
+      '__int16'        \
       'int16_t'        \
       'int'            ; do
       DO_CURL_OFF_T_CHECK([$t2], [2])
@@ -3788,15 +3788,15 @@ AC_DEFUN([CURL_CONFIGURE_CURL_OFF_T], [
         x_format="d"
         u_format="u"
         ;;
-      signed___int64)
+      __int64)
         x_format="I64d"
         u_format="I64u"
         ;;
-      signed___int32)
+      __int32)
         x_format="I32d"
         u_format="I32u"
         ;;
-      signed___int16)
+      __int16)
         x_format="I16d"
         u_format="I16u"
         ;;
