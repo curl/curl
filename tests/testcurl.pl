@@ -495,6 +495,14 @@ if ($configurebuild) {
   }
 }
 
+logit "display include/curl/curlbuild.h";
+if(open(F, "include/curl/curlbuild.h")) {
+  while (<F>) {
+    print if /^ *#define/;
+  }
+  close(F);
+}
+
 logit "display lib/config$confsuffix.h";
 open(F, "lib/config$confsuffix.h") or die "lib/config$confsuffix.h: $!";
 while (<F>) {
