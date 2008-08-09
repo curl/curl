@@ -117,7 +117,7 @@ CURL_DEF_TOKEN $1
 
     echo "DEBUG: $tmp_exp"  >&6
 
-    if test "$tmp_exp" = "$1"; then
+    if test -z "$tmp_exp" || test "$tmp_exp" = "$1"; then
       tmp_exp=""
       echo "DEBUG: $tmp_exp"  >&6
     fi

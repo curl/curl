@@ -52,7 +52,9 @@ dnl -------------------------------------------------
 dnl Use the C preprocessor to find out if the given object-style symbol
 dnl is defined and get its expansion. This macro will not use default
 dnl includes even if no INCLUDES argument is given. This macro will run
-dnl silently when invoked with three arguments.
+dnl silently when invoked with three arguments. If the expansion would
+dnl result in a set of double-quoted strings the returned expansion will
+dnl actually be a single double-quoted string concatenating all them.
 
 AC_DEFUN([CURL_CHECK_DEF], [
   AS_VAR_PUSHDEF([ac_HaveDef], [curl_cv_have_def_$1])dnl
@@ -76,17 +78,17 @@ CURL_DEF_TOKEN $1
     tmp_exp=`eval "$ac_cpp conftest.$ac_ext" 2>/dev/null | \
       "$GREP" CURL_DEF_TOKEN 2>/dev/null | \
       "$SED" 's/.*CURL_DEF_TOKEN[[ ]]//' 2>/dev/null | \
-      "$SED" 'q' 2>/dev/null`
-    if test "$tmp_exp" = "$1"; then
+      "$SED" 's/[["]][[ ]]*[["]]//g' 2>/dev/null`
+    if test -z "$tmp_exp" || test "$tmp_exp" = "$1"; then
       tmp_exp=""
     fi
   ])
   if test -z "$tmp_exp"; then
-    AS_VAR_SET([ac_HaveDef], [no])
+    AS_VAR_SET(ac_HaveDef, no)
     ifelse($3,,[AC_MSG_RESULT([no])])
   else
-    AS_VAR_SET([ac_HaveDef], [yes])
-    AS_VAR_SET([ac_Def], [$tmp_exp])
+    AS_VAR_SET(ac_HaveDef, yes)
+    AS_VAR_SET(ac_Def, $tmp_exp)
     ifelse($3,,[AC_MSG_RESULT([$tmp_exp])])
   fi
   AS_VAR_POPDEF([ac_Def])dnl
