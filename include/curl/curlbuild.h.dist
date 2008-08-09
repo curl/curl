@@ -160,7 +160,7 @@
 #    define CURL_FORMAT_OFF_T      "%ld"
 #    define CURL_SIZEOF_CURL_OFF_T 4
 #  else
-#    define CURL_OFF_T             signed __int64
+#    define CURL_OFF_T             __int64
 #    define CURL_FMT_OFF_T         "I64d"
 #    define CURL_FMT_OFF_TU        "I64u"
 #    define CURL_FORMAT_OFF_T      "%I64d"
@@ -176,7 +176,7 @@
 
 #elif defined(__WATCOMC__)
 #  if defined(__386__)
-#    define CURL_OFF_T             signed __int64
+#    define CURL_OFF_T             __int64
 #    define CURL_FMT_OFF_T         "I64d"
 #    define CURL_FMT_OFF_TU        "I64u"
 #    define CURL_FORMAT_OFF_T      "%I64d"
@@ -197,7 +197,7 @@
 #    define CURL_FORMAT_OFF_T      "%ld"
 #    define CURL_SIZEOF_CURL_OFF_T 4
 #  elif defined(_MSC_VER)
-#    define CURL_OFF_T             signed __int64
+#    define CURL_OFF_T             __int64
 #    define CURL_FMT_OFF_T         "I64d"
 #    define CURL_FMT_OFF_TU        "I64u"
 #    define CURL_FORMAT_OFF_T      "%I64d"
@@ -232,7 +232,7 @@
 #    define CURL_FORMAT_OFF_T      "%lld"
 #    define CURL_SIZEOF_CURL_OFF_T 8
 #  elif defined(__VC32__)
-#    define CURL_OFF_T             signed __int64
+#    define CURL_OFF_T             __int64
 #    define CURL_FMT_OFF_T         "lld"
 #    define CURL_FMT_OFF_TU        "llu"
 #    define CURL_FORMAT_OFF_T      "%lld"
@@ -247,7 +247,7 @@
 #  define CURL_SIZEOF_CURL_OFF_T 8
 
 #elif defined(_WIN32_WCE)
-#  define CURL_OFF_T             signed __int64
+#  define CURL_OFF_T             __int64
 #  define CURL_FMT_OFF_T         "I64d"
 #  define CURL_FMT_OFF_TU        "I64u"
 #  define CURL_FORMAT_OFF_T      "%I64d"
@@ -262,7 +262,7 @@
 
 #elif defined(_MSC_VER)
 #  if (_MSC_VER >= 900)
-#    define CURL_OFF_T             signed __int64
+#    define CURL_OFF_T             __int64
 #    define CURL_FMT_OFF_T         "I64d"
 #    define CURL_FMT_OFF_TU        "I64u"
 #    define CURL_FORMAT_OFF_T      "%I64d"
