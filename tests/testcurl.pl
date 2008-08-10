@@ -486,9 +486,15 @@ if ($configurebuild) {
     system("xcopy /s /q ..\\$CURLDIR .");
     system("buildconf.bat");
   }
-  elsif (($^O eq 'linux') || ($targetos =~ /netware/)) {
-    system("cp -afr ../$CURLDIR/* ."); 
-    system("cp -af ../$CURLDIR/Makefile.dist Makefile"); 
+  elsif ($targetos =~ /netware/) {
+    system("cp -afr ../$CURLDIR/* .");
+    system("cp -af ../$CURLDIR/Makefile.dist Makefile");
+    system("$make -i -C lib -f Makefile.netware prebuild");
+    system("$make -i -C src -f Makefile.netware prebuild");
+  }
+  elsif ($^O eq 'linux') {
+    system("cp -afr ../$CURLDIR/* .");
+    system("cp -af ../$CURLDIR/Makefile.dist Makefile");
     system("cp -af ../$CURLDIR/include/curl/curlbuild.h.dist ./include/curl/curlbuild.h");
     system("$make -i -C lib -f Makefile.$targetos prebuild");
     system("$make -i -C src -f Makefile.$targetos prebuild");
@@ -498,7 +504,7 @@ if ($configurebuild) {
 logit "display include/curl/curlbuild.h";
 if(open(F, "include/curl/curlbuild.h")) {
   while (<F>) {
-    print if /^ *#define/;
+    print if (($1 =~ /^ *#define/) && ($1 !~ /^ *#define.*__CURL_CURLBUILD_H/));
   }
   close(F);
 }
