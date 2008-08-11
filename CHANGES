@@ -8,6 +8,12 @@
 
 
 Daniel Stenberg (11 Aug 2008)
+- Constantine Sapuntzakis filed bug report #2042430
+  (http://curl.haxx.se/bug/view.cgi?id=2042430) with a patch. "NTLM Windows
+  SSPI code is not thread safe". This was due to libcurl using static
+  variables to tell wether to load the necessary SSPI DLL, but now the loading
+  has been moved to the more suitable curl_global_init() call.
+
 - Constantine Sapuntzakis filed bug report #2042440
   (http://curl.haxx.se/bug/view.cgi?id=2042440) with a patch. He identified a
   problem when using NTLM over a proxy but the end-point does Basic, and then

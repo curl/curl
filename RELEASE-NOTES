@@ -50,6 +50,7 @@ This release includes the following bugfixes:
  o HTTP PUT or POST with redirect could lead to hang
  o re-use of connections with failed SSL connects in the multi interface
  o NTLM over proxy state was wrongly cleared when host connection was closed
+ o Windows SSPI DLL loading is now done in curl_global_init()
 
 This release includes the following known bugs:
 

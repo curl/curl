@@ -83,6 +83,7 @@
 #include "easyif.h"
 #include "select.h"
 #include "sendf.h" /* for failf function prototype */
+#include "http_ntlm.h"
 #include "connect.h" /* for Curl_getconnectinfo */
 
 #define _MPRINTF_REPLACE /* use our functions only */
@@ -103,18 +104,23 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-#ifdef USE_WINSOCK
 /* win32_cleanup() is for win32 socket cleanup functionality, the opposite
    of win32_init() */
 static void win32_cleanup(void)
 {
+#ifdef USE_WINSOCK
   WSACleanup();
+#endif
+#ifdef USE_WINDOWS_SSPI
+  Curl_ntlm_global_cleanup();
+#endif
 }
 
 /* win32_init() performs win32 socket initialization to properly setup the
    stack to allow networking */
 static CURLcode win32_init(void)
 {
+#ifdef USE_WINSOCK
   WORD wVersionRequested;
   WSADATA wsaData;
   int err;
@@ -147,14 +153,18 @@ static CURLcode win32_init(void)
     return CURLE_FAILED_INIT;
   }
   /* The Windows Sockets DLL is acceptable. Proceed. */
+#endif
+
+#ifdef USE_WINDOWS_SSPI
+  {
+    CURLcode err = Curl_ntlm_global_init();
+    if (err != CURLE_OK)
+      return err;
+  }
+#endif
+
   return CURLE_OK;
 }
-
-#else
-/* These functions exist merely to prevent compiler warnings */
-static CURLcode win32_init(void) { return CURLE_OK; }
-static void win32_cleanup(void) { }
-#endif
 
 #ifdef USE_LIBIDN
 /*
