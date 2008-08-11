@@ -501,12 +501,18 @@ if ($configurebuild) {
   }
 }
 
-logit "display include/curl/curlbuild.h";
-if(open(F, "include/curl/curlbuild.h")) {
-  while (<F>) {
-    print if (($1 =~ /^ *#define/) && ($1 !~ /^ *#define.*__CURL_CURLBUILD_H/));
+if(-f "./include/curl/curlbuild.h") {
+  logit "display include/curl/curlbuild.h";
+  if(open(F, "<./include/curl/curlbuild.h")) {
+    while(<F>) {
+      my $ll = $_;
+      print $ll if(($ll =~ /^ *# *define/) && ($ll !~ /__CURL_CURLBUILD_H/));
+    }
+    close(F);
   }
-  close(F);
+}
+else {
+  mydie "no curlbuild.h created/found";
 }
 
 logit "display lib/config$confsuffix.h";
