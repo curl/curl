@@ -409,7 +409,7 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
 #endif
           break;
         case 'O':
-#if SIZEOF_CURL_OFF_T > 4
+#if CURL_SIZEOF_CURL_OFF_T > 4
           flags |= FLAGS_LONGLONG;
 #else
           flags |= FLAGS_LONG;

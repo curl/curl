@@ -212,7 +212,7 @@ typedef enum {
 
 /* Support uploading and resuming of >2GB files
  */
-#if defined(WIN32) && (SIZEOF_CURL_OFF_T > 4)
+#if defined(WIN32) && (CURL_SIZEOF_CURL_OFF_T > 4)
 #define lseek(x,y,z) _lseeki64(x, y, z)
 #define struct_stat struct _stati64
 #define stat(file,st) _stati64(file,st)
@@ -1387,7 +1387,7 @@ static int str2num(long *val, const char *str)
  */
 static int str2offset(curl_off_t *val, const char *str)
 {
-#if SIZEOF_CURL_OFF_T > 4
+#if CURL_SIZEOF_CURL_OFF_T > 4
   /* Ugly, but without going through a bunch of rigmarole, we don't have the
    * definitions for LLONG_{MIN,MAX} or LONG_LONG_{MIN,MAX}.
    */
@@ -3214,7 +3214,7 @@ static int my_seek(void *stream, curl_off_t offset, int whence)
 {
   struct InStruct *in=(struct InStruct *)stream;
 
-#if (SIZEOF_CURL_OFF_T > SIZEOF_OFF_T) && !defined(lseek)
+#if (CURL_SIZEOF_CURL_OFF_T > SIZEOF_OFF_T) && !defined(lseek)
   /* The sizeof check following here is only interesting if curl_off_t is
      larger than off_t, but also not on windows-like systems for which lseek
      is a defined macro that works around the 32bit off_t-problem and thus do

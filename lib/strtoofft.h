@@ -38,7 +38,7 @@
  * not, should try to emulate its functionality.  At any rate, we define
  * 'strtoofft' such that it can be used to work with curl_off_t's regardless.
  */
-#if (SIZEOF_CURL_OFF_T > 4) && (SIZEOF_LONG < 8)
+#if (CURL_SIZEOF_CURL_OFF_T > 4) && (SIZEOF_LONG < 8)
 #ifdef HAVE_STRTOLL
 #define curlx_strtoofft strtoll
 #else /* HAVE_STRTOLL */
@@ -54,7 +54,7 @@ curl_off_t curlx_strtoll(const char *nptr, char **endptr, int base);
 #endif /* MSVC7 or later */
 
 #endif /* HAVE_STRTOLL */
-#else /* (SIZEOF_CURL_OFF_T > 4) && (SIZEOF_LONG < 8) */
+#else /* (CURL_SIZEOF_CURL_OFF_T > 4) && (SIZEOF_LONG < 8) */
 /* simply use strtol() to get numbers, either 32 or 64 bit */
 #define curlx_strtoofft strtol
 #endif

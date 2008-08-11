@@ -112,14 +112,12 @@
 #include <curl/curlrules.h>
 
 /*
- * Set up internal curl_off_t size macro
+ * Ensure that no one is using the old SIZEOF_CURL_OFF_T macro
  */
 
 #ifdef SIZEOF_CURL_OFF_T
-#  error "SIZEOF_CURL_OFF_T shall not be defined before this point!"
-   Error Compilation_aborted_SIZEOF_CURL_OFF_T_already_defined
-#else
-#  define SIZEOF_CURL_OFF_T CURL_SIZEOF_CURL_OFF_T
+#  error "SIZEOF_CURL_OFF_T shall not be defined!"
+   Error Compilation_aborted_SIZEOF_CURL_OFF_T_shall_not_be_defined
 #endif
 
 /*
@@ -284,7 +282,7 @@
 
 
 /* To make large file support transparent even on Windows */
-#if defined(WIN32) && (SIZEOF_CURL_OFF_T > 4)
+#if defined(WIN32) && (CURL_SIZEOF_CURL_OFF_T > 4)
 #include <sys/stat.h>   /* must come first before we redefine stat() */
 #include <io.h>
 #define lseek(x,y,z) _lseeki64(x, y, z)
