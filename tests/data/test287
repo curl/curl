@@ -1,4 +1,13 @@
 <testcase>
+<info>
+<keywords>
+HTTP
+HTTP CONNECT
+HTTP proxy
+proxytunnel
+</keywords>
+</info>
+
 # Server-side
 <reply>
 

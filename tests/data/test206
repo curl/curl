@@ -3,6 +3,7 @@
 <keywords>
 HTTP
 HTTP GET
+HTTP CONNECT
 HTTP proxy
 proxytunnel
 HTTP proxy Digest auth

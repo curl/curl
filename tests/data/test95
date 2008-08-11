@@ -3,9 +3,11 @@
 <keywords>
 HTTP
 HTTP POST
+HTTP CONNECT
 proxytunnel
 </keywords>
 </info>
+
 #
 # Server-side
 <reply>

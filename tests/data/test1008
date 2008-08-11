@@ -3,11 +3,12 @@
 <keywords>
 HTTP
 HTTP GET
+HTTP CONNECT
 HTTP proxy
 HTTP proxy NTLM auth
-CONNECT
 </keywords>
 </info>
+
 # Server-side
 <reply>
 
