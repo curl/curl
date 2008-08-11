@@ -388,7 +388,7 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
   ssize_t gotbytes;
   char *ptr;
   struct SessionHandle *data = conn->data;
-  char *buf = data->state.buffer;
+  char * const buf = data->state.buffer;
   CURLcode result = CURLE_OK;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   int code = 0;
@@ -414,6 +414,7 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
        * int to begin with, even though its datatype may be larger
        * than an int.
        */
+      DEBUGASSERT((ptr+ftpc->cache_size) <= (buf+BUFSIZE+1));
       memcpy(ptr, ftpc->cache, (int)ftpc->cache_size);
       gotbytes = (int)ftpc->cache_size;
       free(ftpc->cache);    /* free the cache */
@@ -427,6 +428,7 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
 
       conn->data_prot = 0;
 #endif
+      DEBUGASSERT((ptr+BUFSIZE-ftpc->nread_resp) <= (buf+BUFSIZE+1));
       res = Curl_read(conn, sockfd, ptr, BUFSIZE-ftpc->nread_resp,
                       &gotbytes);
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
@@ -535,9 +537,10 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
                dash or a space and it is significant */
             clipamount = 4;
         }
-        else if(perline && (ftpc->nread_resp > BUFSIZE/2)) {
-          /* We got a large chunk of data and there's still trailing data to
-             take care of, so we put that part in the "cache" and restart */
+        else if(ftpc->nread_resp > BUFSIZE/2) {
+          /* We got a large chunk of data and there's potentially still trailing
+             data to take care of, so we put any such part in the "cache", clear
+             the buffer to make space and restart. */
           clipamount = perline;
           restart = TRUE;
         }
@@ -3224,17 +3227,19 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
   shutdown(conn->sock[SECONDARYSOCKET],2);  /* SD_BOTH */
 #endif
 
-  if(conn->ssl[SECONDARYSOCKET].use) {
-    /* The secondary socket is using SSL so we must close down that part first
-       before we close the socket for real */
-    Curl_ssl_close(conn, SECONDARYSOCKET);
+  if(conn->sock[SECONDARYSOCKET] != CURL_SOCKET_BAD) {
+    if(conn->ssl[SECONDARYSOCKET].use) {
+      /* The secondary socket is using SSL so we must close down that part first
+         before we close the socket for real */
+      Curl_ssl_close(conn, SECONDARYSOCKET);
 
-    /* Note that we keep "use" set to TRUE since that (next) connection is
-       still requested to use SSL */
+      /* Note that we keep "use" set to TRUE since that (next) connection is
+         still requested to use SSL */
+    }
+    sclose(conn->sock[SECONDARYSOCKET]);
+
+    conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD;
   }
-  sclose(conn->sock[SECONDARYSOCKET]);
-
-  conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD;
 
   if((ftp->transfer == FTPTRANSFER_BODY) && !status && !premature) {
     /*

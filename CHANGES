@@ -7,6 +7,16 @@
                                   Changelog
 
 
+Daniel Fandrich (11 Aug 2008)
+- Fixed a boundary condition error in ftp_readresp() whereby a non-terminal
+  line of a multiline FTP response whose last byte landed exactly at the end
+  of the BUFSIZE-length buffer would be treated as the terminal response
+  line.  The following response code read in would then actually be the
+  end of the previous response line, and all responses from then on would
+  correspond to the wrong command. Test case 1062 verifies this.
+
+- Stop closing a never-opened ftp socket.
+
 Daniel Stenberg (11 Aug 2008)
 - Constantine Sapuntzakis filed bug report #2042430
   (http://curl.haxx.se/bug/view.cgi?id=2042430) with a patch. "NTLM Windows
