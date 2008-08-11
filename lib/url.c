@@ -2179,22 +2179,31 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   Curl_expire(data, 0); /* shut off timers */
   Curl_hostcache_prune(data); /* kill old DNS cache entries */
 
-  if((conn->ntlm.state != NTLMSTATE_NONE) ||
-     (conn->proxyntlm.state != NTLMSTATE_NONE)) {
+  {
+    int has_host_ntlm = (conn->ntlm.state != NTLMSTATE_NONE);
+    int has_proxy_ntlm = (conn->proxyntlm.state != NTLMSTATE_NONE);
+
     /* Authentication data is a mix of connection-related and sessionhandle-
        related stuff. NTLM is connection-related so when we close the shop
        we shall forget. */
-    data->state.authhost.done = FALSE;
-    data->state.authhost.picked =
-      data->state.authhost.want;
 
-    data->state.authproxy.done = FALSE;
-    data->state.authproxy.picked =
-      data->state.authproxy.want;
+    if (has_host_ntlm) {
+      data->state.authhost.done = FALSE;
+      data->state.authhost.picked =
+	data->state.authhost.want;
+    }
 
-    data->state.authproblem = FALSE;
+    if (has_proxy_ntlm) {
+      data->state.authproxy.done = FALSE;
+      data->state.authproxy.picked =
+	data->state.authproxy.want;
+    }
 
-    Curl_ntlm_cleanup(conn);
+    if (has_host_ntlm || has_proxy_ntlm) {
+      data->state.authproblem = FALSE;
+
+      Curl_ntlm_cleanup(conn);
+    }
   }
 
   if(conn->handler->disconnect)

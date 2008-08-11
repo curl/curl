@@ -6,6 +6,14 @@
 
                                   Changelog
 
+
+Daniel Stenberg (11 Aug 2008)
+- Constantine Sapuntzakis filed bug report #2042440
+  (http://curl.haxx.se/bug/view.cgi?id=2042440) with a patch. He identified a
+  problem when using NTLM over a proxy but the end-point does Basic, and then
+  libcurl would do wrong when the host sent "Connection: close" as the proxy's
+  NTLM state was erroneously cleared.
+
 Yang Tse (11 Aug 2008)
 - Added missing signed and unsigned curl_off_t integer constant suffixes for
   internal and external use. CURL_SUFFIX_CURL_OFF_T, CURL_SUFFIX_CURL_OFF_TU.

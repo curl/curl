@@ -49,6 +49,7 @@ This release includes the following bugfixes:
  o HTTP PUT with -C - sent bad Content-Range: header
  o HTTP PUT or POST with redirect could lead to hang
  o re-use of connections with failed SSL connects in the multi interface
+ o NTLM over proxy state was wrongly cleared when host connection was closed
 
 This release includes the following known bugs:
 
@@ -69,7 +70,8 @@ advice from friends like these:
  Rob Crittenden, Dengminwen, Christopher Palow, Hans-Jurgen May,
  Phil Pellouchoud, Eduard Bloch, John Lightsey, Stephen Collyer, Tor Arntsen,
  Rolland Dudemaine, Phil Blundell, Scott Barrett, Andreas Schuldei,
- Peter Lamberg, David Bau, Pramod Sharma, Yehoshua Hershberg
+ Peter Lamberg, David Bau, Pramod Sharma, Yehoshua Hershberg,
+ Constantine Sapuntzakis
 
 
         Thanks! (and sorry if I forgot to mention someone)
