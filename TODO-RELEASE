@@ -9,10 +9,6 @@ To be addressed before 7.19.0 (planned release: August 2008)
          has to be revisited and adjusted as appropriate.
        * Enabling and disabling of large file support needs further inspection.
 
-152 - bug #2042440 "NTLM proxy overrides endpoint auth"
-
-153 - bug #2042430 "NTLM Windows SSPI code is not thread safe"
-
 154 - bug #2041827 "Segfault in http_output_auth w/ FORBID_REUSE (7.18.2)"
 
 155 - bug #2038004 "Curl OpenSSL not compatible with 7.17 or 7.18"
