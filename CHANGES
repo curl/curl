@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Yang Tse (11 Aug 2008)
+- Added missing signed and unsigned curl_off_t integer constant suffixes for
+  internal and external use. CURL_SUFFIX_CURL_OFF_T, CURL_SUFFIX_CURL_OFF_TU.
+
 Daniel Fandrich (7 Aug 2008)
 - Fixed an uninitialized variable in multi_runsingle() that could cause a
   request to prematurely end.

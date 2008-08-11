@@ -126,4 +126,10 @@ typedef CURL_OFF_T curl_off_t;
 /* The expected size of curl_off_t, as to be computed by sizeof. */
 #undef CURL_SIZEOF_CURL_OFF_T
 
+/* curl_off_t constant suffix. */
+#undef CURL_SUFFIX_CURL_OFF_T
+
+/* unsigned curl_off_t constant suffix. */
+#undef CURL_SUFFIX_CURL_OFF_TU
+
 #endif /* __CURL_CURLBUILD_H */
