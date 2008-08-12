@@ -152,15 +152,15 @@ AC_DEFUN([CURL_CHECK_DEF_INTXX_C], [
     AC_LANG_SOURCE(
 ifelse($2,,,[$2])[[
 #ifdef $1
-CURL_DEF_TOKEN $1(77)
+CURL_DEF_TOKEN $1(_)
 #endif
     ]])
   ],[
     tmp_suf=`eval "$ac_cpp conftest.$ac_ext" 2>/dev/null | \
       "$GREP" CURL_DEF_TOKEN 2>/dev/null | \
       "$SED" 's/.*CURL_DEF_TOKEN[[ ]]//' 2>/dev/null | \
-      "$SED" 's/.*$1//' 2>/dev/null | \
-      "$SED" 's/[[^$curl_cv_Letters]]//g' 2>/dev/null`
+      "$SED" 's/.*'$1'//' 2>/dev/null | \
+      "$SED" 's/[[^'$curl_cv_alnum']]//g' 2>/dev/null`
     if test -z "$tmp_suf"; then
       tmp_suf=""
     fi
