@@ -353,7 +353,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
                                struct SingleRequest *k,
                                int *didwhat, bool *done)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   ssize_t nread; /* number of bytes read */
   bool is_empty_data = FALSE;
 
