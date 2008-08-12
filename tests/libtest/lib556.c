@@ -54,7 +54,7 @@ int test(char *URL)
 
         total += iolen;
 
-      } while((res == CURLE_AGAIN) && (total < 129));
+      } while(((res == CURLE_OK) || (res == CURLE_AGAIN)) && (total < 129));
     }
   }
 
