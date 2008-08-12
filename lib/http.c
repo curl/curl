@@ -1474,6 +1474,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
         case 0: /* timeout */
           break;
         default:
+          DEBUGASSERT(ptr+BUFSIZE-nread <= data->state.buffer+BUFSIZE+1);
           res = Curl_read(conn, tunnelsocket, ptr, BUFSIZE-nread, &gotbytes);
           if(res< 0)
             /* EWOULDBLOCK */
@@ -1506,6 +1507,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
               /* This means we are currently ignoring a response-body */
 
               nread = 0; /* make next read start over in the read buffer */
+              ptr=data->state.buffer;
               if(cl) {
                 /* A Content-Length based body: simply count down the counter
                    and make sure to break out of the loop when we're done! */
@@ -1565,6 +1567,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                     /* end of response-headers from the proxy */
                     nread = 0; /* make next read start over in the read
                                   buffer */
+                    ptr=data->state.buffer;
                     if((407 == k->httpcode) && !data->state.authproblem) {
                       /* If we get a 407 response code with content length
                          when we have no auth problem, we must ignore the

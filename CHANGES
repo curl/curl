@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Fandrich (12 Aug 2008)
+- Fixed a buffer overflow problem in Curl_proxyCONNECT that could occur
+  when a server responded with long headers and data.  Luckily, the buffer
+  overflowed into another unused buffer, so no actual harm was done.
+  Added test cases 1060 and 1061 to verify.
+
 Daniel Stenberg (12 Aug 2008)
 - Andy Tsouladze fixed runtests.pl to not attempt to execute the stunnel
   _directory_ if that happened to appear in the path!
