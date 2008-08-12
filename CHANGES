@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Stenberg (12 Aug 2008)
+- Andy Tsouladze fixed runtests.pl to not attempt to execute the stunnel
+  _directory_ if that happened to appear in the path!
+
 Yang Tse (12 Aug 2008)
 - Added macros for minimum-width signed and unsigned curl_off_t integer
   constants CURL_OFF_T_C and CURL_OFF_TU_C. The clever double helper macro

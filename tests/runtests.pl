@@ -388,7 +388,8 @@ sub checkcmd {
     my @paths=(split(":", $ENV{'PATH'}), "/usr/sbin", "/usr/local/sbin",
                "/sbin", "/usr/bin", "/usr/local/bin" );
     for(@paths) {
-        if( -x "$_/$cmd") {
+        if( -x "$_/$cmd" && ! -d "$_/$cmd") {
+            # executable bit but not a directory!
             return "$_/$cmd";
         }
     }
