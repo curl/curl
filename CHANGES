@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Yang Tse (12 Aug 2008)
+- Added macros for minimum-width signed and unsigned curl_off_t integer
+  constants CURL_OFF_T_C and CURL_OFF_TU_C. The clever double helper macro
+  used internally to provide its functionality is thanks to Lars Nilsson.
 
 Daniel Fandrich (11 Aug 2008)
 - Fixed a boundary condition error in ftp_readresp() whereby a non-terminal

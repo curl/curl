@@ -101,6 +101,16 @@
    Error Compilation_aborted_CURL_SIZEOF_CURL_OFF_T_is_missing
 #endif
 
+#ifndef CURL_SUFFIX_CURL_OFF_T
+#  error "CURL_SUFFIX_CURL_OFF_T definition is missing!"
+   Error Compilation_aborted_CURL_SUFFIX_CURL_OFF_T_is_missing
+#endif
+
+#ifndef CURL_SUFFIX_CURL_OFF_TU
+#  error "CURL_SUFFIX_CURL_OFF_TU definition is missing!"
+   Error Compilation_aborted_CURL_SUFFIX_CURL_OFF_TU_is_missing
+#endif
+
 /*
  * Macros private to this header file.
  */
@@ -128,6 +138,49 @@ typedef char
 typedef char
   __curl_rule_02__
     [CurlchkszGE(curl_off_t, long)];
+
+/* ================================================================ */
+/*          EXTERNALLY AND INTERNALLY VISIBLE DEFINITIONS           */
+/* ================================================================ */
+
+/* 
+ * CURL_ISOCPP and CURL_OFF_T_C definitions are done here in order to allow
+ * these to be visible and exported by the external libcurl interface API,
+ * while also making them visible to the library internals, simply including
+ * setup.h, without actually needing to include curl.h internally.
+ * If some day this section would grow big enough, all this should be moved
+ * to its own header file.
+ */
+
+/*
+ * Figure out if we can use the ## preprocessor operator, which is supported
+ * by ISO/ANSI C and C++. Some compilers support it without setting __STDC__
+ * or  __cplusplus so we need to carefully check for them too.
+ */
+
+#if defined(__STDC__) || defined(_MSC_VER) || defined(__cplusplus) || \
+  defined(__HP_aCC) || defined(__BORLANDC__) || defined(__LCC__) || \
+  defined(__POCC__) || defined(__SALFORDC__) || defined(__HIGHC__) || \
+  defined(__ILEC400__)
+  /* This compiler is believed to have an ISO compatible preprocessor */
+#define CURL_ISOCPP
+#else
+  /* This compiler is believed NOT to have an ISO compatible preprocessor */
+#undef CURL_ISOCPP
+#endif
+
+/*
+ * Macros for minimum-width signed and unsigned curl_off_t integer constants.
+ */
+
+#ifdef CURL_ISOCPP
+#  define __CURL_OFF_T_C_HELPER2(Val,Suffix) Val ## Suffix
+#else
+#  define __CURL_OFF_T_C_HELPER2(Val,Suffix) Val/**/Suffix
+#endif
+#define __CURL_OFF_T_C_HELPER1(Val,Suffix) __CURL_OFF_T_C_HELPER2(Val,Suffix)
+#define CURL_OFF_T_C(Val)  __CURL_OFF_T_C_HELPER1(Val,CURL_SUFFIX_CURL_OFF_T)
+#define CURL_OFF_TU_C(Val) __CURL_OFF_T_C_HELPER1(Val,CURL_SUFFIX_CURL_OFF_TU)
 
 /*
  * Get rid of macros private to this header file.
