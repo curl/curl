@@ -52,6 +52,9 @@ This release includes the following bugfixes:
  o NTLM over proxy state was wrongly cleared when host connection was closed
  o Windows SSPI DLL loading is now done in curl_global_init()
  o runtests.pl has an improved find-stunnel-and-invoke
+ o FTP sessions could go out of sync on a long header boundary condition
+ o potential buffer overflows in the MS-DOS command-line port fixed
+ o --stderr is now honoured with the -v option
 
 This release includes the following known bugs:
 
