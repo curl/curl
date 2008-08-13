@@ -3623,7 +3623,7 @@ dnl must be recorded in curlbuild.h
 
 AC_DEFUN([CURL_CONFIGURE_LONG], [
   if test ! -z "$ac_cv_sizeof_long"; then
-    AC_MSG_WARN([AC_CHECK_SIZEOF(long) was called before CURL_CONFIGURE_LONG])
+    AC_MSG_WARN([Use CURL-CONFIGURE-LONG to check the size of long first])
   fi
   AC_MSG_CHECKING([size of long])
   curl_sizeof_long="unknown"
