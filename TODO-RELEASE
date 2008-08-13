@@ -11,10 +11,6 @@ To be addressed before 7.19.0 (planned release: August 2008)
 
 154 - bug #2041827 "Segfault in http_output_auth w/ FORBID_REUSE (7.18.2)"
 
-155 - bug #2038004 "Curl OpenSSL not compatible with 7.17 or 7.18"
-
-156 - proxy CONNECT issue (details not public yet due to possible security impact)
-
 To be addressed before 7.19.1 (planned release: October 2008)
 =============================
 
