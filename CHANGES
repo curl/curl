@@ -11,14 +11,6 @@ Yang Tse (13 Aug 2008)
   in curlbuild.h as CURL_SIZEOF_LONG. Definition now done from configure process
   and in CVS curlbuild.h.dist for non-configure systems.
 
-- Make SIZE_OF_LONG mandatory. It is not possible to build the library without
-  it.  It will be defined by the configure process in generated config.h. And
-  can be defined in hand-crafted system-specific config.h files to the numeric
-  size that sizeof(long) would return for that specific platform.  It might be
-  ABI dependant, if this is the case, the definition is equally ABI dependant,
-  its value normally will be 4 or 8.  It can also be defined in curlbuild.h.dist
-  and maybe it is easier and more appropriate to make the definition here.
-
 Daniel Fandrich (12 Aug 2008)
 - Fixed a buffer overflow problem in Curl_proxyCONNECT that could occur
   when a server responded with long headers and data.  Luckily, the buffer
