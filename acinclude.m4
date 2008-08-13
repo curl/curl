@@ -3613,43 +3613,6 @@ _EOF
 ])
 
 
-dnl CURL_CONFIGURE_LONG
-dnl -------------------------------------------------
-dnl Find out the size of long as reported by sizeof() and define
-dnl CURL_SIZEOF_LONG as appropriate to be used in template file
-dnl include/curl/curlbuild.h.in to properly configure the library.
-dnl The size of long is a build time characteristic and as such
-dnl must be recorded in curlbuild.h
-
-AC_DEFUN([CURL_CONFIGURE_LONG], [
-  if test ! -z "$ac_cv_sizeof_long"; then
-    AC_MSG_WARN([Use CURL-CONFIGURE-LONG to check the size of long first])
-  fi
-  AC_MSG_CHECKING([size of long])
-  curl_sizeof_long="unknown"
-  for tmp_size in '16' '8' '4' '2' '1' ; do
-    if test "$curl_sizeof_long" = "unknown"; then
-      AC_COMPILE_IFELSE([
-        AC_LANG_PROGRAM([[
-          typedef char dummy_arr[sizeof(long) == $tmp_size ? 1 : -1];
-        ]],[[
-          dummy_arr[1] = (long)1;
-        ]])
-      ],[
-        curl_sizeof_long="$tmp_size"
-      ])
-    fi
-  done
-  if test "$curl_sizeof_long" = "unknown"; then
-    AC_MSG_ERROR([cannot find out size of long])
-  else
-    AC_MSG_RESULT([$curl_sizeof_long])
-    CURL_DEFINE_UNQUOTED([CURL_SIZEOF_LONG], [$curl_sizeof_long])
-    ac_cv_sizeof_long="$curl_sizeof_long"
-  fi
-])
-
-
 dnl CURL_INCLUDES_INTTYPES
 dnl -------------------------------------------------
 dnl Set up variable with list of headers that must be
@@ -3671,6 +3634,45 @@ curl_includes_inttypes="\
   AC_CHECK_HEADERS(
     sys/types.h stdint.h inttypes.h,
     [], [], [$curl_includes_inttypes])
+])
+
+
+dnl CURL_CONFIGURE_LONG
+dnl -------------------------------------------------
+dnl Find out the size of long as reported by sizeof() and define
+dnl CURL_SIZEOF_LONG as appropriate to be used in template file
+dnl include/curl/curlbuild.h.in to properly configure the library.
+dnl The size of long is a build time characteristic and as such
+dnl must be recorded in curlbuild.h
+
+AC_DEFUN([CURL_CONFIGURE_LONG], [
+  AC_REQUIRE([CURL_INCLUDES_INTTYPES])dnl
+  if test ! -z "$ac_cv_sizeof_long"; then
+    AC_MSG_WARN([Use CURL-CONFIGURE-LONG to check the size of long first])
+  fi
+  AC_MSG_CHECKING([size of long])
+  curl_sizeof_long="unknown"
+  for tmp_size in '16' '8' '4' '2' '1' ; do
+    if test "$curl_sizeof_long" = "unknown"; then
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+          $curl_includes_inttypes
+          typedef char dummy_arr[sizeof(long) == $tmp_size ? 1 : -1];
+        ]],[[
+          dummy_arr[1] = (long)1;
+        ]])
+      ],[
+        curl_sizeof_long="$tmp_size"
+      ])
+    fi
+  done
+  if test "$curl_sizeof_long" = "unknown"; then
+    AC_MSG_ERROR([cannot find out size of long])
+  else
+    AC_MSG_RESULT([$curl_sizeof_long])
+    CURL_DEFINE_UNQUOTED([CURL_SIZEOF_LONG], [$curl_sizeof_long])
+    ac_cv_sizeof_long="$curl_sizeof_long"
+  fi
 ])
 
 
