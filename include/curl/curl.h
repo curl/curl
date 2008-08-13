@@ -77,7 +77,7 @@
 #ifndef _WIN32_WCE
 #include <sys/socket.h>
 #endif
-#if !defined(WIN32) || !defined(__WATCOMC__)
+#if !defined(WIN32) && !defined(__WATCOMC__)
 #include <sys/time.h>
 #endif
 #include <sys/types.h>
