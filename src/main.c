@@ -1387,21 +1387,13 @@ static int str2num(long *val, const char *str)
  */
 static int str2offset(curl_off_t *val, const char *str)
 {
-#if CURL_SIZEOF_CURL_OFF_T > 4
+#if (CURL_SIZEOF_CURL_OFF_T > SIZEOF_LONG)
   /* Ugly, but without going through a bunch of rigmarole, we don't have the
    * definitions for LLONG_{MIN,MAX} or LONG_LONG_{MIN,MAX}.
    */
 #ifndef LLONG_MAX
-#if defined(_MSC_VER)
-#define LLONG_MAX (curl_off_t)0x7FFFFFFFFFFFFFFFi64
-#define LLONG_MIN (curl_off_t)0x8000000000000000i64
-#elif defined(_CRAYC)
-#define LLONG_MAX (curl_off_t)0x7FFFFFFFFFFFFFFF
-#define LLONG_MIN (curl_off_t)0x8000000000000000
-#else
-#define LLONG_MAX (curl_off_t)0x7FFFFFFFFFFFFFFFLL
-#define LLONG_MIN (curl_off_t)0x8000000000000000LL
-#endif
+#  define LLONG_MAX CURL_OFF_T_C(0x7FFFFFFFFFFFFFFF)
+#  define LLONG_MIN CURL_OFF_T_C(0x8000000000000000)
 #endif
 
   /* this is a duplicate of the function that is also used in libcurl */
