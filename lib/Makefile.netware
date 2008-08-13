@@ -398,6 +398,7 @@ ifeq ($(LIBARCH),CLIB)
 	@echo $(DL)#define SEND_TYPE_ARG4 int$(DL) >> $@
 	@echo $(DL)#define SEND_TYPE_RETV int$(DL) >> $@
 	@echo $(DL)#define socklen_t int$(DL) >> $@
+	@echo $(DL)#define pressanykey PressAnyKeyToContinue$(DL) >> $@
 else
 	@echo $(DL)#define OS "i586-pc-libc-NetWare"$(DL) >> $@
 	@echo $(DL)#define HAVE_FTRUNCATE 1$(DL) >> $@
@@ -442,6 +443,7 @@ ifdef ENABLE_IPV6
 	@echo $(DL)#define ENABLE_IPV6 1$(DL) >> $@
 endif
 endif
+	@echo $(DL)#define USE_MANUAL 1$(DL) >> $@
 	@echo $(DL)#define HAVE_ARPA_INET_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_ASSERT_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_ERR_H 1$(DL) >> $@
@@ -454,6 +456,7 @@ endif
 	@echo $(DL)#define HAVE_INET_ADDR 1$(DL) >> $@
 	@echo $(DL)#define HAVE_INET_NTOA 1$(DL) >> $@
 	@echo $(DL)#define HAVE_LL 1$(DL) >> $@
+	@echo $(DL)#define HAVE_LOCALE_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_LOCALTIME_R 1$(DL) >> $@
 	@echo $(DL)#define HAVE_MALLOC_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_NETINET_IN_H 1$(DL) >> $@
@@ -462,6 +465,7 @@ endif
 	@echo $(DL)#define HAVE_SELECT 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SEND 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SETJMP_H 1$(DL) >> $@
+	@echo $(DL)#define HAVE_SETLOCALE 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SIGNAL 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SIGNAL_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SIG_ATOMIC_T 1$(DL) >> $@

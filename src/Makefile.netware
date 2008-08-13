@@ -208,9 +208,11 @@ endif
 ifeq ($(findstring linux,$(OSTYPE)),linux)
 DL	= '
 DS	= /
+PCT	= %
 #-include $(NDKBASE)/nlmconv/ncpfs.inc
 else
 DS	= \\
+PCT	= %%
 endif
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
@@ -396,9 +398,14 @@ else
 	@echo $(DL)#define HAVE_STRCASECMP 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRLCAT 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRLCPY 1$(DL) >> $@
+	@echo $(DL)#define HAVE_STRTOLL 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SYS_PARAM_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SYS_SELECT_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_TERMIOS_H 1$(DL) >> $@
+	@echo $(DL)#define HAVE_AF_INET6 1$(DL) >> $@
+	@echo $(DL)#define HAVE_PF_INET6 1$(DL) >> $@
+	@echo $(DL)#define HAVE_STRUCT_IN6_ADDR 1$(DL) >> $@
+	@echo $(DL)#define HAVE_STRUCT_SOCKADDR_IN6 1$(DL) >> $@
 	@echo $(DL)#define RECV_TYPE_ARG1 int$(DL) >> $@
 	@echo $(DL)#define RECV_TYPE_ARG2 void *$(DL) >> $@
 	@echo $(DL)#define RECV_TYPE_ARG3 size_t$(DL) >> $@
@@ -418,6 +425,7 @@ else
 	@echo $(DL)#define SEND_TYPE_ARG3 size_t$(DL) >> $@
 	@echo $(DL)#define SEND_TYPE_ARG4 int$(DL) >> $@
 	@echo $(DL)#define SEND_TYPE_RETV ssize_t$(DL) >> $@
+	@echo $(DL)#define SIZEOF_STRUCT_IN6_ADDR 16$(DL) >> $@
 ifdef ENABLE_IPV6
 	@echo $(DL)#define ENABLE_IPV6 1$(DL) >> $@
 endif
@@ -429,10 +437,14 @@ endif
 	@echo $(DL)#define HAVE_FCNTL_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_FIONBIO 1$(DL) >> $@
 	@echo $(DL)#define HAVE_GETHOSTBYADDR 1$(DL) >> $@
+	@echo $(DL)#define HAVE_GETHOSTBYNAME 1$(DL) >> $@
+	@echo $(DL)#define HAVE_GETPROTOBYNAME 1$(DL) >> $@
+	@echo $(DL)#define HAVE_GMTIME_R 1$(DL) >> $@
 	@echo $(DL)#define HAVE_INET_ADDR 1$(DL) >> $@
 	@echo $(DL)#define HAVE_INET_NTOA 1$(DL) >> $@
 	@echo $(DL)#define HAVE_LL 1$(DL) >> $@
 	@echo $(DL)#define HAVE_LOCALE_H 1$(DL) >> $@
+	@echo $(DL)#define HAVE_LOCALTIME_R 1$(DL) >> $@
 	@echo $(DL)#define HAVE_MALLOC_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_NETINET_IN_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_RECV 1$(DL) >> $@
@@ -450,7 +462,9 @@ endif
 	@echo $(DL)#define HAVE_STRFTIME 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRING_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRSTR 1$(DL) >> $@
+	@echo $(DL)#define HAVE_STRUCT_ADDRINFO 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRUCT_TIMEVAL 1$(DL) >> $@
+	@echo $(DL)#define HAVE_SYS_IOCTL_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SYS_STAT_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SYS_TIME_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_TIME_H 1$(DL) >> $@
@@ -459,6 +473,7 @@ endif
 	@echo $(DL)#define HAVE_UTIME 1$(DL) >> $@
 	@echo $(DL)#define HAVE_UTIME_H 1$(DL) >> $@
 	@echo $(DL)#define RETSIGTYPE void$(DL) >> $@
+	@echo $(DL)#define SIZEOF_STRUCT_IN_ADDR 4$(DL) >> $@
 	@echo $(DL)#define STDC_HEADERS 1$(DL) >> $@
 	@echo $(DL)#define TIME_WITH_SYS_TIME 1$(DL) >> $@
 ifdef DISABLE_LDAP
@@ -489,6 +504,7 @@ ifdef WITH_ZLIB
 endif
 ifdef WITH_SSL
 	@echo $(DL)#define USE_SSLEAY 1$(DL) >> $@
+	@echo $(DL)#define USE_OPENSSL 1$(DL) >> $@
 	@echo $(DL)#define HAVE_OPENSSL_X509_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_OPENSSL_SSL_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_OPENSSL_RSA_H 1$(DL) >> $@
@@ -511,6 +527,11 @@ endif
 	@echo $(DL)#endif$(DL) >> $@
 ifdef OLD_NOVELLSDK
 	@echo $(DL)#define socklen_t int$(DL) >> $@
+endif
+ifdef CABUNDLE
+	@echo $(DL)#define CURL_CA_BUNDLE "$(CABUNDLE)"$(DL) >> $@
+else
+	@echo $(DL)#define CURL_CA_BUNDLE getenv("CURL_CA_BUNDLE")$(DL) >> $@
 endif
 
 hugehelp.c:
