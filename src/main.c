@@ -1399,7 +1399,9 @@ static int str2offset(curl_off_t *val, const char *str)
   /* this is a duplicate of the function that is also used in libcurl */
   *val = curlx_strtoofft(str, NULL, 0);
 
-  if ((*val == LLONG_MAX || *val == LLONG_MIN) && ERRNO == ERANGE)
+  if( ( (*val == LLONG_MAX) || 
+        (*val == LLONG_MIN) ) &&
+      (ERRNO == ERANGE) )
     return 1;
 #else
   *val = strtol(str, NULL, 0);
