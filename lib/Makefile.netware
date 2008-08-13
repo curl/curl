@@ -595,6 +595,7 @@ $(CURL_INC)/curl/curlbuild.h: Makefile.netware FORCE
 	@echo $(DL)#ifndef __CURL_CURLBUILD_H$(DL) >> $@
 	@echo $(DL)#define __CURL_CURLBUILD_H$(DL) >> $@
 ifeq ($(LIBARCH),LIBC)
+	@echo $(DL)#define CURL_SIZEOF_LONG 4$(DL) >> $@
 	@echo $(DL)#define CURL_OFF_T long long$(DL) >> $@
 	@echo $(DL)#define CURL_FMT_OFF_T "lld"$(DL) >> $@
 	@echo $(DL)#define CURL_FMT_OFF_TU "llu"$(DL) >> $@
@@ -603,6 +604,7 @@ ifeq ($(LIBARCH),LIBC)
 	@echo $(DL)#define CURL_SUFFIX_CURL_OFF_T LL$(DL) >> $@
 	@echo $(DL)#define CURL_SUFFIX_CURL_OFF_TU ULL$(DL) >> $@
 else
+	@echo $(DL)#define CURL_SIZEOF_LONG 4$(DL) >> $@
 	@echo $(DL)#define CURL_OFF_T long$(DL) >> $@
 	@echo $(DL)#define CURL_FMT_OFF_T "ld"$(DL) >> $@
 	@echo $(DL)#define CURL_FMT_OFF_TU "lu"$(DL) >> $@

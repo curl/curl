@@ -1387,7 +1387,7 @@ static int str2num(long *val, const char *str)
  */
 static int str2offset(curl_off_t *val, const char *str)
 {
-#if (CURL_SIZEOF_CURL_OFF_T > SIZEOF_LONG)
+#if (CURL_SIZEOF_CURL_OFF_T > CURL_SIZEOF_LONG)
   /* Ugly, but without going through a bunch of rigmarole, we don't have the
    * definitions for LLONG_{MIN,MAX} or LONG_LONG_{MIN,MAX}.
    */

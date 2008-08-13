@@ -108,6 +108,9 @@
 #  include <inttypes.h>
 #endif
 
+/* The expected size of long , as to be computed by sizeof. */
+#undef CURL_SIZEOF_LONG
+
 /* Signed integral data type used for curl_off_t. */
 #undef CURL_OFF_T
 
