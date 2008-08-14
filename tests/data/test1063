@@ -1,0 +1,47 @@
+<testcase>
+<info>
+<keywords>
+FILE
+Range
+FAILURE
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+file
+large_file
+</features>
+ <name>
+Invalid large X- range on a file://
+ </name>
+# This range value is 2**32+7, which will be truncated to the valid value 7
+# if the large file support is not working correctly
+ <command>
+-r 4294967303- file://localhost/%PWD/log/test1063.txt 
+</command>
+<file name="log/test1063.txt">
+1234567890
+1234567890
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+36
+</errorcode>
+<stdout>
+</stdout>
+</verify>
+</testcase>
