@@ -152,19 +152,53 @@ AC_DEFUN([CURL_CHECK_DEF_INTXX_C], [
     AC_LANG_SOURCE(
 ifelse($2,,,[$2])[[
 #ifdef $1
-CURL_DEF_TOKEN $1(_)
+$1(CURL_DEF_TOKEN)
 #endif
     ]])
   ],[
+
+    echo " " >&6
+    echo "DEBUG: preproc IF-ACTION branch for $1 -----" >&6
+    echo "DEBUG: ------- preproc source follows: " >&6
+    sed 's/^/cpp-src> /' conftest.$ac_ext >&6
+    (eval "$ac_cpp conftest.$ac_ext") 2>conftest.yang2 1>conftest.yang1
+    echo "DEBUG: ------- preproc STDOUT follows: " >&6
+    sed 's/^/cpp-out> /' conftest.yang1 >&6
+    echo "DEBUG: ------- preproc STDERR follows: " >&6
+    sed 's/^/cpp-err> /' conftest.yang2 >&6
+    echo "DEBUG: ------- preproc STDERR ends in above line. " >&6
+    echo "DEBUG: ------- shell tmp_suf follows: " >&6
+
     tmp_suf=`eval "$ac_cpp conftest.$ac_ext" 2>/dev/null | \
       "$GREP" CURL_DEF_TOKEN 2>/dev/null | \
-      "$SED" 's/.*CURL_DEF_TOKEN[[ ]]//' 2>/dev/null | \
-      "$SED" 's/.*'$1'//' 2>/dev/null | \
-      "$SED" 's/[[^'$curl_cv_alnum']]//g' 2>/dev/null`
+      "$SED" 's/.*CURL_DEF_TOKEN//' 2>/dev/null | \
+      "$SED" 's/[[^'"$curl_cv_alnum"']]//g' 2>/dev/null`
+
+    echo "DEBUG: $tmp_suf"  >&6
+    echo "DEBUG: ------- shell tmp_suf ends in above line. " >&6
+
     if test -z "$tmp_suf"; then
       tmp_suf=""
     fi
+
+  ],[
+
+    echo " " >&6
+    echo "DEBUG: preproc ELSE-ACTION branch for $1 -----" >&6
+    echo "DEBUG: ------- preproc source follows: " >&6
+    sed 's/^/cpp-src> /' conftest.$ac_ext >&6
+    (eval "$ac_cpp conftest.$ac_ext") 2>conftest.yang2 1>conftest.yang1
+    echo "DEBUG: ------- preproc STDOUT follows: " >&6
+    sed 's/^/cpp-out> /' conftest.yang1 >&6
+    echo "DEBUG: ------- preproc STDERR follows: " >&6
+    sed 's/^/cpp-err> /' conftest.yang2 >&6
+    echo "DEBUG: ------- preproc STDERR ends in above line. " >&6
+
   ])
+
+  rm -f conftest.yang1
+  rm -f conftest.yang2
+
   if test -z "$tmp_suf"; then
     AS_VAR_SET(ac_HaveDef, no)
   else
