@@ -18,7 +18,6 @@
 static int wait_on_socket(int sockfd, int for_recv, long timeout_ms)
 {
   struct timeval tv;
-  long seconds, usecs;
   fd_set infd, outfd, errfd;
   int res;
 
