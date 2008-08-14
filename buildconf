@@ -270,6 +270,7 @@ for fname in .deps \
     config.sub \
     configure \
     curl-config \
+    curlbuild.h \
     depcomp \
     libcares.pc \
     libcurl.pc \
