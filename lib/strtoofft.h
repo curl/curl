@@ -51,6 +51,7 @@
 #    else
        curl_off_t curlx_strtoll(const char *nptr, char **endptr, int base);
 #      define curlx_strtoofft curlx_strtoll
+#      define NEED_CURL_STRTOLL 1
 #    endif
 #  endif
 #else
