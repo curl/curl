@@ -118,98 +118,6 @@ CURL_DEF_TOKEN $1
 ])
 
 
-dnl CURL_SETUP_VARS_ALPHA_SETS
-dnl -------------------------------------------------
-dnl Set up variables with sets of several letters.
-
-AC_DEFUN([CURL_SETUP_VARS_ALPHA_SETS], [
-curl_cv_letters='abcdefghijklmnopqrstuvwxyz'
-curl_cv_LETTERS='ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-curl_cv_Letters=$curl_cv_letters$curl_cv_LETTERS
-curl_cv_digits='0123456789'
-curl_cv_alnum=$curl_cv_Letters$curl_cv_digits
-])
-
-
-dnl CURL_CHECK_DEF_INTXX_C (INTXX_C, [INCLUDES])
-dnl -------------------------------------------------
-dnl Use the C preprocessor to find out if the given INTXX_C function-style
-dnl macro is defined and get the suffix part of its expansion. This macro
-dnl will not use default includes even if no INCLUDES argument is given.
-
-AC_DEFUN([CURL_CHECK_DEF_INTXX_C], [
-  AC_REQUIRE([CURL_SETUP_VARS_ALPHA_SETS])dnl
-  AS_VAR_PUSHDEF([ac_HaveDef], [curl_cv_have_def_$1])dnl
-  AS_VAR_PUSHDEF([ac_Def], [curl_cv_def_$1])dnl
-  if test -z "$SED"; then
-    AC_MSG_ERROR([SED not set. Cannot continue without SED being set.])
-  fi
-  if test -z "$GREP"; then
-    AC_MSG_ERROR([GREP not set. Cannot continue without GREP being set.])
-  fi
-  tmp_suf=""
-  AC_PREPROC_IFELSE([
-    AC_LANG_SOURCE(
-ifelse($2,,,[$2])[[
-#ifdef $1
-$1(CURL_DEF_TOKEN)
-#endif
-    ]])
-  ],[
-
-    echo " " >&6
-    echo "DEBUG: preproc IF-ACTION branch for $1 -----" >&6
-    echo "DEBUG: ------- preproc source follows: " >&6
-    sed 's/^/cpp-src> /' conftest.$ac_ext >&6
-    (eval "$ac_cpp conftest.$ac_ext") 2>conftest.yang2 1>conftest.yang1
-    echo "DEBUG: ------- preproc STDOUT follows: " >&6
-    sed 's/^/cpp-out> /' conftest.yang1 >&6
-    echo "DEBUG: ------- preproc STDERR follows: " >&6
-    sed 's/^/cpp-err> /' conftest.yang2 >&6
-    echo "DEBUG: ------- preproc STDERR ends in above line. " >&6
-    echo "DEBUG: ------- shell tmp_suf follows: " >&6
-
-    tmp_suf=`eval "$ac_cpp conftest.$ac_ext" 2>/dev/null | \
-      "$GREP" CURL_DEF_TOKEN 2>/dev/null | \
-      "$SED" 's/.*CURL_DEF_TOKEN//' 2>/dev/null | \
-      "$SED" 's/[[^'"$curl_cv_alnum"']]//g' 2>/dev/null`
-
-    echo "DEBUG: $tmp_suf"  >&6
-    echo "DEBUG: ------- shell tmp_suf ends in above line. " >&6
-
-    if test -z "$tmp_suf"; then
-      tmp_suf=""
-    fi
-
-  ],[
-
-    echo " " >&6
-    echo "DEBUG: preproc ELSE-ACTION branch for $1 -----" >&6
-    echo "DEBUG: ------- preproc source follows: " >&6
-    sed 's/^/cpp-src> /' conftest.$ac_ext >&6
-    (eval "$ac_cpp conftest.$ac_ext") 2>conftest.yang2 1>conftest.yang1
-    echo "DEBUG: ------- preproc STDOUT follows: " >&6
-    sed 's/^/cpp-out> /' conftest.yang1 >&6
-    echo "DEBUG: ------- preproc STDERR follows: " >&6
-    sed 's/^/cpp-err> /' conftest.yang2 >&6
-    echo "DEBUG: ------- preproc STDERR ends in above line. " >&6
-
-  ])
-
-  rm -f conftest.yang1
-  rm -f conftest.yang2
-
-  if test -z "$tmp_suf"; then
-    AS_VAR_SET(ac_HaveDef, no)
-  else
-    AS_VAR_SET(ac_HaveDef, yes)
-    AS_VAR_SET(ac_Def, $tmp_suf)
-  fi
-  AS_VAR_POPDEF([ac_Def])dnl
-  AS_VAR_POPDEF([ac_HaveDef])dnl
-])
-
-
 dnl CURL_CHECK_AIX_ALL_SOURCE
 dnl -------------------------------------------------
 dnl Provides a replacement of traditional AC_AIX with
@@ -3697,25 +3605,21 @@ AC_DEFUN([DO_CURL_OFF_T_CHECK], [
   if test "$x_typeof" = "unknown" && test ! -z "$1"; then
     tmp_includes=""
     tmp_source=""
-    tmp_intxx=""
     tmp_fmt=""
     case AS_TR_SH([$1]) in
       int64_t)
         tmp_includes="$curl_includes_inttypes"
         tmp_source="char f@<:@@:>@ = PRId64;"
-        tmp_intxx="INT64_C"
         tmp_fmt="PRId64"
         ;;
       int32_t)
         tmp_includes="$curl_includes_inttypes"
         tmp_source="char f@<:@@:>@ = PRId32;"
-        tmp_intxx="INT32_C"
         tmp_fmt="PRId32"
         ;;
       int16_t)
         tmp_includes="$curl_includes_inttypes"
         tmp_source="char f@<:@@:>@ = PRId16;"
-        tmp_intxx="INT16_C"
         tmp_fmt="PRId16"
         ;;
     esac
@@ -3734,25 +3638,99 @@ AC_DEFUN([DO_CURL_OFF_T_CHECK], [
         x_sizeof="$2"
       else
         CURL_CHECK_DEF([$tmp_fmt], [$curl_includes_inttypes], [silent])
-        CURL_CHECK_DEF_INTXX_C([$tmp_intxx], [$curl_includes_inttypes])
         AS_VAR_PUSHDEF([tmp_HaveFmtDef], [curl_cv_have_def_$tmp_fmt])dnl
         AS_VAR_PUSHDEF([tmp_FmtDef], [curl_cv_def_$tmp_fmt])dnl
-        AS_VAR_PUSHDEF([tmp_HaveSufDef], [curl_cv_have_def_$tmp_intxx])dnl
-        AS_VAR_PUSHDEF([tmp_SufDef], [curl_cv_def_$tmp_intxx])dnl
-        if test AS_VAR_GET(tmp_HaveFmtDef) = "yes" &&
-           test AS_VAR_GET(tmp_HaveSufDef) = "yes"; then
+        if test AS_VAR_GET(tmp_HaveFmtDef) = "yes"; then
           x_format=AS_VAR_GET(tmp_FmtDef)
-          x_suffix=AS_VAR_GET(tmp_SufDef)
           x_typeof="$1"
           x_sizeof="$2"
         fi
-        AS_VAR_POPDEF([tmp_SufDef])dnl
-        AS_VAR_POPDEF([tmp_HaveSufDef])dnl
         AS_VAR_POPDEF([tmp_FmtDef])dnl
         AS_VAR_POPDEF([tmp_HaveFmtDef])dnl
       fi
     ])
   fi
+])
+
+
+dnl DO_CURL_OFF_T_SUFFIX_CHECK (TYPE)
+dnl -------------------------------------------------
+dnl Internal macro for CURL_CONFIGURE_CURL_OFF_T
+
+AC_DEFUN([DO_CURL_OFF_T_SUFFIX_CHECK], [
+  AC_REQUIRE([CURL_INCLUDES_INTTYPES])dnl
+  AC_MSG_CHECKING([constant suffix string for curl_off_t])
+  #
+  curl_suffix_curl_off_t="unknown"
+  curl_suffix_curl_off_tu="unknown"
+  #
+  case AS_TR_SH([$1]) in
+    long_long | __longlong | __longlong_t)
+      tst_suffixes="LL::"
+      ;;
+    long)
+      tst_suffixes="L::"
+      ;;
+    int)
+      tst_suffixes="::"
+      ;;
+    __int64 | int64_t)
+      tst_suffixes="LL:i64::"
+      ;;
+    __int32 | int32_t)
+      tst_suffixes="L:i32::"
+      ;;
+    __int16 | int16_t)
+      tst_suffixes="L:i16::"
+      ;;
+    *)
+      AC_MSG_ERROR([unexpected data type $1])
+      ;;
+  esac
+  #
+  old_IFS=$IFS; IFS=':'
+  for tmp_ssuf in $tst_suffixes ; do
+    IFS=$old_IFS
+    if test "x$curl_suffix_curl_off_t" = "xunknown"; then
+      case $tmp_ssuf in
+        i64 | i32 | i16)
+          tmp_usuf="u$tmp_ssuf"
+          ;;
+        LL | L)
+          tmp_usuf="U$tmp_ssuf"
+          ;;
+        *)
+          tmp_usuf=""
+          ;;
+      esac
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+          $curl_includes_inttypes
+          typedef $1 new_t;
+        ]],[[
+          new_t s1;
+          new_t s2;
+          s1 = -10$tmp_ssuf ;
+          s2 =  20$tmp_ssuf ;
+          if(s1 > s2)
+            return 1;
+        ]])
+      ],[
+        curl_suffix_curl_off_t="$tmp_ssuf"
+        curl_suffix_curl_off_tu="$tmp_usuf"
+      ])
+    fi
+  done
+  IFS=$old_IFS
+  #
+  if test "x$curl_suffix_curl_off_t" = "xunknown"; then
+    AC_MSG_ERROR([cannot find constant suffix string for curl_off_t.])
+  else
+    AC_MSG_RESULT([$curl_suffix_curl_off_t])
+    AC_MSG_CHECKING([constant suffix string for unsigned curl_off_t])
+    AC_MSG_RESULT([$curl_suffix_curl_off_tu])
+  fi
+  #
 ])
 
 
@@ -3806,8 +3784,6 @@ AC_DEFUN([CURL_CONFIGURE_CURL_OFF_T], [
   x_sizeof="unknown"
   x_format="unknown"
   u_format="unknown"
-  x_suffix="unknown"
-  u_suffix="unknown"
   #
   if test "$x_typeof" = "unknown"; then
     AC_MSG_CHECKING([for 64-bit curl_off_t data type])
@@ -3858,45 +3834,32 @@ AC_DEFUN([CURL_CONFIGURE_CURL_OFF_T], [
     u_format=`echo "$x_format" | "$SED" 's/i$/u/'`
     u_format=`echo "$u_format" | "$SED" 's/d$/u/'`
     u_format=`echo "$u_format" | "$SED" 's/D$/U/'`
-    u_suffix=`echo "$x_suffix" | "$SED" 's/^/U/'`
   else
     x_pull_headers="no"
     case AS_TR_SH([$x_typeof]) in
       long_long | __longlong | __longlong_t)
         x_format="lld"
         u_format="llu"
-        x_suffix="LL"
-        u_suffix="ULL"
         ;;
       long)
         x_format="ld"
         u_format="lu"
-        x_suffix="L"
-        u_suffix="UL"
         ;;
       int)
         x_format="d"
         u_format="u"
-        x_suffix=""
-        u_suffix=""
         ;;
       __int64)
         x_format="I64d"
         u_format="I64u"
-        x_suffix="i64"
-        u_suffix="ui64"
         ;;
       __int32)
         x_format="I32d"
         u_format="I32u"
-        x_suffix="i32"
-        u_suffix="ui32"
         ;;
       __int16)
         x_format="I16d"
         u_format="I16u"
-        x_suffix="i16"
-        u_suffix="ui16"
         ;;
       *)
         AC_MSG_ERROR([cannot find print format string for curl_off_t.])
@@ -3907,10 +3870,8 @@ AC_DEFUN([CURL_CONFIGURE_CURL_OFF_T], [
   #
   AC_MSG_CHECKING([formatting string directive for unsigned curl_off_t])
   AC_MSG_RESULT(["$u_format"])
-  AC_MSG_CHECKING([constant suffix string for curl_off_t])
-  AC_MSG_RESULT([$x_suffix])
-  AC_MSG_CHECKING([constant suffix string for unsigned curl_off_t])
-  AC_MSG_RESULT([$u_suffix])
+  #
+  DO_CURL_OFF_T_SUFFIX_CHECK([$x_typeof])
   #
   if test "$x_pull_headers" = "yes"; then
     if test "x$ac_cv_header_sys_types_h" = "xyes"; then
@@ -3929,8 +3890,8 @@ AC_DEFUN([CURL_CONFIGURE_CURL_OFF_T], [
   CURL_DEFINE_UNQUOTED([CURL_FMT_OFF_TU], ["$u_format"])
   CURL_DEFINE_UNQUOTED([CURL_FORMAT_OFF_T], ["%$x_format"])
   CURL_DEFINE_UNQUOTED([CURL_SIZEOF_CURL_OFF_T], [$x_sizeof])
-  CURL_DEFINE_UNQUOTED([CURL_SUFFIX_CURL_OFF_T], [$x_suffix])
-  CURL_DEFINE_UNQUOTED([CURL_SUFFIX_CURL_OFF_TU], [$u_suffix])
+  CURL_DEFINE_UNQUOTED([CURL_SUFFIX_CURL_OFF_T], [$curl_suffix_curl_off_t])
+  CURL_DEFINE_UNQUOTED([CURL_SUFFIX_CURL_OFF_TU], [$curl_suffix_curl_off_tu])
   #
 ])
 
