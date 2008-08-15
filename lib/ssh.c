@@ -1647,8 +1647,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
       if(data->state.resume_from< 0) {
         /* We're supposed to download the last abs(from) bytes */
         if((curl_off_t)attrs.filesize < -data->state.resume_from) {
-          failf(data, "Offset (%"
-                FORMAT_OFF_T ") was beyond file size (%" FORMAT_OFF_T ")",
+          failf(data, "Offset (%" CURL_FORMAT_CURL_OFF_T
+                ") was beyond file size (%" CURL_FORMAT_CURL_OFF_T ")",
                 data->state.resume_from, attrs.filesize);
           return CURLE_BAD_DOWNLOAD_RESUME;
         }
@@ -1657,8 +1657,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
       }
       else {
         if((curl_off_t)attrs.filesize < data->state.resume_from) {
-          failf(data, "Offset (%" FORMAT_OFF_T
-                ") was beyond file size (%" FORMAT_OFF_T ")",
+          failf(data, "Offset (%" CURL_FORMAT_CURL_OFF_T
+                ") was beyond file size (%" CURL_FORMAT_CURL_OFF_T ")",
                 data->state.resume_from, attrs.filesize);
           return CURLE_BAD_DOWNLOAD_RESUME;
         }

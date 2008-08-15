@@ -63,14 +63,14 @@
    Error Compilation_aborted_CURL_OFF_T_already_defined
 #endif
 
-#ifdef CURL_FMT_OFF_T
-#  error "CURL_FMT_OFF_T shall not be defined except in curlbuild.h"
-   Error Compilation_aborted_CURL_FMT_OFF_T_already_defined
+#ifdef CURL_FORMAT_CURL_OFF_T
+#  error "CURL_FORMAT_CURL_OFF_T shall not be defined except in curlbuild.h"
+   Error Compilation_aborted_CURL_FORMAT_CURL_OFF_T_already_defined
 #endif
 
-#ifdef CURL_FMT_OFF_TU
-#  error "CURL_FMT_OFF_TU shall not be defined except in curlbuild.h"
-   Error Compilation_aborted_CURL_FMT_OFF_TU_already_defined
+#ifdef CURL_FORMAT_CURL_OFF_TU
+#  error "CURL_FORMAT_CURL_OFF_TU shall not be defined except in curlbuild.h"
+   Error Compilation_aborted_CURL_FORMAT_CURL_OFF_TU_already_defined
 #endif
 
 #ifdef CURL_FORMAT_OFF_T
@@ -118,10 +118,10 @@
 typedef CURL_OFF_T curl_off_t;
 
 /* curl_off_t formatting string directive without "%" conversion specifier. */
-#undef CURL_FMT_OFF_T
+#undef CURL_FORMAT_CURL_OFF_T
 
 /* unsigned curl_off_t formatting string without "%" conversion specifier. */
-#undef CURL_FMT_OFF_TU
+#undef CURL_FORMAT_CURL_OFF_TU
 
 /* curl_off_t formatting string directive with "%" conversion specifier. */
 #undef CURL_FORMAT_OFF_T

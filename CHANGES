@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Yang Tse (15 Aug 2008)
+- C preprocessor macros used internally and equally available externally which
+  aid in the use of the curl_off_t data type are named: CURL_FORMAT_CURL_OFF_T,
+  CURL_FORMAT_CURL_OFF_TU, CURL_SIZEOF_CURL_OFF_T, CURL_SUFFIX_CURL_OFF_T,
+  CURL_SUFFIX_CURL_OFF_TU, CURL_OFF_T_C and CURL_OFF_TU_C.
+
 Yang Tse (13 Aug 2008)
 - The size of long is a build time characteristic and as such it is now recorded
   in curlbuild.h as CURL_SIZEOF_LONG. Definition now done from configure process

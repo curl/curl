@@ -121,25 +121,21 @@
 #endif
 
 /*
- * Set up internal curl_off_t formatting string directive
+ * Ensure that no one is using the old internal FORMAT_OFF_T macro
  */
 
 #ifdef FORMAT_OFF_T
-#  error "FORMAT_OFF_T shall not be defined before this point!"
-   Error Compilation_aborted_FORMAT_OFF_T_already_defined
-#else
-#  define FORMAT_OFF_T CURL_FMT_OFF_T
+#  error "FORMAT_OFF_T shall not be defined!"
+   Error Compilation_aborted_FORMAT_OFF_T_shall_not_be_defined
 #endif
 
 /*
- * Set up internal unsigned curl_off_t formatting string directive
+ * Ensure that no one is using the old internal FORMAT_OFF_TU macro
  */
 
 #ifdef FORMAT_OFF_TU
-#  error "FORMAT_OFF_TU shall not be defined before this point!"
-   Error Compilation_aborted_FORMAT_OFF_TU_already_defined
-#else
-#  define FORMAT_OFF_TU CURL_FMT_OFF_TU
+#  error "FORMAT_OFF_TU shall not be defined!"
+   Error Compilation_aborted_FORMAT_OFF_TU_shall_not_be_defined
 #endif
 
 /*

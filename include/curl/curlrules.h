@@ -86,14 +86,14 @@
    Error Compilation_aborted_CURL_OFF_T_is_missing
 #endif
 
-#ifndef CURL_FMT_OFF_T
-#  error "CURL_FMT_OFF_T definition is missing!"
-   Error Compilation_aborted_CURL_FMT_OFF_T_is_missing
+#ifndef CURL_FORMAT_CURL_OFF_T
+#  error "CURL_FORMAT_CURL_OFF_T definition is missing!"
+   Error Compilation_aborted_CURL_FORMAT_CURL_OFF_T_is_missing
 #endif
 
-#ifndef CURL_FMT_OFF_TU
-#  error "CURL_FMT_OFF_TU definition is missing!"
-   Error Compilation_aborted_CURL_FMT_OFF_TU_is_missing
+#ifndef CURL_FORMAT_CURL_OFF_TU
+#  error "CURL_FORMAT_CURL_OFF_TU definition is missing!"
+   Error Compilation_aborted_CURL_FORMAT_CURL_OFF_TU_is_missing
 #endif
 
 #ifndef CURL_FORMAT_OFF_T
