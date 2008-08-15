@@ -1,0 +1,79 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP PUT
+</keywords>
+</info>
+
+<reply>
+<data nocheck="1">
+HTTP/1.1 200 A OK
+Server: curl test
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 3
+
+ok
+</data>
+<data2 nocheck="1">
+HTTP/1.1 200 A OK
+Server: curl test
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 9
+
+still ok
+</data2>
+</reply>
+
+# Client-side
+<client>
+# 
+<server>
+http
+</server>
+ <name>
+HTTP PUT twice
+ </name>
+ <command>
+-H "Expect:" -T log/1064 http://%HOSTIP:%HTTPPORT/1064.upload1 -T log/1064 http://%HOSTIP:%HTTPPORT/10640002.upload2
+</command>
+<file name="log/1064">
+test
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+PUT /1064.upload1 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 5
+
+test
+PUT /10640002.upload2 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 5
+
+test
+</protocol>
+<stdout>
+HTTP/1.1 200 A OK
+Server: curl test
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 3
+
+ok
+HTTP/1.1 200 A OK
+Server: curl test
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 9
+
+still ok
+</stdout>
+</verify>
+</testcase>

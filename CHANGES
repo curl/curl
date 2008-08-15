@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel Fandrich (15 Aug 2008)
+- Added test case 1063 to test invalid long file ranges with file: URLs and
+  1064 to test multiple http PUTs.
+
+- Added test case 1065 to test a PUT with a single file but two URLs. This
+  was discovered to be problematic while investigating an incident reported by
+  Von back in May.  curl in this case doesn't include a Content-Length: or
+  Transfer-Encoding: chunked header which is illegal. This test case is
+  added to DISABLED until a solution is found.
+
 Yang Tse (15 Aug 2008)
 - C preprocessor macros used internally and equally available externally which
   aid in the use of the curl_off_t data type are named: CURL_FORMAT_CURL_OFF_T,
