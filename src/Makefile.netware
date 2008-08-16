@@ -504,7 +504,6 @@ ifdef WITH_ZLIB
 endif
 ifdef WITH_SSL
 	@echo $(DL)#define USE_SSLEAY 1$(DL) >> $@
-	@echo $(DL)#define USE_OPENSSL 1$(DL) >> $@
 	@echo $(DL)#define HAVE_OPENSSL_X509_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_OPENSSL_SSL_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_OPENSSL_RSA_H 1$(DL) >> $@

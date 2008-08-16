@@ -43,12 +43,16 @@
 #include "memory.h"
 
 #ifdef HAVE_SPNEGO
-# include <spnegohelp.h>
-# if defined(USE_OPENSSL) && !defined(USE_YASSLEMUL)
-#  include <openssl/objects.h>
-# else
-#  error "Can't compile SPNEGO support without OpenSSL."
-# endif
+#  include <spnegohelp.h>
+#  ifdef USE_SSLEAY
+#    ifdef USE_OPENSSL
+#      include <openssl/objects.h>
+#    else
+#      include <objects.h>
+#    endif
+#  else
+#    error "Can't compile SPNEGO support without OpenSSL."
+#  endif
 #endif
 
 #define _MPRINTF_REPLACE /* use our functions only */
