@@ -398,7 +398,7 @@ CURLcode Curl_http_perhapsrewind(struct connectdata *conn)
         /* this is already marked to get closed */
         return CURLE_OK;
 
-      infof(data, "NTLM send, close instead of sending %" CURL_FORMAT_CURL_OFF_T
+      infof(data, "NTLM send, close instead of sending %" FORMAT_OFF_T
             " bytes\n", (curl_off_t)(expectsend - bytessent));
     }
 
@@ -1576,7 +1576,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 
                       if(cl) {
 
-                        infof(data, "Ignore %" CURL_FORMAT_CURL_OFF_T
+                        infof(data, "Ignore %" FORMAT_OFF_T
                               " bytes of response-body\n", cl);
                         /* remove the remaining chunk of what we already
                            read */
@@ -2337,7 +2337,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
           passed += actuallyread;
           if(actuallyread != readthisamountnow) {
-            failf(data, "Could only read %" CURL_FORMAT_CURL_OFF_T
+            failf(data, "Could only read %" FORMAT_OFF_T
                   " bytes from the input",
                   passed);
             return CURLE_READ_ERROR;
@@ -2383,8 +2383,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
            remote part so we tell the server (and act accordingly) that we
            upload the whole file (again) */
         conn->allocptr.rangeline =
-          aprintf("Content-Range: bytes 0-%" CURL_FORMAT_CURL_OFF_T
-                  "/%" CURL_FORMAT_CURL_OFF_T "\r\n",
+          aprintf("Content-Range: bytes 0-%" FORMAT_OFF_T
+                  "/%" FORMAT_OFF_T "\r\n",
                   data->set.infilesize - 1, data->set.infilesize);
 
       }
@@ -2393,8 +2393,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         curl_off_t total_expected_size=
           data->state.resume_from + data->set.infilesize;
         conn->allocptr.rangeline =
-            aprintf("Content-Range: bytes %s%" CURL_FORMAT_CURL_OFF_T
-                    "/%" CURL_FORMAT_CURL_OFF_T "\r\n",
+            aprintf("Content-Range: bytes %s%" FORMAT_OFF_T
+                    "/%" FORMAT_OFF_T "\r\n",
                     data->state.range, total_expected_size-1,
                     total_expected_size);
       }
@@ -2402,7 +2402,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         /* Range was selected and then we just pass the incoming range and
            append total size */
         conn->allocptr.rangeline =
-            aprintf("Content-Range: bytes %s/%" CURL_FORMAT_CURL_OFF_T "\r\n",
+            aprintf("Content-Range: bytes %s/%" FORMAT_OFF_T "\r\n",
                     data->state.range, data->set.infilesize);
       }
       if(!conn->allocptr.rangeline)
@@ -2629,7 +2629,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     if(!data->req.upload_chunky) {
       /* only add Content-Length if not uploading chunked */
       result = add_bufferf(req_buffer,
-                           "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n",
+                           "Content-Length: %" FORMAT_OFF_T "\r\n",
                            http->postsize);
       if(result)
         return result;
@@ -2701,7 +2701,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     if((postsize != -1) && !data->req.upload_chunky) {
       /* only add Content-Length if not uploading chunked */
       result = add_bufferf(req_buffer,
-                           "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n",
+                           "Content-Length: %" FORMAT_OFF_T "\r\n",
                            postsize );
       if(result)
         return result;
@@ -2753,7 +2753,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
             /* we allow replacing this header, although it isn't very wise to
                actually set your own */
             result = add_bufferf(req_buffer,
-                             "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n",
+                                 "Content-Length: %" FORMAT_OFF_T"\r\n",
                                  postsize);
             if(result)
               return result;

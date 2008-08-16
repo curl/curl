@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Yang Tse (16 Aug 2008)
+- Library internal only C preprocessor macros FORMAT_OFF_T and FORMAT_OFF_TU
+  remain in use as internal curl_off_t print formatting strings for the internal
+  *printf functions which still cannot handle print formatting string directives
+  such as "I64d", "I64u", and others available on MSVC, MinGW, Intel's ICC, and
+  other DOS/Windows compilers.
+
 Daniel Fandrich (15 Aug 2008)
 - Added test case 1063 to test invalid long file ranges with file: URLs and
   1064 to test multiple http PUTs.

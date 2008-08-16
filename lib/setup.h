@@ -121,21 +121,32 @@
 #endif
 
 /*
- * Ensure that no one is using the old internal FORMAT_OFF_T macro
+ * Set up internal curl_off_t formatting string directives for
+ * exclusive use with libcurl's internal *printf functions.
  */
 
 #ifdef FORMAT_OFF_T
-#  error "FORMAT_OFF_T shall not be defined!"
-   Error Compilation_aborted_FORMAT_OFF_T_shall_not_be_defined
+#  error "FORMAT_OFF_T shall not be defined before this point!"
+   Error Compilation_aborted_FORMAT_OFF_T_already_defined
 #endif
 
-/*
- * Ensure that no one is using the old internal FORMAT_OFF_TU macro
- */
-
 #ifdef FORMAT_OFF_TU
-#  error "FORMAT_OFF_TU shall not be defined!"
-   Error Compilation_aborted_FORMAT_OFF_TU_shall_not_be_defined
+#  error "FORMAT_OFF_TU shall not be defined before this point!"
+   Error Compilation_aborted_FORMAT_OFF_TU_already_defined
+#endif
+
+#if (CURL_SIZEOF_CURL_OFF_T > 4)
+#  if (CURL_SIZEOF_LONG > 4)
+#    define FORMAT_OFF_T "ld"
+#  else
+#    define FORMAT_OFF_T "lld"
+#  endif
+#else
+#  if (CURL_SIZEOF_LONG > 2)
+#    define FORMAT_OFF_T "ld"
+#  else
+#    define FORMAT_OFF_T "lld"
+#  endif
 #endif
 
 /*

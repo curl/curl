@@ -940,7 +940,7 @@ static char *get_netscape_format(const struct Cookie *co)
     "%s\t"   /* tailmatch */
     "%s\t"   /* path */
     "%s\t"   /* secure */
-    "%" CURL_FORMAT_CURL_OFF_T "\t"   /* expires */
+    "%" FORMAT_OFF_T "\t"   /* expires */
     "%s\t"   /* name */
     "%s",    /* value */
     co->httponly?"#HttpOnly_":"",

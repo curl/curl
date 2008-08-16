@@ -1674,7 +1674,7 @@ int main(int argc, argv_item_t argv[])
   } while(1);
 
   fprintf(stdout, "size: ");
-  fprintf(stdout, "%" CURL_FORMAT_CURL_OFF_T, size);
+  fprintf(stdout, "%" FORMAT_OFF_T, size);
   fprintf(stdout, "\n");
   if(errors)
     fprintf(stdout, "\n==> %d Test(s) failed!\n", errors);
