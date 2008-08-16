@@ -107,8 +107,6 @@ int main(int argc, char **argv)
       case 'v':
         verbose++;
         break;
-      case 't':
-        use_vc = 1;
       case 'h':
       case '?':
       default:
