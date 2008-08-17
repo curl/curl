@@ -81,7 +81,7 @@
 #include "easyif.h" /* for Curl_convert_... prototypes */
 #include "formdata.h"
 #include "progress.h"
-#include "base64.h"
+#include "curl_base64.h"
 #include "cookie.h"
 #include "strequal.h"
 #include "sslgen.h"

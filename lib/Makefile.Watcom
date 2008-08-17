@@ -118,7 +118,7 @@ $(OBJ_DIR)\base64.obj: base64.c setup.h config-win32.h ..\include\curl\curlbuild
   ..\include\curl\curlrules.h ..\include\curl\easy.h &
   ..\include\curl\multi.h urldata.h cookie.h ..\include\curl\curl.h &
   formdata.h timeval.h http_chunks.h hostip.h hash.h llist.h splay.h &
-  easyif.h base64.h memory.h memdebug.h
+  easyif.h curl_base64.h memory.h memdebug.h
 $(OBJ_DIR)\hostip.obj: hostip.c setup.h config-win32.h ..\include\curl\curlbuild.h &
   ..\include\curl\curlrules.h setup_once.h urldata.h cookie.h &
   ..\include\curl\curl.h ..\include\curl\curlver.h &
@@ -154,7 +154,7 @@ $(OBJ_DIR)\http.obj: http.c setup.h config-win32.h ..\include\curl\curlbuild.h &
   ..\include\curl\curlrules.h ..\include\curl\easy.h &
   ..\include\curl\multi.h ..\include\curl\curl.h formdata.h timeval.h &
   http_chunks.h hostip.h hash.h llist.h splay.h transfer.h sendf.h &
-  easyif.h progress.h base64.h strequal.h sslgen.h http_digest.h &
+  easyif.h progress.h curl_base64.h strequal.h sslgen.h http_digest.h &
   http_ntlm.h http_negotiate.h url.h share.h http.h memory.h select.h &
   parsedate.h strtoofft.h multiif.h ..\include\curl\mprintf.h memdebug.h
 $(OBJ_DIR)\sendf.obj: sendf.c setup.h config-win32.h ..\include\curl\curlbuild.h &
@@ -206,7 +206,7 @@ $(OBJ_DIR)\ldap.obj: ldap.c setup.h config-win32.h ..\include\curl\curlbuild.h &
   ..\include\curl\curlrules.h ..\include\curl\easy.h &
   ..\include\curl\multi.h ..\include\curl\curl.h formdata.h timeval.h &
   http_chunks.h hostip.h hash.h llist.h splay.h sendf.h escape.h &
-  transfer.h strequal.h strtok.h curl_ldap.h memory.h base64.h &
+  transfer.h strequal.h strtok.h curl_ldap.h memory.h curl_base64.h &
   ..\include\curl\mprintf.h memdebug.h
 $(OBJ_DIR)\ssluse.obj: ssluse.c setup.h config-win32.h ..\include\curl\curlbuild.h &
   ..\include\curl\curlrules.h setup_once.h urldata.h cookie.h &
@@ -343,7 +343,7 @@ $(OBJ_DIR)\http_digest.obj: http_digest.c setup.h config-win32.h &
   ..\include\curl\curlrules.h ..\include\curl\easy.h &
   ..\include\curl\multi.h ..\include\curl\curl.h formdata.h timeval.h &
   http_chunks.h hostip.h hash.h llist.h splay.h sendf.h strequal.h &
-  base64.h curl_md5.h http_digest.h strtok.h url.h memory.h easyif.h &
+  curl_base64.h curl_md5.h http_digest.h strtok.h url.h memory.h easyif.h &
   ..\include\curl\mprintf.h memdebug.h
 $(OBJ_DIR)\md5.obj: md5.c setup.h config-win32.h ..\include\curl\curlbuild.h &
   ..\include\curl\curlrules.h setup_once.h curl_md5.h
@@ -355,7 +355,7 @@ $(OBJ_DIR)\http_ntlm.obj: http_ntlm.c setup.h config-win32.h &
   ..\include\curl\curlrules.h ..\include\curl\easy.h &
   ..\include\curl\multi.h ..\include\curl\curl.h formdata.h timeval.h &
   http_chunks.h hostip.h hash.h llist.h splay.h easyif.h sendf.h &
-  strequal.h base64.h http_ntlm.h url.h memory.h ssluse.h &
+  strequal.h curl_base64.h http_ntlm.h url.h memory.h ssluse.h &
   ..\include\curl\mprintf.h memdebug.h
 $(OBJ_DIR)\inet_pton.obj: inet_pton.c setup.h config-win32.h &
   ..\include\curl\curlbuild.h ..\include\curl\curlrules.h setup_once.h &

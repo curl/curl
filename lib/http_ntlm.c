@@ -56,7 +56,7 @@
 #include "easyif.h"  /* for Curl_convert_... prototypes */
 #include "sendf.h"
 #include "strequal.h"
-#include "base64.h"
+#include "curl_base64.h"
 #include "http_ntlm.h"
 #include "url.h"
 #include "memory.h"

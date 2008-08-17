@@ -33,7 +33,7 @@ struct SessionHandle {
   int fake;
 };
 
-#include "base64.h"
+#include "curl_base64.h"
 
 /* include memdebug.h last */
 #include "memdebug.h"

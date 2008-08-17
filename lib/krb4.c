@@ -58,7 +58,7 @@
 #endif
 
 #include "urldata.h"
-#include "base64.h"
+#include "curl_base64.h"
 #include "ftp.h"
 #include "sendf.h"
 #include "krb4.h"

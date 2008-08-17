@@ -38,7 +38,7 @@
 #include "urldata.h"
 #include "sendf.h"
 #include "strequal.h"
-#include "base64.h"
+#include "curl_base64.h"
 #include "http_negotiate.h"
 #include "memory.h"
 

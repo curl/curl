@@ -62,7 +62,7 @@
 
 #include "urldata.h"
 #include "krb4.h"
-#include "base64.h"
+#include "curl_base64.h"
 #include "sendf.h"
 #include "ftp.h"
 #include "memory.h"

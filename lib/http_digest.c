@@ -33,7 +33,7 @@
 #include "urldata.h"
 #include "sendf.h"
 #include "strequal.h"
-#include "base64.h"
+#include "curl_base64.h"
 #include "curl_md5.h"
 #include "http_digest.h"
 #include "strtok.h"
