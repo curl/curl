@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,10 +25,19 @@
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
 
-#if !defined(USE_SSLEAY) || !defined(USE_OPENSSL)
-/* This code segment is only used if OpenSSL is not provided, as if it is
-   we use the MD5-function provided there instead. No good duplicating
-   code! */
+#include <string.h>
+
+#ifdef USE_SSLEAY
+/* When OpenSSL is available we use the MD5-function from OpenSSL */
+
+#  ifdef USE_OPENSSL
+#    include <openssl/md5.h>
+#  else
+#    include <md5.h>
+#  endif
+
+#else /* USE_SSLEAY */
+/* When OpenSSL is not available we use this code segment */
 
 /* Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All
 rights reserved.
@@ -51,8 +60,6 @@ without express or implied warranty of any kind.
 These notices must be retained in any copies of any part of this
 documentation and/or software.
  */
-
-#include <string.h>
 
 /* UINT4 defines a four byte word */
 typedef unsigned int UINT4;
@@ -332,11 +339,7 @@ static void Decode (UINT4 *output,
       (((UINT4)input[j+2]) << 16) | (((UINT4)input[j+3]) << 24);
 }
 
-#else
-/* If OpenSSL is present */
-#include <openssl/md5.h>
-#include <string.h>
-#endif
+#endif /* USE_SSLEAY */
 
 #include "curl_md5.h"
 

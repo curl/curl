@@ -74,6 +74,12 @@
 #include "pem.h"
 #include "ssl.h"
 #include "err.h"
+#ifdef HAVE_OPENSSL_ENGINE_H
+#include <engine.h>
+#endif
+#ifdef HAVE_OPENSSL_PKCS12_H
+#include <pkcs12.h>
+#endif
 #endif /* USE_OPENSSL */
 #ifdef USE_GNUTLS
 #error Configuration error; cannot use GnuTLS *and* OpenSSL.

@@ -70,11 +70,23 @@
 
 #ifndef USE_WINDOWS_SSPI
 
-#include <openssl/des.h>
-#include <openssl/md4.h>
-#include <openssl/md5.h>
-#include <openssl/ssl.h>
-#include <openssl/rand.h>
+#  ifdef USE_SSLEAY
+#    ifdef USE_OPENSSL
+#      include <openssl/des.h>
+#      include <openssl/md4.h>
+#      include <openssl/md5.h>
+#      include <openssl/ssl.h>
+#      include <openssl/rand.h>
+#    else
+#      include <des.h>
+#      include <md4.h>
+#      include <md5.h>
+#      include <ssl.h>
+#      include <rand.h>
+#    endif
+#  else
+#    error "Can't compile NTLM support without OpenSSL."
+#  endif
 
 #if OPENSSL_VERSION_NUMBER < 0x00907001L
 #define DES_key_schedule des_key_schedule
