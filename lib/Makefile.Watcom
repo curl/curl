@@ -343,10 +343,10 @@ $(OBJ_DIR)\http_digest.obj: http_digest.c setup.h config-win32.h &
   ..\include\curl\curlrules.h ..\include\curl\easy.h &
   ..\include\curl\multi.h ..\include\curl\curl.h formdata.h timeval.h &
   http_chunks.h hostip.h hash.h llist.h splay.h sendf.h strequal.h &
-  base64.h md5.h http_digest.h strtok.h url.h memory.h easyif.h &
+  base64.h curl_md5.h http_digest.h strtok.h url.h memory.h easyif.h &
   ..\include\curl\mprintf.h memdebug.h
 $(OBJ_DIR)\md5.obj: md5.c setup.h config-win32.h ..\include\curl\curlbuild.h &
-  ..\include\curl\curlrules.h setup_once.h md5.h
+  ..\include\curl\curlrules.h setup_once.h curl_md5.h
 $(OBJ_DIR)\http_negotiate.obj: http_negotiate.c setup.h config-win32.h &
   ..\include\curl\curlbuild.h ..\include\curl\curlrules.h setup_once.h
 $(OBJ_DIR)\http_ntlm.obj: http_ntlm.c setup.h config-win32.h &

@@ -338,7 +338,7 @@ static void Decode (UINT4 *output,
 #include <string.h>
 #endif
 
-#include "md5.h"
+#include "curl_md5.h"
 
 void Curl_md5it(unsigned char *outbuffer, /* 16 bytes */
                 const unsigned char *input)

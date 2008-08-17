@@ -34,7 +34,7 @@
 #include "sendf.h"
 #include "strequal.h"
 #include "base64.h"
-#include "md5.h"
+#include "curl_md5.h"
 #include "http_digest.h"
 #include "strtok.h"
 #include "url.h" /* for Curl_safefree() */
