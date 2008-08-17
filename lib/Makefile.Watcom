@@ -4,7 +4,7 @@
 #
 # $Id$
 
-TARGETS = libcurl_wc.dll libcurl_wc_imp.lib
+TARGETS = libcurl_wc.dll libcurl_wc_imp.lib libcurl_wc.lib
 
 CC = wcc386
 
@@ -24,9 +24,10 @@ USE_ZLIB  = 0
 CFLAGS += -dHAVE_ZLIB_H -dHAVE_LIBZ -I$(ZLIB_ROOT)
 !endif
 
-OBJ_DIR  = WC_Win32.obj
-C_ARG    = $(OBJ_DIR)\wcc386.arg
-LINK_ARG = $(OBJ_DIR)\wlink.arg
+OBJ_BASE = WC_Win32.obj
+C_ARG    = $(OBJ_BASE)\wcc386.arg
+LINK_ARG = $(OBJ_BASE)\dyn\wlink.arg
+LIB_ARG  = $(OBJ_BASE)\stat\wlib.arg
 
 OBJS = $(OBJ_DIR)\base64.obj           $(OBJ_DIR)\connect.obj     &
        $(OBJ_DIR)\content_encoding.obj $(OBJ_DIR)\cookie.obj      &
@@ -58,31 +59,51 @@ OBJS = $(OBJ_DIR)\base64.obj           $(OBJ_DIR)\connect.obj     &
        $(OBJ_DIR)\timeval.obj          $(OBJ_DIR)\transfer.obj    &
        $(OBJ_DIR)\url.obj              $(OBJ_DIR)\version.obj
 
-RESOURCE = $(OBJ_DIR)\libcurl.res
+#
+# Use $(OBJS) as a template to generate $(OBJS_STAT) and $(OBJS_DYN).
+#
+OBJ_DIR   = $(OBJ_BASE)\stat
+OBJS_STAT = $+ $(OBJS) $-
 
-all: $(OBJ_DIR) $(C_ARG) $(TARGETS) .SYMBOLIC
+OBJ_DIR  = $(OBJ_BASE)\dyn
+OBJS_DYN = $+ $(OBJS) $-
+
+RESOURCE = $(OBJ_BASE)\dyn\libcurl.res
+
+all: $(OBJ_BASE) $(C_ARG) $(TARGETS) .SYMBOLIC
 	@echo Welcome to libcurl
 
-$(OBJ_DIR):
-	mkdir $(OBJ_DIR)
+$(OBJ_BASE):
+	- mkdir $(OBJ_BASE)
+	- mkdir $(OBJ_BASE)\stat
+	- mkdir $(OBJ_BASE)\dyn
 
-libcurl_wc.dll libcurl_wc_imp.lib: $(OBJS) $(RESOURCE) $(LINK_ARG)
+libcurl_wc.dll libcurl_wc_imp.lib: $(OBJS_DYN) $(RESOURCE) $(LINK_ARG)
 	wlink name libcurl_wc.dll @$(LINK_ARG)
 
+libcurl_wc.lib: $(OBJS_STAT) $(LIB_ARG)
+	wlib -q -b- c $@ @$(LIB_ARG)
+
 clean: .SYMBOLIC
-	- rm -f $(OBJS) $(RESOURCE)
+	- rm -f $(OBJS_STAT) $(OBJS_DYN) $(RESOURCE) $(C_ARG) $(LINK_ARG) $(LIB_ARG)
 
 vclean realclean: clean .SYMBOLIC
-	- rm -f $(TARGETS) $(C_ARG) $(LINK_ARG) libcurl_wc.map
-	- rmdir $(OBJ_DIR)
+	- rm -f $(TARGETS) libcurl_wc.map
+	- rmdir $(OBJ_BASE)\stat
+	- rmdir $(OBJ_BASE)\dyn
+	- rmdir $(OBJ_BASE)
 
 .ERASE
 $(RESOURCE): libcurl.rc
         wrc -dCURLDEBUG=1 -q -r -zm -I..\include -fo=$@ libcurl.rc
 
 .ERASE
-.c{$(OBJ_DIR)}.obj:
+.c{$(OBJ_BASE)\dyn}.obj:
 	$(CC) $[@ @$(C_ARG) -fo=$@
+
+.ERASE
+.c{$(OBJ_BASE)\stat}.obj:
+	$(CC) $[@ @$(C_ARG) -DCURL_STATICLIB -fo=$@
 
 $(C_ARG): $(__MAKEFILES__)
 	%create $^@
@@ -91,13 +112,17 @@ $(C_ARG): $(__MAKEFILES__)
 $(LINK_ARG): $(__MAKEFILES__)
 	%create $^@
 	@%append $^@ system nt dll
-	@%append $^@ file { $(OBJS) }
+	@%append $^@ file { $(OBJS_DYN) }
 	@%append $^@ option quiet, map, caseexact, eliminate, implib=libcurl_wc_imp.lib,
 	@%append $^@ res=$(RESOURCE) libpath $(%watcom)\lib386;$(%watcom)\lib386\nt
 	@%append $^@ library clib3r.lib, wldap32.lib, ws2_32.lib
 !ifeq USE_ZLIB 1
 	@%append $^@ library $(ZLIB_ROOT)\zlib.lib
 !endif
+
+$(LIB_ARG): $(__MAKEFILES__)
+	%create $^@
+	for %f in ($(OBJS_STAT)) do @%append $^@ +- %f
 
 #
 # Dependencies based on "gcc -MM .."
