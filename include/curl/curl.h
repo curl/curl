@@ -658,7 +658,7 @@ typedef enum {
   /* This points to a linked list of headers, struct curl_slist kind */
   CINIT(HTTPHEADER, OBJECTPOINT, 23),
 
-  /* This points to a linked list of post entries, struct HttpPost */
+  /* This points to a linked list of post entries, struct curl_httppost */
   CINIT(HTTPPOST, OBJECTPOINT, 24),
 
   /* name of the file keeping your private SSL-certificate */
@@ -1284,7 +1284,7 @@ struct curl_forms {
  * CURL_FORMADD_MEMORY         if the allocation of a FormInfo struct failed
  * CURL_FORMADD_UNKNOWN_OPTION if an unknown option was used
  * CURL_FORMADD_INCOMPLETE     if the some FormInfo is not complete (or error)
- * CURL_FORMADD_MEMORY         if a HttpPost struct cannot be allocated
+ * CURL_FORMADD_MEMORY         if a curl_httppost struct cannot be allocated
  * CURL_FORMADD_MEMORY         if some allocation for string copying failed.
  * CURL_FORMADD_ILLEGAL_ARRAY  if an illegal option is used in an array
  *
