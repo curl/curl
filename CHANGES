@@ -6,6 +6,15 @@
 
                                   Changelog
 
+Yang Tse (17 Aug 2008)
+- OpenSSl enabled NetWare builds are changed to use the 'openssl' subdirectory
+  when including the OpenSSL header files. This is the recommended setting, this
+  prevents the undesired inclusion of header files with the same name as those
+  of OpenSSL but which do not belong to the OpenSSL package. The visible change
+  from previously released libcurl versions is that now OpenSSl enabled NetWare
+  builds also define USE_OPENSSL in config files, and that OpenSSL header files
+  must be located in a subdirectory named 'openssl'.
+
 Yang Tse (16 Aug 2008)
 - Library internal only C preprocessor macros FORMAT_OFF_T and FORMAT_OFF_TU
   remain in use as internal curl_off_t print formatting strings for the internal

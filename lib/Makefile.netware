@@ -168,7 +168,7 @@ else
 endif
 endif
 ifdef WITH_SSL
-	INCLUDES += -I$(OPENSSL_PATH)/outinc_nw_$(LIBARCH_L) -I$(OPENSSL_PATH)/outinc_nw_$(LIBARCH_L)/openssl
+	INCLUDES += -I$(OPENSSL_PATH)/outinc_nw_$(LIBARCH_L)
 	LDLIBS += $(OPENSSL_PATH)/out_nw_$(LIBARCH_L)/ssl.$(LIBEXT)
 	LDLIBS += $(OPENSSL_PATH)/out_nw_$(LIBARCH_L)/crypto.$(LIBEXT)
 	IMPORTS += GetProcessSwitchCount RunningProcess
@@ -517,6 +517,7 @@ ifdef WITH_ZLIB
 endif
 ifdef WITH_SSL
 	@echo $(DL)#define USE_SSLEAY 1$(DL) >> $@
+	@echo $(DL)#define USE_OPENSSL 1$(DL) >> $@
 	@echo $(DL)#define HAVE_OPENSSL_X509_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_OPENSSL_SSL_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_OPENSSL_RSA_H 1$(DL) >> $@
