@@ -22,14 +22,9 @@ endif
 
 LIBS += $(WATT32_ROOT)/lib/libwatt.a $(ZLIB_ROOT)/libz.a
 
-CSOURCES = fopen.c ftpget.c ftpgetresp.c ftpupload.c getinmemory.c  \
-           http-post.c httpput.c https.c multi-app.c multi-double.c \
-           multi-post.c multi-single.c persistant.c post-callback.c \
-           postit2.c sepheaders.c simple.c simplepost.c simplessl.c \
-           multi-debugcallback.c fileupload.c getinfo.c anyauthput.c \
-           10-at-a-time.c sendrecv.c cookie_interface.c # ftpuploadresume.c
+include Makefile.inc
 
-PROGRAMS = $(CSOURCES:.c=.exe)
+PROGRAMS = $(patsubst %,%.exe,$(check_PROGRAMS))
 
 all: $(PROGRAMS)
 	@echo Welcome to libcurl example program
