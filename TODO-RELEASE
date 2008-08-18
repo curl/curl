@@ -8,15 +8,10 @@ To be addressed before 7.19.0 (planned release: August 2008)
        * Old logic based on CURL_SIZEOF_CURL_OFF_T, ENABLE_64BIT, HAVE_LONGLONG,
          has to be revisited and adjusted as appropriate.
        * Enabling and disabling of large file support needs further inspection.
+       * Test case 557 must pass on all autobuilds.
+       * System off_t, or equivalent, size must be recorded in curlbuild.h
 
 154 - bug #2041827 "Segfault in http_output_auth w/ FORBID_REUSE (7.18.2)"
-
-159 - Ensure that USE_OPENSSL is used to include OpenSSL header files with the
-      openssl subdirectory specification like in #include <openssl/header.h> and
-      when not defined without it like #include <header.h> all over the code.
-
-160 - Rename internal library header files which clash with file names used in
-      external OpenSSL headers. (md5.h is one of this)
 
 To be addressed before 7.19.1 (planned release: October 2008)
 =============================
