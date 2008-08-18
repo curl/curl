@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Yang Tse (18 Aug 2008)
+- Added test case 557 to verify libcurl's internal curl_m*printf() functions
+  formatting functionality when handling signed and unsigned longs, as well as
+  our curl_off_t data type.
+
 Yang Tse (17 Aug 2008)
 - OpenSSl enabled NetWare builds are changed to use the 'openssl' subdirectory
   when including the OpenSSL header files. This is the recommended setting, this

@@ -1,0 +1,52 @@
+<testcase>
+<info>
+<keywords>
+curl_mprintf
+</keywords>
+</info>
+# Server-side
+
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+none
+</server>
+<tool>
+lib557
+</tool>
+ <name>
+curl_mprintf
+ </name>
+ <command>
+nothing
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<stdout mode="text">
+unsigned long test #1: OK
+unsigned long test #2: OK
+unsigned long test #3: OK
+unsigned long test #4: OK
+signed long test #1: OK
+signed long test #2: OK
+signed long test #3: OK
+signed long test #4: OK
+signed long test #5: OK
+signed long test #6: OK
+signed long test #7: OK
+curl_off_t test #1: OK
+curl_off_t test #2: OK
+curl_off_t test #3: OK
+curl_off_t test #4: OK
+curl_off_t test #5: OK
+curl_off_t test #6: OK
+curl_off_t test #7: OK
+</stdout>
+</verify>
+</testcase>
