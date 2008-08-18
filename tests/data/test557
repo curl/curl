@@ -1,11 +1,6 @@
 <testcase>
-<info>
-<keywords>
-curl_mprintf
-</keywords>
-</info>
+#
 # Server-side
-
 <reply>
 </reply>
 
@@ -14,13 +9,15 @@ curl_mprintf
 <server>
 none
 </server>
+# tool is what to use instead of 'curl'
 <tool>
 lib557
 </tool>
- <name>
-curl_mprintf
- </name>
- <command>
+
+<name>
+curl_mprintf() testing
+</name>
+<command>
 nothing
 </command>
 </client>
@@ -29,24 +26,10 @@ nothing
 # Verify data after the test has been "shot"
 <verify>
 <stdout mode="text">
-unsigned long test #1: OK
-unsigned long test #2: OK
-unsigned long test #3: OK
-unsigned long test #4: OK
-signed long test #1: OK
-signed long test #2: OK
-signed long test #3: OK
-signed long test #4: OK
-signed long test #5: OK
-signed long test #6: OK
-signed long test #7: OK
-curl_off_t test #1: OK
-curl_off_t test #2: OK
-curl_off_t test #3: OK
-curl_off_t test #4: OK
-curl_off_t test #5: OK
-curl_off_t test #6: OK
-curl_off_t test #7: OK
+All curl_mprintf() unsigned long tests OK!
+All curl_mprintf() signed long tests OK!
+All curl_mprintf() curl_off_t tests OK!
 </stdout>
 </verify>
+
 </testcase>
