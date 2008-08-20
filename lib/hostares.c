@@ -73,6 +73,7 @@
 #include "strerror.h"
 #include "url.h"
 #include "multiif.h"
+#include "inet_pton.h"
 #include "connect.h"
 #include "select.h"
 
@@ -389,7 +390,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   }
 
 #ifdef ENABLE_IPV6 /* CURLRES_IPV6 */
-  if (inet_pton (AF_INET6, hostname, &in6) > 0) {
+  if (Curl_inet_pton (AF_INET6, hostname, &in6) > 0) {
     /* This must be an IPv6 address literal.  */
     return Curl_ip2addr6(&in6, hostname, port);
   }
