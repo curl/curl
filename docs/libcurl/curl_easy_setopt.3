@@ -972,8 +972,12 @@ properly filled in with text strings. Use \fIcurl_slist_append(3)\fP
 to append strings (commands) to the list, and clear the entire list
 afterwards with \fIcurl_slist_free_all(3)\fP. Disable this operation
 again by setting a NULL to this option.
+The set of valid FTP commands depends on the server (see RFC959 for a
+list of mandatory commands).
 The valid SFTP commands are: chgrp, chmod, chown, ln, mkdir, pwd,
-rename, rm, rmdir, symlink. (SFTP support added in 7.16.3)
+rename, rm, rmdir, symlink (see
+.BR curl (1))
+(SFTP support added in 7.16.3)
 .IP CURLOPT_POSTQUOTE
 Pass a pointer to a linked list of FTP or SFTP commands to pass to the
 server after your ftp transfer request. The linked list should be a
@@ -1630,4 +1634,4 @@ If you try to set an option that libcurl doesn't know about, perhaps because
 the library is too old to support it or the option was removed in a recent
 version, this function will return \fICURLE_FAILED_INIT\fP.
 .SH "SEE ALSO"
-.BR curl_easy_init "(3), " curl_easy_cleanup "(3), " curl_easy_reset "(3), "
+.BR curl_easy_init "(3), " curl_easy_cleanup "(3), " curl_easy_reset "(3)"
