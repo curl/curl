@@ -135,22 +135,12 @@
    Error Compilation_aborted_FORMAT_OFF_TU_already_defined
 #endif
 
-#if (CURL_SIZEOF_CURL_OFF_T > 4)
-#  if (CURL_SIZEOF_LONG > 4)
-#    define FORMAT_OFF_T  "ld"
-#    define FORMAT_OFF_TU "lu"
-#  else
-#    define FORMAT_OFF_T  "lld"
-#    define FORMAT_OFF_TU "llu"
-#  endif
+#if (CURL_SIZEOF_CURL_OFF_T > CURL_SIZEOF_LONG)
+#  define FORMAT_OFF_T  "lld"
+#  define FORMAT_OFF_TU "llu"
 #else
-#  if (CURL_SIZEOF_LONG > 2)
-#    define FORMAT_OFF_T  "ld"
-#    define FORMAT_OFF_TU "lu"
-#  else
-#    define FORMAT_OFF_T  "lld"
-#    define FORMAT_OFF_TU "llu"
-#  endif
+#  define FORMAT_OFF_T  "ld"
+#  define FORMAT_OFF_TU "lu"
 #endif
 
 /*
