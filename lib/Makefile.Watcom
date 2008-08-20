@@ -19,9 +19,14 @@ CFLAGS = -3r -mf -d3 -hc -zff -zgf -zq -zm -zc -s -fr=con -w2 -fpi -oilrtfm -bt=
 #
 ZLIB_ROOT = ..\..\..\zlib-1.2.3
 USE_ZLIB  = 0
+USE_ARES  = 0
 
 !ifeq USE_ZLIB 1
 CFLAGS += -dHAVE_ZLIB_H -dHAVE_LIBZ -I$(ZLIB_ROOT)
+!endif
+
+!ifeq USE_ARES 1
+CFLAGS += -dUSE_ARES -I..\ares
 !endif
 
 OBJ_BASE = WC_Win32.obj
@@ -118,6 +123,9 @@ $(LINK_ARG): $(__MAKEFILES__)
 	@%append $^@ library clib3r.lib, wldap32.lib, ws2_32.lib
 !ifeq USE_ZLIB 1
 	@%append $^@ library $(ZLIB_ROOT)\zlib.lib
+!endif
+!ifeq USE_ARES 1
+	@%append $^@ library ..\ares\cares.lib
 !endif
 
 $(LIB_ARG): $(__MAKEFILES__)
