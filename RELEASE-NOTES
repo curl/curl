@@ -54,6 +54,7 @@ This release includes the following bugfixes:
  o FTP sessions could go out of sync on a long header boundary condition
  o potential buffer overflows in the MS-DOS command-line port fixed
  o --stderr is now honoured with the -v option
+ o memory leak in libcurl on Windows built with OpenSSL
 
 This release includes the following known bugs:
 

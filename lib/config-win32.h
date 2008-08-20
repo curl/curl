@@ -172,6 +172,10 @@
 /* Define if you have the `RAND_status' function when using SSL. */
 #define HAVE_RAND_STATUS 1
 
+/* Define to 1 if you have the `CRYPTO_cleanup_all_ex_data' function.
+   This is present in OpenSSL versions after 0.9.6b */
+#define HAVE_CRYPTO_CLEANUP_ALL_EX_DATA 1
+
 /* Define if you have the select function.  */
 #define HAVE_SELECT 1
 
@@ -351,7 +355,7 @@
 #define HAVE_VARIADIC_MACROS_C99 1
 #endif
 
-/* Define if the compiler supports LONGLONG. */
+/* Define if the compiler supports the 'long long' data type. */
 #if defined(__MINGW32__) || defined(__WATCOMC__)
 #define HAVE_LONGLONG 1
 #endif

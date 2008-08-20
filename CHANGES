@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (20 Aug 2008)
+- Phil Pellouchoud pointed out that the windows version of libcurl had a
+  memory leak because it never called the OpenSSL function
+  CRYPTO_cleanup_all_ex_data() as it was supposed to. This was because of a
+  missing define in config-win32.h!
+
 Yang Tse (18 Aug 2008)
 - Added test case 557 to verify libcurl's internal curl_m*printf() functions
   formatting functionality when handling signed and unsigned longs, as well as
