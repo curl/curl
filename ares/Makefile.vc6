@@ -111,6 +111,7 @@ $(DEF_FILE): $(OBJECTS) Makefile.VC6
        @echo   ares_parse_ptr_reply   >> $@
        @echo   ares_parse_ns_reply    >> $@
        @echo   ares_process           >> $@
+       @echo   ares_process_fd        >> $@
        @echo   ares_query             >> $@
        @echo   ares_search            >> $@
        @echo   ares_strerror          >> $@
