@@ -213,10 +213,10 @@ static BOOL dprintf_IsQualifierNoDollar(char c)
 }
 
 #ifdef DPRINTF_DEBUG2
-int dprintf_Pass1Report(va_stack_t *vto, int max)
+static void dprintf_Pass1Report(va_stack_t *vto, int max)
 {
   int i;
-  char buffer[128];
+  char buffer[256];
   int bit;
   int flags;
 
@@ -234,6 +234,9 @@ int dprintf_Pass1Report(va_stack_t *vto, int max)
       break;
     case FORMAT_INT:
       type = "int";
+      break;
+    case FORMAT_INTPTR:
+      type = "intptr";
       break;
     case FORMAT_LONG:
       type = "long";
@@ -649,7 +652,7 @@ static int dprintf_formatf(
     long prec;
 
     /* Decimal integer is negative.  */
-    char is_neg;
+    int is_neg;
 
     /* Base of a number to be written.  */
     long base;
@@ -657,10 +660,11 @@ static int dprintf_formatf(
     /* Integral values to be written.  */
 #ifdef HAVE_LONG_LONG_TYPE
     unsigned LONG_LONG_TYPE num;
+    LONG_LONG_TYPE signed_num;
 #else
     unsigned long num;
-#endif
     long signed_num;
+#endif
 
     if(*f != '%') {
       /* This isn't a format spec, so write everything out until the next one
@@ -759,15 +763,28 @@ static int dprintf_formatf(
 #ifdef HAVE_LONG_LONG_TYPE
       if(p->flags & FLAGS_LONGLONG) {
         /* long long */
-        is_neg = (char)(p->data.lnum < 0);
-        num = is_neg ? (- p->data.lnum) : p->data.lnum;
+        is_neg = (p->data.lnum < 0);
+        if(is_neg) {
+          /* signed long long might fail to hold absolute LLONG_MIN by 1 */
+          signed_num = p->data.lnum + (LONG_LONG_TYPE)1;
+          num = (unsigned LONG_LONG_TYPE)-signed_num;
+          num += (unsigned LONG_LONG_TYPE)1;
+        }
+        else
+          num = p->data.lnum;
       }
       else
 #endif
       {
-        signed_num = (long) num;
-        is_neg = (char)(signed_num < 0);
-        num = is_neg ? (- signed_num) : signed_num;
+        is_neg = (p->data.num < 0);
+        if(is_neg) {
+          /* signed long might fail to hold absolute LONG_MIN by 1 */
+          signed_num = p->data.num + (long)1;
+          num = (unsigned long)-signed_num;
+          num += (unsigned long)1;
+        }
+        else
+          num = p->data.num;
       }
       goto number;
 
