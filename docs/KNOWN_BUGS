@@ -3,6 +3,13 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+57. On VMS-Alpha: When using an http-file-upload the file is not sent to the
+  Server with the correct content-length.  Sending a file with 511 or less
+  bytes, content-length 512 is used.  Sending a file with 513 - 1023 bytes,
+  content-length 1024 is used.  Files with a length of a multiple of 512 Bytes
+  show the correct content-length. Only these files work for upload.
+  http://curl.haxx.se/bug/view.cgi?id=2057858
+
 56. When libcurl sends CURLOPT_POSTQUOTE commands when connected to a SFTP
   server using the multi interface, the commands are not being sent correctly
   and instead the connection is "cancelled" (the operation is considered done)
