@@ -35,9 +35,25 @@ int curl_msprintf(char *buffer, const char *format, ...);
 
 
 #define BUFSZ    256
+#define UINT_TESTS_ARRSZ   1 + 100
+#define SINT_TESTS_ARRSZ   1 + 100
 #define ULONG_TESTS_ARRSZ  1 + 100
 #define SLONG_TESTS_ARRSZ  1 + 100
 #define COFFT_TESTS_ARRSZ  1 + 100
+
+
+struct unsint_st {
+  unsigned int num;     /* unsigned int    */
+  const char *expected; /* expected string */
+  char result[BUFSZ];   /* result string   */
+};
+
+
+struct sigint_st {
+  int num;              /* signed int      */
+  const char *expected; /* expected string */
+  char result[BUFSZ];   /* result string   */
+};
 
 
 struct unslong_st {
@@ -61,9 +77,388 @@ struct curloff_st {
 };
 
 
+static struct unsint_st  ui_test[UINT_TESTS_ARRSZ];
+static struct sigint_st  si_test[SINT_TESTS_ARRSZ];
 static struct unslong_st ul_test[ULONG_TESTS_ARRSZ];
 static struct siglong_st sl_test[SLONG_TESTS_ARRSZ];
 static struct curloff_st co_test[COFFT_TESTS_ARRSZ];
+
+
+static int test_unsigned_int_formatting(void)
+{
+  int i, j;
+  int num_uint_tests;
+  int failed = 0;
+
+#if (SIZEOF_INT == 2)
+
+  i=1; ui_test[i].num = 0xFFFFU; ui_test[i].expected = "65535";
+  i++; ui_test[i].num = 0xFF00U; ui_test[i].expected = "65280";
+  i++; ui_test[i].num = 0x00FFU; ui_test[i].expected = "255";
+
+  i++; ui_test[i].num = 0xF000U; ui_test[i].expected = "61440";
+  i++; ui_test[i].num = 0x0F00U; ui_test[i].expected = "3840";
+  i++; ui_test[i].num = 0x00F0U; ui_test[i].expected = "240";
+  i++; ui_test[i].num = 0x000FU; ui_test[i].expected = "15";
+
+  i++; ui_test[i].num = 0xC000U; ui_test[i].expected = "49152";
+  i++; ui_test[i].num = 0x0C00U; ui_test[i].expected = "3072";
+  i++; ui_test[i].num = 0x00C0U; ui_test[i].expected = "192";
+  i++; ui_test[i].num = 0x000CU; ui_test[i].expected = "12";
+
+  i++; ui_test[i].num = 0x0001U; ui_test[i].expected = "1";
+  i++; ui_test[i].num = 0x0000U; ui_test[i].expected = "0";
+
+  num_uint_tests = i;
+
+#elif (SIZEOF_INT == 4)
+
+  i=1; ui_test[i].num = 0xFFFFFFFFU; ui_test[i].expected = "4294967295";
+  i++; ui_test[i].num = 0xFFFF0000U; ui_test[i].expected = "4294901760";
+  i++; ui_test[i].num = 0x0000FFFFU; ui_test[i].expected = "65535";
+
+  i++; ui_test[i].num = 0xFF000000U; ui_test[i].expected = "4278190080";
+  i++; ui_test[i].num = 0x00FF0000U; ui_test[i].expected = "16711680";
+  i++; ui_test[i].num = 0x0000FF00U; ui_test[i].expected = "65280";
+  i++; ui_test[i].num = 0x000000FFU; ui_test[i].expected = "255";
+
+  i++; ui_test[i].num = 0xF0000000U; ui_test[i].expected = "4026531840";
+  i++; ui_test[i].num = 0x0F000000U; ui_test[i].expected = "251658240";
+  i++; ui_test[i].num = 0x00F00000U; ui_test[i].expected = "15728640";
+  i++; ui_test[i].num = 0x000F0000U; ui_test[i].expected = "983040";
+  i++; ui_test[i].num = 0x0000F000U; ui_test[i].expected = "61440";
+  i++; ui_test[i].num = 0x00000F00U; ui_test[i].expected = "3840";
+  i++; ui_test[i].num = 0x000000F0U; ui_test[i].expected = "240";
+  i++; ui_test[i].num = 0x0000000FU; ui_test[i].expected = "15";
+
+  i++; ui_test[i].num = 0xC0000000U; ui_test[i].expected = "3221225472";
+  i++; ui_test[i].num = 0x0C000000U; ui_test[i].expected = "201326592";
+  i++; ui_test[i].num = 0x00C00000U; ui_test[i].expected = "12582912";
+  i++; ui_test[i].num = 0x000C0000U; ui_test[i].expected = "786432";
+  i++; ui_test[i].num = 0x0000C000U; ui_test[i].expected = "49152";
+  i++; ui_test[i].num = 0x00000C00U; ui_test[i].expected = "3072";
+  i++; ui_test[i].num = 0x000000C0U; ui_test[i].expected = "192";
+  i++; ui_test[i].num = 0x0000000CU; ui_test[i].expected = "12";
+
+  i++; ui_test[i].num = 0x00000001U; ui_test[i].expected = "1";
+  i++; ui_test[i].num = 0x00000000U; ui_test[i].expected = "0";
+
+  num_uint_tests = i;
+
+#elif (SIZEOF_INT == 8)
+
+  i=1; ui_test[i].num = 0xFFFFFFFFFFFFFFFFU; ui_test[i].expected = "18446744073709551615";
+  i++; ui_test[i].num = 0xFFFFFFFF00000000U; ui_test[i].expected = "18446744069414584320";
+  i++; ui_test[i].num = 0x00000000FFFFFFFFU; ui_test[i].expected = "4294967295";
+
+  i++; ui_test[i].num = 0xFFFF000000000000U; ui_test[i].expected = "18446462598732840960";
+  i++; ui_test[i].num = 0x0000FFFF00000000U; ui_test[i].expected = "281470681743360";
+  i++; ui_test[i].num = 0x00000000FFFF0000U; ui_test[i].expected = "4294901760";
+  i++; ui_test[i].num = 0x000000000000FFFFU; ui_test[i].expected = "65535";
+
+  i++; ui_test[i].num = 0xFF00000000000000U; ui_test[i].expected = "18374686479671623680";
+  i++; ui_test[i].num = 0x00FF000000000000U; ui_test[i].expected = "71776119061217280";
+  i++; ui_test[i].num = 0x0000FF0000000000U; ui_test[i].expected = "280375465082880";
+  i++; ui_test[i].num = 0x000000FF00000000U; ui_test[i].expected = "1095216660480";
+  i++; ui_test[i].num = 0x00000000FF000000U; ui_test[i].expected = "4278190080";
+  i++; ui_test[i].num = 0x0000000000FF0000U; ui_test[i].expected = "16711680";
+  i++; ui_test[i].num = 0x000000000000FF00U; ui_test[i].expected = "65280";
+  i++; ui_test[i].num = 0x00000000000000FFU; ui_test[i].expected = "255";
+
+  i++; ui_test[i].num = 0xF000000000000000U; ui_test[i].expected = "17293822569102704640";
+  i++; ui_test[i].num = 0x0F00000000000000U; ui_test[i].expected = "1080863910568919040";
+  i++; ui_test[i].num = 0x00F0000000000000U; ui_test[i].expected = "67553994410557440";
+  i++; ui_test[i].num = 0x000F000000000000U; ui_test[i].expected = "4222124650659840";
+  i++; ui_test[i].num = 0x0000F00000000000U; ui_test[i].expected = "263882790666240";
+  i++; ui_test[i].num = 0x00000F0000000000U; ui_test[i].expected = "16492674416640";
+  i++; ui_test[i].num = 0x000000F000000000U; ui_test[i].expected = "1030792151040";
+  i++; ui_test[i].num = 0x0000000F00000000U; ui_test[i].expected = "64424509440";
+  i++; ui_test[i].num = 0x00000000F0000000U; ui_test[i].expected = "4026531840";
+  i++; ui_test[i].num = 0x000000000F000000U; ui_test[i].expected = "251658240";
+  i++; ui_test[i].num = 0x0000000000F00000U; ui_test[i].expected = "15728640";
+  i++; ui_test[i].num = 0x00000000000F0000U; ui_test[i].expected = "983040";
+  i++; ui_test[i].num = 0x000000000000F000U; ui_test[i].expected = "61440";
+  i++; ui_test[i].num = 0x0000000000000F00U; ui_test[i].expected = "3840";
+  i++; ui_test[i].num = 0x00000000000000F0U; ui_test[i].expected = "240";
+  i++; ui_test[i].num = 0x000000000000000FU; ui_test[i].expected = "15";
+
+  i++; ui_test[i].num = 0xC000000000000000U; ui_test[i].expected = "13835058055282163712";
+  i++; ui_test[i].num = 0x0C00000000000000U; ui_test[i].expected = "864691128455135232";
+  i++; ui_test[i].num = 0x00C0000000000000U; ui_test[i].expected = "54043195528445952";
+  i++; ui_test[i].num = 0x000C000000000000U; ui_test[i].expected = "3377699720527872";
+  i++; ui_test[i].num = 0x0000C00000000000U; ui_test[i].expected = "211106232532992";
+  i++; ui_test[i].num = 0x00000C0000000000U; ui_test[i].expected = "13194139533312";
+  i++; ui_test[i].num = 0x000000C000000000U; ui_test[i].expected = "824633720832";
+  i++; ui_test[i].num = 0x0000000C00000000U; ui_test[i].expected = "51539607552";
+  i++; ui_test[i].num = 0x00000000C0000000U; ui_test[i].expected = "3221225472";
+  i++; ui_test[i].num = 0x000000000C000000U; ui_test[i].expected = "201326592";
+  i++; ui_test[i].num = 0x0000000000C00000U; ui_test[i].expected = "12582912";
+  i++; ui_test[i].num = 0x00000000000C0000U; ui_test[i].expected = "786432";
+  i++; ui_test[i].num = 0x000000000000C000U; ui_test[i].expected = "49152";
+  i++; ui_test[i].num = 0x0000000000000C00U; ui_test[i].expected = "3072";
+  i++; ui_test[i].num = 0x00000000000000C0U; ui_test[i].expected = "192";
+  i++; ui_test[i].num = 0x000000000000000CU; ui_test[i].expected = "12";
+
+  i++; ui_test[i].num = 0x00000001U; ui_test[i].expected = "1";
+  i++; ui_test[i].num = 0x00000000U; ui_test[i].expected = "0";
+
+  num_uint_tests = i;
+
+#endif
+
+  for(i=1; i<=num_uint_tests; i++) {
+
+    for(j=0; j<BUFSZ; j++)
+      ui_test[i].result[j] = 'X';
+    ui_test[i].result[BUFSZ-1] = '\0';
+
+    (void)curl_msprintf(ui_test[i].result, "%u", ui_test[i].num);
+
+    if(memcmp(ui_test[i].result,
+               ui_test[i].expected,
+               strlen(ui_test[i].expected))) {
+      printf("unsigned int test #%.2d: Failed (Expected: %s Got: %s)\n",
+             i, ui_test[i].expected, ui_test[i].result);
+      failed++;
+    }
+
+  }
+
+  if(!failed)
+    printf("All curl_mprintf() unsigned int tests OK!\n");
+  else
+    printf("Some curl_mprintf() unsigned int tests Failed!\n");
+
+  return failed;
+}
+
+
+static int test_signed_int_formatting(void)
+{
+  int i, j;
+  int num_sint_tests;
+  int failed = 0;
+
+#if (SIZEOF_INT == 2)
+
+  i=1; si_test[i].num = 0x7FFF; si_test[i].expected = "32767";
+  i++; si_test[i].num = 0x7FFE; si_test[i].expected = "32766";
+  i++; si_test[i].num = 0x7FFD; si_test[i].expected = "32765";
+  i++; si_test[i].num = 0x7F00; si_test[i].expected = "32512";
+  i++; si_test[i].num = 0x07F0; si_test[i].expected = "2032";
+  i++; si_test[i].num = 0x007F; si_test[i].expected = "127";
+
+  i++; si_test[i].num = 0x7000; si_test[i].expected = "28672";
+  i++; si_test[i].num = 0x0700; si_test[i].expected = "1792";
+  i++; si_test[i].num = 0x0070; si_test[i].expected = "112";
+  i++; si_test[i].num = 0x0007; si_test[i].expected = "7";
+
+  i++; si_test[i].num = 0x5000; si_test[i].expected = "20480";
+  i++; si_test[i].num = 0x0500; si_test[i].expected = "1280";
+  i++; si_test[i].num = 0x0050; si_test[i].expected = "80";
+  i++; si_test[i].num = 0x0005; si_test[i].expected = "5";
+
+  i++; si_test[i].num = 0x0001; si_test[i].expected = "1";
+  i++; si_test[i].num = 0x0000; si_test[i].expected = "0";
+
+  i++; si_test[i].num = -0x7FFF -1; si_test[i].expected = "-32768";
+  i++; si_test[i].num = -0x7FFE -1; si_test[i].expected = "-32767";
+  i++; si_test[i].num = -0x7FFD -1; si_test[i].expected = "-32766";
+  i++; si_test[i].num = -0x7F00 -1; si_test[i].expected = "-32513";
+  i++; si_test[i].num = -0x07F0 -1; si_test[i].expected = "-2033";
+  i++; si_test[i].num = -0x007F -1; si_test[i].expected = "-128";
+
+  i++; si_test[i].num = -0x7000 -1; si_test[i].expected = "-28673";
+  i++; si_test[i].num = -0x0700 -1; si_test[i].expected = "-1793";
+  i++; si_test[i].num = -0x0070 -1; si_test[i].expected = "-113";
+  i++; si_test[i].num = -0x0007 -1; si_test[i].expected = "-8";
+
+  i++; si_test[i].num = -0x5000 -1; si_test[i].expected = "-20481";
+  i++; si_test[i].num = -0x0500 -1; si_test[i].expected = "-1281";
+  i++; si_test[i].num = -0x0050 -1; si_test[i].expected = "-81";
+  i++; si_test[i].num = -0x0005 -1; si_test[i].expected = "-6";
+
+  i++; si_test[i].num =  0x0000 -1; si_test[i].expected = "-1";
+
+  num_sint_tests = i;
+
+#elif (SIZEOF_INT == 4)
+
+  i=1; si_test[i].num = 0x7FFFFFFF; si_test[i].expected = "2147483647";
+  i++; si_test[i].num = 0x7FFFFFFE; si_test[i].expected = "2147483646";
+  i++; si_test[i].num = 0x7FFFFFFD; si_test[i].expected = "2147483645";
+  i++; si_test[i].num = 0x7FFF0000; si_test[i].expected = "2147418112";
+  i++; si_test[i].num = 0x00007FFF; si_test[i].expected = "32767";
+
+  i++; si_test[i].num = 0x7F000000; si_test[i].expected = "2130706432";
+  i++; si_test[i].num = 0x007F0000; si_test[i].expected = "8323072";
+  i++; si_test[i].num = 0x00007F00; si_test[i].expected = "32512";
+  i++; si_test[i].num = 0x0000007F; si_test[i].expected = "127";
+
+  i++; si_test[i].num = 0x70000000; si_test[i].expected = "1879048192";
+  i++; si_test[i].num = 0x07000000; si_test[i].expected = "117440512";
+  i++; si_test[i].num = 0x00700000; si_test[i].expected = "7340032";
+  i++; si_test[i].num = 0x00070000; si_test[i].expected = "458752";
+  i++; si_test[i].num = 0x00007000; si_test[i].expected = "28672";
+  i++; si_test[i].num = 0x00000700; si_test[i].expected = "1792";
+  i++; si_test[i].num = 0x00000070; si_test[i].expected = "112";
+  i++; si_test[i].num = 0x00000007; si_test[i].expected = "7";
+
+  i++; si_test[i].num = 0x50000000; si_test[i].expected = "1342177280";
+  i++; si_test[i].num = 0x05000000; si_test[i].expected = "83886080";
+  i++; si_test[i].num = 0x00500000; si_test[i].expected = "5242880";
+  i++; si_test[i].num = 0x00050000; si_test[i].expected = "327680";
+  i++; si_test[i].num = 0x00005000; si_test[i].expected = "20480";
+  i++; si_test[i].num = 0x00000500; si_test[i].expected = "1280";
+  i++; si_test[i].num = 0x00000050; si_test[i].expected = "80";
+  i++; si_test[i].num = 0x00000005; si_test[i].expected = "5";
+
+  i++; si_test[i].num = 0x00000001; si_test[i].expected = "1";
+  i++; si_test[i].num = 0x00000000; si_test[i].expected = "0";
+
+  i++; si_test[i].num = -0x7FFFFFFF -1; si_test[i].expected = "-2147483648";
+  i++; si_test[i].num = -0x7FFFFFFE -1; si_test[i].expected = "-2147483647";
+  i++; si_test[i].num = -0x7FFFFFFD -1; si_test[i].expected = "-2147483646";
+  i++; si_test[i].num = -0x7FFF0000 -1; si_test[i].expected = "-2147418113";
+  i++; si_test[i].num = -0x00007FFF -1; si_test[i].expected = "-32768";
+
+  i++; si_test[i].num = -0x7F000000 -1; si_test[i].expected = "-2130706433";
+  i++; si_test[i].num = -0x007F0000 -1; si_test[i].expected = "-8323073";
+  i++; si_test[i].num = -0x00007F00 -1; si_test[i].expected = "-32513";
+  i++; si_test[i].num = -0x0000007F -1; si_test[i].expected = "-128";
+
+  i++; si_test[i].num = -0x70000000 -1; si_test[i].expected = "-1879048193";
+  i++; si_test[i].num = -0x07000000 -1; si_test[i].expected = "-117440513";
+  i++; si_test[i].num = -0x00700000 -1; si_test[i].expected = "-7340033";
+  i++; si_test[i].num = -0x00070000 -1; si_test[i].expected = "-458753";
+  i++; si_test[i].num = -0x00007000 -1; si_test[i].expected = "-28673";
+  i++; si_test[i].num = -0x00000700 -1; si_test[i].expected = "-1793";
+  i++; si_test[i].num = -0x00000070 -1; si_test[i].expected = "-113";
+  i++; si_test[i].num = -0x00000007 -1; si_test[i].expected = "-8";
+
+  i++; si_test[i].num = -0x50000000 -1; si_test[i].expected = "-1342177281";
+  i++; si_test[i].num = -0x05000000 -1; si_test[i].expected = "-83886081";
+  i++; si_test[i].num = -0x00500000 -1; si_test[i].expected = "-5242881";
+  i++; si_test[i].num = -0x00050000 -1; si_test[i].expected = "-327681";
+  i++; si_test[i].num = -0x00005000 -1; si_test[i].expected = "-20481";
+  i++; si_test[i].num = -0x00000500 -1; si_test[i].expected = "-1281";
+  i++; si_test[i].num = -0x00000050 -1; si_test[i].expected = "-81";
+  i++; si_test[i].num = -0x00000005 -1; si_test[i].expected = "-6";
+
+  i++; si_test[i].num =  0x00000000 -1; si_test[i].expected = "-1";
+
+  num_sint_tests = i;
+
+#elif (SIZEOF_INT == 8)
+
+  i=1; si_test[i].num = 0x7FFFFFFFFFFFFFFF; si_test[i].expected = "9223372036854775807";
+  i++; si_test[i].num = 0x7FFFFFFFFFFFFFFE; si_test[i].expected = "9223372036854775806";
+  i++; si_test[i].num = 0x7FFFFFFFFFFFFFFD; si_test[i].expected = "9223372036854775805";
+  i++; si_test[i].num = 0x7FFFFFFF00000000; si_test[i].expected = "9223372032559808512";
+  i++; si_test[i].num = 0x000000007FFFFFFF; si_test[i].expected = "2147483647";
+
+  i++; si_test[i].num = 0x7FFF000000000000; si_test[i].expected = "9223090561878065152";
+  i++; si_test[i].num = 0x00007FFF00000000; si_test[i].expected = "140733193388032";
+  i++; si_test[i].num = 0x000000007FFF0000; si_test[i].expected = "2147418112";
+  i++; si_test[i].num = 0x0000000000007FFF; si_test[i].expected = "32767";
+
+  i++; si_test[i].num = 0x7F00000000000000; si_test[i].expected = "9151314442816847872";
+  i++; si_test[i].num = 0x007F000000000000; si_test[i].expected = "35747322042253312";
+  i++; si_test[i].num = 0x00007F0000000000; si_test[i].expected = "139637976727552";
+  i++; si_test[i].num = 0x0000007F00000000; si_test[i].expected = "545460846592";
+  i++; si_test[i].num = 0x000000007F000000; si_test[i].expected = "2130706432";
+  i++; si_test[i].num = 0x00000000007F0000; si_test[i].expected = "8323072";
+  i++; si_test[i].num = 0x0000000000007F00; si_test[i].expected = "32512";
+  i++; si_test[i].num = 0x000000000000007F; si_test[i].expected = "127";
+
+  i++; si_test[i].num = 0x7000000000000000; si_test[i].expected = "8070450532247928832";
+  i++; si_test[i].num = 0x0700000000000000; si_test[i].expected = "504403158265495552";
+  i++; si_test[i].num = 0x0070000000000000; si_test[i].expected = "31525197391593472";
+  i++; si_test[i].num = 0x0007000000000000; si_test[i].expected = "1970324836974592";
+  i++; si_test[i].num = 0x0000700000000000; si_test[i].expected = "123145302310912";
+  i++; si_test[i].num = 0x0000070000000000; si_test[i].expected = "7696581394432";
+  i++; si_test[i].num = 0x0000007000000000; si_test[i].expected = "481036337152";
+  i++; si_test[i].num = 0x0000000700000000; si_test[i].expected = "30064771072";
+  i++; si_test[i].num = 0x0000000070000000; si_test[i].expected = "1879048192";
+  i++; si_test[i].num = 0x0000000007000000; si_test[i].expected = "117440512";
+  i++; si_test[i].num = 0x0000000000700000; si_test[i].expected = "7340032";
+  i++; si_test[i].num = 0x0000000000070000; si_test[i].expected = "458752";
+  i++; si_test[i].num = 0x0000000000007000; si_test[i].expected = "28672";
+  i++; si_test[i].num = 0x0000000000000700; si_test[i].expected = "1792";
+  i++; si_test[i].num = 0x0000000000000070; si_test[i].expected = "112";
+  i++; si_test[i].num = 0x0000000000000007; si_test[i].expected = "7";
+
+  i++; si_test[i].num = 0x0000000000000001; si_test[i].expected = "1";
+  i++; si_test[i].num = 0x0000000000000000; si_test[i].expected = "0";
+
+  i++; si_test[i].num = -0x7FFFFFFFFFFFFFFF -1; si_test[i].expected = "-9223372036854775808";
+  i++; si_test[i].num = -0x7FFFFFFFFFFFFFFE -1; si_test[i].expected = "-9223372036854775807";
+  i++; si_test[i].num = -0x7FFFFFFFFFFFFFFD -1; si_test[i].expected = "-9223372036854775806";
+  i++; si_test[i].num = -0x7FFFFFFF00000000 -1; si_test[i].expected = "-9223372032559808513";
+  i++; si_test[i].num = -0x000000007FFFFFFF -1; si_test[i].expected = "-2147483648";
+
+  i++; si_test[i].num = -0x7FFF000000000000 -1; si_test[i].expected = "-9223090561878065153";
+  i++; si_test[i].num = -0x00007FFF00000000 -1; si_test[i].expected = "-140733193388033";
+  i++; si_test[i].num = -0x000000007FFF0000 -1; si_test[i].expected = "-2147418113";
+  i++; si_test[i].num = -0x0000000000007FFF -1; si_test[i].expected = "-32768";
+
+  i++; si_test[i].num = -0x7F00000000000000 -1; si_test[i].expected = "-9151314442816847873";
+  i++; si_test[i].num = -0x007F000000000000 -1; si_test[i].expected = "-35747322042253313";
+  i++; si_test[i].num = -0x00007F0000000000 -1; si_test[i].expected = "-139637976727553";
+  i++; si_test[i].num = -0x0000007F00000000 -1; si_test[i].expected = "-545460846593";
+  i++; si_test[i].num = -0x000000007F000000 -1; si_test[i].expected = "-2130706433";
+  i++; si_test[i].num = -0x00000000007F0000 -1; si_test[i].expected = "-8323073";
+  i++; si_test[i].num = -0x0000000000007F00 -1; si_test[i].expected = "-32513";
+  i++; si_test[i].num = -0x000000000000007F -1; si_test[i].expected = "-128";
+
+  i++; si_test[i].num = -0x7000000000000000 -1; si_test[i].expected = "-8070450532247928833";
+  i++; si_test[i].num = -0x0700000000000000 -1; si_test[i].expected = "-504403158265495553";
+  i++; si_test[i].num = -0x0070000000000000 -1; si_test[i].expected = "-31525197391593473";
+  i++; si_test[i].num = -0x0007000000000000 -1; si_test[i].expected = "-1970324836974593";
+  i++; si_test[i].num = -0x0000700000000000 -1; si_test[i].expected = "-123145302310913";
+  i++; si_test[i].num = -0x0000070000000000 -1; si_test[i].expected = "-7696581394433";
+  i++; si_test[i].num = -0x0000007000000000 -1; si_test[i].expected = "-481036337153";
+  i++; si_test[i].num = -0x0000000700000000 -1; si_test[i].expected = "-30064771073";
+  i++; si_test[i].num = -0x0000000070000000 -1; si_test[i].expected = "-1879048193";
+  i++; si_test[i].num = -0x0000000007000000 -1; si_test[i].expected = "-117440513";
+  i++; si_test[i].num = -0x0000000000700000 -1; si_test[i].expected = "-7340033";
+  i++; si_test[i].num = -0x0000000000070000 -1; si_test[i].expected = "-458753";
+  i++; si_test[i].num = -0x0000000000007000 -1; si_test[i].expected = "-28673";
+  i++; si_test[i].num = -0x0000000000000700 -1; si_test[i].expected = "-1793";
+  i++; si_test[i].num = -0x0000000000000070 -1; si_test[i].expected = "-113";
+  i++; si_test[i].num = -0x0000000000000007 -1; si_test[i].expected = "-8";
+
+  i++; si_test[i].num =  0x0000000000000000 -1; si_test[i].expected = "-1";
+
+  num_sint_tests = i;
+
+#endif
+
+  for(i=1; i<=num_sint_tests; i++) {
+
+    for(j=0; j<BUFSZ; j++)
+      si_test[i].result[j] = 'X';
+    si_test[i].result[BUFSZ-1] = '\0';
+
+    (void)curl_msprintf(si_test[i].result, "%ld", si_test[i].num);
+
+    if(memcmp(si_test[i].result,
+              si_test[i].expected,
+              strlen(si_test[i].expected))) {
+      printf("signed int test #%.2d: Failed (Expected: %s Got: %s)\n",
+             i, si_test[i].expected, si_test[i].result);
+      failed++;
+    }
+
+  }
+
+  if(!failed)
+    printf("All curl_mprintf() signed int tests OK!\n");
+  else
+    printf("Some curl_mprintf() signed int tests Failed!\n");
+
+  return failed;
+}
 
 
 static int test_unsigned_long_formatting(void)
@@ -675,6 +1070,10 @@ int test(char *URL)
 {
   int errors = 0;
   (void)URL; /* not used */
+
+  errors += test_unsigned_int_formatting();
+
+  errors += test_signed_int_formatting();
 
   errors += test_unsigned_long_formatting();
 
