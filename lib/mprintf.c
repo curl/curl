@@ -720,10 +720,10 @@ static int dprintf_formatf(
     case FORMAT_INT:
 #ifdef HAVE_LONG_LONG_TYPE
       if(p->flags & FLAGS_LONGLONG)
-        num = p->data.lnum;
+        num = (unsigned LONG_LONG_TYPE)p->data.lnum;
       else
 #endif
-        num = p->data.num;
+        num = (unsigned long)p->data.num;
       if(p->flags & FLAGS_CHAR) {
         /* Character.  */
         if(!(p->flags & FLAGS_LEFT))
