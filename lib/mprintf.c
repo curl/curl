@@ -53,9 +53,12 @@
 #define SIZEOF_LONG_DOUBLE 0
 #endif
 
+/*
+ * If SIZEOF_SIZE_T has not been defined, default to the size of long.
+ */
+
 #ifndef SIZEOF_SIZE_T
-/* default to 4 bytes for size_t unless defined in the config.h */
-#define SIZEOF_SIZE_T 4
+#  define SIZEOF_SIZE_T CURL_SIZEOF_LONG
 #endif
 
 #ifdef HAVE_LONGLONG
@@ -409,14 +412,14 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
         case 'z':
           /* the code below generates a warning if -Wunreachable-code is
              used */
-#if SIZEOF_SIZE_T>4
+#if (SIZEOF_SIZE_T > CURL_SIZEOF_LONG)
           flags |= FLAGS_LONGLONG;
 #else
           flags |= FLAGS_LONG;
 #endif
           break;
         case 'O':
-#if CURL_SIZEOF_CURL_OFF_T > 4
+#if (CURL_SIZEOF_CURL_OFF_T > CURL_SIZEOF_LONG)
           flags |= FLAGS_LONGLONG;
 #else
           flags |= FLAGS_LONG;
