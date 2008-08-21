@@ -5,8 +5,7 @@ To be addressed before 7.19.0 (planned release: August 2008)
       64-bit curl_off_t no longer gated to off_t patch already committed.
       TODO:
        * Test it on the broadest combination of platforms and compilers.
-       * Old logic based on CURL_SIZEOF_CURL_OFF_T, ENABLE_64BIT, HAVE_LONGLONG,
-         has to be revisited and adjusted as appropriate.
+       * Old logic based on CURL_SIZEOF_CURL_OFF_T, still needs some adjusting.
        * Enabling and disabling of large file support needs further inspection.
        * Test case 557 must pass on all autobuilds.
        * System off_t, or equivalent, size must be recorded in curlbuild.h
