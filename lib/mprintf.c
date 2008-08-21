@@ -65,7 +65,7 @@
 #  define LONG_LONG_TYPE long long
 #  define HAVE_LONG_LONG_TYPE
 #else
-#  if defined(_MSC_VER) && (_MSC_VER >= 900)
+#  if defined(_MSC_VER) && (_MSC_VER >= 900) && (_INTEGRAL_MAX_BITS >= 64)
 #    define LONG_LONG_TYPE __int64
 #    define HAVE_LONG_LONG_TYPE
 #  else

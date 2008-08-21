@@ -417,7 +417,7 @@
 /* ===================================== */
 
 #elif defined(_MSC_VER)
-#  if (_MSC_VER >= 900)
+#  if (_MSC_VER >= 900) && (_INTEGRAL_MAX_BITS >= 64)
 #    define CURL_SIZEOF_LONG        4
 #    define CURL_OFF_T              __int64
 #    define CURL_FORMAT_CURL_OFF_T  "I64d"
