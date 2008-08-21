@@ -16,12 +16,15 @@ OBJECTS := $(patsubst %.c,$(OBJ_DIR)/%.o,$(strip $(CSOURCES)))
 
 CURL_LIB = libcurl.a
 
-all: $(OBJ_DIR) config.h $(CURL_LIB)
+all: $(OBJ_DIR) ../include/curl/curlbuild.h config.h $(CURL_LIB)
 
 $(CURL_LIB): $(OBJECTS)
 	ar rs $@ $?
 
 config.h: config.dos
+	cp $^ $@
+
+../include/curl/curlbuild.h: ../include/curl/curlbuild.h.dist
 	cp $^ $@
 
 clean:
