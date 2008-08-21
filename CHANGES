@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Yang Tse (21 Aug 2008)
+- Fixed a couple of bugs in libcurl's internal curl_m*printf() functions.
+
 Daniel Fandrich (20 Aug 2008)
 - Added an edited version of Vincent Le Normand's documentation of SFTP quote
   commands to the man pages.
