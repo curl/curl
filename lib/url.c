@@ -2978,8 +2978,8 @@ static CURLcode ParseURLAndFillConnection(struct SessionHandle *data,
 {
   char *at;
   char *tmp;
-
   char *path = data->state.path;
+  int rc;
 
   /*************************************************************
    * Parse the URL.
@@ -3052,13 +3052,20 @@ static CURLcode ParseURLAndFillConnection(struct SessionHandle *data,
        * The URL was badly formatted, let's try the browser-style _without_
        * protocol specified like 'http://'.
        */
-      if((1 > sscanf(data->change.url, "%[^\n/]%[^\n]",
-                     conn->host.name, path)) ) {
+      if(1 > (rc = sscanf(data->change.url, "%[^\n/]%[^\n]",
+                          conn->host.name, path)) ) {
         /*
          * We couldn't even get this format.
+         * djgpp 2.04 has a sscanf() bug where 'conn->host.name' is
+         * assigned, but the return value is EOF!
          */
-        failf(data, "<url> malformed");
-        return CURLE_URL_MALFORMAT;
+#if defined(__DJGPP__) && (DJGPP_MINOR == 4)
+        if (!(rc == -1 && *conn->host.name))
+#endif
+        {
+          failf(data, "<url> malformed");
+          return CURLE_URL_MALFORMAT;
+        }
       }
 
       /*
@@ -3161,7 +3168,7 @@ static CURLcode ParseURLAndFillConnection(struct SessionHandle *data,
    *   conn->host.name is B
    *   data->state.path is /C
    */
-
+  (void)rc;
   return CURLE_OK;
 }
 
@@ -3652,7 +3659,7 @@ static CURLcode parse_remote_port(struct SessionHandle *data,
     if(conn->bits.httpproxy) {
       /* we need to create new URL with the new port number */
       char *url;
-      bool isftp = strequal("ftp", conn->protostr) || 
+      bool isftp = strequal("ftp", conn->protostr) ||
                    strequal("ftps", conn->protostr);
 
       /*
@@ -3662,7 +3669,7 @@ static CURLcode parse_remote_port(struct SessionHandle *data,
        */
       url = aprintf("%s://%s%s%s:%d%s%s", conn->protostr,
              conn->bits.ipv6_ip?"[":"", conn->host.name,
-             conn->bits.ipv6_ip?"]":"", conn->remote_port, 
+             conn->bits.ipv6_ip?"]":"", conn->remote_port,
              isftp?"/":"", data->state.path);
       if(!url)
         return CURLE_OUT_OF_MEMORY;
