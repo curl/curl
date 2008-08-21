@@ -272,7 +272,7 @@
 /* Define to 1 if you have the `localtime_r' function. */
 #define HAVE_LOCALTIME_R 1
 
-/* if your compiler supports long long */
+/* Define to 1 if the compiler supports the 'long long' data type. */
 #define HAVE_LONGLONG 1
 
 /* Define to 1 if you need the malloc.h header file even with stdlib.h  */

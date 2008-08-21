@@ -190,7 +190,16 @@ static curl_version_info_data version_info = {
 #ifdef HAVE_SPNEGO
   | CURL_VERSION_SPNEGO
 #endif
-#if defined(ENABLE_64BIT) && (CURL_SIZEOF_CURL_OFF_T > 4)
+/*
+ * FIXME before 7.19.0 release.
+ *
+ * libcurl is largefile enabled when (CURL_SIZEOF_CURL_OFF_T > 4) _AND_
+ * libcurl has been built with sizeof(system off_t) > 4 or when large
+ * file support is available even with sizeof(system off_t) <= 4.
+ *
+ * Until this is adjusted, only the (CURL_SIZEOF_CURL_OFF_T > 4) check is done.
+ */
+#if (CURL_SIZEOF_CURL_OFF_T > 4)
   | CURL_VERSION_LARGEFILE
 #endif
 #if defined(CURL_DOES_CONVERSIONS)

@@ -213,17 +213,6 @@
 #  endif
 #endif
 
-
-#ifdef HAVE_LONGLONG
-#define LONG_LONG long long
-#define ENABLE_64BIT
-#else
-#ifdef _MSC_VER
-#define LONG_LONG __int64
-#define ENABLE_64BIT
-#endif /* _MSC_VER */
-#endif /* HAVE_LONGLONG */
-
 #ifdef HAVE_EXTRA_STRICMP_H
 #  include <extra/stricmp.h>
 #endif

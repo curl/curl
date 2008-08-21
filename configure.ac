@@ -2001,7 +2001,8 @@ AC_CHECK_SIZEOF(time_t)
 AC_CHECK_SIZEOF(off_t)
 
 AC_CHECK_TYPE(long long,
-   [AC_DEFINE(HAVE_LONGLONG, 1, [if your compiler supports long long])]
+   [AC_DEFINE(HAVE_LONGLONG, 1,
+      [Define to 1 if the compiler supports the 'long long' data type.])]
    longlong="yes"
 )
 

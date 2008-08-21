@@ -200,7 +200,7 @@
 #define HAVE_VARIADIC_MACROS_C99 1
 #endif
 
-/* Define if the compiler supports LONGLONG. */
+/* Define if the compiler supports the 'long long' data type. */
 #if defined(__MINGW32__) || defined(__WATCOMC__)
 #define HAVE_LONGLONG 1
 #endif

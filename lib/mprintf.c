@@ -58,10 +58,17 @@
 #define SIZEOF_SIZE_T 4
 #endif
 
-#ifdef DPRINTF_DEBUG
-#define HAVE_LONGLONG
-#define LONG_LONG long long
-#define ENABLE_64BIT
+#ifdef HAVE_LONGLONG
+#  define LONG_LONG_TYPE long long
+#  define HAVE_LONG_LONG_TYPE
+#else
+#  if defined(_MSC_VER) && (_MSC_VER >= 900)
+#    define LONG_LONG_TYPE __int64
+#    define HAVE_LONG_LONG_TYPE
+#  else
+#    undef LONG_LONG_TYPE
+#    undef HAVE_LONG_LONG_TYPE
+#  endif
 #endif
 
 #include "memory.h"
@@ -150,8 +157,8 @@ typedef struct {
     char *str;
     void *ptr;
     long num;
-#ifdef ENABLE_64BIT
-    LONG_LONG lnum;
+#ifdef HAVE_LONG_LONG_TYPE
+    LONG_LONG_TYPE lnum;
 #endif
     double dnum;
   } data;
@@ -560,9 +567,9 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
         break;
 
       case FORMAT_INT:
-#ifdef ENABLE_64BIT
+#ifdef HAVE_LONG_LONG_TYPE
         if(vto[i].flags & FLAGS_LONGLONG)
-          vto[i].data.lnum = va_arg(arglist, LONG_LONG);
+          vto[i].data.lnum = va_arg(arglist, LONG_LONG_TYPE);
         else
 #endif
         {
@@ -645,8 +652,8 @@ static int dprintf_formatf(
     long base;
 
     /* Integral values to be written.  */
-#ifdef ENABLE_64BIT
-    unsigned LONG_LONG num;
+#ifdef HAVE_LONG_LONG_TYPE
+    unsigned LONG_LONG_TYPE num;
 #else
     unsigned long num;
 #endif
@@ -708,7 +715,7 @@ static int dprintf_formatf(
 
     switch (p->type) {
     case FORMAT_INT:
-#ifdef ENABLE_64BIT
+#ifdef HAVE_LONG_LONG_TYPE
       if(p->flags & FLAGS_LONGLONG)
         num = p->data.lnum;
       else
@@ -746,7 +753,7 @@ static int dprintf_formatf(
       /* Decimal integer.  */
       base = 10;
 
-#ifdef ENABLE_64BIT
+#ifdef HAVE_LONG_LONG_TYPE
       if(p->flags & FLAGS_LONGLONG) {
         /* long long */
         is_neg = (char)(p->data.lnum < 0);
@@ -978,9 +985,9 @@ static int dprintf_formatf(
 
     case FORMAT_INTPTR:
       /* Answer the count of characters written.  */
-#ifdef ENABLE_64BIT
+#ifdef HAVE_LONG_LONG_TYPE
       if(p->flags & FLAGS_LONGLONG)
-        *(LONG_LONG *) p->data.ptr = (LONG_LONG)done;
+        *(LONG_LONG_TYPE *) p->data.ptr = (LONG_LONG_TYPE)done;
       else
 #endif
         if(p->flags & FLAGS_LONG)
@@ -1199,10 +1206,10 @@ int main()
 {
   char buffer[129];
   char *ptr;
-#ifdef ENABLE_64BIT
-  long long one=99;
-  long long two=100;
-  long long test = 0x1000000000LL;
+#ifdef HAVE_LONG_LONG_TYPE
+  LONG_LONG_TYPE one=99;
+  LONG_LONG_TYPE two=100;
+  LONG_LONG_TYPE test = 0x1000000000LL;
   curl_mprintf("%lld %lld %lld\n", one, two, test);
 #endif
 

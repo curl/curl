@@ -364,7 +364,7 @@
 /* The size of a `long double', as computed by sizeof. */
 #define SIZEOF_LONG_DOUBLE      8
 
-/* Define if 64 bit integers are supported. */
+/* Define if the compiler supports the 'long long' data type. */
 #define HAVE_LONGLONG
 
 /* The size of a `long long', as computed by sizeof. */
