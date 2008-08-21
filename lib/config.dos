@@ -97,6 +97,7 @@
 #endif
 
 #ifdef USE_SSLEAY   /* on cmd-line */
+  #define HAVE_CRYPTO_CLEANUP_ALL_EX_DATA 1
   #define HAVE_OPENSSL_ENGINE_H  1
   #define OPENSSL_NO_KRB5        1
   #define USE_OPENSSL            1
