@@ -50,7 +50,7 @@ print "running configure\n";
 
 # now make the actual tarball
 print "running make dist\n";
-`make dist`;
+`make dist VERSION=$version`;
 
 print "removing temporary configure.ac file\n";
 `rm configure.ac.dist`;
