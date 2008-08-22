@@ -210,14 +210,32 @@ typedef enum {
 #include "curlmsg_vms.h"
 #endif
 
-/* Support uploading and resuming of >2GB files
+/*
+ * Large file support (>2Gb) using WIN32 functions.
  */
-#if defined(WIN32) && (CURL_SIZEOF_CURL_OFF_T > 4)
-#define lseek(x,y,z) _lseeki64(x, y, z)
-#define struct_stat struct _stati64
-#define stat(file,st) _stati64(file,st)
-#else
-#define struct_stat struct stat
+
+#ifdef USE_WIN32_LARGE_FILES
+#  include <io.h>
+#  include <sys/types.h>
+#  include <sys/stat.h>
+#  define lseek(fdes,offset,whence)  _lseeki64(fdes, offset, whence)
+#  define fstat(fdes,stp)            _fstati64(fdes, stp)
+#  define stat(fname,stp)            _stati64(fname, stp)
+#  define struct_stat                struct _stati64
+#endif
+
+/*
+ * Small file support (<2Gb) using WIN32 functions.
+ */
+
+#ifdef USE_WIN32_SMALL_FILES
+#  include <io.h>
+#  include <sys/types.h>
+#  include <sys/stat.h>
+#  define lseek(fdes,offset,whence)  _lseek(fdes, offset, whence)
+#  define fstat(fdes,stp)            _fstat(fdes, stp)
+#  define stat(fname,stp)            _stat(fname, stp)
+#  define struct_stat                struct _stat
 #endif
 
 #ifdef CURL_DOES_CONVERSIONS

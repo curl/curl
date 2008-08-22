@@ -270,18 +270,33 @@
   #include <clib.h>
 #endif
 
+/*
+ * Large file (>2Gb) support using WIN32 functions.
+ */
 
-/* To make large file support transparent even on Windows */
-#if defined(WIN32) && (CURL_SIZEOF_CURL_OFF_T > 4)
-#include <sys/stat.h>   /* must come first before we redefine stat() */
-#include <io.h>
-#define lseek(x,y,z) _lseeki64(x, y, z)
-#define struct_stat struct _stati64
-#define stat(file,st) _stati64(file,st)
-#define fstat(fd,st) _fstati64(fd,st)
-#else
-#define struct_stat struct stat
-#endif /* Win32 with large file support */
+#ifdef USE_WIN32_LARGE_FILES
+#  include <io.h>
+#  include <sys/types.h>
+#  include <sys/stat.h>
+#  define lseek(fdes,offset,whence)  _lseeki64(fdes, offset, whence)
+#  define fstat(fdes,stp)            _fstati64(fdes, stp)
+#  define stat(fname,stp)            _stati64(fname, stp)
+#  define struct_stat                struct _stati64
+#endif
+
+/*
+ * Small file (<2Gb) support using WIN32 functions.
+ */
+
+#ifdef USE_WIN32_SMALL_FILES
+#  include <io.h>
+#  include <sys/types.h>
+#  include <sys/stat.h>
+#  define lseek(fdes,offset,whence)  _lseek(fdes, offset, whence)
+#  define fstat(fdes,stp)            _fstat(fdes, stp)
+#  define stat(fname,stp)            _stat(fname, stp)
+#  define struct_stat                struct _stat
+#endif
 
 
 /* Below we define some functions. They should
