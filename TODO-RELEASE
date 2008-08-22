@@ -10,8 +10,6 @@ To be addressed before 7.19.0 (planned release: August 2008)
        * Test case 557 must pass on all autobuilds.
        * System off_t, or equivalent, size must be recorded in curlbuild.h
 
-154 - bug #2041827 "Segfault in http_output_auth w/ FORBID_REUSE (7.18.2)"
-
 To be addressed before 7.19.1 (planned release: October 2008)
 =============================
 
