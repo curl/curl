@@ -141,6 +141,11 @@ CURL_CHECK_AIX_ALL_SOURCE
 dnl Our configure and build reentrant settings
 CURL_CONFIGURE_REENTRANT
 
+
+dnl check for off_t size once before enabling large files
+AC_CHECK_SIZEOF([off_t_before_largefile], [], [AC_INCLUDES_DEFAULT
+    typedef off_t off_t_before_largefile;])
+
 dnl check for how to do large files
 AC_SYS_LARGEFILE
 
