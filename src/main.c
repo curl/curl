@@ -238,6 +238,10 @@ typedef enum {
 #  define struct_stat                struct _stat
 #endif
 
+#ifndef struct_stat
+#  define struct_stat struct stat
+#endif
+
 #ifdef CURL_DOES_CONVERSIONS
 #ifdef HAVE_ICONV
 iconv_t inbound_cd  = (iconv_t)-1;

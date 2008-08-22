@@ -298,6 +298,9 @@
 #  define struct_stat                struct _stat
 #endif
 
+#ifndef struct_stat
+#  define struct_stat struct stat
+#endif
 
 /* Below we define some functions. They should
    1. close a socket
