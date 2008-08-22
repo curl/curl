@@ -367,7 +367,7 @@ if ($CVS) {
   while (!cvsup()) {
     $att++;
     logit "failed CVS update attempt number $att.";
-    if ($att > 10) {
+    if ($att > 20) {
       $cvsstat=111;
       last; # get out of the loop
     }
