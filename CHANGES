@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Fandrich (22 Aug 2008)
+- Fixed a problem when --dump-header - was given with more than one URL,
+  which caused an error when the second header was dumped due to stdout
+  being closed.  Added test case 1066 to verify.  Also fixed a potential
+  problem where a closed file descriptor might be used for an upload
+  when more than one URL is given.
+
 Yang Tse (22 Aug 2008)
 - Improved libcurl's internal curl_m*printf() functions integral data type
   size and signedness handling.

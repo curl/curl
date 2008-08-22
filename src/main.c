@@ -3890,9 +3890,6 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
   int infilenum;
   char *uploadfile=NULL; /* a single file, never a glob */
 
-  int infd = STDIN_FILENO;
-  bool infdopen;
-  FILE *headerfilep = NULL;
   curl_off_t uploadfilesize; /* -1 means unknown */
   bool stillflags=TRUE;
 
@@ -4126,11 +4123,9 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
     /* open file for output: */
     if(strcmp(config->headerfile,"-")) {
       heads.filename = config->headerfile;
-      headerfilep=NULL;
     }
     else
-      headerfilep=stdout;
-    heads.stream = headerfilep;
+      heads.stream=stdout;
     heads.config = config;
   }
 
@@ -4218,6 +4213,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
       for(i = 0;
           (url = urls?glob_next_url(urls):(i?NULL:strdup(url)));
           i++) {
+        int infd = STDIN_FILENO;
+        bool infdopen;
         char *outfile;
         struct timeval retrystart;
         outfile = outfiles?strdup(outfiles):NULL;
@@ -4965,9 +4962,6 @@ show_error:
 #endif
 
 quit_urls:
-        if(headerfilep)
-          fclose(headerfilep);
-
         if(url)
           free(url);
 
@@ -5026,7 +5020,7 @@ quit_curl:
   if (easycode)
     curl_slist_append(easycode, "curl_easy_cleanup(hnd);");
 
-  if(config->headerfile && !headerfilep && heads.stream)
+  if(heads.stream && (heads.stream != stdout))
     fclose(heads.stream);
 
   if(allocuseragent)

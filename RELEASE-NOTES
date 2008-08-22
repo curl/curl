@@ -56,6 +56,7 @@ This release includes the following bugfixes:
  o --stderr is now honoured with the -v option
  o memory leak in libcurl on Windows built with OpenSSL
  o improved curl_m*printf() integral data type size and signedness handling
+ o error when --dump-header - used with more than one URL
 
 This release includes the following known bugs:
 
@@ -77,7 +78,8 @@ advice from friends like these:
  Phil Pellouchoud, Eduard Bloch, John Lightsey, Stephen Collyer, Tor Arntsen,
  Rolland Dudemaine, Phil Blundell, Scott Barrett, Andreas Schuldei,
  Peter Lamberg, David Bau, Pramod Sharma, Yehoshua Hershberg,
- Constantine Sapuntzakis, Lars Nilsson, Andy Tsouladze, Jamie Lokier
+ Constantine Sapuntzakis, Lars Nilsson, Andy Tsouladze, Jamie Lokier,
+ Vincent Le Normand
 
 
         Thanks! (and sorry if I forgot to mention someone)
