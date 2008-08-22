@@ -19,4 +19,7 @@ To be addressed before 7.19.1 (planned release: October 2008)
 158 - Martin Drasar's CURLOPT_POSTREDIR work:
       http://curl.haxx.se/mail/lib-2008-08/0170.html
 
-161 - 
+161 - test case 1065 failure (HTTP PUT with one file but two URLs)
+      http://curl.haxx.se/mail/archive-2008-08/0075.html
+
+162 - 
