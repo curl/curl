@@ -81,19 +81,6 @@
 #define BUFFSIZE 256 /* buffer for long-to-str and float-to-str calcs */
 #define MAX_PARAMETERS 128 /* lame static limit */
 
-#undef TRUE
-#undef FALSE
-#undef BOOL
-#ifdef __cplusplus
-# define TRUE true
-# define FALSE false
-# define BOOL bool
-#else
-# define TRUE  ((char)(1 == 1))
-# define FALSE ((char)(0 == 1))
-# define BOOL char
-#endif
-
 #ifdef __AMIGA__
 # undef FORMAT_INT
 #endif
@@ -177,8 +164,8 @@ struct asprintf {
   char *buffer; /* allocated buffer */
   size_t len;   /* length of string */
   size_t alloc; /* length of alloc */
-  bool fail;    /* TRUE if an alloc has failed and thus the output is not
-                   the complete data */
+  int fail;     /* (!= 0) if an alloc has failed and thus
+                   the output is not the complete data */
 };
 
 int curl_msprintf(char *buffer, const char *format, ...);
@@ -198,7 +185,7 @@ static long dprintf_DollarString(char *input, char **end)
   return 0;
 }
 
-static BOOL dprintf_IsQualifierNoDollar(char c)
+static int dprintf_IsQualifierNoDollar(char c)
 {
   switch (c) {
   case '-': case '+': case ' ': case '#': case '.':
@@ -206,9 +193,9 @@ static BOOL dprintf_IsQualifierNoDollar(char c)
   case '5': case '6': case '7': case '8': case '9':
   case 'h': case 'l': case 'L': case 'z': case 'q':
   case '*': case 'O':
-    return TRUE;
+    return 1; /* true */
   default:
-    return FALSE;
+    return 0; /* false */
   }
 }
 
@@ -643,7 +630,7 @@ static int dprintf_formatf(
   f = (char *)format;
   while(*f != '\0') {
     /* Format spec modifiers.  */
-    char alt;
+    int is_alt;
 
     /* Width of a field.  */
     long width;
@@ -718,7 +705,7 @@ static int dprintf_formatf(
     else
       prec = -1;
 
-    alt = (char)((p->flags & FLAGS_ALT)?TRUE:FALSE);
+    is_alt = p->flags & FLAGS_ALT;
 
     switch (p->type) {
     case FORMAT_INT:
@@ -811,7 +798,7 @@ static int dprintf_formatf(
         width -= (long)(workend - w);
         prec -= (long)(workend - w);
 
-        if(alt && base == 8 && prec <= 0) {
+        if(is_alt && base == 8 && prec <= 0) {
           *w-- = '0';
           --width;
         }
@@ -822,7 +809,7 @@ static int dprintf_formatf(
             *w-- = '0';
         }
 
-        if(alt && base == 16)
+        if(is_alt && base == 16)
           width -= 2;
 
         if(is_neg || (p->flags & FLAGS_SHOWSIGN) || (p->flags & FLAGS_SPACE))
@@ -839,7 +826,7 @@ static int dprintf_formatf(
         else if(p->flags & FLAGS_SPACE)
           OUTCHAR(' ');
 
-        if(alt && base == 16) {
+        if(is_alt && base == 16) {
           OUTCHAR('0');
           if(p->flags & FLAGS_UPPER)
             OUTCHAR('X');
@@ -917,7 +904,7 @@ static int dprintf_formatf(
           /* If the pointer is not NULL, write it as a %#x spec.  */
           base = 16;
           digits = (p->flags & FLAGS_UPPER)? upper_digits : lower_digits;
-          alt = 1;
+          is_alt = 1;
           num = (size_t) ptr;
           is_neg = 0;
           goto number;
@@ -1084,7 +1071,7 @@ static int alloc_addbyter(int output, FILE *data)
   if(!infop->buffer) {
     infop->buffer=(char *)malloc(32);
     if(!infop->buffer) {
-      infop->fail = TRUE;
+      infop->fail = 1;
       return -1; /* fail */
     }
     infop->alloc = 32;
@@ -1096,8 +1083,8 @@ static int alloc_addbyter(int output, FILE *data)
     newptr = (char *)realloc(infop->buffer, infop->alloc*2);
 
     if(!newptr) {
-      infop->fail = TRUE;
-      return -1;
+      infop->fail = 1;
+      return -1; /* fail */
     }
     infop->buffer = newptr;
     infop->alloc *= 2;
@@ -1119,7 +1106,7 @@ char *curl_maprintf(const char *format, ...)
   info.buffer = NULL;
   info.len = 0;
   info.alloc = 0;
-  info.fail = FALSE;
+  info.fail = 0;
 
   va_start(ap_save, format);
   retcode = dprintf_formatf(&info, alloc_addbyter, format, ap_save);
@@ -1145,7 +1132,7 @@ char *curl_mvaprintf(const char *format, va_list ap_save)
   info.buffer = NULL;
   info.len = 0;
   info.alloc = 0;
-  info.fail = FALSE;
+  info.fail = 0;
 
   retcode = dprintf_formatf(&info, alloc_addbyter, format, ap_save);
   if((-1 == retcode) || info.fail) {
