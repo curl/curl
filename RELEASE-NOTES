@@ -55,6 +55,7 @@ This release includes the following bugfixes:
  o potential buffer overflows in the MS-DOS command-line port fixed
  o --stderr is now honoured with the -v option
  o memory leak in libcurl on Windows built with OpenSSL
+ o improved curl_m*printf() integral data type size and signedness handling
 
 This release includes the following known bugs:
 

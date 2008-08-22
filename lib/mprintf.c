@@ -49,6 +49,10 @@
 
 #include <curl/mprintf.h>
 
+#include "memory.h"
+/* The last #include file should be: */
+#include "memdebug.h"
+
 #ifndef SIZEOF_LONG_DOUBLE
 #define SIZEOF_LONG_DOUBLE 0
 #endif
@@ -74,9 +78,17 @@
 #  endif
 #endif
 
-#include "memory.h"
-/* The last #include file should be: */
-#include "memdebug.h"
+/*
+ * Max integer data types that mprintf.c is capable
+ */
+
+#ifdef HAVE_LONG_LONG_TYPE
+#  define mp_intmax_t LONG_LONG_TYPE
+#  define mp_uintmax_t unsigned LONG_LONG_TYPE
+#else
+#  define mp_intmax_t long
+#  define mp_uintmax_t unsigned long
+#endif
 
 #define BUFFSIZE 256 /* buffer for long-to-str and float-to-str calcs */
 #define MAX_PARAMETERS 128 /* lame static limit */
@@ -146,10 +158,10 @@ typedef struct {
   union {
     char *str;
     void *ptr;
-    long num;
-#ifdef HAVE_LONG_LONG_TYPE
-    LONG_LONG_TYPE lnum;
-#endif
+    union {
+      mp_intmax_t as_signed;
+      mp_uintmax_t as_unsigned;
+    } num;
     double dnum;
   } data;
 } va_stack_t;
@@ -544,7 +556,7 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
         /* Width/precision arguments must be read before the main argument
          * they are attached to
          */
-        vto[i + 1].data.num = va_arg(arglist, int);
+        vto[i + 1].data.num.as_signed = (mp_intmax_t)va_arg(arglist, int);
       }
 
     switch (vto[i].type)
@@ -561,15 +573,27 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
 
       case FORMAT_INT:
 #ifdef HAVE_LONG_LONG_TYPE
-        if(vto[i].flags & FLAGS_LONGLONG)
-          vto[i].data.lnum = va_arg(arglist, LONG_LONG_TYPE);
+        if((vto[i].flags & FLAGS_LONGLONG) && (vto[i].flags & FLAGS_UNSIGNED))
+          vto[i].data.num.as_unsigned =
+            (mp_uintmax_t)va_arg(arglist, unsigned LONG_LONG_TYPE);
+        else if(vto[i].flags & FLAGS_LONGLONG)
+          vto[i].data.num.as_signed =
+            (mp_intmax_t)va_arg(arglist, LONG_LONG_TYPE);
         else
 #endif
         {
-          if(vto[i].flags & FLAGS_LONG)
-            vto[i].data.num = va_arg(arglist, long);
+          if((vto[i].flags & FLAGS_LONG) && (vto[i].flags & FLAGS_UNSIGNED))
+            vto[i].data.num.as_unsigned =
+              (mp_uintmax_t)va_arg(arglist, unsigned long);
+          else if(vto[i].flags & FLAGS_LONG)
+            vto[i].data.num.as_signed =
+              (mp_intmax_t)va_arg(arglist, long);
+          else if(vto[i].flags & FLAGS_UNSIGNED)
+            vto[i].data.num.as_unsigned =
+              (mp_uintmax_t)va_arg(arglist, unsigned int);
           else
-            vto[i].data.num = va_arg(arglist, int);
+            vto[i].data.num.as_signed =
+              (mp_intmax_t)va_arg(arglist, int);
         }
         break;
 
@@ -645,13 +669,10 @@ static int dprintf_formatf(
     long base;
 
     /* Integral values to be written.  */
-#ifdef HAVE_LONG_LONG_TYPE
-    unsigned LONG_LONG_TYPE num;
-    LONG_LONG_TYPE signed_num;
-#else
-    unsigned long num;
-    long signed_num;
-#endif
+    mp_uintmax_t num;
+
+    /* Used to convert negative in positive.  */
+    mp_intmax_t signed_num;
 
     if(*f != '%') {
       /* This isn't a format spec, so write everything out until the next one
@@ -690,13 +711,13 @@ static int dprintf_formatf(
 
     /* pick up the specified width */
     if(p->flags & FLAGS_WIDTHPARAM)
-      width = vto[p->width].data.num;
+      width = (long)vto[p->width].data.num.as_signed;
     else
       width = p->width;
 
     /* pick up the specified precision */
     if(p->flags & FLAGS_PRECPARAM) {
-      prec = vto[p->precision].data.num;
+      prec = (long)vto[p->precision].data.num.as_signed;
       param_num++; /* since the precision is extraced from a parameter, we
                       must skip that to get to the next one properly */
     }
@@ -709,12 +730,7 @@ static int dprintf_formatf(
 
     switch (p->type) {
     case FORMAT_INT:
-#ifdef HAVE_LONG_LONG_TYPE
-      if(p->flags & FLAGS_LONGLONG)
-        num = (unsigned LONG_LONG_TYPE)p->data.lnum;
-      else
-#endif
-        num = (unsigned long)p->data.num;
+      num = p->data.num.as_unsigned;
       if(p->flags & FLAGS_CHAR) {
         /* Character.  */
         if(!(p->flags & FLAGS_LEFT))
@@ -747,32 +763,14 @@ static int dprintf_formatf(
       /* Decimal integer.  */
       base = 10;
 
-#ifdef HAVE_LONG_LONG_TYPE
-      if(p->flags & FLAGS_LONGLONG) {
-        /* long long */
-        is_neg = (p->data.lnum < 0);
-        if(is_neg) {
-          /* signed long long might fail to hold absolute LLONG_MIN by 1 */
-          signed_num = p->data.lnum + (LONG_LONG_TYPE)1;
-          num = (unsigned LONG_LONG_TYPE)-signed_num;
-          num += (unsigned LONG_LONG_TYPE)1;
-        }
-        else
-          num = p->data.lnum;
+      is_neg = p->data.num.as_signed < 0;
+      if(is_neg) {
+        /* signed_num might fail to hold absolute negative minimum by 1 */
+        signed_num = p->data.num.as_signed + (mp_intmax_t)1;
+        num = (mp_uintmax_t)-signed_num;
+        num += (mp_uintmax_t)1;
       }
-      else
-#endif
-      {
-        is_neg = (p->data.num < 0);
-        if(is_neg) {
-          /* signed long might fail to hold absolute LONG_MIN by 1 */
-          signed_num = p->data.num + (long)1;
-          num = (unsigned long)-signed_num;
-          num += (unsigned long)1;
-        }
-        else
-          num = p->data.num;
-      }
+
       goto number;
 
       unsigned_number:
@@ -938,13 +936,13 @@ static int dprintf_formatf(
         if(p->flags & FLAGS_WIDTH)
           width = p->width;
         else if(p->flags & FLAGS_WIDTHPARAM)
-          width = vto[p->width].data.num;
+          width = (long)vto[p->width].data.num.as_signed;
 
         prec = -1;
         if(p->flags & FLAGS_PREC)
           prec = p->precision;
         else if(p->flags & FLAGS_PRECPARAM)
-          prec = vto[p->precision].data.num;
+          prec = (long)vto[p->precision].data.num.as_signed;
 
         if(p->flags & FLAGS_LEFT)
           strcat(formatbuf, "-");
