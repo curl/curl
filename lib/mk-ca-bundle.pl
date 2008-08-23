@@ -163,7 +163,7 @@ while (<TXT>) {
             . MIME::Base64::encode($data)
             . "-----END CERTIFICATE-----\n";
     open(CRT, ">>$crt") or die "Couldn't open $crt: $!";
-    print CRT "\n\"$caname\"\n";
+    print CRT "\n$caname\n";
     print CRT ("=" x length($caname) . "\n");
     if (!$opt_t) {
       print CRT $pem;
