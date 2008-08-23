@@ -726,7 +726,7 @@ static int dprintf_formatf(
     else
       prec = -1;
 
-    is_alt = p->flags & FLAGS_ALT;
+    is_alt = (p->flags & FLAGS_ALT) ? 1 : 0;
 
     switch (p->type) {
     case FORMAT_INT:
@@ -763,7 +763,7 @@ static int dprintf_formatf(
       /* Decimal integer.  */
       base = 10;
 
-      is_neg = (p->data.num.as_signed < (mp_intmax_t)0);
+      is_neg = (p->data.num.as_signed < (mp_intmax_t)0) ? 1 : 0;
       if(is_neg) {
         /* signed_num might fail to hold absolute negative minimum by 1 */
         signed_num = p->data.num.as_signed + (mp_intmax_t)1;
