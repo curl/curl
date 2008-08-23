@@ -137,3 +137,7 @@ uninstall-hook:
 ca-bundle: lib/mk-ca-bundle.pl
 	@echo "generate a fresh ca-bundle.crt"
 	@perl $< -b -l -u lib/ca-bundle.crt
+
+ca-firefox: lib/db2pem.sh
+	@echo "generate a fresh ca-bundle.crt"
+	./lib/firefox-db2pem.sh lib/ca-bundle.crt

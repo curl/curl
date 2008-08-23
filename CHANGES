@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel Stenberg (23 Aug 2008)
+- Running 'make ca-firefox' in the root build dir will now run the new
+  firefox-db2pem.sh conversion script that converts a local Firefox db of ca
+  certs into PEM format, suitable for use with a OpenSSL or GnuTLS built
+  libcurl.
+
 - Constantine Sapuntzakis fixed a bug when doing proxy CONNECT with the multi
   interface, and the proxy would send Connection: close during the
   authentication phase.  http://curl.haxx.se/bug/view.cgi?id=2069047
