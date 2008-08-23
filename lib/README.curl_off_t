@@ -1,0 +1,40 @@
+
+   curl_off_t explained
+   ====================
+
+curl_off_t is a data type provided by the external libcurl include headers. It
+is the type meant to be used for the curl_easy_setopt() options that end with
+LARGE. The type is 64bit large on most modern platforms.
+
+Transition from < 7.19.0 to >= 7.19.0
+-------------------------------------
+
+Applications that used libcurl before 7.19.0 that is rebuilt with a libcurl
+that is 7.19.0 or later may or may not have to worry about anything of
+this. We have made a significant effort to make the transition really seamless
+and transparant.
+
+You have have to take notice if you are in one of the following situations:
+
+o Your app is using or will after the transition use a libcurl that is built
+  with LFS (large file support) disabled even though your system otherwise
+  supports it.
+
+o Your app is using or will after the transition use a libcurl that doesn't
+  support LFS at all, but your system and compiler support 64bit data types.
+
+In both these cases, the curl_off_t type will now (after the transition) be
+64bit where it previously were 32bit. This will cause a binary incompatibility
+that you MAY need to deal with.
+
+Historicly
+----------
+
+Previously, before 7.19.0, the curl_off_t type would be rather strongly
+connected to the size of the system off_t type, where currently curl_off_t is
+independent of that.
+
+The strong connection to off_t made it troublesome for application authors
+since when they did mistakes, they could get curl_off_t type of different
+sizes in the app vs libcurl, and that caused strange effects that were hard to
+track and detect by users of libcurl.
