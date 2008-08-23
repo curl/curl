@@ -38,3 +38,11 @@ The strong connection to off_t made it troublesome for application authors
 since when they did mistakes, they could get curl_off_t type of different
 sizes in the app vs libcurl, and that caused strange effects that were hard to
 track and detect by users of libcurl.
+
+SONAME
+------
+
+We opted to not bump the soname for the library, simply because soname bumping
+is causing a lot of grief and moaning all over the community so we try to keep
+that at minimum. Also, our selected design path should be 100% backwards
+compatible for the vast majority of all libcurl users.
