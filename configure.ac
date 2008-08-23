@@ -2006,6 +2006,13 @@ CURL_CONFIGURE_LONG
 AC_CHECK_SIZEOF(time_t)
 AC_CHECK_SIZEOF(off_t)
 
+dnl now check if curl_off_t is larger than off_t
+
+if test $ac_cv_sizeof_off_t -ge $ac_cv_sizeof_curl_off_t; then
+  AC_MSG_WARN([curl_off_t was detected to be larger than off_t.])
+fi
+
+
 AC_CHECK_TYPE(long long,
    [AC_DEFINE(HAVE_LONGLONG, 1,
       [Define to 1 if the compiler supports the 'long long' data type.])]

@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (23 Aug 2008)
+- Constantine Sapuntzakis fixed a bug when doing proxy CONNECT with the multi
+  interface, and the proxy would send Connection: close during the
+  authentication phase.  http://curl.haxx.se/bug/view.cgi?id=2069047
+
 Daniel Fandrich (22 Aug 2008)
 - Fixed a problem when --dump-header - was given with more than one URL,
   which caused an error when the second header was dumped due to stdout
