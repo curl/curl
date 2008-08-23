@@ -2490,6 +2490,7 @@ sub stopservers {
             }
             $prev = $pid;
         }
+        delete $run{$server};
     }
     ftpkillslaves($verbose);
 }
