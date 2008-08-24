@@ -182,19 +182,6 @@ struct asprintf {
 
 int curl_msprintf(char *buffer, const char *format, ...);
 
-static int trace_this(void)
-{
-  const char * host = OS;
-  const char * arc1 = "x86_64";
-  const char * arc2 = "ia64";
-
-  if(0 == memcmp(host, arc1, strlen(arc1)))
-    return 1;
-  if(0 == memcmp(host, arc2, strlen(arc2)))
-    return 1;
-  return 0;
-}
-
 static long dprintf_DollarString(char *input, char **end)
 {
   int number=0;
@@ -338,13 +325,6 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
   int flags;
   long max_param=0;
   long i;
-
-  int           va_signed_int;
-  unsigned int  va_unsigned_int;
-  long          va_signed_long;
-  unsigned long va_unsigned_long;
-  mp_intmax_t   va_signed_long_long;
-  mp_uintmax_t  va_unsigned_long_long;
 
   while(*fmt) {
     if(*fmt++ == '%') {
@@ -593,69 +573,27 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
 
       case FORMAT_INT:
 #ifdef HAVE_LONG_LONG_TYPE
-        if((vto[i].flags & FLAGS_LONGLONG) && (vto[i].flags & FLAGS_UNSIGNED)) {
-          va_unsigned_long_long = va_arg(arglist, mp_uintmax_t);
-          if(trace_this())
-            printf("va_unsigned_long_long = %llu\n",
-                    va_unsigned_long_long);
-          vto[i].data.num.as_unsigned = (mp_uintmax_t)va_unsigned_long_long;
-          if(trace_this())
-            printf("vto[i].data.num.as_unsigned = %llu\n",
-                    vto[i].data.num.as_unsigned);
-        }
-        else if(vto[i].flags & FLAGS_LONGLONG) {
-          va_signed_long_long = va_arg(arglist, mp_intmax_t);
-          if(trace_this())
-            printf("va_signed_long_long = %lld\n",
-                    va_signed_long_long);
-          vto[i].data.num.as_signed = (mp_intmax_t)va_signed_long_long;
-          if(trace_this())
-            printf("vto[i].data.num.as_signed = %lld\n",
-                    vto[i].data.num.as_signed);
-        }
+        if((vto[i].flags & FLAGS_LONGLONG) && (vto[i].flags & FLAGS_UNSIGNED))
+          vto[i].data.num.as_unsigned =
+            (mp_uintmax_t)va_arg(arglist, mp_uintmax_t);
+        else if(vto[i].flags & FLAGS_LONGLONG)
+          vto[i].data.num.as_signed =
+            (mp_intmax_t)va_arg(arglist, mp_intmax_t);
         else
 #endif
         {
-          if((vto[i].flags & FLAGS_LONG) && (vto[i].flags & FLAGS_UNSIGNED)) {
-            va_unsigned_long = va_arg(arglist, unsigned long);
-            if(trace_this())
-              printf("va_unsigned_long = %lu\n",
-                      va_unsigned_long);
-            vto[i].data.num.as_unsigned = (mp_uintmax_t)va_unsigned_long;
-            if(trace_this())
-              printf("vto[i].data.num.as_unsigned = %llu\n",
-                      vto[i].data.num.as_unsigned);
-          }
-          else if(vto[i].flags & FLAGS_LONG) {
-            va_signed_long = va_arg(arglist, long);
-            if(trace_this())
-              printf("va_signed_long = %ld\n",
-                      va_signed_long);
-            vto[i].data.num.as_signed = (mp_intmax_t)va_signed_long;
-            if(trace_this())
-              printf("vto[i].data.num.as_signed = %lld\n",
-                      vto[i].data.num.as_signed);
-          }
-          else if(vto[i].flags & FLAGS_UNSIGNED) {
-            va_unsigned_int = va_arg(arglist, unsigned int);
-            if(trace_this())
-              printf("va_unsigned_int = %u\n",
-                      va_unsigned_int);
-            vto[i].data.num.as_unsigned = (mp_uintmax_t)va_unsigned_int;
-            if(trace_this())
-              printf("vto[i].data.num.as_unsigned = %llu\n",
-                      vto[i].data.num.as_unsigned);
-          }
-          else {
-            va_signed_int = va_arg(arglist, int);
-            if(trace_this())
-              printf("va_signed_int = %d\n",
-                      va_signed_int);
-            vto[i].data.num.as_signed = (mp_intmax_t)va_signed_int;
-            if(trace_this())
-              printf("vto[i].data.num.as_signed = %lld\n",
-                      vto[i].data.num.as_signed);
-          }
+          if((vto[i].flags & FLAGS_LONG) && (vto[i].flags & FLAGS_UNSIGNED))
+            vto[i].data.num.as_unsigned =
+              (mp_uintmax_t)va_arg(arglist, unsigned long);
+          else if(vto[i].flags & FLAGS_LONG)
+            vto[i].data.num.as_signed =
+              (mp_intmax_t)va_arg(arglist, long);
+          else if(vto[i].flags & FLAGS_UNSIGNED)
+            vto[i].data.num.as_unsigned =
+              (mp_uintmax_t)va_arg(arglist, unsigned int);
+          else
+            vto[i].data.num.as_signed =
+              (mp_intmax_t)va_arg(arglist, int);
         }
         break;
 
@@ -825,26 +763,13 @@ static int dprintf_formatf(
       /* Decimal integer.  */
       base = 10;
 
-      signed_num = p->data.num.as_signed;
-      if(trace_this())
-        printf("1 signed_num = %lld\n", signed_num);
-      is_neg = (signed_num < (mp_intmax_t)0) ? 1 : 0;
-      if(trace_this())
-        printf("is_neg = %d\n", is_neg);
+      is_neg = (p->data.num.as_signed < (mp_intmax_t)0) ? 1 : 0;
       if(is_neg) {
         /* signed_num might fail to hold absolute negative minimum by 1 */
-        signed_num += (mp_intmax_t)1;
-        if(trace_this())
-          printf("2 signed_num = %lld\n", signed_num);
+        signed_num = p->data.num.as_signed + (mp_intmax_t)1;
         signed_num = -signed_num;
-        if(trace_this())
-          printf("3 signed_num = %lld\n", signed_num);
         num = (mp_uintmax_t)signed_num;
-        if(trace_this())
-          printf("4 num = %llu\n", num);
-        num += (mp_uintmax_t)0x1;
-        if(trace_this())
-          printf("5 num = %llu\n", num);
+        num += (mp_uintmax_t)1;
       }
 
       goto number;
