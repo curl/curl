@@ -325,7 +325,13 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
   int flags;
   long max_param=0;
   long i;
-  int aux_signed_int;
+
+  int           va_signed_int;
+  unsigned int  va_unsigned_int;
+  long          va_signed_long;
+  unsigned long va_unsigned_long;
+  mp_intmax_t   va_signed_long_long;
+  mp_uintmax_t  va_unsigned_long_long;
 
   while(*fmt) {
     if(*fmt++ == '%') {
@@ -574,34 +580,32 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
 
       case FORMAT_INT:
 #ifdef HAVE_LONG_LONG_TYPE
-        if((vto[i].flags & FLAGS_LONGLONG) && (vto[i].flags & FLAGS_UNSIGNED))
-          vto[i].data.num.as_unsigned =
-            (mp_uintmax_t)va_arg(arglist, unsigned LONG_LONG_TYPE);
-        else if(vto[i].flags & FLAGS_LONGLONG)
-          vto[i].data.num.as_signed =
-            (mp_intmax_t)va_arg(arglist, LONG_LONG_TYPE);
+        if((vto[i].flags & FLAGS_LONGLONG) && (vto[i].flags & FLAGS_UNSIGNED)) {
+          va_unsigned_long_long = va_arg(arglist, mp_uintmax_t);
+          vto[i].data.num.as_unsigned = (mp_uintmax_t)va_unsigned_long_long;
+        }
+        else if(vto[i].flags & FLAGS_LONGLONG) {
+          va_signed_long_long = va_arg(arglist, mp_intmax_t);
+          vto[i].data.num.as_signed = (mp_intmax_t)va_signed_long_long;
+        }
         else
 #endif
         {
-          if((vto[i].flags & FLAGS_LONG) && (vto[i].flags & FLAGS_UNSIGNED))
-            vto[i].data.num.as_unsigned =
-              (mp_uintmax_t)va_arg(arglist, unsigned long);
-          else if(vto[i].flags & FLAGS_LONG)
-            vto[i].data.num.as_signed =
-              (mp_intmax_t)va_arg(arglist, long);
-          else if(vto[i].flags & FLAGS_UNSIGNED)
-            vto[i].data.num.as_unsigned =
-              (mp_uintmax_t)va_arg(arglist, unsigned int);
+          if((vto[i].flags & FLAGS_LONG) && (vto[i].flags & FLAGS_UNSIGNED)) {
+            va_unsigned_long = va_arg(arglist, unsigned long);
+            vto[i].data.num.as_unsigned = (mp_uintmax_t)va_unsigned_long;
+          }
+          else if(vto[i].flags & FLAGS_LONG) {
+            va_signed_long = va_arg(arglist, long);
+            vto[i].data.num.as_signed = (mp_intmax_t)va_signed_long;
+          }
+          else if(vto[i].flags & FLAGS_UNSIGNED) {
+            va_unsigned_int = va_arg(arglist, unsigned int);
+            vto[i].data.num.as_unsigned = (mp_uintmax_t)va_unsigned_int;
+          }
           else {
-            /*
-            vto[i].data.num.as_signed =
-              (mp_intmax_t)va_arg(arglist, int);
-            */
-            aux_signed_int = va_arg(arglist, int);
-            if(sizeof(mp_intmax_t) > sizeof(long))
-              vto[i].data.num.as_signed = (mp_intmax_t)aux_signed_int;
-            else
-              vto[i].data.num.as_signed = (long)aux_signed_int;
+            va_signed_int = va_arg(arglist, int);
+            vto[i].data.num.as_signed = (mp_intmax_t)va_signed_int;
           }
         }
         break;
@@ -776,8 +780,9 @@ static int dprintf_formatf(
       if(is_neg) {
         /* signed_num might fail to hold absolute negative minimum by 1 */
         signed_num = p->data.num.as_signed + (mp_intmax_t)1;
-        num = (mp_uintmax_t)-signed_num;
-        num += (mp_uintmax_t)1;
+        signed_num = -signed_num;
+        num = (mp_uintmax_t)signed_num;
+        num += (mp_uintmax_t)0x1;
       }
 
       goto number;
