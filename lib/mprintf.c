@@ -325,6 +325,7 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
   int flags;
   long max_param=0;
   long i;
+  int aux_signed_int;
 
   while(*fmt) {
     if(*fmt++ == '%') {
@@ -591,9 +592,17 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
           else if(vto[i].flags & FLAGS_UNSIGNED)
             vto[i].data.num.as_unsigned =
               (mp_uintmax_t)va_arg(arglist, unsigned int);
-          else
+          else {
+            /*
             vto[i].data.num.as_signed =
               (mp_intmax_t)va_arg(arglist, int);
+            */
+            aux_signed_int = va_arg(arglist, int);
+            if(sizeof(mp_intmax_t) > sizeof(long))
+              vto[i].data.num.as_signed = (mp_intmax_t)aux_signed_int;
+            else
+              vto[i].data.num.as_signed = (long)aux_signed_int;
+          }
         }
         break;
 
