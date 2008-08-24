@@ -2493,6 +2493,29 @@ AC_HELP_STRING([--disable-hidden-symbols],[Leave all symbols with default visibi
 )
 
 dnl ************************************************************
+dnl enforce SONAME bump
+dnl 
+
+soname_bump=no
+
+AC_MSG_CHECKING([whether to enforce SONAME bump])
+AC_ARG_ENABLE(soname-bump,
+AC_HELP_STRING([--enable-soname-bump],[Enable enforced SONAME bump])
+AC_HELP_STRING([--disable-soname-bump],[Disable enforced SONAME bump]),
+[ case "$enableval" in
+  yes)   AC_MSG_RESULT(yes)
+         soname_bump=yes
+         ;;
+  *)
+         AC_MSG_RESULT(nope: $enableval)
+         ;;
+  esac ],
+        AC_MSG_RESULT(nono)
+)
+AM_CONDITIONAL(SONAME_BUMP, test x$soname_bump = xyes)
+
+
+dnl ************************************************************
 if test ! -z "$winsock_LIB"; then
 
   dnl If ws2_32 is wanted, make sure it is the _last_ lib in LIBS (makes
