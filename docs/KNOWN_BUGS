@@ -3,6 +3,10 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+58.  It seems sensible to be able to use CURLOPT_NOBODY and
+  CURLOPT_FAILONERROR with FTP to detect if a file exists or not, but it is
+  not working: http://curl.haxx.se/mail/lib-2008-07/0295.html
+
 57. On VMS-Alpha: When using an http-file-upload the file is not sent to the
   Server with the correct content-length.  Sending a file with 511 or less
   bytes, content-length 512 is used.  Sending a file with 513 - 1023 bytes,
