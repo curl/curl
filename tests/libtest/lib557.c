@@ -440,7 +440,7 @@ static int test_signed_int_formatting(void)
       si_test[i].result[j] = 'X';
     si_test[i].result[BUFSZ-1] = '\0';
 
-    (void)curl_msprintf(si_test[i].result, "%ld", si_test[i].num);
+    (void)curl_msprintf(si_test[i].result, "%d", si_test[i].num);
 
     if(memcmp(si_test[i].result,
               si_test[i].expected,
