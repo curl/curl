@@ -1820,6 +1820,11 @@ sub singletest {
         last;
     }
 
+    my $dbghosttype=join(' ', runclientoutput("uname -a"));
+    if(($dbghosttype =~ /x86_64/) || ($dbghosttype =~ /ia64/)) {
+        $why = "debugging curl_mprintf" if($testnum != 557);
+    }
+
     if(!$why) {
         my @keywords = getpart("info", "keywords");
 	my $match;
