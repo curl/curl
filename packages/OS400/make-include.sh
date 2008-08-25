@@ -9,6 +9,13 @@ SCRIPTDIR=`dirname "${0}"`
 cd "${TOPDIR}/include"
 
 
+#	Produce the curlbuild.h include file.
+
+if action_needed curl/curlbuild.h curl/curlbuild.h.dist
+then	cp -p curl/curlbuild.h.dist curl/curlbuild.h
+fi
+
+
 #       Create the OS/400 source program file for the include files.
 
 SRCPF="${LIBIFSNAME}/H.FILE"

@@ -22,7 +22,7 @@ export SCRIPTDIR TOPDIR
 
 #  Extract the SONAME from the library makefile.
 
-SONAME=`sed -e '/^VERSION=/!d' -e 's/^.* \([0-9]*\):.*$/\1/'           \
+SONAME=`sed -e '/^VERSIONINFO=/!d' -e 's/^.* \([0-9]*\):.*$/\1/' -e 'q' \
                                                 < "${TOPDIR}/lib/Makefile.am"`
 export SONAME
 
