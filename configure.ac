@@ -141,11 +141,6 @@ CURL_CHECK_AIX_ALL_SOURCE
 dnl Our configure and build reentrant settings
 CURL_CONFIGURE_REENTRANT
 
-
-dnl check for off_t size once before enabling large files
-AC_CHECK_SIZEOF([off_t_before_largefile], [], [AC_INCLUDES_DEFAULT
-    typedef off_t off_t_before_largefile;])
-
 dnl check for how to do large files
 AC_SYS_LARGEFILE
 
@@ -2006,6 +2001,14 @@ CURL_CONFIGURE_LONG
 AC_CHECK_SIZEOF(time_t)
 AC_CHECK_SIZEOF(off_t)
 
+soname_bump=no
+if test $ac_cv_sizeof_off_t -ne $curl_sizeof_curl_off_t; then
+  AC_MSG_WARN([This libcurl built is probably not ABI compatible with previous])
+  AC_MSG_WARN([builds! You MUST read lib/README.curl_off_t to figure it out.])
+  soname_bump=yes
+fi
+
+
 AC_CHECK_TYPE(long long,
    [AC_DEFINE(HAVE_LONGLONG, 1,
       [Define to 1 if the compiler supports the 'long long' data type.])]
@@ -2496,8 +2499,6 @@ dnl ************************************************************
 dnl enforce SONAME bump
 dnl 
 
-soname_bump=no
-
 AC_MSG_CHECKING([whether to enforce SONAME bump])
 AC_ARG_ENABLE(soname-bump,
 AC_HELP_STRING([--enable-soname-bump],[Enable enforced SONAME bump])
@@ -2510,7 +2511,7 @@ AC_HELP_STRING([--disable-soname-bump],[Disable enforced SONAME bump]),
          AC_MSG_RESULT(nope: $enableval)
          ;;
   esac ],
-        AC_MSG_RESULT(nono)
+        AC_MSG_RESULT($soname_bump)
 )
 AM_CONDITIONAL(SONAME_BUMP, test x$soname_bump = xyes)
 
@@ -2597,5 +2598,16 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   ca cert bundle:  ${ca}
   ca cert path:    ${capath}
   LDAP support:    ${curl_ldap_msg}
-  LDAPS support:   ${curl_ldaps_msg}
+  LDAPS support:   ${curl_ldaps_msg} 
 ])
+
+if test "x$soname_bump" = "xyes"; then
+
+cat <<EOM
+  SONAME bump:     yes - WARNING: this library will be built with the SONAME
+                   number bumped due to (a detected) ABI breakage.
+                   See lib/README.curl_off_t for details on this.
+EOM
+
+fi
+
