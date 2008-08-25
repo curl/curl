@@ -2508,7 +2508,7 @@ AC_HELP_STRING([--disable-soname-bump],[Disable enforced SONAME bump]),
          soname_bump=yes
          ;;
   *)
-         AC_MSG_RESULT(nope: $enableval)
+         AC_MSG_RESULT(no)
          ;;
   esac ],
         AC_MSG_RESULT($soname_bump)
