@@ -617,6 +617,6 @@ else
 	@echo $(DL)#define CURL_SUFFIX_CURL_OFF_T L$(DL) >> $@
 	@echo $(DL)#define CURL_SUFFIX_CURL_OFF_TU UL$(DL) >> $@
 endif
-	@echo $(DL)typedef CURL_OFF_T curl_off_t;$(DL) >> $@
+	@echo $(DL)typedef CURL_TYPEOF_CURL_OFF_T curl_off_t;$(DL) >> $@
 	@echo $(DL)#endif /* __CURL_CURLBUILD_H */$(DL) >> $@
 
