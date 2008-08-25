@@ -60,6 +60,10 @@
 #include "inet_net_pton.h"
 #include "inet_ntop.h"
 
+#ifndef INADDR_NONE
+#define INADDR_NONE 0xffffffff
+#endif
+
 static const char *usage      = "acountry [-vh?] {host|addr} ...\n";
 static const char  nerd_fmt[] = "%u.%u.%u.%u.zz.countries.nerd.dk";
 static const char *nerd_ver1  = nerd_fmt + 14;

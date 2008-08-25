@@ -10,10 +10,11 @@ This is what's new and changed in the c-ares 1.5.3 release:
  o Improved configure detection of number of arguments for getservbyport_r
  o Improved query-ID randomness
  o Validate that DNS response address matches the request address
+ o fix acountry sample application compilation failure on some systems
 
 Thanks go to these friendly people for their efforts and contributions:
 
- Brad House, Yang Tse, Phil Blundell, Tofu Linden
+ Brad House, Yang Tse, Phil Blundell, Tofu Linden, George Neill
  and obviously Daniel Stenberg
 
 Have fun!

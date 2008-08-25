@@ -12,6 +12,9 @@
   connected to. Only necessary on UDP sockets as they are connection-less, TCP
   is unaffected.
 
+- Fix by George Neill:
+  Fixed compilation of acountry sample application failure on some systems.
+
 * Aug 4 2008 (Daniel Stenberg)
 - Fix by Tofu Linden:
 
