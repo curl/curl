@@ -1,5 +1,17 @@
   Changelog for the c-ares project
 
+* Aug 25 2008 (Yang Tse)
+- Improvement by Brad House:
+
+  This patch addresses an issue in which a response could be sent back to the
+  source port of a client from a different address than the request was made to.
+  This is one form of a DNS cache poisoning attack.
+
+  The patch simply uses recvfrom() rather than recv() and validates that the
+  address returned from recvfrom() matches the address of the server we have
+  connected to. Only necessary on UDP sockets as they are connection-less, TCP
+  is unaffected.
+
 * Aug 4 2008 (Daniel Stenberg)
 - Fix by Tofu Linden:
 

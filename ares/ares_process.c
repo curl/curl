@@ -429,6 +429,8 @@ static void read_udp_packets(ares_channel channel, fd_set *read_fds,
   int i;
   ssize_t count;
   unsigned char buf[PACKETSZ + 1];
+  struct sockaddr_in from;
+  socklen_t fromlen;
 
   if(!read_fds && (read_fd == ARES_SOCKET_BAD))
     /* no possible action */
@@ -462,11 +464,23 @@ static void read_udp_packets(ares_channel channel, fd_set *read_fds,
       /* To reduce event loop overhead, read and process as many
        * packets as we can. */
       do {
-        count = sread(server->udp_socket, buf, sizeof(buf));
+        /* Must memset 'from' to 0 as recvfrom() on some systems may
+         * not use 'from' at all if it doesn't support receiving the
+         * source address of the response */
+        memset(&from, 0, sizeof(from));
+        fromlen = sizeof(from);
+        count = (ssize_t)recvfrom(server->udp_socket, (void *)buf, sizeof(buf),
+                                  0, (struct sockaddr *)&from, &fromlen);
         if (count == -1 && try_again(SOCKERRNO))
           continue;
         else if (count <= 0)
           handle_error(channel, i, now);
+        else if (fromlen && from.sin_addr.s_addr != 0 &&
+                 from.sin_addr.s_addr != server->addr.s_addr)
+          /* Address response came from did not match the address
+           * we sent the request to.  Someone may be attempting
+           * to perform a cache poisoning attack */
+          break;
         else
           process_answer(channel, buf, (int)count, i, 0, now);
        } while (count > 0);
