@@ -58,6 +58,11 @@
 /*  DEFINITION OF THESE SYMBOLS SHALL NOT TAKE PLACE ANYWHERE ELSE  */
 /* ================================================================ */
 
+#ifdef CURL_SIZEOF_LONG
+#  error "CURL_SIZEOF_LONG shall not be defined except in curlbuild.h"
+   Error Compilation_aborted_CURL_SIZEOF_LONG_already_defined
+#endif
+
 #ifdef CURL_TYPEOF_CURL_OFF_T
 #  error "CURL_TYPEOF_CURL_OFF_T shall not be defined except in curlbuild.h"
    Error Compilation_aborted_CURL_TYPEOF_CURL_OFF_T_already_defined
@@ -81,6 +86,16 @@
 #ifdef CURL_SIZEOF_CURL_OFF_T
 #  error "CURL_SIZEOF_CURL_OFF_T shall not be defined except in curlbuild.h"
    Error Compilation_aborted_CURL_SIZEOF_CURL_OFF_T_already_defined
+#endif
+
+#ifdef CURL_SUFFIX_CURL_OFF_T
+#  error "CURL_SUFFIX_CURL_OFF_T shall not be defined except in curlbuild.h"
+   Error Compilation_aborted_CURL_SUFFIX_CURL_OFF_T_already_defined
+#endif
+
+#ifdef CURL_SUFFIX_CURL_OFF_TU
+#  error "CURL_SUFFIX_CURL_OFF_TU shall not be defined except in curlbuild.h"
+   Error Compilation_aborted_CURL_SUFFIX_CURL_OFF_TU_already_defined
 #endif
 
 /* ================================================================ */
@@ -108,7 +123,7 @@
 #  include <inttypes.h>
 #endif
 
-/* The expected size of long , as to be computed by sizeof. */
+/* The size of `long', as computed by sizeof. */
 #undef CURL_SIZEOF_LONG
 
 /* Signed integral data type used for curl_off_t. */
@@ -126,7 +141,7 @@ typedef CURL_TYPEOF_CURL_OFF_T curl_off_t;
 /* curl_off_t formatting string directive with "%" conversion specifier. */
 #undef CURL_FORMAT_OFF_T
 
-/* The expected size of curl_off_t, as to be computed by sizeof. */
+/* The size of `curl_off_t', as computed by sizeof. */
 #undef CURL_SIZEOF_CURL_OFF_T
 
 /* curl_off_t constant suffix. */
