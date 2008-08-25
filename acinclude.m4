@@ -3602,7 +3602,7 @@ dnl Internal macro for CURL_CONFIGURE_CURL_OFF_T
 
 AC_DEFUN([DO_CURL_OFF_T_CHECK], [
   AC_REQUIRE([CURL_INCLUDES_INTTYPES])dnl
-  if test "$x_typeof" = "unknown" && test ! -z "$1"; then
+  if test "$curl_typeof_curl_off_t" = "unknown" && test ! -z "$1"; then
     tmp_includes=""
     tmp_source=""
     tmp_fmt=""
@@ -3634,16 +3634,16 @@ AC_DEFUN([DO_CURL_OFF_T_CHECK], [
       ]])
     ],[
       if test -z "$tmp_fmt"; then
-        x_typeof="$1"
-        x_sizeof="$2"
+        curl_typeof_curl_off_t="$1"
+        curl_sizeof_curl_off_t="$2"
       else
         CURL_CHECK_DEF([$tmp_fmt], [$curl_includes_inttypes], [silent])
         AS_VAR_PUSHDEF([tmp_HaveFmtDef], [curl_cv_have_def_$tmp_fmt])dnl
         AS_VAR_PUSHDEF([tmp_FmtDef], [curl_cv_def_$tmp_fmt])dnl
         if test AS_VAR_GET(tmp_HaveFmtDef) = "yes"; then
-          x_format=AS_VAR_GET(tmp_FmtDef)
-          x_typeof="$1"
-          x_sizeof="$2"
+          curl_format_curl_off_t=AS_VAR_GET(tmp_FmtDef)
+          curl_typeof_curl_off_t="$1"
+          curl_sizeof_curl_off_t="$2"
         fi
         AS_VAR_POPDEF([tmp_FmtDef])dnl
         AS_VAR_POPDEF([tmp_HaveFmtDef])dnl
@@ -3780,12 +3780,12 @@ AC_DEFUN([CURL_CONFIGURE_CURL_OFF_T], [
   #
   dnl DO_CURL_OFF_T_CHECK results are stored in next 3 vars
   #
-  x_typeof="unknown"
-  x_sizeof="unknown"
-  x_format="unknown"
-  u_format="unknown"
+  curl_typeof_curl_off_t="unknown"
+  curl_sizeof_curl_off_t="unknown"
+  curl_format_curl_off_t="unknown"
+  curl_format_curl_off_tu="unknown"
   #
-  if test "$x_typeof" = "unknown"; then
+  if test "$curl_typeof_curl_off_t" = "unknown"; then
     AC_MSG_CHECKING([for 64-bit curl_off_t data type])
     for t8 in          \
       "$x_LP64_long"   \
@@ -3796,9 +3796,9 @@ AC_DEFUN([CURL_CONFIGURE_CURL_OFF_T], [
       '__longlong_t'   ; do
       DO_CURL_OFF_T_CHECK([$t8], [8])
     done
-    AC_MSG_RESULT([$x_typeof])
+    AC_MSG_RESULT([$curl_typeof_curl_off_t])
   fi
-  if test "$x_typeof" = "unknown"; then
+  if test "$curl_typeof_curl_off_t" = "unknown"; then
     AC_MSG_CHECKING([for 32-bit curl_off_t data type])
     for t4 in          \
       "$x_LP32_long"   \
@@ -3807,9 +3807,9 @@ AC_DEFUN([CURL_CONFIGURE_CURL_OFF_T], [
       'int'            ; do
       DO_CURL_OFF_T_CHECK([$t4], [4])
     done 
-    AC_MSG_RESULT([$x_typeof])
+    AC_MSG_RESULT([$curl_typeof_curl_off_t])
   fi
-  if test "$x_typeof" = "unknown"; then
+  if test "$curl_typeof_curl_off_t" = "unknown"; then
     AC_MSG_CHECKING([for 16-bit curl_off_t data type])
     for t2 in          \
       "$x_LP16_long"   \
@@ -3818,60 +3818,60 @@ AC_DEFUN([CURL_CONFIGURE_CURL_OFF_T], [
       'int'            ; do
       DO_CURL_OFF_T_CHECK([$t2], [2])
     done
-    AC_MSG_RESULT([$x_typeof])
+    AC_MSG_RESULT([$curl_typeof_curl_off_t])
   fi
-  if test "$x_typeof" = "unknown"; then
+  if test "$curl_typeof_curl_off_t" = "unknown"; then
     AC_MSG_ERROR([cannot find data type for curl_off_t.])
   fi
   #
   AC_MSG_CHECKING([size of curl_off_t])
-  AC_MSG_RESULT([$x_sizeof])
+  AC_MSG_RESULT([$curl_sizeof_curl_off_t])
   #
   AC_MSG_CHECKING([formatting string directive for curl_off_t])
-  if test "$x_format" != "unknown"; then
+  if test "$curl_format_curl_off_t" != "unknown"; then
     x_pull_headers="yes"
-    x_format=`echo "$x_format" | "$SED" 's/[["]]//g'`
-    u_format=`echo "$x_format" | "$SED" 's/i$/u/'`
-    u_format=`echo "$u_format" | "$SED" 's/d$/u/'`
-    u_format=`echo "$u_format" | "$SED" 's/D$/U/'`
+    curl_format_curl_off_t=`echo "$curl_format_curl_off_t" | "$SED" 's/[["]]//g'`
+    curl_format_curl_off_tu=`echo "$curl_format_curl_off_t" | "$SED" 's/i$/u/'`
+    curl_format_curl_off_tu=`echo "$curl_format_curl_off_tu" | "$SED" 's/d$/u/'`
+    curl_format_curl_off_tu=`echo "$curl_format_curl_off_tu" | "$SED" 's/D$/U/'`
   else
     x_pull_headers="no"
-    case AS_TR_SH([$x_typeof]) in
+    case AS_TR_SH([$curl_typeof_curl_off_t]) in
       long_long | __longlong | __longlong_t)
-        x_format="lld"
-        u_format="llu"
+        curl_format_curl_off_t="lld"
+        curl_format_curl_off_tu="llu"
         ;;
       long)
-        x_format="ld"
-        u_format="lu"
+        curl_format_curl_off_t="ld"
+        curl_format_curl_off_tu="lu"
         ;;
       int)
-        x_format="d"
-        u_format="u"
+        curl_format_curl_off_t="d"
+        curl_format_curl_off_tu="u"
         ;;
       __int64)
-        x_format="I64d"
-        u_format="I64u"
+        curl_format_curl_off_t="I64d"
+        curl_format_curl_off_tu="I64u"
         ;;
       __int32)
-        x_format="I32d"
-        u_format="I32u"
+        curl_format_curl_off_t="I32d"
+        curl_format_curl_off_tu="I32u"
         ;;
       __int16)
-        x_format="I16d"
-        u_format="I16u"
+        curl_format_curl_off_t="I16d"
+        curl_format_curl_off_tu="I16u"
         ;;
       *)
         AC_MSG_ERROR([cannot find print format string for curl_off_t.])
         ;;
     esac
   fi
-  AC_MSG_RESULT(["$x_format"])
+  AC_MSG_RESULT(["$curl_format_curl_off_t"])
   #
   AC_MSG_CHECKING([formatting string directive for unsigned curl_off_t])
-  AC_MSG_RESULT(["$u_format"])
+  AC_MSG_RESULT(["$curl_format_curl_off_tu"])
   #
-  DO_CURL_OFF_T_SUFFIX_CHECK([$x_typeof])
+  DO_CURL_OFF_T_SUFFIX_CHECK([$curl_typeof_curl_off_t])
   #
   if test "$x_pull_headers" = "yes"; then
     if test "x$ac_cv_header_sys_types_h" = "xyes"; then
@@ -3885,11 +3885,11 @@ AC_DEFUN([CURL_CONFIGURE_CURL_OFF_T], [
     fi
   fi
   #
-  CURL_DEFINE_UNQUOTED([CURL_OFF_T], [$x_typeof])
-  CURL_DEFINE_UNQUOTED([CURL_FORMAT_CURL_OFF_T], ["$x_format"])
-  CURL_DEFINE_UNQUOTED([CURL_FORMAT_CURL_OFF_TU], ["$u_format"])
-  CURL_DEFINE_UNQUOTED([CURL_FORMAT_OFF_T], ["%$x_format"])
-  CURL_DEFINE_UNQUOTED([CURL_SIZEOF_CURL_OFF_T], [$x_sizeof])
+  CURL_DEFINE_UNQUOTED([CURL_OFF_T], [$curl_typeof_curl_off_t])
+  CURL_DEFINE_UNQUOTED([CURL_FORMAT_CURL_OFF_T], ["$curl_format_curl_off_t"])
+  CURL_DEFINE_UNQUOTED([CURL_FORMAT_CURL_OFF_TU], ["$curl_format_curl_off_tu"])
+  CURL_DEFINE_UNQUOTED([CURL_FORMAT_OFF_T], ["%$curl_format_curl_off_t"])
+  CURL_DEFINE_UNQUOTED([CURL_SIZEOF_CURL_OFF_T], [$curl_sizeof_curl_off_t])
   CURL_DEFINE_UNQUOTED([CURL_SUFFIX_CURL_OFF_T], [$curl_suffix_curl_off_t])
   CURL_DEFINE_UNQUOTED([CURL_SUFFIX_CURL_OFF_TU], [$curl_suffix_curl_off_tu])
   #
