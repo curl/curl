@@ -3885,7 +3885,7 @@ AC_DEFUN([CURL_CONFIGURE_CURL_OFF_T], [
     fi
   fi
   #
-  CURL_DEFINE_UNQUOTED([CURL_OFF_T], [$curl_typeof_curl_off_t])
+  CURL_DEFINE_UNQUOTED([CURL_TYPEOF_CURL_OFF_T], [$curl_typeof_curl_off_t])
   CURL_DEFINE_UNQUOTED([CURL_FORMAT_CURL_OFF_T], ["$curl_format_curl_off_t"])
   CURL_DEFINE_UNQUOTED([CURL_FORMAT_CURL_OFF_TU], ["$curl_format_curl_off_tu"])
   CURL_DEFINE_UNQUOTED([CURL_FORMAT_OFF_T], ["%$curl_format_curl_off_t"])

@@ -58,9 +58,9 @@
 /*  DEFINITION OF THESE SYMBOLS SHALL NOT TAKE PLACE ANYWHERE ELSE  */
 /* ================================================================ */
 
-#ifdef CURL_OFF_T
-#  error "CURL_OFF_T shall not be defined except in curlbuild.h"
-   Error Compilation_aborted_CURL_OFF_T_already_defined
+#ifdef CURL_TYPEOF_CURL_OFF_T
+#  error "CURL_TYPEOF_CURL_OFF_T shall not be defined except in curlbuild.h"
+   Error Compilation_aborted_CURL_TYPEOF_CURL_OFF_T_already_defined
 #endif
 
 #ifdef CURL_FORMAT_CURL_OFF_T
@@ -112,10 +112,10 @@
 #undef CURL_SIZEOF_LONG
 
 /* Signed integral data type used for curl_off_t. */
-#undef CURL_OFF_T
+#undef CURL_TYPEOF_CURL_OFF_T
 
 /* Data type definition of curl_off_t. */
-typedef CURL_OFF_T curl_off_t;
+typedef CURL_TYPEOF_CURL_OFF_T curl_off_t;
 
 /* curl_off_t formatting string directive without "%" conversion specifier. */
 #undef CURL_FORMAT_CURL_OFF_T

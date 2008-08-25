@@ -109,9 +109,9 @@
 /*  DEFINITION OF THESE SYMBOLS SHALL NOT TAKE PLACE ANYWHERE ELSE  */
 /* ================================================================ */
 
-#ifdef CURL_OFF_T
-#  error "CURL_OFF_T shall not be defined except in curlbuild.h"
-   Error Compilation_aborted_CURL_OFF_T_already_defined
+#ifdef CURL_TYPEOF_CURL_OFF_T
+#  error "CURL_TYPEOF_CURL_OFF_T shall not be defined except in curlbuild.h"
+   Error Compilation_aborted_CURL_TYPEOF_CURL_OFF_T_already_defined
 #endif
 
 #ifdef CURL_FORMAT_CURL_OFF_T
@@ -140,7 +140,7 @@
 
 #if defined(__DJGPP__)
 #  define CURL_SIZEOF_LONG        4
-#  define CURL_OFF_T              long
+#  define CURL_TYPEOF_CURL_OFF_T  long
 #  define CURL_FORMAT_CURL_OFF_T  "ld"
 #  define CURL_FORMAT_CURL_OFF_TU "lu"
 #  define CURL_FORMAT_OFF_T       "%ld"
@@ -150,7 +150,7 @@
 
 #elif defined(__SALFORDC__)
 #  define CURL_SIZEOF_LONG        4
-#  define CURL_OFF_T              long
+#  define CURL_TYPEOF_CURL_OFF_T  long
 #  define CURL_FORMAT_CURL_OFF_T  "ld"
 #  define CURL_FORMAT_CURL_OFF_TU "lu"
 #  define CURL_FORMAT_OFF_T       "%ld"
@@ -161,7 +161,7 @@
 #elif defined(__BORLANDC__)
 #  if (__BORLANDC__ < 0x520)
 #    define CURL_SIZEOF_LONG        4
-#    define CURL_OFF_T              long
+#    define CURL_TYPEOF_CURL_OFF_T  long
 #    define CURL_FORMAT_CURL_OFF_T  "ld"
 #    define CURL_FORMAT_CURL_OFF_TU "lu"
 #    define CURL_FORMAT_OFF_T       "%ld"
@@ -170,7 +170,7 @@
 #    define CURL_SUFFIX_CURL_OFF_TU UL
 #  else
 #    define CURL_SIZEOF_LONG        4
-#    define CURL_OFF_T              __int64
+#    define CURL_TYPEOF_CURL_OFF_T  __int64
 #    define CURL_FORMAT_CURL_OFF_T  "I64d"
 #    define CURL_FORMAT_CURL_OFF_TU "I64u"
 #    define CURL_FORMAT_OFF_T       "%I64d"
@@ -181,7 +181,7 @@
 
 #elif defined(__TURBOC__)
 #  define CURL_SIZEOF_LONG        4
-#  define CURL_OFF_T              long
+#  define CURL_TYPEOF_CURL_OFF_T  long
 #  define CURL_FORMAT_CURL_OFF_T  "ld"
 #  define CURL_FORMAT_CURL_OFF_TU "lu"
 #  define CURL_FORMAT_OFF_T       "%ld"
@@ -192,7 +192,7 @@
 #elif defined(__WATCOMC__)
 #  if defined(__386__)
 #    define CURL_SIZEOF_LONG        4
-#    define CURL_OFF_T              __int64
+#    define CURL_TYPEOF_CURL_OFF_T  __int64
 #    define CURL_FORMAT_CURL_OFF_T  "I64d"
 #    define CURL_FORMAT_CURL_OFF_TU "I64u"
 #    define CURL_FORMAT_OFF_T       "%I64d"
@@ -201,7 +201,7 @@
 #    define CURL_SUFFIX_CURL_OFF_TU ui64
 #  else
 #    define CURL_SIZEOF_LONG        4
-#    define CURL_OFF_T              long
+#    define CURL_TYPEOF_CURL_OFF_T  long
 #    define CURL_FORMAT_CURL_OFF_T  "ld"
 #    define CURL_FORMAT_CURL_OFF_TU "lu"
 #    define CURL_FORMAT_OFF_T       "%ld"
@@ -213,7 +213,7 @@
 #elif defined(__POCC__)
 #  if (__POCC__ < 280)
 #    define CURL_SIZEOF_LONG        4
-#    define CURL_OFF_T              long
+#    define CURL_TYPEOF_CURL_OFF_T  long
 #    define CURL_FORMAT_CURL_OFF_T  "ld"
 #    define CURL_FORMAT_CURL_OFF_TU "lu"
 #    define CURL_FORMAT_OFF_T       "%ld"
@@ -222,7 +222,7 @@
 #    define CURL_SUFFIX_CURL_OFF_TU UL
 #  elif defined(_MSC_VER)
 #    define CURL_SIZEOF_LONG        4
-#    define CURL_OFF_T              __int64
+#    define CURL_TYPEOF_CURL_OFF_T  __int64
 #    define CURL_FORMAT_CURL_OFF_T  "I64d"
 #    define CURL_FORMAT_CURL_OFF_TU "I64u"
 #    define CURL_FORMAT_OFF_T       "%I64d"
@@ -231,7 +231,7 @@
 #    define CURL_SUFFIX_CURL_OFF_TU ui64
 #  else
 #    define CURL_SIZEOF_LONG        4
-#    define CURL_OFF_T              long long
+#    define CURL_TYPEOF_CURL_OFF_T  long long
 #    define CURL_FORMAT_CURL_OFF_T  "lld"
 #    define CURL_FORMAT_CURL_OFF_TU "llu"
 #    define CURL_FORMAT_OFF_T       "%lld"
@@ -242,7 +242,7 @@
 
 #elif defined(__LCC__)
 #  define CURL_SIZEOF_LONG        4
-#  define CURL_OFF_T              long
+#  define CURL_TYPEOF_CURL_OFF_T  long
 #  define CURL_FORMAT_CURL_OFF_T  "ld"
 #  define CURL_FORMAT_CURL_OFF_TU "lu"
 #  define CURL_FORMAT_OFF_T       "%ld"
@@ -253,7 +253,7 @@
 #elif defined(__SYMBIAN32__)
 #  if defined(__GCC32__)
 #    define CURL_SIZEOF_LONG        4
-#    define CURL_OFF_T              long long
+#    define CURL_TYPEOF_CURL_OFF_T  long long
 #    define CURL_FORMAT_CURL_OFF_T  "lld"
 #    define CURL_FORMAT_CURL_OFF_TU "llu"
 #    define CURL_FORMAT_OFF_T       "%lld"
@@ -263,7 +263,7 @@
 #  elif defined(__CW32__)
 #    pragma longlong on
 #    define CURL_SIZEOF_LONG        4
-#    define CURL_OFF_T              long long
+#    define CURL_TYPEOF_CURL_OFF_T  long long
 #    define CURL_FORMAT_CURL_OFF_T  "lld"
 #    define CURL_FORMAT_CURL_OFF_TU "llu"
 #    define CURL_FORMAT_OFF_T       "%lld"
@@ -272,7 +272,7 @@
 #    define CURL_SUFFIX_CURL_OFF_TU ULL
 #  elif defined(__VC32__)
 #    define CURL_SIZEOF_LONG        4
-#    define CURL_OFF_T              __int64
+#    define CURL_TYPEOF_CURL_OFF_T  __int64
 #    define CURL_FORMAT_CURL_OFF_T  "lld"
 #    define CURL_FORMAT_CURL_OFF_TU "llu"
 #    define CURL_FORMAT_OFF_T       "%lld"
@@ -283,7 +283,7 @@
 
 #elif defined(__MWERKS__)
 #  define CURL_SIZEOF_LONG        4
-#  define CURL_OFF_T              long long
+#  define CURL_TYPEOF_CURL_OFF_T  long long
 #  define CURL_FORMAT_CURL_OFF_T  "lld"
 #  define CURL_FORMAT_CURL_OFF_TU "llu"
 #  define CURL_FORMAT_OFF_T       "%lld"
@@ -293,7 +293,7 @@
 
 #elif defined(_WIN32_WCE)
 #  define CURL_SIZEOF_LONG        4
-#  define CURL_OFF_T              __int64
+#  define CURL_TYPEOF_CURL_OFF_T  __int64
 #  define CURL_FORMAT_CURL_OFF_T  "I64d"
 #  define CURL_FORMAT_CURL_OFF_TU "I64u"
 #  define CURL_FORMAT_OFF_T       "%I64d"
@@ -303,7 +303,7 @@
 
 #elif defined(__MINGW32__)
 #  define CURL_SIZEOF_LONG        4
-#  define CURL_OFF_T              long long
+#  define CURL_TYPEOF_CURL_OFF_T  long long
 #  define CURL_FORMAT_CURL_OFF_T  "I64d"
 #  define CURL_FORMAT_CURL_OFF_TU "I64u"
 #  define CURL_FORMAT_OFF_T       "%I64d"
@@ -314,7 +314,7 @@
 #elif defined(__VMS)
 #  if defined(__alpha) || defined(__ia64)
 #    define CURL_SIZEOF_LONG        4
-#    define CURL_OFF_T              long long
+#    define CURL_TYPEOF_CURL_OFF_T  long long
 #    define CURL_FORMAT_CURL_OFF_T  "lld"
 #    define CURL_FORMAT_CURL_OFF_TU "llu"
 #    define CURL_FORMAT_OFF_T       "%lld"
@@ -323,7 +323,7 @@
 #    define CURL_SUFFIX_CURL_OFF_TU ULL
 #  else
 #    define CURL_SIZEOF_LONG        4
-#    define CURL_OFF_T              long
+#    define CURL_TYPEOF_CURL_OFF_T  long
 #    define CURL_FORMAT_CURL_OFF_T  "ld"
 #    define CURL_FORMAT_CURL_OFF_TU "lu"
 #    define CURL_FORMAT_OFF_T       "%ld"
@@ -335,7 +335,7 @@
 #elif defined(__OS400__)
 #  if defined(__ILEC400__)
 #    define CURL_SIZEOF_LONG        4
-#    define CURL_OFF_T              long long
+#    define CURL_TYPEOF_CURL_OFF_T  long long
 #    define CURL_FORMAT_CURL_OFF_T  "lld"
 #    define CURL_FORMAT_CURL_OFF_TU "llu"
 #    define CURL_FORMAT_OFF_T       "%lld"
@@ -352,7 +352,7 @@
 #      define CURL_SIZEOF_LONG        8
 #    endif
 #    if defined(_LONG_LONG)
-#      define CURL_OFF_T              long long
+#      define CURL_TYPEOF_CURL_OFF_T  long long
 #      define CURL_FORMAT_CURL_OFF_T  "lld"
 #      define CURL_FORMAT_CURL_OFF_TU "llu"
 #      define CURL_FORMAT_OFF_T       "%lld"
@@ -360,7 +360,7 @@
 #      define CURL_SUFFIX_CURL_OFF_T  LL
 #      define CURL_SUFFIX_CURL_OFF_TU ULL
 #    elif defined(_LP64)
-#      define CURL_OFF_T              long
+#      define CURL_TYPEOF_CURL_OFF_T  long
 #      define CURL_FORMAT_CURL_OFF_T  "ld"
 #      define CURL_FORMAT_CURL_OFF_TU "lu"
 #      define CURL_FORMAT_OFF_T       "%ld"
@@ -368,7 +368,7 @@
 #      define CURL_SUFFIX_CURL_OFF_T  L
 #      define CURL_SUFFIX_CURL_OFF_TU UL
 #    else
-#      define CURL_OFF_T              long
+#      define CURL_TYPEOF_CURL_OFF_T  long
 #      define CURL_FORMAT_CURL_OFF_T  "ld"
 #      define CURL_FORMAT_CURL_OFF_TU "lu"
 #      define CURL_FORMAT_OFF_T       "%ld"
@@ -386,7 +386,7 @@
 #      define CURL_SIZEOF_LONG        8
 #    endif
 #    if defined(_LONG_LONG)
-#      define CURL_OFF_T              long long
+#      define CURL_TYPEOF_CURL_OFF_T  long long
 #      define CURL_FORMAT_CURL_OFF_T  "lld"
 #      define CURL_FORMAT_CURL_OFF_TU "llu"
 #      define CURL_FORMAT_OFF_T       "%lld"
@@ -394,7 +394,7 @@
 #      define CURL_SUFFIX_CURL_OFF_T  LL
 #      define CURL_SUFFIX_CURL_OFF_TU ULL
 #    elif defined(_LP64)
-#      define CURL_OFF_T              long
+#      define CURL_TYPEOF_CURL_OFF_T  long
 #      define CURL_FORMAT_CURL_OFF_T  "ld"
 #      define CURL_FORMAT_CURL_OFF_TU "lu"
 #      define CURL_FORMAT_OFF_T       "%ld"
@@ -402,7 +402,7 @@
 #      define CURL_SUFFIX_CURL_OFF_T  L
 #      define CURL_SUFFIX_CURL_OFF_TU UL
 #    else
-#      define CURL_OFF_T              long
+#      define CURL_TYPEOF_CURL_OFF_T  long
 #      define CURL_FORMAT_CURL_OFF_T  "ld"
 #      define CURL_FORMAT_CURL_OFF_TU "lu"
 #      define CURL_FORMAT_OFF_T       "%ld"
@@ -419,7 +419,7 @@
 #elif defined(_MSC_VER)
 #  if (_MSC_VER >= 900) && (_INTEGRAL_MAX_BITS >= 64)
 #    define CURL_SIZEOF_LONG        4
-#    define CURL_OFF_T              __int64
+#    define CURL_TYPEOF_CURL_OFF_T  __int64
 #    define CURL_FORMAT_CURL_OFF_T  "I64d"
 #    define CURL_FORMAT_CURL_OFF_TU "I64u"
 #    define CURL_FORMAT_OFF_T       "%I64d"
@@ -428,7 +428,7 @@
 #    define CURL_SUFFIX_CURL_OFF_TU ui64
 #  else
 #    define CURL_SIZEOF_LONG        4
-#    define CURL_OFF_T              long
+#    define CURL_TYPEOF_CURL_OFF_T  long
 #    define CURL_FORMAT_CURL_OFF_T  "ld"
 #    define CURL_FORMAT_CURL_OFF_TU "lu"
 #    define CURL_FORMAT_OFF_T       "%ld"
@@ -444,7 +444,7 @@
 #elif defined(__GNUC__)
 #  if defined(__i386__)
 #    define CURL_SIZEOF_LONG        4
-#    define CURL_OFF_T              long long
+#    define CURL_TYPEOF_CURL_OFF_T  long long
 #    define CURL_FORMAT_CURL_OFF_T  "lld"
 #    define CURL_FORMAT_CURL_OFF_TU "llu"
 #    define CURL_FORMAT_OFF_T       "%lld"
@@ -453,7 +453,7 @@
 #    define CURL_SUFFIX_CURL_OFF_TU ULL
 #  elif defined(__x86_64__)
 #    define CURL_SIZEOF_LONG        8
-#    define CURL_OFF_T              long
+#    define CURL_TYPEOF_CURL_OFF_T  long
 #    define CURL_FORMAT_CURL_OFF_T  "ld"
 #    define CURL_FORMAT_CURL_OFF_TU "lu"
 #    define CURL_FORMAT_OFF_T       "%ld"
@@ -469,8 +469,8 @@
 
 /* Data type definition of curl_off_t. */
 
-#ifdef CURL_OFF_T
-  typedef CURL_OFF_T curl_off_t;
+#ifdef CURL_TYPEOF_CURL_OFF_T
+  typedef CURL_TYPEOF_CURL_OFF_T curl_off_t;
 #endif
 
 #endif /* __CURL_CURLBUILD_H */

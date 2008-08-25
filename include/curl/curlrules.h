@@ -81,9 +81,9 @@
    Error Compilation_aborted_CURL_SIZEOF_LONG_is_missing
 #endif
 
-#ifndef CURL_OFF_T
-#  error "CURL_OFF_T definition is missing!"
-   Error Compilation_aborted_CURL_OFF_T_is_missing
+#ifndef CURL_TYPEOF_CURL_OFF_T
+#  error "CURL_TYPEOF_CURL_OFF_T definition is missing!"
+   Error Compilation_aborted_CURL_TYPEOF_CURL_OFF_T_is_missing
 #endif
 
 #ifndef CURL_FORMAT_CURL_OFF_T
@@ -211,6 +211,6 @@ typedef char
 #undef CURL_PULL_STDINT_H
 #undef CURL_PULL_INTTYPES_H
 
-#undef CURL_OFF_T
+#undef CURL_TYPEOF_CURL_OFF_T
 
 #endif /* __CURL_CURLRULES_H */
