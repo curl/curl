@@ -2182,6 +2182,10 @@ CURLcode Curl_follow(struct SessionHandle *data,
         free(data->change.referer);
 
       data->change.referer = strdup(data->change.url);
+      if (!data->change.referer) {
+        data->change.referer_alloc = FALSE;
+        return CURLE_OUT_OF_MEMORY;
+      }
       data->change.referer_alloc = TRUE; /* yes, free this later */
     }
   }

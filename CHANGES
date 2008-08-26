@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Fandrich (26 Aug 2008)
+- Fixed out of memory problems that caused torture test failures in tests
+  1021 and 1067.
+
 Yang Tse (26 Aug 2008)
 - Added check and symbol definition for WIN32 file API usage in configure,
   supporting configure's --disable-largefile option for WIN32 targets also.

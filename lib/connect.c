@@ -552,7 +552,7 @@ CURLcode Curl_store_ip_addr(struct connectdata *conn)
 }
 
 /* Used within the multi interface. Try next IP address, return TRUE if no
-   more address exists */
+   more address exists or error */
 static bool trynextip(struct connectdata *conn,
                       int sockindex,
                       bool *connected)
@@ -578,8 +578,7 @@ static bool trynextip(struct connectdata *conn,
       conn->sock[sockindex] = sockfd;
       conn->ip_addr = ai;
 
-      Curl_store_ip_addr(conn);
-      return FALSE;
+      return Curl_store_ip_addr(conn) != CURLE_OK;
     }
     ai = ai->ai_next;
   }
@@ -919,6 +918,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   long timeout_ms;
   long timeout_per_addr;
 
+  DEBUGASSERT(sockconn);
   *connected = FALSE; /* default to not connected */
 
   /* get the timeout left */
@@ -967,9 +967,10 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     before = after;
   }  /* end of connect-to-each-address loop */
 
+  *sockconn = sockfd;    /* the socket descriptor we've connected */
+
   if(sockfd == CURL_SOCKET_BAD) {
     /* no good connect was made */
-    *sockconn = CURL_SOCKET_BAD;
     failf(data, "couldn't connect to host");
     return CURLE_COULDNT_CONNECT;
   }
@@ -979,10 +980,6 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   /* store the address we use */
   if(addr)
     *addr = curr_addr;
-
-  /* allow NULL-pointers to get passed in */
-  if(sockconn)
-    *sockconn = sockfd;    /* the socket descriptor we've connected */
 
   data->info.numconnects++; /* to track the number of connections made */
 

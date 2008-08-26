@@ -2206,6 +2206,12 @@ CURLcode Curl_disconnect(struct connectdata *conn)
     }
   }
 
+  /* Cleanup possible redirect junk */
+  if(data->req.newurl) {
+    free(data->req.newurl);
+    data->req.newurl = NULL;
+  }
+
   if(conn->handler->disconnect)
     /* This is set if protocol-specific cleanups should be made */
     conn->handler->disconnect(conn);
@@ -4483,7 +4489,7 @@ static CURLcode setup_conn(struct connectdata *conn,
   }
 #endif
 
-  return CURLE_OK;
+  return result;
 }
 
 CURLcode Curl_connect(struct SessionHandle *data,
