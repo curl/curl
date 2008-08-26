@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Yang Tse (26 Aug 2008)
+- Added check and symbol definition for WIN32 file API usage in configure,
+  supporting configure's --disable-largefile option for WIN32 targets also.
+
+- Non-configure systems which do not use config-win32.h configuration file,
+  and want to use the WIN32 file API, must define USE_WIN32_LARGE_FILES or
+  USE_WIN32_SMALL_FILES as appropriate in their own configuration files.
+
 Daniel Stenberg (23 Aug 2008)
 - Running 'make ca-firefox' in the root build dir will now run the new
   firefox-db2pem.sh conversion script that converts a local Firefox db of ca

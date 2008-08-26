@@ -348,6 +348,7 @@ case X-"$ac_cv_native_windows" in
     ac_cv_header_winber_h="no"
     ;;
 esac
+CURL_CHECK_WIN32_LARGEFILE
 
 dnl ************************************************************
 dnl switch off particular protocols

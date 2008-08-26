@@ -3895,3 +3895,60 @@ AC_DEFUN([CURL_CONFIGURE_CURL_OFF_T], [
   #
 ])
 
+
+dnl CURL_CHECK_WIN32_LARGEFILE
+dnl -------------------------------------------------
+dnl Check if curl's WIN32 large file will be used
+
+AC_DEFUN([CURL_CHECK_WIN32_LARGEFILE], [
+  AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
+  AC_MSG_CHECKING([whether build target supports WIN32 file API])
+  curl_win32_file_api="no"
+  if test "$ac_cv_header_windows_h" = "yes"; then
+    if test x"$enable_largefile" != "xno"; then
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+        ]],[[
+#if !defined(_WIN32_WCE) && \
+    (defined(__MINGW32__) || \
+    (defined(_MSC_VER) && (defined(_WIN32) || defined(_WIN64))))
+          int dummy=1;
+#else
+          WIN32 large file API not supported.
+#endif
+        ]])
+      ],[
+        curl_win32_file_api="win32_large_files"
+      ])
+    fi
+    if test "$curl_win32_file_api" = "no"; then
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+        ]],[[
+#if defined(_WIN32_WCE) || defined(__MINGW32__) || defined(_MSC_VER)
+          int dummy=1;
+#else
+          WIN32 small file API not supported.
+#endif
+        ]])
+      ],[
+        curl_win32_file_api="win32_small_files"
+      ])
+    fi
+  fi
+  case "$curl_win32_file_api" in
+    win32_large_files)
+      AC_MSG_RESULT([yes (large file enabled)])
+      AC_DEFINE_UNQUOTED(USE_WIN32_LARGE_FILES, 1,
+        [Define to 1 if you are building a Windows target with large file support.])
+      ;;
+    win32_small_files)
+      AC_MSG_RESULT([yes (large file disabled)])
+      AC_DEFINE_UNQUOTED(USE_WIN32_LARGE_FILES, 1,
+        [Define to 1 if you are building a Windows target without large file support.])
+      ;;
+    *)
+      AC_MSG_RESULT([no])
+      ;;
+  esac
+])
