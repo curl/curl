@@ -2,10 +2,8 @@ To be addressed before 7.19.0 (planned release: August 2008)
 =============================
 
 144 - Help apps use 64bit/LFS libcurl!
-      64-bit curl_off_t no longer gated to off_t patch already committed.
       TODO:
        * Test it on the broadest combination of platforms and compilers.
-       * Enabling and disabling of large file support needs further inspection.
 
 To be addressed before 7.19.1 (planned release: October 2008)
 =============================
