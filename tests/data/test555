@@ -8,9 +8,10 @@ HTTP
 HTTP POST
 POST callback
 HTTP proxy NTLM auth
-multi interface
+multi
 </keywords>
 </info>
+
 # Server-side
 <reply>
 

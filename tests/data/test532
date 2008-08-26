@@ -4,8 +4,10 @@
 FTP
 PASV
 RETR
+multi
 </keywords>
 </info>
+
 # Server-side
 <reply>
 <data>

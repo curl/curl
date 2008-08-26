@@ -4,8 +4,10 @@
 FTP
 PORT
 STOR
+multi
 </keywords>
 </info>
+
 # Server-side
 <reply>
 <data>
