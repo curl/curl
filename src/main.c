@@ -242,6 +242,32 @@ typedef enum {
 #  define struct_stat struct stat
 #endif
 
+/*
+ * Default sizeof(off_t) in case it hasn't been defined in config file.
+ */
+
+#ifndef SIZEOF_OFF_T
+#  if defined(__VMS) && (defined(__alpha) || defined(__ia64))
+#    if defined(_LARGEFILE)
+#      define SIZEOF_OFF_T 8
+#    endif
+#  elif defined(__OS400__) && defined(__ILEC400__)
+#    if defined(_LARGE_FILES)
+#      define SIZEOF_OFF_T 8
+#    endif
+#  elif defined(__MVS__) && defined(__IBMC__)
+#    if defined(_LP64) || defined(_LARGE_FILES)
+#      define SIZEOF_OFF_T 8
+#    endif
+#  elif defined(__370__) && defined(__IBMC__)
+#    if defined(_LP64) || defined(_LARGE_FILES)
+#      define SIZEOF_OFF_T 8
+#    endif
+#  else
+#    define SIZEOF_OFF_T 4
+#  endif
+#endif
+
 #ifdef CURL_DOES_CONVERSIONS
 #ifdef HAVE_ICONV
 iconv_t inbound_cd  = (iconv_t)-1;
@@ -3205,12 +3231,6 @@ struct InStruct {
 
 #define MAX_SEEK 2147483647
 
-#ifndef SIZEOF_OFF_T
-/* (Jan 11th 2008) this is a reasonably new define in the config.h so there
-   might be older handicrafted configs that don't define it properly and then
-   we assume 32bit off_t */
-#define SIZEOF_OFF_T 4
-#endif
 /*
  * my_seek() is the CURLOPT_SEEKFUNCTION we use
  */
@@ -3218,11 +3238,10 @@ static int my_seek(void *stream, curl_off_t offset, int whence)
 {
   struct InStruct *in=(struct InStruct *)stream;
 
-#if (CURL_SIZEOF_CURL_OFF_T > SIZEOF_OFF_T) && !defined(lseek)
-  /* The sizeof check following here is only interesting if curl_off_t is
-     larger than off_t, but also not on windows-like systems for which lseek
-     is a defined macro that works around the 32bit off_t-problem and thus do
-     64bit seeks correctly anyway */
+#if (CURL_SIZEOF_CURL_OFF_T > SIZEOF_OFF_T) && !defined(USE_WIN32_LARGE_FILES)
+  /* The offset check following here is only interesting if curl_off_t is
+     larger than off_t and we are not using the WIN32 large file support
+     macros that provide the support to do 64bit seeks correctly */
 
   if(offset > MAX_SEEK) {
     /* Some precaution code to work around problems with different data sizes
