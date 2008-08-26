@@ -27,6 +27,19 @@ In both these cases, the curl_off_t type will now (after the transition) be
 64bit where it previously were 32bit. This will cause a binary incompatibility
 that you MAY need to deal with.
 
+Benefits
+--------
+
+This new way has several benefits:
+
+o Platforms without LFS support can still use libcurl to do >32 bit file
+  transfers and range operations etc as long as they have >32 bit datatypes
+  supported.
+
+o Applications will no longer easily build with the curl_off_t size
+  mismatched, which has been a very frequent (and annoying) problem with
+  libcurl <= 7.18.2
+
 Historicly
 ----------
 
