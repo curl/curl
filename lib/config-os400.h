@@ -374,12 +374,6 @@
 
 #define HAVE_LL
 
-/*  */
-
-#ifndef _LARGE_FILES
-#define _LARGE_FILES
-#endif
-
 /* Define this if you have struct sockaddr_storage */
 #define HAVE_STRUCT_SOCKADDR_STORAGE
 
@@ -396,7 +390,7 @@
 #undef _FILE_OFFSET_BITS
 
 /* Define for large files, on AIX-style hosts. */
-#undef _LARGE_FILES
+#define _LARGE_FILES
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
