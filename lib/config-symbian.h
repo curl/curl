@@ -802,3 +802,8 @@
 #ifdef _DEBUG
 /* #define CURLDEBUG */
 #endif
+
+/* sys/cdefs.h fails to define this for WINSCW */
+#ifndef __LONG_LONG_SUPPORTED
+#define __LONG_LONG_SUPPORTED
+#endif
