@@ -198,6 +198,7 @@ struct timeval {
 #endif /* HAVE_SEND */
 
 
+#if 0
 #if defined(HAVE_RECVFROM)
 /*
  * Currently recvfrom is only used on udp sockets.
@@ -234,6 +235,7 @@ struct timeval {
 #else
 #  define RECVFROM_ARG6_T RECVFROM_TYPE_ARG6
 #endif
+#endif /* if 0 */
 
 
 /*
