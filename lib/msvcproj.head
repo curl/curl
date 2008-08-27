@@ -100,7 +100,7 @@ LINK32=link.exe
 # PROP Intermediate_Dir "LIB-Debug"
 # PROP Target_Dir ""
 CPP=cl.exe
-# ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "." /I "..\include" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "BUILDING_LIBCURL" /FD /GZ /c
+# ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "." /I "..\include" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "BUILDING_LIBCURL" /D "CURL_STATICLIB" /FD /GZ /c
 # ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "." /I "..\include" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "BUILDING_LIBCURL" /D "CURL_STATICLIB" /FD /GZ /c
 RSC=rc.exe
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -125,7 +125,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "LIB-Release"
 # PROP Target_Dir ""
 CPP=cl.exe
-# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "." /I "..\include" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "BUILDING_LIBCURL" /FD /c
+# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "." /I "..\include" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "BUILDING_LIBCURL" /D "CURL_STATICLIB" /FD /c
 # ADD CPP /nologo /MD /W3 /GX /O2 /I "." /I "..\include" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "BUILDING_LIBCURL" /D "CURL_STATICLIB" /FD /c
 RSC=rc.exe
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
