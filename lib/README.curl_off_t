@@ -12,7 +12,7 @@ Transition from < 7.19.0 to >= 7.19.0
 Applications that used libcurl before 7.19.0 that are rebuilt with a libcurl
 that is 7.19.0 or later may or may not have to worry about anything of
 this. We have made a significant effort to make the transition really seamless
-and transparant.
+and transparent.
 
 You have have to take notice if you are in one of the following situations:
 
@@ -33,15 +33,15 @@ Benefits
 This new way has several benefits:
 
 o Platforms without LFS support can still use libcurl to do >32 bit file
-  transfers and range operations etc as long as they have >32 bit datatypes
+  transfers and range operations etc as long as they have >32 bit data-types
   supported.
 
 o Applications will no longer easily build with the curl_off_t size
   mismatched, which has been a very frequent (and annoying) problem with
   libcurl <= 7.18.2
 
-Historicly
-----------
+Historically
+------------
 
 Previously, before 7.19.0, the curl_off_t type would be rather strongly
 connected to the size of the system off_t type, where currently curl_off_t is
