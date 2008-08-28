@@ -129,7 +129,11 @@ $(DSP): msvcproj.head msvcproj.foot Makefile.am
 	echo "creating $(DSP)"
 	@(cp $(srcdir)/msvcproj.head $(DSP); \
 	echo "# Begin Group \"Source Files\"" $(DSPOUT); \
-	for file in $(WIN32SOURCES); do \
+        echo "" $(DSPOUT); \
+        echo "# PROP Default_Filter \"\"" $(DSPOUT); \
+        win32_srcs='$(WIN32SOURCES)'; \
+        sorted_srcs=`for file in $$win32_srcs; do echo $$file; done | sort`; \
+        for file in $$sorted_srcs; do \
 	echo "# Begin Source File" $(DSPOUT); \
 	echo "" $(DSPOUT); \
 	echo "SOURCE=.\\"$$file $(DSPOUT); \
@@ -137,7 +141,11 @@ $(DSP): msvcproj.head msvcproj.foot Makefile.am
 	done; \
 	echo "# End Group" $(DSPOUT); \
 	echo "# Begin Group \"Header Files\"" $(DSPOUT); \
-	for file in $(WIN32HEADERS); do \
+        echo "" $(DSPOUT); \
+        echo "# PROP Default_Filter \"\"" $(DSPOUT); \
+        win32_hdrs='$(WIN32HEADERS)'; \
+        sorted_hdrs=`for file in $$win32_hdrs; do echo $$file; done | sort`; \
+        for file in $$sorted_hdrs; do \
 	echo "# Begin Source File" $(DSPOUT); \
 	echo "" $(DSPOUT); \
 	echo "SOURCE=.\\"$$file $(DSPOUT); \
@@ -149,11 +157,15 @@ $(DSP): msvcproj.head msvcproj.foot Makefile.am
 $(VCPROJ): vc8proj.head vc8proj.foot Makefile.am
 	echo "creating $(VCPROJ)"
 	@(cp $(srcdir)/vc8proj.head $(VCPROJ); \
-	for file in $(WIN32SOURCES); do \
+        win32_srcs='$(WIN32SOURCES)'; \
+        sorted_srcs=`for file in $$win32_srcs; do echo $$file; done | sort`; \
+        for file in $$sorted_srcs; do \
 	echo "<File RelativePath=\""$$file"\"></File>" $(VCPROJOUT); \
 	done; \
 	echo "</Filter><Filter	Name=\"Header Files\">" $(VCPROJOUT); \
-	for file in $(WIN32HEADERS); do \
+        win32_hdrs='$(WIN32HEADERS)'; \
+        sorted_hdrs=`for file in $$win32_hdrs; do echo $$file; done | sort`; \
+        for file in $$sorted_hdrs; do \
 	echo "<File RelativePath=\""$$file"\"></File>" $(VCPROJOUT); \
 	done; \
 	cat $(srcdir)/vc8proj.foot $(VCPROJOUT) )
