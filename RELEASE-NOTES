@@ -58,6 +58,7 @@ This release includes the following bugfixes:
  o improved curl_m*printf() integral data type size and signedness handling
  o error when --dump-header - used with more than one URL
  o proxy closing connect during CONNECT with auth with the multi interface
+ o CURLOPT_UPLOAD sets HTTP method back to GET or HEAD when passed in a 0
 
 This release includes the following known bugs:
 

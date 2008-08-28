@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Fandrich (27 Aug 2008)
+- Fixed test case 1065 by changing the handling of CURLOPT_UPLOAD to set
+  the HTTP method to GET (or HEAD) when given a value of 0.
+
+- Added test cases 1068 and 1069 to test a simple HTTP PUT from stdin.  Test
+  case 1069 fails in a similar manner to test 1065 so is added to DISABLED.
+
 Yang Tse (27 Aug 2008)
 - Fix generation of MS VC6 .dsp file to make it support compilation of either
   dynamic (DLL) or static (LIB) libcurl libraries in debug and release modes.

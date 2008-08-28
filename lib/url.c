@@ -888,6 +888,9 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     if(data->set.upload)
       /* If this is HTTP, PUT is what's needed to "upload" */
       data->set.httpreq = HTTPREQ_PUT;
+    else
+      /* In HTTP, the opposite of upload is either GET or a HEAD */
+      data->set.httpreq = data->set.opt_no_body?HTTPREQ_HEAD:HTTPREQ_GET;
     break;
   case CURLOPT_FILETIME:
     /*

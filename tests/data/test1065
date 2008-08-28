@@ -3,6 +3,7 @@
 <keywords>
 HTTP
 HTTP PUT
+HTTP GET
 </keywords>
 </info>
 
@@ -35,7 +36,7 @@ http
 HTTP PUT with one file but two URLs
  </name>
  <command>
--H "Expect:" -T log/1065 http://%HOSTIP:%HTTPPORT/1065.upload1 http://%HOSTIP:%HTTPPORT/10650002.upload2
+-H "Expect:" -T log/1065 http://%HOSTIP:%HTTPPORT/1065.upload1 http://%HOSTIP:%HTTPPORT/10650002.url2
 </command>
 <file name="log/1065">
 test
@@ -54,10 +55,9 @@ Accept: */*
 Content-Length: 5
 
 test
-PUT /10650002.upload2 HTTP/1.1
+GET /10650002.url2 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Content-Length: 0
 
 </protocol>
 <stdout>
