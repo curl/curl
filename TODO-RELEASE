@@ -1,9 +1,6 @@
 To be addressed before 7.19.0 (planned release: August 2008)
 =============================
 
-144 - Help apps use 64bit/LFS libcurl!
-      TODO:
-       * Test it on the broadest combination of platforms and compilers.
 
 To be addressed before 7.19.1 (planned release: October 2008)
 =============================
