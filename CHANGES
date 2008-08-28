@@ -13,6 +13,10 @@ Daniel Stenberg (28 Aug 2008)
   get locked again so this is now fixed.
   http://curl.haxx.se/mail/lib-2008-08/0422.html
 
+- I'm abandoning the system with the web site mirrors (but keeping download
+  files bing mirrored) and thus I've changed the URL in the cookiejar header
+  to no longer use curlm.haxx.se but instead use the main site curl.haxx.se
+
 Daniel Fandrich (27 Aug 2008)
 - Fixed test case 1065 by changing the handling of CURLOPT_UPLOAD to set
   the HTTP method to GET (or HEAD) when given a value of 0.
