@@ -17,4 +17,9 @@ To be addressed before 7.19.1 (planned release: October 2008)
 161 - test case 1065 failure (HTTP PUT with one file but two URLs)
       http://curl.haxx.se/mail/archive-2008-08/0075.html
 
-162 - 
+162 - Craig Perras' note "http upload: how to stop on error"
+      http://curl.haxx.se/mail/archive-2008-08/0138.html Most possibly this is
+      also closely related to the bug "race condition while POSTing to
+      HTTP/1.0 servers" => http://curl.haxx.se/bug/view.cgi?id=2080222
+
+163 -
