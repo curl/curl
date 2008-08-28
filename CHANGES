@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (28 Aug 2008)
+- Dengminwen reported that libcurl would lock a (cookie) share twice (without
+  an unlock in between) for a certain case and that in fact works when using
+  regular windows mutexes but not with pthreads'! Locks should of course not
+  get locked again so this is now fixed.
+  http://curl.haxx.se/mail/lib-2008-08/0422.html
+
 Daniel Fandrich (27 Aug 2008)
 - Fixed test case 1065 by changing the handling of CURLOPT_UPLOAD to set
   the HTTP method to GET (or HEAD) when given a value of 0.
