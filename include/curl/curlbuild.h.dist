@@ -153,15 +153,26 @@
 /*    EXTERNAL INTERFACE SETTINGS FOR NON-CONFIGURE SYSTEMS ONLY    */
 /* ================================================================ */
 
-#if defined(__DJGPP__)
-#  define CURL_SIZEOF_LONG        4
-#  define CURL_TYPEOF_CURL_OFF_T  long
-#  define CURL_FORMAT_CURL_OFF_T  "ld"
-#  define CURL_FORMAT_CURL_OFF_TU "lu"
-#  define CURL_FORMAT_OFF_T       "%ld"
-#  define CURL_SIZEOF_CURL_OFF_T  4
-#  define CURL_SUFFIX_CURL_OFF_T  L
-#  define CURL_SUFFIX_CURL_OFF_TU UL
+#if defined(__DJGPP__) || defined(__GO32__)
+#  if defined(__DJGPP__) && (__DJGPP__ > 1)
+#    define CURL_SIZEOF_LONG        4
+#    define CURL_TYPEOF_CURL_OFF_T  long long
+#    define CURL_FORMAT_CURL_OFF_T  "lld"
+#    define CURL_FORMAT_CURL_OFF_TU "llu"
+#    define CURL_FORMAT_OFF_T       "%lld"
+#    define CURL_SIZEOF_CURL_OFF_T  8
+#    define CURL_SUFFIX_CURL_OFF_T  LL
+#    define CURL_SUFFIX_CURL_OFF_TU ULL
+#  else
+#    define CURL_SIZEOF_LONG        4
+#    define CURL_TYPEOF_CURL_OFF_T  long
+#    define CURL_FORMAT_CURL_OFF_T  "ld"
+#    define CURL_FORMAT_CURL_OFF_TU "lu"
+#    define CURL_FORMAT_OFF_T       "%ld"
+#    define CURL_SIZEOF_CURL_OFF_T  4
+#    define CURL_SUFFIX_CURL_OFF_T  L
+#    define CURL_SUFFIX_CURL_OFF_TU UL
+#  endif
 
 #elif defined(__SALFORDC__)
 #  define CURL_SIZEOF_LONG        4
