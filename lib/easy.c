@@ -959,7 +959,8 @@ CURLcode Curl_convert_from_network(struct SessionHandle *data,
             rc, curl_easy_strerror(rc));
     }
     return(rc);
-  } else {
+  }
+  else {
 #ifdef HAVE_ICONV
     /* do the translation ourselves */
     char *input_ptr, *output_ptr;
@@ -974,9 +975,9 @@ CURLcode Curl_convert_from_network(struct SessionHandle *data,
         error = ERRNO;
         failf(data,
               "The iconv_open(\"%s\", \"%s\") call failed with errno %i: %s",
-               CURL_ICONV_CODESET_OF_HOST,
-               CURL_ICONV_CODESET_OF_NETWORK,
-               error, strerror(error));
+              CURL_ICONV_CODESET_OF_HOST,
+              CURL_ICONV_CODESET_OF_NETWORK,
+              error, strerror(error));
         return CURLE_CONV_FAILED;
       }
     }
@@ -988,8 +989,8 @@ CURLcode Curl_convert_from_network(struct SessionHandle *data,
     if((rc == ICONV_ERROR) || (in_bytes != 0)) {
       error = ERRNO;
       failf(data,
-        "The Curl_convert_from_network iconv call failed with errno %i: %s",
-             error, strerror(error));
+            "The Curl_convert_from_network iconv call failed with errno %i: %s",
+            error, strerror(error));
       return CURLE_CONV_FAILED;
     }
 #else
@@ -1035,9 +1036,9 @@ CURLcode Curl_convert_from_utf8(struct SessionHandle *data,
         error = ERRNO;
         failf(data,
               "The iconv_open(\"%s\", \"%s\") call failed with errno %i: %s",
-               CURL_ICONV_CODESET_OF_HOST,
-               CURL_ICONV_CODESET_FOR_UTF8,
-               error, strerror(error));
+              CURL_ICONV_CODESET_OF_HOST,
+              CURL_ICONV_CODESET_FOR_UTF8,
+              error, strerror(error));
         return CURLE_CONV_FAILED;
       }
     }
@@ -1049,8 +1050,8 @@ CURLcode Curl_convert_from_utf8(struct SessionHandle *data,
     if((rc == ICONV_ERROR) || (in_bytes != 0)) {
       error = ERRNO;
       failf(data,
-        "The Curl_convert_from_utf8 iconv call failed with errno %i: %s",
-             error, strerror(error));
+            "The Curl_convert_from_utf8 iconv call failed with errno %i: %s",
+            error, strerror(error));
       return CURLE_CONV_FAILED;
     }
     if(output_ptr < input_ptr) {
