@@ -232,7 +232,7 @@ typedef enum {
 #  include <io.h>
 #  include <sys/types.h>
 #  include <sys/stat.h>
-#  define lseek(fdes,offset,whence)  _lseek(fdes, offset, whence)
+#  define lseek(fdes,offset,whence)  _lseek(fdes, (long)offset, whence)
 #  define fstat(fdes,stp)            _fstat(fdes, stp)
 #  define stat(fname,stp)            _stat(fname, stp)
 #  define struct_stat                struct _stat
