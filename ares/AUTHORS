@@ -1,34 +1,37 @@
 c-ares is based on ares, and these are the people that have worked on it since
 the fork was made:
 
-Daniel Stenberg
-Dominick Meglio
-liren at vivisimo.com
-James Bursa
-Duncan Wilcox
-Dirk Manske
+Alexander Lazic
+Alexey Simak
+Andreas Rieke
+Ashish Sharma
+Brad House
+Brad Spencer
+Bram Matthys
 Dan Fandrich
+Daniel Stenberg
+Dirk Manske
+Dominick Meglio
+Doug Goldstein
+Duncan Wilcox
+Eino Tuominen
+Erik Kline
+George Neill
 Gisle Vanem
+Guilherme Balena Versiani
 Gunter Knauf
 Henrik Stoerner
-Yang Tse
-Nick Mathewson
-Alexander Lazic
-Andreas Rieke
-Guilherme Balena Versiani
-Brad Spencer
-Ravi Pratap
-William Ahern
-Bram Matthys
+James Bursa
 Michael Wallner
-Vlad Dinulescu
-Brad House
-Shmulik Regev
-Ashish Sharma
-Steinar H. Gunderson
+Nick Mathewson
+Phil Blundell
+Ravi Pratap
 Robin Cornelius
-Erik Kline
-Alexey Simak
-Eino Tuominen
-Doug Goldstein
 Sebastian at basti79.de
+Shmulik Regev
+Steinar H. Gunderson
+Tofu Linden
+Vlad Dinulescu
+William Ahern
+Yang Tse
+liren at vivisimo.com
