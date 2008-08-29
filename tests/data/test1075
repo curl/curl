@@ -1,0 +1,94 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP PUT
+HTTP Basic auth
+--anyauth
+</keywords>
+</info>
+
+# Server-side
+<reply>
+# The test server provides no way to respond differently to a subsequent
+# Basic authenticated request (we really want to respond with 200 for
+# the second), so just respond with 401 for both and let curl deal with it.
+<data>
+HTTP/1.1 401 Authorization Required
+Server: testcurl
+WWW-Authenticate: Blackmagic realm="gimme all yer s3cr3ts"
+WWW-Authenticate: Basic realm="gimme all yer s3cr3ts"
+WWW-Authenticate: X-bogus-auth realm="gimme all yer s3cr3ts"
+Content-Type: text/plain
+Content-Length: 0
+
+</data>
+<datacheck>
+HTTP/1.1 401 Authorization Required
+Server: testcurl
+WWW-Authenticate: Blackmagic realm="gimme all yer s3cr3ts"
+WWW-Authenticate: Basic realm="gimme all yer s3cr3ts"
+WWW-Authenticate: X-bogus-auth realm="gimme all yer s3cr3ts"
+Content-Type: text/plain
+Content-Length: 0
+
+HTTP/1.1 401 Authorization Required
+Server: testcurl
+WWW-Authenticate: Blackmagic realm="gimme all yer s3cr3ts"
+WWW-Authenticate: Basic realm="gimme all yer s3cr3ts"
+WWW-Authenticate: X-bogus-auth realm="gimme all yer s3cr3ts"
+Content-Type: text/plain
+Content-Length: 0
+
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP PUT with --anyauth authorization (picking Basic)
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/1075 -T log/put1075 -u testuser:testpass --anyauth
+</command>
+<file name="log/put1075">
+This is data we upload with PUT
+a second line
+line three
+four is the number of lines
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+PUT /1075 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 85
+Expect: 100-continue
+
+This is data we upload with PUT
+a second line
+line three
+four is the number of lines
+PUT /1075 HTTP/1.1
+Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 85
+Expect: 100-continue
+
+This is data we upload with PUT
+a second line
+line three
+four is the number of lines
+</protocol>
+</verify>
+</testcase>

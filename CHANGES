@@ -6,6 +6,15 @@
 
                                   Changelog
 
+Daniel Fandrich (29 Aug 2008)
+- Added tests 1071 through 1074 to test automatic downgrading from HTTP 1.1
+  to HTTP 1.0 upon receiving a response from the HTTP server.  Tests 1072
+  and 1073 are similar to test 1069 in that they involve the impossible
+  scenario of sending chunked data to a HTTP 1.0 server.  All these fail
+  and are added to DISABLED.
+
+- Added test 1075 to test --anyauth with Basic authentication.
+
 Daniel Stenberg (29 Aug 2008)
 - When libcurl was doing a HTTP POST and the server would respond with
   "Connection: close" and actually close the connection after the

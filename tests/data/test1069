@@ -3,13 +3,14 @@
 <keywords>
 HTTP
 HTTP PUT
+HTTP/1.0
 </keywords>
 </info>
 
 # Server-side
 <reply>
 <data>
-HTTP/1.0 200 OK swsclose
+HTTP/1.0 500 Impossible swsclose
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 
@@ -30,21 +31,14 @@ HTTP 1.0 PUT from stdin with no content length
 http://%HOSTIP:%HTTPPORT/bzz/1069 -T - -0
 </command>
 <stdin>
-more than one byte
+this data can't be sent
 </stdin>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-PUT /bzz/1069 HTTP/1.0
-Host: %HOSTIP:%HTTPPORT
-Accept: */*
-Content-Length: 0
-
-</protocol>
+<errorcode>
+25
+</errorcode>
 </verify>
 </testcase>
