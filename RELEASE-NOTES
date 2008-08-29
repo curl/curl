@@ -60,6 +60,7 @@ This release includes the following bugfixes:
  o proxy closing connect during CONNECT with auth with the multi interface
  o CURLOPT_UPLOAD sets HTTP method back to GET or HEAD when passed in a 0
  o shared cookies could get locked twice
+ o deal with closed connection while doing POST/PUT
 
 This release includes the following known bugs:
 

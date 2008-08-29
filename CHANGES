@@ -6,6 +6,18 @@
 
                                   Changelog
 
+Daniel Stenberg (29 Aug 2008)
+- When libcurl was doing a HTTP POST and the server would respond with
+  "Connection: close" and actually close the connection after the
+  response-body, libcurl could still have outstanding data to send and it
+  would not properly notice this and stop sending. This caused weirdness and
+  sad faces. http://curl.haxx.se/bug/view.cgi?id=2080222
+
+  Note that there are still reasons to consider libcurl's behavior when
+  getting a >= 400 response code while sending data, as Craig Perras' note
+  "http upload: how to stop on error" specifies:
+  http://curl.haxx.se/mail/archive-2008-08/0138.html
+
 Daniel Stenberg (28 Aug 2008)
 - Dengminwen reported that libcurl would lock a (cookie) share twice (without
   an unlock in between) for a certain case and that in fact works when using

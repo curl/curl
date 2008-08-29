@@ -656,6 +656,15 @@ static CURLcode readwrite_data(struct SessionHandle *data,
 
   } while(data_pending(conn));
 
+  if(((k->keepon & (KEEP_READ|KEEP_WRITE)) == KEEP_WRITE) &&
+     conn->bits.close ) {
+    /* When we've read the entire thing and the close bit is set, the server may
+       now close the connection. If there's now any kind of sending going on from
+       our side, we need to stop that immediately. */
+    infof(data, "we are done reading and this is set to close, stop send\n");
+    k->keepon &= ~KEEP_WRITE; /* no writing anymore either */
+  }
+
   return CURLE_OK;
 }
 

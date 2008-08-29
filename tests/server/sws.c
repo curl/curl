@@ -99,6 +99,10 @@ struct httprequest {
   bool ntlm;      /* Authorization ntlm header found */
   int pipe;       /* if non-zero, expect this many requests to do a "piped"
                      request/response */
+  int skip;       /* if non-zero, the server is instructed to not read this
+                     many bytes from a PUT/POST request. Ie the client sends N
+                     bytes said in Content-Length, but the server only reads N
+                     - skip bytes. */
   int rcmd;       /* doing a special command, see defines above */
   int prot_version; /* HTTP version * 10 */
   bool pipelining; /* true if request is pipelined */
@@ -303,6 +307,13 @@ int ProcessRequest(struct httprequest *req)
             req->pipe = num-1; /* decrease by one since we don't count the
                                   first request in this number */
           }
+          else if(1 == sscanf(cmd, "skip: %d", &num)) {
+            logmsg("instructed to skip this number of bytes %d", num);
+            req->skip = num;
+          }
+          else {
+            logmsg("funny instruction found: %s", cmd);
+          }
           free(cmd);
         }
       }
@@ -351,7 +362,7 @@ int ProcessRequest(struct httprequest *req)
        headers, for the pipelining case mostly */
     req->checkindex += (end - line) + strlen(END_OF_HEADERS);
 
-  /* **** Persistency ****
+  /* **** Persistence ****
    *
    * If the request is a HTTP/1.0 one, we close the connection unconditionally
    * when we're done.
@@ -363,14 +374,17 @@ int ProcessRequest(struct httprequest *req)
    */
 
   do {
-    if(!req->cl && curlx_strnequal("Content-Length:", line, 15)) {
+    if((req->cl<=0) && curlx_strnequal("Content-Length:", line, 15)) {
       /* If we don't ignore content-length, we read it and we read the whole
          request including the body before we return. If we've been told to
          ignore the content-length, we will return as soon as all headers
          have been received */
-      req->cl = strtol(line+15, &line, 10);
+      size_t cl = strtol(line+15, &line, 10);
+      req->cl = cl - req->skip;
 
-      logmsg("Found Content-Length: %d in the request", req->cl);
+      logmsg("Found Content-Length: %d in the request", cl);
+      if(req->skip)
+        logmsg("... but will abort after %d bytes", req->cl);
       break;
     }
     else if(curlx_strnequal("Transfer-Encoding: chunked", line,
@@ -457,7 +471,7 @@ int ProcessRequest(struct httprequest *req)
   if(req->auth_req && !req->auth)
     return 1;
 
-  if(req->cl) {
+  if(req->cl > 0) {
     if(req->cl <= req->offset - (end - req->reqbuf) - strlen(END_OF_HEADERS))
       return 1; /* done */
     else
@@ -552,6 +566,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
   req->digest = FALSE;
   req->ntlm = FALSE;
   req->pipe = 0;
+  req->skip = 0;
   req->rcmd = RCMD_NORMALREQ;
   req->prot_version = 0;
   req->pipelining = FALSE;
@@ -564,8 +579,15 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
       got = pipereq_length;
       pipereq_length = 0;
     }
-    else
-      got = sread(sock, reqbuf + req->offset, REQBUFSIZ-1 - req->offset);
+    else {
+      if(req->skip)
+        /* we are instructed to not read the entire thing, so we make sure to only
+           read what we're supposed to and NOT read the enire thing the client
+           wants to send! */
+        got = sread(sock, reqbuf + req->offset, req->cl);
+      else
+        got = sread(sock, reqbuf + req->offset, REQBUFSIZ-1 - req->offset);
+    }
     if (got <= 0) {
       if (got < 0) {
         logmsg("recv() returned error: %d", SOCKERRNO);
