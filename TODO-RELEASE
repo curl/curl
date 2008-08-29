@@ -11,10 +11,13 @@ To be addressed before 7.19.1 (planned release: October 2008)
 158 - Martin Drasar's CURLOPT_POSTREDIR work:
       http://curl.haxx.se/mail/lib-2008-08/0170.html
 
-161 - test case 1065 failure (HTTP PUT with one file but two URLs)
-      http://curl.haxx.se/mail/archive-2008-08/0075.html
-
 162 - Craig Perras' note "http upload: how to stop on error"
       http://curl.haxx.se/mail/archive-2008-08/0138.html
 
-163 -
+163 - Detecting illegal attempts at chunked transfers on HTTP 1.0
+      (tests 1069, 1072, 1073)
+      http://curl.haxx.se/mail/archive-2008-08/0435.html
+
+164 - Automatic downgrading to HTTP 1.0 (tests 1071 through 1074)
+
+165 -
