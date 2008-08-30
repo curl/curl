@@ -26,7 +26,8 @@ AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I m4
 
 EXTRA_DIST = CHANGES COPYING maketgz reconf Makefile.dist curl-config.in \
- curl-style.el sample.emacs RELEASE-NOTES buildconf buildconf.bat libcurl.pc.in
+ curl-style.el sample.emacs RELEASE-NOTES buildconf buildconf.bat 	 \
+ libcurl.pc.in vc6curl.dsw
 
 bin_SCRIPTS = curl-config
 
