@@ -20,4 +20,7 @@ To be addressed before 7.19.1 (planned release: October 2008)
 
 164 - Automatic downgrading to HTTP 1.0 (tests 1071 through 1074)
 
-165 -
+165 - "Problem with CURLOPT_RESUME_FROM and CURLOPT_APPEND" by Daniele Pinau,
+      recipe: http://curl.haxx.se/mail/lib-2008-08/0439.html
+
+166 -
