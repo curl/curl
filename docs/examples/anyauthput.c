@@ -9,10 +9,23 @@
  */
 
 #include <stdio.h>
-#include <stdint.h>
 #include <fcntl.h>
+#ifdef WIN32
+#  include <io.h>
+#else
+#  include <stdint.h>
+#  include <unistd.h>
+#endif
+#include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
+
+#ifdef _MSC_VER
+#  ifdef _WIN64
+     typedef __int64 intptr_t;
+#  else
+     typedef int intptr_t;
+#  endif
+#endif
 
 #include <curl/curl.h>
 

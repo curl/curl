@@ -205,6 +205,10 @@ static long          init_flags;
 #define system_strdup strdup
 #endif
 
+#if defined(_MSC_VER) && defined(_DLL)
+#  pragma warning(disable:4232) /* MSVC extension, dllimport identity */
+#endif
+
 #ifndef __SYMBIAN32__
 /*
  * If a memory-using function (like curl_getenv) is used before
@@ -225,6 +229,10 @@ curl_free_callback Curl_cfree;
 curl_realloc_callback Curl_crealloc;
 curl_strdup_callback Curl_cstrdup;
 curl_calloc_callback Curl_ccalloc;
+#endif
+
+#if defined(_MSC_VER) && defined(_DLL)
+#  pragma warning(default:4232) /* MSVC extension, dllimport identity */
 #endif
 
 /**

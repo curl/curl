@@ -21,6 +21,9 @@
 
 #include <curl/curl.h>
 
+#if defined(_MSC_VER) && (_MSC_VER < 1300)
+#  error _snscanf requires MSVC 7.0 or later.
+#endif
 
 /* The MinGW headers are missing a few Win32 function definitions,
    you shouldn't need this if you use VC++ */

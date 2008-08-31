@@ -16,11 +16,10 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <curl/multi.h>
-#ifdef WIN32
-#include <windows.h>
+#ifndef WIN32
+#  include <unistd.h>
 #endif
+#include <curl/multi.h>
 
 static const char *urls[] = {
   "http://www.microsoft.com",
