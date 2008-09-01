@@ -1,6 +1,6 @@
-Curl and libcurl 7.19.0
+Curl and libcurl 7.19.1
 
- Public curl releases:         106
+ Public curl releases:         107
  Command line options:         127
  curl_easy_setopt() options:   153
  Public functions in libcurl:  58
@@ -9,61 +9,11 @@ Curl and libcurl 7.19.0
 
 This release includes the following changes:
 
- o curl_off_t gets its size/typedef somewhat differently than before. This _may_
-   cause an ABI change for you. See lib/README.curl_off_t for a full explanation.
- 
- o Added CURLINFO_PRIMARY_IP
- o Added CURLOPT_CRLFILE and CURLE_SSL_CRL_BADFILE
- o Added CURLOPT_ISSUERCERT and CURLE_SSL_ISSUER_ERROR
- o curl's option parser for boolean options reworked
- o Added --remote-name-all
- o Now builds for the INTEGRITY operating system
- o Added CURLINFO_APPCONNECT_TIME
- o Added test selection by key word in runtests.pl
- o the curl tool's -w option support the %{ssl_verify_result} variable
- o Added CURLOPT_ADDRESS_SCOPE and scope parsing of the URL according to RFC4007
- o Support --append on SFTP uploads (not with OpenSSH, though)
- o Added curlbuild.h and curlrules.h to the external library interface
+ o 
 
 This release includes the following bugfixes:
 
- o Fixed curl-config --ca
- o Fixed the multi interface connection re-use with NSS-built libcurl
- o connection re-use when using the multi interface with pipelining enabled
- o curl_multi_socket() socket callback fix for close/re-create sockets case
- o SCP or SFTP over socks proxy crashed
- o RC4-MD5 cipher now works with NSS-built libcurl
- o range requests with --head are now done correctly
- o fallback to gettimeofday when monotonic clock is unavailable at run-time
- o range numbers could be made to wrongly get output as signed
- o unexpected 1xx responses hung transfers
- o FTP transfers segfault when using different CURLOPT_FTP_FILEMETHOD
- o c-ares powered libcurls can resolve/use IPv6 addresses
- o poll not working on Windows Vista due to POLLPRI being incorrectly used
- o user-agent in CONNECT with non-HTTP protocols
- o CURL_READFUNC_PAUSE problems fixed
- o --use-ascii now works on Symbian OS, MS-DOS and OS/2
- o CURLINFO_SSL_VERIFYRESULT is fixed
- o FTP URLs and IPv6 URLs mangled when sent to proxy with CURLOPT_PORT set
- o a user name in a proxy URL without a password was parsed incorrectly
- o library will now be built with _REENTRANT symbol defined only if needed
- o no longer link with gdi32 on Windows cross-compiled targets
- o HTTP PUT with -C - sent bad Content-Range: header
- o HTTP PUT or POST with redirect could lead to hang
- o re-use of connections with failed SSL connects in the multi interface
- o NTLM over proxy state was wrongly cleared when host connection was closed
- o Windows SSPI DLL loading is now done in curl_global_init()
- o runtests.pl has an improved find-stunnel-and-invoke
- o FTP sessions could go out of sync on a long header boundary condition
- o potential buffer overflows in the MS-DOS command-line port fixed
- o --stderr is now honoured with the -v option
- o memory leak in libcurl on Windows built with OpenSSL
- o improved curl_m*printf() integral data type size and signedness handling
- o error when --dump-header - used with more than one URL
- o proxy closing connect during CONNECT with auth with the multi interface
- o CURLOPT_UPLOAD sets HTTP method back to GET or HEAD when passed in a 0
- o shared cookies could get locked twice
- o deal with closed connection while doing POST/PUT
+ o 
 
 This release includes the following known bugs:
 
@@ -76,13 +26,6 @@ Other curl-related news:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Lenny Rachitsky, Axel Tillequin, Arnaud Ebalard, Yang Tse, Dan Fandrich,
- Rob Crittenden, Dengminwen, Christopher Palow, Hans-Jurgen May,
- Phil Pellouchoud, Eduard Bloch, John Lightsey, Stephen Collyer, Tor Arntsen,
- Rolland Dudemaine, Phil Blundell, Scott Barrett, Andreas Schuldei,
- Peter Lamberg, David Bau, Pramod Sharma, Yehoshua Hershberg,
- Constantine Sapuntzakis, Lars Nilsson, Andy Tsouladze, Jamie Lokier,
- Vincent Le Normand
-
+ 
 
         Thanks! (and sorry if I forgot to mention someone)
