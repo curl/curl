@@ -8,6 +8,9 @@ Curl and libcurl 7.19.0
  Contributors:                 654
 
 This release includes the following changes:
+
+ o curl_off_t gets its size/typedef somewhat differently than before. This _may_
+   cause an ABI change for you. See lib/README.curl_off_t for a full explanation.
  
  o Added CURLINFO_PRIMARY_IP
  o Added CURLOPT_CRLFILE and CURLE_SSL_CRL_BADFILE
