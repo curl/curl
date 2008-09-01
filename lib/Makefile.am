@@ -27,7 +27,7 @@ VCPROJ = curllib.vcproj
 
 DOCS = README.encoding README.memoryleak README.ares README.curlx	\
  README.hostip README.multi_socket README.httpauth README.pipelining    \
- README.NSS
+ README.NSS README.curl_off_t
 
 EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 Makefile.riscos $(DSP) \
  curllib.dsw config-win32.h config-win32ce.h config-riscos.h config-mac.h  \
