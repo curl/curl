@@ -6,6 +6,8 @@
 
                                   Changelog
 
+Version 7.19.0 (1 September 2008)
+
 Daniel Fandrich (29 Aug 2008)
 - Added tests 1071 through 1074 to test automatic downgrading from HTTP 1.1
   to HTTP 1.0 upon receiving a response from the HTTP server.  Tests 1072
