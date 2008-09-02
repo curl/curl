@@ -619,7 +619,7 @@ Curl_addrinfo *Curl_ip2addr(in_addr_t num, const char *hostname, int port)
   h->h_aliases = NULL;
 
   /* Now store the dotted version of the address */
-  snprintf((char *)h->h_name, 16, "%s", hostname);
+  snprintf(h->h_name, 16, "%s", hostname);
 
 #if defined(VMS) && \
     defined(__INITIAL_POINTER_SIZE) && (__INITIAL_POINTER_SIZE == 64)

@@ -765,7 +765,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
     else if(rc > 0) {
       /* It seems that this string is not always NULL terminated */
       tempHome[rc] = '\0';
-      sshc->homedir = (char *)strdup(tempHome);
+      sshc->homedir = strdup(tempHome);
       if(!sshc->homedir) {
         state(conn, SSH_SFTP_CLOSE);
         sshc->actualcode = CURLE_OUT_OF_MEMORY;

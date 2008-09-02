@@ -117,7 +117,7 @@ size_t Curl_base64_decode(const char *src, unsigned char **outptr)
   /* Decode all but the last quantum (which may not decode to a
   multiple of 3 bytes) */
   for(i = 0; i < numQuantums - 1; i++) {
-    decodeQuantum((unsigned char *)newstr, src);
+    decodeQuantum(newstr, src);
     newstr += 3; src += 4;
   }
 
@@ -153,7 +153,7 @@ size_t Curl_base64_encode(struct SessionHandle *data,
   char *convbuf = NULL;
 #endif
 
-  char *indata = (char *)inp;
+  const char *indata = inp;
 
   *outptr = NULL; /* set to NULL in case of failure before we reach the end */
 

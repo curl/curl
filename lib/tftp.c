@@ -803,7 +803,7 @@ static CURLcode tftp_do(struct connectdata *conn, bool *done)
           break;
         case TFTP_EVENT_ERROR:
           state->error = (tftp_error_t)getrpacketblock(&state->rpacket);
-          infof(data, "%s\n", (char *)&state->rpacket.data[4]);
+          infof(data, "%s\n", (const char *)&state->rpacket.data[4]);
           break;
         case TFTP_EVENT_ACK:
           break;
