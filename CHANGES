@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Fandrich (2 Sep 2008)
+- Fixed an out of memory problem that caused torture test failures in tests
+  706 and 707.
+
 Daniel Stenberg (2 Sep 2008)
 - Keith Mok added supported_protocols and supported_features to the pkg-config
   file for libcurl, and while doing that fix he unified with curl-config.in
