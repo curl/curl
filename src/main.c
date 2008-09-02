@@ -3867,7 +3867,7 @@ static void dumpeasycode(struct Configurable *config)
         if(!memcmp((char *)c, "[m]", 3)) {
 #if defined(_FILE_OFFSET_BITS) && (_FILE_OFFSET_BITS > 32)
           fprintf(out, "#define _FILE_OFFSET_BITS %d "
-                  "/* for curl_off_t magic */\n",
+                  "/* for pre libcurl 7.19.0 curl_off_t magic */\n",
                   _FILE_OFFSET_BITS);
 #endif
         }
