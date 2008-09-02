@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (2 Sep 2008)
+- Keith Mok added supported_protocols and supported_features to the pkg-config
+  file for libcurl, and while doing that fix he unified with curl-config.in
+  how the supported protocols and features are extracted and used, so both those
+  tools should now always be synced.
+
 Version 7.19.0 (1 September 2008)
 
 Daniel Fandrich (29 Aug 2008)

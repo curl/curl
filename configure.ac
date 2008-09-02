@@ -2546,6 +2546,78 @@ LIBS=$ALL_LIBS  dnl LIBS is a magic variable that's used for every link
 
 AM_CONDITIONAL(CROSSCOMPILING, test x$cross_compiling = xyes)
 
+dnl
+dnl For keeping supported features and protocols also in pkg-config file
+dnl since it is more cross-compile frient than curl-config
+dnl
+
+if test "x$USE_SSLEAY" = "x1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES SSL"
+elif test -n "$SSL_ENABLED"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES SSL"
+fi
+if test "@KRB4_ENABLED@" = "x1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES KRB4"
+fi
+if test "x$IPV6_ENABLED" = "x1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES IPv6"
+fi
+if test "x$HAVE_LIBZ" = "x1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES libz"
+fi
+if test "x$HAVE_ARES" = "x1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES AsynchDNS"
+fi
+if test "x$IDN_ENABLED" = "x1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES IDN"
+fi
+if test "x$USE_WINDOWS_SSPI" = "x1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES SSPI"
+fi
+if test "x$USE_SSLEAY" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM"
+fi
+
+AC_SUBST(SUPPORT_FEATURES)
+
+dnl For supported protocols in pkg-config file
+if test "x$CURL_DISABLE_HTTP" != "x1"; then
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS HTTP"
+  if test "x$SSL_ENABLED" = "x1"; then
+    SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS HTTPS"
+  fi
+fi
+if test "x$CURL_DISABLE_FTP" != "x1"; then
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS FTP"
+  if test "x$SSL_ENABLED" = "x1"; then
+    SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS FTPS"
+  fi
+fi
+if test "x$CURL_DISABLE_FILE" != "x1"; then
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS FILE"
+fi
+if test "x$CURL_DISABLE_TELNET" != "x1"; then
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS TELNET"
+fi
+if test "x$CURL_DISABLE_LDAP" != "x1"; then
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS LDAP"
+fi
+if test "x$CURL_DISABLE_LDAPS" != "x1"; then
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS LDAPS"
+fi
+if test "x$CURL_DISABLE_DICT" != "x1"; then
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS DICT"
+fi
+if test "x$CURL_DISABLE_TFTP" != "x1"; then
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS TFTP"
+fi
+if test "x$USE_LIBSSH2" = "x1"; then
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SCP"
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SFTP"
+fi
+
+AC_SUBST(SUPPORT_PROTOCOLS)
+
 AC_CONFIG_FILES([Makefile \
            docs/Makefile \
            docs/examples/Makefile \

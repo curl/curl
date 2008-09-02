@@ -9,7 +9,7 @@ Curl and libcurl 7.19.1
 
 This release includes the following changes:
 
- o 
+ o pkg-config can now show supported_protocols and supported_features
 
 This release includes the following bugfixes:
 
@@ -26,6 +26,6 @@ Other curl-related news:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- 
+ Keith Mok, Yang Tse
 
         Thanks! (and sorry if I forgot to mention someone)

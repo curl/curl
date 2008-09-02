@@ -80,71 +80,15 @@ while test $# -gt 0; do
 	;;
 
     --feature|--features)
-	if test "@USE_SSLEAY@" = "1"; then
-          echo "SSL"
-          NTLM=1 # OpenSSL implies NTLM
-        elif test -n "@SSL_ENABLED@"; then
-          echo "SSL"
-        fi
-	if test "@KRB4_ENABLED@" = "1"; then
-          echo "KRB4"
-        fi
-	if test "@IPV6_ENABLED@" = "1"; then
-          echo "IPv6"
-        fi
-	if test "@HAVE_LIBZ@" = "1"; then
-          echo "libz"
-        fi
-	if test "@HAVE_ARES@" = "1"; then
-          echo "AsynchDNS"
-        fi
-	if test "@IDN_ENABLED@" = "1"; then
-          echo "IDN"
-        fi
-	if test "@USE_WINDOWS_SSPI@" = "1"; then
-          echo "SSPI"
-          NTLM=1
-        fi
-	if test "$NTLM" = "1"; then
-          echo "NTLM"
-        fi
+        for feature in @SUPPORT_FEATURES@; do
+            echo $feature;
+        done
 	;;
 
     --protocols)
-	if test "@CURL_DISABLE_HTTP@" != "1"; then
-          echo "HTTP"
-	  if test "@SSL_ENABLED@" = "1"; then
-            echo "HTTPS"
-          fi
-        fi
-	if test "@CURL_DISABLE_FTP@" != "1"; then
-          echo "FTP"
-	  if test "@SSL_ENABLED@" = "1"; then
-            echo "FTPS"
-          fi
-        fi
-	if test "@CURL_DISABLE_FILE@" != "1"; then
-          echo "FILE"
-        fi
-	if test "@CURL_DISABLE_TELNET@" != "1"; then
-          echo "TELNET"
-        fi
-	if test "@CURL_DISABLE_LDAP@" != "1"; then
-          echo "LDAP"
-        fi
-	if test "@CURL_DISABLE_LDAPS@" != "1"; then
-          echo "LDAPS"
-        fi
-	if test "@CURL_DISABLE_DICT@" != "1"; then
-          echo "DICT"
-        fi
-	if test "@CURL_DISABLE_TFTP@" != "1"; then
-          echo "TFTP"
-        fi
-	if test "@USE_LIBSSH2@" = "1"; then
-          echo "SCP"
-          echo "SFTP"
-        fi
+        for protocol in @SUPPORT_PROTOCOLS@; do
+            echo $protocol;
+        done
 	;;
     --version)
 	echo libcurl @VERSION@

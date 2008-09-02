@@ -28,6 +28,8 @@ prefix=@prefix@
 exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
+supported_protocols="@SUPPORT_PROTOCOLS@"
+supported_features="@SUPPORT_FEATURES@"
 
 Name: libcurl
 URL: http://curl.haxx.se/
