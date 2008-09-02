@@ -370,7 +370,7 @@ static void lm_resp(unsigned char *keys,
  * Set up lanmanager hashed password
  */
 static void mk_lm_hash(struct SessionHandle *data,
-                       char *password,
+                       const char *password,
                        unsigned char *lmbuffer /* 21 bytes */)
 {
   unsigned char pw[14];
@@ -418,7 +418,7 @@ static void mk_lm_hash(struct SessionHandle *data,
   }
 
 #if USE_NTRESPONSES
-static void utf8_to_unicode_le(unsigned char *dest, const char *src,
+static void ascii_to_unicode_le(unsigned char *dest, const char *src,
                                size_t srclen)
 {
   size_t i;
@@ -432,7 +432,7 @@ static void utf8_to_unicode_le(unsigned char *dest, const char *src,
  * Set up nt hashed passwords
  */
 static CURLcode mk_nt_hash(struct SessionHandle *data,
-                           char *password,
+                           const char *password,
                            unsigned char *ntbuffer /* 21 bytes */)
 {
   size_t len = strlen(password);
@@ -440,7 +440,7 @@ static CURLcode mk_nt_hash(struct SessionHandle *data,
   if(!pw)
     return CURLE_OUT_OF_MEMORY;
 
-  utf8_to_unicode_le(pw, password, len);
+  ascii_to_unicode_le(pw, password, len);
 
 #ifdef CURL_DOES_CONVERSIONS
   /*
@@ -524,8 +524,8 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
   char **allocuserpwd;
 
   /* point to the name and password for this */
-  char *userp;
-  char *passwdp;
+  const char *userp;
+  const char *passwdp;
   /* point to the correct struct with this */
   struct ntlmdata *ntlm;
   struct auth *authp;
@@ -551,10 +551,10 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 
   /* not set means empty */
   if(!userp)
-    userp=(char *)"";
+    userp="";
 
   if(!passwdp)
-    passwdp=(char *)"";
+    passwdp="";
 
 #ifdef USE_WINDOWS_SSPI
   if (s_hSecDll == NULL) {

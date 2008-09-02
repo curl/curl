@@ -325,7 +325,7 @@ static char *memdup(const char *src, size_t buffer_length)
   }
   else
     /* no length and a NULL src pointer! */
-    return strdup((char *)"");
+    return strdup("");
 
   buffer = (char*)malloc(length+add);
   if(!buffer)

@@ -2878,7 +2878,7 @@ static bool tld_check_name(struct SessionHandle *data,
   char *uc_name = NULL;
   int rc;
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-  char *tld_errmsg = (char *)"<no msg>";
+  const char *tld_errmsg = "<no msg>";
 #else
   (void)data;
 #endif
@@ -2892,7 +2892,7 @@ static bool tld_check_name(struct SessionHandle *data,
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 #ifdef HAVE_TLD_STRERROR
   if(rc != TLD_SUCCESS)
-    tld_errmsg = (char *)tld_strerror((Tld_rc)rc);
+    tld_errmsg = tld_strerror((Tld_rc)rc);
 #endif
   if(rc == TLD_INVALID)
     infof(data, "WARNING: %s; pos %u = `%c'/0x%02X\n",

@@ -232,8 +232,8 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   struct timeval now;
 
   char **allocuserpwd;
-  char *userp;
-  char *passwdp;
+  const char *userp;
+  const char *passwdp;
   struct auth *authp;
 
   struct SessionHandle *data = conn->data;
@@ -276,10 +276,10 @@ CURLcode Curl_output_digest(struct connectdata *conn,
 
   /* not set means empty */
   if(!userp)
-    userp=(char *)"";
+    userp="";
 
   if(!passwdp)
-    passwdp=(char *)"";
+    passwdp="";
 
   if(!d->nonce) {
     authp->done = FALSE;

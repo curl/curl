@@ -101,7 +101,7 @@ get_gss_name(struct connectdata *conn, bool proxy, gss_name_t *server)
 }
 
 static void
-log_gss_error(struct connectdata *conn, OM_uint32 error_status, char *prefix)
+log_gss_error(struct connectdata *conn, OM_uint32 error_status, const char *prefix)
 {
   OM_uint32 maj_stat, min_stat;
   OM_uint32 msg_ctx = 0;
@@ -257,7 +257,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
   if(GSS_ERROR(major_status)) {
     /* Curl_cleanup_negotiate(conn->data) ??? */
     log_gss_error(conn, minor_status,
-                  (char *)"gss_init_sec_context() failed: ");
+                  "gss_init_sec_context() failed: ");
     return -1;
   }
 
