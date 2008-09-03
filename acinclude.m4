@@ -3444,6 +3444,7 @@ dnl regarding the paths this will scan:
 dnl /etc/ssl/certs/ca-certificates.crt Debian systems
 dnl /etc/pki/tls/certs/ca-bundle.crt Redhat and Mandriva
 dnl /usr/share/ssl/certs/ca-bundle.crt old(er) Redhat
+dnl /usr/local/share/certs/ca-root.crt FreeBSD
 dnl /etc/ssl/certs/ (ca path) SUSE
 
 AC_DEFUN([CURL_CHECK_CA_BUNDLE], [
@@ -3505,6 +3506,7 @@ AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
       for a in /etc/ssl/certs/ca-certificates.crt \
                /etc/pki/tls/certs/ca-bundle.crt \
                /usr/share/ssl/certs/ca-bundle.crt \
+               /usr/local/share/certs/ca-root.crt \
                "$cac"; do
         if test -f "$a"; then
           ca="$a"

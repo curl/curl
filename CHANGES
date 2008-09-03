@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel Fandrich (3 Sep 2008)
+- Search for the FreeBSD CA cert file /usr/local/share/certs/ca-root.crt
+
 Daniel Fandrich (2 Sep 2008)
 - Fixed an out of memory problem that caused torture test failures in tests
   706 and 707.
