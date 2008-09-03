@@ -105,6 +105,8 @@ REMOTE_FILE_NOT_FOUND	<remote file not found>
 SSH			<unspecified error from the SSH layer>
 SSL_SHUTDOWN_FAILED	<failed to shut down the SSL connection>
 AGAIN			<socket not ready, wait and try again>
+SSL_CRL_BADFILE		<could not load CRL file, missing or wrong format>
+SSL_ISSUER_ERROR	<issuer check failed>
 CURL_LAST		<CURLMSG.MSG is out of sync with the source code>
 
 .END
