@@ -80,8 +80,8 @@ while test $# -gt 0; do
 	;;
 
     --feature|--features)
-        for feature in @SUPPORT_FEATURES@; do
-            echo "$feature"
+        for feature in @SUPPORT_FEATURES@ ""; do
+            test -n "$feature" && echo "$feature"
         done
 	;;
 
