@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -79,13 +79,13 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
     switch (*pattern) {
     case '\0':                  /* URL ended while set was still open */
       snprintf(glob->errormsg, sizeof(glob->errormsg),
-               "unmatched brace at pos %d\n", (int)pos);
+               "unmatched brace at pos %zu\n", pos);
       return GLOB_ERROR;
 
     case '{':
     case '[':                   /* no nested expressions at this time */
       snprintf(glob->errormsg, sizeof(glob->errormsg),
-               "nested braces not supported at pos %d\n", (int)pos);
+               "nested braces not supported at pos %zu\n", pos);
       return GLOB_ERROR;
 
     case ',':
@@ -122,7 +122,7 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
 
     case ']':                           /* illegal closing bracket */
       snprintf(glob->errormsg, sizeof(glob->errormsg),
-               "illegal pattern at pos %d\n", (int)pos);
+               "illegal pattern at pos %zu\n", pos);
       return GLOB_ERROR;
 
     case '\\':                          /* escaped character, skip '\' */
@@ -141,7 +141,7 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
       if(skip) {
         if (*(buf+1) == '\0') {           /* but no escaping of '\0'! */
           snprintf(glob->errormsg, sizeof(glob->errormsg),
-                   "illegal pattern at pos %d\n", (int)pos);
+                   "illegal pattern at pos %zu\n", pos);
           return GLOB_ERROR;
         }
         ++pattern;
@@ -186,14 +186,14 @@ static GlobCode glob_range(URLGlob *glob, char *pattern,
     if ((rc < 3) || (min_c >= max_c) || ((max_c - min_c) > ('z' - 'a'))) {
       /* the pattern is not well-formed */
       snprintf(glob->errormsg, sizeof(glob->errormsg),
-               "error: bad range specification after pos %d\n", pos);
+               "error: bad range specification after pos %zu\n", pos);
       return GLOB_ERROR;
     }
 
     /* check the (first) separating character */
     if((sep != ']') && (sep != ':')) {
       snprintf(glob->errormsg, sizeof(glob->errormsg),
-               "error: unsupported character (%c) after range at pos %d\n",
+               "error: unsupported character (%c) after range at pos %zu\n",
                sep, pos);
       return GLOB_ERROR;
     }
@@ -217,7 +217,7 @@ static GlobCode glob_range(URLGlob *glob, char *pattern,
     if ((rc < 2) || (min_n > max_n)) {
       /* the pattern is not well-formed */
       snprintf(glob->errormsg, sizeof(glob->errormsg),
-               "error: bad range specification after pos %d\n", pos);
+               "error: bad range specification after pos %zu\n", pos);
       return GLOB_ERROR;
     }
     pat->content.NumRange.ptr_n =  pat->content.NumRange.min_n = min_n;
@@ -239,7 +239,7 @@ static GlobCode glob_range(URLGlob *glob, char *pattern,
   }
   else {
     snprintf(glob->errormsg, sizeof(glob->errormsg),
-             "illegal character in range specification at pos %d\n", pos);
+             "illegal character in range specification at pos %zu\n", pos);
     return GLOB_ERROR;
   }
 

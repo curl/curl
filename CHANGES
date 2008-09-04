@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Yang Tse (4 Sep 2008)
+- Several fixes related with print formatting string directives.
+
 Daniel Fandrich (3 Sep 2008)
 - Search for the FreeBSD CA cert file /usr/local/share/certs/ca-root.crt
 

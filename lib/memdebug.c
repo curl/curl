@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -167,7 +167,7 @@ void *curl_docalloc(size_t wanted_elements, size_t wanted_size,
   }
 
   if(logfile && source)
-    fprintf(logfile, "MEM %s:%d calloc(%u,%u) = %p\n",
+    fprintf(logfile, "MEM %s:%d calloc(%zu,%zu) = %p\n",
             source, line, wanted_elements, wanted_size, mem ? mem->mem : 0);
   return (mem ? mem->mem : NULL);
 }
@@ -189,7 +189,7 @@ char *curl_dostrdup(const char *str, int line, const char *source)
     memcpy(mem, str, len);
 
   if(logfile)
-    fprintf(logfile, "MEM %s:%d strdup(%p) (%zd) = %p\n",
+    fprintf(logfile, "MEM %s:%d strdup(%p) (%zu) = %p\n",
             source, line, str, len, mem);
 
   return mem;
@@ -212,7 +212,7 @@ void *curl_dorealloc(void *ptr, size_t wantedsize,
 
   mem=(struct memdebug *)(Curl_crealloc)(mem, size);
   if(logfile)
-    fprintf(logfile, "MEM %s:%d realloc(%p, %zd) = %p\n",
+    fprintf(logfile, "MEM %s:%d realloc(%p, %zu) = %p\n",
             source, line, ptr, wantedsize, mem?mem->mem:NULL);
 
   if(mem) {

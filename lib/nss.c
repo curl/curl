@@ -1096,7 +1096,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
       n = strrchr(data->set.str[STRING_CERT], '/');
       if(n) {
         n++; /* skip last slash */
-        snprintf(nickname, PATH_MAX, "PEM Token #%ld:%s", 1, n);
+        snprintf(nickname, PATH_MAX, "PEM Token #%d:%s", 1, n);
       }
     }
     else {
@@ -1164,7 +1164,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
       n = strrchr(data->set.str[STRING_SSL_ISSUERCERT], '/');
       if (n) {
         n++; /* skip last slash */
-        snprintf(nickname, PATH_MAX, "PEM Token #%ld:%s", 1, n);
+        snprintf(nickname, PATH_MAX, "PEM Token #%d:%s", 1, n);
       }
     }
     else {

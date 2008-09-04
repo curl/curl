@@ -3480,8 +3480,8 @@ int my_trace(CURL *handle, curl_infotype type,
   secs = tv.tv_sec;
   now = localtime(&secs);  /* not multithread safe but we don't care */
   if(config->tracetime)
-    snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06d ",
-             now->tm_hour, now->tm_min, now->tm_sec, tv.tv_usec);
+    snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld ",
+             now->tm_hour, now->tm_min, now->tm_sec, (long)tv.tv_usec);
   else
     timebuf[0]=0;
 
@@ -4927,7 +4927,7 @@ show_error:
         }
 #else
         if((res!=CURLE_OK) && config->showerror) {
-          fprintf(config->errors, "curl: (%d) %s\n", (int)res,
+          fprintf(config->errors, "curl: (%d) %s\n", res,
                   errorbuffer[0]? errorbuffer:
                   curl_easy_strerror((CURLcode)res));
           if(CURLE_SSL_CACERT == res) {

@@ -271,7 +271,7 @@ int main(int argc, argv_item_t argv[], char **envp)
   data = (unsigned char *)suck(&dataLen);
   base64Len = Curl_base64_encode(handle, data, dataLen, &base64);
 
-  fprintf(stderr, "%d\n", base64Len);
+  fprintf(stderr, "%zu\n", base64Len);
   fprintf(stdout, "%s\n", base64);
 
   free(base64); free(data);
