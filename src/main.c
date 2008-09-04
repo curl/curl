@@ -577,7 +577,6 @@ static void warnf(struct Configurable *config, const char *fmt, ...)
     char print_buffer[256];
 
     va_start(ap, fmt);
-    va_start(ap, fmt);
     len = vsnprintf(print_buffer, sizeof(print_buffer), fmt, ap);
     va_end(ap);
 
