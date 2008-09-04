@@ -439,6 +439,8 @@ else
 	@echo $(DL)#define SEND_TYPE_ARG4 int$(DL) >> $@
 	@echo $(DL)#define SEND_TYPE_RETV ssize_t$(DL) >> $@
 	@echo $(DL)#define SIZEOF_STRUCT_IN6_ADDR 16$(DL) >> $@
+	@echo $(DL)#define SIZEOF_OFF_T 8$(DL) >> $@
+	@echo $(DL)#define _LARGEFILE 1$(DL) >> $@
 ifdef ENABLE_IPV6
 	@echo $(DL)#define ENABLE_IPV6 1$(DL) >> $@
 endif
