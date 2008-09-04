@@ -367,7 +367,7 @@ done:
   return 1;
 }
 
-static int nss_load_crl(char* crlfilename, PRBool ascii)
+static int nss_load_crl(const char* crlfilename, PRBool ascii)
 {
   PRFileDesc *infile;
   PRStatus    prstat;

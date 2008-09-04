@@ -218,8 +218,8 @@ struct ssl_config_data {
                             2: CN must match hostname */
   char *CApath;          /* certificate dir (doesn't work on windows) */
   char *CAfile;          /* cerficate to verify peer against */
-  char *CRLfile;         /* CRL to check cerficate revocation */
-  char *issuercert;      /* optional issuer cerficate filename */
+  const char *CRLfile;   /* CRL to check cerficate revocation */
+  const char *issuercert;/* optional issuer cerficate filename */
   char *random_file;     /* path to file containing "random" data */
   char *egdsocket;       /* path to file containing the EGD daemon socket */
   char *cipher_list;     /* list of ciphers to use */
@@ -308,7 +308,7 @@ struct negotiatedata {
 struct HTTP {
   struct FormData *sendit;
   curl_off_t postsize; /* off_t to handle large file sizes */
-  char *postdata;
+  const char *postdata;
 
   const char *p_pragma;      /* Pragma: string */
   const char *p_accept;      /* Accept: string */
@@ -321,7 +321,7 @@ struct HTTP {
   struct back {
     curl_read_callback fread_func; /* backup storage for fread pointer */
     void *fread_in;           /* backup storage for fread_in pointer */
-    char *postdata;
+    const char *postdata;
     curl_off_t postsize;
   } backup;
 
@@ -629,7 +629,7 @@ struct hostname {
   char *rawalloc; /* allocated "raw" version of the name */
   char *encalloc; /* allocated IDN-encoded version of the name */
   char *name;     /* name to use internally, might be encoded, might be raw */
-  char *dispname; /* name to display, as 'name' might be encoded */
+  const char *dispname; /* name to display, as 'name' might be encoded */
 };
 
 /*
