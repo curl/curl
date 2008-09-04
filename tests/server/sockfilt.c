@@ -119,7 +119,7 @@
 #define DEFAULT_LOGFILE "log/sockfilt.log"
 #endif
 
-const char *serverlogfile = (char *)DEFAULT_LOGFILE;
+const char *serverlogfile = DEFAULT_LOGFILE;
 
 bool verbose = FALSE;
 bool use_ipv6 = FALSE;
@@ -178,29 +178,29 @@ static void install_signal_handlers(void)
 #ifdef SIGHUP
   /* ignore SIGHUP signal */
   if((old_sighup_handler = signal(SIGHUP, SIG_IGN)) == SIG_ERR)
-    logmsg("cannot install SIGHUP handler: 5s", strerror(ERRNO));
+    logmsg("cannot install SIGHUP handler: %s", strerror(ERRNO));
 #endif
 #ifdef SIGPIPE
   /* ignore SIGPIPE signal */
   if((old_sigpipe_handler = signal(SIGPIPE, SIG_IGN)) == SIG_ERR)
-    logmsg("cannot install SIGPIPE handler: 5s", strerror(ERRNO));
+    logmsg("cannot install SIGPIPE handler: %s", strerror(ERRNO));
 #endif
 #ifdef SIGALRM
   /* ignore SIGALRM signal */
   if((old_sigalrm_handler = signal(SIGALRM, SIG_IGN)) == SIG_ERR)
-    logmsg("cannot install SIGALRM handler: 5s", strerror(ERRNO));
+    logmsg("cannot install SIGALRM handler: %s", strerror(ERRNO));
 #endif
 #ifdef SIGINT
   /* handle SIGINT signal with our exit_signal_handler */
   if((old_sigint_handler = signal(SIGINT, exit_signal_handler)) == SIG_ERR)
-    logmsg("cannot install SIGINT handler: 5s", strerror(ERRNO));
+    logmsg("cannot install SIGINT handler: %s", strerror(ERRNO));
   else
     siginterrupt(SIGINT, 1);
 #endif
 #ifdef SIGTERM
   /* handle SIGTERM signal with our exit_signal_handler */
   if((old_sigterm_handler = signal(SIGTERM, exit_signal_handler)) == SIG_ERR)
-    logmsg("cannot install SIGTERM handler: 5s", strerror(ERRNO));
+    logmsg("cannot install SIGTERM handler: %s", strerror(ERRNO));
   else
     siginterrupt(SIGTERM, 1);
 #endif
@@ -269,7 +269,7 @@ static ssize_t fullread(int filedes, void *buffer, size_t nbytes)
   } while((size_t)nread < nbytes);
 
   if(verbose)
-    logmsg("read %ld bytes", (long)nread);
+    logmsg("read %zd bytes", nread);
 
   return nread;
 }
@@ -313,7 +313,7 @@ static ssize_t fullwrite(int filedes, const void *buffer, size_t nbytes)
   } while((size_t)nwrite < nbytes);
 
   if(verbose)
-    logmsg("wrote %ld bytes", (long)nwrite);
+    logmsg("wrote %zd bytes", nwrite);
 
   return nwrite;
 }
@@ -565,11 +565,11 @@ static bool juggle(curl_socket_t *sockfdp,
 
       buffer_len = (ssize_t)strtol((char *)buffer, NULL, 16);
       if (buffer_len > (ssize_t)sizeof(buffer)) {
-        logmsg("ERROR: Buffer size (%ld bytes) too small for data size "
-               "(%ld bytes)", (long)sizeof(buffer), (long)buffer_len);
+        logmsg("ERROR: Buffer size (%zu bytes) too small for data size "
+               "(%zd bytes)", sizeof(buffer), buffer_len);
         return FALSE;
       }
-      logmsg("> %d bytes data, server => client", buffer_len);
+      logmsg("> %zd bytes data, server => client", buffer_len);
 
       if(!read_stdin(buffer, buffer_len))
         return FALSE;
@@ -585,7 +585,7 @@ static bool juggle(curl_socket_t *sockfdp,
         /* send away on the socket */
         bytes_written = swrite(sockfd, buffer, buffer_len);
         if(bytes_written != buffer_len) {
-          logmsg("Not all data was sent. Bytes to send: %d sent: %d", 
+          logmsg("Not all data was sent. Bytes to send: %zd sent: %zd",
                  buffer_len, bytes_written);
         }
       }
@@ -650,7 +650,7 @@ static bool juggle(curl_socket_t *sockfdp,
     if(!write_stdout(buffer, nread_socket))
       return FALSE;
 
-    logmsg("< %d bytes data, client => server", nread_socket);
+    logmsg("< %zd bytes data, client => server", nread_socket);
     lograw(buffer, nread_socket);
   }
 
@@ -906,7 +906,7 @@ int main(int argc, char *argv[])
 #endif /* ENABLE_IPV6 */
     if(rc) {
       error = SOCKERRNO;
-      logmsg("Error connecting to port %d: (%d) %s",
+      logmsg("Error connecting to port %hu: (%d) %s",
              connectport, error, strerror(error));
       goto sockfilt_cleanup;
     }
@@ -925,9 +925,9 @@ int main(int argc, char *argv[])
          (use_ipv6?6:4));
 
   if(connectport)
-    logmsg("Connected to port %d", connectport);
+    logmsg("Connected to port %hu", connectport);
   else
-    logmsg("Listening on port %d", port);
+    logmsg("Listening on port %hu", port);
 
   wrotepidfile = write_pidfile(pidname);
   if(!wrotepidfile)

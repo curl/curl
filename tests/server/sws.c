@@ -273,7 +273,7 @@ int ProcessRequest(struct httprequest *req)
         error = ERRNO;
         logmsg("fopen() failed with error: %d %s", error, strerror(error));
         logmsg("Error opening file: %s", filename);
-        logmsg("Couldn't open test file %d", req->testno);
+        logmsg("Couldn't open test file %ld", req->testno);
         req->open = FALSE; /* closes connection */
         return 1; /* done */
       }
@@ -374,7 +374,7 @@ int ProcessRequest(struct httprequest *req)
    */
 
   do {
-    if((req->cl<=0) && curlx_strnequal("Content-Length:", line, 15)) {
+    if((req->cl==0) && curlx_strnequal("Content-Length:", line, 15)) {
       /* If we don't ignore content-length, we read it and we read the whole
          request including the body before we return. If we've been told to
          ignore the content-length, we will return as soon as all headers
@@ -382,9 +382,9 @@ int ProcessRequest(struct httprequest *req)
       size_t cl = strtol(line+15, &line, 10);
       req->cl = cl - req->skip;
 
-      logmsg("Found Content-Length: %d in the request", cl);
+      logmsg("Found Content-Length: %zu in the request", cl);
       if(req->skip)
-        logmsg("... but will abort after %d bytes", req->cl);
+        logmsg("... but will abort after %zu bytes", req->cl);
       break;
     }
     else if(curlx_strnequal("Transfer-Encoding: chunked", line,
@@ -418,16 +418,16 @@ int ProcessRequest(struct httprequest *req)
        Digest stuff to work in the test suite. */
     req->partno += 1000;
     req->digest = TRUE; /* header found */
-    logmsg("Received Digest request, sending back data %d", req->partno);
+    logmsg("Received Digest request, sending back data %ld", req->partno);
   }
   else if(!req->ntlm &&
           strstr(req->reqbuf, "Authorization: NTLM TlRMTVNTUAAD")) {
     /* If the client is passing this type-3 NTLM header */
     req->partno += 1002;
     req->ntlm = TRUE; /* NTLM found */
-    logmsg("Received NTLM type-3, sending back data %d", req->partno);
+    logmsg("Received NTLM type-3, sending back data %ld", req->partno);
     if(req->cl) {
-      logmsg("  Expecting %d POSTed bytes", req->cl);
+      logmsg("  Expecting %zu POSTed bytes", req->cl);
     }
   }
   else if(!req->ntlm &&
@@ -435,7 +435,7 @@ int ProcessRequest(struct httprequest *req)
     /* If the client is passing this type-1 NTLM header */
     req->partno += 1001;
     req->ntlm = TRUE; /* NTLM found */
-    logmsg("Received NTLM type-1, sending back data %d", req->partno);
+    logmsg("Received NTLM type-1, sending back data %ld", req->partno);
   }
   if(strstr(req->reqbuf, "Connection: close"))
     req->open = FALSE; /* close connection after this request */
@@ -496,7 +496,7 @@ void storerequest(char *reqbuf, ssize_t totalsize)
   if (totalsize == 0)
     return;
   else if (totalsize < 0) {
-    logmsg("Invalid size (%d bytes) for request input. Not written to %s",
+    logmsg("Invalid size (%zd bytes) for request input. Not written to %s",
            totalsize, REQUEST_DUMP);
     return;
   }
@@ -522,7 +522,7 @@ void storerequest(char *reqbuf, ssize_t totalsize)
   if (writeleft > 0) {
     logmsg("Error writing file %s error: %d %s",
            REQUEST_DUMP, error, strerror(error));
-    logmsg("Wrote only (%d bytes) of (%d bytes) request input to %s",
+    logmsg("Wrote only (%zd bytes) of (%zd bytes) request input to %s",
            totalsize-writeleft, totalsize, REQUEST_DUMP);
   }
 
@@ -534,7 +534,7 @@ void storerequest(char *reqbuf, ssize_t totalsize)
            REQUEST_DUMP, error, strerror(error));
 
   if(!writeleft)
-    logmsg("Wrote request (%d bytes) input to " REQUEST_DUMP,
+    logmsg("Wrote request (%zd bytes) input to " REQUEST_DUMP,
            totalsize);
 }
 
@@ -575,7 +575,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
 
   while (req->offset < REQBUFSIZ-1) {
     if(pipereq_length) {
-      memmove(reqbuf, pipereq, pipereq_length); 
+      memmove(reqbuf, pipereq, pipereq_length);
       got = pipereq_length;
       pipereq_length = 0;
     }
@@ -601,7 +601,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
       return DOCNUMBER_INTERNAL;
     }
 
-    logmsg("Read %d bytes", got);
+    logmsg("Read %zd bytes", got);
 
     req->offset += got;
     reqbuf[req->offset] = '\0';
@@ -657,7 +657,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
 
   char partbuf[80]="data";
 
-  logmsg("Send response number %d part %d", req->testno, req->partno);
+  logmsg("Send response number %ld part %ld", req->testno, req->partno);
 
   switch(req->rcmd) {
   default:
@@ -695,7 +695,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
       logmsg("Identifying ourselves as friends");
       sprintf(msgbuf, "WE ROOLZ: %ld\r\n", (long)getpid());
       msglen = strlen(msgbuf);
-      sprintf(weare, "HTTP/1.1 200 OK\r\nContent-Length: %d\r\n\r\n%s",
+      sprintf(weare, "HTTP/1.1 200 OK\r\nContent-Length: %zu\r\n\r\n%s",
               msglen, msgbuf);
       buffer = weare;
       break;
@@ -795,7 +795,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
       break;
     }
     else {
-      logmsg("Sent off %d bytes", written);
+      logmsg("Sent off %zd bytes", written);
     }
     /* write to file as well */
     fwrite(buffer, 1, written, dump);
@@ -812,7 +812,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
            RESPONSE_DUMP, error, strerror(error));
 
   if(sendfailure) {
-    logmsg("Sending response failed. Only (%d bytes) of (%d bytes) were sent",
+    logmsg("Sending response failed. Only (%zu bytes) of (%zu bytes) were sent",
            responsesize-count, responsesize);
     if(ptr)
       free(ptr);
@@ -821,7 +821,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     return -1;
   }
 
-  logmsg("Response sent (%d bytes) and written to " RESPONSE_DUMP,
+  logmsg("Response sent (%zu bytes) and written to " RESPONSE_DUMP,
          responsesize);
 
   if(ptr)
@@ -986,7 +986,7 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  logmsg("Running IPv%d version on port %d",
+  logmsg("Running IPv%d version on port %hu",
 #ifdef ENABLE_IPV6
          (use_ipv6?6:4)
 #else

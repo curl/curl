@@ -505,7 +505,7 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  logmsg("Running IPv%d version on port UDP/%d",
+  logmsg("Running IPv%d version on port UDP/%hu",
 #ifdef ENABLE_IPV6
          (use_ipv6?6:4)
 #else
