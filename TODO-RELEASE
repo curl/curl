@@ -19,4 +19,19 @@ To be addressed before 7.19.1 (planned release: October/November 2008)
 165 - "Problem with CURLOPT_RESUME_FROM and CURLOPT_APPEND" by Daniele Pinau,
       recipe: http://curl.haxx.se/mail/lib-2008-08/0439.html
 
-166 -
+166 - Cookies with bad expiry date treated as session cookies (and thus wrongly
+      matches and get sent)
+
+167 - pipelining with proxy hangs
+
+168 - curl_easy_pause bugs
+
+169 - curl crash when using sftp with socks. We need a Curl_plain_read() to
+      use for the SOCKS code in the same style I made the Curl_plain_write()
+      before.
+
+170 - Two small items of interest for the webpage
+      two mistakes in the curl.1 man page
+
+171 -
+
