@@ -452,18 +452,16 @@ CURLcode Curl_client_write(struct connectdata *conn,
       /* major internal confusion */
       return CURLE_RECV_ERROR;
 
+    DEBUGASSERT(data->state.tempwrite);
+
     /* figure out the new size of the data to save */
     newlen = len + data->state.tempwritesize;
     /* allocate the new memory area */
-    newptr = malloc(newlen);
+    newptr = realloc(data->state.tempwrite, newlen);
     if(!newptr)
       return CURLE_OUT_OF_MEMORY;
-    /* copy the previously held data to the new area */
-    memcpy(newptr, data->state.tempwrite, data->state.tempwritesize);
     /* copy the new data to the end of the new area */
     memcpy(newptr + data->state.tempwritesize, ptr, len);
-    /* free the old data */
-    free(data->state.tempwrite);
     /* update the pointer and the size */
     data->state.tempwrite = newptr;
     data->state.tempwritesize = newlen;
