@@ -1,3 +1,12 @@
+#ifndef __LIB_CONFIG_MAC_H
+#define __LIB_CONFIG_MAC_H
+
+/* ================================================================ */
+/*    lib/config-mac.h - Hand crafted config file for Mac OS 9      */
+/* ================================================================ */
+/*   On Mac OS X you must run configure to generate config.h file   */
+/* ================================================================ */
+
 #define OS "mac"
 
 #define HAVE_NETINET_IN_H       1
@@ -83,3 +92,5 @@
 
 #define HAVE_EXTRA_STRICMP_H 1
 #define HAVE_EXTRA_STRDUP_H  1
+
+#endif /* __LIB_CONFIG_MAC_H */

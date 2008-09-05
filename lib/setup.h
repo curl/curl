@@ -48,8 +48,8 @@
 #endif
 #endif
 
-#ifdef macintosh
-#include "config-mac.h"
+#if defined(macintosh) && defined(__MRC__)
+#  include "config-mac.h"
 #endif
 
 #ifdef __AMIGA__

@@ -1,3 +1,12 @@
+#ifndef __SRC_CONFIG_MAC_H
+#define __SRC_CONFIG_MAC_H
+
+/* ================================================================ */
+/*    src/config-mac.h - Hand crafted config file for Mac OS 9      */
+/* ================================================================ */
+/*   On Mac OS X you must run configure to generate config.h file   */
+/* ================================================================ */
+
 /* Define to 1 if you want the built-in manual */
 #define USE_MANUAL 1
 
@@ -19,3 +28,5 @@
 
 /* we provide our own strdup prototype */
 char *strdup(char *s1);
+
+#endif /* __SRC_CONFIG_MAC_H */
