@@ -54,6 +54,8 @@ nothing
 19: Sat, 11 Sep 2004 21:32:11 +0200 => 1094931131
 20: 20040912 15:05:58 -0700 => 1095026758
 21: 20040911 +0200 => 1094853600
+22: Thu, 01-Jan-1970 00:59:59 GMT => 3599
+23: Thu, 01-Jan-1970 01:00:00 GMT => 3600
 </stdout>
 
 # This test case previously testes an overflow case ("2094 Nov 6 =>
