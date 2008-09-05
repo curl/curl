@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Guenter Knauf (4 Sep 2008)
+- MingW32 non-configure builds are now largefile feature enabled by default.
+  NetWare LIBC builds are also now largefile feature enabled by default.
+
 Yang Tse (4 Sep 2008)
 - Several fixes related with print formatting string directives.
 

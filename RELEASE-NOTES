@@ -13,7 +13,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o 
+ o MingW32 non-configure builds are now largefile feature enabled by default
+ o NetWare LIBC builds are now largefile feature enabled by default
 
 This release includes the following known bugs:
 
@@ -26,6 +27,6 @@ Other curl-related news:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Keith Mok, Yang Tse
+ Keith Mok, Yang Tse, Daniel Fandrich, Guenter Knauf
 
         Thanks! (and sorry if I forgot to mention someone)
