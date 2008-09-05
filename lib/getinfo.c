@@ -217,6 +217,11 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
     /* Return the ip address of the most recent (primary) connection */
     *param_charp = data->info.ip;
     break;
+  case CURLINFO_CERTINFO:
+    /* Return the a pointer to the certinfo struct. Not really an slist
+       pointer but we can pretend it is here */
+    *param_slistp = (struct curl_slist *)&data->info.certs;
+    break;
   default:
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }

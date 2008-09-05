@@ -59,7 +59,7 @@ size_t Curl_ssl_version(char *buffer, size_t size);
 bool Curl_ssl_data_pending(const struct connectdata *conn,
                            int connindex);
 int Curl_ssl_check_cxn(struct connectdata *conn);
-
+void Curl_ssl_free_certinfo(struct SessionHandle *data);
 #else
 /* When SSL support is not present, just define away these function calls */
 #define Curl_ssl_init() 1
@@ -78,6 +78,7 @@ int Curl_ssl_check_cxn(struct connectdata *conn);
 #define Curl_ssl_version(x,y) 0
 #define Curl_ssl_data_pending(x,y) 0
 #define Curl_ssl_check_cxn(x) 0
+#define Curl_ssl_free_certinfo(x)
 
 #endif
 
@@ -89,11 +90,6 @@ int Curl_ssl_getsessionid(struct connectdata *conn,
 CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
                                void *ssl_sessionid,
                                size_t idsize);
-
-#if !defined(USE_SSL) && !defined(SSLGEN_C)
-/* set up blank macros for none-SSL builds */
-#define Curl_ssl_close_all(x)
-#endif
 
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 

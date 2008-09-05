@@ -465,3 +465,15 @@ bool Curl_ssl_data_pending(const struct connectdata *conn,
 }
 #endif /* USE_SSL */
 
+void Curl_ssl_free_certinfo(struct SessionHandle *data)
+{
+  int i;
+  struct curl_certinfo *ci = &data->info.certs;
+  if(ci->num_of_certs) {
+    /* free all individual lists used */
+    for(i=0; i<ci->num_of_certs; i++)
+      curl_slist_free_all(ci->certinfo[i]);
+    free(ci->certinfo); /* free the actual array too */
+    ci->num_of_certs = 0;
+  }
+}

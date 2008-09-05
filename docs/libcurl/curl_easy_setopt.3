@@ -1496,6 +1496,13 @@ A specific error code (CURLE_SSL_CRL_BADFILE) is defined with the option. It
 is returned when the SSL exchange fails because the CRL file cannot be loaded.
 Note that a failure in certificate verification due to a revocation information
 found in the CRL does not trigger this specific error. (Added in 7.19.0)
+.IP CURLOPT_CERTINFO
+Pass a long set to 1 to enable libcurl's certificate chain info gatherer. With
+this enabled, libcurl (if built with OpenSSL) will extract lots of information
+and data about the certificate's in the certificate chain used in the SSL
+connection. This data is then possible to extract after a transfer using
+\fIcurl_easy_getinfo(3)\fP and its option \fICURLINFO_CERTINFO\fP. (Added in
+7.19.0)
 .IP CURLOPT_RANDOM_FILE
 Pass a char * to a zero terminated file name. The file will be used to read
 from to seed the random engine for SSL. The more random the specified file is,

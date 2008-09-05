@@ -1135,6 +1135,11 @@ typedef enum {
   /* (IPv6) Address scope */
   CINIT(ADDRESS_SCOPE, LONG, 171),
 
+  /* Collect certificate chain info and allow it to get retrievable with
+     CURLINFO_CERTINFO after the transfer is complete. (Unfortunately) only
+     working with OpenSSL-powered builds. */
+  CINIT(CERTINFO, LONG, 172),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -1491,6 +1496,15 @@ CURL_EXTERN void curl_slist_free_all(struct curl_slist *);
  */
 CURL_EXTERN time_t curl_getdate(const char *p, const time_t *unused);
 
+/* info about the certificate chain, only for OpenSSL builds. Asked
+   for with CURLOPT_CERTINFO / CURLINFO_CERTINFO */
+struct curl_certinfo {
+  int num_of_certs;             /* number of certificates with information */
+  struct curl_slist **certinfo; /* for each index in this array, there's a
+                                   linked list with textual information in the
+                                   format "name: value" */
+};
+
 #define CURLINFO_STRING   0x100000
 #define CURLINFO_LONG     0x200000
 #define CURLINFO_DOUBLE   0x300000
@@ -1533,9 +1547,10 @@ typedef enum {
   CURLINFO_REDIRECT_URL     = CURLINFO_STRING + 31,
   CURLINFO_PRIMARY_IP       = CURLINFO_STRING + 32,
   CURLINFO_APPCONNECT_TIME  = CURLINFO_DOUBLE + 33,
+  CURLINFO_CERTINFO         = CURLINFO_SLIST  + 34,
   /* Fill in new entries below here! */
 
-  CURLINFO_LASTONE          = 33
+  CURLINFO_LASTONE          = 34
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as

@@ -7,6 +7,18 @@
                                   Changelog
 
 Daniel Stenberg (5 Sep 2008)
+- Introducing CURLOPT_CERTINFO and the corresponding CURLINFO_CERTINFO. By
+  enabling this feature with CURLOPT_CERTINFO for a request using SSL (HTTPS
+  or FTPS), libcurl will gather lots of server certificate info and that info
+  can then get extracted by a client after the request has completed with
+  curl_easy_getinfo()'s CURLINFO_CERTINFO option. Linus Nielsen Feltzing
+  helped me test and smoothen out this feature.
+
+  Unfortunately, this feature currently only works with libcurl built to use
+  OpenSSL.
+
+  This feature was sponsored by networking4all.com - thanks!
+
 - Dmitriy Sergeyev pointed out that curl_easy_pause() didn't unpause properly
   during certain conditions. I also changed this code to use realloc() based
   on Daniel Fandrich's suggestion.

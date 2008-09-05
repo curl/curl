@@ -481,6 +481,7 @@ CURLcode Curl_close(struct SessionHandle *data)
   Curl_ssl_close_all(data);
   Curl_safefree(data->state.first_host);
   Curl_safefree(data->state.scratch);
+  Curl_ssl_free_certinfo(data);
 
   if(data->change.referer_alloc)
     free(data->change.referer);
@@ -1799,6 +1800,9 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * Set a SSL_CTX callback parameter pointer
      */
     data->set.ssl.fsslctxp = va_arg(param, void *);
+    break;
+  case CURLOPT_CERTINFO:
+    data->set.ssl.certinfo = (bool)(0 != va_arg(param, long));
     break;
 #endif
   case CURLOPT_CAINFO:

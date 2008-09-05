@@ -94,4 +94,4 @@ bool Curl_ossl_data_pending(const struct connectdata *conn,
 #define curlssl_data_pending(x,y) Curl_ossl_data_pending(x,y)
 
 #endif /* USE_SSLEAY */
-#endif
+#endif /* __SSLUSE_H */

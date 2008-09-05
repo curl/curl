@@ -2,7 +2,7 @@ Curl and libcurl 7.19.1
 
  Public curl releases:         107
  Command line options:         127
- curl_easy_setopt() options:   153
+ curl_easy_setopt() options:   154
  Public functions in libcurl:  58
  Known libcurl bindings:       36
  Contributors:                 672
@@ -10,6 +10,7 @@ Curl and libcurl 7.19.1
 This release includes the following changes:
 
  o pkg-config can now show supported_protocols and supported_features
+ o Added CURLOPT_CERTINFO and CURLINFO_CERTINFO
 
 This release includes the following bugfixes:
 
@@ -28,6 +29,7 @@ Other curl-related news:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Keith Mok, Yang Tse, Daniel Fandrich, Guenter Knauf, Dmitriy Sergeyev
+ Keith Mok, Yang Tse, Daniel Fandrich, Guenter Knauf, Dmitriy Sergeyev,
+ Linus Nielsen Feltzing
 
         Thanks! (and sorry if I forgot to mention someone)

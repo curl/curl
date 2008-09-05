@@ -227,6 +227,7 @@ struct ssl_config_data {
   curl_ssl_ctx_callback fsslctx; /* function to initialize ssl ctx */
   void *fsslctxp;        /* parameter for call back */
   bool sessionid;        /* cache session IDs or not */
+  bool certinfo;         /* gather lots of cert info */
 };
 
 /* information stored about one single SSL session */
@@ -1051,6 +1052,9 @@ struct PureInfo {
   char ip[MAX_IPADR_LEN]; /* this buffer gets the numerical ip version stored
                              at the connect *attempt* so it will get the last
                              tried connect IP even on failures */
+  struct curl_certinfo certs; /* info about the certs, only populated in
+                                 OpenSSL builds. Asked for with
+                                 CURLOPT_CERTINFO / CURLINFO_CERTINFO */
 };
 
 

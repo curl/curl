@@ -5,7 +5,7 @@ check_PROGRAMS = 10-at-a-time anyauthput cookie_interface \
   https multi-app multi-debugcallback multi-double \
   multi-post multi-single persistant post-callback \
   postit2 sepheaders simple simplepost simplessl \
-  sendrecv httpcustomheader
+  sendrecv httpcustomheader certinfo
 
 # These examples require external dependencies that may not be commonly
 # available on POSIX systems, so don't bother attempting to compile them here.
@@ -13,5 +13,4 @@ COMPLICATED_EXAMPLES = \
  curlgtk.c curlx.c htmltitle.cc cacertinmem.c ftpuploadresume.c \
  ghiper.c hiperfifo.c htmltidy.c multithread.c \
  opensslthreadlock.c sampleconv.c synctime.c threaded-ssl.c
-
 

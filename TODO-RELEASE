@@ -1,9 +1,6 @@
 To be addressed before 7.19.1 (planned release: October/November 2008)
 =============================
 
-157 - the CERTINFO patch as posted to:
-      http://curl.haxx.se/mail/lib-2008-08/0105.html
-
 158 - Martin Drasar's CURLOPT_POSTREDIR work:
       http://curl.haxx.se/mail/lib-2008-08/0170.html
 
