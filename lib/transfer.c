@@ -2286,7 +2286,7 @@ CURLcode Curl_follow(struct SessionHandle *data,
      * libcurl gets the page that most user agents would get, libcurl has to
      * force GET.
      *
-     * This behaviour can be overridden with CURLOPT_POST301.
+     * This behaviour can be overridden with CURLOPT_POSTREDIR.
      */
     if( (data->set.httpreq == HTTPREQ_POST
          || data->set.httpreq == HTTPREQ_POST_FORM)
@@ -2313,7 +2313,18 @@ CURLcode Curl_follow(struct SessionHandle *data,
     status. When interoperability with such clients is a concern, the
     302 status code may be used instead, since most user agents react
     to a 302 response as described here for 303.
+
+    This behaviour can be overriden with CURLOPT_POSTREDIR
     */
+    if( (data->set.httpreq == HTTPREQ_POST
+         || data->set.httpreq == HTTPREQ_POST_FORM)
+        && !data->set.post302) {
+      infof(data,
+            "Violate RFC 2616/10.3.3 and switch from POST to GET\n");
+      data->set.httpreq = HTTPREQ_GET;
+    }
+    break;
+
   case 303: /* See Other */
     /* Disable both types of POSTs, since doing a second POST when
      * following isn't what anyone would want! */

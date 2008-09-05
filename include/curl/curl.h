@@ -1103,8 +1103,9 @@ typedef enum {
   CINIT(NEW_FILE_PERMS, LONG, 159),
   CINIT(NEW_DIRECTORY_PERMS, LONG, 160),
 
-  /* Obey RFC 2616/10.3.2 and keep POSTs as POSTs after a 301 */
-  CINIT(POST301, LONG, 161),
+  /* Set the behaviour of POST when redirecting. Values must be set to one
+     of CURL_REDIR* defines below. This used to be called CURLOPT_POST301 */
+  CINIT(POSTREDIR, LONG, 161),
 
   /* used by scp/sftp to verify the host's public key */
   CINIT(SSH_HOST_PUBLIC_KEY_MD5, OBJECTPOINT, 162),
@@ -1147,6 +1148,11 @@ typedef enum {
                           the obsolete stuff removed! */
 
 /* Backwards compatibility with older names */
+/* These are scheduled to disappear by 2011 */
+
+/* This was added in version 7.19.1 */
+#define CURLOPT_POST301 CURLOPT_POSTREDIR
+
 /* These are scheduled to disappear by 2009 */
 
 /* The following were added in 7.17.0 */
@@ -1211,6 +1217,14 @@ enum {
   CURL_SSLVERSION_LAST /* never use, keep last */
 };
 
+/* symbols to use with CURLOPT_POSTREDIR.
+   CURL_REDIR_POST_301 and CURL_REDIR_POST_302 can be bitwise ORed so that
+   CURL_REDIR_POST_301 | CURL_REDIR_POST_302 == CURL_REDIR_POST_ALL */
+
+#define CURL_REDIR_GET_ALL  0
+#define CURL_REDIR_POST_301 1
+#define CURL_REDIR_POST_302 2
+#define CURL_REDIR_POST_ALL (CURL_REDIR_POST_301|CURL_REDIR_POST_302)
 
 typedef enum {
   CURL_TIMECOND_NONE,

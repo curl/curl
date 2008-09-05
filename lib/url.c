@@ -1028,12 +1028,21 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.maxredirs = va_arg(param, long);
     break;
 
-  case CURLOPT_POST301:
+  case CURLOPT_POSTREDIR:
+  {
     /*
-     * Obey RFC 2616/10.3.2 and resubmit a POST as a POST after a 301.
+     * Set the behaviour of POST when redirecting
+     * CURL_REDIR_GET_ALL - POST is changed to GET after 301 and 302
+     * CURL_REDIR_POST_301 - POST is kept as POST after 301
+     * CURL_REDIR_POST_302 - POST is kept as POST after 302
+     * CURL_REDIR_POST_ALL - POST is kept as POST after 301 and 302
+     * other - POST is kept as POST after 301 and 302
      */
-    data->set.post301 = (bool)(0 != va_arg(param, long));
-    break;
+    long postRedir = va_arg(param, long);
+    data->set.post301 = (postRedir & CURL_REDIR_POST_301)?1:0;
+    data->set.post302 = (postRedir & CURL_REDIR_POST_302)?1:0;
+  }
+  break;
 
   case CURLOPT_POST:
     /* Does this option serve a purpose anymore? Yes it does, when
@@ -2200,13 +2209,13 @@ CURLcode Curl_disconnect(struct connectdata *conn)
     if (has_host_ntlm) {
       data->state.authhost.done = FALSE;
       data->state.authhost.picked =
-	data->state.authhost.want;
+        data->state.authhost.want;
     }
 
     if (has_proxy_ntlm) {
       data->state.authproxy.done = FALSE;
       data->state.authproxy.picked =
-	data->state.authproxy.want;
+        data->state.authproxy.want;
     }
 
     if (has_host_ntlm || has_proxy_ntlm) {

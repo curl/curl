@@ -1358,6 +1358,7 @@ struct UserDefined {
                         for infinity */
   bool post301;      /* Obey RFC 2616/10.3.2 and keep POSTs as POSTs after a
                         301 */
+  bool post302;      /* keep POSTs as POSTs after a 302 */
   bool free_referer; /* set TRUE if 'referer' points to a string we
                         allocated */
   void *postfields;  /* if POST, set the fields' values here */

@@ -557,6 +557,7 @@ struct Configurable {
   char *libcurl; /* output libcurl code to this file name */
   bool raw;
   bool post301;
+  bool post302;
   bool nokeepalive; /* for keepalive needs */
   long alivetime;
 
@@ -780,6 +781,7 @@ static void help(void)
     " -o/--output <file> Write output to <file> instead of stdout",
     "    --pass  <pass>  Pass phrase for the private key (SSL/SSH)",
     "    --post301       Do not switch to GET after following a 301 redirect (H)",
+    "    --post302       Do not switch to GET after following a 302 redirect (H)",
     " -#/--progress-bar  Display transfer progress as a progress bar",
     " -x/--proxy <host[:port]> Use HTTP proxy on given port",
     "    --proxy-anyauth Pick \"any\" proxy authentication method (H)",
@@ -1669,6 +1671,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$1", "keepalive",   FALSE}, /* listed as --no-keepalive in the help */
     {"$2", "socks5-hostname", TRUE},
     {"$3", "keepalive-time",  TRUE},
+    {"$4", "post302",    FALSE},
 
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
@@ -2176,6 +2179,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       case '3': /* --keepalive-time */
         if(str2num(&config->alivetime, nextarg))
           return PARAM_BAD_NUMERIC;
+        break;
+      case '4': /* --post302 */
+        config->post302 = toggle;
         break;
       }
       break;
@@ -2946,19 +2952,19 @@ static const char *unslashquote(const char *line, char *param)
       /* default is to output the letter after the backslash */
       switch(out = *line) {
       case '\0':
-	continue; /* this'll break out of the loop */
+        continue; /* this'll break out of the loop */
       case 't':
-	out='\t';
-	break;
+        out='\t';
+        break;
       case 'n':
-	out='\n';
-	break;
+        out='\n';
+        break;
       case 'r':
-	out='\r';
-	break;
+        out='\r';
+        break;
       case 'v':
-	out='\v';
-	break;
+        out='\v';
+        break;
       }
       *param++=out;
       line++;
@@ -4777,11 +4783,14 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         }
 
         /* curl 7.17.1 */
-        my_setopt(curl, CURLOPT_POST301, config->post301);
         if (!config->nokeepalive) {
           my_setopt(curl, CURLOPT_SOCKOPTFUNCTION, sockoptcallback);
           my_setopt(curl, CURLOPT_SOCKOPTDATA, config);
         }
+
+        /* curl 7.19.1 (the 301 version existed in 7.18.2) */
+        my_setopt(curl, CURLOPT_POSTREDIR, config->post301 |
+                  (config->post302 ? CURL_REDIR_POST_302 : FALSE));
 
         retry_numretries = config->req_retry;
 

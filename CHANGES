@@ -7,6 +7,14 @@
                                   Changelog
 
 Daniel Stenberg (5 Sep 2008)
+- Martin Drasar provided the CURLOPT_POSTREDIR patch. It renames
+  CURLOPT_POST301 (but adds a define for backwards compatibility for you who
+  don't define CURL_NO_OLDIES). This option allows you to now also change the
+  libcurl behavior for a HTTP response 302 after a POST to not use GET in the
+  subsequent request (when CURLOPT_FOLLOWLOCATION is enabled). I edited the
+  patch somewhat before commit. The curl tool got a matching --post302
+  option. Test case 1076 was added to verify this.
+
 - Introducing CURLOPT_CERTINFO and the corresponding CURLINFO_CERTINFO. By
   enabling this feature with CURLOPT_CERTINFO for a request using SSL (HTTPS
   or FTPS), libcurl will gather lots of server certificate info and that info
