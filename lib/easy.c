@@ -821,6 +821,7 @@ CURLcode curl_easy_pause(CURL *curl, int action)
        return PAUSE again and then we'll get a new copy allocted and stored in
        the tempwrite variables */
     char *tempwrite = data->state.tempwrite;
+    char *freewrite = tempwrite; /* store this pointer to free it later */
     size_t tempsize = data->state.tempwritesize;
     int temptype = data->state.tempwritetype;
     size_t chunklen;
@@ -845,7 +846,7 @@ CURLcode curl_easy_pause(CURL *curl, int action)
 
       result = Curl_client_write(data->state.current_conn,
                                  temptype, tempwrite, chunklen);
-      if(!result)
+      if(result)
         /* failures abort the loop at once */
         break;
 
@@ -858,13 +859,13 @@ CURLcode curl_easy_pause(CURL *curl, int action)
         */
         char *newptr;
 
-        free(data->state.tempwrite); /* free the one just cached as it isn't
-                                        enough */
-
         /* note that tempsize is still the size as before the callback was
            used, and thus the whole piece of data to keep */
-        newptr = malloc(tempsize);
+        newptr = realloc(data->state.tempwrite, tempsize);
+
         if(!newptr) {
+          free(data->state.tempwrite); /* free old area */
+          data->state.tempwrite = NULL;
           result = CURLE_OUT_OF_MEMORY;
           /* tempwrite will be freed further down */
           break;
@@ -882,7 +883,7 @@ CURLcode curl_easy_pause(CURL *curl, int action)
 
     } while((result == CURLE_OK) && tempsize);
 
-    free(tempwrite); /* this is unconditionally no longer used */
+    free(freewrite); /* this is unconditionally no longer used */
   }
 
   return result;

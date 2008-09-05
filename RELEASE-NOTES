@@ -15,6 +15,7 @@ This release includes the following bugfixes:
 
  o MingW32 non-configure builds are now largefile feature enabled by default
  o NetWare LIBC builds are now largefile feature enabled by default
+ o curl_easy_pause() could behave wrongly on unpause
 
 This release includes the following known bugs:
 
@@ -27,6 +28,6 @@ Other curl-related news:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Keith Mok, Yang Tse, Daniel Fandrich, Guenter Knauf
+ Keith Mok, Yang Tse, Daniel Fandrich, Guenter Knauf, Dmitriy Sergeyev
 
         Thanks! (and sorry if I forgot to mention someone)
