@@ -64,6 +64,7 @@ This is data we upload with PUT
 it comes from stdin so MUST be sent
 with chunked encoding
 which is impossible in HTTP/1.0
+
 0
 
 </protocol>

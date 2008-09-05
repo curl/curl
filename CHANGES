@@ -6,6 +6,19 @@
 
                                   Changelog
 
+Daniel Fandrich (5 Sep 2008)
+- Improved the logic the decides whether to use HTTP 1.1 features or not in a
+  request.  Setting a specific version with CURLOPT_HTTP_VERSION overrides
+  all other checks, but otherwise, a 1.0 request will be made if the server
+  is known to support only 1.0 because it previously responded so and the
+  connection was kept alive, or a response to a previous request on this handle
+  came back as 1.0. The latter could take place in cases like redirection or
+  authentication where several requests have to be made before the operation
+  is complete.
+
+- Detect cases where an upload must be sent chunked and the server supports
+  only HTTP 1.0 and return CURLE_UPLOAD_FAILED.
+
 Daniel Stenberg (5 Sep 2008)
 - Martin Drasar provided the CURLOPT_POSTREDIR patch. It renames
   CURLOPT_POST301 (but adds a define for backwards compatibility for you who

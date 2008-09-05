@@ -1950,15 +1950,30 @@ CURLcode Curl_http_done(struct connectdata *conn,
   return CURLE_OK;
 }
 
+
+/* Determine if we should use HTTP 1.1 for this request. Reasons to avoid it
+are if the user specifically requested HTTP 1.0, if the server we are
+connected to only supports 1.0, or if any server previously contacted to
+handle this request only supports 1.0. */
+static bool use_http_1_1(const struct SessionHandle *data,
+                         const struct connectdata *conn)
+{
+  return (data->set.httpversion == CURL_HTTP_VERSION_1_1) ||
+         ((data->set.httpversion != CURL_HTTP_VERSION_1_0) &&
+          ((conn->httpversion == 11) ||
+           ((conn->httpversion != 10) &&
+            (data->state.httpversion != 10))));
+}
+
 /* check and possibly add an Expect: header */
 static CURLcode expect100(struct SessionHandle *data,
+                          struct connectdata *conn,
                           send_buffer *req_buffer)
 {
   CURLcode result = CURLE_OK;
   data->state.expect100header = FALSE; /* default to false unless it is set
                                           to TRUE below */
-  if((data->set.httpversion != CURL_HTTP_VERSION_1_0) &&
-     !checkheaders(data, "Expect:")) {
+  if(use_http_1_1(data, conn) && !checkheaders(data, "Expect:")) {
     /* if not doing HTTP 1.0 or disabled explicitly, we add a Expect:
        100-continue to the headers which actually speeds up post
        operations (as there is one packet coming back from the web
@@ -2139,10 +2154,14 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   else {
     if((conn->protocol&PROT_HTTP) &&
         data->set.upload &&
-        (data->set.infilesize == -1) &&
-        (data->set.httpversion != CURL_HTTP_VERSION_1_0)) {
-      /* HTTP, upload, unknown file size and not HTTP 1.0 */
-      data->req.upload_chunky = TRUE;
+        (data->set.infilesize == -1)) {
+      if (use_http_1_1(data, conn)) {
+        /* HTTP, upload, unknown file size and not HTTP 1.0 */
+        data->req.upload_chunky = TRUE;
+      } else {
+        failf(data, "Chunky upload is not supported by HTTP 1.0");
+        return CURLE_UPLOAD_FAILED;
+      }
     }
     else {
       /* else, no chunky upload */
@@ -2410,8 +2429,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     }
   }
 
-  /* Use 1.1 unless the use specificly asked for 1.0 */
-  httpstring= data->set.httpversion==CURL_HTTP_VERSION_1_0?"1.0":"1.1";
+  /* Use 1.1 unless the user specifically asked for 1.0 or the server only
+     supports 1.0 */
+  httpstring= use_http_1_1(data, conn)?"1.1":"1.0";
 
   /* initialize a dynamic send-buffer */
   req_buffer = add_buffer_init();
@@ -2635,7 +2655,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         return result;
     }
 
-    result = expect100(data, req_buffer);
+    result = expect100(data, conn, req_buffer);
     if(result)
       return result;
 
@@ -2707,7 +2727,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         return result;
     }
 
-    result = expect100(data, req_buffer);
+    result = expect100(data, conn, req_buffer);
     if(result)
       return result;
 
@@ -2772,7 +2792,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
            sure that the expect100header is always set to the preferred value
            here. */
         if(postsize > TINY_INITIAL_POST_SIZE) {
-          result = expect100(data, req_buffer);
+          result = expect100(data, conn, req_buffer);
           if(result)
             return result;
         }

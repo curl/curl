@@ -12,6 +12,7 @@ This release includes the following changes:
  o pkg-config can now show supported_protocols and supported_features
  o Added CURLOPT_CERTINFO and CURLINFO_CERTINFO
  o Added CURLOPT_POSTREDIR
+ o Better detect HTTP 1.0 servers and don't do HTTP 1.1 requests on them
 
 This release includes the following bugfixes:
 

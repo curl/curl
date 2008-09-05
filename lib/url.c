@@ -4689,7 +4689,8 @@ CURLcode Curl_done(struct connectdata **connp,
  * do_init() inits the readwrite session. This is inited each time (in the DO
  * function before the protocol-specific DO functions are invoked) for a
  * transfer, sometimes multiple times on the same SessionHandle. Make sure
- * nothing in here depends on stuff that are setup dynamicly for the transfer.
+ * nothing in here depends on stuff that are setup dynamically for the
+ * transfer.
  */
 
 static CURLcode do_init(struct connectdata *conn)
@@ -4706,7 +4707,6 @@ static CURLcode do_init(struct connectdata *conn)
   k->start = Curl_tvnow(); /* start time */
   k->now = k->start;   /* current time is now */
   k->header = TRUE; /* assume header */
-  k->httpversion = -1; /* unknown at this point */
 
   k->bytecount = 0;
 

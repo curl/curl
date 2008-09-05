@@ -694,7 +694,7 @@ enum expect100 {
 /*
  * Request specific data in the easy handle (SessionHandle).  Previously,
  * these members were on the connectdata struct but since a conn struct may
- * now be shared between different SessionHandles, we store connection-specifc
+ * now be shared between different SessionHandles, we store connection-specific
  * data here. This struct only keeps stuff that's interesting for *this*
  * request, as it will be cleared between multiple ones
  */
@@ -738,7 +738,6 @@ struct SingleRequest {
   curl_off_t offset;            /* possible resume offset read from the
                                    Content-Range: header */
   int httpcode;                 /* error code from the 'HTTP/1.? XXX' line */
-  int httpversion;              /* the HTTP version*10 */
   struct timeval start100;      /* time stamp to wait for the 100 code from */
   enum expect100 exp100;        /* expect 100 continue state */
 
@@ -928,6 +927,8 @@ struct connectdata {
   char *proxyuser;    /* proxy user name string, allocated */
   char *proxypasswd;  /* proxy password string, allocated */
   curl_proxytype proxytype; /* what kind of proxy that is in use */
+
+  int httpversion;              /* the HTTP version*10 reported by the server */
 
   struct timeval now;     /* "current" time */
   struct timeval created; /* creation time */
@@ -1218,6 +1219,8 @@ struct UrlState {
   /* set after initial USER failure, to prevent an authentication loop */
   bool ftp_trying_alternative;
 
+  int httpversion;       /* the lowest HTTP version*10 reported by any server
+                            involved in this request */
   bool expect100header;  /* TRUE if we added Expect: 100-continue */
 
   bool pipe_broke; /* TRUE if the connection we were pipelined on broke
@@ -1519,7 +1522,7 @@ struct SessionHandle {
   struct Names dns;
   struct Curl_multi *multi;    /* if non-NULL, points to the multi handle
                                   struct to which this "belongs" */
-  struct Curl_one_easy *multi_pos; /* if non-NULL, points to the its position
+  struct Curl_one_easy *multi_pos; /* if non-NULL, points to its position
                                       in multi controlling structure to assist
                                       in removal. */
   struct Curl_share *share;    /* Share, handles global variable mutexing */

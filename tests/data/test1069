@@ -9,14 +9,6 @@ HTTP/1.0
 
 # Server-side
 <reply>
-<data>
-HTTP/1.0 500 Impossible swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
-Server: test-server/fake
-
-blablabla
-
-</data>
 </reply>
 
 # Client-side

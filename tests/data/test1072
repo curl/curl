@@ -22,10 +22,9 @@ WWW-Authenticate: Blackmagic realm="gimme all yer s3cr3ts"
 WWW-Authenticate: Basic realm="gimme all yer s3cr3ts"
 WWW-Authenticate: Digest realm="gimme all yer s3cr3ts", nonce="11223344"
 Content-Type: text/plain
-Content-Length: 35
+Content-Length: 0
 Connection: close
 
-Try again on this HTTP 1.0 server!
 </data>
 </reply>
 
@@ -71,6 +70,7 @@ This is data we upload with PUT
 it comes from stdin so MUST be sent
 with chunked encoding
 which is impossible in HTTP/1.0
+
 0
 
 </protocol>

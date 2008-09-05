@@ -12,7 +12,7 @@ followlocation
 # Server-side
 <reply>
 <data>
-HTTP/1.0 307 Redirect swsclose
+HTTP/1.1 307 Redirect swsclose
 Date: Thu, 29 Jul 2008 14:49:00 GMT
 Server: test-server/fake
 Location: data/10530002.txt?coolsite=yes
@@ -21,24 +21,28 @@ Connection: close
 
 </data>
 <data2>
-HTTP/1.0 200 OK swsclose
+HTTP/1.1 200 OK swsclose
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
+Content-Length: 11
+Connection: close
 
 blablabla
 
 </data2>
 <datacheck>
-HTTP/1.0 307 Redirect swsclose
+HTTP/1.1 307 Redirect swsclose
 Date: Thu, 29 Jul 2008 14:49:00 GMT
 Server: test-server/fake
 Location: data/10530002.txt?coolsite=yes
 Content-Length: 0
 Connection: close
 
-HTTP/1.0 200 OK swsclose
+HTTP/1.1 200 OK swsclose
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
+Content-Length: 11
+Connection: close
 
 blablabla
 

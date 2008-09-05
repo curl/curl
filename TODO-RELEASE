@@ -4,12 +4,6 @@ To be addressed before 7.19.1 (planned release: October/November 2008)
 162 - Craig Perras' note "http upload: how to stop on error"
       http://curl.haxx.se/mail/archive-2008-08/0138.html
 
-163 - Detecting illegal attempts at chunked transfers on HTTP 1.0
-      (tests 1069, 1072, 1073)
-      http://curl.haxx.se/mail/archive-2008-08/0435.html
-
-164 - Automatic downgrading to HTTP 1.0 (tests 1071 through 1074)
-
 165 - "Problem with CURLOPT_RESUME_FROM and CURLOPT_APPEND" by Daniele Pinau,
       recipe: http://curl.haxx.se/mail/lib-2008-08/0439.html
 

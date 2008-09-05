@@ -832,7 +832,7 @@ static CURLcode readwrite_headers(struct SessionHandle *data,
 	k->header = FALSE; /* no more header to parse! */
 
 	if((k->size == -1) && !k->chunk && !conn->bits.close &&
-	   (k->httpversion >= 11) ) {
+	   (conn->httpversion >= 11) ) {
 	  /* On HTTP 1.1, when connection is not to get closed, but no
 	     Content-Length nor Content-Encoding chunked have been
 	     received, according to RFC2616 section 4.4 point 5, we
@@ -1006,17 +1006,17 @@ static CURLcode readwrite_headers(struct SessionHandle *data,
       nc = sscanf(HEADER1,
 		  " HTTP/%d.%d %3d",
 		  &httpversion_major,
-		  &k->httpversion,
+		  &conn->httpversion,
 		  &k->httpcode);
       if(nc==3) {
-	k->httpversion += 10 * httpversion_major;
+	conn->httpversion += 10 * httpversion_major;
       }
       else {
 	/* this is the real world, not a Nirvana
 	   NCSA 1.5.x returns this crap when asked for HTTP/1.1
 	*/
 	nc=sscanf(HEADER1, " HTTP %3d", &k->httpcode);
-	k->httpversion = 10;
+	conn->httpversion = 10;
 
 	/* If user has set option HTTP200ALIASES,
 	   compare header line against list of aliases
@@ -1025,14 +1025,18 @@ static CURLcode readwrite_headers(struct SessionHandle *data,
 	  if(checkhttpprefix(data, k->p)) {
 	    nc = 1;
 	    k->httpcode = 200;
-	    k->httpversion = 10;
+	    conn->httpversion = 10;
 	  }
 	}
       }
 
       if(nc) {
 	data->info.httpcode = k->httpcode;
-	data->info.httpversion = k->httpversion;
+	data->info.httpversion = conn->httpversion;
+        if (!data->state.httpversion ||
+            data->state.httpversion > conn->httpversion)
+          /* store the lowest server version we encounter */
+          data->state.httpversion = conn->httpversion;
 
 	/*
 	 * This code executes as part of processing the header.  As a
@@ -1060,14 +1064,14 @@ static CURLcode readwrite_headers(struct SessionHandle *data,
 	  }
 	}
 
-	if(k->httpversion == 10) {
+	if(conn->httpversion == 10) {
 	  /* Default action for HTTP/1.0 must be to close, unless
 	     we get one of those fancy headers that tell us the
 	     server keeps it open for us! */
 	  infof(data, "HTTP 1.0, assume close after body\n");
 	  conn->bits.close = TRUE;
 	}
-	else if(k->httpversion >= 11 &&
+	else if(conn->httpversion >= 11 &&
 		!conn->bits.close) {
 	  /* If HTTP version is >= 1.1 and connection is persistent
 	     server supports pipelining. */
@@ -1161,7 +1165,7 @@ static CURLcode readwrite_headers(struct SessionHandle *data,
 	data->info.contenttype = contenttype;
       }
     }
-    else if((k->httpversion == 10) &&
+    else if((conn->httpversion == 10) &&
 	    conn->bits.httpproxy &&
 	    Curl_compareheader(k->p,
 			       "Proxy-Connection:", "keep-alive")) {
@@ -1174,7 +1178,7 @@ static CURLcode readwrite_headers(struct SessionHandle *data,
       conn->bits.close = FALSE; /* don't close when done */
       infof(data, "HTTP/1.0 proxy connection set to keep alive!\n");
     }
-    else if((k->httpversion == 11) &&
+    else if((conn->httpversion == 11) &&
 	    conn->bits.httpproxy &&
 	    Curl_compareheader(k->p,
 			       "Proxy-Connection:", "close")) {
@@ -1185,7 +1189,7 @@ static CURLcode readwrite_headers(struct SessionHandle *data,
       conn->bits.close = TRUE; /* close when done */
       infof(data, "HTTP/1.1 proxy connection set close!\n");
     }
-    else if((k->httpversion == 10) &&
+    else if((conn->httpversion == 10) &&
 	    Curl_compareheader(k->p, "Connection:", "keep-alive")) {
       /*
        * A HTTP/1.0 reply with the 'Connection: keep-alive' line
@@ -1886,6 +1890,7 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
   data->set.followlocation=0; /* reset the location-follow counter */
   data->state.this_is_a_follow = FALSE; /* reset this */
   data->state.errorbuf = FALSE; /* no error has occurred */
+  data->state.httpversion = 0; /* don't assume any particular server version */
 
   data->state.authproblem = FALSE;
   data->state.authhost.want = data->set.httpauth;
