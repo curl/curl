@@ -463,7 +463,6 @@ bool Curl_ssl_data_pending(const struct connectdata *conn,
 {
   return curlssl_data_pending(conn, connindex);
 }
-#endif /* USE_SSL */
 
 void Curl_ssl_free_certinfo(struct SessionHandle *data)
 {
@@ -477,3 +476,4 @@ void Curl_ssl_free_certinfo(struct SessionHandle *data)
     ci->num_of_certs = 0;
   }
 }
+#endif /* USE_SSL */
