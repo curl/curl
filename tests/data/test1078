@@ -1,0 +1,85 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP/1.0
+HTTP GET
+HTTP CONNECT
+proxytunnel
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="1">
+HTTP/1.0 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Funny-head: yesyes
+Content-Length: 9
+Connection: keep-alive
+
+contents
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP CONNECT with proxytunnel and downgrade to HTTP/1.0
+ </name>
+ <command>
+-x %HOSTIP:%HTTPPORT -p http://%HOSTIP:%HTTPPORT/we/want/that/page/1078 http://%HOSTIP:%HTTPPORT/we/want/that/page/1078
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+CONNECT %HOSTIP:%HTTPPORT HTTP/1.0
+Host: %HOSTIP:%HTTPPORT
+Proxy-Connection: Keep-Alive
+
+GET /we/want/that/page/1078 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /we/want/that/page/1078 HTTP/1.0
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+<stdout>
+HTTP/1.1 200 Mighty fine indeed
+
+HTTP/1.0 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Funny-head: yesyes
+Content-Length: 9
+Connection: keep-alive
+
+contents
+HTTP/1.0 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Funny-head: yesyes
+Content-Length: 9
+Connection: keep-alive
+
+contents
+</stdout>
+</verify>
+</testcase>
