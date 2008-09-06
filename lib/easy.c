@@ -600,8 +600,7 @@ CURL *curl_easy_duphandle(CURL *incurl)
   bool fail = TRUE;
   struct SessionHandle *data=(struct SessionHandle *)incurl;
 
-  struct SessionHandle *outcurl = (struct SessionHandle *)
-    calloc(sizeof(struct SessionHandle), 1);
+  struct SessionHandle *outcurl = calloc(sizeof(struct SessionHandle), 1);
 
   if(NULL == outcurl)
     return NULL; /* failure */

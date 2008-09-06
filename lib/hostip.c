@@ -332,7 +332,7 @@ Curl_cache_addr(struct SessionHandle *data,
   entry_len = strlen(entry_id);
 
   /* Create a new cache entry */
-  dns = (struct Curl_dns_entry *) calloc(sizeof(struct Curl_dns_entry), 1);
+  dns = calloc(sizeof(struct Curl_dns_entry), 1);
   if(!dns) {
     free(entry_id);
     return NULL;

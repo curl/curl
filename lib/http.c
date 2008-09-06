@@ -2063,7 +2063,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   if(!data->state.proto.http) {
     /* Only allocate this struct if we don't already have it! */
 
-    http = (struct HTTP *)calloc(sizeof(struct HTTP), 1);
+    http = calloc(sizeof(struct HTTP), 1);
     if(!http)
       return CURLE_OUT_OF_MEMORY;
     data->state.proto.http = http;

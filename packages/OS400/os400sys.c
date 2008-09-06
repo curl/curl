@@ -192,7 +192,7 @@ buffer_threaded(localkey_t key, long size)
 
     /* Allocate buffer descriptors for the current thread. */
 
-    if (!(bufs = (buffer_t *) calloc((size_t) LK_LAST, sizeof *bufs)))
+    if (!(bufs = calloc((size_t) LK_LAST, sizeof *bufs)))
       return (char *) NULL;
 
     if (pthread_setspecific(thdkey, (void *) bufs)) {
@@ -220,7 +220,7 @@ buffer_undef(localkey_t key, long size)
   if (Curl_thread_buffer == buffer_undef) {     /* If unchanged during lock. */
     if (!pthread_key_create(&thdkey, thdbufdestroy))
       Curl_thread_buffer = buffer_threaded;
-    else if (!(locbufs = (buffer_t *) calloc((size_t) LK_LAST,
+    else if (!(locbufs = calloc((size_t) LK_LAST,
                                              sizeof *locbufs))) {
       pthread_mutex_unlock(&mutex);
       return (char *) NULL;
@@ -777,7 +777,7 @@ Curl_ldap_search_s_a(void * ld, char * base, int scope, char * filter,
     for (i = 0; attrs[i++];)
       ;
 
-    if (!(eattrs = (char * *) calloc(i, sizeof *eattrs)))
+    if (!(eattrs = calloc(i, sizeof *eattrs)))
       status = LDAP_NO_MEMORY;
     else {
       for (j = 0; attrs[j]; j++) {

@@ -651,7 +651,7 @@ CURLcode Curl_open(struct SessionHandle **curl)
 #endif
 
   /* Very simple start-up: alloc the struct, init it with zeroes and return */
-  data = (struct SessionHandle *)calloc(1, sizeof(struct SessionHandle));
+  data = calloc(1, sizeof(struct SessionHandle));
   if(!data) {
     /* this is a very serious error */
     DEBUGF(fprintf(stderr, "Error: calloc of SessionHandle failed\n"));
@@ -2969,7 +2969,7 @@ static struct connectdata *allocate_conn(void)
 {
   struct connectdata *conn;
 
-  conn = (struct connectdata *)calloc(1, sizeof(struct connectdata));
+  conn = calloc(1, sizeof(struct connectdata));
   if(!conn)
     return NULL;
 

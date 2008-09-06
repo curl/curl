@@ -150,7 +150,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   else {
     int h_errnop;
 
-    buf = (struct hostent *)calloc(CURL_HOSTENT_SIZE, 1);
+    buf = calloc(CURL_HOSTENT_SIZE, 1);
     if(!buf)
       return NULL; /* major failure */
     /*

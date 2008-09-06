@@ -1461,7 +1461,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
       else {
         sshc->readdir_currLen = strlen(sshc->readdir_longentry);
         sshc->readdir_totalLen = 80 + sshc->readdir_currLen;
-        sshc->readdir_line = (char *)calloc(sshc->readdir_totalLen, 1);
+        sshc->readdir_line = calloc(sshc->readdir_totalLen, 1);
         if(!sshc->readdir_line) {
           Curl_safefree(sshc->readdir_filename);
           sshc->readdir_filename = NULL;
@@ -2021,7 +2021,7 @@ static CURLcode ssh_init(struct connectdata *conn)
   if(data->state.proto.ssh)
     return CURLE_OK;
 
-  ssh = (struct SSHPROTO *)calloc(sizeof(struct SSHPROTO), 1);
+  ssh = calloc(sizeof(struct SSHPROTO), 1);
   if(!ssh)
     return CURLE_OUT_OF_MEMORY;
 

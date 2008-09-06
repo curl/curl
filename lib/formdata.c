@@ -171,7 +171,7 @@ AddHttpPost(char *name, size_t namelength,
             struct curl_httppost **last_post)
 {
   struct curl_httppost *post;
-  post = (struct curl_httppost *)calloc(sizeof(struct curl_httppost), 1);
+  post = calloc(sizeof(struct curl_httppost), 1);
   if(post) {
     post->name = name;
     post->namelength = (long)(name?(namelength?namelength:strlen(name)):0);
@@ -410,7 +410,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
   /*
    * We need to allocate the first struct to fill in.
    */
-  first_form = (FormInfo *)calloc(sizeof(struct FormInfo), 1);
+  first_form = calloc(sizeof(struct FormInfo), 1);
   if(!first_form)
     return CURL_FORMADD_MEMORY;
 

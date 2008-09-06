@@ -190,7 +190,7 @@ Curl_cookie_add(struct SessionHandle *data,
 #endif
 
   /* First, alloc and init a new struct for it */
-  co = (struct Cookie *)calloc(sizeof(struct Cookie), 1);
+  co = calloc(sizeof(struct Cookie), 1);
   if(!co)
     return NULL; /* bail out if we're this low on memory */
 
@@ -683,7 +683,7 @@ struct CookieInfo *Curl_cookie_init(struct SessionHandle *data,
 
   if(NULL == inc) {
     /* we didn't get a struct, create one */
-    c = (struct CookieInfo *)calloc(1, sizeof(struct CookieInfo));
+    c = calloc(1, sizeof(struct CookieInfo));
     if(!c)
       return NULL; /* failed to get memory */
     c->filename = strdup(file?file:"none"); /* copy the name just in case */

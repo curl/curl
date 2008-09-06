@@ -3022,7 +3022,7 @@ static CURLcode ftp_init(struct connectdata *conn)
   struct SessionHandle *data = conn->data;
   struct FTP *ftp = data->state.proto.ftp;
   if(!ftp) {
-    ftp = (struct FTP *)calloc(sizeof(struct FTP), 1);
+    ftp = calloc(sizeof(struct FTP), 1);
     if(!ftp)
       return CURLE_OUT_OF_MEMORY;
 
@@ -3905,7 +3905,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
     }
     slash_pos=strrchr(cur_pos, '/');
     if(slash_pos || !*cur_pos) {
-      ftpc->dirs = (char **)calloc(1, sizeof(ftpc->dirs[0]));
+      ftpc->dirs = calloc(1, sizeof(ftpc->dirs[0]));
       if(!ftpc->dirs)
         return CURLE_OUT_OF_MEMORY;
 
@@ -3927,7 +3927,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
   case FTPFILE_MULTICWD:
     ftpc->dirdepth = 0;
     ftpc->diralloc = 5; /* default dir depth to allocate */
-    ftpc->dirs = (char **)calloc(ftpc->diralloc, sizeof(ftpc->dirs[0]));
+    ftpc->dirs = calloc(ftpc->diralloc, sizeof(ftpc->dirs[0]));
     if(!ftpc->dirs)
       return CURLE_OUT_OF_MEMORY;
 
