@@ -320,7 +320,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   Curl_md5it(md5buf, md5this);
   free(md5this); /* free this again */
 
-  ha1 = (unsigned char *)malloc(33); /* 32 digits and 1 zero byte */
+  ha1 = malloc(33); /* 32 digits and 1 zero byte */
   if(!ha1)
     return CURLE_OUT_OF_MEMORY;
 

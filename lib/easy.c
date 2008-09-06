@@ -612,7 +612,7 @@ CURL *curl_easy_duphandle(CURL *incurl)
      * get setup on-demand in the code, as that would probably decrease
      * the likeliness of us forgetting to init a buffer here in the future.
      */
-    outcurl->state.headerbuff=(char*)malloc(HEADERSIZE);
+    outcurl->state.headerbuff = malloc(HEADERSIZE);
     if(!outcurl->state.headerbuff) {
       break;
     }

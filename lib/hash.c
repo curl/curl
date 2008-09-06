@@ -67,7 +67,7 @@ Curl_hash_init(struct curl_hash *h,
   h->size = 0;
   h->slots = slots;
 
-  h->table = (struct curl_llist **) malloc(slots * sizeof(struct curl_llist *));
+  h->table = malloc(slots * sizeof(struct curl_llist *));
   if(h->table) {
     for (i = 0; i < slots; ++i) {
       h->table[i] = Curl_llist_alloc((curl_llist_dtor) hash_element_dtor);
@@ -96,7 +96,7 @@ Curl_hash_alloc(int slots,
     return NULL; /* failure */
   }
 
-  h = (struct curl_hash *) malloc(sizeof(struct curl_hash));
+  h = malloc(sizeof(struct curl_hash));
   if(h) {
     if(Curl_hash_init(h, slots, hfunc, comparator, dtor)) {
       /* failure */
@@ -113,8 +113,7 @@ Curl_hash_alloc(int slots,
 static struct curl_hash_element *
 mk_hash_element(const void *key, size_t key_len, const void *p)
 {
-  struct curl_hash_element *he =
-    (struct curl_hash_element *) malloc(sizeof(struct curl_hash_element));
+  struct curl_hash_element *he = malloc(sizeof(struct curl_hash_element));
 
   if(he) {
     void *dupkey = malloc(key_len);

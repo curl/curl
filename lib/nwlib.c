@@ -185,7 +185,7 @@ int GetOrSetUpData(int id, libdata_t **appData,
     NXLock(gLibLock);
 
     if(!(app_data = (libdata_t *) get_app_data(id))) {
-      app_data = (libdata_t *) malloc(sizeof(libdata_t));
+      app_data = malloc(sizeof(libdata_t));
 
       if(app_data) {
         memset(app_data, 0, sizeof(libdata_t));
@@ -246,7 +246,7 @@ int GetOrSetUpData(int id, libdata_t **appData,
 ** important, this just helps to demonstrate that we can have arbitrarily
 ** complex per-thread data.
 */
-      thread_data = (libthreaddata_t *) malloc(sizeof(libthreaddata_t));
+      thread_data = malloc(sizeof(libthreaddata_t));
 
       if(thread_data) {
         thread_data->_errno      = 0;

@@ -932,7 +932,7 @@ AddMultiFiles (const char *file_name,
   struct multi_files *multi;
   struct multi_files *multi_type = NULL;
   struct multi_files *multi_name = NULL;
-  multi = (struct multi_files *)malloc(sizeof(struct multi_files));
+  multi = malloc(sizeof(struct multi_files));
   if (multi) {
     memset(multi, 0, sizeof(struct multi_files));
     multi->form.option = CURLFORM_FILE;
@@ -945,7 +945,7 @@ AddMultiFiles (const char *file_name,
     *multi_start = multi;
 
   if (type_name) {
-    multi_type = (struct multi_files *)malloc(sizeof(struct multi_files));
+    multi_type = malloc(sizeof(struct multi_files));
     if (multi_type) {
       memset(multi_type, 0, sizeof(struct multi_files));
       multi_type->form.option = CURLFORM_CONTENTTYPE;
@@ -960,7 +960,7 @@ AddMultiFiles (const char *file_name,
     }
   }
   if (show_filename) {
-    multi_name = (struct multi_files *)malloc(sizeof(struct multi_files));
+    multi_name = malloc(sizeof(struct multi_files));
     if (multi_name) {
       memset(multi_name, 0, sizeof(struct multi_files));
       multi_name->form.option = CURLFORM_FILENAME;
@@ -1192,8 +1192,7 @@ static int formparse(struct Configurable *config,
           ptr = ptr->next;
           ++count;
         }
-        forms =
-          (struct curl_forms *)malloc((count+1)*sizeof(struct curl_forms));
+        forms = malloc((count+1)*sizeof(struct curl_forms));
         if (!forms)
         {
           fprintf(config->errors, "Error building form post!\n");
@@ -3726,7 +3725,7 @@ static void FindWin32CACert(struct Configurable *config,
   if(curlinfo->features & CURL_VERSION_SSL) {
     DWORD buflen;
     char *ptr = NULL;
-    char *retval = (char *) malloc(sizeof (TCHAR) * (MAX_PATH + 1));
+    char *retval = malloc(sizeof (TCHAR) * (MAX_PATH + 1));
     if (!retval)
       return;
     retval[0] = '\0';
@@ -4370,7 +4369,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             filep = curl_easy_escape(curl, filep, 0 /* use strlen */);
 
             if(filep) {
-              char *urlbuffer=(char *)malloc(strlen(url) + strlen(filep) + 3);
+              char *urlbuffer = malloc(strlen(url) + strlen(filep) + 3);
               if(!urlbuffer) {
                 helpf(config->errors, "out of memory\n");
                 return CURLE_OUT_OF_MEMORY;
@@ -4471,7 +4470,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           /*
            * Then append ? followed by the get fields to the url.
            */
-          urlbuffer=(char *)malloc(strlen(url) + strlen(httpgetfields) + 3);
+          urlbuffer = malloc(strlen(url) + strlen(httpgetfields) + 3);
           if(!urlbuffer) {
             helpf(config->errors, "out of memory\n");
             return CURLE_OUT_OF_MEMORY;

@@ -675,7 +675,7 @@ DhcpNameServer
       {
         if (bytes)
         {
-          line = (char *)malloc(bytes+1);
+          line = malloc(bytes+1);
           if (RegQueryValueEx(mykey, NAMESERVER, NULL, &data_type,
                               (unsigned char *)line, &bytes) ==
               ERROR_SUCCESS)
@@ -952,7 +952,7 @@ static int init_by_defaults(ares_channel channel)
     size_t len = 64;
     int res;
 
-    hostname = (char *)malloc(len);
+    hostname = malloc(len);
     if(!hostname) {
       rc = ARES_ENOMEM;
       goto error;

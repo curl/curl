@@ -221,7 +221,7 @@ url_fopen(const char *url,const char *operation)
     URL_FILE *file;
     (void)operation;
 
-    file = (URL_FILE *)malloc(sizeof(URL_FILE));
+    file = malloc(sizeof(URL_FILE));
     if(!file)
         return NULL;
 

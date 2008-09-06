@@ -309,7 +309,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         }
         else {
           conn->trlMax=128;
-          ptr = (char*)malloc(conn->trlMax);
+          ptr = malloc(conn->trlMax);
         }
         if(!ptr)
           return CHUNKE_OUT_OF_MEMORY;

@@ -971,7 +971,7 @@ static
 send_buffer *add_buffer_init(void)
 {
   send_buffer *blonk;
-  blonk=(send_buffer *)malloc(sizeof(send_buffer));
+  blonk = malloc(sizeof(send_buffer));
   if(blonk) {
     memset(blonk, 0, sizeof(send_buffer));
     return blonk;
@@ -1193,7 +1193,7 @@ CURLcode add_buffer(send_buffer *in, const void *inptr, size_t size)
       new_rb = realloc(in->buffer, new_size);
     else
       /* create a new buffer */
-      new_rb = (char *)malloc(new_size);
+      new_rb = malloc(new_size);
 
     if(!new_rb) {
       /* If we failed, we cleanup the whole buffer and return error */

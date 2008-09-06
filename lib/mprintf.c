@@ -1068,7 +1068,7 @@ static int alloc_addbyter(int output, FILE *data)
   unsigned char outc = (unsigned char)output;
 
   if(!infop->buffer) {
-    infop->buffer=(char *)malloc(32);
+    infop->buffer = malloc(32);
     if(!infop->buffer) {
       infop->fail = 1;
       return -1; /* fail */

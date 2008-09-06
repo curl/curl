@@ -394,7 +394,7 @@ int main(int argc, argv_item_t argv[])
 
   for (i = 0; i < MAX; i++) {
     struct timeval key;
-    ptrs[i] = t = (struct Curl_tree *)malloc(sizeof(struct Curl_tree));
+    ptrs[i] = t = malloc(sizeof(struct Curl_tree));
 
     key.tv_sec = 0;
 #ifdef TEST2

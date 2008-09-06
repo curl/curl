@@ -1427,7 +1427,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     }
 
     /* now add a node to the Curl_message linked list with this info */
-    msg = (struct Curl_message *)malloc(sizeof(struct Curl_message));
+    msg = malloc(sizeof(struct Curl_message));
 
     if(!msg)
       return CURLM_OUT_OF_MEMORY;

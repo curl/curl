@@ -281,7 +281,7 @@ int main(int argc, char **argv) {
   struct curl_slist * headers=NULL;
   int badarg=0;
 
-  binaryptr=(char*)malloc(tabLength);
+  binaryptr = malloc(tabLength);
 
   p.verbose = 0;
   p.errorbio = BIO_new_fp (stderr, BIO_NOCLOSE);
@@ -404,7 +404,7 @@ int main(int argc, char **argv) {
   /* determine URL to go */
 
   if (hostporturl) {
-    serverurl=(char*) malloc(9+strlen(hostporturl));
+    serverurl = malloc(9+strlen(hostporturl));
     sprintf(serverurl,"https://%s",hostporturl);
   }
   else if (p.accesstype != 0) { /* see whether we can find an AIA or SIA for a given access type */
@@ -442,7 +442,7 @@ int main(int argc, char **argv) {
 
   /* pass our list of custom made headers */
 
-  contenttype=(char*) malloc(15+strlen(mimetype));
+  contenttype = malloc(15+strlen(mimetype));
   sprintf(contenttype,"Content-type: %s",mimetype);
   headers = curl_slist_append(headers,contenttype);
   curl_easy_setopt(p.curl, CURLOPT_HTTPHEADER, headers);

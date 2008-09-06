@@ -89,7 +89,7 @@ inflate_stream(struct connectdata *conn,
 
   /* Dynamically allocate a buffer for decompression because it's uncommonly
      large to hold on the stack */
-  decomp = (char*)malloc(DSIZ);
+  decomp = malloc(DSIZ);
   if(decomp == NULL) {
     return exit_zlib(z, &k->zlib_init, CURLE_OUT_OF_MEMORY);
   }

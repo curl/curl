@@ -160,7 +160,7 @@ size_t Curl_base64_encode(struct SessionHandle *data,
   if(0 == insize)
     insize = strlen(indata);
 
-  base64data = output = (char*)malloc(insize*4/3+4);
+  base64data = output = malloc(insize*4/3+4);
   if(NULL == output)
     return 0;
 
@@ -171,7 +171,7 @@ size_t Curl_base64_encode(struct SessionHandle *data,
    * so we copy it to a buffer, translate it, and use that instead.
    */
   if(data) {
-    convbuf = (char*)malloc(insize);
+    convbuf = malloc(insize);
     if(!convbuf) {
       free(output);
       return 0;

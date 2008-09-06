@@ -70,6 +70,7 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
   pat->type = UPTSet;
   pat->content.Set.size = 0;
   pat->content.Set.ptr_s = 0;
+  /* FIXME: Here's a nasty zero size malloc */
   pat->content.Set.elements = (char**)malloc(0);
   ++glob->size;
 
@@ -335,7 +336,7 @@ int glob_url(URLGlob** glob, char* url, int *urlnum, FILE *error)
    */
   URLGlob *glob_expand;
   int amount;
-  char *glob_buffer=(char *)malloc(strlen(url)+1);
+  char *glob_buffer = malloc(strlen(url)+1);
 
   *glob = NULL;
   if(NULL == glob_buffer)

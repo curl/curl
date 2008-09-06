@@ -2136,7 +2136,7 @@ static char *concat_url(const char *base, const char *relurl)
 
   urllen = strlen(url_clone);
 
-  newest=(char *)malloc( urllen + 1 + /* possible slash */
+  newest = malloc( urllen + 1 + /* possible slash */
 			 newlen + 1 /* zero byte */);
 
   if(!newest) {

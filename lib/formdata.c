@@ -222,7 +222,7 @@ static FormInfo * AddFormInfo(char *value,
                               FormInfo *parent_form_info)
 {
   FormInfo *form_info;
-  form_info = (FormInfo *)malloc(sizeof(FormInfo));
+  form_info = malloc(sizeof(FormInfo));
   if(form_info) {
     memset(form_info, 0, sizeof(FormInfo));
     if(value)
@@ -327,7 +327,7 @@ static char *memdup(const char *src, size_t buffer_length)
     /* no length and a NULL src pointer! */
     return strdup("");
 
-  buffer = (char*)malloc(length+add);
+  buffer = malloc(length+add);
   if(!buffer)
     return NULL; /* fail */
 
@@ -838,8 +838,7 @@ static CURLcode AddFormData(struct FormData **formp,
                             size_t length,
                             curl_off_t *size)
 {
-  struct FormData *newform = (struct FormData *)
-    malloc(sizeof(struct FormData));
+  struct FormData *newform = malloc(sizeof(struct FormData));
   if(!newform)
     return CURLE_OUT_OF_MEMORY;
   newform->next = NULL;
@@ -849,7 +848,7 @@ static CURLcode AddFormData(struct FormData **formp,
     if(!length)
       length = strlen((char *)line);
 
-    newform->line = (char *)malloc(length+1);
+    newform->line = malloc(length+1);
     if(!newform->line) {
       free(newform);
       return CURLE_OUT_OF_MEMORY;
@@ -1729,7 +1728,7 @@ char *Curl_FormBoundary(void)
 
   static const char table16[]="abcdef0123456789";
 
-  retstring = (char *)malloc(BOUNDARY_LENGTH+1);
+  retstring = malloc(BOUNDARY_LENGTH+1);
 
   if(!retstring)
     return NULL; /* failed */

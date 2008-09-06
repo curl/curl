@@ -298,8 +298,8 @@ nss_load_cert(const char *filename, PRBool cacert)
   else
     slotID = 1;
 
-  slotname = (char *)malloc(SLOTSIZE);
-  nickname = (char *)malloc(PATH_MAX);
+  slotname = malloc(SLOTSIZE);
+  nickname = malloc(PATH_MAX);
   snprintf(slotname, SLOTSIZE, "PEM Token #%ld", slotID);
   snprintf(nickname, PATH_MAX, "PEM Token #%ld:%s", slotID, n);
 
@@ -460,7 +460,7 @@ static int nss_load_key(struct connectdata *conn, char *key_file)
 
   slotID = 1; /* hardcoded for now */
 
-  slotname = (char *)malloc(SLOTSIZE);
+  slotname = malloc(SLOTSIZE);
   snprintf(slotname, SLOTSIZE, "PEM Token #%ld", slotID);
 
   slot = PK11_FindSlotByName(slotname);
@@ -485,7 +485,7 @@ static int nss_load_key(struct connectdata *conn, char *key_file)
   SECMOD_WaitForAnyTokenEvent(mod, 0, 0);
   PK11_IsPresent(slot);
 
-  parg = (pphrase_arg_t *) malloc(sizeof(*parg));
+  parg = malloc(sizeof(pphrase_arg_t));
   parg->retryCount = 0;
   parg->data = conn->data;
   /* parg is initialized in nss_Init_Tokens() */
@@ -581,7 +581,7 @@ static SECStatus nss_Init_Tokens(struct connectdata * conn)
   SECStatus ret, status = SECSuccess;
   pphrase_arg_t *parg = NULL;
 
-  parg = (pphrase_arg_t *) malloc(sizeof(*parg));
+  parg = malloc(sizeof(pphrase_arg_t));
   parg->retryCount = 0;
   parg->data = conn->data;
 
@@ -800,7 +800,7 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
 
     if(!strncmp(nickname, "PEM Token", 9)) {
       CK_SLOT_ID slotID = 1; /* hardcoded for now */
-      char * slotname = (char *)malloc(SLOTSIZE);
+      char * slotname = malloc(SLOTSIZE);
       snprintf(slotname, SLOTSIZE, "PEM Token #%ld", slotID);
       slot = PK11_FindSlotByName(slotname);
       privKey = PK11_FindPrivateKeyFromCert(slot, cert, NULL);
@@ -956,7 +956,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
     NSS_SetDomesticPolicy();
 
 #ifdef HAVE_PK11_CREATEGENERICOBJECT
-    configstring = (char *)malloc(PATH_MAX);
+    configstring = malloc(PATH_MAX);
 
     PR_snprintf(configstring, PATH_MAX, "library=%s name=PEM", pem_library);
 
@@ -1091,7 +1091,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
     char *n;
     char *nickname;
 
-    nickname = (char *)malloc(PATH_MAX);
+    nickname = malloc(PATH_MAX);
     if(is_file(data->set.str[STRING_CERT])) {
       n = strrchr(data->set.str[STRING_CERT], '/');
       if(n) {
@@ -1159,7 +1159,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   if (data->set.str[STRING_SSL_ISSUERCERT]) {
     char *n;
     char *nickname;
-    nickname = (char *)malloc(PATH_MAX);
+    nickname = malloc(PATH_MAX);
     if(is_file(data->set.str[STRING_SSL_ISSUERCERT])) {
       n = strrchr(data->set.str[STRING_SSL_ISSUERCERT], '/');
       if (n) {

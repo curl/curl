@@ -122,7 +122,7 @@ const char *spitout(FILE *stream,
     STATE_ILLEGAL
   } state = STATE_OUTSIDE;
 
-  string = (char *)malloc(stralloc);
+  string = malloc(stralloc);
   if(!string)
     return NULL;
 

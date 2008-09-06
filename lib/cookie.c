@@ -711,7 +711,7 @@ struct CookieInfo *Curl_cookie_init(struct SessionHandle *data,
     char *lineptr;
     bool headerline;
 
-    char *line = (char *)malloc(MAX_COOKIE_LINE);
+    char *line = malloc(MAX_COOKIE_LINE);
     if(line) {
       while(fgets(line, MAX_COOKIE_LINE, fp)) {
         if(checkprefix("Set-Cookie:", line)) {
@@ -789,7 +789,7 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
           /* and now, we know this is a match and we should create an
              entry for the return-linked-list */
 
-          newco = (struct Cookie *)malloc(sizeof(struct Cookie));
+          newco = malloc(sizeof(struct Cookie));
           if(newco) {
             /* first, copy the whole source cookie: */
             memcpy(newco, co, sizeof(struct Cookie));

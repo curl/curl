@@ -77,7 +77,7 @@ int ares_parse_ptr_reply(const unsigned char *abuf, int alen, const void *addr,
 
   /* Examine each answer resource record (RR) in turn. */
   hostname = NULL;
-  aliases = (char **) malloc(8 * sizeof(char *));
+  aliases = malloc(8 * sizeof(char *));
   if (!aliases)
     {
       free(ptrname);

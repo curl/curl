@@ -379,7 +379,7 @@ static CURLcode ssh_getworkingpath(struct connectdata *conn,
 
   /* Check for /~/ , indicating relative to the user's home directory */
   if(conn->protocol & PROT_SCP) {
-    real_path = (char *)malloc(working_path_len+1);
+    real_path = malloc(working_path_len+1);
     if(real_path == NULL) {
       free(working_path);
       return CURLE_OUT_OF_MEMORY;
@@ -393,7 +393,7 @@ static CURLcode ssh_getworkingpath(struct connectdata *conn,
   else if(conn->protocol & PROT_SFTP) {
     if((working_path_len > 1) && (working_path[1] == '~')) {
       size_t homelen = strlen(homedir);
-      real_path = (char *)malloc(homelen + working_path_len + 1);
+      real_path = malloc(homelen + working_path_len + 1);
       if(real_path == NULL) {
         free(working_path);
         return CURLE_OUT_OF_MEMORY;
@@ -409,7 +409,7 @@ static CURLcode ssh_getworkingpath(struct connectdata *conn,
       }
     }
     else {
-      real_path = (char *)malloc(working_path_len+1);
+      real_path = malloc(working_path_len+1);
       if(real_path == NULL) {
         free(working_path);
         return CURLE_OUT_OF_MEMORY;
@@ -1403,12 +1403,12 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
         break;
       }
     }
-    if((sshc->readdir_filename = (char *)malloc(PATH_MAX+1)) == NULL) {
+    if((sshc->readdir_filename = malloc(PATH_MAX+1)) == NULL) {
       state(conn, SSH_SFTP_CLOSE);
       sshc->actualcode = CURLE_OUT_OF_MEMORY;
       break;
     }
-    if((sshc->readdir_longentry = (char *)malloc(PATH_MAX+1)) == NULL) {
+    if((sshc->readdir_longentry = malloc(PATH_MAX+1)) == NULL) {
       Curl_safefree(sshc->readdir_filename);
       sshc->readdir_filename = NULL;
       state(conn, SSH_SFTP_CLOSE);
@@ -1477,7 +1477,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
         if((sshc->readdir_attrs.flags & LIBSSH2_SFTP_ATTR_PERMISSIONS) &&
            ((sshc->readdir_attrs.permissions & LIBSSH2_SFTP_S_IFMT) ==
             LIBSSH2_SFTP_S_IFLNK)) {
-          sshc->readdir_linkPath = (char *)malloc(PATH_MAX + 1);
+          sshc->readdir_linkPath = malloc(PATH_MAX + 1);
           if(sshc->readdir_linkPath == NULL) {
             Curl_safefree(sshc->readdir_filename);
             sshc->readdir_filename = NULL;

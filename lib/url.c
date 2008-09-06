@@ -675,7 +675,7 @@ CURLcode Curl_open(struct SessionHandle **curl)
 
   /* We do some initial setup here, all those fields that can't be just 0 */
 
-  data->state.headerbuff=(char*)malloc(HEADERSIZE);
+  data->state.headerbuff = malloc(HEADERSIZE);
   if(!data->state.headerbuff) {
     DEBUGF(fprintf(stderr, "Error: malloc of headerbuff failed\n"));
     res = CURLE_OUT_OF_MEMORY;
@@ -4154,12 +4154,12 @@ static CURLcode create_conn(struct SessionHandle *data,
    */
 
   Curl_safefree(data->state.pathbuffer);
-  data->state.pathbuffer=(char *)malloc(urllen+2);
+  data->state.pathbuffer = malloc(urllen+2);
   if(NULL == data->state.pathbuffer)
     return CURLE_OUT_OF_MEMORY; /* really bad error */
   data->state.path = data->state.pathbuffer;
 
-  conn->host.rawalloc=(char *)malloc(urllen+2);
+  conn->host.rawalloc = malloc(urllen+2);
   if(NULL == conn->host.rawalloc)
     return CURLE_OUT_OF_MEMORY;
 

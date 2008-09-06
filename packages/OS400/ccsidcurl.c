@@ -727,7 +727,7 @@ curl_formadd_ccsid(struct curl_httppost * * httppost,
   /* Allocate the local curl_forms array. */
 
   lformlen = ALLOC_GRANULE;
-  lforms = (struct curl_forms *) malloc(lformlen * sizeof * lforms);
+  lforms = malloc(lformlen * sizeof(struct curl_forms));
 
   if (!lforms)
     return CURL_FORMADD_MEMORY;
