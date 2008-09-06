@@ -119,7 +119,7 @@ int ares_parse_ptr_reply(const unsigned char *abuf, int alen, const void *addr,
           strncpy(aliases[aliascnt], rr_data, strlen(rr_data)+1);
           aliascnt++;
           if ((aliascnt%8)==0)
-            aliases = (char **) realloc(aliases, (aliascnt/16+1) * sizeof(char *));
+            aliases = realloc(aliases, (aliascnt/16+1) * sizeof(char *));
         }
 
       if (rr_class == C_IN && rr_type == T_CNAME)

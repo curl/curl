@@ -749,8 +749,7 @@ curl_formadd_ccsid(struct curl_httppost * * httppost,
 
     if (nargs >= lformlen) {
       lformlen += ALLOC_GRANULE;
-      tforms = (struct curl_forms *) realloc((char *) lforms,
-                                             lformlen * sizeof *lforms);
+      tforms = realloc(lforms, lformlen * sizeof *lforms);
 
       if (!tforms) {
         result = CURL_FORMADD_MEMORY;

@@ -356,7 +356,7 @@ void *suck(int *lenptr)
 
   do {
     cursize *= 2;
-    buf = (unsigned char *)realloc(buf, cursize);
+    buf = realloc(buf, cursize);
     memset(buf + len, 0, cursize - len);
     lastread = fread(buf + len, 1, cursize - len, stdin);
     len += lastread;

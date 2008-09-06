@@ -702,7 +702,7 @@ static CURLcode readwrite_headers(struct SessionHandle *data,
 	size_t newsize=CURLMAX((k->hbuflen+*nread)*3/2,
 			       data->state.headersize*2);
 	hbufp_index = k->hbufp - data->state.headerbuff;
-	newbuff = (char *)realloc(data->state.headerbuff, newsize);
+	newbuff = realloc(data->state.headerbuff, newsize);
 	if(!newbuff) {
 	  failf (data, "Failed to alloc memory for big header!");
 	  return CURLE_OUT_OF_MEMORY;
@@ -747,7 +747,7 @@ static CURLcode readwrite_headers(struct SessionHandle *data,
       size_t newsize=CURLMAX((k->hbuflen+full_length)*3/2,
 			     data->state.headersize*2);
       hbufp_index = k->hbufp - data->state.headerbuff;
-      newbuff = (char *)realloc(data->state.headerbuff, newsize);
+      newbuff = realloc(data->state.headerbuff, newsize);
       if(!newbuff) {
 	failf (data, "Failed to alloc memory for big header!");
 	return CURLE_OUT_OF_MEMORY;

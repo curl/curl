@@ -1190,7 +1190,7 @@ CURLcode add_buffer(send_buffer *in, const void *inptr, size_t size)
 
     if(in->buffer)
       /* we have a buffer, enlarge the existing one */
-      new_rb = (char *)realloc(in->buffer, new_size);
+      new_rb = realloc(in->buffer, new_size);
     else
       /* create a new buffer */
       new_rb = (char *)malloc(new_size);

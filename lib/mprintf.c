@@ -1079,7 +1079,7 @@ static int alloc_addbyter(int output, FILE *data)
   else if(infop->len+1 >= infop->alloc) {
     char *newptr;
 
-    newptr = (char *)realloc(infop->buffer, infop->alloc*2);
+    newptr = realloc(infop->buffer, infop->alloc*2);
 
     if(!newptr) {
       infop->fail = 1;

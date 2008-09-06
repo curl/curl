@@ -602,8 +602,7 @@ CURLcode Curl_ch_connc(struct SessionHandle *data,
       data->state.lastconnect = -1;
   }
   if(newamount > 0) {
-    newptr= (struct connectdata **)
-      realloc(c->connects, sizeof(struct connectdata *) * newamount);
+    newptr = realloc(c->connects, sizeof(struct connectdata *) * newamount);
     if(!newptr)
       /* we closed a few connections in vain, but so what? */
       return CURLE_OUT_OF_MEMORY;

@@ -305,7 +305,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         char *ptr;
         if(conn->trlMax) {
           conn->trlMax *= 2;
-          ptr = (char*)realloc(conn->trailer,conn->trlMax);
+          ptr = realloc(conn->trailer,conn->trlMax);
         }
         else {
           conn->trlMax=128;

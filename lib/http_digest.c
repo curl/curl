@@ -460,7 +460,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   }
 
   /* append CRLF to the userpwd header */
-  tmp = (char*) realloc(*allocuserpwd, strlen(*allocuserpwd) + 3 + 1);
+  tmp = realloc(*allocuserpwd, strlen(*allocuserpwd) + 3 + 1);
   if(!tmp)
     return CURLE_OUT_OF_MEMORY;
   strcat(tmp, "\r\n");

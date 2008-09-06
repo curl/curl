@@ -469,7 +469,7 @@ int main(int argc, char **argv) {
       i+=lu;
       if (i== tabLength) {
         tabLength+=100;
-        binaryptr=(char*)realloc(binaryptr,tabLength); /* should be more careful */
+        binaryptr=realloc(binaryptr,tabLength); /* should be more careful */
       }
     }
     tabLength = i;

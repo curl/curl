@@ -26,6 +26,8 @@ struct MemoryStruct {
   size_t size;
 };
 
+static void *myrealloc(void *ptr, size_t size);
+
 static void *myrealloc(void *ptr, size_t size)
 {
   /* There might be a realloc() out there that doesn't like reallocing
@@ -42,7 +44,7 @@ WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data)
   size_t realsize = size * nmemb;
   struct MemoryStruct *mem = (struct MemoryStruct *)data;
 
-  mem->memory = (char *)myrealloc(mem->memory, mem->size + realsize + 1);
+  mem->memory = myrealloc(mem->memory, mem->size + realsize + 1);
   if (mem->memory) {
     memcpy(&(mem->memory[mem->size]), ptr, realsize);
     mem->size += realsize;
