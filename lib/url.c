@@ -1038,8 +1038,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * other - POST is kept as POST after 301 and 302
      */
     long postRedir = va_arg(param, long);
-    data->set.post301 = (postRedir & CURL_REDIR_POST_301)?1:0;
-    data->set.post302 = (postRedir & CURL_REDIR_POST_302)?1:0;
+    data->set.post301 = (bool)((postRedir & CURL_REDIR_POST_301)?TRUE:FALSE);
+    data->set.post302 = (bool)((postRedir & CURL_REDIR_POST_302)?TRUE:FALSE);
   }
   break;
 
@@ -3683,8 +3683,8 @@ static CURLcode parse_remote_port(struct SessionHandle *data,
     if(conn->bits.httpproxy) {
       /* we need to create new URL with the new port number */
       char *url;
-      bool isftp = strequal("ftp", conn->protostr) ||
-                   strequal("ftps", conn->protostr);
+      bool isftp = (bool)(strequal("ftp", conn->protostr) ||
+                          strequal("ftps", conn->protostr));
 
       /*
        * This synthesized URL isn't always right--suffixes like ;type=A

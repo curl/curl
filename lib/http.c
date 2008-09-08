@@ -1958,11 +1958,11 @@ handle this request only supports 1.0. */
 static bool use_http_1_1(const struct SessionHandle *data,
                          const struct connectdata *conn)
 {
-  return (data->set.httpversion == CURL_HTTP_VERSION_1_1) ||
+  return (bool)((data->set.httpversion == CURL_HTTP_VERSION_1_1) ||
          ((data->set.httpversion != CURL_HTTP_VERSION_1_0) &&
           ((conn->httpversion == 11) ||
            ((conn->httpversion != 10) &&
-            (data->state.httpversion != 10))));
+            (data->state.httpversion != 10)))));
 }
 
 /* check and possibly add an Expect: header */

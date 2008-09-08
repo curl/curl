@@ -578,7 +578,7 @@ static bool trynextip(struct connectdata *conn,
       conn->sock[sockindex] = sockfd;
       conn->ip_addr = ai;
 
-      return Curl_store_ip_addr(conn) != CURLE_OK;
+      return (bool)(Curl_store_ip_addr(conn) != CURLE_OK);
     }
     ai = ai->ai_next;
   }
