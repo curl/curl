@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel Stenberg (8 Sep 2008)
+- Stefan Krause pointed out that libcurl would wrongly send away cookies to
+  sites in cases where the cookie clearly has a very old expiry date. The
+  condition was simply that libcurl's date parser would fail to convert the
+  date and it would then count as a (timed-based) match. Starting now, a
+  missed date due to an unsupported date format or date range will now cause
+  the cookie to not match.
+
 Daniel Fandrich (5 Sep 2008)
 - Improved the logic the decides whether to use HTTP 1.1 features or not in a
   request.  Setting a specific version with CURLOPT_HTTP_VERSION overrides

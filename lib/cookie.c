@@ -338,7 +338,8 @@ Curl_cookie_add(struct SessionHandle *data,
               break;
             }
             co->expires =
-              atoi((*co->maxage=='\"')?&co->maxage[1]:&co->maxage[0]) + (long)now;
+              atoi((*co->maxage=='\"')?&co->maxage[1]:&co->maxage[0]) +
+              (long)now;
           }
           else if(strequal("expires", name)) {
             co->expirestr=strdup(whatptr);
@@ -346,6 +347,9 @@ Curl_cookie_add(struct SessionHandle *data,
               badcookie = TRUE;
               break;
             }
+            /* Note that we store -1 in 'expires' here if the date couldn't
+               get parsed for whatever reason. This will have the effect that
+               the cookie won't match. */
             co->expires = curl_getdate(what, &now);
           }
           else if(!co->name) {
@@ -437,10 +441,10 @@ Curl_cookie_add(struct SessionHandle *data,
     char *tok_buf;
     int fields;
 
-    /* IE introduced HTTP-only cookies to prevent XSS attacks. Cookies 
-       marked with httpOnly after the domain name are not accessible  
-       from javascripts, but since curl does not operate at javascript  
-       level, we include them anyway. In Firefox's cookie files, these 
+    /* IE introduced HTTP-only cookies to prevent XSS attacks. Cookies
+       marked with httpOnly after the domain name are not accessible
+       from javascripts, but since curl does not operate at javascript
+       level, we include them anyway. In Firefox's cookie files, these
        lines are preceeded with #HttpOnly_ and then everything is
        as usual, so we skip 10 characters of the line..
     */
@@ -753,7 +757,7 @@ struct CookieInfo *Curl_cookie_init(struct SessionHandle *data,
 
 struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
                                    const char *host, const char *path,
-				   bool secure)
+                                   bool secure)
 {
   struct Cookie *newco;
   struct Cookie *co;
@@ -769,7 +773,7 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
     /* only process this cookie if it is not expired or had no expire
        date AND that if the cookie requires we're secure we must only
        continue if we are! */
-    if( (co->expires<=0 || (co->expires> now)) &&
+    if( (!co->expires || (co->expires > now)) &&
         (co->secure?secure:TRUE) ) {
 
       /* now check if the domain is correct */

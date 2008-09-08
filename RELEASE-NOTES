@@ -19,6 +19,7 @@ This release includes the following bugfixes:
  o MingW32 non-configure builds are now largefile feature enabled by default
  o NetWare LIBC builds are now largefile feature enabled by default
  o curl_easy_pause() could behave wrongly on unpause
+ o cookie with invalid expire dates are now considered expired
 
 This release includes the following known bugs:
 
@@ -32,6 +33,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Keith Mok, Yang Tse, Daniel Fandrich, Guenter Knauf, Dmitriy Sergeyev,
- Linus Nielsen Feltzing, Martin Drasar
+ Linus Nielsen Feltzing, Martin Drasar, Stefan Krause
 
         Thanks! (and sorry if I forgot to mention someone)
