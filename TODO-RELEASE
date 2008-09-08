@@ -21,5 +21,8 @@ To be addressed before 7.19.1 (planned release: October/November 2008)
 170 - Two small items of interest for the webpage
       two mistakes in the curl.1 man page
 
-171 -
+171 - [PATCH] add some locking for thread-safety to NSS implementation
+
+172 -
+
 
