@@ -7,6 +7,17 @@
                                   Changelog
 
 Daniel Stenberg (8 Sep 2008)
+- Dmitry Kurochkin patched a problem: I have found bug in pipelining through
+  proxy. I have a transparent proxy. When running with http_proxy environment
+  variable not set my test completes fine (it goes through transparent
+  proxy). When I set http_proxy variable my test hangs after the first
+  downloaded is complete. Looks like the second handle never gets out from
+  WAITDO state.
+
+  The fix: It makes checkPendPipeline move 1 handler from pend pipe to send
+  pipe if pipelining is not supported by server but there are no handles in
+  send and recv pipes.
+
 - Stefan Krause pointed out that libcurl would wrongly send away cookies to
   sites in cases where the cookie clearly has a very old expiry date. The
   condition was simply that libcurl's date parser would fail to convert the

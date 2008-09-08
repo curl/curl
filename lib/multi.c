@@ -1988,11 +1988,13 @@ static int checkPendPipeline(struct connectdata *conn)
   int result = 0;
   struct curl_llist_element *sendhead = conn->send_pipe->head;
 
-  if (conn->server_supports_pipelining) {
-    size_t pipeLen = conn->send_pipe->size + conn->recv_pipe->size;
+  size_t pipeLen = conn->send_pipe->size + conn->recv_pipe->size;
+  if (conn->server_supports_pipelining || pipeLen == 0) {
     struct curl_llist_element *curr = conn->pend_pipe->head;
+    const size_t maxPipeLen =
+      conn->server_supports_pipelining ? MAX_PIPELINE_LENGTH : 1;
 
-    while(pipeLen < MAX_PIPELINE_LENGTH && curr) {
+    while(pipeLen < maxPipeLen && curr) {
       Curl_llist_move(conn->pend_pipe, curr,
                       conn->send_pipe, conn->send_pipe->tail);
       Curl_pgrsTime(curr->ptr, TIMER_PRETRANSFER);
@@ -2000,11 +2002,10 @@ static int checkPendPipeline(struct connectdata *conn)
       curr = conn->pend_pipe->head;
       ++pipeLen;
     }
-    if (result > 0)
-      conn->now = Curl_tvnow();
   }
 
-  if(result) {
+  if (result) {
+    conn->now = Curl_tvnow();
     /* something moved, check for a new send pipeline leader */
     if(sendhead != conn->send_pipe->head) {
       /* this is a new one as head, expire it */
