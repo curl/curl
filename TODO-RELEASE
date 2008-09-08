@@ -7,11 +7,6 @@ To be addressed before 7.19.1 (planned release: October/November 2008)
 165 - "Problem with CURLOPT_RESUME_FROM and CURLOPT_APPEND" by Daniele Pinau,
       recipe: http://curl.haxx.se/mail/lib-2008-08/0439.html
 
-166 - Cookies with bad expiry date treated as session cookies (and thus wrongly
-      matches and get sent)
-
-167 - pipelining with proxy hangs
-
 168 - curl_easy_pause bugs
 
 169 - curl crash when using sftp with socks. We need a Curl_plain_read() to
@@ -23,6 +18,7 @@ To be addressed before 7.19.1 (planned release: October/November 2008)
 
 171 - [PATCH] add some locking for thread-safety to NSS implementation
 
-172 -
+172 - Apply the getdate patch with Jamie Lokier's date function. Needs an
+      added check for years < 1970 (== no negative numbers may be returned)
 
-
+173 - 
