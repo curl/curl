@@ -229,6 +229,20 @@ else
   AC_MSG_RESULT([no])
 fi
 
+AC_MSG_CHECKING([whether we are using the Intel C compiler])
+CURL_CHECK_DEF([__INTEL_COMPILER], [], [silent])
+if test "$curl_cv_have_def___INTEL_COMPILER" = "yes"; then
+  AC_MSG_RESULT([yes])
+  dnl Select strict ANSI C conformance
+  CFLAGS="$CFLAGS -strict-ansi"
+  dnl Select ANSI C dialect
+  CFLAGS="$CFLAGS -std=c89"
+  dnl Disable use of ANSI C aliasing rules in optimizations
+  CFLAGS="$CFLAGS -no-ansi-alias"
+else
+  AC_MSG_RESULT([no])
+fi
+
 AC_MSG_CHECKING([whether we are using the DEC/Compaq C compiler])
 CURL_CHECK_DEF([__DECC], [], [silent])
 CURL_CHECK_DEF([__DECC_VER], [], [silent])
