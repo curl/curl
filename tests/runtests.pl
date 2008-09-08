@@ -1820,6 +1820,11 @@ sub singletest {
         last;
     }
 
+    my $dbghosttype=join(' ', runclientoutput("uname -a"));
+    if(($dbghosttype =~ /SMP PREEMPT/) && ($dbghosttype =~ /i686 GNU/)) {
+        $why = "debugging icc build";
+    }
+
     if(!$why) {
         my @keywords = getpart("info", "keywords");
 	my $match;
