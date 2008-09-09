@@ -1892,6 +1892,7 @@ AC_DEFUN([CURL_CC_DEBUG_OPTS],
          dnl   which we know and do on purpose.
 
          WARN="-wd279,269,981,1418,1419"
+         WARN=""
 
          if test "$gccnum" -gt "600"; then
             dnl icc 6.0 and older doesn't have the -Wall flag

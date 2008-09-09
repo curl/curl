@@ -168,13 +168,6 @@ AC_MSG_RESULT($need_no_undefined)
 AM_CONDITIONAL(NO_UNDEFINED, test x$need_no_undefined = xyes)
 
 dnl **********************************************************************
-dnl check if this is the Intel ICC compiler, and if so make it stricter
-dnl (convert warning 147 into an error) so that it properly can detect the
-dnl gethostbyname_r() version
-dnl **********************************************************************
-CURL_DETECT_ICC([CFLAGS="$CFLAGS -we 147"])
-
-dnl **********************************************************************
 dnl platform/compiler/architecture specific checks/flags
 dnl **********************************************************************
 
@@ -239,6 +232,12 @@ if test "$curl_cv_have_def___INTEL_COMPILER" = "yes"; then
   CFLAGS="$CFLAGS -std=c89"
   dnl Disable use of ANSI C aliasing rules in optimizations
   CFLAGS="$CFLAGS -no-ansi-alias"
+  dnl Change some warnings into errors
+  dnl #140: too many arguments in function call
+  dnl #147: declaration is incompatible with 'previous one'
+  dnl #165: too few arguments in function call
+  dnl #266: function declared implicitly
+  CFLAGS="$CFLAGS -we 140,147,165,266"
 else
   AC_MSG_RESULT([no])
 fi
