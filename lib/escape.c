@@ -42,6 +42,30 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
+/* Portable character check (remember EBCDIC). Do not use isalnum() because
+its behavior is altered by the current locale. */
+static bool Curl_isalnum(unsigned char in)
+{
+  switch (in) {
+    case '0': case '1': case '2': case '3': case '4':
+    case '5': case '6': case '7': case '8': case '9':
+    case 'a': case 'b': case 'c': case 'd': case 'e':
+    case 'f': case 'g': case 'h': case 'i': case 'j':
+    case 'k': case 'l': case 'm': case 'n': case 'o':
+    case 'p': case 'q': case 'r': case 's': case 't':
+    case 'u': case 'v': case 'w': case 'x': case 'y': case 'z':
+    case 'A': case 'B': case 'C': case 'D': case 'E':
+    case 'F': case 'G': case 'H': case 'I': case 'J':
+    case 'K': case 'L': case 'M': case 'N': case 'O':
+    case 'P': case 'Q': case 'R': case 'S': case 'T':
+    case 'U': case 'V': case 'W': case 'X': case 'Y': case 'Z':
+      return TRUE;
+    default:
+      break;
+  }
+  return FALSE;
+}
+
 /* for ABI-compatibility with previous versions */
 char *curl_escape(const char *string, int inlength)
 {
@@ -76,26 +100,10 @@ char *curl_easy_escape(CURL *handle, const char *string, int inlength)
   while(length--) {
     in = *string;
 
-    /* Portable character check (remember EBCDIC). Do not use isalnum() because
-       its behavior is altered by the current locale. */
-
-    switch (in) {
-    case '0': case '1': case '2': case '3': case '4':
-    case '5': case '6': case '7': case '8': case '9':
-    case 'a': case 'b': case 'c': case 'd': case 'e':
-    case 'f': case 'g': case 'h': case 'i': case 'j':
-    case 'k': case 'l': case 'm': case 'n': case 'o':
-    case 'p': case 'q': case 'r': case 's': case 't':
-    case 'u': case 'v': case 'w': case 'x': case 'y': case 'z':
-    case 'A': case 'B': case 'C': case 'D': case 'E':
-    case 'F': case 'G': case 'H': case 'I': case 'J':
-    case 'K': case 'L': case 'M': case 'N': case 'O':
-    case 'P': case 'Q': case 'R': case 'S': case 'T':
-    case 'U': case 'V': case 'W': case 'X': case 'Y': case 'Z':
+    if (Curl_isalnum(in)) {
       /* just copy this */
       ns[strindex++]=in;
-      break;
-    default:
+    } else {
       /* encode it */
       newlen += 2; /* the size grows with two, since this'll become a %XX */
       if(newlen > alloc) {
@@ -123,7 +131,6 @@ char *curl_easy_escape(CURL *handle, const char *string, int inlength)
       snprintf(&ns[strindex], 4, "%%%02X", in);
 
       strindex+=3;
-      break;
     }
     string++;
   }
@@ -187,7 +194,7 @@ char *curl_easy_unescape(CURL *handle, const char *string, int length,
 }
 
 /* For operating systems/environments that use different malloc/free
-   ssystems for the app and for this library, we provide a free that uses
+   systems for the app and for this library, we provide a free that uses
    the library's memory system */
 void curl_free(void *p)
 {
