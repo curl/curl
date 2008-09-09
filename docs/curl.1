@@ -1381,15 +1381,15 @@ If this option is used several times, the last one will be used.
 .IP "-y/--speed-time <time>"
 If a download is slower than speed-limit bytes per second during a speed-time
 period, the download gets aborted. If speed-time is used, the default
-speed-limit will be 1 unless set with -y.
+speed-limit will be 1 unless set with -Y.
 
 This option controls transfers and thus will not affect slow connects etc. If
 this is a concern for you, try the \fI--connect-timeout\fP option.
 
 If this option is used several times, the last one will be used.
 .IP "-Y/--speed-limit <speed>"
-If a download is slower than this given speed, in bytes per second, for
-speed-time seconds it gets aborted. speed-time is set with -Y and is 30 if
+If a download is slower than this given speed (in bytes per second) for
+speed-time seconds it gets aborted. speed-time is set with -y and is 30 if
 not set.
 
 If this option is used several times, the last one will be used.
