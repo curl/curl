@@ -1117,12 +1117,18 @@ interface that transfers one file at a time and doesn't return until its
 done.
 
 The multi interface on the other hand, allows your program to transfer
-multiple files in both directions at the same time, without forcing you to
-use multiple threads.
+multiple files in both directions at the same time, without forcing you
+to use multiple threads.  The name might make it seem that the multi
+interface is for multi-threaded programs, but the truth is almost the
+reverse.  The multi interface can allow a single-threaded application
+to perform the same kinds of multiple, simultaneous transfers that
+multi-threaded programs can perform.  It allows many of the benefits
+of multi-threaded transfers without the complexity of managing and
+synchronizing many threads.
 
 To use this interface, you are better off if you first understand the basics
 of how to use the easy interface. The multi interface is simply a way to make
-multiple transfers at the same time, by adding up multiple easy handles in to
+multiple transfers at the same time by adding up multiple easy handles in to
 a "multi stack".
 
 You create the easy handles you want and you set all the options just like you
