@@ -4403,7 +4403,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
            */
 
           infd= open(uploadfile, O_RDONLY | O_BINARY);
-          if ((infd == -1) || stat(uploadfile, &fileinfo)) {
+          if ((infd == -1) || fstat(infd, &fileinfo)) {
             helpf(config->errors, "Can't open '%s'!\n", uploadfile);
             if(infd != -1)
               close(infd);
@@ -5374,11 +5374,16 @@ rename_if_dos_device_name (char *file_name)
   char fname[PATH_MAX];
 
   strncpy(fname, file_name, PATH_MAX-1);
-  fname[PATH_MAX-2] = 0;  /* Leave room for an extra _ */
+  fname[PATH_MAX-1] = 0;
   base = basename (fname);
   if (((stat(base, &st_buf)) == 0) && (S_ISCHR(st_buf.st_mode))) {
     size_t blen = strlen (base);
 
+    if (strlen(fname) >= PATH_MAX-1) {
+      /* Make room for the '_' */
+      blen--;
+      base[blen] = 0;
+    }
     /* Prepend a '_'.  */
     memmove (base + 1, base, blen + 1);
     base[0] = '_';

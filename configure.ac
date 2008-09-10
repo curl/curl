@@ -163,10 +163,10 @@ m4_defun([AC_LIBTOOL_CXXCPP],[true])
 m4_ifdef([AC_LIBTOOL_F77], [m4_undefine([AC_LIBTOOL_F77])])
 m4_defun([AC_LIBTOOL_F77],[])
 
-dnl force libtool to build static libraries with PIC on AMD64-linux
-AC_MSG_CHECKING([if arch-OS host is AMD64-linux (to build static libraries with PIC)])
+dnl force libtool to build static libraries with PIC on AMD64-Linux & FreeBSD
+AC_MSG_CHECKING([if arch-OS host is AMD64-Linux/FreeBSD (to build static libraries with PIC)])
 case $host in
-  x86_64*linux*)
+  x86_64*linux*|amd64*freebsd*|ia64*freebsd*)
     AC_MSG_RESULT([yes])
     with_pic=yes
     ;;
@@ -247,7 +247,7 @@ dnl **********************************************************************
 
 case $host in
   #
-  x86_64*linux*)
+  x86_64*linux*|amd64*freebsd*|ia64*freebsd*)
     #
     dnl find out if icc is being used
     if test "z$ICC" = "z"; then
