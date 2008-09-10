@@ -50,7 +50,7 @@
 
  7. SSL
  7.1 Disable specific versions
- 7.2 Provide mytex locking API
+ 7.2 Provide mutex locking API
  7.3 dumpcert
  7.4 Evaluate SSL patches
  7.5 Cache OpenSSL contexts
@@ -152,7 +152,7 @@
  know MUST have it. This is error-prone. We therefore want the header files to
  adapt to configure results. Those results must be stored in a new header and
  they must use a curl name space, i.e not be HAVE_* prefix (as that would risk
- collide with other apps that use libcurl and that runs configure).
+ a collision with other apps that use libcurl and that runs configure).
 
  Work on this has been started but hasn't been finished, and the initial patch
  and some details are found here:
@@ -165,7 +165,7 @@
 
 2.1 More non-blocking
 
- Make sure we don't ever loop because of non-blocking sockets return
+ Make sure we don't ever loop because of non-blocking sockets returning
  EWOULDBLOCK or similar. The GnuTLS connection etc.
 
 2.2 Pause transfers
@@ -304,7 +304,7 @@ to provide the data to send.
  Provide an option that allows for disabling specific SSL versions, such as
  SSLv2 http://curl.haxx.se/bug/feature.cgi?id=1767276
 
-7.2 Provide mytex locking API
+7.2 Provide mutex locking API
 
  Provide a libcurl API for setting mutex callbacks in the underlying SSL
  library, so that the same application code can use mutex-locking

@@ -10,6 +10,9 @@ Daniel Fandrich (9 Sep 2008)
 - Mike Revi discovered some swapped speed switches documented in the curl man
   page.
 
+- Checked in some grammatical and minor other fixes in the documentation and
+  examples that I found in the FreeBSD ports system.
+
 Daniel Stenberg (8 Sep 2008)
 - Dmitry Kurochkin patched a problem: I have found bug in pipelining through
   proxy. I have a transparent proxy. When running with http_proxy environment

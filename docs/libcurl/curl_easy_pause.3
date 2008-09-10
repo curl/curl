@@ -12,7 +12,7 @@ curl_easy_pause - pause and unpause a connection
 Using this function, you can explicitly mark a running connection to get
 paused, and you can unpause a connection that was previously paused.
 
-A connection can made to pause by using this function or by letting the read
+A connection can be paused by using this function or by letting the read
 or the write callbacks return the proper magic return code
 (\fICURL_READFUNC_PAUSE\fP and \fICURL_WRITEFUNC_PAUSE\fP). A write callback
 that returns pause signals to the library that it couldn't take care of any
@@ -56,7 +56,7 @@ it in an allocated buffer until the reading is again unpaused using this
 function.
 
 If the downloaded data is compressed and is asked to get uncompressed
-automatially on download, libcurl will continue to uncompress the entire
+automatically on download, libcurl will continue to uncompress the entire
 downloaded chunk and it will cache the data uncompressed. This has the side-
 effect that if you download something that is compressed a lot, it can result
 in a very large data amount needing to be allocated to save the data during

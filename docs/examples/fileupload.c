@@ -27,7 +27,11 @@ int main(void)
     return 1; /* can't continue */
   }
 
-  stat("debugit", &file_info); /* to get the file size */
+  /* to get the file size */
+  if(fstat(fileno(fd), &file_info) != 0) {
+
+    return 1; /* can't continue */
+  }
 
   curl = curl_easy_init();
   if(curl) {
