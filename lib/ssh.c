@@ -2437,7 +2437,7 @@ get_pathname(const char **cpp, char **path)
 {
   const char *cp = *cpp, *end;
   char quot;
-  u_int i, j;
+  unsigned int i, j;
   static const char * const WHITESPACE = " \t\r\n";
 
   cp += strspn(cp, WHITESPACE);
