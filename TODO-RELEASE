@@ -13,9 +13,6 @@ To be addressed before 7.19.1 (planned release: October/November 2008)
       use for the SOCKS code in the same style I made the Curl_plain_write()
       before.
 
-170 - Two small items of interest for the webpage
-      two mistakes in the curl.1 man page
-
 171 - [PATCH] add some locking for thread-safety to NSS implementation
 
 172 - Apply the getdate patch with Jamie Lokier's date function. Needs an
