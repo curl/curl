@@ -1881,47 +1881,6 @@ if test "x$RECENTAIX" = "xyes"; then
   checkfor_gmtime_r="yes"
 fi
 
-if test x$cross_compiling != xyes; then
-
-  if test x$checkfor_gmtime_r = xyes; then
-
-    dnl if gmtime_r was found, verify that it actually works, as (at least) HPUX
-    dnl 10.20 is known to have a buggy one. If it doesn't work, disable use of
-    dnl it.
-
-    AC_MSG_CHECKING([if gmtime_r exists and works])
-    AC_RUN_IFELSE([[
-    #include <time.h>
-    int main(void)
-    {
-    time_t local = 1170352587;
-    struct tm *gmt;
-    struct tm keeper;
-    putenv("TZ=CST6CDT");
-    tzset();
-    gmt = gmtime_r(&local, &keeper);
-    if(gmt) {
-      return 0;
-    }
-    return 1; /* failure */
-    }
-     ]],
-     dnl success, do nothing
-     AC_MSG_RESULT(yes)
-     AC_DEFINE(HAVE_GMTIME_R, 1, [if you have (a working) gmtime_r])
-     ,
-     dnl failure, now disable the function
-     AC_MSG_RESULT(no)
-    ,
-    dnl not invoked when crosscompiling)
-     echo "hej"
-    )
-  fi
-else
-  dnl and for crosscompiling
-  AC_CHECK_FUNCS(gmtime_r)
-fi
-
 
 dnl **********************************************************************
 dnl Back to "normal" configuring
@@ -2075,6 +2034,9 @@ CURL_CHECK_FUNC_RECVFROM
 CURL_CHECK_FUNC_SEND
 CURL_CHECK_MSG_NOSIGNAL
 
+CURL_CHECK_FUNC_GMTIME_R
+CURL_CHECK_FUNC_STRTOLL
+
 dnl Checks for library functions.
 dnl AC_PROG_GCC_TRADITIONAL
 
@@ -2121,7 +2083,6 @@ AC_CHECK_FUNCS([basename \
   strlcat \
   strstr \
   strtok_r \
-  strtoll \
   uname \
   utime
 ],[
