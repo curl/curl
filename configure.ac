@@ -2034,8 +2034,10 @@ CURL_CHECK_FUNC_RECVFROM
 CURL_CHECK_FUNC_SEND
 CURL_CHECK_MSG_NOSIGNAL
 
+CURL_CHECK_FUNC_FTRUNCATE
 CURL_CHECK_FUNC_GMTIME_R
 CURL_CHECK_FUNC_SIGACTION
+CURL_CHECK_FUNC_STRDUP
 CURL_CHECK_FUNC_STRTOK_R
 CURL_CHECK_FUNC_STRTOLL
 
@@ -2054,7 +2056,6 @@ esac
 AC_CHECK_FUNCS([basename \
   closesocket \
   fork \
-  ftruncate \
   geteuid \
   gethostbyaddr \
   getpass_r \
@@ -2079,7 +2080,6 @@ AC_CHECK_FUNCS([basename \
   strcasecmp \
   strcasestr \
   strcmpi \
-  strdup \
   stricmp \
   strlcat \
   strstr \

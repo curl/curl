@@ -117,6 +117,112 @@ curl_includes_time="\
 ])
 
 
+dnl CURL_INCLUDES_UNISTD
+dnl -------------------------------------------------
+dnl Set up variable with list of headers that must be
+dnl included when unistd.h is to be included.
+
+AC_DEFUN([CURL_INCLUDES_UNISTD], [
+curl_includes_unistd="\
+/* includes start */
+#ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
+/* includes end */"
+  AC_CHECK_HEADERS(
+    sys/types.h unistd.h,
+    [], [], [$curl_includes_unistd])
+])
+
+
+dnl CURL_CHECK_FUNC_FTRUNCATE
+dnl -------------------------------------------------
+dnl Verify if ftruncate is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_ftruncate, then
+dnl HAVE_FTRUNCATE will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_FTRUNCATE], [
+  AC_REQUIRE([CURL_INCLUDES_UNISTD])dnl
+  #
+  tst_links_ftruncate="unknown"
+  tst_proto_ftruncate="unknown"
+  tst_compi_ftruncate="unknown"
+  tst_allow_ftruncate="unknown"
+  #
+  AC_MSG_CHECKING([if ftruncate can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([ftruncate])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_ftruncate="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_ftruncate="no"
+  ])
+  #
+  if test "$tst_links_ftruncate" = "yes"; then
+    AC_MSG_CHECKING([if ftruncate is prototyped])
+    AC_EGREP_CPP([ftruncate],[
+      $curl_includes_unistd
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_ftruncate="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_ftruncate="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_ftruncate" = "yes"; then
+    AC_MSG_CHECKING([if ftruncate is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_unistd
+      ]],[[
+        if(0 != ftruncate(0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_ftruncate="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_ftruncate="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_ftruncate" = "yes"; then
+    AC_MSG_CHECKING([if ftruncate usage allowed])
+    if test "x$curl_disallow_ftruncate" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_ftruncate="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_ftruncate="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if ftruncate might be used])
+  if test "$tst_links_ftruncate" = "yes" &&
+     test "$tst_proto_ftruncate" = "yes" &&
+     test "$tst_compi_ftruncate" = "yes" &&
+     test "$tst_allow_ftruncate" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_FTRUNCATE, 1,
+      [Define to 1 if you have the ftruncate function.])
+    ac_cv_func_ftruncate="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_ftruncate="no"
+  fi
+])
+
+
 dnl CURL_CHECK_FUNC_GMTIME_R
 dnl -------------------------------------------------
 dnl Verify if gmtime_r is available, prototyped, can
@@ -311,6 +417,91 @@ AC_DEFUN([CURL_CHECK_FUNC_SIGACTION], [
   else
     AC_MSG_RESULT([no])
     ac_cv_func_sigaction="no"
+  fi
+])
+
+
+dnl CURL_CHECK_FUNC_STRDUP
+dnl -------------------------------------------------
+dnl Verify if strdup is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_strdup, then
+dnl HAVE_STRDUP will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_STRDUP], [
+  AC_REQUIRE([CURL_INCLUDES_STRING])dnl
+  #
+  tst_links_strdup="unknown"
+  tst_proto_strdup="unknown"
+  tst_compi_strdup="unknown"
+  tst_allow_strdup="unknown"
+  #
+  AC_MSG_CHECKING([if strdup can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([strdup])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_strdup="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_strdup="no"
+  ])
+  #
+  if test "$tst_links_strdup" = "yes"; then
+    AC_MSG_CHECKING([if strdup is prototyped])
+    AC_EGREP_CPP([strdup],[
+      $curl_includes_string
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_strdup="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_strdup="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_strdup" = "yes"; then
+    AC_MSG_CHECKING([if strdup is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_string
+      ]],[[
+        if(0 != strdup(0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_strdup="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_strdup="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_strdup" = "yes"; then
+    AC_MSG_CHECKING([if strdup usage allowed])
+    if test "x$curl_disallow_strdup" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_strdup="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_strdup="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if strdup might be used])
+  if test "$tst_links_strdup" = "yes" &&
+     test "$tst_proto_strdup" = "yes" &&
+     test "$tst_compi_strdup" = "yes" &&
+     test "$tst_allow_strdup" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_STRDUP, 1,
+      [Define to 1 if you have the strdup function.])
+    ac_cv_func_strdup="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_strdup="no"
   fi
 ])
 
