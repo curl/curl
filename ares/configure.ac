@@ -227,17 +227,17 @@ CURL_CHECK_DEF([__INTEL_COMPILER], [], [silent])
 if test "$curl_cv_have_def___INTEL_COMPILER" = "yes"; then
   AC_MSG_RESULT([yes])
   dnl Select strict ANSI C conformance
-  CFLAGS="$CFLAGS -strict-ansi"
+  CPPFLAGS="$CPPFLAGS -strict-ansi"
   dnl Select ANSI C dialect
-  CFLAGS="$CFLAGS -std=c89"
-  dnl Disable use of ANSI C aliasing rules in optimizations
-  CFLAGS="$CFLAGS -no-ansi-alias"
+  CPPFLAGS="$CPPFLAGS -std=c89 -D__STRICT_ANSI__"
   dnl Change some warnings into errors
   dnl #140: too many arguments in function call
   dnl #147: declaration is incompatible with 'previous one'
   dnl #165: too few arguments in function call
   dnl #266: function declared implicitly
-  CFLAGS="$CFLAGS -we 140,147,165,266"
+  CPPFLAGS="$CPPFLAGS -we 140,147,165,266"
+  dnl Disable use of ANSI C aliasing rules in optimizations
+  CFLAGS="$CFLAGS -no-ansi-alias"
 else
   AC_MSG_RESULT([no])
 fi
