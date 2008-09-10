@@ -2035,6 +2035,8 @@ CURL_CHECK_FUNC_SEND
 CURL_CHECK_MSG_NOSIGNAL
 
 CURL_CHECK_FUNC_GMTIME_R
+CURL_CHECK_FUNC_SIGACTION
+CURL_CHECK_FUNC_STRTOK_R
 CURL_CHECK_FUNC_STRTOLL
 
 dnl Checks for library functions.
@@ -2070,7 +2072,6 @@ AC_CHECK_FUNCS([basename \
   setlocale \
   setmode \
   setrlimit \
-  sigaction \
   siginterrupt \
   signal \
   sigsetjmp \
@@ -2082,7 +2083,6 @@ AC_CHECK_FUNCS([basename \
   stricmp \
   strlcat \
   strstr \
-  strtok_r \
   uname \
   utime
 ],[
