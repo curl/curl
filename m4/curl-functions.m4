@@ -308,7 +308,8 @@ AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
     ])
   fi
   #
-  if test "$tst_works_gmtime_r" != "no"; then
+  if test "$tst_compi_gmtime_r" = "yes" &&
+    test "$tst_works_gmtime_r" != "no"; then
     AC_MSG_CHECKING([if gmtime_r usage allowed])
     if test "x$curl_disallow_gmtime_r" != "xyes"; then
       AC_MSG_RESULT([yes])
