@@ -94,6 +94,11 @@
 #include "ares_ipv6.h"
 #include "ares_llist.h"
 
+#ifndef HAVE_STRDUP
+#  include "ares_strdup.h"
+#  define strdup(ptr) ares_strdup(ptr)
+#endif
+
 struct query;
 
 struct send_request {

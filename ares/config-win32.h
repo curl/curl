@@ -79,6 +79,9 @@
 /* Define if you have the ioctlsocket function.  */
 #define HAVE_IOCTLSOCKET 1
 
+/* Define if you have the strdup function. */
+#define HAVE_STRDUP 1
+
 /* Define if you have the recv function. */
 #define HAVE_RECV 1
 
