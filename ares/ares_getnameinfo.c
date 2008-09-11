@@ -42,9 +42,9 @@
 #include <string.h>
 
 #include "ares.h"
-#include "ares_private.h"
 #include "ares_ipv6.h"
 #include "inet_ntop.h"
+#include "ares_private.h"
 
 #ifdef WATT32
 #undef WIN32

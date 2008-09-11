@@ -30,8 +30,8 @@
 #include <ctype.h>
 
 #include "ares.h"
-#include "ares_private.h"
 #include "inet_net_pton.h"
+#include "ares_private.h"
 
 int ares__get_hostent(FILE *fp, int family, struct hostent **host)
 {
