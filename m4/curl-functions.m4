@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 6
+# serial 7
 
 
 dnl CURL_INCLUDES_SIGNAL
@@ -622,7 +622,8 @@ dnl -------------------------------------------------
 dnl Verify if strerror_r is available, prototyped, can be compiled and
 dnl seems to work. If all of these are true, and usage has not been
 dnl previously disallowed with shell variable curl_disallow_strerror_r,
-dnl then HAVE_GLIBC_STRERROR_R or HAVE_POSIX_STRERROR_R will be defined.
+dnl then HAVE_STRERROR_R and STRERROR_R_TYPE_ARG3 will be defined, as
+dnl well as one of HAVE_GLIBC_STRERROR_R or HAVE_POSIX_STRERROR_R.
 dnl
 dnl glibc-style strerror_r:
 dnl
@@ -651,6 +652,8 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
   tst_allow_strerror_r="unknown"
   tst_works_glibc_strerror_r="unknown"
   tst_works_posix_strerror_r="unknown"
+  tst_glibc_strerror_r_type_arg3="unknown"
+  tst_posix_strerror_r_type_arg3="unknown"
   #
   AC_MSG_CHECKING([if strerror_r can be linked])
   AC_LINK_IFELSE([
@@ -696,25 +699,32 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
   #
   if test "$tst_compi_strerror_r" = "yes"; then
     AC_MSG_CHECKING([if strerror_r is glibc like])
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        $curl_includes_string
-      ]],[[
-        char *strerror_r(int errnum, char *workbuf, size_t bufsize);
-        if(0 != strerror_r(0, 0, 0))
-          return 1;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_glibc_strerror_r="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_glibc_strerror_r="no"
-      dnl temporary debug tracing follows
-      echo " " >&6
-      sed 's/^/cc-fail> /' conftest.err >&6
-      echo " " >&6
-    ])
+    tst_glibc_strerror_r_type_arg3="unknown"
+    for arg3 in 'size_t' 'int'; do
+      if test "$tst_glibc_strerror_r_type_arg3" = "unknown"; then
+        AC_COMPILE_IFELSE([
+          AC_LANG_PROGRAM([[
+            $curl_includes_string
+          ]],[[
+            char *strerror_r(int errnum, char *workbuf, $arg3 bufsize);
+            if(0 != strerror_r(0, 0, 0))
+              return 1;
+          ]])
+        ],[
+          tst_glibc_strerror_r_type_arg3="$arg3"
+        ])
+      fi
+    done
+    case "$tst_glibc_strerror_r_type_arg3" in
+      unknown)
+        AC_MSG_RESULT([no])
+        tst_glibc_strerror_r="no"
+        ;;
+      *)
+        AC_MSG_RESULT([yes])
+        tst_glibc_strerror_r="yes"
+        ;;
+    esac
   fi
   #
   dnl only do runtime verification when not cross-compiling
@@ -749,25 +759,32 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
   if test "$tst_compi_strerror_r" = "yes" &&
     test "$tst_works_glibc_strerror_r" != "yes"; then
     AC_MSG_CHECKING([if strerror_r is POSIX like])
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        $curl_includes_string
-      ]],[[
-        int strerror_r(int errnum, char *resultbuf, size_t bufsize);
-        if(0 != strerror_r(0, 0, 0))
-          return 1;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_posix_strerror_r="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_posix_strerror_r="no"
-      dnl temporary debug tracing follows
-      echo " " >&6
-      sed 's/^/cc-fail> /' conftest.err >&6
-      echo " " >&6
-    ])
+    tst_posix_strerror_r_type_arg3="unknown"
+    for arg3 in 'size_t' 'int'; do
+      if test "$tst_posix_strerror_r_type_arg3" = "unknown"; then
+        AC_COMPILE_IFELSE([
+          AC_LANG_PROGRAM([[
+            $curl_includes_string
+          ]],[[
+            int strerror_r(int errnum, char *resultbuf, $arg3 bufsize);
+            if(0 != strerror_r(0, 0, 0))
+              return 1;
+          ]])
+        ],[
+          tst_posix_strerror_r_type_arg3="$arg3"
+        ])
+      fi
+    done
+    case "$tst_posix_strerror_r_type_arg3" in
+      unknown)
+        AC_MSG_RESULT([no])
+        tst_posix_strerror_r="no"
+        ;;
+      *)
+        AC_MSG_RESULT([yes])
+        tst_posix_strerror_r="yes"
+        ;;
+    esac
   fi
   #
   dnl only do runtime verification when not cross-compiling
@@ -827,12 +844,20 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
      test "$tst_allow_strerror_r" = "yes"; then
     AC_MSG_RESULT([yes])
     if test "$tst_glibc_strerror_r" = "yes"; then
+      AC_DEFINE_UNQUOTED(HAVE_STRERROR_R, 1,
+        [Define to 1 if you have the strerror_r function.])
       AC_DEFINE_UNQUOTED(HAVE_GLIBC_STRERROR_R, 1,
         [Define to 1 if you have a working glibc-style strerror_r function.])
+      AC_DEFINE_UNQUOTED(STRERROR_R_TYPE_ARG3, $tst_glibc_strerror_r_type_arg3,
+        [Define to the type of arg 3 for strerror_r.])
     fi
     if test "$tst_posix_strerror_r" = "yes"; then
+      AC_DEFINE_UNQUOTED(HAVE_STRERROR_R, 1,
+        [Define to 1 if you have the strerror_r function.])
       AC_DEFINE_UNQUOTED(HAVE_POSIX_STRERROR_R, 1,
         [Define to 1 if you have a working POSIX-style strerror_r function.])
+      AC_DEFINE_UNQUOTED(STRERROR_R_TYPE_ARG3, $tst_posix_strerror_r_type_arg3,
+        [Define to the type of arg 3 for strerror_r.])
     fi
     ac_cv_func_strerror_r="yes"
   else
