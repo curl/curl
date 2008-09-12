@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 7
+# serial 8
 
 
 dnl CURL_INCLUDES_SIGNAL
@@ -700,7 +700,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
   if test "$tst_compi_strerror_r" = "yes"; then
     AC_MSG_CHECKING([if strerror_r is glibc like])
     tst_glibc_strerror_r_type_arg3="unknown"
-    for arg3 in 'size_t' 'int'; do
+    for arg3 in 'size_t' 'int' 'unsigned int'; do
       if test "$tst_glibc_strerror_r_type_arg3" = "unknown"; then
         AC_COMPILE_IFELSE([
           AC_LANG_PROGRAM([[
@@ -760,7 +760,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
     test "$tst_works_glibc_strerror_r" != "yes"; then
     AC_MSG_CHECKING([if strerror_r is POSIX like])
     tst_posix_strerror_r_type_arg3="unknown"
-    for arg3 in 'size_t' 'int'; do
+    for arg3 in 'size_t' 'int' 'unsigned int'; do
       if test "$tst_posix_strerror_r_type_arg3" = "unknown"; then
         AC_COMPILE_IFELSE([
           AC_LANG_PROGRAM([[
