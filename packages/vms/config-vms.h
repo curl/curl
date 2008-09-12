@@ -355,3 +355,6 @@
 /* Define to the function return type for send. */
 #define SEND_TYPE_RETV int
 
+/* Define to hide dollar sign from compilers in strict ansi mode. */
+#define decc_translate_vms(__s) decc$translate_vms(__s)
+

@@ -71,7 +71,7 @@ char *GetEnv(const char *variable, char do_expand)
 #ifdef  VMS
   env = getenv(variable);
   if (env && strcmp("HOME",variable) == 0) {
-        env = decc$translate_vms(env);
+        env = decc_translate_vms(env);
   }
 #else
   /* no length control */
@@ -100,7 +100,7 @@ char *homedir(void)
 
    if (pw) {
 #ifdef VMS
-     home = decc$translate_vms(pw->pw_dir);
+     home = decc_translate_vms(pw->pw_dir);
 #else
      home = pw->pw_dir;
 #endif
