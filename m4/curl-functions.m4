@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 5
+# serial 6
 
 
 dnl CURL_INCLUDES_SIGNAL
@@ -214,6 +214,10 @@ AC_DEFUN([CURL_CHECK_FUNC_FDOPEN], [
     ],[
       AC_MSG_RESULT([no])
       tst_compi_fdopen="no"
+      dnl temporary debug tracing follows
+      echo " " >&6
+      sed 's/^/cc-fail> /' conftest.err >&6
+      echo " " >&6
     ])
   fi
   #
@@ -706,6 +710,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
     ],[
       AC_MSG_RESULT([no])
       tst_glibc_strerror_r="no"
+      dnl temporary debug tracing follows
+      echo " " >&6
+      sed 's/^/cc-fail> /' conftest.err >&6
+      echo " " >&6
     ])
   fi
   #
@@ -755,6 +763,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
     ],[
       AC_MSG_RESULT([no])
       tst_posix_strerror_r="no"
+      dnl temporary debug tracing follows
+      echo " " >&6
+      sed 's/^/cc-fail> /' conftest.err >&6
+      echo " " >&6
     ])
   fi
   #
@@ -891,6 +903,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRTOK_R], [
     ],[
       AC_MSG_RESULT([no])
       tst_compi_strtok_r="no"
+      dnl temporary debug tracing follows
+      echo " " >&6
+      sed 's/^/cc-fail> /' conftest.err >&6
+      echo " " >&6
     ])
   fi
   #
@@ -976,6 +992,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRTOLL], [
     ],[
       AC_MSG_RESULT([no])
       tst_compi_strtoll="no"
+      dnl temporary debug tracing follows
+      echo " " >&6
+      sed 's/^/cc-fail> /' conftest.err >&6
+      echo " " >&6
     ])
   fi
   #
