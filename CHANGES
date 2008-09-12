@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Yang Tse (12 Sep 2008)
+- Further adjust detection of strerror_r() in the configure process, and
+  ensure that errno is not modified inside Curl_strerror().
+
+Yang Tse (10 Sep 2008)
+- Improve detection of gmtime_r(), strtoll(), sigaction(), strtok_r(),
+  strdup() and ftruncate() in the configure process.
+
 Daniel Fandrich (9 Sep 2008)
 - Mike Revi discovered some swapped speed switches documented in the curl man
   page.
