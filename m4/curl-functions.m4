@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 1
+# serial 5
 
 
 dnl CURL_INCLUDES_SIGNAL
@@ -43,6 +43,27 @@ curl_includes_signal="\
   AC_CHECK_HEADERS(
     sys/types.h signal.h,
     [], [], [$curl_includes_signal])
+])
+
+
+dnl CURL_INCLUDES_STDIO
+dnl -------------------------------------------------
+dnl Set up variable with list of headers that must be
+dnl included when stdio.h is to be included.
+
+AC_DEFUN([CURL_INCLUDES_STDIO], [
+curl_includes_stdio="\
+/* includes start */
+#ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+#endif
+#ifdef HAVE_STDIO_H
+#  include <stdio.h>
+#endif
+/* includes end */"
+  AC_CHECK_HEADERS(
+    sys/types.h stdio.h,
+    [], [], [$curl_includes_stdio])
 ])
 
 
@@ -135,6 +156,91 @@ curl_includes_unistd="\
   AC_CHECK_HEADERS(
     sys/types.h unistd.h,
     [], [], [$curl_includes_unistd])
+])
+
+
+dnl CURL_CHECK_FUNC_FDOPEN
+dnl -------------------------------------------------
+dnl Verify if fdopen is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_fdopen, then
+dnl HAVE_FDOPEN will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_FDOPEN], [
+  AC_REQUIRE([CURL_INCLUDES_STDIO])dnl
+  #
+  tst_links_fdopen="unknown"
+  tst_proto_fdopen="unknown"
+  tst_compi_fdopen="unknown"
+  tst_allow_fdopen="unknown"
+  #
+  AC_MSG_CHECKING([if fdopen can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([fdopen])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_fdopen="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_fdopen="no"
+  ])
+  #
+  if test "$tst_links_fdopen" = "yes"; then
+    AC_MSG_CHECKING([if fdopen is prototyped])
+    AC_EGREP_CPP([fdopen],[
+      $curl_includes_stdio
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_fdopen="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_fdopen="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_fdopen" = "yes"; then
+    AC_MSG_CHECKING([if fdopen is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_stdio
+      ]],[[
+        if(0 != fdopen(0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_fdopen="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_fdopen="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_fdopen" = "yes"; then
+    AC_MSG_CHECKING([if fdopen usage allowed])
+    if test "x$curl_disallow_fdopen" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_fdopen="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_fdopen="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if fdopen might be used])
+  if test "$tst_links_fdopen" = "yes" &&
+     test "$tst_proto_fdopen" = "yes" &&
+     test "$tst_compi_fdopen" = "yes" &&
+     test "$tst_allow_fdopen" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_FDOPEN, 1,
+      [Define to 1 if you have the fdopen function.])
+    ac_cv_func_fdopen="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_fdopen="no"
+  fi
 ])
 
 
@@ -504,6 +610,229 @@ AC_DEFUN([CURL_CHECK_FUNC_STRDUP], [
     AC_MSG_RESULT([no])
     ac_cv_func_strdup="no"
   fi
+])
+
+
+dnl CURL_CHECK_FUNC_STRERROR_R
+dnl -------------------------------------------------
+dnl Verify if strerror_r is available, prototyped, can be compiled and
+dnl seems to work. If all of these are true, and usage has not been
+dnl previously disallowed with shell variable curl_disallow_strerror_r,
+dnl then HAVE_GLIBC_STRERROR_R or HAVE_POSIX_STRERROR_R will be defined.
+dnl
+dnl glibc-style strerror_r:
+dnl
+dnl      char *strerror_r(int errnum, char *workbuf, size_t bufsize);
+dnl
+dnl  glibc-style strerror_r returns a pointer to the the error string,
+dnl  and might use the provided workbuf as a scratch area if needed. A
+dnl  quick test on a few systems shows that it's usually not used at all.
+dnl
+dnl POSIX-style strerror_r:
+dnl
+dnl      int strerror_r(int errnum, char *resultbuf, size_t bufsize);
+dnl
+dnl  POSIX-style strerror_r returns 0 upon successful completion and the
+dnl  error string in the provided resultbuf.
+dnl
+
+AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
+  AC_REQUIRE([CURL_INCLUDES_STRING])dnl
+  #
+  tst_links_strerror_r="unknown"
+  tst_proto_strerror_r="unknown"
+  tst_compi_strerror_r="unknown"
+  tst_glibc_strerror_r="unknown"
+  tst_posix_strerror_r="unknown"
+  tst_allow_strerror_r="unknown"
+  tst_works_glibc_strerror_r="unknown"
+  tst_works_posix_strerror_r="unknown"
+  #
+  AC_MSG_CHECKING([if strerror_r can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([strerror_r])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_strerror_r="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_strerror_r="no"
+  ])
+  #
+  if test "$tst_links_strerror_r" = "yes"; then
+    AC_MSG_CHECKING([if strerror_r is prototyped])
+    AC_EGREP_CPP([strerror_r],[
+      $curl_includes_string
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_strerror_r="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_strerror_r="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_strerror_r" = "yes"; then
+    AC_MSG_CHECKING([if strerror_r is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_string
+      ]],[[
+        if(0 != strerror_r(0, 0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_strerror_r="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_strerror_r="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_strerror_r" = "yes"; then
+    AC_MSG_CHECKING([if strerror_r is glibc like])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_string
+      ]],[[
+        char *strerror_r(int errnum, char *workbuf, size_t bufsize);
+        if(0 != strerror_r(0, 0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_glibc_strerror_r="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_glibc_strerror_r="no"
+    ])
+  fi
+  #
+  dnl only do runtime verification when not cross-compiling
+  if test "x$cross_compiling" != "xyes" &&
+    test "$tst_glibc_strerror_r" = "yes"; then
+    AC_MSG_CHECKING([if strerror_r seems to work])
+    AC_RUN_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_string
+#       include <errno.h>
+      ]],[[
+        char buffer[1024];
+        char *string = 0;
+        buffer[0] = '\0';
+        string = strerror_r(EACCES, buffer, sizeof(buffer));
+        if(!string)
+          exit(1); /* fail */
+        if(!string[0])
+          exit(1); /* fail */
+        else
+          exit(0);
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_works_glibc_strerror_r="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_works_glibc_strerror_r="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_strerror_r" = "yes" &&
+    test "$tst_works_glibc_strerror_r" != "yes"; then
+    AC_MSG_CHECKING([if strerror_r is POSIX like])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_string
+      ]],[[
+        int strerror_r(int errnum, char *resultbuf, size_t bufsize);
+        if(0 != strerror_r(0, 0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_posix_strerror_r="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_posix_strerror_r="no"
+    ])
+  fi
+  #
+  dnl only do runtime verification when not cross-compiling
+  if test "x$cross_compiling" != "xyes" &&
+    test "$tst_posix_strerror_r" = "yes"; then
+    AC_MSG_CHECKING([if strerror_r seems to work])
+    AC_RUN_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_string
+#       include <errno.h>
+      ]],[[
+        char buffer[1024];
+        int error = 1;
+        buffer[0] = '\0';
+        error = strerror_r(EACCES, buffer, sizeof(buffer));
+        if(error)
+          exit(1); /* fail */
+        if(buffer[0] == '\0')
+          exit(1); /* fail */
+        else
+          exit(0);
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_works_posix_strerror_r="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_works_posix_strerror_r="no"
+    ])
+  fi
+  #
+  if test "$tst_glibc_strerror_r" = "yes" &&
+    test "$tst_works_glibc_strerror_r" != "no" &&
+    test "$tst_posix_strerror_r" != "yes"; then
+    tst_allow_strerror_r="check"
+  fi
+  if test "$tst_posix_strerror_r" = "yes" &&
+    test "$tst_works_posix_strerror_r" != "no" &&
+    test "$tst_glibc_strerror_r" != "yes"; then
+    tst_allow_strerror_r="check"
+  fi
+  if test "$tst_allow_strerror_r" = "check"; then
+    AC_MSG_CHECKING([if strerror_r usage allowed])
+    if test "x$curl_disallow_strerror_r" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_strerror_r="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_strerror_r="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if strerror_r might be used])
+  if test "$tst_links_strerror_r" = "yes" &&
+     test "$tst_proto_strerror_r" = "yes" &&
+     test "$tst_compi_strerror_r" = "yes" &&
+     test "$tst_allow_strerror_r" = "yes"; then
+    AC_MSG_RESULT([yes])
+    if test "$tst_glibc_strerror_r" = "yes"; then
+      AC_DEFINE_UNQUOTED(HAVE_GLIBC_STRERROR_R, 1,
+        [Define to 1 if you have a working glibc-style strerror_r function.])
+    fi
+    if test "$tst_posix_strerror_r" = "yes"; then
+      AC_DEFINE_UNQUOTED(HAVE_POSIX_STRERROR_R, 1,
+        [Define to 1 if you have a working POSIX-style strerror_r function.])
+    fi
+    ac_cv_func_strerror_r="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_strerror_r="no"
+  fi
+  #
+  if test "$tst_compi_strerror_r" = "yes" &&
+     test "$tst_allow_strerror_r" = "unknown"; then
+    AC_MSG_NOTICE([cannot determine strerror_r() style: edit lib/config.h manually.])
+  fi
+  #
 ])
 
 

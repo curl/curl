@@ -1855,7 +1855,7 @@ else
   CURL_CHECK_LOCALTIME_R()
 
   dnl is there a strerror_r()
-  CURL_CHECK_STRERROR_R()
+  dnl the old strerror_r check was done here
 
   checkfor_gmtime_r="yes"
 fi
@@ -1876,7 +1876,7 @@ if test "x$RECENTAIX" = "xyes"; then
   CURL_CHECK_LOCALTIME_R()
 
   dnl is there a strerror_r()
-  CURL_CHECK_STRERROR_R()
+  dnl the old strerror_r check was done here
 
   checkfor_gmtime_r="yes"
 fi
@@ -2034,10 +2034,12 @@ CURL_CHECK_FUNC_RECVFROM
 CURL_CHECK_FUNC_SEND
 CURL_CHECK_MSG_NOSIGNAL
 
+CURL_CHECK_FUNC_FDOPEN
 CURL_CHECK_FUNC_FTRUNCATE
 CURL_CHECK_FUNC_GMTIME_R
 CURL_CHECK_FUNC_SIGACTION
 CURL_CHECK_FUNC_STRDUP
+CURL_CHECK_FUNC_STRERROR_R
 CURL_CHECK_FUNC_STRTOK_R
 CURL_CHECK_FUNC_STRTOLL
 
