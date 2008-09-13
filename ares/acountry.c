@@ -240,7 +240,7 @@ struct search_list {
        const char *long_name;      /* normal country name */
      };
 
-const struct search_list *list_lookup(int number, const struct search_list *list, int num)
+static const struct search_list *list_lookup(int number, const struct search_list *list, int num)
 {
   while (num > 0 && list->long_name)
     {
