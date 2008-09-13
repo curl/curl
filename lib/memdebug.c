@@ -283,6 +283,7 @@ FILE *curl_fopen(const char *file, const char *mode,
   return res;
 }
 
+#ifdef HAVE_FDOPEN
 FILE *curl_fdopen(int filedes, const char *mode,
                   int line, const char *source)
 {
@@ -292,6 +293,7 @@ FILE *curl_fdopen(int filedes, const char *mode,
             source, line, filedes, mode, res);
   return res;
 }
+#endif
 
 int curl_fclose(FILE *file, int line, const char *source)
 {

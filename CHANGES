@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Yang Tse (13 Sep 2008)
+- Disable tracking of fdopen() calls in the low-level memory leak tracking
+  code when fdopen() is not available, to avoid compiler error.
+
 Yang Tse (12 Sep 2008)
 - Further adjust detection of strerror_r() in the configure process, and
   ensure that errno is not modified inside Curl_strerror().
