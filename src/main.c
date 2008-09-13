@@ -3757,11 +3757,11 @@ output_expected(const char* url, const char* uploadfile)
 
 static struct curl_slist *easycode;
 
-CURLcode _my_setopt(CURL *curl, struct Configurable *config, const char *name,
-                    CURLoption tag, ...);
+static CURLcode _my_setopt(CURL *curl, struct Configurable *config,
+                           const char *name, CURLoption tag, ...);
 
-CURLcode _my_setopt(CURL *curl, struct Configurable *config, const char *name,
-                    CURLoption tag, ...)
+static CURLcode _my_setopt(CURL *curl, struct Configurable *config,
+                           const char *name, CURLoption tag, ...)
 {
   va_list arg;
   CURLcode ret;
