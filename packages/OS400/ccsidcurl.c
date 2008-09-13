@@ -33,6 +33,7 @@
 #pragma enum(int)
 
 #include <curl/curl.h>
+#include <curl/mprintf.h>
 #include "urldata.h"
 #include "url.h"
 #include "getinfo.h"

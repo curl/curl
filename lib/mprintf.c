@@ -180,8 +180,6 @@ struct asprintf {
                    the output is not the complete data */
 };
 
-int curl_msprintf(char *buffer, const char *format, ...);
-
 static long dprintf_DollarString(char *input, char **end)
 {
   int number=0;
