@@ -213,8 +213,6 @@ static const char * const statename[]={
   "DONE",
   "COMPLETED",
 };
-
-static void curl_multi_dump(CURLM *multi_handle);
 #endif
 
 /* always use this function to change state, to make debugging easier */
@@ -2232,7 +2230,7 @@ static void add_closure(struct Curl_multi *multi,
 }
 
 #ifdef CURLDEBUG
-static void curl_multi_dump(CURLM *multi_handle)
+void Curl_multi_dump(const struct Curl_multi *multi_handle)
 {
   struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
   struct Curl_one_easy *easy;
