@@ -305,11 +305,4 @@ int curl_fclose(FILE *file, int line, const char *source)
             source, line, file);
   return res;
 }
-#else
-#ifdef VMS
-int VOID_VAR_MEMDEBUG;
-#else
-/* we provide a fake do-nothing function here to avoid compiler warnings */
-void curl_memdebug(void) {}
-#endif /* VMS */
 #endif /* CURLDEBUG */
