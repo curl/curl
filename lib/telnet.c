@@ -1289,7 +1289,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
   if(event_select_func(sockfd, event_handle, FD_READ|FD_CLOSE) == SOCKET_ERROR) {
     close_event_func(event_handle);
     FreeLibrary(wsock2);
-    return 0;
+    return CURLE_OK;
   }
 
   /* If stdin_handle is a pipe, use PeekNamedPipe() method to check it,
