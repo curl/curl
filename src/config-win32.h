@@ -81,11 +81,20 @@
 /* Define if you have the setlocale function.  */
 #define HAVE_SETLOCALE 1
 
+/* Define if you have the strcasecmp function. */
+/* #define HAVE_STRCASECMP 1 */
+
 /* Define if you have the strdup function.  */
 #define HAVE_STRDUP 1
 
 /* Define if you have the stricmp function.  */
 #define HAVE_STRICMP 1
+
+/* Define if you have the strncasecmp function. */
+/* #define HAVE_STRNCASECMP 1 */
+
+/* Define if you have the strnicmp function. */
+#define HAVE_STRNICMP 1
 
 /* Define if you have the utime function */
 #ifndef __BORLANDC__
