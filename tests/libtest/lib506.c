@@ -54,7 +54,7 @@ static void my_lock(CURL *handle, curl_lock_data data, curl_lock_access laccess,
       fprintf(stderr, "lock: no such data: %d\n", (int)data);
       return;
   }
-  printf("lock:   %-6s <%s>: %d\n", what, user->text, user->counter);
+  printf("lock:   %-6s [%s]: %d\n", what, user->text, user->counter);
   user->counter++;
 }
 
@@ -78,7 +78,7 @@ static void my_unlock(CURL *handle, curl_lock_data data, void *useptr )
       fprintf(stderr, "unlock: no such data: %d\n", (int)data);
       return;
   }
-  printf("unlock: %-6s <%s>: %d\n", what, user->text, user->counter);
+  printf("unlock: %-6s [%s]: %d\n", what, user->text, user->counter);
   user->counter++;
 }
 
