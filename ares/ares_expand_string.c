@@ -20,8 +20,12 @@
 #if defined(WIN32) && !defined(WATT32)
 #include "nameser.h"
 #else
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#ifdef HAVE_ARPA_NAMESER_H
 #include <arpa/nameser.h>
+#endif
 #endif
 
 #include <string.h>
