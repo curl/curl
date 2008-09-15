@@ -139,19 +139,6 @@
 #define HAVE_SYS_UIO_H
 #endif
 
-#if (defined(WIN32) || defined(WATT32)) && \
-   !(defined(__MINGW32__) || defined(NETWARE) || defined(__DJGPP__))
-/* protos for the functions we provide in windows_port.c */
-int ares_strncasecmp(const char *s1, const char *s2, int n);
-int ares_strcasecmp(const char *s1, const char *s2);
-
-/* use this define magic to prevent us from adding symbol names to the library
-   that is a high-risk to collide with another libraries' attempts to do the
-   same */
-#define strncasecmp(a,b,c) ares_strncasecmp(a,b,c)
-#define strcasecmp(a,b) ares_strcasecmp(a,b)
-#endif
-
 /* IPv6 compatibility */
 #if !defined(HAVE_AF_INET6)
 #if defined(HAVE_PF_INET6)

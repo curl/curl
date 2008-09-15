@@ -34,27 +34,6 @@ WINAPI DllMain (HINSTANCE hnd, DWORD reason, LPVOID reserved)
 }
 #endif
 
-#ifndef __MINGW32__
-int
-ares_strncasecmp(const char *a, const char *b, int n)
-{
-    int i;
-
-    for (i = 0; i < n; i++) {
-        int c1 = ISUPPER(a[i]) ? tolower(a[i]) : a[i];
-        int c2 = ISUPPER(b[i]) ? tolower(b[i]) : b[i];
-        if (c1 != c2) return c1-c2;
-    }
-    return 0;
-}
-
-int
-ares_strcasecmp(const char *a, const char *b)
-{
-    return strncasecmp(a, b, strlen(a)+1);
-}
-#endif
-
 int
 ares_writev (ares_socket_t s, const struct iovec *vector, size_t count)
 {

@@ -57,6 +57,7 @@ OBJECTS = $(OBJ_DIR)\ares_fds.obj              \
           $(OBJ_DIR)\ares__read_line.obj       \
           $(OBJ_DIR)\ares_gethostbyname.obj    \
           $(OBJ_DIR)\ares_getnameinfo.obj      \
+          $(OBJ_DIR)\ares_strcasecmp.obj       \
           $(OBJ_DIR)\ares_strerror.obj         \
           $(OBJ_DIR)\ares_cancel.obj           \
           $(OBJ_DIR)\ares_init.obj             \
@@ -183,6 +184,8 @@ $(OBJ_DIR)\ares__read_line.obj: ares__read_line.c setup.h setup_once.h ares.h  \
 
 $(OBJ_DIR)\ares_gethostbyname.obj: ares_gethostbyname.c setup.h setup_once.h   \
   nameser.h ares.h ares_private.h ares_ipv6.h inet_net_pton.h bitncmp.h
+
+$(OBJ_DIR)\ares_strcasecmp.obj: ares_strcasecmp.c setup.h setup_once.h ares.h
 
 $(OBJ_DIR)\ares_strerror.obj: ares_strerror.c setup.h setup_once.h ares.h
 
