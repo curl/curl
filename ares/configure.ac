@@ -449,6 +449,7 @@ if test "$ac_cv_lib_resolve_strcasecmp" = "$ac_cv_func_strcasecmp"; then
                ,
                -lnsl)
 fi
+ac_cv_func_strcasecmp="no"
 
 dnl socket lib?
 AC_CHECK_FUNC(connect, , [ AC_CHECK_LIB(socket, connect) ])
@@ -643,7 +644,14 @@ CURL_CHECK_FUNC_RECVFROM
 CURL_CHECK_FUNC_SEND
 CURL_CHECK_MSG_NOSIGNAL
 
+CARES_CHECK_FUNC_STRCASECMP
+CARES_CHECK_FUNC_STRCMPI
 CARES_CHECK_FUNC_STRDUP
+CARES_CHECK_FUNC_STRICMP
+CARES_CHECK_FUNC_STRNCASECMP
+CARES_CHECK_FUNC_STRNCMPI
+CARES_CHECK_FUNC_STRNICMP
+
 
 dnl check for AF_INET6
 CARES_CHECK_CONSTANT(
