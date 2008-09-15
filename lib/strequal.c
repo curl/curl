@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,11 +21,6 @@
  * $Id$
  ***************************************************************************/
 
-#ifndef _GNU_SOURCE
-/* glibc needs this to define the prototype for strcasestr */
-#define _GNU_SOURCE 1
-#endif
-
 #include "setup.h"
 
 #include <string.h>
@@ -36,12 +31,6 @@
 #endif
 
 #include "strequal.h"
-
-#if defined(HAVE_STRCASECMP) && defined(__STRICT_ANSI__)
-/* this is for "-ansi -Wall -pedantic" to stop complaining! */
-extern int (strcasecmp)(const char *s1, const char *s2);
-extern int (strncasecmp)(const char *s1, const char *s2, size_t n);
-#endif
 
 int curl_strequal(const char *first, const char *second)
 {
@@ -65,11 +54,11 @@ int curl_strequal(const char *first, const char *second)
 
 int curl_strnequal(const char *first, const char *second, size_t max)
 {
-#if defined(HAVE_STRCASECMP)
+#if defined(HAVE_STRNCASECMP)
   return !strncasecmp(first, second, max);
-#elif defined(HAVE_STRCMPI)
+#elif defined(HAVE_STRNCMPI)
   return !strncmpi(first, second, max);
-#elif defined(HAVE_STRICMP)
+#elif defined(HAVE_STRNICMP)
   return !strnicmp(first, second, max);
 #else
   while(*first && *second && max) {

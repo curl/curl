@@ -714,6 +714,7 @@ if test "$ac_cv_lib_resolve_strcasecmp" = "$ac_cv_func_strcasecmp"; then
                ,
                -lnsl)
 fi
+ac_cv_func_strcasecmp="no"
 
 dnl socket lib?
 AC_CHECK_FUNC(connect, , [ AC_CHECK_LIB(socket, connect) ])
@@ -2038,8 +2039,16 @@ CURL_CHECK_FUNC_FDOPEN
 CURL_CHECK_FUNC_FTRUNCATE
 CURL_CHECK_FUNC_GMTIME_R
 CURL_CHECK_FUNC_SIGACTION
+CURL_CHECK_FUNC_STRCASECMP
+CURL_CHECK_FUNC_STRCASESTR
+CURL_CHECK_FUNC_STRCMPI
 CURL_CHECK_FUNC_STRDUP
 CURL_CHECK_FUNC_STRERROR_R
+CURL_CHECK_FUNC_STRICMP
+CURL_CHECK_FUNC_STRLCAT
+CURL_CHECK_FUNC_STRNCASECMP
+CURL_CHECK_FUNC_STRNCMPI
+CURL_CHECK_FUNC_STRNICMP
 CURL_CHECK_FUNC_STRTOK_R
 CURL_CHECK_FUNC_STRTOLL
 
@@ -2079,11 +2088,6 @@ AC_CHECK_FUNCS([basename \
   signal \
   sigsetjmp \
   socket \
-  strcasecmp \
-  strcasestr \
-  strcmpi \
-  stricmp \
-  strlcat \
   strstr \
   uname \
   utime
