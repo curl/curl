@@ -803,7 +803,7 @@
 /* #define CURLDEBUG */
 #endif
 
-/* sys/cdefs.h fails to define this for WINSCW */
+/* sys/cdefs.h fails to define this for WINSCW prior to Symbian OS ver. 9.4 */
 #ifndef __LONG_LONG_SUPPORTED
 #define __LONG_LONG_SUPPORTED
 #endif
