@@ -387,6 +387,7 @@ endif
 	@echo $(DL)#define HAVE_UNISTD_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_UTIME 1$(DL) >> $@
 	@echo $(DL)#define HAVE_UTIME_H 1$(DL) >> $@
+	@echo $(DL)#define HAVE_WRITEV 1$(DL) >> $@
 	@echo $(DL)#define RETSIGTYPE void$(DL) >> $@
 	@echo $(DL)#define SIZEOF_STRUCT_IN_ADDR 4$(DL) >> $@
 	@echo $(DL)#define STDC_HEADERS 1$(DL) >> $@
