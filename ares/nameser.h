@@ -3,21 +3,7 @@
 #ifndef ARES_NAMESER_H
 #define ARES_NAMESER_H
 
-/* Windows-only header file provided by liren@vivisimo.com to make his Windows
-   port build */
-
-#ifndef NETWARE
-#include <process.h> /* for the _getpid() proto */
-#endif  /* !NETWARE */
-#include <sys/types.h>
-
-#ifndef NETWARE
-
-#ifndef __WATCOMC__
-#define getpid() _getpid()
-#endif
-
-#endif  /* !NETWARE */
+/* header file provided by liren@vivisimo.com */
 
 #define NS_CMPRSFLGS  0xc0
 #define NS_IN6ADDRSZ  16
