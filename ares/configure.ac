@@ -545,6 +545,7 @@ AC_CHECK_HEADERS(
        sys/socket.h \
        sys/ioctl.h \
        sys/param.h \
+       sys/uio.h \
        netdb.h \
        netinet/in.h \
        netinet/tcp.h \
@@ -651,6 +652,7 @@ CARES_CHECK_FUNC_STRICMP
 CARES_CHECK_FUNC_STRNCASECMP
 CARES_CHECK_FUNC_STRNCMPI
 CARES_CHECK_FUNC_STRNICMP
+CARES_CHECK_FUNC_WRITEV
 
 
 dnl check for AF_INET6

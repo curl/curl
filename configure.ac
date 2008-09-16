@@ -1900,6 +1900,7 @@ AC_CHECK_HEADERS(
         sys/select.h \
         sys/socket.h \
         sys/ioctl.h \
+        sys/uio.h \
         assert.h \
         unistd.h \
         stdlib.h \
@@ -2051,6 +2052,7 @@ CURL_CHECK_FUNC_STRNCMPI
 CURL_CHECK_FUNC_STRNICMP
 CURL_CHECK_FUNC_STRTOK_R
 CURL_CHECK_FUNC_STRTOLL
+CURL_CHECK_FUNC_WRITEV
 
 dnl Checks for library functions.
 dnl AC_PROG_GCC_TRADITIONAL

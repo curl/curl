@@ -197,6 +197,10 @@ SOURCE=..\..\ares_version.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\ares_writev.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\bitncmp.c
 # End Source File
 # Begin Source File
@@ -242,6 +246,10 @@ SOURCE=..\..\ares_strcasecmp.h
 # Begin Source File
 
 SOURCE=..\..\ares_version.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\ares_writev.h
 # End Source File
 # Begin Source File
 

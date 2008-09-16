@@ -43,6 +43,27 @@ cares_includes_string="\
 ])
 
 
+dnl CARES_INCLUDES_SYS_UIO
+dnl -------------------------------------------------
+dnl Set up variable with list of headers that must be
+dnl included when sys/uio.h is to be included.
+
+AC_DEFUN([CARES_INCLUDES_SYS_UIO], [
+cares_includes_sys_uio="\
+/* includes start */
+#ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_UIO_H
+#  include <sys/uio.h>
+#endif
+/* includes end */"
+  AC_CHECK_HEADERS(
+    sys/types.h sys/uio.h,
+    [], [], [$cares_includes_sys_uio])
+])
+
+
 dnl CARES_CHECK_FUNC_STRCASECMP
 dnl -------------------------------------------------
 dnl Verify if strcasecmp is available, prototyped, and
@@ -634,5 +655,90 @@ AC_DEFUN([CARES_CHECK_FUNC_STRNICMP], [
   else
     AC_MSG_RESULT([no])
     ac_cv_func_strnicmp="no"
+  fi
+])
+
+
+dnl CARES_CHECK_FUNC_WRITEV
+dnl -------------------------------------------------
+dnl Verify if writev is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable cares_disallow_writev, then
+dnl HAVE_WRITEV will be defined.
+
+AC_DEFUN([CARES_CHECK_FUNC_WRITEV], [
+  AC_REQUIRE([CARES_INCLUDES_SYS_UIO])dnl
+  #
+  tst_links_writev="unknown"
+  tst_proto_writev="unknown"
+  tst_compi_writev="unknown"
+  tst_allow_writev="unknown"
+  #
+  AC_MSG_CHECKING([if writev can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([writev])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_writev="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_writev="no"
+  ])
+  #
+  if test "$tst_links_writev" = "yes"; then
+    AC_MSG_CHECKING([if writev is prototyped])
+    AC_EGREP_CPP([writev],[
+      $cares_includes_sys_uio
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_writev="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_writev="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_writev" = "yes"; then
+    AC_MSG_CHECKING([if writev is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $cares_includes_sys_uio
+      ]],[[
+        if(0 != writev(0, 0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_writev="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_writev="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_writev" = "yes"; then
+    AC_MSG_CHECKING([if writev usage allowed])
+    if test "x$cares_disallow_writev" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_writev="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_writev="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if writev might be used])
+  if test "$tst_links_writev" = "yes" &&
+     test "$tst_proto_writev" = "yes" &&
+     test "$tst_compi_writev" = "yes" &&
+     test "$tst_allow_writev" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_WRITEV, 1,
+      [Define to 1 if you have the writev function.])
+    ac_cv_func_writev="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_writev="no"
   fi
 ])

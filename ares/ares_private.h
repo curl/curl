@@ -43,6 +43,7 @@
 #undef  closesocket
 #define closesocket(s)    close_s(s)
 #define writev(s,v,c)     writev_s(s,v,c)
+#define HAVE_WRITEV 1
 #endif
 
 #ifdef NETWARE
@@ -107,6 +108,11 @@
 #ifndef HAVE_STRNCASECMP
 #  include "ares_strcasecmp.h"
 #  define strncasecmp(p1,p2,n) ares_strncasecmp(p1,p2,n)
+#endif
+
+#ifndef HAVE_WRITEV
+#  include "ares_writev.h"
+#  define writev(s,ptr,cnt) ares_writev(s,ptr,cnt)
 #endif
 
 struct query;
