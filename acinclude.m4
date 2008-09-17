@@ -2601,26 +2601,6 @@ fi
 ])
 
 
-AC_DEFUN([CURL_CHECK_LOCALTIME_R],
-[
-  dnl check for localtime_r
-  AC_CHECK_FUNCS(localtime_r,[
-    AC_MSG_CHECKING(whether localtime_r is declared)
-    AC_EGREP_CPP(localtime_r,[
-#undef _REENTRANT
-#include <time.h>],[
-      AC_MSG_RESULT(yes)],[
-      AC_MSG_RESULT(no)
-      AC_MSG_CHECKING(whether localtime_r with -D_REENTRANT is declared)
-      AC_EGREP_CPP(localtime_r,[
-#undef _REENTRANT
-#define _REENTRANT
-#include <time.h>],[
-        AC_MSG_RESULT(yes)],
-        AC_MSG_RESULT(no))])])
-])
-
-
 AC_DEFUN([CURL_CHECK_INET_NTOA_R],
 [
   dnl determine if function definition for inet_ntoa_r exists.

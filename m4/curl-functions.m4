@@ -353,6 +353,91 @@ AC_DEFUN([CURL_CHECK_FUNC_FTRUNCATE], [
 ])
 
 
+dnl CURL_CHECK_FUNC_GETHOSTNAME
+dnl -------------------------------------------------
+dnl Verify if gethostname is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_gethostname, then
+dnl HAVE_GETHOSTNAME will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
+  AC_REQUIRE([CURL_INCLUDES_UNISTD])dnl
+  #
+  tst_links_gethostname="unknown"
+  tst_proto_gethostname="unknown"
+  tst_compi_gethostname="unknown"
+  tst_allow_gethostname="unknown"
+  #
+  AC_MSG_CHECKING([if gethostname can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([gethostname])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_gethostname="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_gethostname="no"
+  ])
+  #
+  if test "$tst_links_gethostname" = "yes"; then
+    AC_MSG_CHECKING([if gethostname is prototyped])
+    AC_EGREP_CPP([gethostname],[
+      $curl_includes_unistd
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_gethostname="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_gethostname="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_gethostname" = "yes"; then
+    AC_MSG_CHECKING([if gethostname is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_unistd
+      ]],[[
+        if(0 != gethostname(0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_gethostname="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_gethostname="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_gethostname" = "yes"; then
+    AC_MSG_CHECKING([if gethostname usage allowed])
+    if test "x$curl_disallow_gethostname" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_gethostname="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_gethostname="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if gethostname might be used])
+  if test "$tst_links_gethostname" = "yes" &&
+     test "$tst_proto_gethostname" = "yes" &&
+     test "$tst_compi_gethostname" = "yes" &&
+     test "$tst_allow_gethostname" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_GETHOSTNAME, 1,
+      [Define to 1 if you have the gethostname function.])
+    ac_cv_func_gethostname="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_gethostname="no"
+  fi
+])
+
+
 dnl CURL_CHECK_FUNC_GMTIME_R
 dnl -------------------------------------------------
 dnl Verify if gmtime_r is available, prototyped, can
@@ -463,6 +548,120 @@ AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
   else
     AC_MSG_RESULT([no])
     ac_cv_func_gmtime_r="no"
+  fi
+])
+
+
+dnl CURL_CHECK_FUNC_LOCALTIME_R
+dnl -------------------------------------------------
+dnl Verify if localtime_r is available, prototyped, can
+dnl be compiled and seems to work. If all of these are
+dnl true, and usage has not been previously disallowed
+dnl with shell variable curl_disallow_localtime_r, then
+dnl HAVE_LOCALTIME_R will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_LOCALTIME_R], [
+  AC_REQUIRE([CURL_INCLUDES_TIME])dnl
+  #
+  tst_links_localtime_r="unknown"
+  tst_proto_localtime_r="unknown"
+  tst_compi_localtime_r="unknown"
+  tst_works_localtime_r="unknown"
+  tst_allow_localtime_r="unknown"
+  #
+  AC_MSG_CHECKING([if localtime_r can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([localtime_r])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_localtime_r="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_localtime_r="no"
+  ])
+  #
+  if test "$tst_links_localtime_r" = "yes"; then
+    AC_MSG_CHECKING([if localtime_r is prototyped])
+    AC_EGREP_CPP([localtime_r],[
+      $curl_includes_time
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_localtime_r="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_localtime_r="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_localtime_r" = "yes"; then
+    AC_MSG_CHECKING([if localtime_r is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_time
+      ]],[[
+        if(0 != localtime_r(0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_localtime_r="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_localtime_r="no"
+    ])
+  fi
+  #
+  dnl only do runtime verification when not cross-compiling
+  if test "x$cross_compiling" != "xyes" &&
+    test "$tst_compi_localtime_r" = "yes"; then
+    AC_MSG_CHECKING([if localtime_r seems to work])
+    AC_RUN_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_time
+      ]],[[
+        time_t clock = 1170352587;
+        struct tm *tmp = 0;
+        struct tm result;
+        tmp = localtime_r(&clock, &result);
+        if(tmp)
+          exit(0);
+        else
+          exit(1);
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_works_localtime_r="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_works_localtime_r="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_localtime_r" = "yes" &&
+    test "$tst_works_localtime_r" != "no"; then
+    AC_MSG_CHECKING([if localtime_r usage allowed])
+    if test "x$curl_disallow_localtime_r" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_localtime_r="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_localtime_r="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if localtime_r might be used])
+  if test "$tst_links_localtime_r" = "yes" &&
+     test "$tst_proto_localtime_r" = "yes" &&
+     test "$tst_compi_localtime_r" = "yes" &&
+     test "$tst_allow_localtime_r" = "yes" &&
+     test "$tst_works_localtime_r" != "no"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_LOCALTIME_R, 1,
+      [Define to 1 if you have a working localtime_r function.])
+    ac_cv_func_localtime_r="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_localtime_r="no"
   fi
 ])
 
@@ -1569,6 +1768,91 @@ AC_DEFUN([CURL_CHECK_FUNC_STRNICMP], [
   else
     AC_MSG_RESULT([no])
     ac_cv_func_strnicmp="no"
+  fi
+])
+
+
+dnl CURL_CHECK_FUNC_STRSTR
+dnl -------------------------------------------------
+dnl Verify if strstr is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_strstr, then
+dnl HAVE_STRSTR will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_STRSTR], [
+  AC_REQUIRE([CURL_INCLUDES_STRING])dnl
+  #
+  tst_links_strstr="unknown"
+  tst_proto_strstr="unknown"
+  tst_compi_strstr="unknown"
+  tst_allow_strstr="unknown"
+  #
+  AC_MSG_CHECKING([if strstr can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([strstr])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_strstr="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_strstr="no"
+  ])
+  #
+  if test "$tst_links_strstr" = "yes"; then
+    AC_MSG_CHECKING([if strstr is prototyped])
+    AC_EGREP_CPP([strstr],[
+      $curl_includes_string
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_strstr="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_strstr="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_strstr" = "yes"; then
+    AC_MSG_CHECKING([if strstr is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_string
+      ]],[[
+        if(0 != strstr(0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_strstr="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_strstr="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_strstr" = "yes"; then
+    AC_MSG_CHECKING([if strstr usage allowed])
+    if test "x$curl_disallow_strstr" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_strstr="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_strstr="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if strstr might be used])
+  if test "$tst_links_strstr" = "yes" &&
+     test "$tst_proto_strstr" = "yes" &&
+     test "$tst_compi_strstr" = "yes" &&
+     test "$tst_allow_strstr" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_STRSTR, 1,
+      [Define to 1 if you have the strstr function.])
+    ac_cv_func_strstr="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_strstr="no"
   fi
 ])
 

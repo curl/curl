@@ -1853,7 +1853,7 @@ else
   CURL_CHECK_INET_NTOA_R()
 
   dnl is there a localtime_r()
-  CURL_CHECK_LOCALTIME_R()
+  dnl the old localtime_r check was done here
 
   dnl is there a strerror_r()
   dnl the old strerror_r check was done here
@@ -1874,7 +1874,7 @@ if test "x$RECENTAIX" = "xyes"; then
   AC_DEFINE(_THREAD_SAFE, 1, [define this if you need it to compile thread-safe code])
 
   dnl is there a localtime_r()
-  CURL_CHECK_LOCALTIME_R()
+  dnl the old localtime_r check was done here
 
   dnl is there a strerror_r()
   dnl the old strerror_r check was done here
@@ -2038,7 +2038,9 @@ CURL_CHECK_MSG_NOSIGNAL
 
 CURL_CHECK_FUNC_FDOPEN
 CURL_CHECK_FUNC_FTRUNCATE
+CURL_CHECK_FUNC_GETHOSTNAME
 CURL_CHECK_FUNC_GMTIME_R
+CURL_CHECK_FUNC_LOCALTIME_R
 CURL_CHECK_FUNC_SIGACTION
 CURL_CHECK_FUNC_STRCASECMP
 CURL_CHECK_FUNC_STRCASESTR
@@ -2050,6 +2052,7 @@ CURL_CHECK_FUNC_STRLCAT
 CURL_CHECK_FUNC_STRNCASECMP
 CURL_CHECK_FUNC_STRNCMPI
 CURL_CHECK_FUNC_STRNICMP
+CURL_CHECK_FUNC_STRSTR
 CURL_CHECK_FUNC_STRTOK_R
 CURL_CHECK_FUNC_STRTOLL
 CURL_CHECK_FUNC_WRITEV
@@ -2090,7 +2093,6 @@ AC_CHECK_FUNCS([basename \
   signal \
   sigsetjmp \
   socket \
-  strstr \
   uname \
   utime
 ],[
