@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Yang Tse (14 Sep 2008)
+- Improve configure detection of strcasecmp(), strcasestr(), strcmpi(),
+  stricmp(), strlcat(), strncasecmp(), strncmpi() and strnicmp().
+
 Yang Tse (13 Sep 2008)
 - Disable tracking of fdopen() calls in the low-level memory leak tracking
   code when fdopen() is not available, to avoid compiler error.
