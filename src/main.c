@@ -4942,8 +4942,8 @@ show_error:
 #define CURL_CA_CERT_ERRORMSG1 \
 "More details here: http://curl.haxx.se/docs/sslcerts.html\n\n" \
 "curl performs SSL certificate verification by default, using a \"bundle\"\n" \
-" of Certificate Authority (CA) public keys (CA certs). The default\n" \
-" bundle is named curl-ca-bundle.crt; you can specify an alternate file\n" \
+" of Certificate Authority (CA) public keys (CA certs). If the default\n" \
+" bundle file isn't adequate, you can specify an alternate file\n" \
 " using the --cacert option.\n"
 
 #define CURL_CA_CERT_ERRORMSG2 \
