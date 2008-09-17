@@ -1,5 +1,23 @@
   Changelog for the c-ares project
 
+* Sep 17 2008 (Yang Tse)
+- Code reorganization to allow internal/private use of "nameser.h" to any
+  system that lacks arpa/nameser.h or arpa/nameser_compat.h header files.
+
+* Sep 16 2008 (Yang Tse)
+- Code reorganization to allow internal/private use of ares_writev to any
+  system that lacks the writev function.
+
+* Sep 15 2008 (Yang Tse)
+- Code reorganization to allow internal/private use of ares_strcasecmp to any
+  system that lacks the strcasecmp function.
+
+- Improve configure detection of some string functions.
+
+* Sep 11 2008 (Yang Tse)
+- Code reorganization to allow internal/private use of ares_strdup to any
+  system that lacks the strdup function.
+
 Version 1.5.3 (Aug 29, 2008)
 
 * Aug 25 2008 (Yang Tse)

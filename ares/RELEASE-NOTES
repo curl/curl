@@ -1,6 +1,7 @@
 This is what's new and changed in the c-ares 1.5.4 release:
 
- o 
+ o improved configure detection of several functions
+ o improved source code portability
 
 Thanks go to these friendly people for their efforts and contributions:
 
