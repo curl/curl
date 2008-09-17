@@ -226,10 +226,9 @@ AC_MSG_CHECKING([whether we are using the Intel C compiler])
 CURL_CHECK_DEF([__INTEL_COMPILER], [], [silent])
 if test "$curl_cv_have_def___INTEL_COMPILER" = "yes"; then
   AC_MSG_RESULT([yes])
-  dnl Select strict ANSI C conformance
-  CPPFLAGS="$CPPFLAGS -strict-ansi"
-  dnl Select ANSI C dialect
-  CPPFLAGS="$CPPFLAGS -std=c89 -D__STRICT_ANSI__"
+  dnl On Linux this compiler uses gcc's header files, so
+  dnl we select ANSI C89 dialect plus GNU extensions.
+  CPPFLAGS="$CPPFLAGS -std=gnu89"
   dnl Change some warnings into errors
   dnl #140: too many arguments in function call
   dnl #147: declaration is incompatible with 'previous one'
