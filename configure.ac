@@ -1842,10 +1842,10 @@ then
 else
   if test "$ipv6" != "yes"; then
     dnl dig around for gethostbyname_r()
-    CURL_CHECK_GETHOSTBYNAME_R()
+    dnl the old gethostbyname_r check was done here
 
     dnl dig around for gethostbyaddr_r()
-    dnl CURL_CHECK_GETHOSTBYADDR_R()
+    dnl the old gethostbyaddr_r check was here BUT COMMENTED OUT
   fi
 
   dnl poke around for inet_ntoa_r()
@@ -2037,6 +2037,8 @@ CURL_CHECK_MSG_NOSIGNAL
 
 CURL_CHECK_FUNC_FDOPEN
 CURL_CHECK_FUNC_FTRUNCATE
+CURL_CHECK_FUNC_GETHOSTBYADDR_R
+CURL_CHECK_FUNC_GETHOSTBYNAME_R
 CURL_CHECK_FUNC_GETHOSTNAME
 CURL_CHECK_FUNC_GETSERVBYPORT_R
 CURL_CHECK_FUNC_GMTIME_R

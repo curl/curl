@@ -374,6 +374,290 @@ AC_DEFUN([CURL_CHECK_FUNC_FTRUNCATE], [
 ])
 
 
+dnl CURL_CHECK_FUNC_GETHOSTBYADDR_R
+dnl -------------------------------------------------
+dnl Verify if gethostbyaddr_r is available, prototyped,
+dnl and can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_gethostbyaddr_r, then
+dnl HAVE_GETHOSTBYADDR_R will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYADDR_R], [
+  AC_REQUIRE([CURL_INCLUDES_SYS_UIO])dnl
+  #
+  tst_links_gethostbyaddr_r="unknown"
+  tst_proto_gethostbyaddr_r="unknown"
+  tst_compi_gethostbyaddr_r="unknown"
+  tst_allow_gethostbyaddr_r="unknown"
+  tst_nargs_gethostbyaddr_r="unknown"
+  #
+  AC_MSG_CHECKING([if gethostbyaddr_r can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([gethostbyaddr_r])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_gethostbyaddr_r="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_gethostbyaddr_r="no"
+  ])
+  #
+  if test "$tst_links_gethostbyaddr_r" = "yes"; then
+    AC_MSG_CHECKING([if gethostbyaddr_r is prototyped])
+    AC_EGREP_CPP([gethostbyaddr_r],[
+      $curl_includes_netdb
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_gethostbyaddr_r="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_gethostbyaddr_r="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_gethostbyaddr_r" = "yes"; then
+    if test "$tst_nargs_gethostbyaddr_r" = "unknown"; then
+      AC_MSG_CHECKING([if gethostbyaddr_r takes 5 args.])
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+          $curl_includes_netdb
+        ]],[[
+          if(0 != gethostbyaddr_r(0, 0, 0, 0, 0))
+            return 1;
+        ]])
+      ],[
+        AC_MSG_RESULT([yes])
+        tst_compi_gethostbyaddr_r="yes"
+        tst_nargs_gethostbyaddr_r="5"
+      ],[
+        AC_MSG_RESULT([no])
+        tst_compi_gethostbyaddr_r="no"
+      ])
+    fi
+    if test "$tst_nargs_gethostbyaddr_r" = "unknown"; then
+      AC_MSG_CHECKING([if gethostbyaddr_r takes 7 args.])
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+          $curl_includes_netdb
+        ]],[[
+          if(0 != gethostbyaddr_r(0, 0, 0, 0, 0, 0, 0))
+            return 1;
+        ]])
+      ],[
+        AC_MSG_RESULT([yes])
+        tst_compi_gethostbyaddr_r="yes"
+        tst_nargs_gethostbyaddr_r="7"
+      ],[
+        AC_MSG_RESULT([no])
+        tst_compi_gethostbyaddr_r="no"
+      ])
+    fi
+    if test "$tst_nargs_gethostbyaddr_r" = "unknown"; then
+      AC_MSG_CHECKING([if gethostbyaddr_r takes 8 args.])
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+          $curl_includes_netdb
+        ]],[[
+          if(0 != gethostbyaddr_r(0, 0, 0, 0, 0, 0, 0, 0))
+            return 1;
+        ]])
+      ],[
+        AC_MSG_RESULT([yes])
+        tst_compi_gethostbyaddr_r="yes"
+        tst_nargs_gethostbyaddr_r="8"
+      ],[
+        AC_MSG_RESULT([no])
+        tst_compi_gethostbyaddr_r="no"
+      ])
+    fi
+    AC_MSG_CHECKING([if gethostbyaddr_r is compilable])
+    if test "$tst_compi_gethostbyaddr_r" = "yes"; then
+      AC_MSG_RESULT([yes])
+    else
+      AC_MSG_RESULT([no])
+    fi
+  fi
+  #
+  if test "$tst_compi_gethostbyaddr_r" = "yes"; then
+    AC_MSG_CHECKING([if gethostbyaddr_r usage allowed])
+    if test "x$curl_disallow_gethostbyaddr_r" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_gethostbyaddr_r="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_gethostbyaddr_r="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if gethostbyaddr_r might be used])
+  if test "$tst_links_gethostbyaddr_r" = "yes" &&
+     test "$tst_proto_gethostbyaddr_r" = "yes" &&
+     test "$tst_compi_gethostbyaddr_r" = "yes" &&
+     test "$tst_allow_gethostbyaddr_r" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_GETHOSTBYADDR_R, 1,
+      [Define to 1 if you have the gethostbyaddr_r function.])
+    dnl AC_DEFINE_UNQUOTED(GETHOSTBYADDR_R_ARGS, $tst_nargs_gethostbyaddr_r,
+    dnl   [Specifies the number of arguments to gethostbyaddr_r])
+    #
+    if test "$tst_nargs_getservbyport_r" -eq "5"; then
+      AC_DEFINE(HAVE_GETHOSTBYADDR_R_5, 1, [gethostbyaddr_r() takes 5 args])
+    elif test "$tst_nargs_getservbyport_r" -eq "7"; then
+      AC_DEFINE(HAVE_GETHOSTBYADDR_R_7, 1, [gethostbyaddr_r() takes 7 args])
+    elif test "$tst_nargs_getservbyport_r" -eq "6"; then
+      AC_DEFINE(HAVE_GETHOSTBYADDR_R_8, 1, [gethostbyaddr_r() takes 8 args])
+    fi
+    #
+    ac_cv_func_gethostbyaddr_r="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_gethostbyaddr_r="no"
+  fi
+])
+
+
+dnl CURL_CHECK_FUNC_GETHOSTBYNAME_R
+dnl -------------------------------------------------
+dnl Verify if gethostbyname_r is available, prototyped,
+dnl and can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_gethostbyname_r, then
+dnl HAVE_GETHOSTBYNAME_R will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME_R], [
+  AC_REQUIRE([CURL_INCLUDES_SYS_UIO])dnl
+  #
+  tst_links_gethostbyname_r="unknown"
+  tst_proto_gethostbyname_r="unknown"
+  tst_compi_gethostbyname_r="unknown"
+  tst_allow_gethostbyname_r="unknown"
+  tst_nargs_gethostbyname_r="unknown"
+  #
+  AC_MSG_CHECKING([if gethostbyname_r can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([gethostbyname_r])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_gethostbyname_r="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_gethostbyname_r="no"
+  ])
+  #
+  if test "$tst_links_gethostbyname_r" = "yes"; then
+    AC_MSG_CHECKING([if gethostbyname_r is prototyped])
+    AC_EGREP_CPP([gethostbyname_r],[
+      $curl_includes_netdb
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_gethostbyname_r="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_gethostbyname_r="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_gethostbyname_r" = "yes"; then
+    if test "$tst_nargs_gethostbyname_r" = "unknown"; then
+      AC_MSG_CHECKING([if gethostbyname_r takes 3 args.])
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+          $curl_includes_netdb
+        ]],[[
+          if(0 != gethostbyname_r(0, 0, 0))
+            return 1;
+        ]])
+      ],[
+        AC_MSG_RESULT([yes])
+        tst_compi_gethostbyname_r="yes"
+        tst_nargs_gethostbyname_r="3"
+      ],[
+        AC_MSG_RESULT([no])
+        tst_compi_gethostbyname_r="no"
+      ])
+    fi
+    if test "$tst_nargs_gethostbyname_r" = "unknown"; then
+      AC_MSG_CHECKING([if gethostbyname_r takes 5 args.])
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+          $curl_includes_netdb
+        ]],[[
+          if(0 != gethostbyname_r(0, 0, 0, 0, 0))
+            return 1;
+        ]])
+      ],[
+        AC_MSG_RESULT([yes])
+        tst_compi_gethostbyname_r="yes"
+        tst_nargs_gethostbyname_r="5"
+      ],[
+        AC_MSG_RESULT([no])
+        tst_compi_gethostbyname_r="no"
+      ])
+    fi
+    if test "$tst_nargs_gethostbyname_r" = "unknown"; then
+      AC_MSG_CHECKING([if gethostbyname_r takes 6 args.])
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+          $curl_includes_netdb
+        ]],[[
+          if(0 != gethostbyname_r(0, 0, 0, 0, 0, 0))
+            return 1;
+        ]])
+      ],[
+        AC_MSG_RESULT([yes])
+        tst_compi_gethostbyname_r="yes"
+        tst_nargs_gethostbyname_r="6"
+      ],[
+        AC_MSG_RESULT([no])
+        tst_compi_gethostbyname_r="no"
+      ])
+    fi
+    AC_MSG_CHECKING([if gethostbyname_r is compilable])
+    if test "$tst_compi_gethostbyname_r" = "yes"; then
+      AC_MSG_RESULT([yes])
+    else
+      AC_MSG_RESULT([no])
+    fi
+  fi
+  #
+  if test "$tst_compi_gethostbyname_r" = "yes"; then
+    AC_MSG_CHECKING([if gethostbyname_r usage allowed])
+    if test "x$curl_disallow_gethostbyname_r" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_gethostbyname_r="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_gethostbyname_r="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if gethostbyname_r might be used])
+  if test "$tst_links_gethostbyname_r" = "yes" &&
+     test "$tst_proto_gethostbyname_r" = "yes" &&
+     test "$tst_compi_gethostbyname_r" = "yes" &&
+     test "$tst_allow_gethostbyname_r" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_GETHOSTBYNAME_R, 1,
+      [Define to 1 if you have the gethostbyname_r function.])
+    dnl AC_DEFINE_UNQUOTED(GETHOSTBYNAME_R_ARGS, $tst_nargs_gethostbyname_r,
+    dnl   [Specifies the number of arguments to gethostbyname_r])
+    #
+    if test "$tst_nargs_getservbyport_r" -eq "3"; then
+      AC_DEFINE(HAVE_GETHOSTBYNAME_R_3, 1, [gethostbyname_r() takes 3 args])
+    elif test "$tst_nargs_getservbyport_r" -eq "5"; then
+      AC_DEFINE(HAVE_GETHOSTBYNAME_R_5, 1, [gethostbyname_r() takes 5 args])
+    elif test "$tst_nargs_getservbyport_r" -eq "6"; then
+      AC_DEFINE(HAVE_GETHOSTBYNAME_R_6, 1, [gethostbyname_r() takes 6 args])
+    fi
+    #
+    ac_cv_func_gethostbyname_r="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_gethostbyname_r="no"
+  fi
+])
+
+
 dnl CURL_CHECK_FUNC_GETHOSTNAME
 dnl -------------------------------------------------
 dnl Verify if gethostname is available, prototyped, and
