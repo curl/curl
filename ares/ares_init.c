@@ -19,11 +19,10 @@
 #include "setup.h"
 
 #if defined(WIN32) && !defined(WATT32)
-#include "nameser.h"
 #include <iphlpapi.h>
 #include <malloc.h>
+#endif
 
-#else
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
@@ -49,15 +48,16 @@
 #endif
 
 #ifdef HAVE_ARPA_NAMESER_H
-#include <arpa/nameser.h>
+#  include <arpa/nameser.h>
+#else
+#  include "nameser.h"
+#endif
+#ifdef HAVE_ARPA_NAMESER_COMPAT_H
+#  include <arpa/nameser_compat.h>
 #endif
 
-#ifdef HAVE_ARPA_NAMESER_COMPAT_H
-#include <arpa/nameser_compat.h>
-#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#endif
 #endif
 
 #include <stdio.h>

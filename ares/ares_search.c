@@ -16,15 +16,12 @@
  */
 
 #include "setup.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
-
-#if defined(WIN32) && !defined(WATT32)
-#include "nameser.h"
-#endif
 
 #include "ares.h"
 #include "ares_private.h"

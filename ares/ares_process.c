@@ -18,47 +18,45 @@
 
 #include "setup.h"
 
-#if defined(WIN32) && !defined(WATT32)
-#include "nameser.h"
-
-#else
 #ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
+#  include <sys/socket.h>
 #endif
 #ifdef HAVE_SYS_UIO_H
-#include <sys/uio.h>
+#  include <sys/uio.h>
 #endif
 #ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h> /* <netinet/tcp.h> may need it */
+#  include <netinet/in.h>
 #endif
 #ifdef HAVE_NETINET_TCP_H
-#include <netinet/tcp.h> /* for TCP_NODELAY */
+#  include <netinet/tcp.h>
 #endif
 #ifdef HAVE_NETDB_H
-#include <netdb.h>
+#  include <netdb.h>
 #endif
 #ifdef HAVE_ARPA_NAMESER_H
-#include <arpa/nameser.h>
+#  include <arpa/nameser.h>
+#else
+#  include "nameser.h"
 #endif
 #ifdef HAVE_ARPA_NAMESER_COMPAT_H
-#include <arpa/nameser_compat.h>
+#  include <arpa/nameser_compat.h>
 #endif
+
 #ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
+#  include <sys/time.h>
 #endif
-#endif /* WIN32 && !WATT32 */
 
 #ifdef HAVE_STRINGS_H
-#include <strings.h>
+#  include <strings.h>
 #endif
 #ifdef HAVE_UNISTD_H
-#include <unistd.h>
+#  include <unistd.h>
 #endif
 #ifdef HAVE_SYS_IOCTL_H
-#include <sys/ioctl.h>
+#  include <sys/ioctl.h>
 #endif
 #ifdef NETWARE
-#include <sys/filio.h>
+#  include <sys/filio.h>
 #endif
 
 #include <assert.h>
