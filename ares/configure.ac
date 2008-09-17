@@ -645,6 +645,7 @@ CURL_CHECK_FUNC_SEND
 CURL_CHECK_MSG_NOSIGNAL
 
 CARES_CHECK_FUNC_GETHOSTNAME
+CARES_CHECK_FUNC_GETSERVBYPORT_R
 CARES_CHECK_FUNC_STRCASECMP
 CARES_CHECK_FUNC_STRCMPI
 CARES_CHECK_FUNC_STRDUP
@@ -998,10 +999,6 @@ dnl Check if the getnameinfo function is available
 dnl and get the types of five of its arguments.
 CURL_CHECK_FUNC_GETNAMEINFO
 
-
-dnl God bless non-standardized functions! We need to see which getservbyport_r
-dnl variant is available
-CARES_CHECK_GETSERVBYPORT_R
 
 CURL_CHECK_NONBLOCKING_SOCKET
 

@@ -16,6 +16,13 @@
  */
 #include "setup.h"
 
+#ifdef HAVE_GETSERVBYPORT_R
+#  if !defined(GETSERVBYPORT_R_ARGS) || \
+     (GETSERVBYPORT_R_ARGS < 4) || (GETSERVBYPORT_R_ARGS > 6)
+#    error "you MUST specifiy a valid number of arguments for getservbyport_r"
+#  endif
+#endif
+
 #ifdef HAVE_SYS_SOCKET_H
 #  include <sys/socket.h>
 #endif
