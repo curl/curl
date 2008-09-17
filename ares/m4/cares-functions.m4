@@ -64,6 +64,112 @@ cares_includes_sys_uio="\
 ])
 
 
+dnl CARES_INCLUDES_UNISTD
+dnl -------------------------------------------------
+dnl Set up variable with list of headers that must be
+dnl included when unistd.h is to be included.
+
+AC_DEFUN([CARES_INCLUDES_UNISTD], [
+cares_includes_unistd="\
+/* includes start */
+#ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
+/* includes end */"
+  AC_CHECK_HEADERS(
+    sys/types.h unistd.h,
+    [], [], [$cares_includes_unistd])
+])
+
+
+dnl CARES_CHECK_FUNC_GETHOSTNAME
+dnl -------------------------------------------------
+dnl Verify if gethostname is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable cares_disallow_gethostname, then
+dnl HAVE_GETHOSTNAME will be defined.
+
+AC_DEFUN([CARES_CHECK_FUNC_GETHOSTNAME], [
+  AC_REQUIRE([CARES_INCLUDES_UNISTD])dnl
+  #
+  tst_links_gethostname="unknown"
+  tst_proto_gethostname="unknown"
+  tst_compi_gethostname="unknown"
+  tst_allow_gethostname="unknown"
+  #
+  AC_MSG_CHECKING([if gethostname can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([gethostname])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_gethostname="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_gethostname="no"
+  ])
+  #
+  if test "$tst_links_gethostname" = "yes"; then
+    AC_MSG_CHECKING([if gethostname is prototyped])
+    AC_EGREP_CPP([gethostname],[
+      $cares_includes_unistd
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_gethostname="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_gethostname="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_gethostname" = "yes"; then
+    AC_MSG_CHECKING([if gethostname is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $cares_includes_unistd
+      ]],[[
+        if(0 != gethostname(0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_gethostname="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_gethostname="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_gethostname" = "yes"; then
+    AC_MSG_CHECKING([if gethostname usage allowed])
+    if test "x$cares_disallow_gethostname" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_gethostname="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_gethostname="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if gethostname might be used])
+  if test "$tst_links_gethostname" = "yes" &&
+     test "$tst_proto_gethostname" = "yes" &&
+     test "$tst_compi_gethostname" = "yes" &&
+     test "$tst_allow_gethostname" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_GETHOSTNAME, 1,
+      [Define to 1 if you have the gethostname function.])
+    ac_cv_func_gethostname="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_gethostname="no"
+  fi
+])
+
+
 dnl CARES_CHECK_FUNC_STRCASECMP
 dnl -------------------------------------------------
 dnl Verify if strcasecmp is available, prototyped, and
