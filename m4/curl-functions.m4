@@ -500,11 +500,11 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYADDR_R], [
     dnl AC_DEFINE_UNQUOTED(GETHOSTBYADDR_R_ARGS, $tst_nargs_gethostbyaddr_r,
     dnl   [Specifies the number of arguments to gethostbyaddr_r])
     #
-    if test "$tst_nargs_getservbyport_r" -eq "5"; then
+    if test "$tst_nargs_gethostbyaddr_r" -eq "5"; then
       AC_DEFINE(HAVE_GETHOSTBYADDR_R_5, 1, [gethostbyaddr_r() takes 5 args])
-    elif test "$tst_nargs_getservbyport_r" -eq "7"; then
+    elif test "$tst_nargs_gethostbyaddr_r" -eq "7"; then
       AC_DEFINE(HAVE_GETHOSTBYADDR_R_7, 1, [gethostbyaddr_r() takes 7 args])
-    elif test "$tst_nargs_getservbyport_r" -eq "6"; then
+    elif test "$tst_nargs_gethostbyaddr_r" -eq "6"; then
       AC_DEFINE(HAVE_GETHOSTBYADDR_R_8, 1, [gethostbyaddr_r() takes 8 args])
     fi
     #
@@ -642,11 +642,11 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME_R], [
     dnl AC_DEFINE_UNQUOTED(GETHOSTBYNAME_R_ARGS, $tst_nargs_gethostbyname_r,
     dnl   [Specifies the number of arguments to gethostbyname_r])
     #
-    if test "$tst_nargs_getservbyport_r" -eq "3"; then
+    if test "$tst_nargs_gethostbyname_r" -eq "3"; then
       AC_DEFINE(HAVE_GETHOSTBYNAME_R_3, 1, [gethostbyname_r() takes 3 args])
-    elif test "$tst_nargs_getservbyport_r" -eq "5"; then
+    elif test "$tst_nargs_gethostbyname_r" -eq "5"; then
       AC_DEFINE(HAVE_GETHOSTBYNAME_R_5, 1, [gethostbyname_r() takes 5 args])
-    elif test "$tst_nargs_getservbyport_r" -eq "6"; then
+    elif test "$tst_nargs_gethostbyname_r" -eq "6"; then
       AC_DEFINE(HAVE_GETHOSTBYNAME_R_6, 1, [gethostbyname_r() takes 6 args])
     fi
     #
