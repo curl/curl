@@ -229,6 +229,12 @@ if test "$curl_cv_have_def___INTEL_COMPILER" = "yes"; then
   dnl On Linux this compiler uses gcc's header files, so
   dnl we select ANSI C89 dialect plus GNU extensions.
   CPPFLAGS="$CPPFLAGS -std=gnu89"
+  if test "$curl_cv_def___INTEL_COMPILER" -gt "600"; then
+    dnl Show errors, warnings, and remarks
+    CPPFLAGS="$CPPFLAGS -Wall"
+    dnl Perform extra compile-time code checking
+    CPPFLAGS="$CPPFLAGS -Wcheck"
+  fi
   dnl Change some warnings into errors
   dnl #140: too many arguments in function call
   dnl #147: declaration is incompatible with 'previous one'

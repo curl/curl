@@ -1894,10 +1894,10 @@ AC_DEFUN([CURL_CC_DEBUG_OPTS],
          WARN="-wd279,269,981,1418,1419"
          WARN=""
 
-         if test "$gccnum" -gt "600"; then
-            dnl icc 6.0 and older doesn't have the -Wall flag
-            WARN="-Wall $WARN"
-         fi
+         dnl if test "$gccnum" -gt "600"; then
+         dnl    dnl icc 6.0 and older doesn't have the -Wall flag
+         dnl    WARN="-Wall $WARN"
+         dnl fi
        else dnl $ICC = yes
          dnl this is a set of options we believe *ALL* gcc versions support:
          WARN="-W -Wall -Wwrite-strings -pedantic -Wpointer-arith -Wnested-externs -Winline -Wmissing-prototypes"
