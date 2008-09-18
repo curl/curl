@@ -1735,6 +1735,12 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
     ])
   fi
   #
+  if test "$tst_works_glibc_strerror_r" = "yes"; then
+    tst_posix_strerror_r="no"
+  fi
+  if test "$tst_works_posix_strerror_r" = "yes"; then
+    tst_glibc_strerror_r="no"
+  fi
   if test "$tst_glibc_strerror_r" = "yes" &&
     test "$tst_works_glibc_strerror_r" != "no" &&
     test "$tst_posix_strerror_r" != "yes"; then
