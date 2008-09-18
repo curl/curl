@@ -504,7 +504,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYADDR_R], [
       AC_DEFINE(HAVE_GETHOSTBYADDR_R_5, 1, [gethostbyaddr_r() takes 5 args])
     elif test "$tst_nargs_gethostbyaddr_r" -eq "7"; then
       AC_DEFINE(HAVE_GETHOSTBYADDR_R_7, 1, [gethostbyaddr_r() takes 7 args])
-    elif test "$tst_nargs_gethostbyaddr_r" -eq "6"; then
+    elif test "$tst_nargs_gethostbyaddr_r" -eq "8"; then
       AC_DEFINE(HAVE_GETHOSTBYADDR_R_8, 1, [gethostbyaddr_r() takes 8 args])
     fi
     #
