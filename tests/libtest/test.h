@@ -43,8 +43,9 @@ extern char *libtest_arg3; /* set by first.c to the argv[3] or NULL */
 extern int test_argc;
 extern char **test_argv;
 
-int select_test (int num_fds, fd_set *rd, fd_set *wr, fd_set *exc,
-                 struct timeval *tv);
+extern int select_test(int num_fds, fd_set *rd, fd_set *wr, fd_set *exc,
+                       struct timeval *tv);
 
-int test(char *URL); /* the actual test function provided by each individual
-                        libXXX.c file */
+extern int test(char *URL); /* the actual test function provided by each
+                               individual libXXX.c file */
+

@@ -184,10 +184,6 @@ static void flush_cookies(struct SessionHandle *data, int cleanup);
 #ifndef WIN32
 /* not for WIN32 builds */
 
-#ifdef HAVE_SIGSETJMP
-extern sigjmp_buf curl_jmpenv;
-#endif
-
 #ifdef SIGALRM
 static
 RETSIGTYPE alarmfunc(int sig)

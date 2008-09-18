@@ -32,6 +32,9 @@ void logmsg(const char *msg, ...);
 /* global variable, where to find the 'data' dir */
 extern const char *path;
 
+/* global variable, log file name */
+extern const char *serverlogfile;
+
 #ifdef WIN32
 #include <process.h>
 #include <fcntl.h>

@@ -108,8 +108,8 @@ struct httprequest {
   bool pipelining; /* true if request is pipelined */
 };
 
-int ProcessRequest(struct httprequest *req);
-void storerequest(char *reqbuf, ssize_t totalsize);
+static int ProcessRequest(struct httprequest *req);
+static void storerequest(char *reqbuf, ssize_t totalsize);
 
 #define DEFAULT_PORT 8999
 
@@ -191,7 +191,7 @@ static void sigpipe_handler(int sig)
 }
 #endif
 
-int ProcessRequest(struct httprequest *req)
+static int ProcessRequest(struct httprequest *req)
 {
   char *line=&req->reqbuf[req->checkindex];
   bool chunked = FALSE;
@@ -482,7 +482,7 @@ int ProcessRequest(struct httprequest *req)
 }
 
 /* store the entire request in a file */
-void storerequest(char *reqbuf, ssize_t totalsize)
+static void storerequest(char *reqbuf, ssize_t totalsize)
 {
   int res;
   int error;

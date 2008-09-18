@@ -26,6 +26,10 @@
 #include "setup.h"
 #include "hash.h"
 
+#ifdef HAVE_SETJMP_H
+#include <setjmp.h>
+#endif
+
 #ifdef NETWARE
 #undef in_addr_t
 #define in_addr_t unsigned long
@@ -287,7 +291,13 @@ void Curl_destroy_thread_data(struct Curl_async *async);
 #define CURL_INADDR_NONE INADDR_NONE
 #endif
 
-
-
+#ifdef HAVE_SIGSETJMP
+/* Forward-declaration of variable defined in hostip.c. Beware this
+ * is a global and unique instance. This is used to store the return
+ * address that we can jump back to from inside a signal handler.
+ * This is not thread-safe stuff.
+ */
+extern sigjmp_buf curl_jmpenv;
+#endif
 
 #endif

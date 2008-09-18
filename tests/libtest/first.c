@@ -16,9 +16,6 @@ extern void curl_memdebug(const char *);
 extern void curl_memlimit(int);
 #endif
 
-/* test is provided in the test code file */
-int test(char *url);
-
 int select_test (int num_fds, fd_set *rd, fd_set *wr, fd_set *exc,
                  struct timeval *tv)
 {

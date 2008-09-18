@@ -59,9 +59,6 @@
 const struct in6_addr in6addr_any = {{ IN6ADDR_ANY_INIT }};
 #endif
 
-/* someone else must set this properly */
-extern const char *serverlogfile;
-
 void logmsg(const char *msg, ...)
 {
   va_list ap;
