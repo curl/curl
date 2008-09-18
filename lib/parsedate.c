@@ -83,6 +83,7 @@
 #endif
 
 #include <curl/curl.h>
+#include "parsedate.h"
 
 const char * const Curl_wkday[] =
 {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};

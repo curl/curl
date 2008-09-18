@@ -15,8 +15,8 @@
 
 #include <curl/mprintf.h>
 
-const char *HOSTHEADER = "Host: www.host.foo.com";
-const char *JAR = "log/jar506";
+static const char *HOSTHEADER = "Host: www.host.foo.com";
+static const char *JAR = "log/jar506";
 #define THREADS 2
 
 /* struct containing data of a thread */
