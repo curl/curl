@@ -10,6 +10,10 @@ Daniel Fandrich (17 Sep 2008)
 - Removed reference to curl-ca-bundle.crt in the host verification failure
   error message.
 
+Yang Tse (17 Sep 2008)
+- Improve configure detection of gethostname(), localtime_r(), strstr(),
+  getservbyport_r(), gethostbyaddr_r() and gethostbyname_r().
+
 Yang Tse (14 Sep 2008)
 - Improve configure detection of strcasecmp(), strcasestr(), strcmpi(),
   stricmp(), strlcat(), strncasecmp(), strncmpi() and strnicmp().
