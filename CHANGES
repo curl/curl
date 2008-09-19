@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Yang Tse (19 Sep 2008)
+- configure script now checks availability of the alarm() function.
+
 Daniel Fandrich (18 Sep 2008)
 - Don't bother to install a SIGALRM handler unless alarm() is available.
   Also, leave the existing SIGALRM handler alone if the timeout is too small

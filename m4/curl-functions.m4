@@ -204,6 +204,91 @@ curl_includes_unistd="\
 ])
 
 
+dnl CURL_CHECK_FUNC_ALARM
+dnl -------------------------------------------------
+dnl Verify if alarm is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_alarm, then
+dnl HAVE_ALARM will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_ALARM], [
+  AC_REQUIRE([CURL_INCLUDES_UNISTD])dnl
+  #
+  tst_links_alarm="unknown"
+  tst_proto_alarm="unknown"
+  tst_compi_alarm="unknown"
+  tst_allow_alarm="unknown"
+  #
+  AC_MSG_CHECKING([if alarm can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([alarm])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_alarm="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_alarm="no"
+  ])
+  #
+  if test "$tst_links_alarm" = "yes"; then
+    AC_MSG_CHECKING([if alarm is prototyped])
+    AC_EGREP_CPP([alarm],[
+      $curl_includes_unistd
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_alarm="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_alarm="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_alarm" = "yes"; then
+    AC_MSG_CHECKING([if alarm is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_unistd
+      ]],[[
+        if(0 != alarm(0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_alarm="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_alarm="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_alarm" = "yes"; then
+    AC_MSG_CHECKING([if alarm usage allowed])
+    if test "x$curl_disallow_alarm" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_alarm="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_alarm="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if alarm might be used])
+  if test "$tst_links_alarm" = "yes" &&
+     test "$tst_proto_alarm" = "yes" &&
+     test "$tst_compi_alarm" = "yes" &&
+     test "$tst_allow_alarm" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_ALARM, 1,
+      [Define to 1 if you have the alarm function.])
+    ac_cv_func_alarm="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_alarm="no"
+  fi
+])
+
+
 dnl CURL_CHECK_FUNC_FDOPEN
 dnl -------------------------------------------------
 dnl Verify if fdopen is available, prototyped, and
