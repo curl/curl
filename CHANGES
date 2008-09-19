@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Fandrich (18 Sep 2008)
+- Don't bother to install a SIGALRM handler unless alarm() is available.
+  Also, leave the existing SIGALRM handler alone if the timeout is too small
+  to handle.
+
 Daniel Fandrich (17 Sep 2008)
 - Removed reference to curl-ca-bundle.crt in the host verification failure
   error message.

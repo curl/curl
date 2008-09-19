@@ -185,6 +185,11 @@ static void flush_cookies(struct SessionHandle *data, int cleanup);
 /* not for WIN32 builds */
 
 #ifdef SIGALRM
+/*
+ * This signal handler jumps back into the main libcurl code and continues
+ * execution.  This effectively causes the remainder of the application to run
+ * within a signal handler which is nonportable and could lead to problems.
+ */
 static
 RETSIGTYPE alarmfunc(int sig)
 {
@@ -3796,8 +3801,8 @@ static CURLcode resolve_server(struct SessionHandle *data,
                                bool *async)
 {
   CURLcode result=CURLE_OK;
-#ifndef USE_ARES
-#ifdef SIGALRM
+
+#if defined(HAVE_ALARM) && defined(SIGALRM) && !defined(USE_ARES)
 #ifdef HAVE_SIGACTION
   struct sigaction keep_sigact;   /* store the old struct here */
   bool keep_copysig=FALSE;        /* did copy it? */
@@ -3806,30 +3811,42 @@ static CURLcode resolve_server(struct SessionHandle *data,
   void (*keep_sigact)(int);       /* store the old handler here */
 #endif /* HAVE_SIGNAL */
 #endif /* HAVE_SIGACTION */
-#endif /* SIGALRM */
-#endif /* USE_ARES */
 
-#if defined(HAVE_ALARM) && !defined(USE_ARES)
   unsigned int prev_alarm=0;
-#endif
 
-#ifndef USE_ARES
   /*************************************************************
    * Set timeout if that is being used, and we're not using an asynchronous
    * name resolve.
    *************************************************************/
   if((data->set.timeout || data->set.connecttimeout) && !data->set.no_signal) {
+#ifdef HAVE_SIGACTION
+    struct sigaction sigact;
+#endif /* HAVE_SIGACTION */
+
+    /* We set the timeout on the name resolving phase first, separately from
+     * the download/upload part to allow a maximum time on everything. This is
+     * a signal-based timeout, why it won't work and shouldn't be used in
+     * multi-threaded environments. */
+
+    long shortest = data->set.timeout; /* default to this timeout value */
+    if(shortest && data->set.connecttimeout &&
+       (data->set.connecttimeout < shortest))
+      /* if both are set, pick the shortest */
+      shortest = data->set.connecttimeout;
+    else if(!shortest)
+      /* if timeout is not set, use the connect timeout */
+      shortest = data->set.connecttimeout;
+
+    if(shortest < 1000)
+      /* the alarm() function only provide integer second resolution, so if
+         we want to wait less than one second we must bail out already now. */
+      return CURLE_OPERATION_TIMEDOUT;
+
     /*************************************************************
      * Set signal handler to catch SIGALRM
      * Store the old value to be able to set it back later!
      *************************************************************/
-
-#ifdef SIGALRM
-#ifdef HAVE_ALARM
-    long shortest;
-#endif
 #ifdef HAVE_SIGACTION
-    struct sigaction sigact;
     sigaction(SIGALRM, NULL, &sigact);
     keep_sigact = sigact;
     keep_copysig = TRUE; /* yes, we have a copy */
@@ -3847,36 +3864,14 @@ static CURLcode resolve_server(struct SessionHandle *data,
 #endif
 #endif /* HAVE_SIGACTION */
 
-    /* We set the timeout on the name resolving phase first, separately from
-     * the download/upload part to allow a maximum time on everything. This is
-     * a signal-based timeout, why it won't work and shouldn't be used in
-     * multi-threaded environments. */
-
-#ifdef HAVE_ALARM
-    shortest = data->set.timeout; /* default to this timeout value */
-    if(shortest && data->set.connecttimeout &&
-       (data->set.connecttimeout < shortest))
-      /* if both are set, pick the shortest */
-      shortest = data->set.connecttimeout;
-    else if(!shortest)
-      /* if timeout is not set, use the connect timeout */
-      shortest = data->set.connecttimeout;
-
-    if(shortest < 1000)
-      /* the alarm() function only provide integer second resolution, so if
-         we want to wait less than one second we must bail out already now. */
-      return CURLE_OPERATION_TIMEDOUT;
-
     /* alarm() makes a signal get sent when the timeout fires off, and that
        will abort system calls */
     prev_alarm = alarm((unsigned int) (shortest ? shortest/1000L : shortest));
     /* We can expect the conn->created time to be "now", as that was just
        recently set in the beginning of this function and nothing slow
        has been done since then until now. */
-#endif
-#endif /* SIGALRM */
   }
-#endif /* USE_ARES */
+#endif /* HAVE_ALARM && SIGALRM && !USE_ARES */
 
   /*************************************************************
    * Resolve the name of the server or proxy
@@ -3975,7 +3970,7 @@ static CURLcode resolve_server(struct SessionHandle *data,
     else
       alarm(0); /* just shut it off */
   }
-#endif
+#endif /* HAVE_ALARM && SIGALRM && !USE_ARES */
   return result;
 }
 
