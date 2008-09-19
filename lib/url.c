@@ -150,10 +150,6 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
 /* The last #include file should be: */
 #include "memdebug.h"
 
-#ifdef __SYMBIAN32__
-#undef SIGALRM
-#endif
-
 /* Local static prototypes */
 static long ConnectionKillOne(struct SessionHandle *data);
 static bool ConnectionExists(struct SessionHandle *data,
@@ -178,13 +174,10 @@ static void flush_cookies(struct SessionHandle *data, int cleanup);
 #define verboseconnect(x)  do { } while (0)
 #endif
 
-#ifndef USE_ARES
-/* not for ares builds */
-
 #ifndef WIN32
 /* not for WIN32 builds */
 
-#ifdef SIGALRM
+#if defined(HAVE_ALARM) && defined(SIGALRM) && !defined(USE_ARES)
 /*
  * This signal handler jumps back into the main libcurl code and continues
  * execution.  This effectively causes the remainder of the application to run
@@ -200,9 +193,8 @@ RETSIGTYPE alarmfunc(int sig)
 #endif
   return;
 }
-#endif /* SIGALRM */
+#endif /* HAVE_ALARM && SIGALRM && !USE_ARES */
 #endif /* WIN32 */
-#endif /* USE_ARES */
 
 /*
  * Protocol table.
