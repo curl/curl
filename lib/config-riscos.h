@@ -59,6 +59,9 @@
 /* Define if you want to enable IPv6 support */
 #undef ENABLE_IPV6
 
+/* Define to 1 if you have the alarm function. */
+#define HAVE_ALARM 1
+
 /* Define if you have the <alloca.h> header file. */
 #define HAVE_ALLOCA_H
 

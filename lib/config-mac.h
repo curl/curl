@@ -28,6 +28,7 @@
 
 #define TIME_WITH_SYS_TIME      1
 
+#define HAVE_ALARM              1
 #define HAVE_STRDUP             1
 #define HAVE_UTIME              1
 #define HAVE_INET_NTOA          1

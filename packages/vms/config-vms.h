@@ -35,6 +35,9 @@
 /* The number of bytes in a long long.  */
 #define SIZEOF_LONG_LONG 8
 
+/* Define if you have the alarm function.  */
+#define HAVE_ALARM 1
+
 /* Define if you have the geteuid function.  */
 #define HAVE_GETEUID 1
 

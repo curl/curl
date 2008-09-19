@@ -63,6 +63,9 @@
 /* Set to explicitly specify we don't want to use thread-safe functions */
 #undef DISABLED_THREADSAFE
 
+/* Define to 1 if you have the alarm function. */
+#define HAVE_ALARM 1
+
 /* Define if you have the <alloca.h> header file. */
 #undef HAVE_ALLOCA_H
 
