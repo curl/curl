@@ -241,6 +241,10 @@ if test "$curl_cv_have_def___INTEL_COMPILER" = "yes"; then
   dnl #165: too few arguments in function call
   dnl #266: function declared implicitly
   CPPFLAGS="$CPPFLAGS -we 140,147,165,266"
+  dnl Disable some remarks
+  dnl #981: operands are evaluated in unspecified order
+  dnl #1469: "cc" clobber ignored
+  CPPFLAGS="$CPPFLAGS -wd 981,1469"
   dnl Disable use of ANSI C aliasing rules in optimizations
   CFLAGS="$CFLAGS -no-ansi-alias"
 else
