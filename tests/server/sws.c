@@ -74,11 +74,11 @@
 #define REQBUFSIZ 150000
 #define REQBUFSIZ_TXT "149999"
 
-long prevtestno=-1; /* previous test number we served */
-long prevpartno=-1; /* previous part number we served */
-bool prevbounce=FALSE; /* instructs the server to increase the part number for
-                          a test in case the identical testno+partno request
-                          shows up again */
+static long prevtestno=-1;    /* previous test number we served */
+static long prevpartno=-1;    /* previous part number we served */
+static bool prevbounce=FALSE; /* instructs the server to increase the part
+                                 number for a test in case the identical
+                                 testno+partno request shows up again */
 
 #define RCMD_NORMALREQ 0 /* default request, use the tests file normally */
 #define RCMD_IDLE      1 /* told to sit idle */
@@ -858,7 +858,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   return 0;
 }
 
-bool use_ipv6=FALSE;
+static bool use_ipv6=FALSE;
 
 int main(int argc, char *argv[])
 {

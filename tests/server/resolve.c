@@ -61,7 +61,7 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-char use_ipv6=FALSE;
+static char use_ipv6=FALSE;
 
 const char *serverlogfile=""; /* for a util.c function we don't use */
 

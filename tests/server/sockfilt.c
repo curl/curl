@@ -121,10 +121,10 @@
 
 const char *serverlogfile = DEFAULT_LOGFILE;
 
-bool verbose = FALSE;
-bool use_ipv6 = FALSE;
-unsigned short port = DEFAULT_PORT;
-unsigned short connectport = 0; /* if non-zero, we activate this mode */
+static bool verbose = FALSE;
+static bool use_ipv6 = FALSE;
+static unsigned short port = DEFAULT_PORT;
+static unsigned short connectport = 0; /* if non-zero, we activate this mode */
 
 enum sockmode {
   PASSIVE_LISTEN,    /* as a server waiting for connections */

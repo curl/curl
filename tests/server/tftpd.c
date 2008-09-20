@@ -118,7 +118,16 @@ static void mysignal(int, void (*func)(int));
 
 #define PKTSIZE SEGSIZE+4
 
-struct formats;
+struct formats {
+  const char *f_mode;
+  int f_convert;
+};
+static struct formats formata[] = {
+  { "netascii",   1 },
+  { "octet",      0 },
+  { NULL,         0 }
+};
+
 static int tftp(struct testcase *test, struct tftphdr *tp, ssize_t size);
 static void nak(int error);
 static void sendtftp(struct testcase *test, struct formats *pf);
@@ -137,7 +146,8 @@ static socklen_t fromlen;
 struct bf {
   int counter;            /* size of data in buffer, or flag */
   char buf[PKTSIZE];      /* room for data packet */
-} bfs[2];
+};
+static struct bf bfs[2];
 
                                 /* Values for bf.counter  */
 #define BF_ALLOC -3             /* alloc'd but not yet filled */
@@ -147,9 +157,9 @@ struct bf {
 static int nextone;     /* index of next buffer to use */
 static int current;     /* index of buffer in use */
 
-                        /* control flags for crlf conversions */
-int newline = 0;        /* fillbuf: in middle of newline expansion */
-int prevchar = -1;      /* putbuf: previous char (cr check) */
+                           /* control flags for crlf conversions */
+static int newline = 0;    /* fillbuf: in middle of newline expansion */
+static int prevchar = -1;  /* putbuf: previous char (cr check) */
 
 static void read_ahead(struct testcase *test,
                        int convert /* if true, convert to ascii */);
@@ -397,7 +407,7 @@ const char *serverlogfile = DEFAULT_LOGFILE;
 
 #define REQUEST_DUMP  "log/server.input"
 
-char use_ipv6=FALSE;
+static char use_ipv6=FALSE;
 
 int main(int argc, char **argv)
 {
@@ -561,15 +571,6 @@ int main(int argc, char **argv)
   return result;
 }
 
-struct formats {
-  const char *f_mode;
-  int f_convert;
-} formats[] = {
-  { "netascii",   1 },
-  { "octet",      0 },
-  { NULL,         0 }
-};
-
 /*
  * Handle initial connection protocol.
  */
@@ -623,7 +624,7 @@ again:
   fprintf(server, "mode: %s\n", mode);
   fclose(server);
 
-  for (pf = formats; pf->f_mode; pf++)
+  for (pf = formata; pf->f_mode; pf++)
     if (strcmp(pf->f_mode, mode) == 0)
       break;
   if (!pf->f_mode) {
@@ -734,9 +735,9 @@ static int validate_access(struct testcase *test,
   return 0;
 }
 
-int timeout;
+static int timeout;
 #ifdef HAVE_SIGSETJMP
-sigjmp_buf timeoutbuf;
+static sigjmp_buf timeoutbuf;
 #endif
 
 static void timer(int signum)
@@ -919,7 +920,8 @@ abort:
 struct errmsg {
   int e_code;
   const char *e_msg;
-} errmsgs[] = {
+};
+static struct errmsg errmsgs[] = {
   { EUNDEF,       "Undefined error code" },
   { ENOTFOUND,    "File not found" },
   { EACCESS,      "Access violation" },
