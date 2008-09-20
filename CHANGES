@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Yang Tse (20 Sep 2008)
+- Fix regression in configure script which affected OpenSSL builds on MSYS.
+
 Yang Tse (19 Sep 2008)
 - configure script now checks availability of the alarm() function.
 

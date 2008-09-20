@@ -21,6 +21,7 @@ This release includes the following bugfixes:
  o curl_easy_pause() could behave wrongly on unpause
  o cookie with invalid expire dates are now considered expired
  o HTTP pipelining over proxy
+ o fix regression in configure script which affected OpenSSL builds on MSYS
 
 This release includes the following known bugs:
 
@@ -35,6 +36,6 @@ advice from friends like these:
 
  Keith Mok, Yang Tse, Daniel Fandrich, Guenter Knauf, Dmitriy Sergeyev,
  Linus Nielsen Feltzing, Martin Drasar, Stefan Krause, Dmitry Kurochkin,
- Mike Revi
+ Mike Revi, Andres Garcia
 
         Thanks! (and sorry if I forgot to mention someone)
