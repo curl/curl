@@ -13,6 +13,8 @@
 
 #include "test.h"
 
+#include "memdebug.h"
+
 struct data {
   char trace_ascii; /* 1 or 0 */
 };

@@ -28,6 +28,8 @@
 #include <unistd.h>
 #endif
 
+#include "memdebug.h"
+
 /*
  * Two FTP uploads, the second with no content sent.
  */

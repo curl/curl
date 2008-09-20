@@ -10,6 +10,8 @@
 
 #include "test.h"
 
+#include "memdebug.h"
+
 static char data[]="this is what we post to the silly web server\n";
 
 struct WriteThis {

@@ -26,6 +26,8 @@
 #include <string.h>
 #endif
 
+#include "memdebug.h"
+
 #ifndef FD_SETSIZE
 #error "this test requires FD_SETSIZE"
 #endif

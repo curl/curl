@@ -11,9 +11,8 @@
 #include "test.h"
 
 #ifdef CURLDEBUG
-/* provide a proto for this debug function */
-extern void curl_memdebug(const char *);
-extern void curl_memlimit(int);
+#  define MEMDEBUG_NODEFINES
+#  include "memdebug.h"
 #endif
 
 int select_test (int num_fds, fd_set *rd, fd_set *wr, fd_set *exc,

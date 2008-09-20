@@ -10,6 +10,8 @@
 
 #include "test.h"
 
+#include "memdebug.h"
+
 static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp)
 {
   (void)ptr;

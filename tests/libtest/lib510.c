@@ -10,6 +10,8 @@
 
 #include "test.h"
 
+#include "memdebug.h"
+
 static const char *post[]={
   "one",
   "two",

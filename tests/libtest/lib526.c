@@ -34,6 +34,7 @@
 #include <fcntl.h>
 
 #include "testutil.h"
+#include "memdebug.h"
 
 #define MAIN_LOOP_HANG_TIMEOUT     90 * 1000
 #define MULTI_PERFORM_HANG_TIMEOUT 60 * 1000

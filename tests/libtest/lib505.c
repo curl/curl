@@ -28,6 +28,8 @@
 #include <unistd.h>
 #endif
 
+#include "memdebug.h"
+
 /*
  * This example shows an FTP upload, with a rename of the file just after
  * a successful upload.

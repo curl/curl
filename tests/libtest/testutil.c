@@ -24,6 +24,7 @@
 #include "setup.h"
 
 #include "testutil.h"
+#include "memdebug.h"
 
 #if defined(WIN32) && !defined(MSDOS)
 

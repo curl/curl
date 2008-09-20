@@ -26,6 +26,8 @@
 #include <string.h>
 #endif
 
+#include "memdebug.h"
+
 #if !defined(HAVE_POLL_FINE)    && \
     !defined(USE_WINSOCK)       && \
     !defined(TPF)               && \

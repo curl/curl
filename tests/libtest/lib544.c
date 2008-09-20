@@ -10,6 +10,7 @@
 
 #include "test.h"
 
+#include "memdebug.h"
 
 static char teststring[] =
   "This\0 is test binary data with an embedded NUL byte\n";

@@ -15,6 +15,8 @@
 
 #include "test.h"
 
+#include "memdebug.h"
+
 int curl_msprintf(char *buffer, const char *format, ...);
 
 

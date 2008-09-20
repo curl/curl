@@ -13,6 +13,8 @@
 
 #include "test.h"
 
+#include "memdebug.h"
+
 #define POSTLEN 40960
 
 static size_t myreadfunc(void *ptr, size_t size, size_t nmemb, void *stream)

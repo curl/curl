@@ -13,6 +13,8 @@
 #include "setup.h"
 #include "test.h"
 
+#include "memdebug.h"
+
 int test(char *URL)
 {
   unsigned char a[] = {0x9c, 0x26, 0x4b, 0x3d, 0x49, 0x4, 0xa1, 0x1,

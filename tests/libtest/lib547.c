@@ -14,6 +14,8 @@
 
 #include "test.h"
 
+#include "memdebug.h"
+
 #define UPLOADTHIS "this is the blurb we want to upload\n"
 
 #ifndef LIB548

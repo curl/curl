@@ -14,6 +14,8 @@
 
 #include "test.h"
 
+#include "memdebug.h"
+
 int test(char *URL)
 {
   CURLcode res;

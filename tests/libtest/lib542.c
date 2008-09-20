@@ -28,6 +28,8 @@
 #include <unistd.h>
 #endif
 
+#include "memdebug.h"
+
 /*
  * FTP get with NOBODY but no HEADER
  */
