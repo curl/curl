@@ -18,4 +18,13 @@ To be addressed before 7.19.1 (planned release: October/November 2008)
 172 - Apply the getdate patch with Jamie Lokier's date function. Needs an
       added check for years < 1970 (== no negative numbers may be returned)
 
-173 - 
+173 - "Patch to use GSSAPI authentication for socks5 connection" by
+      Markus Moeller http://curl.haxx.se/mail/archive-2008-09/0053.html
+
+174 - "CURLINFO_PRIMARY_IP yields empty string?" by Jason Pump
+      http://curl.haxx.se/mail/lib-2008-09/0145.html
+
+175 - "No info on REDIRECT_URL in multi-mode" by Max Ivanov
+      http://curl.haxx.se/mail/lib-2008-09/0143.html
+
+176 - 
