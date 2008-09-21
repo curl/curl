@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
   }
 #endif
   if(rc)
-    printf("Resolving '%s' didn't work\n", host);
+    printf("Resolving IPv%d '%s' didn't work\n", (use_ipv6?6:4), host);
 
   return !rc?0:1;
 }
