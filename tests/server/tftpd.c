@@ -516,12 +516,7 @@ int main(int argc, char **argv)
   }
 
   logmsg("Running IPv%d version on port UDP/%hu",
-#ifdef ENABLE_IPV6
-         (use_ipv6?6:4)
-#else
-         4
-#endif
-         , port );
+         (use_ipv6?6:4), port);
 
   do {
     fromlen = sizeof(from);
