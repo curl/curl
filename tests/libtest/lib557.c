@@ -15,9 +15,9 @@
 
 #include "test.h"
 
-#include "memdebug.h"
+#include <curl/mprintf.h>
 
-int curl_msprintf(char *buffer, const char *format, ...);
+#include "memdebug.h"
 
 
 #if (CURL_SIZEOF_CURL_OFF_T > CURL_SIZEOF_LONG)
