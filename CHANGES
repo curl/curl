@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Fandrich (22 Sep 2008)
+- Fixed test 539 to handle an out of memory condition that shows up now
+  that memdebug.h is included in the test programs.
+
 Yang Tse (20 Sep 2008)
 - Fix regression in configure script which affected OpenSSL builds on MSYS.
 
@@ -68,14 +72,15 @@ Daniel Stenberg (8 Sep 2008)
   the cookie to not match.
 
 Daniel Fandrich (5 Sep 2008)
-- Improved the logic the decides whether to use HTTP 1.1 features or not in a
+- Improved the logic that decides whether to use HTTP 1.1 features or not in a
   request.  Setting a specific version with CURLOPT_HTTP_VERSION overrides
   all other checks, but otherwise, a 1.0 request will be made if the server
   is known to support only 1.0 because it previously responded so and the
   connection was kept alive, or a response to a previous request on this handle
   came back as 1.0. The latter could take place in cases like redirection or
   authentication where several requests have to be made before the operation
-  is complete.
+  is complete.  If any one of the servers in a redirection chain supports only
+  1.0, then remaining requests will be sent in 1.0 mode.
 
 - Detect cases where an upload must be sent chunked and the server supports
   only HTTP 1.0 and return CURLE_UPLOAD_FAILED.

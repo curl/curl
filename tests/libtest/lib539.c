@@ -35,7 +35,7 @@ int test(char *URL)
     */
    curl_easy_setopt(curl, CURLOPT_URL, URL);
    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-   curl_easy_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_SINGLECWD);
+   curl_easy_setopt(curl, CURLOPT_FTP_FILEMETHOD, (long) CURLFTPMETHOD_SINGLECWD);
 
    res = curl_easy_perform(curl);
 
@@ -47,13 +47,24 @@ int test(char *URL)
     * even though no directories are stored in the ftpconn->dirs array (after a
     * call to freedirs).
     */
-   newURL = strcat (strcpy ((char*)malloc (strlen (URL) + 3),
-                            URL),
-                    "./");
+   newURL = malloc(strlen(URL) + 3);
+   if (newURL == NULL) {
+     curl_easy_cleanup(curl);
+     curl_global_cleanup();
+     return TEST_ERR_MAJOR_BAD;
+   }
+   newURL = strcat(strcpy(newURL, URL), "./");
+
    slist = curl_slist_append (NULL, "SYST");
+   if (slist == NULL) {
+     free(newURL);
+     curl_easy_cleanup(curl);
+     curl_global_cleanup();
+     return TEST_ERR_MAJOR_BAD;
+   }
 
    curl_easy_setopt(curl, CURLOPT_URL, newURL);
-   curl_easy_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_NOCWD);
+   curl_easy_setopt(curl, CURLOPT_FTP_FILEMETHOD, (long) CURLFTPMETHOD_NOCWD);
    curl_easy_setopt(curl, CURLOPT_QUOTE, slist);
 
    res = curl_easy_perform(curl);
