@@ -113,7 +113,7 @@ int main(void)
 
   /* we can optionally limit the total amount of connections this multi handle
      uses */
-  curl_multi_setopt(cm, CURLMOPT_MAXCONNECTS, MAX);
+  curl_multi_setopt(cm, CURLMOPT_MAXCONNECTS, (long)MAX);
 
   for (C = 0; C < MAX; ++C) {
     init(cm, C);
