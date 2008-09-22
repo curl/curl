@@ -1814,6 +1814,13 @@ static CURLcode https_connecting(struct connectdata *conn, bool *done)
   CURLcode result;
   DEBUGASSERT((conn) && (conn->protocol & PROT_HTTPS));
 
+  if(conn->ssl[FIRSTSOCKET].use) {
+    /* in some circumstances, this already has SSL enabled and then we don't
+       need to connect SSL again */
+    *done = TRUE;
+    return CURLE_OK;
+  }
+
   /* perform SSL initialization for this socket */
   result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, done);
   if(result) {

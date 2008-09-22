@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel Stenberg (22 Sep 2008)
+- Michael Goffioul filed bug report #2107377 "Problem with mutli + GnuTLS +
+  proxy" (http://curl.haxx.se/bug/view.cgi?id=2107377) that showed how a multi
+  interface using program didn't work when built with GnuTLS and a CONNECT
+  request was done over a proxy (basically test 502 over a proxy to a HTTPS
+  site). It turned out the ssl connect function would get called twice which
+  caused the second call to fail.
+
 Daniel Fandrich (22 Sep 2008)
 - Fixed test 539 to handle an out of memory condition that shows up now
   that memdebug.h is included in the test programs.
