@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 13
+# serial 20
 
 
 dnl CURL_INCLUDES_NETDB
@@ -201,6 +201,34 @@ curl_includes_unistd="\
   AC_CHECK_HEADERS(
     sys/types.h unistd.h,
     [], [], [$curl_includes_unistd])
+])
+
+
+dnl CURL_INCLUDES_WINSOCK2
+dnl -------------------------------------------------
+dnl Set up variable with list of headers that must be
+dnl included when winsock(2).h is to be included.
+
+AC_DEFUN([CURL_INCLUDES_WINSOCK2], [
+curl_includes_winsock2="\
+/* includes start */
+#ifdef HAVE_WINDOWS_H
+#  ifndef WIN32_LEAN_AND_MEAN
+#    define WIN32_LEAN_AND_MEAN
+#  endif
+#  include <windows.h>
+#  ifdef HAVE_WINSOCK2_H
+#    include <winsock2.h>
+#  else
+#    ifdef HAVE_WINSOCK_H
+#      include <winsock.h>
+#    endif
+#  endif
+#endif
+/* includes end */"
+  CURL_CHECK_HEADER_WINDOWS
+  CURL_CHECK_HEADER_WINSOCK
+  CURL_CHECK_HEADER_WINSOCK2
 ])
 
 
@@ -752,6 +780,7 @@ dnl shell variable curl_disallow_gethostname, then
 dnl HAVE_GETHOSTNAME will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
+  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
   AC_REQUIRE([CURL_INCLUDES_UNISTD])dnl
   #
   tst_links_gethostname="unknown"
@@ -761,7 +790,13 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
   #
   AC_MSG_CHECKING([if gethostname can be linked])
   AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([gethostname])
+    AC_LANG_PROGRAM([[
+      $curl_includes_winsock2
+      $curl_includes_unistd
+    ]],[[
+      if(0 != gethostname(0, 0))
+        return 1;
+    ]])
   ],[
     AC_MSG_RESULT([yes])
     tst_links_gethostname="yes"
@@ -773,6 +808,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
   if test "$tst_links_gethostname" = "yes"; then
     AC_MSG_CHECKING([if gethostname is prototyped])
     AC_EGREP_CPP([gethostname],[
+      $curl_includes_winsock2
       $curl_includes_unistd
     ],[
       AC_MSG_RESULT([yes])
@@ -787,6 +823,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
     AC_MSG_CHECKING([if gethostname is compilable])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
+        $curl_includes_winsock2
         $curl_includes_unistd
       ]],[[
         if(0 != gethostname(0, 0))
