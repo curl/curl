@@ -88,7 +88,7 @@ static int blockread_all(struct connectdata *conn, /* connection data */
       result = ~CURLE_OK;
       break;
     }
-    result = Curl_read(conn, sockfd, buf, buffersize, &nread);
+    result = Curl_read_plain(sockfd, buf, buffersize, &nread);
     if(result)
       break;
 

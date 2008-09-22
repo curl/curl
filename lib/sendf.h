@@ -58,6 +58,12 @@ CURLcode Curl_client_write(struct connectdata *conn, int type, char *ptr,
 void Curl_read_rewind(struct connectdata *conn,
                       size_t extraBytesRead);
 
+/* internal read-function, does plain socket only */
+CURLcode Curl_read_plain(curl_socket_t sockfd,
+                         char *buf,
+                         size_t bytesfromsocket,
+                         ssize_t *n);
+
 /* internal read-function, does plain socket, SSL and krb4 */
 int Curl_read(struct connectdata *conn, curl_socket_t sockfd,
               char *buf, size_t buffersize,

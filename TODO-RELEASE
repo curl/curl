@@ -7,10 +7,6 @@ To be addressed before 7.19.1 (planned release: October/November 2008)
 
 168 - curl_easy_pause bugs (still under discussion)
 
-169 - curl crash when using sftp with socks. We need a Curl_plain_read() to
-      use for the SOCKS code in the same style I made the Curl_plain_write()
-      before.
-
 171 - [PATCH] add some locking for thread-safety to NSS implementation
 
 172 - Apply the getdate patch with Jamie Lokier's date function. Needs an
@@ -27,3 +23,4 @@ To be addressed before 7.19.1 (planned release: October/November 2008)
       Patch: http://sourceforge.net/tracker/index.php?func=detail&aid=2107803&group_id=976&atid=100976
 
 176 - 
+

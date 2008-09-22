@@ -23,6 +23,8 @@ This release includes the following bugfixes:
  o HTTP pipelining over proxy
  o fix regression in configure script which affected OpenSSL builds on MSYS
  o GnuTLS-based multi interface doing HTTPS over proxy failed
+ o recv() failures cause CURLE_RECV_ERROR
+ o SFTP over SOCKS crash fixed
 
 This release includes the following known bugs:
 
@@ -37,6 +39,6 @@ advice from friends like these:
 
  Keith Mok, Yang Tse, Daniel Fandrich, Guenter Knauf, Dmitriy Sergeyev,
  Linus Nielsen Feltzing, Martin Drasar, Stefan Krause, Dmitry Kurochkin,
- Mike Revi, Andres Garcia, Michael Goffioul
+ Mike Revi, Andres Garcia, Michael Goffioul, Markus Moeller
 
         Thanks! (and sorry if I forgot to mention someone)

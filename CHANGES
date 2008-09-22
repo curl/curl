@@ -7,6 +7,13 @@
                                   Changelog
 
 Daniel Stenberg (22 Sep 2008)
+- Made the SOCKS code use the new Curl_read_plain() function to fix the bug
+  Markus Moeller reported: http://curl.haxx.se/mail/archive-2008-09/0016.html
+
+- recv() errors other than those equal to EAGAIN now cause proper
+  CURLE_RECV_ERROR to get returned. This made test case 160 fail so I've now
+  disabled it until we can figure out another way to exercise that logic.
+
 - Michael Goffioul filed bug report #2107377 "Problem with mutli + GnuTLS +
   proxy" (http://curl.haxx.se/bug/view.cgi?id=2107377) that showed how a multi
   interface using program didn't work when built with GnuTLS and a CONNECT
