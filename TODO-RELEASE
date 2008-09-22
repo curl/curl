@@ -1,13 +1,11 @@
 To be addressed before 7.19.1 (planned release: October/November 2008)
 =============================
 
-162 - Craig Perras' note "http upload: how to stop on error"
-      http://curl.haxx.se/mail/archive-2008-08/0138.html
-
 165 - "Problem with CURLOPT_RESUME_FROM and CURLOPT_APPEND" by Daniele Pinau,
       recipe: http://curl.haxx.se/mail/lib-2008-08/0439.html
+      (under discussion)
 
-168 - curl_easy_pause bugs
+168 - curl_easy_pause bugs (still under discussion)
 
 169 - curl crash when using sftp with socks. We need a Curl_plain_read() to
       use for the SOCKS code in the same style I made the Curl_plain_write()
