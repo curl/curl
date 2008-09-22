@@ -29,7 +29,7 @@ skip: 2300
 http
 </server>
  <name>
-HTTP POST with server sending error before (all) data is received
+HTTP POST with server closing connection before (all) data is received
  </name>
  <command>
  -d @log/input1070 http://%HOSTIP:%HTTPPORT/1070
