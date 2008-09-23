@@ -7,6 +7,25 @@
                                   Changelog
 
 Daniel Stenberg (23 Sep 2008)
+- Introducing Jamie Lokier's function for date to epoch conversion used in the
+  date parser function. This makes our function less dependent on system-
+  provided functions and instead we do all the magic ourselves. We also no
+  longer depend on the TZ environment variable. Switching to our own converter
+  has some side-effect and they are noted here for future reference (taken
+  from a mail by mr Lokier):
+
+  time_t is not measured in seconds in the ANSI C standard - or even counted
+  uniformly - weird platforms can use other numeric representations of dates
+  in time_t - hence the difftime() function.
+
+  On POSIX time_t is measured in UTC seconds, which means not including leap
+  seconds.  But it's mentioned in a few places that some old POSIX-ish
+  environments include leap seconds in their time_t counts...
+
+  I'm pretty sure [the new implementation is] correct on anything truly POSIX.
+  And it's obviously a lot less dependent on platform quirks and corner cases
+  in many ways than the mktime() version.
+
 - Rob Crittenden brought a patch to "add some locking for thread-safety to NSS
   implementation".
 

@@ -21,7 +21,6 @@ curl_getdate() testing
 # using one of the 'right' zones that take into account leap seconds
 # which causes the cookie expiry times to be different.
 <setenv>
-TZ=GMT
 </setenv>
  <command>
 nothing

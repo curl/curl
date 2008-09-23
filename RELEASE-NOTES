@@ -26,6 +26,7 @@ This release includes the following bugfixes:
  o recv() failures cause CURLE_RECV_ERROR
  o SFTP over SOCKS crash fixed
  o thread-safety issues addressed for NSS-powered libcurls
+ o removed the use of mktime() and gmtime(_r)() in date parsing and conversions
 
 This release includes the following known bugs:
 
@@ -40,6 +41,7 @@ advice from friends like these:
 
  Keith Mok, Yang Tse, Daniel Fandrich, Guenter Knauf, Dmitriy Sergeyev,
  Linus Nielsen Feltzing, Martin Drasar, Stefan Krause, Dmitry Kurochkin,
- Mike Revi, Andres Garcia, Michael Goffioul, Markus Moeller, Rob Crittenden
+ Mike Revi, Andres Garcia, Michael Goffioul, Markus Moeller, Rob Crittenden,
+ Jamie Lokier
 
         Thanks! (and sorry if I forgot to mention someone)
