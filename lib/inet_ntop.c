@@ -42,12 +42,6 @@
 
 #include "inet_ntop.h"
 
-#if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)
-/* this platform has a inet_ntoa_r() function, but no proto declared anywhere
-   so we include our own proto to make compilers happy */
-#include "inet_ntoa_r.h"
-#endif
-
 #define IN6ADDRSZ       16
 #define INADDRSZ         4
 #define INT16SZ          2
@@ -62,30 +56,26 @@
  */
 static char *inet_ntop4 (const unsigned char *src, char *dst, size_t size)
 {
-#if defined(HAVE_INET_NTOA_R_2_ARGS)
-  const char *ptr;
+  char tmp[sizeof "255.255.255.255"];
+  size_t len;
+
   DEBUGASSERT(size >= 16);
-  ptr = inet_ntoa_r(*(struct in_addr*)src, dst);
-  return (char *)memmove(dst, ptr, strlen(ptr)+1);
 
-#elif defined(HAVE_INET_NTOA_R)
+  tmp[0] = '\0';
+  (void)snprintf(tmp, sizeof(tmp), "%d.%d.%d.%d",
+          ((int)((unsigned char)src[0])) & 0xff,
+          ((int)((unsigned char)src[1])) & 0xff,
+          ((int)((unsigned char)src[2])) & 0xff,
+          ((int)((unsigned char)src[3])) & 0xff);
 
-#if defined(HAVE_INT_INET_NTOA_R)
-  return inet_ntoa_r(*(struct in_addr*)src, dst, size)? NULL: dst;
-#else
-  return inet_ntoa_r(*(struct in_addr*)src, dst, size);
-#endif
-
-#else
-  const char *addr = inet_ntoa(*(struct in_addr*)src);
-
-  if(strlen(addr) >= size)
+  len = strlen(tmp);
+  if(len == 0 || len >= size)
   {
     SET_ERRNO(ENOSPC);
     return (NULL);
   }
-  return strcpy(dst, addr);
-#endif
+  strcpy(dst, tmp);
+  return dst;
 }
 
 #ifdef ENABLE_IPV6
@@ -192,7 +182,8 @@ static char *inet_ntop6 (const unsigned char *src, char *dst, size_t size)
     SET_ERRNO(ENOSPC);
     return (NULL);
   }
-  return strcpy (dst, tmp);
+  strcpy(dst, tmp);
+  return dst;
 }
 #endif  /* ENABLE_IPV6 */
 
