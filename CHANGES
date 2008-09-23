@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Stenberg (23 Sep 2008)
+- Rob Crittenden brought a patch to "add some locking for thread-safety to NSS
+  implementation".
+
 Daniel Stenberg (22 Sep 2008)
 - Made the SOCKS code use the new Curl_read_plain() function to fix the bug
   Markus Moeller reported: http://curl.haxx.se/mail/archive-2008-09/0016.html

@@ -78,7 +78,9 @@
 
 PRFileDesc *PR_ImportTCPSocket(PRInt32 osfd);
 
-int initialized = 0;
+PRLock * nss_initlock = NULL;
+
+volatile int initialized = 0;
 
 #define HANDSHAKE_TIMEOUT 30
 
@@ -837,8 +839,11 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
  */
 int Curl_nss_init(void)
 {
-  if(!initialized)
+  /* curl_global_init() is not thread-safe so this test is ok */
+  if (nss_initlock == NULL) {
     PR_Init(PR_USER_THREAD, PR_PRIORITY_NORMAL, 256);
+    nss_initlock = PR_NewLock();
+  }
 
   /* We will actually initialize NSS later */
 
@@ -848,7 +853,17 @@ int Curl_nss_init(void)
 /* Global cleanup */
 void Curl_nss_cleanup(void)
 {
-  NSS_Shutdown();
+  /* This function isn't required to be threadsafe and this is only done
+   * as a safety feature.
+   */
+  PR_Lock(nss_initlock);
+  if (initialized)
+    NSS_Shutdown();
+  PR_Unlock(nss_initlock);
+
+  PR_DestroyLock(nss_initlock);
+  nss_initlock = NULL;
+
   initialized = 0;
 }
 
@@ -926,7 +941,8 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
     return CURLE_OK;
 
   /* FIXME. NSS doesn't support multiple databases open at the same time. */
-  if(!initialized) {
+  PR_Lock(nss_initlock);
+  if(!initialized && !NSS_IsInitialized()) {
     initialized = 1;
 
     certDir = getenv("SSL_DIR"); /* Look in $SSL_DIR */
@@ -950,6 +966,8 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
     if(rv != SECSuccess) {
       infof(conn->data, "Unable to initialize NSS database\n");
       curlerr = CURLE_SSL_CACERT_BADFILE;
+      initialized = 0;
+      PR_Unlock(nss_initlock);
       goto error;
     }
 
@@ -972,6 +990,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
     }
 #endif
   }
+  PR_Unlock(nss_initlock);
 
   model = PR_NewTCPSocket();
   if(!model)
