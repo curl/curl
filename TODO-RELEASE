@@ -7,8 +7,6 @@ To be addressed before 7.19.1 (planned release: October/November 2008)
 
 168 - curl_easy_pause bugs (still under discussion)
 
-171 - [PATCH] add some locking for thread-safety to NSS implementation
-
 172 - Apply the getdate patch with Jamie Lokier's date function. Needs an
       added check for years < 1970 (== no negative numbers may be returned)
 
