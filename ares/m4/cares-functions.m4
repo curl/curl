@@ -552,6 +552,167 @@ AC_DEFUN([CARES_CHECK_FUNC_INET_NTOP], [
 ])
 
 
+dnl CARES_CHECK_FUNC_INET_PTON
+dnl -------------------------------------------------
+dnl Verify if inet_pton is available, prototyped, can
+dnl be compiled and seems to work. If all of these are
+dnl true, and usage has not been previously disallowed
+dnl with shell variable cares_disallow_inet_pton, then
+dnl HAVE_INET_PTON will be defined.
+
+AC_DEFUN([CARES_CHECK_FUNC_INET_PTON], [
+  AC_REQUIRE([CARES_INCLUDES_ARPA_INET])dnl
+  AC_REQUIRE([CARES_INCLUDES_STRING])dnl
+  #
+  tst_links_inet_pton="unknown"
+  tst_proto_inet_pton="unknown"
+  tst_compi_inet_pton="unknown"
+  tst_works_inet_pton="unknown"
+  tst_allow_inet_pton="unknown"
+  #
+  AC_MSG_CHECKING([if inet_pton can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([inet_pton])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_inet_pton="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_inet_pton="no"
+  ])
+  #
+  if test "$tst_links_inet_pton" = "yes"; then
+    AC_MSG_CHECKING([if inet_pton is prototyped])
+    AC_EGREP_CPP([inet_pton],[
+      $cares_includes_arpa_inet
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_inet_pton="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_inet_pton="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_inet_pton" = "yes"; then
+    AC_MSG_CHECKING([if inet_pton is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $cares_includes_arpa_inet
+      ]],[[
+        if(0 != inet_pton(0, 0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_inet_pton="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_inet_pton="no"
+    ])
+  fi
+  #
+  dnl only do runtime verification when not cross-compiling
+  if test "x$cross_compiling" != "xyes" &&
+    test "$tst_compi_inet_pton" = "yes"; then
+    AC_MSG_CHECKING([if inet_pton seems to work])
+    AC_RUN_IFELSE([
+      AC_LANG_PROGRAM([[
+        $cares_includes_arpa_inet
+        $cares_includes_string
+      ]],[[
+        unsigned char ipv6a[26];
+        unsigned char ipv4a[5];
+        const char *ipv6src = "fe80::214:4fff:fe0b:76c8";
+        const char *ipv4src = "192.168.100.1";
+        /* - */
+        memset(ipv4a, 1, sizeof(ipv4a));
+        if(1 != inet_pton(AF_INET, ipv4src, ipv4a))
+          exit(1); /* fail */
+        /* - */
+        if( (ipv4a[0] != 0xc0) ||
+            (ipv4a[1] != 0xa8) ||
+            (ipv4a[2] != 0x64) ||
+            (ipv4a[3] != 0x01) ||
+            (ipv4a[4] != 0x01) )
+          exit(1); /* fail */
+        /* - */
+        memset(ipv6a, 1, sizeof(ipv6a));
+        if(1 != inet_pton(AF_INET6, ipv6src, ipv6a))
+          exit(1); /* fail */
+        /* - */
+        ipv6res[0] = '\0';
+        memset(ipv6a, 0, sizeof(ipv6a));
+        if( (ipv6a[0]  != 0xfe) ||
+            (ipv6a[1]  != 0x80) ||
+            (ipv6a[8]  != 0x02) ||
+            (ipv6a[9]  != 0x14) ||
+            (ipv6a[10] != 0x4f) ||
+            (ipv6a[11] != 0xff) ||
+            (ipv6a[12] != 0xfe) ||
+            (ipv6a[13] != 0x0b) ||
+            (ipv6a[14] != 0x76) ||
+            (ipv6a[15] != 0xc8) ||
+            (ipv6a[25] != 0x01) )
+          exit(1); /* fail */
+        /* - */
+        if( (ipv6a[2]  != 0x0) ||
+            (ipv6a[3]  != 0x0) ||
+            (ipv6a[4]  != 0x0) ||
+            (ipv6a[5]  != 0x0) ||
+            (ipv6a[6]  != 0x0) ||
+            (ipv6a[7]  != 0x0) ||
+            (ipv6a[16] != 0x0) ||
+            (ipv6a[17] != 0x0) ||
+            (ipv6a[18] != 0x0) ||
+            (ipv6a[19] != 0x0) ||
+            (ipv6a[20] != 0x0) ||
+            (ipv6a[21] != 0x0) ||
+            (ipv6a[22] != 0x0) ||
+            (ipv6a[23] != 0x0) ||
+            (ipv6a[24] != 0x0) )
+          exit(1); /* fail */
+        /* - */
+        exit(0);
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_works_inet_pton="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_works_inet_pton="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_inet_pton" = "yes" &&
+    test "$tst_works_inet_pton" != "no"; then
+    AC_MSG_CHECKING([if inet_pton usage allowed])
+    if test "x$cares_disallow_inet_pton" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_inet_pton="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_inet_pton="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if inet_pton might be used])
+  if test "$tst_links_inet_pton" = "yes" &&
+     test "$tst_proto_inet_pton" = "yes" &&
+     test "$tst_compi_inet_pton" = "yes" &&
+     test "$tst_allow_inet_pton" = "yes" &&
+     test "$tst_works_inet_pton" != "no"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_INET_PTON, 1,
+      [Define to 1 if you have a IPv6 capable working inet_pton function.])
+    ac_cv_func_inet_pton="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_inet_pton="no"
+  fi
+])
+
+
 dnl CARES_CHECK_FUNC_STRCASECMP
 dnl -------------------------------------------------
 dnl Verify if strcasecmp is available, prototyped, and

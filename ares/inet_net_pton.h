@@ -18,7 +18,7 @@
  * without express or implied warranty.
  */
 
-#if defined(HAVE_INET_PTON) && defined(HAVE_INET_PTON_IPV6)
+#ifdef HAVE_INET_PTON
 #define ares_inet_pton(x,y,z) inet_pton(x,y,z)
 #else
 int ares_inet_pton(int af, const char *src, void *dst);

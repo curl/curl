@@ -310,7 +310,6 @@ else
 	@echo $(DL)#define HAVE_DLOPEN 1$(DL) >> $@
 	@echo $(DL)#define HAVE_FTRUNCATE 1$(DL) >> $@
 	@echo $(DL)#define HAVE_GETTIMEOFDAY 1$(DL) >> $@
-	@echo $(DL)#define HAVE_INET_PTON 1$(DL) >> $@
 	@echo $(DL)#define HAVE_INTTYPES_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_LIMITS_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_LONGLONG 1$(DL) >> $@

@@ -222,8 +222,11 @@
 /* Define to 1 if you have the `inet_addr' function. */
 /*#define HAVE_INET_ADDR 1*/
 
-/* Define to 1 if you have the `inet_pton' function. */
-#define HAVE_INET_PTON 1
+/* Define to 1 if you have a IPv6 capable working inet_ntop function. */
+/*#define HAVE_INET_NTOP 1*/
+
+/* Define to 1 if you have a IPv6 capable working inet_pton function. */
+/*#define HAVE_INET_PTON 1*/
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
@@ -329,9 +332,6 @@
 
 /* Define to 1 if NI_WITHSCOPEID exists and works. */
 /*#define HAVE_NI_WITHSCOPEID 1*/
-
-/* Defined if no inet_pton() prototype available */
-/* #undef HAVE_NO_INET_PTON_PROTO */
 
 /* we have no strerror_r() proto */
 /* #undef HAVE_NO_STRERROR_R_DECL */

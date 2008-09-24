@@ -24,7 +24,6 @@
 #define HAVE_GETTIMEOFDAY      1
 #define HAVE_IO_H              1
 #define HAVE_IOCTLSOCKET       1
-#define HAVE_INET_PTON         1
 #define HAVE_LOCALE_H          1
 #define HAVE_LONGLONG          1
 #define HAVE_MEMORY_H          1

@@ -2077,6 +2077,7 @@ CURL_CHECK_FUNC_GETSERVBYPORT_R
 CURL_CHECK_FUNC_GMTIME_R
 CURL_CHECK_FUNC_INET_NTOA_R
 CURL_CHECK_FUNC_INET_NTOP
+CURL_CHECK_FUNC_INET_PTON
 CURL_CHECK_FUNC_LOCALTIME_R
 CURL_CHECK_FUNC_SIGACTION
 CURL_CHECK_FUNC_STRCASECMP
@@ -2118,7 +2119,6 @@ AC_CHECK_FUNCS([basename \
   getrlimit \
   gettimeofday \
   inet_addr \
-  inet_pton \
   perror \
   pipe \
   poll \
@@ -2186,15 +2186,6 @@ AC_CHECK_DECL(basename, ,
 #endif
 )
 
-AC_CHECK_DECL(inet_pton, ,
-              AC_DEFINE(HAVE_NO_INET_PTON_PROTO, 1,
-                        [Defined if no inet_pton() prototype available]),
-[
-#ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-]
-)
 
 dnl Check if the getnameinfo function is available
 dnl and get the types of five of its arguments.
