@@ -1,7 +1,6 @@
 /* MSK, 02/05/04, Hand edited for trail build on Alpha V7.3, DEC C 6.5-003 */
 /* MSK, 03/09/04, Seems to work for all platforms I've built on so far.    */
 /*      Added HAVE_SYS_IOCTL_H and IOCTL_3_ARGS defines                    */
-/* MSK, 06/04/04, Added HAVE_INET_NTOP                                     */
 /* TES, 10/06/04, Added MAX_INITIAL_POST_SIZE, HAVE_BASENAME               */
 /* MSK, 02/02/05, Changed HAVE_TERMIOS_H to an undef since the change in   */
 /*                getpass.c no longer undef'd it during compile.           */
@@ -264,9 +263,6 @@
 
 /* IOCTL_3_ARGS defined to match the ioctl function in stropts.h */
 #define IOCTL_3_ARGS 1
-
-/* Somewhere around 7.12.0 HAVE_INET_NTOP was introduced. */
-#define HAVE_INET_NTOP 1
 
 /* to disable LDAP */
 #define CURL_DISABLE_LDAP 1
