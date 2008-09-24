@@ -222,15 +222,6 @@
 /* Define to 1 if you have the `inet_addr' function. */
 /*#define HAVE_INET_ADDR 1*/
 
-/* Define to 1 if you have the `inet_ntoa' function. */
-/*#define HAVE_INET_NTOA 1*/
-
-/* Define to 1 if you have the `inet_ntoa_r' function. */
-/* #undef HAVE_INET_NTOA_R */
-
-/* inet_ntoa_r() is declared */
-/* #undef HAVE_INET_NTOA_R_DECL */
-
 /* Define to 1 if you have the `inet_pton' function. */
 #define HAVE_INET_PTON 1
 

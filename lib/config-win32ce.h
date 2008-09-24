@@ -145,9 +145,6 @@
 /* Define if you have the inet_addr function.  */
 #define HAVE_INET_ADDR 1
 
-/* Define if you have the inet_ntoa function.  */
-#define HAVE_INET_NTOA 1
-
 /* Define if you have the ioctlsocket function.  */
 #define HAVE_IOCTLSOCKET 1
 

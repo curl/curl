@@ -40,9 +40,6 @@
 #ifndef select
 # define select(args...) WaitSelect( args, NULL)
 #endif
-#ifndef inet_ntoa
-# define inet_ntoa(x)    Inet_NtoA( x ## .s_addr)
-#endif
 #ifndef ioctl
 # define ioctl(a,b,c,d)  IoctlSocket( (LONG)a, (ULONG)b, (char*)c)
 #endif

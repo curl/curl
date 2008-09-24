@@ -32,9 +32,6 @@
 /* Define if you have the gethostbyname_r() function with 6 arguments */
 #undef HAVE_GETHOSTBYNAME_R_6
 
-/* Define if you have the inet_ntoa_r function declared. */
-#undef HAVE_INET_NTOA_R_DECL
-
 /* Define if you need the _REENTRANT define for some functions */
 #undef NEED_REENTRANT
 
@@ -124,12 +121,6 @@
 
 /* Define if you have the `inet_addr' function. */
 #undef HAVE_INET_ADDR
-
-/* Define if you have the `inet_ntoa' function. */
-#undef HAVE_INET_NTOA
-
-/* Define if you have the `inet_ntoa_r' function. */
-#undef HAVE_INET_NTOA_R
 
 /* Define if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H

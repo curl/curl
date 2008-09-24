@@ -1881,7 +1881,7 @@ else
   dnl fi
 
   dnl poke around for inet_ntoa_r()
-  CURL_CHECK_INET_NTOA_R()
+  dnl the old inet_ntoa_r check was done here
 
   dnl is there a localtime_r()
   dnl the old localtime_r check was done here
@@ -2116,7 +2116,6 @@ AC_CHECK_FUNCS([basename \
   getrlimit \
   gettimeofday \
   inet_addr \
-  inet_ntoa \
   inet_pton \
   perror \
   pipe \

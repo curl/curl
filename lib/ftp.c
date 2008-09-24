@@ -84,7 +84,6 @@
 #include "sslgen.h"
 #include "connect.h"
 #include "strerror.h"
-#include "memory.h"
 #include "inet_ntop.h"
 #include "select.h"
 #include "parsedate.h" /* for the week day and month names */
@@ -92,17 +91,12 @@
 #include "multiif.h"
 #include "url.h"
 
-#if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)
-#include "inet_ntoa_r.h"
-#endif
-
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
+#include "memory.h"
 /* The last #include file should be: */
-#ifdef CURLDEBUG
 #include "memdebug.h"
-#endif
 
 #ifdef HAVE_NI_WITHSCOPEID
 #define NIFLAGS NI_NUMERICHOST | NI_NUMERICSERV | NI_WITHSCOPEID

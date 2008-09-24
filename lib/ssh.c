@@ -98,23 +98,17 @@
 #include "sslgen.h"
 #include "connect.h"
 #include "strerror.h"
-#include "memory.h"
 #include "inet_ntop.h"
 #include "parsedate.h" /* for the week day and month names */
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "multiif.h"
 
-#if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)
-#include "inet_ntoa_r.h"
-#endif
-
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
+#include "memory.h"
 /* The last #include file should be: */
-#ifdef CURLDEBUG
 #include "memdebug.h"
-#endif
 
 #ifndef PATH_MAX
 #define PATH_MAX 1024 /* just an extra precaution since there are systems that

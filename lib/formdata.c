@@ -56,14 +56,14 @@ Content-Type: application/octet-stream
 vlue for PTRCONTENTS + CONTENTSLENGTH + CONTENTTYPE
 (or you might see v^@lue at the start)
 
-Content-Disposition: form-data; name="FILE1_+_CONTENTTYPE"; filename="inet_ntoa_r.h"
+Content-Disposition: form-data; name="FILE1_+_CONTENTTYPE"; filename="formdata.h"
 Content-Type: text/html
 ...
 
 Content-Disposition: form-data; name="FILE1_+_FILE2"
 Content-Type: multipart/mixed, boundary=curlz1s0dkticx49MV1KGcYP5cvfSsz
 ...
-Content-Disposition: attachment; filename="inet_ntoa_r.h"
+Content-Disposition: attachment; filename="formdata.h"
 Content-Type: application/octet-stream
 ...
 Content-Disposition: attachment; filename="Makefile.b32"
@@ -73,13 +73,13 @@ Content-Type: application/octet-stream
 Content-Disposition: form-data; name="FILE1_+_FILE2_+_FILE3"
 Content-Type: multipart/mixed, boundary=curlirkYPmPwu6FrJ1vJ1u1BmtIufh1
 ...
-Content-Disposition: attachment; filename="inet_ntoa_r.h"
+Content-Disposition: attachment; filename="formdata.h"
 Content-Type: application/octet-stream
 ...
 Content-Disposition: attachment; filename="Makefile.b32"
 Content-Type: application/octet-stream
 ...
-Content-Disposition: attachment; filename="inet_ntoa_r.h"
+Content-Disposition: attachment; filename="formdata.h"
 Content-Type: application/octet-stream
 ...
 
@@ -87,13 +87,13 @@ Content-Type: application/octet-stream
 Content-Disposition: form-data; name="ARRAY: FILE1_+_FILE2_+_FILE3"
 Content-Type: multipart/mixed, boundary=curlirkYPmPwu6FrJ1vJ1u1BmtIufh1
 ...
-Content-Disposition: attachment; filename="inet_ntoa_r.h"
+Content-Disposition: attachment; filename="formdata.h"
 Content-Type: application/octet-stream
 ...
 Content-Disposition: attachment; filename="Makefile.b32"
 Content-Type: application/octet-stream
 ...
-Content-Disposition: attachment; filename="inet_ntoa_r.h"
+Content-Disposition: attachment; filename="formdata.h"
 Content-Type: application/octet-stream
 ...
 
@@ -1562,7 +1562,7 @@ int main(int argc, argv_item_t argv[])
   char value4[] = "value for simple PTRCONTENTS";
   char value5[] = "value for PTRCONTENTS + CONTENTSLENGTH";
   char value6[] = "value for PTRCONTENTS + CONTENTSLENGTH + CONTENTTYPE";
-  char value7[] = "inet_ntoa_r.h";
+  char value7[] = "formdata.h";
   char value8[] = "Makefile.b32";
   char type2[] = "image/gif";
   char type6[] = "text/plain";

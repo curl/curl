@@ -31,7 +31,6 @@
 #define HAVE_ALARM              1
 #define HAVE_STRDUP             1
 #define HAVE_UTIME              1
-#define HAVE_INET_NTOA          1
 #define HAVE_SETVBUF            1
 #define HAVE_STRFTIME           1
 #define HAVE_INET_ADDR          1

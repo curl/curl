@@ -455,10 +455,6 @@ int netware_init(void);
 
 #define LIBIDN_REQUIRED_VERSION "0.4.1"
 
-#ifdef __UCLIBC__
-#define HAVE_INET_NTOA_R_2_ARGS 1
-#endif
-
 #if defined(USE_GNUTLS) || defined(USE_SSLEAY) || defined(USE_NSS) || defined(USE_QSOSSL)
 #define USE_SSL    /* SSL support has been enabled */
 #endif

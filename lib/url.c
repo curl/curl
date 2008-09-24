@@ -138,15 +138,10 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
 #include "http_ntlm.h"
 #include "socks.h"
 
-#if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)
-#include "inet_ntoa_r.h"
-#endif
-
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 #include "memory.h"
-
 /* The last #include file should be: */
 #include "memdebug.h"
 

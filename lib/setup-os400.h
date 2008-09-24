@@ -59,12 +59,6 @@ extern int      Curl_getnameinfo_a(const struct sockaddr * sa, socklen_t salen,
 
 /* SSL wrappers. */
 
-extern int      Curl_inet_ntoa_r_a(struct in_addr internet_address,
-                                   char * output_buffer,
-                                   int output_buffer_length);
-#define inet_ntoa_r             Curl_inet_ntoa_r_a
-
-
 extern int      Curl_SSL_Init_Application_a(SSLInitApp * init_app);
 #define SSL_Init_Application    Curl_SSL_Init_Application_a
 

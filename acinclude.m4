@@ -2601,28 +2601,6 @@ fi
 ])
 
 
-AC_DEFUN([CURL_CHECK_INET_NTOA_R],
-[
-  dnl determine if function definition for inet_ntoa_r exists.
-  AC_CHECK_FUNCS(inet_ntoa_r,[
-    AC_MSG_CHECKING(whether inet_ntoa_r is declared)
-    AC_EGREP_CPP(inet_ntoa_r,[
-#undef _REENTRANT
-#include <arpa/inet.h>],[
-      AC_DEFINE(HAVE_INET_NTOA_R_DECL, 1, [inet_ntoa_r() is declared])
-      AC_MSG_RESULT(yes)],[
-      AC_MSG_RESULT(no)
-      AC_MSG_CHECKING(whether inet_ntoa_r with -D_REENTRANT is declared)
-      AC_EGREP_CPP(inet_ntoa_r,[
-#undef _REENTRANT
-#define _REENTRANT
-#include <arpa/inet.h>],[
-        AC_DEFINE(HAVE_INET_NTOA_R_DECL, 1, [inet_ntoa_r() is declared])
-        AC_MSG_RESULT(yes)],
-        AC_MSG_RESULT(no))])])
-])
-
-
 dnl **********************************************************************
 dnl CURL_DETECT_ICC ([ACTION-IF-YES])
 dnl
