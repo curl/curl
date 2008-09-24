@@ -567,7 +567,7 @@ static int x509_name_oneline(X509_NAME *a, char *buf, size_t size)
   rc = X509_NAME_print_ex(bio_out, a, 0, XN_FLAG_SEP_CPLUS_SPC);
   BIO_get_mem_ptr(bio_out, &biomem);
 
-  if(biomem->length < size)
+  if((size_t)biomem->length < size)
     size = biomem->length;
   else
     size--; /* don't overwrite the buffer end */
@@ -1775,15 +1775,15 @@ static int X509V3_ext(struct SessionHandle *data,
     /* biomem->length bytes at biomem->data, this little loop here is only
        done for the infof() call, we send the "raw" data to the certinfo
        function */
-    for(j=0; j<biomem->length; j++) {
+    for(j=0; j<(size_t)biomem->length; j++) {
       const char *sep="";
       if(biomem->data[j] == '\n') {
         sep=", ";
         j++; /* skip the newline */
       };
-      while((biomem->data[j] == ' ') && (j<biomem->length))
+      while((biomem->data[j] == ' ') && (j<(size_t)biomem->length))
         j++;
-      if(j<biomem->length)
+      if(j<(size_t)biomem->length)
         ptr+=snprintf(ptr, sizeof(buf)-(ptr-buf), "%s%c", sep, biomem->data[j]);
     }
     infof(data, "  %s\n", buf);
