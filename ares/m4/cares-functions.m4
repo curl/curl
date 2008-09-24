@@ -16,7 +16,34 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 7
+# serial 8
+
+
+dnl CARES_INCLUDES_ARPA_INET
+dnl -------------------------------------------------
+dnl Set up variable with list of headers that must be
+dnl included when arpa/inet.h is to be included.
+
+AC_DEFUN([CARES_INCLUDES_ARPA_INET], [
+cares_includes_arpa_inet="\
+/* includes start */
+#ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#  include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#  include <netinet/in.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
+#  include <arpa_inet.h>
+#endif
+/* includes end */"
+  AC_CHECK_HEADERS(
+    sys/types.h sys/socket.h netinet/in.h arpa/inet.h,
+    [], [], [$cares_includes_arpa_inet])
+])
 
 
 dnl CARES_INCLUDES_NETDB
@@ -364,6 +391,163 @@ AC_DEFUN([CARES_CHECK_FUNC_GETSERVBYPORT_R], [
   else
     AC_MSG_RESULT([no])
     ac_cv_func_getservbyport_r="no"
+  fi
+])
+
+
+dnl CARES_CHECK_FUNC_INET_NTOP
+dnl -------------------------------------------------
+dnl Verify if inet_ntop is available, prototyped, can
+dnl be compiled and seems to work. If all of these are
+dnl true, and usage has not been previously disallowed
+dnl with shell variable cares_disallow_inet_ntop, then
+dnl HAVE_INET_NTOP will be defined.
+
+AC_DEFUN([CARES_CHECK_FUNC_INET_NTOP], [
+  AC_REQUIRE([CARES_INCLUDES_ARPA_INET])dnl
+  AC_REQUIRE([CARES_INCLUDES_STRING])dnl
+  #
+  tst_links_inet_ntop="unknown"
+  tst_proto_inet_ntop="unknown"
+  tst_compi_inet_ntop="unknown"
+  tst_works_inet_ntop="unknown"
+  tst_allow_inet_ntop="unknown"
+  #
+  AC_MSG_CHECKING([if inet_ntop can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([inet_ntop])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_inet_ntop="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_inet_ntop="no"
+  ])
+  #
+  if test "$tst_links_inet_ntop" = "yes"; then
+    AC_MSG_CHECKING([if inet_ntop is prototyped])
+    AC_EGREP_CPP([inet_ntop],[
+      $cares_includes_arpa_inet
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_inet_ntop="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_inet_ntop="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_inet_ntop" = "yes"; then
+    AC_MSG_CHECKING([if inet_ntop is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $cares_includes_arpa_inet
+      ]],[[
+        if(0 != inet_ntop(0, 0, 0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_inet_ntop="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_inet_ntop="no"
+    ])
+  fi
+  #
+  dnl only do runtime verification when not cross-compiling
+  if test "x$cross_compiling" != "xyes" &&
+    test "$tst_compi_inet_ntop" = "yes"; then
+    AC_MSG_CHECKING([if inet_ntop seems to work])
+    AC_RUN_IFELSE([
+      AC_LANG_PROGRAM([[
+        $cares_includes_arpa_inet
+        $cares_includes_string
+      ]],[[
+        char ipv6res[sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255")];
+        char ipv4res[sizeof "255.255.255.255"];
+        unsigned char ipv6a[26];
+        unsigned char ipv4a[5];
+        char *ipv6ptr = 0;
+        char *ipv4ptr = 0;
+        /* - */
+        ipv4res[0] = '\0';
+        ipv4a[0] = 0xc0;
+        ipv4a[1] = 0xa8;
+        ipv4a[2] = 0x64;
+        ipv4a[3] = 0x01;
+        ipv4a[4] = 0x01;
+        /* - */
+        ipv4ptr = inet_ntop(AF_INET, ipv4a, ipv4res, sizeof(ipv4res));
+        if(!ipv4ptr)
+          exit(1); /* fail */
+        if(ipv4ptr != ipv4res)
+          exit(1); /* fail */
+        if(!ipv4ptr[0])
+          exit(1); /* fail */
+        if(memcmp(ipv4res, "192.168.100.1", 13) != 0)
+          exit(1); /* fail */
+        /* - */
+        ipv6res[0] = '\0';
+        memset(ipv6a, 0, sizeof(ipv6a));
+        ipv6a[0] = 0xfe;
+        ipv6a[1] = 0x80;
+        ipv6a[8] = 0x02;
+        ipv6a[9] = 0x14;
+        ipv6a[10] = 0x4f;
+        ipv6a[11] = 0xff;
+        ipv6a[12] = 0xfe;
+        ipv6a[13] = 0x0b;
+        ipv6a[14] = 0x76;
+        ipv6a[15] = 0xc8;
+        ipv6a[25] = 0x01;
+        /* - */
+        ipv6ptr = inet_ntop(AF_INET6, ipv6a, ipv6res, sizeof(ipv6res));
+        if(!ipv6ptr)
+          exit(1); /* fail */
+        if(ipv6ptr != ipv6res)
+          exit(1); /* fail */
+        if(!ipv6ptr[0])
+          exit(1); /* fail */
+        if(memcmp(ipv6res, "fe80::214:4fff:fe0b:76c8", 24) != 0)
+          exit(1); /* fail */
+        /* - */
+        exit(0);
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_works_inet_ntop="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_works_inet_ntop="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_inet_ntop" = "yes" &&
+    test "$tst_works_inet_ntop" != "no"; then
+    AC_MSG_CHECKING([if inet_ntop usage allowed])
+    if test "x$cares_disallow_inet_ntop" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_inet_ntop="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_inet_ntop="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if inet_ntop might be used])
+  if test "$tst_links_inet_ntop" = "yes" &&
+     test "$tst_proto_inet_ntop" = "yes" &&
+     test "$tst_compi_inet_ntop" = "yes" &&
+     test "$tst_allow_inet_ntop" = "yes" &&
+     test "$tst_works_inet_ntop" != "no"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_INET_NTOP, 1,
+      [Define to 1 if you have a IPv6 capable working inet_ntop function.])
+    ac_cv_func_inet_ntop="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_inet_ntop="no"
   fi
 ])
 

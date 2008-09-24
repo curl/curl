@@ -46,7 +46,7 @@
 #include "inet_ntop.h"
 
 
-#if !defined(HAVE_INET_NTOP) || !defined(HAVE_INET_NTOP_IPV6)
+#ifndef HAVE_INET_NTOP
 
 #ifdef SPRINTF_CHAR
 # define SPRINTF(x) strlen(sprintf/**/x)
