@@ -4682,6 +4682,7 @@ static CURLcode do_init(struct connectdata *conn)
 
   conn->bits.done = FALSE; /* Curl_done() is not called yet */
   conn->bits.do_more = FALSE; /* by default there's no curl_do_more() to use */
+  data->state.expect100header = FALSE;
 
   /* NB: the content encoding software depends on this initialization */
   Curl_easy_initHandleData(data);

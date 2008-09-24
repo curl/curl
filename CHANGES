@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Fandrich (23 Sep 2008)
+- Make sure not to dereference the wrong UrlState proto union member when
+  switching from one protocol to another in a single request (e.g.
+  redirecting from HTTP to FTP as in test 1055) by resetting
+  state.expect100header before every request.
+
 Daniel Stenberg (23 Sep 2008)
 - Introducing Jamie Lokier's function for date to epoch conversion used in the
   date parser function. This makes our function less dependent on system-
@@ -37,7 +43,7 @@ Daniel Stenberg (22 Sep 2008)
   CURLE_RECV_ERROR to get returned. This made test case 160 fail so I've now
   disabled it until we can figure out another way to exercise that logic.
 
-- Michael Goffioul filed bug report #2107377 "Problem with mutli + GnuTLS +
+- Michael Goffioul filed bug report #2107377 "Problem with multi + GnuTLS +
   proxy" (http://curl.haxx.se/bug/view.cgi?id=2107377) that showed how a multi
   interface using program didn't work when built with GnuTLS and a CONNECT
   request was done over a proxy (basically test 502 over a proxy to a HTTPS
