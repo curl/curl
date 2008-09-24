@@ -1,4 +1,4 @@
-Updated: Feb 18, 2008 (http://curl.haxx.se/docs/faq.html)
+Updated: Sep 24, 2008 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -85,6 +85,7 @@ FAQ
   5.11 How do I make libcurl not receive the whole HTTP response?
   5.12 Can I make libcurl fake or hide my real IP address?
   5.13 How do I stop an ongoing transfer?
+  5.14 Using C++ non-static functions for callbacks?
 
  6. License Issues
   6.1 I have a GPL program, can I use the libcurl library?
@@ -1069,6 +1070,24 @@ FAQ
 
   If you're using the multi interface, you also stop a transfer by removing
   the particular easy handle from the multi stack.
+
+  5.14 Using C++ non-static functions for callbacks?
+
+  libcurl is a C library, it doesn't know anything about C++ member functions.
+
+  You can overcome this "limitation" with a relative ease using a static
+  member function that is passed a pointer to the class:
+
+     // f is the pointer to your object.
+     static YourClass::staticFunction(void *buffer, size_t sz, size_t n, void *f)
+     {
+       // Call non-static member function.
+       static_cast<YourClass*>(f)->nonStaticFunction();
+     }
+
+     // This is how you pass pointer to the static function:
+     curl_easy_setopt(hcurl, CURLOPT_WRITEFUNCTION, YourClass:staticFunction);
+     curl_easy_setopt(hcurl, CURLOPT_WRITEDATA, this);
 
 6. License Issues
 
