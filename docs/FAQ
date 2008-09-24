@@ -70,6 +70,7 @@ FAQ
   4.13 Why is curl -R on Windows one hour off?
   4.14 Redirects work in browser but not with curl!
   4.15 FTPS doesn't work
+  4.16 My HTTP POST or PUT requests are slow!
 
  5. libcurl Issues
   5.1 Is libcurl thread-safe?
@@ -868,6 +869,20 @@ FAQ
   mandated by RFC4217. This kind of connection then of course uses the
   standard FTP port 21 by default.
 
+  4.16 My HTTP POST or PUT requests are slow!
+
+  libcurl makes all POST and PUT requests (except for POST requests with a
+  very tiny request body) use the "Expect: 100-continue" header. This header
+  allows the server to deny the operation early so that libcurl can bail out
+  already before having to send any data. This is useful in authentication
+  cases and others.
+
+  However, many servers don't implement the Expect: stuff properly and if the
+  server doesn't respond (positively) within 1 second libcurl will continue
+  and send off the data anyway.
+
+  You can disable libcurl's use of the Expect: header the same way you disable
+  any header, using -H / CURLOPT_HTTPHEADER, or by forcing it to use HTTP 1.0.
 
 5. libcurl Issues
 
