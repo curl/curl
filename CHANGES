@@ -7,8 +7,9 @@
                                   Changelog
 
 Daniel Stenberg (25 Sep 2008)
-- Fixed the HTTP Digest auth code to not behave badly when getting a blank realm
-  with realm="". http://curl.haxx.se/bug/view.cgi?id=2126435
+- Emanuele Bovisio submitted bug report #2126435. We fixed the HTTP Digest
+  auth code to not behave badly when getting a blank realm with
+  realm="". http://curl.haxx.se/bug/view.cgi?id=2126435
 
 Daniel Fandrich (23 Sep 2008)
 - Make sure not to dereference the wrong UrlState proto union member when
