@@ -27,6 +27,7 @@ This release includes the following bugfixes:
  o SFTP over SOCKS crash fixed
  o thread-safety issues addressed for NSS-powered libcurls
  o removed the use of mktime() and gmtime(_r)() in date parsing and conversions
+ o HTTP Digest with a blank realm did wrong
 
 This release includes the following known bugs:
 

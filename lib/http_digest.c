@@ -104,6 +104,12 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
             include the possibly trailing comma, newline or carriage return */
          (2 ==  sscanf(header, "%255[^=]=%1023[^\r\n,]",
                        value, content)) ) {
+        if(!strcmp("\"\"", content)) {
+          /* for the name="" case where we get only the "" in the content variable,
+           * simply clear the content then
+           */
+          content[0]=0;
+        }
         if(strequal(value, "nonce")) {
           d->nonce = strdup(content);
           if(!d->nonce)
