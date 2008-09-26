@@ -2080,6 +2080,9 @@ CURL_CHECK_FUNC_INET_NTOP
 CURL_CHECK_FUNC_INET_PTON
 CURL_CHECK_FUNC_LOCALTIME_R
 CURL_CHECK_FUNC_SIGACTION
+CURL_CHECK_FUNC_SIGINTERRUPT
+CURL_CHECK_FUNC_SIGNAL
+CURL_CHECK_FUNC_SIGSETJMP
 CURL_CHECK_FUNC_STRCASECMP
 CURL_CHECK_FUNC_STRCASESTR
 CURL_CHECK_FUNC_STRCMPI
@@ -2125,9 +2128,6 @@ AC_CHECK_FUNCS([basename \
   setlocale \
   setmode \
   setrlimit \
-  siginterrupt \
-  signal \
-  sigsetjmp \
   socket \
   uname \
   utime
@@ -2153,25 +2153,6 @@ AC_CHECK_FUNCS([basename \
   fi
 ])
 
-
-dnl sigsetjmp() might be a macro and no function so if it isn't found already
-dnl we make an extra check here!
-if test "$ac_cv_func_sigsetjmp" != "yes"; then
-  AC_MSG_CHECKING([for sigsetjmp defined as macro])
-  AC_LINK_IFELSE([
-    AC_LANG_PROGRAM([[
-#include <setjmp.h>
-    ]],[[
-      sigjmp_buf jmpenv;
-      sigsetjmp(jmpenv, 1);
-    ]])
-  ],[
-    AC_MSG_RESULT([yes])
-    AC_DEFINE(HAVE_SIGSETJMP, 1, [If you have sigsetjmp])
-  ],[
-    AC_MSG_RESULT([no])
-  ])
-fi
 
 AC_CHECK_DECL(basename, ,
               AC_DEFINE(NEED_BASENAME_PROTO, 1, [If you lack a fine basename() prototype]),

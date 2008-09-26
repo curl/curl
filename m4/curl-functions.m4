@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 22
+# serial 24
 
 
 dnl CURL_INCLUDES_ARPA_INET
@@ -70,6 +70,27 @@ curl_includes_netdb="\
   AC_CHECK_HEADERS(
     sys/types.h netdb.h,
     [], [], [$curl_includes_netdb])
+])
+
+
+dnl CURL_INCLUDES_SETJMP
+dnl -------------------------------------------------
+dnl Set up variable with list of headers that must be
+dnl included when setjmp.h is to be included.
+
+AC_DEFUN([CURL_INCLUDES_SETJMP], [
+curl_includes_setjmp="\
+/* includes start */
+#ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+#endif
+#ifdef HAVE_SETJMP_H
+#  include <setjmp.h>
+#endif
+/* includes end */"
+  AC_CHECK_HEADERS(
+    sys/types.h setjmp.h,
+    [], [], [$curl_includes_setjmp])
 ])
 
 
@@ -1783,6 +1804,283 @@ AC_DEFUN([CURL_CHECK_FUNC_SIGACTION], [
   else
     AC_MSG_RESULT([no])
     ac_cv_func_sigaction="no"
+  fi
+])
+
+
+dnl CURL_CHECK_FUNC_SIGINTERRUPT
+dnl -------------------------------------------------
+dnl Verify if siginterrupt is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_siginterrupt, then
+dnl HAVE_SIGINTERRUPT will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_SIGINTERRUPT], [
+  AC_REQUIRE([CURL_INCLUDES_SIGNAL])dnl
+  #
+  tst_links_siginterrupt="unknown"
+  tst_proto_siginterrupt="unknown"
+  tst_compi_siginterrupt="unknown"
+  tst_allow_siginterrupt="unknown"
+  #
+  AC_MSG_CHECKING([if siginterrupt can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([siginterrupt])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_siginterrupt="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_siginterrupt="no"
+  ])
+  #
+  if test "$tst_links_siginterrupt" = "yes"; then
+    AC_MSG_CHECKING([if siginterrupt is prototyped])
+    AC_EGREP_CPP([siginterrupt],[
+      $curl_includes_signal
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_siginterrupt="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_siginterrupt="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_siginterrupt" = "yes"; then
+    AC_MSG_CHECKING([if siginterrupt is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_signal
+      ]],[[
+        if(0 != siginterrupt(0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_siginterrupt="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_siginterrupt="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_siginterrupt" = "yes"; then
+    AC_MSG_CHECKING([if siginterrupt usage allowed])
+    if test "x$curl_disallow_siginterrupt" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_siginterrupt="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_siginterrupt="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if siginterrupt might be used])
+  if test "$tst_links_siginterrupt" = "yes" &&
+     test "$tst_proto_siginterrupt" = "yes" &&
+     test "$tst_compi_siginterrupt" = "yes" &&
+     test "$tst_allow_siginterrupt" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_SIGINTERRUPT, 1,
+      [Define to 1 if you have the siginterrupt function.])
+    ac_cv_func_siginterrupt="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_siginterrupt="no"
+  fi
+])
+
+
+dnl CURL_CHECK_FUNC_SIGNAL
+dnl -------------------------------------------------
+dnl Verify if signal is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_signal, then
+dnl HAVE_SIGNAL will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_SIGNAL], [
+  AC_REQUIRE([CURL_INCLUDES_SIGNAL])dnl
+  #
+  tst_links_signal="unknown"
+  tst_proto_signal="unknown"
+  tst_compi_signal="unknown"
+  tst_allow_signal="unknown"
+  #
+  AC_MSG_CHECKING([if signal can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([signal])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_signal="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_signal="no"
+  ])
+  #
+  if test "$tst_links_signal" = "yes"; then
+    AC_MSG_CHECKING([if signal is prototyped])
+    AC_EGREP_CPP([signal],[
+      $curl_includes_signal
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_signal="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_signal="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_signal" = "yes"; then
+    AC_MSG_CHECKING([if signal is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_signal
+      ]],[[
+        if(0 != signal(0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_signal="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_signal="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_signal" = "yes"; then
+    AC_MSG_CHECKING([if signal usage allowed])
+    if test "x$curl_disallow_signal" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_signal="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_signal="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if signal might be used])
+  if test "$tst_links_signal" = "yes" &&
+     test "$tst_proto_signal" = "yes" &&
+     test "$tst_compi_signal" = "yes" &&
+     test "$tst_allow_signal" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_SIGNAL, 1,
+      [Define to 1 if you have the signal function.])
+    ac_cv_func_signal="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_signal="no"
+  fi
+])
+
+
+dnl CURL_CHECK_FUNC_SIGSETJMP
+dnl -------------------------------------------------
+dnl Verify if sigsetjmp is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_sigsetjmp, then
+dnl HAVE_SIGSETJMP will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_SIGSETJMP], [
+  AC_REQUIRE([CURL_INCLUDES_SETJMP])dnl
+  #
+  tst_links_sigsetjmp="unknown"
+  tst_macro_sigsetjmp="unknown"
+  tst_proto_sigsetjmp="unknown"
+  tst_compi_sigsetjmp="unknown"
+  tst_allow_sigsetjmp="unknown"
+  #
+  AC_MSG_CHECKING([if sigsetjmp can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([sigsetjmp])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_sigsetjmp="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_sigsetjmp="no"
+  ])
+  #
+  if test "$tst_links_sigsetjmp" = "no"; then
+    AC_MSG_CHECKING([if sigsetjmp seems a macro])
+    AC_LINK_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_setjmp
+      ]],[[
+        sigjmp_buf env;
+        if(0 != sigsetjmp(env, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_macro_sigsetjmp="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_macro_sigsetjmp="no"
+    ])
+  fi
+  #
+  if test "$tst_links_sigsetjmp" = "yes"; then
+    AC_MSG_CHECKING([if sigsetjmp is prototyped])
+    AC_EGREP_CPP([sigsetjmp],[
+      $curl_includes_setjmp
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_sigsetjmp="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_sigsetjmp="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_sigsetjmp" = "yes" ||
+     test "$tst_macro_sigsetjmp" = "yes"; then
+    AC_MSG_CHECKING([if sigsetjmp is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_setjmp
+      ]],[[
+        sigjmp_buf env;
+        if(0 != sigsetjmp(env, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_sigsetjmp="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_sigsetjmp="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_sigsetjmp" = "yes"; then
+    AC_MSG_CHECKING([if sigsetjmp usage allowed])
+    if test "x$curl_disallow_sigsetjmp" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_sigsetjmp="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_sigsetjmp="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if sigsetjmp might be used])
+  if (test "$tst_proto_sigsetjmp" = "yes" ||
+      test "$tst_macro_sigsetjmp" = "yes") &&
+     test "$tst_compi_sigsetjmp" = "yes" &&
+     test "$tst_allow_sigsetjmp" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_SIGSETJMP, 1,
+      [Define to 1 if you have the sigsetjmp function or macro.])
+    ac_cv_func_sigsetjmp="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_sigsetjmp="no"
   fi
 ])
 
