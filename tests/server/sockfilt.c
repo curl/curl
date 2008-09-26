@@ -122,7 +122,10 @@
 const char *serverlogfile = DEFAULT_LOGFILE;
 
 static bool verbose = FALSE;
+#ifdef ENABLE_IPV6
 static bool use_ipv6 = FALSE;
+#endif
+static const char *ipv_inuse = "IPv4";
 static unsigned short port = DEFAULT_PORT;
 static unsigned short connectport = 0; /* if non-zero, we activate this mode */
 
@@ -542,7 +545,7 @@ static bool juggle(curl_socket_t *sockfdp,
     else if(!memcmp("PORT", buffer, 4)) {
       /* Question asking us what PORT number we are listening to.
          Replies to PORT with "IPv[num]/[port]" */
-      sprintf((char *)buffer, "IPv%d/%d\n", use_ipv6?6:4, (int)port);
+      sprintf((char *)buffer, "%s/%d\n", ipv_inuse, (int)port);
       buffer_len = (ssize_t)strlen((char *)buffer);
       snprintf(data, sizeof(data), "PORT\n%04x\n", buffer_len);
       if(!write_stdout(data, 10))
@@ -805,13 +808,17 @@ int main(int argc, char *argv[])
     }
     else if(!strcmp("--ipv6", argv[arg])) {
 #ifdef ENABLE_IPV6
-      use_ipv6=TRUE;
+      ipv_inuse = "IPv6";
+      use_ipv6 = TRUE;
 #endif
       arg++;
     }
     else if(!strcmp("--ipv4", argv[arg])) {
       /* for completeness, we support this option as well */
-      use_ipv6=FALSE;
+#ifdef ENABLE_IPV6
+      ipv_inuse = "IPv4";
+      use_ipv6 = FALSE;
+#endif
       arg++;
     }
     else if(!strcmp("--port", argv[arg])) {
@@ -921,8 +928,7 @@ int main(int argc, char *argv[])
     msgsock = CURL_SOCKET_BAD; /* no stream socket yet */
   }
 
-  logmsg("Running IPv%d version",
-         (use_ipv6?6:4));
+  logmsg("Running %s version", ipv_inuse);
 
   if(connectport)
     logmsg("Connected to port %hu", connectport);

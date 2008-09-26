@@ -61,7 +61,10 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-static char use_ipv6=FALSE;
+#ifdef ENABLE_IPV6
+static bool use_ipv6 = FALSE;
+#endif
+static const char *ipv_inuse = "IPv4";
 
 const char *serverlogfile=""; /* for a util.c function we don't use */
 
@@ -84,13 +87,17 @@ int main(int argc, char *argv[])
     }
     else if(!strcmp("--ipv6", argv[arg])) {
 #ifdef ENABLE_IPV6
-      use_ipv6=TRUE;
+      ipv_inuse = "IPv6";
+      use_ipv6 = TRUE;
 #endif
       arg++;
     }
     else if(!strcmp("--ipv4", argv[arg])) {
       /* for completeness, we support this option as well */
-      use_ipv6=FALSE;
+#ifdef ENABLE_IPV6
+      ipv_inuse = "IPv4";
+      use_ipv6 = FALSE;
+#endif
       arg++;
     }
     else {
@@ -136,7 +143,7 @@ int main(int argc, char *argv[])
   }
 #endif
   if(rc)
-    printf("Resolving IPv%d '%s' didn't work\n", (use_ipv6?6:4), host);
+    printf("Resolving %s '%s' didn't work\n", ipv_inuse, host);
 
   return !rc?0:1;
 }

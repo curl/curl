@@ -74,7 +74,7 @@
 #ifdef ENABLE_IPV6
 static bool use_ipv6 = FALSE;
 #endif
-const char *ipv_inuse = "IPv4";
+static const char *ipv_inuse = "IPv4";
 
 #define REQBUFSIZ 150000
 #define REQBUFSIZ_TXT "149999"
