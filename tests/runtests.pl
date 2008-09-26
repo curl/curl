@@ -2109,6 +2109,7 @@ sub singletest {
         }
         else {
             $cmdres >>= 8;
+            $cmdres = (2000 + $signal_num) if($signal_num && !$cmdres);
         }
     }
     if(!$dumped_core) {
