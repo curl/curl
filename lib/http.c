@@ -290,7 +290,7 @@ static bool pickoneauth(struct auth *pick)
   picked = TRUE;
 
   /* The order of these checks is highly relevant, as this will be the order
-     of preference in case of the existance of multiple accepted types. */
+     of preference in case of the existence of multiple accepted types. */
   if(avail & CURLAUTH_GSSNEGOTIATE)
     pick->picked = CURLAUTH_GSSNEGOTIATE;
   else if(avail & CURLAUTH_DIGEST)
@@ -419,9 +419,9 @@ CURLcode Curl_http_perhapsrewind(struct connectdata *conn)
 }
 
 /*
- * Curl_http_auth_act() gets called when a all HTTP headers have been received
+ * Curl_http_auth_act() gets called when all HTTP headers have been received
  * and it checks what authentication methods that are available and decides
- * which one (if any) to use. It will set 'newurl' if an auth metod was
+ * which one (if any) to use. It will set 'newurl' if an auth method was
  * picked.
  */
 
@@ -791,7 +791,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
         authp->avail |= CURLAUTH_BASIC;
         if(authp->picked == CURLAUTH_BASIC) {
           /* We asked for Basic authentication but got a 40X back
-             anyway, which basicly means our name+password isn't
+             anyway, which basically means our name+password isn't
              valid. */
           authp->avail = CURLAUTH_NONE;
           infof(data, "Authentication problem. Ignoring this.\n");
