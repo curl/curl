@@ -2108,7 +2108,7 @@ sub singletest {
             $cmdres = 1000;
         }
         else {
-            $cmdres /= 256;
+            $cmdres >>= 8;
         }
     }
     if(!$dumped_core) {
