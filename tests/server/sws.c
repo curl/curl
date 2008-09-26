@@ -71,6 +71,11 @@
 #define CURL_SWS_FORK_ENABLED
 #endif
 
+#ifdef ENABLE_IPV6
+static bool use_ipv6 = FALSE;
+#endif
+const char *ipv_inuse = "IPv4";
+
 #define REQBUFSIZ 150000
 #define REQBUFSIZ_TXT "149999"
 
@@ -858,7 +863,6 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   return 0;
 }
 
-static bool use_ipv6=FALSE;
 
 int main(int argc, char *argv[])
 {
@@ -900,7 +904,8 @@ int main(int argc, char *argv[])
     }
     else if(!strcmp("--ipv6", argv[arg])) {
 #ifdef ENABLE_IPV6
-      use_ipv6=TRUE;
+      ipv_inuse = "IPv6";
+      use_ipv6 = TRUE;
 #endif
       arg++;
     }
@@ -986,8 +991,7 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  logmsg("Running IPv%d version on port %hu",
-         (use_ipv6?6:4), port);
+  logmsg("Running %s version on port %d", ipv_inuse, (int)port);
 
   /* start accepting connections */
   rc = listen(sock, 5);
