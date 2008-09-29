@@ -17,10 +17,6 @@ To be addressed before 7.19.1 (planned release: October/November 2008)
       possibly the same or related to "Potential issue when using the new
       PRIMARY_IP metric"
 
-175 - "No info on REDIRECT_URL in multi-mode" by Max Ivanov
-      http://curl.haxx.se/mail/lib-2008-09/0143.html
-      Patch: http://sourceforge.net/tracker/index.php?func=detail&aid=2107803&group_id=976&atid=100976
-
 176 - "SFTP and CURLOPT_RANGE"
 
 177 - "[Patch] Disable proxy support"
