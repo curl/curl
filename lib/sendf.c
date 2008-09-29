@@ -534,7 +534,7 @@ CURLcode Curl_client_write(struct connectdata *conn,
   return CURLE_OK;
 }
 
-CURLcode Curl_read_plain(curl_socket_t sockfd,
+int Curl_read_plain(curl_socket_t sockfd,
                          char *buf,
                          size_t bytesfromsocket,
                          ssize_t *n)
