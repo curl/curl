@@ -1876,13 +1876,11 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     ftp_pasv_verbose(conn, conninfo, newhost, connectport);
 
   switch(data->set.proxytype) {
+#ifndef CURL_DISABLE_PROXY
   case CURLPROXY_SOCKS5:
   case CURLPROXY_SOCKS5_HOSTNAME:
     result = Curl_SOCKS5(conn->proxyuser, conn->proxypasswd, newhost, newport,
                          SECONDARYSOCKET, conn);
-    break;
-  case CURLPROXY_HTTP:
-    /* do nothing here. handled later. */
     break;
   case CURLPROXY_SOCKS4:
     result = Curl_SOCKS4(conn->proxyuser, newhost, newport,
@@ -1891,6 +1889,10 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
   case CURLPROXY_SOCKS4A:
     result = Curl_SOCKS4(conn->proxyuser, newhost, newport,
                          SECONDARYSOCKET, conn, TRUE);
+    break;
+#endif /* CURL_DISABLE_PROXY */
+  case CURLPROXY_HTTP:
+    /* do nothing here. handled later. */
     break;
   default:
     failf(data, "unknown proxytype option given");

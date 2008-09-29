@@ -13,6 +13,7 @@ This release includes the following changes:
  o Added CURLOPT_CERTINFO and CURLINFO_CERTINFO
  o Added CURLOPT_POSTREDIR
  o Better detect HTTP 1.0 servers and don't do HTTP 1.1 requests on them
+ o configure --disable-proxy disables proxy
 
 This release includes the following bugfixes:
 
@@ -45,6 +46,6 @@ advice from friends like these:
  Keith Mok, Yang Tse, Daniel Fandrich, Guenter Knauf, Dmitriy Sergeyev,
  Linus Nielsen Feltzing, Martin Drasar, Stefan Krause, Dmitry Kurochkin,
  Mike Revi, Andres Garcia, Michael Goffioul, Markus Moeller, Rob Crittenden,
- Jamie Lokier, Emanuele Bovisio, Maxim Ivanov, Ian Lynagh
+ Jamie Lokier, Emanuele Bovisio, Maxim Ivanov, Ian Lynagh, Daniel Egger
 
         Thanks! (and sorry if I forgot to mention someone)

@@ -2666,16 +2666,13 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
     result = Curl_store_ip_addr(conn);
 
     if(CURLE_OK == result) {
-
       switch(data->set.proxytype) {
+#ifndef CURL_DISABLE_PROXY
       case CURLPROXY_SOCKS5:
       case CURLPROXY_SOCKS5_HOSTNAME:
         result = Curl_SOCKS5(conn->proxyuser, conn->proxypasswd,
                              conn->host.name, conn->remote_port,
                              FIRSTSOCKET, conn);
-        break;
-      case CURLPROXY_HTTP:
-        /* do nothing here. handled later. */
         break;
       case CURLPROXY_SOCKS4:
         result = Curl_SOCKS4(conn->proxyuser, conn->host.name,
@@ -2684,6 +2681,10 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
       case CURLPROXY_SOCKS4A:
         result = Curl_SOCKS4(conn->proxyuser, conn->host.name,
                              conn->remote_port, FIRSTSOCKET, conn, TRUE);
+        break;
+#endif /* CURL_DISABLE_PROXY */
+      case CURLPROXY_HTTP:
+        /* do nothing here. handled later. */
         break;
       default:
         failf(data, "unknown proxytype option given");
@@ -3237,6 +3238,7 @@ static CURLcode setup_connection_internals(struct SessionHandle *data,
   return CURLE_UNSUPPORTED_PROTOCOL;
 }
 
+#ifndef CURL_DISABLE_PROXY
 /****************************************************************
 * Detect what (if any) proxy to use. Remember that this selects a host
 * name and is not limited to HTTP proxies only.
@@ -3513,6 +3515,7 @@ static CURLcode parse_proxy_auth(struct SessionHandle *data,
 
   return CURLE_OK;
 }
+#endif /* CURL_DISABLE_PROXY */
 
 /*
  *
@@ -4040,6 +4043,7 @@ static CURLcode create_conn(struct SessionHandle *data,
       return result;
   }
 
+#ifndef CURL_DISABLE_PROXY
   /*************************************************************
    * Extract the user and password from the authentication string
    *************************************************************/
@@ -4068,6 +4072,7 @@ static CURLcode create_conn(struct SessionHandle *data,
     proxy = NULL;
   }
   /* proxy must be freed later unless NULL */
+#endif /* CURL_DISABLE_PROXY */
 
   /*************************************************************
    * No protocol part in URL was used, add it!

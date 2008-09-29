@@ -23,6 +23,7 @@
 
 #include "setup.h"
 
+#ifndef CURL_DISABLE_PROXY
 #include <string.h>
 
 #ifdef NEED_MALLOC_H
@@ -686,3 +687,6 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   Curl_nonblock(sock, TRUE);
   return CURLE_OK; /* Proxy was successful! */
 }
+
+#endif /* CURL_DISABLE_PROXY */
+

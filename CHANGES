@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (29 Sep 2008)
+- Daniel Egger provided a patch that allows you to disable proxy support in
+  libcurl to somewhat reduce the size of the binary. Run configure
+  --disable-proxy.
+  
 Daniel Fandrich (29 Sep 2008)
 - Moved all signal-based name resolution timeout handling into a single new
   Curl_resolv_timeout function to reduce coupling.

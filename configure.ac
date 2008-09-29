@@ -509,6 +509,22 @@ AC_HELP_STRING([--disable-ldaps],[Disable LDAPS support]),
        AC_SUBST(CURL_DISABLE_LDAPS, [1])
 )
 
+AC_MSG_CHECKING([whether to support proxiesy])
+AC_ARG_ENABLE(proxy,
+AC_HELP_STRING([--enable-proxy],[Enable proxy support])
+AC_HELP_STRING([--disable-proxy],[Disable proxy support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_PROXY, 1, [to disable proxies])
+       AC_SUBST(CURL_DISABLE_PROXY, [1])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
 AC_MSG_CHECKING([whether to support dict])
 AC_ARG_ENABLE(dict,
 AC_HELP_STRING([--enable-dict],[Enable DICT support])
