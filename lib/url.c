@@ -60,9 +60,6 @@
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
-#ifdef HAVE_SIGNAL_H
-#include <signal.h>
-#endif
 
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
@@ -71,10 +68,6 @@
 #ifdef VMS
 #include <in.h>
 #include <inet.h>
-#endif
-
-#ifdef HAVE_SETJMP_H
-#include <setjmp.h>
 #endif
 
 #ifndef HAVE_SOCKET
@@ -169,27 +162,6 @@ static void flush_cookies(struct SessionHandle *data, int cleanup);
 #define verboseconnect(x)  do { } while (0)
 #endif
 
-#ifndef WIN32
-/* not for WIN32 builds */
-
-#if defined(HAVE_ALARM) && defined(SIGALRM) && !defined(USE_ARES)
-/*
- * This signal handler jumps back into the main libcurl code and continues
- * execution.  This effectively causes the remainder of the application to run
- * within a signal handler which is nonportable and could lead to problems.
- */
-static
-RETSIGTYPE alarmfunc(int sig)
-{
-  /* this is for "-ansi -Wall -pedantic" to stop complaining!   (rabe) */
-  (void)sig;
-#ifdef HAVE_SIGSETJMP
-  siglongjmp(curl_jmpenv, 1);
-#endif
-  return;
-}
-#endif /* HAVE_ALARM && SIGALRM && !USE_ARES */
-#endif /* WIN32 */
 
 /*
  * Protocol table.
@@ -3788,34 +3760,19 @@ static CURLcode resolve_server(struct SessionHandle *data,
                                bool *async)
 {
   CURLcode result=CURLE_OK;
-
-#if defined(HAVE_ALARM) && defined(SIGALRM) && !defined(USE_ARES)
-#ifdef HAVE_SIGACTION
-  struct sigaction keep_sigact;   /* store the old struct here */
-  bool keep_copysig=FALSE;        /* did copy it? */
-#else
-#ifdef HAVE_SIGNAL
-  void (*keep_sigact)(int);       /* store the old handler here */
-#endif /* HAVE_SIGNAL */
-#endif /* HAVE_SIGACTION */
-
-  unsigned int prev_alarm=0;
+  long shortest = 0; /* default to no timeout */
 
   /*************************************************************
-   * Set timeout if that is being used, and we're not using an asynchronous
-   * name resolve.
+   * Set timeout if that is being used
    *************************************************************/
-  if((data->set.timeout || data->set.connecttimeout) && !data->set.no_signal) {
-#ifdef HAVE_SIGACTION
-    struct sigaction sigact;
-#endif /* HAVE_SIGACTION */
+  if(data->set.timeout || data->set.connecttimeout) {
 
     /* We set the timeout on the name resolving phase first, separately from
      * the download/upload part to allow a maximum time on everything. This is
      * a signal-based timeout, why it won't work and shouldn't be used in
      * multi-threaded environments. */
 
-    long shortest = data->set.timeout; /* default to this timeout value */
+    shortest = data->set.timeout; /* default to this timeout value */
     if(shortest && data->set.connecttimeout &&
        (data->set.connecttimeout < shortest))
       /* if both are set, pick the shortest */
@@ -3823,42 +3780,10 @@ static CURLcode resolve_server(struct SessionHandle *data,
     else if(!shortest)
       /* if timeout is not set, use the connect timeout */
       shortest = data->set.connecttimeout;
-
-    if(shortest < 1000)
-      /* the alarm() function only provide integer second resolution, so if
-         we want to wait less than one second we must bail out already now. */
-      return CURLE_OPERATION_TIMEDOUT;
-
-    /*************************************************************
-     * Set signal handler to catch SIGALRM
-     * Store the old value to be able to set it back later!
-     *************************************************************/
-#ifdef HAVE_SIGACTION
-    sigaction(SIGALRM, NULL, &sigact);
-    keep_sigact = sigact;
-    keep_copysig = TRUE; /* yes, we have a copy */
-    sigact.sa_handler = alarmfunc;
-#ifdef SA_RESTART
-    /* HPUX doesn't have SA_RESTART but defaults to that behaviour! */
-    sigact.sa_flags &= ~SA_RESTART;
-#endif
-    /* now set the new struct */
-    sigaction(SIGALRM, &sigact, NULL);
-#else /* HAVE_SIGACTION */
-    /* no sigaction(), revert to the much lamer signal() */
-#ifdef HAVE_SIGNAL
-    keep_sigact = signal(SIGALRM, alarmfunc);
-#endif
-#endif /* HAVE_SIGACTION */
-
-    /* alarm() makes a signal get sent when the timeout fires off, and that
-       will abort system calls */
-    prev_alarm = alarm((unsigned int) (shortest ? shortest/1000L : shortest));
-    /* We can expect the conn->created time to be "now", as that was just
-       recently set in the beginning of this function and nothing slow
-       has been done since then until now. */
+  /* We can expect the conn->created time to be "now", as that was just
+     recently set in the beginning of this function and nothing slow
+     has been done since then until now. */
   }
-#endif /* HAVE_ALARM && SIGALRM && !USE_ARES */
 
   /*************************************************************
    * Resolve the name of the server or proxy
@@ -3885,9 +3810,13 @@ static CURLcode resolve_server(struct SessionHandle *data,
       conn->port =  conn->remote_port; /* it is the same port */
 
       /* Resolve target host right on */
-      rc = Curl_resolv(conn, conn->host.name, (int)conn->port, &hostaddr);
+      rc = Curl_resolv_timeout(conn, conn->host.name, (int)conn->port,
+                               &hostaddr, shortest);
       if(rc == CURLRESOLV_PENDING)
         *async = TRUE;
+
+      else if (rc == CURLRESOLV_TIMEDOUT)
+        result = CURLE_OPERATION_TIMEDOUT;
 
       else if(!hostaddr) {
         failf(data, "Couldn't resolve host '%s'", conn->host.dispname);
@@ -3902,10 +3831,14 @@ static CURLcode resolve_server(struct SessionHandle *data,
       fix_hostname(data, conn, &conn->proxy);
 
       /* resolve proxy */
-      rc = Curl_resolv(conn, conn->proxy.name, (int)conn->port, &hostaddr);
+      rc = Curl_resolv_timeout(conn, conn->proxy.name, (int)conn->port,
+                               &hostaddr, shortest);
 
       if(rc == CURLRESOLV_PENDING)
         *async = TRUE;
+
+      else if (rc == CURLRESOLV_TIMEDOUT)
+        result = CURLE_OPERATION_TIMEDOUT;
 
       else if(!hostaddr) {
         failf(data, "Couldn't resolve proxy '%s'", conn->proxy.dispname);
@@ -3916,48 +3849,6 @@ static CURLcode resolve_server(struct SessionHandle *data,
     *addr = hostaddr;
   }
 
-#if defined(HAVE_ALARM) && defined(SIGALRM) && !defined(USE_ARES)
-  if((data->set.timeout || data->set.connecttimeout) && !data->set.no_signal) {
-#ifdef HAVE_SIGACTION
-    if(keep_copysig) {
-      /* we got a struct as it looked before, now put that one back nice
-         and clean */
-      sigaction(SIGALRM, &keep_sigact, NULL); /* put it back */
-    }
-#else
-#ifdef HAVE_SIGNAL
-    /* restore the previous SIGALRM handler */
-    signal(SIGALRM, keep_sigact);
-#endif
-#endif /* HAVE_SIGACTION */
-
-    /* switch back the alarm() to either zero or to what it was before minus
-       the time we spent until now! */
-    if(prev_alarm) {
-      /* there was an alarm() set before us, now put it back */
-      unsigned long elapsed_ms = Curl_tvdiff(Curl_tvnow(), conn->created);
-      unsigned long alarm_set;
-
-      /* the alarm period is counted in even number of seconds */
-      alarm_set = prev_alarm - elapsed_ms/1000;
-
-      if(!alarm_set ||
-         ((alarm_set >= 0x80000000) && (prev_alarm < 0x80000000)) ) {
-        /* if the alarm time-left reached zero or turned "negative" (counted
-           with unsigned values), we should fire off a SIGALRM here, but we
-           won't, and zero would be to switch it off so we never set it to
-           less than 1! */
-        alarm(1);
-        result = CURLE_OPERATION_TIMEDOUT;
-        failf(data, "Previous alarm fired off!");
-      }
-      else
-        alarm((unsigned int)alarm_set);
-    }
-    else
-      alarm(0); /* just shut it off */
-  }
-#endif /* HAVE_ALARM && SIGALRM && !USE_ARES */
   return result;
 }
 

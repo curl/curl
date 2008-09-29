@@ -158,11 +158,15 @@ struct Curl_dns_entry {
  * use, or we'll leak memory!
  */
 /* return codes */
+#define CURLRESOLV_TIMEDOUT -2
 #define CURLRESOLV_ERROR    -1
 #define CURLRESOLV_RESOLVED  0
 #define CURLRESOLV_PENDING   1
 int Curl_resolv(struct connectdata *conn, const char *hostname,
                 int port, struct Curl_dns_entry **dnsentry);
+int Curl_resolv_timeout(struct connectdata *conn, const char *hostname,
+                        int port, struct Curl_dns_entry **dnsentry,
+                        long timeout);
 
 /*
  * Curl_ipvalid() checks what CURL_IPRESOLVE_* requirements that might've

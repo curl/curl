@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Fandrich (29 Sep 2008)
+- Moved all signal-based name resolution timeout handling into a single new
+  Curl_resolv_timeout function to reduce coupling.
+
 Daniel Stenberg (29 Sep 2008)
 - Ian Lynagh provided a patch that now makes CURLOPT_RANGE work fine for SFTP
   downloads!
