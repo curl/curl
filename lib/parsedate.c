@@ -222,10 +222,14 @@ enum assume {
   DATE_TIME
 };
 
-/* struct tm to time since epoch in GMT time zone */
+/* struct tm to time since epoch in GMT time zone.
+ * This is similar to the standard mktime function but for GMT only, and
+ * doesn't suffer from the various bugs and portability problems that
+ * some systems' implementations have.
+ */
 static time_t my_timegm(struct tm * tm)
 {
-  int month_days_cumulative [12] =
+  static const int month_days_cumulative [12] =
     { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
   int month, year, leap_days;
 
