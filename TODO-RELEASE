@@ -17,8 +17,6 @@ To be addressed before 7.19.1 (planned release: October/November 2008)
       possibly the same or related to "Potential issue when using the new
       PRIMARY_IP metric"
 
-177 - "[Patch] Disable proxy support"
-
 178 - "[Patch] Disable multi API support"
 
 179 - "[PATCH] Colon in username"
