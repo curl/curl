@@ -52,10 +52,6 @@
 #include <stdlib.h>
 #endif
 
-#ifdef HAVE_SETJMP_H
-#include <setjmp.h>
-#endif
-
 #ifdef HAVE_PROCESS_H
 #include <process.h>
 #endif

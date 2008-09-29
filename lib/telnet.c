@@ -53,7 +53,6 @@
 #include <net/if.h>
 #endif
 #include <sys/ioctl.h>
-#include <signal.h>
 
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
