@@ -23,6 +23,10 @@ To be addressed before 7.19.1 (planned release: October/November 2008)
 
 176 - "SFTP and CURLOPT_RANGE"
 
-177 -
+177 - "[Patch] Disable proxy support"
 
+178 - "[Patch] Disable multi API support"
 
+179 - "[PATCH] Colon in username"
+
+180 - 
