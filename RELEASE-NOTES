@@ -28,6 +28,7 @@ This release includes the following bugfixes:
  o thread-safety issues addressed for NSS-powered libcurls
  o removed the use of mktime() and gmtime(_r)() in date parsing and conversions
  o HTTP Digest with a blank realm did wrong
+ o CURLINFO_REDIRECT_URL didn't work with the multi interface
 
 This release includes the following known bugs:
 

@@ -1310,7 +1310,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         /* Check if we can move pending requests to send pipe */
         checkPendPipeline(easy->easy_conn);
 
-        /* When we follow redirects, must to go back to the CONNECT state */
+        /* When we follow redirects or is set to retry the connection, we must
+           to go back to the CONNECT state */
         if(easy->easy_handle->req.newurl || retry) {
           if(!retry) {
             /* if the URL is a follow-location and not just a retried request
@@ -1335,6 +1336,18 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         }
         else {
           /* after the transfer is done, go DONE */
+
+          /* but first check to see if we got a location info even though we're
+             not following redirects */
+          if (easy->easy_handle->req.location) {
+            newurl = easy->easy_handle->req.location;
+            easy->easy_handle->req.location = NULL;
+            easy->result = Curl_follow(easy->easy_handle, newurl, FOLLOW_FAKE);
+            if (easy->result)
+              free(newurl);
+            break;
+          }
+
           multistate(easy, CURLM_STATE_DONE);
           result = CURLM_CALL_MULTI_PERFORM;
         }

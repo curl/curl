@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (29 Sep 2008)
+- Bug #2107803 (http://curl.haxx.se/bug/view.cgi?id=2107803) "no
+  CURLINFO_REDIRECT_URL in multi mode" also contained a patch that fixed the
+  problem.
+  
 Daniel Stenberg (25 Sep 2008)
 - Emanuele Bovisio submitted bug report #2126435. We fixed the HTTP Digest
   auth code to not behave badly when getting a blank realm with
