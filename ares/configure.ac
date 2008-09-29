@@ -251,6 +251,8 @@ if test "$curl_cv_have_def___INTEL_COMPILER" = "yes"; then
   CPPFLAGS="$CPPFLAGS -wd 981,1469"
   dnl Disable use of ANSI C aliasing rules in optimizations
   CFLAGS="$CFLAGS -no-ansi-alias"
+  dnl Disable floating point optimizations
+  CFLAGS="$CFLAGS -fp-model precise -mp"
 else
   AC_MSG_RESULT([no])
 fi
