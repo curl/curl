@@ -101,6 +101,7 @@
 #include "inet_ntop.h"
 #include "parsedate.h" /* for the week day and month names */
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
+#include "strtoofft.h"
 #include "multiif.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
@@ -1631,9 +1632,35 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
       data->req.maxdownload = -1;
     }
     else {
-      data->req.size = attrs.filesize;
-      data->req.maxdownload = attrs.filesize;
-      Curl_pgrsSetDownloadSize(data, attrs.filesize);
+      curl_off_t size;
+
+      size = attrs.filesize;
+      if(conn->data->state.use_range) {
+        curl_off_t from, to;
+        char *ptr;
+        char *ptr2;
+
+        from=curlx_strtoofft(conn->data->state.range, &ptr, 0);
+        while(ptr && *ptr && (isspace((int)*ptr) || (*ptr=='-')))
+          ptr++;
+        to=curlx_strtoofft(ptr, &ptr2, 0);
+        if ((ptr == ptr2) /* no "to" value given */
+            || (to > size)) {
+          to = size;
+        }
+        if (from > to) {
+          from = to;
+          size = 0;
+        }
+        else {
+          size = to - from + 1;
+        }
+
+        libssh2_sftp_seek(conn->proto.sshc.sftp_handle, from);
+      }
+      data->req.size = size;
+      data->req.maxdownload = size;
+      Curl_pgrsSetDownloadSize(data, size);
     }
 
     /* We can resume if we can seek to the resume position */

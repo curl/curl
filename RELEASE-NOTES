@@ -29,6 +29,7 @@ This release includes the following bugfixes:
  o removed the use of mktime() and gmtime(_r)() in date parsing and conversions
  o HTTP Digest with a blank realm did wrong
  o CURLINFO_REDIRECT_URL didn't work with the multi interface
+ o CURLOPT_RANGE now works for SFTP downloads
 
 This release includes the following known bugs:
 
@@ -44,6 +45,6 @@ advice from friends like these:
  Keith Mok, Yang Tse, Daniel Fandrich, Guenter Knauf, Dmitriy Sergeyev,
  Linus Nielsen Feltzing, Martin Drasar, Stefan Krause, Dmitry Kurochkin,
  Mike Revi, Andres Garcia, Michael Goffioul, Markus Moeller, Rob Crittenden,
- Jamie Lokier, Emanuele Bovisio, Maxim Ivanov
+ Jamie Lokier, Emanuele Bovisio, Maxim Ivanov, Ian Lynagh
 
         Thanks! (and sorry if I forgot to mention someone)
