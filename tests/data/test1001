@@ -2,8 +2,9 @@
 <info>
 <keywords>
 HTTP
-HTTP Digest auth
 HTTP PUT
+HTTP proxy
+HTTP Digest auth
 Resume
 Content-Range
 CUSTOMREQUEST

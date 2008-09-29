@@ -4,9 +4,11 @@
 HTTP
 HTTP GET
 HTTP Basic auth
+HTTP proxy
 HTTP proxy Basic auth
 </keywords>
 </info>
+
 #
 # Server-side
 <reply>

@@ -4,6 +4,7 @@
 HTTP
 HTTP POST
 POST callback
+HTTP proxy
 HTTP proxy NTLM auth
 </keywords>
 </info>

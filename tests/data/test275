@@ -5,9 +5,12 @@ HTTP
 HTTP GET
 HTTP CONNECT
 HTTP Basic auth
+HTTP proxy
 HTTP proxy Basic auth
+proxytunnel
 </keywords>
 </info>
+
 #
 # Server-side
 <reply>

@@ -1,4 +1,13 @@
 <testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+HTTP proxy
+HTTP proxy NTLM auth
+</keywords>
+</info>
+
 # Server-side
 <reply>
 

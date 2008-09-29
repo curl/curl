@@ -3,9 +3,11 @@
 <keywords>
 HTTP
 HTTP GET
+HTTP proxy
 HTTP proxy NTLM auth
 </keywords>
 </info>
+
 # Server-side
 <reply>
 

@@ -3,10 +3,13 @@
 <keywords>
 HTTP
 HTTP GET
+HTTP proxy
+HTTP Basic auth
 followlocation
 netrc
 </keywords>
 </info>
+
 # Server-side
 <reply>
 <data>

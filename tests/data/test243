@@ -3,10 +3,12 @@
 <keywords>
 HTTP
 HTTP GET
---proxy-anyauth
+HTTP proxy
 HTTP proxy NTLM auth
+--proxy-anyauth
 </keywords>
 </info>
+
 # Server-side
 <reply>
 

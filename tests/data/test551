@@ -5,9 +5,11 @@
 HTTP
 HTTP POST
 POST callback
+HTTP proxy
 HTTP proxy Digest auth
 </keywords>
 </info>
+
 # Server-side
 <reply>
 

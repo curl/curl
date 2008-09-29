@@ -4,6 +4,7 @@
 FTP
 CURLOPT_PROXY_TRANSFER_MODE
 CURLOPT_PROXY
+HTTP proxy
 </keywords>
 </info>
 
