@@ -171,43 +171,14 @@ dnl **********************************************************************
 dnl platform/compiler/architecture specific checks/flags
 dnl **********************************************************************
 
-case $host in
-  #
-  x86_64*linux*)
-    #
-    dnl find out if icc is being used
-    if test "z$ICC" = "z"; then
-      CURL_DETECT_ICC
-    fi
-    #
-    if test "$ICC" = "yes"; then
-      dnl figure out icc version
-      AC_MSG_CHECKING([icc version])
-      iccver=`$CC -dumpversion`
-      iccnhi=`echo $iccver | cut -d . -f1`
-      iccnlo=`echo $iccver | cut -d . -f2`
-      iccnum=`(expr $iccnhi "*" 100 + $iccnlo) 2>/dev/null`
-      AC_MSG_RESULT($iccver)
-      #
-      if test "$iccnum" -ge "900" && test "$iccnum" -lt "1000"; then
-        dnl icc 9.X specific
-        CFLAGS="$CFLAGS -i-dynamic"
-      fi
-      #
-      if test "$iccnum" -ge "1000"; then
-        dnl icc 10.X or later
-        CFLAGS="$CFLAGS -shared-intel"
-      fi
-      #
-    fi
-    ;;
-  #
-esac
+ac_cv_compiler="unknown"
+ac_cv_compiler_num="unknown"
 
 AC_MSG_CHECKING([whether we are using the IBM C compiler])
 CURL_CHECK_DEF([__IBMC__], [], [silent])
 if test "$curl_cv_have_def___IBMC__" = "yes"; then
   AC_MSG_RESULT([yes])
+  ac_cv_compiler="IBMC"
   dnl Ensure that compiler optimizations are always thread-safe.
   CFLAGS="$CFLAGS -qthreaded"
   dnl Disable type based strict aliasing optimizations, using worst
@@ -226,10 +197,14 @@ AC_MSG_CHECKING([whether we are using the Intel C compiler])
 CURL_CHECK_DEF([__INTEL_COMPILER], [], [silent])
 if test "$curl_cv_have_def___INTEL_COMPILER" = "yes"; then
   AC_MSG_RESULT([yes])
-  dnl On Linux this compiler uses gcc's header files, so
+  ac_cv_compiler="ICC"
+  AC_MSG_CHECKING([compiler version])
+  ac_cv_compiler_num="$curl_cv_def___INTEL_COMPILER"
+  AC_MSG_RESULT([$ac_cv_compiler_num])
+  dnl On unix this compiler uses gcc's header files, so
   dnl we select ANSI C89 dialect plus GNU extensions.
   CPPFLAGS="$CPPFLAGS -std=gnu89"
-  if test "$curl_cv_def___INTEL_COMPILER" -gt "600"; then
+  if test "$ac_cv_compiler_num" -gt "600"; then
     dnl Show errors, warnings, and remarks
     CPPFLAGS="$CPPFLAGS -Wall"
     dnl Perform extra compile-time code checking
@@ -263,6 +238,7 @@ CURL_CHECK_DEF([__DECC_VER], [], [silent])
 if test "$curl_cv_have_def___DECC" = "yes" &&
   test "$curl_cv_have_def___DECC_VER" = "yes"; then
   AC_MSG_RESULT([yes])
+  ac_cv_compiler="DECC"
   dnl Select strict ANSI C compiler mode
   CFLAGS="$CFLAGS -std1"
   dnl Turn off optimizer ANSI C aliasing rules
@@ -276,6 +252,45 @@ if test "$curl_cv_have_def___DECC" = "yes" &&
 else
   AC_MSG_RESULT([no])
 fi
+
+AC_MSG_CHECKING([whether we are using the GNU C compiler])
+CURL_CHECK_DEF([__GNUC__], [], [silent])
+if test "$curl_cv_have_def___GNUC__" = "yes" &&
+  test "$ac_cv_compiler" = "unknown"; then
+  AC_MSG_RESULT([yes])
+  ac_cv_compiler="GNUC"
+  AC_MSG_CHECKING([compiler version])
+  gccver=`$CC -dumpversion`
+  gccvhi=`echo $gccver | cut -d . -f1`
+  gccvlo=`echo $gccver | cut -d . -f2`
+  gccnum=`(expr $gccvhi "*" 100 + $gccvlo) 2>/dev/null`
+  ac_cv_compiler_num="$gccnum"
+  AC_MSG_RESULT([$ac_cv_compiler_num])
+else
+  AC_MSG_RESULT([no])
+fi
+
+case $host in
+  #
+  x86_64*linux*|amd64*freebsd*|ia64*freebsd*)
+    #
+    if test "$ac_cv_compiler" = "ICC"; then
+      #
+      if test "$ac_cv_compiler_num" -ge "900" &&
+        test "$ac_cv_compiler_num" -lt "1000"; then
+        dnl icc 9.X specific
+        LDFLAGS="$LDFLAGS -i-dynamic"
+      fi
+      #
+      if test "$ac_cv_compiler_num" -ge "1000"; then
+        dnl icc 10.X or later
+        LDFLAGS="$LDFLAGS -shared-intel"
+      fi
+      #
+    fi
+    ;;
+  #
+esac
 
 CURL_CHECK_COMPILER_HALT_ON_ERROR
 CURL_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE
