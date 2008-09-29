@@ -538,9 +538,9 @@ int Curl_resolv_timeout(struct connectdata *conn,
 #endif /* HAVE_SIGACTION */
 
   unsigned int prev_alarm=0;
+  struct SessionHandle *data = conn->data;
 #endif /* USE_ALARM_TIMEOUT */
 
-  struct SessionHandle *data = conn->data;
   int rc = CURLRESOLV_ERROR; /* error by default */
 
   *entry = NULL;
@@ -595,7 +595,9 @@ int Curl_resolv_timeout(struct connectdata *conn,
 #else
 #ifndef CURLRES_ASYNCH
   if(timeout)
-    infof(data, "timeout on name lookup is not supported\n");
+    infof(conn->data, "timeout on name lookup is not supported\n");
+#else
+  (void)timeout; /* timeout not used with an async resolver */
 #endif
 #endif /* USE_ALARM_TIMEOUT */
 
