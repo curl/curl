@@ -4105,6 +4105,7 @@ static CURLcode create_conn(struct SessionHandle *data,
   }
 
 
+#ifndef CURL_DISABLE_PROXY
   /***********************************************************************
    * If this is supposed to use a proxy, we need to figure out the proxy
    * host name, so that we can re-use an existing connection
@@ -4117,6 +4118,7 @@ static CURLcode create_conn(struct SessionHandle *data,
     if(result != CURLE_OK)
       return result;
   }
+#endif /* CURL_DISABLE_PROXY */
 
   /***********************************************************************
    * file: is a special case in that it doesn't need a network connection
