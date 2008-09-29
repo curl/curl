@@ -509,7 +509,7 @@ AC_HELP_STRING([--disable-ldaps],[Disable LDAPS support]),
        AC_SUBST(CURL_DISABLE_LDAPS, [1])
 )
 
-AC_MSG_CHECKING([whether to support proxiesy])
+AC_MSG_CHECKING([whether to support proxies])
 AC_ARG_ENABLE(proxy,
 AC_HELP_STRING([--enable-proxy],[Enable proxy support])
 AC_HELP_STRING([--disable-proxy],[Disable proxy support]),
