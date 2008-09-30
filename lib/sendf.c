@@ -638,7 +638,7 @@ int Curl_read(struct connectdata *conn, /* connection data */
       nread = Curl_sec_read(conn, sockfd, buffertofill,
                             bytesfromsocket);
     else {
-      CURLcode ret = Curl_read_plain(sockfd, buffertofill, bytesfromsocket,
+      int ret = Curl_read_plain(sockfd, buffertofill, bytesfromsocket,
                                      &nread);
       if(ret)
         return ret;
