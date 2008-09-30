@@ -188,6 +188,15 @@
      d CURL_SSLVERSION_SSLv3...
      d                 c                   3
       *
+     d CURL_REDIR_GET_ALL...
+     d                 c                   0
+     d CURL_REDIR_POST_301...
+     d                 c                   1
+     d CURL_REDIR_POST_302...
+     d                 c                   2
+     d CURL_REDIR_POST_ALL...
+     d                 c                   3
+      *
      d CURL_POLL_NONE  c                   0
      d CURL_POLL_IN    c                   1
      d CURL_POLL_OUT   c                   2
@@ -749,7 +758,7 @@
      d                 c                   00159
      d  CURLOPT_NEW_DIRECTORY_PERMS...
      d                 c                   00160
-     d  CURLOPT_POST301...
+     d  CURLOPT_POSTREDIR...
      d                 c                   00161
      d  CURLOPT_SSH_HOST_PUBLIC_KEY_MD5...
      d                 c                   10162
@@ -771,6 +780,11 @@
      d                 c                   10170
      d  CURLOPT_ADDRESS_SCOPE...
      d                 c                   00171
+     d  CURLOPT_CERTINFO...
+     d                 c                   00172
+      *
+     d  CURLOPT_POST301...
+     d                 c                   00161                                Obsolescent
       *
      d CURLFORMcode    s             10i 0 based(######ptr######)               Enum
      d  CURL_FORMADD_OK...
@@ -899,6 +913,9 @@
      d                 c                   X'00100020'
      d  CURLINFO_APPCONNECT_TIME...                                             CURLINFO_DOUBLE + 33
      d                 c                   X'00300021'
+     d  CURLINFO_CERTINFO...                                                    CURLINFO_SLIST + 34
+     d                 c                   X'00400022'
+      *
      d  CURLINFO_HTTP_CODE...                                                   Old ...RESPONSE_CODE
      d                 c                   X'00200002'
       *
@@ -1100,6 +1117,11 @@
      d                               10i 0
      d  libssh_version...
      d                                 *                                        const char *
+      *
+     d curl_certinfo   ds                  based(######ptr######)
+     d                                     qualified
+     d  num_of_certs                 10i 0
+     d  certinfo                       *                                        struct curl_slist **
       *
      d curl_formget_callback...
      d                 s               *   based(######ptr######) procptr
