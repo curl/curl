@@ -31,6 +31,7 @@ This release includes the following bugfixes:
  o HTTP Digest with a blank realm did wrong
  o CURLINFO_REDIRECT_URL didn't work with the multi interface
  o CURLOPT_RANGE now works for SFTP downloads
+ o FTP SIZE response 550 now causes CURLE_REMOTE_FILE_NOT_FOUND
 
 This release includes the following known bugs:
 

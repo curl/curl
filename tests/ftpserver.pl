@@ -389,12 +389,14 @@ sub SIZE_command {
 
     my $size = $data[0];
 
-    if($size) {
+    if($size ne "") {
+        # we check for "" to be able to explictly set the size to 0 and yet have
+        # that send a 213
         if($size > -1) {
             sendcontrol "213 $size\r\n";
         }
         else {
-            sendcontrol "550 $testno: No such file or directory.\r\n";
+            sendcontrol "350 $testno: SIZE is not supported.\r\n";
         }
     }
     else {
@@ -407,7 +409,7 @@ sub SIZE_command {
             sendcontrol "213 $size\r\n";
         }
         else {
-            sendcontrol "550 $testno: No such file or directory.\r\n";
+            sendcontrol "350 $testno: SIZE is not supported.\r\n";
         }
     }
     return 0;

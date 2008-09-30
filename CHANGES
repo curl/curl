@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel Stenberg (30 Sep 2008)
+- The libcurl FTP code now returns CURLE_REMOTE_FILE_NOT_FOUND error when SIZE
+  gets a 550 response back for the cases where a download (or NOBODY) is
+  wanted. It still allows a 550 as response if the SIZE is used as part of an
+  upload process (like if resuming an upload is requested and the file isn't
+  there before the upload). I also modified the FTP test server and a few test
+  cases accordingly to match this modified behavior.
+
 Daniel Stenberg (29 Sep 2008)
 - Daniel Egger provided a patch that allows you to disable proxy support in
   libcurl to somewhat reduce the size of the binary. Run configure
