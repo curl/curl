@@ -220,7 +220,7 @@ if test "$curl_cv_have_def___INTEL_COMPILER" = "yes"; then
   dnl #279: controlling expression is constant
   dnl #981: operands are evaluated in unspecified order
   dnl #1469: "cc" clobber ignored
-  if test "$curl_cv_def___INTEL_COMPILER" -lt "910"; then
+  if test "$ac_cv_compiler_num" -lt "910"; then
     CPPFLAGS="$CPPFLAGS -wd 279"
   fi
   CPPFLAGS="$CPPFLAGS -wd 981,1469"
@@ -279,12 +279,12 @@ case $host in
       if test "$ac_cv_compiler_num" -ge "900" &&
         test "$ac_cv_compiler_num" -lt "1000"; then
         dnl icc 9.X specific
-        LDFLAGS="$LDFLAGS -i-dynamic"
+        CFLAGS="$CFLAGS -i-dynamic"
       fi
       #
       if test "$ac_cv_compiler_num" -ge "1000"; then
         dnl icc 10.X or later
-        LDFLAGS="$LDFLAGS -shared-intel"
+        CFLAGS="$CFLAGS -shared-intel"
       fi
       #
     fi
