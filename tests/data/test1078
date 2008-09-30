@@ -5,6 +5,7 @@ HTTP
 HTTP/1.0
 HTTP GET
 HTTP CONNECT
+HTTP proxy
 proxytunnel
 </keywords>
 </info>
