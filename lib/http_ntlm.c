@@ -1111,7 +1111,7 @@ Curl_ntlm_cleanup(struct connectdata *conn)
 }
 
 #ifdef USE_WINDOWS_SSPI
-CURLcode Curl_ntlm_global_init()
+CURLcode Curl_ntlm_global_init(void)
 {
   /* If security interface is not yet initialized try to do this */
   if(s_hSecDll == NULL) {
@@ -1143,7 +1143,7 @@ CURLcode Curl_ntlm_global_init()
   return CURLE_OK;
 }
 
-void Curl_ntlm_global_cleanup()
+void Curl_ntlm_global_cleanup(void)
 {
   if(s_hSecDll != NULL) {
     FreeLibrary(s_hSecDll);

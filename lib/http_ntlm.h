@@ -45,8 +45,8 @@ void Curl_ntlm_cleanup(struct connectdata *conn);
 #endif
 
 #ifdef USE_WINDOWS_SSPI
-CURLcode Curl_ntlm_global_init();
-void Curl_ntlm_global_cleanup();
+CURLcode Curl_ntlm_global_init(void);
+void Curl_ntlm_global_cleanup(void);
 #endif
 
 /* Flag bits definitions based on http://davenport.sourceforge.net/ntlm.html */
