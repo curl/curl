@@ -460,13 +460,16 @@ static const unsigned char *display_rr(const unsigned char *aptr,
                                        const unsigned char *abuf, int alen)
 {
   const unsigned char *p;
-  char *name;
   int type, dnsclass, ttl, dlen, status;
   long len;
   char addr[46];
+  union {
+    unsigned char * as_uchar;
+             char * as_char;
+  } name;
 
   /* Parse the RR name. */
-  status = ares_expand_name(aptr, abuf, alen, &name, &len);
+  status = ares_expand_name(aptr, abuf, alen, &name.as_char, &len);
   if (status != ARES_SUCCESS)
     return NULL;
   aptr += len;
@@ -476,7 +479,7 @@ static const unsigned char *display_rr(const unsigned char *aptr,
    */
   if (aptr + RRFIXEDSZ > abuf + alen)
     {
-      ares_free_string(name);
+      ares_free_string(name.as_char);
       return NULL;
     }
 
@@ -489,16 +492,16 @@ static const unsigned char *display_rr(const unsigned char *aptr,
   aptr += RRFIXEDSZ;
   if (aptr + dlen > abuf + alen)
     {
-      ares_free_string(name);
+      ares_free_string(name.as_char);
       return NULL;
     }
 
   /* Display the RR name, class, and type. */
-  printf("\t%-15s.\t%d", name, ttl);
+  printf("\t%-15s.\t%d", name.as_char, ttl);
   if (dnsclass != C_IN)
     printf("\t%s", class_name(dnsclass));
   printf("\t%s", type_name(type));
-  ares_free_string(name);
+  ares_free_string(name.as_char);
 
   /* Display the RR data.  Don't touch aptr. */
   switch (type)
@@ -512,11 +515,11 @@ static const unsigned char *display_rr(const unsigned char *aptr,
     case T_NS:
     case T_PTR:
       /* For these types, the RR data is just a domain name. */
-      status = ares_expand_name(aptr, abuf, alen, &name, &len);
+      status = ares_expand_name(aptr, abuf, alen, &name.as_char, &len);
       if (status != ARES_SUCCESS)
         return NULL;
-      printf("\t%s.", name);
-      ares_free_string(name);
+      printf("\t%s.", name.as_char);
+      ares_free_string(name.as_char);
       break;
 
     case T_HINFO:
@@ -536,17 +539,17 @@ static const unsigned char *display_rr(const unsigned char *aptr,
     case T_MINFO:
       /* The RR data is two domain names. */
       p = aptr;
-      status = ares_expand_name(p, abuf, alen, &name, &len);
+      status = ares_expand_name(p, abuf, alen, &name.as_char, &len);
       if (status != ARES_SUCCESS)
         return NULL;
-      printf("\t%s.", name);
-      ares_free_string(name);
+      printf("\t%s.", name.as_char);
+      ares_free_string(name.as_char);
       p += len;
-      status = ares_expand_name(p, abuf, alen, &name, &len);
+      status = ares_expand_name(p, abuf, alen, &name.as_char, &len);
       if (status != ARES_SUCCESS)
         return NULL;
-      printf("\t%s.", name);
-      ares_free_string(name);
+      printf("\t%s.", name.as_char);
+      ares_free_string(name.as_char);
       break;
 
     case T_MX:
@@ -556,11 +559,11 @@ static const unsigned char *display_rr(const unsigned char *aptr,
       if (dlen < 2)
         return NULL;
       printf("\t%d", DNS__16BIT(aptr));
-      status = ares_expand_name(aptr + 2, abuf, alen, &name, &len);
+      status = ares_expand_name(aptr + 2, abuf, alen, &name.as_char, &len);
       if (status != ARES_SUCCESS)
         return NULL;
-      printf("\t%s.", name);
-      ares_free_string(name);
+      printf("\t%s.", name.as_char);
+      ares_free_string(name.as_char);
       break;
 
     case T_SOA:
@@ -568,17 +571,17 @@ static const unsigned char *display_rr(const unsigned char *aptr,
        * numbers giving the serial number and some timeouts.
        */
       p = aptr;
-      status = ares_expand_name(p, abuf, alen, &name, &len);
+      status = ares_expand_name(p, abuf, alen, &name.as_char, &len);
       if (status != ARES_SUCCESS)
         return NULL;
-      printf("\t%s.\n", name);
-      ares_free_string(name);
+      printf("\t%s.\n", name.as_char);
+      ares_free_string(name.as_char);
       p += len;
-      status = ares_expand_name(p, abuf, alen, &name, &len);
+      status = ares_expand_name(p, abuf, alen, &name.as_char, &len);
       if (status != ARES_SUCCESS)
         return NULL;
-      printf("\t\t\t\t\t\t%s.\n", name);
-      ares_free_string(name);
+      printf("\t\t\t\t\t\t%s.\n", name.as_char);
+      ares_free_string(name.as_char);
       p += len;
       if (p + 20 > aptr + dlen)
         return NULL;
@@ -629,11 +632,11 @@ static const unsigned char *display_rr(const unsigned char *aptr,
       printf(" %d", DNS__16BIT(aptr + 2));
       printf(" %d", DNS__16BIT(aptr + 4));
 
-      status = ares_expand_name(aptr + 6, abuf, alen, &name, &len);
+      status = ares_expand_name(aptr + 6, abuf, alen, &name.as_char, &len);
       if (status != ARES_SUCCESS)
         return NULL;
-      printf("\t%s.", name);
-      ares_free_string(name);
+      printf("\t%s.", name.as_char);
+      ares_free_string(name.as_char);
       break;
 
     case T_NAPTR:
@@ -642,32 +645,32 @@ static const unsigned char *display_rr(const unsigned char *aptr,
       printf(" %d\n", DNS__16BIT(aptr + 2)); /* preference */
 
       p = aptr + 4;
-      status = ares_expand_string(p, abuf, alen, (unsigned char **)&name, &len);
+      status = ares_expand_string(p, abuf, alen, &name.as_uchar, &len);
       if (status != ARES_SUCCESS)
         return NULL;
-      printf("\t\t\t\t\t\t%s\n", name);
-      ares_free_string(name);
+      printf("\t\t\t\t\t\t%s\n", name.as_char);
+      ares_free_string(name.as_char);
       p += len;
 
-      status = ares_expand_string(p, abuf, alen, (unsigned char **)&name, &len);
+      status = ares_expand_string(p, abuf, alen, &name.as_uchar, &len);
       if (status != ARES_SUCCESS)
         return NULL;
-      printf("\t\t\t\t\t\t%s\n", name);
-      ares_free_string(name);
+      printf("\t\t\t\t\t\t%s\n", name.as_char);
+      ares_free_string(name.as_char);
       p += len;
 
-      status = ares_expand_string(p, abuf, alen, (unsigned char **)&name, &len);
+      status = ares_expand_string(p, abuf, alen, &name.as_uchar, &len);
       if (status != ARES_SUCCESS)
         return NULL;
-      printf("\t\t\t\t\t\t%s\n", name);
-      ares_free_string(name);
+      printf("\t\t\t\t\t\t%s\n", name.as_char);
+      ares_free_string(name.as_char);
       p += len;
 
-      status = ares_expand_string(p, abuf, alen, (unsigned char **)&name, &len);
+      status = ares_expand_string(p, abuf, alen, &name.as_uchar, &len);
       if (status != ARES_SUCCESS)
         return NULL;
-      printf("\t\t\t\t\t\t%s", name);
-      ares_free_string(name);
+      printf("\t\t\t\t\t\t%s", name.as_char);
+      ares_free_string(name.as_char);
       break;
 
 
