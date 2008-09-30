@@ -4500,7 +4500,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           my_setopt(curl, CURLOPT_TCP_NODELAY, 1);
 
         /* where to store */
-        my_setopt(curl, CURLOPT_WRITEDATA, (FILE *)&outs);
+        my_setopt(curl, CURLOPT_WRITEDATA, &outs);
         /* what call to write */
         my_setopt(curl, CURLOPT_WRITEFUNCTION, my_fwrite);
 
