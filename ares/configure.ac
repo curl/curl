@@ -140,10 +140,10 @@ m4_defun([AC_LIBTOOL_CXXCPP],[true])
 m4_ifdef([AC_LIBTOOL_F77], [m4_undefine([AC_LIBTOOL_F77])])
 m4_defun([AC_LIBTOOL_F77],[])
 
-dnl force libtool to build static libraries with PIC on AMD64-linux
-AC_MSG_CHECKING([if arch-OS host is AMD64-linux (to build static libraries with PIC)])
+dnl force libtool to build static libraries with PIC on AMD64-Linux & FreeBSD
+AC_MSG_CHECKING([if arch-OS host is AMD64-Linux/FreeBSD (to build static libraries with PIC)])
 case $host in
-  x86_64*linux*)
+  x86_64*linux*|amd64*freebsd*|ia64*freebsd*)
     AC_MSG_RESULT([yes])
     with_pic=yes
     ;;
@@ -198,9 +198,7 @@ CURL_CHECK_DEF([__INTEL_COMPILER], [], [silent])
 if test "$curl_cv_have_def___INTEL_COMPILER" = "yes"; then
   AC_MSG_RESULT([yes])
   ac_cv_compiler="ICC"
-  AC_MSG_CHECKING([compiler version])
   ac_cv_compiler_num="$curl_cv_def___INTEL_COMPILER"
-  AC_MSG_RESULT([$ac_cv_compiler_num])
   dnl On unix this compiler uses gcc's header files, so
   dnl we select ANSI C89 dialect plus GNU extensions.
   CPPFLAGS="$CPPFLAGS -std=gnu89"
@@ -259,13 +257,57 @@ if test "$curl_cv_have_def___GNUC__" = "yes" &&
   test "$ac_cv_compiler" = "unknown"; then
   AC_MSG_RESULT([yes])
   ac_cv_compiler="GNUC"
-  AC_MSG_CHECKING([compiler version])
   gccver=`$CC -dumpversion`
   gccvhi=`echo $gccver | cut -d . -f1`
   gccvlo=`echo $gccver | cut -d . -f2`
   gccnum=`(expr $gccvhi "*" 100 + $gccvlo) 2>/dev/null`
   ac_cv_compiler_num="$gccnum"
-  AC_MSG_RESULT([$ac_cv_compiler_num])
+  dnl this is a set of options we believe *ALL* gcc versions support:
+  WARN="-W -Wall -Wwrite-strings -pedantic -Wpointer-arith -Wnested-externs -Winline -Wmissing-prototypes"
+  dnl -Wcast-align is a bit too annoying on all gcc versions ;-)
+  if test "$ac_cv_compiler_num" -ge "207"; then
+    dnl gcc 2.7 or later
+    WARN="$WARN -Wmissing-declarations"
+  fi
+  if test "$ac_cv_compiler_num" -gt "295"; then
+    dnl only if the compiler is newer than 2.95 since we got lots of
+    dnl "`_POSIX_C_SOURCE' is not defined" in system headers with
+    dnl gcc 2.95.4 on FreeBSD 4.9!
+    WARN="$WARN -Wundef -Wno-long-long -Wsign-compare -Wshadow -Wno-multichar"
+  fi
+  if test "$ac_cv_compiler_num" -ge "296"; then
+    dnl gcc 2.96 or later
+    WARN="$WARN -Wfloat-equal"
+  fi
+  if test "$ac_cv_compiler_num" -gt "296"; then
+    dnl this option does not exist in 2.96
+    WARN="$WARN -Wno-format-nonliteral"
+  fi
+  dnl -Wunreachable-code seems totally unreliable on my gcc 3.3.2 on
+  dnl on i686-Linux as it gives us heaps with false positives.
+  dnl Also, on gcc 4.0.X it is totally unbearable and complains all
+  dnl over making it unusable for generic purposes. Let's not use it.
+  if test "$ac_cv_compiler_num" -ge "303"; then
+    dnl gcc 3.3 and later
+    WARN="$WARN -Wendif-labels -Wstrict-prototypes"
+  fi
+  if test "$ac_cv_compiler_num" -ge "304"; then
+    # try these on gcc 3.4
+    WARN="$WARN -Wdeclaration-after-statement"
+  fi
+  for flag in $CPPFLAGS; do
+    case "$flag" in
+      -I*)
+        dnl Include path, provide a -isystem option for the same dir
+        dnl to prevent warnings in those dirs. The -isystem was not very
+        dnl reliable on earlier gcc versions.
+        add=`echo $flag | sed 's/^-I/-isystem /g'`
+        WARN="$WARN $add"
+        ;;
+    esac
+  done
+  CFLAGS="$CFLAGS $WARN"
+  AC_MSG_NOTICE([Added this set of compiler options: $WARN])
 else
   AC_MSG_RESULT([no])
 fi
