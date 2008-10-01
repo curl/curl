@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel Fandrich (1 Oct 2008)
+- "make clean" now cleans out the docs and tests directories, too.
+
 Daniel Stenberg (30 Sep 2008)
 - The libcurl FTP code now returns CURLE_REMOTE_FILE_NOT_FOUND error when SIZE
   gets a 550 response back for the cases where a download (or NOBODY) is

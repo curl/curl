@@ -77,6 +77,10 @@ endif
 examples:
 	@(cd docs/examples; $(MAKE) check)
 
+clean-local:
+	@(cd tests; $(MAKE) clean)
+	@(cd docs; $(MAKE) clean)
+
 #
 # Build source and binary rpms. For rpm-3.0 and above, the ~/.rpmmacros
 # must contain the following line:
@@ -105,7 +109,7 @@ rpm:
 	mv $$RPM_TOPDIR/SRPMS/$(RPMDIST)-*.src.rpm .
 
 #
-# Build a Solaris pkkgadd format file
+# Build a Solaris pkgadd format file
 # run 'make pkgadd' once you've done './configure' and 'make' to make a Solaris pkgadd format
 # file (which ends up back in this directory).
 # The pkgadd file is in 'pkgtrans' format, so to install on Solaris, do
