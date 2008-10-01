@@ -45,7 +45,7 @@ static char buf[SIZE_HEADERS + 100];
 int test(char *URL)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode res = CURLE_FAILED_INIT;
   int i;
   struct curl_slist *headerlist=NULL, *hl;
 

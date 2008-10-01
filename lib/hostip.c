@@ -540,8 +540,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
   unsigned int prev_alarm=0;
   struct SessionHandle *data = conn->data;
 #endif /* USE_ALARM_TIMEOUT */
-
-  int rc = CURLRESOLV_ERROR; /* error by default */
+  int rc;
 
   *entry = NULL;
 
@@ -562,7 +561,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
       if(sigsetjmp(curl_jmpenv, 1)) {
         /* this is coming from a siglongjmp() after an alarm signal */
         failf(data, "name lookup timed out");
-        return rc;
+        return CURLRESOLV_ERROR;
       }
 
     /*************************************************************

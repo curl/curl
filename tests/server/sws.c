@@ -490,7 +490,7 @@ static int ProcessRequest(struct httprequest *req)
 static void storerequest(char *reqbuf, ssize_t totalsize)
 {
   int res;
-  int error;
+  int error = 0;
   ssize_t written;
   ssize_t writeleft;
   FILE *dump;
@@ -550,7 +550,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
   char *reqbuf = req->reqbuf;
   ssize_t got = 0;
 
-  char *pipereq;
+  char *pipereq = NULL;
   int pipereq_length = 0;
 
   if(req->pipelining) {
@@ -655,7 +655,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   bool persistant = TRUE;
   bool sendfailure = FALSE;
   size_t responsesize;
-  int error;
+  int error = 0;
   int res;
 
   static char weare[256];

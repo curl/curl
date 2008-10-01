@@ -71,7 +71,7 @@ const char *serverlogfile=""; /* for a util.c function we don't use */
 int main(int argc, char *argv[])
 {
   int arg=1;
-  char *host;
+  const char *host = NULL;
   int rc;
 
   while(argc>arg) {

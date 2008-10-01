@@ -591,6 +591,9 @@ http_output_auth(struct connectdata *conn,
         if(result)
           return result;
       }
+#else
+      (void)request;
+      (void)path;
 #endif
       if(auth) {
         infof(data, "Proxy auth using %s with user '%s'\n",

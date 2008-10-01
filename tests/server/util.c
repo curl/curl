@@ -235,7 +235,7 @@ int write_pidfile(const char *filename)
 void set_advisor_read_lock(const char *filename)
 {
   FILE *lockfile;
-  int error;
+  int error = 0;
   int res;
 
   do {
@@ -257,7 +257,7 @@ void set_advisor_read_lock(const char *filename)
 
 void clear_advisor_read_lock(const char *filename)
 {
-  int error;
+  int error = 0;
   int res;
 
   do {
