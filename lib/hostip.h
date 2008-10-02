@@ -166,7 +166,7 @@ int Curl_resolv(struct connectdata *conn, const char *hostname,
                 int port, struct Curl_dns_entry **dnsentry);
 int Curl_resolv_timeout(struct connectdata *conn, const char *hostname,
                         int port, struct Curl_dns_entry **dnsentry,
-                        long timeout);
+                        volatile long timeout);
 
 /*
  * Curl_ipvalid() checks what CURL_IPRESOLVE_* requirements that might've
