@@ -524,7 +524,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
                         const char *hostname,
                         int port,
                         struct Curl_dns_entry **entry,
-                        volatile long timeout)
+                        long timeoutms)
 {
 #ifdef USE_ALARM_TIMEOUT 
 #ifdef HAVE_SIGACTION
@@ -536,7 +536,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
   void (*keep_sigact)(int);       /* store the old handler here */
 #endif /* HAVE_SIGNAL */
 #endif /* HAVE_SIGACTION */
-
+  volatile long timeout;
   unsigned int prev_alarm=0;
   struct SessionHandle *data = conn->data;
 #endif /* USE_ALARM_TIMEOUT */
@@ -548,6 +548,8 @@ int Curl_resolv_timeout(struct connectdata *conn,
   if (data->set.no_signal)
     /* Ignore the timeout when signals are disabled */
     timeout = 0;
+  else
+    timeout = timeoutms;
 
   if(timeout && timeout < 1000)
     /* The alarm() function only provides integer second resolution, so if
