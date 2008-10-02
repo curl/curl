@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 1
+# serial 2
 
 
 dnl CARES_CHECK_COMPILER
@@ -176,8 +176,8 @@ AC_DEFUN([CARES_PROCESS_CC_BASIC_OPTS], [
 
 dnl CARES_PROCESS_CC_DEBUG_OPTS
 dnl -------------------------------------------------
-dnl Sets compiler options/flags and other settings
-dnl which depend on configure's debug given option.
+dnl Sets compiler options/flags which depend on
+dnl configure's debug given option.
 
 AC_DEFUN([CARES_PROCESS_CC_DEBUG_OPTS], [
   AC_REQUIRE([CARES_CHECK_OPTION_DEBUG])dnl
