@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 1
+# serial 2
 
 
 dnl CURL_CHECK_OPTION_DEBUG
@@ -32,7 +32,7 @@ dnl --enable-debug or --disable-debug, and set shell
 dnl variable want_debug value as appropriate.
 
 AC_DEFUN([CURL_CHECK_OPTION_DEBUG], [
-  AC_BEFORE([$0],[CURL_CHECK_OPTION_DEBUG])dnl
+  AC_BEFORE([$0],[CURL_CHECK_OPTION_WARNINGS])dnl
   AC_BEFORE([$0],[AC_PROG_CC])dnl
   AC_MSG_CHECKING([whether to enable debug build options])
   OPT_DEBUG_BUILD="default"
