@@ -274,6 +274,13 @@ if ($fixed < 4) {
     close(F);
 }
 
+# Enable picky compiler warnings unless explicitly disabled
+if (($confopts !~ /--enable-debug/) &&
+    ($confopts !~ /--enable-warnings/) &&
+    ($confopts !~ /--disable-warnings/)) {
+  $confopts .= " --enable-warnings";
+}
+
 my $str1066os = 'o' x 1066;
 
 # Set timestamp to the UTC this script is running. Its value might
