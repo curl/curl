@@ -8,6 +8,9 @@ AC_CONFIG_SRCDIR([ares_ipv6.h])
 AM_CONFIG_HEADER([config.h])
 AM_MAINTAINER_MODE
 
+CARES_CHECK_OPTION_DEBUG
+CARES_CHECK_OPTION_WARNINGS
+
 dnl SED is mandatory for configure process and libtool.
 dnl Set it now, allowing it to be changed later.
 AC_PATH_PROG([SED], [sed], [not_found],
@@ -86,43 +89,10 @@ esac
 dnl support building of Windows DLLs
 AC_LIBTOOL_WIN32_DLL
 
-dnl ************************************************************
-dnl Option to switch on debug options. This makes an assumption that
-dnl this is built as an 'ares' subdir in the curl source tree. Subject for
-dnl improval in the future!
-dnl
-AC_MSG_CHECKING([whether to enable debug options])
-AC_ARG_ENABLE(debug,
-AC_HELP_STRING([--enable-debug],[Enable pedantic debug options])
-AC_HELP_STRING([--disable-debug],[Disable debug options]),
-[ case "$enableval" in
-  no)
-       AC_MSG_RESULT(no)
-       ;;
-  *)   AC_MSG_RESULT(yes)
+CARES_PROCESS_DEBUG_BUILD_OPTS
 
-    dnl when doing the debug stuff, use static library only
-    AC_DISABLE_SHARED
-
-    debugbuild="yes"
-
-    dnl the entire --enable-debug is a hack that lives and runs on top of
-    dnl libcurl stuff so this BUILDING_LIBCURL is not THAT much uglier
-    AC_DEFINE(BUILDING_LIBCURL, 1, [when building as static part of libcurl])
-
-    CPPFLAGS="$CPPFLAGS -DCURLDEBUG -I$srcdir/../include"
-    CFLAGS="$CFLAGS -g" 
-
-    dnl set compiler "debug" options to become more picky, and remove
-    dnl optimize options from CFLAGS
-    CURL_CC_DEBUG_OPTS
-
-       ;;
-  esac ],
-       AC_MSG_RESULT(no)
-)
-AM_CONDITIONAL(DEBUGBUILD, test x$debugbuild = xyes)
-AM_CONDITIONAL(CURLDEBUG, test x$debugbuild = xyes)
+AM_CONDITIONAL(DEBUGBUILD, test x$want_debug = xyes)
+AM_CONDITIONAL(CURLDEBUG, test x$want_debug = xyes)
 
 dnl skip libtool C++ and Fortran compiler checks
 m4_ifdef([AC_PROG_CXX], [m4_undefine([AC_PROG_CXX])])
@@ -171,160 +141,24 @@ dnl **********************************************************************
 dnl platform/compiler/architecture specific checks/flags
 dnl **********************************************************************
 
-ac_cv_compiler="unknown"
-ac_cv_compiler_num="unknown"
-
-AC_MSG_CHECKING([whether we are using the IBM C compiler])
-CURL_CHECK_DEF([__IBMC__], [], [silent])
-if test "$curl_cv_have_def___IBMC__" = "yes"; then
-  AC_MSG_RESULT([yes])
-  ac_cv_compiler="IBMC"
-  dnl Ensure that compiler optimizations are always thread-safe.
-  CFLAGS="$CFLAGS -qthreaded"
-  dnl Disable type based strict aliasing optimizations, using worst
-  dnl case aliasing assumptions when compiling. Type based aliasing
-  dnl would restrict the lvalues that could be safely used to access
-  dnl a data object.
-  CFLAGS="$CFLAGS -qnoansialias"
-  dnl Force compiler to stop after the compilation phase, without
-  dnl generating an object code file when compilation has errors.
-  CFLAGS="$CFLAGS -qhalt=e"
-else
-  AC_MSG_RESULT([no])
-fi
-
-AC_MSG_CHECKING([whether we are using the Intel C compiler])
-CURL_CHECK_DEF([__INTEL_COMPILER], [], [silent])
-if test "$curl_cv_have_def___INTEL_COMPILER" = "yes"; then
-  AC_MSG_RESULT([yes])
-  ac_cv_compiler="ICC"
-  ac_cv_compiler_num="$curl_cv_def___INTEL_COMPILER"
-  dnl On unix this compiler uses gcc's header files, so
-  dnl we select ANSI C89 dialect plus GNU extensions.
-  CPPFLAGS="$CPPFLAGS -std=gnu89"
-  if test "$ac_cv_compiler_num" -gt "600"; then
-    dnl Show errors, warnings, and remarks
-    CPPFLAGS="$CPPFLAGS -Wall"
-    dnl Perform extra compile-time code checking
-    CPPFLAGS="$CPPFLAGS -Wcheck"
-  fi
-  dnl Change some warnings into errors
-  dnl #140: too many arguments in function call
-  dnl #147: declaration is incompatible with 'previous one'
-  dnl #165: too few arguments in function call
-  dnl #266: function declared implicitly
-  CPPFLAGS="$CPPFLAGS -we 140,147,165,266"
-  dnl Disable some remarks
-  dnl #279: controlling expression is constant
-  dnl #981: operands are evaluated in unspecified order
-  dnl #1469: "cc" clobber ignored
-  if test "$ac_cv_compiler_num" -lt "910"; then
-    CPPFLAGS="$CPPFLAGS -wd 279"
-  fi
-  CPPFLAGS="$CPPFLAGS -wd 981,1469"
-  dnl Disable use of ANSI C aliasing rules in optimizations
-  CFLAGS="$CFLAGS -no-ansi-alias"
-  dnl Disable floating point optimizations
-  CFLAGS="$CFLAGS -fp-model precise -mp"
-else
-  AC_MSG_RESULT([no])
-fi
-
-AC_MSG_CHECKING([whether we are using the DEC/Compaq C compiler])
-CURL_CHECK_DEF([__DECC], [], [silent])
-CURL_CHECK_DEF([__DECC_VER], [], [silent])
-if test "$curl_cv_have_def___DECC" = "yes" &&
-  test "$curl_cv_have_def___DECC_VER" = "yes"; then
-  AC_MSG_RESULT([yes])
-  ac_cv_compiler="DECC"
-  dnl Select strict ANSI C compiler mode
-  CFLAGS="$CFLAGS -std1"
-  dnl Turn off optimizer ANSI C aliasing rules
-  CFLAGS="$CFLAGS -noansi_alias"
-  dnl Select a higher warning level than default level2
-  CFLAGS="$CFLAGS -msg_enable level3"
-  dnl Generate warnings for missing function prototypes
-  CFLAGS="$CFLAGS -warnprotos"
-  dnl Change some warnings into fatal errors
-  CFLAGS="$CFLAGS -msg_fatal toofewargs,toomanyargs"
-else
-  AC_MSG_RESULT([no])
-fi
-
-AC_MSG_CHECKING([whether we are using the GNU C compiler])
-CURL_CHECK_DEF([__GNUC__], [], [silent])
-if test "$curl_cv_have_def___GNUC__" = "yes" &&
-  test "$ac_cv_compiler" = "unknown"; then
-  AC_MSG_RESULT([yes])
-  ac_cv_compiler="GNUC"
-  gccver=`$CC -dumpversion`
-  gccvhi=`echo $gccver | cut -d . -f1`
-  gccvlo=`echo $gccver | cut -d . -f2`
-  gccnum=`(expr $gccvhi "*" 100 + $gccvlo) 2>/dev/null`
-  ac_cv_compiler_num="$gccnum"
-  dnl this is a set of options we believe *ALL* gcc versions support:
-  WARN="-W -Wall -Wwrite-strings -pedantic -Wpointer-arith -Wnested-externs -Winline -Wmissing-prototypes"
-  dnl -Wcast-align is a bit too annoying on all gcc versions ;-)
-  if test "$ac_cv_compiler_num" -ge "207"; then
-    dnl gcc 2.7 or later
-    WARN="$WARN -Wmissing-declarations"
-  fi
-  if test "$ac_cv_compiler_num" -gt "295"; then
-    dnl only if the compiler is newer than 2.95 since we got lots of
-    dnl "`_POSIX_C_SOURCE' is not defined" in system headers with
-    dnl gcc 2.95.4 on FreeBSD 4.9!
-    WARN="$WARN -Wundef -Wno-long-long -Wsign-compare -Wshadow -Wno-multichar"
-  fi
-  if test "$ac_cv_compiler_num" -ge "296"; then
-    dnl gcc 2.96 or later
-    WARN="$WARN -Wfloat-equal"
-  fi
-  if test "$ac_cv_compiler_num" -gt "296"; then
-    dnl this option does not exist in 2.96
-    WARN="$WARN -Wno-format-nonliteral"
-  fi
-  dnl -Wunreachable-code seems totally unreliable on my gcc 3.3.2 on
-  dnl on i686-Linux as it gives us heaps with false positives.
-  dnl Also, on gcc 4.0.X it is totally unbearable and complains all
-  dnl over making it unusable for generic purposes. Let's not use it.
-  if test "$ac_cv_compiler_num" -ge "303"; then
-    dnl gcc 3.3 and later
-    WARN="$WARN -Wendif-labels -Wstrict-prototypes"
-  fi
-  if test "$ac_cv_compiler_num" -ge "304"; then
-    # try these on gcc 3.4
-    WARN="$WARN -Wdeclaration-after-statement"
-  fi
-  for flag in $CPPFLAGS; do
-    case "$flag" in
-      -I*)
-        dnl Include path, provide a -isystem option for the same dir
-        dnl to prevent warnings in those dirs. The -isystem was not very
-        dnl reliable on earlier gcc versions.
-        add=`echo $flag | sed 's/^-I/-isystem /g'`
-        WARN="$WARN $add"
-        ;;
-    esac
-  done
-  CFLAGS="$CFLAGS $WARN"
-  AC_MSG_NOTICE([Added this set of compiler options: $WARN])
-else
-  AC_MSG_RESULT([no])
-fi
+CARES_CHECK_COMPILER
+CARES_PROCESS_CC_BASIC_OPTS
+CARES_PROCESS_CC_DEBUG_OPTS
+CARES_PROCESS_CC_WARNING_OPTS
 
 case $host in
   #
   x86_64*linux*|amd64*freebsd*|ia64*freebsd*)
     #
-    if test "$ac_cv_compiler" = "ICC"; then
+    if test "$compiler_id" = "ICC_unix"; then
       #
-      if test "$ac_cv_compiler_num" -ge "900" &&
-        test "$ac_cv_compiler_num" -lt "1000"; then
+      if test "$compiler_num" -ge "900" &&
+        test "$compiler_num" -lt "1000"; then
         dnl icc 9.X specific
         CFLAGS="$CFLAGS -i-dynamic"
       fi
       #
-      if test "$ac_cv_compiler_num" -ge "1000"; then
+      if test "$compiler_num" -ge "1000"; then
         dnl icc 10.X or later
         CFLAGS="$CFLAGS -shared-intel"
       fi
