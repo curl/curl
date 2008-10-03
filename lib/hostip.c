@@ -595,7 +595,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
 
 #else
 #ifndef CURLRES_ASYNCH
-  if(timeout)
+  if(timeoutms)
     infof(conn->data, "timeout on name lookup is not supported\n");
 #else
   (void)timeoutms; /* timeoutms not used with an async resolver */
