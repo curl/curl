@@ -78,6 +78,11 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
   struct curl_slist **param_slistp=NULL;
   int type;
 
+  union {
+    struct curl_certinfo * to_certinfo;
+    struct curl_slist    * to_slist;
+  } ptr;
+
   if(!data)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
@@ -220,7 +225,8 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
   case CURLINFO_CERTINFO:
     /* Return the a pointer to the certinfo struct. Not really an slist
        pointer but we can pretend it is here */
-    *param_slistp = (struct curl_slist *)&data->info.certs;
+    ptr.to_certinfo = &data->info.certs;
+    *param_slistp = ptr.to_slist;
     break;
   default:
     return CURLE_BAD_FUNCTION_ARGUMENT;
