@@ -11,12 +11,6 @@ To be addressed before 7.19.1 (planned release: October/November 2008)
       Markus Moeller http://curl.haxx.se/mail/archive-2008-09/0053.html
       (under discussion)
 
-174 - "CURLINFO_PRIMARY_IP yields empty string?" by Jason Pump
-      http://curl.haxx.se/mail/lib-2008-09/0145.html
-
-      possibly the same or related to "Potential issue when using the new
-      PRIMARY_IP metric"
-
 178 - "[Patch] Disable multi API support"
 
 179 - "[PATCH] Colon in username"
