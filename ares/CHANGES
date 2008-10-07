@@ -1,5 +1,13 @@
   Changelog for the c-ares project
 
+* Oct 7 2008 (Yang Tse)
+- Added --enable-optimize configure option to enable and disable compiler
+  optimizations to allow decoupled setting from --enable-debug.
+
+* Oct 2 2008 (Yang Tse)
+- Added --enable-warnings configure option to enable and disable strict
+  compiler warnings to allow decoupled setting from --enable-debug.
+
 * Sep 17 2008 (Yang Tse)
 - Code reorganization to allow internal/private use of "nameser.h" to any
   system that lacks arpa/nameser.h or arpa/nameser_compat.h header files.

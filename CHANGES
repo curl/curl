@@ -6,6 +6,17 @@
 
                                   Changelog
 
+Yang Tse (7 Oct 2008)
+- Added --enable-optimize configure option to enable and disable compiler
+  optimizations to allow decoupled setting from --enable-debug.
+
+Yang Tse (2 Oct 2008)
+- Added --enable-warnings configure option to enable and disable strict
+  compiler warnings to allow decoupled setting from --enable-debug.
+
+  runtests.pl will now run with picky compiler warnings enabled unless
+  explicitly disabled.
+  
 Daniel Fandrich (1 Oct 2008)
 - "make clean" now cleans out the docs and tests directories, too.
 
