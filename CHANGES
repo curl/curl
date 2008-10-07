@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Fandrich (7 Oct 2008)
+- Changed the handling of read/write errors in Curl_perform() to allow a
+  a fresh connection to be made in such cases and the request retransmitted.
+  This should fix test case 160.  Added test case 1079 in an attempt to
+  test a similar connection dropping scenario, but as a race condition, it's
+  hard to test reliably.
+
 Daniel Stenberg (7 Oct 2008)
 - Fixed CURLINFO_PRIMARY_IP: When libcurl created a connection to host A then
   the app re-used the handle to do a connection to host B and then again

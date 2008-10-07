@@ -1848,11 +1848,9 @@ Transfer(struct connectdata *conn)
       /* The EINTR is not serious, and it seems you might get this more
          often when using the lib in a multi-threaded environment! */
       if(SOCKERRNO == EINTR)
-        ;
-      else
+        continue;
 #endif
-        done = TRUE; /* no more read or write */
-      continue;
+      return CURLE_RECV_ERROR;  /* indicate a network problem */
     case 0:  /* timeout */
     default: /* readable descriptors */
 
@@ -2465,15 +2463,16 @@ CURLcode Curl_perform(struct SessionHandle *data)
 
       if(res == CURLE_OK) {
         res = Transfer(conn); /* now fetch that URL please */
-        if(res == CURLE_OK) {
+        if((res == CURLE_OK) || (res == CURLE_RECV_ERROR)) {
           bool retry = Curl_retry_request(conn, &newurl);
 
           if(retry) {
+            res = CURLE_OK;
             follow = FOLLOW_RETRY;
             if (!newurl)
               res = CURLE_OUT_OF_MEMORY;
           }
-          else {
+          else if (res == CURLE_OK) {
             /*
              * We must duplicate the new URL here as the connection data may
              * be free()ed in the Curl_done() function. We prefer the newurl
