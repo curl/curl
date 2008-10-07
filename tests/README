@@ -109,8 +109,7 @@ Code coverage:
   and torture tests to get more full coverage, i.e. do:
 
     make test
-    cd tests
-    make torture-test
+    make test-torture
 
   The graphical tool ggcov can be used to browse the source and create
   coverage reports on *NIX hosts:

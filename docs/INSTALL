@@ -770,10 +770,12 @@ REDUCING SIZE
    will not use, here are some other flags that can reduce the size of the
    library:
 
-     --disable-ares (disables support for the ARES DNS library)
+     --disable-ares (disables support for the C-ARES DNS library)
      --disable-cookies (disables support for HTTP cookies)
      --disable-crypto-auth (disables HTTP cryptographic authentication)
      --disable-ipv6 (disables support for IPv6)
+     --disable-manual (disables support for the built-in documentation)
+     --disable-proxy (disables support for HTTP and SOCKS proxies)
      --disable-verbose (eliminates debugging strings and error code strings)
      --enable-hidden-symbols (eliminates unneeded symbols in the shared library)
      --without-libidn (disables support for the libidn DNS library)
@@ -791,10 +793,23 @@ REDUCING SIZE
 
    Using these techniques it is possible to create an HTTP-only shared libcurl
    library for i386 Linux platforms that is only 96 KiB in size (as of libcurl
-   version 7.17.1, using gcc 4.2.2).
+   version pre-7.19.1, using gcc 4.2.2).
 
    You may find that statically linking libcurl to your application will
    result in a lower total size.
+
+   Note that the curl test harness can detect the use of some, but not all, of
+   the --disable statements suggested above. Use will cause tests relying on
+   those features to fail.  The test harness can be manually forced to skip
+   the relevant tests by specifying certain key words on the runtests.pl
+   command line.  Following is a list of appropriate key words:
+
+     --disable-cookies          !cookies
+     --disable-crypto-auth      !HTTP\ Digest\ auth !HTTP\ NTLM\ auth
+                                !HTTP\ proxy\ Digest\ auth
+                                !HTTP\ proxy\ NTLM\ auth
+     --disable-manual           !--manual
+     --disable-proxy            !HTTP\ proxy !SOCKS4 !SOCKS5
 
 
 PORTS
