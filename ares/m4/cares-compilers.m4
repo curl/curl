@@ -161,14 +161,14 @@ AC_DEFUN([CARES_CHECK_COMPILER_INTEL], [
     if test "$curl_cv_have_def___unix__" = "yes"; then
       compiler_id="ICC_unix"
       flags_dbg_all="-g -g0"
-      flags_dbg_yes="-g -fp"
+      flags_dbg_yes="-g"
       flags_dbg_off="-g0"
       flags_opt_all="-O -O0 -O1 -O2 -O3 -Os"
       flags_opt_yes="-O2"
       flags_opt_off="-O0"
     else
       compiler_id="ICC_windows"
-      flags_dbg_all="/ZI /Zi /zI /zi /ZD /Zd /zD /zd /Z7 /z7"
+      flags_dbg_all="/ZI /Zi /zI /zi /ZD /Zd /zD /zd /Z7 /z7 /Oy /Oy-"
       flags_dbg_all="$flags_dbg_all /debug"
       flags_dbg_all="$flags_dbg_all /debug:none"
       flags_dbg_all="$flags_dbg_all /debug:minimal"
@@ -177,10 +177,10 @@ AC_DEFUN([CARES_CHECK_COMPILER_INTEL], [
       flags_dbg_all="$flags_dbg_all /debug:semantic_stepping"
       flags_dbg_all="$flags_dbg_all /debug:extended"
       flags_dbg_yes="/Zi /Oy-"
-      flags_dbg_off=""
-      flags_opt_all="/O /O0 /O1 /O2 /O3 /Os"
+      flags_dbg_off="/debug:none /Oy-"
+      flags_opt_all="/O /O0 /O1 /O2 /O3 /Od /Og /Og- /Oi /Oi-"
       flags_opt_yes="/O2"
-      flags_opt_off=""
+      flags_opt_off="/Od"
     fi
     compiler_num="$curl_cv_def___INTEL_COMPILER"
   else
