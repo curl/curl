@@ -78,6 +78,11 @@ Haskell
   Written by Galois, Inc
   http://hackage.haskell.org/cgi-bin/hackage-scripts/package/curl
 
+ILE/RPG
+
+  Written by Patrick Monnerat
+  See the packages/OS400/README.OS400 file
+
 Java
 
   Maintained by [blank]
@@ -181,6 +186,7 @@ Smalltalk
   http://www.squeaksource.com/CurlPlugin/
 
 SP-Forth
+
   SP-Forth binding by ygrek
   http://www.forth.org.ru/~ac/lib/lin/curl/
 
@@ -198,6 +204,11 @@ Visual Basic
 
   libcurl-vb by Jeffrey Phillips
   http://sourceforge.net/projects/libcurl-vb/
+
+Visual Foxpro
+
+  by Carlos Alloatti
+  http://www.ctl32.com.ar/libcurl.asp
 
 Q
   The libcurl module is part of the default install
