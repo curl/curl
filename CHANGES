@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (7 Oct 2008)
+- Fixed CURLINFO_PRIMARY_IP: When libcurl created a connection to host A then
+  the app re-used the handle to do a connection to host B and then again
+  re-used the handle to host A, it would not update the info with host A's IP
+  address (due to the connection being re-used) but it would instead report
+  the info from host B.
+
 Yang Tse (7 Oct 2008)
 - Added --enable-optimize configure option to enable and disable compiler
   optimizations to allow decoupled setting from --enable-debug.
