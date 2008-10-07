@@ -557,5 +557,5 @@ AC_DEFUN([CARES_VAR_STRIP], [
     fi
   done
   dnl squeeze whitespace out of result
-  [$1]=`eval echo $[$1]`
+  [$1]=`eval echo $ac_var_stripped`
 ])
