@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 2
+# serial 3
 
 
 dnl CARES_CHECK_COMPILER
@@ -28,11 +28,33 @@ AC_DEFUN([CARES_CHECK_COMPILER], [
   compiler_id="unknown"
   compiler_num="0"
   #
+  flags_dbg_all="unknown"
+  flags_dbg_yes="unknown"
+  flags_dbg_off="unknown"
+  flags_opt_all="unknown"
+  flags_opt_yes="unknown"
+  flags_opt_off="unknown"
+  #
   CARES_CHECK_COMPILER_DEC
   CARES_CHECK_COMPILER_IBM
   CARES_CHECK_COMPILER_INTEL
   CARES_CHECK_COMPILER_GNU
   #
+  if test "$compiler_id" = "unknown"; then
+  cat <<_EOF 1>&2
+***
+*** Warning: This configure script does not have information about the
+*** compiler you are using, relative to the flags required to enable or
+*** disable generation of debug info, optimization options or warnings.
+***
+*** Whatever settings are present in CFLAGS will be used for this run.
+***
+*** If you wish to help the c-ares project to better support your compiler
+*** you can report this and the required info on the c-ares development
+*** mailing list: http://cool.haxx.se/mailman/listinfo/c-ares/
+***
+_EOF
+  fi
 ])
 
 
@@ -48,6 +70,12 @@ AC_DEFUN([CARES_CHECK_COMPILER_DEC], [
     test "$curl_cv_have_def___DECC_VER" = "yes"; then
     AC_MSG_RESULT([yes])
     compiler_id="DECC"
+    flags_dbg_all="-g -g0 -g1 -g2 -g3"
+    flags_dbg_yes="-g2"
+    flags_dbg_off="-g0"
+    flags_opt_all="-O -O0 -O1 -O2 -O3 -O4"
+    flags_opt_yes="-O1"
+    flags_opt_off="-O0"
   else
     AC_MSG_RESULT([no])
   fi
@@ -71,6 +99,19 @@ AC_DEFUN([CARES_CHECK_COMPILER_GNU], [
     gccvhi=`echo $gccver | cut -d . -f1`
     gccvlo=`echo $gccver | cut -d . -f2`
     compiler_num=`(expr $gccvhi "*" 100 + $gccvlo) 2>/dev/null`
+    flags_dbg_all="-g -g0 -g1 -g2 -g3"
+    flags_dbg_all="$flags_dbg_all -ggdb"
+    flags_dbg_all="$flags_dbg_all -gstabs"
+    flags_dbg_all="$flags_dbg_all -gstabs+"
+    flags_dbg_all="$flags_dbg_all -gcoff"
+    flags_dbg_all="$flags_dbg_all -gxcoff"
+    flags_dbg_all="$flags_dbg_all -gdwarf-2"
+    flags_dbg_all="$flags_dbg_all -gvms"
+    flags_dbg_yes="-g"
+    flags_dbg_off="-g0"
+    flags_opt_all="-O -O0 -O1 -O2 -O3 -Os"
+    flags_opt_yes="-O2"
+    flags_opt_off="-O0"
   else
     AC_MSG_RESULT([no])
   fi
@@ -87,6 +128,19 @@ AC_DEFUN([CARES_CHECK_COMPILER_IBM], [
   if test "$curl_cv_have_def___IBMC__" = "yes"; then
     AC_MSG_RESULT([yes])
     compiler_id="IBMC"
+    flags_dbg_all="-g -g0 -g1 -g2 -g3"
+    flags_dbg_yes="-g"
+    flags_dbg_off=""
+    flags_opt_all="-O -O0 -O1 -O2 -O3 -O4 -O5"
+    flags_opt_all="$flags_opt_all -qnooptimize"
+    flags_opt_all="$flags_opt_all -qoptimize=0"
+    flags_opt_all="$flags_opt_all -qoptimize=1"
+    flags_opt_all="$flags_opt_all -qoptimize=2"
+    flags_opt_all="$flags_opt_all -qoptimize=3"
+    flags_opt_all="$flags_opt_all -qoptimize=4"
+    flags_opt_all="$flags_opt_all -qoptimize=5"
+    flags_opt_yes="-O2"
+    flags_opt_off="-qnooptimize"
   else
     AC_MSG_RESULT([no])
   fi
@@ -106,8 +160,27 @@ AC_DEFUN([CARES_CHECK_COMPILER_INTEL], [
     CURL_CHECK_DEF([__unix__], [], [silent])
     if test "$curl_cv_have_def___unix__" = "yes"; then
       compiler_id="ICC_unix"
+      flags_dbg_all="-g -g0"
+      flags_dbg_yes="-g -fp"
+      flags_dbg_off="-g0"
+      flags_opt_all="-O -O0 -O1 -O2 -O3 -Os"
+      flags_opt_yes="-O2"
+      flags_opt_off="-O0"
     else
       compiler_id="ICC_windows"
+      flags_dbg_all="/ZI /Zi /zI /zi /ZD /Zd /zD /zd /Z7 /z7"
+      flags_dbg_all="$flags_dbg_all /debug"
+      flags_dbg_all="$flags_dbg_all /debug:none"
+      flags_dbg_all="$flags_dbg_all /debug:minimal"
+      flags_dbg_all="$flags_dbg_all /debug:partial"
+      flags_dbg_all="$flags_dbg_all /debug:full"
+      flags_dbg_all="$flags_dbg_all /debug:semantic_stepping"
+      flags_dbg_all="$flags_dbg_all /debug:extended"
+      flags_dbg_yes="/Zi /Oy-"
+      flags_dbg_off=""
+      flags_opt_all="/O /O0 /O1 /O2 /O3 /Os"
+      flags_opt_yes="/O2"
+      flags_opt_off=""
     fi
     compiler_num="$curl_cv_def___INTEL_COMPILER"
   else
@@ -116,12 +189,13 @@ AC_DEFUN([CARES_CHECK_COMPILER_INTEL], [
 ])
 
 
-dnl CARES_PROCESS_CC_BASIC_OPTS
+dnl CARES_SET_COMPILER_BASIC_OPTS
 dnl -------------------------------------------------
-dnl Sets compiler options/flags which are independant
-dnl of configure's debug or warnings options.
+dnl Sets compiler specific options/flags which do not
+dnl depend on configure's debug, optimize or warnings
+dnl options.
 
-AC_DEFUN([CARES_PROCESS_CC_BASIC_OPTS], [
+AC_DEFUN([CARES_SET_COMPILER_BASIC_OPTS], [
   AC_REQUIRE([CARES_CHECK_COMPILER])dnl
   #
   if test "$compiler_id" = "DECC"; then
@@ -174,44 +248,134 @@ AC_DEFUN([CARES_PROCESS_CC_BASIC_OPTS], [
 ])
 
 
-dnl CARES_PROCESS_CC_DEBUG_OPTS
+dnl CARES_SET_COMPILER_DEBUG_OPTS
 dnl -------------------------------------------------
-dnl Sets compiler options/flags which depend on
-dnl configure's debug given option.
+dnl Sets compiler specific options/flags which depend
+dnl on configure's debug option.
 
-AC_DEFUN([CARES_PROCESS_CC_DEBUG_OPTS], [
+AC_DEFUN([CARES_SET_COMPILER_DEBUG_OPTS], [
   AC_REQUIRE([CARES_CHECK_OPTION_DEBUG])dnl
   AC_REQUIRE([CARES_CHECK_COMPILER])dnl
   #
-  if test "$want_debug" = "yes"; then
-    CFLAGS="$CFLAGS -g"
+  if test "$compiler_id" != "unknown"; then
+    #
+    ac_save_CFLAGS="$CFLAGS"
+    ac_save_CPPFLAGS="$CPPFLAGS"
+    #
+    honor_debug_option="yes"
+    CARES_VAR_STRIP([CFLAGS],[${flags_dbg_all}])
+    CARES_VAR_STRIP([CPPFLAGS],[${flags_dbg_all}])
+    if test "$want_debug" = "yes"; then
+      CFLAGS="$CFLAGS $flags_dbg_yes"
+      AC_MSG_CHECKING([if compiler accepts debug enabling flags $flags_dbg_yes])
+    fi
+    if test "$want_debug" = "no"; then
+      CFLAGS="$CFLAGS $flags_dbg_off"
+      AC_MSG_CHECKING([if compiler accepts debug disabling flags $flags_dbg_off])
+    fi
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+      ]],[[
+        int i = 1;
+        return i;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+    ],[
+      AC_MSG_RESULT([no])
+      honor_debug_option="no"
+    ])
+    #
+    if test "$honor_debug_option" = "no"; then
+      CFLAGS="$ac_save_CFLAGS"
+      CPPFLAGS="$ac_save_CPPFLAGS"
+    fi
+    #
   fi
-  #
-  if test "$want_debug" = "no"; then
-    dnl strip off optimizer flags
-    NEWFLAGS=""
-    for flag in $CFLAGS; do
-      case "$flag" in
-        -O*)
-          dnl echo "cut off $flag"
-          ;;
-        *)
-          NEWFLAGS="$NEWFLAGS $flag"
-          ;;
-      esac
-    done
-    CFLAGS=$NEWFLAGS
-  fi
-  #
 ])
 
 
-dnl CARES_PROCESS_CC_WARNING_OPTS
+dnl CARES_SET_COMPILER_OPTIMIZE_OPTS
+dnl -------------------------------------------------
+dnl Sets compiler specific options/flags which depend
+dnl on configure's optimize option.
+
+AC_DEFUN([CARES_SET_COMPILER_OPTIMIZE_OPTS], [
+  AC_REQUIRE([CARES_CHECK_OPTION_OPTIMIZE])dnl
+  AC_REQUIRE([CARES_CHECK_COMPILER])dnl
+  #
+  if test "$compiler_id" != "unknown"; then
+    #
+    ac_save_CFLAGS="$CFLAGS"
+    ac_save_CPPFLAGS="$CPPFLAGS"
+    #
+    dnl If optimization request setting has not been explicitly specified,
+    dnl it has been derived from the debug setting and initially assumed.
+    dnl This initially assumed optimizer setting will finally be ignored
+    dnl if CFLAGS or CPPFLAGS already hold optimizer flags. This implies
+    dnl that an initially assumed optimizer setting might not be honored.
+    #
+    honor_optimize_option="yes"
+    if test "$want_optimize" = "assume_no" ||
+       test "$want_optimize" = "assume_yes"; then
+      AC_MSG_CHECKING([if compiler optimizer assumed setting might be used])
+      CARES_VAR_MATCH_IFELSE([CFLAGS],[${flags_opt_all}],[
+        honor_optimize_option="no"
+      ])
+      CARES_VAR_MATCH_IFELSE([CPPFLAGS],[${flags_opt_all}],[
+        honor_optimize_option="no"
+      ])
+      AC_MSG_RESULT([$honor_optimize_option])
+      if test "$honor_optimize_option" = "yes"; then
+        if test "$want_optimize" = "assume_yes"; then
+          want_optimize="yes"
+        fi
+        if test "$want_optimize" = "assume_no"; then
+          want_optimize="no"
+        fi
+      fi
+    fi
+    #
+    if test "$honor_optimize_option" = "yes"; then
+      CARES_VAR_STRIP([CFLAGS],[${flags_opt_all}])
+      CARES_VAR_STRIP([CPPFLAGS],[${flags_opt_all}])
+      if test "$want_optimize" = "yes"; then
+        CFLAGS="$CFLAGS $flags_opt_yes"
+        AC_MSG_CHECKING([if compiler accepts optimizer enabling flags $flags_opt_yes])
+      fi
+      if test "$want_optimize" = "no"; then
+        CFLAGS="$CFLAGS $flags_opt_off"
+        AC_MSG_CHECKING([if compiler accepts optimizer disabling flags $flags_opt_off])
+      fi
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+        ]],[[
+          int i = 1;
+          return i;
+        ]])
+      ],[
+        AC_MSG_RESULT([yes])
+      ],[
+        AC_MSG_RESULT([no])
+        honor_optimize_option="no"
+      ])
+    fi
+    #
+    if test "$honor_optimize_option" = "no"; then
+      CFLAGS="$ac_save_CFLAGS"
+      CPPFLAGS="$ac_save_CPPFLAGS"
+    fi
+    #
+  fi
+])
+
+
+dnl CARES_SET_COMPILER_WARNING_OPTS
 dnl -------------------------------------------------
 dnl Sets compiler options/flags which depend on
 dnl configure's warnings given option.
 
-AC_DEFUN([CARES_PROCESS_CC_WARNING_OPTS], [
+AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
   AC_REQUIRE([CARES_CHECK_OPTION_WARNINGS])dnl
   AC_REQUIRE([CARES_CHECK_COMPILER])dnl
   #
@@ -236,7 +400,7 @@ AC_DEFUN([CARES_PROCESS_CC_WARNING_OPTS], [
   if test "$compiler_id" = "GNUC"; then
     #
     # FIXME: Some of these warnings should be changed into errors
-    #        and moved to CARES-PROCESS-CC-BASIC-OPTS
+    #        and moved to CARES-SET-COMPILER-BASIC-OPTS
     #
     if test "$want_warnings" = "yes"; then
       dnl this is a set of options we believe *ALL* gcc versions support:
@@ -295,6 +459,7 @@ dnl CARES_PROCESS_DEBUG_BUILD_OPTS
 dnl -------------------------------------------------
 dnl Settings which depend on configure's debug given
 dnl option, and further configure the build process.
+dnl Don't use this macro for compiler dependant stuff.
 
 AC_DEFUN([CARES_PROCESS_DEBUG_BUILD_OPTS], [
   AC_REQUIRE([CARES_CHECK_OPTION_DEBUG])dnl
@@ -311,9 +476,86 @@ AC_DEFUN([CARES_PROCESS_DEBUG_BUILD_OPTS], [
     dnl libcurl stuff so this BUILDING_LIBCURL is not THAT much uglier
     AC_DEFINE(BUILDING_LIBCURL, 1, [when building as static part of libcurl])
 
-    CPPFLAGS="$CPPFLAGS -DCURLDEBUG -I$srcdir/../include"
+    CPPFLAGS="$CPPFLAGS -DCURLDEBUG"
+
+    dnl CHECKME: Do we still need so specify this include path here?
+    CPPFLAGS="$CPPFLAGS -I$srcdir/../include"
+
   fi
   #
 ])
 
 
+dnl CARES_CHECK_PROG_CC
+dnl -------------------------------------------------
+dnl Check for compiler program, preventing CFLAGS and
+dnl CPPFLAGS from being unexpectedly changed.
+
+AC_DEFUN([CARES_CHECK_PROG_CC], [
+  ac_save_CFLAGS="$CFLAGS"
+  ac_save_CPPFLAGS="$CPPFLAGS"
+  AC_PROG_CC
+  CFLAGS="$ac_save_CFLAGS"
+  CPPFLAGS="$ac_save_CPPFLAGS"
+])
+
+
+dnl CARES_VAR_MATCH (VARNAME, VALUE)
+dnl -------------------------------------------------
+dnl Verifies if shell variable VARNAME contains VALUE.
+dnl Contents of variable VARNAME and VALUE are handled
+dnl as whitespace separated lists of words. If at least
+dnl one word of VALUE is present in VARNAME the match
+dnl is considered positive, otherwise false.
+
+AC_DEFUN([CARES_VAR_MATCH], [
+  ac_var_match_word="no"
+  for word1 in "${[$1]}"; do
+    for word2 in "[$2]"; do
+      if test "$word1" = "$word2"; then
+        ac_var_match_word="yes"
+      fi
+    done
+  done
+])
+
+
+dnl CARES_VAR_MATCH_IFELSE (VARNAME, VALUE,
+dnl                        [ACTION-IF-MATCH], [ACTION-IF-NOT-MATCH])
+dnl -------------------------------------------------
+dnl This performs a CURL_VAR_MATCH check and executes
+dnl first branch if the match is positive, otherwise
+dnl the second branch is executed.
+
+AC_DEFUN([CARES_VAR_MATCH_IFELSE], [
+  CARES_VAR_MATCH([$1],[$2])
+  if test "$ac_var_match_word" = "yes"; then
+  ifelse($3,,:,[$3])
+  ifelse($4,,,[else
+    [$4]])
+  fi
+])
+
+
+dnl CARES_VAR_STRIP (VARNAME, VALUE)
+dnl -------------------------------------------------
+dnl Contents of variable VARNAME and VALUE are handled
+dnl as whitespace separated lists of words. Each word
+dnl from VALUE is removed from VARNAME when present.
+
+AC_DEFUN([CARES_VAR_STRIP], [
+  ac_var_stripped=""
+  for word1 in "${[$1]}"; do
+    ac_var_strip_word="no"
+    for word2 in "[$2]"; do
+      if test "$word1" = "$word2"; then
+        ac_var_strip_word="yes"
+      fi
+    done
+    if test "$ac_var_strip_word" = "no"; then
+      ac_var_stripped="$ac_var_stripped $word1"
+    fi
+  done
+  dnl squeeze whitespace out of result
+  [$1]=`eval echo $[$1]`
+])

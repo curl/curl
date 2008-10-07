@@ -37,6 +37,7 @@ AM_CONFIG_HEADER(lib/config.h src/config.h include/curl/curlbuild.h)
 AM_MAINTAINER_MODE
 
 CURL_CHECK_OPTION_DEBUG
+CURL_CHECK_OPTION_OPTIMIZE
 CURL_CHECK_OPTION_WARNINGS
 
 dnl SED is mandatory for configure process and libtool.
@@ -133,7 +134,7 @@ dnl Get system canonical name
 AC_DEFINE_UNQUOTED(OS, "${host}", [cpu-machine-OS])
 
 dnl Checks for programs.
-AC_PROG_CC
+CURL_CHECK_PROG_CC
 
 dnl Our curl_off_t internal and external configure settings
 CURL_CONFIGURE_CURL_OFF_T
@@ -251,9 +252,10 @@ dnl platform/compiler/architecture specific checks/flags
 dnl **********************************************************************
 
 CURL_CHECK_COMPILER
-CURL_PROCESS_CC_BASIC_OPTS
-CURL_PROCESS_CC_DEBUG_OPTS
-CURL_PROCESS_CC_WARNING_OPTS
+CURL_SET_COMPILER_BASIC_OPTS
+CURL_SET_COMPILER_DEBUG_OPTS
+CURL_SET_COMPILER_OPTIMIZE_OPTS
+CURL_SET_COMPILER_WARNING_OPTS
 
 case $host in
   #
@@ -2528,6 +2530,18 @@ if test "x$USE_LIBSSH2" = "x1"; then
 fi
 
 AC_SUBST(SUPPORT_PROTOCOLS)
+
+dnl squeeze whitespace out of some variables
+
+CFLAGS=`eval echo $CFLAGS`
+CPPFLAGS=`eval echo $CPPFLAGS`
+DEFS=`eval echo $DEFS`
+LDFLAGS=`eval echo $LDFLAGS`
+LIBS=`eval echo $LIBS`
+
+CURL_LIBS=`eval echo $CURL_LIBS`
+LIBCURL_LIBS=`eval echo $LIBCURL_LIBS`
+TEST_SERVER_LIBS=`eval echo $TEST_SERVER_LIBS`
 
 AC_CONFIG_FILES([Makefile \
            docs/Makefile \

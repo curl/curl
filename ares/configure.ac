@@ -9,6 +9,7 @@ AM_CONFIG_HEADER([config.h])
 AM_MAINTAINER_MODE
 
 CARES_CHECK_OPTION_DEBUG
+CARES_CHECK_OPTION_OPTIMIZE
 CARES_CHECK_OPTION_WARNINGS
 
 dnl SED is mandatory for configure process and libtool.
@@ -67,7 +68,7 @@ AC_CANONICAL_HOST
 dnl Get system canonical name
 AC_DEFINE_UNQUOTED(OS, "${host}", [cpu-machine-OS])
 
-AC_PROG_CC
+CARES_CHECK_PROG_CC
 AM_PROG_CC_C_O
 AC_PROG_INSTALL
 
@@ -142,9 +143,10 @@ dnl platform/compiler/architecture specific checks/flags
 dnl **********************************************************************
 
 CARES_CHECK_COMPILER
-CARES_PROCESS_CC_BASIC_OPTS
-CARES_PROCESS_CC_DEBUG_OPTS
-CARES_PROCESS_CC_WARNING_OPTS
+CARES_SET_COMPILER_BASIC_OPTS
+CARES_SET_COMPILER_DEBUG_OPTS
+CARES_SET_COMPILER_OPTIMIZE_OPTS
+CARES_SET_COMPILER_WARNING_OPTS
 
 case $host in
   #
@@ -881,6 +883,16 @@ fi
 
 CARES_PRIVATE_LIBS="$LIBS"
 AC_SUBST(CARES_PRIVATE_LIBS)
+
+dnl squeeze whitespace out of some variables
+
+CFLAGS=`eval echo $CFLAGS`
+CPPFLAGS=`eval echo $CPPFLAGS`
+DEFS=`eval echo $DEFS`
+LDFLAGS=`eval echo $LDFLAGS`
+LIBS=`eval echo $LIBS`
+
+CARES_PRIVATE_LIBS=`eval echo $CARES_PRIVATE_LIBS`
 
 AC_CONFIG_FILES([Makefile libcares.pc])
 AC_OUTPUT
