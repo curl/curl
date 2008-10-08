@@ -1501,8 +1501,14 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * user:password to use in the operation
      */
     {
-      char* userpwd = va_arg(param, char *);
-      char* separator = strchr(userpwd, ':');
+      char* userpwd;
+      char* separator;
+
+      userpwd = va_arg(param, char *);
+      if(userpwd == NULL)
+        break;
+
+      separator = strchr(userpwd, ':');
       if (separator != NULL) {
 
         /* store username part of option */
