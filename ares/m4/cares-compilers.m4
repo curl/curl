@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 6
+# serial 9
 
 
 dnl CARES_CHECK_COMPILER
@@ -419,31 +419,36 @@ AC_DEFUN([CARES_SET_COMPILER_DEBUG_OPTS], [
   #
   if test "$compiler_id" != "unknown"; then
     #
-    ac_save_CFLAGS="$CFLAGS"
-    ac_save_CPPFLAGS="$CPPFLAGS"
+    tmp_save_CFLAGS="$CFLAGS"
+    tmp_save_CPPFLAGS="$CPPFLAGS"
     #
-    honor_debug_option="yes"
-    CARES_VAR_STRIP([CFLAGS],[${flags_dbg_all}])
-    CARES_VAR_STRIP([CPPFLAGS],[${flags_dbg_all}])
+    tmp_options=""
+    tmp_CFLAGS="$CFLAGS"
+    tmp_CPPFLAGS="$CPPFLAGS"
+    CARES_VAR_STRIP([tmp_CFLAGS],[$flags_dbg_all])
+    CARES_VAR_STRIP([tmp_CPPFLAGS],[$flags_dbg_all])
+    #
     if test "$want_debug" = "yes"; then
-      CFLAGS="$CFLAGS $flags_dbg_yes"
-      AC_MSG_CHECKING([if compiler accepts debug enabling flags $flags_dbg_yes])
+      AC_MSG_CHECKING([if compiler accepts debug enabling options])
+      tmp_options="$flags_dbg_yes"
     fi
     if test "$want_debug" = "no"; then
-      CFLAGS="$CFLAGS $flags_dbg_off"
-      AC_MSG_CHECKING([if compiler accepts debug disabling flags $flags_dbg_off])
+      AC_MSG_CHECKING([if compiler accepts debug disabling options])
+      tmp_options="$flags_dbg_off"
     fi
+    #
+    CPPFLAGS=`eval echo $tmp_CPPFLAGS`
+    CFLAGS=`eval echo $tmp_CFLAGS $tmp_options`
     CARES_COMPILER_WORKS_IFELSE([
       AC_MSG_RESULT([yes])
+      AC_MSG_NOTICE([compiler options added: $tmp_options])
     ],[
       AC_MSG_RESULT([no])
-      honor_debug_option="no"
+      AC_MSG_NOTICE([compiler options rejected: $tmp_options])
+      dnl restore initial settings
+      CPPFLAGS="$tmp_save_CPPFLAGS"
+      CFLAGS="$tmp_save_CFLAGS"
     ])
-    #
-    if test "$honor_debug_option" = "no"; then
-      CFLAGS="$ac_save_CFLAGS"
-      CPPFLAGS="$ac_save_CPPFLAGS"
-    fi
     #
   fi
 ])
@@ -460,8 +465,13 @@ AC_DEFUN([CARES_SET_COMPILER_OPTIMIZE_OPTS], [
   #
   if test "$compiler_id" != "unknown"; then
     #
-    ac_save_CFLAGS="$CFLAGS"
-    ac_save_CPPFLAGS="$CPPFLAGS"
+    tmp_save_CFLAGS="$CFLAGS"
+    tmp_save_CPPFLAGS="$CPPFLAGS"
+    #
+    tmp_options=""
+    tmp_CFLAGS="$CFLAGS"
+    tmp_CPPFLAGS="$CPPFLAGS"
+    honor_optimize_option="yes"
     #
     dnl If optimization request setting has not been explicitly specified,
     dnl it has been derived from the debug setting and initially assumed.
@@ -469,14 +479,13 @@ AC_DEFUN([CARES_SET_COMPILER_OPTIMIZE_OPTS], [
     dnl if CFLAGS or CPPFLAGS already hold optimizer flags. This implies
     dnl that an initially assumed optimizer setting might not be honored.
     #
-    honor_optimize_option="yes"
     if test "$want_optimize" = "assume_no" ||
        test "$want_optimize" = "assume_yes"; then
       AC_MSG_CHECKING([if compiler optimizer assumed setting might be used])
-      CARES_VAR_MATCH_IFELSE([CFLAGS],[${flags_opt_all}],[
+      CARES_VAR_MATCH_IFELSE([tmp_CFLAGS],[$flags_opt_all],[
         honor_optimize_option="no"
       ])
-      CARES_VAR_MATCH_IFELSE([CPPFLAGS],[${flags_opt_all}],[
+      CARES_VAR_MATCH_IFELSE([tmp_CPPFLAGS],[$flags_opt_all],[
         honor_optimize_option="no"
       ])
       AC_MSG_RESULT([$honor_optimize_option])
@@ -491,27 +500,28 @@ AC_DEFUN([CARES_SET_COMPILER_OPTIMIZE_OPTS], [
     fi
     #
     if test "$honor_optimize_option" = "yes"; then
-      CARES_VAR_STRIP([CFLAGS],[${flags_opt_all}])
-      CARES_VAR_STRIP([CPPFLAGS],[${flags_opt_all}])
+      CARES_VAR_STRIP([tmp_CFLAGS],[$flags_opt_all])
+      CARES_VAR_STRIP([tmp_CPPFLAGS],[$flags_opt_all])
       if test "$want_optimize" = "yes"; then
-        CFLAGS="$CFLAGS $flags_opt_yes"
-        AC_MSG_CHECKING([if compiler accepts optimizer enabling flags $flags_opt_yes])
+        AC_MSG_CHECKING([if compiler accepts optimizer enabling options])
+        tmp_options="$flags_opt_yes"
       fi
       if test "$want_optimize" = "no"; then
-        CFLAGS="$CFLAGS $flags_opt_off"
-        AC_MSG_CHECKING([if compiler accepts optimizer disabling flags $flags_opt_off])
+        AC_MSG_CHECKING([if compiler accepts optimizer disabling options])
+        tmp_options="$flags_opt_off"
       fi
+      CPPFLAGS=`eval echo $tmp_CPPFLAGS`
+      CFLAGS=`eval echo $tmp_CFLAGS $tmp_options`
       CARES_COMPILER_WORKS_IFELSE([
         AC_MSG_RESULT([yes])
+        AC_MSG_NOTICE([compiler options added: $tmp_options])
       ],[
         AC_MSG_RESULT([no])
-        honor_optimize_option="no"
+        AC_MSG_NOTICE([compiler options rejected: $tmp_options])
+        dnl restore initial settings
+        CPPFLAGS="$tmp_save_CPPFLAGS"
+        CFLAGS="$tmp_save_CFLAGS"
       ])
-    fi
-    #
-    if test "$honor_optimize_option" = "no"; then
-      CFLAGS="$ac_save_CFLAGS"
-      CPPFLAGS="$ac_save_CPPFLAGS"
     fi
     #
   fi
@@ -672,7 +682,7 @@ dnl is considered positive, otherwise false.
 
 AC_DEFUN([CARES_VAR_MATCH], [
   ac_var_match_word="no"
-  for word1 in "${[$1]}"; do
+  for word1 in "$[$1]"; do
     for word2 in "[$2]"; do
       if test "$word1" = "$word2"; then
         ac_var_match_word="yes"
@@ -707,7 +717,7 @@ dnl from VALUE is removed from VARNAME when present.
 
 AC_DEFUN([CARES_VAR_STRIP], [
   ac_var_stripped=""
-  for word1 in "${[$1]}"; do
+  for word1 in "$[$1]"; do
     ac_var_strip_word="no"
     for word2 in "[$2]"; do
       if test "$word1" = "$word2"; then
