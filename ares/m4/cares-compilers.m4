@@ -40,6 +40,7 @@ AC_DEFUN([CARES_CHECK_COMPILER], [
   CARES_CHECK_COMPILER_IBM
   CARES_CHECK_COMPILER_INTEL
   CARES_CHECK_COMPILER_GNU
+  CARES_CHECK_COMPILER_SUN
   #
   if test "$compiler_id" = "unknown"; then
   cat <<_EOF 1>&2
@@ -206,6 +207,28 @@ AC_DEFUN([CARES_CHECK_COMPILER_INTEL], [
       flags_opt_off="/Od"
     fi
     compiler_num="$curl_cv_def___INTEL_COMPILER"
+  else
+    AC_MSG_RESULT([no])
+  fi
+])
+
+
+dnl CARES_CHECK_COMPILER_SUN
+dnl -------------------------------------------------
+dnl Verify if the C compiler being used is SUN's.
+
+AC_DEFUN([CARES_CHECK_COMPILER_SUN], [
+  AC_MSG_CHECKING([whether we are using the SUN C compiler])
+  CURL_CHECK_DEF([__SUNPRO_C], [], [silent])
+  if test "$curl_cv_have_def___SUNPRO_C" = "yes"; then
+    AC_MSG_RESULT([yes])
+    compiler_id="SUNC"
+    flags_dbg_all="-g -s"
+    flags_dbg_yes="-g"
+    flags_dbg_off="-s"
+    flags_opt_all="-O -xO1 -xO2 -xO3 -xO4 -xO5"
+    flags_opt_yes="-xO2"
+    flags_opt_off=""
   else
     AC_MSG_RESULT([no])
   fi
@@ -414,24 +437,6 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
     fi
   fi
   #
-  if test "$compiler_id" = "HPC"; then
-    if test "$want_warnings" = "yes"; then
-      dnl Issue all warnings
-      CFLAGS="$CFLAGS +w1"
-    fi
-  fi
-  #
-  if test "$compiler_id" = "ICC_unix"; then
-    if test "$want_warnings" = "yes"; then
-      if test "$compiler_num" -gt "600"; then
-        dnl Show errors, warnings, and remarks
-        CPPFLAGS="$CPPFLAGS -Wall"
-        dnl Perform extra compile-time code checking
-        CPPFLAGS="$CPPFLAGS -Wcheck"
-      fi
-    fi
-  fi
-  #
   if test "$compiler_id" = "GNUC"; then
     #
     # FIXME: Some of these warnings should be changed into errors
@@ -484,6 +489,31 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
       done
       CFLAGS="$CFLAGS $WARN"
       AC_MSG_NOTICE([Added this set of compiler options: $WARN])
+    fi
+  fi
+  #
+  if test "$compiler_id" = "HPC"; then
+    if test "$want_warnings" = "yes"; then
+      dnl Issue all warnings
+      CFLAGS="$CFLAGS +w1"
+    fi
+  fi
+  #
+  if test "$compiler_id" = "ICC_unix"; then
+    if test "$want_warnings" = "yes"; then
+      if test "$compiler_num" -gt "600"; then
+        dnl Show errors, warnings, and remarks
+        CPPFLAGS="$CPPFLAGS -Wall"
+        dnl Perform extra compile-time code checking
+        CPPFLAGS="$CPPFLAGS -Wcheck"
+      fi
+    fi
+  fi
+  #
+  if test "$compiler_id" = "SUNC"; then
+    if test "$want_warnings" = "yes"; then
+      dnl Perform stricter semantic and lint-like checks
+      CFLAGS="$CFLAGS -v"
     fi
   fi
   #
