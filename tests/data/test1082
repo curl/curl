@@ -4,7 +4,6 @@
 HTTP
 HTTP GET
 --interface
-IPv6
 </keywords>
 </info>
 
@@ -26,21 +25,17 @@ Content-Type: text/plain
 #
 # Client-side
 <client>
-<features>
-ipv6
-</features>
 <server>
-http-ipv6
+http
 </server>
  <name>
-HTTP-IPv6 GET with numeric localhost --interface
+HTTP GET with localhost --interface
  </name>
  <command>
--g "http://%HOST6IP:%HTTP6PORT/1046" --interface ::1
+http://%HOSTIP:%HTTPPORT/1082 --interface localhost
 </command>
-# --interface doesn't accept an address surrounded by [] so %CLIENT6IP is out
 <precheck>
-perl -e "print 'Test requires default test server host address' if ( '%CLIENT6IP' ne '[::1]' );"
+perl -e "print 'Test requires default test server host address' if ( '%CLIENTIP' ne '127.0.0.1' );"
 </precheck>
 </client>
 
@@ -51,8 +46,8 @@ perl -e "print 'Test requires default test server host address' if ( '%CLIENT6IP
 ^User-Agent:.*
 </strip>
 <protocol>
-GET /1046 HTTP/1.1
-Host: %HOST6IP:%HTTP6PORT
+GET /1082 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

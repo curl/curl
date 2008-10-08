@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel Fandrich (8 Oct 2008)
+- Added tests 1082 through 1085 to test symbolic --interface parameters
+
 Daniel Stenberg (8 Oct 2008)
 - Igor filed bug #2111613 (http://curl.haxx.se/bug/view.cgi?id=2111613) that
   eventually identified a flaw in how the multi_socket interface in some cases

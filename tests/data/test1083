@@ -33,14 +33,13 @@ ipv6
 http-ipv6
 </server>
  <name>
-HTTP-IPv6 GET with numeric localhost --interface
+HTTP-IPv6 GET with ip6-localhost --interface
  </name>
  <command>
--g "http://%HOST6IP:%HTTP6PORT/1046" --interface ::1
+-g "http://%HOST6IP:%HTTP6PORT/1083" --interface ip6-localhost
 </command>
-# --interface doesn't accept an address surrounded by [] so %CLIENT6IP is out
 <precheck>
-perl -e "print 'Test requires default test server host address' if ( '%CLIENT6IP' ne '[::1]' );"
+perl -e "print 'Test requires default test server host address' if ( '%CLIENT6IP' ne '[::1]' );" && ./server/resolve --ipv6 ip6-localhost
 </precheck>
 </client>
 
@@ -51,7 +50,7 @@ perl -e "print 'Test requires default test server host address' if ( '%CLIENT6IP
 ^User-Agent:.*
 </strip>
 <protocol>
-GET /1046 HTTP/1.1
+GET /1083 HTTP/1.1
 Host: %HOST6IP:%HTTP6PORT
 Accept: */*
 
