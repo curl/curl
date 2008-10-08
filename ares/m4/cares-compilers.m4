@@ -129,7 +129,7 @@ AC_DEFUN([CARES_CHECK_COMPILER_HP], [
   CURL_CHECK_DEF([__HP_cc], [], [silent])
   if test "$curl_cv_have_def___HP_cc" = "yes"; then
     AC_MSG_RESULT([yes])
-    compiler_id="HPC"
+    compiler_id="HPUXC"
     flags_dbg_all="-g -s"
     flags_dbg_yes="-g"
     flags_dbg_off="-s"
@@ -235,6 +235,64 @@ AC_DEFUN([CARES_CHECK_COMPILER_SUN], [
 ])
 
 
+dnl CARES_COMPILER_WORKS_IFELSE ([ACTION-IF-WORKS], [ACTION-IF-NOT-WORKS])
+dnl -------------------------------------------------
+dnl Verify if the C compiler seems to work with the
+dnl settings that are 'active' at the time the test
+dnl is performed.
+
+AC_DEFUN([CARES_COMPILER_WORKS_IFELSE], [
+  dnl compilation capability verification
+  tmp_compiler_works="unknown"
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+    ]],[[
+      int i = 1;
+      return i;
+    ]])
+  ],[
+    tmp_compiler_works="yes"
+  ],[
+    tmp_compiler_works="no"
+  ])
+  dnl linking capability verification
+  if test "$tmp_compiler_works" = "yes"; then
+    AC_LINK_IFELSE([
+      AC_LANG_PROGRAM([[
+      ]],[[
+        int i = 1;
+        return i;
+      ]])
+    ],[
+      tmp_compiler_works="yes"
+    ],[
+      tmp_compiler_works="no"
+    ])
+  fi
+  dnl only do runtime verification when not cross-compiling
+  if test "x$cross_compiling" != "xyes" &&
+    test "$tmp_compiler_works" = "yes"; then
+    AC_RUN_IFELSE([
+      AC_LANG_PROGRAM([[
+      ]],[[
+        int i = 0;
+        exit(i);
+      ]])
+    ],[
+      tmp_compiler_works="yes"
+    ],[
+      tmp_compiler_works="no"
+    ])
+  fi
+  dnl branch upon test result
+  if test "$tmp_compiler_works" = "yes"; then
+  ifelse($1,,:,[$1])
+  ifelse($2,,,[else
+    $2])
+  fi
+])
+
+
 dnl CARES_SET_COMPILER_BASIC_OPTS
 dnl -------------------------------------------------
 dnl Sets compiler specific options/flags which do not
@@ -244,57 +302,108 @@ dnl options.
 AC_DEFUN([CARES_SET_COMPILER_BASIC_OPTS], [
   AC_REQUIRE([CARES_CHECK_COMPILER])dnl
   #
-  if test "$compiler_id" = "DECC"; then
-    dnl Select strict ANSI C compiler mode
-    CFLAGS="$CFLAGS -std1"
-    dnl Turn off optimizer ANSI C aliasing rules
-    CFLAGS="$CFLAGS -noansi_alias"
-    dnl Generate warnings for missing function prototypes
-    CFLAGS="$CFLAGS -warnprotos"
-    dnl Change some warnings into fatal errors
-    CFLAGS="$CFLAGS -msg_fatal toofewargs,toomanyargs"
-  fi
-  #
-  if test "$compiler_id" = "HPC"; then
-    dnl Disallow run-time dereferencing of null pointers
-    CFLAGS="$CFLAGS -z"
-  fi
-  #
-  if test "$compiler_id" = "IBMC"; then
-    dnl Ensure that compiler optimizations are always thread-safe.
-    CFLAGS="$CFLAGS -qthreaded"
-    dnl Disable type based strict aliasing optimizations, using worst
-    dnl case aliasing assumptions when compiling. Type based aliasing
-    dnl would restrict the lvalues that could be safely used to access
-    dnl a data object.
-    CFLAGS="$CFLAGS -qnoansialias"
-    dnl Force compiler to stop after the compilation phase, without
-    dnl generating an object code file when compilation has errors.
-    CFLAGS="$CFLAGS -qhalt=e"
-  fi
-  #
-  if test "$compiler_id" = "ICC_unix"; then
-    dnl On unix this compiler uses gcc's header files, so
-    dnl we select ANSI C89 dialect plus GNU extensions.
-    CPPFLAGS="$CPPFLAGS -std=gnu89"
-    dnl Change some warnings into errors
-    dnl #140: too many arguments in function call
-    dnl #147: declaration is incompatible with 'previous one'
-    dnl #165: too few arguments in function call
-    dnl #266: function declared implicitly
-    CPPFLAGS="$CPPFLAGS -we 140,147,165,266"
-    dnl Disable some remarks
-    dnl #279: controlling expression is constant
-    dnl #981: operands are evaluated in unspecified order
-    dnl #1469: "cc" clobber ignored
-    if test "$compiler_num" -lt "910"; then
-      CPPFLAGS="$CPPFLAGS -wd 279"
+  if test "$compiler_id" != "unknown"; then
+    #
+    tmp_save_CPPFLAGS="$CPPFLAGS"
+    tmp_save_CFLAGS="$CFLAGS"
+    tmp_CPPFLAGS=""
+    tmp_CFLAGS=""
+    #
+    case "$compiler_id" in
+        #
+      DECC)
+        #
+        dnl Select strict ANSI C compiler mode
+        tmp_CFLAGS="$tmp_CFLAGS -std1"
+        dnl Turn off optimizer ANSI C aliasing rules
+        tmp_CFLAGS="$tmp_CFLAGS -noansi_alias"
+        dnl Generate warnings for missing function prototypes
+        tmp_CFLAGS="$tmp_CFLAGS -warnprotos"
+        dnl Change some warnings into fatal errors
+        tmp_CFLAGS="$tmp_CFLAGS -msg_fatal toofewargs,toomanyargs"
+        ;;
+        #
+      GNUC)
+        #
+        dnl Placeholder
+        tmp_CFLAGS="$tmp_CFLAGS"
+        ;;
+        #
+      HPUXC)
+        #
+        dnl Placeholder
+        tmp_CFLAGS="$tmp_CFLAGS"
+        ;;
+        #
+      IBMC)
+        #
+        dnl Ensure that compiler optimizations are always thread-safe.
+        tmp_CFLAGS="$tmp_CFLAGS -qthreaded"
+        dnl Disable type based strict aliasing optimizations, using worst
+        dnl case aliasing assumptions when compiling. Type based aliasing
+        dnl would restrict the lvalues that could be safely used to access
+        dnl a data object.
+        tmp_CFLAGS="$tmp_CFLAGS -qnoansialias"
+        dnl Force compiler to stop after the compilation phase, without
+        dnl generating an object code file when compilation has errors.
+        tmp_CFLAGS="$tmp_CFLAGS -qhalt=e"
+        ;;
+        #
+      ICC_unix)
+        #
+        dnl On unix this compiler uses gcc's header files, so
+        dnl we select ANSI C89 dialect plus GNU extensions.
+        tmp_CPPFLAGS="$tmp_CPPFLAGS -std=gnu89"
+        dnl Change some warnings into errors
+        dnl #140: too many arguments in function call
+        dnl #147: declaration is incompatible with 'previous one'
+        dnl #165: too few arguments in function call
+        dnl #266: function declared implicitly
+        tmp_CPPFLAGS="$tmp_CPPFLAGS -we 140,147,165,266"
+        dnl Disable some remarks
+        dnl #279: controlling expression is constant
+        dnl #981: operands are evaluated in unspecified order
+        dnl #1469: "cc" clobber ignored
+        tmp_CPPFLAGS="$tmp_CPPFLAGS -wd 279,981,1469"
+        dnl Disable use of ANSI C aliasing rules in optimizations
+        tmp_CFLAGS="$tmp_CFLAGS -no-ansi-alias"
+        dnl Disable floating point optimizations
+        tmp_CFLAGS="$tmp_CFLAGS -fp-model precise"
+        ;;
+        #
+      ICC_windows)
+        #
+        dnl Placeholder
+        tmp_CFLAGS="$tmp_CFLAGS"
+        ;;
+        #
+      SUNC)
+        #
+        dnl Placeholder
+        tmp_CFLAGS="$tmp_CFLAGS"
+        ;;
+        #
+    esac
+    #
+    tmp_CPPFLAGS=`eval echo $tmp_CPPFLAGS`
+    tmp_CFLAGS=`eval echo $tmp_CFLAGS`
+    #
+    if test ! -z "$tmp_CFLAGS" || test ! -z "$tmp_CPPFLAGS"; then
+      AC_MSG_CHECKING([if compiler accepts some basic options])
+      CPPFLAGS=`eval echo $tmp_save_CPPFLAGS $tmp_CPPFLAGS`
+      CFLAGS=`eval echo $tmp_save_CFLAGS $tmp_CFLAGS`
+      CARES_COMPILER_WORKS_IFELSE([
+        AC_MSG_RESULT([yes])
+        AC_MSG_NOTICE([compiler options added: $tmp_CFLAGS $tmp_CPPFLAGS])
+      ],[
+        AC_MSG_RESULT([no])
+        AC_MSG_NOTICE([compiler options rejected: $tmp_CFLAGS $tmp_CPPFLAGS])
+        dnl restore initial settings
+        CPPFLAGS="$tmp_save_CPPFLAGS"
+        CFLAGS="$tmp_save_CFLAGS"
+      ])
     fi
-    CPPFLAGS="$CPPFLAGS -wd 981,1469"
-    dnl Disable use of ANSI C aliasing rules in optimizations
-    CFLAGS="$CFLAGS -no-ansi-alias"
-    dnl Disable floating point optimizations
-    CFLAGS="$CFLAGS -fp-model precise"
+    #
   fi
 ])
 
@@ -324,13 +433,7 @@ AC_DEFUN([CARES_SET_COMPILER_DEBUG_OPTS], [
       CFLAGS="$CFLAGS $flags_dbg_off"
       AC_MSG_CHECKING([if compiler accepts debug disabling flags $flags_dbg_off])
     fi
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-      ]],[[
-        int i = 1;
-        return i;
-      ]])
-    ],[
+    CARES_COMPILER_WORKS_IFELSE([
       AC_MSG_RESULT([yes])
     ],[
       AC_MSG_RESULT([no])
@@ -398,13 +501,7 @@ AC_DEFUN([CARES_SET_COMPILER_OPTIMIZE_OPTS], [
         CFLAGS="$CFLAGS $flags_opt_off"
         AC_MSG_CHECKING([if compiler accepts optimizer disabling flags $flags_opt_off])
       fi
-      AC_COMPILE_IFELSE([
-        AC_LANG_PROGRAM([[
-        ]],[[
-          int i = 1;
-          return i;
-        ]])
-      ],[
+      CARES_COMPILER_WORKS_IFELSE([
         AC_MSG_RESULT([yes])
       ],[
         AC_MSG_RESULT([no])
@@ -492,7 +589,7 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
     fi
   fi
   #
-  if test "$compiler_id" = "HPC"; then
+  if test "$compiler_id" = "HPUXC"; then
     if test "$want_warnings" = "yes"; then
       dnl Issue all warnings
       CFLAGS="$CFLAGS +w1"
@@ -597,7 +694,7 @@ AC_DEFUN([CARES_VAR_MATCH_IFELSE], [
   if test "$ac_var_match_word" = "yes"; then
   ifelse($3,,:,[$3])
   ifelse($4,,,[else
-    [$4]])
+    $4])
   fi
 ])
 
