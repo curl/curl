@@ -1520,6 +1520,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
         else {
             memcpy(p, userpwd, username_len);
             p[username_len] = '\0';
+            Curl_safefree(data->set.str[STRING_USERNAME]);
             data->set.str[STRING_USERNAME] = p;
         }
 
