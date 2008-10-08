@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 3
+# serial 6
 
 
 dnl CARES_CHECK_COMPILER
@@ -36,6 +36,7 @@ AC_DEFUN([CARES_CHECK_COMPILER], [
   flags_opt_off="unknown"
   #
   CARES_CHECK_COMPILER_DEC
+  CARES_CHECK_COMPILER_HP
   CARES_CHECK_COMPILER_IBM
   CARES_CHECK_COMPILER_INTEL
   CARES_CHECK_COMPILER_GNU
@@ -112,6 +113,28 @@ AC_DEFUN([CARES_CHECK_COMPILER_GNU], [
     flags_opt_all="-O -O0 -O1 -O2 -O3 -Os"
     flags_opt_yes="-O2"
     flags_opt_off="-O0"
+  else
+    AC_MSG_RESULT([no])
+  fi
+])
+
+
+dnl CARES_CHECK_COMPILER_HP
+dnl -------------------------------------------------
+dnl Verify if the C compiler being used is HP's.
+
+AC_DEFUN([CARES_CHECK_COMPILER_HP], [
+  AC_MSG_CHECKING([whether we are using the HP C compiler])
+  CURL_CHECK_DEF([__HP_cc], [], [silent])
+  if test "$curl_cv_have_def___HP_cc" = "yes"; then
+    AC_MSG_RESULT([yes])
+    compiler_id="HPC"
+    flags_dbg_all="-g -s"
+    flags_dbg_yes="-g"
+    flags_dbg_off="-s"
+    flags_opt_all="-O +O0 +O1 +O2 +O3 +O4"
+    flags_opt_yes="+O2"
+    flags_opt_off="+O0"
   else
     AC_MSG_RESULT([no])
   fi
@@ -207,6 +230,11 @@ AC_DEFUN([CARES_SET_COMPILER_BASIC_OPTS], [
     CFLAGS="$CFLAGS -warnprotos"
     dnl Change some warnings into fatal errors
     CFLAGS="$CFLAGS -msg_fatal toofewargs,toomanyargs"
+  fi
+  #
+  if test "$compiler_id" = "HPC"; then
+    dnl Disallow run-time dereferencing of null pointers
+    CFLAGS="$CFLAGS -z"
   fi
   #
   if test "$compiler_id" = "IBMC"; then
@@ -383,6 +411,13 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
     if test "$want_warnings" = "yes"; then
       dnl Select a higher warning level than default level2
       CFLAGS="$CFLAGS -msg_enable level3"
+    fi
+  fi
+  #
+  if test "$compiler_id" = "HPC"; then
+    if test "$want_warnings" = "yes"; then
+      dnl Issue all warnings
+      CFLAGS="$CFLAGS +w1"
     fi
   fi
   #
