@@ -13,6 +13,10 @@ Daniel Fandrich (7 Oct 2008)
   test a similar connection dropping scenario, but as a race condition, it's
   hard to test reliably.
 
+- Created test cases 1080 and 1081 to reproduce a problem of
+  CURLINFO_REDIRECT_URL leaking memory and returning incorrect results when
+  two URLs are requested. Reported by vmpdemo in bug #2152270
+
 Daniel Stenberg (7 Oct 2008)
 - Fixed CURLINFO_PRIMARY_IP: When libcurl created a connection to host A then
   the app re-used the handle to do a connection to host B and then again
