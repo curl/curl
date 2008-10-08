@@ -34,6 +34,7 @@ This release includes the following bugfixes:
  o CURLOPT_RANGE now works for SFTP downloads
  o FTP SIZE response 550 now causes CURLE_REMOTE_FILE_NOT_FOUND
  o CURLINFO_PRIMARY_IP fixed for persistent connection re-use cases
+ o remove_handle/add_handle multi interface timer callback flaw
 
 This release includes the following known bugs:
 

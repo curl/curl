@@ -532,6 +532,18 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   /* increase the alive-counter */
   multi->num_alive++;
 
+  /* A somewhat crude work-around for a little glitch in update_timer() that
+     happens if the lastcall time is set to the same time when the handle is
+     removed as when the next handle is added, as then the check in
+     update_timer() that prevents calling the application multiple times with
+     the same timer infor will not trigger and then the new handle's timeout
+     will not be notified to the app.
+
+     The work-around is thus simply to clear the 'lastcall' variable to force
+     update_timer() to always trigger a callback to the app when a new easy
+     handle is added */
+  memset(&multi->timer_lastcall, 0, sizeof(multi->timer_lastcall));
+
   update_timer(multi);
   return CURLM_OK;
 }
@@ -1013,9 +1025,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           easy->easy_handle->set.errorbuffer[0] = '\0';
         easy->easy_handle->state.errorbuf = FALSE;
 
-	easy->result = CURLE_OK;
-	result = CURLM_CALL_MULTI_PERFORM;
-	multistate(easy, CURLM_STATE_CONNECT);
+        easy->result = CURLE_OK;
+        result = CURLM_CALL_MULTI_PERFORM;
+        multistate(easy, CURLM_STATE_CONNECT);
       }
       else if (CURLE_OK == easy->result) {
         if(!easy->easy_conn->bits.tunnel_connecting)
