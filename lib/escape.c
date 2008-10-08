@@ -138,6 +138,12 @@ char *curl_easy_escape(CURL *handle, const char *string, int inlength)
   return ns;
 }
 
+/*
+ * Unescapes the given URL escaped string of given length. Returns a
+ * pointer to a malloced string with length given in *olen.
+ * If length == 0, the length is assumed to be strlen(string).
+ * If olen == NULL, no output length is stored.
+ */
 char *curl_easy_unescape(CURL *handle, const char *string, int length,
                          int *olen)
 {

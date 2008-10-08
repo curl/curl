@@ -2046,11 +2046,11 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   char *buf = data->state.buffer; /* this is a short cut to the buffer */
   CURLcode result=CURLE_OK;
   struct HTTP *http;
-  char *ppath = data->state.path;
+  const char *ppath = data->state.path;
   char ftp_typecode[sizeof(";type=?")] = "";
-  char *host = conn->host.name;
+  const char *host = conn->host.name;
   const char *te = ""; /* transfer-encoding */
-  char *ptr;
+  const char *ptr;
   const char *request;
   Curl_HttpReq httpreq = data->set.httpreq;
   char *addcookies = NULL;

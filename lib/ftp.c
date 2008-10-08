@@ -3150,7 +3150,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
   CURLcode result=CURLE_OK;
   bool was_ctl_valid = ftpc->ctl_valid;
   char *path;
-  char *path_to_use = data->state.path;
+  const char *path_to_use = data->state.path;
 
   if(!ftp)
     /* When the easy handle is removed from the multi while libcurl is still
@@ -3860,10 +3860,10 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
   /* the ftp struct is already inited in ftp_connect() */
   struct FTP *ftp = data->state.proto.ftp;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
-  size_t dlen;
-  char *slash_pos;  /* position of the first '/' char in curpos */
-  char *path_to_use = data->state.path;
-  char *cur_pos;
+  const char *slash_pos;  /* position of the first '/' char in curpos */
+  const char *path_to_use = data->state.path;
+  const char *cur_pos;
+  const char *filename = NULL;
 
   cur_pos = path_to_use; /* current position in path. point at the begin
                             of next path component */
@@ -3885,13 +3885,11 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
     if(data->state.path &&
        data->state.path[0] &&
        (data->state.path[strlen(data->state.path) - 1] != '/') )
-      ftpc->file = data->state.path;  /* this is a full file path */
-    else
-      ftpc->file = NULL;
+      filename = data->state.path;  /* this is a full file path */
       /*
         ftpc->file is not used anywhere other than for operations on a file.
         In other words, never for directory operations.
-        So we can safely set it to NULL here and use it as a
+        So we can safely leave filename as NULL here and use it as a
         argument in dir/file decisions.
       */
     break;
@@ -3901,7 +3899,6 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
     if(!path_to_use[0]) {
       /* no dir, no file */
       ftpc->dirdepth = 0;
-      ftpc->file = NULL;
       break;
     }
     slash_pos=strrchr(cur_pos, '/');
@@ -3918,10 +3915,10 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
         return CURLE_OUT_OF_MEMORY;
       }
       ftpc->dirdepth = 1; /* we consider it to be a single dir */
-      ftpc->file = slash_pos ? slash_pos+1 : cur_pos; /* rest is file name */
+      filename = slash_pos ? slash_pos+1 : cur_pos; /* rest is file name */
     }
     else
-      ftpc->file = cur_pos;  /* this is a file name only */
+      filename = cur_pos;  /* this is a file name only */
     break;
 
   default: /* allow pretty much anything */
@@ -3983,11 +3980,12 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
         }
       }
     }
-    ftpc->file = cur_pos;  /* the rest is the file name */
-  }
+    filename = cur_pos;  /* the rest is the file name */
+    break;
+  } /* switch */
 
-  if(ftpc->file && *ftpc->file) {
-    ftpc->file = curl_easy_unescape(conn->data, ftpc->file, 0, NULL);
+  if(filename && *filename) {
+    ftpc->file = curl_easy_unescape(conn->data, filename, 0, NULL);
     if(NULL == ftpc->file) {
       freedirs(ftpc);
       failf(data, "no memory");
@@ -4013,14 +4011,15 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
   if(ftpc->prevpath) {
     /* prevpath is "raw" so we convert the input path before we compare the
        strings */
-    char *path = curl_easy_unescape(conn->data, data->state.path, 0, NULL);
+    int dlen;
+    char *path = curl_easy_unescape(conn->data, data->state.path, 0, &dlen);
     if(!path) {
       freedirs(ftpc);
       return CURLE_OUT_OF_MEMORY;
     }
 
-    dlen = strlen(path) - (ftpc->file?strlen(ftpc->file):0);
-    if((dlen == strlen(ftpc->prevpath)) &&
+    dlen -= ftpc->file?strlen(ftpc->file):0;
+    if((dlen == (int)strlen(ftpc->prevpath)) &&
        curl_strnequal(path, ftpc->prevpath, dlen)) {
       infof(data, "Request has same path as previous transfer\n");
       ftpc->cwddone = TRUE;
