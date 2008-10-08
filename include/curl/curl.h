@@ -1141,6 +1141,10 @@ typedef enum {
      working with OpenSSL-powered builds. */
   CINIT(CERTINFO, LONG, 172),
 
+  /* "name" and "pwd" to use when fetching. */
+  CINIT(USERNAME, OBJECTPOINT, 173),
+  CINIT(PASSWORD, OBJECTPOINT, 174),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

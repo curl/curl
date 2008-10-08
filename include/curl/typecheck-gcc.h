@@ -196,6 +196,8 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_slist,
    (option) == CURLOPT_INTERFACE ||                                           \
    (option) == CURLOPT_NETRC_FILE ||                                          \
    (option) == CURLOPT_USERPWD ||                                             \
+   (option) == CURLOPT_USERNAME ||                                            \
+   (option) == CURLOPT_PASSWORD ||                                            \
    (option) == CURLOPT_PROXYUSERPWD ||                                        \
    (option) == CURLOPT_ENCODING ||                                            \
    (option) == CURLOPT_REFERER ||                                             \

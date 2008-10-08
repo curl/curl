@@ -2,7 +2,7 @@ Curl and libcurl 7.19.1
 
  Public curl releases:         107
  Command line options:         128
- curl_easy_setopt() options:   154
+ curl_easy_setopt() options:   156
  Public functions in libcurl:  58
  Known libcurl bindings:       37
  Contributors:                 672
@@ -14,6 +14,7 @@ This release includes the following changes:
  o Added CURLOPT_POSTREDIR
  o Better detect HTTP 1.0 servers and don't do HTTP 1.1 requests on them
  o configure --disable-proxy disables proxy
+ o Added CURLOPT_USERNAME and CURLOPT_PASSWORD
 
 This release includes the following bugfixes:
 
@@ -48,6 +49,7 @@ advice from friends like these:
  Keith Mok, Yang Tse, Daniel Fandrich, Guenter Knauf, Dmitriy Sergeyev,
  Linus Nielsen Feltzing, Martin Drasar, Stefan Krause, Dmitry Kurochkin,
  Mike Revi, Andres Garcia, Michael Goffioul, Markus Moeller, Rob Crittenden,
- Jamie Lokier, Emanuele Bovisio, Maxim Ivanov, Ian Lynagh, Daniel Egger
+ Jamie Lokier, Emanuele Bovisio, Maxim Ivanov, Ian Lynagh, Daniel Egger,
+ Igor Novoseltsev
 
         Thanks! (and sorry if I forgot to mention someone)

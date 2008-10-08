@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (8 Oct 2008)
+- Igor Novoseltsev brought a patch that introduced two new options to
+  curl_easy_setopt: CURLOPT_USERNAME and CURLOPT_PASSWORD that sort of
+  deprecates the good old CURLOPT_USERPWD since they allow applications to set
+  the user name and password independently and perhaps more importantly allow
+  both to contain colon(s) which CURLOPT_USERPWD doesn't fully support.
+
 Daniel Fandrich (7 Oct 2008)
 - Changed the handling of read/write errors in Curl_perform() to allow a
   a fresh connection to be made in such cases and the request retransmitted.

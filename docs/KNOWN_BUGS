@@ -160,10 +160,10 @@ may have been fixed since this was written!
   doesn't do a HEAD first to get the initial size. This needs to be done
   manually for HTTP PUT resume to work, and then '-C [index]'.
 
-7. CURLOPT_USERPWD and CURLOPT_PROXYUSERPWD have no way of providing user names
-  that contain a colon. This can't be fixed easily in a backwards compatible
-  way without adding new options (and then, they should most probably allow
-  setting user name and password separately).
+7. CURLOPT_PROXYUSERPWD has no way of providing user names that contain a
+  colon. This can't be fixed easily in a backwards compatible way without
+  adding new options. CURLOPT_USERPWD was split into CURLOPT_USERNAME and
+  CURLOPT_PASSWORD for this reason.
 
 6. libcurl ignores empty path parts in FTP URLs, whereas RFC1738 states that
   such parts should be sent to the server as 'CWD ' (without an argument).

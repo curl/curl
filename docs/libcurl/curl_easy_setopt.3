@@ -601,14 +601,34 @@ to prevent accidental information leakage.
 Pass a char * as parameter, which should be [user name]:[password] to use for
 the connection to the HTTP proxy.  Use \fICURLOPT_PROXYAUTH\fP to decide
 authentication method.
+.IP CURLOPT_USERNAME
+Pass a char * as parameter, which should be pointing to the zero terminated
+user name to use for the transfer.
+
+The CURLOPT_USERNAME option should be used in same way as the
+\fICURLOPT_USERPWD\fP is used.  In comparison to \fICURLOPT_USERPWD\fP the
+CURLOPT_USERNAME allows the username to contain colon, like in following
+example: "sip:user@example.com".  Note the CURLOPT_USERNAME option is an
+alternative way to set the user name.  There is no meaning to use it together
+with the \fICURLOPT_USERPWD\fP option.
+
+In order to specify the password to be used in conjunction with the user name
+use the \fICURLOPT_PASSWORD\fP option.  (Added in 7.19.1)
+.IP CURLOPT_PASSWORD
+Pass a char * as parameter, which should be pointing to the zero terminated
+password to use for the transfer.
+
+The CURLOPT_PASSWORD option should be used in conjunction with
+as the \fICURLOPT_USERNAME\fP option. (Added in 7.19.1)
 .IP CURLOPT_HTTPAUTH
 Pass a long as parameter, which is set to a bitmask, to tell libcurl what
 authentication method(s) you want it to use. The available bits are listed
 below. If more than one bit is set, libcurl will first query the site to see
 what authentication methods it supports and then pick the best one you allow
 it to use. For some methods, this will induce an extra network round-trip. Set
-the actual name and password with the \fICURLOPT_USERPWD\fP option. (Added in
-7.10.6)
+the actual name and password with the \fICURLOPT_USERPWD\fP option or
+with the \fICURLOPT_USERNAME\fP and the \fICURLOPT_USERPASSWORD\fP options.
+(Added in 7.10.6)
 .RS
 .IP CURLAUTH_BASIC
 HTTP Basic authentication. This is the default choice, and the only method
