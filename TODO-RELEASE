@@ -15,8 +15,6 @@ Awaiting feedback, updates or removal:
 
 Patches pending commit:
 
-179 - "[PATCH] Colon in username"
-
 180 -  CURLINFO_REDIRECT_URL leaks memory and is incorrect, bug #2152270
 
 181 - "multi object is stuck" bug #2111613
