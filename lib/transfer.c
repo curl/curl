@@ -1893,6 +1893,8 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
   data->state.authproblem = FALSE;
   data->state.authhost.want = data->set.httpauth;
   data->state.authproxy.want = data->set.proxyauth;
+  Curl_safefree(data->info.wouldredirect);
+  data->info.wouldredirect = NULL;
 
   /* If there is a list of cookie files to read, do it now! */
   if(data->change.cookielist) {

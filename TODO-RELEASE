@@ -13,12 +13,8 @@ Awaiting feedback, updates or removal:
 
 178 - "[Patch] Disable multi API support"
 
+182 -  Make CURLINFO_LASTSOCKET accessible during perform
+
 Patches pending commit:
 
-180 -  CURLINFO_REDIRECT_URL leaks memory and is incorrect, bug #2152270
-
-181 - "multi object is stuck" bug #2111613
-       needs to be done slightly nicer
-
-182 -
-
+183 -
