@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 12
+# serial 14
 
 
 dnl CARES_CHECK_COMPILER
@@ -441,7 +441,7 @@ AC_DEFUN([CARES_SET_COMPILER_BASIC_OPTS], [
         AC_MSG_NOTICE([compiler options added: $tmp_CFLAGS $tmp_CPPFLAGS])
       ],[
         AC_MSG_RESULT([no])
-        AC_MSG_NOTICE([compiler options rejected: $tmp_CFLAGS $tmp_CPPFLAGS])
+        AC_MSG_WARN([compiler options rejected: $tmp_CFLAGS $tmp_CPPFLAGS])
         dnl restore initial settings
         CPPFLAGS="$tmp_save_CPPFLAGS"
         CFLAGS="$tmp_save_CFLAGS"
@@ -488,7 +488,7 @@ AC_DEFUN([CARES_SET_COMPILER_DEBUG_OPTS], [
       AC_MSG_NOTICE([compiler options added: $tmp_options])
     ],[
       AC_MSG_RESULT([no])
-      AC_MSG_NOTICE([compiler options rejected: $tmp_options])
+      AC_MSG_WARN([compiler options rejected: $tmp_options])
       dnl restore initial settings
       CPPFLAGS="$tmp_save_CPPFLAGS"
       CFLAGS="$tmp_save_CFLAGS"
@@ -561,7 +561,7 @@ AC_DEFUN([CARES_SET_COMPILER_OPTIMIZE_OPTS], [
         AC_MSG_NOTICE([compiler options added: $tmp_options])
       ],[
         AC_MSG_RESULT([no])
-        AC_MSG_NOTICE([compiler options rejected: $tmp_options])
+        AC_MSG_WARN([compiler options rejected: $tmp_options])
         dnl restore initial settings
         CPPFLAGS="$tmp_save_CPPFLAGS"
         CFLAGS="$tmp_save_CFLAGS"
