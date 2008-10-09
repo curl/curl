@@ -794,7 +794,7 @@ static void help(void)
     "    --pubkey <key>  Public key file name (SSH)",
     " -Q/--quote <cmd>   Send command(s) to server before file transfer (F/SFTP)",
     "    --random-file <file> File for reading random data from (SSL)",
-    " -r/--range <range> Retrieve a byte range from a HTTP/1.1 or FTP server",
+    " -r/--range <range> Retrieve only the bytes within a range",
     "    --raw           Pass HTTP \"raw\", without any transfer decoding (H)",
     " -e/--referer       Referer URL (H)",
     " -O/--remote-name   Write output to a file named as the remote file",

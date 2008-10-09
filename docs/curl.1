@@ -982,9 +982,9 @@ See ln.
 random data. The data is used to seed the random engine for SSL connections.
 See also the \fI--egd-file\fP option.
 .IP "-r/--range <range>"
-(HTTP/FTP/FILE) Retrieve a byte range (i.e a partial document) from a
-HTTP/1.1 or FTP server or a local FILE. Ranges can be specified in a number of
-ways.
+(HTTP/FTP/SFTP/FILE) Retrieve a byte range (i.e a partial document) from a
+HTTP/1.1, FTP or SFTP server or a local FILE. Ranges can be specified
+in a number of ways.
 .RS
 .TP 10
 .B 0-499
@@ -1020,8 +1020,9 @@ You should also be aware that many HTTP/1.1 servers do not have this feature
 enabled, so that when you attempt to get a range, you'll instead get the whole
 document.
 
-FTP range downloads only support the simple 'start-stop' syntax (optionally
-with one of the numbers omitted). It depends on the non-RFC command SIZE.
+FTP and SFTP range downloads only support the simple 'start-stop' syntax
+(optionally with one of the numbers omitted). FTP use depends on the extended
+FTP command SIZE.
 
 If this option is used several times, the last one will be used.
 .IP "--raw"
