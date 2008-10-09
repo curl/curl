@@ -337,8 +337,12 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
         #
       HPUXC)
         #
-        dnl Placeholder
-        tmp_CFLAGS="$tmp_CFLAGS"
+        dnl Disallow run-time dereferencing of null pointers
+        tmp_CFLAGS="$tmp_CFLAGS -z"
+        dnl Disable some remarks
+        dnl #4227: padding struct with n bytes to align member
+        dnl #4255: padding size of struct with n bytes to alignment boundary
+        tmp_CFLAGS="$tmp_CFLAGS +W 4227,4255"
         ;;
         #
       IBMC)
