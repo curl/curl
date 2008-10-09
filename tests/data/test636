@@ -1,0 +1,43 @@
+<testcase>
+<info>
+<keywords>
+SFTP
+Range
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+data
+for ssh test
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+sftp
+</server>
+ <name>
+SFTP retrieval with X- byte range
+ </name>
+ <command>
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%PWD/log/file636.txt -r 5-
+</command>
+<file name="log/file636.txt">
+Test data
+for ssh test
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<valgrind>
+disable
+</valgrind>
+</verify>
+</testcase>

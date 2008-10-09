@@ -9,6 +9,10 @@
 Daniel Fandrich (8 Oct 2008)
 - Added tests 1082 through 1085 to test symbolic --interface parameters
 
+- Added tests 633 through 637 to test the new file range support for SFTP.
+  All but the first test cause an infinite loop or other failure and so
+  are added to DISABLED.
+
 Daniel Stenberg (8 Oct 2008)
 - Bug #2152270 (http://curl.haxx.se/bug/view.cgi?id=2152270) identified and
   fixed a CURLINFO_REDIRECT_URL memory leak and an additional wrong-doing:
