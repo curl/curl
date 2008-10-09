@@ -46,6 +46,7 @@ AC_DEFUN([CURL_CHECK_COMPILER], [
   CURL_CHECK_COMPILER_IBM
   CURL_CHECK_COMPILER_INTEL
   CURL_CHECK_COMPILER_GNU
+  CURL_CHECK_COMPILER_SGI
   CURL_CHECK_COMPILER_SUN
   #
   if test "$compiler_id" = "unknown"; then
@@ -219,6 +220,40 @@ AC_DEFUN([CURL_CHECK_COMPILER_INTEL], [
 ])
 
 
+dnl CURL_CHECK_COMPILER_SGI
+dnl -------------------------------------------------
+dnl Verify if the C compiler being used is SGI's.
+
+AC_DEFUN([CURL_CHECK_COMPILER_SGI], [
+  AC_MSG_CHECKING([whether we are using the SGI C compiler])
+  CURL_CHECK_DEF([_SGI_COMPILER_VERSION], [], [silent])
+  CURL_CHECK_DEF([_COMPILER_VERSION], [], [silent])
+  CURL_CHECK_DEF([__GNUC__], [], [silent])
+  CURL_CHECK_DEF([__sgi], [], [silent])
+  if test "$curl_cv_have_def___GNUC__ " = "no"; then
+    if test "$curl_cv_have_def__SGI_COMPILER_VERSION" = "yes"; then
+      compiler_id="SGIC"
+    fi
+    if test "$curl_cv_have_def__COMPILER_VERSION " = "yes" &&
+      test "$curl_cv_have_def___sgi " = "yes"; then
+      compiler_id="SGIC"
+    fi
+  fi
+  if test "$compiler_id" != "SGIC"; then
+    AC_MSG_RESULT([yes])
+    compiler_id="SGIC"
+    flags_dbg_all="-g -g0 -g1 -g2 -g3"
+    flags_dbg_yes="-g"
+    flags_dbg_off="-g0"
+    flags_opt_all="-O -O0 -O1 -O2 -O3 -Ofast"
+    flags_opt_yes="-O2"
+    flags_opt_off="-O0"
+  else
+    AC_MSG_RESULT([no])
+  fi
+])
+
+
 dnl CURL_CHECK_COMPILER_SUN
 dnl -------------------------------------------------
 dnl Verify if the C compiler being used is SUN's.
@@ -382,6 +417,12 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
         ;;
         #
       ICC_windows)
+        #
+        dnl Placeholder
+        tmp_CFLAGS="$tmp_CFLAGS"
+        ;;
+        #
+      SGIC)
         #
         dnl Placeholder
         tmp_CFLAGS="$tmp_CFLAGS"
@@ -624,6 +665,13 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
         dnl Perform extra compile-time code checking
         CPPFLAGS="$CPPFLAGS -Wcheck"
       fi
+    fi
+  fi
+  #
+  if test "$compiler_id" = "SGIC"; then
+    if test "$want_warnings" = "yes"; then
+      dnl Perform stricter semantic and lint-like checks
+      CFLAGS="$CFLAGS -fullwarn"
     fi
   fi
   #
