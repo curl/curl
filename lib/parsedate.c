@@ -222,12 +222,23 @@ enum assume {
   DATE_TIME
 };
 
+/* this is a clone of 'struct tm' but with all fields we don't need or use
+   cut out */
+struct my_tm {
+  int tm_sec;
+  int tm_min;
+  int tm_hour;
+  int tm_mday;
+  int tm_mon;
+  int tm_year;
+};
+
 /* struct tm to time since epoch in GMT time zone.
  * This is similar to the standard mktime function but for GMT only, and
  * doesn't suffer from the various bugs and portability problems that
  * some systems' implementations have.
  */
-static time_t my_timegm(struct tm * tm)
+static time_t my_timegm(struct my_tm *tm)
 {
   static const int month_days_cumulative [12] =
     { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
@@ -269,7 +280,7 @@ static time_t parsedate(const char *date)
   int secnum=-1;
   int yearnum=-1;
   int tzoff=-1;
-  struct tm tm;
+  struct my_tm tm;
   enum assume dignext = DATE_MDAY;
   const char *indate = date; /* save the original pointer */
   int part = 0; /* max 6 parts */
@@ -407,9 +418,6 @@ static time_t parsedate(const char *date)
   tm.tm_mday = mdaynum;
   tm.tm_mon = monnum;
   tm.tm_year = yearnum - 1900;
-  tm.tm_wday = 0;
-  tm.tm_yday = 0;
-  tm.tm_isdst = 0;
 
   /* my_timegm() returns a time_t. time_t is often 32 bits, even on many
      architectures that feature 64 bit 'long'.
