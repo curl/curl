@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Fandrich (9 Oct 2008)
+- Fixed the --interface option to work with IPv6 connections on glibc
+  systems supporting getifaddrs(). Also fixed a problem where an IPv6
+  address could be chosen instead of an IPv4 one for --interface when it
+  involved a name lookup.
+
 Daniel Fandrich (8 Oct 2008)
 - Added tests 1082 through 1085 to test symbolic --interface parameters
 

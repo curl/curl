@@ -15,6 +15,7 @@ This release includes the following changes:
  o Better detect HTTP 1.0 servers and don't do HTTP 1.1 requests on them
  o configure --disable-proxy disables proxy
  o Added CURLOPT_USERNAME and CURLOPT_PASSWORD
+ o --interface now works with IPv6 connections on glibc systems
 
 This release includes the following bugfixes:
 

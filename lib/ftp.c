@@ -892,7 +892,8 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   if(data->set.str[STRING_FTPPORT] &&
      (strlen(data->set.str[STRING_FTPPORT]) > 1)) {
     /* attempt to get the address of the given interface name */
-    if(!Curl_if2ip(data->set.str[STRING_FTPPORT], hbuf, sizeof(hbuf)))
+    if(!Curl_if2ip(conn->ip_addr->ai_family, data->set.str[STRING_FTPPORT],
+                   hbuf, sizeof(hbuf)))
       /* not an interface, use the given string as host name instead */
       host = data->set.str[STRING_FTPPORT];
     else
@@ -964,8 +965,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
 
     /* It failed. Bind the address used for the control connection instead */
     sslen = sizeof(ss);
-    if(getsockname(conn->sock[FIRSTSOCKET],
-                    (struct sockaddr *)sa, &sslen)) {
+    if(getsockname(conn->sock[FIRSTSOCKET], sa, &sslen)) {
       failf(data, "getsockname() failed: %s",
           Curl_strerror(conn, SOCKERRNO) );
       sclose(portsock);
@@ -973,7 +973,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     }
 
     /* set port number to zero to make bind() pick "any" */
-    if(((struct sockaddr *)sa)->sa_family == AF_INET)
+    if(sa->sa_family == AF_INET)
       ((struct sockaddr_in *)sa)->sin_port=0;
     else
       ((struct sockaddr_in6 *)sa)->sin6_port =0;
@@ -981,7 +981,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     if(sslen > (socklen_t)sizeof(ss))
       sslen = sizeof(ss);
 
-    if(bind(portsock, (struct sockaddr *)sa, sslen)) {
+    if(bind(portsock, sa, sslen)) {
       failf(data, "bind failed: %s", Curl_strerror(conn, SOCKERRNO));
       sclose(portsock);
       return CURLE_FTP_PORT_FAILED;
@@ -1112,7 +1112,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
       /* this is an IPv4 address */
       addr = Curl_ip2addr(in, ftpportstr, 0);
     else {
-      if(Curl_if2ip(ftpportstr, myhost, sizeof(myhost))) {
+      if(Curl_if2ip(AF_INET, ftpportstr, myhost, sizeof(myhost))) {
         /* The interface to IP conversion provided a dotted address */
         in=inet_addr(myhost);
         addr = Curl_ip2addr(in, myhost, 0);

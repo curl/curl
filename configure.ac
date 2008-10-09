@@ -2061,6 +2061,7 @@ AC_CHECK_FUNCS([basename \
   fork \
   geteuid \
   gethostbyaddr \
+  getifaddrs \
   getpass_r \
   getppid \
   getprotobyname \
