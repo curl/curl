@@ -18,6 +18,7 @@ FAILURE
 # Client-side
 <client>
 <features>
+http
 ipv6
 </features>
 <server>

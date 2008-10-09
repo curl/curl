@@ -16,6 +16,9 @@ FAILURE
 #
 # Client-side
 <client>
+<features>
+http
+</features>
 <server>
 none
 </server>
