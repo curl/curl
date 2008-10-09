@@ -224,12 +224,12 @@ AC_DEFUN([CARES_CHECK_COMPILER_SGI], [
   CURL_CHECK_DEF([_COMPILER_VERSION], [], [silent])
   CURL_CHECK_DEF([__GNUC__], [], [silent])
   CURL_CHECK_DEF([__sgi], [], [silent])
-  if test "$curl_cv_have_def___GNUC__ " = "no"; then
+  if test "$curl_cv_have_def___GNUC__" = "no"; then
     if test "$curl_cv_have_def__SGI_COMPILER_VERSION" = "yes"; then
       compiler_id="SGIC"
     fi
-    if test "$curl_cv_have_def__COMPILER_VERSION " = "yes" &&
-      test "$curl_cv_have_def___sgi " = "yes"; then
+    if test "$curl_cv_have_def__COMPILER_VERSION" = "yes" &&
+      test "$curl_cv_have_def___sgi" = "yes"; then
       compiler_id="SGIC"
     fi
   fi
