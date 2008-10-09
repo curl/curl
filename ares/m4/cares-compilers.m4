@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 14
+# serial 15
 
 
 dnl CARES_CHECK_COMPILER
@@ -269,6 +269,46 @@ AC_DEFUN([CARES_CHECK_COMPILER_SUN], [
 ])
 
 
+dnl CARES_CONVERT_INCLUDE_TO_ISYSTEM
+dnl -------------------------------------------------
+dnl Changes standard include paths present in CFLAGS
+dnl and CPPFLAGS into isystem include paths. This is
+dnl done to prevent GNUC from generating warnings on
+dnl headers from these locations, even though this is
+dnl not reliable on ancient GNUC versions.
+
+AC_DEFUN([CARES_CONVERT_INCLUDE_TO_ISYSTEM], [
+  tmp_has_include="no"
+  tmp_chg_FLAGS=$CFLAGS
+  for word1 in $tmp_chg_FLAGS; do
+    case "$word" in
+      -I*)
+        tmp_has_include="yes"
+        ;;
+    esac
+  done
+  if test "$tmp_has_include" = "yes"; then
+    tmp_chg_FLAGS=`echo $tmp_chg_FLAGS | sed 's/^-I/ -isystem /g'`
+    tmp_chg_FLAGS=`echo $tmp_chg_FLAGS | sed 's/ -I/ -isystem /g'`
+    CFLAGS=`eval echo $tmp_chg_FLAGS`
+  fi
+  tmp_has_include="no"
+  tmp_chg_FLAGS=$CPPFLAGS
+  for word1 in $tmp_chg_FLAGS; do
+    case "$word" in
+      -I*)
+        tmp_has_include="yes"
+        ;;
+    esac
+  done
+  if test "$tmp_has_include" = "yes"; then
+    tmp_chg_FLAGS=`echo $tmp_chg_FLAGS | sed 's/^-I/ -isystem /g'`
+    tmp_chg_FLAGS=`echo $tmp_chg_FLAGS | sed 's/ -I/ -isystem /g'`
+    CPPFLAGS=`eval echo $tmp_chg_FLAGS`
+  fi
+])
+
+
 dnl CARES_COMPILER_WORKS_IFELSE ([ACTION-IF-WORKS], [ACTION-IF-NOT-WORKS])
 dnl -------------------------------------------------
 dnl Verify if the C compiler seems to work with the
@@ -308,6 +348,9 @@ AC_DEFUN([CARES_COMPILER_WORKS_IFELSE], [
     test "$tmp_compiler_works" = "yes"; then
     AC_RUN_IFELSE([
       AC_LANG_PROGRAM([[
+#       ifdef __STDC__
+#         include <stdlib.h>
+#       endif
       ]],[[
         int i = 0;
         exit(i);
@@ -337,6 +380,10 @@ AC_DEFUN([CARES_SET_COMPILER_BASIC_OPTS], [
   AC_REQUIRE([CARES_CHECK_COMPILER])dnl
   #
   if test "$compiler_id" != "unknown"; then
+    #
+    if test "$compiler_id" = "GNUC"; then
+      CARES_CONVERT_INCLUDE_TO_ISYSTEM
+    fi
     #
     tmp_save_CPPFLAGS="$CPPFLAGS"
     tmp_save_CFLAGS="$CFLAGS"
@@ -581,100 +628,135 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
   AC_REQUIRE([CARES_CHECK_OPTION_WARNINGS])dnl
   AC_REQUIRE([CARES_CHECK_COMPILER])dnl
   #
-  if test "$compiler_id" = "DECC"; then
-    if test "$want_warnings" = "yes"; then
-      dnl Select a higher warning level than default level2
-      CFLAGS="$CFLAGS -msg_enable level3"
-    fi
-  fi
-  #
-  if test "$compiler_id" = "GNUC"; then
+  if test "$compiler_id" != "unknown"; then
     #
-    # FIXME: Some of these warnings should be changed into errors
-    #        and moved to CARES-SET-COMPILER-BASIC-OPTS
+    tmp_save_CPPFLAGS="$CPPFLAGS"
+    tmp_save_CFLAGS="$CFLAGS"
+    tmp_CPPFLAGS=""
+    tmp_CFLAGS=""
     #
-    if test "$want_warnings" = "yes"; then
-      dnl this is a set of options we believe *ALL* gcc versions support:
-      WARN="-W -Wall -Wwrite-strings -pedantic -Wpointer-arith -Wnested-externs -Winline -Wmissing-prototypes"
-      dnl -Wcast-align is a bit too annoying on all gcc versions ;-)
-      if test "$compiler_num" -ge "207"; then
-        dnl gcc 2.7 or later
-        WARN="$WARN -Wmissing-declarations"
-      fi
-      if test "$compiler_num" -gt "295"; then
-        dnl only if the compiler is newer than 2.95 since we got lots of
-        dnl "`_POSIX_C_SOURCE' is not defined" in system headers with
-        dnl gcc 2.95.4 on FreeBSD 4.9!
-        WARN="$WARN -Wundef -Wno-long-long -Wsign-compare -Wshadow -Wno-multichar"
-      fi
-      if test "$compiler_num" -ge "296"; then
-        dnl gcc 2.96 or later
-        WARN="$WARN -Wfloat-equal"
-      fi
-      if test "$compiler_num" -gt "296"; then
-        dnl this option does not exist in 2.96
-        WARN="$WARN -Wno-format-nonliteral"
-      fi
-      dnl -Wunreachable-code seems totally unreliable on my gcc 3.3.2 on
-      dnl on i686-Linux as it gives us heaps with false positives.
-      dnl Also, on gcc 4.0.X it is totally unbearable and complains all
-      dnl over making it unusable for generic purposes. Let's not use it.
-      if test "$compiler_num" -ge "303"; then
-        dnl gcc 3.3 and later
-        WARN="$WARN -Wendif-labels -Wstrict-prototypes"
-      fi
-      if test "$compiler_num" -ge "304"; then
-        # try these on gcc 3.4
-        WARN="$WARN -Wdeclaration-after-statement"
-      fi
-      for flag in $CPPFLAGS; do
-        case "$flag" in
-          -I*)
-            dnl Include path, provide a -isystem option for the same dir
-            dnl to prevent warnings in those dirs. The -isystem was not very
-            dnl reliable on earlier gcc versions.
-            add=`echo $flag | sed 's/^-I/-isystem /g'`
-            WARN="$WARN $add"
-            ;;
-        esac
-      done
-      CFLAGS="$CFLAGS $WARN"
-      AC_MSG_NOTICE([Added this set of compiler options: $WARN])
+    case "$compiler_id" in
+        #
+      DECC)
+        #
+        if test "$want_warnings" = "yes"; then
+          dnl Select a higher warning level than default level2
+          tmp_CFLAGS="$tmp_CFLAGS -msg_enable level3"
+        fi
+        ;;
+        #
+      GNUC)
+        #
+        if test "$want_warnings" = "yes"; then
+          dnl Set of options we believe *ALL* gcc versions support:
+          tmp_CFLAGS="$tmp_CFLAGS -pedantic -Wall -W -Winline -Wnested-externs"
+          tmp_CFLAGS="$tmp_CFLAGS -Wmissing-prototypes -Wpointer-arith"
+          tmp_CFLAGS="$tmp_CFLAGS -Wwrite-strings"
+          dnl -Wcast-align is a bit too annoying on all gcc versions ;-)
+          if test "$compiler_num" -ge "207"; then
+            dnl gcc 2.7 or later
+            tmp_CFLAGS="$tmp_CFLAGS -Wmissing-declarations"
+          fi
+          if test "$compiler_num" -gt "295"; then
+            dnl only if the compiler is newer than 2.95 since we got lots of
+            dnl "`_POSIX_C_SOURCE' is not defined" in system headers with
+            dnl gcc 2.95.4 on FreeBSD 4.9!
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-long-long -Wno-multichar -Wshadow"
+            tmp_CFLAGS="$tmp_CFLAGS -Wsign-compare -Wundef"
+          fi
+          if test "$compiler_num" -ge "296"; then
+            dnl gcc 2.96 or later
+            tmp_CFLAGS="$tmp_CFLAGS -Wfloat-equal"
+          fi
+          if test "$compiler_num" -gt "296"; then
+            dnl this option does not exist in 2.96
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-format-nonliteral"
+          fi
+          dnl -Wunreachable-code seems totally unreliable on my gcc 3.3.2 on
+          dnl on i686-Linux as it gives us heaps with false positives.
+          dnl Also, on gcc 4.0.X it is totally unbearable and complains all
+          dnl over making it unusable for generic purposes. Let's not use it.
+          if test "$compiler_num" -ge "303"; then
+            dnl gcc 3.3 and later
+            tmp_CFLAGS="$tmp_CFLAGS -Wendif-labels -Wstrict-prototypes"
+          fi
+          if test "$compiler_num" -ge "304"; then
+            dnl gcc 3.4 and later
+            tmp_CFLAGS="$tmp_CFLAGS -Wdeclaration-after-statement"
+          fi
+        fi
+        ;;
+        #
+      HPUXC)
+        #
+        if test "$want_warnings" = "yes"; then
+          dnl Issue all warnings
+          tmp_CFLAGS="$tmp_CFLAGS +w1"
+        fi
+        ;;
+        #
+      IBMC)
+        #
+        dnl Placeholder
+        tmp_CFLAGS="$tmp_CFLAGS"
+        ;;
+        #
+      ICC_unix)
+        #
+        if test "$want_warnings" = "yes"; then
+          if test "$compiler_num" -gt "600"; then
+            dnl Show errors, warnings, and remarks
+            tmp_CPPFLAGS="$tmp_CPPFLAGS -Wall"
+            dnl Perform extra compile-time code checking
+            tmp_CPPFLAGS="$tmp_CPPFLAGS -Wcheck"
+          fi
+        fi
+        ;;
+        #
+      ICC_windows)
+        #
+        dnl Placeholder
+        tmp_CFLAGS="$tmp_CFLAGS"
+        ;;
+        #
+      SGIC)
+        #
+        if test "$want_warnings" = "yes"; then
+          dnl Perform stricter semantic and lint-like checks
+          tmp_CFLAGS="$tmp_CFLAGS -fullwarn"
+        fi
+        ;;
+        #
+      SUNC)
+        #
+        if test "$want_warnings" = "yes"; then
+          dnl Perform stricter semantic and lint-like checks
+          tmp_CFLAGS="$tmp_CFLAGS -v"
+        fi
+        ;;
+        #
+    esac
+    #
+    tmp_CPPFLAGS=`eval echo $tmp_CPPFLAGS`
+    tmp_CFLAGS=`eval echo $tmp_CFLAGS`
+    #
+    if test ! -z "$tmp_CFLAGS" || test ! -z "$tmp_CPPFLAGS"; then
+      AC_MSG_CHECKING([if compiler accepts strict warning options])
+      CPPFLAGS=`eval echo $tmp_save_CPPFLAGS $tmp_CPPFLAGS`
+      CFLAGS=`eval echo $tmp_save_CFLAGS $tmp_CFLAGS`
+      CARES_COMPILER_WORKS_IFELSE([
+        AC_MSG_RESULT([yes])
+        AC_MSG_NOTICE([compiler options added: $tmp_CFLAGS $tmp_CPPFLAGS])
+      ],[
+        AC_MSG_RESULT([no])
+        AC_MSG_WARN([compiler options rejected: $tmp_CFLAGS $tmp_CPPFLAGS])
+        dnl restore initial settings
+        CPPFLAGS="$tmp_save_CPPFLAGS"
+        CFLAGS="$tmp_save_CFLAGS"
+      ])
     fi
+    #
   fi
-  #
-  if test "$compiler_id" = "HPUXC"; then
-    if test "$want_warnings" = "yes"; then
-      dnl Issue all warnings
-      CFLAGS="$CFLAGS +w1"
-    fi
-  fi
-  #
-  if test "$compiler_id" = "ICC_unix"; then
-    if test "$want_warnings" = "yes"; then
-      if test "$compiler_num" -gt "600"; then
-        dnl Show errors, warnings, and remarks
-        CPPFLAGS="$CPPFLAGS -Wall"
-        dnl Perform extra compile-time code checking
-        CPPFLAGS="$CPPFLAGS -Wcheck"
-      fi
-    fi
-  fi
-  #
-  if test "$compiler_id" = "SGIC"; then
-    if test "$want_warnings" = "yes"; then
-      dnl Perform stricter semantic and lint-like checks
-      CFLAGS="$CFLAGS -fullwarn"
-    fi
-  fi
-  #
-  if test "$compiler_id" = "SUNC"; then
-    if test "$want_warnings" = "yes"; then
-      dnl Perform stricter semantic and lint-like checks
-      CFLAGS="$CFLAGS -v"
-    fi
-  fi
-  #
 ])
 
 
@@ -733,8 +815,8 @@ dnl is considered positive, otherwise false.
 
 AC_DEFUN([CARES_VAR_MATCH], [
   ac_var_match_word="no"
-  for word1 in "$[$1]"; do
-    for word2 in "[$2]"; do
+  for word1 in $[$1]; do
+    for word2 in [$2]; do
       if test "$word1" = "$word2"; then
         ac_var_match_word="yes"
       fi
@@ -768,9 +850,9 @@ dnl from VALUE is removed from VARNAME when present.
 
 AC_DEFUN([CARES_VAR_STRIP], [
   ac_var_stripped=""
-  for word1 in "$[$1]"; do
+  for word1 in $[$1]; do
     ac_var_strip_word="no"
-    for word2 in "[$2]"; do
+    for word2 in [$2]; do
       if test "$word1" = "$word2"; then
         ac_var_strip_word="yes"
       fi
