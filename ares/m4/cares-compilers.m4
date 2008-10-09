@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 9
+# serial 12
 
 
 dnl CARES_CHECK_COMPILER
@@ -233,9 +233,8 @@ AC_DEFUN([CARES_CHECK_COMPILER_SGI], [
       compiler_id="SGIC"
     fi
   fi
-  if test "$compiler_id" != "SGIC"; then
+  if test "$compiler_id" = "SGIC"; then
     AC_MSG_RESULT([yes])
-    compiler_id="SGIC"
     flags_dbg_all="-g -g0 -g1 -g2 -g3"
     flags_dbg_yes="-g"
     flags_dbg_off="-g0"
