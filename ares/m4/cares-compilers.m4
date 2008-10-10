@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 18
+# serial 19
 
 
 dnl CARES_CHECK_COMPILER
@@ -251,7 +251,7 @@ AC_DEFUN([CARES_CHECK_COMPILER_SUN], [
     flags_dbg_all="-g -s"
     flags_dbg_yes="-g"
     flags_dbg_off="-s"
-    flags_opt_all="-O -xO1 -xO2 -xO3 -xO4 -xO5"
+    flags_opt_all="-O -xO -xO1 -xO2 -xO3 -xO4 -xO5"
     flags_opt_yes="-xO2"
     flags_opt_off=""
   else
@@ -272,7 +272,7 @@ AC_DEFUN([CARES_CONVERT_INCLUDE_TO_ISYSTEM], [
   tmp_has_include="no"
   tmp_chg_FLAGS=$CFLAGS
   for word1 in $tmp_chg_FLAGS; do
-    case "$word" in
+    case "$word1" in
       -I*)
         tmp_has_include="yes"
         ;;
@@ -286,7 +286,7 @@ AC_DEFUN([CARES_CONVERT_INCLUDE_TO_ISYSTEM], [
   tmp_has_include="no"
   tmp_chg_FLAGS=$CPPFLAGS
   for word1 in $tmp_chg_FLAGS; do
-    case "$word" in
+    case "$word1" in
       -I*)
         tmp_has_include="yes"
         ;;
@@ -728,6 +728,9 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
         if test "$want_warnings" = "yes"; then
           dnl Perform stricter semantic and lint-like checks
           tmp_CFLAGS="$tmp_CFLAGS -fullwarn"
+          dnl Disable some remarks
+          dnl #1209: controlling expression is constant
+          tmp_CFLAGS="$tmp_CFLAGS -woff 1209"
         fi
         ;;
         #
