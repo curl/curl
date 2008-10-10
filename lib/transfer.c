@@ -357,6 +357,8 @@ static CURLcode readwrite_data(struct SessionHandle *data,
   ssize_t nread; /* number of bytes read */
   bool is_empty_data = FALSE;
 
+  *done = FALSE;
+
   /* This is where we loop until we have read everything there is to
      read or we get a EWOULDBLOCK */
   do {
@@ -1943,6 +1945,7 @@ CURLcode Curl_posttransfer(struct SessionHandle *data)
   return CURLE_OK;
 }
 
+#ifndef CURL_DISABLE_HTTP
 /*
  * strlen_url() returns the length of the given URL if the spaces within the
  * URL were properly URL encoded.
@@ -2162,6 +2165,7 @@ static char *concat_url(const char *base, const char *relurl)
 
   return newest;
 }
+#endif /* CURL_DISABLE_HTTP */
 
 /*
  * Curl_follow() handles the URL redirect magic. Pass in the 'newurl' string
