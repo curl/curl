@@ -1536,14 +1536,14 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
   case CURLOPT_USERNAME:
     /*
-     * user:password to use in the operation
+     * authentication user name to use in the operation
      */
     result = setstropt(&data->set.str[STRING_USERNAME],
                        va_arg(param, char *));
     break;
   case CURLOPT_PASSWORD:
     /*
-     * user:password to use in the operation
+     * authentication password to use in the operation
      */
     result = setstropt(&data->set.str[STRING_PASSWORD],
                        va_arg(param, char *));
