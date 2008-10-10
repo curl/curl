@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 20
+# serial 21
 
 
 dnl CARES_CHECK_COMPILER
@@ -43,6 +43,7 @@ AC_DEFUN([CARES_CHECK_COMPILER], [
   CARES_CHECK_COMPILER_LCC
   CARES_CHECK_COMPILER_SGI
   CARES_CHECK_COMPILER_SUN
+  CARES_CHECK_COMPILER_TINYC
   #
   if test "$compiler_id" = "unknown"; then
   cat <<_EOF 1>&2
@@ -283,6 +284,28 @@ AC_DEFUN([CARES_CHECK_COMPILER_SUN], [
 ])
 
 
+dnl CARES_CHECK_COMPILER_TINYC
+dnl -------------------------------------------------
+dnl Verify if the C compiler being used is TINYC.
+
+AC_DEFUN([CARES_CHECK_COMPILER_TINYC], [
+  AC_MSG_CHECKING([whether we are using the TinyCC C compiler])
+  CURL_CHECK_DEF([__TINYC__], [], [silent])
+  if test "$curl_cv_have_def___TINYC__" = "yes"; then
+    AC_MSG_RESULT([yes])
+    compiler_id="TINYC"
+    flags_dbg_all="-g -b"
+    flags_dbg_yes="-g -b"
+    flags_dbg_off=""
+    flags_opt_all=""
+    flags_opt_yes=""
+    flags_opt_off=""
+  else
+    AC_MSG_RESULT([no])
+  fi
+])
+
+
 dnl CARES_CONVERT_INCLUDE_TO_ISYSTEM
 dnl -------------------------------------------------
 dnl Changes standard include paths present in CFLAGS
@@ -498,6 +521,12 @@ AC_DEFUN([CARES_SET_COMPILER_BASIC_OPTS], [
         ;;
         #
       SUNC)
+        #
+        dnl Placeholder
+        tmp_CFLAGS="$tmp_CFLAGS"
+        ;;
+        #
+      TINYC)
         #
         dnl Placeholder
         tmp_CFLAGS="$tmp_CFLAGS"
@@ -776,6 +805,18 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
         if test "$want_warnings" = "yes"; then
           dnl Perform stricter semantic and lint-like checks
           tmp_CFLAGS="$tmp_CFLAGS -v"
+        fi
+        ;;
+        #
+      TINYC)
+        #
+        if test "$want_warnings" = "yes"; then
+          dnl Activate all warnings
+          tmp_CFLAGS="$tmp_CFLAGS -Wall"
+          dnl Make string constants be of type const char *
+          tmp_CFLAGS="$tmp_CFLAGS -Wwrite-strings"
+          dnl Warn use of unsupported GCC features ignored by TCC
+          tmp_CFLAGS="$tmp_CFLAGS -Wunsupported"
         fi
         ;;
         #
