@@ -335,8 +335,10 @@ static CURLcode bindlocal(struct connectdata *conn,
       long ipver = data->set.ip_version;
       if (af == AF_INET)
         data->set.ip_version = CURL_IPRESOLVE_V4;
+#ifdef ENABLE_IPV6
       else if (af == AF_INET6)
         data->set.ip_version = CURL_IPRESOLVE_V6;
+#endif
 
       rc = Curl_resolv(conn, dev, 0, &h);
       if(rc == CURLRESOLV_PENDING)
