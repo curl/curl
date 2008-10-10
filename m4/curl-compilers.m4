@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 18
+# serial 19
 
 
 dnl CURL_CHECK_COMPILER
@@ -46,6 +46,7 @@ AC_DEFUN([CURL_CHECK_COMPILER], [
   CURL_CHECK_COMPILER_IBM
   CURL_CHECK_COMPILER_INTEL
   CURL_CHECK_COMPILER_GNU
+  CURL_CHECK_COMPILER_LCC
   CURL_CHECK_COMPILER_SGI
   CURL_CHECK_COMPILER_SUN
   #
@@ -214,6 +215,28 @@ AC_DEFUN([CURL_CHECK_COMPILER_INTEL], [
       flags_opt_off="/Od"
     fi
     compiler_num="$curl_cv_def___INTEL_COMPILER"
+  else
+    AC_MSG_RESULT([no])
+  fi
+])
+
+
+dnl CURL_CHECK_COMPILER_LCC
+dnl -------------------------------------------------
+dnl Verify if the C compiler being used is LCC.
+
+AC_DEFUN([CURL_CHECK_COMPILER_LCC], [
+  AC_MSG_CHECKING([whether we are using the LCC C compiler])
+  CURL_CHECK_DEF([__LCC__], [], [silent])
+  if test "$curl_cv_have_def___LCC__" = "yes"; then
+    AC_MSG_RESULT([yes])
+    compiler_id="LCC"
+    flags_dbg_all="-g"
+    flags_dbg_yes="-g"
+    flags_dbg_off=""
+    flags_opt_all=""
+    flags_opt_yes=""
+    flags_opt_off=""
   else
     AC_MSG_RESULT([no])
   fi
@@ -466,6 +489,12 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
         #
         dnl Placeholder
         tmp_CFLAGS="$tmp_CFLAGS"
+        ;;
+        #
+      LCC)
+        #
+        dnl Disallow run-time dereferencing of null pointers
+        tmp_CFLAGS="$tmp_CFLAGS -n"
         ;;
         #
       SGIC)
@@ -727,6 +756,14 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
         #
         dnl Placeholder
         tmp_CFLAGS="$tmp_CFLAGS"
+        ;;
+        #
+      LCC)
+        #
+        if test "$want_warnings" = "yes"; then
+          dnl Highest warning level is double -A
+          tmp_CFLAGS="$tmp_CFLAGS -A -A"
+        fi
         ;;
         #
       SGIC)
