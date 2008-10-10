@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 15
+# serial 18
 
 
 dnl CARES_CHECK_COMPILER
@@ -220,21 +220,12 @@ dnl Verify if the C compiler being used is SGI's.
 
 AC_DEFUN([CARES_CHECK_COMPILER_SGI], [
   AC_MSG_CHECKING([whether we are using the SGI C compiler])
-  CURL_CHECK_DEF([_SGI_COMPILER_VERSION], [], [silent])
-  CURL_CHECK_DEF([_COMPILER_VERSION], [], [silent])
   CURL_CHECK_DEF([__GNUC__], [], [silent])
   CURL_CHECK_DEF([__sgi], [], [silent])
-  if test "$curl_cv_have_def___GNUC__" = "no"; then
-    if test "$curl_cv_have_def__SGI_COMPILER_VERSION" = "yes"; then
-      compiler_id="SGIC"
-    fi
-    if test "$curl_cv_have_def__COMPILER_VERSION" = "yes" &&
-      test "$curl_cv_have_def___sgi" = "yes"; then
-      compiler_id="SGIC"
-    fi
-  fi
-  if test "$compiler_id" = "SGIC"; then
+  if test "$curl_cv_have_def___GNUC__" = "no" &&
+    test "$curl_cv_have_def___sgi" = "yes"; then
     AC_MSG_RESULT([yes])
+    compiler_id="SGIC"
     flags_dbg_all="-g -g0 -g1 -g2 -g3"
     flags_dbg_yes="-g"
     flags_dbg_off="-g0"
