@@ -334,6 +334,9 @@ AC_DEFUN([CURL_COMPILER_WORKS_IFELSE], [
     tmp_compiler_works="yes"
   ],[
     tmp_compiler_works="no"
+    echo " " >&6
+    sed 's/^/cc-fail> /' conftest.err >&6
+    echo " " >&6
   ])
   dnl linking capability verification
   if test "$tmp_compiler_works" = "yes"; then
@@ -347,6 +350,9 @@ AC_DEFUN([CURL_COMPILER_WORKS_IFELSE], [
       tmp_compiler_works="yes"
     ],[
       tmp_compiler_works="no"
+      echo " " >&6
+      sed 's/^/ln-fail> /' conftest.err >&6
+      echo " " >&6
     ])
   fi
   dnl only do runtime verification when not cross-compiling
@@ -365,6 +371,9 @@ AC_DEFUN([CURL_COMPILER_WORKS_IFELSE], [
       tmp_compiler_works="yes"
     ],[
       tmp_compiler_works="no"
+      echo " " >&6
+      echo "rn-fail test program exited with status $ac_status" >&6
+      echo " " >&6
     ])
   fi
   dnl branch upon test result
