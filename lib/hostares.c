@@ -292,10 +292,9 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
 #ifdef ENABLE_IPV6 /* CURLRES_IPV6 */
 
 struct namebuf6 {
-  struct hostent hostentry;
-  char *h_addr_list[2];
+  struct hostent  hostentry;
   struct in6_addr addrentry;
-  char hostname[1];
+  char *h_addr_list[2];
 };
 
 /*
@@ -312,41 +311,51 @@ Curl_addrinfo *Curl_ip2addr6(struct in6_addr *in,
 {
   Curl_addrinfo *ai;
 
-#if defined(VMS) &&  defined(__INITIAL_POINTER_SIZE) && \
-  (__INITIAL_POINTER_SIZE == 64)
+#if defined(VMS) && \
+    defined(__INITIAL_POINTER_SIZE) && (__INITIAL_POINTER_SIZE == 64)
 #pragma pointer_size save
 #pragma pointer_size short
 #pragma message disable PTRMISMATCH
 #endif
 
-  struct hostent *h;
+  struct hostent  *h;
   struct in6_addr *addrentry;
-  struct namebuf6 *buf = malloc(sizeof (struct namebuf6) + strlen(hostname));
+  struct namebuf6 *buf;
+  char  *hoststr;
 
+  DEBUGASSERT(in && hostname);
+
+  buf = malloc(sizeof(struct namebuf6));
   if(!buf)
     return NULL;
 
-  h = &buf->hostentry;
-  h->h_addr_list = &buf->h_addr_list[0];
+  hoststr = strdup(hostname);
+  if(!hoststr) {
+    free(buf);
+    return NULL;
+  }
+
   addrentry = &buf->addrentry;
-  memcpy(addrentry, in, sizeof (*in));
-  h->h_addr_list[0] = (char*)addrentry;
-  h->h_addr_list[1] = NULL; /* terminate list of entries */
-  h->h_name = &buf->hostname[0];
+  memcpy(addrentry, in, sizeof(struct in6_addr));
+
+  h = &buf->hostentry;
+  h->h_name = hoststr;
   h->h_aliases = NULL;
   h->h_addrtype = AF_INET6;
+  h->h_length = sizeof(struct in6_addr);
+  h->h_addr_list = &buf->h_addr_list[0];
+  h->h_addr_list[0] = (char*)addrentry;
+  h->h_addr_list[1] = NULL; /* terminate list of entries */
 
-  /* Now store the dotted version of the address */
-  strcpy (h->h_name, hostname);
-
-#if defined(VMS) && defined(__INITIAL_POINTER_SIZE) && \
-  (__INITIAL_POINTER_SIZE == 64)
+#if defined(VMS) && \
+    defined(__INITIAL_POINTER_SIZE) && (__INITIAL_POINTER_SIZE == 64)
 #pragma pointer_size restore
 #pragma message enable PTRMISMATCH
 #endif
 
   ai = Curl_he2ai(h, port);
 
+  free(hoststr);
   free(buf);
 
   return ai;

@@ -733,11 +733,10 @@ void Curl_freeaddrinfo(Curl_addrinfo *ai)
   }
 }
 
-struct namebuf {
+struct namebuf4 {
   struct hostent hostentry;
-  char *h_addr_list[2];
   struct in_addr addrentry;
-  char h_name[16]; /* 123.123.123.123 = 15 letters is maximum */
+  char *h_addr_list[2];
 };
 
 /*
@@ -760,13 +759,23 @@ Curl_addrinfo *Curl_ip2addr(in_addr_t num, const char *hostname, int port)
 #pragma message disable PTRMISMATCH
 #endif
 
-  struct hostent *h;
-  struct in_addr *addrentry;
-  struct namebuf buffer;
-  struct namebuf *buf = &buffer;
+  struct hostent  *h;
+  struct in_addr  *addrentry;
+  struct namebuf4 *buf;
+  char  *hoststr;
 
-  h = &buf->hostentry;
-  h->h_addr_list = &buf->h_addr_list[0];
+  DEBUGASSERT(hostname);
+
+  buf = malloc(sizeof(struct namebuf4));
+  if(!buf)
+    return NULL;
+
+  hoststr = strdup(hostname);
+  if(!hoststr) {
+    free(buf);
+    return NULL;
+  }
+
   addrentry = &buf->addrentry;
 #ifdef _CRAYC
   /* On UNICOS, s_addr is a bit field and for some reason assigning to it
@@ -776,15 +785,15 @@ Curl_addrinfo *Curl_ip2addr(in_addr_t num, const char *hostname, int port)
 #else
   addrentry->s_addr = num;
 #endif
-  h->h_addr_list[0] = (char*)addrentry;
-  h->h_addr_list[1] = NULL;
-  h->h_addrtype = AF_INET;
-  h->h_length = sizeof(*addrentry);
-  h->h_name = &buf->h_name[0];
-  h->h_aliases = NULL;
 
-  /* Now store the dotted version of the address */
-  snprintf(h->h_name, 16, "%s", hostname);
+  h = &buf->hostentry;
+  h->h_name = hoststr;
+  h->h_aliases = NULL;
+  h->h_addrtype = AF_INET;
+  h->h_length = sizeof(struct in_addr);
+  h->h_addr_list = &buf->h_addr_list[0];
+  h->h_addr_list[0] = (char*)addrentry;
+  h->h_addr_list[1] = NULL; /* terminate list of entries */
 
 #if defined(VMS) && \
     defined(__INITIAL_POINTER_SIZE) && (__INITIAL_POINTER_SIZE == 64)
@@ -793,6 +802,9 @@ Curl_addrinfo *Curl_ip2addr(in_addr_t num, const char *hostname, int port)
 #endif
 
   ai = Curl_he2ai(h, port);
+
+  free(hoststr);
+  free(buf);
 
   return ai;
 }
