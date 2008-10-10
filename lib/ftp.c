@@ -1393,7 +1393,8 @@ static CURLcode ftp_state_post_listtype(struct connectdata *conn)
 
       /* chop off the file part if format is dir/dir/file */
       slashPos = strrchr(lstArg,'/');
-      *(slashPos+1) = '\0';
+      if(slashPos)
+        *(slashPos+1) = '\0';
     }
   }
 
