@@ -290,6 +290,14 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
 }
 
 #ifdef ENABLE_IPV6 /* CURLRES_IPV6 */
+
+struct namebuf6 {
+  struct hostent hostentry;
+  char *h_addr_list[2];
+  struct in6_addr addrentry;
+  char hostname[1];
+};
+
 /*
  * Curl_ip2addr6() takes an ipv6 internet address as input parameter
  * together with a pointer to the string version of the address, and it
@@ -313,12 +321,6 @@ Curl_addrinfo *Curl_ip2addr6(struct in6_addr *in,
 
   struct hostent *h;
   struct in6_addr *addrentry;
-  struct namebuf6 {
-    struct hostent hostentry;
-    char *h_addr_list[2];
-    struct in6_addr addrentry;
-    char hostname[1];
-  };
   struct namebuf6 *buf = malloc(sizeof (struct namebuf6) + strlen(hostname));
 
   if(!buf)
