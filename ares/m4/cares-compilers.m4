@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 22
+# serial 23
 
 
 dnl CARES_CHECK_COMPILER
@@ -41,7 +41,8 @@ AC_DEFUN([CARES_CHECK_COMPILER], [
   CARES_CHECK_COMPILER_INTEL
   CARES_CHECK_COMPILER_GNU
   CARES_CHECK_COMPILER_LCC
-  CARES_CHECK_COMPILER_SGI
+  CARES_CHECK_COMPILER_SGI_MIPSpro_C
+  CARES_CHECK_COMPILER_SGI_MIPS _C
   CARES_CHECK_COMPILER_SUN
   CARES_CHECK_COMPILER_TINYC
   #
@@ -238,18 +239,45 @@ AC_DEFUN([CARES_CHECK_COMPILER_LCC], [
 ])
 
 
-dnl CARES_CHECK_COMPILER_SGI
+dnl CARES_CHECK_COMPILER_SGI_MIPS_C
 dnl -------------------------------------------------
 dnl Verify if the C compiler being used is SGI's.
 
-AC_DEFUN([CARES_CHECK_COMPILER_SGI], [
-  AC_MSG_CHECKING([whether we are using the SGI C compiler])
+AC_DEFUN([CARES_CHECK_COMPILER_SGI_MIPS_C], [
+  AC_REQUIRE([CARES_CHECK_COMPILER_SGI_MIPSpro_C])dnl
+  AC_MSG_CHECKING([if compiler is SGI MIPS C])
   CURL_CHECK_DEF([__GNUC__], [], [silent])
   CURL_CHECK_DEF([__sgi], [], [silent])
   if test "$curl_cv_have_def___GNUC__" = "no" &&
-    test "$curl_cv_have_def___sgi" = "yes"; then
+    test "$curl_cv_have_def___sgi" = "yes" &&
+    test "$compiler_id" = "unknown"; then
     AC_MSG_RESULT([yes])
-    compiler_id="SGIC"
+    compiler_id="SGI_MIPS_C"
+    flags_dbg_all="-g -g0 -g1 -g2 -g3"
+    flags_dbg_yes="-g"
+    flags_dbg_off="-g0"
+    flags_opt_all="-O -O0 -O1 -O2 -O3 -Ofast"
+    flags_opt_yes="-O2"
+    flags_opt_off="-O0"
+  else
+    AC_MSG_RESULT([no])
+  fi
+])
+
+
+dnl CARES_CHECK_COMPILER_SGI_MIPSpro_C
+dnl -------------------------------------------------
+dnl Verify if the C compiler being used is SGI's.
+
+AC_DEFUN([CARES_CHECK_COMPILER_SGI_MIPSpro_C], [
+  AC_BEFORE([$0],[CARES_CHECK_COMPILER_SGI_MIPS_C])dnl
+  AC_MSG_CHECKING([if compiler is SGI MIPSpro C])
+  CURL_CHECK_DEF([__GNUC__], [], [silent])
+  CURL_CHECK_DEF([_SGI_COMPILER_VERSION], [], [silent])
+  if test "$curl_cv_have_def___GNUC__" = "no" &&
+    test "$curl_cv_have_def__SGI_COMPILER_VERSION" = "yes"; then
+    AC_MSG_RESULT([yes])
+    compiler_id="SGI_MIPSpro_C"
     flags_dbg_all="-g -g0 -g1 -g2 -g3"
     flags_dbg_yes="-g"
     flags_dbg_off="-g0"
@@ -514,7 +542,13 @@ AC_DEFUN([CARES_SET_COMPILER_BASIC_OPTS], [
         tmp_CFLAGS="$tmp_CFLAGS -n"
         ;;
         #
-      SGIC)
+      SGI_MIPS_C)
+        #
+        dnl Placeholder
+        tmp_CFLAGS="$tmp_CFLAGS"
+        ;;
+        #
+      SGI_MIPSpro_C)
         #
         dnl Placeholder
         tmp_CFLAGS="$tmp_CFLAGS"
@@ -786,13 +820,21 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
         if test "$want_warnings" = "yes"; then
           dnl Highest warning level is double -A, next is single -A.
           dnl Due to the big number of warnings this triggers on third
-          dnl party header files it is impratical for to activate this
+          dnl party header files it is impratical for us to use this
           dnl warning level here. If you want them define it in CFLAGS.
           tmp_CFLAGS="$tmp_CFLAGS -A"
         fi
         ;;
         #
-      SGIC)
+      SGI_MIPS_C)
+        #
+        if test "$want_warnings" = "yes"; then
+          dnl Perform stricter semantic and lint-like checks
+          tmp_CFLAGS="$tmp_CFLAGS -fullwarn"
+        fi
+        ;;
+        #
+      SGI_MIPSpro_C)
         #
         if test "$want_warnings" = "yes"; then
           dnl Perform stricter semantic and lint-like checks
