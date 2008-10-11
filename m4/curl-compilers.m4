@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 20
+# serial 21
 
 
 dnl CURL_CHECK_COMPILER
@@ -790,8 +790,11 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
       LCC)
         #
         if test "$want_warnings" = "yes"; then
-          dnl Highest warning level is double -A
-          tmp_CFLAGS="$tmp_CFLAGS -A -A"
+          dnl Highest warning level is double -A, next is single -A.
+          dnl Due to the big number of warnings this triggers on third
+          dnl party header files it is impratical for to activate this
+          dnl warning level here. If you want them define it in CFLAGS.
+          tmp_CFLAGS="$tmp_CFLAGS -A"
         fi
         ;;
         #
