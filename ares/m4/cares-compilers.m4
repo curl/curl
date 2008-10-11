@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 23
+# serial 24
 
 
 dnl CARES_CHECK_COMPILER
@@ -42,7 +42,7 @@ AC_DEFUN([CARES_CHECK_COMPILER], [
   CARES_CHECK_COMPILER_GNU
   CARES_CHECK_COMPILER_LCC
   CARES_CHECK_COMPILER_SGI_MIPSpro_C
-  CARES_CHECK_COMPILER_SGI_MIPS _C
+  CARES_CHECK_COMPILER_SGI_MIPS_C
   CARES_CHECK_COMPILER_SUN
   CARES_CHECK_COMPILER_TINYC
   #

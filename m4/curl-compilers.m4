@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 22
+# serial 23
 
 
 dnl CURL_CHECK_COMPILER
@@ -48,7 +48,7 @@ AC_DEFUN([CURL_CHECK_COMPILER], [
   CURL_CHECK_COMPILER_GNU
   CURL_CHECK_COMPILER_LCC
   CURL_CHECK_COMPILER_SGI_MIPSpro_C
-  CURL_CHECK_COMPILER_SGI_MIPS _C
+  CURL_CHECK_COMPILER_SGI_MIPS_C
   CURL_CHECK_COMPILER_SUN
   CURL_CHECK_COMPILER_TINYC
   #
