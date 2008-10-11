@@ -32,26 +32,29 @@
 
 /* Provide a string that is 2 + 1 + 2 + 1 + 2 = 8 letters long (plus the zero
    byte) */
-static void time2str(char *r, long t)
+static void time2str(char *r, curl_off_t seconds)
 {
-  long h;
-  if(!t) {
+  curl_off_t d, h, m, s;
+  if(seconds <= 0) {
     strcpy(r, "--:--:--");
     return;
   }
-  h = (t/3600);
-  if(h <= 99) {
-    long m = (t-(h*3600))/60;
-    long s = (t-(h*3600)-(m*60));
-    snprintf(r, 9, "%2ld:%02ld:%02ld",h,m,s);
+  h = seconds / CURL_OFF_T_C(3600);
+  if(h <= CURL_OFF_T_C(99)) {
+    m = (seconds - (h*CURL_OFF_T_C(3600))) / CURL_OFF_T_C(60);
+    s = (seconds - (h*CURL_OFF_T_C(3600))) - (m*CURL_OFF_T_C(60));
+    snprintf(r, 9, "%2" FORMAT_OFF_T ":%02" FORMAT_OFF_T ":%02" FORMAT_OFF_T,
+             h, m, s);
   }
   else {
     /* this equals to more than 99 hours, switch to a more suitable output
        format to fit within the limits. */
-    if(h/24 <= 999)
-      snprintf(r, 9, "%3ldd %02ldh", h/24, h-(h/24)*24);
+    d = seconds / CURL_OFF_T_C(86400);
+    h = (seconds - (d*CURL_OFF_T_C(86400))) / CURL_OFF_T_C(3600);
+    if(d <= CURL_OFF_T_C(999))
+      snprintf(r, 9, "%3" FORMAT_OFF_T "d %02" FORMAT_OFF_T "h", d, h);
     else
-      snprintf(r, 9, "%7ldd", h/24);
+      snprintf(r, 9, "%7" FORMAT_OFF_T "d", d);
   }
 }
 
@@ -228,12 +231,12 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   struct timeval now;
   int result;
   char max5[6][10];
-  int dlpercen=0;
-  int ulpercen=0;
-  int total_percen=0;
+  curl_off_t dlpercen=0;
+  curl_off_t ulpercen=0;
+  curl_off_t total_percen=0;
   curl_off_t total_transfer;
   curl_off_t total_expected_transfer;
-  long timespent;
+  curl_off_t timespent;
   struct SessionHandle *data = conn->data;
   int nowindex = data->progress.speeder_c% CURR_TIME;
   int checkindex;
@@ -241,9 +244,9 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   char time_left[10];
   char time_total[10];
   char time_spent[10];
-  long ulestimate=0;
-  long dlestimate=0;
-  long total_estimate;
+  curl_off_t ulestimate=0;
+  curl_off_t dlestimate=0;
+  curl_off_t total_estimate;
   bool shownow=FALSE;
 
   now = Curl_tvnow(); /* what time is it */
@@ -252,7 +255,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   data->progress.timespent =
     (double)(now.tv_sec - data->progress.start.tv_sec) +
     (double)(now.tv_usec - data->progress.start.tv_usec)/1000000.0;
-  timespent = (long)data->progress.timespent;
+  timespent = (curl_off_t)data->progress.timespent;
 
   /* The average download speed this far */
   data->progress.dlspeed = (curl_off_t)
@@ -368,20 +371,20 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
     /* Figure out the estimated time of arrival for the upload */
     if((data->progress.flags & PGRS_UL_SIZE_KNOWN) &&
-       (data->progress.ulspeed>0) &&
-       (data->progress.size_ul > 100) ) {
-      ulestimate = (long)(data->progress.size_ul / data->progress.ulspeed);
-      ulpercen = (int)(100*(data->progress.uploaded/100) /
-                        (data->progress.size_ul/100) );
+       (data->progress.ulspeed > CURL_OFF_T_C(0)) &&
+       (data->progress.size_ul > CURL_OFF_T_C(100)) ) {
+      ulestimate = data->progress.size_ul / data->progress.ulspeed;
+      ulpercen = data->progress.uploaded /
+                (data->progress.size_ul/CURL_OFF_T_C(100));
     }
 
     /* ... and the download */
     if((data->progress.flags & PGRS_DL_SIZE_KNOWN) &&
-       (data->progress.dlspeed>0) &&
-       (data->progress.size_dl>100)) {
-      dlestimate = (long)(data->progress.size_dl / data->progress.dlspeed);
-      dlpercen = (int)(100*(data->progress.downloaded/100) /
-                        (data->progress.size_dl/100));
+       (data->progress.dlspeed > CURL_OFF_T_C(0)) &&
+       (data->progress.size_dl > CURL_OFF_T_C(100))) {
+      dlestimate = data->progress.size_dl / data->progress.dlspeed;
+      dlpercen = data->progress.downloaded /
+                (data->progress.size_dl/CURL_OFF_T_C(100));
     }
 
     /* Now figure out which of them is slower and use that one for the
@@ -404,12 +407,15 @@ int Curl_pgrsUpdate(struct connectdata *conn)
     total_transfer = data->progress.downloaded + data->progress.uploaded;
 
     /* Get the percentage of data transfered so far */
-    if(total_expected_transfer > 100)
-      total_percen=(int)(100*(total_transfer/100) /
-                         (total_expected_transfer/100) );
+    if(total_expected_transfer > CURL_OFF_T_C(100))
+      total_percen = total_transfer /
+                    (total_expected_transfer/CURL_OFF_T_C(100));
 
     fprintf(data->set.err,
-            "\r%3d %s  %3d %s  %3d %s  %s  %s %s %s %s %s",
+            "\r"
+            "%3" FORMAT_OFF_T " %s  "
+            "%3" FORMAT_OFF_T " %s  "
+            "%3" FORMAT_OFF_T " %s  %s  %s %s %s %s %s",
             total_percen,  /* 3 letters */                /* total % */
             max5data(total_expected_transfer, max5[2]),   /* total size */
             dlpercen,      /* 3 letters */                /* rcvd % */
