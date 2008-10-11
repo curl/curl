@@ -299,6 +299,7 @@ static CURLcode bindlocal(struct connectdata *conn,
   /* how many port numbers to try to bind to, increasing one at a time */
   int portnum = data->set.localportrange;
   const char *dev = data->set.str[STRING_DEVICE];
+  int error;
 
   /*************************************************************
    * Select device to bind socket to
@@ -358,7 +359,9 @@ static CURLcode bindlocal(struct connectdata *conn,
          hostent_buf,
          sizeof(hostent_buf));
       */
-      failf(data, "Couldn't bind to '%s'", dev);
+      data->state.os_errno = error = SOCKERRNO;
+      failf(data, "Couldn't bind to '%s', failed with errno %d: %s",
+            dev, error, Curl_strerror(conn, error));
       if(h)
         Curl_resolv_unlock(data, h);
       return CURLE_INTERFACE_FAILED;
@@ -384,9 +387,7 @@ static CURLcode bindlocal(struct connectdata *conn,
        */
       if(setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
                      dev, strlen(dev)+1) != 0) {
-        /* printf("Failed to BINDTODEVICE, socket: %d  device: %s error: %s\n",
-           sockfd, dev, Curl_strerror(SOCKERRNO)); */
-        int error = ERRNO;
+        error = ERRNO;
         infof(data, "SO_BINDTODEVICE %s failed with errno %d: %s; will do regular bind\n",
               dev, error, Curl_strerror(conn, error));
         /* This is typically "errno 1, error: Operation not permitted" if
@@ -437,7 +438,9 @@ static CURLcode bindlocal(struct connectdata *conn,
       struct Curl_sockaddr_storage add;
       socklen_t size = sizeof(add);
       if(getsockname(sockfd, (struct sockaddr *) &add, &size) < 0) {
-        failf(data, "getsockname() failed");
+        data->state.os_errno = error = SOCKERRNO;
+        failf(data, "getsockname() failed with errno %d: %s",
+              error, Curl_strerror(conn, error));
 	if(h)
 	  Curl_resolv_unlock(data, h);
         return CURLE_INTERFACE_FAILED;
@@ -463,9 +466,9 @@ static CURLcode bindlocal(struct connectdata *conn,
       break;
   } while(1);
 
-  data->state.os_errno = SOCKERRNO;
-  failf(data, "bind failure: %s",
-        Curl_strerror(conn, data->state.os_errno));
+  data->state.os_errno = error = SOCKERRNO;
+  failf(data, "bind failed with errno %d: %s",
+        error, Curl_strerror(conn, error));
   if(h)
     Curl_resolv_unlock(data, h);
 
