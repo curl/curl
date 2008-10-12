@@ -819,10 +819,10 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
         #
         if test "$want_warnings" = "yes"; then
           dnl Highest warning level is double -A, next is single -A.
-          dnl Due to the big number of warnings this triggers on third
-          dnl party header files it is impratical for us to use this
-          dnl warning level here. If you want them define it in CFLAGS.
-          tmp_CFLAGS="$tmp_CFLAGS -A"
+          dnl Due to the big number of warnings these trigger on third
+          dnl party header files it is impratical for us to use any of
+          dnl them here. If you want them simply define it in CPPFLAGS.
+          tmp_CFLAGS="$tmp_CFLAGS"
         fi
         ;;
         #
