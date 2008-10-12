@@ -85,7 +85,7 @@ char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
 	} else
           addr = &((struct sockaddr_in *)iface->ifa_addr)->sin_addr;
         ip = (char *) Curl_inet_ntop(af, addr, buf, buf_size);
-	Curl_strlcat(buf, scope, buf_size);
+	strlcat(buf, scope, buf_size);
 	break;
       }
     }
