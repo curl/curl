@@ -614,8 +614,7 @@ Curl_cookie_add(struct SessionHandle *data,
         co->next = clist->next; /* get the next-pointer first */
 
         /* then free all the old pointers */
-        if(clist->name)
-          free(clist->name);
+        free(clist->name);
         if(clist->value)
           free(clist->value);
         if(clist->domain)
