@@ -359,9 +359,7 @@ static CURLcode bindlocal(struct connectdata *conn,
          hostent_buf,
          sizeof(hostent_buf));
       */
-      data->state.os_errno = error = SOCKERRNO;
-      failf(data, "Couldn't bind to '%s', failed with errno %d: %s",
-            dev, error, Curl_strerror(conn, error));
+      failf(data, "Couldn't bind to '%s'", dev);
       if(h)
         Curl_resolv_unlock(data, h);
       return CURLE_INTERFACE_FAILED;
@@ -387,7 +385,7 @@ static CURLcode bindlocal(struct connectdata *conn,
        */
       if(setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
                      dev, strlen(dev)+1) != 0) {
-        error = ERRNO;
+        error = SOCKERRNO;
         infof(data, "SO_BINDTODEVICE %s failed with errno %d: %s; will do regular bind\n",
               dev, error, Curl_strerror(conn, error));
         /* This is typically "errno 1, error: Operation not permitted" if
