@@ -496,7 +496,8 @@ char *glob_match_url(char *filename, URLGlob *glob)
    * be longer than the URL we use. We allocate a good start size, then
    * we need to realloc in case of need.
    */
-  allocsize=strlen(filename);
+  allocsize=strlen(filename)+1; /* make it at least one byte to store the
+                                   trailing zero */
   target = malloc(allocsize);
   if(NULL == target)
     return NULL; /* major failure */
@@ -548,7 +549,9 @@ char *glob_match_url(char *filename, URLGlob *glob)
     }
     if(appendlen + stringlen >= allocsize) {
       char *newstr;
-      allocsize = (appendlen + stringlen)*2;
+      /* we append a single byte to allow for the trailing byte to be appended
+         at the end of this function outside the while() loop */
+      allocsize = (appendlen + stringlen)*2 + 1;
       newstr=realloc(target, allocsize);
       if(NULL ==newstr) {
         free(target);
