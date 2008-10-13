@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 24
+# serial 29
 
 
 dnl CARES_CHECK_COMPILER
@@ -35,16 +35,16 @@ AC_DEFUN([CARES_CHECK_COMPILER], [
   flags_opt_yes="unknown"
   flags_opt_off="unknown"
   #
-  CARES_CHECK_COMPILER_DEC
-  CARES_CHECK_COMPILER_HP
-  CARES_CHECK_COMPILER_IBM
-  CARES_CHECK_COMPILER_INTEL
-  CARES_CHECK_COMPILER_GNU
+  CARES_CHECK_COMPILER_DEC_C
+  CARES_CHECK_COMPILER_HPUX_C
+  CARES_CHECK_COMPILER_IBM_C
+  CARES_CHECK_COMPILER_INTEL_C
+  CARES_CHECK_COMPILER_GNU_C
   CARES_CHECK_COMPILER_LCC
-  CARES_CHECK_COMPILER_SGI_MIPSpro_C
+  CARES_CHECK_COMPILER_SGI_MIPSPRO_C
   CARES_CHECK_COMPILER_SGI_MIPS_C
-  CARES_CHECK_COMPILER_SUN
-  CARES_CHECK_COMPILER_TINYC
+  CARES_CHECK_COMPILER_SUNPRO_C
+  CARES_CHECK_COMPILER_TINY_C
   #
   if test "$compiler_id" = "unknown"; then
   cat <<_EOF 1>&2
@@ -64,18 +64,18 @@ _EOF
 ])
 
 
-dnl CARES_CHECK_COMPILER_DEC
+dnl CARES_CHECK_COMPILER_DEC_C
 dnl -------------------------------------------------
-dnl Verify if the C compiler being used is DEC's.
+dnl Verify if compiler being used is DEC C.
 
-AC_DEFUN([CARES_CHECK_COMPILER_DEC], [
-  AC_MSG_CHECKING([whether we are using the DEC/Compaq C compiler])
+AC_DEFUN([CARES_CHECK_COMPILER_DEC_C], [
+  AC_MSG_CHECKING([if compiler is DEC/Compaq/HP C])
   CURL_CHECK_DEF([__DECC], [], [silent])
   CURL_CHECK_DEF([__DECC_VER], [], [silent])
   if test "$curl_cv_have_def___DECC" = "yes" &&
     test "$curl_cv_have_def___DECC_VER" = "yes"; then
     AC_MSG_RESULT([yes])
-    compiler_id="DECC"
+    compiler_id="DEC_C"
     flags_dbg_all="-g -g0 -g1 -g2 -g3"
     flags_dbg_yes="-g2"
     flags_dbg_off="-g0"
@@ -88,19 +88,18 @@ AC_DEFUN([CARES_CHECK_COMPILER_DEC], [
 ])
 
 
-dnl CARES_CHECK_COMPILER_GNU
+dnl CARES_CHECK_COMPILER_GNU_C
 dnl -------------------------------------------------
-dnl Verify if the C compiler being used is GNU's.
+dnl Verify if compiler being used is GNU C.
 
-AC_DEFUN([CARES_CHECK_COMPILER_GNU], [
-  AC_REQUIRE([CARES_CHECK_COMPILER_INTEL])dnl
-  #
-  AC_MSG_CHECKING([whether we are using the GNU C compiler])
+AC_DEFUN([CARES_CHECK_COMPILER_GNU_C], [
+  AC_REQUIRE([CARES_CHECK_COMPILER_INTEL_C])dnl
+  AC_MSG_CHECKING([if compiler is GNU C])
   CURL_CHECK_DEF([__GNUC__], [], [silent])
   if test "$curl_cv_have_def___GNUC__" = "yes" &&
     test "$compiler_id" = "unknown"; then
     AC_MSG_RESULT([yes])
-    compiler_id="GNUC"
+    compiler_id="GNU_C"
     gccver=`$CC -dumpversion`
     gccvhi=`echo $gccver | cut -d . -f1`
     gccvlo=`echo $gccver | cut -d . -f2`
@@ -124,16 +123,16 @@ AC_DEFUN([CARES_CHECK_COMPILER_GNU], [
 ])
 
 
-dnl CARES_CHECK_COMPILER_HP
+dnl CARES_CHECK_COMPILER_HPUX_C
 dnl -------------------------------------------------
-dnl Verify if the C compiler being used is HP's.
+dnl Verify if compiler being used is HP-UX C.
 
-AC_DEFUN([CARES_CHECK_COMPILER_HP], [
-  AC_MSG_CHECKING([whether we are using the HP C compiler])
+AC_DEFUN([CARES_CHECK_COMPILER_HPUX_C], [
+  AC_MSG_CHECKING([if compiler is HP-UX C])
   CURL_CHECK_DEF([__HP_cc], [], [silent])
   if test "$curl_cv_have_def___HP_cc" = "yes"; then
     AC_MSG_RESULT([yes])
-    compiler_id="HPUXC"
+    compiler_id="HP_UX_C"
     flags_dbg_all="-g -s"
     flags_dbg_yes="-g"
     flags_dbg_off="-s"
@@ -146,16 +145,16 @@ AC_DEFUN([CARES_CHECK_COMPILER_HP], [
 ])
 
 
-dnl CARES_CHECK_COMPILER_IBM
+dnl CARES_CHECK_COMPILER_IBM_C
 dnl -------------------------------------------------
-dnl Verify if the C compiler being used is IBM's.
+dnl Verify if compiler being used is IBM C.
 
-AC_DEFUN([CARES_CHECK_COMPILER_IBM], [
-  AC_MSG_CHECKING([whether we are using the IBM C compiler])
+AC_DEFUN([CARES_CHECK_COMPILER_IBM_C], [
+  AC_MSG_CHECKING([if compiler is IBM C])
   CURL_CHECK_DEF([__IBMC__], [], [silent])
   if test "$curl_cv_have_def___IBMC__" = "yes"; then
     AC_MSG_RESULT([yes])
-    compiler_id="IBMC"
+    compiler_id="IBM_C"
     flags_dbg_all="-g -g0 -g1 -g2 -g3"
     flags_dbg_yes="-g"
     flags_dbg_off=""
@@ -175,19 +174,19 @@ AC_DEFUN([CARES_CHECK_COMPILER_IBM], [
 ])
 
 
-dnl CARES_CHECK_COMPILER_INTEL
+dnl CARES_CHECK_COMPILER_INTEL_C
 dnl -------------------------------------------------
-dnl Verify if the C compiler being used is Intel's.
+dnl Verify if compiler being used is Intel C.
 
-AC_DEFUN([CARES_CHECK_COMPILER_INTEL], [
-  AC_BEFORE([$0],[CARES_CHECK_COMPILER_GNU])dnl
-  AC_MSG_CHECKING([whether we are using the Intel C compiler])
+AC_DEFUN([CARES_CHECK_COMPILER_INTEL_C], [
+  AC_BEFORE([$0],[CARES_CHECK_COMPILER_GNU_C])dnl
+  AC_MSG_CHECKING([if compiler is Intel C])
   CURL_CHECK_DEF([__INTEL_COMPILER], [], [silent])
   if test "$curl_cv_have_def___INTEL_COMPILER" = "yes"; then
     AC_MSG_RESULT([yes])
     CURL_CHECK_DEF([__unix__], [], [silent])
     if test "$curl_cv_have_def___unix__" = "yes"; then
-      compiler_id="ICC_unix"
+      compiler_id="INTEL_UNIX_C"
       flags_dbg_all="-g -g0"
       flags_dbg_yes="-g"
       flags_dbg_off="-g0"
@@ -195,7 +194,7 @@ AC_DEFUN([CARES_CHECK_COMPILER_INTEL], [
       flags_opt_yes="-O2"
       flags_opt_off="-O0"
     else
-      compiler_id="ICC_windows"
+      compiler_id="INTEL_WINDOWS_C"
       flags_dbg_all="/ZI /Zi /zI /zi /ZD /Zd /zD /zd /Z7 /z7 /Oy /Oy-"
       flags_dbg_all="$flags_dbg_all /debug"
       flags_dbg_all="$flags_dbg_all /debug:none"
@@ -219,10 +218,10 @@ AC_DEFUN([CARES_CHECK_COMPILER_INTEL], [
 
 dnl CARES_CHECK_COMPILER_LCC
 dnl -------------------------------------------------
-dnl Verify if the C compiler being used is LCC.
+dnl Verify if compiler being used is LCC.
 
 AC_DEFUN([CARES_CHECK_COMPILER_LCC], [
-  AC_MSG_CHECKING([whether we are using the LCC C compiler])
+  AC_MSG_CHECKING([if compiler is LCC])
   CURL_CHECK_DEF([__LCC__], [], [silent])
   if test "$curl_cv_have_def___LCC__" = "yes"; then
     AC_MSG_RESULT([yes])
@@ -241,10 +240,10 @@ AC_DEFUN([CARES_CHECK_COMPILER_LCC], [
 
 dnl CARES_CHECK_COMPILER_SGI_MIPS_C
 dnl -------------------------------------------------
-dnl Verify if the C compiler being used is SGI's.
+dnl Verify if compiler being used is SGI MIPS C.
 
 AC_DEFUN([CARES_CHECK_COMPILER_SGI_MIPS_C], [
-  AC_REQUIRE([CARES_CHECK_COMPILER_SGI_MIPSpro_C])dnl
+  AC_REQUIRE([CARES_CHECK_COMPILER_SGI_MIPSPRO_C])dnl
   AC_MSG_CHECKING([if compiler is SGI MIPS C])
   CURL_CHECK_DEF([__GNUC__], [], [silent])
   CURL_CHECK_DEF([__sgi], [], [silent])
@@ -265,11 +264,11 @@ AC_DEFUN([CARES_CHECK_COMPILER_SGI_MIPS_C], [
 ])
 
 
-dnl CARES_CHECK_COMPILER_SGI_MIPSpro_C
+dnl CARES_CHECK_COMPILER_SGI_MIPSPRO_C
 dnl -------------------------------------------------
-dnl Verify if the C compiler being used is SGI's.
+dnl Verify if compiler being used is SGI MIPSpro C.
 
-AC_DEFUN([CARES_CHECK_COMPILER_SGI_MIPSpro_C], [
+AC_DEFUN([CARES_CHECK_COMPILER_SGI_MIPSPRO_C], [
   AC_BEFORE([$0],[CARES_CHECK_COMPILER_SGI_MIPS_C])dnl
   AC_MSG_CHECKING([if compiler is SGI MIPSpro C])
   CURL_CHECK_DEF([__GNUC__], [], [silent])
@@ -279,7 +278,7 @@ AC_DEFUN([CARES_CHECK_COMPILER_SGI_MIPSpro_C], [
     (test "$curl_cv_have_def__SGI_COMPILER_VERSION" = "yes" ||
      test "$curl_cv_have_def__COMPILER_VERSION" = "yes"); then
     AC_MSG_RESULT([yes])
-    compiler_id="SGI_MIPSpro_C"
+    compiler_id="SGI_MIPSPRO_C"
     flags_dbg_all="-g -g0 -g1 -g2 -g3"
     flags_dbg_yes="-g"
     flags_dbg_off="-g0"
@@ -292,16 +291,16 @@ AC_DEFUN([CARES_CHECK_COMPILER_SGI_MIPSpro_C], [
 ])
 
 
-dnl CARES_CHECK_COMPILER_SUN
+dnl CARES_CHECK_COMPILER_SUNPRO_C
 dnl -------------------------------------------------
-dnl Verify if the C compiler being used is SUN's.
+dnl Verify if compiler being used is SunPro C.
 
-AC_DEFUN([CARES_CHECK_COMPILER_SUN], [
-  AC_MSG_CHECKING([whether we are using the SUN C compiler])
+AC_DEFUN([CARES_CHECK_COMPILER_SUNPRO_C], [
+  AC_MSG_CHECKING([if compiler is SunPro C])
   CURL_CHECK_DEF([__SUNPRO_C], [], [silent])
   if test "$curl_cv_have_def___SUNPRO_C" = "yes"; then
     AC_MSG_RESULT([yes])
-    compiler_id="SUNC"
+    compiler_id="SUNPRO_C"
     flags_dbg_all="-g -s"
     flags_dbg_yes="-g"
     flags_dbg_off="-s"
@@ -314,16 +313,16 @@ AC_DEFUN([CARES_CHECK_COMPILER_SUN], [
 ])
 
 
-dnl CARES_CHECK_COMPILER_TINYC
+dnl CARES_CHECK_COMPILER_TINY_C
 dnl -------------------------------------------------
-dnl Verify if the C compiler being used is TINYC.
+dnl Verify if compiler being used is Tiny C.
 
-AC_DEFUN([CARES_CHECK_COMPILER_TINYC], [
-  AC_MSG_CHECKING([whether we are using the TinyCC C compiler])
+AC_DEFUN([CARES_CHECK_COMPILER_TINY_C], [
+  AC_MSG_CHECKING([if compiler is Tiny C])
   CURL_CHECK_DEF([__TINYC__], [], [silent])
   if test "$curl_cv_have_def___TINYC__" = "yes"; then
     AC_MSG_RESULT([yes])
-    compiler_id="TINYC"
+    compiler_id="TINY_C"
     flags_dbg_all="-g -b"
     flags_dbg_yes="-g -b"
     flags_dbg_off=""
@@ -457,7 +456,7 @@ AC_DEFUN([CARES_SET_COMPILER_BASIC_OPTS], [
   #
   if test "$compiler_id" != "unknown"; then
     #
-    if test "$compiler_id" = "GNUC"; then
+    if test "$compiler_id" = "GNU_C"; then
       CARES_CONVERT_INCLUDE_TO_ISYSTEM
     fi
     #
@@ -468,7 +467,7 @@ AC_DEFUN([CARES_SET_COMPILER_BASIC_OPTS], [
     #
     case "$compiler_id" in
         #
-      DECC)
+      DEC_C)
         #
         dnl Select strict ANSI C compiler mode
         tmp_CFLAGS="$tmp_CFLAGS -std1"
@@ -480,13 +479,13 @@ AC_DEFUN([CARES_SET_COMPILER_BASIC_OPTS], [
         tmp_CFLAGS="$tmp_CFLAGS -msg_fatal toofewargs,toomanyargs"
         ;;
         #
-      GNUC)
+      GNU_C)
         #
         dnl Placeholder
         tmp_CFLAGS="$tmp_CFLAGS"
         ;;
         #
-      HPUXC)
+      HP_UX_C)
         #
         dnl Disallow run-time dereferencing of null pointers
         tmp_CFLAGS="$tmp_CFLAGS -z"
@@ -496,7 +495,7 @@ AC_DEFUN([CARES_SET_COMPILER_BASIC_OPTS], [
         tmp_CFLAGS="$tmp_CFLAGS +W 4227,4255"
         ;;
         #
-      IBMC)
+      IBM_C)
         #
         dnl Ensure that compiler optimizations are always thread-safe.
         tmp_CFLAGS="$tmp_CFLAGS -qthreaded"
@@ -510,7 +509,7 @@ AC_DEFUN([CARES_SET_COMPILER_BASIC_OPTS], [
         tmp_CFLAGS="$tmp_CFLAGS -qhalt=e"
         ;;
         #
-      ICC_unix)
+      INTEL_UNIX_C)
         #
         dnl On unix this compiler uses gcc's header files, so
         dnl we select ANSI C89 dialect plus GNU extensions.
@@ -532,7 +531,7 @@ AC_DEFUN([CARES_SET_COMPILER_BASIC_OPTS], [
         tmp_CFLAGS="$tmp_CFLAGS -fp-model precise"
         ;;
         #
-      ICC_windows)
+      INTEL_WINDOWS_C)
         #
         dnl Placeholder
         tmp_CFLAGS="$tmp_CFLAGS"
@@ -550,19 +549,19 @@ AC_DEFUN([CARES_SET_COMPILER_BASIC_OPTS], [
         tmp_CFLAGS="$tmp_CFLAGS"
         ;;
         #
-      SGI_MIPSpro_C)
+      SGI_MIPSPRO_C)
         #
         dnl Placeholder
         tmp_CFLAGS="$tmp_CFLAGS"
         ;;
         #
-      SUNC)
+      SUNPRO_C)
         #
         dnl Placeholder
         tmp_CFLAGS="$tmp_CFLAGS"
         ;;
         #
-      TINYC)
+      TINY_C)
         #
         dnl Placeholder
         tmp_CFLAGS="$tmp_CFLAGS"
@@ -731,7 +730,7 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
     #
     case "$compiler_id" in
         #
-      DECC)
+      DEC_C)
         #
         if test "$want_warnings" = "yes"; then
           dnl Select a higher warning level than default level2
@@ -739,7 +738,7 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
         fi
         ;;
         #
-      GNUC)
+      GNU_C)
         #
         if test "$want_warnings" = "yes"; then
           dnl Do not enable -pedantic when cross-compiling with a gcc older
@@ -805,7 +804,7 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
         fi
         ;;
         #
-      HPUXC)
+      HP_UX_C)
         #
         if test "$want_warnings" = "yes"; then
           dnl Issue all warnings
@@ -817,13 +816,13 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
         fi
         ;;
         #
-      IBMC)
+      IBM_C)
         #
         dnl Placeholder
         tmp_CFLAGS="$tmp_CFLAGS"
         ;;
         #
-      ICC_unix)
+      INTEL_UNIX_C)
         #
         if test "$want_warnings" = "yes"; then
           if test "$compiler_num" -gt "600"; then
@@ -835,7 +834,7 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
         fi
         ;;
         #
-      ICC_windows)
+      INTEL_WINDOWS_C)
         #
         dnl Placeholder
         tmp_CFLAGS="$tmp_CFLAGS"
@@ -860,7 +859,7 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
         fi
         ;;
         #
-      SGI_MIPSpro_C)
+      SGI_MIPSPRO_C)
         #
         if test "$want_warnings" = "yes"; then
           dnl Perform stricter semantic and lint-like checks
@@ -871,7 +870,7 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
         fi
         ;;
         #
-      SUNC)
+      SUNPRO_C)
         #
         if test "$want_warnings" = "yes"; then
           dnl Perform stricter semantic and lint-like checks
@@ -879,7 +878,7 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
         fi
         ;;
         #
-      TINYC)
+      TINY_C)
         #
         if test "$want_warnings" = "yes"; then
           dnl Activate all warnings
