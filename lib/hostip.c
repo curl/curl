@@ -726,6 +726,8 @@ void Curl_freeaddrinfo(Curl_addrinfo *ai)
   /* walk over the list and free all entries */
   while(ai) {
     next = ai->ai_next;
+    if(ai->ai_addr)
+      free(ai->ai_addr);
     if(ai->ai_canonname)
       free(ai->ai_canonname);
     free(ai);
@@ -851,14 +853,15 @@ Curl_addrinfo *Curl_he2ai(const struct hostent *he, int port)
 #ifdef CURLRES_IPV6
   struct sockaddr_in6 *addr6;
 #endif /* CURLRES_IPV6 */
+  CURLcode result = CURLE_OK;
   int i;
-  struct in_addr *curr;
+  char *curr;
 
   if(!he)
     /* no input == no output! */
     return NULL;
 
-  for(i=0; (curr = (struct in_addr *)he->h_addr_list[i]) != NULL; i++) {
+  for(i=0; (curr = he->h_addr_list[i]) != NULL; i++) {
 
     int ss_size;
 #ifdef CURLRES_IPV6
@@ -868,10 +871,21 @@ Curl_addrinfo *Curl_he2ai(const struct hostent *he, int port)
 #endif /* CURLRES_IPV6 */
       ss_size = sizeof (struct sockaddr_in);
 
-    ai = calloc(1, sizeof(Curl_addrinfo) + ss_size);
-
-    if(!ai)
+    if((ai = calloc(1, sizeof(Curl_addrinfo))) == NULL) {
+      result = CURLE_OUT_OF_MEMORY;
       break;
+    }
+    if((ai->ai_canonname = strdup(he->h_name)) == NULL) {
+      result = CURLE_OUT_OF_MEMORY;
+      free(ai);
+      break;
+    }
+    if((ai->ai_addr = calloc(1, ss_size)) == NULL) {
+      result = CURLE_OUT_OF_MEMORY;
+      free(ai->ai_canonname);
+      free(ai);
+      break;
+    }
 
     if(!firstai)
       /* store the pointer we want to return from this function */
@@ -888,12 +902,6 @@ Curl_addrinfo *Curl_he2ai(const struct hostent *he, int port)
     ai->ai_socktype = SOCK_STREAM;
 
     ai->ai_addrlen = ss_size;
-    /* make the ai_addr point to the address immediately following this struct
-       and use that area to store the address */
-    ai->ai_addr = (struct sockaddr *) ((char*)ai + sizeof(Curl_addrinfo));
-
-    /* need to free this eventually */
-    ai->ai_canonname = strdup(he->h_name);
 
     /* leave the rest of the struct filled with zero */
 
@@ -901,7 +909,7 @@ Curl_addrinfo *Curl_he2ai(const struct hostent *he, int port)
     case AF_INET:
       addr = (struct sockaddr_in *)ai->ai_addr; /* storage area for this info */
 
-      memcpy((char *)&(addr->sin_addr), curr, sizeof(struct in_addr));
+      memcpy(&addr->sin_addr, curr, sizeof(struct in_addr));
       addr->sin_family = (unsigned short)(he->h_addrtype);
       addr->sin_port = htons((unsigned short)port);
       break;
@@ -910,7 +918,7 @@ Curl_addrinfo *Curl_he2ai(const struct hostent *he, int port)
     case AF_INET6:
       addr6 = (struct sockaddr_in6 *)ai->ai_addr; /* storage area for this info */
 
-      memcpy((char *)&(addr6->sin6_addr), curr, sizeof(struct in6_addr));
+      memcpy(&addr6->sin6_addr, curr, sizeof(struct in6_addr));
       addr6->sin6_family = (unsigned short)(he->h_addrtype);
       addr6->sin6_port = htons((unsigned short)port);
       break;
@@ -919,6 +927,10 @@ Curl_addrinfo *Curl_he2ai(const struct hostent *he, int port)
 
     prevai = ai;
   }
+
+  if(result != CURLE_OK)
+    Curl_freeaddrinfo(firstai);
+
   return firstai;
 }
 
