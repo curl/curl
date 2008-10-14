@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 32
+# serial 33
 
 
 dnl CURL_CHECK_COMPILER
@@ -976,7 +976,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
         #
         if test "$want_warnings" = "yes"; then
           dnl Issue all warnings
-          tmp_CFLAGS="$tmp_CFLAGS -Wall -Wextra -Wpadded"
+          tmp_CFLAGS="$tmp_CFLAGS -Wall -Wextra"
         fi
         ;;
         #

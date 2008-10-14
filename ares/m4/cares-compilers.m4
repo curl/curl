@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 33
+# serial 34
 
 
 dnl CARES_CHECK_COMPILER
@@ -970,7 +970,7 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
         #
         if test "$want_warnings" = "yes"; then
           dnl Issue all warnings
-          tmp_CFLAGS="$tmp_CFLAGS -Wall -Wextra -Wpadded"
+          tmp_CFLAGS="$tmp_CFLAGS -Wall -Wextra"
         fi
         ;;
         #
