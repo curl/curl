@@ -18,6 +18,7 @@
  1.4 Get IP address
  1.5 c-ares ipv6
  1.6 configure-based info in public headers
+ 1.7 signal-based resolver timeouts
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -160,6 +161,18 @@
 
  The remaining problems to solve involve the platforms that can't run
  configure.
+
+1.7 signal-based resolver timeouts
+
+ libcurl built without an asynchronous resolver library uses alarm() to time
+ out DNS lookups. When a timeout occurs, this causes libcurl to jump from the
+ signal handler back into the library with a sigsetjmp, which effectively 
+ causes libcurl to continue running within the signal handler. This is
+ non-portable and could cause problems on some platforms. A discussion on the
+ problem is available at http://curl.haxx.se/mail/lib-2008-09/0197.html
+
+ Also, alarm() provides timeout resolution only to the nearest second. alarm
+ ought to be replaced by setitimer on systems that support it.
 
 2. libcurl - multi interface
 
