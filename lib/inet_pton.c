@@ -221,8 +221,8 @@ inet_pton6(const char *src, unsigned char *dst)
      * Since some memmove()'s erroneously fail to handle
      * overlapping regions, we'll do the shift by hand.
      */
-    const int n = tp - colonp;
-    int i;
+    const long n = tp - colonp;
+    long i;
 
     for (i = 1; i <= n; i++) {
       endp[- i] = colonp[n - i];

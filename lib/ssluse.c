@@ -1644,9 +1644,16 @@ ossl_connect_step2(struct connectdata *conn, int sockindex)
 
 static int asn1_object_dump(ASN1_OBJECT *a, char *buf, size_t len)
 {
-  int i = i2t_ASN1_OBJECT(buf, len, a);
-  if (i >= (int)len)
-    return 1; /* too small buffer! */
+  int i, ilen;
+
+  if((ilen = (int)len) < 0)
+    return 1; /* buffer too big */
+
+  i = i2t_ASN1_OBJECT(buf, ilen, a);
+
+  if(i >= ilen)
+    return 1; /* buffer too small */
+
   return 0;
 }
 
@@ -2244,9 +2251,9 @@ ossl_connect_common(struct connectdata *conn,
     if(connssl->connecting_state == ssl_connect_2_reading
         || connssl->connecting_state == ssl_connect_2_writing) {
 
-      int writefd = ssl_connect_2_writing==
+      curl_socket_t writefd = ssl_connect_2_writing==
         connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
-      int readfd = ssl_connect_2_reading==
+      curl_socket_t readfd = ssl_connect_2_reading==
         connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
 
       while(1) {

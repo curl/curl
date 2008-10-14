@@ -3176,13 +3176,13 @@ static CURLcode ParseURLAndFillConnection(struct SessionHandle *data,
     char *percent = strstr (conn->host.name, "%25");
     if (percent) {
       char *endp;
-      unsigned int scope = strtoul (percent + 3, &endp, 10);
+      unsigned long scope = strtoul (percent + 3, &endp, 10);
       if (*endp == ']') {
         /* The address scope was well formed.  Knock it out of the hostname.  */
         memmove(percent, endp, strlen(endp)+1);
         if (!data->state.this_is_a_follow)
           /* Don't honour a scope given in a Location: header */
-          conn->scope = scope;
+          conn->scope = (unsigned int)scope;
       } else
         infof(data, "Invalid IPv6 address format\n");
     }
