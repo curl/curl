@@ -15,6 +15,8 @@ Awaiting feedback, updates or removal:
 
 182 -  Make CURLINFO_LASTSOCKET accessible during perform
 
+187 -  Failing SFTP range tests cases 634 through 637
+
 Patches pending commit:
 
 183 - "libcurl issue with IPv6 and c-ares"
@@ -25,6 +27,5 @@ Patches pending commit:
 
 186 - strcasecmp in Turkish
 
-187 -
-
+188 -
 
