@@ -551,8 +551,8 @@ char *glob_match_url(char *filename, URLGlob *glob)
       char *newstr;
       /* we append a single byte to allow for the trailing byte to be appended
          at the end of this function outside the while() loop */
-      allocsize = (appendlen + stringlen)*2 + 1;
-      newstr=realloc(target, allocsize);
+      allocsize = (appendlen + stringlen)*2;
+      newstr=realloc(target, allocsize + 1);
       if(NULL ==newstr) {
         free(target);
         return NULL;
