@@ -45,6 +45,7 @@ AC_DEFUN([CARES_CHECK_COMPILER], [
   CARES_CHECK_COMPILER_SGI_MIPS_C
   CARES_CHECK_COMPILER_SUNPRO_C
   CARES_CHECK_COMPILER_TINY_C
+  CARES_CHECK_COMPILER_WATCOM_C
   #
   if test "$compiler_id" = "unknown"; then
   cat <<_EOF 1>&2
@@ -335,6 +336,39 @@ AC_DEFUN([CARES_CHECK_COMPILER_TINY_C], [
 ])
 
 
+dnl CARES_CHECK_COMPILER_WATCOM_C
+dnl -------------------------------------------------
+dnl Verify if compiler being used is Watcom C.
+
+AC_DEFUN([CARES_CHECK_COMPILER_WATCOM_C], [
+  AC_MSG_CHECKING([if compiler is Watcom C])
+  CURL_CHECK_DEF([__WATCOMC__], [], [silent])
+  if test "$curl_cv_have_def___WATCOMC__" = "yes"; then
+    AC_MSG_RESULT([yes])
+    CURL_CHECK_DEF([__UNIX__], [], [silent])
+    if test "$curl_cv_have_def___UNIX__" = "yes"; then
+      compiler_id="WATCOM_UNIX_C"
+      flags_dbg_all="-g1 -g1+ -g2 -g3"
+      flags_dbg_yes="-g2"
+      flags_dbg_off=""
+      flags_opt_all="-O0 -O1 -O2 -O3"
+      flags_opt_yes="-O2"
+      flags_opt_off="-O0"
+    else
+      compiler_id="WATCOM_WINDOWS_C"
+      flags_dbg_all=""
+      flags_dbg_yes=""
+      flags_dbg_off=""
+      flags_opt_all=""
+      flags_opt_yes=""
+      flags_opt_off=""
+    fi
+  else
+    AC_MSG_RESULT([no])
+  fi
+])
+
+
 dnl CARES_CONVERT_INCLUDE_TO_ISYSTEM
 dnl -------------------------------------------------
 dnl Changes standard include paths present in CFLAGS
@@ -562,6 +596,18 @@ AC_DEFUN([CARES_SET_COMPILER_BASIC_OPTS], [
         ;;
         #
       TINY_C)
+        #
+        dnl Placeholder
+        tmp_CFLAGS="$tmp_CFLAGS"
+        ;;
+        #
+      WATCOM_UNIX_C)
+        #
+        dnl Placeholder
+        tmp_CFLAGS="$tmp_CFLAGS"
+        ;;
+        #
+      WATCOM_WINDOWS_C)
         #
         dnl Placeholder
         tmp_CFLAGS="$tmp_CFLAGS"
@@ -888,6 +934,20 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
           dnl Warn use of unsupported GCC features ignored by TCC
           tmp_CFLAGS="$tmp_CFLAGS -Wunsupported"
         fi
+        ;;
+        #
+      WATCOM_UNIX_C)
+        #
+        if test "$want_warnings" = "yes"; then
+          dnl Issue all warnings
+          dnl tmp_CFLAGS="$tmp_CFLAGS -Wall -Wextra -Wpadded"
+        fi
+        ;;
+        #
+      WATCOM_WINDOWS_C)
+        #
+        dnl Placeholder
+        tmp_CFLAGS="$tmp_CFLAGS"
         ;;
         #
     esac
