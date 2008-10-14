@@ -17,4 +17,14 @@ Awaiting feedback, updates or removal:
 
 Patches pending commit:
 
-183 -
+183 - "libcurl issue with IPv6 and c-ares"
+
+184 - coverity.com issues
+
+185 - CURLOPT_PROXYUSER etc
+
+186 - strcasecmp in Turkish
+
+187 -
+
+
