@@ -946,7 +946,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
         #
         if test "$want_warnings" = "yes"; then
           dnl Issue all warnings
-          dnl tmp_CFLAGS="$tmp_CFLAGS -Wall -Wextra -Wpadded"
+          tmp_CFLAGS="$tmp_CFLAGS -Wall -Wextra -Wpadded"
         fi
         ;;
         #
