@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 29
+# serial 32
 
 
 dnl CARES_CHECK_COMPILER
@@ -787,65 +787,95 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
       GNU_C)
         #
         if test "$want_warnings" = "yes"; then
+          #
           dnl Do not enable -pedantic when cross-compiling with a gcc older
           dnl than 3.0, to avoid warnings from third party system headers.
           if test "x$cross_compiling" != "xyes" ||
             test "$compiler_num" -ge "300"; then
             tmp_CFLAGS="$tmp_CFLAGS -pedantic"
           fi
+          #
           dnl Set of options we believe *ALL* gcc versions support:
-          tmp_CFLAGS="$tmp_CFLAGS -Wall -W -Winline -Wnested-externs"
-          tmp_CFLAGS="$tmp_CFLAGS -Wpointer-arith -Wwrite-strings"
-          dnl -Wcast-align is a bit too annoying on all gcc versions ;-)
-          dnl Do not enable some warnings, when cross-compiling with a gcc
-          dnl older than 3.0, triggered on third party system headers.
-          if test "x$cross_compiling" != "xyes" ||
-            test "$compiler_num" -ge "300"; then
-            tmp_CFLAGS="$tmp_CFLAGS -Wmissing-prototypes"
+          tmp_CFLAGS="$tmp_CFLAGS -Wall -W"
+          #
+          dnl Only gcc 1.4 or later
+          if test "$compiler_num" -ge "104"; then
+            tmp_CFLAGS="$tmp_CFLAGS -Wpointer-arith -Wwrite-strings"
+            dnl If not cross-compiling with a gcc older than 3.0
+            if test "x$cross_compiling" != "xyes" ||
+              test "$compiler_num" -ge "300"; then
+              tmp_CFLAGS="$tmp_CFLAGS -Wunused -Wshadow"
+            fi
           fi
+          #
+          dnl Only gcc 2.7 or later
           if test "$compiler_num" -ge "207"; then
-            dnl gcc 2.7 or later
-            tmp_CFLAGS="$tmp_CFLAGS -Wmissing-declarations"
+            tmp_CFLAGS="$tmp_CFLAGS -Winline -Wnested-externs"
+            dnl If not cross-compiling with a gcc older than 3.0
+            if test "x$cross_compiling" != "xyes" ||
+              test "$compiler_num" -ge "300"; then
+              tmp_CFLAGS="$tmp_CFLAGS -Wmissing-declarations"
+              tmp_CFLAGS="$tmp_CFLAGS -Wmissing-prototypes"
+            fi
           fi
-          if test "$compiler_num" -gt "295"; then
-            dnl only if the compiler is newer than 2.95 since we got lots of
-            dnl "`_POSIX_C_SOURCE' is not defined" in system headers with
-            dnl gcc 2.95.4 on FreeBSD 4.9!
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-long-long -Wno-multichar -Wshadow"
-            tmp_CFLAGS="$tmp_CFLAGS -Wsign-compare -Wundef"
+          #
+          dnl Only gcc 2.95 or later
+          if test "$compiler_num" -ge "295"; then
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-long-long"
           fi
+          #
+          dnl Only gcc 2.96 or later
           if test "$compiler_num" -ge "296"; then
-            dnl gcc 2.96 or later
             tmp_CFLAGS="$tmp_CFLAGS -Wfloat-equal"
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-multichar -Wsign-compare"
+            dnl -Wundef used only if gcc is 2.96 or later since we get
+            dnl lots of "`_POSIX_C_SOURCE' is not defined" in system
+            dnl headers with gcc 2.95.4 on FreeBSD 4.9
+            tmp_CFLAGS="$tmp_CFLAGS -Wundef"
           fi
-          if test "$compiler_num" -gt "296"; then
-            dnl this option does not exist in 2.96
+          #
+          dnl Only gcc 2.97 or later
+          if test "$compiler_num" -ge "297"; then
             tmp_CFLAGS="$tmp_CFLAGS -Wno-format-nonliteral"
           fi
-          dnl -Wunreachable-code seems totally unreliable on my gcc 3.3.2 on
-          dnl on i686-Linux as it gives us heaps with false positives.
-          dnl Also, on gcc 4.0.X it is totally unbearable and complains all
-          dnl over making it unusable for generic purposes. Let's not use it.
+          #
+          dnl Only gcc 3.0 or later
+          if test "$compiler_num" -ge "300"; then
+            dnl -Wunreachable-code seems totally unreliable on my gcc 3.3.2 on
+            dnl on i686-Linux as it gives us heaps with false positives.
+            dnl Also, on gcc 4.0.X it is totally unbearable and complains all
+            dnl over making it unusable for generic purposes. Let's not use it.
+            tmp_CFLAGS="$tmp_CFLAGS"
+          fi
+          #
+          dnl Only gcc 3.3 or later
           if test "$compiler_num" -ge "303"; then
-            dnl gcc 3.3 and later
             tmp_CFLAGS="$tmp_CFLAGS -Wendif-labels -Wstrict-prototypes"
           fi
+          #
+          dnl Only gcc 3.4 or later
           if test "$compiler_num" -ge "304"; then
-            dnl gcc 3.4 and later
             tmp_CFLAGS="$tmp_CFLAGS -Wdeclaration-after-statement"
           fi
+          #
         fi
         #
         dnl Do not issue warnings for code in system include paths.
         if test "$compiler_num" -ge "300"; then
-          dnl gcc 3.0 and later
           tmp_CFLAGS="$tmp_CFLAGS -Wno-system-headers"
         else
-          dnl Disable some warnings, when cross-compiling with a gcc
-          dnl older than 3.0, triggered on third party system headers.
+          dnl When cross-compiling with a gcc older than 3.0, disable
+          dnl some warnings triggered on third party system headers.
           if test "x$cross_compiling" = "xyes"; then
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-missing-prototypes"
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-unused -Wno-shadow"
+            if test "$compiler_num" -ge "104"; then
+              dnl gcc 1.4 or later
+              tmp_CFLAGS="$tmp_CFLAGS -Wno-unused -Wno-shadow"
+            fi
+            if test "$compiler_num" -ge "207"; then
+              dnl gcc 2.7 or later
+              tmp_CFLAGS="$tmp_CFLAGS -Wno-missing-declarations"
+              tmp_CFLAGS="$tmp_CFLAGS -Wno-missing-prototypes"
+            fi
           fi
         fi
         ;;
