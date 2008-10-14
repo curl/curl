@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 31
+# serial 32
 
 
 dnl CURL_CHECK_COMPILER
@@ -331,7 +331,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_TINY_C], [
     AC_MSG_RESULT([yes])
     compiler_id="TINY_C"
     flags_dbg_all="-g -b"
-    flags_dbg_yes="-g -b"
+    flags_dbg_yes="-g"
     flags_dbg_off=""
     flags_opt_all=""
     flags_opt_yes=""

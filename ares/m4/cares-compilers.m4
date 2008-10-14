@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 32
+# serial 33
 
 
 dnl CARES_CHECK_COMPILER
@@ -325,7 +325,7 @@ AC_DEFUN([CARES_CHECK_COMPILER_TINY_C], [
     AC_MSG_RESULT([yes])
     compiler_id="TINY_C"
     flags_dbg_all="-g -b"
-    flags_dbg_yes="-g -b"
+    flags_dbg_yes="-g"
     flags_dbg_off=""
     flags_opt_all=""
     flags_opt_yes=""
