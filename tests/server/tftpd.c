@@ -755,35 +755,36 @@ static void timer(int signum)
 #endif
 }
 
+static unsigned short sendblock;
+static struct tftphdr *sdp;
+static struct tftphdr *sap; /* ack packet */
 /*
  * Send the requested file.
  */
 static void sendtftp(struct testcase *test, struct formats *pf)
 {
-  struct tftphdr *dp;
-  struct tftphdr *ap;    /* ack packet */
-  unsigned short block = 1;
   int size;
   ssize_t n;
+  sendblock = 1;
 #if defined(HAVE_ALARM) && defined(SIGALRM)
   mysignal(SIGALRM, timer);
 #endif
-  dp = r_init();
-  ap = (struct tftphdr *)ackbuf;
+  sdp = r_init();
+  sap = (struct tftphdr *)ackbuf;
   do {
-    size = readit(test, &dp, pf->f_convert);
+    size = readit(test, &sdp, pf->f_convert);
     if (size < 0) {
       nak(ERRNO + 100);
       return;
     }
-    dp->th_opcode = htons((u_short)DATA);
-    dp->th_block = htons((u_short)block);
+    sdp->th_opcode = htons((u_short)DATA);
+    sdp->th_block = htons((u_short)sendblock);
     timeout = 0;
 #ifdef HAVE_SIGSETJMP
     (void) sigsetjmp(timeoutbuf, 1);
 #endif
     send_data:
-    if (swrite(peer, dp, size + 4) != size + 4) {
+    if (swrite(peer, sdp, size + 4) != size + 4) {
       logmsg("write\n");
       return;
     }
@@ -800,27 +801,27 @@ static void sendtftp(struct testcase *test, struct formats *pf)
         logmsg("read: fail\n");
         return;
       }
-      ap->th_opcode = ntohs((u_short)ap->th_opcode);
-      ap->th_block = ntohs((u_short)ap->th_block);
+      sap->th_opcode = ntohs((u_short)sap->th_opcode);
+      sap->th_block = ntohs((u_short)sap->th_block);
 
-      if (ap->th_opcode == ERROR) {
+      if (sap->th_opcode == ERROR) {
         logmsg("got ERROR");
         return;
       }
 
-      if (ap->th_opcode == ACK) {
-        if (ap->th_block == block) {
+      if (sap->th_opcode == ACK) {
+        if (sap->th_block == sendblock) {
           break;
         }
         /* Re-synchronize with the other side */
         (void) synchnet(peer);
-        if (ap->th_block == (block -1)) {
+        if (sap->th_block == (sendblock-1)) {
           goto send_data;
         }
       }
 
     }
-    block++;
+    sendblock++;
   } while (size == SEGSIZE);
 }
 
@@ -830,25 +831,26 @@ static void justtimeout(int signum)
 }
 
 
+static unsigned short recvblock;
+static struct tftphdr *rdp;
+static struct tftphdr *rap; /* ack buffer */
 /*
  * Receive a file.
  */
 static void recvtftp(struct testcase *test, struct formats *pf)
 {
-  struct tftphdr *dp;
-  struct tftphdr *ap;    /* ack buffer */
-  unsigned short block = 0;
   ssize_t n, size;
+  recvblock = 0;
 #if defined(HAVE_ALARM) && defined(SIGALRM)
   mysignal(SIGALRM, timer);
 #endif
-  dp = w_init();
-  ap = (struct tftphdr *)ackbuf;
+  rdp = w_init();
+  rap = (struct tftphdr *)ackbuf;
   do {
     timeout = 0;
-    ap->th_opcode = htons((u_short)ACK);
-    ap->th_block = htons((u_short)block);
-    block++;
+    rap->th_opcode = htons((u_short)ACK);
+    rap->th_block = htons((u_short)recvblock);
+    recvblock++;
 #ifdef HAVE_SIGSETJMP
     (void) sigsetjmp(timeoutbuf, 1);
 #endif
@@ -862,7 +864,7 @@ send_ack:
 #ifdef HAVE_ALARM
       alarm(rexmtval);
 #endif
-      n = sread(peer, dp, PKTSIZE);
+      n = sread(peer, rdp, PKTSIZE);
 #ifdef HAVE_ALARM
       alarm(0);
 #endif
@@ -870,22 +872,22 @@ send_ack:
         logmsg("read: fail\n");
         goto abort;
       }
-      dp->th_opcode = ntohs((u_short)dp->th_opcode);
-      dp->th_block = ntohs((u_short)dp->th_block);
-      if (dp->th_opcode == ERROR)
+      rdp->th_opcode = ntohs((u_short)rdp->th_opcode);
+      rdp->th_block = ntohs((u_short)rdp->th_block);
+      if (rdp->th_opcode == ERROR)
         goto abort;
-      if (dp->th_opcode == DATA) {
-        if (dp->th_block == block) {
+      if (rdp->th_opcode == DATA) {
+        if (rdp->th_block == recvblock) {
           break;                         /* normal */
         }
         /* Re-synchronize with the other side */
         (void) synchnet(peer);
-        if (dp->th_block == (block-1))
+        if (rdp->th_block == (recvblock-1))
           goto send_ack;                 /* rexmit */
       }
     }
 
-    size = writeit(test, &dp, (int)(n - 4), pf->f_convert);
+    size = writeit(test, &rdp, (int)(n - 4), pf->f_convert);
     if (size != (n-4)) {                 /* ahem */
       if (size < 0)
         nak(ERRNO + 100);
@@ -896,8 +898,8 @@ send_ack:
   } while (size == SEGSIZE);
   write_behind(test, pf->f_convert);
 
-  ap->th_opcode = htons((u_short)ACK);   /* send the "final" ack */
-  ap->th_block = htons((u_short)(block));
+  rap->th_opcode = htons((u_short)ACK);   /* send the "final" ack */
+  rap->th_block = htons((u_short)recvblock);
   (void) swrite(peer, ackbuf, 4);
 #if defined(HAVE_ALARM) && defined(SIGALRM)
   mysignal(SIGALRM, justtimeout);        /* just abort read on timeout */
@@ -908,8 +910,8 @@ send_ack:
   alarm(0);
 #endif
   if (n >= 4 &&                          /* if read some data */
-      dp->th_opcode == DATA &&           /* and got a data block */
-      block == dp->th_block) {           /* then my last ack was lost */
+      rdp->th_opcode == DATA &&          /* and got a data block */
+      recvblock == rdp->th_block) {      /* then my last ack was lost */
     (void) swrite(peer, ackbuf, 4);      /* resend final ack */
   }
 abort:
