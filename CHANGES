@@ -20,8 +20,9 @@ Daniel Fandrich (8 Oct 2008)
   are added to DISABLED.
 
 Daniel Stenberg (8 Oct 2008)
-- Bug #2152270 (http://curl.haxx.se/bug/view.cgi?id=2152270) identified and
-  fixed a CURLINFO_REDIRECT_URL memory leak and an additional wrong-doing:
+- John Wilkinson filed bug #2152270
+  (http://curl.haxx.se/bug/view.cgi?id=2152270) which identified and fixed a
+  CURLINFO_REDIRECT_URL memory leak and an additional wrong-doing:
 
   Any subsequent transfer with a redirect leaks memory, eventually crashing
   the process potentially.
