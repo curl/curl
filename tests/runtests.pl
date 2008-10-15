@@ -486,6 +486,7 @@ sub torture {
         else {
             $ret = runclient($testcmd);
         }
+        #logmsg "$_ Returned " . $ret / 256 . "\n";
 
         # Now clear the variable again
         $ENV{'CURL_MEMLIMIT'} = undef;
@@ -1857,6 +1858,8 @@ sub singletest {
             if($o[0]) {
                 $why = $o[0];
                 chomp $why;
+            } elsif($?) {
+                $why = "precheck command error";
             }
             logmsg "prechecked $cmd\n" if($verbose);
         }

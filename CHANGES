@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Fandrich (15 Oct 2008)
+- A <precheck> command is considered to have failed if it returns a non-zero
+  return code.  This way, if the precheck command can't be run at all for
+  whatever reason, it's treated as a precheck failure which causes the
+  test to be skipped.
+
 Daniel Stenberg (15 Oct 2008)
 - John Wilkinson filed bug #2155496
   (http://curl.haxx.se/bug/view.cgi?id=2155496) pointing out an error case
