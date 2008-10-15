@@ -152,6 +152,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
   else if((size_t)nread > buffersize) {
     /* the read function returned a too large value */
     *nreadp = 0;
+    failf(data, "read function returned funny value");
     return CURLE_READ_ERROR;
   }
 

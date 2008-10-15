@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel Stenberg (15 Oct 2008)
+- John Wilkinson filed bug #2155496
+  (http://curl.haxx.se/bug/view.cgi?id=2155496) pointing out an error case
+  without a proper human-readable error message. When a read callback returns
+  a too large value (like when trying to return a negative number) it would
+  trigger and the generic error message then makes the proplem slightly
+  different to track down. I've added an error message for this now.
+
 Daniel Fandrich (9 Oct 2008)
 - Fixed the --interface option to work with IPv6 connections on glibc
   systems supporting getifaddrs(). Also fixed a problem where an IPv6
