@@ -37,6 +37,7 @@ This release includes the following bugfixes:
  o CURLINFO_PRIMARY_IP fixed for persistent connection re-use cases
  o remove_handle/add_handle multi interface timer callback flaw
  o CURLINFO_REDIRECT_URL memory leak and wrong-doing
+ o case insensitive matching works in Turkish too
 
 This release includes the following known bugs:
 
@@ -53,6 +54,6 @@ advice from friends like these:
  Linus Nielsen Feltzing, Martin Drasar, Stefan Krause, Dmitry Kurochkin,
  Mike Revi, Andres Garcia, Michael Goffioul, Markus Moeller, Rob Crittenden,
  Jamie Lokier, Emanuele Bovisio, Maxim Ivanov, Ian Lynagh, Daniel Egger,
- Igor Novoseltsev, John Wilkinson
+ Igor Novoseltsev, John Wilkinson, Pascal Terjan
 
         Thanks! (and sorry if I forgot to mention someone)

@@ -1216,17 +1216,17 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     if(argptr == NULL)
       break;
 
-    if(strequal(argptr, "ALL")) {
+    if(Curl_ascii_equal(argptr, "ALL")) {
       /* clear all cookies */
       Curl_cookie_clearall(data->cookies);
       break;
     }
-    else if(strequal(argptr, "SESS")) {
+    else if(Curl_ascii_equal(argptr, "SESS")) {
       /* clear session cookies */
       Curl_cookie_clearsess(data->cookies);
       break;
     }
-    else if(strequal(argptr, "FLUSH")) {
+    else if(Curl_ascii_equal(argptr, "FLUSH")) {
       /* flush cookies to file */
       flush_cookies(data, 0);
       break;
@@ -2496,14 +2496,14 @@ ConnectionExists(struct SessionHandle *data,
     if(!needle->bits.httpproxy || needle->protocol&PROT_SSL ||
        (needle->bits.httpproxy && check->bits.httpproxy &&
         needle->bits.tunnel_proxy && check->bits.tunnel_proxy &&
-        strequal(needle->proxy.name, check->proxy.name) &&
+        Curl_ascii_equal(needle->proxy.name, check->proxy.name) &&
         (needle->port == check->port))) {
       /* The requested connection does not use a HTTP proxy or it uses SSL or
          it is a non-SSL protocol tunneled over the same http proxy name and
          port number */
 
-      if(strequal(needle->protostr, check->protostr) &&
-         strequal(needle->host.name, check->host.name) &&
+      if(Curl_ascii_equal(needle->protostr, check->protostr) &&
+         Curl_ascii_equal(needle->host.name, check->host.name) &&
          (needle->remote_port == check->remote_port) ) {
         if(needle->protocol & PROT_SSL) {
           /* This is SSL, verify that we're using the same
@@ -2542,7 +2542,7 @@ ConnectionExists(struct SessionHandle *data,
               is the checked one using the same host, port and type? */
       if(check->bits.proxy &&
          (needle->proxytype == check->proxytype) &&
-         strequal(needle->proxy.name, check->proxy.name) &&
+         Curl_ascii_equal(needle->proxy.name, check->proxy.name) &&
          needle->port == check->port) {
         /* This is the same proxy connection, use it! */
         match = TRUE;
@@ -3021,7 +3021,7 @@ static CURLcode ParseURLAndFillConnection(struct SessionHandle *data,
    ************************************************************/
   if((2 == sscanf(data->change.url, "%15[^:]:%[^\n]",
                   conn->protostr,
-                  path)) && strequal(conn->protostr, "file")) {
+                  path)) && Curl_ascii_equal(conn->protostr, "file")) {
     if(path[0] == '/' && path[1] == '/') {
       /* Allow omitted hostname (e.g. file:/<path>).  This is not strictly
        * speaking a valid file: URL by RFC 1738, but treating file:/<path> as
@@ -3256,7 +3256,7 @@ static CURLcode setup_connection_internals(struct SessionHandle *data,
   /* Scan protocol handler table. */
 
   for (pp = protocols; (p = *pp) != NULL; pp++)
-    if(strequal(p->scheme, conn->protostr)) {
+    if(Curl_ascii_equal(p->scheme, conn->protostr)) {
       /* Protocol found in table. Perform setup complement if some. */
       conn->handler = p;
 
@@ -3370,7 +3370,7 @@ static char *detect_proxy(struct connectdata *conn)
        * This can cause 'internal' http/ftp requests to be
        * arbitrarily redirected by any external attacker.
        */
-      if(!prox && !strequal("http_proxy", proxy_env)) {
+      if(!prox && !Curl_ascii_equal("http_proxy", proxy_env)) {
         /* There was no lowercase variable, try the uppercase version: */
         for(envp = proxy_env; *envp; envp++)
           *envp = (char)toupper((int)*envp);
@@ -3691,8 +3691,8 @@ static CURLcode parse_remote_port(struct SessionHandle *data,
     if(conn->bits.httpproxy) {
       /* we need to create new URL with the new port number */
       char *url;
-      bool isftp = (bool)(strequal("ftp", conn->protostr) ||
-                          strequal("ftps", conn->protostr));
+      bool isftp = (bool)(Curl_ascii_equal("ftp", conn->protostr) ||
+                          Curl_ascii_equal("ftps", conn->protostr));
 
       /*
        * This synthesized URL isn't always right--suffixes like ;type=A

@@ -243,14 +243,14 @@ Curl_cookie_add(struct SessionHandle *data,
             whatptr++;
           }
 
-          if(strequal("path", name)) {
+          if(Curl_ascii_equal("path", name)) {
             co->path=strdup(whatptr);
             if(!co->path) {
               badcookie = TRUE; /* out of memory bad */
               break;
             }
           }
-          else if(strequal("domain", name)) {
+          else if(Curl_ascii_equal("domain", name)) {
             /* note that this name may or may not have a preceeding dot, but
                we don't care about that, we treat the names the same anyway */
 
@@ -315,14 +315,14 @@ Curl_cookie_add(struct SessionHandle *data,
               }
             }
           }
-          else if(strequal("version", name)) {
+          else if(Curl_ascii_equal("version", name)) {
             co->version=strdup(whatptr);
             if(!co->version) {
               badcookie = TRUE;
               break;
             }
           }
-          else if(strequal("max-age", name)) {
+          else if(Curl_ascii_equal("max-age", name)) {
             /* Defined in RFC2109:
 
                Optional.  The Max-Age attribute defines the lifetime of the
@@ -341,7 +341,7 @@ Curl_cookie_add(struct SessionHandle *data,
               atoi((*co->maxage=='\"')?&co->maxage[1]:&co->maxage[0]) +
               (long)now;
           }
-          else if(strequal("expires", name)) {
+          else if(Curl_ascii_equal("expires", name)) {
             co->expirestr=strdup(whatptr);
             if(!co->expirestr) {
               badcookie = TRUE;
@@ -371,10 +371,10 @@ Curl_cookie_add(struct SessionHandle *data,
       else {
         if(sscanf(ptr, "%" MAX_COOKIE_LINE_TXT "[^;\r\n]",
                   what)) {
-          if(strequal("secure", what)) {
+          if(Curl_ascii_equal("secure", what)) {
             co->secure = TRUE;
           }
-          else if (strequal("httponly", what)) {
+          else if (Curl_ascii_equal("httponly", what)) {
             co->httponly = TRUE;
           }
           /* else,
@@ -498,7 +498,7 @@ Curl_cookie_add(struct SessionHandle *data,
            As far as I can see, it is set to true when the cookie says
            .domain.com and to false when the domain is complete www.domain.com
         */
-        co->tailmatch=(bool)strequal(ptr, "TRUE"); /* store information */
+        co->tailmatch=(bool)Curl_ascii_equal(ptr, "TRUE"); /* store information */
         break;
       case 2:
         /* It turns out, that sometimes the file format allows the path
@@ -518,7 +518,7 @@ Curl_cookie_add(struct SessionHandle *data,
         fields++; /* add a field and fall down to secure */
         /* FALLTHROUGH */
       case 3:
-        co->secure = (bool)strequal(ptr, "TRUE");
+        co->secure = (bool)Curl_ascii_equal(ptr, "TRUE");
         break;
       case 4:
         co->expires = curlx_strtoofft(ptr, NULL, 10);
@@ -571,11 +571,11 @@ Curl_cookie_add(struct SessionHandle *data,
   clist = c->cookies;
   replace_old = FALSE;
   while(clist) {
-    if(strequal(clist->name, co->name)) {
+    if(Curl_ascii_equal(clist->name, co->name)) {
       /* the names are identical */
 
       if(clist->domain && co->domain) {
-        if(strequal(clist->domain, co->domain))
+        if(Curl_ascii_equal(clist->domain, co->domain))
           /* The domains are identical */
           replace_old=TRUE;
       }
@@ -586,7 +586,7 @@ Curl_cookie_add(struct SessionHandle *data,
         /* the domains were identical */
 
         if(clist->path && co->path) {
-          if(strequal(clist->path, co->path)) {
+          if(Curl_ascii_equal(clist->path, co->path)) {
             replace_old = TRUE;
           }
           else
@@ -778,7 +778,7 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
       /* now check if the domain is correct */
       if(!co->domain ||
          (co->tailmatch && tailmatch(co->domain, host)) ||
-         (!co->tailmatch && strequal(host, co->domain)) ) {
+         (!co->tailmatch && Curl_ascii_equal(host, co->domain)) ) {
         /* the right part of the host matches the domain stuff in the
            cookie data */
 

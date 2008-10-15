@@ -32,6 +32,12 @@
    argument is zero-byte terminated */
 #define checkprefix(a,b)    strnequal(a,b,strlen(a))
 
+/*
+ * Curl_ascii_equal() is for doing "ascii" case insensitive strings. This is
+ * meant to be locale independent and only compare strings we know are safe
+ * for this.
+ */
+int Curl_ascii_equal(const char *first, const char *second);
 
 #ifndef HAVE_STRLCAT
 #define strlcat(x,y,z) Curl_strlcat(x,y,z)

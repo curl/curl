@@ -6,6 +6,17 @@
 
                                   Changelog
 
+Daniel Stenberg (15 Oct 2008)
+- Pascal Terjan filed bug #2154627
+  (http://curl.haxx.se/bug/view.cgi?id=2154627) which pointed out that libcurl
+  uses strcasecmp() in multiple places where it causes failures when the
+  Turkish locale is used. This is because 'i' and 'I' isn't the same letter so
+  strcasecmp() on those letters are different in Turkish than in English (or
+  just about all other languages). I thus introduced a totally new internal
+  function in libcurl (called Curl_ascii_equal) for doing case insentive
+  comparisons for english-(ascii?) style strings that thus will make "file"
+  and "FILE" match even if the Turkish locale is selected.
+
 Daniel Fandrich (15 Oct 2008)
 - A <precheck> command is considered to have failed if it returns a non-zero
   return code.  This way, if the precheck command can't be run at all for

@@ -1501,11 +1501,11 @@ static ParameterError add2list(struct curl_slist **list,
 
 static int ftpfilemethod(struct Configurable *config, const char *str)
 {
-  if(curlx_strequal("singlecwd", str))
+  if(curlx_ascii_equal("singlecwd", str))
     return CURLFTPMETHOD_SINGLECWD;
-  if(curlx_strequal("nocwd", str))
+  if(curlx_ascii_equal("nocwd", str))
     return CURLFTPMETHOD_NOCWD;
-  if(curlx_strequal("multicwd", str))
+  if(curlx_ascii_equal("multicwd", str))
     return CURLFTPMETHOD_MULTICWD;
   warnf(config, "unrecognized ftp file method '%s', using default\n", str);
   return CURLFTPMETHOD_MULTICWD;
@@ -1513,9 +1513,9 @@ static int ftpfilemethod(struct Configurable *config, const char *str)
 
 static int ftpcccmethod(struct Configurable *config, const char *str)
 {
-  if(curlx_strequal("passive", str))
+  if(curlx_ascii_equal("passive", str))
     return CURLFTPSSL_CCC_PASSIVE;
-  if(curlx_strequal("active", str))
+  if(curlx_ascii_equal("active", str))
     return CURLFTPSSL_CCC_ACTIVE;
   warnf(config, "unrecognized ftp CCC method '%s', using default\n", str);
   return CURLFTPSSL_CCC_PASSIVE;
@@ -1765,7 +1765,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       if(curlx_strnequal(aliases[j].lname, word, fnam)) {
         longopt = TRUE;
         numhits++;
-        if(curlx_strequal(aliases[j].lname, word)) {
+        if(curlx_ascii_equal(aliases[j].lname, word)) {
           parse = aliases[j].letter;
           hit = j;
           numhits = 1; /* a single unique hit */
@@ -2450,7 +2450,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'f': /* crypto engine */
         GetStr(&config->engine, nextarg);
-        if (config->engine && curlx_strequal(config->engine,"list"))
+        if (config->engine && curlx_ascii_equal(config->engine,"list"))
            config->list_engines = TRUE;
         break;
       case 'g': /* CA info PEM file */

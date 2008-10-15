@@ -76,6 +76,30 @@ int curl_strnequal(const char *first, const char *second, size_t max)
 #endif
 }
 
+/*
+ * Curl_ascii_equal() is for doing "ascii" case insensitive strings. This is
+ * meant to be locale independent and only compare strings we know are safe
+ * for this.
+ * See http://daniel.haxx.se/blog/2008/10/15/strcasecmp-in-turkish/ for some
+ * further explanation to why this function is necessary.
+ */
+#define TOASCIIUPPER(x) ((((x) >= 'a') && ((x) <= 'z'))?((x) - 0x20):(x))
+
+int Curl_ascii_equal(const char *first, const char *second)
+{
+  while(*first && *second) {
+    if(! (TOASCIIUPPER(*first) == TOASCIIUPPER(*second)))
+      /* get out of the loop as soon as they don't match */
+      break;
+    first++;
+    second++;
+  }
+  /* we do the comparison here (possibly again), just to make sure that if the
+     loop above is skipped because one of the strings reached zero, we must not
+     return this as a successful match */
+  return (TOASCIIUPPER(*first) == TOASCIIUPPER(*second));
+}
+
 #ifndef HAVE_STRLCAT
 /*
  * The strlcat() function appends the NUL-terminated string src to the end

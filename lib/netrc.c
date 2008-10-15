@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -155,7 +155,7 @@ int Curl_parsenetrc(const char *host,
 
         switch(state) {
         case NOTHING:
-          if(strequal("machine", tok)) {
+          if(Curl_ascii_equal("machine", tok)) {
             /* the next tok is the machine name, this is in itself the
                delimiter that starts the stuff entered for this machine,
                after this we need to search for 'login' and
@@ -164,7 +164,7 @@ int Curl_parsenetrc(const char *host,
           }
           break;
         case HOSTFOUND:
-          if(strequal(host, tok)) {
+          if(Curl_ascii_equal(host, tok)) {
             /* and yes, this is our host! */
             state=HOSTVALID;
 #ifdef _NETRC_DEBUG
@@ -180,7 +180,7 @@ int Curl_parsenetrc(const char *host,
           /* we are now parsing sub-keywords concerning "our" host */
           if(state_login) {
             if(specific_login) {
-              state_our_login = strequal(login, tok);
+              state_our_login = Curl_ascii_equal(login, tok);
             }
             else {
               strncpy(login, tok, LOGINSIZE-1);
@@ -199,11 +199,11 @@ int Curl_parsenetrc(const char *host,
             }
             state_password=0;
           }
-          else if(strequal("login", tok))
+          else if(Curl_ascii_equal("login", tok))
             state_login=1;
-          else if(strequal("password", tok))
+          else if(Curl_ascii_equal("password", tok))
             state_password=1;
-          else if(strequal("machine", tok)) {
+          else if(Curl_ascii_equal("machine", tok)) {
             /* ok, there's machine here go => */
             state = HOSTFOUND;
             state_our_login = FALSE;
