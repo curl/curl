@@ -38,10 +38,11 @@ Daniel Stenberg (8 Oct 2008)
   Any subsequent transfer WITHOUT a redirect causes the most recent redirect
   that DID occur on some previous transfer to still be reported.
 
-- Igor filed bug #2111613 (http://curl.haxx.se/bug/view.cgi?id=2111613) that
-  eventually identified a flaw in how the multi_socket interface in some cases
-  missed to call the timeout callback when easy interfaces are removed and
-  added within the same millisecond.
+- Igor Novoseltsev filed bug #2111613
+  (http://curl.haxx.se/bug/view.cgi?id=2111613) that eventually identified a
+  flaw in how the multi_socket interface in some cases missed to call the
+  timeout callback when easy interfaces are removed and added within the same
+  millisecond.
 
 - Igor Novoseltsev brought a patch that introduced two new options to
   curl_easy_setopt: CURLOPT_USERNAME and CURLOPT_PASSWORD that sort of
