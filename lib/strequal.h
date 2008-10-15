@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -32,8 +32,6 @@
    argument is zero-byte terminated */
 #define checkprefix(a,b)    strnequal(a,b,strlen(a))
 
-/* case insensitive strstr() */
-char *Curl_strcasestr(const char *haystack, const char *needle);
 
 #ifndef HAVE_STRLCAT
 #define strlcat(x,y,z) Curl_strlcat(x,y,z)
