@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 34
+# serial 35
 
 
 dnl CARES_CHECK_COMPILER
@@ -378,6 +378,7 @@ dnl headers from these locations, even though this is
 dnl not reliable on ancient GNUC versions.
 
 AC_DEFUN([CARES_CONVERT_INCLUDE_TO_ISYSTEM], [
+  AC_REQUIRE([CARES_SHFUNC_SQUEEZE])dnl
   tmp_has_include="no"
   tmp_chg_FLAGS=$CFLAGS
   for word1 in $tmp_chg_FLAGS; do
@@ -390,7 +391,8 @@ AC_DEFUN([CARES_CONVERT_INCLUDE_TO_ISYSTEM], [
   if test "$tmp_has_include" = "yes"; then
     tmp_chg_FLAGS=`echo $tmp_chg_FLAGS | sed 's/^-I/ -isystem /g'`
     tmp_chg_FLAGS=`echo $tmp_chg_FLAGS | sed 's/ -I/ -isystem /g'`
-    CFLAGS=`eval echo $tmp_chg_FLAGS`
+    CFLAGS="$tmp_chg_FLAGS"
+    squeeze CFLAGS
   fi
   tmp_has_include="no"
   tmp_chg_FLAGS=$CPPFLAGS
@@ -404,7 +406,8 @@ AC_DEFUN([CARES_CONVERT_INCLUDE_TO_ISYSTEM], [
   if test "$tmp_has_include" = "yes"; then
     tmp_chg_FLAGS=`echo $tmp_chg_FLAGS | sed 's/^-I/ -isystem /g'`
     tmp_chg_FLAGS=`echo $tmp_chg_FLAGS | sed 's/ -I/ -isystem /g'`
-    CPPFLAGS=`eval echo $tmp_chg_FLAGS`
+    CPPFLAGS="$tmp_chg_FLAGS"
+    squeeze CPPFLAGS
   fi
 ])
 
@@ -487,6 +490,7 @@ dnl options.
 
 AC_DEFUN([CARES_SET_COMPILER_BASIC_OPTS], [
   AC_REQUIRE([CARES_CHECK_COMPILER])dnl
+  AC_REQUIRE([CARES_SHFUNC_SQUEEZE])dnl
   #
   if test "$compiler_id" != "unknown"; then
     #
@@ -615,13 +619,15 @@ AC_DEFUN([CARES_SET_COMPILER_BASIC_OPTS], [
         #
     esac
     #
-    tmp_CPPFLAGS=`eval echo $tmp_CPPFLAGS`
-    tmp_CFLAGS=`eval echo $tmp_CFLAGS`
+    squeeze tmp_CPPFLAGS
+    squeeze tmp_CFLAGS
     #
     if test ! -z "$tmp_CFLAGS" || test ! -z "$tmp_CPPFLAGS"; then
       AC_MSG_CHECKING([if compiler accepts some basic options])
-      CPPFLAGS=`eval echo $tmp_save_CPPFLAGS $tmp_CPPFLAGS`
-      CFLAGS=`eval echo $tmp_save_CFLAGS $tmp_CFLAGS`
+      CPPFLAGS="$tmp_save_CPPFLAGS $tmp_CPPFLAGS"
+      CFLAGS="$tmp_save_CFLAGS $tmp_CFLAGS"
+      squeeze CPPFLAGS
+      squeeze CFLAGS
       CARES_COMPILER_WORKS_IFELSE([
         AC_MSG_RESULT([yes])
         AC_MSG_NOTICE([compiler options added: $tmp_CFLAGS $tmp_CPPFLAGS])
@@ -646,6 +652,7 @@ dnl on configure's debug option.
 AC_DEFUN([CARES_SET_COMPILER_DEBUG_OPTS], [
   AC_REQUIRE([CARES_CHECK_OPTION_DEBUG])dnl
   AC_REQUIRE([CARES_CHECK_COMPILER])dnl
+  AC_REQUIRE([CARES_SHFUNC_SQUEEZE])dnl
   #
   if test "$compiler_id" != "unknown"; then
     #
@@ -667,8 +674,10 @@ AC_DEFUN([CARES_SET_COMPILER_DEBUG_OPTS], [
       tmp_options="$flags_dbg_off"
     fi
     #
-    CPPFLAGS=`eval echo $tmp_CPPFLAGS`
-    CFLAGS=`eval echo $tmp_CFLAGS $tmp_options`
+    CPPFLAGS="$tmp_CPPFLAGS"
+    CFLAGS="$tmp_CFLAGS $tmp_options"
+    squeeze CPPFLAGS
+    squeeze CFLAGS
     CARES_COMPILER_WORKS_IFELSE([
       AC_MSG_RESULT([yes])
       AC_MSG_NOTICE([compiler options added: $tmp_options])
@@ -692,6 +701,7 @@ dnl on configure's optimize option.
 AC_DEFUN([CARES_SET_COMPILER_OPTIMIZE_OPTS], [
   AC_REQUIRE([CARES_CHECK_OPTION_OPTIMIZE])dnl
   AC_REQUIRE([CARES_CHECK_COMPILER])dnl
+  AC_REQUIRE([CARES_SHFUNC_SQUEEZE])dnl
   #
   if test "$compiler_id" != "unknown"; then
     #
@@ -740,8 +750,10 @@ AC_DEFUN([CARES_SET_COMPILER_OPTIMIZE_OPTS], [
         AC_MSG_CHECKING([if compiler accepts optimizer disabling options])
         tmp_options="$flags_opt_off"
       fi
-      CPPFLAGS=`eval echo $tmp_CPPFLAGS`
-      CFLAGS=`eval echo $tmp_CFLAGS $tmp_options`
+      CPPFLAGS="$tmp_CPPFLAGS"
+      CFLAGS="$tmp_CFLAGS $tmp_options"
+      squeeze CPPFLAGS
+      squeeze CFLAGS
       CARES_COMPILER_WORKS_IFELSE([
         AC_MSG_RESULT([yes])
         AC_MSG_NOTICE([compiler options added: $tmp_options])
@@ -766,6 +778,7 @@ dnl configure's warnings given option.
 AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
   AC_REQUIRE([CARES_CHECK_OPTION_WARNINGS])dnl
   AC_REQUIRE([CARES_CHECK_COMPILER])dnl
+  AC_REQUIRE([CARES_SHFUNC_SQUEEZE])dnl
   #
   if test "$compiler_id" != "unknown"; then
     #
@@ -982,13 +995,15 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
         #
     esac
     #
-    tmp_CPPFLAGS=`eval echo $tmp_CPPFLAGS`
-    tmp_CFLAGS=`eval echo $tmp_CFLAGS`
+    squeeze tmp_CPPFLAGS
+    squeeze tmp_CFLAGS
     #
     if test ! -z "$tmp_CFLAGS" || test ! -z "$tmp_CPPFLAGS"; then
       AC_MSG_CHECKING([if compiler accepts strict warning options])
-      CPPFLAGS=`eval echo $tmp_save_CPPFLAGS $tmp_CPPFLAGS`
-      CFLAGS=`eval echo $tmp_save_CFLAGS $tmp_CFLAGS`
+      CPPFLAGS="$tmp_save_CPPFLAGS $tmp_CPPFLAGS"
+      CFLAGS="$tmp_save_CFLAGS $tmp_CFLAGS"
+      squeeze CPPFLAGS
+      squeeze CFLAGS
       CARES_COMPILER_WORKS_IFELSE([
         AC_MSG_RESULT([yes])
         AC_MSG_NOTICE([compiler options added: $tmp_CFLAGS $tmp_CPPFLAGS])
@@ -1005,6 +1020,28 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
 ])
 
 
+dnl CARES_SHFUNC_SQUEEZE
+dnl -------------------------------------------------
+dnl Declares a shell function squeeze() which removes
+dnl redundant whitespace out of a shell variable.
+
+AC_DEFUN([CARES_SHFUNC_SQUEEZE], [
+squeeze() {
+  _sqz_result=""
+  eval _sqz_input=\[$][$]1
+  for _sqz_token in $_sqz_input; do
+    if test -z "$_sqz_result"; then
+      _sqz_result="$_sqz_token"
+    else
+      _sqz_result="$_sqz_result $_sqz_token"
+    fi
+  done
+  eval [$]1=\$_sqz_result
+  return 0
+}
+])
+
+
 dnl CARES_PROCESS_DEBUG_BUILD_OPTS
 dnl -------------------------------------------------
 dnl Settings which depend on configure's debug given
@@ -1013,6 +1050,7 @@ dnl Don't use this macro for compiler dependant stuff.
 
 AC_DEFUN([CARES_PROCESS_DEBUG_BUILD_OPTS], [
   AC_REQUIRE([CARES_CHECK_OPTION_DEBUG])dnl
+  AC_REQUIRE([CARES_SHFUNC_SQUEEZE])dnl
   AC_BEFORE([$0],[AC_PROG_LIBTOOL])dnl
   #
   if test "$want_debug" = "yes"; then
@@ -1031,6 +1069,7 @@ AC_DEFUN([CARES_PROCESS_DEBUG_BUILD_OPTS], [
     dnl CHECKME: Do we still need so specify this include path here?
     CPPFLAGS="$CPPFLAGS -I$srcdir/../include"
 
+    squeeze CPPFLAGS
   fi
   #
 ])
@@ -1094,6 +1133,7 @@ dnl as whitespace separated lists of words. Each word
 dnl from VALUE is removed from VARNAME when present.
 
 AC_DEFUN([CARES_VAR_STRIP], [
+  AC_REQUIRE([CARES_SHFUNC_SQUEEZE])dnl
   ac_var_stripped=""
   for word1 in $[$1]; do
     ac_var_strip_word="no"
@@ -1107,5 +1147,7 @@ AC_DEFUN([CARES_VAR_STRIP], [
     fi
   done
   dnl squeeze whitespace out of result
-  [$1]=`eval echo $ac_var_stripped`
+  [$1]="$ac_var_stripped"
+  squeeze [$1]
 ])
+

@@ -886,13 +886,13 @@ AC_SUBST(CARES_PRIVATE_LIBS)
 
 dnl squeeze whitespace out of some variables
 
-CFLAGS=`eval echo $CFLAGS`
-CPPFLAGS=`eval echo $CPPFLAGS`
-DEFS=`eval echo $DEFS`
-LDFLAGS=`eval echo $LDFLAGS`
-LIBS=`eval echo $LIBS`
+squeeze CFLAGS
+squeeze CPPFLAGS
+squeeze DEFS
+squeeze LDFLAGS
+squeeze LIBS
 
-CARES_PRIVATE_LIBS=`eval echo $CARES_PRIVATE_LIBS`
+squeeze CARES_PRIVATE_LIBS
 
 AC_CONFIG_FILES([Makefile libcares.pc])
 AC_OUTPUT

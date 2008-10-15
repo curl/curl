@@ -2534,15 +2534,15 @@ AC_SUBST(SUPPORT_PROTOCOLS)
 
 dnl squeeze whitespace out of some variables
 
-CFLAGS=`eval echo $CFLAGS`
-CPPFLAGS=`eval echo $CPPFLAGS`
-DEFS=`eval echo $DEFS`
-LDFLAGS=`eval echo $LDFLAGS`
-LIBS=`eval echo $LIBS`
+squeeze CFLAGS
+squeeze CPPFLAGS
+squeeze DEFS
+squeeze LDFLAGS
+squeeze LIBS
 
-CURL_LIBS=`eval echo $CURL_LIBS`
-LIBCURL_LIBS=`eval echo $LIBCURL_LIBS`
-TEST_SERVER_LIBS=`eval echo $TEST_SERVER_LIBS`
+squeeze CURL_LIBS
+squeeze LIBCURL_LIBS
+squeeze TEST_SERVER_LIBS
 
 AC_CONFIG_FILES([Makefile \
            docs/Makefile \
