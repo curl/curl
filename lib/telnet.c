@@ -76,6 +76,7 @@
 #include "arpa_telnet.h"
 #include "memory.h"
 #include "select.h"
+#include "strequal.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
