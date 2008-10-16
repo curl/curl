@@ -140,23 +140,8 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
 
 /* Local static prototypes */
 static long ConnectionKillOne(struct SessionHandle *data);
-static bool ConnectionExists(struct SessionHandle *data,
-                             struct connectdata *needle,
-                             struct connectdata **usethis);
-static long ConnectionStore(struct SessionHandle *data,
-                            struct connectdata *conn);
-static bool IsPipeliningPossible(const struct SessionHandle *handle);
 static void conn_free(struct connectdata *conn);
-
 static void signalPipeClose(struct curl_llist *pipeline);
-
-static struct SessionHandle* gethandleathead(struct curl_llist *pipeline);
-static CURLcode do_init(struct connectdata *conn);
-static void do_complete(struct connectdata *conn);
-
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
-static void flush_cookies(struct SessionHandle *data, int cleanup);
-#endif
 
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
 #define verboseconnect(x)  do { } while (0)
@@ -1309,13 +1294,6 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.httpversion = va_arg(param, long);
     break;
 
-  case CURLOPT_HTTPPROXYTUNNEL:
-    /*
-     * Tunnel operations through the proxy instead of normal proxy use
-     */
-    data->set.tunnel_thru_httpproxy = (bool)(0 != va_arg(param, long));
-    break;
-
   case CURLOPT_CUSTOMREQUEST:
     /*
      * Set a custom string to use as request
@@ -1327,13 +1305,6 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
        data->set.httpreq = HTTPREQ_CUSTOM;
        here, we continue as if we were using the already set type
        and this just changes the actual request keyword */
-    break;
-
-  case CURLOPT_PROXYPORT:
-    /*
-     * Explicitly set HTTP proxy port number.
-     */
-    data->set.proxyport = va_arg(param, long);
     break;
 
   case CURLOPT_HTTPAUTH:
@@ -1355,6 +1326,21 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.httpauth = auth;
   }
   break;
+
+#ifndef CURL_DISABLE_PROXY
+  case CURLOPT_HTTPPROXYTUNNEL:
+    /*
+     * Tunnel operations through the proxy instead of normal proxy use
+     */
+    data->set.tunnel_thru_httpproxy = (bool)(0 != va_arg(param, long));
+    break;
+
+  case CURLOPT_PROXYPORT:
+    /*
+     * Explicitly set HTTP proxy port number.
+     */
+    data->set.proxyport = va_arg(param, long);
+    break;
 
   case CURLOPT_PROXYAUTH:
     /*
@@ -1390,6 +1376,32 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     result = setstropt(&data->set.str[STRING_PROXY],
                        va_arg(param, char *));
     break;
+
+  case CURLOPT_PROXYTYPE:
+    /*
+     * Set proxy type. HTTP/SOCKS4/SOCKS4a/SOCKS5/SOCKS5_HOSTNAME
+     */
+    data->set.proxytype = (curl_proxytype)va_arg(param, long);
+    break;
+
+  case CURLOPT_PROXY_TRANSFER_MODE:
+    /*
+     * set transfer mode (;type=<a|i>) when doing FTP via an HTTP proxy
+     */
+    switch (va_arg(param, long)) {
+    case 0:
+      data->set.proxy_transfer_mode = FALSE;
+      break;
+    case 1:
+      data->set.proxy_transfer_mode = TRUE;
+      break;
+    default:
+      /* reserve other values for future use */
+      result = CURLE_FAILED_INIT;
+      break;
+    }
+    break;
+#endif
 
   case CURLOPT_WRITEHEADER:
     /*
@@ -1589,6 +1601,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      */
     data->set.progress_client = va_arg(param, void *);
     break;
+
+#ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXYUSERPWD:
     /*
      * user:password needed to use the proxy
@@ -1611,6 +1625,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     result = setstropt(&data->set.str[STRING_PROXYPASSWORD],
                        va_arg(param, char *));
     break;
+#endif
+
   case CURLOPT_RANGE:
     /*
      * What range of the file you want to transfer
@@ -1955,13 +1971,6 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
   }
   break;
 
-  case CURLOPT_PROXYTYPE:
-    /*
-     * Set proxy type. HTTP/SOCKS4/SOCKS4a/SOCKS5/SOCKS5_HOSTNAME
-     */
-    data->set.proxytype = (curl_proxytype)va_arg(param, long);
-    break;
-
   case CURLOPT_PRIVATE:
     /*
      * Set private data pointer.
@@ -2116,23 +2125,6 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * Uses these permissions instead of 0755
      */
     data->set.new_directory_perms = va_arg(param, long);
-    break;
-  case CURLOPT_PROXY_TRANSFER_MODE:
-    /*
-     * set transfer mode (;type=<a|i>) when doing FTP via an HTTP proxy
-     */
-    switch (va_arg(param, long)) {
-    case 0:
-      data->set.proxy_transfer_mode = FALSE;
-      break;
-    case 1:
-      data->set.proxy_transfer_mode = TRUE;
-      break;
-    default:
-      /* reserve other values for future use */
-      result = CURLE_FAILED_INIT;
-      break;
-    }
     break;
 
   case CURLOPT_ADDRESS_SCOPE:
