@@ -922,10 +922,20 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
         if test "$want_warnings" = "yes"; then
           if test "$compiler_num" -gt "600"; then
             dnl Show errors, warnings, and remarks
-            tmp_CPPFLAGS="$tmp_CPPFLAGS -Wall"
+            tmp_CPPFLAGS="$tmp_CPPFLAGS -Wall -w2"
             dnl Perform extra compile-time code checking
             tmp_CPPFLAGS="$tmp_CPPFLAGS -Wcheck"
           fi
+          dnl Disable using EBP register in optimizations
+          tmp_CFLAGS="$tmp_CFLAGS -fno-omit-frame-pointer"
+          dnl Disable inline expansion of intrinsic functions
+          tmp_CFLAGS="$tmp_CFLAGS -fno-builtin"
+          dnl Disable inlining of functions
+          tmp_CFLAGS="$tmp_CFLAGS -fno-inline"
+          dnl Enable floating-point stack integrity checks
+          tmp_CFLAGS="$tmp_CFLAGS -fpstkchk"
+          dnl Enable run-time detection of buffer overruns.
+          tmp_CFLAGS="$tmp_CFLAGS -fstack-security-check"
         fi
         ;;
         #
