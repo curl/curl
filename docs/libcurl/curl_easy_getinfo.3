@@ -197,7 +197,8 @@ chain, assuming you had CURLOPT_CERTINFO enabled when the previous request was
 done. The struct reports how many certs it found and then you can extract info
 for each of those certs by following the linked lists. The info chain is
 provided in a series of data in the format "name:content" where the content is
-for the specific named data. See also the certinfo.c example. (Added in
+for the specific named data. See also the certinfo.c example. NOTE: this
+option is only available in libcurl built with OpenSSL support. (Added in
 7.19.1)
 .SH TIMES
 .NF
