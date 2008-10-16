@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_easy_getinfo 3 "21 Mar 2006" "libcurl 7.15.4" "libcurl Manual"
+.TH curl_easy_getinfo 3 "16 Oct 2008" "libcurl 7.19.1" "libcurl Manual"
 .SH NAME
 curl_easy_getinfo - extract information from a curl handle
 .SH SYNOPSIS
@@ -190,6 +190,15 @@ Pass a pointer to a 'char *' to receive a pointer to a string holding the path
 of the entry path. That is the initial path libcurl ended up in when logging
 on to the remote FTP server. This stores a NULL as pointer if something is
 wrong. (Added in 7.15.4)
+.IP CURLINFO_CERTINFO
+Pass a pointer to a 'struct curl_certinfo *' and you'll get it set to point to
+struct that holds a number of linked lists with info about the certificate
+chain, assuming you had CURLOPT_CERTINFO enabled when the previous request was
+done. The struct reports how many certs it found and then you can extract info
+for each of those certs by following the linked lists. The info chain is
+provided in a series of data in the format "name:content" where the content is
+for the specific named data. See also the certinfo.c example. (Added in
+7.19.1)
 .SH TIMES
 .NF
 An overview of the six time values available from curl_easy_getinfo()
