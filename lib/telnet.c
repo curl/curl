@@ -834,7 +834,7 @@ static CURLcode check_telnet_options(struct connectdata *conn)
               option_keyword, option_arg) == 2) {
 
       /* Terminal type */
-      if(Curl_ascii_equal(option_keyword, "TTYPE")) {
+      if(Curl_raw_equal(option_keyword, "TTYPE")) {
         strncpy(tn->subopt_ttype, option_arg, 31);
         tn->subopt_ttype[31] = 0; /* String termination */
         tn->us_preferred[CURL_TELOPT_TTYPE] = CURL_YES;
@@ -842,7 +842,7 @@ static CURLcode check_telnet_options(struct connectdata *conn)
       }
 
       /* Display variable */
-      if(Curl_ascii_equal(option_keyword, "XDISPLOC")) {
+      if(Curl_raw_equal(option_keyword, "XDISPLOC")) {
         strncpy(tn->subopt_xdisploc, option_arg, 127);
         tn->subopt_xdisploc[127] = 0; /* String termination */
         tn->us_preferred[CURL_TELOPT_XDISPLOC] = CURL_YES;
@@ -850,7 +850,7 @@ static CURLcode check_telnet_options(struct connectdata *conn)
       }
 
       /* Environment variable */
-      if(Curl_ascii_equal(option_keyword, "NEW_ENV")) {
+      if(Curl_raw_equal(option_keyword, "NEW_ENV")) {
         buf = strdup(option_arg);
         if(!buf)
           return CURLE_OUT_OF_MEMORY;

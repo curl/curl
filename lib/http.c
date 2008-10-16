@@ -613,7 +613,7 @@ http_output_auth(struct connectdata *conn,
   if(!data->state.this_is_a_follow ||
      conn->bits.netrc ||
      !data->state.first_host ||
-     Curl_ascii_equal(data->state.first_host, conn->host.name) ||
+     Curl_raw_equal(data->state.first_host, conn->host.name) ||
      data->set.http_disable_hostname_check_before_authentication) {
 
     /* Send web authentication header if needed */
@@ -2185,7 +2185,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
   ptr = checkheaders(data, "Host:");
   if(ptr && (!data->state.this_is_a_follow ||
-             Curl_ascii_equal(data->state.first_host, conn->host.name))) {
+             Curl_raw_equal(data->state.first_host, conn->host.name))) {
 #if !defined(CURL_DISABLE_COOKIES)
     /* If we have a given custom Host: header, we extract the host name in
        order to possibly use it for cookie reasons later on. We only allow the

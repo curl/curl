@@ -78,7 +78,7 @@ int curl_strnequal(const char *first, const char *second, size_t max)
 
 /* Portable toupper (remember EBCDIC). Do not use tupper() because
    its behavior is altered by the current locale. */
-static bool my_toupper(unsigned char in)
+static unsigned char my_toupper(unsigned char in)
 {
   switch (in) {
   case 'a':
@@ -138,17 +138,18 @@ static bool my_toupper(unsigned char in)
 }
 
 /*
- * Curl_ascii_equal() is for doing "ascii" case insensitive strings. This is
- * meant to be locale independent and only compare strings we know are safe
- * for this.
- * See http://daniel.haxx.se/blog/2008/10/15/strcasecmp-in-turkish/ for some
- * further explanation to why this function is necessary.
+ * Curl_raw_equal() is for doing "raw" case insensitive strings. This is meant
+ * to be locale independent and only compare strings we know are safe for
+ * this.  See http://daniel.haxx.se/blog/2008/10/15/strcasecmp-in-turkish/ for
+ * some further explanation to why this function is necessary.
+ *
+ * The function is capable of comparing a-z case insensitively even for non-ascii.
  */
 
-int Curl_ascii_equal(const char *first, const char *second)
+int Curl_raw_equal(const char *first, const char *second)
 {
   while(*first && *second) {
-    if(! (my_toupper(*first) == my_toupper(*second)))
+    if(my_toupper(*first) != my_toupper(*second))
       /* get out of the loop as soon as they don't match */
       break;
     first++;

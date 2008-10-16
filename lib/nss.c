@@ -201,7 +201,7 @@ static SECStatus set_ciphers(struct SessionHandle *data, PRFileDesc * model,
     found = PR_FALSE;
 
     for(i=0; i<NUM_OF_CIPHERS; i++) {
-      if(Curl_ascii_equal(cipher, cipherlist[i].name)) {
+      if(Curl_raw_equal(cipher, cipherlist[i].name)) {
         cipher_state[i] = PR_TRUE;
         found = PR_TRUE;
         break;

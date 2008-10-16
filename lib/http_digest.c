@@ -110,28 +110,28 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
            */
           content[0]=0;
         }
-        if(Curl_ascii_equal(value, "nonce")) {
+        if(Curl_raw_equal(value, "nonce")) {
           d->nonce = strdup(content);
           if(!d->nonce)
             return CURLDIGEST_NOMEM;
         }
-        else if(Curl_ascii_equal(value, "stale")) {
-          if(Curl_ascii_equal(content, "true")) {
+        else if(Curl_raw_equal(value, "stale")) {
+          if(Curl_raw_equal(content, "true")) {
             d->stale = TRUE;
             d->nc = 1; /* we make a new nonce now */
           }
         }
-        else if(Curl_ascii_equal(value, "realm")) {
+        else if(Curl_raw_equal(value, "realm")) {
           d->realm = strdup(content);
           if(!d->realm)
             return CURLDIGEST_NOMEM;
         }
-        else if(Curl_ascii_equal(value, "opaque")) {
+        else if(Curl_raw_equal(value, "opaque")) {
           d->opaque = strdup(content);
           if(!d->opaque)
             return CURLDIGEST_NOMEM;
         }
-        else if(Curl_ascii_equal(value, "qop")) {
+        else if(Curl_raw_equal(value, "qop")) {
           char *tok_buf;
           /* tokenize the list and choose auth if possible, use a temporary
              clone of the buffer since strtok_r() ruins it */
@@ -140,10 +140,10 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
             return CURLDIGEST_NOMEM;
           token = strtok_r(tmp, ",", &tok_buf);
           while(token != NULL) {
-            if(Curl_ascii_equal(token, "auth")) {
+            if(Curl_raw_equal(token, "auth")) {
               foundAuth = TRUE;
             }
-            else if(Curl_ascii_equal(token, "auth-int")) {
+            else if(Curl_raw_equal(token, "auth-int")) {
               foundAuthInt = TRUE;
             }
             token = strtok_r(NULL, ",", &tok_buf);
@@ -161,13 +161,13 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
               return CURLDIGEST_NOMEM;
           }
         }
-        else if(Curl_ascii_equal(value, "algorithm")) {
+        else if(Curl_raw_equal(value, "algorithm")) {
           d->algorithm = strdup(content);
           if(!d->algorithm)
             return CURLDIGEST_NOMEM;
-          if(Curl_ascii_equal(content, "MD5-sess"))
+          if(Curl_raw_equal(content, "MD5-sess"))
             d->algo = CURLDIGESTALGO_MD5SESS;
-          else if(Curl_ascii_equal(content, "MD5"))
+          else if(Curl_raw_equal(content, "MD5"))
             d->algo = CURLDIGESTALGO_MD5;
           else
             return CURLDIGEST_BADALGO;
@@ -362,7 +362,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
     return CURLE_OUT_OF_MEMORY;
   }
 
-  if(d->qop && Curl_ascii_equal(d->qop, "auth-int")) {
+  if(d->qop && Curl_raw_equal(d->qop, "auth-int")) {
     /* We don't support auth-int at the moment. I can't see a easy way to get
        entity-body here */
     /* TODO: Append H(entity-body)*/
@@ -423,7 +423,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
                d->qop,
                request_digest);
 
-    if(Curl_ascii_equal(d->qop, "auth"))
+    if(Curl_raw_equal(d->qop, "auth"))
       d->nc++; /* The nc (from RFC) has to be a 8 hex digit number 0 padded
                   which tells to the server how many times you are using the
                   same nonce in the qop=auth mode. */
