@@ -280,6 +280,39 @@ static CURLcode setstropt(char **charp, char * s)
   return CURLE_OK;
 }
 
+static CURLcode setstropt_userpwd(char *option, char **user_storage,
+                                  char **pwd_storage)
+{
+  char* separator;
+  CURLcode result = CURLE_OK;
+
+  separator = strchr(option, ':');
+  if (separator != NULL) {
+
+    /* store username part of option */
+    char * p;
+    size_t username_len = (size_t)(separator-option);
+    p = malloc(username_len+1);
+    if(!p)
+      result = CURLE_OUT_OF_MEMORY;
+    else {
+      memcpy(p, option, username_len);
+      p[username_len] = '\0';
+      Curl_safefree(*user_storage);
+      *user_storage = p;
+    }
+
+    /* store password part of option */
+    if (result == CURLE_OK) {
+      result = setstropt(pwd_storage, separator+1);
+    }
+  }
+  else {
+    result = setstropt(user_storage, option);
+  }
+  return result;
+}
+
 CURLcode Curl_dupset(struct SessionHandle * dst, struct SessionHandle * src)
 {
   CURLcode r = CURLE_OK;
@@ -1500,39 +1533,9 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * user:password to use in the operation
      */
-    {
-      char* userpwd;
-      char* separator;
-
-      userpwd = va_arg(param, char *);
-      if(userpwd == NULL)
-        break;
-
-      separator = strchr(userpwd, ':');
-      if (separator != NULL) {
-
-        /* store username part of option */
-        char * p;
-        size_t username_len = (size_t)(separator-userpwd);
-        p = malloc(username_len+1);
-        if(!p)
-          result = CURLE_OUT_OF_MEMORY;
-        else {
-            memcpy(p, userpwd, username_len);
-            p[username_len] = '\0';
-            Curl_safefree(data->set.str[STRING_USERNAME]);
-            data->set.str[STRING_USERNAME] = p;
-        }
-
-        /* store password part of option */
-        if (result == CURLE_OK) {
-          result = setstropt(&data->set.str[STRING_PASSWORD], separator+1);
-        }
-      }
-      else {
-        result = setstropt(&data->set.str[STRING_USERNAME], userpwd);
-      }
-    }
+    result = setstropt_userpwd(va_arg(param, char *),
+                               &data->set.str[STRING_USERNAME],
+                               &data->set.str[STRING_PASSWORD]);
     break;
   case CURLOPT_USERNAME:
     /*
@@ -1587,7 +1590,22 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * user:password needed to use the proxy
      */
-    result = setstropt(&data->set.str[STRING_PROXYUSERPWD],
+    result = setstropt_userpwd(va_arg(param, char *),
+                               &data->set.str[STRING_PROXYUSERNAME],
+                               &data->set.str[STRING_PROXYPASSWORD]);
+    break;
+  case CURLOPT_PROXYUSERNAME:
+    /*
+     * authentication user name to use in the operation
+     */
+    result = setstropt(&data->set.str[STRING_PROXYUSERNAME],
+                       va_arg(param, char *));
+    break;
+  case CURLOPT_PROXYPASSWORD:
+    /*
+     * authentication password to use in the operation
+     */
+    result = setstropt(&data->set.str[STRING_PROXYPASSWORD],
                        va_arg(param, char *));
     break;
   case CURLOPT_RANGE:
@@ -3545,10 +3563,15 @@ static CURLcode parse_proxy_auth(struct SessionHandle *data,
   char proxyuser[MAX_CURL_USER_LENGTH]="";
   char proxypasswd[MAX_CURL_PASSWORD_LENGTH]="";
 
-  sscanf(data->set.str[STRING_PROXYUSERPWD],
-         "%" MAX_CURL_USER_LENGTH_TXT "[^:]:"
-         "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^\n]",
-         proxyuser, proxypasswd);
+  if(data->set.str[STRING_PROXYUSERNAME] != NULL) {
+    strncpy(proxyuser, data->set.str[STRING_PROXYUSERNAME], MAX_CURL_USER_LENGTH);
+    proxyuser[MAX_CURL_USER_LENGTH-1] = '\0';   /*To be on safe side*/
+  }
+  if(data->set.str[STRING_PROXYPASSWORD] != NULL) {
+    strncpy(proxypasswd, data->set.str[STRING_PROXYPASSWORD],
+            MAX_CURL_PASSWORD_LENGTH);
+    proxypasswd[MAX_CURL_PASSWORD_LENGTH-1] = '\0'; /*To be on safe side*/
+  }
 
   conn->proxyuser = curl_easy_unescape(data, proxyuser, 0, NULL);
   if(!conn->proxyuser)
@@ -4032,7 +4055,7 @@ static CURLcode create_conn(struct SessionHandle *data,
 
 
   conn->bits.user_passwd = (bool)(NULL != data->set.str[STRING_USERNAME]);
-  conn->bits.proxy_user_passwd = (bool)(NULL != data->set.str[STRING_PROXYUSERPWD]);
+  conn->bits.proxy_user_passwd = (bool)(NULL != data->set.str[STRING_PROXYUSERNAME]);
   conn->bits.tunnel_proxy = data->set.tunnel_thru_httpproxy;
   conn->bits.ftp_use_epsv = data->set.ftp_use_epsv;
   conn->bits.ftp_use_eprt = data->set.ftp_use_eprt;

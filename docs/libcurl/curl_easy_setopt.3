@@ -620,6 +620,26 @@ password to use for the transfer.
 
 The CURLOPT_PASSWORD option should be used in conjunction with
 as the \fICURLOPT_USERNAME\fP option. (Added in 7.19.1)
+.IP CURLOPT_PROXYUSERNAME
+Pass a char * as parameter, which should be pointing to the zero terminated
+user name to use for the transfer while connecting to Proxy.
+
+The CURLOPT_PROXYUSERNAME option should be used in same way as the
+\fICURLOPT_PROXYUSERPWD\fP is used.  In comparison to \fICURLOPT_PROXYUSERPWD\fP
+the CURLOPT_PROXYUSERNAME allows the username to contain colon,
+like in following example: "sip:user@example.com".
+Note the CURLOPT_PROXYUSERNAME option is an alternative way to set the user name
+while connecting to Proxy.  There is no meaning to use it together
+with the \fICURLOPT_PROXYUSERPWD\fP option.
+
+In order to specify the password to be used in conjunction with the user name
+use the \fICURLOPT_PROXYPASSWORD\fP option.  (Added in 7.19.1)
+.IP CURLOPT_PROXYPASSWORD
+Pass a char * as parameter, which should be pointing to the zero terminated
+password to use for the transfer while connecting to Proxy.
+
+The CURLOPT_PROXYPASSWORD option should be used in conjunction with
+as the \fICURLOPT_PROXYUSERNAME\fP option. (Added in 7.19.1)
 .IP CURLOPT_HTTPAUTH
 Pass a long as parameter, which is set to a bitmask, to tell libcurl what
 authentication method(s) you want it to use. The available bits are listed

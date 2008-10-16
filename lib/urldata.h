@@ -1322,7 +1322,6 @@ enum dupstring {
                              $HOME/.netrc */
   STRING_COPYPOSTFIELDS,  /* if POST, set the fields' values here */
   STRING_PROXY,           /* proxy to use */
-  STRING_PROXYUSERPWD,    /* Proxy <user:password>, if used */
   STRING_SET_RANGE,       /* range, if used */
   STRING_SET_REFERER,     /* custom string for the HTTP referer field */
   STRING_SET_URL,         /* what original URL to work on */
@@ -1339,6 +1338,8 @@ enum dupstring {
   STRING_SSL_ISSUERCERT,  /* issuer cert file to check certificate */
   STRING_USERNAME,        /* <username>, if used */
   STRING_PASSWORD,        /* <password>, if used */
+  STRING_PROXYUSERNAME,   /* Proxy <username>, if used */
+  STRING_PROXYPASSWORD,   /* Proxy <password>, if used */
 
   /* -- end of strings -- */
   STRING_LAST /* not used, just an end-of-list marker */

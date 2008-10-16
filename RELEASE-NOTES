@@ -2,7 +2,7 @@ Curl and libcurl 7.19.1
 
  Public curl releases:         107
  Command line options:         128
- curl_easy_setopt() options:   156
+ curl_easy_setopt() options:   158
  Public functions in libcurl:  58
  Known libcurl bindings:       37
  Contributors:                 672
@@ -16,6 +16,7 @@ This release includes the following changes:
  o configure --disable-proxy disables proxy
  o Added CURLOPT_USERNAME and CURLOPT_PASSWORD
  o --interface now works with IPv6 connections on glibc systems
+ o Added CURLOPT_PROXYUSER and CURLOPT_PROXYPASSWORD
 
 This release includes the following bugfixes:
 

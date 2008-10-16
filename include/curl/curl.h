@@ -1145,6 +1145,10 @@ typedef enum {
   CINIT(USERNAME, OBJECTPOINT, 173),
   CINIT(PASSWORD, OBJECTPOINT, 174),
 
+    /* "name" and "pwd" to use with Proxy when fetching. */
+  CINIT(PROXYUSERNAME, OBJECTPOINT, 175),
+  CINIT(PROXYPASSWORD, OBJECTPOINT, 176),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

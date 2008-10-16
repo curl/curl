@@ -199,6 +199,8 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_slist,
    (option) == CURLOPT_USERNAME ||                                            \
    (option) == CURLOPT_PASSWORD ||                                            \
    (option) == CURLOPT_PROXYUSERPWD ||                                        \
+   (option) == CURLOPT_PROXYUSERNAME ||                                       \
+   (option) == CURLOPT_PROXYPASSWORD ||                                       \
    (option) == CURLOPT_ENCODING ||                                            \
    (option) == CURLOPT_REFERER ||                                             \
    (option) == CURLOPT_USERAGENT ||                                           \

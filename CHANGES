@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (16 Oct 2008)
+- Igor Novoseltsev added CURLOPT_PROXYUSER and CURLOPT_PROXYPASSWORD that then
+  make CURLOPT_PROXYUSERPWD sort of deprecated. The primary motive for adding
+  these new options is that they have no problems with the colon separator
+  that the CURLOPT_PROXYUSERPWD option does.
+
 Daniel Stenberg (15 Oct 2008)
 - Pascal Terjan filed bug #2154627
   (http://curl.haxx.se/bug/view.cgi?id=2154627) which pointed out that libcurl
