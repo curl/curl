@@ -13,7 +13,7 @@ Daniel Stenberg (15 Oct 2008)
   Turkish locale is used. This is because 'i' and 'I' isn't the same letter so
   strcasecmp() on those letters are different in Turkish than in English (or
   just about all other languages). I thus introduced a totally new internal
-  function in libcurl (called Curl_ascii_equal) for doing case insentive
+  function in libcurl (called Curl_raw_equal) for doing case insentive
   comparisons for english-(ascii?) style strings that thus will make "file"
   and "FILE" match even if the Turkish locale is selected.
 
