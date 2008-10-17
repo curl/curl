@@ -232,7 +232,7 @@ static void close_connections(struct SessionHandle *data)
 {
   /* Loop through all open connections and kill them one by one */
   long i;
-  do
+  do {
     i = ConnectionKillOne(data);
   } while(i != -1L);
 }
