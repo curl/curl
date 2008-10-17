@@ -57,6 +57,7 @@
 #include "ares.h"
 #include "ares_dns.h"
 #include "inet_ntop.h"
+#include "inet_net_pton.h"
 #include "ares_getopt.h"
 
 #ifndef HAVE_STRDUP
@@ -213,7 +214,7 @@ int main(int argc, char **argv)
 
         case 's':
           /* Add a server, and specify servers in the option mask. */
-          if (inet_pton(AF_INET, optarg, &inaddr) <= 0)
+          if (ares_inet_pton(AF_INET, optarg, &inaddr) <= 0)
             {
               hostent = gethostbyname(optarg);
               if (!hostent || hostent->h_addrtype != AF_INET)
