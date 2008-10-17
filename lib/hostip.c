@@ -928,8 +928,10 @@ Curl_addrinfo *Curl_he2ai(const struct hostent *he, int port)
     prevai = ai;
   }
 
-  if(result != CURLE_OK)
+  if(result != CURLE_OK) {
     Curl_freeaddrinfo(firstai);
+    firstai = NULL;
+  }
 
   return firstai;
 }
