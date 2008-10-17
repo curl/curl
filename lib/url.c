@@ -234,7 +234,7 @@ static void close_connections(struct SessionHandle *data)
   long i;
   do
     i = ConnectionKillOne(data);
-  while(i != -1L);
+  } while(i != -1L);
 }
 
 void Curl_freeset(struct SessionHandle * data)
