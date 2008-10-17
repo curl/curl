@@ -102,6 +102,18 @@
 #undef SO_NOSIGPIPE
 #endif
 
+struct Curl_sockaddr_ex {
+  int family;
+  int socktype;
+  int protocol;
+  unsigned int addrlen;
+  union {
+    struct sockaddr addr;
+    struct Curl_sockaddr_storage buff;
+  } _sa_ex_u;
+};
+#define sa_addr _sa_ex_u.addr
+
 static bool verifyconnect(curl_socket_t sockfd, int *error);
 
 static curl_socket_t
@@ -743,6 +755,7 @@ singleipconnect(struct connectdata *conn,
                 long timeout_ms,
                 bool *connected)
 {
+  struct Curl_sockaddr_ex addr;
   char addr_buf[128];
   int rc;
   int error;
@@ -750,63 +763,72 @@ singleipconnect(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   curl_socket_t sockfd;
   CURLcode res;
-  /*
-   * Curl_sockaddr_storage, which is basically sockaddr_storage has a space
-   * for a largest possible struct sockaddr only. We should add some space for
-   * the other fields we are using. Hence the addr_storage size math.
-   */
-  char addr_storage[sizeof(struct curl_sockaddr)-
-                    sizeof(struct sockaddr)+
-                    sizeof(struct Curl_sockaddr_storage)];
-  struct curl_sockaddr *addr=(struct curl_sockaddr*)&addr_storage;
   const void *iptoprint;
 
-  addr->family=ai->ai_family;
-  addr->socktype=conn->socktype;
-  addr->protocol=ai->ai_protocol;
-  addr->addrlen =
-    (ai->ai_addrlen < (socklen_t)sizeof(struct Curl_sockaddr_storage)) ?
-     (unsigned int)ai->ai_addrlen : sizeof(struct Curl_sockaddr_storage);
-  memcpy(&addr->addr, ai->ai_addr, addr->addrlen);
+  /*
+   * The Curl_sockaddr_ex structure is basically libcurl's external API
+   * curl_sockaddr structure with enough space available to directly hold
+   * any protocol-specific address structures. The variable declared here
+   * will be used to pass / receive data to/from the fopensocket callback
+   * if this has been set, before that, it is initialized from parameters.
+   */
 
-  /* If set, use opensocket callback to get the socket */
-  if(data->set.fopensocket)
-    sockfd = data->set.fopensocket(data->set.opensocket_client,
-                                   CURLSOCKTYPE_IPCXN, addr);
-  else
-    sockfd = socket(addr->family, addr->socktype, addr->protocol);
-  if(sockfd == CURL_SOCKET_BAD)
-    return CURL_SOCKET_BAD;
+  addr.family = ai->ai_family;
+  addr.socktype = conn->socktype;
+  addr.protocol = ai->ai_protocol;
+  addr.addrlen = ai->ai_addrlen;
+
+  if(addr.addrlen > sizeof(struct Curl_sockaddr_storage))
+     addr.addrlen = sizeof(struct Curl_sockaddr_storage);
+  memcpy(&addr.sa_addr, ai->ai_addr, addr.addrlen);
 
   *connected = FALSE; /* default is not connected */
 
+  if(data->set.fopensocket)
+   /*
+    * If the opensocket callback is set, all the destination address information
+    * is passed to the callback. Depending on this information the callback may
+    * opt to abort the connection, this is indicated returning CURL_SOCKET_BAD;
+    * otherwise it will return a not-connected socket. When the callback returns
+    * a valid socket the destination address information might have been changed
+    * and this 'new' address will actually be used here to connect.
+    */
+    sockfd = data->set.fopensocket(data->set.opensocket_client,
+                                   CURLSOCKTYPE_IPCXN,
+                                   (struct curl_sockaddr *)&addr);
+  else
+    /* opensocket callback not set, so simply create the socket now */
+    sockfd = socket(addr.family, addr.socktype, addr.protocol);
+
+  if(sockfd == CURL_SOCKET_BAD)
+    /* no socket, no connection */
+    return CURL_SOCKET_BAD;
+
 #ifdef CURLRES_IPV6
-  if (conn->scope && (addr->family == AF_INET6)) {
-    struct sockaddr_in6 *in6 = (struct sockaddr_in6 *)&addr->addr;
-    in6->sin6_scope_id = conn->scope;
-  }
+  if (conn->scope && (addr.family == AF_INET6))
+    ((struct sockaddr_in6 *)(&addr.sa_addr))->sin6_scope_id = conn->scope;
 #endif
 
   /* FIXME: do we have Curl_printable_address-like with struct sockaddr* as
      argument? */
 #if defined(HAVE_SYS_UN_H) && defined(AF_UNIX)
-  if(addr->family==AF_UNIX) {
+  if(addr.family == AF_UNIX) {
     infof(data, "  Trying %s... ",
-          ((const struct sockaddr_un*)(&addr->addr))->sun_path);
+          ((const struct sockaddr_un*)(&addr.sa_addr))->sun_path);
     snprintf(data->info.ip, MAX_IPADR_LEN, "%s",
-             ((const struct sockaddr_un*)(&addr->addr))->sun_path);
+             ((const struct sockaddr_un*)(&addr.sa_addr))->sun_path);
   }
   else
 #endif
   {
 #ifdef ENABLE_IPV6
-    if(addr->family==AF_INET6)
-      iptoprint= &((const struct sockaddr_in6*)(&addr->addr))->sin6_addr;
+    if(addr.family == AF_INET6)
+      iptoprint = &((const struct sockaddr_in6*)(&addr.sa_addr))->sin6_addr;
     else
 #endif
-      iptoprint = &((const struct sockaddr_in*)(&addr->addr))->sin_addr;
+      iptoprint = &((const struct sockaddr_in*)(&addr.sa_addr))->sin_addr;
 
-    if(Curl_inet_ntop(addr->family, iptoprint, addr_buf,
+    if(Curl_inet_ntop(addr.family, iptoprint, addr_buf,
                       sizeof(addr_buf)) != NULL) {
       infof(data, "  Trying %s... ", addr_buf);
       snprintf(data->info.ip, MAX_IPADR_LEN, "%s", addr_buf);
@@ -830,7 +852,7 @@ singleipconnect(struct connectdata *conn,
   }
 
   /* possibly bind the local end to an IP, interface or port */
-  res = bindlocal(conn, sockfd, addr->family);
+  res = bindlocal(conn, sockfd, addr.family);
   if(res) {
     sclose(sockfd); /* close socket and bail out */
     return CURL_SOCKET_BAD;
@@ -841,7 +863,7 @@ singleipconnect(struct connectdata *conn,
 
   /* Connect TCP sockets, bind UDP */
   if(conn->socktype == SOCK_STREAM)
-    rc = connect(sockfd, &addr->addr, addr->addrlen);
+    rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
   else
     rc = 0;
 
