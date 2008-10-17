@@ -4240,6 +4240,13 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
       for(i = 0;
           (url = urls?glob_next_url(urls):(i?NULL:strdup(url)));
           i++) {
+        /* NOTE: In the condition expression in the for() statement above, the
+           'url' variable is only ever strdup()ed if (i == 0) and thus never
+           when this loops later on. Further down in this function we call
+           free(url) and then the code loops. Static code parsers may thus get
+           tricked into believing that we have a potential access-after-free
+           here.  I can however not spot any such case. */
+
         int infd = STDIN_FILENO;
         bool infdopen;
         char *outfile;
