@@ -732,6 +732,7 @@ void Curl_freeaddrinfo(Curl_addrinfo *ai)
       free(ai->ai_addr);
     if(ai->ai_canonname)
       free(ai->ai_canonname);
+    memset(ai, 0, sizeof(Curl_addrinfo));
     free(ai);
     ai = next;
   }
