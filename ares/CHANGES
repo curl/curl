@@ -1,5 +1,9 @@
   Changelog for the c-ares project
 
+* Oct 18 2008 (Daniel Stenberg)
+  Charles Hardin made adig support a regular numerical dotted IP address for the
+  -s option as well.
+
 * Oct 7 2008 (Yang Tse)
 - Added --enable-optimize configure option to enable and disable compiler
   optimizations to allow decoupled setting from --enable-debug.
