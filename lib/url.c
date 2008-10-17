@@ -231,8 +231,10 @@ void Curl_safefree(void *ptr)
 static void close_connections(struct SessionHandle *data)
 {
   /* Loop through all open connections and kill them one by one */
-  while(-1 != ConnectionKillOne(data))
-    ; /* empty loop */
+  long i;
+  do {
+    i = ConnectionKillOne(data);
+  while(i != -1L);
 }
 
 void Curl_freeset(struct SessionHandle * data)

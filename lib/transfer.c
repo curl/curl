@@ -1255,10 +1255,9 @@ static CURLcode readwrite_headers(struct SessionHandle *data,
       char *start;
 
       /* Find the first non-space letter */
-      for(start=k->p+17;
-	  *start && ISSPACE(*start);
-	  start++)
-	;  /* empty loop */
+      start = k->p + 17;
+      while(*start && ISSPACE(*start))
+        start++;
 
       /* Record the content-encoding for later use */
       if(checkprefix("identity", start))
