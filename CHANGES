@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Fandrich (17 Oct 2008)
+- Fixed a compile error reported by Albert Chin on AIX and IRIX when using
+  GTLS.
+
 Daniel Stenberg (16 Oct 2008)
 - Igor Novoseltsev added CURLOPT_PROXYUSER and CURLOPT_PROXYPASSWORD that then
   make CURLOPT_PROXYUSERPWD sort of deprecated. The primary motive for adding
