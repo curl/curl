@@ -110,11 +110,13 @@
 #define CURL_TIMEOUT_EXPECT_100 1000 /* counting ms here */
 
 
+#ifndef CURL_DISABLE_HTTP
 static CURLcode readwrite_headers(struct SessionHandle *data,
                                   struct connectdata *conn,
                                   struct SingleRequest *k,
                                   ssize_t *nread,
                                   bool *stop_reading);
+#endif /* CURL_DISABLE_HTTP */
 
 /*
  * This function will call the read callback to fill our buffer with data
@@ -424,6 +426,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
        in the flow below before the actual storing is done. */
     k->str = k->buf;
 
+#ifndef CURL_DISABLE_HTTP
     /* Since this is a two-state thing, we check if we are parsing
        headers at the moment or not. */
     if(k->header) {
@@ -436,6 +439,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
 	/* We've stopped dealing with input, get out of the do-while loop */
 	break;
     }
+#endif /* CURL_DISABLE_HTTP */
 
 
     /* This is not an 'else if' since it may be a rest from the header
@@ -673,6 +677,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
   return CURLE_OK;
 }
 
+#ifndef CURL_DISABLE_HTTP
 /*
  * Read any header lines from the server and pass them to the client app.
  */
@@ -815,7 +820,6 @@ static CURLcode readwrite_headers(struct SessionHandle *data,
 	k->p++; /* pass the \n byte */
 #endif /* CURL_DOES_CONVERSIONS */
 
-#ifndef CURL_DISABLE_HTTP
       if(100 <= k->httpcode && 199 >= k->httpcode) {
 	/*
 	 * We have made a HTTP PUT or POST and this is 1.1-lingo
@@ -869,7 +873,6 @@ static CURLcode readwrite_headers(struct SessionHandle *data,
 	       k->httpcode);
 	return CURLE_HTTP_RETURNED_ERROR;
       }
-#endif   /* CURL_DISABLE_HTTP */
 
       /* now, only output this if the header AND body are requested:
        */
@@ -888,7 +891,6 @@ static CURLcode readwrite_headers(struct SessionHandle *data,
       data->info.header_size += (long)headerlen;
       data->req.headerbytecount += (long)headerlen;
 
-#ifndef CURL_DISABLE_HTTP
       data->req.deductheadercount =
 	(100 <= k->httpcode && 199 >= k->httpcode)?data->req.headerbytecount:0;
 
@@ -915,7 +917,6 @@ static CURLcode readwrite_headers(struct SessionHandle *data,
 	  k->keepon |= KEEP_WRITE;
 	}
       }
-#endif   /* CURL_DISABLE_HTTP */
 
       if(!k->header) {
 	/*
@@ -975,7 +976,6 @@ static CURLcode readwrite_headers(struct SessionHandle *data,
       continue;
     }
 
-#ifndef CURL_DISABLE_HTTP
     /*
      * Checks for special headers coming up.
      */
@@ -1116,7 +1116,6 @@ static CURLcode readwrite_headers(struct SessionHandle *data,
 	break;
       }
     }
-#endif /* CURL_DISABLE_HTTP */
 
 #ifdef CURL_DOES_CONVERSIONS
     /* convert from the network encoding */
@@ -1127,7 +1126,6 @@ static CURLcode readwrite_headers(struct SessionHandle *data,
     /* Curl_convert_from_network calls failf if unsuccessful */
 #endif /* CURL_DOES_CONVERSIONS */
 
-#ifndef CURL_DISABLE_HTTP
     /* Check for Content-Length: header lines to get size. Ignore
        the header completely if we get a 416 response as then we're
        resuming a document that we don't get, and this header contains
@@ -1351,7 +1349,6 @@ static CURLcode readwrite_headers(struct SessionHandle *data,
 	}
       }
     }
-#endif   /* CURL_DISABLE_HTTP */
 
     /*
      * End of header-checks. Write them to the client.
@@ -1384,6 +1381,7 @@ static CURLcode readwrite_headers(struct SessionHandle *data,
 
   return CURLE_OK;
 }
+#endif   /* CURL_DISABLE_HTTP */
 
 /*
  * Send data to upload to the server, when the socket is writable.
