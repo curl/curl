@@ -592,7 +592,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
 
     /* alarm() makes a signal get sent when the timeout fires off, and that
        will abort system calls */
-    prev_alarm = alarm((unsigned int) (timeout ? timeout/1000L : timeout));
+    prev_alarm = alarm((unsigned int) (timeout/1000L));
   }
 
 #else
