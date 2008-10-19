@@ -44,6 +44,7 @@ hash_element_dtor(void *user, void *element)
 
   h->dtor(e->ptr);
 
+  memset(e, 0, sizeof(struct curl_hash_element));
   free(e);
 }
 
@@ -232,6 +233,7 @@ Curl_hash_clean(struct curl_hash *h)
 
   for (i = 0; i < h->slots; ++i) {
     Curl_llist_destroy(h->table[i], (void *) h);
+    h->table[i] = NULL;
   }
 
   free(h->table);
@@ -269,6 +271,8 @@ Curl_hash_destroy(struct curl_hash *h)
     return;
 
   Curl_hash_clean(h);
+
+  memset(h, 0, sizeof(struct struct curl_hash));
   free(h);
 }
 

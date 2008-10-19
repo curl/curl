@@ -168,8 +168,10 @@ curl_share_cleanup(CURLSH *sh)
     return CURLSHE_IN_USE;
   }
 
-  if(share->hostcache)
+  if(share->hostcache) {
     Curl_hash_destroy(share->hostcache);
+    share->hostcache = NULL;
+  }
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
   if(share->cookies)

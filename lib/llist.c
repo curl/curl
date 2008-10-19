@@ -113,6 +113,8 @@ Curl_llist_remove(struct curl_llist *list, struct curl_llist_element *e,
   }
 
   list->dtor(user, e->ptr);
+
+  memset(e, 0, sizeof(struct curl_llist_element));
   free(e);
   --list->size;
 
@@ -126,6 +128,7 @@ Curl_llist_destroy(struct curl_llist *list, void *user)
     while(list->size > 0)
       Curl_llist_remove(list, list->tail, user);
 
+    memset(list, 0, sizeof(struct curl_llist));
     free(list);
   }
 }

@@ -1551,6 +1551,8 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
     multi->type = 0; /* not good anymore */
     Curl_hash_destroy(multi->hostcache);
     Curl_hash_destroy(multi->sockhash);
+    multi->hostcache = NULL;
+    multi->sockhash = NULL;
 
     /* go over all connections that have close actions */
     for(i=0; i< multi->connc->num; i++) {

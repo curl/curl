@@ -695,6 +695,7 @@ static void freednsentry(void *freethis)
 
   Curl_freeaddrinfo(p->addr);
 
+  memset(p, 0, sizeof(struct Curl_dns_entry));
   free(p);
 }
 

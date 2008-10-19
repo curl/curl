@@ -450,8 +450,11 @@ CURLcode Curl_close(struct SessionHandle *data)
     return CURLE_OK;
   }
 
-  if(data->dns.hostcachetype == HCACHE_PRIVATE)
+  if(data->dns.hostcachetype == HCACHE_PRIVATE) {
     Curl_hash_destroy(data->dns.hostcache);
+    data->dns.hostcachetype = HCACHE_NONE;
+    data->dns.hostcache = NULL;
+  }
 
   if(data->state.rangestringalloc)
     free(data->state.range);

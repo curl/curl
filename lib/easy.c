@@ -502,9 +502,12 @@ CURLcode curl_easy_perform(CURL *curl)
       /* global dns cache was requested but still isn't */
       struct curl_hash *ptr;
 
-      if(data->dns.hostcachetype == HCACHE_PRIVATE)
+      if(data->dns.hostcachetype == HCACHE_PRIVATE) {
         /* if the current cache is private, kill it first */
         Curl_hash_destroy(data->dns.hostcache);
+        data->dns.hostcachetype = HCACHE_NONE;
+        data->dns.hostcache = NULL;
+      }
 
       ptr = Curl_global_host_cache_init();
       if(ptr) {
