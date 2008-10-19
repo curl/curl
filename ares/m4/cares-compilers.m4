@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 35
+# serial 38
 
 
 dnl CARES_CHECK_COMPILER
@@ -432,7 +432,7 @@ AC_DEFUN([CARES_COMPILER_WORKS_IFELSE], [
   ],[
     tmp_compiler_works="no"
     echo " " >&6
-    sed 's/^/cc-fail> /' conftest.err >&6
+    sed 's/^/cc-fail: /' conftest.err >&6
     echo " " >&6
   ])
   dnl linking capability verification
@@ -448,7 +448,7 @@ AC_DEFUN([CARES_COMPILER_WORKS_IFELSE], [
     ],[
       tmp_compiler_works="no"
       echo " " >&6
-      sed 's/^/ln-fail> /' conftest.err >&6
+      sed 's/^/link-fail: /' conftest.err >&6
       echo " " >&6
     ])
   fi
@@ -469,7 +469,7 @@ AC_DEFUN([CARES_COMPILER_WORKS_IFELSE], [
     ],[
       tmp_compiler_works="no"
       echo " " >&6
-      echo "rn-fail test program exited with status $ac_status" >&6
+      echo "run-fail: test program exited with status $ac_status" >&6
       echo " " >&6
     ])
   fi
