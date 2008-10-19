@@ -272,7 +272,7 @@ Curl_hash_destroy(struct curl_hash *h)
 
   Curl_hash_clean(h);
 
-  memset(h, 0, sizeof(struct struct curl_hash));
+  memset(h, 0, sizeof(struct curl_hash));
   free(h);
 }
 
