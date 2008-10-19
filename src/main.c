@@ -2313,6 +2313,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           }
           else {
             char *enc = curl_easy_escape(config->easy, postdata, size);
+            free(postdata); /* no matter if it worked or not */
             if(enc) {
               /* now make a string with the name from above and append the
                  encoded string */
@@ -2325,7 +2326,6 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
               else
                 strcpy(n, enc);
               curl_free(enc);
-              free(postdata);
               if(n) {
                 postdata = n;
               }
