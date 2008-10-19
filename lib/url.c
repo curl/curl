@@ -4355,8 +4355,8 @@ static CURLcode create_conn(struct SessionHandle *data,
  */
 
 static CURLcode setup_conn(struct connectdata *conn,
-                                struct Curl_dns_entry *hostaddr,
-                                bool *protocol_done)
+                           struct Curl_dns_entry *hostaddr,
+                           bool *protocol_done)
 {
   CURLcode result=CURLE_OK;
   struct SessionHandle *data = conn->data;
@@ -4402,7 +4402,12 @@ static CURLcode setup_conn(struct connectdata *conn,
     if(CURL_SOCKET_BAD == conn->sock[FIRSTSOCKET]) {
       bool connected = FALSE;
 
-      /* Connect only if not already connected! */
+      /* Connect only if not already connected!
+       *
+       * NOTE: hostaddr can be NULL when passed to this function, but that is
+       * only for the case where we re-use an existing connection and thus
+       * this code section will not be reached with hostaddr == NULL.
+       */
       result = ConnectPlease(data, conn, hostaddr, &connected);
 
       if(connected) {
