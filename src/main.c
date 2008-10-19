@@ -1818,9 +1818,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         return PARAM_OPTION_UNKNOWN;
       }
     }
-    if(hit < 0) {
-      return PARAM_OPTION_UNKNOWN;
-    }
+
     if(aliases[hit].extraparam) {
       /* this option requires an extra parameter */
       if(!longopt && parse[1]) {
