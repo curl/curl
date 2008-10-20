@@ -694,8 +694,6 @@ static void freednsentry(void *freethis)
   struct Curl_dns_entry *p = (struct Curl_dns_entry *) freethis;
 
   Curl_freeaddrinfo(p->addr);
-
-  memset(p, 0, sizeof(struct Curl_dns_entry));
   free(p);
 }
 
@@ -746,7 +744,6 @@ void Curl_freeaddrinfo(Curl_addrinfo *ai)
       free(ai->ai_addr);
     if(ai->ai_canonname)
       free(ai->ai_canonname);
-    memset(ai, 0, sizeof(Curl_addrinfo));
     free(ai);
     ai = next;
   }
