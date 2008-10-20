@@ -743,8 +743,11 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         }
         if( !(form->flags & HTTPPOST_PTRNAME) &&
              (form == first_form) ) {
-          /* copy name (without strdup; possibly contains null characters) */
-          form->name = memdup(form->name, form->namelength);
+          /* Note that there's small risk that form->name is NULL here if the
+             app passed in a bad combo, so we better check for that first. */
+          if(form->name)
+            /* copy name (without strdup; possibly contains null characters) */
+            form->name = memdup(form->name, form->namelength);
           if(!form->name) {
             return_value = CURL_FORMADD_MEMORY;
             break;
