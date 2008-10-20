@@ -44,7 +44,6 @@ hash_element_dtor(void *user, void *element)
 
   h->dtor(e->ptr);
 
-  memset(e, 0, sizeof(struct curl_hash_element));
   free(e);
 }
 
@@ -272,7 +271,6 @@ Curl_hash_destroy(struct curl_hash *h)
 
   Curl_hash_clean(h);
 
-  memset(h, 0, sizeof(struct curl_hash));
   free(h);
 }
 
