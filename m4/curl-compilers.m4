@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 37
+# serial 38
 
 
 dnl CURL_CHECK_COMPILER
@@ -569,10 +569,6 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
         dnl #981: operands are evaluated in unspecified order
         dnl #1469: "cc" clobber ignored
         tmp_CPPFLAGS="$tmp_CPPFLAGS -wd 279,981,1469"
-        dnl Disable use of ANSI C aliasing rules in optimizations
-        tmp_CFLAGS="$tmp_CFLAGS -no-ansi-alias"
-        dnl Disable floating point optimizations
-        tmp_CFLAGS="$tmp_CFLAGS -fp-model precise"
         ;;
         #
       INTEL_WINDOWS_C)
@@ -936,6 +932,16 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           tmp_CFLAGS="$tmp_CFLAGS -fpstkchk"
           dnl Enable run-time detection of buffer overruns.
           tmp_CFLAGS="$tmp_CFLAGS -fstack-security-check"
+          dnl Disable use of ANSI C aliasing rules in optimizations
+          tmp_CFLAGS="$tmp_CFLAGS -no-ansi-alias"
+          dnl Disable floating point optimizations
+          tmp_CFLAGS="$tmp_CFLAGS -fp-model precise"
+          dnl Assume aliasing in the program.
+          tmp_CFLAGS="$tmp_CFLAGS -falias"
+          dnl Assume that arguments may be aliased.
+          tmp_CFLAGS="$tmp_CFLAGS -alias-args"
+          dnl Assume aliasing within functions
+          tmp_CFLAGS="$tmp_CFLAGS -ffnalias"
         fi
         ;;
         #

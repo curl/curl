@@ -257,11 +257,11 @@ CURL_SET_COMPILER_DEBUG_OPTS
 CURL_SET_COMPILER_OPTIMIZE_OPTS
 CURL_SET_COMPILER_WARNING_OPTS
 
-case $host in
-  #
-  x86_64*linux*|amd64*freebsd*|ia64*freebsd*)
-    #
-    if test "$compiler_id" = "ICC_unix"; then
+dnl case $host in
+dnl   #
+dnl   x86_64*linux*|amd64*freebsd*|ia64*freebsd*)
+dnl     #
+    if test "$compiler_id" = "INTEL_UNIX_C"; then
       #
       if test "$compiler_num" -ge "900" &&
         test "$compiler_num" -lt "1000"; then
@@ -275,9 +275,9 @@ case $host in
       fi
       #
     fi
-    ;;
-  #
-esac
+dnl     ;;
+dnl   #
+dnl esac
 
 CURL_CHECK_COMPILER_HALT_ON_ERROR
 CURL_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE
