@@ -118,6 +118,10 @@ case $host in
     AC_MSG_RESULT([yes])
     with_pic=yes
     ;;
+  i686*linux*)
+    AC_MSG_RESULT([yes])
+    with_pic=yes
+    ;;
   *)
     AC_MSG_RESULT([no])
     ;;

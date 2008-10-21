@@ -915,6 +915,8 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
             tmp_CPPFLAGS="$tmp_CPPFLAGS -Wall -w2"
             dnl Perform extra compile-time code checking
             tmp_CPPFLAGS="$tmp_CPPFLAGS -Wcheck"
+            dnl Generate inlining diagnostics
+            tmp_CPPFLAGS="$tmp_CPPFLAGS -Winline"
           fi
           dnl Disable using EBP register in optimizations
           tmp_CFLAGS="$tmp_CFLAGS -fno-omit-frame-pointer"
@@ -922,6 +924,12 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
           tmp_CFLAGS="$tmp_CFLAGS -fno-builtin"
           dnl Disable inlining of functions
           tmp_CFLAGS="$tmp_CFLAGS -fno-inline"
+          dnl Disable some IPO for single file optimizations
+          tmp_CFLAGS="$tmp_CFLAGS -fno-inline-functions"
+          dnl Disable inlining of standard library functions
+          tmp_CFLAGS="$tmp_CFLAGS -nolib-inline"
+          dnl Disable inlining of user-defined functions
+          tmp_CFLAGS="$tmp_CFLAGS -Ob0"
           dnl Enable floating-point stack integrity checks
           tmp_CFLAGS="$tmp_CFLAGS -fpstkchk"
           dnl Enable run-time detection of buffer overruns.
