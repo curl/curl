@@ -1644,11 +1644,21 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
         while(ptr && *ptr && (isspace((int)*ptr) || (*ptr=='-')))
           ptr++;
         to=curlx_strtoofft(ptr, &ptr2, 0);
-        if ((ptr == ptr2) /* no "to" value given */
-            || (to > size)) {
-          to = size;
+        if((ptr == ptr2) /* no "to" value given */
+            || (to >= size)) {
+          to = size - 1;
         }
-        if (from > to) {
+        if(from < 0) {
+          /* from is relative to end of file */
+          from += size;
+        }
+        if(from >= size) {
+          failf(data, "Offset (%"
+                FORMAT_OFF_T ") was beyond file size (%" FORMAT_OFF_T ")",
+                from, attrs.filesize);
+          return CURLE_BAD_DOWNLOAD_RESUME;
+        }
+        if(from > to) {
           from = to;
           size = 0;
         }

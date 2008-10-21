@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Fandrich (21 Oct 2008)
+- Fixed some problems with SFTP range support to fix test cases 634 through
+  637.
+
 Daniel Fandrich (17 Oct 2008)
 - Fixed a compile error reported by Albert Chin on AIX and IRIX when using
   GTLS.
