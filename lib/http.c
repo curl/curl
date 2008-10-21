@@ -545,6 +545,7 @@ http_output_auth(struct connectdata *conn,
        and if this is one single bit it'll be used instantly. */
     authproxy->picked = authproxy->want;
 
+#ifndef CURL_DISABLE_PROXY
   /* Send proxy authentication header if needed */
   if(conn->bits.httpproxy &&
       (conn->bits.tunnel_proxy == proxytunnel)) {
@@ -605,6 +606,7 @@ http_output_auth(struct connectdata *conn,
         authproxy->multi = FALSE;
     }
   else
+#endif /* CURL_DISABLE_PROXY */
     /* we have no proxy so let's pretend we're done authenticating
        with it */
     authproxy->done = TRUE;
@@ -1273,6 +1275,7 @@ Curl_compareheader(const char *headerline, /* line to check */
   return FALSE; /* no match */
 }
 
+#ifndef CURL_DISABLE_PROXY
 /*
  * Curl_proxyCONNECT() requires that we're connected to a HTTP proxy. This
  * function will issue the necessary commands to get a seamless tunnel through
@@ -1729,6 +1732,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
   data->req.ignorebody = FALSE; /* put it (back) to non-ignore state */
   return CURLE_OK;
 }
+#endif /* CURL_DISABLE_PROXY */
 
 /*
  * Curl_http_connect() performs HTTP stuff to do at connect-time, called from
@@ -1745,12 +1749,12 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
      function to make the re-use checks properly be able to check this bit. */
   conn->bits.close = FALSE;
 
+#ifndef CURL_DISABLE_PROXY
   /* If we are not using a proxy and we want a secure connection, perform SSL
    * initialization & connection now.  If using a proxy with https, then we
    * must tell the proxy to CONNECT to the host we want to talk to.  Only
    * after the connect has occurred, can we start talking SSL
    */
-
   if(conn->bits.tunnel_proxy && conn->bits.httpproxy) {
 
     /* either SSL over proxy, or explicitly asked for */
@@ -1765,6 +1769,7 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
     /* nothing else to do except wait right now - we're not done here. */
     return CURLE_OK;
   }
+#endif /* CURL_DISABLE_PROXY */
 
   if(!data->state.this_is_a_follow) {
     /* this is not a followed location, get the original host name */
@@ -2234,6 +2239,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       return CURLE_OUT_OF_MEMORY;
   }
 
+#ifndef CURL_DISABLE_PROXY
   if(conn->bits.httpproxy && !conn->bits.tunnel_proxy)  {
     /* Using a proxy but does not tunnel through it */
 
@@ -2295,6 +2301,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       }
     }
   }
+#endif /* CURL_DISABLE_PROXY */
+
   if(HTTPREQ_POST_FORM == httpreq) {
     /* we must build the whole darned post sequence first, so that we have
        a size of the whole shebang before we start to send it */
