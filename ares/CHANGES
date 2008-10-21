@@ -1,5 +1,8 @@
   Changelog for the c-ares project
 
+* Oct 21 2008 (Yang Tse)
+  Charles Hardin added handling of EINPROGRESS for UDP connects.
+
 * Oct 18 2008 (Daniel Stenberg)
   Charles Hardin made adig support a regular numerical dotted IP address for the
   -s option as well.
