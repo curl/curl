@@ -118,10 +118,6 @@ case $host in
     AC_MSG_RESULT([yes])
     with_pic=yes
     ;;
-  i686*linux*)
-    AC_MSG_RESULT([yes])
-    with_pic=yes
-    ;;
   *)
     AC_MSG_RESULT([no])
     ;;
@@ -152,10 +148,10 @@ CARES_SET_COMPILER_DEBUG_OPTS
 CARES_SET_COMPILER_OPTIMIZE_OPTS
 CARES_SET_COMPILER_WARNING_OPTS
 
-dnl case $host in
-dnl   #
-dnl   x86_64*linux*|amd64*freebsd*|ia64*freebsd*)
-dnl     #
+case $host in
+  #
+  x86_64*linux*|amd64*freebsd*|ia64*freebsd*)
+    #
     if test "$compiler_id" = "INTEL_UNIX_C"; then
       #
       if test "$compiler_num" -ge "900" &&
@@ -170,9 +166,9 @@ dnl     #
       fi
       #
     fi
-dnl     ;;
-dnl   #
-dnl esac
+    ;;
+  #
+esac
 
 CURL_CHECK_COMPILER_HALT_ON_ERROR
 CURL_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE
