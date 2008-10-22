@@ -1823,7 +1823,14 @@ sub singletest {
 
     my $dbghosttype=join(' ', runclientoutput("uname -a"));
     if(($dbghosttype =~ /SMP PREEMPT/) && ($dbghosttype =~ /i686 GNU/)) {
-        $why = "debugging icc build" if(($testnum != 1) && ($testnum != 100));
+        if(!$curl_debug) {
+            if(($testnum != 1)   && ($testnum != 100) &&
+               ($testnum != 500) && ($testnum != 507) &&
+               ($testnum != 517) && ($testnum != 534) &&
+               ($testnum != 557) && ($testnum != 1013)) {
+                $why = "debugging icc build";
+            }
+        }
     }
 
     if(!$why) {
