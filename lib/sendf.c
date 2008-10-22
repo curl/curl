@@ -661,7 +661,7 @@ int Curl_read(struct connectdata *conn, /* connection data */
 static int showit(struct SessionHandle *data, curl_infotype type,
                   char *ptr, size_t size)
 {
-  static const char * const s_infotype[CURLINFO_END] = {
+  static const char s_infotype[CURLINFO_END][3] = {
     "* ", "< ", "> ", "{ ", "} ", "{ ", "} " };
 
 #ifdef CURL_DOES_CONVERSIONS

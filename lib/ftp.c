@@ -880,7 +880,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   char hbuf[NI_MAXHOST];
   struct sockaddr *sa=(struct sockaddr *)&ss;
   char tmp[1024];
-  static const char * const mode[] = { "EPRT", "PORT", NULL };
+  static const char mode[][5] = { "EPRT", "PORT" };
   int rc;
   int error;
   char *host=NULL;
@@ -1266,7 +1266,7 @@ static CURLcode ftp_state_use_pasv(struct connectdata *conn)
 
   */
 
-  static const char * const mode[] = { "EPSV", "PASV", NULL };
+  static const char mode[][5] = { "EPSV", "PASV" };
   int modeoff;
 
 #ifdef PF_INET6
@@ -2550,9 +2550,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
   struct SessionHandle *data=conn->data;
   int ftpcode;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
-  static const char * const ftpauth[]  = {
-    "SSL", "TLS"
-  };
+  static const char ftpauth[][4]  = { "SSL", "TLS" };
   size_t nread = 0;
 
   if(ftpc->sendleft) {

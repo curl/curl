@@ -96,7 +96,7 @@ const char * const Curl_month[]=
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 
 struct tzinfo {
-  const char *name;
+  char name[5];
   int offset; /* +/- in minutes */
 };
 
