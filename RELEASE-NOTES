@@ -13,7 +13,7 @@ This release includes the following changes:
  o Added CURLOPT_CERTINFO and CURLINFO_CERTINFO
  o Added CURLOPT_POSTREDIR
  o Better detect HTTP 1.0 servers and don't do HTTP 1.1 requests on them
- o configure --disable-proxy disables proxy
+ o configure --disable-proxy disables proxy support
  o Added CURLOPT_USERNAME and CURLOPT_PASSWORD
  o --interface now works with IPv6 connections on glibc systems
  o Added CURLOPT_PROXYUSER and CURLOPT_PROXYPASSWORD
@@ -23,7 +23,7 @@ This release includes the following bugfixes:
  o MingW32 non-configure builds are now largefile feature enabled by default
  o NetWare LIBC builds are now largefile feature enabled by default
  o curl_easy_pause() could behave wrongly on unpause
- o cookie with invalid expire dates are now considered expired
+ o cookies with invalid expire dates are now considered expired
  o HTTP pipelining over proxy
  o fix regression in configure script which affected OpenSSL builds on MSYS
  o GnuTLS-based multi interface doing HTTPS over proxy failed
@@ -38,7 +38,8 @@ This release includes the following bugfixes:
  o CURLINFO_PRIMARY_IP fixed for persistent connection re-use cases
  o remove_handle/add_handle multi interface timer callback flaw
  o CURLINFO_REDIRECT_URL memory leak and wrong-doing
- o case insensitive matching works in Turkish too
+ o case insensitive string matching works in Turkish too
+ o Solaris builds get _REENTRANT defined properly and work again
 
 This release includes the following known bugs:
 
