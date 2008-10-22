@@ -791,12 +791,13 @@ REDUCING SIZE
    sections of the shared library using the -R option to objcopy (e.g. the
    .comment section).
 
-   Using these techniques it is possible to create an HTTP-only shared libcurl
-   library for i386 Linux platforms that is only 96 KiB in size (as of libcurl
-   version pre-7.19.1, using gcc 4.2.2).
+   Using these techniques it is possible to create a basic HTTP-only shared
+   libcurl library for i386 Linux platforms that is only 94 KiB in size, and
+   an FTP-only library that is 87 KiB in size (as of libcurl version 7.19.1,
+   using gcc 4.2.2).
 
    You may find that statically linking libcurl to your application will
-   result in a lower total size.
+   result in a lower total size than dynamically linking.
 
    Note that the curl test harness can detect the use of some, but not all, of
    the --disable statements suggested above. Use will cause tests relying on
@@ -805,11 +806,9 @@ REDUCING SIZE
    command line.  Following is a list of appropriate key words:
 
      --disable-cookies          !cookies
-     --disable-crypto-auth      !HTTP\ Digest\ auth !HTTP\ NTLM\ auth
-                                !HTTP\ proxy\ Digest\ auth
-                                !HTTP\ proxy\ NTLM\ auth
+     --disable-crypto-auth      !HTTP\ Digest\ auth !HTTP\ proxy\ Digest\ auth
      --disable-manual           !--manual
-     --disable-proxy            !HTTP\ proxy !SOCKS4 !SOCKS5
+     --disable-proxy            !HTTP\ proxy !proxytunnel !SOCKS4 !SOCKS5
 
 
 PORTS
@@ -826,6 +825,7 @@ PORTS
         - Alpha OpenBSD 3.0
         - Alpha OpenVMS V7.1-1H2
         - Alpha Tru64 v5.0 5.1
+        - AVR32 Linux
         - HP-PA HP-UX 9.X 10.X 11.X
         - HP-PA Linux
         - HP3000 MPE/iX
