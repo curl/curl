@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 39
+# serial 41
 
 
 dnl CARES_CHECK_COMPILER
@@ -185,6 +185,7 @@ AC_DEFUN([CARES_CHECK_COMPILER_INTEL_C], [
   CURL_CHECK_DEF([__INTEL_COMPILER], [], [silent])
   if test "$curl_cv_have_def___INTEL_COMPILER" = "yes"; then
     AC_MSG_RESULT([yes])
+    CURL_CHECK_DEF([__i386__], [], [silent])
     CURL_CHECK_DEF([__unix__], [], [silent])
     if test "$curl_cv_have_def___unix__" = "yes"; then
       compiler_id="INTEL_UNIX_C"
@@ -194,6 +195,13 @@ AC_DEFUN([CARES_CHECK_COMPILER_INTEL_C], [
       flags_opt_all="-O -O0 -O1 -O2 -O3 -Os"
       flags_opt_yes="-O2"
       flags_opt_off="-O0"
+      dnl icc 9.1 optimization on IA32 triggers SIGSEGV
+      if test "$curl_cv_have_def___i386__" = "yes" &&
+        test "$compiler_num" -eq "910"; then
+        INTEL_UNIX_C_OPT_SIGSEGV="yes"
+      else
+        INTEL_UNIX_C_OPT_SIGSEGV="no"
+      fi
     else
       compiler_id="INTEL_WINDOWS_C"
       flags_dbg_all="/ZI /Zi /zI /zi /ZD /Zd /zD /zd /Z7 /z7 /Oy /Oy-"
@@ -915,11 +923,11 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
             tmp_CPPFLAGS="$tmp_CPPFLAGS -Wall -w2"
             dnl Perform extra compile-time code checking
             tmp_CPPFLAGS="$tmp_CPPFLAGS -Wcheck"
-            dnl Generate inlining diagnostics
-            tmp_CPPFLAGS="$tmp_CPPFLAGS -Winline"
           fi
           dnl Disable using EBP register in optimizations
           tmp_CFLAGS="$tmp_CFLAGS -fno-omit-frame-pointer"
+          dnl Disable inlining of user-defined functions
+          tmp_CFLAGS="$tmp_CFLAGS -Ob0"
           dnl Disable inline expansion of intrinsic functions
           tmp_CFLAGS="$tmp_CFLAGS -fno-builtin"
           dnl Disable inlining of functions
@@ -928,8 +936,8 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
           tmp_CFLAGS="$tmp_CFLAGS -fno-inline-functions"
           dnl Disable inlining of standard library functions
           tmp_CFLAGS="$tmp_CFLAGS -nolib-inline"
-          dnl Disable inlining of user-defined functions
-          tmp_CFLAGS="$tmp_CFLAGS -Ob0"
+          dnl Disable full and partial inlining when IPO
+          tmp_CFLAGS="$tmp_CFLAGS -ip-no-inlining"
           dnl Enable floating-point stack integrity checks
           tmp_CFLAGS="$tmp_CFLAGS -fpstkchk"
           dnl Enable run-time detection of buffer overruns.
@@ -944,6 +952,10 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
           tmp_CFLAGS="$tmp_CFLAGS -alias-args"
           dnl Assume aliasing within functions
           tmp_CFLAGS="$tmp_CFLAGS -ffnalias"
+          dnl Disable prefetch insertion optimization
+          tmp_CFLAGS="$tmp_CFLAGS -no-prefetch"
+          dnl Disable loop unrolling optimization
+          tmp_CFLAGS="$tmp_CFLAGS -unroll0"
         fi
         ;;
         #
