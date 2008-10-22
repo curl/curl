@@ -3,16 +3,6 @@ To be addressed before 7.19.1 (planned release: October/November 2008)
 
 Awaiting feedback, updates or removal:
 
-165 - "Problem with CURLOPT_RESUME_FROM and CURLOPT_APPEND" by Daniele Pinau,
-      recipe: http://curl.haxx.se/mail/lib-2008-08/0439.html
-
-168 - curl_easy_pause bugs
-
-173 - "Patch to use GSSAPI authentication for socks5 connection" by
-      Markus Moeller http://curl.haxx.se/mail/archive-2008-09/0053.html
-
-178 - "[Patch] Disable multi API support"
-
 182 -  Make CURLINFO_LASTSOCKET accessible during perform
 
 Patches pending commit:
