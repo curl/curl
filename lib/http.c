@@ -606,6 +606,10 @@ http_output_auth(struct connectdata *conn,
         authproxy->multi = FALSE;
     }
   else
+#else
+  (void)request;
+  (void)path;
+  (void)proxytunnel;
 #endif /* CURL_DISABLE_PROXY */
     /* we have no proxy so let's pretend we're done authenticating
        with it */
