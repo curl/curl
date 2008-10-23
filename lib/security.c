@@ -66,6 +66,7 @@
 #include "sendf.h"
 #include "ftp.h"
 #include "memory.h"
+#include "strequal.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
