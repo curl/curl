@@ -96,6 +96,7 @@ Example set of cookies:
 #include "memory.h"
 #include "share.h"
 #include "strtoofft.h"
+#include "rawstr.h"
 
 /* The last #include file should be: */
 #ifdef CURLDEBUG

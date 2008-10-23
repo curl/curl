@@ -1,5 +1,5 @@
-#ifndef __STREQUAL_H
-#define __STREQUAL_H
+#ifndef __RAWSTR_H
+#define __RAWSTR_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -25,12 +25,18 @@
 
 #include <curl/curl.h>
 
-#define strequal(a,b) curl_strequal(a,b)
-#define strnequal(a,b,c) curl_strnequal(a,b,c)
+/*
+ * Curl_raw_equal() is for doing "raw" case insensitive strings. This is meant
+ * to be locale independent and only compare strings we know are safe for
+ * this.
+ *
+ * The function is capable of comparing a-z case insensitively even for non-ascii.
+ */
+int Curl_raw_equal(const char *first, const char *second);
+int Curl_raw_nequal(const char *first, const char *second, size_t max);
 
-#ifndef HAVE_STRLCAT
-#define strlcat(x,y,z) Curl_strlcat(x,y,z)
-#endif
-size_t strlcat(char *dst, const char *src, size_t siz);
+/* checkprefix() is a shorter version of the above, used when the first
+   argument is zero-byte terminated */
+#define checkprefix(a,b)    Curl_raw_nequal(a,b,strlen(a))
 
 #endif

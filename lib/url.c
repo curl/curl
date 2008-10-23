@@ -115,6 +115,7 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
 #include "multiif.h"
 #include "easyif.h"
 #include "speedcheck.h"
+#include "rawstr.h"
 
 /* And now for the protocols */
 #include "ftp.h"

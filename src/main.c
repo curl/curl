@@ -44,6 +44,7 @@
 #ifdef USE_ENVIRONMENT
 #include "writeenv.h"
 #endif
+#include "rawstr.h"
 
 #define CURLseparator   "--_curl_--"
 

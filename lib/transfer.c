@@ -33,6 +33,7 @@
 
 #include "strtoofft.h"
 #include "strequal.h"
+#include "rawstr.h"
 
 #ifdef WIN32
 #include <time.h>

@@ -43,6 +43,7 @@
 #include "strequal.h"
 #include "strtok.h"
 #include "memory.h"
+#include "rawstr.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>

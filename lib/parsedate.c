@@ -83,7 +83,7 @@
 #endif
 
 #include <curl/curl.h>
-#include "strequal.h"
+#include "rawstr.h"
 #include "parsedate.h"
 
 const char * const Curl_wkday[] =

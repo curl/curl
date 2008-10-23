@@ -55,7 +55,7 @@
 #include "urldata.h"
 #include "easyif.h"  /* for Curl_convert_... prototypes */
 #include "sendf.h"
-#include "strequal.h"
+#include "rawstr.h"
 #include "curl_base64.h"
 #include "http_ntlm.h"
 #include "url.h"
