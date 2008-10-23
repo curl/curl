@@ -46,12 +46,6 @@ struct tftphdr {
 #define th_code  th_block
 #define th_msg   th_data
 
-#define opcode_RRQ   1
-#define opcode_WRQ   2
-#define opcode_DATA  3
-#define opcode_ACK   4
-#define opcode_ERROR 5
-
 #define EUNDEF    0
 #define ENOTFOUND 1
 #define EACCESS   2

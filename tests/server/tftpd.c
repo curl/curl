@@ -118,6 +118,11 @@ static int writeit(struct testcase *test, struct tftphdr **dpp, int ct,
                    int convert);
 static void mysignal(int, void (*func)(int));
 
+#define opcode_RRQ   1
+#define opcode_WRQ   2
+#define opcode_DATA  3
+#define opcode_ACK   4
+#define opcode_ERROR 5
 
 #define TIMEOUT         5
 
