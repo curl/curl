@@ -552,7 +552,7 @@ int main(int argc, char **argv)
 
     tp = (struct tftphdr *)buf;
     tp->th_opcode = ntohs(tp->th_opcode);
-    if (tp->th_opcode == RRQ || tp->th_opcode == WRQ) {
+    if (tp->th_opcode == opcode_RRQ || tp->th_opcode == opcode_WRQ) {
       memset(&test, 0, sizeof(test));
       if (tftp(&test, tp, n) < 0)
         break;
@@ -635,7 +635,7 @@ again:
     nak(ecode);
     return 1;
   }
-  if (tp->th_opcode == WRQ)
+  if (tp->th_opcode == opcode_WRQ)
     recvtftp(test, pf);
   else
     sendtftp(test, pf);
@@ -777,7 +777,7 @@ static void sendtftp(struct testcase *test, struct formats *pf)
       nak(ERRNO + 100);
       return;
     }
-    sdp->th_opcode = htons((u_short)DATA);
+    sdp->th_opcode = htons((u_short)opcode_DATA);
     sdp->th_block = htons((u_short)sendblock);
     timeout = 0;
 #ifdef HAVE_SIGSETJMP
@@ -804,12 +804,12 @@ static void sendtftp(struct testcase *test, struct formats *pf)
       sap->th_opcode = ntohs((u_short)sap->th_opcode);
       sap->th_block = ntohs((u_short)sap->th_block);
 
-      if (sap->th_opcode == ERROR) {
+      if (sap->th_opcode == opcode_ERROR) {
         logmsg("got ERROR");
         return;
       }
 
-      if (sap->th_opcode == ACK) {
+      if (sap->th_opcode == opcode_ACK) {
         if (sap->th_block == sendblock) {
           break;
         }
@@ -848,7 +848,7 @@ static void recvtftp(struct testcase *test, struct formats *pf)
   rap = (struct tftphdr *)ackbuf;
   do {
     timeout = 0;
-    rap->th_opcode = htons((u_short)ACK);
+    rap->th_opcode = htons((u_short)opcode_ACK);
     rap->th_block = htons((u_short)recvblock);
     recvblock++;
 #ifdef HAVE_SIGSETJMP
@@ -874,9 +874,9 @@ send_ack:
       }
       rdp->th_opcode = ntohs((u_short)rdp->th_opcode);
       rdp->th_block = ntohs((u_short)rdp->th_block);
-      if (rdp->th_opcode == ERROR)
+      if (rdp->th_opcode == opcode_ERROR)
         goto abort;
-      if (rdp->th_opcode == DATA) {
+      if (rdp->th_opcode == opcode_DATA) {
         if (rdp->th_block == recvblock) {
           break;                         /* normal */
         }
@@ -898,7 +898,7 @@ send_ack:
   } while (size == SEGSIZE);
   write_behind(test, pf->f_convert);
 
-  rap->th_opcode = htons((u_short)ACK);   /* send the "final" ack */
+  rap->th_opcode = htons((u_short)opcode_ACK);  /* send the "final" ack */
   rap->th_block = htons((u_short)recvblock);
   (void) swrite(peer, ackbuf, 4);
 #if defined(HAVE_ALARM) && defined(SIGALRM)
@@ -910,7 +910,7 @@ send_ack:
   alarm(0);
 #endif
   if (n >= 4 &&                          /* if read some data */
-      rdp->th_opcode == DATA &&          /* and got a data block */
+      rdp->th_opcode == opcode_DATA &&   /* and got a data block */
       recvblock == rdp->th_block) {      /* then my last ack was lost */
     (void) swrite(peer, ackbuf, 4);      /* resend final ack */
   }
@@ -945,7 +945,7 @@ static void nak(int error)
   struct errmsg *pe;
 
   tp = (struct tftphdr *)buf;
-  tp->th_opcode = htons((u_short)ERROR);
+  tp->th_opcode = htons((u_short)opcode_ERROR);
   tp->th_code = htons((u_short)error);
   for (pe = errmsgs; pe->e_code >= 0; pe++)
     if (pe->e_code == error)

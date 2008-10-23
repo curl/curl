@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,7 +26,7 @@
 /* This file is a rewrite/clone of the arpa/tftp.h file for systems without
    it. */
 
-#define	SEGSIZE 512 /* data segment size */
+#define SEGSIZE 512 /* data segment size */
 
 #ifndef __GNUC__
 #define __attribute__(x)
@@ -46,11 +46,11 @@ struct tftphdr {
 #define th_code  th_block
 #define th_msg   th_data
 
-#define RRQ   1
-#define WRQ   2
-#define DATA  3
-#define ACK   4
-#define ERROR 5
+#define opcode_RRQ   1
+#define opcode_WRQ   2
+#define opcode_DATA  3
+#define opcode_ACK   4
+#define opcode_ERROR 5
 
 #define EUNDEF    0
 #define ENOTFOUND 1
