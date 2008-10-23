@@ -244,7 +244,7 @@ void curl_dofree(void *ptr, int line, const char *source)
 int curl_socket(int domain, int type, int protocol, int line,
                 const char *source)
 {
-  int sockfd=(socket)(domain, type, protocol);
+  int sockfd=socket(domain, type, protocol);
   if(logfile && (sockfd!=-1))
     fprintf(logfile, "FD %s:%d socket() = %d\n",
             source, line, sockfd);
@@ -256,7 +256,7 @@ int curl_accept(int s, void *saddr, void *saddrlen,
 {
   struct sockaddr *addr = (struct sockaddr *)saddr;
   socklen_t *addrlen = (socklen_t *)saddrlen;
-  int sockfd=(accept)(s, addr, addrlen);
+  int sockfd=accept(s, addr, addrlen);
   if(logfile)
     fprintf(logfile, "FD %s:%d accept() = %d\n",
             source, line, sockfd);
@@ -276,7 +276,7 @@ int curl_sclose(int sockfd, int line, const char *source)
 FILE *curl_fopen(const char *file, const char *mode,
                  int line, const char *source)
 {
-  FILE *res=(fopen)(file, mode);
+  FILE *res=fopen(file, mode);
   if(logfile)
     fprintf(logfile, "FILE %s:%d fopen(\"%s\",\"%s\") = %p\n",
             source, line, file, mode, res);
@@ -287,7 +287,7 @@ FILE *curl_fopen(const char *file, const char *mode,
 FILE *curl_fdopen(int filedes, const char *mode,
                   int line, const char *source)
 {
-  FILE *res=(fdopen)(filedes, mode);
+  FILE *res=fdopen(filedes, mode);
   if(logfile)
     fprintf(logfile, "FILE %s:%d fdopen(\"%d\",\"%s\") = %p\n",
             source, line, filedes, mode, res);
@@ -301,7 +301,7 @@ int curl_fclose(FILE *file, int line, const char *source)
 
   DEBUGASSERT(file != NULL);
 
-  res=(fclose)(file);
+  res=fclose(file);
   if(logfile)
     fprintf(logfile, "FILE %s:%d fclose(%p)\n",
             source, line, file);
