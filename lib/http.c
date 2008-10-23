@@ -173,7 +173,7 @@ static char *checkheaders(struct SessionHandle *data, const char *thisheader)
   size_t thislen = strlen(thisheader);
 
   for(head = data->set.headers; head; head=head->next) {
-    if(strnequal(head->data, thisheader, thislen))
+    if(Curl_raw_nequal(head->data, thisheader, thislen))
       return head->data;
   }
   return NULL;
@@ -1246,7 +1246,7 @@ Curl_compareheader(const char *headerline, /* line to check */
   const char *start;
   const char *end;
 
-  if(!strnequal(headerline, header, hlen))
+  if(!Curl_raw_nequal(headerline, header, hlen))
     return FALSE; /* doesn't start with header */
 
   /* pass the header */
@@ -1272,7 +1272,7 @@ Curl_compareheader(const char *headerline, /* line to check */
 
   /* find the content string in the rest of the line */
   for(;len>=clen;len--, start++) {
-    if(strnequal(start, content, clen))
+    if(Curl_raw_nequal(start, content, clen))
       return TRUE; /* match! */
   }
 
@@ -2026,12 +2026,11 @@ static CURLcode add_custom_headers(struct connectdata *conn,
         if(conn->allocptr.host &&
            /* a Host: header was sent already, don't pass on any custom Host:
               header as that will produce *two* in the same request! */
-           curl_strnequal("Host:", headers->data, 5))
+           checkprefix("Host:", headers->data))
           ;
         else if(conn->data->set.httpreq == HTTPREQ_POST_FORM &&
                 /* this header (extended by formdata.c) is sent later */
-                curl_strnequal("Content-Type:", headers->data,
-                               strlen("Content-Type:")))
+                checkprefix("Content-Type:", headers->data))
           ;
         else {
           CURLcode result = add_bufferf(req_buffer, "%s\r\n", headers->data);

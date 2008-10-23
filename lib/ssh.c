@@ -822,7 +822,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn)
     /*
      * Support some of the "FTP" commands
      */
-    if(curl_strnequal(sshc->quote_item->data, "PWD", 3)) {
+    if(curl_strequal("pwd", sshc->quote_item->data)) {
       /* output debug output if that is requested */
       if(data->set.verbose) {
         char tmp[PATH_MAX+1];

@@ -4019,7 +4019,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
 
     dlen -= ftpc->file?strlen(ftpc->file):0;
     if((dlen == (int)strlen(ftpc->prevpath)) &&
-       curl_strnequal(path, ftpc->prevpath, dlen)) {
+       strnequal(path, ftpc->prevpath, dlen)) {
       infof(data, "Request has same path as previous transfer\n");
       ftpc->cwddone = TRUE;
     }

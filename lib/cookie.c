@@ -131,7 +131,7 @@ static bool tailmatch(const char *little, const char *bigone)
   if(littlelen > biglen)
     return FALSE;
 
-  return (bool)strequal(little, bigone+biglen-littlelen);
+  return (bool)Curl_raw_equal(little, bigone+biglen-littlelen);
 }
 
 /*

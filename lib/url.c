@@ -3337,7 +3337,7 @@ static char *detect_proxy(struct connectdata *conn)
   if(!no_proxy)
     no_proxy=curl_getenv("NO_PROXY");
 
-  if(!no_proxy || !strequal("*", no_proxy)) {
+  if(!no_proxy || !Curl_raw_equal("*", no_proxy)) {
     /* NO_PROXY wasn't specified or it wasn't just an asterisk */
     char *nope;
 

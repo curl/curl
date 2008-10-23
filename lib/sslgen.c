@@ -64,8 +64,6 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-static bool safe_strequal(char* str1, char* str2);
-
 static bool safe_strequal(char* str1, char* str2)
 {
   if(str1 && str2)
@@ -228,7 +226,7 @@ int Curl_ssl_getsessionid(struct connectdata *conn,
     if(!check->sessionid)
       /* not session ID means blank entry */
       continue;
-    if(curl_strequal(conn->host.name, check->name) &&
+    if(Curl_raw_equal(conn->host.name, check->name) &&
        (conn->remote_port == check->remote_port) &&
        Curl_ssl_config_matches(&conn->ssl_config, &check->ssl_config)) {
       /* yes, we have a session ID! */

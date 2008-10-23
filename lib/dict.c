@@ -163,9 +163,9 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
     /* AUTH is missing */
   }
 
-  if(strnequal(path, DICT_MATCH, sizeof(DICT_MATCH)-1) ||
-      strnequal(path, DICT_MATCH2, sizeof(DICT_MATCH2)-1) ||
-      strnequal(path, DICT_MATCH3, sizeof(DICT_MATCH3)-1)) {
+  if(Curl_raw_nequal(path, DICT_MATCH, sizeof(DICT_MATCH)-1) ||
+      Curl_raw_nequal(path, DICT_MATCH2, sizeof(DICT_MATCH2)-1) ||
+      Curl_raw_nequal(path, DICT_MATCH3, sizeof(DICT_MATCH3)-1)) {
 
     word = strchr(path, ':');
     if(word) {
@@ -222,9 +222,9 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
     if(result)
       return result;
   }
-  else if(strnequal(path, DICT_DEFINE, sizeof(DICT_DEFINE)-1) ||
-           strnequal(path, DICT_DEFINE2, sizeof(DICT_DEFINE2)-1) ||
-           strnequal(path, DICT_DEFINE3, sizeof(DICT_DEFINE3)-1)) {
+  else if(Curl_raw_nequal(path, DICT_DEFINE, sizeof(DICT_DEFINE)-1) ||
+           Curl_raw_nequal(path, DICT_DEFINE2, sizeof(DICT_DEFINE2)-1) ||
+           Curl_raw_nequal(path, DICT_DEFINE3, sizeof(DICT_DEFINE3)-1)) {
 
     word = strchr(path, ':');
     if(word) {

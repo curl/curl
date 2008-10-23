@@ -161,6 +161,22 @@ int Curl_raw_equal(const char *first, const char *second)
   return (my_toupper(*first) == my_toupper(*second));
 }
 
+int Curl_raw_nequal(const char *first, const char *second, size_t max)
+{
+  while(*first && *second && max) {
+    if(my_toupper(*first) != my_toupper(*second)) {
+      break;
+    }
+    max--;
+    first++;
+    second++;
+  }
+  if(0 == max)
+    return 1; /* they are equal this far */
+
+  return my_toupper(*first) == my_toupper(*second);
+}
+
 #ifndef HAVE_STRLCAT
 /*
  * The strlcat() function appends the NUL-terminated string src to the end
