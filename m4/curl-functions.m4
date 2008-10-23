@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 24
+# serial 25
 
 
 dnl CURL_INCLUDES_ARPA_INET
@@ -1062,6 +1062,7 @@ dnl with shell variable curl_disallow_gmtime_r, then
 dnl HAVE_GMTIME_R will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
+  AC_REQUIRE([CURL_INCLUDES_STDLIB])dnl
   AC_REQUIRE([CURL_INCLUDES_TIME])dnl
   #
   tst_links_gmtime_r="unknown"
@@ -1118,6 +1119,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
     AC_MSG_CHECKING([if gmtime_r seems to work])
     AC_RUN_IFELSE([
       AC_LANG_PROGRAM([[
+        $curl_includes_stdlib
         $curl_includes_time
       ]],[[
         time_t local = 1170352587;
@@ -1300,6 +1302,7 @@ dnl with shell variable curl_disallow_inet_ntop, then
 dnl HAVE_INET_NTOP will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
+  AC_REQUIRE([CURL_INCLUDES_STDLIB])dnl
   AC_REQUIRE([CURL_INCLUDES_ARPA_INET])dnl
   AC_REQUIRE([CURL_INCLUDES_STRING])dnl
   #
@@ -1357,6 +1360,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
     AC_MSG_CHECKING([if inet_ntop seems to work])
     AC_RUN_IFELSE([
       AC_LANG_PROGRAM([[
+        $curl_includes_stdlib
         $curl_includes_arpa_inet
         $curl_includes_string
       ]],[[
@@ -1457,6 +1461,7 @@ dnl with shell variable curl_disallow_inet_pton, then
 dnl HAVE_INET_PTON will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
+  AC_REQUIRE([CURL_INCLUDES_STDLIB])dnl
   AC_REQUIRE([CURL_INCLUDES_ARPA_INET])dnl
   AC_REQUIRE([CURL_INCLUDES_STRING])dnl
   #
@@ -1514,6 +1519,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
     AC_MSG_CHECKING([if inet_pton seems to work])
     AC_RUN_IFELSE([
       AC_LANG_PROGRAM([[
+        $curl_includes_stdlib
         $curl_includes_arpa_inet
         $curl_includes_string
       ]],[[
@@ -1618,6 +1624,7 @@ dnl with shell variable curl_disallow_localtime_r, then
 dnl HAVE_LOCALTIME_R will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_LOCALTIME_R], [
+  AC_REQUIRE([CURL_INCLUDES_STDLIB])dnl
   AC_REQUIRE([CURL_INCLUDES_TIME])dnl
   #
   tst_links_localtime_r="unknown"
@@ -1674,6 +1681,7 @@ AC_DEFUN([CURL_CHECK_FUNC_LOCALTIME_R], [
     AC_MSG_CHECKING([if localtime_r seems to work])
     AC_RUN_IFELSE([
       AC_LANG_PROGRAM([[
+        $curl_includes_stdlib
         $curl_includes_time
       ]],[[
         time_t clock = 1170352587;
@@ -2450,6 +2458,7 @@ dnl  error string in the provided resultbuf.
 dnl
 
 AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
+  AC_REQUIRE([CURL_INCLUDES_STDLIB])dnl
   AC_REQUIRE([CURL_INCLUDES_STRING])dnl
   #
   tst_links_strerror_r="unknown"
@@ -2541,6 +2550,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
     AC_MSG_CHECKING([if strerror_r seems to work])
     AC_RUN_IFELSE([
       AC_LANG_PROGRAM([[
+        $curl_includes_stdlib
         $curl_includes_string
 #       include <errno.h>
       ]],[[
@@ -2601,6 +2611,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
     AC_MSG_CHECKING([if strerror_r seems to work])
     AC_RUN_IFELSE([
       AC_LANG_PROGRAM([[
+        $curl_includes_stdlib
         $curl_includes_string
 #       include <errno.h>
       ]],[[

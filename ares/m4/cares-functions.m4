@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 8
+# serial 10
 
 
 dnl CARES_INCLUDES_ARPA_INET
@@ -64,6 +64,27 @@ cares_includes_netdb="\
   AC_CHECK_HEADERS(
     sys/types.h netdb.h,
     [], [], [$cares_includes_netdb])
+])
+
+
+dnl CARES_INCLUDES_STDLIB
+dnl -------------------------------------------------
+dnl Set up variable with list of headers that must be
+dnl included when stdlib.h is to be included.
+
+AC_DEFUN([CARES_INCLUDES_STDLIB], [
+cares_includes_stdlib="\
+/* includes start */
+#ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#  include <stdlib.h>
+#endif
+/* includes end */"
+  AC_CHECK_HEADERS(
+    sys/types.h stdlib.h,
+    [], [], [$cares_includes_stdlib])
 ])
 
 
@@ -404,6 +425,7 @@ dnl with shell variable cares_disallow_inet_ntop, then
 dnl HAVE_INET_NTOP will be defined.
 
 AC_DEFUN([CARES_CHECK_FUNC_INET_NTOP], [
+  AC_REQUIRE([CARES_INCLUDES_STDLIB])dnl
   AC_REQUIRE([CARES_INCLUDES_ARPA_INET])dnl
   AC_REQUIRE([CARES_INCLUDES_STRING])dnl
   #
@@ -461,6 +483,7 @@ AC_DEFUN([CARES_CHECK_FUNC_INET_NTOP], [
     AC_MSG_CHECKING([if inet_ntop seems to work])
     AC_RUN_IFELSE([
       AC_LANG_PROGRAM([[
+        $cares_includes_stdlib
         $cares_includes_arpa_inet
         $cares_includes_string
       ]],[[
@@ -561,6 +584,7 @@ dnl with shell variable cares_disallow_inet_pton, then
 dnl HAVE_INET_PTON will be defined.
 
 AC_DEFUN([CARES_CHECK_FUNC_INET_PTON], [
+  AC_REQUIRE([CARES_INCLUDES_STDLIB])dnl
   AC_REQUIRE([CARES_INCLUDES_ARPA_INET])dnl
   AC_REQUIRE([CARES_INCLUDES_STRING])dnl
   #
@@ -618,6 +642,7 @@ AC_DEFUN([CARES_CHECK_FUNC_INET_PTON], [
     AC_MSG_CHECKING([if inet_pton seems to work])
     AC_RUN_IFELSE([
       AC_LANG_PROGRAM([[
+        $cares_includes_stdlib
         $cares_includes_arpa_inet
         $cares_includes_string
       ]],[[

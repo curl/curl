@@ -702,6 +702,9 @@ AC_DEFUN([CURL_CHECK_NI_WITHSCOPEID], [
     [ac_cv_working_ni_withscopeid], [
     AC_RUN_IFELSE([
       AC_LANG_PROGRAM([[
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #ifdef HAVE_STDIO_H
 #include <stdio.h>
 #endif
@@ -1785,6 +1788,9 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
       AC_MSG_CHECKING([if monotonic clock_gettime works])
       AC_RUN_IFELSE([
         AC_LANG_PROGRAM([[
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
