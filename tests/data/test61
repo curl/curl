@@ -17,7 +17,7 @@ Server: test-server/fake
 Content-Type: text/html
 Funny-head: yesyes
 Set-Cookie: test=yes; domain=foo.com; expires=Fri Feb 2 11:56:27 GMT 2035
-Set-Cookie: test2=yes; domain=host.foo.com; expires=Fri Feb 2 11:56:27 GMT 2035
+SET-COOKIE: test2=yes; domain=host.foo.com; expires=Fri Feb 2 11:56:27 GMT 2035
 Set-Cookie: test3=maybe; domain=foo.com; path=/moo; secure
 Set-Cookie: test4=no; domain=nope.foo.com; path=/moo; secure
 Set-Cookie: test5=name; domain=anything.com; path=/ ; secure
