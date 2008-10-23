@@ -159,6 +159,10 @@ SOURCE=.\main.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\lib\rawstr.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\lib\strtoofft.c
 # End Source File
 # Begin Source File
@@ -200,6 +204,10 @@ SOURCE=.\hugehelp.h
 # Begin Source File
 
 SOURCE=.\setup.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\lib\rawstr.h
 # End Source File
 # Begin Source File
 
