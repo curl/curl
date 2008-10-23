@@ -54,6 +54,7 @@ OBJS = $(OBJ_DIR)\base64.obj           $(OBJ_DIR)\connect.obj     &
        $(OBJ_DIR)\mprintf.obj          $(OBJ_DIR)\multi.obj       &
        $(OBJ_DIR)\netrc.obj            $(OBJ_DIR)\parsedate.obj   &
        $(OBJ_DIR)\progress.obj         $(OBJ_DIR)\security.obj    &
+       $(OBJ_DIR)\rawstr.obj           $(OBJ_DIR)\rawstr.obj    &
        $(OBJ_DIR)\select.obj           $(OBJ_DIR)\sendf.obj       &
        $(OBJ_DIR)\share.obj            $(OBJ_DIR)\socks.obj       &
        $(OBJ_DIR)\speedcheck.obj       $(OBJ_DIR)\splay.obj       &
@@ -503,3 +504,9 @@ $(OBJ_DIR)\nss.obj: nss.c setup.h config-win32.h ..\include\curl\curlbuild.h &
   strequal.h select.h sslgen.h ..\include\curl\mprintf.h
 $(OBJ_DIR)\qssl.obj: qssl.c setup.h config-win32.h ..\include\curl\curlbuild.h &
   ..\include\curl\curlrules.h setup_once.h
+$(OBJ_DIR)\rawstr.obj: rawstr.c setup.h config-win32.h ..\include\curl\curlbuild.h &
+  ..\include\curl\curlrules.h setup_once.h ..\include\curl\curl.h &
+  ..\include\curl\curlver.h ..\include\curl\curlrules.h &
+  ..\include\curl\easy.h ..\include\curl\multi.h ..\include\curl\curl.h &
+  strerror.h urldata.h cookie.h formdata.h timeval.h http_chunks.h &
+  hostip.h hash.h llist.h splay.h ..\include\curl\mprintf.h

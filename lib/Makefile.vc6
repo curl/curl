@@ -481,6 +481,7 @@ X_OBJS= \
 	$(DIROBJ)\tftp.obj \
 	$(DIROBJ)\splay.obj \
 	$(DIROBJ)\socks.obj \
+	$(DIROBJ)\rawstr.obj \
 	$(RESOURCE)
 
 all : $(TARGET)

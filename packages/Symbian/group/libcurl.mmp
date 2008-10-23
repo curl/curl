@@ -19,7 +19,7 @@ SOURCE \
   http_negotiate.c http_ntlm.c inet_pton.c strtoofft.c strerror.c   \
   hostares.c hostasyn.c hostip4.c hostip6.c hostsyn.c hostthre.c    \
   inet_ntop.c parsedate.c select.c gtls.c sslgen.c tftp.c splay.c   \
-  strdup.c socks.c ssh.c nss.c qssl.c
+  strdup.c socks.c ssh.c nss.c qssl.c rawstr.c
 
 USERINCLUDE   ../../../lib
 
