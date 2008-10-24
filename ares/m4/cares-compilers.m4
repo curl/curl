@@ -951,8 +951,17 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
         tmp_CFLAGS="$tmp_CFLAGS -no-ansi-alias"
         dnl Value-safe optimizations on floating-point data
         tmp_CFLAGS="$tmp_CFLAGS -fp-model precise"
+        dnl Only icc 10.0 or later
+        if test "$compiler_num" -ge "1000"; then
+          dnl Disable vectorizer diagnostic information
+          tmp_CFLAGS="$tmp_CFLAGS -vec-report0"
+        fi
         dnl Disable some optimizations to debug icc 9.1 SIGSEGV
         if test "$INTEL_UNIX_C_OPT_SIGSEGV" = "yes"; then
+          dnl Disable interprocedural optimizations
+          tmp_CFLAGS="$tmp_CFLAGS -no-ip -no-ipo"
+          dnl Separate functions for the linker
+          tmp_CFLAGS="$tmp_CFLAGS -ffunction-sections"
           dnl Disable inlining of user-defined functions
           tmp_CFLAGS="$tmp_CFLAGS -Ob0"
           dnl Disable inline expansion of intrinsic functions
