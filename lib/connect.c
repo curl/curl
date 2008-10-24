@@ -422,7 +422,9 @@ static CURLcode bindlocal(struct connectdata *conn,
     else { /* AF_INET6 */
       memset(&me6, 0, sizeof(me6));
       me6.sin6_family = AF_INET6;
-      me6.sin6_addr = in6addr_any;
+      /* in6addr_any isn't always available and since me6 has just been
+         cleared, it's not strictly necessary to use it here */
+      /*me6.sin6_addr = in6addr_any;*/
 
       sock = (struct sockaddr *)&me6;
       socksize = sizeof(me6);
