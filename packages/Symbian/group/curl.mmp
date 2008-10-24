@@ -11,6 +11,10 @@ SOURCE \
     main.c hugehelp.c urlglob.c writeout.c writeenv.c \
     getpass.c homedir.c curlutil.c
 
+SOURCEPATH  ../../../lib
+SOURCE \
+    rawstr.c
+
 SYSTEMINCLUDE ../../../include ../../../lib ../../../include/curl \
             /epoc32/include /epoc32/include/stdapis
 
