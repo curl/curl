@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 42
+# serial 43
 
 
 dnl CARES_CHECK_COMPILER
@@ -185,6 +185,7 @@ AC_DEFUN([CARES_CHECK_COMPILER_INTEL_C], [
   CURL_CHECK_DEF([__INTEL_COMPILER], [], [silent])
   if test "$curl_cv_have_def___INTEL_COMPILER" = "yes"; then
     AC_MSG_RESULT([yes])
+    compiler_num="$curl_cv_def___INTEL_COMPILER"
     CURL_CHECK_DEF([__i386__], [], [silent])
     CURL_CHECK_DEF([__unix__], [], [silent])
     if test "$curl_cv_have_def___unix__" = "yes"; then
@@ -218,7 +219,6 @@ AC_DEFUN([CARES_CHECK_COMPILER_INTEL_C], [
       flags_opt_yes="/O2"
       flags_opt_off="/Od"
     fi
-    compiler_num="$curl_cv_def___INTEL_COMPILER"
   else
     AC_MSG_RESULT([no])
   fi
@@ -559,7 +559,9 @@ AC_DEFUN([CARES_SET_COMPILER_BASIC_OPTS], [
         #
         dnl On unix this compiler uses gcc's header files, so
         dnl we select ANSI C89 dialect plus GNU extensions.
-        tmp_CPPFLAGS="$tmp_CPPFLAGS -std=gnu89"
+        dnl tmp_CFLAGS="$tmp_CFLAGS -std=gnu89"
+        dnl Select ANSI C89 dialect without GNU extensions.
+        tmp_CFLAGS="$tmp_CFLAGS -std=c89"
         dnl Change some warnings into errors
         dnl #140: too many arguments in function call
         dnl #147: declaration is incompatible with 'previous one'
@@ -942,41 +944,41 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
             dnl Warn if a declared function is not used
             tmp_CPPFLAGS="$tmp_CPPFLAGS -Wunused-function"
           fi
-          dnl Disable using EBP register in optimizations
-          tmp_CFLAGS="$tmp_CFLAGS -fno-omit-frame-pointer"
-          dnl Disable use of ANSI C aliasing rules in optimizations
-          tmp_CFLAGS="$tmp_CFLAGS -no-ansi-alias"
-          dnl Disable some optimizations to debug icc 9.1 SIGSEGV
-          if test "$INTEL_UNIX_C_OPT_SIGSEGV" = "yes"; then
-            dnl Disable inlining of user-defined functions
-            tmp_CFLAGS="$tmp_CFLAGS -Ob0"
-            dnl Disable inline expansion of intrinsic functions
-            tmp_CFLAGS="$tmp_CFLAGS -fno-builtin"
-            dnl Disable inlining of functions
-            tmp_CFLAGS="$tmp_CFLAGS -fno-inline"
-            dnl Disable some IPO for single file optimizations
-            tmp_CFLAGS="$tmp_CFLAGS -fno-inline-functions"
-            dnl Disable inlining of standard library functions
-            tmp_CFLAGS="$tmp_CFLAGS -nolib-inline"
-            dnl Disable full and partial inlining when IPO
-            tmp_CFLAGS="$tmp_CFLAGS -ip-no-inlining"
-            dnl Enable floating-point stack integrity checks
-            tmp_CFLAGS="$tmp_CFLAGS -fpstkchk"
-            dnl Enable run-time detection of buffer overruns.
-            tmp_CFLAGS="$tmp_CFLAGS -fstack-security-check"
-            dnl Disable floating point optimizations
-            tmp_CFLAGS="$tmp_CFLAGS -fp-model precise"
-            dnl Assume aliasing in the program.
-            tmp_CFLAGS="$tmp_CFLAGS -falias"
-            dnl Assume that arguments may be aliased.
-            tmp_CFLAGS="$tmp_CFLAGS -alias-args"
-            dnl Assume aliasing within functions
-            tmp_CFLAGS="$tmp_CFLAGS -ffnalias"
-            dnl Disable prefetch insertion optimization
-            tmp_CFLAGS="$tmp_CFLAGS -no-prefetch"
-            dnl Disable loop unrolling optimization
-            tmp_CFLAGS="$tmp_CFLAGS -unroll0"
-          fi
+        fi
+        dnl Disable using EBP register in optimizations
+        tmp_CFLAGS="$tmp_CFLAGS -fno-omit-frame-pointer"
+        dnl Disable use of ANSI C aliasing rules in optimizations
+        tmp_CFLAGS="$tmp_CFLAGS -no-ansi-alias"
+        dnl Value-safe optimizations on floating-point data
+        tmp_CFLAGS="$tmp_CFLAGS -fp-model precise"
+        dnl Disable some optimizations to debug icc 9.1 SIGSEGV
+        if test "$INTEL_UNIX_C_OPT_SIGSEGV" = "yes"; then
+          dnl Disable inlining of user-defined functions
+          tmp_CFLAGS="$tmp_CFLAGS -Ob0"
+          dnl Disable inline expansion of intrinsic functions
+          tmp_CFLAGS="$tmp_CFLAGS -fno-builtin"
+          dnl Disable inlining of functions
+          tmp_CFLAGS="$tmp_CFLAGS -fno-inline"
+          dnl Disable some IPO for single file optimizations
+          tmp_CFLAGS="$tmp_CFLAGS -fno-inline-functions"
+          dnl Disable inlining of standard library functions
+          tmp_CFLAGS="$tmp_CFLAGS -nolib-inline"
+          dnl Disable full and partial inlining when IPO
+          tmp_CFLAGS="$tmp_CFLAGS -ip-no-inlining"
+          dnl Enable floating-point stack integrity checks
+          tmp_CFLAGS="$tmp_CFLAGS -fpstkchk"
+          dnl Enable run-time detection of buffer overruns.
+          tmp_CFLAGS="$tmp_CFLAGS -fstack-security-check"
+          dnl Assume aliasing in the program.
+          tmp_CFLAGS="$tmp_CFLAGS -falias"
+          dnl Assume that arguments may be aliased.
+          tmp_CFLAGS="$tmp_CFLAGS -alias-args"
+          dnl Assume aliasing within functions
+          tmp_CFLAGS="$tmp_CFLAGS -ffnalias"
+          dnl Disable prefetch insertion optimization
+          tmp_CFLAGS="$tmp_CFLAGS -no-prefetch"
+          dnl Disable loop unrolling optimization
+          tmp_CFLAGS="$tmp_CFLAGS -unroll0"
         fi
         ;;
         #
