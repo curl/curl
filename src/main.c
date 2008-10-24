@@ -1852,7 +1852,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         config->disable_epsv = toggle;
         break;
       case 'E': /* --epsv */
-        config->disable_epsv = !toggle;
+        config->disable_epsv = (bool)(!toggle);
         break;
 #ifdef USE_ENVIRONMENT
       case 'f':
@@ -2021,7 +2021,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         config->disable_eprt = toggle;
         break;
       case 'Z': /* --eprt */
-        config->disable_eprt = !toggle;
+        config->disable_eprt = (bool)(!toggle);
         break;
 
       default: /* the URL! */
@@ -2148,7 +2148,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         config->ftp_ssl_reqd = toggle;
         break;
       case 'w': /* --no-sessionid */
-        config->disable_sessionid = !toggle;
+        config->disable_sessionid = (bool)(!toggle);
         break;
       case 'x': /* --ftp-ssl-control */
         config->ftp_ssl_control = toggle;
@@ -2172,7 +2172,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         config->post301 = toggle;
         break;
       case '1': /* --no-keepalive */
-        config->nokeepalive = !toggle;
+        config->nokeepalive = (bool)(!toggle);
         break;
       case '3': /* --keepalive-time */
         if(str2num(&config->alivetime, nextarg))
@@ -2602,7 +2602,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
     case 'N':
       /* disable the output I/O buffering */
-      config->nobuffer = !toggle;
+      config->nobuffer = (bool)(!toggle);
       break;
     case 'O': /* --remote-name */
       if(subletter == 'a') { /* --remote-name-all */
@@ -2727,7 +2727,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         config->mute = config->noprogress = TRUE;
       else
         config->mute = config->noprogress = FALSE;
-      config->showerror = !toggle; /* toggle off */
+      config->showerror = (bool)(!toggle); /* toggle off */
       break;
     case 'S':
       /* show errors */

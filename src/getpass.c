@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -113,7 +113,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
   fputs(prompt, stderr);
 
   for(i=0; i<buflen; i++) {
-    buffer[i] = getch();
+    buffer[i] = (char)getch();
     if ( buffer[i] == '\r' || buffer[i] == '\n' ) {
       buffer[i] = 0;
       break;
