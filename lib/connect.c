@@ -410,22 +410,22 @@ static CURLcode bindlocal(struct connectdata *conn,
     /* if a local port number is requested but no local IP, extract the
        address from the socket */
     if(af == AF_INET) {
-      memset(&me, 0, sizeof(struct sockaddr));
+      memset(&me, 0, sizeof(me));
       me.sin_family = AF_INET;
       me.sin_addr.s_addr = INADDR_ANY;
 
       sock = (struct sockaddr *)&me;
-      socksize = sizeof(struct sockaddr);
+      socksize = sizeof(me);
 
     }
 #ifdef ENABLE_IPV6
     else { /* AF_INET6 */
-      memset(&me6, 0, sizeof(struct sockaddr));
+      memset(&me6, 0, sizeof(me6));
       me6.sin6_family = AF_INET6;
       me6.sin6_addr = in6addr_any;
 
       sock = (struct sockaddr *)&me6;
-      socksize = sizeof(struct sockaddr);
+      socksize = sizeof(me6);
     }
 #endif
   }
@@ -437,22 +437,23 @@ static CURLcode bindlocal(struct connectdata *conn,
 
     /* Set port number to bind to, 0 makes the system pick one */
     if(sock->sa_family == AF_INET)
-      ((struct sockaddr_in *)sock)->sin_port = htons(port);
+      me.sin_port = htons(port);
 #ifdef ENABLE_IPV6
     else
-      ((struct sockaddr_in6 *)sock)->sin6_port = htons(port);
+      me6.sin6_port = htons(port);
 #endif
 
     if( bind(sockfd, sock, socksize) >= 0) {
       /* we succeeded to bind */
       struct Curl_sockaddr_storage add;
       socklen_t size = sizeof(add);
+      memset(&add, 0, sizeof(struct Curl_sockaddr_storage));
       if(getsockname(sockfd, (struct sockaddr *) &add, &size) < 0) {
         data->state.os_errno = error = SOCKERRNO;
         failf(data, "getsockname() failed with errno %d: %s",
               error, Curl_strerror(conn, error));
-	if(h)
-	  Curl_resolv_unlock(data, h);
+        if(h)
+          Curl_resolv_unlock(data, h);
         return CURLE_INTERFACE_FAILED;
       }
       /* We re-use/clobber the port variable here below */
@@ -465,7 +466,7 @@ static CURLcode bindlocal(struct connectdata *conn,
       infof(data, "Local port: %d\n", port);
       conn->bits.bound = TRUE;
       if(h)
-	Curl_resolv_unlock(data, h);
+        Curl_resolv_unlock(data, h);
       return CURLE_OK;
     }
     if(--portnum > 0) {
@@ -764,6 +765,10 @@ singleipconnect(struct connectdata *conn,
   curl_socket_t sockfd;
   CURLcode res;
   const void *iptoprint;
+  struct sockaddr_in * const sa4 = (void *)&addr.sa_addr;
+#ifdef ENABLE_IPV6
+  struct sockaddr_in6 * const sa6 = (void *)&addr.sa_addr;
+#endif
 
   /*
    * The Curl_sockaddr_ex structure is basically libcurl's external API
@@ -804,9 +809,9 @@ singleipconnect(struct connectdata *conn,
     /* no socket, no connection */
     return CURL_SOCKET_BAD;
 
-#ifdef CURLRES_IPV6
+#ifdef ENABLE_IPV6
   if (conn->scope && (addr.family == AF_INET6))
-    ((struct sockaddr_in6 *)(&addr.sa_addr))->sin6_scope_id = conn->scope;
+    sa6->sin6_scope_id = conn->scope;
 #endif
 
   /* FIXME: do we have Curl_printable_address-like with struct sockaddr* as
@@ -823,10 +828,10 @@ singleipconnect(struct connectdata *conn,
   {
 #ifdef ENABLE_IPV6
     if(addr.family == AF_INET6)
-      iptoprint = &((const struct sockaddr_in6*)(&addr.sa_addr))->sin6_addr;
+      iptoprint = &sa6->sin6_addr;
     else
 #endif
-      iptoprint = &((const struct sockaddr_in*)(&addr.sa_addr))->sin_addr;
+      iptoprint = &sa4->sin_addr;
 
     if(Curl_inet_ntop(addr.family, iptoprint, addr_buf,
                       sizeof(addr_buf)) != NULL) {
