@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 42
+# serial 44
 
 
 dnl CURL_CHECK_COMPILER
@@ -565,9 +565,7 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
         #
         dnl On unix this compiler uses gcc's header files, so
         dnl we select ANSI C89 dialect plus GNU extensions.
-        dnl tmp_CFLAGS="$tmp_CFLAGS -std=gnu89"
-        dnl Select ANSI C89 dialect without GNU extensions.
-        tmp_CFLAGS="$tmp_CFLAGS -std=c89"
+        tmp_CFLAGS="$tmp_CFLAGS -std=gnu89"
         dnl Change some warnings into errors
         dnl #140: too many arguments in function call
         dnl #147: declaration is incompatible with 'previous one'
