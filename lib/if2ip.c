@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -64,6 +64,13 @@
 #include "inet_ntop.h"
 #include "strequal.h"
 
+#define _MPRINTF_REPLACE /* use our functions only */
+#include <curl/mprintf.h>
+
+#include "memory.h"
+/* The last #include file should be: */
+#include "memdebug.h"
+
 char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
 {
   struct ifaddrs *iface, *head;
@@ -74,19 +81,20 @@ char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
       if ((iface->ifa_addr->sa_family == af) &&
           curl_strequal(iface->ifa_name, interface)) {
         void *addr;
-	char scope[12]="";
+        char scope[12]="";
         if (af == AF_INET6) {
           unsigned int scopeid;
           addr = &((struct sockaddr_in6 *)iface->ifa_addr)->sin6_addr;
-	  /* Include the scope of this interface as part of the address */
+          /* Include the scope of this interface as part of the address */
           scopeid = ((struct sockaddr_in6 *)iface->ifa_addr)->sin6_scope_id;
           if (scopeid)
-	    snprintf(scope, sizeof(scope), "%%%u", scopeid);
-	} else
+            snprintf(scope, sizeof(scope), "%%%u", scopeid);
+        }
+        else
           addr = &((struct sockaddr_in *)iface->ifa_addr)->sin_addr;
         ip = (char *) Curl_inet_ntop(af, addr, buf, buf_size);
-	strlcat(buf, scope, buf_size);
-	break;
+        strlcat(buf, scope, buf_size);
+        break;
       }
     }
     freeifaddrs(head);
@@ -130,8 +138,11 @@ char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
 #endif
 
 #include "inet_ntop.h"
-#include "memory.h"
 
+#define _MPRINTF_REPLACE /* use our functions only */
+#include <curl/mprintf.h>
+
+#include "memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
 
