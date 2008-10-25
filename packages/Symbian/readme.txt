@@ -68,7 +68,15 @@ P.I.P.S. doesn't support signals or the alarm() call, so some timeouts
 P.I.P.S. causes a USER:87 panic if certain timeouts much longer than
 half an hour are selected.
 
-SSL/TLS encryption is not supported, nor are LDAP, SCP or SFTP URLs.
+LDAP, SCP or SFTP methods are not supported.
+
+gzip and deflate decompression is supported when enabled in the libcurl.mmp
+file.
+
+SSL/TLS encryption is not supported by default, but it has been reported
+to be made working with macros similar to the ones in config-symbian.h
+and libcurl.mmp. This requires the OpenSSL libraries included in the S60
+Open C SDK.
 
 Debug builds are not supported (i.e. --enable-debug) because they cause
 additional symbol exports in the library which are not frozen in the .def
@@ -77,4 +85,4 @@ files.
 
 Dan Fandrich
 dan@coneharvesters.com
-July 2008
+October 2008

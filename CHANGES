@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel Fandrich (24 Oct 2008)
+- Added experimental support for zlib and OpenSSL on Symbian OS.
+
 Daniel Fandrich (21 Oct 2008)
 - Fixed some problems with SFTP range support to fix test cases 634 through
   637.

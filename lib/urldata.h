@@ -106,6 +106,10 @@
 
 #ifdef HAVE_ZLIB_H
 #include <zlib.h>               /* for content-encoding */
+#ifdef __SYMBIAN32__
+/* zlib pollutes the namespace with this definition */
+#undef WIN32
+#endif
 #endif
 
 #ifdef USE_ARES

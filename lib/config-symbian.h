@@ -291,9 +291,6 @@
 /* Define to 1 if you have the `ssl' library (-lssl). */
 /*#define HAVE_LIBSSL 1*/
 
-/* if zlib is available */
-/*#define HAVE_LIBZ 1*/
-
 /* Define to 1 if you have the <limits.h> header file. */
 #define HAVE_LIMITS_H 1
 
@@ -619,9 +616,6 @@
 /* Define to 1 if you have the <x509.h> header file. */
 /* #undef HAVE_X509_H */
 
-/* if you have the zlib.h header file */
-/*#define HAVE_ZLIB_H 1*/
-
 /* Define to 1 if you are building a native Windows target. */
 /* #undef NATIVE_WINDOWS */
 
@@ -797,4 +791,15 @@
 /* sys/cdefs.h fails to define this for WINSCW prior to Symbian OS ver. 9.4 */
 #ifndef __LONG_LONG_SUPPORTED
 #define __LONG_LONG_SUPPORTED
+#endif
+
+/* Enable appropriate header only when zlib support is enabled */
+#ifdef HAVE_LIBZ
+#define HAVE_ZLIB_H 1
+#endif
+
+/* Enable appropriate definitions only when OpenSSL support is enabled */
+#ifdef USE_SSL
+#define USE_OPENSSL 1
+#define USE_SSLEAY 1
 #endif

@@ -2,11 +2,22 @@
 // libcurl.dll cURL network retrieval client library
 //
 
+// Build-time options
+//#define ENABLE_ZLIB     // Enable gzip/deflate decompression
+//#define ENABLE_SSL      // Enable SSL for HTTPS/FTPS (requires S60 Open C SDK)
+
 TARGET        libcurl.dll
 TARGETTYPE    dll
 UID    0x1000008d 0xF0206D00
 
-MACRO       BUILDING_LIBCURL=1
+MACRO       BUILDING_LIBCURL
+
+#ifdef ENABLE_ZLIB
+MACRO       HAVE_LIBZ
+#endif
+#ifdef ENABLE_SSL
+MACRO       USE_SSL
+#endif
 
 SOURCEPATH  ../../../lib
 SOURCE \
@@ -27,6 +38,12 @@ SYSTEMINCLUDE ../../../include ../../../include/curl \
             /epoc32/include/stdapis /epoc32/include
 
 LIBRARY       euser.lib libc.lib
+#ifdef ENABLE_ZLIB
+LIBRARY       ezlib.lib
+#endif
+#ifdef ENABLE_SSL
+LIBRARY       libssl.lib libcrypto.lib
+#endif
 
 CAPABILITY NetworkServices
 
