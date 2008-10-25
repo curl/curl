@@ -28,9 +28,12 @@
 
 #include "hash.h"
 #include "llist.h"
-#include "memory.h"
 
-/* this must be the last include file */
+#define _MPRINTF_REPLACE /* use our functions only */
+#include <curl/mprintf.h>
+
+#include "memory.h"
+/* The last #include file should be: */
 #include "memdebug.h"
 
 static void
