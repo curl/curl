@@ -8,120 +8,91 @@
  * $Id$
  */
 
-
-
 #include "test.h"
 
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+
+#define ENABLE_CURLX_PRINTF
+#include "curlx.h"
+
+#include "hash.h"
+#include "hostip.h"
+
+#include "memory.h"
 #include "memdebug.h"
-
-#define TABLE_SIZE 10
-
-
-struct element_st {
-  int idx;
-  int dummy;
-};
-
-
-struct root_st {
-  struct element_st **table;
-  int size;
-};
-
-
-static
-struct root_st * new_root(void)
-{
-  struct root_st *r;
-
-  r = malloc(sizeof(struct root_st));
-  if(r != NULL)
-    printf("malloc of root struct OK\n");
-  else {
-    printf("malloc of root struct failed\n");
-    return NULL;
-  }
-
-  r->size = TABLE_SIZE;
-  r->table = malloc(r->size * sizeof(struct element_st *));
-  if(r->table != NULL)
-    printf("malloc of pointer table OK\n");
-  else {
-    printf("malloc of pointer table failed\n");
-    free(r);
-    return NULL;
-  }
-
-  return r;
-}
-
-
-static
-struct element_st * new_element(int idx)
-{
-  struct element_st *e;
-
-  e = malloc(sizeof(struct element_st));
-  if(e != NULL)
-    printf("malloc of pointed element (idx %d) OK\n", idx);
-  else {
-    printf("malloc of pointed element (idx %d) failed\n", idx);
-    return NULL;
-  }
-
-  e->idx = e->dummy = idx;
-
-  return e;
-}
-
 
 int test(char *URL)
 {
-  struct root_st *root;
-  int error;
-  int i;
+  CURL *easyh;
+  struct curl_hash *hp;
+  char *data_key;
+  struct Curl_dns_entry *data_node;
+  struct Curl_dns_entry *nodep;
+  size_t key_len;
+ 
   (void)URL; /* not used */
 
-  root = new_root();
-  if(!root)
-    return TEST_ERR_MAJOR_BAD;
-
-  printf("initializing table...\n");
-  for (i = 0; i < root->size; ++i) {
-    root->table[i] = NULL;
-  }
-  printf("table initialized OK\n");
-
-  printf("filling pointer table...\n");
-  error = 0;
-  for (i = 0; i < root->size; ++i) {
-    root->table[i] = new_element(i);
-    if(!root->table[i]) {
-      error = 1;
-      break;
-    }
-  }
-  if(error) {
-    printf("pointer table filling failed\n");
+  easyh = curl_easy_init();
+  if(!easyh) {
+    printf("easy handle init failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
-  else
-    printf("pointer table filling OK\n");
+  printf("easy handle init OK\n");
 
-  printf("freeing pointers in table...\n");
-  for (i = 0; i < root->size; ++i) {
-    if(root->table[i])
-      free(root->table[i]);
+  printf("creating hash...\n");
+  hp = Curl_mk_dnscache();
+  if(!hp) {
+    printf("hash creation failed\n");
+    return TEST_ERR_MAJOR_BAD;
   }
-  printf("freeing pointers in table OK\n");
+  printf("hash creation OK\n");
 
-  printf("freeing table...\n");
-  free(root->table);
-  printf("freeing table OK\n");
+  /**/
 
-  printf("freeing root struct...\n");
-  free(root);
-  printf("freeing root struct OK\n");
+  data_key = aprintf("%s:%d", "dummy", 0);
+  if(!data_key) {
+    printf("data key creation failed\n");
+    return TEST_ERR_MAJOR_BAD;
+  }
+  key_len = strlen(data_key);
+
+  data_node = calloc(1, sizeof(struct Curl_dns_entry));
+  if(!data_node) {
+    printf("data node creation failed\n");
+    return TEST_ERR_MAJOR_BAD;
+  }
+
+  data_node->addr = Curl_ip2addr(INADDR_ANY, "dummy", 0);
+  if(!data_node->addr) {
+    printf("actual data creation failed\n");
+    return TEST_ERR_MAJOR_BAD;
+  }
+
+  nodep = Curl_hash_add(hp, data_key, key_len+1, (void *)data_node);
+  if(!nodep) {
+    printf("insertion into hash failed\n");
+    return TEST_ERR_MAJOR_BAD;
+  }
+
+  free(data_key);
+
+  /**/
+
+  printf("destroying hash...\n");
+  Curl_hash_destroy(hp);
+  printf("hash destruction OK\n");
+
+  printf("destroying easy handle...\n");
+  curl_easy_cleanup(easyh);
+  printf("easy handle destruction OK\n");
+
+  curl_global_cleanup();
 
   return 0; /* OK */
 }
+
