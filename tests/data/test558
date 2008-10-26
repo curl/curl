@@ -1,0 +1,54 @@
+<testcase>
+#
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+none
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib558
+</tool>
+
+<name>
+loop testing
+</name>
+<command>
+nothing
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<stdout mode="text">
+malloc of root struct OK
+malloc of pointer table OK
+initializing table...
+table initialized OK
+filling pointer table...
+malloc of pointed element (idx 0) OK
+malloc of pointed element (idx 1) OK
+malloc of pointed element (idx 2) OK
+malloc of pointed element (idx 3) OK
+malloc of pointed element (idx 4) OK
+malloc of pointed element (idx 5) OK
+malloc of pointed element (idx 6) OK
+malloc of pointed element (idx 7) OK
+malloc of pointed element (idx 8) OK
+malloc of pointed element (idx 9) OK
+pointer table filling OK
+freeing pointers in table...
+freeing pointers in table OK
+freeing table...
+freeing table OK
+freeing root struct...
+freeing root struct OK
+</stdout>
+</verify>
+
+</testcase>
