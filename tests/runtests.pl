@@ -1827,7 +1827,7 @@ sub singletest {
             if(($testnum != 1)   && ($testnum != 100) &&
                ($testnum != 500) && ($testnum != 507) &&
                ($testnum != 517) && ($testnum != 534) &&
-               ($testnum != 558) &&
+               ($testnum != 558) && ($testnum != 559) &&
                ($testnum != 557) && ($testnum != 1013)) {
                 $why = "debugging icc build";
             }
