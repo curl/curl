@@ -51,6 +51,13 @@ static Curl_addrinfo *fake_ai(void)
   ai->ai_family = AF_INET;
   ai->ai_addrlen = ss_size;
 
+#if defined(ENABLE_IPV6) && defined(CURLDEBUG)
+  /* For tracing purposes log a fake call to getaddrinfo */
+  if(logfile)
+    fprintf(logfile, "ADDR %s:%d getaddrinfo() = %p\n",
+            __FILE__, __LINE__, (void *)ai);
+#endif
+
   return ai;
 }
 
