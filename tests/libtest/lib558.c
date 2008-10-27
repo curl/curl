@@ -26,6 +26,7 @@
 #include "memory.h"
 #include "memdebug.h"
 
+/* This source file is used for test # 558 and 559 */
 
 /*
  * This hacky test bypasses the library external API,
@@ -38,7 +39,7 @@
 
 #if !defined(CURL_HIDDEN_SYMBOLS)
 
-
+#ifdef LIB559
 static Curl_addrinfo *fake_ai(void)
 {
   Curl_addrinfo *ai;
@@ -72,16 +73,13 @@ static Curl_addrinfo *fake_ai(void)
 
   return ai;
 }
+#endif /* LIB559 */
 
 
 int test(char *URL)
 {
   CURL *easyh;
   struct curl_hash *hp;
-  char *data_key;
-  struct Curl_dns_entry *data_node;
-  struct Curl_dns_entry *nodep;
-  size_t key_len;
  
   if(!strcmp(URL, "check")) {
     /* test harness script verifying if this test can run */
@@ -104,34 +102,41 @@ int test(char *URL)
   fprintf(stdout, "hash creation OK\n");
 
   /**/
+#ifdef LIB559
+  {
+    char *data_key;
+    struct Curl_dns_entry *data_node;
+    struct Curl_dns_entry *nodep;
+    size_t key_len;
 
-  data_key = aprintf("%s:%d", "dummy", 0);
-  if(!data_key) {
-    fprintf(stdout, "data key creation failed\n");
-    return TEST_ERR_MAJOR_BAD;
+    data_key = aprintf("%s:%d", "dummy", 0);
+    if(!data_key) {
+      fprintf(stdout, "data key creation failed\n");
+      return TEST_ERR_MAJOR_BAD;
+    }
+    key_len = strlen(data_key);
+
+    data_node = calloc(1, sizeof(struct Curl_dns_entry));
+    if(!data_node) {
+      fprintf(stdout, "data node creation failed\n");
+      return TEST_ERR_MAJOR_BAD;
+    }
+
+    data_node->addr = fake_ai();
+    if(!data_node->addr) {
+      fprintf(stdout, "actual data creation failed\n");
+      return TEST_ERR_MAJOR_BAD;
+    }
+
+    nodep = Curl_hash_add(hp, data_key, key_len+1, (void *)data_node);
+    if(!nodep) {
+      fprintf(stdout, "insertion into hash failed\n");
+      return TEST_ERR_MAJOR_BAD;
+    }
+
+    free(data_key);
   }
-  key_len = strlen(data_key);
-
-  data_node = calloc(1, sizeof(struct Curl_dns_entry));
-  if(!data_node) {
-    fprintf(stdout, "data node creation failed\n");
-    return TEST_ERR_MAJOR_BAD;
-  }
-
-  data_node->addr = fake_ai();
-  if(!data_node->addr) {
-    fprintf(stdout, "actual data creation failed\n");
-    return TEST_ERR_MAJOR_BAD;
-  }
-
-  nodep = Curl_hash_add(hp, data_key, key_len+1, (void *)data_node);
-  if(!nodep) {
-    fprintf(stdout, "insertion into hash failed\n");
-    return TEST_ERR_MAJOR_BAD;
-  }
-
-  free(data_key);
-
+#endif /* LIB559 */
   /**/
 
   fprintf(stdout, "destroying hash...\n");

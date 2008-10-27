@@ -11,16 +11,16 @@ none
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib558
+lib559
 </tool>
 # precheck is a command line to run before the test,
 # to see if we can execute the test or not
 <precheck>
-./libtest/lib558 check
+./libtest/lib559 check
 </precheck>
 
 <name>
-internal hash create/destroy testing
+internal hash create/add/destroy testing
 </name>
 <command>
 nothing
