@@ -1,9 +1,10 @@
 # Makefile for project cURL
 # Generated on Sun,13 Jan 2002.17:11:10 by EasyGCC (0.1.3 [beta 2] (3 Jan 2002))
+# Manually updated
 # Contact: easygcc@melotech.co.uk
 
 # Project objects:
-objs =	o.hugehelp o.main o.urlglob o.writeout o.writeenv \
+objs =	o.hugehelp o.main o.urlglob o.writeout o.writeenv o.rawstr
 	
 
 # Compile options:
@@ -29,6 +30,9 @@ o.writeout:	c.writeout
 
 o.writeenv:	c.writeenv
 		gcc $(compileropts) -c -o writeenv.o c.writeenv
+
+o.rawstr:	../lib/c.rawstr
+		gcc $(compileropts) -c -o rawstr.o ../lib/c.rawstr
 
 # Dynamic dependancies:
 o.hugehelp:	c.hugehelp
