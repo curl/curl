@@ -45,7 +45,8 @@ hash_element_dtor(void *user, void *element)
   if(e->key)
     free(e->key);
 
-  h->dtor(e->ptr);
+  if(e->ptr)
+    h->dtor(e->ptr);
 
   free(e);
 }

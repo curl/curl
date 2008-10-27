@@ -85,7 +85,8 @@
  */
 void Curl_freeaddrinfo(Curl_addrinfo *p)
 {
-  freeaddrinfo(p);
+  if(p)
+    freeaddrinfo(p);
 }
 
 #ifdef CURLRES_ASYNCH
