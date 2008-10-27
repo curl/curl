@@ -27,6 +27,18 @@
 #include "memdebug.h"
 
 
+/*
+ * This hacky test bypasses the library external API,
+ * using internal only libcurl functions. So don't be
+ * surprised if we cannot run it when the library has
+ * been built with hidden symbols, exporting only the
+ * ones in the public API.
+ */
+
+
+#if !defined(CURL_HIDDEN_SYMBOLS)
+
+
 static Curl_addrinfo *fake_ai(void)
 {
   Curl_addrinfo *ai;
@@ -71,47 +83,50 @@ int test(char *URL)
   struct Curl_dns_entry *nodep;
   size_t key_len;
  
-  (void)URL; /* not used */
+  if(!strcmp(URL, "check")) {
+    /* test harness script verifying if this test can run */
+    return 0; /* sure, run this! */
+  }
 
   easyh = curl_easy_init();
   if(!easyh) {
-    printf("easy handle init failed\n");
+    fprintf(stdout, "easy handle init failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
-  printf("easy handle init OK\n");
+  fprintf(stdout, "easy handle init OK\n");
 
-  printf("creating hash...\n");
+  fprintf(stdout, "creating hash...\n");
   hp = Curl_mk_dnscache();
   if(!hp) {
-    printf("hash creation failed\n");
+    fprintf(stdout, "hash creation failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
-  printf("hash creation OK\n");
+  fprintf(stdout, "hash creation OK\n");
 
   /**/
 
   data_key = aprintf("%s:%d", "dummy", 0);
   if(!data_key) {
-    printf("data key creation failed\n");
+    fprintf(stdout, "data key creation failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
   key_len = strlen(data_key);
 
   data_node = calloc(1, sizeof(struct Curl_dns_entry));
   if(!data_node) {
-    printf("data node creation failed\n");
+    fprintf(stdout, "data node creation failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   data_node->addr = fake_ai();
   if(!data_node->addr) {
-    printf("actual data creation failed\n");
+    fprintf(stdout, "actual data creation failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   nodep = Curl_hash_add(hp, data_key, key_len+1, (void *)data_node);
   if(!nodep) {
-    printf("insertion into hash failed\n");
+    fprintf(stdout, "insertion into hash failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
@@ -119,16 +134,29 @@ int test(char *URL)
 
   /**/
 
-  printf("destroying hash...\n");
+  fprintf(stdout, "destroying hash...\n");
   Curl_hash_destroy(hp);
-  printf("hash destruction OK\n");
+  fprintf(stdout, "hash destruction OK\n");
 
-  printf("destroying easy handle...\n");
+  fprintf(stdout, "destroying easy handle...\n");
   curl_easy_cleanup(easyh);
-  printf("easy handle destruction OK\n");
+  fprintf(stdout, "easy handle destruction OK\n");
 
   curl_global_cleanup();
 
   return 0; /* OK */
 }
 
+
+#else /* !defined(CURL_HIDDEN_SYMBOLS) */
+
+
+int test(char *URL)
+{
+  (void)URL;
+  fprintf(stdout, "libcurl built with hidden symbols");
+  return 1; /* skip test */
+}
+
+
+#endif /* !defined(CURL_HIDDEN_SYMBOLS) */

@@ -13,6 +13,11 @@ none
 <tool>
 lib558
 </tool>
+# precheck is a command line to run before the test,
+# to see if we can execute the test or not
+<precheck>
+./libtest/lib558 check
+</precheck>
 
 <name>
 internal hash testing
