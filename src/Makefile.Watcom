@@ -12,9 +12,9 @@ CFLAGS = -3r -mf -d3 -hc -zff -zgf -zq -zm -s -fr=con -w2 -fpi -oilrtfm &
 
 OBJ_DIR = WC_Win32.obj
 
-OBJS = $(OBJ_DIR)\getpass.obj  $(OBJ_DIR)\homedir.obj $(OBJ_DIR)\hugehelp.obj &
-       $(OBJ_DIR)\main.obj     $(OBJ_DIR)\urlglob.obj $(OBJ_DIR)\writeenv.obj &
-       $(OBJ_DIR)\writeout.obj $(OBJ_DIR)\curlutil.obj
+OBJS = $(OBJ_DIR)\getpass.obj  $(OBJ_DIR)\homedir.obj  $(OBJ_DIR)\hugehelp.obj &
+       $(OBJ_DIR)\main.obj     $(OBJ_DIR)\urlglob.obj  $(OBJ_DIR)\writeenv.obj &
+       $(OBJ_DIR)\writeout.obj $(OBJ_DIR)\curlutil.obj $(OBJ_DIR)\rawstr.obj
 
 RESOURCE = $(OBJ_DIR)\curl.res
 
@@ -45,6 +45,10 @@ $(RESOURCE): curl.rc
 
 .ERASE
 .c{$(OBJ_DIR)}.obj:
+	$(CC) $[@ $(CFLAGS) -fo=$@
+
+.ERASE
+$(OBJ_DIR)\rawstr.obj: ..\lib\rawstr.c
 	$(CC) $[@ $(CFLAGS) -fo=$@
 
 #
@@ -94,3 +98,11 @@ $(OBJ_DIR)\writeout.obj: writeout.c setup.h config-win32.h ..\lib\setup_once.h &
 
 $(OBJ_DIR)\curlutil.obj: curlutil.c setup.h config-win32.h ..\lib\setup_once.h &
   curlutil.h
+
+$(OBJ_DIR)\rawstr.obj: ..\lib\rawstr.c ..\lib\setup.h ..\lib\config-win32.h &
+  ..\include\curl\curlbuild.h ..\include\curl\curlrules.h ..\lib\setup_once.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\curlrules.h &
+  ..\include\curl\easy.h ..\include\curl\multi.h ..\include\curl\curl.h &
+  ..\lib\strerror.h ..\lib\urldata.h ..\lib\cookie.h ..\lib\formdata.h &
+  ..\lib\timeval.h ..\lib\http_chunks.h ..\lib\hostip.h ..\lib\hash.h &
+  ..\lib\llist.h ..\lib\splay.h ..\include\curl\mprintf.h
