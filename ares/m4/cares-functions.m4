@@ -440,6 +440,81 @@ AC_DEFUN([CARES_CHECK_FUNC_GETADDRINFO_UNFREEABLE_AI_ADDR], [
 ])
 
 
+dnl CARES_CHECK_FUNC_GETADDRINFO_UNFREEABLE_AI_CANONNAME
+dnl -------------------------------------------------
+dnl verify if the ai_canonname pointer member of the addrinfo
+dnl struct returned by function getaddrinfo is a pointer
+dnl which can actually be free()ed or not.
+
+AC_DEFUN([CARES_CHECK_FUNC_GETADDRINFO_UNFREEABLE_AI_CANONNAME], [
+  AC_REQUIRE([CARES_CHECK_FUNC_GETADDRINFO])dnl
+  AC_REQUIRE([CARES_INCLUDES_STRING])dnl
+  #
+  if test "$ac_cv_func_getaddrinfo" = "yes"; then
+    AC_MSG_CHECKING([if getaddrinfo returns unfreeable ai_canonname])
+    dnl only do runtime verification when not cross-compiling
+    if test "x$cross_compiling" != "xyes"; then
+      AC_RUN_IFELSE([
+        AC_LANG_PROGRAM([[
+          $cares_includes_ws2tcpip
+          $cares_includes_stdlib
+          $cares_includes_sys_socket
+          $cares_includes_netdb
+          $cares_includes_string
+        ]],[[
+          char tmp_canonname[80];
+          char *ai_canonname, *freed_ptr;
+          struct addrinfo hints;
+          struct addrinfo *ai = 0;
+          int error;
+
+          memset(&hints, 0, sizeof(hints));
+          hints.ai_flags = AI_NUMERICHOST|AI_CANONNAME;
+          hints.ai_family = AF_UNSPEC;
+          hints.ai_socktype = SOCK_STREAM;
+          error = getaddrinfo("127.0.0.1", 0, &hints, &ai);
+          if(error || !ai)
+            /* should not happen, same test already succeeded,   */
+            /* assume that returned ai_canonname not unfreeable. */
+            exit(0);
+
+          memset(&tmp_canonname, 1, sizeof(tmp_canonname));
+          /* attempt to free ai_canonname pointer */
+          freed_ptr = ai_canonname = ai->ai_canonname;
+          /* seg-fault free'ing an unfreeable ptr would be    */
+          /* nice, if this happen exit code will be non-zero. */
+          free(ai_canonname);
+          /* attempt to write free'ed memory */
+          freed_ptr[0] = 'x';
+          /* attempt to reuse and clear free'ed memory */
+          ai_canonname = calloc(1, sizeof(tmp_canonname));
+          /* attempt to read free'ed memory */
+          tmp_canonname[0] = freed_ptr[0];
+          /* verify if everithing has worked */
+          if(tmp_canonname[0] == 'x')
+            /* ai_canonname might be unfreeable, ouch! */
+            exit(1);
+          else
+            /* ai_canonname is certainly freeable */
+            exit(0);
+        ]])
+      ],[
+        dnl exit code was zero, getaddrinfo behaves nicely.
+        AC_MSG_RESULT([no])
+      ],[
+        dnl exit code wasn't zero, getaddrinfo returns unfreeable ptr.
+        AC_MSG_RESULT([yes])
+        AC_DEFINE_UNQUOTED(HAVE_GETADDRINFO_UNFREEABLE_AI_CANONNAME, 1,
+          [Define to 1 if getaddrinfo returns unfreeable ai_addr pointer.])
+      ])
+    else
+      dnl for cross-compiling a static check would be nice.
+      AC_MSG_RESULT([unknown])
+    fi
+  fi
+])
+
+
 dnl CARES_CHECK_FUNC_GETHOSTNAME
 dnl -------------------------------------------------
 dnl Verify if gethostname is available, prototyped, and
