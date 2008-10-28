@@ -15,8 +15,9 @@ SOURCEPATH  ../../../lib
 SOURCE \
     rawstr.c
 
-SYSTEMINCLUDE ../../../include ../../../lib ../../../include/curl \
-            /epoc32/include /epoc32/include/stdapis
+USERINCLUDE ../../../src ../../../lib ../../../include/curl
+
+SYSTEMINCLUDE ../../../include /epoc32/include /epoc32/include/stdapis
 
 LIBRARY       euser.lib libc.lib libcurl.lib
 STATICLIBRARY libcrt0.lib

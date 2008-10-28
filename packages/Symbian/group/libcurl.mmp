@@ -32,10 +32,9 @@ SOURCE \
   inet_ntop.c parsedate.c select.c gtls.c sslgen.c tftp.c splay.c   \
   strdup.c socks.c ssh.c nss.c qssl.c rawstr.c
 
-USERINCLUDE   ../../../lib
+USERINCLUDE   ../../../lib ../../../include/curl
 
-SYSTEMINCLUDE ../../../include ../../../include/curl \
-            /epoc32/include/stdapis /epoc32/include
+SYSTEMINCLUDE ../../../include /epoc32/include/stdapis /epoc32/include
 
 LIBRARY       euser.lib libc.lib
 #ifdef ENABLE_ZLIB
