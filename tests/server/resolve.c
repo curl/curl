@@ -38,6 +38,9 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -61,9 +64,7 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-#ifdef ENABLE_IPV6
 static bool use_ipv6 = FALSE;
-#endif
 static const char *ipv_inuse = "IPv4";
 
 const char *serverlogfile=""; /* for a util.c function we don't use */
@@ -72,7 +73,7 @@ int main(int argc, char *argv[])
 {
   int arg=1;
   const char *host = NULL;
-  int rc;
+  int rc = 0;
 
   while(argc>arg) {
     if(!strcmp("--version", argv[arg])) {
@@ -86,18 +87,14 @@ int main(int argc, char *argv[])
       return 0;
     }
     else if(!strcmp("--ipv6", argv[arg])) {
-#ifdef ENABLE_IPV6
       ipv_inuse = "IPv6";
       use_ipv6 = TRUE;
-#endif
       arg++;
     }
     else if(!strcmp("--ipv4", argv[arg])) {
       /* for completeness, we support this option as well */
-#ifdef ENABLE_IPV6
       ipv_inuse = "IPv4";
       use_ipv6 = FALSE;
-#endif
       arg++;
     }
     else {
@@ -107,9 +104,12 @@ int main(int argc, char *argv[])
   if(!host) {
     puts("Usage: resolve [option] <host>\n"
          " --version\n"
-         " --ipv4\n"
-         " --ipv6");
-    return 0;
+         " --ipv4"
+#ifdef ENABLE_IPV6
+         "\n --ipv6"
+#endif
+         );
+    return 1;
   }
 
 #ifdef WIN32
@@ -117,10 +117,7 @@ int main(int argc, char *argv[])
   atexit(win32_cleanup);
 #endif
 
-#ifdef ENABLE_IPV6
-  if(!use_ipv6)
-#endif
-  {
+  if(!use_ipv6) {
     /* gethostbyname() resolve */
     struct hostent *he;
 
@@ -128,22 +125,38 @@ int main(int argc, char *argv[])
 
     rc = !he;
   }
-#ifdef ENABLE_IPV6
   else {
-    /* getaddrinfo() resolve */
-    struct addrinfo *ai;
-    struct addrinfo hints;
+#ifdef ENABLE_IPV6
+    /* Check that the system has IPv6 enabled before checking the resolver */
+    int s = socket(PF_INET6, SOCK_DGRAM, 0);
+    if(s == -1)
+      /* an ipv6 address was requested and we can't get/use one */
+      rc = -1;
+    else {
+      sclose(s);
+    }
 
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = PF_INET6;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_CANONNAME;
-    rc = (getaddrinfo)(host, "80", &hints, &ai);
+    if (rc == 0) {
+      /* getaddrinfo() resolve */
+      struct addrinfo *ai;
+      struct addrinfo hints;
 
-  }
+      memset(&hints, 0, sizeof(hints));
+      hints.ai_family = PF_INET6;
+      hints.ai_socktype = SOCK_STREAM;
+      hints.ai_flags = AI_CANONNAME;
+      /* Use parenthesis around function to stop it from being replaced by
+      the macro in memdebug.h */
+      rc = (getaddrinfo)(host, "80", &hints, &ai);
+    }
+
+#else
+    puts("IPv6 support has been disabled in this program");
+    return 1;
 #endif
+  }
   if(rc)
     printf("Resolving %s '%s' didn't work\n", ipv_inuse, host);
 
-  return !rc?0:1;
+  return !!rc;
 }

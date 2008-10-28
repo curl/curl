@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel Fandrich (28 Oct 2008)
+- Changed the "resolve" test precheck program to verify that an IPv6 socket
+  can be created before resolving the IPv6 name.  In the context of running
+  a test, it doesn't make sense to run an IPv6 test when a host is resolvable
+  but IPv6 isn't usable.  This should fix failures of test 1085 on hosts with
+  library and DNS support for IPv6 but where actual use of IPv6 has been
+  administratively disabled.
+
 Daniel Fandrich (24 Oct 2008)
 - Added experimental support for zlib and OpenSSL on Symbian OS.
 
