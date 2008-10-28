@@ -2777,133 +2777,133 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
     if(conn->bits.authneg)
       postsize = 0;
-    else
+    else {
       /* figure out the size of the postfields */
       postsize = (data->set.postfieldsize != -1)?
         data->set.postfieldsize:
         (data->set.postfields? (curl_off_t)strlen(data->set.postfields):0);
+    }
+    if(!data->req.upload_chunky) {
+      /* We only set Content-Length and allow a custom Content-Length if
+         we don't upload data chunked, as RFC2616 forbids us to set both
+         kinds of headers (Transfer-Encoding: chunked and Content-Length) */
+
+      if(!checkheaders(data, "Content-Length:")) {
+        /* we allow replacing this header, although it isn't very wise to
+           actually set your own */
+        result = add_bufferf(req_buffer,
+                             "Content-Length: %" FORMAT_OFF_T"\r\n",
+                             postsize);
+        if(result)
+          return result;
+      }
+    }
+
+    if(!checkheaders(data, "Content-Type:")) {
+      result = add_bufferf(req_buffer,
+                           "Content-Type: application/x-www-form-urlencoded\r\n");
+      if(result)
+        return result;
+    }
+
+    /* For really small posts we don't use Expect: headers at all, and for
+       the somewhat bigger ones we allow the app to disable it. Just make
+       sure that the expect100header is always set to the preferred value
+       here. */
+    if(postsize > TINY_INITIAL_POST_SIZE) {
+      result = expect100(data, conn, req_buffer);
+      if(result)
+        return result;
+    }
+    else
+      data->state.expect100header = FALSE;
+
+    if(data->set.postfields) {
+
+      if(!data->state.expect100header &&
+         (postsize < MAX_INITIAL_POST_SIZE))  {
+        /* if we don't use expect: 100  AND
+           postsize is less than MAX_INITIAL_POST_SIZE
+
+           then append the post data to the HTTP request header. This limit
+           is no magic limit but only set to prevent really huge POSTs to
+           get the data duplicated with malloc() and family. */
+
+        result = add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
+        if(result)
+          return result;
 
         if(!data->req.upload_chunky) {
-          /* We only set Content-Length and allow a custom Content-Length if
-             we don't upload data chunked, as RFC2616 forbids us to set both
-             kinds of headers (Transfer-Encoding: chunked and Content-Length) */
-
-          if(!checkheaders(data, "Content-Length:")) {
-            /* we allow replacing this header, although it isn't very wise to
-               actually set your own */
-            result = add_bufferf(req_buffer,
-                                 "Content-Length: %" FORMAT_OFF_T"\r\n",
-                                 postsize);
-            if(result)
-              return result;
-          }
-        }
-
-        if(!checkheaders(data, "Content-Type:")) {
-          result = add_bufferf(req_buffer,
-                               "Content-Type: application/x-www-form-urlencoded\r\n");
-          if(result)
-            return result;
-        }
-
-        /* For really small posts we don't use Expect: headers at all, and for
-           the somewhat bigger ones we allow the app to disable it. Just make
-           sure that the expect100header is always set to the preferred value
-           here. */
-        if(postsize > TINY_INITIAL_POST_SIZE) {
-          result = expect100(data, conn, req_buffer);
-          if(result)
-            return result;
-        }
-        else
-          data->state.expect100header = FALSE;
-
-        if(data->set.postfields) {
-
-          if(!data->state.expect100header &&
-             (postsize < MAX_INITIAL_POST_SIZE))  {
-            /* if we don't use expect: 100  AND
-               postsize is less than MAX_INITIAL_POST_SIZE
-
-               then append the post data to the HTTP request header. This limit
-               is no magic limit but only set to prevent really huge POSTs to
-               get the data duplicated with malloc() and family. */
-
-            result = add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
-            if(result)
-              return result;
-
-            if(!data->req.upload_chunky) {
-              /* We're not sending it 'chunked', append it to the request
-                 already now to reduce the number if send() calls */
-              result = add_buffer(req_buffer, data->set.postfields,
-                                  (size_t)postsize);
-              included_body = postsize;
-            }
-            else {
-              /* Append the POST data chunky-style */
-              result = add_bufferf(req_buffer, "%x\r\n", (int)postsize);
-              if(CURLE_OK == result)
-                result = add_buffer(req_buffer, data->set.postfields,
-                                    (size_t)postsize);
-              if(CURLE_OK == result)
-                result = add_buffer(req_buffer,
-                                    "\x0d\x0a\x30\x0d\x0a\x0d\x0a", 7);
-              /* CR  LF   0  CR  LF  CR  LF */
-              included_body = postsize + 7;
-            }
-            if(result)
-              return result;
-          }
-          else {
-            /* A huge POST coming up, do data separate from the request */
-            http->postsize = postsize;
-            http->postdata = data->set.postfields;
-
-            http->sending = HTTPSEND_BODY;
-
-            conn->fread_func = (curl_read_callback)readmoredata;
-            conn->fread_in = (void *)conn;
-
-            /* set the upload size to the progress meter */
-            Curl_pgrsSetUploadSize(data, http->postsize);
-
-            result = add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
-            if(result)
-              return result;
-          }
+          /* We're not sending it 'chunked', append it to the request
+             already now to reduce the number if send() calls */
+          result = add_buffer(req_buffer, data->set.postfields,
+                              (size_t)postsize);
+          included_body = postsize;
         }
         else {
-          result = add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
-          if(result)
-            return result;
-
-          if(data->set.postfieldsize) {
-            /* set the upload size to the progress meter */
-            Curl_pgrsSetUploadSize(data, postsize?postsize:-1);
-
-            /* set the pointer to mark that we will send the post body using the
-               read callback, but only if we're not in authenticate
-               negotiation  */
-            if(!conn->bits.authneg) {
-              http->postdata = (char *)&http->postdata;
-              http->postsize = postsize;
-            }
-          }
+          /* Append the POST data chunky-style */
+          result = add_bufferf(req_buffer, "%x\r\n", (int)postsize);
+          if(CURLE_OK == result)
+            result = add_buffer(req_buffer, data->set.postfields,
+                                (size_t)postsize);
+          if(CURLE_OK == result)
+            result = add_buffer(req_buffer,
+                                "\x0d\x0a\x30\x0d\x0a\x0d\x0a", 7);
+          /* CR  LF   0  CR  LF  CR  LF */
+          included_body = postsize + 7;
         }
-        /* issue the request */
-        result = add_buffer_send(req_buffer, conn, &data->info.request_size,
-                                 (size_t)included_body, FIRSTSOCKET);
-
         if(result)
-          failf(data, "Failed sending HTTP POST request");
-        else
-          result =
-            Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
-                                &http->readbytecount,
-                                http->postdata?FIRSTSOCKET:-1,
-                                http->postdata?&http->writebytecount:NULL);
-        break;
+          return result;
+      }
+      else {
+        /* A huge POST coming up, do data separate from the request */
+        http->postsize = postsize;
+        http->postdata = data->set.postfields;
+
+        http->sending = HTTPSEND_BODY;
+
+        conn->fread_func = (curl_read_callback)readmoredata;
+        conn->fread_in = (void *)conn;
+
+        /* set the upload size to the progress meter */
+        Curl_pgrsSetUploadSize(data, http->postsize);
+
+        result = add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
+        if(result)
+          return result;
+      }
+    }
+    else {
+      result = add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
+      if(result)
+        return result;
+
+      if(data->set.postfieldsize) {
+        /* set the upload size to the progress meter */
+        Curl_pgrsSetUploadSize(data, postsize?postsize:-1);
+
+        /* set the pointer to mark that we will send the post body using the
+           read callback, but only if we're not in authenticate
+           negotiation  */
+        if(!conn->bits.authneg) {
+          http->postdata = (char *)&http->postdata;
+          http->postsize = postsize;
+        }
+      }
+    }
+    /* issue the request */
+    result = add_buffer_send(req_buffer, conn, &data->info.request_size,
+                             (size_t)included_body, FIRSTSOCKET);
+
+    if(result)
+      failf(data, "Failed sending HTTP POST request");
+    else
+      result =
+        Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
+                            &http->readbytecount,
+                            http->postdata?FIRSTSOCKET:-1,
+                            http->postdata?&http->writebytecount:NULL);
+    break;
 
   default:
     result = add_buffer(req_buffer, "\r\n", 2);
