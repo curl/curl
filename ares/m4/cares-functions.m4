@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 10
+# serial 11
 
 
 dnl CARES_INCLUDES_ARPA_INET
@@ -112,6 +112,27 @@ cares_includes_string="\
 ])
 
 
+dnl CARES_INCLUDES_SYS_SOCKET
+dnl -------------------------------------------------
+dnl Set up variable with list of headers that must be
+dnl included when sys/socket.h is to be included.
+
+AC_DEFUN([CARES_INCLUDES_SYS_SOCKET], [
+cares_includes_sys_socket="\
+/* includes start */
+#ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#  include <sys/socket.h>
+#endif
+/* includes end */"
+  AC_CHECK_HEADERS(
+    sys/types.h sys/socket.h,
+    [], [], [$cares_includes_sys_socket])
+])
+
+
 dnl CARES_INCLUDES_SYS_UIO
 dnl -------------------------------------------------
 dnl Set up variable with list of headers that must be
@@ -179,6 +200,243 @@ cares_includes_winsock2="\
   CURL_CHECK_HEADER_WINDOWS
   CURL_CHECK_HEADER_WINSOCK
   CURL_CHECK_HEADER_WINSOCK2
+])
+
+
+dnl CARES_INCLUDES_WS2TCPIP
+dnl -------------------------------------------------
+dnl Set up variable with list of headers that must be
+dnl included when ws2tcpip.h is to be included.
+
+AC_DEFUN([CARES_INCLUDES_WS2TCPIP], [
+cares_includes_ws2tcpip="\
+/* includes start */
+#ifdef HAVE_WINDOWS_H
+#  ifndef WIN32_LEAN_AND_MEAN
+#    define WIN32_LEAN_AND_MEAN
+#  endif
+#  include <windows.h>
+#  ifdef HAVE_WINSOCK2_H
+#    include <winsock2.h>
+#    ifdef HAVE_WS2TCPIP_H
+#       include <ws2tcpip.h>
+#    endif
+#  endif
+#endif
+/* includes end */"
+  CURL_CHECK_HEADER_WINDOWS
+  CURL_CHECK_HEADER_WINSOCK2
+  CURL_CHECK_HEADER_WS2TCPIP
+])
+
+
+dnl CARES_CHECK_FUNC_GETADDRINFO
+dnl -------------------------------------------------
+dnl Verify if getaddrinfo is available, prototyped, can
+dnl be compiled and seems to work. If all of these are
+dnl true, and usage has not been previously disallowed
+dnl with shell variable cares_disallow_getaddrinfo, then
+dnl HAVE_GETADDRINFO will be defined.
+
+AC_DEFUN([CARES_CHECK_FUNC_GETADDRINFO], [
+  AC_REQUIRE([CARES_INCLUDES_WS2TCPIP])dnl
+  AC_REQUIRE([CARES_INCLUDES_STDLIB])dnl
+  AC_REQUIRE([CARES_INCLUDES_SYS_SOCKET])dnl
+  AC_REQUIRE([CARES_INCLUDES_NETDB])dnl
+  #
+  tst_links_getaddrinfo="unknown"
+  tst_proto_getaddrinfo="unknown"
+  tst_compi_getaddrinfo="unknown"
+  tst_works_getaddrinfo="unknown"
+  tst_allow_getaddrinfo="unknown"
+  #
+  AC_MSG_CHECKING([if getaddrinfo can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+      $cares_includes_ws2tcpip
+      $cares_includes_sys_socket
+      $cares_includes_netdb
+    ]],[[
+      if(0 != getaddrinfo(0, 0, 0, 0))
+        return 1;
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_getaddrinfo="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_getaddrinfo="no"
+  ])
+  #
+  if test "$tst_links_getaddrinfo" = "yes"; then
+    AC_MSG_CHECKING([if getaddrinfo is prototyped])
+    AC_EGREP_CPP([getaddrinfo],[
+      $cares_includes_ws2tcpip
+      $cares_includes_sys_socket
+      $cares_includes_netdb
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_getaddrinfo="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_getaddrinfo="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_getaddrinfo" = "yes"; then
+    AC_MSG_CHECKING([if getaddrinfo is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $cares_includes_ws2tcpip
+        $cares_includes_sys_socket
+        $cares_includes_netdb
+      ]],[[
+        if(0 != getaddrinfo(0, 0, 0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_getaddrinfo="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_getaddrinfo="no"
+    ])
+  fi
+  #
+  dnl only do runtime verification when not cross-compiling
+  if test "x$cross_compiling" != "xyes" &&
+    test "$tst_compi_getaddrinfo" = "yes"; then
+    AC_MSG_CHECKING([if getaddrinfo seems to work])
+    AC_RUN_IFELSE([
+      AC_LANG_PROGRAM([[
+        $cares_includes_ws2tcpip
+        $cares_includes_stdlib
+        $cares_includes_sys_socket
+        $cares_includes_netdb
+      ]],[[
+        struct addrinfo hints;
+        struct addrinfo *ai = 0;
+        int error;
+
+        memset(&hints, 0, sizeof(hints));
+        hints.ai_flags = AI_NUMERICHOST;
+        hints.ai_family = AF_UNSPEC;
+        hints.ai_socktype = SOCK_STREAM;
+        error = getaddrinfo("127.0.0.1", 0, &hints, &ai);
+        if(error || !ai)
+          exit(1); /* fail */
+        else
+          exit(0);
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_works_getaddrinfo="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_works_getaddrinfo="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_getaddrinfo" = "yes" &&
+    test "$tst_works_getaddrinfo" != "no"; then
+    AC_MSG_CHECKING([if getaddrinfo usage allowed])
+    if test "x$cares_disallow_getaddrinfo" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_getaddrinfo="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_getaddrinfo="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if getaddrinfo might be used])
+  if test "$tst_links_getaddrinfo" = "yes" &&
+     test "$tst_proto_getaddrinfo" = "yes" &&
+     test "$tst_compi_getaddrinfo" = "yes" &&
+     test "$tst_allow_getaddrinfo" = "yes" &&
+     test "$tst_works_getaddrinfo" != "no"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_GETADDRINFO, 1,
+      [Define to 1 if you have a working getaddrinfo function.])
+    ac_cv_func_getaddrinfo="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_getaddrinfo="no"
+  fi
+])
+
+
+dnl CARES_CHECK_FUNC_GETADDRINFO_UNFREEABLE_AI_ADDR
+dnl -------------------------------------------------
+dnl verify if the ai_addr pointer member of the addrinfo
+dnl struct returned by function getaddrinfo is a pointer
+dnl which can actually be free()ed or not.
+
+AC_DEFUN([CARES_CHECK_FUNC_GETADDRINFO_UNFREEABLE_AI_ADDR], [
+  AC_REQUIRE([CARES_CHECK_FUNC_GETADDRINFO])dnl
+  AC_REQUIRE([CARES_INCLUDES_STRING])dnl
+  #
+  if test "$ac_cv_func_getaddrinfo" = "yes"; then
+    AC_MSG_CHECKING([if getaddrinfo returns unfreeable ai_addr])
+    dnl only do runtime verification when not cross-compiling
+    if test "x$cross_compiling" != "xyes"; then
+      AC_RUN_IFELSE([
+        AC_LANG_PROGRAM([[
+          $cares_includes_ws2tcpip
+          $cares_includes_stdlib
+          $cares_includes_sys_socket
+          $cares_includes_netdb
+          $cares_includes_string
+        ]],[[
+          struct sockaddr tmp_addr, *ai_addr, *freed_ptr;
+          struct addrinfo hints;
+          struct addrinfo *ai = 0;
+          int error;
+
+          memset(&hints, 0, sizeof(hints));
+          hints.ai_flags = AI_NUMERICHOST;
+          hints.ai_family = AF_UNSPEC;
+          hints.ai_socktype = SOCK_STREAM;
+          error = getaddrinfo("127.0.0.1", 0, &hints, &ai);
+          if(error || !ai)
+            /* should not happen, same test already succeeded, */
+            /* assume that returned ai_addr is not unfreeable. */
+            exit(0);
+
+          memset(&tmp_addr, 1, sizeof(tmp_addr));
+          /* attempt to free ai_addr pointer */
+          freed_ptr = ai_addr = ai->ai_addr;
+          /* seg-fault free'ing an unfreeable ptr would be    */
+          /* nice, if this happen exit code will be non-zero. */
+          free(ai_addr);
+          /* attempt to write free'ed memory */
+          freed_ptr->sa_family = 'x';
+          /* attempt to reuse and clear free'ed memory */
+          ai_addr = calloc(1, sizeof(struct sockaddr));
+          /* attempt to read free'ed memory */
+          tmp_addr = *freed_ptr;
+          /* verify if everithing has worked */
+          if(tmp_addr.sa_family == 'x')
+            /* ai_addr might be unfreeable, ouch! */
+            exit(1);
+          else
+            /* ai_addr is certainly freeable */
+            exit(0);
+        ]])
+      ],[
+        dnl exit code was zero, getaddrinfo behaves nicely.
+        AC_MSG_RESULT([no])
+      ],[
+        dnl exit code wasn't zero, getaddrinfo returns unfreeable ptr.
+        AC_MSG_RESULT([yes])
+        AC_DEFINE_UNQUOTED(HAVE_GETADDRINFO_UNFREEABLE_AI_ADDR, 1,
+          [Define to 1 if getaddrinfo returns unfreeable ai_addr pointer.])
+      ])
+    else
+      dnl for cross-compiling a static check would be nice.
+      AC_MSG_RESULT([unknown])
+    fi
+  fi
 ])
 
 
