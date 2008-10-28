@@ -97,7 +97,7 @@
 #define ENABLE_CURLX_PRINTF
 /* make the curlx header define all printf() functions to use the curlx_*
    versions instead */
-#include <curlx.h> /* header from the libcurl directory */
+#include "curlx.h" /* header from the libcurl directory */
 
 #if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
 #include <iconv.h>
