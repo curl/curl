@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 14
+# serial 15
 
 
 dnl CARES_INCLUDES_ARPA_INET
@@ -430,7 +430,7 @@ AC_DEFUN([DO_CARES_CHECK_FUNC_GETADDRINFO_UNFREEABLE_AI_ADDR], [
       dnl exit code was zero, getaddrinfo behaves nicely.
       AC_MSG_RESULT([no])
     ],[
-      dnl exit code wasn't zero, getaddrinfo returns unfreeable ptr.
+      dnl exit code wasn't zero, getaddrinfo returns unfreeable member ptr.
       AC_MSG_RESULT([yes])
       AC_DEFINE_UNQUOTED(HAVE_GETADDRINFO_UNFREEABLE_AI_ADDR, 1,
         [Define to 1 if getaddrinfo returns unfreeable ai_addr pointer.])
