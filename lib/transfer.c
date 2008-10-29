@@ -132,7 +132,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
   if(data->req.upload_chunky) {
     /* if chunked Transfer-Encoding */
     buffersize -= (8 + 2 + 2);   /* 32bit hex + CRLF + CRLF */
-    data->req.upload_fromhere += 10; /* 32bit hex + CRLF */
+    data->req.upload_fromhere += (8 + 2); /* 32bit hex + CRLF */
   }
 
   /* this function returns a size_t, so we typecast to int to prevent warnings
@@ -149,6 +149,10 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
     struct SingleRequest *k = &data->req;
     /* CURL_READFUNC_PAUSE pauses read callbacks that feed socket writes */
     k->keepon |= KEEP_WRITE_PAUSE; /* mark socket send as paused */
+    if(data->req.upload_chunky) {
+      /* Back out the preallocation done above */
+      data->req.upload_fromhere -= (8 + 2);
+    }
     *nreadp = 0;
     return CURLE_OK; /* nothing was read */
   }
@@ -168,7 +172,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
     data->req.upload_fromhere -= hexlen;
     nread += hexlen;
 
-    /* copy the prefix to the buffer */
+    /* copy the prefix to the buffer, leaving out the NUL */
     memcpy(data->req.upload_fromhere, hexbuffer, hexlen);
 
     /* always append CRLF to the data */

@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Fandrich (29 Oct 2008)
+- Fixed a bug that caused a few bytes of garbage to be sent after a
+  curl_easy_pause() during a chunky upload. Reported by Steve Roskowski.
+
 Daniel Fandrich (28 Oct 2008)
 - Changed the "resolve" test precheck program to verify that an IPv6 socket
   can be created before resolving the IPv6 name.  In the context of running

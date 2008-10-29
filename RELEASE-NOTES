@@ -40,6 +40,7 @@ This release includes the following bugfixes:
  o CURLINFO_REDIRECT_URL memory leak and wrong-doing
  o case insensitive string matching works in Turkish too
  o Solaris builds get _REENTRANT defined properly and work again
+ o Garbage sent on chunky upload after curl_easy_pause()
 
 This release includes the following known bugs:
 
@@ -56,6 +57,6 @@ advice from friends like these:
  Linus Nielsen Feltzing, Martin Drasar, Stefan Krause, Dmitry Kurochkin,
  Mike Revi, Andres Garcia, Michael Goffioul, Markus Moeller, Rob Crittenden,
  Jamie Lokier, Emanuele Bovisio, Maxim Ivanov, Ian Lynagh, Daniel Egger,
- Igor Novoseltsev, John Wilkinson, Pascal Terjan
+ Igor Novoseltsev, John Wilkinson, Pascal Terjan, Steve Roskowski
 
         Thanks! (and sorry if I forgot to mention someone)
