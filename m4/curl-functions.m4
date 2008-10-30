@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 32
+# serial 33
 
 
 dnl CURL_INCLUDES_ARPA_INET
@@ -494,6 +494,102 @@ AC_DEFUN([CURL_CHECK_FUNC_FDOPEN], [
   else
     AC_MSG_RESULT([no])
     ac_cv_func_fdopen="no"
+  fi
+])
+
+
+dnl CURL_CHECK_FUNC_FREEADDRINFO
+dnl -------------------------------------------------
+dnl Verify if freeaddrinfo is available, prototyped,
+dnl and can be compiled. If all of these are true,
+dnl and usage has not been previously disallowed with
+dnl shell variable curl_disallow_freeaddrinfo, then
+dnl HAVE_FREEADDRINFO will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_FREEADDRINFO], [
+  AC_REQUIRE([CURL_INCLUDES_WS2TCPIP])dnl
+  AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
+  AC_REQUIRE([CURL_INCLUDES_NETDB])dnl
+  #
+  tst_links_freeaddrinfo="unknown"
+  tst_proto_freeaddrinfo="unknown"
+  tst_compi_freeaddrinfo="unknown"
+  tst_allow_freeaddrinfo="unknown"
+  #
+  AC_MSG_CHECKING([if freeaddrinfo can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+      $curl_includes_ws2tcpip
+      $curl_includes_sys_socket
+      $curl_includes_netdb
+    ]],[[
+      freeaddrinfo(0);
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_freeaddrinfo="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_freeaddrinfo="no"
+  ])
+  #
+  if test "$tst_links_freeaddrinfo" = "yes"; then
+    AC_MSG_CHECKING([if freeaddrinfo is prototyped])
+    AC_EGREP_CPP([freeaddrinfo],[
+      $curl_includes_ws2tcpip
+      $curl_includes_sys_socket
+      $curl_includes_netdb
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_freeaddrinfo="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_freeaddrinfo="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_freeaddrinfo" = "yes"; then
+    AC_MSG_CHECKING([if freeaddrinfo is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_ws2tcpip
+        $curl_includes_sys_socket
+        $curl_includes_netdb
+      ]],[[
+        freeaddrinfo(0);
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_freeaddrinfo="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_freeaddrinfo="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_freeaddrinfo" = "yes"; then
+    AC_MSG_CHECKING([if freeaddrinfo usage allowed])
+    if test "x$curl_disallow_freeaddrinfo" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_freeaddrinfo="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_freeaddrinfo="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if freeaddrinfo might be used])
+  if test "$tst_links_freeaddrinfo" = "yes" &&
+     test "$tst_proto_freeaddrinfo" = "yes" &&
+     test "$tst_compi_freeaddrinfo" = "yes" &&
+     test "$tst_allow_freeaddrinfo" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_FREEADDRINFO, 1,
+      [Define to 1 if you have the freeaddrinfo function.])
+    ac_cv_func_freeaddrinfo="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_freeaddrinfo="no"
   fi
 ])
 
