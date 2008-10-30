@@ -108,7 +108,7 @@ RETRNOSIZE
 NOSAVE
  - Don't actually save what is received
 SLOWDOWN
- - Send FTP responses with 0.1 sec delay between each byte
+ - Send FTP responses with 0.01 sec delay between each byte
 PASVBADIP
  - makes PASV send back an illegal IP in its 227 response
 
