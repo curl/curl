@@ -875,7 +875,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
    * IPv6-specific section
    */
   struct Curl_sockaddr_storage ss;
-  struct addrinfo *res, *ai;
+  Curl_ addrinfo *res, *ai;
   socklen_t sslen;
   char hbuf[NI_MAXHOST];
   struct sockaddr *sa=(struct sockaddr *)&ss;
