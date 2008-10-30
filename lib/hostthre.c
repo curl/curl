@@ -288,7 +288,7 @@ static unsigned __stdcall getaddrinfo_thread (void *arg)
 {
   struct connectdata *conn = (struct connectdata*) arg;
   struct thread_data *td   = (struct thread_data*) conn->async.os_specific;
-  struct addrinfo    *res;
+  Curl_addrinfo      *res;
   char   service [NI_MAXSERV];
   int    rc;
   struct addrinfo hints = td->hints;
@@ -313,7 +313,7 @@ static unsigned __stdcall getaddrinfo_thread (void *arg)
      need */
   SetEvent(td->event_thread_started);
 
-  rc = getaddrinfo(tsd.hostname, service, &hints, &res);
+  rc = Curl_getaddrinfo_ex(tsd.hostname, service, &hints, &res);
 
   /* is parent thread waiting for us and are we able to access conn members? */
   if(acquire_thread_sync(&tsd)) {
@@ -703,7 +703,8 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
                                 int port,
                                 int *waitp)
 {
-  struct addrinfo hints, *res;
+  struct addrinfo hints;
+  Curl_addrinfo *res;
   int error;
   char sbuf[NI_MAXSERV];
   int pf;
@@ -762,7 +763,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   infof(data, "init_resolve_thread() failed for %s; %s\n",
         hostname, Curl_strerror(conn, ERRNO));
 
-  error = getaddrinfo(hostname, sbuf, &hints, &res);
+  error = Curl_getaddrinfo_ex(hostname, sbuf, &hints, &res);
   if(error) {
     infof(data, "getaddrinfo() failed for %s:%d; %s\n",
           hostname, port, Curl_strerror(conn, SOCKERRNO));

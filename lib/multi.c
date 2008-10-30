@@ -315,7 +315,8 @@ static void sh_freeentry(void *freethis)
 {
   struct Curl_sh_entry *p = (struct Curl_sh_entry *) freethis;
 
-  free(p);
+  if(p)
+    free(p);
 }
 
 static size_t fd_key_compare(void*k1, size_t k1_len, void*k2, size_t k2_len)

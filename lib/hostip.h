@@ -25,6 +25,7 @@
 
 #include "setup.h"
 #include "hash.h"
+#include "curl_addrinfo.h"
 
 #ifdef HAVE_SETJMP_H
 #include <setjmp.h>
@@ -103,29 +104,9 @@
 #define ares_destroy(x) do {} while(0)
 #endif
 
-/*
- * Curl_addrinfo MUST be used for all name resolved info.
- */
-#ifdef CURLRES_IPV6
-typedef struct addrinfo Curl_addrinfo;
-#ifdef CURLRES_ARES
+#if defined(CURLRES_IPV6) && defined(CURLRES_ARES)
 Curl_addrinfo *Curl_ip2addr6(struct in6_addr *in,
-			     const char *hostname, int port);
-#endif
-#else
-/* OK, so some ipv4-only include tree probably have the addrinfo struct, but
-   to work even on those that don't, we provide our own look-alike! */
-struct Curl_addrinfo {
-  int                   ai_flags;
-  int                   ai_family;
-  int                   ai_socktype;
-  int                   ai_protocol;
-  socklen_t             ai_addrlen;   /* Follow rfc3493 struct addrinfo */
-  char                 *ai_canonname;
-  struct sockaddr      *ai_addr;
-  struct Curl_addrinfo *ai_next;
-};
-typedef struct Curl_addrinfo Curl_addrinfo;
+                             const char *hostname, int port);
 #endif
 
 struct addrinfo;
@@ -207,9 +188,6 @@ void Curl_resolv_unlock(struct SessionHandle *data,
 /* for debugging purposes only: */
 void Curl_scan_cache_used(void *user, void *ptr);
 
-/* free name info */
-void Curl_freeaddrinfo(Curl_addrinfo *freeaddr);
-
 /* make a new dns cache and return the handle */
 struct curl_hash *Curl_mk_dnscache(void);
 
@@ -251,16 +229,12 @@ CURLcode Curl_addrinfo6_callback(void *arg,
 #ifdef HAVE_CARES_CALLBACK_TIMEOUTS
                                  int timeouts,
 #endif
-                                 struct addrinfo *ai);
+                                 Curl_addrinfo *ai);
 
 
 /* [ipv4/ares only] Creates a Curl_addrinfo struct from a numerical-only IP
    address */
 Curl_addrinfo *Curl_ip2addr(in_addr_t num, const char *hostname, int port);
-
-/* [ipv4/ares only] Curl_he2ai() converts a struct hostent to a Curl_addrinfo chain
-   and returns it */
-Curl_addrinfo *Curl_he2ai(const struct hostent *, int port);
 
 /* Clone a Curl_addrinfo struct, works protocol independently */
 Curl_addrinfo *Curl_addrinfo_copy(const void *orig, int port);

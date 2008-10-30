@@ -10,11 +10,17 @@
 
 #include "test.h"
 
+#ifdef HAVE_SYS_SOCKET_H
+#  include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#  include <netinet/in.h>
+#endif
 #ifdef HAVE_NETDB_H
-#include <netdb.h>
+#  include <netdb.h>
 #endif
 #ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>
+#  include <arpa/inet.h>
 #endif
 
 #define ENABLE_CURLX_PRINTF
@@ -63,13 +69,6 @@ static Curl_addrinfo *fake_ai(void)
 
   ai->ai_family = AF_INET;
   ai->ai_addrlen = ss_size;
-
-#if defined(ENABLE_IPV6) && defined(CURLDEBUG)
-  /* For tracing purposes log a fake call to getaddrinfo */
-  if(logfile)
-    fprintf(logfile, "ADDR %s:%d getaddrinfo() = %p\n",
-            __FILE__, __LINE__, (void *)ai);
-#endif
 
   return ai;
 }

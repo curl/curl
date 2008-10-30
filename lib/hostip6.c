@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -77,18 +77,8 @@
  * Only for ipv6-enabled builds
  **********************************************************************/
 #ifdef CURLRES_IPV6
-#ifndef CURLRES_ARES
-/*
- * This is a wrapper function for freeing name information in a protocol
- * independent way. This takes care of using the appropriate underlaying
- * function.
- */
-void Curl_freeaddrinfo(Curl_addrinfo *p)
-{
-  if(p)
-    freeaddrinfo(p);
-}
 
+#ifndef CURLRES_ARES
 #ifdef CURLRES_ASYNCH
 /*
  * Curl_addrinfo_copy() is used by the asynch callback to copy a given
@@ -189,7 +179,7 @@ bool Curl_ipvalid(struct SessionHandle *data)
 #if !defined(USE_THREADING_GETADDRINFO) && !defined(CURLRES_ARES)
 
 #ifdef DEBUG_ADDRINFO
-static void dump_addrinfo(struct connectdata *conn, const struct addrinfo *ai)
+static void dump_addrinfo(struct connectdata *conn, const Curl_addrinfo *ai)
 {
   printf("dump_addrinfo:\n");
   for ( ; ai; ai = ai->ai_next) {
@@ -221,7 +211,8 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
                                 int port,
                                 int *waitp)
 {
-  struct addrinfo hints, *res;
+  struct addrinfo hints;
+  Curl_addrinfo *res;
   int error;
   char sbuf[NI_MAXSERV];
   char *sbufptr = NULL;
@@ -283,7 +274,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
     snprintf(sbuf, sizeof(sbuf), "%d", port);
     sbufptr=sbuf;
   }
-  error = getaddrinfo(hostname, sbufptr, &hints, &res);
+  error = Curl_getaddrinfo_ex(hostname, sbufptr, &hints, &res);
   if(error) {
     infof(data, "getaddrinfo(3) failed for %s:%d\n", hostname, port);
     return NULL;

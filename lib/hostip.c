@@ -693,8 +693,10 @@ static void freednsentry(void *freethis)
 {
   struct Curl_dns_entry *p = (struct Curl_dns_entry *) freethis;
 
-  Curl_freeaddrinfo(p->addr);
-  free(p);
+  if(p) {
+    Curl_freeaddrinfo(p->addr);
+    free(p);
+  }
 }
 
 /*
@@ -729,25 +731,6 @@ Curl_addrinfo *Curl_addrinfo_copy(const void *org, int port)
  **********************************************************************/
 
 #if defined(CURLRES_IPV4) || defined(CURLRES_ARES)
-/*
- * This is a function for freeing name information in a protocol independent
- * way.
- */
-void Curl_freeaddrinfo(Curl_addrinfo *ai)
-{
-  Curl_addrinfo *next;
-
-  /* walk over the list and free all entries */
-  while(ai) {
-    next = ai->ai_next;
-    if(ai->ai_addr)
-      free(ai->ai_addr);
-    if(ai->ai_canonname)
-      free(ai->ai_canonname);
-    free(ai);
-    ai = next;
-  }
-}
 
 struct namebuf4 {
   struct hostent hostentry;
@@ -823,131 +806,6 @@ Curl_addrinfo *Curl_ip2addr(in_addr_t num, const char *hostname, int port)
   free(buf);
 
   return ai;
-}
-
-/*
- * Curl_he2ai() translates from a hostent struct to a Curl_addrinfo struct.
- * The Curl_addrinfo is meant to work like the addrinfo struct does for IPv6
- * stacks, but for all hosts and environments.
- *
- *   Curl_addrinfo defined in "lib/hostip.h"
- *
- *     struct Curl_addrinfo {
- *       int                   ai_flags;
- *       int                   ai_family;
- *       int                   ai_socktype;
- *       int                   ai_protocol;
- *       socklen_t             ai_addrlen;   * Follow rfc3493 struct addrinfo *
- *       char                 *ai_canonname;
- *       struct sockaddr      *ai_addr;
- *       struct Curl_addrinfo *ai_next;
- *     };
- *
- *   hostent defined in <netdb.h>
- *
- *     struct hostent {
- *       char    *h_name;
- *       char    **h_aliases;
- *       int     h_addrtype;
- *       int     h_length;
- *       char    **h_addr_list;
- *     };
- *
- *   for backward compatibility:
- *
- *     #define h_addr  h_addr_list[0]
- */
-
-Curl_addrinfo *Curl_he2ai(const struct hostent *he, int port)
-{
-  Curl_addrinfo *ai;
-  Curl_addrinfo *prevai = NULL;
-  Curl_addrinfo *firstai = NULL;
-  struct sockaddr_in *addr;
-#ifdef CURLRES_IPV6
-  struct sockaddr_in6 *addr6;
-#endif /* CURLRES_IPV6 */
-  CURLcode result = CURLE_OK;
-  int i;
-  char *curr;
-
-  if(!he)
-    /* no input == no output! */
-    return NULL;
-
-  for(i=0; (curr = he->h_addr_list[i]) != NULL; i++) {
-
-    int ss_size;
-#ifdef CURLRES_IPV6
-    if (he->h_addrtype == AF_INET6)
-      ss_size = sizeof (struct sockaddr_in6);
-    else
-#endif /* CURLRES_IPV6 */
-      ss_size = sizeof (struct sockaddr_in);
-
-    if((ai = calloc(1, sizeof(Curl_addrinfo))) == NULL) {
-      result = CURLE_OUT_OF_MEMORY;
-      break;
-    }
-    if((ai->ai_canonname = strdup(he->h_name)) == NULL) {
-      result = CURLE_OUT_OF_MEMORY;
-      free(ai);
-      break;
-    }
-    if((ai->ai_addr = calloc(1, ss_size)) == NULL) {
-      result = CURLE_OUT_OF_MEMORY;
-      free(ai->ai_canonname);
-      free(ai);
-      break;
-    }
-
-    if(!firstai)
-      /* store the pointer we want to return from this function */
-      firstai = ai;
-
-    if(prevai)
-      /* make the previous entry point to this */
-      prevai->ai_next = ai;
-
-    ai->ai_family = he->h_addrtype;
-
-    /* we return all names as STREAM, so when using this address for TFTP
-       the type must be ignored and conn->socktype be used instead! */
-    ai->ai_socktype = SOCK_STREAM;
-
-    ai->ai_addrlen = ss_size;
-
-    /* leave the rest of the struct filled with zero */
-
-    switch (ai->ai_family) {
-    case AF_INET:
-      addr = (struct sockaddr_in *)ai->ai_addr; /* storage area for this info */
-
-      memcpy(&addr->sin_addr, curr, sizeof(struct in_addr));
-      addr->sin_family = (unsigned short)(he->h_addrtype);
-      addr->sin_port = htons((unsigned short)port);
-      break;
-
-#ifdef CURLRES_IPV6
-    case AF_INET6:
-      addr6 = (struct sockaddr_in6 *)ai->ai_addr; /* storage area for this info */
-
-      memcpy(&addr6->sin6_addr, curr, sizeof(struct in6_addr));
-      addr6->sin6_family = (unsigned short)(he->h_addrtype);
-      addr6->sin6_port = htons((unsigned short)port);
-      break;
-#endif /* CURLRES_IPV6 */
-    }
-
-    prevai = ai;
-  }
-
-  if(result != CURLE_OK) {
-    Curl_freeaddrinfo(firstai);
-    firstai = NULL;
-  }
-
-  return firstai;
 }
 
 #endif /* CURLRES_IPV4 || CURLRES_ARES */
