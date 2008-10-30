@@ -322,7 +322,6 @@ Curl_he2ai(const struct hostent *he, int port)
   }
 
   if(result != CURLE_OK) {
-    /* Use parenthesis to prevent memdebug from replacing this */
     Curl_freeaddrinfo(firstai);
     firstai = NULL;
   }
