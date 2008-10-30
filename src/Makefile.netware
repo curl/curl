@@ -431,6 +431,8 @@ else
 	@echo $(DL)#define _LARGEFILE 1$(DL) >> $@
 ifdef ENABLE_IPV6
 	@echo $(DL)#define ENABLE_IPV6 1$(DL) >> $@
+	@echo $(DL)#define HAVE_FREEADDRINFO 1$(DL) >> $@
+	@echo $(DL)#define HAVE_GETADDRINFO 1$(DL) >> $@
 endif
 endif
 	@echo $(DL)#define USE_MANUAL 1$(DL) >> $@
