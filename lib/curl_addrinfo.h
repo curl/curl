@@ -78,4 +78,20 @@ Curl_getaddrinfo_ex(const char *nodename,
 Curl_addrinfo *
 Curl_he2ai(const struct hostent *he, int port);
 
+
+#if defined(CURLDEBUG) && defined(HAVE_FREEADDRINFO)
+void
+curl_dofreeaddrinfo(struct addrinfo *freethis,
+                    int line, const char *source);
+#endif
+
+#if defined(CURLDEBUG) && defined(HAVE_GETADDRINFO)
+int
+curl_dogetaddrinfo(const char *hostname,
+                   const char *service,
+                   const struct addrinfo *hints,
+                   struct addrinfo **result,
+                   int line, const char *source);
+#endif
+
 #endif /* HEADER_CURL_ADDRINFO_H */

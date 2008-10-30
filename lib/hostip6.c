@@ -93,36 +93,17 @@ Curl_addrinfo *Curl_addrinfo_copy(const void *orig, int port)
 #endif  /* CURLRES_ASYNCH */
 #endif  /* CURLRES_ARES */
 
-#ifdef CURLDEBUG
+#if defined(CURLDEBUG) && defined(HAVE_GETNAMEINFO)
 /* These are strictly for memory tracing and are using the same style as the
  * family otherwise present in memdebug.c. I put these ones here since they
  * require a bunch of structs I didn't wanna include in memdebug.c
  */
-int curl_dogetaddrinfo(const char *hostname, const char *service,
-                       struct addrinfo *hints,
-                       struct addrinfo **result,
-                       int line, const char *source)
-{
-  int res=(getaddrinfo)(hostname, service, hints, result);
-  if(0 == res) {
-    /* success */
-    if(logfile)
-      fprintf(logfile, "ADDR %s:%d getaddrinfo() = %p\n",
-              source, line, (void *)*result);
-  }
-  else {
-    if(logfile)
-      fprintf(logfile, "ADDR %s:%d getaddrinfo() failed\n",
-              source, line);
-  }
-  return res;
-}
 
 /*
  * For CURLRES_ARS, this should be written using ares_gethostbyaddr()
  * (ignoring the fact c-ares doesn't return 'serv').
  */
-#ifdef HAVE_GETNAMEINFO
+
 int curl_dogetnameinfo(GETNAMEINFO_QUAL_ARG1 GETNAMEINFO_TYPE_ARG1 sa,
                        GETNAMEINFO_TYPE_ARG2 salen,
                        char *host, GETNAMEINFO_TYPE_ARG46 hostlen,
@@ -147,17 +128,7 @@ int curl_dogetnameinfo(GETNAMEINFO_QUAL_ARG1 GETNAMEINFO_TYPE_ARG1 sa,
   }
   return res;
 }
-#endif
-
-void curl_dofreeaddrinfo(struct addrinfo *freethis,
-                         int line, const char *source)
-{
-  (freeaddrinfo)(freethis);
-  if(logfile)
-    fprintf(logfile, "ADDR %s:%d freeaddrinfo(%p)\n",
-            source, line, (void *)freethis);
-}
-#endif  /* CURLDEBUG */
+#endif /* defined(CURLDEBUG) && defined(HAVE_GETNAMEINFO) */
 
 /*
  * Curl_ipvalid() checks what CURL_IPRESOLVE_* requirements that might've

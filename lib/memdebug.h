@@ -89,6 +89,7 @@ CURL_EXTERN int curl_fclose(FILE *file, int line, const char *source);
 #define accept(sock,addr,len)\
  curl_accept(sock,addr,len,__LINE__,__FILE__)
 
+#ifdef HAVE_GETADDRINFO
 #if defined(getaddrinfo) && defined(__osf__)
 /* OSF/1 and Tru64 have getaddrinfo as a define already, so we cannot define
    our macro as for other platforms. Instead, we redefine the new name they
@@ -100,17 +101,20 @@ CURL_EXTERN int curl_fclose(FILE *file, int line, const char *source);
 #define getaddrinfo(host,serv,hint,res) \
   curl_dogetaddrinfo(host,serv,hint,res,__LINE__,__FILE__)
 #endif
+#endif /* HAVE_GETADDRINFO */
 
 #ifdef HAVE_GETNAMEINFO
 #undef getnameinfo
 #define getnameinfo(sa,salen,host,hostlen,serv,servlen,flags) \
   curl_dogetnameinfo(sa,salen,host,hostlen,serv,servlen,flags, __LINE__, \
   __FILE__)
-#endif
+#endif /* HAVE_GETNAMEINFO */
 
+#ifdef HAVE_FREEADDRINFO
 #undef freeaddrinfo
 #define freeaddrinfo(data) \
   curl_dofreeaddrinfo(data,__LINE__,__FILE__)
+#endif /* HAVE_FREEADDRINFO */
 
 /* sclose is probably already defined, redefine it! */
 #undef sclose
