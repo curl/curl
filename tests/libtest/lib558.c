@@ -77,8 +77,9 @@ static Curl_addrinfo *fake_ai(void)
 
 int test(char *URL)
 {
-  CURL *easyh;
-  struct curl_hash *hp;
+  CURL *easyh = NULL;
+  struct curl_hash *hp = NULL;
+  int result = 0;
  
   if(!strcmp(URL, "check")) {
     /* test harness script verifying if this test can run */
@@ -88,7 +89,8 @@ int test(char *URL)
   easyh = curl_easy_init();
   if(!easyh) {
     fprintf(stdout, "easy handle init failed\n");
-    return TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
+    goto cleanup;
   }
   fprintf(stdout, "easy handle init OK\n");
 
@@ -96,7 +98,8 @@ int test(char *URL)
   hp = Curl_mk_dnscache();
   if(!hp) {
     fprintf(stdout, "hash creation failed\n");
-    return TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
+    goto cleanup;
   }
   fprintf(stdout, "hash creation OK\n");
 
@@ -111,32 +114,44 @@ int test(char *URL)
     data_key = aprintf("%s:%d", "dummy", 0);
     if(!data_key) {
       fprintf(stdout, "data key creation failed\n");
-      return TEST_ERR_MAJOR_BAD;
+      result = TEST_ERR_MAJOR_BAD;
+      goto cleanup;
     }
     key_len = strlen(data_key);
 
     data_node = calloc(1, sizeof(struct Curl_dns_entry));
     if(!data_node) {
       fprintf(stdout, "data node creation failed\n");
-      return TEST_ERR_MAJOR_BAD;
+      result = TEST_ERR_MAJOR_BAD;
+      free(data_key);
+      goto cleanup;
     }
 
     data_node->addr = fake_ai();
     if(!data_node->addr) {
       fprintf(stdout, "actual data creation failed\n");
-      return TEST_ERR_MAJOR_BAD;
+      result = TEST_ERR_MAJOR_BAD;
+      free(data_node);
+      free(data_key);
+      goto cleanup;
     }
 
     nodep = Curl_hash_add(hp, data_key, key_len+1, (void *)data_node);
     if(!nodep) {
       fprintf(stdout, "insertion into hash failed\n");
-      return TEST_ERR_MAJOR_BAD;
+      result = TEST_ERR_MAJOR_BAD;
+      Curl_freeaddrinfo(data_node->addr);
+      free(data_node);
+      free(data_key);
+      goto cleanup;
     }
 
     free(data_key);
   }
 #endif /* LIB559 */
   /**/
+
+cleanup:
 
   fprintf(stdout, "destroying hash...\n");
   Curl_hash_destroy(hp);
