@@ -1,0 +1,8 @@
+TODO
+====
+
+ares_gethostbyname
+
+- When built to support IPv6, it needs to also support PF_UNSPEC or similar,
+  so that an application can ask for any protocol and then c-ares would return
+  all known resolves and not just explicitly IPv4 _or_ IPv6 resolves.
