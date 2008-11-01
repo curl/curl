@@ -92,7 +92,7 @@
 /* This function is used to init a threaded resolve */
 static bool init_resolve_thread(struct connectdata *conn,
                                 const char *hostname, int port,
-                                const Curl_addrinfo *hints);
+                                const struct addrinfo *hints);
 
 #ifdef CURLRES_IPV4
   #define THREAD_FUNC  gethostbyname_thread
@@ -396,7 +396,7 @@ void Curl_destroy_thread_data (struct Curl_async *async)
  */
 static bool init_resolve_thread (struct connectdata *conn,
                                  const char *hostname, int port,
-                                 const Curl_addrinfo *hints)
+                                 const struct addrinfo *hints)
 {
   struct thread_data *td = calloc(sizeof(*td), 1);
   HANDLE thread_and_event[2] = {0};
