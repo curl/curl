@@ -399,9 +399,12 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 
   switch(data->set.ip_version) {
   case CURL_IPRESOLVE_V4:
+  default: /* By default we try ipv4, as PF_UNSPEC isn't supported by c-ares.
+              This is a bit disturbing since users may very well assume that
+              both kinds of addresses are asked for, but the problem is really
+              in c-ares' end here. */
     family = PF_INET;
     break;
-  default: /* by default we try ipv6, as PF_UNSPEC isn't supported by (c-)ares */
   case CURL_IPRESOLVE_V6:
     family = PF_INET6;
     break;

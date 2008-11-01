@@ -41,6 +41,7 @@ This release includes the following bugfixes:
  o case insensitive string matching works in Turkish too
  o Solaris builds get _REENTRANT defined properly and work again
  o Garbage sent on chunky upload after curl_easy_pause()
+ o ipv4 name resolves when libcurl is built with ipv6-enabled c-ares
 
 This release includes the following known bugs:
 
@@ -57,6 +58,8 @@ advice from friends like these:
  Linus Nielsen Feltzing, Martin Drasar, Stefan Krause, Dmitry Kurochkin,
  Mike Revi, Andres Garcia, Michael Goffioul, Markus Moeller, Rob Crittenden,
  Jamie Lokier, Emanuele Bovisio, Maxim Ivanov, Ian Lynagh, Daniel Egger,
- Igor Novoseltsev, John Wilkinson, Pascal Terjan, Steve Roskowski
+ Igor Novoseltsev, John Wilkinson, Pascal Terjan, Steve Roskowski,
+ Daniel Johnson
+ 
 
         Thanks! (and sorry if I forgot to mention someone)

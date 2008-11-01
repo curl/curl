@@ -6,6 +6,26 @@
 
                                   Changelog
 
+Daniel Stenberg (2 Nov 2008)
+- Daniel Johnson reported and fixed:
+
+  When c-ares isn't enabled, libcurl by default calls getaddrinfo with family
+  set to PF_UNSPEC which causes getaddrinfo to return all available addresses,
+  both IPv4 and IPv6. Libcurl then tries each one until it can connect. If the
+  net connection doesn't support IPv6, libcurl can still fall back to IPv4.
+
+  However, since c-ares doesn't support PF_UNSPEC, when it's used it defaults
+  to using family=PF_INET6 and therefore only returns IPv6 addresses when AAAA
+  records are available, even if IPv4 addresses are also available. The effect
+  is that since my ISP doesn't do IPv6, libcurl can't connect at all to a site
+  that has AAAA records. It will work if I explicitly use CURL_IPRESOLVE_V4 or
+  --ipv4 with the curl tool. I discovered this when curl would fail to connect
+  to seemingly random sites. It turns out they weren't random, they were sites
+  with AAAA records.
+
+  So now libcurl defaults to PF_INET... until c-ares has been tought to offer
+  both.
+
 Daniel Fandrich (29 Oct 2008)
 - Fixed a bug that caused a few bytes of garbage to be sent after a
   curl_easy_pause() during a chunky upload. Reported by Steve Roskowski.
