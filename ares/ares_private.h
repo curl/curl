@@ -195,8 +195,8 @@ struct query {
   void *arg;
 
   /* Query status */
-  int try;
-  int server;
+  int try; /* Number of times we tried this query already. */
+  int server; /* Server this query has last been sent to. */
   struct query_server_info *server_info;   /* per-server state */
   int using_tcp;
   int error_status;
@@ -242,6 +242,7 @@ struct ares_channeldata {
   int timeout; /* in milliseconds */
   int tries;
   int ndots;
+  int rotate; /* if true, all servers specified are used */
   int udp_port;
   int tcp_port;
   int socket_send_buffer_size;
@@ -267,6 +268,9 @@ struct ares_channeldata {
   /* The time at which we last called process_timeouts(). Uses integer seconds
      just to draw the line somewhere. */
   time_t last_timeout_processed;
+
+  /* Last server we sent a query to. */
+  int last_server;
 
   /* Circular, doubly-linked list of queries, bucketed various ways.... */
   /* All active queries in a single list: */

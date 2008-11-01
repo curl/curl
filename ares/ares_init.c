@@ -144,6 +144,7 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
   channel->timeout = -1;
   channel->tries = -1;
   channel->ndots = -1;
+  channel->rotate = -1;
   channel->udp_port = -1;
   channel->tcp_port = -1;
   channel->socket_send_buffer_size = -1;
@@ -159,6 +160,7 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
   channel->sock_state_cb = NULL;
   channel->sock_state_cb_data = NULL;
 
+  channel->last_server = 0;
   channel->last_timeout_processed = (time_t)now.tv_sec;
 
   /* Initialize our lists of queries */
@@ -352,6 +354,8 @@ static int init_by_options(ares_channel channel,
     channel->tries = options->tries;
   if ((optmask & ARES_OPT_NDOTS) && channel->ndots == -1)
     channel->ndots = options->ndots;
+  if ((optmask & ARES_OPT_ROTATE) && channel->rotate == -1)
+    channel->rotate = options->rotate;
   if ((optmask & ARES_OPT_UDP_PORT) && channel->udp_port == -1)
     channel->udp_port = options->udp_port;
   if ((optmask & ARES_OPT_TCP_PORT) && channel->tcp_port == -1)
@@ -932,6 +936,8 @@ static int init_by_defaults(ares_channel channel)
     channel->tries = DEFAULT_TRIES;
   if (channel->ndots == -1)
     channel->ndots = 1;
+  if (channel->rotate == -1)
+    channel->rotate = 0;
   if (channel->udp_port == -1)
     channel->udp_port = htons(NAMESERVER_PORT);
   if (channel->tcp_port == -1)
@@ -1302,6 +1308,9 @@ static int set_options(ares_channel channel, const char *str)
       val = try_option(p, q, "retry:");
       if (val && channel->tries == -1)
         channel->tries = atoi(val);
+      val = try_option(p, q, "rotate");
+      if (val && channel->rotate == -1)
+        channel->rotate = 1;
       p = q;
       while (ISSPACE(*p))
         p++;
@@ -1374,7 +1383,7 @@ static char *try_config(char *s, const char *opt)
 static const char *try_option(const char *p, const char *q, const char *opt)
 {
   size_t len = strlen(opt);
-  return ((size_t)(q - p) > len && !strncmp(p, opt, len)) ? &p[len] : NULL;
+  return ((size_t)(q - p) >= len && !strncmp(p, opt, len)) ? &p[len] : NULL;
 }
 
 #ifndef WIN32

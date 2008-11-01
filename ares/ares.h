@@ -114,6 +114,7 @@ extern "C" {
 #define ARES_OPT_SOCK_SNDBUF    (1 << 11)
 #define ARES_OPT_SOCK_RCVBUF    (1 << 12)
 #define ARES_OPT_TIMEOUTMS      (1 << 13)
+#define ARES_OPT_ROTATE         (1 << 14)
 
 /* Nameinfo flag values */
 #define ARES_NI_NOFQDN                  (1 << 0)
@@ -184,6 +185,7 @@ struct ares_options {
   int timeout; /* in seconds or milliseconds, depending on options */
   int tries;
   int ndots;
+  int rotate;
   unsigned short udp_port;
   unsigned short tcp_port;
   int socket_send_buffer_size;

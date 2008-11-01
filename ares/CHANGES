@@ -1,5 +1,15 @@
   Changelog for the c-ares project
 
+* Nov 1 2008 (Daniel Stenberg)
+- Carlo Contavalli added support for the glibc "rotate" option, as documented
+  in man resolv.conf: 
+
+  causes round robin selection of nameservers from among those listed.  This
+  has the effect of spreading the query load among all listed servers, rather
+  than having all clients try the first listed server first every time.
+
+  You can enable it with ARES_OPT_ROTATE
+
 * Oct 21 2008 (Yang Tse)
   Charles Hardin added handling of EINPROGRESS for UDP connects.
 

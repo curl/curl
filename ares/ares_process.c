@@ -670,30 +670,33 @@ static void skip_server(ares_channel channel, struct query *query,
 static void next_server(ares_channel channel, struct query *query,
                         struct timeval *now)
 {
-  /* Advance to the next server or try. */
-  query->server++;
-  for (; query->try < channel->tries; query->try++)
+  /* We need to try each server channel->tries times. We have channel->nservers
+   * servers to try. In total, we need to do channel->nservers * channel->tries
+   * attempts. Use query->try to remember how many times we already attempted
+   * this query. Use modular arithmetic to find the next server to try. */
+  while (++(query->try) < (channel->nservers * channel->tries))
     {
-      for (; query->server < channel->nservers; query->server++)
+      struct server_state *server;
+
+      /* Move on to the next server. */
+      query->server = (query->server + 1) % channel->nservers;
+      server = &channel->servers[query->server];
+
+      /* We don't want to use this server if (1) we decided this
+       * connection is broken, and thus about to be closed, (2)
+       * we've decided to skip this server because of earlier
+       * errors we encountered, or (3) we already sent this query
+       * over this exact connection.
+       */
+      if (!server->is_broken &&
+           !query->server_info[query->server].skip_server &&
+           !(query->using_tcp &&
+             (query->server_info[query->server].tcp_connection_generation ==
+              server->tcp_connection_generation)))
         {
-          struct server_state *server = &channel->servers[query->server];
-          /* We don't want to use this server if (1) we decided this
-           * connection is broken, and thus about to be closed, (2)
-           * we've decided to skip this server because of earlier
-           * errors we encountered, or (3) we already sent this query
-           * over this exact connection.
-           */
-          if (!server->is_broken &&
-               !query->server_info[query->server].skip_server &&
-               !(query->using_tcp &&
-                 (query->server_info[query->server].tcp_connection_generation ==
-                  server->tcp_connection_generation)))
-            {
-               ares__send_query(channel, query, now);
-               return;
-            }
+           ares__send_query(channel, query, now);
+           return;
         }
-      query->server = 0;
 
       /* You might think that with TCP we only need one try. However,
        * even when using TCP, servers can time-out our connection just
@@ -702,6 +705,8 @@ static void next_server(ares_channel channel, struct query *query,
        * tickle a bug that drops our request.
        */
     }
+
+  /* If we are here, all attempts to perform query failed. */
   end_query(channel, query, query->error_status, NULL, 0);
 }
 
@@ -775,8 +780,7 @@ void ares__send_query(ares_channel channel, struct query *query,
     }
     query->timeout = *now;
     ares__timeadd(&query->timeout,
-                  (query->try == 0) ? channel->timeout
-                  : channel->timeout << query->try / channel->nservers);
+                  channel->timeout << (query->try / channel->nservers));
     /* Keep track of queries bucketed by timeout, so we can process
      * timeout events quickly.
      */
