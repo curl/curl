@@ -219,6 +219,13 @@
 #define HAVE_UTIME 1
 #endif
 
+/* The following 2 functions are strictly only available when
+ * _WIN32_WINNT is 0x0501 or larger. But we assume this value
+ * is defined. See below. */
+
+/* Define if you have the getaddrinfo function. */
+#define HAVE_GETADDRINFO 1
+
 /* Define if you have the getnameinfo function. */
 #define HAVE_GETNAMEINFO 1
 
