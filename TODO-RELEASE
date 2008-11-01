@@ -1,8 +1,6 @@
 To be addressed before 7.19.1 (planned release: November 2008)
 =============================
 
-183 - "libcurl issue with IPv6 and c-ares"
-
 188 - "Curl keep special character in filename when saving" bug #2192220
 
 189 - "NTLM authentication and POST wrong behavior" bug #2203193
