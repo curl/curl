@@ -219,16 +219,6 @@
 #define HAVE_UTIME 1
 #endif
 
-/* The following 2 functions are strictly only available when
- * _WIN32_WINNT is 0x0501 or larger. But we assume this value
- * is defined. See below. */
-
-/* Define if you have the getaddrinfo function. */
-#define HAVE_GETADDRINFO 1
-
-/* Define if you have the getnameinfo function. */
-#define HAVE_GETNAMEINFO 1
-
 /* Define to the type qualifier of arg 1 for getnameinfo. */
 #define GETNAMEINFO_QUAL_ARG1 const
 
@@ -397,6 +387,20 @@
 #  endif
 #  if (_WIN32_WINNT < 0x0501) || (WINVER < 0x0501)
 #    error VS2008 does not support Windows build targets prior to WinXP
+#  endif
+#endif
+
+/* Availability of freeaddrinfo, getaddrinfo and getnameinfo functions is quite */
+/* convoluted, compiler dependant and in some cases even build target dependat. */
+#if defined(HAVE_WS2TCPIP_H)
+#  if defined(_MSC_VER) && (_MSC_VER >= 1200)
+#    define HAVE_FREEADDRINFO 1
+#    define HAVE_GETADDRINFO  1
+#    define HAVE_GETNAMEINFO  1
+#  elif defined(__MINGW32__) && defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0501)
+#    define HAVE_FREEADDRINFO 1
+#    define HAVE_GETADDRINFO  1
+#    define HAVE_GETNAMEINFO  1
 #  endif
 #endif
 
