@@ -630,13 +630,16 @@ int Curl_read(struct connectdata *conn, /* connection data */
       return -1;
 #endif
     if(nread < 0)
-      /* since it is negative and not EGAIN, it was a protocol-layer error */
+      /* since it is negative and not EAGAIN, it was a protocol-layer error */
       return CURLE_RECV_ERROR;
   }
   else {
     if(conn->sec_complete)
       nread = Curl_sec_read(conn, sockfd, buffertofill,
                             bytesfromsocket);
+    /* TODO: Need to handle EAGAIN here somehow, similar to how it
+     * is done in Curl_read_plain, either right here or in Curl_sec_read
+     * itself. */
     else {
       int ret = Curl_read_plain(sockfd, buffertofill, bytesfromsocket,
                                      &nread);

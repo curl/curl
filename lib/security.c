@@ -101,6 +101,7 @@ static const struct Curl_sec_client_mech * const mechs[] = {
   NULL
 };
 
+/* TODO: This function isn't actually used anywhere and should be removed */
 int
 Curl_sec_getc(struct connectdata *conn, FILE *F)
 {
@@ -124,6 +125,7 @@ block_read(int fd, void *buf, size_t len)
     if(b == 0)
       return 0;
     else if(b < 0 && (errno == EINTR || errno == EAGAIN))
+      /* TODO: this will busy loop in the EAGAIN case */
       continue;
     else if(b < 0)
       return -1;
@@ -163,6 +165,8 @@ sec_get_data(struct connectdata *conn,
   else if(b < 0)
     return -1;
   len = ntohl(len);
+  /* TODO: This realloc will cause a memory leak in an out of memory
+   * condition */
   buf->data = realloc(buf->data, len);
   b = buf->data ? block_read(fd, buf->data, len) : -1;
   if(b == 0)
