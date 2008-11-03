@@ -20,6 +20,7 @@
 #define HAVE_ARPA_INET_H       1
 #define HAVE_FCNTL_H           1
 #define HAVE_FIONBIO           1
+#define HAVE_GETADDRINFO       1
 #define HAVE_GETPROTOBYNAME    1
 #define HAVE_GETTIMEOFDAY      1
 #define HAVE_IO_H              1
