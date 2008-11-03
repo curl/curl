@@ -48,7 +48,8 @@
 #define CURL_DEFAULT_USER "anonymous"
 #define CURL_DEFAULT_PASSWORD "ftp@example.com"
 
-#define MAX_IPADR_LEN (4*9) /* should be enough to hold the longest ipv6 one */
+/* length of longest IPv6 address string including the trailing null */
+#define MAX_IPADR_LEN sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255")
 
 #include "cookie.h"
 #include "formdata.h"
