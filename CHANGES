@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (3 Nov 2008)
+- Bug #2218480 (http://curl.haxx.se/bug/view.cgi?id=2218480) pointed out a
+  problem with my CURLINFO_PRIMARY_IP fix from October 7th that caused a NULL
+  pointer read. I also took the opportunity to clean up this logic (storing of
+  the connection's IP address) somewhat as we had it stored in two different
+  places and ways previously and they are now unified.
+
 Daniel Stenberg (2 Nov 2008)
 - Daniel Johnson reported and fixed:
 

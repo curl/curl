@@ -37,8 +37,6 @@ CURLcode Curl_connecthost(struct connectdata *conn,
                           Curl_addrinfo **addr, /* the one we used */
                           bool *connected); /* truly connected? */
 
-CURLcode Curl_store_ip_addr(struct connectdata *conn);
-
 /* generic function that returns how much time there's left to run, according
    to the timeouts set */
 long Curl_timeleft(struct connectdata *conn,

@@ -555,25 +555,6 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
   return rc;
 }
 
-CURLcode Curl_store_ip_addr(struct connectdata *conn)
-{
-  char addrbuf[256];
-  Curl_printable_address(conn->ip_addr, addrbuf, sizeof(addrbuf));
-
-  /* save the string */
-  Curl_safefree(conn->ip_addr_str);
-  conn->ip_addr_str = strdup(addrbuf);
-  if(!conn->ip_addr_str)
-    return CURLE_OUT_OF_MEMORY; /* FAIL */
-
-#ifdef PF_INET6
-  if(conn->ip_addr->ai_family == PF_INET6)
-    conn->bits.ipv6 = TRUE;
-#endif
-
-  return CURLE_OK;
-}
-
 /* Used within the multi interface. Try next IP address, return TRUE if no
    more address exists or error */
 static bool trynextip(struct connectdata *conn,
@@ -600,8 +581,7 @@ static bool trynextip(struct connectdata *conn,
       /* store the new socket descriptor */
       conn->sock[sockindex] = sockfd;
       conn->ip_addr = ai;
-
-      return (bool)(Curl_store_ip_addr(conn) != CURLE_OK);
+      break;
     }
     ai = ai->ai_next;
   }
@@ -824,21 +804,27 @@ singleipconnect(struct connectdata *conn,
           ((const struct sockaddr_un*)(&addr.sa_addr))->sun_path);
     snprintf(data->info.ip, MAX_IPADR_LEN, "%s",
              ((const struct sockaddr_un*)(&addr.sa_addr))->sun_path);
+    strcpy(conn->ip_addr_str, data->info.ip);
   }
   else
 #endif
   {
 #ifdef ENABLE_IPV6
-    if(addr.family == AF_INET6)
+    if(addr.family == AF_INET6) {
       iptoprint = &sa6->sin6_addr;
+      conn->bits.ipv6 = TRUE;
+    }
     else
 #endif
+    {
       iptoprint = &sa4->sin_addr;
+    }
 
     if(Curl_inet_ntop(addr.family, iptoprint, addr_buf,
                       sizeof(addr_buf)) != NULL) {
       infof(data, "  Trying %s... ", addr_buf);
       snprintf(data->info.ip, MAX_IPADR_LEN, "%s", addr_buf);
+      strcpy(conn->ip_addr_str, data->info.ip);
     }
   }
 

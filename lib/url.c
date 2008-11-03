@@ -2174,7 +2174,6 @@ static void conn_free(struct connectdata *conn)
   Curl_safefree(conn->allocptr.ref);
   Curl_safefree(conn->allocptr.host);
   Curl_safefree(conn->allocptr.cookiehost);
-  Curl_safefree(conn->ip_addr_str);
   Curl_safefree(conn->trailer);
   Curl_safefree(conn->host.rawalloc); /* host name buffer */
   Curl_safefree(conn->proxy.rawalloc); /* proxy name buffer */
@@ -2479,9 +2478,9 @@ ConnectionExists(struct SessionHandle *data,
       }
 
 #ifdef CURLRES_ASYNCH
-      /* ip_addr_str is NULL only if the resolving of the name hasn't completed
-         yet and until then we don't re-use this connection */
-      if(!check->ip_addr_str) {
+      /* ip_addr_str[0] is NUL only if the resolving of the name hasn't
+         completed yet and until then we don't re-use this connection */
+      if(!check->ip_addr_str[0]) {
         infof(data,
               "Connection #%ld hasn't finished name resolve, can't reuse\n",
               check->connectindex);
@@ -2727,36 +2726,33 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
     conn->dns_entry = hostaddr;
     conn->ip_addr = addr;
 
-    result = Curl_store_ip_addr(conn);
-
-    if(CURLE_OK == result) {
-      switch(data->set.proxytype) {
+    switch(data->set.proxytype) {
 #ifndef CURL_DISABLE_PROXY
-      case CURLPROXY_SOCKS5:
-      case CURLPROXY_SOCKS5_HOSTNAME:
-        result = Curl_SOCKS5(conn->proxyuser, conn->proxypasswd,
-                             conn->host.name, conn->remote_port,
-                             FIRSTSOCKET, conn);
-        break;
-      case CURLPROXY_SOCKS4:
-        result = Curl_SOCKS4(conn->proxyuser, conn->host.name,
-                             conn->remote_port, FIRSTSOCKET, conn, FALSE);
-        break;
-      case CURLPROXY_SOCKS4A:
-        result = Curl_SOCKS4(conn->proxyuser, conn->host.name,
-                             conn->remote_port, FIRSTSOCKET, conn, TRUE);
-        break;
+    case CURLPROXY_SOCKS5:
+    case CURLPROXY_SOCKS5_HOSTNAME:
+      result = Curl_SOCKS5(conn->proxyuser, conn->proxypasswd,
+                           conn->host.name, conn->remote_port,
+                           FIRSTSOCKET, conn);
+      break;
+    case CURLPROXY_SOCKS4:
+      result = Curl_SOCKS4(conn->proxyuser, conn->host.name,
+                           conn->remote_port, FIRSTSOCKET, conn, FALSE);
+      break;
+    case CURLPROXY_SOCKS4A:
+      result = Curl_SOCKS4(conn->proxyuser, conn->host.name,
+                           conn->remote_port, FIRSTSOCKET, conn, TRUE);
+      break;
 #endif /* CURL_DISABLE_PROXY */
-      case CURLPROXY_HTTP:
-        /* do nothing here. handled later. */
-        break;
-      default:
-        failf(data, "unknown proxytype option given");
-        result = CURLE_COULDNT_CONNECT;
-        break;
-      }
-    }
-  }
+    case CURLPROXY_HTTP:
+      /* do nothing here. handled later. */
+      break;
+    default:
+      failf(data, "unknown proxytype option given");
+      result = CURLE_COULDNT_CONNECT;
+      break;
+    } /* switch proxytype */
+  } /* if result is ok */
+
   if(result)
     *connected = FALSE; /* mark it as not connected */
 
