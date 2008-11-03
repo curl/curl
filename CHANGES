@@ -13,6 +13,10 @@ Daniel Stenberg (3 Nov 2008)
   the connection's IP address) somewhat as we had it stored in two different
   places and ways previously and they are now unified.
 
+Yang Tse (3 Nov 2008)
+- Fix undersized IPv6 address internal buffer. IPv6 address strings longer
+  than 35 characters would be truncated.
+
 Daniel Stenberg (2 Nov 2008)
 - Daniel Johnson reported and fixed:
 
@@ -32,6 +36,22 @@ Daniel Stenberg (2 Nov 2008)
 
   So now libcurl defaults to PF_INET... until c-ares has been tought to offer
   both.
+
+Yang Tse (31 Oct 2008)
+- Tests 558 and 559 are stabilized. These two tests were initially introduced
+  to aid in the location of a seg-fault which was only triggered on non-debug
+  builds done with the icc 9.1 Intel compiler. Test 558 does not trigger the
+  problem, but test 559 does trigger it. As of today, it isn't yet absolutely
+  clear if it is a compiler optimizer issue or a memory corruption one.
+
+Yang Tse (30 Oct 2008)
+- Use our Curl_addrinfo structure definition to handle address info data even
+  when a system addrinfo struct is available. Provide and use a wrapper around
+  systems getaddrinfo function, Curl_getaddrinfo_ex which returns a pointer to
+  a list of dynamically allocated Curl_addrinfo structs.
+
+  Configure will check freeaddrinfo and getaddrinfo functions and define
+  preprocessor symbols HAVE_FREEADDRINFO and HAVE_GETADDRINFO when appropriate.
 
 Daniel Fandrich (29 Oct 2008)
 - Fixed a bug that caused a few bytes of garbage to be sent after a
