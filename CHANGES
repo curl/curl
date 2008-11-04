@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel Stenberg (4 Nov 2008)
+- CURLINFO_FILETIME now works for file:// transfers as well
+
 Daniel Stenberg (3 Nov 2008)
 - Bug #2218480 (http://curl.haxx.se/bug/view.cgi?id=2218480) pointed out a
   problem with my CURLINFO_PRIMARY_IP fix from October 7th that caused a NULL

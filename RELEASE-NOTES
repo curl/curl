@@ -42,7 +42,8 @@ This release includes the following bugfixes:
  o Solaris builds get _REENTRANT defined properly and work again
  o Garbage sent on chunky upload after curl_easy_pause()
  o ipv4 name resolves when libcurl is built with ipv6-enabled c-ares
- o undersized IPv6 address internal buffer truncates long IPv6 addresses
+ o undersized IPv6 address internal buffer truncated long IPv6 addresses
+ o CURLINFO_FILETIME works for file:// transfers as well
 
 This release includes the following known bugs:
 

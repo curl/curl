@@ -451,6 +451,8 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
   if( -1 != fstat(fd, &statbuf)) {
     /* we could stat it, then read out the size */
     expected_size = statbuf.st_size;
+    /* and store the modification time */
+    data->info.filetime = (long)statbuf.st_mtime;
     fstated = TRUE;
   }
 
