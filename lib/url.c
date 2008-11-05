@@ -1487,17 +1487,15 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
   case CURLOPT_MAX_SEND_SPEED_LARGE:
     /*
-     * The max speed limit that sends transfer more than
-     * CURLOPT_MAX_SEND_PER_SECOND bytes per second the transfer is
-     * throttled..
+     * When transfer uploads are faster then CURLOPT_MAX_SEND_SPEED_LARGE
+     * bytes per second the transfer is throttled..
      */
     data->set.max_send_speed=va_arg(param, curl_off_t);
     break;
   case CURLOPT_MAX_RECV_SPEED_LARGE:
     /*
-     * The max speed limit that sends transfer more than
-     * CURLOPT_MAX_RECV_PER_SECOND bytes per second the transfer is
-     * throttled..
+     * When receiving data faster than CURLOPT_MAX_RECV_SPEED_LARGE bytes per
+     * second the transfer is throttled..
      */
     data->set.max_recv_speed=va_arg(param, curl_off_t);
     break;
