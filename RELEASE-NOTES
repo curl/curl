@@ -1,6 +1,6 @@
-Curl and libcurl 7.19.1
+Curl and libcurl 7.19.2
 
- Public curl releases:         107
+ Public curl releases:         108
  Command line options:         128
  curl_easy_setopt() options:   158
  Public functions in libcurl:  58
@@ -9,41 +9,11 @@ Curl and libcurl 7.19.1
 
 This release includes the following changes:
 
- o pkg-config can now show supported_protocols and supported_features
- o Added CURLOPT_CERTINFO and CURLINFO_CERTINFO
- o Added CURLOPT_POSTREDIR
- o Better detect HTTP 1.0 servers and don't do HTTP 1.1 requests on them
- o configure --disable-proxy disables proxy support
- o Added CURLOPT_USERNAME and CURLOPT_PASSWORD
- o --interface now works with IPv6 connections on glibc systems
- o Added CURLOPT_PROXYUSERNAME and CURLOPT_PROXYPASSWORD
+ o 
 
 This release includes the following bugfixes:
 
- o MingW32 non-configure builds are now largefile feature enabled by default
- o NetWare LIBC builds are now largefile feature enabled by default
- o curl_easy_pause() could behave wrongly on unpause
- o cookies with invalid expire dates are now considered expired
- o HTTP pipelining over proxy
- o fix regression in configure script which affected OpenSSL builds on MSYS
- o GnuTLS-based multi interface doing HTTPS over proxy failed
- o recv() failures cause CURLE_RECV_ERROR
- o SFTP over SOCKS crash fixed
- o thread-safety issues addressed for NSS-powered libcurls
- o removed the use of mktime() and gmtime(_r)() in date parsing and conversions
- o HTTP Digest with a blank realm did wrong
- o CURLINFO_REDIRECT_URL didn't work with the multi interface
- o CURLOPT_RANGE now works for SFTP downloads
- o FTP SIZE response 550 now causes CURLE_REMOTE_FILE_NOT_FOUND
- o CURLINFO_PRIMARY_IP fixed for persistent connection re-use cases
- o remove_handle/add_handle multi interface timer callback flaw
- o CURLINFO_REDIRECT_URL memory leak and wrong-doing
- o case insensitive string matching works in Turkish too
- o Solaris builds get _REENTRANT defined properly and work again
- o Garbage sent on chunky upload after curl_easy_pause()
- o ipv4 name resolves when libcurl is built with ipv6-enabled c-ares
- o undersized IPv6 address internal buffer truncated long IPv6 addresses
- o CURLINFO_FILETIME works for file:// transfers as well
+ o 
 
 This release includes the following known bugs:
 
@@ -56,12 +26,6 @@ Other curl-related news:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Keith Mok, Yang Tse, Daniel Fandrich, Guenter Knauf, Dmitriy Sergeyev,
- Linus Nielsen Feltzing, Martin Drasar, Stefan Krause, Dmitry Kurochkin,
- Mike Revi, Andres Garcia, Michael Goffioul, Markus Moeller, Rob Crittenden,
- Jamie Lokier, Emanuele Bovisio, Maxim Ivanov, Ian Lynagh, Daniel Egger,
- Igor Novoseltsev, John Wilkinson, Pascal Terjan, Steve Roskowski,
- Daniel Johnson
  
 
         Thanks! (and sorry if I forgot to mention someone)
