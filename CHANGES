@@ -6,6 +6,8 @@
 
                                   Changelog
 
+Version 7.19.1 (5 November 2008)
+
 Daniel Stenberg (4 Nov 2008)
 - CURLINFO_FILETIME now works for file:// transfers as well
 
