@@ -426,62 +426,63 @@ clean:
 #
 X_OBJS= \
 	$(DIROBJ)\base64.obj \
+	$(DIROBJ)\connect.obj \
+	$(DIROBJ)\content_encoding.obj \
 	$(DIROBJ)\cookie.obj \
-	$(DIROBJ)\transfer.obj \
+	$(DIROBJ)\curl_addrinfo.obj \
+	$(DIROBJ)\dict.obj \
+	$(DIROBJ)\easy.obj \
 	$(DIROBJ)\escape.obj \
+	$(DIROBJ)\file.obj \
 	$(DIROBJ)\formdata.obj \
 	$(DIROBJ)\ftp.obj \
-	$(DIROBJ)\http.obj \
-	$(DIROBJ)\http_chunks.obj \
-	$(DIROBJ)\ldap.obj \
-	$(DIROBJ)\dict.obj \
-	$(DIROBJ)\telnet.obj \
-	$(DIROBJ)\parsedate.obj \
 	$(DIROBJ)\getenv.obj \
+	$(DIROBJ)\getinfo.obj \
 	$(DIROBJ)\gtls.obj \
-	$(DIROBJ)\inet_pton.obj \
-	$(DIROBJ)\hostip.obj \
-	$(DIROBJ)\hostasyn.obj \
-	$(DIROBJ)\hostsyn.obj \
+	$(DIROBJ)\hash.obj \
 	$(DIROBJ)\hostares.obj \
-	$(DIROBJ)\hostthre.obj \
+	$(DIROBJ)\hostasyn.obj \
+	$(DIROBJ)\hostip.obj \
 	$(DIROBJ)\hostip4.obj \
 	$(DIROBJ)\hostip6.obj \
-	$(DIROBJ)\inet_ntop.obj \
-	$(DIROBJ)\if2ip.obj \
-	$(DIROBJ)\mprintf.obj \
-	$(DIROBJ)\netrc.obj \
-	$(DIROBJ)\progress.obj \
-	$(DIROBJ)\sendf.obj \
-	$(DIROBJ)\speedcheck.obj \
-	$(DIROBJ)\sslgen.obj \
-	$(DIROBJ)\ssluse.obj \
-	$(DIROBJ)\timeval.obj \
-	$(DIROBJ)\url.obj \
-	$(DIROBJ)\file.obj \
-	$(DIROBJ)\getinfo.obj \
-	$(DIROBJ)\version.obj \
-	$(DIROBJ)\easy.obj \
-	$(DIROBJ)\strequal.obj \
-	$(DIROBJ)\strtok.obj \
-	$(DIROBJ)\strtoofft.obj \
-	$(DIROBJ)\connect.obj \
-	$(DIROBJ)\hash.obj \
-	$(DIROBJ)\llist.obj \
-	$(DIROBJ)\share.obj \
-	$(DIROBJ)\multi.obj \
+	$(DIROBJ)\hostsyn.obj \
+	$(DIROBJ)\hostthre.obj \
+	$(DIROBJ)\http.obj \
+	$(DIROBJ)\http_chunks.obj \
 	$(DIROBJ)\http_digest.obj \
-        $(DIROBJ)\http_negotiate.obj \
-        $(DIROBJ)\http_ntlm.obj \
+	$(DIROBJ)\http_negotiate.obj \
+	$(DIROBJ)\http_ntlm.obj \
+	$(DIROBJ)\if2ip.obj \
+	$(DIROBJ)\inet_ntop.obj \
+	$(DIROBJ)\inet_pton.obj \
+	$(DIROBJ)\ldap.obj \
+	$(DIROBJ)\llist.obj \
 	$(DIROBJ)\md5.obj \
 	$(DIROBJ)\memdebug.obj \
-	$(DIROBJ)\strerror.obj \
-	$(DIROBJ)\select.obj \
-	$(DIROBJ)\content_encoding.obj \
-	$(DIROBJ)\tftp.obj \
-	$(DIROBJ)\splay.obj \
-	$(DIROBJ)\socks.obj \
+	$(DIROBJ)\mprintf.obj \
+	$(DIROBJ)\multi.obj \
+	$(DIROBJ)\netrc.obj \
+	$(DIROBJ)\parsedate.obj \
+	$(DIROBJ)\progress.obj \
 	$(DIROBJ)\rawstr.obj \
+	$(DIROBJ)\select.obj \
+	$(DIROBJ)\sendf.obj \
+	$(DIROBJ)\share.obj \
+	$(DIROBJ)\socks.obj \
+	$(DIROBJ)\speedcheck.obj \
+	$(DIROBJ)\splay.obj \
+	$(DIROBJ)\sslgen.obj \
+	$(DIROBJ)\ssluse.obj \
+	$(DIROBJ)\strequal.obj \
+	$(DIROBJ)\strerror.obj \
+	$(DIROBJ)\strtok.obj \
+	$(DIROBJ)\strtoofft.obj \
+	$(DIROBJ)\telnet.obj \
+	$(DIROBJ)\tftp.obj \
+	$(DIROBJ)\timeval.obj \
+	$(DIROBJ)\transfer.obj \
+	$(DIROBJ)\url.obj \
+	$(DIROBJ)\version.obj \
 	$(RESOURCE)
 
 all : $(TARGET)
