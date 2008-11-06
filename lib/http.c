@@ -246,8 +246,8 @@ static CURLcode http_output_basic(struct connectdata *conn, bool proxy)
   char *authorization;
   struct SessionHandle *data=conn->data;
   char **userp;
-  char *user;
-  char *pwd;
+  const char *user;
+  const char *pwd;
 
   if(proxy) {
     userp = &conn->allocptr.proxyuserpwd;
@@ -493,6 +493,89 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
   return code;
 }
 
+
+/*
+ * Output the correct authentication header depending on the auth type
+ * and whether or not it is to a proxy.
+ */
+static CURLcode
+output_auth_headers(struct connectdata *conn,
+                    struct auth *authstatus,
+		    const char *request,
+		    const char *path,
+                    bool proxy)
+{
+  struct SessionHandle *data = conn->data;
+  const char *auth=NULL;
+  CURLcode result = CURLE_OK;
+
+#ifndef CURL_DISABLE_CRYPTO_AUTH
+  (void)request;
+  (void)path;
+#endif
+
+#ifdef HAVE_GSSAPI
+  if((authstatus->picked == CURLAUTH_GSSNEGOTIATE) &&
+     data->state.negotiate.context &&
+     !GSS_ERROR(data->state.negotiate.status)) {
+    auth="GSS-Negotiate";
+    result = Curl_output_negotiate(conn, proxy);
+    if(result)
+      return result;
+    authstatus->done = TRUE;
+  }
+  else
+#endif
+#ifdef USE_NTLM
+  if(authstatus->picked == CURLAUTH_NTLM) {
+    auth="NTLM";
+    result = Curl_output_ntlm(conn, proxy);
+    if(result)
+      return result;
+  }
+  else
+#endif
+#ifndef CURL_DISABLE_CRYPTO_AUTH
+  if(authstatus->picked == CURLAUTH_DIGEST) {
+    auth="Digest";
+    result = Curl_output_digest(conn,
+				proxy,
+				(const unsigned char *)request,
+				(const unsigned char *)path);
+    if(result)
+      return result;
+  }
+  else
+#endif
+  if(authstatus->picked == CURLAUTH_BASIC) {
+    /* Basic */
+    if((proxy && conn->bits.proxy_user_passwd &&
+       !checkheaders(data, "Proxy-authorization:")) ||
+       (!proxy && conn->bits.user_passwd &&
+       !checkheaders(data, "Authorization:"))) {
+      auth="Basic";
+      result = http_output_basic(conn, proxy);
+      if(result)
+	return result;
+    }
+    /* NOTE: this function should set 'done' TRUE, as the other auth
+       functions work that way */
+    authstatus->done = TRUE;
+  }
+
+  if(auth) {
+    infof(data, "%s auth using %s with user '%s'\n",
+	  proxy?"Proxy":"Server", auth,
+	  proxy?(conn->proxyuser?conn->proxyuser:""):
+	        (conn->user?conn->user:""));
+    authstatus->multi = (bool)(!authstatus->done);
+  }
+  else
+    authstatus->multi = FALSE;
+
+  return CURLE_OK;
+}
+
 /**
  * Curl_http_output_auth() setups the authentication headers for the
  * host/proxy and the correct authentication
@@ -516,7 +599,6 @@ http_output_auth(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  const char *auth=NULL;
   struct auth *authhost;
   struct auth *authproxy;
 
@@ -550,66 +632,12 @@ http_output_auth(struct connectdata *conn,
   /* Send proxy authentication header if needed */
   if(conn->bits.httpproxy &&
       (conn->bits.tunnel_proxy == proxytunnel)) {
-#ifdef HAVE_GSSAPI
-    if((authproxy->picked == CURLAUTH_GSSNEGOTIATE) &&
-       data->state.negotiate.context &&
-       !GSS_ERROR(data->state.negotiate.status)) {
-      auth="GSS-Negotiate";
-      result = Curl_output_negotiate(conn, TRUE);
-      if(result)
-        return result;
-      authproxy->done = TRUE;
-    }
-    else
-#endif
-#ifdef USE_NTLM
-    if(authproxy->picked == CURLAUTH_NTLM) {
-      auth="NTLM";
-      result = Curl_output_ntlm(conn, TRUE);
-      if(result)
-        return result;
-    }
-    else
-#endif
-      if(authproxy->picked == CURLAUTH_BASIC) {
-        /* Basic */
-        if(conn->bits.proxy_user_passwd &&
-           !checkheaders(data, "Proxy-authorization:")) {
-          auth="Basic";
-          result = http_output_basic(conn, TRUE);
-          if(result)
-            return result;
-        }
-        /* NOTE: http_output_basic() should set 'done' TRUE, as the other auth
-           functions work that way */
-        authproxy->done = TRUE;
-      }
-#ifndef CURL_DISABLE_CRYPTO_AUTH
-      else if(authproxy->picked == CURLAUTH_DIGEST) {
-        auth="Digest";
-        result = Curl_output_digest(conn,
-                                    TRUE, /* proxy */
-                                    (const unsigned char *)request,
-                                    (const unsigned char *)path);
-        if(result)
-          return result;
-      }
-#else
-      (void)request;
-      (void)path;
-#endif
-      if(auth) {
-        infof(data, "Proxy auth using %s with user '%s'\n",
-              auth, conn->proxyuser?conn->proxyuser:"");
-        authproxy->multi = (bool)(!authproxy->done);
-      }
-      else
-        authproxy->multi = FALSE;
-    }
+    result = output_auth_headers(conn, authproxy, request, path, TRUE);
+    if(result)
+      return result;
+  }
   else
 #else
-  (void)request;
-  (void)path;
   (void)proxytunnel;
 #endif /* CURL_DISABLE_PROXY */
     /* we have no proxy so let's pretend we're done authenticating
@@ -621,66 +649,9 @@ http_output_auth(struct connectdata *conn,
   if(!data->state.this_is_a_follow ||
      conn->bits.netrc ||
      !data->state.first_host ||
-     Curl_raw_equal(data->state.first_host, conn->host.name) ||
-     data->set.http_disable_hostname_check_before_authentication) {
-
-    /* Send web authentication header if needed */
-    {
-      auth = NULL;
-#ifdef HAVE_GSSAPI
-      if((authhost->picked == CURLAUTH_GSSNEGOTIATE) &&
-         data->state.negotiate.context &&
-         !GSS_ERROR(data->state.negotiate.status)) {
-        auth="GSS-Negotiate";
-        result = Curl_output_negotiate(conn, FALSE);
-        if(result)
-          return result;
-        authhost->done = TRUE;
-      }
-      else
-#endif
-#ifdef USE_NTLM
-      if(authhost->picked == CURLAUTH_NTLM) {
-        auth="NTLM";
-        result = Curl_output_ntlm(conn, FALSE);
-        if(result)
-          return result;
-      }
-      else
-#endif
-      {
-#ifndef CURL_DISABLE_CRYPTO_AUTH
-        if(authhost->picked == CURLAUTH_DIGEST) {
-          auth="Digest";
-          result = Curl_output_digest(conn,
-                                      FALSE, /* not a proxy */
-                                      (const unsigned char *)request,
-                                      (const unsigned char *)path);
-          if(result)
-            return result;
-        } else
-#endif
-        if(authhost->picked == CURLAUTH_BASIC) {
-          if(conn->bits.user_passwd &&
-             !checkheaders(data, "Authorization:")) {
-            auth="Basic";
-            result = http_output_basic(conn, FALSE);
-            if(result)
-              return result;
-          }
-          /* basic is always ready */
-          authhost->done = TRUE;
-        }
-      }
-      if(auth) {
-        infof(data, "Server auth using %s with user '%s'\n",
-              auth, conn->user);
-
-        authhost->multi = (bool)(!authhost->done);
-      }
-      else
-        authhost->multi = FALSE;
-    }
+     data->set.http_disable_hostname_check_before_authentication ||
+     Curl_raw_equal(data->state.first_host, conn->host.name)) {
+    result = output_auth_headers(conn, authhost, request, path, FALSE);
   }
   else
     authhost->done = TRUE;
