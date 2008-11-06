@@ -13,7 +13,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o 
+ o build failure when using MSVC 6 makefile
 
 This release includes the following known bugs:
 
