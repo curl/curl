@@ -207,6 +207,15 @@ sub sockfilt {
 }
 
 
+sub sockfiltsecondary {
+    my $l;
+    foreach $l (@_) {
+        printf DWRITE "DATA\n%04x\n", length($l);
+        print DWRITE $l;
+    }
+}
+
+
 # Send data to the client on the control stream, which happens to be plain
 # stdout.
 
@@ -237,8 +246,17 @@ sub sendcontrol {
 sub senddata {
     my $l;
     foreach $l (@_) {
-        printf DWRITE "DATA\n%04x\n", length($l);
-        print DWRITE $l;
+      if(!$controldelay) {
+        # spit it all out at once
+        sockfiltsecondary $l;
+      }
+      else {
+          # pause between each byte
+          for (split(//,$l)) {
+              sockfiltsecondary $_;
+              select(undef, undef, undef, 0.01);
+          }
+      }
     }
 }
 
