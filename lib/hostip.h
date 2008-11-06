@@ -104,11 +104,6 @@
 #define ares_destroy(x) do {} while(0)
 #endif
 
-#if defined(CURLRES_IPV6) && defined(CURLRES_ARES)
-Curl_addrinfo *Curl_ip2addr6(struct in6_addr *in,
-                             const char *hostname, int port);
-#endif
-
 struct addrinfo;
 struct hostent;
 struct SessionHandle;
@@ -223,10 +218,6 @@ CURLcode Curl_addrinfo6_callback(void *arg,
 #endif
                                  Curl_addrinfo *ai);
 
-
-/* [ipv4/ares only] Creates a Curl_addrinfo struct from a numerical-only IP
-   address */
-Curl_addrinfo *Curl_ip2addr(in_addr_t num, const char *hostname, int port);
 
 /* Clone a Curl_addrinfo struct, works protocol independently */
 Curl_addrinfo *Curl_addrinfo_copy(const void *orig, int port);

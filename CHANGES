@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Yang Tse (6 Nov 2008)
+- Merged existing IPv4 and IPv6 Curl_ip2addr functions into a single one
+  which now also takes a protocol address family argument.
+
 Version 7.19.1 (5 November 2008)
 
 Daniel Stenberg (4 Nov 2008)

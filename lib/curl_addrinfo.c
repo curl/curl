@@ -190,7 +190,8 @@ Curl_getaddrinfo_ex(const char *nodename,
 
   *result = cafirst;
 
-  return error; /* This is not a CURLcode */
+  /* This is not a CURLcode */
+  return error;
 }
 #endif /* HAVE_GETADDRINFO */
 
@@ -254,6 +255,8 @@ Curl_he2ai(const struct hostent *he, int port)
     /* no input == no output! */
     return NULL;
 
+  DEBUGASSERT((he->h_name != NULL) && (he->h_addr_list != NULL));
+
   for(i=0; (curr = he->h_addr_list[i]) != NULL; i++) {
 
     int ss_size;
@@ -300,7 +303,7 @@ Curl_he2ai(const struct hostent *he, int port)
 
     switch (ai->ai_family) {
     case AF_INET:
-      addr = (struct sockaddr_in *)ai->ai_addr; /* storage area for this info */
+      addr = (void *)ai->ai_addr; /* storage area for this info */
 
       memcpy(&addr->sin_addr, curr, sizeof(struct in_addr));
       addr->sin_family = (unsigned short)(he->h_addrtype);
@@ -309,7 +312,7 @@ Curl_he2ai(const struct hostent *he, int port)
 
 #ifdef ENABLE_IPV6
     case AF_INET6:
-      addr6 = (struct sockaddr_in6 *)ai->ai_addr; /* storage area for this info */
+      addr6 = (void *)ai->ai_addr; /* storage area for this info */
 
       memcpy(&addr6->sin6_addr, curr, sizeof(struct in6_addr));
       addr6->sin6_family = (unsigned short)(he->h_addrtype);
@@ -327,6 +330,100 @@ Curl_he2ai(const struct hostent *he, int port)
   }
 
   return firstai;
+}
+
+
+struct namebuff {
+  struct hostent hostentry;
+  union {
+    struct in_addr  ina4;
+#ifdef ENABLE_IPV6
+    struct in6_addr ina6;
+#endif
+  } addrentry;
+  char *h_addr_list[2];
+};
+
+
+/*
+ * Curl_ip2addr()
+ *
+ * This function takes an internet address, in binary form, as input parameter
+ * along with its address family and the string version of the address, and it
+ * returns a Curl_addrinfo chain filled in correctly with information for the
+ * given address/host
+ */
+
+Curl_addrinfo *
+Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
+{
+  Curl_addrinfo *ai;
+
+#if defined(VMS) && \
+    defined(__INITIAL_POINTER_SIZE) && (__INITIAL_POINTER_SIZE == 64)
+#pragma pointer_size save
+#pragma pointer_size short
+#pragma message disable PTRMISMATCH
+#endif
+
+  struct hostent  *h;
+  struct namebuff *buf;
+  char  *addrentry;
+  char  *hoststr;
+  int    addrsize;
+
+  DEBUGASSERT(inaddr && hostname);
+
+  buf = malloc(sizeof(struct namebuff));
+  if(!buf)
+    return NULL;
+
+  hoststr = strdup(hostname);
+  if(!hoststr) {
+    free(buf);
+    return NULL;
+  }
+
+  switch(af) {
+  case AF_INET:
+    addrsize = sizeof(struct in_addr);
+    addrentry = (void *)&buf->addrentry.ina4;
+    memcpy(addrentry, inaddr, sizeof(struct in_addr));
+    break;
+#ifdef ENABLE_IPV6
+  case AF_INET6:
+    addrsize = sizeof(struct in6_addr);
+    addrentry = (void *)&buf->addrentry.ina6;
+    memcpy(addrentry, inaddr, sizeof(struct in6_addr));
+    break;
+#endif
+  default:
+    free(hoststr);
+    free(buf);
+    return NULL;
+  }
+
+  h = &buf->hostentry;
+  h->h_name = hoststr;
+  h->h_aliases = NULL;
+  h->h_addrtype = (short)af;
+  h->h_length = (short)addrsize;
+  h->h_addr_list = &buf->h_addr_list[0];
+  h->h_addr_list[0] = addrentry;
+  h->h_addr_list[1] = NULL; /* terminate list of entries */
+
+#if defined(VMS) && \
+    defined(__INITIAL_POINTER_SIZE) && (__INITIAL_POINTER_SIZE == 64)
+#pragma pointer_size restore
+#pragma message enable PTRMISMATCH
+#endif
+
+  ai = Curl_he2ai(h, port);
+
+  free(hoststr);
+  free(buf);
+
+  return ai;
 }
 
 

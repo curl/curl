@@ -78,6 +78,8 @@ Curl_getaddrinfo_ex(const char *nodename,
 Curl_addrinfo *
 Curl_he2ai(const struct hostent *he, int port);
 
+Curl_addrinfo *
+Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port);
 
 #if defined(CURLDEBUG) && defined(HAVE_FREEADDRINFO)
 void

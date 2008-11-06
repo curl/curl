@@ -91,7 +91,6 @@
 #include "multiif.h"
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "inet_ntop.h"
-#include "inet_pton.h"
 #include "sslgen.h" /* for Curl_ssl_check_cxn() */
 
 /* The last #include file should be: */

@@ -289,80 +289,6 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
   return rc;
 }
 
-#ifdef ENABLE_IPV6 /* CURLRES_IPV6 */
-
-struct namebuf6 {
-  struct hostent  hostentry;
-  struct in6_addr addrentry;
-  char *h_addr_list[2];
-};
-
-/*
- * Curl_ip2addr6() takes an ipv6 internet address as input parameter
- * together with a pointer to the string version of the address, and it
- * returns a Curl_addrinfo chain filled in correctly with information for this
- * address/host.
- *
- * The input parameters ARE NOT checked for validity but they are expected
- * to have been checked already when this is called.
- */
-Curl_addrinfo *Curl_ip2addr6(struct in6_addr *in,
-			     const char *hostname, int port)
-{
-  Curl_addrinfo *ai;
-
-#if defined(VMS) && \
-    defined(__INITIAL_POINTER_SIZE) && (__INITIAL_POINTER_SIZE == 64)
-#pragma pointer_size save
-#pragma pointer_size short
-#pragma message disable PTRMISMATCH
-#endif
-
-  struct hostent  *h;
-  struct in6_addr *addrentry;
-  struct namebuf6 *buf;
-  char  *hoststr;
-
-  DEBUGASSERT(in && hostname);
-
-  buf = malloc(sizeof(struct namebuf6));
-  if(!buf)
-    return NULL;
-
-  hoststr = strdup(hostname);
-  if(!hoststr) {
-    free(buf);
-    return NULL;
-  }
-
-  addrentry = &buf->addrentry;
-  memcpy(addrentry, in, sizeof(struct in6_addr));
-
-  h = &buf->hostentry;
-  h->h_name = hoststr;
-  h->h_aliases = NULL;
-  h->h_addrtype = AF_INET6;
-  h->h_length = sizeof(struct in6_addr);
-  h->h_addr_list = &buf->h_addr_list[0];
-  h->h_addr_list[0] = (char*)addrentry;
-  h->h_addr_list[1] = NULL; /* terminate list of entries */
-
-#if defined(VMS) && \
-    defined(__INITIAL_POINTER_SIZE) && (__INITIAL_POINTER_SIZE == 64)
-#pragma pointer_size restore
-#pragma message enable PTRMISMATCH
-#endif
-
-  ai = Curl_he2ai(h, port);
-
-  free(hoststr);
-  free(buf);
-
-  return ai;
-}
-#endif /* CURLRES_IPV6 */
-
-
 
 /*
  * Curl_getaddrinfo() - when using ares
@@ -379,22 +305,24 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 {
   char *bufp;
   struct SessionHandle *data = conn->data;
-  in_addr_t in = inet_addr(hostname);
+  struct in_addr in;
   int family = PF_INET;
 #ifdef ENABLE_IPV6 /* CURLRES_IPV6 */
   struct in6_addr in6;
 #endif /* CURLRES_IPV6 */
   *waitp = FALSE;
 
-  if(in != CURL_INADDR_NONE) {
+  /* First check if this is an IPv4 address string */
+  if(Curl_inet_pton(AF_INET, hostname, &in) > 0) {
     /* This is a dotted IP address 123.123.123.123-style */
-    return Curl_ip2addr(in, hostname, port);
+    return Curl_ip2addr(AF_INET, &in, hostname, port);
   }
 
 #ifdef ENABLE_IPV6 /* CURLRES_IPV6 */
+  /* Otherwise, check if this is an IPv6 address string */
   if (Curl_inet_pton (AF_INET6, hostname, &in6) > 0) {
     /* This must be an IPv6 address literal.  */
-    return Curl_ip2addr6(&in6, hostname, port);
+    return Curl_ip2addr(AF_INET6, &in6, hostname, port);
   }
 
   switch(data->set.ip_version) {

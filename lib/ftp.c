@@ -85,6 +85,7 @@
 #include "connect.h"
 #include "strerror.h"
 #include "inet_ntop.h"
+#include "inet_pton.h"
 #include "select.h"
 #include "parsedate.h" /* for the week day and month names */
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
@@ -1105,41 +1106,39 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
 
   (void)fcmd; /* not used in the IPv4 code */
   if(ftpportstr) {
-    in_addr_t in;
+    struct in_addr in;
 
-    /* First check if the given name is an IP address */
-    in=inet_addr(ftpportstr);
-
-    if(in != CURL_INADDR_NONE)
+    /* First check if the given string is an IP address */
+    if(Curl_inet_pton(AF_INET, ftpportstr, &in) > 0) {
       /* this is an IPv4 address */
-      addr = Curl_ip2addr(in, ftpportstr, 0);
-    else {
-      if(Curl_if2ip(AF_INET, ftpportstr, myhost, sizeof(myhost))) {
-        /* The interface to IP conversion provided a dotted address */
-        in=inet_addr(myhost);
-        addr = Curl_ip2addr(in, myhost, 0);
-      }
-      else if(strlen(ftpportstr)> 1) {
-        /* might be a host name! */
-        struct Curl_dns_entry *h=NULL;
-        int rc = Curl_resolv(conn, ftpportstr, 0, &h);
-        if(rc == CURLRESOLV_PENDING)
-          /* BLOCKING */
-          rc = Curl_wait_for_resolv(conn, &h);
-        if(h) {
-          addr = h->addr;
-          /* when we return from this function, we can forget about this entry
-             so we can unlock it now already */
-          Curl_resolv_unlock(data, h);
+      addr = Curl_ip2addr(AF_INET, &in, ftpportstr, 0);
+    }
+    /* otherwise check if the given string is an interface */
+    else if(Curl_if2ip(AF_INET, ftpportstr, myhost, sizeof(myhost))) {
+      /* The interface to IP conversion provided a dotted address */
+      if(Curl_inet_pton(AF_INET, myhost, &in) > 0)
+        addr = Curl_ip2addr(AF_INET, &in, myhost, 0);
+    }
+    else if(strlen(ftpportstr)> 1) {
+      /* might be a host name! */
+      struct Curl_dns_entry *h=NULL;
+      int rc = Curl_resolv(conn, ftpportstr, 0, &h);
+      if(rc == CURLRESOLV_PENDING)
+        /* BLOCKING */
+        rc = Curl_wait_for_resolv(conn, &h);
+      if(h) {
+        addr = h->addr;
+        /* when we return from this function, we can forget about this entry
+           so we can unlock it now already */
+        Curl_resolv_unlock(data, h);
 
-          freeaddr = FALSE; /* make sure we don't free 'addr' in this function
-                               since it points to a DNS cache entry! */
-        } /* (h) */
-        else {
-          infof(data, "Failed to resolve host name %s\n", ftpportstr);
-        }
-      } /* strlen */
-    } /* CURL_INADDR_NONE */
+        freeaddr = FALSE; /* make sure we don't free 'addr' in this function
+                             since it points to a DNS cache entry! */
+      } /* (h) */
+      else {
+        infof(data, "Failed to resolve host name %s\n", ftpportstr);
+      }
+    } /* strlen */
   } /* ftpportstr */
 
   if(!addr) {

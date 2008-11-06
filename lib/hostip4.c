@@ -118,20 +118,18 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 #endif
   Curl_addrinfo *ai = NULL;
   struct hostent *h = NULL;
-  in_addr_t in;
+  struct in_addr in;
   struct hostent *buf = NULL;
 
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
   (void)conn;
 #endif
 
-  (void)port; /* unused in IPv4 code */
-
   *waitp = 0; /* don't wait, we act synchronously */
 
-  if(1 == Curl_inet_pton(AF_INET, hostname, &in))
+  if(Curl_inet_pton(AF_INET, hostname, &in) > 0)
     /* This is a dotted IP address 123.123.123.123-style */
-    return Curl_ip2addr(in, hostname, port);
+    return Curl_ip2addr(AF_INET, &in, hostname, port);
 
 #if defined(HAVE_GETHOSTBYNAME_R)
   /*

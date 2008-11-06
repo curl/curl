@@ -70,6 +70,7 @@
 #include "strerror.h"
 #include "url.h"
 #include "multiif.h"
+#include "inet_pton.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -665,14 +666,13 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 {
   struct hostent *h = NULL;
   struct SessionHandle *data = conn->data;
-  in_addr_t in;
+  struct in_addr in;
 
   *waitp = 0; /* don't wait, we act synchronously */
 
-  in = inet_addr(hostname);
-  if(in != CURL_INADDR_NONE)
+  if(Curl_inet_pton(AF_INET, hostname, &in) > 0)
     /* This is a dotted IP address 123.123.123.123-style */
-    return Curl_ip2addr(in, hostname, port);
+    return Curl_ip2addr(AF_INET, &in, hostname, port);
 
   /* fire up a new resolver thread! */
   if(init_resolve_thread(conn, hostname, port, NULL)) {
