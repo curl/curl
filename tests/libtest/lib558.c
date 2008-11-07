@@ -163,7 +163,7 @@ cleanup:
 
   curl_global_cleanup();
 
-  return 0; /* OK */
+  return result;
 }
 
 
