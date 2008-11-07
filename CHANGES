@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Fandrich (7 Nov 2008)
+- The getifaddrs() version of Curl_if2ip() crashed when used on a Linux
+  system with a TEQL load-balancing device configured, which doesn't
+  have an address.  Thanks to Adam Sampson for spotting this (bug #2234923).
+
 Yang Tse (6 Nov 2008)
 - Merged existing IPv4 and IPv6 Curl_ip2addr functions into a single one
   which now also takes a protocol address family argument.

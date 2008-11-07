@@ -14,6 +14,7 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o build failure when using MSVC 6 makefile
+ o crash when using --interface name on Linux systems with a TEQL device
 
 This release includes the following known bugs:
 
@@ -26,6 +27,6 @@ Other curl-related news:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- John Wilkinson
+ John Wilkinson, Adam Sampson
 
         Thanks! (and sorry if I forgot to mention someone)

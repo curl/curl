@@ -78,7 +78,8 @@ char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
 
   if (getifaddrs(&head) >= 0) {
     for (iface=head; iface != NULL; iface=iface->ifa_next) {
-      if ((iface->ifa_addr->sa_family == af) &&
+      if ((iface->ifa_addr != NULL) &&
+          (iface->ifa_addr->sa_family == af) &&
           curl_strequal(iface->ifa_name, interface)) {
         void *addr;
         char scope[12]="";
