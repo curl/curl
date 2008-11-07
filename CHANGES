@@ -13,7 +13,7 @@ Yang Tse (6 Nov 2008)
 - Bug #2230535 (http://curl.haxx.se/bug/view.cgi?id=2230535) pointed out a
   problem with MSVC 6 makefile that caused a build failure. It was noted that
   the curl_addrinfo.obj reference was missing. I took the opportunity to sort
-  the list in which this was missing.
+  the list in which this was missing. Issue submitted by John Wilkinson.
 
 Version 7.19.1 (5 November 2008)
 
