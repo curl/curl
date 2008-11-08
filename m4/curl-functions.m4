@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 33
+# serial 34
 
 
 dnl CURL_INCLUDES_ARPA_INET
@@ -49,6 +49,33 @@ curl_includes_arpa_inet="\
   AC_CHECK_HEADERS(
     sys/types.h sys/socket.h netinet/in.h arpa/inet.h,
     [], [], [$curl_includes_arpa_inet])
+])
+
+
+dnl CURL_INCLUDES_IFADDRS
+dnl -------------------------------------------------
+dnl Set up variable with list of headers that must be
+dnl included when ifaddrs.h is to be included.
+
+AC_DEFUN([CURL_INCLUDES_IFADDRS], [
+curl_includes_ifaddrs="\
+/* includes start */
+#ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#  include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#  include <netinet/in.h>
+#endif
+#ifdef HAVE_IFADDRS_H
+#  include <ifaddrs.h>
+#endif
+/* includes end */"
+  AC_CHECK_HEADERS(
+    sys/types.h sys/socket.h netinet/in.h ifaddrs.h,
+    [], [], [$curl_includes_ifaddrs])
 ])
 
 
@@ -590,6 +617,90 @@ AC_DEFUN([CURL_CHECK_FUNC_FREEADDRINFO], [
   else
     AC_MSG_RESULT([no])
     ac_cv_func_freeaddrinfo="no"
+  fi
+])
+
+
+dnl CURL_CHECK_FUNC_FREEIFADDRS
+dnl -------------------------------------------------
+dnl Verify if freeifaddrs is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_freeifaddrs, then
+dnl HAVE_FREEIFADDRS will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_FREEIFADDRS], [
+  AC_REQUIRE([CURL_INCLUDES_IFADDRS])dnl
+  #
+  tst_links_freeifaddrs="unknown"
+  tst_proto_freeifaddrs="unknown"
+  tst_compi_freeifaddrs="unknown"
+  tst_allow_freeifaddrs="unknown"
+  #
+  AC_MSG_CHECKING([if freeifaddrs can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([freeifaddrs])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_freeifaddrs="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_freeifaddrs="no"
+  ])
+  #
+  if test "$tst_links_freeifaddrs" = "yes"; then
+    AC_MSG_CHECKING([if freeifaddrs is prototyped])
+    AC_EGREP_CPP([freeifaddrs],[
+      $curl_includes_ifaddrs
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_freeifaddrs="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_freeifaddrs="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_freeifaddrs" = "yes"; then
+    AC_MSG_CHECKING([if freeifaddrs is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_ifaddrs
+      ]],[[
+        freeifaddrs(0);
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_freeifaddrs="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_freeifaddrs="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_freeifaddrs" = "yes"; then
+    AC_MSG_CHECKING([if freeifaddrs usage allowed])
+    if test "x$curl_disallow_freeifaddrs" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_freeifaddrs="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_freeifaddrs="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if freeifaddrs might be used])
+  if test "$tst_links_freeifaddrs" = "yes" &&
+     test "$tst_proto_freeifaddrs" = "yes" &&
+     test "$tst_compi_freeifaddrs" = "yes" &&
+     test "$tst_allow_freeifaddrs" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_FREEIFADDRS, 1,
+      [Define to 1 if you have the freeifaddrs function.])
+    ac_cv_func_freeifaddrs="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_freeifaddrs="no"
   fi
 ])
 
@@ -1189,6 +1300,120 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
   else
     AC_MSG_RESULT([no])
     ac_cv_func_gethostname="no"
+  fi
+])
+
+
+dnl CURL_CHECK_FUNC_GETIFADDRS
+dnl -------------------------------------------------
+dnl Verify if getifaddrs is available, prototyped, can
+dnl be compiled and seems to work. If all of these are
+dnl true, and usage has not been previously disallowed
+dnl with shell variable curl_disallow_getifaddrs, then
+dnl HAVE_GETIFADDRS will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_GETIFADDRS], [
+  AC_REQUIRE([CURL_INCLUDES_IFADDRS])dnl
+  #
+  tst_links_getifaddrs="unknown"
+  tst_proto_getifaddrs="unknown"
+  tst_compi_getifaddrs="unknown"
+  tst_works_getifaddrs="unknown"
+  tst_allow_getifaddrs="unknown"
+  #
+  AC_MSG_CHECKING([if getifaddrs can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([getifaddrs])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_getifaddrs="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_getifaddrs="no"
+  ])
+  #
+  if test "$tst_links_getifaddrs" = "yes"; then
+    AC_MSG_CHECKING([if getifaddrs is prototyped])
+    AC_EGREP_CPP([getifaddrs],[
+      $curl_includes_ifaddrs
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_getifaddrs="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_getifaddrs="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_getifaddrs" = "yes"; then
+    AC_MSG_CHECKING([if getifaddrs is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_ifaddrs
+      ]],[[
+        if(0 != getifaddrs(0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_getifaddrs="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_getifaddrs="no"
+    ])
+  fi
+  #
+  dnl only do runtime verification when not cross-compiling
+  if test "x$cross_compiling" != "xyes" &&
+    test "$tst_compi_getifaddrs" = "yes"; then
+    AC_MSG_CHECKING([if getifaddrs seems to work])
+    AC_RUN_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_ifaddrs
+      ]],[[
+        struct ifaddrs *ifa = 0;
+        int error;
+
+        error = getifaddrs(&ifa);
+        if(error || !ifa)
+          exit(1); /* fail */
+        else
+          exit(0);
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_works_getifaddrs="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_works_getifaddrs="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_getifaddrs" = "yes" &&
+    test "$tst_works_getifaddrs" != "no"; then
+    AC_MSG_CHECKING([if getifaddrs usage allowed])
+    if test "x$curl_disallow_getifaddrs" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_getifaddrs="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_getifaddrs="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if getifaddrs might be used])
+  if test "$tst_links_getifaddrs" = "yes" &&
+     test "$tst_proto_getifaddrs" = "yes" &&
+     test "$tst_compi_getifaddrs" = "yes" &&
+     test "$tst_allow_getifaddrs" = "yes" &&
+     test "$tst_works_getifaddrs" != "no"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_GETIFADDRS, 1,
+      [Define to 1 if you have a working getifaddrs function.])
+    ac_cv_func_getifaddrs="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_getifaddrs="no"
   fi
 ])
 
