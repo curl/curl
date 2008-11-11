@@ -15,16 +15,12 @@
  1.1 Zero-copy interface
  1.2 More data sharing
  1.3 struct lifreq
- 1.4 Get IP address
- 1.5 c-ares ipv6
- 1.6 configure-based info in public headers
- 1.7 signal-based resolver timeouts
+ 1.4 signal-based resolver timeouts
 
  2. libcurl - multi interface
  2.1 More non-blocking
- 2.2 Pause transfers
- 2.3 Remove easy interface internally
- 2.4 Avoid having to remove/readd handles
+ 2.2 Remove easy interface internally
+ 2.3 Avoid having to remove/readd handles
 
  3. Documentation
  3.1  More and better
@@ -39,9 +35,8 @@
  4.7 ASCII support
 
  5. HTTP
- 5.1 Other HTTP versions with CONNECT
- 5.2 Better persistency for HTTP 1.0
- 5.3 support FF3 sqlite cookie files
+ 5.1 Better persistency for HTTP 1.0
+ 5.2 support FF3 sqlite cookie files
 
  6. TELNET
  6.1 ditch stdin
@@ -52,14 +47,13 @@
  7. SSL
  7.1 Disable specific versions
  7.2 Provide mutex locking API
- 7.3 dumpcert
- 7.4 Evaluate SSL patches
- 7.5 Cache OpenSSL contexts
- 7.6 Export session ids
- 7.7 Provide callback for cert verification
- 7.8 Support other SSL libraries
- 7.9  Support SRP on the TLS layer
- 7.10 improve configure --with-ssl
+ 7.3 Evaluate SSL patches
+ 7.4 Cache OpenSSL contexts
+ 7.5 Export session ids
+ 7.6 Provide callback for cert verification
+ 7.7 Support other SSL libraries
+ 7.8  Support SRP on the TLS layer
+ 7.9 improve configure --with-ssl
 
  8. GnuTLS
  8.1 Make NTLM work without OpenSSL functions
@@ -132,37 +126,7 @@
  SIOCGIFADDR on newer Solaris versions as they claim the latter is obsolete.
  To support ipv6 interface addresses for network interfaces properly.
 
-1.4 Get IP address
-
- Add the following to curl_easy_getinfo(): GET_HTTP_IP, GET_FTP_IP and
- GET_FTP_DATA_IP. Return a string with the used IP.
-
-1.5 c-ares ipv6
-
- Make libcurl built with c-ares use c-ares' IPv6 abilities. They weren't
- present when we first added c-ares support but they have been added since!
- When this is done and works, we can actually start considering making c-ares
- powered libcurl the default build (which of course would require that we'd
- bundle the c-ares source code in the libcurl source code releases).
-
-1.6 configure-based info in public headers
-
- Make the public headers include the proper system includes based on what was
- present at the time when configure was run. Currently, the sys/select.h
- header is for example included by curl/multi.h only on specific platforms we
- know MUST have it. This is error-prone. We therefore want the header files to
- adapt to configure results. Those results must be stored in a new header and
- they must use a curl name space, i.e not be HAVE_* prefix (as that would risk
- a collision with other apps that use libcurl and that runs configure).
-
- Work on this has been started but hasn't been finished, and the initial patch
- and some details are found here:
- http://curl.haxx.se/mail/lib-2006-12/0084.html
-
- The remaining problems to solve involve the platforms that can't run
- configure.
-
-1.7 signal-based resolver timeouts
+1.4 signal-based resolver timeouts
 
  libcurl built without an asynchronous resolver library uses alarm() to time
  out DNS lookups. When a timeout occurs, this causes libcurl to jump from the
@@ -181,17 +145,7 @@
  Make sure we don't ever loop because of non-blocking sockets returning
  EWOULDBLOCK or similar. The GnuTLS connection etc.
 
-2.2 Pause transfers
-
- Make transfers treated more carefully. We need a way to tell libcurl we have
- data to write, as the current system expects us to upload data each time the
- socket is writable and there is no way to say that we want to upload data
- soon just not right now, without that aborting the upload. The opposite
- situation should be possible as well, that we tell libcurl we're ready to
- accept read data. Today libcurl feeds the data as soon as it is available for
- reading, no matter what.
-
-2.3 Remove easy interface internally
+2.2 Remove easy interface internally
 
  Make curl_easy_perform() a wrapper-function that simply creates a multi
  handle, adds the easy handle to it, runs curl_multi_perform() until the
@@ -200,7 +154,7 @@
  internally use and assume the multi interface. The select()-loop should use
  curl_multi_socket().
 
-2.4 Avoid having to remove/readd handles
+2.3 Avoid having to remove/readd handles
 
  curl_multi_handle_control() - this can control the easy handle (while) added
  to a multi handle in various ways:
@@ -269,18 +223,12 @@
 
 5. HTTP
 
-5.1 Other HTTP versions with CONNECT
-
- When doing CONNECT to a HTTP proxy, libcurl always uses HTTP/1.0. This has
- never been reported as causing trouble to anyone, but should be considered to
- use the HTTP version the user has chosen.
-
-5.2 Better persistency for HTTP 1.0
+5.1 Better persistency for HTTP 1.0
 
  "Better" support for persistent connections over HTTP 1.0
  http://curl.haxx.se/bug/feature.cgi?id=1089001
 
-5.3 support FF3 sqlite cookie files
+5.2 support FF3 sqlite cookie files
 
  Firefox 3 is changing from its former format to a a sqlite database instead.
  We should consider how (lib)curl can/should support this.
@@ -323,17 +271,12 @@ to provide the data to send.
  library, so that the same application code can use mutex-locking
  independently of OpenSSL or GnutTLS being used.
 
-7.3 dumpcert
-
- Anton Fedorov's "dumpcert" patch:
- http://curl.haxx.se/mail/lib-2004-03/0088.html
-
-7.4 Evaluate SSL patches
+7.3 Evaluate SSL patches
 
  Evaluate/apply Gertjan van Wingerde's SSL patches:
  http://curl.haxx.se/mail/lib-2004-03/0087.html
 
-7.5 Cache OpenSSL contexts
+7.4 Cache OpenSSL contexts
 
  "Look at SSL cafile - quick traces look to me like these are done on every
  request as well, when they should only be necessary once per ssl context (or
@@ -343,7 +286,7 @@ to provide the data to send.
  style connections are re-used. It will make us use slightly more memory but
  it will libcurl do less creations and deletions of SSL contexts.
 
-7.6 Export session ids
+7.5 Export session ids
 
  Add an interface to libcurl that enables "session IDs" to get
  exported/imported. Cris Bailiff said: "OpenSSL has functions which can
@@ -351,24 +294,24 @@ to provide the data to send.
  the state from such a buffer at a later date - this is used by mod_ssl for
  apache to implement and SSL session ID cache".
 
-7.7 Provide callback for cert verification
+7.6 Provide callback for cert verification
 
  OpenSSL supports a callback for customised verification of the peer
  certificate, but this doesn't seem to be exposed in the libcurl APIs. Could
  it be? There's so much that could be done if it were!
 
-7.8 Support other SSL libraries
+7.7 Support other SSL libraries
 
  Make curl's SSL layer capable of using other free SSL libraries.  Such as
  MatrixSSL (http://www.matrixssl.org/).
 
-7.9  Support SRP on the TLS layer
+7.8  Support SRP on the TLS layer
 
  Peter Sylvester's patch for SRP on the TLS layer.  Awaits OpenSSL support for
  this, no need to support this in libcurl before there's an OpenSSL release
  that does it.
 
-7.10 improve configure --with-ssl
+7.9 improve configure --with-ssl
 
  make the configure --with-ssl option first check for OpenSSL, then GnuTLS,
  then NSS...
