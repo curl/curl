@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Yang Tse (11 Nov 2008)
+- Related with bug #2230535 (http://curl.haxx.se/bug/view.cgi?id=2230535)
+  Daniel Fandrich noticed that curl_addrinfo was also missing in the build
+  process of other four non-configure platforms. Added now.
+
 Daniel Fandrich (7 Nov 2008)
 - The getifaddrs() version of Curl_if2ip() crashed when used on a Linux
   system with a TEQL load-balancing device configured, which doesn't

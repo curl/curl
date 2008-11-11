@@ -7,13 +7,13 @@ objs =	o.base64 o.connect o.cookie o.dict \
 	o.dllinit o.easy o.escape o.file \
 	o.formdata o.ftp o.getenv \
 	o.getinfo o.getpass o.hostip \
-    o.hostip4 o.hostsyn o.http \
+	o.hostip4 o.hostsyn o.http \
 	o.http_chunks o.inet_ntop o.inet_pton o.if2ip o.krb4 o.ldap \
 	o.memdebug o.mprintf o.netrc o.parsedate o.progress \
 	o.security o.select o.sendf o.speedcheck o.ssluse \
 	o.strequal o.strtok o.telnet o.timeval \
 	o.transfer o.url o.version o.strtoofft o.sslgen o.gtls \
-	o.rawstr
+	o.rawstr o.curl_addrinfo
 
 # Compile options:
 linkopts	= -o libcurl
@@ -32,6 +32,9 @@ o.connect:	c.connect
 
 o.cookie:	c.cookie
 		gcc $(compileropts) -c -o cookie.o c.cookie
+
+o.curl_addrinfo:	c.curl_addrinfo
+		gcc $(compileropts) -c -o curl_addrinfo.o c.curl_addrinfo
 
 o.dict:	c.dict
 		gcc $(compileropts) -c -o dict.o c.dict

@@ -48,6 +48,7 @@ OBJECTS = $(TMP_DIR)/base64.o \
 	$(TMP_DIR)/connect.o \
 	$(TMP_DIR)/content_encoding.o \
 	$(TMP_DIR)/cookie.o \
+	$(TMP_DIR)/curl_addrinfo.o \
 	$(TMP_DIR)/dict.o \
 	$(TMP_DIR)/easy.o \
 	$(TMP_DIR)/escape.o \
