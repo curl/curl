@@ -1,14 +1,9 @@
-To be addressed in 7.19.2 (planned release: January 2009)
+To be addressed in 7.19.3 (planned release: January 2009)
 =========================
-
-188 - "Curl keep special character in filename when saving" bug #2192220
-
-189 - "NTLM authentication and POST wrong behavior" bug #2203193
-
-190 - "Using NTLM proxy will lose form-data. Makes NTLM unusable." bug #2210686
 
 191 - "proposed patch for curl/libssh2 bugfix"
       http://curl.haxx.se/mail/archive-2008-10/0000.html
 
-192 - 
+192 - "infinite loop during GSS authentication" bug #2221237
 
+193 - 
