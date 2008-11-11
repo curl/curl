@@ -263,6 +263,11 @@ Curl_gtls_connect(struct connectdata *conn,
   struct in_addr addr;
 #endif
 
+  if(conn->ssl[sockindex].state == ssl_connection_complete)
+    /* to make us tolerant against being called more than once for the
+       same connection */
+    return CURLE_OK;
+
   if(!gtls_inited)
     _Curl_gtls_init();
 

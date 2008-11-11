@@ -6,6 +6,21 @@
 
                                   Changelog
 
+Daniel Stenberg (11 Nov 2008)
+- Rainer Canavan filed bug #2255627
+  (http://curl.haxx.se/bug/view.cgi?id=2255627) which pointed out that a
+  program using libcurl's multi interface to download a HTTPS page with a
+  libcurl built powered by OpenSSL, would easily get silly and instead hand
+  over SSL details as data instead of the actual HTTP headers and body. This
+  happened because libcurl would consider the connection handshake done too
+  early. This problem was introduced at September 22nd 2008 with my fix of the
+  bug #2107377
+
+  The correct fix is now instead done within the GnuTLS-handling code, as both
+  the OpenSSL and the NSS code already deal with this situation in similar
+  fashion. I added test case 560 in an attempt to verify this fix, but
+  unfortunately it didn't trigger it even before this fix!
+
 Yang Tse (11 Nov 2008)
 - Related with bug #2230535 (http://curl.haxx.se/bug/view.cgi?id=2230535)
   Daniel Fandrich noticed that curl_addrinfo was also missing in the build

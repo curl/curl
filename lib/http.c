@@ -114,11 +114,13 @@
 static int http_getsock_do(struct connectdata *conn,
                            curl_socket_t *socks,
                            int numsocks);
-static CURLcode https_connecting(struct connectdata *conn, bool *done);
 #ifdef USE_SSL
+static CURLcode https_connecting(struct connectdata *conn, bool *done);
 static int https_getsock(struct connectdata *conn,
                          curl_socket_t *socks,
                          int numsocks);
+#else
+#define https_connecting(x,y) CURLE_COULDNT_CONNECT
 #endif
 
 /*
@@ -1793,17 +1795,11 @@ static int http_getsock_do(struct connectdata *conn,
   return GETSOCK_WRITESOCK(0);
 }
 
+#ifdef USE_SSL
 static CURLcode https_connecting(struct connectdata *conn, bool *done)
 {
   CURLcode result;
   DEBUGASSERT((conn) && (conn->protocol & PROT_HTTPS));
-
-  if(conn->ssl[FIRSTSOCKET].use) {
-    /* in some circumstances, this already has SSL enabled and then we don't
-       need to connect SSL again */
-    *done = TRUE;
-    return CURLE_OK;
-  }
 
   /* perform SSL initialization for this socket */
   result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, done);
@@ -1812,6 +1808,7 @@ static CURLcode https_connecting(struct connectdata *conn, bool *done)
                                 to prevent (bad) re-use or similar */
   return result;
 }
+#endif
 
 #ifdef USE_SSLEAY
 /* This function is OpenSSL-specific. It should be made to query the generic

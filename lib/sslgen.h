@@ -79,7 +79,6 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
 #define Curl_ssl_init() 1
 #define Curl_ssl_cleanup() do { } while (0)
 #define Curl_ssl_connect(x,y) CURLE_FAILED_INIT
-#define Curl_ssl_connect_nonblocking(x,y,z) (z=z, CURLE_FAILED_INIT)
 #define Curl_ssl_close_all(x)
 #define Curl_ssl_close(x,y)
 #define Curl_ssl_shutdown(x,y) CURLE_FAILED_INIT
