@@ -5,7 +5,7 @@
 ## and optionally OpenSSL (0.9.8), libssh2 (0.18), zlib (1.2.3)
 ##
 ## Usage:
-## mingw32-make -f Makefile.m32 [SSL=1] [SSH2=1] [ZLIB=1] [SSPI=1] [IPV6=1] [DYN=1]
+## mingw32-make -f Makefile.m32 [SSL=1] [SSH2=1] [ZLIB=1] [IDN=1] [SSPI=1] [IPV6=1] [DYN=1]
 ##
 ## Hint: you can also set environment vars to control the build, f.e.:
 ## set ZLIB_PATH=c:/zlib-1.2.3
@@ -26,6 +26,10 @@ endif
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
 LIBSSH2_PATH = ../../libssh2-0.18
+endif
+# Edit the path below to point to the base of your libidn package.
+ifndef LIBIDN_PATH
+LIBIDN_PATH = ../../libidn-1.9
 endif
 # Edit the path below to point to the base of your Novell LDAP NDK.
 ifndef LDAP_SDK
@@ -71,6 +75,11 @@ ifdef ZLIB
   INCLUDES += -I"$(ZLIB_PATH)"
   CFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
   DLL_LIBS += -L$(ZLIB_PATH) -lz
+endif
+ifdef IDN
+  INCLUDES += -I"$(LIBIDN_PATH)/include"
+  CFLAGS += -DUSE_LIBIDN
+  DLL_LIBS += -L$(LIBIDN_PATH)/lib -lidn
 endif
 ifdef SSPI
   CFLAGS += -DUSE_WINDOWS_SSPI
