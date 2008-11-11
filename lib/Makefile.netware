@@ -28,6 +28,11 @@ ifndef LIBSSH2_PATH
 LIBSSH2_PATH = ../../libssh2-0.18
 endif
 
+# Edit the path below to point to the base of your libidn package.
+ifndef LIBIDN_PATH
+LIBIDN_PATH = ../../libidn-1.9
+endif
+
 ifndef INSTDIR
 INSTDIR	= ..$(DS)curl-$(LIBCURL_VERSION_STR)-bin-nw
 endif
@@ -182,6 +187,10 @@ else
 	MODULES += libz.nlm
 	IMPORTS += @$(ZLIB_PATH)/nw/$(LIBARCH)/libz.imp
 endif
+endif
+ifdef WITH_IDN
+	INCLUDES += -I$(LIBIDN_PATH)/include
+	LDLIBS += $(LIBIDN_PATH)/lib/libidn.$(LIBEXT)
 endif
 
 ifeq ($(LIBARCH),LIBC)
@@ -536,6 +545,9 @@ endif
 ifdef WITH_SSH2
 	@echo $(DL)#define USE_LIBSSH2 1$(DL) >> $@
 	@echo $(DL)#define HAVE_LIBSSH2_H 1$(DL) >> $@
+endif
+ifdef WITH_IDN
+	@echo $(DL)#define USE_LIBIDN 1$(DL) >> $@
 endif
 	@echo $(DL)#ifdef __GNUC__$(DL) >> $@
 	@echo $(DL)#define HAVE_VARIADIC_MACROS_GCC 1$(DL) >> $@
