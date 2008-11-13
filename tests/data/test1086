@@ -11,8 +11,14 @@ FAILURE
 
 # Server-side
 <reply>
+# Overload some standard FTP responses to make them shorter and faster
+# to avoid wasting time waiting for the data phase to start
 <servercmd>
 SLOWDOWN
+REPLY USER 331 OK
+REPLY PASS 230 OK
+REPLY PWD 257 "/"
+REPLY TYPE 200 OK
 </servercmd>
 <data nocheck="yes">
 Long chunk of data that couldn't possibly be sent in the time allotted.
@@ -54,7 +60,7 @@ ftp
 FTP download with strict timeout and slow data transfer
  </name>
  <command timeout="1">
-ftp://%HOSTIP:%FTPPORT/1086 -m 7
+ftp://%HOSTIP:%FTPPORT/1086 -m 6
 </command>
 </client>
 
