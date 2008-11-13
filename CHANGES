@@ -6,6 +6,8 @@
 
                                   Changelog
 
+Version 7.19.2 (13 November 2008)
+
 Michal Marek (13 Nov 2008)
 - Fixed a potential data loss in Curl_client_write() when the transfer is
   paused.
