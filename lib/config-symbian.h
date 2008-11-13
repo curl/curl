@@ -111,9 +111,6 @@
 /* Define to 1 if you have the <des.h> header file. */
 /* #undef HAVE_DES_H */
 
-/* disabled non-blocking sockets */
-/* #undef HAVE_DISABLED_NONBLOCKING */
-
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #define HAVE_DLFCN_H 1
 
@@ -129,8 +126,11 @@
 /* Define to 1 if you have the <fcntl.h> header file. */
 #define HAVE_FCNTL_H 1
 
-/* use FIONBIO for non-blocking sockets */
-#define HAVE_FIONBIO 1
+/* Define to 1 if you have the fcntl function. */
+#define HAVE_FCNTL 1
+
+/* Define to 1 if you have a working fcntl O_NONBLOCK function. */
+#define HAVE_FCNTL_O_NONBLOCK 1
 
 /* Define to 1 if you have the `fork' function. */
 /*#define HAVE_FORK 1*/
@@ -231,11 +231,23 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
 
-/* use ioctlsocket() for non-blocking sockets */
+/* Define to 1 if you have the ioctl function. */
+#define HAVE_IOCTL 1
+
+/* Define to 1 if you have a working ioctl FIONBIO function. */
+#define HAVE_IOCTL_FIONBIO 1
+
+/* Define to 1 if you have the ioctlsocket function. */
 /* #undef HAVE_IOCTLSOCKET */
 
-/* use Ioctlsocket() for non-blocking sockets */
-/* #undef HAVE_IOCTLSOCKET_CASE */
+/* Define to 1 if you have a working ioctlsocket FIONBIO function. */
+/* #undef HAVE_IOCTLSOCKET_FIONBIO */
+
+/* Define to 1 if you have the IoctlSocket camel case function. */
+/* #undef HAVE_IOCTLSOCKET_CAMEL */
+
+/* Define to 1 if you have a working IoctlSocket camel case FIONBIO function. */
+/* #undef HAVE_IOCTLSOCKET_CAMEL_FIONBIO */
 
 /* Define to 1 if you have the <io.h> header file. */
 /* #undef HAVE_IO_H */
@@ -361,9 +373,6 @@
 /* Define to 1 if you have the <openssl/x509.h> header file. */
 /*#define HAVE_OPENSSL_X509_H 1*/
 
-/* use O_NONBLOCK for non-blocking sockets */
-#define HAVE_O_NONBLOCK 1
-
 /* Define to 1 if you have the <pem.h> header file. */
 /* #undef HAVE_PEM_H */
 
@@ -427,6 +436,12 @@
 /* Define to 1 if you have the `setrlimit' function. */
 /*#define HAVE_SETRLIMIT 1*/
 
+/* Define to 1 if you have the setsockopt function. */
+/* #undef HAVE_SETSOCKOPT */
+
+/* Define to 1 if you have a working setsockopt SO_NONBLOCK function. */
+/* #undef HAVE_SETSOCKOPT_SO_NONBLOCK */
+
 /* Define to 1 if you have the <sgtty.h> header file. */
 /*#define HAVE_SGTTY_H 1*/
 
@@ -453,9 +468,6 @@
 
 /* Define to 1 if you have the `socket' function. */
 #define HAVE_SOCKET 1
-
-/* use SO_NONBLOCK for non-blocking sockets */
-/* #undef HAVE_SO_NONBLOCK */
 
 /* Define this if you have the SPNEGO library fbopenssl */
 /* #undef HAVE_SPNEGO */
@@ -714,6 +726,9 @@
 
 /* Define if you want to enable c-ares support */
 /* #undef USE_ARES */
+
+/* Define to disable non-blocking sockets */
+/* #undef USE_BLOCKING_SOCKETS */
 
 /* if GnuTLS is enabled */
 /* #undef USE_GNUTLS */

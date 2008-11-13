@@ -61,6 +61,12 @@
 /* Define if you have the inet_addr function.  */
 #define HAVE_INET_ADDR 1
 
+/* Define if you have the ioctl function. */
+#define HAVE_IOCTL 1
+
+/* Define if you have a working ioctl FIONBIO function. */
+#define HAVE_IOCTL_FIONBIO 1
+
 /* Define if you have the perror function.  */
 #define HAVE_PERROR 1
 
@@ -246,8 +252,6 @@
 
 /* Define if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H   1
-
-#define HAVE_FIONBIO	1
 
 /* Define if you have the `sigsetjmp' function. */
 #define HAVE_SIGSETJMP 1

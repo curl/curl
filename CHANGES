@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Yang Tse (13 Nov 2008)
+- Refactored configure script detection of functions used to set sockets into
+  non-blocking mode, and decouple function detection from function capability.
+
 Version 7.19.2 (13 November 2008)
 
 Michal Marek (13 Nov 2008)

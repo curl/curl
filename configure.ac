@@ -833,25 +833,6 @@ if test "$ipv6" = "yes"; then
 fi
 
 dnl **********************************************************************
-dnl Check how non-blocking sockets are set
-dnl **********************************************************************
-AC_ARG_ENABLE(nonblocking,
-AC_HELP_STRING([--enable-nonblocking],[Enable detecting how to do it])
-AC_HELP_STRING([--disable-nonblocking],[Disable non-blocking socket detection]),
-[
-  if test "$enableval" = "no" ; then
-    AC_MSG_WARN([non-blocking sockets disabled])
-    AC_DEFINE(HAVE_DISABLED_NONBLOCKING, 1,
-    [to disable NON-BLOCKING connections])
-  else
-    CURL_CHECK_NONBLOCKING_SOCKET
-  fi
-],
-[
-  CURL_CHECK_NONBLOCKING_SOCKET
-])
-
-dnl **********************************************************************
 dnl Check if the operating system allows programs to write to their own argv[]
 dnl **********************************************************************
 
@@ -2014,6 +1995,7 @@ CURL_CHECK_FUNC_SEND
 CURL_CHECK_MSG_NOSIGNAL
 
 CURL_CHECK_FUNC_ALARM
+CURL_CHECK_FUNC_FCNTL
 CURL_CHECK_FUNC_FDOPEN
 CURL_CHECK_FUNC_FREEADDRINFO
 CURL_CHECK_FUNC_FREEIFADDRS
@@ -2028,7 +2010,11 @@ CURL_CHECK_FUNC_GMTIME_R
 CURL_CHECK_FUNC_INET_NTOA_R
 CURL_CHECK_FUNC_INET_NTOP
 CURL_CHECK_FUNC_INET_PTON
+CURL_CHECK_FUNC_IOCTL
+CURL_CHECK_FUNC_IOCTLSOCKET
+CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL
 CURL_CHECK_FUNC_LOCALTIME_R
+CURL_CHECK_FUNC_SETSOCKOPT
 CURL_CHECK_FUNC_SIGACTION
 CURL_CHECK_FUNC_SIGINTERRUPT
 CURL_CHECK_FUNC_SIGNAL
@@ -2170,6 +2156,15 @@ if test "$disable_poll" = "no"; then
   fi dnl poll() was found
 fi dnl poll()-check is not disabled
 
+dnl ************************************************************
+dnl enable non-blocking communications
+dnl
+CURL_CHECK_OPTION_NONBLOCKING
+CURL_CHECK_NONBLOCKING_SOCKET
+
+dnl ************************************************************
+dnl nroff tool stuff
+dnl
 
 AC_PATH_PROG( PERL, perl, ,
   $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin )

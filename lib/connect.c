@@ -59,7 +59,7 @@
 #include <stdlib.h> /* required for free() prototype, without it, this crashes */
 #endif              /* on macos 68K */
 
-#if (defined(HAVE_FIONBIO) && defined(NETWARE))
+#if (defined(HAVE_IOCTL_FIONBIO) && defined(NETWARE))
 #include <sys/filio.h>
 #endif
 #ifdef NETWARE
@@ -189,64 +189,47 @@ long Curl_timeleft(struct connectdata *conn,
 int Curl_nonblock(curl_socket_t sockfd,    /* operate on this */
                   int nonblock   /* TRUE or FALSE */)
 {
-#undef SETBLOCK
-#define SETBLOCK 0
-#ifdef HAVE_O_NONBLOCK
+#if defined(USE_BLOCKING_SOCKETS)
+
+  return 0; /* returns success */
+
+#elif defined(HAVE_FCNTL_O_NONBLOCK)
+
   /* most recent unix versions */
   int flags;
-
   flags = fcntl(sockfd, F_GETFL, 0);
   if(FALSE != nonblock)
     return fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
   else
     return fcntl(sockfd, F_SETFL, flags & (~O_NONBLOCK));
-#undef SETBLOCK
-#define SETBLOCK 1
-#endif
 
-#if defined(HAVE_FIONBIO) && (SETBLOCK == 0)
+#elif defined(HAVE_IOCTL_FIONBIO)
+
   /* older unix versions */
   int flags;
-
   flags = nonblock;
   return ioctl(sockfd, FIONBIO, &flags);
-#undef SETBLOCK
-#define SETBLOCK 2
-#endif
 
-#if defined(HAVE_IOCTLSOCKET) && (SETBLOCK == 0)
-  /* Windows? */
+#elif defined(HAVE_IOCTLSOCKET_FIONBIO)
+
+  /* Windows */
   unsigned long flags;
   flags = nonblock;
-
   return ioctlsocket(sockfd, FIONBIO, &flags);
-#undef SETBLOCK
-#define SETBLOCK 3
-#endif
 
-#if defined(HAVE_IOCTLSOCKET_CASE) && (SETBLOCK == 0)
-  /* presumably for Amiga */
+#elif defined(HAVE_IOCTLSOCKET_CAMEL_FIONBIO)
+
+  /* Amiga */
   return IoctlSocket(sockfd, FIONBIO, (long)nonblock);
-#undef SETBLOCK
-#define SETBLOCK 4
-#endif
 
-#if defined(HAVE_SO_NONBLOCK) && (SETBLOCK == 0)
+#elif defined(HAVE_SETSOCKOPT_SO_NONBLOCK)
+
   /* BeOS */
   long b = nonblock ? 1 : 0;
   return setsockopt(sockfd, SOL_SOCKET, SO_NONBLOCK, &b, sizeof(b));
-#undef SETBLOCK
-#define SETBLOCK 5
-#endif
 
-#ifdef HAVE_DISABLED_NONBLOCKING
-  return 0; /* returns success */
-#undef SETBLOCK
-#define SETBLOCK 6
-#endif
-
-#if(SETBLOCK == 0)
-#error "no non-blocking method was found/used/set"
+#else
+#  error "no non-blocking method was found/used/set"
 #endif
 }
 

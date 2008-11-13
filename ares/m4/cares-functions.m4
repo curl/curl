@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 18
+# serial 19
 
 
 dnl CARES_INCLUDES_ARPA_INET
@@ -43,6 +43,30 @@ cares_includes_arpa_inet="\
   AC_CHECK_HEADERS(
     sys/types.h sys/socket.h netinet/in.h arpa/inet.h,
     [], [], [$cares_includes_arpa_inet])
+])
+
+
+dnl CARES_INCLUDES_FCNTL
+dnl -------------------------------------------------
+dnl Set up variable with list of headers that must be
+dnl included when fcntl.h is to be included.
+
+AC_DEFUN([CARES_INCLUDES_FCNTL], [
+cares_includes_fcntl="\
+/* includes start */
+#ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
+#ifdef HAVE_STROPTS_H
+#  include <fcntl.h>
+#endif
+/* includes end */"
+  AC_CHECK_HEADERS(
+    sys/types.h unistd.h fcntl.h,
+    [], [], [$cares_includes_fcntl])
 ])
 
 
@@ -109,6 +133,36 @@ cares_includes_string="\
   AC_CHECK_HEADERS(
     sys/types.h string.h strings.h,
     [], [], [$cares_includes_string])
+])
+
+
+dnl CARES_INCLUDES_STROPTS
+dnl -------------------------------------------------
+dnl Set up variable with list of headers that must be
+dnl included when stropts.h is to be included.
+
+AC_DEFUN([CARES_INCLUDES_STROPTS], [
+cares_includes_stropts="\
+/* includes start */
+#ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#  include <sys/socket.h>
+#endif
+#ifdef HAVE_SYS_IOCTL_H
+#  include <sys/ioctl.h>
+#endif
+#ifdef HAVE_STROPTS_H
+#  include <stropts.h>
+#endif
+/* includes end */"
+  AC_CHECK_HEADERS(
+    sys/types.h unistd.h sys/socket.h sys/ioctl.h stropts.h,
+    [], [], [$cares_includes_stropts])
 ])
 
 
@@ -227,6 +281,155 @@ cares_includes_ws2tcpip="\
   CURL_CHECK_HEADER_WINDOWS
   CURL_CHECK_HEADER_WINSOCK2
   CURL_CHECK_HEADER_WS2TCPIP
+])
+
+
+dnl CARES_CHECK_FUNC_FCNTL
+dnl -------------------------------------------------
+dnl Verify if fcntl is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable cares_disallow_fcntl, then
+dnl HAVE_FCNTL will be defined.
+
+AC_DEFUN([CARES_CHECK_FUNC_FCNTL], [
+  AC_REQUIRE([CARES_INCLUDES_FCNTL])dnl
+  #
+  tst_links_fcntl="unknown"
+  tst_proto_fcntl="unknown"
+  tst_compi_fcntl="unknown"
+  tst_allow_fcntl="unknown"
+  #
+  AC_MSG_CHECKING([if fcntl can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([fcntl])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_fcntl="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_fcntl="no"
+  ])
+  #
+  if test "$tst_links_fcntl" = "yes"; then
+    AC_MSG_CHECKING([if fcntl is prototyped])
+    AC_EGREP_CPP([fcntl],[
+      $cares_includes_fcntl
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_fcntl="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_fcntl="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_fcntl" = "yes"; then
+    AC_MSG_CHECKING([if fcntl is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $cares_includes_fcntl
+      ]],[[
+        if(0 != fcntl(0, 0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_fcntl="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_fcntl="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_fcntl" = "yes"; then
+    AC_MSG_CHECKING([if fcntl usage allowed])
+    if test "x$cares_disallow_fcntl" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_fcntl="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_fcntl="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if fcntl might be used])
+  if test "$tst_links_fcntl" = "yes" &&
+     test "$tst_proto_fcntl" = "yes" &&
+     test "$tst_compi_fcntl" = "yes" &&
+     test "$tst_allow_fcntl" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_FCNTL, 1,
+      [Define to 1 if you have the fcntl function.])
+    ac_cv_func_fcntl="yes"
+    CARES_CHECK_FUNC_FCNTL_O_NONBLOCK
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_fcntl="no"
+  fi
+])
+
+
+dnl CARES_CHECK_FUNC_FCNTL_O_NONBLOCK
+dnl -------------------------------------------------
+dnl Verify if fcntl with status flag O_NONBLOCK is
+dnl available, can be compiled, and seems to work. If
+dnl all of these are true, then HAVE_FCNTL_O_NONBLOCK
+dnl will be defined.
+
+AC_DEFUN([CARES_CHECK_FUNC_FCNTL_O_NONBLOCK], [
+  #
+  tst_compi_fcntl_o_nonblock="unknown"
+  tst_allow_fcntl_o_nonblock="unknown"
+  #
+  case $host_os in
+    sunos4* | aix3* | beos*)
+      dnl O_NONBLOCK does not work on these platforms
+      cares_disallow_fcntl_o_nonblock="yes"
+      ;;
+  esac
+  #
+  if test "$ac_cv_func_fcntl" = "yes"; then
+    AC_MSG_CHECKING([if fcntl O_NONBLOCK is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $cares_includes_fcntl
+      ]],[[
+        int flags = 0;
+        if(0 != fcntl(0, F_SETFL, flags | O_NONBLOCK))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_fcntl_o_nonblock="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_fcntl_o_nonblock="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_fcntl_o_nonblock" = "yes"; then
+    AC_MSG_CHECKING([if fcntl O_NONBLOCK usage allowed])
+    if test "x$cares_disallow_fcntl_o_nonblock" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_fcntl_o_nonblock="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_fcntl_o_nonblock="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if fcntl O_NONBLOCK might be used])
+  if test "$tst_compi_fcntl_o_nonblock" = "yes" &&
+     test "$tst_allow_fcntl_o_nonblock" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_FCNTL_O_NONBLOCK, 1,
+      [Define to 1 if you have a working fcntl O_NONBLOCK function.])
+    ac_cv_func_fcntl_o_nonblock="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_fcntl_o_nonblock="no"
+  fi
 ])
 
 
@@ -1014,6 +1217,587 @@ AC_DEFUN([CARES_CHECK_FUNC_INET_PTON], [
   else
     AC_MSG_RESULT([no])
     ac_cv_func_inet_pton="no"
+  fi
+])
+
+
+dnl CARES_CHECK_FUNC_IOCTL
+dnl -------------------------------------------------
+dnl Verify if ioctl is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable cares_disallow_ioctl, then
+dnl HAVE_IOCTL will be defined.
+
+AC_DEFUN([CARES_CHECK_FUNC_IOCTL], [
+  AC_REQUIRE([CARES_INCLUDES_STROPTS])dnl
+  #
+  tst_links_ioctl="unknown"
+  tst_proto_ioctl="unknown"
+  tst_compi_ioctl="unknown"
+  tst_allow_ioctl="unknown"
+  #
+  AC_MSG_CHECKING([if ioctl can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([ioctl])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_ioctl="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_ioctl="no"
+  ])
+  #
+  if test "$tst_links_ioctl" = "yes"; then
+    AC_MSG_CHECKING([if ioctl is prototyped])
+    AC_EGREP_CPP([ioctl],[
+      $cares_includes_stropts
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_ioctl="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_ioctl="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_ioctl" = "yes"; then
+    AC_MSG_CHECKING([if ioctl is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $cares_includes_stropts
+      ]],[[
+        if(0 != ioctl(0, 0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_ioctl="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_ioctl="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_ioctl" = "yes"; then
+    AC_MSG_CHECKING([if ioctl usage allowed])
+    if test "x$cares_disallow_ioctl" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_ioctl="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_ioctl="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if ioctl might be used])
+  if test "$tst_links_ioctl" = "yes" &&
+     test "$tst_proto_ioctl" = "yes" &&
+     test "$tst_compi_ioctl" = "yes" &&
+     test "$tst_allow_ioctl" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_IOCTL, 1,
+      [Define to 1 if you have the ioctl function.])
+    ac_cv_func_ioctl="yes"
+    CARES_CHECK_FUNC_IOCTL_FIONBIO
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_ioctl="no"
+  fi
+])
+
+
+dnl CARES_CHECK_FUNC_IOCTL_FIONBIO
+dnl -------------------------------------------------
+dnl Verify if ioctl with the FIONBIO command is
+dnl available, can be compiled, and seems to work. If
+dnl all of these are true, then HAVE_IOCTL_FIONBIO
+dnl will be defined.
+
+AC_DEFUN([CARES_CHECK_FUNC_IOCTL_FIONBIO], [
+  #
+  tst_compi_ioctl_fionbio="unknown"
+  tst_allow_ioctl_fionbio="unknown"
+  #
+  if test "$ac_cv_func_ioctl" = "yes"; then
+    AC_MSG_CHECKING([if ioctl FIONBIO is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $cares_includes_stropts
+      ]],[[
+        int flags = 0;
+        if(0 != ioctl(0, FIONBIO, &flags))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_ioctl_fionbio="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_ioctl_fionbio="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_ioctl_fionbio" = "yes"; then
+    AC_MSG_CHECKING([if ioctl FIONBIO usage allowed])
+    if test "x$cares_disallow_ioctl_fionbio" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_ioctl_fionbio="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_ioctl_fionbio="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if ioctl FIONBIO might be used])
+  if test "$tst_compi_ioctl_fionbio" = "yes" &&
+     test "$tst_allow_ioctl_fionbio" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_IOCTL_FIONBIO, 1,
+      [Define to 1 if you have a working ioctl FIONBIO function.])
+    ac_cv_func_ioctl_fionbio="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_ioctl_fionbio="no"
+  fi
+])
+
+
+dnl CARES_CHECK_FUNC_IOCTLSOCKET
+dnl -------------------------------------------------
+dnl Verify if ioctlsocket is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable cares_disallow_ioctlsocket, then
+dnl HAVE_IOCTLSOCKET will be defined.
+
+AC_DEFUN([CARES_CHECK_FUNC_IOCTLSOCKET], [
+  AC_REQUIRE([CARES_INCLUDES_WINSOCK2])dnl
+  #
+  tst_links_ioctlsocket="unknown"
+  tst_proto_ioctlsocket="unknown"
+  tst_compi_ioctlsocket="unknown"
+  tst_allow_ioctlsocket="unknown"
+  #
+  AC_MSG_CHECKING([if ioctlsocket can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+      $cares_includes_winsock2
+    ]],[[
+      if(0 != ioctlsocket(0, 0, 0))
+        return 1;
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_ioctlsocket="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_ioctlsocket="no"
+  ])
+  #
+  if test "$tst_links_ioctlsocket" = "yes"; then
+    AC_MSG_CHECKING([if ioctlsocket is prototyped])
+    AC_EGREP_CPP([ioctlsocket],[
+      $cares_includes_winsock2
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_ioctlsocket="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_ioctlsocket="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_ioctlsocket" = "yes"; then
+    AC_MSG_CHECKING([if ioctlsocket is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $cares_includes_winsock2
+      ]],[[
+        if(0 != ioctlsocket(0, 0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_ioctlsocket="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_ioctlsocket="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_ioctlsocket" = "yes"; then
+    AC_MSG_CHECKING([if ioctlsocket usage allowed])
+    if test "x$cares_disallow_ioctlsocket" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_ioctlsocket="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_ioctlsocket="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if ioctlsocket might be used])
+  if test "$tst_links_ioctlsocket" = "yes" &&
+     test "$tst_proto_ioctlsocket" = "yes" &&
+     test "$tst_compi_ioctlsocket" = "yes" &&
+     test "$tst_allow_ioctlsocket" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_IOCTLSOCKET, 1,
+      [Define to 1 if you have the ioctlsocket function.])
+    ac_cv_func_ioctlsocket="yes"
+    CARES_CHECK_FUNC_IOCTLSOCKET_FIONBIO
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_ioctlsocket="no"
+  fi
+])
+
+
+dnl CARES_CHECK_FUNC_IOCTLSOCKET_FIONBIO
+dnl -------------------------------------------------
+dnl Verify if ioctlsocket with the FIONBIO command is
+dnl available, can be compiled, and seems to work. If
+dnl all of these are true, then HAVE_IOCTLSOCKET_FIONBIO
+dnl will be defined.
+
+AC_DEFUN([CARES_CHECK_FUNC_IOCTLSOCKET_FIONBIO], [
+  #
+  tst_compi_ioctlsocket_fionbio="unknown"
+  tst_allow_ioctlsocket_fionbio="unknown"
+  #
+  if test "$ac_cv_func_ioctlsocket" = "yes"; then
+    AC_MSG_CHECKING([if ioctlsocket FIONBIO is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $cares_includes_winsock2
+      ]],[[
+        int flags = 0;
+        if(0 != ioctlsocket(0, FIONBIO, &flags))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_ioctlsocket_fionbio="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_ioctlsocket_fionbio="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_ioctlsocket_fionbio" = "yes"; then
+    AC_MSG_CHECKING([if ioctlsocket FIONBIO usage allowed])
+    if test "x$cares_disallow_ioctlsocket_fionbio" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_ioctlsocket_fionbio="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_ioctlsocket_fionbio="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if ioctlsocket FIONBIO might be used])
+  if test "$tst_compi_ioctlsocket_fionbio" = "yes" &&
+     test "$tst_allow_ioctlsocket_fionbio" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_IOCTLSOCKET_FIONBIO, 1,
+      [Define to 1 if you have a working ioctlsocket FIONBIO function.])
+    ac_cv_func_ioctlsocket_fionbio="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_ioctlsocket_fionbio="no"
+  fi
+])
+
+
+dnl CARES_CHECK_FUNC_IOCTLSOCKET_CAMEL
+dnl -------------------------------------------------
+dnl Verify if IoctlSocket is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable cares_disallow_ioctlsocket_camel,
+dnl then HAVE_IOCTLSOCKET_CAMEL will be defined.
+
+AC_DEFUN([CARES_CHECK_FUNC_IOCTLSOCKET_CAMEL], [
+  AC_REQUIRE([CARES_INCLUDES_STROPTS])dnl
+  #
+  tst_links_ioctlsocket_camel="unknown"
+  tst_proto_ioctlsocket_camel="unknown"
+  tst_compi_ioctlsocket_camel="unknown"
+  tst_allow_ioctlsocket_camel="unknown"
+  #
+  AC_MSG_CHECKING([if IoctlSocket can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([IoctlSocket])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_ioctlsocket_camel="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_ioctlsocket_camel="no"
+  ])
+  #
+  if test "$tst_links_ioctlsocket_camel" = "yes"; then
+    AC_MSG_CHECKING([if IoctlSocket is prototyped])
+    AC_EGREP_CPP([IoctlSocket],[
+      $cares_includes_stropts
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_ioctlsocket_camel="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_ioctlsocket_camel="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_ioctlsocket_camel" = "yes"; then
+    AC_MSG_CHECKING([if IoctlSocket is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $cares_includes_stropts
+      ]],[[
+        if(0 != IoctlSocket(0, 0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_ioctlsocket_camel="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_ioctlsocket_camel="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_ioctlsocket_camel" = "yes"; then
+    AC_MSG_CHECKING([if IoctlSocket usage allowed])
+    if test "x$cares_disallow_ioctlsocket_camel" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_ioctlsocket_camel="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_ioctlsocket_camel="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if IoctlSocket might be used])
+  if test "$tst_links_ioctlsocket_camel" = "yes" &&
+     test "$tst_proto_ioctlsocket_camel" = "yes" &&
+     test "$tst_compi_ioctlsocket_camel" = "yes" &&
+     test "$tst_allow_ioctlsocket_camel" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_IOCTLSOCKET_CAMEL, 1,
+      [Define to 1 if you have the IoctlSocket camel case function.])
+    ac_cv_func_ioctlsocket_camel="yes"
+    CARES_CHECK_FUNC_IOCTLSOCKET_CAMEL_FIONBIO
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_ioctlsocket_camel="no"
+  fi
+])
+
+
+dnl CARES_CHECK_FUNC_IOCTLSOCKET_CAMEL_FIONBIO
+dnl -------------------------------------------------
+dnl Verify if IoctlSocket with FIONBIO command is available,
+dnl can be compiled, and seems to work. If all of these are
+dnl true, then HAVE_IOCTLSOCKET_CAMEL_FIONBIO will be defined.
+
+AC_DEFUN([CARES_CHECK_FUNC_IOCTLSOCKET_CAMEL_FIONBIO], [
+  #
+  tst_compi_ioctlsocket_camel_fionbio="unknown"
+  tst_allow_ioctlsocket_camel_fionbio="unknown"
+  #
+  if test "$ac_cv_func_ioctlsocket_camel" = "yes"; then
+    AC_MSG_CHECKING([if IoctlSocket FIONBIO is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $cares_includes_stropts
+      ]],[[
+        long flags = 0;
+        if(0 != ioctlsocket(0, FIONBIO, &flags))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_ioctlsocket_camel_fionbio="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_ioctlsocket_camel_fionbio="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_ioctlsocket_camel_fionbio" = "yes"; then
+    AC_MSG_CHECKING([if IoctlSocket FIONBIO usage allowed])
+    if test "x$cares_disallow_ioctlsocket_camel_fionbio" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_ioctlsocket_camel_fionbio="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_ioctlsocket_camel_fionbio="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if IoctlSocket FIONBIO might be used])
+  if test "$tst_compi_ioctlsocket_camel_fionbio" = "yes" &&
+     test "$tst_allow_ioctlsocket_camel_fionbio" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_IOCTLSOCKET_CAMEL_FIONBIO, 1,
+      [Define to 1 if you have a working IoctlSocket camel case FIONBIO function.])
+    ac_cv_func_ioctlsocket_camel_fionbio="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_ioctlsocket_camel_fionbio="no"
+  fi
+])
+
+
+dnl CARES_CHECK_FUNC_SETSOCKOPT
+dnl -------------------------------------------------
+dnl Verify if setsockopt is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable cares_disallow_setsockopt, then
+dnl HAVE_SETSOCKOPT will be defined.
+
+AC_DEFUN([CARES_CHECK_FUNC_SETSOCKOPT], [
+  AC_REQUIRE([CARES_INCLUDES_WINSOCK2])dnl
+  AC_REQUIRE([CARES_INCLUDES_SYS_SOCKET])dnl
+  #
+  tst_links_setsockopt="unknown"
+  tst_proto_setsockopt="unknown"
+  tst_compi_setsockopt="unknown"
+  tst_allow_setsockopt="unknown"
+  #
+  AC_MSG_CHECKING([if setsockopt can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+      $cares_includes_winsock2
+      $cares_includes_sys_socket
+    ]],[[
+      if(0 != setsockopt(0, 0, 0, 0, 0))
+        return 1;
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_setsockopt="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_setsockopt="no"
+  ])
+  #
+  if test "$tst_links_setsockopt" = "yes"; then
+    AC_MSG_CHECKING([if setsockopt is prototyped])
+    AC_EGREP_CPP([setsockopt],[
+      $cares_includes_winsock2
+      $cares_includes_sys_socket
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_setsockopt="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_setsockopt="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_setsockopt" = "yes"; then
+    AC_MSG_CHECKING([if setsockopt is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $cares_includes_winsock2
+        $cares_includes_sys_socket
+      ]],[[
+        if(0 != setsockopt(0, 0, 0, 0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_setsockopt="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_setsockopt="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_setsockopt" = "yes"; then
+    AC_MSG_CHECKING([if setsockopt usage allowed])
+    if test "x$cares_disallow_setsockopt" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_setsockopt="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_setsockopt="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if setsockopt might be used])
+  if test "$tst_links_setsockopt" = "yes" &&
+     test "$tst_proto_setsockopt" = "yes" &&
+     test "$tst_compi_setsockopt" = "yes" &&
+     test "$tst_allow_setsockopt" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_SETSOCKOPT, 1,
+      [Define to 1 if you have the setsockopt function.])
+    ac_cv_func_setsockopt="yes"
+    CARES_CHECK_FUNC_SETSOCKOPT_SO_NONBLOCK
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_setsockopt="no"
+  fi
+])
+
+
+dnl CARES_CHECK_FUNC_SETSOCKOPT_SO_NONBLOCK
+dnl -------------------------------------------------
+dnl Verify if setsockopt with the SO_NONBLOCK command is
+dnl available, can be compiled, and seems to work. If
+dnl all of these are true, then HAVE_SETSOCKOPT_SO_NONBLOCK
+dnl will be defined.
+
+AC_DEFUN([CARES_CHECK_FUNC_SETSOCKOPT_SO_NONBLOCK], [
+  #
+  tst_compi_setsockopt_so_nonblock="unknown"
+  tst_allow_setsockopt_so_nonblock="unknown"
+  #
+  if test "$ac_cv_func_setsockopt" = "yes"; then
+    AC_MSG_CHECKING([if setsockopt SO_NONBLOCK is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $cares_includes_winsock2
+        $cares_includes_sys_socket
+      ]],[[
+        if(0 != setsockopt(0, SOL_SOCKET, SO_NONBLOCK, 0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_setsockopt_so_nonblock="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_setsockopt_so_nonblock="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_setsockopt_so_nonblock" = "yes"; then
+    AC_MSG_CHECKING([if setsockopt SO_NONBLOCK usage allowed])
+    if test "x$cares_disallow_setsockopt_so_nonblock" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_setsockopt_so_nonblock="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_setsockopt_so_nonblock="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if setsockopt SO_NONBLOCK might be used])
+  if test "$tst_compi_setsockopt_so_nonblock" = "yes" &&
+     test "$tst_allow_setsockopt_so_nonblock" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_SETSOCKOPT_SO_NONBLOCK, 1,
+      [Define to 1 if you have a working setsockopt SO_NONBLOCK function.])
+    ac_cv_func_setsockopt_so_nonblock="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_setsockopt_so_nonblock="no"
   fi
 ])
 

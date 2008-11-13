@@ -72,14 +72,20 @@
 /*                             FUNCTIONS                            */
 /* ---------------------------------------------------------------- */
 
-/* Define if you have the setmode function. */
-#define HAVE_SETMODE 1
-
 /* Define if you have the ftruncate function.  */
 #define HAVE_FTRUNCATE 1
 
+/* Define if you have the ioctlsocket function. */
+#define HAVE_IOCTLSOCKET 1
+
+/* Define if you have a working ioctlsocket FIONBIO function. */
+#define HAVE_IOCTLSOCKET_FIONBIO 1
+
 /* Define if you have the setlocale function.  */
 #define HAVE_SETLOCALE 1
+
+/* Define if you have the setmode function. */
+#define HAVE_SETMODE 1
 
 /* Define if you have the strcasecmp function. */
 /* #define HAVE_STRCASECMP 1 */

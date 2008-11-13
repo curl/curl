@@ -394,7 +394,11 @@
 
 #define IOCTL_3_ARGS
 
-#define HAVE_FIONBIO
+/* Define if you have the ioctl function. */
+#define HAVE_IOCTL
+
+/* Define if you have a working ioctl FIONBIO function. */
+#define HAVE_IOCTL_FIONBIO
 
 /* to disable LDAP */
 #undef CURL_DISABLE_LDAP

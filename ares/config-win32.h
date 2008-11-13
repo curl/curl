@@ -76,8 +76,11 @@
 /*                             FUNCTIONS                            */
 /* ---------------------------------------------------------------- */
 
-/* Define if you have the ioctlsocket function.  */
+/* Define if you have the ioctlsocket function. */
 #define HAVE_IOCTLSOCKET 1
+
+/* Define if you have a working ioctlsocket FIONBIO function. */
+#define HAVE_IOCTLSOCKET_FIONBIO 1
 
 /* Define if you have the strcasecmp function. */
 /* #define HAVE_STRCASECMP 1 */
