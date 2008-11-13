@@ -425,7 +425,7 @@ static CURLcode pausewrite(struct SessionHandle *data,
 }
 
 
-/* client_write() sends data to the write callback(s)
+/* Curl_client_write() sends data to the write callback(s)
 
    The bit pattern defines to what "streams" to write to. Body and/or header.
    The defines are in sendf.h of course.
@@ -441,6 +441,9 @@ CURLcode Curl_client_write(struct connectdata *conn,
 {
   struct SessionHandle *data = conn->data;
   size_t wrote;
+
+  if(0 == len)
+    len = strlen(ptr);
 
   /* If reading is actually paused, we're forced to append this chunk of data
      to the already held data, but only if it is the same type as otherwise it
@@ -468,9 +471,6 @@ CURLcode Curl_client_write(struct connectdata *conn,
 
     return CURLE_OK;
   }
-
-  if(0 == len)
-    len = strlen(ptr);
 
   if(type & CLIENTWRITE_BODY) {
     if((conn->protocol&PROT_FTP) && conn->proto.ftpc.transfertype == 'A') {

@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Michal Marek (13 Nov 2008)
+- Fixed a potential data loss in Curl_client_write() when the transfer is
+  paused.
+
 Daniel Stenberg (11 Nov 2008)
 - Rainer Canavan filed bug #2255627
   (http://curl.haxx.se/bug/view.cgi?id=2255627) which pointed out that a
