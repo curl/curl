@@ -829,6 +829,7 @@ PORTS
         - HP-PA HP-UX 9.X 10.X 11.X
         - HP-PA Linux
         - HP3000 MPE/iX
+        - Cell Linux
         - MIPS IRIX 6.2, 6.5
         - MIPS Linux
         - OS/400
