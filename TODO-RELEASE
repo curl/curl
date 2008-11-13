@@ -6,4 +6,8 @@ To be addressed in 7.19.3 (planned release: January 2009)
 
 192 - "infinite loop during GSS authentication" bug #2221237
 
-193 - 
+193 - Fix zero-byte file transfers
+
+194 - remove "Pragma: no-cache" from default HTTP requests
+
+195 - 
