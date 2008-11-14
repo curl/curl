@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 38
+# serial 39
 
 
 dnl CURL_INCLUDES_ARPA_INET
@@ -43,7 +43,7 @@ curl_includes_arpa_inet="\
 #  include <netinet/in.h>
 #endif
 #ifdef HAVE_ARPA_INET_H
-#  include <arpa_inet.h>
+#  include <arpa/inet.h>
 #endif
 /* includes end */"
   AC_CHECK_HEADERS(

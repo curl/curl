@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 21
+# serial 22
 
 
 dnl CARES_INCLUDES_ARPA_INET
@@ -37,7 +37,7 @@ cares_includes_arpa_inet="\
 #  include <netinet/in.h>
 #endif
 #ifdef HAVE_ARPA_INET_H
-#  include <arpa_inet.h>
+#  include <arpa/inet.h>
 #endif
 /* includes end */"
   AC_CHECK_HEADERS(
