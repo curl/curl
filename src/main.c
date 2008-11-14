@@ -4284,11 +4284,17 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             {
               /* This is for DOS, and then we do some major replacing of
                  bad characters in the file name before using it */
-              char file1 [PATH_MAX];
-
+              char file1[PATH_MAX];
+              if(strlen(outfile) >= PATH_MAX)
+                outfile[PATH_MAX-1]=0; /* cut it */
               strcpy(file1, msdosify(outfile));
-              free (outfile);
-              outfile = strdup (rename_if_dos_device_name(file1));
+              free(outfile);
+
+              outfile = strdup(rename_if_dos_device_name(file1));
+              if(!outfile) {
+                res = CURLE_OUT_OF_MEMORY;
+                break;
+              }
             }
 #endif /* MSDOS */
           }
@@ -5146,12 +5152,19 @@ static char *my_get_line(FILE *fp)
    do {
      if (NULL == fgets(buf, sizeof(buf), fp))
        break;
-     if (NULL == retval)
+     if (NULL == retval) {
        retval = strdup(buf);
+       if(!retval)
+         return NULL;
+     }
      else {
-       if (NULL == (retval = realloc(retval,
-                                     strlen(retval) + strlen(buf) + 1)))
-         break;
+       char *ptr;
+       ptr = realloc(retval, strlen(retval) + strlen(buf) + 1);
+       if (NULL == ptr) {
+         free(retval);
+         return NULL;
+       }
+       retval = ptr;
        strcat(retval, buf);
      }
    }
