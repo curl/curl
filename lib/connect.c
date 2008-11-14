@@ -848,12 +848,14 @@ singleipconnect(struct connectdata *conn,
     switch (error) {
     case EINPROGRESS:
     case EWOULDBLOCK:
-#if defined(EAGAIN) && EAGAIN != EWOULDBLOCK
+#if defined(EAGAIN)
+#if (EAGAIN) != (EWOULDBLOCK)
       /* On some platforms EAGAIN and EWOULDBLOCK are the
        * same value, and on others they are different, hence
        * the odd #if
        */
     case EAGAIN:
+#endif
 #endif
       rc = waitconnect(sockfd, timeout_ms);
       break;
