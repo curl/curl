@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 35
+# serial 36
 
 
 dnl CURL_INCLUDES_ARPA_INET
@@ -1516,6 +1516,7 @@ dnl with shell variable curl_disallow_getifaddrs, then
 dnl HAVE_GETIFADDRS will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_GETIFADDRS], [
+  AC_REQUIRE([CURL_INCLUDES_STDLIB])dnl
   AC_REQUIRE([CURL_INCLUDES_IFADDRS])dnl
   #
   tst_links_getifaddrs="unknown"
@@ -1572,6 +1573,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETIFADDRS], [
     AC_MSG_CHECKING([if getifaddrs seems to work])
     AC_RUN_IFELSE([
       AC_LANG_PROGRAM([[
+        $curl_includes_stdlib
         $curl_includes_ifaddrs
       ]],[[
         struct ifaddrs *ifa = 0;
