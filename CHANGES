@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Fandrich (14 Nov 2008)
+- Added .xml as one of the few common file extensions known by the multipart
+  form generator.
+
 Yang Tse (13 Nov 2008)
 - Refactored configure script detection of functions used to set sockets into
   non-blocking mode, and decouple function detection from function capability.
