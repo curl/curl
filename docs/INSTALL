@@ -782,9 +782,13 @@ REDUCING SIZE
      --without-ssl (disables support for SSL/TLS)
      --without-zlib (disables support for on-the-fly decompression)
 
-   The GNU linker has a number of options to reduce the size of the libcurl
-   dynamic libraries on some platforms even further. Specify them by giving
-   the options -Wl,-Bsymbolic and -Wl,-s on the gcc command-line.  
+   The GNU compiler and linker have a number of options that can reduce the
+   size of the libcurl dynamic libraries on some platforms even further.
+   Specify them by providing appropriate CFLAGS and LDFLAGS variables on the
+   configure command-line:
+     CFLAGS="-ffunction-sections -fdata-sections" \
+     LDFLAGS="-Wl,-s -Wl,-Bsymbolic -Wl,--gc-sections"
+
    Be sure also to strip debugging symbols from your binaries after
    compiling using 'strip' (or the appropriate variant if cross-compiling).
    If space is really tight, you may be able to remove some unneeded
@@ -826,10 +830,11 @@ PORTS
         - Alpha OpenVMS V7.1-1H2
         - Alpha Tru64 v5.0 5.1
         - AVR32 Linux
+        - ARM INTEGRITY
+        - Cell Linux
         - HP-PA HP-UX 9.X 10.X 11.X
         - HP-PA Linux
         - HP3000 MPE/iX
-        - Cell Linux
         - MIPS IRIX 6.2, 6.5
         - MIPS Linux
         - OS/400
@@ -849,7 +854,6 @@ PORTS
         - StrongARM (and other ARM) RISC OS 3.1, 4.02
         - StrongARM/ARM7/ARM9 Linux 2.4, 2.6
         - StrongARM NetBSD 1.4.1
-        - ARM INTEGRITY
         - Symbian OS (P.I.P.S.) 9.x
         - TPF
         - Ultrix 4.3a
@@ -879,6 +883,7 @@ PORTS
         - m68k OpenBSD
         - m88k dg-dgux5.4R3.00
         - s390 Linux
+        - x86_64 Linux
         - XScale/PXA250 Linux 2.4
         - Nios II uClinux
 
