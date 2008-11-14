@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 37
+# serial 38
 
 
 dnl CURL_INCLUDES_ARPA_INET
@@ -1004,6 +1004,7 @@ dnl HAVE_GETADDRINFO will be defined.
 AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   AC_REQUIRE([CURL_INCLUDES_WS2TCPIP])dnl
   AC_REQUIRE([CURL_INCLUDES_STDLIB])dnl
+  AC_REQUIRE([CURL_INCLUDES_STRING])dnl
   AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
   AC_REQUIRE([CURL_INCLUDES_NETDB])dnl
   #
@@ -1074,6 +1075,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
       AC_LANG_PROGRAM([[
         $curl_includes_ws2tcpip
         $curl_includes_stdlib
+        $curl_includes_string
         $curl_includes_sys_socket
         $curl_includes_netdb
       ]],[[

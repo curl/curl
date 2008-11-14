@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 20
+# serial 21
 
 
 dnl CARES_INCLUDES_ARPA_INET
@@ -540,6 +540,7 @@ dnl HAVE_GETADDRINFO will be defined.
 AC_DEFUN([CARES_CHECK_FUNC_GETADDRINFO], [
   AC_REQUIRE([CARES_INCLUDES_WS2TCPIP])dnl
   AC_REQUIRE([CARES_INCLUDES_STDLIB])dnl
+  AC_REQUIRE([CARES_INCLUDES_STRING])dnl
   AC_REQUIRE([CARES_INCLUDES_SYS_SOCKET])dnl
   AC_REQUIRE([CARES_INCLUDES_NETDB])dnl
   #
@@ -610,6 +611,7 @@ AC_DEFUN([CARES_CHECK_FUNC_GETADDRINFO], [
       AC_LANG_PROGRAM([[
         $cares_includes_ws2tcpip
         $cares_includes_stdlib
+        $cares_includes_string
         $cares_includes_sys_socket
         $cares_includes_netdb
       ]],[[
