@@ -1100,7 +1100,7 @@ static char *strippath(const char *fullfile)
 
   free(filename); /* free temporary buffer */
 
-  return base; /* returns an allocated string! */
+  return base; /* returns an allocated string or NULL ! */
 }
 
 /*
@@ -1207,8 +1207,12 @@ CURLcode Curl_getFormData(struct FormData **finalform,
 
       if(post->more) {
         /* if multiple-file */
-        char *filebasename=
-          (!file->showfilename)?strippath(file->contents):NULL;
+        char *filebasename= NULL;
+        if(!file->showfilename) {
+          filebasename = strippath(file->contents);
+          if(!filebasename)
+            return CURLE_OUT_OF_MEMORY;
+        }
 
         result = AddFormDataf(&form, &size,
                               "\r\n--%s\r\nContent-Disposition: "
