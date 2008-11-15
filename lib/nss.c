@@ -65,6 +65,7 @@
 #include <certdb.h>
 
 #include "memory.h"
+#include "rawstr.h"
 #include "easyif.h" /* for Curl_convert_from_utf8 prototype */
 
 /* The last #include file should be: */
@@ -263,7 +264,7 @@ nss_load_cert(const char *filename, PRBool cacert)
   CK_BBOOL cktrue = CK_TRUE;
   CK_BBOOL ckfalse = CK_FALSE;
   CK_OBJECT_CLASS objClass = CKO_CERTIFICATE;
-  char *slotname = NULL;
+  char slotname[SLOTSIZE];
 #endif
   CERTCertificate *cert;
   char *nickname = NULL;
@@ -284,6 +285,8 @@ nss_load_cert(const char *filename, PRBool cacert)
     if(cacert)
       return 0; /* You can't specify an NSS CA nickname this way */
     nickname = strdup(filename);
+    if(!nickname)
+      return 0;
     goto done;
   }
 
@@ -299,15 +302,15 @@ nss_load_cert(const char *filename, PRBool cacert)
   else
     slotID = 1;
 
-  slotname = malloc(SLOTSIZE);
-  nickname = malloc(PATH_MAX);
   snprintf(slotname, SLOTSIZE, "PEM Token #%ld", slotID);
-  snprintf(nickname, PATH_MAX, "PEM Token #%ld:%s", slotID, n);
+
+  nickname = aprintf("PEM Token #%ld:%s", slotID, n);
+  if(!nickname)
+    return 0;
 
   slot = PK11_FindSlotByName(slotname);
 
   if(!slot) {
-    free(slotname);
     free(nickname);
     return 0;
   }
@@ -334,7 +337,6 @@ nss_load_cert(const char *filename, PRBool cacert)
 
   PK11_FreeSlot(slot);
 
-  free(slotname);
   if(rv == NULL) {
     free(nickname);
     return 0;
@@ -452,8 +454,8 @@ static int nss_load_key(struct connectdata *conn, char *key_file)
   CK_BBOOL cktrue = CK_TRUE;
   CK_OBJECT_CLASS objClass = CKO_PRIVATE_KEY;
   CK_SLOT_ID slotID;
-  char *slotname = NULL;
   pphrase_arg_t *parg = NULL;
+  char slotname[SLOTSIZE];
 
   attrs = theTemplate;
 
@@ -461,11 +463,8 @@ static int nss_load_key(struct connectdata *conn, char *key_file)
 
   slotID = 1; /* hardcoded for now */
 
-  slotname = malloc(SLOTSIZE);
-  snprintf(slotname, SLOTSIZE, "PEM Token #%ld", slotID);
-
+  snprintf(slotname, sizeof(slotname), "PEM Token #%ld", slotID);
   slot = PK11_FindSlotByName(slotname);
-  free(slotname);
 
   if(!slot)
     return 0;
@@ -487,6 +486,8 @@ static int nss_load_key(struct connectdata *conn, char *key_file)
   PK11_IsPresent(slot);
 
   parg = malloc(sizeof(pphrase_arg_t));
+  if(!parg)
+    return 0;
   parg->retryCount = 0;
   parg->data = conn->data;
   /* parg is initialized in nss_Init_Tokens() */
@@ -583,6 +584,9 @@ static SECStatus nss_Init_Tokens(struct connectdata * conn)
   pphrase_arg_t *parg = NULL;
 
   parg = malloc(sizeof(pphrase_arg_t));
+  if(!parg)
+    return SECFailure;
+
   parg->retryCount = 0;
   parg->data = conn->data;
 
@@ -743,7 +747,7 @@ static void display_conn_info(struct connectdata *conn, PRFileDesc *sock)
  * X509_check_issued function (in x509v3/v3_purp.c)
  */
 static SECStatus check_issuer_cert(PRFileDesc *sock,
-                                   char* issuer_nickname)
+                                   char *issuer_nickname)
 {
   CERTCertificate *cert,*cert_issuer,*issuer;
   SECStatus res=SECSuccess;
@@ -801,12 +805,11 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
 
     if(!strncmp(nickname, "PEM Token", 9)) {
       CK_SLOT_ID slotID = 1; /* hardcoded for now */
-      char * slotname = malloc(SLOTSIZE);
+      char slotname[SLOTSIZE];
       snprintf(slotname, SLOTSIZE, "PEM Token #%ld", slotID);
       slot = PK11_FindSlotByName(slotname);
       privKey = PK11_FindPrivateKeyFromCert(slot, cert, NULL);
       PK11_FreeSlot(slot);
-      free(slotname);
       if(privKey) {
         secStatus = SECSuccess;
       }
@@ -973,12 +976,12 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
     NSS_SetDomesticPolicy();
 
 #ifdef HAVE_PK11_CREATEGENERICOBJECT
-    configstring = malloc(PATH_MAX);
-
-    PR_snprintf(configstring, PATH_MAX, "library=%s name=PEM", pem_library);
-
+    configstring = aprintf("library=%s name=PEM", pem_library);
+    if(!configstring)
+      goto error;
     mod = SECMOD_LoadUserModule(configstring, NULL, PR_FALSE);
     free(configstring);
+
     if(!mod || !mod->loaded) {
       if(mod) {
         SECMOD_DestroyModule(mod);
@@ -1108,40 +1111,47 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   if(data->set.str[STRING_CERT]) {
     char *n;
     char *nickname;
+    bool nickname_alloc = FALSE;
 
-    nickname = malloc(PATH_MAX);
     if(is_file(data->set.str[STRING_CERT])) {
       n = strrchr(data->set.str[STRING_CERT], '/');
       if(n) {
         n++; /* skip last slash */
-        snprintf(nickname, PATH_MAX, "PEM Token #%d:%s", 1, n);
+        nickname = aprintf(nickname, "PEM Token #%d:%s", 1, n);
+        if(!nickname)
+          return CURLE_OUT_OF_MEMORY;
+
+        nickname_alloc = TRUE;
       }
     }
     else {
-      strncpy(nickname, data->set.str[STRING_CERT], PATH_MAX);
-      nickname[PATH_MAX-1]=0; /* make sure this is zero terminated */
+      nickname = data->set.str[STRING_CERT];
     }
     if(nss_Init_Tokens(conn) != SECSuccess) {
-      free(nickname);
+      if(nickname_alloc)
+        free(nickname);
       goto error;
     }
     if(!cert_stuff(conn, data->set.str[STRING_CERT],
                     data->set.str[STRING_KEY])) {
       /* failf() is already done in cert_stuff() */
-      free(nickname);
+      if(nickname_alloc)
+        free(nickname);
       return CURLE_SSL_CERTPROBLEM;
     }
 
-    connssl->client_nickname = strdup(nickname);
+    /* this "takes over" the pointer to the allocated name or makes a
+       dup of it */
+    connssl->client_nickname = nickname_alloc?nickname:strdup(nickname);
+    if(!connssl->client_nickname)
+      return CURLE_OUT_OF_MEMORY;
+
     if(SSL_GetClientAuthDataHook(model,
                                  (SSLGetClientAuthData) SelectClientCert,
-                                 (void *)connssl) !=
-       SECSuccess) {
+                                 (void *)connssl) != SECSuccess) {
       curlerr = CURLE_SSL_CERTPROBLEM;
       goto error;
     }
-
-    free(nickname);
 
     PK11_SetPasswordFunc(nss_no_password);
   }
@@ -1177,21 +1187,29 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   if (data->set.str[STRING_SSL_ISSUERCERT]) {
     char *n;
     char *nickname;
-    nickname = malloc(PATH_MAX);
+    bool nickname_alloc = FALSE;
+    SECStatus ret;
+
     if(is_file(data->set.str[STRING_SSL_ISSUERCERT])) {
       n = strrchr(data->set.str[STRING_SSL_ISSUERCERT], '/');
       if (n) {
         n++; /* skip last slash */
-        snprintf(nickname, PATH_MAX, "PEM Token #%d:%s", 1, n);
+        nickname = aprintf("PEM Token #%d:%s", 1, n);
+        if(!nickname)
+          return CURLE_OUT_OF_MEMORY;
+        nickname_alloc = TRUE;
       }
     }
-    else {
-      strncpy(nickname, data->set.str[STRING_SSL_ISSUERCERT], PATH_MAX);
-      nickname[PATH_MAX-1]=0; /* make sure this is zero terminated */
-    }
-    if (check_issuer_cert(connssl->handle, nickname) == SECFailure) {
-      infof(data,"SSL certificate issuer check failed\n");
+    else
+      nickname = data->set.str[STRING_SSL_ISSUERCERT];
+
+    ret = check_issuer_cert(connssl->handle, nickname);
+
+    if(nickname_alloc)
       free(nickname);
+
+    if(SECFailure == ret) {
+      infof(data,"SSL certificate issuer check failed\n");
       curlerr = CURLE_SSL_ISSUER_ERROR;
       goto error;
     }
