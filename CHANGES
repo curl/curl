@@ -6,6 +6,19 @@
 
                                   Changelog
 
+Daniel Stenberg (16 Nov 2008)
+- Added check for NULL returns from strdup() in src/main.c and lib/formdata.c
+  - reported by Jim Meyering also prevent buffer overflow on MSDOS when you do
+  for example -O on a url with a file name part longer than PATH_MAX letters
+
+- lib/nss.c fixes based on the report by Jim Meyering: I went over and added
+  checks for return codes for all calls to malloc and strdup that were
+  missing. I also changed a few malloc(13) to use arrays on the stack and a
+  few malloc(PATH_MAX) to instead use aprintf() to lower memory use.
+
+- I fixed a memory leak in Curl_nss_connect() when CURLOPT_ISSUERCERT is
+  in use.
+
 Daniel Fandrich (14 Nov 2008)
 - Added .xml as one of the few common file extensions known by the multipart
   form generator.

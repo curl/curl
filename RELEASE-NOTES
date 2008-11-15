@@ -13,7 +13,9 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o 
+ o fixed several calls to memory functions that didn't check return codes
+ o memory leak for SSL connects with libcurl/NSS when CURLOPT_ISSUERCERT was
+   used
 
 This release includes the following known bugs:
 
@@ -26,6 +28,6 @@ Other curl-related news:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- 
+ Yang Tse, Daniel Fandrich, Jim Meyering
 
         Thanks! (and sorry if I forgot to mention someone)
