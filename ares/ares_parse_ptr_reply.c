@@ -125,8 +125,15 @@ int ares_parse_ptr_reply(const unsigned char *abuf, int alen, const void *addr,
             }
           strncpy(aliases[aliascnt], rr_data, strlen(rr_data)+1);
           aliascnt++;
-          if ((aliascnt%8)==0)
-            aliases = realloc(aliases, (aliascnt/16+1) * sizeof(char *));
+          if ((aliascnt%8)==0) {
+            char **ptr;
+            ptr = realloc(aliases, (aliascnt/16+1) * sizeof(char *));
+            if(!ptr) {
+              status = ARES_ENOMEM;
+              break;
+            }
+            aliases = ptr;
+          }
         }
 
       if (rr_class == C_IN && rr_type == T_CNAME)
