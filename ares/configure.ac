@@ -4,6 +4,8 @@ dnl Version not hardcoded here. Fetched later from ares_version.h
 AC_INIT([c-ares], [-],
   [c-ares mailing list => http://cool.haxx.se/mailman/listinfo/c-ares])
 
+CARES_OVERRIDE_AUTOCONF
+
 AC_CONFIG_SRCDIR([ares_ipv6.h])
 AM_CONFIG_HEADER([config.h])
 AM_MAINTAINER_MODE
@@ -94,22 +96,6 @@ CARES_PROCESS_DEBUG_BUILD_OPTS
 
 AM_CONDITIONAL(DEBUGBUILD, test x$want_debug = xyes)
 AM_CONDITIONAL(CURLDEBUG, test x$want_debug = xyes)
-
-dnl skip libtool C++ and Fortran compiler checks
-m4_ifdef([AC_PROG_CXX], [m4_undefine([AC_PROG_CXX])])
-m4_defun([AC_PROG_CXX],[])
-m4_ifdef([AC_PROG_CXXCPP], [m4_undefine([AC_PROG_CXXCPP])])
-m4_defun([AC_PROG_CXXCPP],[true])
-m4_ifdef([AC_PROG_F77], [m4_undefine([AC_PROG_F77])])
-m4_defun([AC_PROG_F77],[])
-
-dnl skip libtool C++ and Fortran linker checks
-m4_ifdef([AC_LIBTOOL_CXX], [m4_undefine([AC_LIBTOOL_CXX])])
-m4_defun([AC_LIBTOOL_CXX],[])
-m4_ifdef([AC_LIBTOOL_CXXCPP], [m4_undefine([AC_LIBTOOL_CXXCPP])])
-m4_defun([AC_LIBTOOL_CXXCPP],[true])
-m4_ifdef([AC_LIBTOOL_F77], [m4_undefine([AC_LIBTOOL_F77])])
-m4_defun([AC_LIBTOOL_F77],[])
 
 dnl force libtool to build static libraries with PIC on AMD64-Linux & FreeBSD
 AC_MSG_CHECKING([if arch-OS host is AMD64-Linux/FreeBSD (to build static libraries with PIC)])
