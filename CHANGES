@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel Stenberg (16 Nov 2008)
+- Christian Krause fixed a build failure when building with gss support
+  enabled and FTP disabled.
+
 - Added check for NULL returns from strdup() in src/main.c and lib/formdata.c
   - reported by Jim Meyering also prevent buffer overflow on MSDOS when you do
   for example -O on a url with a file name part longer than PATH_MAX letters
