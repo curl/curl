@@ -153,6 +153,8 @@ krb4_encode(void *app_data, const void *from, int length, int level, void **to,
 {
   struct krb4_data *d = app_data;
   *to = malloc(length + 31);
+  if(!*to)
+    return -1;
   if(level == prot_safe)
     /* NOTE that the void* cast is safe, krb_mk_safe/priv don't modify the
      * input buffer
