@@ -372,8 +372,6 @@
 /* this is a quick hack.  I hope it's correct. */
 #define ifr_dstaddr ifr_addr
 
-#define IOCTL_3_ARGS
-
 /* Define if you have the ioctl function. */
 #define HAVE_IOCTL
 

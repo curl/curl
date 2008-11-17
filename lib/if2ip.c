@@ -23,46 +23,43 @@
 
 #include "setup.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #ifdef HAVE_UNISTD_H
-#include <unistd.h>
+#  include <unistd.h>
 #endif
-
-#include "if2ip.h"
-
-/*
- * This test can probably be simplified to #if defined(SIOCGIFADDR) and
- * moved after the following includes.
- */
-#if !defined(WIN32) && !defined(__BEOS__) && !defined(__CYGWIN__) && \
-    !defined(__riscos__) && !defined(__INTERIX) && !defined(NETWARE) && \
-    !defined(__AMIGA__) && !defined(__minix) && !defined(__SYMBIAN32__) && \
-    !defined(__WATCOMC__)
-
-#if defined(HAVE_GETIFADDRS)
-
-/*
- * glibc provides getifaddrs() to provide a list of all interfaces and their
- * addresses.
- */
-
-#include <ifaddrs.h>
-
 #ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
+#  include <sys/socket.h>
 #endif
 #ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
+#  include <netinet/in.h>
 #endif
 #ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>
+#  include <arpa/inet.h>
+#endif
+#ifdef HAVE_NET_IF_H
+#  include <net/if.h>
+#endif
+#ifdef HAVE_SYS_IOCTL_H
+#  include <sys/ioctl.h>
+#endif
+#ifdef HAVE_NETDB_H
+#  include <netdb.h>
+#endif
+#ifdef HAVE_SYS_SOCKIO_H
+#  include <sys/sockio.h>
+#endif
+#ifdef HAVE_IFADDRS_H
+#  include <ifaddrs.h>
+#endif
+#ifdef HAVE_STROPTS_H
+#  include <stropts.h>
+#endif
+#ifdef VMS
+#  include <inet.h>
 #endif
 
 #include "inet_ntop.h"
 #include "strequal.h"
+#include "if2ip.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -70,6 +67,10 @@
 #include "memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
+
+------------------------------------------------------------------
+
+#if defined(HAVE_GETIFADDRS)
 
 char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
 {
@@ -103,49 +104,7 @@ char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
   return ip;
 }
 
-#else
-
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-
-#ifdef HAVE_SYS_TIME_H
-/* This must be before net/if.h for AIX 3.2 to enjoy life */
-#include <sys/time.h>
-#endif
-#ifdef HAVE_NET_IF_H
-#include <net/if.h>
-#endif
-#ifdef HAVE_SYS_IOCTL_H
-#include <sys/ioctl.h>
-#endif
-
-#ifdef HAVE_NETDB_H
-#include <netdb.h>
-#endif
-
-#ifdef HAVE_SYS_SOCKIO_H
-#include <sys/sockio.h>
-#endif
-
-#ifdef VMS
-#include <inet.h>
-#endif
-
-#include "inet_ntop.h"
-
-#define _MPRINTF_REPLACE /* use our functions only */
-#include <curl/mprintf.h>
-
-#include "memory.h"
-/* The last #include file should be: */
-#include "memdebug.h"
+#elif defined(HAVE_IOCTL_SIOCGIFADDR)
 
 #define SYS_ERROR -1
 
@@ -171,11 +130,7 @@ char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
     }
     memcpy(req.ifr_name, interface, len+1);
     req.ifr_addr.sa_family = AF_INET;
-#ifdef IOCTL_3_ARGS
     if(SYS_ERROR == ioctl(dummy, SIOCGIFADDR, &req)) {
-#else
-    if(SYS_ERROR == ioctl(dummy, SIOCGIFADDR, &req, sizeof(req))) {
-#endif
       sclose(dummy);
       return NULL;
     }
@@ -190,10 +145,9 @@ char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
   }
   return ip;
 }
-#endif
 
-/* -- end of if2ip() -- */
 #else
+
 char *Curl_if2ip(int af, const char *interf, char *buf, int buf_size)
 {
     (void) af;
@@ -202,4 +156,5 @@ char *Curl_if2ip(int af, const char *interf, char *buf, int buf_size)
     (void) buf_size;
     return NULL;
 }
+
 #endif

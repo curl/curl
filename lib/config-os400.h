@@ -283,6 +283,9 @@
 /* Define if you have the `strlcpy' function. */
 #undef HAVE_STRLCPY
 
+/* Define if you have the <stropts.h> header file. */
+#define HAVE_STROPTS_H
+
 /* Define if you have the `strstr' function. */
 #define HAVE_STRSTR
 
@@ -392,13 +395,14 @@
 /* Define to `unsigned' if <sys/types.h> does not define. */
 #undef size_t
 
-#define IOCTL_3_ARGS
-
 /* Define if you have the ioctl function. */
 #define HAVE_IOCTL
 
 /* Define if you have a working ioctl FIONBIO function. */
 #define HAVE_IOCTL_FIONBIO
+
+/* Define if you have a working ioctl SIOCGIFADDR function. */
+#define HAVE_IOCTL_SIOCGIFADDR
 
 /* to disable LDAP */
 #undef CURL_DISABLE_LDAP

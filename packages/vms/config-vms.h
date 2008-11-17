@@ -1,6 +1,6 @@
 /* MSK, 02/05/04, Hand edited for trail build on Alpha V7.3, DEC C 6.5-003 */
 /* MSK, 03/09/04, Seems to work for all platforms I've built on so far.    */
-/*      Added HAVE_SYS_IOCTL_H and IOCTL_3_ARGS defines                    */
+/*      Added HAVE_SYS_IOCTL_H define                                      */
 /* TES, 10/06/04, Added MAX_INITIAL_POST_SIZE, HAVE_BASENAME               */
 /* MSK, 02/02/05, Changed HAVE_TERMIOS_H to an undef since the change in   */
 /*                getpass.c no longer undef'd it during compile.           */
@@ -66,6 +66,9 @@
 
 /* Define if you have a working ioctl FIONBIO function. */
 #define HAVE_IOCTL_FIONBIO 1
+
+/* Define if you have a working ioctl SIOCGIFADDR function. */
+#define HAVE_IOCTL_SIOCGIFADDR 1
 
 /* Define if you have the perror function.  */
 #define HAVE_PERROR 1
@@ -265,8 +268,8 @@
 /* Define to 1 if you have the <sys/ioctl.h> header file. */
 #define HAVE_SYS_IOCTL_H 1
 
-/* IOCTL_3_ARGS defined to match the ioctl function in stropts.h */
-#define IOCTL_3_ARGS 1
+/* Define to 1 if you have the <stropts.h> header file. */
+#define HAVE_STROPTS_H 1
 
 /* to disable LDAP */
 #define CURL_DISABLE_LDAP 1

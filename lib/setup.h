@@ -355,7 +355,6 @@
 #    define sclose(x)         close_s(x)
 #    define select(n,r,w,x,t) select_s(n,r,w,x,t)
 #    define ioctl(x,y,z) ioctlsocket(x,y,(char *)(z))
-#    define IOCTL_3_ARGS
 #    include <tcp.h>
 #    ifdef word
 #      undef word
@@ -428,10 +427,6 @@
 #if !defined(HAVE_WINSOCK2_H) || ((_MSC_VER < 1300) && !defined(IPPROTO_ESP))
 #undef HAVE_STRUCT_SOCKADDR_STORAGE
 #endif
-#endif
-
-#ifdef mpeix
-#define IOCTL_3_ARGS
 #endif
 
 #ifdef NETWARE
