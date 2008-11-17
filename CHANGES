@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel Fandrich (17 Nov 2008)
+- Added more compiler warning options for gcc 4.3
+
 Yang Tse (17 Nov 2008)
 - Fix a remaining problem in the inet_pton() runtime configure check. And
   fix internal Curl_inet_pton() failures to reject certain malformed literals.
