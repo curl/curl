@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH libcurl-tutorial 3 "27 Feb 2007" "libcurl" "libcurl programming"
+.TH libcurl-tutorial 3 "17 Nov 2008" "libcurl" "libcurl programming"
 .SH NAME
 libcurl-tutorial \- libcurl programming tutorial
 .SH "Objective"
@@ -41,7 +41,7 @@ refer to their respective man pages.
 
 .SH "Building"
 There are many different ways to build C programs. This chapter will assume a
-unix-style build process. If you use a different build system, you can still
+UNIX-style build process. If you use a different build system, you can still
 read this to get general information that may apply to your environment as
 well.
 .IP "Compiling the Program"
@@ -167,11 +167,9 @@ something different. Alas, multiple requests using the same handle will use
 the same options.
 
 Many of the options you set in libcurl are "strings", pointers to data
-terminated with a zero byte. Keep in mind that when you set strings with
-\fIcurl_easy_setopt(3)\fP, libcurl will not copy the data. It will merely
-point to the data. You MUST make sure that the data remains available for
-libcurl to use until finished or until you use the same option again to point
-to something else.
+terminated with a zero byte. When you set strings with
+\fIcurl_easy_setopt(3)\fP, libcurl makes its own copy so that they don't
+need to be kept around in your application after being set[4].
 
 One of the most basic properties to set in the handle is the URL. You set
 your preferred URL to transfer with CURLOPT_URL in a manner similar to:
@@ -245,14 +243,20 @@ again. Mind you, it is even preferred that you re-use an existing handle if
 you intend to make another transfer. libcurl will then attempt to re-use the
 previous connection.
 
+For some protocols, downloading a file can involve a complicated process of
+logging in, setting the transfer mode, changing the current directory and
+finally transferring the file data. libcurl takes care of all that
+complication for you. Given simply the URL to a file, libcurl will take care
+of all the details needed to get the file moved from one machine to another.
+
 .SH "Multi-threading Issues"
 The first basic rule is that you must \fBnever\fP share a libcurl handle (be
 it easy or multi or whatever) between multiple threads. Only use one handle in
 one thread at a time.
 
 libcurl is completely thread safe, except for two issues: signals and SSL/TLS
-handlers. Signals are used timeouting name resolves (during DNS lookup) - when
-built without c-ares support and not on Windows..
+handlers. Signals are used for timing out name resolves (during DNS lookup) -
+when built without c-ares support and not on Windows..
 
 If you are accessing HTTPS or FTPS URLs in a multi-threaded manner, you are
 then of course using the underlying SSL library multi-threaded and those libs
@@ -350,7 +354,7 @@ knowledge of the expected file size. So, set the upload file size using the
 CURLOPT_INFILESIZE_LARGE for all known file sizes like this[1]:
 
 .nf
- /* in this example, file_size must be an off_t variable */
+ /* in this example, file_size must be an curl_off_t variable */
  curl_easy_setopt(easyhandle, CURLOPT_INFILESIZE_LARGE, file_size);
 .fi
 
@@ -389,7 +393,7 @@ to the CURLOPT_USERPWD option like this:
 
  curl_easy_setopt(easyhandle, CURLOPT_PROXYUSERPWD, "myname:thesecret");
  
-There's a long time unix "standard" way of storing ftp user names and
+There's a long time UNIX "standard" way of storing ftp user names and
 passwords, namely in the $HOME/.netrc file. The file should be made private
 so that only the user may read it (see also the "Security Considerations"
 chapter), as it might contain the password in plain text. libcurl has the
@@ -1194,6 +1198,9 @@ This happens on Windows machines when libcurl is built and used as a
 DLL. However, you can still do this on Windows if you link with a static
 library.
 .IP "[3]"
-The curl-config tool is generated at build-time (on unix-like systems) and
+The curl-config tool is generated at build-time (on UNIX-like systems) and
 should be installed with the 'make install' or similar instruction that
 installs the library, header files, man pages etc.
+.IP "[4]"
+This behavior was different in versions before 7.17.0, where strings had to
+remain valid past the end of the \fIcurl_easy_setopt(3)\fP call.
