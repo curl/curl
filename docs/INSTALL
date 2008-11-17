@@ -832,6 +832,7 @@ PORTS
         - AVR32 Linux
         - ARM INTEGRITY
         - Cell Linux
+        - Cell Cell OS
         - HP-PA HP-UX 9.X 10.X 11.X
         - HP-PA Linux
         - HP3000 MPE/iX
