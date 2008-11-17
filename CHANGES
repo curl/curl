@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Yang Tse (17 Nov 2008)
+- Fix a remaining problem in the inet_pton() runtime configure check. And
+  fix internal Curl_inet_pton() failures to reject certain malformed literals.
+
 Daniel Stenberg (16 Nov 2008)
 - Christian Krause fixed a build failure when building with gss support
   enabled and FTP disabled.
@@ -28,6 +32,10 @@ Daniel Fandrich (14 Nov 2008)
 
 - Added some #ifdefs around header files and change the EAGAIN test to
   fix compilation on Cell (reported by Jeff Curley).
+
+Yang Tse (14 Nov 2008)
+- Fixed several configure script issues affecting checks for inet_ntoa_r(),
+  inet_ntop(), inet_pton(), getifaddrs(), fcntl() and getaddrinfo().
 
 Yang Tse (13 Nov 2008)
 - Refactored configure script detection of functions used to set sockets into
