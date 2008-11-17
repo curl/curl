@@ -74,9 +74,6 @@ Curl_inet_pton(int af, const char *src, void *dst)
   case AF_INET:
     return (inet_pton4(src, (unsigned char *)dst));
 #ifdef ENABLE_IPV6
-#ifndef AF_INET6
-#define AF_INET6        (AF_MAX+1)        /* just to let this compile */
-#endif
   case AF_INET6:
     return (inet_pton6(src, (unsigned char *)dst));
 #endif
@@ -114,6 +111,8 @@ inet_pton4(const char *src, unsigned char *dst)
     if((pch = strchr(digits, ch)) != NULL) {
       unsigned int val = *tp * 10 + (unsigned int)(pch - digits);
 
+      if(saw_digit && *tp == 0)
+        return (0);
       if(val > 255)
         return (0);
       *tp = (unsigned char)val;
@@ -134,7 +133,6 @@ inet_pton4(const char *src, unsigned char *dst)
   }
   if(octets < 4)
     return (0);
-  /* bcopy(tmp, dst, INADDRSZ); */
   memcpy(dst, tmp, INADDRSZ);
   return (1);
 }
@@ -181,9 +179,8 @@ inet_pton6(const char *src, unsigned char *dst)
     if(pch != NULL) {
       val <<= 4;
       val |= (pch - xdigits);
-      if(val > 0xffff)
+      if(++saw_xdigit > 4)
         return (0);
-      saw_xdigit = 1;
       continue;
     }
     if(ch == ':') {
@@ -224,6 +221,8 @@ inet_pton6(const char *src, unsigned char *dst)
     const long n = tp - colonp;
     long i;
 
+    if(tp == endp)
+      return (0);
     for (i = 1; i <= n; i++) {
       endp[- i] = colonp[n - i];
       colonp[n - i] = 0;
@@ -232,7 +231,6 @@ inet_pton6(const char *src, unsigned char *dst)
   }
   if(tp != endp)
     return (0);
-  /* bcopy(tmp, dst, IN6ADDRSZ); */
   memcpy(dst, tmp, IN6ADDRSZ);
   return (1);
 }
