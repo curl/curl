@@ -378,9 +378,6 @@
 /* Define to `int' if <sys/types.h> does not define. */
 #undef ssize_t
 
-/* this is a quick hack.  I hope it's correct. */
-#define ifr_dstaddr ifr_addr
-
 /* Define if you have the ioctl function. */
 #define HAVE_IOCTL
 

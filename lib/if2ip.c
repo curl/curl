@@ -137,7 +137,7 @@ char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
     else {
       struct in_addr in;
 
-      struct sockaddr_in *s = (struct sockaddr_in *)&req.ifr_dstaddr;
+      struct sockaddr_in *s = (struct sockaddr_in *)&req.ifr_addr;
       memcpy(&in, &s->sin_addr, sizeof(in));
       ip = (char *) Curl_inet_ntop(s->sin_family, &in, buf, buf_size);
     }

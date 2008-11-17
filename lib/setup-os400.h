@@ -30,9 +30,6 @@
 /* OS/400 netdb.h does not define NI_MAXSERV. */
 #define NI_MAXSERV      32
 
-/* OS/400 does not define the ifr_dstaddr union member. */
-#define ifr_dstaddr     ifr_addr
-
 /* No OS/400 header file defines u_int32_t. */
 typedef unsigned long   u_int32_t;
 

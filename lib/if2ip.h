@@ -50,7 +50,6 @@ struct ifreq {
 
 /* This define was added by Daniel to avoid an extra #ifdef INTERIX in the
    C code. */
-#define ifr_dstaddr ifr_addr
 
 #define ifr_name ifr_ifrn.ifrn_name /* interface name */
 #define ifr_addr ifr_ifru.ifru_addr /* address */
