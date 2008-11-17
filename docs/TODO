@@ -21,6 +21,7 @@
  2.1 More non-blocking
  2.2 Remove easy interface internally
  2.3 Avoid having to remove/readd handles
+ 2.4 Fix HTTP Pipelining for PUT
 
  3. Documentation
  3.1  More and better
@@ -170,6 +171,13 @@
  o PAUSE?
 
  o RESUME?
+
+2.4 Fix HTTP Pipelining for PUT
+
+ HTTP Pipelining can be a way to greatly enhance performance for multiple
+ serial requests and currently libcurl only supports that for HEAD and GET
+ requests but it should also be possible for PUT.
+
 
 3. Documentation
 
