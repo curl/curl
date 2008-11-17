@@ -10,6 +10,9 @@ Yang Tse (17 Nov 2008)
 - Fix a remaining problem in the inet_pton() runtime configure check. And
   fix internal Curl_inet_pton() failures to reject certain malformed literals.
 
+- Make configure script check if ioctl with the SIOCGIFADDR command can be
+  used, and define HAVE_IOCTL_SIOCGIFADDR if appropriate.
+
 Daniel Stenberg (16 Nov 2008)
 - Christian Krause fixed a build failure when building with gss support
   enabled and FTP disabled.

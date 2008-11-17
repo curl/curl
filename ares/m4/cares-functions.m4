@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 24
+# serial 25
 
 
 dnl CARES_INCLUDES_ARPA_INET
@@ -1291,6 +1291,7 @@ AC_DEFUN([CARES_CHECK_FUNC_IOCTL], [
       [Define to 1 if you have the ioctl function.])
     ac_cv_func_ioctl="yes"
     CARES_CHECK_FUNC_IOCTL_FIONBIO
+    CARES_CHECK_FUNC_IOCTL_SIOCGIFADDR
   else
     AC_MSG_RESULT([no])
     ac_cv_func_ioctl="no"
@@ -1350,6 +1351,61 @@ AC_DEFUN([CARES_CHECK_FUNC_IOCTL_FIONBIO], [
   else
     AC_MSG_RESULT([no])
     ac_cv_func_ioctl_fionbio="no"
+  fi
+])
+
+
+dnl CARES_CHECK_FUNC_IOCTL_SIOCGIFADDR
+dnl -------------------------------------------------
+dnl Verify if ioctl with the SIOCGIFADDR command is
+dnl available, can be compiled, and seems to work. If
+dnl all of these are true, then HAVE_IOCTL_SIOCGIFADDR
+dnl will be defined.
+
+AC_DEFUN([CARES_CHECK_FUNC_IOCTL_SIOCGIFADDR], [
+  #
+  tst_compi_ioctl_siocgifaddr="unknown"
+  tst_allow_ioctl_siocgifaddr="unknown"
+  #
+  if test "$ac_cv_func_ioctl" = "yes"; then
+    AC_MSG_CHECKING([if ioctl SIOCGIFADDR is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $cares_includes_stropts
+      ]],[[
+        if(0 != ioctl(0, SIOCGIFADDR, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_ioctl_siocgifaddr="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_ioctl_siocgifaddr="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_ioctl_siocgifaddr" = "yes"; then
+    AC_MSG_CHECKING([if ioctl SIOCGIFADDR usage allowed])
+    if test "x$cares_disallow_ioctl_siocgifaddr" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_ioctl_siocgifaddr="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_ioctl_siocgifaddr="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if ioctl SIOCGIFADDR might be used])
+  if test "$tst_compi_ioctl_siocgifaddr" = "yes" &&
+     test "$tst_allow_ioctl_siocgifaddr" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_IOCTL_SIOCGIFADDR, 1,
+      [Define to 1 if you have a working ioctl SIOCGIFADDR function.])
+    ac_cv_func_ioctl_siocgifaddr="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_ioctl_siocgifaddr="no"
   fi
 ])
 
