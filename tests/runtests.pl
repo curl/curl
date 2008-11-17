@@ -433,6 +433,7 @@ sub runclientoutput {
 # Memory allocation test and failure torture testing.
 #
 sub torture {
+    use POSIX "strftime";
     my $testcmd = shift;
     my $gdbline = shift;
 
@@ -469,7 +470,7 @@ sub torture {
             next;
         }
 
-        logmsg "Fail alloc no: $limit\r" if($verbose);
+        logmsg "Fail alloc no: $limit @ " . strftime ("%H:%M:%S", localtime) . "\r" if($verbose);
 
         # make the memory allocation function number $limit return failure
         $ENV{'CURL_MEMLIMIT'} = $limit;
