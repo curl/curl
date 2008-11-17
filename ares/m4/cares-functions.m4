@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 22
+# serial 23
 
 
 dnl CARES_INCLUDES_ARPA_INET
@@ -1131,8 +1131,8 @@ AC_DEFUN([CARES_CHECK_FUNC_INET_PTON], [
         $cares_includes_arpa_inet
         $cares_includes_string
       ]],[[
-        unsigned char ipv6a[26];
-        unsigned char ipv4a[5];
+        unsigned char ipv6a[16+1];
+        unsigned char ipv4a[4+1];
         const char *ipv6src = "fe80::214:4fff:fe0b:76c8";
         const char *ipv4src = "192.168.100.1";
         /* - */
@@ -1151,8 +1151,6 @@ AC_DEFUN([CARES_CHECK_FUNC_INET_PTON], [
         if(1 != inet_pton(AF_INET6, ipv6src, ipv6a))
           exit(1); /* fail */
         /* - */
-        ipv6res[0] = '\0';
-        memset(ipv6a, 0, sizeof(ipv6a));
         if( (ipv6a[0]  != 0xfe) ||
             (ipv6a[1]  != 0x80) ||
             (ipv6a[8]  != 0x02) ||
@@ -1171,16 +1169,7 @@ AC_DEFUN([CARES_CHECK_FUNC_INET_PTON], [
             (ipv6a[4]  != 0x0) ||
             (ipv6a[5]  != 0x0) ||
             (ipv6a[6]  != 0x0) ||
-            (ipv6a[7]  != 0x0) ||
-            (ipv6a[16] != 0x0) ||
-            (ipv6a[17] != 0x0) ||
-            (ipv6a[18] != 0x0) ||
-            (ipv6a[19] != 0x0) ||
-            (ipv6a[20] != 0x0) ||
-            (ipv6a[21] != 0x0) ||
-            (ipv6a[22] != 0x0) ||
-            (ipv6a[23] != 0x0) ||
-            (ipv6a[24] != 0x0) )
+            (ipv6a[7]  != 0x0) )
           exit(1); /* fail */
         /* - */
         exit(0);
