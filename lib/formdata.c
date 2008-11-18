@@ -1211,8 +1211,11 @@ CURLcode Curl_getFormData(struct FormData **finalform,
         char *filebasename= NULL;
         if(!file->showfilename) {
           filebasename = strippath(file->contents);
-          if(!filebasename)
+          if(!filebasename) {
+            Curl_formclean(&firstform);
+            free(boundary);
             return CURLE_OUT_OF_MEMORY;
+          }
         }
 
         result = AddFormDataf(&form, &size,
