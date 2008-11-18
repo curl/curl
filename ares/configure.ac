@@ -14,6 +14,8 @@ CARES_CHECK_OPTION_DEBUG
 CARES_CHECK_OPTION_OPTIMIZE
 CARES_CHECK_OPTION_WARNINGS
 
+CARES_CHECK_PATH_SEPARATOR
+
 dnl SED is mandatory for configure process and libtool.
 dnl Set it now, allowing it to be changed later.
 AC_PATH_PROG([SED], [sed], [not_found],

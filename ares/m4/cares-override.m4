@@ -3,7 +3,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 1
+# serial 2
 
 dnl CARES_OVERRIDE_AUTOCONF
 dnl -------------------------------------------------
@@ -39,7 +39,8 @@ m4_define([AC_LANG_PROGRAM(C)],
 int main (void)
 {
 $2
-; return 0;
+ ;
+ return 0;
 }])
 
 dnl Override Autoconf's AC_LANG_CALL (C)
@@ -83,5 +84,20 @@ char $1 ();
 choke me
 #endif
 ], [return $1 ();])])
+
+dnl Override Autoconf's PATH_SEPARATOR check
+dnl -------------------------------------------------
+dnl This is done to ensure that the same check is
+dnl used across different Autoconf versions and to
+dnl allow us to use this macro early enough in the
+dnl configure script.
+
+m4_define([_AS_PATH_SEPARATOR_PREPARE],
+[CARES_CHECK_PATH_SEPARATOR
+m4_define([$0],[])])
+
+m4_define([_LT_AC_LIBTOOL_SYS_PATH_SEPARATOR],
+[CARES_CHECK_PATH_SEPARATOR
+m4_define([$0],[])])
 
 
