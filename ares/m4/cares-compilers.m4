@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 45
+# serial 46
 
 
 dnl CARES_CHECK_COMPILER
@@ -873,6 +873,13 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
           dnl Only gcc 3.4 or later
           if test "$compiler_num" -ge "304"; then
             tmp_CFLAGS="$tmp_CFLAGS -Wdeclaration-after-statement"
+          fi
+          #
+          dnl Only gcc 4.3 or later
+          if test "$compiler_num" -ge "403"; then
+            tmp_CFLAGS="$tmp_CFLAGS -Wtype-limits -Wold-style-declaration"
+            tmp_CFLAGS="$tmp_CFLAGS -Wmissing-parameter-type -Wempty-body"
+            tmp_CFLAGS="$tmp_CFLAGS -Wclobbered -Wignored-qualifiers"
           fi
           #
         fi
