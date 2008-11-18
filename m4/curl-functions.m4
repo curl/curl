@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 42
+# serial 43
 
 
 dnl CURL_INCLUDES_ARPA_INET
@@ -1131,6 +1131,100 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
 ])
 
 
+dnl CURL_CHECK_FUNC_GETHOSTBYADDR
+dnl -------------------------------------------------
+dnl Verify if gethostbyaddr is available, prototyped,
+dnl and can be compiled. If all of these are true,
+dnl and usage has not been previously disallowed with
+dnl shell variable curl_disallow_gethostbyaddr, then
+dnl HAVE_GETHOSTBYADDR will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYADDR], [
+  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
+  AC_REQUIRE([CURL_INCLUDES_NETDB])dnl
+  #
+  tst_links_gethostbyaddr="unknown"
+  tst_proto_gethostbyaddr="unknown"
+  tst_compi_gethostbyaddr="unknown"
+  tst_allow_gethostbyaddr="unknown"
+  #
+  AC_MSG_CHECKING([if gethostbyaddr can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+      $curl_includes_winsock2
+      $curl_includes_netdb
+    ]],[[
+      if(0 != gethostbyaddr(0, 0, 0))
+        return 1;
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_gethostbyaddr="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_gethostbyaddr="no"
+  ])
+  #
+  if test "$tst_links_gethostbyaddr" = "yes"; then
+    AC_MSG_CHECKING([if gethostbyaddr is prototyped])
+    AC_EGREP_CPP([gethostbyaddr],[
+      $curl_includes_winsock2
+      $curl_includes_netdb
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_gethostbyaddr="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_gethostbyaddr="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_gethostbyaddr" = "yes"; then
+    AC_MSG_CHECKING([if gethostbyaddr is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_winsock2
+        $curl_includes_netdb
+      ]],[[
+        if(0 != gethostbyaddr(0, 0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_gethostbyaddr="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_gethostbyaddr="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_gethostbyaddr" = "yes"; then
+    AC_MSG_CHECKING([if gethostbyaddr usage allowed])
+    if test "x$curl_disallow_gethostbyaddr" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_gethostbyaddr="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_gethostbyaddr="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if gethostbyaddr might be used])
+  if test "$tst_links_gethostbyaddr" = "yes" &&
+     test "$tst_proto_gethostbyaddr" = "yes" &&
+     test "$tst_compi_gethostbyaddr" = "yes" &&
+     test "$tst_allow_gethostbyaddr" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_GETHOSTBYADDR, 1,
+      [Define to 1 if you have the gethostbyaddr function.])
+    ac_cv_func_gethostbyaddr="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_gethostbyaddr="no"
+  fi
+])
+
+
 dnl CURL_CHECK_FUNC_GETHOSTBYADDR_R
 dnl -------------------------------------------------
 dnl Verify if gethostbyaddr_r is available, prototyped,
@@ -1269,6 +1363,100 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYADDR_R], [
   else
     AC_MSG_RESULT([no])
     ac_cv_func_gethostbyaddr_r="no"
+  fi
+])
+
+
+dnl CURL_CHECK_FUNC_GETHOSTBYNAME
+dnl -------------------------------------------------
+dnl Verify if gethostbyname is available, prototyped,
+dnl and can be compiled. If all of these are true,
+dnl and usage has not been previously disallowed with
+dnl shell variable curl_disallow_gethostbyname, then
+dnl HAVE_GETHOSTBYNAME will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME], [
+  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
+  AC_REQUIRE([CURL_INCLUDES_NETDB])dnl
+  #
+  tst_links_gethostbyname="unknown"
+  tst_proto_gethostbyname="unknown"
+  tst_compi_gethostbyname="unknown"
+  tst_allow_gethostbyname="unknown"
+  #
+  AC_MSG_CHECKING([if gethostbyname can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+      $curl_includes_winsock2
+      $curl_includes_netdb
+    ]],[[
+      if(0 != gethostbyname(0))
+        return 1;
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_gethostbyname="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_gethostbyname="no"
+  ])
+  #
+  if test "$tst_links_gethostbyname" = "yes"; then
+    AC_MSG_CHECKING([if gethostbyname is prototyped])
+    AC_EGREP_CPP([gethostbyname],[
+      $curl_includes_winsock2
+      $curl_includes_netdb
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_gethostbyname="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_gethostbyname="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_gethostbyname" = "yes"; then
+    AC_MSG_CHECKING([if gethostbyname is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_winsock2
+        $curl_includes_netdb
+      ]],[[
+        if(0 != gethostbyname(0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_gethostbyname="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_gethostbyname="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_gethostbyname" = "yes"; then
+    AC_MSG_CHECKING([if gethostbyname usage allowed])
+    if test "x$curl_disallow_gethostbyname" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_gethostbyname="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_gethostbyname="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if gethostbyname might be used])
+  if test "$tst_links_gethostbyname" = "yes" &&
+     test "$tst_proto_gethostbyname" = "yes" &&
+     test "$tst_compi_gethostbyname" = "yes" &&
+     test "$tst_allow_gethostbyname" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_GETHOSTBYNAME, 1,
+      [Define to 1 if you have the gethostbyname function.])
+    ac_cv_func_gethostbyname="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_gethostbyname="no"
   fi
 ])
 

@@ -644,9 +644,7 @@ then
 fi
 
 
-if test "$HAVE_GETHOSTBYNAME" = "1"; then
-  AC_DEFINE(HAVE_GETHOSTBYNAME, 1, [If you have gethostbyname])
-else
+if test "$HAVE_GETHOSTBYNAME" != "1"; then
   AC_MSG_ERROR([couldn't find libraries for gethostbyname()])
 fi
 
@@ -1987,7 +1985,9 @@ CURL_CHECK_FUNC_FREEADDRINFO
 CURL_CHECK_FUNC_FREEIFADDRS
 CURL_CHECK_FUNC_FTRUNCATE
 CURL_CHECK_FUNC_GETADDRINFO
+CURL_CHECK_FUNC_GETHOSTBYADDR
 CURL_CHECK_FUNC_GETHOSTBYADDR_R
+CURL_CHECK_FUNC_GETHOSTBYNAME
 CURL_CHECK_FUNC_GETHOSTBYNAME_R
 CURL_CHECK_FUNC_GETHOSTNAME
 CURL_CHECK_FUNC_GETIFADDRS
@@ -2036,7 +2036,6 @@ AC_CHECK_FUNCS([basename \
   closesocket \
   fork \
   geteuid \
-  gethostbyaddr \
   getpass_r \
   getppid \
   getprotobyname \
