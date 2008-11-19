@@ -17,6 +17,8 @@ This release includes the following bugfixes:
  o fixed several calls to memory functions that didn't check return codes
  o memory leak for SSL connects with libcurl/NSS when CURLOPT_ISSUERCERT was
    used
+ o re-use of connections with the multi interface when multiple handles used
+   the same server
 
 This release includes the following known bugs:
 
@@ -29,6 +31,7 @@ Other curl-related news:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Yang Tse, Daniel Fandrich, Jim Meyering, Christian Krause
+ Yang Tse, Daniel Fandrich, Jim Meyering, Christian Krause, Andreas Wurf,
+ Markus Koetter
 
         Thanks! (and sorry if I forgot to mention someone)

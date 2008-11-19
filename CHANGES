@@ -6,6 +6,17 @@
 
                                   Changelog
 
+Daniel Stenberg (19 Nov 2008)
+- Andreas Wurf and Markus Koetter helped me analyze a problem that Andreas got
+  when uploading files to a single FTP server using multiple easy handle
+  handles with the multi interface. Occasionally a handle would stall in
+  mysterious ways.
+
+  The problem turned out to be a side-effect of the ConnectionExists()
+  function's eagerness to re-use a handle for HTTP pipelining so it would
+  select it even if already being in use, due to an inadequate check for its
+  chances of being used for pipelnining.
+
 Daniel Fandrich (17 Nov 2008)
 - Added more compiler warning options for gcc 4.3
 

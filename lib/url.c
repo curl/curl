@@ -2509,6 +2509,11 @@ ConnectionExists(struct SessionHandle *data,
       /* don't do mixed proxy and non-proxy connections */
       continue;
 
+    if(!canPipeline && check->inuse)
+      /* this request can't be pipelined but the checked connection is already
+         in use so we skip it */
+      continue;
+
     if(!needle->bits.httpproxy || needle->protocol&PROT_SSL ||
        (needle->bits.httpproxy && check->bits.httpproxy &&
         needle->bits.tunnel_proxy && check->bits.tunnel_proxy &&
