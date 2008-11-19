@@ -2097,9 +2097,11 @@ sub singletest {
     }
 
     if($gdbthis) {
+        my $gdbinit = "$TESTDIR/gdbinit$testnum";
         open(GDBCMD, ">$LOGDIR/gdbcmd");
         print GDBCMD "set args $cmdargs\n";
         print GDBCMD "show args\n";
+        print GDBCMD "source $gdbinit\n" if -e $gdbinit;
         close(GDBCMD);
     }
     # run the command line we built
