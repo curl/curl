@@ -180,12 +180,17 @@ static void event_cb(int fd, short kind, void *userp)
 {
   GlobalInfo *g = (GlobalInfo*) userp;
   CURLMcode rc;
-  (void)kind; /* unused */
+
+  int action =
+    (kind&EV_READ:CURL_CSELECT_IN)|
+    (kind&EV_WRITE:CURL_CSELECT_OUT);
 
   do {
-    rc = curl_multi_socket(g->multi, fd, &g->still_running);
+    rc = curl_multi_socket_action(g->multi, fd, action, &g->still_running);
   } while (rc == CURLM_CALL_MULTI_PERFORM);
-  mcode_or_die("event_cb: curl_multi_socket", rc);
+
+  mcode_or_die("event_cb: curl_multi_socket_action", rc);
+
   check_run_count(g);
   if ( g->still_running <= 0 ) {
     fprintf(MSG_OUT, "last transfer done, kill timeout\n");
@@ -206,9 +211,10 @@ static void timer_cb(int fd, short kind, void *userp)
   (void)kind;
 
   do {
-    rc = curl_multi_socket(g->multi, CURL_SOCKET_TIMEOUT, &g->still_running);
+    rc = curl_multi_socket_action(g->multi,
+                                  CURL_SOCKET_TIMEOUT, 0, &g->still_running);
   } while (rc == CURLM_CALL_MULTI_PERFORM);
-  mcode_or_die("timer_cb: curl_multi_socket", rc);
+  mcode_or_die("timer_cb: curl_multi_socket_action", rc);
   check_run_count(g);
 }
 
@@ -337,11 +343,9 @@ static void new_conn(char *url, GlobalInfo *g )
           "Adding easy %p to multi %p (%s)\n", conn->easy, g->multi, url);
   rc =curl_multi_add_handle(g->multi, conn->easy);
   mcode_or_die("new_conn: curl_multi_add_handle", rc);
-  do {
-    rc = curl_multi_socket_all(g->multi, &g->still_running);
-  } while (CURLM_CALL_MULTI_PERFORM == rc);
-  mcode_or_die("new_conn: curl_multi_socket_all", rc);
-  check_run_count(g);
+
+  /* note that the add_handle() will set a time-out to trigger very soon so
+     that the necessary socket_action() call will be called by this app */
 }
 
 /* This gets called whenever data is received from the fifo */
@@ -409,13 +413,16 @@ int main(int argc, char **argv)
   init_fifo(&g);
   g.multi = curl_multi_init();
   evtimer_set(&g.timer_event, timer_cb, &g);
+
+  /* setup the generic multi interface options we want */
   curl_multi_setopt(g.multi, CURLMOPT_SOCKETFUNCTION, sock_cb);
   curl_multi_setopt(g.multi, CURLMOPT_SOCKETDATA, &g);
   curl_multi_setopt(g.multi, CURLMOPT_TIMERFUNCTION, multi_timer_cb);
   curl_multi_setopt(g.multi, CURLMOPT_TIMERDATA, &g);
-  do {
-    rc = curl_multi_socket_all(g.multi, &g.still_running);
-  } while (CURLM_CALL_MULTI_PERFORM == rc);
+
+  /* we don't call any curl_multi_socket*() function yet as we have no handles
+     added! */
+
   event_dispatch();
   curl_multi_cleanup(g.multi);
   return 0;
