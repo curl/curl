@@ -1,5 +1,9 @@
   Changelog for the c-ares project
 
+* Nov 19 2008 (Daniel Stenberg)
+- Brad Spencer brought the new function ares_gethostbyname_file() which simply
+  resolves a host name from the given file, using the regular hosts syntax.
+
 * Nov 1 2008 (Daniel Stenberg)
 - Carlo Contavalli added support for the glibc "rotate" option, as documented
   in man resolv.conf: 

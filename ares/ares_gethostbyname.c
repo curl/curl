@@ -289,6 +289,31 @@ static int fake_hostent(const char *name, int family, ares_host_callback callbac
   return 1;
 }
 
+/* This is an API method */
+int ares_gethostbyname_file(ares_channel channel, const char *name,
+                            int family, struct hostent **host)
+{
+  /* We only take the channel to ensure that ares_init() been called. */
+  if(channel == NULL)
+    {
+      /* Anything will do, really.  This seems fine, and is consistent with
+         other error cases. */
+      *host = NULL;
+      return ARES_ENOTFOUND;
+    }
+  
+  /* Just chain to the internal implementation we use here; it's exactly
+   * what we want.  
+   */
+  const int result = file_lookup(name, family, host);
+  if(result != ARES_SUCCESS)
+    {
+      /* We guarantee a NULL hostent on failure. */
+      *host = NULL;
+    }
+  return result;
+}
+
 static int file_lookup(const char *name, int family, struct hostent **host)
 {
   FILE *fp;

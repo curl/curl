@@ -19,4 +19,4 @@ MANPAGES= ares_destroy.3 ares_expand_name.3 ares_expand_string.3 ares_fds.3 \
  ares_query.3 ares_search.3 ares_send.3 ares_strerror.3 ares_timeout.3	    \
  ares_version.3 ares_cancel.3 ares_parse_aaaa_reply.3 ares_getnameinfo.3    \
  ares_getsock.3 ares_parse_ns_reply.3 \
- ares_destroy_options.3 ares_save_options.3
+ ares_destroy_options.3 ares_save_options.3 ares_gethostbyname_file.3

@@ -228,6 +228,8 @@ void ares_search(ares_channel channel, const char *name, int dnsclass,
                  int type, ares_callback callback, void *arg);
 void ares_gethostbyname(ares_channel channel, const char *name, int family,
                         ares_host_callback callback, void *arg);
+int ares_gethostbyname_file(ares_channel channel, const char *name,
+                            int family, struct hostent **host);
 void ares_gethostbyaddr(ares_channel channel, const void *addr, int addrlen,
                         int family, ares_host_callback callback, void *arg);
 void ares_getnameinfo(ares_channel channel, const struct sockaddr *sa,
