@@ -46,7 +46,6 @@ GET http://%HOSTIP:%HTTPPORT/we/want/that/page/84 HTTP/1.1
 Authorization: Basic aWFtOm15c2VsZg==
 User-Agent: curl/7.10.7-pre2 (i686-pc-linux-gnu) libcurl/7.10.7-pre2 OpenSSL/0.9.7a zlib/1.1.3
 Host: %HOSTIP:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive
 

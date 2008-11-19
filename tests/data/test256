@@ -50,7 +50,6 @@ GET http://%HOSTIP:%HTTPPORT/want/256 HTTP/1.1
 Proxy-Authorization: Basic ZGFuaWVsOnN0ZW5iZXJn
 Range: bytes=78-
 Host: %HOSTIP:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive
 

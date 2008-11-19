@@ -75,21 +75,18 @@ http://test.remote.server.com/path/540 http://%HOSTIP:%HTTPPORT silly:person cus
 </strip>
 <protocol>
 GET http://test.remote.server.com/path/540 HTTP/1.1
-Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive
 Host: custom.set.host.name
 
 GET http://test.remote.server.com/path/540 HTTP/1.1
 Proxy-Authorization: Digest username="silly", realm="weirdorealm", nonce="12345", uri="/path/540", response="ca507dcf189196b6a5374d3233042261"
-Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive
 Host: custom.set.host.name
 
 GET http://test.remote.server.com/path/540 HTTP/1.1
 Proxy-Authorization: Digest username="silly", realm="weirdorealm", nonce="12345", uri="/path/540", response="ca507dcf189196b6a5374d3233042261"
-Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive
 Host: custom.set.host.name

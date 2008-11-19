@@ -62,13 +62,11 @@ FTP over HTTP proxy with downgrade to HTTP 1.0
 <protocol>
 GET ftp://%HOSTIP:%HTTPPORT/we/want/that/page/1077 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET ftp://%HOSTIP:%HTTPPORT/we/want/that/page/10770002 HTTP/1.0
 Host: %HOSTIP:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive
 

@@ -20,6 +20,7 @@ This release includes the following bugfixes:
  o re-use of connections with the multi interface when multiple handles used
    the same server
  o memory leak with HTTP GSS/kerberos authentication
+ o removed the default use of "Pragma: no-cache"
 
 This release includes the following known bugs:
 
@@ -33,6 +34,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Yang Tse, Daniel Fandrich, Jim Meyering, Christian Krause, Andreas Wurf,
- Markus Koetter
+ Markus Koetter, Josef Wolf
 
         Thanks! (and sorry if I forgot to mention someone)

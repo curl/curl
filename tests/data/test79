@@ -47,7 +47,6 @@ ftp://%HOSTIP:%HTTPPORT/we/want/that/page/79 -x %HOSTIP:%HTTPPORT
 <protocol>
 GET ftp://%HOSTIP:%HTTPPORT/we/want/that/page/79 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive
 

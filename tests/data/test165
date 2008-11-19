@@ -50,7 +50,6 @@ http://www.едц.se/page/165 -x %HOSTIP:%HTTPPORT
 <protocol>
 GET http://www.xn--4cab6c.se/page/165 HTTP/1.1
 Host: www.xn--4cab6c.se
-Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive
 

@@ -44,7 +44,6 @@ http://we.want.that.site.com/63
 GET http://we.want.that.site.com/63 HTTP/1.1
 Proxy-Authorization: Basic ZmFrZTp1c2Vy
 Host: we.want.that.site.com
-Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive
 

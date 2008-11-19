@@ -7,6 +7,14 @@
                                   Changelog
 
 Daniel Stenberg (19 Nov 2008)
+- I removed the default use of "Pragma: no-cache" from libcurl when a proxy is
+  used. It has been used since forever but it was never a good idea to use
+  unless explicitly asked for.
+
+- Josef Wolf's extension that allows a $TESTDIR/gdbinit$testnum file that when
+  you use runtests.pl -g, will be sourced by gdb to allow additional fancy or
+  whatever you see fit
+
 - Christian Krause reported and fixed a memory leak that would occur with HTTP
   GSS/kerberos authentication (http://curl.haxx.se/bug/view.cgi?id=2284386)
 

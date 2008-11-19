@@ -43,7 +43,6 @@ HTTP, get cookie with dot prefixed full domain
 <protocol>
 GET http://z.x.com/171 HTTP/1.1
 Host: z.x.com
-Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive
 

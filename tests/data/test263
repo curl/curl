@@ -46,7 +46,6 @@ HTTP-IPv6 GET with proxy specified using IPv6-numerical address
 <protocol>
 GET http://veryveryremotesite.com/263 HTTP/1.1
 Host: veryveryremotesite.com
-Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive
 

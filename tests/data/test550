@@ -54,7 +54,6 @@ ftp://www.haxx.se/moo/550 http://%HOSTIP:%HTTPPORT ascii
 <protocol>
 GET ftp://www.haxx.se/moo/550;type=a HTTP/1.1
 Host: www.haxx.se:21
-Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive
 

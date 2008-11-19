@@ -51,7 +51,6 @@ http://too-long-IDN-name-cürl-rüles-la-la-la-dee-da-flooby-nooby.local/page/1035
 <protocol>
 GET http://too-long-IDN-name-cürl-rüles-la-la-la-dee-da-flooby-nooby.local/page/1035 HTTP/1.1
 Host: too-long-IDN-name-cürl-rüles-la-la-la-dee-da-flooby-nooby.local
-Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive
 

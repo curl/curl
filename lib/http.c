@@ -2290,11 +2290,6 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   }
 
 
-  http->p_pragma =
-    (!checkheaders(data, "Pragma:") &&
-     (conn->bits.httpproxy && !conn->bits.tunnel_proxy) )?
-    "Pragma: no-cache\r\n":NULL;
-
   http->p_accept = checkheaders(data, "Accept:")?NULL:"Accept: */*\r\n";
 
   if(( (HTTPREQ_POST == httpreq) ||
@@ -2440,7 +2435,6 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                 "%s" /* range */
                 "%s" /* user agent */
                 "%s" /* host */
-                "%s" /* pragma */
                 "%s" /* accept */
                 "%s" /* accept-encoding */
                 "%s" /* referer */
@@ -2460,7 +2454,6 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                  *data->set.str[STRING_USERAGENT] && conn->allocptr.uagent)?
                 conn->allocptr.uagent:"",
                 (conn->allocptr.host?conn->allocptr.host:""), /* Host: host */
-                http->p_pragma?http->p_pragma:"",
                 http->p_accept?http->p_accept:"",
                 (data->set.str[STRING_ENCODING] &&
                  *data->set.str[STRING_ENCODING] &&

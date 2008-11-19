@@ -53,7 +53,6 @@ http://www.haxx.se:999/523 http://%HOSTIP:%HTTPPORT
 GET http://www.haxx.se:19999/523 HTTP/1.1
 Authorization: Basic eHh4Onl5eQ==
 Host: www.haxx.se:19999
-Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive
 

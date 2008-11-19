@@ -41,7 +41,6 @@ http://we.want.that.site.com/264 -x http://f%61ke:user@%HOSTIP:%HTTPPORT
 GET http://we.want.that.site.com/264 HTTP/1.1
 Proxy-Authorization: Basic ZmFrZTp1c2Vy
 Host: we.want.that.site.com
-Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive
 

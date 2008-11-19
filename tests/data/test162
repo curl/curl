@@ -49,7 +49,6 @@ GET http://%HOSTIP:%HTTPPORT/162 HTTP/1.1
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
 Host: %HOSTIP:%HTTPPORT
-Pragma: no-cache
 Accept: */*
 Proxy-Connection: Keep-Alive
 
