@@ -8,6 +8,4 @@ To be addressed in 7.19.3 (planned release: January 2009)
 
 193 - Fix zero-byte file transfers
 
-194 - remove "Pragma: no-cache" from default HTTP requests
-
 195 - 
