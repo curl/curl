@@ -19,6 +19,7 @@ This release includes the following bugfixes:
    used
  o re-use of connections with the multi interface when multiple handles used
    the same server
+ o memory leak with HTTP GSS/kerberos authentication
 
 This release includes the following known bugs:
 

@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel Stenberg (19 Nov 2008)
+- Christian Krause reported and fixed a memory leak that would occur with HTTP
+  GSS/kerberos authentication (http://curl.haxx.se/bug/view.cgi?id=2284386)
+
 - Andreas Wurf and Markus Koetter helped me analyze a problem that Andreas got
   when uploading files to a single FTP server using multiple easy handle
   handles with the multi interface. Occasionally a handle would stall in
