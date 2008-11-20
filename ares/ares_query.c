@@ -67,7 +67,7 @@ void ares__rc4(rc4_key* key, unsigned char *buffer_ptr, int buffer_len)
   key->y = y;
 }
 
-static struct query* find_query_by_id(ares_channel channel, int id)
+static struct query* find_query_by_id(ares_channel channel, unsigned short id)
 {
   unsigned short qid;
   struct list_node* list_head;
@@ -94,11 +94,11 @@ static struct query* find_query_by_id(ares_channel channel, int id)
 */
 static unsigned short generate_unique_id(ares_channel channel)
 {
-  short id;
+  unsigned short id;
 
   do {
-	id = ares__generate_new_id(&channel->id_key);
-  } while (find_query_by_id(channel,id));
+    id = ares__generate_new_id(&channel->id_key);
+  } while (find_query_by_id(channel, id));
 
   return (unsigned short)id;
 }
