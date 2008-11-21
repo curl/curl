@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel Fandrich (20 Nov 2008)
+- Automatically detect OpenBSD's CA cert bundle.
+
 Daniel Stenberg (19 Nov 2008)
 - I removed the default use of "Pragma: no-cache" from libcurl when a proxy is
   used. It has been used since forever but it was never a good idea to use
