@@ -21,19 +21,16 @@ This release includes the following bugfixes:
    the same server
  o memory leak with HTTP GSS/kerberos authentication
  o removed the default use of "Pragma: no-cache"
+ o fix SCP/SFTP busyloop by using a new libssh2 0.19 function
 
 This release includes the following known bugs:
 
  o see docs/KNOWN_BUGS (http://curl.haxx.se/docs/knownbugs.html)
 
-Other curl-related news:
-
- o 
-
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Yang Tse, Daniel Fandrich, Jim Meyering, Christian Krause, Andreas Wurf,
- Markus Koetter, Josef Wolf
+ Markus Koetter, Josef Wolf, Vlad Grachov
 
         Thanks! (and sorry if I forgot to mention someone)

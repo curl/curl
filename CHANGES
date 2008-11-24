@@ -6,6 +6,15 @@
 
                                   Changelog
 
+Daniel Stenberg (24 Nov 2008)
+- Based on a patch by Vlad Grachov, libcurl now uses a new libssh2 0.19
+  function when built to support SCP and SFTP that helps the library to know
+  in which direction a particular libssh2 operation would return EAGAIN so
+  that libcurl knows what socket conditions to wait for before trying the
+  function call again. Previously (and still when using libssh2 0.18 or
+  earlier), libcurl will busy-loop in this situation when the easy interface
+  is used!
+
 Daniel Fandrich (20 Nov 2008)
 - Automatically detect OpenBSD's CA cert bundle.
 

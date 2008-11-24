@@ -1476,6 +1476,10 @@ if test X"$OPT_LIBSSH2" != Xno; then
     LIBSSH2_ENABLED=1
     AC_DEFINE(USE_LIBSSH2, 1, [if libSSH2 is in use])
     AC_SUBST(USE_LIBSSH2, [1])
+
+    dnl check for this function only present in libssh2 0.19+
+    AC_CHECK_FUNCS( libssh2_session_block_directions )
+
   )
 
   if test X"$OPT_LIBSSH2" != Xoff &&
