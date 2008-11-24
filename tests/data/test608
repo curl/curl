@@ -26,6 +26,11 @@ SFTP post-quote rename
  <command>
 --key curl_client_key --pubkey curl_client_key.pub -u %USER: -Q "-rename %PWD/log/file608.txt %PWD/log/file608-renamed.txt" sftp://%HOSTIP:%SSHPORT%PWD/log/file608.txt
 </command>
+# Verify that the file was renamed properly, then rename the file back to what
+# it was so the verify section works and the file can be cleaned up.
+<postcheck>
+perl %SRCDIR/libtest/test610.pl gone %PWD/log/file608.txt move %PWD/log/file608-renamed.txt %PWD/log/file608.txt
+</postcheck>
 <file name="log/file608.txt">
 Test file for rename test
 </file>
@@ -34,7 +39,7 @@ Test file for rename test
 #
 # Verify data after the test has been "shot"
 <verify>
-<file name="log/file608-renamed.txt">
+<file name="log/file608.txt">
 Test file for rename test
 </file>
 <valgrind>
