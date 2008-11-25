@@ -442,6 +442,13 @@ static int ProcessRequest(struct httprequest *req)
     req->ntlm = TRUE; /* NTLM found */
     logmsg("Received NTLM type-1, sending back data %ld", req->partno);
   }
+  else if((req->partno >= 1000) && strstr(req->reqbuf, "Authorization: Basic")) {
+    /* If the client is passing this Basic-header and the part number is already
+       >=1000, we add 1 to the part number.  This allows simple Basic authentication
+       negotiation to work in the test suite. */
+    req->partno += 1;
+    logmsg("Received Basic request, sending back data %ld", req->partno);
+  }
   if(strstr(req->reqbuf, "Connection: close"))
     req->open = FALSE; /* close connection after this request */
 

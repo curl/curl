@@ -67,6 +67,13 @@ of [test case number]%10000.
 B) The request was HTTP and included digest details, which adds 1000 to NUM
 C) If a HTTP request is NTLM type-1, it adds 1001 to num
 D) If a HTTP request is NTLM type-3, it adds 1002 to num
+E) If a HTTP request is Basic and num is already >=1000, it adds 1 to num
+
+Dynamically changing num in this way allows the test harness to be used to
+test authentication negotiation where several different requests must be sent
+to complete a transfer. The response to each request is found in its own data
+section.  Validating the entire negotiation sequence can be done by
+specifying a datacheck section.
 </dataNUM>
 <datacheck [nonewline="yes"]>
 if the data is sent but this is what should be checked afterwards. If
