@@ -1179,8 +1179,8 @@ static int config_sortlist(struct apattern **sortlist, int *nsort,
       /* Lets see if it is CIDR */
       /* First we'll try IPv6 */
       if ((bits = ares_inet_net_pton(AF_INET6, ipbufpfx[0] ? ipbufpfx : ipbuf,
-                                     &pat.addr.addr6,
-                                     sizeof(pat.addr.addr6))) > 0)
+                                     &pat.addrV6,
+                                     sizeof(pat.addrV6))) > 0)
         {
           pat.type = PATTERN_CIDR;
           pat.mask.bits = (unsigned short)bits;
@@ -1189,8 +1189,8 @@ static int config_sortlist(struct apattern **sortlist, int *nsort,
             return ARES_ENOMEM;
         }
       if (ipbufpfx[0] &&
-          (bits = ares_inet_net_pton(AF_INET, ipbufpfx, &pat.addr.addr4,
-                                     sizeof(pat.addr.addr4))) > 0)
+          (bits = ares_inet_net_pton(AF_INET, ipbufpfx, &pat.addrV4,
+                                     sizeof(pat.addrV4))) > 0)
         {
           pat.type = PATTERN_CIDR;
           pat.mask.bits = (unsigned short)bits;
@@ -1199,13 +1199,13 @@ static int config_sortlist(struct apattern **sortlist, int *nsort,
             return ARES_ENOMEM;
         }
       /* See if it is just a regular IP */
-      else if (ip_addr(ipbuf, (int)(q-str), &pat.addr.addr4) == 0)
+      else if (ip_addr(ipbuf, (int)(q-str), &pat.addrV4) == 0)
         {
           if (ipbufpfx[0])
             {
               memcpy(ipbuf, str, (int)(q-str));
               ipbuf[(int)(q-str)] = '\0';
-              if (ip_addr(ipbuf, (int)(q - str), &pat.mask.addr.addr4) != 0)
+              if (ip_addr(ipbuf, (int)(q - str), &pat.mask.addr4) != 0)
                 natural_mask(&pat);
             }
           else
@@ -1420,17 +1420,17 @@ static void natural_mask(struct apattern *pat)
   /* Store a host-byte-order copy of pat in a struct in_addr.  Icky,
    * but portable.
    */
-  addr.s_addr = ntohl(pat->addr.addr4.s_addr);
+  addr.s_addr = ntohl(pat->addrV4.s_addr);
 
   /* This is out of date in the CIDR world, but some people might
    * still rely on it.
    */
   if (IN_CLASSA(addr.s_addr))
-    pat->mask.addr.addr4.s_addr = htonl(IN_CLASSA_NET);
+    pat->mask.addr4.s_addr = htonl(IN_CLASSA_NET);
   else if (IN_CLASSB(addr.s_addr))
-    pat->mask.addr.addr4.s_addr = htonl(IN_CLASSB_NET);
+    pat->mask.addr4.s_addr = htonl(IN_CLASSB_NET);
   else
-    pat->mask.addr.addr4.s_addr = htonl(IN_CLASSC_NET);
+    pat->mask.addr4.s_addr = htonl(IN_CLASSC_NET);
 }
 #endif
 /* initialize an rc4 key. If possible a cryptographically secure random key

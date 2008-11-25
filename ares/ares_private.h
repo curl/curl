@@ -115,6 +115,16 @@
 #  define writev(s,ptr,cnt) ares_writev(s,ptr,cnt)
 #endif
 
+struct ares_addr {
+  int family;
+  union {
+    struct in_addr  addr4;
+    struct in6_addr addr6;
+  } addr;
+};
+#define addrV4 addr.addr4
+#define addrV6 addr.addr6
+
 struct query;
 
 struct send_request {
@@ -213,17 +223,17 @@ struct query_server_info {
 #define PATTERN_MASK 0x1
 #define PATTERN_CIDR 0x2
 
-union ares_addr {
-  struct in_addr addr4;
-  struct in6_addr addr6;
-};
-
 struct apattern {
-  union ares_addr addr;
   union
   {
-    union ares_addr addr;
-    unsigned short bits;
+    struct in_addr  addr4;
+    struct in6_addr addr6;
+  } addr;
+  union
+  {
+    struct in_addr  addr4;
+    struct in6_addr addr6;
+    unsigned short  bits;
   } mask;
   int family;
   unsigned short type;

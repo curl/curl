@@ -1,5 +1,10 @@
   Changelog for the c-ares project
 
+* Nov 25 2008 (Yang Tse)
+- In preparation for the upcomming IPv6 nameservers patch, the internal
+  ares_addr union is now changed into an internal struct which also holds
+  the address family.
+
 * Nov 19 2008 (Daniel Stenberg)
 - Brad Spencer brought the new function ares_gethostbyname_file() which simply
   resolves a host name from the given file, using the regular hosts syntax.

@@ -432,13 +432,13 @@ static int get_address_index(struct in_addr *addr, struct apattern *sortlist,
         continue;
       if (sortlist[i].type == PATTERN_MASK)
         {
-          if ((addr->s_addr & sortlist[i].mask.addr.addr4.s_addr)
-              == sortlist[i].addr.addr4.s_addr)
+          if ((addr->s_addr & sortlist[i].mask.addr4.s_addr)
+              == sortlist[i].addrV4.s_addr)
             break;
         }
       else
         {
-          if (!ares_bitncmp(&addr->s_addr, &sortlist[i].addr.addr4.s_addr,
+          if (!ares_bitncmp(&addr->s_addr, &sortlist[i].addrV4.s_addr,
                             sortlist[i].mask.bits))
             break;
         }
@@ -485,7 +485,7 @@ static int get6_address_index(struct in6_addr *addr, struct apattern *sortlist,
     {
       if (sortlist[i].family != AF_INET6)
         continue;
-        if (!ares_bitncmp(&addr->s6_addr, &sortlist[i].addr.addr6.s6_addr, sortlist[i].mask.bits))
+        if (!ares_bitncmp(&addr->s6_addr, &sortlist[i].addrV6.s6_addr, sortlist[i].mask.bits))
           break;
     }
   return i;
