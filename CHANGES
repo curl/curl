@@ -6,6 +6,15 @@
 
                                   Changelog
 
+Daniel Fandrich (25 Nov 2008)
+- If a HTTP request is Basic and num is already >=1000, the HTTP test
+  server adds 1 to num to get the data section to return. This allows
+  testing authentication negotiations using the Basic authentication
+  method.
+
+- Added tests 1087 and 1088 to test Basic authentication on a redirect
+  with and without --location-trusted
+
 Daniel Stenberg (24 Nov 2008)
 - Based on a patch by Vlad Grachov, libcurl now uses a new libssh2 0.19
   function when built to support SCP and SFTP that helps the library to know
