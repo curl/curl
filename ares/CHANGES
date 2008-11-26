@@ -3,6 +3,9 @@
 * Nov 26 2008 (Yang Tse)
 - Brad Spencer provided changes to allow buildconf to work on OS X.
 
+- Gerald Combs fixed a bug in ares_parse_ptr_reply() which would cause a
+  buffer to shrink instead of expand if a reply contained 8 or more records.
+
 * Nov 25 2008 (Yang Tse)
 - In preparation for the upcomming IPv6 nameservers patch, the internal
   ares_addr union is now changed into an internal struct which also holds

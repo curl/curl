@@ -55,6 +55,7 @@ int ares_parse_ptr_reply(const unsigned char *abuf, int alen, const void *addr,
   char *ptrname, *hostname, *rr_name, *rr_data;
   struct hostent *hostent;
   int aliascnt = 0;
+  int alias_alloc = 8;
   char ** aliases;
 
   /* Set *host to NULL for all failure cases. */
@@ -84,7 +85,7 @@ int ares_parse_ptr_reply(const unsigned char *abuf, int alen, const void *addr,
 
   /* Examine each answer resource record (RR) in turn. */
   hostname = NULL;
-  aliases = malloc(8 * sizeof(char *));
+  aliases = malloc(alias_alloc * sizeof(char *));
   if (!aliases)
     {
       free(ptrname);
@@ -125,9 +126,10 @@ int ares_parse_ptr_reply(const unsigned char *abuf, int alen, const void *addr,
             }
           strncpy(aliases[aliascnt], rr_data, strlen(rr_data)+1);
           aliascnt++;
-          if ((aliascnt%8)==0) {
+          if (aliascnt >= alias_alloc) {
             char **ptr;
-            ptr = realloc(aliases, (aliascnt/16+1) * sizeof(char *));
+            alias_alloc *= 2;
+            ptr = realloc(aliases, alias_alloc * sizeof(char *));
             if(!ptr) {
               status = ARES_ENOMEM;
               break;
