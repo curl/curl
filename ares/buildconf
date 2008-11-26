@@ -1,6 +1,44 @@
 #!/bin/sh
 
-${LIBTOOLIZE:-libtoolize} --copy --automake --force
+# The logic for finding the right libtoolize is taken from libcurl's buildconf
+
+#--------------------------------------------------------------------------
+# findtool works as 'which' but we use a different name to make it more
+# obvious we aren't using 'which'! ;-)
+#
+findtool(){
+  file="$1"
+
+  old_IFS=$IFS; IFS=':'
+  for path in $PATH
+  do
+    IFS=$old_IFS
+    # echo "checks for $file in $path" >&2
+    if test -f "$path/$file"; then
+      echo "$path/$file"
+      return
+    fi
+  done
+  IFS=$old_IFS
+}
+
+# this approach that tries 'glibtool' first is some kind of work-around for
+# some BSD-systems I believe that use to provide the GNU libtool named
+# glibtool, with 'libtool' being something completely different.
+libtool=`findtool glibtool 2>/dev/null`
+if test ! -x "$libtool"; then
+  libtool=`findtool ${LIBTOOL:-libtool}`
+fi
+
+if test -z "$LIBTOOLIZE"; then
+  # set the LIBTOOLIZE here so that glibtoolize is used if glibtool was found
+  # $libtool is already the full path
+  libtoolize="${libtool}ize"
+else
+  libtoolize=`findtool $LIBTOOLIZE`
+fi
+
+${libtoolize} --copy --automake --force
 ${ACLOCAL:-aclocal} -I m4 $ACLOCAL_FLAGS
 ${AUTOHEADER:-autoheader}
 ${AUTOCONF:-autoconf}

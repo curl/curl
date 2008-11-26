@@ -1,5 +1,8 @@
   Changelog for the c-ares project
 
+* Nov 26 2008 (Yang Tse)
+- Brad Spencer provided changes to allow buildconf to work on OS X.
+
 * Nov 25 2008 (Yang Tse)
 - In preparation for the upcomming IPv6 nameservers patch, the internal
   ares_addr union is now changed into an internal struct which also holds
