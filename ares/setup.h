@@ -107,6 +107,18 @@
 #define ssize_t int
 #endif
 
+#if !defined(HAVE_SYS_TIME_H) && !defined(_MSC_VER) && !defined(__WATCOMC__)
+#define HAVE_SYS_TIME_H
+#endif
+
+#if !defined(HAVE_UNISTD_H) && !defined(_MSC_VER)
+#define HAVE_UNISTD_H 1
+#endif
+
+#if !defined(HAVE_SYS_UIO_H) && !defined(WIN32) && !defined(MSDOS)
+#define HAVE_SYS_UIO_H
+#endif
+
 #endif /* HAVE_CONFIG_H */
 
 /*
@@ -122,22 +134,6 @@
 #undef PACKAGE_NAME
 #undef VERSION
 #undef PACKAGE
-
-/*
- * Assume a few thing unless they're set by configure
- */
-
-#if !defined(HAVE_SYS_TIME_H) && !defined(_MSC_VER) && !defined(__WATCOMC__)
-#define HAVE_SYS_TIME_H
-#endif
-
-#if !defined(HAVE_UNISTD_H) && !defined(_MSC_VER)
-#define HAVE_UNISTD_H 1
-#endif
-
-#if !defined(HAVE_SYS_UIO_H) && !defined(WIN32) && !defined(MSDOS)
-#define HAVE_SYS_UIO_H
-#endif
 
 /* IPv6 compatibility */
 #if !defined(HAVE_AF_INET6)
