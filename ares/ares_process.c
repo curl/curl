@@ -897,6 +897,7 @@ static int open_tcp_socket(ares_channel channel, struct server_state *server)
        return -1;
     }
 
+#ifdef TCP_NODELAY
   /*
    * Disable the Nagle algorithm (only relevant for TCP sockets, and thus not in
    * configure_socket). In general, in DNS lookups we're pretty much interested
@@ -910,6 +911,7 @@ static int open_tcp_socket(ares_channel channel, struct server_state *server)
        closesocket(s);
        return -1;
     }
+#endif
 
   /* Connect to the server. */
   memset(&sockin, 0, sizeof(sockin));
