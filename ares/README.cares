@@ -11,7 +11,7 @@ c-ares is not API compatible with ares: a new name makes that more obvious to
 the public.
 
 The full source code is available in the 'c-ares' release archives, and in the
-'ares' subdir of the curl CVS source repostitory.
+'ares' subdir of the curl CVS source repository.
 
 If you find bugs, correct flaws, have questions or have comments in general in
 regard to c-ares (or by all means the original ares too), get in touch with us
