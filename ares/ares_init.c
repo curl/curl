@@ -966,7 +966,9 @@ static int init_by_defaults(ares_channel channel)
      */
     size_t len = 64;
     int res;
+    channel->ndomains = 0; /* default to none */
 
+#ifdef HAVE_GETHOSTNAME
     hostname = malloc(len);
     if(!hostname) {
       rc = ARES_ENOMEM;
@@ -994,7 +996,6 @@ static int init_by_defaults(ares_channel channel)
 
     } while(0);
 
-    channel->ndomains = 0; /* default to none */
     if (strchr(hostname, '.'))  {
       /* a dot was found */
 
@@ -1010,6 +1011,7 @@ static int init_by_defaults(ares_channel channel)
       }
       channel->ndomains = 1;
     }
+#endif
   }
 
   if (channel->nsort == -1) {

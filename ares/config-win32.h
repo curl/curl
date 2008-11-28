@@ -97,6 +97,9 @@
 /* Define if you have the strnicmp function. */
 #define HAVE_STRNICMP 1
 
+/* Define if you have the gethostname function.  */
+#define HAVE_GETHOSTNAME 1
+
 /* Define if you have the recv function. */
 #define HAVE_RECV 1
 
