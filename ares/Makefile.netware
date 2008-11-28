@@ -352,6 +352,7 @@ endif
 	@echo $(DL)#define HAVE_FCNTL_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_GETHOSTBYADDR 1$(DL) >> $@
 	@echo $(DL)#define HAVE_GETHOSTBYNAME 1$(DL) >> $@
+	@echo $(DL)#define HAVE_GETHOSTNAME 1$(DL) >> $@
 	@echo $(DL)#define HAVE_GETPROTOBYNAME 1$(DL) >> $@
 	@echo $(DL)#define HAVE_GMTIME_R 1$(DL) >> $@
 	@echo $(DL)#define HAVE_INET_ADDR 1$(DL) >> $@
