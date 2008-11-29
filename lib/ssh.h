@@ -30,9 +30,9 @@
 #endif
 
 #if (LIBSSH2_VERSION_NUM >= 0x001300)
-#  ifndef HAVE_LIBSSH2_SESSION_BLOCK_DIRECTIONS
-#    define HAVE_LIBSSH2_SESSION_BLOCK_DIRECTIONS 1
-#  endif
+#  define HAVE_LIBSSH2_SESSION_BLOCK_DIRECTIONS 1
+#else
+#  undef HAVE_LIBSSH2_SESSION_BLOCK_DIRECTIONS
 #endif
 
 extern const struct Curl_handler Curl_handler_scp;
