@@ -1,6 +1,5 @@
-#ifndef __SSH_H
-#define __SSH_H
-
+#ifndef HEADER_CURL_SSH_H
+#define HEADER_CURL_SSH_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -25,6 +24,17 @@
  ***************************************************************************/
 
 #ifdef USE_LIBSSH2
+
+#if !defined(LIBSSH2_VERSION_NUM) || (LIBSSH2_VERSION_NUM < 0x001000)
+#  error "SCP/SFTP protocols require libssh2 0.16 or later"
+#endif
+
+#if (LIBSSH2_VERSION_NUM >= 0x001300)
+#  ifndef HAVE_LIBSSH2_SESSION_BLOCK_DIRECTIONS
+#    define HAVE_LIBSSH2_SESSION_BLOCK_DIRECTIONS 1
+#  endif
+#endif
+
 extern const struct Curl_handler Curl_handler_scp;
 extern const struct Curl_handler Curl_handler_sftp;
 
@@ -49,4 +59,4 @@ ssize_t Curl_sftp_recv(struct connectdata *conn, int sockindex,
 
 #endif /* USE_LIBSSH2 */
 
-#endif /* __SSH_H */
+#endif /* HEADER_CURL_SSH_H */
