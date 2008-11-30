@@ -831,6 +831,7 @@ PORTS
         - Alpha Tru64 v5.0 5.1
         - AVR32 Linux
         - ARM INTEGRITY
+        - ARM iPhone OS
         - Cell Linux
         - Cell Cell OS
         - HP-PA HP-UX 9.X 10.X 11.X
