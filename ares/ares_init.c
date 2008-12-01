@@ -179,7 +179,7 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
    */
 
   if (status == ARES_SUCCESS) {
-  status = init_by_options(channel, options, optmask);
+    status = init_by_options(channel, options, optmask);
     if (status != ARES_SUCCESS)
       DEBUGF(fprintf(stderr, "Error: init_by_options failed: %s\n",
                      ares_strerror(status)));
@@ -430,7 +430,8 @@ static int init_by_options(ares_channel channel,
         return ARES_ENOMEM;
       for (i = 0; i < options->nsort; i++)
         {
-          memcpy(&(channel->sortlist[i]), &(options->sortlist[i]), sizeof(struct apattern));
+          memcpy(&(channel->sortlist[i]), &(options->sortlist[i]),
+                 sizeof(struct apattern));
         }
       channel->nsort = options->nsort;
     }
