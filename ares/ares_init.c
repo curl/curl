@@ -269,10 +269,14 @@ int ares_save_options(ares_channel channel, struct ares_options *options,
   if (!ARES_CONFIG_CHECK(channel))
     return ARES_ENODATA;
 
+  /* Traditionally the optmask wasn't saved in the channel struct so it was
+     recreated here. ROTATE is the first option that has no struct field of
+     its own in the public config struct */
   (*optmask) = (ARES_OPT_FLAGS|ARES_OPT_TRIES|ARES_OPT_NDOTS|
                 ARES_OPT_UDP_PORT|ARES_OPT_TCP_PORT|ARES_OPT_SOCK_STATE_CB|
                 ARES_OPT_SERVERS|ARES_OPT_DOMAINS|ARES_OPT_LOOKUPS|
-                ARES_OPT_SORTLIST|ARES_OPT_TIMEOUTMS);
+                ARES_OPT_SORTLIST|ARES_OPT_TIMEOUTMS) |
+    (channel->optmask & ARES_OPT_ROTATE);
 
   /* Copy easy stuff */
   options->flags   = channel->flags;
@@ -355,7 +359,7 @@ static int init_by_options(ares_channel channel,
   if ((optmask & ARES_OPT_NDOTS) && channel->ndots == -1)
     channel->ndots = options->ndots;
   if ((optmask & ARES_OPT_ROTATE) && channel->rotate == -1)
-    channel->rotate = options->rotate;
+    channel->rotate = 1;
   if ((optmask & ARES_OPT_UDP_PORT) && channel->udp_port == -1)
     channel->udp_port = options->udp_port;
   if ((optmask & ARES_OPT_TCP_PORT) && channel->tcp_port == -1)
@@ -430,6 +434,8 @@ static int init_by_options(ares_channel channel,
         }
       channel->nsort = options->nsort;
     }
+
+  channel->optmask = optmask;
 
   return ARES_SUCCESS;
 }

@@ -263,6 +263,8 @@ struct ares_channeldata {
   int nsort;
   char *lookups;
 
+  int optmask; /* the option bitfield passed in at init time */
+
   /* Server addresses and communications state */
   struct server_state *servers;
   int nservers;

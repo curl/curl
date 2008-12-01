@@ -185,7 +185,6 @@ struct ares_options {
   int timeout; /* in seconds or milliseconds, depending on options */
   int tries;
   int ndots;
-  int rotate;
   unsigned short udp_port;
   unsigned short tcp_port;
   int socket_send_buffer_size;
