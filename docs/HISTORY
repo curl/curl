@@ -144,10 +144,38 @@ August 2004:
 
 April 2005:
 
-GnuTLS can now optionally be used for the secure layer when curl is built.
+ GnuTLS can now optionally be used for the secure layer when curl is built.
 
 September 2005:
 
-TFTP support was added.
+ TFTP support was added.
 
-More than 100,000 unique visitors of the curl web site. 25 mirrors.
+ More than 100,000 unique visitors of the curl web site. 25 mirrors.
+
+April 2006:
+
+ Added the multi_socket() API
+
+September 2006:
+
+ The major SONAME number for libcurl was bumped to 4 due to the removal of
+ ftp third party transfer support.
+
+November 2006:
+
+ Added SCP and SFTP support
+
+February 2007:
+
+ Added support for the Mozilla NSS library to do the SSL/TLS stuff
+
+November 2008:
+
+ Command line options:         128
+ curl_easy_setopt() options:   158
+ Public functions in libcurl:  58
+ Known libcurl bindings:       37
+ Contributors:                 683
+
+ 145,000 unique visitors. >100 GB downloaded.
+
