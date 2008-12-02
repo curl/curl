@@ -50,6 +50,7 @@
 #if defined(WIN32) && !defined(WATT32)
   #include <winsock.h>
 #else
+  #include <sys/socket.h>
   #include <arpa/inet.h>
   #include <netinet/in.h>
   #include <netdb.h>
