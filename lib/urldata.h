@@ -978,6 +978,10 @@ struct connectdata {
   struct sockaddr_in local_addr;
 #endif
 
+  /* the two following *_inuse fields are only flags, not counters in any way.
+     If TRUE it means the channel is in use, and if FALSE it means the channel
+     is up for grabs by one. */
+
   bool readchannel_inuse;  /* whether the read channel is in use by an easy
                               handle */
   bool writechannel_inuse; /* whether the write channel is in use by an easy
