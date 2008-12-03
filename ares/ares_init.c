@@ -257,6 +257,39 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
   return ARES_SUCCESS;
 }
 
+/* ares_dup() duplicates a channel handle with all its options and returns a
+   new channel handle */
+int ares_dup(ares_channel *dest, ares_channel src)
+{
+  struct ares_options opts;
+  int rc;
+  int optmask;
+
+  *dest = NULL; /* in case of failure return NULL explicitly */
+
+  /* First get the options supported by the old ares_save_options() function,
+     which is most of them */
+  rc = ares_save_options(src, &opts, &optmask);
+  if(rc)
+    return rc;
+
+  /* Then create the new channel with those options */
+  rc = ares_init_options(dest, &opts, optmask);
+
+  /* destroy the options copy to not leak any memory */
+  ares_destroy_options(&opts);
+
+  if(rc)
+    return rc;
+
+  /* Now clone the options that ares_save_options() doesn't support. */
+
+  /* No such options available yet */
+
+  return ARES_SUCCESS; /* everything went fine */
+
+}
+
 /* Save options from initialized channel */
 int ares_save_options(ares_channel channel, struct ares_options *options,
                       int *optmask)

@@ -1,5 +1,39 @@
   Changelog for the c-ares project
 
+* Dec 3 2008 (Daniel Stenberg)
+
+  API changes:
+
+  I made sure the public ares_config struct looks like before and yet it
+  supports the ROTATE option thanks to c-ares now storing the "optmask"
+  internally. Thus we should be ABI compatible with the past release(s)
+  now. My efforts mentioned below should not break backwards ABI compliance.
+
+  Here's how I suggest we proceed with the API:
+
+  ares_init() will be primary "channel creator" function.
+
+  ares_init_options() will continue to work exactly like now and before. For
+  starters, it will be the (only) way to set the existing options.
+
+  ares_save_options() will continue to work like today, but will ONLY save
+  options that you can set today (including ARES_OPT_ROTATE actually) but new
+  options that we add may not be saved with this.
+
+  Instead we introduce:
+
+  ares_dup() that instead can make a new channel and clone the config used
+  from an existing channel. It will then clone all config options, including
+  future new things we add.
+
+  ares_set_*() style functions that set (new) config options. As a start we
+  simply add these for new functionality, but over time we can also introduce
+  them for existing "struct ares_options" so that we can eventually deprecate
+  the two ares_*_options() functions.
+
+  ares_get_*() style functions for extracting info from a channel handle that
+  should be used instead of ares_save_options().
+
 * Nov 26 2008 (Yang Tse)
 - Brad Spencer provided changes to allow buildconf to work on OS X.
 

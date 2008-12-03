@@ -24,9 +24,7 @@ ares_save_options \- Save configuration values obtained from initialized ares_ch
 .B void ares_save_options(ares_channel \fIchannel\fP, struct ares_options *\fIoptions\fP, int *\fIoptmask\fP)
 .fi
 .SH DESCRIPTION
-The
-.B ares_save_options
-function saves the channel data identified by
+The \fBares_save_options(3)\fP function saves the channel data identified by
 .IR channel ,
 into the options struct identified by
 .IR options ,
@@ -38,11 +36,18 @@ The resultant options and optmask are then able to be
 passed directly to ares_init_options.  When the options
 are no longer needed, ares_destroy_options should be called
 to free any associated memory.
-
-
+.SH NOTE
+Since c-ares 1.6.0 the ares_options struct has been "locked" meaning that it
+won't be extended to cover new funtions. This function will remain
+functioning, but it can only return config data that can be represented in
+this config struct, which may no longer be the complete set of config
+options. \fBares_dup(3)\fP will not have that restriction.
 .SH SEE ALSO
 .BR ares_destroy_options (3),
-.BR ares_init_options (3)
+.BR ares_init_options (3),
+.BR ares_dup (3)
+.SH AVAILABILITY
+ares_save_options(3) was added in c-ares 1.4.0
 .SH AUTHOR
 Brad House
 .br

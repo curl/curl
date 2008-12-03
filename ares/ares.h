@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /* Copyright 1998 by the Massachusetts Institute of Technology.
- * Copyright (C) 2007 by Daniel Stenberg
+ * Copyright (C) 2007-2008 by Daniel Stenberg
  *
  * Permission to use, copy, modify, and distribute this
  * software and its documentation for any purpose and without
@@ -180,6 +180,26 @@ typedef void (*ares_sock_state_cb)(void *data,
 
 struct apattern;
 
+/* NOTE about the ares_options struct to users and developers.
+
+   This struct will remain looking like this. It will not be extended nor
+   shrunk in future releases, but all new options will be set by ares_set_*()
+   options instead of with the ares_init_options() function.
+
+   Eventually (in a galaxy far far away), all options will be settable by
+   ares_set_*() options and the ares_init_options() function will become
+   deprecated.
+
+   ares_save_options() is considered deprecated as of right now. Use ares_dup()
+   instead!
+
+   So, if new options are added they are not added to this struct. And they
+   are not "saved" with the ares_save_options() function but instead we
+   encourage the use of the ares_dup() function. Needless to say, if you add
+   config options to c-ares you need to make sure ares_dup() duplicates this
+   new option.
+
+ */
 struct ares_options {
   int flags;
   int timeout; /* in seconds or milliseconds, depending on options */
@@ -215,8 +235,10 @@ typedef void (*ares_nameinfo_callback)(void *arg, int status, int timeouts,
 int ares_init(ares_channel *channelptr);
 int ares_init_options(ares_channel *channelptr, struct ares_options *options,
                       int optmask);
-int ares_save_options(ares_channel channel, struct ares_options *options, int *optmask);
+int ares_save_options(ares_channel channel, struct ares_options *options,
+                      int *optmask);
 void ares_destroy_options(struct ares_options *options);
+int ares_dup(ares_channel *dest, ares_channel src);
 void ares_destroy(ares_channel channel);
 void ares_cancel(ares_channel channel);
 void ares_send(ares_channel channel, const unsigned char *qbuf, int qlen,
