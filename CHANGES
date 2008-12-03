@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Fandrich (3 Dec 2008)
+- Pawel Kierski pointed out a mistake in the cookie code that could lead to a
+  bad fclose() after a fatal error had occured.
+  (http://curl.haxx.se/bug/view.cgi?id=2382219)
+
 Daniel Fandrich (25 Nov 2008)
 - If a HTTP request is Basic and num is already >=1000, the HTTP test
   server adds 1 to num to get the data section to return. This allows
