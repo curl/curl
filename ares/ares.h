@@ -190,14 +190,11 @@ struct apattern;
    ares_set_*() options and the ares_init_options() function will become
    deprecated.
 
-   ares_save_options() is considered deprecated as of right now. Use ares_dup()
-   instead!
-
-   So, if new options are added they are not added to this struct. And they
-   are not "saved" with the ares_save_options() function but instead we
-   encourage the use of the ares_dup() function. Needless to say, if you add
-   config options to c-ares you need to make sure ares_dup() duplicates this
-   new option.
+   When new options are added to c-ares, they are not added to this
+   struct. And they are not "saved" with the ares_save_options() function but
+   instead we encourage the use of the ares_dup() function. Needless to say,
+   if you add config options to c-ares you need to make sure ares_dup()
+   duplicates this new option.
 
  */
 struct ares_options {
