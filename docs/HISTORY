@@ -77,7 +77,7 @@ different bindings exist at the time of this writing.
 September 2000, kerberos4 support was added.
 
 In November 2000 started the work on a test suite for curl. It was later
-re-written from scratch again.
+re-written from scratch again. The libcurl major SONAME number was set to 1.
 
 January 2001, Daniel released curl 7.5.2 under a new license again: MIT (or
 MPL). The MIT license is extremely liberal and can be used combined with GPL
@@ -88,7 +88,7 @@ deemed "GPL incompatible".)
 
 curl supports HTTP 1.1 starting with the release of 7.7, March 22 2001. This
 also introduced libcurl's ability to do persistent connections. 24000 lines of
-code.
+code. The libcurl major SONAME number was bumped to 2 due to this overhaul.
 
 The first experimental ftps:// support was added in March 2001.
 
@@ -129,7 +129,12 @@ December 2003, full-fledged SSL for FTP is supported.
 
 January 2004: curl 7.11.0 introduced large file support.
 
-June 2004: curl 7.12.0 introduced IDN support. 10 official web mirrors.
+June 2004:
+
+  curl 7.12.0 introduced IDN support. 10 official web mirrors.
+
+  This release bumped the major SONAME to 3 due to the removal of the
+  curl_formparse() function
 
 August 2004:
  Curl and libcurl 7.12.1
