@@ -620,22 +620,27 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
       easy->easy_handle->dns.hostcachetype = HCACHE_NONE;
     }
 
-    /* we must call Curl_done() here (if we still "own it") so that we don't
-       leave a half-baked one around */
-    if(easy->easy_conn &&
-       (easy->easy_conn->data == easy->easy_handle)) {
+    if(easy->easy_conn) {
 
-      /* Curl_done() clears the conn->data field to lose the association
-         between the easy handle and the connection
+      /* we must call Curl_done() here (if we still "own it") so that we don't
+         leave a half-baked one around */
+      if (easy->easy_conn->data == easy->easy_handle) {
 
-         Note that this ignores the return code simply because there's nothing
-         really useful to do with it anyway! */
-      (void)Curl_done(&easy->easy_conn, easy->result, premature);
+        /* Curl_done() clears the conn->data field to lose the association
+           between the easy handle and the connection
 
-      if(easy->easy_conn)
-        /* the connection is still alive, set back the association to enable
-           the check below to trigger TRUE */
-        easy->easy_conn->data = easy->easy_handle;
+           Note that this ignores the return code simply because there's
+           nothing really useful to do with it anyway! */
+        (void)Curl_done(&easy->easy_conn, easy->result, premature);
+
+        if(easy->easy_conn)
+          /* the connection is still alive, set back the association to enable
+             the check below to trigger TRUE */
+          easy->easy_conn->data = easy->easy_handle;
+      }
+      else
+        /* Clear connection pipelines, if Curl_done above was not called */
+        Curl_getoff_all_pipelines(easy->easy_handle, easy->easy_conn);
     }
 
     /* If this easy_handle was the last one in charge for one or more

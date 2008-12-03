@@ -69,6 +69,10 @@ CURLcode Curl_addHandleToPipeline(struct SessionHandle *handle,
                                   struct curl_llist *pipeline);
 int Curl_removeHandleFromPipeline(struct SessionHandle *handle,
                                   struct curl_llist *pipeline);
+/* remove the specified connection from all (possible) pipelines and related
+   queues */
+void Curl_getoff_all_pipelines(struct SessionHandle *data,
+                               struct connectdata *conn);
 
 void Curl_close_connections(struct SessionHandle *data);
 

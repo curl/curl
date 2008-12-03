@@ -23,6 +23,7 @@ This release includes the following bugfixes:
  o removed the default use of "Pragma: no-cache"
  o fix SCP/SFTP busyloop by using a new libssh2 0.19 function
  o bad fclose() after a fatal error in cookie code
+ o curl_multi_remove_handle() when the handle was in use in a HTTP pipeline
 
 This release includes the following known bugs:
 
@@ -32,6 +33,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Yang Tse, Daniel Fandrich, Jim Meyering, Christian Krause, Andreas Wurf,
- Markus Koetter, Josef Wolf, Vlad Grachov, Pawel Kierski
+ Markus Koetter, Josef Wolf, Vlad Grachov, Pawel Kierski, Igor Novoseltsev
 
         Thanks! (and sorry if I forgot to mention someone)

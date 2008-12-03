@@ -6,7 +6,12 @@
 
                                   Changelog
 
-Daniel Fandrich (3 Dec 2008)
+Daniel Stenberg (3 Dec 2008)
+- Igor Novoseltsev filed bug #2351645
+  (http://curl.haxx.se/bug/view.cgi?id=2351645) that identified a problem with
+  the multi interface that occured if you removed an easy handle while in
+  progress and the handle was used in a HTTP pipeline.
+
 - Pawel Kierski pointed out a mistake in the cookie code that could lead to a
   bad fclose() after a fatal error had occured.
   (http://curl.haxx.se/bug/view.cgi?id=2382219)
