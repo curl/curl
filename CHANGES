@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Fandrich (3 Dec 2008)
+- Fixed the getifaddrs version of Curl_if2ip to work on systems without IPv6
+  support (e.g. Minix)
+
 Daniel Stenberg (3 Dec 2008)
 - Igor Novoseltsev filed bug #2351645
   (http://curl.haxx.se/bug/view.cgi?id=2351645) that identified a problem with
