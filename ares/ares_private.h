@@ -296,6 +296,9 @@ struct ares_channeldata {
 
   ares_sock_state_cb sock_state_cb;
   void *sock_state_cb_data;
+
+  ares_sock_create_callback sock_create_cb;
+  void *sock_create_cb_data;
 };
 
 /* return true if now is exactly check time or later */

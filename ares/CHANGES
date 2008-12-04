@@ -1,5 +1,10 @@
   Changelog for the c-ares project
 
+* Dec 4 2008 (Daniel Stenberg)
+
+  Gregor Jasny provided the patch that introduces ares_set_socket_callback(),
+  and I edited it to also get duped by ares_dup().
+
 * Dec 3 2008 (Daniel Stenberg)
 
   API changes:

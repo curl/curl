@@ -159,6 +159,8 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
   channel->servers = NULL;
   channel->sock_state_cb = NULL;
   channel->sock_state_cb_data = NULL;
+  channel->sock_create_cb = NULL;
+  channel->sock_create_cb_data = NULL;
 
   channel->last_server = 0;
   channel->last_timeout_processed = (time_t)now.tv_sec;
@@ -283,8 +285,9 @@ int ares_dup(ares_channel *dest, ares_channel src)
     return rc;
 
   /* Now clone the options that ares_save_options() doesn't support. */
+  (*dest)->sock_create_cb      = src->sock_create_cb;
+  (*dest)->sock_create_cb_data = src->sock_create_cb_data;
 
-  /* No such options available yet */
 
   return ARES_SUCCESS; /* everything went fine */
 
@@ -1550,4 +1553,12 @@ unsigned short ares__generate_new_id(rc4_key* key)
   unsigned short r=0;
   ares__rc4(key, (unsigned char *)&r, sizeof(r));
   return r;
+}
+
+void ares_set_socket_callback(ares_channel channel,
+                              ares_sock_create_callback cb,
+                              void *data)
+{
+  channel->sock_create_cb = cb;
+  channel->sock_create_cb_data = data;
 }
