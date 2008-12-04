@@ -29,10 +29,11 @@
 
 #include <sys/types.h>
 
-#if defined(_AIX) || (defined(NETWARE) && defined(__NOVELL_LIBC__))
 /* HP-UX systems version 9, 10 and 11 lack sys/select.h and so does oldish
    libc5-based Linux systems. Only include it on system that are known to
    require it! */
+#if defined(_AIX) || defined(__NOVELL_LIBC__) || defined(__NetBSD__) || \
+    defined(__minix) || defined(__SYMBIAN32__) || defined(__INTEGRITY)
 #include <sys/select.h>
 #endif
 #if (defined(NETWARE) && !defined(__NOVELL_LIBC__))
