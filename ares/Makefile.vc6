@@ -26,7 +26,7 @@ OBJ_DIR  = VC6_obj
 DEF_FILE = cares.def
 
 !if "$(USE_WATT32)" == "1"
-CFLAGS  = $(CFLAGS) -UWIN32 -DWATT32 -I$(WATT_ROOT)\inc
+CFLAGS  = $(CFLAGS) -UWIN32 -DWATT32 -D_USE_32BIT_TIME_T -I$(WATT_ROOT)\inc
 EX_LIBS = $(WATT_ROOT)\lib\wattcpvc_imp.lib
 
 !else
@@ -124,9 +124,11 @@ $(DEF_FILE): $(OBJECTS) Makefile.VC6
        @echo   ares_inet_net_pton     >> $@
        @echo   ares_inet_ntop         >> $@
        @echo   ares_inet_pton         >> $@
-       @echo   ares_writev            >> $@
        @echo   ares_getnameinfo       >> $@
        @echo   ares_parse_aaaa_reply  >> $@
+!if "$(USE_WATT32)" == "0"
+       @echo   ares_writev            >> $@
+!endif
 
 ahost.exe: $(OBJ_DIR) $(OBJ_DIR)\ahost.obj $(OBJ_DIR)\ares_getopt.obj cares_imp.lib
        link $(LDFLAGS) -out:$@ $(OBJ_DIR)\ahost.obj $(OBJ_DIR)\ares_getopt.obj cares_imp.lib $(EX_LIBS)
