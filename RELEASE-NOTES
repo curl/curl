@@ -25,6 +25,7 @@ This release includes the following bugfixes:
  o bad fclose() after a fatal error in cookie code
  o curl_multi_remove_handle() when the handle was in use in a HTTP pipeline
  o GSS authentication infinite loop problem
+ o 550 response from SIZE no longer treated as missing file
 
 This release includes the following known bugs:
 
@@ -34,6 +35,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Yang Tse, Daniel Fandrich, Jim Meyering, Christian Krause, Andreas Wurf,
- Markus Koetter, Josef Wolf, Vlad Grachov, Pawel Kierski, Igor Novoseltsev
+ Markus Koetter, Josef Wolf, Vlad Grachov, Pawel Kierski, Igor Novoseltsev,
+ Fred Machado
 
         Thanks! (and sorry if I forgot to mention someone)

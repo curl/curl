@@ -9,9 +9,6 @@ FAILURE
 </info>
 # Server-side
 <reply>
-<size>
-1
-</size>
 <servercmd>
 REPLY RETR 314 bluah you f00l!
 REPLY EPSV 314 bluah you f00l!

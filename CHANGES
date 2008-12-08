@@ -7,6 +7,18 @@
                                   Changelog
 
 Daniel Stenberg (8 Dec 2008)
+- Fred Machado posted about a weird FTP problem on the curl-users list and when
+  researching it, it turned out he got a 550 response back from a SIZE command
+  and then I fell over the text in RFC3659 that says:
+
+   The presence of the 550 error response to a SIZE command MUST NOT be taken
+   by the client as an indication that the file cannot be transferred in the
+   current MODE and TYPE.
+
+  In other words: the change I did on September 30th 2008 and that has been
+  included in the last two releases were a regression and a bad idea. We MUST
+  NOT take a 550 response from SIZE as a hint that the file doesn't exist.
+
 - Christian Krause filed bug #2221237
   (http://curl.haxx.se/bug/view.cgi?id=2221237) that identified an infinite
   loop during GSS authentication given some specific conditions. With his

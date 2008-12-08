@@ -45,8 +45,10 @@ CWD path
 EPSV
 TYPE I
 SIZE 533
+RETR 533
 EPSV
 SIZE 533
+RETR 533
 QUIT
 </protocol>
 </verify>
