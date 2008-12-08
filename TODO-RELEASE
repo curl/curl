@@ -1,8 +1,25 @@
 To be addressed in 7.19.3 (planned release: January 2009)
 =========================
 
-192 - "infinite loop during GSS authentication" bug #2221237
-
 193 - Fix zero-byte file transfers
 
-195 - 
+195 - SIZE returning 550 must not abort the transfer
+
+196 - #2351653 "crash in ConnectionExists"
+
+197 - IIS-bug in Digest
+
+198 - implicit SSL with FileZilla server
+
+199 - "Bug 2351645" adjustment of the patch Daniel S applied
+
+200 - "afert redirect, the content length is not reset"
+
+201 - "bug: header data output to the body callback function after set header"
+
+202 -
+
+
+
+
+
