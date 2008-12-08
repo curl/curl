@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (8 Dec 2008)
+- Christian Krause filed bug #2221237
+  (http://curl.haxx.se/bug/view.cgi?id=2221237) that identified an infinite
+  loop during GSS authentication given some specific conditions. With his
+  patience and great feedback I managed to narrow down the problem and
+  eventually fix it although I can't test any of this myself!
+
 Daniel Fandrich (3 Dec 2008)
 - Fixed the getifaddrs version of Curl_if2ip to work on systems without IPv6
   support (e.g. Minix)

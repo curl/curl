@@ -299,6 +299,9 @@ struct ntlmdata {
 
 #ifdef HAVE_GSSAPI
 struct negotiatedata {
+  /* when doing Negotiate we first need to receive an auth token and then we
+     need to send our header */
+  enum { GSS_AUTHNONE, GSS_AUTHRECV, GSS_AUTHSENT } state;
   bool gss; /* Whether we're processing GSS-Negotiate or Negotiate */
   const char* protocol; /* "GSS-Negotiate" or "Negotiate" */
   OM_uint32 status;

@@ -24,6 +24,7 @@ This release includes the following bugfixes:
  o fix SCP/SFTP busyloop by using a new libssh2 0.19 function
  o bad fclose() after a fatal error in cookie code
  o curl_multi_remove_handle() when the handle was in use in a HTTP pipeline
+ o GSS authentication infinite loop problem
 
 This release includes the following known bugs:
 
