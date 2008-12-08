@@ -33,6 +33,12 @@
 
 int ares_getopt(int nargc, char * const nargv[], const char *ostr);
 
+#if defined(WATT32)
+#undef optarg
+#undef optind
+#undef opterr
+#endif
+
 extern char *optarg;
 extern int optind;
 extern int opterr;
