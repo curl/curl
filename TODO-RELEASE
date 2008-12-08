@@ -13,13 +13,13 @@ To be addressed in 7.19.3 (planned release: January 2009)
 
 199 - "Bug 2351645" adjustment of the patch Daniel S applied
 
-200 - "afert redirect, the content length is not reset"
+200 - "afert redirect, the content length is not reset" by Shunlong Bai
 
 201 - "bug: header data output to the body callback function after set header"
+      by Shunlong Bai
 
-202 -
+202 - "hangs up of application above libcurl" - problems with the multi_socket
+      implementation when using HTTP pipelining. Patch pending by 
+      Igor Novoseltsev
 
-
-
-
-
+203 -
