@@ -1,25 +1,15 @@
-This is what's new and changed in the c-ares 1.6.0 release:
+This is what's new and changed in the c-ares 1.6.1 release:
 
 Changed:
 
- o Added support for the glibc "rotate" resolv.conf option (or ARES_OPT_ROTATE)
- o Added ares_gethostbyname_file()
- o Added ares_dup()
- o Added ares_set_socket_callback()
+ o 
 
 Fixed:
 
- o improved configure detection of several functions
- o improved source code portability
- o adig supports a regular numerical dotted IP address for the -s option
- o handling of EINPROGRESS for UDP connects
- o ares_parse_ptr_reply() would cause a buffer to shrink instead of expand if a
-   reply contained 8 or more records
- o buildconf works on OS X
+ o 
 
 Thanks go to these friendly people for their efforts and contributions:
 
- Yang Tse, Charles Hardin, Carlo Contavalli, Brad Spencer, Gerald Combs,
- Gregor Jasny
+ 
 
 Have fun!
