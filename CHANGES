@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (9 Dec 2008)
+- Ken Hirsch simplified how libcurl does FTPS: now it doesn't assume any
+  particular state for the control connection like it did before for implicit
+  FTPS (libcurl assumed such control connections to be encrypted while some
+  FTPS servers such as FileZilla assumes such connections to be clear
+  mode). Use the CURLOPT_USE_SSL option to set your desired level.
+
 Daniel Stenberg (8 Dec 2008)
 - Fred Machado posted about a weird FTP problem on the curl-users list and when
   researching it, it turned out he got a 550 response back from a SIZE command

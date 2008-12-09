@@ -26,6 +26,7 @@ This release includes the following bugfixes:
  o curl_multi_remove_handle() when the handle was in use in a HTTP pipeline
  o GSS authentication infinite loop problem
  o 550 response from SIZE no longer treated as missing file
+ o ftps:// control connections now use explicit protection level
 
 This release includes the following known bugs:
 
@@ -36,6 +37,6 @@ advice from friends like these:
 
  Yang Tse, Daniel Fandrich, Jim Meyering, Christian Krause, Andreas Wurf,
  Markus Koetter, Josef Wolf, Vlad Grachov, Pawel Kierski, Igor Novoseltsev,
- Fred Machado
+ Fred Machado, Ken Hirsch
 
         Thanks! (and sorry if I forgot to mention someone)

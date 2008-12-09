@@ -150,9 +150,6 @@ static int ftp_getsock(struct connectdata *conn,
 static CURLcode ftp_doing(struct connectdata *conn,
                                bool *dophase_done);
 static CURLcode ftp_setup_connection(struct connectdata * conn);
-#ifdef USE_SSL
-static CURLcode ftps_setup_connection(struct connectdata * conn);
-#endif
 
 /* easy-to-use macro: */
 #define FTPSENDF(x,y,z)    if((result = Curl_ftpsendf(x,y,z)) != CURLE_OK) \
@@ -189,7 +186,7 @@ const struct Curl_handler Curl_handler_ftp = {
 
 const struct Curl_handler Curl_handler_ftps = {
   "FTPS",                               /* scheme */
-  ftps_setup_connection,           /* setup_connection */
+  ftp_setup_connection,            /* setup_connection */
   ftp_do,                          /* do_it */
   ftp_done,                        /* done */
   ftp_nextconnect,                 /* do_more */
@@ -2683,24 +2680,9 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
       break;
 
     case FTP_PBSZ:
-      /* FIX: check response code */
-
-      /* For TLS, the data connection can have one of two security levels.
-
-      1) Clear (requested by 'PROT C')
-
-      2)Private (requested by 'PROT P')
-      */
-      if(!conn->ssl[SECONDARYSOCKET].use) {
-        NBFTPSENDF(conn, "PROT %c",
-                   data->set.ftp_ssl == CURLUSESSL_CONTROL ? 'C' : 'P');
-        state(conn, FTP_PROT);
-      }
-      else {
-        result = ftp_state_pwd(conn);
-        if(result)
-          return result;
-      }
+      NBFTPSENDF(conn, "PROT %c",
+                 data->set.ftp_ssl == CURLUSESSL_CONTROL ? 'C' : 'P');
+      state(conn, FTP_PROT);
 
       break;
 
@@ -4178,15 +4160,5 @@ static CURLcode ftp_setup_connection(struct connectdata * conn)
 
   return CURLE_OK;
 }
-
-#ifdef USE_SSL
-static CURLcode ftps_setup_connection(struct connectdata * conn)
-{
-  struct SessionHandle *data = conn->data;
-
-  conn->ssl[SECONDARYSOCKET].use = data->set.ftp_ssl != CURLUSESSL_CONTROL;
-  return ftp_setup_connection(conn);
-}
-#endif
 
 #endif /* CURL_DISABLE_FTP */

@@ -2,14 +2,15 @@ To be addressed in 7.19.3 (planned release: January 2009)
 =========================
 
 193 - Fix zero-byte file transfers
+      - Nobody has actually started for real on this
 
 196 - #2351653 "crash in ConnectionExists"
+      - Being worked on in the bug tracker
 
 197 - IIS-bug in Digest
 
-198 - implicit SSL with FileZilla server
-
 199 - "Bug 2351645" adjustment of the patch Daniel S applied
+      - Suggested fix posted to list
 
 200 - "afert redirect, the content length is not reset" by Shunlong Bai
 
