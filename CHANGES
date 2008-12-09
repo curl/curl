@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Fandrich (9 Dec 2008)
+- Added test cases 1089 and 1090 to test --write-out after a redirect to
+  test a report that the size didn't work, but these test cases pass.
+
+- Documented CURLOPT_CONNECT_ONLY as being useful only on HTTP URLs.
+
 Daniel Stenberg (9 Dec 2008)
 - Ken Hirsch simplified how libcurl does FTPS: now it doesn't assume any
   particular state for the control connection like it did before for implicit
