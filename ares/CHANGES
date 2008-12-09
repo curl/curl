@@ -1,5 +1,9 @@
   Changelog for the c-ares project
 
+* December 9 2008 (Gisle Vanem)
+
+  Fixes for Win32 targets using the Watt-32 tcp/ip stack.
+
 * Dec 4 2008 (Daniel Stenberg)
 
   Gregor Jasny provided the patch that introduces ares_set_socket_callback(),
@@ -56,7 +60,7 @@
 
 * Nov 1 2008 (Daniel Stenberg)
 - Carlo Contavalli added support for the glibc "rotate" option, as documented
-  in man resolv.conf: 
+  in man resolv.conf:
 
   causes round robin selection of nameservers from among those listed.  This
   has the effect of spreading the query load among all listed servers, rather
