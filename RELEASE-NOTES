@@ -9,7 +9,7 @@ Curl and libcurl 7.19.3
 
 This release includes the following changes:
 
- o 
+ o CURLAUTH_DIGEST_IE bit added for CURLOPT_HTTPAUTH and CURLOPT_PROXYAUTH
 
 This release includes the following bugfixes:
 

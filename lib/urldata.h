@@ -1139,7 +1139,8 @@ struct auth {
                  request */
   bool multi; /* TRUE if this is not yet authenticated but within the auth
                  multipass negotiation */
-
+  bool iestyle; /* TRUE if digest should be done IE-style or FALSE if it should
+                   be RFC compliant */
 };
 
 struct conncache {

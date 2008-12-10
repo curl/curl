@@ -474,8 +474,9 @@ typedef enum {
 #define CURLAUTH_DIGEST       (1<<1)  /* Digest */
 #define CURLAUTH_GSSNEGOTIATE (1<<2)  /* GSS-Negotiate */
 #define CURLAUTH_NTLM         (1<<3)  /* NTLM */
-#define CURLAUTH_ANY ~0               /* all types set */
-#define CURLAUTH_ANYSAFE (~CURLAUTH_BASIC)
+#define CURLAUTH_DIGEST_IE    (1<<4)  /* Digest with IE flavour */
+#define CURLAUTH_ANY (~CURLAUTH_DIGEST_IE)  /* all fine types set */
+#define CURLAUTH_ANYSAFE (~(CURLAUTH_BASIC|CURLAUTH_DIGEST_IE))
 
 #define CURLSSH_AUTH_ANY       ~0     /* all types supported by the server */
 #define CURLSSH_AUTH_NONE      0      /* none allowed, silly but complete */

@@ -6,6 +6,22 @@
 
                                   Changelog
 
+Daniel Stenberg (11 Dec 2008)
+- Internet Explorer had a broken HTTP digest authentication before v7 and
+  there are servers "out there" that relies on the client doing this broken
+  Digest authentication. Apache even comes with an option to work with such
+  broken clients.
+
+  The difference is only for URLs that contain a query-part (a '?'-letter and
+  text to the right of it).
+
+  libcurl now supports this quirk, and you enable it by setting the
+  CURLAUTH_DIGEST_IE bit in the bitmask you pass to the CURLOPT_HTTPAUTH or
+  CURLOPT_PROXYAUTH options. They are thus individually controlled to server
+  and proxy.
+
+  (note that there's no way to activate this with the curl tool yet)
+
 Daniel Fandrich (9 Dec 2008)
 - Added test cases 1089 and 1090 to test --write-out after a redirect to
   test a report that the size didn't work, but these test cases pass.

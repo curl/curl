@@ -1319,6 +1319,16 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      */
   {
     long auth = va_arg(param, long);
+
+    /* the DIGEST_IE bit is only used to set a special marker, for all the
+       rest we need to handle it as normal DIGEST */
+    data->state.authhost.iestyle = (auth & CURLAUTH_DIGEST_IE)?TRUE:FALSE;
+
+    if(auth & CURLAUTH_DIGEST_IE) {
+      auth |= CURLAUTH_DIGEST; /* set standard digest bit */
+      auth &= ~CURLAUTH_DIGEST_IE; /* unset ie digest bit */
+    }
+
     /* switch off bits we can't support */
 #ifndef USE_NTLM
     auth &= ~CURLAUTH_NTLM; /* no NTLM without SSL */
@@ -1354,6 +1364,15 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      */
   {
     long auth = va_arg(param, long);
+
+    /* the DIGEST_IE bit is only used to set a special marker, for all the
+       rest we need to handle it as normal DIGEST */
+    data->state.authproxy.iestyle = (auth & CURLAUTH_DIGEST_IE)?TRUE:FALSE;
+
+    if(auth & CURLAUTH_DIGEST_IE) {
+      auth |= CURLAUTH_DIGEST; /* set standard digest bit */
+      auth &= ~CURLAUTH_DIGEST_IE; /* unset ie digest bit */
+    }
     /* switch off bits we can't support */
 #ifndef USE_NTLM
     auth &= ~CURLAUTH_NTLM; /* no NTLM without SSL */

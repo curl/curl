@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_easy_setopt 3 "28 Oct 2008" "libcurl 7.19.1" "libcurl Manual"
+.TH curl_easy_setopt 3 "11 Dec 2008" "libcurl 7.19.3" "libcurl Manual"
 .SH NAME
 curl_easy_setopt \- set options for a curl easy handle
 .SH SYNOPSIS
@@ -661,6 +661,13 @@ others.
 HTTP Digest authentication.  Digest authentication is defined in RFC2617 and
 is a more secure way to do authentication over public networks than the
 regular old-fashioned Basic method.
+.IP CURLAUTH_DIGEST_IE
+HTTP Digest authentication with an IE flavor.  Digest authentication is
+defined in RFC2617 and is a more secure way to do authentication over public
+networks than the regular old-fashioned Basic method. The IE flavor is simply
+that libcurl will use a special "quirk" that IE is known to have used before
+version 7 and that some servers require the client to use. (This define was
+added in 7.19.3)
 .IP CURLAUTH_GSSNEGOTIATE
 HTTP GSS-Negotiate authentication. The GSS-Negotiate (also known as plain
 \&"Negotiate") method was designed by Microsoft and is used in their web
