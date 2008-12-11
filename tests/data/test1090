@@ -47,7 +47,7 @@ monster
 http
 </server>
  <name>
-HTTP GET --write-out with redirected fetch
+HTTP GET --write-out with redirected fetch and chunked reply
  </name>
  <command>
 http://%HOSTIP:%HTTPPORT/1090 -w "%{num_connects}\n%{num_redirects}\n%{size_download}\n%{url_effective}\n%{content_type}\n%{response_code}\n" -L
