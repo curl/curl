@@ -3724,7 +3724,10 @@ static CURLcode parse_remote_port(struct SessionHandle *data,
   char *portptr;
   char endbracket;
 
-  if((1 == sscanf(conn->host.name, "[%*45[0123456789abcdefABCDEF:.%]%c",
+  /* Note that at this point, the IPv6 address cannot contain any scope
+     suffix as that has already been removed in the ParseURLAndFillConnection()
+     function */
+  if((1 == sscanf(conn->host.name, "[%*45[0123456789abcdefABCDEF:.]%c",
                   &endbracket)) &&
      (']' == endbracket)) {
     /* this is a RFC2732-style specified IP-address */
