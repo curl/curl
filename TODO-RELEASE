@@ -8,11 +8,10 @@ To be addressed in 7.19.3 (planned release: January 2009)
       - Being worked on in the bug tracker
 
 197 - IIS-bug in Digest
+      - libcurl parts done, no curl options added yet
 
 199 - "Bug 2351645" adjustment of the patch Daniel S applied
       - Suggested fix posted to list
-
-200 - "afert redirect, the content length is not reset" by Shunlong Bai
 
 201 - "bug: header data output to the body callback function after set header"
       by Shunlong Bai
@@ -21,4 +20,6 @@ To be addressed in 7.19.3 (planned release: January 2009)
       implementation when using HTTP pipelining. Patch pending by 
       Igor Novoseltsev
 
-203 -
+203 - "dns cache memory leak and TTL failure after failed conn" bug #2413067
+
+204 - 
