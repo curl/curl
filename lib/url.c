@@ -3724,7 +3724,8 @@ static CURLcode parse_remote_port(struct SessionHandle *data,
   char *portptr;
   char endbracket;
 
-  if((1 == sscanf(conn->host.name, "[%*39[0123456789abcdefABCDEF:.%]%c", &endbracket)) &&
+  if((1 == sscanf(conn->host.name, "[%*45[0123456789abcdefABCDEF:.%]%c",
+                  &endbracket)) &&
      (']' == endbracket)) {
     /* this is a RFC2732-style specified IP-address */
     conn->bits.ipv6_ip = TRUE;

@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel Stenberg (11 Dec 2008)
+- Keshav Krity found out that libcurl failed to deal with dotted IPv6
+  addresses if they were very long (>39 letters) due to a too strict address
+  validity parser. It now accepts addresses up to 45 bytes long.
+
+Daniel Stenberg (11 Dec 2008)
 - Internet Explorer had a broken HTTP digest authentication before v7 and
   there are servers "out there" that relies on the client doing this broken
   Digest authentication. Apache even comes with an option to work with such

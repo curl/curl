@@ -27,6 +27,7 @@ This release includes the following bugfixes:
  o GSS authentication infinite loop problem
  o 550 response from SIZE no longer treated as missing file
  o ftps:// control connections now use explicit protection level
+ o dotted IPv6 addresses longer than 39 bytes failed
 
 This release includes the following known bugs:
 
@@ -37,6 +38,6 @@ advice from friends like these:
 
  Yang Tse, Daniel Fandrich, Jim Meyering, Christian Krause, Andreas Wurf,
  Markus Koetter, Josef Wolf, Vlad Grachov, Pawel Kierski, Igor Novoseltsev,
- Fred Machado, Ken Hirsch
+ Fred Machado, Ken Hirsch, Keshav Krity
 
         Thanks! (and sorry if I forgot to mention someone)
