@@ -82,8 +82,8 @@
 #define HAVE_FCNTL_H
 
 /* Define if getaddrinfo exists and works */
-/* OS400 has no ASCII version of this procedure. */
-#undef HAVE_GETADDRINFO
+/* OS400 has no ASCII version of this procedure: wrapped in setup-os400.h. */
+#define HAVE_GETADDRINFO
 
 /* Define if you have the `geteuid' function. */
 #define HAVE_GETEUID
@@ -284,7 +284,7 @@
 #undef HAVE_STRLCPY
 
 /* Define if you have the <stropts.h> header file. */
-#define HAVE_STROPTS_H
+#undef HAVE_STROPTS_H
 
 /* Define if you have the `strstr' function. */
 #define HAVE_STRSTR
@@ -404,15 +404,21 @@
 /* Define if you have a working ioctl SIOCGIFADDR function. */
 #define HAVE_IOCTL_SIOCGIFADDR
 
-/* to disable LDAP */
+/* To disable LDAP */
 #undef CURL_DISABLE_LDAP
+
+/* To avoid external use of library hidden symbols */
+#define CURL_HIDDEN_SYMBOLS
+
+/* External symbols need no special keyword. */
+#define CURL_EXTERN_SYMBOL
 
 /* Define if you have the ldap_url_parse procedure. */
 /* #define HAVE_LDAP_URL_PARSE */    /* Disabled because of an IBM bug. */
 
 /* Define if you have the getnameinfo function. */
-/* OS400 has no ASCII version of this procedure. */
-#undef HAVE_GETNAMEINFO
+/* OS400 has no ASCII version of this procedure: wrapped in setup-os400.h. */
+#define HAVE_GETNAMEINFO
 
 /* Define to the type qualifier of arg 1 for getnameinfo. */
 #define GETNAMEINFO_QUAL_ARG1 const

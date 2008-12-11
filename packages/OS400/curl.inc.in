@@ -127,9 +127,11 @@
      d CURLAUTH_GSSNEGOTIATE...
      d                 c                   X'00000004'
      d CURLAUTH_NTLM   c                   X'00000008'
-     d CURLAUTH_ANY    c                   X'7FFFFFFF'
+     d CURLAUTH_DIGEST_IE...
+     d                 c                   X'00000010'
+     d CURLAUTH_ANY    c                   X'7FFFFFEF'
      d CURLAUTH_ANYSAFE...
-     d                 c                   X'7FFFFFFE'                          ~CURLAUTH_BASIC
+     d                 c                   X'7FFFFFEE'                          ~CURLAUTH_BASIC
       *
      d CURLSSH_AUTH_ANY...
      d                 c                   X'7FFFFFFF'
