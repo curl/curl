@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (12 Dec 2008)
+- Bug report #2416182 titled "crash in ConnectionExists when using
+  duphandle+curl_mutli" (http://curl.haxx.se/bug/view.cgi?id=2416182) showed
+  that curl_easy_duphandle() wrongly also copied the pointer to the connection
+  cache, which was plain wrong and caused a segfault if the handle would be
+  used in a different multi handle than the handle it was duplicated from.
+
 Daniel Stenberg (11 Dec 2008)
 - Keshav Krity found out that libcurl failed to deal with dotted IPv6
   addresses if they were very long (>39 letters) due to a too strict address

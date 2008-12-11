@@ -624,13 +624,8 @@ CURL *curl_easy_duphandle(CURL *incurl)
     if(Curl_dupset(outcurl, data) != CURLE_OK)
       break;
 
-    if(data->state.used_interface == Curl_if_multi)
-      outcurl->state.connc = data->state.connc;
-    else
-      outcurl->state.connc = Curl_mk_connc(CONNCACHE_PRIVATE, -1);
-
-    if(!outcurl->state.connc)
-      break;
+    /* the connection cache is setup on demand */
+    outcurl->state.connc = NULL;
 
     outcurl->state.lastconnect = -1;
 

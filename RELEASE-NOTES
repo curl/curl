@@ -28,6 +28,7 @@ This release includes the following bugfixes:
  o 550 response from SIZE no longer treated as missing file
  o ftps:// control connections now use explicit protection level
  o dotted IPv6 addresses longer than 39 bytes failed
+ o curl_easy_duphandle() doesn't try to duplicate the connection cache pointer
 
 This release includes the following known bugs:
 
