@@ -10,9 +10,6 @@ To be addressed in 7.19.3 (planned release: January 2009)
 197 - IIS-bug in Digest
       - libcurl parts done, no curl options added yet
 
-199 - "Bug 2351645" adjustment of the patch Daniel S applied
-      - Suggested fix posted to list
-
 201 - "bug: header data output to the body callback function after set header"
       by Shunlong Bai
 

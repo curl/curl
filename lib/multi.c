@@ -587,6 +587,8 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
 
   if(easy) {
     bool premature = (bool)(easy->state != CURLM_STATE_COMPLETED);
+    bool easy_owns_conn = (bool)(easy->easy_conn &&
+                                 (easy->easy_conn->data == easy->easy_handle));
 
     /* If the 'state' is not INIT or COMPLETED, we might need to do something
        nice to put the easy_handle in a good known state when this returns. */
@@ -624,7 +626,7 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
 
       /* we must call Curl_done() here (if we still "own it") so that we don't
          leave a half-baked one around */
-      if (easy->easy_conn->data == easy->easy_handle) {
+      if (easy_owns_conn) {
 
         /* Curl_done() clears the conn->data field to lose the association
            between the easy handle and the connection
@@ -676,9 +678,15 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
          to that since we're not part of that handle anymore */
       easy->easy_handle->state.connc = NULL;
 
-      /* and modify the connectindex since this handle can't point to the
-         connection cache anymore */
-      if(easy->easy_conn &&
+      /* Modify the connectindex since this handle can't point to the
+         connection cache anymore.
+
+         TODO: consider if this is really what we want. The connection cache
+         is within the multi handle and that owns the connections so we should
+         not need to touch connections like this when we just remove an easy
+         handle...
+      */
+      if(easy->easy_conn && easy_owns_conn &&
          (easy->easy_conn->send_pipe->size +
           easy->easy_conn->recv_pipe->size == 0))
         easy->easy_conn->connectindex = -1;

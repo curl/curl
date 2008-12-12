@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (12 Dec 2008)
+- More work with Igor Novoseltsev to first fix the remaining stuff for
+  removing easy handles from multi handles when the easy handle is/was within
+  a HTTP pipeline. His bug report #2351653
+  (http://curl.haxx.se/bug/view.cgi?id=2351653) was also related and was
+  eventually fixed by a patch by Igor himself.
+
 Yang Tse (12 Dec 2008)
 - Patrick Monnerat fixed a build regression, introduced in 7.19.2, affecting
   OS/400 compilations with IPv6 enabled.
