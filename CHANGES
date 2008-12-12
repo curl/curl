@@ -11,9 +11,10 @@ Yang Tse (12 Dec 2008)
   OS/400 compilations with IPv6 enabled.
 
 Daniel Stenberg (12 Dec 2008)
-- Bug report #2416182 titled "crash in ConnectionExists when using
-  duphandle+curl_mutli" (http://curl.haxx.se/bug/view.cgi?id=2416182) showed
-  that curl_easy_duphandle() wrongly also copied the pointer to the connection
+- Mark Karpeles filed bug report #2416182 titled "crash in ConnectionExists
+  when using duphandle+curl_mutli"
+  (http://curl.haxx.se/bug/view.cgi?id=2416182) which showed that
+  curl_easy_duphandle() wrongly also copied the pointer to the connection
   cache, which was plain wrong and caused a segfault if the handle would be
   used in a different multi handle than the handle it was duplicated from.
 
