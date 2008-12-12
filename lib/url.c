@@ -2378,20 +2378,6 @@ int Curl_removeHandleFromPipeline(struct SessionHandle *handle,
   return 0;
 }
 
-/* remove the specified connection from all (possible) pipelines and related
-   queues */
-void Curl_getoff_all_pipelines(struct SessionHandle *data,
-                               struct connectdata *conn)
-{
-  if(Curl_removeHandleFromPipeline(data, conn->recv_pipe) &&
-     conn->readchannel_inuse)
-    conn->readchannel_inuse = FALSE;
-  if(Curl_removeHandleFromPipeline(data, conn->send_pipe) &&
-     conn->writechannel_inuse)
-    conn->writechannel_inuse = FALSE;
-  Curl_removeHandleFromPipeline(data, conn->pend_pipe);
-}
-
 #if 0 /* this code is saved here as it is useful for debugging purposes */
 static void Curl_printPipeline(struct curl_llist *pipeline)
 {
@@ -2414,6 +2400,24 @@ static struct SessionHandle* gethandleathead(struct curl_llist *pipeline)
   }
 
   return NULL;
+}
+
+/* remove the specified connection from all (possible) pipelines and related
+   queues */
+void Curl_getoff_all_pipelines(struct SessionHandle *data,
+                               struct connectdata *conn)
+{
+  bool recv_head = conn->readchannel_inuse &&
+    (gethandleathead(conn->recv_pipe) == data);
+
+  bool send_head = conn->writechannel_inuse &&
+    (gethandleathead(conn->send_pipe) == data);
+
+  if(Curl_removeHandleFromPipeline(data, conn->recv_pipe) && recv_head)
+    conn->readchannel_inuse = FALSE;
+  if(Curl_removeHandleFromPipeline(data, conn->send_pipe) && send_head)
+    conn->writechannel_inuse = FALSE;
+  Curl_removeHandleFromPipeline(data, conn->pend_pipe);
 }
 
 static void signalPipeClose(struct curl_llist *pipeline)
