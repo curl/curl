@@ -29,6 +29,7 @@ This release includes the following bugfixes:
  o ftps:// control connections now use explicit protection level
  o dotted IPv6 addresses longer than 39 bytes failed
  o curl_easy_duphandle() doesn't try to duplicate the connection cache pointer
+ o build failure on OS/400 when enabling IPv6
 
 This release includes the following known bugs:
 
@@ -39,6 +40,6 @@ advice from friends like these:
 
  Yang Tse, Daniel Fandrich, Jim Meyering, Christian Krause, Andreas Wurf,
  Markus Koetter, Josef Wolf, Vlad Grachov, Pawel Kierski, Igor Novoseltsev,
- Fred Machado, Ken Hirsch, Keshav Krity
+ Fred Machado, Ken Hirsch, Keshav Krity, Patrick Monnerat
 
         Thanks! (and sorry if I forgot to mention someone)
