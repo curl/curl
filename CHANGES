@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Stenberg (16 Dec 2008)
+- libssh2_sftp_last_error() was wrongly used at some places in libcurl which
+  made libcurl sometimes not properly abort problematic SFTP transfers.
+
 Daniel Stenberg (12 Dec 2008)
 - More work with Igor Novoseltsev to first fix the remaining stuff for
   removing easy handles from multi handles when the easy handle is/was within

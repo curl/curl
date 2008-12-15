@@ -778,6 +778,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       /* Return the error type */
       err = libssh2_sftp_last_error(sshc->sftp_session);
       result = sftp_libssh2_error_to_CURLE(err);
+      sshc->actualcode = result?result:CURLE_SSH;
       DEBUGF(infof(data, "error = %d makes libcurl = %d\n", err, result));
       state(conn, SSH_STOP);
       break;
@@ -1238,16 +1239,22 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
                         flags, data->set.new_file_perms);
 
     if(!sshc->sftp_handle) {
-      if(libssh2_session_last_errno(sshc->ssh_session) ==
-         LIBSSH2_ERROR_EAGAIN) {
-        rc = LIBSSH2_ERROR_EAGAIN;
+      rc = libssh2_session_last_errno(sshc->ssh_session);
+
+      if(LIBSSH2_ERROR_EAGAIN == rc)
         break;
-      }
       else {
-        err = libssh2_sftp_last_error(sshc->sftp_session);
+        if(LIBSSH2_ERROR_SFTP_PROTOCOL == rc)
+          /* only when there was an SFTP protocol error can we extract
+             the sftp error! */
+          err = libssh2_sftp_last_error(sshc->sftp_session);
+        else
+          err = -1; /* not an sftp error at all */
+
         if(sshc->secondCreateDirs) {
           state(conn, SSH_SFTP_CLOSE);
-          sshc->actualcode = sftp_libssh2_error_to_CURLE(err);
+          sshc->actualcode = err>= LIBSSH2_FX_OK?
+            sftp_libssh2_error_to_CURLE(err):CURLE_SSH;
           failf(data, "Creating the dir/file failed: %s",
                 sftp_libssh2_strerror(err));
           break;
@@ -1263,8 +1270,18 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           break;
         }
         state(conn, SSH_SFTP_CLOSE);
-        sshc->actualcode = sftp_libssh2_error_to_CURLE(err);
-        failf(data, "Upload failed: %s", sftp_libssh2_strerror(err));
+        sshc->actualcode = err>= LIBSSH2_FX_OK?
+          sftp_libssh2_error_to_CURLE(err):CURLE_SSH;
+        if(!sshc->actualcode) {
+          /* Sometimes, for some reason libssh2_sftp_last_error() returns zero
+             even though libssh2_sftp_open() failed previously! We need to
+             work around that! */
+          sshc->actualcode = CURLE_SSH;
+          err=-1;
+        }
+        failf(data, "Upload failed: %s (%d/%d)",
+              err>= LIBSSH2_FX_OK?sftp_libssh2_strerror(err):"ssh error",
+              err, rc);
         break;
       }
     }
@@ -1378,7 +1395,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
          (sftp_err != LIBSSH2_FX_PERMISSION_DENIED)) {
         result = sftp_libssh2_error_to_CURLE(sftp_err);
         state(conn, SSH_SFTP_CLOSE);
-        sshc->actualcode = result;
+        sshc->actualcode = result?result:CURLE_SSH;
         break;
       }
     }
@@ -1403,7 +1420,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         failf(data, "Could not open directory for reading: %s",
               sftp_libssh2_strerror(err));
         state(conn, SSH_SFTP_CLOSE);
-        sshc->actualcode = sftp_libssh2_error_to_CURLE(err);
+        result = sftp_libssh2_error_to_CURLE(err);
+        sshc->actualcode = result?result:CURLE_SSH;
         break;
       }
     }
@@ -1512,7 +1530,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
     }
     else if(sshc->readdir_len <= 0) {
       err = libssh2_sftp_last_error(sshc->sftp_session);
-      sshc->actualcode = sftp_libssh2_error_to_CURLE(err);
+      result = sftp_libssh2_error_to_CURLE(err);
+      sshc->actualcode = result?result:CURLE_SSH;
       failf(data, "Could not open remote file for reading: %s :: %d",
             sftp_libssh2_strerror(err),
             libssh2_session_last_errno(sshc->ssh_session));
@@ -1621,7 +1640,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         failf(data, "Could not open remote file for reading: %s",
               sftp_libssh2_strerror(err));
         state(conn, SSH_SFTP_CLOSE);
-        sshc->actualcode = sftp_libssh2_error_to_CURLE(err);
+        result = sftp_libssh2_error_to_CURLE(err);
+        sshc->actualcode = result?result:CURLE_SSH;
         break;
       }
     }

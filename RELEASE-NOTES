@@ -30,6 +30,7 @@ This release includes the following bugfixes:
  o dotted IPv6 addresses longer than 39 bytes failed
  o curl_easy_duphandle() doesn't try to duplicate the connection cache pointer
  o build failure on OS/400 when enabling IPv6
+ o better detection of SFTP failures
 
 This release includes the following known bugs:
 
