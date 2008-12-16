@@ -8,7 +8,7 @@ TARGETS = libcurl_wc.dll libcurl_wc_imp.lib libcurl_wc.lib
 
 CC = wcc386
 
-CFLAGS = -3r -mf -d3 -hc -zff -zgf -zq -zm -zc -s -fr=con -w2 -fpi -oilrtfm -bt=nt &
+CFLAGS = -3s -mf -d3 -hc -zff -zgf -zq -zm -zc -s -fr=con -w2 -fpi -oilrtfm -bt=nt &
          -bd -d+ -dWIN32 -dCURL_CA_BUNDLE=getenv("CURL_CA_BUNDLE")                 &
          -dBUILDING_LIBCURL -dHAVE_SPNEGO=1 -dENABLE_IPV6                          &
          -dDEBUG=1 -dCURLDEBUG -d_WIN32_WINNT=0x0501 -dWINBERAPI=__declspec(cdecl) &
@@ -17,9 +17,10 @@ CFLAGS = -3r -mf -d3 -hc -zff -zgf -zq -zm -zc -s -fr=con -w2 -fpi -oilrtfm -bt=
 #
 # Change to suite.
 #
-ZLIB_ROOT = ..\..\..\zlib-1.2.3
-USE_ZLIB  = 0
-USE_ARES  = 0
+ZLIB_ROOT  = ..\..\..\zlib-1.2.3
+USE_ZLIB   = 0
+USE_ARES   = 0
+USE_WATT32 = 0
 
 !ifeq USE_ZLIB 1
 CFLAGS += -dHAVE_ZLIB_H -dHAVE_LIBZ -I$(ZLIB_ROOT)
@@ -27,6 +28,10 @@ CFLAGS += -dHAVE_ZLIB_H -dHAVE_LIBZ -I$(ZLIB_ROOT)
 
 !ifeq USE_ARES 1
 CFLAGS += -dUSE_ARES -I..\ares
+!endif
+
+!ifeq USE_WATT32 1
+CFLAGS += -dUSE_WATT32 -I$(%watt_root)\inc
 !endif
 
 OBJ_BASE = WC_Win32.obj
@@ -121,7 +126,12 @@ $(LINK_ARG): $(__MAKEFILES__)
 	@%append $^@ file { $(OBJS_DYN) }
 	@%append $^@ option quiet, map, caseexact, eliminate, implib=libcurl_wc_imp.lib,
 	@%append $^@ res=$(RESOURCE) libpath $(%watcom)\lib386;$(%watcom)\lib386\nt
-	@%append $^@ library clib3r.lib, wldap32.lib, ws2_32.lib
+	@%append $^@ library clib3s.lib, wldap32.lib
+!ifeq USE_WATT32 1
+	@%append $^@ library $(%watt_root)\lib\wattcpw_imp.lib
+!else
+	@%append $^@ library ws2_32.lib
+!endif
 !ifeq USE_ZLIB 1
 	@%append $^@ library $(ZLIB_ROOT)\zlib.lib
 !endif
