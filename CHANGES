@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Gisle Vanem (16 Dec 2008)
+- Added the possibility to use the Watt-32 tcp/ip stack under Windows.
+  The change simply involved adding a USE_WATT32 section in the
+  config-win32.h files (under ./lib and ./src). This section disables
+  the use of any Winsock headers.
+
 Daniel Stenberg (16 Dec 2008)
 - libssh2_sftp_last_error() was wrongly used at some places in libcurl which
   made libcurl sometimes not properly abort problematic SFTP transfers.
@@ -390,7 +396,7 @@ Yang Tse (2 Oct 2008)
 
   runtests.pl will now run with picky compiler warnings enabled unless
   explicitly disabled.
-  
+
 Daniel Fandrich (1 Oct 2008)
 - "make clean" now cleans out the docs and tests directories, too.
 
@@ -406,7 +412,7 @@ Daniel Stenberg (29 Sep 2008)
 - Daniel Egger provided a patch that allows you to disable proxy support in
   libcurl to somewhat reduce the size of the binary. Run configure
   --disable-proxy.
-  
+
 Daniel Fandrich (29 Sep 2008)
 - Moved all signal-based name resolution timeout handling into a single new
   Curl_resolv_timeout function to reduce coupling.
@@ -418,7 +424,7 @@ Daniel Stenberg (29 Sep 2008)
 - Maxim Ivanov filed bug report #2107803
   (http://curl.haxx.se/bug/view.cgi?id=2107803) "no CURLINFO_REDIRECT_URL in
   multi mode" together with a patch that fixed the problem.
-  
+
 Daniel Stenberg (25 Sep 2008)
 - Emanuele Bovisio submitted bug report #2126435. We fixed the HTTP Digest
   auth code to not behave badly when getting a blank realm with
@@ -1090,7 +1096,7 @@ Daniel Stenberg (22 Jun 2008)
   libcurl used Content-Range: instead of Range when doing a range request with
   --head (CURLOPT_NOBODY). This is now fixed and test case 1032 was added to
   verify.
-  
+
 Daniel Fandrich (21 Jun 2008)
 - Stopped using ranges in scanf character sequences (e.g. %[a-z]) since that
   is not ANSI C, just a common extension.  This caused problems on
@@ -1231,7 +1237,7 @@ Daniel Stenberg (26 May 2008)
   the new url was but a query string such as "Location: ?moo=foo". Test case
   1031 was added to verify this fix.
 
-- Andreas Faerber and Scott McCreary made (lib)curl build for the Haiku OS. 
+- Andreas Faerber and Scott McCreary made (lib)curl build for the Haiku OS.
 
 Yang Tse (26 May 2008)
 - David Rosenstrauch reported that header files spnegohelp.h and
@@ -1344,7 +1350,7 @@ Daniel Stenberg (26 Apr 2008)
   bug #1944825 (http://curl.haxx.se/bug/view.cgi?id=1944825). I have not
   personally approached the automake team about either one of these but I
   figure we need a Solaris 10 guy to do it!
-  
+
 Yang Tse (25 Apr 2008)
 - Added 'timeout' and 'delay' attributes support for the test harness
   <command> subsection.
@@ -1395,7 +1401,7 @@ Michal Marek (7 Apr 2008)
 - Fix the MIT / Heimdal check for good:
   Define HAVE_GSSMIT if <gssapi/{gssapi.h,gssapi_generic.h,gssapi_krb5.h}> are
   available, otherwise define HAVE_GSSHEIMDAL if <gssapi.h> is available.
-  
+
   Only define GSS_C_NT_HOSTBASED_SERVICE to gss_nt_service_name if
   GSS_C_NT_HOSTBASED_SERVICE isn't declared by the gssapi headers. This should
   avoid breakage in case we wrongly recognize Heimdal as MIT again.
@@ -1600,7 +1606,7 @@ Daniel S (20 Feb 2008)
 Guenter Knauf (19 Feb 2008)
 - We do no longer support SSLv2 by default since it has known flaws.
   Kaspar Brand provided a patch for all supported SSL toolkits.
- 
+
 Daniel Fandrich (19 Feb 2008)
 - Added test309 to test HTTP redirect to HTTPS URL
 
@@ -1623,7 +1629,7 @@ Daniel S (17 Feb 2008)
 - Based on the same debugging logic, I've also made Curl_http_done() not
   return CURLE_GOT_NOTHING if called "prematurely". This should have no real
   effect to anything but the code makes more sense like this.
-  
+
 Daniel S (15 Feb 2008)
 - Made the gnutls code path not even try to get the server cert if no peer
   verification is requested. Previously it would even return failure if gnutls
