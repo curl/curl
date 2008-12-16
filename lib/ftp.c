@@ -34,7 +34,6 @@
 #include <unistd.h>
 #endif
 
-#ifndef WIN32
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -54,7 +53,6 @@
 #include <in.h>
 #include <inet.h>
 #endif
-#endif  /* !WIN32 */
 
 #if (defined(NETWARE) && defined(__NOVELL_LIBC__))
 #undef in_addr_t

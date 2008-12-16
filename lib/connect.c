@@ -23,8 +23,6 @@
 
 #include "setup.h"
 
-#ifndef WIN32
-/* headers for non-win32 */
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -70,8 +68,6 @@
 #include <in.h>
 #include <inet.h>
 #endif
-
-#endif  /* !WIN32 */
 
 #include <stdio.h>
 #include <errno.h>

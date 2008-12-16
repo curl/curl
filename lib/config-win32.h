@@ -344,6 +344,30 @@
 #define HAVE_STRUCT_TIMEVAL 1
 
 /* ---------------------------------------------------------------- */
+/*                        Watt-32 tcp/ip SPECIFIC                   */
+/* ---------------------------------------------------------------- */
+
+#ifdef USE_WATT32
+  #include <tcp.h>
+  #undef byte
+  #undef word
+  #undef USE_WINSOCK
+  #undef HAVE_WINSOCK_H
+  #undef HAVE_WINSOCK2_H
+  #undef HAVE_WS2TCPIP_H
+  #define HAVE_GETADDRINFO
+  #define HAVE_GETNAMEINFO
+  #define HAVE_SYS_IOCTL_H
+  #define HAVE_SYS_SOCKET_H
+  #define HAVE_NETINET_IN_H
+  #define HAVE_NETDB_H
+  #define HAVE_ARPA_INET_H
+  #define HAVE_FREEADDRINFO
+  #define SOCKET int
+#endif
+
+
+/* ---------------------------------------------------------------- */
 /*                        COMPILER SPECIFIC                         */
 /* ---------------------------------------------------------------- */
 
