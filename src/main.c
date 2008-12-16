@@ -153,6 +153,7 @@
 #endif
 
 #ifdef MSDOS
+#define USE_WATT32
 #include <dos.h>
 
 static const char *msdosify(const char *);
@@ -621,6 +622,7 @@ static CURLcode main_init(void)
   /* stop stat() wasting time */
   _djstat_flags |= _STAT_INODE | _STAT_EXEC_MAGIC | _STAT_DIRSIZE;
 #endif
+
   return curl_global_init(CURL_GLOBAL_DEFAULT);
 }
 
@@ -831,8 +833,8 @@ static void help(void)
     " -v/--verbose       Make the operation more talkative",
     " -V/--version       Show version number and quit",
 
-#ifdef MSDOS
-    "    --wdebug        Turn on Watt-32 debugging under DJGPP",
+#ifdef USE_WATT32
+    "    --wdebug        Turn on Watt-32 debugging",
 #endif
     " -w/--write-out <format> What to output after completion",
     " -q                 If used as the first parameter disables .curlrc",
@@ -1620,7 +1622,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"*m", "ntlm",       FALSE},
     {"*n", "basic",      FALSE},
     {"*o", "anyauth",    FALSE},
-#ifdef MSDOS
+#ifdef USE_WATT32
     {"*p", "wdebug",     FALSE},
 #endif
     {"*q", "ftp-create-dirs", FALSE},
@@ -1955,7 +1957,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         /* --no-anyauth simply doesn't touch it */
         break;
 
-#ifdef MSDOS
+#ifdef USE_WATT32
       case 'p': /* --wdebug */
         dbug_init();
         break;
