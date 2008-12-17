@@ -31,6 +31,7 @@ This release includes the following bugfixes:
  o curl_easy_duphandle() doesn't try to duplicate the connection cache pointer
  o build failure on OS/400 when enabling IPv6
  o better detection of SFTP failures
+ o improved connection re-use for subsequent SCP and SFTP trnasfers 
 
 This release includes the following known bugs:
 

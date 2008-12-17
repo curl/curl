@@ -6,6 +6,15 @@
 
                                   Changelog
 
+Daniel Stenberg (17 Dec 2008)
+- SCP and SFTP with the multi interface had the same flaw: the 'DONE'
+  operation didn't complete properly if the EAGAIN equivalent was returned but
+  libcurl would simply continue with a half-completed close operation
+  performed. This ruined persistent connection re-use and cause some
+  SSH-protocol errors in general. The correction is unfortunately adding a
+  blocking function - doing it entirely non-blocking should be considered for
+  a better fix.
+
 Gisle Vanem (16 Dec 2008)
 - Added the possibility to use the Watt-32 tcp/ip stack under Windows.
   The change simply involved adding a USE_WATT32 section in the
