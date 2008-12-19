@@ -1524,6 +1524,7 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
 			data->req.upload_fromhere, /* buffer pointer */
 			data->req.upload_present,  /* buffer size */
 			&bytes_written);       /* actually send away */
+
     if(result)
       return result;
 
@@ -1743,6 +1744,9 @@ int Curl_single_getsock(const struct connectdata *conn,
   const struct SessionHandle *data = conn->data;
   int bitmap = GETSOCK_BLANK;
   unsigned sockindex = 0;
+
+  if(conn->handler->perform_getsock)
+    return conn->handler->perform_getsock(conn, sock, numsocks);
 
   if(numsocks < 2)
     /* simple check but we might need two slots */

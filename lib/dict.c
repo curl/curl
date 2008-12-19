@@ -106,6 +106,7 @@ const struct Curl_handler Curl_handler_dict = {
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   PORT_DICT,                            /* defport */
   PROT_DICT                             /* protocol */

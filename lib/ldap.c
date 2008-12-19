@@ -136,6 +136,7 @@ const struct Curl_handler Curl_handler_ldap = {
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   PORT_LDAP,                            /* defport */
   PROT_LDAP                             /* protocol */
@@ -157,6 +158,7 @@ const struct Curl_handler Curl_handler_ldaps = {
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   PORT_LDAPS,                           /* defport */
   PROT_LDAP | PROT_SSL                  /* protocol */

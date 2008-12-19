@@ -786,11 +786,8 @@ static int multi_getsock(struct Curl_one_easy *easy,
      happen when this is called from curl_multi_remove_handle() =>
      singlesocket() => multi_getsock().
   */
-
-  if(easy->easy_handle->state.pipe_broke ||
-      !easy->easy_conn) {
+  if(easy->easy_handle->state.pipe_broke || !easy->easy_conn)
     return 0;
-  }
 
   if(easy->state > CURLM_STATE_CONNECT &&
       easy->state < CURLM_STATE_COMPLETED) {
@@ -2108,7 +2105,10 @@ static bool isHandleAtHead(struct SessionHandle *handle,
 }
 
 /* given a number of milliseconds from now to use to set the 'act before
-   this'-time for the transfer, to be extracted by curl_multi_timeout() */
+   this'-time for the transfer, to be extracted by curl_multi_timeout()
+
+   Pass zero to clear the timeout value for this handle.
+*/
 void Curl_expire(struct SessionHandle *data, long milli)
 {
   struct Curl_multi *multi = data->multi;

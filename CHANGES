@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (19 Dec 2008)
+- Using the libssh2 0.19 function libssh2_session_block_directions(), libcurl
+  now has an improved ability to do right when the multi interface (both
+  "regular" and multi_socket) is used for SCP and SFTP transfers. This should
+  result in (much) less busy-loop situations and thus less CPU usage with no
+  speed loss.
+
 Daniel Stenberg (17 Dec 2008)
 - SCP and SFTP with the multi interface had the same flaw: the 'DONE'
   operation didn't complete properly if the EAGAIN equivalent was returned but

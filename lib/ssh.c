@@ -144,6 +144,17 @@ static
 CURLcode sftp_perform(struct connectdata *conn,
                       bool *connected,
                       bool *dophase_done);
+
+static int ssh_getsock(struct connectdata *conn,
+                       curl_socket_t *sock, /* points to numsocks number
+                                               of sockets */
+                       int numsocks);
+
+static int ssh_perform_getsock(const struct connectdata *conn,
+                               curl_socket_t *sock, /* points to numsocks
+                                                       number of sockets */
+                               int numsocks);
+
 /*
  * SCP protocol handler.
  */
@@ -157,8 +168,9 @@ const struct Curl_handler Curl_handler_scp = {
   ssh_connect,                          /* connect_it */
   ssh_multi_statemach,                  /* connecting */
   scp_doing,                            /* doing */
-  ZERO_NULL,                            /* proto_getsock */
-  ZERO_NULL,                            /* doing_getsock */
+  ssh_getsock,                          /* proto_getsock */
+  ssh_getsock,                          /* doing_getsock */
+  ssh_perform_getsock,                  /* perform_getsock */
   scp_disconnect,                       /* disconnect */
   PORT_SSH,                             /* defport */
   PROT_SCP                              /* protocol */
@@ -178,8 +190,9 @@ const struct Curl_handler Curl_handler_sftp = {
   ssh_connect,                          /* connect_it */
   ssh_multi_statemach,                  /* connecting */
   sftp_doing,                           /* doing */
-  ZERO_NULL,                            /* proto_getsock */
-  ZERO_NULL,                            /* doing_getsock */
+  ssh_getsock,                          /* proto_getsock */
+  ssh_getsock,                          /* doing_getsock */
+  ssh_perform_getsock,                  /* perform_getsock */
   sftp_disconnect,                      /* disconnect */
   PORT_SSH,                             /* defport */
   PROT_SFTP                             /* protocol */
@@ -1345,6 +1358,10 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       sshc->actualcode = result;
     }
     else {
+      /* store this original bitmask setup to use later on if we can't figure
+         out a "real" bitmask */
+      sshc->orig_waitfor = data->req.keepon;
+
       state(conn, SSH_STOP);
     }
     break;
@@ -2055,17 +2072,89 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
   return result;
 }
 
+/* called by the multi interface to figure out what socket(s) to wait for and
+   for what actions in the DO_DONE, PERFORM and WAITPERFORM states */
+static int ssh_perform_getsock(const struct connectdata *conn,
+                               curl_socket_t *sock, /* points to numsocks
+                                                       number of sockets */
+                               int numsocks)
+{
+#ifdef HAVE_LIBSSH2_SESSION_BLOCK_DIRECTIONS
+  int bitmap = GETSOCK_BLANK;
+  (void)numsocks;
+
+  sock[0] = conn->sock[FIRSTSOCKET];
+
+  if(conn->proto.sshc.waitfor & KEEP_READ)
+    bitmap |= GETSOCK_READSOCK(FIRSTSOCKET);
+
+  if(conn->proto.sshc.waitfor & KEEP_WRITE)
+    bitmap |= GETSOCK_WRITESOCK(FIRSTSOCKET);
+
+  return bitmap;
+#else
+  /* if we don't know the direction we can use the generic *_getsock()
+     function even for the protocol_connect and doing states */
+  return Curl_single_getsock(conn, sock, numsocks);
+#endif
+}
+
+/* Generic function called by the multi interface to figure out what socket(s)
+   to wait for and for what actions during the DOING and PROTOCONNECT states*/
+static int ssh_getsock(struct connectdata *conn,
+                       curl_socket_t *sock, /* points to numsocks number
+                                               of sockets */
+                       int numsocks)
+{
+#ifndef HAVE_LIBSSH2_SESSION_BLOCK_DIRECTIONS
+  /* if we don't know any direction we can just play along as we used to and
+     not provide any sensible info */
+  return GETSOCK_BLANK;
+#else
+  /* if we know the direction we can use the generic *_getsock() function even
+     for the protocol_connect and doing states */
+  return ssh_perform_getsock(conn, sock, numsocks);
+#endif
+}
+
+#ifdef HAVE_LIBSSH2_SESSION_BLOCK_DIRECTIONS
+/*
+ * When one of the libssh2 functions has returned LIBSSH2_ERROR_EAGAIN this
+ * function is used to figure out in what direction and stores this info so
+ * that the multi interface can take advantage of it. Make sure to call this
+ * function in all cases so that when it _doesn't_ return EAGAIN we can
+ * restore the default wait bits.
+ */
+static void ssh_block2waitfor(struct connectdata *conn, bool block)
+{
+  struct ssh_conn *sshc = &conn->proto.sshc;
+  int dir;
+  if(block && (dir = libssh2_session_block_directions(sshc->ssh_session))) {
+    /* translate the libssh2 define bits into our own bit defines */
+    sshc->waitfor = ((dir&LIBSSH2_SESSION_BLOCK_INBOUND)?KEEP_READ:0) |
+      ((dir&LIBSSH2_SESSION_BLOCK_OUTBOUND)?KEEP_WRITE:0);
+  }
+  else
+    /* It didn't block or libssh2 didn't reveal in which direction, put back
+       the original set */
+    sshc->waitfor = sshc->orig_waitfor;
+}
+#else
+  /* no libssh2 directional support so we simply don't know */
+#define ssh_block2waitfor(x,y)
+#endif
+
 /* called repeatedly until done from multi.c */
 static CURLcode ssh_multi_statemach(struct connectdata *conn, bool *done)
 {
   struct ssh_conn *sshc = &conn->proto.sshc;
   CURLcode result = CURLE_OK;
-  bool block_we_ignore; /* we don't care about EAGAIN at this point, but TODO:
-                           we _should_ store the status and use that to
-                           provide a ssh_getsock() implementation */
+  bool block; /* we store the status and use that to provide a ssh_getsock()
+                 implementation */
 
-  result = ssh_statemach_act(conn, &block_we_ignore);
+  result = ssh_statemach_act(conn, &block);
   *done = (bool)(sshc->state == SSH_STOP);
+  ssh_block2waitfor(conn, block);
 
   return result;
 }
@@ -2170,10 +2259,7 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
   }
 
 #ifdef CURL_LIBSSH2_DEBUG
-  libssh2_trace(ssh->ssh_session, LIBSSH2_TRACE_CONN|LIBSSH2_TRACE_TRANS|
-                LIBSSH2_TRACE_KEX|LIBSSH2_TRACE_AUTH|LIBSSH2_TRACE_SCP|
-                LIBSSH2_TRACE_SFTP|LIBSSH2_TRACE_ERROR|
-                LIBSSH2_TRACE_PUBLICKEY);
+  libssh2_trace(ssh->ssh_session, ~0);
   infof(data, "SSH socket: %d\n", sock);
 #endif /* CURL_LIBSSH2_DEBUG */
 
@@ -2328,6 +2414,7 @@ static CURLcode ssh_done(struct connectdata *conn, CURLcode status)
   sftp_scp->path = NULL;
   Curl_pgrsDone(conn);
 
+  conn->data->req.keepon = 0; /* clear all bits */
   return result;
 }
 
@@ -2354,6 +2441,9 @@ ssize_t Curl_scp_send(struct connectdata *conn, int sockindex,
   /* libssh2_channel_write() returns int! */
   nwrite = (ssize_t)
     libssh2_channel_write(conn->proto.sshc.ssh_channel, mem, len);
+
+  ssh_block2waitfor(conn, (nwrite == LIBSSH2_ERROR_EAGAIN)?TRUE:FALSE);
+
   if(nwrite == LIBSSH2_ERROR_EAGAIN)
     return 0;
 
@@ -2373,6 +2463,9 @@ ssize_t Curl_scp_recv(struct connectdata *conn, int sockindex,
   /* libssh2_channel_read() returns int */
   nread = (ssize_t)
     libssh2_channel_read(conn->proto.sshc.ssh_channel, mem, len);
+
+  ssh_block2waitfor(conn, (nread == LIBSSH2_ERROR_EAGAIN)?TRUE:FALSE);
+
   return nread;
 }
 
@@ -2484,6 +2577,12 @@ ssize_t Curl_sftp_send(struct connectdata *conn, int sockindex,
   (void)sockindex;
 
   nwrite = libssh2_sftp_write(conn->proto.sshc.sftp_handle, mem, len);
+
+  infof(conn->data, "libssh2_sftp_write() returned %d (told to send %d)\n",
+        nwrite, (int)len);
+
+  ssh_block2waitfor(conn, (nwrite == LIBSSH2_ERROR_EAGAIN)?TRUE:FALSE);
+
   if(nwrite == LIBSSH2_ERROR_EAGAIN)
     return 0;
 
@@ -2500,6 +2599,8 @@ ssize_t Curl_sftp_recv(struct connectdata *conn, int sockindex,
   (void)sockindex;
 
   nread = libssh2_sftp_read(conn->proto.sshc.sftp_handle, mem, len);
+
+  ssh_block2waitfor(conn, (nread == LIBSSH2_ERROR_EAGAIN)?TRUE:FALSE);
 
   return nread;
 }
