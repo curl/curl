@@ -7,6 +7,13 @@
                                   Changelog
 
 Daniel Stenberg (19 Dec 2008)
+- curl_multi_timeout() could return a timeout value of 0 even though nothing
+  was actually ready to get done, as the internal time resolution is higher
+  than the returned millisecond timer. Therefore it could cause applications
+  running on fast processors to do short bursts of busy-loops.
+  curl_multi_timeout() will now only return 0 if the timeout is actually
+  alreay triggered.
+
 - Using the libssh2 0.19 function libssh2_session_block_directions(), libcurl
   now has an improved ability to do right when the multi interface (both
   "regular" and multi_socket) is used for SCP and SFTP transfers. This should

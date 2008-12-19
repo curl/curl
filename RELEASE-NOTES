@@ -34,6 +34,8 @@ This release includes the following bugfixes:
  o improved connection re-use for subsequent SCP and SFTP transfers
  o multi interface does less busy-loops for SCP and SFTP transfers with libssh2
    0.19 or later
+ o curl_multi_timeout() no longer returns timeout 0 when there's nothing to do
+   yet
 
 This release includes the following known bugs:
 
