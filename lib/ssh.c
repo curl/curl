@@ -2578,9 +2578,6 @@ ssize_t Curl_sftp_send(struct connectdata *conn, int sockindex,
 
   nwrite = libssh2_sftp_write(conn->proto.sshc.sftp_handle, mem, len);
 
-  infof(conn->data, "libssh2_sftp_write() returned %d (told to send %d)\n",
-        nwrite, (int)len);
-
   ssh_block2waitfor(conn, (nwrite == LIBSSH2_ERROR_EAGAIN)?TRUE:FALSE);
 
   if(nwrite == LIBSSH2_ERROR_EAGAIN)
