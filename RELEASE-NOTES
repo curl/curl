@@ -36,6 +36,7 @@ This release includes the following bugfixes:
    0.19 or later
  o curl_multi_timeout() no longer returns timeout 0 when there's nothing to do
    yet
+ o the multi_socket API and HTTP pipelining now work a lot better when combined
 
 This release includes the following known bugs:
 

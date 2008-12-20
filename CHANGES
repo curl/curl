@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (20 Dec 2008)
+- Igor Novoseltsev fixed a bad situation for the multi_socket() API when doing
+  pipelining, as libcurl could then easily get confused and A) work on the
+  handle that was not "first in queue" on a pipeline, or even B) tell the app
+  to REMOVE a socket while it was in use by a second handle in a pipeline. Both
+  errors caused hanging or stalling applications.
+
 Daniel Stenberg (19 Dec 2008)
 - curl_multi_timeout() could return a timeout value of 0 even though nothing
   was actually ready to get done, as the internal time resolution is higher

@@ -1668,6 +1668,8 @@ static void singlesocket(struct Curl_multi *multi,
   curl_socket_t s;
   int num;
   unsigned int curraction;
+  struct Curl_one_easy *easy_by_hash;
+  bool remove_sock_from_hash;
 
   memset(&socks, 0, sizeof(socks));
   for(i=0; i< MAX_SOCKSPEREASYHANDLE; i++)
@@ -1735,21 +1737,69 @@ static void singlesocket(struct Curl_multi *multi,
       }
     }
     if(s != CURL_SOCKET_BAD) {
-      /* this socket has been removed. Remove it */
+
+      /* this socket has been removed. Tell the app to remove it */
+      remove_sock_from_hash = TRUE;
 
       entry = Curl_hash_pick(multi->sockhash, (char *)&s, sizeof(s));
       if(entry) {
+        /* check if the socket to be removed serves a connection which has
+           other easy-s in a pipeline. In this case the socket should not be
+           removed. */
+        struct connectdata *easy_conn;
+
+        easy_by_hash = entry->easy->multi_pos;
+        easy_conn = easy_by_hash->easy_conn;
+        if(easy_conn) {
+          if (easy_conn->recv_pipe && easy_conn->recv_pipe->size > 1) {
+            /* the handle should not be removed from the pipe yet */
+            remove_sock_from_hash = FALSE;
+
+            /* Update the sockhash entry to instead point to the next in line
+               for the recv_pipe, or the first (in case this particular easy
+               isn't already) */
+            if (entry->easy == easy->easy_handle) {
+              if (isHandleAtHead(easy->easy_handle, easy_conn->recv_pipe))
+                entry->easy = easy_conn->recv_pipe->head->next->ptr;
+              else
+                entry->easy = easy_conn->recv_pipe->head->ptr;
+            }
+          }
+          if (easy_conn->send_pipe  && easy_conn->send_pipe->size > 1) {
+            /* the handle should not be removed from the pipe yet */
+            remove_sock_from_hash = FALSE;
+
+            /* Update the sockhash entry to instead point to the next in line
+               for the send_pipe, or the first (in case this particular easy
+               isn't already) */
+            if (entry->easy == easy->easy_handle) {
+              if (isHandleAtHead(easy->easy_handle, easy_conn->send_pipe))
+                entry->easy = easy_conn->send_pipe->head->next->ptr;
+              else
+                entry->easy = easy_conn->send_pipe->head->ptr;
+            }
+          }
+          /* Don't worry about overwriting recv_pipe head with send_pipe_head,
+             when action will be asked on the socket (see multi_socket()), the
+             head of the correct pipe will be taken according to the
+             action. */
+        }
+      }
+      else
         /* just a precaution, this socket really SHOULD be in the hash already
            but in case it isn't, we don't have to tell the app to remove it
            either since it never got to know about it */
+        remove_sock_from_hash = FALSE;
+
+      if (remove_sock_from_hash) {
         multi->socket_cb(easy->easy_handle,
                          s,
                          CURL_POLL_REMOVE,
                          multi->socket_userp,
                          entry ? entry->socketp : NULL);
-
         sh_delentry(multi->sockhash, s);
       }
+
     }
   }
 
@@ -1801,6 +1851,21 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
       if(data->magic != CURLEASY_MAGIC_NUMBER)
         /* bad bad bad bad bad bad bad */
         return CURLM_INTERNAL_ERROR;
+
+      /* If the pipeline is enabled, take the handle which is in the head of
+         the pipeline. If we should write into the socket, take the send_pipe
+         head.  If we should read from the socket, take the recv_pipe head. */
+      if(data->set.one_easy->easy_conn) {
+        if ((ev_bitmask & CURL_POLL_OUT) &&
+            data->set.one_easy->easy_conn->send_pipe &&
+            data->set.one_easy->easy_conn->send_pipe->head)
+          data = data->set.one_easy->easy_conn->send_pipe->head->ptr;
+        else
+        if ((ev_bitmask & CURL_POLL_IN) &&
+            data->set.one_easy->easy_conn->recv_pipe &&
+            data->set.one_easy->easy_conn->recv_pipe->head)
+          data = data->set.one_easy->easy_conn->recv_pipe->head->ptr;
+      }
 
       if(data->set.one_easy->easy_conn)  /* set socket event bitmask */
         data->set.one_easy->easy_conn->cselect_bits = ev_bitmask;
