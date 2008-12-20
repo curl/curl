@@ -345,13 +345,13 @@ void Curl_splayprint(struct Curl_tree * t, int d, char output)
   Curl_splayprint(t->larger, d+1, output);
   for (i=0; i<d; i++)
     if(output)
-      printf("  ");
+      fprintf(stderr, "  ");
 
   if(output) {
 #ifdef TEST_SPLAY
-    printf("%ld[%d]", (long)t->key.tv_usec, i);
+    fprintf(stderr, "%ld[%d]", (long)t->key.tv_usec, i);
 #else
-    printf("%ld.%ld[%d]", (long)t->key.tv_sec, (long)t->key.tv_usec, i);
+    fprintf(stderr, "%ld.%ld[%d]", (long)t->key.tv_sec, (long)t->key.tv_usec, i);
 #endif
   }
 
@@ -360,9 +360,9 @@ void Curl_splayprint(struct Curl_tree * t, int d, char output)
 
   if(output) {
     if(count)
-      printf(" [%d more]\n", count);
+      fprintf(stderr, " [%d more]\n", count);
     else
-      printf("\n");
+      fprintf(stderr, "\n");
   }
 
   Curl_splayprint(t->smaller, d+1, output);
