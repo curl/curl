@@ -975,13 +975,7 @@ static CURLcode
 static
 send_buffer *add_buffer_init(void)
 {
-  send_buffer *blonk;
-  blonk = malloc(sizeof(send_buffer));
-  if(blonk) {
-    memset(blonk, 0, sizeof(send_buffer));
-    return blonk;
-  }
-  return NULL; /* failed, go home */
+  return calloc(sizeof(send_buffer), 1);
 }
 
 /*
