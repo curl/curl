@@ -222,9 +222,8 @@ static FormInfo * AddFormInfo(char *value,
                               FormInfo *parent_form_info)
 {
   FormInfo *form_info;
-  form_info = malloc(sizeof(FormInfo));
+  form_info = calloc(sizeof(FormInfo), 1);
   if(form_info) {
-    memset(form_info, 0, sizeof(FormInfo));
     if(value)
       form_info->value = value;
     if(contenttype)
