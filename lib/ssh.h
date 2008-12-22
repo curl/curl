@@ -44,7 +44,7 @@
    later */
 #  define HAVE_LIBSSH2_SFTP_SEEK64 1
 #else
-#  undef HAVE_LIBSSH2_SFTP_SEEK64 1
+#  undef HAVE_LIBSSH2_SFTP_SEEK64
 #endif
 
 
