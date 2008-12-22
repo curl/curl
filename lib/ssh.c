@@ -435,8 +435,8 @@ static CURLcode ssh_getworkingpath(struct connectdata *conn,
  * Earlier libssh2 versions didn't have the ability to seek to 64bit positions
  * with 32bit size_t.
  */
-#ifdef HAVE_LIBSSH2_SFTP_SEEK2
-#define SFTP_SEEK(x,y) libssh2_sftp_seek2(x, (libssh2_uint64_t)y)
+#ifdef HAVE_LIBSSH2_SFTP_SEEK64
+#define SFTP_SEEK(x,y) libssh2_sftp_seek64(x, (libssh2_uint64_t)y)
 #else
 #define SFTP_SEEK(x,y) libssh2_sftp_seek(x, y)
 #endif
