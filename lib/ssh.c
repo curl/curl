@@ -432,6 +432,16 @@ static CURLcode ssh_getworkingpath(struct connectdata *conn,
 }
 
 /*
+ * Earlier libssh2 versions didn't have the ability to seek to 64bit positions
+ * with 32bit size_t.
+ */
+#ifdef HAVE_LIBSSH2_SFTP_SEEK2
+#define SFTP_SEEK(x,y) libssh2_sftp_seek2(x, (libssh2_uint64_t)y)
+#else
+#define SFTP_SEEK(x,y) libssh2_sftp_seek(x, y)
+#endif
+
+/*
  * ssh_statemach_act() runs the SSH statemachine "one round" and returns.  The
  * data the pointer 'block' points to will be set to TRUE if the libssh2
  * function returns LIBSSH2_ERROR_EAGAIN meaning it wants to be called again
@@ -1343,7 +1353,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         Curl_pgrsSetUploadSize(data, data->set.infilesize);
       }
 
-      libssh2_sftp_seek(sshc->sftp_handle, data->state.resume_from);
+      SFTP_SEEK(sshc->sftp_handle, data->state.resume_from);
     }
     if(data->set.infilesize>0) {
       data->req.size = data->set.infilesize;
@@ -1716,7 +1726,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           size = to - from + 1;
         }
 
-        libssh2_sftp_seek(conn->proto.sshc.sftp_handle, from);
+        SFTP_SEEK(conn->proto.sshc.sftp_handle, from);
       }
       data->req.size = size;
       data->req.maxdownload = size;
@@ -1750,7 +1760,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       data->req.maxdownload = attrs.filesize - data->state.resume_from;
       Curl_pgrsSetDownloadSize(data,
                                attrs.filesize - data->state.resume_from);
-      libssh2_sftp_seek(sshc->sftp_handle, data->state.resume_from);
+      SFTP_SEEK(sshc->sftp_handle, data->state.resume_from);
     }
   }
   /* Setup the actual download */

@@ -7,6 +7,8 @@
                                   Changelog
 
 Daniel Stenberg (22 Dec 2008)
+- Given a recent enough libssh2, libcurl can now seek/resume with SFTP even
+  on file indexes beyond 2 or 4GB.
 
 - Anthony Bryan provided a set of patches that cleaned up manual language,
   corrected spellings and more.

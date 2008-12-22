@@ -37,6 +37,7 @@ This release includes the following bugfixes:
  o curl_multi_timeout() no longer returns timeout 0 when there's nothing to do
    yet
  o the multi_socket API and HTTP pipelining now work a lot better when combined
+ o SFTP seek/resume beyond 32bit file sizes
 
 This release includes the following known bugs:
 
