@@ -30,9 +30,15 @@
 #endif
 
 #if (LIBSSH2_VERSION_NUM >= 0x001300)
+/* libssh2 0.19 was the planned release version for a while before it was
+   decided to instead become 1.0. Thus >= 0x001300 should still work fine
+   for snapshots done during the 0.19 days as well as things released once
+   it was bumped to 1.0 */
 #  define HAVE_LIBSSH2_SESSION_BLOCK_DIRECTIONS 1
+#  define HAVE_LIBSSH2_SFTP_SEEK2 1
 #else
 #  undef HAVE_LIBSSH2_SESSION_BLOCK_DIRECTIONS
+#  undef HAVE_LIBSSH2_SFTP_SEEK2 1
 #endif
 
 extern const struct Curl_handler Curl_handler_scp;

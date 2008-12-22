@@ -135,7 +135,7 @@ Pass the data to the HTTP server as a cookie. It is supposedly the
 data previously received from the server in a "Set-Cookie:" line.
 The data should be in the format "NAME1=VALUE1; NAME2=VALUE2".
 
-If no '=' letter is used in the line, it is treated as a filename to use to
+If no '=' symbol is used in the line, it is treated as a filename to use to
 read previously stored cookie lines from, which should be used in this session
 if they match. Using this method also activates the "cookie parser" which will
 make curl record incoming cookies too, which may be handy if you're using this
@@ -197,7 +197,7 @@ If this option is used several times, the last specified file name will be
 used.
 .IP "-C/--continue-at <offset>"
 Continue/Resume a previous file transfer at the given offset. The given offset
-is the exact number of bytes that will be skipped counted from the beginning
+is the exact number of bytes that will be skipped, counting from the beginning
 of the source file before it is transferred to the destination.  If used with
 uploads, the FTP server command SIZE will not be used by curl.
 
@@ -228,7 +228,7 @@ of a form field you may use \fI--data-urlencode\fP.
 
 If any of these options is used more than once on the same command line, the
 data pieces specified will be merged together with a separating
-&-letter. Thus, using '-d name=daniel -d skill=lousy' would generate a post
+&-symbol. Thus, using '-d name=daniel -d skill=lousy' would generate a post
 chunk that looks like \&'name=daniel&skill=lousy'.
 
 If you start the data with the letter @, the rest should be a file name to
@@ -256,11 +256,11 @@ curl using one of the following syntaxes:
 .RS
 .IP "content"
 This will make curl URL-encode the content and pass that on. Just be careful
-so that the content doesn't contain any = or @ letters, as that will then make
+so that the content doesn't contain any = or @ symbols, as that will then make
 the syntax match one of the other cases below!
 .IP "=content"
 This will make curl URL-encode the content and pass that on. The preceding =
-letter is not included in the data.
+symbol is not included in the data.
 .IP "name=content"
 This will make curl URL-encode the content part and pass that on. Note that
 the name part is expected to be URL-encoded already.
@@ -286,8 +286,8 @@ difference.
 (FTP) Tell curl to disable the use of the EPRT and LPRT commands when doing
 active FTP transfers. Curl will normally always first attempt to use EPRT,
 then LPRT before using PORT, but with this option, it will use PORT right
-away. EPRT and LPRT are extensions to the original FTP protocol, may not work
-on all servers but enable more functionality in a better way than the
+away. EPRT and LPRT are extensions to the original FTP protocol, and may not work
+on all servers, but they enable more functionality in a better way than the
 traditional PORT command.
 
 Since curl 7.19.0, \fB--eprt\fP can be used to explicitly enable EPRT again
@@ -326,7 +326,7 @@ engines. Note that not all (or none) of the engines may be available at
 run-time.
 .IP "--environment"
 (RISC OS ONLY) Sets a range of environment variables, using the names the -w
-option supports, to easier allow extraction of useful information after having
+option supports, to allow easier extraction of useful information after having
 run curl.
 .IP "--egd-file <file>"
 (SSL) Specify the path name to the Entropy Gathering Daemon socket. The socket
@@ -473,7 +473,7 @@ submit button. This causes curl to POST data using the Content-Type
 multipart/form-data according to RFC1867. This enables uploading of binary
 files etc. To force the 'content' part to be a file, prefix the file name
 with an @ sign. To just get the content part from a file, prefix the file name
-with the letter <. The difference between @ and < is then that @ makes a file
+with the symbol <. The difference between @ and < is then that @ makes a file
 get attached in the post as a file upload, while the < makes a text field and
 just get the contents for that text field from a file.
 
@@ -732,7 +732,7 @@ re-send the following request using the same unmodified method.
 .IP "--location-trusted"
 (HTTP/HTTPS) Like \fI-L/--location\fP, but will allow sending the name +
 password to all hosts that the site may redirect to. This may or may not
-introduce a security breach if the site redirects you do a site to which
+introduce a security breach if the site redirects you to a site to which
 you'll send your authentication info (which is plaintext in the case of HTTP
 Basic authentication).
 
@@ -776,7 +776,7 @@ Very similar to \fI--netrc\fP, but this option makes the .netrc usage
 (HTTP) Enables GSS-Negotiate authentication. The GSS-Negotiate method was
 designed by Microsoft and is used in their web applications. It is primarily
 meant as a support for Kerberos5 authentication but may be also used along
-with another authentication methods. For more information see IETF draft
+with another authentication method. For more information see IETF draft
 draft-brezak-spnego-http-04.txt.
 
 If you want to enable Negotiate for your proxy authentication, then use
@@ -1201,7 +1201,7 @@ received by curl that is hidden in normal cases, and a line starting with '*'
 means additional info provided by curl.
 
 Note that if you only want HTTP headers in the output, \fI-i/--include\fP
-might be option you're looking for.
+might be the option you're looking for.
 
 If you think this option still doesn't give you enough details, consider using
 \fI--trace\fP or \fI--trace-ascii\fP instead.
@@ -1255,12 +1255,12 @@ format from stdin you write "@-".
 
 The variables present in the output format will be substituted by the value or
 text that curl thinks fit, as described below. All variables are specified
-as %{variable_name} and to output a normal % you just it them as
+as %{variable_name} and to output a normal % you just write them as
 %%. You can output a newline by using \\n, a carriage return with \\r and a tab
 space with \\t.
 
 .B NOTE:
-The %-letter is a special letter in the win32-environment, where all
+The %-symbol is a special symbol in the win32-environment, where all
 occurrences of % must be doubled when using this option.
 
 The variables available at this point are:
@@ -1456,7 +1456,7 @@ Sets the proxy server to use if no protocol-specific proxy is set.
 list of host names that shouldn't go through any proxy. If set to a asterisk
 \&'*' only, it matches all hosts.
 .SH EXIT CODES
-There exists a bunch of different error codes and their corresponding error
+There are a bunch of different error codes and their corresponding error
 messages that may appear during bad conditions. At the time of this writing,
 the exit codes are:
 .IP 1
@@ -1464,7 +1464,7 @@ Unsupported protocol. This build of curl has no support for this protocol.
 .IP 2
 Failed to initialize.
 .IP 3
-URL malformat. The syntax was not correct.
+URL malformed. The syntax was not correct.
 .IP 5
 Couldn't resolve proxy. The given proxy host could not be resolved.
 .IP 6
@@ -1545,67 +1545,67 @@ Unknown TELNET option specified.
 .IP 49
 Malformed telnet option.
 .IP 51
-The peer's SSL certificate or SSH MD5 fingerprint was not ok
+The peer's SSL certificate or SSH MD5 fingerprint was not ok.
 .IP 52
 The server didn't reply anything, which here is considered an error.
 .IP 53
-SSL crypto engine not found
+SSL crypto engine not found.
 .IP 54
-Cannot set SSL crypto engine as default
+Cannot set SSL crypto engine as default.
 .IP 55
-Failed sending network data
+Failed sending network data.
 .IP 56
-Failure in receiving network data
+Failure in receiving network data.
 .IP 58
-Problem with the local certificate
+Problem with the local certificate.
 .IP 59
-Couldn't use specified SSL cipher
+Couldn't use specified SSL cipher.
 .IP 60
-Peer certificate cannot be authenticated with known CA certificates
+Peer certificate cannot be authenticated with known CA certificates.
 .IP 61
-Unrecognized transfer encoding
+Unrecognized transfer encoding.
 .IP 62
-Invalid LDAP URL
+Invalid LDAP URL.
 .IP 63
-Maximum file size exceeded
+Maximum file size exceeded.
 .IP 64
-Requested FTP SSL level failed
+Requested FTP SSL level failed.
 .IP 65
-Sending the data requires a rewind that failed
+Sending the data requires a rewind that failed.
 .IP 66
-Failed to initialise SSL Engine
+Failed to initialise SSL Engine.
 .IP 67
-The user name, password, or similar was not accepted and curl failed to log in
+The user name, password, or similar was not accepted and curl failed to log in.
 .IP 68
-File not found on TFTP server
+File not found on TFTP server.
 .IP 69
-Permission problem on TFTP server
+Permission problem on TFTP server.
 .IP 70
-Out of disk space on TFTP server
+Out of disk space on TFTP server.
 .IP 71
-Illegal TFTP operation
+Illegal TFTP operation.
 .IP 72
-Unknown TFTP transfer ID
+Unknown TFTP transfer ID.
 .IP 73
-File already exists (TFTP)
+File already exists (TFTP).
 .IP 74
-No such user (TFTP)
+No such user (TFTP).
 .IP 75
-Character conversion failed
+Character conversion failed.
 .IP 76
-Character conversion functions required
+Character conversion functions required.
 .IP 77
-Problem with reading the SSL CA cert (path? access rights?)
+Problem with reading the SSL CA cert (path? access rights?).
 .IP 78
-The resource referenced in the URL does not exist
+The resource referenced in the URL does not exist.
 .IP 79
-An unspecified error occurred during the SSH session
+An unspecified error occurred during the SSH session.
 .IP 80
-Failed to shut down the SSL connection
+Failed to shut down the SSL connection.
 .IP 82
-Could not load CRL file, missing or wrong format (added in 7.19.0)
+Could not load CRL file, missing or wrong format (added in 7.19.0).
 .IP 83
-Issuer check failed (added in 7.19.0)
+Issuer check failed (added in 7.19.0).
 .IP XX
 More error codes will appear here in future releases. The existing ones
 are meant to never change.

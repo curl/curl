@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (22 Dec 2008)
+
+- Anthony Bryan provided a set of patches that cleaned up manual language,
+  corrected spellings and more.
+
 Daniel Stenberg (20 Dec 2008)
 - Igor Novoseltsev fixed a bad situation for the multi_socket() API when doing
   pipelining, as libcurl could then easily get confused and A) work on the
