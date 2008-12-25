@@ -1,9 +1,6 @@
 To be addressed in 7.19.3 (planned release: January 2009)
 =========================
 
-193 - Fix zero-byte file transfers
-      - Nobody has actually started for real on this
-
 203 - "dns cache memory leak and TTL failure after failed conn" bug #2413067
 
 204 - 
