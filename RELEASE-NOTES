@@ -21,7 +21,7 @@ This release includes the following bugfixes:
    the same server
  o memory leak with HTTP GSS/kerberos authentication
  o removed the default use of "Pragma: no-cache"
- o fix SCP/SFTP busyloop by using a new libssh2 0.19 function
+ o fix SCP/SFTP busyloop by using a new libssh2 1.0 function
  o bad fclose() after a fatal error in cookie code
  o curl_multi_remove_handle() when the handle was in use in a HTTP pipeline
  o GSS authentication infinite loop problem
@@ -33,7 +33,7 @@ This release includes the following bugfixes:
  o better detection of SFTP failures
  o improved connection re-use for subsequent SCP and SFTP transfers
  o multi interface does less busy-loops for SCP and SFTP transfers with libssh2
-   0.19 or later
+   1.0 or later
  o curl_multi_timeout() no longer returns timeout 0 when there's nothing to do
    yet
  o the multi_socket API and HTTP pipelining now work a lot better when combined
