@@ -818,6 +818,21 @@ if test "$ipv6" = "yes"; then
   curl_ipv6_msg="enabled"
 fi
 
+# Check if struct sockaddr_in6 have sin6_scope_id member
+if test "$ipv6" = yes; then
+  AC_MSG_CHECKING([if struct sockaddr_in6 has sin6_scope_id member])
+  AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <netinet/in.h>] ,
+  struct sockaddr_in6 s; s.sin6_scope_id = 0; , have_sin6_scope_id=yes)
+  if test "$have_sin6_scope_id" = yes; then
+  	AC_MSG_RESULT([yes])
+  	AC_DEFINE(HAVE_SIN6_SCOPE_ID, 1, [Define to 1 if struct sockaddr_in6 has the sin6_scope_id member])
+  else
+  	AC_MSG_RESULT([no])
+  fi
+fi
+
 dnl **********************************************************************
 dnl Check if the operating system allows programs to write to their own argv[]
 dnl **********************************************************************
