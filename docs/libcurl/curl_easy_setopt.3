@@ -1623,9 +1623,9 @@ cache. Note that while nothing ever should get hurt by attempting to reuse SSL
 session-IDs, there seem to be broken SSL implementations in the wild that may
 require you to disable this in order for you to succeed. (Added in 7.16.0)
 .IP CURLOPT_KRBLEVEL
-Pass a char * as parameter. Set the kerberos security level for FTP; this
-also enables kerberos awareness.  This is a string, 'clear', 'safe',
-'confidential' or \&'private'.  If the string is set but doesn't match one
+Pass a char * as parameter. Set the kerberos security level for FTP; this also
+enables kerberos awareness.  This is a string, \&'clear', \&'safe',
+\&'confidential' or \&'private'.  If the string is set but doesn't match one
 of these, 'private' will be used. Set the string to NULL to disable kerberos
 support for FTP.
 
