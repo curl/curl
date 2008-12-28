@@ -38,6 +38,7 @@ This release includes the following bugfixes:
    yet
  o the multi_socket API and HTTP pipelining now work a lot better when combined
  o SFTP seek/resume beyond 32bit file sizes
+ o fixed breakage with --with-ssl --disable-verbose
 
 This release includes the following known bugs:
 
@@ -49,6 +50,6 @@ advice from friends like these:
  Yang Tse, Daniel Fandrich, Jim Meyering, Christian Krause, Andreas Wurf,
  Markus Koetter, Josef Wolf, Vlad Grachov, Pawel Kierski, Igor Novoseltsev,
  Fred Machado, Ken Hirsch, Keshav Krity, Patrick Monnerat, Mark Karpeles,
- Anthony Bryan
+ Anthony Bryan, Peter Korsgaard
 
         Thanks! (and sorry if I forgot to mention someone)

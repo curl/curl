@@ -923,10 +923,6 @@ static int asn1_output(const ASN1_UTCTIME *tm,
   int i;
   int year=0,month=0,day=0,hour=0,minute=0,second=0;
 
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)prefix;
-#endif
-
   i=tm->length;
   asn1_string=(const char *)tm->data;
 

@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (28 Dec 2008)
+- Peter Korsgaard fixed building libcurl with "configure --with-ssl
+  --disable-verbose".
+  
+- Anthony Bryan fixed more language and spelling flaws in man pages.
+
 Daniel Stenberg (22 Dec 2008)
 - Given a recent enough libssh2, libcurl can now seek/resume with SFTP even
   on file indexes beyond 2 or 4GB.
