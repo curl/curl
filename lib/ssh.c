@@ -2117,6 +2117,9 @@ static int ssh_getsock(struct connectdata *conn,
                        int numsocks)
 {
 #ifndef HAVE_LIBSSH2_SESSION_BLOCK_DIRECTIONS
+  (void)conn;
+  (void)sock;
+  (void)numsocks;
   /* if we don't know any direction we can just play along as we used to and
      not provide any sensible info */
   return GETSOCK_BLANK;
