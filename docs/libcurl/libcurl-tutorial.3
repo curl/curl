@@ -191,8 +191,8 @@ similar to this:
 
  curl_easy_setopt(easyhandle, CURLOPT_WRITEFUNCTION, write_data);
 
-You can control what data your function get in the forth argument by setting
-another property:
+You can control what data your callback function gets in the fourth argument
+by setting another property:
 
  curl_easy_setopt(easyhandle, CURLOPT_WRITEDATA, &internal_struct);
 
