@@ -284,9 +284,8 @@ When using multiple threads you should set the CURLOPT_NOSIGNAL option to 1
 for all handles. Everything will or might work fine except that timeouts are
 not honored during the DNS lookup - which you can work around by building
 libcurl with c-ares support. c-ares is a library that provides asynchronous
-name resolves. Unfortunately, c-ares does not yet fully support IPv6. On some
-platforms, libcurl simply will not function properly multi-threaded unless
-this option is set.
+name resolves. On some platforms, libcurl simply will not function properly
+multi-threaded unless this option is set.
 
 Also, note that CURLOPT_DNS_USE_GLOBAL_CACHE is not thread-safe.
 
@@ -977,7 +976,7 @@ are then use accordingly on later requests.
 
 One way to do this, is to save all headers you receive in a plain file and
 when you make a request, you tell libcurl to read the previous headers to
-figure out which cookies to use. Set header file to read cookies from with
+figure out which cookies to use. Set the header file to read cookies from with
 CURLOPT_COOKIEFILE.
 
 The CURLOPT_COOKIEFILE option also automatically enables the cookie parser in
@@ -986,9 +985,9 @@ understand incoming cookies and they will just be ignored. However, when the
 parser is enabled the cookies will be understood and the cookies will be kept
 in memory and used properly in subsequent requests when the same handle is
 used. Many times this is enough, and you may not have to save the cookies to
-disk at all. Note that the file you specify to CURLOPT_COOKIEFILE doesn't
-have to exist to enable the parser, so a common way to just enable the parser
-and not read able might be to use a file name you know doesn't exist.
+disk at all. Note that the file you specify to CURLOPT_COOKIEFILE doesn't have
+to exist to enable the parser, so a common way to just enable the parser and
+not read any cookies is to use a the name of a file you know doesn't exist.
 
 If you rather use existing cookies that you've previously received with your
 Netscape or Mozilla browsers, you can make libcurl use that cookie file as
@@ -1094,14 +1093,12 @@ Many of the protocols libcurl supports send name and password unencrypted as
 clear text (HTTP Basic authentication, FTP, TELNET etc). It is very easy for
 anyone on your network or a network nearby yours, to just fire up a network
 analyzer tool and eavesdrop on your passwords. Don't let the fact that HTTP
-uses base64 encoded passwords fool you. They may not look readable at a first
-glance, but they very easily "deciphered" by anyone within seconds.
+Basic uses base64 encoded passwords fool you. They may not look readable at a
+first glance, but they very easily "deciphered" by anyone within seconds.
 
-To avoid this problem, use protocols that don't let snoopers see your
-password: HTTPS, FTPS and FTP-kerberos are a few examples. HTTP Digest
-authentication allows this too, but isn't supported by libcurl as of this
-writing.
-
+To avoid this problem, use HTTP athentication methods or other protocols that
+don't let snoopers see your password: HTTP with Digest, NTLM or GSS
+authentication, HTTPS, FTPS, SCP, SFTP and FTP-kerberos are a few examples.
 .IP "Showing What You Do"
 On a related issue, be aware that even in situations like when you have
 problems with libcurl and ask someone for help, everything you reveal in order
