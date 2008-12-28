@@ -17,9 +17,9 @@ CURLMcode curl_multi_fdset(CURLM *multi_handle,
 This function extracts file descriptor information from a given multi_handle.
 libcurl returns its fd_set sets. The application can use these to select() on,
 but be sure to FD_ZERO them before calling this function as
-\fIcurl_multi_fdset(3)\fP only adds its own descriptors it doesn't zero or
-otherwise remove any other. The \fIcurl_multi_perform(3)\fP function should be
-called as soon as one of them are ready to be read from or written to.
+\fIcurl_multi_fdset(3)\fP only adds its own descriptors, it doesn't zero or
+otherwise remove any others. The \fIcurl_multi_perform(3)\fP function should be
+called as soon as one of them is ready to be read from or written to.
 
 If no file descriptors are set by libcurl, \fImax_fd\fP will contain -1 when
 this function returns. Otherwise it will contain the higher descriptor number

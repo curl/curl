@@ -21,7 +21,7 @@ You can only set one option in each function call.
 .IP CURLMOPT_SOCKETFUNCTION
 Pass a pointer to a function matching the \fBcurl_socket_callback\fP
 prototype. The \fIcurl_multi_socket(3)\fP functions inform the application
-about updates in the socket (file descriptor) status by doing none, one or
+about updates in the socket (file descriptor) status by doing none, one, or
 multiple calls to the curl_socket_callback given in the \fBparam\fP
 argument. They update the status with changes since the previous time a
 \fIcurl_multi_socket(3)\fP function was called. If the given callback pointer
@@ -38,7 +38,7 @@ Pass a long set to 1 to enable or 0 to disable. Enabling pipelining on a multi
 handle will make it attempt to perform HTTP Pipelining as far as possible for
 transfers using this handle. This means that if you add a second request that
 can use an already existing connection, the second request will be \&"piped"
-on the same connection rather than being executed in parallell. (Added in
+on the same connection rather than being executed in parallel. (Added in
 7.16.0)
 .IP CURLMOPT_TIMERFUNCTION
 Pass a pointer to a function matching the \fBcurl_multi_timer_callback\fP
@@ -63,11 +63,11 @@ simultaneously open connections that libcurl may cache. Default is 10, and
 libcurl will enlarge the size for each added easy handle to make it fit 4
 times the number of added easy handles.
 
-By setting this option, you can prevent the cache size to grow beyond the
+By setting this option, you can prevent the cache size from growing beyond the
 limit set by you.
 
 When the cache is full, curl closes the oldest one in the cache to prevent the
-number of open connections to increase.
+number of open connections from increasing.
 
 This option is for the multi handle's use only, when using the easy interface
 you should instead use the \fICURLOPT_MAXCONNECTS\fP option.

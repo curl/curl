@@ -31,7 +31,7 @@ prototype:
 void unlock_function(CURL *handle, curl_lock_data data, void *userptr);
 
 \fIdata\fP defines what data libcurl wants to unlock, and you must make sure
-that only one lick is given at any time for each kind of data.
+that only one lock is given at any time for each kind of data.
 
 \fIuserptr\fP is the pointer you set with \fICURLSHOPT_USERDATA\fP.
 .IP CURLSHOPT_SHARE
@@ -51,7 +51,7 @@ This option does the opposite of \fICURLSHOPT_SHARE\fP. It specifies that
 the specified \fIparameter\fP will no longer be shared. Valid values are 
 the same as those for \fICURLSHOPT_SHARE\fP.
 .IP CURLSHOPT_USERDATA
-The \fIparameter\fP allows you to specify a pointer to data that will passed
+The \fIparameter\fP allows you to specify a pointer to data that will be passed
 to the lock_function and unlock_function each time it is called.
 .SH RETURN VALUE
 CURLSHE_OK (zero) means that the option was set properly, non-zero means an

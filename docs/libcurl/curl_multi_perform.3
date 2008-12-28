@@ -32,12 +32,12 @@ actions. You don't have to do it immediately, but the return code means that
 libcurl may have more data available to return or that there may be more data
 to send off before it is "satisfied". Do note that \fIcurl_multi_perform(3)\fP
 will return \fICURLM_CALL_MULTI_PERFORM\fP only when it wants to be called
-again \fBimmediately\fP. When things are fine and there are nothing immediate
+again \fBimmediately\fP. When things are fine and there is nothing immediate
 it wants done, it'll return \fICURLM_OK\fP and you need to wait for \&"action"
 and then call this function again.
 
-NOTE that this only returns errors etc regarding the whole multi stack. There
-might still have occurred problems on individual transfers even when this
+NOTE that this only returns errors etc regarding the whole multi stack. Problems
+still might have occurred on individual transfers even when this
 function returns \fICURLM_OK\fP.
 .SH "TYPICAL USAGE"
 Most applications will use \fIcurl_multi_fdset(3)\fP to get the multi_handle's

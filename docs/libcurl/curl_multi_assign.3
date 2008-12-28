@@ -2,7 +2,7 @@
 .\"
 .TH curl_multi_assign 3 "9 Jul 2006" "libcurl 7.16.0" "libcurl Manual"
 .SH NAME
-curl_multi_assign \- set data to associated with an internal socket
+curl_multi_assign \- set data to association with an internal socket
 .SH SYNOPSIS
 #include <curl/curl.h>
 
@@ -34,7 +34,7 @@ In a typical application you allocate a struct or at least use some kind of
 semi-dynamic data for each socket that we must wait for action on when using
 the \fIcurl_multi_socket(3)\fP approach.
 
-When our socket-callback get called by libcurl and we get to know about yet
+When our socket-callback gets called by libcurl and we get to know about yet
 another socket to wait for, we can use \fIcurl_multi_assign(3)\fP to point out
 the particular data so that when we get updates about this same socket again,
 we don't have to find the struct associated with this socket by ourselves.

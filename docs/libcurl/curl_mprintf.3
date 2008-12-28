@@ -28,7 +28,7 @@ curl_mvsprintf - formatted output conversion
 .br
 .BI "char *curl_mvaprintf(const char *" format ", va_list " args ");"
 .SH DESCRIPTION
-These are all functions that produces output according to a format string and
+These are all functions that produce output according to a format string and
 given arguments. These are mostly clones of the well-known C-style functions
 and there will be no detailed explanation of all available formatting rules
 and usage here.
@@ -83,8 +83,8 @@ future. They will instead be made "available" by source code access only, and
 then as curlx_-prefixed functions. See lib/README.curlx for further details.
 .SH RETURN VALUE
 The \fBcurl_maprintf\fP and \fBcurl_mvaprintf\fP functions return a pointer to
-a newly allocated string, or NULL it it failed.
+a newly allocated string, or NULL if it failed.
 
-All other functions return the number of character they actually outputed.
+All other functions return the number of characters they actually outputted.
 .SH "SEE ALSO"
 .BR printf "(3), " sprintf "(3), " fprintf "(3), " vprintf "(3) "

@@ -44,7 +44,7 @@ is the one that completed. Use \fIcurl_multi_info_read(3)\fP to figure out
 which easy handle that completed.
 
 The \fBcurl_multi_socket_action(3)\fP functions inform the application about
-updates in the socket (file descriptor) status by doing none, one or multiple
+updates in the socket (file descriptor) status by doing none, one, or multiple
 calls to the socket callback function set with the CURLMOPT_SOCKETFUNCTION
 option to \fIcurl_multi_setopt(3)\fP. They update the status with changes
 since the previous time the callback was called.
@@ -64,7 +64,7 @@ equivalent to \fIcurl_multi_socket_action(3)\fP with \fBev_bitmask\fP set to
 
 Force libcurl to (re-)check all its internal sockets and transfers instead of
 just a single one by calling \fBcurl_multi_socket_all(3)\fP. Note that there
-should not exist any reasons to use this function!
+should not be any reason to use this function!
 .SH "CALLBACK DETAILS"
 
 The socket \fBcallback\fP function uses a prototype like this
@@ -121,8 +121,8 @@ In modern libcurls, \fICURLM_CALL_MULTI_PERFORM\fP or
 \fICURLM_CALL_MULTI_SOKCET\fP should not be returned and no application needs
 to care about them.
 
-NOTE that the return code is for the whole multi stack. There might still have
-occurred problems on individual transfers even when one of these functions
+NOTE that the return code is for the whole multi stack. Problems still might have
+occurred on individual transfers even when one of these functions
 return OK.
 .SH "TYPICAL USAGE"
 1. Create a multi handle
@@ -147,7 +147,7 @@ call \fIcurl_multi_socket_action(3)\fP with \fICURL_SOCKET_TIMEOUT\fP
 
 8. Go back to step 6.
 .SH AVAILABILITY
-This function was added in libcurl 7.15.4, although deemed stable since
+This function was added in libcurl 7.15.4, and is deemed stable since
 7.16.0.
 
 \fIcurl_multi_socket(3)\fP is deprecated, use

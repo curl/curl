@@ -31,7 +31,7 @@ the connection you want to pause or unpause.
 The \fBbitmask\fP argument is a set of bits that sets the new state of the
 connection. The following bits can be used:
 .IP CURLPAUSE_RECV
-Pause receiving data. There will be no data received on this conneciton until
+Pause receiving data. There will be no data received on this connection until
 this function is called again without this bit set. Thus, the write callback
 (\fICURLOPT_WRITEFUNCTION\fP) won't be called.
 .IP CURLPAUSE_SEND

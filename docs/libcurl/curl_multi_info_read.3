@@ -29,7 +29,7 @@ is emptied.
 calling \fIcurl_multi_cleanup(3)\fP, \fIcurl_multi_remove_handle(3)\fP or
 \fIcurl_easy_cleanup(3)\fP.
 
-The 'CURLMsg' struct is very simple and only contain very basic information.
+The 'CURLMsg' struct is very simple and only contains very basic information.
 If more involved information is wanted, the particular "easy handle" in
 present in that struct and can thus be used in subsequent regular
 \fIcurl_easy_getinfo(3)\fP calls (or similar):
@@ -48,7 +48,7 @@ When \fBmsg\fP is \fICURLMSG_DONE\fP, the message identifies a transfer that
 is done, and then \fBresult\fP contains the return code for the easy handle
 that just completed.
 
-At this point, there is no other \fBmsg\fP types defined.
+At this point, there are no other \fBmsg\fP types defined.
 .SH "RETURN VALUE"
 A pointer to a filled-in struct, or NULL if it failed or ran out of
 structs. It also writes the number of messages left in the queue (after this

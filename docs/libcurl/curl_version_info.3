@@ -34,7 +34,7 @@ Returns a pointer to a filled in struct with information about various
 run-time features in libcurl. \fItype\fP should be set to the version of this
 functionality by the time you write your program. This way, libcurl will
 always return a proper struct that your program understands, while programs in
-the future might get an different struct. CURLVERSION_NOW will be the most
+the future might get a different struct. CURLVERSION_NOW will be the most
 recent one for the library you have installed:
 
         data = curl_version_info(CURLVERSION_NOW);
@@ -74,8 +74,8 @@ typedef struct {
 } curl_version_info_data;
 .fi
 
-\fIage\fP describes what age of this struct this is. The number depends on how
-new libcurl you're using. You are however guaranteed to get a struct that you
+\fIage\fP describes what the age of this struct is. The number depends on how
+new the libcurl you're using is. You are however guaranteed to get a struct that you
 have a matching struct for in the header, as you tell libcurl your "age" with
 the input argument.
 
@@ -126,15 +126,15 @@ allows libcurl to use the current user and the current user's password without
 the app having to pass them on. (Added in 7.13.2)
 .IP CURL_VERSION_CONV
 libcurl was built with support for character conversions, as provided by the
-CUURLOPT_CONV_* callbacks. (Added in 7.15.4)
+CURLOPT_CONV_* callbacks. (Added in 7.15.4)
 .RE
-\fIssl_version\fP is an ascii string for the OpenSSL version used. If libcurl
+\fIssl_version\fP is an ASCII string for the OpenSSL version used. If libcurl
 has no SSL support, this is NULL.
 
 \fIssl_version_num\fP is the numerical OpenSSL version value as defined by the
 OpenSSL project. If libcurl has no SSL support, this is 0.
 
-\fIlibz_version\fP is an ascii string (there is no numerical version). If
+\fIlibz_version\fP is an ASCII string (there is no numerical version). If
 libcurl has no libz support, this is NULL.
 
 \fIprotocols\fP is a pointer to an array of char * pointers, containing the
