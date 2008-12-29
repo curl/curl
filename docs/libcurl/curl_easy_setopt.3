@@ -607,12 +607,9 @@ the authentication method.
 Pass a char * as parameter, which should be pointing to the zero terminated
 user name to use for the transfer.
 
-The CURLOPT_USERNAME option should be used in the same way that
-\fICURLOPT_USERPWD\fP is used.  In comparison to \fICURLOPT_USERPWD\fP the
-CURLOPT_USERNAME allows the username to contain a colon, like in the following
-example: "sip:user@example.com".  Note the CURLOPT_USERNAME option is an
-alternative way to set the user name.  There is no meaning to use it together
-with the \fICURLOPT_USERPWD\fP option.
+\fBCURLOPT_USERNAME\fP sets the user name to be used in protocol
+authentication. You should not use this option together with the (older)
+CURLOPT_USERPWD option.
 
 In order to specify the password to be used in conjunction with the user name
 use the \fICURLOPT_PASSWORD\fP option.  (Added in 7.19.1)
@@ -1212,12 +1209,17 @@ when doing a FTP directory listing. This is useful for doing DELETE or other
 more or less obscure HTTP requests. Don't do this at will, make sure your
 server supports the command first.
 
-Note that libcurl will still act and assume the keyword it would use if you
-didn't set your custom one is the one in use and it will act according to
-that. Thus, changing this to a HEAD when libcurl otherwise would do a GET
-might cause libcurl to act funny, and similar. To switch to a proper HEAD, use
-\fICURLOPT_NOBODY\fP, to switch to a proper POST, use \fICURLOPT_POST\fP or
-\fICURLOPT_POSTFIELDS\fP and so on.
+When you change the request method by setting \fBCURLOPT_CUSTOMREQUEST\fP to
+something, you don't actually change how libcurl behaves or acts in regards to
+the particular request method, it will only change the actual string sent in
+the request.
+
+For example: if you tell libcurl to do a HEAD request, but then change the
+request to a "GET" with \fBCURLOPT_CUSTOMREQUEST\fP you'll still see libcurl
+act as if it sent a HEAD even when it does send a GET.
+
+To switch to a proper HEAD, use \fICURLOPT_NOBODY\fP, to switch to a proper
+POST, use \fICURLOPT_POST\fP or \fICURLOPT_POSTFIELDS\fP and so on.
 
 Restore to the internal default by setting this to NULL.
 

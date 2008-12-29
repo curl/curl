@@ -987,11 +987,11 @@ in memory and used properly in subsequent requests when the same handle is
 used. Many times this is enough, and you may not have to save the cookies to
 disk at all. Note that the file you specify to CURLOPT_COOKIEFILE doesn't have
 to exist to enable the parser, so a common way to just enable the parser and
-not read any cookies is to use a the name of a file you know doesn't exist.
+not read any cookies is to use the name of a file you know doesn't exist.
 
-If you would rather use existing cookies that you've previously received with your
-Netscape or Mozilla browsers, you can make libcurl use that cookie file as
-input. The CURLOPT_COOKIEFILE is used for that too, as libcurl will
+If you would rather use existing cookies that you've previously received with
+your Netscape or Mozilla browsers, you can make libcurl use that cookie file
+as input. The CURLOPT_COOKIEFILE is used for that too, as libcurl will
 automatically find out what kind of file it is and act accordingly.
 
 Perhaps the most advanced cookie operation libcurl offers, is saving the
