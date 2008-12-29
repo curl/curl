@@ -4523,22 +4523,28 @@ CURLcode Curl_connect(struct SessionHandle *data,
 
   if(CURLE_OK == code) {
     /* no error */
-    if((*in_connect)->send_pipe->size +
-       (*in_connect)->recv_pipe->size != 0)
+    if((*in_connect)->send_pipe->size || (*in_connect)->recv_pipe->size)
       /* pipelining */
       *protocol_done = TRUE;
     else {
+
       if(dns || !*asyncp)
         /* If an address is available it means that we already have the name
            resolved, OR it isn't async. if this is a re-used connection 'dns'
            will be NULL here. Continue connecting from here */
         code = setup_conn(*in_connect, dns, protocol_done);
-      /* else
-         response will be received and treated async wise */
+
+      if(dns && code) {
+        /* We have the dns entry info already but failed to connect to the
+         * host and thus we must make sure to unlock the dns entry again
+         * before returning failure from here.
+         */
+        Curl_resolv_unlock(data, dns);
+      }
     }
   }
 
-  if(CURLE_OK != code && *in_connect) {
+  if(code && *in_connect) {
     /* We're not allowed to return failure with memory left allocated
        in the connectdata struct, free those here */
     Curl_disconnect(*in_connect); /* close the connection */

@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel Stenberg (29 Dec 2008)
+ - Phil Lisiecki filed bug report #2413067
+  (http://curl.haxx.se/bug/view.cgi?id=2413067) that identified a problem that
+  would cause libcurl to mark a DNS cache entry "in use" eternally if the
+  subsequence TCP connect failed. It would thus never get pruned and refreshed
+  as it should've been.
+
+  Phil provided his own patch to this problem that while it seemed to work
+  wasn't complete and thus I wrote my own fix to the problem.
+
 Daniel Stenberg (28 Dec 2008)
 - Peter Korsgaard fixed building libcurl with "configure --with-ssl
   --disable-verbose".
