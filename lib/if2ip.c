@@ -86,10 +86,12 @@ char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
         char scope[12]="";
 #ifdef ENABLE_IPV6
         if (af == AF_INET6) {
-          unsigned int scopeid;
+          unsigned int scopeid = 0;
           addr = &((struct sockaddr_in6 *)iface->ifa_addr)->sin6_addr;
+#ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
           /* Include the scope of this interface as part of the address */
           scopeid = ((struct sockaddr_in6 *)iface->ifa_addr)->sin6_scope_id;
+#endif
           if (scopeid)
             snprintf(scope, sizeof(scope), "%%%u", scopeid);
         }

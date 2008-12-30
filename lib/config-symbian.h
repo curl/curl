@@ -67,7 +67,7 @@
 #define ENABLE_IPV6 1
 
 /* Define if struct sockaddr_in6 has the sin6_scope_id member */
-#define HAVE_SIN6_SCOPE_ID 1
+#define HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID 1
 
 /* Define to the type qualifier of arg 1 for getnameinfo. */
 #define GETNAMEINFO_QUAL_ARG1 const

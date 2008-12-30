@@ -42,7 +42,7 @@
 #undef ENABLE_IPV6
 
 /* Define if struct sockaddr_in6 has the sin6_scope_id member */
-#define HAVE_SIN6_SCOPE_ID 1
+#define HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID 1
 
 /* Define this to 'int' if ssize_t is not an available typedefed type */
 #undef ssize_t

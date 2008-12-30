@@ -324,7 +324,7 @@
 #define HAVE_STRUCT_TIMEVAL 1
 
 /* Define this if struct sockaddr_in6 has the sin6_scope_id member */
-#define HAVE_SIN6_SCOPE_ID 1
+#define HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID 1
 
 /* ---------------------------------------------------------------- */
 /*                        COMPILER SPECIFIC                         */

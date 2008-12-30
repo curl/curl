@@ -769,7 +769,7 @@ singleipconnect(struct connectdata *conn,
     /* no socket, no connection */
     return CURL_SOCKET_BAD;
 
-#ifdef ENABLE_IPV6
+#if defined(ENABLE_IPV6) && defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
   if (conn->scope && (addr.family == AF_INET6))
     sa6->sin6_scope_id = conn->scope;
 #endif
