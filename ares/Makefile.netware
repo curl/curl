@@ -323,6 +323,9 @@ else
 	@echo $(DL)#define HAVE_TERMIOS_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_AF_INET6 1$(DL) >> $@
 	@echo $(DL)#define HAVE_PF_INET6 1$(DL) >> $@
+	@echo $(DL)#define HAVE_FREEADDRINFO 1$(DL) >> $@
+	@echo $(DL)#define HAVE_GETADDRINFO 1$(DL) >> $@
+	@echo $(DL)#define HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRUCT_IN6_ADDR 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRUCT_SOCKADDR_IN6 1$(DL) >> $@
 	@echo $(DL)#define RECV_TYPE_ARG1 int$(DL) >> $@
