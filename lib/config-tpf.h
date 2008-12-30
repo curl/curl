@@ -62,6 +62,9 @@
 /* Define if you want to enable IPv6 support */
 /* #undef ENABLE_IPV6 */
 
+/* Define if struct sockaddr_in6 has the sin6_scope_id member */
+/* #undef HAVE_SIN6_SCOPE_ID */
+
 /* Define to the type of arg 1 for getnameinfo. */
 /* #undef GETNAMEINFO_TYPE_ARG1 */
 

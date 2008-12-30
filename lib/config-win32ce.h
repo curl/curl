@@ -323,6 +323,9 @@
 /* Define this if you have struct timeval */
 #define HAVE_STRUCT_TIMEVAL 1
 
+/* Define this if struct sockaddr_in6 has the sin6_scope_id member */
+#define HAVE_SIN6_SCOPE_ID 1
+
 /* ---------------------------------------------------------------- */
 /*                        COMPILER SPECIFIC                         */
 /* ---------------------------------------------------------------- */
