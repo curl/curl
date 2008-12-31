@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (31 Dec 2008)
+- Bas Mevissen reported http://curl.haxx.se/bug/view.cgi?id=2479030 pointing
+  out that 'reconf' didn't properly point out the m4 subdirectory when running
+  aclocal.
+
 Daniel Stenberg (29 Dec 2008)
  - Phil Lisiecki filed bug report #2413067
   (http://curl.haxx.se/bug/view.cgi?id=2413067) that identified a problem that
