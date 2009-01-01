@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -25,7 +25,7 @@ AUTOMAKE_OPTIONS = foreign
 
 ACLOCAL_AMFLAGS = -I m4
 
-EXTRA_DIST = CHANGES COPYING maketgz reconf Makefile.dist curl-config.in \
+EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in \
  curl-style.el sample.emacs RELEASE-NOTES buildconf buildconf.bat 	 \
  libcurl.pc.in vc6curl.dsw
 

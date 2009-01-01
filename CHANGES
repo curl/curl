@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel Stenberg (1 Jan 2009)
+- 'reconf' is removed since we rather have users use 'buildconf'
+
 Daniel Stenberg (31 Dec 2008)
 - Bas Mevissen reported http://curl.haxx.se/bug/view.cgi?id=2479030 pointing
   out that 'reconf' didn't properly point out the m4 subdirectory when running
