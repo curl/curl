@@ -1,4 +1,12 @@
 To be addressed in 7.19.3 (planned release: January 2009)
 =========================
 
+204 - Rob C's NSS fix
 
+205 - A. Craig West's CURLOPT_NOPROXY option
+
+206 - A. Craig West's CURLOPT_HTTP_VERSION change for CONNECT
+
+207 - Vitaliy Kulikov's Callback for cert verification
+
+208 -
