@@ -6,6 +6,22 @@
 
                                   Changelog
 
+
+Daniel Stenberg (7 Jan 2009)
+- Rob Crittenden did once again provide an NSS update:
+
+  I have to jump through a few hoops now with the NSS library initialization
+  since another part of an application may have already initialized NSS by the
+  time Curl gets invoked. This patch is more careful to only shutdown the NSS
+  library if Curl did the initialization.
+
+  It also adds in a bit of code to set the default ciphers if the app that
+  call NSS_Init* did not call NSS_SetDomesticPolicy() or set specific
+  ciphers. One might argue that this lets other application developers get
+  lazy and/or they aren't using the NSS API correctly, and you'd be right.
+  But still, this will avoid terribly difficult-to-trace crashes and is
+  generally helpful.
+
 Daniel Stenberg (1 Jan 2009)
 - 'reconf' is removed since we rather have users use 'buildconf'
 

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -229,6 +229,24 @@ static SECStatus set_ciphers(struct SessionHandle *data, PRFileDesc * model,
   }
 
   return SECSuccess;
+}
+
+/*
+ * Get the number of ciphers that are enabled. We use this to determine
+ * if we need to call NSS_SetDomesticPolicy() to enable the default ciphers.
+ */
+static int num_enabled_ciphers()
+{
+  PRInt32 policy = 0;
+  int count = 0;
+  int i;
+
+  for(i=0; i<NUM_OF_CIPHERS; i++) {
+    SSL_CipherPolicyGet(cipherlist[i].num, &policy);
+    if(policy)
+      count++;
+  }
+  return count;
 }
 
 /*
@@ -944,8 +962,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 
   /* FIXME. NSS doesn't support multiple databases open at the same time. */
   PR_Lock(nss_initlock);
-  if(!initialized && !NSS_IsInitialized()) {
-    initialized = 1;
+  if(!initialized) {
 
     certDir = getenv("SSL_DIR"); /* Look in $SSL_DIR */
 
@@ -958,27 +975,33 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
         }
     }
 
-    if(!certDir) {
-      rv = NSS_NoDB_Init(NULL);
-    }
-    else {
-      rv = NSS_Initialize(certDir, NULL, NULL, "secmod.db",
-                          NSS_INIT_READONLY);
-    }
-    if(rv != SECSuccess) {
-      infof(conn->data, "Unable to initialize NSS database\n");
-      curlerr = CURLE_SSL_CACERT_BADFILE;
-      initialized = 0;
-      PR_Unlock(nss_initlock);
-      goto error;
+    if (!NSS_IsInitialized()) {
+      initialized = 1;
+      if(!certDir) {
+        rv = NSS_NoDB_Init(NULL);
+      }
+      else {
+        rv = NSS_Initialize(certDir, NULL, NULL, "secmod.db",
+                            NSS_INIT_READONLY);
+      }
+      if(rv != SECSuccess) {
+        infof(conn->data, "Unable to initialize NSS database\n");
+        curlerr = CURLE_SSL_CACERT_BADFILE;
+        initialized = 0;
+        PR_Unlock(nss_initlock);
+        goto error;
+      }
     }
 
-    NSS_SetDomesticPolicy();
+    if(num_enabled_ciphers() == 0)
+      NSS_SetDomesticPolicy();
 
 #ifdef HAVE_PK11_CREATEGENERICOBJECT
     configstring = aprintf("library=%s name=PEM", pem_library);
-    if(!configstring)
+    if(!configstring) {
+      PR_Unlock(nss_initlock);
       goto error;
+    }
     mod = SECMOD_LoadUserModule(configstring, NULL, PR_FALSE);
     free(configstring);
 
