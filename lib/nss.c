@@ -235,11 +235,11 @@ static SECStatus set_ciphers(struct SessionHandle *data, PRFileDesc * model,
  * Get the number of ciphers that are enabled. We use this to determine
  * if we need to call NSS_SetDomesticPolicy() to enable the default ciphers.
  */
-static int num_enabled_ciphers()
+static int num_enabled_ciphers(void)
 {
   PRInt32 policy = 0;
   int count = 0;
-  int i;
+  unsigned int i;
 
   for(i=0; i<NUM_OF_CIPHERS; i++) {
     SSL_CipherPolicyGet(cipherlist[i].num, &policy);
