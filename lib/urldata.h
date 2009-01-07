@@ -150,9 +150,11 @@
 
 #define CURLEASY_MAGIC_NUMBER 0xc0dedbadU
 
-/* Just a convenience macro to get the larger value out of two given.
+/* Some convenience macros to get the larger/smaller value out of two given.
    We prefix with CURL to prevent name collisions. */
 #define CURLMAX(x,y) ((x)>(y)?(x):(y))
+#define CURLMIN(x,y) ((x)<(y)?(x):(y))
+
 
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
 /* Types needed for krb4/5-ftp connections */

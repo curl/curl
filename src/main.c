@@ -184,14 +184,6 @@ char **__crt0_glob_function (char *arg)
 #define CURL_PROGRESS_STATS 0 /* default progress display */
 #define CURL_PROGRESS_BAR   1
 
-/**
- * @def MIN
- * standard MIN macro
- */
-#ifndef MIN
-#define MIN(X,Y)        (((X) < (Y)) ? (X) : (Y))
-#endif
-
 typedef enum {
   HTTPREQ_UNSPEC,
   HTTPREQ_GET,
