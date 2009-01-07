@@ -10,7 +10,7 @@ Resume
 
 # Server-side
 <reply>
-<data nocheck="1">
+<data nocheck="yes">
 expected to be a file without the first part
 but we emulate that
 </data>

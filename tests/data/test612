@@ -9,7 +9,7 @@ post-quote
 #
 # Server-side
 <reply>
-<data nocheck="1">
+<data nocheck="yes">
 Dummy test file for remove test
 </data>
 </reply>

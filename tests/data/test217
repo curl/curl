@@ -15,7 +15,7 @@ followlocation
 <reply>
 
 # this is returned first since we get no proxy-auth
-<data nocheck="1">
+<data nocheck="yes">
 HTTP/1.1 405 Method Not Allowed swsclose
 
 And you should ignore this data.

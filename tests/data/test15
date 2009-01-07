@@ -8,7 +8,7 @@ HTTP GET
 </info>
 # Server-side
 <reply>
-<data nocheck="true">
+<data nocheck="yes">
 HTTP/1.4 200 OK
 Fake: yes
 Fake: yes

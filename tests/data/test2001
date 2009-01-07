@@ -13,7 +13,7 @@ multiprotocol
 #
 # Server-side
 <reply>
-<data1 nocheck="1">
+<data1 nocheck="yes">
 HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -27,7 +27,7 @@ Funny-head: yesyes
 
 -foo-
 </data1>
-<data2 nocheck="1">
+<data2 nocheck="yes">
 data
     to
       see

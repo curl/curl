@@ -11,7 +11,7 @@ followlocation
 
 # Server-side
 <reply>
-<data nocheck="1">
+<data nocheck="yes">
 HTTP/1.1 301 This is a weirdo text message swsclose
 Location: data/10800002.txt?coolsite=yes
 Content-Length: 62

@@ -13,7 +13,7 @@ multiprotocol
 #
 # Server-side
 <reply>
-<data nocheck="1">
+<data nocheck="yes">
 Test data file
 for tftp test
 </data>

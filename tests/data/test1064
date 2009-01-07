@@ -7,7 +7,7 @@ HTTP PUT
 </info>
 
 <reply>
-<data nocheck="1">
+<data nocheck="yes">
 HTTP/1.1 200 A OK
 Server: curl test
 Content-Type: text/html; charset=iso-8859-1
@@ -15,7 +15,7 @@ Content-Length: 3
 
 ok
 </data>
-<data2 nocheck="1">
+<data2 nocheck="yes">
 HTTP/1.1 200 A OK
 Server: curl test
 Content-Type: text/html; charset=iso-8859-1

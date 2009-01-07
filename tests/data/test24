@@ -7,7 +7,7 @@ HTTP GET
 </info>
 # Server-side
 <reply>
-<data nocheck="1">
+<data nocheck="yes">
 HTTP/1.0 404 BAD BOY
 Content-Type: text/html
 

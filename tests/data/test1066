@@ -8,7 +8,7 @@ HTTP GET
 
 # Server-side
 <reply>
-<data nocheck="1">
+<data nocheck="yes">
 HTTP/1.1 200 OK
 Server: thebest/1.0
 Content-Type: text/plain
@@ -16,7 +16,7 @@ Content-Length: 6
 
 first
 </data>
-<data1 nocheck="1">
+<data1 nocheck="yes">
 HTTP/1.1 200 OK
 Server: thebest/1.0
 Content-Type: text/plain

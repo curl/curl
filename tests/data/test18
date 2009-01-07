@@ -8,7 +8,7 @@ HTTP GET
 </info>
 # Server-side
 <reply>
-<data nocheck="1">
+<data nocheck="yes">
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 4

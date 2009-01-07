@@ -11,7 +11,7 @@ followlocation
 
 # Server-side
 <reply>
-<data nocheck="1">
+<data nocheck="yes">
 HTTP/1.1 301 This is a weirdo text message swsclose
 Location: data/10810099.txt?coolsite=yes
 Content-Length: 62
@@ -19,7 +19,7 @@ Connection: close
 
 This server reply is for testing a simple Location: following
 </data>
-<data2 nocheck="1">
+<data2 nocheck="yes">
 HTTP/1.1 200 Followed here fine swsclose
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
