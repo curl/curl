@@ -3,7 +3,19 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
-58.  It seems sensible to be able to use CURLOPT_NOBODY and
+61. If an upload using Expect: 100-continue receives an HTTP 417 response,
+  it ought to be automatically resent without the Expect:.  A workaround is
+  for the client application to redo the transfer after disabling Expect:.
+  http://curl.haxx.se/mail/archive-2008-02/0043.html
+
+60. libcurl closes the connection if an HTTP 401 reply is received while it
+  is waiting for the the 100-continue response.
+  http://curl.haxx.se/mail/lib-2008-08/0462.html
+
+59. If the CURLOPT_PORT option is used on an FTP URL like
+  "ftp://example.com/file;type=A" the ";type=A" is stripped off.
+
+58. It seems sensible to be able to use CURLOPT_NOBODY and
   CURLOPT_FAILONERROR with FTP to detect if a file exists or not, but it is
   not working: http://curl.haxx.se/mail/lib-2008-07/0295.html
 
