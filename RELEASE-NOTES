@@ -41,6 +41,7 @@ This release includes the following bugfixes:
  o fixed breakage with --with-ssl --disable-verbose
  o TTL "leak" in the DNS cache
  o improved NSS initing
+ o curl_easy_reset now resets more options
 
 This release includes the following known bugs:
 

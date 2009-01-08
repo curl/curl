@@ -30,6 +30,7 @@
  */
 
 CURLcode Curl_open(struct SessionHandle **curl);
+CURLcode Curl_init_userdefined(struct UserDefined *set);
 CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
                      va_list arg);
 CURLcode Curl_dupset(struct SessionHandle * dst, struct SessionHandle * src);

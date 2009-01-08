@@ -7,6 +7,12 @@
                                   Changelog
 
 
+Daniel Fandrich (7 Jan 2009)
+- Unified much of the SessionHandle initialization done in Curl_open() and
+  curl_easy_reset() by creating Curl_init_userdefined(). This had the side effect
+  of fixing curl_easy_reset() so it now also resets CURLOPT_FTP_FILEMETHOD and
+  CURLOPT_SSL_SESSIONID_CACHE
+
 Daniel Stenberg (7 Jan 2009)
 - Rob Crittenden did once again provide an NSS update:
 
