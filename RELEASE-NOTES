@@ -42,6 +42,7 @@ This release includes the following bugfixes:
  o TTL "leak" in the DNS cache
  o improved NSS initing
  o curl_easy_reset now resets more options
+ o rare Location: follow bug with the multi interface
 
 This release includes the following known bugs:
 
@@ -53,6 +54,7 @@ advice from friends like these:
  Yang Tse, Daniel Fandrich, Jim Meyering, Christian Krause, Andreas Wurf,
  Markus Koetter, Josef Wolf, Vlad Grachov, Pawel Kierski, Igor Novoseltsev,
  Fred Machado, Ken Hirsch, Keshav Krity, Patrick Monnerat, Mark Karpeles,
- Anthony Bryan, Peter Korsgaard, Phil Lisiecki, Bas Mevissen, Rob Crittenden
+ Anthony Bryan, Peter Korsgaard, Phil Lisiecki, Bas Mevissen, Rob Crittenden,
+ Emil Romanus
 
         Thanks! (and sorry if I forgot to mention someone)

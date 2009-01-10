@@ -7,11 +7,27 @@
                                   Changelog
 
 
+Daniel Stenberg (10 Jan 2009)
+- Emil Romanus fixed:
+
+  When using the multi interface over HTTP and the server returns a Location
+  header, the running easy handle will get stuck in the CURLM_STATE_PERFORM
+  state, leaving the external event loop stuck waiting for data from the
+  ingoing socket (when using the curl_multi_socket_action stuff). While this
+  bug was pretty hard to find, it seems to require only a one-line fix. The
+  break statement on line 1374 in multi.c caused the function to skip the call
+  to multistate().
+
+  How to reproduce this bug? Well, that's another question.  evhiperfifo.c in
+  the examples directory chokes on this bug only _sometimes_, probably
+  depending on how fast the URLs are added. One way of testing the bug out is
+  writing to hiper.fifo from more than one source at the same time.
+
 Daniel Fandrich (7 Jan 2009)
 - Unified much of the SessionHandle initialization done in Curl_open() and
-  curl_easy_reset() by creating Curl_init_userdefined(). This had the side effect
-  of fixing curl_easy_reset() so it now also resets CURLOPT_FTP_FILEMETHOD and
-  CURLOPT_SSL_SESSIONID_CACHE
+  curl_easy_reset() by creating Curl_init_userdefined(). This had the side
+  effect of fixing curl_easy_reset() so it now also resets
+  CURLOPT_FTP_FILEMETHOD and CURLOPT_SSL_SESSIONID_CACHE
 
 Daniel Stenberg (7 Jan 2009)
 - Rob Crittenden did once again provide an NSS update:
