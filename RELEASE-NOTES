@@ -10,6 +10,7 @@ Curl and libcurl 7.19.3
 This release includes the following changes:
 
  o CURLAUTH_DIGEST_IE bit added for CURLOPT_HTTPAUTH and CURLOPT_PROXYAUTH
+ o VC9 Makefiles were added to the release package
 
 This release includes the following bugfixes:
 

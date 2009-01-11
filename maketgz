@@ -1,6 +1,28 @@
 #! /bin/sh
 # Script to build release-archives with
 #
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at http://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+# $Id$
+###########################################################################
 
 version=$1
 
@@ -40,8 +62,11 @@ sed 's/#define CURL_VERSION .*/#define CURL_VERSION "'$curlversion'"/g' $CHEADER
 
 echo "generate VC8 makefiles"
 # Generate VC8 versions from the VC6 Makefile versions 
-perl -pe 's%/GX /DWIN32 /YX%/EHsc /DWIN32%;' -e 's%/GZ%/RTC1%;' -e 's%wsock32.lib%wsock32.lib bufferoverflowu.lib%g;' -e 's%(VC)6%${1}8%gi;' lib/Makefile.vc6 > lib/Makefile.vc8.dist
-perl -pe "s%/GX /DWIN32 /YX%/EHsc /DWIN32%;" -e 's%/GZ%/RTC1%;' -e 's%wsock32.lib%wsock32.lib bufferoverflowu.lib%g;' -e 's%(VC)6%${1}8%gi;' -e 's/^#MANIFESTTOOL/MANIFESTTOOL/' src/Makefile.vc6 > src/Makefile.vc8.dist
+make -f Makefile.dist vc8
+
+echo "generate VC9 makefiles"
+# Generate VC9 versions from the VC6 Makefile versions 
+make -f Makefile.dist vc9
 
 # Replace version number in plist file:
 PLIST=lib/libcurl.plist

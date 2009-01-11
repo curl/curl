@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel Stenberg (11 Jan 2009)
+- Karl M brought the patch that creates vc9 Makefiles, and I made 'maketgz'
+  now use the actual makefile targets to do the VC8 and VC9 makefiles.
+
 Daniel Stenberg (10 Jan 2009)
 - Emil Romanus fixed:
 
