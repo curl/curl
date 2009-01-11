@@ -35,8 +35,8 @@ This release includes the following bugfixes:
  o improved connection re-use for subsequent SCP and SFTP transfers
  o multi interface does less busy-loops for SCP and SFTP transfers with libssh2
    1.0 or later
- o curl_multi_timeout() no longer returns timeout 0 when there's nothing to do
-   yet
+ o curl_multi_timeout() no longer returns timeout 0 when there's still more
+   than 0 but less than 999 microseconds left
  o the multi_socket API and HTTP pipelining now work a lot better when combined
  o SFTP seek/resume beyond 32bit file sizes
  o fixed breakage with --with-ssl --disable-verbose
