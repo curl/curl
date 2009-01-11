@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -1178,32 +1178,19 @@ if test X"$OPT_SSL" != Xno; then
 
   if test "$PKGTEST" = "yes"; then
 
-    dnl Detect the pkg-config tool, as it may have extra info about the
-    dnl openssl installation we can use. I *believe* this is what we are
-    dnl expected to do on really recent Redhat Linux hosts.
+    CURL_CHECK_PKGCONFIG(openssl)
 
-    AC_PATH_PROG( PKGCONFIG, pkg-config, no, $PATH:/usr/bin:/usr/local/bin)
     if test "$PKGCONFIG" != "no" ; then
-      AC_MSG_CHECKING([OpenSSL options with pkg-config])
+      SSL_LIBS=`$PKGCONFIG --libs-only-l openssl 2>/dev/null`
+      SSL_LDFLAGS=`$PKGCONFIG --libs-only-L openssl 2>/dev/null`
+      SSL_CPPFLAGS=`$PKGCONFIG --cflags-only-I openssl 2>/dev/null`
 
-      $PKGCONFIG --exists openssl
-      SSL_EXISTS=$?
+      LIB_OPENSSL=`echo $SSL_LDFLAGS | sed -e 's/-L//g'`
 
-      if test "$SSL_EXISTS" -eq "0"; then
-        SSL_LIBS=`$PKGCONFIG --libs-only-l openssl 2>/dev/null`
-        SSL_LDFLAGS=`$PKGCONFIG --libs-only-L openssl 2>/dev/null`
-        SSL_CPPFLAGS=`$PKGCONFIG --cflags-only-I openssl 2>/dev/null`
-
-        LIB_OPENSSL=`echo $SSL_LDFLAGS | sed -e 's/-L//g'`
-
-        dnl use the values pkg-config reported
-        LIBS="$LIBS $SSL_LIBS"
-        CPPFLAGS="$CPPFLAGS $SSL_CPPFLAGS"
-        LDFLAGS="$LDFLAGS $SSL_LDFLAGS"
-        AC_MSG_RESULT([found])
-      else
-        AC_MSG_RESULT([no])
-      fi
+      dnl use the values pkg-config reported
+      LIBS="$LIBS $SSL_LIBS"
+      CPPFLAGS="$CPPFLAGS $SSL_CPPFLAGS"
+      LDFLAGS="$LDFLAGS $SSL_LDFLAGS"
     fi
   fi
 
@@ -1544,7 +1531,7 @@ if test X"$OPENSSL_ENABLED" = X"1"; then
 fi
 
 dnl ----------------------------------------------------
-dnl FIX: only check for GnuTLS if OpenSSL is not enabled
+dnl check for GnuTLS
 dnl ----------------------------------------------------
 
 dnl Default to compiler & linker defaults for GnuTLS files & libraries.
@@ -1558,29 +1545,51 @@ AC_HELP_STRING([--without-gnutls], [disable GnuTLS detection]),
 if test "$OPENSSL_ENABLED" != "1"; then
 
   if test X"$OPT_GNUTLS" != Xno; then
+
+    AC_MSG_NOTICE([OPT_GNUTLS is $OPT_GNUTLS])
+
+    addld=""
     if test "x$OPT_GNUTLS" = "xyes"; then
-     check=`libgnutls-config --version 2>/dev/null`
-     if test -n "$check"; then
-       addlib=`libgnutls-config --libs`
-       addcflags=`libgnutls-config --cflags`
-       version=`libgnutls-config --version`
-       gtlsprefix=`libgnutls-config --prefix`
-     fi
+      check=`libgnutls-config --version 2>/dev/null`
+      if test -n "$check"; then
+        addlib=`libgnutls-config --libs`
+        addcflags=`libgnutls-config --cflags`
+        version=`libgnutls-config --version`
+        gtlslib=`libgnutls-config --prefix`/lib$libsuff
+      fi
     else
       addlib=`$OPT_GNUTLS/bin/libgnutls-config --libs`
       addcflags=`$OPT_GNUTLS/bin/libgnutls-config --cflags`
       version=`$OPT_GNUTLS/bin/libgnutls-config --version 2>/dev/null`
-      gtlsprefix=$OPT_GNUTLS
-      if test -z "$version"; then
-        version="unknown"
-      fi
+      gtlslib=$OPT_GNUTLS/lib$libsuff
     fi
+
+    if test -z "$version"; then
+      CURL_CHECK_PKGCONFIG(gnutls)
+
+      if test "$PKGCONFIG" != "no" ; then
+        addlib=`$PKGCONFIG --libs-only-l gnutls`
+        addld=`$PKGCONFIG --libs-only-L gnutls`
+        addcflags=`$PKGCONFIG --cflags-only-I gnutls`
+        version=`$PKGCONFIG --modversion gnutls`
+        gtlslib=`echo $addld | $SED -e 's/-L//'`
+      fi
+
+    fi
+
+    if test -z "$version"; then
+      dnl lots of efforts, still no go
+      version="unknown"
+    fi
+
     if test -n "$addlib"; then
 
       CLEANLIBS="$LIBS"
       CLEANCPPFLAGS="$CPPFLAGS"
+      CLEADLDFLAGS="$LDFLAGS"
 
       LIBS="$LIBS $addlib"
+      LDFLAGS="$LDFLAGS $addld"
       if test "$addcflags" != "-I/usr/include"; then
          CPPFLAGS="$CPPFLAGS $addcflags"
       fi
@@ -1601,14 +1610,16 @@ if test "$OPENSSL_ENABLED" != "1"; then
       if test "x$USE_GNUTLS" = "xyes"; then
         AC_MSG_NOTICE([detected GnuTLS version $version])
 
-        dnl when shared libs were found in a path that the run-time
-        dnl linker doesn't search through, we need to add it to
-        dnl LD_LIBRARY_PATH to prevent further configure tests to fail
-        dnl due to this
+        if test -n "$gtlslib"; then
+          dnl when shared libs were found in a path that the run-time
+          dnl linker doesn't search through, we need to add it to
+          dnl LD_LIBRARY_PATH to prevent further configure tests to fail
+          dnl due to this
 
-        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$gtlsprefix/lib$libsuff"
-        export LD_LIBRARY_PATH
-        AC_MSG_NOTICE([Added $gtlsprefix/lib$libsuff to LD_LIBRARY_PATH])
+          LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$gtlslib"
+          export LD_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $gtlslib to LD_LIBRARY_PATH])
+        fi
       fi
 
     fi
@@ -1633,13 +1644,15 @@ if test "$OPENSSL_ENABLED" != "1" -a "$GNUTLS_ENABLED" != "1"; then
 
   if test X"$OPT_NSS" != Xno; then
     if test "x$OPT_NSS" = "xyes"; then
-     check=`pkg-config --version 2>/dev/null`
-     if test -n "$check"; then
-       addlib=`pkg-config --libs nss`
-       addcflags=`pkg-config --cflags nss`
-       version=`pkg-config --modversion nss`
-       nssprefix=`pkg-config --variable=prefix nss`
-     fi
+
+      CURL_CHECK_PKGCONFIG(nss)
+
+      if test "$PKGCONFIG" != "no" ; then
+        addlib=`$PKGCONFIG --libs nss`
+        addcflags=`$PKGCONFIG --cflags nss`
+        version=`$PKGCONFIG --modversion nss`
+        nssprefix=`$PKGCONFIG --variable=prefix nss`
+      fi
     else
       # Without pkg-config, we'll kludge in some defaults
       addlib="-lssl3 -lsmime3 -lnss3 -lplds4 -lplc4 -lnspr4 -lpthread -ldl"

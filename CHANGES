@@ -7,6 +7,13 @@
                                   Changelog
 
 
+Daniel Stenberg (12 Jan 2009)
+- Based on bug report #2498665 (http://curl.haxx.se/bug/view.cgi?id=2498665)
+  by Daniel Black, I've now added magic to the configure script that makes it
+  use pkg-config to detect gnutls details as well if the existing method
+  (using libgnutls-config) fails. While doing this, I cleaned up and unified
+  the pkg-config usage when detecting openssl and nss as well.
+
 Daniel Stenberg (11 Jan 2009)
 - Karl Moerder brought the patch that creates vc9 Makefiles, and I made
   'maketgz' now use the actual makefile targets to do the VC8 and VC9

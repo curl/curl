@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -3056,4 +3056,37 @@ AC_DEFUN([CURL_CHECK_WIN32_LARGEFILE], [
       AC_MSG_RESULT([no])
       ;;
   esac
+])
+
+dnl CURL_CHECK_PKGCONFIG ($module)
+dnl ------------------------
+dnl search for the pkg-config tool (if not cross-compiling). Set the PKGCONFIG
+dnl variable to hold the path to it, or 'no' if not found/present.
+dnl
+dnl If pkg-config is present, check that it has info about the $module or return
+dnl "no" anyway!
+dnl
+
+AC_DEFUN([CURL_CHECK_PKGCONFIG], [
+  if test x$cross_compiling != xyes; then
+    dnl only do pkg-config magic when not cross-compiling
+    AC_PATH_PROG( PKGCONFIG, pkg-config, no, $PATH:/usr/bin:/usr/local/bin)
+
+    if test x$PKGCONFIG != xno; then
+      AC_MSG_CHECKING([for $1 options with pkg-config])
+      dnl ask pkg-config about $1
+      $PKGCONFIG --exists $1
+      if test "$?" -ne "0"; then
+        dnl pkg-config does not have info about the given module! set the
+        dnl variable to 'no'
+        PKGCONFIG="no"
+        AC_MSG_RESULT([no])
+      else
+        AC_MSG_RESULT([found])
+      fi
+    fi
+
+  else
+    PKGCONFIG="no"
+  fi
 ])
