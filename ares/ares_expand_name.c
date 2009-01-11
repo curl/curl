@@ -177,3 +177,14 @@ static int name_length(const unsigned char *encoded, const unsigned char *abuf,
    */
   return (n) ? n - 1 : n;
 }
+
+/* Like ares_expand_name but returns EBADRESP in case of invalid input. */
+int ares__expand_name_for_response(const unsigned char *encoded,
+                                   const unsigned char *abuf, int alen,
+                                   char **s, long *enclen)
+{
+  int status = ares_expand_name(encoded, abuf, alen, s, enclen);
+  if (status == ARES_EBADNAME)
+    status = ARES_EBADRESP;
+  return status;
+}

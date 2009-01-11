@@ -1,5 +1,13 @@
   Changelog for the c-ares project
 
+* January 11 2008 (Daniel Stenberg)
+- Phil Blundell added the internal function ares__expand_name_for_response()
+  that is now used by the ares_parse_*_reply() functions instead of the
+  ares_expand_name() simply to easier return ARES_EBADRESP for the cases where
+  the name expansion fails as in responses that really isn't expected.
+
+Version 1.6.0 (Dec 9, 2008)
+
 * December 9 2008 (Gisle Vanem)
 
   Fixes for Win32 targets using the Watt-32 tcp/ip stack.

@@ -83,7 +83,7 @@ int ares_parse_a_reply(const unsigned char *abuf, int alen,
 
   /* Expand the name from the question, and skip past the question. */
   aptr = abuf + HFIXEDSZ;
-  status = ares_expand_name(aptr, abuf, alen, &hostname, &len);
+  status = ares__expand_name_for_response(aptr, abuf, alen, &hostname, &len);
   if (status != ARES_SUCCESS)
     return status;
   if (aptr + len + QFIXEDSZ > abuf + alen)
@@ -95,7 +95,8 @@ int ares_parse_a_reply(const unsigned char *abuf, int alen,
 
   if (host)
     {
-      /* Allocate addresses and aliases; ancount gives an upper bound for both. */
+      /* Allocate addresses and aliases; ancount gives an upper bound for
+         both. */
       addrs = malloc(ancount * sizeof(struct in_addr));
       if (!addrs)
         {
@@ -115,7 +116,7 @@ int ares_parse_a_reply(const unsigned char *abuf, int alen,
       addrs = NULL;
       aliases = NULL;
     }
-  
+
   naddrs = 0;
   naliases = 0;
 
@@ -123,7 +124,7 @@ int ares_parse_a_reply(const unsigned char *abuf, int alen,
   for (i = 0; i < (int)ancount; i++)
     {
       /* Decode the RR up to the data field. */
-      status = ares_expand_name(aptr, abuf, alen, &rr_name, &len);
+      status = ares__expand_name_for_response(aptr, abuf, alen, &rr_name, &len);
       if (status != ARES_SUCCESS)
         break;
       aptr += len;
@@ -176,7 +177,8 @@ int ares_parse_a_reply(const unsigned char *abuf, int alen,
           naliases++;
 
           /* Decode the RR data and replace the hostname with it. */
-          status = ares_expand_name(aptr, abuf, alen, &rr_data, &len);
+          status = ares__expand_name_for_response(aptr, abuf, alen, &rr_data,
+                                                  &len);
           if (status != ARES_SUCCESS)
             break;
           free(hostname);
