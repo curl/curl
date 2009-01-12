@@ -21,6 +21,7 @@ int main(void)
     struct curl_slist *chunk = NULL;
 
     chunk = curl_slist_append(chunk, "Accept: moo");
+    chunk = curl_slist_append(chunk, "Another: yes");
 
     /* request with the built-in Accept: */
     curl_easy_setopt(curl, CURLOPT_URL, "localhost");
