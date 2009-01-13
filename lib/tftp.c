@@ -195,11 +195,12 @@ static CURLcode tftp_set_timeouts(tftp_state_data_t *state)
 {
   time_t maxtime, timeout;
   long timeout_ms;
+  const bool start = (state->state == TFTP_STATE_START);
 
   time(&state->start_time);
 
   /* Compute drop-dead time */
-  timeout_ms = Curl_timeleft(state->conn, NULL, TRUE);
+  timeout_ms = Curl_timeleft(state->conn, NULL, start);
 
   if(timeout_ms < 0) {
     /* time-out, bail out, go home */
@@ -207,7 +208,7 @@ static CURLcode tftp_set_timeouts(tftp_state_data_t *state)
     return CURLE_OPERATION_TIMEDOUT;
   }
 
-  if(state->state == TFTP_STATE_START) {
+  if(start) {
 
     maxtime = (time_t)(timeout_ms + 500) / 1000;
     state->max_time = state->start_time+maxtime;

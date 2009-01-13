@@ -6,6 +6,44 @@
 
                                   Changelog
 
+Daniel Stenberg (14 Jan 2009)
+- Grant Erickson fixed timeouts for TFTP such that specifying a
+  connect-timeout, a max-time or both options work correctly and as expected
+  by passing the correct boolean value to Curl_timeleft via the
+  'duringconnect' parameter.
+
+  With this small change, curl TFTP now behaves as expected (and likely as
+  originally-designed):
+
+  1) For non-existent or unreachable dotted IP addresses:
+
+   a) With no options, follows the default curl 300s timeout...
+   b) With --connect-timeout only, follows that value...
+   c) With --max-time only, follows that value...
+   d) With both --connect-timeout and --max-time, follows the smaller value...
+
+   and times out with a "curl: (7) Couldn't connect to server" error.
+
+  2) For transfers to/from a valid host:
+
+   a) With no options, follows default curl 300s timeout for the
+      first XRQ/DATA/ACK transaction and the default TFTP 3600s
+      timeout for the remainder of the transfer...
+
+   b) With --connect-time only, follows that value for the
+      first XRQ/DATA/ACK transaction and the default TFTP 3600s
+      timeout for the remainder of the transfer...
+
+   c) With --max-time only, follows that value for the first
+      XRQ/DATA/ACK transaction and for the remainder of the
+      transfer...
+
+   d) With both --connect-timeout and --max-time, follows the former
+      for the first XRQ/DATA/ACK transaction and the latter for the
+      remainder of the transfer...
+
+   and times out with a "curl: (28) Timeout was reached" error as
+   appropriate.
 
 Daniel Stenberg (13 Jan 2009)
 - Michael Wallner fixed a NULL pointer deref when calling

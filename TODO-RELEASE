@@ -1,11 +1,7 @@
 To be addressed in 7.19.3 (planned release: January 2009)
 =========================
 
-210 - [PATCH] TFTP: Fix Connect and Transfer Timeout Behavior
-
 211 - Building and using static libcurl on Windows with VS2008
-
-212 - Updated libcurl VS2008 Guide
 
 213 - bug #2501457 "Timeouts not working with curl_multi_socket_action()" -
       most probably subject for addition to docs/KNOWN_BUGS
