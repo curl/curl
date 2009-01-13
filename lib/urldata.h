@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -224,9 +224,9 @@ struct ssl_config_data {
                             1: check that CN exists
                             2: CN must match hostname */
   char *CApath;          /* certificate dir (doesn't work on windows) */
-  char *CAfile;          /* cerficate to verify peer against */
-  const char *CRLfile;   /* CRL to check cerficate revocation */
-  const char *issuercert;/* optional issuer cerficate filename */
+  char *CAfile;          /* certificate to verify peer against */
+  const char *CRLfile;   /* CRL to check certificate revocation */
+  const char *issuercert;/* optional issuer certificate filename */
   char *random_file;     /* path to file containing "random" data */
   char *egdsocket;       /* path to file containing the EGD daemon socket */
   char *cipher_list;     /* list of ciphers to use */
@@ -234,7 +234,7 @@ struct ssl_config_data {
   curl_ssl_ctx_callback fsslctx; /* function to initialize ssl ctx */
   void *fsslctxp;        /* parameter for call back */
   bool sessionid;        /* cache session IDs or not */
-  bool certinfo;         /* gather lots of cert info */
+  bool certinfo;         /* gather lots of certificate info */
 };
 
 /* information stored about one single SSL session */
@@ -415,7 +415,7 @@ struct FTP {
   curl_off_t downloadsize;
 };
 
-/* ftp_conn is used for striuct connection-oriented data in the connectdata
+/* ftp_conn is used for struct connection-oriented data in the connectdata
    struct */
 struct ftp_conn {
   char *entrypath; /* the PWD reply when we logged on */
@@ -530,7 +530,7 @@ struct SSHPROTO {
 struct ssh_conn {
   const char *authlist;       /* List of auth. methods, managed by libssh2 */
 #ifdef USE_LIBSSH2
-  const char *passphrase;     /* passphrase to use */
+  const char *passphrase;     /* pass-phrase to use */
   char *rsa_pub;              /* path name */
   char *rsa;                  /* path name */
   bool authed;                /* the connection has been authenticated fine */
@@ -594,7 +594,7 @@ struct ConnectBits {
   bool do_more; /* this is set TRUE if the ->curl_do_more() function is
                    supposed to be called, after ->curl_do() */
 
-  bool tcpconnect;    /* the TCP layer (or simimlar) is connected, this is set
+  bool tcpconnect;    /* the TCP layer (or similar) is connected, this is set
                          the first time on the first connect function call */
   bool protoconnstart;/* the protocol layer has STARTED its operation after
                          the TCP layer connect */
@@ -756,7 +756,7 @@ struct SingleRequest {
   int content_encoding;         /* What content encoding. sec 3.5, RFC2616. */
 
 #define IDENTITY 0              /* No encoding */
-#define DEFLATE 1               /* zlib delfate [RFC 1950 & 1951] */
+#define DEFLATE 1               /* zlib deflate [RFC 1950 & 1951] */
 #define GZIP 2                  /* gzip algorithm [RFC 1952] */
 #define COMPRESS 3              /* Not handled, added for completeness */
 
@@ -1236,7 +1236,7 @@ struct UrlState {
   struct timeval expiretime; /* set this with Curl_expire() only */
   struct Curl_tree timenode; /* for the splay stuff */
 
-  /* a place to store the most recenlty set FTP entrypath */
+  /* a place to store the most recently set FTP entrypath */
   char *most_recent_ftp_entrypath;
 
   /* set after initial USER failure, to prevent an authentication loop */
@@ -1282,7 +1282,7 @@ struct UrlState {
    *************************************************************************
    * Note that this data will be REMOVED after each request, so anything that
    * should be kept/stored on a per-connection basis and thus live for the
-   * next requst on the same connection MUST be put in the connectdata struct!
+   * next request on the same connection MUST be put in the connectdata struct!
    *************************************************************************/
   union {
     struct HTTP *http;
