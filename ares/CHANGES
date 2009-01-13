@@ -1,6 +1,10 @@
   Changelog for the c-ares project
 
-* January 11 2008 (Daniel Stenberg)
+* January 13 2009 (Phil Blundell)
+- ares__send_query() now varies the retry timeout pseudo-randomly to avoid
+  packet storms when several queries were started at the same time.
+
+* January 11 2009 (Daniel Stenberg)
 - Phil Blundell added the internal function ares__expand_name_for_response()
   that is now used by the ares_parse_*_reply() functions instead of the
   ares_expand_name() simply to easier return ARES_EBADRESP for the cases where

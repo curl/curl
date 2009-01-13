@@ -715,6 +715,7 @@ void ares__send_query(ares_channel channel, struct query *query,
 {
   struct send_request *sendreq;
   struct server_state *server;
+  int timeplus;
 
   server = &channel->servers[query->server];
   if (query->using_tcp)
@@ -778,9 +779,11 @@ void ares__send_query(ares_channel channel, struct query *query,
           return;
         }
     }
+    timeplus = channel->timeout << (query->try / channel->nservers);
+    timeplus = (timeplus * (9 + (rand () & 7))) / 16;
     query->timeout = *now;
     ares__timeadd(&query->timeout,
-                  channel->timeout << (query->try / channel->nservers));
+                  timeplus);
     /* Keep track of queries bucketed by timeout, so we can process
      * timeout events quickly.
      */
