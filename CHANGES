@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel Stenberg (13 Jan 2009)
+- Stefan Teleman brought a patch to fix the default curlbuild.h file for the
+  SunPro compilers.
+
 Daniel Stenberg (12 Jan 2009)
 - Based on bug report #2498665 (http://curl.haxx.se/bug/view.cgi?id=2498665)
   by Daniel Black, I've now added magic to the configure script that makes it

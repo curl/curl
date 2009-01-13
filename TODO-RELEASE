@@ -1,6 +1,20 @@
 To be addressed in 7.19.3 (planned release: January 2009)
 =========================
 
+ * curlbuild.h patch for Sun Compiler
+
+ * [PATCH] TFTP: Fix Connect and Transfer Timeout Behavior
+
+ * Building and using static libcurl on Windows with VS2008
+
+ * Updated libcurl VS2008 Guide
+
+ * [PATCH] Curl_cookie_clearsess segfaults on new handle
+
+ * bug #2501457 "Timeouts not working with curl_multi_socket_action()" -
+   most probably subject for addition to docs/KNOWN_BUGS
+
+
 [nothing]
 
 To be addressed in 7.19.4 (planned release: March 2009)
@@ -10,6 +24,6 @@ To be addressed in 7.19.4 (planned release: March 2009)
 
 206 - A. Craig West's CURLOPT_HTTP_VERSION change for CONNECT
 
-207 - Vitaliy Kulikov's Callback for cert verification
+208 - Patch to allow GSSAPI authentication to a socks5 server
 
-208 -
+209 - 
