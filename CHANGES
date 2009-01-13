@@ -8,6 +8,10 @@
 
 
 Daniel Stenberg (13 Jan 2009)
+- Michael Wallner fixed a NULL pointer deref when calling
+  curl_easy_setup(curl, CURLOPT_COOKIELIST, "SESS") on a CURL handle with no
+  cookies data.
+
 - Stefan Teleman brought a patch to fix the default curlbuild.h file for the
   SunPro compilers.
 

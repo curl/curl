@@ -1,8 +1,6 @@
 To be addressed in 7.19.3 (planned release: January 2009)
 =========================
 
-209 - [PATCH] Curl_cookie_clearsess segfaults on new handle
-
 210 - [PATCH] TFTP: Fix Connect and Transfer Timeout Behavior
 
 211 - Building and using static libcurl on Windows with VS2008
@@ -21,4 +19,9 @@ To be addressed in 7.19.4 (planned release: March 2009)
 
 208 - Patch to allow GSSAPI authentication to a socks5 server
 
-214 - 
+214 - progress bar prefix, second try (for the curl tool)
+
+215 - Patch for Metalink Support (for the curl tool)
+
+216 - 
+
