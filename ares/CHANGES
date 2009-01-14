@@ -1,5 +1,10 @@
   Changelog for the c-ares project
 
+* January 14 2009 (Daniel Stenberg)
+- ares.h no longer uses the HAVE_STRUCT_IN6_ADDR define check, but instead it
+  now declares the private struct ares_in6_addr for all systems instead of
+  relying on one possibly not present in the system.
+
 * January 13 2009 (Phil Blundell)
 - ares__send_query() now varies the retry timeout pseudo-randomly to avoid
   packet storms when several queries were started at the same time.

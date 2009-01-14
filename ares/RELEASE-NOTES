@@ -2,7 +2,8 @@ This is what's new and changed in the c-ares 1.6.1 release:
 
 Changed:
 
- o 
+ o in6_addr is not used in ares.h anymore, but a private ares_in6_addr is instead
+   declared and used
 
 Fixed:
 

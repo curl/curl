@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /* Copyright 1998 by the Massachusetts Institute of Technology.
- * Copyright (C) 2007-2008 by Daniel Stenberg
+ * Copyright (C) 2007-2009 by Daniel Stenberg
  *
  * Permission to use, copy, modify, and distribute this
  * software and its documentation for any purpose and without
@@ -275,21 +275,29 @@ int ares_expand_name(const unsigned char *encoded, const unsigned char *abuf,
 int ares_expand_string(const unsigned char *encoded, const unsigned char *abuf,
                      int alen, unsigned char **s, long *enclen);
 
-#if !defined(HAVE_STRUCT_IN6_ADDR) && !defined(s6_addr)
-struct in6_addr {
+/*
+ * NOTE: before c-ares 1.6.1 we would most often use the system in6_addr
+ * struct below when ares itself was built, but many apps would use this
+ * private version since the header checked a HAVE_* define for it. Starting
+ * with 1.6.1 we always declare and use our own to stop relying on the
+ * system's one.
+ */
+struct ares_in6_addr {
   union {
     unsigned char _S6_u8[16];
   } _S6_un;
 };
-#define s6_addr _S6_un._S6_u8
-#endif
 
+/*
+ * TODO: the structs 'addrttl' and 'addr6ttl' really should get their names
+ * prefixed with ares_ to keep them in our own "name space".
+ */
 struct addrttl {
   struct in_addr ipaddr;
   int            ttl;
 };
 struct addr6ttl {
-  struct in6_addr ip6addr;
+  struct ares_in6_addr ip6addr;
   int             ttl;
 };
 
@@ -304,12 +312,12 @@ int ares_parse_a_reply(const unsigned char *abuf, int alen,
                        struct hostent **host,
                        struct addrttl *addrttls, int *naddrttls);
 int ares_parse_aaaa_reply(const unsigned char *abuf, int alen,
-                       struct hostent **host,
-                       struct addr6ttl *addrttls, int *naddrttls);
+                          struct hostent **host,
+                          struct addr6ttl *addrttls, int *naddrttls);
 int ares_parse_ptr_reply(const unsigned char *abuf, int alen, const void *addr,
                          int addrlen, int family, struct hostent **host);
 int ares_parse_ns_reply(const unsigned char *abuf, int alen,
-                       struct hostent **host);
+                        struct hostent **host);
 void ares_free_string(void *str);
 void ares_free_hostent(struct hostent *host);
 const char *ares_strerror(int code);
