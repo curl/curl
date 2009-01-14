@@ -1,4 +1,4 @@
-Updated: Sep 24, 2008 (http://curl.haxx.se/docs/faq.html)
+Updated: Jan 14, 2009 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -119,10 +119,10 @@ FAQ
   libcurl
 
     A free and easy-to-use client-side URL transfer library, supporting FTP,
-    FTPS, HTTP, HTTPS, SCP, SFTP, TFTP, TELNET, DICT, FILE and LDAP.  libcurl
-    supports HTTPS certificates, HTTP POST, HTTP PUT, FTP uploading, kerberos,
-    HTTP form based upload, proxies, cookies, user+password authentication,
-    file transfer resume, http proxy tunneling and more!
+    FTPS, HTTP, HTTPS, SCP, SFTP, TFTP, TELNET, DICT, FILE, LDAP and LDAPS.
+    libcurl supports HTTPS certificates, HTTP POST, HTTP PUT, FTP uploading,
+    kerberos, HTTP form based upload, proxies, cookies, user+password
+    authentication, file transfer resume, http proxy tunneling and more!
 
     libcurl is highly portable, it builds and works identically on numerous
     platforms, including Solaris, NetBSD, FreeBSD, OpenBSD, Darwin, HPUX,
@@ -137,8 +137,8 @@ FAQ
     A command line tool for getting or sending files using URL syntax.
 
     Since curl uses libcurl, it supports a range of common Internet protocols,
-    currently including HTTP, HTTPS, FTP, FTPS, SCP, SFTP, TFTP, LDAP, DICT,
-    TELNET and FILE.
+    currently including HTTP, HTTPS, FTP, FTPS, SCP, SFTP, TFTP, LDAP, LDAPS,
+    DICT, TELNET and FILE.
 
   We pronounce curl and cURL with an initial k sound: [kurl].
 
@@ -227,11 +227,11 @@ FAQ
   Project cURL is entirely free and open. No person gets paid for developing
   (lib)curl. We do this voluntarily on our spare time.
 
-  We get some help from companies. Contactor Data hosts the curl web site,
-  Haxx owns the curl web site's domain and sourceforge.net hosts project
-  services we take advantage from, like the bug tracker. Also, some companies
-  have sponsored certain parts of the development in the past and I hope some
-  will continue to do so in the future.
+  We get some help from companies. CAG Contactor hosts the curl web site, Haxx
+  owns the curl web site's domain and sourceforge.net hosts project services
+  we take advantage from, like the bug tracker. Also, some companies have
+  sponsored certain parts of the development in the past and I hope some will
+  continue to do so in the future.
 
   If you want to support our project, consider a donation or a banner-program
   or even better: by helping us coding, documenting, testing etc.
@@ -299,7 +299,7 @@ FAQ
   as used by numerous applications that include libcurl binaries in their
   distribution packages (like Adobe Acrobat Reader and Google Earth).
 
-  More than 80 known named companies use curl in commercial environments and
+  More than 90 known named companies use curl in commercial environments and
   products. More than 100 known named open source projects depend on
   (lib)curl.
 
