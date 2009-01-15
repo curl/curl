@@ -673,8 +673,9 @@ Minix
    Configure and compile with:
 
      ./configure CONFIG_SHELL=/bin/bigsh CC=cc LD=cc AR=/usr/bin/aal \
-                 GREP=grep CPPFLAGS=-D_POSIX_SOURCE=1
+                 GREP=grep CPPFLAGS='-D_POSIX_SOURCE=1 -I/usr/local/include'
      make
+     chmem =256000 src/curl
 
    GCC
    ---
@@ -686,6 +687,7 @@ Minix
 
      ./configure CONFIG_SHELL=/bin/bigsh CC=gcc AR=/usr/gnu/bin/gar GREP=grep
      make
+     chmem =256000 src/curl
 
 
 Symbian OS
