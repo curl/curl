@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel Stenberg (15 Jan 2009)
+- Tim Ansell fixed a compiler warning in lib/cookie.c
+
 Daniel Stenberg (14 Jan 2009)
 - Grant Erickson fixed timeouts for TFTP such that specifying a
   connect-timeout, a max-time or both options work correctly and as expected

@@ -439,7 +439,7 @@ Curl_cookie_add(struct SessionHandle *data,
        reading the odd netscape cookies-file format here */
     char *ptr;
     char *firstptr;
-    char *tok_buf;
+    char *tok_buf=NULL;
     int fields;
 
     /* IE introduced HTTP-only cookies to prevent XSS attacks. Cookies
@@ -453,7 +453,6 @@ Curl_cookie_add(struct SessionHandle *data,
       lineptr += 10;
       co->httponly = TRUE;
     }
-
 
     if(lineptr[0]=='#') {
       /* don't even try the comments */
