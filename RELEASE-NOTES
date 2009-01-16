@@ -48,6 +48,7 @@ This release includes the following bugfixes:
  o curlbuild.h was adjusted for SunPro compilers
  o CURLOPT_COOKIELIST set to "SESS" on an easy handle with no cookies data
  o fixed timeouts for TFTP
+ o fixed PPC builds
 
 This release includes the following known bugs:
 
@@ -61,6 +62,6 @@ advice from friends like these:
  Fred Machado, Ken Hirsch, Keshav Krity, Patrick Monnerat, Mark Karpeles,
  Anthony Bryan, Peter Korsgaard, Phil Lisiecki, Bas Mevissen, Rob Crittenden,
  Emil Romanus, Karl Moerder, Daniel Black, Stefan Teleman, Michael Wallner,
- Grant Erickson, Tim Ansell
+ Grant Erickson, Tim Ansell, Andrew de los Reyes
 
         Thanks! (and sorry if I forgot to mention someone)
