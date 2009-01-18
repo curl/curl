@@ -74,13 +74,13 @@ static void end_hquery(struct host_query *hquery, int status,
 static int fake_hostent(const char *name, int family, ares_host_callback callback,
                         void *arg);
 static int file_lookup(const char *name, int family, struct hostent **host);
-static void sort_addresses(struct hostent *host, struct apattern *sortlist,
+static void sort_addresses(struct hostent *host, const struct apattern *sortlist,
                            int nsort);
-static void sort6_addresses(struct hostent *host, struct apattern *sortlist,
+static void sort6_addresses(struct hostent *host, const struct apattern *sortlist,
                            int nsort);
-static int get_address_index(struct in_addr *addr, struct apattern *sortlist,
+static int get_address_index(const struct in_addr *addr, const struct apattern *sortlist,
                              int nsort);
-static int get6_address_index(struct in6_addr *addr, struct apattern *sortlist,
+static int get6_address_index(const struct in6_addr *addr, const struct apattern *sortlist,
                              int nsort);
 
 void ares_gethostbyname(ares_channel channel, const char *name, int family,
@@ -391,7 +391,7 @@ static int file_lookup(const char *name, int family, struct hostent **host)
   return status;
 }
 
-static void sort_addresses(struct hostent *host, struct apattern *sortlist,
+static void sort_addresses(struct hostent *host, const struct apattern *sortlist,
                            int nsort)
 {
   struct in_addr a1, a2;
@@ -421,7 +421,8 @@ static void sort_addresses(struct hostent *host, struct apattern *sortlist,
 /* Find the first entry in sortlist which matches addr.  Return nsort
  * if none of them match.
  */
-static int get_address_index(struct in_addr *addr, struct apattern *sortlist,
+static int get_address_index(const struct in_addr *addr,
+                             const struct apattern *sortlist,
                              int nsort)
 {
   int i;
@@ -446,7 +447,7 @@ static int get_address_index(struct in_addr *addr, struct apattern *sortlist,
   return i;
 }
 
-static void sort6_addresses(struct hostent *host, struct apattern *sortlist,
+static void sort6_addresses(struct hostent *host, const struct apattern *sortlist,
                            int nsort)
 {
   struct in6_addr a1, a2;
@@ -476,8 +477,9 @@ static void sort6_addresses(struct hostent *host, struct apattern *sortlist,
 /* Find the first entry in sortlist which matches addr.  Return nsort
  * if none of them match.
  */
-static int get6_address_index(struct in6_addr *addr, struct apattern *sortlist,
-                             int nsort)
+static int get6_address_index(const struct in6_addr *addr,
+                              const struct apattern *sortlist,
+                              int nsort)
 {
   int i;
 

@@ -66,7 +66,7 @@ static void addr_callback(void *arg, int status, int timeouts,
 static void end_aquery(struct addr_query *aquery, int status,
                        struct hostent *host);
 static int file_lookup(struct ares_addr *addr, struct hostent **host);
-static void ptr_rr_name(char *name, struct ares_addr *addr);
+static void ptr_rr_name(char *name, const struct ares_addr *addr);
 
 void ares_gethostbyaddr(ares_channel channel, const void *addr, int addrlen,
                         int family, ares_host_callback callback, void *arg)
@@ -252,7 +252,7 @@ static int file_lookup(struct ares_addr *addr, struct hostent **host)
   return status;
 }
 
-static void ptr_rr_name(char *name, struct ares_addr *addr)
+static void ptr_rr_name(char *name, const struct ares_addr *addr)
 {
   if (addr->family == AF_INET)
     {
@@ -267,7 +267,7 @@ static void ptr_rr_name(char *name, struct ares_addr *addr)
     {
        unsigned char *bytes = (unsigned char *)&addr->addrV6.s6_addr;
        /* There are too many arguments to do this in one line using
-	* minimally C89-compliant compilers */
+        * minimally C89-compliant compilers */
        sprintf(name,
                 "%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.",
                 bytes[15]&0xf, bytes[15] >> 4, bytes[14]&0xf, bytes[14] >> 4,
