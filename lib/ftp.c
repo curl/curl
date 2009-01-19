@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -814,7 +814,7 @@ static int ftp_getsock(struct connectdata *conn,
 
 /* This is called after the FTP_QUOTE state is passed.
 
-   ftp_state_cwd() sends the range of PWD commands to the server to change to
+   ftp_state_cwd() sends the range of CWD commands to the server to change to
    the correct directory. It may also need to send MKD commands to create
    missing ones, if that option is enabled.
 */
