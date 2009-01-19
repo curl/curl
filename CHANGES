@@ -6,6 +6,8 @@
 
                                   Changelog
 
+Version 7.19.3 (19 January 2009)
+
 Daniel Stenberg (16 Jan 2009)
 - Andrew de los Reyes fixed curlbuild.h for "generic" gcc builds on PPC, both
   32 bit and 64 bit.
