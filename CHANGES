@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Stenberg (20 Jan 2009)
+- Lisa Xu pointed out that the ssh.obj file was missing from the lib/Makefile.vc6
+  file (and thus from the vc8 and vc9 ones too). 
+
 Version 7.19.3 (19 January 2009)
 
 Daniel Stenberg (16 Jan 2009)
