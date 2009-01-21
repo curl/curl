@@ -5,6 +5,7 @@ FTP
 HTTP
 HTTP GET
 HTTP proxy
+type=
 </keywords>
 </info>
 #
@@ -31,7 +32,7 @@ http
 ftp
 </features>
  <name>
-FTP over HTTP proxy
+FTP with type=i over HTTP proxy
  </name>
  <command>
 "ftp://%HOSTIP:%HTTPPORT/we/want/that/page/1092;type=i" --use-ascii -x %HOSTIP:%HTTPPORT
