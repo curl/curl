@@ -35,6 +35,8 @@
 int Curl_raw_equal(const char *first, const char *second);
 int Curl_raw_nequal(const char *first, const char *second, size_t max);
 
+char Curl_raw_toupper(char in);
+
 /* checkprefix() is a shorter version of the above, used when the first
    argument is zero-byte terminated */
 #define checkprefix(a,b)    Curl_raw_nequal(a,b,strlen(a))

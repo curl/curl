@@ -6,6 +6,19 @@
 
                                   Changelog
 
+Daniel Fandrich (20 Jan 2009)
+- Call setlocale() for libtest tests to test the effects of locale-induced
+  libc changes on libcurl.
+
+- Fixed a couple more locale-dependent toupper conversions, mainly for
+  clarity.  This does fix one problem that causes ;type=i FTP URLs
+  to fail in the Turkish locale when CURLOPT_PROXY_TRANSFER_MODE is
+  used (test case 561)
+
+- Added tests 561 and 1091 through 1094 to test various combinations
+  of ;type= and ;mode= URLs that could potentially fail in the Turkish
+  locale.
+
 Daniel Stenberg (20 Jan 2009)
 - Lisa Xu pointed out that the ssh.obj file was missing from the lib/Makefile.vc6
   file (and thus from the vc8 and vc9 ones too). 

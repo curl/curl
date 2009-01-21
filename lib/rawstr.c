@@ -25,9 +25,9 @@
 
 #include "rawstr.h"
 
-/* Portable toupper (remember EBCDIC). Do not use tupper() because
+/* Portable, consistent toupper (remember EBCDIC). Do not use toupper() because
    its behavior is altered by the current locale. */
-static unsigned char my_toupper(unsigned char in)
+char Curl_raw_toupper(char in)
 {
   switch (in) {
   case 'a':
@@ -98,7 +98,7 @@ static unsigned char my_toupper(unsigned char in)
 int Curl_raw_equal(const char *first, const char *second)
 {
   while(*first && *second) {
-    if(my_toupper(*first) != my_toupper(*second))
+    if(Curl_raw_toupper(*first) != Curl_raw_toupper(*second))
       /* get out of the loop as soon as they don't match */
       break;
     first++;
@@ -107,13 +107,13 @@ int Curl_raw_equal(const char *first, const char *second)
   /* we do the comparison here (possibly again), just to make sure that if the
      loop above is skipped because one of the strings reached zero, we must not
      return this as a successful match */
-  return (my_toupper(*first) == my_toupper(*second));
+  return (Curl_raw_toupper(*first) == Curl_raw_toupper(*second));
 }
 
 int Curl_raw_nequal(const char *first, const char *second, size_t max)
 {
   while(*first && *second && max) {
-    if(my_toupper(*first) != my_toupper(*second)) {
+    if(Curl_raw_toupper(*first) != Curl_raw_toupper(*second)) {
       break;
     }
     max--;
@@ -123,6 +123,6 @@ int Curl_raw_nequal(const char *first, const char *second, size_t max)
   if(0 == max)
     return 1; /* they are equal this far */
 
-  return my_toupper(*first) == my_toupper(*second);
+  return Curl_raw_toupper(*first) == Curl_raw_toupper(*second);
 }
 

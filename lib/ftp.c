@@ -89,6 +89,7 @@
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "multiif.h"
 #include "url.h"
+#include "rawstr.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -4141,7 +4142,7 @@ static CURLcode ftp_setup_connection(struct connectdata * conn)
 
   if(type) {
     *type = 0;                     /* it was in the middle of the hostname */
-    command = (char) toupper((int) type[6]);
+    command = Curl_raw_toupper(type[6]);
 
     switch (command) {
     case 'A': /* ASCII mode */

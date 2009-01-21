@@ -994,7 +994,7 @@ static int hostmatch(const char *hostname, const char *pattern)
       break;
     }
 
-    if(toupper(c) != toupper(*hostname++))
+    if(Curl_raw_toupper(c) != Curl_raw_toupper(*hostname++))
       break;
   }
   return HOST_NOMATCH;

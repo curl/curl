@@ -14,6 +14,7 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o missing ssh.obj in VS makefiles
+ o FTP ;type=i URLs now work with CURLOPT_PROXY_TRANSFER_MODE in Turkish locale
 
 This release includes the following known bugs:
 

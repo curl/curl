@@ -323,7 +323,7 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
  * Turns a 56 bit key into the 64 bit, odd parity key and sets the key.  The
  * key schedule ks is also set.
  */
-static void setup_des_key(unsigned char *key_56,
+static void setup_des_key(const unsigned char *key_56,
                           DES_key_schedule DESKEYARG(ks))
 {
   DES_cblock key;
@@ -346,9 +346,9 @@ static void setup_des_key(unsigned char *key_56,
   * 8 byte plaintext is encrypted with each key and the resulting 24
   * bytes are stored in the results array.
   */
-static void lm_resp(unsigned char *keys,
-                      unsigned char *plaintext,
-                      unsigned char *results)
+static void lm_resp(const unsigned char *keys,
+                    const unsigned char *plaintext,
+                    unsigned char *results)
 {
   DES_key_schedule ks;
 
@@ -377,17 +377,10 @@ static void mk_lm_hash(struct SessionHandle *data,
   static const unsigned char magic[] = {
     0x4B, 0x47, 0x53, 0x21, 0x40, 0x23, 0x24, 0x25 /* i.e. KGS!@#$% */
   };
-  unsigned int i;
-  size_t len = strlen(password);
+  size_t len = CURLMIN(strlen(password), 14);
 
-  if(len > 14)
-    len = 14;
-
-  for (i=0; i<len; i++)
-    pw[i] = (unsigned char)toupper(password[i]);
-
-  for (; i<14; i++)
-    pw[i] = 0;
+  Curl_strntoupper((char *)pw, password, len);
+  memset(&pw[len], 0, 14-len);
 
 #ifdef CURL_DOES_CONVERSIONS
   /*

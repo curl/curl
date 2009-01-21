@@ -48,6 +48,7 @@ CURLcode Curl_protocol_connect(struct connectdata *conn, bool *done);
 CURLcode Curl_protocol_connecting(struct connectdata *conn, bool *done);
 CURLcode Curl_protocol_doing(struct connectdata *conn, bool *done);
 void Curl_safefree(void *ptr);
+void Curl_strntoupper(char *dest, const char *src, size_t n);
 
 /* create a connection cache */
 struct conncache *Curl_mk_connc(int type, long amount);
