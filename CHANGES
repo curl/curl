@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (26 Jan 2009)
+- Craig A West brought CURLOPT_NOPROXY and the corresponding --noproxy option.
+  They basically offer the same thing the NO_PROXY environment variable only
+  offered previously: list a set of host names that shall not use the proxy
+  even if one is specified.
+
 Daniel Fandrich (20 Jan 2009)
 - Call setlocale() for libtest tests to test the effects of locale-induced
   libc changes on libcurl.
@@ -20,8 +26,8 @@ Daniel Fandrich (20 Jan 2009)
   locale.
 
 Daniel Stenberg (20 Jan 2009)
-- Lisa Xu pointed out that the ssh.obj file was missing from the lib/Makefile.vc6
-  file (and thus from the vc8 and vc9 ones too). 
+- Lisa Xu pointed out that the ssh.obj file was missing from the
+  lib/Makefile.vc6 file (and thus from the vc8 and vc9 ones too).
 
 Version 7.19.3 (19 January 2009)
 

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1675,6 +1675,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * authentication password to use in the operation
      */
     result = setstropt(&data->set.str[STRING_PROXYPASSWORD],
+                       va_arg(param, char *));
+    break;
+  case CURLOPT_NOPROXY:
+    /*
+     * proxy exception list
+     */
+    result = setstropt(&data->set.str[STRING_NOPROXY],
                        va_arg(param, char *));
     break;
 #endif
@@ -3369,6 +3376,80 @@ static CURLcode setup_connection_internals(struct SessionHandle *data,
 
 #ifndef CURL_DISABLE_PROXY
 /****************************************************************
+* Checks if the host is in the noproxy list. returns true if it matches
+* and therefore the proxy should NOT be used.
+****************************************************************/
+static bool check_noproxy(const char* name, const char* no_proxy)
+{
+  /* no_proxy=domain1.dom,host.domain2.dom
+   *   (a comma-separated list of hosts which should
+   *   not be proxied, or an asterisk to override
+   *   all proxy variables)
+   */
+  size_t tok_start;
+  size_t tok_end;
+  const char* separator = ", ";
+  size_t no_proxy_len;
+  size_t namelen;
+  char *endptr;
+
+  if(no_proxy && no_proxy[0]) {
+    if(Curl_raw_equal("*", no_proxy)) {
+      return TRUE;
+    }
+
+    /* NO_PROXY was specified and it wasn't just an asterisk */
+
+    no_proxy_len = strlen(no_proxy);
+    endptr = strchr(name, ':');
+    if(endptr)
+      namelen = endptr - name;
+    else
+      namelen = strlen(name);
+
+    tok_start = 0;
+    for (tok_start = 0; tok_start < no_proxy_len; tok_start = tok_end + 1) {
+      while (tok_start < no_proxy_len &&
+             strchr(separator, no_proxy[tok_start]) != NULL) {
+        /* Look for the beginning of the token. */
+        ++tok_start;
+      }
+
+      if(tok_start == no_proxy_len)
+        break; /* It was all trailing separator chars, no more tokens. */
+
+      for (tok_end = tok_start; tok_end < no_proxy_len &&
+             strchr(separator, no_proxy[tok_end]) == NULL; ++tok_end) {
+        /* Look for the end of the token. */
+      }
+
+      /* To match previous behaviour, where it was necessary to specify
+       * ".local.com" to prevent matching "notlocal.com", we will leave
+       * the '.' off.
+       */
+      if(no_proxy[tok_start] == '.')
+        ++tok_start;
+
+      if((tok_end - tok_start) <= namelen) {
+        /* Match the last part of the name to the domain we are checking. */
+        const char *checkn = name + namelen - (tok_end - tok_start);
+        if(Curl_raw_nequal(no_proxy + tok_start, checkn, tok_end - tok_start)) {
+          if((tok_end - tok_start) == namelen || *(checkn - 1) == '.') {
+            /* We either have an exact match, or the previous character is a .
+             * so it is within the same domain, so no proxy for this host.
+             */
+            return TRUE;
+          }
+        }
+      } /* if((tok_end - tok_start) <= namelen) */
+    } /* for (tok_start = 0; tok_start < no_proxy_len;
+         tok_start = tok_end + 1) */
+  } /* NO_PROXY was specified and it wasn't just an asterisk */
+
+  return FALSE;
+}
+
+/****************************************************************
 * Detect what (if any) proxy to use. Remember that this selects a host
 * name and is not limited to HTTP proxies only.
 * The returned pointer must be freed by the caller (unless NULL)
@@ -3396,90 +3477,56 @@ static char *detect_proxy(struct connectdata *conn)
    * checked if the lowercase versions don't exist.
    */
   char *no_proxy=NULL;
-  char *no_proxy_tok_buf;
   char proxy_env[128];
 
   no_proxy=curl_getenv("no_proxy");
   if(!no_proxy)
     no_proxy=curl_getenv("NO_PROXY");
 
-  if(!no_proxy || !Curl_raw_equal("*", no_proxy)) {
-    /* NO_PROXY wasn't specified or it wasn't just an asterisk */
-    char *nope;
+  if(!check_noproxy(conn->host.name, no_proxy)) {
+    /* It was not listed as without proxy */
+    char *protop = conn->protostr;
+    char *envp = proxy_env;
+    char *prox;
 
-    nope=no_proxy?strtok_r(no_proxy, ", ", &no_proxy_tok_buf):NULL;
-    while(nope) {
-      size_t namelen;
-      char *endptr = strchr(conn->host.name, ':');
-      if(endptr)
-        namelen=endptr-conn->host.name;
-      else
-        namelen=strlen(conn->host.name);
+    /* Now, build <protocol>_proxy and check for such a one to use */
+    while(*protop)
+      *envp++ = (char)tolower((int)*protop++);
 
-      if(strlen(nope) <= namelen) {
-        char *checkn=
-          conn->host.name + namelen - strlen(nope);
-        if(checkprefix(nope, checkn)) {
-          /* no proxy for this host! */
-          break;
-        }
-      }
-      nope=strtok_r(NULL, ", ", &no_proxy_tok_buf);
-    }
-    if(!nope) {
-      /* It was not listed as without proxy */
-      char *protop = conn->protostr;
-      char *envp = proxy_env;
-      char *prox;
+    /* append _proxy */
+    strcpy(envp, "_proxy");
 
-      /* Now, build <protocol>_proxy and check for such a one to use */
-      while(*protop)
-        *envp++ = (char)tolower((int)*protop++);
+    /* read the protocol proxy: */
+    prox=curl_getenv(proxy_env);
 
-      /* append _proxy */
-      strcpy(envp, "_proxy");
-
-      /* read the protocol proxy: */
+    /*
+     * We don't try the uppercase version of HTTP_PROXY because of
+     * security reasons:
+     *
+     * When curl is used in a webserver application
+     * environment (cgi or php), this environment variable can
+     * be controlled by the web server user by setting the
+     * http header 'Proxy:' to some value.
+     *
+     * This can cause 'internal' http/ftp requests to be
+     * arbitrarily redirected by any external attacker.
+     */
+    if(!prox && !Curl_raw_equal("http_proxy", proxy_env)) {
+      /* There was no lowercase variable, try the uppercase version: */
+      Curl_strntoupper(proxy_env, proxy_env, sizeof(proxy_env));
       prox=curl_getenv(proxy_env);
+    }
 
-      /*
-       * We don't try the uppercase version of HTTP_PROXY because of
-       * security reasons:
-       *
-       * When curl is used in a webserver application
-       * environment (cgi or php), this environment variable can
-       * be controlled by the web server user by setting the
-       * http header 'Proxy:' to some value.
-       *
-       * This can cause 'internal' http/ftp requests to be
-       * arbitrarily redirected by any external attacker.
-       */
-      if(!prox && !Curl_raw_equal("http_proxy", proxy_env)) {
-        /* There was no lowercase variable, try the uppercase version: */
-	Curl_strntoupper(proxy_env, proxy_env, sizeof(proxy_env));
-        prox=curl_getenv(proxy_env);
-      }
-
-      if(prox && *prox) { /* don't count "" strings */
-        proxy = prox; /* use this */
-      }
-      else {
-        proxy = curl_getenv("all_proxy"); /* default proxy to use */
-        if(!proxy)
-          proxy=curl_getenv("ALL_PROXY");
-      }
-
-      if(proxy && *proxy) {
-        long bits = conn->protocol & (PROT_HTTPS|PROT_SSL|PROT_MISSING);
-
-        if(conn->proxytype == CURLPROXY_HTTP) {
-          /* force this connection's protocol to become HTTP */
-          conn->protocol = PROT_HTTP | bits;
-          conn->bits.proxy = conn->bits.httpproxy = TRUE;
-        }
-      }
-    } /* if(!nope) - it wasn't specified non-proxy */
-  } /* NO_PROXY wasn't specified or '*' */
+    if(prox && *prox) { /* don't count "" strings */
+      proxy = prox; /* use this */
+    }
+    else {
+      proxy = curl_getenv("all_proxy"); /* default proxy to use */
+      if(!proxy)
+        proxy=curl_getenv("ALL_PROXY");
+    }
+  } /* if(!check_noproxy(conn->host.name, no_proxy)) - it wasn't specified
+       non-proxy */
   if(no_proxy)
     free(no_proxy);
 
@@ -3629,7 +3676,8 @@ static CURLcode parse_proxy_auth(struct SessionHandle *data,
   char proxypasswd[MAX_CURL_PASSWORD_LENGTH]="";
 
   if(data->set.str[STRING_PROXYUSERNAME] != NULL) {
-    strncpy(proxyuser, data->set.str[STRING_PROXYUSERNAME], MAX_CURL_USER_LENGTH);
+    strncpy(proxyuser, data->set.str[STRING_PROXYUSERNAME],
+            MAX_CURL_USER_LENGTH);
     proxyuser[MAX_CURL_USER_LENGTH-1] = '\0';   /*To be on safe side*/
   }
   if(data->set.str[STRING_PROXYPASSWORD] != NULL) {
@@ -4117,15 +4165,26 @@ static CURLcode create_conn(struct SessionHandle *data,
                         and the SessionHandle */
 
   conn->proxytype = data->set.proxytype; /* type */
+
+#ifdef CURL_DISABLE_PROXY
+
+  conn->bits.proxy = FALSE;
+  conn->bits.httpproxy = FALSE;
+  conn->bits.proxy_user_passwd = FALSE;
+  conn->bits.tunnel_proxy = FALSE;
+
+#else /* CURL_DISABLE_PROXY */
+
   conn->bits.proxy = (bool)(data->set.str[STRING_PROXY] &&
                             *data->set.str[STRING_PROXY]);
   conn->bits.httpproxy = (bool)(conn->bits.proxy
                                 && (conn->proxytype == CURLPROXY_HTTP));
-
-
-  conn->bits.user_passwd = (bool)(NULL != data->set.str[STRING_USERNAME]);
   conn->bits.proxy_user_passwd = (bool)(NULL != data->set.str[STRING_PROXYUSERNAME]);
   conn->bits.tunnel_proxy = data->set.tunnel_thru_httpproxy;
+
+#endif /* CURL_DISABLE_PROXY */
+
+  conn->bits.user_passwd = (bool)(NULL != data->set.str[STRING_USERNAME]);
   conn->bits.ftp_use_epsv = data->set.ftp_use_epsv;
   conn->bits.ftp_use_eprt = data->set.ftp_use_eprt;
 
@@ -4205,11 +4264,34 @@ static CURLcode create_conn(struct SessionHandle *data,
 
   if(!proxy)
     proxy = detect_proxy(conn);
+  else if(data->set.str[STRING_NOPROXY]) {
+    if(check_noproxy(conn->host.name, data->set.str[STRING_NOPROXY])) {
+      free(proxy);  /* proxy is in exception list */
+      proxy = NULL;
+    }
+  }
   if(proxy && !*proxy) {
     free(proxy);  /* Don't bother with an empty proxy string */
     proxy = NULL;
   }
   /* proxy must be freed later unless NULL */
+  if(proxy && *proxy) {
+    long bits = conn->protocol & (PROT_HTTPS|PROT_SSL|PROT_MISSING);
+
+    if(conn->proxytype == CURLPROXY_HTTP) {
+      /* force this connection's protocol to become HTTP */
+      conn->protocol = PROT_HTTP | bits;
+      conn->bits.httpproxy = TRUE;
+    }
+    conn->bits.proxy = TRUE;
+  }
+  else {
+      /* we aren't using the proxy after all... */
+      conn->bits.proxy = FALSE;
+      conn->bits.httpproxy = FALSE;
+      conn->bits.proxy_user_passwd = FALSE;
+      conn->bits.tunnel_proxy = FALSE;
+  }
 #endif /* CURL_DISABLE_PROXY */
 
   /*************************************************************

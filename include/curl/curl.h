@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1149,6 +1149,15 @@ typedef enum {
     /* "name" and "pwd" to use with Proxy when fetching. */
   CINIT(PROXYUSERNAME, OBJECTPOINT, 175),
   CINIT(PROXYPASSWORD, OBJECTPOINT, 176),
+
+  /* Comma separated list of hostnames defining no-proxy zones. These should
+     match both hostnames directly, and hostnames within a domain. For
+     example, local.com will match local.com and www.local.com, but NOT
+     notlocal.com or www.notlocal.com. For compatibility with other
+     implementations of this, .local.com will be considered to be the same as
+     local.com. A single * is the only valid wildcard, and effectively
+     disables the use of proxy. */
+  CINIT(NOPROXY, OBJECTPOINT, 177),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

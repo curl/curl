@@ -1363,6 +1363,8 @@ enum dupstring {
   STRING_PASSWORD,        /* <password>, if used */
   STRING_PROXYUSERNAME,   /* Proxy <username>, if used */
   STRING_PROXYPASSWORD,   /* Proxy <password>, if used */
+  STRING_NOPROXY,         /* List of hosts which should not use the proxy, if
+                             used */
 
   /* -- end of strings -- */
   STRING_LAST /* not used, just an end-of-list marker */

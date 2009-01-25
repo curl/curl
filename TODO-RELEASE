@@ -1,8 +1,6 @@
 To be addressed in 7.19.4 (planned release: March 2009)
 =========================
 
-205 - A. Craig West's CURLOPT_NOPROXY option
-
 206 - A. Craig West's CURLOPT_HTTP_VERSION change for CONNECT
 
 208 - Patch to allow GSSAPI authentication to a socks5 server

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -448,6 +448,7 @@ struct Configurable {
   char *userpwd;
   char *proxyuserpwd;
   char *proxy;
+  char *noproxy;
   bool proxytunnel;
   bool ftp_append;         /* APPE on ftp */
   bool mute;               /* shutup */
@@ -772,6 +773,7 @@ static void help(void)
     " -N/--no-buffer     Disable buffering of the output stream",
     "    --no-keepalive  Disable keepalive use on the connection",
     "    --no-sessionid  Disable SSL session-ID reusing (SSL)",
+    "    --noproxy       Comma-separated list of hosts which do not use proxy",
     "    --ntlm          Use HTTP NTLM authentication (H)",
     " -o/--output <file> Write output to <file> instead of stdout",
     "    --pass  <pass>  Pass phrase for the private key (SSL/SSH)",
@@ -1666,6 +1668,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$2", "socks5-hostname", TRUE},
     {"$3", "keepalive-time",  TRUE},
     {"$4", "post302",    FALSE},
+    {"$5", "noproxy",    TRUE},
 
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
@@ -2174,6 +2177,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case '4': /* --post302 */
         config->post302 = toggle;
+        break;
+      case '5': /* --noproxy */
+        /* This specifies the noproxy list */
+        GetStr(&config->noproxy, nextarg);
         break;
       }
       break;
@@ -3641,6 +3648,8 @@ static void free_config_fields(struct Configurable *config)
     free(config->proxy);
   if(config->proxyuserpwd)
     free(config->proxyuserpwd);
+  if(config->noproxy)
+    free(config->noproxy);
   if(config->cookie)
     free(config->cookie);
   if(config->cookiefile)
@@ -4559,6 +4568,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         my_setopt(curl, CURLOPT_TRANSFERTEXT, config->use_ascii);
         my_setopt(curl, CURLOPT_USERPWD, config->userpwd);
         my_setopt(curl, CURLOPT_PROXYUSERPWD, config->proxyuserpwd);
+        my_setopt(curl, CURLOPT_NOPROXY, config->noproxy);
         my_setopt(curl, CURLOPT_RANGE, config->range);
         my_setopt(curl, CURLOPT_ERRORBUFFER, errorbuffer);
         my_setopt(curl, CURLOPT_TIMEOUT, config->timeout);

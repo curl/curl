@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -474,6 +474,14 @@ this are \fICURLPROXY_HTTP\fP, \fICURLPROXY_SOCKS4\fP (added in 7.15.2),
 \fICURLPROXY_SOCKS5\fP, \fICURLPROXY_SOCKS4A\fP (added in 7.18.0) and
 \fICURLPROXY_SOCKS5_HOSTNAME\fP (added in 7.18.0). The HTTP type is
 default. (Added in 7.10)
+.IP CURLOPT_NOPROXY
+Pass a pointer to a zero terminated string. The should be a comma- separated
+list of hosts which do not use a proxy, if one is specified.  The only
+wildcard is a single * character, which matches all hosts, and effectively
+disables the proxy. Each name in this list is matched as either a domain which
+contains the hostname, or the hostname itself. For example, local.com would
+match local.com, local.com:80, and www.local.com, but not www.notlocal.com.
+(Added in 7.19.4)
 .IP CURLOPT_HTTPPROXYTUNNEL
 Set the parameter to 1 to make the library tunnel all operations through a
 given HTTP proxy. There is a big difference between using a proxy and to

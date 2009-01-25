@@ -1,15 +1,15 @@
 Curl and libcurl 7.19.4
 
  Public curl releases:         110
- Command line options:         128
- curl_easy_setopt() options:   158
+ Command line options:         129
+ curl_easy_setopt() options:   159
  Public functions in libcurl:  58
  Known libcurl bindings:       37
  Contributors:                 700
 
 This release includes the following changes:
 
- o 
+ o Added CURLOPT_NOPROXY and the corresponding --noproxy
 
 This release includes the following bugfixes:
 
@@ -23,6 +23,6 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Lisa Xu
+ Lisa Xu, Daniel Fandrich, Craig A West
 
         Thanks! (and sorry if I forgot to mention someone)
