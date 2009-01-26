@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -46,6 +46,77 @@
 
 /* The last #include file should be: */
 #include "memdebug.h"
+
+#define MAX_VALUE_LENGTH 256
+#define MAX_CONTENT_LENGTH 1024
+
+/*
+ * Return 0 on success and then the buffers are filled in fine.
+ *
+ * Non-zero means failure to parse.
+ */
+static int get_pair(const char *str, char *value, char *content,
+                    const char **endptr)
+{
+  int c;
+  bool starts_with_quote = FALSE;
+  bool escape = FALSE;
+
+  for(c=MAX_VALUE_LENGTH-1; (*str && (*str != '=') && c--); )
+    *value++ = *str++;
+  *value=0;
+
+  if('=' != *str++)
+    /* eek, no match */
+    return 1;
+
+  if('\"' == *str) {
+    /* this starts with a quote so it must end with one as well! */
+    str++;
+    starts_with_quote = TRUE;
+  }
+
+  for(c=MAX_CONTENT_LENGTH-1; *str && c--; str++) {
+    switch(*str) {
+    case '\\':
+      if(!escape) {
+        /* possibly the start of an escaped quote */
+        escape = TRUE;
+        *content++ = '\\'; /* even though this is an escape character, we still
+                              store it as-is in the target buffer */
+        continue;
+      }
+      break;
+    case ',':
+      if(!starts_with_quote) {
+        /* this signals the end of the content if we didn't get a starting quote
+           and then we do "sloppy" parsing */
+        c=0; /* the end */
+        continue;
+      }
+      break;
+    case '\r':
+    case '\n':
+      /* end of string */
+      c=0;
+      continue;
+    case '\"':
+      if(!escape && starts_with_quote) {
+        /* end of string */
+        c=0;
+        continue;
+      }
+      break;
+    }
+    escape = FALSE;
+    *content++ = *str;
+  }
+  *content=0;
+
+  *endptr = str;
+
+  return 0; /* all is fine! */
+}
 
 /* Test example headers:
 
@@ -90,26 +161,16 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
     Curl_digest_cleanup_one(d);
 
     while(more) {
-      char value[256];
-      char content[1024];
+      char value[MAX_VALUE_LENGTH];
+      char content[MAX_CONTENT_LENGTH];
       size_t totlen=0;
 
       while(*header && ISSPACE(*header))
         header++;
 
-      /* how big can these strings be? */
-      if((2 == sscanf(header, "%255[^=]=\"%1023[^\"]\"",
-                      value, content)) ||
-         /* try the same scan but without quotes around the content but don't
-            include the possibly trailing comma, newline or carriage return */
-         (2 ==  sscanf(header, "%255[^=]=%1023[^\r\n,]",
-                       value, content)) ) {
-        if(!strcmp("\"\"", content)) {
-          /* for the name="" case where we get only the "" in the content
-           * variable, simply clear the content then
-           */
-          content[0]=0;
-        }
+      /* extract a value=content pair */
+      if(!get_pair(header, value, content, &header)) {
+
         if(Curl_raw_equal(value, "nonce")) {
           d->nonce = strdup(content);
           if(!d->nonce)
@@ -185,7 +246,6 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
       else
         break; /* we're done here */
 
-      header += totlen;
       /* pass all additional spaces here */
       while(*header && ISSPACE(*header))
         header++;
@@ -247,7 +307,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
 #ifdef CURL_DOES_CONVERSIONS
   CURLcode rc;
 /* The CURL_OUTPUT_DIGEST_CONV macro below is for non-ASCII machines.
-   It converts digest text to ASCII so the MD5 will be correct for 
+   It converts digest text to ASCII so the MD5 will be correct for
    what ultimately goes over the network.
 */
 #define CURL_OUTPUT_DIGEST_CONV(a, b) \

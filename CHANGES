@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel Stenberg (26 Jan 2009)
+- Alexey Borzov filed bug report #2535504
+  (http://curl.haxx.se/bug/view.cgi?id=2535504) pointing out that realms with
+  quoted quotation marks in HTTP Digest headers didn't work. I've now added 
+  test case 1095 that verifies my fix.
+
 - Craig A West brought CURLOPT_NOPROXY and the corresponding --noproxy option.
   They basically offer the same thing the NO_PROXY environment variable only
   offered previously: list a set of host names that shall not use the proxy
