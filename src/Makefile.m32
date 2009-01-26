@@ -120,8 +120,11 @@ COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
 include Makefile.inc
 
 curl_OBJECTS := $(patsubst %.c,%.o,$(strip $(CURL_SOURCES)))
-# curlx_OBJECTS := $(patsubst %.c,%.o,$(notdir $(strip $(CURLX_ONES))))
-# vpath %.c ../lib
+ifdef DYN
+curlx_OBJECTS := $(patsubst %.c,%.o,$(notdir $(strip $(CURLX_ONES))))
+curl_OBJECTS += $(curlx_OBJECTS)
+vpath %.c ../lib
+endif
 
 RESOURCE = curl.res
 
