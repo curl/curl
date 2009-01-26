@@ -10,8 +10,8 @@ Curl and libcurl 7.19.4
 This release includes the following changes:
 
  o Added CURLOPT_NOPROXY and the corresponding --noproxy
- o the OpenSSL-specific code disables TICKET (rfc5077) which is enabled by default
-   in openssl 0.9.8j
+ o the OpenSSL-specific code disables TICKET (rfc5077) which is enabled by
+   default in openssl 0.9.8j
 
 This release includes the following bugfixes:
 
