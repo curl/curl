@@ -7,6 +7,21 @@
                                   Changelog
 
 Daniel Stenberg (26 Jan 2009)
+- The "-no_ticket" option was introduced in Openssl0.9.8j. It's a flag to
+  disable "rfc4507bis session ticket support".  rfc4507bis was later turned
+  into the proper RFC5077 it seems: http://tools.ietf.org/html/rfc5077
+
+  The enabled extension concerns the session management. I wonder how often
+  libcurl stops a connection and then resumes a TLS session. also, sending the
+  session data is some overhead. .I suggest that you just use your proposed
+  patch (which explicitly disables TICKET).
+
+  If someone writes an application with libcurl and openssl who wants to
+  enable the feature, one can do this in the SSL callback.
+
+  Sharad Gupta brought this to my attention. Peter Sylvester helped me decide
+  on the proper action.
+
 - Alexey Borzov filed bug report #2535504
   (http://curl.haxx.se/bug/view.cgi?id=2535504) pointing out that realms with
   quoted quotation marks in HTTP Digest headers didn't work. I've now added 

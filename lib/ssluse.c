@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1385,8 +1385,28 @@ ossl_connect_step1(struct connectdata *conn,
      enable the bug workaround options if compatibility with somewhat broken
      implementations is desired."
 
+     The "-no_ticket" option was introduced in Openssl0.9.8j. It's a flag to
+     disable "rfc4507bis session ticket support".  rfc4507bis was later turned
+     into the proper RFC5077 it seems: http://tools.ietf.org/html/rfc5077
+
+     The enabled extension concerns the session management. I wonder how often
+     libcurl stops a connection and then resumes a TLS session. also, sending
+     the session data is some overhead. .I suggest that you just use your
+     proposed patch (which explicitly disables TICKET).
+
+     If someone writes an application with libcurl and openssl who wants to
+     enable the feature, one can do this in the SSL callback.
+
   */
-  SSL_CTX_set_options(connssl->ctx, SSL_OP_ALL);
+#ifdef SSL_OP_NO_TICKET
+  /* expect older openssl releases to not have this define so only use it if
+     present */
+#define CURL_CTX_OPTIONS SSL_OP_ALL|SSL_OP_NO_TICKET
+#else
+#define CURL_CTX_OPTIONS SSL_OP_ALL
+#endif
+
+  SSL_CTX_set_options(connssl->ctx, CURL_CTX_OPTIONS);
 
   /* disable SSLv2 in the default case (i.e. allow SSLv3 and TLSv1) */
   if(data->set.ssl.version == CURL_SSLVERSION_DEFAULT)
