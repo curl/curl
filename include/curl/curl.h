@@ -1159,6 +1159,9 @@ typedef enum {
      disables the use of proxy. */
   CINIT(NOPROXY, OBJECTPOINT, 177),
 
+  /* block size for TFTP transfers */
+  CINIT(TFTP_BLKSIZE, LONG, 178),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel Stenberg (26 Jan 2009)
+- Chad Monroe provided the new CURLOPT_TFTP_BLKSIZE option that allows an app
+  to set desired block size to use for TFTP transfers instead of the default
+  512 bytes.
+
 - The "-no_ticket" option was introduced in Openssl0.9.8j. It's a flag to
   disable "rfc4507bis session ticket support".  rfc4507bis was later turned
   into the proper RFC5077 it seems: http://tools.ietf.org/html/rfc5077

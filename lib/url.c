@@ -932,6 +932,12 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      */
     data->set.ftp_response_timeout = va_arg( param , long ) * 1000;
     break;
+  case CURLOPT_TFTP_BLKSIZE:
+    /*
+     * TFTP option that specifies the block size to use for data transmission
+     */
+    data->set.tftp_blksize = va_arg(param, long);
+    break;
   case CURLOPT_DIRLISTONLY:
     /*
      * An option that changes the command to one that asks for a list
