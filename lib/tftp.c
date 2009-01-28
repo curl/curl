@@ -408,28 +408,28 @@ static size_t tftp_option_add(tftp_state_data_t *state, size_t csize,
   return( strlen(option) + 1 );
 }
 
-static int tftp_connect_for_tx(tftp_state_data_t *state, tftp_event_t event)
+static CURLcode tftp_connect_for_tx(tftp_state_data_t *state, tftp_event_t event)
 {
-  int res = 0;
+  CURLcode res;
   struct SessionHandle *data = state->conn->data;
 
   infof(data, "%s\n", "Connected for transmit");
   state->state = TFTP_STATE_TX;
   res = tftp_set_timeouts(state);
-  if(res)
+  if(res != CURLE_OK)
     return(res);
   return tftp_tx(state, event);
 }
 
-static int tftp_connect_for_rx(tftp_state_data_t *state, tftp_event_t event)
+static CURLcode tftp_connect_for_rx(tftp_state_data_t *state, tftp_event_t event)
 {
-  int res = 0;
+  CURLcode res;
   struct SessionHandle *data = state->conn->data;
 
   infof(data, "%s\n", "Connected for receive");
   state->state = TFTP_STATE_RX;
   res = tftp_set_timeouts(state);
-  if(res)
+  if(res != CURLE_OK)
     return(res);
   return tftp_rx(state, event);
 }
