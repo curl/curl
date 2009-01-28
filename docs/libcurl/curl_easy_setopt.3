@@ -487,6 +487,16 @@ Set the parameter to 1 to make the library tunnel all operations through a
 given HTTP proxy. There is a big difference between using a proxy and to
 tunnel through it. If you don't know what this means, you probably don't want
 this tunneling option.
+.IP CURLOPT_SOCKS5_GSSAPI_SERVICE
+Pass a char * as parameter to a string holding the name of the service. The
+default service name for a SOCKS5 server is rcmd/server-fqdn. This option
+allows you to change it. (Added in 7.19.4)
+.IP CURLOPT_SOCKS5_GSSAPI_NEC
+Pass a long set to 1 to enable or 0 to disable. As part of the gssapi
+negotiation a protection mode is negotiated. The rfc1961 says in section
+4.3/4.4 it should be protected, but the NEC reference implementation does not.
+If enabled, this option allows the unprotected exchange of the protection mode
+negotiation. (Added in 7.19.4).
 .IP CURLOPT_INTERFACE
 Pass a char * as parameter. This sets the interface name to use as outgoing
 network interface. The name can be an interface name, an IP address, or a host

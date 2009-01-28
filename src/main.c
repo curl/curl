@@ -536,6 +536,10 @@ struct Configurable {
 
   char *socksproxy; /* set to server string */
   int socksver;     /* set to CURLPROXY_SOCKS* define */
+  char *socks5_gssapi_service;  /* set service name for gssapi principal
+                                 * default rcmd */
+  int socks5_gssapi_nec ;  /* The NEC reference server does not protect
+                            * the encryption type exchange */
 
   bool tcp_nodelay;
   long req_retry;   /* number of retries */
@@ -807,6 +811,10 @@ static void help(void)
     "    --socks4a <host[:port]> SOCKS4a proxy on given host + port",
     "    --socks5 <host[:port]> SOCKS5 proxy on given host + port",
     "    --socks5-hostname <host[:port]> SOCKS5 proxy, pass host name to proxy",
+#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
+    "    --socks5-gssapi-service <name> SOCKS5 proxy service name for gssapi",
+    "    --socks5-gssapi-nec  Compatibility with NEC SOCKS5 server",
+#endif
     " -Y/--speed-limit   Stop transfer if below speed-limit for 'speed-time' secs",
     " -y/--speed-time    Time needed to trig speed-limit abort. Defaults to 30",
     " -2/--sslv2         Use SSLv2 (SSL)",
@@ -1669,6 +1677,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$3", "keepalive-time",  TRUE},
     {"$4", "post302",    FALSE},
     {"$5", "noproxy",    TRUE},
+#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
+    {"$6", "socks5-gssapi-service",  TRUE},
+    {"$7", "socks5-gssapi-nec",  FALSE},
+#endif
 
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
@@ -2182,6 +2194,14 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         /* This specifies the noproxy list */
         GetStr(&config->noproxy, nextarg);
         break;
+#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
+      case '6': /* --socks5-gssapi-service */
+        GetStr(&config->socks5_gssapi_service, nextarg);
+        break;
+      case '7': /* --socks5-gssapi-nec*/
+        config->socks5_gssapi_nec = TRUE;
+        break;
+#endif
       }
       break;
     case '#': /* --progress-bar */
@@ -3700,6 +3720,10 @@ static void free_config_fields(struct Configurable *config)
     free(config->referer);
   if (config->hostpubmd5)
     free(config->hostpubmd5);
+#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
+  if(config->socks5_gssapi_service)
+    free(config->socks5_gssapi_service);
+#endif
 
   curl_slist_free_all(config->quote); /* checks for config->quote == NULL */
   curl_slist_free_all(config->prequote);
@@ -4768,6 +4792,16 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           my_setopt(curl, CURLOPT_PROXYTYPE, config->socksver);
         }
 
+#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
+        /* new in curl 7.19.4 */
+        if(config->socks5_gssapi_service)
+          my_setopt(curl, CURLOPT_SOCKS5_GSSAPI_SERVICE,
+                    config->socks5_gssapi_service);
+
+        /* new in curl 7.19.4 */
+        if(config->socks5_gssapi_nec)
+          my_setopt(curl, CURLOPT_SOCKS5_GSSAPI_NEC, config->socks5_gssapi_nec);
+#endif
         /* curl 7.13.0 */
         my_setopt(curl, CURLOPT_FTP_ACCOUNT, config->ftp_account);
 

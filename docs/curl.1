@@ -821,7 +821,7 @@ The only wildcard is a single * character, which matches all hosts, and
 effectively disables the proxy. Each name in this list is matched as either
 a domain which contains the hostname, or the hostname itself. For example,
 local.com would match local.com, local.com:80, and www.local.com, but not
-www.notlocal.com.
+www.notlocal.com.  (Added in 7.19.4).
 .IP "--ntlm"
 (HTTP) Enables NTLM authentication. The NTLM authentication method was
 designed by Microsoft and is used by IIS web servers. It is a proprietary
@@ -1114,6 +1114,21 @@ mutually exclusive.
 If this option is used several times, the last one will be used. (This option
 was previously wrongly documented and used as --socks without the number
 appended.)
+.IP "--socks5-gssapi-service <servicename>"
+The default service name for a socks server is rcmd/server-fqdn. This option
+allows you to change it.
+
+Examples:
+ --socks5 proxy-name \fI--socks5-gssapi-service\fP sockd   would use
+sockd/proxy-name
+ --socks5 proxy-name \fI--socks5-gssapi-service\fP sockd/real-name   would use
+sockd/real-name for cases where the proxy-name does not match the princpal name.
+ (Added in 7.19.4).
+.IP "--socks5-gssapi-nec"
+As part of the gssapi negotiation a protection mode is negotiated. The rfc1961
+says in section 4.3/4.4 it should be protected, but the NEC reference
+implementation does not.  The option \fI--socks5-gssapi-nec\fP allows the
+unprotected exchange of the protection mode negotiation. (Added in 7.19.4).
 .IP "--stderr <file>"
 Redirect all writes to stderr to the specified file instead. If the file name
 is a plain '-', it is instead written to stdout. This option has no point when

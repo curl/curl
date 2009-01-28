@@ -1162,6 +1162,12 @@ typedef enum {
   /* block size for TFTP transfers */
   CINIT(TFTP_BLKSIZE, LONG, 178),
 
+  /* Socks Service */
+  CINIT(SOCKS5_GSSAPI_SERVICE, LONG, 179),
+
+  /* Socks Service */
+  CINIT(SOCKS5_GSSAPI_NEC, LONG, 180),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

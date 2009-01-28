@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (28 Jan 2009)
+- Markus Moeller introduced two new options to libcurl:
+  CURLOPT_SOCKS5_GSSAPI_SERVICE and CURLOPT_SOCKS5_GSSAPI_NEC to allow libcurl
+  to do GSS-style authentication with SOCKS5 proxies. The curl tool got the
+  options called --socks5-gssapi-service and --socks5-gssapi-nec to enable
+  these.
+
 Daniel Stenberg (26 Jan 2009)
 - Chad Monroe provided the new CURLOPT_TFTP_BLKSIZE option that allows an app
   to set desired block size to use for TFTP transfers instead of the default

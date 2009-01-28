@@ -698,6 +698,20 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
   set->new_file_perms = 0644;    /* Default permissions */
   set->new_directory_perms = 0755; /* Default permissions */
 
+
+#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
+  /*
+   * disallow unprotected protection negotiation NEC reference implementation
+   * seem not to follow rfc1961 section 4.3/4.4
+   */
+  set->socks5_gssapi_nec = FALSE;
+  /* set default gssapi service name */
+  res = setstropt(&set->str[STRING_SOCKS5_GSSAPI_SERVICE],
+                  (char *) CURL_DEFAULT_SOCKS5_GSSAPI_SERVICE);
+  if (res != CURLE_OK)
+    return res;
+#endif
+
   /* This is our preferred CA cert bundle/path since install time */
 #if defined(CURL_CA_BUNDLE)
   res = setstropt(&set->str[STRING_SSL_CAFILE], (char *) CURL_CA_BUNDLE);
@@ -1460,6 +1474,23 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       result = CURLE_FAILED_INIT;
       break;
     }
+    break;
+#endif
+
+#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
+  case CURLOPT_SOCKS5_GSSAPI_SERVICE:
+    /*
+     * Set gssapi service name
+     */
+    result = setstropt(&data->set.str[STRING_SOCKS5_GSSAPI_SERVICE],
+                       va_arg(param, char *));
+    break;
+
+  case CURLOPT_SOCKS5_GSSAPI_NEC:
+    /*
+     * set flag for nec socks5 support
+     */
+    data->set.socks5_gssapi_nec = (bool)(0 != va_arg(param, long));
     break;
 #endif
 

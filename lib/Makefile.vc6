@@ -101,7 +101,7 @@ LFLAGS     = /nologo /machine:$(MACHINE)
 SSLLIBS    = libeay32.lib ssleay32.lib
 ZLIBLIBSDLL= zdll.lib
 ZLIBLIBS   = zlib.lib
-WINLIBS    = wsock32.lib wldap32.lib
+WINLIBS    = wsock32.lib wldap32.lib secur32.lib
 CFLAGS     = $(CFLAGS)
 
 CFGSET     = FALSE
@@ -489,6 +489,7 @@ X_OBJS= \
 	$(DIROBJ)\sendf.obj \
 	$(DIROBJ)\share.obj \
 	$(DIROBJ)\socks.obj \
+	$(DIROBJ)\socks_sspi.obj \
 	$(DIROBJ)\speedcheck.obj \
 	$(DIROBJ)\splay.obj \
 	$(DIROBJ)\ssh.obj \

@@ -9,7 +9,8 @@ CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	\
   http_negotiate.c http_ntlm.c inet_pton.c strtoofft.c strerror.c	\
   hostares.c hostasyn.c hostip4.c hostip6.c hostsyn.c hostthre.c	\
   inet_ntop.c parsedate.c select.c gtls.c sslgen.c tftp.c splay.c	\
-  strdup.c socks.c ssh.c nss.c qssl.c rawstr.c curl_addrinfo.c
+  strdup.c socks.c ssh.c nss.c qssl.c rawstr.c curl_addrinfo.c          \
+  socks_gssapi.c socks_sspi.c
 
 HHEADERS = arpa_telnet.h netrc.h file.h timeval.h qssl.h hostip.h	\
   progress.h formdata.h cookie.h http.h sendf.h ftp.h url.h dict.h	\
