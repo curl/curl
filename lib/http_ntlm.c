@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -106,12 +106,7 @@
 
 #else
 
-#include <rpc.h>
-
-/* Handle of security.dll or secur32.dll, depending on Windows version */
-static HMODULE s_hSecDll = NULL;
-/* Pointer to SSPI dispatch table */
-static PSecurityFunctionTable s_pSecFn = NULL;
+#include "curl_sspi.h"
 
 #endif
 
@@ -552,7 +547,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 #ifdef USE_WINDOWS_SSPI
   if (s_hSecDll == NULL) {
     /* not thread safe and leaks - use curl_global_init() to avoid */
-    CURLcode err = Curl_ntlm_global_init();
+    CURLcode err = Curl_sspi_global_init();
     if (s_hSecDll == NULL)
       return err;
   }
@@ -1103,48 +1098,6 @@ Curl_ntlm_cleanup(struct connectdata *conn)
 #endif
 }
 
-#ifdef USE_WINDOWS_SSPI
-CURLcode Curl_ntlm_global_init(void)
-{
-  /* If security interface is not yet initialized try to do this */
-  if(s_hSecDll == NULL) {
-    /* Determine Windows version. Security functions are located in
-     * security.dll on WinNT 4.0 and in secur32.dll on Win9x. Win2K and XP
-     * contain both these DLLs (security.dll just forwards calls to
-     * secur32.dll)
-     */
-    OSVERSIONINFO osver;
-    osver.dwOSVersionInfoSize = sizeof(osver);
-    GetVersionEx(&osver);
-    if(osver.dwPlatformId == VER_PLATFORM_WIN32_NT
-      && osver.dwMajorVersion == 4)
-      s_hSecDll = LoadLibrary("security.dll");
-    else
-      s_hSecDll = LoadLibrary("secur32.dll");
-    if(s_hSecDll != NULL) {
-      INIT_SECURITY_INTERFACE pInitSecurityInterface;
-      pInitSecurityInterface =
-        (INIT_SECURITY_INTERFACE)GetProcAddress(s_hSecDll,
-                                                "InitSecurityInterfaceA");
-      if(pInitSecurityInterface != NULL)
-        s_pSecFn = pInitSecurityInterface();
-    }
-  }
-  if(s_pSecFn == NULL)
-    return CURLE_RECV_ERROR;
-
-  return CURLE_OK;
-}
-
-void Curl_ntlm_global_cleanup(void)
-{
-  if(s_hSecDll != NULL) {
-    FreeLibrary(s_hSecDll);
-    s_hSecDll = NULL;
-    s_pSecFn = NULL;
-  }
-}
-#endif
 
 #endif /* USE_NTLM */
 #endif /* !CURL_DISABLE_HTTP */

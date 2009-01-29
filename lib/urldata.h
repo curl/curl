@@ -269,13 +269,7 @@ typedef enum {
 } curlntlm;
 
 #ifdef USE_WINDOWS_SSPI
-/* When including these headers, you must define either SECURITY_WIN32
- * or SECURITY_KERNEL, indicating who is compiling the code.
- */
-#define SECURITY_WIN32 1
-#include <security.h>
-#include <sspi.h>
-#include <rpc.h>
+#include "curl_sspi.h"
 #endif
 
 #if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)

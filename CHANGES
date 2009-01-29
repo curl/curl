@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Yang Tse (29 Jan 2009)
+- Introduced curl_sspi.c and curl_sspi.h for the implementation of functions
+  Curl_sspi_global_init() and Curl_sspi_global_cleanup() which previously were
+  named Curl_ntlm_global_init() and Curl_ntlm_global_cleanup() in http_ntlm.c
+  Also adjusted socks_sspi.c to remove the link-time dependency on the Windows
+  SSPI library using it now in the same way as it was done in http_ntlm.c.
+
 Daniel Stenberg (28 Jan 2009)
 - Markus Moeller introduced two new options to libcurl:
   CURLOPT_SOCKS5_GSSAPI_SERVICE and CURLOPT_SOCKS5_GSSAPI_NEC to allow libcurl

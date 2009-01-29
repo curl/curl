@@ -101,7 +101,7 @@ LFLAGS     = /nologo /machine:$(MACHINE)
 SSLLIBS    = libeay32.lib ssleay32.lib
 ZLIBLIBSDLL= zdll.lib
 ZLIBLIBS   = zlib.lib
-WINLIBS    = wsock32.lib wldap32.lib secur32.lib
+WINLIBS    = wsock32.lib wldap32.lib
 CFLAGS     = $(CFLAGS)
 
 CFGSET     = FALSE
@@ -450,6 +450,7 @@ X_OBJS= \
 	$(DIROBJ)\content_encoding.obj \
 	$(DIROBJ)\cookie.obj \
 	$(DIROBJ)\curl_addrinfo.obj \
+	$(DIROBJ)\curl_sspi.obj \
 	$(DIROBJ)\dict.obj \
 	$(DIROBJ)\easy.obj \
 	$(DIROBJ)\escape.obj \

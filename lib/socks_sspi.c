@@ -40,6 +40,7 @@
 #include "connect.h"
 #include "timeval.h"
 #include "socks.h"
+#include "curl_sspi.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -233,22 +234,22 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   cred_handle.dwLower = 0;
   cred_handle.dwUpper = 0;
 
-  sspi_major_status = AcquireCredentialsHandle( NULL,
-                                                (char *)"Kerberos",
-                                                SECPKG_CRED_OUTBOUND,
-                                                NULL,
-                                                NULL,
-                                                NULL,
-                                                NULL,
-                                                &cred_handle,
-                                                &expiry);
+  sspi_major_status = s_pSecFn->AcquireCredentialsHandleA( NULL,
+                                                           (char *)"Kerberos",
+                                                           SECPKG_CRED_OUTBOUND,
+                                                           NULL,
+                                                           NULL,
+                                                           NULL,
+                                                           NULL,
+                                                           &cred_handle,
+                                                           &expiry);
 
   if(check_sspi_err(data, sspi_major_status,sspi_minor_status,
-                    "AcquireCredentialsHandle") ) {
+                    "AcquireCredentialsHandleA") ) {
     failf(data, "Failed to acquire credentials.");
     free(service_name);
     service_name=NULL;
-    FreeCredentialsHandle(&cred_handle);
+    s_pSecFn->FreeCredentialsHandle(&cred_handle);
     return CURLE_COULDNT_CONNECT;
   }
 
@@ -256,35 +257,36 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   /* errors, keep sending it...                                            */
   for(;;) {
 
-    sspi_major_status = InitializeSecurityContext( &cred_handle,
-                                                   context_handle,
-                                                   service_name,
-                                                   ISC_REQ_MUTUAL_AUTH |
-                                                   ISC_REQ_ALLOCATE_MEMORY |
-                                                   ISC_REQ_CONFIDENTIALITY |
-                                                   ISC_REQ_REPLAY_DETECT,
-                                                   0,
-                                                   SECURITY_NATIVE_DREP,
-                                                   &input_desc,
-                                                   0,
-                                                   &sspi_context,
-                                                   &output_desc,
-                                                   &sspi_ret_flags,
-                                                   &expiry);
+    sspi_major_status = s_pSecFn->InitializeSecurityContextA(
+                                    &cred_handle,
+                                    context_handle,
+                                    service_name,
+                                    ISC_REQ_MUTUAL_AUTH |
+                                    ISC_REQ_ALLOCATE_MEMORY |
+                                    ISC_REQ_CONFIDENTIALITY |
+                                    ISC_REQ_REPLAY_DETECT,
+                                    0,
+                                    SECURITY_NATIVE_DREP,
+                                    &input_desc,
+                                    0,
+                                    &sspi_context,
+                                    &output_desc,
+                                    &sspi_ret_flags,
+                                    &expiry);
 
     if(sspi_recv_token.pvBuffer) {
-      FreeContextBuffer(sspi_recv_token.pvBuffer);
+      s_pSecFn->FreeContextBuffer(sspi_recv_token.pvBuffer);
       sspi_recv_token.pvBuffer = NULL;
       sspi_recv_token.cbBuffer = 0;
     }
 
     if(check_sspi_err(data,sspi_major_status,sspi_minor_status,
-                      "InitializeSecurityContext") ){
+                      "InitializeSecurityContextA") ){
       free(service_name);
       service_name=NULL;
-      FreeCredentialsHandle(&cred_handle);
-      DeleteSecurityContext(&sspi_context);
-      FreeContextBuffer(sspi_recv_token.pvBuffer);
+      s_pSecFn->FreeCredentialsHandle(&cred_handle);
+      s_pSecFn->DeleteSecurityContext(&sspi_context);
+      s_pSecFn->FreeContextBuffer(sspi_recv_token.pvBuffer);
       failf(data, "Failed to initialise security context.");
       return CURLE_COULDNT_CONNECT;
     }
@@ -300,10 +302,10 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
         failf(data, "Failed to send SSPI authentication request.");
         free(service_name);
         service_name=NULL;
-        FreeContextBuffer(sspi_send_token.pvBuffer);
-        FreeContextBuffer(sspi_recv_token.pvBuffer);
-        FreeCredentialsHandle(&cred_handle);
-        DeleteSecurityContext(&sspi_context);
+        s_pSecFn->FreeContextBuffer(sspi_send_token.pvBuffer);
+        s_pSecFn->FreeContextBuffer(sspi_recv_token.pvBuffer);
+        s_pSecFn->FreeCredentialsHandle(&cred_handle);
+        s_pSecFn->DeleteSecurityContext(&sspi_context);
         return CURLE_COULDNT_CONNECT;
       }
 
@@ -313,19 +315,19 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
         failf(data, "Failed to send SSPI authentication token.");
         free(service_name);
         service_name=NULL;
-        FreeContextBuffer(sspi_send_token.pvBuffer);
-        FreeContextBuffer(sspi_recv_token.pvBuffer);
-        FreeCredentialsHandle(&cred_handle);
-        DeleteSecurityContext(&sspi_context);
+        s_pSecFn->FreeContextBuffer(sspi_send_token.pvBuffer);
+        s_pSecFn->FreeContextBuffer(sspi_recv_token.pvBuffer);
+        s_pSecFn->FreeCredentialsHandle(&cred_handle);
+        s_pSecFn->DeleteSecurityContext(&sspi_context);
         return CURLE_COULDNT_CONNECT;
       }
 
     }
 
-    FreeContextBuffer(sspi_send_token.pvBuffer);
+    s_pSecFn->FreeContextBuffer(sspi_send_token.pvBuffer);
     sspi_send_token.pvBuffer = NULL;
     sspi_send_token.cbBuffer = 0;
-    FreeContextBuffer(sspi_recv_token.pvBuffer);
+    s_pSecFn->FreeContextBuffer(sspi_recv_token.pvBuffer);
     sspi_recv_token.pvBuffer = NULL;
     sspi_recv_token.cbBuffer = 0;
     if(sspi_major_status != SEC_I_CONTINUE_NEEDED)  break;
@@ -346,8 +348,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
       failf(data, "Failed to receive SSPI authentication response.");
       free(service_name);
       service_name=NULL;
-      FreeCredentialsHandle(&cred_handle);
-      DeleteSecurityContext(&sspi_context);
+      s_pSecFn->FreeCredentialsHandle(&cred_handle);
+      s_pSecFn->DeleteSecurityContext(&sspi_context);
       return CURLE_COULDNT_CONNECT;
     }
 
@@ -357,8 +359,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
             socksreq[0], socksreq[1]);
       free(service_name);
       service_name=NULL;
-      FreeCredentialsHandle(&cred_handle);
-      DeleteSecurityContext(&sspi_context);
+      s_pSecFn->FreeCredentialsHandle(&cred_handle);
+      s_pSecFn->DeleteSecurityContext(&sspi_context);
       return CURLE_COULDNT_CONNECT;
     }
 
@@ -367,8 +369,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
             socksreq[0], socksreq[1]);
       free(service_name);
       service_name=NULL;
-      FreeCredentialsHandle(&cred_handle);
-      DeleteSecurityContext(&sspi_context);
+      s_pSecFn->FreeCredentialsHandle(&cred_handle);
+      s_pSecFn->DeleteSecurityContext(&sspi_context);
       return CURLE_COULDNT_CONNECT;
     }
 
@@ -381,8 +383,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     if(!sspi_recv_token.pvBuffer) {
       free(service_name);
       service_name=NULL;
-      FreeCredentialsHandle(&cred_handle);
-      DeleteSecurityContext(&sspi_context);
+      s_pSecFn->FreeCredentialsHandle(&cred_handle);
+      s_pSecFn->DeleteSecurityContext(&sspi_context);
       return CURLE_OUT_OF_MEMORY;
     }
     result = Curl_blockread_all(conn, sock, (char *)sspi_recv_token.pvBuffer,
@@ -393,9 +395,9 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
       failf(data, "Failed to receive SSPI authentication token.");
       free(service_name);
       service_name=NULL;
-      FreeContextBuffer(sspi_recv_token.pvBuffer);
-      FreeCredentialsHandle(&cred_handle);
-      DeleteSecurityContext(&sspi_context);
+      s_pSecFn->FreeContextBuffer(sspi_recv_token.pvBuffer);
+      s_pSecFn->FreeCredentialsHandle(&cred_handle);
+      s_pSecFn->DeleteSecurityContext(&sspi_context);
       return CURLE_COULDNT_CONNECT;
     }
 
@@ -406,19 +408,20 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   service_name=NULL;
 
   /* Everything is good so far, user was authenticated! */
-  sspi_major_status =
-    QueryCredentialsAttributes(&cred_handle, SECPKG_CRED_ATTR_NAMES, &names);
-  FreeCredentialsHandle(&cred_handle);
+  sspi_major_status = s_pSecFn->QueryCredentialsAttributes( &cred_handle,
+                                                            SECPKG_CRED_ATTR_NAMES,
+                                                            &names);
+  s_pSecFn->FreeCredentialsHandle(&cred_handle);
   if(check_sspi_err(data,sspi_major_status,sspi_minor_status,
                     "QueryCredentialAttributes") ){
-    DeleteSecurityContext(&sspi_context);
-    FreeContextBuffer(names.sUserName);
+    s_pSecFn->DeleteSecurityContext(&sspi_context);
+    s_pSecFn->FreeContextBuffer(names.sUserName);
     failf(data, "Failed to determine user name.");
     return CURLE_COULDNT_CONNECT;
   }
   infof(data, "SOCKS5 server authencticated user %s with gssapi.\n",
         names.sUserName);
-  FreeContextBuffer(names.sUserName);
+  s_pSecFn->FreeContextBuffer(names.sUserName);
 
   /* Do encryption */
   socksreq[0] = 1;    /* gssapi subnegotiation version */
@@ -472,12 +475,12 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     memcpy(socksreq+2, &us_length, sizeof(short));
   }
   else {
-    sspi_major_status = QueryContextAttributes( &sspi_context,
-                                                SECPKG_ATTR_SIZES,
-                                                &sspi_sizes);
+    sspi_major_status = s_pSecFn->QueryContextAttributesA( &sspi_context,
+                                                           SECPKG_ATTR_SIZES,
+                                                           &sspi_sizes);
     if(check_sspi_err(data,sspi_major_status,sspi_minor_status,
-                      "QueryContextAttributes")) {
-      DeleteSecurityContext(&sspi_context);
+                      "QueryContextAttributesA")) {
+      s_pSecFn->DeleteSecurityContext(&sspi_context);
       failf(data, "Failed to query security context attributes.");
       return CURLE_COULDNT_CONNECT;
     }
@@ -487,15 +490,15 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     sspi_w_token[0].pvBuffer = malloc(sspi_sizes.cbSecurityTrailer);
 
     if(!sspi_w_token[0].pvBuffer) {
-      DeleteSecurityContext(&sspi_context);
+      s_pSecFn->DeleteSecurityContext(&sspi_context);
       return CURLE_OUT_OF_MEMORY;
     }
 
     sspi_w_token[1].cbBuffer = 1;
     sspi_w_token[1].pvBuffer = malloc(1);
     if(!sspi_w_token[1].pvBuffer){
-      FreeContextBuffer(sspi_w_token[0].pvBuffer);
-      DeleteSecurityContext(&sspi_context);
+      s_pSecFn->FreeContextBuffer(sspi_w_token[0].pvBuffer);
+      s_pSecFn->DeleteSecurityContext(&sspi_context);
       return CURLE_OUT_OF_MEMORY;
     }
 
@@ -504,21 +507,21 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     sspi_w_token[2].cbBuffer = sspi_sizes.cbBlockSize;
     sspi_w_token[2].pvBuffer = malloc(sspi_sizes.cbBlockSize);
     if(!sspi_w_token[2].pvBuffer) {
-      FreeContextBuffer(sspi_w_token[0].pvBuffer);
-      FreeContextBuffer(sspi_w_token[1].pvBuffer);
-      DeleteSecurityContext(&sspi_context);
+      s_pSecFn->FreeContextBuffer(sspi_w_token[0].pvBuffer);
+      s_pSecFn->FreeContextBuffer(sspi_w_token[1].pvBuffer);
+      s_pSecFn->DeleteSecurityContext(&sspi_context);
       return CURLE_OUT_OF_MEMORY;
     }
-    sspi_major_status = EncryptMessage( &sspi_context,
-                                        KERB_WRAP_NO_ENCRYPT,
-                                        &wrap_desc,
-                                        0);
+    sspi_major_status = s_pSecFn->EncryptMessage( &sspi_context,
+                                                  KERB_WRAP_NO_ENCRYPT,
+                                                  &wrap_desc,
+                                                  0);
     if(check_sspi_err(data,sspi_major_status,sspi_minor_status,
                       "EncryptMessage") ) {
-      FreeContextBuffer(sspi_w_token[0].pvBuffer);
-      FreeContextBuffer(sspi_w_token[1].pvBuffer);
-      FreeContextBuffer(sspi_w_token[2].pvBuffer);
-      DeleteSecurityContext(&sspi_context);
+      s_pSecFn->FreeContextBuffer(sspi_w_token[0].pvBuffer);
+      s_pSecFn->FreeContextBuffer(sspi_w_token[1].pvBuffer);
+      s_pSecFn->FreeContextBuffer(sspi_w_token[2].pvBuffer);
+      s_pSecFn->DeleteSecurityContext(&sspi_context);
       failf(data, "Failed to query security context attributes.");
       return CURLE_COULDNT_CONNECT;
     }
@@ -527,10 +530,10 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
       + sspi_w_token[2].cbBuffer;
     sspi_send_token.pvBuffer = malloc(sspi_send_token.cbBuffer);
     if(!sspi_send_token.pvBuffer) {
-      FreeContextBuffer(sspi_w_token[0].pvBuffer);
-      FreeContextBuffer(sspi_w_token[1].pvBuffer);
-      FreeContextBuffer(sspi_w_token[2].pvBuffer);
-      DeleteSecurityContext(&sspi_context);
+      s_pSecFn->FreeContextBuffer(sspi_w_token[0].pvBuffer);
+      s_pSecFn->FreeContextBuffer(sspi_w_token[1].pvBuffer);
+      s_pSecFn->FreeContextBuffer(sspi_w_token[2].pvBuffer);
+      s_pSecFn->DeleteSecurityContext(&sspi_context);
       return CURLE_OUT_OF_MEMORY;
     }
 
@@ -543,13 +546,13 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
            +sspi_w_token[1].cbBuffer,
            sspi_w_token[2].pvBuffer, sspi_w_token[2].cbBuffer);
 
-    FreeContextBuffer(sspi_w_token[0].pvBuffer);
+    s_pSecFn->FreeContextBuffer(sspi_w_token[0].pvBuffer);
     sspi_w_token[0].pvBuffer = NULL;
     sspi_w_token[0].cbBuffer = 0;
-    FreeContextBuffer(sspi_w_token[1].pvBuffer);
+    s_pSecFn->FreeContextBuffer(sspi_w_token[1].pvBuffer);
     sspi_w_token[1].pvBuffer = NULL;
     sspi_w_token[1].cbBuffer = 0;
-    FreeContextBuffer(sspi_w_token[2].pvBuffer);
+    s_pSecFn->FreeContextBuffer(sspi_w_token[2].pvBuffer);
     sspi_w_token[2].pvBuffer = NULL;
     sspi_w_token[2].cbBuffer = 0;
 
@@ -560,8 +563,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   code = Curl_write_plain(conn, sock, (char *)socksreq, 4, &written);
   if((code != CURLE_OK) || (4 != written)) {
     failf(data, "Failed to send SSPI encryption request.");
-    FreeContextBuffer(sspi_send_token.pvBuffer);
-    DeleteSecurityContext(&sspi_context);
+    s_pSecFn->FreeContextBuffer(sspi_send_token.pvBuffer);
+    s_pSecFn->DeleteSecurityContext(&sspi_context);
     return CURLE_COULDNT_CONNECT;
   }
 
@@ -570,7 +573,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     code = Curl_write_plain(conn, sock, (char *)socksreq, 1, &written);
     if((code != CURLE_OK) || (1 != written)) {
       failf(data, "Failed to send SSPI encryption type.");
-      DeleteSecurityContext(&sspi_context);
+      s_pSecFn->DeleteSecurityContext(&sspi_context);
       return CURLE_COULDNT_CONNECT;
     }
   } else {
@@ -578,18 +581,18 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
                             sspi_send_token.cbBuffer, &written);
     if((code != CURLE_OK) || (sspi_send_token.cbBuffer != (size_t)written)) {
       failf(data, "Failed to send SSPI encryption type.");
-      FreeContextBuffer(sspi_send_token.pvBuffer);
-      DeleteSecurityContext(&sspi_context);
+      s_pSecFn->FreeContextBuffer(sspi_send_token.pvBuffer);
+      s_pSecFn->DeleteSecurityContext(&sspi_context);
       return CURLE_COULDNT_CONNECT;
     }
-    FreeContextBuffer(sspi_send_token.pvBuffer);
+    s_pSecFn->FreeContextBuffer(sspi_send_token.pvBuffer);
   }
 
   result=Curl_blockread_all(conn, sock, (char *)socksreq, 4,
                             &actualread, timeout);
   if(result != CURLE_OK || actualread != 4) {
     failf(data, "Failed to receive SSPI encryption response.");
-    DeleteSecurityContext(&sspi_context);
+    s_pSecFn->DeleteSecurityContext(&sspi_context);
     return CURLE_COULDNT_CONNECT;
   }
 
@@ -597,14 +600,14 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   if(socksreq[1] == 255) { /* status / message type */
     failf(data, "User was rejected by the SOCKS5 server (%d %d).",
           socksreq[0], socksreq[1]);
-    DeleteSecurityContext(&sspi_context);
+    s_pSecFn->DeleteSecurityContext(&sspi_context);
     return CURLE_COULDNT_CONNECT;
   }
 
   if(socksreq[1] != 2) { /* status / message type */
     failf(data, "Invalid SSPI encryption response type (%d %d).",
           socksreq[0], socksreq[1]);
-    DeleteSecurityContext(&sspi_context);
+    s_pSecFn->DeleteSecurityContext(&sspi_context);
     return CURLE_COULDNT_CONNECT;
   }
 
@@ -614,7 +617,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   sspi_w_token[0].cbBuffer = us_length;
   sspi_w_token[0].pvBuffer = malloc(us_length);
   if(!sspi_w_token[0].pvBuffer) {
-    DeleteSecurityContext(&sspi_context);
+    s_pSecFn->DeleteSecurityContext(&sspi_context);
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -624,8 +627,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
 
   if(result != CURLE_OK || actualread != us_length) {
     failf(data, "Failed to receive SSPI encryption type.");
-    FreeContextBuffer(sspi_w_token[0].pvBuffer);
-    DeleteSecurityContext(&sspi_context);
+    s_pSecFn->FreeContextBuffer(sspi_w_token[0].pvBuffer);
+    s_pSecFn->DeleteSecurityContext(&sspi_context);
     return CURLE_COULDNT_CONNECT;
   }
 
@@ -637,13 +640,16 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     sspi_w_token[1].cbBuffer = 0;
     sspi_w_token[1].pvBuffer = NULL;
 
-    sspi_major_status = DecryptMessage(&sspi_context, &wrap_desc, 0, &qop);
+    sspi_major_status = s_pSecFn->DecryptMessage( &sspi_context,
+                                                  &wrap_desc,
+                                                  0,
+                                                  &qop);
 
     if(check_sspi_err(data,sspi_major_status,sspi_minor_status,
                       "DecryptMessage")) {
-      FreeContextBuffer(sspi_w_token[0].pvBuffer);
-      FreeContextBuffer(sspi_w_token[1].pvBuffer);
-      DeleteSecurityContext(&sspi_context);
+      s_pSecFn->FreeContextBuffer(sspi_w_token[0].pvBuffer);
+      s_pSecFn->FreeContextBuffer(sspi_w_token[1].pvBuffer);
+      s_pSecFn->DeleteSecurityContext(&sspi_context);
       failf(data, "Failed to query security context attributes.");
       return CURLE_COULDNT_CONNECT;
     }
@@ -651,25 +657,25 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     if(sspi_w_token[1].cbBuffer != 1) {
       failf(data, "Invalid SSPI encryption response length (%d).",
             sspi_w_token[1].cbBuffer);
-      FreeContextBuffer(sspi_w_token[0].pvBuffer);
-      FreeContextBuffer(sspi_w_token[1].pvBuffer);
-      DeleteSecurityContext(&sspi_context);
+      s_pSecFn->FreeContextBuffer(sspi_w_token[0].pvBuffer);
+      s_pSecFn->FreeContextBuffer(sspi_w_token[1].pvBuffer);
+      s_pSecFn->DeleteSecurityContext(&sspi_context);
       return CURLE_COULDNT_CONNECT;
     }
 
     memcpy(socksreq,sspi_w_token[1].pvBuffer,sspi_w_token[1].cbBuffer);
-    FreeContextBuffer(sspi_w_token[0].pvBuffer);
-    FreeContextBuffer(sspi_w_token[1].pvBuffer);
+    s_pSecFn->FreeContextBuffer(sspi_w_token[0].pvBuffer);
+    s_pSecFn->FreeContextBuffer(sspi_w_token[1].pvBuffer);
   } else {
     if(sspi_w_token[0].cbBuffer != 1) {
       failf(data, "Invalid SSPI encryption response length (%d).",
             sspi_w_token[0].cbBuffer);
-      FreeContextBuffer(sspi_w_token[0].pvBuffer);
-      DeleteSecurityContext(&sspi_context);
+      s_pSecFn->FreeContextBuffer(sspi_w_token[0].pvBuffer);
+      s_pSecFn->DeleteSecurityContext(&sspi_context);
       return CURLE_COULDNT_CONNECT;
     }
     memcpy(socksreq,sspi_w_token[0].pvBuffer,sspi_w_token[0].cbBuffer);
-    FreeContextBuffer(sspi_w_token[0].pvBuffer);
+    s_pSecFn->FreeContextBuffer(sspi_w_token[0].pvBuffer);
   }
 
   infof(data, "SOCKS5 access with%s protection granted.\n",
@@ -681,7 +687,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
      if (socksreq[0] != 0)
      conn->socks5_sspi_context = sspi_context;
      else {
-     DeleteSecurityContext(&sspi_context);
+     s_pSecFn->DeleteSecurityContext(&sspi_context);
      conn->socks5_sspi_context = sspi_context;
      }
   */
