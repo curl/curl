@@ -48,13 +48,13 @@
 /*
  * Helper sspi error functions.
  */
-typedef long OM_uint32;
 static int check_sspi_err(struct SessionHandle *data,
-                          OM_uint32 major_status,
-                          OM_uint32 minor_status,
+                          SECURITY_STATUS major_status,
+                          SECURITY_STATUS minor_status,
                           const char* function)
 {
-  char *txt;
+  const char *txt;
+  (void)minor_status;
 
   if(major_status != SEC_E_OK &&
      major_status != SEC_I_COMPLETE_AND_CONTINUE &&
@@ -109,9 +109,9 @@ static int check_sspi_err(struct SessionHandle *data,
 
     }
     failf(data, "SSPI error: %s failed: %s\n", function, txt);
-    return(1);
+    return 1;
   }
-  return(0);
+  return 0;
 }
 
 /* This is the SSPI-using version of this function */
@@ -126,8 +126,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   int result;
   long timeout;
   /* Needs GSSAPI authentication */
-  OM_uint32 sspi_major_status, sspi_minor_status=0;
-  OM_uint32 sspi_ret_flags=0;
+  SECURITY_STATUS sspi_major_status, sspi_minor_status=0;
+  unsigned long sspi_ret_flags=0;
   int gss_enc;
   SecBuffer sspi_send_token, sspi_recv_token, sspi_w_token[3];
   SecBufferDesc input_desc, output_desc, wrap_desc;
@@ -268,7 +268,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
 
       code = Curl_write_plain(conn, sock, (char *)sspi_send_token.pvBuffer,
                               sspi_send_token.cbBuffer, &written);
-      if((code != CURLE_OK) || (sspi_send_token.cbBuffer != written)) {
+      if((code != CURLE_OK) || (sspi_send_token.cbBuffer != (size_t)written)) {
         failf(data, "Failed to send SSPI authentication token.");
         free(service_name);
         service_name=NULL;
@@ -535,7 +535,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   } else {
     code = Curl_write_plain(conn, sock, (char *)sspi_send_token.pvBuffer,
                             sspi_send_token.cbBuffer, &written);
-    if((code != CURLE_OK) || (sspi_send_token.cbBuffer != written)) {
+    if((code != CURLE_OK) || (sspi_send_token.cbBuffer != (size_t)written)) {
       failf(data, "Failed to send SSPI encryption type.");
       FreeContextBuffer(sspi_send_token.pvBuffer);
       DeleteSecurityContext(&sspi_context);
