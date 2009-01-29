@@ -41,6 +41,24 @@
 #include <sspi.h>
 #include <rpc.h>
 
+/* Provide some definitions missing in MinGW's headers */
+
+#ifndef SEC_I_CONTEXT_EXPIRED
+# define SEC_I_CONTEXT_EXPIRED ((HRESULT)0x00090317L)
+#endif
+#ifndef SEC_E_BUFFER_TOO_SMALL
+# define SEC_E_BUFFER_TOO_SMALL ((HRESULT)0x80090321L)
+#endif
+#ifndef SEC_E_CRYPTO_SYSTEM_INVALID
+# define SEC_E_CRYPTO_SYSTEM_INVALID ((HRESULT)0x80090337L)
+#endif
+#ifndef SEC_E_MESSAGE_ALTERED
+# define SEC_E_MESSAGE_ALTERED ((HRESULT)0x8009030FL)
+#endif
+#ifndef SEC_E_OUT_OF_SEQUENCE
+# define SEC_E_OUT_OF_SEQUENCE ((HRESULT)0x80090310L)
+#endif
+
 CURLcode Curl_sspi_global_init(void);
 void Curl_sspi_global_cleanup(void);
 
