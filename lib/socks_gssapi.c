@@ -23,6 +23,8 @@
 
 #include "setup.h"
 
+#ifndef CURL_DISABLE_PROXY
+
 #ifdef HAVE_GSSAPI
 #ifdef HAVE_OLD_GSSMIT
 #define GSS_C_NT_HOSTBASED_SERVICE gss_nt_service_name
@@ -545,3 +547,5 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   return CURLE_OK;
 }
 #endif
+
+#endif /* CURL_DISABLE_PROXY */

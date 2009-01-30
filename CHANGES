@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Fandrich (30 Jan 2009)
+- Fixed --disable-proxy for FTP and SOCKS. Thanks to Daniel Egger for
+  reporting.
+
 Yang Tse (29 Jan 2009)
 - Introduced curl_sspi.c and curl_sspi.h for the implementation of functions
   Curl_sspi_global_init() and Curl_sspi_global_cleanup() which previously were

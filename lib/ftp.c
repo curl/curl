@@ -1901,7 +1901,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     result = CURLE_COULDNT_CONNECT;
     break;
   }
-#ifndef CURL_DISABLE_HTTP
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_PROXY)
   if(conn->bits.tunnel_proxy && conn->bits.httpproxy) {
     /* FIX: this MUST wait for a proper connect first if 'connected' is
      * FALSE */
@@ -1927,7 +1927,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     if(CURLE_OK != result)
       return result;
   }
-#endif   /* CURL_DISABLE_HTTP */
+#endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_PROXY */
 
   state(conn, FTP_STOP); /* this phase is completed */
 
@@ -3060,7 +3060,7 @@ static CURLcode ftp_connect(struct connectdata *conn,
 
   ftpc->response_time = RESP_TIMEOUT; /* set default response time-out */
 
-#ifndef CURL_DISABLE_HTTP
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_PROXY)
   if(conn->bits.tunnel_proxy && conn->bits.httpproxy) {
     /* BLOCKING */
     /* We want "seamless" FTP operations through HTTP proxy tunnel */
@@ -3083,7 +3083,7 @@ static CURLcode ftp_connect(struct connectdata *conn,
     if(CURLE_OK != result)
       return result;
   }
-#endif   /* CURL_DISABLE_HTTP */
+#endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_PROXY */
 
   if(conn->protocol & PROT_FTPS) {
     /* BLOCKING */
