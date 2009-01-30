@@ -1,5 +1,6 @@
 #! /bin/sh
-# Script to build release-archives with
+# Script to build release-archives with. Note that this requires a checkout
+# from CVS and you should first run ./buildconf and build curl once.
 #
 #***************************************************************************
 #                                  _   _ ____  _
@@ -60,13 +61,12 @@ sed -e 's/^#define LIBCURL_VERSION .*/#define LIBCURL_VERSION "'$libversion'"/g'
 # Replace version number in header file:
 sed 's/#define CURL_VERSION .*/#define CURL_VERSION "'$curlversion'"/g' $CHEADER >$CHEADER.dist
 
-echo "generate VC8 makefiles"
-# Generate VC8 versions from the VC6 Makefile versions 
-make -f Makefile.dist vc8
-
-echo "generate VC9 makefiles"
-# Generate VC9 versions from the VC6 Makefile versions 
-make -f Makefile.dist vc9
+# Generate VC8 and VC9 versions from the VC6 Makefile versions 
+for ver in vc8 vc9; do
+  make -f Makefile.dist $ver
+  mv src/Makefile.$ver src/Makefile.$ver.dist
+  mv lib/Makefile.$ver lib/Makefile.$ver.dist
+done
 
 # Replace version number in plist file:
 PLIST=lib/libcurl.plist
