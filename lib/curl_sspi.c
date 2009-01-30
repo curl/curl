@@ -52,7 +52,7 @@ PSecurityFunctionTableA s_pSecFn = NULL;
  * the need to directly link libcurl, nor the application using it, at
  * build time.
  *
- * Once this function has been execured, Windows SSPI functions can be
+ * Once this function has been executed, Windows SSPI functions can be
  * called through the Security Service Provider Interface dispatch table.
  */
 
