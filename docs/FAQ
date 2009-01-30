@@ -26,7 +26,7 @@ FAQ
    2.1.2 only the libssl lib is missing
   2.2 Does curl work/build with other SSL libraries?
   2.3 Where can I find a copy of LIBEAY32.DLL?
-  2.4 Does curl support Socks (RFC 1928) ?
+  2.4 Does curl support SOCKS (RFC 1928) ?
 
  3. Usage Problems
   3.1 curl: (1) SSL is disabled, https: not supported
@@ -42,7 +42,7 @@ FAQ
   3.11 How do I POST with a different Content-Type?
   3.12 Why do FTP specific features over HTTP proxy fail?
   3.13 Why does my single/double quotes fail?
-  3.14 Does curl support javascript or pac (automated proxy config)?
+  3.14 Does curl support Javascript or PAC (automated proxy config)?
   3.15 Can I do recursive fetches with curl?
   3.16 What certificates do I need when I use SSL?
   3.17 How do I list the root dir of an FTP server?
@@ -95,7 +95,7 @@ FAQ
   6.4 I have a program that uses LGPL libraries, can I use libcurl?
   6.5 Can I modify curl/libcurl for my program and keep the changes secret?
   6.6 Can you please change the curl/libcurl license to XXXX?
-  6.7 What are my obligations when using libcurl in my commerical apps?
+  6.7 What are my obligations when using libcurl in my commercial apps?
 
  7. PHP/CURL Issues
   7.1 What is PHP/CURL?
@@ -399,7 +399,7 @@ FAQ
   accurate and up-to-date pointers to recent OpenSSL DLLs and other binary
   packages.
 
-  2.4 Does curl support Socks (RFC 1928) ?
+  2.4 Does curl support SOCKS (RFC 1928) ?
 
   Yes, SOCKS 4 and 5 are supported.
 
@@ -557,27 +557,27 @@ FAQ
   Remember that curl works and runs on more operating systems than most single
   individuals have ever tried.
 
-  3.14 Does curl support javascript or pac (automated proxy config)?
+  3.14 Does curl support Javascript or PAC (automated proxy config)?
 
-  Many web pages do magic stuff using embedded javascript. Curl and libcurl
+  Many web pages do magic stuff using embedded Javascript. Curl and libcurl
   have no built-in support for that, so it will be treated just like any other
   contents.
 
   .pac files are a netscape invention and are sometimes used by organizations
   to allow them to differentiate which proxies to use. The .pac contents is
-  just a javascript program that gets invoked by the browser and that returns
-  the name of the proxy to connect to. Since curl doesn't support javascript,
+  just a Javascript program that gets invoked by the browser and that returns
+  the name of the proxy to connect to. Since curl doesn't support Javascript,
   it can't support .pac proxy configuration either.
 
-  Some work-arounds usually suggested to overcome this javascript dependency:
+  Some work-arounds usually suggested to overcome this Javascript dependency:
 
-  - Depending on the javascript complexity, write up a script that
+  - Depending on the Javascript complexity, write up a script that
     translates it to another language and execute that.
 
-  - Read the javascript code and rewrite the same logic in another language.
+  - Read the Javascript code and rewrite the same logic in another language.
 
-  - Implement a javascript interpreter, people have successfully used the
-    Mozilla javascript engine in the past.
+  - Implement a Javascript interpreter, people have successfully used the
+    Mozilla Javascript engine in the past.
 
   - Ask your admins to stop this, for a static proxy setup or similar.
 
@@ -658,10 +658,11 @@ FAQ
 
   4.2 Why do I get problems when I use & or % in the URL?
 
-  In general unix shells, the & letter is treated special and when used, it
+  In general unix shells, the & letter is treated specially and when used, it
   runs the specified command in the background. To safely send the & as a part
   of a URL, you should quote the entire URL by using single (') or double (")
-  quotes around it.
+  quotes around it. Similar problems can also occur on some shells with other
+  characters, including ?*!$~(){}<>\|;`.  When in doubt, quote the URL.
 
   An example that would invoke a remote CGI that uses &-letters could be:
 
@@ -848,7 +849,7 @@ FAQ
   - Meta tags. You can write a HTML tag that will cause the browser to
     redirect to another given URL after a certain time.
 
-  - Javascript. You can write a javascript program embeded in a HTML page
+  - Javascript. You can write a Javascript program embedded in a HTML page
     that redirects the browser to another given URL.
 
   There is no way to make curl follow these redirects. You must either
@@ -1158,7 +1159,7 @@ FAQ
   libraries that use it. It should be possible for everyone to use libcurl or
   curl in their projects, no matter what license they already have in use.
 
-  6.7 What are my obligations when using libcurl in my commerical apps?
+  6.7 What are my obligations when using libcurl in my commercial apps?
 
   Next to none. All you need to adhere to is the MIT-style license (stated in
   the COPYING file) which basically says you have to include the copyright
@@ -1174,7 +1175,7 @@ FAQ
   your app.
 
   As can be seen here: http://curl.haxx.se/docs/companies.html and
-  elsewhere, more and more companies are dicovering the power
+  elsewhere, more and more companies are discovering the power
   of libcurl and take advantage of it even in commercial environments.
 
 
