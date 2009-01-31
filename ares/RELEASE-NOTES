@@ -2,8 +2,10 @@ This is what's new and changed in the c-ares 1.6.1 release:
 
 Changed:
 
- o in6_addr is not used in ares.h anymore, but a private ares_in6_addr is instead
-   declared and used
+ o in6_addr is not used in ares.h anymore, but a private ares_in6_addr is
+   instead declared and used
+ p ares_gethostbyname() now supports 'AF_UNSPEC' as a family for resolving
+   either AF_INET6 or AF_INET
 
 Fixed:
 

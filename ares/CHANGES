@@ -1,5 +1,10 @@
   Changelog for the c-ares project
 
+* January 31 2009 (Daniel Stenberg)
+- ares_gethostbyname() now accepts 'AF_UNSPEC' as a family for resolving
+  either AF_INET6 or AF_INET. It works by accepting any of the looksups in the
+  hosts file, and it resolves the AAAA field with a fallback to A.
+
 * January 14 2009 (Daniel Stenberg)
 - ares.h no longer uses the HAVE_STRUCT_IN6_ADDR define check, but instead it
   now declares the private struct ares_in6_addr for all systems instead of
