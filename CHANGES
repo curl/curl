@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (30 Jan 2009)
+- Scott Cantor filed bug report #2550061
+  (http://curl.haxx.se/bug/view.cgi?id=2550061) mentioning that I failed to
+  properly make sure that the VC9 makefiles got included in the latest
+  release. I've now fixed the release script and verified it so next release
+  will hopefully include them properly!
+
 Daniel Fandrich (30 Jan 2009)
 - Fixed --disable-proxy for FTP and SOCKS. Thanks to Daniel Egger for
   reporting.
