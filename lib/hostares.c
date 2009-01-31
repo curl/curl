@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -326,11 +326,14 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   }
 
   switch(data->set.ip_version) {
+  default:
+#if ARES_VERSION >= 0x010601
+    family = PF_UNSPEC; /* supported by c-ares since 1.6.1, so for older
+                           c-ares versions this just falls through and defaults
+                           to PF_INET */
+    break;
+#endif
   case CURL_IPRESOLVE_V4:
-  default: /* By default we try ipv4, as PF_UNSPEC isn't supported by c-ares.
-              This is a bit disturbing since users may very well assume that
-              both kinds of addresses are asked for, but the problem is really
-              in c-ares' end here. */
     family = PF_INET;
     break;
   case CURL_IPRESOLVE_V6:

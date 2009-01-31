@@ -16,6 +16,7 @@ This release includes the following changes:
  o Added CURLOPT_SOCKS5_GSSAPI_SERVICE and CURLOPT_SOCKS5_GSSAPI_NEC - with
    the corresponding curl options --socks5-gssapi-service and
    --socks5-gssapi-nec
+ o Improved IPv6 support when built with with c-ares >= 1.6.1
 
 This release includes the following bugfixes:
 
