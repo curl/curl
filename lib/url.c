@@ -4804,8 +4804,12 @@ CURLcode Curl_done(struct connectdata **connp,
      state it is for re-using, so we're forced to close it. In a perfect world
      we can add code that keep track of if we really must close it here or not,
      but currently we have no such detail knowledge.
+
+     connectindex == -1 here means that the connection has no spot in the
+     connection cache and thus we must disconnect it here.
   */
-  if(data->set.reuse_forbid || conn->bits.close || premature) {
+  if(data->set.reuse_forbid || conn->bits.close || premature ||
+     (-1 == conn->connectindex)) {
     CURLcode res2 = Curl_disconnect(conn); /* close the connection */
 
     /* If we had an error already, make sure we return that one. But

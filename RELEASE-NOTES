@@ -25,6 +25,7 @@ This release includes the following bugfixes:
  o FTP ;type=i URLs now work with CURLOPT_PROXY_TRANSFER_MODE in Turkish locale
  o realms with quoted quotation marks in HTTP Digest headers
  o VC9 makefiles are now really included
+ o multi interface memory leak with CURLMOPT_MAXCONNECTS set
 
 This release includes the following known bugs:
 
@@ -34,6 +35,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Lisa Xu, Daniel Fandrich, Craig A West, Alexey Borzov, Sharad Gupta,
- Peter Sylvester, Chad Monroe, Markus Moeller, Yang Tse, Scott Cantor
+ Peter Sylvester, Chad Monroe, Markus Moeller, Yang Tse, Scott Cantor,
+ Patrick Scott
 
         Thanks! (and sorry if I forgot to mention someone)

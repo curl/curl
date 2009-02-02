@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel Stenberg (2 Feb 2009)
+- Patrick Scott found a rather large memory leak when using the multi
+  interface and setting CURLMOPT_MAXCONNECTS to something less than the number
+  of handles you add to the multi handle. All the connections that didn't fit
+  in the cache would not be properly disconnected nor freed!
+
 - Craig A West brought us: libcurl now defaults to do CONNECT with HTTP
   version 1.1 instead of 1.0 like before. This change also introduces the new
   proxy type for libcurl called 'CURLPROXY_HTTP_1_0' that then allows apps to
