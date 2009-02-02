@@ -889,11 +889,11 @@ http://test.remote.server.com:1061/path/10610002 --proxy http://%HOSTIP:%HTTPPOR
 ^User-Agent: curl/.*
 </strip>
 <protocol>
-CONNECT test.remote.server.com:1061 HTTP/1.0
+CONNECT test.remote.server.com:1061 HTTP/1.1
 Host: test.remote.server.com:1061
 Proxy-Connection: Keep-Alive
 
-CONNECT test.remote.server.com:1061 HTTP/1.0
+CONNECT test.remote.server.com:1061 HTTP/1.1
 Host: test.remote.server.com:1061
 Proxy-Authorization: Digest username="silly", realm="weirdorealm", nonce="12345", uri="test.remote.server.com:1061", response="244a8caab5f343a1a20d2425e4d6e951"
 Proxy-Connection: Keep-Alive

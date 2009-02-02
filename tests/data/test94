@@ -31,10 +31,10 @@ http
 SSL
 </features>
  <name>
-HTTPS GET with failed proxy auth
+HTTPS GET with failed proxy auth (CONNECT 1.0)
  </name>
  <command>
-https://test.anything.really.com:94 -x %HOSTIP:%HTTPPORT
+https://test.anything.really.com:94 --proxy1.0 %HOSTIP:%HTTPPORT
 </command>
 </client>
 

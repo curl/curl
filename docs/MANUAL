@@ -141,6 +141,9 @@ PROXY
 
         curl --noproxy localhost,get.this -x my-proxy:888 http://www.get.this/
 
+ If the proxy is specified with --proxy1.0 instead of --proxy or -x, then
+ curl will use HTTP/1.0 instead of HTTP/1.1 for any CONNECT attempts.
+
  curl also supports SOCKS4 and SOCKS5 proxies with --socks4 and --socks5.
 
  See also the environment variables Curl support that offer further proxy

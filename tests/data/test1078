@@ -33,10 +33,10 @@ contents
 http
 </server>
  <name>
-HTTP CONNECT with proxytunnel and downgrade to HTTP/1.0
+HTTP 1.0 CONNECT with proxytunnel and downgrade GET to HTTP/1.0
  </name>
  <command>
--x %HOSTIP:%HTTPPORT -p http://%HOSTIP:%HTTPPORT/we/want/that/page/1078 http://%HOSTIP:%HTTPPORT/we/want/that/page/1078
+--proxy1.0 %HOSTIP:%HTTPPORT -p http://%HOSTIP:%HTTPPORT/we/want/that/page/1078 http://%HOSTIP:%HTTPPORT/we/want/that/page/1078
 </command>
 </client>
 

@@ -470,10 +470,10 @@ Pass a long with this option to set the proxy port to connect to unless it is
 specified in the proxy string \fICURLOPT_PROXY\fP.
 .IP CURLOPT_PROXYTYPE
 Pass a long with this option to set type of the proxy. Available options for
-this are \fICURLPROXY_HTTP\fP, \fICURLPROXY_SOCKS4\fP (added in 7.15.2),
-\fICURLPROXY_SOCKS5\fP, \fICURLPROXY_SOCKS4A\fP (added in 7.18.0) and
-\fICURLPROXY_SOCKS5_HOSTNAME\fP (added in 7.18.0). The HTTP type is
-default. (Added in 7.10)
+this are \fICURLPROXY_HTTP\fP, \fICURLPROXY_HTTP_1_0\fP (added in 7.19.4),
+\fICURLPROXY_SOCKS4\fP (added in 7.15.2), \fICURLPROXY_SOCKS5\fP,
+\fICURLPROXY_SOCKS4A\fP (added in 7.18.0) and \fICURLPROXY_SOCKS5_HOSTNAME\fP
+(added in 7.18.0). The HTTP type is default. (Added in 7.10)
 .IP CURLOPT_NOPROXY
 Pass a pointer to a zero terminated string. The should be a comma- separated
 list of hosts which do not use a proxy, if one is specified.  The only

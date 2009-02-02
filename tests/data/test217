@@ -42,7 +42,7 @@ http://test.remote.server.com:217/path/2170002 --proxy http://%HOSTIP:%HTTPPORT 
 ^User-Agent: curl/.*
 </strip>
 <protocol>
-CONNECT test.remote.server.com:217 HTTP/1.0
+CONNECT test.remote.server.com:217 HTTP/1.1
 Host: test.remote.server.com:217
 Proxy-Connection: Keep-Alive
 

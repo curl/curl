@@ -57,7 +57,7 @@ http://remotesite.com/we/want/that/page/275 -p -x %HOSTIP:%HTTPPORT --user iam:m
 ^User-Agent:.*
 </strip>
 <protocol>
-CONNECT remotesite.com:80 HTTP/1.0
+CONNECT remotesite.com:80 HTTP/1.1
 Host: remotesite.com:80
 Proxy-Authorization: Basic eW91YXJlOnlvdXJzZWxm
 User-Agent: curl/7.10.7-pre2 (i686-pc-linux-gnu) libcurl/7.10.7-pre2 OpenSSL/0.9.7a zlib/1.1.3

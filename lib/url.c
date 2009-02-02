@@ -1453,7 +1453,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 
   case CURLOPT_PROXYTYPE:
     /*
-     * Set proxy type. HTTP/SOCKS4/SOCKS4a/SOCKS5/SOCKS5_HOSTNAME
+     * Set proxy type. HTTP/HTTP_1_0/SOCKS4/SOCKS4a/SOCKS5/SOCKS5_HOSTNAME
      */
     data->set.proxytype = (curl_proxytype)va_arg(param, long);
     break;
@@ -2857,6 +2857,7 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
       break;
 #endif /* CURL_DISABLE_PROXY */
     case CURLPROXY_HTTP:
+    case CURLPROXY_HTTP_1_0:
       /* do nothing here. handled later. */
       break;
     default:
@@ -4214,9 +4215,11 @@ static CURLcode create_conn(struct SessionHandle *data,
 
   conn->bits.proxy = (bool)(data->set.str[STRING_PROXY] &&
                             *data->set.str[STRING_PROXY]);
-  conn->bits.httpproxy = (bool)(conn->bits.proxy
-                                && (conn->proxytype == CURLPROXY_HTTP));
-  conn->bits.proxy_user_passwd = (bool)(NULL != data->set.str[STRING_PROXYUSERNAME]);
+  conn->bits.httpproxy = (bool)(conn->bits.proxy &&
+                                (conn->proxytype == CURLPROXY_HTTP ||
+                                 conn->proxytype == CURLPROXY_HTTP_1_0));
+  conn->bits.proxy_user_passwd =
+    (bool)(NULL != data->set.str[STRING_PROXYUSERNAME]);
   conn->bits.tunnel_proxy = data->set.tunnel_thru_httpproxy;
 
 #endif /* CURL_DISABLE_PROXY */
@@ -4315,7 +4318,8 @@ static CURLcode create_conn(struct SessionHandle *data,
   if(proxy && *proxy) {
     long bits = conn->protocol & (PROT_HTTPS|PROT_SSL|PROT_MISSING);
 
-    if(conn->proxytype == CURLPROXY_HTTP) {
+    if((conn->proxytype == CURLPROXY_HTTP) ||
+       (conn->proxytype == CURLPROXY_HTTP_1_0)) {
       /* force this connection's protocol to become HTTP */
       conn->protocol = PROT_HTTP | bits;
       conn->bits.httpproxy = TRUE;

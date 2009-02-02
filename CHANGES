@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel Stenberg (2 Feb 2009)
+- Craig A West brought us: libcurl now defaults to do CONNECT with HTTP
+  version 1.1 instead of 1.0 like before. This change also introduces the new
+  proxy type for libcurl called 'CURLPROXY_HTTP_1_0' that then allows apps to
+  switch (back) to CONNECT 1.0 requests. The curl tool also got a --proxy1.0
+  option that works exactly like --proxy but sets CURLPROXY_HTTP_1_0.
+
+  I updated all test cases cases that use CONNECT and I tried to do some using
+  --proxy1.0 and some updated to do CONNECT 1.1 to get both versions run.
+
 Daniel Stenberg (31 Jan 2009)
 - When building with c-ares 1.6.1 (not yet released) or later and IPv6 support
   enabled, we can now take advantage of its brand new AF_UNSPEC support in

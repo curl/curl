@@ -1894,6 +1894,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     break;
 #endif /* CURL_DISABLE_PROXY */
   case CURLPROXY_HTTP:
+  case CURLPROXY_HTTP_1_0:
     /* do nothing here. handled later. */
     break;
   default:

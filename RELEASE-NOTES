@@ -1,7 +1,7 @@
 Curl and libcurl 7.19.4
 
  Public curl releases:         110
- Command line options:         131
+ Command line options:         132
  curl_easy_setopt() options:   161
  Public functions in libcurl:  58
  Known libcurl bindings:       37
@@ -17,6 +17,7 @@ This release includes the following changes:
    the corresponding curl options --socks5-gssapi-service and
    --socks5-gssapi-nec
  o Improved IPv6 support when built with with c-ares >= 1.6.1
+ o Added CURLPROXY_HTTP_1_0 and --proxy1.0
 
 This release includes the following bugfixes:
 

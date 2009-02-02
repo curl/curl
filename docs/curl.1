@@ -903,6 +903,13 @@ with a remote host. (Added in 7.17.1)
 .IP "--proxy-ntlm"
 Tells curl to use HTTP NTLM authentication when communicating with the given
 proxy. Use \fI--ntlm\fP for enabling NTLM with a remote host.
+.IP "--proxy1.0 <proxyhost[:port]>"
+Use the specified HTTP 1.0 proxy. If the port number is not specified, it is
+assumed at port 1080.
+
+The only difference between this and the HTTP proxy option (\fI-x/--proxy\fP),
+is that attempts to use CONNECT through the proxy will specify an HTTP 1.0
+protocol instead of the default HTTP 1.1.
 .IP "-p/--proxytunnel"
 When an HTTP proxy is used (\fI-x/--proxy\fP), this option will cause non-HTTP
 protocols to attempt to tunnel through the proxy instead of merely using it to

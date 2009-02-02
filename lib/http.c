@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1343,6 +1343,8 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
         char *host=(char *)"";
         const char *proxyconn="";
         const char *useragent="";
+        const char *http = (conn->proxytype == CURLPROXY_HTTP_1_0) ?
+          "1.0" : "1.1";
 
         if(!checkheaders(data, "Host:")) {
           host = aprintf("Host: %s\r\n", host_port);
@@ -1363,12 +1365,12 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
         /* BLOCKING */
         result =
           add_bufferf(req_buffer,
-                      "CONNECT %s:%d HTTP/1.0\r\n"
+                      "CONNECT %s:%d HTTP/%s\r\n"
                       "%s"  /* Host: */
                       "%s"  /* Proxy-Authorization */
                       "%s"  /* User-Agent */
                       "%s", /* Proxy-Connection */
-                      hostname, remote_port,
+                      hostname, remote_port, http,
                       host,
                       conn->allocptr.proxyuserpwd?
                       conn->allocptr.proxyuserpwd:"",

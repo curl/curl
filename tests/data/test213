@@ -77,10 +77,10 @@ http
 NTLM
 </features>
  <name>
-HTTP proxy CONNECT auth NTLM and then POST
+HTTP 1.0 proxy CONNECT auth NTLM and then POST
  </name>
  <command>
-http://test.remote.server.com:213/path/2130002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-ntlm --proxytunnel -d "postit"
+http://test.remote.server.com:213/path/2130002 --proxy1.0 http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-ntlm --proxytunnel -d "postit"
 </command>
 </client>
 

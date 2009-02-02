@@ -98,12 +98,12 @@ http://test.remote.server.com:265/path/2650002 --proxy http://%HOSTIP:%HTTPPORT 
 s/^(Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA).*/$1/
 </strippart>
 <protocol nonewline="yes">
-CONNECT test.remote.server.com:265 HTTP/1.0
+CONNECT test.remote.server.com:265 HTTP/1.1
 Host: test.remote.server.com:265
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 Proxy-Connection: Keep-Alive
 
-CONNECT test.remote.server.com:265 HTTP/1.0
+CONNECT test.remote.server.com:265 HTTP/1.1
 Host: test.remote.server.com:265
 Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA
 Proxy-Connection: Keep-Alive

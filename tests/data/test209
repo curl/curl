@@ -95,12 +95,12 @@ http://test.remote.server.com:209/path/2090002 --proxy http://%HOSTIP:%HTTPPORT 
 s/^(Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA).*/$1/
 </strippart>
 <protocol>
-CONNECT test.remote.server.com:209 HTTP/1.0
+CONNECT test.remote.server.com:209 HTTP/1.1
 Host: test.remote.server.com:209
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 Proxy-Connection: Keep-Alive
 
-CONNECT test.remote.server.com:209 HTTP/1.0
+CONNECT test.remote.server.com:209 HTTP/1.1
 Host: test.remote.server.com:209
 Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA
 Proxy-Connection: Keep-Alive

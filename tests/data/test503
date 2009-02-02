@@ -61,7 +61,7 @@ moo
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-CONNECT %HOSTIP:%HTTPSPORT HTTP/1.0
+CONNECT %HOSTIP:%HTTPSPORT HTTP/1.1
 Host: %HOSTIP:%HTTPSPORT
 Proxy-Authorization: Basic dGVzdDppbmc=
 Proxy-Connection: Keep-Alive

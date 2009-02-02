@@ -102,12 +102,12 @@ http://test.remote.server.com:1008/path/10080002 --proxy http://%HOSTIP:%HTTPPOR
 s/^(Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA).*/$1/
 </strippart>
 <protocol>
-CONNECT test.remote.server.com:1008 HTTP/1.0
+CONNECT test.remote.server.com:1008 HTTP/1.1
 Host: test.remote.server.com:1008
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 Proxy-Connection: Keep-Alive
 
-CONNECT test.remote.server.com:1008 HTTP/1.0
+CONNECT test.remote.server.com:1008 HTTP/1.1
 Host: test.remote.server.com:1008
 Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA
 Proxy-Connection: Keep-Alive

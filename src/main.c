@@ -448,6 +448,7 @@ struct Configurable {
   char *userpwd;
   char *proxyuserpwd;
   char *proxy;
+  int proxyver;     /* set to CURLPROXY_HTTP* define */
   char *noproxy;
   bool proxytunnel;
   bool ftp_append;         /* APPE on ftp */
@@ -791,6 +792,7 @@ static void help(void)
     "    --proxy-negotiate Use Negotiate authentication on the proxy (H)",
     "    --proxy-ntlm    Use NTLM authentication on the proxy (H)",
     " -U/--proxy-user <user[:password]> Set proxy user and password",
+    "    --proxy1.0 <host[:port]> Use HTTP/1.0 proxy on given port",
     " -p/--proxytunnel   Operate through a HTTP proxy tunnel (using CONNECT)",
     "    --pubkey <key>  Public key file name (SSH)",
     " -Q/--quote <cmd>   Send command(s) to server before file transfer (F/SFTP)",
@@ -1681,6 +1683,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$6", "socks5-gssapi-service",  TRUE},
     {"$7", "socks5-gssapi-nec",  FALSE},
 #endif
+    {"$8", "proxy1.0",   TRUE},
 
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
@@ -2202,6 +2205,11 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         config->socks5_gssapi_nec = TRUE;
         break;
 #endif
+      case '8': /* --proxy1.0 */
+        /* http 1.0 proxy */
+        GetStr(&config->proxy, nextarg);
+        config->proxyver = CURLPROXY_HTTP_1_0;
+        break;
       }
       break;
     case '#': /* --progress-bar */
@@ -2887,6 +2895,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     case 'x':
       /* proxy */
       GetStr(&config->proxy, nextarg);
+      config->proxyver = CURLPROXY_HTTP;
       break;
     case 'X':
       /* set custom request */
@@ -4567,6 +4576,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         my_setopt(curl, CURLOPT_INFILESIZE_LARGE, uploadfilesize);
         my_setopt(curl, CURLOPT_URL, url);     /* what to fetch */
         my_setopt(curl, CURLOPT_PROXY, config->proxy); /* proxy to use */
+        if(config->proxy)
+          my_setopt(curl, CURLOPT_PROXYTYPE, config->proxyver);
         my_setopt(curl, CURLOPT_NOPROGRESS, config->noprogress);
         if(config->no_body) {
           my_setopt(curl, CURLOPT_NOBODY, 1);

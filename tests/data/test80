@@ -45,10 +45,10 @@ contents
 http
 </server>
  <name>
-HTTP CONNECT with proxytunnel and host Basic authentication
+HTTP 1.0 CONNECT with proxytunnel and host Basic authentication
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/that/page/80 -p -x %HOSTIP:%HTTPPORT --user iam:myself --proxy-user youare:yourself
+http://%HOSTIP:%HTTPPORT/we/want/that/page/80 -p --proxy1.0 %HOSTIP:%HTTPPORT --user iam:myself --proxy-user youare:yourself
 </command>
 </client>
 

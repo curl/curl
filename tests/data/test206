@@ -81,11 +81,11 @@ http://test.remote.server.com:206/path/2060002 --proxy http://%HOSTIP:%HTTPPORT 
 ^User-Agent: curl/.*
 </strip>
 <protocol>
-CONNECT test.remote.server.com:206 HTTP/1.0
+CONNECT test.remote.server.com:206 HTTP/1.1
 Host: test.remote.server.com:206
 Proxy-Connection: Keep-Alive
 
-CONNECT test.remote.server.com:206 HTTP/1.0
+CONNECT test.remote.server.com:206 HTTP/1.1
 Host: test.remote.server.com:206
 Proxy-Authorization: Digest username="silly", realm="weirdorealm", nonce="12345", uri="test.remote.server.com:206", response="5059a96c954981ceb94e17d667c8d3f8"
 Proxy-Connection: Keep-Alive
