@@ -646,7 +646,7 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
     }
 
     /* If this easy_handle was the last one in charge for one or more
-       connections a the shared connection cache, we might need to keep this
+       connections in the shared connection cache, we might need to keep this
        handle around until either A) the connection is closed and killed
        properly, or B) another easy_handle uses the connection.
 
