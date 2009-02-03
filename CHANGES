@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (3 Feb 2009)
+- Hidemoto Nakada provided a small fix that makes it possible to get the
+  CURLINFO_CONTENT_LENGTH_DOWNLOAD size from file:// "transfers" with
+  CURLOPT_NOBODY set true.
+
 Daniel Stenberg (2 Feb 2009)
 - Patrick Scott found a rather large memory leak when using the multi
   interface and setting CURLMOPT_MAXCONNECTS to something less than the number
@@ -24,7 +29,7 @@ Daniel Stenberg (2 Feb 2009)
 Daniel Stenberg (31 Jan 2009)
 - When building with c-ares 1.6.1 (not yet released) or later and IPv6 support
   enabled, we can now take advantage of its brand new AF_UNSPEC support in
-  ares_gethostbyname(). This makes test case 241 finally run fine for me wtih
+  ares_gethostbyname(). This makes test case 241 finally run fine for me with
   this setup since it now parses the "::1 ip6-localhost" line fine in my
   /etc/hosts file!
 

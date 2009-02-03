@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -496,6 +496,10 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
                tm->tm_sec);
       result = Curl_client_write(conn, CLIENTWRITE_BOTH, buf, 0);
     }
+    /* if we fstat()ed the file, set the file size to make it available post-
+       transfer */
+    if(fstated)
+      Curl_pgrsSetDownloadSize(data, expected_size);
     return result;
   }
 

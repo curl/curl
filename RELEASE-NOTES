@@ -26,6 +26,8 @@ This release includes the following bugfixes:
  o realms with quoted quotation marks in HTTP Digest headers
  o VC9 makefiles are now really included
  o multi interface memory leak with CURLMOPT_MAXCONNECTS set
+ o CURLINFO_CONTENT_LENGTH_DOWNLOAD size from file:// "transfers" with
+   CURLOPT_NOBODY set true
 
 This release includes the following known bugs:
 
@@ -36,6 +38,6 @@ advice from friends like these:
 
  Lisa Xu, Daniel Fandrich, Craig A West, Alexey Borzov, Sharad Gupta,
  Peter Sylvester, Chad Monroe, Markus Moeller, Yang Tse, Scott Cantor,
- Patrick Scott
+ Patrick Scott, Hidemoto Nakada
 
         Thanks! (and sorry if I forgot to mention someone)
