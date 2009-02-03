@@ -1,5 +1,9 @@
   Changelog for the c-ares project
 
+* February 3 2009 (Phil Blundell)
+- If the server returns garbage or nothing at all in response to an AAAA query,
+  go on and ask for A records anyway.
+
 * January 31 2009 (Daniel Stenberg)
 - ares_gethostbyname() now accepts 'AF_UNSPEC' as a family for resolving
   either AF_INET6 or AF_INET. It works by accepting any of the looksups in the
