@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Fandrich (4 Feb 2009)
+- Don't add the standard /usr/lib or /usr/include paths to LDFLAGS and CPPFLAGS
+  (respectively) when --with-ssl=/usr is used (patch based on FreeBSD).
+
 Daniel Stenberg (3 Feb 2009)
 - Hidemoto Nakada provided a small fix that makes it possible to get the
   CURLINFO_CONTENT_LENGTH_DOWNLOAD size from file:// "transfers" with
