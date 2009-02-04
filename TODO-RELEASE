@@ -1,8 +1,6 @@
 To be addressed in 7.19.4 (planned release: March 2009)
 =========================
 
-206 - A. Craig West's CURLOPT_HTTP_VERSION change for CONNECT
-
 214 - progress bar prefix, second try (for the curl tool)
 
 215 - Patch for Metalink Support (for the curl tool)
