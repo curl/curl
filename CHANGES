@@ -10,6 +10,10 @@ Daniel Fandrich (4 Feb 2009)
 - Don't add the standard /usr/lib or /usr/include paths to LDFLAGS and CPPFLAGS
   (respectively) when --with-ssl=/usr is used (patch based on FreeBSD).
 
+- Added an explicit buffer limit check in msdosify() (patch based on FreeBSD).
+  This couldn't ever overflow in curl, but might if the code were used
+  elsewhere or under different conditions.
+
 Daniel Stenberg (3 Feb 2009)
 - Hidemoto Nakada provided a small fix that makes it possible to get the
   CURLINFO_CONTENT_LENGTH_DOWNLOAD size from file:// "transfers" with

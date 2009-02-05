@@ -5350,12 +5350,14 @@ static char *basename(char *path)
 static const char *
 msdosify (const char *file_name)
 {
-  static char dos_name[PATH_MAX*2];
-  static const char illegal_chars_dos[] = ".+, ;=[]|<>\\\":?*";
+  static char dos_name[PATH_MAX];
+  static const char illegal_chars_dos[] = ".+, ;=[]" /* illegal in DOS */
+                                       "|<>\\\":?*"; /* illegal in DOS & W95 */
   static const char *illegal_chars_w95 = &illegal_chars_dos[8];
   int idx, dot_idx;
   const char *s = file_name;
   char *d = dos_name;
+  const char * const dlimit = dos_name + sizeof(dos_name) - 1;
   const char *illegal_aliens = illegal_chars_dos;
   size_t len = sizeof (illegal_chars_dos) - 1;
   int lfn = 0;
@@ -5376,7 +5378,7 @@ msdosify (const char *file_name)
     *d++ = *s++;
   }
 
-  for (idx = 0, dot_idx = -1; *s; s++, d++) {
+  for (idx = 0, dot_idx = -1; *s && d < dlimit; s++, d++) {
     if (memchr (illegal_aliens, *s, len)) {
       /* Dots are special: DOS doesn't allow them as the leading character,
          and a file name cannot have more than a single dot.  We leave the
