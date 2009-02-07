@@ -230,21 +230,6 @@ void Curl_safefree(void *ptr)
     free(ptr);
 }
 
-/* Copy an upper case version of the string from src to dest.  The
- * strings may overlap.  No more than n characters of the string are copied
- * (including any NUL) and the destination string will NOT be
- * NUL-terminated if that limit is reached.
- */
-void Curl_strntoupper(char *dest, const char *src, size_t n)
-{
-  if (n < 1)
-    return;
-
-  do {
-    *dest++ = Curl_raw_toupper(*src);
-  } while (*src++ && --n);
-}
-
 static void close_connections(struct SessionHandle *data)
 {
   /* Loop through all open connections and kill them one by one */

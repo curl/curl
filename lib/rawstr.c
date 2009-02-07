@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -92,7 +92,8 @@ char Curl_raw_toupper(char in)
  * this.  See http://daniel.haxx.se/blog/2008/10/15/strcasecmp-in-turkish/ for
  * some further explanation to why this function is necessary.
  *
- * The function is capable of comparing a-z case insensitively even for non-ascii.
+ * The function is capable of comparing a-z case insensitively even for
+ * non-ascii.
  */
 
 int Curl_raw_equal(const char *first, const char *second)
@@ -126,3 +127,17 @@ int Curl_raw_nequal(const char *first, const char *second, size_t max)
   return Curl_raw_toupper(*first) == Curl_raw_toupper(*second);
 }
 
+/* Copy an upper case version of the string from src to dest.  The
+ * strings may overlap.  No more than n characters of the string are copied
+ * (including any NUL) and the destination string will NOT be
+ * NUL-terminated if that limit is reached.
+ */
+void Curl_strntoupper(char *dest, const char *src, size_t n)
+{
+  if (n < 1)
+    return;
+
+  do {
+    *dest++ = Curl_raw_toupper(*src);
+  } while (*src++ && --n);
+}
