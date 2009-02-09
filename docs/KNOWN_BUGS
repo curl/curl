@@ -42,11 +42,6 @@ may have been fixed since this was written!
   library header files exporting symbols/macros that should be kept private
   to the KfW library. See ticket #5601 at http://krbdev.mit.edu/rt/
 
-53. SFTP busy-loop problem. When doing SFTP uploads, we can see that libcurl
-  occasionally will busy-loop while waiting for certain network conditions.
-  Reported by Pavel Shalagin, explained somewhat by Daniel Stenberg here:
-  http://curl.haxx.se/mail/lib-2008-04/0439.html
-
 52. Gautam Kachroo's issue that identifies a problem with the multi interface
   where a connection can be re-used without actually being properly
   SSL-negoatiated:
