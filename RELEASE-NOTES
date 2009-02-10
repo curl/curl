@@ -18,6 +18,7 @@ This release includes the following changes:
    --socks5-gssapi-nec
  o Improved IPv6 support when built with with c-ares >= 1.6.1
  o Added CURLPROXY_HTTP_1_0 and --proxy1.0
+ o Added docs/libcurl/symbols-in-versions
 
 This release includes the following bugfixes:
 
