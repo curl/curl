@@ -563,7 +563,7 @@ data at a time, and can contribute to congestion on the network if
 overdone.
 .IP CURLOPT_ADDRESS_SCOPE
 Pass a long specifying the scope_id value to use when connecting to IPv6
-link-local or site-local addresses.
+link-local or site-local addresses. (Added in 7.19.0)
 .SH NAMES and PASSWORDS OPTIONS (Authentication)
 .IP CURLOPT_NETRC
 This parameter controls the preference of libcurl between using user names and
@@ -861,7 +861,6 @@ copy. In any case, the size must not be changed after
 \fICURLOPT_COPYPOSTFIELDS\fP, unless another \fICURLOPT_POSTFIELDS\fP or
 \fICURLOPT_COPYPOSTFIELDS\fP option is issued.
 (Added in 7.17.1)
-
 .IP CURLOPT_HTTPPOST
 Tells libcurl you want a multipart/formdata HTTP POST to be made and you
 instruct what data to pass on to the server.  Pass a pointer to a linked list
