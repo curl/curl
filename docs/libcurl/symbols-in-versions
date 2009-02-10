@@ -1,0 +1,292 @@
+                                  _   _ ____  _
+                              ___| | | |  _ \| |
+                             / __| | | | |_) | |
+                            | (__| |_| |  _ <| |___
+                             \___|\___/|_| \_\_____|
+
+ This document lists defines and other symbols present in libcurl, together
+ with exact information about the first libcurl version that provides the
+ symbol, the first version in which the symbol was marked as deprecated and
+ for a few symbols the last version that featured it. The names appear in
+ alphabetical order.
+
+ Name                           Introduced  Deprecated  Removed
+
+CURLAUTH_ANY                    7.10.6
+CURLAUTH_ANYSAFE                7.10.6
+CURLAUTH_BASIC                  7.10.6
+CURLAUTH_DIGEST                 7.10.6
+CURLAUTH_DIGEST_IE              7.19.3
+CURLAUTH_GSSNEGOTIATE           7.10.6
+CURLAUTH_NTLM                   7.10.6
+CURLFTPAUTH_DEFAULT             7.12.2
+CURLFTPAUTH_DEFAULT             7.12.2
+CURLFTPAUTH_SSL                 7.12.2
+CURLFTPAUTH_SSL                 7.12.2
+CURLFTPAUTH_TLS                 7.12.2
+CURLFTPAUTH_TLS                 7.12.2
+CURLFTPMETHOD_MULTICWD          7.15.1
+CURLFTPMETHOD_NOCWD             7.15.1
+CURLFTPMETHOD_SINGLECWD         7.15.1
+CURLFTPSSL_CCC_ACTIVE           7.16.1
+CURLFTPSSL_CCC_NONE             7.16.1
+CURLFTPSSL_CCC_PASSIVE          7.16.1
+CURLINFO_APPCONNECT_TIME        7.19.0
+CURLINFO_CERTINFO               7.19.1
+CURLINFO_CONNECT_TIME           7.4.1
+CURLINFO_CONTENT_LENGTH_DOWNLOAD 7.6.1
+CURLINFO_CONTENT_LENGTH_UPLOAD  7.6.1
+CURLINFO_CONTENT_TYPE           7.9.4
+CURLINFO_COOKIELIST             7.14.1
+CURLINFO_DATA_IN                7.9.6
+CURLINFO_DATA_OUT               7.9.6
+CURLINFO_FILETIME               7.5
+CURLINFO_FTP_ENTRY_PATH         7.15.4
+CURLINFO_HEADER_IN              7.9.6
+CURLINFO_HEADER_OUT             7.9.6
+CURLINFO_HEADER_SIZE            7.4.1
+CURLINFO_HTTPAUTH_AVAIL         7.10.8
+CURLINFO_HTTP_CODE              7.4.1         7.10.8
+CURLINFO_HTTP_CONNECTCODE       7.10.7
+CURLINFO_LASTSOCKET             7.15.2
+CURLINFO_NAMELOOKUP_TIME        7.4.1
+CURLINFO_NUM_CONNECTS           7.12.3
+CURLINFO_OS_ERRNO               7.12.2
+CURLINFO_PRETRANSFER_TIME       7.4.1
+CURLINFO_PRIMARY_IP             7.19.0
+CURLINFO_PRIVATE                7.10.3
+CURLINFO_PRIVATE                7.10.3
+CURLINFO_PROXYAUTH_AVAIL        7.10.8
+CURLINFO_REDIRECT_COUNT         7.9.7
+CURLINFO_REDIRECT_TIME          7.9.7
+CURLINFO_REDIRECT_URL           7.18.2
+CURLINFO_REQUEST_SIZE           7.4.1
+CURLINFO_RESPONSE_CODE          7.10.8
+CURLINFO_SIZE_DOWNLOAD          7.4.1
+CURLINFO_SIZE_UPLOAD            7.4.1
+CURLINFO_SPEED_DOWNLOAD         7.4.1
+CURLINFO_SPEED_UPLOAD           7.4.1
+CURLINFO_SSL_ENGINES            7.12.3
+CURLINFO_SSL_VERIFYRESULT       7.5
+CURLINFO_STARTTRANSFER_TIME     7.9.2
+CURLINFO_TEXT                   7.9.6
+CURLINFO_TOTAL_TIME             7.4.1
+CURLOPT_ADDRESS_SCOPE           7.19.0
+CURLOPT_APPEND                  7.16.4
+CURLOPT_AUTOREFERER             7.1
+CURLOPT_BUFFERSIZE              7.10
+CURLOPT_CAINFO                  7.4.2
+CURLOPT_CAPATH                  7.9.8
+CURLOPT_CERTINFO                7.19.1
+CURLOPT_CLOSEFUNCTION           7.7           7.11.1      7.15.4
+CURLOPT_CLOSEPOLICY             7.7           7.16.1
+CURLOPT_CONNECTTIMEOUT          7.7
+CURLOPT_CONNECTTIMEOUT_MS       7.16.2
+CURLOPT_CONNECT_ONLY            7.15.2
+CURLOPT_CONV_FROM_NETWORK_FUNCTION 7.15.4
+CURLOPT_CONV_FROM_UTF8_FUNCTION 7.15.4
+CURLOPT_CONV_TO_NETWORK_FUNCTION 7.15.4
+CURLOPT_COOKIE                  7.1
+CURLOPT_COOKIEFILE              7.1
+CURLOPT_COOKIEJAR               7.9
+CURLOPT_COOKIELIST              7.17.1
+CURLOPT_COOKIESESSION           7.9.7
+CURLOPT_COPYPOSTFIELDS          7.17.1
+CURLOPT_CRLF                    7.1
+CURLOPT_CRLFILE                 7.19.0
+CURLOPT_CUSTOMREQUEST           7.1
+CURLOPT_DEBUGDATA               7.9.6
+CURLOPT_DEBUGFUNCTION           7.9.6
+CURLOPT_DIRLISTONLY             7.16.4
+CURLOPT_DNS_CACHE_TIMEOUT       7.9.3
+CURLOPT_DNS_USE_GLOBAL_CACHE    7.9.3         7.11.1
+CURLOPT_EGDSOCKET               7.7
+CURLOPT_ENCODING                7.12.2
+CURLOPT_ERRORBUFFER             7.1
+CURLOPT_FAILONERROR             7.1
+CURLOPT_FILE                    7.1           7.9.7
+CURLOPT_FILETIME                7.5
+CURLOPT_FLAGS                   7.1           -           7.9.2
+CURLOPT_FOLLOWLOCATION          7.1
+CURLOPT_FORBID_REUSE            7.7
+CURLOPT_FRESH_CONNECT           7.7
+CURLOPT_FTPAPPEND               7.1           7.16.4
+CURLOPT_FTPASCII                7.1           7.11.1      7.15.4
+CURLOPT_FTPLISTONLY             7.1           7.16.4
+CURLOPT_FTPPORT                 7.1
+CURLOPT_FTPSSLAUTH              7.12.2     
+CURLOPT_FTP_ACCOUNT             7.13.1
+CURLOPT_FTP_ALTERNATIVE_TO_USER 7.15.5
+CURLOPT_FTP_CREATE_MISSING_DIRS 7.10.7
+CURLOPT_FTP_FILEMETHOD          7.15.1
+CURLOPT_FTP_RESPONSE_TIMEOUT    7.10.8
+CURLOPT_FTP_SKIP_PASV_IP        7.15.0
+CURLOPT_FTP_SSL                 7.11.0        7.16.4
+CURLOPT_FTP_SSL_CCC             7.16.1
+CURLOPT_FTP_USE_EPRT            7.10.5
+CURLOPT_FTP_USE_EPSV            7.9.2
+CURLOPT_HEADER                  7.1
+CURLOPT_HEADERFUNCTION          7.7.2
+CURLOPT_HTTP200ALIASES          7.10.3
+CURLOPT_HTTPAUTH                7.10.6
+CURLOPT_HTTPGET                 7.8.1
+CURLOPT_HTTPHEADER              7.1
+CURLOPT_HTTPPOST                7.1
+CURLOPT_HTTPPROXYTUNNEL         7.3
+CURLOPT_HTTPREQUEST             7.1           -           7.15.4
+CURLOPT_HTTP_CONTENT_DECODING   7.16.2
+CURLOPT_HTTP_TRANSFER_DECODING  7.16.2
+CURLOPT_HTTP_VERSION            7.9.1
+CURLOPT_IGNORE_CONTENT_LENGTH   7.14.1
+CURLOPT_INFILE                  7.1           7.9.7
+CURLOPT_INFILESIZE              7.1
+CURLOPT_INFILESIZE_LARGE        7.11.0
+CURLOPT_INTERFACE               7.3
+CURLOPT_IOCTLDATA               7.12.3
+CURLOPT_IOCTLFUNCTION           7.12.3
+CURLOPT_IPRESOLVE               7.10.8
+CURLOPT_ISSUERCERT              7.19.0
+CURLOPT_KEYPASSWD               7.17.0
+CURLOPT_KRB4LEVEL               7.3
+CURLOPT_KRBLEVEL                7.16.4
+CURLOPT_LOCALPORT               7.15.2
+CURLOPT_LOCALPORTRANGE          7.15.2
+CURLOPT_LOW_SPEED_LIMIT         7.1
+CURLOPT_LOW_SPEED_TIME          7.1
+CURLOPT_MAXCONNECTS             7.7
+CURLOPT_MAXFILESIZE             7.10.8
+CURLOPT_MAXFILESIZE_LARGE       7.11.0
+CURLOPT_MAXREDIRS               7.5
+CURLOPT_MAX_RECV_SPEED_LARGE    7.15.5
+CURLOPT_MAX_SEND_SPEED_LARGE    7.15.5
+CURLOPT_MUTE                    7.1           7.8         7.15.4
+CURLOPT_NETRC                   7.1
+CURLOPT_NETRC_FILE              7.11.0
+CURLOPT_NEW_DIRECTORY_PERMS     7.16.4
+CURLOPT_NEW_FILE_PERMS          7.16.4
+CURLOPT_NOBODY                  7.1
+CURLOPT_NOPROGRESS              7.1
+CURLOPT_NOPROXY                 7.19.4
+CURLOPT_NOSIGNAL                7.10
+CURLOPT_OPENSOCKETDATA          7.17.1
+CURLOPT_OPENSOCKETFUNCTION      7.17.1
+CURLOPT_PASSWDDATA              7.1           7.11.1      7.15.4
+CURLOPT_PASSWDFUNCTION          7.1           7.11.1      7.15.4
+CURLOPT_PASSWORD                7.19.1
+CURLOPT_PASV_POST               7.12.1        -           7.13.0
+CURLOPT_PORT                    7.1
+CURLOPT_POST                    7.1
+CURLOPT_POST301                 7.17.1        7.19.1
+CURLOPT_POSTFIELDS              7.1
+CURLOPT_POSTFIELDSIZE           7.2
+CURLOPT_POSTFIELDSIZE_LARGE     7.11.1
+CURLOPT_POSTQUOTE               7.1
+CURLOPT_POSTREDIR               7.19.1
+CURLOPT_PREQUOTE                7.9.5
+CURLOPT_PRIVATE                 7.10.3
+CURLOPT_PROGRESSDATA            7.1
+CURLOPT_PROGRESSFUNCTION        7.1
+CURLOPT_PROGRESSMODE            7.1           -           7.9.2
+CURLOPT_PROXY                   7.1
+CURLOPT_PROXYAUTH               7.10.7
+CURLOPT_PROXYPASSWORD           7.19.1
+CURLOPT_PROXYPORT               7.1
+CURLOPT_PROXYTYPE               7.10
+CURLOPT_PROXYUSERNAME           7.19.1
+CURLOPT_PROXYUSERPWD            7.1
+CURLOPT_PROXY_TRANSFER_MODE     7.18.0
+CURLOPT_PUT                     7.1
+CURLOPT_QUOTE                   7.1
+CURLOPT_RANDOM_FILE             7.7
+CURLOPT_RANGE                   7.1
+CURLOPT_READDATA                7.9.7
+CURLOPT_READFUNCTION            7.1
+CURLOPT_REFERER                 7.1
+CURLOPT_RESUME_FROM             7.1
+CURLOPT_RESUME_FROM_LARGE       7.11.0
+CURLOPT_SEEKDATA                7.18.1
+CURLOPT_SEEKFUNCTION            7.18.1
+CURLOPT_SHARE                   7.10
+CURLOPT_SOCKOPTDATA             7.16.0
+CURLOPT_SOCKOPTFUNCTION         7.16.0
+CURLOPT_SOCKS5_GSSAPI_NEC       7.19.4
+CURLOPT_SOCKS5_GSSAPI_SERVICE   7.19.4
+CURLOPT_SOURCE_HOST             7.12.1        -           7.13.0
+CURLOPT_SOURCE_PATH             7.12.1        -           7.13.0
+CURLOPT_SOURCE_PORT             7.12.1        -           7.13.0
+CURLOPT_SOURCE_POSTQUOTE        7.12.1        -           7.15.4
+CURLOPT_SOURCE_PREQUOTE         7.12.1        -           7.15.4
+CURLOPT_SOURCE_QUOTE            7.13.0        -           7.15.4
+CURLOPT_SOURCE_URL              7.13.0        -           7.15.4
+CURLOPT_SOURCE_USERPWD          7.12.1        -           7.15.4
+CURLOPT_SSH_AUTH_TYPES          7.16.1
+CURLOPT_SSH_HOST_PUBLIC_KEY_MD5 7.17.1
+CURLOPT_SSH_PRIVATE_KEYFILE     7.16.1
+CURLOPT_SSH_PUBLIC_KEYFILE      7.16.1
+CURLOPT_SSLCERT                 7.1
+CURLOPT_SSLCERTTYPE             7.9.3
+CURLOPT_SSLENGINE               7.9.3
+CURLOPT_SSLENGINE_DEFAULT       7.9.3
+CURLOPT_SSLKEY                  7.9.3
+CURLOPT_SSLKEYPASSWD            7.17.0
+CURLOPT_SSLKEYTYPE              7.9.3
+CURLOPT_SSLVERSION              7.1
+CURLOPT_SSL_CIPHER_LIST         7.9
+CURLOPT_SSL_CTX_DATA            7.10.6
+CURLOPT_SSL_CTX_FUNCTION        7.10.6
+CURLOPT_SSL_SESSIONID_CACHE     7.16.0
+CURLOPT_SSL_VERIFYHOST          7.8.1
+CURLOPT_SSL_VERIFYPEER          7.4.2
+CURLOPT_STDERR                  7.1
+CURLOPT_TCP_NODELAY             7.11.2
+CURLOPT_TELNETOPTIONS           7.7
+CURLOPT_TFTPBLKSIZE             7.19.4
+CURLOPT_TIMECONDITION           7.1
+CURLOPT_TIMEOUT                 7.1
+CURLOPT_TIMEOUT_MS              7.16.2
+CURLOPT_TIMEVALUE               7.1
+CURLOPT_TRANSFERTEXT            7.11.1
+CURLOPT_UNRESTRICTED_AUTH       7.10.4
+CURLOPT_UPLOAD                  7.1
+CURLOPT_URL                     7.1
+CURLOPT_USERAGENT               7.1
+CURLOPT_USERNAME                7.19.1
+CURLOPT_USERPWD                 7.1
+CURLOPT_USE_SSL                 7.17.0
+CURLOPT_VERBOSE                 7.1
+CURLOPT_WRITEDATA               7.9.7
+CURLOPT_WRITEFUNCTION           7.1
+CURLOPT_WRITEHEADER             7.1
+CURLPROXY_HTTP                  7.10
+CURLPROXY_SOCKS4                7.10
+CURLPROXY_SOCKS4                7.10
+CURLUSESSL_ALL                  7.17.0
+CURLUSESSL_CONTROL              7.17.0
+CURLUSESSL_NONE                 7.17.0
+CURLUSESSL_TRY                  7.17.0
+CURL_HTTP_VERSION_1_0           7.9.1
+CURL_HTTP_VERSION_1_1           7.9.1
+CURL_HTTP_VERSION_NONE          7.9.1
+CURL_IPRESOLVE_V4               7.10.8
+CURL_IPRESOLVE_V6               7.10.8
+CURL_IPRESOLVE_WHATEVER         7.10.8
+CURL_NETRC_IGNORED              7.9.8
+CURL_NETRC_OPTIONAL             7.9.8
+CURL_NETRC_REQUIRED             7.9.8
+CURL_SSLVERSION_DEFAULT         7.9.2
+CURL_SSLVERSION_SSLv2           7.9.2
+CURL_SSLVERSION_SSLv3           7.9.2
+CURL_SSLVERSION_TLSv1           7.9.2
+CURL_VERSION_ASYNCHDNS          7.10.7
+CURL_VERSION_CONV               7.15.4
+CURL_VERSION_DEBUG              7.10.6
+CURL_VERSION_GSSNEGOTIATE       7.10.6
+CURL_VERSION_IDN                7.12.0
+CURL_VERSION_IPV6               7.10
+CURL_VERSION_KERBEROS4          7.10
+CURL_VERSION_LARGEFILE          7.11.1
+CURL_VERSION_LIBZ               7.10
+CURL_VERSION_NTLM               7.10.6
+CURL_VERSION_SPNEGO             7.10.8
+CURL_VERSION_SSL                7.10
+CURL_VERSION_SSPI               7.13.2
