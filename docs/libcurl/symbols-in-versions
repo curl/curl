@@ -258,8 +258,11 @@ CURLOPT_WRITEDATA               7.9.7
 CURLOPT_WRITEFUNCTION           7.1
 CURLOPT_WRITEHEADER             7.1
 CURLPROXY_HTTP                  7.10
+CURLPROXY_HTTP_1_0              7.19.4
 CURLPROXY_SOCKS4                7.10
-CURLPROXY_SOCKS4                7.10
+CURLPROXY_SOCKS4A               7.18.0
+CURLPROXY_SOCKS5                7.10
+CURLPROXY_SOCKS5_HOSTNAME       7.18.0
 CURLUSESSL_ALL                  7.17.0
 CURLUSESSL_CONTROL              7.17.0
 CURLUSESSL_NONE                 7.17.0
