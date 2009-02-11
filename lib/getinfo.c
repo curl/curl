@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -227,6 +227,10 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
        pointer but we can pretend it is here */
     ptr.to_certinfo = &data->info.certs;
     *param_slistp = ptr.to_slist;
+    break;
+  case CURLINFO_CONDITION_UNMET:
+    /* return if the condition prevented the document to get transfered */
+    *param_longp = data->info.timecond;
     break;
   default:
     return CURLE_BAD_FUNCTION_ARGUMENT;

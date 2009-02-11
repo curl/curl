@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -497,6 +497,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
 		  infof(data,
 			"The requested document is not new enough\n");
 		  *done = TRUE;
+                  data->info.timecond = TRUE;
 		  return CURLE_OK;
 		}
 		break;
@@ -505,6 +506,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
 		  infof(data,
 			"The requested document is not old enough\n");
 		  *done = TRUE;
+                  data->info.timecond = TRUE;
 		  return CURLE_OK;
 		}
 		break;
@@ -1107,6 +1109,8 @@ static CURLcode readwrite_http_headers(struct SessionHandle *data,
 	   * MUST NOT contain a message-body, and thus is always
 	   * terminated by the first empty line after the header
 	   * fields.  */
+          if(data->set.timecondition)
+            data->info.timecond = TRUE;
 	  k->size=0;
 	  k->maxdownload=0;
 	  k->ignorecl = TRUE; /* ignore Content-Length headers */

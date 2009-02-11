@@ -2045,6 +2045,7 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
         if(data->info.filetime <= data->set.timevalue) {
           infof(data, "The requested document is not new enough\n");
           ftp->transfer = FTPTRANSFER_NONE; /* mark this to not transfer data */
+          data->info.timecond = TRUE;
           state(conn, FTP_STOP);
           return CURLE_OK;
         }
@@ -2053,6 +2054,7 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
         if(data->info.filetime > data->set.timevalue) {
           infof(data, "The requested document is not old enough\n");
           ftp->transfer = FTPTRANSFER_NONE; /* mark this to not transfer data */
+          data->info.timecond = TRUE;
           state(conn, FTP_STOP);
           return CURLE_OK;
         }

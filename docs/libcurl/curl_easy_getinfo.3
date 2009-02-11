@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_easy_getinfo 3 "16 Oct 2008" "libcurl 7.19.1" "libcurl Manual"
+.TH curl_easy_getinfo 3 "11 Feb 2009" "libcurl 7.19.4" "libcurl Manual"
 .SH NAME
 curl_easy_getinfo - extract information from a curl handle
 .SH SYNOPSIS
@@ -200,6 +200,12 @@ provided in a series of data in the format "name:content" where the content is
 for the specific named data. See also the certinfo.c example. NOTE: this
 option is only available in libcurl built with OpenSSL support. (Added in
 7.19.1)
+.IP CURLINFO_CONDITION_UNMET
+Pass a pointer to a long to receive the number 1 if the condition provided in
+the previous request didn't match (see \fICURLOPT_TIMECONDITION\fP). Alas, if
+this returns a 1 you know that the reason you didn't get data in return is
+because it didn't fulfill the condition. The long ths argument points to will
+get a zero stored if the condition instead was met. (Added in 7.19.4)
 .SH TIMES
 .NF
 An overview of the six time values available from curl_easy_getinfo()

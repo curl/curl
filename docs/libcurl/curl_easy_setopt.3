@@ -1326,8 +1326,10 @@ value is treated. You can set this parameter to \fICURL_TIMECOND_IFMODSINCE\fP
 or \fICURL_TIMECOND_IFUNMODSINCE\fP. This feature applies to HTTP and FTP.
 
 The last modification time of a file is not always known and in such instances
-this feature will have no effect even if the given time condition would not have
-been met.
+this feature will have no effect even if the given time condition would not
+have been met. \fIcurl_easy_getinfo(3)\fP with the
+\fICURLINFO_CONDITION_UNMET\fP option can be used after a transfer to learn if
+a zero-byte successful "transfer" was due to this condition not matching.
 .IP CURLOPT_TIMEVALUE
 Pass a long as parameter. This should be the time in seconds since 1 Jan 1970,
 and the time will be used in a condition as specified with

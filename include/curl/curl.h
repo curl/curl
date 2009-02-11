@@ -1592,9 +1592,10 @@ typedef enum {
   CURLINFO_PRIMARY_IP       = CURLINFO_STRING + 32,
   CURLINFO_APPCONNECT_TIME  = CURLINFO_DOUBLE + 33,
   CURLINFO_CERTINFO         = CURLINFO_SLIST  + 34,
+  CURLINFO_CONDITION_UNMET  = CURLINFO_LONG   + 35,
   /* Fill in new entries below here! */
 
-  CURLINFO_LASTONE          = 34
+  CURLINFO_LASTONE          = 35
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as
