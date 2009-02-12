@@ -60,7 +60,6 @@
 #include "http_ntlm.h"
 #include "url.h"
 #include "memory.h"
-#include "ssluse.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -68,9 +67,8 @@
 /* "NTLMSSP" signature is always in ASCII regardless of the platform */
 #define NTLMSSP_SIGNATURE "\x4e\x54\x4c\x4d\x53\x53\x50"
 
-#ifndef USE_WINDOWS_SSPI
-
-#  ifdef USE_SSLEAY
+#ifdef USE_SSLEAY
+#include "ssluse.h"
 #    ifdef USE_OPENSSL
 #      include <openssl/des.h>
 #      include <openssl/md4.h>
@@ -84,9 +82,6 @@
 #      include <ssl.h>
 #      include <rand.h>
 #    endif
-#  else
-#    error "Can't compile NTLM support without OpenSSL."
-#  endif
 
 #if OPENSSL_VERSION_NUMBER < 0x00907001L
 #define DES_key_schedule des_key_schedule
@@ -104,10 +99,20 @@
 #define DESKEY(x) &x
 #endif
 
-#else
+#elif defined(USE_GNUTLS)
+
+#include "gtls.h"
+#include <gcrypt.h>
+
+#define MD5_DIGEST_LENGTH 16
+#define MD4_DIGEST_LENGTH 16
+
+#elif defined(USE_WINDOWS_SSPI)
 
 #include "curl_sspi.h"
 
+#else
+#    error "Can't compile NTLM support without a crypto library."
 #endif
 
 /* The last #include file should be: */
@@ -314,6 +319,7 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
 
 #ifndef USE_WINDOWS_SSPI
 
+#ifdef USE_SSLEAY
 /*
  * Turns a 56 bit key into the 64 bit, odd parity key and sets the key.  The
  * key schedule ks is also set.
@@ -335,6 +341,28 @@ static void setup_des_key(const unsigned char *key_56,
   DES_set_odd_parity(&key);
   DES_set_key(&key, ks);
 }
+#elif defined(USE_GNUTLS)
+
+/*
+ * Turns a 56 bit key into the 64 bit, odd parity key and sets the key.
+ */
+static void setup_des_key(const unsigned char *key_56,
+			  gcry_cipher_hd_t *des)
+{
+  char key[8];
+
+  key[0] = key_56[0];
+  key[1] = (unsigned char)(((key_56[0] << 7) & 0xFF) | (key_56[1] >> 1));
+  key[2] = (unsigned char)(((key_56[1] << 6) & 0xFF) | (key_56[2] >> 2));
+  key[3] = (unsigned char)(((key_56[2] << 5) & 0xFF) | (key_56[3] >> 3));
+  key[4] = (unsigned char)(((key_56[3] << 4) & 0xFF) | (key_56[4] >> 4));
+  key[5] = (unsigned char)(((key_56[4] << 3) & 0xFF) | (key_56[5] >> 5));
+  key[6] = (unsigned char)(((key_56[5] << 2) & 0xFF) | (key_56[6] >> 6));
+  key[7] = (unsigned char) ((key_56[6] << 1) & 0xFF);
+
+  gcry_cipher_setkey(*des, key, 8);
+}
+#endif
 
  /*
   * takes a 21 byte array and treats it as 3 56-bit DES keys. The
@@ -345,6 +373,7 @@ static void lm_resp(const unsigned char *keys,
                     const unsigned char *plaintext,
                     unsigned char *results)
 {
+#ifdef USE_SSLEAY
   DES_key_schedule ks;
 
   setup_des_key(keys, DESKEY(ks));
@@ -358,6 +387,24 @@ static void lm_resp(const unsigned char *keys,
   setup_des_key(keys+14, DESKEY(ks));
   DES_ecb_encrypt((DES_cblock*) plaintext, (DES_cblock*) (results+16),
                   DESKEY(ks), DES_ENCRYPT);
+#elif USE_GNUTLS
+  gcry_cipher_hd_t des;
+
+  gcry_cipher_open(&des, GCRY_CIPHER_DES, GCRY_CIPHER_MODE_ECB, 0);
+  setup_des_key(keys, &des);
+  gcry_cipher_encrypt(des, results, 8, plaintext, 8);
+  gcry_cipher_close(des);
+
+  gcry_cipher_open(&des, GCRY_CIPHER_DES, GCRY_CIPHER_MODE_ECB, 0);
+  setup_des_key(keys+7, &des);
+  gcry_cipher_encrypt(des, results+8, 8, plaintext, 8);
+  gcry_cipher_close(des);
+
+  gcry_cipher_open(&des, GCRY_CIPHER_DES, GCRY_CIPHER_MODE_ECB, 0);
+  setup_des_key(keys+14, &des);
+  gcry_cipher_encrypt(des, results+16, 8, plaintext, 8);
+  gcry_cipher_close(des);
+#endif
 }
 
 
@@ -391,6 +438,7 @@ static void mk_lm_hash(struct SessionHandle *data,
   {
     /* Create LanManager hashed password. */
 
+#ifdef USE_SSLEAY
     DES_key_schedule ks;
 
     setup_des_key(pw, DESKEY(ks));
@@ -400,6 +448,19 @@ static void mk_lm_hash(struct SessionHandle *data,
     setup_des_key(pw+7, DESKEY(ks));
     DES_ecb_encrypt((DES_cblock *)magic, (DES_cblock *)(lmbuffer+8),
                     DESKEY(ks), DES_ENCRYPT);
+#elif USE_GNUTLS
+    gcry_cipher_hd_t des;
+
+    gcry_cipher_open(&des, GCRY_CIPHER_DES, GCRY_CIPHER_MODE_ECB, 0);
+    setup_des_key(pw, &des);
+    gcry_cipher_encrypt(des, lmbuffer, 8, magic, 8);
+    gcry_cipher_close(des);
+
+    gcry_cipher_open(&des, GCRY_CIPHER_DES, GCRY_CIPHER_MODE_ECB, 0);
+    setup_des_key(pw+7, &des);
+    gcry_cipher_encrypt(des, lmbuffer+8, 8, magic, 8);
+    gcry_cipher_close(des);
+#endif
 
     memset(lmbuffer + 16, 0, 21 - 16);
   }
@@ -443,11 +504,18 @@ static CURLcode mk_nt_hash(struct SessionHandle *data,
 
   {
     /* Create NT hashed password. */
+#ifdef USE_SSLEAY
     MD4_CTX MD4pw;
-
     MD4_Init(&MD4pw);
     MD4_Update(&MD4pw, pw, 2*len);
     MD4_Final(ntbuffer, &MD4pw);
+#elif USE_GNUTLS
+    gcry_md_hd_t MD4pw;
+    gcry_md_open(&MD4pw, GCRY_MD_MD4, 0);
+    gcry_md_write(MD4pw, pw, 2*len);
+    memcpy (ntbuffer, gcry_md_read (MD4pw, 0), MD4_DIGEST_LENGTH);
+    gcry_md_close(MD4pw);
+#endif
 
     memset(ntbuffer + 16, 0, 21 - 16);
   }
@@ -837,12 +905,18 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       unsigned char ntbuffer[0x18];
       unsigned char tmp[0x18];
       unsigned char md5sum[MD5_DIGEST_LENGTH];
-      MD5_CTX MD5pw;
       unsigned char entropy[8];
 
       /* Need to create 8 bytes random data */
+#ifdef USE_SSLEAY
+      MD5_CTX MD5pw;
       Curl_ossl_seed(conn->data); /* Initiate the seed if not already done */
       RAND_bytes(entropy,8);
+#elif USE_GNUTLS
+      gcry_md_hd_t MD5pw;
+      Curl_gtls_seed(conn->data); /* Initiate the seed if not already done */
+      gcry_randomize(entropy, 8, GCRY_STRONG_RANDOM);
+#endif
 
       /* 8 bytes random data as challenge in lmresp */
       memcpy(lmresp,entropy,8);
@@ -853,9 +927,17 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       memcpy(tmp,&ntlm->nonce[0],8);
       memcpy(tmp+8,entropy,8);
 
+#ifdef USE_SSLEAY
       MD5_Init(&MD5pw);
       MD5_Update(&MD5pw, tmp, 16);
       MD5_Final(md5sum, &MD5pw);
+#elif USE_GNUTLS
+      gcry_md_open(&MD5pw, GCRY_MD_MD5, 0);
+      gcry_md_write(MD5pw, tmp, MD5_DIGEST_LENGTH);
+      memcpy(md5sum, gcry_md_read (MD5pw, 0), MD5_DIGEST_LENGTH);
+      gcry_md_close(MD5pw);
+#endif
+
       /* We shall only use the first 8 bytes of md5sum,
          but the des code in lm_resp only encrypt the first 8 bytes */
       if(mk_nt_hash(conn->data, passwdp, ntbuffer) == CURLE_OUT_OF_MEMORY)

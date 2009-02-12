@@ -20,6 +20,7 @@ This release includes the following changes:
  o Added CURLPROXY_HTTP_1_0 and --proxy1.0
  o Added docs/libcurl/symbols-in-versions
  o Added CURLINFO_CONDITION_UNMET
+ o Added support for Digest and NTLM authentication using GnuTLS
 
 This release includes the following bugfixes:
 

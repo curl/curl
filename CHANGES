@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel Fandrich (12 Feb 2009)
+- Added support for Digest and NTLM authentication using GnuTLS.
+
 Daniel Stenberg (11 Feb 2009)
 - CURLINFO_CONDITION_UNMET was added to allow an application to get to know if
   the condition in the previous request was unmet. This is typically a time

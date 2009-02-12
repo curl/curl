@@ -33,6 +33,7 @@
 #ifdef USE_GNUTLS
 #include <gnutls/gnutls.h>
 #include <gnutls/x509.h>
+#include <gcrypt.h>
 
 #include <string.h>
 #include <stdlib.h>
@@ -775,6 +776,31 @@ void Curl_gtls_session_free(void *ptr)
 size_t Curl_gtls_version(char *buffer, size_t size)
 {
   return snprintf(buffer, size, "GnuTLS/%s", gnutls_check_version(NULL));
+}
+
+static void gtls_seed(struct SessionHandle *data)
+{
+  /* TODO: to a good job seeding the RNG */
+  /* This may involve the gcry_control function and these options: */
+  /* GCRYCTL_SET_RANDOM_SEED_FILE */
+  /* GCRYCTL_SET_RNDEGD_SOCKET */
+}
+
+int Curl_gtls_seed(struct SessionHandle *data)
+{
+  /* we have the "SSL is seeded" boolean static to prevent multiple
+     time-consuming seedings in vain */
+  static bool ssl_seeded = FALSE;
+
+  /* Quickly add a bit of entropy */
+  gcry_fast_random_poll();
+
+  if(!ssl_seeded || data->set.str[STRING_SSL_RANDOM_FILE] ||
+     data->set.str[STRING_SSL_EGDSOCKET]) {
+    gtls_seed(data);
+    ssl_seeded = TRUE;
+  }
+  return 0;
 }
 
 #endif /* USE_GNUTLS */

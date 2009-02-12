@@ -47,6 +47,7 @@ ssize_t Curl_gtls_recv(struct connectdata *conn, /* connection data */
 void Curl_gtls_session_free(void *ptr);
 size_t Curl_gtls_version(char *buffer, size_t size);
 int Curl_gtls_shutdown(struct connectdata *conn, int sockindex);
+int Curl_gtls_seed(struct SessionHandle *data);
 
 /* API setup for GnuTLS */
 #define curlssl_init Curl_gtls_init
