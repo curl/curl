@@ -11,7 +11,7 @@ Daniel Stenberg (11 Feb 2009)
   the condition in the previous request was unmet. This is typically a time
   condition set with CURLOPT_TIMECONDITION and was previously not possible to
   reliably figure out. From bug report #2565128
-  (http://curl.haxx.se/bug/view.cgi?id=2565128)
+  (http://curl.haxx.se/bug/view.cgi?id=2565128) filed by Jocelyn Jaubert.
 
 Daniel Fandrich (4 Feb 2009)
 - Don't add the standard /usr/lib or /usr/include paths to LDFLAGS and CPPFLAGS
