@@ -2033,6 +2033,7 @@ CURL_CHECK_FUNC_IOCTL
 CURL_CHECK_FUNC_IOCTLSOCKET
 CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL
 CURL_CHECK_FUNC_LOCALTIME_R
+CURL_CHECK_FUNC_POLL
 CURL_CHECK_FUNC_SETSOCKOPT
 CURL_CHECK_FUNC_SIGACTION
 CURL_CHECK_FUNC_SIGINTERRUPT
@@ -2078,7 +2079,6 @@ AC_CHECK_FUNCS([basename \
   inet_addr \
   perror \
   pipe \
-  poll \
   setlocale \
   setmode \
   setrlimit \
@@ -2134,45 +2134,6 @@ if test "$ipv6" = "yes"; then
   fi
   CURL_CHECK_NI_WITHSCOPEID
 fi
-
-AC_MSG_CHECKING([if we are Mac OS X (to disable poll)])
-disable_poll=no
-case $host in
-  *-*-darwin*)
-    disable_poll="yes";
-    ;;
-  *)
-    ;;
-esac
-AC_MSG_RESULT($disable_poll)
-
-if test "$disable_poll" = "no"; then
-
-  dnl poll() might be badly emulated, as in Mac OS X 10.3 (and other BSDs?) and
-  dnl to find out we make an extra check here!
-  if test "$ac_cv_func_poll" = "yes"; then
-    AC_MSG_CHECKING([if poll works with NULL inputs])
-    AC_RUN_IFELSE([
-#ifdef HAVE_SYS_POLL_H
-#include <sys/poll.h>
-#elif defined(HAVE_POLL_H)
-#include <poll.h>
-#endif
-
-  int main(void)
-  {
-    /* make this return 0 == timeout since there's nothing to read from */
-    return poll((void *)0, 0, 10 /*ms*/);
-  }
-],
-    AC_MSG_RESULT(yes)
-    AC_DEFINE(HAVE_POLL_FINE, 1, [If you have a fine poll]),
-    AC_MSG_RESULT(no),
-    AC_MSG_RESULT(cross-compiling assumes yes)
-    AC_DEFINE(HAVE_POLL_FINE, 1, [If you have a fine poll])
-    ) dnl end of AC_RUN_IFELSE
-  fi dnl poll() was found
-fi dnl poll()-check is not disabled
 
 dnl ************************************************************
 dnl enable non-blocking communications
