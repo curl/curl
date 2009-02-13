@@ -658,22 +658,22 @@ FAQ
 
   4.2 Why do I get problems when I use & or % in the URL?
 
-  In general unix shells, the & letter is treated specially and when used, it
+  In general unix shells, the & symbol is treated specially and when used, it
   runs the specified command in the background. To safely send the & as a part
   of a URL, you should quote the entire URL by using single (') or double (")
   quotes around it. Similar problems can also occur on some shells with other
   characters, including ?*!$~(){}<>\|;`.  When in doubt, quote the URL.
 
-  An example that would invoke a remote CGI that uses &-letters could be:
+  An example that would invoke a remote CGI that uses &-symbols could be:
 
      curl 'http://www.altavista.com/cgi-bin/query?text=yes&q=curl'
 
-  In Windows, the standard DOS shell treats the %-letter specially and you
-  need to use TWO %-letters for each single one you want to use in the URL.
+  In Windows, the standard DOS shell treats the %-symbol specially and you
+  need to use TWO %-symbols for each single one you want to use in the URL.
 
-  Also note that if you want the literal %-letter to be part of the data you
+  Also note that if you want the literal %-symbol to be part of the data you
   pass in a POST using -d/--data you must encode it as '%25' (which then also
-  needs the %-letter doubled on Windows machines).
+  needs the %-symbol doubled on Windows machines).
 
   4.3 How can I use {, }, [ or ] to specify multiple URLs?
 

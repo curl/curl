@@ -512,7 +512,7 @@ CONFIG FILE
   can also specify the long options without the dashes to make it more
   readable. You can separate the options and the parameter with spaces, or
   with = or :. Comments can be used within the file. If the first letter on a
-  line is a '#'-letter the rest of the line is treated as a comment.
+  line is a '#'-symbol the rest of the line is treated as a comment.
 
   If you want the parameter to contain spaces, you must enclose the entire
   parameter within double quotes ("). Within those quotes, you specify a
