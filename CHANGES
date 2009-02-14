@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Stenberg (14 Feb 2009)
+- Andre Guibert de Bruet found and fixed a memory leak in the content encoding
+  code, which could happen on libz errors.
+
 Daniel Fandrich (12 Feb 2009)
 - Added support for Digest and NTLM authentication using GnuTLS.
 
