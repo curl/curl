@@ -5,7 +5,7 @@
       *                            | (__| |_| |  _ <| |___
       *                             \___|\___/|_| \_\_____|
       *
-      * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+      * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
       *
       * This software is licensed as described in the file COPYING, which
       * you should have received as part of this distribution. The terms
@@ -131,7 +131,7 @@
      d                 c                   X'00000010'
      d CURLAUTH_ANY    c                   X'7FFFFFEF'
      d CURLAUTH_ANYSAFE...
-     d                 c                   X'7FFFFFEE'                          ~CURLAUTH_BASIC
+     d                 c                   X'7FFFFFEE'
       *
      d CURLSSH_AUTH_ANY...
      d                 c                   X'7FFFFFFF'
@@ -433,6 +433,8 @@
      d curl_proxytype  s             10i 0 based(######ptr######)               Enum
      d  CURLPROXY_HTTP...
      d                 c                   0
+     d  CURLPROXY_HTTP_1_0...
+     d                 c                   1
      d  CURLPROXY_SOCKS4...
      d                 c                   4
      d  CURLPROXY_SOCKS5...
@@ -792,6 +794,14 @@
      d                 c                   10175
      d  CURLOPT_PROXYPASSWORD...
      d                 c                   10176
+     d  CURLOPT_NOPROXY...
+     d                 c                   10177
+     d  CURLOPT_TFTP_BLKSIZE...
+     d                 c                   00178
+     d  CURLOPT_SOCKS5_GSSAPI_SERVICE...
+     d                 c                   00179
+     d  CURLOPT_SOCKS5_GSSAPI_NEC...
+     d                 c                   00180
       *
      d  CURLOPT_POST301...
      d                 c                   00161                                Obsolescent
@@ -925,6 +935,8 @@
      d                 c                   X'00300021'
      d  CURLINFO_CERTINFO...                                                    CURLINFO_SLIST + 34
      d                 c                   X'00400022'
+     d  CURLINFO_CONDITION_UNMET...                                             CURLINFO_LONG + 35
+     d                 c                   X'00200023'
       *
      d  CURLINFO_HTTP_CODE...                                                   Old ...RESPONSE_CODE
      d                 c                   X'00200002'
