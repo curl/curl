@@ -7,6 +7,8 @@
                                   Changelog
 
 Daniel Stenberg (17 Feb 2009)
+- Kamil Dudka made NSS-powered builds compile and run again!
+
 - A second follow-up change by Andre Guibert de Bruet to fix a related memory
   leak like that fixed on the 14th. When zlib returns failure, we need to
   cleanup properly before returning error.

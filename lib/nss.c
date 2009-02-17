@@ -1140,7 +1140,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
       n = strrchr(data->set.str[STRING_CERT], '/');
       if(n) {
         n++; /* skip last slash */
-        nickname = aprintf(nickname, "PEM Token #%d:%s", 1, n);
+        nickname = aprintf("PEM Token #%d:%s", 1, n);
         if(!nickname)
           return CURLE_OUT_OF_MEMORY;
 
@@ -1171,7 +1171,8 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 
     if(SSL_GetClientAuthDataHook(model,
                                  (SSLGetClientAuthData) SelectClientCert,
-                                 (void *)connssl) != SECSuccess) {
+                                 (void *)connssl->client_nickname) !=
+       SECSuccess) {
       curlerr = CURLE_SSL_CERTPROBLEM;
       goto error;
     }

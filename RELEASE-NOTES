@@ -34,6 +34,7 @@ This release includes the following bugfixes:
  o CURLINFO_CONTENT_LENGTH_DOWNLOAD size from file:// "transfers" with
    CURLOPT_NOBODY set true
  o memory leak on some libz errors for content encodings
+ o NSS-enabled build is repaired
 
 This release includes the following known bugs:
 
@@ -44,6 +45,7 @@ advice from friends like these:
 
  Lisa Xu, Daniel Fandrich, Craig A West, Alexey Borzov, Sharad Gupta,
  Peter Sylvester, Chad Monroe, Markus Moeller, Yang Tse, Scott Cantor,
- Patrick Scott, Hidemoto Nakada, Jocelyn Jaubert, Andre Guibert de Bruet
+ Patrick Scott, Hidemoto Nakada, Jocelyn Jaubert, Andre Guibert de Bruet,
+ Kamil Dudka
 
         Thanks! (and sorry if I forgot to mention someone)
