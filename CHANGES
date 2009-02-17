@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel Stenberg (17 Feb 2009)
+- A second follow-up change by Andre Guibert de Bruet to fix a related memory
+  leak like that fixed on the 14th. When zlib returns failure, we need to
+  cleanup properly before returning error.
+
 - CURLOPT_FTP_CREATE_MISSING_DIRS can now be set to 2 in addition to 1 for
   plain FTP connections, and it will then allow MKD to fail once and retry the
   CWD afterwards. This is especially useful if you're doing many simultanoes

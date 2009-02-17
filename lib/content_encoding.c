@@ -136,7 +136,7 @@ inflate_stream(struct connectdata *conn,
       (void) inflateEnd(z);     /* don't care about the return code */
       if(inflateInit2(z, -MAX_WBITS) != Z_OK) {
         free(decomp);
-        return process_zlib_error(conn, z);
+        return exit_zlib(z, &k->zlib_init, process_zlib_error(conn, z));
       }
       z->next_in = orig_in;
       z->avail_in = nread;
