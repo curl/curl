@@ -1030,7 +1030,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   if (testwarn) {
     testwarn = 0;
 
-    if ((int) STRING_LAST != (int) STRING_NOPROXY + 1)
+    if ((int) STRING_LAST != (int) STRING_SOCKS5_GSSAPI_SERVICE + 1)
       curl_mfprintf(stderr,
        "*** WARNING: curl_easy_setopt_ccsid() should be reworked ***\n");
     }
@@ -1080,6 +1080,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   case CURLOPT_PROXYUSERNAME:
   case CURLOPT_PROXYPASSWORD:
   case CURLOPT_NOPROXY:
+  case CURLOPT_SOCKS5_GSSAPI_SERVICE:
     s = va_arg(arg, char *);
     ccsid = va_arg(arg, unsigned int);
 
