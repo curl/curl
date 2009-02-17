@@ -1474,6 +1474,10 @@ struct UserDefined {
 
   curl_ftpfile ftp_filemethod; /* how to get to a file when FTP is used  */
 
+  int ftp_create_missing_dirs; /* 1 - create directories that don't exist
+                                  2 - the same but also allow MKD to fail once
+                               */
+
 /* Here follows boolean settings that define how to behave during
    this session. They are STATIC, set by libcurl users or at least initially
    and they don't change during operations. */
@@ -1484,7 +1488,6 @@ struct UserDefined {
   bool prefer_ascii;     /* ASCII rather than binary */
   bool ftp_append;       /* append, not overwrite, on upload */
   bool ftp_list_only;    /* switch FTP command for listing directories */
-  bool ftp_create_missing_dirs; /* create directories that don't exist */
   bool ftp_use_port;     /* use the FTP PORT command */
   bool hide_progress;    /* don't use the progress meter */
   bool http_fail_on_error;  /* fail on HTTP error codes >= 300 */

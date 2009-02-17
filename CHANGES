@@ -6,6 +6,20 @@
 
                                   Changelog
 
+Daniel Stenberg (17 Feb 2009)
+- CURLOPT_FTP_CREATE_MISSING_DIRS can now be set to 2 in addition to 1 for
+  plain FTP connections, and it will then allow MKD to fail once and retry the
+  CWD afterwards. This is especially useful if you're doing many simultanoes
+  connections against the same server and they all have this option enabled,
+  as then CWD may first fail but then another connection does MKD before this
+  connection and thus MKD fails but trying CWD works! The numbers can
+  (should?) now be set with the convenience enums now called
+  CURLFTP_CREATE_DIR and CURLFTP_CREATE_DIR_RETRY.
+
+  Tests has proven that if you're making an application that uploads a set of
+  files to an ftp server, you will get a noticable gain in speed if you're
+  using multiple connections and this option will be then be very useful.
+
 Daniel Stenberg (14 Feb 2009)
 - Andre Guibert de Bruet found and fixed a memory leak in the content encoding
   code, which could happen on libz errors.

@@ -21,6 +21,8 @@ This release includes the following changes:
  o Added docs/libcurl/symbols-in-versions
  o Added CURLINFO_CONDITION_UNMET
  o Added support for Digest and NTLM authentication using GnuTLS
+ o CURLOPT_FTP_CREATE_MISSING_DIRS can now be set to 2 to retry the CWD even
+   when MKD fails
 
 This release includes the following bugfixes:
 

@@ -4753,11 +4753,11 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         /* new in curl 7.10 */
         my_setopt(curl, CURLOPT_ENCODING,
-                         (config->encoding) ? "" : NULL);
+                  (config->encoding) ? "" : NULL);
 
-        /* new in curl 7.10.7 */
+        /* new in curl 7.10.7, extended in 7.19.4 but this only sets 0 or 1 */
         my_setopt(curl, CURLOPT_FTP_CREATE_MISSING_DIRS,
-                         config->ftp_create_dirs);
+                  config->ftp_create_dirs);
         if(config->proxyanyauth)
           my_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
         else if(config->proxynegotiate)
@@ -4925,17 +4925,13 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             }
 
             if(retry) {
-              static const char * const m[]={NULL,
-                                             "timeout",
-                                             "HTTP error",
-                                             "FTP error"
+              static const char * const m[]={
+                NULL, "timeout", "HTTP error", "FTP error"
               };
               warnf(config, "Transient problem: %s "
                     "Will retry in %ld seconds. "
                     "%ld retries left.\n",
-                    m[retry],
-                    retry_sleep/1000,
-                    retry_numretries);
+                    m[retry], retry_sleep/1000, retry_numretries);
 
               go_sleep(retry_sleep);
               retry_numretries--;
@@ -4977,15 +4973,13 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         } while(1);
 
         if((config->progressmode == CURL_PROGRESS_BAR) &&
-           progressbar.calls) {
+           progressbar.calls)
           /* if the custom progress bar has been displayed, we output a
              newline here */
           fputs("\n", progressbar.out);
-        }
 
-        if(config->writeout) {
+        if(config->writeout)
           ourWriteOut(curl, config->writeout);
-        }
 #ifdef USE_ENVIRONMENT
         if (config->writeenv)
           ourWriteEnv(curl);

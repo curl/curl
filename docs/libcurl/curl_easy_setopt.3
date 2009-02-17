@@ -1103,6 +1103,17 @@ This setting also applies to SFTP-connections. curl will attempt to create
 the remote directory if it can't obtain a handle to the target-location. The
 creation will fail if a file of the same name as the directory to create
 already exists or lack of permissions prevents creation. (Added in 7.16.3)
+
+Starting with 7.19.4, you can also set this value to 2, which will make
+libcurl retry the CWD command again if the subsequent MKD command fails. This
+is especially useful if you're doing many simultanoes connections against the
+same server and they all have this option enabled, as then CWD may first fail
+but then another connection does MKD before this connection and thus MKD fails
+but trying CWD works! 7.19.4 also introduced the \fICURLFTP_CREATE_DIR\fP and
+\fICURLFTP_CREATE_DIR_RETRY\fP enum names for these arguments.
+
+Before version 7.19.4, libcurl will simply ignore arguments set to 2 and act
+as if 1 was selected.
 .IP CURLOPT_FTP_RESPONSE_TIMEOUT
 Pass a long.  Causes curl to set a timeout period (in seconds) on the amount
 of time that the server is allowed to take in order to generate a response
