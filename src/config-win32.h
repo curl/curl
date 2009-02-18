@@ -263,8 +263,8 @@
 #  endif
 #endif
 
-/* VS2008 does not support Windows build targets prior to WinXP, */
-/* so, if no build target has been defined we will target WinXP. */
+/* VS2008 does not support Windows build targets prior to WinXP, so, if no
+   build target has been defined we will target WinXP. */
 #if defined(_MSC_VER) && (_MSC_VER >= 1500)
 #  ifndef _WIN32_WINNT
 #    define _WIN32_WINNT 0x0501
@@ -277,8 +277,9 @@
 #  endif
 #endif
 
-/* Availability of freeaddrinfo, getaddrinfo and getnameinfo functions is quite */
-/* convoluted, compiler dependant and in some cases even build target dependat. */
+/* Availability of freeaddrinfo, getaddrinfo and getnameinfo functions is
+   quite convoluted, compiler dependant and in some cases even build target
+   dependant. */
 #if defined(HAVE_WS2TCPIP_H)
 #  if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0501)
 #    define HAVE_FREEADDRINFO 1
