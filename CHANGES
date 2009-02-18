@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Patrick Monnerat (18 Feb 2009)
+- FTP downloads (i.e.: RETR) ending with code 550 now return error
+  CURLE_REMOTE_FILE_NOT_FOUND instead of CURLE_FTP_COULDNT_RETR_FILE.
+
 Daniel Stenberg (17 Feb 2009)
 - Kamil Dudka made NSS-powered builds compile and run again!
 

@@ -2427,7 +2427,8 @@ static CURLcode ftp_state_get_resp(struct connectdata *conn,
     }
     else {
       failf(data, "RETR response: %03d", ftpcode);
-      return CURLE_FTP_COULDNT_RETR_FILE;
+      return instate == FTP_RETR && ftpcode == 550? CURLE_REMOTE_FILE_NOT_FOUND:
+                                                    CURLE_FTP_COULDNT_RETR_FILE;
     }
   }
 
@@ -3159,6 +3160,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
   case CURLE_UPLOAD_FAILED:
   case CURLE_REMOTE_ACCESS_DENIED:
   case CURLE_FILESIZE_EXCEEDED:
+  case CURLE_REMOTE_FILE_NOT_FOUND:
     /* the connection stays alive fine even though this happened */
     /* fall-through */
   case CURLE_OK: /* doesn't affect the control connection's status */
