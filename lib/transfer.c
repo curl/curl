@@ -1804,6 +1804,8 @@ Transfer(struct connectdata *conn)
   struct SessionHandle *data = conn->data;
   struct SingleRequest *k = &data->req;
   bool done=FALSE;
+  bool first=TRUE;
+  int timeout_ms;
 
   if((conn->sockfd == CURL_SOCKET_BAD) &&
      (conn->writesockfd == CURL_SOCKET_BAD))
@@ -1855,9 +1857,21 @@ Transfer(struct connectdata *conn)
        be no traffic during the select interval, we still call
        Curl_readwrite() for the timeout case and if we limit transfer speed we
        must make sure that this function doesn't transfer anything while in
-       HOLD status. */
+       HOLD status.
 
-    switch (Curl_socket_ready(fd_read, fd_write, 1000)) {
+       The no timeout for the first round is for the protocols for which data
+       has already been slurped off the socket and thus waiting for action
+       won't work since it'll wait even though there is already data present
+       to work with. */
+    if(first &&
+       ((fd_read != CURL_SOCKET_BAD) || (fd_write != CURL_SOCKET_BAD)))
+      /* if this is the first lap and one of the file descriptors is fine
+         to work with, skip the timeout */
+      timeout_ms = 0;
+    else
+      timeout_ms = 1000;
+
+    switch (Curl_socket_ready(fd_read, fd_write, timeout_ms)) {
     case -1: /* select() error, stop reading */
 #ifdef EINTR
       /* The EINTR is not serious, and it seems you might get this more
@@ -1870,12 +1884,13 @@ Transfer(struct connectdata *conn)
     default: /* readable descriptors */
 
       result = Curl_readwrite(conn, &done);
+      /* "done" signals to us if the transfer(s) are ready */
       break;
     }
     if(result)
       return result;
 
-    /* "done" signals to us if the transfer(s) are ready */
+    first = FALSE; /* not the first lap anymore */
   }
 
   return CURLE_OK;

@@ -6,6 +6,17 @@
 
                                   Changelog
 
+Daniel Stenberg (19 Feb 2009)
+- Patrik Thunstrom reported a problem and helped me repeat it. It turned out 
+  libcurl did a superfluous 1000ms wait when doing SFTP downloads!
+
+  We read data with libssh2 while doing the "DO" operation for SFTP and then
+  when we were about to start getting data for the actual file part, the
+  "TRANSFER" part, we waited for socket action (in 1000ms) before doing a
+  libssh2-read. But in this case libssh2 had already read and buffered the
+  data so we ended up always just waiting 1000ms before we get working on the
+  data!
+
 Patrick Monnerat (18 Feb 2009)
 - FTP downloads (i.e.: RETR) ending with code 550 now return error
   CURLE_REMOTE_FILE_NOT_FOUND instead of CURLE_FTP_COULDNT_RETR_FILE.
