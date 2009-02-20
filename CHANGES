@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Yang Tse (20 Feb 2009)
+- Do not halt compilation when using VS2008 to build a Windows 2000 target.
+
 Daniel Stenberg (20 Feb 2009)
 - Linus Nielsen Feltzing reported and helped me repeat and fix a problem with
   FTP with the multi interface: when a transfer fails, like when aborted by a

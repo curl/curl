@@ -1,5 +1,8 @@
   Changelog for the c-ares project
 
+* February 20 2009 (Yang Tse)
+- Do not halt compilation when using VS2008 to build a Windows 2000 target.
+
 * February 3 2009 (Phil Blundell)
 - If the server returns garbage or nothing at all in response to an AAAA query,
   go on and ask for A records anyway.
