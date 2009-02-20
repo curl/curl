@@ -27,7 +27,8 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o missing ssh.obj in VS makefiles
- o FTP ;type=i URLs now work with CURLOPT_PROXY_TRANSFER_MODE in Turkish locale
+ o FTP ;type=i URLs now work with CURLOPT_PROXY_TRANSFER_MODE in Turkish
+   locale 
  o realms with quoted quotation marks in HTTP Digest headers
  o VC9 makefiles are now really included
  o multi interface memory leak with CURLMOPT_MAXCONNECTS set
@@ -36,6 +37,8 @@ This release includes the following bugfixes:
  o memory leak on some libz errors for content encodings
  o NSS-enabled build is repaired
  o superfluous wait in SFTP downloads removed
+ o FTP with the multi interface no longer kills the control connection as
+   easily on transfer failures
 
 This release includes the following known bugs:
 
