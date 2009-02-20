@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel Stenberg (20 Feb 2009)
+- Linus Nielsen Feltzing reported and helped me repeat and fix a problem with
+  FTP with the multi interface: when a transfer fails, like when aborted by a
+  write callback, the control connection was wrongly closed and thus not
+  re-used properly.
+
+  This change is also an attempt to cleanup the code somewhat in this area, as
+  now the FTP code attempts to keep (better) track on pending responses
+  necessary to get read in ftp_done().
+
 Daniel Stenberg (19 Feb 2009)
 - Patrik Thunstrom reported a problem and helped me repeat it. It turned out 
   libcurl did a superfluous 1000ms wait when doing SFTP downloads!

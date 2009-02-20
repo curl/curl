@@ -363,6 +363,7 @@ static void ftp_respinit(struct connectdata *conn)
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   ftpc->nread_resp = 0;
   ftpc->linestart_resp = conn->data->state.buffer;
+  ftpc->pending_resp = TRUE;
 }
 
 /* macro to check for a three-digit ftp status code at the start of the
@@ -590,6 +591,8 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
   /* store the latest code for later retrieval */
   conn->data->info.httpcode=code;
 
+  ftpc->pending_resp = FALSE;
+
   return result;
 }
 
@@ -714,6 +717,8 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
     *nreadp += nread;
 
   } /* while there's buffer left and loop is requested */
+
+  ftpc->pending_resp = FALSE;
 
   return result;
 }
@@ -2305,6 +2310,8 @@ static CURLcode ftp_state_stor_resp(struct connectdata *conn,
                                SECONDARYSOCKET, ftp->bytecountp);
   state(conn, FTP_STOP);
 
+  conn->proto.ftpc.pending_resp = TRUE; /* we expect a server response more */
+
   return result;
 }
 
@@ -2417,6 +2424,7 @@ static CURLcode ftp_state_get_resp(struct connectdata *conn,
     if(result)
       return result;
 
+    conn->proto.ftpc.pending_resp = TRUE; /* we expect a server response more */
     state(conn, FTP_STOP);
   }
   else {
@@ -3161,6 +3169,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
   case CURLE_REMOTE_ACCESS_DENIED:
   case CURLE_FILESIZE_EXCEEDED:
   case CURLE_REMOTE_FILE_NOT_FOUND:
+  case CURLE_WRITE_ERROR:
     /* the connection stays alive fine even though this happened */
     /* fall-through */
   case CURLE_OK: /* doesn't affect the control connection's status */
@@ -3239,7 +3248,8 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
     conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD;
   }
 
-  if((ftp->transfer == FTPTRANSFER_BODY) && !status && !premature) {
+  if((ftp->transfer == FTPTRANSFER_BODY) && ftpc->ctl_valid &&
+     ftpc->pending_resp && !premature) {
     /*
      * Let's see what the server says about the transfer we just performed,
      * but lower the timeout as sometimes this connection has died while the

@@ -1237,14 +1237,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       break;
 
     case CURLM_STATE_WAITPERFORM:
-#ifdef CURLDEBUG
-      infof(easy->easy_handle, "Conn %d recv pipe %d inuse %d athead %d\n",
-            easy->easy_conn->connectindex,
-            easy->easy_conn->recv_pipe->size,
-            easy->easy_conn->readchannel_inuse,
-            isHandleAtHead(easy->easy_handle,
-                           easy->easy_conn->recv_pipe));
-#endif
       /* Wait for our turn to PERFORM */
       if(!easy->easy_conn->readchannel_inuse &&
          isHandleAtHead(easy->easy_handle,
@@ -1254,6 +1246,16 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         multistate(easy, CURLM_STATE_PERFORM);
         result = CURLM_CALL_MULTI_PERFORM;
       }
+#ifdef CURLDEBUG
+      else {
+        infof(easy->easy_handle, "Conn %d recv pipe %d inuse %d athead %d\n",
+              easy->easy_conn->connectindex,
+              easy->easy_conn->recv_pipe->size,
+              easy->easy_conn->readchannel_inuse,
+              isHandleAtHead(easy->easy_handle,
+                             easy->easy_conn->recv_pipe));
+      }
+#endif
       break;
 
     case CURLM_STATE_TOOFAST: /* limit-rate exceeded in either direction */
@@ -1302,18 +1304,14 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
       if(easy->result)  {
         /* The transfer phase returned error, we mark the connection to get
-         * closed to prevent being re-used. This is because we can't
-         * possibly know if the connection is in a good shape or not now. */
-        easy->easy_conn->bits.close = TRUE;
-        Curl_removeHandleFromPipeline(easy->easy_handle,
-                                      easy->easy_conn->recv_pipe);
+         * closed to prevent being re-used. This is because we can't possibly
+         * know if the connection is in a good shape or not now.  Unless it is
+         * a protocol which uses two "channels" like FTP, as then the error
+         * happened in the data connection.
+         */
+        if(!(easy->easy_conn->protocol & PROT_DUALCHANNEL))
+          easy->easy_conn->bits.close = TRUE;
 
-        if(CURL_SOCKET_BAD != easy->easy_conn->sock[SECONDARYSOCKET]) {
-          /* if we failed anywhere, we must clean up the secondary socket if
-             it was used */
-          sclose(easy->easy_conn->sock[SECONDARYSOCKET]);
-          easy->easy_conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD;
-        }
         Curl_posttransfer(easy->easy_handle);
         Curl_done(&easy->easy_conn, easy->result, FALSE);
       }
