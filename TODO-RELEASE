@@ -1,10 +1,20 @@
 To be addressed in 7.19.4 (planned release: March 2009)
 =========================
 
+216 - Markus Moeller's "proxy question" to reverse lookup SOCKS proxys and more
+
+217 - Dan Fandrich's "GnuTLS initialization thread safety"
+
+218 - Senthil Raja Velu's "CURLOPT_LOCALPORT option broken", patch by 
+      Markus Koetter
+
+219 - James Cheng's bug "How to detect missing Content-Length response header?"
+
+
 To be addressed in 7.19.5 (planned release: May 2009)
 =========================
 
 215 - Patch for Metalink Support (for the curl tool)
 
-216 - 
+220 - 
 
