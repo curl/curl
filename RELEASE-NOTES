@@ -39,6 +39,7 @@ This release includes the following bugfixes:
  o superfluous wait in SFTP downloads removed
  o FTP with the multi interface no longer kills the control connection as
    easily on transfer failures
+ o compilation halting when using VS2008 to build a Windows 2000 target
 
 This release includes the following known bugs:
 
@@ -50,6 +51,6 @@ advice from friends like these:
  Lisa Xu, Daniel Fandrich, Craig A West, Alexey Borzov, Sharad Gupta,
  Peter Sylvester, Chad Monroe, Markus Moeller, Yang Tse, Scott Cantor,
  Patrick Scott, Hidemoto Nakada, Jocelyn Jaubert, Andre Guibert de Bruet,
- Kamil Dudka, Patrik Thunstrom, Linus Nielsen Feltzing
+ Kamil Dudka, Patrik Thunstrom, Linus Nielsen Feltzing, Mark Incley
 
         Thanks! (and sorry if I forgot to mention someone)
