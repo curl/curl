@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -22,15 +22,15 @@
 ###########################################################################
 AUTOMAKE_OPTIONS = foreign nostdinc
 
-DSP = curllib.dsp
-VCPROJ = curllib.vcproj
+DSP = libcurl.dsp
+VCPROJ = libcurl.vcproj
 
 DOCS = README.encoding README.memoryleak README.ares README.curlx	\
  README.hostip README.multi_socket README.httpauth README.pipelining    \
  README.NSS README.curl_off_t
 
 EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 Makefile.riscos $(DSP) \
- curllib.dsw config-win32.h config-win32ce.h config-riscos.h config-mac.h  \
+ libcurl.dsw config-win32.h config-win32ce.h config-riscos.h config-mac.h  \
  config.h.in makefile.dj config.dos libcurl.framework.make libcurl.plist   \
  libcurl.rc config-amigaos.h amigaos.c amigaos.h makefile.amiga		   \
  Makefile.netware nwlib.c nwos.c libcurl.imp msvcproj.head msvcproj.foot   \

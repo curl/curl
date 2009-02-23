@@ -7,6 +7,6 @@ Makefile
 config.h
 stamp-*
 getdate.c
-curllib.dsp
-curllib.vcproj
+libcurl.dsp
+libcurl.vcproj
 *.dist

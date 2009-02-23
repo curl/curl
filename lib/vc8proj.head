@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="curllib"
+	Name="libcurl"
 	ProjectGUID="{87EE9DA4-DE1E-4448-8324-183C98DCA588}"
 	>
 	<Platforms>
@@ -31,9 +31,9 @@
 			/>
 			<Tool Name="VCWebServiceProxyGeneratorTool"
 			/>
-			<Tool Name="VCMIDLTool" PreprocessorDefinitions="NDEBUG" MkTypLibCompatible="true" SuppressStartupBanner="true" TargetEnvironment="1" TypeLibraryName=".\Release/curllib.tlb" HeaderFileName=""
+			<Tool Name="VCMIDLTool" PreprocessorDefinitions="NDEBUG" MkTypLibCompatible="true" SuppressStartupBanner="true" TargetEnvironment="1" TypeLibraryName=".\Release/libcurl.tlb" HeaderFileName=""
 			/>
-			<Tool Name="VCCLCompilerTool" Optimization="2" InlineFunctionExpansion="1" AdditionalIncludeDirectories=".,..\include" PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;BUILDING_LIBCURL" StringPooling="true" RuntimeLibrary="2" EnableFunctionLevelLinking="true" PrecompiledHeaderFile=".\Release/curllib.pch" AssemblerListingLocation=".\Release/" ObjectFile=".\Release/" ProgramDataBaseFileName=".\Release/" BrowseInformation="1" WarningLevel="0" SuppressStartupBanner="true" DebugInformationFormat="3"
+			<Tool Name="VCCLCompilerTool" Optimization="2" InlineFunctionExpansion="1" AdditionalIncludeDirectories=".,..\include" PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;BUILDING_LIBCURL" StringPooling="true" RuntimeLibrary="2" EnableFunctionLevelLinking="true" PrecompiledHeaderFile=".\Release/libcurl.pch" AssemblerListingLocation=".\Release/" ObjectFile=".\Release/" ProgramDataBaseFileName=".\Release/" BrowseInformation="1" WarningLevel="0" SuppressStartupBanner="true" DebugInformationFormat="3"
 			/>
 			<Tool Name="VCManagedResourceCompilerTool"
 			/>
@@ -47,7 +47,7 @@
 			/>
 			<Tool Name="VCXDCMakeTool"
 			/>
-			<Tool Name="VCBscMakeTool" SuppressStartupBanner="true" OutputFile=".\Release/curllib.bsc"
+			<Tool Name="VCBscMakeTool" SuppressStartupBanner="true" OutputFile=".\Release/libcurl.bsc"
 			/>
 			<Tool Name="VCFxCopTool"
 			/>
@@ -72,9 +72,9 @@
 			/>
 			<Tool Name="VCWebServiceProxyGeneratorTool"
 			/>
-			<Tool Name="VCMIDLTool" PreprocessorDefinitions="_DEBUG" MkTypLibCompatible="true" SuppressStartupBanner="true" TargetEnvironment="1" TypeLibraryName=".\Debug/curllib.tlb" HeaderFileName=""
+			<Tool Name="VCMIDLTool" PreprocessorDefinitions="_DEBUG" MkTypLibCompatible="true" SuppressStartupBanner="true" TargetEnvironment="1" TypeLibraryName=".\Debug/libcurl.tlb" HeaderFileName=""
 			/>
-			<Tool Name="VCCLCompilerTool" Optimization="0" AdditionalIncludeDirectories=".,..\include" PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;BUILDING_LIBCURL" MinimalRebuild="true" BasicRuntimeChecks="3" RuntimeLibrary="3" PrecompiledHeaderFile=".\Debug/curllib.pch" AssemblerListingLocation=".\Debug/" ObjectFile=".\Debug/" ProgramDataBaseFileName=".\Debug/" BrowseInformation="1" WarningLevel="0" SuppressStartupBanner="true" DebugInformationFormat="3"
+			<Tool Name="VCCLCompilerTool" Optimization="0" AdditionalIncludeDirectories=".,..\include" PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;BUILDING_LIBCURL" MinimalRebuild="true" BasicRuntimeChecks="3" RuntimeLibrary="3" PrecompiledHeaderFile=".\Debug/libcurl.pch" AssemblerListingLocation=".\Debug/" ObjectFile=".\Debug/" ProgramDataBaseFileName=".\Debug/" BrowseInformation="1" WarningLevel="0" SuppressStartupBanner="true" DebugInformationFormat="3"
 			/>
 			<Tool Name="VCManagedResourceCompilerTool"
 			/>
@@ -88,7 +88,7 @@
 			/>
 			<Tool Name="VCXDCMakeTool"
 			/>
-			<Tool Name="VCBscMakeTool" SuppressStartupBanner="true" OutputFile=".\Debug/curllib.bsc"
+			<Tool Name="VCBscMakeTool" SuppressStartupBanner="true" OutputFile=".\Debug/libcurl.bsc"
 			/>
 			<Tool Name="VCFxCopTool"
 			/>

@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Stenberg (23 Feb 2009)
+- I renamed everything in the windows builds files that used the name 'curllib'
+  to the proper 'libcurl' as clearly this caused confusion.
+
 Yang Tse (20 Feb 2009)
 - Do not halt compilation when using VS2008 to build a Windows 2000 target.
 

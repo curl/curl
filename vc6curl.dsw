@@ -3,7 +3,7 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "curllib"=".\lib\curllib.dsp" - Package Owner=<4>
+Project: "libcurl"=".\lib\libcurl.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -24,7 +24,7 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name curllib
+    Project_Dep_Name libcurl
     End Project Dependency
 }}}
 

@@ -1,27 +1,27 @@
-# Microsoft Developer Studio Project File - Name="curllib" - Package Owner=<4>
+# Microsoft Developer Studio Project File - Name="libcurl" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Dynamic-Link Library" 0x0102
 # TARGTYPE "Win32 (x86) Static Library" 0x0104
 
-CFG=curllib - Win32 LIB Debug
+CFG=libcurl - Win32 LIB Debug
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "curllib.mak".
+!MESSAGE NMAKE /f "libcurl.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "curllib.mak" CFG="curllib - Win32 LIB Debug"
+!MESSAGE NMAKE /f "libcurl.mak" CFG="libcurl - Win32 LIB Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "curllib - Win32 DLL Debug" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "curllib - Win32 DLL Release" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "curllib - Win32 LIB Debug" (based on "Win32 (x86) Static Library")
-!MESSAGE "curllib - Win32 LIB Release" (based on "Win32 (x86) Static Library")
+!MESSAGE "libcurl - Win32 DLL Debug" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "libcurl - Win32 DLL Release" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "libcurl - Win32 LIB Debug" (based on "Win32 (x86) Static Library")
+!MESSAGE "libcurl - Win32 LIB Release" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -29,7 +29,7 @@ CFG=curllib - Win32 LIB Debug
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
 
-!IF  "$(CFG)" == "curllib - Win32 DLL Debug"
+!IF  "$(CFG)" == "libcurl - Win32 DLL Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -58,7 +58,7 @@ LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib ws2_32.lib wldap32.lib /nologo /dll /incremental:no /map /debug /machine:I386 /out:"DLL-Debug/libcurld.dll" /implib:"DLL-Debug/libcurld_imp.lib" /pdbtype:sept
 # ADD LINK32 kernel32.lib ws2_32.lib wldap32.lib /nologo /dll /incremental:no /map /debug /machine:I386 /out:"DLL-Debug/libcurld.dll" /implib:"DLL-Debug/libcurld_imp.lib" /pdbtype:sept
 
-!ELSEIF  "$(CFG)" == "curllib - Win32 DLL Release"
+!ELSEIF  "$(CFG)" == "libcurl - Win32 DLL Release"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -87,7 +87,7 @@ LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib ws2_32.lib wldap32.lib /nologo /dll /pdb:none /machine:I386 /out:"DLL-Release/libcurl.dll" /implib:"DLL-Release/libcurl_imp.lib"
 # ADD LINK32 kernel32.lib ws2_32.lib wldap32.lib /nologo /dll /pdb:none /machine:I386 /out:"DLL-Release/libcurl.dll" /implib:"DLL-Release/libcurl_imp.lib"
 
-!ELSEIF  "$(CFG)" == "curllib - Win32 LIB Debug"
+!ELSEIF  "$(CFG)" == "libcurl - Win32 LIB Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -112,7 +112,7 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo /out:"LIB-Debug/libcurld.lib" /machine:I386
 # ADD LIB32 /nologo /out:"LIB-Debug/libcurld.lib" /machine:I386
 
-!ELSEIF  "$(CFG)" == "curllib - Win32 LIB Release"
+!ELSEIF  "$(CFG)" == "libcurl - Win32 LIB Release"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -141,7 +141,7 @@ LIB32=link.exe -lib
 
 # Begin Target
 
-# Name "curllib - Win32 DLL Debug"
-# Name "curllib - Win32 DLL Release"
-# Name "curllib - Win32 LIB Debug"
-# Name "curllib - Win32 LIB Release"
+# Name "libcurl - Win32 DLL Debug"
+# Name "libcurl - Win32 DLL Release"
+# Name "libcurl - Win32 LIB Debug"
+# Name "libcurl - Win32 LIB Release"
