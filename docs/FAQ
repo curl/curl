@@ -1,4 +1,4 @@
-Updated: Jan 14, 2009 (http://curl.haxx.se/docs/faq.html)
+Updated: Feb 23, 2009 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -71,6 +71,7 @@ FAQ
   4.14 Redirects work in browser but not with curl!
   4.15 FTPS doesn't work
   4.16 My HTTP POST or PUT requests are slow!
+  4.17 Non-functional connect timeouts on Windows
 
  5. libcurl Issues
   5.1 Is libcurl thread-safe?
@@ -885,6 +886,23 @@ FAQ
   You can disable libcurl's use of the Expect: header the same way you disable
   any header, using -H / CURLOPT_HTTPHEADER, or by forcing it to use HTTP 1.0.
 
+  4.17 Non-functional connect timeouts
+
+  In most Windows setups having a timeout longer than 21 seconds make no
+  difference, as it will only send 3 TCP SYN packets and no more. The second
+  packet sent three seconds after the first and the third six seconds after
+  the second.  No more than three packets are sent, no matter how long the
+  timeout is set.
+
+  See option TcpMaxConnectRetransmissions on this page:
+  http://support.microsoft.com/?scid=kb%3Ben-us%3B175523&x=6&y=7
+
+  Also, even on non-Windows systems there may run a firewall or anti-virus
+  software or similar that accepts the connection but does not actually do
+  anything else. This will make (lib)curl to consider the connection connected
+  and thus the connect timeout won't trigger.
+
+
 5. libcurl Issues
 
   5.1 Is libcurl thread-safe?
@@ -898,7 +916,7 @@ FAQ
   If you use a OpenSSL-powered libcurl in a multi-threaded environment, you
   need to provide one or two locking functions:
 
-    http://www.openssl.org/docs/crypto/threads.html#DESCRIPTION
+    http://www.openssl.org/docs/crypto/threads.html
 
   If you use a GnuTLS-powered libcurl in a multi-threaded environment, you
   need to provide locking function(s) for libgcrypt (which is used by GnuTLS
