@@ -134,9 +134,11 @@ on the list pointer once you're done with it, as libcurl will not free the
 data for you. (Added in 7.12.3)
 .IP CURLINFO_CONTENT_LENGTH_DOWNLOAD
 Pass a pointer to a double to receive the content-length of the download. This
-is the value read from the Content-Length: field.
+is the value read from the Content-Length: field. Since 7.19.4, this returns -1
+if the size isn't known.
 .IP CURLINFO_CONTENT_LENGTH_UPLOAD
-Pass a pointer to a double to receive the specified size of the upload.
+Pass a pointer to a double to receive the specified size of the upload.  Since
+7.19.4, this returns -1 if the size isn't known.
 .IP CURLINFO_CONTENT_TYPE
 Pass a pointer to a 'char *' to receive the content-type of the downloaded
 object. This is the value read from the Content-Type: field. If you get NULL,
