@@ -1,0 +1,49 @@
+#!/bin/bash
+# This script performs all of the steps needed to build a 32 bit 
+# universal binary libcurl.framework for Mac OS X 10.4 or greater.
+
+VERSION=`/usr/bin/sed -ne 's/^#define LIBCURL_VERSION "\(.*\)"/\1/p' include/curl/curlver.h`
+
+SDK='/Developer/SDKs/MacOSX10.4u.sdk'
+
+MINVER='-mmacosx-version-min=10.4'
+
+ARCHES='-arch ppc -arch i386'
+
+# Use these values instead to produce a 64 bit framework that only works on 10.5.
+# You can't currently build a combined 32/64 framework.
+#SDK='/Developer/SDKs/MacOSX10.5.sdk'
+#
+#MINVER='-mmacosx-version-min=10.5'
+#
+#ARCHES='-arch ppc64 -arch x86_64'
+
+
+if test -d $SDK; then
+  echo "Configuring libcurl for 32 bit universal framework..."
+  ./configure --disable-dependency-tracking --disable-static --with-gssapi \
+    CFLAGS="-isysroot $SDK $ARCHES $MINVER" \
+    LDFLAGS="-Wl,-syslibroot,$SDK $ARCHES $MINVER -Wl,-headerpad_max_install_names"
+  
+  echo "Building libcurl..."
+  make
+  
+  echo "Creating framework..."
+  rm -r libcurl.framework
+  mkdir -p libcurl.framework/Versions/A/Resources
+  cp lib/.libs/libcurl.dylib libcurl.framework/Versions/A/libcurl
+  install_name_tool -id @executable_path/../Frameworks/libcurl.framework/Versions/A/libcurl libcurl.framework/Versions/A/libcurl
+  /usr/bin/sed -e "s/7\.12\.3/$VERSION/" lib/libcurl.plist >libcurl.framework/Versions/A/Resources/Info.plist
+  mkdir -p libcurl.framework/Versions/A/Headers
+  cp include/curl/*.h libcurl.framework/Versions/A/Headers
+  cd libcurl.framework
+  ln -fs Versions/A/libcurl libcurl
+  ln -fs Versions/A/Resources Resources
+  ln -fs Versions/A/Headers Headers
+  cd Versions
+  ln -fs A Current
+  
+  echo "libcurl.framework is built and can now be included in other projects."
+else
+  echo "Building libcurl.framework requires Mac OS X 10.4 or later with the MacOSX10.4u SDK installed."
+fi

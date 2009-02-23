@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Yang Tse (23 Feb 2009)
+- Daniel Johnson provided a shell script that will perform all the steps needed
+  to build a Mac OS X fat ppc/i386 or ppc64/x86_64 libcurl.framework
+
 Daniel Stenberg (23 Feb 2009)
 - I renamed everything in the windows builds files that used the name 'curllib'
   to the proper 'libcurl' as clearly this caused confusion.
