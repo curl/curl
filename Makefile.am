@@ -27,7 +27,7 @@ ACLOCAL_AMFLAGS = -I m4
 
 EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in \
  curl-style.el sample.emacs RELEASE-NOTES buildconf buildconf.bat 	 \
- libcurl.pc.in vc6curl.dsw
+ libcurl.pc.in vc6curl.dsw MacOSX-Framework
 
 bin_SCRIPTS = curl-config
 
