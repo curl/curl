@@ -143,7 +143,16 @@ make -s dist VERSION=$version
 
 bzip2="curl-$version.tar.bz2"
 echo "Generating $bzip2"
-gzip -dc $targz | bzip2 - > $bzip2
+gzip -dc $targz | bzip2 --best - > $bzip2
+
+############################################################################
+#
+# Now make an lzma archive from the tar.gz original
+#
+
+lzma="curl-$version.tar.lzma"
+echo "Generating $lzma"
+gzip -dc $targz | lzma --best - > $lzma
 
 ############################################################################
 #
@@ -169,9 +178,7 @@ makezip
 echo "------------------"
 echo "maketgz report:"
 echo ""
-ls -l $targz $bzip2 $zip
-
-md5sum $targz $bzip2 $zip
+ls -l $targz $bzip2 $zip $lzma
 
 echo "Run this:"
-echo "gpg -b -a $targz && gpg -b -a $bzip2 && gpg -b -a $zip"
+echo "gpg -b -a $targz && gpg -b -a $bzip2 && gpg -b -a $zip && gpg -b -a $lzma"
