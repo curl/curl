@@ -16,5 +16,7 @@ To be addressed in 7.19.5 (planned release: May 2009)
 
 215 - Patch for Metalink Support (for the curl tool)
 
-220 - 
+220 - Take advantage of libssh2_version() that's been added for the upcoming
+      1.1, to extract the run-time version number properly.
 
+221 - 
