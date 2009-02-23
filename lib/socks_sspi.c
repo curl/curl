@@ -42,6 +42,9 @@
 #include "socks.h"
 #include "curl_sspi.h"
 
+#define _MPRINTF_REPLACE /* use the internal *printf() functions */
+#include <curl/mprintf.h>
+
 /* The last #include file should be: */
 #include "memdebug.h"
 
@@ -207,8 +210,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     service_name = malloc(strlen(service) + strlen(conn->proxy.name) + 2);
     if(!service_name)
       return CURLE_OUT_OF_MEMORY;
-    _snprintf(service_name,strlen(service) +strlen(conn->proxy.name)+2,"%s/%s",
-              service,conn->proxy.name);
+    snprintf(service_name,strlen(service) +strlen(conn->proxy.name)+2,"%s/%s",
+             service,conn->proxy.name);
   }
 
   input_desc.cBuffers = 1;
