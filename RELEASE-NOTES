@@ -43,6 +43,7 @@ This release includes the following bugfixes:
  o ease creation of libcurl Mac OS X Framework
  o CURLINFO_CONTENT_LENGTH_DOWNLOAD and CURLINFO_CONTENT_LENGTH_UPLOAD are -1
    if unknown
+ o Negotiate proxy authentication
 
 This release includes the following known bugs:
 
@@ -55,6 +56,6 @@ advice from friends like these:
  Peter Sylvester, Chad Monroe, Markus Moeller, Yang Tse, Scott Cantor,
  Patrick Scott, Hidemoto Nakada, Jocelyn Jaubert, Andre Guibert de Bruet,
  Kamil Dudka, Patrik Thunstrom, Linus Nielsen Feltzing, Mark Incley,
- Daniel Johnson, James Cheng
+ Daniel Johnson, James Cheng, Brian J. Murrell
 
         Thanks! (and sorry if I forgot to mention someone)

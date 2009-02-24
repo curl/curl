@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (24 Feb 2009)
+- Brian J. Murrell found out that Negotiate proxy authentication didn't work.
+  It happened because the code used the struct for server-based auth all the
+  time for both proxy and server auth which of course was wrong.
+
 Daniel Stenberg (23 Feb 2009)
 - After a bug reported by James Cheng I've made curl_easy_getinfo() for
   CURLINFO_CONTENT_LENGTH_DOWNLOAD and CURLINFO_CONTENT_LENGTH_UPLOAD return

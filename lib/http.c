@@ -516,6 +516,10 @@ output_auth_headers(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   const char *auth=NULL;
   CURLcode result = CURLE_OK;
+#ifdef HAVE_GSSAPI
+  struct negotiatedata *negdata = proxy?
+    &data->state.proxyneg:&data->state.negotiate;
+#endif
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
   (void)request;
@@ -524,14 +528,13 @@ output_auth_headers(struct connectdata *conn,
 
 #ifdef HAVE_GSSAPI
   if((authstatus->picked == CURLAUTH_GSSNEGOTIATE) &&
-     data->state.negotiate.context &&
-     !GSS_ERROR(data->state.negotiate.status)) {
+     negdata->context && !GSS_ERROR(negdata->status)) {
     auth="GSS-Negotiate";
     result = Curl_output_negotiate(conn, proxy);
     if(result)
       return result;
     authstatus->done = TRUE;
-    data->state.negotiate.state = GSS_AUTHSENT;
+    negdata->state = GSS_AUTHSENT;
   }
   else
 #endif
