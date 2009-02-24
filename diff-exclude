@@ -8,7 +8,6 @@ Makefile
 Makefile.in
 *.pid
 *.bak
-ads
 *.o
 *.lo
 *.Plo
@@ -29,3 +28,13 @@ mkinstalldirs
 .#*
 aclocal.m4
 hugehelp.c
+.deps
+.libs
+libcurl.pc
+curl-config
+stamp-h*
+curl
+curllib.dsp
+curllib.vcproj
+*.spec
+curl.list
