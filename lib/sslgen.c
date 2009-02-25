@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,9 +21,9 @@
  * $Id$
  ***************************************************************************/
 
-/* This file is for "generic" SSL functions that all libcurl internals should
-   use. It is responsible for calling the proper 'ossl' function in ssluse.c
-   (OpenSSL based) or the 'gtls' function in gtls.c (GnuTLS based).
+/* This file is for implementing all "generic" SSL functions that all libcurl
+   internals should use. It is then responsible for calling the proper
+   "backend" function.
 
    SSL-functions in libcurl should call functions in this source file, and not
    to any specific SSL-layer.
