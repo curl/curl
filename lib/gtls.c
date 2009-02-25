@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -86,19 +86,14 @@ static ssize_t Curl_gtls_pull(void *s, void *buf, size_t len)
   return sread(s, buf, len);
 }
 
-/* Global GnuTLS init, called from Curl_ssl_init() */
-int Curl_gtls_init(void)
-{
-/* Unfortunately we can not init here, things like curl --version will
- * fail to work if there is no egd socket available because libgcrypt
- * will EXIT the application!!
- * By doing the actual init later (before actually trying to use GnuTLS),
- * we can at least provide basic info etc.
+/* Curl_gtls_init()
+ *
+ * Global GnuTLS init, called from Curl_ssl_init(). This calls functions that
+ * are not thread-safe and thus this function itself is not thread-safe and
+ * must only be called from within curl_global_init() to keep the thread
+ * situation under control!
  */
-  return 1;
-}
-
-static int _Curl_gtls_init(void)
+int Curl_gtls_init(void)
 {
   int ret = 1;
   if(!gtls_inited) {
@@ -181,7 +176,7 @@ static CURLcode handshake(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   int rc;
   if(!gtls_inited)
-    _Curl_gtls_init();
+    Curl_gtls_init();
   do {
     rc = gnutls_handshake(session);
 
@@ -272,7 +267,7 @@ Curl_gtls_connect(struct connectdata *conn,
     return CURLE_OK;
 
   if(!gtls_inited)
-    _Curl_gtls_init();
+    Curl_gtls_init();
 
   /* GnuTLS only supports SSLv3 and TLSv1 */
   if(data->set.ssl.version == CURL_SSLVERSION_SSLv2) {
@@ -309,8 +304,8 @@ Curl_gtls_connect(struct connectdata *conn,
   if(data->set.ssl.CRLfile) {
     /* set the CRL list file */
     rc = gnutls_certificate_set_x509_crl_file(conn->ssl[sockindex].cred,
-					      data->set.ssl.CRLfile,
-					      GNUTLS_X509_FMT_PEM);
+                                              data->set.ssl.CRLfile,
+                                              GNUTLS_X509_FMT_PEM);
     if(rc < 0) {
       failf(data, "error reading crl file %s (%s)\n",
             data->set.ssl.CRLfile, gnutls_strerror(rc));
@@ -437,8 +432,8 @@ Curl_gtls_connect(struct connectdata *conn,
     if(verify_status & GNUTLS_CERT_INVALID) {
       if(data->set.ssl.verifypeer) {
         failf(data, "server certificate verification failed. CAfile: %s "
-	      "CRLfile: %s", data->set.ssl.CAfile?data->set.ssl.CAfile:"none",
-	      data->set.ssl.CRLfile?data->set.ssl.CRLfile:"none");
+              "CRLfile: %s", data->set.ssl.CAfile?data->set.ssl.CAfile:"none",
+              data->set.ssl.CRLfile?data->set.ssl.CRLfile:"none");
         return CURLE_SSL_CACERT;
       }
       else
@@ -465,11 +460,11 @@ Curl_gtls_connect(struct connectdata *conn,
     unload_file(issuerp);
     if (rc <= 0) {
       failf(data, "server certificate issuer check failed (IssuerCert: %s)",
-	    data->set.ssl.issuercert?data->set.ssl.issuercert:"none");
+            data->set.ssl.issuercert?data->set.ssl.issuercert:"none");
       return CURLE_SSL_ISSUER_ERROR;
     }
     infof(data,"\t server certificate issuer check OK (Issuer Cert: %s)\n",
-	  data->set.ssl.issuercert?data->set.ssl.issuercert:"none");
+          data->set.ssl.issuercert?data->set.ssl.issuercert:"none");
   }
 
   size=sizeof(certbuf);
@@ -778,14 +773,6 @@ size_t Curl_gtls_version(char *buffer, size_t size)
   return snprintf(buffer, size, "GnuTLS/%s", gnutls_check_version(NULL));
 }
 
-static void gtls_seed(struct SessionHandle *data)
-{
-  /* TODO: to a good job seeding the RNG */
-  /* This may involve the gcry_control function and these options: */
-  /* GCRYCTL_SET_RANDOM_SEED_FILE */
-  /* GCRYCTL_SET_RNDEGD_SOCKET */
-}
-
 int Curl_gtls_seed(struct SessionHandle *data)
 {
   /* we have the "SSL is seeded" boolean static to prevent multiple
@@ -797,7 +784,12 @@ int Curl_gtls_seed(struct SessionHandle *data)
 
   if(!ssl_seeded || data->set.str[STRING_SSL_RANDOM_FILE] ||
      data->set.str[STRING_SSL_EGDSOCKET]) {
-    gtls_seed(data);
+
+    /* TODO: to a good job seeding the RNG
+       This may involve the gcry_control function and these options:
+       GCRYCTL_SET_RANDOM_SEED_FILE
+       GCRYCTL_SET_RNDEGD_SOCKET
+    */
     ssl_seeded = TRUE;
   }
   return 0;

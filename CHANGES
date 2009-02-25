@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel Stenberg (25 Feb 2009)
+- As Daniel Fandrich figured out, we must do the GnuTLS initing in the
+  curl_global_init() function to properly maintain the performing functions
+  thread-safe. We've previously (28 April 2007) moved the init to a later time
+  just to avoid it to fail very early when libgcrypt dislikes the situation,
+  but that move was bad and the fix should rather be in libgcrypt or
+  elsewhere.
+  
 Daniel Stenberg (24 Feb 2009)
 - Brian J. Murrell found out that Negotiate proxy authentication didn't work.
   It happened because the code used the struct for server-based auth all the

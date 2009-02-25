@@ -23,6 +23,7 @@ This release includes the following changes:
  o Added support for Digest and NTLM authentication using GnuTLS
  o CURLOPT_FTP_CREATE_MISSING_DIRS can now be set to 2 to retry the CWD even
    when MKD fails
+ o GnuTLS initing moved to curl_global_init()
 
 This release includes the following bugfixes:
 
