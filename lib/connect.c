@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -54,8 +54,8 @@
 #include <arpa/inet.h>
 #endif
 #ifdef HAVE_STDLIB_H
-#include <stdlib.h> /* required for free() prototype, without it, this crashes */
-#endif              /* on macos 68K */
+#include <stdlib.h>
+#endif
 
 #if (defined(HAVE_IOCTL_FIONBIO) && defined(NETWARE))
 #include <sys/filio.h>
@@ -277,12 +277,15 @@ static CURLcode bindlocal(struct connectdata *conn,
                           curl_socket_t sockfd, int af)
 {
   struct SessionHandle *data = conn->data;
-  struct sockaddr_in me;
+
+  struct Curl_sockaddr_storage sa;
+  struct sockaddr *sock = (struct sockaddr *)&sa;  /* bind to this address */
+  socklen_t sizeof_sa = 0; /* size of the data sock points to */
+  struct sockaddr_in *si4 = (struct sockaddr_in *)&sa;
 #ifdef ENABLE_IPV6
-  struct sockaddr_in6 me6;
+  struct sockaddr_in6 *si6 = (struct sockaddr_in6 *)&sa;
 #endif
-  struct sockaddr *sock = NULL;  /* bind to this address */
-  socklen_t socksize = 0; /* size of the data sock points to */
+
   struct Curl_dns_entry *h=NULL;
   unsigned short port = data->set.localport; /* use this port number, 0 for
                                                 "random" */
@@ -290,40 +293,64 @@ static CURLcode bindlocal(struct connectdata *conn,
   int portnum = data->set.localportrange;
   const char *dev = data->set.str[STRING_DEVICE];
   int error;
+  char myhost[256] = "";
+  int done = 0; /* -1 for error, 1 for address found */
 
   /*************************************************************
    * Select device to bind socket to
    *************************************************************/
-  if(dev && (strlen(dev)<255) ) {
-    char myhost[256] = "";
-    int rc;
-    bool was_iface = FALSE;
+  if ( !dev && !port )
+    /* no local kind of binding was requested */
+    return CURLE_OK;
 
+  memset(&sa, 0, sizeof(struct Curl_sockaddr_storage));
+
+  if(dev && (strlen(dev)<255) ) {
+
+    /* interface */
     if(Curl_if2ip(af, dev, myhost, sizeof(myhost))) {
       /*
        * We now have the numerical IP address in the 'myhost' buffer
        */
-      rc = Curl_resolv(conn, myhost, 0, &h);
-      if(rc == CURLRESOLV_PENDING)
-        (void)Curl_wait_for_resolv(conn, &h);
+      infof(data, "Local Interface %s is ip %s using address family %i\n",
+            dev, myhost, af);
+      done = 1;
 
-      if(h) {
-        was_iface = TRUE;
+#ifdef SO_BINDTODEVICE
+      /* I am not sure any other OSs than Linux that provide this feature, and
+       * at the least I cannot test. --Ben
+       *
+       * This feature allows one to tightly bind the local socket to a
+       * particular interface.  This will force even requests to other local
+       * interfaces to go out the external interface.
+       *
+       *
+       * Only bind to the interface when specified as interface, not just as a
+       * hostname or ip address.
+       */
+      if(setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
+                    dev, strlen(dev)+1) != 0) {
+        error = SOCKERRNO;
+        infof(data, "SO_BINDTODEVICE %s failed with errno %d: %s;"
+              " will do regular bind\n",
+              dev, error, Curl_strerror(conn, error));
+        /* This is typically "errno 1, error: Operation not permitted" if
+           you're not running as root or another suitable privileged user */
       }
+#endif
     }
-
-    if(!was_iface) {
+    else {
       /*
        * This was not an interface, resolve the name as a host name
        * or IP number
-       */
-
-      /*
+       *
        * Temporarily force name resolution to use only the address type
        * of the connection. The resolve functions should really be changed
        * to take a type parameter instead.
        */
       long ipver = data->set.ip_version;
+      int rc;
+
       if (af == AF_INET)
         data->set.ip_version = CURL_IPRESOLVE_V4;
 #ifdef ENABLE_IPV6
@@ -338,93 +365,65 @@ static CURLcode bindlocal(struct connectdata *conn,
 
       if(h) {
         /* convert the resolved address, sizeof myhost >= INET_ADDRSTRLEN */
-        Curl_printable_address(h->addr, myhost, sizeof myhost);
+        Curl_printable_address(h->addr, myhost, sizeof(myhost));
+        infof(data, "Name '%s' family %i resolved to '%s' family %i\n",
+              dev, af, myhost, h->addr->ai_family);
+        Curl_resolv_unlock(data, h);
+        done = 1;
+      }
+      else {
+        /*
+         * provided dev was no interface (or interfaces are not supported
+         * e.g. solaris) no ip address and no domain we fail here
+         */
+        done = -1;
       }
     }
 
-    if(!*myhost || !h) {
-      /* need to fix this
-         h=Curl_gethost(data,
-         getmyhost(*myhost,sizeof(myhost)),
-         hostent_buf,
-         sizeof(hostent_buf));
-      */
+    if(done > 0) {
+#ifdef ENABLE_IPV6
+      /* ipv6 address */
+      if ( (af == AF_INET6) &&
+           inet_pton(AF_INET6, myhost, &si6->sin6_addr) > 0 ) {
+        si6->sin6_family = AF_INET6;
+        si6->sin6_port = htons(port);
+        sizeof_sa = sizeof(struct sockaddr_in6);
+      }
+      else
+#endif
+      /* ipv4 address */
+      if ( af == AF_INET && inet_pton(AF_INET, myhost, &si4->sin_addr) > 0 ) {
+        si4->sin_family = AF_INET;
+        si4->sin_port = htons(port);
+        sizeof_sa = sizeof(struct sockaddr_in);
+      }
+    }
+
+    if(done < 1) {
       failf(data, "Couldn't bind to '%s'", dev);
-      if(h)
-        Curl_resolv_unlock(data, h);
       return CURLE_INTERFACE_FAILED;
     }
-
-    infof(data, "Bind local address to %s\n", myhost);
-
-    sock = h->addr->ai_addr;
-    socksize = h->addr->ai_addrlen;
-
-#ifdef SO_BINDTODEVICE
-    /* I am not sure any other OSs than Linux that provide this feature, and
-     * at the least I cannot test. --Ben
-     *
-     * This feature allows one to tightly bind the local socket to a
-     * particular interface.  This will force even requests to other local
-     * interfaces to go out the external interface.
-     *
-     */
-    if(was_iface) {
-      /* Only bind to the interface when specified as interface, not just as a
-       * hostname or ip address.
-       */
-      if(setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
-                     dev, strlen(dev)+1) != 0) {
-        error = SOCKERRNO;
-        infof(data, "SO_BINDTODEVICE %s failed with errno %d: %s; will do regular bind\n",
-              dev, error, Curl_strerror(conn, error));
-        /* This is typically "errno 1, error: Operation not permitted" if
-           you're not running as root or another suitable privileged user */
-      }
-    }
-#endif
   }
-  else if(port) {
-    /* if a local port number is requested but no local IP, extract the
-       address from the socket */
-    if(af == AF_INET) {
-      memset(&me, 0, sizeof(me));
-      me.sin_family = AF_INET;
-      me.sin_addr.s_addr = INADDR_ANY;
-
-      sock = (struct sockaddr *)&me;
-      socksize = sizeof(me);
-
-    }
+  else {
+    /* no device was given, prepare sa to match af's needs */
 #ifdef ENABLE_IPV6
-    else { /* AF_INET6 */
-      memset(&me6, 0, sizeof(me6));
-      me6.sin6_family = AF_INET6;
-      /* in6addr_any isn't always available and since me6 has just been
-         cleared, it's not strictly necessary to use it here */
-      /*me6.sin6_addr = in6addr_any;*/
-
-      sock = (struct sockaddr *)&me6;
-      socksize = sizeof(me6);
+    if ( af == AF_INET6 ) {
+      si6->sin6_family = AF_INET6;
+      si6->sin6_port = htons(port);
+      sizeof_sa = sizeof(struct sockaddr_in6);
     }
+    else
 #endif
+    if ( af == AF_INET ) {
+      si4->sin_family = AF_INET;
+      si4->sin_port = htons(port);
+      sizeof_sa = sizeof(struct sockaddr_in);
+    }
   }
-  else
-    /* no local kind of binding was requested */
-    return CURLE_OK;
 
   do {
-
-    /* Set port number to bind to, 0 makes the system pick one */
-    if(sock->sa_family == AF_INET)
-      me.sin_port = htons(port);
-#ifdef ENABLE_IPV6
-    else
-      me6.sin6_port = htons(port);
-#endif
-
-    if( bind(sockfd, sock, socksize) >= 0) {
-      /* we succeeded to bind */
+    if( bind(sockfd, sock, sizeof_sa) >= 0) {
+    /* we succeeded to bind */
       struct Curl_sockaddr_storage add;
       socklen_t size = sizeof(add);
       memset(&add, 0, sizeof(struct Curl_sockaddr_storage));
@@ -432,26 +431,23 @@ static CURLcode bindlocal(struct connectdata *conn,
         data->state.os_errno = error = SOCKERRNO;
         failf(data, "getsockname() failed with errno %d: %s",
               error, Curl_strerror(conn, error));
-        if(h)
-          Curl_resolv_unlock(data, h);
         return CURLE_INTERFACE_FAILED;
       }
-      /* We re-use/clobber the port variable here below */
-      if(((struct sockaddr *)&add)->sa_family == AF_INET)
-        port = ntohs(((struct sockaddr_in *)&add)->sin_port);
-#ifdef ENABLE_IPV6
-      else
-        port = ntohs(((struct sockaddr_in6 *)&add)->sin6_port);
-#endif
       infof(data, "Local port: %d\n", port);
       conn->bits.bound = TRUE;
-      if(h)
-        Curl_resolv_unlock(data, h);
       return CURLE_OK;
     }
+
     if(--portnum > 0) {
       infof(data, "Bind to local port %d failed, trying next\n", port);
       port++; /* try next port */
+      /* We re-use/clobber the port variable here below */
+      if(sock->sa_family == AF_INET)
+        si4->sin_port = ntohs(port);
+#ifdef ENABLE_IPV6
+      else
+        si6->sin6_port = ntohs(port);
+#endif
     }
     else
       break;
@@ -460,8 +456,6 @@ static CURLcode bindlocal(struct connectdata *conn,
   data->state.os_errno = error = SOCKERRNO;
   failf(data, "bind failed with errno %d: %s",
         error, Curl_strerror(conn, error));
-  if(h)
-    Curl_resolv_unlock(data, h);
 
   return CURLE_INTERFACE_FAILED;
 }

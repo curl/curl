@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (27 Feb 2009)
+- Senthil Raja Velu reported a problem when CURLOPT_INTERFACE and
+  CURLOPT_LOCALPORT were used together (the local port bind failed), and
+  Markus Koetter provided the fix!
+
 Daniel Stenberg (25 Feb 2009)
 - As Daniel Fandrich figured out, we must do the GnuTLS initing in the
   curl_global_init() function to properly maintain the performing functions
