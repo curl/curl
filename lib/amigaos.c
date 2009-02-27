@@ -33,42 +33,39 @@ extern int errno, h_errno;
 #include <stabs.h>
 void __request(const char *msg);
 #else
-# define __request( msg )	Printf( msg "\n\a")
+# define __request( msg )       Printf( msg "\n\a")
 #endif
 
 void amiga_cleanup()
 {
-	if(SocketBase) {
-		CloseLibrary(SocketBase);
-		SocketBase = NULL;
-	}
+  if(SocketBase) {
+    CloseLibrary(SocketBase);
+    SocketBase = NULL;
+  }
 }
 
 BOOL amiga_init()
 {
-	if(!SocketBase)
-		SocketBase = OpenLibrary("bsdsocket.library", 4);
-	
-	if(!SocketBase) {
-		__request("No TCP/IP Stack running!");
-		return FALSE;
-	}
-	
-	if(SocketBaseTags(
-		SBTM_SETVAL(SBTC_ERRNOPTR(sizeof(errno))), (ULONG) &errno,
-//		SBTM_SETVAL(SBTC_HERRNOLONGPTR),	   (ULONG) &h_errno,
-		SBTM_SETVAL(SBTC_LOGTAGPTR),		   (ULONG) "cURL",
-	TAG_DONE)) {
-		
-		__request("SocketBaseTags ERROR");
-		return FALSE;
-	}
-	
+  if(!SocketBase)
+    SocketBase = OpenLibrary("bsdsocket.library", 4);
+
+  if(!SocketBase) {
+    __request("No TCP/IP Stack running!");
+    return FALSE;
+  }
+
+  if(SocketBaseTags(SBTM_SETVAL(SBTC_ERRNOPTR(sizeof(errno))), (ULONG) &errno,
+                    SBTM_SETVAL(SBTC_LOGTAGPTR), (ULONG) "cURL",
+                    TAG_DONE)) {
+    __request("SocketBaseTags ERROR");
+    return FALSE;
+  }
+
 #ifndef __libnix__
-	atexit(amiga_cleanup);
+  atexit(amiga_cleanup);
 #endif
-	
-	return TRUE;
+
+  return TRUE;
 }
 
 #ifdef __libnix__

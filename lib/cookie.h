@@ -91,7 +91,7 @@ struct Cookie *Curl_cookie_add(struct SessionHandle *data,
 struct CookieInfo *Curl_cookie_init(struct SessionHandle *data,
                                     const char *, struct CookieInfo *, bool);
 struct Cookie *Curl_cookie_getlist(struct CookieInfo *, const char *,
-		                   const char *, bool);
+                                   const char *, bool);
 void Curl_cookie_freelist(struct Cookie *cookies, bool cookiestoo);
 void Curl_cookie_clearall(struct CookieInfo *cookies);
 void Curl_cookie_clearsess(struct CookieInfo *cookies);

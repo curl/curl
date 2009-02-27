@@ -347,7 +347,7 @@ static void setup_des_key(const unsigned char *key_56,
  * Turns a 56 bit key into the 64 bit, odd parity key and sets the key.
  */
 static void setup_des_key(const unsigned char *key_56,
-			  gcry_cipher_hd_t *des)
+                          gcry_cipher_hd_t *des)
 {
   char key[8];
 

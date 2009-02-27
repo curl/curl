@@ -1124,7 +1124,7 @@ void telrcv(struct connectdata *conn,
 /* Escape and send a telnet data block */
 /* TODO: write large chunks of data instead of one byte at a time */
 static CURLcode send_telnet_data(struct connectdata *conn,
-				 char *buffer, ssize_t nread)
+                                 char *buffer, ssize_t nread)
 {
   unsigned char outbuf[2];
   ssize_t bytes_written, total_written;
@@ -1144,16 +1144,16 @@ static CURLcode send_telnet_data(struct connectdata *conn,
       pfd[0].fd = conn->sock[FIRSTSOCKET];
       pfd[0].events = POLLOUT;
       switch (Curl_poll(pfd, 1, -1)) {
-	case -1:                    /* error, abort writing */
-	case 0:                     /* timeout (will never happen) */
-	  rc = CURLE_SEND_ERROR;
-	  break;
-	default:                    /* write! */
-	  bytes_written = 0;
-	  rc = Curl_write(conn, conn->sock[FIRSTSOCKET], outbuf+total_written,
-			  out_count-total_written, &bytes_written);
-	  total_written += bytes_written;
-	  break;
+        case -1:                    /* error, abort writing */
+        case 0:                     /* timeout (will never happen) */
+          rc = CURLE_SEND_ERROR;
+          break;
+        default:                    /* write! */
+          bytes_written = 0;
+          rc = Curl_write(conn, conn->sock[FIRSTSOCKET], outbuf+total_written,
+                          out_count-total_written, &bytes_written);
+          total_written += bytes_written;
+          break;
       }
     /* handle partial write */
     } while (rc == CURLE_OK && total_written < out_count);
@@ -1317,7 +1317,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
       while(1) {
         if(!PeekNamedPipe(stdin_handle, NULL, 0, NULL, &readfile_read, NULL)) {
           keepon = FALSE;
-	  code = CURLE_READ_ERROR;
+          code = CURLE_READ_ERROR;
           break;
         }
 
@@ -1327,15 +1327,15 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
         if(!ReadFile(stdin_handle, buf, sizeof(data->state.buffer),
                      &readfile_read, NULL)) {
           keepon = FALSE;
-	  code = CURLE_READ_ERROR;
+          code = CURLE_READ_ERROR;
           break;
         }
 
         code = send_telnet_data(conn, buf, readfile_read);
-	if(code) {
+        if(code) {
           keepon = FALSE;
-	  break;
-	}
+          break;
+        }
       }
     }
     break;
@@ -1345,14 +1345,14 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
       if(!ReadFile(stdin_handle, buf, sizeof(data->state.buffer),
                    &readfile_read, NULL)) {
         keepon = FALSE;
-	code = CURLE_READ_ERROR;
+        code = CURLE_READ_ERROR;
         break;
       }
 
       code = send_telnet_data(conn, buf, readfile_read);
       if(code) {
-	keepon = FALSE;
-	break;
+        keepon = FALSE;
+        break;
       }
     }
     break;
@@ -1417,10 +1417,10 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
       if(pfd[1].revents & POLLIN) { /* read from stdin */
         nread = read(0, buf, 255);
         code = send_telnet_data(conn, buf, nread);
-	if(code) {
+        if(code) {
           keepon = FALSE;
-	  break;
-	}
+          break;
+        }
       }
 
       if(pfd[0].revents & POLLIN) {
