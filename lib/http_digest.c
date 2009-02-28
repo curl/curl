@@ -428,7 +428,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
      Further details on Digest implementation differences:
      http://www.fngtps.com/2006/09/http-authentication
   */
-  if(authp->iestyle && (tmp = strchr((char *)uripath, '?'))) {
+  if(authp->iestyle && ((tmp = strchr((char *)uripath, '?')) != NULL)) {
     md5this = (unsigned char *)aprintf("%s:%.*s", request,
                                        (int)(tmp - (char *)uripath), uripath);
   }

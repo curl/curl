@@ -1356,7 +1356,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 
     /* the DIGEST_IE bit is only used to set a special marker, for all the
        rest we need to handle it as normal DIGEST */
-    data->state.authhost.iestyle = (auth & CURLAUTH_DIGEST_IE)?TRUE:FALSE;
+    data->state.authhost.iestyle = (bool)((auth & CURLAUTH_DIGEST_IE)?TRUE:FALSE);
 
     if(auth & CURLAUTH_DIGEST_IE) {
       auth |= CURLAUTH_DIGEST; /* set standard digest bit */
@@ -1401,7 +1401,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 
     /* the DIGEST_IE bit is only used to set a special marker, for all the
        rest we need to handle it as normal DIGEST */
-    data->state.authproxy.iestyle = (auth & CURLAUTH_DIGEST_IE)?TRUE:FALSE;
+    data->state.authproxy.iestyle = (bool)((auth & CURLAUTH_DIGEST_IE)?TRUE:FALSE);
 
     if(auth & CURLAUTH_DIGEST_IE) {
       auth |= CURLAUTH_DIGEST; /* set standard digest bit */
@@ -2465,11 +2465,11 @@ static struct SessionHandle* gethandleathead(struct curl_llist *pipeline)
 void Curl_getoff_all_pipelines(struct SessionHandle *data,
                                struct connectdata *conn)
 {
-  bool recv_head = conn->readchannel_inuse &&
-    (gethandleathead(conn->recv_pipe) == data);
+  bool recv_head = (bool)(conn->readchannel_inuse &&
+    (gethandleathead(conn->recv_pipe) == data));
 
-  bool send_head = conn->writechannel_inuse &&
-    (gethandleathead(conn->send_pipe) == data);
+  bool send_head = (bool)(conn->writechannel_inuse &&
+    (gethandleathead(conn->send_pipe) == data));
 
   if(Curl_removeHandleFromPipeline(data, conn->recv_pipe) && recv_head)
     conn->readchannel_inuse = FALSE;
