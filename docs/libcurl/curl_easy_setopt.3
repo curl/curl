@@ -440,6 +440,26 @@ The string given to CURLOPT_URL must be url-encoded and follow RFC 2396
 
 \fICURLOPT_URL\fP is the only option that \fBmust\fP be set before
 \fIcurl_easy_perform(3)\fP is called.
+
+\fICURLOPT_PROTOCOLS\fP can be used to limit what protocols libcurl will use
+for this transfer, independent of what libcurl has been compiled to
+support. That may be useful if you accept the URL from an external source and
+want to limit the accessibility.
+.IP CURLOPT_PROTOCOLS
+Pass a long that holds a bitmask of CURLPROTO_* defines. If used, this bitmask
+limits what protocols libcurl may use in the transfer. This allows you to have
+a libcurl built to support a wide range of protocols but still limit specific
+transfers to only be allowed to use a subset of them. By default libcurl will
+accept all protocols it supports. See also
+\fICURLOPT_REDIR_PROTOCOLS\fP. (Added in 7.19.4)
+.IP CURLOPT_REDIR_PROTOCOLS
+Pass a long that holds a bitmask of CURLPROTO_* defines. If used, this bitmask
+limits what protocols libcurl may use in a transfer that it follows to in a
+redirect when \fICURLOPT_FOLLOWLOCATION\fP is enabled. This allows you to
+limit specific transfers to only be allowed to use a subset of protocols in
+redirections. By default libcurl will allow all protocols except for FILE and
+SCP. This is a difference compared to pre-7.19.4 versions which
+unconditionally would follow to all protocols supported. (Added in 7.19.4)
 .IP CURLOPT_PROXY
 Set HTTP proxy to use. The parameter should be a char * to a zero terminated
 string holding the host name or dotted IP address. To specify port number in
@@ -743,6 +763,10 @@ This means that the library will re-send the same request on the new location
 and follow new Location: headers all the way until no more such headers are
 returned. \fICURLOPT_MAXREDIRS\fP can be used to limit the number of redirects
 libcurl will follow.
+
+NOTE: since 7.19.4, libcurl can limit to what protocols it will automatically
+follow. The accepted protocols are set with \fICURLOPT_REDIR_PROTOCOLS\fP and
+it excludes the FILE protocol by default.
 .IP CURLOPT_UNRESTRICTED_AUTH
 A parameter set to 1 tells the library it can continue to send authentication
 (user+password) when following locations, even when hostname changed. This

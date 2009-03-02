@@ -191,6 +191,7 @@ CURLOPT_PRIVATE                 7.10.3
 CURLOPT_PROGRESSDATA            7.1
 CURLOPT_PROGRESSFUNCTION        7.1
 CURLOPT_PROGRESSMODE            7.1           -           7.9.2
+CURLOPT_PROTOCOLS               7.19.4
 CURLOPT_PROXY                   7.1
 CURLOPT_PROXYAUTH               7.10.7
 CURLOPT_PROXYPASSWORD           7.19.1
@@ -205,6 +206,7 @@ CURLOPT_RANDOM_FILE             7.7
 CURLOPT_RANGE                   7.1
 CURLOPT_READDATA                7.9.7
 CURLOPT_READFUNCTION            7.1
+CURLOPT_REDIR_PROTOCOLS         7.19.4
 CURLOPT_REFERER                 7.1
 CURLOPT_RESUME_FROM             7.1
 CURLOPT_RESUME_FROM_LARGE       7.11.0
@@ -261,6 +263,19 @@ CURLOPT_VERBOSE                 7.1
 CURLOPT_WRITEDATA               7.9.7
 CURLOPT_WRITEFUNCTION           7.1
 CURLOPT_WRITEHEADER             7.1
+CURLPROTO_ALL                   7.19.4
+CURLPROTO_DICT                  7.19.4
+CURLPROTO_FILE                  7.19.4
+CURLPROTO_FTP                   7.19.4
+CURLPROTO_FTPS                  7.19.4
+CURLPROTO_HTTP                  7.19.4
+CURLPROTO_HTTPS                 7.19.4
+CURLPROTO_LDAP                  7.19.4
+CURLPROTO_LDAPS                 7.19.4
+CURLPROTO_SCP                   7.19.4
+CURLPROTO_SFTP                  7.19.4
+CURLPROTO_TELNET                7.19.4
+CURLPROTO_TFTP                  7.19.4
 CURLPROXY_HTTP                  7.10
 CURLPROXY_HTTP_1_0              7.19.4
 CURLPROXY_SOCKS4                7.10

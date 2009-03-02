@@ -6,6 +6,27 @@
 
                                   Changelog
 
+Version 7.19.4 (3 March 2009)
+
+Daniel Stenberg (3 Mar 2009)
+- David Kierznowski notified us about a security flaw
+  (http://curl.haxx.se/docs/adv_20090303.html also known as CVE-2009-0037) in
+  which previous libcurl versions (by design) can be tricked to access an
+  arbitrary local/different file instead of a remote one when
+  CURLOPT_FOLLOWLOCATION is enabled. This flaw is now fixed in this release
+  together this the addition of two new setopt options for controlling this
+  new behavior:
+
+  o CURLOPT_REDIR_PROTOCOLS controls what protocols libcurl is allowed to
+  follow to when CURLOPT_FOLLOWLOCATION is enabled. By default, this option
+  excludes the FILE and SCP protocols and thus you nee to explicitly allow
+  them in your app if you really want that behavior.
+
+  o CURLOPT_PROTOCOLS controls what protocol(s) libcurl is allowed to fetch
+  using the primary URL option. This is useful if you want to allow a user or
+  other outsiders control what URL to pass to libcurl and yet not allow all
+  protocols libcurl may have been built to support.
+
 Daniel Stenberg (27 Feb 2009)
 - Senthil Raja Velu reported a problem when CURLOPT_INTERFACE and
   CURLOPT_LOCALPORT were used together (the local port bind failed), and

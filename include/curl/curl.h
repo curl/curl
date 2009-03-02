@@ -550,6 +550,21 @@ typedef enum {
   CURLFTPMETHOD_LAST       /* not an option, never use */
 } curl_ftpmethod;
 
+/* CURLPROTO_ defines are for the CURLOPT_*PROTOCOLS options */
+#define CURLPROTO_HTTP   (1<<0)
+#define CURLPROTO_HTTPS  (1<<1)
+#define CURLPROTO_FTP    (1<<2)
+#define CURLPROTO_FTPS   (1<<3)
+#define CURLPROTO_SCP    (1<<4)
+#define CURLPROTO_SFTP   (1<<5)
+#define CURLPROTO_TELNET (1<<6)
+#define CURLPROTO_LDAP   (1<<7)
+#define CURLPROTO_LDAPS  (1<<8)
+#define CURLPROTO_DICT   (1<<9)
+#define CURLPROTO_FILE   (1<<10)
+#define CURLPROTO_TFTP   (1<<11)
+#define CURLPROTO_ALL    (~0) /* enable everything */
+
 /* long may be 32 or 64 bits, but we should never depend on anything else
    but 32 */
 #define CURLOPTTYPE_LONG          0
@@ -1184,6 +1199,18 @@ typedef enum {
 
   /* Socks Service */
   CINIT(SOCKS5_GSSAPI_NEC, LONG, 180),
+
+  /* set the bitmask for the protocols that are allowed to be used for the
+     transfer, which thus helps the app which takes URLs from users or other
+     external inputs and want to restrict what protocol(s) to deal
+     with. Defaults to CURLPROTO_ALL. */
+  CINIT(PROTOCOLS, LONG, 181),
+
+  /* set the bitmask for the protocols that libcurl is allowed to follow to,
+     as a subset of the CURLOPT_PROTOCOLS ones. That means the protocol needs
+     to be set in both bitmasks to be allowed to get redirected to. Defaults
+     to all protocols except FILE and SCP. */
+  CINIT(REDIR_PROTOCOLS, LONG, 182),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

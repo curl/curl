@@ -683,6 +683,12 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
   set->new_file_perms = 0644;    /* Default permissions */
   set->new_directory_perms = 0755; /* Default permissions */
 
+  /* for the *protocols fields we don't use the CURLPROTO_ALL convenience
+     define since we internally only use the lower 16 bits for the passed
+     in bitmask to not conflict with the private bits */
+  set->allowed_protocols = PROT_EXTMASK;
+  set->redir_protocols =
+    PROT_EXTMASK & ~(CURLPROTO_FILE|CURLPROTO_SCP); /* not FILE or SCP */
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   /*
@@ -2217,6 +2223,22 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.scope = (unsigned int) va_arg(param, long);
     break;
 
+  case CURLOPT_PROTOCOLS:
+    /* set the bitmask for the protocols that are allowed to be used for the
+       transfer, which thus helps the app which takes URLs from users or other
+       external inputs and want to restrict what protocol(s) to deal
+       with. Defaults to CURLPROTO_ALL. */
+    data->set.allowed_protocols = va_arg(param, long) & PROT_EXTMASK;
+    break;
+
+  case CURLOPT_REDIR_PROTOCOLS:
+    /* set the bitmask for the protocols that libcurl is allowed to follow to,
+       as a subset of the CURLOPT_PROTOCOLS ones. That means the protocol needs
+       to be set in both bitmasks to be allowed to get redirected to. Defaults
+       to all protocols except FILE and SCP. */
+    data->set.redir_protocols = va_arg(param, long) & PROT_EXTMASK;
+    break;
+
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_FAILED_INIT; /* correct this */
@@ -3371,7 +3393,19 @@ static CURLcode setup_connection_internals(struct SessionHandle *data,
 
   for (pp = protocols; (p = *pp) != NULL; pp++)
     if(Curl_raw_equal(p->scheme, conn->protostr)) {
-      /* Protocol found in table. Perform setup complement if some. */
+      /* Protocol found in table. Check if allowed */
+      if(!(data->set.allowed_protocols & p->protocol))
+        /* nope, get out */
+        break;
+
+      /* it is allowed for "normal" request, now do an extra check if this is
+         the result of a redirect */
+      if(data->state.this_is_a_follow &&
+         !(data->set.redir_protocols & p->protocol))
+        /* nope, get out */
+        break;
+
+      /* Perform setup complement if some. */
       conn->handler = p;
 
       if(p->setup_connection) {

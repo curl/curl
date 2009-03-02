@@ -2,10 +2,15 @@ Curl and libcurl 7.19.4
 
  Public curl releases:         110
  Command line options:         132
- curl_easy_setopt() options:   161
+ curl_easy_setopt() options:   163
  Public functions in libcurl:  58
  Known libcurl bindings:       38
  Contributors:                 700
+
+This release includes the following security-related fix:
+
+ o CVE-2009-0037 with the curl advisory here:
+   http://curl.haxx.se/docs/adv_20090303.html
 
 This release includes the following changes:
 
@@ -24,6 +29,7 @@ This release includes the following changes:
  o CURLOPT_FTP_CREATE_MISSING_DIRS can now be set to 2 to retry the CWD even
    when MKD fails
  o GnuTLS initing moved to curl_global_init()
+ o Added CURLOPT_REDIR_PROTOCOLS and CURLOPT_PROTOCOLS
 
 This release includes the following bugfixes:
 
@@ -59,6 +65,6 @@ advice from friends like these:
  Patrick Scott, Hidemoto Nakada, Jocelyn Jaubert, Andre Guibert de Bruet,
  Kamil Dudka, Patrik Thunstrom, Linus Nielsen Feltzing, Mark Incley,
  Daniel Johnson, James Cheng, Brian J. Murrell, Senthil Raja Velu,
- Markus Koetter
+ Markus Koetter, David Kierznowski, Michal Marek
 
         Thanks! (and sorry if I forgot to mention someone)

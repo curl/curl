@@ -891,19 +891,26 @@ struct connectdata {
   long connectindex; /* what index in the connection cache connects index this
                         particular struct has */
   long protocol; /* PROT_* flags concerning the protocol set */
-#define PROT_MISSING (1<<0)
-#define PROT_HTTP    (1<<2)
-#define PROT_HTTPS   (1<<3)
-#define PROT_FTP     (1<<4)
-#define PROT_TELNET  (1<<5)
-#define PROT_DICT    (1<<6)
-#define PROT_LDAP    (1<<7)
-#define PROT_FILE    (1<<8)
-#define PROT_FTPS    (1<<9)
-#define PROT_SSL     (1<<10) /* protocol requires SSL */
-#define PROT_TFTP    (1<<11)
-#define PROT_SCP     (1<<12)
-#define PROT_SFTP    (1<<13)
+#define PROT_HTTP    CURLPROTO_HTTP
+#define PROT_HTTPS   CURLPROTO_HTTPS
+#define PROT_FTP     CURLPROTO_FTP
+#define PROT_TELNET  CURLPROTO_TELNET
+#define PROT_DICT    CURLPROTO_DICT
+#define PROT_LDAP    CURLPROTO_LDAP
+#define PROT_FILE    CURLPROTO_FILE
+#define PROT_FTPS    CURLPROTO_FTPS
+#define PROT_TFTP    CURLPROTO_TFTP
+#define PROT_SCP     CURLPROTO_SCP
+#define PROT_SFTP    CURLPROTO_SFTP
+
+/* CURLPROTO_TFTP (1<<11) is currently the highest used bit in the public
+   bitmask. We make sure we use "private bits" above the first 16 to make
+   things easier. */
+
+#define PROT_EXTMASK 0xffff
+
+#define PROT_SSL     (1<<22) /* protocol requires SSL */
+#define PROT_MISSING (1<<23)
 
 #define PROT_CLOSEACTION PROT_FTP /* these ones need action before socket
                                      close */
@@ -1533,6 +1540,8 @@ struct UserDefined {
                                via an HTTP proxy */
   char *str[STRING_LAST]; /* array of strings, pointing to allocated memory */
   unsigned int scope;    /* address scope for IPv6 */
+  long allowed_protocols;
+  long redir_protocols;
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   long socks5_gssapi_nec; /* flag to support nec socks5 server */
 #endif
