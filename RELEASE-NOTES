@@ -1,57 +1,19 @@
-Curl and libcurl 7.19.4
+Curl and libcurl 7.19.5
 
- Public curl releases:         110
+ Public curl releases:         111
  Command line options:         132
  curl_easy_setopt() options:   163
  Public functions in libcurl:  58
  Known libcurl bindings:       38
  Contributors:                 700
 
-This release includes the following security-related fix:
-
- o CVE-2009-0037 with the curl advisory here:
-   http://curl.haxx.se/docs/adv_20090303.html
-
 This release includes the following changes:
 
- o Added CURLOPT_NOPROXY and the corresponding --noproxy
- o the OpenSSL-specific code disables TICKET (rfc5077) which is enabled by
-   default in openssl 0.9.8j
- o Added CURLOPT_TFTP_BLKSIZE
- o Added CURLOPT_SOCKS5_GSSAPI_SERVICE and CURLOPT_SOCKS5_GSSAPI_NEC - with
-   the corresponding curl options --socks5-gssapi-service and
-   --socks5-gssapi-nec
- o Improved IPv6 support when built with with c-ares >= 1.6.1
- o Added CURLPROXY_HTTP_1_0 and --proxy1.0
- o Added docs/libcurl/symbols-in-versions
- o Added CURLINFO_CONDITION_UNMET
- o Added support for Digest and NTLM authentication using GnuTLS
- o CURLOPT_FTP_CREATE_MISSING_DIRS can now be set to 2 to retry the CWD even
-   when MKD fails
- o GnuTLS initing moved to curl_global_init()
- o Added CURLOPT_REDIR_PROTOCOLS and CURLOPT_PROTOCOLS
+ o 
 
 This release includes the following bugfixes:
 
- o missing ssh.obj in VS makefiles
- o FTP ;type=i URLs now work with CURLOPT_PROXY_TRANSFER_MODE in Turkish
-   locale 
- o realms with quoted quotation marks in HTTP Digest headers
- o VC9 makefiles are now really included
- o multi interface memory leak with CURLMOPT_MAXCONNECTS set
- o CURLINFO_CONTENT_LENGTH_DOWNLOAD size from file:// "transfers" with
-   CURLOPT_NOBODY set true
- o memory leak on some libz errors for content encodings
- o NSS-enabled build is repaired
- o superfluous wait in SFTP downloads removed
- o FTP with the multi interface no longer kills the control connection as
-   easily on transfer failures
- o compilation halting when using VS2008 to build a Windows 2000 target
- o ease creation of libcurl Mac OS X Framework
- o CURLINFO_CONTENT_LENGTH_DOWNLOAD and CURLINFO_CONTENT_LENGTH_UPLOAD are -1
-   if unknown
- o Negotiate proxy authentication
- o CURLOPT_INTERFACE and CURLOPT_LOCALPORT used together
+ o 
 
 This release includes the following known bugs:
 
@@ -60,11 +22,6 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Lisa Xu, Daniel Fandrich, Craig A West, Alexey Borzov, Sharad Gupta,
- Peter Sylvester, Chad Monroe, Markus Moeller, Yang Tse, Scott Cantor,
- Patrick Scott, Hidemoto Nakada, Jocelyn Jaubert, Andre Guibert de Bruet,
- Kamil Dudka, Patrik Thunstrom, Linus Nielsen Feltzing, Mark Incley,
- Daniel Johnson, James Cheng, Brian J. Murrell, Senthil Raja Velu,
- Markus Koetter, David Kierznowski, Michal Marek
+ 
 
         Thanks! (and sorry if I forgot to mention someone)
