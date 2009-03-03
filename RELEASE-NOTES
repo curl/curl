@@ -9,7 +9,8 @@ Curl and libcurl 7.19.5
 
 This release includes the following changes:
 
- o 
+ o libcurl now closes all dead connections whenever you attempt to open a new
+   connection
 
 This release includes the following bugfixes:
 
@@ -22,6 +23,6 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- 
+ David James
 
         Thanks! (and sorry if I forgot to mention someone)

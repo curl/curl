@@ -6,6 +6,17 @@
 
                                   Changelog
 
+Daniel Stenberg (3 Mar 2009)
+- David James brought a patch that make libcurl close (all) dead connections
+  whenever you attempt to open a new connection.
+
+  1. After cleaning up a dead connection, "continue" instead of
+     returning FALSE. This ensures that we clean up all dead connections,
+     rather than just cleaning up the first dead connection.
+  2. Move up the cleanup for dead connections so that it occurs for
+     all connections, rather than just the connections which have the same
+     preferences as our current new connection.
+
 Version 7.19.4 (3 March 2009)
 
 Daniel Stenberg (3 Mar 2009)
