@@ -33,7 +33,6 @@ hugehelp.c
 libcurl.pc
 curl-config
 stamp-h*
-curl
 curllib.dsp
 curllib.vcproj
 *.spec
