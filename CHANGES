@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Fandrich (4 Mar 2009)
+- Fixed a problem with m4 quoting in the OpenSSL configure check reported
+  by Daniel Johnson.
+
 Daniel Stenberg (3 Mar 2009)
 - David James brought a patch that make libcurl close (all) dead connections
   whenever you attempt to open a new connection.

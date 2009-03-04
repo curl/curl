@@ -1171,7 +1171,7 @@ if test X"$OPT_SSL" != Xno; then
     PKGTEST="no"
     PREFIX_OPENSSL=$OPT_SSL
     LIB_OPENSSL="$PREFIX_OPENSSL/lib$libsuff"
-    if [ "$PREFIX_OPENSSL" != "/usr" ] ; then
+    if test "$PREFIX_OPENSSL" != "/usr" ; then
       LDFLAGS="$LDFLAGS -L$LIB_OPENSSL"
       CPPFLAGS="$CPPFLAGS -I$PREFIX_OPENSSL/include"
     fi
