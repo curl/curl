@@ -303,9 +303,8 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
         fprintf(stderr, "\n****\n");
         fprintf(stderr, "**** Header %s\n ", header);
       });
-
-      free(buffer);
 #endif
+      free(buffer);
     }
     else {
       if(ntlm->state >= NTLMSTATE_TYPE1)

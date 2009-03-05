@@ -14,7 +14,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o 
+ o NTLM authentication memory leak on SSPI enabled Windows builds
 
 This release includes the following known bugs:
 
@@ -23,6 +23,6 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- David James
+ David James, Chris Deidun
 
         Thanks! (and sorry if I forgot to mention someone)
