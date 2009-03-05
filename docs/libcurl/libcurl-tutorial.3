@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH libcurl-tutorial 3 "17 Nov 2008" "libcurl" "libcurl programming"
+.TH libcurl-tutorial 3 "4 Mar 2009" "libcurl" "libcurl programming"
 .SH NAME
 libcurl-tutorial \- libcurl programming tutorial
 .SH "Objective"
@@ -200,7 +200,7 @@ Using that property, you can easily pass local data between your application
 and the function that gets invoked by libcurl. libcurl itself won't touch the
 data you pass with \fICURLOPT_WRITEDATA\fP.
 
-libcurl offers its own default internal callback that'll take care of the data
+libcurl offers its own default internal callback that will take care of the data
 if you don't set the callback with \fICURLOPT_WRITEFUNCTION\fP. It will then
 simply output the received data to stdout. You can have the default callback
 write the data to a different file handle by passing a 'FILE *' to a file
@@ -738,24 +738,24 @@ stand in the way for such innovative actions either!
 .IP "Proxy Auto-Config"
 
 Netscape first came up with this. It is basically a web page (usually using a
-\&.pac extension) with a javascript that when executed by the browser with the
+\&.pac extension) with a Javascript that when executed by the browser with the
 requested URL as input, returns information to the browser on how to connect
 to the URL. The returned information might be "DIRECT" (which means no proxy
 should be used), "PROXY host:port" (to tell the browser where the proxy for
 this particular URL is) or "SOCKS host:port" (to direct the browser to a SOCKS
 proxy).
 
-libcurl has no means to interpret or evaluate javascript and thus it doesn't
+libcurl has no means to interpret or evaluate Javascript and thus it doesn't
 support this. If you get yourself in a position where you face this nasty
 invention, the following advice have been mentioned and used in the past:
 
-- Depending on the javascript complexity, write up a script that translates it
+- Depending on the Javascript complexity, write up a script that translates it
 to another language and execute that.
 
-- Read the javascript code and rewrite the same logic in another language.
+- Read the Javascript code and rewrite the same logic in another language.
 
-- Implement a javascript interpreted, people have successfully used the
-Mozilla javascript engine in the past.
+- Implement a Javascript interpreted, people have successfully used the
+Mozilla Javascript engine in the past.
 
 - Ask your admins to stop this, for a static proxy setup or similar.
 
@@ -836,7 +836,7 @@ If just changing the actual HTTP request keyword is what you want, like when
 GET, HEAD or POST is not good enough for you, CURLOPT_CUSTOMREQUEST is there
 for you. It is very simple to use:
 
- curl_easy_setopt(easyhandle, CURLOPT_CUSTOMREQUEST, "MYOWNRUQUEST");
+ curl_easy_setopt(easyhandle, CURLOPT_CUSTOMREQUEST, "MYOWNREQUEST");
 
 When using the custom request, you change the request keyword of the actual
 request you are performing. Thus, by default you make a GET request but you can
@@ -908,7 +908,7 @@ Sending custom commands to a FTP server means that you need to send the
 commands exactly as the FTP server expects them (RFC959 is a good guide
 here), and you can only use commands that work on the control-connection
 alone. All kinds of commands that require data interchange and thus need
-a data-connection must be left to libcurl's own judgment. Also be aware
+a data-connection must be left to libcurl's own judgement. Also be aware
 that libcurl will do its very best to change directory to the target
 directory before doing any transfer, so if you change directory (with CWD
 or similar) you might confuse libcurl and then it might not attempt to
@@ -1062,20 +1062,32 @@ actually true headers, but in this case we pretend they are! ;-)
 
 .SH "Security Considerations"
 
-libcurl is in itself not insecure. If used the right way, you can use libcurl
-to transfer data pretty safely.
+The libcurl project takes security seriously.  The library is written with
+caution and precautions are taken to mitigate many kinds of risks encountered
+while operating with potentially malicious servers on the Internet.  It is a
+powerful library, however, which allows application writers to make trade offs
+between ease of writing and exposure to potential risky operations.  If
+used the right way, you can use libcurl to transfer data pretty safely.
 
-There are of course many things to consider that may loosen up this
-situation:
+Many applications are used in closed networks where users and servers
+can be trusted, but many others are used on arbitrary servers and are fed
+input from potentially untrusted users.  Following is a discussion about
+some risks in the ways in which applications commonly use libcurl and
+potential mitigations of those risks. It is by no means comprehensive, but
+shows classes of attacks that robust applications should consider. The
+Common Weakness Enumeration project at http://cwe.mitre.org/ is a good
+reference for many of these and similar types of weaknesses of which
+application writers should be aware.
 
 .IP "Command Lines"
 If you use a command line tool (such as curl) that uses libcurl, and you give
-option to the tool on the command line those options can very likely get read
+options to the tool on the command line those options can very likely get read
 by other users of your system when they use 'ps' or other tools to list
 currently running processes.
 
 To avoid this problem, never feed sensitive things to programs using command
-line options.
+line options. Write them to a protected file and use the \-K option to
+avoid this.
 
 .IP ".netrc"
 \&.netrc is a pretty handy file/feature that allows you to login quickly and
@@ -1091,14 +1103,143 @@ plain text anywhere.
 .IP "Clear Text Passwords"
 Many of the protocols libcurl supports send name and password unencrypted as
 clear text (HTTP Basic authentication, FTP, TELNET etc). It is very easy for
-anyone on your network or a network nearby yours, to just fire up a network
+anyone on your network or a network nearby yours to just fire up a network
 analyzer tool and eavesdrop on your passwords. Don't let the fact that HTTP
 Basic uses base64 encoded passwords fool you. They may not look readable at a
 first glance, but they very easily "deciphered" by anyone within seconds.
 
-To avoid this problem, use HTTP athentication methods or other protocols that
+To avoid this problem, use HTTP authentication methods or other protocols that
 don't let snoopers see your password: HTTP with Digest, NTLM or GSS
-authentication, HTTPS, FTPS, SCP, SFTP and FTP-kerberos are a few examples.
+authentication, HTTPS, FTPS, SCP, SFTP and FTP-Kerberos are a few examples.
+
+.IP "Redirects"
+The CURLOPT_FOLLOWLOCATION option automatically follows HTTP redirects sent
+by a remote server.  These redirects can refer to any kind of URL, not just
+HTTP.  A redirect to a file: URL would cause the libcurl to read (or write)
+arbitrary files from the local filesystem.  If the application returns
+the data back to the user (as would happen in some kinds of CGI scripts),
+an attacker could leverage this to read otherwise forbidden data (e.g.
+file://localhost/etc/passwd).
+
+If authentication credentials are stored in the ~/.netrc file, or Kerberos
+is in use, any other URL type (not just file:) that requires
+authentication is also at risk.  A redirect such as
+ftp://some-internal-server/private-file would then return data even when
+the server is password protected.
+
+In the same way, if an unencrypted SSH private key has been configured for
+the user running the libcurl application, SCP: or SFTP: URLs could access
+password or private-key protected resources,
+e.g. sftp://user@some-internal-server/etc/passwd
+
+The CURLOPT_REDIR_PROTOCOLS and CURLOPT_NETRC options can be used to
+mitigate against this kind of attack.
+
+A redirect can also specify a location available only on the machine running
+libcurl, including servers hidden behind a firewall from the attacker.
+e.g. http://127.0.0.1/ or http://intranet/delete-stuff.cgi?delete=all or
+tftp://bootp-server/pc-config-data
+
+Apps can mitigate against this by disabling CURLOPT_FOLLOWLOCATION and
+handling redirects itself, sanitizing URLs as necessary. Alternately, an
+app could leave CURLOPT_FOLLOWLOCATION enabled but set CURLOPT_REDIR_PROTOCOLS
+and install a CURLOPT_OPENSOCKETFUNCTION callback function in which addresses
+are sanitized before use.
+
+.IP "Private Resources"
+A user who can control the DNS server of a domain being passed in within
+a URL can change the address of the host to a local, private address
+which the libcurl application will then use. e.g. The innocuous URL
+http://fuzzybunnies.example.com/ could actually resolve to the IP address
+of a server behind a firewall, such as 127.0.0.1 or 10.1.2.3
+Apps can mitigate against this by setting a CURLOPT_OPENSOCKETFUNCTION
+and checking the address before a connection.
+
+All the malicious scenarios regarding redirected URLs apply just as well
+to non-redirected URLs, if the user is allowed to specify an arbitrary URL
+that could point to a private resource. For example, a web app providing
+a translation service might happily translate file://localhost/etc/passwd
+and display the result.  Apps can mitigate against this with the
+CURLOPT_PROTOCOLS option as well as by similar mitigation techniques for
+redirections.
+
+A malicious FTP server could in response to the PASV command return an
+IP address and port number for a server local to the app running libcurl
+but behind a firewall.  Apps can mitigate against this by using the
+CURLOPT_FTP_SKIP_PASV_IP option or CURLOPT_FTPPORT.
+
+.IP Uploads
+When uploading, a redirect can cause a local (or remote) file to be
+overwritten.  Apps must not allow any unsanitized URL to be passed in
+for uploads.  Also, CURLOPT_FOLLOWLOCATION should not be used on uploads.
+Instead, the app should handle redirects itself, sanitizing each URL first.
+
+.IP Authentication
+Use of CURLOPT_UNRESTRICTED_AUTH could cause authentication information to
+be sent to an unknown second server.  Apps can mitigate against this
+by disabling CURLOPT_FOLLOWLOCATION and handling redirects itself,
+sanitizing where necessary.
+
+Use of the CURLAUTH_ANY option to CURLOPT_HTTPAUTH could result in user
+name and password being sent in clear text to an HTTP server.  Instead,
+use CURLAUTH_ANYSAFE which ensures that the password is encrypted over
+the network, or else fail the request.
+
+Use of the CURLUSESSL_TRY option to CURLOPT_USE_SSL could result in user
+name and password being sent in clear text to an FTP server.  Instead,
+use CURLUSESSL_CONTROL to ensure that an encrypted connection is used or
+else fail the request.
+
+.IP Cookies
+If cookies are enabled and cached, then a user could craft a URL which
+performs some malicious action to a site whose authentication is already
+stored in a cookie. e.g. http://mail.example.com/delete-stuff.cgi?delete=all
+Apps can mitigate against this by disabling cookies or clearing them
+between requests.
+
+.IP "Dangerous URLs"
+SCP URLs can contain raw commands within the scp: URL, which is a side effect
+of how the SCP protocol is designed. e.g. 
+scp://user:pass@host/a;date >/tmp/test;
+Apps must not allow unsanitized SCP: URLs to be passed in for downloads.
+
+.IP "Denial of Service"
+A malicious server could cause libcurl to effectively hang by sending
+a trickle of data through, or even no data at all but just keeping the TCP
+connection open.  This could result in a denial-of-service attack. The
+CURLOPT_TIMEOUT and/or CURLOPT_LOW_SPEED_LIMIT options can be used to
+mitigate against this.
+
+A malicious server could cause libcurl to effectively hang by starting to
+send data, then severing the connection without cleanly closing the
+TCP connection.  The app could install a CURLOPT_SOCKOPTFUNCTION callback
+function and set the TCP SO_KEEPALIVE option to mitigate against this.
+Setting one of the timeout options would also work against this attack.
+
+A malicious server could cause libcurl to download an infinite amount of
+data, potentially causing all of memory or disk to be filled. Setting
+the CURLOPT_MAXFILESIZE_LARGE option is not sufficient to guard against this.
+Instead, the app should monitor the amount of data received within the
+write or progress callback and abort once the limit is reached.
+
+A malicious HTTP server could cause an infinite redirection loop, causing a 
+denial-of-service. This can be mitigated by using the CURLOPT_MAXREDIRS
+option.
+
+.IP "Arbitrary Headers"
+User-supplied data must be sanitized when used in options like
+CURLOPT_USERAGENT, CURLOPT_HTTPHEADER, CURLOPT_POSTFIELDS and others that
+are used to generate structured data. Characters like embedded carriage
+returns or ampersands could allow the user to create additional headers or
+fields that could cause malicious transactions.
+
+.IP "Server Certificates"
+A secure application should never use the CURLOPT_SSL_VERIFYPEER option to
+disable certificate validation. There are numerous attacks that are enabled
+by apps that fail to properly validate server TLS/SSL certificates,
+thus enabling a malicious server to spoof a legitimate one. HTTPS without
+validated certificates is potentially as insecure as a plain HTTP connection.
+
 .IP "Showing What You Do"
 On a related issue, be aware that even in situations like when you have
 problems with libcurl and ask someone for help, everything you reveal in order

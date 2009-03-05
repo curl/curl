@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Fandrich (5 Mar 2009)
+- Expanded the security section of the libcurl-tutorial man page to cover
+  more issues for authors to consider when writing robust libcurl-using
+  applications.
+
 Yang Tse (5 Mar 2009)
 - Fixed NTLM authentication memory leak on SSPI enabled Windows builds. This
   issue was noticed by Chris Deidun.
