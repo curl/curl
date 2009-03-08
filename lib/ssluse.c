@@ -565,6 +565,9 @@ static int x509_name_oneline(X509_NAME *a, char *buf, size_t size)
   BUF_MEM *biomem;
   int rc;
 
+  if(!bio_out)
+    return 1; /* alloc failed! */
+
   rc = X509_NAME_print_ex(bio_out, a, 0, XN_FLAG_SEP_CPLUS_SPC);
   BIO_get_mem_ptr(bio_out, &biomem);
 

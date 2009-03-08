@@ -16,6 +16,7 @@ This release includes the following bugfixes:
 
  o NTLM authentication memory leak on SSPI enabled Windows builds
  o fixed the GnuTLS-using code to do correct return code checks
+ o an alloc-related call in the OpenSSL-using code didn't check the return value
 
 This release includes the following known bugs:
 

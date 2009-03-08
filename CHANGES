@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel Stenberg (8 Mar 2009)
+- Andre Guibert de Bruet found and fixed a code segment in ssluse.c where the
+  allocation of the memory BIO was not being properly checked.
+
 - Andre Guibert de Bruet fixed the gnutls-using code: There are a few places
   in the gnutls code where we were checking for negative values for errors,
   when the man pages state that GNUTLS_E_SUCCESS is returned on success and
