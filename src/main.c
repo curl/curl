@@ -5286,13 +5286,14 @@ static int create_dir_hierarchy(const char *outfile, FILE *errors)
     /* since strtok returns a token for the last word even
        if not ending with DIR_CHAR, we need to prune it */
     if (tempdir2 != NULL) {
-      if (strlen(dirbuildup) > 0)
-        sprintf(dirbuildup,"%s%s%s",dirbuildup, DIR_CHAR, tempdir);
+      size_t dlen = strlen(dirbuildup);
+      if (dlen)
+        sprintf(&dirbuildup[dlen], "%s%s", DIR_CHAR, tempdir);
       else {
         if (0 != strncmp(outdup, DIR_CHAR, 1))
-          sprintf(dirbuildup,"%s",tempdir);
+          strcpy(dirbuildup, tempdir);
         else
-          sprintf(dirbuildup,"%s%s", DIR_CHAR, tempdir);
+          sprintf(dirbuildup, "%s%s", DIR_CHAR, tempdir);
       }
       if (access(dirbuildup, F_OK) == -1) {
         result = mkdir(dirbuildup,(mode_t)0000750);

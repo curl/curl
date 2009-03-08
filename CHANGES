@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (8 Mar 2009)
+- Bill Egert pointed out (http://curl.haxx.se/bug/view.cgi?id=2671602) that
+  curl didn't use sprintf() in a way that is documented to work in POSIX but
+  since we use our own printf() code (from libcurl) that shouldn't be a
+  problem. Nonetheless I modified the code to not rely on such particular
+  features and to not cause further raised eyebrowse with no good reason.
+
 Daniel Fandrich (5 Mar 2009)
 - Expanded the security section of the libcurl-tutorial man page to cover
   more issues for authors to consider when writing robust libcurl-using
