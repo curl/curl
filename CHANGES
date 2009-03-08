@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel Stenberg (8 Mar 2009)
+- Andre Guibert de Bruet fixed the gnutls-using code: There are a few places
+  in the gnutls code where we were checking for negative values for errors,
+  when the man pages state that GNUTLS_E_SUCCESS is returned on success and
+  other values indicate error conditions.
+
 - Bill Egert pointed out (http://curl.haxx.se/bug/view.cgi?id=2671602) that
   curl didn't use sprintf() in a way that is documented to work in POSIX but
   since we use our own printf() code (from libcurl) that shouldn't be a

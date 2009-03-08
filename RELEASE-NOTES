@@ -15,6 +15,7 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o NTLM authentication memory leak on SSPI enabled Windows builds
+ o fixed the GnuTLS-using code to do correct return code checks
 
 This release includes the following known bugs:
 
@@ -23,6 +24,7 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Daniel Fandrich, Yang Tse, David James, Chris Deidun, Bill Egert
+ Daniel Fandrich, Yang Tse, David James, Chris Deidun, Bill Egert,
+ Andre Guibert de Bruet
 
         Thanks! (and sorry if I forgot to mention someone)

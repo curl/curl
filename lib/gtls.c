@@ -277,7 +277,7 @@ Curl_gtls_connect(struct connectdata *conn,
 
   /* allocate a cred struct */
   rc = gnutls_certificate_allocate_credentials(&conn->ssl[sockindex].cred);
-  if(rc < 0) {
+  if(rc != GNUTLS_E_SUCCESS) {
     failf(data, "gnutls_cert_all_cred() failed: %s", gnutls_strerror(rc));
     return CURLE_SSL_CONNECT_ERROR;
   }
@@ -318,7 +318,7 @@ Curl_gtls_connect(struct connectdata *conn,
 
   /* Initialize TLS session as a client */
   rc = gnutls_init(&conn->ssl[sockindex].session, GNUTLS_CLIENT);
-  if(rc) {
+  if(rc != GNUTLS_E_SUCCESS) {
     failf(data, "gnutls_init() failed: %d", rc);
     return CURLE_SSL_CONNECT_ERROR;
   }
@@ -337,13 +337,13 @@ Curl_gtls_connect(struct connectdata *conn,
 
   /* Use default priorities */
   rc = gnutls_set_default_priority(session);
-  if(rc < 0)
+  if(rc != GNUTLS_E_SUCCESS)
     return CURLE_SSL_CONNECT_ERROR;
 
   if(data->set.ssl.version == CURL_SSLVERSION_SSLv3) {
     static const int protocol_priority[] = { GNUTLS_SSL3, 0 };
     gnutls_protocol_set_priority(session, protocol_priority);
-    if(rc < 0)
+    if(rc != GNUTLS_E_SUCCESS)
       return CURLE_SSL_CONNECT_ERROR;
   }
 
@@ -351,7 +351,7 @@ Curl_gtls_connect(struct connectdata *conn,
      is higher for types specified before others. After specifying the types
      you want, you must append a 0. */
   rc = gnutls_certificate_type_set_priority(session, cert_type_priority);
-  if(rc < 0)
+  if(rc != GNUTLS_E_SUCCESS)
     return CURLE_SSL_CONNECT_ERROR;
 
   if(data->set.str[STRING_CERT]) {
@@ -360,7 +360,7 @@ Curl_gtls_connect(struct connectdata *conn,
           data->set.str[STRING_CERT],
           data->set.str[STRING_KEY] ?
           data->set.str[STRING_KEY] : data->set.str[STRING_CERT],
-          do_file_type(data->set.str[STRING_CERT_TYPE]) ) ) {
+          do_file_type(data->set.str[STRING_CERT_TYPE]) ) != GNUTLS_E_SUCCESS) {
       failf(data, "error reading X.509 key or certificate file");
       return CURLE_SSL_CONNECT_ERROR;
     }
