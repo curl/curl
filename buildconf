@@ -294,6 +294,11 @@ done
 echo "buildconf: running libtoolize"
 $libtoolize --copy --automake --force || die "The libtoolize command failed"
 
+if test ! -f m4/curl-functions.m4; then
+  echo "buildconf: cURL m4 macros not found"
+  exit 1
+fi
+
 echo "buildconf: running aclocal"
 ${ACLOCAL:-aclocal} -I m4 $ACLOCAL_FLAGS || die "The aclocal command line failed"
 

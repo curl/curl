@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (9 Mar 2009)
+- Andreas Farber made the 'buildconf' script check for the presence of m4
+  scripts to make it detect a bad checkout earlier. People with older
+  checkouts who don't do cvs update with the -d option won't get the new dirs
+  and then will get funny outputs that can be a bit hard to understand and
+  fix.
+  
 Daniel Stenberg (8 Mar 2009)
 - Andre Guibert de Bruet found and fixed a code segment in ssluse.c where the
   allocation of the memory BIO was not being properly checked.
