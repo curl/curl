@@ -7,6 +7,21 @@
                                   Changelog
 
 Daniel Stenberg (9 Mar 2009)
+- Frank Hempel found out a bug and provided the fix: 
+  
+  curl_easy_duphandle did not necessarily duplicate the CURLOPT_COOKIEFILE
+  option. It only enabled the cookie engine in the destination handle if
+  data->cookies is not NULL (where data is the source handle). In case of a
+  newly initialized handle which just had the cookie support enabled by a
+  curl_easy_setopt(handle, CURL_COOKIEFILE, "")-call, handle->cookies was
+  still NULL because the setopt-call only appends the value to
+  data->change.cookielist, hence duplicating this handle would not have the
+  cookie engine switched on.
+
+  We also concluded that the slist-functionality would be suitable for being
+  put in its own module rather than simply hanging out in lib/sendf.c so I
+  created lib/slist.[ch] for them.
+
 - Andreas Farber made the 'buildconf' script check for the presence of m4
   scripts to make it detect a bad checkout earlier. People with older
   checkouts who don't do cvs update with the -d option won't get the new dirs

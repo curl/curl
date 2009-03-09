@@ -84,6 +84,7 @@
 #include "sendf.h" /* for failf function prototype */
 #include "http_ntlm.h"
 #include "connect.h" /* for Curl_getconnectinfo */
+#include "slist.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -648,6 +649,16 @@ CURL *curl_easy_duphandle(CURL *incurl)
 
     /* duplicate all values in 'change' */
 
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
+    if(data->change.cookielist) {
+      outcurl->change.cookielist =
+        Curl_slist_duplicate(data->change.cookielist);
+
+      if (!outcurl->change.cookielist)
+        break;
+    }
+#endif   /* CURL_DISABLE_HTTP */
+
     if(data->change.url) {
       outcurl->change.url = strdup(data->change.url);
       if(!outcurl->change.url)
@@ -692,6 +703,10 @@ CURL *curl_easy_duphandle(CURL *incurl)
         Curl_rm_connc(outcurl->state.connc);
       if(outcurl->state.headerbuff)
         free(outcurl->state.headerbuff);
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
+      if(outcurl->change.cookielist)
+        curl_slist_free_all(outcurl->change.cookielist);
+#endif
       if(outcurl->change.url)
         free(outcurl->change.url);
       if(outcurl->change.referer)

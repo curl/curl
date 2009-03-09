@@ -17,6 +17,7 @@ This release includes the following bugfixes:
  o NTLM authentication memory leak on SSPI enabled Windows builds
  o fixed the GnuTLS-using code to do correct return code checks
  o an alloc-related call in the OpenSSL-using code didn't check the return value
+ o curl_easy_duphandle() failed to duplicate cookies at times
 
 This release includes the following known bugs:
 
@@ -26,6 +27,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Daniel Fandrich, Yang Tse, David James, Chris Deidun, Bill Egert,
- Andre Guibert de Bruet, Andreas Farber
+ Andre Guibert de Bruet, Andreas Farber, Frank Hempel
 
         Thanks! (and sorry if I forgot to mention someone)
