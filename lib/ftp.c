@@ -3055,7 +3055,7 @@ static CURLcode ftp_connect(struct connectdata *conn,
                                  bool *done) /* see description above */
 {
   CURLcode result;
-#ifndef CURL_DISABLE_HTTP
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_PROXY)
   /* for FTP over HTTP proxy */
   struct HTTP http_proxy;
   struct FTP *ftp_save;
