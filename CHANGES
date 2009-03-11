@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Stenberg (11 Mar 2009)
+- Kamil Dudka made the curl tool properly call curl_global_init() before any
+  other libcurl function.
+
 Yang Tse (11 Mar 2009)
 - Added missing TELNET timeout support for Windows builds. This issue was
   reported by Pierre Brico.

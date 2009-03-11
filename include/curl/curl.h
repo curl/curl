@@ -1510,7 +1510,9 @@ CURL_EXTERN void curl_free(void *p);
  * DESCRIPTION
  *
  * curl_global_init() should be invoked exactly once for each application that
- * uses libcurl
+ * uses libcurl and before any call of other libcurl function.
+ *
+ * This function is not thread-safe!
  */
 CURL_EXTERN CURLcode curl_global_init(long flags);
 

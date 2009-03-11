@@ -3969,6 +3969,12 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
   memset(&heads, 0, sizeof(struct OutStruct));
 
+  /* initialize curl library - do not call any libcurl functions before */
+  if (main_init() != CURLE_OK) {
+    helpf(config->errors, "error initializing curl library\n");
+    return CURLE_FAILED_INIT;
+  }
+
 #ifdef CURLDEBUG
   /* this sends all memory debug messages to a logfile named memdump */
   env = curlx_getenv("CURL_MEMDEBUG");
@@ -4015,10 +4021,6 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 #endif
 
   /* inits */
-  if (main_init() != CURLE_OK) {
-    helpf(config->errors, "error initializing curl library\n");
-    return CURLE_FAILED_INIT;
-  }
   config->postfieldsize = -1;
   config->showerror=TRUE;
   config->use_httpget=FALSE;
