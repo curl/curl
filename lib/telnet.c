@@ -1366,8 +1366,8 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
           infof(data,"WSAEnumNetworkEvents failed (%d)", err);
           keepon = FALSE;
           code = CURLE_READ_ERROR;
-          break;
         }
+        break;
       }
       if(events.lNetworkEvents & FD_READ) {
         /* This reallu OUGHT to check its return code. */
