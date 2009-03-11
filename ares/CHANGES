@@ -1,5 +1,8 @@
   Changelog for the c-ares project
 
+* March 11 2009 (Yang Tse)
+- Japheth Cleaver fixed acountry.c replacing u_long with unsigned long.
+
 * February 20 2009 (Yang Tse)
 - Do not halt compilation when using VS2008 to build a Windows 2000 target.
 
