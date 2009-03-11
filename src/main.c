@@ -3969,12 +3969,6 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
   memset(&heads, 0, sizeof(struct OutStruct));
 
-  /* initialize curl library - do not call any libcurl functions before */
-  if (main_init() != CURLE_OK) {
-    helpf(config->errors, "error initializing curl library\n");
-    return CURLE_FAILED_INIT;
-  }
-
 #ifdef CURLDEBUG
   /* this sends all memory debug messages to a logfile named memdump */
   env = curlx_getenv("CURL_MEMDEBUG");
@@ -3994,6 +3988,15 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
     curl_free(env);
   }
 #endif
+
+  /* Initialize curl library - do not call any libcurl functions before.
+     Note that the CURLDEBUG magic above is an exception, but then that's not
+     part of the official public API.
+   */
+  if (main_init() != CURLE_OK) {
+    helpf(config->errors, "error initializing curl library\n");
+    return CURLE_FAILED_INIT;
+  }
 
   /*
    * Get a curl handle to use for all forthcoming curl transfers.  Cleanup
