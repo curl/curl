@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Yang Tse (11 Mar 2009)
+- Added missing TELNET timeout support for Windows builds. This issue was
+  reported by Pierre Brico.
+
 Daniel Stenberg (9 Mar 2009)
 - Frank Hempel found out a bug and provided the fix: 
   

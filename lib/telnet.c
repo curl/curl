@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1195,11 +1195,13 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
   DWORD  wait_timeout;
   DWORD waitret;
   DWORD readfile_read;
+  int err;
 #else
   int interval_ms;
   struct pollfd pfd[2];
 #endif
   ssize_t nread;
+  struct timeval now;
   bool keepon = TRUE;
   char *buf = data->state.buffer;
   struct TELNET *tn;
@@ -1305,7 +1307,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
     wait_timeout = 100;
   } else {
     obj_count = 2;
-    wait_timeout = INFINITE;
+    wait_timeout = 1000;
   }
 
   /* Keep on listening and act on events */
@@ -1358,30 +1360,45 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
     break;
 
     case WAIT_OBJECT_0:
-      if(enum_netevents_func(sockfd, event_handle, &events)
-         != SOCKET_ERROR) {
-        if(events.lNetworkEvents & FD_READ) {
-          /* This reallu OUGHT to check its return code. */
-          (void)Curl_read(conn, sockfd, buf, BUFSIZE - 1, &nread);
 
-          telrcv(conn, (unsigned char *)buf, nread);
-
-          fflush(stdout);
-
-          /* Negotiate if the peer has started negotiating,
-             otherwise don't. We don't want to speak telnet with
-             non-telnet servers, like POP or SMTP. */
-          if(tn->please_negotiate && !tn->already_negotiated) {
-            negotiate(conn);
-            tn->already_negotiated = 1;
-          }
-        }
-
-        if(events.lNetworkEvents & FD_CLOSE) {
+      if(SOCKET_ERROR == enum_netevents_func(sockfd, event_handle, &events)) {
+        if((err = SOCKERRNO) != EINPROGRESS) {
+          infof(data,"WSAEnumNetworkEvents failed (%d)", err);
           keepon = FALSE;
+          code = CURLE_READ_ERROR;
+          break;
         }
       }
+      if(events.lNetworkEvents & FD_READ) {
+        /* This reallu OUGHT to check its return code. */
+        (void)Curl_read(conn, sockfd, buf, BUFSIZE - 1, &nread);
+
+        telrcv(conn, (unsigned char *)buf, nread);
+
+        fflush(stdout);
+
+        /* Negotiate if the peer has started negotiating,
+           otherwise don't. We don't want to speak telnet with
+           non-telnet servers, like POP or SMTP. */
+        if(tn->please_negotiate && !tn->already_negotiated) {
+          negotiate(conn);
+          tn->already_negotiated = 1;
+        }
+      }
+      if(events.lNetworkEvents & FD_CLOSE) {
+        keepon = FALSE;
+      }
       break;
+
+    }
+
+    if(data->set.timeout) {
+      now = Curl_tvnow();
+      if(Curl_tvdiff(now, conn->created) >= data->set.timeout) {
+        failf(data, "Time-out");
+        code = CURLE_OPERATION_TIMEDOUT;
+        keepon = FALSE;
+      }
     }
   }
 
@@ -1446,7 +1463,6 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
       }
     }
     if(data->set.timeout) {
-      struct timeval now;           /* current time */
       now = Curl_tvnow();
       if(Curl_tvdiff(now, conn->created) >= data->set.timeout) {
         failf(data, "Time-out");
