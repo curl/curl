@@ -19,6 +19,7 @@ This release includes the following bugfixes:
  o an alloc-related call in the OpenSSL-using code didn't check the return value
  o curl_easy_duphandle() failed to duplicate cookies at times
  o missing TELNET timeout support in Windows builds
+ o missing Curl_read() and write callback result checking in TELNET transfers
 
 This release includes the following known bugs:
 

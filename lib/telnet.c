@@ -108,9 +108,9 @@ static CURLcode check_wsock2 ( struct SessionHandle *data );
 #endif
 
 static
-void telrcv(struct connectdata *,
-            const unsigned char *inbuf, /* Data received from socket */
-            ssize_t count);             /* Number of bytes received */
+CURLcode telrcv(struct connectdata *,
+                const unsigned char *inbuf, /* Data received from socket */
+                ssize_t count);             /* Number of bytes received */
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 static void printoption(struct SessionHandle *data,
@@ -952,19 +952,26 @@ static void suboption(struct connectdata *conn)
 }
 
 static
-void telrcv(struct connectdata *conn,
-            const unsigned char *inbuf, /* Data received from socket */
-            ssize_t count)              /* Number of bytes received */
+CURLcode telrcv(struct connectdata *conn,
+                const unsigned char *inbuf, /* Data received from socket */
+                ssize_t count)              /* Number of bytes received */
 {
   unsigned char c;
+  CURLcode result;
   int in = 0;
   int startwrite=-1;
   struct SessionHandle *data = conn->data;
   struct TELNET *tn = (struct TELNET *)data->state.proto.telnet;
 
 #define startskipping() \
-    if(startwrite >= 0) \
-       Curl_client_write(conn, CLIENTWRITE_BODY, (char *)&inbuf[startwrite], in-startwrite); \
+    if(startwrite >= 0) { \
+       result = Curl_client_write(conn, \
+                                  CLIENTWRITE_BODY, \
+                                  (char *)&inbuf[startwrite], \
+                                  in-startwrite); \
+      if(result != CURLE_OK) \
+        return result; \
+    } \
     startwrite = -1
 
 #define writebyte() \
@@ -1119,6 +1126,7 @@ void telrcv(struct connectdata *conn,
     ++in;
   }
   bufferflush();
+  return CURLE_OK;
 }
 
 /* Escape and send a telnet data block */
@@ -1389,7 +1397,11 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
           break;
         }
 
-        telrcv(conn, (unsigned char *)buf, nread);
+        code = telrcv(conn, (unsigned char *)buf, nread);
+        if(code) {
+          keepon = FALSE;
+          break;
+        }
 
         fflush(stdout);
 
@@ -1475,7 +1487,11 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
           break;
         }
 
-        telrcv(conn, (unsigned char *)buf, nread);
+        code = telrcv(conn, (unsigned char *)buf, nread);
+        if(code) {
+          keepon = FALSE;
+          break;
+        }
 
         /* Negotiate if the peer has started negotiating,
            otherwise don't. We don't want to speak telnet with

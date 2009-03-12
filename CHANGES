@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Yang Tse (12 Mar 2009)
+- Added missing Curl_read() return code checking in TELNET transfers.
+
+- Pierre Brico found and fixed TELNET transfers not being aborted upon
+  a write callback failure.
+
 Daniel Stenberg (11 Mar 2009)
 - Kamil Dudka made the curl tool properly call curl_global_init() before any
   other libcurl function.
