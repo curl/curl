@@ -1200,6 +1200,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
   int interval_ms;
   struct pollfd pfd[2];
 #endif
+  int ret;
   ssize_t nread;
   struct timeval now;
   bool keepon = TRUE;
@@ -1370,8 +1371,23 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
         break;
       }
       if(events.lNetworkEvents & FD_READ) {
-        /* This reallu OUGHT to check its return code. */
-        (void)Curl_read(conn, sockfd, buf, BUFSIZE - 1, &nread);
+        /* read data from network */
+        ret = Curl_read(conn, sockfd, buf, BUFSIZE - 1, &nread);
+        /* returned sub-zero, this would've blocked. Loop again */
+        if(ret < 0)
+          break;
+        /* returned not-zero, this an error */
+        else if(ret) {
+          keepon = FALSE;
+          code = (CURLcode)ret;
+          break;
+        }
+        /* returned zero but actually received 0 or less here,
+           the server closed the connection and we bail out */
+        else if(nread <= 0) {
+          keepon = FALSE;
+          break;
+        }
 
         telrcv(conn, (unsigned char *)buf, nread);
 
@@ -1441,12 +1457,20 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
       }
 
       if(pfd[0].revents & POLLIN) {
-        /* This OUGHT to check the return code... */
-        (void)Curl_read(conn, sockfd, buf, BUFSIZE - 1, &nread);
-
-        /* if we receive 0 or less here, the server closed the connection and
-           we bail out from this! */
-        if(nread <= 0) {
+        /* read data from network */
+        ret = Curl_read(conn, sockfd, buf, BUFSIZE - 1, &nread);
+        /* returned sub-zero, this would've blocked. Loop again */
+        if(ret < 0)
+          break;
+        /* returned not-zero, this an error */
+        else if(ret) {
+          keepon = FALSE;
+          code = (CURLcode)ret;
+          break;
+        }
+        /* returned zero but actually received 0 or less here,
+           the server closed the connection and we bail out */
+        else if(nread <= 0) {
           keepon = FALSE;
           break;
         }
