@@ -1494,6 +1494,9 @@ if test X"$OPT_LIBSSH2" != Xno; then
        dnl linker doesn't search through, we need to add it to LD_LIBRARY_PATH
        dnl to prevent further configure tests to fail due to this
 
+       dnl libssh2_version is a post 1.0 addition
+       AC_CHECK_FUNCS( libssh2_version )
+
        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_LIBSSH2"
        export LD_LIBRARY_PATH
        AC_MSG_NOTICE([Added $LIB_LIBSSH2 to LD_LIBRARY_PATH])

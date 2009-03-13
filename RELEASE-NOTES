@@ -11,6 +11,8 @@ This release includes the following changes:
 
  o libcurl now closes all dead connections whenever you attempt to open a new
    connection
+ o libssh2's version number can now be figured out run-time instead of using
+   the build-time fixed number
 
 This release includes the following bugfixes:
 

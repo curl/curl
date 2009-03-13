@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Stenberg (13 Mar 2009)
+- Use libssh2_version() to present the libssh2 version in case the libssh2
+  library is found to support it.
+
 Yang Tse (12 Mar 2009)
 - Added missing Curl_read() return code checking in TELNET transfers.
 
