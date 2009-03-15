@@ -23,7 +23,7 @@
 
 #include "setup.h"
 
-#ifndef CURL_DISABLE_PROXY
+#if !defined(CURL_DISABLE_PROXY) || defined(USE_WINDOWS_SSPI)
 #include <string.h>
 
 #ifdef NEED_MALLOC_H
