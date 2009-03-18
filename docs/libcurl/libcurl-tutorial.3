@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -381,7 +381,7 @@ them URL encoded, as %XX where XX is a two-digit hexadecimal number.
 libcurl also provides options to set various passwords. The user name and
 password as shown embedded in the URL can instead get set with the
 CURLOPT_USERPWD option. The argument passed to libcurl should be a char * to
-a string in the format "user:password:". In a manner like this:
+a string in the format "user:password". In a manner like this:
 
  curl_easy_setopt(easyhandle, CURLOPT_USERPWD, "myname:thesecret");
 
