@@ -177,6 +177,9 @@ Win32
    KB140584 - How to link with the correct C Run-Time (CRT) library
               http://support.microsoft.com/kb/140584/en-us
 
+   KB190799 - Potential Errors Passing CRT Objects Across DLL Boundaries
+              http://msdn.microsoft.com/en-us/library/ms235460
+
    If your app is misbehaving in some strange way, or it is suffering
    from memory corruption, before asking for further help, please try
    first to rebuild every single library your app uses as well as your
