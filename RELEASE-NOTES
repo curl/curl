@@ -22,6 +22,7 @@ This release includes the following bugfixes:
  o curl_easy_duphandle() failed to duplicate cookies at times
  o missing TELNET timeout support in Windows builds
  o missing Curl_read() and write callback result checking in TELNET transfers
+ o more ciphers enabled in libcurl built to use NSS
 
 This release includes the following known bugs:
 
@@ -31,6 +32,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Daniel Fandrich, Yang Tse, David James, Chris Deidun, Bill Egert,
- Andre Guibert de Bruet, Andreas Farber, Frank Hempel, Pierre Brico
+ Andre Guibert de Bruet, Andreas Farber, Frank Hempel, Pierre Brico,
+ Kamil Dudka
 
         Thanks! (and sorry if I forgot to mention someone)

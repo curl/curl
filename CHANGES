@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (18 Mar 2009)
+- Kamil Dudka brought a patch that enables 6 additional crypto algorithms when
+  NSS is used. These ciphers were added in NSS 3.4 and require to be enabled
+  explicitly.
+ 
 Daniel Stenberg (13 Mar 2009)
 - Use libssh2_version() to present the libssh2 version in case the libssh2
   library is found to support it.

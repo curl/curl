@@ -162,6 +162,18 @@ static const cipher_s cipherlist[] = {
 #endif
 };
 
+/* following ciphers are new in NSS 3.4 and not enabled by default, therefor
+   they are enabled explicitly */
+static const int enable_ciphers_by_default[] = {
+  TLS_DHE_DSS_WITH_AES_128_CBC_SHA,
+  TLS_DHE_DSS_WITH_AES_256_CBC_SHA,
+  TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
+  TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
+  TLS_RSA_WITH_AES_128_CBC_SHA,
+  TLS_RSA_WITH_AES_256_CBC_SHA,
+  SSL_NULL_WITH_NULL_NULL
+};
+
 #ifdef HAVE_PK11_CREATEGENERICOBJECT
 static const char* pem_library = "libnsspem.so";
 #endif
@@ -954,6 +966,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 #endif
   char *certDir = NULL;
   int curlerr;
+  const int *cipher_to_enable;
 
   curlerr = CURLE_SSL_CONNECT_ERROR;
 
@@ -1056,6 +1069,16 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 
   if(SSL_OptionSet(model, SSL_V2_COMPATIBLE_HELLO, ssl2) != SECSuccess)
     goto error;
+
+  /* enable all ciphers from enable_ciphers_by_default */
+  cipher_to_enable = enable_ciphers_by_default;
+  while (SSL_NULL_WITH_NULL_NULL != *cipher_to_enable) {
+    if (SSL_CipherPrefSet(model, *cipher_to_enable, PR_TRUE) != SECSuccess) {
+      curlerr = CURLE_SSL_CIPHER;
+      goto error;
+    }
+    cipher_to_enable++;
+  }
 
   if(data->set.ssl.cipher_list) {
     if(set_ciphers(data, model, data->set.ssl.cipher_list) != SECSuccess) {
