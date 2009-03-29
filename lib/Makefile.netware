@@ -20,17 +20,17 @@ endif
 
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8i
+OPENSSL_PATH = ../../openssl-0.9.8k
 endif
 
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-0.18
+LIBSSH2_PATH = ../../libssh2-1.0
 endif
 
 # Edit the path below to point to the base of your libidn package.
 ifndef LIBIDN_PATH
-LIBIDN_PATH = ../../libidn-1.11
+LIBIDN_PATH = ../../libidn-1.13
 endif
 
 ifndef INSTDIR

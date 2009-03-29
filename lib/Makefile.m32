@@ -1,8 +1,8 @@
 #########################################################################
 # $Id$
 #
-## Makefile for building libcurl.a with MingW32 (GCC-3.2)
-## and optionally OpenSSL (0.9.8), libssh2 (0.18), zlib (1.2.3)
+## Makefile for building libcurl.a with MingW32 (GCC-3.2 or later)
+## and optionally OpenSSL (0.9.8), libssh2 (1.0), zlib (1.2.3)
 ##
 ## Usage:
 ## mingw32-make -f Makefile.m32 [SSL=1] [SSH2=1] [ZLIB=1] [IDN=1] [SSPI=1] [IPV6=1] [LDAPS=1] [DYN=1]
@@ -21,15 +21,15 @@ ZLIB_PATH = ../../zlib-1.2.3
 endif
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8i
+OPENSSL_PATH = ../../openssl-0.9.8k
 endif
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-0.18
+LIBSSH2_PATH = ../../libssh2-1.0
 endif
 # Edit the path below to point to the base of your libidn package.
 ifndef LIBIDN_PATH
-LIBIDN_PATH = ../../libidn-1.11
+LIBIDN_PATH = ../../libidn-1.13
 endif
 # Edit the path below to point to the base of your Novell LDAP NDK.
 ifndef LDAP_SDK
