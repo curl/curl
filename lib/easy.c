@@ -1095,8 +1095,8 @@ CURLcode curl_easy_recv(CURL *curl, void *buffer, size_t buflen, size_t *n)
   if(ret1 == -1)
     return CURLE_AGAIN;
 
-  if(n1 == -1)
-    return CURLE_RECV_ERROR;
+  if(ret1 != CURLE_OK)
+    return ret1;
 
   *n = (size_t)n1;
 

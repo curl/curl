@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel Fandrich (31 Mar 2009)
+- Properly return an error code in curl_easy_recv (reported by Jim Freeman).
+
 Daniel Stenberg (18 Mar 2009)
 - Kamil Dudka brought a patch that enables 6 additional crypto algorithms when
   NSS is used. These ciphers were added in NSS 3.4 and require to be enabled
