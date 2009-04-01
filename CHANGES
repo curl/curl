@@ -6,6 +6,11 @@
 
                                   Changelog
 
+
+Daniel Stenberg (1 Apr 2009)
+- Andre Guibert de Bruet fixed a NULL pointer use in an infof() call if a
+  strdup() call failed. 
+
 Daniel Fandrich (31 Mar 2009)
 - Properly return an error code in curl_easy_recv (reported by Jim Freeman).
 

@@ -3214,7 +3214,8 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
         ftpc->prevpath=strdup("");
         free(path);
       }
-      infof(data, "Remembering we are in dir \"%s\"\n", ftpc->prevpath);
+      if(ftpc->prevpath)
+        infof(data, "Remembering we are in dir \"%s\"\n", ftpc->prevpath);
     }
     else {
       ftpc->prevpath = NULL; /* no path */
