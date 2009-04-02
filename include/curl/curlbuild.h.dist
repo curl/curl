@@ -443,25 +443,33 @@
 /* ===================================== */
 
 #elif defined(__SUNPRO_C) || defined(__SUNPRO_CC)
-#include <sys/types.h>
-#include <stdint.h>
-
-#  define CURL_TYPEOF_CURL_OFF_T off_t
-#  define CURL_SIZEOF_CURL_OFF_T 8
-#  if defined(__amd64) || defined(__sparcv9)
-#     define CURL_SIZEOF_LONG 8
-#     define CURL_FORMAT_CURL_OFF_T  "ld"
-#     define CURL_FORMAT_CURL_OFF_TU "lu"
-#     define CURL_FORMAT_OFF_T       "%ld"
-#     define CURL_SUFFIX_CURL_OFF_T L
-#     define CURL_SUFFIX_CURL_OFF_TU UL
+#  if defined(_LP64)
+#    define CURL_SIZEOF_LONG        8
+#    define CURL_TYPEOF_CURL_OFF_T  long
+#    define CURL_FORMAT_CURL_OFF_T  "ld"
+#    define CURL_FORMAT_CURL_OFF_TU "lu"
+#    define CURL_FORMAT_OFF_T       "%ld"
+#    define CURL_SIZEOF_CURL_OFF_T  8
+#    define CURL_SUFFIX_CURL_OFF_T  L
+#    define CURL_SUFFIX_CURL_OFF_TU UL
+#  elif defined(__STDC__) && (__STDC__ == 1)
+#    define CURL_SIZEOF_LONG        4
+#    define CURL_TYPEOF_CURL_OFF_T  long
+#    define CURL_FORMAT_CURL_OFF_T  "ld"
+#    define CURL_FORMAT_CURL_OFF_TU "lu"
+#    define CURL_FORMAT_OFF_T       "%ld"
+#    define CURL_SIZEOF_CURL_OFF_T  4
+#    define CURL_SUFFIX_CURL_OFF_T  L
+#    define CURL_SUFFIX_CURL_OFF_TU UL
 #  else
-#     define CURL_SIZEOF_LONG 4
-#     define CURL_FORMAT_CURL_OFF_T  "lld"
-#     define CURL_FORMAT_CURL_OFF_TU "llu"
-#     define CURL_FORMAT_OFF_T       "%lld"
-#     define CURL_SUFFIX_CURL_OFF_T LL
-#     define CURL_SUFFIX_CURL_OFF_TU ULL
+#    define CURL_SIZEOF_LONG        4
+#    define CURL_TYPEOF_CURL_OFF_T  long long
+#    define CURL_FORMAT_CURL_OFF_T  "lld"
+#    define CURL_FORMAT_CURL_OFF_TU "llu"
+#    define CURL_FORMAT_OFF_T       "%lld"
+#    define CURL_SIZEOF_CURL_OFF_T  8
+#    define CURL_SUFFIX_CURL_OFF_T  LL
+#    define CURL_SUFFIX_CURL_OFF_TU ULL
 #  endif
 
 /* ===================================== */

@@ -7,6 +7,16 @@
                                   Changelog
 
 
+Yang Tse (2 Apr 2009)
+- Fix curl_off_t definition for builds done using Sun compilers and a
+  non-configured libcurl. In this case curl_off_t data type was gated
+  to the off_t data type which depends on the _FILE_OFFSET_BITS. This
+  configuration is exactly the unwanted configuration for our curl_off_t
+  data type which must not depend on such setting. This breaks ABI for
+  libcurl libraries built with Sun compilers which were built without
+  having run the configure script with _FILE_OFFSET_BITS different than
+  64 and using the ILP32 data model.
+
 Daniel Stenberg (1 Apr 2009)
 - Andre Guibert de Bruet fixed a NULL pointer use in an infof() call if a
   strdup() call failed. 

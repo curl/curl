@@ -24,6 +24,7 @@ This release includes the following bugfixes:
  o missing Curl_read() and write callback result checking in TELNET transfers
  o more ciphers enabled in libcurl built to use NSS
  o properly return an error code in curl_easy_recv
+ o fixed curl_off_t definition for non-configured builds with Sun compilers
 
 This release includes the following known bugs:
 
