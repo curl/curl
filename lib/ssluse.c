@@ -420,7 +420,7 @@ int cert_stuff(struct connectdata *conn,
         return 0;
       }
       /* Set Certificate Verification chain */
-      if (ca && sk_num(ca)) {
+      if (ca && sk_X509_num(ca)) {
         for (i = 0; i < sk_X509_num(ca); i++) {
           if (!SSL_CTX_add_extra_chain_cert(ctx,sk_X509_value(ca, i))) {
             failf(data, "cannot add certificate to certificate chain");
