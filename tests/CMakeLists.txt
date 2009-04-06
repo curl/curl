@@ -1,0 +1,2 @@
+ADD_SUBDIRECTORY(libtest)
+ADD_SUBDIRECTORY(server)
