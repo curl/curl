@@ -8,22 +8,8 @@ IF (NOT HUGEHELP_C_FILE)
 	FILE(WRITE hugehelp.c "/* built-in manual is disabled, blank function */\n#include \"hugehelp.h\"\nvoid hugehelp(void) {}")
 ENDIF()
 
-SET(CURLX_SOURCE
-	${CURL_SOURCE_DIR}/lib/strtoofft.c
-	${CURL_SOURCE_DIR}/lib/strdup.c
-	${CURL_SOURCE_DIR}/lib/rawstr.c
-)
-
-SET(CURL_SOURCE
-	main.c hugehelp.c urlglob.c writeout.c writeenv.c
-	getpass.c homedir.c curlutil.c
-)
-
-SET(CURL_HEADERS
-	hugehelp.h setup.h config-win32.h config-mac.h
-	config-riscos.h urlglob.h version.h
-	writeout.h writeenv.h getpass.h homedir.h curlutil.h
-)
+TRANSFORM_MAKEFILE_INC("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
+INCLUDE(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
 
 IF(MSVC)
 	LIST(APPEND CURL_SOURCE curl.rc)
@@ -31,13 +17,12 @@ ENDIF()
 
 ADD_EXECUTABLE(
 	${EXE_NAME}
-    ${CURL_HEADERS}
-	${CURL_SOURCE} ${CURLX_SOURCE}
+    ${curl_SOURCES}
 )
 
-SOURCE_GROUP("cURLX source files" FILES ${CURLX_SOURCE})
-SOURCE_GROUP("cURL source files" FILES ${CURL_SOURCE})
-SOURCE_GROUP("cURL header files" FILES ${CURL_HEADERS})
+SOURCE_GROUP("cURLX source files" FILES ${CURLX_ONES})
+SOURCE_GROUP("cURL source files" FILES ${CURL_SOURCES})
+SOURCE_GROUP("cURL header files" FILES ${CURL_HFILES})
 
 INCLUDE_DIRECTORIES(
     ${CURL_SOURCE_DIR}/lib		# To be able to reach "setup_once.h"
