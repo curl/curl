@@ -7,6 +7,13 @@
                                   Changelog
 
 
+Daniel Stenberg (6 Apr 2009)
+- I clarified in the docs that CURLOPT_SEEKFUNCTION should return 0 on success
+  and 1 on fatal errors. Previously it only mentioned non-zero on fatal
+  errors. This is a slight change in meaning, but it follows what we've done
+  elsewhere before and it opens up for LOTS of more useful return codes
+  whenever we can think of them...
+
 Yang Tse (2 Apr 2009)
 - Fix curl_off_t definition for builds done using Sun compilers and a
   non-configured libcurl. In this case curl_off_t data type was gated

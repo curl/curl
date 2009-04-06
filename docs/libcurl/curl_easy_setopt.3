@@ -208,9 +208,10 @@ currently only one value is supported: \fICURLSOCKTYPE_IPCXN\fP for the
 primary connection (meaning the control connection in the FTP case). Future
 versions of libcurl may support more purposes. It passes the newly created
 socket descriptor so additional setsockopt() calls can be done at the user's
-discretion.  A non-zero return code from the callback function will signal an
-unrecoverable error to the library and it will close the socket and return
-\fICURLE_COULDNT_CONNECT\fP.  (Option added in 7.15.6.)
+discretion.  Return 0 (zero) from the callback on success. Return 1 from the
+callback function to signal an unrecoverable error to the library and it will
+close the socket and return \fICURLE_COULDNT_CONNECT\fP.  (Option added in
+7.15.6.)
 .IP CURLOPT_SOCKOPTDATA
 Pass a pointer that will be untouched by libcurl and passed as the first
 argument in the sockopt callback set with \fICURLOPT_SOCKOPTFUNCTION\fP.
