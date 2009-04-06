@@ -224,12 +224,21 @@ ENDIF()
 	# ADD_DEFINITIONS( -DUSE_SSLEAY )
 # ENDIF()
 
-# IF(MSVC)
-	# IF(NOT BUILD_RELEASE_DEBUG_DIRS)
-		# # Ugly workaround to remove the "/debug" or "/release" in each output
-		# SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES PREFIX "../")
-		# SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES IMPORT_PREFIX "../")
-	# ENDIF()
-	# # Add "_imp" as a suffix before the extension
-	# SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES IMPORT_SUFFIX "_imp.lib")
-# ENDIF()
+# Remove the "lib" prefix since the library is already named "libcurl".
+SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES PREFIX "")
+SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES IMPORT_PREFIX "")
+
+IF(MSVC)
+	IF(NOT BUILD_RELEASE_DEBUG_DIRS)
+		# Ugly workaround to remove the "/debug" or "/release" in each output
+		SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES PREFIX "../")
+		SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES IMPORT_PREFIX "../")
+	ENDIF()
+ENDIF()
+
+IF(WIN32)
+	IF(NOT CURL_STATICLIB)
+		# Add "_imp" as a suffix before the extension to avoid conflicting with the statically linked "libcurl.lib"
+		SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES IMPORT_SUFFIX "_imp.lib")
+	ENDIF()
+ENDIF()
