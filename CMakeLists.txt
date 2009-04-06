@@ -2,7 +2,12 @@
 # by [PUT YOUR REAL NAME TETEST!] and Sukender (Benoit Neil)
 
 # TODO:
-# Check on Linux, Mac
+# Add tests sub project
+# Add full (4 or 5 libs) SSL support
+# Add INSTALL target
+# Check on all possible platforms
+# Test with as many configurations possible (With or without any option)
+# Create scripts that help keeping the CMake build system up to date (to reduce maintenance)
 # Add documentation subproject
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.2 FATAL_ERROR)
@@ -734,7 +739,7 @@ ENDIF(CMAKE_COMPILER_IS_GNUCC AND APPLE)
 
 INCLUDE(CMake/OtherTests.cmake)
 
-ADD_DEFINITIONS(-DHAVE_CONFIG_H -DCURL_STATICLIB)
+ADD_DEFINITIONS(-DHAVE_CONFIG_H)
 
 # For windows, do not allow the compiler to use default target (Vista).
 IF(WIN32)
@@ -746,7 +751,7 @@ IF(MSVC)
 ENDIF(MSVC)
 
 ADD_SUBDIRECTORY(lib)
-# ADD_SUBDIRECTORY(src)
+ADD_SUBDIRECTORY(src)
 
 # This needs to be run very last so other parts of the scripts can take advantage of this.
 IF(NOT CURL_CONFIG_HAS_BEEN_RUN_BEFORE)
