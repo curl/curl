@@ -10,7 +10,7 @@ MACRO(SETUP_EXECUTABLE TEST_NAME)		# ARGN are the files in the test
 	)
 
 	SETUP_CURL_DEPENDENCIES(${TEST_NAME})
-	TARGET_LINK_LIBRARIES( ${TEST_NAME} libcurl )
+	#TARGET_LINK_LIBRARIES( ${TEST_NAME} libcurl )
 
 	ADD_DEFINITIONS( "-D${UPPER_TEST_NAME}" )
 	
@@ -31,8 +31,10 @@ ENDMACRO()
 SET(useful
 	getpart.c getpart.h
 	${CURL_SOURCE_DIR}/lib/strequal.c
-	${CURL_SOURCE_DIR}/lib/base64.c ${CURL_SOURCE_DIR}/lib/mprintf.c
-	${CURL_SOURCE_DIR}/lib/memdebug.c ${CURL_SOURCE_DIR}/lib/timeval.c
+	${CURL_SOURCE_DIR}/lib/base64.c
+	${CURL_SOURCE_DIR}/lib/mprintf.c
+	${CURL_SOURCE_DIR}/lib/memdebug.c
+	${CURL_SOURCE_DIR}/lib/timeval.c
 )
 
 SETUP_EXECUTABLE(sws sws.c util.c util.h ${useful})
