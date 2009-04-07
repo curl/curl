@@ -2,13 +2,22 @@
 # by [PUT YOUR REAL NAME TETEST!] and Sukender (Benoit Neil)
 
 # TODO:
-# Add tests sub project
+# Finish tests sub project (with Makefile.inc)
+# The output .so file lacks the soname number which we currently have within the lib/Makefile.am file
 # Add full (4 or 5 libs) SSL support
 # Add INSTALL target
+# Add CTests(?)
 # Check on all possible platforms
 # Test with as many configurations possible (With or without any option)
-# Create scripts that help keeping the CMake build system up to date (to reduce maintenance)
+# Create scripts that help keeping the CMake build system up to date (to reduce maintenance). According to Tetetest:
+#	- lists of headers that 'configure' checks for;
+#	- curl-specific tests (the ones that are in m4/curl-*.m4 files);
+#	- (most obvious thing:) curl version numbers.
 # Add documentation subproject
+#
+# To check:
+# (From Daniel Stenberg) The cmake build selected to run gcc with -fPIC on my box while the plain configure script did not.
+# (From Daniel Stenberg) The gcc command line use neither -g nor any -O options. As a developer, I also treasure our configure scripts's --enable-debug option that sets a long range of "picky" compiler options.
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.2 FATAL_ERROR)
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
@@ -54,6 +63,9 @@ IF(MSVC)
 	OPTION(BUILD_RELEASE_DEBUG_DIRS "Set OFF to build each configuration to a separate directory" OFF)
 	MARK_AS_ADVANCED(BUILD_RELEASE_DEBUG_DIRS)
 ENDIF()
+
+OPTION(CURL_HIDDEN_SYMBOLS "Set to ON to build libcurl with internal symbols exported." OFF)
+MARK_AS_ADVANCED(CURL_HIDDEN_SYMBOLS)
 
 # IF(WIN32)
 	# OPTION(CURL_WINDOWS_SSPI "Use windows libraries to allow NTLM authentication without openssl" ON)
@@ -352,6 +364,7 @@ CHECK_TYPE_SIZE(size_t  SIZEOF_SIZE_T)
 CHECK_TYPE_SIZE(ssize_t  SIZEOF_SSIZE_T)
 CHECK_TYPE_SIZE("long long"  SIZEOF_LONG_LONG)
 CHECK_TYPE_SIZE("long"  SIZEOF_LONG)
+CHECK_TYPE_SIZE("int"  SIZEOF_INT)
 CHECK_TYPE_SIZE("__int64"  SIZEOF___INT64)
 CHECK_TYPE_SIZE("long double"  SIZEOF_LONG_DOUBLE)
 CHECK_TYPE_SIZE("time_t"  SIZEOF_TIME_T)
