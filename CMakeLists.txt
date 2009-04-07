@@ -822,6 +822,12 @@ IF(BUILD_CURL_TESTS)
 	ADD_SUBDIRECTORY(tests)
 ENDIF()
 
+OPTION(BUILD_DASHBOARD_REPORTS "Set to ON to activate reporting of cURL builds here http://www.cdash.org/CDashPublic/index.php?project=CURL" OFF)
+IF(BUILD_DASHBOARD_REPORTS)
+    INCLUDE(Dart)
+	#INCLUDE(CTest)
+ENDIF(BUILD_DASHBOARD_REPORTS)
+
 # This needs to be run very last so other parts of the scripts can take advantage of this.
 IF(NOT CURL_CONFIG_HAS_BEEN_RUN_BEFORE)
     SET(CURL_CONFIG_HAS_BEEN_RUN_BEFORE 1 CACHE INTERNAL "Flag to track whether this is the first time running CMake or if CMake has been configured before")
