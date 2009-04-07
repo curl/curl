@@ -15,8 +15,9 @@ specified easy handle be removed from this multi handle's control.
 When the easy handle has been removed from a multi stack, it is again
 perfectly legal to invoke \fIcurl_easy_perform()\fP on this easy handle.
 
-Removing a handle while being used, will effectively halt all transfers in
-progress.
+Removing an easy handle while being used, will effectively halt the transfer
+in progress involving that easy handle. All other easy handles and transfers
+will remain unaffected.
 .SH RETURN VALUE
 CURLMcode type, general libcurl multi interface error code.
 .SH "SEE ALSO"
