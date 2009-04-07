@@ -27,19 +27,26 @@ MACRO(SETUP_EXECUTABLE TEST_NAME)		# ARGN are the files in the test
 ENDMACRO()
 
 
+TRANSFORM_MAKEFILE_INC("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
+INCLUDE(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
 
-SET(useful
-	getpart.c getpart.h
-	${CURL_SOURCE_DIR}/lib/strequal.c
-	${CURL_SOURCE_DIR}/lib/base64.c
-	${CURL_SOURCE_DIR}/lib/mprintf.c
-	${CURL_SOURCE_DIR}/lib/memdebug.c
-	${CURL_SOURCE_DIR}/lib/timeval.c
-)
+FOREACH(EXECUTABLE_NAME ${noinst_PROGRAMS})
+	SETUP_EXECUTABLE(${EXECUTABLE_NAME} ${${EXECUTABLE_NAME}_SOURCES})
+ENDFOREACH()
 
-SETUP_EXECUTABLE(sws sws.c util.c util.h ${useful})
-SETUP_EXECUTABLE(resolve resolve.c util.c util.h ${useful})
-SETUP_EXECUTABLE(sockfilt sockfilt.c util.c util.h ${useful} ${CURL_SOURCE_DIR}/lib/inet_pton.c)
-SETUP_EXECUTABLE(getpart testpart.c ${useful})
-SETUP_EXECUTABLE(tftpd tftpd.c util.c util.h ${useful} tftp.h)
+
+# SET(useful
+	# getpart.c getpart.h
+	# ${CURL_SOURCE_DIR}/lib/strequal.c
+	# ${CURL_SOURCE_DIR}/lib/base64.c
+	# ${CURL_SOURCE_DIR}/lib/mprintf.c
+	# ${CURL_SOURCE_DIR}/lib/memdebug.c
+	# ${CURL_SOURCE_DIR}/lib/timeval.c
+# )
+
+# SETUP_EXECUTABLE(sws sws.c util.c util.h ${useful})
+# SETUP_EXECUTABLE(resolve resolve.c util.c util.h ${useful})
+# SETUP_EXECUTABLE(sockfilt sockfilt.c util.c util.h ${useful} ${CURL_SOURCE_DIR}/lib/inet_pton.c)
+# SETUP_EXECUTABLE(getpart testpart.c ${useful})
+# SETUP_EXECUTABLE(tftpd tftpd.c util.c util.h ${useful} tftp.h)
 

@@ -786,11 +786,15 @@ ENDFUNCTION()
 # Ugly (but functional) way to include "Makefile.inc" by transforming it (= regenerate it).
 FUNCTION(TRANSFORM_MAKEFILE_INC INPUT_FILE OUTPUT_FILE)
 	FILE(READ ${INPUT_FILE} MAKEFILE_INC_TEXT)
-	STRING(REPLACE "$(top_srcdir)" "\${CURL_SOURCE_DIR}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
+	STRING(REPLACE "$(top_srcdir)"   "\${CURL_SOURCE_DIR}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
+	STRING(REPLACE "$(top_builddir)" "\${CURL_BINARY_DIR}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
+
 	STRING(REGEX REPLACE "\\\\\n" "§!§" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
 	STRING(REGEX REPLACE "([a-zA-Z_][a-zA-Z0-9_]*)[\t ]*=[\t ]*([^\n]*\n)" "SET(\\1 \\2)\n" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
 	STRING(REPLACE "§!§" "\n" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
-	STRING(REGEX REPLACE "\\$\\(([a-zA-Z_][a-zA-Z0-9_]*)\\)" "\${\\1}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
+
+	STRING(REGEX REPLACE "\\$\\(([a-zA-Z_][a-zA-Z0-9_]*)\\)" "\${\\1}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})		# Replace $() with ${}
+	STRING(REGEX REPLACE "@([a-zA-Z_][a-zA-Z0-9_]*)@" "\${\\1}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})		# Replace @@ with ${}, even if that may not be read by CMake scripts.
 	FILE(WRITE ${OUTPUT_FILE} ${MAKEFILE_INC_TEXT})
 
 	### BUGGY METHOD 1
