@@ -2,10 +2,9 @@
 # by [PUT YOUR REAL NAME TETEST!] and Sukender (Benoit Neil)
 
 # TODO:
-# Finish tests sub project (with Makefile.inc)
 # The output .so file lacks the soname number which we currently have within the lib/Makefile.am file
 # Add full (4 or 5 libs) SSL support
-# Add INSTALL target
+# Add INSTALL target (EXTRA_DIST variables in Makefile.am may be moved to Makefile.inc so that CMake/CPack is aware of what's to include).
 # Add CTests(?)
 # Check on all possible platforms
 # Test with as many configurations possible (With or without any option)
