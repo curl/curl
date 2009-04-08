@@ -3,7 +3,6 @@
 
 # TODO:
 # The output .so file lacks the soname number which we currently have within the lib/Makefile.am file
-# Fix the Win32 "_beginthreadex" warning (According to Tetetest: The proto of this function is in process.h file, so first of all make sure that HAVE_PROCESS_H is defined. Second, this function is only available in multithread builds (_MT is defined, /MD or /MT compiler switch supplied). CMake does supply /MD switch to compiler (I have just checked this), so the reason must be the absense of HAVE_PROCESS_H.)
 # Add full (4 or 5 libs) SSL support
 # Add INSTALL target (EXTRA_DIST variables in Makefile.am may be moved to Makefile.inc so that CMake/CPack is aware of what's to include).
 # Add CTests(?)
@@ -48,8 +47,8 @@ INCLUDE_DIRECTORIES( ${CURL_SOURCE_DIR}/include )
 
 # Save C and CXX STD libs (we may need to modify them)
 IF(NOT CURL_CONFIG_HAS_BEEN_RUN_BEFORE)
-	SET(CMAKE_CXX_STANDARD_LIBRARIES_INIT ${CMAKE_CXX_STANDARD_LIBRARIES} CACHE INTERNAL "Initial C++ libs")
-	SET(CMAKE_C_STANDARD_LIBRARIES_INIT   ${CMAKE_C_STANDARD_LIBRARIES} CACHE INTERNAL "Initial C libs")
+	SET(CMAKE_CXX_STANDARD_LIBRARIES_INITIAL ${CMAKE_CXX_STANDARD_LIBRARIES} CACHE INTERNAL "Initial C++ libs")
+	SET(CMAKE_C_STANDARD_LIBRARIES_INITIAL   ${CMAKE_C_STANDARD_LIBRARIES} CACHE INTERNAL "Initial C libs")
 ENDIF()
 
 IF(WIN32)
@@ -71,7 +70,7 @@ IF(MSVC)
 	MARK_AS_ADVANCED(BUILD_RELEASE_DEBUG_DIRS)
 ENDIF()
 
-OPTION(CURL_HIDDEN_SYMBOLS "Set to ON to build libcurl with internal symbols exported." OFF)
+OPTION(CURL_HIDDEN_SYMBOLS "Set to ON to hide libcurl internal symbols (=hide all symbols that aren't officially external)." OFF)
 MARK_AS_ADVANCED(CURL_HIDDEN_SYMBOLS)
 
 # IF(WIN32)
@@ -133,12 +132,12 @@ MARK_AS_ADVANCED(ENABLE_IPV6)
 IF(WIN32)
 	IF(CURL_DISABLE_LDAP)
 		#SET(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} wsock32.lib bufferoverflowu.lib ws2_32.lib" CACHE STRING "" FORCE)
-		#SET(CMAKE_C_STANDARD_LIBRARIES   "${CMAKE_C_STANDARD_LIBRARIES} wsock32.lib bufferoverflowu.lib ws2_32.lib"   CACHE STRING "" FORCE)
-		SET(CMAKE_C_STANDARD_LIBRARIES   "${CMAKE_C_STANDARD_LIBRARIES} wsock32.lib ws2_32.lib"   CACHE STRING "" FORCE)
+		#SET(CMAKE_C_STANDARD_LIBRARIES   "${CMAKE_C_STANDARD_LIBRARIES_INITIAL} wsock32.lib bufferoverflowu.lib ws2_32.lib"   CACHE STRING "" FORCE)
+		SET(CMAKE_C_STANDARD_LIBRARIES   "${CMAKE_C_STANDARD_LIBRARIES_INITIAL} wsock32.lib ws2_32.lib"   CACHE STRING "" FORCE)
 	ELSE()
 		#SET(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} wsock32.lib bufferoverflowu.lib ws2_32.lib wldap32.lib" CACHE STRING "" FORCE)
-		#SET(CMAKE_C_STANDARD_LIBRARIES   "${CMAKE_C_STANDARD_LIBRARIES} wsock32.lib bufferoverflowu.lib ws2_32.lib wldap32.lib"   CACHE STRING "" FORCE)
-		SET(CMAKE_C_STANDARD_LIBRARIES   "${CMAKE_C_STANDARD_LIBRARIES} wsock32.lib ws2_32.lib wldap32.lib"   CACHE STRING "" FORCE)
+		#SET(CMAKE_C_STANDARD_LIBRARIES   "${CMAKE_C_STANDARD_LIBRARIES_INITIAL} wsock32.lib bufferoverflowu.lib ws2_32.lib wldap32.lib"   CACHE STRING "" FORCE)
+		SET(CMAKE_C_STANDARD_LIBRARIES   "${CMAKE_C_STANDARD_LIBRARIES_INITIAL} wsock32.lib ws2_32.lib wldap32.lib"   CACHE STRING "" FORCE)
 	ENDIF()
 ENDIF()
 
