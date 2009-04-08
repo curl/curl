@@ -116,7 +116,6 @@ static struct tftphdr *w_init(void);
 static int readit(struct testcase *test, struct tftphdr **dpp, int convert);
 static int writeit(struct testcase *test, struct tftphdr **dpp, int ct,
                    int convert);
-static void mysignal(int, void (*func)(int));
 
 #define opcode_RRQ   1
 #define opcode_WRQ   2
@@ -145,7 +144,6 @@ static void recvtftp(struct testcase *test, struct formats *pf);
 static int validate_access(struct testcase *test, const char *, int);
 
 static curl_socket_t peer;
-static int rexmtval = TIMEOUT;
 static int maxtimeout = 5*TIMEOUT;
 
 static char buf[PKTSIZE];
@@ -744,6 +742,9 @@ static int timeout;
 static sigjmp_buf timeoutbuf;
 #endif
 
+#if defined(HAVE_ALARM) && defined(SIGALRM)
+static int rexmtval = TIMEOUT;
+
 static void timer(int signum)
 {
   (void)signum;
@@ -759,6 +760,12 @@ static void timer(int signum)
   siglongjmp(timeoutbuf, 1);
 #endif
 }
+
+static void (int signum)
+{
+  (void)signum;
+}
+#endif  /* HAVE_ALARM && SIGALRM */
 
 static unsigned short sendblock;
 static struct tftphdr *sdp;
@@ -828,11 +835,6 @@ static void sendtftp(struct testcase *test, struct formats *pf)
     }
     sendblock++;
   } while (size == SEGSIZE);
-}
-
-static void justtimeout(int signum)
-{
-  (void)signum;
 }
 
 
