@@ -93,6 +93,10 @@ extern "C" {
 
 typedef void CURL;
 
+#ifdef USES_DIRECT_CURL_UTILITIES
+#define CURL_EXTERN
+#else /* USES_DIRECT_CURL_UTILITIES */
+
 /*
  * Decorate exportable functions for Win32 and Symbian OS DLL linking.
  * This avoids using a .def file for building libcurl.dll.
@@ -118,6 +122,7 @@ typedef void CURL;
 #define CURL_EXTERN
 #endif
 #endif
+#endif /* USES_DIRECT_CURL_UTILITIES */
 
 #ifndef curl_socket_typedef
 /* socket typedef */
