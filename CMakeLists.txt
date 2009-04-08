@@ -3,6 +3,7 @@
 
 # TODO:
 # The output .so file lacks the soname number which we currently have within the lib/Makefile.am file
+# Fix the Win32 "_beginthreadex" warning (According to Tetetest: The proto of this function is in process.h file, so first of all make sure that HAVE_PROCESS_H is defined. Second, this function is only available in multithread builds (_MT is defined, /MD or /MT compiler switch supplied). CMake does supply /MD switch to compiler (I have just checked this), so the reason must be the absense of HAVE_PROCESS_H.)
 # Add full (4 or 5 libs) SSL support
 # Add INSTALL target (EXTRA_DIST variables in Makefile.am may be moved to Makefile.inc so that CMake/CPack is aware of what's to include).
 # Add CTests(?)
@@ -58,6 +59,13 @@ ENDIF()
 OPTION(BUILD_CURL_EXE "Set to ON to build cURL executable." ON)
 OPTION(BUILD_CURL_TESTS "Set to ON to build cURL tests." ON)
 OPTION(CURL_STATICLIB "Set to ON to build libcurl with static linking." OFF)
+
+OPTION(BUILD_DASHBOARD_REPORTS "Set to ON to activate reporting of cURL builds here http://www.cdash.org/CDashPublic/index.php?project=CURL" OFF)
+IF(BUILD_DASHBOARD_REPORTS)
+  #INCLUDE(Dart)
+  INCLUDE(CTest)
+ENDIF(BUILD_DASHBOARD_REPORTS)
+
 IF(MSVC)
 	OPTION(BUILD_RELEASE_DEBUG_DIRS "Set OFF to build each configuration to a separate directory" OFF)
 	MARK_AS_ADVANCED(BUILD_RELEASE_DEBUG_DIRS)
@@ -837,12 +845,6 @@ ENDIF()
 IF(BUILD_CURL_TESTS)
 	ADD_SUBDIRECTORY(tests)
 ENDIF()
-
-OPTION(BUILD_DASHBOARD_REPORTS "Set to ON to activate reporting of cURL builds here http://www.cdash.org/CDashPublic/index.php?project=CURL" OFF)
-IF(BUILD_DASHBOARD_REPORTS)
-    INCLUDE(Dart)
-	#INCLUDE(CTest)
-ENDIF(BUILD_DASHBOARD_REPORTS)
 
 # This needs to be run very last so other parts of the scripts can take advantage of this.
 IF(NOT CURL_CONFIG_HAS_BEEN_RUN_BEFORE)
