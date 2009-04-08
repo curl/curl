@@ -5,7 +5,7 @@ SET(EXE_NAME curl)
 FIND_FILE(HUGEHELP_C_FILE hugehelp.c PATHS . NO_DEFAULT_PATH)
 IF (NOT HUGEHELP_C_FILE)
 	MESSAGE(STATUS "Warning: hugehelp.c file was not generated before. Generating an 'empty' file...")
-	FILE(WRITE hugehelp.c "/* built-in manual is disabled, blank function */\n#include \"hugehelp.h\"\nvoid hugehelp(void) {}")
+	FILE(WRITE hugehelp.c "/* built-in manual is disabled, blank function */\n#include \"hugehelp.h\"\nvoid hugehelp(void) {}\n\n")
 ENDIF()
 
 TRANSFORM_MAKEFILE_INC("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
