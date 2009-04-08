@@ -7,6 +7,14 @@
                                   Changelog
 
 
+Yang Tse (8 Apr 2009)
+- Removed Sun compilers preprocessor block from curlbuild.h.dist, this also
+  removes it from the curlbuild.h file originally distributed by the cURL
+  project as this file is intended for systems not capable of running the
+  configure script.  For those who have been building curl out of the source
+  code curl distribution tarball provided by curl.haxx.se the change implies
+  nothing.  Previous change in this area committed 2 Apr becomes irrelevant.
+
 Daniel Stenberg (6 Apr 2009)
 - I clarified in the docs that CURLOPT_SEEKFUNCTION should return 0 on success
   and 1 on fatal errors. Previously it only mentioned non-zero on fatal
