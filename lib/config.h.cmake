@@ -716,6 +716,9 @@
 /* Define to 1 if you have the <x509.h> header file. */
 #cmakedefine HAVE_X509_H ${HAVE_X509_H}
 
+/* Define if you have the <process.h> header file. */
+#cmakedefine HAVE_PROCESS_H ${HAVE_PROCESS_H}
+
 /* if you have the zlib.h header file */
 #cmakedefine HAVE_ZLIB_H ${HAVE_ZLIB_H}
 
