@@ -761,7 +761,7 @@ static void timer(int signum)
 #endif
 }
 
-static void (int signum)
+static void justtimeout(int signum)
 {
   (void)signum;
 }
