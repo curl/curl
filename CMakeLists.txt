@@ -1,5 +1,5 @@
 # cURL/libcurl CMake script
-# by [PUT YOUR REAL NAME TETEST!] and Sukender (Benoit Neil)
+# by Tetetest and Sukender (Benoit Neil)
 
 # TODO:
 # The output .so file lacks the soname number which we currently have within the lib/Makefile.am file
@@ -140,7 +140,6 @@ OPTION(DISABLED_THREADSAFE "Set to explicitly specify we don't want to use threa
 MARK_AS_ADVANCED(DISABLED_THREADSAFE)
 OPTION(ENABLE_IPV6 "Define if you want to enable IPv6 support" OFF)
 MARK_AS_ADVANCED(ENABLE_IPV6)
-
 
 IF(WIN32)
   LIST_SPACES_APPEND_ONCE(CMAKE_C_STANDARD_LIBRARIES wsock32.lib ws2_32.lib)  # bufferoverflowu.lib

@@ -13,7 +13,11 @@ FUNCTION(SETUP_EXECUTABLE TEST_NAME)		# ARGN are the files in the test
 	SETUP_CURL_DEPENDENCIES(${TEST_NAME})
 	#TARGET_LINK_LIBRARIES( ${TEST_NAME} libcurl )
 
-	SET_TARGET_PROPERTIES(${TEST_NAME} PROPERTIES COMPILE_DEFINITIONS USES_DIRECT_CURL_UTILITIES)	# ${UPPER_TEST_NAME}
+	# Here we define CURL_STATICLIB if not already done. This is a hacky way to avoid symbols from libcrul to be exported/imported, since we do NOT link against libcurl, but include directly some source files.
+	# Please note this is specific to those tests.
+	IF(NOT CURL_STATICLIB)
+		SET_TARGET_PROPERTIES(${TEST_NAME} PROPERTIES COMPILE_DEFINITIONS CURL_STATICLIB)	# ${UPPER_TEST_NAME}
+	ENDIF()
 	SET_TARGET_PROPERTIES(${TEST_NAME} PROPERTIES PROJECT_LABEL "${TARGET_LABEL_PREFIX}${TEST_NAME}")
 
 	# Add the postfix to the executable since it is not added automatically as for modules and shared libraries

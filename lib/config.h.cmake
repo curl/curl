@@ -50,6 +50,10 @@
 
 /* to make a symbol visible */
 #cmakedefine CURL_EXTERN_SYMBOL ${CURL_EXTERN_SYMBOL}
+/* Ensure using CURL_EXTERN_SYMBOL is possible */
+#ifndef CURL_EXTERN_SYMBOL
+#define CURL_EXTERN_SYMBOL
+#endif
 
 /* to enable hidden symbols */
 #cmakedefine CURL_HIDDEN_SYMBOLS ${CURL_HIDDEN_SYMBOLS}
