@@ -42,8 +42,16 @@
  * ones in the public API.
  */
 
+#if defined(CURL_HIDDEN_SYMBOLS)
+#  define SKIP_TEST 1
+#elif defined(WIN32) && !defined(CURL_STATICLIB)
+#  define SKIP_TEST 1
+#else
+#  undef  SKIP_TEST
+#endif
 
-#if !defined(CURL_HIDDEN_SYMBOLS)
+
+#if !defined(SKIP_TEST)
 
 #ifdef LIB559
 static Curl_addrinfo *fake_ai(void)
@@ -167,7 +175,7 @@ cleanup:
 }
 
 
-#else /* !defined(CURL_HIDDEN_SYMBOLS) */
+#else /* !defined(SKIP_TEST) */
 
 
 int test(char *URL)
@@ -178,4 +186,4 @@ int test(char *URL)
 }
 
 
-#endif /* !defined(CURL_HIDDEN_SYMBOLS) */
+#endif /* !defined(SKIP_TEST) */
