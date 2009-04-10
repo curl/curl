@@ -25,6 +25,7 @@ This release includes the following bugfixes:
  o more ciphers enabled in libcurl built to use NSS
  o properly return an error code in curl_easy_recv
  o Sun compilers specific preprocessor block removed from curlbuild.h.dist
+ o allow creation of four way fat libcurl Mac OS X Framework
 
 This release includes the following known bugs:
 
@@ -35,6 +36,6 @@ advice from friends like these:
 
  Daniel Fandrich, Yang Tse, David James, Chris Deidun, Bill Egert,
  Andre Guibert de Bruet, Andreas Farber, Frank Hempel, Pierre Brico,
- Kamil Dudka, Jim Freeman
+ Kamil Dudka, Jim Freeman, Daniel Johnson
 
         Thanks! (and sorry if I forgot to mention someone)

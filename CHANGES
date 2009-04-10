@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Yang Tse (10 Apr 2009)
+- Daniel Johnson improved the MacOSX-Framework shell script to now perform all
+  the steps required to build a Mac OS X four way fat ppc/i386/ppc64/x86_64
+  libcurl.framework.  Four way fat framework requires OS X 10.5 SDK or later.
 
 Yang Tse (8 Apr 2009)
 - Removed Sun compilers preprocessor block from curlbuild.h.dist, this also
