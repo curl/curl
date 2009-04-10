@@ -13,8 +13,12 @@ FUNCTION(SETUP_EXECUTABLE TEST_NAME)		# ARGN are the files in the test
 	SETUP_CURL_DEPENDENCIES(${TEST_NAME})
 	#TARGET_LINK_LIBRARIES( ${TEST_NAME} libcurl )
 
-	# Here we define CURL_STATICLIB if not already done. This is a hacky way to avoid symbols from libcrul to be exported/imported, since we do NOT link against libcurl, but include directly some source files.
-	# Please note this is specific to those tests.
+	# Test servers simply are standalone programs that do not use libcurl
+	# library.  For convinience and to ease portability of these servers,
+	# some source code files from the libcurl subdirectory are also used
+	# to build the servers.  In order to achieve proper linkage of these
+	# files on Win32 targets it is necessary to build the test servers
+	# with CURL_STATICLIB defined, independently of how libcurl is built.
 	IF(NOT CURL_STATICLIB)
 		SET_TARGET_PROPERTIES(${TEST_NAME} PROPERTIES COMPILE_DEFINITIONS CURL_STATICLIB)	# ${UPPER_TEST_NAME}
 	ENDIF()
