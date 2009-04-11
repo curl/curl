@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -110,43 +110,40 @@ char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
 
 #elif defined(HAVE_IOCTL_SIOCGIFADDR)
 
-#define SYS_ERROR -1
-
 char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
 {
-  int dummy;
-  char *ip=NULL;
+  struct ifreq req;
+  struct in_addr in;
+  struct sockaddr_in *s;
+  curl_socket_t dummy;
+  size_t len;
+  char *ip;
 
   if(!interface || (af != AF_INET))
     return NULL;
 
+  len = strlen(interface);
+  if(len >= sizeof(req.ifr_name))
+    return NULL;
+
   dummy = socket(AF_INET, SOCK_STREAM, 0);
-  if(SYS_ERROR == dummy) {
+  if(CURL_SOCKET_BAD == dummy)
+    return NULL;
+
+  memset(&req, 0, sizeof(req));
+  memcpy(req.ifr_name, interface, len+1);
+  req.ifr_addr.sa_family = AF_INET;
+
+  if(ioctl(dummy, SIOCGIFADDR, &req) < 0) {
+    sclose(dummy);
     return NULL;
   }
-  else {
-    struct ifreq req;
-    size_t len = strlen(interface);
-    memset(&req, 0, sizeof(req));
-    if(len >= sizeof(req.ifr_name)) {
-      sclose(dummy);
-      return NULL; /* this can't be a fine interface name */
-    }
-    memcpy(req.ifr_name, interface, len+1);
-    req.ifr_addr.sa_family = AF_INET;
-    if(SYS_ERROR == ioctl(dummy, SIOCGIFADDR, &req)) {
-      sclose(dummy);
-      return NULL;
-    }
-    else {
-      struct in_addr in;
 
-      struct sockaddr_in *s = (struct sockaddr_in *)&req.ifr_addr;
-      memcpy(&in, &s->sin_addr, sizeof(in));
-      ip = (char *) Curl_inet_ntop(s->sin_family, &in, buf, buf_size);
-    }
-    sclose(dummy);
-  }
+  s = (struct sockaddr_in *)&req.ifr_addr;
+  memcpy(&in, &s->sin_addr, sizeof(in));
+  ip = (char *) Curl_inet_ntop(s->sin_family, &in, buf, buf_size);
+
+  sclose(dummy);
   return ip;
 }
 
