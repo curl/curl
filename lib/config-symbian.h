@@ -745,12 +745,6 @@
 /* if NSS is enabled */
 /* #undef USE_NSS */
 
-/* if OpenSSL is in use */
-/*#define USE_OPENSSL 1*/
-
-/* if SSL is enabled */
-/*#define USE_SSLEAY 1*/
-
 /* to enable SSPI support */
 /* #undef USE_WINDOWS_SSPI */
 
@@ -817,7 +811,7 @@
 #endif
 
 /* Enable appropriate definitions only when OpenSSL support is enabled */
-#ifdef USE_SSL
-#define USE_OPENSSL 1
-#define USE_SSLEAY 1
+#ifdef USE_SSLEAY
+/* if OpenSSL is in use */
+#define USE_OPENSSL
 #endif

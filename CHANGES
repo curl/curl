@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Fandrich (11 Apr 2009)
+- Added new libcurl source files to Symbian OS build files.
+- Improved Symbian support for SSL.
+
 Yang Tse (10 Apr 2009)
 - Daniel Johnson improved the MacOSX-Framework shell script to now perform all
   the steps required to build a Mac OS X four way fat ppc/i386/ppc64/x86_64

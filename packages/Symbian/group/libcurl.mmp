@@ -2,7 +2,7 @@
 // libcurl.dll cURL network retrieval client library
 //
 
-// Build-time options
+// Build-time options (uncomment these to enable)
 //#define ENABLE_ZLIB     // Enable gzip/deflate decompression
 //#define ENABLE_SSL      // Enable SSL for HTTPS/FTPS (requires S60 Open C SDK)
 
@@ -16,7 +16,7 @@ MACRO       BUILDING_LIBCURL
 MACRO       HAVE_LIBZ
 #endif
 #ifdef ENABLE_SSL
-MACRO       USE_SSL
+MACRO       USE_SSLEAY
 #endif
 
 SOURCEPATH  ../../../lib
@@ -30,9 +30,13 @@ SOURCE \
   http_negotiate.c http_ntlm.c inet_pton.c strtoofft.c strerror.c   \
   hostares.c hostasyn.c hostip4.c hostip6.c hostsyn.c hostthre.c    \
   inet_ntop.c parsedate.c select.c gtls.c sslgen.c tftp.c splay.c   \
-  strdup.c socks.c ssh.c nss.c qssl.c rawstr.c curl_addrinfo.c
+  strdup.c socks.c ssh.c nss.c qssl.c rawstr.c curl_addrinfo.c      \
+  socks_gssapi.c socks_sspi.c curl_sspi.c slist.c
 
 USERINCLUDE   ../../../lib ../../../include/curl
+#ifdef ENABLE_SSL
+USERINCLUDE /epoc32/include/stdapis/openssl 
+#endif
 
 SYSTEMINCLUDE ../../../include /epoc32/include/stdapis /epoc32/include
 

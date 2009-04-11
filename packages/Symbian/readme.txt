@@ -70,13 +70,15 @@ half an hour are selected.
 
 LDAP, SCP or SFTP methods are not supported.
 
-gzip and deflate decompression is supported when enabled in the libcurl.mmp
-file.
+gzip and deflate decompression is supported when the appropriate macro
+is uncommented in the libcurl.mmp file.
 
-SSL/TLS encryption is not supported by default, but it has been reported
-to be made working with macros similar to the ones in config-symbian.h
-and libcurl.mmp. This requires the OpenSSL libraries included in the S60
-Open C SDK.
+SSL/TLS encryption is not enabled by default, but it is possible to add
+when the OpenSSL libraries included in the S60 Open C SDK are available.
+The appropriate macro in the libcurl.mmp file must be uncommented to
+enable support.  In addition, some manual editing of the libcurl source
+code must also be done since the S60 port of OpenSSL disables support
+for some encryption methods that libcurl assumes are always available.
 
 Debug builds are not supported (i.e. --enable-debug) because they cause
 additional symbol exports in the library which are not frozen in the .def
@@ -85,4 +87,4 @@ files.
 
 Dan Fandrich
 dan@coneharvesters.com
-October 2008
+April 2009
