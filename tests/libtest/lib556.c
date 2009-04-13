@@ -55,7 +55,7 @@ int test(char *URL)
 
     if(!res) {
       /* we assume that sending always work */
-      int total=0;
+      size_t total=0;
 
       do {
         /* busy-read like crazy */

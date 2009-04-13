@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -140,7 +140,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
   gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
   int ret;
-  size_t len;
+  size_t len, rawlen;
   bool gss;
   const char* protocol;
 
@@ -185,9 +185,9 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
 
   len = strlen(header);
   if(len > 0) {
-    int rawlen = Curl_base64_decode(header,
-                                    (unsigned char **)&input_token.value);
-    if(rawlen < 0)
+    rawlen = Curl_base64_decode(header,
+                                (unsigned char **)&input_token.value);
+    if(rawlen == 0)
       return -1;
     input_token.length = rawlen;
 
@@ -277,7 +277,7 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
   struct negotiatedata *neg_ctx = proxy?&conn->data->state.proxyneg:
     &conn->data->state.negotiate;
   char *encoded = NULL;
-  int len;
+  size_t len;
 
 #ifdef HAVE_SPNEGO /* Handle SPNEGO */
   if(checkprefix("Negotiate", neg_ctx->protocol)) {

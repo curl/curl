@@ -1044,7 +1044,7 @@ static CURLcode verifyhost(struct connectdata *conn,
 {
   bool matched = FALSE; /* no alternative match yet */
   int target = GEN_DNS; /* target type, GEN_DNS or GEN_IPADD */
-  int addrlen = 0;
+  size_t addrlen = 0;
   struct SessionHandle *data = conn->data;
   STACK_OF(GENERAL_NAME) *altnames;
 #ifdef ENABLE_IPV6
@@ -1087,7 +1087,7 @@ static CURLcode verifyhost(struct connectdata *conn,
       if(check->type == target) {
         /* get data and length */
         const char *altptr = (char *)ASN1_STRING_data(check->d.ia5);
-        int altlen;
+        size_t altlen;
 
         switch(target) {
         case GEN_DNS: /* name/pattern comparison */
@@ -1108,7 +1108,7 @@ static CURLcode verifyhost(struct connectdata *conn,
         case GEN_IPADD: /* IP address comparison */
           /* compare alternative IP address if the data chunk is the same size
              our server IP address is */
-          altlen = ASN1_STRING_length(check->d.ia5);
+          altlen = (size_t) ASN1_STRING_length(check->d.ia5);
           if((altlen == addrlen) && !memcmp(altptr, &addr, altlen))
             matched = TRUE;
           break;
