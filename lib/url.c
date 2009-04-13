@@ -887,13 +887,6 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * Do not include the body part in the output data stream.
      */
     data->set.opt_no_body = (bool)(0 != va_arg(param, long));
-
-    /* in HTTP lingo, no body means using the HEAD request and if unset there
-       really is no perfect method that is the "opposite" of HEAD but in
-       reality most people probably think GET then. The important thing is
-       that we can't let it remain HEAD if the opt_no_body is set FALSE since
-       then we'll behave wrong when getting HTTP. */
-    data->set.httpreq = data->set.opt_no_body?HTTPREQ_HEAD:HTTPREQ_GET;
     break;
   case CURLOPT_FAILONERROR:
     /*
@@ -909,12 +902,15 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * using the PUT request.
      */
     data->set.upload = (bool)(0 != va_arg(param, long));
-    if(data->set.upload)
+    if(data->set.upload) {
       /* If this is HTTP, PUT is what's needed to "upload" */
       data->set.httpreq = HTTPREQ_PUT;
+      data->set.opt_no_body = FALSE; /* this is implied */
+    }
     else
-      /* In HTTP, the opposite of upload is either GET or a HEAD */
-      data->set.httpreq = data->set.opt_no_body?HTTPREQ_HEAD:HTTPREQ_GET;
+      /* In HTTP, the opposite of upload is GET (unless NOBODY is true as
+         then this can be changed to HEAD later on) */
+      data->set.httpreq = HTTPREQ_GET;
     break;
   case CURLOPT_FILETIME:
     /*
@@ -4871,6 +4867,17 @@ static CURLcode do_init(struct connectdata *conn)
   conn->bits.done = FALSE; /* Curl_done() is not called yet */
   conn->bits.do_more = FALSE; /* by default there's no curl_do_more() to use */
   data->state.expect100header = FALSE;
+
+  if(data->set.opt_no_body)
+    /* in HTTP lingo, no body means using the HEAD request... */
+    data->set.httpreq = HTTPREQ_HEAD;
+  else if(HTTPREQ_HEAD == data->set.httpreq)
+    /* ... but if unset there really is no perfect method that is the
+       "opposite" of HEAD but in reality most people probably think GET
+       then. The important thing is that we can't let it remain HEAD if the
+       opt_no_body is set FALSE since then we'll behave wrong when getting
+       HTTP. */
+    data->set.httpreq = HTTPREQ_GET;
 
   /* NB: the content encoding software depends on this initialization */
   Curl_easy_initHandleData(data);

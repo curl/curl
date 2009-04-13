@@ -7,6 +7,20 @@
                                   Changelog
 
 Daniel Stenberg (13 Apr 2009)
+- bug report #2727981 (http://curl.haxx.se/bug/view.cgi?id=2727981) by Martin
+  Storsjö pointed out how setting CURLOPT_NOBODY to 0 could be downright
+  confusing as it set the method to either GET or HEAD. The example he showed
+  looked like:
+
+   curl_easy_setopt(curl, CURLOPT_PUT, 1);
+   curl_easy_setopt(curl, CURLOPT_NOBODY, 0);
+
+  The new way doesn't alter the method until the request is about to start. If
+  CURLOPT_NOBODY is then 1 the HTTP request will be HEAD. If CURLOPT_NOBODY is
+  0 and the request happens to have been set to HEAD, it will then instead be
+  set to GET. I believe this will be less surprising to users, and hopefully
+  not hit any existing users badly.
+
 - Toshio Kuratomi reported a memory leak problem with libcurl+NSS that turned
   out to be leaking cacerts. Kamil Dudka helped me complete the fix. The issue
   is found in Redhat's bug tracker:
