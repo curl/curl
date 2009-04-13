@@ -28,7 +28,7 @@ my $srcdir=$path;
 
 my $proto='https';
 
-do {
+while(@ARGV) {
     if($ARGV[0] eq "-v") {
         $verbose=1;
     }
@@ -54,15 +54,44 @@ do {
     elsif($ARGV[0] =~ /^(\d+)$/) {
         $port = $1;
     }
-} while(shift @ARGV);
+    shift @ARGV;
+};
 
 my $conffile="$path/stunnel.conf";	# stunnel configuration data
 my $certfile="$srcdir/stunnel.pem";	# stunnel server certificate
 my $pidfile="$path/.$proto.pid";	# stunnel process pid file
 
-open(CONF, ">$conffile") || exit 1;
-print CONF "
-	CApath=$path
+# find out version info for the given stunnel binary
+my $ver_major;
+my $ver_minor;
+foreach my $veropt (('-version', '-V')) {
+    foreach my $verstr (qx($stunnel $veropt 2>&1)) {
+        if($verstr =~ /^stunnel (\d+)\.(\d+) on /) {
+            $ver_major = $1;
+            $ver_minor = $2;
+            last;
+        }
+    }
+    last if($ver_major);
+}
+
+my $cmd;
+if(!$ver_major) {
+    print STDERR "no stunnel or unknown version\n";
+}
+elsif($ver_major < 4) {
+    # stunnel version less than 4.00
+    $cmd  = "$stunnel -p $certfile -P $pidfile -d $port -r $target_port ";
+    $cmd .= "2>/dev/null";
+}
+else {
+    # stunnel version 4.00 or later
+    $cmd  = "$stunnel $conffile ";
+    $cmd .= "2>/dev/null";
+    # stunnel configuration file
+    open(STUNCONF, ">$conffile") || exit 1;
+    print STUNCONF "
+	CApath = $path
 	cert = $certfile
 	pid = $pidfile
 	debug = 0
@@ -72,17 +101,9 @@ print CONF "
 	[curltest]
 	accept = $port
 	connect = $target_port
-";
-close CONF; 
-#system("chmod go-rwx $conffile $certfile");	# secure permissions
-
-		# works only with stunnel versions < 4.00
-my $cmd="$stunnel -p $certfile -P $pidfile -d $port -r $target_port 2>/dev/null";
-
-# use some heuristics to determine stunnel version
-my $version_ge_4=system("$stunnel -V 2>&1|grep '^stunnel.* on '>/dev/null 2>&1");
-		# works only with stunnel versions >= 4.00
-if ($version_ge_4) { $cmd="$stunnel $conffile"; }
+	";
+    close STUNCONF;
+}
 
 if($verbose) {
     print uc($proto)." server: $cmd\n";
