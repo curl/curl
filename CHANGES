@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel Stenberg (13 Apr 2009)
+- Toshio Kuratomi reported a memory leak problem with libcurl+NSS that turned
+  out to be leaking cacerts. Kamil Dudka helped me complete the fix. The issue
+  is found in Redhat's bug tracker:
+  https://bugzilla.redhat.com/show_bug.cgi?id=453612
+
+  There are still memory leaks present, but they seem to have other reasons.
+
 Daniel Fandrich (11 Apr 2009)
 - Added new libcurl source files to Symbian OS build files.
 - Improved Symbian support for SSL.

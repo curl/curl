@@ -93,6 +93,7 @@
 
 #ifdef USE_NSS
 #include <nspr.h>
+#include <pk11pub.h>
 #endif
 
 #ifdef USE_QSOSSL
@@ -210,6 +211,10 @@ struct ssl_connect_data {
 #ifdef USE_NSS
   PRFileDesc *handle;
   char *client_nickname;
+#ifdef HAVE_PK11_CREATEGENERICOBJECT
+  PK11GenericObject *key;
+  PK11GenericObject *cacert[2];
+#endif
 #endif /* USE_NSS */
 #ifdef USE_QSOSSL
   SSLHandle *handle;

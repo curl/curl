@@ -282,13 +282,12 @@ static int is_file(const char *filename)
   return 0;
 }
 
-static int
-nss_load_cert(const char *filename, PRBool cacert)
+static int nss_load_cert(struct ssl_connect_data *ssl,
+                         const char *filename, PRBool cacert)
 {
 #ifdef HAVE_PK11_CREATEGENERICOBJECT
   CK_SLOT_ID slotID;
   PK11SlotInfo * slot = NULL;
-  PK11GenericObject *rv;
   CK_ATTRIBUTE *attrs;
   CK_ATTRIBUTE theTemplate[20];
   CK_BBOOL cktrue = CK_TRUE;
@@ -363,11 +362,12 @@ nss_load_cert(const char *filename, PRBool cacert)
   /* This load the certificate in our PEM module into the appropriate
    * slot.
    */
-  rv = PK11_CreateGenericObject(slot, theTemplate, 4, PR_FALSE /* isPerm */);
+  ssl->cacert[slotID] = PK11_CreateGenericObject(slot, theTemplate, 4,
+                                         PR_FALSE /* isPerm */);
 
   PK11_FreeSlot(slot);
 
-  if(rv == NULL) {
+  if(ssl->cacert == NULL) {
     free(nickname);
     return 0;
   }
@@ -474,11 +474,10 @@ static int nss_load_crl(const char* crlfilename, PRBool ascii)
   return 1;
 }
 
-static int nss_load_key(struct connectdata *conn, char *key_file)
+static int nss_load_key(struct connectdata *conn, int sockindex, char *key_file)
 {
 #ifdef HAVE_PK11_CREATEGENERICOBJECT
   PK11SlotInfo * slot = NULL;
-  PK11GenericObject *rv;
   CK_ATTRIBUTE *attrs;
   CK_ATTRIBUTE theTemplate[20];
   CK_BBOOL cktrue = CK_TRUE;
@@ -486,6 +485,7 @@ static int nss_load_key(struct connectdata *conn, char *key_file)
   CK_SLOT_ID slotID;
   pphrase_arg_t *parg = NULL;
   char slotname[SLOTSIZE];
+  struct ssl_connect_data *sslconn = &conn->ssl[sockindex];
 
   attrs = theTemplate;
 
@@ -505,8 +505,9 @@ static int nss_load_key(struct connectdata *conn, char *key_file)
                 strlen(key_file)+1); attrs++;
 
   /* When adding an encrypted key the PKCS#11 will be set as removed */
-  rv = PK11_CreateGenericObject(slot, theTemplate, 3, PR_FALSE /* isPerm */);
-  if(rv == NULL) {
+  sslconn->key = PK11_CreateGenericObject(slot, theTemplate, 3,
+                                          PR_FALSE /* isPerm */);
+  if(sslconn->key == NULL) {
     PR_SetError(SEC_ERROR_BAD_KEY, 0);
     return 0;
   }
@@ -554,13 +555,14 @@ static int display_error(struct connectdata *conn, PRInt32 err,
   return 0; /* The caller will print a generic error */
 }
 
-static int cert_stuff(struct connectdata *conn, char *cert_file, char *key_file)
+static int cert_stuff(struct connectdata *conn,
+                      int sockindex, char *cert_file, char *key_file)
 {
   struct SessionHandle *data = conn->data;
   int rv = 0;
 
   if(cert_file) {
-    rv = nss_load_cert(cert_file, PR_FALSE);
+    rv = nss_load_cert(&conn->ssl[sockindex], cert_file, PR_FALSE);
     if(!rv) {
       if(!display_error(conn, PR_GetError(), cert_file))
         failf(data, "Unable to load client cert %d.", PR_GetError());
@@ -569,10 +571,10 @@ static int cert_stuff(struct connectdata *conn, char *cert_file, char *key_file)
   }
   if(key_file || (is_file(cert_file))) {
     if(key_file)
-      rv = nss_load_key(conn, key_file);
+      rv = nss_load_key(conn, sockindex, key_file);
     else
       /* In case the cert file also has the key */
-      rv = nss_load_key(conn, cert_file);
+      rv = nss_load_key(conn, sockindex, cert_file);
     if(!rv) {
       if(!display_error(conn, PR_GetError(), key_file))
         failf(data, "Unable to load client key %d.", PR_GetError());
@@ -938,6 +940,12 @@ void Curl_nss_close(struct connectdata *conn, int sockindex)
       free(connssl->client_nickname);
       connssl->client_nickname = NULL;
     }
+    if(connssl->key)
+      (void)PK11_DestroyGenericObject(connssl->key);
+    if(connssl->cacert[1])
+      (void)PK11_DestroyGenericObject(connssl->cacert[1]);
+    if(connssl->cacert[0])
+      (void)PK11_DestroyGenericObject(connssl->cacert[0]);
     connssl->handle = NULL;
   }
 }
@@ -972,6 +980,10 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 
   if (connssl->state == ssl_connection_complete)
     return CURLE_OK;
+
+  connssl->cacert[0] = NULL;
+  connssl->cacert[1] = NULL;
+  connssl->key = NULL;
 
   /* FIXME. NSS doesn't support multiple databases open at the same time. */
   PR_Lock(nss_initlock);
@@ -1100,7 +1112,8 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
     /* skip the verifying of the peer */
     ;
   else if(data->set.ssl.CAfile) {
-    int rc = nss_load_cert(data->set.ssl.CAfile, PR_TRUE);
+    int rc = nss_load_cert(&conn->ssl[sockindex], data->set.ssl.CAfile,
+                           PR_TRUE);
     if(!rc) {
       curlerr = CURLE_SSL_CACERT_BADFILE;
       goto error;
@@ -1128,7 +1141,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 
           snprintf(fullpath, sizeof(fullpath), "%s/%s", data->set.ssl.CApath,
                    entry->name);
-          rc = nss_load_cert(fullpath, PR_TRUE);
+          rc = nss_load_cert(&conn->ssl[sockindex], fullpath, PR_TRUE);
           /* FIXME: check this return value! */
         }
         /* This is purposefully tolerant of errors so non-PEM files
@@ -1178,7 +1191,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
         free(nickname);
       goto error;
     }
-    if(!cert_stuff(conn, data->set.str[STRING_CERT],
+    if(!cert_stuff(conn, sockindex, data->set.str[STRING_CERT],
                     data->set.str[STRING_KEY])) {
       /* failf() is already done in cert_stuff() */
       if(nickname_alloc)
