@@ -275,12 +275,12 @@ static int fake_hostent(const char *name, int family, ares_host_callback callbac
 
   if (family == AF_INET)
     {
-      hostent.h_length = sizeof(struct in_addr);
+      hostent.h_length = (int)sizeof(struct in_addr);
       addrs[0] = (char *)&in;
     }
   else if (family == AF_INET6)
     {
-      hostent.h_length = sizeof(struct in6_addr);
+      hostent.h_length = (int)sizeof(struct in6_addr);
       addrs[0] = (char *)&in6;
     }
   /* Duplicate the name, to avoid a constness violation. */

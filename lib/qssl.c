@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -419,9 +419,11 @@ ssize_t Curl_qsossl_recv(struct connectdata * conn, int num, char * buf,
   char error_buffer[120]; /* OpenSSL documents that this must be at
                              least 120 bytes long. */
   unsigned long sslerror;
+  int buffsize;
   int nread;
 
-  nread = SSL_Read(conn->ssl[num].handle, buf, (int) buffersize);
+  buffsize = (buffersize > (size_t)INT_MAX) ? INT_MAX : (int)buffersize;
+  nread = SSL_Read(conn->ssl[num].handle, buf, buffsize);
   *wouldblock = FALSE;
 
   if(nread < 0) {

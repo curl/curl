@@ -259,7 +259,7 @@ Curl_he2ai(const struct hostent *he, int port)
 
   for(i=0; (curr = he->h_addr_list[i]) != NULL; i++) {
 
-    int ss_size;
+    size_t ss_size;
 #ifdef ENABLE_IPV6
     if (he->h_addrtype == AF_INET6)
       ss_size = sizeof (struct sockaddr_in6);
@@ -297,7 +297,7 @@ Curl_he2ai(const struct hostent *he, int port)
        the type must be ignored and conn->socktype be used instead! */
     ai->ai_socktype = SOCK_STREAM;
 
-    ai->ai_addrlen = ss_size;
+    ai->ai_addrlen = (int)ss_size;
 
     /* leave the rest of the struct filled with zero */
 

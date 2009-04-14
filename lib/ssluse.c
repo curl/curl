@@ -797,6 +797,7 @@ int Curl_ossl_shutdown(struct connectdata *conn, int sockindex)
                     to be at least 120 bytes long. */
   unsigned long sslerror;
   ssize_t nread;
+  int buffsize;
   int err;
   int done = 0;
 
@@ -809,6 +810,7 @@ int Curl_ossl_shutdown(struct connectdata *conn, int sockindex)
       (void)SSL_shutdown(connssl->handle);
 
   if(connssl->handle) {
+    buffsize = (int)sizeof(buf);
     while(!done) {
       int what = Curl_socket_ready(conn->sock[sockindex],
                              CURL_SOCKET_BAD, SSL_SHUTDOWN_TIMEOUT);
@@ -816,7 +818,7 @@ int Curl_ossl_shutdown(struct connectdata *conn, int sockindex)
         /* Something to read, let's do it and hope that it is the close
            notify alert from the server */
         nread = (ssize_t)SSL_read(conn->ssl[sockindex].handle, buf,
-                                  sizeof(buf));
+                                  buffsize);
         err = SSL_get_error(conn->ssl[sockindex].handle, (int)nread);
 
         switch(err) {
@@ -2374,7 +2376,11 @@ ssize_t Curl_ossl_send(struct connectdata *conn,
   char error_buffer[120]; /* OpenSSL documents that this must be at least 120
                              bytes long. */
   unsigned long sslerror;
-  int rc = SSL_write(conn->ssl[sockindex].handle, mem, (int)len);
+  int memlen;
+  int rc;
+
+  memlen = (len > (size_t)INT_MAX) ? INT_MAX : (int)len;
+  rc = SSL_write(conn->ssl[sockindex].handle, mem, memlen);
 
   if(rc < 0) {
     err = SSL_get_error(conn->ssl[sockindex].handle, rc);
@@ -2419,8 +2425,11 @@ ssize_t Curl_ossl_recv(struct connectdata *conn, /* connection data */
   char error_buffer[120]; /* OpenSSL documents that this must be at
                              least 120 bytes long. */
   unsigned long sslerror;
-  ssize_t nread = (ssize_t)SSL_read(conn->ssl[num].handle, buf,
-                                    (int)buffersize);
+  ssize_t nread;
+  int buffsize;
+
+  buffsize = (buffersize > (size_t)INT_MAX) ? INT_MAX : (int)buffersize;
+  nread = (ssize_t)SSL_read(conn->ssl[num].handle, buf, buffsize);
   *wouldblock = FALSE;
   if(nread < 0) {
     /* failed SSL_read */

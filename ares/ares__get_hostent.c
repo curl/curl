@@ -47,7 +47,7 @@ int ares__get_hostent(FILE *fp, int family, struct hostent **host)
   int status, linesize, end_at_hostname, naliases;
   struct in_addr addr;
   struct in6_addr addr6;
-  int addrlen = sizeof(struct in_addr);
+  size_t addrlen = sizeof(struct in_addr);
   struct hostent *hostent = NULL;
 
   while ((status = ares__read_line(fp, &line, &linesize)) == ARES_SUCCESS)
@@ -162,7 +162,7 @@ int ares__get_hostent(FILE *fp, int family, struct hostent **host)
       hostent->h_aliases[naliases] = NULL;
 
       hostent->h_addrtype = family;
-      hostent->h_length = addrlen;
+      hostent->h_length = (int)addrlen;
       if (family == AF_INET)
         memcpy(hostent->h_addr_list[0], &addr, addrlen);
       else if (family == AF_INET6)

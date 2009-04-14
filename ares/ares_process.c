@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /* Copyright 1998 by the Massachusetts Institute of Technology.
- * Copyright (C) 2004-2008 by Daniel Stenberg
+ * Copyright (C) 2004-2009 by Daniel Stenberg
  *
  * Permission to use, copy, modify, and distribute this
  * software and its documentation for any purpose and without
@@ -104,7 +104,7 @@ static void end_query(ares_channel channel, struct query *query, int status,
 int ares__timedout(struct timeval *now,
                    struct timeval *check)
 {
-  int secs = (now->tv_sec - check->tv_sec);
+  long secs = (now->tv_sec - check->tv_sec);
 
   if(secs > 0)
     return 1; /* yes, timed out */

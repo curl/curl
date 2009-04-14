@@ -22,7 +22,8 @@ int test(char *URL)
                        0x1d, 0x57, 0xe1};
 
   CURL* easy  = curl_easy_init();
-  char* s = curl_easy_escape(easy, (char*)a, sizeof(a));
+  int asize = (int)sizeof(a);
+  char* s = curl_easy_escape(easy, (char*)a, asize);
   (void)URL;
 
   printf("%s\n", s);
