@@ -30,6 +30,9 @@
 /* Define if you have the <io.h> header file.  */
 #define HAVE_IO_H 1
 
+/* Define if you have the <limits.h> header file.  */
+#define HAVE_LIMITS_H 1
+
 /* Define if you need the malloc.h header file even with stdlib.h  */
 #ifndef __SALFORDC__
 #define NEED_MALLOC_H 1

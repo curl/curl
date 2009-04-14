@@ -27,7 +27,9 @@
 #include <qsossl.h>
 #include <errno.h>
 #include <string.h>
-#include <limits.h>
+#ifdef HAVE_LIMITS_H
+#  include <limits.h>
+#endif
 
 #include <curl/curl.h>
 #include "urldata.h"

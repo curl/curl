@@ -29,6 +29,9 @@
 #define HAVE_GETOPT_H 1
 #endif
 
+/* Define if you have the <limits.h> header file.  */
+#define HAVE_LIMITS_H 1
+
 /* Define if you have the <signal.h> header file. */
 #define HAVE_SIGNAL_H 1
 

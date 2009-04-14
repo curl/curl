@@ -44,7 +44,10 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <limits.h>
+#ifdef HAVE_LIMITS_H
+#  include <limits.h>
+#endif
+
 #include "ares.h"
 #include "ares_dns.h"
 #include "ares_private.h"

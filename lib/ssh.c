@@ -31,7 +31,9 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <ctype.h>
-#include <limits.h>
+#ifdef HAVE_LIMITS_H
+#  include <limits.h>
+#endif
 
 #include <libssh2.h>
 #include <libssh2_sftp.h>

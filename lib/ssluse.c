@@ -36,7 +36,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#ifdef HAVE_LIMITS_H
 #include <limits.h>
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif

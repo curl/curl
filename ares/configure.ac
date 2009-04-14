@@ -448,6 +448,7 @@ AC_CHECK_HEADERS(
        strings.h \
        stdbool.h \
        time.h \
+       limits.h \
        arpa/nameser.h \
        arpa/nameser_compat.h \
        arpa/inet.h,
