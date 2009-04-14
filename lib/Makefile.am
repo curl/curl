@@ -36,7 +36,7 @@ EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 Makefile.riscos $(DSP) \
  Makefile.netware nwlib.c nwos.c libcurl.imp msvcproj.head msvcproj.foot   \
  config-win32ce.h config-os400.h setup-os400.h config-symbian.h		   \
  Makefile.Watcom config-tpf.h $(DOCS) $(VCPROJ) mk-ca-bundle.pl		   \
- firefox-db2pem.sh
+ firefox-db2pem.sh CMakeLists.txt
 
 CLEANFILES = $(DSP) $(VCPROJ)
 
