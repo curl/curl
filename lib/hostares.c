@@ -24,6 +24,7 @@
 #include "setup.h"
 
 #include <string.h>
+#include <limits.h>
 
 #ifdef NEED_MALLOC_H
 #include <malloc.h>
