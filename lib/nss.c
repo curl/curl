@@ -367,7 +367,7 @@ static int nss_load_cert(struct ssl_connect_data *ssl,
 
   PK11_FreeSlot(slot);
 
-  if(ssl->cacert == NULL) {
+  if(ssl->cacert[slotID] == NULL) {
     free(nickname);
     return 0;
   }
