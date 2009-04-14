@@ -1,8 +1,14 @@
 To be addressed in 7.19.5 (planned release: May 2009)
 =========================
 
-216 - Markus Moeller's "proxy question" to reverse lookup SOCKS proxys and more
+221 - debian man page warnings
 
-215 - Patch for Metalink Support (for the curl tool)
+222 - TFTP close bug/fix, #2723219
 
-221 - 
+223 - TFTP flaw, #2723236
+
+224 - VMS-problemm, #2715307
+
+225 - resume when upload from stream, #2709004
+
+226 -
