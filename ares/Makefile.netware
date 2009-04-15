@@ -282,7 +282,6 @@ config.h: Makefile.netware
 	@echo $(DL)#define PACKAGE_BUGREPORT "a suitable curl mailing list => http://curl.haxx.se/mail/"$(DL) >> $@
 ifeq ($(LIBARCH),CLIB)
 	@echo $(DL)#define OS "i586-pc-clib-NetWare"$(DL) >> $@
-	@echo $(DL)#define HAVE_LIMITS_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRICMP 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRNICMP 1$(DL) >> $@
 	@echo $(DL)#define NETDB_USE_INTERNET 1$(DL) >> $@
@@ -312,7 +311,6 @@ else
 	@echo $(DL)#define HAVE_FTRUNCATE 1$(DL) >> $@
 	@echo $(DL)#define HAVE_GETTIMEOFDAY 1$(DL) >> $@
 	@echo $(DL)#define HAVE_INTTYPES_H 1$(DL) >> $@
-	@echo $(DL)#define HAVE_LIMITS_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_LONGLONG 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STDINT_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRCASECMP 1$(DL) >> $@
@@ -362,6 +360,7 @@ endif
 	@echo $(DL)#define HAVE_INET_ADDR 1$(DL) >> $@
 	@echo $(DL)#define HAVE_IOCTL 1$(DL) >> $@
 	@echo $(DL)#define HAVE_IOCTL_FIONBIO 1$(DL) >> $@
+	@echo $(DL)#define HAVE_LIMITS_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_LL 1$(DL) >> $@
 	@echo $(DL)#define HAVE_LOCALTIME_R 1$(DL) >> $@
 	@echo $(DL)#define HAVE_MALLOC_H 1$(DL) >> $@
