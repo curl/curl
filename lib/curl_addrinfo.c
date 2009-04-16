@@ -74,7 +74,12 @@
 void
 Curl_freeaddrinfo(Curl_addrinfo *cahead)
 {
+#if defined(__INTEL_COMPILER) && (__INTEL_COMPILER == 910)
+  volatile Curl_addrinfo * volatile ca;
+  volatile Curl_addrinfo * volatile canext;
+#else
   Curl_addrinfo *ca, *canext;
+#endif
 
   for(ca = cahead; ca != NULL; ca = canext) {
 
