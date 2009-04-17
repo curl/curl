@@ -43,7 +43,7 @@ explicitly mentioned below.
 .SH AVAILABLE INFORMATION
 The following information can be extracted:
 .IP CURLINFO_EFFECTIVE_URL
-Pass a pointer to a 'char *' to receive the last used effective URL.
+Pass a pointer to a char pointer to receive the last used effective URL.
 .IP CURLINFO_RESPONSE_CODE
 Pass a pointer to a long to receive the last received HTTP or FTP code. This
 option was known as CURLINFO_HTTP_CODE in libcurl 7.10.7 and earlier. This
@@ -140,15 +140,15 @@ if the size isn't known.
 Pass a pointer to a double to receive the specified size of the upload.  Since
 7.19.4, this returns -1 if the size isn't known.
 .IP CURLINFO_CONTENT_TYPE
-Pass a pointer to a 'char *' to receive the content-type of the downloaded
+Pass a pointer to a char pointer to receive the content-type of the downloaded
 object. This is the value read from the Content-Type: field. If you get NULL,
 it means that the server didn't send a valid Content-Type header or that the
 protocol used doesn't support this.
 .IP CURLINFO_PRIVATE
-Pass a pointer to a 'char *' to receive the pointer to the private data
+Pass a pointer to a char pointer to receive the pointer to the private data
 associated with the curl handle (set with the CURLOPT_PRIVATE option to
 \fIcurl_easy_setopt(3)\fP). Please note that for internal reasons, the
-value is returned as a 'char *', although effectively being a 'void *'.
+value is returned as a char pointer, although effectively being a 'void *'.
 (Added in 7.10.3)
 .IP CURLINFO_HTTPAUTH_AVAIL
 Pass a pointer to a long to receive a bitmask indicating the authentication
@@ -188,10 +188,10 @@ libcurl close the socket and cleanup other resources associated with the
 handle. This is typically used in combination with \fICURLOPT_CONNECT_ONLY\fP.
 (Added in 7.15.2)
 .IP CURLINFO_FTP_ENTRY_PATH
-Pass a pointer to a 'char *' to receive a pointer to a string holding the path
-of the entry path. That is the initial path libcurl ended up in when logging
-on to the remote FTP server. This stores a NULL as pointer if something is
-wrong. (Added in 7.15.4)
+Pass a pointer to a char pointer to receive a pointer to a string holding the
+path of the entry path. That is the initial path libcurl ended up in when
+logging on to the remote FTP server. This stores a NULL as pointer if
+something is wrong. (Added in 7.15.4)
 .IP CURLINFO_CERTINFO
 Pass a pointer to a 'struct curl_certinfo *' and you'll get it set to point to
 struct that holds a number of linked lists with info about the certificate
