@@ -74,7 +74,9 @@
 void
 Curl_freeaddrinfo(Curl_addrinfo *cahead)
 {
-#if defined(__INTEL_COMPILER) && (__INTEL_COMPILER == 910)
+#if defined(__INTEL_COMPILER) && (__INTEL_COMPILER == 910) && \
+    defined(__unix__) &&  defined(__i386__)
+  /* workaround icc 9.1 optimizer issue */
   volatile Curl_addrinfo * volatile ca;
   volatile Curl_addrinfo * volatile canext;
 #else
