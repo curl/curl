@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 47
+# serial 48
 
 
 dnl CARES_CHECK_COMPILER
@@ -186,7 +186,6 @@ AC_DEFUN([CARES_CHECK_COMPILER_INTEL_C], [
   if test "$curl_cv_have_def___INTEL_COMPILER" = "yes"; then
     AC_MSG_RESULT([yes])
     compiler_num="$curl_cv_def___INTEL_COMPILER"
-    CURL_CHECK_DEF([__i386__], [], [silent])
     CURL_CHECK_DEF([__unix__], [], [silent])
     if test "$curl_cv_have_def___unix__" = "yes"; then
       compiler_id="INTEL_UNIX_C"
@@ -196,13 +195,6 @@ AC_DEFUN([CARES_CHECK_COMPILER_INTEL_C], [
       flags_opt_all="-O -O0 -O1 -O2 -O3 -Os"
       flags_opt_yes="-O2"
       flags_opt_off="-O0"
-      dnl icc 9.1 optimization on IA32 triggers SIGSEGV
-      if test "$curl_cv_have_def___i386__" = "yes" &&
-        test "$compiler_num" -eq "910"; then
-        INTEL_UNIX_C_OPT_SIGSEGV="yes"
-      else
-        INTEL_UNIX_C_OPT_SIGSEGV="no"
-      fi
     else
       compiler_id="INTEL_WINDOWS_C"
       flags_dbg_all="/ZI /Zi /zI /zi /ZD /Zd /zD /zd /Z7 /z7 /Oy /Oy-"
@@ -960,39 +952,6 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
         if test "$compiler_num" -ge "1000"; then
           dnl Disable vectorizer diagnostic information
           tmp_CFLAGS="$tmp_CFLAGS -vec-report0"
-        fi
-        dnl Disable some optimizations to debug icc 9.1 SIGSEGV
-        if test "$INTEL_UNIX_C_OPT_SIGSEGV" = "yes"; then
-          dnl Disable interprocedural optimizations
-          tmp_CFLAGS="$tmp_CFLAGS -no-ip -no-ipo"
-          dnl Separate functions for the linker
-          tmp_CFLAGS="$tmp_CFLAGS -ffunction-sections"
-          dnl Disable inlining of user-defined functions
-          tmp_CFLAGS="$tmp_CFLAGS -Ob0"
-          dnl Disable inline expansion of intrinsic functions
-          tmp_CFLAGS="$tmp_CFLAGS -fno-builtin"
-          dnl Disable inlining of functions
-          tmp_CFLAGS="$tmp_CFLAGS -fno-inline"
-          dnl Disable some IPO for single file optimizations
-          tmp_CFLAGS="$tmp_CFLAGS -fno-inline-functions"
-          dnl Disable inlining of standard library functions
-          tmp_CFLAGS="$tmp_CFLAGS -nolib-inline"
-          dnl Disable full and partial inlining when IPO
-          tmp_CFLAGS="$tmp_CFLAGS -ip-no-inlining"
-          dnl Enable floating-point stack integrity checks
-          tmp_CFLAGS="$tmp_CFLAGS -fpstkchk"
-          dnl Enable run-time detection of buffer overruns.
-          tmp_CFLAGS="$tmp_CFLAGS -fstack-security-check"
-          dnl Assume aliasing in the program.
-          tmp_CFLAGS="$tmp_CFLAGS -falias"
-          dnl Assume that arguments may be aliased.
-          tmp_CFLAGS="$tmp_CFLAGS -alias-args"
-          dnl Assume aliasing within functions
-          tmp_CFLAGS="$tmp_CFLAGS -ffnalias"
-          dnl Disable prefetch insertion optimization
-          tmp_CFLAGS="$tmp_CFLAGS -no-prefetch"
-          dnl Disable loop unrolling optimization
-          tmp_CFLAGS="$tmp_CFLAGS -unroll0"
         fi
         ;;
         #
