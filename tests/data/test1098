@@ -1,0 +1,73 @@
+<testcase>
+<info>
+<keywords>
+FTP
+HTTP proxy
+CURLOPT_PROXY
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+
+hello
+</data>
+
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+http
+ftp
+</features>
+ <name>
+FTP RETR twice over proxy confirming persistent connection
+ </name>
+
+ <command>
+ftp://ftp-site/moo/1098 ftp://ftp-site/moo/1098 --proxy http://%HOSTIP:%HTTPPORT
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET ftp://ftp-site/moo/1098 HTTP/1.1
+Host: ftp-site:21
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+GET ftp://ftp-site/moo/1098 HTTP/1.1
+Host: ftp-site:21
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+</protocol>
+<stdout mode="text">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+
+hello
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+
+hello
+</stdout>
+</verify>
+</testcase>

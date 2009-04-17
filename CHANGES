@@ -6,6 +6,17 @@
 
                                   Changelog
 
+Daniel Stenberg (17 Apr 2009)
+- Pramod Sharma reported and tracked down a bug when doing FTP over a HTTP
+  proxy. libcurl would then wrongly close the connection after each
+  request. In his case it had the weird side-effect that it killed NTLM auth
+  for the proxy causing an inifinite loop!
+
+  I added test case 1098 to verify this fix. The test case does however not
+  properly verify that the transfers are done persistently - as I couldn't
+  think of a clever way to achieve it right now - but you need to read the
+  stderr output after a test run to see that it truly did the right thing.
+
 Daniel Stenberg (13 Apr 2009)
 - bug report #2727981 (http://curl.haxx.se/bug/view.cgi?id=2727981) by Martin
   Storsjö pointed out how setting CURLOPT_NOBODY to 0 could be downright

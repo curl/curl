@@ -4146,7 +4146,12 @@ static CURLcode ftp_setup_connection(struct connectdata * conn)
       return CURLE_UNSUPPORTED_PROTOCOL;
 #endif
     }
-
+    /*
+     * We explicitly mark this connection as persistent here as we're doing
+     * FTP over HTTP and thus we accidentally avoid setting this value
+     * otherwise.
+     */
+    conn->bits.close = FALSE;
 #else
     failf(data, "FTP over http proxy requires HTTP support built-in!");
     return CURLE_UNSUPPORTED_PROTOCOL;
