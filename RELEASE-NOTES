@@ -28,6 +28,7 @@ This release includes the following bugfixes:
  o allow creation of four way fat libcurl Mac OS X Framework
  o memory leaks in libcurl+NSS
  o improved the CURLOPT_NOBODY set to 0 confusions
+ o persistent connections when doing FTP over a HTTP proxy
 
 This release includes the following known bugs:
 
@@ -38,6 +39,7 @@ advice from friends like these:
 
  Daniel Fandrich, Yang Tse, David James, Chris Deidun, Bill Egert,
  Andre Guibert de Bruet, Andreas Farber, Frank Hempel, Pierre Brico,
- Kamil Dudka, Jim Freeman, Daniel Johnson, Toshio Kuratomi, Martin Storsjö
+ Kamil Dudka, Jim Freeman, Daniel Johnson, Toshio Kuratomi, Martin Storsjö,
+ Pramod Sharma
 
         Thanks! (and sorry if I forgot to mention someone)
