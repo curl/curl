@@ -68,7 +68,8 @@ OBJS = $(OBJ_DIR)\base64.obj           $(OBJ_DIR)\connect.obj        &
        $(OBJ_DIR)\strtok.obj           $(OBJ_DIR)\strtoofft.obj      &
        $(OBJ_DIR)\telnet.obj           $(OBJ_DIR)\tftp.obj           &
        $(OBJ_DIR)\timeval.obj          $(OBJ_DIR)\transfer.obj       &
-       $(OBJ_DIR)\url.obj              $(OBJ_DIR)\version.obj
+       $(OBJ_DIR)\url.obj              $(OBJ_DIR)\version.obj        &
+       $(OBJ_DIR)\slist.obj
 
 #
 # Use $(OBJS) as a template to generate $(OBJS_STAT) and $(OBJS_DYN).
