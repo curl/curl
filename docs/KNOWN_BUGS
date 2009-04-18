@@ -3,6 +3,11 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+63. When CURLOPT_CONNECT_ONLY is used, the handle cannot reliably be re-used
+  for any further requests or transfers. The work-around is then to close that
+  handle with curl_easy_cleanup() and create a new. Some more details:
+  http://curl.haxx.se/mail/lib-2009-04/0300.html
+
 62. CURLOPT_TIMEOUT does not work properly with the regular multi and
   multi_socket interfaces. The work-around for apps is to simply remove the
   easy handle once the time is up. See also:
