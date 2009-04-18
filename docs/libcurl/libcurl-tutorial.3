@@ -667,14 +667,14 @@ default to assume a HTTP proxy):
 
 .IP "Environment Variables"
 
-libcurl automatically checks and uses a set of environment variables to
-know what proxies to use for certain protocols. The names of the variables
-are following an ancient de facto standard and are built up as
-"[protocol]_proxy" (note the lower casing). Which makes the variable
-'http_proxy' checked for a name of a proxy to use when the input URL is
-HTTP. Following the same rule, the variable named 'ftp_proxy' is checked
-for FTP URLs. Again, the proxies are always HTTP proxies, the different
-names of the variables simply allows different HTTP proxies to be used.
+libcurl automatically checks and uses a set of environment variables to know
+what proxies to use for certain protocols. The names of the variables are
+following an ancient de facto standard and are built up as "[protocol]_proxy"
+(note the lower casing). Which makes the variable \&'http_proxy' checked for a
+name of a proxy to use when the input URL is HTTP. Following the same rule,
+the variable named 'ftp_proxy' is checked for FTP URLs. Again, the proxies are
+always HTTP proxies, the different names of the variables simply allows
+different HTTP proxies to be used.
 
 The proxy environment variable contents should be in the format
 \&"[protocol://][user:password@]machine[:port]". Where the protocol:// part is
