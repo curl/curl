@@ -3021,11 +3021,9 @@ static CURLcode ftp_init(struct connectdata *conn)
   struct SessionHandle *data = conn->data;
   struct FTP *ftp = data->state.proto.ftp;
   if(!ftp) {
-    ftp = calloc(sizeof(struct FTP), 1);
+    ftp = data->state.proto.ftp = calloc(sizeof(struct FTP), 1);
     if(!ftp)
       return CURLE_OUT_OF_MEMORY;
-
-    data->state.proto.ftp = ftp;
   }
 
   /* get some initial data into the ftp struct */
@@ -3037,7 +3035,9 @@ static CURLcode ftp_init(struct connectdata *conn)
   */
   ftp->user = conn->user;
   ftp->passwd = conn->passwd;
-  if(isBadFtpString(ftp->user) || isBadFtpString(ftp->passwd))
+  if(TRUE == isBadFtpString(ftp->user))
+    return CURLE_URL_MALFORMAT;
+  if(TRUE == isBadFtpString(ftp->passwd))
     return CURLE_URL_MALFORMAT;
 
   return CURLE_OK;
@@ -3070,7 +3070,7 @@ static CURLcode ftp_connect(struct connectdata *conn,
   Curl_reset_reqproto(conn);
 
   result = ftp_init(conn);
-  if(result)
+  if(CURLE_OK != result)
     return result;
 
   /* We always support persistant connections on ftp */
