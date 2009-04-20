@@ -7,6 +7,13 @@
                                   Changelog
 
 Daniel Stenberg (20 Apr 2009)
+- Leanic Lefever reported a crash and did some detailed research on why and
+  how it occurs (http://curl.haxx.se/mail/lib-2009-04/0289.html). The
+  conclusion was that if an error is detected and Curl_done() is called for
+  the connection, ftp_done() could at times return another error code that
+  then would take precedence and that new code confused existing logic that
+  works for the first error code (CURLE_SEND_ERROR) only.
+
 - Gisle Vanem noticed that --libtool would produce bogus strings at times for
   OBJECTPOINT options. Now we've introduced a new function - my_setopt_str -
   within the app for setting plain string options to avoid the risk of this

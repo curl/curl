@@ -3185,6 +3185,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
     ftpc->cwdfail = TRUE; /* set this TRUE to prevent us to remember the
                              current path, as this connection is going */
     conn->bits.close = TRUE; /* marked for closure */
+    result = status;      /* use the already set error code */
     break;
   }
 
