@@ -29,6 +29,7 @@ This release includes the following bugfixes:
  o memory leaks in libcurl+NSS
  o improved the CURLOPT_NOBODY set to 0 confusions
  o persistent connections when doing FTP over a HTTP proxy
+ o --libcurl bogus strings where other data was pointed to
 
 This release includes the following known bugs:
 
@@ -40,6 +41,6 @@ advice from friends like these:
  Daniel Fandrich, Yang Tse, David James, Chris Deidun, Bill Egert,
  Andre Guibert de Bruet, Andreas Farber, Frank Hempel, Pierre Brico,
  Kamil Dudka, Jim Freeman, Daniel Johnson, Toshio Kuratomi, Martin Storsjö,
- Pramod Sharma
+ Pramod Sharma, Gisle Vanem
 
         Thanks! (and sorry if I forgot to mention someone)

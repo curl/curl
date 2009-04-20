@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (20 Apr 2009)
+- Gisle Vanem noticed that --libtool would produce bogus strings at times for
+  OBJECTPOINT options. Now we've introduced a new function - my_setopt_str -
+  within the app for setting plain string options to avoid the risk of this
+  mistake happening.
+
 Daniel Stenberg (17 Apr 2009)
 - Pramod Sharma reported and tracked down a bug when doing FTP over a HTTP
   proxy. libcurl would then wrongly close the connection after each
