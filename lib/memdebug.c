@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -133,7 +133,7 @@ void *curl_domalloc(size_t wantedsize, int line, const char *source)
   /* alloc at least 64 bytes */
   size = sizeof(struct memdebug)+wantedsize;
 
-  mem=(struct memdebug *)(Curl_cmalloc)(size);
+  mem = (Curl_cmalloc)(size);
   if(mem) {
     /* fill memory with junk */
     memset(mem->mem, 0xA5, wantedsize);
@@ -159,7 +159,7 @@ void *curl_docalloc(size_t wanted_elements, size_t wanted_size,
   user_size = wanted_size * wanted_elements;
   size = sizeof(struct memdebug) + user_size;
 
-  mem = (struct memdebug *)(Curl_cmalloc)(size);
+  mem = (Curl_cmalloc)(size);
   if(mem) {
     /* fill memory with zeroes */
     memset(mem->mem, 0, user_size);
@@ -210,7 +210,7 @@ void *curl_dorealloc(void *ptr, size_t wantedsize,
   if(ptr)
     mem = (struct memdebug *)((char *)ptr - offsetof(struct memdebug, mem));
 
-  mem=(struct memdebug *)(Curl_crealloc)(mem, size);
+  mem = (Curl_crealloc)(mem, size);
   if(logfile)
     fprintf(logfile, "MEM %s:%d realloc(%p, %zu) = %p\n",
             source, line, ptr, wantedsize, mem?mem->mem:NULL);
