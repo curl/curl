@@ -1,5 +1,10 @@
   Changelog for the c-ares project
 
+* April 21 2009 (Yang Tse)
+- Moved potential inclusion of system's malloc.h and memory.h header files to
+  setup_once.h.  Inclusion of each header file is based on the definition of
+  NEED_MALLOC_H and NEED_MEMORY_H respectively.
+
 * March 11 2009 (Yang Tse)
 - Japheth Cleaver fixed acountry.c replacing u_long with unsigned long.
 

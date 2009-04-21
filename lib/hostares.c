@@ -28,9 +28,6 @@
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
-#ifdef NEED_MALLOC_H
-#include <malloc.h>
-#endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif

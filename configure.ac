@@ -1869,6 +1869,7 @@ dnl Checks for header files.
 AC_HEADER_STDC
 
 CURL_CHECK_HEADER_MALLOC
+CURL_CHECK_HEADER_MEMORY
 
 dnl Now check for the very most basic headers. Then we can use these
 dnl ones as default-headers when checking for the rest!

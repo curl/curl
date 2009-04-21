@@ -256,6 +256,9 @@
 /* Define if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H   1
 
+/* Define to 1 if you need the memory.h header file even with stdlib.h */
+#define NEED_MEMORY_H 1
+
 /* Define if you have the `sigsetjmp' function. */
 #define HAVE_SIGSETJMP 1
 

@@ -30,9 +30,6 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <ctype.h>
-#ifdef NEED_MALLOC_H
-#include <malloc.h>
-#endif
 #include <errno.h>
 
 #ifdef CURL_LDAP_HYBRID         /* If W$ definitions are needed. */

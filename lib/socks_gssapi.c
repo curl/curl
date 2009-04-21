@@ -34,9 +34,6 @@
 #endif
 #include <string.h>
 
-#ifdef NEED_MALLOC_H
-#include <malloc.h>
-#endif
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif

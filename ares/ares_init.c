@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /* Copyright 1998 by the Massachusetts Institute of Technology.
- * Copyright (C) 2007-2008 by Daniel Stenberg
+ * Copyright (C) 2007-2009 by Daniel Stenberg
  *
  * Permission to use, copy, modify, and distribute this
  * software and its documentation for any purpose and without
@@ -20,7 +20,6 @@
 
 #if defined(WIN32) && !defined(WATT32)
 #include <iphlpapi.h>
-#include <malloc.h>
 #endif
 
 #ifdef HAVE_SYS_PARAM_H

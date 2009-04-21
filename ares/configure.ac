@@ -430,6 +430,7 @@ dnl Checks for header files.
 AC_HEADER_STDC
 
 CURL_CHECK_HEADER_MALLOC
+CURL_CHECK_HEADER_MEMORY
 
 dnl check for a few basic system headers we need
 AC_CHECK_HEADERS(

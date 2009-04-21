@@ -360,6 +360,58 @@ AC_DEFUN([CURL_CHECK_HEADER_MALLOC], [
 ])
 
 
+dnl CURL_CHECK_HEADER_MEMORY
+dnl -------------------------------------------------
+dnl Check for compilable and valid memory.h header,
+dnl and check if it is needed even with stdlib.h for
+dnl memory related functions.
+
+AC_DEFUN([CURL_CHECK_HEADER_MEMORY], [
+  AC_CACHE_CHECK([for memory.h], [ac_cv_header_memory_h], [
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+#include <memory.h>
+      ]],[[
+        void *p = malloc(10);
+        void *q = calloc(10,10);
+        free(p);
+        free(q);
+      ]])
+    ],[
+      ac_cv_header_memory_h="yes"
+    ],[
+      ac_cv_header_memory_h="no"
+    ])
+  ])
+  if test "$ac_cv_header_memory_h" = "yes"; then
+    AC_DEFINE_UNQUOTED(HAVE_MEMORY_H, 1,
+      [Define to 1 if you have the memory.h header file.])
+    #
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+#include <stdlib.h>
+      ]],[[
+        void *p = malloc(10);
+        void *q = calloc(10,10);
+        free(p);
+        free(q);
+      ]])
+    ],[
+      curl_cv_need_header_memory_h="no"
+    ],[
+      curl_cv_need_header_memory_h="yes"
+    ])
+    #
+    case "$curl_cv_need_header_memory_h" in
+      yes)
+        AC_DEFINE_UNQUOTED(NEED_MEMORY_H, 1,
+          [Define to 1 if you need the memory.h header file even with stdlib.h])
+        ;;
+    esac
+  fi
+])
+
+
 dnl CURL_CHECK_TYPE_SOCKLEN_T
 dnl -------------------------------------------------
 dnl Check for existing socklen_t type, and provide
