@@ -11,6 +11,8 @@ Yang Tse (21 Apr 2009)
   setup_once.h.  Inclusion of each header file is based on the definition of
   NEED_MALLOC_H and NEED_MEMORY_H respectively.
 
+  Renamed libcurl's memory.h to curl_memory.h
+
 Daniel Stenberg (20 Apr 2009)
 - Leanic Lefever reported a crash and did some detailed research on why and
   how it occurs (http://curl.haxx.se/mail/lib-2009-04/0289.html). The

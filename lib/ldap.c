@@ -70,7 +70,7 @@
 #include "strequal.h"
 #include "strtok.h"
 #include "curl_ldap.h"
-#include "memory.h"
+#include "curl_memory.h"
 #include "curl_base64.h"
 #include "rawstr.h"
 

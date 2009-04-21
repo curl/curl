@@ -32,7 +32,7 @@
 #include <curl/curl.h>
 #include "sendf.h"
 #include "content_encoding.h"
-#include "memory.h"
+#include "curl_memory.h"
 
 #include "memdebug.h"
 

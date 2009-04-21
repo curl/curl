@@ -40,7 +40,7 @@
 #include "rawstr.h"
 #include "curl_base64.h"
 #include "http_negotiate.h"
-#include "memory.h"
+#include "curl_memory.h"
 
 #ifdef HAVE_SPNEGO
 #  include <spnegohelp.h>

@@ -56,7 +56,7 @@
 #endif
 
 #include <string.h>
-#include "memory.h"
+#include "curl_memory.h"
 #include "strerror.h"
 #include "easyif.h" /* for the Curl_convert_from_network prototype */
 /* The last #include file should be: */

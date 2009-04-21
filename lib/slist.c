@@ -28,7 +28,7 @@
 #include <stdlib.h>
 
 #include <string.h>
-#include "memory.h"
+#include "curl_memory.h"
 #include "slist.h"
 
 /* The last #include file should be: */

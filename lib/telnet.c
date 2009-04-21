@@ -76,7 +76,7 @@
 #define  TELCMDS
 
 #include "arpa_telnet.h"
-#include "memory.h"
+#include "curl_memory.h"
 #include "select.h"
 #include "strequal.h"
 #include "rawstr.h"

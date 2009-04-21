@@ -32,7 +32,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stdlib.h>
-#include "memory.h"
+#include "curl_memory.h"
 #include "sslgen.h"
 #include "connect.h" /* Curl_getconnectinfo() */
 #include "progress.h"

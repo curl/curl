@@ -77,7 +77,7 @@
 #include "hostip.h"
 #include "share.h"
 #include "strdup.h"
-#include "memory.h"
+#include "curl_memory.h"
 #include "progress.h"
 #include "easyif.h"
 #include "select.h"

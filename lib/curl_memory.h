@@ -1,5 +1,5 @@
-#ifndef _CURL_MEMORY_H
-#define _CURL_MEMORY_H
+#ifndef HEADER_CURL_MEMORY_H
+#define HEADER_CURL_MEMORY_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -47,4 +47,4 @@ extern curl_calloc_callback Curl_ccalloc;
 
 #endif
 
-#endif /* _CURL_MEMORY_H */
+#endif /* HEADER_CURL_MEMORY_H */

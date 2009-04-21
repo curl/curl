@@ -64,7 +64,7 @@
 #include <secport.h>
 #include <certdb.h>
 
-#include "memory.h"
+#include "curl_memory.h"
 #include "rawstr.h"
 #include "easyif.h" /* for Curl_convert_from_utf8 prototype */
 

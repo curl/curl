@@ -59,7 +59,7 @@
 #include "curl_base64.h"
 #include "http_ntlm.h"
 #include "url.h"
-#include "memory.h"
+#include "curl_memory.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>

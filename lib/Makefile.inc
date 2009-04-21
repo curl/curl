@@ -18,7 +18,7 @@ HHEADERS = arpa_telnet.h netrc.h file.h timeval.h qssl.h hostip.h	\
   getinfo.h strequal.h krb4.h memdebug.h http_chunks.h	                \
   strtok.h connect.h llist.h hash.h content_encoding.h share.h		\
   curl_md5.h http_digest.h http_negotiate.h http_ntlm.h inet_pton.h	\
-  strtoofft.h strerror.h inet_ntop.h curlx.h memory.h setup.h		\
+  strtoofft.h strerror.h inet_ntop.h curlx.h curl_memory.h setup.h	\
   transfer.h select.h easyif.h multiif.h parsedate.h sslgen.h gtls.h	\
   tftp.h sockaddr.h splay.h strdup.h setup_once.h socks.h ssh.h nssg.h	\
   curl_base64.h rawstr.h curl_addrinfo.h curl_sspi.h slist.h

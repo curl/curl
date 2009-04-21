@@ -81,7 +81,7 @@
 #include "if2ip.h"
 #include "strerror.h"
 #include "connect.h"
-#include "memory.h"
+#include "curl_memory.h"
 #include "select.h"
 #include "url.h" /* for Curl_safefree() */
 #include "multiif.h"

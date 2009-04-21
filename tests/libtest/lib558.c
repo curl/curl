@@ -29,7 +29,7 @@
 #include "hash.h"
 #include "hostip.h"
 
-#include "memory.h"
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /* This source file is used for test # 558 and 559 */

@@ -99,7 +99,7 @@
 #include "http_ntlm.h"
 #include "http_negotiate.h"
 #include "share.h"
-#include "memory.h"
+#include "curl_memory.h"
 #include "select.h"
 #include "multiif.h"
 #include "easyif.h" /* for Curl_convert_to_network prototype */

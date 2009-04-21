@@ -42,7 +42,7 @@
 #endif
 
 #define MEMDEBUG_NODEFINES /* don't redefine the standard functions */
-#include "memory.h"
+#include "curl_memory.h"
 #include "memdebug.h"
 
 struct memdebug {

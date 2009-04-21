@@ -59,7 +59,7 @@
 #include "sendf.h"
 #include "rawstr.h"
 #include "url.h"
-#include "memory.h"
+#include "curl_memory.h"
 #include "progress.h"
 /* The last #include file should be: */
 #include "memdebug.h"
