@@ -558,7 +558,7 @@ static int get_res_interfaces_nt(HKEY hKey, const char *subkey, char **obuf)
 
 static int get_iphlpapi_dns_info (char *ret_buf, size_t ret_size)
 {
-  FIXED_INFO    *fi   = alloca (sizeof(*fi));
+  FIXED_INFO    *fi, *newfi;
   DWORD          size = sizeof (*fi);
   typedef DWORD (WINAPI* get_net_param_func) (FIXED_INFO*, DWORD*);
   get_net_param_func fpGetNetworkParams;  /* available only on Win-98/2000+ */
@@ -571,12 +571,13 @@ static int get_iphlpapi_dns_info (char *ret_buf, size_t ret_size)
   char          *ret = ret_buf;
   HRESULT        res;
 
+  fi = malloc(size);
   if (!fi)
      return (0);
 
   handle = LoadLibrary ("iphlpapi.dll");
   if (!handle)
-     return (0);
+     goto quit;
 
   fpGetNetworkParams = (get_net_param_func) GetProcAddress (handle, "GetNetworkParams");
   if (!fpGetNetworkParams)
@@ -586,8 +587,13 @@ static int get_iphlpapi_dns_info (char *ret_buf, size_t ret_size)
   if ((res != ERROR_BUFFER_OVERFLOW) && (res != ERROR_SUCCESS))
      goto quit;
 
-  fi = alloca (size);
-  if (!fi || (*fpGetNetworkParams) (fi, &size) != ERROR_SUCCESS)
+  newfi = realloc(fi, size);
+  if (!newfi)
+     goto quit;
+
+  fi = newfi;
+  res = (*fpGetNetworkParams) (fi, &size);
+  if (res != ERROR_SUCCESS)
      goto quit;
 
   if (debug)
@@ -620,6 +626,8 @@ static int get_iphlpapi_dns_info (char *ret_buf, size_t ret_size)
   }
 
 quit:
+  if (fi)
+     free(fi);
   if (handle)
      FreeLibrary (handle);
 
