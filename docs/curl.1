@@ -1482,8 +1482,10 @@ default statistics.
 .I ~/.curlrc
 .RS
 Default config file, see \fI-K/--config\fP for details.
-
 .SH ENVIRONMENT
+The environment variables can be specified in lower case or upper case. The
+lower case version has precedence. http_proxy is an exception as it is only
+available in lower case.
 .IP "http_proxy [protocol://]<host>[:port]"
 Sets the proxy server to use for HTTP.
 .IP "HTTPS_PROXY [protocol://]<host>[:port]"

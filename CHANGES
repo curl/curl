@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (24 Apr 2009)
+- bug report #2779245 (http://curl.haxx.se/bug/view.cgi?id=2779245) by Rainer
+  Koenig pointed out that the man page didn't tell that the *_proxy
+  environment variables can be specified lower case or UPPER CASE and the
+  lower case takes precedence,
+
 Daniel Fandrich (21 Apr 2009)
 - Added new libcurl source files to Amiga, RiscOS and VC6 build files.
 
