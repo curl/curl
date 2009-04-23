@@ -1078,11 +1078,11 @@ rename, rm, rmdir, symlink (see
 .BR curl (1))
 (SFTP support added in 7.16.3)
 .IP CURLOPT_POSTQUOTE
-Pass a pointer to a linked list of FTP or SFTP commands to pass to the
-server after your FTP transfer request. The linked list should be a
-fully valid list of struct curl_slist structs properly filled in as
-described for \fICURLOPT_QUOTE\fP. Disable this operation again by
-setting a NULL to this option.
+Pass a pointer to a linked list of FTP or SFTP commands to pass to the server
+after your FTP transfer request. The commands will only be run if no error
+occurred. The linked list should be a fully valid list of struct curl_slist
+structs properly filled in as described for \fICURLOPT_QUOTE\fP. Disable this
+operation again by setting a NULL to this option.
 .IP CURLOPT_PREQUOTE
 Pass a pointer to a linked list of FTP commands to pass to the server after
 the transfer type is set. The linked list should be a fully valid list of
