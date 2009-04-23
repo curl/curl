@@ -489,7 +489,9 @@ X_OBJS= \
 	$(DIROBJ)\select.obj \
 	$(DIROBJ)\sendf.obj \
 	$(DIROBJ)\share.obj \
+	$(DIROBJ)\slist.obj \
 	$(DIROBJ)\socks.obj \
+	$(DIROBJ)\socks_gssapi.obj \
 	$(DIROBJ)\socks_sspi.obj \
 	$(DIROBJ)\speedcheck.obj \
 	$(DIROBJ)\splay.obj \

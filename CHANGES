@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel Fandrich (21 Apr 2009)
+- Added new libcurl source files to Amiga, RiscOS and VC6 build files.
+
 Yang Tse (21 Apr 2009)
 - Moved potential inclusion of system's malloc.h and memory.h header files to
   setup_once.h.  Inclusion of each header file is based on the definition of

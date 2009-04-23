@@ -16,8 +16,9 @@ OBJS = amigaos.c base64.c connect.c content_encoding.c cookie.c dict.c easy.c \
 	http_negotiate.c http_ntlm.c if2ip.c inet_ntop.c inet_pton.c krb4.c   \
 	ldap.c llist.c md5.c memdebug.c mprintf.c multi.c netrc.c parsedate.c \
 	progress.c security.c select.c sendf.c share.c speedcheck.c ssluse.c  \
-	strequal.c strtok.c telnet.c timeval.c transfer.c url.c version.c \
-	sslgen.c gtls.c strerror.c rawstr.c curl_addrinfo.c
+	strequal.c strtok.c telnet.c timeval.c transfer.c url.c version.c     \
+	sslgen.c gtls.c strerror.c rawstr.c curl_addrinfo.c		      \
+	socks_gssapi.c socks_sspi.c curl_sspi.c slist.c
 
 all:	$(OBJS:.c=.o)
 	ar cru libcurl.a $(OBJS:.c=.o)
