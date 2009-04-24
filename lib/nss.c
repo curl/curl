@@ -527,6 +527,7 @@ static int nss_load_key(struct connectdata *conn, int sockindex, char *key_file)
     return 0;
   }
   free(parg);
+  PK11_FreeSlot(slot);
 
   return 1;
 #else
@@ -819,9 +820,9 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
                                   struct CERTCertificateStr **pRetCert,
                                   struct SECKEYPrivateKeyStr **pRetKey)
 {
-  CERTCertificate *cert;
   SECKEYPrivateKey *privKey;
-  char *nickname = (char *)arg;
+  struct ssl_connect_data *connssl = (struct ssl_connect_data *) arg;
+  char *nickname = connssl->client_nickname;
   void *proto_win = NULL;
   SECStatus secStatus = SECFailure;
   PK11SlotInfo *slot;
@@ -832,34 +833,35 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
   if(!nickname)
     return secStatus;
 
-  cert = PK11_FindCertFromNickname(nickname, proto_win);
-  if(cert) {
+  connssl->client_cert = PK11_FindCertFromNickname(nickname, proto_win);
+  if(connssl->client_cert) {
 
     if(!strncmp(nickname, "PEM Token", 9)) {
       CK_SLOT_ID slotID = 1; /* hardcoded for now */
       char slotname[SLOTSIZE];
       snprintf(slotname, SLOTSIZE, "PEM Token #%ld", slotID);
       slot = PK11_FindSlotByName(slotname);
-      privKey = PK11_FindPrivateKeyFromCert(slot, cert, NULL);
+      privKey = PK11_FindPrivateKeyFromCert(slot, connssl->client_cert, NULL);
       PK11_FreeSlot(slot);
       if(privKey) {
         secStatus = SECSuccess;
       }
     }
     else {
-      privKey = PK11_FindKeyByAnyCert(cert, proto_win);
+      privKey = PK11_FindKeyByAnyCert(connssl->client_cert, proto_win);
       if(privKey)
         secStatus = SECSuccess;
     }
   }
 
   if(secStatus == SECSuccess) {
-    *pRetCert = cert;
+    *pRetCert = connssl->client_cert;
     *pRetKey = privKey;
   }
   else {
-    if(cert)
-      CERT_DestroyCertificate(cert);
+    if(connssl->client_cert)
+      CERT_DestroyCertificate(connssl->client_cert);
+    connssl->client_cert = NULL;
   }
 
   return secStatus;
@@ -891,8 +893,12 @@ void Curl_nss_cleanup(void)
    * as a safety feature.
    */
   PR_Lock(nss_initlock);
-  if (initialized)
+  if (initialized) {
+    if(mod)
+      SECMOD_DestroyModule(mod);
+    mod = NULL;
     NSS_Shutdown();
+  }
   PR_Unlock(nss_initlock);
 
   PR_DestroyLock(nss_initlock);
@@ -940,6 +946,8 @@ void Curl_nss_close(struct connectdata *conn, int sockindex)
       free(connssl->client_nickname);
       connssl->client_nickname = NULL;
     }
+    if(connssl->client_cert)
+      CERT_DestroyCertificate(connssl->client_cert);
     if(connssl->key)
       (void)PK11_DestroyGenericObject(connssl->key);
     if(connssl->cacert[1])
@@ -981,6 +989,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   if (connssl->state == ssl_connection_complete)
     return CURLE_OK;
 
+  connssl->client_cert = NULL;
   connssl->cacert[0] = NULL;
   connssl->cacert[1] = NULL;
   connssl->key = NULL;
@@ -1207,8 +1216,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 
     if(SSL_GetClientAuthDataHook(model,
                                  (SSLGetClientAuthData) SelectClientCert,
-                                 (void *)connssl->client_nickname) !=
-       SECSuccess) {
+                                 (void *)connssl) != SECSuccess) {
       curlerr = CURLE_SSL_CERTPROBLEM;
       goto error;
     }

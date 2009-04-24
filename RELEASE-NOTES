@@ -26,7 +26,7 @@ This release includes the following bugfixes:
  o properly return an error code in curl_easy_recv
  o Sun compilers specific preprocessor block removed from curlbuild.h.dist
  o allow creation of four way fat libcurl Mac OS X Framework
- o memory leaks in libcurl+NSS
+ o several memory leaks in libcurl+NSS
  o improved the CURLOPT_NOBODY set to 0 confusions
  o persistent connections when doing FTP over a HTTP proxy
  o --libcurl bogus strings where other data was pointed to

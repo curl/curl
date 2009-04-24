@@ -211,6 +211,7 @@ struct ssl_connect_data {
 #ifdef USE_NSS
   PRFileDesc *handle;
   char *client_nickname;
+  CERTCertificate *client_cert;
 #ifdef HAVE_PK11_CREATEGENERICOBJECT
   PK11GenericObject *key;
   PK11GenericObject *cacert[2];
