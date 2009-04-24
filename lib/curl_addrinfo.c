@@ -68,17 +68,19 @@
  * any function call which actually allocates a Curl_addrinfo struct.
  */
 
-void
-Curl_freeaddrinfo(Curl_addrinfo *cahead)
-{
 #if defined(__INTEL_COMPILER) && (__INTEL_COMPILER == 910) && \
     defined(__unix__) &&  defined(__i386__)
   /* workaround icc 9.1 optimizer issue */
-  volatile Curl_addrinfo * volatile canext;
-  Curl_addrinfo *ca;
+# define vqualifier volatile
 #else
-  Curl_addrinfo *ca, *canext;
+# define vqualifier
 #endif
+
+void
+Curl_freeaddrinfo(Curl_addrinfo *cahead)
+{
+  Curl_addrinfo *vqualifier canext;
+  Curl_addrinfo *ca;
 
   for(ca = cahead; ca != NULL; ca = canext) {
 
