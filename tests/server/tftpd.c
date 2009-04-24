@@ -193,7 +193,7 @@ rw_init(int x)              /* init for either read-ahead or write-behind */
    Free it and return next buffer filled with data.
  */
 static int readit(struct testcase *test, struct tftphdr **dpp,
-           int convert /* if true, convert to ascii */)
+                  int convert /* if true, convert to ascii */)
 {
   struct bf *b;
 
@@ -202,7 +202,7 @@ static int readit(struct testcase *test, struct tftphdr **dpp,
 
   b = &bfs[current];              /* look at new buffer */
   if (b->counter == BF_FREE)      /* if it's empty */
-    read_ahead(test, convert);      /* fill it */
+    read_ahead(test, convert);    /* fill it */
 
   *dpp = (struct tftphdr *)b->buf;        /* set caller's ptr */
   return b->counter;
@@ -530,7 +530,7 @@ int main(int argc, char **argv)
     n = (ssize_t)recvfrom(sock, buf, sizeof(buf), 0,
                           (struct sockaddr *)&from, &fromlen);
     if (n < 0) {
-      logmsg("recvfrom:\n");
+      logmsg("recvfrom");
       result = 3;
       break;
     }
@@ -541,13 +541,13 @@ int main(int argc, char **argv)
 
     peer = socket(AF_INET, SOCK_DGRAM, 0);
     if (peer < 0) {
-      logmsg("socket:\n");
+      logmsg("socket");
       result = 2;
       break;
     }
 
     if (connect(peer, (struct sockaddr *)&from, sizeof(from)) < 0) {
-      logmsg("connect: fail\n");
+      logmsg("connect: fail");
       result = 1;
       break;
     }
@@ -565,6 +565,8 @@ int main(int argc, char **argv)
     sclose(peer);
 
     clear_advisor_read_lock(SERVERLOGS_LOCK);
+
+    logmsg("end of one transfer");
 
   } while(1);
 
@@ -734,6 +736,7 @@ static int validate_access(struct testcase *test,
     return EACCESS; /* failure */
   }
 
+  logmsg("file opened and all is good");
   return 0;
 }
 
@@ -797,7 +800,7 @@ static void sendtftp(struct testcase *test, struct formats *pf)
 #endif
     send_data:
     if (swrite(peer, sdp, size + 4) != size + 4) {
-      logmsg("write\n");
+      logmsg("write");
       return;
     }
     read_ahead(test, pf->f_convert);
@@ -810,7 +813,7 @@ static void sendtftp(struct testcase *test, struct formats *pf)
       alarm(0);
 #endif
       if (n < 0) {
-        logmsg("read: fail\n");
+        logmsg("read: fail");
         return;
       }
       sap->th_opcode = ntohs((u_short)sap->th_opcode);
