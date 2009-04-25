@@ -28,8 +28,8 @@ ACLOCAL_AMFLAGS = -I m4
 CMAKE_DIST = CMakeLists.txt CMake/CheckTypeSize.c.in CMake/CheckTypeSize.cmake \
 CMake/CMakeConfigurableFile.in CMake/CurlCheckCSourceCompiles.cmake	       \
 CMake/CurlCheckCSourceRuns.cmake CMake/CurlTests.c CMake/FindOpenSSL.cmake     \
-CMake/FindZLIB.cmake CMake/OtherTests.cmake CMake/Platforms/config-aix.h       \
-CMake/Platforms/WindowsCache.cmake CMake/Utilities.cmake
+CMake/FindZLIB.cmake CMake/OtherTests.cmake CMake/Platforms/WindowsCache.cmake \
+CMake/Utilities.cmake
 
 EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in	\
  curl-style.el sample.emacs RELEASE-NOTES buildconf buildconf.bat	\
