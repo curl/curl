@@ -7,8 +7,12 @@ To be addressed in 7.19.5 (planned release: May 2009)
 
 223 - TFTP flaw, #2723236
 
-224 - VMS-problemm, #2715307
-
 225 - resume when upload from stream, #2709004
 
-226 -
+226 - Active Mode FTPS Data Port Range
+
+227 - CURLINFO_APPCONNECT_TIME doesn't work with multi interface, #2779733
+
+228 - rpath problems in linking with custom openssl
+
+229 -
