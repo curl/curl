@@ -1,7 +1,7 @@
 #***************************************************************************
 # $Id$
 #
-# Copyright (C) 2008 by Daniel Stenberg et al
+# Copyright (C) 2008 - 2009 by Daniel Stenberg et al
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 26
+# serial 28
 
 
 dnl CARES_INCLUDES_ARPA_INET
@@ -281,6 +281,23 @@ cares_includes_ws2tcpip="\
   CURL_CHECK_HEADER_WINDOWS
   CURL_CHECK_HEADER_WINSOCK2
   CURL_CHECK_HEADER_WS2TCPIP
+])
+
+
+dnl CARES_PREPROCESS_CALLCONV
+dnl -------------------------------------------------
+dnl Set up variable with a preprocessor block which
+dnl defines function calling convention.
+
+AC_DEFUN([CARES_PREPROCESS_CALLCONV], [
+cares_preprocess_callconv="\
+/* preprocess start */
+#ifdef HAVE_WINDOWS_H
+#  define FUNCALLCONV __stdcall
+#else
+#  define FUNCALLCONV
+#endif
+/* preprocess end */"
 ])
 
 

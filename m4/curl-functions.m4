@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 45
+# serial 46
 
 
 dnl CURL_INCLUDES_ARPA_INET
@@ -307,6 +307,24 @@ curl_includes_sys_socket="\
 ])
 
 
+dnl CURL_INCLUDES_SYS_TYPES
+dnl -------------------------------------------------
+dnl Set up variable with list of headers that must be
+dnl included when sys/types.h is to be included.
+
+AC_DEFUN([CURL_INCLUDES_SYS_TYPES], [
+curl_includes_sys_types="\
+/* includes start */
+#ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+#endif
+/* includes end */"
+  AC_CHECK_HEADERS(
+    sys/types.h,
+    [], [], [$curl_includes_sys_types])
+])
+
+
 dnl CURL_INCLUDES_SYS_UIO
 dnl -------------------------------------------------
 dnl Set up variable with list of headers that must be
@@ -430,6 +448,23 @@ curl_includes_ws2tcpip="\
   CURL_CHECK_HEADER_WINDOWS
   CURL_CHECK_HEADER_WINSOCK2
   CURL_CHECK_HEADER_WS2TCPIP
+])
+
+
+dnl CURL_PREPROCESS_CALLCONV
+dnl -------------------------------------------------
+dnl Set up variable with a preprocessor block which
+dnl defines function calling convention.
+
+AC_DEFUN([CURL_PREPROCESS_CALLCONV], [
+curl_preprocess_callconv="\
+/* preprocess start */
+#ifdef HAVE_WINDOWS_H
+#  define FUNCALLCONV __stdcall
+#else
+#  define FUNCALLCONV
+#endif
+/* preprocess end */"
 ])
 
 

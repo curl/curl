@@ -3053,6 +3053,110 @@ AC_DEFUN([CURL_CONFIGURE_CURL_OFF_T], [
 ])
 
 
+dnl CURL_CONFIGURE_CURL_SOCKLEN_T
+dnl -------------------------------------------------
+dnl Find out suitable curl_socklen_t data type definition and size, making
+dnl appropriate definitions for template file include/curl/curlbuild.h.in
+dnl to properly configure and use the library.
+dnl
+dnl The need for the curl_socklen_t definition arises mainly to properly
+dnl interface HP-UX systems which on one hand have a typedef'ed socklen_t
+dnl data type which is 32 or 64-Bit wide depending on the data model being
+dnl used, and that on the other hand is only actually used when interfacing
+dnl the X/Open sockets provided in the xnet library.
+
+AC_DEFUN([CURL_CONFIGURE_CURL_SOCKLEN_T], [
+  AC_REQUIRE([CURL_INCLUDES_WS2TCPIP])dnl
+  AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
+  AC_REQUIRE([CURL_PREPROCESS_CALLCONV])dnl
+  #
+  AC_MSG_CHECKING([for curl_socklen_t data type])
+  curl_typeof_curl_socklen_t="unknown"
+  for arg1 in int SOCKET; do
+    for arg2 in 'struct sockaddr' void; do
+      for t in socklen_t int size_t 'unsigned int' long 'unsigned long'; do
+        if test "$curl_typeof_curl_socklen_t" = "unknown"; then
+          AC_COMPILE_IFELSE([
+            AC_LANG_PROGRAM([[
+              $curl_includes_ws2tcpip
+              $curl_includes_sys_socket
+              $curl_preprocess_callconv
+              extern int FUNCALLCONV getpeername($arg1, $arg2 *, $t *);
+            ]],[[
+              $t len = 0;
+              getpeername(0, 0, &len);
+            ]])
+          ],[
+            curl_typeof_curl_socklen_t="$t"
+          ])
+        fi
+      done
+    done
+  done
+  AC_MSG_RESULT([$curl_typeof_curl_socklen_t])
+  if test "$curl_typeof_curl_socklen_t" = "unknown"; then
+    AC_MSG_ERROR([cannot find data type for curl_socklen_t.])
+  fi
+  #
+  AC_MSG_CHECKING([size of curl_socklen_t])
+  curl_sizeof_curl_socklen_t="unknown"
+  curl_pull_headers_socklen_t="unknown"
+  for tst_pull_headers in 'none' 'ws2tcpip' 'systypes' 'syssocket'; do
+    if test "$curl_sizeof_curl_socklen_t" = "unknown"; then
+      case $tst_pull_headers in
+        none)
+          tmp_includes=""
+          ;;
+        ws2tcpip)
+          tmp_includes="$curl_includes_ws2tcpip"
+          ;;
+        systypes)
+          tmp_includes="$curl_includes_sys_types"
+          ;;
+        syssocket)
+          tmp_includes="$curl_includes_sys_socket"
+          ;;
+      esac
+      for tst_size in 8 4 2; do
+        if test "$curl_sizeof_curl_socklen_t" = "unknown"; then
+          AC_COMPILE_IFELSE([
+            AC_LANG_PROGRAM([[
+              $tmp_includes
+              typedef $curl_typeof_curl_socklen_t curl_socklen_t;
+              typedef char dummy_arr[sizeof(curl_socklen_t) == $tst_size ? 1 : -1];
+            ]],[[
+              curl_socklen_t dummy;
+            ]])
+          ],[
+            curl_sizeof_curl_socklen_t="$tst_size"
+            curl_pull_headers_socklen_t="$tst_pull_headers"
+          ])
+        fi
+      done
+    fi
+  done
+  AC_MSG_RESULT([$curl_sizeof_curl_socklen_t])
+  if test "$curl_sizeof_curl_socklen_t" = "unknown"; then
+    AC_MSG_ERROR([cannot find out size of curl_socklen_t.])
+  fi
+  #
+  case $curl_pull_headers_socklen_t in
+    ws2tcpip)
+      CURL_DEFINE_UNQUOTED([CURL_PULL_WS2TCPIP_H])
+      ;;
+    systypes)
+      CURL_DEFINE_UNQUOTED([CURL_PULL_SYS_TYPES_H])
+      ;;
+    syssocket)
+      CURL_DEFINE_UNQUOTED([CURL_PULL_SYS_TYPES_H])
+      CURL_DEFINE_UNQUOTED([CURL_PULL_SYS_SOCKET_H])
+      ;;
+  esac
+  CURL_DEFINE_UNQUOTED([CURL_TYPEOF_CURL_SOCKLEN_T], [$curl_typeof_curl_socklen_t])
+  CURL_DEFINE_UNQUOTED([CURL_SIZEOF_CURL_SOCKLEN_T], [$curl_sizeof_curl_socklen_t])
+])
+
+
 dnl CURL_CHECK_WIN32_LARGEFILE
 dnl -------------------------------------------------
 dnl Check if curl's WIN32 large file will be used
