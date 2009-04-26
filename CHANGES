@@ -6,10 +6,15 @@
 
                                   Changelog
 
+Daniel Stenberg (26 Apr 2009)
+- Bug report #2779733 (http://curl.haxx.se/bug/view.cgi?id=2779733) by Sven
+  Wegener pointed out that CURLINFO_APPCONNECT_TIME didn't work with the multi
+  interface and provided a patch that fixed the problem!
+
 Daniel Stenberg (24 Apr 2009)
 - Kamil Dudka fixed another NSS-related leak when client certs were used.
 
-- bug report #2779245 (http://curl.haxx.se/bug/view.cgi?id=2779245) by Rainer
+- Bug report #2779245 (http://curl.haxx.se/bug/view.cgi?id=2779245) by Rainer
   Koenig pointed out that the man page didn't tell that the *_proxy
   environment variables can be specified lower case or UPPER CASE and the
   lower case takes precedence,

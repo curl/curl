@@ -31,6 +31,7 @@ This release includes the following bugfixes:
  o persistent connections when doing FTP over a HTTP proxy
  o --libcurl bogus strings where other data was pointed to
  o crash related to FTP and "Re-used connection seems dead, get a new one"
+ o CURLINFO_APPCONNECT_TIME with the multi interface
 
 This release includes the following known bugs:
 
@@ -42,6 +43,6 @@ advice from friends like these:
  Daniel Fandrich, Yang Tse, David James, Chris Deidun, Bill Egert,
  Andre Guibert de Bruet, Andreas Farber, Frank Hempel, Pierre Brico,
  Kamil Dudka, Jim Freeman, Daniel Johnson, Toshio Kuratomi, Martin Storsjo,
- Pramod Sharma, Gisle Vanem, Leanic Lefever, Rainer Koenig
+ Pramod Sharma, Gisle Vanem, Leanic Lefever, Rainer Koenig, Sven Wegener
 
         Thanks! (and sorry if I forgot to mention someone)

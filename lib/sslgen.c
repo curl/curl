@@ -195,9 +195,13 @@ Curl_ssl_connect_nonblocking(struct connectdata *conn, int sockindex,
                              bool *done)
 {
 #ifdef curlssl_connect_nonblocking
+  CURLcode res;
   /* mark this is being ssl requested from here on. */
   conn->ssl[sockindex].use = TRUE;
-  return curlssl_connect_nonblocking(conn, sockindex, done);
+  res = curlssl_connect_nonblocking(conn, sockindex, done);
+  if(!res && *done == TRUE)
+    Curl_pgrsTime(conn->data, TIMER_APPCONNECT); /* SSL is connected */
+  return res;
 #else
   *done = TRUE; /* fallback to BLOCKING */
   conn->ssl[sockindex].use = TRUE;
