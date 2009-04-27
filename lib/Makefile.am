@@ -29,6 +29,8 @@ DOCS = README.encoding README.memoryleak README.ares README.curlx	\
  README.hostip README.multi_socket README.httpauth README.pipelining    \
  README.NSS README.curl_off_t
 
+CMAKE_DIST = CMakeLists.txt config.h.cmake
+
 EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 Makefile.riscos $(DSP) \
  libcurl.dsw config-win32.h config-win32ce.h config-riscos.h config-mac.h  \
  config.h.in makefile.dj config.dos libcurl.plist                          \
@@ -36,7 +38,7 @@ EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 Makefile.riscos $(DSP) \
  Makefile.netware nwlib.c nwos.c libcurl.imp msvcproj.head msvcproj.foot   \
  config-win32ce.h config-os400.h setup-os400.h config-symbian.h		   \
  Makefile.Watcom config-tpf.h $(DOCS) $(VCPROJ) mk-ca-bundle.pl		   \
- firefox-db2pem.sh CMakeLists.txt
+ firefox-db2pem.sh $(CMAKE_DIST)
 
 CLEANFILES = $(DSP) $(VCPROJ)
 
