@@ -3,6 +3,11 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+64. The threaded resolver used in libcurl on Windows has some kind of race
+  problem when multiple simultanoes resolves are done, like with the multi
+  interface transferring many files in parallell:
+  http://curl.haxx.se/mail/lib-2009-04/0028.html
+
 63. When CURLOPT_CONNECT_ONLY is used, the handle cannot reliably be re-used
   for any further requests or transfers. The work-around is then to close that
   handle with curl_easy_cleanup() and create a new. Some more details:
