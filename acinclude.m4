@@ -3084,8 +3084,9 @@ AC_DEFUN([CURL_CONFIGURE_CURL_SOCKLEN_T], [
               $curl_preprocess_callconv
               extern int FUNCALLCONV getpeername($arg1, $arg2 *, $t *);
             ]],[[
-              $t len = 0;
-              getpeername(0, 0, &len);
+              $t *lenptr = 0;
+              if(0 != getpeername(0, 0, lenptr))
+                return 1;
             ]])
           ],[
             curl_typeof_curl_socklen_t="$t"
@@ -3117,7 +3118,8 @@ AC_DEFUN([CURL_CONFIGURE_CURL_SOCKLEN_T], [
     fi
   done
   AC_MSG_RESULT([$curl_typeof_curl_socklen_t])
-  if test "$curl_typeof_curl_socklen_t" = "unknown"; then
+  if test "$curl_typeof_curl_socklen_t" = "void" ||
+    test "$curl_typeof_curl_socklen_t" = "unknown"; then
     cat debug.txt >&6
     AC_MSG_ERROR([cannot find data type for curl_socklen_t.])
   fi
