@@ -3075,7 +3075,7 @@ AC_DEFUN([CURL_CONFIGURE_CURL_SOCKLEN_T], [
   rm -f debug.txt
   for arg1 in int SOCKET; do
     for arg2 in 'struct sockaddr' void; do
-      for t in socklen_t int size_t 'unsigned int' long 'unsigned long'; do
+      for t in socklen_t int size_t 'unsigned int' long 'unsigned long' void; do
         if test "$curl_typeof_curl_socklen_t" = "unknown"; then
           AC_COMPILE_IFELSE([
             AC_LANG_PROGRAM([[
@@ -3097,6 +3097,24 @@ AC_DEFUN([CURL_CONFIGURE_CURL_SOCKLEN_T], [
         fi
       done
     done
+  done
+  for t in socklen_t int; do
+    if test "$curl_typeof_curl_socklen_t" = "void"; then
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+          $curl_includes_sys_socket
+          typedef $t curl_socklen_t;
+        ]],[[
+          curl_socklen_t dummy;
+        ]])
+      ],[
+        curl_typeof_curl_socklen_t="$t"
+      ],[
+        echo "DEBUG: ======================================" >>debug.txt
+        sed 's/^/cc-src: /' conftest.$ac_ext >>debug.txt
+        sed 's/^/cc-err: /' conftest.err     >>debug.txt
+      ])
+    fi
   done
   AC_MSG_RESULT([$curl_typeof_curl_socklen_t])
   if test "$curl_typeof_curl_socklen_t" = "unknown"; then
