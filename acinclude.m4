@@ -3072,6 +3072,7 @@ AC_DEFUN([CURL_CONFIGURE_CURL_SOCKLEN_T], [
   #
   AC_MSG_CHECKING([for curl_socklen_t data type])
   curl_typeof_curl_socklen_t="unknown"
+  rm -f debug.txt
   for arg1 in int SOCKET; do
     for arg2 in 'struct sockaddr' void; do
       for t in socklen_t int size_t 'unsigned int' long 'unsigned long'; do
@@ -3088,6 +3089,10 @@ AC_DEFUN([CURL_CONFIGURE_CURL_SOCKLEN_T], [
             ]])
           ],[
             curl_typeof_curl_socklen_t="$t"
+          ],[
+            echo "DEBUG: ======================================" >>debug.txt
+            sed 's/^/cc-src: /' conftest.$ac_ext >>debug.txt
+            sed 's/^/cc-err: /' conftest.err     >>debug.txt
           ])
         fi
       done
@@ -3095,8 +3100,10 @@ AC_DEFUN([CURL_CONFIGURE_CURL_SOCKLEN_T], [
   done
   AC_MSG_RESULT([$curl_typeof_curl_socklen_t])
   if test "$curl_typeof_curl_socklen_t" = "unknown"; then
+    cat debug.txt >&6
     AC_MSG_ERROR([cannot find data type for curl_socklen_t.])
   fi
+  rm -f debug.txt
   #
   AC_MSG_CHECKING([size of curl_socklen_t])
   curl_sizeof_curl_socklen_t="unknown"
