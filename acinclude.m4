@@ -3101,39 +3101,44 @@ AC_DEFUN([CURL_CONFIGURE_CURL_SOCKLEN_T], [
   AC_MSG_CHECKING([size of curl_socklen_t])
   curl_sizeof_curl_socklen_t="unknown"
   curl_pull_headers_socklen_t="unknown"
-  for tst_pull_headers in 'none' 'ws2tcpip' 'systypes' 'syssocket'; do
-    if test "$curl_sizeof_curl_socklen_t" = "unknown"; then
-      case $tst_pull_headers in
-        none)
-          tmp_includes=""
-          ;;
-        ws2tcpip)
-          tmp_includes="$curl_includes_ws2tcpip"
-          ;;
-        systypes)
-          tmp_includes="$curl_includes_sys_types"
-          ;;
-        syssocket)
-          tmp_includes="$curl_includes_sys_socket"
-          ;;
-      esac
-      for tst_size in 8 4 2; do
-        if test "$curl_sizeof_curl_socklen_t" = "unknown"; then
-          AC_COMPILE_IFELSE([
-            AC_LANG_PROGRAM([[
-              $tmp_includes
-              typedef $curl_typeof_curl_socklen_t curl_socklen_t;
-              typedef char dummy_arr[sizeof(curl_socklen_t) == $tst_size ? 1 : -1];
-            ]],[[
-              curl_socklen_t dummy;
-            ]])
-          ],[
-            curl_sizeof_curl_socklen_t="$tst_size"
-            curl_pull_headers_socklen_t="$tst_pull_headers"
-          ])
-        fi
-      done
-    fi
+  if test "$ac_cv_header_ws2tcpip_h" = "yes"; then
+    tst_pull_header_checks='none ws2tcpip'
+    tst_size_checks='4'
+  else
+    tst_pull_header_checks='none systypes syssocket'
+    tst_size_checks='4 8 2'
+  fi
+  for tst_size in $tst_size_checks; do
+    for tst_pull_headers in $tst_pull_header_checks; do
+      if test "$curl_sizeof_curl_socklen_t" = "unknown"; then
+        case $tst_pull_headers in
+          ws2tcpip)
+            tmp_includes="$curl_includes_ws2tcpip"
+            ;;
+          systypes)
+            tmp_includes="$curl_includes_sys_types"
+            ;;
+          syssocket)
+            tmp_includes="$curl_includes_sys_socket"
+            ;;
+          *)
+            tmp_includes=""
+            ;;
+        esac
+        AC_COMPILE_IFELSE([
+          AC_LANG_PROGRAM([[
+            $tmp_includes
+            typedef $curl_typeof_curl_socklen_t curl_socklen_t;
+            typedef char dummy_arr[sizeof(curl_socklen_t) == $tst_size ? 1 : -1];
+          ]],[[
+            curl_socklen_t dummy;
+          ]])
+        ],[
+          curl_sizeof_curl_socklen_t="$tst_size"
+          curl_pull_headers_socklen_t="$tst_pull_headers"
+        ])
+      fi
+    done
   done
   AC_MSG_RESULT([$curl_sizeof_curl_socklen_t])
   if test "$curl_sizeof_curl_socklen_t" = "unknown"; then
