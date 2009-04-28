@@ -6,6 +6,7 @@ Makefile.in
 aclocal.m4
 adig
 ahost
+ares_build.h
 ares_version.h.dist
 autom4te.cache
 config.guess

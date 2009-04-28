@@ -3,7 +3,7 @@
 
 /* $Id$ */
 
-/* Copyright (C) 2004 - 2008 by Daniel Stenberg et al
+/* Copyright (C) 2004 - 2009 by Daniel Stenberg et al
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -39,6 +39,15 @@
 
 #endif /* HAVE_CONFIG_H */
 
+/* ================================================================ */
+/* Definition of preprocessor macros/symbols which modify compiler  */
+/* behaviour or generated code characteristics must be done here,   */
+/* as appropriate, before any system header file is included. It is */
+/* also possible to have them defined in the config file included   */
+/* before this point. As a result of all this we frown inclusion of */
+/* system header files in our config files, avoid this at any cost. */
+/* ================================================================ */
+
 /*
  * Tru64 needs _REENTRANT set for a few function prototypes and
  * things to appear in the system header files. Unixware needs it
@@ -50,6 +59,29 @@
 #    define _REENTRANT
 #  endif
 #endif
+
+/* ================================================================ */
+/*  If you need to include a system header file for your platform,  */
+/*  please, do it beyond the point further indicated in this file.  */
+/* ================================================================ */
+
+/*
+ * c-ares external interface definitions are also used internally,
+ * and might also include required system header files to define them.
+ */
+
+#include <ares_build.h>
+
+/*
+ * Compile time sanity checks must also be done when building the library.
+ */
+
+#include <ares_rules.h>
+
+/* ================================================================ */
+/* No system header file shall be included in this file before this */
+/* point. The only allowed ones are those included from curlbuild.h */
+/* ================================================================ */
 
 /*
  * Include header files for windows builds before redefining anything.

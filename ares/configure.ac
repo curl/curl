@@ -7,7 +7,7 @@ AC_INIT([c-ares], [-],
 CARES_OVERRIDE_AUTOCONF
 
 AC_CONFIG_SRCDIR([ares_ipv6.h])
-AM_CONFIG_HEADER([config.h])
+AM_CONFIG_HEADER([config.h ares_build.h])
 AM_MAINTAINER_MODE
 
 CARES_CHECK_OPTION_DEBUG
@@ -489,7 +489,9 @@ AC_HEADER_TIME
 CURL_CHECK_STRUCT_TIMEVAL
 
 AC_CHECK_SIZEOF(size_t)
+AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long)
+CARES_CONFIGURE_LONG
 AC_CHECK_SIZEOF(time_t)
 
 AC_CHECK_TYPE(long long,
@@ -524,6 +526,8 @@ AC_CHECK_TYPE([bool],[
 #include <stdbool.h>
 #endif
 ])
+
+CARES_CONFIGURE_ARES_SOCKLEN_T
 
 # Check for socklen_t or equivalent
 CURL_CHECK_TYPE_SOCKLEN_T

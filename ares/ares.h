@@ -19,6 +19,9 @@
 #ifndef ARES__H
 #define ARES__H
 
+#include "ares_build.h"  /* c-ares build definitions */
+#include "ares_rules.h"  /* c-ares rules enforcement */
+
 /*
  * Define WIN32 when build target is Win32 API
  */
