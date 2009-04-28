@@ -2712,30 +2712,6 @@ _EOF
 ])
 
 
-dnl CURL_INCLUDES_INTTYPES
-dnl -------------------------------------------------
-dnl Set up variable with list of headers that must be
-dnl included when inttypes.h is to be included.
-
-AC_DEFUN([CURL_INCLUDES_INTTYPES], [
-curl_includes_inttypes="\
-/* includes start */
-#ifdef HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
-#ifdef HAVE_STDINT_H
-# include <stdint.h>
-#endif
-#ifdef HAVE_INTTYPES_H
-# include <inttypes.h>
-#endif
-/* includes end */"
-  AC_CHECK_HEADERS(
-    sys/types.h stdint.h inttypes.h,
-    [], [], [$curl_includes_inttypes])
-])
-
-
 dnl CURL_CONFIGURE_LONG
 dnl -------------------------------------------------
 dnl Find out the size of long as reported by sizeof() and define
