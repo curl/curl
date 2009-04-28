@@ -1520,6 +1520,7 @@ static CURLcode ftp_state_ul_setup(struct connectdata *conn,
   struct FTP *ftp = conn->data->state.proto.ftp;
   struct SessionHandle *data = conn->data;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
+  int seekerr = CURL_SEEKFUNC_OK;
 
   if((data->state.resume_from && !sizechecked) ||
      ((data->state.resume_from > 0) && sizechecked)) {
@@ -1548,38 +1549,39 @@ static CURLcode ftp_state_ul_setup(struct connectdata *conn,
 
     /* Let's read off the proper amount of bytes from the input. */
     if(conn->seek_func) {
-      curl_off_t readthisamountnow = data->state.resume_from;
+      seekerr = conn->seek_func(conn->seek_client, data->state.resume_from,
+                                SEEK_SET);
+    }
 
-      if(conn->seek_func(conn->seek_client,
-                         readthisamountnow, SEEK_SET) != 0) {
+    if(seekerr != CURL_SEEKFUNC_OK) {
+      if(seekerr != CURL_SEEKFUNC_CANTSEEK) {
         failf(data, "Could not seek stream");
         return CURLE_FTP_COULDNT_USE_REST;
       }
+      /* seekerr == CURL_SEEKFUNC_CANTSEEK (can't seek to offset) */
+      else {
+        curl_off_t passed=0;
+        do {
+          curl_off_t readthisamountnow = (data->state.resume_from - passed);
+          curl_off_t actuallyread;
+
+          if(readthisamountnow > BUFSIZE)
+            readthisamountnow = BUFSIZE;
+
+          actuallyread = (curl_off_t)
+            conn->fread_func(data->state.buffer, 1, (size_t)readthisamountnow,
+                             conn->fread_in);
+
+          passed += actuallyread;
+          if((actuallyread <= 0) || (actuallyread > readthisamountnow)) {
+            /* this checks for greater-than only to make sure that the
+               CURL_READFUNC_ABORT return code still aborts */
+            failf(data, "Failed to read data");
+            return CURLE_FTP_COULDNT_USE_REST;
+          }
+        } while(passed < data->state.resume_from);
+      }
     }
-
-    else {
-      curl_off_t passed=0;
-      do {
-        curl_off_t readthisamountnow = (data->state.resume_from - passed);
-        curl_off_t actuallyread;
-
-        if(readthisamountnow > BUFSIZE)
-          readthisamountnow = BUFSIZE;
-
-        actuallyread = (curl_off_t)
-          conn->fread_func(data->state.buffer, 1, (size_t)readthisamountnow,
-                      conn->fread_in);
-
-        passed += actuallyread;
-        if((actuallyread <= 0) || (actuallyread > readthisamountnow)) {
-          /* this checks for greater-than only to make sure that the
-             CURL_READFUNC_ABORT return code still aborts */
-          failf(data, "Failed to read data");
-          return CURLE_FTP_COULDNT_USE_REST;
-        }
-      } while(passed < data->state.resume_from);
-    }
-
     /* now, decrease the size of the read */
     if(data->set.infilesize>0) {
       data->set.infilesize -= data->state.resume_from;

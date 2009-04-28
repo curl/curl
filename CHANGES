@@ -6,6 +6,18 @@
 
                                   Changelog
 
+Daniel Stenberg (28 Apr 2009)
+- Bug report #2709004 (http://curl.haxx.se/bug/view.cgi?id=2709004) by Tim
+  Chen pointed out how curl couldn't upload with resume when reading from a
+  pipe.
+
+  This ended up with the introduction of a new return code for the
+  CURLOPT_SEEKFUNCTION callback that basically says that the seek failed but
+  that libcurl may try to resolve the situation anyway. In our case this means
+  libcurl will attempt to instead read that much data from the stream instead
+  of seeking and that way curl can now upload with resume when data is read
+  from a stream!
+
 Daniel Stenberg (26 Apr 2009)
 - Bug report #2779733 (http://curl.haxx.se/bug/view.cgi?id=2779733) by Sven
   Wegener pointed out that CURLINFO_APPCONNECT_TIME didn't work with the multi

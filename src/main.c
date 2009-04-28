@@ -3302,9 +3302,10 @@ static int my_seek(void *stream, curl_off_t offset, int whence)
   }
 #endif
   if(-1 == lseek(in->fd, offset, whence))
-    /* couldn't rewind, the reason is in errno but errno is just not
-       portable enough and we don't actually care that much why we failed. */
-    return 1;
+    /* couldn't rewind, the reason is in errno but errno is just not portable
+       enough and we don't actually care that much why we failed. We'll let
+       libcurl know that it may try other means if it wants to. */
+    return CURL_SEEKFUNC_CANTSEEK;
 
   return 0;
 }

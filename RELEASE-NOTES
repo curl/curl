@@ -13,6 +13,8 @@ This release includes the following changes:
    connection
  o libssh2's version number can now be figured out run-time instead of using
    the build-time fixed number
+ o CURLOPT_SEEKFUNCTION may now return CURL_SEEKFUNC_CANTSEEK
+ o curl can now upload with resume even when reading from a pipe
 
 This release includes the following bugfixes:
 
@@ -43,6 +45,7 @@ advice from friends like these:
  Daniel Fandrich, Yang Tse, David James, Chris Deidun, Bill Egert,
  Andre Guibert de Bruet, Andreas Farber, Frank Hempel, Pierre Brico,
  Kamil Dudka, Jim Freeman, Daniel Johnson, Toshio Kuratomi, Martin Storsjo,
- Pramod Sharma, Gisle Vanem, Leanic Lefever, Rainer Koenig, Sven Wegener
+ Pramod Sharma, Gisle Vanem, Leanic Lefever, Rainer Koenig, Sven Wegener,
+ Tim Chen
 
         Thanks! (and sorry if I forgot to mention someone)

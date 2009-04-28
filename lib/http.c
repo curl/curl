@@ -2054,7 +2054,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   const char *httpstring;
   send_buffer *req_buffer;
   curl_off_t postsize; /* off_t type to be able to hold a large file size */
-
+  int seekerr = CURL_SEEKFUNC_OK;
 
   /* Always consider the DO phase done after this function call, even if there
      may be parts of the request that is not yet sent, since we can deal with
@@ -2335,36 +2335,40 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       /* Now, let's read off the proper amount of bytes from the
          input. */
       if(conn->seek_func) {
-        curl_off_t readthisamountnow = data->state.resume_from;
+        seekerr = conn->seek_func(conn->seek_client, data->state.resume_from,
+                                  SEEK_SET);
+      }
 
-        if(conn->seek_func(conn->seek_client,
-                           readthisamountnow, SEEK_SET) != 0) {
+      if(seekerr != CURL_SEEKFUNC_OK) {
+        if(seekerr != CURL_SEEKFUNC_CANTSEEK) {
           failf(data, "Could not seek stream");
           return CURLE_READ_ERROR;
         }
-      }
-      else {
-        curl_off_t passed=0;
+        /* when seekerr == CURL_SEEKFUNC_CANTSEEK (can't seek to offset) */
+        else {
+          curl_off_t passed=0;
 
-        do {
-          size_t readthisamountnow = (size_t)(data->state.resume_from - passed);
-          size_t actuallyread;
+          do {
+            size_t readthisamountnow = (size_t)(data->state.resume_from -
+                                                passed);
+            size_t actuallyread;
 
-          if(readthisamountnow > BUFSIZE)
-            readthisamountnow = BUFSIZE;
+            if(readthisamountnow > BUFSIZE)
+              readthisamountnow = BUFSIZE;
 
-          actuallyread = data->set.fread_func(data->state.buffer, 1,
-                                              (size_t)readthisamountnow,
-                                              data->set.in);
+            actuallyread = data->set.fread_func(data->state.buffer, 1,
+                                                (size_t)readthisamountnow,
+                                                data->set.in);
 
-          passed += actuallyread;
-          if(actuallyread != readthisamountnow) {
-            failf(data, "Could only read %" FORMAT_OFF_T
-                  " bytes from the input",
-                  passed);
-            return CURLE_READ_ERROR;
-          }
-        } while(passed != data->state.resume_from); /* loop until done */
+            passed += actuallyread;
+            if(actuallyread != readthisamountnow) {
+              failf(data, "Could only read %" FORMAT_OFF_T
+                    " bytes from the input",
+                    passed);
+              return CURLE_READ_ERROR;
+            }
+          } while(passed != data->state.resume_from); /* loop until done */
+        }
       }
 
       /* now, decrease the size of the read */

@@ -463,6 +463,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
   const char *host_public_key_md5;
   int rc = LIBSSH2_ERROR_NONE, i;
   int err;
+  int seekerr = CURL_SEEKFUNC_OK;
   *block = 0; /* we're not blocking by default */
 
   switch(sshc->state) {
@@ -1315,37 +1316,41 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
     if(data->state.resume_from > 0) {
       /* Let's read off the proper amount of bytes from the input. */
       if(conn->seek_func) {
-        curl_off_t readthisamountnow = data->state.resume_from;
+        seekerr = conn->seek_func(conn->seek_client, data->state.resume_from,
+                                  SEEK_SET);
+      }
 
-        if(conn->seek_func(conn->seek_client,
-                           readthisamountnow, SEEK_SET) != 0) {
+      if(seekerr != CURL_SEEKFUNC_OK){
+
+        if(seekerr != CURL_SEEKFUNC_CANTSEEK) {
           failf(data, "Could not seek stream");
           return CURLE_FTP_COULDNT_USE_REST;
         }
-      }
-      else {
-        curl_off_t passed=0;
-        curl_off_t readthisamountnow;
-        curl_off_t actuallyread;
-        do {
-          readthisamountnow = (data->state.resume_from - passed);
+        /* seekerr == CURL_SEEKFUNC_CANTSEEK (can't seek to offset) */
+        else {
+          curl_off_t passed=0;
+          curl_off_t readthisamountnow;
+          curl_off_t actuallyread;
+          do {
+            readthisamountnow = (data->state.resume_from - passed);
 
-          if(readthisamountnow > BUFSIZE)
-            readthisamountnow = BUFSIZE;
+            if(readthisamountnow > BUFSIZE)
+              readthisamountnow = BUFSIZE;
 
-          actuallyread =
-            (curl_off_t) conn->fread_func(data->state.buffer, 1,
-                                          (size_t)readthisamountnow,
-                                          conn->fread_in);
+            actuallyread =
+              (curl_off_t) conn->fread_func(data->state.buffer, 1,
+                                            (size_t)readthisamountnow,
+                                            conn->fread_in);
 
-          passed += actuallyread;
-          if((actuallyread <= 0) || (actuallyread > readthisamountnow)) {
-            /* this checks for greater-than only to make sure that the
-               CURL_READFUNC_ABORT return code still aborts */
-             failf(data, "Failed to read data");
-            return CURLE_FTP_COULDNT_USE_REST;
-          }
-        } while(passed < data->state.resume_from);
+            passed += actuallyread;
+            if((actuallyread <= 0) || (actuallyread > readthisamountnow)) {
+              /* this checks for greater-than only to make sure that the
+                 CURL_READFUNC_ABORT return code still aborts */
+              failf(data, "Failed to read data");
+              return CURLE_FTP_COULDNT_USE_REST;
+            }
+          } while(passed < data->state.resume_from);
+        }
       }
 
       /* now, decrease the size of the read */
