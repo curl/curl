@@ -704,6 +704,27 @@ static void nosigpipe(struct connectdata *conn,
 #define nosigpipe(x,y)
 #endif
 
+#ifdef WIN32
+/* When you run a program that uses the Windows Sockets API, you may
+   experience slow performance when you copy data to a TCP server.
+
+   http://support.microsoft.com/kb/823764
+
+   Work-around: Make the Socket Send Buffer Size Larger Than the Program Send
+   Buffer Size
+
+*/
+static void sndbufset(struct connectdata *conn,
+                      curl_socket_t sockfd)
+{
+  int val = CURL_MAX_WRITE_SIZE + 32;
+  setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (const char *)&val, sizeof(val));
+}
+#else
+#define sndbufset(x,y)
+#endif
+
+
 /* singleipconnect() connects to the given IP only, and it may return without
    having connected if used from the multi interface. */
 static curl_socket_t
@@ -806,6 +827,8 @@ singleipconnect(struct connectdata *conn,
     tcpnodelay(conn, sockfd);
 
   nosigpipe(conn, sockfd);
+
+  sndbufset(conn, sockfd);
 
   if(data->set.fsockopt) {
     /* activate callback for setting socket options */

@@ -7,6 +7,12 @@
                                   Changelog
 
 Daniel Stenberg (28 Apr 2009)
+- Constantine Sapuntzakis filed bug report #2783090
+  (http://curl.haxx.se/bug/view.cgi?id=2783090) pointing out that on windows
+  we need to grow the SO_SNDBUF buffer somewhat to get really good upload
+  speeds. http://support.microsoft.com/kb/823764 has the details. Friends
+  confirmed that simply adding 32 to CURL_MAX_WRITE_SIZE is enough.
+
 - Bug report #2709004 (http://curl.haxx.se/bug/view.cgi?id=2709004) by Tim
   Chen pointed out how curl couldn't upload with resume when reading from a
   pipe.

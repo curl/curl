@@ -34,6 +34,7 @@ This release includes the following bugfixes:
  o --libcurl bogus strings where other data was pointed to
  o crash related to FTP and "Re-used connection seems dead, get a new one"
  o CURLINFO_APPCONNECT_TIME with the multi interface
+ o Enhanced upload speeds on Windows
 
 This release includes the following known bugs:
 
@@ -46,6 +47,6 @@ advice from friends like these:
  Andre Guibert de Bruet, Andreas Farber, Frank Hempel, Pierre Brico,
  Kamil Dudka, Jim Freeman, Daniel Johnson, Toshio Kuratomi, Martin Storsjo,
  Pramod Sharma, Gisle Vanem, Leanic Lefever, Rainer Koenig, Sven Wegener,
- Tim Chen
+ Tim Chen, Constantine Sapuntzakis
 
         Thanks! (and sorry if I forgot to mention someone)
