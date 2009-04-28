@@ -7,8 +7,6 @@ To be addressed in 7.19.5 (planned release: May 2009)
 
 223 - TFTP flaw, #2723236
 
-225 - resume when upload from stream, #2709004
-
 226 - Active Mode FTPS Data Port Range
 
 228 - rpath problems in linking with custom openssl
