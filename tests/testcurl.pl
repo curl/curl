@@ -499,6 +499,9 @@ if ($configurebuild) {
     system("cp -af ../$CURLDIR/Makefile.dist Makefile");
     system("$make -i -C lib -f Makefile.netware prebuild");
     system("$make -i -C src -f Makefile.netware prebuild");
+    if (-d "../$CURLDIR/ares") {
+      system("$make -i -C ares -f Makefile.netware prebuild");
+    }
   }
   elsif ($^O eq 'linux') {
     system("cp -afr ../$CURLDIR/* .");
@@ -506,6 +509,10 @@ if ($configurebuild) {
     system("cp -af ../$CURLDIR/include/curl/curlbuild.h.dist ./include/curl/curlbuild.h");
     system("$make -i -C lib -f Makefile.$targetos prebuild");
     system("$make -i -C src -f Makefile.$targetos prebuild");
+    if (-d "../$CURLDIR/ares") {
+      system("cp -af ../$CURLDIR/ares/ares_build.h.dist ./ares/ares_build.h");
+      system("$make -i -C ares -f Makefile.$targetos prebuild");
+    }
   }
 }
 
