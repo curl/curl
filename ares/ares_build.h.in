@@ -70,6 +70,18 @@
 /*  EXTERNAL INTERFACE SETTINGS FOR CONFIGURE CAPABLE SYSTEMS ONLY  */
 /* ================================================================ */
 
+/* Configure process defines this to 1 when it finds out that system  */
+/* header file ws2tcpip.h must be included by the external interface. */
+#undef CARES_PULL_WS2TCPIP_H
+#ifdef CARES_PULL_WS2TCPIP_H
+#  ifndef WIN32_LEAN_AND_MEAN
+#    define WIN32_LEAN_AND_MEAN
+#  endif
+#  include <windows.h>
+#  include <winsock2.h>
+#  include <ws2tcpip.h>
+#endif
+
 /* Configure process defines this to 1 when it finds out that system   */
 /* header file sys/types.h must be included by the external interface. */
 #undef CARES_PULL_SYS_TYPES_H
