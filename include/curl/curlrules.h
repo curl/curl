@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -79,6 +79,16 @@
 #ifndef CURL_SIZEOF_LONG
 #  error "CURL_SIZEOF_LONG definition is missing!"
    Error Compilation_aborted_CURL_SIZEOF_LONG_is_missing
+#endif
+
+#ifndef CURL_TYPEOF_CURL_SOCKLEN_T
+#  error "CURL_TYPEOF_CURL_SOCKLEN_T definition is missing!"
+   Error Compilation_aborted_CURL_TYPEOF_CURL_SOCKLEN_T_is_missing
+#endif
+
+#ifndef CURL_SIZEOF_CURL_SOCKLEN_T
+#  error "CURL_SIZEOF_CURL_SOCKLEN_T definition is missing!"
+   Error Compilation_aborted_CURL_SIZEOF_CURL_SOCKLEN_T_is_missing
 #endif
 
 #ifndef CURL_TYPEOF_CURL_OFF_T
@@ -153,6 +163,26 @@ typedef char
   __curl_rule_03__
     [CurlchkszGE(curl_off_t, long)];
 
+/*
+ * Verify that the size previously defined and expected for
+ * curl_socklen_t is actually the the same as the one reported
+ * by sizeof() at compile time.
+ */
+
+typedef char
+  __curl_rule_04__
+    [CurlchkszEQ(curl_socklen_t, CURL_SIZEOF_CURL_SOCKLEN_T)];
+
+/*
+ * Verify at compile time that the size of curl_socklen_t as reported
+ * by sizeof() is greater or equal than the one reported for int for
+ * the current compilation.
+ */
+
+typedef char
+  __curl_rule_05__
+    [CurlchkszGE(curl_socklen_t, int)];
+
 /* ================================================================ */
 /*          EXTERNALLY AND INTERNALLY VISIBLE DEFINITIONS           */
 /* ================================================================ */
@@ -207,10 +237,13 @@ typedef char
  * Get rid of macros not intended to exist beyond this point.
  */
 
+#undef CURL_PULL_WS2TCPIP_H
 #undef CURL_PULL_SYS_TYPES_H
+#undef CURL_PULL_SYS_SOCKET_H
 #undef CURL_PULL_STDINT_H
 #undef CURL_PULL_INTTYPES_H
 
+#undef CURL_TYPEOF_CURL_SOCKLEN_T
 #undef CURL_TYPEOF_CURL_OFF_T
 
 #endif /* __CURL_CURLRULES_H */
