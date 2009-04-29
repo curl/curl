@@ -35,6 +35,7 @@ This release includes the following bugfixes:
  o crash related to FTP and "Re-used connection seems dead, get a new one"
  o CURLINFO_APPCONNECT_TIME with the multi interface
  o Enhanced upload speeds on Windows
+ o TFTP problems after a failed transfer to the same host
 
 This release includes the following known bugs:
 

@@ -3,8 +3,6 @@ To be addressed in 7.19.5 (planned release: May 2009)
 
 221 - debian man page warnings
 
-222 - TFTP close bug/fix, #2723219
-
 223 - TFTP flaw, #2723236
 
 226 - Active Mode FTPS Data Port Range

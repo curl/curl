@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel Stenberg (29 Apr 2009)
+- Based on bug report #2723219 (http://curl.haxx.se/bug/view.cgi?id=2723219)
+  I've now made TFTP "connections" not being kept for re-use within libcurl.
+  TFTP is UDP-based so the benefit was really low (if even existing) to begin
+  with so instead of tracking down to fix this problem we instead removed the
+  re-use. I also enabled test case 1099 that I wrote a few days ago to verify
+  that this change fixes the reported problem.
+
 Daniel Stenberg (28 Apr 2009)
 - Constantine Sapuntzakis filed bug report #2783090
   (http://curl.haxx.se/bug/view.cgi?id=2783090) pointing out that on windows

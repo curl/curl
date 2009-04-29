@@ -8,7 +8,7 @@ FAILURE
 </info>
 
 <reply>
-<data>
+<data nocheck="yes">
 data for 1099
 </data>
 </reply>
@@ -30,9 +30,6 @@ tftp://%HOSTIP:%TFTPPORT/an/invalid-file tftp://%HOSTIP:%TFTPPORT//1099 --trace-
 #
 # Verify pseudo protocol after the test has been "shot"
 <verify>
-<errorcode>
-69
-</errorcode>
 <protocol>
 opcode: 1
 filename: an/invalid-file
@@ -41,5 +38,8 @@ opcode: 1
 filename: /1099
 mode: octet
 </protocol>
+<stdout mode="text">
+data for 1099
+</stdout>
 </verify>
 </testcase>
