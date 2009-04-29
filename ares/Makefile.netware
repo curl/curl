@@ -411,6 +411,8 @@ ifdef OLD_NOVELLSDK
 	@echo $(DL)#define socklen_t int$(DL) >> $@
 endif
 
+FORCE: ;
+
 ares_build.h: Makefile.netware FORCE
 	@echo Creating $@
 	@echo $(DL)/* $@ intended for NetWare target.$(DL) > $@
