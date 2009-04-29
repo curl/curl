@@ -136,6 +136,7 @@ typedef char
  * Get rid of macros not intended to exist beyond this point.
  */
 
+#undef CARES_PULL_WS2TCPIP_H
 #undef CARES_PULL_SYS_TYPES_H
 #undef CARES_PULL_SYS_SOCKET_H
 
