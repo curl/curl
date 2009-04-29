@@ -619,6 +619,8 @@ $(CURL_INC)/curl/curlbuild.h: Makefile.netware FORCE
 	@echo $(DL)#define __CURL_CURLBUILD_H$(DL) >> $@
 ifeq ($(LIBARCH),LIBC)
 	@echo $(DL)#define CURL_SIZEOF_LONG 4$(DL) >> $@
+	@echo $(DL)#define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t$(DL) >> $@
+	@echo $(DL)#define CURL_SIZEOF_CURL_SOCKLEN_T 4$(DL) >> $@
 	@echo $(DL)#define CURL_TYPEOF_CURL_OFF_T long long$(DL) >> $@
 	@echo $(DL)#define CURL_FORMAT_CURL_OFF_T "lld"$(DL) >> $@
 	@echo $(DL)#define CURL_FORMAT_CURL_OFF_TU "llu"$(DL) >> $@
@@ -628,6 +630,8 @@ ifeq ($(LIBARCH),LIBC)
 	@echo $(DL)#define CURL_SUFFIX_CURL_OFF_TU ULL$(DL) >> $@
 else
 	@echo $(DL)#define CURL_SIZEOF_LONG 4$(DL) >> $@
+	@echo $(DL)#define CURL_TYPEOF_CURL_SOCKLEN_T int$(DL) >> $@
+	@echo $(DL)#define CURL_SIZEOF_CURL_SOCKLEN_T 4$(DL) >> $@
 	@echo $(DL)#define CURL_TYPEOF_CURL_OFF_T long$(DL) >> $@
 	@echo $(DL)#define CURL_FORMAT_CURL_OFF_T "ld"$(DL) >> $@
 	@echo $(DL)#define CURL_FORMAT_CURL_OFF_TU "lu"$(DL) >> $@
@@ -636,6 +640,7 @@ else
 	@echo $(DL)#define CURL_SUFFIX_CURL_OFF_T L$(DL) >> $@
 	@echo $(DL)#define CURL_SUFFIX_CURL_OFF_TU UL$(DL) >> $@
 endif
+	@echo $(DL)typedef CURL_TYPEOF_CURL_SOCKLEN_T curl_socklen_t;$(DL) >> $@
 	@echo $(DL)typedef CURL_TYPEOF_CURL_OFF_T curl_off_t;$(DL) >> $@
 	@echo $(DL)#endif /* __CURL_CURLBUILD_H */$(DL) >> $@
 
