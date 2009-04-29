@@ -533,6 +533,20 @@ close(F);
 if (grepfile("define USE_ARES", "lib/config$confsuffix.h")) {
   logit "setup to build ares";
 
+  if(-f "./ares/ares_build.h") {
+    logit "display ares/ares_build.h";
+    if(open(F, "<./ares/ares_build.h")) {
+      while(<F>) {
+        my $ll = $_;
+        print $ll if(($ll =~ /^ *# *define/) && ($ll !~ /__CARES_BUILD_H/));
+      }
+      close(F);
+    }
+  }
+  else {
+    mydie "no ares_build.h created/found";
+  }
+
   logit "display ares/config$confsuffix.h";
   if(open(F, "ares/config$confsuffix.h")) {
       while (<F>) {
