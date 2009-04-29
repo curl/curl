@@ -1845,10 +1845,6 @@ AC_DEFUN([CARES_CONFIGURE_ARES_SOCKLEN_T], [
     tst_pull_header_checks='none systypes syssocket'
     tst_size_checks='4 8 2'
   fi
-  rm -f debug.txt
-  echo "DEBUG: ======================================"          >>debug.txt
-  echo "DEBUG: tst_pull_header_checks: $tst_pull_header_checks" >>debug.txt
-  echo "DEBUG: tst_size_checks       : $tst_size_checks"        >>debug.txt
   for tst_size in $tst_size_checks; do
     for tst_pull_headers in $tst_pull_header_checks; do
       if test "$cares_sizeof_ares_socklen_t" = "unknown"; then
@@ -1866,10 +1862,6 @@ AC_DEFUN([CARES_CONFIGURE_ARES_SOCKLEN_T], [
             tmp_includes=""
             ;;
         esac
-        echo "DEBUG: --------------------------------------" >>debug.txt
-        echo "DEBUG: tst_pull_headers: $tst_pull_headers"    >>debug.txt
-        echo "DEBUG: tst_size        : $tst_size"            >>debug.txt
-        echo "DEBUG: --------------------------------------" >>debug.txt
         AC_COMPILE_IFELSE([
           AC_LANG_PROGRAM([[
             $tmp_includes
@@ -1881,10 +1873,6 @@ AC_DEFUN([CARES_CONFIGURE_ARES_SOCKLEN_T], [
         ],[
           cares_sizeof_ares_socklen_t="$tst_size"
           cares_pull_headers_socklen_t="$tst_pull_headers"
-          sed 's/^/cc-OK : /' conftest.$ac_ext >>debug.txt
-        ],[
-          sed 's/^/cc-src: /' conftest.$ac_ext >>debug.txt
-          sed 's/^/cc-err: /' conftest.err     >>debug.txt
         ])
       fi
     done
@@ -1894,10 +1882,6 @@ AC_DEFUN([CARES_CONFIGURE_ARES_SOCKLEN_T], [
     AC_MSG_ERROR([cannot find out size of ares_socklen_t.])
   fi
   #
-  echo "DEBUG: ======================================"                      >>debug.txt
-  echo "DEBUG: cares_pull_headers_socklen_t: $cares_pull_headers_socklen_t" >>debug.txt
-  echo "DEBUG: cares_sizeof_ares_socklen_t : $cares_sizeof_ares_socklen_t"  >>debug.txt
-  echo "DEBUG: ======================================"                      >>debug.txt
   case $cares_pull_headers_socklen_t in
     ws2tcpip)
       CARES_DEFINE_UNQUOTED([CARES_PULL_WS2TCPIP_H])
@@ -1912,12 +1896,6 @@ AC_DEFUN([CARES_CONFIGURE_ARES_SOCKLEN_T], [
   esac
   CARES_DEFINE_UNQUOTED([CARES_TYPEOF_ARES_SOCKLEN_T], [$cares_typeof_ares_socklen_t])
   CARES_DEFINE_UNQUOTED([CARES_SIZEOF_ARES_SOCKLEN_T], [$cares_sizeof_ares_socklen_t])
-  case X-"$ac_cv_native_windows" in
-    X-yes)
-      cat debug.txt >&6
-      ;;
-  esac
-  rm -f debug.txt
 ])
 
 
