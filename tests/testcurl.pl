@@ -521,7 +521,7 @@ if(-f "./include/curl/curlbuild.h") {
   if(open(F, "<./include/curl/curlbuild.h")) {
     while(<F>) {
       my $ll = $_;
-      print $ll if(($ll =~ /^ *# *define/) && ($ll !~ /__CURL_CURLBUILD_H/));
+      print $ll if(($ll =~ /^ *# *define *CURL_/) && ($ll !~ /__CURL_CURLBUILD_H/));
     }
     close(F);
   }
@@ -545,7 +545,7 @@ if (grepfile("define USE_ARES", "lib/config$confsuffix.h")) {
     if(open(F, "<./ares/ares_build.h")) {
       while(<F>) {
         my $ll = $_;
-        print $ll if(($ll =~ /^ *# *define/) && ($ll !~ /__CARES_BUILD_H/));
+        print $ll if(($ll =~ /^ *# *define *CARES_/) && ($ll !~ /__CARES_BUILD_H/));
       }
       close(F);
     }
