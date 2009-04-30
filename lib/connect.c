@@ -718,6 +718,7 @@ static void sndbufset(struct connectdata *conn,
                       curl_socket_t sockfd)
 {
   int val = CURL_MAX_WRITE_SIZE + 32;
+  (void)conn;
   setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (const char *)&val, sizeof(val));
 }
 #else
