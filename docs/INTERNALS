@@ -472,3 +472,6 @@ Building Releases
  need to fill in the Makefile.am files properly for which files that should
  be included in the release archives.
 
+ NOTE: you need to have curl checked out from CVS to be able to do a proper
+ release build. The release tarballs do not have everything setup in order to
+ do releases properly.
