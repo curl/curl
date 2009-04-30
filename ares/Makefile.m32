@@ -40,7 +40,7 @@ tags:
 %.exe: %.o ares_getopt.o $(LIB)
 	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
 
-$(OBJLIB): ares.h ares_dns.h ares_private.h
+$(OBJLIB): ares.h ares_dns.h ares_private.h ares_build.h ares_rules.h
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<
@@ -55,7 +55,8 @@ install:
 	${RANLIB} ${DESTDIR}${libdir}/$(LIB)
 	chmod u-w ${DESTDIR}${libdir}/$(LIB)
 	${INSTALL} -m 444 ${srcdir}/ares.h ${DESTDIR}${includedir}
-	${INSTALL} -m 444 ${srcdir}/ares_version.h ${DESTDIR}${includedir}
+	${INSTALL} -m 444 ${srcdir}/ares_build.h ${DESTDIR}${includedir}
+	${INSTALL} -m 444 ${srcdir}/ares_rules.h ${DESTDIR}${includedir}
 	(for man in $(MANPAGES); do \
 	   ${INSTALL} -m 444 ${srcdir}/$${man} ${DESTDIR}${mandir}/man3; \
 	done)

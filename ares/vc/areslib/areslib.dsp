@@ -225,6 +225,10 @@ SOURCE=..\..\ares.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\ares_build.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\ares_dns.h
 # End Source File
 # Begin Source File
@@ -238,6 +242,10 @@ SOURCE=..\..\ares_llist.h
 # Begin Source File
 
 SOURCE=..\..\ares_private.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\ares_rules.h
 # End Source File
 # Begin Source File
 
