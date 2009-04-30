@@ -43,7 +43,7 @@ CFLAGS  = $(CFLAGS) -O2 -Og
 LDFLAGS = $(LDFLAGS) -release
 !endif
 
-CFLAGS  = -I.\.
+CFLAGS  = $(CFLAGS) -I.\.
 
 OBJECTS = $(OBJ_DIR)\ares_fds.obj              \
           $(OBJ_DIR)\ares_process.obj          \
