@@ -6,6 +6,16 @@
 
                                   Changelog
 
+
+Daniel Stenberg (30 Apr 2009)
+- I was going to fix issue #59 in KNOWN_BUGS
+
+  If the CURLOPT_PORT option is used on an FTP URL like
+  "ftp://example.com/file;type=A" the ";type=A" is stripped off.
+
+  I added test case 562 to verify, only to find out that I couldn't repeat
+  this bug so I hereby consider it not a bug anymore!
+
 Daniel Stenberg (29 Apr 2009)
 - Based on bug report #2723219 (http://curl.haxx.se/bug/view.cgi?id=2723219)
   I've now made TFTP "connections" not being kept for re-use within libcurl.
