@@ -425,7 +425,7 @@ ifeq ($(LIBARCH),CLIB)
 	@echo $(DL)#define CARES_TYPEOF_ARES_SOCKLEN_T int$(DL) >> $@
 	@echo $(DL)#define CARES_SIZEOF_ARES_SOCKLEN_T 4$(DL) >> $@
 else
-	@echo $(DL)#define CARES_TYPEOF_ARES_SOCKLEN_T socklen_t$(DL) >> $@
+	@echo $(DL)#define CARES_TYPEOF_ARES_SOCKLEN_T size_t$(DL) >> $@
 	@echo $(DL)#define CARES_SIZEOF_ARES_SOCKLEN_T 4$(DL) >> $@
 endif
 	@echo $(DL)#define CARES_SIZEOF_LONG 4$(DL) >> $@
