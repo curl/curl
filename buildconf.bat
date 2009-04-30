@@ -11,3 +11,11 @@ copy Makefile.dist Makefile
 
 REM create curlbuild.h
 copy include\curl\curlbuild.h.dist include\curl\curlbuild.h
+
+REM setup c-ares CVS tree
+if not exist ares\buildconf.bat goto end_c_ares
+cd ares
+call buildconf.bat
+cd ..
+:end_c_ares
+
