@@ -52,3 +52,18 @@ Downgrades
   that doesn't support the options your application needs. Or possibly you
   even downgrade so far so you cross an ABI break border and thus a different
   soname, and then your application may need to adapt to the modified ABI.
+
+History
+
+  The previous major library soname number bumps (breaking backwards
+  compatibility) have happened the following times:
+
+  0 - libcurl 7.1,   August 200
+
+  1 - libcurl 7.5    December 2000
+
+  2 - libcurl 7.7    March 2001
+
+  3 - libcurl 7.12.0 June 2004
+
+  4 - libcurl 7.16.0 October 2006
