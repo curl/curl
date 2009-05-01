@@ -9,4 +9,19 @@ To be addressed in 7.19.5 (planned release: May 2009)
 
 228 - rpath problems in linking with custom openssl
 
-229 -
+229 - [PATCH] to correct spelling in ABI
+
+230 - [PATCH] http.c fix to Curl_proxyCONNECT for non-ASCII platforms.
+
+231 - [PATCH] TPF-platform specific changes to various files
+
+232 - [PATCH] transfer.c fixes for CURL_DO_LINEEND_CONV and non-ASCII 
+      platform HTTP requests
+
+233 - [PATCH] Allow Curl test suite test #251 to work if client and server 
+      are on different machines
+
+234 - [PATCH] Allow various Curl test suite tests to work on non-ASCII 
+      platforms
+
+235 - 
