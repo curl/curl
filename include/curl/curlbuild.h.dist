@@ -487,8 +487,8 @@
 #  define CURL_SIZEOF_CURL_OFF_T     8
 #  define CURL_SUFFIX_CURL_OFF_T     L
 #  define CURL_SUFFIX_CURL_OFF_TU    UL
-#  define CURL_TYPEOF_CURL_SOCKLEN_T FIXME
-#  define CURL_SIZEOF_CURL_SOCKLEN_T -1
+#  define CURL_TYPEOF_CURL_SOCKLEN_T int
+#  define CURL_SIZEOF_CURL_SOCKLEN_T 4
 
 /* ===================================== */
 /*    KEEP MSVC THE PENULTIMATE ENTRY    */

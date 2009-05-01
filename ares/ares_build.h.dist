@@ -198,8 +198,8 @@
 
 #elif defined(TPF)
 #  define CARES_SIZEOF_LONG           8
-#  define CARES_TYPEOF_ARES_SOCKLEN_T FIXME
-#  define CARES_SIZEOF_ARES_SOCKLEN_T -1
+#  define CARES_TYPEOF_ARES_SOCKLEN_T int
+#  define CARES_SIZEOF_ARES_SOCKLEN_T 4
 
 /* ===================================== */
 /*    KEEP MSVC THE PENULTIMATE ENTRY    */
