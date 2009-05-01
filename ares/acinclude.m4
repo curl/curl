@@ -96,6 +96,44 @@ CURL_DEF_TOKEN $1
 ])
 
 
+dnl CURL_CHECK_DEF_CC (SYMBOL, [INCLUDES], [SILENT])
+dnl -------------------------------------------------
+dnl Use the C compiler to find out only if the given symbol is defined
+dnl or not, this can not find out its expansion. This macro will not use
+dnl default includes even if no INCLUDES argument is given. This macro
+dnl will run silently when invoked with three arguments.
+
+AC_DEFUN([CURL_CHECK_DEF_CC], [
+  AS_VAR_PUSHDEF([ac_HaveDef], [curl_cv_have_def_$1])dnl
+  ifelse($3,,[AC_MSG_CHECKING([for compiler definition of $1])])
+  AC_COMPILE_IFELSE([
+    AC_LANG_SOURCE(
+ifelse($2,,,[$2])[[
+int main (void)
+{
+#ifdef $1
+  return 0;
+#else
+  force compilation error
+#endif
+}
+    ]])
+  ],[
+    tst_symbol_defined="yes"
+  ],[
+    tst_symbol_defined="no"
+  ])
+  if test "$tst_symbol_defined" = "yes"; then
+    AS_VAR_SET(ac_HaveDef, yes)
+    ifelse($3,,[AC_MSG_RESULT([yes])])
+  else
+    AS_VAR_SET(ac_HaveDef, no)
+    ifelse($3,,[AC_MSG_RESULT([no])])
+  fi
+  AS_VAR_POPDEF([ac_HaveDef])dnl
+])
+
+
 dnl CARES_CHECK_AIX_ALL_SOURCE
 dnl -------------------------------------------------
 dnl Provides a replacement of traditional AC_AIX with

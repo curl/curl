@@ -194,7 +194,7 @@ dnl **********************************************************************
 tst_lib_xnet_required="no"
 AC_MSG_CHECKING([if X/Open network library is required])
 CURL_CHECK_DEF([__hpux], [], [silent])
-CURL_CHECK_DEF([_XOPEN_SOURCE_EXTENDED], [], [silent])
+CURL_CHECK_DEF_CC([_XOPEN_SOURCE_EXTENDED], [], [silent])
 if test "$curl_cv_have_def__XOPEN_SOURCE_EXTENDED" = "yes" &&
   test "$curl_cv_have_def___hpux" = "yes"; then
   my_ac_save_LIBS=$LIBS
