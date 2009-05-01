@@ -13,7 +13,7 @@ ABI - Application Binary Interface
   conventions, function arguments, return values, struct sizes/defines and
   more.
 
-  For a longer descricption, see
+  For a longer description, see
   http://en.wikipedia.org/wiki/Application_binary_interface
 
 Upgrades
@@ -36,7 +36,7 @@ Soname Bumps
   breakage, that may require your application to get attention or possibly be
   changed to adhere to new things, we will bump the soname. Then the library
   will get a different output name and thus can in fact be installed in
-  parallell with an older installed lib (on most systems). Thus, old
+  parallel with an older installed lib (on most systems). Thus, old
   applications built against the previous ABI version will remain working and
   using the older lib, while newer applications build and use the newer one.
 
@@ -58,7 +58,7 @@ History
   The previous major library soname number bumps (breaking backwards
   compatibility) have happened the following times:
 
-  0 - libcurl 7.1,   August 200
+  0 - libcurl 7.1,   August 2000
 
   1 - libcurl 7.5    December 2000
 
