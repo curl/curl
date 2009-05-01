@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Yang Tse (1 May 2009)
+- Applied David McCreedy's patches "TPF-platform specific changes to various
+  files" and "http.c fix to Curl_proxyCONNECT for non-ASCII platforms", the
+  former with minor edits.
 
 Daniel Stenberg (30 Apr 2009)
 - I was going to fix issue #59 in KNOWN_BUGS

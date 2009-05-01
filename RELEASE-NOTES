@@ -36,6 +36,7 @@ This release includes the following bugfixes:
  o CURLINFO_APPCONNECT_TIME with the multi interface
  o Enhanced upload speeds on Windows
  o TFTP problems after a failed transfer to the same host
+ o improved out of the box TPF compatibility
 
 This release includes the following known bugs:
 
@@ -48,6 +49,6 @@ advice from friends like these:
  Andre Guibert de Bruet, Andreas Farber, Frank Hempel, Pierre Brico,
  Kamil Dudka, Jim Freeman, Daniel Johnson, Toshio Kuratomi, Martin Storsjo,
  Pramod Sharma, Gisle Vanem, Leanic Lefever, Rainer Koenig, Sven Wegener,
- Tim Chen, Constantine Sapuntzakis
+ Tim Chen, Constantine Sapuntzakis David McCreedy
 
         Thanks! (and sorry if I forgot to mention someone)
