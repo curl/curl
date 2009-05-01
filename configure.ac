@@ -516,13 +516,9 @@ if test "$curl_cv_have_def__XOPEN_SOURCE_EXTENDED" = "yes" &&
     tst_lib_xnet_required="yes"
   ],[
     LIBS=$my_ac_save_LIBS
-    sed 's/^/cc-src: /' conftest.$ac_ext >&6
-    sed 's/^/cc-err: /' conftest.err >&6
   ])
 fi
 AC_MSG_RESULT([$tst_lib_xnet_required])
-echo "DEBUG: curl_cv_have_def___hpux: $curl_cv_have_def___hpux" >&6
-echo "DEBUG: curl_cv_have_def__XOPEN_SOURCE_EXTENDED: $curl_cv_have_def__XOPEN_SOURCE_EXTENDED" >&6
 
 dnl gethostbyname without lib or in the nsl lib?
 AC_CHECK_FUNC(gethostbyname,
