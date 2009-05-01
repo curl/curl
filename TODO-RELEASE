@@ -9,8 +9,6 @@ To be addressed in 7.19.5 (planned release: May 2009)
 
 228 - rpath problems in linking with custom openssl
 
-229 - [PATCH] to correct spelling in ABI
-
 231 - [PATCH] TPF-platform specific changes to various files
       - committed with minor changes
       - awaiting feedback
