@@ -54,7 +54,7 @@ The following notes apply to c-ares version 1.6.1 and later.
   and must not be modified by anyone. Configure script generates it for you.
 
 * We cannot assume anything else but very basic compiler features being
-  present. While libcurl requires an ANSI C compiler to build, some of the
+  present. While c-ares requires an ANSI C compiler to build, some of the
   earlier ANSI compilers clearly can't deal with some preprocessor operators.
 
 * Newlines must remain unix-style for older compilers' sake.
