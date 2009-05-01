@@ -1544,9 +1544,17 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
             else
               for(i = 0; i < gotbytes; ptr++, i++) {
                 perline++; /* amount of bytes in this line so far */
-                if(*ptr=='\n') {
+                if(*ptr=='\x0a') {
                   char letter;
                   int writetype;
+
+#ifdef CURL_DOES_CONVERSIONS
+                  /* convert from the network encoding */
+                  result = Curl_convert_from_network(data, line_start, perline);
+                  /* Curl_convert_from_network calls failf if unsuccessful */
+                  if(result)
+                    return result;
+#endif /* CURL_DOES_CONVERSIONS */
 
                   /* output debug if that is requested */
                   if(data->set.verbose)
