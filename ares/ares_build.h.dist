@@ -196,6 +196,11 @@
 #    endif
 #  endif
 
+#elif defined(TPF)
+#  define CARES_SIZEOF_LONG           8
+#  define CARES_TYPEOF_ARES_SOCKLEN_T FIXME
+#  define CARES_SIZEOF_ARES_SOCKLEN_T -1
+
 /* ===================================== */
 /*    KEEP MSVC THE PENULTIMATE ENTRY    */
 /* ===================================== */

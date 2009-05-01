@@ -14,6 +14,8 @@ To be addressed in 7.19.5 (planned release: May 2009)
 230 - [PATCH] http.c fix to Curl_proxyCONNECT for non-ASCII platforms.
 
 231 - [PATCH] TPF-platform specific changes to various files
+      - committed with minor changes
+      - awaiting feedback
 
 232 - [PATCH] transfer.c fixes for CURL_DO_LINEEND_CONV and non-ASCII 
       platform HTTP requests

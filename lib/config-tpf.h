@@ -601,6 +601,9 @@
 /* Define to the type of arg 5 for `select'. */
 #define SELECT_TYPE_ARG5 (struct timeval *)
 
+/* The size of an `off_t', as computed by sizeof. */
+#define SIZEOF_OFF_T 8
+
 /* The size of a `size_t', as computed by sizeof. */
 #define SIZEOF_SIZE_T 8
 

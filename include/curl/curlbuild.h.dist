@@ -478,6 +478,18 @@
 #  define CURL_TYPEOF_CURL_SOCKLEN_T FIXME
 #  define CURL_SIZEOF_CURL_SOCKLEN_T -1
 
+#elif defined(TPF)
+#  define CURL_SIZEOF_LONG           8
+#  define CURL_TYPEOF_CURL_OFF_T     long
+#  define CURL_FORMAT_CURL_OFF_T     "ld"
+#  define CURL_FORMAT_CURL_OFF_TU    "lu"
+#  define CURL_FORMAT_OFF_T          "%ld"
+#  define CURL_SIZEOF_CURL_OFF_T     8
+#  define CURL_SUFFIX_CURL_OFF_T     L
+#  define CURL_SUFFIX_CURL_OFF_TU    UL
+#  define CURL_TYPEOF_CURL_SOCKLEN_T FIXME
+#  define CURL_SIZEOF_CURL_SOCKLEN_T -1
+
 /* ===================================== */
 /*    KEEP MSVC THE PENULTIMATE ENTRY    */
 /* ===================================== */

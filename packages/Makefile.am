@@ -1,4 +1,4 @@
-SUBDIRS = Win32 Linux Solaris EPM DOS AIX vms
+SUBDIRS = Win32 Linux Solaris EPM DOS AIX vms TPF
 
 EXTRA_DIST = README NetWare/get_ver.awk OS400/ccsidcurl.c OS400/ccsidcurl.h   \
 OS400/curl.inc.in OS400/initscript.sh OS400/makefile.sh OS400/make-include.sh \

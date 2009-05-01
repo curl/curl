@@ -33,6 +33,10 @@
 #include <unistd.h>
 #endif
 
+#ifdef TPF
+#  include "select.h"
+#endif
+
 #define TEST_ERR_MAJOR_BAD     100
 #define TEST_ERR_RUNS_FOREVER   99
 

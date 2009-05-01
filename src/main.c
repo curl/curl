@@ -257,6 +257,8 @@ typedef enum {
 #    if defined(_LP64) || defined(_LARGE_FILES)
 #      define SIZEOF_OFF_T 8
 #    endif
+#  elif defined(TPF)
+#    define SIZEOF_OFF_T 8
 #  endif
 #  ifndef SIZEOF_OFF_T
 #    define SIZEOF_OFF_T 4

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -64,10 +64,6 @@
 
 #ifdef TPF
 #include "config-tpf.h"
-/* change which select is used for the curl command line tool */
-#define select(a,b,c,d,e) tpf_select_bsd(a,b,c,d,e)
-/* and turn off the progress meter */
-#define CONF_DEFAULT (0|CONF_NOPROGRESS)
 #endif
 
 #endif /* HAVE_CONFIG_H */
@@ -128,6 +124,13 @@
 #  endif
 #endif
 
+#ifdef TPF
+#  include <sys/socket.h>
+   /* change which select is used for the curl command line tool */
+#  define select(a,b,c,d,e) tpf_select_bsd(a,b,c,d,e)
+   /* and turn off the progress meter */
+#  define CONF_DEFAULT (0|CONF_NOPROGRESS)
+#endif
 
 #include <stdio.h>
 

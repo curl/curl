@@ -65,9 +65,7 @@
 #endif
 
 #ifdef TPF
-#include "config-tpf.h" /* hand-modified TPF config.h */
-/* change which select is used for libcurl */
-#define select(a,b,c,d,e) tpf_select_libcurl(a,b,c,d,e)
+#  include "config-tpf.h"
 #endif
 
 #endif /* HAVE_CONFIG_H */
@@ -228,6 +226,8 @@
 #  include <sys/socket.h> /* for select and ioctl*/
 #  include <netdb.h>      /* for in_addr_t definition */
 #  include <tpf/sysapi.h> /* for tpf_process_signals */
+   /* change which select is used for libcurl */
+#  define select(a,b,c,d,e) tpf_select_libcurl(a,b,c,d,e)
 #endif
 
 #include <stdio.h>
