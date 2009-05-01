@@ -24,4 +24,6 @@ To be addressed in 7.19.5 (planned release: May 2009)
 234 - [PATCH] Allow various Curl test suite tests to work on non-ASCII 
       platforms
 
-235 - 
+235 - #2784055, connect race with multi and socks proxy
+
+236 -
