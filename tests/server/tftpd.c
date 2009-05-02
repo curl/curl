@@ -152,7 +152,7 @@ static int maxtimeout = 5*TIMEOUT;
 static char buf[PKTSIZE];
 static char ackbuf[PKTSIZE];
 static struct sockaddr_in from;
-static socklen_t fromlen;
+static curl_socklen_t fromlen;
 
 struct bf {
   int counter;            /* size of data in buffer, or flag */
@@ -376,7 +376,7 @@ static int synchnet(curl_socket_t f /* socket to flush */)
   int j = 0;
   char rbuf[PKTSIZE];
   struct sockaddr_in fromaddr;
-  socklen_t fromaddrlen;
+  curl_socklen_t fromaddrlen;
 
   while (1) {
 #if defined(HAVE_IOCTLSOCKET)

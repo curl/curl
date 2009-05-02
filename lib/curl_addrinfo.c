@@ -221,7 +221,7 @@ Curl_getaddrinfo_ex(const char *nodename,
  *       int                   ai_family;
  *       int                   ai_socktype;
  *       int                   ai_protocol;
- *       socklen_t             ai_addrlen;   * Follow rfc3493 struct addrinfo *
+ *       curl_socklen_t        ai_addrlen;   * Follow rfc3493 struct addrinfo *
  *       char                 *ai_canonname;
  *       struct sockaddr      *ai_addr;
  *       struct Curl_addrinfo *ai_next;

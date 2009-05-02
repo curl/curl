@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -237,9 +237,9 @@ buffer_undef(localkey_t key, long size)
 
 
 int
-Curl_getnameinfo_a(const struct sockaddr * sa, socklen_t salen,
-              char * nodename, socklen_t nodenamelen,
-              char * servname, socklen_t servnamelen,
+Curl_getnameinfo_a(const struct sockaddr * sa, curl_socklen_t salen,
+              char * nodename, curl_socklen_t nodenamelen,
+              char * servname, curl_socklen_t servnamelen,
               int flags)
 
 {

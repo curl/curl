@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Yang Tse (2 May 2009)
+- Use a build-time configured curl_socklen_t data type instead of socklen_t.
+
 Yang Tse (1 May 2009)
 - Applied David McCreedy's patches "TPF-platform specific changes to various
   files" and "http.c fix to Curl_proxyCONNECT for non-ASCII platforms", the

@@ -15,6 +15,7 @@ This release includes the following changes:
    the build-time fixed number
  o CURLOPT_SEEKFUNCTION may now return CURL_SEEKFUNC_CANTSEEK
  o curl can now upload with resume even when reading from a pipe
+ o a build-time configured curl_socklen_t is now used instead of socklen_t
 
 This release includes the following bugfixes:
 
@@ -49,6 +50,6 @@ advice from friends like these:
  Andre Guibert de Bruet, Andreas Farber, Frank Hempel, Pierre Brico,
  Kamil Dudka, Jim Freeman, Daniel Johnson, Toshio Kuratomi, Martin Storsjo,
  Pramod Sharma, Gisle Vanem, Leanic Lefever, Rainer Koenig, Sven Wegener,
- Tim Chen, Constantine Sapuntzakis David McCreedy
+ Tim Chen, Constantine Sapuntzakis, David McCreedy
 
         Thanks! (and sorry if I forgot to mention someone)

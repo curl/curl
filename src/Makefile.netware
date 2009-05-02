@@ -395,7 +395,6 @@ ifeq ($(LIBARCH),CLIB)
 	@echo $(DL)#define SEND_TYPE_ARG3 int$(DL) >> $@
 	@echo $(DL)#define SEND_TYPE_ARG4 int$(DL) >> $@
 	@echo $(DL)#define SEND_TYPE_RETV int$(DL) >> $@
-	@echo $(DL)#define socklen_t int$(DL) >> $@
 	@echo $(DL)#define pressanykey PressAnyKeyToContinue$(DL) >> $@
 else
 	@echo $(DL)#define OS "i586-pc-libc-NetWare"$(DL) >> $@
@@ -545,9 +544,6 @@ endif
 	@echo $(DL)#else$(DL) >> $@
 	@echo $(DL)#define HAVE_VARIADIC_MACROS_C99 1$(DL) >> $@
 	@echo $(DL)#endif$(DL) >> $@
-ifdef OLD_NOVELLSDK
-	@echo $(DL)#define socklen_t int$(DL) >> $@
-endif
 ifdef CABUNDLE
 	@echo $(DL)#define CURL_CA_BUNDLE "$(CABUNDLE)"$(DL) >> $@
 else

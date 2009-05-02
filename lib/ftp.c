@@ -332,7 +332,7 @@ static CURLcode AllowServerConnect(struct connectdata *conn)
 #else
       struct sockaddr_in add;
 #endif
-      socklen_t size = (socklen_t) sizeof(add);
+      curl_socklen_t size = (curl_socklen_t) sizeof(add);
 
       if(0 == getsockname(sock, (struct sockaddr *) &add, &size)) {
         size = sizeof(add);
@@ -888,7 +888,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
    */
   struct Curl_sockaddr_storage ss;
   Curl_addrinfo *res, *ai;
-  socklen_t sslen;
+  curl_socklen_t sslen;
   char hbuf[NI_MAXHOST];
   struct sockaddr *sa=(struct sockaddr *)&ss;
   struct sockaddr_in * const sa4 = (void *)sa;
@@ -925,7 +925,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
       return CURLE_FTP_PORT_FAILED;
     }
 
-    if(sslen > (socklen_t)sizeof(ss))
+    if(sslen > (curl_socklen_t)sizeof(ss))
       sslen = sizeof(ss);
     rc = getnameinfo((struct sockaddr *)&ss, sslen, hbuf, sizeof(hbuf), NULL,
                      0, NIFLAGS);
@@ -992,7 +992,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     else
       sa6->sin6_port = 0;
 
-    if(sslen > (socklen_t)sizeof(ss))
+    if(sslen > (curl_socklen_t)sizeof(ss))
       sslen = sizeof(ss);
 
     if(bind(portsock, sa, sslen)) {
@@ -1112,7 +1112,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   Curl_addrinfo *addr = NULL;
   unsigned short ip[4];
   bool freeaddr = TRUE;
-  socklen_t sslen = sizeof(sa);
+  curl_socklen_t sslen = sizeof(sa);
   const char *ftpportstr = data->set.str[STRING_FTPPORT];
 
   (void)fcmd; /* not used in the IPv4 code */
@@ -1161,7 +1161,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
           Curl_strerror(conn, SOCKERRNO) );
       return CURLE_FTP_PORT_FAILED;
     }
-    if(sslen > (socklen_t)sizeof(sa))
+    if(sslen > (curl_socklen_t)sizeof(sa))
       sslen = sizeof(sa);
 
     sa_filled_in = TRUE; /* the sa struct is filled in */
@@ -1189,7 +1189,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
       if(bind(portsock, (struct sockaddr *)&sa, sslen) == 0) {
         /* we succeeded to bind */
         struct sockaddr_in add;
-        socklen_t socksize = sizeof(add);
+        curl_socklen_t socksize = sizeof(add);
 
         if(getsockname(portsock, (struct sockaddr *) &add,
                        &socksize)) {

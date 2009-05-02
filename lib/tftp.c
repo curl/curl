@@ -147,7 +147,7 @@ typedef struct tftp_state_data {
   unsigned short  block;
   struct Curl_sockaddr_storage   local_addr;
   struct Curl_sockaddr_storage   remote_addr;
-  socklen_t       remote_addrlen;
+  curl_socklen_t  remote_addrlen;
   ssize_t         rbytes;
   size_t          sbytes;
   size_t          blksize;
@@ -947,7 +947,7 @@ static CURLcode tftp_do(struct connectdata *conn, bool *done)
   CURLcode              code;
   int                   rc;
   struct Curl_sockaddr_storage fromaddr;
-  socklen_t             fromlen;
+  curl_socklen_t        fromlen;
   int                   check_time = 0;
   struct SingleRequest *k = &data->req;
 

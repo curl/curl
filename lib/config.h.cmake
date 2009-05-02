@@ -946,8 +946,5 @@
 /* Define to `unsigned int' if <sys/types.h> does not define. */
 #cmakedefine size_t ${size_t}
 
-/* Type to use in place of socklen_t when system does not provide it. */
-#cmakedefine socklen_t ${socklen_t}
-
 /* the signed version of size_t */
 #cmakedefine ssize_t ${ssize_t}

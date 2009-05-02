@@ -751,7 +751,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
        got */
     /* we succeeded to bind */
     struct sockaddr_in add;
-    socklen_t socksize = sizeof(add);
+    curl_socklen_t socksize = sizeof(add);
 
     if(getsockname(sock, (struct sockaddr *) &add,
                    &socksize)<0) {

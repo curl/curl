@@ -688,10 +688,6 @@ ENDIF(HAVE_INET_NTOA_R_DECL_REENTRANT)
 
 # Some other minor tests
 
-IF(NOT HAVE_SOCKLEN_T)
-  SET(socklen_t "int")
-ENDIF(NOT HAVE_SOCKLEN_T)
-
 IF(NOT HAVE_IN_ADDR_T)
   SET(in_addr_t "unsigned long")
 ENDIF(NOT HAVE_IN_ADDR_T)
