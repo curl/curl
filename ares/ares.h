@@ -260,7 +260,7 @@ int ares_gethostbyname_file(ares_channel channel, const char *name,
 void ares_gethostbyaddr(ares_channel channel, const void *addr, int addrlen,
                         int family, ares_host_callback callback, void *arg);
 void ares_getnameinfo(ares_channel channel, const struct sockaddr *sa,
-                      socklen_t salen, int flags,
+                      ares_socklen_t salen, int flags,
                       ares_nameinfo_callback callback,
                       void *arg);
 int ares_fds(ares_channel channel, fd_set *read_fds, fd_set *write_fds);

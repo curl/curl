@@ -429,7 +429,7 @@ static void read_udp_packets(ares_channel channel, fd_set *read_fds,
   unsigned char buf[PACKETSZ + 1];
 #ifdef HAVE_RECVFROM
   struct sockaddr_in from;
-  socklen_t fromlen;
+  ares_socklen_t fromlen;
 #endif
 
   if(!read_fds && (read_fd == ARES_SOCKET_BAD))

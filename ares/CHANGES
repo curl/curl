@@ -1,5 +1,8 @@
   Changelog for the c-ares project
 
+* May 2 2009 (Yang Tse)
+- Use a build-time configured ares_socklen_t data type instead of socklen_t.
+
 * April 21 2009 (Yang Tse)
 - Moved potential inclusion of system's malloc.h and memory.h header files to
   setup_once.h.  Inclusion of each header file is based on the definition of

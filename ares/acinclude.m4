@@ -450,94 +450,6 @@ AC_DEFUN([CURL_CHECK_HEADER_MEMORY], [
 ])
 
 
-dnl CURL_CHECK_TYPE_SOCKLEN_T
-dnl -------------------------------------------------
-dnl Check for existing socklen_t type, and provide
-dnl an equivalent type if socklen_t not available
-
-AC_DEFUN([CURL_CHECK_TYPE_SOCKLEN_T], [
-  AC_REQUIRE([CURL_CHECK_HEADER_WS2TCPIP])dnl
-  AC_CHECK_TYPE([socklen_t], ,[
-    dnl socklen_t not available
-    AC_CACHE_CHECK([for socklen_t equivalent],
-      [curl_cv_socklen_t_equiv], [
-      curl_cv_socklen_t_equiv="unknown"
-      for arg1 in 'int' 'SOCKET'; do
-        for arg2 in "struct sockaddr" void; do
-          for t in int size_t unsigned long "unsigned long"; do
-            if test "$curl_cv_socklen_t_equiv" = "unknown"; then
-              AC_COMPILE_IFELSE([
-                AC_LANG_PROGRAM([[
-#undef inline
-#ifdef HAVE_WINDOWS_H
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#ifdef HAVE_WINSOCK2_H
-#include <winsock2.h>
-#else
-#ifdef HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
-#endif
-#define GETPEERNCALLCONV PASCAL
-#else
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#define GETPEERNCALLCONV
-#endif
-                  extern int GETPEERNCALLCONV getpeername($arg1, $arg2 *, $t *);
-                ]],[[
-                  $t len=0;
-                  getpeername(0,0,&len);
-                ]])
-              ],[
-                curl_cv_socklen_t_equiv="$t"
-              ])
-            fi
-          done
-        done
-      done
-    ])
-    case "$curl_cv_socklen_t_equiv" in
-      unknown)
-        AC_MSG_ERROR([Cannot find a type to use in place of socklen_t])
-        ;;
-      *)
-        AC_DEFINE_UNQUOTED(socklen_t, $curl_cv_socklen_t_equiv,
-          [Type to use in place of socklen_t when system does not provide it.])
-        ;;
-    esac
-  ],[
-#undef inline
-#ifdef HAVE_WINDOWS_H
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#ifdef HAVE_WINSOCK2_H
-#include <winsock2.h>
-#ifdef HAVE_WS2TCPIP_H
-#include <ws2tcpip.h>
-#endif
-#endif
-#else
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#endif
-  ])
-])
-
-
 dnl CURL_CHECK_FUNC_GETNAMEINFO
 dnl -------------------------------------------------
 dnl Test if the getnameinfo function is available, 
@@ -551,7 +463,6 @@ dnl argument in GETNAMEINFO_QUAL_ARG1.
 
 AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
   AC_REQUIRE([CURL_CHECK_HEADER_WS2TCPIP])dnl
-  AC_REQUIRE([CURL_CHECK_TYPE_SOCKLEN_T])dnl
   AC_CHECK_HEADERS(sys/types.h sys/socket.h netdb.h)
   #
   AC_MSG_CHECKING([for getnameinfo])

@@ -3,7 +3,7 @@
 
 /* $Id$ */
 
-/* Copyright (C) 2004 - 2008 by Daniel Stenberg et al
+/* Copyright (C) 2004 - 2009 by Daniel Stenberg et al
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -96,23 +96,6 @@ struct timeval {
 #define SEND_4TH_ARG MSG_NOSIGNAL
 #else
 #define SEND_4TH_ARG 0
-#endif
-
-
-/*
- * Windows build targets have socklen_t definition in
- * ws2tcpip.h but some versions of ws2tcpip.h do not
- * have the definition. It seems that when the socklen_t
- * definition is missing from ws2tcpip.h the definition
- * for INET_ADDRSTRLEN is also missing, and that when one
- * definition is present the other one also is available.
- */
-
-#if defined(WIN32) && !defined(HAVE_CONFIG_H)
-#  if ( defined(_MSC_VER) && !defined(INET_ADDRSTRLEN) ) || \
-      (!defined(_MSC_VER) && !defined(HAVE_WS2TCPIP_H) )
-#    define socklen_t int
-#  endif
 #endif
 
 
@@ -442,89 +425,6 @@ typedef int sig_atomic_t;
  */
 
 #define ZERO_NULL 0
-
-
-#if defined (__LP64__) && defined(__hpux) && !defined(_XOPEN_SOURCE_EXTENDED)
-#include <sys/socket.h>
-/* HP-UX has this oddity where it features a few functions that don't work
-   with socklen_t so we need to convert to ints
-
-   This is due to socklen_t being a 64bit int under 64bit ABI, but the
-   pre-xopen (default) interfaces require an int, which is 32bits.
-
-   Therefore, Anytime socklen_t is passed by pointer, the libc function
-   truncates the 64bit socklen_t value by treating it as a 32bit value.
-
-
-   Note that some socket calls are allowed to have a NULL pointer for
-   the socklen arg.
-*/
-
-inline static int Curl_hp_getsockname(int s, struct sockaddr *name,
-                                      socklen_t *namelen)
-{
-  int rc;
-  if(namelen) {
-     int len = *namelen;
-     rc = getsockname(s, name, &len);
-     *namelen = len;
-   }
-  else
-     rc = getsockname(s, name, 0);
-  return rc;
-}
-
-inline static int Curl_hp_getsockopt(int  s, int level, int optname,
-                                     void *optval, socklen_t *optlen)
-{
-  int rc;
-  if(optlen) {
-    int len = *optlen;
-    rc = getsockopt(s, level, optname, optval, &len);
-    *optlen = len;
-  }
-  else
-    rc = getsockopt(s, level, optname, optval, 0);
-  return rc;
-}
-
-inline static int Curl_hp_accept(int sockfd, struct sockaddr *addr,
-                                 socklen_t *addrlen)
-{
-  int rc;
-  if(addrlen) {
-     int len = *addrlen;
-     rc = accept(sockfd, addr, &len);
-     *addrlen = len;
-  }
-  else
-     rc = accept(sockfd, addr, 0);
-  return rc;
-}
-
-
-inline static ssize_t Curl_hp_recvfrom(int s, void *buf, size_t len, int flags,
-                                       struct sockaddr *from,
-                                       socklen_t *fromlen)
-{
-  ssize_t rc;
-  if(fromlen) {
-    int fromlen32 = *fromlen;
-    rc = recvfrom(s, buf, len, flags, from, &fromlen32);
-    *fromlen = fromlen32;
-  }
-  else {
-    rc = recvfrom(s, buf, len, flags, from, 0);
-  }
-  return rc;
-}
-
-#define getsockname(a,b,c) Curl_hp_getsockname((a),(b),(c))
-#define getsockopt(a,b,c,d,e) Curl_hp_getsockopt((a),(b),(c),(d),(e))
-#define accept(a,b,c) Curl_hp_accept((a),(b),(c))
-#define recvfrom(a,b,c,d,e,f) Curl_hp_recvfrom((a),(b),(c),(d),(e),(f))
-
-#endif /* HPUX work-around */
 
 
 #endif /* __SETUP_ONCE_H */
