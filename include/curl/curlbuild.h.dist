@@ -389,8 +389,8 @@
 #    define CURL_SUFFIX_CURL_OFF_T     L
 #    define CURL_SUFFIX_CURL_OFF_TU    UL
 #  endif
-#  define CURL_TYPEOF_CURL_SOCKLEN_T unsigned int
-#  define CURL_SIZEOF_CURL_SOCKLEN_T 4
+#  define CURL_TYPEOF_CURL_SOCKLEN_T FIXME
+#  define CURL_SIZEOF_CURL_SOCKLEN_T -1
 
 #elif defined(__OS400__)
 #  if defined(__ILEC400__)

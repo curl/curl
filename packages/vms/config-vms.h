@@ -284,7 +284,7 @@
 #define GETNAMEINFO_TYPE_ARG1 struct sockaddr *
 
 /* Define to the type of arg 2 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG2 unsigned int
+#define GETNAMEINFO_TYPE_ARG2 FIXME
 
 /* Define to the type of args 4 and 6 for getnameinfo. */
 #define GETNAMEINFO_TYPE_ARG46 size_t
