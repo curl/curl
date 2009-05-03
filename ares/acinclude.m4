@@ -147,7 +147,7 @@ int main (void)
 {
 #if defined(__hpux) && defined(_XOPEN_SOURCE) && defined(_XOPEN_SOURCE >= 600)
   return 0;
-#if defined(__hpux) && defined(_XOPEN_SOURCE) && defined(_XOPEN_SOURCE_EXTENDED)
+#elif defined(__hpux) && defined(_XOPEN_SOURCE_EXTENDED)
   return 0;
 #else
   force compilation error
