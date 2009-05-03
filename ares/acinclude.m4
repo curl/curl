@@ -134,6 +134,34 @@ int main (void)
 ])
 
 
+dnl CARES_CHECK_LIB_XNET
+dnl -------------------------------------------------
+dnl Verify if X/Open network library is required.
+
+AC_DEFUN([CARES_CHECK_LIB_XNET], [
+  AC_MSG_CHECKING([if X/Open network library is required])
+  tst_lib_xnet_required="no"
+  AC_COMPILE_IFELSE([
+    AC_LANG_SOURCE([[
+int main (void)
+{
+#if defined(__hpux) && defined(_XOPEN_SOURCE) && defined(_XOPEN_SOURCE >= 600)
+  return 0;
+#if defined(__hpux) && defined(_XOPEN_SOURCE) && defined(_XOPEN_SOURCE_EXTENDED)
+  return 0;
+#else
+  force compilation error
+#endif
+}
+    ]])
+  ],[
+    tst_lib_xnet_required="yes"
+    LIBS="$LIBS -lxnet"
+  ])
+  AC_MSG_RESULT([$tst_lib_xnet_required])
+])
+
+
 dnl CARES_CHECK_AIX_ALL_SOURCE
 dnl -------------------------------------------------
 dnl Provides a replacement of traditional AC_AIX with
