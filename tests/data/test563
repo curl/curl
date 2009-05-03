@@ -1,0 +1,57 @@
+<testcase>
+<info>
+<keywords>
+FTP
+CURLOPT_PORT
+HTTP proxy
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK swsclose
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Accept-Ranges: bytes
+Content-Length: 6
+
+hello
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+http
+</server>
+<tool>
+lib562
+</tool>
+ <name>
+FTP type=A URL and CURLOPT_PORT set and proxy
+ </name>
+
+<setenv>
+ftp_proxy=http://%HOSTIP:%HTTPPORT/
+</setenv>
+# note that we need quotes around the URL below to make sure the shell doesn't
+# treat the semicolon as a separator!
+ <command>
+"ftp://%HOSTIP:23456/563;type=A" %FTPPORT
+</command>
+
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET ftp://%HOSTIP:%FTPPORT/563;type=A HTTP/1.1
+Host: %HOSTIP:%FTPPORT
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+</protocol>
+</verify>
+</testcase>

@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Fandrich (3 May 2009)
+- Added and disabled test case 563 which shows KNOWN_BUGS #59.  The bug
+  report failed to mention that a proxy must be used to reproduce it.
+
 Yang Tse (2 May 2009)
 - Use a build-time configured curl_socklen_t data type instead of socklen_t.
 
