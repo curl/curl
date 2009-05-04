@@ -588,20 +588,39 @@ Curl_gtls_connect(struct connectdata *conn,
 
   conn->ssl[sockindex].state = ssl_connection_complete;
 
-  if(!ssl_sessionid) {
-    /* this session was not previously in the cache, add it now */
+  {
+    /* we always unconditionally get the session id here, as even if we
+       already got it from the cache and asked to use it in the connection, it
+       might've been rejected and then a new one is in use now and we need to
+       detect that. */
+    void *connect_sessionid;
+    size_t connect_idsize;
 
     /* get the session ID data size */
-    gnutls_session_get_data(session, NULL, &ssl_idsize);
-    ssl_sessionid = malloc(ssl_idsize); /* get a buffer for it */
+    gnutls_session_get_data(session, NULL, &connect_idsize);
+    connect_sessionid = malloc(connect_idsize); /* get a buffer for it */
 
-    if(ssl_sessionid) {
+    if(connect_sessionid) {
       /* extract session ID to the allocated buffer */
-      gnutls_session_get_data(session, ssl_sessionid, &ssl_idsize);
+      gnutls_session_get_data(session, connect_sessionid, &connect_idsize);
+
+      if(ssl_sessionid &&
+         ((connect_idsize != ssl_idsize) ||
+          memcmp(connect_sessionid, ssl_sessionid, ssl_idsize)))
+        /* there was one before in the cache, but without the same size or
+           with different contents so delete the old one */
+        Curl_ssl_delsessionid(conn, ssl_sessionid);
+      else if(ssl_sessionid) {
+        /* it was in the cache and its the same one now, just leave it */
+        free(connect_sessionid);
+        return CURLE_OK;
+      }
+
 
       /* store this session id */
-      return Curl_ssl_addsessionid(conn, ssl_sessionid, ssl_idsize);
+      return Curl_ssl_addsessionid(conn, connect_sessionid, connect_idsize);
     }
+
   }
 
   return CURLE_OK;

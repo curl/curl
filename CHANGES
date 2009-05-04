@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (5 May 2009)
+- Inspired by Michael Smith's session id fix for OpenSSL, I did the
+  corresponding fix in the GnuTLS code: make sure to store the new session id
+  in case the previous re-used one is rejected.
+
 Daniel Stenberg (4 May 2009)
 - Michael Smith posted bug report #2786255
   (http://curl.haxx.se/bug/view.cgi?id=2786255) with a patch, identifying how
