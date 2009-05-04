@@ -39,6 +39,7 @@ This release includes the following bugfixes:
  o TFTP problems after a failed transfer to the same host
  o improved out of the box TPF compatibility
  o HTTP PUT protocol line endings portions mangled from CRLF to CRCRLF
+ o Rejected SSL session ids are killed properly (for OpenSSL builds)
 
 This release includes the following known bugs:
 
@@ -51,6 +52,6 @@ advice from friends like these:
  Andre Guibert de Bruet, Andreas Farber, Frank Hempel, Pierre Brico,
  Kamil Dudka, Jim Freeman, Daniel Johnson, Toshio Kuratomi, Martin Storsjo,
  Pramod Sharma, Gisle Vanem, Leanic Lefever, Rainer Koenig, Sven Wegener,
- Tim Chen, Constantine Sapuntzakis, David McCreedy
+ Tim Chen, Constantine Sapuntzakis, David McCreedy, Michael Smith
 
         Thanks! (and sorry if I forgot to mention someone)

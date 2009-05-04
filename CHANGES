@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel Stenberg (4 May 2009)
+- Michael Smith posted bug report #2786255
+  (http://curl.haxx.se/bug/view.cgi?id=2786255) with a patch, identifying how
+  libcurl did not deal with SSL session ids properly if the server rejected a
+  re-use of one. Starting now, it will forget the rejected one and remember
+  the new. This change was for OpenSSL only, it is likely that other SSL lib
+  code needs similar fixes.
+
 Yang Tse (4 May 2009)
 - Applied David McCreedy's "transfer.c fixes for CURL_DO_LINEEND_CONV and
   non-ASCII platform HTTP requests" patch addressing two HTTP PUT problems:

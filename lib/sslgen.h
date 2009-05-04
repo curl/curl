@@ -71,6 +71,8 @@ int Curl_ssl_getsessionid(struct connectdata *conn,
 CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
                                void *ssl_sessionid,
                                size_t idsize);
+/* delete a session from the cache */
+void Curl_ssl_delsessionid(struct connectdata *conn, void *ssl_sessionid);
 
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 

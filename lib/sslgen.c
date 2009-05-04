@@ -272,6 +272,22 @@ static int kill_session(struct curl_ssl_session *session)
 }
 
 /*
+ * Delete the given session ID from the cache.
+ */
+void Curl_ssl_delsessionid(struct connectdata *conn, void *ssl_sessionid)
+{
+  int i;
+  for(i=0; i< conn->data->set.ssl.numsessions; i++) {
+    struct curl_ssl_session *check = &conn->data->state.session[i];
+
+    if (check->sessionid == ssl_sessionid) {
+      kill_session(check);
+      break;
+    }
+  }
+}
+
+/*
  * Store session id in the session cache. The ID passed on to this function
  * must already have been extracted and allocated the proper way for the SSL
  * layer. Curl_XXXX_session_free() will be called to free/kill the session ID
