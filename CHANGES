@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Yang Tse (4 May 2009)
+- Applied David McCreedy's "transfer.c fixes for CURL_DO_LINEEND_CONV and
+  non-ASCII platform HTTP requests" patch addressing two HTTP PUT problems:
+  1) On non-ASCII platforms not all of the protocol portions of the PUT are
+  being translated to ASCII.  2) On all platforms the line endings of part of
+  the protocol portions are mangled from CRLF to CRCRLF if data->set.crlf or
+  data->set.prefer_ascii are set (depending on CURL_DO_LINEEND_CONV).
+
 Daniel Fandrich (3 May 2009)
 - Added and disabled test case 563 which shows KNOWN_BUGS #59.  The bug
   report failed to mention that a proxy must be used to reproduce it.

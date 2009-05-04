@@ -130,11 +130,18 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
   struct SessionHandle *data = conn->data;
   size_t buffersize = (size_t)bytes;
   int nread;
+  int sending_http_headers = FALSE;
 
   if(data->req.upload_chunky) {
     /* if chunked Transfer-Encoding */
     buffersize -= (8 + 2 + 2);   /* 32bit hex + CRLF + CRLF */
     data->req.upload_fromhere += (8 + 2); /* 32bit hex + CRLF */
+  }
+  if((data->state.proto.http)
+  && (data->state.proto.http->sending == HTTPSEND_REQUEST)) {
+     /* We're sending the HTTP request headers, not the data.
+        Remember that so we don't re-translate them into garbage. */
+     sending_http_headers = TRUE;
   }
 
   /* this function returns a size_t, so we typecast to int to prevent warnings
@@ -166,10 +173,40 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
   }
 
   if(!data->req.forbidchunk && data->req.upload_chunky) {
-    /* if chunked Transfer-Encoding */
+    /* if chunked Transfer-Encoding 
+     *    build chunk:
+     *
+     *        <HEX SIZE> CRLF
+     *        <DATA> CRLF
+     */
+    /* On non-ASCII platforms the <DATA> may or may not be
+       translated based on set.prefer_ascii while the protocol
+       portion must always be translated to the network encoding.
+       To further complicate matters, line end conversion might be
+       done later on, so we need to prevent CRLFs from becoming
+       CRCRLFs if that's the case.  To do this we use bare LFs
+       here, knowing they'll become CRLFs later on.
+     */
+
     char hexbuffer[11];
-    int hexlen = snprintf(hexbuffer, sizeof(hexbuffer),
-                          "%x\r\n", nread);
+    const char *endofline_native;
+    const char *endofline_network;
+    int hexlen;
+#ifdef CURL_DO_LINEEND_CONV
+    if((data->set.crlf) || (data->set.prefer_ascii)) {
+#else
+    if(data->set.crlf) {
+#endif /* CURL_DO_LINEEND_CONV */
+      /* \n will become \r\n later on */
+      endofline_native  = "\n";
+      endofline_network = "\x0a";
+    } else {
+      endofline_native  = "\r\n";
+      endofline_network = "\x0d\x0a";
+    }
+    hexlen = snprintf(hexbuffer, sizeof(hexbuffer),
+                      "%x%s", nread, endofline_native);
+
     /* move buffer pointer */
     data->req.upload_fromhere -= hexlen;
     nread += hexlen;
@@ -177,29 +214,48 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
     /* copy the prefix to the buffer, leaving out the NUL */
     memcpy(data->req.upload_fromhere, hexbuffer, hexlen);
 
-    /* always append CRLF to the data */
-    memcpy(data->req.upload_fromhere + nread, "\r\n", 2);
+    /* always append ASCII CRLF to the data */  
+    memcpy(data->req.upload_fromhere + nread, 
+           endofline_network, 
+           strlen(endofline_network));
+
+#ifdef CURL_DOES_CONVERSIONS
+    CURLcode res;
+    int length;
+    if(data->set.prefer_ascii) {
+      /* translate the protocol and data */
+      length = nread;
+    } else {
+      /* just translate the protocol portion */
+      length = strlen(hexbuffer);
+    }
+    res = Curl_convert_to_network(data, data->req.upload_fromhere, length);
+    /* Curl_convert_to_network calls failf if unsuccessful */
+    if(res != CURLE_OK) {
+      return(res);
+    }
+#endif /* CURL_DOES_CONVERSIONS */
 
     if((nread - hexlen) == 0) {
       /* mark this as done once this chunk is transfered */
       data->req.upload_done = TRUE;
     }
 
-    nread+=2; /* for the added CRLF */
+    nread+=strlen(endofline_native); /* for the added end of line */
+#ifdef CURL_DOES_CONVERSIONS
+  } else {
+    if((data->set.prefer_ascii) && (!sending_http_headers)) {
+      CURLcode res;
+      res = Curl_convert_to_network(data, data->req.upload_fromhere, nread);
+      /* Curl_convert_to_network calls failf if unsuccessful */
+      if(res != CURLE_OK) {
+        return(res);
+      }
+    }
+#endif /* CURL_DOES_CONVERSIONS */
   }
 
   *nreadp = nread;
-
-#ifdef CURL_DOES_CONVERSIONS
-  if(data->set.prefer_ascii) {
-    CURLcode res;
-    res = Curl_convert_to_network(data, data->req.upload_fromhere, nread);
-    /* Curl_convert_to_network calls failf if unsuccessful */
-    if(res != CURLE_OK) {
-      return(res);
-    }
-  }
-#endif /* CURL_DOES_CONVERSIONS */
 
   return CURLE_OK;
 }
@@ -1404,6 +1460,7 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
   ssize_t bytes_written;
   CURLcode result;
   ssize_t nread; /* number of bytes read */
+  int sending_http_headers = FALSE;
 
   if((k->bytecount == 0) && (k->writebytecount == 0))
     Curl_pgrsTime(data, TIMER_STARTTRANSFER);
@@ -1439,6 +1496,15 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
           break;
         }
 
+        if(data->state.proto.http) {
+          if(data->state.proto.http->sending == HTTPSEND_REQUEST) {
+            /* We're sending the HTTP request headers, not the data.
+               Remember that so we don't change the line endings. */
+               sending_http_headers = TRUE;
+          } else {
+            sending_http_headers = FALSE;
+          }
+        }
         result = Curl_fillreadbuffer(conn, BUFSIZE, &fillcount);
         if(result)
           return result;
@@ -1470,11 +1536,11 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
       /* convert LF to CRLF if so asked */
 #ifdef CURL_DO_LINEEND_CONV
       /* always convert if we're FTPing in ASCII mode */
-      if((data->set.crlf) || (data->set.prefer_ascii))
+        if(((data->set.crlf) || (data->set.prefer_ascii))
 #else
-        if(data->set.crlf)
+        if((data->set.crlf)
 #endif /* CURL_DO_LINEEND_CONV */
-        {
+        && (!sending_http_headers)) {
           if(data->state.scratch == NULL)
             data->state.scratch = malloc(2*BUFSIZE);
           if(data->state.scratch == NULL) {

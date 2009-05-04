@@ -9,9 +9,6 @@ To be addressed in 7.19.5 (planned release: May 2009)
 
 228 - rpath problems in linking with custom openssl
 
-232 - [PATCH] transfer.c fixes for CURL_DO_LINEEND_CONV and non-ASCII 
-      platform HTTP requests
-
 233 - [PATCH] Allow Curl test suite test #251 to work if client and server 
       are on different machines
 
