@@ -943,6 +943,8 @@ sub runftpserver {
     my $ip=$HOSTIP;
     my $nameext;
     my $cmd;
+    my $addr;
+    my $addr_client;
 
     if($ipv6) {
         # if IPv6, use a different setup
@@ -966,18 +968,20 @@ sub runftpserver {
     # start our server:
     my $flag=$debugprotocol?"-v ":"";
     $flag .= "-s \"$srcdir\" ";
-    my $addr;
     if($id) {
         $flag .="--id $id ";
     }
     if($ipv6) {
         $flag .="--ipv6 ";
         $addr = $HOST6IP;
+        $addr_client = $CLIENT6IP;
     } else {
         $addr = $HOSTIP;
+        $addr_client = $CLIENTIP;
     }
 
-    $cmd="$perl $srcdir/ftpserver.pl --pidfile $pidfile $flag --port $port --addr \"$addr\"";
+    $cmd="$perl $srcdir/ftpserver.pl --pidfile $pidfile $flag --port $port --addr \"$addr\" --client \"$addr_client\"";
+
     my ($ftppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($ftppid <= 0 || !kill(0, $ftppid)) {
