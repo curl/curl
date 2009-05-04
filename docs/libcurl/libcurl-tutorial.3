@@ -557,7 +557,7 @@ post handle:
  curl_easy_perform(easyhandle); /* post away! */
 
  curl_formfree(post); /* free post */
- curl_slist_free_all(post); /* free custom header list */
+ curl_slist_free_all(headers); /* free custom header list */
 .fi
 
 Since all options on an easyhandle are "sticky", they remain the same until
