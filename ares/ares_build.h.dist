@@ -174,26 +174,26 @@
 #  if defined(__IBMC__) || defined(__IBMCPP__)
 #    if defined(_ILP32)
 #      define CARES_SIZEOF_LONG           4
-#      define CARES_TYPEOF_ARES_SOCKLEN_T FIXME
-#      define CARES_SIZEOF_ARES_SOCKLEN_T -1
 #    elif defined(_LP64)
 #      define CARES_SIZEOF_LONG           8
-#      define CARES_TYPEOF_ARES_SOCKLEN_T FIXME
-#      define CARES_SIZEOF_ARES_SOCKLEN_T -1
 #    endif
+#    define CARES_TYPEOF_ARES_SOCKLEN_T socklen_t
+#    define CARES_SIZEOF_ARES_SOCKLEN_T 4
+#    define CARES_PULL_SYS_TYPES_H      1
+#    define CARES_PULL_SYS_SOCKET_H     1
 #  endif
 
 #elif defined(__370__)
 #  if defined(__IBMC__) || defined(__IBMCPP__)
 #    if defined(_ILP32)
 #      define CARES_SIZEOF_LONG           4
-#      define CARES_TYPEOF_ARES_SOCKLEN_T FIXME
-#      define CARES_SIZEOF_ARES_SOCKLEN_T -1
 #    elif defined(_LP64)
 #      define CARES_SIZEOF_LONG           8
-#      define CARES_TYPEOF_ARES_SOCKLEN_T FIXME
-#      define CARES_SIZEOF_ARES_SOCKLEN_T -1
 #    endif
+#    define CARES_TYPEOF_ARES_SOCKLEN_T socklen_t
+#    define CARES_SIZEOF_ARES_SOCKLEN_T 4
+#    define CARES_PULL_SYS_TYPES_H      1
+#    define CARES_PULL_SYS_SOCKET_H     1
 #  endif
 
 #elif defined(TPF)
@@ -228,6 +228,18 @@
 #else
 #  error "Unknown non-configure build target!"
    Error Compilation_aborted_Unknown_non_configure_build_target
+#endif
+
+/* CARES_PULL_SYS_TYPES_H is defined above when inclusion of header file  */
+/* sys/types.h is required here to properly make type definitions below.  */
+#ifdef CARES_PULL_SYS_TYPES_H
+#  include <sys/types.h>
+#endif
+
+/* CARES_PULL_SYS_SOCKET_H is defined above when inclusion of header file  */
+/* sys/socket.h is required here to properly make type definitions below.  */
+#ifdef CARES_PULL_SYS_SOCKET_H
+#  include <sys/socket.h>
 #endif
 
 /* Data type definition of ares_socklen_t. */

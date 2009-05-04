@@ -438,9 +438,11 @@
 #      define CURL_SUFFIX_CURL_OFF_T     L
 #      define CURL_SUFFIX_CURL_OFF_TU    UL
 #    endif
+#    define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
+#    define CURL_SIZEOF_CURL_SOCKLEN_T 4
+#    define CURL_PULL_SYS_TYPES_H      1
+#    define CURL_PULL_SYS_SOCKET_H     1
 #  endif
-#  define CURL_TYPEOF_CURL_SOCKLEN_T FIXME
-#  define CURL_SIZEOF_CURL_SOCKLEN_T -1
 
 #elif defined(__370__)
 #  if defined(__IBMC__) || defined(__IBMCPP__)
@@ -474,9 +476,11 @@
 #      define CURL_SUFFIX_CURL_OFF_T     L
 #      define CURL_SUFFIX_CURL_OFF_TU    UL
 #    endif
+#    define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
+#    define CURL_SIZEOF_CURL_SOCKLEN_T 4
+#    define CURL_PULL_SYS_TYPES_H      1
+#    define CURL_PULL_SYS_SOCKET_H     1
 #  endif
-#  define CURL_TYPEOF_CURL_SOCKLEN_T FIXME
-#  define CURL_SIZEOF_CURL_SOCKLEN_T -1
 
 #elif defined(TPF)
 #  define CURL_SIZEOF_LONG           8
@@ -547,6 +551,18 @@
 #else
 #  error "Unknown non-configure build target!"
    Error Compilation_aborted_Unknown_non_configure_build_target
+#endif
+
+/* CURL_PULL_SYS_TYPES_H is defined above when inclusion of header file  */
+/* sys/types.h is required here to properly make type definitions below. */
+#ifdef CURL_PULL_SYS_TYPES_H
+#  include <sys/types.h>
+#endif
+
+/* CURL_PULL_SYS_SOCKET_H is defined above when inclusion of header file  */
+/* sys/socket.h is required here to properly make type definitions below. */
+#ifdef CURL_PULL_SYS_SOCKET_H
+#  include <sys/socket.h>
 #endif
 
 /* Data type definition of curl_socklen_t. */
