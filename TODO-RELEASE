@@ -9,6 +9,12 @@ To be addressed in 7.19.5 (planned release: May 2009)
 
 228 - rpath problems in linking with custom openssl
 
+232 - [PATCH] transfer.c fixes for CURL_DO_LINEEND_CONV and non-ASCII
+      platform HTTP requests
+      - committed to cvs
+      - test #128 fails with this applied on cygwin
+      - awaiting follow-up
+
 234 - [PATCH] Allow various Curl test suite tests to work on non-ASCII 
       platforms
 
