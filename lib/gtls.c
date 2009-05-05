@@ -604,18 +604,10 @@ Curl_gtls_connect(struct connectdata *conn,
       /* extract session ID to the allocated buffer */
       gnutls_session_get_data(session, connect_sessionid, &connect_idsize);
 
-      if(ssl_sessionid &&
-         ((connect_idsize != ssl_idsize) ||
-          memcmp(connect_sessionid, ssl_sessionid, ssl_idsize)))
-        /* there was one before in the cache, but without the same size or
-           with different contents so delete the old one */
+      if(ssl_sessionid)
+        /* there was one before in the cache, so instead of risking that the
+           previous one was rejected, we just kill that and store the new */
         Curl_ssl_delsessionid(conn, ssl_sessionid);
-      else if(ssl_sessionid) {
-        /* it was in the cache and its the same one now, just leave it */
-        free(connect_sessionid);
-        return CURLE_OK;
-      }
-
 
       /* store this session id */
       return Curl_ssl_addsessionid(conn, connect_sessionid, connect_idsize);
