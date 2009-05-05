@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Yang Tse (5 May 2009)
+- Fixed the --ftp-port address of test #251 to the CLIENTIP address, and
+  reverted the change affecting test suite harness committed 4 May.
+
 Daniel Stenberg (5 May 2009)
 - Inspired by Michael Smith's session id fix for OpenSSL, I did the
   corresponding fix in the GnuTLS code: make sure to store the new session id
