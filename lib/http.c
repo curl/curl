@@ -1544,7 +1544,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
             else
               for(i = 0; i < gotbytes; ptr++, i++) {
                 perline++; /* amount of bytes in this line so far */
-                if(*ptr=='\x0a') {
+                if(*ptr == 0x0a) {
                   char letter;
                   int writetype;
 
