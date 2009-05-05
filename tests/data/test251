@@ -30,7 +30,7 @@ ftp
 FTP dir list, PORT with specified IP and slow response
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/ -P %HOSTIP
+ftp://%HOSTIP:%FTPPORT/ -P %CLIENTIP
 </command>
 </client>
 
