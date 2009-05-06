@@ -168,6 +168,10 @@
 #    define CARES_SIZEOF_LONG           4
 #    define CARES_TYPEOF_ARES_SOCKLEN_T FIXME
 #    define CARES_SIZEOF_ARES_SOCKLEN_T -1
+#    define CARES_TYPEOF_ARES_SOCKLEN_T socklen_t
+#    define CARES_SIZEOF_ARES_SOCKLEN_T 4
+#    define CARES_PULL_SYS_TYPES_H      1
+#    define CARES_PULL_SYS_SOCKET_H     1
 #  endif
 
 #elif defined(__MVS__)
@@ -217,13 +221,13 @@
 #elif defined(__GNUC__)
 #  if defined(__i386__) || defined(__ppc__)
 #    define CARES_SIZEOF_LONG           4
-#    define CARES_TYPEOF_ARES_SOCKLEN_T FIXME
-#    define CARES_SIZEOF_ARES_SOCKLEN_T -1
 #  elif defined(__x86_64__) || defined(__ppc64__)
 #    define CARES_SIZEOF_LONG           8
-#    define CARES_TYPEOF_ARES_SOCKLEN_T FIXME
-#    define CARES_SIZEOF_ARES_SOCKLEN_T -1
 #  endif
+#  define CARES_TYPEOF_ARES_SOCKLEN_T socklen_t
+#  define CARES_SIZEOF_ARES_SOCKLEN_T 4
+#  define CARES_PULL_SYS_TYPES_H      1
+#  define CARES_PULL_SYS_SOCKET_H     1
 
 #else
 #  error "Unknown non-configure build target!"
