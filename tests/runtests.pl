@@ -1162,6 +1162,8 @@ sub runsshserver {
         return (0,0);
     }
 
+    my $dbghosttype=join(' ', runclientoutput("uname -a"));
+
     my $pid = checkserver($pidfile);
     if($pid > 0) {
         stopserver($pid);
@@ -1181,6 +1183,10 @@ sub runsshserver {
     if($sshpid <= 0 || !kill(0, $sshpid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the SSH server\n";
+        if(($dbghosttype =~ /HP-UX/) && ($dbghosttype =~ /hairball/)) {
+          display_sshdlog();
+          display_sshdconfig();
+        }
         stopserver("$pid2");
         $doesntrun{$pidfile} = 1;
         return (0,0);
