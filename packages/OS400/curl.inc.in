@@ -1141,7 +1141,7 @@
      d  family                       10i 0
      d  socktype                     10i 0
      d  protocol                     10i 0
-     d  addrlen                      10i 0                                      socklen_t
+     d  addrlen                      10u 0
      d  addr                         16                                         struct sockaddr
       *
      d curl_forms      ds                  based(######ptr######)
