@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 49
+# serial 50
 
 
 dnl CARES_CHECK_COMPILER
@@ -1165,6 +1165,68 @@ AC_DEFUN([CARES_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE], [
   ],[
     AC_MSG_RESULT([yes])
   ])
+])
+
+
+dnl CARES_CHECK_COMPILER_STRUCT_MEMBER_SIZE
+dnl -------------------------------------------------
+dnl Verifies if the compiler is capable of handling the
+dnl size of a struct member, struct which is a function
+dnl result, as a compilation-time condition inside the
+dnl type definition of a constant array.
+
+AC_DEFUN([CARES_CHECK_COMPILER_STRUCT_MEMBER_SIZE], [
+  AC_REQUIRE([CARES_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE])dnl
+  AC_MSG_CHECKING([if compiler struct member size checking works])
+  tst_compiler_check_one_works="unknown"
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+      struct mystruct {
+        int  mi;
+        char mc;
+        struct mystruct *next;
+      };
+      struct mystruct myfunc();
+      typedef char good_t1[sizeof(myfunc().mi) == sizeof(int)  ? 1 : -1 ];
+      typedef char good_t2[sizeof(myfunc().mc) == sizeof(char) ? 1 : -1 ];
+    ]],[[
+      good_t1 dummy1;
+      good_t2 dummy2;
+    ]])
+  ],[
+    tst_compiler_check_one_works="yes"
+  ],[
+    tst_compiler_check_one_works="no"
+    sed 's/^/cc-src: /' conftest.$ac_ext >&6
+    sed 's/^/cc-err: /' conftest.err >&6
+  ])
+  tst_compiler_check_two_works="unknown"
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+      struct mystruct {
+        int  mi;
+        char mc;
+        struct mystruct *next;
+      };
+      struct mystruct myfunc();
+      typedef char bad_t1[sizeof(myfunc().mi) != sizeof(int)  ? 1 : -1 ];
+      typedef char bad_t2[sizeof(myfunc().mc) != sizeof(char) ? 1 : -1 ];
+    ]],[[
+      bad_t1 dummy1;
+      bad_t2 dummy2;
+    ]])
+  ],[
+    tst_compiler_check_two_works="no"
+  ],[
+    tst_compiler_check_two_works="yes"
+  ])
+  if test "$tst_compiler_check_one_works" = "yes" &&
+    test "$tst_compiler_check_two_works" = "yes"; then
+    AC_MSG_RESULT([yes])
+  else
+    AC_MSG_RESULT([no])
+    AC_MSG_ERROR([compiler fails struct member size checking.])
+  fi
 ])
 
 

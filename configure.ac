@@ -269,6 +269,7 @@ esac
 
 CURL_CHECK_COMPILER_HALT_ON_ERROR
 CURL_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE
+CURL_CHECK_COMPILER_STRUCT_MEMBER_SIZE
 
 dnl **********************************************************************
 dnl Compilation based checks should not be done before this point.
@@ -1998,8 +1999,6 @@ AC_CHECK_TYPE([bool],[
 #include <stdbool.h>
 #endif
 ])
-
-CURL_A_COUPLE_OF_EXPERIMENTAL_COMPILER_TESTS
 
 CURL_CONFIGURE_CURL_SOCKLEN_T
 

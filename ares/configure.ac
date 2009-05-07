@@ -160,6 +160,7 @@ esac
 
 CARES_CHECK_COMPILER_HALT_ON_ERROR
 CARES_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE
+CARES_CHECK_COMPILER_STRUCT_MEMBER_SIZE
 
 dnl **********************************************************************
 dnl Compilation based checks should not be done before this point.
