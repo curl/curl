@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (7 May 2009)
+- Vijay G filed bug report #2723236
+  (http://curl.haxx.se/bug/view.cgi?id=2723236) identifying a problem with
+  libcurl's TFTP code and its lack of dealing with the OACK packet.
+
 Yang Tse (5 May 2009)
 - Fixed the --ftp-port address of test #251 to the CLIENTIP address, and
   reverted the change affecting test suite harness committed 4 May.

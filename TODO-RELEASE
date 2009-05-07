@@ -3,10 +3,6 @@ To be addressed in 7.19.5 (planned release: May 2009)
 
 221 - debian man page warnings
 
-223 - TFTP flaw, #2723236
-
-226 - Active Mode FTPS Data Port Range
-
 228 - rpath problems in linking with custom openssl
 
 232 - [PATCH] transfer.c fixes for CURL_DO_LINEEND_CONV and non-ASCII
@@ -21,3 +17,9 @@ To be addressed in 7.19.5 (planned release: May 2009)
 235 - #2784055, connect race with multi and socks proxy
 
 236 -
+
+To be addressed in 7.19.6 (planned release: July 2009)
+=========================
+
+226 - Active Mode FTPS Data Port Range
+

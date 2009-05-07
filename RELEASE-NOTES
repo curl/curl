@@ -40,6 +40,7 @@ This release includes the following bugfixes:
  o improved out of the box TPF compatibility
  o HTTP PUT protocol line endings portions mangled from CRLF to CRCRLF
  o Rejected SSL session ids are killed properly (for OpenSSL and GnuTLS builds)
+ o Deal with the TFTP OACK packet
 
 This release includes the following known bugs:
 

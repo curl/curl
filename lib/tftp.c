@@ -695,6 +695,8 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
       }
       return res;
     }
+    /* fall-through */
+  case TFTP_EVENT_OACK:
     /* This is the expected packet.  Reset the counters and send the next
        block */
     state->block++;
