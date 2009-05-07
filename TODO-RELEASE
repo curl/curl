@@ -14,7 +14,11 @@ To be addressed in 7.19.5 (planned release: May 2009)
 
 235 - #2784055, connect race with multi and socks proxy
 
-236 -
+236 - timeout in milliseconds doesn't seem to work
+
+237 - Redirection failing with NTLM authentication
+
+238 -
 
 To be addressed in 7.19.6 (planned release: July 2009)
 =========================
