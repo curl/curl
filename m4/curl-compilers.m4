@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 48
+# serial 49
 
 
 dnl CURL_CHECK_COMPILER
@@ -380,8 +380,8 @@ dnl -------------------------------------------------
 dnl Changes standard include paths present in CFLAGS
 dnl and CPPFLAGS into isystem include paths. This is
 dnl done to prevent GNUC from generating warnings on
-dnl headers from these locations, even though this is
-dnl not reliable on ancient GNUC versions.
+dnl headers from these locations, although on ancient
+dnl GNUC versions these warnings are not silenced.
 
 AC_DEFUN([CURL_CONVERT_INCLUDE_TO_ISYSTEM], [
   AC_REQUIRE([CURL_SHFUNC_SQUEEZE])dnl
@@ -1110,6 +1110,53 @@ AC_DEFUN([CURL_CHECK_PROG_CC], [
   AC_PROG_CC
   CFLAGS="$ac_save_CFLAGS"
   CPPFLAGS="$ac_save_CPPFLAGS"
+])
+
+
+dnl CURL_CHECK_COMPILER_HALT_ON_ERROR
+dnl -------------------------------------------------
+dnl Verifies if the compiler actually halts after the
+dnl compilation phase without generating any object
+dnl code file, when the source compiles with errors.
+
+AC_DEFUN([CURL_CHECK_COMPILER_HALT_ON_ERROR], [
+  AC_MSG_CHECKING([if compiler halts on compilation errors])
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+    ]],[[
+      force compilation error
+    ]])
+  ],[
+    AC_MSG_RESULT([no])
+    AC_MSG_ERROR([compiler does not halt on compilation errors.])
+  ],[
+    AC_MSG_RESULT([yes])
+  ])
+])
+
+
+dnl CURL_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE
+dnl -------------------------------------------------
+dnl Verifies if the compiler actually halts after the
+dnl compilation phase without generating any object
+dnl code file, when the source code tries to define a
+dnl type for a constant array with negative dimension.
+
+AC_DEFUN([CURL_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE], [
+  AC_REQUIRE([CURL_CHECK_COMPILER_HALT_ON_ERROR])dnl
+  AC_MSG_CHECKING([if compiler halts on negative sized arrays])
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+      typedef char bad_t[sizeof(char) == sizeof(int) ? -1 : -1 ];
+    ]],[[
+      bad_t dummy;
+    ]])
+  ],[
+    AC_MSG_RESULT([no])
+    AC_MSG_ERROR([compiler does not halt on negative sized arrays.])
+  ],[
+    AC_MSG_RESULT([yes])
+  ])
 ])
 
 
