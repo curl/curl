@@ -34,7 +34,7 @@ If more involved information is wanted, the particular "easy handle" in
 present in that struct and can thus be used in subsequent regular
 \fIcurl_easy_getinfo(3)\fP calls (or similar):
 
-.NF
+.nf
  struct CURLMsg {
    CURLMSG msg;       /* what this message means */
    CURL *easy_handle; /* the handle it concerns */
@@ -43,7 +43,7 @@ present in that struct and can thus be used in subsequent regular
      CURLcode result;   /* return code for transfer */
    } data;
  };
-
+.fi
 When \fBmsg\fP is \fICURLMSG_DONE\fP, the message identifies a transfer that
 is done, and then \fBresult\fP contains the return code for the easy handle
 that just completed.

@@ -41,6 +41,7 @@ This release includes the following bugfixes:
  o HTTP PUT protocol line endings portions mangled from CRLF to CRCRLF
  o Rejected SSL session ids are killed properly (for OpenSSL and GnuTLS builds)
  o Deal with the TFTP OACK packet
+ o fixed roff mistakes in man pages
 
 This release includes the following known bugs:
 
@@ -53,6 +54,7 @@ advice from friends like these:
  Andre Guibert de Bruet, Andreas Farber, Frank Hempel, Pierre Brico,
  Kamil Dudka, Jim Freeman, Daniel Johnson, Toshio Kuratomi, Martin Storsjo,
  Pramod Sharma, Gisle Vanem, Leanic Lefever, Rainer Koenig, Sven Wegener,
- Tim Chen, Constantine Sapuntzakis, David McCreedy, Michael Smith
+ Tim Chen, Constantine Sapuntzakis, David McCreedy, Michael Smith,
+ Colin Watson
 
         Thanks! (and sorry if I forgot to mention someone)
