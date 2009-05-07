@@ -130,18 +130,18 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
   struct SessionHandle *data = conn->data;
   size_t buffersize = (size_t)bytes;
   int nread;
-  int sending_http_headers = FALSE;
+  bool sending_http_headers = FALSE;
 
   if(data->req.upload_chunky) {
     /* if chunked Transfer-Encoding */
     buffersize -= (8 + 2 + 2);   /* 32bit hex + CRLF + CRLF */
     data->req.upload_fromhere += (8 + 2); /* 32bit hex + CRLF */
   }
-  if((data->state.proto.http)
-  && (data->state.proto.http->sending == HTTPSEND_REQUEST)) {
-     /* We're sending the HTTP request headers, not the data.
-        Remember that so we don't re-translate them into garbage. */
-     sending_http_headers = TRUE;
+  if((conn->protocol&PROT_HTTP) &&
+     (data->state.proto.http->sending == HTTPSEND_REQUEST)) {
+    /* We're sending the HTTP request headers, not the data.
+       Remember that so we don't re-translate them into garbage. */
+    sending_http_headers = TRUE;
   }
 
   /* this function returns a size_t, so we typecast to int to prevent warnings
@@ -242,18 +242,16 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
     }
 
     nread+=strlen(endofline_native); /* for the added end of line */
-#ifdef CURL_DOES_CONVERSIONS
-  } else {
-    if((data->set.prefer_ascii) && (!sending_http_headers)) {
-      CURLcode res;
-      res = Curl_convert_to_network(data, data->req.upload_fromhere, nread);
-      /* Curl_convert_to_network calls failf if unsuccessful */
-      if(res != CURLE_OK) {
-        return(res);
-      }
-    }
-#endif /* CURL_DOES_CONVERSIONS */
   }
+#ifdef CURL_DOES_CONVERSIONS
+  else if((data->set.prefer_ascii) && (!sending_http_headers)) {
+    CURLcode res;
+    res = Curl_convert_to_network(data, data->req.upload_fromhere, nread);
+    /* Curl_convert_to_network calls failf if unsuccessful */
+    if(res != CURLE_OK)
+      return(res);
+  }
+#endif /* CURL_DOES_CONVERSIONS */
 
   *nreadp = nread;
 
@@ -1460,7 +1458,7 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
   ssize_t bytes_written;
   CURLcode result;
   ssize_t nread; /* number of bytes read */
-  int sending_http_headers = FALSE;
+  bool sending_http_headers = FALSE;
 
   if((k->bytecount == 0) && (k->writebytecount == 0))
     Curl_pgrsTime(data, TIMER_STARTTRANSFER);
@@ -1496,15 +1494,15 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
           break;
         }
 
-        if(data->state.proto.http) {
-          if(data->state.proto.http->sending == HTTPSEND_REQUEST) {
+        if(conn->protocol&PROT_HTTP) {
+          if(data->state.proto.http->sending == HTTPSEND_REQUEST)
             /* We're sending the HTTP request headers, not the data.
                Remember that so we don't change the line endings. */
-               sending_http_headers = TRUE;
-          } else {
+            sending_http_headers = TRUE;
+          else
             sending_http_headers = FALSE;
-          }
         }
+
         result = Curl_fillreadbuffer(conn, BUFSIZE, &fillcount);
         if(result)
           return result;
@@ -1534,50 +1532,50 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
       data->req.upload_present = nread;
 
       /* convert LF to CRLF if so asked */
+      if((!sending_http_headers) &&
 #ifdef CURL_DO_LINEEND_CONV
-      /* always convert if we're FTPing in ASCII mode */
-        if(((data->set.crlf) || (data->set.prefer_ascii))
+        /* always convert if we're FTPing in ASCII mode */
+         ((data->set.crlf) || (data->set.prefer_ascii))) {
 #else
-        if((data->set.crlf)
-#endif /* CURL_DO_LINEEND_CONV */
-        && (!sending_http_headers)) {
-          if(data->state.scratch == NULL)
-            data->state.scratch = malloc(2*BUFSIZE);
-          if(data->state.scratch == NULL) {
-            failf (data, "Failed to alloc scratch buffer!");
-            return CURLE_OUT_OF_MEMORY;
-          }
-          /*
-           * ASCII/EBCDIC Note: This is presumably a text (not binary)
-           * transfer so the data should already be in ASCII.
-           * That means the hex values for ASCII CR (0x0d) & LF (0x0a)
-           * must be used instead of the escape sequences \r & \n.
-           */
-          for(i = 0, si = 0; i < nread; i++, si++) {
-            if(data->req.upload_fromhere[i] == 0x0a) {
-              data->state.scratch[si++] = 0x0d;
-              data->state.scratch[si] = 0x0a;
-              if(!data->set.crlf) {
-                /* we're here only because FTP is in ASCII mode...
-                   bump infilesize for the LF we just added */
-                data->set.infilesize++;
-              }
-            }
-            else
-              data->state.scratch[si] = data->req.upload_fromhere[i];
-          }
-          if(si != nread) {
-            /* only perform the special operation if we really did replace
-               anything */
-            nread = si;
-
-            /* upload from the new (replaced) buffer instead */
-            data->req.upload_fromhere = data->state.scratch;
-
-            /* set the new amount too */
-            data->req.upload_present = nread;
-          }
+         (data->set.crlf)) {
+#endif
+        if(data->state.scratch == NULL)
+          data->state.scratch = malloc(2*BUFSIZE);
+        if(data->state.scratch == NULL) {
+          failf (data, "Failed to alloc scratch buffer!");
+          return CURLE_OUT_OF_MEMORY;
         }
+        /*
+         * ASCII/EBCDIC Note: This is presumably a text (not binary)
+         * transfer so the data should already be in ASCII.
+         * That means the hex values for ASCII CR (0x0d) & LF (0x0a)
+         * must be used instead of the escape sequences \r & \n.
+         */
+        for(i = 0, si = 0; i < nread; i++, si++) {
+          if(data->req.upload_fromhere[i] == 0x0a) {
+            data->state.scratch[si++] = 0x0d;
+            data->state.scratch[si] = 0x0a;
+            if(!data->set.crlf) {
+              /* we're here only because FTP is in ASCII mode...
+                 bump infilesize for the LF we just added */
+              data->set.infilesize++;
+            }
+          }
+          else
+            data->state.scratch[si] = data->req.upload_fromhere[i];
+        }
+        if(si != nread) {
+          /* only perform the special operation if we really did replace
+             anything */
+          nread = si;
+
+          /* upload from the new (replaced) buffer instead */
+          data->req.upload_fromhere = data->state.scratch;
+
+          /* set the new amount too */
+          data->req.upload_present = nread;
+        }
+      }
     } /* if 0 == data->req.upload_present */
     else {
       /* We have a partial buffer left from a previous "round". Use
