@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -54,4 +54,20 @@ long Curl_timeleft(struct connectdata *conn,
 CURLcode Curl_getconnectinfo(struct SessionHandle *data,
                              long *param_longp,
                              struct connectdata **connp);
+
+#ifdef WIN32
+/* When you run a program that uses the Windows Sockets API, you may
+   experience slow performance when you copy data to a TCP server.
+
+   http://support.microsoft.com/kb/823764
+
+   Work-around: Make the Socket Send Buffer Size Larger Than the Program Send
+   Buffer Size
+
+*/
+void Curl_sndbufset(curl_socket_t sockfd);
+#else
+#define Curl_sndbufset(y)
+#endif
+
 #endif

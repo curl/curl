@@ -2308,6 +2308,9 @@ static CURLcode ftp_state_stor_resp(struct connectdata *conn,
 
   Curl_pgrsSetUploadSize(data, data->set.infilesize);
 
+  /* set the SO_SNDBUF for the secondary socket for those who need it */
+  Curl_sndbufset(conn->sock[SECONDARYSOCKET]);
+
   result = Curl_setup_transfer(conn, -1, -1, FALSE, NULL, /* no download */
                                SECONDARYSOCKET, ftp->bytecountp);
   state(conn, FTP_STOP);

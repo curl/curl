@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Stenberg (7 May 2009)
+- Made the SO_SNDBUF setting for the data connection socket for ftp uploads as
+  well. See change 28 Apr 2009.
+
 Yang Tse (7 May 2009)
 - Fixed an issue affecting FTP transfers, introduced with the transfer.c
   patch committed May 4.
