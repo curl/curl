@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Yang Tse (8 May 2009)
+- Changed host name literal in several tests to one under the haxx.se domain.
+
+- Renamed vc6 workspace and project files to avoid filename clash when used
+  for conversion to later VS versions.
+
 Daniel Stenberg (8 May 2009)
 - Constantine Sapuntzakis fixed bug report #2784055
   (http://curl.haxx.se/bug/view.cgi?id=2784055) identifying a problem to
