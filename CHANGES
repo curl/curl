@@ -6,6 +6,15 @@
 
                                   Changelog
 
+Daniel Stenberg (8 May 2009)
+- Constantine Sapuntzakis fixed bug report #2784055
+  (http://curl.haxx.se/bug/view.cgi?id=2784055) identifying a problem to
+  connect to SOCKS proxies when using the multi interface. It turned out to
+  almost not work at all previously. We need to wait for the TCP connect to
+  be properly verified before doing the SOCKS magic.
+
+  There's still a flaw in the FTP code for this.
+
 Daniel Stenberg (7 May 2009)
 - Made the SO_SNDBUF setting for the data connection socket for ftp uploads as
   well. See change 28 Apr 2009.

@@ -42,6 +42,7 @@ This release includes the following bugfixes:
  o Rejected SSL session ids are killed properly (for OpenSSL and GnuTLS builds)
  o Deal with the TFTP OACK packet
  o fixed roff mistakes in man pages
+ o use SOCKS proxy with the multi interface
 
 This release includes the following known bugs:
 

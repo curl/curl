@@ -2814,6 +2814,47 @@ ConnectionStore(struct SessionHandle *data,
   return i;
 }
 
+/* after a TCP connection to the proxy has been verified, this function does
+   the next magic step.
+
+   Note: this function (and its sub-functions) calls failf()
+
+*/
+CURLcode Curl_connected_proxy(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+
+  switch(data->set.proxytype) {
+#ifndef CURL_DISABLE_PROXY
+  case CURLPROXY_SOCKS5:
+  case CURLPROXY_SOCKS5_HOSTNAME:
+    result = Curl_SOCKS5(conn->proxyuser, conn->proxypasswd,
+                         conn->host.name, conn->remote_port,
+                         FIRSTSOCKET, conn);
+    break;
+  case CURLPROXY_SOCKS4:
+    result = Curl_SOCKS4(conn->proxyuser, conn->host.name,
+                         conn->remote_port, FIRSTSOCKET, conn, FALSE);
+    break;
+  case CURLPROXY_SOCKS4A:
+    result = Curl_SOCKS4(conn->proxyuser, conn->host.name,
+                         conn->remote_port, FIRSTSOCKET, conn, TRUE);
+    break;
+#endif /* CURL_DISABLE_PROXY */
+  case CURLPROXY_HTTP:
+  case CURLPROXY_HTTP_1_0:
+    /* do nothing here. handled later. */
+    break;
+  default:
+    failf(data, "unknown proxytype option given");
+      result = CURLE_COULDNT_CONNECT;
+      break;
+  } /* switch proxytype */
+
+  return result;
+}
+
 static CURLcode ConnectPlease(struct SessionHandle *data,
                               struct connectdata *conn,
                               struct Curl_dns_entry *hostaddr,
@@ -2838,39 +2879,14 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
                            &addr,
                            connected);
   if(CURLE_OK == result) {
-    /* All is cool, then we store the current information */
+    /* All is cool, we store the current information */
     conn->dns_entry = hostaddr;
     conn->ip_addr = addr;
 
-    switch(data->set.proxytype) {
-#ifndef CURL_DISABLE_PROXY
-    case CURLPROXY_SOCKS5:
-    case CURLPROXY_SOCKS5_HOSTNAME:
-      result = Curl_SOCKS5(conn->proxyuser, conn->proxypasswd,
-                           conn->host.name, conn->remote_port,
-                           FIRSTSOCKET, conn);
-      break;
-    case CURLPROXY_SOCKS4:
-      result = Curl_SOCKS4(conn->proxyuser, conn->host.name,
-                           conn->remote_port, FIRSTSOCKET, conn, FALSE);
-      break;
-    case CURLPROXY_SOCKS4A:
-      result = Curl_SOCKS4(conn->proxyuser, conn->host.name,
-                           conn->remote_port, FIRSTSOCKET, conn, TRUE);
-      break;
-#endif /* CURL_DISABLE_PROXY */
-    case CURLPROXY_HTTP:
-    case CURLPROXY_HTTP_1_0:
-      /* do nothing here. handled later. */
-      break;
-    default:
-      failf(data, "unknown proxytype option given");
-      result = CURLE_COULDNT_CONNECT;
-      break;
-    } /* switch proxytype */
-  } /* if result is ok */
-
-  if(result)
+    if(*connected)
+      result = Curl_connected_proxy(conn);
+  }
+  else
     *connected = FALSE; /* mark it as not connected */
 
   return result;
@@ -4761,8 +4777,6 @@ CURLcode Curl_done(struct connectdata **connp,
 
   Curl_expire(data, 0); /* stop timer */
 
-  Curl_getoff_all_pipelines(data, conn);
-
   if(conn->bits.done ||
      (conn->send_pipe->size + conn->recv_pipe->size != 0 &&
       !data->set.reuse_forbid &&
@@ -4772,6 +4786,8 @@ CURLcode Curl_done(struct connectdata **connp,
     return CURLE_OK;
 
   conn->bits.done = TRUE; /* called just now! */
+
+  Curl_getoff_all_pipelines(data, conn);
 
   /* Cleanup possible redirect junk */
   if(data->req.newurl) {
