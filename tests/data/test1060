@@ -874,7 +874,7 @@ crypto
 HTTP proxy CONNECT auth Digest, large headers and data
  </name>
  <command>
-http://test.remote.server.com:1060/path/10600002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-digest --proxytunnel
+http://test.remote.haxx.se:1060/path/10600002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-digest --proxytunnel
 </command>
 </client>
 
@@ -884,17 +884,17 @@ http://test.remote.server.com:1060/path/10600002 --proxy http://%HOSTIP:%HTTPPOR
 ^User-Agent: curl/.*
 </strip>
 <protocol>
-CONNECT test.remote.server.com:1060 HTTP/1.1
-Host: test.remote.server.com:1060
+CONNECT test.remote.haxx.se:1060 HTTP/1.1
+Host: test.remote.haxx.se:1060
 Proxy-Connection: Keep-Alive
 
-CONNECT test.remote.server.com:1060 HTTP/1.1
-Host: test.remote.server.com:1060
-Proxy-Authorization: Digest username="silly", realm="weirdorealm", nonce="12345", uri="test.remote.server.com:1060", response="b527d164630481e2cc48c04d18ed2212"
+CONNECT test.remote.haxx.se:1060 HTTP/1.1
+Host: test.remote.haxx.se:1060
+Proxy-Authorization: Digest username="silly", realm="weirdorealm", nonce="12345", uri="test.remote.haxx.se:1060", response="79e394ffcd42b6c771c7582da1fc4498"
 Proxy-Connection: Keep-Alive
 
 GET /path/10600002 HTTP/1.1
-Host: test.remote.server.com:1060
+Host: test.remote.haxx.se:1060
 Accept: */*
 
 </protocol>

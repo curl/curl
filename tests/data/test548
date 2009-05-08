@@ -81,7 +81,7 @@ NTLM
 HTTP proxy auth NTLM with POST data from CURLOPT_POSTFIELDS
  </name>
  <command>
-http://test.remote.server.com/path/548 http://%HOSTIP:%HTTPPORT s1lly:pers0n
+http://test.remote.haxx.se/path/548 http://%HOSTIP:%HTTPPORT s1lly:pers0n
 </command>
 </client>
 
@@ -96,28 +96,28 @@ http://test.remote.server.com/path/548 http://%HOSTIP:%HTTPPORT s1lly:pers0n
 s/^(Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA).*/$1/
 </strippart>
 <protocol>
-POST http://test.remote.server.com/path/548 HTTP/1.1
+POST http://test.remote.haxx.se/path/548 HTTP/1.1
 User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
-Host: test.remote.server.com
+Host: test.remote.haxx.se
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 36
 Content-Type: application/x-www-form-urlencoded
 
 this is the blurb we want to upload
-POST http://test.remote.server.com/path/548 HTTP/1.1
+POST http://test.remote.haxx.se/path/548 HTTP/1.1
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
-Host: test.remote.server.com
+Host: test.remote.haxx.se
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 0
 Content-Type: application/x-www-form-urlencoded
 
-POST http://test.remote.server.com/path/548 HTTP/1.1
+POST http://test.remote.haxx.se/path/548 HTTP/1.1
 Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA
 User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
-Host: test.remote.server.com
+Host: test.remote.haxx.se
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 36

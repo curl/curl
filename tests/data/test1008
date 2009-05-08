@@ -87,7 +87,7 @@ NTLM
 HTTP proxy CONNECT auth NTLM with chunked-encoded 407 response
  </name>
  <command>
-http://test.remote.server.com:1008/path/10080002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-ntlm --proxytunnel
+http://test.remote.haxx.se:1008/path/10080002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-ntlm --proxytunnel
 </command>
 </client>
 
@@ -102,19 +102,19 @@ http://test.remote.server.com:1008/path/10080002 --proxy http://%HOSTIP:%HTTPPOR
 s/^(Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA).*/$1/
 </strippart>
 <protocol>
-CONNECT test.remote.server.com:1008 HTTP/1.1
-Host: test.remote.server.com:1008
+CONNECT test.remote.haxx.se:1008 HTTP/1.1
+Host: test.remote.haxx.se:1008
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 Proxy-Connection: Keep-Alive
 
-CONNECT test.remote.server.com:1008 HTTP/1.1
-Host: test.remote.server.com:1008
+CONNECT test.remote.haxx.se:1008 HTTP/1.1
+Host: test.remote.haxx.se:1008
 Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA
 Proxy-Connection: Keep-Alive
 
 GET /path/10080002 HTTP/1.1
 User-Agent: curl/7.12.3-CVS (i686-pc-linux-gnu) libcurl/7.12.3-CVS OpenSSL/0.9.6b zlib/1.1.4
-Host: test.remote.server.com:1008
+Host: test.remote.haxx.se:1008
 Accept: */*
 
 </protocol>

@@ -71,7 +71,7 @@ crypto
 HTTP proxy CONNECT auth Digest
  </name>
  <command>
-http://test.remote.server.com:206/path/2060002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-digest --proxytunnel
+http://test.remote.haxx.se:206/path/2060002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-digest --proxytunnel
 </command>
 </client>
 
@@ -81,18 +81,18 @@ http://test.remote.server.com:206/path/2060002 --proxy http://%HOSTIP:%HTTPPORT 
 ^User-Agent: curl/.*
 </strip>
 <protocol>
-CONNECT test.remote.server.com:206 HTTP/1.1
-Host: test.remote.server.com:206
+CONNECT test.remote.haxx.se:206 HTTP/1.1
+Host: test.remote.haxx.se:206
 Proxy-Connection: Keep-Alive
 
-CONNECT test.remote.server.com:206 HTTP/1.1
-Host: test.remote.server.com:206
-Proxy-Authorization: Digest username="silly", realm="weirdorealm", nonce="12345", uri="test.remote.server.com:206", response="5059a96c954981ceb94e17d667c8d3f8"
+CONNECT test.remote.haxx.se:206 HTTP/1.1
+Host: test.remote.haxx.se:206
+Proxy-Authorization: Digest username="silly", realm="weirdorealm", nonce="12345", uri="test.remote.haxx.se:206", response="676e0836f3e1c5b31bf29770ef9d8224"
 Proxy-Connection: Keep-Alive
 
 GET /path/2060002 HTTP/1.1
 User-Agent: curl/7.12.3-CVS (i686-pc-linux-gnu) libcurl/7.12.3-CVS OpenSSL/0.9.6b zlib/1.1.4
-Host: test.remote.server.com:206
+Host: test.remote.haxx.se:206
 Accept: */*
 
 </protocol>

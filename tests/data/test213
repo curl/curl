@@ -80,7 +80,7 @@ NTLM
 HTTP 1.0 proxy CONNECT auth NTLM and then POST
  </name>
  <command>
-http://test.remote.server.com:213/path/2130002 --proxy1.0 http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-ntlm --proxytunnel -d "postit"
+http://test.remote.haxx.se:213/path/2130002 --proxy1.0 http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-ntlm --proxytunnel -d "postit"
 </command>
 </client>
 
@@ -95,19 +95,19 @@ http://test.remote.server.com:213/path/2130002 --proxy1.0 http://%HOSTIP:%HTTPPO
 s/^(Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA).*/$1/
 </strippart>
 <protocol nonewline="yes">
-CONNECT test.remote.server.com:213 HTTP/1.0
-Host: test.remote.server.com:213
+CONNECT test.remote.haxx.se:213 HTTP/1.0
+Host: test.remote.haxx.se:213
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 Proxy-Connection: Keep-Alive
 
-CONNECT test.remote.server.com:213 HTTP/1.0
-Host: test.remote.server.com:213
+CONNECT test.remote.haxx.se:213 HTTP/1.0
+Host: test.remote.haxx.se:213
 Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA
 Proxy-Connection: Keep-Alive
 
 POST /path/2130002 HTTP/1.1
 User-Agent: curl/7.12.3-CVS (i686-pc-linux-gnu) libcurl/7.12.3-CVS OpenSSL/0.9.6b zlib/1.1.4
-Host: test.remote.server.com:213
+Host: test.remote.haxx.se:213
 Accept: */*
 Content-Length: 6
 Content-Type: application/x-www-form-urlencoded

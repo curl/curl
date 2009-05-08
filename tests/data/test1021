@@ -96,7 +96,7 @@ NTLM
 HTTP proxy CONNECT with any proxyauth and proxy offers NTLM and close
  </name>
  <command>
-http://test.remote.server.com:1021/path/10210002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-anyauth --proxytunnel
+http://test.remote.haxx.se:1021/path/10210002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-anyauth --proxytunnel
 </command>
 </client>
 
@@ -111,23 +111,23 @@ http://test.remote.server.com:1021/path/10210002 --proxy http://%HOSTIP:%HTTPPOR
 s/^(Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA).*/$1/
 </strippart>
 <protocol>
-CONNECT test.remote.server.com:1021 HTTP/1.1
-Host: test.remote.server.com:1021
+CONNECT test.remote.haxx.se:1021 HTTP/1.1
+Host: test.remote.haxx.se:1021
 Proxy-Connection: Keep-Alive
 
-CONNECT test.remote.server.com:1021 HTTP/1.1
-Host: test.remote.server.com:1021
+CONNECT test.remote.haxx.se:1021 HTTP/1.1
+Host: test.remote.haxx.se:1021
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 Proxy-Connection: Keep-Alive
 
-CONNECT test.remote.server.com:1021 HTTP/1.1
-Host: test.remote.server.com:1021
+CONNECT test.remote.haxx.se:1021 HTTP/1.1
+Host: test.remote.haxx.se:1021
 Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA
 Proxy-Connection: Keep-Alive
 
 GET /path/10210002 HTTP/1.1
 User-Agent: curl/7.12.3-CVS (i686-pc-linux-gnu) libcurl/7.12.3-CVS OpenSSL/0.9.6b zlib/1.1.4
-Host: test.remote.server.com:1021
+Host: test.remote.haxx.se:1021
 Accept: */*
 
 </protocol>
