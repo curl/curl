@@ -22,7 +22,7 @@
 ###########################################################################
 AUTOMAKE_OPTIONS = foreign nostdinc
 
-DSP = libcurl.dsp
+DSP = vc6libcurl.dsp
 VCPROJ = libcurl.vcproj
 
 DOCS = README.encoding README.memoryleak README.ares README.curlx	\
