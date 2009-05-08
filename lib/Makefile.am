@@ -32,8 +32,8 @@ DOCS = README.encoding README.memoryleak README.ares README.curlx	\
 CMAKE_DIST = CMakeLists.txt config.h.cmake
 
 EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 Makefile.riscos $(DSP) \
- libcurl.dsw config-win32.h config-win32ce.h config-riscos.h config-mac.h  \
- config.h.in makefile.dj config.dos libcurl.plist                          \
+ vc6libcurl.dsw config-win32.h config-win32ce.h config-riscos.h            \
+ config-mac.h config.h.in makefile.dj config.dos libcurl.plist             \
  libcurl.rc config-amigaos.h amigaos.c amigaos.h makefile.amiga		   \
  Makefile.netware nwlib.c nwos.c libcurl.imp msvcproj.head msvcproj.foot   \
  config-win32ce.h config-os400.h setup-os400.h config-symbian.h		   \
