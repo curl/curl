@@ -63,6 +63,11 @@ int test(char *URL)
   /* Now specify we want to POST data */
   curl_easy_setopt(curl, CURLOPT_POST, 1L);
 
+#ifdef CURL_DOES_CONVERSIONS
+  /* Convert the POST data to ASCII */
+  curl_easy_setopt(curl, CURLOPT_TRANSFERTEXT, 1L);
+#endif
+
   /* Set the expected POST size */
   curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)pooh.sizeleft);
 

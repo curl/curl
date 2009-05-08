@@ -16,7 +16,14 @@
 
 #include "memdebug.h"
 
-#define UPLOADTHIS "this is the blurb we want to upload\n"
+#ifdef CURL_DOES_CONVERSIONS
+   /* ASCII representation with escape sequences for non-ASCII platforms */
+#  define UPLOADTHIS "\x74\x68\x69\x73\x20\x69\x73\x20\x74\x68\x65\x20\x62" \
+                     "\x6c\x75\x72\x62\x20\x77\x65\x20\x77\x61\x6e\x74\x20" \
+                     "\x74\x6f\x20\x75\x70\x6c\x6f\x61\x64\x0a"
+#else
+#  define UPLOADTHIS "this is the blurb we want to upload\n"
+#endif
 
 #ifndef LIB548
 static size_t readcallback(void  *ptr,

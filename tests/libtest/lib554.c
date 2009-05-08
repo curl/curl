@@ -12,7 +12,15 @@
 
 #include "memdebug.h"
 
-static char data[]="this is what we post to the silly web server\n";
+static char data[]=
+#ifdef CURL_DOES_CONVERSIONS
+  /* ASCII representation with escape sequences for non-ASCII platforms */
+  "\x74\x68\x69\x73\x20\x69\x73\x20\x77\x68\x61\x74\x20\x77\x65\x20\x70"
+  "\x6f\x73\x74\x20\x74\x6f\x20\x74\x68\x65\x20\x73\x69\x6c\x6c\x79\x20"
+  "\x77\x65\x62\x20\x73\x65\x72\x76\x65\x72\x0a";
+#else
+  "this is what we post to the silly web server\n";
+#endif
 
 struct WriteThis {
   char *readptr;
@@ -70,7 +78,14 @@ int test(char *URL)
   formrc = curl_formadd(&formpost,
                         &lastptr,
                         CURLFORM_COPYNAME, "filename",
+#ifdef CURL_DOES_CONVERSIONS
+                        /* ASCII representation with escape
+                           sequences for non-ASCII platforms */
+                        CURLFORM_COPYCONTENTS,
+                           "\x70\x6f\x73\x74\x69\x74\x32\x2e\x63",
+#else
                         CURLFORM_COPYCONTENTS, "postit2.c",
+#endif
                         CURLFORM_END);
 
   if(formrc)
@@ -80,7 +95,13 @@ int test(char *URL)
   formrc = curl_formadd(&formpost,
                         &lastptr,
                         CURLFORM_COPYNAME, "submit",
+#ifdef CURL_DOES_CONVERSIONS
+                        /* ASCII representation with escape
+                           sequences for non-ASCII platforms */
+                        CURLFORM_COPYCONTENTS, "\x73\x65\x6e\x64",
+#else
                         CURLFORM_COPYCONTENTS, "send",
+#endif
                         CURLFORM_END);
 
   if(formrc)

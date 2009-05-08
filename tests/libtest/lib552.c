@@ -169,6 +169,11 @@ int test(char *URL)
     /* Post */
     curl_easy_setopt(curl, CURLOPT_POST, 1L);
 
+#ifdef CURL_DOES_CONVERSIONS
+    /* Convert the POST data to ASCII */
+    curl_easy_setopt(curl, CURLOPT_TRANSFERTEXT, 1L);
+#endif
+
     /* Setup read callback */
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long) sizeof(databuf));
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
