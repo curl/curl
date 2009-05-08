@@ -43,6 +43,7 @@ This release includes the following bugfixes:
  o Deal with the TFTP OACK packet
  o fixed roff mistakes in man pages
  o use SOCKS proxy with the multi interface
+ o fixed the Curl_getoff_all_pipelines SIGSEGV 
 
 This release includes the following known bugs:
 
@@ -54,7 +55,7 @@ advice from friends like these:
  Daniel Fandrich, Yang Tse, David James, Chris Deidun, Bill Egert,
  Andre Guibert de Bruet, Andreas Farber, Frank Hempel, Pierre Brico,
  Kamil Dudka, Jim Freeman, Daniel Johnson, Toshio Kuratomi, Martin Storsjo,
- Pramod Sharma, Gisle Vanem, Leanic Lefever, Rainer Koenig, Sven Wegener,
+ Pramod Sharma, Gisle Vanem, Lenaic Lefever, Rainer Koenig, Sven Wegener,
  Tim Chen, Constantine Sapuntzakis, David McCreedy, Michael Smith,
  Colin Watson
 
