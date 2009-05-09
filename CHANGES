@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Yang Tse (9 May 2009)
+- Removed DOS and TPF package's subdirectory Makefile.am, it was only used
+  to include some files in the distribution tarball serving no other purpose.
+  Files from the DOS and TPF subdirectories are now included in the EXTRA_DIST
+  of the Makefile in the parent subdirectory.
+
 Yang Tse (8 May 2009)
 - Changed host name literal in several tests to one under the haxx.se domain.
 
