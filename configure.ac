@@ -2551,14 +2551,12 @@ AC_CONFIG_FILES([Makefile \
            packages/Linux/RPM/curl.spec \
            packages/Linux/RPM/curl-ssl.spec \
            packages/Solaris/Makefile \
-           packages/DOS/Makefile \
            packages/EPM/curl.list \
            packages/EPM/Makefile \
            packages/vms/Makefile \
            packages/AIX/Makefile \
            packages/AIX/RPM/Makefile \
            packages/AIX/RPM/curl.spec \
-           packages/TPF/Makefile \
            curl-config \
            libcurl.pc
 ])
