@@ -16,3 +16,7 @@ depcomp
 libcurl.pc
 libtool
 ltmain.sh
+vc6curl.ncb
+vc6curl.opt
+vc6curl.sln
+vc6curl.suo
