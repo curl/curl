@@ -2886,7 +2886,8 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
     if(*connected)
       result = Curl_connected_proxy(conn);
   }
-  else
+
+  if(result)
     *connected = FALSE; /* mark it as not connected */
 
   return result;
@@ -4777,17 +4778,20 @@ CURLcode Curl_done(struct connectdata **connp,
 
   Curl_expire(data, 0); /* stop timer */
 
-  if(conn->bits.done ||
-     (conn->send_pipe->size + conn->recv_pipe->size != 0 &&
+  if(conn->bits.done)
+    /* Stop if Curl_done() has already been called */
+    return CURLE_OK;
+
+  Curl_getoff_all_pipelines(data, conn);
+
+  if((conn->send_pipe->size + conn->recv_pipe->size != 0 &&
       !data->set.reuse_forbid &&
       !conn->bits.close))
-    /* Stop if Curl_done() has already been called or pipeline
-       is not empty and we do not have to close connection. */
+    /* Stop if pipeline is not empty and we do not have to close
+       connection. */
     return CURLE_OK;
 
   conn->bits.done = TRUE; /* called just now! */
-
-  Curl_getoff_all_pipelines(data, conn);
 
   /* Cleanup possible redirect junk */
   if(data->req.newurl) {
