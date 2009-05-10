@@ -661,6 +661,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
   struct SessionHandle *data = state->conn->data;
   int sbytes;
   int rblock;
+  int readcount;
   CURLcode res = CURLE_OK;
   struct SingleRequest *k = &data->req;
 
@@ -707,8 +708,8 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
       state->state = TFTP_STATE_FIN;
       return CURLE_OK;
     }
-    res = Curl_fillreadbuffer(state->conn, state->blksize,
-                              (int *)&state->sbytes);
+    res = Curl_fillreadbuffer(state->conn, state->blksize, &readcount);
+    state->sbytes = readcount;
     if(res)
       return res;
     sbytes = sendto(state->sockfd, (void *)state->spacket.data,
