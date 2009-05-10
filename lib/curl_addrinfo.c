@@ -303,7 +303,7 @@ Curl_he2ai(const struct hostent *he, int port)
        the type must be ignored and conn->socktype be used instead! */
     ai->ai_socktype = SOCK_STREAM;
 
-    ai->ai_addrlen = (int)ss_size;
+    ai->ai_addrlen = (curl_socklen_t)ss_size;
 
     /* leave the rest of the struct filled with zero */
 
