@@ -14,8 +14,6 @@ To be addressed in 7.19.5 (planned release: May 2009)
 
 237 - Redirection failing with NTLM authentication
 
-238 - Curl_getoff_all_pipelines SIGSEGV
-
 239 -
 
 To be addressed in 7.19.6 (planned release: July 2009)
