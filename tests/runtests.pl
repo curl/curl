@@ -112,6 +112,9 @@ my $SOCKSPORT; # SOCKS4/5 port
 
 my $srcdir = $ENV{'srcdir'} || '.';
 my $CURL="../src/curl"; # what curl executable to run on the tests
+my $VCURL=$CURL;   # what curl binary to use to verify the servers with
+                   # VCURL is handy to set to the system one when the one you
+                   # just built hangs or crashes and thus prevent verification
 my $DBGCURL=$CURL; #"../src/.libs/curl";  # alternative for debugging
 my $LOGDIR="log";
 my $TESTDIR="$srcdir/data";
@@ -587,7 +590,7 @@ sub stopserver {
 
 sub verifyhttp {
     my ($proto, $ip, $port) = @_;
-    my $cmd = "$CURL --max-time $server_response_maxtime --output $LOGDIR/verifiedserver --insecure --silent --verbose --globoff \"$proto://$ip:$port/verifiedserver\" 2>$LOGDIR/verifyhttp";
+    my $cmd = "$VCURL --max-time $server_response_maxtime --output $LOGDIR/verifiedserver --insecure --silent --verbose --globoff \"$proto://$ip:$port/verifiedserver\" 2>$LOGDIR/verifyhttp";
     my $pid;
 
     # verify if our/any server is running on this port
@@ -642,7 +645,7 @@ sub verifyftp {
     if($proto eq "ftps") {
     	$extra = "--insecure --ftp-ssl-control ";
     }
-    my $cmd="$CURL --max-time $server_response_maxtime --silent --verbose --globoff $extra\"$proto://$ip:$port/verifiedserver\" 2>$LOGDIR/verifyftp";
+    my $cmd="$VCURL --max-time $server_response_maxtime --silent --verbose --globoff $extra\"$proto://$ip:$port/verifiedserver\" 2>$LOGDIR/verifyftp";
     # check if this is our server running on this port:
     my @data=runclientoutput($cmd);
     logmsg "RUN: $cmd\n" if($verbose);
