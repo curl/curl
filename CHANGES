@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Stenberg (10 May 2009)
+- Andre Guibert de Bruet correctly pointed out an over-alloc with one wasted
+  byte in the digest code.
+
 Yang Tse (9 May 2009)
 - Removed DOS and TPF package's subdirectory Makefile.am, it was only used
   to include some files in the distribution tarball serving no other purpose.

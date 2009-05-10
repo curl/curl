@@ -543,8 +543,8 @@ CURLcode Curl_output_digest(struct connectdata *conn,
     *allocuserpwd = tmp;
   }
 
-  /* append CRLF to the userpwd header */
-  tmp = realloc(*allocuserpwd, strlen(*allocuserpwd) + 3 + 1);
+  /* append CRLF + zero (3 bytes) to the userpwd header */
+  tmp = realloc(*allocuserpwd, strlen(*allocuserpwd) + 3);
   if(!tmp)
     return CURLE_OUT_OF_MEMORY;
   strcat(tmp, "\r\n");
