@@ -12,8 +12,6 @@ To be addressed in 7.19.5 (planned release: May 2009)
 
 236 - timeout in milliseconds doesn't seem to work
 
-237 - Redirection failing with NTLM authentication
-
 239 -
 
 To be addressed in 7.19.6 (planned release: July 2009)

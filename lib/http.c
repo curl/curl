@@ -369,6 +369,8 @@ CURLcode Curl_http_perhapsrewind(struct connectdata *conn)
     case HTTPREQ_POST:
       if(data->set.postfieldsize != -1)
         expectsend = data->set.postfieldsize;
+      else if(data->set.postfields)
+        expectsend = (curl_off_t)strlen(data->set.postfields);
       break;
     case HTTPREQ_PUT:
       if(data->set.infilesize != -1)

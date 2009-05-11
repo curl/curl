@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (11 May 2009)
+- I fixed the problem with doing NTLM, POST and then following a 302 redirect,
+  as reported by Ebenezer Ikonne (on curl-users) and Laurent Rabret (on
+  curl-library). The transfer was mistakenly marked to get more data to send
+  but since it didn't actually have that, it just hung there...
+
 Daniel Stenberg (10 May 2009)
 - Andre Guibert de Bruet correctly pointed out an over-alloc with one wasted
   byte in the digest code.

@@ -44,6 +44,7 @@ This release includes the following bugfixes:
  o fixed roff mistakes in man pages
  o use SOCKS proxy with the multi interface
  o fixed the Curl_getoff_all_pipelines SIGSEGV 
+ o POST, NTLM and following a redirect hang
 
 This release includes the following known bugs:
 
@@ -57,6 +58,6 @@ advice from friends like these:
  Kamil Dudka, Jim Freeman, Daniel Johnson, Toshio Kuratomi, Martin Storsjo,
  Pramod Sharma, Gisle Vanem, Lenaic Lefever, Rainer Koenig, Sven Wegener,
  Tim Chen, Constantine Sapuntzakis, David McCreedy, Michael Smith,
- Colin Watson
+ Colin Watson, Ebenezer Ikonne, Laurent Rabret
 
         Thanks! (and sorry if I forgot to mention someone)
