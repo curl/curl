@@ -2825,6 +2825,12 @@ CURLcode Curl_connected_proxy(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
 
+  if(conn->bits.tcpconnect)
+    /* allow this to get called again from the multi interface when TCP is
+       found connected in the state machine, even though it has already been
+       called if the connection happened "instantly" */
+    return CURLE_OK;
+
   switch(data->set.proxytype) {
 #ifndef CURL_DISABLE_PROXY
   case CURLPROXY_SOCKS5:
