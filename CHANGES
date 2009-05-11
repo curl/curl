@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel Stenberg (11 May 2009)
+- Balint Szilakszi reported a memory leak when libcurl did gzip decompression
+  of streams that had some parts (legitimately) missing. We now provide and use
+  a proper cleanup function for the content encoding submodule.
+  http://curl.haxx.se/mail/lib-2009-05/0092.html
+
 - Kamil Dudka provided a fix for libcurl-NSS reported by Michael Cronenworth
   at https://bugzilla.redhat.com/show_bug.cgi?id=453612#c12
 

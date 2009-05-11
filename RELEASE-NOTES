@@ -46,6 +46,7 @@ This release includes the following bugfixes:
  o fixed the Curl_getoff_all_pipelines SIGSEGV 
  o POST, NTLM and following a redirect hang
  o libcurl+NSS endless loop on incorrect password for private key
+ o gzip decompression memory leak
 
 This release includes the following known bugs:
 
@@ -59,6 +60,7 @@ advice from friends like these:
  Kamil Dudka, Jim Freeman, Daniel Johnson, Toshio Kuratomi, Martin Storsjo,
  Pramod Sharma, Gisle Vanem, Lenaic Lefever, Rainer Koenig, Sven Wegener,
  Tim Chen, Constantine Sapuntzakis, David McCreedy, Michael Smith,
- Colin Watson, Ebenezer Ikonne, Laurent Rabret, Michael Cronenworth
+ Colin Watson, Ebenezer Ikonne, Laurent Rabret, Michael Cronenworth,
+ Balint Szilakszi
 
         Thanks! (and sorry if I forgot to mention someone)

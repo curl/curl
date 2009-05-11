@@ -97,6 +97,7 @@
 #include "strtoofft.h"
 #include "multiif.h"
 #include "rawstr.h"
+#include "content_encoding.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -1916,6 +1917,8 @@ CURLcode Curl_http_done(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   struct HTTP *http =data->state.proto.http;
   (void)premature; /* not used */
+
+  Curl_unencode_cleanup(conn);
 
   /* set the proper values (possibly modified on POST) */
   conn->fread_func = data->set.fread_func; /* restore */

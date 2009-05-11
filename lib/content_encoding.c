@@ -414,4 +414,14 @@ Curl_unencode_gzip_write(struct connectdata *conn,
   return inflate_stream(conn, k);
 #endif
 }
+
+void Curl_unencode_cleanup(struct connectdata *conn)
+{
+  struct SessionHandle *data = conn->data;
+  struct SingleRequest *k = &data->req;
+  z_stream *z = &k->z;
+  if(k->zlib_init != ZLIB_UNINIT)
+    (void) exit_zlib(z, &k->zlib_init, CURLE_OK);
+}
+
 #endif /* HAVE_LIBZ */
