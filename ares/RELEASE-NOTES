@@ -12,9 +12,10 @@ Fixed:
 
  o ares_parse_*_reply() functions now return ARES_EBADRESP instead of
    ARES_EBADNAME if the name in the response failed to decode
+ o only expose/export symbols starting with 'ares_'
 
 Thanks go to these friendly people for their efforts and contributions:
 
- Phil Blundell, Japheth Cleaver
+ Phil Blundell, Japheth Cleaver, Yang Tse, Gregor Jasny
 
 Have fun!

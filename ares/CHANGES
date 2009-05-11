@@ -1,5 +1,9 @@
   Changelog for the c-ares project
 
+* May 11 2009 (Daniel Stenberg)
+- Gregor Jasny made c-ares link with libtool 's -export-symbols-regex option to
+  only expose functions starting with ares_.
+
 * May 2 2009 (Yang Tse)
 - Use a build-time configured ares_socklen_t data type instead of socklen_t.
 

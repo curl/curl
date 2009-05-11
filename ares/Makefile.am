@@ -87,8 +87,9 @@ if NO_UNDEFINED
 UNDEF = -no-undefined
 endif
 
+EXPORT_SYMBOLS = -export-symbols-regex '^ares_[[:alnum:]].*'
 
-libcares_la_LDFLAGS = $(UNDEF) $(VER)
+libcares_la_LDFLAGS = $(UNDEF) $(VER) $(EXPORT_SYMBOLS)
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
