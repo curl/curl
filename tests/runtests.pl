@@ -184,6 +184,7 @@ my $has_ipv6;    # set if libcurl is built with IPv6 support
 my $has_libz;    # set if libcurl is built with libz support
 my $has_getrlimit;  # set if system has getrlimit()
 my $has_ntlm;    # set if libcurl is built with NTLM support
+my $has_charconv;# set if libcurl is built with CharConv support
 
 my $has_openssl; # built with a lib using an OpenSSL-like API
 my $has_gnutls;  # built with GnuTLS
@@ -1568,6 +1569,10 @@ sub checksystem {
             if($feat =~ /NTLM/i) {
                 # NTLM enabled
                 $has_ntlm=1;
+            }
+            if($feat =~ /CharConv/i) {
+                # CharConv enabled
+                $has_charconv=1;
             }
         }
     }
