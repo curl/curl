@@ -7,6 +7,12 @@
                                   Changelog
 
 Daniel Stenberg (11 May 2009)
+- Kamil Dudka provided a fix for libcurl-NSS reported by Michael Cronenworth
+  at https://bugzilla.redhat.com/show_bug.cgi?id=453612#c12
+
+  If an incorrect password is given while loading a private key, libcurl ends
+  up in an infinite loop consuming memory. The bug is critical.
+
 - I fixed the problem with doing NTLM, POST and then following a 302 redirect,
   as reported by Ebenezer Ikonne (on curl-users) and Laurent Rabret (on
   curl-library). The transfer was mistakenly marked to get more data to send

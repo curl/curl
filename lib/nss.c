@@ -85,11 +85,6 @@ volatile int initialized = 0;
 #define HANDSHAKE_TIMEOUT 30
 
 typedef struct {
-  PRInt32 retryCount;
-  struct SessionHandle *data;
-} pphrase_arg_t;
-
-typedef struct {
   const char *name;
   int num;
   PRInt32 version; /* protocol version valid for this cipher */
@@ -483,7 +478,6 @@ static int nss_load_key(struct connectdata *conn, int sockindex, char *key_file)
   CK_BBOOL cktrue = CK_TRUE;
   CK_OBJECT_CLASS objClass = CKO_PRIVATE_KEY;
   CK_SLOT_ID slotID;
-  pphrase_arg_t *parg = NULL;
   char slotname[SLOTSIZE];
   struct ssl_connect_data *sslconn = &conn->ssl[sockindex];
 
@@ -516,17 +510,13 @@ static int nss_load_key(struct connectdata *conn, int sockindex, char *key_file)
   SECMOD_WaitForAnyTokenEvent(mod, 0, 0);
   PK11_IsPresent(slot);
 
-  parg = malloc(sizeof(pphrase_arg_t));
-  if(!parg)
-    return 0;
-  parg->retryCount = 0;
-  parg->data = conn->data;
   /* parg is initialized in nss_Init_Tokens() */
-  if(PK11_Authenticate(slot, PR_TRUE, parg) != SECSuccess) {
-    free(parg);
+  if(PK11_Authenticate(slot, PR_TRUE,
+                       conn->data->set.str[STRING_KEY_PASSWD]) != SECSuccess) {
+
+    PK11_FreeSlot(slot);
     return 0;
   }
-  free(parg);
   PK11_FreeSlot(slot);
 
   return 1;
@@ -588,25 +578,11 @@ static int cert_stuff(struct connectdata *conn,
 
 static char * nss_get_password(PK11SlotInfo * slot, PRBool retry, void *arg)
 {
-  pphrase_arg_t *parg;
-  parg = (pphrase_arg_t *) arg;
-
   (void)slot; /* unused */
-  if(retry > 2)
+  if(retry || NULL == arg)
     return NULL;
-  if(parg->data->set.str[STRING_KEY_PASSWD])
-    return (char *)PORT_Strdup((char *)parg->data->set.str[STRING_KEY_PASSWD]);
   else
-    return NULL;
-}
-
-/* No longer ask for the password, parg has been freed */
-static char * nss_no_password(PK11SlotInfo *slot, PRBool retry, void *arg)
-{
-  (void)slot; /* unused */
-  (void)retry; /* unused */
-  (void)arg; /* unused */
-  return NULL;
+    return (char *)PORT_Strdup((char *)arg);
 }
 
 static SECStatus nss_Init_Tokens(struct connectdata * conn)
@@ -614,14 +590,6 @@ static SECStatus nss_Init_Tokens(struct connectdata * conn)
   PK11SlotList *slotList;
   PK11SlotListElement *listEntry;
   SECStatus ret, status = SECSuccess;
-  pphrase_arg_t *parg = NULL;
-
-  parg = malloc(sizeof(pphrase_arg_t));
-  if(!parg)
-    return SECFailure;
-
-  parg->retryCount = 0;
-  parg->data = conn->data;
 
   PK11_SetPasswordFunc(nss_get_password);
 
@@ -644,7 +612,8 @@ static SECStatus nss_Init_Tokens(struct connectdata * conn)
       continue;
     }
 
-    ret = PK11_Authenticate(slot, PR_TRUE, parg);
+    ret = PK11_Authenticate(slot, PR_TRUE,
+                            conn->data->set.str[STRING_KEY_PASSWD]);
     if(SECSuccess != ret) {
       if(PR_GetError() == SEC_ERROR_BAD_PASSWORD)
         infof(conn->data, "The password for token '%s' is incorrect\n",
@@ -652,11 +621,8 @@ static SECStatus nss_Init_Tokens(struct connectdata * conn)
       status = SECFailure;
       break;
     }
-    parg->retryCount = 0; /* reset counter to 0 for the next token */
     PK11_FreeSlot(slot);
   }
-
-  free(parg);
 
   return status;
 }
@@ -1220,8 +1186,6 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
       curlerr = CURLE_SSL_CERTPROBLEM;
       goto error;
     }
-
-    PK11_SetPasswordFunc(nss_no_password);
   }
   else
     connssl->client_nickname = NULL;
