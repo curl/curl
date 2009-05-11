@@ -269,7 +269,6 @@ esac
 
 CURL_CHECK_COMPILER_HALT_ON_ERROR
 CURL_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE
-CURL_CHECK_COMPILER_STRUCT_MEMBER_SIZE
 
 dnl **********************************************************************
 dnl Compilation based checks should not be done before this point.
