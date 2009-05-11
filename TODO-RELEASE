@@ -3,11 +3,6 @@ To be addressed in 7.19.5 (planned release: May 2009)
 
 228 - rpath problems in linking with custom openssl
 
-234 - [PATCH] Allow various Curl test suite tests to work on non-ASCII 
-      platforms
-      - reviewed
-      - awaiting patch rework/breakdown
-
 240 - 
 
 To be addressed in 7.19.6 (planned release: July 2009)
