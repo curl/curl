@@ -124,7 +124,7 @@ applications to not only avoid being forced to use select(), but it also
 offers a much more high-performance API that will make a significant difference
 for applications using large numbers of simultaneous connections.
 
-\fIcurl_multi_socket(3)\fP (and \fIcurl_multi_socket_all(3)\fP) is then used
+\fIcurl_multi_socket_action(3)\fP is then used
 instead of \fIcurl_multi_perform(3)\fP.
 .SH "BLOCKING"
 A few areas in the code are still using blocking code, even when used from the
