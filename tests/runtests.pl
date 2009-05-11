@@ -2370,7 +2370,8 @@ sub singletest {
     }
     else {
         if(!$short) {
-            printf "\ncurl returned $cmdres, %d was expected\n", $errorcode;
+            printf("\n%s returned $cmdres, %d was expected\n",
+                   (!$tool)?"curl":$tool, $errorcode);
         }
         logmsg " exit FAILED\n";
         return 1;
