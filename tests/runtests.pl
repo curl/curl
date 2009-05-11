@@ -2799,7 +2799,7 @@ while(@ARGV) {
         # keep stdout and stderr files after tests
         $keepoutfiles=1;
     }
-    elsif($ARGV[0] eq "-h") {
+    elsif(($ARGV[0] eq "-h") || ($ARGV[0] eq "--help")) {
         # show help text
         print <<EOHELP
 Usage: runtests.pl [options] [test selection(s)]
