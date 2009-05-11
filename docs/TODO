@@ -551,7 +551,13 @@ to provide the data to send.
  curl_strnequal
 
  They will instead become curlx_ - alternatives. That makes the curl app
- still capable of building with them from source.
+ still capable of using them, by building with them from source.
+
+ These functions have no purpose anymore:
+
+ curl_multi_socket
+
+ curl_multi_socket_all
 
 15.5 remove CURLOPT_FAILONERROR
 
