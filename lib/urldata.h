@@ -653,17 +653,17 @@ struct hostname {
  */
 
 #define KEEP_NONE  0
-#define KEEP_READ  (1<<0)     /* there is or may be data to read */
-#define KEEP_WRITE (1<<1)     /* there is or may be data to write */
-#define KEEP_READ_HOLD (1<<2) /* when set, no reading should be done but there
+#define KEEP_RECV  (1<<0)     /* there is or may be data to read */
+#define KEEP_SEND (1<<1)     /* there is or may be data to write */
+#define KEEP_RECV_HOLD (1<<2) /* when set, no reading should be done but there
                                  might still be data to read */
-#define KEEP_WRITE_HOLD (1<<3) /* when set, no writing should be done but there
+#define KEEP_SEND_HOLD (1<<3) /* when set, no writing should be done but there
                                   might still be data to write */
-#define KEEP_READ_PAUSE (1<<4) /* reading is paused */
-#define KEEP_WRITE_PAUSE (1<<5) /* writing is paused */
+#define KEEP_RECV_PAUSE (1<<4) /* reading is paused */
+#define KEEP_SEND_PAUSE (1<<5) /* writing is paused */
 
-#define KEEP_READBITS (KEEP_READ | KEEP_READ_HOLD | KEEP_READ_PAUSE)
-#define KEEP_WRITEBITS (KEEP_WRITE | KEEP_WRITE_HOLD | KEEP_WRITE_PAUSE)
+#define KEEP_RECVBITS (KEEP_RECV | KEEP_RECV_HOLD | KEEP_RECV_PAUSE)
+#define KEEP_SENDBITS (KEEP_SEND | KEEP_SEND_HOLD | KEEP_SEND_PAUSE)
 
 
 #ifdef HAVE_LIBZ

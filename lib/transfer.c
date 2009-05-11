@@ -157,7 +157,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
   else if(nread == CURL_READFUNC_PAUSE) {
     struct SingleRequest *k = &data->req;
     /* CURL_READFUNC_PAUSE pauses read callbacks that feed socket writes */
-    k->keepon |= KEEP_WRITE_PAUSE; /* mark socket send as paused */
+    k->keepon |= KEEP_SEND_PAUSE; /* mark socket send as paused */
     if(data->req.upload_chunky) {
       /* Back out the preallocation done above */
       data->req.upload_fromhere -= (8 + 2);
@@ -320,7 +320,7 @@ CURLcode Curl_readrewind(struct connectdata *conn)
      about to restart a new transfer and thus we want to avoid inadvertently
      sending more data on the existing connection until the next transfer
      starts */
-  data->req.keepon &= ~KEEP_WRITE;
+  data->req.keepon &= ~KEEP_SEND;
 
   /* We have sent away data. If not using CURLOPT_POSTFIELDS or
      CURLOPT_HTTPPOST, call app to rewind
@@ -465,7 +465,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
         k->start100 = Curl_tvnow();
     }
 
-    *didwhat |= KEEP_READ;
+    *didwhat |= KEEP_RECV;
     /* indicates data of zero size, i.e. empty file */
     is_empty_data = (bool)((nread == 0) && (k->bodywrites == 0));
 
@@ -477,7 +477,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
       /* if we receive 0 or less here, the server closed the connection
          and we bail out from this! */
       DEBUGF(infof(data, "nread <= 0, server closed connection, bailing\n"));
-      k->keepon &= ~KEEP_READ;
+      k->keepon &= ~KEEP_RECV;
       break;
     }
 
@@ -517,7 +517,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
             if(conn->bits.close) {
               /* Abort after the headers if "follow Location" is set
                  and we're set to close anyway. */
-              k->keepon &= ~KEEP_READ;
+              k->keepon &= ~KEEP_RECV;
               *done = TRUE;
               return CURLE_OK;
             }
@@ -610,7 +610,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
         else if(CHUNKE_STOP == res) {
           size_t dataleft;
           /* we're done reading chunks! */
-          k->keepon &= ~KEEP_READ; /* read no more */
+          k->keepon &= ~KEEP_RECV; /* read no more */
 
           /* There are now possibly N number of bytes at the end of the
              str buffer that weren't written to the client.
@@ -649,7 +649,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
         if(nread < 0 ) /* this should be unusual */
           nread = 0;
 
-        k->keepon &= ~KEEP_READ; /* we're done reading */
+        k->keepon &= ~KEEP_RECV; /* we're done reading */
       }
 
       k->bytecount += nread;
@@ -721,18 +721,18 @@ static CURLcode readwrite_data(struct SessionHandle *data,
     if(is_empty_data) {
       /* if we received nothing, the server closed the connection and we
          are done */
-      k->keepon &= ~KEEP_READ;
+      k->keepon &= ~KEEP_RECV;
     }
 
   } while(data_pending(conn));
 
-  if(((k->keepon & (KEEP_READ|KEEP_WRITE)) == KEEP_WRITE) &&
+  if(((k->keepon & (KEEP_RECV|KEEP_SEND)) == KEEP_SEND) &&
      conn->bits.close ) {
     /* When we've read the entire thing and the close bit is set, the server
        may now close the connection. If there's now any kind of sending going
        on from our side, we need to stop that immediately. */
     infof(data, "we are done reading and this is set to close, stop send\n");
-    k->keepon &= ~KEEP_WRITE; /* no writing anymore either */
+    k->keepon &= ~KEEP_SEND; /* no writing anymore either */
   }
 
   return CURLE_OK;
@@ -895,7 +895,7 @@ static CURLcode readwrite_http_headers(struct SessionHandle *data,
         /* if we did wait for this do enable write now! */
         if(k->exp100) {
           k->exp100 = EXP100_SEND_DATA;
-          k->keepon |= KEEP_WRITE;
+          k->keepon |= KEEP_SEND;
         }
       }
       else {
@@ -922,7 +922,7 @@ static CURLcode readwrite_http_headers(struct SessionHandle *data,
          * (or prevent them from starting).
          */
         k->exp100 = EXP100_FAILED;
-        k->keepon &= ~KEEP_WRITE;
+        k->keepon &= ~KEEP_SEND;
       }
 
       /*
@@ -975,7 +975,7 @@ static CURLcode readwrite_http_headers(struct SessionHandle *data,
           /* We rewind after a complete send, so thus we continue
              sending now */
           infof(data, "Keep sending data to get tossed away!\n");
-          k->keepon |= KEEP_WRITE;
+          k->keepon |= KEEP_SEND;
         }
       }
 
@@ -1021,7 +1021,7 @@ static CURLcode readwrite_http_headers(struct SessionHandle *data,
 
         if(*stop_reading) {
           /* we make sure that this socket isn't read more now */
-          k->keepon &= ~KEEP_READ;
+          k->keepon &= ~KEEP_RECV;
         }
 
         if(data->set.verbose)
@@ -1463,7 +1463,7 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
   if((k->bytecount == 0) && (k->writebytecount == 0))
     Curl_pgrsTime(data, TIMER_STARTTRANSFER);
 
-  *didwhat |= KEEP_WRITE;
+  *didwhat |= KEEP_SEND;
 
   /*
    * We loop here to do the READ and SEND loop until we run out of
@@ -1488,9 +1488,9 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
              We have sent off the full HTTP 1.1 request, and we shall now
              go into the Expect: 100 state and await such a header */
           k->exp100 = EXP100_AWAITING_CONTINUE; /* wait for the header */
-          k->keepon &= ~KEEP_WRITE;         /* disable writing */
+          k->keepon &= ~KEEP_SEND;         /* disable writing */
           k->start100 = Curl_tvnow();       /* timeout count starts now */
-          *didwhat &= ~KEEP_WRITE;  /* we didn't write anything actually */
+          *didwhat &= ~KEEP_SEND;  /* we didn't write anything actually */
           break;
         }
 
@@ -1512,13 +1512,13 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
       else
         nread = 0; /* we're done uploading/reading */
 
-      if(!nread && (k->keepon & KEEP_WRITE_PAUSE)) {
+      if(!nread && (k->keepon & KEEP_SEND_PAUSE)) {
         /* this is a paused transfer */
         break;
       }
       else if(nread<=0) {
         /* done */
-        k->keepon &= ~KEEP_WRITE; /* we're done writing */
+        k->keepon &= ~KEEP_SEND; /* we're done writing */
 
         if(conn->bits.rewindaftersend) {
           result = Curl_readrewind(conn);
@@ -1614,7 +1614,7 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
 
       if(k->upload_done) {
         /* switch off writing, we're done! */
-        k->keepon &= ~KEEP_WRITE; /* we're done writing */
+        k->keepon &= ~KEEP_SEND; /* we're done writing */
       }
     }
 
@@ -1647,7 +1647,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   /* only use the proper socket if the *_HOLD bit is not set simultaneously as
      then we are in rate limiting state in that transfer direction */
 
-  if((k->keepon & KEEP_READBITS) == KEEP_READ) {
+  if((k->keepon & KEEP_RECVBITS) == KEEP_RECV) {
     fd_read = conn->sockfd;
 #if defined(USE_LIBSSH2)
     if(conn->protocol & (PROT_SCP|PROT_SFTP))
@@ -1656,7 +1656,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   } else
     fd_read = CURL_SOCKET_BAD;
 
-  if((k->keepon & KEEP_WRITEBITS) == KEEP_WRITE)
+  if((k->keepon & KEEP_SENDBITS) == KEEP_SEND)
     fd_write = conn->writesockfd;
   else
     fd_write = CURL_SOCKET_BAD;
@@ -1674,7 +1674,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   /* We go ahead and do a read if we have a readable socket or if
      the stream was rewound (in which case we have data in a
      buffer) */
-  if((k->keepon & KEEP_READ) &&
+  if((k->keepon & KEEP_RECV) &&
      ((select_res & CURL_CSELECT_IN) || conn->bits.stream_was_rewound)) {
 
     result = readwrite_data(data, conn, k, &didwhat, done);
@@ -1683,7 +1683,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   }
 
   /* If we still have writing to do, we check if we have a writable socket. */
-  if((k->keepon & KEEP_WRITE) && (select_res & CURL_CSELECT_OUT)) {
+  if((k->keepon & KEEP_SEND) && (select_res & CURL_CSELECT_OUT)) {
     /* write */
 
     result = readwrite_upload(data, conn, k, &didwhat);
@@ -1719,7 +1719,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
       if(ms > CURL_TIMEOUT_EXPECT_100) {
         /* we've waited long enough, continue anyway */
         k->exp100 = EXP100_SEND_DATA;
-        k->keepon |= KEEP_WRITE;
+        k->keepon |= KEEP_SEND;
         infof(data, "Done waiting for 100-continue\n");
       }
     }
@@ -1787,8 +1787,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   }
 
   /* Now update the "done" boolean we return */
-  *done = (bool)(0 == (k->keepon&(KEEP_READ|KEEP_WRITE|
-                                  KEEP_READ_PAUSE|KEEP_WRITE_PAUSE)));
+  *done = (bool)(0 == (k->keepon&(KEEP_RECV|KEEP_SEND|
+                                  KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)));
 
   return CURLE_OK;
 }
@@ -1817,7 +1817,7 @@ int Curl_single_getsock(const struct connectdata *conn,
     return GETSOCK_BLANK;
 
   /* don't include HOLD and PAUSE connections */
-  if((data->req.keepon & KEEP_READBITS) == KEEP_READ) {
+  if((data->req.keepon & KEEP_RECVBITS) == KEEP_RECV) {
 
     DEBUGASSERT(conn->sockfd != CURL_SOCKET_BAD);
 
@@ -1826,13 +1826,13 @@ int Curl_single_getsock(const struct connectdata *conn,
   }
 
   /* don't include HOLD and PAUSE connections */
-  if((data->req.keepon & KEEP_WRITEBITS) == KEEP_WRITE) {
+  if((data->req.keepon & KEEP_SENDBITS) == KEEP_SEND) {
 
     if((conn->sockfd != conn->writesockfd) ||
-       !(data->req.keepon & KEEP_READ)) {
+       !(data->req.keepon & KEEP_RECV)) {
       /* only if they are not the same socket or we didn't have a readable
          one, we increase index */
-      if(data->req.keepon & KEEP_READ)
+      if(data->req.keepon & KEEP_RECV)
         sockindex++; /* increase index if we need two entries */
 
       DEBUGASSERT(conn->writesockfd != CURL_SOCKET_BAD);
@@ -1887,34 +1887,34 @@ Transfer(struct connectdata *conn)
     /* limit-rate logic: if speed exceeds threshold, then do not include fd in
        select set. The current speed is recalculated in each Curl_readwrite()
        call */
-    if((k->keepon & KEEP_WRITE) &&
+    if((k->keepon & KEEP_SEND) &&
         (!data->set.max_send_speed ||
          (data->progress.ulspeed < data->set.max_send_speed) )) {
       fd_write = conn->writesockfd;
-      k->keepon &= ~KEEP_WRITE_HOLD;
+      k->keepon &= ~KEEP_SEND_HOLD;
     }
     else {
       fd_write = CURL_SOCKET_BAD;
-      if(k->keepon & KEEP_WRITE)
-        k->keepon |= KEEP_WRITE_HOLD; /* hold it */
+      if(k->keepon & KEEP_SEND)
+        k->keepon |= KEEP_SEND_HOLD; /* hold it */
     }
 
-    if((k->keepon & KEEP_READ) &&
+    if((k->keepon & KEEP_RECV) &&
         (!data->set.max_recv_speed ||
          (data->progress.dlspeed < data->set.max_recv_speed)) ) {
       fd_read = conn->sockfd;
-      k->keepon &= ~KEEP_READ_HOLD;
+      k->keepon &= ~KEEP_RECV_HOLD;
     }
     else {
       fd_read = CURL_SOCKET_BAD;
-      if(k->keepon & KEEP_READ)
-        k->keepon |= KEEP_READ_HOLD; /* hold it */
+      if(k->keepon & KEEP_RECV)
+        k->keepon |= KEEP_RECV_HOLD; /* hold it */
     }
 
     /* pause logic. Don't check descriptors for paused connections */
-    if(k->keepon & KEEP_READ_PAUSE)
+    if(k->keepon & KEEP_RECV_PAUSE)
       fd_read = CURL_SOCKET_BAD;
-    if(k->keepon & KEEP_WRITE_PAUSE)
+    if(k->keepon & KEEP_SEND_PAUSE)
       fd_write = CURL_SOCKET_BAD;
 
     /* The *_HOLD and *_PAUSE logic is necessary since even though there might
@@ -2730,7 +2730,7 @@ Curl_setup_transfer(
   if(k->getheader || !data->set.opt_no_body) {
 
     if(conn->sockfd != CURL_SOCKET_BAD) {
-      k->keepon |= KEEP_READ;
+      k->keepon |= KEEP_RECV;
     }
 
     if(conn->writesockfd != CURL_SOCKET_BAD) {
@@ -2756,7 +2756,7 @@ Curl_setup_transfer(
           k->exp100 = EXP100_SENDING_REQUEST;
 
         /* enable the write bit when we're not waiting for continue */
-        k->keepon |= KEEP_WRITE;
+        k->keepon |= KEEP_SEND;
       }
     } /* if(conn->writesockfd != CURL_SOCKET_BAD) */
   } /* if(k->getheader || !data->set.opt_no_body) */

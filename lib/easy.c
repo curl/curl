@@ -766,17 +766,17 @@ CURLcode curl_easy_pause(CURL *curl, int action)
   CURLcode result = CURLE_OK;
 
   /* first switch off both pause bits */
-  int newstate = k->keepon &~ (KEEP_READ_PAUSE| KEEP_WRITE_PAUSE);
+  int newstate = k->keepon &~ (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE);
 
   /* set the new desired pause bits */
-  newstate |= ((action & CURLPAUSE_RECV)?KEEP_READ_PAUSE:0) |
-    ((action & CURLPAUSE_SEND)?KEEP_WRITE_PAUSE:0);
+  newstate |= ((action & CURLPAUSE_RECV)?KEEP_RECV_PAUSE:0) |
+    ((action & CURLPAUSE_SEND)?KEEP_SEND_PAUSE:0);
 
   /* put it back in the keepon */
   k->keepon = newstate;
 
-  if(!(newstate & KEEP_READ_PAUSE) && data->state.tempwrite) {
-    /* we have a buffer for writing that we now seem to be able to deliver since
+  if(!(newstate & KEEP_RECV_PAUSE) && data->state.tempwrite) {
+    /* we have a buffer for sending that we now seem to be able to deliver since
        the receive pausing is lifted! */
 
     /* get the pointer, type and length in local copies since the function may

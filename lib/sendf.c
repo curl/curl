@@ -341,7 +341,7 @@ static CURLcode pausewrite(struct SessionHandle *data,
   data->state.tempwritetype = type;
 
   /* mark the connection as RECV paused */
-  k->keepon |= KEEP_READ_PAUSE;
+  k->keepon |= KEEP_RECV_PAUSE;
 
   DEBUGF(infof(data, "Pausing with %d bytes in buffer for type %02x\n",
                (int)len, type));
@@ -373,7 +373,7 @@ CURLcode Curl_client_write(struct connectdata *conn,
   /* If reading is actually paused, we're forced to append this chunk of data
      to the already held data, but only if it is the same type as otherwise it
      can't work and it'll return error instead. */
-  if(data->req.keepon & KEEP_READ_PAUSE) {
+  if(data->req.keepon & KEEP_RECV_PAUSE) {
     size_t newlen;
     char *newptr;
     if(type != data->state.tempwritetype)
