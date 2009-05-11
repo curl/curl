@@ -8,9 +8,6 @@ To be addressed in 7.19.5 (planned release: May 2009)
       - reviewed
       - awaiting patch rework/breakdown
 
-236 - timeout in milliseconds doesn't seem to work
-      http://curl.haxx.se/mail/lib-2009-05/0021.html
-
 240 - 
 
 To be addressed in 7.19.6 (planned release: July 2009)
