@@ -99,6 +99,8 @@ http://test.remote.haxx.se/path/555 http://%HOSTIP:%HTTPPORT s1lly:pers0n
 # the local host name and thus differs on different machines!
 <strippart>
 s/^(Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA).*/$1/
+# remove CR that CURLOPT_TRANSFERTEXT added, when CharConv enabled:
+s/^(this is the blurb we want to upload)\r\n/$1\n/ if($has_charconv)
 </strippart>
 <protocol>
 POST http://test.remote.haxx.se/path/555 HTTP/1.1

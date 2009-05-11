@@ -34,6 +34,10 @@ http://%HOSTIP:%HTTPPORT/508
 #
 # Verify data after the test has been "shot"
 <verify>
+<strippart>
+# remove CR that CURLOPT_TRANSFERTEXT added, when CharConv enabled:
+s/^(this is what we post to the silly web server)\r\n/$1\n/ if($has_charconv)
+</strippart>
 <protocol>
 POST /508 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
