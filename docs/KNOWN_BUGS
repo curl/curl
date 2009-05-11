@@ -3,6 +3,12 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+65. When doing FTP over a socks proxy or CONNECT through HTTP proxy and the
+  multi interface is used, libcurl will fail if the (passive) TCP connection
+  for the data transfer isn't more or less instant as the code does not
+  properly wait for the connect to be confirmed. See test case 564 for a first
+  shot at a test case.
+
 64. The threaded resolver used in libcurl on Windows has some kind of race
   problem when multiple simultanoes resolves are done, like with the multi
   interface transferring many files in parallell:
