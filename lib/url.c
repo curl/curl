@@ -2853,9 +2853,7 @@ CURLcode Curl_connected_proxy(struct connectdata *conn)
     /* do nothing here. handled later. */
     break;
   default:
-    failf(data, "unknown proxytype option given");
-      result = CURLE_COULDNT_CONNECT;
-      break;
+    break;
   } /* switch proxytype */
 
   return result;
