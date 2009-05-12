@@ -115,18 +115,18 @@
 
 #elif defined(__BORLANDC__)
 #  define CARES_SIZEOF_LONG           4
-#  define CARES_TYPEOF_ARES_SOCKLEN_T FIXME
-#  define CARES_SIZEOF_ARES_SOCKLEN_T -1
+#  define CARES_TYPEOF_ARES_SOCKLEN_T int
+#  define CARES_SIZEOF_ARES_SOCKLEN_T 4
 
 #elif defined(__TURBOC__)
 #  define CARES_SIZEOF_LONG           4
-#  define CARES_TYPEOF_ARES_SOCKLEN_T FIXME
-#  define CARES_SIZEOF_ARES_SOCKLEN_T -1
+#  define CARES_TYPEOF_ARES_SOCKLEN_T int
+#  define CARES_SIZEOF_ARES_SOCKLEN_T 4
 
 #elif defined(__WATCOMC__)
 #  define CARES_SIZEOF_LONG           4
-#  define CARES_TYPEOF_ARES_SOCKLEN_T FIXME
-#  define CARES_SIZEOF_ARES_SOCKLEN_T -1
+#  define CARES_TYPEOF_ARES_SOCKLEN_T int
+#  define CARES_SIZEOF_ARES_SOCKLEN_T 4
 
 #elif defined(__POCC__)
 #  define CARES_SIZEOF_LONG           4
@@ -135,8 +135,8 @@
 
 #elif defined(__LCC__)
 #  define CARES_SIZEOF_LONG           4
-#  define CARES_TYPEOF_ARES_SOCKLEN_T FIXME
-#  define CARES_SIZEOF_ARES_SOCKLEN_T -1
+#  define CARES_TYPEOF_ARES_SOCKLEN_T int
+#  define CARES_SIZEOF_ARES_SOCKLEN_T 4
 
 #elif defined(__SYMBIAN32__)
 #  define CARES_SIZEOF_LONG           4
@@ -145,8 +145,8 @@
 
 #elif defined(__MWERKS__)
 #  define CARES_SIZEOF_LONG           4
-#  define CARES_TYPEOF_ARES_SOCKLEN_T FIXME
-#  define CARES_SIZEOF_ARES_SOCKLEN_T -1
+#  define CARES_TYPEOF_ARES_SOCKLEN_T int
+#  define CARES_SIZEOF_ARES_SOCKLEN_T 4
 
 #elif defined(_WIN32_WCE)
 #  define CARES_SIZEOF_LONG           4
