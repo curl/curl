@@ -166,8 +166,6 @@
 #elif defined(__OS400__)
 #  if defined(__ILEC400__)
 #    define CARES_SIZEOF_LONG           4
-#    define CARES_TYPEOF_ARES_SOCKLEN_T FIXME
-#    define CARES_SIZEOF_ARES_SOCKLEN_T -1
 #    define CARES_TYPEOF_ARES_SOCKLEN_T socklen_t
 #    define CARES_SIZEOF_ARES_SOCKLEN_T 4
 #    define CARES_PULL_SYS_TYPES_H      1
