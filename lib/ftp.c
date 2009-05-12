@@ -1890,11 +1890,33 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     /* this just dumps information about this second connection */
     ftp_pasv_verbose(conn, conninfo, newhost, connectport);
 
-  /* FIX: this MUST wait for a proper connect first if 'connected' is
-     FALSE to make proxies work properly here! */
-  result = Curl_connected_proxy(conn);
-  if(result)
-    return result;
+  switch(data->set.proxytype) {
+#ifndef CURL_DISABLE_PROXY
+    /* FIX: this MUST wait for a proper connect first if 'connected' is
+     * FALSE */
+  case CURLPROXY_SOCKS5:
+  case CURLPROXY_SOCKS5_HOSTNAME:
+    result = Curl_SOCKS5(conn->proxyuser, conn->proxypasswd, newhost, newport,
+                         SECONDARYSOCKET, conn);
+    break;
+  case CURLPROXY_SOCKS4:
+    result = Curl_SOCKS4(conn->proxyuser, newhost, newport,
+                         SECONDARYSOCKET, conn, FALSE);
+    break;
+  case CURLPROXY_SOCKS4A:
+    result = Curl_SOCKS4(conn->proxyuser, newhost, newport,
+                         SECONDARYSOCKET, conn, TRUE);
+    break;
+#endif /* CURL_DISABLE_PROXY */
+  case CURLPROXY_HTTP:
+  case CURLPROXY_HTTP_1_0:
+    /* do nothing here. handled later. */
+    break;
+  default:
+    failf(data, "unknown proxytype option given");
+    result = CURLE_COULDNT_CONNECT;
+    break;
+  }
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_PROXY)
   if(conn->bits.tunnel_proxy && conn->bits.httpproxy) {
     /* FIX: this MUST wait for a proper connect first if 'connected' is
