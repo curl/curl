@@ -688,13 +688,16 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
   int delay= 20;
   int attempt = 0;
   int error = 0;
+  curl_socklen_t optlen;
 
   do {
     attempt++;
+    optlen = sizeof(flag);
     rc = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-         (void *)&flag, sizeof(flag));
+         (void *)&flag, optlen);
     if(rc) {
       error = SOCKERRNO;
+      logmsg("setsockopt/SO_REUSEADDR failed: (%d) %s", error, strerror(error));
       if(maxretr) {
         rc = wait_ms(delay);
         if(rc) {
