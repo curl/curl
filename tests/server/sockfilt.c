@@ -681,29 +681,30 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
 #ifdef ENABLE_IPV6
   struct sockaddr_in6 me6;
 #endif /* ENABLE_IPV6 */
-  int flag = 1;
+  int flag;
   int rc;
   int totdelay = 0;
   int maxretr = 10;
   int delay= 20;
   int attempt = 0;
   int error = 0;
-  curl_socklen_t optlen;
 
   do {
     attempt++;
-    optlen = sizeof(flag);
+    flag = 1;
     rc = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-         (void *)&flag, optlen);
+         (void *)&flag, sizeof(flag));
     if(rc) {
       error = SOCKERRNO;
-      logmsg("setsockopt/SO_REUSEADDR failed: (%d) %s", error, strerror(error));
+      logmsg("setsockopt(SO_REUSEADDR) failed with error: (%d) %s",
+             error, strerror(error));
       if(maxretr) {
         rc = wait_ms(delay);
         if(rc) {
           /* should not happen */
           error = SOCKERRNO;
-          logmsg("wait_ms() failed: (%d) %s", error, strerror(error));
+          logmsg("wait_ms() failed with error: (%d) %s",
+                 error, strerror(error));
           sclose(sock);
           return CURL_SOCKET_BAD;
         }
@@ -723,6 +724,9 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
            attempt, totdelay, error, strerror(error));
     logmsg("Continuing anyway...");
   }
+
+  /* When the specified listener port is zero, it is actually a
+     request to let the system choose a non-zero available port. */
 
 #ifdef ENABLE_IPV6
   if(!use_ipv6) {
@@ -750,21 +754,50 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
   }
 
   if(!*listenport) {
-    /* The system picked a port number, now figure out which port we actually
-       got */
-    /* we succeeded to bind */
-    struct sockaddr_in add;
-    curl_socklen_t socksize = sizeof(add);
-
-    if(getsockname(sock, (struct sockaddr *) &add,
-                   &socksize)<0) {
+    /* The system was supposed to choose a port number, figure out which
+       port we actually got and update the listener port value with it. */
+    curl_socklen_t la_size;
+    struct sockaddr *localaddr;
+    struct sockaddr_in localaddr4;
+#ifdef ENABLE_IPV6
+    struct sockaddr_in6 localaddr6;
+    if(!use_ipv6) {
+#endif
+      la_size = sizeof(localaddr4);
+      localaddr = (struct sockaddr *)&localaddr4;
+#ifdef ENABLE_IPV6
+    }
+    else {
+      la_size = sizeof(localaddr6);
+      localaddr = (struct sockaddr *)&localaddr6;
+    }
+#endif
+    memset(localaddr, 0, (size_t)la_size);
+    if(getsockname(sock, localaddr, &la_size) < 0) {
       error = SOCKERRNO;
       logmsg("getsockname() failed with error: (%d) %s",
              error, strerror(error));
       sclose(sock);
       return CURL_SOCKET_BAD;
     }
-    *listenport = ntohs(add.sin_port);
+    switch (localaddr->sa_family) {
+    case AF_INET:
+      *listenport = ntohs(localaddr4.sin_port);
+      break;
+#ifdef ENABLE_IPV6
+    case AF_INET6:
+      *listenport = ntohs(localaddr6.sin6_port);
+      break;
+#endif
+    default:
+      break;
+    }
+    if(!*listenport) {
+      /* Real failure, listener port shall not be zero beyond this point. */
+      logmsg("Successfull getsockname() but unknown listener port.");
+      sclose(sock);
+      return CURL_SOCKET_BAD;
+    }
   }
 
   /* start accepting connections */
