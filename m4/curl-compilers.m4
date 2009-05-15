@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 50
+# serial 51
 
 
 dnl CURL_CHECK_COMPILER
@@ -907,10 +907,6 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
         if test "$want_warnings" = "yes"; then
           dnl Issue all warnings
           tmp_CFLAGS="$tmp_CFLAGS +w1"
-          dnl Due to the HP-UX socklen_t issue it is insane to use the +w1
-          dnl warning level. Until the issue is somehow fixed we will just
-          dnl use the +w2 warning level.
-          dnl tmp_CFLAGS="$tmp_CFLAGS +w2"
         fi
         ;;
         #
