@@ -848,6 +848,7 @@ sub runhttpserver {
         # it is NOT alive
         logmsg "RUN: failed to start the HTTP$nameext server\n";
         stopserver("$pid2");
+        displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
@@ -858,6 +859,7 @@ sub runhttpserver {
         logmsg "RUN: HTTP$nameext server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$httppid $pid2");
+        displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
@@ -912,6 +914,7 @@ sub runhttpsserver {
         # it is NOT alive
         logmsg "RUN: failed to start the HTTPS server\n";
         stopservers($verbose);
+        displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return(0,0);
     }
@@ -922,6 +925,7 @@ sub runhttpsserver {
         logmsg "RUN: HTTPS server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$httpspid $pid2");
+        displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
@@ -990,7 +994,7 @@ sub runftpserver {
         # it is NOT alive
         logmsg "RUN: failed to start the FTP$id$nameext server\n";
         stopserver("$pid2");
-        displaylogs($testnumcheck) if($testnumcheck == 100);
+        displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
@@ -1001,7 +1005,7 @@ sub runftpserver {
         logmsg "RUN: FTP$id$nameext server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$ftppid $pid2");
-        displaylogs($testnumcheck) if($testnumcheck == 100);
+        displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
@@ -1056,6 +1060,7 @@ sub runftpsserver {
         # it is NOT alive
         logmsg "RUN: failed to start the FTPS server\n";
         stopservers($verbose);
+        displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return(0,0);
     }
@@ -1066,6 +1071,7 @@ sub runftpsserver {
         logmsg "RUN: FTPS server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$ftpspid $pid2");
+        displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
@@ -1130,6 +1136,7 @@ sub runtftpserver {
         # it is NOT alive
         logmsg "RUN: failed to start the TFTP$id$nameext server\n";
         stopserver("$pid2");
+        displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
@@ -1140,6 +1147,7 @@ sub runtftpserver {
         logmsg "RUN: TFTP$id$nameext server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$tftppid $pid2");
+        displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
