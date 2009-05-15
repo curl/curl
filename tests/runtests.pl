@@ -211,6 +211,8 @@ my $sshderror;   # for socks server, ssh daemon version error
 my $defserverlogslocktimeout = 20; # timeout to await server logs lock removal
 my $defpostcommanddelay = 0; # delay between command and postcheck sections
 
+my $testnumcheck; # test number, set in singletest sub.
+
 #######################################################################
 # variables the command line options may set
 #
@@ -231,7 +233,6 @@ my %doesntrun;    # servers that don't work, identified by pidfile
 my $torture;
 my $tortnum;
 my $tortalloc;
-my $testnumrequiringthis;
 
 # open and close each time to allow removal at any time
 sub logmsg {
@@ -989,7 +990,7 @@ sub runftpserver {
         # it is NOT alive
         logmsg "RUN: failed to start the FTP$id$nameext server\n";
         stopserver("$pid2");
-        displaylogs($testnumrequiringthis) if($testnumrequiringthis == 100);
+        displaylogs($testnumcheck) if($testnumcheck == 100);
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
@@ -1000,7 +1001,7 @@ sub runftpserver {
         logmsg "RUN: FTP$id$nameext server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$ftppid $pid2");
-        displaylogs($testnumrequiringthis) if($testnumrequiringthis == 100);
+        displaylogs($testnumcheck) if($testnumcheck == 100);
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
@@ -1743,7 +1744,9 @@ sub singletest {
     my %feature;
     my $cmd;
 
-    $testnumrequiringthis = $testnum;
+    # copy test number to a global scope var, this allows
+    # testnum checking when starting test harness servers.
+    $testnumcheck = $testnum;
 
     # load the test case file definition
     if(loadtest("${TESTDIR}/test${testnum}")) {
