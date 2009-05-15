@@ -8,8 +8,6 @@
  * $Id$
  */
 
-/* used for test case 533, 534 and 535 */
-
 #include "test.h"
 
 #include <sys/types.h>
@@ -29,7 +27,6 @@ int test(char *URL)
   int running;
   char done=FALSE;
   CURLM *m;
-  int current=0;
   struct timeval ml_start;
   struct timeval mp_start;
   char ml_timedout = FALSE;
