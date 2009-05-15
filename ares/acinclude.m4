@@ -98,7 +98,7 @@ AC_DEFUN([CARES_CHECK_LIB_XNET], [
     AC_LANG_SOURCE([[
 int main (void)
 {
-#if defined(__hpux) && defined(_XOPEN_SOURCE) && defined(_XOPEN_SOURCE >= 600)
+#if defined(__hpux) && defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 600)
   return 0;
 #elif defined(__hpux) && defined(_XOPEN_SOURCE_EXTENDED)
   return 0;
