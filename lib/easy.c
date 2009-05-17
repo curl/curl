@@ -280,6 +280,13 @@ CURLcode curl_global_init(long flags)
   idna_init();
 #endif
 
+#if defined(USE_ARES) && defined(ARES_VERSION) && (ARES_VERSION >= 0x010601)
+  If(ares_library_init(ARES_LIB_INIT_ALL)) {
+    DEBUGF(fprintf(stderr, "Error: ares_library_init failed\n"));
+    return CURLE_FAILED_INIT;
+  }
+#endif
+
   init_flags  = flags;
 
   return CURLE_OK;
@@ -332,6 +339,10 @@ void curl_global_cleanup(void)
 
   if(init_flags & CURL_GLOBAL_SSL)
     Curl_ssl_cleanup();
+
+#if defined(USE_ARES) && defined(ARES_VERSION) && (ARES_VERSION >= 0x010601)
+  ares_library_cleanup();
+#endif
 
   if(init_flags & CURL_GLOBAL_WIN32)
     win32_cleanup();
