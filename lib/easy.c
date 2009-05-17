@@ -281,7 +281,7 @@ CURLcode curl_global_init(long flags)
 #endif
 
 #if defined(USE_ARES) && defined(ARES_VERSION) && (ARES_VERSION >= 0x010601)
-  If(ares_library_init(ARES_LIB_INIT_ALL)) {
+  if(ares_library_init(ARES_LIB_INIT_ALL)) {
     DEBUGF(fprintf(stderr, "Error: ares_library_init failed\n"));
     return CURLE_FAILED_INIT;
   }
