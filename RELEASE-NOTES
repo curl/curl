@@ -47,6 +47,7 @@ This release includes the following bugfixes:
  o POST, NTLM and following a redirect hang
  o libcurl+NSS endless loop on incorrect password for private key
  o gzip decompression memory leak
+ o no_proxy flaw with user name in URL
 
 This release includes the following known bugs:
 
@@ -61,6 +62,6 @@ advice from friends like these:
  Pramod Sharma, Gisle Vanem, Lenaic Lefever, Rainer Koenig, Sven Wegener,
  Tim Chen, Constantine Sapuntzakis, David McCreedy, Michael Smith,
  Colin Watson, Ebenezer Ikonne, Laurent Rabret, Michael Cronenworth,
- Balint Szilakszi
+ Balint Szilakszi, James Bursa
 
         Thanks! (and sorry if I forgot to mention someone)

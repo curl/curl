@@ -4316,6 +4316,44 @@ static CURLcode create_conn(struct SessionHandle *data,
       return result;
   }
 
+  /*************************************************************
+   * No protocol part in URL was used, add it!
+   *************************************************************/
+  if(conn->protocol&PROT_MISSING) {
+    /* We're guessing prefixes here and if we're told to use a proxy or if
+       we're gonna follow a Location: later or... then we need the protocol
+       part added so that we have a valid URL. */
+    char *reurl;
+
+    reurl = aprintf("%s://%s", conn->protostr, data->change.url);
+
+    if(!reurl) {
+      Curl_safefree(proxy);
+      return CURLE_OUT_OF_MEMORY;
+    }
+
+    data->change.url = reurl;
+    data->change.url_alloc = TRUE; /* free this later */
+    conn->protocol &= ~PROT_MISSING; /* switch that one off again */
+  }
+
+  /*************************************************************
+   * Setup internals depending on protocol
+   *************************************************************/
+  result = setup_connection_internals(data, conn);
+  if(result != CURLE_OK) {
+    Curl_safefree(proxy);
+    return result;
+  }
+
+  /*************************************************************
+   * Parse a user name and password in the URL and strip it out
+   * of the host name
+   *************************************************************/
+  result = parse_url_userpass(data, conn, user, passwd);
+  if(result != CURLE_OK)
+    return result;
+
 #ifndef CURL_DISABLE_PROXY
   /*************************************************************
    * Extract the user and password from the authentication string
@@ -4370,37 +4408,6 @@ static CURLcode create_conn(struct SessionHandle *data,
       conn->bits.tunnel_proxy = FALSE;
   }
 #endif /* CURL_DISABLE_PROXY */
-
-  /*************************************************************
-   * No protocol part in URL was used, add it!
-   *************************************************************/
-  if(conn->protocol&PROT_MISSING) {
-    /* We're guessing prefixes here and if we're told to use a proxy or if
-       we're gonna follow a Location: later or... then we need the protocol
-       part added so that we have a valid URL. */
-    char *reurl;
-
-    reurl = aprintf("%s://%s", conn->protostr, data->change.url);
-
-    if(!reurl) {
-      Curl_safefree(proxy);
-      return CURLE_OUT_OF_MEMORY;
-    }
-
-    data->change.url = reurl;
-    data->change.url_alloc = TRUE; /* free this later */
-    conn->protocol &= ~PROT_MISSING; /* switch that one off again */
-  }
-
-  /*************************************************************
-   * Setup internals depending on protocol
-   *************************************************************/
-  result = setup_connection_internals(data, conn);
-  if(result != CURLE_OK) {
-    Curl_safefree(proxy);
-    return result;
-  }
-
 
 #ifndef CURL_DISABLE_PROXY
   /***********************************************************************
@@ -4461,14 +4468,6 @@ static CURLcode create_conn(struct SessionHandle *data,
    *************************************************************/
   if((conn->protocol&PROT_SSL) && conn->bits.httpproxy)
     conn->bits.tunnel_proxy = TRUE;
-
-  /*************************************************************
-   * Parse a user name and password in the URL and strip it out
-   * of the host name
-   *************************************************************/
-  result = parse_url_userpass(data, conn, user, passwd);
-  if(result != CURLE_OK)
-    return result;
 
   /*************************************************************
    * Figure out the remote port number and fix it in the URL

@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (17 May 2009)
+- James Bursa posted a patch to the mailing list that fixed a problem with
+  no_proxy which made it not skip the proxy if the URL entered contained a
+  user name. I added test case 1101 to verify.
+
 Daniel Stenberg (11 May 2009)
 - Balint Szilakszi reported a memory leak when libcurl did gzip decompression
   of streams that had some parts (legitimately) missing. We now provide and use
