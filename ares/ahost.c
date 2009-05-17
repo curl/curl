@@ -77,6 +77,13 @@ int main(int argc, char **argv)
   WSAStartup(wVersionRequested, &wsaData);
 #endif
 
+  status = ares_library_init(ARES_LIB_INIT_ALL);
+  if (status != ARES_SUCCESS)
+    {
+      fprintf(stderr, "ares_library_init: %s\n", ares_strerror(status));
+      return 1;
+    }
+
   while ((c = ares_getopt(argc,argv,"dt:h")) != -1)
     {
       switch (c)
@@ -146,6 +153,8 @@ int main(int argc, char **argv)
     }
 
   ares_destroy(channel);
+
+  ares_library_cleanup();
 
 #ifdef USE_WINSOCK
   WSACleanup();

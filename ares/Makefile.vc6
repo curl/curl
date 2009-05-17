@@ -63,6 +63,7 @@ OBJECTS = $(OBJ_DIR)\ares_fds.obj              \
           $(OBJ_DIR)\ares_strerror.obj         \
           $(OBJ_DIR)\ares_cancel.obj           \
           $(OBJ_DIR)\ares_init.obj             \
+          $(OBJ_DIR)\ares_library_init.obj     \
           $(OBJ_DIR)\ares_llist.obj            \
           $(OBJ_DIR)\ares_timeout.obj          \
           $(OBJ_DIR)\ares__timeval.obj         \
@@ -110,6 +111,8 @@ $(DEF_FILE): $(OBJECTS) Makefile.VC6
        @echo   ares_getsock           >> $@
        @echo   ares_init              >> $@
        @echo   ares_init_options      >> $@
+       @echo   ares_library_init      >> $@
+       @echo   ares_library_cleanup   >> $@
        @echo   ares_mkquery           >> $@
        @echo   ares_parse_a_reply     >> $@
        @echo   ares_parse_ptr_reply   >> $@
@@ -203,7 +206,8 @@ $(OBJ_DIR)\ares_cancel.obj: ares_cancel.c setup.h setup_once.h ares.h          \
   ares_private.h ares_ipv6.h ares_build.h ares_rules.h
 
 $(OBJ_DIR)\ares_init.obj: ares_init.c setup.h setup_once.h nameser.h ares.h    \
-  ares_private.h ares_ipv6.h inet_net_pton.h ares_build.h ares_rules.h
+  ares_private.h ares_ipv6.h inet_net_pton.h ares_build.h ares_rules.h         \
+  ares_library_init.h
 
 $(OBJ_DIR)\ares_timeout.obj: ares_timeout.c setup.h setup_once.h ares.h        \
   ares_private.h ares_ipv6.h ares_build.h ares_rules.h
@@ -259,6 +263,9 @@ $(OBJ_DIR)\inet_ntop.obj: inet_ntop.c setup.h setup_once.h nameser.h           \
 
 $(OBJ_DIR)\ares_getopt.obj: ares_getopt.c ares_getopt.h ares_build.h           \
   ares_rules.h
+
+$(OBJ_DIR)\ares_library_init.obj: ares_library_init.c setup.h setup_once.h     \
+  ares.h ares_private.h ares_library_init.h ares_build.h ares_rules.h
 
 $(OBJ_DIR)\ares_llist.obj: ares_llist.c setup.h setup_once.h ares.h            \
   ares_private.h ares_llist.h ares_build.h ares_rules.h

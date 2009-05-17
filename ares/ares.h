@@ -93,6 +93,12 @@ extern "C" {
 #define ARES_ENONAME            19
 #define ARES_EBADHINTS          20
 
+/* ares_library_init error codes */
+#define ARES_ELOADIPHLPAPI           21
+#define ARES_ELOADADVAPI32           22
+#define ARES_EADDRGetNetworkParams   23
+#define ARES_EADDRSYSTEMFUNCTION036  24
+
 /* Flag values */
 #define ARES_FLAG_USEVC         (1 << 0)
 #define ARES_FLAG_PRIMARY       (1 << 1)
@@ -160,6 +166,11 @@ extern "C" {
 #define ARES_GETSOCK_READABLE(bits,num) (bits & (1<< (num)))
 #define ARES_GETSOCK_WRITABLE(bits,num) (bits & (1 << ((num) + \
                                          ARES_GETSOCK_MAXNUM)))
+
+/* c-ares library initialization flag values */
+#define ARES_LIB_INIT_NONE   (0)
+#define ARES_LIB_INIT_WIN32  (1 << 0)
+#define ARES_LIB_INIT_ALL    (ARES_LIB_INIT_WIN32)
 
 
 /*
@@ -234,6 +245,9 @@ typedef void (*ares_nameinfo_callback)(void *arg, int status, int timeouts,
                                        char *node, char *service);
 typedef int  (*ares_sock_create_callback)(ares_socket_t socket_fd,
                                           int type, void *data);
+
+int ares_library_init(int flags);
+void ares_library_cleanup(void);
 
 int ares_init(ares_channel *channelptr);
 int ares_init_options(ares_channel *channelptr, struct ares_options *options,

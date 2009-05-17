@@ -43,7 +43,11 @@ const char *ares_strerror(int code)
     "Misformatted string",
     "Illegal flags specified",
     "Given hostname is not numeric",
-    "Illegal hints flags specified"
+    "Illegal hints flags specified",
+    "Error loading iphlpapi.dll",
+    "Error loading advapi32.dll",
+    "Unknown GetNetworkParams function address",
+    "Unknown SystemFunction036 function address"
   };
 
   if(code >= 0 && code < (int)(sizeof(errtext) / sizeof(*errtext)))
