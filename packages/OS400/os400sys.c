@@ -24,6 +24,7 @@
 
 /* OS/400 additional support. */
 
+#include "curlbuild.h"
 #include "config-os400.h"       /* Not setup.h: we only need some defines. */
 
 #include <sys/types.h>
