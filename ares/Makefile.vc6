@@ -221,7 +221,7 @@ $(OBJ_DIR)\ares_destroy.obj: ares_destroy.c setup.h setup_once.h ares.h        \
 $(OBJ_DIR)\ares_mkquery.obj: ares_mkquery.c setup.h setup_once.h nameser.h     \
   ares.h ares_dns.h ares_build.h ares_rules.h
 
-$(OBJ_DIR)\ares_version.obj: ares_version.c setup.h setup_once.h               \
+$(OBJ_DIR)\ares_version.obj: ares_version.c setup.h setup_once.h ares.h        \
   ares_version.h ares_build.h ares_rules.h
 
 $(OBJ_DIR)\ares_expand_name.obj: ares_expand_name.c setup.h setup_once.h       \

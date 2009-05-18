@@ -11,15 +11,12 @@
                        (ARES_VERSION_PATCH))
 #define ARES_VERSION_STR "1.6.1-CVS"
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
-const char *ares_version(int *version);
-
-#ifdef  __cplusplus
-}
+#if (ARES_VERSION >= 0x010601)
+#  define CARES_HAVE_ARES_LIBRARY_INIT 1
+#  define CARES_HAVE_ARES_LIBRARY_CLEANUP 1
+#else
+#  undef CARES_HAVE_ARES_LIBRARY_INIT
+#  undef CARES_HAVE_ARES_LIBRARY_CLEANUP
 #endif
 
 #endif
-

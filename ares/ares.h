@@ -19,8 +19,9 @@
 #ifndef ARES__H
 #define ARES__H
 
-#include "ares_build.h"  /* c-ares build definitions */
-#include "ares_rules.h"  /* c-ares rules enforcement */
+#include "ares_version.h"  /* c-ares version defines   */
+#include "ares_build.h"    /* c-ares build definitions */
+#include "ares_rules.h"    /* c-ares rules enforcement */
 
 /*
  * Define WIN32 when build target is Win32 API
@@ -248,6 +249,7 @@ typedef int  (*ares_sock_create_callback)(ares_socket_t socket_fd,
 
 int ares_library_init(int flags);
 void ares_library_cleanup(void);
+const char *ares_version(int *version);
 
 int ares_init(ares_channel *channelptr);
 int ares_init_options(ares_channel *channelptr, struct ares_options *options,
