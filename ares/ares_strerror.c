@@ -46,8 +46,7 @@ const char *ares_strerror(int code)
     "Illegal hints flags specified",
     "Error loading iphlpapi.dll",
     "Error loading advapi32.dll",
-    "Unknown GetNetworkParams function address",
-    "Unknown SystemFunction036 function address"
+    "Could not find GetNetworkParams function"
   };
 
   if(code >= 0 && code < (int)(sizeof(errtext) / sizeof(*errtext)))

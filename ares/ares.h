@@ -98,7 +98,6 @@ extern "C" {
 #define ARES_ELOADIPHLPAPI           21
 #define ARES_ELOADADVAPI32           22
 #define ARES_EADDRGetNetworkParams   23
-#define ARES_EADDRSYSTEMFUNCTION036  24
 
 /* Flag values */
 #define ARES_FLAG_USEVC         (1 << 0)

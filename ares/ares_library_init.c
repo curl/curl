@@ -51,12 +51,12 @@ static int ares_win32_init(void)
 
   fpSystemFunction036 = (fpSystemFunction036_t)
     GetProcAddress(hnd_advapi32, "SystemFunction036");
-  if (!fpSystemFunction036)
-    {
-      FreeLibrary(hnd_advapi32);
-      FreeLibrary(hnd_iphlpapi);
-      return ARES_EADDRSYSTEMFUNCTION036;
-    }
+
+  /*
+   * Intentionally avoid checking if the address of SystemFunction036, a.k.a.
+   * RtlGenRandom, has been located or not. This function is only available on
+   * WinXP and later. When unavailable c-ares uses portable rand() function.
+   */
 
 #endif
   return ARES_SUCCESS;
