@@ -1,6 +1,6 @@
-Curl and libcurl 7.19.5
+Curl and libcurl 7.19.6
 
- Public curl releases:         111
+ Public curl releases:         112
  Command line options:         132
  curl_easy_setopt() options:   163
  Public functions in libcurl:  58
@@ -9,45 +9,11 @@ Curl and libcurl 7.19.5
 
 This release includes the following changes:
 
- o libcurl now closes all dead connections whenever you attempt to open a new
-   connection
- o libssh2's version number can now be figured out run-time instead of using
-   the build-time fixed number
- o CURLOPT_SEEKFUNCTION may now return CURL_SEEKFUNC_CANTSEEK
- o curl can now upload with resume even when reading from a pipe
- o a build-time configured curl_socklen_t is now used instead of socklen_t
+ o 
 
 This release includes the following bugfixes:
 
- o NTLM authentication memory leak on SSPI enabled Windows builds
- o fixed the GnuTLS-using code to do correct return code checks
- o an alloc-related call in the OpenSSL-using code didn't check the return value
- o curl_easy_duphandle() failed to duplicate cookies at times
- o missing TELNET timeout support in Windows builds
- o missing Curl_read() and write callback result checking in TELNET transfers
- o more ciphers enabled in libcurl built to use NSS
- o properly return an error code in curl_easy_recv
- o Sun compilers specific preprocessor block removed from curlbuild.h.dist
- o allow creation of four way fat libcurl Mac OS X Framework
- o several memory leaks in libcurl+NSS
- o improved the CURLOPT_NOBODY set to 0 confusions
- o persistent connections when doing FTP over a HTTP proxy
- o --libcurl bogus strings where other data was pointed to
- o crash related to FTP and "Re-used connection seems dead, get a new one"
- o CURLINFO_APPCONNECT_TIME with the multi interface
- o Enhanced upload speeds on Windows
- o TFTP problems after a failed transfer to the same host
- o improved out of the box TPF compatibility
- o HTTP PUT protocol line endings portions mangled from CRLF to CRCRLF
- o Rejected SSL session ids are killed properly (for OpenSSL and GnuTLS builds)
- o Deal with the TFTP OACK packet
- o fixed roff mistakes in man pages
- o use SOCKS proxy with the multi interface
- o fixed the Curl_getoff_all_pipelines SIGSEGV 
- o POST, NTLM and following a redirect hang
- o libcurl+NSS endless loop on incorrect password for private key
- o gzip decompression memory leak
- o no_proxy flaw with user name in URL
+ o 
 
 This release includes the following known bugs:
 
@@ -56,12 +22,6 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Daniel Fandrich, Yang Tse, David James, Chris Deidun, Bill Egert,
- Andre Guibert de Bruet, Andreas Farber, Frank Hempel, Pierre Brico,
- Kamil Dudka, Jim Freeman, Daniel Johnson, Toshio Kuratomi, Martin Storsjo,
- Pramod Sharma, Gisle Vanem, Lenaic Lefever, Rainer Koenig, Sven Wegener,
- Tim Chen, Constantine Sapuntzakis, David McCreedy, Michael Smith,
- Colin Watson, Ebenezer Ikonne, Laurent Rabret, Michael Cronenworth,
- Balint Szilakszi, James Bursa
+ 
 
         Thanks! (and sorry if I forgot to mention someone)
