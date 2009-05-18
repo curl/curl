@@ -765,13 +765,11 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
 #endif
       la_size = sizeof(localaddr4);
       localaddr = (struct sockaddr *)&localaddr4;
-      logmsg("debug: IPv4 la_size = %zu\n", (size_t)la_size);
 #ifdef ENABLE_IPV6
     }
     else {
       la_size = sizeof(localaddr6);
       localaddr = (struct sockaddr *)&localaddr6;
-      logmsg("debug: IPv6 la_size = %zu\n", (size_t)la_size);
     }
 #endif
     memset(localaddr, 0, (size_t)la_size);
@@ -782,25 +780,24 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
       sclose(sock);
       return CURL_SOCKET_BAD;
     }
-    logmsg("debug: localaddr->sa_family = %d\n", (int)localaddr->sa_family);
     switch (localaddr->sa_family) {
     case AF_INET:
-      logmsg("debug: AF_INET localaddr4.sin_port = %hu\n", localaddr4.sin_port);
       *listenport = ntohs(localaddr4.sin_port);
       break;
 #ifdef ENABLE_IPV6
     case AF_INET6:
-      logmsg("debug: AF_INET6 localaddr6.sin6_port = %hu\n", localaddr6.sin6_port);
       *listenport = ntohs(localaddr6.sin6_port);
       break;
 #endif
     default:
-      logmsg("debug: AF_UNKNOWN\n");
       break;
     }
     if(!*listenport) {
       /* Real failure, listener port shall not be zero beyond this point. */
-      logmsg("Successfull getsockname() but unknown listener port.");
+      logmsg("Apparently getsockname() succeeded, with listener port zero.");
+      logmsg("A valid reason for this failure is a binary built without");
+      logmsg("proper network library linkage. This might not be the only");
+      logmsg("reason, but double check it before anything else.");
       sclose(sock);
       return CURL_SOCKET_BAD;
     }
