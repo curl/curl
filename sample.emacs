@@ -44,3 +44,4 @@ nil HOOK is executed and the rest of the hooks are ignored."
 	  '((string-match "other" (buffer-file-name)) . other-c-mode-common-hook))
 ;; Make sure the default style is appended.
 (add-hook 'my-style-selective-mode-hook '(t . my-c-mode-common-hook) t)
+

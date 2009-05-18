@@ -37,3 +37,4 @@ package:
 	mkdir ./tmp
 	pkgmk -o -d ./tmp
 	pkgtrans -so ./tmp ${top_srcdir}/../${PKGADD_FILE} ${PKGADD_PKG}
+

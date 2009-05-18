@@ -12,6 +12,7 @@ $!
 $!  8-FEB-2005, MSK, changed the openssl, libssl and libcrypto defines
 $!                   to not override previously defined logicals.
 $!
+$!
 $ proc = f$environment( "PROCEDURE")
 $ thisdev = f$parse( proc,,,"DEVICE")
 $ thisdir = f$parse( proc,,,"DIRECTORY") - ".PACKAGES.VMS]"
