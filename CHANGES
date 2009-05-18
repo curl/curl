@@ -6,6 +6,8 @@
 
                                   Changelog
 
+Version 7.19.5 (18 May 2009)
+
 Daniel Stenberg (17 May 2009)
 - James Bursa posted a patch to the mailing list that fixed a problem with
   no_proxy which made it not skip the proxy if the URL entered contained a

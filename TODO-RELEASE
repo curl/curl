@@ -1,8 +1,3 @@
-To be addressed in 7.19.5 (planned release: May 2009)
-=========================
-
-240 - 
-
 To be addressed in 7.19.6 (planned release: July 2009)
 =========================
 
@@ -11,3 +6,4 @@ To be addressed in 7.19.6 (planned release: July 2009)
 235 - KNOWN_BUG #65
       Code adjustment for FTP over socks proxy remains
 
+240 - 
