@@ -45,7 +45,6 @@ const char *ares_strerror(int code)
     "Given hostname is not numeric",
     "Illegal hints flags specified",
     "Error loading iphlpapi.dll",
-    "Error loading advapi32.dll",
     "Could not find GetNetworkParams function"
   };
 
