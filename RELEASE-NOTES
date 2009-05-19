@@ -13,7 +13,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o 
+ o crash on bad socket close with FTP
 
 This release includes the following known bugs:
 
@@ -22,6 +22,6 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- 
+ Kamil Dudka, Caolan McNamara
 
         Thanks! (and sorry if I forgot to mention someone)

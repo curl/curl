@@ -3251,9 +3251,10 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
       /* Note that we keep "use" set to TRUE since that (next) connection is
          still requested to use SSL */
     }
-    sclose(conn->sock[SECONDARYSOCKET]);
-
-    conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD;
+    if(CURL_SOCKET_BAD != conn->sock[SECONDARYSOCKET]) {
+      sclose(conn->sock[SECONDARYSOCKET]);
+      conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD;
+    }
   }
 
   if((ftp->transfer == FTPTRANSFER_BODY) && ftpc->ctl_valid &&

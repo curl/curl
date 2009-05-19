@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (19 May 2009)
+- Kamil Dudka brought the patch from the Redhat bug entry
+  https://bugzilla.redhat.com/show_bug.cgi?id=427966 which was libcurl closing
+  a bad file descriptor when closing down the FTP data connection.  Caolan
+  McNamara seems to be the original author of it.
+
 Version 7.19.5 (18 May 2009)
 
 Daniel Stenberg (17 May 2009)
