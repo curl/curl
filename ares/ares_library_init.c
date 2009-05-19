@@ -38,7 +38,7 @@ static int ares_win32_init(void)
   if (!fpGetNetworkParams)
     {
       FreeLibrary(hnd_iphlpapi);
-      return ARES_EADDRGetNetworkParams;
+      return ARES_EADDRGETNETWORKPARAMS;
     }
 
   /*
