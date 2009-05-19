@@ -2096,7 +2096,7 @@ static int ssh_perform_getsock(const struct connectdata *conn,
                                                        number of sockets */
                                int numsocks)
 {
-#ifdef HAVE_LIBSSH2_SESSION_BLOCK_DIRECTIONS
+#ifdef HAVE_LIBSSH2_SESSION_BLOCK_DIRECTION
   int bitmap = GETSOCK_BLANK;
   (void)numsocks;
 
@@ -2123,7 +2123,7 @@ static int ssh_getsock(struct connectdata *conn,
                                                of sockets */
                        int numsocks)
 {
-#ifndef HAVE_LIBSSH2_SESSION_BLOCK_DIRECTIONS
+#ifndef HAVE_LIBSSH2_SESSION_BLOCK_DIRECTION
   (void)conn;
   (void)sock;
   (void)numsocks;
@@ -2137,7 +2137,7 @@ static int ssh_getsock(struct connectdata *conn,
 #endif
 }
 
-#ifdef HAVE_LIBSSH2_SESSION_BLOCK_DIRECTIONS
+#ifdef HAVE_LIBSSH2_SESSION_BLOCK_DIRECTION
 /*
  * When one of the libssh2 functions has returned LIBSSH2_ERROR_EAGAIN this
  * function is used to figure out in what direction and stores this info so
@@ -2188,7 +2188,7 @@ static CURLcode ssh_easy_statemach(struct connectdata *conn)
     bool block;
     result = ssh_statemach_act(conn, &block);
 
-#ifdef HAVE_LIBSSH2_SESSION_BLOCK_DIRECTIONS
+#ifdef HAVE_LIBSSH2_SESSION_BLOCK_DIRECTION
     if((CURLE_OK == result) && block) {
       int dir = libssh2_session_block_directions(sshc->ssh_session);
       curl_socket_t sock = conn->sock[FIRSTSOCKET];
