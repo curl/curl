@@ -5,6 +5,7 @@ HTTP
 HTTP GET
 --interface
 FAILURE
+non-existing host
 </keywords>
 </info>
 

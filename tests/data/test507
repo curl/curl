@@ -1,4 +1,13 @@
 <testcase>
+<info>
+<keywords>
+HTTP
+multi
+FAILURE
+non-existing host
+</keywords>
+</info>
+
 # Server-side
 <reply>
 </reply>

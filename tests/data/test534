@@ -5,6 +5,7 @@ FTP
 PASV
 RETR
 multi
+non-existing host
 </keywords>
 </info>
 

@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Fandrich (20 May 2009)
+- Added "non-existing host" test keywords to make it easy to skip those
+  tests on machines that have broken DNS configurations (such as
+  those configured to use OpenDNS).
+
 Daniel Stenberg (19 May 2009)
 - Kamil Dudka brought the patch from the Redhat bug entry
   https://bugzilla.redhat.com/show_bug.cgi?id=427966 which was libcurl closing
