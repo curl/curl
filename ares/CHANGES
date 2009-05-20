@@ -1,5 +1,20 @@
   Changelog for the c-ares project
 
+* May 19 2009 (Yang Tse)
+- Introduced ares_library_init() and ares_library_cleanup() functions.
+
+  This is an API and ABI break for Win32/64 systems. Non-Win32/64 build targets
+  using c-ares 1.6.1 can still survive without calling these functions. Read all
+  the details on ares_library_init(3) and ares_library_cleanup(3) man pages that
+  are included.
+
+  curl/libcurl 7.19.5 is fully compatible with c-ares 1.6.1 on all systems.
+
+  In order to use c-ares 1.6.1 with curl/libcurl on Win32/64 systems it is
+  required that curl/libcurl is 7.19.5 or newer. In other words, it is not
+  possible on Win32/64 to use c-ares 1.6.1 with a curl/libcurl version less
+  than 7.19.5
+
 * May 11 2009 (Daniel Stenberg)
 - Gregor Jasny made c-ares link with libtool 's -export-symbols-regex option to
   only expose functions starting with ares_.
