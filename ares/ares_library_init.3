@@ -58,13 +58,16 @@ library initialization, and also due to the fact that ares_library_init()
 might call functions from other libraries that are thread unsafe, and
 could conflict with any other thread that is already using these other
 libraries.
+.PP
+Win32/64 application DLLs shall not call ares_library_init() from the
+DllMain function. Doing so will produce deadlocks and other problems.
 .SH FLAGS
 .TP 5
 .B ARES_LIB_INIT_ALL
 Initialize everything possible. This sets all known bits.
 .TP
 .B ARES_LIB_INIT_WIN32
-Initialize Win32 specific libraries.
+Initialize Win32/64 specific libraries.
 .TP
 .B ARES_LIB_INIT_NONE
 Initialize nothing extra. This sets no bit.
@@ -79,11 +82,11 @@ the definition of preprocessor symbol \fICARES_HAVE_ARES_LIBRARY_INIT\fP
 as an indication of the availability of this function.
 .PP
 Since the introduction of this function it is absolutely mandatory to
-call it for any Win32 program using c-ares.
+call it for any Win32/64 program using c-ares.
 .PP
-Non-Win32 systems can still use c-ares version 1.6.1 without calling
+Non-Win32/64 systems can still use c-ares version 1.6.1 without calling
 ares_library_init() due to the fact that it is nearly a do-nothing
-function on non-Win32 platforms.
+function on non-Win32/64 platforms.
 .SH SEE ALSO
 .BR ares_library_cleanup(3),
 .BR ares_strerror(3)
