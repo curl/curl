@@ -48,9 +48,23 @@ print "makes a new configure script\n";
 print "running configure\n";
 `./configure`;
 
+# generate HTML versions of man pages
+# Deactivated for now. It seems that man pages need some adjustments
+# relative to paragraph and/or line breaks for proper html formatting.
+# EXTRA_DIST will need $(HTMLPAGES) when this is fully activated.
+# print "running make html\n";
+# `make -s html`;
+
+# generate PDF versions of man pages
+print "running make pdf\n";
+`make -s pdf`;
+
 # now make the actual tarball
 print "running make dist\n";
 `make dist VERSION=$version`;
+
+# remove temporay sourced man pages
+`make -s clean-sourced-manpages`;
 
 print "removing temporary configure.ac file\n";
 `rm configure.ac.dist`;
