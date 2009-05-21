@@ -666,7 +666,6 @@ if (!$crosscompile || (($extvercmd ne '') && (-x $extvercmd))) {
   while(<F>) {
     s/\r//;
     print;
-    print LOG;
   }
   close(F);
 }
