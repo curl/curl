@@ -73,7 +73,7 @@ acountry.exe: acountry.c $(OBJ_DIR)/ares_getopt.o $(OBJ_HACK)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $^ $(EX_LIBS)
 
 clean:
-	rm -f $(OBJECTS) libcares.a
+	rm -f $(OBJECTS) $(OBJ_DIR)/ares_getopt.o libcares.a
 
 vclean realclean: clean
 	rm -f ahost.exe adig.exe acountry.exe depend.dj
