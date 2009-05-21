@@ -624,11 +624,6 @@ if (grepfile("define USE_ARES", "lib/config$confsuffix.h")) {
 if ($configurebuild) {
   logit "$make -i";
   open(F, "$make -i 2>&1 |") or die;
-  while (<F>) {
-    s/$pwd//g;
-    print;
-  }
-  close(F);
 }
 else {
   logit "$make -i $targetos";
@@ -643,12 +638,12 @@ else {
   else {
     open(F, "$make -i $targetos 2>&1 |") or die;
   }
-  while (<F>) {
-    s/$pwd//g;
-    print;
-  }
-  close(F);
 }
+while (<F>) {
+  s/$pwd//g;
+  print;
+}
+close(F);
 
 if (-f "lib/libcurl$libext") {
   logit "libcurl was created fine (libcurl$libext)";
