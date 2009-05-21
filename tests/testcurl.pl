@@ -137,7 +137,7 @@ if ($^O eq 'MSWin32' || $targetos) {
     $binext = '.exe';
     $libext = '.lib';
   }
-  elsif ($targetos =~ /mingw32/) {
+  elsif ($targetos =~ /mingw/) {
     $binext = '.exe';
     if ($^O eq 'MSWin32') {
       $libext = '.a';
