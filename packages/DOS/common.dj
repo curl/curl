@@ -1,8 +1,8 @@
 #
 # Common defines for curl (djgpp/Watt-32)
 #
-# Assumes you've unpacked cURL with short-file names
-# I.e use "set LFN=n" before untaring on Win9x/XP.
+# Assumes you've unpacked cURL with long-file names
+# I.e use "set LFN=y" before untaring on Win9x/XP.
 # Requires sed, yacc, rm and the usual stuff.
 #
 # Define TOPDIR before including this file.
@@ -36,7 +36,6 @@ USE_IPV6 = 0
 
 #
 # Use C-Ares resolver library
-# This conflicts with USE_IPV6=1
 #
 USE_ARES = 0
 
