@@ -463,10 +463,8 @@ if ($configurebuild) {
 sub findinpath {
   my $c;
   my $e;
-  my $x='';
-  $x='.exe' if ($^O eq 'MSWin32');
-  my $s=':';
-  $s=';' if ($^O eq 'MSWin32');
+  my $x = ($^O eq 'MSWin32') ? '.exe' : '';
+  my $s = ($^O eq 'MSWin32') ? ';' : ':';
   my $p=$ENV{'PATH'};
   my @pa = split($s, $p);
   for $c (@_) {
@@ -482,6 +480,8 @@ my $make = findinpath("gmake", "make", "nmake");
 if(!$make) {
     mydie "Couldn't find make in the PATH";
 }
+# force to 'nmake' for VC builds
+$make = "nmake" if ($targetos =~ /vc/);
 logit "going with $make as make";
 
 # change to build dir
@@ -621,24 +621,9 @@ if (grepfile("define USE_ARES", "lib/config$confsuffix.h")) {
   chdir "$pwd/$build";
 }
 
-if ($configurebuild) {
-  logit "$make -i";
-  open(F, "$make -i 2>&1 |") or die;
-}
-else {
-  logit "$make -i $targetos";
-  if ($^O eq 'MSWin32') {
-    if ($targetos =~ /vc/) {
-      open(F, "nmake -i $targetos|") or die;
-    }
-    else {
-      open(F, "$make -i $targetos |") or die;
-    }
-  }
-  else {
-    open(F, "$make -i $targetos 2>&1 |") or die;
-  }
-}
+my $mkcmd = "$make -i" . ($targetos && !$configurebuild ? " $targetos" : "");
+logit "$mkcmd";
+open(F, "$mkcmd 2>&1 |") or die;
 while (<F>) {
   s/$pwd//g;
   print;
