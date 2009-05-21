@@ -1,4 +1,6 @@
+*.html
 *.lo
+*.pdf
 .deps
 .libs
 Makefile
@@ -22,5 +24,6 @@ libcares.la
 libcares.pc
 libtool
 ltmain.sh
+man3
 missing
 stamp-h*

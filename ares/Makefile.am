@@ -46,7 +46,9 @@ noinst_PROGRAMS =$(PROGS)
 EXTRA_DIST = AUTHORS CHANGES README.cares Makefile.inc Makefile.dj	   \
  Makefile.m32 Makefile.netware Makefile.vc6 $(man_MANS) $(MSVCFILES)	   \
  config-win32.h RELEASE-NOTES libcares.pc.in buildconf get_ver.awk maketgz \
- TODO ares_build.h.in buildconf.bat
+ TODO ares_build.h.in buildconf.bat $(PDFPAGES)
+
+CLEANFILES = $(PDFPAGES) $(HTMLPAGES)
 
 DISTCLEANFILES = ares_build.h
 
@@ -110,6 +112,48 @@ adig_LDADD = $(top_builddir)/$(lib_LTLIBRARIES)
 
 acountry_SOURCES = acountry.c ares_getopt.c ares_getopt.h
 acountry_LDADD = $(top_builddir)/$(lib_LTLIBRARIES)
+
+SOURCEDMANDIR = man3
+SOURCEDMANPAGES = ares_init.3
+SOURCINGMANPAGES = ares_init_options.3
+
+clean-local: clean-sourced-manpages
+
+clean-sourced-manpages:
+	@srcdmandir='$(SOURCEDMANDIR)'; \
+	echo "rm -rf $(top_builddir)/$$srcdmandir"; \
+	rm -rf $(top_builddir)/$$srcdmandir
+
+sourced-manpages: clean-sourced-manpages
+	@srcdmandir='$(SOURCEDMANDIR)'; \
+	srcdmanfiles='$(SOURCEDMANPAGES)'; \
+	mkdir $(top_builddir)/$$srcdmandir; \
+	for file in $$srcdmanfiles; do \
+	  if test -f $(top_srcdir)/$$file; then \
+	    echo "cp $(top_srcdir)/$$file $(top_builddir)/$$srcdmandir/$$file"; \
+	    cp $(top_srcdir)/$$file $(top_builddir)/$$srcdmandir/$$file; \
+	  fi; \
+	done
+
+$(SOURCINGMANPAGES): sourced-manpages
+
+MAN2HTML = roffit --mandir=. < $< >$@
+
+SUFFIXES = .3 .html
+
+html: $(HTMLPAGES)
+
+.3.html:
+	$(MAN2HTML)
+
+pdf: $(PDFPAGES)
+
+.3.pdf:
+	@(foo=`echo $@ | sed -e 's/\.[0-9]$$//g'`; \
+	groff -Tps -man $< >$$foo.ps; \
+	ps2pdf $$foo.ps $@; \
+	rm $$foo.ps; \
+	echo "converted $< to $@")
 
 # Make files named *.dist replace the file without .dist extension
 dist-hook:
