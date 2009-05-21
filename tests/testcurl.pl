@@ -669,8 +669,9 @@ if (!$crosscompile || (($extvercmd ne '') && (-x $extvercmd))) {
   my $cmd = ($extvercmd ne '' ? $extvercmd.' ' : '')."./src/curl${binext} --version|";
   open(F, $cmd);
   while(<F>) {
-      print;
-      print LOG;
+    s/\r//;
+    print;
+    print LOG;
   }
   close(F);
 }
