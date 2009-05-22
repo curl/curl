@@ -3,6 +3,7 @@
 <keywords>
 HTTP
 HTTP GET
+HTTP Basic auth
 NO_PROXY
 </keywords>
 </info>

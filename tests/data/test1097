@@ -3,6 +3,7 @@
 <keywords>
 HTTP
 HTTP POST
+HTTP CONNECT
 HTTP proxy
 HTTP proxy NTLM auth
 </keywords>
