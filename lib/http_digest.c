@@ -163,14 +163,12 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
     while(more) {
       char value[MAX_VALUE_LENGTH];
       char content[MAX_CONTENT_LENGTH];
-      size_t totlen=0;
 
       while(*header && ISSPACE(*header))
         header++;
 
       /* extract a value=content pair */
       if(!get_pair(header, value, content, &header)) {
-
         if(Curl_raw_equal(value, "nonce")) {
           d->nonce = strdup(content);
           if(!d->nonce)
@@ -236,12 +234,6 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
         else {
           /* unknown specifier, ignore it! */
         }
-        totlen = strlen(value)+strlen(content)+1;
-
-        if(header[strlen(value)+1] == '\"')
-          /* the contents were within quotes, then add 2 for them to the
-             length */
-          totlen += 2;
       }
       else
         break; /* we're done here */

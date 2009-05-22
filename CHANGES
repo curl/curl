@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel Fandrich (22 May 2009)
+- Removed some obsolete digest code that caused a valgrind error in test 551.
+
 Daniel Fandrich (20 May 2009)
 - Added "non-existing host" test keywords to make it easy to skip those
   tests on machines that have broken DNS configurations (such as
