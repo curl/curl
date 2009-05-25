@@ -38,6 +38,7 @@ Funny-head: yesyes
 Set-Cookie: foobar=name; domain=127.0.0.1; path=/;
 Set-Cookie: mismatch=this; domain=127.0.0.1; path="/silly/";
 Set-Cookie: partmatch=present; domain=.0.0.1; path=/;
+Set-Cookie: duplicate=test; domain=.0.0.1; domain=.0.0.1; path=/donkey;
 Set-Cookie: cookie=yes; path=/we;
 Set-Cookie: nocookie=yes; path=/WE;
 
