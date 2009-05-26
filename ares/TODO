@@ -9,10 +9,10 @@ ares_gethostbyname
 
 ares_process
 
-- Upon next ABI brakage ares_process() could/should be changed to return 'int'
+- Upon next ABI breakage ares_process() should be changed to return 'int'
   and return ARES_ENOTINITIALIZED if ares_library_init() has not been called.
 
 ares_process_fd
 
-- Upon next ABI brakage ares_process_fd() could/should be changed to return
+- Upon next ABI breakage ares_process_fd() should be changed to return
   'int' and return ARES_ENOTINITIALIZED if library has not been initialized.
