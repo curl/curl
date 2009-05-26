@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 51
+# serial 52
 
 
 dnl CARES_CHECK_COMPILER
@@ -1070,36 +1070,88 @@ squeeze() {
 ])
 
 
-dnl CARES_PROCESS_DEBUG_BUILD_OPTS
+dnl CARES_CHECK_CURLDEBUG
 dnl -------------------------------------------------
-dnl Settings which depend on configure's debug given
-dnl option, and further configure the build process.
-dnl Don't use this macro for compiler dependant stuff.
+dnl Settings which depend on configure's curldebug given
+dnl option, and other additional configure pre-requisites.
+dnl Using the curl debug memory tracking feature in c-ares
+dnl is a hack that actually can only be used/enabled when
+dnl c-ares is built as a static library directly in curl's
+dnl CVS tree along with an equally configured libcurl.
 
-AC_DEFUN([CARES_PROCESS_DEBUG_BUILD_OPTS], [
-  AC_REQUIRE([CARES_CHECK_OPTION_DEBUG])dnl
+AC_DEFUN([CARES_CHECK_CURLDEBUG], [
   AC_REQUIRE([CARES_SHFUNC_SQUEEZE])dnl
-  AC_BEFORE([$0],[AC_PROG_LIBTOOL])dnl
-  #
-  if test "$want_debug" = "yes"; then
-
-    dnl when doing the debug stuff, use static library only
-    AC_DISABLE_SHARED
-
-    debugbuild="yes"
-
-    dnl the entire --enable-debug is a hack that lives and runs on top of
-    dnl libcurl stuff so this BUILDING_LIBCURL is not THAT much uglier
-    AC_DEFINE(BUILDING_LIBCURL, 1, [when building as static part of libcurl])
-
-    CPPFLAGS="$CPPFLAGS -DCURLDEBUG"
-
-    dnl CHECKME: Do we still need so specify this include path here?
-    CPPFLAGS="$CPPFLAGS -I$srcdir/../include"
-
-    squeeze CPPFLAGS
+  cares_builddir=`pwd`
+  supports_curldebug="unknown"
+  if test "$want_curldebug" = "yes"; then
+    if test "x$enable_shared" != "xno" &&
+      test "x$enable_shared" != "xyes"; then
+      AC_MSG_WARN([unknown enable_shared setting.])
+      supports_curldebug="no"
+    fi
+    if test "x$enable_static" != "xno" &&
+      test "x$enable_static" != "xyes"; then
+      AC_MSG_WARN([unknown enable_static setting.])
+      supports_curldebug="no"
+    fi
+    if test "$supports_curldebug" != "no"; then
+      if test "$enable_shared" != "no"; then
+        AC_MSG_WARN([configured to build shared library.])
+        supports_curldebug="no"
+      fi
+      if test "$enable_static" != "yes"; then
+        AC_MSG_WARN([configured to build no static library.])
+        supports_curldebug="no"
+      fi
+      if test ! -f "$srcdir/../include/curl/curlbuild.h.dist"; then
+        AC_MSG_WARN([source not embedded in curl's CVS tree.])
+        supports_curldebug="no"
+      elif test ! -f "$srcdir/../include/curl/Makefile.in"; then
+        AC_MSG_WARN([curl's buildconf has not been run.])
+        supports_curldebug="no"
+      elif test ! -f "$cares_builddir/../libcurl.pc" ||
+        test ! -f "$cares_builddir/../include/curl/curlbuild.h"; then
+        AC_MSG_WARN([curl's configure has not been run.])
+        supports_curldebug="no"
+      elif test ! -f "$cares_builddir/../lib/config.h"; then
+        AC_MSG_WARN([libcurl's config.h is missing.])
+        supports_curldebug="no"
+      elif test ! -f "$cares_builddir/../config.status"; then
+        AC_MSG_WARN([curl's config.status is missing.])
+        supports_curldebug="no"
+      fi
+      if test "$supports_curldebug" != "no"; then
+        grep '^#define USE_ARES' "$cares_builddir/../lib/config.h" >/dev/null
+        if test "$?" -ne "0"; then
+          AC_MSG_WARN([libcurl configured without c-ares support.])
+          supports_curldebug="no"
+        fi
+      fi
+      if test "$supports_curldebug" != "no"; then
+        grep 'CPPFLAGS.*CURLDEBUG' "$cares_builddir/../config.status" >/dev/null
+        if test "$?" -ne "0"; then
+          AC_MSG_WARN([libcurl configured without curldebug support.])
+          supports_curldebug="no"
+        fi
+      fi
+    fi
   fi
   #
+  if test "$want_curldebug" = "yes"; then
+    AC_MSG_CHECKING([if curl debug memory tracking can be enabled])
+    test "$supports_curldebug" = "no" || supports_curldebug="yes"
+    AC_MSG_RESULT([$supports_curldebug])
+    if test "$supports_curldebug" = "no"; then
+      AC_MSG_WARN([cannot enable curl debug memory tracking.])
+      want_curldebug="no"
+    fi
+  fi
+  #
+  if test "$want_curldebug" = "yes"; then
+    AC_DEFINE(BUILDING_LIBCURL, 1, [when building as static part of libcurl])
+    CPPFLAGS="$CPPFLAGS -DCURLDEBUG"
+    squeeze CPPFLAGS
+  fi
 ])
 
 

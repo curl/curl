@@ -1,5 +1,11 @@
   Changelog for the c-ares project
 
+* May 26 2009 (Yang Tse)
+- Added --enable-curldebug configure option to enable and disable building
+  with the low-level curl debug memory tracking 'feature' to allow decoupled
+  setting from --enable-debug, allowing again to build c-ares independently
+  out of the CVS tree.
+
 * May 19 2009 (Yang Tse)
 - Introduced ares_library_init() and ares_library_cleanup() functions.
 

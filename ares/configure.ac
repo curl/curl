@@ -13,6 +13,7 @@ AM_MAINTAINER_MODE
 CARES_CHECK_OPTION_DEBUG
 CARES_CHECK_OPTION_OPTIMIZE
 CARES_CHECK_OPTION_WARNINGS
+CARES_CHECK_OPTION_CURLDEBUG
 
 CARES_CHECK_PATH_SEPARATOR
 
@@ -94,11 +95,6 @@ esac
 dnl support building of Windows DLLs
 AC_LIBTOOL_WIN32_DLL
 
-CARES_PROCESS_DEBUG_BUILD_OPTS
-
-AM_CONDITIONAL(DEBUGBUILD, test x$want_debug = xyes)
-AM_CONDITIONAL(CURLDEBUG, test x$want_debug = xyes)
-
 dnl force libtool to build static libraries with PIC on AMD64-Linux & FreeBSD
 AC_MSG_CHECKING([if arch-OS host is AMD64-Linux/FreeBSD (to build static libraries with PIC)])
 case $host in
@@ -113,6 +109,10 @@ esac
 
 dnl libtool setup
 AC_PROG_LIBTOOL
+
+CARES_CHECK_CURLDEBUG
+
+AM_CONDITIONAL(CURLDEBUG, test x$want_curldebug = xyes)
 
 AC_MSG_CHECKING([if we need -no-undefined])
 case $host in

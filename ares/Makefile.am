@@ -14,11 +14,13 @@ ACLOCAL_AMFLAGS = -I m4
 # libcurl, but we do this anyway for convenience.
 #
 # $(top_builddir)/../include is for libcurl's generated curl/curlbuild.h file
+# $(top_srcdir)/../include is for libcurl's external include files
 # $(top_builddir) is for c-ares's generated config.h file
 # $(top_srcdir) is for c-ares's lib/setup.h and other "c-ares-private" files
 
 if CURLDEBUG
 INCLUDES = -I$(top_builddir)/../include \
+           -I$(top_srcdir)/../include   \
            -I$(top_builddir)            \
            -I$(top_srcdir)
 else
@@ -33,7 +35,7 @@ man_MANS = $(MANPAGES)
 MSVCFILES = vc/vc.dsw vc/acountry/acountry.dsp vc/adig/adig.dsp \
  vc/ahost/ahost.dsp vc/areslib/areslib.dsp vc/areslib/areslib.dsw
 
-if DEBUGBUILD
+if CURLDEBUG
 PROGS =
 else
 PROGS = ahost adig acountry

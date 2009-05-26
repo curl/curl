@@ -8,6 +8,7 @@ Changed:
    either AF_INET6 or AF_INET
  o a build-time configured ares_socklen_t is now used instead of socklen_t
  o new ares_library_init() and ares_library_cleanup() functions
+ o new --enable-curldebug configure option
 
 Fixed:
 

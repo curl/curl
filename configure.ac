@@ -2530,6 +2530,10 @@ squeeze CURL_LIBS
 squeeze LIBCURL_LIBS
 squeeze TEST_SERVER_LIBS
 
+if test "x$want_debug" = "xyes" && test "x$HAVE_ARES" = "x1"; then
+  ac_configure_args="$ac_configure_args --enable-curldebug"
+fi
+
 AC_CONFIG_FILES([Makefile \
            docs/Makefile \
            docs/examples/Makefile \
