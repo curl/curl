@@ -52,7 +52,7 @@ conflict with any other thread that is already using these other libraries.
 .PP
 Win32/64 application DLLs shall not call \fIares_library_cleanup(3)\fP from
 the DllMain function. Doing so will produce deadlocks and other problems.
-.SH NOTES
+.SH AVAILABILITY
 This function was first introduced in c-ares version 1.6.1 along with the
 definition of preprocessor symbol \fICARES_HAVE_ARES_LIBRARY_CLEANUP\fP as an
 indication of the availability of this function.

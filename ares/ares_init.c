@@ -129,6 +129,9 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
     curl_memlimit(atoi(env));
 #endif
 
+  if (ares_library_initialized() != ARES_SUCCESS)
+    return ARES_ENOTINITIALIZED;
+
   channel = malloc(sizeof(struct ares_channeldata));
   if (!channel) {
     *channelptr = NULL;

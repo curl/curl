@@ -120,3 +120,14 @@ void ares_library_cleanup(void)
   ares_init_flags = ARES_LIB_INIT_NONE;
 }
 
+
+int ares_library_initialized(void)
+{
+#ifdef WIN32
+  if (!ares_initialized)
+    return ARES_ENOTINITIALIZED;
+#endif
+  return ARES_SUCCESS;
+}
+
+

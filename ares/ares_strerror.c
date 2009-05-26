@@ -44,6 +44,7 @@ const char *ares_strerror(int code)
     "Illegal flags specified",
     "Given hostname is not numeric",
     "Illegal hints flags specified",
+    "c-ares library initialization not yet performed",
     "Error loading iphlpapi.dll",
     "Could not find GetNetworkParams function"
   };
