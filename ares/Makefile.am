@@ -115,7 +115,6 @@ acountry_LDADD = $(top_builddir)/$(lib_LTLIBRARIES)
 
 SOURCEDMANDIR = man3
 SOURCEDMANPAGES = ares_init.3
-SOURCINGMANPAGES = ares_init_options.3
 
 clean-local: clean-sourced-manpages
 
@@ -135,18 +134,16 @@ sourced-manpages: clean-sourced-manpages
 	  fi; \
 	done
 
-$(SOURCINGMANPAGES): sourced-manpages
-
 MAN2HTML = roffit --mandir=. < $< >$@
 
 SUFFIXES = .3 .html
 
-html: $(HTMLPAGES)
+html: sourced-manpages $(HTMLPAGES)
 
 .3.html:
 	$(MAN2HTML)
 
-pdf: $(PDFPAGES)
+pdf: sourced-manpages $(PDFPAGES)
 
 .3.pdf:
 	@(foo=`echo $@ | sed -e 's/\.[0-9]$$//g'`; \
