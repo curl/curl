@@ -17,6 +17,7 @@ This release includes the following bugfixes:
  o leaking cookie memory when duplicate domains or paths were used
  o build fix for Symbian
  o CURLOPT_USERPWD set to NULL clears auth credentials
+ o libcurl-NSS build fix
 
 This release includes the following known bugs:
 
@@ -26,6 +27,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Kamil Dudka, Caolan McNamara, Frank McGeough, Andre Guibert de Bruet,
- Mike Crowe
+ Mike Crowe, Claes Jakobsson
 
         Thanks! (and sorry if I forgot to mention someone)

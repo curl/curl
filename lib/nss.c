@@ -914,12 +914,14 @@ void Curl_nss_close(struct connectdata *conn, int sockindex)
     }
     if(connssl->client_cert)
       CERT_DestroyCertificate(connssl->client_cert);
+#ifdef HAVE_PK11_CREATEGENERICOBJECT      
     if(connssl->key)
       (void)PK11_DestroyGenericObject(connssl->key);
     if(connssl->cacert[1])
       (void)PK11_DestroyGenericObject(connssl->cacert[1]);
     if(connssl->cacert[0])
       (void)PK11_DestroyGenericObject(connssl->cacert[0]);
+#endif
     connssl->handle = NULL;
   }
 }
@@ -956,9 +958,11 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
     return CURLE_OK;
 
   connssl->client_cert = NULL;
+#ifdef HAVE_PK11_CREATEGENERICOBJECT  
   connssl->cacert[0] = NULL;
   connssl->cacert[1] = NULL;
   connssl->key = NULL;
+#endif
 
   /* FIXME. NSS doesn't support multiple databases open at the same time. */
   PR_Lock(nss_initlock);
