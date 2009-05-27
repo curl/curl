@@ -275,8 +275,14 @@ static CURLcode setstropt_userpwd(char *option, char **user_storage,
   char* separator;
   CURLcode result = CURLE_OK;
 
-  if(!option)
-    return result;
+  if(!option) {
+    /* we treat a NULL passed in as a hint to clear existing info */
+    Curl_safefree(*user_storage);
+    *user_storage = (char *) NULL;
+    Curl_safefree(*pwd_storage);
+    *pwd_storage = (char *) NULL;
+    return CURLE_OK;
+  }
 
   separator = strchr(option, ':');
   if (separator != NULL) {

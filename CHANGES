@@ -13,6 +13,10 @@ Daniel Stenberg (27 May 2009)
 - Andre Guibert de Bruet found a call to a OpenSSL function that didn't check
   for a failure properly.
 
+- Mike Crowe pointed out that setting CURLOPT_USERPWD to NULL used to clear
+  the auth credentials back in 7.19.0 and earlier while now you have to set ""
+  to get the same effect. His patch brings back the ability to use NULL.
+
 Daniel Stenberg (25 May 2009)
 - bug report #2796358 (http://curl.haxx.se/bug/view.cgi?id=2796358) pointed
   out that the cookie parser would leak memory when it parses cookies that are
