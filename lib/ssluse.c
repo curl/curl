@@ -63,6 +63,8 @@
 #ifdef USE_OPENSSL
 #include <openssl/rand.h>
 #include <openssl/x509v3.h>
+#include <openssl/dsa.h>
+#include <openssl/dh.h>
 #else
 #include <rand.h>
 #include <x509v3.h>
@@ -89,6 +91,7 @@
 #if OPENSSL_VERSION_NUMBER >= 0x00907001L
 /* ENGINE_load_private_key() takes four arguments */
 #define HAVE_ENGINE_LOAD_FOUR_ARGS
+#include <openssl/ui.h>
 #else
 /* ENGINE_load_private_key() takes three arguments */
 #undef HAVE_ENGINE_LOAD_FOUR_ARGS
