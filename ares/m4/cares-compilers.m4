@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 52
+# serial 53
 
 
 dnl CARES_CHECK_COMPILER
@@ -1095,13 +1095,17 @@ AC_DEFUN([CARES_CHECK_CURLDEBUG], [
       supports_curldebug="no"
     fi
     if test "$supports_curldebug" != "no"; then
-      if test "$enable_shared" != "no"; then
-        AC_MSG_WARN([configured to build shared library.])
-        supports_curldebug="no"
-      fi
-      if test "$enable_static" != "yes"; then
-        AC_MSG_WARN([configured to build no static library.])
-        supports_curldebug="no"
+      if test "$enable_shared" = "yes"; then
+        if test "x$allow_undefined" = "xno"; then
+          supports_curldebug="no"
+        elif test "x$allow_undefined_flag" = "xunsupported"; then
+          supports_curldebug="no"
+        elif test "x$need_no_undefined" = "xyes"; then
+          supports_curldebug="no"
+        fi
+        if test "$supports_curldebug" = "no"; then
+          AC_MSG_WARN([shared library does not support undefined symbols.])
+        fi
       fi
       if test ! -f "$srcdir/../include/curl/curlbuild.h.dist"; then
         AC_MSG_WARN([source not embedded in curl's CVS tree.])
