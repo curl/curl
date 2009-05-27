@@ -1789,11 +1789,14 @@ static int X509V3_ext(struct SessionHandle *data,
   for (i=0; i<sk_X509_EXTENSION_num(exts); i++) {
     ASN1_OBJECT *obj;
     X509_EXTENSION *ext = sk_X509_EXTENSION_value(exts, i);
-    BIO *bio_out = BIO_new(BIO_s_mem());
     BUF_MEM *biomem;
     char buf[512];
     char *ptr=buf;
     char namebuf[128];
+    BIO *bio_out = BIO_new(BIO_s_mem());
+
+    if(!bio_out)
+      return 1;
 
     obj = X509_EXTENSION_get_object(ext);
 
