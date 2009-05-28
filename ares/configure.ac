@@ -110,22 +110,6 @@ esac
 dnl libtool setup
 AC_PROG_LIBTOOL
 
-CARES_CHECK_CURLDEBUG
-
-AM_CONDITIONAL(CURLDEBUG, test x$want_curldebug = xyes)
-
-AC_MSG_CHECKING([if we need -no-undefined])
-case $host in
-  *-*-cygwin* | *-*-mingw* | *-*-pw32* | *-*-cegcc*)
-    need_no_undefined=yes
-    ;;
-  *)
-    need_no_undefined=no
-    ;;
-esac
-AC_MSG_RESULT($need_no_undefined)
-AM_CONDITIONAL(NO_UNDEFINED, test x$need_no_undefined = xyes)
-
 dnl **********************************************************************
 dnl platform/compiler/architecture specific checks/flags
 dnl **********************************************************************
@@ -160,6 +144,12 @@ esac
 
 CARES_CHECK_COMPILER_HALT_ON_ERROR
 CARES_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE
+
+CARES_CHECK_NO_UNDEFINED
+AM_CONDITIONAL(NO_UNDEFINED, test x$need_no_undefined = xyes)
+
+CARES_CHECK_CURLDEBUG
+AM_CONDITIONAL(CURLDEBUG, test x$want_curldebug = xyes)
 
 dnl **********************************************************************
 dnl Compilation based checks should not be done before this point.

@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 53
+# serial 54
 
 
 dnl CARES_CHECK_COMPILER
@@ -24,6 +24,7 @@ dnl -------------------------------------------------
 dnl Verify if the C compiler being used is known.
 
 AC_DEFUN([CARES_CHECK_COMPILER], [
+  AC_BEFORE([$0],[CARES_CHECK_NO_UNDEFINED])dnl
   #
   compiler_id="unknown"
   compiler_num="0"
@@ -1095,20 +1096,13 @@ AC_DEFUN([CARES_CHECK_CURLDEBUG], [
       supports_curldebug="no"
     fi
     if test "$supports_curldebug" != "no"; then
-      if test "$enable_shared" = "yes"; then
-        if test "x$allow_undefined" = "xno"; then
-          supports_curldebug="no"
-        elif test "x$allow_undefined_flag" = "xunsupported"; then
-          supports_curldebug="no"
-        elif test "x$need_no_undefined" = "xyes"; then
-          supports_curldebug="no"
-        fi
-        if test "$supports_curldebug" = "no"; then
-          AC_MSG_WARN([shared library does not support undefined symbols.])
-        fi
+      if test "$enable_shared" = "yes" &&
+        test "$need_no_undefined" = "yes"; then
+        supports_curldebug="no"
+        AC_MSG_WARN([shared library does not support undefined symbols.])
       fi
       if test ! -f "$srcdir/../include/curl/curlbuild.h.dist"; then
-        AC_MSG_WARN([source not embedded in curl's CVS tree.])
+        AC_MSG_WARN([c-ares source not embedded in curl's CVS tree.])
         supports_curldebug="no"
       elif test ! -f "$srcdir/../include/curl/Makefile.in"; then
         AC_MSG_WARN([curl's buildconf has not been run.])
@@ -1156,6 +1150,32 @@ AC_DEFUN([CARES_CHECK_CURLDEBUG], [
     CPPFLAGS="$CPPFLAGS -DCURLDEBUG"
     squeeze CPPFLAGS
   fi
+])
+
+
+dnl CARES_CHECK_NO_UNDEFINED
+dnl -------------------------------------------------
+
+AC_DEFUN([CARES_CHECK_NO_UNDEFINED], [
+  AC_BEFORE([$0],[CARES_CHECK_CURLDEBUG])dnl
+  AC_MSG_CHECKING([if we need -no-undefined])
+  need_no_undefined="no"
+  case $host in
+    *-*-cygwin* | *-*-mingw* | *-*-pw32* | *-*-cegcc*)
+      need_no_undefined="yes"
+      ;;
+  esac
+  if test "x$allow_undefined" = "xno"; then
+    need_no_undefined="yes"
+  elif test "x$allow_undefined_flag" = "xunsupported"; then
+    need_no_undefined="yes"
+  fi
+  case $compiler_id in
+    IBM_C | INTEL_UNIX_C | INTEL_WINDOWS_C | SUNPRO_C)
+      need_no_undefined="yes"
+      ;;
+  esac
+  AC_MSG_RESULT($need_no_undefined)
 ])
 
 
