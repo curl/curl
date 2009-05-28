@@ -84,6 +84,11 @@
 #define T_SRV 33 /* server selection */
 #endif
 
+/* AIX portability check */
+#ifndef T_NAPTR
+#define T_NAPTR 35 /* naming authority pointer */
+#endif
+
 struct nv {
   const char *name;
   int value;
