@@ -2878,6 +2878,8 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
   infof(data, "About to connect() to %s%s port %d (#%d)\n",
         conn->bits.proxy?"proxy ":"",
         hostname, conn->port, conn->connectindex);
+#else
+  (void)data;
 #endif
 
   /*************************************************************

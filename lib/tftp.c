@@ -411,9 +411,11 @@ static size_t tftp_option_add(tftp_state_data_t *state, size_t csize,
 static CURLcode tftp_connect_for_tx(tftp_state_data_t *state, tftp_event_t event)
 {
   CURLcode res;
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   struct SessionHandle *data = state->conn->data;
 
   infof(data, "%s\n", "Connected for transmit");
+#endif
   state->state = TFTP_STATE_TX;
   res = tftp_set_timeouts(state);
   if(res != CURLE_OK)
@@ -424,9 +426,11 @@ static CURLcode tftp_connect_for_tx(tftp_state_data_t *state, tftp_event_t event
 static CURLcode tftp_connect_for_rx(tftp_state_data_t *state, tftp_event_t event)
 {
   CURLcode res;
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   struct SessionHandle *data = state->conn->data;
 
   infof(data, "%s\n", "Connected for receive");
+#endif
   state->state = TFTP_STATE_RX;
   res = tftp_set_timeouts(state);
   if(res != CURLE_OK)

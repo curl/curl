@@ -524,7 +524,7 @@ output_auth_headers(struct connectdata *conn,
     &data->state.proxyneg:&data->state.negotiate;
 #endif
 
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#ifdef CURL_DISABLE_CRYPTO_AUTH
   (void)request;
   (void)path;
 #endif
