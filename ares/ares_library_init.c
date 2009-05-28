@@ -90,13 +90,10 @@ static void ares_win32_cleanup(void)
 int ares_library_init(int flags)
 {
   int res;
-  char *leekme;
 
   if (ares_initialized)
     return ARES_SUCCESS;
   ares_initialized++;
-
-  leekme = malloc(32);
 
   if (flags & ARES_LIB_INIT_WIN32)
     {
