@@ -219,9 +219,10 @@ int main(int argc, char **argv)
               if (strcmp(flags[i].name, optarg) == 0)
                 break;
             }
-          if (i == nflags)
+          if (i < nflags)
+            options.flags |= flags[i].value;
+          else
             usage();
-          options.flags |= flags[i].value;
           break;
 
         case 's':
@@ -256,9 +257,10 @@ int main(int argc, char **argv)
               if (strcasecmp(classes[i].name, optarg) == 0)
                 break;
             }
-          if (i == nclasses)
+          if (i < nclasses)
+            dnsclass = classes[i].value;
+          else
             usage();
-          dnsclass = classes[i].value;
           break;
 
         case 't':
@@ -268,9 +270,10 @@ int main(int argc, char **argv)
               if (strcasecmp(types[i].name, optarg) == 0)
                 break;
             }
-          if (i == ntypes)
+          if (i < ntypes)
+            type = types[i].value;
+          else
             usage();
-          type = types[i].value;
           break;
 
         case 'T':

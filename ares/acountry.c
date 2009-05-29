@@ -612,9 +612,14 @@ static void find_country_from_cname(const char *cname, struct in_addr addr)
     printf("Name for country-number %d not found.\n", cnumber);
   else
     {
-      if (ver_1 && *(unsigned short*)&country->short_name != *(unsigned*)&ccode_A2)
-        printf("short-name mismatch; %s vs %s\n", country->short_name, ccode_A2);
-
+      if (ver_1)
+        {
+          if ((country->short_name[0] != ccode_A2[0]) ||
+              (country->short_name[1] != ccode_A2[1]) ||
+              (country->short_name[2] != ccode_A2[2]))
+            printf("short-name mismatch; %s vs %s\n",
+                   country->short_name, ccode_A2);
+        }
       printf("%s (%s), number %d.\n",
              country->long_name, country->short_name, cnumber);
     }
