@@ -1842,14 +1842,14 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
   case CURLOPT_SSLKEY:
     /*
-     * String that holds file name of the SSL certificate to use
+     * String that holds file name of the SSL key to use
      */
     result = setstropt(&data->set.str[STRING_KEY],
                        va_arg(param, char *));
     break;
   case CURLOPT_SSLKEYTYPE:
     /*
-     * String that holds file type of the SSL certificate to use
+     * String that holds file type of the SSL key to use
      */
     result = setstropt(&data->set.str[STRING_KEY_TYPE],
                        va_arg(param, char *));
