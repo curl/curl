@@ -45,8 +45,14 @@ bin_PROGRAMS = curl
 
 include Makefile.inc
 
-curl_LDADD = ../lib/libcurl.la @CURL_LIBS@
-curl_DEPENDENCIES = ../lib/libcurl.la
+if USE_EMBEDDED_ARES
+EMBEDDEDARES = ../ares/libcares.la
+else
+EMBEDDEDARES =
+endif
+
+curl_LDADD = ../lib/libcurl.la $(EMBEDDEDARES) @CURL_LIBS@
+curl_DEPENDENCIES = ../lib/libcurl.la $(EMBEDDEDARES)
 BUILT_SOURCES = hugehelp.c
 CLEANFILES = hugehelp.c
 # Use the C locale to ensure that only ASCII characters appear in the

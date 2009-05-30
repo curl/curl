@@ -42,9 +42,15 @@ LIBDIR = $(top_builddir)/lib
 EXTRA_DIST = test75.pl test307.pl test610.pl test613.pl test1013.pl	\
 test1022.pl Makefile.inc
 
+if USE_EMBEDDED_ARES
+EMBEDDEDARES = $(top_builddir)/ares/libcares.la
+else
+EMBEDDEDARES =
+endif
+
 # Dependencies (may need to be overriden)
-LDADD = $(LIBDIR)/libcurl.la
-DEPENDENCIES = $(LIBDIR)/libcurl.la
+LDADD = $(LIBDIR)/libcurl.la $(EMBEDDEDARES)
+DEPENDENCIES = $(LIBDIR)/libcurl.la $(EMBEDDEDARES)
 
 # Makefile.inc provides the source defines (TESTUTIL, SUPPORTFILES, noinst_PROGRAMS, lib*_SOURCES, and lib*_CFLAGS)
 include Makefile.inc

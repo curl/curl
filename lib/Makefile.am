@@ -103,12 +103,20 @@ if MIMPURE
 MIMPURE = -mimpure-text
 endif
 
+if USE_EMBEDDED_ARES
+EMBEDDEDARES = ../ares/libcares.la
+else
+EMBEDDEDARES =
+endif
+
 libcurl_la_LDFLAGS = $(UNDEF) $(VERSIONINFO) $(MIMPURE) $(LIBCURL_LIBS)
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
 
 libcurl_la_SOURCES = $(CSOURCES) $(HHEADERS)
+
+libcurl_la_LIBADD = $(EMBEDDEDARES)
 
 WIN32SOURCES = $(CSOURCES)
 WIN32HEADERS = $(HHEADERS) config-win32.h
