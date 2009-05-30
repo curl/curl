@@ -166,8 +166,10 @@ large_file
 libz
 netrc_debug
 NSS
+NTLM
 OpenSSL
 SSL
+socks
 
 as well as each protocol that curl supports.  A protocol only needs to be
 specified if it is different from the server (useful when the server
