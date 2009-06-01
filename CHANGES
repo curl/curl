@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Yang Tse (1 Jun 2009)
+- John E. Malmberg provided a VMS specific clean-up for curl.h, and pointed
+  out that the configure script was failing to detect the timeval struct on
+  VMS when building with _XOPEN_SOURCE_EXTENDED undefined due to definition
+  taking place in socket.h instead of time.h.  I have adjusted configure
+  script to also include this header when checking struct timeval.
+
 Daniel Stenberg (27 May 2009)
 - Frank McGeough provided a small OpenSSL #include fix to make libcurl compile
   fine with Nokia 5th edition 1.0 SDK for Symbian.
