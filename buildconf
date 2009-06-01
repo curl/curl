@@ -294,6 +294,8 @@ done
 echo "buildconf: running libtoolize"
 $libtoolize --copy --automake --force || die "The libtoolize command failed"
 
+if test "1" = "0"; then
+
 if test ! -f ./config.guess; then
   echo "buildconf: config.guess not found"
   exit 1
@@ -340,6 +342,8 @@ if test ! -z "$need_lt_check"; then
     echo "            $buildhost requires libtool $need_lt_version or newer."
     exit 1
   fi
+fi
+
 fi
 
 if test ! -f m4/curl-functions.m4; then
