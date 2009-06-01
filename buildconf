@@ -294,6 +294,54 @@ done
 echo "buildconf: running libtoolize"
 $libtoolize --copy --automake --force || die "The libtoolize command failed"
 
+if test ! -f ./config.guess; then
+  echo "buildconf: config.guess not found"
+  exit 1
+fi
+
+buildhost=`./config.guess 2>/dev/null|head -n 1`
+case $buildhost in
+  *-*-hpux*)
+    need_lt_major=1
+    need_lt_minor=5
+    need_lt_patch=24
+    need_lt_check="yes"
+    ;;
+esac
+
+if test ! -z "$need_lt_check"; then
+  lt_major="$major"
+  lt_minor="$minor"
+  lt_patch="$patch"
+  if test -z "$lt_major"; then
+    lt_status="bad"
+  elif test "$lt_major" -gt "$need_lt_major"; then
+    lt_status="good"
+  elif test "$lt_major" -lt "$need_lt_major"; then
+    lt_status="bad"
+  elif test -z "$lt_minor"; then
+    lt_status="bad"
+  elif test "$lt_minor" -gt "$need_lt_minor"; then
+    lt_status="good"
+  elif test "$lt_minor" -lt "$need_lt_minor"; then
+    lt_status="bad"
+  elif test -z "$lt_patch"; then
+    lt_status="bad"
+  elif test "$lt_patch" -gt "$need_lt_patch"; then
+    lt_status="good"
+  elif test "$lt_patch" -lt "$need_lt_patch"; then
+    lt_status="bad"
+  else
+    lt_status="good"
+  fi
+  if test "$lt_status" != "good"; then
+    need_lt_version="$need_lt_major.$need_lt_minor.$need_lt_patch"
+    echo "buildconf: libtool version $lt_pversion found."
+    echo "            $buildhost requires libtool $need_lt_version or newer."
+    exit 1
+  fi
+fi
+
 if test ! -f m4/curl-functions.m4; then
   echo "buildconf: cURL m4 macros not found"
   exit 1
