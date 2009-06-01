@@ -48,13 +48,8 @@
 #include <limits.h>
 
 /* The include stuff here below is mainly for time_t! */
-#ifdef vms
-# include <types.h>
-# include <time.h>
-#else
-# include <sys/types.h>
-# include <time.h>
-#endif /* defined (vms) */
+#include <sys/types.h>
+#include <time.h>
 
 #if defined(WIN32) && !defined(_WIN32_WCE) && !defined(__GNUC__) && \
   !defined(__CYGWIN__) || defined(__MINGW32__)
