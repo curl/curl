@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Stenberg (1 June 2009)
+- Claes Jakobsson fixed the configure script to better find and use NSS
+  without pkg-config.
+
 Yang Tse (1 Jun 2009)
 - John E. Malmberg provided a VMS specific clean-up for curl.h, and pointed
   out that the configure script was failing to detect the timeval struct on

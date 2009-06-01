@@ -1663,10 +1663,10 @@ if test "$OPENSSL_ENABLED" != "1" -a "$GNUTLS_ENABLED" != "1"; then
       fi
     else
       # Without pkg-config, we'll kludge in some defaults
-      addlib="-lssl3 -lsmime3 -lnss3 -lplds4 -lplc4 -lnspr4 -lpthread -ldl"
+      addlib="-L$OPT_NSS/lib -lssl3 -lsmime3 -lnss3 -lplds4 -lplc4 -lnspr4 -lpthread -ldl"
       addcflags="-I$OPT_NSS/include"
       version="unknown"
-      gtlsprefix=$OPT_GNUTLS
+      nssprefix=$OPT_NSS
     fi
 
     dnl Check for functionPK11_CreateGenericObject
