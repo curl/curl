@@ -107,13 +107,13 @@ libcares_la_HEADERS = ares.h ares_version.h ares_dns.h \
 	ares_build.h ares_rules.h
 
 ahost_SOURCES = ahost.c ares_getopt.c ares_getopt.h
-ahost_LDADD = $(top_builddir)/$(lib_LTLIBRARIES)
+ahost_LDADD = ./libcares.la
 
 adig_SOURCES = adig.c ares_getopt.c ares_getopt.h
-adig_LDADD = $(top_builddir)/$(lib_LTLIBRARIES)
+adig_LDADD = ./libcares.la
 
 acountry_SOURCES = acountry.c ares_getopt.c ares_getopt.h
-acountry_LDADD = $(top_builddir)/$(lib_LTLIBRARIES)
+acountry_LDADD = ./libcares.la
 
 SOURCEDMANDIR = man3
 SOURCEDMANPAGES = ares_init.3
