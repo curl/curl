@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Fandrich (2 June 2009)
+- Checked in a Google Android make file. To use it, you must first
+  create a config.h file by running configure in the Android environment,
+  which doesn't seem to be easy to do. If no easy way can be found, a
+  static config-android.h may need to be created and checked in to the
+  libcurl source tree.
+
 Daniel Stenberg (1 June 2009)
 - Claes Jakobsson fixed the configure script to better find and use NSS
   without pkg-config.
