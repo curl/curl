@@ -614,7 +614,7 @@ if (grepfile("define USE_ARES", "lib/config$confsuffix.h")) {
   if (-f "libcares$libext") {
     logit "ares is now built successfully (libcares$libext)";
   } else {
-    logit "ares build failed (libares$libext)";
+    mydie "ares build failed (libcares$libext)";
   }
 
   # cd back to the curl build dir
