@@ -258,6 +258,10 @@ PERL=`findtool ${PERL:-perl}`
 #
 for fname in .deps \
     .libs \
+    *.la \
+    *.lo \
+    *.a \
+    *.o \
     Makefile \
     Makefile.in \
     aclocal.m4 \
@@ -268,17 +272,15 @@ for fname in .deps \
     config.guess \
     config.h \
     config.h.in \
-    config.lt \
     config.log \
+    config.lt \
     config.status \
     config.sub \
     configure \
     curl-config \
     curlbuild.h \
     depcomp \
-    libcares.la \
     libcares.pc \
-    libcurl.la \
     libcurl.pc \
     libtool \
     libtool.m4 \
