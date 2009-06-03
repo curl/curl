@@ -260,11 +260,13 @@ for fname in .deps \
     Makefile.in \
     aclocal.m4 \
     aclocal.m4.bak \
+    ares_build.h \
     autom4te.cache \
     compile \
     config.guess \
     config.h \
     config.h.in \
+    config.lt \
     config.log \
     config.status \
     config.sub \
@@ -272,7 +274,9 @@ for fname in .deps \
     curl-config \
     curlbuild.h \
     depcomp \
+    libcares.la \
     libcares.pc \
+    libcurl.la \
     libcurl.pc \
     libtool \
     libtool.m4 \
