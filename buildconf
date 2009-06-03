@@ -257,6 +257,7 @@ PERL=`findtool ${PERL:-perl}`
 # Remove files generated on previous buildconf/configure run.
 #
 for fname in .deps \
+    .libs \
     Makefile \
     Makefile.in \
     aclocal.m4 \
