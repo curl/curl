@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2004 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2004 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,9 +24,13 @@
 #include "setup.h"
 
 #ifdef HAVE_STRERROR_R
-#  if (!defined(HAVE_POSIX_STRERROR_R) && !defined(HAVE_GLIBC_STRERROR_R)) || \
-       (defined(HAVE_POSIX_STRERROR_R) &&  defined(HAVE_GLIBC_STRERROR_R))
-#    error "strerror_r MUST be either POSIX-style or glibc-style"
+#  if (!defined(HAVE_POSIX_STRERROR_R) && \
+       !defined(HAVE_GLIBC_STRERROR_R) && \
+       !defined(HAVE_VXWORKS_STRERROR_R)) || \
+      (defined(HAVE_POSIX_STRERROR_R) && defined(HAVE_VXWORKS_STRERROR_R)) || \
+      (defined(HAVE_GLIBC_STRERROR_R) && defined(HAVE_VXWORKS_STRERROR_R)) || \
+      (defined(HAVE_POSIX_STRERROR_R) && defined(HAVE_GLIBC_STRERROR_R))
+#    error "strerror_r MUST be either POSIX-style, glibc-style or vxworks-style"
 #  endif
 #endif
 
@@ -638,6 +642,18 @@ const char *Curl_strerror(struct connectdata *conn, int err)
     char *msg = strerror_r(err, buffer, sizeof(buffer));
     if(msg)
       strncpy(buf, msg, max);
+    else
+      snprintf(buf, max, "Unknown error %d", err);
+  }
+#elif defined(HAVE_STRERROR_R) && defined(HAVE_VXWORKS_STRERROR_R)
+ /*
+  * The vxworks-style strerror_r() does use the buffer we pass to the function.
+  * The buffer size should be at least MAXERRSTR_SIZE (150) defined in rtsold.h
+  */
+  {
+    char buffer[256];
+    if(OK == strerror_r(err, buffer))
+      strncpy(buf, buffer, max);
     else
       snprintf(buf, max, "Unknown error %d", err);
   }

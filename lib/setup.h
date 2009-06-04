@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -37,15 +37,17 @@
  */
 
 #ifdef HAVE_CONFIG_H
+
 #include "config.h"
-#else
+
+#else /* HAVE_CONFIG_H */
 
 #ifdef _WIN32_WCE
-#include "config-win32ce.h"
+#  include "config-win32ce.h"
 #else
-#ifdef WIN32
-#include "config-win32.h"
-#endif
+#  ifdef WIN32
+#    include "config-win32.h"
+#  endif
 #endif
 
 #if defined(macintosh) && defined(__MRC__)
@@ -53,11 +55,11 @@
 #endif
 
 #ifdef __AMIGA__
-#include "amigaos.h"
+#  include "amigaos.h"
 #endif
 
 #ifdef __SYMBIAN32__
-#include "config-symbian.h"
+#  include "config-symbian.h"
 #endif
 
 #ifdef __OS400__
@@ -66,6 +68,10 @@
 
 #ifdef TPF
 #  include "config-tpf.h"
+#endif
+
+#ifdef __VXWORKS__
+#  include "config-vxworks.h"
 #endif
 
 #endif /* HAVE_CONFIG_H */
@@ -228,6 +234,11 @@
 #  include <tpf/sysapi.h> /* for tpf_process_signals */
    /* change which select is used for libcurl */
 #  define select(a,b,c,d,e) tpf_select_libcurl(a,b,c,d,e)
+#endif
+
+#ifdef __VXWORKS__
+#  include <sockLib.h>    /* for generic BSD socket functions */
+#  include <ioLib.h>      /* for basic I/O interface functions */
 #endif
 
 #include <stdio.h>

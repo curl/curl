@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Yang Tse (4 Jun 2009)
+- Igor Novoseltsev provided patches and information, that after some
+  adjustments to better fit curl's way of doing things, have resulted
+  in the posibility of building libcurl for VxWorks.
+
 Daniel Fandrich (2 June 2009)
 - Checked in a Google Android make file. To use it, you must first
   create a config.h file by running configure in the Android environment,
