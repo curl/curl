@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -141,7 +141,8 @@ size_t Curl_base64_decode(const char *src, unsigned char **outptr)
  *
  */
 size_t Curl_base64_encode(struct SessionHandle *data,
-                          const char *inp, size_t insize, char **outptr)
+                          const char *inputbuff, size_t insize,
+                          char **outptr)
 {
   unsigned char ibuf[3];
   unsigned char obuf[4];
@@ -153,7 +154,7 @@ size_t Curl_base64_encode(struct SessionHandle *data,
   char *convbuf = NULL;
 #endif
 
-  const char *indata = inp;
+  const char *indata = inputbuff;
 
   *outptr = NULL; /* set to NULL in case of failure before we reach the end */
 

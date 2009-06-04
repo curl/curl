@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -112,7 +112,7 @@ const struct Curl_handler Curl_handler_dict = {
   PROT_DICT                             /* protocol */
 };
 
-static char *unescape_word(struct SessionHandle *data, const char *inp)
+static char *unescape_word(struct SessionHandle *data, const char *inputbuff)
 {
   char *newp;
   char *dictp;
@@ -121,7 +121,7 @@ static char *unescape_word(struct SessionHandle *data, const char *inp)
   char byte;
   int olen=0;
 
-  newp = curl_easy_unescape(data, inp, 0, &len);
+  newp = curl_easy_unescape(data, inputbuff, 0, &len);
   if(!newp)
     return NULL;
 
