@@ -2229,10 +2229,10 @@ AC_HELP_STRING([--disable-ares],[Disable c-ares for name lookups]),
          if test -d "$srcdir/ares"; then
             aresembedded="yes"
             AC_CONFIG_SUBDIRS(ares)
-            aresinc=`cd $srcdir/ares && pwd`
-            CPPFLAGS="$CPPFLAGS -I$aresinc"
             dnl This c-ares library is an uninstalled libtool archive, so
             dnl we delegate all the linking magic on libtool and automake.
+            dnl Since c-ares has installable configured header files, path
+            dnl inclusion is fully done in makefiles for in-tree builds.
          else
            LIBS="-lcares $LIBS"
          fi

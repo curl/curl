@@ -57,12 +57,19 @@ LIBCURL_LIBS = @LIBCURL_LIBS@
 # $(top_builddir)/ares is for in-tree c-ares's generated ares_build.h file
 # $(top_srcdir)/ares is for in-tree c-ares's external include files
 
+if USE_EMBEDDED_ARES
 INCLUDES = -I$(top_builddir)/include \
            -I$(top_srcdir)/include   \
            -I$(top_builddir)/lib     \
            -I$(top_srcdir)/lib       \
            -I$(top_builddir)/ares    \
            -I$(top_srcdir)/ares
+else
+INCLUDES = -I$(top_builddir)/include \
+           -I$(top_srcdir)/include   \
+           -I$(top_builddir)/lib     \
+           -I$(top_srcdir)/lib
+endif
 
 if SONAME_BUMP
 #
