@@ -20,7 +20,11 @@ This release includes the following bugfixes:
  o libcurl-NSS build fixes
  o libcurl-NSS build fix
  o configure script fixed for VMS
+<<<<<<< RELEASE-NOTES
+ o set Content-Length: with POST and PUT failed with NTLM auth
+=======
  o allow building libcurl for VxWorks
+>>>>>>> 1.1030
 
 This release includes the following known bugs:
 
@@ -29,7 +33,13 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
+<<<<<<< RELEASE-NOTES
+ Yang Tse, Daniel Fandrich, Kamil Dudka, Caolan McNamara, Frank McGeough,
+ Andre Guibert de Bruet, Mike Crowe, Claes Jakobsson, John E. Malmberg,
+ Aaron Oneal
+=======
  Kamil Dudka, Caolan McNamara, Frank McGeough, Andre Guibert de Bruet,
  Mike Crowe, Claes Jakobsson, John E. Malmberg, Igor Novoseltsev
+>>>>>>> 1.1030
 
         Thanks! (and sorry if I forgot to mention someone)

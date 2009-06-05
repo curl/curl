@@ -2032,6 +2032,11 @@ static CURLcode add_custom_headers(struct connectdata *conn,
                 /* this header (extended by formdata.c) is sent later */
                 checkprefix("Content-Type:", headers->data))
           ;
+        else if(conn->bits.authneg &&
+                /* while doing auth neg, don't allow the custom length since
+                   we will force length zero then */
+                checkprefix("Content-Length", headers->data))
+          ;
         else {
           CURLcode result = add_bufferf(req_buffer, "%s\r\n", headers->data);
           if(result)
@@ -2787,9 +2792,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
          we don't upload data chunked, as RFC2616 forbids us to set both
          kinds of headers (Transfer-Encoding: chunked and Content-Length) */
 
-      if(!checkheaders(data, "Content-Length:")) {
-        /* we allow replacing this header, although it isn't very wise to
-           actually set your own */
+      if(conn->bits.authneg || !checkheaders(data, "Content-Length:")) {
+        /* we allow replacing this header if not during auth negotiation,
+           although it isn't very wise to actually set your own */
         result = add_bufferf(req_buffer,
                              "Content-Length: %" FORMAT_OFF_T"\r\n",
                              postsize);
