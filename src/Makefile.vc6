@@ -98,6 +98,7 @@ RELEASE_OBJS= \
 	getpassr.obj \
 	homedirr.obj \
 	curlutilr.obj \
+	os-specificr.obj \
 	rawstrr.obj \
 	strtoofftr.obj \
 	mainr.obj \
@@ -110,6 +111,7 @@ DEBUG_OBJS= \
 	getpassd.obj \
 	homedird.obj \
 	curlutild.obj \
+	os-specificd.obj \
 	rawstrd.obj \
 	strtoofftd.obj \
 	maind.obj \
@@ -247,6 +249,8 @@ homedirr.obj: homedir.c
 	$(CCR) $(CFLAGS) /Fo"$@" homedir.c
 curlutilr.obj: curlutil.c
 	$(CCR) $(CFLAGS) /Fo"$@" curlutil.c
+os-specificr.obj: os-specific.c
+	$(CCR) $(CFLAGS) /Fo"$@" os-specific.c
 rawstrr.obj: ../lib/rawstr.c
 	$(CCR) $(CFLAGS) /Fo"$@" ../lib/rawstr.c
 strtoofftr.obj: ../lib/strtoofft.c
@@ -269,6 +273,8 @@ homedird.obj: homedir.c
 	$(CCD) $(CFLAGS) /Fo"$@" homedir.c
 curlutild.obj: curlutil.c
 	$(CCD) $(CFLAGS) /Fo"$@" curlutil.c
+os-specificd.obj: os-specific.c
+	$(CCD) $(CFLAGS) /Fo"$@" os-specific.c
 rawstrd.obj: ../lib/rawstr.c
 	$(CCD) $(CFLAGS) /Fo"$@" ../lib/rawstr.c
 strtoofftd.obj: ../lib/strtoofft.c

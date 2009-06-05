@@ -159,6 +159,10 @@ SOURCE=.\main.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\os-specific.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\lib\rawstr.c
 # End Source File
 # Begin Source File
@@ -200,6 +204,10 @@ SOURCE=.\homedir.h
 # Begin Source File
 
 SOURCE=.\hugehelp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\os-specific.h
 # End Source File
 # Begin Source File
 

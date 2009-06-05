@@ -114,6 +114,12 @@
 #include <netinet/tcp.h> /* for TCP_KEEPIDLE, TCP_KEEPINTVL */
 #endif
 
+#ifdef __VMS
+#  include "curlmsg_vms.h"
+#endif
+
+#include "os-specific.h"
+
 /* The last #include file should be: */
 #ifdef CURLDEBUG
 #ifndef CURLTOOLDEBUG
@@ -198,10 +204,6 @@ typedef enum {
 #include <direct.h>
 #define F_OK 0
 #define mkdir(x,y) (mkdir)(x)
-#endif
-
-#ifdef  VMS
-#include "curlmsg_vms.h"
 #endif
 
 /*
@@ -4996,16 +4998,21 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
 show_error:
 
-#ifdef  VMS
-        if (!config->showerror)  {
-          vms_show = VMSSTS_HIDE;
+#ifdef __VMS
+        if(is_vms_shell()) {
+          /* VMS DCL shell behavior */
+          if(!config->showerror) {
+            vms_show = VMSSTS_HIDE;
+          }
         }
-#else
-        if((res!=CURLE_OK) && config->showerror) {
-          fprintf(config->errors, "curl: (%d) %s\n", res,
-                  errorbuffer[0]? errorbuffer:
-                  curl_easy_strerror((CURLcode)res));
-          if(CURLE_SSL_CACERT == res) {
+        else
+#endif
+        {
+          if((res!=CURLE_OK) && config->showerror) {
+            fprintf(config->errors, "curl: (%d) %s\n", res,
+                    errorbuffer[0]? errorbuffer:
+                    curl_easy_strerror((CURLcode)res));
+            if(CURLE_SSL_CACERT == res) {
 #define CURL_CA_CERT_ERRORMSG1 \
 "More details here: http://curl.haxx.se/docs/sslcerts.html\n\n" \
 "curl performs SSL certificate verification by default, using a \"bundle\"\n" \
@@ -5021,12 +5028,12 @@ show_error:
 "If you'd like to turn off curl's verification of the certificate, use\n" \
 " the -k (or --insecure) option.\n"
 
-            fprintf(config->errors, "%s%s",
-                    CURL_CA_CERT_ERRORMSG1,
-                    CURL_CA_CERT_ERRORMSG2 );
+              fprintf(config->errors, "%s%s",
+                      CURL_CA_CERT_ERRORMSG1,
+                      CURL_CA_CERT_ERRORMSG2 );
+            }
           }
         }
-#endif
 
         if (outfile && !curlx_strequal(outfile, "-") && outs.stream)
           fclose(outs.stream);
@@ -5182,9 +5189,8 @@ int main(int argc, char *argv[])
 #ifdef __NOVELL_LIBC__
   pressanykey();
 #endif
-#ifdef  VMS
-  if (res > CURL_LAST) res = CURL_LAST; /* If CURL_LAST exceeded then */
-  return (vms_cond[res]|vms_show);      /* curlmsg.h is out of sync.  */
+#ifdef __VMS
+  vms_special_exit(res, vms_show);
 #else
   return res;
 #endif

@@ -22,6 +22,9 @@ o.hugehelp:	c.hugehelp
 o.main:	c.main
 		gcc $(compileropts) -c -o main.o c.main
 
+o.os-specific:	c.os-specific
+		gcc $(compileropts) -c -o os-specific.o c.os-specific
+
 o.urlglob:	c.urlglob
 		gcc $(compileropts) -c -o urlglob.o c.urlglob
 
@@ -39,12 +42,18 @@ o.hugehelp:	c.hugehelp
 
 o.main:	c.main
 o.main:	h.setup
+o.main:	h.os-specific
 o.main:	h.urlglob
 o.main:	h.writeout
 o.main:	h.version
 
+o.os-specific:	c.os-specific
+o.os-specific:	h.setup
+o.os-specific:	h.os-specific
+
 o.urlglob:	c.urlglob
 o.urlglob:	h.setup
+o.urlglob:	h.os-specific
 o.urlglob:	h.urlglob
 
 o.writeout:	c.writeout
