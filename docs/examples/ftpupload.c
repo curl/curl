@@ -65,7 +65,7 @@ int main(int argc, char **argv)
     printf("Couldnt open '%s': %s\n", LOCAL_FILE, strerror(errno));
     return 1;
   }
-  printf("Local file size: %ld bytes.\n", file_info.st_size);
+  printf("Local file size: %ld bytes.\n", (long)file_info.st_size);
 
   /* get a FILE * of the same file */
   hd_src = fopen(LOCAL_FILE, "rb");
