@@ -12,7 +12,7 @@ Yang Tse (5 Jun 2009)
   DCL compatible exit code.  This fix required the enhancement described next.
   This also adds an enhancement to main.c so that when curl is run under a
   Unix shell like Bash on VMS, it will return the standard Unix exit codes
-  and messages."
+  and messages." And another patch for docs/examples.
 
   I introduced os-specific.c and os-specific.h for use in curl tool code
   and adjusted John E. Malmberg's patch placement to use these new files
