@@ -6,7 +6,6 @@
 
                                   Changelog
 
-<<<<<<< CHANGES
 Daniel Stenberg (4 June 2009)
 - Setting the Content-Length: header from your app when you do a POST or PUT
   is almost always a VERY BAD IDEA. Yet there are still apps out there doing
@@ -17,13 +16,11 @@ Daniel Stenberg (4 June 2009)
   wouldn't send. Aaron Oneal reported this problem in bug report #2799008
   http://curl.haxx.se/bug/view.cgi?id=2799008) and helped us verify the fix.
 
-=======
 Yang Tse (4 Jun 2009)
 - Igor Novoseltsev provided patches and information, that after some
   adjustments to better fit curl's way of doing things, have resulted
   in the posibility of building libcurl for VxWorks.
 
->>>>>>> 1.1683
 Daniel Fandrich (2 June 2009)
 - Checked in a Google Android make file. To use it, you must first
   create a config.h file by running configure in the Android environment,
