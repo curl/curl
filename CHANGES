@@ -6,6 +6,19 @@
 
                                   Changelog
 
+Yang Tse (5 Jun 2009)
+- John E. Malmberg provided VMS specific patch: "This fixes an existing bug
+  in urlglob.c where it was not converting the Curl Unix exit code to a VMS
+  DCL compatible exit code.  This fix required the enhancement described next.
+  This also adds an enhancement to main.c so that when curl is run under a
+  Unix shell like Bash on VMS, it will return the standard Unix exit codes
+  and messages."
+
+  I introduced os-specific.c and os-specific.h for use in curl tool code
+  and adjusted John E. Malmberg's patch placement to use these new files
+  as an effort to prevent main.c from growing ad infinitum. Code already
+  existing in main.c which is OS specific should be moved into these files.
+
 Daniel Stenberg (4 June 2009)
 - Setting the Content-Length: header from your app when you do a POST or PUT
   is almost always a VERY BAD IDEA. Yet there are still apps out there doing

@@ -22,6 +22,7 @@ This release includes the following bugfixes:
  o configure script fixed for VMS
  o set Content-Length: with POST and PUT failed with NTLM auth
  o allow building libcurl for VxWorks
+ o curl tool exit codes fixed for VMS
 
 This release includes the following known bugs:
 
