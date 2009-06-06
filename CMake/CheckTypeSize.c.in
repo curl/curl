@@ -6,6 +6,12 @@
 #  include <sys/types.h>
 #endif /* HAVE_SYS_TYPES_H */
 
+
+#ifdef _WIN32
+#  include <ws2tcpip.h>
+#endif
+
+
 #ifdef HAVE_STDINT_H
 #  include <stdint.h>
 #endif /* HAVE_STDINT_H */

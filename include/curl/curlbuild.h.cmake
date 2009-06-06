@@ -63,6 +63,15 @@
    Error Compilation_aborted_CURL_SIZEOF_LONG_already_defined
 #endif
 
+#ifdef CURL_TYPEOF_CURL_SOCKLEN_T
+#  error "CURL_TYPEOF_CURL_SOCKLEN_T shall not be defined except in curlbuild.h"
+   Error Compilation_aborted_CURL_TYPEOF_CURL_SOCKLEN_T_already_defined
+#endif
+
+#ifdef CURL_SIZEOF_CURL_SOCKLEN_T
+#  error "CURL_SIZEOF_CURL_SOCKLEN_T shall not be defined except in curlbuild.h"
+   Error Compilation_aborted_CURL_SIZEOF_CURL_SOCKLEN_T_already_defined
+#endif
 #ifdef CURL_TYPEOF_CURL_OFF_T
 #  error "CURL_TYPEOF_CURL_OFF_T shall not be defined except in curlbuild.h"
    Error Compilation_aborted_CURL_TYPEOF_CURL_OFF_T_already_defined
@@ -125,6 +134,20 @@
 
 /* The size of `long', as computed by sizeof. */
 #cmakedefine CURL_SIZEOF_LONG ${CURL_SIZEOF_LONG}
+
+/* Integral data type used for curl_socklen_t. */
+#cmakedefine CURL_TYPEOF_CURL_SOCKLEN_T ${CURL_TYPEOF_CURL_SOCKLEN_T}
+
+/* on windows socklen_t is in here */
+#ifdef _WIN32
+#  include <ws2tcpip.h>
+#endif
+
+/* Data type definition of curl_socklen_t. */
+typedef CURL_TYPEOF_CURL_SOCKLEN_T curl_socklen_t;
+
+/* The size of `curl_socklen_t', as computed by sizeof. */
+#cmakedefine CURL_SIZEOF_CURL_SOCKLEN_T ${CURL_SIZEOF_CURL_SOCKLEN_T}
 
 /* Signed integral data type used for curl_off_t. */
 #cmakedefine CURL_TYPEOF_CURL_OFF_T ${CURL_TYPEOF_CURL_OFF_T}

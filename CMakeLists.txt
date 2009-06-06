@@ -17,7 +17,6 @@
 # To check:
 # (From Daniel Stenberg) The cmake build selected to run gcc with -fPIC on my box while the plain configure script did not.
 # (From Daniel Stenberg) The gcc command line use neither -g nor any -O options. As a developer, I also treasure our configure scripts's --enable-debug option that sets a long range of "picky" compiler options.
-
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.2 FATAL_ERROR)
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 INCLUDE(Utilities)
@@ -642,7 +641,6 @@ ENDFOREACH(CURL_TEST)
 IF(HAVE_FILE_OFFSET_BITS)
   SET(_FILE_OFFSET_BITS 64)
 ENDIF(HAVE_FILE_OFFSET_BITS)
-
 FOREACH(CURL_TEST 
     HAVE_GLIBC_STRERROR_R
     HAVE_POSIX_STRERROR_R
@@ -747,6 +745,14 @@ IF(CMAKE_COMPILER_IS_GNUCC AND APPLE)
       COMPILE_FLAGS ${MPRINTF_COMPILE_FLAGS})
   ENDIF(HAVE_C_FLAG_Wno_long_double)
 ENDIF(CMAKE_COMPILER_IS_GNUCC AND APPLE)
+
+IF(HAVE_SOCKLEN_T)
+  SET(CURL_TYPEOF_CURL_SOCKLEN_T "socklen_t")
+  CHECK_TYPE_SIZE("socklen_t" CURL_SIZEOF_CURL_SOCKLEN_T)
+ELSE()
+  SET(CURL_TYPEOF_CURL_SOCKLEN_T int)
+  SET(CURL_SIZEOF_CURL_SOCKLEN_T ${SIZEOF_INT})
+ENDIF()
 
 INCLUDE(CMake/OtherTests.cmake)
 
