@@ -2201,6 +2201,8 @@ dnl set variable for use in automakefile(s)
 AM_CONDITIONAL(USE_MANUAL, test x"$USE_MANUAL" = x1)
 
 aresembedded="unknown"
+configure_rundir=`pwd`
+embedded_ares_builddir="$configure_rundir/ares"
 AC_MSG_CHECKING([whether to enable c-ares])
 AC_ARG_ENABLE(ares,
 AC_HELP_STRING([--enable-ares=PATH],[Enable c-ares for name lookups])
@@ -2221,6 +2223,8 @@ AC_HELP_STRING([--disable-ares],[Disable c-ares for name lookups]),
        AC_SUBST(HAVE_ARES)
        curl_ares_msg="enabled"
 
+       LIBS="-lcares $LIBS"
+
        dnl For backwards compatibility default to includes/lib in srcdir/ares
        dnl If a value is specified it is assumed that the libs are in $val/lib
        dnl and the includes are in $val/include. This is the default setup for
@@ -2229,17 +2233,13 @@ AC_HELP_STRING([--disable-ares],[Disable c-ares for name lookups]),
          if test -d "$srcdir/ares"; then
             aresembedded="yes"
             AC_CONFIG_SUBDIRS(ares)
-            dnl This c-ares library is an uninstalled libtool archive, so
-            dnl we delegate all the linking magic on libtool and automake.
             dnl Since c-ares has installable configured header files, path
             dnl inclusion is fully done in makefiles for in-tree builds.
-         else
-           LIBS="-lcares $LIBS"
+            LDFLAGS="$LDFLAGS -L$embedded_ares_builddir"
          fi
        else
          CPPFLAGS="$CPPFLAGS -I$enableval/include"
          LDFLAGS="$LDFLAGS -L$enableval/lib"
-         LIBS="-lcares $LIBS"
        fi
 
        if test -z "$aresembedded"; then
