@@ -228,8 +228,6 @@ fi
 
 echo "buildconf: libtool version $lt_version (ok)"
 
-exit 0
-
 if test -f "$libtoolize"; then
   echo "buildconf: libtoolize found"
 else
