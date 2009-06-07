@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Stenberg (8 June 2009)
+- Eric Wong fixed --no-buffer to actually switch off output buffering. Been
+  broken since 7.19.0
+
 Yang Tse (5 Jun 2009)
 - John E. Malmberg provided VMS specific patch: "This fixes an existing bug
   in urlglob.c where it was not converting the Curl Unix exit code to a VMS

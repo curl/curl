@@ -23,6 +23,7 @@ This release includes the following bugfixes:
  o set Content-Length: with POST and PUT failed with NTLM auth
  o allow building libcurl for VxWorks
  o curl tool exit codes fixed for VMS
+ o --no-buffer treated correctly
 
 This release includes the following known bugs:
 
@@ -33,6 +34,6 @@ advice from friends like these:
 
  Yang Tse, Daniel Fandrich, Kamil Dudka, Caolan McNamara, Frank McGeough,
  Andre Guibert de Bruet, Mike Crowe, Claes Jakobsson, John E. Malmberg,
- Aaron Oneal, Igor Novoseltsev
+ Aaron Oneal, Igor Novoseltsev, Eric Wong
 
         Thanks! (and sorry if I forgot to mention someone)
