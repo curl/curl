@@ -91,9 +91,7 @@ if NO_UNDEFINED
 UNDEF = -no-undefined
 endif
 
-if DONT_SKIP_THE_EXPORT_SYMBOLS_REGEX
-EXPORT_SYMBOLS = -export-symbols-regex '^ares_[[:alnum:]].*'
-endif
+# EXPORT_SYMBOLS = -export-symbols-regex '^ares_[[:alnum:]].*'
 
 libcares_la_LDFLAGS = $(UNDEF) $(VER) $(EXPORT_SYMBOLS)
 
