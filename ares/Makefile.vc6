@@ -12,8 +12,8 @@ USE_WATT32  = 0
 # Configurations:
 #  -MD   - msvcrt.dll,  threads, release (normal)
 #  -MDd  - msvcrtd.dll, threads, debug
-#  -ML   - libc, no threads,     release
-#  -MLd  - libc, no threads,     debug
+#  -ML   - libc, no threads,     release (not available on VC-2008+)
+#  -MLd  - libc, no threads,     debug   (not available on VC-2008+)
 #  -MT   - libc, threads,        release
 #  -MTd  - libc, threads,        debug
 
@@ -26,7 +26,7 @@ OBJ_DIR  = VC6_obj
 DEF_FILE = cares.def
 
 !if "$(USE_WATT32)" == "1"
-CFLAGS  = $(CFLAGS) -UWIN32 -DWATT32 -D_USE_32BIT_TIME_T -I$(WATT_ROOT)\inc
+CFLAGS  = $(CFLAGS) -UWIN32 -DWATT32 -I$(WATT_ROOT)\inc
 EX_LIBS = $(WATT_ROOT)\lib\wattcpvc_imp.lib
 
 !else
