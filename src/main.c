@@ -2636,7 +2636,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     case 'N':
       /* disable the output I/O buffering. note that the option is called
          --buffer but is mostly used in the negative form: --no-buffer */
-      config->nobuffer = (bool)(longopt ? !toggle : toggle);
+      if(longopt)
+        config->nobuffer = !toggle;
+      else
+        config->nobuffer = toggle;
       break;
     case 'O': /* --remote-name */
       if(subletter == 'a') { /* --remote-name-all */
