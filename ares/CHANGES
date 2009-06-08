@@ -1,5 +1,9 @@
   Changelog for the c-ares project
 
+* June 8 2009 (Yang Tse)
+- Removed buildconf.bat from release and daily snapshot archives. This
+  file is only for CVS tree checkout builds.
+
 * May 26 2009 (Yang Tse)
 - Added --enable-curldebug configure option to enable and disable building
   with the low-level curl debug memory tracking 'feature' to allow decoupled

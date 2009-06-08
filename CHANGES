@@ -10,6 +10,9 @@ Yang Tse (8 Jun 2009)
 - Igor Novoseltsev adjusted Makefile.vxworks to get sources and headers
   included from Makefile.inc, and provided docs\INSTALL VxWorks section.
 
+  I removed buildconf.bat from release and daily snapshot archives. This
+  file is only for CVS tree checkout builds.
+
 Daniel Stenberg (8 June 2009)
 - Eric Wong fixed --no-buffer to actually switch off output buffering. Been
   broken since 7.19.0
