@@ -1,0 +1,7 @@
+
+CVS-INFO
+
+This file is only present in the CVS - never in release archives. It is used
+as a sentinel file in buildconf.bat in order to differentiate a CVS checkout
+from release and daily snapshot archives.
+
