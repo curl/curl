@@ -706,6 +706,32 @@ Symbian OS
    to obtain that first.
 
 
+VxWorks
+========
+   Build for VxWorks is performed using cross compilation.
+   That means you build on Windows machine using VxWorks tools and 
+   run the built image on the VxWorks device.
+   
+   To build libcurl for VxWorks you need:
+   
+      - CYGWIN (free, http://cygwin.com/)
+      - Wind River Workbench (commercial)
+
+   If you have CYGWIN and Workbench installed on you machine
+   follow after next steps:
+
+    1. Open the Command Prompt window and change directory ('cd')
+       to the libcurl 'lib' folder.
+    2. Add CYGWIN 'bin' folder to the PATH environment variable.
+       For example, type 'set PATH=C:/embedded/cygwin/bin;%PATH%'.
+    3. Adjust environment variables defined in 'Environment' section
+       of the Makefile.vxworks file to point to your software folders.
+    4. Build the libcurl by typing 'make -f ./Makefile.vxworks'
+   
+   As a result the libcurl.a library should be created in the 'lib' folder.   
+   To clean the build results type 'make -f ./Makefile.vxworks clean'.
+   
+
 CROSS COMPILE
 =============
    (This section was graciously brought to us by Jim Duey, with additions by
