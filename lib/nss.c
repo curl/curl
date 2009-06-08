@@ -786,7 +786,8 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
                                   struct CERTCertificateStr **pRetCert,
                                   struct SECKEYPrivateKeyStr **pRetKey)
 {
-  SECKEYPrivateKey *privKey;
+  SECKEYPrivateKey *privKey = NULL;
+  CERTCertificate *cert;
   struct ssl_connect_data *connssl = (struct ssl_connect_data *) arg;
   char *nickname = connssl->client_nickname;
   void *proto_win = NULL;
@@ -799,36 +800,32 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
   if(!nickname)
     return secStatus;
 
-  connssl->client_cert = PK11_FindCertFromNickname(nickname, proto_win);
-  if(connssl->client_cert) {
-
+  cert = PK11_FindCertFromNickname(nickname, proto_win);
+  if(cert) {
     if(!strncmp(nickname, "PEM Token", 9)) {
       CK_SLOT_ID slotID = 1; /* hardcoded for now */
       char slotname[SLOTSIZE];
       snprintf(slotname, SLOTSIZE, "PEM Token #%ld", slotID);
       slot = PK11_FindSlotByName(slotname);
-      privKey = PK11_FindPrivateKeyFromCert(slot, connssl->client_cert, NULL);
+      privKey = PK11_FindPrivateKeyFromCert(slot, cert, NULL);
       PK11_FreeSlot(slot);
       if(privKey) {
         secStatus = SECSuccess;
       }
     }
     else {
-      privKey = PK11_FindKeyByAnyCert(connssl->client_cert, proto_win);
+      privKey = PK11_FindKeyByAnyCert(cert, proto_win);
       if(privKey)
         secStatus = SECSuccess;
     }
   }
 
-  if(secStatus == SECSuccess) {
-    *pRetCert = connssl->client_cert;
-    *pRetKey = privKey;
-  }
-  else {
-    if(connssl->client_cert)
-      CERT_DestroyCertificate(connssl->client_cert);
-    connssl->client_cert = NULL;
-  }
+  *pRetCert = cert;
+  *pRetKey = privKey;
+  
+  /* There's no need to destroy either cert or privKey as 
+   * NSS will do that for us even if returning SECFailure
+   */
 
   return secStatus;
 }
@@ -912,8 +909,6 @@ void Curl_nss_close(struct connectdata *conn, int sockindex)
       free(connssl->client_nickname);
       connssl->client_nickname = NULL;
     }
-    if(connssl->client_cert)
-      CERT_DestroyCertificate(connssl->client_cert);
 #ifdef HAVE_PK11_CREATEGENERICOBJECT      
     if(connssl->key)
       (void)PK11_DestroyGenericObject(connssl->key);
@@ -957,7 +952,6 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   if (connssl->state == ssl_connection_complete)
     return CURLE_OK;
 
-  connssl->client_cert = NULL;
 #ifdef HAVE_PK11_CREATEGENERICOBJECT  
   connssl->cacert[0] = NULL;
   connssl->cacert[1] = NULL;

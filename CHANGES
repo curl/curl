@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel Stenberg (8 Jun 2009)
+- Claes Jakobsson provided a patch for libcurl-NSS that fixed a bad refcount
+  issue with client certs that caused issues like segfaults.
+  http://curl.haxx.se/mail/lib-2009-05/0316.html
+
 - Triggered by bug report #2798852 and the patch in there, I fixed configure
   to detect gnutls build options with pkg-config only and not libgnutls-config
   anymore since GnuTLS has stopped distributing that tool. If an explicit path

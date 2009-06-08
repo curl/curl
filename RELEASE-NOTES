@@ -18,7 +18,6 @@ This release includes the following bugfixes:
  o build fix for Symbian
  o CURLOPT_USERPWD set to NULL clears auth credentials
  o libcurl-NSS build fixes
- o libcurl-NSS build fix
  o configure script fixed for VMS
  o set Content-Length: with POST and PUT failed with NTLM auth
  o allow building libcurl for VxWorks
@@ -26,6 +25,7 @@ This release includes the following bugfixes:
  o --no-buffer treated correctly
  o djgpp build fix
  o configure detection of GnuTLS now based on pkg-config
+ o libcurl-NSS client cert handling segfaults
 
 This release includes the following known bugs:
 
