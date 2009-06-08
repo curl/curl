@@ -24,6 +24,7 @@ This release includes the following bugfixes:
  o allow building libcurl for VxWorks
  o curl tool exit codes fixed for VMS
  o --no-buffer treated correctly
+ o djgpp build fix
 
 This release includes the following known bugs:
 
