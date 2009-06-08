@@ -88,7 +88,7 @@ if test -z "$ac_version"; then
   echo "            You need autoconf version $need_autoconf or newer installed."
   exit 1
 fi
-IFS=.; set $ac_version; IFS=' '
+old_IFS=$IFS; IFS='.'; set $ac_version; IFS=$old_IFS
 if test "$1" = "2" -a "$2" -lt "57" || test "$1" -lt "2"; then
   echo "buildconf: autoconf version $ac_version found."
   echo "            You need autoconf version $need_autoconf or newer installed."
@@ -121,7 +121,7 @@ if test -z "$ah_version"; then
   echo "            You need autoheader version 2.50 or newer installed."
   exit 1
 fi
-IFS=.; set $ah_version; IFS=' '
+old_IFS=$IFS; IFS='.'; set $ah_version; IFS=$old_IFS
 if test "$1" = "2" -a "$2" -lt "50" || test "$1" -lt "2"; then
   echo "buildconf: autoheader version $ah_version found."
   echo "            You need autoheader version 2.50 or newer installed."
@@ -143,7 +143,7 @@ if test -z "$am_version"; then
   echo "            You need automake version $need_automake or newer installed."
   exit 1
 fi
-IFS=.; set $am_version; IFS=' '
+old_IFS=$IFS; IFS='.'; set $am_version; IFS=$old_IFS
 if test "$1" = "1" -a "$2" -lt "7" || test "$1" -lt "1"; then
   echo "buildconf: automake version $am_version found."
   echo "            You need automake version $need_automake or newer installed."
@@ -191,28 +191,28 @@ else
   libtoolize=`findtool $LIBTOOLIZE`
 fi
 
-lt_pversion=`$libtool --version 2>/dev/null|head -n 1|sed -e 's/^[^0-9]*//g' -e 's/[- ].*//'`
-if test -z "$lt_pversion"; then
+lt_pver=`$libtool --version 2>/dev/null|head -n 1`
+lt_qver=`echo $lt_pver|sed -e "s/([^)]*)//g" -e "s/^[^0-9]*//g"`
+lt_version=`echo $lt_qver|sed -e "s/[- ].*//" -e "s/\([a-z]*\)$//"`
+if test -z "$lt_version"; then
   echo "buildconf: libtool not found."
   echo "            You need libtool version $LIBTOOL_WANTED_VERSION or newer installed"
   exit 1
 fi
-lt_version=`echo $lt_pversion|sed -e 's/\([a-z]*\)$//'`
-IFS=.; set $lt_version; IFS=' '
+old_IFS=$IFS; IFS='.'; set $lt_version; IFS=$old_IFS
+lt_major=$1
+lt_minor=$2
+lt_patch=$3
 lt_status="good"
 
-major=$1
-minor=$2
-patch=$3
-
-if test "$major" = "$LIBTOOL_WANTED_MAJOR"; then
-   if test "$minor" -lt "$LIBTOOL_WANTED_MINOR"; then
+if test "$lt_major" = "$LIBTOOL_WANTED_MAJOR"; then
+   if test "$lt_minor" -lt "$LIBTOOL_WANTED_MINOR"; then
       lt_status="bad"
    elif test -n "$LIBTOOL_WANTED_PATCH"; then
-       if test "$minor" -gt "$LIBTOOL_WANTED_MINOR"; then
+       if test "$lt_minor" -gt "$LIBTOOL_WANTED_MINOR"; then
          lt_status="good"
-       elif test -n "$patch"; then
-          if test "$patch" -lt "$LIBTOOL_WANTED_PATCH"; then
+       elif test -n "$lt_patch"; then
+          if test "$lt_patch" -lt "$LIBTOOL_WANTED_PATCH"; then
              lt_status="bad"
           fi
        else
@@ -221,31 +221,12 @@ if test "$major" = "$LIBTOOL_WANTED_MAJOR"; then
    fi
 fi
 if test $lt_status != "good"; then
-  echo "buildconf: libtool version $lt_pversion found."
+  echo "buildconf: libtool version $lt_version found."
   echo "            You need libtool version $LIBTOOL_WANTED_VERSION or newer installed"
   exit 1
 fi
 
 echo "buildconf: libtool version $lt_version (ok)"
-
-dbg1=`$libtool --version 2>/dev/null|head -n 1`
-dbg2=`$libtool --version 2>/dev/null|head -n 1|sed -e "s/([^)]*)//g"`
-dbg3=`$libtool --version 2>/dev/null|head -n 1|sed -e "s/([^)]*)//g" -e "s/^[^0-9]*//g"`
-dbg4=`$libtool --version 2>/dev/null|head -n 1|sed -e "s/([^)]*)//g" -e "s/^[^0-9]*//g" -e "s/[- ].*//"`
-dbg5=`echo $dbg4|sed -e "s/\([a-z]*\)$//"`
-old_IFS=$IFS; IFS='.'; set $dbg5; IFS=$old_IFS
-dbg6=$1
-dbg7=$2
-dbg8=$3
-
-echo "dbg1 = $dbg1"
-echo "dbg2 = $dbg2"
-echo "dbg3 = $dbg3"
-echo "dbg4 = $dbg4"
-echo "dbg5 = $dbg5"
-echo "dbg6 = $dbg6"
-echo "dbg7 = $dbg7"
-echo "dbg8 = $dbg8"
 
 if test -f "$libtoolize"; then
   echo "buildconf: libtoolize found"
@@ -375,9 +356,6 @@ else
       ;;
   esac
   if test ! -z "$need_lt_check"; then
-    lt_major="$major"
-    lt_minor="$minor"
-    lt_patch="$patch"
     if test -z "$lt_major"; then
       lt_status="bad"
     elif test "$lt_major" -gt "$need_lt_major"; then
@@ -401,8 +379,8 @@ else
     fi
     if test "$lt_status" != "good"; then
       need_lt_version="$need_lt_major.$need_lt_minor.$need_lt_patch"
-      echo "buildconf: libtool version $lt_pversion found."
-      echo "            $buildhost requires libtool $need_lt_version or newer."
+      echo "buildconf: libtool version $lt_version found."
+      echo "            $buildhost requires libtool $need_lt_version or newer installed."
       rm -f configure
       exit 1
     fi
