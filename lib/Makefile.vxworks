@@ -13,6 +13,7 @@
 #                For example type 'set PATH=C:/embedded/cygwin/bin;%PATH%'
 #             4. Build the library by typing 'make -f ./Makefile.vxworks'
 #             As a result the libcurl.a should be created in the 'lib' folder.
+#             To clean package use 'make -f ./Makefile.vxworks clean'
 #Requirements:
 #             1. WinXP machine
 #             2. Full CYGWIN installation (open source) with GNU make version
@@ -126,13 +127,15 @@ endif
 # Directory to hold compilation intermediate files
 TMP_DIR := tmp
 
+# Get sources and headers to be compiled
+include Makefile.inc
+
 # List of headers
-INCLUDE_FILES := $(shell find . -name \*.h)
+INCLUDE_FILES := $(HHEADERS)
 INCLUDE_FILES += $(shell find ../include -name \*.h)
 
 # List of sources
-SOURCE  := $(shell find . -name \*.c)
-OBJLIST := $(SOURCE:%.c=$(TMP_DIR)/%$(OBJ_EXTENSION))
+OBJLIST := $(CSOURCES:%.c=$(TMP_DIR)/%$(OBJ_EXTENSION))
 
 
 # ----------------------------------------------------------------------
