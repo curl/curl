@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (8 Jun 2009)
+- Triggered by bug report #2798852 and the patch in there, I fixed configure
+  to detect gnutls build options with pkg-config only and not libgnutls-config
+  anymore since GnuTLS has stopped distributing that tool. If an explicit path
+  is given to configure, we will instead guess on how to link and use that
+  lib. I did not use the patch from the bug report.
+
 Yang Tse (8 Jun 2009)
 - Igor Novoseltsev adjusted Makefile.vxworks to get sources and headers
   included from Makefile.inc, and provided docs\INSTALL VxWorks section.
@@ -13,11 +20,11 @@ Yang Tse (8 Jun 2009)
   I removed buildconf.bat from release and daily snapshot archives. This
   file is only for CVS tree checkout builds.
 
-Daniel Stenberg (8 June 2009)
+Daniel Stenberg (8 Jun 2009)
 - Eric Wong fixed --no-buffer to actually switch off output buffering. Been
   broken since 7.19.0
 
-Bill Hoffman (6 June 2009)
+Bill Hoffman (6 Jun 2009)
 - Added some cmake docs and fixed socklen_t in the build.
 
 Yang Tse (5 Jun 2009)

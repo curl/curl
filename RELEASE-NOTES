@@ -25,6 +25,7 @@ This release includes the following bugfixes:
  o curl tool exit codes fixed for VMS
  o --no-buffer treated correctly
  o djgpp build fix
+ o configure detection of GnuTLS now based on pkg-config
 
 This release includes the following known bugs:
 

@@ -1554,25 +1554,8 @@ if test "$OPENSSL_ENABLED" != "1"; then
 
   if test X"$OPT_GNUTLS" != Xno; then
 
-    AC_MSG_NOTICE([OPT_GNUTLS is $OPT_GNUTLS])
-
     addld=""
     if test "x$OPT_GNUTLS" = "xyes"; then
-      check=`libgnutls-config --version 2>/dev/null`
-      if test -n "$check"; then
-        addlib=`libgnutls-config --libs`
-        addcflags=`libgnutls-config --cflags`
-        version=`libgnutls-config --version`
-        gtlslib=`libgnutls-config --prefix`/lib$libsuff
-      fi
-    else
-      addlib=`$OPT_GNUTLS/bin/libgnutls-config --libs`
-      addcflags=`$OPT_GNUTLS/bin/libgnutls-config --cflags`
-      version=`$OPT_GNUTLS/bin/libgnutls-config --version 2>/dev/null`
-      gtlslib=$OPT_GNUTLS/lib$libsuff
-    fi
-
-    if test -z "$version"; then
       CURL_CHECK_PKGCONFIG(gnutls)
 
       if test "$PKGCONFIG" != "no" ; then
@@ -1582,7 +1565,13 @@ if test "$OPENSSL_ENABLED" != "1"; then
         version=`$PKGCONFIG --modversion gnutls`
         gtlslib=`echo $addld | $SED -e 's/-L//'`
       fi
-
+    else
+      dnl without pkg-config, we guess a lot!
+      addlib=-lgnutls
+      addld=-L$OPT_GNUTLS/lib$libsuff
+      addcflags=-I$OPT_GNUTLS/include
+      version="" # we just don't know
+      gtlslib=$OPT_GNUTLS/lib$libsuff
     fi
 
     if test -z "$version"; then
