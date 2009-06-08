@@ -32,7 +32,7 @@ CMake/FindZLIB.cmake CMake/OtherTests.cmake CMake/Platforms/WindowsCache.cmake \
 CMake/Utilities.cmake include/curl/curlbuild.h.cmake
 
 EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in	\
- curl-style.el sample.emacs RELEASE-NOTES buildconf buildconf.bat	\
+ curl-style.el sample.emacs RELEASE-NOTES buildconf 	\
  libcurl.pc.in vc6curl.dsw MacOSX-Framework $(CMAKE_DIST)
 
 bin_SCRIPTS = curl-config
