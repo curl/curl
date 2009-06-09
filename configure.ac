@@ -41,6 +41,7 @@ AM_MAINTAINER_MODE
 CURL_CHECK_OPTION_DEBUG
 CURL_CHECK_OPTION_OPTIMIZE
 CURL_CHECK_OPTION_WARNINGS
+CURL_CHECK_OPTION_CURLDEBUG
 
 CURL_CHECK_PATH_SEPARATOR
 
@@ -155,8 +156,6 @@ AC_SYS_LARGEFILE
 dnl support building of Windows DLLs
 AC_LIBTOOL_WIN32_DLL
 
-CURL_PROCESS_DEBUG_BUILD_OPTS
-
 dnl force libtool to build static libraries with PIC on AMD64-Linux & FreeBSD
 AC_MSG_CHECKING([if arch-OS host is AMD64-Linux/FreeBSD (to build static libraries with PIC)])
 case $host in
@@ -171,18 +170,6 @@ esac
 
 dnl libtool setup
 AC_PROG_LIBTOOL
-
-AC_MSG_CHECKING([if we need -no-undefined])
-case $host in
-  *-*-cygwin* | *-*-mingw* | *-*-pw32* | *-*-cegcc*)
-    need_no_undefined=yes
-    ;;
-  *)
-    need_no_undefined=no
-    ;;
-esac
-AC_MSG_RESULT($need_no_undefined)
-AM_CONDITIONAL(NO_UNDEFINED, test x$need_no_undefined = xyes)
 
 AC_MSG_CHECKING([if we need -mimpure-text])
 mimpure=no
@@ -269,6 +256,12 @@ esac
 
 CURL_CHECK_COMPILER_HALT_ON_ERROR
 CURL_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE
+
+CURL_CHECK_NO_UNDEFINED
+AM_CONDITIONAL(NO_UNDEFINED, test x$need_no_undefined = xyes)
+
+CURL_CHECK_CURLDEBUG
+AM_CONDITIONAL(CURLDEBUG, test x$want_curldebug = xyes)
 
 dnl **********************************************************************
 dnl Compilation based checks should not be done before this point.
@@ -2520,7 +2513,8 @@ squeeze CURL_LIBS
 squeeze LIBCURL_LIBS
 squeeze TEST_SERVER_LIBS
 
-if test "x$want_debug" = "xyes" && test "x$HAVE_ARES" = "x1"; then
+if test "x$want_curldebug_assumed" = "xyes" &&
+  test "x$want_curldebug" = "xyes" && test "x$HAVE_ARES" = "x1"; then
   ac_configure_args="$ac_configure_args --enable-curldebug"
 fi
 

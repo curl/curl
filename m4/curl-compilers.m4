@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 51
+# serial 52
 
 
 dnl CURL_CHECK_COMPILER
@@ -1076,22 +1076,82 @@ squeeze() {
 ])
 
 
-dnl CURL_PROCESS_DEBUG_BUILD_OPTS
+dnl CURL_CHECK_CURLDEBUG
 dnl -------------------------------------------------
-dnl Settings which depend on configure's debug given
-dnl option, and further configure the build process.
-dnl Don't use this macro for compiler dependant stuff.
+dnl Settings which depend on configure's curldebug given
+dnl option, and other additional configure pre-requisites.
+dnl Actually the curl debug memory tracking feature can
+dnl only be used/enabled when libcurl is built as a static
+dnl library or as a shared one on those systems on which
+dnl shared libraries support undefined symbols.
 
-AC_DEFUN([CURL_PROCESS_DEBUG_BUILD_OPTS], [
-  AC_REQUIRE([CURL_CHECK_OPTION_DEBUG])dnl
+AC_DEFUN([CURL_CHECK_CURLDEBUG], [
   AC_REQUIRE([CURL_SHFUNC_SQUEEZE])dnl
-  AC_BEFORE([$0],[AC_PROG_LIBTOOL])dnl
+  supports_curldebug="unknown"
+  if test "$want_curldebug" = "yes"; then
+    if test "x$enable_shared" != "xno" &&
+      test "x$enable_shared" != "xyes"; then
+      AC_MSG_WARN([unknown enable_shared setting.])
+      supports_curldebug="no"
+    fi
+    if test "x$enable_static" != "xno" &&
+      test "x$enable_static" != "xyes"; then
+      AC_MSG_WARN([unknown enable_static setting.])
+      supports_curldebug="no"
+    fi
+    if test "$supports_curldebug" != "no"; then
+      if test "$enable_shared" = "yes" &&
+        test "$need_no_undefined" = "yes"; then
+        supports_curldebug="no"
+        AC_MSG_WARN([shared library does not support undefined symbols.])
+      fi
+    fi
+  fi
   #
-  if test "$want_debug" = "yes"; then
+  if test "$want_curldebug" = "yes"; then
+    AC_MSG_CHECKING([if curl debug memory tracking can be enabled])
+    test "$supports_curldebug" = "no" || supports_curldebug="yes"
+    AC_MSG_RESULT([$supports_curldebug])
+    if test "$supports_curldebug" = "no"; then
+      AC_MSG_WARN([cannot enable curl debug memory tracking.])
+      want_curldebug="no"
+    fi
+  fi
+  #
+  if test "$want_curldebug" = "yes"; then
     CPPFLAGS="$CPPFLAGS -DCURLDEBUG"
     squeeze CPPFLAGS
   fi
-  #
+  if test "$want_debug" = "yes"; then
+    CPPFLAGS="$CPPFLAGS -DDEBUGBUILD"
+    squeeze CPPFLAGS
+  fi
+])
+
+
+dnl CURL_CHECK_NO_UNDEFINED
+dnl -------------------------------------------------
+dnl Checks if the -no-undefined flag must be used when
+dnl building shared libraries. This is required on all
+dnl systems on which shared libraries should not have
+dnl references to undefined symbols. This check should
+dnl not be done before AC-PROG-LIBTOOL.
+
+AC_DEFUN([CURL_CHECK_NO_UNDEFINED], [
+  AC_BEFORE([$0],[CURL_CHECK_CURLDEBUG])dnl
+  AC_MSG_CHECKING([if shared libraries need -no-undefined])
+  need_no_undefined="no"
+  case $host in
+    *-*-cygwin* | *-*-mingw* | *-*-pw32* | *-*-cegcc* | *-*-aix*)
+      need_no_undefined="yes"
+      ;;
+  esac
+  if test "x$allow_undefined" = "xno"; then
+    need_no_undefined="yes"
+  elif test "x$allow_undefined_flag" = "xunsupported"; then
+    need_no_undefined="yes"
+  fi
+  AC_MSG_RESULT($need_no_undefined)
 ])
 
 
