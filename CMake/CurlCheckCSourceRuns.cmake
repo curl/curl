@@ -12,43 +12,43 @@
 #  CMAKE_REQUIRED_INCLUDES = list of include directories
 #  CMAKE_REQUIRED_LIBRARIES = list of libraries to link
 
-MACRO(CURL_CHECK_C_SOURCE_RUNS SOURCE VAR)
-  IF("${VAR}" MATCHES "^${VAR}$" OR "${VAR}" MATCHES "UNKNOWN")
-    SET(message "${VAR}")
+macro(CURL_CHECK_C_SOURCE_RUNS SOURCE VAR)
+  if("${VAR}" MATCHES "^${VAR}$" OR "${VAR}" MATCHES "UNKNOWN")
+    set(message "${VAR}")
     # If the number of arguments is greater than 2 (SOURCE VAR)
-    IF(${ARGC} GREATER 2)
+    if(${ARGC} GREATER 2)
       # then add the third argument as a message
-      SET(message "${ARGV2} (${VAR})")
-    ENDIF(${ARGC} GREATER 2)
-    SET(MACRO_CHECK_FUNCTION_DEFINITIONS
+      set(message "${ARGV2} (${VAR})")
+    endif(${ARGC} GREATER 2)
+    set(MACRO_CHECK_FUNCTION_DEFINITIONS
       "-D${VAR} ${CMAKE_REQUIRED_FLAGS}")
-    IF(CMAKE_REQUIRED_LIBRARIES)
-      SET(CURL_CHECK_C_SOURCE_COMPILES_ADD_LIBRARIES
+    if(CMAKE_REQUIRED_LIBRARIES)
+      set(CURL_CHECK_C_SOURCE_COMPILES_ADD_LIBRARIES
         "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
-    ELSE(CMAKE_REQUIRED_LIBRARIES)
-      SET(CURL_CHECK_C_SOURCE_COMPILES_ADD_LIBRARIES)
-    ENDIF(CMAKE_REQUIRED_LIBRARIES)
-    IF(CMAKE_REQUIRED_INCLUDES)
-      SET(CURL_CHECK_C_SOURCE_COMPILES_ADD_INCLUDES
+    else(CMAKE_REQUIRED_LIBRARIES)
+      set(CURL_CHECK_C_SOURCE_COMPILES_ADD_LIBRARIES)
+    endif(CMAKE_REQUIRED_LIBRARIES)
+    if(CMAKE_REQUIRED_INCLUDES)
+      set(CURL_CHECK_C_SOURCE_COMPILES_ADD_INCLUDES
         "-DINCLUDE_DIRECTORIES:STRING=${CMAKE_REQUIRED_INCLUDES}")
-    ELSE(CMAKE_REQUIRED_INCLUDES)
-      SET(CURL_CHECK_C_SOURCE_COMPILES_ADD_INCLUDES)
-    ENDIF(CMAKE_REQUIRED_INCLUDES)
-    SET(src "")
-    FOREACH(def ${EXTRA_DEFINES})
-      SET(src "${src}#define ${def} 1\n")
-    ENDFOREACH(def)
-    FOREACH(inc ${HEADER_INCLUDES})
-      SET(src "${src}#include <${inc}>\n")
-    ENDFOREACH(inc)
+    else(CMAKE_REQUIRED_INCLUDES)
+      set(CURL_CHECK_C_SOURCE_COMPILES_ADD_INCLUDES)
+    endif(CMAKE_REQUIRED_INCLUDES)
+    set(src "")
+    foreach(def ${EXTRA_DEFINES})
+      set(src "${src}#define ${def} 1\n")
+    endforeach(def)
+    foreach(inc ${HEADER_INCLUDES})
+      set(src "${src}#include <${inc}>\n")
+    endforeach(inc)
 
-    SET(src "${src}\nint main() { ${SOURCE} ; return 0; }")
-    SET(CMAKE_CONFIGURABLE_FILE_CONTENT "${src}")
-    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/CMake/CMakeConfigurableFile.in
+    set(src "${src}\nint main() { ${SOURCE} ; return 0; }")
+    set(CMAKE_CONFIGURABLE_FILE_CONTENT "${src}")
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/CMake/CMakeConfigurableFile.in
       "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.c"
       IMMEDIATE)
-    MESSAGE(STATUS "Performing Test ${message}")
-    TRY_RUN(${VAR} ${VAR}_COMPILED
+    message(STATUS "Performing Test ${message}")
+    try_run(${VAR} ${VAR}_COMPILED
       ${CMAKE_BINARY_DIR}
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.c
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
@@ -57,27 +57,27 @@ MACRO(CURL_CHECK_C_SOURCE_RUNS SOURCE VAR)
       "${CURL_CHECK_C_SOURCE_COMPILES_ADD_INCLUDES}"
       OUTPUT_VARIABLE OUTPUT)
     # if it did not compile make the return value fail code of 1
-    IF(NOT ${VAR}_COMPILED)
-      SET(${VAR} 1)
-    ENDIF(NOT ${VAR}_COMPILED)
+    if(NOT ${VAR}_COMPILED)
+      set(${VAR} 1)
+    endif(NOT ${VAR}_COMPILED)
     # if the return value was 0 then it worked
-    SET(result_var ${${VAR}})
-    IF("${result_var}" EQUAL 0)
-      SET(${VAR} 1 CACHE INTERNAL "Test ${message}")
-      MESSAGE(STATUS "Performing Test ${message} - Success")
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+    set(result_var ${${VAR}})
+    if("${result_var}" EQUAL 0)
+      set(${VAR} 1 CACHE INTERNAL "Test ${message}")
+      message(STATUS "Performing Test ${message} - Success")
+      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Performing C SOURCE FILE Test ${message} succeded with the following output:\n"
         "${OUTPUT}\n"
         "Return value: ${${VAR}}\n"
         "Source file was:\n${src}\n")
-    ELSE("${result_var}" EQUAL 0)
-      MESSAGE(STATUS "Performing Test ${message} - Failed")
-      SET(${VAR} "" CACHE INTERNAL "Test ${message}")
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+    else("${result_var}" EQUAL 0)
+      message(STATUS "Performing Test ${message} - Failed")
+      set(${VAR} "" CACHE INTERNAL "Test ${message}")
+      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Performing C SOURCE FILE Test ${message} failed with the following output:\n"
         "${OUTPUT}\n"
         "Return value: ${result_var}\n"
         "Source file was:\n${src}\n")
-    ENDIF("${result_var}" EQUAL 0)
-  ENDIF("${VAR}" MATCHES "^${VAR}$" OR "${VAR}" MATCHES "UNKNOWN")
-ENDMACRO(CURL_CHECK_C_SOURCE_RUNS)
+    endif("${result_var}" EQUAL 0)
+  endif("${VAR}" MATCHES "^${VAR}$" OR "${VAR}" MATCHES "UNKNOWN")
+endmacro(CURL_CHECK_C_SOURCE_RUNS)

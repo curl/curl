@@ -1,2 +1,2 @@
-ADD_SUBDIRECTORY(libtest)
-ADD_SUBDIRECTORY(server)
+add_subdirectory(libtest)
+add_subdirectory(server)
