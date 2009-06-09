@@ -1,4 +1,4 @@
-Updated: Feb 23, 2009 (http://curl.haxx.se/docs/faq.html)
+Updated: Jun 9, 2009 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -19,6 +19,7 @@ FAQ
   1.9 Where do I buy commercial support for curl?
   1.10 How many are using curl?
   1.11 Why don't you update ca-bundle.crt
+  1.12 I have a problem who can I chat with?
 
  2. Install Related Problems
   2.1 configure doesn't find OpenSSL even when it is installed
@@ -88,6 +89,7 @@ FAQ
   5.12 Can I make libcurl fake or hide my real IP address?
   5.13 How do I stop an ongoing transfer?
   5.14 Using C++ non-static functions for callbacks?
+  5.15 How do I get an FTP directory listing? 
 
  6. License Issues
   6.1 I have a GPL program, can I use the libcurl library?
@@ -343,6 +345,12 @@ FAQ
   uses, we recommend that you extract the collection yourself from Mozilla
   Firefox (by running 'make ca-bundle), or by using our online service setup
   for this purpose: http://curl.haxx.se/docs/caextract.html
+
+  1.12 I have a problem who can I chat with?
+
+  There's a bunch of friendly people hanging out in the #curl channel on the
+  IRC network irc.freenode.net. If you're polite and nice, chances are big
+  that you can get -- or provide -- help instantly.
 
 
 2. Install Related Problems
@@ -1122,6 +1130,27 @@ FAQ
      // This is how you pass pointer to the static function:
      curl_easy_setopt(hcurl, CURLOPT_WRITEFUNCTION, YourClass:staticFunction);
      curl_easy_setopt(hcurl, CURLOPT_WRITEDATA, this);
+
+  5.15 How do I get an FTP directory listing? 
+
+  If you end the FTP URL you request with a slash, libcurl will provide you
+  with a directory listing of that given directory. You can also set
+  CURLOPT_CUSTOMREQUEST to alter what exact listing command libcurl would use
+  to list the files.
+
+  The follow-up question that tend to follow the previous one, is how a
+  program is supposed to parse the directory listing. How does it know what's
+  a file and what's a dir and what's a symlink etc. The harsh reality is that
+  FTP provides no such fine and easy-to-parse output. The output format FTP
+  servers respond to LIST commands are entirely at the server's own liking and
+  the NLST output doesn't reveal any types and in many cases don't even
+  include all the directory entries. Also, both LIST and NLST tend to hide
+  unix-style hidden files (those that start with a dot) by default so you need
+  to do "LIST -a" or similar to see them.
+
+  The application thus needs to parse the LIST output. One such existing
+  list parser is available at http://cr.yp.to/ftpparse.html
+
 
 6. License Issues
 
