@@ -2637,7 +2637,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       /* disable the output I/O buffering. note that the option is called
          --buffer but is mostly used in the negative form: --no-buffer */
       if(longopt)
-        config->nobuffer = !toggle;
+        config->nobuffer = (bool)(!toggle);
       else
         config->nobuffer = toggle;
       break;
