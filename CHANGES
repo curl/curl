@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Yang Tse (9 Jun 2009)
+- Daniel Steinberg pointed out that Curl_FormInit() in formdata.c was not
+  initializing the fread callback pointer and this triggered a compiler
+  warning, also provided a friendly suggestion on how to fix it.
+
 Daniel Stenberg (8 Jun 2009)
 - Claes Jakobsson provided a patch for libcurl-NSS that fixed a bad refcount
   issue with client certs that caused issues like segfaults.
@@ -21,7 +26,7 @@ Yang Tse (8 Jun 2009)
 - Igor Novoseltsev adjusted Makefile.vxworks to get sources and headers
   included from Makefile.inc, and provided docs\INSTALL VxWorks section.
 
-  I removed buildconf.bat from release and daily snapshot archives. This
+- I removed buildconf.bat from release and daily snapshot archives. This
   file is only for CVS tree checkout builds.
 
 Daniel Stenberg (8 Jun 2009)
