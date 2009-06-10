@@ -13,7 +13,9 @@
 #ifdef WIN32
 #  include <io.h>
 #else
-#  ifndef __VMS
+#  ifdef __VMS
+     typedef int intptr_t;
+#  else
 #    include <stdint.h>
 #  endif
 #  include <unistd.h>
