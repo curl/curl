@@ -182,7 +182,7 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
           *strategy++ = (char)0;
           nthdef = strchr(strategy, ':');
           if(nthdef) {
-            *nthdef++ = (char)0;
+            *nthdef = (char)0;
           }
         }
       }
@@ -238,7 +238,7 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
         *database++ = (char)0;
         nthdef = strchr(database, ':');
         if(nthdef) {
-          *nthdef++ = (char)0;
+          *nthdef = (char)0;
         }
       }
     }

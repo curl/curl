@@ -405,7 +405,7 @@ Curl_cookie_add(struct SessionHandle *data,
       }
 
       ptr=semiptr+1;
-      while(ptr && *ptr && ISBLANK(*ptr))
+      while(*ptr && ISBLANK(*ptr))
         ptr++;
       semiptr=strchr(ptr, ';'); /* now, find the next semicolon */
 

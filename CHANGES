@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Stenberg (10 Jun 2009)
+- Fabian Keil ran clang on the (lib)curl code, found a bunch of warnings and
+  contributed a range of patches to fix them.
+
 Yang Tse (9 Jun 2009)
 - Daniel Steinberg pointed out that Curl_FormInit() in formdata.c was not
   initializing the fread callback pointer and this triggered a compiler

@@ -3489,7 +3489,6 @@ static bool check_noproxy(const char* name, const char* no_proxy)
     else
       namelen = strlen(name);
 
-    tok_start = 0;
     for (tok_start = 0; tok_start < no_proxy_len; tok_start = tok_end + 1) {
       while (tok_start < no_proxy_len &&
              strchr(separator, no_proxy[tok_start]) != NULL) {

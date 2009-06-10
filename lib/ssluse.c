@@ -857,7 +857,6 @@ int Curl_ossl_shutdown(struct connectdata *conn, int sockindex)
         /* timeout */
         failf(data, "SSL shutdown timeout");
         done = 1;
-        break;
       }
       else {
         /* anything that gets here is fatally bad */
@@ -2272,7 +2271,6 @@ ossl_connect_common(struct connectdata *conn,
       return retcode;
   }
 
-  timeout_ms = 0;
   while(ssl_connect_2 == connssl->connecting_state ||
         ssl_connect_2_reading == connssl->connecting_state ||
         ssl_connect_2_writing == connssl->connecting_state) {

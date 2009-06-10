@@ -1417,10 +1417,9 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
     /* if timeout is requested, find out how much remaining time we have */
     check = timeout - /* timeout time */
       Curl_tvdiff(Curl_tvnow(), conn->now); /* spent time */
-    if(check <=0 ) {
+    if(check <= 0) {
       failf(data, "Proxy CONNECT aborted due to timeout");
-      error = SELECT_TIMEOUT; /* already too little time */
-      break;
+      return CURLE_RECV_ERROR;
     }
 
     /* if we're in multi-mode and we would block, return instead for a retry */

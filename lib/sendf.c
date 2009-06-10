@@ -133,12 +133,11 @@ static size_t convert_lineends(struct SessionHandle *data,
         *outPtr = *inPtr;
       }
       outPtr++;
-      inPtr++;
     }
-    if(outPtr < startPtr+size) {
+    if(outPtr < startPtr+size)
       /* tidy up by null terminating the now shorter data */
       *outPtr = '\0';
-    }
+
     return(outPtr - startPtr);
   }
   return(size);

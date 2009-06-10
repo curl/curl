@@ -345,7 +345,6 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         conn->trailer[conn->trlPos]=0;
         if(conn->trlPos==2) {
           ch->state = CHUNK_STOP;
-          datap++;
           length--;
 
           /*
@@ -400,7 +399,6 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
 
     case CHUNK_STOP:
       if(*datap == 0x0a) {
-        datap++;
         length--;
 
         /* Record the length of any data left in the end of the buffer
