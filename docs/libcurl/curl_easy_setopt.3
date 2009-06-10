@@ -282,6 +282,13 @@ NULL, the function used to accept response data will be used instead. That is,
 it will be the function specified with \fICURLOPT_WRITEFUNCTION\fP, or if it
 is not specified or NULL - the default, stream-writing function.
 
+It's important to note that the callback will be invoked for the headers of
+all responses received after initiating a request and not just the final
+response. This includes all responses which occur during authentication
+negotiation. If you need to operate on only the headers from the final
+response, you will need to collect headers in the callback yourself and use
+HTTP status lines, for example, to delimit response boundaries.
+
 Since 7.14.1: When a server sends a chunked encoded transfer, it may contain a
 trailer. That trailer is identical to a HTTP header and if such a trailer is
 received it is passed to the application using this callback as well. There
