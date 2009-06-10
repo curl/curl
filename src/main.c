@@ -114,10 +114,6 @@
 #include <netinet/tcp.h> /* for TCP_KEEPIDLE, TCP_KEEPINTVL */
 #endif
 
-#ifdef __VMS
-#  include "curlmsg_vms.h"
-#endif
-
 #include "os-specific.h"
 
 /* The last #include file should be: */
@@ -129,6 +125,10 @@
    the library level code from this client-side is ugly, but we do this
    anyway for convenience. */
 #include "memdebug.h"
+#endif
+
+#ifdef __VMS
+static int vms_show = 0;
 #endif
 
 #if defined(NETWARE)

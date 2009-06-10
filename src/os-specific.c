@@ -24,10 +24,6 @@
 
 #include <curl/curl.h>
 
-#ifdef __VMS
-#  include "curlmsg_vms.h"
-#endif
-
 #define ENABLE_CURLX_PRINTF
 #include "curlx.h"
 
@@ -39,7 +35,12 @@
 
 #ifdef __VMS
 
-int vms_shell = -1;
+#include "curlmsg_vms.h"
+
+void decc$__posix_exit(int __status);
+void decc$exit(int __status);
+
+static int vms_shell = -1;
 
 /* VMS has a DCL shell and and also has Unix shells ported to it.
  * When curl is running under a Unix shell, we want it to be as much

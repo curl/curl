@@ -1,5 +1,7 @@
-/* $Id$                                                                     */
+/* $Id$ */
+/*                                                                          */
 /* CURLMSG_VMS.H                                                            */
+/*                                                                          */
 /* This defines the necessary bits to change CURLE_* error codes to VMS     */
 /* style error codes.  CURLMSG.H is built from CURLMSG.SDL which is built   */
 /* from CURLMSG.MSG.  The vms_cond array is used to return VMS errors by    */
@@ -7,23 +9,24 @@
 /*                                                                          */
 /* If you update CURLMSG.MSG make sure to update this file to match.        */
 /*                                                                          */
+
 #include "curlmsg.h"
-int       vms_show = 0;
+
 /*
 #define   FAC_CURL      0xC01
 #define   FAC_SYSTEM    0
 #define   MSG_NORMAL    0
 */
-#define   VMS_STS(c,f,e,s) (((c&0xF)<<28)|((f&0xFFF)<<16)|((e&0x1FFF)<3)|(s&7))
-#define   VMSSTS_HIDE   VMS_STS(1,0,0,0)
+
 /*
 #define   SEV_WARNING   0
 #define   SEV_SUCCESS   1
 #define   SEV_ERROR     2
-#define   SEV_INFO      3   
+#define   SEV_INFO      3
 #define   SEV_FATAL     4
 */
-long vms_cond[] = 
+
+static const long vms_cond[] =
         {
         CURL_OK,
 	CURL_UNSUPPORTED_PROTOCOL,
