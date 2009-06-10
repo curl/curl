@@ -301,7 +301,7 @@ static LIBSSH2_FREE_FUNC(libssh2_free)
 /* This is the ONLY way to change SSH state! */
 static void state(struct connectdata *conn, sshstate nowstate)
 {
-#if defined(CURLDEBUG) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   /* for debug purposes */
   static const char * const names[] = {
     "SSH_STOP",
@@ -358,7 +358,7 @@ static void state(struct connectdata *conn, sshstate nowstate)
 #endif
   struct ssh_conn *sshc = &conn->proto.sshc;
 
-#if defined(CURLDEBUG) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   if(sshc->state != nowstate) {
     infof(conn->data, "SFTP %p state change from %s to %s\n",
           sshc, names[sshc->state], names[nowstate]);

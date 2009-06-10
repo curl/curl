@@ -727,7 +727,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
 static void state(struct connectdata *conn,
                   ftpstate newstate)
 {
-#if defined(CURLDEBUG) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   /* for debug purposes */
   static const char * const names[]={
     "STOP",
@@ -765,7 +765,7 @@ static void state(struct connectdata *conn,
   };
 #endif
   struct ftp_conn *ftpc = &conn->proto.ftpc;
-#if defined(CURLDEBUG) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   if(ftpc->state != newstate)
     infof(conn->data, "FTP %p state change from %s to %s\n",
           ftpc, names[ftpc->state], names[newstate]);

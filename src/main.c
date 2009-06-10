@@ -2857,6 +2857,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         static const struct feat feats[] = {
           {"AsynchDNS", CURL_VERSION_ASYNCHDNS},
           {"Debug", CURL_VERSION_DEBUG},
+          {"TrackMemory", CURL_VERSION_CURLDEBUG},
           {"GSS-Negotiate", CURL_VERSION_GSSNEGOTIATE},
           {"IDN", CURL_VERSION_IDN},
           {"IPv6", CURL_VERSION_IPV6},

@@ -386,7 +386,7 @@ static void read_rewind(struct connectdata *conn,
   conn->read_pos -= thismuch;
   conn->bits.stream_was_rewound = TRUE;
 
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
   {
     char buf[512 + 1];
     size_t show;

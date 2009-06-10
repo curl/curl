@@ -188,8 +188,11 @@ static curl_version_info_data version_info = {
 #ifdef HAVE_GSSAPI
   | CURL_VERSION_GSSNEGOTIATE
 #endif
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
   | CURL_VERSION_DEBUG
+#endif
+#ifdef CURLDEBUG
+  | CURL_VERSION_CURLDEBUG
 #endif
 #ifdef USE_ARES
   | CURL_VERSION_ASYNCHDNS

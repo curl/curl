@@ -197,7 +197,7 @@ static void moveHandleFromSendToRecvPipeline(struct SessionHandle *habdle,
 static bool isHandleAtHead(struct SessionHandle *handle,
                            struct curl_llist *pipeline);
 
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
 static const char * const statename[]={
   "INIT",
   "CONNECT",
@@ -221,7 +221,7 @@ static const char * const statename[]={
 /* always use this function to change state, to make debugging easier */
 static void multistate(struct Curl_one_easy *easy, CURLMstate state)
 {
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
   long connectindex = -5000;
 #endif
   CURLMstate oldstate = easy->state;
@@ -232,7 +232,7 @@ static void multistate(struct Curl_one_easy *easy, CURLMstate state)
 
   easy->state = state;
 
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
   if(easy->state > CURLM_STATE_CONNECT &&
      easy->state < CURLM_STATE_COMPLETED)
     connectindex = easy->easy_conn->connectindex;
@@ -1117,7 +1117,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
     case CURLM_STATE_WAITDO:
       /* Wait for our turn to DO when we're pipelining requests */
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
       infof(easy->easy_handle, "Conn %d send pipe %d inuse %d athead %d\n",
             easy->easy_conn->connectindex,
             easy->easy_conn->send_pipe->size,
@@ -1253,7 +1253,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         multistate(easy, CURLM_STATE_PERFORM);
         result = CURLM_CALL_MULTI_PERFORM;
       }
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
       else {
         infof(easy->easy_handle, "Conn %d recv pipe %d inuse %d athead %d\n",
               easy->easy_conn->connectindex,
@@ -2353,7 +2353,7 @@ static void add_closure(struct Curl_multi *multi,
 
 }
 
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
 void Curl_multi_dump(const struct Curl_multi *multi_handle)
 {
   struct Curl_multi *multi=(struct Curl_multi *)multi_handle;

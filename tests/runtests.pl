@@ -152,8 +152,8 @@ my $SOCKSPIDFILE=".socks.pid";
 my $perl="perl -I$srcdir";
 my $server_response_maxtime=13;
 
-# this gets set if curl is compiled with debugging:
-my $curl_debug=0;
+my $debug_build=0; # curl built with --enable-debug
+my $curl_debug=0;  # curl built with --enable-curldebug (memory tracking)
 my $libtool;
 
 # name of the file that the memory debugging creates:
@@ -1554,9 +1554,13 @@ sub checksystem {
         }
         elsif($_ =~ /^Features: (.*)/i) {
             $feat = $1;
-            if($feat =~ /debug/i) {
-                # debug is a listed "feature", use that knowledge
+            if($feat =~ /TrackMemory/i) {
+                # curl was built with --enable-curldebug (memory tracking)
                 $curl_debug = 1;
+            }
+            if($feat =~ /debug/i) {
+                # curl was built with --enable-debug
+                $debug_build = 1;
                 # set the NETRC debug env
                 $ENV{'CURL_DEBUG_NETRC'} = "$LOGDIR/netrc";
             }
@@ -1639,7 +1643,7 @@ sub checksystem {
     }
 
     if(!$curl_debug && $torture) {
-        die "can't run torture tests since curl was not build with debug";
+        die "can't run torture tests since curl was not built with curldebug";
     }
 
     # curl doesn't list cryptographic support separately, so assume it's
@@ -1658,7 +1662,8 @@ sub checksystem {
 
     logmsg sprintf("* Server SSL:     %s\n", $stunnel?"ON":"OFF");
     logmsg sprintf("* libcurl SSL:    %s\n", $ssl_version?"ON":"OFF");
-    logmsg sprintf("* libcurl debug:  %s\n", $curl_debug?"ON":"OFF");
+    logmsg sprintf("* debug build:    %s\n", $debug_build?"ON":"OFF");
+    logmsg sprintf("* track memory:   %s\n", $curl_debug?"ON":"OFF");
     logmsg sprintf("* valgrind:       %s\n", $valgrind?"ON":"OFF");
     logmsg sprintf("* HTTP IPv6       %s\n", $http_ipv6?"ON":"OFF");
     logmsg sprintf("* FTP IPv6        %s\n", $ftp_ipv6?"ON":"OFF");
@@ -1795,7 +1800,7 @@ sub singletest {
             }
         }
         elsif($f eq "netrc_debug") {
-            if($curl_debug) {
+            if($debug_build) {
                 next;
             }
         }

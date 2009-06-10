@@ -1786,8 +1786,8 @@ typedef struct {
 #define CURL_VERSION_LARGEFILE (1<<9)  /* supports files bigger than 2GB */
 #define CURL_VERSION_IDN       (1<<10) /* International Domain Names support */
 #define CURL_VERSION_SSPI      (1<<11) /* SSPI is supported */
-#define CURL_VERSION_CONV      (1<<12) /* character conversions are
-                                          supported */
+#define CURL_VERSION_CONV      (1<<12) /* character conversions supported */
+#define CURL_VERSION_CURLDEBUG (1<<13) /* debug memory tracking supported */
 
 /*
  * NAME curl_version_info()

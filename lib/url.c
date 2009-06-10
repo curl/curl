@@ -380,7 +380,7 @@ CURLcode Curl_close(struct SessionHandle *data)
 {
   struct Curl_multi *m = data->multi;
 
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
   /* only for debugging, scan through all connections and see if there's a
      pipe reference still identifying this handle */
 
@@ -2310,7 +2310,7 @@ CURLcode Curl_disconnect(struct connectdata *conn)
     return CURLE_OK;
   }
 
-#if defined(CURLDEBUG) && defined(AGGRESIVE_TEST)
+#if defined(DEBUGBUILD) && defined(AGGRESIVE_TEST)
   /* scan for DNS cache entries still marked as in use */
   Curl_hash_apply(data->hostcache,
                   NULL, Curl_scan_cache_used);
@@ -2431,7 +2431,7 @@ bool Curl_isPipeliningEnabled(const struct SessionHandle *handle)
 CURLcode Curl_addHandleToPipeline(struct SessionHandle *data,
                                   struct curl_llist *pipeline)
 {
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
   if(!IsPipeliningPossible(data)) {
     /* when not pipelined, there MUST be no handle in the list already */
     if(pipeline->head)
@@ -2514,7 +2514,7 @@ static void signalPipeClose(struct curl_llist *pipeline)
     struct curl_llist_element *next = curr->next;
     struct SessionHandle *data = (struct SessionHandle *) curr->ptr;
 
-#ifdef CURLDEBUG /* debug-only code */
+#ifdef DEBUGBUILD /* debug-only code */
     if(data->magic != CURLEASY_MAGIC_NUMBER) {
       /* MAJOR BADNESS */
       infof(data, "signalPipeClose() found BAAD easy handle\n");
@@ -2596,7 +2596,7 @@ ConnectionExists(struct SessionHandle *data,
           continue;
       }
 
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
       if(pipeLen > MAX_PIPELINE_LENGTH) {
         infof(data, "BAD! Connection #%ld has too big pipeline!\n",
               check->connectindex);
@@ -2626,7 +2626,7 @@ ConnectionExists(struct SessionHandle *data,
            get closed. */
         infof(data, "Connection #%ld isn't open enough, can't reuse\n",
               check->connectindex);
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
         if(check->recv_pipe->size > 0) {
           infof(data, "BAD! Unconnected #%ld has a non-empty recv pipeline!\n",
                 check->connectindex);
