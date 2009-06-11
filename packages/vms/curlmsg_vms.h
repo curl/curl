@@ -1,3 +1,6 @@
+#ifndef HEADER_CURLMSG_VMS_H
+#define HEADER_CURLMSG_VMS_H
+
 /* $Id$ */
 /*                                                                          */
 /* CURLMSG_VMS.H                                                            */
@@ -114,3 +117,5 @@ static const long vms_cond[] =
 	CURLE_SSL_ISSUER_ERROR,
         CURL_CURL_LAST
         };
+
+#endif /* HEADER_CURLMSG_VMS_H */

@@ -1,3 +1,8 @@
+#ifndef HEADER_CONFIG_VMS_H
+#define HEADER_CONFIG_VMS_H
+
+/* $Id$ */
+/*                                                                         */
 /* MSK, 02/05/04, Hand edited for trail build on Alpha V7.3, DEC C 6.5-003 */
 /* MSK, 03/09/04, Seems to work for all platforms I've built on so far.    */
 /*      Added HAVE_SYS_IOCTL_H define                                      */
@@ -361,3 +366,4 @@
 /* Define to hide dollar sign from compilers in strict ansi mode. */
 #define decc_translate_vms(__s) decc$translate_vms(__s)
 
+#endif /* HEADER_CONFIG_VMS_H */
