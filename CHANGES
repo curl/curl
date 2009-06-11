@@ -14,6 +14,21 @@ Daniel Stenberg (10 Jun 2009)
 - Fabian Keil ran clang on the (lib)curl code, found a bunch of warnings and
   contributed a range of patches to fix them.
 
+Yang Tse (10 Jun 2009)
+- I introduced configure script option --enable-curldebug which now allows
+  the decoupled enabling or disabling of the curl debug memory tracking
+  feature from the --enable-debug option which no longer controls this.
+
+  curl --version will list 'Debug' feature for debug enabled builds, and
+  will list 'TrackMemory' feature for curl debug memory tracking capable
+  builds. These features are independent and can be controlled when running
+  the configure script. When --enable-debug is given both features will be
+  enabled, unless some restriction prevents memory tracking from being used.
+
+  Internally, definition of preprocessor symbol DEBUGBUILD restricts code
+  which is only compiled for debug enabled builds. And symbol CURLDEBUG is
+  used to differentiate code which is _only_ used for memory tracking.
+
 Yang Tse (9 Jun 2009)
 - Daniel Steinberg pointed out that Curl_FormInit() in formdata.c was not
   initializing the fread callback pointer and this triggered a compiler
