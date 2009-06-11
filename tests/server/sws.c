@@ -183,11 +183,8 @@ static const char *doc404 = "HTTP/1.1 404 Not Found\r\n"
     "The requested URL was not found on this server.\n"
     "<P><HR><ADDRESS>" SWSVERSION "</ADDRESS>\n" "</BODY></HTML>\n";
 
-#ifdef SIGPIPE
+#if defined(SIGPIPE) && defined(HAVE_SIGNAL)
 static volatile int sigpipe;  /* Why? It's not used */
-#endif
-
-#ifdef SIGPIPE
 static void sigpipe_handler(int sig)
 {
   (void)sig; /* prevent warning */
