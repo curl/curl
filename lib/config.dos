@@ -1,10 +1,12 @@
-#ifndef _CURL_CONFIG_DOS_H
-#define _CURL_CONFIG_DOS_H
+#ifndef HEADER_CONFIG_DOS_H
+#define HEADER_CONFIG_DOS_H
 
-/* lib/config.dos - Hand crafted config file for MSDOS.
- *
- * $Id$
- */
+/* $Id$ */
+
+/* ================================================================ */
+/*        lib/config.dos - Hand crafted config file for DOS         */
+/* ================================================================ */
+
 #if defined(DJGPP)
   #define OS  "MSDOS/djgpp"
 #elif defined(__HIGHC__)
@@ -101,12 +103,14 @@
 
 /* #define MALLOCDEBUG */
 
-#ifdef USE_ZLIB     /* on cmd-line */
+/* USE_ZLIB on cmd-line */
+#ifdef USE_ZLIB
   #define HAVE_ZLIB_H            1
   #define HAVE_LIBZ              1
 #endif
 
-#ifdef USE_SSLEAY   /* on cmd-line */
+/* USE_SSLEAY on cmd-line */
+#ifdef USE_SSLEAY
   #define HAVE_CRYPTO_CLEANUP_ALL_EX_DATA 1
   #define HAVE_OPENSSL_ENGINE_H  1
   #define OPENSSL_NO_KRB5        1
@@ -119,14 +123,14 @@
 #define in_addr_t  u_long
 
 #if defined(__HIGHC__) || \
-    (defined(__GNUC__) && __GNUC__ < 4)   /* gcc 4.x built-in ? */
+    (defined(__GNUC__) && (__GNUC__ < 4))
 #define ssize_t    int
 #endif
 
 #define CURL_CA_BUNDLE  getenv("CURL_CA_BUNDLE")
 
-/* Target HAVE_x section
- */
+/* Target HAVE_x section */
+
 #if defined(DJGPP)
   #define HAVE_BASENAME   1
   #define HAVE_STRCASECMP 1
@@ -154,5 +158,5 @@
 #undef word
 #undef byte
 
-#endif  /* _CURL_CONFIG_DOS_H */
+#endif /* HEADER_CONFIG_DOS_H */
 
