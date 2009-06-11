@@ -42,4 +42,4 @@ ${libtoolize} --copy --automake --force
 ${ACLOCAL:-aclocal} -I m4 $ACLOCAL_FLAGS
 ${AUTOHEADER:-autoheader}
 ${AUTOCONF:-autoconf}
-${AUTOMAKE:-automake} --add-missing
+${AUTOMAKE:-automake} --add-missing --copy
