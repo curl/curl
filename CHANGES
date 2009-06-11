@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Yang Tse (11 Jun 2009)
+- I adapted testcurl script to allow building test harness programs when
+  cross-compiling for a *-*-mingw* host.
+
 Daniel Stenberg (10 Jun 2009)
 - Fabian Keil ran clang on the (lib)curl code, found a bunch of warnings and
   contributed a range of patches to fix them.
