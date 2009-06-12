@@ -337,7 +337,7 @@ long ares__tvdiff(struct timeval t1, struct timeval t2);
       (c)->sock_state_cb((c)->sock_state_cb_data, (s), (r), (w));       \
   } while (0)
 
-#ifdef DEBUGBUILD
+#ifdef CURLDEBUG
 /* This is low-level hard-hacking memory leak tracking and similar. Using the
    libcurl lowlevel code from within library is ugly and only works when
    c-ares is built and linked with a similarly debug-build libcurl, but we do

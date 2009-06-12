@@ -119,7 +119,7 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
   struct server_state *server;
   struct timeval now;
 
-#ifdef DEBUGBUILD
+#ifdef CURLDEBUG
   const char *env = getenv("CARES_MEMDEBUG");
 
   if (env)
