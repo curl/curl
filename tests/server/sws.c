@@ -183,13 +183,15 @@ static const char *doc404 = "HTTP/1.1 404 Not Found\r\n"
     "The requested URL was not found on this server.\n"
     "<P><HR><ADDRESS>" SWSVERSION "</ADDRESS>\n" "</BODY></HTML>\n";
 
-#if defined(SIGPIPE) && defined(HAVE_SIGNAL)
+#ifndef WIN32
+#  if defined(SIGPIPE) && defined(HAVE_SIGNAL)
 static volatile int sigpipe;  /* Why? It's not used */
 static void sigpipe_handler(int sig)
 {
   (void)sig; /* prevent warning */
   sigpipe = 1;
 }
+#  endif
 #endif
 
 static int ProcessRequest(struct httprequest *req)
