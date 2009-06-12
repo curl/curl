@@ -10,6 +10,16 @@
   setting from --enable-debug, allowing again to build c-ares independently
   out of the CVS tree.
 
+  For the c-ares library option --enable-debug enables debug build features
+  which are _not_ related with memory tracking. For the c-ares library when
+  --enable-debug is given it does not enable the memory tracking feature. If
+  you wish to enable the curl debug memory tracking you must use configure
+  option --enable-curldebug explicitily to do so.
+
+  Internally, definition of preprocessor symbol DEBUGBUILD restricts code
+  which is only compiled for debug enabled builds. And symbol CURLDEBUG is
+  used to differentiate code which is _only_ used for memory tracking.
+
 * May 19 2009 (Yang Tse)
 - Introduced ares_library_init() and ares_library_cleanup() functions.
 
