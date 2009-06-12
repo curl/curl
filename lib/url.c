@@ -531,22 +531,23 @@ struct conncache *Curl_mk_connc(int type,
 
   struct conncache *c;
   long default_amount;
+  long max_amount = (long)(((size_t)INT_MAX) / sizeof(struct connectdata *));
 
   if(type == CONNCACHE_PRIVATE) {
-    default_amount = (amount < 0) ? 5 : amount;
+    default_amount = (amount < 1L) ? 5L : amount;
   }
   else {
-    default_amount = (amount < 0) ? 10 : amount;
+    default_amount = (amount < 1L) ? 10L : amount;
   }
 
-  c= calloc(sizeof(struct conncache), 1);
+  if(default_amount > max_amount)
+    default_amount = max_amount;
+
+  c = calloc(1, sizeof(struct conncache));
   if(!c)
     return NULL;
 
-  if((size_t)(default_amount) > ((size_t)-1) / sizeof(struct connectdata *))
-    default_amount = ((size_t)-1) / sizeof(struct connectdata *);
-
-  c->connects = calloc(sizeof(struct connectdata *), (size_t)default_amount);
+  c->connects = calloc((size_t)default_amount, sizeof(struct connectdata *));
   if(!c->connects) {
     free(c);
     return NULL;
@@ -564,6 +565,7 @@ CURLcode Curl_ch_connc(struct SessionHandle *data,
 {
   long i;
   struct connectdata **newptr;
+  long max_amount = (long)(((size_t)INT_MAX) / sizeof(struct connectdata *));
 
   if(newamount < 1)
     newamount = 1; /* we better have at least one entry */
@@ -596,6 +598,8 @@ CURLcode Curl_ch_connc(struct SessionHandle *data,
       data->state.lastconnect = -1;
   }
   if(newamount > 0) {
+    if(newamount > max_amount)
+      newamount = max_amount;
     newptr = realloc(c->connects, sizeof(struct connectdata *) * newamount);
     if(!newptr)
       /* we closed a few connections in vain, but so what? */

@@ -382,7 +382,7 @@ CURLM *curl_multi_init(void)
     return NULL;
   }
 
-  multi->connc = Curl_mk_connc(CONNCACHE_MULTI, -1);
+  multi->connc = Curl_mk_connc(CONNCACHE_MULTI, -1L);
   if(!multi->connc) {
     Curl_hash_destroy(multi->sockhash);
     Curl_hash_destroy(multi->hostcache);

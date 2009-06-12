@@ -544,7 +544,7 @@ CURLcode curl_easy_perform(CURL *curl)
 
   if(!data->state.connc) {
     /* oops, no connection cache, make one up */
-    data->state.connc = Curl_mk_connc(CONNCACHE_PRIVATE, -1);
+    data->state.connc = Curl_mk_connc(CONNCACHE_PRIVATE, -1L);
     if(!data->state.connc)
       return CURLE_OUT_OF_MEMORY;
   }
