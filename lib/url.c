@@ -76,6 +76,10 @@
 
 #endif  /* WIN32 */
 
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
+
 #ifdef USE_LIBIDN
 #include <idna.h>
 #include <tld.h>
