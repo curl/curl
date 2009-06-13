@@ -4,42 +4,17 @@
 #
 # $Id$
 
+
 TOPDIR = ..
 
 include ../packages/DOS/common.dj
-
 include Makefile.inc
 
-CFLAGS += -DWATT32 -DHAVE_AF_INET6 -DHAVE_PF_INET6 -DHAVE_IOCTLSOCKET \
-          -DHAVE_IOCTLSOCKET_FIONBIO -DHAVE_STRUCT_IN6_ADDR \
-          -DHAVE_SOCKADDR_IN6_SIN6_SCOPE_ID -DHAVE_SYS_TIME_H \
-          -DHAVE_STRUCT_SOCKADDR_IN6 -DHAVE_STRUCT_ADDRINFO \
-          -DHAVE_ARPA_NAMESER_H -DHAVE_ARPA_INET_H -DHAVE_SYS_SOCKET_H \
-          -DHAVE_SYS_UIO_H -DHAVE_NETINET_IN_H -DHAVE_NETINET_TCP_H \
-          -DNS_INADDRSZ=4 -DHAVE_RECV -DHAVE_SEND -DHAVE_GETTIMEOFDAY \
-          -DSEND_TYPE_ARG1='int'   -DSEND_QUAL_ARG2='const' \
-          -DSEND_TYPE_ARG2='void*' -DSEND_TYPE_ARG3='int' \
-          -DSEND_TYPE_ARG4='int'   -DSEND_TYPE_RETV='int' \
-          -DRECV_TYPE_ARG1='int'   -DRECV_TYPE_ARG2='void*' \
-          -DRECV_TYPE_ARG3='int'   -DRECV_TYPE_ARG4='int' \
-          -DRECV_TYPE_RETV='int'   -DHAVE_STRUCT_TIMEVAL \
-          -Dselect=select_s        -UHAVE_CONFIG_H \
-          -DRECVFROM_TYPE_ARG1='int' -DRECVFROM_TYPE_ARG2='void' \
-          -DRECVFROM_TYPE_ARG3='int' -DRECVFROM_TYPE_ARG4='int' \
-          -DRECVFROM_TYPE_ARG6='int' -DRECVFROM_TYPE_RETV='int' \
-          -DRECVFROM_TYPE_ARG5='struct sockaddr' -DHAVE_RECVFROM \
-          -DRECVFROM_TYPE_ARG2_IS_VOID -DHAVE_STRDUP -DHAVE_NETDB_H \
-          -DHAVE_STRCASECMP -DHAVE_STRNCASECMP -DHAVE_GETHOSTNAME \
-          -DHAVE_LIMITS_H
+CFLAGS += -DHAVE_CONFIG_H -DWATT32
 
 LDFLAGS = -s
 
-ifeq ($(USE_DEBUG),1)
-  CFLAGS += -DDEBUGBUILD
-endif
-
 ifeq ($(USE_CURLDEBUG),1)
-  CFLAGS += -DCURLDEBUG
   EX_LIBS  = ../lib/libcurl.a
   OBJ_HACK = $(OBJECTS)
 else
@@ -62,11 +37,14 @@ EX_LIBS += $(WATT32_ROOT)/lib/libwatt.a
 
 OBJECTS = $(addprefix $(OBJ_DIR)/, $(CSOURCES:.c=.o))
 
-all: $(OBJ_DIR) libcares.a ahost.exe adig.exe acountry.exe
+all: $(OBJ_DIR) config.h libcares.a ahost.exe adig.exe acountry.exe
 	@echo Welcome to c-ares.
 
 libcares.a: $(OBJECTS)
 	ar rs $@ $?
+
+config.h: config.dos
+	$(COPY) $^ $@
 
 ahost.exe: ahost.c $(OBJ_DIR)/ares_getopt.o $(OBJ_HACK)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $^ $(EX_LIBS)
@@ -77,12 +55,30 @@ adig.exe: adig.c $(OBJ_DIR)/ares_getopt.o $(OBJ_HACK)
 acountry.exe: acountry.c $(OBJ_DIR)/ares_getopt.o $(OBJ_HACK)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $^ $(EX_LIBS)
 
-clean:
-	rm -f $(OBJECTS) $(OBJ_DIR)/ares_getopt.o libcares.a
+# clean generated files
+#
+genclean:
+	- $(DELETE) config.h
 
-vclean realclean: clean
-	rm -f ahost.exe adig.exe acountry.exe depend.dj
-	- rmdir $(OBJ_DIR)
+# clean object files and subdir
+#
+objclean: genclean
+	- $(DELETE) $(OBJ_DIR)$(DS)*.o
+	- $(RMDIR) $(OBJ_DIR)
+
+# clean without removing built library and programs
+#
+clean: objclean
+	- $(DELETE) depend.dj
+
+# clean everything
+#
+realclean vclean: clean
+	- $(DELETE) libcares.a
+	- $(DELETE) acountry.exe
+	- $(DELETE) adig.exe
+	- $(DELETE) ahost.exe
+	- $(DELETE) libcares.a
 
 -include depend.dj
 
