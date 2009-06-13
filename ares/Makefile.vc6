@@ -35,7 +35,7 @@ EX_LIBS = advapi32.lib ws2_32.lib
 !endif
 
 !if "$(DEBUG_MODEL)" == "d"
-CFLAGS  = $(CFLAGS) -D_DEBUG -GZ
+CFLAGS  = $(CFLAGS) -DDEBUGBUILD -D_DEBUG -GZ
 LDFLAGS = $(LDFLAGS) -debug -fixed:no
 
 !else
