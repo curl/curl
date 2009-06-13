@@ -39,14 +39,6 @@ CFLAGS += -DUSE_ENVIRONMENT
 PROGRAM  = curl.exe
 OBJECTS += $(addprefix $(OBJ_DIR)/, $(CSOURCES:.c=.o))
 
-ifneq ($(findstring COMMAND.COM,$(SHELL)),COMMAND.COM)
-  ifneq ($(findstring CMD.EXE,$(SHELL)),CMD.EXE)
-    ifneq ($(findstring 4DOS.COM,$(SHELL)),4DOS.COM)
-      IS_UNIX_SHELL = 1
-    endif
-  endif
-endif
-
 all: $(OBJ_DIR) config.h $(PROGRAM)
 	@echo Welcome to cURL
 
@@ -67,11 +59,27 @@ hugehelp.c: ../docs/MANUAL ../docs/curl.1 mkhelp.pl
 	groff -Tascii -man ../docs/curl.1 | \
 	perl -w mkhelp.pl ../docs/MANUAL > $@
 
-clean:
-	- rm -f $(OBJECTS) config.h
+# clean generated files
+#
+genclean:
+	- $(DELETE) config.h
+	- $(DELETE) hugehelp.c
 
+# clean object files and subdir
+#
+objclean: genclean
+	- $(DELETE) $(OBJ_DIR)$(DS)*.o
+	- $(RMDIR) $(OBJ_DIR)
+
+# clean without removing built program
+#
+clean: objclean
+	- $(DELETE) depend.dj
+
+# clean everything
+#
 realclean vclean: clean
-	- rm -f $(PROGRAM) hugehelp.c depend.dj
+	- $(DELETE) $(PROGRAM)
 
 -include depend.dj
 

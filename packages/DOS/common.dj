@@ -14,6 +14,34 @@ MAKEFILE = Makefile.dj
 OBJ_DIR = djgpp
 
 #
+# Find out if using a UNIX-like shell or a DOS command interpreter
+#
+ifneq ($(findstring COMMAND.COM,$(SHELL)),COMMAND.COM)
+  ifneq ($(findstring CMD.EXE,$(SHELL)),CMD.EXE)
+    ifneq ($(findstring 4DOS.COM,$(SHELL)),4DOS.COM)
+      IS_UNIX_SHELL = 1
+    endif
+  endif
+endif
+
+#
+# Define shell dependant commands and vars
+#
+ifeq ($(IS_UNIX_SHELL),1)
+  COPY   = cp -f
+  DELETE = rm -f
+  MKDIR  = mkdir
+  RMDIR  = rm -f -r
+  DS     = /
+else
+  COPY   = copy
+  DELETE = del
+  MKDIR  = mkdir
+  RMDIR  = rmdir
+  DS     = \$(NOTHING)
+endif
+
+#
 # OpenSSL is available from www.openssl.org and builds okay
 # with djgpp/Watt-32. Set to 0 if you don't need https URLs
 # (reduces curl.exe with approx 700 kB)
@@ -85,11 +113,15 @@ ifeq ($(USE_IDNA),1)
 endif
 
 ifeq ($(USE_DEBUG),1)
-  CFLAGS += -DDEBUG=1 -DCURLDEBUG # -DDPRINTF_DEBUG2=1
+  CFLAGS += -DDEBUG=1 -DDEBUGBUILD
+endif
+
+ifeq ($(USE_CURLDEBUG),1)
+  CFLAGS += -DCURLDEBUG
 endif
 
 $(OBJ_DIR):
-	mkdir $(OBJ_DIR)
+	$(MKDIR) $(OBJ_DIR)
 
 $(OBJ_DIR)/%.o: %.c
 	$(CC) $(CFLAGS) -o $@ -c $<
