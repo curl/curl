@@ -537,11 +537,11 @@ debug-dll\libcurl.res \
 debug-dll-ssl-dll\libcurl.res \
 debug-dll-zlib-dll\libcurl.res \
 debug-dll-ssl-dll-zlib-dll\libcurl.res: libcurl.rc
-	rc /dCURLDEBUG=1 /Fo $@ libcurl.rc
+	rc /dDEBUGBUILD=1 /Fo $@ libcurl.rc
 
 release-dll\libcurl.res \
 release-dll-ssl-dll\libcurl.res \
 release-dll-zlib-dll\libcurl.res \
 release-dll-ssl-dll-zlib-dll\libcurl.res: libcurl.rc
-	rc /dCURLDEBUG=0 /Fo $@ libcurl.rc
+	rc /dDEBUGBUILD=0 /Fo $@ libcurl.rc
 !ENDIF  # End of case where a config was provided.

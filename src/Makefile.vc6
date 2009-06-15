@@ -71,12 +71,12 @@ RTLIBD = /MTd
 ## Release
 CCR   = cl.exe $(RTLIB) /O2 /DNDEBUG
 LINKR = link.exe /incremental:no /libpath:"../lib"
-RCR   = rc.exe /dCURLDEBUG=0
+RCR   = rc.exe /dDEBUGBUILD=0
 
 ## Debug
 CCD   = cl.exe $(RTLIBD) /Gm /ZI /Od /D_DEBUG /GZ
 LINKD = link.exe /incremental:yes /debug /libpath:"../lib"
-RCD   = rc.exe /dCURLDEBUG=1
+RCD   = rc.exe /dDEBUGBUILD=1
 
 CFLAGS   = /I../lib /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c
 LFLAGS   = /nologo /out:$(PROGRAM_NAME) /subsystem:console /machine:$(MACHINE)
