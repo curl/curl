@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Patrick Monnerat (15 Jun 2009)
+- Replaced use of standard C library rand()/srand() by our own pseudo-random
+  number generator.
+
 Yang Tse (11 Jun 2009)
 - I adapted testcurl script to allow building test harness programs when
   cross-compiling for a *-*-mingw* host.

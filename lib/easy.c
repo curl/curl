@@ -85,6 +85,7 @@
 #include "http_ntlm.h"
 #include "connect.h" /* for Curl_getconnectinfo */
 #include "slist.h"
+#include "formdata.h"   /* For Curl_srand(). */
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -288,6 +289,10 @@ CURLcode curl_global_init(long flags)
 #endif
 
   init_flags  = flags;
+
+  /* Preset pseudo-random number sequence. */
+
+  Curl_srand();
 
   return CURLE_OK;
 }

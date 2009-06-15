@@ -108,6 +108,12 @@ Content-Disposition: form-data; name="FILECONTENT"
 /* Length of the random boundary string. */
 #define BOUNDARY_LENGTH 40
 
+/* Private pseudo-random number seed. Unsigned integer >= 32bit. Threads
+   mutual exclusion is not implemented to acess it since we do not require
+   high quality random numbers (only used in form boudary generation). */
+
+static unsigned int     randseed;
+
 #if !defined(CURL_DISABLE_HTTP) || defined(USE_SSLEAY)
 
 #include <stdio.h>
@@ -1597,6 +1603,8 @@ int main(int argc, argv_item_t argv[])
   (void) argc;
   (void) argv;
 
+  Curl_srand();         /* Because we do not call curl_global_init() here. */
+
   if(FormAddTest("simple COPYCONTENTS test", &httppost, &last_post,
                   CURLFORM_COPYNAME, name1, CURLFORM_COPYCONTENTS, value1,
                   CURLFORM_END))
@@ -1733,8 +1741,6 @@ void curl_formfree(struct curl_httppost *form)
 char *Curl_FormBoundary(void)
 {
   char *retstring;
-  static int randomizer;   /* this is just so that two boundaries within
-                              the same form won't be identical */
   size_t i;
 
   static const char table16[]="0123456789abcdef";
@@ -1744,12 +1750,10 @@ char *Curl_FormBoundary(void)
   if(!retstring)
     return NULL; /* failed */
 
-  srand((unsigned int)time(NULL)+randomizer++); /* seed */
-
   strcpy(retstring, "----------------------------");
 
   for(i=strlen(retstring); i<BOUNDARY_LENGTH; i++)
-    retstring[i] = table16[rand()%16];
+    retstring[i] = table16[Curl_rand()%16];
 
   /* 28 dashes and 12 hexadecimal digits makes 12^16 (184884258895036416)
      combinations */
@@ -1759,3 +1763,24 @@ char *Curl_FormBoundary(void)
 }
 
 #endif  /* !defined(CURL_DISABLE_HTTP) || defined(USE_SSLEAY) */
+
+/* Pseudo-random number support. This is always enabled, since called from
+   curl_global_init(). */
+
+unsigned int Curl_rand(void)
+{
+  unsigned int r;
+  /* Return an unsigned 32-bit pseudo-random number. */
+  r = randseed = randseed * 1103515245 + 12345;
+  return (r << 16) | ((r >> 16) & 0xFFFF);
+}
+
+void Curl_srand(void)
+{
+  /* Randomize pseudo-random number sequence. */
+
+  randseed = (unsigned int) time(NULL);
+  Curl_rand();
+  Curl_rand();
+  Curl_rand();
+}

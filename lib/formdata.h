@@ -97,5 +97,8 @@ void Curl_formclean(struct FormData **);
 
 CURLcode Curl_formconvert(struct SessionHandle *, struct FormData *);
 
+void Curl_srand(void);
+unsigned int Curl_rand(void);
+
 #endif
 
