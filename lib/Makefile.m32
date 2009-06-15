@@ -44,7 +44,7 @@ AR = ar
 LDFLAGS = -s
 RANLIB = ranlib
 RC = windres
-RCFLAGS = --include-dir=../include -DCURLDEBUG=0 -O COFF -i
+RCFLAGS = --include-dir=../include -DDEBUGBUILD=0 -O COFF -i
 RM = del /q /f > NUL 2>&1
 STRIP = strip -g
 

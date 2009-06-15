@@ -99,9 +99,7 @@ Example set of cookies:
 #include "rawstr.h"
 
 /* The last #include file should be: */
-#ifdef CURLDEBUG
 #include "memdebug.h"
-#endif
 
 
 static void freecookie(struct Cookie *co)

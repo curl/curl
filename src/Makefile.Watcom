@@ -7,7 +7,7 @@
 CC = wcc386
 
 CFLAGS = -3r -mf -d3 -hc -zff -zgf -zq -zm -s -fr=con -w2 -fpi -oilrtfm &
-         -bt=nt -d+ -dWIN32 -dHAVE_STRTOLL -dCURLDEBUG -dENABLE_IPV6    &
+         -bt=nt -d+ -dWIN32 -dHAVE_STRTOLL -dDEBUGBUILD -dENABLE_IPV6    &
          -dHAVE_WINSOCK2_H -I..\include -I..\lib
 
 OBJ_DIR = WC_Win32.obj
@@ -42,7 +42,7 @@ vclean realclean: clean .SYMBOLIC
 	- rmdir $(OBJ_DIR)
 
 $(RESOURCE): curl.rc
-	wrc -dCURLDEBUG=1 -q -r -zm -I..\include -fo=$@ curl.rc
+	wrc -dDEBUGBUILD=1 -q -r -zm -I..\include -fo=$@ curl.rc
 
 .ERASE
 .c{$(OBJ_DIR)}.obj:

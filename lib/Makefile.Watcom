@@ -11,7 +11,7 @@ CC = wcc386
 CFLAGS = -3s -mf -d3 -hc -zff -zgf -zq -zm -zc -s -fr=con -w2 -fpi -oilrtfm -bt=nt &
          -bd -d+ -dWIN32 -dCURL_CA_BUNDLE=getenv("CURL_CA_BUNDLE")                 &
          -dBUILDING_LIBCURL -dHAVE_SPNEGO=1 -dENABLE_IPV6                          &
-         -dDEBUG=1 -dCURLDEBUG -d_WIN32_WINNT=0x0501 -dWINBERAPI=__declspec(cdecl) &
+         -dDEBUG=1 -dDEBUGBUILD -d_WIN32_WINNT=0x0501 -dWINBERAPI=__declspec(cdecl) &
          -dWINLDAPAPI=__declspec(cdecl) -I. -I..\include
 
 #
@@ -107,7 +107,7 @@ vclean realclean: clean .SYMBOLIC
 
 .ERASE
 $(RESOURCE): libcurl.rc
-        wrc -dCURLDEBUG=1 -q -r -zm -I..\include -fo=$@ libcurl.rc
+        wrc -dDEBUGBUILD=1 -q -r -zm -I..\include -fo=$@ libcurl.rc
 
 .ERASE
 .c{$(OBJ_BASE)\dyn}.obj:
