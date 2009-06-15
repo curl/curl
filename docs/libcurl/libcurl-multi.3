@@ -119,10 +119,10 @@ If you want to re-use an easy handle that was added to the multi handle for
 transfer, you must first remove it from the multi stack and then re-add it
 again (possibly after having altered some options at your own choice).
 .SH "MULTI_SOCKET"
-Since 7.16.0, the \fIcurl_multi_socket(3)\fP function offers a way for
+Since 7.16.0, the \fIcurl_multi_socket_action(3)\fP function offers a way for
 applications to not only avoid being forced to use select(), but it also
-offers a much more high-performance API that will make a significant difference
-for applications using large numbers of simultaneous connections.
+offers a much more high-performance API that will make a significant
+difference for applications using large numbers of simultaneous connections.
 
 \fIcurl_multi_socket_action(3)\fP is then used
 instead of \fIcurl_multi_perform(3)\fP.
