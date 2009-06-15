@@ -498,6 +498,7 @@ struct Configurable {
   long httpversion;
   bool progressmode;
   bool nobuffer;
+  bool readbusy; /* set when reading input returns EAGAIN */
   bool globoff;
   bool use_httpget;
   bool insecure_ok; /* set TRUE to allow insecure SSL connects */
@@ -3230,6 +3231,19 @@ static void go_sleep(long ms)
 #endif
 }
 
+/* maybe we could just use Curl_nonblock() instead ... */
+static void set_nonblocking(struct Configurable *config, int fd)
+{
+#if defined(HAVE_FCNTL_O_NONBLOCK)
+  int flags = fcntl(fd, F_GETFL, 0);
+
+  if (flags >= 0)
+    flags = fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+  else
+    warnf(config, "fcntl failed on fd=%d: %s\n", fd, strerror(errno));
+#endif
+}
+
 static size_t my_fwrite(void *buffer, size_t sz, size_t nmemb, void *stream)
 {
   size_t rc;
@@ -3257,6 +3271,11 @@ static size_t my_fwrite(void *buffer, size_t sz, size_t nmemb, void *stream)
   if((sz * nmemb) == rc) {
     /* we added this amount of data to the output */
     out->bytes += (sz * nmemb);
+  }
+
+  if(config->readbusy) {
+    config->readbusy = false;
+    curl_easy_pause(config->easy, CURLPAUSE_CONT);
   }
 
   if(config->nobuffer)
@@ -3324,9 +3343,16 @@ static size_t my_fread(void *buffer, size_t sz, size_t nmemb, void *userp)
   struct InStruct *in=(struct InStruct *)userp;
 
   rc = read(in->fd, buffer, sz*nmemb);
-  if(rc < 0)
+  if(rc < 0) {
+    if(errno == EAGAIN) {
+      errno = 0;
+      in->config->readbusy = true;
+      return CURL_READFUNC_PAUSE;
+    }
     /* since size_t is unsigned we can't return negative values fine */
-    return 0;
+    rc = 0;
+  }
+  in->config->readbusy = false;
   return (size_t)rc;
 }
 
@@ -4494,6 +4520,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         else if(uploadfile && curlx_strequal(uploadfile, "-")) {
           SET_BINMODE(stdin);
           infd = STDIN_FILENO;
+          set_nonblocking(config, infd);
         }
 
         if(uploadfile && config->resume_from_current)

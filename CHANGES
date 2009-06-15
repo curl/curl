@@ -6,6 +6,21 @@
 
                                   Changelog
 
+Daniel Stenberg (15 Jun 2009)
+- Eric Wong's patch:
+
+  This allows curl(1) to be used as a client-side tunnel for arbitrary stream
+  protocols by abusing chunked transfer encoding in both the HTTP request and
+  HTTP response.  This requires server support for sending a response while a
+  request is still being read, of course.
+
+  If attempting to read from stdin returns EAGAIN, then we pause our sender.
+  This leaves curl to attempt to read from the socket while reading from stdin
+  (and thus sending) is paused.
+
+  This change was needed to allow successfully tunneling the git protocol over
+  HTTP (--no-buffer is needed, as well).
+
 Patrick Monnerat (15 Jun 2009)
 - Replaced use of standard C library rand()/srand() by our own pseudo-random
   number generator.
