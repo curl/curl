@@ -3274,7 +3274,7 @@ static size_t my_fwrite(void *buffer, size_t sz, size_t nmemb, void *stream)
   }
 
   if(config->readbusy) {
-    config->readbusy = false;
+    config->readbusy = FALSE;
     curl_easy_pause(config->easy, CURLPAUSE_CONT);
   }
 
@@ -3346,13 +3346,13 @@ static size_t my_fread(void *buffer, size_t sz, size_t nmemb, void *userp)
   if(rc < 0) {
     if(errno == EAGAIN) {
       errno = 0;
-      in->config->readbusy = true;
+      in->config->readbusy = TRUE;
       return CURL_READFUNC_PAUSE;
     }
     /* since size_t is unsigned we can't return negative values fine */
     rc = 0;
   }
-  in->config->readbusy = false;
+  in->config->readbusy = FALSE;
   return (size_t)rc;
 }
 
