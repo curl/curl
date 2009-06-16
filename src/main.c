@@ -4584,7 +4584,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         if(!config->errors)
           config->errors = stderr;
 
-        if(!outfile && !config->use_ascii) {
+        if((!outfile || !strcmp(outfile, "-")) && !config->use_ascii) {
           /* We get the output to stdout and we have not got the ASCII/text
              flag, then set stdout to be binary */
           SET_BINMODE(stdout);

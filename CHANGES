@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (16 Jun 2009)
+- Reuven Wachtfogel made curl -o - properly produce a binary output on windows
+  (no newline translations). Use -B/--use-ascii if you rather get the ascii
+  approach.
+
 Michal Marek (16 Jun 2009)
 - When doing non-anonymous ftp via http proxies and the password is not
   provided in the url, add it there (squid needs this).
