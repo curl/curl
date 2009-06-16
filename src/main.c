@@ -3241,6 +3241,9 @@ static void set_nonblocking(struct Configurable *config, int fd)
     flags = fcntl(fd, F_SETFL, flags | O_NONBLOCK);
   else
     warnf(config, "fcntl failed on fd=%d: %s\n", fd, strerror(errno));
+#else
+  (void) config;
+  (void) fd;
 #endif
 }
 
