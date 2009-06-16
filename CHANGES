@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Michal Marek (16 Jun 2009)
+- When doing non-anonymous ftp via http proxies and the password is not
+  provided in the url, add it there (squid needs this).
+
 Daniel Stenberg (15 Jun 2009)
 - Eric Wong's patch:
 

@@ -3831,6 +3831,7 @@ static CURLcode parse_url_userpass(struct SessionHandle *data,
        * set user/passwd, but doing that first adds more cases here :-(
        */
 
+      conn->bits.userpwd_in_url = 1;
       if(data->set.use_netrc != CURL_NETRC_REQUIRED) {
         /* We could use the one in the URL */
 

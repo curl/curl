@@ -28,6 +28,7 @@ This release includes the following bugfixes:
  o libcurl-NSS client cert handling segfaults
  o curl uploading from stdin/pipes now works in non-blocking way so that it
    continues the downloading even when the read stalls
+ o ftp credentials are added to the url if needed for http proxies
 
 This release includes the following known bugs:
 

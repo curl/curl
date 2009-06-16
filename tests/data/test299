@@ -1,0 +1,53 @@
+<testcase>
+<info>
+<keywords>
+FTP
+HTTP
+CURLOPT_USERPWD
+HTTP proxy
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.0 200 OK swsclose
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+
+blablabla
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+ftp
+</features>
+ <name>
+FTP over HTTP proxy with user:pass not in url
+ </name>
+ <command>
+-x http://%HOSTIP:%HTTPPORT -u michal:aybabtu ftp://host.com/we/want/299
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET ftp://michal:aybabtu@host.com/we/want/299 HTTP/1.1
+Authorization: Basic bWljaGFsOmF5YmFidHU=
+Host: host.com:21
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+</protocol>
+</verify>
+</testcase>

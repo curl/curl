@@ -625,6 +625,7 @@ struct ConnectBits {
                          EPRT doesn't work we disable it for the forthcoming
                          requests */
   bool netrc;         /* name+password provided by netrc */
+  bool userpwd_in_url; /* name+password found in url */
 
   bool done;          /* set to FALSE when Curl_do() is called and set to TRUE
                          when Curl_done() is called, to prevent Curl_done() to
