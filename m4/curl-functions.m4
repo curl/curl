@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 47
+# serial 48
 
 
 dnl CURL_INCLUDES_ARPA_INET
@@ -573,6 +573,96 @@ AC_DEFUN([CURL_CHECK_FUNC_ALARM], [
   else
     AC_MSG_RESULT([no])
     ac_cv_func_alarm="no"
+  fi
+])
+
+
+dnl CURL_CHECK_FUNC_CLOSESOCKET
+dnl -------------------------------------------------
+dnl Verify if closesocket is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_closesocket, then
+dnl HAVE_CLOSESOCKET will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
+  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
+  #
+  tst_links_closesocket="unknown"
+  tst_proto_closesocket="unknown"
+  tst_compi_closesocket="unknown"
+  tst_allow_closesocket="unknown"
+  #
+  AC_MSG_CHECKING([if closesocket can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+      $curl_includes_winsock2
+    ]],[[
+      if(0 != closesocket(0))
+        return 1;
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_closesocket="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_closesocket="no"
+  ])
+  #
+  if test "$tst_links_closesocket" = "yes"; then
+    AC_MSG_CHECKING([if closesocket is prototyped])
+    AC_EGREP_CPP([closesocket],[
+      $curl_includes_winsock2
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_closesocket="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_closesocket="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_closesocket" = "yes"; then
+    AC_MSG_CHECKING([if closesocket is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_winsock2
+      ]],[[
+        if(0 != closesocket(0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_closesocket="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_closesocket="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_closesocket" = "yes"; then
+    AC_MSG_CHECKING([if closesocket usage allowed])
+    if test "x$curl_disallow_closesocket" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_closesocket="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_closesocket="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if closesocket might be used])
+  if test "$tst_links_closesocket" = "yes" &&
+     test "$tst_proto_closesocket" = "yes" &&
+     test "$tst_compi_closesocket" = "yes" &&
+     test "$tst_allow_closesocket" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_CLOSESOCKET, 1,
+      [Define to 1 if you have the closesocket function.])
+    ac_cv_func_closesocket="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_closesocket="no"
   fi
 ])
 
@@ -3826,6 +3916,100 @@ AC_DEFUN([CURL_CHECK_FUNC_SIGSETJMP], [
   else
     AC_MSG_RESULT([no])
     ac_cv_func_sigsetjmp="no"
+  fi
+])
+
+
+dnl CURL_CHECK_FUNC_SOCKET
+dnl -------------------------------------------------
+dnl Verify if socket is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_socket, then
+dnl HAVE_SOCKET will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
+  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
+  AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
+  #
+  tst_links_socket="unknown"
+  tst_proto_socket="unknown"
+  tst_compi_socket="unknown"
+  tst_allow_socket="unknown"
+  #
+  AC_MSG_CHECKING([if socket can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+      $curl_includes_winsock2
+      $curl_includes_sys_socket
+    ]],[[
+      if(0 != socket(0, 0, 0))
+        return 1;
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_socket="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_socket="no"
+  ])
+  #
+  if test "$tst_links_socket" = "yes"; then
+    AC_MSG_CHECKING([if socket is prototyped])
+    AC_EGREP_CPP([socket],[
+      $curl_includes_winsock2
+      $curl_includes_sys_socket
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_socket="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_socket="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_socket" = "yes"; then
+    AC_MSG_CHECKING([if socket is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_winsock2
+        $curl_includes_sys_socket
+      ]],[[
+        if(0 != socket(0, 0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_socket="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_socket="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_socket" = "yes"; then
+    AC_MSG_CHECKING([if socket usage allowed])
+    if test "x$curl_disallow_socket" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_socket="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_socket="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if socket might be used])
+  if test "$tst_links_socket" = "yes" &&
+     test "$tst_proto_socket" = "yes" &&
+     test "$tst_compi_socket" = "yes" &&
+     test "$tst_allow_socket" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_SOCKET, 1,
+      [Define to 1 if you have the socket function.])
+    ac_cv_func_socket="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_socket="no"
   fi
 ])
 
