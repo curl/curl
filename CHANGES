@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel Fandrich (16 June 2009)
+- Added a few more compiler warning options for gcc.
+
 Daniel Stenberg (16 Jun 2009)
 - Reuven Wachtfogel made curl -o - properly produce a binary output on windows
   (no newline translations). Use -B/--use-ascii if you rather get the ascii
