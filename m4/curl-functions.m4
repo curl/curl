@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 48
+# serial 49
 
 
 dnl CURL_INCLUDES_ARPA_INET
@@ -211,6 +211,27 @@ curl_includes_signal="\
   AC_CHECK_HEADERS(
     sys/types.h signal.h,
     [], [], [$curl_includes_signal])
+])
+
+
+dnl CURL_INCLUDES_SOCKET
+dnl -------------------------------------------------
+dnl Set up variable with list of headers that must be
+dnl included when socket.h is to be included.
+
+AC_DEFUN([CURL_INCLUDES_SOCKET], [
+curl_includes_socket="\
+/* includes start */
+#ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+#endif
+#ifdef HAVE_SOCKET_H
+#  include <socket.h>
+#endif
+/* includes end */"
+  AC_CHECK_HEADERS(
+    sys/types.h socket.h,
+    [], [], [$curl_includes_socket])
 ])
 
 
@@ -587,6 +608,7 @@ dnl HAVE_CLOSESOCKET will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
   AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
+  AC_REQUIRE([CURL_INCLUDES_SOCKET])dnl
   #
   tst_links_closesocket="unknown"
   tst_proto_closesocket="unknown"
@@ -597,6 +619,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_socket
     ]],[[
       if(0 != closesocket(0))
         return 1;
@@ -613,6 +636,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
     AC_MSG_CHECKING([if closesocket is prototyped])
     AC_EGREP_CPP([closesocket],[
       $curl_includes_winsock2
+      $curl_includes_socket
     ],[
       AC_MSG_RESULT([yes])
       tst_proto_closesocket="yes"
@@ -627,6 +651,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+        $curl_includes_socket
       ]],[[
         if(0 != closesocket(0))
           return 1;
@@ -3931,6 +3956,7 @@ dnl HAVE_SOCKET will be defined.
 AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
   AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
   AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
+  AC_REQUIRE([CURL_INCLUDES_SOCKET])dnl
   #
   tst_links_socket="unknown"
   tst_proto_socket="unknown"
@@ -3942,6 +3968,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
       $curl_includes_sys_socket
+      $curl_includes_socket
     ]],[[
       if(0 != socket(0, 0, 0))
         return 1;
@@ -3959,6 +3986,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
     AC_EGREP_CPP([socket],[
       $curl_includes_winsock2
       $curl_includes_sys_socket
+      $curl_includes_socket
     ],[
       AC_MSG_RESULT([yes])
       tst_proto_socket="yes"
@@ -3974,6 +4002,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
         $curl_includes_sys_socket
+        $curl_includes_socket
       ]],[[
         if(0 != socket(0, 0, 0))
           return 1;

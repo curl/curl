@@ -1889,6 +1889,7 @@ AC_CHECK_HEADERS(
         sys/utime.h \
         sys/poll.h \
         poll.h \
+        socket.h \
         sys/resource.h \
         libgen.h \
         locale.h \
