@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 49
+# serial 50
 
 
 dnl CURL_INCLUDES_ARPA_INET
@@ -688,6 +688,96 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
   else
     AC_MSG_RESULT([no])
     ac_cv_func_closesocket="no"
+  fi
+])
+
+
+dnl CURL_CHECK_FUNC_CLOSESOCKET_CAMEL
+dnl -------------------------------------------------
+dnl Verify if CloseSocket is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_closesocket_camel,
+dnl then HAVE_CLOSESOCKET_CAMEL will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET_CAMEL], [
+  AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
+  #
+  tst_links_closesocket_camel="unknown"
+  tst_proto_closesocket_camel="unknown"
+  tst_compi_closesocket_camel="unknown"
+  tst_allow_closesocket_camel="unknown"
+  #
+  AC_MSG_CHECKING([if CloseSocket can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+      $curl_includes_sys_socket
+    ]],[[
+      if(0 != CloseSocket(0))
+        return 1;
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_closesocket_camel="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_closesocket_camel="no"
+  ])
+  #
+  if test "$tst_links_closesocket_camel" = "yes"; then
+    AC_MSG_CHECKING([if CloseSocket is prototyped])
+    AC_EGREP_CPP([CloseSocket],[
+      $curl_includes_sys_socket
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_closesocket_camel="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_closesocket_camel="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_closesocket_camel" = "yes"; then
+    AC_MSG_CHECKING([if CloseSocket is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_sys_socket
+      ]],[[
+        if(0 != CloseSocket(0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_closesocket_camel="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_closesocket_camel="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_closesocket_camel" = "yes"; then
+    AC_MSG_CHECKING([if CloseSocket usage allowed])
+    if test "x$curl_disallow_closesocket_camel" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_closesocket_camel="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_closesocket_camel="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if CloseSocket might be used])
+  if test "$tst_links_closesocket_camel" = "yes" &&
+     test "$tst_proto_closesocket_camel" = "yes" &&
+     test "$tst_compi_closesocket_camel" = "yes" &&
+     test "$tst_allow_closesocket_camel" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_CLOSESOCKET_CAMEL, 1,
+      [Define to 1 if you have the CloseSocket camel case function.])
+    ac_cv_func_closesocket_camel="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_closesocket_camel="no"
   fi
 ])
 
