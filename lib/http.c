@@ -2292,20 +2292,20 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     if(checkprefix("ftp://", ppath)) {
       if (data->set.proxy_transfer_mode) {
         /* when doing ftp, append ;type=<a|i> if not present */
-          char *p = strstr(ppath, ";type=");
-          if(p && p[6] && p[7] == 0) {
-            switch (Curl_raw_toupper(p[6])) {
-            case 'A':
-            case 'D':
-            case 'I':
-              break;
-            default:
-              p = NULL;
-            }
+        char *p = strstr(ppath, ";type=");
+        if(p && p[6] && p[7] == 0) {
+          switch (Curl_raw_toupper(p[6])) {
+          case 'A':
+          case 'D':
+          case 'I':
+            break;
+          default:
+            p = NULL;
           }
-          if(!p)
-            snprintf(ftp_typecode, sizeof(ftp_typecode), ";type=%c",
-                     data->set.prefer_ascii ? 'a' : 'i');
+        }
+        if(!p)
+          snprintf(ftp_typecode, sizeof(ftp_typecode), ";type=%c",
+                   data->set.prefer_ascii ? 'a' : 'i');
       }
       if (conn->bits.user_passwd && !conn->bits.userpwd_in_url)
         paste_ftp_userpwd = TRUE;
