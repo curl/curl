@@ -155,6 +155,11 @@
   #define HAVE_SYS_TIME_H 1
 #endif
 
+#ifdef MSDOS  /* Watt-32 */
+  #define HAVE_CLOSESOCKET_CAMEL  1
+  #define CloseSocket(s)          close_s((s))
+#endif
+
 #undef word
 #undef byte
 

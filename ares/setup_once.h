@@ -223,6 +223,19 @@ struct timeval {
 
 
 /*
+ * Function-like macro definition used to close a socket.
+ */
+
+#if defined(HAVE_CLOSESOCKET)
+#  define sclose(x)  closesocket((x))
+#elif defined(HAVE_CLOSESOCKET_CAMEL)
+#  define sclose(x)  CloseSocket((x))
+#else
+#  define sclose(x)  close((x))
+#endif
+
+
+/*
  * Uppercase macro versions of ANSI/ISO is*() functions/macros which
  * avoid negative number inputs with argument byte codes > 127.
  */

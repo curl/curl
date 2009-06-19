@@ -26,6 +26,7 @@
 #ifdef __AMIGA__ /* Any AmigaOS flavour */
 
 #define HAVE_ARPA_INET_H 1
+#define HAVE_CLOSESOCKET_CAMEL 1
 #define HAVE_GETHOSTBYADDR 1
 #define HAVE_INET_ADDR 1
 #define HAVE_INTTYPES_H 1

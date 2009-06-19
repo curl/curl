@@ -341,19 +341,12 @@
 #endif
 
 /* Below we define some functions. They should
-   1. close a socket
 
    4. set the SIGALRM signal timeout
    5. set dir/file naming defines
    */
 
 #ifdef WIN32
-
-#  if !defined(__CYGWIN__)
-#    define sclose(x) closesocket(x)
-#  else
-#    define sclose(x) close(x)
-#  endif
 
 #  define DIR_CHAR      "\\"
 #  define DOT_CHAR      "_"
@@ -363,7 +356,6 @@
 #  ifdef MSDOS  /* Watt-32 */
 
 #    include <sys/ioctl.h>
-#    define sclose(x)         close_s(x)
 #    define select(n,r,w,x,t) select_s(n,r,w,x,t)
 #    define ioctl(x,y,z) ioctlsocket(x,y,(char *)(z))
 #    include <tcp.h>
@@ -374,20 +366,7 @@
 #      undef byte
 #    endif
 
-#  else /* MSDOS */
-
-#    ifdef __BEOS__
-#      define sclose(x) closesocket(x)
-#    else /* __BEOS__ */
-#      define sclose(x) close(x)
-#    endif /* __BEOS__ */
-
 #  endif /* MSDOS */
-
-#  ifdef _AMIGASF
-#    undef sclose
-#    define sclose(x) CloseSocket(x)
-#  endif
 
 #  ifdef __minix
      /* Minix 3 versions up to at least 3.1.3 are missing these prototypes */
