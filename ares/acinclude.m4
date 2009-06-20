@@ -1670,6 +1670,47 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
 ])
 
 
+dnl CARES_CHECK_LIBS_CONNECT
+dnl -------------------------------------------------
+dnl Verify if network connect function is already available
+dnl using current libraries or if another one is required.
+
+AC_DEFUN([CARES_CHECK_LIBS_CONNECT], [
+  AC_MSG_CHECKING([for connect in libraries])
+  tst_connect_save_LIBS="$LIBS"
+  tst_connect_need_LIBS="unknown"
+  for tst_lib in '' '-lsocket' ; do
+    if test "$tst_connect_need_LIBS" = "unknown"; then
+      LIBS="$tst_lib $tst_connect_save_LIBS"
+      AC_LINK_IFELSE([
+        AC_LANG_PROGRAM([[
+        ]],[[
+          if(0 != connect(0, 0, 0))
+            return 1;
+        ]])
+      ],[
+        tst_connect_need_LIBS="$tst_lib"
+      ])
+    fi
+  done
+  LIBS="$tst_connect_save_LIBS"
+  #
+  case X-"$tst_connect_need_LIBS" in
+    X-unknown)
+      AC_MSG_RESULT([cannot find connect])
+      AC_MSG_ERROR([cannot find connect function in libraries.])
+      ;;
+    X-)
+      AC_MSG_RESULT([yes])
+      ;;
+    *)
+      AC_MSG_RESULT([$tst_connect_need_LIBS])
+      LIBS="$tst_connect_need_LIBS $tst_connect_save_LIBS"
+      ;;
+  esac
+])
+
+
 dnl CARES_DEFINE_UNQUOTED (VARIABLE, [VALUE])
 dnl -------------------------------------------------
 dnl Like AC_DEFINE_UNQUOTED this macro will define a C preprocessor

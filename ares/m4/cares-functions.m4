@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 31
+# serial 32
 
 
 dnl CARES_INCLUDES_ARPA_INET
@@ -520,6 +520,104 @@ AC_DEFUN([CARES_CHECK_FUNC_CLOSESOCKET_CAMEL], [
   else
     AC_MSG_RESULT([no])
     ac_cv_func_closesocket_camel="no"
+  fi
+])
+
+
+dnl CARES_CHECK_FUNC_CONNECT
+dnl -------------------------------------------------
+dnl Verify if connect is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable cares_disallow_connect, then
+dnl HAVE_CONNECT will be defined.
+
+AC_DEFUN([CARES_CHECK_FUNC_CONNECT], [
+  AC_REQUIRE([CARES_INCLUDES_WINSOCK2])dnl
+  AC_REQUIRE([CARES_INCLUDES_SYS_SOCKET])dnl
+  AC_REQUIRE([CARES_INCLUDES_SOCKET])dnl
+  #
+  tst_links_connect="unknown"
+  tst_proto_connect="unknown"
+  tst_compi_connect="unknown"
+  tst_allow_connect="unknown"
+  #
+  AC_MSG_CHECKING([if connect can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+      $cares_includes_winsock2
+      $cares_includes_sys_socket
+      $cares_includes_socket
+    ]],[[
+      if(0 != connect(0, 0, 0))
+        return 1;
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_connect="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_connect="no"
+  ])
+  #
+  if test "$tst_links_connect" = "yes"; then
+    AC_MSG_CHECKING([if connect is prototyped])
+    AC_EGREP_CPP([connect],[
+      $cares_includes_winsock2
+      $cares_includes_sys_socket
+      $cares_includes_socket
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_connect="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_connect="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_connect" = "yes"; then
+    AC_MSG_CHECKING([if connect is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $cares_includes_winsock2
+        $cares_includes_sys_socket
+        $cares_includes_socket
+      ]],[[
+        if(0 != connect(0, 0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_connect="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_connect="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_connect" = "yes"; then
+    AC_MSG_CHECKING([if connect usage allowed])
+    if test "x$cares_disallow_connect" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_connect="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_connect="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if connect might be used])
+  if test "$tst_links_connect" = "yes" &&
+     test "$tst_proto_connect" = "yes" &&
+     test "$tst_compi_connect" = "yes" &&
+     test "$tst_allow_connect" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_CONNECT, 1,
+      [Define to 1 if you have the connect function.])
+    ac_cv_func_connect="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_connect="no"
   fi
 ])
 

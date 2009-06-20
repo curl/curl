@@ -656,8 +656,7 @@ if test "$ac_cv_lib_resolve_strcasecmp" = "$ac_cv_func_strcasecmp"; then
 fi
 ac_cv_func_strcasecmp="no"
 
-dnl socket lib?
-AC_CHECK_FUNC(connect, , [ AC_CHECK_LIB(socket, connect) ])
+CURL_CHECK_LIBS_CONNECT
 
 dnl **********************************************************************
 dnl In case that function clock_gettime with monotonic timer is available,
@@ -2002,6 +2001,7 @@ CURL_CHECK_MSG_NOSIGNAL
 CURL_CHECK_FUNC_ALARM
 CURL_CHECK_FUNC_CLOSESOCKET
 CURL_CHECK_FUNC_CLOSESOCKET_CAMEL
+CURL_CHECK_FUNC_CONNECT
 CURL_CHECK_FUNC_FCNTL
 CURL_CHECK_FUNC_FDOPEN
 CURL_CHECK_FUNC_FREEADDRINFO
