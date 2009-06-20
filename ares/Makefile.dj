@@ -10,7 +10,7 @@ TOPDIR = ..
 include ../packages/DOS/common.dj
 include Makefile.inc
 
-CFLAGS += -DWATT32
+CFLAGS += -DWATT32 -Dselect=select_s
 
 LDFLAGS = -s
 
