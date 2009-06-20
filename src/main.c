@@ -5220,7 +5220,8 @@ int main(int argc, char *argv[])
   free_config_fields(&config);
 
 #ifdef __NOVELL_LIBC__
-  pressanykey();
+  if (getenv("_IN_NETWARE_BASH_") == NULL)
+    pressanykey();
 #endif
 #ifdef __VMS
   vms_special_exit(res, vms_show);
