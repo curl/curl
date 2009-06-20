@@ -7,62 +7,30 @@
 /*       ares/config.dos - Hand crafted config file for DOS         */
 /* ================================================================ */
 
-#if defined(DJGPP)
-  #define OS  "MSDOS/djgpp"
-#elif defined(__HIGHC__)
-  #define OS  "MSDOS/HighC"
-#elif defined(__WATCOMC__)
-  #define OS  "MSDOS/Watcom"
-#else
-  #define OS  "MSDOS/?"
-#endif
-
 #define PACKAGE  "c-ares"
 
-#define HAVE_FCNTL_H           1
-#define HAVE_GETADDRINFO       1
-#define HAVE_GETNAMEINFO       1
-#define HAVE_GETPROTOBYNAME    1
 #define HAVE_GETTIMEOFDAY      1
-#define HAVE_IO_H              1
-#define HAVE_IOCTL             1
-#define HAVE_IOCTL_FIONBIO     1
 #define HAVE_IOCTLSOCKET       1
 #define HAVE_IOCTLSOCKET_FIONBIO   1
 #define HAVE_LIMITS_H          1
-#define HAVE_LOCALE_H          1
-#define HAVE_LONGLONG          1
-#define HAVE_MEMORY_H          1
 #define HAVE_NET_IF_H          1
-#define HAVE_PROCESS_H         1
 #define HAVE_RECV              1
 #define HAVE_RECVFROM          1
-#define HAVE_SELECT            1
 #define HAVE_SEND              1
-#define HAVE_SETJMP_H          1
-#define HAVE_SETLOCALE         1
-#define HAVE_SETMODE           1
-#define HAVE_SIGNAL            1
-#define HAVE_SOCKET            1
-#define HAVE_SPNEGO            1
 #define HAVE_STRDUP            1
 #define HAVE_STRICMP           1
-#define HAVE_STRTOLL           1
-#define HAVE_STRUCT_TIMEVAL    1
 #define HAVE_STRUCT_IN6_ADDR   1
+#define HAVE_STRUCT_TIMEVAL    1
 #define HAVE_SYS_IOCTL_H       1
 #define HAVE_SYS_SOCKET_H      1
 #define HAVE_SYS_STAT_H        1
 #define HAVE_SYS_TYPES_H       1
-#define HAVE_TERMIOS_H         1
 #define HAVE_TIME_H            1
 #define HAVE_UNISTD_H          1
 
 #define NEED_MALLOC_H          1
 
 #define RETSIGTYPE             void
-#define SIZEOF_LONG_DOUBLE     16
-#define STDC_HEADERS           1
 #define TIME_WITH_SYS_TIME     1
 
 /* Qualifiers for send(), recv(), recvfrom() and getnameinfo(). */
@@ -89,54 +57,20 @@
 #define RECVFROM_TYPE_RETV     int
 #define RECVFROM_TYPE_ARG2_IS_VOID 1
 
-#define GETNAMEINFO_QUAL_ARG1  const
-#define GETNAMEINFO_TYPE_ARG1  struct sockaddr *
-#define GETNAMEINFO_TYPE_ARG2  int
-#define GETNAMEINFO_TYPE_ARG46 int
-#define GETNAMEINFO_TYPE_ARG7  int
-
 #define BSD
-
-/* USE_ZLIB on cmd-line */
-#ifdef USE_ZLIB
-  #define HAVE_ZLIB_H            1
-  #define HAVE_LIBZ              1
-#endif
-
-/* USE_SSLEAY on cmd-line */
-#ifdef USE_SSLEAY
-  #define HAVE_CRYPTO_CLEANUP_ALL_EX_DATA 1
-  #define HAVE_OPENSSL_ENGINE_H  1
-  #define OPENSSL_NO_KRB5        1
-  #define USE_OPENSSL            1
-#endif
-
-/* to disable LDAP */
-#define CURL_DISABLE_LDAP        1
-
-#define in_addr_t  u_long
 
 #if defined(__HIGHC__) || \
     (defined(__GNUC__) && (__GNUC__ < 4))
 #define ssize_t    int
 #endif
 
-#define CURL_CA_BUNDLE  getenv("CURL_CA_BUNDLE")
-
 /* Target HAVE_x section */
 
 #if defined(DJGPP)
-  #define HAVE_BASENAME             1
   #define HAVE_STRCASECMP           1
   #define HAVE_STRNCASECMP          1
-  #define HAVE_SIGACTION            1
-  #define HAVE_SIGSETJMP            1
   #define HAVE_SYS_TIME_H           1
   #define HAVE_VARIADIC_MACROS_GCC  1
-
-  #if (DJGPP_MINOR >= 4)
-    #define HAVE_STRLCAT  1
-  #endif
 
   /* Because djgpp <= 2.03 doesn't have snprintf() etc. */
   #if (DJGPP_MINOR < 4)
@@ -168,7 +102,7 @@
   #define HAVE_SYS_UIO_H                   1
   #define NS_INADDRSZ                      4
   #define HAVE_STRUCT_SOCKADDR_IN6         1
-  #define CloseSocket(s)  close_s((s))
+  #define CloseSocket(s)                   close_s((s))
 #endif
 
 #undef word
