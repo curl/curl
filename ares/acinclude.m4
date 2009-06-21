@@ -1676,6 +1676,7 @@ dnl Verify if network connect function is already available
 dnl using current libraries or if another one is required.
 
 AC_DEFUN([CARES_CHECK_LIBS_CONNECT], [
+  AC_REQUIRE([CARES_INCLUDES_WINSOCK2])dnl
   AC_MSG_CHECKING([for connect in libraries])
   tst_connect_save_LIBS="$LIBS"
   tst_connect_need_LIBS="unknown"
@@ -1684,6 +1685,10 @@ AC_DEFUN([CARES_CHECK_LIBS_CONNECT], [
       LIBS="$tst_lib $tst_connect_save_LIBS"
       AC_LINK_IFELSE([
         AC_LANG_PROGRAM([[
+          $cares_includes_winsock2
+          #ifndef HAVE_WINDOWS_H
+            int connect(int, void*, int);
+          #endif
         ]],[[
           if(0 != connect(0, 0, 0))
             return 1;
