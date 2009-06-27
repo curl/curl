@@ -1877,7 +1877,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
     sshc->ssh_channel =
       libssh2_scp_send_ex(sshc->ssh_session, sftp_scp->path,
                           data->set.new_file_perms,
-                          data->set.infilesize, 0, 0);
+                          (size_t)data->set.infilesize, 0, 0);
     if(!sshc->ssh_channel) {
       if(libssh2_session_last_errno(sshc->ssh_session) ==
          LIBSSH2_ERROR_EAGAIN) {
