@@ -30,6 +30,7 @@ This release includes the following bugfixes:
    continues the downloading even when the read stalls
  o ftp credentials are added to the url if needed for http proxies
  o curl -o - sends data to stdout using binary mode on windows
+ o fixed the separators for "array" style string that CURLINFO_CERTINFO returns
 
 This release includes the following known bugs:
 
