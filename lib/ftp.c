@@ -290,7 +290,8 @@ static void freedirs(struct ftp_conn *ftpc)
 */
 static bool isBadFtpString(const char *string)
 {
-  return (bool)((NULL != strchr(string, '\r')) || (NULL != strchr(string, '\n')));
+  return (bool)((NULL != strchr(string, '\r')) ||
+                (NULL != strchr(string, '\n')));
 }
 
 /***********************************************************************
@@ -882,36 +883,116 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   curl_socket_t portsock= CURL_SOCKET_BAD;
   char myhost[256] = "";
 
-#ifdef ENABLE_IPV6
-  /******************************************************************
-   * IPv6-specific section
-   */
   struct Curl_sockaddr_storage ss;
   Curl_addrinfo *res, *ai;
   curl_socklen_t sslen;
   char hbuf[NI_MAXHOST];
   struct sockaddr *sa=(struct sockaddr *)&ss;
   struct sockaddr_in * const sa4 = (void *)sa;
+#ifdef ENABLE_IPV6
   struct sockaddr_in6 * const sa6 = (void *)sa;
+#endif
   char tmp[1024];
   static const char mode[][5] = { "EPRT", "PORT" };
   int rc;
   int error;
   char *host=NULL;
+  char *string_ftpport = data->set.str[STRING_FTPPORT];
   struct Curl_dns_entry *h=NULL;
-  unsigned short port = 0;
+  unsigned short port_min = 0;
+  unsigned short port_max = 0;
+  unsigned short port;
 
-  /* Step 1, figure out what address that is requested */
+  char *addr = NULL;
+
+  /* Step 1, figure out what is requested,
+   * accepted format :
+   * (ipv4|ipv6|domain|interface)?(:port(-range)?)?
+   */
 
   if(data->set.str[STRING_FTPPORT] &&
      (strlen(data->set.str[STRING_FTPPORT]) > 1)) {
-    /* attempt to get the address of the given interface name */
-    if(!Curl_if2ip(conn->ip_addr->ai_family, data->set.str[STRING_FTPPORT],
-                   hbuf, sizeof(hbuf)))
-      /* not an interface, use the given string as host name instead */
-      host = data->set.str[STRING_FTPPORT];
-    else
-      host = hbuf; /* use the hbuf for host name */
+
+#ifdef ENABLE_IPV6
+    size_t addrlen = INET6_ADDRSTRLEN > strlen(string_ftpport) ?
+      INET6_ADDRSTRLEN : strlen(string_ftpport);
+#else
+    size_t addrlen = INET_ADDRSTRLEN > strlen(string_ftpport) ?
+      INET_ADDRSTRLEN : strlen(string_ftpport);
+#endif
+    char *ip_start = string_ftpport;
+    char *ip_end = NULL;
+    char *port_start = NULL;
+    char *port_sep = NULL;
+
+    addr = malloc(addrlen);
+    memset(addr, 0, addrlen);
+
+
+#ifdef ENABLE_IPV6
+    if(*string_ftpport == '[') {
+      /* [ipv6]:port(-range) */
+      ip_start = string_ftpport + 1;
+      if((ip_end = strchr(string_ftpport, ']')) != NULL )
+        strncpy(addr, ip_start, ip_end - ip_start);
+    } else
+#endif
+      if( *string_ftpport == ':') {
+        /* :port */
+        ip_end = string_ftpport;
+    } else
+      if( (ip_end = strchr(string_ftpport, ':')) != NULL) {
+        /* either ipv6 or (ipv4|domain|interface):port(-range) */
+#ifdef ENABLE_IPV6
+      if(Curl_inet_pton(AF_INET6, string_ftpport, sa6) == 1) {
+        /* ipv6 */
+        port_min = port_max = 0;
+        strcpy(addr, string_ftpport);
+        ip_end = NULL; /* this got no port ! */
+      } else
+#endif
+      {
+        /* (ipv4|domain|interface):port(-range) */
+        strncpy(addr, string_ftpport, ip_end - ip_start );
+      }
+    } else {
+      /* ipv4|interface */
+      strcpy(addr, string_ftpport);
+    }
+
+    /* parse the port */
+    if( ip_end != NULL ) {
+      if((port_start = strchr(ip_end, ':')) != NULL) {
+        port_min = (unsigned short)strtol(port_start+1, NULL, 10);
+        if((port_sep = strchr(port_start, '-')) != NULL) {
+          port_max = (unsigned short)strtol(port_sep + 1, NULL, 10);
+        }
+        else
+          port_max = port_min;
+      }
+    }
+
+    /* correct errors like:
+     *  :1234-1230
+     *  :-4711 , in this case port_min is (unsigned)-1,
+     *           therefore port_min > port_max for all cases
+     *           but port_max = (unsigned)-1
+     */
+    if(port_min > port_max )
+      port_min = port_max = 0;
+
+
+    if(*addr != '\0') {
+      /* attempt to get the address of the given interface name */
+      if(!Curl_if2ip(conn->ip_addr->ai_family, addr,
+                     hbuf, sizeof(hbuf)))
+        /* not an interface, use the given string as host name instead */
+        host = addr;
+      else
+        host = hbuf; /* use the hbuf for host name */
+    }else
+      /* there was only a port(-range) given, default the host */
+      host = NULL;
   } /* data->set.ftpport */
 
   if(!host) {
@@ -922,20 +1003,24 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     if(getsockname(conn->sock[FIRSTSOCKET], (struct sockaddr *)&ss, &sslen)) {
       failf(data, "getsockname() failed: %s",
           Curl_strerror(conn, SOCKERRNO) );
+      if (addr)
+        free(addr);
       return CURLE_FTP_PORT_FAILED;
     }
 
-    if(sslen > (curl_socklen_t)sizeof(ss))
-      sslen = sizeof(ss);
+    sslen = sizeof(ss);
     rc = getnameinfo((struct sockaddr *)&ss, sslen, hbuf, sizeof(hbuf), NULL,
                      0, NIFLAGS);
     if(rc) {
       failf(data, "getnameinfo() returned %d", rc);
+      if (addr)
+        free(addr);
       return CURLE_FTP_PORT_FAILED;
     }
     host = hbuf; /* use this host name */
   }
 
+  /* resolv ip/host to ip */
   rc = Curl_resolv(conn, host, 0, &h);
   if(rc == CURLRESOLV_PENDING)
     rc = Curl_wait_for_resolv(conn, &h);
@@ -948,6 +1033,13 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   else
     res = NULL; /* failure! */
 
+  if (addr)
+    free(addr);
+
+  if (res == NULL) {
+    failf(data, "Curl_resolv failed, we can not recover!");
+    return CURLE_FTP_PORT_FAILED;
+  }
 
   /* step 2, create a socket for the requested address */
 
@@ -974,32 +1066,56 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
 
   /* step 3, bind to a suitable local address */
 
-  /* Try binding the given address. */
-  if(bind(portsock, ai->ai_addr, ai->ai_addrlen)) {
+  memcpy(sa, ai->ai_addr, ai->ai_addrlen);
+  sslen = ai->ai_addrlen;
 
-    /* It failed. Bind the address used for the control connection instead */
-    sslen = sizeof(ss);
-    if(getsockname(conn->sock[FIRSTSOCKET], sa, &sslen)) {
-      failf(data, "getsockname() failed: %s",
-          Curl_strerror(conn, SOCKERRNO) );
-      sclose(portsock);
-      return CURLE_FTP_PORT_FAILED;
-    }
-
-    /* set port number to zero to make bind() pick "any" */
-    if(sa->sa_family == AF_INET)
-      sa4->sin_port = 0;
+  for( port = port_min; port <= port_max; ) {
+    if( sa->sa_family == AF_INET )
+      sa4->sin_port = htons(port);
+#ifdef ENABLE_IPV6
     else
-      sa6->sin6_port = 0;
+      sa6->sin6_port = htons(port);
+#endif
+    /* Try binding the given address. */
+    if(bind(portsock, sa, sslen) ) {
+      /* It failed. */
+      if(errno == EADDRNOTAVAIL) {
 
-    if(sslen > (curl_socklen_t)sizeof(ss))
-      sslen = sizeof(ss);
+        /* The requested bind address is not local
+         * use the address used forthe control connection instead
+         * restart the port loop
+         */
+        failf(data, "bind(port=%i) failed: %s", port,
+              Curl_strerror(conn, SOCKERRNO) );
 
-    if(bind(portsock, sa, sslen)) {
-      failf(data, "bind failed: %s", Curl_strerror(conn, SOCKERRNO));
-      sclose(portsock);
-      return CURLE_FTP_PORT_FAILED;
-    }
+        sslen = sizeof(ss);
+        if(getsockname(conn->sock[FIRSTSOCKET], sa, &sslen)) {
+          failf(data, "getsockname() failed: %s",
+                Curl_strerror(conn, SOCKERRNO) );
+          sclose(portsock);
+          return CURLE_FTP_PORT_FAILED;
+        }
+        port = port_min;
+        continue;
+      }else
+      if(errno != EADDRINUSE && errno != EACCES) {
+        failf(data, "bind(port=%i) failed: %s", port,
+              Curl_strerror(conn, SOCKERRNO) );
+        sclose(portsock);
+        return CURLE_FTP_PORT_FAILED;
+      }
+
+    } else
+      break;
+
+    port++;
+  }
+
+  /* maybe all ports were in use already*/
+  if (port > port_max) {
+    failf(data, "bind() failed, we ran out of ports!");
+    sclose(portsock);
+    return CURLE_FTP_PORT_FAILED;
   }
 
   /* get the name again after the bind() so that we can extract the
@@ -1039,6 +1155,10 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
       /* if disabled, goto next */
       continue;
 
+    if((PORT == fcmd) && sa->sa_family != AF_INET)
+      /* PORT is ipv4 only */
+      continue;
+
     switch (sa->sa_family) {
     case AF_INET:
       port = ntohs(sa4->sin_port);
@@ -1060,7 +1180,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
        */
 
       result = Curl_nbftpsendf(conn, "%s |%d|%s|%d|", mode[fcmd],
-                               ai->ai_family == AF_INET?1:2,
+                               sa->sa_family == AF_INET?1:2,
                                myhost, port);
       if(result)
         return result;
@@ -1069,9 +1189,6 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     else if(PORT == fcmd) {
       char *source = myhost;
       char *dest = tmp;
-
-      if((PORT == fcmd) && ai->ai_family != AF_INET)
-        continue;
 
       /* translate x.x.x.x to x,x,x,x */
       while(source && *source) {
@@ -1101,151 +1218,6 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   if(CURL_SOCKET_BAD != conn->sock[SECONDARYSOCKET])
     sclose(conn->sock[SECONDARYSOCKET]);
   conn->sock[SECONDARYSOCKET] = portsock;
-
-#else
-  /******************************************************************
-   * IPv4-specific section
-   */
-  struct sockaddr_in sa;
-  unsigned short porttouse;
-  bool sa_filled_in = FALSE;
-  Curl_addrinfo *addr = NULL;
-  unsigned short ip[4];
-  bool freeaddr = TRUE;
-  curl_socklen_t sslen = sizeof(sa);
-  const char *ftpportstr = data->set.str[STRING_FTPPORT];
-
-  (void)fcmd; /* not used in the IPv4 code */
-  if(ftpportstr) {
-    struct in_addr in;
-
-    /* First check if the given string is an IP address */
-    if(Curl_inet_pton(AF_INET, ftpportstr, &in) > 0) {
-      /* this is an IPv4 address */
-      addr = Curl_ip2addr(AF_INET, &in, ftpportstr, 0);
-    }
-    /* otherwise check if the given string is an interface */
-    else if(Curl_if2ip(AF_INET, ftpportstr, myhost, sizeof(myhost))) {
-      /* The interface to IP conversion provided a dotted address */
-      if(Curl_inet_pton(AF_INET, myhost, &in) > 0)
-        addr = Curl_ip2addr(AF_INET, &in, myhost, 0);
-    }
-    else if(strlen(ftpportstr)> 1) {
-      /* might be a host name! */
-      struct Curl_dns_entry *h=NULL;
-      int rc = Curl_resolv(conn, ftpportstr, 0, &h);
-      if(rc == CURLRESOLV_PENDING)
-        /* BLOCKING */
-        rc = Curl_wait_for_resolv(conn, &h);
-      if(h) {
-        addr = h->addr;
-        /* when we return from this function, we can forget about this entry
-           so we can unlock it now already */
-        Curl_resolv_unlock(data, h);
-
-        freeaddr = FALSE; /* make sure we don't free 'addr' in this function
-                             since it points to a DNS cache entry! */
-      } /* (h) */
-      else {
-        infof(data, "Failed to resolve host name %s\n", ftpportstr);
-      }
-    } /* strlen */
-  } /* ftpportstr */
-
-  if(!addr) {
-    /* pick a suitable default here */
-
-    if(getsockname(conn->sock[FIRSTSOCKET],
-                    (struct sockaddr *)&sa, &sslen)) {
-      failf(data, "getsockname() failed: %s",
-          Curl_strerror(conn, SOCKERRNO) );
-      return CURLE_FTP_PORT_FAILED;
-    }
-    if(sslen > (curl_socklen_t)sizeof(sa))
-      sslen = sizeof(sa);
-
-    sa_filled_in = TRUE; /* the sa struct is filled in */
-  }
-
-  if(addr || sa_filled_in) {
-    portsock = socket(AF_INET, SOCK_STREAM, 0);
-    if(CURL_SOCKET_BAD != portsock) {
-
-      /* we set the secondary socket variable to this for now, it
-         is only so that the cleanup function will close it in case
-         we fail before the true secondary stuff is made */
-      if(CURL_SOCKET_BAD != conn->sock[SECONDARYSOCKET])
-        sclose(conn->sock[SECONDARYSOCKET]);
-      conn->sock[SECONDARYSOCKET] = portsock;
-
-      if(!sa_filled_in) {
-        memcpy(&sa, addr->ai_addr, sslen);
-        sa.sin_addr.s_addr = INADDR_ANY;
-      }
-
-      sa.sin_port = 0;
-      sslen = sizeof(sa);
-
-      if(bind(portsock, (struct sockaddr *)&sa, sslen) == 0) {
-        /* we succeeded to bind */
-        struct sockaddr_in add;
-        curl_socklen_t socksize = sizeof(add);
-
-        if(getsockname(portsock, (struct sockaddr *) &add,
-                       &socksize)) {
-          failf(data, "getsockname() failed: %s",
-            Curl_strerror(conn, SOCKERRNO) );
-          return CURLE_FTP_PORT_FAILED;
-        }
-        porttouse = ntohs(add.sin_port);
-
-        if( listen(portsock, 1) < 0 ) {
-          failf(data, "listen(2) failed on socket");
-          return CURLE_FTP_PORT_FAILED;
-        }
-      }
-      else {
-        failf(data, "bind(2) failed on socket");
-        return CURLE_FTP_PORT_FAILED;
-      }
-    }
-    else {
-      failf(data, "socket(2) failed (%s)");
-      return CURLE_FTP_PORT_FAILED;
-    }
-  }
-  else {
-    failf(data, "couldn't find IP address to use");
-    return CURLE_FTP_PORT_FAILED;
-  }
-
-  if(sa_filled_in)
-    Curl_inet_ntop(AF_INET, &((struct sockaddr_in *)&sa)->sin_addr,
-                   myhost, sizeof(myhost));
-  else
-    Curl_printable_address(addr, myhost, sizeof(myhost));
-
-  if(4 == sscanf(myhost, "%hu.%hu.%hu.%hu",
-                 &ip[0], &ip[1], &ip[2], &ip[3])) {
-
-    infof(data, "Telling server to connect to %d.%d.%d.%d:%d\n",
-          ip[0], ip[1], ip[2], ip[3], porttouse);
-
-    result=Curl_nbftpsendf(conn, "PORT %d,%d,%d,%d,%d,%d",
-                           ip[0], ip[1], ip[2], ip[3],
-                           porttouse >> 8, porttouse & 255);
-    if(result)
-      return result;
-  }
-  else
-    return CURLE_FTP_PORT_FAILED;
-
-  if(freeaddr)
-    Curl_freeaddrinfo(addr);
-
-  ftpc->count1 = PORT;
-
-#endif /* end of ipv4-specific code */
 
   /* this tcpconnect assignment below is a hackish work-around to make the
      multi interface with active FTP work - as it will not wait for a

@@ -9,7 +9,7 @@ Curl and libcurl 7.19.6
 
 This release includes the following changes:
 
- o 
+ o CURLOPT_FTPPORT (and curl's -P/--ftpport) support port ranges
 
 This release includes the following bugfixes:
 
@@ -41,6 +41,6 @@ advice from friends like these:
  Yang Tse, Daniel Fandrich, Kamil Dudka, Caolan McNamara, Frank McGeough,
  Andre Guibert de Bruet, Mike Crowe, Claes Jakobsson, John E. Malmberg,
  Aaron Oneal, Igor Novoseltsev, Eric Wong, Bill Hoffman, Daniel Steinberg,
- Fabian Keil, Michal Marek, Reuven Wachtfogel
+ Fabian Keil, Michal Marek, Reuven Wachtfogel, Markus Koetter
 
         Thanks! (and sorry if I forgot to mention someone)

@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel Stenberg (29 Jun 2009)
+- Markus Koetter made CURLOPT_FTPPORT (and curl's -P/--ftpport) support a port
+  range if given colon-separated after the host name/address part. Like
+  "192.168.0.1:2000-10000"
+
+- Modified the separators used for CURLOPT_CERTINFO in multi-part outputs. I
+  don't know how they got wrong in the first place, but using this output
+  format makes it possible to quite easily separate the string into an array
+  of multiple items.
+
 Daniel Fandrich (16 June 2009)
 - Added a few more compiler warning options for gcc.
 

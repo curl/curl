@@ -953,6 +953,12 @@ connection
 If this option is used several times, the last one will be used. Disable the
 use of PORT with \fI--ftp-pasv\fP. Disable the attempt to use the EPRT command
 instead of PORT by using \fI--disable-eprt\fP. EPRT is really PORT++.
+
+Starting in 7.19.5, you can append \&":[start]-[end]\&" to the right of the
+address, to tell curl what TCP port range to use. That means you specify a
+port range, from a lower to a higher number. A single number works as well,
+but do not that it increases the risk of failure since the port may not be
+available.
 .IP "-q"
 If used as the first parameter on the command line, the \fIcurlrc\fP config
 file will not be read and used. See the \fI-K/--config\fP for details on the
