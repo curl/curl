@@ -101,6 +101,9 @@
 #ifndef NI_MAXHOST
 #define NI_MAXHOST 1025
 #endif
+#ifndef INET_ADDRSTRLEN
+#define INET_ADDRSTRLEN 16
+#endif
 
 #ifdef __SYMBIAN32__
 /* Symbian OS panics when given a timeout much greater than 1/2 hour */
