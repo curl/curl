@@ -98,10 +98,8 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-#ifdef HAVE_NI_WITHSCOPEID
-#define NIFLAGS NI_NUMERICHOST | NI_NUMERICSERV | NI_WITHSCOPEID
-#else
-#define NIFLAGS NI_NUMERICHOST | NI_NUMERICSERV
+#ifndef NI_MAXHOST
+#define NI_MAXHOST 1025
 #endif
 
 #ifdef __SYMBIAN32__
