@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Guenter Knauf (4 Jul 2009)
+- Markus Koetter provided a patch to avoid getnameinfo() usage which broke a
+  couple of both IPv4 and IPv6 autobuilds.
+
 Daniel Stenberg (29 Jun 2009)
 - Markus Koetter made CURLOPT_FTPPORT (and curl's -P/--ftpport) support a port
   range if given colon-separated after the host name/address part. Like

@@ -1000,22 +1000,23 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
        the IP from the control connection */
 
     sslen = sizeof(ss);
-    if(getsockname(conn->sock[FIRSTSOCKET], (struct sockaddr *)&ss, &sslen)) {
+    if(getsockname(conn->sock[FIRSTSOCKET], sa, &sslen)) {
       failf(data, "getsockname() failed: %s",
           Curl_strerror(conn, SOCKERRNO) );
       if (addr)
         free(addr);
       return CURLE_FTP_PORT_FAILED;
     }
-
-    sslen = sizeof(ss);
-    rc = getnameinfo((struct sockaddr *)&ss, sslen, hbuf, sizeof(hbuf), NULL,
-                     0, NIFLAGS);
-    if(rc) {
-      failf(data, "getnameinfo() returned %d", rc);
-      if (addr)
-        free(addr);
-      return CURLE_FTP_PORT_FAILED;
+    switch(sa->sa_family)
+    {
+#ifdef ENABLE_IPV6
+      case AF_INET6:
+        Curl_inet_ntop(sa->sa_family, &sa6->sin6_addr, hbuf, sizeof(hbuf));
+        break;
+#endif
+      default:
+        Curl_inet_ntop(sa->sa_family, &sa4->sin_addr, hbuf, sizeof(hbuf));
+        break;
     }
     host = hbuf; /* use this host name */
   }
