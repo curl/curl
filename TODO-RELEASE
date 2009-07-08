@@ -11,4 +11,6 @@ To be addressed in 7.19.6 (planned release: August 2009)
 
 244 - patch for [out] parameters
 
-245 - 
+245 - HTTP version getinfo
+
+246 - 
