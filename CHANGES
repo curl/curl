@@ -6,6 +6,27 @@
 
                                   Changelog
 
+Daniel Stenberg (8 Jul 2009)
+- Constantine Sapuntzakis posted bug report #2813123
+  (http://curl.haxx.se/bug/view.cgi?id=2813123) and an a patch that fixes the
+  problem:
+
+  Url A is accessed using auth. Url A redirects to Url B (on a different
+  server0. Url B reuses a persistent connection. Url B has auth, even though
+  it's on a different server.
+
+  Note: if Url B does not reuse a persistent connection, auth is not sent.
+
+  reason:
+
+  data->state.first_host is not initialized becuase Curl_http_connect is not
+  called when a connection is reused.
+
+  Solution:
+
+  move initialization of data->state.first_host to Curl_http. No code before
+  Curl_http uses data->state.first_host anyway.
+
 Guenter Knauf (4 Jul 2009)
 - Markus Koetter provided a patch to avoid getnameinfo() usage which broke a
   couple of both IPv4 and IPv6 autobuilds.
@@ -125,7 +146,7 @@ Daniel Stenberg (4 June 2009)
   knows it will just get a 401/407 back. If the app then replaced the
   Content-Length header, it caused the server to wait for input that libcurl
   wouldn't send. Aaron Oneal reported this problem in bug report #2799008
-  http://curl.haxx.se/bug/view.cgi?id=2799008) and helped us verify the fix.
+  (http://curl.haxx.se/bug/view.cgi?id=2799008) and helped us verify the fix.
 
 Yang Tse (4 Jun 2009)
 - Igor Novoseltsev provided patches and information, that after some

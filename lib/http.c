@@ -1780,17 +1780,6 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
   }
 #endif /* CURL_DISABLE_PROXY */
 
-  if(!data->state.this_is_a_follow) {
-    /* this is not a followed location, get the original host name */
-    if(data->state.first_host)
-      /* Free to avoid leaking memory on multiple requests*/
-      free(data->state.first_host);
-
-    data->state.first_host = strdup(conn->host.name);
-    if(!data->state.first_host)
-      return CURLE_OUT_OF_MEMORY;
-  }
-
   if(conn->protocol & PROT_HTTPS) {
     /* perform SSL initialization */
     if(data->state.used_interface == Curl_if_multi) {
@@ -2093,6 +2082,17 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   }
   else
     http = data->state.proto.http;
+
+  if(!data->state.this_is_a_follow) {
+    /* this is not a followed location, get the original host name */
+    if(data->state.first_host)
+      /* Free to avoid leaking memory on multiple requests*/
+      free(data->state.first_host);
+
+    data->state.first_host = strdup(conn->host.name);
+    if(!data->state.first_host)
+      return CURLE_OUT_OF_MEMORY;
+  }
 
   if( (conn->protocol&(PROT_HTTP|PROT_FTP)) &&
        data->set.upload) {

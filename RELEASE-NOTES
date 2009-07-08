@@ -31,6 +31,7 @@ This release includes the following bugfixes:
  o ftp credentials are added to the url if needed for http proxies
  o curl -o - sends data to stdout using binary mode on windows
  o fixed the separators for "array" style string that CURLINFO_CERTINFO returns
+ o auth problem over several hosts with re-used connection
 
 This release includes the following known bugs:
 
@@ -42,6 +43,7 @@ advice from friends like these:
  Yang Tse, Daniel Fandrich, Kamil Dudka, Caolan McNamara, Frank McGeough,
  Andre Guibert de Bruet, Mike Crowe, Claes Jakobsson, John E. Malmberg,
  Aaron Oneal, Igor Novoseltsev, Eric Wong, Bill Hoffman, Daniel Steinberg,
- Fabian Keil, Michal Marek, Reuven Wachtfogel, Markus Koetter
+ Fabian Keil, Michal Marek, Reuven Wachtfogel, Markus Koetter,
+ Constantine Sapuntzakis
 
         Thanks! (and sorry if I forgot to mention someone)
