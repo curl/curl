@@ -1,9 +1,14 @@
-To be addressed in 7.19.6 (planned release: July 2009)
+To be addressed in 7.19.6 (planned release: August 2009)
 =========================
 
-226 - Active Mode FTPS Data Port Range
+240 - GnuTLS configure fix to find older installations
 
-235 - KNOWN_BUG #65
-      Code adjustment for FTP over socks proxy remains
+241 - expose Curl_nonblock as curlx_nonblock
 
-240 - 
+242 - SSH knownhost support (powered by libssh2 1.2)
+
+243 - ftp QUOTE commands that are allowed to fail but not close the connection
+
+244 - patch for [out] parameters
+
+245 - 
