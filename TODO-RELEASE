@@ -1,8 +1,6 @@
 To be addressed in 7.19.6 (planned release: August 2009)
 =========================
 
-240 - GnuTLS configure fix to find older installations
-
 241 - expose Curl_nonblock as curlx_nonblock
 
 242 - SSH knownhost support (powered by libssh2 1.2)
