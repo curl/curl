@@ -177,59 +177,6 @@ long Curl_timeleft(struct connectdata *conn,
   return timeout_ms;
 }
 
-
-/*
- * Curl_nonblock() set the given socket to either blocking or non-blocking
- * mode based on the 'nonblock' boolean argument. This function is highly
- * portable.
- */
-int Curl_nonblock(curl_socket_t sockfd,    /* operate on this */
-                  int nonblock   /* TRUE or FALSE */)
-{
-#if defined(USE_BLOCKING_SOCKETS)
-
-  return 0; /* returns success */
-
-#elif defined(HAVE_FCNTL_O_NONBLOCK)
-
-  /* most recent unix versions */
-  int flags;
-  flags = fcntl(sockfd, F_GETFL, 0);
-  if(FALSE != nonblock)
-    return fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
-  else
-    return fcntl(sockfd, F_SETFL, flags & (~O_NONBLOCK));
-
-#elif defined(HAVE_IOCTL_FIONBIO)
-
-  /* older unix versions */
-  int flags;
-  flags = nonblock;
-  return ioctl(sockfd, FIONBIO, &flags);
-
-#elif defined(HAVE_IOCTLSOCKET_FIONBIO)
-
-  /* Windows */
-  unsigned long flags;
-  flags = nonblock;
-  return ioctlsocket(sockfd, FIONBIO, &flags);
-
-#elif defined(HAVE_IOCTLSOCKET_CAMEL_FIONBIO)
-
-  /* Amiga */
-  return IoctlSocket(sockfd, FIONBIO, (long)nonblock);
-
-#elif defined(HAVE_SETSOCKOPT_SO_NONBLOCK)
-
-  /* BeOS */
-  long b = nonblock ? 1 : 0;
-  return setsockopt(sockfd, SOL_SOCKET, SO_NONBLOCK, &b, sizeof(b));
-
-#else
-#  error "no non-blocking method was found/used/set"
-#endif
-}
-
 /*
  * waitconnect() waits for a TCP connect on the given socket for the specified
  * number if milliseconds. It returns:
@@ -846,7 +793,7 @@ singleipconnect(struct connectdata *conn,
   }
 
   /* set socket non-blocking */
-  Curl_nonblock(sockfd, TRUE);
+  curlx_nonblock(sockfd, TRUE);
 
   /* Connect TCP sockets, bind UDP */
   if(conn->socktype == SOCK_STREAM)

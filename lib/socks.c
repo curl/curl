@@ -144,7 +144,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
     return CURLE_OPERATION_TIMEDOUT;
   }
 
-  Curl_nonblock(sock, FALSE);
+  curlx_nonblock(sock, FALSE);
 
   /*
    * Compose socks4 request
@@ -344,7 +344,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
     }
   }
 
-  Curl_nonblock(sock, TRUE);
+  curlx_nonblock(sock, TRUE);
 
   return CURLE_OK; /* Proxy was successful! */
 }
@@ -406,7 +406,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     return CURLE_OPERATION_TIMEDOUT;
   }
 
-  Curl_nonblock(sock, TRUE);
+  curlx_nonblock(sock, TRUE);
 
   /* wait until socket gets connected */
   result = Curl_socket_ready(CURL_SOCKET_BAD, sock, (int)timeout);
@@ -437,7 +437,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   socksreq[3] = 2; /* username/password */
 #endif
 
-  Curl_nonblock(sock, FALSE);
+  curlx_nonblock(sock, FALSE);
 
   code = Curl_write_plain(conn, sock, (char *)socksreq, (2 + (int)socksreq[1]),
                           &written);
@@ -446,7 +446,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     return CURLE_COULDNT_CONNECT;
   }
 
-  Curl_nonblock(sock, TRUE);
+  curlx_nonblock(sock, TRUE);
 
   result = Curl_socket_ready(sock, CURL_SOCKET_BAD, (int)timeout);
 
@@ -464,7 +464,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     return CURLE_RECV_ERROR;
   }
 
-  Curl_nonblock(sock, FALSE);
+  curlx_nonblock(sock, FALSE);
 
   result=Curl_blockread_all(conn, sock, (char *)socksreq, 2, &actualread,
                             timeout);
@@ -719,7 +719,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   }
 #endif
 
-  Curl_nonblock(sock, TRUE);
+  curlx_nonblock(sock, TRUE);
   return CURLE_OK; /* Proxy was successful! */
 }
 

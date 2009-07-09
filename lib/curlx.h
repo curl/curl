@@ -53,6 +53,9 @@
   curlx_tvdiff_secs()
 */
 
+#include "nonblock.h"
+/* "nonblock.h" provides curlx_nonblock() */
+
 /* Now setup curlx_ * names for the functions that are to become curlx_ and
    be removed from a future libcurl official API:
    curlx_getenv

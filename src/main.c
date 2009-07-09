@@ -3231,22 +3231,6 @@ static void go_sleep(long ms)
 #endif
 }
 
-/* maybe we could just use Curl_nonblock() instead ... */
-static void set_nonblocking(struct Configurable *config, int fd)
-{
-#if defined(HAVE_FCNTL_O_NONBLOCK)
-  int flags = fcntl(fd, F_GETFL, 0);
-
-  if (flags >= 0)
-    flags = fcntl(fd, F_SETFL, flags | O_NONBLOCK);
-  else
-    warnf(config, "fcntl failed on fd=%d: %s\n", fd, strerror(errno));
-#else
-  (void) config;
-  (void) fd;
-#endif
-}
-
 static size_t my_fwrite(void *buffer, size_t sz, size_t nmemb, void *stream)
 {
   size_t rc;
@@ -4523,7 +4507,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         else if(uploadfile && curlx_strequal(uploadfile, "-")) {
           SET_BINMODE(stdin);
           infd = STDIN_FILENO;
-          set_nonblocking(config, infd);
+          if (curlx_nonblock((curl_socket_t)infd, TRUE) < 0)
+            warnf(config, "fcntl failed on fd=%d: %s\n", infd, strerror(errno));
         }
 
         if(uploadfile && config->resume_from_current)

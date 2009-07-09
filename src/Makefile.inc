@@ -4,7 +4,8 @@
 # the official API, but we re-use the code here to avoid duplication.
 CURLX_ONES =  $(top_srcdir)/lib/strtoofft.c \
 	$(top_srcdir)/lib/strdup.c \
-	$(top_srcdir)/lib/rawstr.c 
+	$(top_srcdir)/lib/rawstr.c \
+	$(top_srcdir)/lib/nonblock.c
 
 CURL_SOURCES = main.c hugehelp.c urlglob.c writeout.c writeenv.c \
 	getpass.c homedir.c curlutil.c os-specific.c

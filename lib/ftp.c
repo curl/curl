@@ -351,7 +351,7 @@ static CURLcode AllowServerConnect(struct connectdata *conn)
       infof(data, "Connection accepted from server\n");
 
       conn->sock[SECONDARYSOCKET] = s;
-      Curl_nonblock(s, TRUE); /* enable non-blocking */
+      curlx_nonblock(s, TRUE); /* enable non-blocking */
     }
     break;
   }

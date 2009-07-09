@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (9 Jul 2009)
+- Eric Wong introduced curlx_nonblock() that the curl tool now (re-)uses for
+  setting a file descriptor non-blocking. Used by the functionality Eric
+  himself brough on June 15th.
+
 Daniel Stenberg (8 Jul 2009)
 - Constantine Sapuntzakis posted bug report #2813123
   (http://curl.haxx.se/bug/view.cgi?id=2813123) and an a patch that fixes the

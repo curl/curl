@@ -23,8 +23,7 @@
  * $Id$
  ***************************************************************************/
 
-int Curl_nonblock(curl_socket_t sockfd,    /* operate on this */
-                  int nonblock   /* TRUE or FALSE */);
+#include "nonblock.h" /* for curlx_nonblock(), formerly Curl_nonblock() */
 
 CURLcode Curl_is_connected(struct connectdata *conn,
                            int sockindex,
