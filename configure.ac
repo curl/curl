@@ -1548,6 +1548,7 @@ if test "$OPENSSL_ENABLED" != "1"; then
 
     addld=""
     if test "x$OPT_GNUTLS" = "xyes"; then
+      dnl this is with no partiular path given
       CURL_CHECK_PKGCONFIG(gnutls)
 
       if test "$PKGCONFIG" != "no" ; then
@@ -1556,14 +1557,34 @@ if test "$OPENSSL_ENABLED" != "1"; then
         addcflags=`$PKGCONFIG --cflags-only-I gnutls`
         version=`$PKGCONFIG --modversion gnutls`
         gtlslib=`echo $addld | $SED -e 's/-L//'`
+      else
+        dnl without pkg-config, we try libgnutls-config as that was how it
+        dnl used to be done
+        check=`libgnutls-config --version 2>/dev/null`
+        if test -n "$check"; then
+          addlib=`libgnutls-config --libs`
+          addcflags=`libgnutls-config --cflags`
+          version=`libgnutls-config --version`
+          gtlslib=`libgnutls-config --prefix`/lib$libsuff
+        fi
       fi
     else
-      dnl without pkg-config, we guess a lot!
-      addlib=-lgnutls
-      addld=-L$OPT_GNUTLS/lib$libsuff
-      addcflags=-I$OPT_GNUTLS/include
-      version="" # we just don't know
-      gtlslib=$OPT_GNUTLS/lib$libsuff
+      dnl this is with a given path, first check if there's a libgnutls-config
+      dnl there and if not, make an educated guess
+      check=`$OPT_GNUTLS/libgnutls-config --version 2>/dev/null`
+      if test -n "$check"; then
+        addlib=`$OPT_GNUTLS/libgnutls-config --libs`
+        addcflags=`$OPT_GNUTLS/libgnutls-config --cflags`
+        version=`$OPT_GNUTLS/libgnutls-config --version`
+        gtlslib=`$OPT_GNUTLS/libgnutls-config --prefix`/lib$libsuff
+      else
+        dnl without pkg-config and libgnutls-config, we guess a lot!
+        addlib=-lgnutls
+        addld=-L$OPT_GNUTLS/lib$libsuff
+        addcflags=-I$OPT_GNUTLS/include
+        version="" # we just don't know
+        gtlslib=$OPT_GNUTLS/lib$libsuff
+      fi
     fi
 
     if test -z "$version"; then
@@ -2384,7 +2405,7 @@ AC_HELP_STRING([--disable-hidden-symbols],[Leave all symbols with default visibi
 
 dnl ************************************************************
 dnl enforce SONAME bump
-dnl 
+dnl
 
 AC_MSG_CHECKING([whether to enforce SONAME bump])
 AC_ARG_ENABLE(soname-bump,
@@ -2573,7 +2594,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   ca cert bundle:  ${ca}
   ca cert path:    ${capath}
   LDAP support:    ${curl_ldap_msg}
-  LDAPS support:   ${curl_ldaps_msg} 
+  LDAPS support:   ${curl_ldaps_msg}
 ])
 
 if test "x$soname_bump" = "xyes"; then
