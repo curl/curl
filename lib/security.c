@@ -331,7 +331,7 @@ Curl_sec_send(struct connectdata *conn, int num, const char *buffer, int length)
 int
 Curl_sec_putc(struct connectdata *conn, int c, FILE *F)
 {
-  char ch = c;
+  char ch = (char)c;
   if(conn->data_prot == prot_clear)
     return putc(c, F);
 
