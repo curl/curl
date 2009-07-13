@@ -322,6 +322,7 @@ logit "CFLAGS = ".$ENV{CFLAGS};
 logit "LDFLAGS = ".$ENV{LDFLAGS};
 logit "CC = ".$ENV{CC};
 logit "MAKEFLAGS = ".$ENV{MAKEFLAGS};
+logit "PKG_CONFIG_PATH = ".$ENV{PKG_CONFIG_PATH};
 logit "target = ".$targetos;
 logit "version = $version"; # script version
 logit "date = $timestamp";  # When the test build starts
