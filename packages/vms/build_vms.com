@@ -34,7 +34,7 @@ $!                   and updated it to do hardware dependant builds.
 $! 29-JAN-2004, MSK, moved logical defines into defines.com
 $!  6-FEB-2004, MSK, put in various SSL support bits
 $!  9-MAR-2004, MSK, the config-vms.h* files are now copied to the lib and
-$!                   src directories as config.h.
+$!                   src directories as curl_config.h.
 $! 15-MAR-2004, MSK, All of the curlmsg*.* files have also been moved to 
 $!                   this build directory.  They will be copied to the src 
 $!                   directory before build.  The .msg file will be compiled 

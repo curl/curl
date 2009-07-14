@@ -2,15 +2,15 @@ set(LIB_NAME libcurl)
 
 configure_file(${CURL_SOURCE_DIR}/include/curl/curlbuild.h.cmake
   ${CURL_BINARY_DIR}/include/curl/curlbuild.h)
-configure_file(config.h.cmake
-  ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+configure_file(curl_config.h.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/curl_config.h)
 
 
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
 
 list(APPEND HHEADERS
-  ${CMAKE_CURRENT_BINARY_DIR}/config.h
+  ${CMAKE_CURRENT_BINARY_DIR}/curl_config.h
   ${CURL_BINARY_DIR}/include/curl/curlbuild.h
   )
 

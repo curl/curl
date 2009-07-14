@@ -230,7 +230,7 @@ sub mydie($){
 
 sub get_host_triplet {
   my $triplet;
-  my $configfile = "$pwd/$build/lib/config.h";
+  my $configfile = "$pwd/$build/lib/curl_config.h";
 
   if(-f $configfile && -s $configfile && open(LIBCONFIGH, "<$configfile")) {
     while(<LIBCONFIGH>) {

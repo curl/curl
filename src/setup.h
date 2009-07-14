@@ -39,7 +39,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include "curl_config.h"
 #else
 
 #ifdef WIN32

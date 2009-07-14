@@ -1,4 +1,4 @@
-/* config.h.in.  Generated automatically from configure.in by autoheader.  */
+/* curl_config.h.in.  Generated automatically from configure.in by autoheader.  */
 /* Name of this package! */
 #undef PACKAGE
 

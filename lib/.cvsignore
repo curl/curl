@@ -9,7 +9,7 @@ DLL-Release
 LIB-Debug
 LIB-Release
 Makefile
-config.h
+curl_config.h
 getdate.c
 libcurl.dsp
 libcurl.vcproj

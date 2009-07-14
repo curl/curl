@@ -66,7 +66,7 @@ Options:
 Supported PROGRAM values:
   aclocal      touch file \`aclocal.m4'
   autoconf     touch file \`configure'
-  autoheader   touch file \`config.h.in'
+  autoheader   touch file \`curl_config.h.in'
   automake     touch all \`Makefile.in' files
   bison        create \`y.tab.[ch]', if possible, from existing .[ch]
   flex         create \`lex.yy.c', if possible, from existing .c
@@ -112,7 +112,7 @@ WARNING: \`$1' is missing on your system.  You should only need it if
          to install the \`Autoconf' and \`GNU m4' packages.  Grab them
          from any GNU archive site."
     files=`sed -n 's/^[ ]*A[CM]_CONFIG_HEADER(\([^)]*\)).*/\1/p' ${configure_ac}`
-    test -z "$files" && files="config.h"
+    test -z "$files" && files="curl_config.h"
     touch_files=
     for f in $files; do
       case "$f" in

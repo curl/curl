@@ -270,8 +270,8 @@ for fname in .deps \
     autom4te.cache \
     compile \
     config.guess \
-    config.h \
-    config.h.in \
+    curl_config.h \
+    curl_config.h.in \
     config.log \
     config.lt \
     config.status \
@@ -321,8 +321,8 @@ fi
 echo "buildconf: running autoheader"
 ${AUTOHEADER:-autoheader} || die "The autoheader command failed"
 
-echo "buildconf: cp lib/config.h.in src/config.h.in"
-cp lib/config.h.in src/config.h.in
+echo "buildconf: cp lib/curl_config.h.in src/curl_config.h.in"
+cp lib/curl_config.h.in src/curl_config.h.in
 
 echo "buildconf: running autoconf"
 ${AUTOCONF:-autoconf}     || die "The autoconf command failed"

@@ -4,7 +4,7 @@
 #
 # $Id$
 
-DEPEND_PREREQ = config.h
+DEPEND_PREREQ = curl_config.h
 TOPDIR = ..
 
 include ../packages/DOS/common.dj
@@ -17,18 +17,18 @@ CURL_LIB = libcurl.a
 # NOTE: if ../include/curl/curlbuild.h is missing, you're probably building
 # this from a CVS checkout and then you need to run buildconf.bat first.
 
-all: $(OBJ_DIR) config.h $(CURL_LIB)
+all: $(OBJ_DIR) curl_config.h $(CURL_LIB)
 
 $(CURL_LIB): $(OBJECTS)
 	ar rs $@ $?
 
-config.h: config.dos
+curl_config.h: config.dos
 	$(COPY) $^ $@
 
 # clean generated files
 #
 genclean:
-	- $(DELETE) config.h
+	- $(DELETE) curl_config.h
 
 # clean object files and subdir
 #

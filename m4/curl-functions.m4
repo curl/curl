@@ -4830,7 +4830,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
   #
   if test "$tst_compi_strerror_r" = "yes" &&
      test "$tst_allow_strerror_r" = "unknown"; then
-    AC_MSG_WARN([cannot determine strerror_r() style: edit lib/config.h manually.])
+    AC_MSG_WARN([cannot determine strerror_r() style: edit lib/curl_config.h manually.])
   fi
   #
 ])

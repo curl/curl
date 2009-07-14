@@ -1614,8 +1614,8 @@ sub checksystem {
         die "couldn't get curl's version";
     }
 
-    if(-r "../lib/config.h") {
-        open(CONF, "<../lib/config.h");
+    if(-r "../lib/curl_config.h") {
+        open(CONF, "<../lib/curl_config.h");
         while(<CONF>) {
             if($_ =~ /^\#define HAVE_GETRLIMIT/) {
                 $has_getrlimit = 1;

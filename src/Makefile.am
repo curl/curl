@@ -29,8 +29,8 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 #
 # $(top_builddir)/include is for libcurl's generated curl/curlbuild.h file
 # $(top_srcdir)/include is for libcurl's external include files
-# $(top_builddir)/lib is for libcurl's generated lib/config.h file
-# $(top_builddir)/src is for curl's generated src/config.h file
+# $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
+# $(top_builddir)/src is for curl's generated src/curl_config.h file
 # $(top_srcdir)/lib is for libcurl's lib/setup.h and other "borrowed" files
 # $(top_srcdir)/src is for curl's src/setup.h and "curl-private" files
 
@@ -54,7 +54,7 @@ CLEANFILES = hugehelp.c
 NROFF=env LC_ALL=C @NROFF@ @MANOPT@ # figured out by the configure script
 
 EXTRA_DIST = mkhelp.pl makefile.dj Makefile.vc6 Makefile.b32 Makefile.m32 \
-	Makefile.riscos config.h.in macos/curl.mcp.xml.sit.hqx		  \
+	Makefile.riscos curl_config.h.in macos/curl.mcp.xml.sit.hqx	  \
 	macos/MACINSTALL.TXT macos/src/curl_GUSIConfig.cpp vc6curlsrc.dsp \
 	macos/src/macos_main.cpp config-amigaos.h makefile.amiga curl.rc  \
 	Makefile.netware Makefile.inc Makefile.Watcom vc6curlsrc.dsw      \

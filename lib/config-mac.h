@@ -1,11 +1,11 @@
 #ifndef __LIB_CONFIG_MAC_H
 #define __LIB_CONFIG_MAC_H
 
-/* ================================================================ */
-/*    lib/config-mac.h - Hand crafted config file for Mac OS 9      */
-/* ================================================================ */
-/*   On Mac OS X you must run configure to generate config.h file   */
-/* ================================================================ */
+/* =================================================================== */
+/*   lib/config-mac.h - Hand crafted config file for Mac OS 9          */
+/* =================================================================== */
+/*  On Mac OS X you must run configure to generate curl_config.h file  */
+/* =================================================================== */
 
 #define OS "mac"
 

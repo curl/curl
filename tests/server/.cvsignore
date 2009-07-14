@@ -3,7 +3,7 @@ Makefile.in
 sws
 .deps
 stamp-h*
-config.h
+curl_config.h
 Makefile
 getpart
 sockfilt

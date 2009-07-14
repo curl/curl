@@ -7,8 +7,8 @@ LIB-Debug
 LIB-Release
 Makefile
 Makefile.in
-config.h
-config.h.in
+curl_config.h
+curl_config.h.in
 curl
 hugehelp.c
 stamp-h*

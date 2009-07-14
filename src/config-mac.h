@@ -1,11 +1,11 @@
 #ifndef __SRC_CONFIG_MAC_H
 #define __SRC_CONFIG_MAC_H
 
-/* ================================================================ */
-/*    src/config-mac.h - Hand crafted config file for Mac OS 9      */
-/* ================================================================ */
-/*   On Mac OS X you must run configure to generate config.h file   */
-/* ================================================================ */
+/* =================================================================== */
+/*   src/config-mac.h - Hand crafted config file for Mac OS 9          */
+/* =================================================================== */
+/*  On Mac OS X you must run configure to generate curl_config.h file  */
+/* =================================================================== */
 
 /* Define to 1 if you want the built-in manual */
 #define USE_MANUAL 1

@@ -29,11 +29,11 @@ DOCS = README.encoding README.memoryleak README.ares README.curlx	\
  README.hostip README.multi_socket README.httpauth README.pipelining    \
  README.NSS README.curl_off_t
 
-CMAKE_DIST = CMakeLists.txt config.h.cmake
+CMAKE_DIST = CMakeLists.txt curl_config.h.cmake
 
 EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 Makefile.riscos $(DSP) \
  vc6libcurl.dsw config-win32.h config-win32ce.h config-riscos.h            \
- config-mac.h config.h.in makefile.dj config.dos libcurl.plist             \
+ config-mac.h curl_config.h.in makefile.dj config.dos libcurl.plist        \
  libcurl.rc config-amigaos.h amigaos.c amigaos.h makefile.amiga		   \
  Makefile.netware nwlib.c nwos.c libcurl.imp msvcproj.head msvcproj.foot   \
  config-win32ce.h config-os400.h setup-os400.h config-symbian.h		   \
@@ -52,7 +52,7 @@ LIBCURL_LIBS = @LIBCURL_LIBS@
 #
 # $(top_builddir)/include is for libcurl's generated curl/curlbuild.h file
 # $(top_srcdir)/include is for libcurl's external include files
-# $(top_builddir)/lib is for libcurl's generated lib/config.h file
+# $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
 # $(top_srcdir)/lib is for libcurl's lib/setup.h and other "private" files
 # $(top_builddir)/ares is for in-tree c-ares's generated ares_build.h file
 # $(top_srcdir)/ares is for in-tree c-ares's external include files

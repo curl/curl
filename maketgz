@@ -92,8 +92,8 @@ findprog()
   return 0
 }
 
-echo "maketgz: cp lib/config.h.in src/config.h.in"
-cp lib/config.h.in src/config.h.in
+echo "maketgz: cp lib/curl_config.h.in src/curl_config.h.in"
+cp lib/curl_config.h.in src/curl_config.h.in
 
 ############################################################################
 #

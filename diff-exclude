@@ -18,7 +18,7 @@ autom4te.cache
 *.patch
 CVS
 *.asc
-config.h
+curl_config.h
 *.la
 *.lai
 libtool
