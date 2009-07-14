@@ -566,14 +566,14 @@ else {
   mydie "no curlbuild.h created/found";
 }
 
-logit_spaced "display lib/config$confsuffix.h";
-open(F, "lib/config$confsuffix.h") or die "lib/config$confsuffix.h: $!";
+logit_spaced "display lib/curl_config$confsuffix.h";
+open(F, "lib/curl_config$confsuffix.h") or die "lib/curl_config$confsuffix.h: $!";
 while (<F>) {
   print if /^ *#/;
 }
 close(F);
 
-if (grepfile("define USE_ARES", "lib/config$confsuffix.h")) {
+if (grepfile("define USE_ARES", "lib/curl_config$confsuffix.h")) {
   print "\n";
   logit "setup to build ares";
 
@@ -602,8 +602,8 @@ if (grepfile("define USE_ARES", "lib/config$confsuffix.h")) {
     mydie "no ares_build.h created/found";
   }
 
-  logit_spaced "display ares/config$confsuffix.h";
-  if(open(F, "ares/config$confsuffix.h")) {
+  logit_spaced "display ares/ares_config$confsuffix.h";
+  if(open(F, "ares/ares_config$confsuffix.h")) {
       while (<F>) {
           print if /^ *#/;
       }
