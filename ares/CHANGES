@@ -1,5 +1,9 @@
   Changelog for the c-ares project
 
+* 14 Jul 2009 (Guenter Knauf)
+- renamed generated config.h to ares_config.h to avoid any future clashes
+  with config.h from other projects.
+  
 * June 8 2009 (Yang Tse)
 - Removed buildconf.bat from release and daily snapshot archives. This
   file is only for CVS tree checkout builds.

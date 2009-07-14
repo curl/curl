@@ -30,7 +30,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include "ares_config.h"
 #else
 
 #ifdef WIN32
@@ -154,7 +154,7 @@
 #endif /* HAVE_CONFIG_H */
 
 /*
- * Recent autoconf versions define these symbols in config.h. We don't
+ * Recent autoconf versions define these symbols in ares_config.h. We don't
  * want them (since they collide with the libcurl ones when we build
  *  --enable-debug) so we undef them again here.
  */

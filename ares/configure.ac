@@ -7,7 +7,7 @@ AC_INIT([c-ares], [-],
 CARES_OVERRIDE_AUTOCONF
 
 AC_CONFIG_SRCDIR([ares_ipv6.h])
-AM_CONFIG_HEADER([config.h ares_build.h])
+AM_CONFIG_HEADER([ares_config.h ares_build.h])
 AM_MAINTAINER_MODE
 
 CARES_CHECK_OPTION_DEBUG

@@ -37,13 +37,13 @@ EX_LIBS += $(WATT32_ROOT)/lib/libwatt.a
 
 OBJECTS = $(addprefix $(OBJ_DIR)/, $(CSOURCES:.c=.o))
 
-all: $(OBJ_DIR) config.h libcares.a ahost.exe adig.exe acountry.exe
+all: $(OBJ_DIR) ares_config.h libcares.a ahost.exe adig.exe acountry.exe
 	@echo Welcome to c-ares.
 
 libcares.a: $(OBJECTS)
 	ar rs $@ $?
 
-config.h: config.dos
+ares_config.h: config.dos
 	$(COPY) $^ $@
 
 ahost.exe: ahost.c $(OBJ_DIR)/ares_getopt.o $(OBJ_HACK)
@@ -58,7 +58,7 @@ acountry.exe: acountry.c $(OBJ_DIR)/ares_getopt.o $(OBJ_HACK)
 # clean generated files
 #
 genclean:
-	- $(DELETE) config.h
+	- $(DELETE) ares_config.h
 
 # clean object files and subdir
 #
