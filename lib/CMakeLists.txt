@@ -55,6 +55,7 @@ if(HAVE_FEATURES_H)
     easy.c
     formdata.c
     getenv.c
+    nonblock.c
     hash.c
     http.c
     if2ip.c 
