@@ -5,7 +5,6 @@ configure_file(${CURL_SOURCE_DIR}/include/curl/curlbuild.h.cmake
 configure_file(curl_config.h.cmake
   ${CMAKE_CURRENT_BINARY_DIR}/curl_config.h)
 
-
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
 
@@ -77,6 +76,9 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/..)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+if(CURL_USE_ARES)
+  include_directories(${CARES_INCLUDE_DIR})
+endif()
 
 if(CURL_STATICLIB)
   # Static lib

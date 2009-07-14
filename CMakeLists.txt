@@ -68,6 +68,17 @@ endif()
 option(BUILD_CURL_EXE "Set to ON to build cURL executable." ON)
 option(BUILD_CURL_TESTS "Set to ON to build cURL tests." ON)
 option(CURL_STATICLIB "Set to ON to build libcurl with static linking." OFF)
+option(CURL_USE_ARES "Set to ON to enable c-ares support" OFF)
+# initialize CURL_LIBS
+set(CURL_LIBS "")
+
+if(CURL_USE_ARES)
+  set(USE_ARES ${CURL_USE_ARES})
+  find_package(CARES REQUIRED) 
+  list(APPEND CURL_LIBS ${CARES_LIBRARY} )
+  message("CURL_LIBS = ${CURL_LIBS}")
+  set(CURL_LIBS ${CURL_LIBS} ${CARES_LIBRARY})
+endif()
 
 option(BUILD_DASHBOARD_REPORTS "Set to ON to activate reporting of cURL builds here http://www.cdash.org/CDashPublic/index.php?project=CURL" OFF)
 if(BUILD_DASHBOARD_REPORTS)
@@ -188,7 +199,6 @@ endif(WIN32)
 
 # This macro checks if the symbol exists in the library and if it
 # does, it appends library to the list.
-set(CURL_LIBS "")
 macro(CHECK_LIBRARY_EXISTS_CONCAT LIBRARY SYMBOL VARIABLE)
   check_library_exists("${LIBRARY};${CURL_LIBS}" ${SYMBOL} "" 
     ${VARIABLE})
