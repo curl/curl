@@ -3,7 +3,7 @@
 # Android source tree.  Then build them with 'make curl' or just 'make libcurl'
 # from the Android root.
 #
-# Note: you must first create a config.h file by running configure in the
+# Note: you must first create a curl_config.h file by running configure in the
 # Android environment. I haven't found an easy way to do this yet. If there is
 # no easy way, a static config-android.h may need to be created and checked in
 # to the libcurl source tree.

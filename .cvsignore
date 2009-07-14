@@ -5,7 +5,7 @@ aclocal.m4.bak
 autom4te.cache
 compile
 config.guess
-config.h
+curl_config.h
 config.log
 config.lt
 config.status

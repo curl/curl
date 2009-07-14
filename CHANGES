@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Guenter Knauf (14 Jul 2009)
+- renamed generated config.h to curl_config.h to avoid any future clashes
+  with config.h from other projects.
+  
 Daniel Stenberg (9 Jul 2009)
 - Eric Wong introduced curlx_nonblock() that the curl tool now (re-)uses for
   setting a file descriptor non-blocking. Used by the functionality Eric
