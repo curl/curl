@@ -1,6 +1,6 @@
 #ifdef CURLDEBUG
-#ifndef _CURL_MEDEBUG_H
-#define _CURL_MEDEBUG_H
+#ifndef _CURL_MEMDEBUG_H
+#define _CURL_MEMDEBUG_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -125,5 +125,5 @@ CURL_EXTERN int curl_fclose(FILE *file, int line, const char *source);
 
 #endif /* MEMDEBUG_NODEFINES */
 
-#endif /* _CURL_MEDEBUG_H */
+#endif /* _CURL_MEMDEBUG_H */
 #endif /* CURLDEBUG */
