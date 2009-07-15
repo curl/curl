@@ -69,7 +69,7 @@ OBJS = $(OBJ_DIR)\base64.obj           $(OBJ_DIR)\connect.obj        &
        $(OBJ_DIR)\telnet.obj           $(OBJ_DIR)\tftp.obj           &
        $(OBJ_DIR)\timeval.obj          $(OBJ_DIR)\transfer.obj       &
        $(OBJ_DIR)\url.obj              $(OBJ_DIR)\version.obj        &
-       $(OBJ_DIR)\slist.obj
+       $(OBJ_DIR)\slist.obj            $(OBJ_DIR)\nonblock.obj
 
 #
 # Use $(OBJS) as a template to generate $(OBJS_STAT) and $(OBJS_DYN).
@@ -525,6 +525,11 @@ $(OBJ_DIR)\nss.obj: nss.c setup.h config-win32.h ..\include\curl\curlbuild.h &
   url.h connect.h strequal.h select.h sslgen.h ..\include\curl\mprintf.h
 $(OBJ_DIR)\qssl.obj: qssl.c setup.h config-win32.h ..\include\curl\curlbuild.h &
   ..\include\curl\curlrules.h setup_once.h
+$(OBJ_DIR)\nonblock.obj: nonblock.c setup.h config-win32.h ..\include\curl\curlbuild.h &
+  ..\include\curl\curlrules.h setup_once.h nonblock.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h &
+  ..\include\curl\curlrules.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h
 $(OBJ_DIR)\rawstr.obj: rawstr.c setup.h config-win32.h ..\include\curl\curlbuild.h &
   ..\include\curl\curlrules.h setup_once.h rawstr.h &
   ..\include\curl\curl.h ..\include\curl\curlver.h &

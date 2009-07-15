@@ -99,6 +99,7 @@ RELEASE_OBJS= \
 	homedirr.obj \
 	curlutilr.obj \
 	os-specificr.obj \
+	nonblockr.obj \
 	rawstrr.obj \
 	strtoofftr.obj \
 	mainr.obj \
@@ -112,6 +113,7 @@ DEBUG_OBJS= \
 	homedird.obj \
 	curlutild.obj \
 	os-specificd.obj \
+	nonblockd.obj \
 	rawstrd.obj \
 	strtoofftd.obj \
 	maind.obj \
@@ -251,6 +253,8 @@ curlutilr.obj: curlutil.c
 	$(CCR) $(CFLAGS) /Fo"$@" curlutil.c
 os-specificr.obj: os-specific.c
 	$(CCR) $(CFLAGS) /Fo"$@" os-specific.c
+nonblockr.obj: ../lib/nonblock.c
+	$(CCR) $(CFLAGS) /Fo"$@" ../lib/nonblock.c
 rawstrr.obj: ../lib/rawstr.c
 	$(CCR) $(CFLAGS) /Fo"$@" ../lib/rawstr.c
 strtoofftr.obj: ../lib/strtoofft.c
@@ -275,6 +279,8 @@ curlutild.obj: curlutil.c
 	$(CCD) $(CFLAGS) /Fo"$@" curlutil.c
 os-specificd.obj: os-specific.c
 	$(CCD) $(CFLAGS) /Fo"$@" os-specific.c
+nonblockd.obj: ../lib/nonblock.c
+	$(CCD) $(CFLAGS) /Fo"$@" ../lib/nonblock.c
 rawstrd.obj: ../lib/rawstr.c
 	$(CCD) $(CFLAGS) /Fo"$@" ../lib/rawstr.c
 strtoofftd.obj: ../lib/strtoofft.c

@@ -4,7 +4,7 @@
 # Contact: easygcc@melotech.co.uk
 
 # Project objects:
-objs =	o.hugehelp o.main o.urlglob o.writeout o.writeenv o.rawstr
+objs =	o.hugehelp o.main o.urlglob o.writeout o.writeenv o.rawstr o.nonblock
 	
 
 # Compile options:
@@ -36,6 +36,9 @@ o.writeenv:	c.writeenv
 
 o.rawstr:	../lib/c.rawstr
 		gcc $(compileropts) -c -o rawstr.o ../lib/c.rawstr
+
+o.nonblock:	../lib/c.nonblock
+		gcc $(compileropts) -c -o nonblock.o ../lib/c.nonblock
 
 # Dynamic dependancies:
 o.hugehelp:	c.hugehelp

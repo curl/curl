@@ -70,6 +70,7 @@ C_SRC += memdebug.c
 C_SRC += mprintf.c
 C_SRC += multi.c
 C_SRC += netrc.c
+C_SRC += nonblock.c
 C_SRC += nss.c
 C_SRC += parsedate.c
 C_SRC += progress.c

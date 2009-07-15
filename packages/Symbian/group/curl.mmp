@@ -13,7 +13,7 @@ SOURCE \
 
 SOURCEPATH  ../../../lib
 SOURCE \
-    rawstr.c
+    rawstr.c nonblock.c
 
 USERINCLUDE ../../../src ../../../lib ../../../include/curl
 

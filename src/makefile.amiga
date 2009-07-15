@@ -14,7 +14,7 @@ MANPAGE =	../docs/curl.1
 README	=	../docs/MANUAL
 MKHELP	=	../src/mkhelp.pl
 
-OBJS	=	getpass.c hugehelp.c main.c urlglob.c writeenv.c writeout.c curlutil.c os-specific.c ../lib/rawstr.c
+OBJS	=	getpass.c hugehelp.c main.c urlglob.c writeenv.c writeout.c curlutil.c os-specific.c ../lib/rawstr.c ../lib/nonblock.c
 
 
 all:	hugehelp.c $(OBJS:.c=.o)

@@ -13,7 +13,7 @@ objs =	o.base64 o.connect o.cookie o.dict \
 	o.security o.select o.sendf o.speedcheck o.ssluse \
 	o.strequal o.strtok o.telnet o.timeval \
 	o.transfer o.url o.version o.strtoofft o.sslgen o.gtls \
-	o.rawstr o.curl_addrinfo o.slist
+	o.rawstr o.curl_addrinfo o.slist o.nonblock
 
 # Compile options:
 linkopts	= -o libcurl
@@ -134,6 +134,9 @@ o.sslgen:	c.sslgen
 
 o.ssluse:	c.ssluse
 		gcc $(compileropts) -c -o ssluse.o c.ssluse
+
+o.nonblock:	c.nonblock
+		gcc $(compileropts) -c -o nonblock.o c.nonblock
 
 o.rawstr:	c.rawstr
 		gcc $(compileropts) -c -o rawstr.o c.rawstr

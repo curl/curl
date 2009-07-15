@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Fandrich (15 Jul 2009)
+- Added nonblock.c to the non-automake makefiles (note that the dependencies
+  in the Watcom makefiles aren't quite correct).
+
 Michal Marek (15 Jul 2009)
 - Changed the description of CURLINFO_OS_ERRNO to make it clear that the
   errno is not reset on success.

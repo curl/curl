@@ -18,7 +18,7 @@ OBJS = amigaos.c base64.c connect.c content_encoding.c cookie.c dict.c easy.c \
 	progress.c security.c select.c sendf.c share.c speedcheck.c ssluse.c  \
 	strequal.c strtok.c telnet.c timeval.c transfer.c url.c version.c     \
 	sslgen.c gtls.c strerror.c rawstr.c curl_addrinfo.c		      \
-	socks_gssapi.c socks_sspi.c curl_sspi.c slist.c
+	socks_gssapi.c socks_sspi.c curl_sspi.c slist.c nonblock.c
 
 all:	$(OBJS:.c=.o)
 	ar cru libcurl.a $(OBJS:.c=.o)
