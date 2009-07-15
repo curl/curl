@@ -140,6 +140,7 @@
 
 /* on windows socklen_t is in here */
 #ifdef _WIN32
+#  include <winsock2.h>
 #  include <ws2tcpip.h>
 #endif
 
