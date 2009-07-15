@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Michal Marek (15 Jul 2009)
+- Changed the description of CURLINFO_OS_ERRNO to make it clear that the
+  errno is not reset on success.
+
 Guenter Knauf (14 Jul 2009)
 - renamed generated config.h to curl_config.h to avoid any future clashes
   with config.h from other projects.
