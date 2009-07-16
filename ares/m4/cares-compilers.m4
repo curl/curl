@@ -1150,7 +1150,8 @@ AC_DEFUN([CARES_CHECK_CURLDEBUG], [
   if test "$want_curldebug" = "yes"; then
     dnl TODO: Verify if the BUILDING_LIBCURL definition is still required.
     AC_DEFINE(BUILDING_LIBCURL, 1, [when building as static part of libcurl])
-    CPPFLAGS="$CPPFLAGS -DCURLDEBUG"
+    # CPPFLAGS="$CPPFLAGS -DCURLDEBUG"
+    CPPFLAGS="$CPPFLAGS -DCURLDEBUG -I../lib"
     squeeze CPPFLAGS
   fi
   #
