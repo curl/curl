@@ -4004,7 +4004,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
       return CURLE_OUT_OF_MEMORY;
     }
 
-    dlen -= ftpc->file?strlen(ftpc->file):0;
+    dlen -= ftpc->file?(int)strlen(ftpc->file):0;
     if((dlen == (int)strlen(ftpc->prevpath)) &&
        strnequal(path, ftpc->prevpath, dlen)) {
       infof(data, "Request has same path as previous transfer\n");

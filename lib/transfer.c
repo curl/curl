@@ -244,7 +244,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
       data->req.upload_done = TRUE;
     }
 
-    nread+=strlen(endofline_native); /* for the added end of line */
+    nread+=(int)strlen(endofline_native); /* for the added end of line */
   }
 #ifdef CURL_DOES_CONVERSIONS
   else if((data->set.prefer_ascii) && (!sending_http_headers)) {
