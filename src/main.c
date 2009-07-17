@@ -3056,11 +3056,11 @@ static int parseconfig(const char *filename,
             /* We got a valid filename - get the directory part */
             char *lastdirchar = strrchr(filebuffer, '\\');
             if (lastdirchar) {
-              int remaining;
+              size_t remaining;
               *lastdirchar = 0;
               /* If we have enough space, build the RC filename */
               remaining = sizeof(filebuffer) - strlen(filebuffer);
-              if ((int)strlen(CURLRC) < remaining - 1) {
+              if (strlen(CURLRC) < remaining - 1) {
                 snprintf(lastdirchar, remaining,
                          "%s%s", DIR_CHAR, CURLRC);
                 /* Don't bother checking if it exists - we do
