@@ -585,48 +585,6 @@ static char * nss_get_password(PK11SlotInfo * slot, PRBool retry, void *arg)
     return (char *)PORT_Strdup((char *)arg);
 }
 
-static SECStatus nss_Init_Tokens(struct connectdata * conn)
-{
-  PK11SlotList *slotList;
-  PK11SlotListElement *listEntry;
-  SECStatus ret, status = SECSuccess;
-
-  PK11_SetPasswordFunc(nss_get_password);
-
-  slotList =
-    PK11_GetAllTokens(CKM_INVALID_MECHANISM, PR_FALSE, PR_TRUE, NULL);
-
-  for(listEntry = PK11_GetFirstSafe(slotList);
-      listEntry; listEntry = listEntry->next) {
-    PK11SlotInfo *slot = listEntry->slot;
-
-    if(PK11_NeedLogin(slot) && PK11_NeedUserInit(slot)) {
-      if(slot == PK11_GetInternalKeySlot()) {
-        failf(conn->data, "The NSS database has not been initialized");
-      }
-      else {
-        failf(conn->data, "The token %s has not been initialized",
-              PK11_GetTokenName(slot));
-      }
-      PK11_FreeSlot(slot);
-      continue;
-    }
-
-    ret = PK11_Authenticate(slot, PR_TRUE,
-                            conn->data->set.str[STRING_KEY_PASSWD]);
-    if(SECSuccess != ret) {
-      if(PR_GetError() == SEC_ERROR_BAD_PASSWORD)
-        infof(conn->data, "The password for token '%s' is incorrect\n",
-              PK11_GetTokenName(slot));
-      status = SECFailure;
-      break;
-    }
-    PK11_FreeSlot(slot);
-  }
-
-  return status;
-}
-
 static SECStatus BadCertHandler(void *arg, PRFileDesc *sock)
 {
   SECStatus success = SECSuccess;
@@ -692,15 +650,37 @@ static SECStatus HandshakeCallback(PRFileDesc *sock, void *arg)
   return SECSuccess;
 }
 
+static void display_cert_info(struct SessionHandle *data, CERTCertificate *cert) {
+    char *subject, *issuer, *common_name;
+    PRExplodedTime printableTime;
+    char timeString[256];
+    PRTime notBefore, notAfter;
+
+    subject = CERT_NameToAscii(&cert->subject);
+    issuer = CERT_NameToAscii(&cert->issuer);
+    common_name = CERT_GetCommonName(&cert->subject);
+    infof(data, "\tsubject: %s\n", subject);
+
+    CERT_GetCertTimes(cert, &notBefore, &notAfter);
+    PR_ExplodeTime(notBefore, PR_GMTParameters, &printableTime);
+    PR_FormatTime(timeString, 256, "%b %d %H:%M:%S %Y GMT", &printableTime);
+    infof(data, "\tstart date: %s\n", timeString);
+    PR_ExplodeTime(notAfter, PR_GMTParameters, &printableTime);
+    PR_FormatTime(timeString, 256, "%b %d %H:%M:%S %Y GMT", &printableTime);
+    infof(data, "\texpire date: %s\n", timeString);
+    infof(data, "\tcommon name: %s\n", common_name);
+    infof(data, "\tissuer: %s\n", issuer);
+
+    PR_Free(subject);
+    PR_Free(issuer);
+    PR_Free(common_name);
+}
+
 static void display_conn_info(struct connectdata *conn, PRFileDesc *sock)
 {
   SSLChannelInfo channel;
   SSLCipherSuiteInfo suite;
   CERTCertificate *cert;
-  char *subject, *issuer, *common_name;
-  PRExplodedTime printableTime;
-  char timeString[256];
-  PRTime notBefore, notAfter;
 
   if(SSL_GetChannelInfo(sock, &channel, sizeof channel) ==
      SECSuccess && channel.length == sizeof channel &&
@@ -714,25 +694,7 @@ static void display_conn_info(struct connectdata *conn, PRFileDesc *sock)
   infof(conn->data, "Server certificate:\n");
 
   cert = SSL_PeerCertificate(sock);
-  subject = CERT_NameToAscii(&cert->subject);
-  issuer = CERT_NameToAscii(&cert->issuer);
-  common_name = CERT_GetCommonName(&cert->subject);
-  infof(conn->data, "\tsubject: %s\n", subject);
-
-  CERT_GetCertTimes(cert, &notBefore, &notAfter);
-  PR_ExplodeTime(notBefore, PR_GMTParameters, &printableTime);
-  PR_FormatTime(timeString, 256, "%b %d %H:%M:%S %Y GMT", &printableTime);
-  infof(conn->data, "\tstart date: %s\n", timeString);
-  PR_ExplodeTime(notAfter, PR_GMTParameters, &printableTime);
-  PR_FormatTime(timeString, 256, "%b %d %H:%M:%S %Y GMT", &printableTime);
-  infof(conn->data, "\texpire date: %s\n", timeString);
-  infof(conn->data, "\tcommon name: %s\n", common_name);
-  infof(conn->data, "\tissuer: %s\n", issuer);
-
-  PR_Free(subject);
-  PR_Free(issuer);
-  PR_Free(common_name);
-
+  display_cert_info(conn->data, cert);
   CERT_DestroyCertificate(cert);
 
   return;
@@ -786,48 +748,71 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
                                   struct CERTCertificateStr **pRetCert,
                                   struct SECKEYPrivateKeyStr **pRetKey)
 {
-  SECKEYPrivateKey *privKey = NULL;
-  CERTCertificate *cert;
-  struct ssl_connect_data *connssl = (struct ssl_connect_data *) arg;
-  char *nickname = connssl->client_nickname;
-  void *proto_win = NULL;
-  SECStatus secStatus = SECFailure;
-  PK11SlotInfo *slot;
-  (void)caNames;
+  static const char pem_nickname[] = "PEM Token #1";
+  const char *pem_slotname = pem_nickname;
 
-  proto_win = SSL_RevealPinArg(sock);
+  struct ssl_connect_data *connssl = (struct ssl_connect_data *)arg;
+  struct SessionHandle *data = connssl->data;
+  const char *nickname = connssl->client_nickname;
 
-  if(!nickname)
-    return secStatus;
+  if (mod && nickname &&
+      0 == strncmp(nickname, pem_nickname, /* length of "PEM Token" */ 9)) {
 
-  cert = PK11_FindCertFromNickname(nickname, proto_win);
-  if(cert) {
-    if(!strncmp(nickname, "PEM Token", 9)) {
-      CK_SLOT_ID slotID = 1; /* hardcoded for now */
-      char slotname[SLOTSIZE];
-      snprintf(slotname, SLOTSIZE, "PEM Token #%ld", slotID);
-      slot = PK11_FindSlotByName(slotname);
-      privKey = PK11_FindPrivateKeyFromCert(slot, cert, NULL);
-      PK11_FreeSlot(slot);
-      if(privKey) {
-        secStatus = SECSuccess;
-      }
+    /* use the cert/key provided by PEM reader */
+    PK11SlotInfo *slot;
+    void *proto_win = SSL_RevealPinArg(sock);
+    *pRetKey = NULL;
+
+    *pRetCert = PK11_FindCertFromNickname(nickname, proto_win);
+    if (NULL == *pRetCert) {
+      failf(data, "NSS: client certificate not found: %s", nickname);
+      return SECFailure;
     }
-    else {
-      privKey = PK11_FindKeyByAnyCert(cert, proto_win);
-      if(privKey)
-        secStatus = SECSuccess;
+
+    slot = PK11_FindSlotByName(pem_slotname);
+    if (NULL == slot) {
+      failf(data, "NSS: PK11 slot not found: %s", pem_slotname);
+      return SECFailure;
     }
+
+    *pRetKey = PK11_FindPrivateKeyFromCert(slot, *pRetCert, NULL);
+    PK11_FreeSlot(slot);
+    if (NULL == *pRetKey) {
+      failf(data, "NSS: private key not found for certificate: %s", nickname);
+      return SECFailure;
+    }
+
+    infof(data, "NSS: Client client certificate: %s\n", nickname);
+    display_cert_info(data, *pRetCert);
+    return SECSuccess;
   }
 
-  *pRetCert = cert;
-  *pRetKey = privKey;
-  
-  /* There's no need to destroy either cert or privKey as 
-   * NSS will do that for us even if returning SECFailure
-   */
+  /* use the default NSS hook */
+  if (SECSuccess != NSS_GetClientAuthData((void *)nickname, sock, caNames,
+                                          pRetCert, pRetKey)
+      || NULL == *pRetCert) {
 
-  return secStatus;
+    if (NULL == nickname)
+      failf(data, "NSS: client certificate not found (nickname not specified)");
+    else
+      failf(data, "NSS: client certificate not found: %s", nickname);
+
+    return SECFailure;
+  }
+
+  /* get certificate nickname if any */
+  nickname = (*pRetCert)->nickname;
+  if (NULL == nickname)
+    nickname = "[unknown]";
+
+  if (NULL == *pRetKey) {
+    failf(data, "NSS: private key not found for certificate: %s", nickname);
+    return SECFailure;
+  }
+
+  infof(data, "NSS: using client certificate: %s\n", nickname);
+  display_cert_info(data, *pRetCert);
+  return SECSuccess;
 }
 
 /**
@@ -857,9 +842,15 @@ void Curl_nss_cleanup(void)
    */
   PR_Lock(nss_initlock);
   if (initialized) {
-    if(mod)
+    /* Free references to client certificates held in the SSL session cache.
+     * Omitting this hampers destruction of the security module owning
+     * the certificates. */
+    SSL_ClearSessionCache();
+
+    if(mod && SECSuccess == SECMOD_UnloadUserModule(mod)) {
       SECMOD_DestroyModule(mod);
-    mod = NULL;
+      mod = NULL;
+    }
     NSS_Shutdown();
   }
   PR_Unlock(nss_initlock);
@@ -940,9 +931,6 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   SECStatus rv;
-#ifdef HAVE_PK11_CREATEGENERICOBJECT
-  char *configstring = NULL;
-#endif
   char *certDir = NULL;
   int curlerr;
   const int *cipher_to_enable;
@@ -951,6 +939,8 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 
   if (connssl->state == ssl_connection_complete)
     return CURLE_OK;
+
+  connssl->data = data;
 
 #ifdef HAVE_PK11_CREATEGENERICOBJECT  
   connssl->cacert[0] = NULL;
@@ -995,23 +985,28 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
       NSS_SetDomesticPolicy();
 
 #ifdef HAVE_PK11_CREATEGENERICOBJECT
-    configstring = aprintf("library=%s name=PEM", pem_library);
-    if(!configstring) {
-      PR_Unlock(nss_initlock);
-      goto error;
-    }
-    mod = SECMOD_LoadUserModule(configstring, NULL, PR_FALSE);
-    free(configstring);
-
-    if(!mod || !mod->loaded) {
-      if(mod) {
-        SECMOD_DestroyModule(mod);
-        mod = NULL;
+    if(!mod) {
+      char *configstring = aprintf("library=%s name=PEM", pem_library);
+      if(!configstring) {
+        PR_Unlock(nss_initlock);
+        goto error;
       }
-      infof(data, "WARNING: failed to load NSS PEM library %s. Using OpenSSL "
-            "PEM certificates will not work.\n", pem_library);
+      mod = SECMOD_LoadUserModule(configstring, NULL, PR_FALSE);
+      free(configstring);
+
+      if(!mod || !mod->loaded) {
+        if(mod) {
+          SECMOD_DestroyModule(mod);
+          mod = NULL;
+        }
+        infof(data, "WARNING: failed to load NSS PEM library %s. Using OpenSSL "
+              "PEM certificates will not work.\n", pem_library);
+      }
     }
 #endif
+
+    PK11_SetPasswordFunc(nss_get_password);
+
   }
   PR_Unlock(nss_initlock);
 
@@ -1159,11 +1154,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
     else {
       nickname = data->set.str[STRING_CERT];
     }
-    if(nss_Init_Tokens(conn) != SECSuccess) {
-      if(nickname_alloc)
-        free(nickname);
-      goto error;
-    }
+
     if(!cert_stuff(conn, sockindex, data->set.str[STRING_CERT],
                     data->set.str[STRING_KEY])) {
       /* failf() is already done in cert_stuff() */
@@ -1178,16 +1169,15 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
     if(!connssl->client_nickname)
       return CURLE_OUT_OF_MEMORY;
 
-    if(SSL_GetClientAuthDataHook(model,
-                                 (SSLGetClientAuthData) SelectClientCert,
-                                 (void *)connssl) != SECSuccess) {
-      curlerr = CURLE_SSL_CERTPROBLEM;
-      goto error;
-    }
   }
   else
     connssl->client_nickname = NULL;
 
+  if(SSL_GetClientAuthDataHook(model, SelectClientCert,
+                               (void *)connssl) != SECSuccess) {
+    curlerr = CURLE_SSL_CERTPROBLEM;
+    goto error;
+  }
 
   /* Import our model socket  onto the existing file descriptor */
   connssl->handle = PR_ImportTCPSocket(sockfd);
@@ -1195,6 +1185,11 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   if(!connssl->handle)
     goto error;
   PR_Close(model); /* We don't need this any more */
+
+  /* This is the password associated with the cert that we're using */
+  if (data->set.str[STRING_KEY_PASSWD]) {
+      SSL_SetPKCS11PinArg(connssl->handle, data->set.str[STRING_KEY_PASSWD]);
+  }
 
   /* Force handshake on next I/O */
   SSL_ResetHandshake(connssl->handle, /* asServer */ PR_FALSE);
