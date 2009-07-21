@@ -3,6 +3,9 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+66. When using telnet, the time limitation options don't work.
+  http://curl.haxx.se/bug/view.cgi?id=2818950
+
 65. When doing FTP over a socks proxy or CONNECT through HTTP proxy and the
   multi interface is used, libcurl will fail if the (passive) TCP connection
   for the data transfer isn't more or less instant as the code does not
