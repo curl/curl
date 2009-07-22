@@ -6,19 +6,26 @@
 
                                   Changelog
 
+Daniel Stenberg (23 Jul 2009)
+- Added CURLOPT_SSH_KNOWNHOSTS, CURLOPT_SSH_KEYFUNCTION, CURLOPT_SSH_KEYDATA.
+  They introduce known_host support for SSH keys to libcurl. See docs for
+  details. Note that this feature depends on a new enough libssh2 version, to
+  be supported in libssh2 1.2 and later (or current git repo at this time).
+
 Michal Marek (22 Jul 2009)
 - David Binderman found a memory and fd leak in lib/gtls.c:load_file()
-  (https://bugzilla.novell.com/523919). When looking at the code, I found
-  that also the ptr pointer can leak.
+  (https://bugzilla.novell.com/523919). When looking at the code, I found that
+  also the ptr pointer can leak.
+
 Kamil Dudka (20 Jul 2009)
-- Claes Jakobsson improved the support for client certificates handling
-  in NSS-powered libcurl. Now the client certificates can be selected
+- Claes Jakobsson improved the support for client certificates handling in
+  NSS-powered libcurl. Now the client certificates can be selected
   automatically by a NSS built-in hook. Additionally pre-login to all PKCS11
   slots is no more performed. It used to cause problems with HW tokens.
 
 - Fixed reference counting for NSS client certificates. Now the PEM reader
-  module should be always properly unloaded on Curl_nss_cleanup(). If the unload
-  fails though, libcurl will try to reuse the already loaded instance.
+  module should be always properly unloaded on Curl_nss_cleanup(). If the
+  unload fails though, libcurl will try to reuse the already loaded instance.
 
 Daniel Fandrich (15 Jul 2009)
 - Added nonblock.c to the non-automake makefiles (note that the dependencies

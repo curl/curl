@@ -172,7 +172,7 @@ curl_easy_strerror(CURLcode error)
     return "Malformed telnet option";
 
   case CURLE_PEER_FAILED_VERIFICATION:
-    return "SSL peer certificate or SSH md5 fingerprint was not OK";
+    return "SSL peer certificate or SSH remote key was not OK";
 
   case CURLE_GOT_NOTHING:
     return "Server returned nothing (no headers, no data)";

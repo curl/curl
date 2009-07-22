@@ -4694,6 +4694,16 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           my_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);
           my_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1);
         }
+        else {
+          char *home = homedir();
+          char *file = aprintf("%s/%sssh/known_hosts", home, DOT_CHAR);
+          if(home && file) {
+            free(home);
+            my_setopt_str(curl, CURLOPT_SSH_KNOWNHOSTS, file);
+          }
+          else
+            return CURLE_OUT_OF_MEMORY;
+        }
 
         if(config->no_body || config->remote_time) {
           /* no body or use remote time */

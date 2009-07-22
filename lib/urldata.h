@@ -468,6 +468,7 @@ typedef enum {
   SSH_STOP = 0,       /* do nothing state, stops the state machine */
 
   SSH_S_STARTUP,      /* Session startup, First state in SSH-CONNECT */
+  SSH_HOSTKEY,        /* verify hostkey */
   SSH_AUTHLIST,
   SSH_AUTH_PKEY_INIT,
   SSH_AUTH_PKEY,
@@ -525,7 +526,7 @@ typedef enum {
    Everything that is strictly related to a connection is banned from this
    struct. */
 struct SSHPROTO {
-  char *path;                   /* the path we operate on */
+  char *path;                  /* the path we operate on */
 };
 
 /* ssh_conn is used for struct connection-oriented data in the connectdata
@@ -566,6 +567,12 @@ struct ssh_conn {
   LIBSSH2_SFTP_HANDLE *sftp_handle;
   int waitfor;                  /* current READ/WRITE bits to wait for */
   int orig_waitfor;             /* default READ/WRITE bits wait for */
+
+  /* note that HAVE_LIBSSH2_KNOWNHOST_API is a define set in the libssh2.h
+     header */
+#ifdef HAVE_LIBSSH2_KNOWNHOST_API
+  LIBSSH2_KNOWNHOSTS *kh;
+#endif
 #endif /* USE_LIBSSH2 */
 };
 
@@ -1366,15 +1373,12 @@ enum dupstring {
   STRING_SET_RANGE,       /* range, if used */
   STRING_SET_REFERER,     /* custom string for the HTTP referer field */
   STRING_SET_URL,         /* what original URL to work on */
-  STRING_SSH_PRIVATE_KEY, /* path to the private key file for auth */
-  STRING_SSH_PUBLIC_KEY,  /* path to the public key file for auth */
   STRING_SSL_CAPATH,      /* CA directory name (doesn't work on windows) */
   STRING_SSL_CAFILE,      /* certificate file to verify peer against */
   STRING_SSL_CIPHER_LIST, /* list of ciphers to use */
   STRING_SSL_EGDSOCKET,   /* path to file containing the EGD daemon socket */
   STRING_SSL_RANDOM_FILE, /* path to file containing "random" data */
   STRING_USERAGENT,       /* User-Agent string */
-  STRING_SSH_HOST_PUBLIC_KEY_MD5, /* md5 of host public key in ascii hex */
   STRING_SSL_CRLFILE,     /* crl file to check certificate */
   STRING_SSL_ISSUERCERT,  /* issuer cert file to check certificate */
   STRING_USERNAME,        /* <username>, if used */
@@ -1383,6 +1387,12 @@ enum dupstring {
   STRING_PROXYPASSWORD,   /* Proxy <password>, if used */
   STRING_NOPROXY,         /* List of hosts which should not use the proxy, if
                              used */
+#ifdef USE_LIBSSH2
+  STRING_SSH_PRIVATE_KEY, /* path to the private key file for auth */
+  STRING_SSH_PUBLIC_KEY,  /* path to the public key file for auth */
+  STRING_SSH_HOST_PUBLIC_KEY_MD5, /* md5 of host public key in ascii hex */
+  STRING_SSH_KNOWNHOSTS,  /* file name of knownhosts file */
+#endif
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   STRING_SOCKS5_GSSAPI_SERVICE,  /* GSSAPI service name */
 #endif
@@ -1495,6 +1505,9 @@ struct UserDefined {
   int ftp_create_missing_dirs; /* 1 - create directories that don't exist
                                   2 - the same but also allow MKD to fail once
                                */
+
+  curl_sshkeycallback ssh_keyfunc; /* key matching callback */
+  void *ssh_keyfunc_userp;         /* custom pointer to callback */
 
 /* Here follows boolean settings that define how to behave during
    this session. They are STATIC, set by libcurl users or at least initially

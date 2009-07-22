@@ -10,6 +10,7 @@ Curl and libcurl 7.19.6
 This release includes the following changes:
 
  o CURLOPT_FTPPORT (and curl's -P/--ftpport) support port ranges
+ o Added CURLOPT_SSH_KNOWNHOSTS, CURLOPT_SSH_KEYFUNCTION, CURLOPT_SSH_KEYDATA
 
 This release includes the following bugfixes:
 
@@ -32,6 +33,7 @@ This release includes the following bugfixes:
  o curl -o - sends data to stdout using binary mode on windows
  o fixed the separators for "array" style string that CURLINFO_CERTINFO returns
  o auth problem over several hosts with re-used connection
+ o improved the support for client certificates in libcurl+NSS
  o fix leak in gtls code
 
 This release includes the following known bugs:

@@ -493,6 +493,45 @@ typedef enum {
 
 #define CURL_ERROR_SIZE 256
 
+struct curl_khkey {
+  const char *key; /* points to a zero-terminated string encoded with base64
+                      if len is zero, otherwise to the "raw" data */
+  size_t len;
+  enum type {
+    CURLKHTYPE_UNKNOWN,
+    CURLKHTYPE_RSA1,
+    CURLKHTYPE_RSA,
+    CURLKHTYPE_DSS
+  } keytype;
+};
+
+/* this is the set of return values expected from the curl_sshkeycallback
+   callback */
+enum curl_khstat {
+  CURLKHSTAT_FINE_ADD_TO_FILE,
+  CURLKHSTAT_FINE,
+  CURLKHSTAT_REJECT, /* reject the connection, return an error */
+  CURLKHSTAT_DEFER,  /* do not accept it, but we can't answer right now so
+                        this causes a CURLE_DEFER error but otherwise the
+                        connection will be left intact etc */
+  CURLKHSTAT_LAST    /* not for use, only a marker for last-in-list */
+};
+
+/* this is the set of status codes pass in to the callback */
+enum curl_khmatch {
+  CURLKHMATCH_OK,       /* match */
+  CURLKHMATCH_MISMATCH, /* host found, key mismatch! */
+  CURLKHMATCH_MISSING,  /* no matching host/key found */
+  CURLKHMATCH_LAST      /* not for use, only a marker for last-in-list */
+};
+
+typedef int
+  (*curl_sshkeycallback) (CURL *easy,     /* easy handle */
+                          const struct curl_khkey *knownkey, /* known */
+                          const struct curl_khkey *foundkey, /* found */
+                          enum curl_khmatch, /* libcurl's view on the keys */
+                          void *clientp); /* custom pointer passed from app */
+
 /* parameter for the CURLOPT_USE_SSL option */
 typedef enum {
   CURLUSESSL_NONE,    /* do not attempt to use SSL */
@@ -1213,6 +1252,16 @@ typedef enum {
      to be set in both bitmasks to be allowed to get redirected to. Defaults
      to all protocols except FILE and SCP. */
   CINIT(REDIR_PROTOCOLS, LONG, 182),
+
+  /* set the SSH knownhost file name to use */
+  CINIT(SSH_KNOWNHOSTS, OBJECTPOINT, 183),
+
+  /* set the SSH host key callback, must point to a curl_sshkeycallback
+     function */
+  CINIT(SSH_KEYFUNCTION, FUNCTIONPOINT, 184),
+
+  /* set the SSH host key callback custom pointer */
+  CINIT(SSH_KEYDATA, OBJECTPOINT, 185),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

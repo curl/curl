@@ -1743,6 +1743,44 @@ Pass a char * pointing to a file name for your private key. If not used,
 libcurl defaults to using \fB~/.ssh/id_dsa\fP.
 If the file is password-protected, set the password with \fICURLOPT_KEYPASSWD\fP.
 (Added in 7.16.1)
+.IP CURLOPT_SSH_KNOWNHOSTS
+Pass a pointer to a zero terminated string holding the file name of the
+known_host file to use.  The known_hosts file should use the OpenSSH file
+format as supported by libssh2. If this file is specified, libcurl will only
+accept connections with hosts that are known and present in that file, with a
+matching public key. Use \fICURLOPT_SSH_KEYFUNCTION\fP to alter the default
+behavior on host and key (mis)matching. (Added in 7.19.6)
+.IP CURLOPT_SSH_KEYFUNCTION
+Pass a pointer to a curl_sshkeycallback function. It gets called when the
+known_host matching has been done, to allow the application to act and decide
+for libcurl how to proceed. It gets passed the CURL handle, the key from the
+known_hosts file, the key from the remote site, info from libcurl on the
+matching status and a custom pointer (set with \fICURLOPT_SSH_KEYDATA\fP). It
+MUST return one of the following return codes to tell libcurl how to act:
+.RS
+.IP CURLKHSTAT_FINE_ADD_TO_FILE
+The host+key is accepted and libcurl will append it to the known_hosts file
+before continuing with the connection. This will also add the host+key combo
+to the known_host pool kept in memory if it wasn't already present there. Note
+that the adding of data to the file is done by completely replacing the file
+with a new copy, so the permissions of the file must allow this.
+.IP CURLKHSTAT_FINE
+The host+key is accepted libcurl will continue with the connection. This will
+also add the host+key combo to the known_host pool kept in memory if it wasn't
+already present there.
+.IP CURLKHSTAT_REJECT
+The host+key is rejected. libcurl will deny the connection to continue and it
+will be closed.
+.IP CURLKHSTAT_DEFER
+The host+key is rejected, but the SSH connection is asked to be kept alive.
+This feature could be used when the app wants to somehow return back and act
+on the host+key situation and then retry without needing the overhead of
+setting it up from scratch again.
+.RE
+ (Added in 7.19.6)
+.IP CURLOPT_SSH_KEYDATA
+Pass a void * as parameter. This pointer will be passed along verbatim to the
+callback set with \fICURLOPT_SSH_KEYFUNCTION\fP. (Added in 7.19.6)
 .SH OTHER OPTIONS
 .IP CURLOPT_PRIVATE
 Pass a void * as parameter, pointing to data that should be associated with
