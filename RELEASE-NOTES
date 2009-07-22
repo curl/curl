@@ -32,6 +32,7 @@ This release includes the following bugfixes:
  o curl -o - sends data to stdout using binary mode on windows
  o fixed the separators for "array" style string that CURLINFO_CERTINFO returns
  o auth problem over several hosts with re-used connection
+ o fix leak in gtls code
 
 This release includes the following known bugs:
 
@@ -44,6 +45,6 @@ advice from friends like these:
  Andre Guibert de Bruet, Mike Crowe, Claes Jakobsson, John E. Malmberg,
  Aaron Oneal, Igor Novoseltsev, Eric Wong, Bill Hoffman, Daniel Steinberg,
  Fabian Keil, Michal Marek, Reuven Wachtfogel, Markus Koetter,
- Constantine Sapuntzakis
+ Constantine Sapuntzakis, David Binderman
 
         Thanks! (and sorry if I forgot to mention someone)

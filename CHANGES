@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Michal Marek (22 Jul 2009)
+- David Binderman found a memory and fd leak in lib/gtls.c:load_file()
+  (https://bugzilla.novell.com/523919). When looking at the code, I found
+  that also the ptr pointer can leak.
 Kamil Dudka (20 Jul 2009)
 - Claes Jakobsson improved the support for client certificates handling
   in NSS-powered libcurl. Now the client certificates can be selected

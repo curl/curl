@@ -148,17 +148,22 @@ static gnutls_datum load_file (const char *file)
   long filelen;
   void *ptr;
 
-  if (!(f = fopen(file, "r"))
-      || fseek(f, 0, SEEK_END) != 0
+  if (!(f = fopen(file, "r")))
+    return loaded_file;
+  if (fseek(f, 0, SEEK_END) != 0
       || (filelen = ftell(f)) < 0
       || fseek(f, 0, SEEK_SET) != 0
-      || !(ptr = malloc((size_t)filelen))
-      || fread(ptr, 1, (size_t)filelen, f) < (size_t)filelen) {
-    return loaded_file;
+      || !(ptr = malloc((size_t)filelen)))
+    goto out;
+  if (fread(ptr, 1, (size_t)filelen, f) < (size_t)filelen) {
+    free(ptr);
+    goto out;
   }
 
   loaded_file.data = ptr;
   loaded_file.size = (unsigned int)filelen;
+out:
+  fclose(f);
   return loaded_file;
 }
 
