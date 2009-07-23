@@ -434,6 +434,7 @@ static CURLcode ssh_getworkingpath(struct connectdata *conn,
   return CURLE_OK;
 }
 
+#ifdef HAVE_LIBSSH2_KNOWNHOST_API
 static int sshkeycallback(CURL *easy,
                           const struct curl_khkey *knownkey, /* known */
                           const struct curl_khkey *foundkey, /* found */
@@ -448,6 +449,7 @@ static int sshkeycallback(CURL *easy,
   /* we only allow perfect matches, and we reject everything else */
   return (match != CURLKHMATCH_OK)?CURLKHSTAT_REJECT:CURLKHSTAT_FINE;
 }
+#endif
 
 /*
  * Earlier libssh2 versions didn't have the ability to seek to 64bit positions
