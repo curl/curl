@@ -354,7 +354,7 @@ static CURLcode tftp_parse_option_ack(tftp_state_data_t *state,
     if(checkprefix(option, TFTP_OPTION_BLKSIZE)) {
       int blksize;
 
-      blksize = strtol( value, NULL, 10 );
+      blksize = (int)strtol( value, NULL, 10 );
 
       if(!blksize) {
         failf(data, "invalid blocksize value in OACK packet");
@@ -440,7 +440,7 @@ static CURLcode tftp_connect_for_rx(tftp_state_data_t *state, tftp_event_t event
 
 static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
 {
-  int sbytes;
+  size_t sbytes;
   const char *mode = "octet";
   char *filename;
   char buf[8];
@@ -509,11 +509,10 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
     sbytes += tftp_option_add(state, sbytes,
                               (char *)state->spacket.data+sbytes, buf );
 
-    sbytes = sendto(state->sockfd, (void *)state->spacket.data,
-                    sbytes, 0,
-                    state->conn->ip_addr->ai_addr,
-                    state->conn->ip_addr->ai_addrlen);
-    if(sbytes < 0) {
+    if (sendto(state->sockfd, (void *)state->spacket.data,
+               sbytes, 0,
+               state->conn->ip_addr->ai_addr,
+               state->conn->ip_addr->ai_addrlen) < 0) {
       failf(data, "%s", Curl_strerror(state->conn, SOCKERRNO));
     }
     Curl_safefree(filename);
@@ -556,7 +555,6 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
  **********************************************************/
 static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
 {
-  int sbytes;
   int rblock;
   struct SessionHandle *data = state->conn->data;
 
@@ -581,11 +579,10 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
     state->retries = 0;
     setpacketevent(&state->spacket, TFTP_EVENT_ACK);
     setpacketblock(&state->spacket, state->block);
-    sbytes = sendto(state->sockfd, (void *)state->spacket.data,
-                    4, SEND_4TH_ARG,
-                    (struct sockaddr *)&state->remote_addr,
-                    state->remote_addrlen);
-    if(sbytes < 0) {
+    if(sendto(state->sockfd, (void *)state->spacket.data,
+              4, SEND_4TH_ARG,
+              (struct sockaddr *)&state->remote_addr,
+              state->remote_addrlen) < 0) {
       failf(data, "%s", Curl_strerror(state->conn, SOCKERRNO));
       return CURLE_SEND_ERROR;
     }
@@ -605,11 +602,10 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
     state->retries = 0;
     setpacketevent(&state->spacket, TFTP_EVENT_ACK);
     setpacketblock(&state->spacket, state->block);
-    sbytes = sendto(state->sockfd, (void *)state->spacket.data,
-                    4, SEND_4TH_ARG,
-                    (struct sockaddr *)&state->remote_addr,
-                    state->remote_addrlen);
-    if(sbytes < 0) {
+    if(sendto(state->sockfd, (void *)state->spacket.data,
+              4, SEND_4TH_ARG,
+              (struct sockaddr *)&state->remote_addr,
+              state->remote_addrlen)) < 0) {
       failf(data, "%s", Curl_strerror(state->conn, SOCKERRNO));
       return CURLE_SEND_ERROR;
     }
@@ -628,13 +624,11 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
       state->state = TFTP_STATE_FIN;
     }
     else {
-      /* Resend the previous ACK */
-      sbytes = sendto(state->sockfd, (void *)state->spacket.data,
-                      4, SEND_4TH_ARG,
-                      (struct sockaddr *)&state->remote_addr,
-                      state->remote_addrlen);
-      /* Check all sbytes were sent */
-      if(sbytes<0) {
+      /* Resend the previous ACK and check all sbytes were sent */
+      if(sendto(state->sockfd, (void *)state->spacket.data,
+                4, SEND_4TH_ARG,
+                (struct sockaddr *)&state->remote_addr,
+                state->remote_addrlen) < 0) {
         failf(data, "%s", Curl_strerror(state->conn, SOCKERRNO));
         return CURLE_SEND_ERROR;
       }
@@ -663,7 +657,7 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
 static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
 {
   struct SessionHandle *data = state->conn->data;
-  int sbytes;
+  ssize_t sbytes;
   int rblock;
   int readcount;
   CURLcode res = CURLE_OK;
