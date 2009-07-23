@@ -605,7 +605,7 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
     if(sendto(state->sockfd, (void *)state->spacket.data,
               4, SEND_4TH_ARG,
               (struct sockaddr *)&state->remote_addr,
-              state->remote_addrlen)) < 0) {
+              state->remote_addrlen) < 0) {
       failf(data, "%s", Curl_strerror(state->conn, SOCKERRNO));
       return CURLE_SEND_ERROR;
     }
