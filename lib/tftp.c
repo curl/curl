@@ -1035,7 +1035,7 @@ static CURLcode tftp_do(struct connectdata *conn, bool *done)
         case TFTP_EVENT_OACK:
           code = tftp_parse_option_ack(state,
                                        (const char *)state->rpacket.data+2,
-                                       state->rbytes-2);
+                                       (int)state->rbytes-2);
           if(code)
             return code;
           break;
