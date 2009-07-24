@@ -703,7 +703,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
       state->state = TFTP_STATE_FIN;
       return CURLE_OK;
     }
-    res = Curl_fillreadbuffer(state->conn, state->blksize, &readcount);
+    res = Curl_fillreadbuffer(state->conn, (int)state->blksize, &readcount);
     state->sbytes = readcount;
     if(res)
       return res;
@@ -839,7 +839,7 @@ static CURLcode tftp_connect(struct connectdata *conn, bool *done)
 
   /* alloc pkt buffers based on specified blksize */
   if(conn->data->set.tftp_blksize) {
-    blksize = conn->data->set.tftp_blksize;
+    blksize = (int)conn->data->set.tftp_blksize;
     if(blksize > TFTP_BLKSIZE_MAX || blksize < TFTP_BLKSIZE_MIN )
       return CURLE_TFTP_ILLEGAL;
   }
