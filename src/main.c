@@ -4694,19 +4694,19 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           my_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);
           my_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1);
         }
-#ifdef HAVE_LIBSSH2_KNOWNHOST_API
         else {
           char *home = homedir();
           char *file = aprintf("%s/%sssh/known_hosts", home, DOT_CHAR);
-          if(home && file) {
+          if(home)
             free(home);
+
+          if(file) {
             my_setopt_str(curl, CURLOPT_SSH_KNOWNHOSTS, file);
-            /* XXX do we need to free file here? */
+            curl_free(file);
           }
           else
             return CURLE_OUT_OF_MEMORY;
         }
-#endif
 
         if(config->no_body || config->remote_time) {
           /* no body or use remote time */
