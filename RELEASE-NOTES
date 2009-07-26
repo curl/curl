@@ -35,6 +35,7 @@ This release includes the following bugfixes:
  o auth problem over several hosts with re-used connection
  o improved the support for client certificates in libcurl+NSS
  o fix leak in gtls code
+ o missing algorithms in libcurl+OpenSSL
 
 This release includes the following known bugs:
 

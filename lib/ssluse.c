@@ -636,9 +636,8 @@ int Curl_ossl_init(void)
   /* Lets get nice error messages */
   SSL_load_error_strings();
 
-  /* Setup all the global SSL stuff */
-  if(!SSLeay_add_ssl_algorithms())
-    return 0;
+  /* Init the global ciphers and digests */
+  OpenSSL_add_all_algorithms();
 
   return 1;
 }
@@ -653,8 +652,7 @@ void Curl_ossl_cleanup(void)
   /* Free the SSL error strings */
   ERR_free_strings();
 
-  /* EVP_cleanup() removes all ciphers and digests from the
-     table. */
+  /* EVP_cleanup() removes all ciphers and digests from the table. */
   EVP_cleanup();
 
 #ifdef HAVE_ENGINE_cleanup
