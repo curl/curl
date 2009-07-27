@@ -11,6 +11,8 @@ This release includes the following changes:
 
  o CURLOPT_FTPPORT (and curl's -P/--ftpport) support port ranges
  o Added CURLOPT_SSH_KNOWNHOSTS, CURLOPT_SSH_KEYFUNCTION, CURLOPT_SSH_KEYDATA
+ o CURLOPT_QUOTE, CURLOPT_POSTQUOTE and CURLOPT_PREQUOTE can be told to ignore
+   error responses when used with FTP
 
 This release includes the following bugfixes:
 
@@ -48,6 +50,6 @@ advice from friends like these:
  Andre Guibert de Bruet, Mike Crowe, Claes Jakobsson, John E. Malmberg,
  Aaron Oneal, Igor Novoseltsev, Eric Wong, Bill Hoffman, Daniel Steinberg,
  Fabian Keil, Michal Marek, Reuven Wachtfogel, Markus Koetter,
- Constantine Sapuntzakis, David Binderman
+ Constantine Sapuntzakis, David Binderman, Johan van Selst
 
         Thanks! (and sorry if I forgot to mention someone)

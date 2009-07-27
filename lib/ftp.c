@@ -3323,6 +3323,8 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
  *
  * Where a 'quote' means a list of custom commands to send to the server.
  * The quote list is passed as an argument.
+ *
+ * BLOCKING
  */
 
 static
@@ -3336,14 +3338,27 @@ CURLcode ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
   item = quote;
   while(item) {
     if(item->data) {
-      FTPSENDF(conn, "%s", item->data);
+      char *cmd = item->data;
+      bool acceptfail = FALSE;
+
+      /* if a command starts with an asterisk, which a legal FTP command never
+         can, the command will be allowed to fail without it causing any
+         aborts or cancels etc. It will cause libcurl to act as if the command
+         is successful, whatever the server reponds. */
+
+      if(cmd[0] == '*') {
+        cmd++;
+        acceptfail = TRUE;
+      }
+
+      FTPSENDF(conn, "%s", cmd);
 
       result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
       if(result)
         return result;
 
-      if(ftpcode >= 400) {
-        failf(conn->data, "QUOT string not accepted: %s", item->data);
+      if(!acceptfail && (ftpcode >= 400)) {
+        failf(conn->data, "QUOT string not accepted: %s", cmd);
         return CURLE_QUOTE_ERROR;
       }
     }

@@ -6,11 +6,21 @@
 
                                   Changelog
 
+Daniel Stenberg (27 Jul 2009)
+- All the quote options (CURLOPT_QUOTE, CURLOPT_POSTQUOTE and
+  CURLOPT_PREQUOTE) now accept a preceeding asterisk before the command to
+  send when using FTP, as a sign that libcurl shall simply ignore the response
+  from the server instead of treating it as an error. Not treating a 400+ FTP
+  response code as an error means that failed commands will not abort the
+  chain of commands, nor will they cause the connection to get disconnected.
+
 Daniel Stenberg (26 Jul 2009)
-- Bug report #2825989 (http://curl.haxx.se/bug/view.cgi?id=2825989) pointed
-  out that OpenSSL-powered libcurl didn't support the SHA-2 digest algorithm,
-  and provided the solution too: to use OpenSSL_add_all_algorithms() instead
-  of the older SSLeay_* alternative.
+- Johan van Selst posted bug report #2825989
+  (http://curl.haxx.se/bug/view.cgi?id=2825989) pointing out that
+  OpenSSL-powered libcurl didn't support the SHA-2 digest algorithm, and
+  provided the solution too: to use OpenSSL_add_all_algorithms() in addition
+  to the older SSLeay_* alternative. OpenSSL_add_all_algorithms was added in
+  OpenSSL 0.9.5
 
 Daniel Stenberg (23 Jul 2009)
 - Added CURLOPT_SSH_KNOWNHOSTS, CURLOPT_SSH_KEYFUNCTION, CURLOPT_SSH_KEYDATA.
