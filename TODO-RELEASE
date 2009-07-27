@@ -1,15 +1,18 @@
 To be addressed in 7.19.6 (planned release: August 2009)
 =========================
 
-243 - ftp QUOTE commands that are allowed to fail but not close the connection
+246 - small logic error with CURLOPT_NOPROXY
+
+248 - "Pausing pipeline problems."
+
+To be addressed in 7.19.7 (planned release: October 2009)
+=========================
 
 244 - patch for [out] parameters
 
 245 - HTTP version getinfo
 
-246 - small logic error with CURLOPT_NOPROXY
-
 247 - Using CURLINFO_ERROR in Curl_failf
 
-248 -
+249 - 
 
