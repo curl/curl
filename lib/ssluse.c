@@ -637,6 +637,9 @@ int Curl_ossl_init(void)
   SSL_load_error_strings();
 
   /* Init the global ciphers and digests */
+  if(!SSLeay_add_ssl_algorithms())
+    return 0;
+
   OpenSSL_add_all_algorithms();
 
   return 1;
