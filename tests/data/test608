@@ -24,7 +24,7 @@ sftp
 SFTP post-quote rename
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: -Q "-rename %PWD/log/file608.txt %PWD/log/file608-renamed.txt" sftp://%HOSTIP:%SSHPORT%PWD/log/file608.txt
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: -Q "-rename %PWD/log/file608.txt %PWD/log/file608-renamed.txt" sftp://%HOSTIP:%SSHPORT%PWD/log/file608.txt --insecure
 </command>
 # Verify that the file was renamed properly, then rename the file back to what
 # it was so the verify section works and the file can be cleaned up.

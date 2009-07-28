@@ -22,7 +22,7 @@ sftp
 SFTP put with --ftp-create-dirs
  </name>
  <command>
---ftp-create-dirs --key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file624.txt sftp://%HOSTIP:%SSHPORT%PWD/log/test624.dir/upload.624
+--ftp-create-dirs --key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file624.txt sftp://%HOSTIP:%SSHPORT%PWD/log/test624.dir/upload.624 --insecure
 </command>
 <postcheck>
 perl %SRCDIR/libtest/test610.pl move %PWD/log/test624.dir/upload.624 %PWD/log/upload.624 rmdir %PWD/log/test624.dir

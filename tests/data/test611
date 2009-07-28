@@ -27,7 +27,7 @@ perl %SRCDIR/libtest/test610.pl mkdir %PWD/log/test611.dir
 SFTP post-quote rename
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: -Q "-rename %PWD/log/test611.dir %PWD/log/test611.new" sftp://%HOSTIP:%SSHPORT%PWD/log/file611.txt
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: -Q "-rename %PWD/log/test611.dir %PWD/log/test611.new" sftp://%HOSTIP:%SSHPORT%PWD/log/file611.txt --insecure
 </command>
 <postcheck>
 perl %SRCDIR/libtest/test610.pl rmdir %PWD/log/test611.new

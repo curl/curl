@@ -22,7 +22,7 @@ scp
 SCP upload failure
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file623.txt scp://%HOSTIP:%SSHPORT%PWD/log/nonexistent-directory/nonexistent-file
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file623.txt scp://%HOSTIP:%SSHPORT%PWD/log/nonexistent-directory/nonexistent-file --insecure
 </command>
 <file name="log/file623.txt">
 Test data

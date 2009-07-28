@@ -23,7 +23,7 @@ sftp
 SFTP retrieval of empty file
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%PWD/log/file616.txt
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%PWD/log/file616.txt --insecure
 </command>
 <file name="log/file616.txt">
 </file>

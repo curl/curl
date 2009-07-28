@@ -32,7 +32,7 @@ perl %SRCDIR/libtest/test613.pl prepare %PWD/log/test614.dir
 SFTP pre-quote chmod
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: -Q "chmod 444 %PWD/log/test614.dir/plainfile.txt" sftp://%HOSTIP:%SSHPORT%PWD/log/test614.dir/
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: -Q "chmod 444 %PWD/log/test614.dir/plainfile.txt" sftp://%HOSTIP:%SSHPORT%PWD/log/test614.dir/ --insecure
 </command>
 <postcheck>
 perl %SRCDIR/libtest/test613.pl postprocess %PWD/log/test614.dir %PWD/log/curl614.out

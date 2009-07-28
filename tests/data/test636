@@ -25,7 +25,7 @@ sftp
 SFTP retrieval with X- byte range
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%PWD/log/file636.txt -r 5-
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%PWD/log/file636.txt -r 5- --insecure
 </command>
 <file name="log/file636.txt">
 Test data

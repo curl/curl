@@ -31,7 +31,7 @@ perl %SRCDIR/libtest/test613.pl prepare %PWD/log/test613.dir
 SFTP directory retrieval
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%PWD/log/test613.dir/
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%PWD/log/test613.dir/ --insecure
 </command>
 <postcheck>
 perl %SRCDIR/libtest/test613.pl postprocess %PWD/log/test613.dir %PWD/log/curl613.out

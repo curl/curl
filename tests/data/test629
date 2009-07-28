@@ -16,7 +16,7 @@ scp
 SCP invalid user login (password authentication)
  </name>
  <command>
--u not-a-valid-user: scp://%HOSTIP:%SSHPORT%PWD/irrelevant-file
+-u not-a-valid-user: scp://%HOSTIP:%SSHPORT%PWD/irrelevant-file --insecure
 </command>
 </client>
 

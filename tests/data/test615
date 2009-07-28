@@ -20,7 +20,7 @@ perl %SRCDIR/libtest/test613.pl prepare %PWD/log/test615.dir
 SFTP put remote failure
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file615.txt sftp://%HOSTIP:%SSHPORT%PWD/log/test615.dir/rofile.txt
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file615.txt sftp://%HOSTIP:%SSHPORT%PWD/log/test615.dir/rofile.txt --insecure
 </command>
 <postcheck>
 perl %SRCDIR/libtest/test613.pl postprocess %PWD/log/test615.dir

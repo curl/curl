@@ -25,7 +25,7 @@ sftp
 SFTP post-quote mkdir failure
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: -Q "-mkdir %PWD/log/file609.txt" sftp://%HOSTIP:%SSHPORT%PWD/log/file609.txt
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: -Q "-mkdir %PWD/log/file609.txt" sftp://%HOSTIP:%SSHPORT%PWD/log/file609.txt --insecure
 </command>
 <file name="log/file609.txt">
 Test file for mkdir test

@@ -23,7 +23,7 @@ scp
 SCP retrieval of empty file
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%PWD/log/file617.txt
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%PWD/log/file617.txt --insecure
 </command>
 <file name="log/file617.txt">
 </file>

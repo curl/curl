@@ -15,7 +15,7 @@ sftp
 SFTP retrieval of two files
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%PWD/log/file618.txt sftp://%HOSTIP:%SSHPORT%PWD/log/file618.txt
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%PWD/log/file618.txt sftp://%HOSTIP:%SSHPORT%PWD/log/file618.txt --insecure
 </command>
 <file name="log/file618.txt">
 Test data

@@ -24,7 +24,7 @@ scp
 SCP retrieval
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%PWD/log/file601.txt
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%PWD/log/file601.txt --insecure
 </command>
 <file name="log/file601.txt">
 Test data

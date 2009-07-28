@@ -22,7 +22,7 @@ sftp
 SFTP invalid quote command
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: -Q "invalid-command foo bar" sftp://%HOSTIP:%SSHPORT%PWD/log/file626.txt
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: -Q "invalid-command foo bar" sftp://%HOSTIP:%SSHPORT%PWD/log/file626.txt --insecure
 </command>
 <file name="log/file626.txt">
 Test file for rename test

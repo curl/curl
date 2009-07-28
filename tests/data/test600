@@ -24,7 +24,7 @@ sftp
 SFTP retrieval
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%PWD/log/file600.txt
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%PWD/log/file600.txt --insecure
 </command>
 <file name="log/file600.txt">
 Test data

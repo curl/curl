@@ -15,7 +15,7 @@ scp
 SCP retrieval of two files
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%PWD/log/file619.txt scp://%HOSTIP:%SSHPORT%PWD/log/file619.txt
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%PWD/log/file619.txt scp://%HOSTIP:%SSHPORT%PWD/log/file619.txt --insecure
 </command>
 <file name="log/file619.txt">
 Test data

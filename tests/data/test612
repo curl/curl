@@ -24,7 +24,7 @@ sftp
 SFTP post-quote remove file
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file612.txt -Q "-rm %PWD/log/file612.txt" sftp://%HOSTIP:%SSHPORT%PWD/log/upload.612
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file612.txt -Q "-rm %PWD/log/file612.txt" sftp://%HOSTIP:%SSHPORT%PWD/log/upload.612  --insecure
 </command>
 <postcheck>
 perl %SRCDIR/libtest/test610.pl gone %PWD/log/test612.txt

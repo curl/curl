@@ -16,7 +16,7 @@ scp
 SCP retrieval of nonexistent file
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%PWD/not-a-valid-file-moooo
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%PWD/not-a-valid-file-moooo --insecure
 </command>
 </client>
 

@@ -16,7 +16,7 @@ scp
 SCP retrieval of missing file followed by good file
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%PWD/log/not-a-valid-file-moooo scp://%HOSTIP:%SSHPORT%PWD/log/file621.txt
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%PWD/log/not-a-valid-file-moooo scp://%HOSTIP:%SSHPORT%PWD/log/file621.txt --insecure
 </command>
 <file name="log/file621.txt">
 Test data
