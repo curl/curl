@@ -9,7 +9,7 @@
 # to the libcurl source tree.
 #
 # Dan Fandrich
-# June 2009
+# July 2009
 
 LOCAL_PATH:= $(call my-dir)
 
@@ -20,9 +20,24 @@ common_CFLAGS := -Wpointer-arith -Wwrite-strings -Wunused -Winline -Wnested-exte
 
 include $(CLEAR_VARS)
 include $(LOCAL_PATH)/lib/Makefile.inc
+CURL_HEADERS := \
+	curlbuild.h \
+	curl.h \
+	curlrules.h \
+	curlver.h \
+	easy.h \
+	mprintf.h \
+	multi.h \
+	stdcheaders.h \
+	typecheck-gcc.h \
+	types.h
+
 LOCAL_SRC_FILES := $(addprefix lib/,$(CSOURCES))
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/include/
 LOCAL_CFLAGS += $(common_CFLAGS)
+
+LOCAL_COPY_HEADERS_TO := libcurl/curl
+LOCAL_COPY_HEADERS := $(addprefix include/curl/,$(CURL_HEADERS))
 
 LOCAL_MODULE:= libcurl
 
