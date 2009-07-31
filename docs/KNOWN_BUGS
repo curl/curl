@@ -3,6 +3,12 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+67. When creating multipart formposts. The file name part can be encoded with
+  something beyond ascii but currently libcurl will only pass in the verbatim
+  string the app provides. There are several browsers that already do this
+  encoding. The key seems to be the updated draft to RFC2231:
+  http://tools.ietf.org/html/draft-reschke-rfc2231-in-http-02
+
 66. When using telnet, the time limitation options don't work.
   http://curl.haxx.se/bug/view.cgi?id=2818950
 
