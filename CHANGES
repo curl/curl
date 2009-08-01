@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (1 Aug 2009)
+- Alexander Beedie provided the patch for a noproxy problem: If I have set
+  CURLOPT_NOPROXY to "*", or to a host that should not use a proxy, I actually
+  could still end up using a proxy if a proxy environment variable was set.
+
 Daniel Stenberg (27 Jul 2009)
 - All the quote options (CURLOPT_QUOTE, CURLOPT_POSTQUOTE and
   CURLOPT_PREQUOTE) now accept a preceeding asterisk before the command to

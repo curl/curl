@@ -4419,14 +4419,17 @@ static CURLcode create_conn(struct SessionHandle *data,
     }
   }
 
-  if(!proxy)
-    proxy = detect_proxy(conn);
-  else if(data->set.str[STRING_NOPROXY]) {
-    if(check_noproxy(conn->host.name, data->set.str[STRING_NOPROXY])) {
+
+  if(data->set.str[STRING_NOPROXY] &&
+     check_noproxy(conn->host.name, data->set.str[STRING_NOPROXY])) {
+    if(proxy) {
       free(proxy);  /* proxy is in exception list */
       proxy = NULL;
     }
   }
+  else if(!proxy)
+    proxy = detect_proxy(conn);
+
   if(proxy && !*proxy) {
     free(proxy);  /* Don't bother with an empty proxy string */
     proxy = NULL;
