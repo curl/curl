@@ -5,8 +5,6 @@ To be addressed in 7.19.6 (planned release: August 2009)
 
 249 - Wildcard cert name checking and null termination
 
-250 - RAND_screen() fix
-
 251 - TFTP block size
 
 252 - disable SNI for SSLv2 and SSLv3

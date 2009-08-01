@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel Stenberg (1 Aug 2009)
+- Tanguy Fautre pointed out that OpenSSL's function RAND_screen() (present
+  only in some OpenSSL installs - like on Windows) isn't thread-safe and we
+  agreed that moving it to the global_init() function is a decent way to deal
+  with this situation.
+
 - Alexander Beedie provided the patch for a noproxy problem: If I have set
   CURLOPT_NOPROXY to "*", or to a host that should not use a proxy, I actually
   could still end up using a proxy if a proxy environment variable was set.
