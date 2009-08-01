@@ -7,6 +7,21 @@
                                   Changelog
 
 Daniel Stenberg (1 Aug 2009)
+- Scott Cantor posted the bug report #2829955
+  (http://curl.haxx.se/bug/view.cgi?id=2829955) mentioning the recent SSL cert
+  verification flaw found and exploited by Moxie Marlinspike. The presentation
+  he did at Black Hat is available here:
+  https://www.blackhat.com/html/bh-usa-09/bh-usa-09-archives.html#Marlinspike
+
+  Apparently at least one CA allowed a subjectAltName or CN that contain a
+  zero byte, and thus clients that assumed they would never have zero bytes
+  were exploited to OK a certificate that didn't actually match the site. Like
+  if the name in the cert was "example.com\0theatualsite.com", libcurl would
+  happily verify that cert for example.com.
+
+  libcurl now better use the length of the extracted name, not assuming it is
+  zero terminated.
+
 - Tanguy Fautre pointed out that OpenSSL's function RAND_screen() (present
   only in some OpenSSL installs - like on Windows) isn't thread-safe and we
   agreed that moving it to the global_init() function is a decent way to deal

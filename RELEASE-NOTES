@@ -40,6 +40,7 @@ This release includes the following bugfixes:
  o missing algorithms in libcurl+OpenSSL
  o with noproxy set you could still get a proxy if a proxy env was set
  o rand seeding on libcurl on windows built with OpenSSL was not thread-safe
+ o fixed the zero byte inserted in cert name flaw in libcurl+OpenSSL
 
 This release includes the following known bugs:
 
@@ -53,6 +54,6 @@ advice from friends like these:
  Aaron Oneal, Igor Novoseltsev, Eric Wong, Bill Hoffman, Daniel Steinberg,
  Fabian Keil, Michal Marek, Reuven Wachtfogel, Markus Koetter,
  Constantine Sapuntzakis, David Binderman, Johan van Selst, Alexander Beedie,
- Tanguy Fautre
+ Tanguy Fautre, Scott Cantor
 
         Thanks! (and sorry if I forgot to mention someone)

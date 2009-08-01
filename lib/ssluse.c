@@ -990,13 +990,18 @@ static int asn1_output(const ASN1_UTCTIME *tm,
 #define HOST_NOMATCH 0
 #define HOST_MATCH   1
 
-static int hostmatch(const char *hostname, const char *pattern)
+static int hostmatch(const char *hostname, const char *pattern, size_t plen)
 {
   while(1) {
     char c = *pattern++;
+    plen--;
 
-    if(c == '\0')
+    if(!plen)
       return (*hostname ? HOST_NOMATCH : HOST_MATCH);
+
+    if(!c)
+      /* an embedded zero in the pattern can't match a host name */
+      return HOST_NOMATCH;
 
     if(c == '*') {
       c = *pattern;
@@ -1005,7 +1010,7 @@ static int hostmatch(const char *hostname, const char *pattern)
 
       while(*hostname) {
         /* The only recursive function in libcurl! */
-        if(hostmatch(hostname++,pattern) == HOST_MATCH)
+        if(hostmatch(hostname++, pattern, plen) == HOST_MATCH)
           return HOST_MATCH;
       }
       break;
@@ -1018,17 +1023,20 @@ static int hostmatch(const char *hostname, const char *pattern)
 }
 
 static int
-cert_hostcheck(const char *match_pattern, const char *hostname)
+cert_hostcheck(const char *match_pattern, size_t mlen, const char *hostname)
 {
+  size_t hlen = strlen(hostname);
   if(!match_pattern || !*match_pattern ||
-      !hostname || !*hostname) /* sanity check */
+     !hostname || !*hostname) /* sanity check */
     return 0;
 
-  if(Curl_raw_equal(hostname, match_pattern)) /* trivial case */
+  if((hlen == mlen) && !memcmp(hostname, match_pattern, hlen))
+    /* trivial case */
     return 1;
 
-  if(hostmatch(hostname,match_pattern) == HOST_MATCH)
+  if(hostmatch(hostname, match_pattern, mlen) == HOST_MATCH)
     return 1;
+
   return 0;
 }
 
@@ -1101,7 +1109,7 @@ static CURLcode verifyhost(struct connectdata *conn,
       if(check->type == target) {
         /* get data and length */
         const char *altptr = (char *)ASN1_STRING_data(check->d.ia5);
-        size_t altlen;
+        size_t altlen = (size_t) ASN1_STRING_length(check->d.ia5);
 
         switch(target) {
         case GEN_DNS: /* name/pattern comparison */
@@ -1114,15 +1122,17 @@ static CURLcode verifyhost(struct connectdata *conn,
              Gisle researched the OpenSSL sources:
              "I checked the 0.9.6 and 0.9.8 sources before my patch and
              it always 0-terminates an IA5String."
+
+             To reduce the risk of an embedded zero before the final zero
+             causing us trouble, we use the length OpenSSL reports!
           */
-          if(cert_hostcheck(altptr, conn->host.name))
+          if(cert_hostcheck(altptr, altlen, conn->host.name))
             matched = TRUE;
           break;
 
         case GEN_IPADD: /* IP address comparison */
           /* compare alternative IP address if the data chunk is the same size
              our server IP address is */
-          altlen = (size_t) ASN1_STRING_length(check->d.ia5);
           if((altlen == addrlen) && !memcmp(altptr, &addr, altlen))
             matched = TRUE;
           break;
@@ -1196,7 +1206,8 @@ static CURLcode verifyhost(struct connectdata *conn,
             "SSL: unable to obtain common name from peer certificate");
       return CURLE_PEER_FAILED_VERIFICATION;
     }
-    else if(!cert_hostcheck((const char *)peer_CN, conn->host.name)) {
+    else if(!cert_hostcheck((const char *)peer_CN, strlen((char *)peer_CN),
+                            conn->host.name)) {
       if(data->set.ssl.verifyhost > 1) {
         failf(data, "SSL: certificate subject name '%s' does not match "
               "target host name '%s'", peer_CN, conn->host.dispname);
