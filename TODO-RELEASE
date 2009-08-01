@@ -5,6 +5,14 @@ To be addressed in 7.19.6 (planned release: August 2009)
 
 248 - "Pausing pipeline problems."
 
+249 - Wildcard cert name checking and null termination
+
+250 - RAND_screen() fix
+
+251 - TFTP block size
+
+252 - disable SNI for SSLv2 and SSLv3
+
 To be addressed in 7.19.7 (planned release: October 2009)
 =========================
 
@@ -14,5 +22,7 @@ To be addressed in 7.19.7 (planned release: October 2009)
 
 247 - Using CURLINFO_ERROR in Curl_failf
 
-249 - 
+253 - add option to disable SNI for TLS handshakes
+
+254 -
 
