@@ -27,8 +27,10 @@ Daniel Stenberg (1 Aug 2009)
   if the name in the cert was "example.com\0theatualsite.com", libcurl would
   happily verify that cert for example.com.
 
-  libcurl now better use the length of the extracted name, not assuming it is
-  zero terminated.
+  libcurl now better uses the length of the extracted name, not using the zero
+  termination for getting the string length.
+
+  This fixing only made and needed in OpenSSL interfacing code.
 
 - Tanguy Fautre pointed out that OpenSSL's function RAND_screen() (present
   only in some OpenSSL installs - like on Windows) isn't thread-safe and we
