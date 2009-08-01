@@ -3,11 +3,7 @@ To be addressed in 7.19.6 (planned release: August 2009)
 
 248 - "Pausing pipeline problems."
 
-249 - Wildcard cert name checking and null termination
-
 251 - TFTP block size
-
-252 - disable SNI for SSLv2 and SSLv3
 
 To be addressed in 7.19.7 (planned release: October 2009)
 =========================

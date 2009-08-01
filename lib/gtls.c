@@ -260,6 +260,7 @@ Curl_gtls_connect(struct connectdata *conn,
   const char *ptr;
   void *ssl_sessionid;
   size_t ssl_idsize;
+  bool sni = TRUE; /* default is SNI enabled */
 #ifdef ENABLE_IPV6
   struct in6_addr addr;
 #else
@@ -279,6 +280,8 @@ Curl_gtls_connect(struct connectdata *conn,
     failf(data, "GnuTLS does not support SSLv2");
     return CURLE_SSL_CONNECT_ERROR;
   }
+  else if(data->set.ssl.version == CURL_SSLVERSION_SSLv3)
+    sni = FALSE; /* SSLv3 has no SNI */
 
   /* allocate a cred struct */
   rc = gnutls_certificate_allocate_credentials(&conn->ssl[sockindex].cred);
@@ -335,6 +338,7 @@ Curl_gtls_connect(struct connectdata *conn,
 #ifdef ENABLE_IPV6
       (0 == Curl_inet_pton(AF_INET6, conn->host.name, &addr)) &&
 #endif
+      sni &&
       (gnutls_server_name_set(session, GNUTLS_NAME_DNS, conn->host.name,
                               strlen(conn->host.name)) < 0))
     infof(data, "WARNING: failed to configure server name indication (SNI) "

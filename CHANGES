@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel Stenberg (2 Aug 2009)
+- Curt Bogmine reported a problem with SNI enabled on a particular server. We
+  should introduce an option to disable SNI, but as we're in feature freeze
+  now I've addressed the obvious bug here (pointed out by Peter Sylvester): we
+  shouldn't try to enable SNI when SSLv2 or SSLv3 is explicitly selected.
+  Code for OpenSSL and GnuTLS was fixed. NSS doesn't seem to have a particular
+  option for SNI, or are we simply not using it?
+
 Daniel Stenberg (1 Aug 2009)
 - Scott Cantor posted the bug report #2829955
   (http://curl.haxx.se/bug/view.cgi?id=2829955) mentioning the recent SSL cert
