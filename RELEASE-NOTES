@@ -27,7 +27,7 @@ This release includes the following bugfixes:
  o curl tool exit codes fixed for VMS
  o --no-buffer treated correctly
  o djgpp build fix
- o configure detection of GnuTLS now based on pkg-config
+ o configure detection of GnuTLS now based on pkg-config as well
  o libcurl-NSS client cert handling segfaults
  o curl uploading from stdin/pipes now works in non-blocking way so that it
    continues the downloading even when the read stalls
