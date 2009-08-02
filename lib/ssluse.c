@@ -1154,10 +1154,11 @@ static CURLcode verifyhost(struct connectdata *conn,
 
     unsigned char *nulstr = (unsigned char *)"";
     unsigned char *peer_CN = nulstr;
+    size_t peer_len = 0;
 
     X509_NAME *name = X509_get_subject_name(server_cert) ;
     if(name)
-      while((j=X509_NAME_get_index_by_NID(name,NID_commonName,i))>=0)
+      while((j = X509_NAME_get_index_by_NID(name, NID_commonName, i))>=0)
         i=j;
 
     /* we have the name entry and we will now convert this to a string
@@ -1172,18 +1173,22 @@ static CURLcode verifyhost(struct connectdata *conn,
          string manually to avoid the problem. This code can be made
          conditional in the future when OpenSSL has been fixed. Work-around
          brought by Alexis S. L. Carvalho. */
-      if(tmp && ASN1_STRING_type(tmp) == V_ASN1_UTF8STRING) {
-        j = ASN1_STRING_length(tmp);
-        if(j >= 0) {
-          peer_CN = OPENSSL_malloc(j+1);
-          if(peer_CN) {
-            memcpy(peer_CN, ASN1_STRING_data(tmp), j);
-            peer_CN[j] = '\0';
+      if(tmp) {
+        /* get the length off the ASN1 to avoid problems with embedded zeroes
+         */
+        peer_len = ASN1_STRING_length(tmp);
+        if(ASN1_STRING_type(tmp) == V_ASN1_UTF8STRING) {
+          if(peer_len) {
+            peer_CN = OPENSSL_malloc(peer_len+1);
+            if(peer_CN) {
+              memcpy(peer_CN, ASN1_STRING_data(tmp), peer_len);
+              peer_CN[peer_len] = '\0';
+            }
           }
         }
+        else /* not a UTF8 name */
+          j = ASN1_STRING_to_UTF8(&peer_CN, tmp);
       }
-      else /* not a UTF8 name */
-        j = ASN1_STRING_to_UTF8(&peer_CN, tmp);
     }
 
     if(peer_CN == nulstr)
@@ -1192,7 +1197,7 @@ static CURLcode verifyhost(struct connectdata *conn,
     else {
       /* convert peer_CN from UTF8 */
       size_t rc;
-      rc = Curl_convert_from_utf8(data, peer_CN, strlen(peer_CN));
+      rc = Curl_convert_from_utf8(data, peer_CN, peer_len);
       /* Curl_convert_from_utf8 calls failf if unsuccessful */
       if(rc != CURLE_OK) {
         OPENSSL_free(peer_CN);
@@ -1206,7 +1211,7 @@ static CURLcode verifyhost(struct connectdata *conn,
             "SSL: unable to obtain common name from peer certificate");
       return CURLE_PEER_FAILED_VERIFICATION;
     }
-    else if(!cert_hostcheck((const char *)peer_CN, strlen((char *)peer_CN),
+    else if(!cert_hostcheck((const char *)peer_CN, peer_len,
                             conn->host.name)) {
       if(data->set.ssl.verifyhost > 1) {
         failf(data, "SSL: certificate subject name '%s' does not match "
