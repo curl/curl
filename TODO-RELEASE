@@ -5,6 +5,10 @@ To be addressed in 7.19.6 (planned release: August 2009)
 
 251 - TFTP block size
 
+254 - Problem re-using easy handle after call to curl_multi_remove_handle
+
+255 - debugging a crash in Curl_pgrsTime/checkPendPipeline?
+
 To be addressed in 7.19.7 (planned release: October 2009)
 =========================
 
@@ -16,5 +20,5 @@ To be addressed in 7.19.7 (planned release: October 2009)
 
 253 - add option to disable SNI for TLS handshakes
 
-254 -
+256 -
 
