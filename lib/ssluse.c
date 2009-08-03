@@ -990,18 +990,13 @@ static int asn1_output(const ASN1_UTCTIME *tm,
 #define HOST_NOMATCH 0
 #define HOST_MATCH   1
 
-static int hostmatch(const char *hostname, const char *pattern, size_t plen)
+static int hostmatch(const char *hostname, const char *pattern)
 {
   while(1) {
     char c = *pattern++;
-    plen--;
 
-    if(!plen)
+    if(c == '\0')
       return (*hostname ? HOST_NOMATCH : HOST_MATCH);
-
-    if(!c)
-      /* an embedded zero in the pattern can't match a host name */
-      return HOST_NOMATCH;
 
     if(c == '*') {
       c = *pattern;
@@ -1010,7 +1005,7 @@ static int hostmatch(const char *hostname, const char *pattern, size_t plen)
 
       while(*hostname) {
         /* The only recursive function in libcurl! */
-        if(hostmatch(hostname++, pattern, plen) == HOST_MATCH)
+        if(hostmatch(hostname++,pattern) == HOST_MATCH)
           return HOST_MATCH;
       }
       break;
@@ -1023,20 +1018,17 @@ static int hostmatch(const char *hostname, const char *pattern, size_t plen)
 }
 
 static int
-cert_hostcheck(const char *match_pattern, size_t mlen, const char *hostname)
+cert_hostcheck(const char *match_pattern, const char *hostname)
 {
-  size_t hlen = strlen(hostname);
   if(!match_pattern || !*match_pattern ||
-     !hostname || !*hostname) /* sanity check */
+      !hostname || !*hostname) /* sanity check */
     return 0;
 
-  if((hlen == mlen) && !memcmp(hostname, match_pattern, hlen))
-    /* trivial case */
+  if(Curl_raw_equal(hostname, match_pattern)) /* trivial case */
     return 1;
 
-  if(hostmatch(hostname, match_pattern, mlen) == HOST_MATCH)
+  if(hostmatch(hostname,match_pattern) == HOST_MATCH)
     return 1;
-
   return 0;
 }
 
@@ -1122,11 +1114,11 @@ static CURLcode verifyhost(struct connectdata *conn,
              Gisle researched the OpenSSL sources:
              "I checked the 0.9.6 and 0.9.8 sources before my patch and
              it always 0-terminates an IA5String."
-
-             To reduce the risk of an embedded zero before the final zero
-             causing us trouble, we use the length OpenSSL reports!
           */
-          if(cert_hostcheck(altptr, altlen, conn->host.name))
+          if((altlen == strlen(altptr)) &&
+             /* if this isn't true, there was an embedded zero in the name
+                string and we cannot match it. */
+             cert_hostcheck(altptr, conn->host.name))
             matched = TRUE;
           break;
 
@@ -1154,7 +1146,6 @@ static CURLcode verifyhost(struct connectdata *conn,
 
     unsigned char *nulstr = (unsigned char *)"";
     unsigned char *peer_CN = nulstr;
-    size_t peer_len = 0;
 
     X509_NAME *name = X509_get_subject_name(server_cert) ;
     if(name)
@@ -1174,20 +1165,25 @@ static CURLcode verifyhost(struct connectdata *conn,
          conditional in the future when OpenSSL has been fixed. Work-around
          brought by Alexis S. L. Carvalho. */
       if(tmp) {
-        /* get the length off the ASN1 to avoid problems with embedded zeroes
-         */
-        peer_len = ASN1_STRING_length(tmp);
+        j = ASN1_STRING_length(tmp);
         if(ASN1_STRING_type(tmp) == V_ASN1_UTF8STRING) {
-          if(peer_len) {
-            peer_CN = OPENSSL_malloc(peer_len+1);
+          if(j >= 0) {
+            peer_CN = OPENSSL_malloc(j+1);
             if(peer_CN) {
-              memcpy(peer_CN, ASN1_STRING_data(tmp), peer_len);
-              peer_CN[peer_len] = '\0';
+              memcpy(peer_CN, ASN1_STRING_data(tmp), j);
+              peer_CN[j] = '\0';
             }
           }
         }
         else /* not a UTF8 name */
           j = ASN1_STRING_to_UTF8(&peer_CN, tmp);
+
+        if((int)strlen((char *)peer_CN) != j) {
+          /* there was a terminating zero before the end of string, this
+             cannot match and we return failure! */
+          failf(data, "SSL: illegal cert name field");
+          res = CURLE_PEER_FAILED_VERIFICATION;
+        }
       }
     }
 
@@ -1197,7 +1193,7 @@ static CURLcode verifyhost(struct connectdata *conn,
     else {
       /* convert peer_CN from UTF8 */
       size_t rc;
-      rc = Curl_convert_from_utf8(data, peer_CN, peer_len);
+      rc = Curl_convert_from_utf8(data, peer_CN, strlen(peer_CN));
       /* Curl_convert_from_utf8 calls failf if unsuccessful */
       if(rc != CURLE_OK) {
         OPENSSL_free(peer_CN);
@@ -1206,13 +1202,15 @@ static CURLcode verifyhost(struct connectdata *conn,
     }
 #endif /* CURL_DOES_CONVERSIONS */
 
-    if(!peer_CN) {
+    if(res)
+      /* error already detected, pass through */
+      ;
+    else if(!peer_CN) {
       failf(data,
             "SSL: unable to obtain common name from peer certificate");
-      return CURLE_PEER_FAILED_VERIFICATION;
+      res = CURLE_PEER_FAILED_VERIFICATION;
     }
-    else if(!cert_hostcheck((const char *)peer_CN, peer_len,
-                            conn->host.name)) {
+    else if(!cert_hostcheck((const char *)peer_CN, conn->host.name)) {
       if(data->set.ssl.verifyhost > 1) {
         failf(data, "SSL: certificate subject name '%s' does not match "
               "target host name '%s'", peer_CN, conn->host.dispname);
