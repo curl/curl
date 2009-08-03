@@ -86,6 +86,7 @@ extern "C" {
 #define ARES_ENOMEM             15
 #define ARES_EDESTRUCTION       16
 #define ARES_EBADSTR            17
+#define ARES_ECANCELLED         21
 
 /* ares_getnameinfo error codes */
 #define ARES_EBADFLAGS          18

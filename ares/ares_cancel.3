@@ -27,7 +27,7 @@ ares_cancel \- Cancel a resolve
 The \fBares_cancel\fP function cancels all lookups/requests made on the the
 name service channel identified by \fIchannel\fP.  \fBares_cancel\fP invokes
 the callbacks for each pending query on the channel, passing a status of
-.BR ARES_ETIMEOUT .
+.BR ARES_ECANCELLED .
 These calls give the callbacks a chance to clean up any state which
 might have been stored in their arguments.
 .SH SEE ALSO
@@ -35,5 +35,10 @@ might have been stored in their arguments.
 .BR ares_destroy (3)
 .SH NOTES
 This function was added in c-ares 1.2.0
+
+c-ares 1.6.0 and earlier pass a status of
+.BR ARES_ETIMEOUT
+instead of
+.BR ARES_ECANCELLED .
 .SH AUTHOR
 Dirk Manske

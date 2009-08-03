@@ -36,7 +36,7 @@ void ares_cancel(ares_channel channel)
   {
     query = list_node->data;
     list_node = list_node->next;  /* since we're deleting the query */
-    query->callback(query->arg, ARES_ETIMEOUT, 0, NULL, 0);
+    query->callback(query->arg, ARES_ECANCELLED, 0, NULL, 0);
     ares__free_query(query);
   }
 #ifndef NDEBUG
