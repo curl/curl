@@ -1178,7 +1178,7 @@ static CURLcode verifyhost(struct connectdata *conn,
         else /* not a UTF8 name */
           j = ASN1_STRING_to_UTF8(&peer_CN, tmp);
 
-        if((int)strlen((char *)peer_CN) != j) {
+        if(peer_CN && ((int)strlen((char *)peer_CN) != j)) {
           /* there was a terminating zero before the end of string, this
              cannot match and we return failure! */
           failf(data, "SSL: illegal cert name field");
