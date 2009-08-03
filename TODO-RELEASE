@@ -9,6 +9,8 @@ To be addressed in 7.19.6 (planned release: August 2009)
 
 255 - debugging a crash in Curl_pgrsTime/checkPendPipeline?
 
+256 - "More questions about ares behavior"
+
 To be addressed in 7.19.7 (planned release: October 2009)
 =========================
 
@@ -20,5 +22,5 @@ To be addressed in 7.19.7 (planned release: October 2009)
 
 253 - add option to disable SNI for TLS handshakes
 
-256 -
+257 -
 
