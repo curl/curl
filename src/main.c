@@ -4991,7 +4991,14 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
                 fflush(outs.stream);
                 /* truncate file at the position where we started appending */
 #ifdef HAVE_FTRUNCATE
-                ftruncate( fileno(outs.stream), outs.init);
+                if(ftruncate( fileno(outs.stream), outs.init)) {
+                  /* when truncate fails, we can't just append as then we'll
+                     create something strange, bail out */
+                  if(!config->mute)
+                    fprintf(config->errors,
+                            "failed to truncate, exiting\n");
+                  break;
+                }
                 /* now seek to the end of the file, the position where we
                    just truncated the file in a large file-safe way */
                 fseek(outs.stream, 0, SEEK_END);
