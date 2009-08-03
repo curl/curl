@@ -1,5 +1,10 @@
   Changelog for the c-ares project
 
+* 3 Aug 2009 (Daniel Stenberg)
+- Joshua Kwan fixed the init routine to fill in the defaults for stuff that
+  fails to get inited by other means. This fixes a case of when the c-ares
+  init fails when internet access is fone.
+
 * 14 Jul 2009 (Guenter Knauf)
 - renamed generated config.h to ares_config.h to avoid any future clashes
   with config.h from other projects.

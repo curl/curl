@@ -16,9 +16,10 @@ Fixed:
    ARES_EBADNAME if the name in the response failed to decode
  o only expose/export symbols starting with 'ares_'
  o fix \Device\TCP handle leaks triggered by buggy iphlpapi.dll
+ o init without internet gone no longer fails
 
 Thanks go to these friendly people for their efforts and contributions:
 
- Phil Blundell, Japheth Cleaver, Yang Tse, Gregor Jasny
+ Phil Blundell, Japheth Cleaver, Yang Tse, Gregor Jasny, Joshua Kwan
 
 Have fun!

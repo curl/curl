@@ -201,12 +201,15 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
       DEBUGF(fprintf(stderr, "Error: init_by_resolv_conf failed: %s\n",
                      ares_strerror(status)));
   }
-  if (status == ARES_SUCCESS) {
-    status = init_by_defaults(channel);
-    if (status != ARES_SUCCESS)
-      DEBUGF(fprintf(stderr, "Error: init_by_defaults failed: %s\n",
-                     ares_strerror(status)));
-  }
+
+  /*
+   * No matter what failed or succeeded, seed defaults to provide
+   * useful behavior for things that we missed.
+   */
+  status = init_by_defaults(channel);
+  if (status != ARES_SUCCESS)
+    DEBUGF(fprintf(stderr, "Error: init_by_defaults failed: %s\n",
+                   ares_strerror(status)));
 
   /* Generate random key */
 
