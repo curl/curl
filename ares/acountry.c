@@ -116,10 +116,6 @@ int main(int argc, char **argv)
   WSAStartup(wVersionRequested, &wsaData);
 #endif
 
-#ifdef WIN32
-  LoadLibrary ("exchndl.dll");
-#endif
-
   status = ares_library_init(ARES_LIB_INIT_ALL);
   if (status != ARES_SUCCESS)
     {
