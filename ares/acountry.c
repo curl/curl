@@ -10,8 +10,8 @@
  *   CNAME = zz<CC>.countries.nerd.dk with address 127.0.x.y (ver 1) or
  *   CNAME = <a.b.c.d>.zz.countries.nerd.dk with address 127.0.x.y (ver 2)
  *
- * The 2 letter country code in <CC> and the ISO-3166 country
- * number in x.y (number = x*256 + y). Version 2 of the protocol is missing
+ * The 2 letter country code is in <CC> and the ISO-3166 country
+ * number is in x.y (number = x*256 + y). Version 2 of the protocol is missing
  * the <CC> number.
  *
  * Ref: http://countries.nerd.dk/more.html
@@ -114,6 +114,10 @@ int main(int argc, char **argv)
   WORD wVersionRequested = MAKEWORD(USE_WINSOCK,USE_WINSOCK);
   WSADATA wsaData;
   WSAStartup(wVersionRequested, &wsaData);
+#endif
+
+#ifdef WIN32
+  LoadLibrary ("exchndl.dll");
 #endif
 
   status = ares_library_init(ARES_LIB_INIT_ALL);
