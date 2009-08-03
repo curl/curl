@@ -452,14 +452,14 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   /* for multi interface connections, we share DNS cache automatically if the
      easy handle's one is currently private. */
   if(easy->easy_handle->dns.hostcache &&
-      (easy->easy_handle->dns.hostcachetype == HCACHE_PRIVATE)) {
+     (easy->easy_handle->dns.hostcachetype == HCACHE_PRIVATE)) {
     Curl_hash_destroy(easy->easy_handle->dns.hostcache);
     easy->easy_handle->dns.hostcache = NULL;
     easy->easy_handle->dns.hostcachetype = HCACHE_NONE;
   }
 
   if(!easy->easy_handle->dns.hostcache ||
-      (easy->easy_handle->dns.hostcachetype == HCACHE_NONE)) {
+     (easy->easy_handle->dns.hostcachetype == HCACHE_NONE)) {
     easy->easy_handle->dns.hostcache = multi->hostcache;
     easy->easy_handle->dns.hostcachetype = HCACHE_MULTI;
   }
@@ -598,10 +598,10 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
       multi->num_alive--;
 
     if(easy->easy_conn &&
-        (easy->easy_conn->send_pipe->size +
-         easy->easy_conn->recv_pipe->size > 1) &&
-        easy->state > CURLM_STATE_WAITDO &&
-        easy->state < CURLM_STATE_COMPLETED) {
+       (easy->easy_conn->send_pipe->size +
+        easy->easy_conn->recv_pipe->size > 1) &&
+       easy->state > CURLM_STATE_WAITDO &&
+       easy->state < CURLM_STATE_COMPLETED) {
       /* If the handle is in a pipeline and has started sending off its
          request but not received its reponse yet, we need to close
          connection. */
@@ -660,7 +660,7 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
        points to this handle and are using PROT_CLOSEACTION. If there's any,
        we need to add this handle to the list of "easy handles kept around for
        nice connection closures".
-     */
+    */
     if(multi_conn_using(multi, easy->easy_handle)) {
       /* There's at least one connection using this handle so we must keep
          this handle around. We also keep the connection cache pointer
@@ -778,7 +778,7 @@ static int domore_getsock(struct connectdata *conn,
 /* returns bitmapped flags for this handle and its sockets */
 static int multi_getsock(struct Curl_one_easy *easy,
                          curl_socket_t *socks, /* points to numsocks number
-                                                 of sockets */
+                                                  of sockets */
                          int numsocks)
 {
   /* If the pipe broke, or if there's no connection left for this easy handle,
@@ -790,7 +790,7 @@ static int multi_getsock(struct Curl_one_easy *easy,
     return 0;
 
   if(easy->state > CURLM_STATE_CONNECT &&
-      easy->state < CURLM_STATE_COMPLETED) {
+     easy->state < CURLM_STATE_COMPLETED) {
     /* Set up ownership correctly */
     easy->easy_conn->data = easy->easy_handle;
   }
@@ -1079,7 +1079,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
              and then we continue to 'STATE_PROTOCONNECT'. If protocol
              connect is TRUE, we move on to STATE_DO.
              BUT if we are using a proxy we must change to WAITPROXYCONNECT
-             */
+          */
 #ifndef CURL_DISABLE_HTTP
           if(easy->easy_conn->bits.tunnel_connecting)
             multistate(easy, CURLM_STATE_WAITPROXYCONNECT);
@@ -1269,23 +1269,23 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       /* if both rates are within spec, resume transfer */
       Curl_pgrsUpdate(easy->easy_conn);
       if( ( ( easy->easy_handle->set.max_send_speed == 0 ) ||
-             ( easy->easy_handle->progress.ulspeed <
-               easy->easy_handle->set.max_send_speed ) )  &&
-           ( ( easy->easy_handle->set.max_recv_speed == 0 ) ||
-             ( easy->easy_handle->progress.dlspeed <
-               easy->easy_handle->set.max_recv_speed ) )
+            ( easy->easy_handle->progress.ulspeed <
+              easy->easy_handle->set.max_send_speed ) )  &&
+          ( ( easy->easy_handle->set.max_recv_speed == 0 ) ||
+            ( easy->easy_handle->progress.dlspeed <
+              easy->easy_handle->set.max_recv_speed ) )
         )
-      multistate(easy, CURLM_STATE_PERFORM);
+        multistate(easy, CURLM_STATE_PERFORM);
       break;
 
     case CURLM_STATE_PERFORM:
       /* check if over speed */
       if( (  ( easy->easy_handle->set.max_send_speed > 0 ) &&
-              ( easy->easy_handle->progress.ulspeed >
-                easy->easy_handle->set.max_send_speed ) )  ||
-           (  ( easy->easy_handle->set.max_recv_speed > 0 ) &&
-              ( easy->easy_handle->progress.dlspeed >
-                easy->easy_handle->set.max_recv_speed ) )
+             ( easy->easy_handle->progress.ulspeed >
+               easy->easy_handle->set.max_send_speed ) )  ||
+          (  ( easy->easy_handle->set.max_recv_speed > 0 ) &&
+             ( easy->easy_handle->progress.dlspeed >
+               easy->easy_handle->set.max_recv_speed ) )
         ) {
         /* Transfer is over the speed limit. Change state.  TODO: Call
          * Curl_expire() with the time left until we're targeted to be below
@@ -1864,10 +1864,9 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
             data->set.one_easy->easy_conn->send_pipe &&
             data->set.one_easy->easy_conn->send_pipe->head)
           data = data->set.one_easy->easy_conn->send_pipe->head->ptr;
-        else
-        if ((ev_bitmask & CURL_POLL_IN) &&
-            data->set.one_easy->easy_conn->recv_pipe &&
-            data->set.one_easy->easy_conn->recv_pipe->head)
+        else if ((ev_bitmask & CURL_POLL_IN) &&
+                 data->set.one_easy->easy_conn->recv_pipe &&
+                 data->set.one_easy->easy_conn->recv_pipe->head)
           data = data->set.one_easy->easy_conn->recv_pipe->head->ptr;
       }
 
@@ -1990,7 +1989,7 @@ CURLMcode curl_multi_socket(CURLM *multi_handle, curl_socket_t s,
 }
 
 CURLMcode curl_multi_socket_action(CURLM *multi_handle, curl_socket_t s,
-                                     int ev_bitmask, int *running_handles)
+                                   int ev_bitmask, int *running_handles)
 {
   CURLMcode result = multi_socket((struct Curl_multi *)multi_handle, FALSE, s,
                                   ev_bitmask, running_handles);
@@ -2143,9 +2142,9 @@ static int checkPendPipeline(struct connectdata *conn)
    Pay special attention to the new sending list "leader" as it needs to get
    checked to update what sockets it acts on.
 
- */
+*/
 static void moveHandleFromSendToRecvPipeline(struct SessionHandle *handle,
-                                            struct connectdata *conn)
+                                             struct connectdata *conn)
 {
   struct curl_llist_element *curr;
 
