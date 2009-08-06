@@ -2347,7 +2347,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
             postdata=strdup("");
           }
           else {
-            char *enc = curl_easy_escape(config->easy, postdata, size);
+            char *enc = curl_easy_escape(config->easy, postdata, (int)size);
             free(postdata); /* no matter if it worked or not */
             if(enc) {
               /* now make a string with the name from above and append the
