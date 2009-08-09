@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Fandrich (9 Aug 2009)
+- Fixed some memory leaks in the command-line tool that caused most of the
+  torture tests to fail.
+
 Daniel Stenberg (2 Aug 2009)
 - Curt Bogmine reported a problem with SNI enabled on a particular server. We
   should introduce an option to disable SNI, but as we're in feature freeze

@@ -4378,8 +4378,11 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
              file output call */
 
           if(config->create_dirs &&
-             (-1 == create_dir_hierarchy(outfile, config->errors)))
-            return CURLE_WRITE_ERROR;
+             (-1 == create_dir_hierarchy(outfile, config->errors))) {
+            free(url);
+	    res = CURLE_WRITE_ERROR;
+	    break;
+	  }
 
           if(config->resume_from_current) {
             /* We're told to continue from where we are now. Get the
@@ -4404,7 +4407,9 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             outs.stream=(FILE *) fopen(outfile, config->resume_from?"ab":"wb");
             if (!outs.stream) {
               helpf(config->errors, "Can't open '%s'!\n", outfile);
-              return CURLE_WRITE_ERROR;
+              free(url);
+	      res = CURLE_WRITE_ERROR;
+	      break;
             }
           }
           else {
@@ -4449,13 +4454,15 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
               char *urlbuffer = malloc(strlen(url) + strlen(filep) + 3);
               if(!urlbuffer) {
                 helpf(config->errors, "out of memory\n");
-                return CURLE_OUT_OF_MEMORY;
+                free(url);
+	        res = CURLE_OUT_OF_MEMORY;
+	        break;
               }
               if(ptr)
                 /* there is a trailing slash on the URL */
                 sprintf(urlbuffer, "%s%s", url, filep);
               else
-                /* thers is no trailing slash on the URL */
+                /* there is no trailing slash on the URL */
                 sprintf(urlbuffer, "%s/%s", url, filep);
 
               curl_free(filep);
@@ -4552,7 +4559,21 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           urlbuffer = malloc(strlen(url) + strlen(httpgetfields) + 3);
           if(!urlbuffer) {
             helpf(config->errors, "out of memory\n");
-            return CURLE_OUT_OF_MEMORY;
+
+            /* Free the list of remaining URLs and globbed upload files
+             * to force curl to exit immediately
+             */
+            if(urls) {
+              glob_cleanup(urls);
+              urls = NULL;
+            }
+            if(inglob) {
+              glob_cleanup(inglob);
+              inglob = NULL;
+            }
+
+	    res = CURLE_OUT_OF_MEMORY;
+	    goto quit_urls;
           }
           if (pc)
             sprintf(urlbuffer, "%s%c%s", url, sep, httpgetfields);
@@ -4704,8 +4725,22 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             my_setopt_str(curl, CURLOPT_SSH_KNOWNHOSTS, file);
             curl_free(file);
           }
-          else
-            return CURLE_OUT_OF_MEMORY;
+          else {
+            /* Free the list of remaining URLs and globbed upload files
+             * to force curl to exit immediately
+             */
+            if(urls) {
+              glob_cleanup(urls);
+              urls = NULL;
+            }
+            if(inglob) {
+              glob_cleanup(inglob);
+              inglob = NULL;
+            }
+
+	    res = CURLE_OUT_OF_MEMORY;
+	    goto quit_urls;
+          }
         }
 
         if(config->no_body || config->remote_time) {
