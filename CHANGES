@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel Fandrich (10 Aug 2009)
+- Fixed a memory leak in the FTP code and an off-by-one heap buffer overflow.
+
 Daniel Fandrich (9 Aug 2009)
 - Fixed some memory leaks in the command-line tool that caused most of the
   torture tests to fail.

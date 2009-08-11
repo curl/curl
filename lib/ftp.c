@@ -926,9 +926,9 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     char *port_start = NULL;
     char *port_sep = NULL;
 
-    addr = malloc(addrlen);
-    memset(addr, 0, addrlen);
-
+    addr = calloc(addrlen+1, 1);
+    if (!addr)
+      return CURLE_OUT_OF_MEMORY;
 
 #ifdef ENABLE_IPV6
     if(*string_ftpport == '[') {
