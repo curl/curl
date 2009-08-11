@@ -1080,6 +1080,8 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   case CURLOPT_PROXYUSERNAME:
   case CURLOPT_PROXYPASSWORD:
   case CURLOPT_NOPROXY:
+  /* SSH2 not (yet) implemented on OS400. */
+  /* case CURLOPT_SSH_KNOWNHOSTS: */
   case CURLOPT_SOCKS5_GSSAPI_SERVICE:
     s = va_arg(arg, char *);
     ccsid = va_arg(arg, unsigned int);
