@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (11 Aug 2009)
+- Benbuck Nason posted the bug report #2835196
+  (http://curl.haxx.se/bug/view.cgi?id=2835196), fixing a few compiler
+  warnings when mixing ints and bools.
+
 Daniel Fandrich (10 Aug 2009)
 - Fixed a memory leak in the FTP code and an off-by-one heap buffer overflow.
 

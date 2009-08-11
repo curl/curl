@@ -3862,7 +3862,7 @@ static CURLcode parse_url_userpass(struct SessionHandle *data,
       if(data->set.use_netrc != CURL_NETRC_REQUIRED) {
         /* We could use the one in the URL */
 
-        conn->bits.user_passwd = 1; /* enable user+password */
+        conn->bits.user_passwd = TRUE; /* enable user+password */
 
         if(*userpass != ':') {
           /* the name is given, get user+password */
@@ -4027,7 +4027,7 @@ static void override_userpass(struct SessionHandle *data,
          different host or similar. */
       conn->bits.netrc = TRUE;
 
-      conn->bits.user_passwd = 1; /* enable user+password */
+      conn->bits.user_passwd = TRUE; /* enable user+password */
     }
   }
 }
