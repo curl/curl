@@ -1,24 +1,29 @@
-To be addressed in 7.19.6 (planned release: August 2009)
-=========================
-
-248 - "Pausing pipeline problems."
-
-251 - TFTP block size
-
-254 - Problem re-using easy handle after call to curl_multi_remove_handle
-
-255 - debugging a crash in Curl_pgrsTime/checkPendPipeline?
-
-256 - "More questions about ares behavior"
-
 To be addressed in 7.19.7 (planned release: October 2009)
 =========================
 
+248 - "Pausing pipeline problems."
+      http://curl.haxx.se/mail/lib-2009-07/0214.html
+
+251 - TFTP block size / better integration in transfer
+      http://curl.haxx.se/mail/lib-2009-08/0028.html
+
+254 - Problem re-using easy handle after call to curl_multi_remove_handle
+      http://curl.haxx.se/mail/lib-2009-07/0249.html
+    
+255 - debugging a crash in Curl_pgrsTime/checkPendPipeline?
+      http://curl.haxx.se/mail/lib-2009-08/0066.html
+
+256 - "More questions about ares behavior"
+      http://curl.haxx.se/mail/lib-2009-08/0012.html
+
 244 - patch for [out] parameters
+      http://curl.haxx.se/mail/lib-2009-06/0342.html
 
 245 - HTTP version getinfo
+      http://curl.haxx.se/mail/lib-2009-06/0312.html
 
 247 - Using CURLINFO_ERROR in Curl_failf
+      http://curl.haxx.se/mail/lib-2009-06/0065.html
 
 253 - add option to disable SNI for TLS handshakes
 
