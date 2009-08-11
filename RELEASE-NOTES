@@ -42,6 +42,8 @@ This release includes the following bugfixes:
  o rand seeding on libcurl on windows built with OpenSSL was not thread-safe
  o fixed the zero byte inserted in cert name flaw in libcurl+OpenSSL
  o don't try SNI with SSLv2 or SSLv3 (OpenSSL and GnuTLS builds)
+ o libcurl+OpenSSL would wrongly acknowledge a cert if CN matched but
+   subjectAltName didn't
 
 This release includes the following known bugs:
 

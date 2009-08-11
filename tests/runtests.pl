@@ -878,7 +878,7 @@ sub runhttpserver {
 # start the https server (or rather, tunnel)
 #
 sub runhttpsserver {
-    my ($verbose, $ipv6) = @_;
+    my ($verbose, $ipv6, $parm) = @_;
     my $STATUS;
     my $RUNNING;
     my $ip = $HOSTIP;
@@ -906,6 +906,7 @@ sub runhttpsserver {
     unlink($pidfile);
 
     my $flag=$debugprotocol?"-v ":"";
+    $flag .= " -c $parm" if ($parm);
     my $cmd="$perl $srcdir/httpsserver.pl $flag -p https -s \"$stunnel\" -d $srcdir -r $HTTPPORT $HTTPSPORT";
 
     my ($httpspid, $pid2) = startnew($cmd, $pidfile, 15, 0);
@@ -2541,8 +2542,10 @@ sub startservers {
     my @what = @_;
     my ($pid, $pid2);
     for(@what) {
-        my $what = lc($_);
+        my (@whatlist) = split(/\s+/,$_);
+        my $what = lc($whatlist[0]);
         $what =~ s/[^a-z0-9-]//g;
+
         if($what eq "ftp") {
             if(!$run{'ftp'}) {
                 ($pid, $pid2) = runftpserver("", $verbose);
@@ -2644,8 +2647,8 @@ sub startservers {
                 printf ("* pid http => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'http'}="$pid $pid2";
             }
-            if(!$run{'https'}) {
-                ($pid, $pid2) = runhttpsserver($verbose);
+            if(1 || !$run{'https'}) {  # QD to restart always conf file may change
+                ($pid, $pid2) = runhttpsserver($verbose,"",$whatlist[1]);
                 if($pid <= 0) {
                     return "failed starting HTTPS server (stunnel)";
                 }
@@ -2743,6 +2746,7 @@ sub serverfortest {
     for (@what) {
 	my $proto = lc($_);
 	chomp $proto;
+        $proto =~ s/\s.*//g;  # take first word
 	if (! grep /^$proto$/, @protocols) {
 	    if (substr($proto,0,5) ne "socks") {
 		    return "curl lacks $proto support";

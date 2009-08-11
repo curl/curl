@@ -7,6 +7,13 @@
                                   Changelog
 
 Daniel Stenberg (11 Aug 2009)
+- Peter Sylvester made the HTTPS test server use specific certificates for
+  each test, so that the test suite can now be used to actually test the
+  verification of cert names etc. This made an error show up in the OpenSSL-
+  specific code where it would attempt to match the CN field even if a
+  subjectAltName exists that doesn't match. This is now fixed and verified
+  in test 311.
+
 - Benbuck Nason posted the bug report #2835196
   (http://curl.haxx.se/bug/view.cgi?id=2835196), fixing a few compiler
   warnings when mixing ints and bools.
