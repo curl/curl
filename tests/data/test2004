@@ -30,7 +30,7 @@ sftp
 TFTP RRQ followed by SFTP retrieval followed by FILE followed by SCP retrieval then again in reverse order
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: tftp://%HOSTIP:%TFTPPORT//2004 sftp://%HOSTIP:%SSHPORT%PWD/log/test2004.txt file://localhost/%PWD/log/test2004.txt scp://%HOSTIP:%SSHPORT%PWD/log/test2004.txt file://localhost/%PWD/log/test2004.txt sftp://%HOSTIP:%SSHPORT%PWD/log/test2004.txt tftp://%HOSTIP:%TFTPPORT//2004
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: tftp://%HOSTIP:%TFTPPORT//2004 sftp://%HOSTIP:%SSHPORT%PWD/log/test2004.txt file://localhost/%PWD/log/test2004.txt scp://%HOSTIP:%SSHPORT%PWD/log/test2004.txt file://localhost/%PWD/log/test2004.txt sftp://%HOSTIP:%SSHPORT%PWD/log/test2004.txt tftp://%HOSTIP:%TFTPPORT//2004 --insecure
 </command>
 <file name="log/test2004.txt">
 This is test data
