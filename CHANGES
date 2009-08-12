@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (12 Aug 2009)
+- Carsten Lange reported a bug and provided a patch for TFTP upload and the
+  sending of the TSIZE option. I don't like fixing bugs just hours before
+  a release, but since it was broken and the patch fixes this for him I decided
+  to get it in anyway.
+
 Daniel Stenberg (11 Aug 2009)
 - Peter Sylvester made the HTTPS test server use specific certificates for
   each test, so that the test suite can now be used to actually test the

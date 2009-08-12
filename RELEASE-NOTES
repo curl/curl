@@ -44,6 +44,7 @@ This release includes the following bugfixes:
  o don't try SNI with SSLv2 or SSLv3 (OpenSSL and GnuTLS builds)
  o libcurl+OpenSSL would wrongly acknowledge a cert if CN matched but
    subjectAltName didn't
+ o TFTP upload sent illegal TSIZE packets
 
 This release includes the following known bugs:
 
@@ -57,6 +58,7 @@ advice from friends like these:
  Aaron Oneal, Igor Novoseltsev, Eric Wong, Bill Hoffman, Daniel Steinberg,
  Fabian Keil, Michal Marek, Reuven Wachtfogel, Markus Koetter,
  Constantine Sapuntzakis, David Binderman, Johan van Selst, Alexander Beedie,
- Tanguy Fautre, Scott Cantor, Curt Bogmine, Peter Sylvester, Benbuck Nason
+ Tanguy Fautre, Scott Cantor, Curt Bogmine, Peter Sylvester, Benbuck Nason,
+ Carsten Lange
 
         Thanks! (and sorry if I forgot to mention someone)
