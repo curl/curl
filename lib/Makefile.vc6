@@ -483,6 +483,7 @@ X_OBJS= \
 	$(DIROBJ)\mprintf.obj \
 	$(DIROBJ)\multi.obj \
 	$(DIROBJ)\netrc.obj \
+        $(DIROBJ)\nonblock.obj \
 	$(DIROBJ)\parsedate.obj \
 	$(DIROBJ)\progress.obj \
 	$(DIROBJ)\rawstr.obj \
