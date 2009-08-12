@@ -1,50 +1,19 @@
-Curl and libcurl 7.19.6
+Curl and libcurl 7.19.7
 
- Public curl releases:         112
+ Public curl releases:         113
  Command line options:         132
  curl_easy_setopt() options:   163
  Public functions in libcurl:  58
  Known libcurl bindings:       38
- Contributors:                 715
+ Contributors:                 732
 
 This release includes the following changes:
 
- o CURLOPT_FTPPORT (and curl's -P/--ftpport) support port ranges
- o Added CURLOPT_SSH_KNOWNHOSTS, CURLOPT_SSH_KEYFUNCTION, CURLOPT_SSH_KEYDATA
- o CURLOPT_QUOTE, CURLOPT_POSTQUOTE and CURLOPT_PREQUOTE can be told to ignore
-   error responses when used with FTP
+ o 
 
 This release includes the following bugfixes:
 
- o crash on bad socket close with FTP
- o leaking cookie memory when duplicate domains or paths were used
- o build fix for Symbian
- o CURLOPT_USERPWD set to NULL clears auth credentials
- o libcurl-NSS build fixes
- o configure script fixed for VMS
- o set Content-Length: with POST and PUT failed with NTLM auth
- o allow building libcurl for VxWorks
- o curl tool exit codes fixed for VMS
- o --no-buffer treated correctly
- o djgpp build fix
- o configure detection of GnuTLS now based on pkg-config as well
- o libcurl-NSS client cert handling segfaults
- o curl uploading from stdin/pipes now works in non-blocking way so that it
-   continues the downloading even when the read stalls
- o ftp credentials are added to the url if needed for http proxies
- o curl -o - sends data to stdout using binary mode on windows
- o fixed the separators for "array" style string that CURLINFO_CERTINFO returns
- o auth problem over several hosts with re-used connection
- o improved the support for client certificates in libcurl+NSS
- o fix leak in gtls code
- o missing algorithms in libcurl+OpenSSL
- o with noproxy set you could still get a proxy if a proxy env was set
- o rand seeding on libcurl on windows built with OpenSSL was not thread-safe
- o fixed the zero byte inserted in cert name flaw in libcurl+OpenSSL
- o don't try SNI with SSLv2 or SSLv3 (OpenSSL and GnuTLS builds)
- o libcurl+OpenSSL would wrongly acknowledge a cert if CN matched but
-   subjectAltName didn't
- o TFTP upload sent illegal TSIZE packets
+ o 
 
 This release includes the following known bugs:
 
@@ -53,12 +22,6 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Yang Tse, Daniel Fandrich, Kamil Dudka, Caolan McNamara, Frank McGeough,
- Andre Guibert de Bruet, Mike Crowe, Claes Jakobsson, John E. Malmberg,
- Aaron Oneal, Igor Novoseltsev, Eric Wong, Bill Hoffman, Daniel Steinberg,
- Fabian Keil, Michal Marek, Reuven Wachtfogel, Markus Koetter,
- Constantine Sapuntzakis, David Binderman, Johan van Selst, Alexander Beedie,
- Tanguy Fautre, Scott Cantor, Curt Bogmine, Peter Sylvester, Benbuck Nason,
- Carsten Lange
+ 
 
         Thanks! (and sorry if I forgot to mention someone)
