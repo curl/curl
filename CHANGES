@@ -6,6 +6,8 @@
 
                                   Changelog
 
+Version 7.19.6 (12 August 2009)
+
 Daniel Stenberg (12 Aug 2009)
 - Carsten Lange reported a bug and provided a patch for TFTP upload and the
   sending of the TSIZE option. I don't like fixing bugs just hours before
