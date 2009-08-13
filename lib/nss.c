@@ -615,15 +615,25 @@ static SECStatus BadCertHandler(void *arg, PRFileDesc *sock)
           issuer);
     break;
   case SSL_ERROR_BAD_CERT_DOMAIN:
-    if(conn->data->set.ssl.verifypeer)
+    if(conn->data->set.ssl.verifyhost) {
+      failf(conn->data, "common name '%s' does not match '%s'",
+            subject, conn->host.dispname);
       success = SECFailure;
-    infof(conn->data, "common name: %s (does not match '%s')\n",
-          subject, conn->host.dispname);
+    } else {
+      infof(conn->data, "warning: common name '%s' does not match '%s'\n",
+            subject, conn->host.dispname);
+    }
     break;
   case SEC_ERROR_EXPIRED_CERTIFICATE:
     if(conn->data->set.ssl.verifypeer)
       success = SECFailure;
     infof(conn->data, "Remote Certificate has expired.\n");
+    break;
+  case SEC_ERROR_UNKNOWN_ISSUER:
+    if(conn->data->set.ssl.verifypeer)
+      success = SECFailure;
+    infof(conn->data, "Peer's certificate issuer is not recognized: '%s'\n",
+          issuer);
     break;
   default:
     if(conn->data->set.ssl.verifypeer)
@@ -1067,6 +1077,9 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
     }
   }
 
+  if(data->set.ssl.verifyhost == 1)
+    infof(data, "warning: ignoring unsupported value (1) of ssl.verifyhost\n");
+
   data->set.ssl.certverifyresult=0; /* not checked yet */
   if(SSL_BadCertHook(model, (SSLBadCertHandler) BadCertHandler, conn)
      != SECSuccess) {
@@ -1200,7 +1213,9 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   if(SSL_ForceHandshakeWithTimeout(connssl->handle,
                                     PR_SecondsToInterval(HANDSHAKE_TIMEOUT))
       != SECSuccess) {
-    if(conn->data->set.ssl.certverifyresult!=0)
+    if(conn->data->set.ssl.certverifyresult == SSL_ERROR_BAD_CERT_DOMAIN)
+      curlerr = CURLE_PEER_FAILED_VERIFICATION;
+    else if(conn->data->set.ssl.certverifyresult!=0)
       curlerr = CURLE_SSL_CACERT;
     goto error;
   }

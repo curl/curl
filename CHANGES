@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Kamil Dudka (13 Aug 2009)
+- Changed NSS code to not ignore the value of ssl.verifyhost and produce more
+  verbose error messages. Originally reported at:
+  https://bugzilla.redhat.com/show_bug.cgi?id=516056
+
 Daniel Stenberg (12 Aug 2009)
 - Karl Moerder fixed the Makefile.vc* makefiles to include the new file
   nonblock.c so that they work fine again
