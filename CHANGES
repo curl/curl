@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel Stenberg (12 Aug 2009)
+- Karl Moerder fixed the Makefile.vc* makefiles to include the new file
+  nonblock.c so that they work fine again
+
+- I expanded test 517 with a bunch of more dates that originate from the
+  Chrome browser test suite. It turns out most of them get parsed the same
+  way.
+
 Version 7.19.6 (12 August 2009)
 
 Daniel Stenberg (12 Aug 2009)
