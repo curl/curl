@@ -7,6 +7,7 @@
 	curl_easy_unescape,
 	curl_easy_getinfo,
 	curl_easy_init,
+	curl_easy_pause,
 	curl_easy_perform,
 	curl_easy_setopt,
 	curl_escape,
