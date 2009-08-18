@@ -78,7 +78,7 @@ server, do one of the following:
       5. all directories along %PATH%
 
  5. Get a better/different/newer CA cert bundle! One option is to extract the
-    one a recent Mozilla browser uses by running 'make ca-bundle' in the curl
+    one a recent Firefox browser uses by running 'make ca-bundle' in the curl
     build tree root, or possibly download a version that was generated this
     way for you:
 
