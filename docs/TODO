@@ -38,6 +38,8 @@
  5. HTTP
  5.1 Better persistency for HTTP 1.0
  5.2 support FF3 sqlite cookie files
+ 5.3 Sort outgoing cookies
+ 5.4 Rearrange request header order
 
  6. TELNET
  6.1 ditch stdin
@@ -241,6 +243,26 @@
  Firefox 3 is changing from its former format to a a sqlite database instead.
  We should consider how (lib)curl can/should support this.
  http://curl.haxx.se/bug/feature.cgi?id=1871388
+
+5.3 Sort outgoing cookies
+
+ All the major browsers sort the cookies sent in the Cookie: header based on
+ the length of the path for which the cookie is set with. This could lead to
+ a small fraction of servers to not play well with curl:
+ http://www.ietf.org/mail-archive/web/http-state/current/msg00150.html
+
+5.4 Rearrange request header order
+
+ Server implementors often make an effort to detect browser and to reject
+ clients it can detect to not match. One of the last details we cannot yet
+ control in libcurl's HTTP requests, which also can be exploited to detect
+ that libcurl is in fact used even when it tries to impersonate a browser, is
+ the order of the request headers. I propose that we introduce a new option in
+ which you give headers a value, and then when the HTTP request is built it
+ sorts the headers based on that number. We could then have internally created
+ headers use a default value so only headers that need to be moved have to be
+ specified.
+
 
 6. TELNET
 
