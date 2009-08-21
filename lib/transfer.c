@@ -176,7 +176,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
   }
 
   if(!data->req.forbidchunk && data->req.upload_chunky) {
-    /* if chunked Transfer-Encoding 
+    /* if chunked Transfer-Encoding
      *    build chunk:
      *
      *        <HEX SIZE> CRLF
@@ -217,9 +217,9 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
     /* copy the prefix to the buffer, leaving out the NUL */
     memcpy(data->req.upload_fromhere, hexbuffer, hexlen);
 
-    /* always append ASCII CRLF to the data */  
-    memcpy(data->req.upload_fromhere + nread, 
-           endofline_network, 
+    /* always append ASCII CRLF to the data */
+    memcpy(data->req.upload_fromhere + nread,
+           endofline_network,
            strlen(endofline_network));
 
 #ifdef CURL_DOES_CONVERSIONS
@@ -2493,6 +2493,61 @@ connect_host(struct SessionHandle *data,
   }
 
   return res;
+}
+
+CURLcode
+Curl_reconnect_request(struct connectdata **connp)
+{
+  CURLcode result = CURLE_OK;
+  struct connectdata *conn = *connp;
+  struct SessionHandle *data = conn->data;
+
+  /* This was a re-use of a connection and we got a write error in the
+   * DO-phase. Then we DISCONNECT this connection and have another attempt to
+   * CONNECT and then DO again! The retry cannot possibly find another
+   * connection to re-use, since we only keep one possible connection for
+   * each.  */
+
+  infof(data, "Re-used connection seems dead, get a new one\n");
+
+  conn->bits.close = TRUE; /* enforce close of this connection */
+  result = Curl_done(&conn, result, FALSE); /* we are so done with this */
+
+  /* conn may no longer be a good pointer */
+
+  /*
+   * According to bug report #1330310. We need to check for CURLE_SEND_ERROR
+   * here as well. I figure this could happen when the request failed on a FTP
+   * connection and thus Curl_done() itself tried to use the connection
+   * (again). Slight Lack of feedback in the report, but I don't think this
+   * extra check can do much harm.
+   */
+  if((CURLE_OK == result) || (CURLE_SEND_ERROR == result)) {
+    bool async;
+    bool protocol_done = TRUE;
+
+    /* Now, redo the connect and get a new connection */
+    result = Curl_connect(data, connp, &async, &protocol_done);
+    if(CURLE_OK == result) {
+      /* We have connected or sent away a name resolve query fine */
+
+      conn = *connp; /* setup conn to again point to something nice */
+      if(async) {
+        /* Now, if async is TRUE here, we need to wait for the name
+           to resolve */
+        result = Curl_wait_for_resolv(conn, NULL);
+        if(result)
+          return result;
+
+        /* Resolved, continue with the connection */
+        result = Curl_async_resolved(conn, &protocol_done);
+        if(result)
+          return result;
+      }
+    }
+  }
+
+  return result;
 }
 
 /* Returns TRUE and sets '*url' if a request retry is wanted.

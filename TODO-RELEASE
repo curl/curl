@@ -10,9 +10,6 @@ To be addressed in 7.19.7 (planned release: October 2009)
 254 - Problem re-using easy handle after call to curl_multi_remove_handle
       http://curl.haxx.se/mail/lib-2009-07/0249.html
     
-255 - debugging a crash in Curl_pgrsTime/checkPendPipeline?
-      http://curl.haxx.se/mail/lib-2009-08/0066.html
-
 256 - "More questions about ares behavior"
       http://curl.haxx.se/mail/lib-2009-08/0012.html
 

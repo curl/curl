@@ -146,7 +146,7 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
 /* Local static prototypes */
 static long ConnectionKillOne(struct SessionHandle *data);
 static void conn_free(struct connectdata *conn);
-static void signalPipeClose(struct curl_llist *pipeline);
+static void signalPipeClose(struct curl_llist *pipeline, bool pipe_broke);
 
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
 #define verboseconnect(x)  do { } while (0)
@@ -416,6 +416,16 @@ CURLcode Curl_close(struct SessionHandle *data)
           if(data == (struct SessionHandle *) curr->ptr) {
             fprintf(stderr,
                     "MAJOR problem we %p are still in recv pipe for %p done %d\n",
+                    data, connptr, (int)connptr->bits.done);
+          }
+        }
+      }
+      pipeline = connptr->done_pipe;
+      if(pipeline) {
+        for (curr = pipeline->head; curr; curr=curr->next) {
+          if(data == (struct SessionHandle *) curr->ptr) {
+            fprintf(stderr,
+                    "MAJOR problem we %p are still in done pipe for %p done %d\n",
                     data, connptr, (int)connptr->bits.done);
           }
         }
@@ -2316,6 +2326,7 @@ static void conn_free(struct connectdata *conn)
   Curl_llist_destroy(conn->send_pipe, NULL);
   Curl_llist_destroy(conn->recv_pipe, NULL);
   Curl_llist_destroy(conn->pend_pipe, NULL);
+  Curl_llist_destroy(conn->done_pipe, NULL);
 
   /* possible left-overs from the async name resolvers */
 #if defined(USE_ARES)
@@ -2415,9 +2426,10 @@ CURLcode Curl_disconnect(struct connectdata *conn)
 
   /* Indicate to all handles on the pipe that we're dead */
   if(Curl_isPipeliningEnabled(data)) {
-    signalPipeClose(conn->send_pipe);
-    signalPipeClose(conn->recv_pipe);
-    signalPipeClose(conn->pend_pipe);
+    signalPipeClose(conn->send_pipe, TRUE);
+    signalPipeClose(conn->recv_pipe, TRUE);
+    signalPipeClose(conn->pend_pipe, TRUE);
+    signalPipeClose(conn->done_pipe, FALSE);
   }
 
   conn_free(conn);
@@ -2535,9 +2547,10 @@ void Curl_getoff_all_pipelines(struct SessionHandle *data,
   if(Curl_removeHandleFromPipeline(data, conn->send_pipe) && send_head)
     conn->writechannel_inuse = FALSE;
   Curl_removeHandleFromPipeline(data, conn->pend_pipe);
+  Curl_removeHandleFromPipeline(data, conn->done_pipe);
 }
 
-static void signalPipeClose(struct curl_llist *pipeline)
+static void signalPipeClose(struct curl_llist *pipeline, bool pipe_broke)
 {
   struct curl_llist_element *curr;
 
@@ -2556,7 +2569,8 @@ static void signalPipeClose(struct curl_llist *pipeline)
     }
 #endif
 
-    data->state.pipe_broke = TRUE;
+    if (pipe_broke)
+       data->state.pipe_broke = TRUE;
     Curl_multi_handlePipeBreak(data);
     Curl_llist_remove(pipeline, curr, NULL);
     curr = next;
@@ -4217,6 +4231,7 @@ static void reuse_conn(struct connectdata *old_conn,
   Curl_llist_destroy(old_conn->send_pipe, NULL);
   Curl_llist_destroy(old_conn->recv_pipe, NULL);
   Curl_llist_destroy(old_conn->pend_pipe, NULL);
+  Curl_llist_destroy(old_conn->done_pipe, NULL);
   Curl_safefree(old_conn->master_buffer);
 }
 
@@ -4319,7 +4334,9 @@ static CURLcode create_conn(struct SessionHandle *data,
   conn->send_pipe = Curl_llist_alloc((curl_llist_dtor) llist_dtor);
   conn->recv_pipe = Curl_llist_alloc((curl_llist_dtor) llist_dtor);
   conn->pend_pipe = Curl_llist_alloc((curl_llist_dtor) llist_dtor);
-  if(!conn->send_pipe || !conn->recv_pipe || !conn->pend_pipe)
+  conn->done_pipe = Curl_llist_alloc((curl_llist_dtor) llist_dtor);
+  if(!conn->send_pipe || !conn->recv_pipe || !conn->pend_pipe ||
+    !conn->done_pipe)
     return CURLE_OUT_OF_MEMORY;
 
   /* This initing continues below, see the comment "Continue connectdata
@@ -5001,53 +5018,22 @@ CURLcode Curl_do(struct connectdata **connp, bool *done)
 
     /* This was formerly done in transfer.c, but we better do it here */
     if((CURLE_SEND_ERROR == result) && conn->bits.reuse) {
-      /* This was a re-use of a connection and we got a write error in the
-       * DO-phase. Then we DISCONNECT this connection and have another attempt
-       * to CONNECT and then DO again! The retry cannot possibly find another
-       * connection to re-use, since we only keep one possible connection for
-       * each.  */
+        /*
+         * If the connection is using an easy handle, call reconnect
+         * to re-establish the connection.  Otherwise, let the multi logic
+         * figure out how to re-establish the connection.
+         */
+        if(!data->multi) {
+          result = Curl_reconnect_request(connp);
 
-      infof(data, "Re-used connection seems dead, get a new one\n");
-
-      conn->bits.close = TRUE; /* enforce close of this connection */
-      result = Curl_done(&conn, result, FALSE); /* we are so done with this */
-
-      /* conn may no longer be a good pointer */
-
-      /*
-       * According to bug report #1330310. We need to check for
-       * CURLE_SEND_ERROR here as well. I figure this could happen when the
-       * request failed on a FTP connection and thus Curl_done() itself tried
-       * to use the connection (again). Slight Lack of feedback in the report,
-       * but I don't think this extra check can do much harm.
-       */
-      if((CURLE_OK == result) || (CURLE_SEND_ERROR == result)) {
-        bool async;
-        bool protocol_done = TRUE;
-
-        /* Now, redo the connect and get a new connection */
-        result = Curl_connect(data, connp, &async, &protocol_done);
-        if(CURLE_OK == result) {
-          /* We have connected or sent away a name resolve query fine */
-
-          conn = *connp; /* setup conn to again point to something nice */
-          if(async) {
-            /* Now, if async is TRUE here, we need to wait for the name
-               to resolve */
-            result = Curl_wait_for_resolv(conn, NULL);
-            if(result)
-              return result;
-
-            /* Resolved, continue with the connection */
-            result = Curl_async_resolved(conn, &protocol_done);
-            if(result)
-              return result;
+          if(result == CURLE_OK) {
+            /* ... finally back to actually retry the DO phase */
+            result = conn->handler->do_it(conn, done);
           }
-
-          /* ... finally back to actually retry the DO phase */
-          result = conn->handler->do_it(conn, done);
         }
-      }
+        else {
+          return result;
+        }
     }
 
     if((result == CURLE_OK) && *done)

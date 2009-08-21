@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (21 Aug 2009)
+- Lots of good work by Krister Johansen, mostly related to pipelining:
+
+  Fix SIGSEGV on free'd easy_conn when pipe unexpectedly breaks
+  Fix data corruption issue with re-connected transfers
+  Fix use after free if we're completed but easy_conn not NULL
+
 Kamil Dudka (13 Aug 2009)
 - Changed NSS code to not ignore the value of ssl.verifyhost and produce more
   verbose error messages. Originally reported at:

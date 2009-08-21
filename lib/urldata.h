@@ -1028,6 +1028,8 @@ struct connectdata {
                                    their responses on this pipeline */
   struct curl_llist *pend_pipe; /* List of pending handles on
                                    this pipeline */
+  struct curl_llist *done_pipe; /* Handles that are finished, but
+				   still reference this connectdata */
 #define MAX_PIPELINE_LENGTH 5
 
   char* master_buffer; /* The master buffer allocated on-demand;
