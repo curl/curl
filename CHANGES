@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Michal Marek (21 Aug 2009)
+- With CURLOPT_PROXY_TRANSFER_MODE, avoid sending invalid URLs like
+  ftp://example.com;type=i if the user specified ftp://example.com without the
+  slash.
+
 Daniel Stenberg (21 Aug 2009)
 - Andre Guibert de Bruet pointed out a missing return code check for a
   strdup() that could lead to segfault if it returned NULL. I extended his
