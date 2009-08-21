@@ -18,6 +18,7 @@ This release includes the following bugfixes:
  o SIGSEGV when pipelined pipe unexpectedly breaks
  o data corruption issue with re-connected transfers
  o use after free if we're completed but easy_conn not NULL (pipelined)
+ o missing strdup() return code check
 
 This release includes the following known bugs:
 
@@ -26,6 +27,6 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Karl Moerder, Kamil Dudka, Krister Johansen,
+ Karl Moerder, Kamil Dudka, Krister Johansen, Andre Guibert de Bruet
 
         Thanks! (and sorry if I forgot to mention someone)

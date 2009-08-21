@@ -1183,7 +1183,16 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           char *newurl;
           followtype follow=FOLLOW_NONE;
           CURLcode drc;
-          bool retry = Curl_retry_request(easy->easy_conn, &newurl);
+          bool retry = FALSE;
+
+          drc = Curl_retry_request(easy->easy_conn, &newurl);
+          if(drc) {
+            /* a failure here pretty much implies an out of memory */
+            easy->result = drc;
+            disconnect_conn = TRUE;
+          }
+          else
+            retry = newurl?TRUE:FALSE;
 
           Curl_posttransfer(easy->easy_handle);
           drc = Curl_done(&easy->easy_conn, easy->result, FALSE);
@@ -1370,8 +1379,12 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
       else if(TRUE == done) {
         char *newurl;
-        bool retry = Curl_retry_request(easy->easy_conn, &newurl);
+        bool retry = FALSE;
         followtype follow=FOLLOW_NONE;
+
+        easy->result = Curl_retry_request(easy->easy_conn, &newurl);
+        if(!easy->result)
+          retry = newurl?TRUE:FALSE;
 
         /* call this even if the readwrite function returned error */
         Curl_posttransfer(easy->easy_handle);
@@ -1406,7 +1419,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             multistate(easy, CURLM_STATE_CONNECT);
             result = CURLM_CALL_MULTI_PERFORM;
           }
-          else
+          else if(newurl)
             /* Since we "took it", we are in charge of freeing this on
                failure */
             free(newurl);

@@ -2550,19 +2550,20 @@ Curl_reconnect_request(struct connectdata **connp)
   return result;
 }
 
-/* Returns TRUE and sets '*url' if a request retry is wanted.
+/* Returns CURLE_OK *and* sets '*url' if a request retry is wanted.
 
    NOTE: that the *url is malloc()ed. */
-bool Curl_retry_request(struct connectdata *conn,
-                        char **url)
+CURLcode Curl_retry_request(struct connectdata *conn,
+                            char **url)
 {
-  bool retry = FALSE;
   struct SessionHandle *data = conn->data;
+
+  *url = NULL;
 
   /* if we're talking upload, we can't do the checks below, unless the protocol
      is HTTP as when uploading over HTTP we will still get a response */
   if(data->set.upload && !(conn->protocol&PROT_HTTP))
-    return retry;
+    return CURLE_OK;
 
   if((data->req.bytecount +
       data->req.headerbytecount == 0) &&
@@ -2574,6 +2575,8 @@ bool Curl_retry_request(struct connectdata *conn,
        it again. Bad luck. Retry the same request on a fresh connect! */
     infof(conn->data, "Connection died, retrying a fresh connect\n");
     *url = strdup(conn->data->change.url);
+    if(!*url)
+      return CURLE_OUT_OF_MEMORY;
 
     conn->bits.close = TRUE; /* close this connection */
     conn->bits.retry = TRUE; /* mark this as a connection we're about
@@ -2581,10 +2584,8 @@ bool Curl_retry_request(struct connectdata *conn,
                                 prevent i.e HTTP transfers to return
                                 error just because nothing has been
                                 transfered! */
-    retry = TRUE;
   }
-
-  return retry;
+  return CURLE_OK;
 }
 
 /*
@@ -2629,7 +2630,12 @@ CURLcode Curl_perform(struct SessionHandle *data)
       if(res == CURLE_OK) {
         res = Transfer(conn); /* now fetch that URL please */
         if((res == CURLE_OK) || (res == CURLE_RECV_ERROR)) {
-          bool retry = Curl_retry_request(conn, &newurl);
+          bool retry = FALSE;
+          CURLcode rc = Curl_retry_request(conn, &newurl);
+          if(rc)
+            res = rc;
+          else
+            retry = newurl?TRUE:FALSE;
 
           if(retry) {
             res = CURLE_OK;

@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel Stenberg (21 Aug 2009)
+- Andre Guibert de Bruet pointed out a missing return code check for a
+  strdup() that could lead to segfault if it returned NULL. I extended his
+  suggest patch to now have Curl_retry_request() return a regular return code
+  and better check that.
+
 - Lots of good work by Krister Johansen, mostly related to pipelining:
 
   Fix SIGSEGV on free'd easy_conn when pipe unexpectedly breaks
