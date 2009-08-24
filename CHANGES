@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Patrick Monnerat (24 Aug 2009)
+- Introduced a SYST-based test to properly set-up name format when dealing
+  with the OS/400 FTP server.
+
+- Fixed an ftp_readresp() bug preventing detection of failing control socket
+  and causing FTP client to loop forever.
+
 Daniel Stenberg (24 Aug 2009)
 - Marc de Bruin pointed out that configure --with-gnutls=PATH didn't work
   properly and provided a fix. http://curl.haxx.se/bug/view.cgi?id=2843008

@@ -439,13 +439,15 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
 #ifdef CURL_DOES_CONVERSIONS
       if((res == CURLE_OK) && (gotbytes > 0)) {
         /* convert from the network encoding */
-        result = res = Curl_convert_from_network(data, ptr, gotbytes);
+        res = Curl_convert_from_network(data, ptr, gotbytes);
         /* Curl_convert_from_network calls failf if unsuccessful */
       }
 #endif /* CURL_DOES_CONVERSIONS */
 
-      if(CURLE_OK != res)
+      if(CURLE_OK != res) {
+        result = res;	/* Set the outer result variable to this error. */
         keepon = FALSE;
+      }
     }
 
     if(!keepon)
@@ -742,6 +744,8 @@ static void state(struct connectdata *conn,
     "PROT",
     "CCC",
     "PWD",
+    "SYST",
+    "NAMEFMT",
     "QUOTE",
     "RETR_PREQUOTE",
     "STOR_PREQUOTE",
@@ -2733,10 +2737,11 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
 
     case FTP_PWD:
       if(ftpcode == 257) {
-        char *dir = malloc(nread+1);
-        char *store=dir;
         char *ptr=&data->state.buffer[4];  /* start on the first letter */
+        char *dir;
+        char *store;
 
+        dir = malloc(nread + 1);
         if(!dir)
           return CURLE_OUT_OF_MEMORY;
 
@@ -2751,7 +2756,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
         if('\"' == *ptr) {
           /* it started good */
           ptr++;
-          while(ptr && *ptr) {
+          for (store = dir; *ptr;) {
             if('\"' == *ptr) {
               if('\"' == ptr[1]) {
                 /* "quote-doubling" */
@@ -2769,10 +2774,30 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
             store++;
             ptr++;
           }
+          if(ftpc->entrypath)
+            free(ftpc->entrypath);
           ftpc->entrypath =dir; /* remember this */
           infof(data, "Entry path is '%s'\n", ftpc->entrypath);
           /* also save it where getinfo can access it: */
           data->state.most_recent_ftp_entrypath = ftpc->entrypath;
+
+          /* If the path name does not look like an absolute path (i.e.: it
+             does not start with a '/'), we probably need some server-dependent
+             adjustments. For example, this is the case when connecting to
+             an OS400 FTP server: this server supports two name syntaxes,
+             the default one being incompatible with standard pathes. In
+             addition, this server switches automatically to the regular path
+             syntax when one is encountered in a command: this results in
+             having an entrypath in the wrong syntax when later used in CWD.
+               The method used here is to check the server OS: we do it only
+             if the path name looks strange to minimize overhead on other
+             systems. */
+
+          if(!ftpc->server_os && ftpc->entrypath[0] != '/') {
+            NBFTPSENDF(conn, "SYST", NULL);
+            state(conn, FTP_SYST);
+            break;
+          }
         }
         else {
           /* couldn't get the path */
@@ -2780,6 +2805,57 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
           infof(data, "Failed to figure out path\n");
         }
       }
+      state(conn, FTP_STOP); /* we are done with the CONNECT phase! */
+      DEBUGF(infof(data, "protocol connect phase DONE\n"));
+      break;
+
+    case FTP_SYST:
+      if(ftpcode == 215) {
+        char *ptr=&data->state.buffer[4];  /* start on the first letter */
+        char *os;
+        char *store;
+
+        os = malloc(nread + 1);
+        if(!os)
+          return CURLE_OUT_OF_MEMORY;
+
+        /* Reply format is like
+           215<space><OS-name><space><commentary>
+        */
+        while (*ptr == ' ')
+          ptr++;
+        for (store = os; *ptr && *ptr != ' ';)
+          *store++ = *ptr++;
+        *store = '\0'; /* zero terminate */
+        ftpc->server_os = os;
+
+        /* Check for special servers here. */
+
+        if(strequal(ftpc->server_os, "OS/400")) {
+          /* Force OS400 name format 1. */
+          NBFTPSENDF(conn, "SITE NAMEFMT 1", NULL);
+          state(conn, FTP_NAMEFMT);
+          break;
+        }
+      else {
+        /* Nothing special for the target server. */
+       }
+      }
+      else {
+        /* Cannot identify server OS. Continue anyway and cross fingers. */
+      }
+
+      state(conn, FTP_STOP); /* we are done with the CONNECT phase! */
+      DEBUGF(infof(data, "protocol connect phase DONE\n"));
+      break;
+
+    case FTP_NAMEFMT:
+      if(ftpcode == 250) {
+        /* Name format change successful: reload initial path. */
+        ftp_state_pwd(conn);
+        break;
+      }
+
       state(conn, FTP_STOP); /* we are done with the CONNECT phase! */
       DEBUGF(infof(data, "protocol connect phase DONE\n"));
       break;
@@ -3842,6 +3918,10 @@ static CURLcode ftp_disconnect(struct connectdata *conn)
   if(ftpc->prevpath) {
     free(ftpc->prevpath);
     ftpc->prevpath = NULL;
+  }
+  if(ftpc->server_os) {
+    free(ftpc->server_os);
+    ftpc->server_os = NULL;
   }
 
   return CURLE_OK;
