@@ -1571,12 +1571,13 @@ if test "$OPENSSL_ENABLED" != "1"; then
     else
       dnl this is with a given path, first check if there's a libgnutls-config
       dnl there and if not, make an educated guess
-      check=`$OPT_GNUTLS/libgnutls-config --version 2>/dev/null`
+      cfg=$OPT_GNUTLS/bin/libgnutls-config
+      check=`$cfg --version 2>/dev/null`
       if test -n "$check"; then
-        addlib=`$OPT_GNUTLS/libgnutls-config --libs`
-        addcflags=`$OPT_GNUTLS/libgnutls-config --cflags`
-        version=`$OPT_GNUTLS/libgnutls-config --version`
-        gtlslib=`$OPT_GNUTLS/libgnutls-config --prefix`/lib$libsuff
+        addlib=`$cfg --libs`
+        addcflags=`$cfg --cflags`
+        version=`$cfg --version`
+        gtlslib=`$cfg --prefix`/lib$libsuff
       else
         dnl without pkg-config and libgnutls-config, we guess a lot!
         addlib=-lgnutls

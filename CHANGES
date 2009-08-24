@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel Stenberg (24 Aug 2009)
+- Marc de Bruin pointed out that configure --with-gnutls=PATH didn't work
+  properly and provided a fix. http://curl.haxx.se/bug/view.cgi?id=2843008
+
 - Eric Wong introduced support for the new option -T. (dot) that makes curl
   read stdin in a non-blocking fashion. This also brings back -T- (minus) to
   the previous blocking behavior since it could break stuff for people at
