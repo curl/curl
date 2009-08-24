@@ -1183,6 +1183,9 @@ file name to use. That will most likely cause the upload operation to fail. If
 this is used on a HTTP(S) server, the PUT command will be used.
 
 Use the file name "-" (a single dash) to use stdin instead of a given file.
+Alternately, the file name "." (a single period) may be specified instead
+of "-" to use stdin in non-blocking mode to allow reading server output
+while stdin is being uploaded.
 
 You can specify one -T for each URL on the command line. Each -T + URL pair
 specifies what to upload and to where. curl also supports "globbing" of the -T

@@ -3953,6 +3953,10 @@ static void dumpeasycode(struct Configurable *config)
   curl_slist_free_all(easycode);
 }
 
+static bool stdin_upload(const char *uploadfile)
+{
+  return curlx_strequal(uploadfile, "-") || curlx_strequal(uploadfile, ".");
+}
 
 static int
 operate(struct Configurable *config, int argc, argv_item_t argv[])
@@ -4417,7 +4421,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           }
         }
         infdopen=FALSE;
-        if(uploadfile && !curlx_strequal(uploadfile, "-")) {
+        if(uploadfile && !stdin_upload(uploadfile)) {
           /*
            * We have specified a file to upload and it isn't "-".
            */
@@ -4511,11 +4515,14 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           uploadfilesize=fileinfo.st_size;
 
         }
-        else if(uploadfile && curlx_strequal(uploadfile, "-")) {
+        else if(uploadfile && stdin_upload(uploadfile)) {
           SET_BINMODE(stdin);
           infd = STDIN_FILENO;
-          if (curlx_nonblock((curl_socket_t)infd, TRUE) < 0)
-            warnf(config, "fcntl failed on fd=%d: %s\n", infd, strerror(errno));
+          if (curlx_strequal(uploadfile, ".")) {
+            if (curlx_nonblock((curl_socket_t)infd, TRUE) < 0)
+              warnf(config,
+                    "fcntl failed on fd=%d: %s\n", infd, strerror(errno));
+          }
         }
 
         if(uploadfile && config->resume_from_current)

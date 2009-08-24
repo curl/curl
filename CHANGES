@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (24 Aug 2009)
+- Eric Wong introduced support for the new option -T. (dot) that makes curl
+  read stdin in a non-blocking fashion. This also brings back -T- (minus) to
+  the previous blocking behavior since it could break stuff for people at
+  times.
+
 Michal Marek (21 Aug 2009)
 - With CURLOPT_PROXY_TRANSFER_MODE, avoid sending invalid URLs like
   ftp://example.com;type=i if the user specified ftp://example.com without the
