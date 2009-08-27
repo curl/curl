@@ -100,11 +100,9 @@ nothing
 71: 15 April 2017 21:01:22 => -1
 72: 98 April 17 21:01:22 => -1
 73: Thu, 012-Aug-2008 20:49:07 GMT => 1218574147
-74: Thu, 12-Aug-31841 20:49:07 GMT => 2147483647
-75: Thu, 12-Aug-9999999999 20:49:07 GMT => 2147483647
-76: Thu, 999999999999-Aug-2007 20:49:07 GMT => -1
-77: Thu, 12-Aug-2007 20:61:99999999999 GMT => -1
-78: IAintNoDateFool => -1
+74: Thu, 999999999999-Aug-2007 20:49:07 GMT => -1
+75: Thu, 12-Aug-2007 20:61:99999999999 GMT => -1
+76: IAintNoDateFool => -1
 </stdout>
 
 # This test case previously testes an overflow case ("2094 Nov 6 =>

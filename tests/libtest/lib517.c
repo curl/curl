@@ -88,8 +88,13 @@ static const char *dates[]={
   "15 April 2017 21:01:22",
   "98 April 17 21:01:22",
   "Thu, 012-Aug-2008 20:49:07 GMT",
+#if 0
+  /* leaving out these strings since they differ between 32 and 64 bit
+     archs and the test suite has no good way to support two different outputs
+     like that */
   "Thu, 12-Aug-31841 20:49:07 GMT",
   "Thu, 12-Aug-9999999999 20:49:07 GMT",
+#endif
   "Thu, 999999999999-Aug-2007 20:49:07 GMT",
   "Thu, 12-Aug-2007 20:61:99999999999 GMT",
   "IAintNoDateFool",
