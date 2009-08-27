@@ -245,15 +245,16 @@ static int fake_hostent(const char *name, int family, ares_host_callback callbac
   struct in_addr in;
   struct in6_addr in6;
 
-  if (family == AF_INET)
+  if (family == AF_INET || family == AF_INET6)
     {
       /* It only looks like an IP address if it's all numbers and dots. */
-      int numdots = 0;
+      int numdots = 0, valid = 1;
       const char *p;
       for (p = name; *p; p++)
         {
           if (!ISDIGIT(*p) && *p != '.') {
-            return 0;
+            valid = 0;
+            break;
           } else if (*p == '.') {
             numdots++;
           }
@@ -262,12 +263,15 @@ static int fake_hostent(const char *name, int family, ares_host_callback callbac
       /* if we don't have 3 dots, it is illegal
        * (although inet_addr doesn't think so).
        */
-      if (numdots != 3)
+      if (numdots != 3 || !valid)
         result = 0;
       else
         result = ((in.s_addr = inet_addr(name)) == INADDR_NONE ? 0 : 1);
+
+      if (result)
+        family = AF_INET;
     }
-  else if (family == AF_INET6)
+  if (family == AF_INET6)
     result = (ares_inet_pton(AF_INET6, name, &in6) < 1 ? 0 : 1);
 
   if (!result)
