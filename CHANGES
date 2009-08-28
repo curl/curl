@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Kamil Dudka (28 Aug 2009)
+- Improved error message for not matching certificate subject name in
+  libcurl-NSS. Originally reported at:
+  https://bugzilla.redhat.com/show_bug.cgi?id=516056#c9
+
 Patrick Monnerat (24 Aug 2009)
 - Introduced a SYST-based test to properly set-up name format when dealing
   with the OS/400 FTP server.

@@ -591,7 +591,7 @@ static SECStatus BadCertHandler(void *arg, PRFileDesc *sock)
   struct connectdata *conn = (struct connectdata *)arg;
   PRErrorCode err = PR_GetError();
   CERTCertificate *cert = NULL;
-  char *subject, *issuer;
+  char *subject, *subject_cn, *issuer;
 
   if(conn->data->set.ssl.certverifyresult!=0)
     return success;
@@ -599,6 +599,7 @@ static SECStatus BadCertHandler(void *arg, PRFileDesc *sock)
   conn->data->set.ssl.certverifyresult=err;
   cert = SSL_PeerCertificate(sock);
   subject = CERT_NameToAscii(&cert->subject);
+  subject_cn = CERT_GetCommonName(&cert->subject);
   issuer = CERT_NameToAscii(&cert->issuer);
   CERT_DestroyCertificate(cert);
 
@@ -616,12 +617,12 @@ static SECStatus BadCertHandler(void *arg, PRFileDesc *sock)
     break;
   case SSL_ERROR_BAD_CERT_DOMAIN:
     if(conn->data->set.ssl.verifyhost) {
-      failf(conn->data, "common name '%s' does not match '%s'",
-            subject, conn->host.dispname);
+      failf(conn->data, "SSL: certificate subject name '%s' does not match "
+            "target host name '%s'", subject_cn, conn->host.dispname);
       success = SECFailure;
     } else {
-      infof(conn->data, "warning: common name '%s' does not match '%s'\n",
-            subject, conn->host.dispname);
+      infof(conn->data, "warning: SSL: certificate subject name '%s' does not "
+            "match target host name '%s'\n", subject_cn, conn->host.dispname);
     }
     break;
   case SEC_ERROR_EXPIRED_CERTIFICATE:
@@ -645,6 +646,7 @@ static SECStatus BadCertHandler(void *arg, PRFileDesc *sock)
   if(success == SECSuccess)
     infof(conn->data, "SSL certificate verify ok.\n");
   PR_Free(subject);
+  PR_Free(subject_cn);
   PR_Free(issuer);
 
   return success;
