@@ -1722,29 +1722,29 @@ static CURLcode push_certinfo_len(struct SessionHandle *data,
                                   size_t valuelen)
 {
   struct curl_certinfo *ci = &data->info.certs;
-  char *outp;
+  char *output;
   struct curl_slist *nl;
   CURLcode res = CURLE_OK;
   size_t labellen = strlen(label);
   size_t outlen = labellen + 1 + valuelen + 1; /* label:value\0 */
 
-  outp = malloc(outlen);
-  if(!outp)
+  output = malloc(outlen);
+  if(!output)
     return CURLE_OUT_OF_MEMORY;
 
   /* sprintf the label and colon */
-  snprintf(outp, outlen, "%s:", label);
+  snprintf(output, outlen, "%s:", label);
 
   /* memcpy the value (it might not be zero terminated) */
-  memcpy(&outp[labellen+1], value, valuelen);
+  memcpy(&output[labellen+1], value, valuelen);
 
   /* zero terminate the output */
-  outp[labellen + 1 + valuelen] = 0;
+  output[labellen + 1 + valuelen] = 0;
 
   /* TODO: we should rather introduce an internal API that can do the
      equivalent of curl_slist_append but doesn't strdup() the given data as
      like in this place the extra malloc/free is totally pointless */
-  nl = curl_slist_append(ci->certinfo[certnum], outp);
+  nl = curl_slist_append(ci->certinfo[certnum], output);
   if(!nl) {
     curl_slist_free_all(ci->certinfo[certnum]);
     res = CURLE_OUT_OF_MEMORY;
@@ -1752,7 +1752,7 @@ static CURLcode push_certinfo_len(struct SessionHandle *data,
   else
     ci->certinfo[certnum] = nl;
 
-  free(outp);
+  free(output);
 
   return res;
 }
