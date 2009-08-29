@@ -365,7 +365,7 @@ Curl_unencode_gzip_write(struct connectdata *conn,
     ssize_t hlen;
     unsigned char *oldblock = z->next_in;
 
-    z->avail_in += nread;
+    z->avail_in += (uInt)nread;
     z->next_in = realloc(z->next_in, z->avail_in);
     if(z->next_in == NULL) {
       free(oldblock);
