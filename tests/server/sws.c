@@ -613,7 +613,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
 
     logmsg("Read %zd bytes", got);
 
-    req->offset += got;
+    req->offset += (int)got;
     reqbuf[req->offset] = '\0';
 
     if(ProcessRequest(req)) {
