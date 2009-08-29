@@ -514,10 +514,10 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     socksreq[len++] = 1;    /* username/pw subnegotiation version */
     socksreq[len++] = (char) userlen;
     memcpy(socksreq + len, proxy_name, (int) userlen);
-    len += userlen;
+    len += (int)userlen;
     socksreq[len++] = (char) pwlen;
     memcpy(socksreq + len, proxy_password, (int) pwlen);
-    len += pwlen;
+    len += (int)pwlen;
 
     code = Curl_write_plain(conn, sock, (char *)socksreq, len, &written);
     if((code != CURLE_OK) || (len != written)) {
