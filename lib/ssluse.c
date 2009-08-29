@@ -1596,7 +1596,7 @@ ossl_connect_step1(struct connectdata *conn,
   }
 
   /* pass the raw socket into the SSL layers */
-  if(!SSL_set_fd(connssl->handle, sockfd)) {
+  if(!SSL_set_fd(connssl->handle, (int)sockfd)) {
      failf(data, "SSL: SSL_set_fd failed: %s",
            ERR_error_string(ERR_get_error(),NULL));
      return CURLE_SSL_CONNECT_ERROR;
