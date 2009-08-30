@@ -676,7 +676,7 @@ void Curl_gtls_close(struct connectdata *conn, int sockindex)
  */
 int Curl_gtls_shutdown(struct connectdata *conn, int sockindex)
 {
-  int result;
+  ssize_t result;
   int retval = 0;
   struct SessionHandle *data = conn->data;
   int done = 0;
@@ -776,7 +776,7 @@ ssize_t Curl_gtls_recv(struct connectdata *conn, /* connection data */
 
   if(ret < 0) {
     failf(conn->data, "GnuTLS recv error (%d): %s",
-          (int)ret, gnutls_strerror(ret));
+          (int)ret, gnutls_strerror((int)ret));
     return -1;
   }
 
