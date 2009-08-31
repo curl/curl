@@ -32,6 +32,11 @@
  */
 
 #include "curlver.h"         /* libcurl version defines   */
+/* The leading path on the following include statement is required by the
+   autobuild system (tests/testcurl.pl) because curlbuild.h is not generated
+   in the same directory as curl.h in this special case. As long as the
+   autobuild system works that way, do not remove it, unless you know what
+   you're doing. */
 #include "curl/curlbuild.h"  /* libcurl build definitions */
 #include "curlrules.h"       /* libcurl rules enforcement */
 
