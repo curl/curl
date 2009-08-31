@@ -35,14 +35,24 @@ fi
 copy_hfile()
 
 {
+	destfile="${1}"
+	srcfile="${2}"
+	shift
+	shift
         sed -e '1i\
 #pragma enum(int)\
-' -e '$a\
+' "${@}" -e '$a\
 #pragma enum(pop)\
-' < "${2}" > "${1}"
+' < "${srcfile}" > "${destfile}"
 }
 
 #       Copy the header files.
+
+DEST="${SRCPF}/`db2_name curl/curl.h`.MBR"
+if action_needed "${DEST}" curl/curl.h
+then	copy_hfile "${DEST}" curl/curl.h -e                             \
+            's/^# *include  *[<"]curl\/curlbuild.h[">]/#include "curlbuild.h"/'
+fi
 
 for HFILE in curl/*.h ${SCRIPTDIR}/ccsidcurl.h
 do      DEST="${SRCPF}/`db2_name \"${HFILE}\"`.MBR"

@@ -25,9 +25,9 @@
 #ifndef __CURL_CCSIDCURL_H
 #define __CURL_CCSIDCURL_H
 
-#include <curl.h>
-#include <easy.h>
-#include <multi.h>
+#include "curl.h"
+#include "easy.h"
+#include "multi.h"
 
 
 CURL_EXTERN char * curl_version_ccsid(unsigned int ccsid);
