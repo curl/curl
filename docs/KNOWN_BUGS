@@ -3,6 +3,13 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+73. if a connection is made to a FTP server but the server then just never
+  sends the 220 response or otherwise is dead slow, libcurl will not
+  acknowledge the connection timeout during that phase but only the "real"
+  timeout - which may surprise users as it is probably considered to be the
+  connect phase to most people. Brought up (and is being misunderstood) in:
+  http://curl.haxx.se/bug/view.cgi?id=2844077
+
 72. "Pausing pipeline problems."
   http://curl.haxx.se/mail/lib-2009-07/0214.html
 
