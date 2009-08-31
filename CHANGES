@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (31 Aug 2009)
+- When using the multi interface with FTP and you asked for NOBODY, you did no
+  QUOTE commands and the request used the same path as the connection had
+  already changed to, it would decide that no commands would be necessary for
+  the "DO" action and that was not handled properly but libcurl would instead
+  hang.
+
 Kamil Dudka (28 Aug 2009)
 - Improved error message for not matching certificate subject name in
   libcurl-NSS. Originally reported at:

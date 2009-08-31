@@ -10,6 +10,7 @@ Curl and libcurl 7.19.7
 This release includes the following changes:
 
  o -T. is now for non-blocking uploading from stdin
+ o SYST handling on FTP for OS/400 FTP server cases
 
 This release includes the following bugfixes:
 
@@ -21,6 +22,9 @@ This release includes the following bugfixes:
  o missing strdup() return code check
  o CURLOPT_PROXY_TRANSFER_MODE could pass along wrong syntax
  o configure --with-gnutls=PATH fixed
+ o ftp response reader bug on failed control connections
+ o improved NSS error message on failed host name verifications
+ o ftp NOBODY on re-used connection hang
 
 This release includes the following known bugs:
 
