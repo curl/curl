@@ -25,6 +25,8 @@ This release includes the following bugfixes:
  o ftp response reader bug on failed control connections
  o improved NSS error message on failed host name verifications
  o ftp NOBODY on re-used connection hang
+ o configure uses pkg-config for cross-compiles as well
+ o improved NSS detection in configure
 
 This release includes the following known bugs:
 
@@ -34,6 +36,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Karl Moerder, Kamil Dudka, Krister Johansen, Andre Guibert de Bruet,
- Michal Marek, Eric Wong
+ Michal Marek, Eric Wong, Guenter Knauf
 
         Thanks! (and sorry if I forgot to mention someone)

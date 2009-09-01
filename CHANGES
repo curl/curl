@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel Stenberg (1 Sep 2009)
+- configure now tries to use pkg-config for a number of sub-dependencies even
+  when cross-compiling. The key to success is then you properly setup
+  PKG_CONFIG_PATH before invoking configure.
+
+  I also improved how NSS is detected by trying nss-config if pkg-config isn't
+  present, and as a last resort just use the lib name and force the user to
+  setup the LIBS/LDFLAGS/CFLAGS etc properly. The previous last resort would
+  add a range of various libs that would almost never be quite correct.
+
 Daniel Stenberg (31 Aug 2009)
 - When using the multi interface with FTP and you asked for NOBODY, you did no
   QUOTE commands and the request used the same path as the connection had

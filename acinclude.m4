@@ -3200,8 +3200,7 @@ dnl "no" anyway!
 dnl
 
 AC_DEFUN([CURL_CHECK_PKGCONFIG], [
-  if test x$cross_compiling != xyes; then
-    dnl only do pkg-config magic when not cross-compiling
+
     AC_PATH_PROG( PKGCONFIG, pkg-config, no, $PATH:/usr/bin:/usr/local/bin)
 
     if test x$PKGCONFIG != xno; then
@@ -3217,8 +3216,4 @@ AC_DEFUN([CURL_CHECK_PKGCONFIG], [
         AC_MSG_RESULT([found])
       fi
     fi
-
-  else
-    PKGCONFIG="no"
-  fi
 ])

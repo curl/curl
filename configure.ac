@@ -1663,13 +1663,21 @@ if test "$OPENSSL_ENABLED" != "1" -a "$GNUTLS_ENABLED" != "1"; then
         addcflags=`$PKGCONFIG --cflags nss`
         version=`$PKGCONFIG --modversion nss`
         nssprefix=`$PKGCONFIG --variable=prefix nss`
+      else
+        dnl Without pkg-config, we check for nss-config
+
+        check=`nss-config --version 2>/dev/null`
+        if test -n "$check"; then
+          addlib=`nss-config --libs`
+          addcflags=`nss-config --cflags`
+          version=`nss-config --version`
+          nssprefix=`nss-config --prefix`
+        else
+          addlib="-lnss3"
+          addcflags=""
+          version="unknown"
+        fi
       fi
-    else
-      # Without pkg-config, we'll kludge in some defaults
-      addlib="-L$OPT_NSS/lib -lssl3 -lsmime3 -lnss3 -lplds4 -lplc4 -lnspr4 -lpthread -ldl"
-      addcflags="-I$OPT_NSS/include"
-      version="unknown"
-      nssprefix=$OPT_NSS
     fi
 
     dnl Check for functionPK11_CreateGenericObject
