@@ -391,6 +391,10 @@ Curl_cache_addr(struct SessionHandle *data,
  * function is used. You MUST call Curl_resolv_unlock() later (when you're
  * done using this struct) to decrease the counter again.
  *
+ * In debug mode, we specifically test for an interface name "LocalHost"
+ * and resolve "localhost" instead as a means to permit test cases
+ * to connect to a local test server with any host name.
+ *
  * Return codes:
  *
  * CURLRESOLV_ERROR   (-1) = error, no pointer
@@ -455,7 +459,13 @@ int Curl_resolv(struct connectdata *conn,
     /* If Curl_getaddrinfo() returns NULL, 'respwait' might be set to a
        non-zero value indicating that we need to wait for the response to the
        resolve call */
-    addr = Curl_getaddrinfo(conn, hostname, port, &respwait);
+    addr = Curl_getaddrinfo(conn,
+#ifdef DEBUGBUILD
+                            (data->set.str[STRING_DEVICE]
+                             && !strcmp(data->set.str[STRING_DEVICE],
+                                        "LocalHost"))?"localhost":
+#endif
+                            hostname, port, &respwait);
 
     if(!addr) {
       if(respwait) {
@@ -494,7 +504,7 @@ int Curl_resolv(struct connectdata *conn,
   return rc;
 }
 
-#ifdef USE_ALARM_TIMEOUT 
+#ifdef USE_ALARM_TIMEOUT
 /*
  * This signal handler jumps back into the main libcurl code and continues
  * execution.  This effectively causes the remainder of the application to run
@@ -538,7 +548,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
                         struct Curl_dns_entry **entry,
                         long timeoutms)
 {
-#ifdef USE_ALARM_TIMEOUT 
+#ifdef USE_ALARM_TIMEOUT
 #ifdef HAVE_SIGACTION
   struct sigaction keep_sigact;   /* store the old struct here */
   bool keep_copysig=FALSE;        /* did copy it? */
@@ -556,7 +566,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
 
   *entry = NULL;
 
-#ifdef USE_ALARM_TIMEOUT 
+#ifdef USE_ALARM_TIMEOUT
   if (data->set.no_signal)
     /* Ignore the timeout when signals are disabled */
     timeout = 0;
@@ -619,7 +629,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
    */
   rc = Curl_resolv(conn, hostname, port, entry);
 
-#ifdef USE_ALARM_TIMEOUT 
+#ifdef USE_ALARM_TIMEOUT
   if (timeout > 0) {
 
 #ifdef HAVE_SIGACTION

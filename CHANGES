@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel Stenberg (1 Sep 2009)
+- Peter Sylvester made a debug featuer for Curl_resolv() that now will force
+  libcurl to resolve 'localhost' whatever name you use in the URL *if* you set
+  the --interface option to (exactly) "LocalHost". This will enable us to
+  write tests for custom hosts names but still use a local host server.
+
 - configure now tries to use pkg-config for a number of sub-dependencies even
   when cross-compiling. The key to success is then you properly setup
   PKG_CONFIG_PATH before invoking configure.
