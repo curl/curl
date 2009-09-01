@@ -1495,6 +1495,11 @@ if test X"$OPT_LIBSSH2" != Xno; then
        export LD_LIBRARY_PATH
        AC_MSG_NOTICE([Added $LIB_LIBSSH2 to LD_LIBRARY_PATH])
     fi
+  else
+    dnl no libssh2, revert back to clean variables
+    LDFLAGS=$CLEANLDFLAGS
+    CPPFLAGS=$CLEANCPPFLAGS
+    LIBS=$CLEANLIBS
   fi
 fi
 
