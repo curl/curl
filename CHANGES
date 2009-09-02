@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Stenberg (2 Sep 2009)
+- Daniel Johnson founded a flaw in the code convering sftp-errors to libcurl
+  errors.
+
 Daniel Stenberg (1 Sep 2009)
 - Peter Sylvester made a debug featuer for Curl_resolv() that now will force
   libcurl to resolve 'localhost' whatever name you use in the URL *if* you set

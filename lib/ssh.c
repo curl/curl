@@ -230,14 +230,11 @@ kbd_callback(const char *name, int name_len, const char *instruction,
   (void)abstract;
 } /* kbd_callback */
 
-static CURLcode sftp_libssh2_error_to_CURLE(unsigned long err)
+static CURLcode sftp_libssh2_error_to_CURLE(int err)
 {
   switch (err) {
     case LIBSSH2_FX_OK:
       return CURLE_OK;
-
-    case LIBSSH2_ERROR_ALLOC:
-      return CURLE_OUT_OF_MEMORY;
 
     case LIBSSH2_FX_NO_SUCH_FILE:
     case LIBSSH2_FX_NO_SUCH_PATH:
