@@ -23,6 +23,9 @@ you've added to the multi handle), you know that there is one or more
 transfers less "running". You can then call \fIcurl_multi_info_read(3)\fP to
 get information about each individual completed transfer, and that returned
 info includes CURLcode and more.
+
+When \fIrunning_handles\fP is set to zero (0) on the return of this function,
+there is no longer any transfers in progress.
 .SH "RETURN VALUE"
 CURLMcode type, general libcurl multi interface error code.
 
