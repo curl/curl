@@ -7,7 +7,7 @@
                                   Changelog
 
 Daniel Stenberg (2 Sep 2009)
-- Daniel Johnson founded a flaw in the code convering sftp-errors to libcurl
+- Daniel Johnson found a flaw in the code convering sftp-errors to libcurl
   errors.
 
 Daniel Stenberg (1 Sep 2009)
