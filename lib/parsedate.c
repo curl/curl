@@ -270,7 +270,18 @@ static time_t my_timegm(struct my_tm *tm)
            + tm->tm_hour) * 60 + tm->tm_min) * 60 + tm->tm_sec;
 }
 
-static time_t parsedate(const char *date)
+/*
+ * Curl_parsedate()
+ *
+ * Returns:
+ *
+ * PARSEDATE_OK     - a fine conversion
+ * PARSEDATE_FAIL   - failed to convert
+ * PARSEDATE_LATER  - time overflow at the far end of time_t
+ * PARSEDATE_SOONER - time underflow at the low end of time_t
+ */
+
+int Curl_parsedate(const char *date, time_t *output)
 {
   time_t t = 0;
   int wdaynum=-1;  /* day of the week number, 0-6 (mon-sun) */
@@ -318,7 +329,7 @@ static time_t parsedate(const char *date)
       }
 
       if(!found)
-        return -1; /* bad string */
+        return PARSEDATE_FAIL; /* bad string */
 
       date += len;
     }
@@ -389,7 +400,7 @@ static time_t parsedate(const char *date)
         }
 
         if(!found)
-          return -1;
+          return PARSEDATE_FAIL;
 
         date = end;
       }
@@ -405,13 +416,20 @@ static time_t parsedate(const char *date)
      (-1 == monnum) ||
      (-1 == yearnum))
     /* lacks vital info, fail */
-    return -1;
+    return PARSEDATE_FAIL;
 
 #if SIZEOF_TIME_T < 5
   /* 32 bit time_t can only hold dates to the beginning of 2038 */
-  if(yearnum > 2037)
-    return 0x7fffffff;
+  if(yearnum > 2037) {
+    *output = 0x7fffffff;
+    return PARSEDATE_LATER;
+  }
 #endif
+
+  if(yearnum < 1970) {
+    *output = 0;
+    return PARSEDATE_SOONER;
+  }
 
   tm.tm_sec = secnum;
   tm.tm_min = minnum;
@@ -441,11 +459,23 @@ static time_t parsedate(const char *date)
     t += delta;
   }
 
-  return t;
+  *output = t;
+
+  return PARSEDATE_OK;
 }
 
 time_t curl_getdate(const char *p, const time_t *now)
 {
-  (void)now;
-  return parsedate(p);
+  time_t parsed;
+  int rc = Curl_parsedate(p, &parsed);
+  (void)now; /* legacy argument from the past that we ignore */
+
+  switch(rc) {
+  case PARSEDATE_OK:
+  case PARSEDATE_LATER:
+  case PARSEDATE_SOONER:
+    return parsed;
+  }
+  /* everything else is fail */
+  return -1;
 }
