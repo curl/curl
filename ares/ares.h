@@ -1,6 +1,6 @@
 /* $Id$ */
 
-/* Copyright 1998 by the Massachusetts Institute of Technology.
+/* Copyright 1998, 2009 by the Massachusetts Institute of Technology.
  * Copyright (C) 2007-2009 by Daniel Stenberg
  *
  * Permission to use, copy, modify, and distribute this
@@ -322,6 +322,13 @@ struct addr6ttl {
   int             ttl;
 };
 
+struct srv_reply {
+  u_int16_t weight;
+  u_int16_t priority;
+  u_int16_t port;
+  char *host;
+};
+
 /*
 ** Parse the buffer, starting at *abuf and of length alen bytes, previously
 ** obtained from an ares_search call.  Put the results in *host, if nonnull.
@@ -339,6 +346,8 @@ int ares_parse_ptr_reply(const unsigned char *abuf, int alen, const void *addr,
                          int addrlen, int family, struct hostent **host);
 int ares_parse_ns_reply(const unsigned char *abuf, int alen,
                         struct hostent **host);
+int ares_parse_srv_reply(const unsigned char* abuf, int alen,
+                         struct srv_reply** srv_out, int *nsrvreply);
 void ares_free_string(void *str);
 void ares_free_hostent(struct hostent *host);
 const char *ares_strerror(int code);

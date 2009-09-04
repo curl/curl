@@ -1,5 +1,8 @@
   Changelog for the c-ares project
 
+* 4 Sep 2009 (Daniel Stenberg)
+- Jakub Hrozek added ares_parse_srv_reply() for SRV parsing
+
 * 3 Aug 2009 (Daniel Stenberg)
 - Joshua Kwan fixed the init routine to fill in the defaults for stuff that
   fails to get inited by other means. This fixes a case of when the c-ares

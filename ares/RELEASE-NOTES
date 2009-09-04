@@ -10,6 +10,7 @@ Changed:
  o new ares_library_init() and ares_library_cleanup() functions
  o new --enable-curldebug configure option
  o ARES_ECANCELLED is now sent as reason for ares_cancel()
+ o added ares_parse_srv_reply()
 
 Fixed:
 
@@ -22,6 +23,6 @@ Fixed:
 Thanks go to these friendly people for their efforts and contributions:
 
  Phil Blundell, Japheth Cleaver, Yang Tse, Gregor Jasny, Joshua Kwan,
- Timo Teras
+ Timo Teras, Jakub Hrozek
 
 Have fun!
