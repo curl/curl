@@ -246,6 +246,23 @@ Win32
 
    See the separate INSTALL.devcpp file for details.
 
+   MSVC 6 caveats
+   --------------
+
+   If you use MSVC 6 it is required that you use the MS PSDK:
+   http://www.microsoft.com/msdownload/platformsdk/sdkupdate/psdk-full.htm
+   The headers and libs provided with MSVC 6 are now more than 10 years old
+   and not sufficient for a build of libcurl / curl with common features!
+   Without the PSDK you will run into these issues:
+   - LDAPv3 is not supported --> breaks compilation
+   - IPv6 support is incomplete --> breaks compilation
+   - socklen_t type is missing --> breaks compilation
+   If you really need to compile without PSDK then you can workaround these
+   issues by disabling LDAP and IPv6 support, and adding a line:
+   typedef int socklen_t;
+   to the winsock2.h header. This is however not recommended, and you should
+   use the PSDK whenever possible!  
+
    MSVC from command line
    ----------------------
 
