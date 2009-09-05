@@ -120,12 +120,12 @@ ares_parse_srv_reply (const unsigned char *abuf, int alen,
               break;
             }
 
-          srv[i].priority = ntohs (*((uint16_t *)aptr));
-          aptr += sizeof(uint16_t);
-          srv[i].weight = ntohs (*((uint16_t *)aptr));
-          aptr += sizeof(uint16_t);
-          srv[i].port = ntohs (*((uint16_t *)aptr));
-          aptr += sizeof(uint16_t);
+          srv[i].priority = ntohs (*((u_int16_t *)aptr));
+          aptr += sizeof(u_int16_t);
+          srv[i].weight = ntohs (*((u_int16_t *)aptr));
+          aptr += sizeof(u_int16_t);
+          srv[i].port = ntohs (*((u_int16_t *)aptr));
+          aptr += sizeof(u_int16_t);
 
           status = ares_expand_name (aptr, abuf, alen, &srv[i].host, &len);
           if (status != ARES_SUCCESS)
