@@ -32,8 +32,7 @@
  4.3 Earlier bad letter detection
  4.4 REST for large files
  4.5 FTP proxy support
- 4.6 PORT port range
- 4.7 ASCII support
+ 4.6 ASCII support
 
  5. HTTP
  5.1 Better persistency for HTTP 1.0
@@ -220,13 +219,7 @@
  from ncftp. This is not a subject without debate, and is probably not really
  suitable for libcurl.  http://curl.haxx.se/mail/archive-2003-04/0126.html
 
-4.6 PORT port range
-
- Make CURLOPT_FTPPORT support an additional port number on the IP/if/name,
- like "blabla:[port]" or possibly even "blabla:[portfirst]-[portsecond]".
- http://curl.haxx.se/bug/feature.cgi?id=1505166
-
-4.7 ASCII support
+4.6 ASCII support
 
  FTP ASCII transfers do not follow RFC959. They don't convert the data
  accordingly.
