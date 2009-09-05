@@ -323,9 +323,9 @@ struct addr6ttl {
 };
 
 struct srv_reply {
-  u_int16_t weight;
-  u_int16_t priority;
-  u_int16_t port;
+  unsigned short weight;
+  unsigned short priority;
+  unsigned short port;
   char *host;
 };
 

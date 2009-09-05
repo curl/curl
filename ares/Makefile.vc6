@@ -19,7 +19,7 @@ USE_WATT32  = 0
 
 CC = cl
 
-CFLAGS  = -nologo -$(CFG_MODEL)$(DEBUG_MODEL) -W3 -Yd -Zi -Du_int16_t=u_short
+CFLAGS  = -nologo -$(CFG_MODEL)$(DEBUG_MODEL) -W3 -Yd -Zi
 LDFLAGS = -machine:i386 -map
 
 OBJ_DIR  = VC6_obj
