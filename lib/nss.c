@@ -266,7 +266,7 @@ static int num_enabled_ciphers(void)
  */
 static int is_file(const char *filename)
 {
-  struct stat st;
+  struct_stat st;
 
   if(filename == NULL)
     return 0;
@@ -968,7 +968,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
     certDir = getenv("SSL_DIR"); /* Look in $SSL_DIR */
 
     if(!certDir) {
-      struct stat st;
+      struct_stat st;
 
       if(stat(SSL_DIR, &st) == 0)
         if(S_ISDIR(st.st_mode)) {
@@ -1104,7 +1104,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
     }
   }
   else if(data->set.ssl.CApath) {
-    struct stat st;
+    struct_stat st;
     PRDir      *dir;
     PRDirEntry *entry;
 
