@@ -63,6 +63,7 @@
 #include <secitem.h>
 #include <secport.h>
 #include <certdb.h>
+#include <base64.h>
 
 #include "curl_memory.h"
 #include "rawstr.h"
