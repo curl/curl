@@ -47,6 +47,11 @@
 #include "ares_dns.h"
 #include "ares_private.h"
 
+/* AIX portability check */
+#ifndef T_SRV
+#  define T_SRV 33 /* server selection */
+#endif
+
 int
 ares_parse_srv_reply (const unsigned char *abuf, int alen,
                       struct srv_reply **srv_out, int *nsrvreply)
