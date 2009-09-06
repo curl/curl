@@ -7,11 +7,11 @@
                                   Changelog
 
 Daniel Stenberg (2 Sep 2009)
-- Daniel Johnson found a flaw in the code convering sftp-errors to libcurl
+- Daniel Johnson found a flaw in the code converting sftp-errors to libcurl
   errors.
 
 Daniel Stenberg (1 Sep 2009)
-- Peter Sylvester made a debug featuer for Curl_resolv() that now will force
+- Peter Sylvester made a debug feature for Curl_resolv() that now will force
   libcurl to resolve 'localhost' whatever name you use in the URL *if* you set
   the --interface option to (exactly) "LocalHost". This will enable us to
   write tests for custom hosts names but still use a local host server.
