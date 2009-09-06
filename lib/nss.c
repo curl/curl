@@ -1283,7 +1283,7 @@ int Curl_nss_send(struct connectdata *conn,  /* connection data */
   int rc;
 
   if(data->set.timeout)
-    timeout = PR_MillisecondsToInterval(data->set.timeout);
+    timeout = PR_MillisecondsToInterval((PRUint32)data->set.timeout);
   else
     timeout = PR_MillisecondsToInterval(DEFAULT_CONNECT_TIMEOUT);
 
@@ -1319,7 +1319,7 @@ ssize_t Curl_nss_recv(struct connectdata * conn, /* connection data */
   PRInt32 timeout;
 
   if(data->set.timeout)
-    timeout = PR_SecondsToInterval(data->set.timeout);
+    timeout = PR_SecondsToInterval((PRUint32)data->set.timeout);
   else
     timeout = PR_MillisecondsToInterval(DEFAULT_CONNECT_TIMEOUT);
 
