@@ -215,7 +215,7 @@ ifdef XDCOPT
 	XDCDATA = $(OBJDIR)/$(TARGET).xdc
 endif
 
-ifeq ($(findstring linux,$(OSTYPE)),linux)
+ifeq ($(findstring /sh,$(SHELL)),/sh)
 DL	= '
 DS	= /
 PCT	= %
