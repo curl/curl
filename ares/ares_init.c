@@ -80,14 +80,16 @@ static int init_by_environment(ares_channel channel);
 static int init_by_resolv_conf(ares_channel channel);
 static int init_by_defaults(ares_channel channel);
 
+#ifndef WATT32
 static int config_nameserver(struct server_state **servers, int *nservers,
                              char *str);
+#endif
 static int set_search(ares_channel channel, const char *str);
 static int set_options(ares_channel channel, const char *str);
 static const char *try_option(const char *p, const char *q, const char *opt);
 static int init_id_key(rc4_key* key,int key_data_len);
 
-#ifndef WIN32
+#if !defined(WIN32) && !defined(WATT32)
 static int sortlist_alloc(struct apattern **sortlist, int *nsort, struct apattern *pat);
 static int ip_addr(const char *s, int len, struct in_addr *addr);
 static void natural_mask(struct apattern *pat);
@@ -635,7 +637,9 @@ quit:
 
 static int init_by_resolv_conf(ares_channel channel)
 {
+#ifndef WATT32
   char *line = NULL;
+#endif
   int status = -1, nservers = 0, nsort = 0;
   struct server_state *servers = NULL;
   struct apattern *sortlist = NULL;
@@ -1088,7 +1092,7 @@ static int init_by_defaults(ares_channel channel)
   return rc;
 }
 
-#ifndef WIN32
+#if !defined(WIN32) && !defined(WATT32)
 static int config_domain(ares_channel channel, char *str)
 {
   char *q;
@@ -1128,9 +1132,9 @@ static int config_lookup(ares_channel channel, const char *str,
   channel->lookups = strdup(lookups);
   return (channel->lookups) ? ARES_SUCCESS : ARES_ENOMEM;
 }
+#endif  /* !WIN32 & !WATT32 */
 
-#endif
-
+#ifndef WATT32
 static int config_nameserver(struct server_state **servers, int *nservers,
                              char *str)
 {
@@ -1273,7 +1277,8 @@ static int config_sortlist(struct apattern **sortlist, int *nsort,
 
   return ARES_SUCCESS;
 }
-#endif
+#endif  /* !WIN32 */
+#endif  /* !WATT32 */
 
 static int set_search(ares_channel channel, const char *str)
 {
@@ -1365,7 +1370,13 @@ static int set_options(ares_channel channel, const char *str)
   return ARES_SUCCESS;
 }
 
-#ifndef WIN32
+static const char *try_option(const char *p, const char *q, const char *opt)
+{
+  size_t len = strlen(opt);
+  return ((size_t)(q - p) >= len && !strncmp(p, opt, len)) ? &p[len] : NULL;
+}
+
+#if !defined(WIN32) && !defined(WATT32)
 static char *try_config(char *s, const char *opt)
 {
   size_t len;
@@ -1424,15 +1435,7 @@ static char *try_config(char *s, const char *opt)
   /* return pointer to option value */
   return p;
 }
-#endif
 
-static const char *try_option(const char *p, const char *q, const char *opt)
-{
-  size_t len = strlen(opt);
-  return ((size_t)(q - p) >= len && !strncmp(p, opt, len)) ? &p[len] : NULL;
-}
-
-#ifndef WIN32
 static int sortlist_alloc(struct apattern **sortlist, int *nsort,
                           struct apattern *pat)
 {
@@ -1478,7 +1481,8 @@ static void natural_mask(struct apattern *pat)
   else
     pat->mask.addr4.s_addr = htonl(IN_CLASSC_NET);
 }
-#endif
+#endif /* !WIN32 && !WATT32 */
+
 /* initialize an rc4 key. If possible a cryptographically secure random key
    is generated using a suitable function (for example win32's RtlGenRandom as
    described in
