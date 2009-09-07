@@ -1,11 +1,13 @@
 #
 # c-ares Makefile for djgpp/gcc/Watt-32.
-#   By Gisle Vanem <giva@bgnett.no> 2004.
+#   By Gisle Vanem <gvanem@broadpark.no> 2004.
 #
 # $Id$
 
 
 TOPDIR = ..
+
+DEPEND_PREREQ = ares_config.h
 
 include ../packages/DOS/common.dj
 include Makefile.inc
