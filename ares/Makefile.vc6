@@ -1,7 +1,7 @@
 # $Id$
 #
 # C-ares makefile for MSVC6+
-# G. Vanem <giva@bgnett.no>.
+# G. Vanem <gvanem@broadpark.no>.
 #
 
 CFG_MODEL   = MD
