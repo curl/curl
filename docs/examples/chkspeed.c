@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
       printf("Average download speed: %0.3f kbyte/sec.\n", val / 1024);
 
   } else {
-    printf("Errror while fetching '%s' : %s\n", url, curl_easy_strerror(res));
+    printf("Error while fetching '%s' : %s\n", url, curl_easy_strerror(res));
   }
 
   /* cleanup curl stuff */
