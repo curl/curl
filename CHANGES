@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (10 Sep 2009)
+- Claes Jakobsson fixed a problem with cookie expiry dates at exctly the epoch
+  start second "Thu Jan 1 00:00:00 GMT 1970" as the date parser then returns 0
+  which internally then is treated as a session cookie. That particular date
+  is now made to get the value of 1.
+
 Daniel Stenberg (2 Sep 2009)
 - Daniel Johnson found a flaw in the code converting sftp-errors to libcurl
   errors.

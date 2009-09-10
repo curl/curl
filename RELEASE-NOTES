@@ -27,6 +27,7 @@ This release includes the following bugfixes:
  o ftp NOBODY on re-used connection hang
  o configure uses pkg-config for cross-compiles as well
  o improved NSS detection in configure
+ o cookie expiry date at 1970-jan-1 00:00:00
 
 This release includes the following known bugs:
 
@@ -36,6 +37,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Karl Moerder, Kamil Dudka, Krister Johansen, Andre Guibert de Bruet,
- Michal Marek, Eric Wong, Guenter Knauf, Peter Sylvester, Daniel Johnson
+ Michal Marek, Eric Wong, Guenter Knauf, Peter Sylvester, Daniel Johnson,
+ Claes Jakobsson
 
         Thanks! (and sorry if I forgot to mention someone)
