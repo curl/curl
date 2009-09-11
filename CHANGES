@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Guenter Knauf (11 Sep 2009)
+- Joshua Kwan provided a patch to pass POLLERR / POLLHUP back to c-ares.
+  This fixes a loop problem with high CPU usage.
+
 Daniel Stenberg (10 Sep 2009)
 - Claes Jakobsson fixed a problem with cookie expiry dates at exctly the epoch
   start second "Thu Jan 1 00:00:00 GMT 1970" as the date parser then returns 0
