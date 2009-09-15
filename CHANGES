@@ -6,6 +6,18 @@
 
                                   Changelog
 
+Yang Tse (14 Sep 2009)
+- Revert Joshua Kwan's patch committed 11 Sep 2009.
+
+  Some systems poll function sets POLLHUP in revents without setting
+  POLLIN, and sets POLLERR without setting POLLIN and POLLOUT. In some
+  libcurl code execution paths this could trigger busy wait loops with
+  high CPU usage until a timeout condition aborted the loop.
+
+  The reverted patch addressed the above issue for a very specific case,
+  when awaiting c-ares to resolve. A libcurl-wide fix for Curl_poll now
+  superceeds this one.
+
 Guenter Knauf (11 Sep 2009)
 - Joshua Kwan provided a patch to pass POLLERR / POLLHUP back to c-ares.
   This fixes a loop problem with high CPU usage.
