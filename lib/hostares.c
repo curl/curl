@@ -169,14 +169,10 @@ static int ares_waitperform(struct connectdata *conn, int timeout_ms)
   else {
     /* move through the descriptors and ask for processing on them */
     for(i=0; i < num; i++)
-      /*
-       * Following the advice from:
-       * http://lists.danga.com/pipermail/memcached/2003-October/000336.html
-       */
       ares_process_fd(data->state.areschannel,
-                      pfd[i].revents & (POLLRDNORM|POLLIN|POLLERR|POLLHUP)?
+                      pfd[i].revents & (POLLRDNORM|POLLIN)?
                       pfd[i].fd:ARES_SOCKET_BAD,
-                      pfd[i].revents & (POLLWRNORM|POLLOUT|POLLERR)?
+                      pfd[i].revents & (POLLWRNORM|POLLOUT)?
                       pfd[i].fd:ARES_SOCKET_BAD);
   }
   return nfds;
