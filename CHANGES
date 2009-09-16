@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Fandrich (15 Sep 2009)
+- Moved the libssh2 checks after the SSL library checks. This helps when
+  statically linking since libssh2 needs the SSL library link flags to be
+  set up already to satisfy its dependencies. This wouldn't be necessary if
+  the libssh2 configure check was changed to use pkg-config since the
+  --static flag would add the dependencies automatically.
+
 Yang Tse (14 Sep 2009)
 - Revert Joshua Kwan's patch committed 11 Sep 2009.
 

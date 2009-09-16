@@ -1433,77 +1433,6 @@ dnl set variable for use in automakefile(s)
 AM_CONDITIONAL(HAVE_LIBZ, test x"$AMFIXLIB" = x1)
 
 dnl **********************************************************************
-dnl Check for the presence of LIBSSH2 libraries and headers
-dnl **********************************************************************
-
-dnl Default to compiler & linker defaults for LIBSSH2 files & libraries.
-OPT_LIBSSH2=off
-AC_ARG_WITH(libssh2,dnl
-AC_HELP_STRING([--with-libssh2=PATH],[Where to look for libssh2, PATH points to the LIBSSH2 installation (default: /usr/local/lib); when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
-AC_HELP_STRING([--without-libssh2], [disable LIBSSH2]),
-  OPT_LIBSSH2=$withval)
-
-if test X"$OPT_LIBSSH2" != Xno; then
-  dnl backup the pre-libssh2 variables
-  CLEANLDFLAGS="$LDFLAGS"
-  CLEANCPPFLAGS="$CPPFLAGS"
-  CLEANLIBS="$LIBS"
-
-  case "$OPT_LIBSSH2" in
-  yes)
-    dnl --with-libssh2 (without path) used
-    PREFIX_LIBSSH2=/usr/local/lib
-    LIB_LIBSSH2="$PREFIX_LIBSSH2$libsuff"
-    ;;
-  off)
-    dnl no --with-libssh2 option given, just check default places
-    PREFIX_LIBSSH2=
-    ;;
-  *)
-    dnl use the given --with-libssh2 spot
-    PREFIX_LIBSSH2=$OPT_LIBSSH2
-    LIB_LIBSSH2="$PREFIX_LIBSSH2/lib$libsuff"
-    LDFLAGS="$LDFLAGS -L$LIB_LIBSSH2"
-    CPPFLAGS="$CPPFLAGS -I$PREFIX_LIBSSH2/include"
-    ;;
-  esac
-
-  AC_CHECK_LIB(ssh2, libssh2_channel_open_ex)
-
-  AC_CHECK_HEADERS(libssh2.h,
-    curl_ssh_msg="enabled (libSSH2)"
-    LIBSSH2_ENABLED=1
-    AC_DEFINE(USE_LIBSSH2, 1, [if libSSH2 is in use])
-    AC_SUBST(USE_LIBSSH2, [1])
-  )
-
-  if test X"$OPT_LIBSSH2" != Xoff &&
-     test "$LIBSSH2_ENABLED" != "1"; then
-    AC_MSG_ERROR([libSSH2 libs and/or directories were not found where specified!])
-  fi
-
-  if test "$LIBSSH2_ENABLED" = "1"; then
-    if test -n "$LIB_LIBSSH2"; then
-       dnl when the libssh2 shared libs were found in a path that the run-time
-       dnl linker doesn't search through, we need to add it to LD_LIBRARY_PATH
-       dnl to prevent further configure tests to fail due to this
-
-       dnl libssh2_version is a post 1.0 addition
-       AC_CHECK_FUNCS( libssh2_version )
-
-       LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_LIBSSH2"
-       export LD_LIBRARY_PATH
-       AC_MSG_NOTICE([Added $LIB_LIBSSH2 to LD_LIBRARY_PATH])
-    fi
-  else
-    dnl no libssh2, revert back to clean variables
-    LDFLAGS=$CLEANLDFLAGS
-    CPPFLAGS=$CLEANCPPFLAGS
-    LIBS=$CLEANLIBS
-  fi
-fi
-
-dnl **********************************************************************
 dnl Check for the random seed preferences
 dnl **********************************************************************
 
@@ -1748,6 +1677,77 @@ dnl Check for the CA bundle
 dnl **********************************************************************
 
 CURL_CHECK_CA_BUNDLE
+
+dnl **********************************************************************
+dnl Check for the presence of LIBSSH2 libraries and headers
+dnl **********************************************************************
+
+dnl Default to compiler & linker defaults for LIBSSH2 files & libraries.
+OPT_LIBSSH2=off
+AC_ARG_WITH(libssh2,dnl
+AC_HELP_STRING([--with-libssh2=PATH],[Where to look for libssh2, PATH points to the LIBSSH2 installation (default: /usr/local/lib); when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AC_HELP_STRING([--without-libssh2], [disable LIBSSH2]),
+  OPT_LIBSSH2=$withval)
+
+if test X"$OPT_LIBSSH2" != Xno; then
+  dnl backup the pre-libssh2 variables
+  CLEANLDFLAGS="$LDFLAGS"
+  CLEANCPPFLAGS="$CPPFLAGS"
+  CLEANLIBS="$LIBS"
+
+  case "$OPT_LIBSSH2" in
+  yes)
+    dnl --with-libssh2 (without path) used
+    PREFIX_LIBSSH2=/usr/local/lib
+    LIB_LIBSSH2="$PREFIX_LIBSSH2$libsuff"
+    ;;
+  off)
+    dnl no --with-libssh2 option given, just check default places
+    PREFIX_LIBSSH2=
+    ;;
+  *)
+    dnl use the given --with-libssh2 spot
+    PREFIX_LIBSSH2=$OPT_LIBSSH2
+    LIB_LIBSSH2="$PREFIX_LIBSSH2/lib$libsuff"
+    LDFLAGS="$LDFLAGS -L$LIB_LIBSSH2"
+    CPPFLAGS="$CPPFLAGS -I$PREFIX_LIBSSH2/include"
+    ;;
+  esac
+
+  AC_CHECK_LIB(ssh2, libssh2_channel_open_ex)
+
+  AC_CHECK_HEADERS(libssh2.h,
+    curl_ssh_msg="enabled (libSSH2)"
+    LIBSSH2_ENABLED=1
+    AC_DEFINE(USE_LIBSSH2, 1, [if libSSH2 is in use])
+    AC_SUBST(USE_LIBSSH2, [1])
+  )
+
+  if test X"$OPT_LIBSSH2" != Xoff &&
+     test "$LIBSSH2_ENABLED" != "1"; then
+    AC_MSG_ERROR([libSSH2 libs and/or directories were not found where specified!])
+  fi
+
+  if test "$LIBSSH2_ENABLED" = "1"; then
+    if test -n "$LIB_LIBSSH2"; then
+       dnl when the libssh2 shared libs were found in a path that the run-time
+       dnl linker doesn't search through, we need to add it to LD_LIBRARY_PATH
+       dnl to prevent further configure tests to fail due to this
+
+       dnl libssh2_version is a post 1.0 addition
+       AC_CHECK_FUNCS( libssh2_version )
+
+       LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_LIBSSH2"
+       export LD_LIBRARY_PATH
+       AC_MSG_NOTICE([Added $LIB_LIBSSH2 to LD_LIBRARY_PATH])
+    fi
+  else
+    dnl no libssh2, revert back to clean variables
+    LDFLAGS=$CLEANLDFLAGS
+    CPPFLAGS=$CLEANCPPFLAGS
+    LIBS=$CLEANLIBS
+  fi
+fi
 
 dnl **********************************************************************
 dnl Check for the presence of IDN libraries and headers
