@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -120,7 +120,7 @@ void ourWriteOut(CURL *curl, const char *writeinfo)
         char *end;
         char keepit;
         int i;
-        if(('{' == ptr[1]) && (end=strchr(ptr, '}'))) {
+        if(('{' == ptr[1]) && ((end = strchr(ptr, '}')) != NULL)) {
           bool match = FALSE;
           ptr+=2; /* pass the % and the { */
           keepit=*end;
@@ -254,7 +254,7 @@ void ourWriteOut(CURL *curl, const char *writeinfo)
               break;
             }
           }
-          if(!match) {
+          if(FALSE == match) {
             fprintf(stderr, "curl: unknown --write-out variable: '%s'\n", ptr);
           }
           ptr=end+1; /* pass the end */
