@@ -108,7 +108,7 @@ void ourWriteOut(CURL *curl, const char *writeinfo)
   long longinfo;
   double doubleinfo;
 
-  while(*ptr) {
+  while(ptr && *ptr) {
     if('%' == *ptr) {
       if('%' == ptr[1]) {
         /* an escaped %-letter */
