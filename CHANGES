@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (16 Sep 2009)
+- Sven Anders reported that we introduced a cert verfication flaw for OpenSSL-
+  powered libcurl in 7.19.6. If there was a X509v3 Subject Alternative Name
+  field in the certficate it had to match and so even if non-DNS and non-IP
+  entry was present it caused the verification to fail.
+
 Daniel Fandrich (15 Sep 2009)
 - Moved the libssh2 checks after the SSL library checks. This helps when
   statically linking since libssh2 needs the SSL library link flags to be

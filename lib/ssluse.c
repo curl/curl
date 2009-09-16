@@ -1056,7 +1056,8 @@ cert_hostcheck(const char *match_pattern, const char *hostname)
 static CURLcode verifyhost(struct connectdata *conn,
                            X509 *server_cert)
 {
-  bool matched = FALSE; /* no alternative match yet */
+  int matched = -1; /* -1 is no alternative match yet, 1 means match and 0
+                       means mismatch */
   int target = GEN_DNS; /* target type, GEN_DNS or GEN_IPADD */
   size_t addrlen = 0;
   struct SessionHandle *data = conn->data;
@@ -1093,7 +1094,7 @@ static CURLcode verifyhost(struct connectdata *conn,
     numalts = sk_GENERAL_NAME_num(altnames);
 
     /* loop through all alternatives while none has matched */
-    for (i=0; (i<numalts) && !matched; i++) {
+    for (i=0; (i<numalts) && (matched != 1); i++) {
       /* get a handle to alternative name number i */
       const GENERAL_NAME *check = sk_GENERAL_NAME_value(altnames, i);
 
@@ -1119,14 +1120,18 @@ static CURLcode verifyhost(struct connectdata *conn,
              /* if this isn't true, there was an embedded zero in the name
                 string and we cannot match it. */
              cert_hostcheck(altptr, conn->host.name))
-            matched = TRUE;
+            matched = 1;
+          else
+            matched = 0;
           break;
 
         case GEN_IPADD: /* IP address comparison */
           /* compare alternative IP address if the data chunk is the same size
              our server IP address is */
           if((altlen == addrlen) && !memcmp(altptr, &addr, altlen))
-            matched = TRUE;
+            matched = 1;
+          else
+            matched = 0;
           break;
         }
       }
@@ -1134,10 +1139,10 @@ static CURLcode verifyhost(struct connectdata *conn,
     GENERAL_NAMES_free(altnames);
   }
 
-  if(matched)
+  if(matched == 1)
     /* an alternative name matched the server hostname */
     infof(data, "\t subjectAltName: %s matched\n", conn->host.dispname);
-  else if(altnames) {
+  else if(matched == 0) {
     /* an alternative name field existed, but didn't match and then
        we MUST fail */
     infof(data, "\t subjectAltName does not match %s\n", conn->host.dispname);
