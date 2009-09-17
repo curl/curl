@@ -455,7 +455,7 @@ static int sshkeycallback(CURL *easy,
 #ifdef HAVE_LIBSSH2_SFTP_SEEK64
 #define SFTP_SEEK(x,y) libssh2_sftp_seek64(x, (libssh2_uint64_t)y)
 #else
-#define SFTP_SEEK(x,y) libssh2_sftp_seek(x, y)
+#define SFTP_SEEK(x,y) libssh2_sftp_seek(x, (size_t)y)
 #endif
 
 /*
