@@ -108,12 +108,6 @@ Content-Disposition: form-data; name="FILECONTENT"
 /* Length of the random boundary string. */
 #define BOUNDARY_LENGTH 40
 
-/* Private pseudo-random number seed. Unsigned integer >= 32bit. Threads
-   mutual exclusion is not implemented to acess it since we do not require
-   high quality random numbers (only used in form boudary generation). */
-
-static unsigned int     randseed;
-
 #if !defined(CURL_DISABLE_HTTP) || defined(USE_SSLEAY)
 
 #include <stdio.h>
@@ -127,6 +121,7 @@ static unsigned int     randseed;
 #include "urldata.h" /* for struct SessionHandle */
 #include "easyif.h" /* for Curl_convert_... prototypes */
 #include "formdata.h"
+#include "curl_rand.h"
 #include "strequal.h"
 #include "curl_memory.h"
 
@@ -1763,24 +1758,3 @@ char *Curl_FormBoundary(void)
 }
 
 #endif  /* !defined(CURL_DISABLE_HTTP) || defined(USE_SSLEAY) */
-
-/* Pseudo-random number support. This is always enabled, since called from
-   curl_global_init(). */
-
-unsigned int Curl_rand(void)
-{
-  unsigned int r;
-  /* Return an unsigned 32-bit pseudo-random number. */
-  r = randseed = randseed * 1103515245 + 12345;
-  return (r << 16) | ((r >> 16) & 0xFFFF);
-}
-
-void Curl_srand(void)
-{
-  /* Randomize pseudo-random number sequence. */
-
-  randseed = (unsigned int) time(NULL);
-  Curl_rand();
-  Curl_rand();
-  Curl_rand();
-}

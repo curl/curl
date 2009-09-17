@@ -85,7 +85,7 @@
 #include "http_ntlm.h"
 #include "connect.h" /* for Curl_getconnectinfo */
 #include "slist.h"
-#include "formdata.h"   /* For Curl_srand(). */
+#include "curl_rand.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>

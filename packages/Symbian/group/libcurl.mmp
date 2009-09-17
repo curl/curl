@@ -31,7 +31,8 @@ SOURCE \
   hostares.c hostasyn.c hostip4.c hostip6.c hostsyn.c hostthre.c    \
   inet_ntop.c parsedate.c select.c gtls.c sslgen.c tftp.c splay.c   \
   strdup.c socks.c ssh.c nss.c qssl.c rawstr.c curl_addrinfo.c      \
-  socks_gssapi.c socks_sspi.c curl_sspi.c slist.c nonblock.c
+  socks_gssapi.c socks_sspi.c curl_sspi.c slist.c nonblock.c        \
+  curl_rand.c
 
 USERINCLUDE   ../../../lib ../../../include/curl
 #ifdef ENABLE_SSL

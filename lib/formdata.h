@@ -1,6 +1,5 @@
-#ifndef __FORMDATA_H
-#define __FORMDATA_H
-
+#ifndef HEADER_CURL_FORMDATA_H
+#define HEADER_CURL_FORMDATA_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -8,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -97,8 +96,4 @@ void Curl_formclean(struct FormData **);
 
 CURLcode Curl_formconvert(struct SessionHandle *, struct FormData *);
 
-void Curl_srand(void);
-unsigned int Curl_rand(void);
-
-#endif
-
+#endif /* HEADER_CURL_FORMDATA_H */

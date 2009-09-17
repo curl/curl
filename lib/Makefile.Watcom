@@ -69,7 +69,8 @@ OBJS = $(OBJ_DIR)\base64.obj           $(OBJ_DIR)\connect.obj        &
        $(OBJ_DIR)\telnet.obj           $(OBJ_DIR)\tftp.obj           &
        $(OBJ_DIR)\timeval.obj          $(OBJ_DIR)\transfer.obj       &
        $(OBJ_DIR)\url.obj              $(OBJ_DIR)\version.obj        &
-       $(OBJ_DIR)\slist.obj            $(OBJ_DIR)\nonblock.obj
+       $(OBJ_DIR)\slist.obj            $(OBJ_DIR)\nonblock.obj       &
+       $(OBJ_DIR)\curl_rand.obj
 
 #
 # Use $(OBJS) as a template to generate $(OBJS_STAT) and $(OBJS_DYN).
@@ -185,7 +186,7 @@ $(OBJ_DIR)\formdata.obj: formdata.c setup.h config-win32.h ..\include\curl\curlb
   ..\include\curl\easy.h ..\include\curl\multi.h ..\include\curl\curl.h &
   urldata.h cookie.h formdata.h timeval.h http_chunks.h hostip.h hash.h &
   llist.h curl_addrinfo.h splay.h easyif.h strequal.h curl_memory.h &
-  ..\include\curl\mprintf.h memdebug.h
+  curl_rand.h ..\include\curl\mprintf.h memdebug.h
 $(OBJ_DIR)\cookie.obj: cookie.c setup.h config-win32.h ..\include\curl\curlbuild.h &
   ..\include\curl\curlrules.h setup_once.h ..\include\curl\mprintf.h &
   ..\include\curl\curl.h ..\include\curl\curlver.h &
@@ -331,7 +332,7 @@ $(OBJ_DIR)\easy.obj: easy.c setup.h config-win32.h ..\include\curl\curlbuild.h &
   formdata.h timeval.h http_chunks.h hostip.h hash.h llist.h &
   curl_addrinfo.h splay.h transfer.h sslgen.h url.h getinfo.h share.h &
   strdup.h curl_memory.h progress.h easyif.h select.h sendf.h http_ntlm.h &
-  connect.h ..\include\curl\mprintf.h memdebug.h
+  curl_rand.h connect.h ..\include\curl\mprintf.h memdebug.h
 $(OBJ_DIR)\security.obj: security.c setup.h config-win32.h ..\include\curl\curlbuild.h &
   ..\include\curl\curlrules.h setup_once.h
 $(OBJ_DIR)\krb4.obj: krb4.c setup.h config-win32.h ..\include\curl\curlbuild.h &
@@ -540,4 +541,10 @@ $(OBJ_DIR)\curl_addrinfo.obj: curl_addrinfo.c setup.h config-win32.h &
   ..\include\curl\curl.h ..\include\curl\curlver.h &
   ..\include\curl\curlrules.h ..\include\curl\easy.h &
   ..\include\curl\multi.h ..\include\curl\curl.h curl_addrinfo.h &
+  ..\include\curl\mprintf.h curl_memory.h memdebug.h
+$(OBJ_DIR)\curl_rand.obj: curl_rand.c setup.h config-win32.h &
+  ..\include\curl\curlbuild.h ..\include\curl\curlrules.h setup_once.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h &
+  ..\include\curl\curlrules.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h curl_rand.h &
   ..\include\curl\mprintf.h curl_memory.h memdebug.h
