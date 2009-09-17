@@ -3946,9 +3946,11 @@ static CURLcode parse_remote_port(struct SessionHandle *data,
 
     conn->host.name++; /* skip over the starting bracket */
     portptr = strchr(conn->host.name, ']');
-    *portptr++ = 0; /* zero terminate, killing the bracket */
-    if(':' != *portptr)
-      portptr = NULL; /* no port number available */
+    if(portptr) {
+      *portptr++ = '\0'; /* zero terminate, killing the bracket */
+      if(':' != *portptr)
+        portptr = NULL; /* no port number available */
+    }
   }
   else
     portptr = strrchr(conn->host.name, ':');

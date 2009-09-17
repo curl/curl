@@ -975,6 +975,9 @@ static int init_by_defaults(ares_channel channel)
 {
   char *hostname = NULL;
   int rc = ARES_SUCCESS;
+#ifdef HAVE_GETHOSTNAME
+  char *dot;
+#endif
 
   if (channel->flags == -1)
     channel->flags = 0;
@@ -1044,15 +1047,15 @@ static int init_by_defaults(ares_channel channel)
 
     } while(0);
 
-    if (strchr(hostname, '.'))  {
+    dot = strchr(hostname, '.');
+    if (dot) {
       /* a dot was found */
-
       channel->domains = malloc(sizeof(char *));
       if (!channel->domains) {
         rc = ARES_ENOMEM;
         goto error;
       }
-      channel->domains[0] = strdup(strchr(hostname, '.') + 1);
+      channel->domains[0] = strdup(dot + 1);
       if (!channel->domains[0]) {
         rc = ARES_ENOMEM;
         goto error;

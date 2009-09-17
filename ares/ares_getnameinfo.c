@@ -99,12 +99,19 @@ void ares_getnameinfo(ares_channel channel, const struct sockaddr *sa,
   struct sockaddr_in *addr = NULL;
   struct sockaddr_in6 *addr6 = NULL;
   struct nameinfo_query *niquery;
+  unsigned int port = 0;
 
   /* Verify the buffer size */
   if (salen == sizeof(struct sockaddr_in))
-    addr = (struct sockaddr_in *)sa;
+    {
+      addr = (struct sockaddr_in *)sa;
+      port = addr->sin_port;
+    }
   else if (salen == sizeof(struct sockaddr_in6))
-    addr6 = (struct sockaddr_in6 *)sa;
+    {
+      addr6 = (struct sockaddr_in6 *)sa;
+      port = addr6->sin6_port;
+    }
   else
     {
       callback(arg, ARES_ENOTIMP, 0, NULL, NULL);
@@ -119,12 +126,7 @@ void ares_getnameinfo(ares_channel channel, const struct sockaddr *sa,
   if ((flags & ARES_NI_LOOKUPSERVICE) && !(flags & ARES_NI_LOOKUPHOST))
     {
       char buf[33], *service;
-      unsigned int port = 0;
 
-      if (salen == sizeof(struct sockaddr_in))
-        port = addr->sin_port;
-      else
-        port = addr6->sin6_port;
       service = lookup_service((unsigned short)(port & 0xffff),
                                flags, buf, sizeof(buf));
       callback(arg, ARES_SUCCESS, 0, NULL, service);
@@ -137,7 +139,6 @@ void ares_getnameinfo(ares_channel channel, const struct sockaddr *sa,
      /* A numeric host can be handled without DNS */
      if ((flags & ARES_NI_NUMERICHOST))
       {
-        unsigned int port = 0;
         char ipbuf[IPBUFSIZ];
         char srvbuf[33];
         char *service = NULL;
@@ -154,7 +155,6 @@ void ares_getnameinfo(ares_channel channel, const struct sockaddr *sa,
         if (salen == sizeof(struct sockaddr_in6))
           {
             ares_inet_ntop(AF_INET6, &addr6->sin6_addr, ipbuf, IPBUFSIZ);
-            port = addr6->sin6_port;
             /* If the system supports scope IDs, use it */
 #ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
             append_scopeid(addr6, flags, ipbuf, sizeof(ipbuf));
@@ -163,7 +163,6 @@ void ares_getnameinfo(ares_channel channel, const struct sockaddr *sa,
         else
           {
             ares_inet_ntop(AF_INET, &addr->sin_addr, ipbuf, IPBUFSIZ);
-            port = addr->sin_port;
           }
         /* They also want a service */
         if (flags & ARES_NI_LOOKUPSERVICE)
