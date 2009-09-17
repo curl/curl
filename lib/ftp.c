@@ -445,7 +445,7 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
 #endif /* CURL_DOES_CONVERSIONS */
 
       if(CURLE_OK != res) {
-        result = res;	/* Set the outer result variable to this error. */
+        result = (CURLcode)res; /* Set outer result variable to this error. */
         keepon = FALSE;
       }
     }
