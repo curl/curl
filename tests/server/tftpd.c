@@ -623,7 +623,7 @@ again:
   /* store input protocol */
   fprintf(server, "filename: %s\n", filename);
 
-  for (cp = mode; *cp; cp++)
+  for (cp = mode; cp && *cp; cp++)
     if(ISUPPER(*cp))
       *cp = (char)tolower((int)*cp);
 
