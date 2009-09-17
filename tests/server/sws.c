@@ -585,7 +585,6 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
 
   while (req->offset < REQBUFSIZ-1) {
     if(pipereq_length && pipereq) {
-    if(pipereq_length) {
       memmove(reqbuf, pipereq, pipereq_length);
       got = pipereq_length;
       pipereq_length = 0;
