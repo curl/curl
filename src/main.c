@@ -218,6 +218,7 @@ typedef enum {
 #  define fstat(fdes,stp)            _fstati64(fdes, stp)
 #  define stat(fname,stp)            _stati64(fname, stp)
 #  define struct_stat                struct _stati64
+#  define LSEEK_ERROR                (__int64)-1
 #endif
 
 /*
@@ -232,10 +233,15 @@ typedef enum {
 #  define fstat(fdes,stp)            _fstat(fdes, stp)
 #  define stat(fname,stp)            _stat(fname, stp)
 #  define struct_stat                struct _stat
+#  define LSEEK_ERROR                (long)-1
 #endif
 
 #ifndef struct_stat
 #  define struct_stat struct stat
+#endif
+
+#ifndef LSEEK_ERROR
+#  define LSEEK_ERROR (off_t)-1
 #endif
 
 /*
@@ -3301,13 +3307,13 @@ static int my_seek(void *stream, curl_off_t offset, int whence)
       /* this code path doesn't support other types */
       return 1;
 
-    if(-1 == lseek(in->fd, 0, SEEK_SET))
+    if(LSEEK_ERROR == lseek(in->fd, 0, SEEK_SET))
       /* couldn't rewind to beginning */
       return 1;
 
     while(left) {
       long step = (left>MAX_SEEK ? MAX_SEEK : (long)left);
-      if(-1 == lseek(in->fd, step, SEEK_CUR))
+      if(LSEEK_ERROR == lseek(in->fd, step, SEEK_CUR))
         /* couldn't seek forwards the desired amount */
         return 1;
       left -= step;
@@ -3315,7 +3321,7 @@ static int my_seek(void *stream, curl_off_t offset, int whence)
     return 0;
   }
 #endif
-  if(-1 == lseek(in->fd, offset, whence))
+  if(LSEEK_ERROR == lseek(in->fd, offset, whence))
     /* couldn't rewind, the reason is in errno but errno is just not portable
        enough and we don't actually care that much why we failed. We'll let
        libcurl know that it may try other means if it wants to. */
