@@ -89,3 +89,28 @@ certificate that isn't signed by one of the certificates in the installed CA
 cert bundle, will cause SSL to report an error ("certificate verify failed")
 during the handshake and SSL will then refuse further communication with that
 server.
+
+                      Peer SSL Certificate Verification with NSS
+                      ==========================================
+
+If libcurl is build with NSS support then depending on the OS distribution it
+is probably required to take some additional steps to use the system-wide CA
+cert db. RedHat ships with an additional module libnsspem.so which enables NSS
+to read the OpenSSL PEM CA bundle. With OpenSuSE this lib is missing, and NSS
+can only work with its own internal formats. Also NSS got a new database
+format:
+https://wiki.mozilla.org/NSS_Shared_DB
+Starting with version 7.19.7 libcurl will check for the NSS version it runs,
+and add automatically the 'sql:' prefix to the certdb directory (either the
+hardcoded default /etc/pki/nssdb or the directory configured with SSL_DIR
+environment variable) if a version 3.12.0 or later is detected. 
+To check which certdb format your distribution provides examine the default
+certdb location /etc/pki/nssdb; the new certdb format can be identified by
+the filenames cert9.db, key4.db, pkcs11.txt; filenames of older versions are
+cert8.db, key3.db, modsec.db.
+Usually these cert databases are empty; but NSS also has built-in CAs which are
+provided through a shared library libnssckbi.so; if you want to use these
+built-in CAs then create a symlink to libnssckbi.so in /etc/pki/nssdb:
+ln -s /usr/lib[64]/libnssckbi.so /etc/pki/nssdb/libnssckbi.so
+
+
