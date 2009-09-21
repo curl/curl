@@ -991,8 +991,11 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
         rv = NSS_NoDB_Init(NULL);
       }
       else {
-        rv = NSS_Initialize(certDir, NULL, NULL, "secmod.db",
-                            NSS_INIT_READONLY);
+        char *certpath = PR_smprintf("%s%s",
+                         NSS_VersionCheck("3.12.0") ? "sql:" : "",
+                         certDir);
+        rv = NSS_Initialize(certpath, "", "", "", NSS_INIT_READONLY);
+        PR_smprintf_free(certpath);
       }
       if(rv != SECSuccess) {
         infof(conn->data, "Unable to initialize NSS database\n");
