@@ -964,16 +964,23 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   /* FIXME. NSS doesn't support multiple databases open at the same time. */
   PR_Lock(nss_initlock);
   if(!initialized) {
+    struct_stat st;
 
-    certDir = getenv("SSL_DIR"); /* Look in $SSL_DIR */
+    /* First we check if $SSL_DIR points to a valid dir */
+    certDir = getenv("SSL_DIR");
+    if(certDir) {
+      if((stat(certDir, &st) != 0) ||
+              (!S_ISDIR(st.st_mode))) {
+        certDir = NULL;
+      }
+    }
 
+    /* Now we check if the default location is a valid dir */
     if(!certDir) {
-      struct_stat st;
-
-      if(stat(SSL_DIR, &st) == 0)
-        if(S_ISDIR(st.st_mode)) {
-          certDir = (char *)SSL_DIR;
-        }
+      if((stat(SSL_DIR, &st) == 0) &&
+              (S_ISDIR(st.st_mode))) {
+        certDir = (char *)SSL_DIR;
+      }
     }
 
     if (!NSS_IsInitialized()) {
