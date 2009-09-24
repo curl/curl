@@ -29,7 +29,6 @@ This release includes the following bugfixes:
  o improved NSS detection in configure
  o cookie expiry date at 1970-jan-1 00:00:00
  o libcurl-OpenSSL failed to verify some certs with Subject Alternative Name
- o builds thread-safer on HPUX
 
 This release includes the following known bugs:
 
