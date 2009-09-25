@@ -1536,8 +1536,8 @@ ossl_connect_step1(struct connectdata *conn,
      * revocation */
     lookup=X509_STORE_add_lookup(connssl->ctx->cert_store,X509_LOOKUP_file());
     if ( !lookup ||
-         (X509_load_crl_file(lookup,data->set.str[STRING_SSL_CRLFILE],
-                             X509_FILETYPE_PEM)!=1) ) {
+         (!X509_load_crl_file(lookup,data->set.str[STRING_SSL_CRLFILE],
+                              X509_FILETYPE_PEM)) ) {
       failf(data,"error loading CRL file :\n"
             "  CRLfile: %s\n",
             data->set.str[STRING_SSL_CRLFILE]?
