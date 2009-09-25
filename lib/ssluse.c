@@ -2300,6 +2300,7 @@ ossl_connect_common(struct connectdata *conn,
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   curl_socket_t sockfd = conn->sock[sockindex];
   long timeout_ms;
+  int what;
 
   if(ssl_connect_1==connssl->connecting_state) {
     /* Find out how much more time we're allowed */
@@ -2337,32 +2338,27 @@ ossl_connect_common(struct connectdata *conn,
       curl_socket_t readfd = ssl_connect_2_reading==
         connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
 
-      while(1) {
-        int what = Curl_socket_ready(readfd, writefd,
-                                     nonblocking?0:(int)timeout_ms);
-        if(what > 0)
-          /* readable or writable, go loop in the outer loop */
-          break;
-        else if(0 == what) {
-          if(nonblocking) {
-            *done = FALSE;
-            return CURLE_OK;
-          }
-          else {
-            /* timeout */
-            failf(data, "SSL connection timeout");
-            return CURLE_OPERATION_TIMEDOUT;
-          }
+      what = Curl_socket_ready(readfd, writefd,
+                               nonblocking?0:(int)timeout_ms);
+      if(what < 0) {
+        /* fatal error */
+        failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
+        return CURLE_SSL_CONNECT_ERROR;
+      }
+      else if(0 == what) {
+        if(nonblocking) {
+          *done = FALSE;
+          return CURLE_OK;
         }
         else {
-          /* anything that gets here is fatally bad */
-          failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
-          return CURLE_SSL_CONNECT_ERROR;
+          /* timeout */
+          failf(data, "SSL connection timeout");
+          return CURLE_OPERATION_TIMEDOUT;
         }
-      } /* while()-loop for the select() */
+      }
+      /* socket is readable or writable */
     }
 
-    /* get the timeout from step2 to avoid computing it twice. */
     retcode = ossl_connect_step2(conn, sockindex);
     if(retcode)
       return retcode;
