@@ -36,7 +36,9 @@ SOURCE \
 
 USERINCLUDE   ../../../lib ../../../include/curl
 #ifdef ENABLE_SSL
-USERINCLUDE /epoc32/include/stdapis/openssl 
+USERINCLUDE /epoc32/include/osextensions/stdapis
+// Older versions of the SDK need this instead:
+//USERINCLUDE /epoc32/include/stdapis/openssl 
 #endif
 
 SYSTEMINCLUDE ../../../include /epoc32/include/stdapis /epoc32/include
