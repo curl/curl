@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Kamil Dudka (26 Sep 2009)
+- Implemented a protocol independent way to specify blocking direction, used by
+  transfer.c for blocking. It is currently used only by SCP and SFTP protocols.
+  This enhancement resolves an issue with 100% CPU usage during SFTP upload,
+  reported by Vourhey.
+
 Daniel Stenberg (25 Sep 2009)
 - Chris Mumford filed bug report #2861587
   (http://curl.haxx.se/bug/view.cgi?id=2861587) identifying that libcurl used

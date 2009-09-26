@@ -1652,10 +1652,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
   if((k->keepon & KEEP_RECVBITS) == KEEP_RECV) {
     fd_read = conn->sockfd;
-#if defined(USE_LIBSSH2)
-    if(conn->protocol & (PROT_SCP|PROT_SFTP))
-      select_res |= CURL_CSELECT_IN;
-#endif /* USE_LIBSSH2 */
   } else
     fd_read = CURL_SOCKET_BAD;
 
@@ -1884,33 +1880,39 @@ Transfer(struct connectdata *conn)
     return CURLE_OK;
 
   while(!done) {
-    curl_socket_t fd_read;
-    curl_socket_t fd_write;
+    curl_socket_t fd_read = conn->sockfd;
+    curl_socket_t fd_write = conn->writesockfd;
+    int keepon = k->keepon;
+
+    if(conn->waitfor) {
+      /* if waitfor is set, get the RECV and SEND bits from that but keep the
+         other bits */
+      keepon &= ~ (KEEP_RECV|KEEP_SEND);
+      keepon |= conn->waitfor & (KEEP_RECV|KEEP_SEND);
+    }
 
     /* limit-rate logic: if speed exceeds threshold, then do not include fd in
        select set. The current speed is recalculated in each Curl_readwrite()
        call */
-    if((k->keepon & KEEP_SEND) &&
+    if((keepon & KEEP_SEND) &&
         (!data->set.max_send_speed ||
          (data->progress.ulspeed < data->set.max_send_speed) )) {
-      fd_write = conn->writesockfd;
       k->keepon &= ~KEEP_SEND_HOLD;
     }
     else {
       fd_write = CURL_SOCKET_BAD;
-      if(k->keepon & KEEP_SEND)
+      if(keepon & KEEP_SEND)
         k->keepon |= KEEP_SEND_HOLD; /* hold it */
     }
 
-    if((k->keepon & KEEP_RECV) &&
+    if((keepon & KEEP_RECV) &&
         (!data->set.max_recv_speed ||
          (data->progress.dlspeed < data->set.max_recv_speed)) ) {
-      fd_read = conn->sockfd;
       k->keepon &= ~KEEP_RECV_HOLD;
     }
     else {
       fd_read = CURL_SOCKET_BAD;
-      if(k->keepon & KEEP_RECV)
+      if(keepon & KEEP_RECV)
         k->keepon |= KEEP_RECV_HOLD; /* hold it */
     }
 

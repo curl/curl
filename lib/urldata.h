@@ -568,7 +568,6 @@ struct ssh_conn {
   LIBSSH2_CHANNEL *ssh_channel; /* Secure Shell channel handle */
   LIBSSH2_SFTP *sftp_session;   /* SFTP handle */
   LIBSSH2_SFTP_HANDLE *sftp_handle;
-  int waitfor;                  /* current READ/WRITE bits to wait for */
   int orig_waitfor;             /* default READ/WRITE bits wait for */
 
   /* note that HAVE_LIBSSH2_KNOWNHOST_API is a define set in the libssh2.h
@@ -1075,6 +1074,8 @@ struct connectdata {
   } proto;
 
   int cselect_bits; /* bitmask of socket events */
+  int waitfor;      /* current READ/WRITE bits to wait for */
+
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   int socks5_gssapi_enctype;
 #endif
