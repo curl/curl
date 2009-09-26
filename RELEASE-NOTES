@@ -30,6 +30,8 @@ This release includes the following bugfixes:
  o cookie expiry date at 1970-jan-1 00:00:00
  o libcurl-OpenSSL failed to verify some certs with Subject Alternative Name
  o libcurl-OpenSSL can load CRL files with more than one certificate inside
+ o received cookies without explicit path got saved wrong if the URL had a
+   query part
 
 This release includes the following known bugs:
 
@@ -40,6 +42,6 @@ advice from friends like these:
 
  Karl Moerder, Kamil Dudka, Krister Johansen, Andre Guibert de Bruet,
  Michal Marek, Eric Wong, Guenter Knauf, Peter Sylvester, Daniel Johnson,
- Claes Jakobsson, Sven Anders, Chris Mumford
+ Claes Jakobsson, Sven Anders, Chris Mumford, John P. McCaskey
 
         Thanks! (and sorry if I forgot to mention someone)

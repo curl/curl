@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (26 Sep 2009)
+- John P. McCaskey posted a bug report that showed how libcurl did wrong when
+  saving received cookies with no given path, if the path in the request had a
+  query part. That is means a question mark (?) and characters on the right
+  side of that. I wrote test case 1105 and fixed this problem.
+
 Kamil Dudka (26 Sep 2009)
 - Implemented a protocol independent way to specify blocking direction, used by
   transfer.c for blocking. It is currently used only by SCP and SFTP protocols.
