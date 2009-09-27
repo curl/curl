@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel Stenberg (27 Sep 2009)
+- I introduced a maximum limit for received HTTP headers. It is controlled by
+  the define CURL_MAX_HTTP_HEADER which is even exposed in the public header
+  file to allow for users to fairly easy rebuild libcurl with a modified
+  limit. The rationale for a fixed limit is that libcurl is realloc()ing a
+  buffer to be able to put a full header into it, so that it can call the
+  header callback with the entire header, but that also risk getting it into
+  trouble if a server by mistake or willingly sends a header that is more or
+  less without an end. The limit is set to 100K.
+
 Daniel Stenberg (26 Sep 2009)
 - John P. McCaskey posted a bug report that showed how libcurl did wrong when
   saving received cookies with no given path, if the path in the request had a

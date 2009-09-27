@@ -178,6 +178,15 @@ typedef int (*curl_progress_callback)(void *clientp,
      time for those who feel adventurous. */
 #define CURL_MAX_WRITE_SIZE 16384
 #endif
+
+#ifndef CURL_MAX_HTTP_HEADER
+/* The only reason to have a max limit for this is to avoid the risk of a bad
+   server feeding libcurl with a never-ending header that will cause reallocs
+   infinitely */
+#define CURL_MAX_HTTP_HEADER (100*1024)
+#endif
+
+
 /* This is a magic return code for the write callback that, when returned,
    will signal libcurl to pause receiving on the current transfer. */
 #define CURL_WRITEFUNC_PAUSE 0x10000001

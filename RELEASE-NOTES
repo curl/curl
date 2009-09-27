@@ -11,6 +11,7 @@ This release includes the following changes:
 
  o -T. is now for non-blocking uploading from stdin
  o SYST handling on FTP for OS/400 FTP server cases
+ o libcurl refuses to read a single HTTP header longer than 100K
 
 This release includes the following bugfixes:
 
