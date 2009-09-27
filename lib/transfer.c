@@ -742,6 +742,41 @@ static CURLcode readwrite_data(struct SessionHandle *data,
 }
 
 #ifndef CURL_DISABLE_HTTP
+
+/*
+ * header_append() copies a chunk of data to the end of the already received
+ * header. We make sure that the full string fit in the allocated header
+ * buffer, or else we enlarge it.
+ */
+static CURLcode header_append(struct SessionHandle *data,
+                              struct SingleRequest *k,
+                              size_t length)
+{
+  if(k->hbuflen + length >= data->state.headersize) {
+    /* We enlarge the header buffer as it is too small */
+    char *newbuff;
+    size_t hbufp_index;
+    size_t newsize=CURLMAX((k->hbuflen+ length)*3/2,
+                           data->state.headersize*2);
+    hbufp_index = k->hbufp - data->state.headerbuff;
+    newbuff = realloc(data->state.headerbuff, newsize);
+    if(!newbuff) {
+      failf (data, "Failed to alloc memory for big header!");
+      return CURLE_OUT_OF_MEMORY;
+    }
+    data->state.headersize=newsize;
+    data->state.headerbuff = newbuff;
+    k->hbufp = data->state.headerbuff + hbufp_index;
+  }
+  memcpy(k->hbufp, k->str_start, length);
+  k->hbufp += length;
+  k->hbuflen += length;
+  *k->hbufp = 0;
+
+  return CURLE_OK;
+}
+
+
 /*
  * Read any HTTP header lines from the server and pass them to the client app.
  */
@@ -755,7 +790,6 @@ static CURLcode readwrite_http_headers(struct SessionHandle *data,
 
   /* header line within buffer loop */
   do {
-    size_t hbufp_index;
     size_t rest_length;
     size_t full_length;
     int writetype;
@@ -769,25 +803,10 @@ static CURLcode readwrite_http_headers(struct SessionHandle *data,
     if(!k->end_ptr) {
       /* Not a complete header line within buffer, append the data to
          the end of the headerbuff. */
+      result = header_append(data, k, *nread);
+      if(result)
+        return result;
 
-      if(k->hbuflen + *nread >= data->state.headersize) {
-        /* We enlarge the header buffer as it is too small */
-        char *newbuff;
-        size_t newsize=CURLMAX((k->hbuflen+*nread)*3/2,
-                               data->state.headersize*2);
-        hbufp_index = k->hbufp - data->state.headerbuff;
-        newbuff = realloc(data->state.headerbuff, newsize);
-        if(!newbuff) {
-          failf (data, "Failed to alloc memory for big header!");
-          return CURLE_OUT_OF_MEMORY;
-        }
-        data->state.headersize=newsize;
-        data->state.headerbuff = newbuff;
-        k->hbufp = data->state.headerbuff + hbufp_index;
-      }
-      memcpy(k->hbufp, k->str, *nread);
-      k->hbufp += *nread;
-      k->hbuflen += *nread;
       if(!k->headerline && (k->hbuflen>5)) {
         /* make a first check that this looks like a HTTP header */
         if(!checkhttpprefix(data, data->state.headerbuff)) {
@@ -809,35 +828,11 @@ static CURLcode readwrite_http_headers(struct SessionHandle *data,
 
     full_length = k->str - k->str_start;
 
-    /*
-     * We're about to copy a chunk of data to the end of the
-     * already received header. We make sure that the full string
-     * fit in the allocated header buffer, or else we enlarge
-     * it.
-     */
-    if(k->hbuflen + full_length >=
-       data->state.headersize) {
-      char *newbuff;
-      size_t newsize=CURLMAX((k->hbuflen+full_length)*3/2,
-                             data->state.headersize*2);
-      hbufp_index = k->hbufp - data->state.headerbuff;
-      newbuff = realloc(data->state.headerbuff, newsize);
-      if(!newbuff) {
-        failf (data, "Failed to alloc memory for big header!");
-        return CURLE_OUT_OF_MEMORY;
-      }
-      data->state.headersize= newsize;
-      data->state.headerbuff = newbuff;
-      k->hbufp = data->state.headerbuff + hbufp_index;
-    }
+    result = header_append(data, k, full_length);
+    if(result)
+      return result;
 
-    /* copy to end of line */
-    memcpy(k->hbufp, k->str_start, full_length);
-    k->hbufp += full_length;
-    k->hbuflen += full_length;
-    *k->hbufp = 0;
     k->end_ptr = k->hbufp;
-
     k->p = data->state.headerbuff;
 
     /****
