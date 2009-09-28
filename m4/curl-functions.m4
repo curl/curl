@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 51
+# serial 53
 
 
 dnl CURL_INCLUDES_ARPA_INET
@@ -3490,6 +3490,111 @@ AC_DEFUN([CURL_CHECK_FUNC_LOCALTIME_R], [
   else
     AC_MSG_RESULT([no])
     ac_cv_func_localtime_r="no"
+  fi
+])
+
+
+dnl CURL_CHECK_FUNC_MEMRCHR
+dnl -------------------------------------------------
+dnl Verify if memrchr is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_memrchr, then
+dnl HAVE_MEMRCHR will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_MEMRCHR], [
+  AC_REQUIRE([CURL_INCLUDES_STRING])dnl
+  #
+  tst_links_memrchr="unknown"
+  tst_macro_memrchr="unknown"
+  tst_proto_memrchr="unknown"
+  tst_compi_memrchr="unknown"
+  tst_allow_memrchr="unknown"
+  #
+  AC_MSG_CHECKING([if memrchr can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([memrchr])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_memrchr="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_memrchr="no"
+  ])
+  #
+  if test "$tst_links_memrchr" = "no"; then
+    AC_MSG_CHECKING([if memrchr seems a macro])
+    AC_LINK_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_string
+      ]],[[
+        if(0 != memrchr(0, 0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_macro_memrchr="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_macro_memrchr="no"
+    ])
+  fi
+  #
+  if test "$tst_links_memrchr" = "yes"; then
+    AC_MSG_CHECKING([if memrchr is prototyped])
+    AC_EGREP_CPP([memrchr],[
+      $curl_includes_string
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_memrchr="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_memrchr="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_memrchr" = "yes" ||
+     test "$tst_macro_memrchr" = "yes"; then
+    AC_MSG_CHECKING([if memrchr is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_string
+      ]],[[
+        if(0 != memrchr(0, 0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_memrchr="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_memrchr="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_memrchr" = "yes"; then
+    AC_MSG_CHECKING([if memrchr usage allowed])
+    if test "x$curl_disallow_memrchr" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_memrchr="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_memrchr="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if memrchr might be used])
+  if (test "$tst_proto_memrchr" = "yes" ||
+      test "$tst_macro_memrchr" = "yes") &&
+     test "$tst_compi_memrchr" = "yes" &&
+     test "$tst_allow_memrchr" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_MEMRCHR, 1,
+      [Define to 1 if you have the memrchr function or macro.])
+    ac_cv_func_memrchr="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_memrchr="no"
   fi
 ])
 
