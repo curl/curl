@@ -35,6 +35,7 @@ C_SRC += connect.c
 C_SRC += content_encoding.c
 C_SRC += cookie.c
 C_SRC += curl_addrinfo.c
+C_SRC += curl_memrchr.c
 C_SRC += curl_rand.c
 C_SRC += curl_sspi.c
 C_SRC += dict.c

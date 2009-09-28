@@ -97,6 +97,7 @@ Example set of cookies:
 #include "share.h"
 #include "strtoofft.h"
 #include "rawstr.h"
+#include "curl_memrchr.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -165,23 +166,6 @@ static void strstore(char **str, const char *newstr)
   if(*str)
     free(*str);
   *str = strdup(newstr);
-}
-
-
-/*
- * The memrchr() function is like the memchr() function, except that it
- * searches backwards from the end of the n bytes pointed to by s instead of
- * forwards from the front.
- *
- * Exists in glibc but is not widely available on other systems.
- */
-static void *memrchr(const char *s, int c, size_t n)
-{
-  while(n--) {
-    if(s[n] == c)
-      return &s[n];
-  }
-  return NULL;
 }
 
 

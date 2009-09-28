@@ -70,7 +70,7 @@ OBJS = $(OBJ_DIR)\base64.obj           $(OBJ_DIR)\connect.obj        &
        $(OBJ_DIR)\timeval.obj          $(OBJ_DIR)\transfer.obj       &
        $(OBJ_DIR)\url.obj              $(OBJ_DIR)\version.obj        &
        $(OBJ_DIR)\slist.obj            $(OBJ_DIR)\nonblock.obj       &
-       $(OBJ_DIR)\curl_rand.obj
+       $(OBJ_DIR)\curl_rand.obj        $(OBJ_DIR)\curl_memrchr.obj
 
 #
 # Use $(OBJS) as a template to generate $(OBJS_STAT) and $(OBJS_DYN).
@@ -194,7 +194,7 @@ $(OBJ_DIR)\cookie.obj: cookie.c setup.h config-win32.h ..\include\curl\curlbuild
   ..\include\curl\multi.h urldata.h cookie.h ..\include\curl\curl.h &
   formdata.h timeval.h http_chunks.h hostip.h hash.h llist.h &
   curl_addrinfo.h splay.h strequal.h strtok.h sendf.h curl_memory.h share.h &
-  strtoofft.h rawstr.h memdebug.h
+  strtoofft.h rawstr.h memdebug.h curl_memrchr.h
 $(OBJ_DIR)\http.obj: http.c setup.h config-win32.h ..\include\curl\curlbuild.h &
   ..\include\curl\curlrules.h setup_once.h urldata.h cookie.h &
   ..\include\curl\curl.h ..\include\curl\curlver.h &
@@ -547,4 +547,10 @@ $(OBJ_DIR)\curl_rand.obj: curl_rand.c setup.h config-win32.h &
   ..\include\curl\curl.h ..\include\curl\curlver.h &
   ..\include\curl\curlrules.h ..\include\curl\easy.h &
   ..\include\curl\multi.h ..\include\curl\curl.h curl_rand.h &
+  ..\include\curl\mprintf.h curl_memory.h memdebug.h
+$(OBJ_DIR)\curl_memrchr.obj: curl_memrchr.c setup.h config-win32.h &
+  ..\include\curl\curlbuild.h ..\include\curl\curlrules.h setup_once.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h &
+  ..\include\curl\curlrules.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h curl_memrchr.h &
   ..\include\curl\mprintf.h curl_memory.h memdebug.h
