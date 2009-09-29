@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -22,13 +22,65 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 3
+# serial 6
 
 dnl Note 1
 dnl ------
 dnl None of the CURL_CHECK_NEED_REENTRANT_* macros shall use HAVE_FOO_H to
 dnl conditionally include header files. These macros are used early in the
 dnl configure process much before header file availability is known.
+
+
+dnl CURL_CHECK_NEED_REENTRANT_ERRNO
+dnl -------------------------------------------------
+dnl Checks if the preprocessor _REENTRANT definition
+dnl makes errno available as a preprocessor macro.
+
+AC_DEFUN([CURL_CHECK_NEED_REENTRANT_ERRNO], [
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+#include <errno.h>
+    ]],[[
+      if(0 != errno)
+        return 1;
+    ]])
+  ],[
+    tmp_errno="yes"
+  ],[
+    tmp_errno="no"
+  ])
+  if test "$tmp_errno" = "yes"; then
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+#include <errno.h>
+      ]],[[
+#ifdef errno
+        int dummy=1;
+#else
+        force compilation error
+#endif
+      ]])
+    ],[
+      tmp_errno="errno_macro_defined"
+    ],[
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+#define _REENTRANT
+#include <errno.h>
+        ]],[[
+#ifdef errno
+          int dummy=1;
+#else
+          force compilation error
+#endif
+        ]])
+      ],[
+        tmp_errno="errno_macro_needs_reentrant"
+        tmp_need_reentrant="yes"
+      ])
+    ])
+  fi
+])
 
 
 dnl CURL_CHECK_NEED_REENTRANT_GMTIME_R
@@ -443,6 +495,9 @@ AC_DEFUN([CURL_CONFIGURE_REENTRANT], [
   if test "$tmp_reentrant_initially_defined" = "no"; then
     AC_MSG_CHECKING([if _REENTRANT is actually needed])
     CURL_CHECK_NEED_REENTRANT_SYSTEM
+    if test "$tmp_need_reentrant" = "no"; then
+      CURL_CHECK_NEED_REENTRANT_ERRNO
+    fi
     if test "$tmp_need_reentrant" = "no"; then
       CURL_CHECK_NEED_REENTRANT_FUNCTIONS_R
     fi
