@@ -502,7 +502,7 @@ static bool trynextip(struct connectdata *conn,
       /* store the new socket descriptor */
       conn->sock[sockindex] = sockfd;
       conn->ip_addr = ai;
-      break;
+      return FALSE;
     }
     ai = ai->ai_next;
   }

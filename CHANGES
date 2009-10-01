@@ -7,6 +7,13 @@
                                   Changelog
 
 Daniel Stenberg (1 Oct 2009)
+- Tom Mueller correctly reported in bug report #2870221
+  (http://curl.haxx.se/bug/view.cgi?id=2870221) that libcurl returned an
+  incorrect return code from the internal trynextip() function which caused
+  him grief. This is a regression that was introduced in 7.19.1 and I find it
+  strange it hasn't hit us harder, but I won't persue into figuring out
+  exactly why.
+ 
 - Constantine Sapuntzakis: The current implementation will always set
   SO_SNDBUF to CURL_WRITE_SIZE even if the SO_SNDBUF starts out larger.  The
   patch doesn't do a setsockopt if SO_SNDBUF is already greater than
