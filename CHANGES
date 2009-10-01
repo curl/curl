@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (1 Oct 2009)
+- Constantine Sapuntzakis: The current implementation will always set
+  SO_SNDBUF to CURL_WRITE_SIZE even if the SO_SNDBUF starts out larger.  The
+  patch doesn't do a setsockopt if SO_SNDBUF is already greater than
+  CURL_WRITE_SIZE. This should help folks who have set up their computer with
+  large send buffers.
+
 Daniel Stenberg (27 Sep 2009)
 - I introduced a maximum limit for received HTTP headers. It is controlled by
   the define CURL_MAX_HTTP_HEADER which is even exposed in the public header
