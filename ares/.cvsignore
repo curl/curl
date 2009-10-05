@@ -16,6 +16,8 @@ ares_version.h.dist
 autom4te.cache
 compile
 config.guess
+config.h
+config.h.in
 config.log
 config.lt
 config.status
