@@ -681,7 +681,8 @@ eCos
 Minix
 =====
    curl can be compiled on Minix 3 using gcc or ACK (starting with
-   ver. 3.1.3).
+   ver. 3.1.3).  Ensure that GNU gawk and bash are both installed and
+   available in the PATH.
    
    ACK
    ---
@@ -689,10 +690,10 @@ Minix
 
      binsizes xxl
 
-   Configure and compile with:
+   then configure and compile curl with:
 
-     ./configure CONFIG_SHELL=/bin/bigsh CC=cc LD=cc AR=/usr/bin/aal \
-                 GREP=grep CPPFLAGS='-D_POSIX_SOURCE=1 -I/usr/local/include'
+     ./configure CC=cc LD=cc AR=/usr/bin/aal GREP=grep \
+      CPPFLAGS='-D_POSIX_SOURCE=1 -I/usr/local/include'
      make
      chmem =256000 src/curl
 
@@ -704,7 +705,7 @@ Minix
    
    then configure and compile curl with:
 
-     ./configure CONFIG_SHELL=/bin/bigsh CC=gcc AR=/usr/gnu/bin/gar GREP=grep
+     ./configure CC=gcc AR=/usr/gnu/bin/gar GREP=grep
      make
      chmem =256000 src/curl
 
@@ -717,9 +718,9 @@ Symbian OS
       bldmake bldfiles
       abld build
 
-   to compile and install curl and libcurl. If your Symbian SDK doesn't
-   include support for P.I.P.S., you will need to contact your SDK vendor
-   to obtain that first.
+   to compile and install curl and libcurl using SBSv1. If your Symbian
+   SDK doesn't include support for P.I.P.S., you will need to contact
+   your SDK vendor to obtain that first.
 
 
 VxWorks
