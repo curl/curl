@@ -196,11 +196,15 @@
 #define RETSIGTYPE void
 
 /* Define ssize_t if it is not an available 'typedefed' type */
-#if (defined(__WATCOMC__) && (__WATCOMC__ >= 1240)) || defined(__POCC__)
+#ifndef _SSIZE_T_DEFINED
+#if (defined(__WATCOMC__) && (__WATCOMC__ >= 1240)) || defined(__POCC__) || \
+    defined(__MINGW32__)
 #elif defined(_WIN64)
 #define ssize_t __int64
 #else
 #define ssize_t int
+#endif
+#define _SSIZE_T_DEFINED
 #endif
 
 /* ---------------------------------------------------------------- */
