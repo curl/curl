@@ -278,6 +278,24 @@ static int is_file(const char *filename)
   return 0;
 }
 
+static char *fmt_nickname(char *str, bool *nickname_alloc)
+{
+    char *nickname = NULL;
+    *nickname_alloc = FALSE;
+
+    if(is_file(str)) {
+      char *n = strrchr(str, '/');
+      if(n) {
+        *nickname_alloc = TRUE;
+        n++; /* skip last slash */
+        nickname = aprintf("PEM Token #%d:%s", 1, n);
+      }
+      return nickname;
+    }
+
+    return str;
+}
+
 static int nss_load_cert(struct ssl_connect_data *ssl,
                          const char *filename, PRBool cacert)
 {
@@ -795,7 +813,7 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
       return SECFailure;
     }
 
-    infof(data, "NSS: Client client certificate: %s\n", nickname);
+    infof(data, "NSS: client certificate: %s\n", nickname);
     display_cert_info(data, *pRetCert);
     return SECSuccess;
   }
@@ -1164,24 +1182,10 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   }
 
   if(data->set.str[STRING_CERT]) {
-    char *n;
-    char *nickname;
     bool nickname_alloc = FALSE;
-
-    if(is_file(data->set.str[STRING_CERT])) {
-      n = strrchr(data->set.str[STRING_CERT], '/');
-      if(n) {
-        n++; /* skip last slash */
-        nickname = aprintf("PEM Token #%d:%s", 1, n);
-        if(!nickname)
-          return CURLE_OUT_OF_MEMORY;
-
-        nickname_alloc = TRUE;
-      }
-    }
-    else {
-      nickname = data->set.str[STRING_CERT];
-    }
+    char *nickname = fmt_nickname(data->set.str[STRING_CERT], &nickname_alloc);
+    if(!nickname)
+      return CURLE_OUT_OF_MEMORY;
 
     if(!cert_stuff(conn, sockindex, data->set.str[STRING_CERT],
                     data->set.str[STRING_KEY])) {
@@ -1240,23 +1244,13 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   display_conn_info(conn, connssl->handle);
 
   if (data->set.str[STRING_SSL_ISSUERCERT]) {
-    char *n;
-    char *nickname;
-    bool nickname_alloc = FALSE;
     SECStatus ret;
+    bool nickname_alloc = FALSE;
+    char *nickname = fmt_nickname(data->set.str[STRING_SSL_ISSUERCERT],
+                                  &nickname_alloc);
 
-    if(is_file(data->set.str[STRING_SSL_ISSUERCERT])) {
-      n = strrchr(data->set.str[STRING_SSL_ISSUERCERT], '/');
-      if (n) {
-        n++; /* skip last slash */
-        nickname = aprintf("PEM Token #%d:%s", 1, n);
-        if(!nickname)
-          return CURLE_OUT_OF_MEMORY;
-        nickname_alloc = TRUE;
-      }
-    }
-    else
-      nickname = data->set.str[STRING_SSL_ISSUERCERT];
+    if(!nickname)
+      return CURLE_OUT_OF_MEMORY;
 
     ret = check_issuer_cert(connssl->handle, nickname);
 
