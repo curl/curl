@@ -1,5 +1,11 @@
   Changelog for the c-ares project
 
+* October 7, 2009 (Yang Tse)
+- Overhauled ares__get_hostent() Fixing out of bounds memory overwrite
+  triggered with malformed /etc/hosts file. Improving parsing of /etc/hosts
+  file. Validating requested address family. Ensuring that failures always
+  return a NULL pointer. Adjusting header inclusions.
+
 * 4 Sep 2009 (Daniel Stenberg)
 - Jakub Hrozek added ares_parse_srv_reply() for SRV parsing
 
