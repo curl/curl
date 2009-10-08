@@ -423,7 +423,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
   while(return_value == CURL_FORMADD_OK) {
 
     /* first see if we have more parts of the array param */
-    if( array_state ) {
+    if( array_state && forms ) {
       /* get the upcoming option from the given array */
       option = forms->option;
       array_value = (char *)forms->value;

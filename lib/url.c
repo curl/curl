@@ -3681,7 +3681,7 @@ static CURLcode parse_proxy(struct SessionHandle *data,
   char *endofprot;
 
   /* We use 'proxyptr' to point to the proxy name from now on... */
-  char *proxyptr=proxy;
+  char *proxyptr;
   char *portptr;
   char *atsign;
 
@@ -3691,9 +3691,11 @@ static CURLcode parse_proxy(struct SessionHandle *data,
    */
 
   /* Skip the protocol part if present */
-  endofprot=strstr(proxyptr, "://");
+  endofprot = strstr(proxy, "://");
   if(endofprot)
     proxyptr = endofprot+3;
+  else
+    proxyptr = proxy;
 
   /* Is there a username and password given in this proxy url? */
   atsign = strchr(proxyptr, '@');
