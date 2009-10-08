@@ -238,7 +238,8 @@ static int single_domain(ares_channel channel, const char *name, char **s)
   const char *hostaliases;
   FILE *fp;
   char *line = NULL;
-  int linesize, status;
+  int status;
+  size_t linesize;
   const char *p, *q;
   int error;
 

@@ -38,10 +38,10 @@ int ares__get_hostent(FILE *fp, int family, struct hostent **host)
 {
   char *line = NULL, *p, *q, **alias;
   char *txtaddr, *txthost, *txtalias;
-  int status, linesize, addrfam, naliases;
+  int status, addrfam;
+  size_t addrlen, linesize, naliases;
   struct in_addr addr;
   struct in6_addr addr6;
-  size_t addrlen;
   struct hostent *hostent = NULL;
 
   *host = NULL; /* Assume failure */
@@ -194,12 +194,13 @@ int ares__get_hostent(FILE *fp, int family, struct hostent **host)
         memcpy(hostent->h_addr_list[0], &addr6, sizeof(struct in6_addr));
 
       /* Copy aliases. */
-      hostent->h_aliases = malloc((((size_t)naliases) + 1) * sizeof(char *));
+      hostent->h_aliases = malloc((naliases + 1) * sizeof(char *));
       if (!hostent->h_aliases)
         break;
       alias = hostent->h_aliases;
-      while (naliases >= 0)
+      while (naliases)
         *(alias + naliases--) = NULL;
+      *alias = NULL;
       while (txtalias)
         {
           p = txtalias;

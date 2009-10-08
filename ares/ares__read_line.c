@@ -30,7 +30,7 @@
  * appropriate.  The initial value of *buf should be NULL.  After the
  * calling routine is done reading lines, it should free *buf.
  */
-int ares__read_line(FILE *fp, char **buf, int *bufsize)
+int ares__read_line(FILE *fp, char **buf, size_t *bufsize)
 {
   char *newbuf;
   size_t offset = 0;
@@ -46,7 +46,7 @@ int ares__read_line(FILE *fp, char **buf, int *bufsize)
 
   while (1)
     {
-      if (!fgets(*buf + offset, *bufsize - (int)offset, fp))
+      if (!fgets(*buf + offset, *bufsize - offset, fp))
         return (offset != 0) ? 0 : (ferror(fp)) ? ARES_EFILE : ARES_EOF;
       len = offset + strlen(*buf + offset);
       if ((*buf)[len - 1] == '\n')

@@ -312,7 +312,7 @@ void ares__send_query(ares_channel channel, struct query *query,
                       struct timeval *now);
 void ares__close_sockets(ares_channel channel, struct server_state *server);
 int ares__get_hostent(FILE *fp, int family, struct hostent **host);
-int ares__read_line(FILE *fp, char **buf, int *bufsize);
+int ares__read_line(FILE *fp, char **buf, size_t *bufsize);
 void ares__free_query(struct query *query);
 unsigned short ares__generate_new_id(rc4_key* key);
 struct timeval ares__tvnow(void);
