@@ -189,9 +189,9 @@ int ares__get_hostent(FILE *fp, int family, struct hostent **host)
       if (!hostent->h_addr_list[0])
         break;
       if (addrfam == AF_INET)
-        memcpy(hostent->h_addr_list[0], &addr, addrlen);
+        memcpy(hostent->h_addr_list[0], &addr, sizeof(struct in_addr));
       else
-        memcpy(hostent->h_addr_list[0], &addr6, addrlen);
+        memcpy(hostent->h_addr_list[0], &addr6, sizeof(struct in6_addr));
 
       /* Copy aliases. */
       hostent->h_aliases = malloc((((size_t)naliases) + 1) * sizeof(char *));
