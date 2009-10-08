@@ -125,7 +125,7 @@ static char *unescape_word(struct SessionHandle *data, const char *inputbuff)
   if(!newp)
     return NULL;
 
-  dictp = malloc(len*2 + 1); /* add one for terminating zero */
+  dictp = malloc(((size_t)len)*2 + 1); /* add one for terminating zero */
   if(dictp) {
     /* According to RFC2229 section 2.2, these letters need to be escaped with
        \[letter] */

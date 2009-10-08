@@ -194,7 +194,7 @@ int ares__get_hostent(FILE *fp, int family, struct hostent **host)
         memcpy(hostent->h_addr_list[0], &addr6, addrlen);
 
       /* Copy aliases. */
-      hostent->h_aliases = malloc((naliases + 1) * sizeof(char *));
+      hostent->h_aliases = malloc((((size_t)naliases) + 1) * sizeof(char *));
       if (!hostent->h_aliases)
         break;
       alias = hostent->h_aliases;
