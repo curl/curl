@@ -81,7 +81,7 @@ inet_net_pton_ipv4(const char *src, unsigned char *dst, size_t size)
   if (ch == '0' && (src[0] == 'x' || src[0] == 'X')
       && ISXDIGIT(src[1])) {
     /* Hexadecimal: Eat nybble string. */
-    if (size <= 0U)
+    if (!size)
       goto emsgsize;
     dirty = 0;
     src++;  /* skip x or X. */
@@ -94,14 +94,14 @@ inet_net_pton_ipv4(const char *src, unsigned char *dst, size_t size)
       else
         tmp = (tmp << 4) | n;
       if (++dirty == 2) {
-        if (size-- <= 0U)
+        if (!size--)
           goto emsgsize;
         *dst++ = (unsigned char) tmp;
         dirty = 0;
       }
     }
     if (dirty) {  /* Odd trailing nybble? */
-      if (size-- <= 0U)
+      if (!size--)
         goto emsgsize;
       *dst++ = (unsigned char) (tmp << 4);
     }
@@ -117,7 +117,7 @@ inet_net_pton_ipv4(const char *src, unsigned char *dst, size_t size)
           goto enoent;
       } while ((ch = *src++) != '\0' &&
                ISDIGIT(ch));
-      if (size-- <= 0U)
+      if (!size--)
         goto emsgsize;
       *dst++ = (unsigned char) tmp;
       if (ch == '\0' || ch == '/')
@@ -179,7 +179,7 @@ inet_net_pton_ipv4(const char *src, unsigned char *dst, size_t size)
   }
   /* Extend network to cover the actual mask. */
   while (bits > ((dst - odst) * 8)) {
-    if (size-- <= 0U)
+    if (!size--)
       goto emsgsize;
     *dst++ = '\0';
   }
@@ -426,7 +426,8 @@ ares_inet_net_pton(int af, const char *src, void *dst, size_t size)
 #ifndef HAVE_INET_PTON
 int ares_inet_pton(int af, const char *src, void *dst)
 {
-  int size, result;
+  int result;
+  size_t size;
 
   if (af == AF_INET)
     size = sizeof(struct in_addr);
