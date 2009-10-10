@@ -837,6 +837,7 @@ int main(int argc, char *argv[])
   curl_socket_t msgsock = CURL_SOCKET_BAD;
   int wrotepidfile = 0;
   char *pidname= (char *)".sockfilt.pid";
+  bool juggle_again;
   int rc;
   int error;
   int arg=1;
@@ -1001,7 +1002,9 @@ int main(int argc, char *argv[])
   if(!wrotepidfile)
     goto sockfilt_cleanup;
 
-  while(juggle(&msgsock, sock, &mode));
+  do {
+    juggle_again = juggle(&msgsock, sock, &mode);
+  } while(juggle_again);
 
 sockfilt_cleanup:
 
