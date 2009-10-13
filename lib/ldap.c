@@ -560,7 +560,7 @@ static bool unescape_elements (void *data, LDAPURLDesc *ludp)
  *   ldap://<hostname>:<port>/?<attributes>?<scope>?<filter>
  * yields ludp->lud_dn = "".
  *
- * Ref. http://developer.netscape.com/docs/manuals/dirsdk/csdk30/url.htm#2831915
+ * Defined in RFC4516 section 2.
  */
 static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
 {
