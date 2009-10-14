@@ -2360,18 +2360,16 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
                  encoded string */
               size_t outlen = nlen + strlen(enc) + 2;
               char *n = malloc(outlen);
-              if(!n)
+              if(!n) {
+                curl_free(enc);
                 return PARAM_NO_MEM;
+              }
               if (nlen > 0) /* only append '=' if we have a name */
                 snprintf(n, outlen, "%.*s=%s", nlen, nextarg, enc);
               else
                 strcpy(n, enc);
               curl_free(enc);
-              if(n) {
-                postdata = n;
-              }
-              else
-                return PARAM_NO_MEM;
+              postdata = n;
             }
             else
               return PARAM_NO_MEM;
