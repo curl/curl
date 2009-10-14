@@ -1176,8 +1176,8 @@ static CURLcode verifyhost(struct connectdata *conn,
          conditional in the future when OpenSSL has been fixed. Work-around
          brought by Alexis S. L. Carvalho. */
       if(tmp) {
-        j = ASN1_STRING_length(tmp);
         if(ASN1_STRING_type(tmp) == V_ASN1_UTF8STRING) {
+          j = ASN1_STRING_length(tmp);
           if(j >= 0) {
             peer_CN = OPENSSL_malloc(j+1);
             if(peer_CN) {
