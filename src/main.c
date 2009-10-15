@@ -4388,9 +4388,9 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           if(config->create_dirs &&
              (-1 == create_dir_hierarchy(outfile, config->errors))) {
             free(url);
-	    res = CURLE_WRITE_ERROR;
-	    break;
-	  }
+            res = CURLE_WRITE_ERROR;
+            break;
+          }
 
           if(config->resume_from_current) {
             /* We're told to continue from where we are now. Get the
@@ -4416,8 +4416,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             if (!outs.stream) {
               helpf(config->errors, "Can't open '%s'!\n", outfile);
               free(url);
-	      res = CURLE_WRITE_ERROR;
-	      break;
+              res = CURLE_WRITE_ERROR;
+              break;
             }
           }
           else {
@@ -4463,8 +4463,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
               if(!urlbuffer) {
                 helpf(config->errors, "out of memory\n");
                 free(url);
-	        res = CURLE_OUT_OF_MEMORY;
-	        break;
+                res = CURLE_OUT_OF_MEMORY;
+                break;
               }
               if(ptr)
                 /* there is a trailing slash on the URL */
@@ -4583,8 +4583,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
               inglob = NULL;
             }
 
-	    res = CURLE_OUT_OF_MEMORY;
-	    goto quit_urls;
+            res = CURLE_OUT_OF_MEMORY;
+            goto quit_urls;
           }
           if (pc)
             sprintf(urlbuffer, "%s%c%s", url, sep, httpgetfields);
@@ -4749,8 +4749,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
               inglob = NULL;
             }
 
-	    res = CURLE_OUT_OF_MEMORY;
-	    goto quit_urls;
+            res = CURLE_OUT_OF_MEMORY;
+            goto quit_urls;
           }
         }
 
