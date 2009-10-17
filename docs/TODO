@@ -56,13 +56,13 @@
  7.7 Support other SSL libraries
  7.8  Support SRP on the TLS layer
  7.9 improve configure --with-ssl
+ 7.10 Make NTLM work with other crypto functions
 
  8. GnuTLS
- 8.1 Make NTLM work without OpenSSL functions
- 8.2 SSL engine stuff
- 8.3 SRP
- 8.4 non-blocking
- 8.5 check connection
+ 8.1 SSL engine stuff
+ 8.2 SRP
+ 8.3 non-blocking
+ 8.4 check connection
 
  9. Other protocols
  9.1 ditch ldap-specific select
@@ -339,29 +339,30 @@ to provide the data to send.
  make the configure --with-ssl option first check for OpenSSL, then GnuTLS,
  then NSS...
 
+7.10 Make NTLM work with other crypto functions
+
+ Get NTLM working using the functions provided by NSS etc. Not strictly
+ SSL/TLS related, but hey... Another option is to get available DES and MD4
+ source code from the cryptopp library. They are fine license-wise, but are
+ C++. NTLM currenly only works when libcurl is built with OpenSSL or GnuTLS
+ support.
+
 8. GnuTLS
 
-8.1 Make NTLM work without OpenSSL functions
-
- Get NTLM working using the functions provided by NSS.  Not strictly
- SSL/TLS related, but hey... Another option is to get available DES and
- MD4 source code from the cryptopp library. They are fine license-wise,
- but are C++.
-
-8.2 SSL engine stuff
+8.1 SSL engine stuff
 
  Is this even possible?
 
-8.3 SRP
+8.2 SRP
 
  Work out a common method with Peter Sylvester's OpenSSL-patch for SRP on the
  TLS to provide name and password. GnuTLS already supports it...
 
-8.4 non-blocking
+8.3 non-blocking
 
  Fix the connection phase to be non-blocking when multi interface is used
 
-8.5 check connection
+8.4 check connection
 
  Add a way to check if the connection seems to be alive, to correspond to the
  SSL_peak() way we use with OpenSSL.
