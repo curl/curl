@@ -158,12 +158,30 @@ static int vms_show = 0;
 #define O_BINARY 0
 #endif
 
-#ifdef MSDOS
-#define USE_WATT32
-#include <dos.h>
+#if defined(MSDOS) || defined(WIN32)
 
 static const char *msdosify(const char *);
 static char *rename_if_dos_device_name(char *);
+
+#ifndef S_ISCHR
+#  ifdef S_IFCHR
+#    define S_ISCHR(m) (((m) & S_IFMT) == S_IFCHR)
+#  else
+#    define S_ISCHR(m) (0) /* cannot tell if file is a device */
+#  endif
+#endif
+
+#ifdef WIN32
+#  define _use_lfn(f) (1)  /* long file names always available */
+#elif !defined(__DJGPP__) || (__DJGPP__ < 2)  /* DJGPP 2.0 has _use_lfn() */
+#  define _use_lfn(f) (0)  /* long file names never available */
+#endif
+
+#endif /* MSDOS || WIN32 */
+
+#ifdef MSDOS
+#define USE_WATT32
+#include <dos.h>
 
 #ifdef DJGPP
 /* we want to glob our own argv[] */
@@ -199,12 +217,6 @@ typedef enum {
   HTTPREQ_CUSTOM,
   HTTPREQ_LAST
 } HttpReq;
-
-#ifdef WIN32
-#include <direct.h>
-#define F_OK 0
-#define mkdir(x,y) (mkdir)(x)
-#endif
 
 /*
  * Large file support (>2Gb) using WIN32 functions.
@@ -242,6 +254,14 @@ typedef enum {
 
 #ifndef LSEEK_ERROR
 #  define LSEEK_ERROR (off_t)-1
+#endif
+
+#ifdef WIN32
+#  include <direct.h>
+#  define F_OK 0
+#  define mkdir(x,y) (mkdir)(x)
+#  undef  PATH_MAX
+#  define PATH_MAX MAX_PATH
 #endif
 
 /*
@@ -4350,9 +4370,9 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
               free(url);
               break;
             }
-#if defined(MSDOS)
+#if defined(MSDOS) || defined(WIN32)
             {
-              /* This is for DOS, and then we do some major replacing of
+              /* For DOS and WIN32, we do some major replacing of
                  bad characters in the file name before using it */
               char file1[PATH_MAX];
               if(strlen(outfile) >= PATH_MAX)
@@ -4366,7 +4386,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
                 break;
               }
             }
-#endif /* MSDOS */
+#endif /* MSDOS || WIN32 */
           }
           else if(urls) {
             /* fill '#1' ... '#9' terms from URL pattern */
@@ -5411,7 +5431,7 @@ static int create_dir_hierarchy(const char *outfile, FILE *errors)
   return result; /* 0 is fine, -1 is badness */
 }
 
-#ifdef MSDOS
+#if defined(MSDOS) || defined(WIN32)
 
 #ifndef HAVE_BASENAME
 /* basename() returns a pointer to the last component of a pathname.
@@ -5455,14 +5475,9 @@ msdosify (const char *file_name)
   const char * const dlimit = dos_name + sizeof(dos_name) - 1;
   const char *illegal_aliens = illegal_chars_dos;
   size_t len = sizeof (illegal_chars_dos) - 1;
-  int lfn = 0;
 
-#ifdef DJGPP
-  /* Support for Windows 9X VFAT systems, when available (djgpp only). */
-  if (_use_lfn (file_name))
-    lfn = 1;
-#endif
-  if (lfn) {
+  /* Support for Windows 9X VFAT systems, when available. */
+  if (_use_lfn (file_name)) {
     illegal_aliens = illegal_chars_w95;
     len -= (illegal_chars_w95 - illegal_chars_dos);
   }
@@ -5541,7 +5556,7 @@ rename_if_dos_device_name (char *file_name)
    * retrieve such a file would fail at best and wedge us at worst.  We need
    * to rename such files. */
   char *base;
-  struct stat st_buf;
+  struct_stat st_buf;
   char fname[PATH_MAX];
 
   strncpy(fname, file_name, PATH_MAX-1);
@@ -5562,4 +5577,4 @@ rename_if_dos_device_name (char *file_name)
   }
   return file_name;
 }
-#endif /* MSDOS */
+#endif /* MSDOS || WIN32 */

@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Yang Tse (17 Oct 2009)
+- Bug report #2866724 indicated
+  (http://curl.haxx.se/bug/view.cgi?id=2866724) that curl on Windows failed
+  when writing files whose file names originally contained characters which
+  are not valid for file names on Windows. Dan Fandrich provided an initial
+  patch and another revised one to fix this issue.
+
 Daniel Stenberg (1 Oct 2009)
 - Tom Mueller correctly reported in bug report #2870221
   (http://curl.haxx.se/bug/view.cgi?id=2870221) that libcurl returned an
