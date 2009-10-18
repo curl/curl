@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (18 Oct 2009)
+- Kevin Baughman found a double close() problem with libcurl-NSS, as when
+  libcurl called NSS to close the SSL "session" it also closed the actual
+  socket.
+
 Yang Tse (17 Oct 2009)
 - Bug report #2866724 indicated
   (http://curl.haxx.se/bug/view.cgi?id=2866724) that curl on Windows failed

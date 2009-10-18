@@ -927,11 +927,15 @@ void Curl_nss_close(struct connectdata *conn, int sockindex)
 
   if(connssl->handle) {
     PR_Close(connssl->handle);
+
+    /* NSS closes the socket we previously handed to it, so we must mark it
+       as closed to avoid double close */
+    conn->sock[sockindex] = CURL_SOCKET_BAD;
     if(connssl->client_nickname != NULL) {
       free(connssl->client_nickname);
       connssl->client_nickname = NULL;
     }
-#ifdef HAVE_PK11_CREATEGENERICOBJECT      
+#ifdef HAVE_PK11_CREATEGENERICOBJECT
     if(connssl->key)
       (void)PK11_DestroyGenericObject(connssl->key);
     if(connssl->cacert[1])
@@ -973,7 +977,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 
   connssl->data = data;
 
-#ifdef HAVE_PK11_CREATEGENERICOBJECT  
+#ifdef HAVE_PK11_CREATEGENERICOBJECT
   connssl->cacert[0] = NULL;
   connssl->cacert[1] = NULL;
   connssl->key = NULL;
