@@ -38,6 +38,7 @@ This release includes the following bugfixes:
  o invalid file name characters handling on Windows
  o double close() on the primary socket with libcurl-NSS
  o GSS negotiate infinite loop on bad credentials
+ o memory leak in SCP/SFTP connections
 
 This release includes the following known bugs:
 

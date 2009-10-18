@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel Stenberg (18 Oct 2009)
+- Fixed memory leak in the SCP/SFTP code as it never freed the knownhosts
+  data!
+
 - John Dennis filed bug report #2873666
   (http://curl.haxx.se/bug/view.cgi?id=2873666) which identified a problem
   which made libcurl loop infinitely when given incorrect credentials when

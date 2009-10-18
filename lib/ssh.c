@@ -2204,6 +2204,13 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
     break;
 
   case SSH_SESSION_FREE:
+#ifdef HAVE_LIBSSH2_KNOWNHOST_API
+    if(sshc->kh) {
+      libssh2_knownhost_free(sshc->kh);
+      sshc->kh = NULL;
+    }
+#endif
+
     if(sshc->ssh_session) {
       rc = libssh2_session_free(sshc->ssh_session);
       if(rc == LIBSSH2_ERROR_EAGAIN) {
@@ -2565,11 +2572,12 @@ static CURLcode ssh_do(struct connectdata *conn, bool *done)
 static CURLcode scp_disconnect(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
+  struct ssh_conn *ssh = &conn->proto.sshc;
 
   Curl_safefree(conn->data->state.proto.ssh);
   conn->data->state.proto.ssh = NULL;
 
-  if(conn->proto.sshc.ssh_session) {
+  if(ssh->ssh_session) {
     /* only if there's a session still around to use! */
 
     state(conn, SSH_SESSION_DISCONNECT);
