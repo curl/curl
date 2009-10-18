@@ -135,9 +135,9 @@ Content-Disposition: form-data; name="FILECONTENT"
 
 #ifndef CURL_DISABLE_HTTP
 
-#if defined(HAVE_BASENAME) && defined(NEED_BASENAME_PROTO)
-/* This system has a basename() but no prototype for it! */
-char *basename(char *path);
+#ifndef HAVE_BASENAME
+static char *Curl_basename(char *path);
+#define basename(x)  Curl_basename((x))
 #endif
 
 static size_t readfromfile(struct Form *form, char *buffer, size_t size);
@@ -1067,7 +1067,7 @@ void curl_formfree(struct curl_httppost *form)
   required to be reentrant is not required to be thread-safe.
 
 */
-static char *basename(char *path)
+static char *Curl_basename(char *path)
 {
   /* Ignore all the details above for now and make a quick and simple
      implementaion here */

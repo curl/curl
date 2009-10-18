@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 53
+# serial 54
 
 
 dnl CURL_INCLUDES_ARPA_INET
@@ -124,6 +124,27 @@ curl_includes_inttypes="\
   AC_CHECK_HEADERS(
     sys/types.h stdint.h inttypes.h,
     [], [], [$curl_includes_inttypes])
+])
+
+
+dnl CURL_INCLUDES_LIBGEN
+dnl -------------------------------------------------
+dnl Set up variable with list of headers that must be
+dnl included when libgen.h is to be included.
+
+AC_DEFUN([CURL_INCLUDES_LIBGEN], [
+curl_includes_libgen="\
+/* includes start */
+#ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+#endif
+#ifdef HAVE_LIBGEN_H
+#  include <libgen.h>
+#endif
+/* includes end */"
+  AC_CHECK_HEADERS(
+    sys/types.h libgen.h,
+    [], [], [$curl_includes_libgen])
 ])
 
 
@@ -594,6 +615,97 @@ AC_DEFUN([CURL_CHECK_FUNC_ALARM], [
   else
     AC_MSG_RESULT([no])
     ac_cv_func_alarm="no"
+  fi
+])
+
+
+dnl CURL_CHECK_FUNC_BASENAME
+dnl -------------------------------------------------
+dnl Verify if basename is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_basename, then
+dnl HAVE_BASENAME will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_BASENAME], [
+  AC_REQUIRE([CURL_INCLUDES_STRING])dnl
+  AC_REQUIRE([CURL_INCLUDES_LIBGEN])dnl
+  AC_REQUIRE([CURL_INCLUDES_UNISTD])dnl
+  #
+  tst_links_basename="unknown"
+  tst_proto_basename="unknown"
+  tst_compi_basename="unknown"
+  tst_allow_basename="unknown"
+  #
+  AC_MSG_CHECKING([if basename can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([basename])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_basename="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_basename="no"
+  ])
+  #
+  if test "$tst_links_basename" = "yes"; then
+    AC_MSG_CHECKING([if basename is prototyped])
+    AC_EGREP_CPP([basename],[
+      $curl_includes_string
+      $curl_includes_libgen
+      $curl_includes_unistd
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_basename="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_basename="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_basename" = "yes"; then
+    AC_MSG_CHECKING([if basename is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_string
+        $curl_includes_libgen
+        $curl_includes_unistd
+      ]],[[
+        if(0 != basename(0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_basename="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_basename="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_basename" = "yes"; then
+    AC_MSG_CHECKING([if basename usage allowed])
+    if test "x$curl_disallow_basename" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_basename="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_basename="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if basename might be used])
+  if test "$tst_links_basename" = "yes" &&
+     test "$tst_proto_basename" = "yes" &&
+     test "$tst_compi_basename" = "yes" &&
+     test "$tst_allow_basename" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_BASENAME, 1,
+      [Define to 1 if you have the basename function.])
+    ac_cv_func_basename="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_basename="no"
   fi
 ])
 

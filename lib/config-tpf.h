@@ -559,9 +559,6 @@
 /* if you have the zlib.h header file */
 /* #undef HAVE_ZLIB_H */
 
-/* If you lack a fine basename() prototype */
-/* #undef NEED_BASENAME_PROTO */
-
 /* need REENTRANT defined */
 /* #undef NEED_REENTRANT */
 

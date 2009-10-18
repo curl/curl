@@ -634,9 +634,6 @@
 /* Define to 1 if you are building a native Windows target. */
 /* #undef NATIVE_WINDOWS */
 
-/* If you lack a fine basename() prototype */
-/* #undef NEED_BASENAME_PROTO */
-
 /* Define to 1 if you need the lber.h header file even with ldap.h */
 /* #undef NEED_LBER_H */
 

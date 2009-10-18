@@ -31,6 +31,12 @@
 #include <ctype.h>
 #include <errno.h>
 
+#if defined(MSDOS) || defined(WIN32)
+#  if defined(HAVE_LIBGEN_H) && defined(HAVE_BASENAME)
+#    include <libgen.h>
+#  endif
+#endif
+
 #include <curl/curl.h>
 
 #include "urlglob.h"
@@ -5437,7 +5443,7 @@ static int create_dir_hierarchy(const char *outfile, FILE *errors)
 /* basename() returns a pointer to the last component of a pathname.
  * Ripped from lib/formdata.c.
  */
-static char *basename(char *path)
+static char *Curl_basename(char *path)
 {
   /* Ignore all the details above for now and make a quick and simple
      implementaion here */
@@ -5457,6 +5463,7 @@ static char *basename(char *path)
 
   return path;
 }
+#define basename(x) Curl_basename((x))
 #endif /* HAVE_BASENAME */
 
 /* The following functions are taken with modification from the DJGPP

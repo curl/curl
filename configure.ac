@@ -2034,6 +2034,7 @@ CURL_CHECK_FUNC_SEND
 CURL_CHECK_MSG_NOSIGNAL
 
 CURL_CHECK_FUNC_ALARM
+CURL_CHECK_FUNC_BASENAME
 CURL_CHECK_FUNC_CLOSESOCKET
 CURL_CHECK_FUNC_CLOSESOCKET_CAMEL
 CURL_CHECK_FUNC_CONNECT
@@ -2093,8 +2094,7 @@ case $host in
     ;;
 esac
 
-AC_CHECK_FUNCS([basename \
-  fork \
+AC_CHECK_FUNCS([fork \
   geteuid \
   getpass_r \
   getppid \
@@ -2131,21 +2131,6 @@ AC_CHECK_FUNCS([basename \
     ])
   fi
 ])
-
-
-AC_CHECK_DECL(basename, ,
-              AC_DEFINE(NEED_BASENAME_PROTO, 1, [If you lack a fine basename() prototype]),
-#ifdef HAVE_STRING_H
-#include <string.h>
-#endif
-#ifdef HAVE_LIBGEN_H
-#include <libgen.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-)
-
 
 dnl Check if the getnameinfo function is available
 dnl and get the types of five of its arguments.
