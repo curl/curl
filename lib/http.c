@@ -750,6 +750,9 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
         /* we received GSS auth info and we dealt with it fine */
         data->state.negotiate.state = GSS_AUTHRECV;
       }
+      else {
+        data->state.authproblem = TRUE;
+      }
     }
   }
   else

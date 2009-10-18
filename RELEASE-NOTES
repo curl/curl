@@ -37,6 +37,7 @@ This release includes the following bugfixes:
  o connect next bug
  o invalid file name characters handling on Windows
  o double close() on the primary socket with libcurl-NSS
+ o GSS negotiate infinite loop on bad credentials
 
 This release includes the following known bugs:
 
@@ -49,6 +50,6 @@ advice from friends like these:
  Michal Marek, Eric Wong, Guenter Knauf, Peter Sylvester, Daniel Johnson,
  Claes Jakobsson, Sven Anders, Chris Mumford, John P. McCaskey,
  Constantine Sapuntzakis, Michael Stillwell, Tom Mueller, Dan Fandrich,
- Kevin Baughman
+ Kevin Baughman, John Dennis
 
         Thanks! (and sorry if I forgot to mention someone)
