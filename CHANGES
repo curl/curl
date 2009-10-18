@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel Stenberg (18 Oct 2009)
+- Ray Dassen provided a patch in Debian's bug tracker (bug number #551461)
+  that now makes curl_getdate(3) actually handles RFC 822 formatted dates that
+  use the "single letter military timezones".
+  http://www.rfc-ref.org/RFC-TEXTS/822/chapter5.html has the details.
+
 - Fixed memory leak in the SCP/SFTP code as it never freed the knownhosts
   data!
 
