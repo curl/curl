@@ -38,10 +38,9 @@ int ares__get_hostent(FILE *fp, int family, struct hostent **host)
 {
   char *line = NULL, *p, *q, **alias;
   char *txtaddr, *txthost, *txtalias;
-  int status, addrfam;
+  int status;
   size_t addrlen, linesize, naliases;
-  struct in_addr addr;
-  struct in6_addr addr6;
+  struct ares_addr addr;
   struct hostent *hostent = NULL;
 
   *host = NULL; /* Assume failure */
@@ -138,23 +137,24 @@ int ares__get_hostent(FILE *fp, int family, struct hostent **host)
 
       /* Convert address string to network address for the requested family. */
       addrlen = 0;
-      addrfam = AF_UNSPEC;
+      addr.family = AF_UNSPEC;
+      addr.addrV4.s_addr = INADDR_NONE;
       if ((family == AF_INET) || (family == AF_UNSPEC))
         {
-          addr.s_addr = inet_addr(txtaddr);
-          if (addr.s_addr != INADDR_NONE)
+          addr.addrV4.s_addr = inet_addr(txtaddr);
+          if (addr.addrV4.s_addr != INADDR_NONE)
             {
               /* Actual network address family and length. */
-              addrfam = AF_INET;
+              addr.family = AF_INET;
               addrlen = sizeof(struct in_addr);
             }
         }
       if ((family == AF_INET6) || ((family == AF_UNSPEC) && (!addrlen)))
         {
-          if (ares_inet_pton(AF_INET6, txtaddr, &addr6) > 0)
+          if (ares_inet_pton(AF_INET6, txtaddr, &addr.addrV6) > 0)
             {
               /* Actual network address family and length. */
-              addrfam = AF_INET6;
+              addr.family = AF_INET6;
               addrlen = sizeof(struct in6_addr);
             }
         }
@@ -188,10 +188,10 @@ int ares__get_hostent(FILE *fp, int family, struct hostent **host)
       hostent->h_addr_list[0] = malloc(addrlen);
       if (!hostent->h_addr_list[0])
         break;
-      if (addrfam == AF_INET)
-        memcpy(hostent->h_addr_list[0], &addr, sizeof(struct in_addr));
+      if (addr.family == AF_INET)
+        memcpy(hostent->h_addr_list[0], &addr.addrV4, sizeof(struct in_addr));
       else
-        memcpy(hostent->h_addr_list[0], &addr6, sizeof(struct in6_addr));
+        memcpy(hostent->h_addr_list[0], &addr.addrV6, sizeof(struct in6_addr));
 
       /* Copy aliases. */
       hostent->h_aliases = malloc((naliases + 1) * sizeof(char *));
@@ -220,7 +220,7 @@ int ares__get_hostent(FILE *fp, int family, struct hostent **host)
         break;
 
       /* Copy actual network address family and length. */
-      hostent->h_addrtype = addrfam;
+      hostent->h_addrtype = addr.family;
       hostent->h_length = (int)addrlen;
 
       /* Free line buffer. */
