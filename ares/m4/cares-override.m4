@@ -3,7 +3,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 2
+# serial 3
 
 dnl CARES_OVERRIDE_AUTOCONF
 dnl -------------------------------------------------
@@ -92,12 +92,11 @@ dnl used across different Autoconf versions and to
 dnl allow us to use this macro early enough in the
 dnl configure script.
 
-m4_define([_AS_PATH_SEPARATOR_PREPARE],
+m4_defun([_AS_PATH_SEPARATOR_PREPARE],
 [CARES_CHECK_PATH_SEPARATOR
 m4_define([$0],[])])
 
-m4_define([_LT_AC_LIBTOOL_SYS_PATH_SEPARATOR],
+m4_defun([_LT_AC_LIBTOOL_SYS_PATH_SEPARATOR],
 [CARES_CHECK_PATH_SEPARATOR
 m4_define([$0],[])])
-
 
