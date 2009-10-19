@@ -15,7 +15,7 @@ CARES_CHECK_OPTION_OPTIMIZE
 CARES_CHECK_OPTION_WARNINGS
 CARES_CHECK_OPTION_CURLDEBUG
 
-CARES_CHECK_PATH_SEPARATOR
+CARES_CHECK_PATH_SEPARATOR_REQUIRED
 
 dnl SED is mandatory for configure process and libtool.
 dnl Set it now, allowing it to be changed later.

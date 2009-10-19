@@ -1,7 +1,7 @@
 #***************************************************************************
 # $Id$
 #
-# Copyright (C) 2008 by Daniel Stenberg et al
+# Copyright (C) 2008 - 2009 by Daniel Stenberg et al
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 2
+# serial 3
 
 
 dnl CARES_CHECK_PATH_SEPARATOR
@@ -71,4 +71,13 @@ AC_DEFUN([CARES_CHECK_PATH_SEPARATOR], [
   AC_SUBST([PATH])
 ])
 
+
+dnl CARES_CHECK_PATH_SEPARATOR_REQUIRED
+dnl -------------------------------------------------
+dnl Use this to ensure that the path separator check
+dnl macro is only expanded and included once.
+
+AC_DEFUN([CARES_CHECK_PATH_SEPARATOR_REQUIRED], [
+  AC_REQUIRE([CARES_CHECK_PATH_SEPARATOR])dnl
+])
 

@@ -43,7 +43,7 @@ CURL_CHECK_OPTION_OPTIMIZE
 CURL_CHECK_OPTION_WARNINGS
 CURL_CHECK_OPTION_CURLDEBUG
 
-CURL_CHECK_PATH_SEPARATOR
+CURL_CHECK_PATH_SEPARATOR_REQUIRED
 
 dnl SED is mandatory for configure process and libtool.
 dnl Set it now, allowing it to be changed later.
