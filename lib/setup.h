@@ -414,15 +414,53 @@
 #endif
 
 /*
+ * When using WINSOCK, TELNET protocol requires WINSOCK2 API.
+ */
+
+#if defined(USE_WINSOCK) && (USE_WINSOCK != 2)
+#  define CURL_DISABLE_TELNET 1
+#endif
+
+/*
  * msvc 6.0 does not have struct sockaddr_storage and
  * does not define IPPROTO_ESP in winsock2.h. But both
  * are available if PSDK is properly installed.
  */
 
 #ifdef _MSC_VER
-#if !defined(HAVE_WINSOCK2_H) || ((_MSC_VER < 1300) && !defined(IPPROTO_ESP))
-#undef HAVE_STRUCT_SOCKADDR_STORAGE
+#  if !defined(HAVE_WINSOCK2_H) || ((_MSC_VER < 1300) && !defined(IPPROTO_ESP))
+#    undef HAVE_STRUCT_SOCKADDR_STORAGE
+#  endif
 #endif
+
+/*
+ * msvc 6.0 requires PSDK in order to have INET6_ADDRSTRLEN
+ * defined in ws2tcpip.h as well as to provide IPv6 support.
+ */
+
+#ifdef _MSC_VER
+#  if !defined(HAVE_WS2TCPIP_H) || ((_MSC_VER < 1300) && !defined(INET6_ADDRSTRLEN))
+#    undef HAVE_FREEADDRINFO
+#    undef HAVE_GETADDRINFO
+#    undef HAVE_GETNAMEINFO
+#    undef ENABLE_IPV6
+#  endif
+#endif
+
+/*
+ * Intentionally fail to build when using msvc 6.0 without PSDK installed.
+ * The brave of heart can circumvect this, defining ALLOW_MSVC6_WITHOUT_PSDK
+ * in lib/config-win32.h although absolutely discouraged and unsupported.
+ */
+
+#if defined(_MSC_VER) && !defined(__POCC__)
+#  if !defined(HAVE_WINDOWS_H) || ((_MSC_VER < 1300) && !defined(_FILETIME_))
+#    if !defined(ALLOW_MSVC6_WITHOUT_PSDK)
+#      error MSVC 6.0 requires 'February 2003 Platform SDK' a.k.a. 'Windows Server 2003 PSDK'
+#    else
+#      define CURL_DISABLE_LDAP 1
+#    endif
+#  endif
 #endif
 
 #ifdef NETWARE
