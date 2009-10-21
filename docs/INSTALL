@@ -249,19 +249,49 @@ Win32
    MSVC 6 caveats
    --------------
 
-   If you use MSVC 6 it is required that you use the MS PSDK:
+   If you use MSVC 6 it is required that you use the February 2003 edition PSDK:
    http://www.microsoft.com/msdownload/platformsdk/sdkupdate/psdk-full.htm
-   The headers and libs provided with MSVC 6 are now more than 10 years old
-   and not sufficient for a build of libcurl / curl with common features!
-   Without the PSDK you will run into these issues:
-   - LDAPv3 is not supported --> breaks compilation
-   - IPv6 support is incomplete --> breaks compilation
-   - socklen_t type is missing --> breaks compilation
-   If you really need to compile without PSDK then you can workaround these
-   issues by disabling LDAP and IPv6 support, and adding a line:
-   typedef int socklen_t;
-   to the winsock2.h header. This is however not recommended, and you should
-   use the PSDK whenever possible!  
+
+   Building any software with MSVC 6 without having PSDK installed is just
+   asking for trouble down the road once you have released it, you might notice
+   the problems in the first corner or ten miles ahead, depending mostly on your
+   choice of static vs dynamic runtime and third party libraries. Anyone using
+   software built in such way will at some point regret having done so.
+
+   When someone uses MSVC 6 without PSDK he is using a compiler back from 1998.
+
+   If the compiler has been updated with the installation of a service pack as
+   those mentioned in http://support.microsoft.com/kb/194022 the compiler can be
+   safely used to read source code, translate and make it object code.
+
+   But, even with the service packs mentioned above installed, the resulting
+   software generated in such an environment will be using outdated system
+   header files and libraries with bugs and security issues which have already
+   been addressed and fixed long time ago.
+
+   In order to make use of the updated system headers and fixed libraries
+   for MSVC 6, it is required that 'Platform SDK', PSDK from now onwards,
+   is installed. The specific PSDK that must be installed for MSVC 6 is the
+   February 2003 edition, which is the latest one supporting the MSVC 6 compiler,
+   this PSDK is also known as 'Windows Server 2003 PSDK' and can be downloaded
+   from http://www.microsoft.com/msdownload/platformsdk/sdkupdate/psdk-full.htm
+
+   So, building curl and libcurl with MSVC 6 without PSDK is absolutely
+   discouraged for the benefit of anyone using software built in such
+   environment. And it will not be supported in any way, as we could just
+   be hunting bugs which have already been fixed way back in 2003.
+
+   When building with MSVC 6 we attempt to detect if PSDK is not being used,
+   and if this is the case the build process will fail hard with an error
+   message stating that the February 2003 PSDK is required. This is done to
+   protect the unsuspecting and avoid PEBKAC issues.
+
+   Additionally it might happen that a die hard MSVC hacker still wants to
+   build curl and libcurl with MSVC 6 without PSDK installed, even knowing
+   that this is a highly discouraged and unsupported build environment. In
+   this case the brave of heart will be able to build in such an environment
+   with the requisite of defining preprocessor symbol ALLOW_MSVC6_WITHOUT_PSDK
+   in lib/config-win32.h and knowing that LDAP and IPv6 support will be missing.
 
    MSVC from command line
    ----------------------
