@@ -512,6 +512,7 @@ struct Configurable {
   char *cert_type;
   char *cacert;
   char *capath;
+  char *crlfile;
   char *key;
   char *key_type;
   char *key_passwd;
@@ -753,6 +754,7 @@ static void help(void)
     " -c/--cookie-jar <file> Write cookies to this file after operation (H)",
     "    --create-dirs   Create necessary local directory hierarchy",
     "    --crlf          Convert LF to CRLF in upload",
+    "    --crlfile <file> Get a CRL list in PEM format from the given file",
     " -d/--data <data>   HTTP POST data (H)",
     "    --data-ascii <data>  HTTP POST ASCII data (H)",
     "    --data-binary <data> HTTP POST binary data (H)",
@@ -1750,6 +1752,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"Eg","capath ",     TRUE},
     {"Eh","pubkey",      TRUE},
     {"Ei", "hostpubmd5", TRUE},
+    {"Ej","crlfile",     TRUE},
     {"f", "fail",        FALSE},
     {"F", "form",        TRUE},
     {"Fs","form-string", TRUE},
@@ -2527,6 +2530,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         GetStr(&config->hostpubmd5, nextarg);
         if (!config->hostpubmd5 || strlen(config->hostpubmd5) != 32)
            return PARAM_BAD_USE;
+        break;
+      case 'j': /* CRL info PEM file */
+        /* CRL file */
+        GetStr(&config->crlfile, nextarg);
         break;
       default: /* certificate file */
         {
@@ -3756,6 +3763,8 @@ static void free_config_fields(struct Configurable *config)
     free(config->cert_type);
   if(config->capath)
     free(config->capath);
+  if(config->crlfile)
+    free(config->crlfile);
   if(config->cookiejar)
     free(config->cookiejar);
   if(config->ftp_account)
@@ -4747,6 +4756,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             my_setopt_str(curl, CURLOPT_CAPATH, config->capath);
           my_setopt(curl, CURLOPT_SSL_VERIFYPEER, TRUE);
         }
+        if (config->crlfile)
+          my_setopt_str(curl, CURLOPT_CRLFILE, config->crlfile);
         if(config->insecure_ok) {
           /* new stuff needed for libcurl 7.10 */
           my_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);

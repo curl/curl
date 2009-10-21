@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (21 Oct 2009)
+- A patch in bug report #2883177 (http://curl.haxx.se/bug/view.cgi?id=2883177)
+  by user 'koresh' introduced the --crlfile option to curl, which makes curl
+  tell libcurl about a file with CRL (certificate revocation list) data to
+  read.
+
 Daniel Stenberg (18 Oct 2009)
 - Ray Dassen provided a patch in Debian's bug tracker (bug number #551461)
   that now makes curl_getdate(3) actually handles RFC 822 formatted dates that
