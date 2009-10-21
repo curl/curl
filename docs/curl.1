@@ -219,6 +219,14 @@ To create remote directories when using FTP or SFTP, try
 \fI--ftp-create-dirs\fP.
 .IP "--crlf"
 (FTP) Convert LF to CRLF in upload. Useful for MVS (OS/390).
+.IP "--crlfile <file>"
+(HTTPS/FTPS) Provide a file using PEM format with a Certificate Revocation
+List that may specify what peer certificates that are to be considered
+revoced.
+
+If this option is used several times, the last one will be used.
+
+(Added in 7.19.7)
 .IP "-d/--data <data>"
 (HTTP) Sends the specified data in a POST request to the HTTP server, in the
 same way that a browser does when a user has filled in an HTML form and
