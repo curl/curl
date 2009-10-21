@@ -101,7 +101,8 @@
 
 #define BSD
 
-/* #define MALLOCDEBUG */
+/* CURLDEBUG definition enables memory tracking */
+/* #define CURLDEBUG */
 
 /* USE_ZLIB on cmd-line */
 #ifdef USE_ZLIB
