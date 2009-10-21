@@ -16,6 +16,9 @@ may have been fixed since this was written!
 71. TFTP block size / better integration in transfer
   http://curl.haxx.se/mail/lib-2009-08/0028.html
 
+  Related problems with TFTP is also that currently (7.19.6) upload file sizes
+  are limited to 32MB (http://curl.haxx.se/bug/view.cgi?id=2848436)
+
 70. Problem re-using easy handle after call to curl_multi_remove_handle
   http://curl.haxx.se/mail/lib-2009-07/0249.html
     
