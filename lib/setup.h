@@ -78,7 +78,7 @@
 
 /* ================================================================ */
 /* Definition of preprocessor macros/symbols which modify compiler  */
-/* behaviour or generated code characteristics must be done here,   */
+/* behavior or generated code characteristics must be done here,   */
 /* as appropriate, before any system header file is included. It is */
 /* also possible to have them defined in the config file included   */
 /* before this point. As a result of all this we frown inclusion of */
@@ -175,9 +175,9 @@
 
 /*
  * Include header files for windows builds before redefining anything.
- * Use this preproessor block only to include or exclude windows.h,
+ * Use this preprocessor block only to include or exclude windows.h,
  * winsock2.h, ws2tcpip.h or winsock.h. Any other windows thing belongs
- * to any other further and independant block.  Under Cygwin things work
+ * to any other further and independent block.  Under Cygwin things work
  * just as under linux (e.g. <sys/socket.h>) and the winsock headers should
  * never be included when __CYGWIN__ is defined.  configure script takes
  * care of this, not defining HAVE_WINDOWS_H, HAVE_WINSOCK_H, HAVE_WINSOCK2_H,
@@ -449,7 +449,7 @@
 
 /*
  * Intentionally fail to build when using msvc 6.0 without PSDK installed.
- * The brave of heart can circumvect this, defining ALLOW_MSVC6_WITHOUT_PSDK
+ * The brave of heart can circumvent this, defining ALLOW_MSVC6_WITHOUT_PSDK
  * in lib/config-win32.h although absolutely discouraged and unsupported.
  */
 
