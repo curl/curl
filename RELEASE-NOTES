@@ -40,6 +40,7 @@ This release includes the following bugfixes:
  o double close() on the primary socket with libcurl-NSS
  o GSS negotiate infinite loop on bad credentials
  o memory leak in SCP/SFTP connections
+ o use pkg-config to find out libssh2 installation details in configure
 
 This release includes the following known bugs:
 

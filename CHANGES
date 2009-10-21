@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel Stenberg (21 Oct 2009)
+- Attempt to use pkg-config for finding out libssh2 installation details
+  during configure.
+
 - A patch in bug report #2883177 (http://curl.haxx.se/bug/view.cgi?id=2883177)
   by Johan van Selst introduced the --crlfile option to curl, which makes curl
   tell libcurl about a file with CRL (certificate revocation list) data to

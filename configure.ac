@@ -1698,21 +1698,36 @@ if test X"$OPT_LIBSSH2" != Xno; then
   case "$OPT_LIBSSH2" in
   yes)
     dnl --with-libssh2 (without path) used
-    PREFIX_LIBSSH2=/usr/local/lib
-    LIB_LIBSSH2="$PREFIX_LIBSSH2$libsuff"
+    CURL_CHECK_PKGCONFIG(libssh2)
+
+    if test "$PKGCONFIG" != "no" ; then
+      LIB_SSH2=`$PKGCONFIG --libs-only-l libssh2`
+      LD_SSH2=`$PKGCONFIG --libs-only-L libssh2`
+      CPP_SSH2=`$PKGCONFIG --cflags-only-I libssh2`
+      version=`$PKGCONFIG --modversion libssh2`
+      DIR_SSH2=`echo $LD_SSH2 | $SED -e 's/-L//'`
+    fi
+    
     ;;
   off)
     dnl no --with-libssh2 option given, just check default places
-    PREFIX_LIBSSH2=
     ;;
   *)
     dnl use the given --with-libssh2 spot
-    PREFIX_LIBSSH2=$OPT_LIBSSH2
-    LIB_LIBSSH2="$PREFIX_LIBSSH2/lib$libsuff"
-    LDFLAGS="$LDFLAGS -L$LIB_LIBSSH2"
-    CPPFLAGS="$CPPFLAGS -I$PREFIX_LIBSSH2/include"
+    PREFIX_SSH2=$OPT_LIBSSH2
     ;;
   esac
+
+  dnl if given with a prefix, we set -L and -I based on that
+  if test -n "$PREFIX_SSH2"; then
+    LD_SSH2=-L${PREFIX_SSH2}/lib
+    CPP_SSH2=-I${PREFIX_SSH2}/include
+    DIR_SSH2=${PREFIX_SSH2}/lib
+  fi
+
+  LDFLAGS="$LDFLAGS $LD_SSH2"
+  CPPFLAGS="$CPPFLAGS $CPP_SSH2"
+  LIBS="$LIBS $LIB_SSH2"
 
   AC_CHECK_LIB(ssh2, libssh2_channel_open_ex)
 
@@ -1737,9 +1752,9 @@ if test X"$OPT_LIBSSH2" != Xno; then
        dnl libssh2_version is a post 1.0 addition
        AC_CHECK_FUNCS( libssh2_version )
 
-       LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_LIBSSH2"
+       LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$DIR_SSH2"
        export LD_LIBRARY_PATH
-       AC_MSG_NOTICE([Added $LIB_LIBSSH2 to LD_LIBRARY_PATH])
+       AC_MSG_NOTICE([Added $DIR_SSH2 to LD_LIBRARY_PATH])
     fi
   else
     dnl no libssh2, revert back to clean variables
