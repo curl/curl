@@ -8,7 +8,7 @@
 
 Daniel Stenberg (21 Oct 2009)
 - A patch in bug report #2883177 (http://curl.haxx.se/bug/view.cgi?id=2883177)
-  by user 'koresh' introduced the --crlfile option to curl, which makes curl
+  by Johan van Selst introduced the --crlfile option to curl, which makes curl
   tell libcurl about a file with CRL (certificate revocation list) data to
   read.
 
