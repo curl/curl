@@ -1,5 +1,9 @@
   Changelog for the c-ares project
 
+* October 23, 2009 (Yang Tse)
+- John Engelhart noticed an unreleased problem relative to a duplicate
+  ARES_ECANCELLED error code value and missing error code description.
+
 * October 7, 2009 (Yang Tse)
 - Overhauled ares__get_hostent() Fixing out of bounds memory overwrite
   triggered with malformed /etc/hosts file. Improving parsing of /etc/hosts
