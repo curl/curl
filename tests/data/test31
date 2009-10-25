@@ -27,6 +27,7 @@ Set-Cookie: novalue; domain=reallysilly
 Set-Cookie: test=yes; domain=foo.com; expires=Sat Feb 2 11:56:27 GMT 2030
 Set-Cookie: test2=yes; domain=se; expires=Sat Feb 2 11:56:27 GMT 2030
 Set-Cookie: magic=yessir; path=/silly/; HttpOnly
+Set-Cookie: blexp=yesyes; domain=.0.0.1; domain=.0.0.1; expiry=totally bad;
 
 boo
 </data>
@@ -71,6 +72,7 @@ Accept: */*
 .127.0.0.1	TRUE	/	FALSE	0	partmatch	present
 127.0.0.1	FALSE	/we/want/	FALSE	2054030187	nodomain	value
 #HttpOnly_127.0.0.1	FALSE	/silly/	FALSE	0	magic	yessir
+.0.0.1	TRUE	/we/want/	FALSE	0	blexp	yesyes
 </file>
 </verify>
 </testcase>

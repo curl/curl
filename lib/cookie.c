@@ -363,9 +363,8 @@ Curl_cookie_add(struct SessionHandle *data,
               badcookie = TRUE;
               break;
             }
-            /* Note that we store -1 in 'expires' here if the date couldn't
-               get parsed for whatever reason. This will have the effect that
-               the cookie won't match. */
+            /* Note that if the date couldn't get parsed for whatever reason,
+               the cookie will be treated as a session cookie */
             co->expires = curl_getdate(what, &now);
 
             /* Session cookies have expires set to 0 so if we get that back
@@ -373,6 +372,8 @@ Curl_cookie_add(struct SessionHandle *data,
                non-session cookie */
             if (co->expires == 0)
               co->expires = 1;
+            else if( co->expires < 0 )
+                co->expires = 0;
           }
           else if(!co->name) {
             co->name = strdup(name);

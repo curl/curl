@@ -41,6 +41,7 @@ Set-Cookie: partmatch=present; domain=.0.0.1; path=/;
 Set-Cookie: duplicate=test; domain=.0.0.1; domain=.0.0.1; path=/donkey;
 Set-Cookie: cookie=yes; path=/we;
 Set-Cookie: nocookie=yes; path=/WE;
+Set-Cookie: blexp=yesyes; domain=.0.0.1; domain=.0.0.1; expiry=totally bad;
 
 </file>
 </client>
@@ -54,7 +55,7 @@ Set-Cookie: nocookie=yes; path=/WE;
 GET /we/want/8 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Cookie: cookie=yes; partmatch=present; foobar=name
+Cookie: blexp=yesyes; cookie=yes; partmatch=present; foobar=name
 
 </protocol>
 </verify>

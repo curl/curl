@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (25 Oct 2009)
+- Dima Barsky made the curl cookie parser accept cookies even with blank or
+  unparsable expiry dates and then treat them as session cookies - previously
+  libcurl would reject cookies with a date format it couldn't parse. Research
+  shows that the major browser treat such cookies as session cookies. I
+  modified test 8 and 31 to verify this.
+
 Daniel Stenberg (21 Oct 2009)
 - Attempt to use pkg-config for finding out libssh2 installation details
   during configure.

@@ -41,6 +41,7 @@ This release includes the following bugfixes:
  o GSS negotiate infinite loop on bad credentials
  o memory leak in SCP/SFTP connections
  o use pkg-config to find out libssh2 installation details in configure
+ o unparsable cookie expire dates make cookies get treated as session coookies
 
 This release includes the following known bugs:
 
@@ -53,6 +54,6 @@ advice from friends like these:
  Michal Marek, Eric Wong, Guenter Knauf, Peter Sylvester, Daniel Johnson,
  Claes Jakobsson, Sven Anders, Chris Mumford, John P. McCaskey,
  Constantine Sapuntzakis, Michael Stillwell, Tom Mueller, Dan Fandrich,
- Kevin Baughman, John Dennis, Ray Dassen, Johan van Selst
+ Kevin Baughman, John Dennis, Ray Dassen, Johan van Selst, Dima Barsky
 
         Thanks! (and sorry if I forgot to mention someone)
