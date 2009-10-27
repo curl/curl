@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -70,6 +70,12 @@ BOOL amiga_init()
 
 #ifdef __libnix__
 ADD2EXIT(amiga_cleanup,-50);
+#endif
+
+#else /* __AMIGA__ */
+
+#ifdef __POCC__
+#  pragma warn(disable:2024)  /* Disable warning #2024: Empty input file */
 #endif
 
 #endif /* __AMIGA__ */

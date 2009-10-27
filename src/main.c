@@ -264,10 +264,12 @@ typedef enum {
 
 #ifdef WIN32
 #  include <direct.h>
-#  define F_OK 0
 #  define mkdir(x,y) (mkdir)(x)
 #  undef  PATH_MAX
 #  define PATH_MAX MAX_PATH
+#  ifndef __POCC__
+#    define F_OK 0
+#  endif
 #endif
 
 /*
@@ -407,17 +409,28 @@ char convert_char(curl_infotype infotype, char this_char)
 #endif /* CURL_DOES_CONVERSIONS */
 
 #ifdef WIN32
-/*
- * Truncate a file handle at a 64-bit position 'where'.
- * Borland doesn't even support 64-bit types.
- */
+
 #ifdef __BORLANDC__
-#define _lseeki64(hnd,ofs,whence) lseek(hnd,ofs,whence)
+   /* 64-bit lseek-like function unavailable */
+#  define _lseeki64(hnd,ofs,whence) lseek(hnd,ofs,whence)
+#endif
+
+#ifdef __POCC__
+#  if (__POCC__ < 450)
+     /* 64-bit lseek-like function unavailable */
+#    define _lseeki64(hnd,ofs,whence) _lseek(hnd,ofs,whence)
+#  else
+#    define _lseeki64(hnd,ofs,whence) _lseek64(hnd,ofs,whence)
+#  endif
 #endif
 
 #ifndef HAVE_FTRUNCATE
 #define HAVE_FTRUNCATE 1
 #endif
+
+/*
+ * Truncate a file handle at a 64-bit position 'where'.
+ */
 
 static int ftruncate64 (int fd, curl_off_t where)
 {
@@ -430,7 +443,8 @@ static int ftruncate64 (int fd, curl_off_t where)
   return 0;
 }
 #define ftruncate(fd,where) ftruncate64(fd,where)
-#endif
+
+#endif /* WIN32 */
 
 typedef enum {
   TRACE_NONE,  /* no trace/verbose output at all! */

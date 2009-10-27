@@ -147,6 +147,12 @@
 
 #endif /* HAVE_CONFIG_H */
 
+#ifdef __POCC__
+#  include <sys/types.h>
+#  include <unistd.h>
+#  define ESRCH 3
+#endif
+
 /*
  * Recent autoconf versions define these symbols in ares_config.h. We don't
  * want them (since they collide with the libcurl ones when we build

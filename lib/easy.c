@@ -206,7 +206,7 @@ static long          init_flags;
 #define system_strdup strdup
 #endif
 
-#if defined(_MSC_VER) && defined(_DLL)
+#if defined(_MSC_VER) && defined(_DLL) && !defined(__POCC__)
 #  pragma warning(disable:4232) /* MSVC extension, dllimport identity */
 #endif
 
@@ -232,7 +232,7 @@ curl_strdup_callback Curl_cstrdup;
 curl_calloc_callback Curl_ccalloc;
 #endif
 
-#if defined(_MSC_VER) && defined(_DLL)
+#if defined(_MSC_VER) && defined(_DLL) && !defined(__POCC__)
 #  pragma warning(default:4232) /* MSVC extension, dllimport identity */
 #endif
 

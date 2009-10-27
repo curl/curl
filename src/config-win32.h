@@ -21,8 +21,16 @@
 /* Define if you have the <locale.h> header file.  */
 #define HAVE_LOCALE_H 1
 
+/* Define if you need the malloc.h header file even with stdlib.h  */
+#if !defined(__SALFORDC__) && !defined(__POCC__)
+#define NEED_MALLOC_H 1
+#endif
+
 /* Define if you have the <signal.h> header file. */
 #define HAVE_SIGNAL_H 1
+
+/* Define if you have the <stdlib.h> header file.  */
+#define HAVE_STDLIB_H 1
 
 /* Define if you have the <sys/time.h> header file */
 /* #define HAVE_SYS_TIME_H 1 */
@@ -30,16 +38,17 @@
 /* Define if you have the <sys/types.h> header file.  */
 #define HAVE_SYS_TYPES_H 1
 
-/* Define if you have the <time.h> header file.  */
-#define HAVE_TIME_H 1
-
 /* Define if you have the <sys/utime.h> header file.  */
 #ifndef __BORLANDC__
 #define HAVE_SYS_UTIME_H 1
 #endif
 
+/* Define if you have the <time.h> header file.  */
+#define HAVE_TIME_H 1
+
 /* Define if you have the <unistd.h> header file.  */
-#if defined(__MINGW32__) || defined(__WATCOMC__) || defined(__LCC__)
+#if defined(__MINGW32__) || defined(__WATCOMC__) || defined(__LCC__) || \
+    defined(__POCC__)
 #define HAVE_UNISTD_H 1
 #endif
 
@@ -50,10 +59,14 @@
 #define HAVE_WINSOCK_H 1
 
 /* Define if you have the <winsock2.h> header file.  */
+#ifndef __SALFORDC__
 #define HAVE_WINSOCK2_H 1
+#endif
 
 /* Define if you have the <ws2tcpip.h> header file.  */
+#ifndef __SALFORDC__
 #define HAVE_WS2TCPIP_H 1
+#endif
 
 /* ---------------------------------------------------------------- */
 /*                        OTHER HEADER INFO                         */
@@ -182,14 +195,16 @@
 
 /* Define ssize_t if it is not an available 'typedefed' type */
 #ifndef _SSIZE_T_DEFINED
-#if (defined(__WATCOMC__) && (__WATCOMC__ >= 1240)) || defined(__POCC__) || \
-    defined(__MINGW32__)
-#elif defined(_WIN64)
-#define ssize_t __int64
-#else
-#define ssize_t int
-#endif
-#define _SSIZE_T_DEFINED
+#  if (defined(__WATCOMC__) && (__WATCOMC__ >= 1240)) || \
+      defined(__POCC__) || \
+      defined(__MINGW32__)
+#  elif defined(_WIN64)
+#    define _SSIZE_T_DEFINED
+#    define ssize_t __int64
+#  else
+#    define _SSIZE_T_DEFINED
+#    define ssize_t int
+#  endif
 #endif
 
 /* ---------------------------------------------------------------- */
@@ -297,11 +312,25 @@
 #  endif
 #endif
 
+/* When no build target is specified Pelles C 5.00 and later default build
+   target is Windows Vista. We override default target to be Windows 2000. */
+#if defined(__POCC__) && (__POCC__ >= 500)
+#  ifndef _WIN32_WINNT
+#    define _WIN32_WINNT 0x0500
+#  endif
+#  ifndef WINVER
+#    define WINVER 0x0500
+#  endif
+#endif
+
 /* Availability of freeaddrinfo, getaddrinfo and getnameinfo functions is
-   quite convoluted, compiler dependant and in some cases even build target
-   dependant. */
+   quite convoluted, compiler dependent and even build target dependent. */
 #if defined(HAVE_WS2TCPIP_H)
-#  if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0501)
+#  if defined(__POCC__)
+#    define HAVE_FREEADDRINFO 1
+#    define HAVE_GETADDRINFO  1
+#    define HAVE_GETNAMEINFO  1
+#  elif defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0501)
 #    define HAVE_FREEADDRINFO 1
 #    define HAVE_GETADDRINFO  1
 #    define HAVE_GETNAMEINFO  1
@@ -309,6 +338,15 @@
 #    define HAVE_FREEADDRINFO 1
 #    define HAVE_GETADDRINFO  1
 #    define HAVE_GETNAMEINFO  1
+#  endif
+#endif
+
+#if defined(__POCC__)
+#  ifndef _MSC_VER
+#    error Microsoft extensions /Ze compiler option is required
+#  endif
+#  ifndef __POCC__OLDNAMES
+#    error Compatibility names /Go compiler option is required
 #  endif
 #endif
 
@@ -328,6 +366,10 @@
 #  define USE_WIN32_LARGE_FILES
 #endif
 
+#if defined(__POCC__)
+#  undef USE_WIN32_LARGE_FILES
+#endif
+
 #if !defined(USE_WIN32_LARGE_FILES) && !defined(USE_WIN32_SMALL_FILES)
 #  define USE_WIN32_SMALL_FILES
 #endif
@@ -344,5 +386,8 @@
 /* Define to 1 if you want the built-in manual */
 #define USE_MANUAL 1
 
+#if defined(__POCC__)
+#  define ENABLE_IPV6 1
+#endif
 
 #endif /* __SRC_CONFIG_WIN32_H */

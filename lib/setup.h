@@ -255,19 +255,10 @@
 #include <curl/stdcheaders.h>
 #endif
 
-/*
- * PellesC kludge section (yikes);
- *  - It has 'ssize_t', but it is in <unistd.h>. The way the headers
- *    on Win32 are included, forces me to include this header here.
- *  - sys_nerr, EINTR is missing in v4.0 or older.
- */
 #ifdef __POCC__
-  #include <sys/types.h>
-  #include <unistd.h>
-  #if (__POCC__ <= 400)
-  #define sys_nerr EILSEQ  /* for strerror.c */
-  #define EINTR    -1      /* for select.c */
-  #endif
+#  include <sys/types.h>
+#  include <unistd.h>
+#  define sys_nerr EILSEQ
 #endif
 
 /*
@@ -427,7 +418,7 @@
  * are available if PSDK is properly installed.
  */
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(__POCC__)
 #  if !defined(HAVE_WINSOCK2_H) || ((_MSC_VER < 1300) && !defined(IPPROTO_ESP))
 #    undef HAVE_STRUCT_SOCKADDR_STORAGE
 #  endif
@@ -438,7 +429,7 @@
  * defined in ws2tcpip.h as well as to provide IPv6 support.
  */
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(__POCC__)
 #  if !defined(HAVE_WS2TCPIP_H) || ((_MSC_VER < 1300) && !defined(INET6_ADDRSTRLEN))
 #    undef HAVE_FREEADDRINFO
 #    undef HAVE_GETADDRINFO

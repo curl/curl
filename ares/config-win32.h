@@ -25,12 +25,17 @@
 /* ---------------------------------------------------------------- */
 
 /* Define if you have the <getopt.h> header file.  */
-#if defined(__MINGW32__)
+#if defined(__MINGW32__) || defined(__POCC__)
 #define HAVE_GETOPT_H 1
 #endif
 
 /* Define if you have the <limits.h> header file.  */
 #define HAVE_LIMITS_H 1
+
+/* Define if you have the <process.h> header file.  */
+#ifndef __SALFORDC__
+#define HAVE_PROCESS_H 1
+#endif
 
 /* Define if you have the <signal.h> header file. */
 #define HAVE_SIGNAL_H 1
@@ -40,9 +45,6 @@
 
 /* Define if you have the <time.h> header file.  */
 #define HAVE_TIME_H 1
-
-/* Define if you have the <process.h> header file.  */
-#define HAVE_PROCESS_H 1
 
 /* Define if you have the <unistd.h> header file.  */
 #if defined(__MINGW32__) || defined(__WATCOMC__) || defined(__LCC__) || \
@@ -57,10 +59,14 @@
 #define HAVE_WINSOCK_H 1
 
 /* Define if you have the <winsock2.h> header file.  */
+#ifndef __SALFORDC__
 #define HAVE_WINSOCK2_H 1
+#endif
 
 /* Define if you have the <ws2tcpip.h> header file.  */
+#ifndef __SALFORDC__
 #define HAVE_WS2TCPIP_H 1
+#endif
 
 /* ---------------------------------------------------------------- */
 /*                        OTHER HEADER INFO                         */
@@ -78,6 +84,9 @@
 /* ---------------------------------------------------------------- */
 /*                             FUNCTIONS                            */
 /* ---------------------------------------------------------------- */
+
+/* Define if you have the gethostname function.  */
+#define HAVE_GETHOSTNAME 1
 
 /* Define if you have the ioctlsocket function. */
 #define HAVE_IOCTLSOCKET 1
@@ -99,9 +108,6 @@
 
 /* Define if you have the strnicmp function. */
 #define HAVE_STRNICMP 1
-
-/* Define if you have the gethostname function.  */
-#define HAVE_GETHOSTNAME 1
 
 /* Define if you have the recv function. */
 #define HAVE_RECV 1
@@ -197,14 +203,16 @@
 
 /* Define ssize_t if it is not an available 'typedefed' type */
 #ifndef _SSIZE_T_DEFINED
-#if (defined(__WATCOMC__) && (__WATCOMC__ >= 1240)) || defined(__POCC__) || \
-    defined(__MINGW32__)
-#elif defined(_WIN64)
-#define ssize_t __int64
-#else
-#define ssize_t int
-#endif
-#define _SSIZE_T_DEFINED
+#  if (defined(__WATCOMC__) && (__WATCOMC__ >= 1240)) || \
+      defined(__POCC__) || \
+      defined(__MINGW32__)
+#  elif defined(_WIN64)
+#    define _SSIZE_T_DEFINED
+#    define ssize_t __int64
+#  else
+#    define _SSIZE_T_DEFINED
+#    define ssize_t int
+#  endif
 #endif
 
 /* ---------------------------------------------------------------- */
@@ -215,7 +223,9 @@
 #define HAVE_STRUCT_ADDRINFO 1
 
 /* Define this if you have struct sockaddr_storage */
+#ifndef __SALFORDC__
 #define HAVE_STRUCT_SOCKADDR_STORAGE 1
+#endif
 
 /* Define this if you have struct timeval */
 #define HAVE_STRUCT_TIMEVAL 1
@@ -260,10 +270,25 @@
 #  endif
 #endif
 
-/* Availability of freeaddrinfo, getaddrinfo and getnameinfo functions is quite */
-/* convoluted, compiler dependant and in some cases even build target dependat. */
+/* When no build target is specified Pelles C 5.00 and later default build
+   target is Windows Vista. We override default target to be Windows 2000. */
+#if defined(__POCC__) && (__POCC__ >= 500)
+#  ifndef _WIN32_WINNT
+#    define _WIN32_WINNT 0x0500
+#  endif
+#  ifndef WINVER
+#    define WINVER 0x0500
+#  endif
+#endif
+
+/* Availability of freeaddrinfo, getaddrinfo and getnameinfo functions is
+   quite convoluted, compiler dependent and even build target dependent. */
 #if defined(HAVE_WS2TCPIP_H)
-#  if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0501)
+#  if defined(__POCC__)
+#    define HAVE_FREEADDRINFO 1
+#    define HAVE_GETADDRINFO  1
+#    define HAVE_GETNAMEINFO  1
+#  elif defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0501)
 #    define HAVE_FREEADDRINFO 1
 #    define HAVE_GETADDRINFO  1
 #    define HAVE_GETNAMEINFO  1
@@ -271,6 +296,15 @@
 #    define HAVE_FREEADDRINFO 1
 #    define HAVE_GETADDRINFO  1
 #    define HAVE_GETNAMEINFO  1
+#  endif
+#endif
+
+#if defined(__POCC__)
+#  ifndef _MSC_VER
+#    error Microsoft extensions /Ze compiler option is required
+#  endif
+#  ifndef __POCC__OLDNAMES
+#    error Compatibility names /Go compiler option is required
 #  endif
 #endif
 
