@@ -78,10 +78,10 @@
 
 #include <ares_rules.h>
 
-/* ================================================================ */
-/* No system header file shall be included in this file before this */
-/* point. The only allowed ones are those included from curlbuild.h */
-/* ================================================================ */
+/* ================================================================= */
+/* No system header file shall be included in this file before this  */
+/* point. The only allowed ones are those included from ares_build.h */
+/* ================================================================= */
 
 /*
  * Include header files for windows builds before redefining anything.
