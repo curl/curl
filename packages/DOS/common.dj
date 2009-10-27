@@ -25,7 +25,7 @@ ifneq ($(findstring COMMAND.COM,$(SHELL)),COMMAND.COM)
 endif
 
 #
-# Define shell dependant commands and vars
+# Define shell dependent commands and vars
 #
 ifeq ($(IS_UNIX_SHELL),1)
   COPY   = cp -f

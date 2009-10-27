@@ -53,7 +53,7 @@ In theory you should be able to do an @defines followed by an
 an .exe.  I say in theory because every release of cURL tosses in a
 new twist that has to be addressed by updating the config-vms.h*
 files, or other files.  I'm working on keeping all the OpenVMS
-dependant stuff in this config file to keep from having to wade
+dependent stuff in this config file to keep from having to wade
 through gobs of #ifdefs and such.
 
 Other Notes:

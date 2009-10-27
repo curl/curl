@@ -39,7 +39,7 @@ The following notes apply to libcurl version 7.19.0 and later.
   the library that you have built. It is _your_ responsability to provide this
   file. No one at the cURL project can know how you have built the library.
 
-* File curl/curlbuild.h includes platform and configuration dependant info,
+* File curl/curlbuild.h includes platform and configuration dependent info,
   and must not be modified by anyone. Configure script generates it for you.
 
 * We cannot assume anything else but very basic compiler features being

@@ -30,7 +30,7 @@ $!
 $!  2-DEC-2003, MSK, the "original" version.
 $!                   It works for me.  Your mileage may vary.
 $! 13-JAN-2004, MSK, moved this procedure to the [.packages.vms] directory
-$!                   and updated it to do hardware dependant builds.
+$!                   and updated it to do hardware dependent builds.
 $! 29-JAN-2004, MSK, moved logical defines into defines.com
 $!  6-FEB-2004, MSK, put in various SSL support bits
 $!  9-MAR-2004, MSK, the config-vms.h* files are now copied to the lib and

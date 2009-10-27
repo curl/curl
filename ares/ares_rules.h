@@ -50,7 +50,7 @@
  * that the dimension of a constant array can not be a negative one.
  * In this way if the compile time verification fails, the compilation
  * will fail issuing an error. The error description wording is compiler
- * dependant but it will be quite similar to one of the following:
+ * dependent but it will be quite similar to one of the following:
  *
  *   "negative subscript or subscript is too large"
  *   "array must have at least one element"

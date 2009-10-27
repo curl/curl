@@ -50,7 +50,7 @@ The following notes apply to c-ares version 1.6.1 and later.
   the library that you have built. It is _your_ responsability to provide this
   file. No one at the c-ares project can know how you have built the library.
 
-* File ares_build.h includes platform and configuration dependant info,
+* File ares_build.h includes platform and configuration dependent info,
   and must not be modified by anyone. Configure script generates it for you.
 
 * We cannot assume anything else but very basic compiler features being

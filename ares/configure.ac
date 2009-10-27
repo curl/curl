@@ -51,7 +51,7 @@ fi
 AC_SUBST([EGREP])
 
 dnl AR is mandatory for configure process and libtool.
-dnl This is target dependant, so check it as a tool.
+dnl This is target dependent, so check it as a tool.
 AC_PATH_TOOL([AR], [ar], [not_found],
   [$PATH:/usr/bin:/usr/local/bin])
 if test -z "$AR" || test "$AR" = "not_found"; then

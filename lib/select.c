@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -82,7 +82,7 @@
  * Waiting indefinitely with this function is not allowed, a
  * zero or negative timeout value will return immediately.
  * Timeout resolution, accuracy, as well as maximum supported
- * value is system dependant, neither factor is a citical issue
+ * value is system dependent, neither factor is a citical issue
  * for the intended use of this function in the library.
  * On non-DOS and non-Winsock platforms, when compiled with
  * CURL_ACKNOWLEDGE_EINTR defined, EINTR condition is honored
