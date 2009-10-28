@@ -14,6 +14,7 @@ CARES_CHECK_OPTION_DEBUG
 CARES_CHECK_OPTION_OPTIMIZE
 CARES_CHECK_OPTION_WARNINGS
 CARES_CHECK_OPTION_CURLDEBUG
+CARES_CHECK_OPTION_HIDDEN_SYMBOLS
 
 CARES_CHECK_PATH_SEPARATOR_REQUIRED
 
@@ -110,6 +111,25 @@ esac
 dnl libtool setup
 AC_PROG_LIBTOOL
 
+AC_MSG_CHECKING([if we need CARES_BUILDING_LIB])
+case $host in
+  *-*-mingw*)
+    AC_DEFINE(CARES_BUILDING_LIB, 1, [when building c-ares library])
+    AC_MSG_RESULT(yes)
+    AC_MSG_CHECKING([if we need CARES_STATICLIB])
+    if test "X$enable_shared" = "Xno"
+    then
+      AC_DEFINE(CARES_STATICLIB, 1, [when not building a shared library])
+      AC_MSG_RESULT(yes)
+    else
+      AC_MSG_RESULT(no)
+    fi
+    ;;
+  *)
+    AC_MSG_RESULT(no)
+    ;;
+esac
+
 dnl **********************************************************************
 dnl platform/compiler/architecture specific checks/flags
 dnl **********************************************************************
@@ -144,6 +164,7 @@ esac
 
 CARES_CHECK_COMPILER_HALT_ON_ERROR
 CARES_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE
+CARES_CHECK_COMPILER_HIDDEN_SYMBOLS
 
 CARES_CHECK_NO_UNDEFINED
 AM_CONDITIONAL(NO_UNDEFINED, test x$need_no_undefined = xyes)
@@ -875,6 +896,8 @@ fi
 
 CARES_CHECK_OPTION_NONBLOCKING
 CARES_CHECK_NONBLOCKING_SOCKET
+
+CARES_CONFIGURE_HIDDEN_SYMBOLS
 
 CARES_PRIVATE_LIBS="$LIBS"
 AC_SUBST(CARES_PRIVATE_LIBS)

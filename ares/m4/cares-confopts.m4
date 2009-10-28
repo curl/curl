@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 5
+# serial 6
 
 
 dnl CARES_CHECK_OPTION_CURLDEBUG
@@ -89,6 +89,46 @@ AC_HELP_STRING([--disable-debug],[Disable debug build options]),
       ;;
   esac
   AC_MSG_RESULT([$want_debug])
+])
+
+
+dnl CARES_CHECK_OPTION_HIDDEN_SYMBOLS
+dnl -------------------------------------------------
+dnl Verify if configure has been invoked with option
+dnl --enable-hidden-symbols or --disable-hidden-symbols,
+dnl setting shell variable want_hidden_symbols value.
+
+AC_DEFUN([CARES_CHECK_OPTION_HIDDEN_SYMBOLS], [
+  AC_BEFORE([$0],[CARES_CHECK_COMPILER_HIDDEN_SYMBOLS])dnl
+  AC_MSG_CHECKING([whether to enable hiding symbols])
+  OPT_HIDDEN_SYMBOLS="default"
+  AC_ARG_ENABLE(hidden-symbols,
+AC_HELP_STRING([--enable-hidden-symbols],[Enable hiding of library internal symbols])
+AC_HELP_STRING([--disable-hidden-symbols],[Disable hiding of library internal symbols]),
+  OPT_HIDDEN_SYMBOLS=$enableval)
+  case "$OPT_HIDDEN_SYMBOLS" in
+    no)
+      dnl --disable-hidden-symbols option used.
+      dnl This is an indication to not attempt hiding of library internal
+      dnl symbols. Default symbol visibility will be used, which normally
+      dnl exposes all library internal symbols.
+      want_hidden_symbols="no"
+      AC_MSG_RESULT([no])
+      ;;
+    default)
+      dnl configure's hidden-symbols option not specified.
+      dnl Handle this as if --enable-hidden-symbols option was given.
+      want_hidden_symbols="yes"
+      AC_MSG_RESULT([not specified (assuming yes)])
+      ;;
+    *)
+      dnl --enable-hidden-symbols option used.
+      dnl This is an indication to attempt hiding of library internal
+      dnl symbols. This is only supported on some compilers/linkers.
+      want_hidden_symbols="yes"
+      AC_MSG_RESULT([yes])
+      ;;
+  esac
 ])
 
 
@@ -249,6 +289,27 @@ AC_DEFUN([CARES_CHECK_NONBLOCKING_SOCKET], [
     AC_DEFINE_UNQUOTED(USE_BLOCKING_SOCKETS, 1,
       [Define to disable non-blocking sockets.])
     AC_MSG_WARN([non-blocking sockets disabled.])
+  fi
+])
+
+
+dnl CARES_CONFIGURE_HIDDEN_SYMBOLS
+dnl -------------------------------------------------
+dnl Depending on --enable-hidden-symbols or --disable-hidden-symbols
+dnl configure option, and compiler capability to actually honor such
+dnl option, compiler flags will be modified as appropriate.
+dnl This macro should not be used until all compilation tests have
+dnl been done to prevent interferences on other tests.
+
+AC_DEFUN([CARES_CONFIGURE_HIDDEN_SYMBOLS], [
+  AC_MSG_CHECKING([whether to actually hide library internal symbols])
+  if test "$want_hidden_symbols" = "yes" &&
+    test "$hidden_symbols_supported" = "yes"; then
+    tmp_save_CFLAGS="$CFLAGS"
+    CFLAGS="$tmp_save_CFLAGS $hidden_symbols_CFLAGS"
+    AC_MSG_RESULT([yes])
+  else
+    AC_MSG_RESULT([no])
   fi
 ])
 

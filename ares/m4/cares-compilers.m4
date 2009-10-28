@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 56
+# serial 59
 
 
 dnl CARES_CHECK_COMPILER
@@ -1246,6 +1246,100 @@ AC_DEFUN([CARES_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE], [
   ],[
     AC_MSG_RESULT([yes])
   ])
+])
+
+
+dnl CARES_CHECK_COMPILER_HIDDEN_SYMBOLS
+dnl -------------------------------------------------
+dnl Verify if compiler supports hiding library internal symbols, setting
+dnl shell variable hidden_symbols_supported value as appropriate, as well
+dnl as variable hidden_symbols_CFLAGS when supported.
+
+AC_DEFUN([CARES_CHECK_COMPILER_HIDDEN_SYMBOLS], [
+  AC_REQUIRE([CARES_CHECK_COMPILER])dnl
+  AC_BEFORE([$0],[CARES_CONFIGURE_HIDDEN_SYMBOLS])dnl
+  AC_MSG_CHECKING([if compiler supports hiding library internal symbols])
+  hidden_symbols_supported="no"
+  hidden_symbols_CFLAGS=""
+  tmp_CFLAGS=""
+  tmp_extern=""
+  case "$compiler_id" in
+    GNU_C)
+      dnl Only gcc 3.4 or later
+      if test "$compiler_num" -ge "304"; then
+        if $CC --help --verbose 2>&1 | grep fvisibility= > /dev/null ; then
+          tmp_extern="__attribute__ ((visibility (\"default\")))"
+          tmp_CFLAGS="-fvisibility=hidden"
+          hidden_symbols_supported="yes"
+          echo " " >&6
+          echo "debug: should work with this compiler and version" >&6
+          echo " " >&6
+        fi
+      fi
+      ;;
+    INTEL_UNIX_C)
+      dnl Only icc 9.0 or later
+      if test "$compiler_num" -ge "900"; then
+        if $CC --help --verbose 2>&1 | grep fvisibility= > /dev/null ; then
+          tmp_extern="__attribute__ ((visibility (\"default\")))"
+          tmp_CFLAGS="-fvisibility=hidden"
+          hidden_symbols_supported="yes"
+          echo " " >&6
+          echo "debug: should work with this compiler and version" >&6
+          echo " " >&6
+        fi
+      fi
+      ;;
+    SUNPRO_C)
+      if $CC 2>&1 | grep flags >/dev/null && $CC -flags | grep xldscope= >/dev/null ; then
+        tmp_extern="__global"
+        tmp_CFLAGS="-xldscope=hidden"
+        hidden_symbols_supported="yes"
+        echo " " >&6
+        echo "debug: should work with this compiler and version" >&6
+        echo " " >&6
+      fi
+      ;;
+  esac
+  if test "$hidden_symbols_supported" = "yes"; then
+    tmp_save_CFLAGS="$CFLAGS"
+    CFLAGS="$tmp_save_CFLAGS $tmp_CFLAGS"
+    squeeze CFLAGS
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $tmp_extern char *dummy(char *buff);
+        char *dummy(char *buff)
+        {
+         if(buff)
+           return ++buff;
+         else
+           return buff;
+        }
+      ]],[[
+        char b[16];
+        char *r = dummy(&b);
+        if(r)
+          return (int)*r;
+      ]])
+    ],[
+      hidden_symbols_supported="yes"
+    ],[
+      hidden_symbols_supported="no"
+      sed 's/^/cc-src: /' conftest.$ac_ext >&6
+      sed 's/^/cc-err: /' conftest.err >&6
+    ])
+    CFLAGS="$tmp_save_CFLAGS"
+  fi
+  if test "$hidden_symbols_supported" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(CARES_HIDDEN_SYMBOLS, 1,
+      [Define to 1 to enable hiding of library internal symbols.])
+    AC_DEFINE_UNQUOTED(CARES_EXTERN_SYMBOL, $tmp_extern,
+      [Definition to make a library symbol externally visible.])
+    hidden_symbols_CFLAGS="$tmp_CFLAGS"
+  else
+    AC_MSG_RESULT([no])
+  fi
 ])
 
 
