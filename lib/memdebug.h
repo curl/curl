@@ -57,6 +57,7 @@ CURL_EXTERN void curl_memlimit(long limit);
 
 /* file descriptor manipulators */
 CURL_EXTERN int curl_socket(int domain, int type, int protocol, int line , const char *);
+CURL_EXTERN int curl_mark_sclose(int sockfd, int, const char *source);
 CURL_EXTERN int curl_sclose(int sockfd, int, const char *source);
 CURL_EXTERN int curl_accept(int s, void *addr, void *addrlen,
                             int line, const char *source);
@@ -117,6 +118,8 @@ CURL_EXTERN int curl_fclose(FILE *file, int line, const char *source);
 #undef sclose
 #define sclose(sockfd) curl_sclose(sockfd,__LINE__,__FILE__)
 
+#define fake_sclose(sockfd) curl_mark_sclose(sockfd,__LINE__,__FILE__)
+
 #undef fopen
 #define fopen(file,mode) curl_fopen(file,mode,__LINE__,__FILE__)
 #undef fdopen
@@ -127,3 +130,7 @@ CURL_EXTERN int curl_fclose(FILE *file, int line, const char *source);
 
 #endif /* _CURL_MEMDEBUG_H */
 #endif /* CURLDEBUG */
+
+#ifndef fake_sclose
+#define fake_sclose(x)
+#endif

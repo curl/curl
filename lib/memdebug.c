@@ -263,13 +263,19 @@ int curl_accept(int s, void *saddr, void *saddrlen,
   return sockfd;
 }
 
+/* separate function to allow libcurl to mark a "faked" close */
+int curl_mark_sclose(int sockfd, int line, const char *source)
+{
+  if(logfile)
+    fprintf(logfile, "FD %s:%d sclose(%d)\n",
+            source, line, sockfd);
+}
+
 /* this is our own defined way to close sockets on *ALL* platforms */
 int curl_sclose(int sockfd, int line, const char *source)
 {
   int res=sclose(sockfd);
-  if(logfile)
-    fprintf(logfile, "FD %s:%d sclose(%d)\n",
-            source, line, sockfd);
+  curl_mark_sclose(sockfd, line, source);
   return res;
 }
 
