@@ -429,7 +429,7 @@ struct addr6ttl {
   int             ttl;
 };
 
-struct srv_reply {
+struct ares_srv_reply {
   unsigned short weight;
   unsigned short priority;
   unsigned short port;
@@ -469,7 +469,7 @@ CARES_EXTERN int ares_parse_ns_reply(const unsigned char *abuf,
 
 CARES_EXTERN int ares_parse_srv_reply(const unsigned char* abuf,
                                       int alen,
-                                      struct srv_reply** srv_out,
+                                      struct ares_srv_reply** srv_out,
                                       int *nsrvreply);
 
 CARES_EXTERN void ares_free_string(void *str);

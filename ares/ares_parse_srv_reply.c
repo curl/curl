@@ -54,14 +54,14 @@
 
 int
 ares_parse_srv_reply (const unsigned char *abuf, int alen,
-                      struct srv_reply **srv_out, int *nsrvreply)
+                      struct ares_srv_reply **srv_out, int *nsrvreply)
 {
   unsigned int qdcount, ancount;
   const unsigned char *aptr;
   int status, i, rr_type, rr_class, rr_len;
   long len;
   char *hostname = NULL, *rr_name = NULL;
-  struct srv_reply *srv = NULL;
+  struct ares_srv_reply *srv = NULL;
 
   /* Set *srv_out to NULL for all failure cases. */
   if (srv_out)
@@ -95,8 +95,8 @@ ares_parse_srv_reply (const unsigned char *abuf, int alen,
     }
   aptr += len + QFIXEDSZ;
 
-  /* Allocate srv_reply array; ancount gives an upper bound */
-  srv = malloc ((ancount) * sizeof (struct srv_reply));
+  /* Allocate ares_srv_reply array; ancount gives an upper bound */
+  srv = malloc ((ancount) * sizeof (struct ares_srv_reply));
   if (!srv)
     {
       free (hostname);
