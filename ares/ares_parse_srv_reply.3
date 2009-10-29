@@ -15,20 +15,19 @@
 .\"
 .TH ARES_PARSE_SRV_REPLY 3 "4 August 2009"
 .SH NAME
-ares_parse_srv_reply \- Parse a reply to a DNS query of type SRV into a
-struct srv_reply
+ares_parse_srv_reply \- Parse a reply to a DNS query of type SRV
 .SH SYNOPSIS
 .nf
 .B #include <ares.h>
 .PP
 .B int ares_parse_srv_reply(const unsigned char* \fIabuf\fP, int \fIalen\fP,
-.B                          struct srv_reply** \fIsrv_out\fP, int *\fInsrvreply\fP);
+.B                          struct ares_srv_reply** \fIsrv_out\fP, int *\fInsrvreply\fP);
 .fi
 .SH DESCRIPTION
 The
 .B ares_parse_srv_reply
 function parses the response to a query of type SRV into a
-.I struct srv_reply 
+.I struct ares_srv_reply 
 The parameters
 .I abuf
 and
@@ -43,12 +42,12 @@ It is the caller's responsibility to free the resulting
 structure when it is no longer needed.
 .PP
 The structure 
-.I srv_reply
+.I ares_srv_reply
 contains the following fields:
 .sp
 .in +4n
 .nf
-struct srv_reply {
+struct ares_srv_reply {
     unsigned short weight;
     unsigned short priority;
     unsigned short port;
