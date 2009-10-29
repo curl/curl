@@ -32,8 +32,8 @@ lib_LTLIBRARIES = libcares.la
 
 man_MANS = $(MANPAGES)
 
-MSVCFILES = vc/vc.dsw vc/acountry/acountry.dsp vc/adig/adig.dsp \
- vc/ahost/ahost.dsp vc/areslib/areslib.dsp vc/areslib/areslib.dsw
+MSVCFILES = vc/vc6aws.dsw vc/acountry/vc6acountry.dsp vc/adig/vc6adig.dsp \
+ vc/ahost/vc6ahost.dsp vc/cares/vc6cares.dsp vc/cares/vc6cares.dsw
 
 if CURLDEBUG
 PROGS =
