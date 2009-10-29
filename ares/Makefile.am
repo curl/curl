@@ -48,7 +48,7 @@ noinst_PROGRAMS =$(PROGS)
 EXTRA_DIST = AUTHORS CHANGES README.cares Makefile.inc Makefile.dj	   \
  Makefile.m32 Makefile.netware Makefile.vc6 $(man_MANS) $(MSVCFILES)	   \
  config-win32.h RELEASE-NOTES libcares.pc.in buildconf get_ver.awk maketgz \
- TODO ares_build.h.in $(PDFPAGES)
+ TODO ares_build.h.in $(PDFPAGES) cares.rc
 
 CLEANFILES = $(PDFPAGES) $(HTMLPAGES)
 
