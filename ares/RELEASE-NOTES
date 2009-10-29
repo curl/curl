@@ -1,4 +1,4 @@
-This is what's new and changed in the c-ares 1.6.1 release:
+This is what's new and changed in the c-ares 1.7.0 release:
 
 Changed:
 
@@ -11,6 +11,7 @@ Changed:
  o new --enable-curldebug configure option
  o ARES_ECANCELLED is now sent as reason for ares_cancel()
  o added ares_parse_srv_reply()
+ o added ares_parse_txt_reply()
 
 Fixed:
 

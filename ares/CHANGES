@@ -1,5 +1,8 @@
   Changelog for the c-ares project
 
+* October 29, 2009 (Daniel Stenberg)
+- Jakub Hrozek added ares_parse_txt_reply() for TXT parsing
+
 * October 23, 2009 (Yang Tse)
 - John Engelhart noticed an unreleased problem relative to a duplicate
   ARES_ECANCELLED error code value and missing error code description.

@@ -23,6 +23,8 @@ CSOURCES = ares__close_sockets.c	\
   ares_parse_ns_reply.c			\
   ares_parse_ptr_reply.c		\
   ares_parse_srv_reply.c		\
+  ares_parse_txt_reply.c		\
+  ares_free_txt_reply.c                 \
   ares_process.c			\
   ares_query.c				\
   ares_search.c				\
