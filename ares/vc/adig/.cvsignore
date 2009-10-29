@@ -1,3 +1,8 @@
+DLL-*
+LIB-*
 adig.dep
 adig.mak
 adig.plg
+vc6adig.dep
+vc6adig.mak
+vc6adig.plg

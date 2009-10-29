@@ -1,5 +1,10 @@
+DLL-*
 Debug
+LIB-*
 Release
 acountry.dep
 acountry.mak
 acountry.plg
+vc6acountry.dep
+vc6acountry.mak
+vc6acountry.plg
