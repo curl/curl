@@ -64,11 +64,10 @@ ares_parse_srv_reply (const unsigned char *abuf, int alen,
   struct ares_srv_reply *srv = NULL;
 
   /* Set *srv_out to NULL for all failure cases. */
-  if (srv_out)
-    *srv_out = NULL;
+  *srv_out = NULL;
+
   /* Same with *nsrvreply. */
-  if (nsrvreply)
-    *nsrvreply = 0;
+  *nsrvreply = 0;
 
   /* Give up if abuf doesn't have room for a header. */
   if (alen < HFIXEDSZ)
