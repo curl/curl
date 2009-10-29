@@ -111,10 +111,10 @@ esac
 dnl libtool setup
 AC_PROG_LIBTOOL
 
-AC_MSG_CHECKING([if we need CARES_BUILDING_LIB])
+AC_MSG_CHECKING([if we need CARES_BUILDING_LIBRARY])
 case $host in
   *-*-mingw*)
-    AC_DEFINE(CARES_BUILDING_LIB, 1, [when building c-ares library])
+    AC_DEFINE(CARES_BUILDING_LIBRARY, 1, [when building c-ares library])
     AC_MSG_RESULT(yes)
     AC_MSG_CHECKING([if we need CARES_STATICLIB])
     if test "X$enable_shared" = "Xno"

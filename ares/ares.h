@@ -27,8 +27,9 @@
  * Define WIN32 when build target is Win32 API
  */
 
-#if (defined(_WIN32) || defined(__WIN32__)) && !defined(WIN32)
-#define WIN32
+#if (defined(_WIN32) || defined(__WIN32__)) && \
+   !defined(WIN32) && !defined(__SYMBIAN32__)
+#  define WIN32
 #endif
 
 #include <sys/types.h>
@@ -69,19 +70,20 @@ extern "C" {
 */
 
 #if !defined(CARES_STATICLIB) && \
-    (defined(WIN32) || defined(_WIN32) || defined(__SYMBIAN32__))
+   (defined(WIN32) || defined(_WIN32) || defined(__SYMBIAN32__))
    /* __declspec function decoration for Win32 and Symbian DLL's */
-#  if defined(CARES_BUILDING_LIB)
+#  if defined(CARES_BUILDING_LIBRARY)
 #    define CARES_EXTERN  __declspec(dllexport)
 #  else
 #    define CARES_EXTERN  __declspec(dllimport)
 #  endif
 #else
    /* visibility function decoration for other cases */
-#  ifdef CARES_HIDDEN_SYMBOLS
-#    define CARES_EXTERN CARES_EXTERN_SYMBOL
-#  else
+#  if !defined(CARES_HIDDEN_SYMBOLS) || \
+     defined(WIN32) || defined(_WIN32) || defined(__SYMBIAN32__)
 #    define CARES_EXTERN
+#  else
+#    define CARES_EXTERN CARES_EXTERN_SYMBOL
 #  endif
 #endif
 
