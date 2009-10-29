@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 59
+# serial 60
 
 
 dnl CARES_CHECK_COMPILER
@@ -1252,8 +1252,8 @@ AC_DEFUN([CARES_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE], [
 dnl CARES_CHECK_COMPILER_HIDDEN_SYMBOLS
 dnl -------------------------------------------------
 dnl Verify if compiler supports hiding library internal symbols, setting
-dnl shell variable hidden_symbols_supported value as appropriate, as well
-dnl as variable hidden_symbols_CFLAGS when supported.
+dnl shell variable hidden_symbols_supported value as appropriate, as well as
+dnl variables hidden_symbols_CFLAGS and hidden_symbols_extern when supported.
 
 AC_DEFUN([CARES_CHECK_COMPILER_HIDDEN_SYMBOLS], [
   AC_REQUIRE([CARES_CHECK_COMPILER])dnl
@@ -1261,6 +1261,7 @@ AC_DEFUN([CARES_CHECK_COMPILER_HIDDEN_SYMBOLS], [
   AC_MSG_CHECKING([if compiler supports hiding library internal symbols])
   hidden_symbols_supported="no"
   hidden_symbols_CFLAGS=""
+  hidden_symbols_extern=""
   tmp_CFLAGS=""
   tmp_extern=""
   case "$compiler_id" in
@@ -1332,11 +1333,8 @@ AC_DEFUN([CARES_CHECK_COMPILER_HIDDEN_SYMBOLS], [
   fi
   if test "$hidden_symbols_supported" = "yes"; then
     AC_MSG_RESULT([yes])
-    AC_DEFINE_UNQUOTED(CARES_HIDDEN_SYMBOLS, 1,
-      [Define to 1 to enable hiding of library internal symbols.])
-    AC_DEFINE_UNQUOTED(CARES_EXTERN_SYMBOL, $tmp_extern,
-      [Definition to make a library symbol externally visible.])
     hidden_symbols_CFLAGS="$tmp_CFLAGS"
+    hidden_symbols_extern="$tmp_extern"
   else
     AC_MSG_RESULT([no])
   fi
