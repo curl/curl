@@ -148,6 +148,7 @@ PDFPAGES = ares_cancel.pdf		\
   ares_parse_aaaa_reply.pdf		\
   ares_parse_ns_reply.pdf		\
   ares_parse_ptr_reply.pdf		\
+  ares_parse_srv_reply.pdf		\
   ares_process.pdf			\
   ares_query.pdf			\
   ares_save_options.pdf			\
