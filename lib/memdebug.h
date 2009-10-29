@@ -57,7 +57,7 @@ CURL_EXTERN void curl_memlimit(long limit);
 
 /* file descriptor manipulators */
 CURL_EXTERN int curl_socket(int domain, int type, int protocol, int line , const char *);
-CURL_EXTERN int curl_mark_sclose(int sockfd, int, const char *source);
+CURL_EXTERN void curl_mark_sclose(int sockfd, int, const char *source);
 CURL_EXTERN int curl_sclose(int sockfd, int, const char *source);
 CURL_EXTERN int curl_accept(int s, void *addr, void *addrlen,
                             int line, const char *source);

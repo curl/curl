@@ -264,7 +264,7 @@ int curl_accept(int s, void *saddr, void *saddrlen,
 }
 
 /* separate function to allow libcurl to mark a "faked" close */
-int curl_mark_sclose(int sockfd, int line, const char *source)
+void curl_mark_sclose(int sockfd, int line, const char *source)
 {
   if(logfile)
     fprintf(logfile, "FD %s:%d sclose(%d)\n",
