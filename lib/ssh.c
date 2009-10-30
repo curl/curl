@@ -2221,6 +2221,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       }
       sshc->ssh_session = NULL;
     }
+    conn->bits.close = TRUE;
     sshc->nextstate = SSH_NO_STATE;
     state(conn, SSH_STOP);
     result = sshc->actualcode;

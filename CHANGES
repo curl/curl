@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel Stenberg (30 Oct 2009)
+- Liza Alenchery mentioned a problem with re-used SCP connection when a bad
+  auth is used, as it caused a crash. I failed to repeat the issue, but still
+  made a change that now forces the TCP connection used for a freed SCP
+  session to get closed and not be re-used.
+
 - "Tom" posted a bug report that mentioned how libcurl did wrong when doing a
   POST using a read callback, with Digest authentication and
   "Transfer-Encoding: chunked" enforced.  I would then cause the first request
