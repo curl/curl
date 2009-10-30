@@ -437,7 +437,7 @@ struct ares_srv_reply {
 };
 
 struct ares_txt_reply {
-  unsigned int  length;
+  size_t         length;  /* length excludes null termination */
   unsigned char *txt;
 };
 

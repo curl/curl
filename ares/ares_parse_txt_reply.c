@@ -1,4 +1,7 @@
+/* $Id$ */
+
 /* Copyright (C) 2009 Jakub Hrozek <jhrozek@redhat.com>
+*  Copyright (C) 2009 Yang Tse <yangsita@gmail.com>
 *
 * Permission to use, copy, modify, and distribute this
 * software and its documentation for any purpose and without
@@ -38,17 +41,20 @@ int
 ares_parse_txt_reply (const unsigned char *abuf, int alen,
                       struct ares_txt_reply **txt_out, int *ntxtreply)
 {
-  unsigned char substr_len = 0;
-  unsigned char str_len = 0;
-  unsigned int qdcount, ancount;
+  size_t substr_len, str_len;
+  unsigned int qdcount, ancount, i;
   const unsigned char *aptr;
   const unsigned char *strptr;
-  int status, i, rr_type, rr_class, rr_len;
+  int status, rr_type, rr_class, rr_len;
   long len;
   char *hostname = NULL, *rr_name = NULL;
   struct ares_txt_reply *txt = NULL;
 
+  /* Set *txt_out to NULL for all failure cases. */
   *txt_out = NULL;
+
+  /* Same with *nsrvreply. */
+  *ntxtreply = 0;
 
   /* Give up if abuf doesn't have room for a header. */
   if (alen < HFIXEDSZ)
@@ -82,11 +88,16 @@ ares_parse_txt_reply (const unsigned char *abuf, int alen,
       free (hostname);
       return ARES_ENOMEM;
     }
-  /* Zero out so we can safely free txt.txt even if NULL */
-  memset(txt, 0, ancount * sizeof (struct ares_txt_reply));
+
+  /* Initialize ares_txt_reply array */
+  for (i = 0; i < ancount; i++)
+    {
+      txt[i].txt = NULL;
+      txt[i].length = 0;
+    }
 
   /* Examine each answer resource record (RR) in turn. */
-  for (i = 0; i < (int) ancount; i++)
+  for (i = 0; i < ancount; i++)
     {
       /* Decode the RR up to the data field. */
       status = ares_expand_name (aptr, abuf, alen, &rr_name, &len);
@@ -116,18 +127,17 @@ ares_parse_txt_reply (const unsigned char *abuf, int alen,
            * substrings contained therein.
            */
 
-          /* Realloc would be expensive, compute the total length */
-          txt[i].length = 0;
+          /* Compute total length to allow a single memory allocation */
           strptr = aptr;
           while (strptr < (aptr + rr_len))
             {
-              memcpy ((void *) &substr_len, strptr, sizeof (unsigned char));
+              substr_len = (unsigned char)*strptr;
               txt[i].length += substr_len;
               strptr += substr_len + 1;
             }
 
           /* Including null byte */
-          txt[i].txt = malloc (sizeof (unsigned char) * (txt[i].length + 1));
+          txt[i].txt = malloc (txt[i].length + 1);
           if (txt[i].txt == NULL)
             {
               status = ARES_ENOMEM;
@@ -135,15 +145,13 @@ ares_parse_txt_reply (const unsigned char *abuf, int alen,
             }
 
           /* Step through the list of substrings, concatenating them */
-          substr_len = 0;
           str_len = 0;
           strptr = aptr;
           while (strptr < (aptr + rr_len))
             {
-              memcpy ((void *) &substr_len, strptr, sizeof (unsigned char));
+              substr_len = (unsigned char)*strptr;
               strptr++;
-              memcpy ((void *) txt[i].txt + str_len, strptr,
-                      sizeof (unsigned char) * substr_len);
+              memcpy ((char *) txt[i].txt + str_len, strptr, substr_len);
               str_len += substr_len;
               strptr += substr_len;
             }
@@ -159,18 +167,25 @@ ares_parse_txt_reply (const unsigned char *abuf, int alen,
       rr_name = NULL;
     }
 
-  free (hostname);
-  free (rr_name);
+  if (hostname);
+    free (hostname);
+  if (rr_name);
+    free (rr_name);
 
   /* clean up on error */
   if (status != ARES_SUCCESS)
     {
-      ares_free_txt_reply(txt, ancount);
+    for (i = 0; i < ancount; i++)
+      {
+        if (txt[i].txt)
+          free (txt[i].txt);
+      }
       return status;
     }
 
   /* everything looks fine, return the data */
   *txt_out = txt;
   *ntxtreply = ancount;
-  return 0;
+
+  return ARES_SUCCESS;
 }
