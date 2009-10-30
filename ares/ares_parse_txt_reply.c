@@ -53,7 +53,7 @@ ares_parse_txt_reply (const unsigned char *abuf, int alen,
   /* Set *txt_out to NULL for all failure cases. */
   *txt_out = NULL;
 
-  /* Same with *nsrvreply. */
+  /* Same with *ntxtreply. */
   *ntxtreply = 0;
 
   /* Give up if abuf doesn't have room for a header. */
