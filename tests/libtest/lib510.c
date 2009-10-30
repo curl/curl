@@ -49,7 +49,6 @@ int test(char *URL)
   CURL *curl;
   CURLcode res=CURLE_OK;
   struct curl_slist *slist = NULL;
-
   struct WriteThis pooh;
   pooh.counter = 0;
 
@@ -97,6 +96,11 @@ int test(char *URL)
 
   /* enforce chunked transfer by setting the header */
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist);
+
+#ifdef LIB565
+  curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
+  curl_easy_setopt(curl, CURLOPT_USERPWD, "foo:bar");
+#endif
 
   /* Perform the request, res will get the return code */
   res = curl_easy_perform(curl);

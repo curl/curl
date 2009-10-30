@@ -42,6 +42,7 @@ This release includes the following bugfixes:
  o memory leak in SCP/SFTP connections
  o use pkg-config to find out libssh2 installation details in configure
  o unparsable cookie expire dates make cookies get treated as session coookies
+ o POST with Digest authentication and "Transfer-Encoding: chunked"
 
 This release includes the following known bugs:
 

@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (30 Oct 2009)
+- "Tom" posted a bug report that mentioned how libcurl did wrong when doing a
+  POST using a read callback, with Digest authentication and
+  "Transfer-Encoding: chunked" enforced.  I would then cause the first request
+  to be wrongly sent and then basically hang until the server closed the
+  connection. I fixed the problem and added test case 565 to verify it.
+
 Daniel Stenberg (25 Oct 2009)
 - Dima Barsky made the curl cookie parser accept cookies even with blank or
   unparsable expiry dates and then treat them as session cookies - previously
