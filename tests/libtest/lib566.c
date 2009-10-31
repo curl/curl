@@ -17,7 +17,7 @@ int test(char *URL)
   CURLcode res;
   CURL *curl;
 
-  long content_length;
+  double content_length = 3;
 
   if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
@@ -41,7 +41,7 @@ int test(char *URL)
                             &content_length);
     moo = fopen(libtest_arg2, "wb");
     if(moo) {
-      fprintf(moo, "CL: %ld\n", content_length);
+      fprintf(moo, "CL: %.0f\n", content_length);
       fclose(moo);
     }
   }

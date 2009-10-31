@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (31 Oct 2009)
+- Gabriel Kuri reported a problem with CURLINFO_CONTENT_LENGTH_DOWNLOAD if the
+  download was 0 bytes, as libcurl would then return the size as unknown (-1)
+  and not 0. I wrote a fix and test case 566 to verify it.
+
 Daniel Stenberg (30 Oct 2009)
 - Liza Alenchery mentioned a problem with re-used SCP connection when a bad
   auth is used, as it caused a crash. I failed to repeat the issue, but still

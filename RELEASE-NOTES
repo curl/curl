@@ -44,6 +44,7 @@ This release includes the following bugfixes:
  o unparsable cookie expire dates make cookies get treated as session coookies
  o POST with Digest authentication and "Transfer-Encoding: chunked"
  o SCP connection re-use with wrong auth
+ o CURLINFO_CONTENT_LENGTH_DOWNLOAD for 0 bytes transfers
 
 This release includes the following known bugs:
 
@@ -57,6 +58,6 @@ advice from friends like these:
  Claes Jakobsson, Sven Anders, Chris Mumford, John P. McCaskey,
  Constantine Sapuntzakis, Michael Stillwell, Tom Mueller, Dan Fandrich,
  Kevin Baughman, John Dennis, Ray Dassen, Johan van Selst, Dima Barsky,
- Liza Alenchery
+ Liza Alenchery, Gabriel Kuri
 
         Thanks! (and sorry if I forgot to mention someone)

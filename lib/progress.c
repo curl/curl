@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -211,7 +211,7 @@ void Curl_pgrsSetUploadCounter(struct SessionHandle *data, curl_off_t size)
 void Curl_pgrsSetDownloadSize(struct SessionHandle *data, curl_off_t size)
 {
   data->progress.size_dl = size;
-  if(size > 0)
+  if(size >= 0)
     data->progress.flags |= PGRS_DL_SIZE_KNOWN;
   else
     data->progress.flags &= ~PGRS_DL_SIZE_KNOWN;
@@ -220,7 +220,7 @@ void Curl_pgrsSetDownloadSize(struct SessionHandle *data, curl_off_t size)
 void Curl_pgrsSetUploadSize(struct SessionHandle *data, curl_off_t size)
 {
   data->progress.size_ul = size;
-  if(size > 0)
+  if(size >= 0)
     data->progress.flags |= PGRS_UL_SIZE_KNOWN;
   else
     data->progress.flags &= ~PGRS_UL_SIZE_KNOWN;
