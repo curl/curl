@@ -12,6 +12,7 @@ Changed:
  o ARES_ECANCELLED is now sent as reason for ares_cancel()
  o added ares_parse_srv_reply()
  o added ares_parse_txt_reply()
+ o new --enable-symbol-hiding configure option
 
 Fixed:
 
