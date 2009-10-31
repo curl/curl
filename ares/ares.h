@@ -79,11 +79,11 @@ extern "C" {
 #  endif
 #else
    /* visibility function decoration for other cases */
-#  if !defined(CARES_HIDDEN_SYMBOLS) || \
+#  if !defined(CARES_SYMBOL_HIDING) || \
      defined(WIN32) || defined(_WIN32) || defined(__SYMBIAN32__)
 #    define CARES_EXTERN
 #  else
-#    define CARES_EXTERN CARES_EXTERN_SYMBOL
+#    define CARES_EXTERN CARES_SYMBOL_SCOPE_EXTERN
 #  endif
 #endif
 
