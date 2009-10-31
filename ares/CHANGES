@@ -1,7 +1,31 @@
   Changelog for the c-ares project
 
+* October 31, 2009 (Yang Tse)
+- Symbol hiding configure options are named now --enable-symbol-hiding
+  and --disable-symbol-hiding in an attempt to make them less ambiguous.
+
+* October 30, 2009 (Yang Tse)
+- Many fixes for ares_parse_txt_reply()
+
 * October 29, 2009 (Daniel Stenberg)
 - Jakub Hrozek added ares_parse_txt_reply() for TXT parsing
+
+* October 29, 2009 (Yang Tse)
+- Updated MSVC 6.0 workspace and project files that allows building
+  dynamic and static c-ares libraries in debug and release flavours.
+  Additionally each of the three sample programs is built against
+  each of the four possible c-ares libraries, generating all this
+  a total number of 12 executables and 4 libraries.
+
+* October 28, 2009 (Yang Tse)
+- Initial step towards the ability to reduce c-ares exported symbols
+  when built as a shared library based on the 'visibility' attribute
+  for GNUC and Intel compilers and based on __global for Sun compilers,
+  taking also in account __declspec function decoration for Win32 and
+  Symbian DLL's.
+
+* October 27, 2009 (Yang Tse)
+- Fixed Pelles C Win32 target compilation issues.
 
 * October 23, 2009 (Yang Tse)
 - John Engelhart noticed an unreleased problem relative to a duplicate
@@ -12,6 +36,16 @@
   triggered with malformed /etc/hosts file. Improving parsing of /etc/hosts
   file. Validating requested address family. Ensuring that failures always
   return a NULL pointer. Adjusting header inclusions.
+
+* October 6, 2009 (Yang Tse)
+- Fix ssize_t redefinition errors on WIN64 reported by Alexey Simak.
+
+* September 29, 2009 (Yang Tse)
+- Make configure script also check if _REENTRANT definition is required to
+  make errno available as a preprocessor macro.
+
+* September 7, 2009 (Yang Tse)
+- Add T_SRV portability check to ares_parse_srv_reply.c
 
 * 4 Sep 2009 (Daniel Stenberg)
 - Jakub Hrozek added ares_parse_srv_reply() for SRV parsing
@@ -28,7 +62,27 @@
 * 14 Jul 2009 (Guenter Knauf)
 - renamed generated config.h to ares_config.h to avoid any future clashes
   with config.h from other projects.
-  
+
+* June 20 2009 (Yang Tse)
+- Refactor how libraries are checked for connect() function in configure
+  script and check for connect() as it is done for other functions.
+
+* June 19 2009 (Yang Tse)
+- Make sclose() function-like macro definition used to close a socket,
+  now solely based on HAVE_CLOSESOCKET and HAVE_CLOSESOCKET_CAMEL
+  config file preprocessor definitions
+
+* June 18 2009 (Yang Tse)
+- Add CloseSocket camel case function check for configure script.
+
+* June 17 2009 (Yang Tse)
+- Check for socket() and closesocket() as it is done for other functions
+  in configure script.
+
+* June 11 2009 (Yang Tse)
+- Modified buildconf so that when automake runs it copies missing files
+  instead of symlinking them.
+
 * June 8 2009 (Yang Tse)
 - Removed buildconf.bat from release and daily snapshot archives. This
   file is only for CVS tree checkout builds.
@@ -49,6 +103,13 @@
   which is only compiled for debug enabled builds. And symbol CURLDEBUG is
   used to differentiate code which is _only_ used for memory tracking.
 
+  Make ares_init(), ares_dup() and ares_init_options() fail returning
+  ARES_ENOTINITIALIZED if library initialization has not been performed
+  calling ares_library_init().
+
+* May 20 2009 (Yang Tse)
+- Added ares_library_init() and ares_library_cleanup() man pages.
+
 * May 19 2009 (Yang Tse)
 - Introduced ares_library_init() and ares_library_cleanup() functions.
 
@@ -67,6 +128,10 @@
 * May 11 2009 (Daniel Stenberg)
 - Gregor Jasny made c-ares link with libtool 's -export-symbols-regex option to
   only expose functions starting with ares_.
+
+* May 7 2009 (Yang Tse)
+- Fix an m4 overquoting triggering a spurious 'AS_TR_CPP' symbol definition
+  attempt in generated config.h
 
 * May 2 2009 (Yang Tse)
 - Use a build-time configured ares_socklen_t data type instead of socklen_t.
