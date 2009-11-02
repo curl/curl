@@ -72,7 +72,7 @@ int main(void)
 
     if(CURLE_OK != res)
     {
-      printf("Error: %s\n", strerror(res));
+      printf("Error: %s\n", curl_easy_strerror(res));
       return 1;
     }
 
@@ -90,7 +90,7 @@ int main(void)
 
     if(CURLE_OK != res)
     {
-      printf("Error: %s\n", strerror(res));
+      printf("Error: %s\n", curl_easy_strerror(res));
       return 1;
     }
     puts("Reading response.");
