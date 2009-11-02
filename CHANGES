@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (2 Nov 2009)
+- As reported independent by both Stan van de Burgt and Didier Brisebourg,
+  CURLINFO_SIZE_DOWNLOAD (the -w variable size_download) didn't work when
+  getting data from ldap!
+
 Daniel Stenberg (31 Oct 2009)
 - Gabriel Kuri reported a problem with CURLINFO_CONTENT_LENGTH_DOWNLOAD if the
   download was 0 bytes, as libcurl would then return the size as unknown (-1)

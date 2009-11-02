@@ -45,6 +45,7 @@ This release includes the following bugfixes:
  o POST with Digest authentication and "Transfer-Encoding: chunked"
  o SCP connection re-use with wrong auth
  o CURLINFO_CONTENT_LENGTH_DOWNLOAD for 0 bytes transfers
+ 0 CURLINFO_SIZE_DOWNLOAD for ldap transfers (-w size_download)
 
 This release includes the following known bugs:
 
@@ -58,6 +59,6 @@ advice from friends like these:
  Claes Jakobsson, Sven Anders, Chris Mumford, John P. McCaskey,
  Constantine Sapuntzakis, Michael Stillwell, Tom Mueller, Dan Fandrich,
  Kevin Baughman, John Dennis, Ray Dassen, Johan van Selst, Dima Barsky,
- Liza Alenchery, Gabriel Kuri
+ Liza Alenchery, Gabriel Kuri, Stan van de Burgt, Didier Brisebourg
 
         Thanks! (and sorry if I forgot to mention someone)
