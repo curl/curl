@@ -20,7 +20,7 @@
  *      on behalf of Red Hat - http://www.redhat.com
  */
 
-#include "setup.h"
+#include "ares_setup.h"
 
 #ifdef HAVE_SYS_SOCKET_H
 #  include <sys/socket.h>

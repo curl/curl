@@ -18,7 +18,7 @@
  * without express or implied warranty.
  */
 
-#include "setup.h"
+#include "ares_setup.h"
 
 #ifndef HAVE_STRCASECMP
 extern int ares_strcasecmp(const char *a, const char *b);

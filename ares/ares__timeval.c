@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-#include "setup.h"
+#include "ares_setup.h"
 #include "ares.h"
 #include "ares_private.h"
 

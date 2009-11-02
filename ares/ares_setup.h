@@ -1,5 +1,5 @@
-#ifndef __ARES_SETUP_H
-#define __ARES_SETUP_H
+#ifndef HEADER_CARES_SETUP_H
+#define HEADER_CARES_SETUP_H
 
 /* $Id$ */
 
@@ -184,4 +184,4 @@
 #include "setup_once.h"
 #endif
 
-#endif /* __ARES_SETUP_H */
+#endif /* HEADER_CARES_SETUP_H */

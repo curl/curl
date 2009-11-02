@@ -55,7 +55,7 @@ HHEADERS = ares.h			\
   inet_net_pton.h			\
   inet_ntop.h				\
   nameser.h				\
-  setup.h				\
+  ares_setup.h				\
   setup_once.h
 
 MANPAGES = ares_cancel.3		\

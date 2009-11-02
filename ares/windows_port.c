@@ -1,4 +1,4 @@
-#include "setup.h"
+#include "ares_setup.h"
 
 /* $Id$ */
 

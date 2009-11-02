@@ -16,7 +16,7 @@
  * without express or implied warranty.
  */
 
-#include "setup.h"
+#include "ares_setup.h"
 
 #if defined(WIN32) && !defined(WATT32)
 #include <iphlpapi.h>

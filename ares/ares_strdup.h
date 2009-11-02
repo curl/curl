@@ -18,7 +18,7 @@
  * without express or implied warranty.
  */
 
-#include "setup.h"
+#include "ares_setup.h"
 
 #ifndef HAVE_STRDUP
 extern char *ares_strdup(const char *s1);

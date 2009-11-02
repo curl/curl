@@ -1,5 +1,8 @@
   Changelog for the c-ares project
 
+* November 2, 2009 (Yang Tse)
+- Renamed c-ares setup.h to ares_setup.h
+
 * October 31, 2009 (Yang Tse)
 - Symbol hiding configure options are named now --enable-symbol-hiding
   and --disable-symbol-hiding in an attempt to make them less ambiguous.

@@ -20,7 +20,7 @@
  *      on behalf of AVIRA Gmbh - http://www.avira.com
  */
 
-#include "setup.h"
+#include "ares_setup.h"
 
 #ifdef HAVE_SYS_SOCKET_H
 #  include <sys/socket.h>

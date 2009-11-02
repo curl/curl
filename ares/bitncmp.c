@@ -19,7 +19,7 @@
 
 #ifndef HAVE_BITNCMP
 
-#include "setup.h"
+#include "ares_setup.h"
 #include "bitncmp.h"
 
 /*
