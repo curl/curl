@@ -66,6 +66,7 @@
 #include <curl/curl.h>
 #include "sendf.h"
 #include "escape.h"
+#include "progress.h"
 #include "transfer.h"
 #include "strequal.h"
 #include "strtok.h"
