@@ -1,4 +1,4 @@
-Updated: Oct 22, 2009 (http://curl.haxx.se/docs/faq.html)
+Updated: Nov 3, 2009 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -130,7 +130,8 @@ FAQ
     libcurl is highly portable, it builds and works identically on numerous
     platforms, including Solaris, NetBSD, FreeBSD, OpenBSD, Darwin, HPUX,
     IRIX, AIX, Tru64, Linux, UnixWare, HURD, Windows, Amiga, OS/2, BeOs, Mac
-    OS X, Ultrix, QNX, OpenVMS, RISC OS, Novell NetWare, DOS and more...
+    OS X, Ultrix, QNX, OpenVMS, RISC OS, Novell NetWare, DOS, Symbian, OSF,
+    Android, Minix, IBM TPF and more...
 
     libcurl is free, thread-safe, IPv6 compatible, feature rich, well
     supported and fast.
@@ -430,7 +431,7 @@ FAQ
   and logs and check out why the configure script doesn't find the SSL libs
   and/or include files.
 
-  Also, check out the other paragraph in this FAQ labeled "configure doesn't
+  Also, check out the other paragraph in this FAQ labelled "configure doesn't
   find OpenSSL even when it is installed".
 
   3.2 How do I tell curl to resume a transfer?
@@ -510,12 +511,13 @@ FAQ
   install and use them, in the libcurl section of the curl web site:
   http://curl.haxx.se/libcurl/
 
-  In February 2007, there are interfaces available for the following
-  languages: Ada95, Basic, C, C++, Ch, Cocoa, D, Dylan, Euphoria, Ferite,
-  Gambas, glib/GTK+, Java, Lisp, Lua, Mono, .NET, Object-Pascal, O'Caml,
-  Pascal, Perl, PHP, PostgreSQL, Python, R, Rexx, Ruby, Scheme, S-Lang,
-  Smalltalk, SPL, Tcl, Visual Basic, Q, wxwidgets and XBLite. By the time you
-  read this, additional ones may have appeared!
+  In October 2009, there were interfaces available for the following
+  languages: Ada95, Basic, C, C++, Ch, Cocoa, D, Dylan, Eiffel, Euphoria,
+  Ferite, Gambas, glib/GTK+, Haskell, ILE/RPG, Java, Lisp, Lua, Mono, .NET,
+  Object-Pascal, O'Caml, Pascal, Perl, PHP, PostgreSQL, Python, R, Rexx, Ruby,
+  Scheme, S-Lang, Smalltalk, SP-Forth, SPL, Tcl, Visual Basic, Visual FoxPro,
+  Q, wxwidgets and XBLite. By the time you read this, additional ones may have
+  appeared!
 
   3.10 What about SOAP, WebDAV, XML-RPC or similar protocols over HTTP?
 
@@ -581,7 +583,7 @@ FAQ
   the name of the proxy to connect to. Since curl doesn't support Javascript,
   it can't support .pac proxy configuration either.
 
-  Some work-arounds usually suggested to overcome this Javascript dependency:
+  Some workarounds usually suggested to overcome this Javascript dependency:
 
   - Depending on the Javascript complexity, write up a script that
     translates it to another language and execute that.
@@ -799,9 +801,9 @@ FAQ
   4.9 Curl can't authenticate to the server that requires NTLM?
 
   This is supported in curl 7.10.6 or later. No earlier curl version knows
-  of this magic. Later versions require the OpenSSL or Microsoft Windows 
-  libraries to provide this functionality. Using the NSS library will 
-  not provide NTLM authentication functionality in curl.
+  of this magic. Later versions require the OpenSSL, GnuTLS or Microsoft
+  Windows libraries to provide this functionality. Using the NSS library
+  will not provide NTLM authentication functionality in curl.
 
   NTLM is a Microsoft proprietary protocol. Proprietary formats are evil. You
   should not use such ones.
