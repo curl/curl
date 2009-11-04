@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (4 Nov 2009)
+- I fixed several problems with the transfer progress meter. It showed the
+  wrong percentage for small files, most notable for <1000 bytes and could
+  easily end up showing more than 100% at the end. It also didn't show any
+  percentage, transfer size or estimated transfer times when transferring
+  less than 100 bytes.
+
 Version 7.19.7 (4 November 2009)
 
 Daniel Stenberg (2 Nov 2009)
