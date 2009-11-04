@@ -9,6 +9,6 @@
 
 #include <openenv.iby>
 
-file=ABI_DIR\BUILD_DIR\libcurl.dll        System\Libs\libcurl.dll
+file=ABI_DIR\BUILD_DIR\libcurl.dll        \sys\bin\libcurl.dll
 
-#endif
+#endif // LIBCURL_IBY

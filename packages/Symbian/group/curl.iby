@@ -10,6 +10,6 @@
 #include <openenv.iby>
 #include <libcurl.iby>
 
-file=ABI_DIR\BUILD_DIR\curl.exe            System\Programs\curl.exe
+file=ABI_DIR\BUILD_DIR\curl.exe            \sys\bin\curl.exe
 
 #endif // CURL_IBY
