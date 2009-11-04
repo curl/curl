@@ -1,51 +1,19 @@
-Curl and libcurl 7.19.7
+Curl and libcurl 7.19.8
 
- Public curl releases:         113
+ Public curl releases:         114
  Command line options:         132
  curl_easy_setopt() options:   163
  Public functions in libcurl:  58
  Known libcurl bindings:       38
- Contributors:                 732
+ Contributors:                 761
 
 This release includes the following changes:
 
- o -T. is now for non-blocking uploading from stdin
- o SYST handling on FTP for OS/400 FTP server cases
- o libcurl refuses to read a single HTTP header longer than 100K
- o added the --crlfile option to curl
+ o 
 
 This release includes the following bugfixes:
 
- o The windows makefiles work again
- o libcurl-NSS acknowledges verifyhost
- o SIGSEGV when pipelined pipe unexpectedly breaks
- o data corruption issue with re-connected transfers
- o use after free if we're completed but easy_conn not NULL (pipelined)
- o missing strdup() return code check
- o CURLOPT_PROXY_TRANSFER_MODE could pass along wrong syntax
- o configure --with-gnutls=PATH fixed
- o ftp response reader bug on failed control connections
- o improved NSS error message on failed host name verifications
- o ftp NOBODY on re-used connection hang
- o configure uses pkg-config for cross-compiles as well
- o improved NSS detection in configure
- o cookie expiry date at 1970-jan-1 00:00:00
- o libcurl-OpenSSL failed to verify some certs with Subject Alternative Name
- o libcurl-OpenSSL can load CRL files with more than one certificate inside
- o received cookies without explicit path got saved wrong if the URL had a
-   query part
- o don't shrink SO_SNDBUF on windows for those who have it set large already
- o connect next bug
- o invalid file name characters handling on Windows
- o double close() on the primary socket with libcurl-NSS
- o GSS negotiate infinite loop on bad credentials
- o memory leak in SCP/SFTP connections
- o use pkg-config to find out libssh2 installation details in configure
- o unparsable cookie expire dates make cookies get treated as session coookies
- o POST with Digest authentication and "Transfer-Encoding: chunked"
- o SCP connection re-use with wrong auth
- o CURLINFO_CONTENT_LENGTH_DOWNLOAD for 0 bytes transfers
- o CURLINFO_SIZE_DOWNLOAD for ldap transfers (-w size_download)
+ o 
 
 This release includes the following known bugs:
 
@@ -54,11 +22,6 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Karl Moerder, Kamil Dudka, Krister Johansen, Andre Guibert de Bruet,
- Michal Marek, Eric Wong, Guenter Knauf, Peter Sylvester, Daniel Johnson,
- Claes Jakobsson, Sven Anders, Chris Mumford, John P. McCaskey,
- Constantine Sapuntzakis, Michael Stillwell, Tom Mueller, Dan Fandrich,
- Kevin Baughman, John Dennis, Ray Dassen, Johan van Selst, Dima Barsky,
- Liza Alenchery, Gabriel Kuri, Stan van de Burgt, Didier Brisebourg
+ 
 
         Thanks! (and sorry if I forgot to mention someone)
