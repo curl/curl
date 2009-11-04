@@ -1,17 +1,5 @@
-To be addressed in 7.19.7 (planned release: October 2009)
+To be addressed in 7.19.8 (planned release: January 2010)
 =========================
-
-248 - "Pausing pipeline problems."
-      http://curl.haxx.se/mail/lib-2009-07/0214.html
-
-251 - TFTP block size / better integration in transfer
-      http://curl.haxx.se/mail/lib-2009-08/0028.html
-
-254 - Problem re-using easy handle after call to curl_multi_remove_handle
-      http://curl.haxx.se/mail/lib-2009-07/0249.html
-    
-256 - "More questions about ares behavior"
-      http://curl.haxx.se/mail/lib-2009-08/0012.html
 
 244 - patch for [out] parameters
       http://curl.haxx.se/mail/lib-2009-06/0342.html
@@ -24,5 +12,11 @@ To be addressed in 7.19.7 (planned release: October 2009)
 
 253 - add option to disable SNI for TLS handshakes
 
-257 -
+257 - bug #2891595  DNS cache
+
+258 - bug #2891591  Curl_dns_entry
+
+259 - Avoding connection re-use when using CURLOPT_HTTPPROXYTUNNEL
+
+260 -
 
