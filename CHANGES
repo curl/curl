@@ -6,6 +6,8 @@
 
                                   Changelog
 
+Version 7.19.7 (4 November 2009)
+
 Daniel Stenberg (2 Nov 2009)
 - As reported independent by both Stan van de Burgt and Didier Brisebourg,
   CURLINFO_SIZE_DOWNLOAD (the -w variable size_download) didn't work when
