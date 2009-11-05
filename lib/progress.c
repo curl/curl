@@ -370,27 +370,27 @@ int Curl_pgrsUpdate(struct connectdata *conn)
     }
 
     /* Figure out the estimated time of arrival for the upload */
-    if((data->progress.flags & PGRS_UL_SIZE_KNOWN)  &&
+    if((data->progress.flags & PGRS_UL_SIZE_KNOWN) &&
        (data->progress.ulspeed > CURL_OFF_T_C(0))) {
       ulestimate = data->progress.size_ul / data->progress.ulspeed;
 
-      if(data->progress.size_ul > CURL_OFF_T_C(10000) )
+      if(data->progress.size_ul > CURL_OFF_T_C(10000))
         ulpercen = data->progress.uploaded /
           (data->progress.size_ul/CURL_OFF_T_C(100));
-      else
+      else if(data->progress.size_ul > CURL_OFF_T_C(0))
         ulpercen = (data->progress.uploaded*100) /
           data->progress.size_ul;
     }
 
     /* ... and the download */
     if((data->progress.flags & PGRS_DL_SIZE_KNOWN) &&
-       (data->progress.dlspeed > CURL_OFF_T_C(0)) ) {
+       (data->progress.dlspeed > CURL_OFF_T_C(0))) {
       dlestimate = data->progress.size_dl / data->progress.dlspeed;
 
       if(data->progress.size_dl > CURL_OFF_T_C(10000))
         dlpercen = data->progress.downloaded /
           (data->progress.size_dl/CURL_OFF_T_C(100));
-      else
+      else if(data->progress.size_dl > CURL_OFF_T_C(0))
         dlpercen = (data->progress.downloaded*100) /
           data->progress.size_dl;
     }
@@ -418,7 +418,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
     if(total_expected_transfer > CURL_OFF_T_C(10000))
       total_percen = total_transfer /
         (total_expected_transfer/CURL_OFF_T_C(100));
-    else if(total_expected_transfer > 0)
+    else if(total_expected_transfer > CURL_OFF_T_C(0))
       total_percen = (total_transfer*100) / total_expected_transfer;
 
     fprintf(data->set.err,
