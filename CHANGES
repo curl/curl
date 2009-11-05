@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Kamil Dudka (5 Nov 2009)
+- Dropped misleading timeouts in libcurl-NSS and made sure the SSL socket works
+  in non-blocking mode.
+
 Yang Tse (5 Nov 2009)
 - I removed leading 'curl' path on the 'curlbuild.h' include statement in
   curl.h, adjusting auto-makefiles include path, to enhance portability to
