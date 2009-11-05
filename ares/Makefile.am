@@ -13,6 +13,7 @@ ACLOCAL_AMFLAGS = -I m4
 # only works when c-ares is built and linked with a similarly debug-build
 # libcurl, but we do this anyway for convenience.
 #
+# $(top_builddir)/../include/curl for generated curlbuild.h included from curl.h
 # $(top_builddir)/../include is for libcurl's generated curl/curlbuild.h file
 # $(top_srcdir)/../include is for libcurl's external include files
 # $(top_builddir)/../lib is for libcurl's generated lib/curl_config.h file
@@ -21,11 +22,12 @@ ACLOCAL_AMFLAGS = -I m4
 # $(top_srcdir) is for c-ares's ares_setup.h and other "c-ares-private" files
 
 if CURLDEBUG
-INCLUDES = -I$(top_builddir)/../include \
-           -I$(top_srcdir)/../include   \
-           -I$(top_builddir)/../lib     \
-           -I$(top_srcdir)/../lib       \
-           -I$(top_builddir)            \
+INCLUDES = -I$(top_builddir)/../include/curl \
+           -I$(top_builddir)/../include      \
+           -I$(top_srcdir)/../include        \
+           -I$(top_builddir)/../lib          \
+           -I$(top_srcdir)/../lib            \
+           -I$(top_builddir)                 \
            -I$(top_srcdir)
 else
 INCLUDES = -I$(top_builddir) \
