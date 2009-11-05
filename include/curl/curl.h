@@ -31,16 +31,8 @@
  *   http://cool.haxx.se/mailman/listinfo/curl-library/
  */
 
-/*
- * Leading 'curl' path on the 'curlbuild.h' include statement is
- * required to properly allow building outside of the source tree,
- * due to the fact that in this case 'curlbuild.h' is generated in
- * a subdirectory of the build tree while 'curl.h actually remains
- * in a subdirectory of the source tree.
- */
-
 #include "curlver.h"         /* libcurl version defines   */
-#include "curl/curlbuild.h"  /* libcurl build definitions */
+#include "curlbuild.h"       /* libcurl build definitions */
 #include "curlrules.h"       /* libcurl rules enforcement */
 
 /*

@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Yang Tse (5 Nov 2009)
+- I removed leading 'curl' path on the 'curlbuild.h' include statement in
+  curl.h, adjusting auto-makefiles include path, to enhance portability to
+  OS's without an orthogonal directory tree structure such as OS/400.
+
 Daniel Stenberg (4 Nov 2009)
 - I fixed several problems with the transfer progress meter. It showed the
   wrong percentage for small files, most notable for <1000 bytes and could

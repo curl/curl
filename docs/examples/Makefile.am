@@ -12,10 +12,12 @@ EXTRA_DIST = README Makefile.example Makefile.inc Makefile.m32 \
 # being currently built and tested are searched before the library which
 # might possibly already be installed in the system.
 #
-# $(top_builddir)/include is for libcurl's generated curl/curlbuild.h file
+# $(top_builddir)/include/curl for generated curlbuild.h included from curl.h
+# $(top_builddir)/include for generated curlbuild.h included from lib/setup.h
 # $(top_srcdir)/include is for libcurl's external include files
 
-INCLUDES = -I$(top_builddir)/include \
+INCLUDES = -I$(top_builddir)/include/curl \
+           -I$(top_builddir)/include      \
            -I$(top_srcdir)/include
 
 LIBDIR = $(top_builddir)/lib

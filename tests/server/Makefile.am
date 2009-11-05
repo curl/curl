@@ -27,7 +27,8 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # being currently built and tested are searched before the library which
 # might possibly already be installed in the system.
 #
-# $(top_builddir)/include is for libcurl's generated curl/curlbuild.h file
+# $(top_builddir)/include/curl for generated curlbuild.h included from curl.h
+# $(top_builddir)/include for generated curlbuild.h included from lib/setup.h
 # $(top_srcdir)/include is for libcurl's external include files
 # $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
 # $(top_srcdir)/lib is for libcurl's lib/setup.h and other "borrowed" files
@@ -35,16 +36,18 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # $(top_srcdir)/ares is for in-tree c-ares's external include files
 
 if USE_EMBEDDED_ARES
-INCLUDES = -I$(top_builddir)/include \
-           -I$(top_srcdir)/include   \
-           -I$(top_builddir)/lib     \
-           -I$(top_srcdir)/lib       \
-           -I$(top_builddir)/ares    \
+INCLUDES = -I$(top_builddir)/include/curl \
+           -I$(top_builddir)/include      \
+           -I$(top_srcdir)/include        \
+           -I$(top_builddir)/lib          \
+           -I$(top_srcdir)/lib            \
+           -I$(top_builddir)/ares         \
            -I$(top_srcdir)/ares
 else
-INCLUDES = -I$(top_builddir)/include \
-           -I$(top_srcdir)/include   \
-           -I$(top_builddir)/lib     \
+INCLUDES = -I$(top_builddir)/include/curl \
+           -I$(top_builddir)/include      \
+           -I$(top_srcdir)/include        \
+           -I$(top_builddir)/lib          \
            -I$(top_srcdir)/lib
 endif
 
