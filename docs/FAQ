@@ -1,4 +1,4 @@
-Updated: Nov 3, 2009 (http://curl.haxx.se/docs/faq.html)
+Updated: Nov 7, 2009 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -73,6 +73,7 @@ FAQ
   4.15 FTPS doesn't work
   4.16 My HTTP POST or PUT requests are slow!
   4.17 Non-functional connect timeouts on Windows
+  4.18 file:// URLs containing drive letters (Windows, NetWare)
 
  5. libcurl Issues
   5.1 Is libcurl thread-safe?
@@ -915,6 +916,33 @@ FAQ
   anything else. This will make (lib)curl to consider the connection connected
   and thus the connect timeout won't trigger.
 
+  4.18 file:// URLs containing drive letters (Windows, NetWare)
+
+  When using cURL to try to download a local file, one might use a URL
+  in this format:
+
+  file://D:/blah.txt
+
+  You'll find that even if D:\blah.txt does exist, cURL returns a 'file
+  not found' error.
+
+  According to RFC 1738 (http://www.faqs.org/rfcs/rfc1738.html),
+  file:// URLs must contain a host component, but it is ignored by
+  most implementations. In the above example, 'D:' is treated as the
+  host component, and is taken away. Thus, cURL tries to open '/blah.txt'.
+  If your system is installed to drive C:, that will resolve to 'C:\blah.txt',
+  and if that doesn't exist you will get the not found error.
+
+  To fix this problem, use file:// URLs with *three* leading slashes:
+
+  file:///D:/blah.txt
+
+  Alternatively, if it makes more sense, specify 'localhost' as the host
+  component:
+
+  file://localhost/D:/blah.txt
+
+  In either case, cURL should now be looking for the correct file.
 
 5. libcurl Issues
 
