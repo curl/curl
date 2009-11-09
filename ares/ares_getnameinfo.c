@@ -61,10 +61,6 @@
 #include "inet_ntop.h"
 #include "ares_private.h"
 
-#ifdef WATT32
-#undef WIN32
-#endif
-
 struct nameinfo_query {
   ares_nameinfo_callback callback;
   void *arg;
