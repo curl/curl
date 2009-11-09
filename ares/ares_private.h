@@ -30,7 +30,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 
-#if !defined(WIN32) || defined(WATT32)
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 

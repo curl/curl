@@ -18,7 +18,7 @@
 #include "ares_setup.h"
 #include <stdlib.h>
 
-#if !defined(WIN32) || defined(WATT32)
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
 
