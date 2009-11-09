@@ -24,7 +24,7 @@
 
 /* library-private global and unique instance vars */
 
-#ifdef WIN32
+#ifdef USE_WINSOCK
 fpGetNetworkParams_t fpGetNetworkParams = ZERO_NULL;
 fpSystemFunction036_t fpSystemFunction036 = ZERO_NULL;
 #endif
@@ -34,7 +34,7 @@ fpSystemFunction036_t fpSystemFunction036 = ZERO_NULL;
 static unsigned int ares_initialized;
 static int          ares_init_flags;
 
-#ifdef WIN32
+#ifdef USE_WINSOCK
 static HMODULE hnd_iphlpapi;
 static HMODULE hnd_advapi32;
 #endif
@@ -42,7 +42,7 @@ static HMODULE hnd_advapi32;
 
 static int ares_win32_init(void)
 {
-#ifdef WIN32
+#ifdef USE_WINSOCK
 
   hnd_iphlpapi = 0;
   hnd_iphlpapi = LoadLibrary("iphlpapi.dll");
@@ -78,7 +78,7 @@ static int ares_win32_init(void)
 
 static void ares_win32_cleanup(void)
 {
-#ifdef WIN32
+#ifdef USE_WINSOCK
   if (hnd_advapi32)
     FreeLibrary(hnd_advapi32);
   if (hnd_iphlpapi)
@@ -123,7 +123,7 @@ void ares_library_cleanup(void)
 
 int ares_library_initialized(void)
 {
-#ifdef WIN32
+#ifdef USE_WINSOCK
   if (!ares_initialized)
     return ARES_ENOTINITIALIZED;
 #endif

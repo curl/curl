@@ -21,7 +21,7 @@
 
 #include "ares_setup.h"
 
-#ifdef WIN32
+#ifdef USE_WINSOCK
 
 #include <iphlpapi.h>
 
@@ -34,7 +34,7 @@ typedef BOOLEAN (APIENTRY *fpSystemFunction036_t) (void*, ULONG);
 extern fpGetNetworkParams_t fpGetNetworkParams;
 extern fpSystemFunction036_t fpSystemFunction036;
 
-#endif /* WIN32 */
+#endif /* USE_WINSOCK */
 
 #endif /* HEADER_CARES_LIBRARY_INIT_H */
 

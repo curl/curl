@@ -18,7 +18,7 @@
 
 #include "ares_setup.h"
 
-#if defined(WIN32) && !defined(WATT32)
+#ifdef USE_WINSOCK
 #include <iphlpapi.h>
 #endif
 
