@@ -34,97 +34,97 @@ RSC=rc.exe
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "DLL-Debug"
-# PROP BASE Intermediate_Dir "DLL-Debug"
+# PROP BASE Output_Dir "dll-debug"
+# PROP BASE Intermediate_Dir "dll-debug/obj"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "DLL-Debug"
-# PROP Intermediate_Dir "DLL-Debug"
+# PROP Output_Dir "dll-debug"
+# PROP Intermediate_Dir "dll-debug/obj"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "..\.." /D "WIN32" /D "_CONSOLE" /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "..\.." /D "WIN32" /D "_CONSOLE" /FD /GZ /c
+# ADD BASE CPP /nologo /MDd /W3 /GX /Zi /Od /I "..\.." /D "_DEBUG" /D "WIN32" /D "_CONSOLE" /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /GX /Zi /Od /I "..\.." /D "_DEBUG" /D "WIN32" /D "_CONSOLE" /FD /GZ /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 caresd_imp.lib ws2_32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"DLL-Debug/acountry.exe" /pdbtype:sept /libpath:"..\cares\DLL-Debug"
-# ADD LINK32 caresd_imp.lib ws2_32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"DLL-Debug/acountry.exe" /pdbtype:sept /libpath:"..\cares\DLL-Debug"
+# ADD BASE LINK32 caresd_imp.lib ws2_32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"dll-debug/acountry.exe" /pdbtype:sept /libpath:"..\cares\dll-debug"
+# ADD LINK32 caresd_imp.lib ws2_32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"dll-debug/acountry.exe" /pdbtype:sept /libpath:"..\cares\dll-debug"
 
 !ELSEIF  "$(CFG)" == "acountry - Win32 using cares DLL Release"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "DLL-Release"
-# PROP BASE Intermediate_Dir "DLL-Release"
+# PROP BASE Output_Dir "dll-release"
+# PROP BASE Intermediate_Dir "dll-release/obj"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "DLL-Release"
-# PROP Intermediate_Dir "DLL-Release"
+# PROP Output_Dir "dll-release"
+# PROP Intermediate_Dir "dll-release/obj"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "..\.." /D "WIN32" /D "_CONSOLE" /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /D "WIN32" /D "_CONSOLE" /FD /c
+# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "..\.." /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /FD /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 cares_imp.lib ws2_32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"DLL-Release/acountry.exe" /libpath:"..\cares\DLL-Release"
-# ADD LINK32 cares_imp.lib ws2_32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"DLL-Release/acountry.exe" /libpath:"..\cares\DLL-Release"
+# ADD BASE LINK32 cares_imp.lib ws2_32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"dll-release/acountry.exe" /libpath:"..\cares\dll-release"
+# ADD LINK32 cares_imp.lib ws2_32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"dll-release/acountry.exe" /libpath:"..\cares\dll-release"
 
 !ELSEIF  "$(CFG)" == "acountry - Win32 using cares LIB Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "LIB-Debug"
-# PROP BASE Intermediate_Dir "LIB-Debug"
+# PROP BASE Output_Dir "lib-debug"
+# PROP BASE Intermediate_Dir "lib-debug/obj"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "LIB-Debug"
-# PROP Intermediate_Dir "LIB-Debug"
+# PROP Output_Dir "lib-debug"
+# PROP Intermediate_Dir "lib-debug/obj"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "..\.." /D "WIN32" /D "_CONSOLE" /D "CARES_STATICLIB" /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "..\.." /D "WIN32" /D "_CONSOLE" /D "CARES_STATICLIB" /FD /GZ /c
+# ADD BASE CPP /nologo /MDd /W3 /GX /Zi /Od /I "..\.." /D "_DEBUG" /D "WIN32" /D "_CONSOLE" /D "CARES_STATICLIB" /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /GX /Zi /Od /I "..\.." /D "_DEBUG" /D "WIN32" /D "_CONSOLE" /D "CARES_STATICLIB" /FD /GZ /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 caresd.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"LIB-Debug/acountry.exe" /pdbtype:sept /libpath:"..\cares\LIB-Debug"
-# ADD LINK32 caresd.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"LIB-Debug/acountry.exe" /pdbtype:sept /libpath:"..\cares\LIB-Debug"
+# ADD BASE LINK32 caresd.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"lib-debug/acountry.exe" /pdbtype:sept /libpath:"..\cares\lib-debug"
+# ADD LINK32 caresd.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"lib-debug/acountry.exe" /pdbtype:sept /libpath:"..\cares\lib-debug"
 
 !ELSEIF  "$(CFG)" == "acountry - Win32 using cares LIB Release"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "LIB-Release"
-# PROP BASE Intermediate_Dir "LIB-Release"
+# PROP BASE Output_Dir "lib-release"
+# PROP BASE Intermediate_Dir "lib-release/obj"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "LIB-Release"
-# PROP Intermediate_Dir "LIB-Release"
+# PROP Output_Dir "lib-release"
+# PROP Intermediate_Dir "lib-release/obj"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "..\.." /D "WIN32" /D "_CONSOLE" /D "CARES_STATICLIB" /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /D "WIN32" /D "_CONSOLE" /D "CARES_STATICLIB" /FD /c
+# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "..\.." /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /D "CARES_STATICLIB" /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /D "CARES_STATICLIB" /FD /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 cares.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"LIB-Release/acountry.exe" /libpath:"..\cares\LIB-Release"
-# ADD LINK32 cares.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"LIB-Release/acountry.exe" /libpath:"..\cares\LIB-Release"
+# ADD BASE LINK32 cares.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"lib-release/acountry.exe" /libpath:"..\cares\lib-release"
+# ADD LINK32 cares.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"lib-release/acountry.exe" /libpath:"..\cares\lib-release"
 
 !ENDIF 
 

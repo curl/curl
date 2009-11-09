@@ -33,18 +33,18 @@ CFG=cares - Win32 LIB Debug
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "DLL-Debug"
-# PROP BASE Intermediate_Dir "DLL-Debug"
+# PROP BASE Output_Dir "dll-debug"
+# PROP BASE Intermediate_Dir "dll-debug/obj"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "DLL-Debug"
-# PROP Intermediate_Dir "DLL-Debug"
+# PROP Output_Dir "dll-debug"
+# PROP Intermediate_Dir "dll-debug/obj"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 CPP=cl.exe
-# ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\.." /D "WIN32" /D "DEBUGBUILD" /D "CARES_BUILDING_LIBRARY" /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "..\.." /D "WIN32" /D "DEBUGBUILD" /D "CARES_BUILDING_LIBRARY" /FD /GZ /c
+# ADD BASE CPP /nologo /MDd /W3 /GX /Zi /Od /I "..\.." /D "_DEBUG" /D "WIN32" /D "DEBUGBUILD" /D "CARES_BUILDING_LIBRARY" /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /GX /Zi /Od /I "..\.." /D "_DEBUG" /D "WIN32" /D "DEBUGBUILD" /D "CARES_BUILDING_LIBRARY" /FD /GZ /c
 MTL=midl.exe
 # ADD BASE MTL /nologo /D "DEBUGBUILD" /mktyplib203 /win32
 # ADD MTL /nologo /D "DEBUGBUILD" /mktyplib203 /win32
@@ -55,25 +55,25 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 ws2_32.lib advapi32.lib /nologo /dll /incremental:no /map /debug /machine:I386 /out:"DLL-Debug/caresd.dll" /implib:"DLL-Debug/caresd_imp.lib" /pdbtype:sept
-# ADD LINK32 ws2_32.lib advapi32.lib /nologo /dll /incremental:no /map /debug /machine:I386 /out:"DLL-Debug/caresd.dll" /implib:"DLL-Debug/caresd_imp.lib" /pdbtype:sept
+# ADD BASE LINK32 ws2_32.lib advapi32.lib /nologo /dll /incremental:no /map /debug /machine:I386 /out:"dll-debug/caresd.dll" /implib:"dll-debug/caresd_imp.lib" /pdbtype:sept
+# ADD LINK32 ws2_32.lib advapi32.lib /nologo /dll /incremental:no /map /debug /machine:I386 /out:"dll-debug/caresd.dll" /implib:"dll-debug/caresd_imp.lib" /pdbtype:sept
 
 !ELSEIF  "$(CFG)" == "cares - Win32 DLL Release"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "DLL-Release"
-# PROP BASE Intermediate_Dir "DLL-Release"
+# PROP BASE Output_Dir "dll-release"
+# PROP BASE Intermediate_Dir "dll-release/obj"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "DLL-Release"
-# PROP Intermediate_Dir "DLL-Release"
+# PROP Output_Dir "dll-release"
+# PROP Intermediate_Dir "dll-release/obj"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 CPP=cl.exe
-# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "..\.." /D "WIN32" /D "CARES_BUILDING_LIBRARY" /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /D "WIN32" /D "CARES_BUILDING_LIBRARY" /FD /c
+# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "..\.." /D "NDEBUG" /D "WIN32" /D "CARES_BUILDING_LIBRARY" /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /D "NDEBUG" /D "WIN32" /D "CARES_BUILDING_LIBRARY" /FD /c
 MTL=midl.exe
 # ADD BASE MTL /nologo /mktyplib203 /win32
 # ADD MTL /nologo /mktyplib203 /win32
@@ -84,24 +84,24 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 ws2_32.lib advapi32.lib /nologo /dll /pdb:none /machine:I386 /out:"DLL-Release/cares.dll" /implib:"DLL-Release/cares_imp.lib"
-# ADD LINK32 ws2_32.lib advapi32.lib /nologo /dll /pdb:none /machine:I386 /out:"DLL-Release/cares.dll" /implib:"DLL-Release/cares_imp.lib"
+# ADD BASE LINK32 ws2_32.lib advapi32.lib /nologo /dll /pdb:none /machine:I386 /out:"dll-release/cares.dll" /implib:"dll-release/cares_imp.lib"
+# ADD LINK32 ws2_32.lib advapi32.lib /nologo /dll /pdb:none /machine:I386 /out:"dll-release/cares.dll" /implib:"dll-release/cares_imp.lib"
 
 !ELSEIF  "$(CFG)" == "cares - Win32 LIB Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "LIB-Debug"
-# PROP BASE Intermediate_Dir "LIB-Debug"
+# PROP BASE Output_Dir "lib-debug"
+# PROP BASE Intermediate_Dir "lib-debug/obj"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "LIB-Debug"
-# PROP Intermediate_Dir "LIB-Debug"
+# PROP Output_Dir "lib-debug"
+# PROP Intermediate_Dir "lib-debug/obj"
 # PROP Target_Dir ""
 CPP=cl.exe
-# ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\.." /D "WIN32" /D "DEBUGBUILD" /D "CARES_BUILDING_LIBRARY" /D "CARES_STATICLIB" /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "..\.." /D "WIN32" /D "DEBUGBUILD" /D "CARES_BUILDING_LIBRARY" /D "CARES_STATICLIB" /FD /GZ /c
+# ADD BASE CPP /nologo /MDd /W3 /GX /Zi /Od /I "..\.." /D "_DEBUG" /D "WIN32" /D "DEBUGBUILD" /D "CARES_BUILDING_LIBRARY" /D "CARES_STATICLIB" /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /GX /Zi /Od /I "..\.." /D "_DEBUG" /D "WIN32" /D "DEBUGBUILD" /D "CARES_BUILDING_LIBRARY" /D "CARES_STATICLIB" /FD /GZ /c
 RSC=rc.exe
 # ADD BASE RSC /l 0x409 /d "DEBUGBUILD"
 # ADD RSC /l 0x409 /d "DEBUGBUILD"
@@ -109,24 +109,24 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
-# ADD BASE LIB32 /nologo /out:"LIB-Debug/caresd.lib" /machine:I386
-# ADD LIB32 /nologo /out:"LIB-Debug/caresd.lib" /machine:I386
+# ADD BASE LIB32 /nologo /out:"lib-debug/caresd.lib" /machine:I386
+# ADD LIB32 /nologo /out:"lib-debug/caresd.lib" /machine:I386
 
 !ELSEIF  "$(CFG)" == "cares - Win32 LIB Release"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "LIB-Release"
-# PROP BASE Intermediate_Dir "LIB-Release"
+# PROP BASE Output_Dir "lib-release"
+# PROP BASE Intermediate_Dir "lib-release/obj"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "LIB-Release"
-# PROP Intermediate_Dir "LIB-Release"
+# PROP Output_Dir "lib-release"
+# PROP Intermediate_Dir "lib-release/obj"
 # PROP Target_Dir ""
 CPP=cl.exe
-# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "..\.." /D "WIN32" /D "CARES_BUILDING_LIBRARY" /D "CARES_STATICLIB" /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /D "WIN32" /D "CARES_BUILDING_LIBRARY" /D "CARES_STATICLIB" /FD /c
+# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "..\.." /D "NDEBUG" /D "WIN32" /D "CARES_BUILDING_LIBRARY" /D "CARES_STATICLIB" /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /D "NDEBUG" /D "WIN32" /D "CARES_BUILDING_LIBRARY" /D "CARES_STATICLIB" /FD /c
 RSC=rc.exe
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
@@ -134,8 +134,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
-# ADD BASE LIB32 /nologo /out:"LIB-Release/cares.lib" /machine:I386
-# ADD LIB32 /nologo /out:"LIB-Release/cares.lib" /machine:I386
+# ADD BASE LIB32 /nologo /out:"lib-release/cares.lib" /machine:I386
+# ADD LIB32 /nologo /out:"lib-release/cares.lib" /machine:I386
 
 !ENDIF 
 
@@ -361,13 +361,13 @@ SOURCE=..\..\inet_ntop.h
 SOURCE=..\..\nameser.h
 # End Source File
 # End Group
-# Begin Group "Resource Files"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\cares.rc
-# End Source File
-# End Group
-# End Target
-# End Project
+# Begin Group "Resource Files"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\cares.rc
+# End Source File
+# End Group
+# End Target
+# End Project
