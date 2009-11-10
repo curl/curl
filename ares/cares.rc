@@ -41,13 +41,20 @@ BEGIN
     BLOCK "040904b0"
     BEGIN
       VALUE "CompanyName",      "The c-ares library, http://c-ares.haxx.se/\0"
+#if defined(DEBUGBUILD) || defined(_DEBUG)
+      VALUE "FileDescription",  "c-ares Debug Shared Library\0"
+      VALUE "FileVersion",      ARES_VERSION_STR "\0"
+      VALUE "InternalName",     "c-ares\0"
+      VALUE "OriginalFilename", "caresd.dll\0"
+#else
       VALUE "FileDescription",  "c-ares Shared Library\0"
       VALUE "FileVersion",      ARES_VERSION_STR "\0"
       VALUE "InternalName",     "c-ares\0"
       VALUE "OriginalFilename", "cares.dll\0"
+#endif
       VALUE "ProductName",      "The c-ares library\0"
       VALUE "ProductVersion",   ARES_VERSION_STR "\0"
-      VALUE "LegalCopyright",   "© 2004 - 2009 Daniel Stenberg, <daniel@haxx.se>.\0"
+      VALUE "LegalCopyright",   " 2004 - 2009 Daniel Stenberg, <daniel@haxx.se>.\0"
       VALUE "License",          "http://c-ares.haxx.se/license.html\0"
     END
   END
