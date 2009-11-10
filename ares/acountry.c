@@ -199,7 +199,7 @@ int main(int argc, char **argv)
  */
 static void wait_ares(ares_channel channel)
 {
-  while (1)
+  for (;;)
     {
       struct timeval *tvp, tv;
       fd_set read_fds, write_fds;

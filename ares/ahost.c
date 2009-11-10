@@ -140,7 +140,7 @@ int main(int argc, char **argv)
     }
 
   /* Wait for all queries to complete. */
-  while (1)
+  for (;;)
     {
       FD_ZERO(&read_fds);
       FD_ZERO(&write_fds);
