@@ -3,6 +3,7 @@
 *.pdf
 .deps
 .libs
+MSVC*
 Makefile
 Makefile.in
 aclocal.m4
@@ -30,4 +31,5 @@ libtool
 ltmain.sh
 man3
 missing
+msvc*
 stamp-h*

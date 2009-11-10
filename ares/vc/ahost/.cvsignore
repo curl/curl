@@ -3,6 +3,8 @@ LIB-*
 ahost.dep
 ahost.mak
 ahost.plg
+dll-*
+lib-*
 vc6ahost.dep
 vc6ahost.mak
 vc6ahost.plg

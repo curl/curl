@@ -1,5 +1,7 @@
 DLL-*
 LIB-*
+dll-*
+lib-*
 vc6cares.dep
 vc6cares.mak
 vc6cares.ncb

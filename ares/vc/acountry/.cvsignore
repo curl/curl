@@ -5,6 +5,8 @@ Release
 acountry.dep
 acountry.mak
 acountry.plg
+dll-*
+lib-*
 vc6acountry.dep
 vc6acountry.mak
 vc6acountry.plg
