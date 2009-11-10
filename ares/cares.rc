@@ -54,7 +54,7 @@ BEGIN
 #endif
       VALUE "ProductName",      "The c-ares library\0"
       VALUE "ProductVersion",   ARES_VERSION_STR "\0"
-      VALUE "LegalCopyright",   " 2004 - 2009 Daniel Stenberg, <daniel@haxx.se>.\0"
+      VALUE "LegalCopyright",   "© 2004 - 2009 Daniel Stenberg, <daniel@haxx.se>.\0"
       VALUE "License",          "http://c-ares.haxx.se/license.html\0"
     END
   END
