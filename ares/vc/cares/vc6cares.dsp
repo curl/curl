@@ -46,17 +46,17 @@ CPP=cl.exe
 # ADD BASE CPP /nologo /MDd /W3 /GX /Zi /Od /I "..\.." /D "_DEBUG" /D "WIN32" /D "DEBUGBUILD" /D "CARES_BUILDING_LIBRARY" /FD /GZ /c
 # ADD CPP /nologo /MDd /W3 /GX /Zi /Od /I "..\.." /D "_DEBUG" /D "WIN32" /D "DEBUGBUILD" /D "CARES_BUILDING_LIBRARY" /FD /GZ /c
 MTL=midl.exe
-# ADD BASE MTL /nologo /D "DEBUGBUILD" /mktyplib203 /win32
-# ADD MTL /nologo /D "DEBUGBUILD" /mktyplib203 /win32
+# ADD BASE MTL /nologo /D "_DEBUG" /win32
+# ADD MTL /nologo /D "_DEBUG" /win32
 RSC=rc.exe
-# ADD BASE RSC /l 0x409 /d "DEBUGBUILD"
-# ADD RSC /l 0x409 /d "DEBUGBUILD"
+# ADD BASE RSC /l 0x409 /d "_DEBUG"
+# ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 ws2_32.lib advapi32.lib /nologo /dll /incremental:no /map /debug /machine:I386 /out:"dll-debug/caresd.dll" /implib:"dll-debug/caresd_imp.lib" /pdbtype:sept
-# ADD LINK32 ws2_32.lib advapi32.lib /nologo /dll /incremental:no /map /debug /machine:I386 /out:"dll-debug/caresd.dll" /implib:"dll-debug/caresd_imp.lib" /pdbtype:sept
+# ADD BASE LINK32 ws2_32.lib advapi32.lib /nologo /dll /incremental:no /debug /machine:I386 /out:"dll-debug/caresd.dll" /implib:"dll-debug/caresd_imp.lib" /pdbtype:con /fixed:no
+# ADD LINK32 ws2_32.lib advapi32.lib /nologo /dll /incremental:no /debug /machine:I386 /out:"dll-debug/caresd.dll" /implib:"dll-debug/caresd_imp.lib" /pdbtype:con /fixed:no
 
 !ELSEIF  "$(CFG)" == "cares - Win32 DLL Release"
 
@@ -75,17 +75,17 @@ CPP=cl.exe
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "..\.." /D "NDEBUG" /D "WIN32" /D "CARES_BUILDING_LIBRARY" /FD /c
 # ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /D "NDEBUG" /D "WIN32" /D "CARES_BUILDING_LIBRARY" /FD /c
 MTL=midl.exe
-# ADD BASE MTL /nologo /mktyplib203 /win32
-# ADD MTL /nologo /mktyplib203 /win32
+# ADD BASE MTL /nologo /D "NDEBUG" /win32
+# ADD MTL /nologo /D "NDEBUG" /win32
 RSC=rc.exe
-# ADD BASE RSC /l 0x409
-# ADD RSC /l 0x409
+# ADD BASE RSC /l 0x409 /d "NDEBUG"
+# ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 ws2_32.lib advapi32.lib /nologo /dll /pdb:none /machine:I386 /out:"dll-release/cares.dll" /implib:"dll-release/cares_imp.lib"
-# ADD LINK32 ws2_32.lib advapi32.lib /nologo /dll /pdb:none /machine:I386 /out:"dll-release/cares.dll" /implib:"dll-release/cares_imp.lib"
+# ADD BASE LINK32 ws2_32.lib advapi32.lib /nologo /dll /pdb:none /machine:I386 /out:"dll-release/cares.dll" /implib:"dll-release/cares_imp.lib" /fixed:no /release /incremental:no
+# ADD LINK32 ws2_32.lib advapi32.lib /nologo /dll /pdb:none /machine:I386 /out:"dll-release/cares.dll" /implib:"dll-release/cares_imp.lib" /fixed:no /release /incremental:no
 
 !ELSEIF  "$(CFG)" == "cares - Win32 LIB Debug"
 
@@ -103,8 +103,8 @@ CPP=cl.exe
 # ADD BASE CPP /nologo /MDd /W3 /GX /Zi /Od /I "..\.." /D "_DEBUG" /D "WIN32" /D "DEBUGBUILD" /D "CARES_BUILDING_LIBRARY" /D "CARES_STATICLIB" /FD /GZ /c
 # ADD CPP /nologo /MDd /W3 /GX /Zi /Od /I "..\.." /D "_DEBUG" /D "WIN32" /D "DEBUGBUILD" /D "CARES_BUILDING_LIBRARY" /D "CARES_STATICLIB" /FD /GZ /c
 RSC=rc.exe
-# ADD BASE RSC /l 0x409 /d "DEBUGBUILD"
-# ADD RSC /l 0x409 /d "DEBUGBUILD"
+# ADD BASE RSC /l 0x409 /d "_DEBUG"
+# ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
@@ -128,8 +128,8 @@ CPP=cl.exe
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "..\.." /D "NDEBUG" /D "WIN32" /D "CARES_BUILDING_LIBRARY" /D "CARES_STATICLIB" /FD /c
 # ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /D "NDEBUG" /D "WIN32" /D "CARES_BUILDING_LIBRARY" /D "CARES_STATICLIB" /FD /c
 RSC=rc.exe
-# ADD BASE RSC /l 0x409
-# ADD RSC /l 0x409
+# ADD BASE RSC /l 0x409 /d "NDEBUG"
+# ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo

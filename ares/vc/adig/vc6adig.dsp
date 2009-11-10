@@ -45,14 +45,14 @@ RSC=rc.exe
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /GX /Zi /Od /I "..\.." /D "_DEBUG" /D "WIN32" /D "_CONSOLE" /FD /GZ /c
 # ADD CPP /nologo /MDd /W3 /GX /Zi /Od /I "..\.." /D "_DEBUG" /D "WIN32" /D "_CONSOLE" /FD /GZ /c
-# ADD BASE RSC /l 0x409
-# ADD RSC /l 0x409
+# ADD BASE RSC /l 0x409 /d "_DEBUG"
+# ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 caresd_imp.lib ws2_32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"dll-debug/adig.exe" /pdbtype:sept /libpath:"..\cares\dll-debug"
-# ADD LINK32 caresd_imp.lib ws2_32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"dll-debug/adig.exe" /pdbtype:sept /libpath:"..\cares\dll-debug"
+# ADD BASE LINK32 caresd_imp.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"dll-debug/adig.exe" /pdbtype:con /libpath:"..\cares\dll-debug" /fixed:no
+# ADD LINK32 caresd_imp.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"dll-debug/adig.exe" /pdbtype:con /libpath:"..\cares\dll-debug" /fixed:no
 
 !ELSEIF  "$(CFG)" == "adig - Win32 using cares DLL Release"
 
@@ -69,14 +69,14 @@ LINK32=link.exe
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "..\.." /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /FD /c
 # ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /FD /c
-# ADD BASE RSC /l 0x409
-# ADD RSC /l 0x409
+# ADD BASE RSC /l 0x409 /d "NDEBUG"
+# ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 cares_imp.lib ws2_32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"dll-release/adig.exe" /libpath:"..\cares\dll-release"
-# ADD LINK32 cares_imp.lib ws2_32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"dll-release/adig.exe" /libpath:"..\cares\dll-release"
+# ADD BASE LINK32 cares_imp.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"dll-release/adig.exe" /libpath:"..\cares\dll-release" /fixed:no
+# ADD LINK32 cares_imp.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"dll-release/adig.exe" /libpath:"..\cares\dll-release" /fixed:no
 
 !ELSEIF  "$(CFG)" == "adig - Win32 using cares LIB Debug"
 
@@ -93,14 +93,14 @@ LINK32=link.exe
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /GX /Zi /Od /I "..\.." /D "_DEBUG" /D "WIN32" /D "_CONSOLE" /D "CARES_STATICLIB" /FD /GZ /c
 # ADD CPP /nologo /MDd /W3 /GX /Zi /Od /I "..\.." /D "_DEBUG" /D "WIN32" /D "_CONSOLE" /D "CARES_STATICLIB" /FD /GZ /c
-# ADD BASE RSC /l 0x409
-# ADD RSC /l 0x409
+# ADD BASE RSC /l 0x409 /d "_DEBUG"
+# ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 caresd.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"lib-debug/adig.exe" /pdbtype:sept /libpath:"..\cares\lib-debug"
-# ADD LINK32 caresd.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"lib-debug/adig.exe" /pdbtype:sept /libpath:"..\cares\lib-debug"
+# ADD BASE LINK32 caresd.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"lib-debug/adig.exe" /pdbtype:con /libpath:"..\cares\lib-debug" /fixed:no
+# ADD LINK32 caresd.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"lib-debug/adig.exe" /pdbtype:con /libpath:"..\cares\lib-debug" /fixed:no
 
 !ELSEIF  "$(CFG)" == "adig - Win32 using cares LIB Release"
 
@@ -117,14 +117,14 @@ LINK32=link.exe
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "..\.." /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /D "CARES_STATICLIB" /FD /c
 # ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /D "CARES_STATICLIB" /FD /c
-# ADD BASE RSC /l 0x409
-# ADD RSC /l 0x409
+# ADD BASE RSC /l 0x409 /d "NDEBUG"
+# ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 cares.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"lib-release/adig.exe" /libpath:"..\cares\lib-release"
-# ADD LINK32 cares.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"lib-release/adig.exe" /libpath:"..\cares\lib-release"
+# ADD BASE LINK32 cares.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"lib-release/adig.exe" /libpath:"..\cares\lib-release" /fixed:no
+# ADD LINK32 cares.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"lib-release/adig.exe" /libpath:"..\cares\lib-release" /fixed:no
 
 !ENDIF 
 
