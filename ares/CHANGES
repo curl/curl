@@ -1,5 +1,15 @@
   Changelog for the c-ares project
 
+* November 10, 2009 (Yang Tse)
+- Updated MSVC 6.0 project files to match settings from Makefile.msvc.
+
+* November 9, 2009 (Yang Tse)
+- Makefile.msvc is now the reference method to build c-ares and sample
+  programs with any MSVC compiler or MS Visual Studio version.  If no
+  option or target are specified it builds dynamic and static c-ares
+  libraries in debug and release flavours and also builds all sample
+  programs using each of the different c-ares libraries.
+
 * November 2, 2009 (Yang Tse)
 - Renamed c-ares setup.h to ares_setup.h
 
