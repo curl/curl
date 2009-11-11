@@ -121,6 +121,8 @@ void Curl_global_host_cache_dtor(void);
 
 struct Curl_dns_entry {
   Curl_addrinfo *addr;
+  /* timestamp == 0 -- entry not in hostcache
+     timestamp != 0 -- entry is in hostcache */
   time_t timestamp;
   long inuse;      /* use-counter, make very sure you decrease this
                       when you're done using the address you received */

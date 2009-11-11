@@ -7,6 +7,12 @@
                                   Changelog
 
 Daniel Stenberg (11 Nov 2009)
+- Constantine Sapuntzakis posted bug #2891595
+  (http://curl.haxx.se/bug/view.cgi?id=2891595) which identified how an entry
+  in the DNS cache would linger too long if the request that added it was in
+  use that long. He also provided the patch that now makes libcurl capable of
+  still doing a request while the DNS hash entry may get timed out.
+  
 - Christian Schmitz noticed that the progress meter/callback was not properly
   used during the FTP connection phase (after the actual TCP connect), while
   it of course should be. I also made the speed check get called correctly so

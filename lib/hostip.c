@@ -123,6 +123,10 @@
 static struct curl_hash hostname_cache;
 static int host_cache_initialized;
 
+#ifdef CURLDEBUG
+static int ndns = 0;
+#endif
+
 static void freednsentry(void *freethis);
 
 /*
@@ -232,14 +236,7 @@ hostcache_timestamp_remove(void *datap, void *hc)
     (struct hostcache_prune_data *) datap;
   struct Curl_dns_entry *c = (struct Curl_dns_entry *) hc;
 
-  if((data->now - c->timestamp < data->cache_timeout) ||
-      c->inuse) {
-    /* please don't remove */
-    return 0;
-  }
-
-  /* fine, remove */
-  return 1;
+  return (data->now - c->timestamp >= data->cache_timeout);
 }
 
 /*
@@ -339,7 +336,6 @@ Curl_cache_addr(struct SessionHandle *data,
   size_t entry_len;
   struct Curl_dns_entry *dns;
   struct Curl_dns_entry *dns2;
-  time_t now;
 
   /* Create an entry id, based upon the hostname and port */
   entry_id = create_hostcache_id(hostname, port);
@@ -357,23 +353,22 @@ Curl_cache_addr(struct SessionHandle *data,
 
   dns->inuse = 0;   /* init to not used */
   dns->addr = addr; /* this is the address(es) */
+  time(&dns->timestamp);
+  if(dns->timestamp == 0)
+    dns->timestamp = 1;   /* zero indicates that entry isn't in hash table */
 
-  /* Store the resolved data in our DNS cache. This function may return a
-     pointer to an existing struct already present in the hash, and it may
-     return the same argument we pass in. Make no assumptions. */
+  /* Store the resolved data in our DNS cache. */
   dns2 = Curl_hash_add(data->dns.hostcache, entry_id, entry_len+1,
                        (void *)dns);
   if(!dns2) {
-    /* Major badness, run away. */
     free(dns);
     free(entry_id);
     return NULL;
   }
-  time(&now);
-  dns = dns2;
 
-  dns->timestamp = now; /* used now */
+  dns = dns2;
   dns->inuse++;         /* mark entry as in-use */
+  DEBUGF(ndns++);
 
   /* free the allocated entry_id again */
   free(entry_id);
@@ -436,6 +431,7 @@ int Curl_resolv(struct connectdata *conn,
 
   if(dns) {
     dns->inuse++; /* we use it! */
+    DEBUGF(ndns++);
     rc = CURLRESOLV_RESOLVED;
   }
 
@@ -688,6 +684,13 @@ void Curl_resolv_unlock(struct SessionHandle *data, struct Curl_dns_entry *dns)
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
   dns->inuse--;
+  DEBUGF(ndns--);
+  /* only free if nobody is using AND it is not in hostcache (timestamp ==
+     0) */
+  if (dns->inuse == 0 && dns->timestamp == 0) {
+    Curl_freeaddrinfo(dns->addr);
+    free(dns);
+  }
 
   if(data->share)
     Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
@@ -700,11 +703,20 @@ static void freednsentry(void *freethis)
 {
   struct Curl_dns_entry *p = (struct Curl_dns_entry *) freethis;
 
-  if(p) {
+  /* mark the entry as not in hostcache */
+  p->timestamp = 0;
+  if (p->inuse == 0) {
     Curl_freeaddrinfo(p->addr);
     free(p);
   }
 }
+
+#ifdef CURLDEBUG
+int curl_get_ndns(void)
+{
+  return ndns;
+}
+#endif
 
 /*
  * Curl_mk_dnscache() creates a new DNS cache and returns the handle for it.

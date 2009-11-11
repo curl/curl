@@ -16,6 +16,7 @@ This release includes the following bugfixes:
  o progress meter percentage and transfer time estimates fixes
  o portability enhancement for OS's without orthogonal directory tree structure
  o progress meter/callback during FTP connection
+ o DNS cache timeout while transfer in progress
 
 This release includes the following known bugs:
 
@@ -24,6 +25,6 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Yang Tse, Kamil Dudka, Christian Schmitz
+ Yang Tse, Kamil Dudka, Christian Schmitz, Constantine Sapuntzakis
 
         Thanks! (and sorry if I forgot to mention someone)
