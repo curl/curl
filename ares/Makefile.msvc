@@ -201,7 +201,7 @@ CFLAGS  = /UWIN32 /DWATT32 /I$(WATT_ROOT)\inc
 EX_LIBS = $(WATT_ROOT)\lib\wattcpvc_imp.lib
 !ELSE
 CFLAGS  = /DWIN32
-EX_LIBS = ws2_32.lib advapi32.lib
+EX_LIBS = ws2_32.lib advapi32.lib kernel32.lib
 !ENDIF
 
 # -----------------------------------------

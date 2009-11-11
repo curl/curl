@@ -51,8 +51,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 caresd_imp.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"dll-debug/adig.exe" /pdbtype:con /libpath:"..\cares\dll-debug" /fixed:no
-# ADD LINK32 caresd_imp.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"dll-debug/adig.exe" /pdbtype:con /libpath:"..\cares\dll-debug" /fixed:no
+# ADD BASE LINK32 caresd_imp.lib ws2_32.lib advapi32.lib kernel32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"dll-debug/adig.exe" /pdbtype:con /libpath:"..\cares\dll-debug" /fixed:no
+# ADD LINK32 caresd_imp.lib ws2_32.lib advapi32.lib kernel32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"dll-debug/adig.exe" /pdbtype:con /libpath:"..\cares\dll-debug" /fixed:no
 
 !ELSEIF  "$(CFG)" == "adig - Win32 using cares DLL Release"
 
@@ -75,8 +75,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 cares_imp.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"dll-release/adig.exe" /libpath:"..\cares\dll-release" /fixed:no
-# ADD LINK32 cares_imp.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"dll-release/adig.exe" /libpath:"..\cares\dll-release" /fixed:no
+# ADD BASE LINK32 cares_imp.lib ws2_32.lib advapi32.lib kernel32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"dll-release/adig.exe" /libpath:"..\cares\dll-release" /fixed:no
+# ADD LINK32 cares_imp.lib ws2_32.lib advapi32.lib kernel32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"dll-release/adig.exe" /libpath:"..\cares\dll-release" /fixed:no
 
 !ELSEIF  "$(CFG)" == "adig - Win32 using cares LIB Debug"
 
@@ -99,8 +99,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 caresd.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"lib-debug/adig.exe" /pdbtype:con /libpath:"..\cares\lib-debug" /fixed:no
-# ADD LINK32 caresd.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"lib-debug/adig.exe" /pdbtype:con /libpath:"..\cares\lib-debug" /fixed:no
+# ADD BASE LINK32 caresd.lib ws2_32.lib advapi32.lib kernel32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"lib-debug/adig.exe" /pdbtype:con /libpath:"..\cares\lib-debug" /fixed:no
+# ADD LINK32 caresd.lib ws2_32.lib advapi32.lib kernel32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"lib-debug/adig.exe" /pdbtype:con /libpath:"..\cares\lib-debug" /fixed:no
 
 !ELSEIF  "$(CFG)" == "adig - Win32 using cares LIB Release"
 
@@ -123,8 +123,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 cares.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"lib-release/adig.exe" /libpath:"..\cares\lib-release" /fixed:no
-# ADD LINK32 cares.lib ws2_32.lib advapi32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"lib-release/adig.exe" /libpath:"..\cares\lib-release" /fixed:no
+# ADD BASE LINK32 cares.lib ws2_32.lib advapi32.lib kernel32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"lib-release/adig.exe" /libpath:"..\cares\lib-release" /fixed:no
+# ADD LINK32 cares.lib ws2_32.lib advapi32.lib kernel32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"lib-release/adig.exe" /libpath:"..\cares\lib-release" /fixed:no
 
 !ENDIF 
 

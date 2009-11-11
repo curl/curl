@@ -55,8 +55,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 ws2_32.lib advapi32.lib /nologo /dll /incremental:no /debug /machine:I386 /out:"dll-debug/caresd.dll" /implib:"dll-debug/caresd_imp.lib" /pdbtype:con /fixed:no
-# ADD LINK32 ws2_32.lib advapi32.lib /nologo /dll /incremental:no /debug /machine:I386 /out:"dll-debug/caresd.dll" /implib:"dll-debug/caresd_imp.lib" /pdbtype:con /fixed:no
+# ADD BASE LINK32 ws2_32.lib advapi32.lib kernel32.lib /nologo /dll /incremental:no /debug /machine:I386 /out:"dll-debug/caresd.dll" /implib:"dll-debug/caresd_imp.lib" /pdbtype:con /fixed:no
+# ADD LINK32 ws2_32.lib advapi32.lib kernel32.lib /nologo /dll /incremental:no /debug /machine:I386 /out:"dll-debug/caresd.dll" /implib:"dll-debug/caresd_imp.lib" /pdbtype:con /fixed:no
 
 !ELSEIF  "$(CFG)" == "cares - Win32 DLL Release"
 
@@ -84,8 +84,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 ws2_32.lib advapi32.lib /nologo /dll /pdb:none /machine:I386 /out:"dll-release/cares.dll" /implib:"dll-release/cares_imp.lib" /fixed:no /release /incremental:no
-# ADD LINK32 ws2_32.lib advapi32.lib /nologo /dll /pdb:none /machine:I386 /out:"dll-release/cares.dll" /implib:"dll-release/cares_imp.lib" /fixed:no /release /incremental:no
+# ADD BASE LINK32 ws2_32.lib advapi32.lib kernel32.lib /nologo /dll /pdb:none /machine:I386 /out:"dll-release/cares.dll" /implib:"dll-release/cares_imp.lib" /fixed:no /release /incremental:no
+# ADD LINK32 ws2_32.lib advapi32.lib kernel32.lib /nologo /dll /pdb:none /machine:I386 /out:"dll-release/cares.dll" /implib:"dll-release/cares_imp.lib" /fixed:no /release /incremental:no
 
 !ELSEIF  "$(CFG)" == "cares - Win32 LIB Debug"
 
