@@ -31,8 +31,8 @@ typedef BOOLEAN (APIENTRY *fpSystemFunction036_t) (void*, ULONG);
 /* Forward-declaration of variables defined in ares_library_init.c */
 /* that are global and unique instances for whole c-ares library.  */
 
-extern fpGetNetworkParams_t fpGetNetworkParams;
-extern fpSystemFunction036_t fpSystemFunction036;
+extern fpGetNetworkParams_t ares_fpGetNetworkParams;
+extern fpSystemFunction036_t ares_fpSystemFunction036;
 
 #endif /* USE_WINSOCK */
 

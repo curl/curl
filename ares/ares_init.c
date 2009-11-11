@@ -581,7 +581,7 @@ static int get_iphlpapi_dns_info (char *ret_buf, size_t ret_size)
   if (!fi)
      return 0;
 
-  res = (*fpGetNetworkParams) (fi, &size);
+  res = (*ares_fpGetNetworkParams) (fi, &size);
   if ((res != ERROR_BUFFER_OVERFLOW) && (res != ERROR_SUCCESS))
      goto quit;
 
@@ -590,7 +590,7 @@ static int get_iphlpapi_dns_info (char *ret_buf, size_t ret_size)
      goto quit;
 
   fi = newfi;
-  res = (*fpGetNetworkParams) (fi, &size);
+  res = (*ares_fpGetNetworkParams) (fi, &size);
   if (res != ERROR_SUCCESS)
      goto quit;
 
@@ -1503,9 +1503,9 @@ static void randomize_key(unsigned char* key,int key_data_len)
   int counter=0;
 #ifdef WIN32
   BOOLEAN res;
-  if (fpSystemFunction036)
+  if (ares_fpSystemFunction036)
     {
-      res = (*fpSystemFunction036) (key, key_data_len);
+      res = (*ares_fpSystemFunction036) (key, key_data_len);
       if (res)
         randomized = 1;
     }

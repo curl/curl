@@ -25,8 +25,8 @@
 /* library-private global and unique instance vars */
 
 #ifdef USE_WINSOCK
-fpGetNetworkParams_t fpGetNetworkParams = ZERO_NULL;
-fpSystemFunction036_t fpSystemFunction036 = ZERO_NULL;
+fpGetNetworkParams_t ares_fpGetNetworkParams = ZERO_NULL;
+fpSystemFunction036_t ares_fpSystemFunction036 = ZERO_NULL;
 #endif
 
 /* library-private global vars with source visibility restricted to this file */
@@ -49,9 +49,9 @@ static int ares_win32_init(void)
   if (!hnd_iphlpapi)
     return ARES_ELOADIPHLPAPI;
 
-  fpGetNetworkParams = (fpGetNetworkParams_t)
+  ares_fpGetNetworkParams = (fpGetNetworkParams_t)
     GetProcAddress(hnd_iphlpapi, "GetNetworkParams");
-  if (!fpGetNetworkParams)
+  if (!ares_fpGetNetworkParams)
     {
       FreeLibrary(hnd_iphlpapi);
       return ARES_EADDRGETNETWORKPARAMS;
@@ -67,7 +67,7 @@ static int ares_win32_init(void)
   hnd_advapi32 = LoadLibrary("advapi32.dll");
   if (hnd_advapi32)
     {
-      fpSystemFunction036 = (fpSystemFunction036_t)
+      ares_fpSystemFunction036 = (fpSystemFunction036_t)
         GetProcAddress(hnd_advapi32, "SystemFunction036");
     }
 
