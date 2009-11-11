@@ -17,6 +17,7 @@ This release includes the following bugfixes:
  o portability enhancement for OS's without orthogonal directory tree structure
  o progress meter/callback during FTP connection
  o DNS cache timeout while transfer in progress
+ o compilation when configured --with-gssapi having GNU GSS installed
 
 This release includes the following known bugs:
 

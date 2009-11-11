@@ -46,14 +46,17 @@
 #include <netdb.h>
 #endif
 #include <string.h>
-#ifdef HAVE_GSSMIT
-/* MIT style */
-#include <gssapi/gssapi.h>
-#include <gssapi/gssapi_generic.h>
-#include <gssapi/gssapi_krb5.h>
+
+#ifdef HAVE_GSSGNU
+#  include <gss.h>
+#elif defined HAVE_GSSMIT
+   /* MIT style */
+#  include <gssapi/gssapi.h>
+#  include <gssapi/gssapi_generic.h>
+#  include <gssapi/gssapi_krb5.h>
 #else
-/* Heimdal-style */
-#include <gssapi.h>
+   /* Heimdal-style */
+#  include <gssapi.h>
 #endif
 
 #include "urldata.h"
