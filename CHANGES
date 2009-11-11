@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (11 Nov 2009)
+- Christian Schmitz noticed that the progress meter/callback was not properly
+  used during the FTP connection phase (after the actual TCP connect), while
+  it of course should be. I also made the speed check get called correctly so
+  that really slow servers will trigger that properly too.
+
 Kamil Dudka (5 Nov 2009)
 - Dropped misleading timeouts in libcurl-NSS and made sure the SSL socket works
   in non-blocking mode.
