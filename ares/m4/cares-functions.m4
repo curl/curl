@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 33
+# serial 34
 
 
 dnl CARES_INCLUDES_ARPA_INET
@@ -1024,6 +1024,12 @@ AC_DEFUN([CARES_CHECK_FUNC_GETADDRINFO], [
         tst_tsafe_getaddrinfo="no"
         ;;
       freebsd*)
+        tst_tsafe_getaddrinfo="yes"
+        ;;
+      hpux[[123456789]].* | hpux10.* | hpux11.0* | hpux11.10*)
+        tst_tsafe_getaddrinfo="no"
+        ;;
+      hpux*)
         tst_tsafe_getaddrinfo="yes"
         ;;
       linux*)
