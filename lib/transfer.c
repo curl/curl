@@ -1994,6 +1994,8 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
   data->state.errorbuf = FALSE; /* no error has occurred */
   data->state.httpversion = 0; /* don't assume any particular server version */
 
+  data->state.ssl_connect_retry = FALSE;
+
   data->state.authproblem = FALSE;
   data->state.authhost.want = data->set.httpauth;
   data->state.authproxy.want = data->set.proxyauth;
