@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 34
+# serial 35
 
 
 dnl CARES_INCLUDES_ARPA_INET
@@ -1011,34 +1011,52 @@ AC_DEFUN([CARES_CHECK_FUNC_GETADDRINFO], [
   if test "$ac_cv_func_getaddrinfo" = "yes"; then
     AC_MSG_CHECKING([if getaddrinfo is threadsafe])
     case $host_os in
+      aix[[1234]].* | aix5.[[01]].*)
+        dnl aix 5.1 and older
+        tst_tsafe_getaddrinfo="no"
+        ;;
+      aix*)
+        dnl aix 5.2 and newer
+        tst_tsafe_getaddrinfo="yes"
+        ;;
       darwin[[12354678]].*)
+        dnl darwin 8.X and older
         tst_tsafe_getaddrinfo="no"
         ;;
       darwin*)
+        dnl darwin 9.X and newer
         tst_tsafe_getaddrinfo="yes"
         ;;
       dragonflybsd*)
+        dnl dragonflybsd any version
         tst_tsafe_getaddrinfo="yes"
         ;;
       freebsd[[1234]].* | freebsd5.[[1234]]*)
+        dnl freebsd 5.4 and older
         tst_tsafe_getaddrinfo="no"
         ;;
       freebsd*)
+        dnl freebsd 5.5 and newer
         tst_tsafe_getaddrinfo="yes"
         ;;
       hpux[[123456789]].* | hpux10.* | hpux11.0* | hpux11.10*)
+        dnl hpux 11.10 and older
         tst_tsafe_getaddrinfo="no"
         ;;
       hpux*)
+        dnl hpux 11.11 and newer
         tst_tsafe_getaddrinfo="yes"
         ;;
       linux*)
+        dnl linux any version
         tst_tsafe_getaddrinfo="yes"
         ;;
       netbsd[[123]].*)
+        dnl netbsd 3.X and older
         tst_tsafe_getaddrinfo="no"
         ;;
       netbsd*)
+        dnl netbsd 4.X and newer
         tst_tsafe_getaddrinfo="yes"
         ;;
     esac
