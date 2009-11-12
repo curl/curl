@@ -1227,7 +1227,9 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   connssl->handle = SSL_ImportFD(model, connssl->handle);
   if(!connssl->handle)
     goto error;
+
   PR_Close(model); /* We don't need this any more */
+  model = NULL;
 
   /* This is the password associated with the cert that we're using */
   if (data->set.str[STRING_KEY_PASSWD]) {

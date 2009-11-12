@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Kamil Dudka (12 Nov 2009)
+- Kevin Baughman provided a fix preventing libcurl-NSS from crash on doubly
+  closed NSPR descriptor. The issue was hard to find, reported several times
+  before and always closed unresolved. More info at the RH bug:
+  https://bugzilla.redhat.com/534176
+
 Yang Tse (11 Nov 2009)
 - Marco Maggi reported that compilation failed when configured --with-gssapi
   and GNU GSS installed due to a missing mutual exclusion of header files in
