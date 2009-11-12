@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 54
+# serial 55
 
 
 dnl CURL_INCLUDES_ARPA_INET
@@ -1497,7 +1497,10 @@ dnl Verify if getaddrinfo is available, prototyped, can
 dnl be compiled and seems to work. If all of these are
 dnl true, and usage has not been previously disallowed
 dnl with shell variable curl_disallow_getaddrinfo, then
-dnl HAVE_GETADDRINFO will be defined.
+dnl HAVE_GETADDRINFO will be defined. Additionally when
+dnl HAVE_GETADDRINFO gets defined this will also attempt
+dnl to find out if getaddrinfo happens to be threadsafe,
+dnl defining HAVE_GETADDRINFO_THREADSAFE when true.
 
 AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   AC_REQUIRE([CURL_INCLUDES_WS2TCPIP])dnl
@@ -1511,6 +1514,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   tst_compi_getaddrinfo="unknown"
   tst_works_getaddrinfo="unknown"
   tst_allow_getaddrinfo="unknown"
+  tst_tsafe_getaddrinfo="unknown"
   #
   AC_MSG_CHECKING([if getaddrinfo can be linked])
   AC_LINK_IFELSE([
@@ -1625,6 +1629,45 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   else
     AC_MSG_RESULT([no])
     ac_cv_func_getaddrinfo="no"
+    ac_cv_func_getaddrinfo_threadsafe="no"
+  fi
+  #
+  if test "$ac_cv_func_getaddrinfo" = "yes"; then
+    AC_MSG_CHECKING([if getaddrinfo is threadsafe])
+    case $host_os in
+      darwin[[12354678]].*)
+        tst_tsafe_getaddrinfo="no"
+        ;;
+      darwin*)
+        tst_tsafe_getaddrinfo="yes"
+        ;;
+      dragonflybsd*)
+        tst_tsafe_getaddrinfo="yes"
+        ;;
+      freebsd[[1234]].* | freebsd5.[[1234]]*)
+        tst_tsafe_getaddrinfo="no"
+        ;;
+      freebsd*)
+        tst_tsafe_getaddrinfo="yes"
+        ;;
+      linux*)
+        tst_tsafe_getaddrinfo="yes"
+        ;;
+      netbsd[[123]].*)
+        tst_tsafe_getaddrinfo="no"
+        ;;
+      netbsd*)
+        tst_tsafe_getaddrinfo="yes"
+        ;;
+    esac
+    AC_MSG_RESULT([$tst_tsafe_getaddrinfo])
+    if test "$tst_tsafe_getaddrinfo" = "yes"; then
+      AC_DEFINE_UNQUOTED(HAVE_GETADDRINFO_THREADSAFE, 1,
+        [Define to 1 if the getaddrinfo function is threadsafe.])
+      ac_cv_func_getaddrinfo_threadsafe="yes"
+    else
+      ac_cv_func_getaddrinfo_threadsafe="no"
+    fi
   fi
 ])
 
