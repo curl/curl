@@ -2572,10 +2572,11 @@ CURLcode Curl_retry_request(struct connectdata *conn,
   if(data->set.upload && !(conn->protocol&PROT_HTTP))
     return CURLE_OK;
 
-  if((data->req.bytecount +
+  if(/* workaround for broken TLS servers */ data->state.ssl_connect_retry ||
+      ((data->req.bytecount +
       data->req.headerbytecount == 0) &&
      conn->bits.reuse &&
-     !data->set.opt_no_body) {
+     !data->set.opt_no_body)) {
     /* We got no data, we attempted to re-use a connection and yet we want a
        "body". This might happen if the connection was left alive when we were
        done using it before, but that was closed when we wanted to read from

@@ -12,6 +12,13 @@ Kamil Dudka (12 Nov 2009)
   before and always closed unresolved. More info at the RH bug:
   https://bugzilla.redhat.com/534176
 
+- libcurl-NSS now tries to reconnect with TLS disabled in case it detects
+  a broken TLS server. However it does not happen if SSL version is selected
+  manually. The approach was originally taken from PSM. Kaspar Brand helped me
+  to complete the patch. Original bug reports:
+  https://bugzilla.redhat.com/525496
+  https://bugzilla.redhat.com/527771
+
 Yang Tse (11 Nov 2009)
 - Marco Maggi reported that compilation failed when configured --with-gssapi
   and GNU GSS installed due to a missing mutual exclusion of header files in
