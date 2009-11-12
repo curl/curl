@@ -123,10 +123,6 @@
 static struct curl_hash hostname_cache;
 static int host_cache_initialized;
 
-#ifdef DEBUGBUILD
-static int ndns = 0;
-#endif
-
 static void freednsentry(void *freethis);
 
 /*
@@ -368,7 +364,6 @@ Curl_cache_addr(struct SessionHandle *data,
 
   dns = dns2;
   dns->inuse++;         /* mark entry as in-use */
-  DEBUGF(ndns++);
 
   /* free the allocated entry_id again */
   free(entry_id);
@@ -431,7 +426,6 @@ int Curl_resolv(struct connectdata *conn,
 
   if(dns) {
     dns->inuse++; /* we use it! */
-    DEBUGF(ndns++);
     rc = CURLRESOLV_RESOLVED;
   }
 
@@ -684,7 +678,6 @@ void Curl_resolv_unlock(struct SessionHandle *data, struct Curl_dns_entry *dns)
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
   dns->inuse--;
-  DEBUGF(ndns--);
   /* only free if nobody is using AND it is not in hostcache (timestamp ==
      0) */
   if (dns->inuse == 0 && dns->timestamp == 0) {
@@ -710,19 +703,6 @@ static void freednsentry(void *freethis)
     free(p);
   }
 }
-
-#if 0
-
-TODO before 7.19.8: Give some use to this function or remove it.
-
-#ifdef DEBUGBUILD
-int curl_get_ndns(void)
-{
-  return ndns;
-}
-#endif
-
-#endif
 
 /*
  * Curl_mk_dnscache() creates a new DNS cache and returns the handle for it.
