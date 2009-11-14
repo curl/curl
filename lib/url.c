@@ -2689,6 +2689,12 @@ ConnectionExists(struct SessionHandle *data,
       /* don't do mixed SSL and non-SSL connections */
       continue;
 
+    if(needle->protocol&PROT_SSL) {
+      if((data->set.ssl.verifypeer != check->verifypeer) ||
+         (data->set.ssl.verifyhost != check->verifyhost))
+        continue;
+    }
+
     if(needle->bits.proxy != check->bits.proxy)
       /* don't do mixed proxy and non-proxy connections */
       continue;
@@ -4325,6 +4331,9 @@ static CURLcode create_conn(struct SessionHandle *data,
   conn->bits.user_passwd = (bool)(NULL != data->set.str[STRING_USERNAME]);
   conn->bits.ftp_use_epsv = data->set.ftp_use_epsv;
   conn->bits.ftp_use_eprt = data->set.ftp_use_eprt;
+
+  conn->verifypeer = data->set.ssl.verifypeer;
+  conn->verifyhost = data->set.ssl.verifyhost;
 
   if(data->multi && Curl_multi_canPipeline(data->multi) &&
       !conn->master_buffer) {

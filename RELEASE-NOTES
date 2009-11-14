@@ -18,6 +18,7 @@ This release includes the following bugfixes:
  o progress meter/callback during FTP connection
  o DNS cache timeout while transfer in progress
  o compilation when configured --with-gssapi having GNU GSS installed
+ o SSL connection reused with mismatched protection level
 
 This release includes the following known bugs:
 

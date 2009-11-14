@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Yang Tse (14 Nov 2009)
+- Constantine Sapuntzakis provided the fix that ensures that an SSL connection
+  won't be reused unless protection level for peer and host verification match.
+
 Kamil Dudka (12 Nov 2009)
 - Kevin Baughman provided a fix preventing libcurl-NSS from crash on doubly
   closed NSPR descriptor. The issue was hard to find, reported several times
