@@ -10,6 +10,7 @@ Curl and libcurl 7.19.8
 This release includes the following changes:
 
  o support SSL_FILETYPE_ENGINE for client certificate
+ o curl-config can now show the arguments used when building curl
 
 This release includes the following bugfixes:
 

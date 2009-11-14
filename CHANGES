@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Claes Jakobsson (14 Nov 2009)
+- curl-config now accepts '--configure' to see what arguments was
+  passed to the configure script when building curl.
 
 Daniel Stenberg (14 Nov 2009)
 - Claes Jakobsson restored the configure functionality to detect NSS when

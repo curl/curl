@@ -45,6 +45,12 @@ CURL_CHECK_OPTION_CURLDEBUG
 
 CURL_CHECK_PATH_SEPARATOR_REQUIRED
 
+#
+# save the configure arguments
+#
+CONFIGURE_OPTIONS="\"$ac_configure_args\""
+AC_SUBST(CONFIGURE_OPTIONS)
+
 dnl SED is mandatory for configure process and libtool.
 dnl Set it now, allowing it to be changed later.
 AC_PATH_PROG([SED], [sed], [not_found],

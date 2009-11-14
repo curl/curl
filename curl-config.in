@@ -37,6 +37,7 @@ Available values for OPTION include:
   --cc        compiler
   --cflags    pre-processor and compiler flags
   --checkfor [version] check for (lib)curl of the specified version
+  --configure the arguments given to configure when building curl
   --features  newline separated list of enabled features
   --help      display this help and exit
   --libs      library linking information
@@ -145,6 +146,10 @@ while test $# -gt 0; do
     --static-libs)
 	echo @libdir@/libcurl.@libext@ @LDFLAGS@ @LIBCURL_LIBS@ @LIBS@
 	;;
+
+    --configure)
+      echo @CONFIGURE_OPTIONS@
+    ;;
 
     *)
         echo "unknown option: $1"
