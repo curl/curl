@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (14 Nov 2009)
+- Camille Moncelier added support for the file type SSL_FILETYPE_ENGINE for
+  the client certificate. It also disable the key name test as some engines
+  can select a private key/cert automatically (When there is only one key
+  and/or certificate on the hardware device used by the engine)
+
 Yang Tse (14 Nov 2009)
 - Constantine Sapuntzakis provided the fix that ensures that an SSL connection
   won't be reused unless protection level for peer and host verification match.

@@ -310,9 +310,10 @@ int cert_stuff(struct connectdata *conn,
                const char *key_type)
 {
   struct SessionHandle *data = conn->data;
-  int file_type;
 
-  if(cert_file != NULL) {
+  int file_type = do_file_type(cert_type);
+
+  if(cert_file != NULL || file_type == SSL_FILETYPE_ENGINE) {
     SSL *ssl;
     X509 *x509;
     int cert_done = 0;
@@ -337,7 +338,6 @@ int cert_stuff(struct connectdata *conn,
       SSL_CTX_set_default_passwd_cb(ctx, passwd_callback);
     }
 
-    file_type = do_file_type(cert_type);
 
 #define SSL_CLIENT_CERT_ERR \
     "unable to use client certificate (no key found or wrong pass phrase?)"
@@ -364,8 +364,56 @@ int cert_stuff(struct connectdata *conn,
       }
       break;
     case SSL_FILETYPE_ENGINE:
+#ifdef HAVE_OPENSSL_ENGINE_H
+      {
+        if(data->state.engine) {
+          const char *cmd_name = "LOAD_CERT_CTRL";
+          struct {
+            const char *cert_id;
+            X509 *cert;
+          } params;
+
+          params.cert_id = cert_file;
+          params.cert = NULL;
+
+          /* Does the engine supports LOAD_CERT_CTRL ? */
+          if (!ENGINE_ctrl(data->state.engine, ENGINE_CTRL_GET_CMD_FROM_NAME,
+                           0, (void *)cmd_name, NULL)) {
+            failf(data, "ssl engine does not support loading certificates");
+            return 0;
+          }
+          /* Load the certificate from the engine */
+          if (!ENGINE_ctrl_cmd(data->state.engine, cmd_name,
+                               0, &params, NULL, 1)) {
+            failf(data, "ssl engine cannot load client cert with id"
+                  " '%s' [%s]", cert_file,
+                  ERR_error_string(ERR_get_error(), NULL));
+            return 0;
+          }
+
+          if (!params.cert) {
+            failf(data, "ssl engine didn't initialized the certificate "
+                  "properly.");
+            return 0;
+          }
+
+          if(SSL_CTX_use_certificate(ctx, params.cert) != 1) {
+            failf(data, "unable to set client certificate");
+            X509_free(params.cert);
+            return 0;
+          }
+          X509_free(params.cert); /* we don't need the handle any more... */
+        }
+        else {
+          failf(data, "crypto engine not set, can't load certificate");
+          return 0;
+        }
+      }
+      break;
+#else
       failf(data, "file type ENG for certificate not implemented");
       return 0;
+#endif
 
     case SSL_FILETYPE_PKCS12:
     {
@@ -481,10 +529,6 @@ int cert_stuff(struct connectdata *conn,
 #ifdef HAVE_ENGINE_LOAD_FOUR_ARGS
           UI_METHOD *ui_method = UI_OpenSSL();
 #endif
-          if(!key_file || !key_file[0]) {
-            failf(data, "no key set to load from crypto engine");
-            return 0;
-          }
           /* the typecast below was added to please mingw32 */
           priv_key = (EVP_PKEY *)
             ENGINE_load_private_key(data->state.engine,key_file,
@@ -1475,7 +1519,7 @@ ossl_connect_step1(struct connectdata *conn,
     SSL_CTX_ctrl(connssl->ctx, BIO_C_SET_NBIO, 1, NULL);
 #endif
 
-  if(data->set.str[STRING_CERT]) {
+  if(data->set.str[STRING_CERT] || data->set.str[STRING_CERT_TYPE]) {
     if(!cert_stuff(conn,
                    connssl->ctx,
                    data->set.str[STRING_CERT],
