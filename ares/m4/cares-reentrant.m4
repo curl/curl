@@ -422,12 +422,35 @@ dnl must be unconditionally done for this platform.
 dnl Internal macro for CARES_CONFIGURE_REENTRANT.
 
 AC_DEFUN([CARES_CHECK_NEED_REENTRANT_SYSTEM], [
-  case $host in
-    *-*-solaris*)
+  case $host_os in
+    solaris*)
       tmp_need_reentrant="yes"
       ;;
     *)
       tmp_need_reentrant="no"
+      ;;
+  esac
+])
+
+
+dnl CARES_CHECK_NEED_THREAD_SAFE_SYSTEM
+dnl -------------------------------------------------
+dnl Checks if the preprocessor _THREAD_SAFE definition
+dnl must be unconditionally done for this platform.
+dnl Internal macro for CARES_CONFIGURE_THREAD_SAFE.
+
+AC_DEFUN([CARES_CHECK_NEED_THREAD_SAFE_SYSTEM], [
+  case $host_os in
+    aix[[123]].* | aix4.[[012]].*)
+      dnl aix 4.2 and older
+      tmp_need_thread_safe="no"
+      ;;
+    aix*)
+      dnl AIX 4.3 and newer
+      tmp_need_thread_safe="yes"
+      ;;
+    *)
+      tmp_need_thread_safe="no"
       ;;
   esac
 ])
@@ -448,6 +471,26 @@ AC_DEFINE(NEED_REENTRANT, 1,
 cat >>confdefs.h <<_EOF
 #ifndef _REENTRANT
 #  define _REENTRANT
+#endif
+_EOF
+])
+
+
+dnl CARES_CONFIGURE_FROM_NOW_ON_WITH_THREAD_SAFE
+dnl -------------------------------------------------
+dnl This macro ensures that configuration tests done
+dnl after this will execute with preprocessor symbol
+dnl _THREAD_SAFE defined. This macro also ensures that
+dnl the generated config file defines NEED_THREAD_SAFE
+dnl and that in turn setup.h will define _THREAD_SAFE.
+dnl Internal macro for CARES_CONFIGURE_THREAD_SAFE.
+
+AC_DEFUN([CARES_CONFIGURE_FROM_NOW_ON_WITH_THREAD_SAFE], [
+AC_DEFINE(NEED_THREAD_SAFE, 1,
+  [Define to 1 if _THREAD_SAFE preprocessor symbol must be defined.])
+cat >>confdefs.h <<_EOF
+#ifndef _THREAD_SAFE
+#  define _THREAD_SAFE
 #endif
 _EOF
 ])
@@ -513,3 +556,56 @@ AC_DEFUN([CARES_CONFIGURE_REENTRANT], [
   #
 ])
 
+
+dnl CARES_CONFIGURE_THREAD_SAFE
+dnl -------------------------------------------------
+dnl This first checks if the preprocessor _THREAD_SAFE
+dnl symbol is already defined. If it isn't currently
+dnl defined a set of checks are performed to verify
+dnl if its definition is required. Finally, if
+dnl _THREAD_SAFE is already defined or needed it takes
+dnl care of making adjustments necessary to ensure
+dnl that it is defined equally for further configure
+dnl tests and generated config file.
+
+AC_DEFUN([CARES_CONFIGURE_THREAD_SAFE], [
+  AC_PREREQ([2.50])dnl
+  #
+  AC_MSG_CHECKING([if _THREAD_SAFE is already defined])
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+    ]],[[
+#ifdef _THREAD_SAFE
+      int dummy=1;
+#else
+      force compilation error
+#endif
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    tmp_thread_safe_initially_defined="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tmp_thread_safe_initially_defined="no"
+  ])
+  #
+  if test "$tmp_thread_safe_initially_defined" = "no"; then
+    AC_MSG_CHECKING([if _THREAD_SAFE is actually needed])
+    CARES_CHECK_NEED_THREAD_SAFE_SYSTEM
+    if test "$tmp_need_thread_safe" = "yes"; then
+      AC_MSG_RESULT([yes])
+    else
+      AC_MSG_RESULT([no])
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if _THREAD_SAFE is onwards defined])
+  if test "$tmp_thread_safe_initially_defined" = "yes" ||
+    test "$tmp_need_thread_safe" = "yes"; then
+    CARES_CONFIGURE_FROM_NOW_ON_WITH_THREAD_SAFE
+    AC_MSG_RESULT([yes])
+  else
+    AC_MSG_RESULT([no])
+  fi
+  #
+])

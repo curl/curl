@@ -82,6 +82,7 @@ dnl This defines _ALL_SOURCE for AIX
 CARES_CHECK_AIX_ALL_SOURCE
 
 dnl Our configure and build reentrant settings
+CARES_CONFIGURE_THREAD_SAFE
 CARES_CONFIGURE_REENTRANT
 
 dnl check for how to do large files
@@ -384,21 +385,6 @@ AC_HELP_STRING([--enable-libgcc],[use libgcc when linking]),
 dnl Default is to try the thread-safe versions of a few functions
 OPT_THREAD=on
 
-dnl detect AIX 4.3 or later
-AC_MSG_CHECKING([AIX 4.3 or later])
-AC_PREPROC_IFELSE([
-#if defined(_AIX) && defined(_AIX43)
-printf("just fine");
-#else
-#error "this is not AIX 4.3 or later"
-#endif
-],
- [ AC_MSG_RESULT([yes])
-   RECENTAIX=yes
-   OPT_THREAD=off ],
- [ AC_MSG_RESULT([no]) ]
-)
-
 AC_ARG_ENABLE(thread,dnl
 AC_HELP_STRING([--disable-thread],[don't look for thread-safe functions])
 AC_HELP_STRING([--enable-thread],[look for thread-safe functions]),
@@ -426,12 +412,6 @@ dnl some functions still not thread-safe. Check for these!
 dnl Let's hope this split URL remains working:
 dnl http://publibn.boulder.ibm.com/doc_link/en_US/a_doc_lib/aixprggd/ \
 dnl genprogc/thread_quick_ref.htm
-
-if test "x$RECENTAIX" = "xyes"; then
-
-  AC_DEFINE(_THREAD_SAFE, 1, [define this if you need it to compile thread-safe code])
-
-fi
 
 
 dnl **********************************************************************

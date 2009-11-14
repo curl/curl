@@ -148,6 +148,7 @@ dnl This defines _ALL_SOURCE for AIX
 CURL_CHECK_AIX_ALL_SOURCE
 
 dnl Our configure and build reentrant settings
+CURL_CONFIGURE_THREAD_SAFE
 CURL_CONFIGURE_REENTRANT
 
 dnl check for how to do large files
@@ -1823,22 +1824,6 @@ esac
 dnl Default is to try the thread-safe versions of a few functions
 OPT_THREAD=on
 
-dnl detect AIX 4.3 or later
-dnl see full docs on this reasoning in the lib/hostip.c source file
-AC_MSG_CHECKING([AIX 4.3 or later])
-AC_PREPROC_IFELSE([
-#if defined(_AIX) && defined(_AIX43)
-printf("just fine");
-#else
-#error "this is not AIX 4.3 or later"
-#endif
-],
- [ AC_MSG_RESULT([yes])
-   RECENTAIX=yes
-   OPT_THREAD=off ],
- [ AC_MSG_RESULT([no]) ]
-)
-
 AC_ARG_ENABLE(thread,dnl
 AC_HELP_STRING([--disable-thread],[don't look for thread-safe functions])
 AC_HELP_STRING([--enable-thread],[look for thread-safe functions]),
@@ -1885,19 +1870,6 @@ dnl some functions still not thread-safe. Check for these!
 dnl Let's hope this split URL remains working:
 dnl http://publibn.boulder.ibm.com/doc_link/en_US/a_doc_lib/aixprggd/ \
 dnl genprogc/thread_quick_ref.htm
-
-if test "x$RECENTAIX" = "xyes"; then
-
-  AC_DEFINE(_THREAD_SAFE, 1, [define this if you need it to compile thread-safe code])
-
-  dnl is there a localtime_r()
-  dnl the old localtime_r check was done here
-
-  dnl is there a strerror_r()
-  dnl the old strerror_r check was done here
-
-  checkfor_gmtime_r="yes"
-fi
 
 
 dnl **********************************************************************

@@ -640,8 +640,11 @@
 /* Define to 1 if you need the malloc.h header file even with stdlib.h */
 /* #undef NEED_MALLOC_H */
 
-/* need REENTRANT defined */
+/* Define to 1 if _REENTRANT preprocessor symbol must be defined. */
 /* #undef NEED_REENTRANT */
+
+/* Define to 1 if _THREAD_SAFE preprocessor symbol must be defined. */
+/* #undef NEED_THREAD_SAFE */
 
 /* cpu-machine-OS */
 #ifdef __WINS__
@@ -766,9 +769,6 @@
 
 /* Define for large files, on AIX-style hosts. */
 /* #undef _LARGE_FILES */
-
-/* define this if you need it to compile thread-safe code */
-/* #undef _THREAD_SAFE */
 
 /* Define to empty if `const' does not conform to ANSI C. */
 /* #undef const */

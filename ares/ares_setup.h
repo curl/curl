@@ -49,6 +49,17 @@
 /* ================================================================ */
 
 /*
+ * AIX 4.3 and newer needs _THREAD_SAFE defined to build
+ * proper reentrant code. Others may also need it.
+ */
+
+#ifdef NEED_THREAD_SAFE
+#  ifndef _THREAD_SAFE
+#    define _THREAD_SAFE
+#  endif
+#endif
+
+/*
  * Tru64 needs _REENTRANT set for a few function prototypes and
  * things to appear in the system header files. Unixware needs it
  * to build proper reentrant code. Others may also need it.
