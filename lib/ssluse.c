@@ -376,12 +376,14 @@ int cert_stuff(struct connectdata *conn,
           params.cert_id = cert_file;
           params.cert = NULL;
 
+#ifdef ENGINE_CTRL_GET_CMD_FROM_NAME
           /* Does the engine supports LOAD_CERT_CTRL ? */
           if (!ENGINE_ctrl(data->state.engine, ENGINE_CTRL_GET_CMD_FROM_NAME,
                            0, (void *)cmd_name, NULL)) {
             failf(data, "ssl engine does not support loading certificates");
             return 0;
           }
+#endif
           /* Load the certificate from the engine */
           if (!ENGINE_ctrl_cmd(data->state.engine, cmd_name,
                                0, &params, NULL, 1)) {
