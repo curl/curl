@@ -6,7 +6,14 @@
 
                                   Changelog
 
+
 Daniel Stenberg (14 Nov 2009)
+- Claes Jakobsson restored the configure functionality to detect NSS when
+  --with-nss is set but not "yes".
+
+  I think we can still improve that to check for pkg-config in that path etc,
+  but at least this patch brings back the same functionality we had before.
+
 - Camille Moncelier added support for the file type SSL_FILETYPE_ENGINE for
   the client certificate. It also disable the key name test as some engines
   can select a private key/cert automatically (When there is only one key

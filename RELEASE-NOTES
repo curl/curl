@@ -19,6 +19,7 @@ This release includes the following bugfixes:
  o DNS cache timeout while transfer in progress
  o compilation when configured --with-gssapi having GNU GSS installed
  o SSL connection reused with mismatched protection level
+ o configure --with-nss is set but not "yes"
 
 This release includes the following known bugs:
 
@@ -28,6 +29,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Yang Tse, Kamil Dudka, Christian Schmitz, Constantine Sapuntzakis,
- Marco Maggi
+ Marco Maggi, Camille Moncelier, Claes Jakobsson, Kevin Baughman
 
         Thanks! (and sorry if I forgot to mention someone)
