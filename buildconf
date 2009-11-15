@@ -267,6 +267,8 @@ for fname in .deps \
     aclocal.m4 \
     aclocal.m4.bak \
     ares_build.h \
+    ares_config.h \
+    ares_config.h.in \
     autom4te.cache \
     compile \
     config.guess \
