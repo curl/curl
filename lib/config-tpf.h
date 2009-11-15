@@ -47,9 +47,6 @@
 /* when not building a shared library */
 /* #undef CURL_STATICLIB */
 
-/* Set to explicitly specify we don't want to use thread-safe functions */
-/* #undef DISABLED_THREADSAFE */
-
 /* lber dynamic library file */
 /* #undef DL_LBER_FILE */
 

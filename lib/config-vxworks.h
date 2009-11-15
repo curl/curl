@@ -68,9 +68,6 @@
 /* when not building a shared library */
 /* #undef CURL_STATICLIB */
 
-/* Set to explicitly specify we don't want to use thread-safe functions */
-/* #undef DISABLED_THREADSAFE */
-
 /* your Entropy Gathering Daemon socket pathname */
 /* #undef EGD_SOCKET */
 

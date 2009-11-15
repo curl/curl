@@ -54,9 +54,6 @@
 /* Define this to your Entropy Gathering Daemon socket pathname */
 #undef EGD_SOCKET
 
-/* Set to explicitly specify we don't want to use thread-safe functions */
-#undef DISABLED_THREADSAFE
-
 /* Define to 1 if you have the alarm function. */
 #define HAVE_ALARM 1
 

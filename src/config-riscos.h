@@ -53,9 +53,6 @@
 /* Define this to your Entropy Gathering Daemon socket pathname */
 #undef EGD_SOCKET
 
-/* Set to explicitly specify we don't want to use thread-safe functions */
-#define DISABLED_THREADSAFE
-
 /* Define if you want to enable IPv6 support */
 #undef ENABLE_IPV6
 

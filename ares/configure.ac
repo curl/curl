@@ -382,33 +382,6 @@ AC_HELP_STRING([--enable-libgcc],[use libgcc when linking]),
 )
 
 
-dnl Default is to try the thread-safe versions of a few functions
-OPT_THREAD=on
-
-AC_ARG_ENABLE(thread,dnl
-AC_HELP_STRING([--disable-thread],[don't look for thread-safe functions])
-AC_HELP_STRING([--enable-thread],[look for thread-safe functions]),
-[ case "$enableval" in
-  no)
-    OPT_THREAD=off
-    AC_MSG_WARN(c-ares will not get built using thread-safe functions)
-    ;;
-  *)
-    ;;
-  esac
-]
-)
-
-if test X"$OPT_THREAD" = Xoff
-then
-  AC_DEFINE(DISABLED_THREADSAFE, 1,
-    [Set to explicitly specify we don't want to use thread-safe functions])
-fi
-
-dnl for recent AIX versions, we skip all the thread-safe checks above since
-dnl they claim a thread-safe libc using the standard API. But there are
-dnl some functions still not thread-safe. Check for these!
-
 dnl Let's hope this split URL remains working:
 dnl http://publibn.boulder.ibm.com/doc_link/en_US/a_doc_lib/aixprggd/ \
 dnl genprogc/thread_quick_ref.htm
