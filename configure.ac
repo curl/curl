@@ -1148,6 +1148,7 @@ if test X"$OPT_SSL" != Xno; then
   CLEANLDFLAGS="$LDFLAGS"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
+  SAVE_PKG_CONFIG_LIBDIR="$PKG_CONFIG_LIBDIR"
 
   case "$OPT_SSL" in
   yes)
@@ -1171,12 +1172,25 @@ if test X"$OPT_SSL" != Xno; then
     dnl check the given --with-ssl spot
     PKGTEST="no"
     PREFIX_OPENSSL=$OPT_SSL
+
+    dnl Try pkg-config even when cross-compiling.  Since we
+    dnl specify PKG_CONFIG_LIBDIR we're only looking where
+    dnl the user told us to look
+    PKG_CONFIG_LIBDIR=$OPT_SSL/lib/pkgconfig
+    export PKG_CONFIG_LIBDIR
+    AC_MSG_NOTICE([set PKG_CONFIG_LIBDIR to "$PKG_CONFIG_LIBDIR"])
+    if test -e "$PKG_CONFIG_LIBDIR/openssl.pc"; then
+      PKGTEST="yes"
+    fi
+
+    dnl in case pkg-config comes up empty, use what we got
+    dnl via --with-ssl
     LIB_OPENSSL="$PREFIX_OPENSSL/lib$libsuff"
     if test "$PREFIX_OPENSSL" != "/usr" ; then
-      LDFLAGS="$LDFLAGS -L$LIB_OPENSSL"
-      CPPFLAGS="$CPPFLAGS -I$PREFIX_OPENSSL/include"
+      SSL_LDFLAGS="-L$LIB_OPENSSL"
+      SSL_CPPFLAGS="-I$PREFIX_OPENSSL/include"
     fi
-    CPPFLAGS="$CPPFLAGS -I$PREFIX_OPENSSL/include/openssl"
+    SSL_CPPFLAGS="$SSL_CPPFLAGS -I$PREFIX_OPENSSL/include/openssl"
     ;;
   esac
 
@@ -1189,14 +1203,29 @@ if test X"$OPT_SSL" != Xno; then
       SSL_LDFLAGS=`$PKGCONFIG --libs-only-L openssl 2>/dev/null`
       SSL_CPPFLAGS=`$PKGCONFIG --cflags-only-I openssl 2>/dev/null`
 
+      AC_MSG_NOTICE([pkg-config: SSL_LIBS: "$SSL_LIBS"])
+      AC_MSG_NOTICE([pkg-config: SSL_LDFLAGS: "$SSL_LDFLAGS"])
+      AC_MSG_NOTICE([pkg-config: SSL_CPPFLAGS: "$SSL_CPPFLAGS"])
+
       LIB_OPENSSL=`echo $SSL_LDFLAGS | sed -e 's/-L//g'`
 
-      dnl use the values pkg-config reported
+      dnl use the values pkg-config reported.  This is here
+      dnl instead of below with CPPFLAGS and LDFLAGS because we only
+      dnl learn about this via pkg-config.  If we only have
+      dnl the argument to --with-ssl we don't know what
+      dnl additional libs may be necessary.  Hope that we
+      dnl don't need any.
       LIBS="$LIBS $SSL_LIBS"
-      CPPFLAGS="$CPPFLAGS $SSL_CPPFLAGS"
-      LDFLAGS="$LDFLAGS $SSL_LDFLAGS"
     fi
   fi
+
+  dnl we're done using pkg-config for openssl
+  PKG_CONFIG_LIBDIR="$SAVE_PKG_CONFIG_LIBDIR"
+  export PKG_CONFIG_LIBDIR
+
+  dnl finally, set flags to use SSL
+  CPPFLAGS="$CPPFLAGS $SSL_CPPFLAGS"
+  LDFLAGS="$LDFLAGS $SSL_LDFLAGS"
 
   dnl This is for Msys/Mingw
   case $host in

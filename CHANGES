@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Kamil Dudka (15 Nov 2009)
+- David Byron improved the configure script to use pkg-config to find OpenSSL
+  (and in particular the list of required libraries) even if a path is given
+  as argument to --with-ssl
+
 Claes Jakobsson (14 Nov 2009)
 - curl-config now accepts '--configure' to see what arguments was
   passed to the configure script when building curl.
