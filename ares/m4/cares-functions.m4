@@ -1055,14 +1055,20 @@ AC_DEFUN([CARES_CHECK_FUNC_GETADDRINFO], [
         dnl All other bsd's
         tst_tsafe_getaddrinfo="no"
         ;;
+      solaris2*)
+        dnl solaris which have it
+        tst_tsafe_getaddrinfo="yes"
+        ;;
     esac
-    CURL_CHECK_DEF_CC([h_errno], [
-      $curl_includes_ws2tcpip
-      $curl_includes_sys_socket
-      $curl_includes_netdb
-      ], [silent])
-    if test "$curl_cv_have_def_h_errno" = "no"; then
-      tst_tsafe_getaddrinfo="no"
+    if test "$tst_tsafe_getaddrinfo" = "unknown"; then
+      CURL_CHECK_DEF_CC([h_errno], [
+        $curl_includes_ws2tcpip
+        $curl_includes_sys_socket
+        $curl_includes_netdb
+        ], [silent])
+      if test "$curl_cv_have_def_h_errno" = "no"; then
+        tst_tsafe_getaddrinfo="no"
+      fi
     fi
     if test "$tst_tsafe_getaddrinfo" = "unknown"; then
       tst_tsafe_getaddrinfo="yes"
