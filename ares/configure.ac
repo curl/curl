@@ -406,6 +406,7 @@ AC_CHECK_HEADERS(
        sys/ioctl.h \
        sys/param.h \
        sys/uio.h \
+       assert.h \
        netdb.h \
        netinet/in.h \
        netinet/tcp.h \
