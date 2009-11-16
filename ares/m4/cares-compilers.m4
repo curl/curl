@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 61
+# serial 63
 
 
 dnl CARES_CHECK_COMPILER
@@ -1340,9 +1340,20 @@ AC_DEFUN([CARES_CHECK_COMPILER_SYMBOL_HIDING], [
       dnl Only icc 9.0 or later
       if test "$compiler_num" -ge "900"; then
         if $CC --help --verbose 2>&1 | grep fvisibility= > /dev/null ; then
-          tmp_EXTERN="__attribute__ ((visibility (\"default\")))"
-          tmp_CFLAGS="-fvisibility=hidden"
-          supports_symbol_hiding="yes"
+          tmp_save_CFLAGS="$CFLAGS"
+          CFLAGS="$CFLAGS -fvisibility=hidden"
+          AC_LINK_IFELSE([
+            AC_LANG_PROGRAM([[
+#             include <stdio.h>
+            ]],[[
+              printf("icc fvisibility bug test");
+            ]])
+          ],[
+            tmp_EXTERN="__attribute__ ((visibility (\"default\")))"
+            tmp_CFLAGS="-fvisibility=hidden"
+            supports_symbol_hiding="yes"
+          ])
+          CFLAGS="$tmp_save_CFLAGS"
         fi
       fi
       ;;
