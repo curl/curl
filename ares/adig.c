@@ -157,13 +157,14 @@ static const char *opcodes[] = {
   "UPDATEA", "UPDATED", "UPDATEDA", "UPDATEM", "UPDATEMA",
   "ZONEINIT", "ZONEREF"
 };
-  struct in_addr inaddr;
 
 static const char *rcodes[] = {
   "NOERROR", "FORMERR", "SERVFAIL", "NXDOMAIN", "NOTIMP", "REFUSED",
   "(unknown)", "(unknown)", "(unknown)", "(unknown)", "(unknown)",
   "(unknown)", "(unknown)", "(unknown)", "(unknown)", "NOCHANGE"
 };
+
+static struct in_addr inaddr;
 
 static void callback(void *arg, int status, int timeouts,
                      unsigned char *abuf, int alen);
