@@ -22,6 +22,7 @@ This release includes the following bugfixes:
  o SSL connection reused with mismatched protection level
  o configure --with-nss is set but not "yes"
  o don't store LDFLAGS in pkg-config file
+ o never-pruned DNS cached entries
 
 This release includes the following known bugs:
 

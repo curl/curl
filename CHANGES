@@ -7,6 +7,18 @@
                                   Changelog
 
 Daniel Stenberg (17 Nov 2009)
+- Constantine Sapuntzakis provided another fix for the DNS cache that could
+  end up with entries that wouldn't time-out:
+
+  1. Set up a first web server that redirects (307) to a http://server:port
+     that's down
+  2. Have curl connect to the first web server using curl multi
+
+  After the curl_easy_cleanup call, there will be curl dns entries hanging
+  around with in_use != 0.
+
+  (http://curl.haxx.se/bug/view.cgi?id=2891591)
+
 - Marc Kleine-Budde fixed: curl saved the LDFLAGS set during configure into
   its pkg-config file.  So -Wl stuff ended up in the .pc file, which is really
   bad, and breaks if there are multiple -Wl in our LDFLAGS (which are in

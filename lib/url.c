@@ -2356,6 +2356,11 @@ CURLcode Curl_disconnect(struct connectdata *conn)
     return CURLE_OK;
   }
 
+  if(conn->dns_entry != NULL) {
+    Curl_resolv_unlock(data, conn->dns_entry);
+    conn->dns_entry = NULL;
+  }
+
 #if defined(DEBUGBUILD) && defined(AGGRESIVE_TEST)
   /* scan for DNS cache entries still marked as in use */
   Curl_hash_apply(data->hostcache,
@@ -2922,7 +2927,6 @@ CURLcode Curl_connected_proxy(struct connectdata *conn)
 
 static CURLcode ConnectPlease(struct SessionHandle *data,
                               struct connectdata *conn,
-                              struct Curl_dns_entry *hostaddr,
                               bool *connected)
 {
   CURLcode result;
@@ -2941,13 +2945,12 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
    * Connect to server/proxy
    *************************************************************/
   result= Curl_connecthost(conn,
-                           hostaddr,
+                           conn->dns_entry,
                            &conn->sock[FIRSTSOCKET],
                            &addr,
                            connected);
   if(CURLE_OK == result) {
     /* All is cool, we store the current information */
-    conn->dns_entry = hostaddr;
     conn->ip_addr = addr;
 
     if(*connected)
@@ -4086,7 +4089,6 @@ static CURLcode set_userpass(struct connectdata *conn,
  *************************************************************/
 static CURLcode resolve_server(struct SessionHandle *data,
                                struct connectdata *conn,
-                               struct Curl_dns_entry **addr,
                                bool *async)
 {
   CURLcode result=CURLE_OK;
@@ -4119,9 +4121,8 @@ static CURLcode resolve_server(struct SessionHandle *data,
    * Resolve the name of the server or proxy
    *************************************************************/
   if(conn->bits.reuse) {
-    /* re-used connection, no resolving is necessary */
-    *addr = NULL;
-    /* we'll need to clear conn->dns_entry later in Curl_disconnect() */
+    /* We're reusing the connection - no need to resolve anything */
+    *async = FALSE;
 
     if(conn->bits.proxy)
       fix_hostname(data, conn, &conn->host);
@@ -4176,7 +4177,8 @@ static CURLcode resolve_server(struct SessionHandle *data,
         /* don't return yet, we need to clean up the timeout first */
       }
     }
-    *addr = hostaddr;
+    DEBUGASSERT(conn->dns_entry == NULL);
+    conn->dns_entry = hostaddr;
   }
 
   return result;
@@ -4255,10 +4257,7 @@ static void reuse_conn(struct connectdata *old_conn,
  *
  * @param data The sessionhandle pointer
  * @param in_connect is set to the next connection data pointer
- * @param addr is set to the new dns entry for this connection. If this
- *        connection is re-used it will be NULL.
- * @param async is set TRUE/FALSE depending on the nature of this lookup
- * @return CURLcode
+ * @param async is set TRUE when an async DNS resolution is pending
  * @see setup_conn()
  *
  * *NOTE* this function assigns the conn->data pointer!
@@ -4266,7 +4265,6 @@ static void reuse_conn(struct connectdata *old_conn,
 
 static CURLcode create_conn(struct SessionHandle *data,
                             struct connectdata **in_connect,
-                            struct Curl_dns_entry **addr,
                             bool *async)
 {
   CURLcode result=CURLE_OK;
@@ -4278,9 +4276,8 @@ static CURLcode create_conn(struct SessionHandle *data,
   bool reuse;
   char *proxy = NULL;
 
-  *addr = NULL; /* nothing yet */
   *async = FALSE;
-
+  
   /*************************************************************
    * Check input data
    *************************************************************/
@@ -4646,7 +4643,7 @@ static CURLcode create_conn(struct SessionHandle *data,
   /*************************************************************
    * Resolve the address of the server or proxy
    *************************************************************/
-  result = resolve_server(data, conn, addr, async);
+  result = resolve_server(data, conn, async);
 
   return result;
 }
@@ -4654,14 +4651,12 @@ static CURLcode create_conn(struct SessionHandle *data,
 /* setup_conn() is called after the name resolve initiated in
  * create_conn() is all done.
  *
- * NOTE: the argument 'hostaddr' is NULL when this function is called for a
- * re-used connection.
- *
+ * setup_conn() also handles reused connections
+ * 
  * conn->data MUST already have been setup fine (in create_conn)
  */
 
 static CURLcode setup_conn(struct connectdata *conn,
-                           struct Curl_dns_entry *hostaddr,
                            bool *protocol_done)
 {
   CURLcode result=CURLE_OK;
@@ -4706,15 +4701,10 @@ static CURLcode setup_conn(struct connectdata *conn,
     /* loop for CURL_SERVER_CLOSED_CONNECTION */
 
     if(CURL_SOCKET_BAD == conn->sock[FIRSTSOCKET]) {
+      /* Try to connect only if not already connected */
       bool connected = FALSE;
 
-      /* Connect only if not already connected!
-       *
-       * NOTE: hostaddr can be NULL when passed to this function, but that is
-       * only for the case where we re-use an existing connection and thus
-       * this code section will not be reached with hostaddr == NULL.
-       */
-      result = ConnectPlease(data, conn, hostaddr, &connected);
+      result = ConnectPlease(data, conn, &connected);
 
       if(connected) {
         result = Curl_protocol_connect(conn, protocol_done);
@@ -4775,33 +4765,22 @@ CURLcode Curl_connect(struct SessionHandle *data,
                       bool *protocol_done)
 {
   CURLcode code;
-  struct Curl_dns_entry *dns;
 
   *asyncp = FALSE; /* assume synchronous resolves by default */
 
   /* call the stuff that needs to be called */
-  code = create_conn(data, in_connect, &dns, asyncp);
+  code = create_conn(data, in_connect, asyncp);
 
   if(CURLE_OK == code) {
     /* no error */
     if((*in_connect)->send_pipe->size || (*in_connect)->recv_pipe->size)
       /* pipelining */
       *protocol_done = TRUE;
-    else {
-
-      if(dns || !*asyncp)
-        /* If an address is available it means that we already have the name
-           resolved, OR it isn't async. if this is a re-used connection 'dns'
-           will be NULL here. Continue connecting from here */
-        code = setup_conn(*in_connect, dns, protocol_done);
-
-      if(dns && code) {
-        /* We have the dns entry info already but failed to connect to the
-         * host and thus we must make sure to unlock the dns entry again
-         * before returning failure from here.
-         */
-        Curl_resolv_unlock(data, dns);
-      }
+    else if (!*asyncp) {
+      /* DNS resolution is done: that's either because this is a reused
+         connection, in which case DNS was unnecessary, or because DNS
+         really did finish already (synch resolver/fast async resolve) */
+      code = setup_conn(*in_connect, protocol_done);
     }
   }
 
@@ -4825,7 +4804,14 @@ CURLcode Curl_async_resolved(struct connectdata *conn,
 {
 #if defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME) || \
     defined(USE_THREADING_GETADDRINFO)
-  CURLcode code = setup_conn(conn, conn->async.dns, protocol_done);
+  CURLcode code;
+
+  if(conn->async.dns) {
+    conn->dns_entry = conn->async.dns;
+    conn->async.dns = NULL;    
+  }
+
+  code = setup_conn(conn, protocol_done);
 
   if(code)
     /* We're not allowed to return failure with memory left allocated
