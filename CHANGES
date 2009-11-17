@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (17 Nov 2009)
+- Marc Kleine-Budde fixed: curl saved the LDFLAGS set during configure into
+  its pkg-config file.  So -Wl stuff ended up in the .pc file, which is really
+  bad, and breaks if there are multiple -Wl in our LDFLAGS (which are in
+  PTXdist). bug #2893592 (http://curl.haxx.se/bug/view.cgi?id=2893592)
+
 Kamil Dudka (15 Nov 2009)
 - David Byron improved the configure script to use pkg-config to find OpenSSL
   (and in particular the list of required libraries) even if a path is given
