@@ -45,6 +45,10 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#ifndef HAVE_ASSERT_H
+#  define assert(x) do { } while (0)
+#endif
+
 struct memdebug {
   size_t size;
   union {
@@ -127,6 +131,8 @@ void *curl_domalloc(size_t wantedsize, int line, const char *source)
   struct memdebug *mem;
   size_t size;
 
+  assert(wantedsize != 0);
+
   if(countcheck("malloc", line, source))
     return NULL;
 
@@ -151,6 +157,9 @@ void *curl_docalloc(size_t wanted_elements, size_t wanted_size,
 {
   struct memdebug *mem;
   size_t size, user_size;
+
+  assert(wanted_elements != 0);
+  assert(wanted_size != 0);
 
   if(countcheck("calloc", line, source))
     return NULL;
@@ -177,7 +186,7 @@ char *curl_dostrdup(const char *str, int line, const char *source)
   char *mem;
   size_t len;
 
-  DEBUGASSERT(str != NULL);
+  assert(str != NULL);
 
   if(countcheck("strdup", line, source))
     return NULL;
@@ -201,6 +210,8 @@ void *curl_dorealloc(void *ptr, size_t wantedsize,
                      int line, const char *source)
 {
   struct memdebug *mem=NULL;
+
+  assert(wantedsize != 0);
 
   size_t size = sizeof(struct memdebug)+wantedsize;
 
@@ -227,7 +238,7 @@ void curl_dofree(void *ptr, int line, const char *source)
 {
   struct memdebug *mem;
 
-  DEBUGASSERT(ptr != NULL);
+  assert(ptr != NULL);
 
   mem = (struct memdebug *)((char *)ptr - offsetof(struct memdebug, mem));
 
@@ -305,7 +316,7 @@ int curl_fclose(FILE *file, int line, const char *source)
 {
   int res;
 
-  DEBUGASSERT(file != NULL);
+  assert(file != NULL);
 
   res=fclose(file);
   if(logfile)
