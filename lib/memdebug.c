@@ -211,9 +211,9 @@ void *curl_dorealloc(void *ptr, size_t wantedsize,
 {
   struct memdebug *mem=NULL;
 
-  assert(wantedsize != 0);
-
   size_t size = sizeof(struct memdebug)+wantedsize;
+
+  assert(wantedsize != 0);
 
   if(countcheck("realloc", line, source))
     return NULL;
