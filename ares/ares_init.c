@@ -1108,11 +1108,19 @@ static int config_domain(ares_channel channel, char *str)
   return set_search(channel, str);
 }
 
+#if defined(__INTEL_COMPILER) && (__INTEL_COMPILER == 910) && \
+    defined(__OPTIMIZE__) && defined(__unix__) &&  defined(__i386__)
+  /* workaround icc 9.1 optimizer issue */
+# define vqualifier volatile
+#else
+# define vqualifier
+#endif
+
 static int config_lookup(ares_channel channel, const char *str,
                          const char *bindch, const char *filech)
 {
   char lookups[3], *l;
-  const char *p;
+  const char *vqualifier p;
 
   /* Set the lookup order.  Only the first letter of each work
    * is relevant, and it has to be "b" for DNS or "f" for the
