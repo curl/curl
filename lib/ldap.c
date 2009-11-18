@@ -673,7 +673,7 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
 static int _ldap_url_parse (const struct connectdata *conn,
                             LDAPURLDesc **ludpp)
 {
-  LDAPURLDesc *ludp = calloc(sizeof(*ludp), 1);
+  LDAPURLDesc *ludp = calloc(1, sizeof(*ludp));
   int rc;
 
   *ludpp = NULL;

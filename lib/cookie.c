@@ -204,7 +204,7 @@ Curl_cookie_add(struct SessionHandle *data,
 #endif
 
   /* First, alloc and init a new struct for it */
-  co = calloc(sizeof(struct Cookie), 1);
+  co = calloc(1, sizeof(struct Cookie));
   if(!co)
     return NULL; /* bail out if we're this low on memory */
 

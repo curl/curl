@@ -732,7 +732,7 @@ void ares__send_query(ares_channel channel, struct query *query,
               return;
             }
         }
-      sendreq = calloc(sizeof(struct send_request), 1);
+      sendreq = calloc(1, sizeof(struct send_request));
       if (!sendreq)
         {
         end_query(channel, query, ARES_ENOMEM, NULL, 0);

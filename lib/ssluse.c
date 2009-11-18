@@ -1966,7 +1966,7 @@ static int init_certinfo(struct SessionHandle *data,
   Curl_ssl_free_certinfo(data);
 
   ci->num_of_certs = num;
-  table = calloc(sizeof(struct curl_slist *) * num, 1);
+  table = calloc((size_t)num, sizeof(struct curl_slist *));
   if(!table)
     return 1;
 

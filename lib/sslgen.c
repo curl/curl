@@ -446,7 +446,7 @@ CURLcode Curl_ssl_initsessions(struct SessionHandle *data, long amount)
     /* this is just a precaution to prevent multiple inits */
     return CURLE_OK;
 
-  session = calloc(sizeof(struct curl_ssl_session), amount);
+  session = calloc(amount, sizeof(struct curl_ssl_session));
   if(!session)
     return CURLE_OUT_OF_MEMORY;
 

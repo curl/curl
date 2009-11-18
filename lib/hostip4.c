@@ -137,7 +137,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   else {
     int h_errnop;
 
-    buf = calloc(CURL_HOSTENT_SIZE, 1);
+    buf = calloc(1, CURL_HOSTENT_SIZE);
     if(!buf)
       return NULL; /* major failure */
     /*

@@ -282,7 +282,7 @@ static struct Curl_sh_entry *sh_addentry(struct curl_hash *sh,
     return there;
 
   /* not present, add it */
-  check = calloc(sizeof(struct Curl_sh_entry), 1);
+  check = calloc(1, sizeof(struct Curl_sh_entry));
   if(!check)
     return NULL; /* major failure */
   check->easy = data;
@@ -364,7 +364,7 @@ static struct curl_hash *sh_init(void)
 
 CURLM *curl_multi_init(void)
 {
-  struct Curl_multi *multi = calloc(sizeof(struct Curl_multi), 1);
+  struct Curl_multi *multi = calloc(1, sizeof(struct Curl_multi));
 
   if(!multi)
     return NULL;
@@ -425,7 +425,7 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
     return CURLM_BAD_EASY_HANDLE;
 
   /* Now, time to add an easy handle to the multi stack */
-  easy = calloc(sizeof(struct Curl_one_easy), 1);
+  easy = calloc(1, sizeof(struct Curl_one_easy));
   if(!easy)
     return CURLM_OUT_OF_MEMORY;
 
@@ -2393,7 +2393,7 @@ static void add_closure(struct Curl_multi *multi,
                         struct SessionHandle *data)
 {
   int i;
-  struct closure *cl = calloc(sizeof(struct closure), 1);
+  struct closure *cl = calloc(1, sizeof(struct closure));
   struct closure *p=NULL;
   struct closure *n;
   if(cl) {

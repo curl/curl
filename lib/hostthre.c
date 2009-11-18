@@ -396,7 +396,7 @@ static bool init_resolve_thread (struct connectdata *conn,
                                  const char *hostname, int port,
                                  const struct addrinfo *hints)
 {
-  struct thread_data *td = calloc(sizeof(*td), 1);
+  struct thread_data *td = calloc(1, sizeof(struct thread_data));
   HANDLE thread_and_event[2] = {0};
 
   if(!td) {

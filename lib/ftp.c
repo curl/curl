@@ -3092,7 +3092,7 @@ static CURLcode ftp_init(struct connectdata *conn)
   struct SessionHandle *data = conn->data;
   struct FTP *ftp = data->state.proto.ftp;
   if(!ftp) {
-    ftp = data->state.proto.ftp = calloc(sizeof(struct FTP), 1);
+    ftp = data->state.proto.ftp = calloc(1, sizeof(struct FTP));
     if(!ftp)
       return CURLE_OUT_OF_MEMORY;
   }

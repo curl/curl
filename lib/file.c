@@ -210,7 +210,7 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
   Curl_reset_reqproto(conn);
 
   if(!data->state.proto.file) {
-    file = calloc(sizeof(struct FILEPROTO), 1);
+    file = calloc(1, sizeof(struct FILEPROTO));
     if(!file) {
       free(real_path);
       return CURLE_OUT_OF_MEMORY;

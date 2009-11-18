@@ -984,7 +984,7 @@ static CURLcode
 static
 send_buffer *add_buffer_init(void)
 {
-  return calloc(sizeof(send_buffer), 1);
+  return calloc(1, sizeof(send_buffer));
 }
 
 /*
@@ -2078,7 +2078,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   if(!data->state.proto.http) {
     /* Only allocate this struct if we don't already have it! */
 
-    http = calloc(sizeof(struct HTTP), 1);
+    http = calloc(1, sizeof(struct HTTP));
     if(!http)
       return CURLE_OUT_OF_MEMORY;
     data->state.proto.http = http;

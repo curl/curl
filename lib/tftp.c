@@ -838,7 +838,7 @@ static CURLcode tftp_connect(struct connectdata *conn, bool *done)
      sessionhandle, deal with it */
   Curl_reset_reqproto(conn);
 
-  state = conn->proto.tftpc = calloc(sizeof(tftp_state_data_t), 1);
+  state = conn->proto.tftpc = calloc(1, sizeof(tftp_state_data_t));
   if(!state)
     return CURLE_OUT_OF_MEMORY;
 

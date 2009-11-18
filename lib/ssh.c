@@ -2383,7 +2383,7 @@ static CURLcode ssh_init(struct connectdata *conn)
   if(data->state.proto.ssh)
     return CURLE_OK;
 
-  ssh = calloc(sizeof(struct SSHPROTO), 1);
+  ssh = calloc(1, sizeof(struct SSHPROTO));
   if(!ssh)
     return CURLE_OUT_OF_MEMORY;
 
