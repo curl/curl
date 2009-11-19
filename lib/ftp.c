@@ -3089,16 +3089,20 @@ static CURLcode ftp_easy_statemach(struct connectdata *conn)
  */
 static CURLcode ftp_init(struct connectdata *conn)
 {
-  struct SessionHandle *data = conn->data;
-  struct FTP *ftp = data->state.proto.ftp;
-  if(!ftp) {
-    ftp = data->state.proto.ftp = calloc(1, sizeof(struct FTP));
-    if(!ftp)
+  struct FTP *ftp;
+
+  if(NULL == conn->data->state.proto.ftp) {
+    conn->data->state.proto.ftp = malloc(sizeof(struct FTP));
+    if(NULL == conn->data->state.proto.ftp)
       return CURLE_OUT_OF_MEMORY;
   }
 
+  ftp = conn->data->state.proto.ftp;
+
   /* get some initial data into the ftp struct */
-  ftp->bytecountp = &data->req.bytecount;
+  ftp->bytecountp = &conn->data->req.bytecount;
+  ftp->transfer = FTPTRANSFER_BODY;
+  ftp->downloadsize = 0;
 
   /* No need to duplicate user+password, the connectdata struct won't change
      during a session, but we re-init them here since on subsequent inits
