@@ -93,7 +93,7 @@ ares_parse_srv_reply (const unsigned char *abuf, int alen,
   aptr += len + QFIXEDSZ;
 
   /* Examine each answer resource record (RR) in turn. */
-  for (i = 0; i < (int) ancount; i++)
+  for (i = 0; i < ancount; i++)
     {
       /* Decode the RR up to the data field. */
       status = ares_expand_name (aptr, abuf, alen, &rr_name, &len);
