@@ -314,9 +314,9 @@ CARES_EXTERN void ares_destroy(ares_channel channel);
 
 CARES_EXTERN void ares_cancel(ares_channel channel);
 
-void ares_set_socket_callback(ares_channel channel,
-                              ares_sock_create_callback callback,
-                              void *user_data);
+CARES_EXTERN void ares_set_socket_callback(ares_channel channel,
+                                           ares_sock_create_callback callback,
+                                           void *user_data);
 
 CARES_EXTERN void ares_send(ares_channel channel,
                             const unsigned char *qbuf,
