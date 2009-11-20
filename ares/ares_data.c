@@ -34,7 +34,8 @@
 ** of c-ares functions returning pointers that must be free'ed using this
 ** function is:
 **
-**   FIXME: specify function list.
+**   ares_parse_srv_reply()
+**   ares_parse_txt_reply()
 */
 
 void ares_free_data(void *dataptr)

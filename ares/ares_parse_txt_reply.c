@@ -1,8 +1,7 @@
 /* $Id$ */
 
 /* Copyright 1998 by the Massachusetts Institute of Technology.
- * Copyright (C) 2009 Jakub Hrozek <jhrozek@redhat.com>
- * Copyright (C) 2009 Yang Tse <yangsita@gmail.com>
+ * Copyright (C) 2009 by Jakub Hrozek <jhrozek@redhat.com>
  *
  * Permission to use, copy, modify, and distribute this
  * software and its documentation for any purpose and without
@@ -49,11 +48,12 @@
 
 #include "ares.h"
 #include "ares_dns.h"
+#include "ares_data.h"
 #include "ares_private.h"
 
 int
 ares_parse_txt_reply (const unsigned char *abuf, int alen,
-                      struct ares_txt_reply **txt_out, int *ntxtreply)
+                      struct ares_txt_reply **txt_out)
 {
   size_t substr_len, str_len;
   unsigned int qdcount, ancount, i;
@@ -62,13 +62,12 @@ ares_parse_txt_reply (const unsigned char *abuf, int alen,
   int status, rr_type, rr_class, rr_len;
   long len;
   char *hostname = NULL, *rr_name = NULL;
-  struct ares_txt_reply *txt = NULL;
+  struct ares_txt_reply *txt_head = NULL;
+  struct ares_txt_reply *txt_last = NULL;
+  struct ares_txt_reply *txt_curr;
 
   /* Set *txt_out to NULL for all failure cases. */
   *txt_out = NULL;
-
-  /* Same with *ntxtreply. */
-  *ntxtreply = 0;
 
   /* Give up if abuf doesn't have room for a header. */
   if (alen < HFIXEDSZ)
@@ -95,21 +94,6 @@ ares_parse_txt_reply (const unsigned char *abuf, int alen,
     }
   aptr += len + QFIXEDSZ;
 
-  /* Allocate ares_txt_reply array; ancount gives an upper bound */
-  txt = malloc ((ancount) * sizeof (struct ares_txt_reply));
-  if (!txt)
-    {
-      free (hostname);
-      return ARES_ENOMEM;
-    }
-
-  /* Initialize ares_txt_reply array */
-  for (i = 0; i < ancount; i++)
-    {
-      txt[i].txt = NULL;
-      txt[i].length = 0;
-    }
-
   /* Examine each answer resource record (RR) in turn. */
   for (i = 0; i < ancount; i++)
     {
@@ -133,6 +117,23 @@ ares_parse_txt_reply (const unsigned char *abuf, int alen,
       /* Check if we are really looking at a TXT record */
       if (rr_class == C_IN && rr_type == T_TXT)
         {
+          /* Allocate storage for this SRV answer appending it to the list */
+          txt_curr = ares_malloc_data(ARES_DATATYPE_TXT_REPLY);
+          if (!txt_curr)
+            {
+              status = ARES_ENOMEM;
+              break;
+            }
+          if (txt_last)
+            {
+              txt_last->next = txt_curr;
+            }
+          else
+            {
+              txt_head = txt_curr;
+            }
+          txt_last = txt_curr;
+
           /*
            * There may be multiple substrings in a single TXT record. Each
            * substring may be up to 255 characters in length, with a
@@ -146,13 +147,13 @@ ares_parse_txt_reply (const unsigned char *abuf, int alen,
           while (strptr < (aptr + rr_len))
             {
               substr_len = (unsigned char)*strptr;
-              txt[i].length += substr_len;
+              txt_curr->length += substr_len;
               strptr += substr_len + 1;
             }
 
           /* Including null byte */
-          txt[i].txt = malloc (txt[i].length + 1);
-          if (txt[i].txt == NULL)
+          txt_curr->txt = malloc (txt_curr->length + 1);
+          if (txt_curr->txt == NULL)
             {
               status = ARES_ENOMEM;
               break;
@@ -165,12 +166,12 @@ ares_parse_txt_reply (const unsigned char *abuf, int alen,
             {
               substr_len = (unsigned char)*strptr;
               strptr++;
-              memcpy ((char *) txt[i].txt + str_len, strptr, substr_len);
+              memcpy ((char *) txt_curr->txt + str_len, strptr, substr_len);
               str_len += substr_len;
               strptr += substr_len;
             }
           /* Make sure we NULL-terminate */
-          txt[i].txt[txt[i].length] = '\0';
+          *((char *) txt_curr->txt + txt_curr->length) = '\0';
 
           /* Move on to the next record */
           aptr += rr_len;
@@ -189,17 +190,13 @@ ares_parse_txt_reply (const unsigned char *abuf, int alen,
   /* clean up on error */
   if (status != ARES_SUCCESS)
     {
-    for (i = 0; i < ancount; i++)
-      {
-        if (txt[i].txt)
-          free (txt[i].txt);
-      }
+      if (txt_head)
+        ares_free_data (txt_head);
       return status;
     }
 
   /* everything looks fine, return the data */
-  *txt_out = txt;
-  *ntxtreply = ancount;
+  *txt_out = txt_head;
 
   return ARES_SUCCESS;
 }

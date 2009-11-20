@@ -1,6 +1,7 @@
-/* Id$ */
+/* $Id$ */
 
 /* Copyright 1998 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2009 by Jakub Hrozek <jhrozek@redhat.com>
  *
  * Permission to use, copy, modify, and distribute this
  * software and its documentation for any purpose and without
@@ -13,11 +14,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is"
  * without express or implied warranty.
- */
-
-/*
- * ares_parse_srv_reply created by Jakub Hrozek <jhrozek@redhat.com>
- *      on behalf of Red Hat - http://www.redhat.com
  */
 
 #include "ares_setup.h"
@@ -47,6 +43,7 @@
 #include <string.h>
 #include "ares.h"
 #include "ares_dns.h"
+#include "ares_data.h"
 #include "ares_private.h"
 
 /* AIX portability check */
@@ -56,20 +53,19 @@
 
 int
 ares_parse_srv_reply (const unsigned char *abuf, int alen,
-                      struct ares_srv_reply **srv_out, int *nsrvreply)
+                      struct ares_srv_reply **srv_out)
 {
-  unsigned int qdcount, ancount;
+  unsigned int qdcount, ancount, i;
   const unsigned char *aptr;
-  int status, i, rr_type, rr_class, rr_len;
+  int status, rr_type, rr_class, rr_len;
   long len;
   char *hostname = NULL, *rr_name = NULL;
-  struct ares_srv_reply *srv = NULL;
+  struct ares_srv_reply *srv_head = NULL;
+  struct ares_srv_reply *srv_last = NULL;
+  struct ares_srv_reply *srv_curr;
 
   /* Set *srv_out to NULL for all failure cases. */
   *srv_out = NULL;
-
-  /* Same with *nsrvreply. */
-  *nsrvreply = 0;
 
   /* Give up if abuf doesn't have room for a header. */
   if (alen < HFIXEDSZ)
@@ -95,14 +91,6 @@ ares_parse_srv_reply (const unsigned char *abuf, int alen,
       return ARES_EBADRESP;
     }
   aptr += len + QFIXEDSZ;
-
-  /* Allocate ares_srv_reply array; ancount gives an upper bound */
-  srv = malloc ((ancount) * sizeof (struct ares_srv_reply));
-  if (!srv)
-    {
-      free (hostname);
-      return ARES_ENOMEM;
-    }
 
   /* Examine each answer resource record (RR) in turn. */
   for (i = 0; i < (int) ancount; i++)
@@ -134,40 +122,58 @@ ares_parse_srv_reply (const unsigned char *abuf, int alen,
               break;
             }
 
-          srv[i].priority = ntohs (*((unsigned short *)aptr));
+          /* Allocate storage for this SRV answer appending it to the list */
+          srv_curr = ares_malloc_data(ARES_DATATYPE_SRV_REPLY);
+          if (!srv_curr)
+            {
+              status = ARES_ENOMEM;
+              break;
+            }
+          if (srv_last)
+            {
+              srv_last->next = srv_curr;
+            }
+          else
+            {
+              srv_head = srv_curr;
+            }
+          srv_last = srv_curr;
+
+          srv_curr->priority = ntohs (*((unsigned short *)aptr));
           aptr += sizeof(unsigned short);
-          srv[i].weight = ntohs (*((unsigned short *)aptr));
+          srv_curr->weight = ntohs (*((unsigned short *)aptr));
           aptr += sizeof(unsigned short);
-          srv[i].port = ntohs (*((unsigned short *)aptr));
+          srv_curr->port = ntohs (*((unsigned short *)aptr));
           aptr += sizeof(unsigned short);
 
-          status = ares_expand_name (aptr, abuf, alen, &srv[i].host, &len);
+          status = ares_expand_name (aptr, abuf, alen, &srv_curr->host, &len);
           if (status != ARES_SUCCESS)
             break;
 
           /* Move on to the next record */
           aptr += len;
-
-          /* Don't lose memory in the next iteration */
-          free (rr_name);
-          rr_name = NULL;
         }
+
+      /* Don't lose memory in the next iteration */
+      free (rr_name);
+      rr_name = NULL;
     }
+
+  if (hostname)
+    free (hostname);
+  if (rr_name)
+    free (rr_name);
 
   /* clean up on error */
   if (status != ARES_SUCCESS)
     {
-      free (srv);
-      free (hostname);
-      free (rr_name);
+      if (srv_head)
+        ares_free_data (srv_head);
       return status;
     }
 
   /* everything looks fine, return the data */
-  *srv_out = srv;
-  *nsrvreply = ancount;
+  *srv_out = srv_head;
 
-  free (hostname);
-  free (rr_name);
-  return status;
+  return ARES_SUCCESS;
 }

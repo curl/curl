@@ -476,13 +476,11 @@ CARES_EXTERN int ares_parse_ns_reply(const unsigned char *abuf,
 
 CARES_EXTERN int ares_parse_srv_reply(const unsigned char* abuf,
                                       int alen,
-                                      struct ares_srv_reply** srv_out,
-                                      int *nsrvreply);
+                                      struct ares_srv_reply** srv_out);
 
 CARES_EXTERN int ares_parse_txt_reply(const unsigned char* abuf,
                                       int alen,
-                                      struct ares_txt_reply** txt_out,
-                                      int *nsrvreply);
+                                      struct ares_txt_reply** txt_out);
 
 CARES_EXTERN void ares_free_string(void *str);
 
