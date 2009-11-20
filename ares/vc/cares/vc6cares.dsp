@@ -170,6 +170,10 @@ SOURCE=..\..\ares_cancel.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\ares_data.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\ares_destroy.c
 # End Source File
 # Begin Source File
@@ -307,6 +311,10 @@ SOURCE=..\..\ares.h
 # Begin Source File
 
 SOURCE=..\..\ares_build.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\ares_data.h
 # End Source File
 # Begin Source File
 
