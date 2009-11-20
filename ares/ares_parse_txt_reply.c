@@ -117,7 +117,7 @@ ares_parse_txt_reply (const unsigned char *abuf, int alen,
       /* Check if we are really looking at a TXT record */
       if (rr_class == C_IN && rr_type == T_TXT)
         {
-          /* Allocate storage for this SRV answer appending it to the list */
+          /* Allocate storage for this TXT answer appending it to the list */
           txt_curr = ares_malloc_data(ARES_DATATYPE_TXT_REPLY);
           if (!txt_curr)
             {
