@@ -67,6 +67,7 @@ MANPAGES = ares_cancel.3		\
   ares_expand_name.3			\
   ares_expand_string.3			\
   ares_fds.3				\
+  ares_free_data.3			\
   ares_free_hostent.3			\
   ares_free_string.3			\
   ares_gethostbyaddr.3			\
@@ -102,6 +103,7 @@ HTMLPAGES = ares_cancel.html		\
   ares_expand_name.html			\
   ares_expand_string.html		\
   ares_fds.html				\
+  ares_free_data.html			\
   ares_free_hostent.html		\
   ares_free_string.html			\
   ares_gethostbyaddr.html		\
@@ -137,6 +139,7 @@ PDFPAGES = ares_cancel.pdf		\
   ares_expand_name.pdf			\
   ares_expand_string.pdf		\
   ares_fds.pdf				\
+  ares_free_data.pdf			\
   ares_free_hostent.pdf			\
   ares_free_string.pdf			\
   ares_gethostbyaddr.pdf		\
