@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (20 Nov 2009)
+- Jad Chamcham pointed out a bug with connection re-use. If a connection had
+  CURLOPT_HTTPPROXYTUNNEL enabled over a proxy, a subsequent request using the
+  same proxy with the tunnel option disabled would still wrongly re-use that
+  previous connection and the outcome would only be badness.
+
 Daniel Stenberg (17 Nov 2009)
 - Constantine Sapuntzakis provided another fix for the DNS cache that could
   end up with entries that wouldn't time-out:

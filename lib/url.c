@@ -2758,6 +2758,7 @@ ConnectionExists(struct SessionHandle *data,
               is the checked one using the same host, port and type? */
       if(check->bits.proxy &&
          (needle->proxytype == check->proxytype) &&
+         (needle->bits.tunnel_proxy == check->bits.tunnel_proxy) &&
          Curl_raw_equal(needle->proxy.name, check->proxy.name) &&
          needle->port == check->port) {
         /* This is the same proxy connection, use it! */
