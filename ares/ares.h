@@ -430,15 +430,17 @@ struct addr6ttl {
 };
 
 struct ares_srv_reply {
-  unsigned short weight;
-  unsigned short priority;
-  unsigned short port;
-  char *host;
+  struct ares_srv_reply  *next;
+  char                   *host;
+  unsigned short          priority;
+  unsigned short          weight;
+  unsigned short          port;
 };
 
 struct ares_txt_reply {
-  size_t         length;  /* length excludes null termination */
-  unsigned char *txt;
+  struct ares_txt_reply  *next;
+  unsigned char          *txt;
+  size_t                  length;  /* length excludes null termination */
 };
 
 /*
@@ -485,6 +487,8 @@ CARES_EXTERN int ares_parse_txt_reply(const unsigned char* abuf,
 CARES_EXTERN void ares_free_string(void *str);
 
 CARES_EXTERN void ares_free_hostent(struct hostent *host);
+
+CARES_EXTERN void ares_free_data(void *dataptr);
 
 CARES_EXTERN const char *ares_strerror(int code);
 

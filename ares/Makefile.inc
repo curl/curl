@@ -4,6 +4,7 @@ CSOURCES = ares__close_sockets.c	\
   ares__read_line.c			\
   ares__timeval.c			\
   ares_cancel.c				\
+  ares_data.c				\
   ares_destroy.c			\
   ares_expand_name.c			\
   ares_expand_string.c			\
@@ -41,6 +42,7 @@ CSOURCES = ares__close_sockets.c	\
 
 HHEADERS = ares.h			\
   ares_build.h				\
+  ares_data.h				\
   ares_dns.h				\
   ares_ipv6.h				\
   ares_library_init.h			\
