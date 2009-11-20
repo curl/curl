@@ -24,6 +24,7 @@ This release includes the following bugfixes:
  o don't store LDFLAGS in pkg-config file
  o never-pruned DNS cached entries
  o HTTP proxy tunnel re-used connection even if tunnel got disabled
+ o SSL lib post-close write
 
 This release includes the following known bugs:
 

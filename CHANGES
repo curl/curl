@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel Stenberg (20 Nov 2009)
+- Constantine Sapuntzakis identified a write after close, as the sockets were
+  closed by libcurl before the SSL lib were shutdown and they may write to its
+  socket. Detected to at least happen with OpenSSL builds.
+
 - Jad Chamcham pointed out a bug with connection re-use. If a connection had
   CURLOPT_HTTPPROXYTUNNEL enabled over a proxy, a subsequent request using the
   same proxy with the tunnel option disabled would still wrongly re-use that

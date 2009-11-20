@@ -2300,6 +2300,11 @@ static void conn_free(struct connectdata *conn)
   if(!conn)
     return;
 
+  /* close the SSL stuff before we close any sockets since they will/may
+     write to the sockets */
+  Curl_ssl_close(conn, FIRSTSOCKET);
+  Curl_ssl_close(conn, SECONDARYSOCKET);
+
   /* close possibly still open sockets */
   if(CURL_SOCKET_BAD != conn->sock[SECONDARYSOCKET])
     sclose(conn->sock[SECONDARYSOCKET]);
@@ -2335,9 +2340,6 @@ static void conn_free(struct connectdata *conn)
 #elif defined(CURLRES_THREADED)
   Curl_destroy_thread_data(&conn->async);
 #endif
-
-  Curl_ssl_close(conn, FIRSTSOCKET);
-  Curl_ssl_close(conn, SECONDARYSOCKET);
 
   Curl_free_ssl_config(&conn->ssl_config);
 
