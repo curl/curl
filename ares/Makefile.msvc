@@ -198,10 +198,12 @@ PROG3_OBJDIR = $(PROG3_OUTDIR)\obj
 
 !IF "$(USE_WATT32)" == "1"
 CFLAGS  = /UWIN32 /DWATT32 /I$(WATT_ROOT)\inc
-EX_LIBS = $(WATT_ROOT)\lib\wattcpvc_imp.lib
+EX_LIBS_REL = $(WATT_ROOT)\lib\wattcpvc_imp.lib
+EX_LIBS_DBG = $(WATT_ROOT)\lib\wattcpvc_imp_d.lib
 !ELSE
 CFLAGS  = /DWIN32
-EX_LIBS = ws2_32.lib advapi32.lib kernel32.lib
+EX_LIBS_REL = ws2_32.lib advapi32.lib kernel32.lib
+EX_LIBS_DBG = ws2_32.lib advapi32.lib kernel32.lib
 !ENDIF
 
 # -----------------------------------------
@@ -243,7 +245,7 @@ CARES_TARGET = $(LIB_BASENAME).lib
 CARES_CFLAGS = /DCARES_BUILDING_LIBRARY /DCARES_STATICLIB
 CARES_LFLAGS =
 SPROG_CFLAGS = /DCARES_STATICLIB
-SPROG_LFLAGS = /libpath:$(CARES_OUTDIR) $(EX_LIBS) $(LIB_BASENAME).lib
+SPROG_LFLAGS = /libpath:$(CARES_OUTDIR) $(EX_LIBS_REL) $(LIB_BASENAME).lib
 CARES_LINK   = $(LINK_CMD_LIB)
 SPROG_LINK   = $(LINK_CMD_EXE_NODBG)
 CC_CMD       = $(CC_CMD_NODBG)
@@ -254,7 +256,7 @@ CARES_TARGET = $(LIB_BASENAME_DEBUG).lib
 CARES_CFLAGS = /DCARES_BUILDING_LIBRARY /DCARES_STATICLIB /DDEBUGBUILD
 CARES_LFLAGS =
 SPROG_CFLAGS = /DCARES_STATICLIB
-SPROG_LFLAGS = /libpath:$(CARES_OUTDIR) $(EX_LIBS) $(LIB_BASENAME_DEBUG).lib
+SPROG_LFLAGS = /libpath:$(CARES_OUTDIR) $(EX_LIBS_DBG) $(LIB_BASENAME_DEBUG).lib
 CARES_LINK   = $(LINK_CMD_LIB)
 SPROG_LINK   = $(LINK_CMD_EXE_DEBUG)
 CC_CMD       = $(CC_CMD_DEBUG)
@@ -263,9 +265,9 @@ CC_CMD       = $(CC_CMD_DEBUG)
 !IF "$(CFG)" == "dll-release"
 CARES_TARGET = $(LIB_BASENAME).dll
 CARES_CFLAGS = /DCARES_BUILDING_LIBRARY
-CARES_LFLAGS = /release $(EX_LIBS) /implib:$(CARES_OUTDIR)\$(IMPLIB_BASENAME).lib $(PDB_NONE)
+CARES_LFLAGS = /release $(EX_LIBS_REL) /implib:$(CARES_OUTDIR)\$(IMPLIB_BASENAME).lib $(PDB_NONE)
 SPROG_CFLAGS =
-SPROG_LFLAGS = /libpath:$(CARES_OUTDIR) $(EX_LIBS) $(IMPLIB_BASENAME).lib
+SPROG_LFLAGS = /libpath:$(CARES_OUTDIR) $(EX_LIBS_REL) $(IMPLIB_BASENAME).lib
 CARES_LINK   = $(LINK_CMD_DLL)
 SPROG_LINK   = $(LINK_CMD_EXE_NODBG)
 CC_CMD       = $(CC_CMD_NODBG)
@@ -276,9 +278,9 @@ RC_CMD       = $(RC_CMD_NODBG)
 !IF "$(CFG)" == "dll-debug"
 CARES_TARGET = $(LIB_BASENAME_DEBUG).dll
 CARES_CFLAGS = /DCARES_BUILDING_LIBRARY /DDEBUGBUILD
-CARES_LFLAGS = /debug $(EX_LIBS) /implib:$(CARES_OUTDIR)\$(IMPLIB_BASENAME_DEBUG).lib /pdb:$(CARES_OUTDIR)\$(LIB_BASENAME_DEBUG).pdb $(PDBTYPE_CONSOLIDATE)
+CARES_LFLAGS = /debug $(EX_LIBS_DBG) /implib:$(CARES_OUTDIR)\$(IMPLIB_BASENAME_DEBUG).lib /pdb:$(CARES_OUTDIR)\$(LIB_BASENAME_DEBUG).pdb $(PDBTYPE_CONSOLIDATE)
 SPROG_CFLAGS =
-SPROG_LFLAGS = /libpath:$(CARES_OUTDIR) $(EX_LIBS) $(IMPLIB_BASENAME_DEBUG).lib
+SPROG_LFLAGS = /libpath:$(CARES_OUTDIR) $(EX_LIBS_DBG) $(IMPLIB_BASENAME_DEBUG).lib
 CARES_LINK   = $(LINK_CMD_DLL)
 SPROG_LINK   = $(LINK_CMD_EXE_DEBUG)
 CC_CMD       = $(CC_CMD_DEBUG)
@@ -396,20 +398,20 @@ ALL: c-ares acountry adig ahost
 c-ares: $(HHEADERS) $(CSOURCES) $(CARES_OBJDIR) $(CARES_OBJS) $(CARES_OUTDIR)
     $(CARES_LINK) $(CARES_LFLAGS) /out:$(CARES_OUTDIR)\$(CARES_TARGET) $(CARES_OBJS)
 !   IF "$(USE_RES_FILE)" == "TRUE"
-    IF EXIST $(CARES_OUTDIR)\$(CARES_TARGET).manifest mt -nologo -manifest $(CARES_OUTDIR)\$(CARES_TARGET).manifest -outputresource:$(CARES_OUTDIR)\$(CARES_TARGET);2
+    @if exist $(CARES_OUTDIR)\$(CARES_TARGET).manifest mt -nologo -manifest $(CARES_OUTDIR)\$(CARES_TARGET).manifest -outputresource:$(CARES_OUTDIR)\$(CARES_TARGET);2
 !   ENDIF
 
 acountry: c-ares acountry.c $(SAMPLESOURCES) $(SAMPLEHEADERS) $(PROG1_OBJDIR) $(PROG1_OBJS) $(PROG1_OUTDIR)
     $(SPROG_LINK) $(SPROG_LFLAGS) /out:$(PROG1_OUTDIR)\acountry.exe $(PROG1_OBJS)
-    IF EXIST $(PROG1_OUTDIR)\acountry.exe.manifest mt -nologo -manifest $(PROG1_OUTDIR)\acountry.exe.manifest -outputresource:$(PROG1_OUTDIR)\acountry.exe;1
+    @if exist $(PROG1_OUTDIR)\acountry.exe.manifest mt -nologo -manifest $(PROG1_OUTDIR)\acountry.exe.manifest -outputresource:$(PROG1_OUTDIR)\acountry.exe;1
 
 adig: c-ares adig.c $(SAMPLESOURCES) $(SAMPLEHEADERS) $(PROG2_OBJDIR) $(PROG2_OBJS) $(PROG2_OUTDIR)
     $(SPROG_LINK) $(SPROG_LFLAGS) /out:$(PROG2_OUTDIR)\adig.exe $(PROG2_OBJS)
-    IF EXIST $(PROG2_OUTDIR)\adig.exe.manifest mt -nologo -manifest $(PROG2_OUTDIR)\adig.exe.manifest -outputresource:$(PROG2_OUTDIR)\adig.exe;1
+    @if exist $(PROG2_OUTDIR)\adig.exe.manifest mt -nologo -manifest $(PROG2_OUTDIR)\adig.exe.manifest -outputresource:$(PROG2_OUTDIR)\adig.exe;1
 
 ahost: c-ares ahost.c $(SAMPLESOURCES) $(SAMPLEHEADERS) $(PROG3_OBJDIR) $(PROG3_OBJS) $(PROG3_OUTDIR)
     $(SPROG_LINK) $(SPROG_LFLAGS) /out:$(PROG3_OUTDIR)\ahost.exe $(PROG3_OBJS)
-    IF EXIST $(PROG3_OUTDIR)\ahost.exe.manifest mt -nologo -manifest $(PROG3_OUTDIR)\ahost.exe.manifest -outputresource:$(PROG3_OUTDIR)\ahost.exe;1
+    @if exist $(PROG3_OUTDIR)\ahost.exe.manifest mt -nologo -manifest $(PROG3_OUTDIR)\ahost.exe.manifest -outputresource:$(PROG3_OUTDIR)\ahost.exe;1
 
 $(CARES_OUTDIR): $(CARES_DIR)
     @if not exist $(CARES_OUTDIR) mkdir $(CARES_OUTDIR)
