@@ -95,6 +95,11 @@ AC_SUBST([AR])
 
 AC_SUBST(libext)
 
+dnl Remove non-configure distributed curlbuild.h
+if test -f ${srcdir}/include/curl/curlbuild.h; then
+  rm -f ${srcdir}/include/curl/curlbuild.h
+fi
+
 dnl figure out the libcurl version
 VERSION=`$SED -ne 's/^#define LIBCURL_VERSION "\(.*\)"/\1/p' ${srcdir}/include/curl/curlver.h`
 AM_INIT_AUTOMAKE(curl,$VERSION)
