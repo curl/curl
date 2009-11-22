@@ -51,7 +51,7 @@
 
 int   opterr = 1,     /* if error message should be printed */
       optind = 1;     /* index into parent argv vector */
-static int optopt;    /* character checked for validity */
+int   optopt = 0;     /* character checked for validity */
 static int optreset;  /* reset getopt */
 char  *optarg;        /* argument associated with option */
 
