@@ -1,5 +1,13 @@
   Changelog for the c-ares project
 
+* November 22, 2009 (Yang Tse)
+- Jakub Hrozek fixed more function prototypes in man pages to sync them
+  with the ones declared in ares.h
+
+* November 20, 2009 (Yang Tse)
+- Fixed several function prototypes in man pages that were out of sync
+  with the ones declared in ares.h
+
 * November 10, 2009 (Yang Tse)
 - Updated MSVC 6.0 project files to match settings from Makefile.msvc.
 

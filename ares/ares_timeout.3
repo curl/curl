@@ -22,7 +22,7 @@ ares_fds \- Get file descriptors to select on for name service
 .B #include <ares.h>
 .PP
 .B struct timeval *ares_timeout(ares_channel \fIchannel\fP,
-.B	struct timeval *\fImaxtv\fP, struct timeval *\fItvbuf\fP)
+.B	struct timeval *\fImaxtv\fP, struct timeval *\fItv\fP)
 .fi
 .SH DESCRIPTION
 The
@@ -33,13 +33,13 @@ invoking \fIares_process(3)\fP to process timeouts.  The parameter
 specifies a existing maximum timeout, or
 .B NULL
 if the caller does not wish to apply a maximum timeout.  The parameter
-.I tvbuf
+.I tv
 must point to a writable buffer of type
 .BR "struct timeval" .
 It is valid for
 .I maxtv
 and
-.I tvbuf
+.I tv
 to have the same value.
 .PP
 If no queries have timeouts pending sooner than the given maximum
@@ -50,9 +50,9 @@ returns the value of
 otherwise
 .B ares_timeout
 stores the appropriate timeout value into the buffer pointed to by
-.I tvbuf
+.I tv
 and returns the value of
-.IR tvbuf .
+.IR tv .
 .SH SEE ALSO
 .BR ares_fds (3),
 .BR ares_process (3)

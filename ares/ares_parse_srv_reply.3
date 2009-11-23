@@ -21,12 +21,13 @@ ares_parse_srv_reply \- Parse a reply to a DNS query of type SRV
 .B #include <ares.h>
 .PP
 .B int ares_parse_srv_reply(const unsigned char* \fIabuf\fP, int \fIalen\fP,
-.B                          struct ares_srv_reply** \fIsrv_out\fP, int *\fInsrvreply\fP);
+.B                          struct ares_srv_reply** \fIsrv_out\fP);
 .fi
 .SH DESCRIPTION
 The
 .B ares_parse_srv_reply
 function parses the response to a query of type SRV into a
+linked list of
 .I struct ares_srv_reply 
 The parameters
 .I abuf
@@ -35,11 +36,10 @@ and
 give the contents of the response.  The result is stored in allocated
 memory and a pointer to it stored into the variable pointed to by
 .IR srv_out .
-The number of responses is stored into the variable pointed to by
-.IR nsrvreply .
 It is the caller's responsibility to free the resulting
 .IR srv_out
-structure when it is no longer needed.
+structure when it is no longer needed using the function
+.B ares_free_data
 .PP
 The structure 
 .I ares_srv_reply
@@ -48,6 +48,7 @@ contains the following fields:
 .in +4n
 .nf
 struct ares_srv_reply {
+    struct ares_srv_reply  *next;
     unsigned short weight;
     unsigned short priority;
     unsigned short port;
@@ -73,5 +74,6 @@ The response did not contain an answer to the query.
 Memory was exhausted.
 .SH SEE ALSO
 .BR ares_query (3)
+.BR ares_free_data (3)
 .SH AUTHOR
 Written by Jakub Hrozek <jhrozek@redhat.com>, on behalf of Red Hat, Inc http://www.redhat.com

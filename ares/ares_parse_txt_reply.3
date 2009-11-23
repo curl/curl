@@ -21,12 +21,13 @@ ares_parse_txt_reply \- Parse a reply to a DNS query of type TXT
 .B #include <ares.h>
 .PP
 .B int ares_parse_txt_reply(const unsigned char* \fIabuf\fP, int \fIalen\fP,
-.B                         struct ares_txt_reply **\fItxt_out\fP, int *\fIntxtreply\fP);
+.B                         struct ares_txt_reply **\fItxt_out\fP);
 .fi
 .SH DESCRIPTION
 The
 .B ares_parse_txt_reply
 function parses the response to a query of type TXT into a
+linked list of
 .I struct ares_txt_reply 
 The parameters
 .I abuf
@@ -35,11 +36,10 @@ and
 give the contents of the response.  The result is stored in allocated
 memory and a pointer to it stored into the variable pointed to by
 .IR txt_out .
-The number of responses is stored into the variable pointed to by
-.IR ntxtreply .
 It is the caller's responsibility to free the resulting
 .IR txt_out
-structure when it is no longer needed.
+structure when it is no longer needed using the function
+.B ares_free_data
 .PP
 The structure 
 .I ares_txt_reply
@@ -48,6 +48,7 @@ contains the following fields:
 .in +4n
 .nf
 struct ares_txt_reply {
+  struct ares_txt_reply  *next;
   unsigned int  length;
   unsigned char *txt;
 };
@@ -71,6 +72,7 @@ The response did not contain an answer to the query.
 Memory was exhausted.
 .SH SEE ALSO
 .BR ares_query (3)
+.BR ares_free_data (3)
 .SH AUTHOR
 Written by Jakub Hrozek <jhrozek@redhat.com>, on behalf of Red Hat, Inc http://www.redhat.com
 

@@ -22,8 +22,8 @@ ares_init, ares_init_options \- Initialize a resolver channel
 .nf
 .B #include <ares.h>
 .PP
-.B int ares_init(ares_channel *\fIchannel\fP)
-.B int ares_init_options(ares_channel *\fIchannel\fP,
+.B int ares_init(ares_channel *\fIchannelptr\fP)
+.B int ares_init_options(ares_channel *\fIchannelptr\fP,
 .B 	struct ares_options *\fIoptions\fP, int \fIoptmask\fP)
 .PP
 .B cc file.c -lcares
@@ -31,7 +31,7 @@ ares_init, ares_init_options \- Initialize a resolver channel
 .SH DESCRIPTION
 The \fBares_init\fP function initializes a communications channel for name
 service lookups.  If it returns successfully, \fBares_init\fP will set the
-variable pointed to by \fIchannel\fP to a handle used to identify the name
+variable pointed to by \fIchannelptr\fP to a handle used to identify the name
 service channel.  The caller should invoke
 .BR ares_destroy (3)
 on the handle when the channel is no longer needed.

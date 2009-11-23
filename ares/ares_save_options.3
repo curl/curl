@@ -21,7 +21,7 @@ ares_save_options \- Save configuration values obtained from initialized ares_ch
 .nf
 .B #include <ares.h>
 .PP
-.B void ares_save_options(ares_channel \fIchannel\fP, struct ares_options *\fIoptions\fP, int *\fIoptmask\fP)
+.B int ares_save_options(ares_channel \fIchannel\fP, struct ares_options *\fIoptions\fP, int *\fIoptmask\fP)
 .fi
 .SH DESCRIPTION
 The \fBares_save_options(3)\fP function saves the channel data identified by
@@ -36,6 +36,20 @@ The resultant options and optmask are then able to be
 passed directly to ares_init_options.  When the options
 are no longer needed, ares_destroy_options should be called
 to free any associated memory.
+.SH RETURN VALUES
+.B ares_save_options(3)
+can return any of the following values:
+.TP 15
+.B ARES_SUCCESS
+The channel data was successfuly stored
+.TP 15
+.B ARES_ENOMEM
+The memory was exhausted
+.TP 15
+.B ARES_ENODATA
+The channel data identified by 
+.IR channel
+were invalid.
 .SH NOTE
 Since c-ares 1.6.0 the ares_options struct has been "locked" meaning that it
 won't be extended to cover new funtions. This function will remain

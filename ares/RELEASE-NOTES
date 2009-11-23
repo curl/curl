@@ -22,6 +22,7 @@ Fixed:
  o fix \Device\TCP handle leaks triggered by buggy iphlpapi.dll
  o init without internet gone no longer fails
  o out of bounds memory overwrite triggered with malformed /etc/hosts file
+ o function prototypes in man pages out of sync with ares.h
 
 Thanks go to these friendly people for their efforts and contributions:
 
