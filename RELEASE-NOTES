@@ -25,6 +25,7 @@ This release includes the following bugfixes:
  o never-pruned DNS cached entries
  o HTTP proxy tunnel re-used connection even if tunnel got disabled
  o SSL lib post-close write
+ o curl failed to report write errors for tiny failed downloads
 
 This release includes the following known bugs:
 
@@ -35,6 +36,6 @@ advice from friends like these:
 
  Yang Tse, Kamil Dudka, Christian Schmitz, Constantine Sapuntzakis,
  Marco Maggi, Camille Moncelier, Claes Jakobsson, Kevin Baughman,
- Marc Kleine-Budde, Jad Chamcham
+ Marc Kleine-Budde, Jad Chamcham, Bjorn Augustsson
 
         Thanks! (and sorry if I forgot to mention someone)

@@ -6,6 +6,14 @@
 
                                   Changelog
 
+
+Daniel Stenberg (23 Nov 2009)
+- Bjorn Augustsson reported a bug which made curl not report any problems even
+  though it failed to write a very small download to disk (done in a single
+  fwrite call). It turned out to be because fwrite() returned success, but
+  there was insufficient error-checking for the fclose() call which tricked
+  curl to believe things were fine.
+
 Daniel Stenberg (20 Nov 2009)
 - Constantine Sapuntzakis identified a write after close, as the sockets were
   closed by libcurl before the SSL lib were shutdown and they may write to its
