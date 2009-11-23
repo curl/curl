@@ -11,9 +11,15 @@
   applications using these structs with the old name will need source code
   adjustments when recompiled using c-ares 1.6.1.
 
+* November 21, 2009 (Yang Tse)
+- Added manifest stuff to Makefile.msvc.
+
 * November 20, 2009 (Yang Tse)
 - Fixed several function prototypes in man pages that were out of sync
-  with the ones declared in ares.h
+  with the ones declared in ares.h.  Added ares_free_data() along with
+  man page.  Updated ares_parse_srv_reply() and ares_parse_txt_reply()
+  with changes from Jakub Hrozek making these now return linked lists
+  instead of arrays, and merging the ares_free_data() adjustments.
 
 * November 10, 2009 (Yang Tse)
 - Updated MSVC 6.0 project files to match settings from Makefile.msvc.

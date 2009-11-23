@@ -12,7 +12,9 @@ Changed:
  o ARES_ECANCELLED is now sent as reason for ares_cancel()
  o added ares_parse_srv_reply()
  o added ares_parse_txt_reply()
+ o added ares_free_data()
  o new --enable-symbol-hiding configure option
+ o new Makefile.msvc for any MSVC compiler or MS Visual Studio version
  o addrttl and addr6ttl structs renamed to ares_addrttl and ares_addr6ttl
 
 Fixed:
