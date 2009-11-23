@@ -676,7 +676,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   case RCMD_STREAM:
 #define STREAMTHIS "a string to stream 01234567890\n"
     count = strlen(STREAMTHIS);
-    while(1) {
+    for (;;) {
       written = swrite(sock, STREAMTHIS, count);
       if(written != (ssize_t)count) {
         logmsg("Stopped streaming");
@@ -875,12 +875,14 @@ int main(int argc, char *argv[])
 #ifdef ENABLE_IPV6
   struct sockaddr_in6 me6;
 #endif /* ENABLE_IPV6 */
-  curl_socket_t sock, msgsock;
+  curl_socket_t sock = CURL_SOCKET_BAD;
+  curl_socket_t msgsock = CURL_SOCKET_BAD;
   int flag;
   unsigned short port = DEFAULT_PORT;
   char *pidname= (char *)".http.pid";
   struct httprequest req;
   int rc;
+  int error;
   int arg=1;
 #ifdef CURL_SWS_FORK_ENABLED
   bool use_fork = FALSE;
@@ -954,15 +956,19 @@ int main(int argc, char *argv[])
     sock = socket(AF_INET6, SOCK_STREAM, 0);
 #endif
 
-  if (CURL_SOCKET_BAD == sock) {
-    logmsg("Error opening socket: %d", SOCKERRNO);
+  if(CURL_SOCKET_BAD == sock) {
+    error = SOCKERRNO;
+    logmsg("Error creating socket: (%d) %s",
+           error, strerror(error));
     return 1;
   }
 
   flag = 1;
   if (0 != setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-            (void *) &flag, sizeof(flag))) {
-    logmsg("setsockopt(SO_REUSEADDR) failed: %d", SOCKERRNO);
+            (void *)&flag, sizeof(flag))) {
+    error = SOCKERRNO;
+    logmsg("setsockopt(SO_REUSEADDR) failed with error: (%d) %s",
+           error, strerror(error));
     sclose(sock);
     return 1;
   }
@@ -986,7 +992,9 @@ int main(int argc, char *argv[])
   }
 #endif /* ENABLE_IPV6 */
   if(0 != rc) {
-    logmsg("Error binding socket: %d", SOCKERRNO);
+    error = SOCKERRNO;
+    logmsg("Error binding socket on port %hu: (%d) %s",
+           port, error, strerror(error));
     sclose(sock);
     return 1;
   }
@@ -1001,16 +1009,20 @@ int main(int argc, char *argv[])
   /* start accepting connections */
   rc = listen(sock, 5);
   if(0 != rc) {
-    logmsg("listen() failed with error: %d", SOCKERRNO);
+    error = SOCKERRNO;
+    logmsg("listen() failed with error: (%d) %s",
+           error, strerror(error));
     sclose(sock);
     return 1;
   }
 
-  while (1) {
+  for (;;) {
     msgsock = accept(sock, NULL, NULL);
 
     if (CURL_SOCKET_BAD == msgsock) {
-      printf("MAJOR ERROR: accept() failed with error: %d\n", SOCKERRNO);
+      error = SOCKERRNO;
+      logmsg("MAJOR ERROR: accept() failed with error: (%d) %s",
+             error, strerror(error));
       break;
     }
 

@@ -378,7 +378,7 @@ static int synchnet(curl_socket_t f /* socket to flush */)
   struct sockaddr_in fromaddr;
   curl_socklen_t fromaddrlen;
 
-  while (1) {
+  for (;;) {
 #if defined(HAVE_IOCTLSOCKET)
     (void) ioctlsocket(f, FIONREAD, &i);
 #else
@@ -431,9 +431,10 @@ int main(int argc, char **argv)
   int arg = 1;
   char *pidname= (char *)".tftpd.pid";
   unsigned short port = DEFAULT_PORT;
-  curl_socket_t sock;
+  curl_socket_t sock = CURL_SOCKET_BAD;
   int flag;
   int rc;
+  int error;
   struct testcase test;
   int result = 0;
 
@@ -485,21 +486,26 @@ int main(int argc, char **argv)
 #endif
 
   if(CURL_SOCKET_BAD == sock) {
-    perror("opening stream socket");
-    logmsg("Error opening socket");
+    error = SOCKERRNO;
+    logmsg("Error creating socket: (%d) %s",
+           error, strerror(error));
     return 1;
   }
 
   flag = 1;
-  if (setsockopt
-      (sock, SOL_SOCKET, SO_REUSEADDR, (const void *) &flag,
-       sizeof(int)) < 0) {
-    perror("setsockopt(SO_REUSEADDR)");
+  if (0 != setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
+            (void *)&flag, sizeof(flag))) {
+    error = SOCKERRNO;
+    logmsg("setsockopt(SO_REUSEADDR) failed with error: (%d) %s",
+           error, strerror(error));
+    sclose(sock);
+    return 1;
   }
 
 #ifdef ENABLE_IPV6
   if(!use_ipv6) {
 #endif
+    memset(&me, 0, sizeof(me));
     me.sin_family = AF_INET;
     me.sin_addr.s_addr = INADDR_ANY;
     me.sin_port = htons(port);
@@ -507,16 +513,17 @@ int main(int argc, char **argv)
 #ifdef ENABLE_IPV6
   }
   else {
-    memset(&me6, 0, sizeof(struct sockaddr_in6));
+    memset(&me6, 0, sizeof(me6));
     me6.sin6_family = AF_INET6;
     me6.sin6_addr = in6addr_any;
     me6.sin6_port = htons(port);
     rc = bind(sock, (struct sockaddr *) &me6, sizeof(me6));
   }
 #endif /* ENABLE_IPV6 */
-  if(rc < 0) {
-    perror("binding stream socket");
-    logmsg("Error binding socket");
+  if(0 != rc) {
+    error = SOCKERRNO;
+    logmsg("Error binding socket on port %hu: (%d) %s",
+           port, error, strerror(error));
     sclose(sock);
     return 1;
   }
@@ -528,7 +535,7 @@ int main(int argc, char **argv)
 
   logmsg("Running %s version on port UDP/%d", ipv_inuse, (int)port);
 
-  do {
+  for (;;) {
     fromlen = sizeof(from);
     n = (ssize_t)recvfrom(sock, buf, sizeof(buf), 0,
                           (struct sockaddr *)&from, &fromlen);
@@ -571,7 +578,7 @@ int main(int argc, char **argv)
 
     logmsg("end of one transfer");
 
-  } while(1);
+  }
 
   clear_advisor_read_lock(SERVERLOGS_LOCK);
 
