@@ -1,5 +1,9 @@
   Changelog for the c-ares project
 
+* November 23, 2009 (Yang Tse)
+- Changed naming convention for c-ares libraries built with MSVC, details
+  and build instructions provided in README.msvc file.
+
 * November 22, 2009 (Yang Tse)
 - Jakub Hrozek fixed more function prototypes in man pages to sync them
   with the ones declared in ares.h

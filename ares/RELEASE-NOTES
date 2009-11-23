@@ -16,6 +16,7 @@ Changed:
  o new --enable-symbol-hiding configure option
  o new Makefile.msvc for any MSVC compiler or MS Visual Studio version
  o addrttl and addr6ttl structs renamed to ares_addrttl and ares_addr6ttl
+ o naming convention for libraries built with MSVC, see README.msvc
 
 Fixed:
 
