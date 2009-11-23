@@ -13,6 +13,7 @@ Changed:
  o added ares_parse_srv_reply()
  o added ares_parse_txt_reply()
  o new --enable-symbol-hiding configure option
+ o addrttl and addr6ttl structs renamed to ares_addrttl and ares_addr6ttl
 
 Fixed:
 

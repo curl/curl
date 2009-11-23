@@ -55,7 +55,7 @@
 #include "ares_private.h"
 
 int ares_parse_aaaa_reply(const unsigned char *abuf, int alen,
-                          struct hostent **host, struct addr6ttl *addrttls,
+                          struct hostent **host, struct ares_addr6ttl *addrttls,
                           int *naddrttls)
 {
   unsigned int qdcount, ancount;
@@ -157,7 +157,7 @@ int ares_parse_aaaa_reply(const unsigned char *abuf, int alen,
             }
           if (naddrs < max_addr_ttls)
             {
-              struct addr6ttl * const at = &addrttls[naddrs];
+              struct ares_addr6ttl * const at = &addrttls[naddrs];
               if (aptr + sizeof(struct in6_addr) > abuf + alen)
               {
                 status = ARES_EBADRESP;

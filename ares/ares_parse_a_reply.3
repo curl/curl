@@ -23,7 +23,7 @@ ares_parse_a_reply \- Parse a reply to a DNS query of type A
 .PP
 .B int ares_parse_a_reply(const unsigned char *\fIabuf\fP, int \fIalen\fP,
 .B 	struct hostent **\fIhost\fP,
-.B      struct addrttl *\fIaddrttls\fB, int *\fInaddrttls\fB);
+.B      struct ares_addrttl *\fIaddrttls\fB, int *\fInaddrttls\fB);
 .fi
 .SH DESCRIPTION
 The
@@ -31,7 +31,7 @@ The
 function parses the response to a query of type A into a
 .BR "struct hostent"
 and/or an array of
-.BR "struct addrttls" . 
+.BR "struct ares_addrttls" . 
 The parameters
 .I abuf
 and
@@ -51,7 +51,7 @@ and
 .IR naddrttls
 are both nonnull,
 then up to *naddrttls
-.BR "struct addrttl"
+.BR "struct ares_addrttl"
 records are stored in the array pointed to by addrttls,
 and then *naddrttls is set to the number of records so stored.
 Note that the memory for these records is supplied by the caller.

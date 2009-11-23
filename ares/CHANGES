@@ -4,6 +4,13 @@
 - Jakub Hrozek fixed more function prototypes in man pages to sync them
   with the ones declared in ares.h
 
+- Jakub Hrozek renamed addrttl and addr6ttl structs to ares_addrttl and
+  ares_addr6ttl in order to prevent name space pollution, along with
+  necessary changes to code base and man pages.This change does not break
+  ABI, there is no need to recompile existing applications. But existing
+  applications using these structs with the old name will need source code
+  adjustments when recompiled using c-ares 1.6.1.
+
 * November 20, 2009 (Yang Tse)
 - Fixed several function prototypes in man pages that were out of sync
   with the ones declared in ares.h
