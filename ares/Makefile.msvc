@@ -34,20 +34,24 @@
 #
 # ------------------------------------------------------------------------------
 
+NAME = cares
+
 # ------------------------------------------------
 # c-ares static and dynamic libraries common base
 # file names for release and debug configurations
 # ------------------------------------------------
 
-LIB_BASENAME       = cares
-LIB_BASENAME_DEBUG = caresd
+STA_LIB_REL = lib$(NAME)
+DYN_LIB_REL = $(NAME)
+STA_LIB_DBG = $(STA_LIB_REL)d
+DYN_LIB_DBG = $(DYN_LIB_REL)d
 
 # -------------------------------------------
 # Base names for c-ares DLL import libraries
 # -------------------------------------------
 
-IMPLIB_BASENAME       = $(LIB_BASENAME)_imp
-IMPLIB_BASENAME_DEBUG = $(LIB_BASENAME_DEBUG)_imp
+IMP_LIB_REL = $(DYN_LIB_REL)
+IMP_LIB_DBG = $(DYN_LIB_DBG)
 
 # --------------------------
 # Runtime library selection
@@ -222,70 +226,70 @@ PDBTYPE_CONSOLIDATE = /pdbtype:consolidate
 # Assorted commands and flags
 # ----------------------------
 
-CC_CMD_NODBG = cl.exe /nologo $(RTLIB) /DNDEBUG /O2
-CC_CMD_DEBUG = cl.exe /nologo $(RTLIBD) /D_DEBUG /Od /Zi /GZ
+CC_CMD_REL = cl.exe /nologo $(RTLIB) /DNDEBUG /O2
+CC_CMD_DBG = cl.exe /nologo $(RTLIBD) /D_DEBUG /Od /Zi /GZ
 CC_CFLAGS    = $(CFLAGS) /I. /W3 /GX /FD
 
-RC_CMD_NODBG = rc.exe /l 0x409 /d "NDEBUG"
-RC_CMD_DEBUG = rc.exe /l 0x409 /d "_DEBUG"
+RC_CMD_REL = rc.exe /l 0x409 /d "NDEBUG"
+RC_CMD_DBG = rc.exe /l 0x409 /d "_DEBUG"
 
 LINK_CMD_LIB = link.exe /lib /nologo
 LINK_CMD_DLL = link.exe /dll /nologo /incremental:no /fixed:no
 LINK_CMD_EXE = link.exe /nologo /incremental:no /fixed:no /subsystem:console
 
-LINK_CMD_EXE_NODBG = $(LINK_CMD_EXE) /release $(PDB_NONE)
-LINK_CMD_EXE_DEBUG = $(LINK_CMD_EXE) /debug $(PDBTYPE_CONSOLIDATE)
+LINK_CMD_EXE_REL = $(LINK_CMD_EXE) /release $(PDB_NONE)
+LINK_CMD_EXE_DBG = $(LINK_CMD_EXE) /debug $(PDBTYPE_CONSOLIDATE)
 
 # ---------------------------------
 # Configuration dependent settings
 # ---------------------------------
 
 !IF "$(CFG)" == "lib-release"
-CARES_TARGET = $(LIB_BASENAME).lib
+CARES_TARGET = $(STA_LIB_REL).lib
 CARES_CFLAGS = /DCARES_BUILDING_LIBRARY /DCARES_STATICLIB
 CARES_LFLAGS =
 SPROG_CFLAGS = /DCARES_STATICLIB
-SPROG_LFLAGS = /libpath:$(CARES_OUTDIR) $(EX_LIBS_REL) $(LIB_BASENAME).lib
+SPROG_LFLAGS = /libpath:$(CARES_OUTDIR) $(EX_LIBS_REL) $(STA_LIB_REL).lib
 CARES_LINK   = $(LINK_CMD_LIB)
-SPROG_LINK   = $(LINK_CMD_EXE_NODBG)
-CC_CMD       = $(CC_CMD_NODBG)
+SPROG_LINK   = $(LINK_CMD_EXE_REL)
+CC_CMD       = $(CC_CMD_REL)
 !ENDIF
 
 !IF "$(CFG)" == "lib-debug"
-CARES_TARGET = $(LIB_BASENAME_DEBUG).lib
+CARES_TARGET = $(STA_LIB_DBG).lib
 CARES_CFLAGS = /DCARES_BUILDING_LIBRARY /DCARES_STATICLIB /DDEBUGBUILD
 CARES_LFLAGS =
 SPROG_CFLAGS = /DCARES_STATICLIB
-SPROG_LFLAGS = /libpath:$(CARES_OUTDIR) $(EX_LIBS_DBG) $(LIB_BASENAME_DEBUG).lib
+SPROG_LFLAGS = /libpath:$(CARES_OUTDIR) $(EX_LIBS_DBG) $(STA_LIB_DBG).lib
 CARES_LINK   = $(LINK_CMD_LIB)
-SPROG_LINK   = $(LINK_CMD_EXE_DEBUG)
-CC_CMD       = $(CC_CMD_DEBUG)
+SPROG_LINK   = $(LINK_CMD_EXE_DBG)
+CC_CMD       = $(CC_CMD_DBG)
 !ENDIF
 
 !IF "$(CFG)" == "dll-release"
-CARES_TARGET = $(LIB_BASENAME).dll
+CARES_TARGET = $(DYN_LIB_REL).dll
 CARES_CFLAGS = /DCARES_BUILDING_LIBRARY
-CARES_LFLAGS = /release $(EX_LIBS_REL) /implib:$(CARES_OUTDIR)\$(IMPLIB_BASENAME).lib $(PDB_NONE)
+CARES_LFLAGS = /release $(EX_LIBS_REL) /implib:$(CARES_OUTDIR)\$(IMP_LIB_REL).lib $(PDB_NONE)
 SPROG_CFLAGS =
-SPROG_LFLAGS = /libpath:$(CARES_OUTDIR) $(EX_LIBS_REL) $(IMPLIB_BASENAME).lib
+SPROG_LFLAGS = /libpath:$(CARES_OUTDIR) $(EX_LIBS_REL) $(IMP_LIB_REL).lib
 CARES_LINK   = $(LINK_CMD_DLL)
-SPROG_LINK   = $(LINK_CMD_EXE_NODBG)
-CC_CMD       = $(CC_CMD_NODBG)
+SPROG_LINK   = $(LINK_CMD_EXE_REL)
+CC_CMD       = $(CC_CMD_REL)
 USE_RES_FILE = TRUE
-RC_CMD       = $(RC_CMD_NODBG)
+RC_CMD       = $(RC_CMD_REL)
 !ENDIF
 
 !IF "$(CFG)" == "dll-debug"
-CARES_TARGET = $(LIB_BASENAME_DEBUG).dll
+CARES_TARGET = $(DYN_LIB_DBG).dll
 CARES_CFLAGS = /DCARES_BUILDING_LIBRARY /DDEBUGBUILD
-CARES_LFLAGS = /debug $(EX_LIBS_DBG) /implib:$(CARES_OUTDIR)\$(IMPLIB_BASENAME_DEBUG).lib /pdb:$(CARES_OUTDIR)\$(LIB_BASENAME_DEBUG).pdb $(PDBTYPE_CONSOLIDATE)
+CARES_LFLAGS = /debug $(EX_LIBS_DBG) /implib:$(CARES_OUTDIR)\$(IMP_LIB_DBG).lib /pdb:$(CARES_OUTDIR)\$(DYN_LIB_DBG).pdb $(PDBTYPE_CONSOLIDATE)
 SPROG_CFLAGS =
-SPROG_LFLAGS = /libpath:$(CARES_OUTDIR) $(EX_LIBS_DBG) $(IMPLIB_BASENAME_DEBUG).lib
+SPROG_LFLAGS = /libpath:$(CARES_OUTDIR) $(EX_LIBS_DBG) $(IMP_LIB_DBG).lib
 CARES_LINK   = $(LINK_CMD_DLL)
-SPROG_LINK   = $(LINK_CMD_EXE_DEBUG)
-CC_CMD       = $(CC_CMD_DEBUG)
+SPROG_LINK   = $(LINK_CMD_EXE_DBG)
+CC_CMD       = $(CC_CMD_DBG)
 USE_RES_FILE = TRUE
-RC_CMD       = $(RC_CMD_DEBUG)
+RC_CMD       = $(RC_CMD_DBG)
 !ENDIF
 
 # --------------------------------------------
