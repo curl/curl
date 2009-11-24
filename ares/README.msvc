@@ -15,8 +15,8 @@
   How to build using MSVC from the command line
   ---------------------------------------------
 
-  Open a command prompt window and ensure that that the environment is
-  properly set up in order to use the compiler tools.
+  Open a command prompt window and ensure that the environment is properly
+  set up in order to use MSVC or Visual Studio compiler tools.
 
   Change to c-ares source folder where Makefile.msvc file is located and run:
 
@@ -25,18 +25,18 @@
   This will build all c-ares libraries as well as three sample programs.
 
   Once the above command has finished a new folder named MSVCXX will exist
-  below the subdir where makefile.msvc is found. The name of the folder
+  below the folder where makefile.msvc is found. The name of the folder
   depends on the MSVC compiler version being used to build c-ares.
 
   Below the MSVCXX folder there will exist four folders named 'cares',
-  'ahost', 'acountry', and 'adig'. The 'cares' folder is the one which
+  'ahost', 'acountry', and 'adig'. The 'cares' folder is the one that
   holds the c-ares libraries you have just generated, the other three
   hold sample programs that use the libraries.
 
-  The above command builds four versions of the c-ares library, the dynamic
-  and static versions and each of them in release and debug flavours. Each
-  of these are found in folders named dll-release, dll-debug, lib-release,
-  and lib-debug which hang from the 'cares' folder mentioned above. Each
+  The above command builds four versions of the c-ares library, dynamic
+  and static versions and each one in release and debug flavours. Each
+  of these is found in folders named dll-release, dll-debug, lib-release,
+  and lib-debug, which hang from the 'cares' folder mentioned above. Each
   sample program also has folders with the same names to reflect which
   library version it is using.
 
@@ -56,12 +56,12 @@
 
   Dynamic and static c-ares libraries are built in debug and release flavours,
   and can be located each one in its own subdirectory, dll-debug, dll-release,
-  lib-debug and lib-release, all of them below the 'vc/cares' subdirectory.
+  lib-debug and lib-release, all of them below the 'vc\cares' subdirectory.
 
   In the same way four executable versions of each sample program are built,
   each using its respective library. The resulting sample executables are
   located in its own subdirectory, dll-debug, dll-release, lib-debug and
-  lib-release, below the 'vc/acountry', 'vc/adig' and 'vc/ahost'subdirs.
+  lib-release, below the 'vc\acountry', 'vc\adig' and 'vc\ahost'folders.
 
   These reference VC++ 6.0 configurations are generated using the dynamic CRT.
 
@@ -107,8 +107,8 @@
       caresd.pdb -> debug symbol file for the dynamic debug library
 
 
-  How to use the c-ares static libraries
-  --------------------------------------
+  How to use c-ares static libraries
+  ----------------------------------
 
   When using the c-ares static library in your program, you will have to
   define preprocessor symbol CARES_STATICLIB while building your program,
