@@ -140,16 +140,16 @@ static int ftp_need_type(struct connectdata *conn,
                          bool ascii);
 static CURLcode ftp_do(struct connectdata *conn, bool *done);
 static CURLcode ftp_done(struct connectdata *conn,
-                              CURLcode, bool premature);
+                         CURLcode, bool premature);
 static CURLcode ftp_connect(struct connectdata *conn, bool *done);
 static CURLcode ftp_disconnect(struct connectdata *conn);
 static CURLcode ftp_nextconnect(struct connectdata *conn);
 static CURLcode ftp_multi_statemach(struct connectdata *conn, bool *done);
 static int ftp_getsock(struct connectdata *conn,
-                            curl_socket_t *socks,
-                            int numsocks);
+                       curl_socket_t *socks,
+                       int numsocks);
 static CURLcode ftp_doing(struct connectdata *conn,
-                               bool *dophase_done);
+                          bool *dophase_done);
 static CURLcode ftp_setup_connection(struct connectdata * conn);
 
 /* easy-to-use macro: */
@@ -309,34 +309,38 @@ static CURLcode AllowServerConnect(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
   curl_socket_t sock = conn->sock[SECONDARYSOCKET];
-  long timeout_ms = Curl_timeleft(conn, NULL, TRUE);
-
-  if(timeout_ms < 0) {
-    /* if a timeout was already reached, bail out */
-    failf(data, "Timed out before server could connect to us");
-    return CURLE_OPERATION_TIMEDOUT;
-  }
-
-  switch (Curl_socket_ready(sock, CURL_SOCKET_BAD, (int)timeout_ms)) {
-  case -1: /* error */
-    /* let's die here */
-    failf(data, "Error while waiting for server connect");
-    return CURLE_FTP_PORT_FAILED;
-  case 0:  /* timeout */
-    /* let's die here */
-    failf(data, "Timeout while waiting for server connect");
-    return CURLE_FTP_PORT_FAILED;
-  default:
-    /* we have received data here */
-    {
-      curl_socket_t s = CURL_SOCKET_BAD;
+  long timeout_ms;
+  long interval_ms;
+  curl_socket_t s = CURL_SOCKET_BAD;
 #ifdef ENABLE_IPV6
-      struct Curl_sockaddr_storage add;
+  struct Curl_sockaddr_storage add;
 #else
-      struct sockaddr_in add;
+  struct sockaddr_in add;
 #endif
-      curl_socklen_t size = (curl_socklen_t) sizeof(add);
+  curl_socklen_t size = (curl_socklen_t) sizeof(add);
 
+  for(;;) {
+    timeout_ms = Curl_timeleft(conn, NULL, TRUE);
+
+    if(timeout_ms <= 0) {
+      /* if a timeout was already reached, bail out */
+      failf(data, "Timeout while waiting for server connect");
+      return CURLE_OPERATION_TIMEDOUT;
+    }
+
+    interval_ms = 1000;  /* use 1 second timeout intervals */
+    if(timeout_ms < interval_ms)
+      interval_ms = timeout_ms;
+
+    switch (Curl_socket_ready(sock, CURL_SOCKET_BAD, (int)interval_ms)) {
+    case -1: /* error */
+      /* let's die here */
+      failf(data, "Error while waiting for server connect");
+      return CURLE_FTP_PORT_FAILED;
+    case 0:  /* timeout */
+      break; /* loop */
+    default:
+      /* we have received data here */
       if(0 == getsockname(sock, (struct sockaddr *) &add, &size)) {
         size = sizeof(add);
 
@@ -345,7 +349,6 @@ static CURLcode AllowServerConnect(struct connectdata *conn)
       sclose(sock); /* close the first socket */
 
       if(CURL_SOCKET_BAD == s) {
-        /* DIE! */
         failf(data, "Error accept()ing server connect");
         return CURLE_FTP_PORT_FAILED;
       }
@@ -353,11 +356,10 @@ static CURLcode AllowServerConnect(struct connectdata *conn)
 
       conn->sock[SECONDARYSOCKET] = s;
       curlx_nonblock(s, TRUE); /* enable non-blocking */
-    }
-    break;
+      return CURLE_OK;
+    } /* switch() */
   }
-
-  return CURLE_OK;
+  /* never reaches this point */
 }
 
 /* initialize stuff to prepare for reading a fresh new response */
@@ -664,7 +666,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
       return CURLE_OPERATION_TIMEDOUT; /* already too little time */
     }
 
-    interval_ms = 1 * 1000;  /* use 1 second timeout intervals */
+    interval_ms = 1000;  /* use 1 second timeout intervals */
     if(timeout < interval_ms)
       interval_ms = timeout;
 
@@ -3047,6 +3049,7 @@ static CURLcode ftp_easy_statemach(struct connectdata *conn)
   CURLcode result = CURLE_OK;
 
   while(ftpc->state != FTP_STOP) {
+    long interval_ms;
     long timeout_ms = ftp_state_timeout(conn);
 
     if(timeout_ms <=0 ) {
@@ -3054,30 +3057,31 @@ static CURLcode ftp_easy_statemach(struct connectdata *conn)
       return CURLE_OPERATION_TIMEDOUT; /* already too little time */
     }
 
+    interval_ms = 1000;  /* use 1 second timeout intervals */
+    if(timeout_ms < interval_ms)
+      interval_ms = timeout_ms;
+
     rc = Curl_socket_ready(ftpc->sendleft?CURL_SOCKET_BAD:sock, /* reading */
                            ftpc->sendleft?sock:CURL_SOCKET_BAD, /* writing */
-                           (int)timeout_ms);
+                           (int)interval_ms);
+
+    if(Curl_pgrsUpdate(conn))
+      result = CURLE_ABORTED_BY_CALLBACK;
+    else
+      result = Curl_speedcheck(data, Curl_tvnow());
+
+    if(result)
+      break;
 
     if(rc == -1) {
       failf(data, "select/poll error");
-      return CURLE_OUT_OF_MEMORY;
+      result = CURLE_OUT_OF_MEMORY;
     }
-    else if(rc == 0) {
-      result = CURLE_OPERATION_TIMEDOUT;
-      break;
-    }
-    else {
+    else if(rc)
       result = ftp_statemach_act(conn);
-      if(result)
-        break;
-      else if(Curl_pgrsUpdate(conn))
-        result = CURLE_ABORTED_BY_CALLBACK;
-      else
-        result = Curl_speedcheck(data, Curl_tvnow());
 
-      if(result)
-        break;
-    }
+    if(result)
+      break;
   }
 
   return result;
