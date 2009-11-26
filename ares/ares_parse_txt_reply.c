@@ -172,14 +172,14 @@ ares_parse_txt_reply (const unsigned char *abuf, int alen,
             }
           /* Make sure we NULL-terminate */
           *((char *) txt_curr->txt + txt_curr->length) = '\0';
-
-          /* Move on to the next record */
-          aptr += rr_len;
         }
 
       /* Don't lose memory in the next iteration */
       free (rr_name);
       rr_name = NULL;
+
+      /* Move on to the next record */
+      aptr += rr_len;
     }
 
   if (hostname)

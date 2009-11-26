@@ -56,7 +56,7 @@ ares_parse_srv_reply (const unsigned char *abuf, int alen,
                       struct ares_srv_reply **srv_out)
 {
   unsigned int qdcount, ancount, i;
-  const unsigned char *aptr;
+  const unsigned char *aptr, *vptr;
   int status, rr_type, rr_class, rr_len;
   long len;
   char *hostname = NULL, *rr_name = NULL;
@@ -139,24 +139,25 @@ ares_parse_srv_reply (const unsigned char *abuf, int alen,
             }
           srv_last = srv_curr;
 
-          srv_curr->priority = ntohs (*((unsigned short *)aptr));
-          aptr += sizeof(unsigned short);
-          srv_curr->weight = ntohs (*((unsigned short *)aptr));
-          aptr += sizeof(unsigned short);
-          srv_curr->port = ntohs (*((unsigned short *)aptr));
-          aptr += sizeof(unsigned short);
+          vptr = aptr;
+          srv_curr->priority = ntohs (*((unsigned short *)vptr));
+          vptr += sizeof(unsigned short);
+          srv_curr->weight = ntohs (*((unsigned short *)vptr));
+          vptr += sizeof(unsigned short);
+          srv_curr->port = ntohs (*((unsigned short *)vptr));
+          vptr += sizeof(unsigned short);
 
-          status = ares_expand_name (aptr, abuf, alen, &srv_curr->host, &len);
+          status = ares_expand_name (vptr, abuf, alen, &srv_curr->host, &len);
           if (status != ARES_SUCCESS)
             break;
-
-          /* Move on to the next record */
-          aptr += len;
         }
 
       /* Don't lose memory in the next iteration */
       free (rr_name);
       rr_name = NULL;
+
+      /* Move on to the next record */
+      aptr += rr_len;
     }
 
   if (hostname)
