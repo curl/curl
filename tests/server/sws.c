@@ -183,16 +183,116 @@ static const char *doc404 = "HTTP/1.1 404 Not Found\r\n"
     "The requested URL was not found on this server.\n"
     "<P><HR><ADDRESS>" SWSVERSION "</ADDRESS>\n" "</BODY></HTML>\n";
 
-#ifndef WIN32
-#  if defined(SIGPIPE) && defined(HAVE_SIGNAL)
-static volatile int sigpipe;  /* Why? It's not used */
-static void sigpipe_handler(int sig)
-{
-  (void)sig; /* prevent warning */
-  sigpipe = 1;
-}
-#  endif
+/* do-nothing macro replacement for systems which lack siginterrupt() */
+
+#ifndef HAVE_SIGINTERRUPT
+#define siginterrupt(x,y) do {} while(0)
 #endif
+
+/* vars used to keep around previous signal handlers */
+
+typedef RETSIGTYPE (*SIGHANDLER_T)(int);
+
+#ifdef SIGHUP
+static SIGHANDLER_T old_sighup_handler  = SIG_ERR;
+#endif
+
+#ifdef SIGPIPE
+static SIGHANDLER_T old_sigpipe_handler = SIG_ERR;
+#endif
+
+#ifdef SIGALRM
+static SIGHANDLER_T old_sigalrm_handler = SIG_ERR;
+#endif
+
+#ifdef SIGINT
+static SIGHANDLER_T old_sigint_handler  = SIG_ERR;
+#endif
+
+#ifdef SIGTERM
+static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
+#endif
+
+/* var which if set indicates that the program should finish execution */
+
+SIG_ATOMIC_T got_exit_signal = 0;
+
+/* if next is set indicates the first signal handled in exit_signal_handler */
+
+static volatile int exit_signal = 0;
+
+/* signal handler that will be triggered to indicate that the program
+  should finish its execution in a controlled manner as soon as possible.
+  The first time this is called it will set got_exit_signal to one and
+  store in exit_signal the signal that triggered its execution. */
+
+static RETSIGTYPE exit_signal_handler(int signum)
+{
+  int old_errno = ERRNO;
+  if(got_exit_signal == 0) {
+    got_exit_signal = 1;
+    exit_signal = signum;
+  }
+  (void)signal(signum, exit_signal_handler);
+  SET_ERRNO(old_errno);
+}
+
+static void install_signal_handlers(void)
+{
+#ifdef SIGHUP
+  /* ignore SIGHUP signal */
+  if((old_sighup_handler = signal(SIGHUP, SIG_IGN)) == SIG_ERR)
+    logmsg("cannot install SIGHUP handler: %s", strerror(ERRNO));
+#endif
+#ifdef SIGPIPE
+  /* ignore SIGPIPE signal */
+  if((old_sigpipe_handler = signal(SIGPIPE, SIG_IGN)) == SIG_ERR)
+    logmsg("cannot install SIGPIPE handler: %s", strerror(ERRNO));
+#endif
+#ifdef SIGALRM
+  /* ignore SIGALRM signal */
+  if((old_sigalrm_handler = signal(SIGALRM, SIG_IGN)) == SIG_ERR)
+    logmsg("cannot install SIGALRM handler: %s", strerror(ERRNO));
+#endif
+#ifdef SIGINT
+  /* handle SIGINT signal with our exit_signal_handler */
+  if((old_sigint_handler = signal(SIGINT, exit_signal_handler)) == SIG_ERR)
+    logmsg("cannot install SIGINT handler: %s", strerror(ERRNO));
+  else
+    siginterrupt(SIGINT, 1);
+#endif
+#ifdef SIGTERM
+  /* handle SIGTERM signal with our exit_signal_handler */
+  if((old_sigterm_handler = signal(SIGTERM, exit_signal_handler)) == SIG_ERR)
+    logmsg("cannot install SIGTERM handler: %s", strerror(ERRNO));
+  else
+    siginterrupt(SIGTERM, 1);
+#endif
+}
+
+static void restore_signal_handlers(void)
+{
+#ifdef SIGHUP
+  if(SIG_ERR != old_sighup_handler)
+    (void)signal(SIGHUP, old_sighup_handler);
+#endif
+#ifdef SIGPIPE
+  if(SIG_ERR != old_sigpipe_handler)
+    (void)signal(SIGPIPE, old_sigpipe_handler);
+#endif
+#ifdef SIGALRM
+  if(SIG_ERR != old_sigalrm_handler)
+    (void)signal(SIGALRM, old_sigalrm_handler);
+#endif
+#ifdef SIGINT
+  if(SIG_ERR != old_sigint_handler)
+    (void)signal(SIGINT, old_sigint_handler);
+#endif
+#ifdef SIGTERM
+  if(SIG_ERR != old_sigterm_handler)
+    (void)signal(SIGTERM, old_sigterm_handler);
+#endif
+}
 
 static int ProcessRequest(struct httprequest *req)
 {
@@ -525,6 +625,10 @@ static void storerequest(char *reqbuf, ssize_t totalsize)
   do {
     written = (ssize_t)fwrite((void *) &reqbuf[totalsize-writeleft],
                               1, (size_t)writeleft, dump);
+    if(got_exit_signal) {
+      res = fclose(dump);
+      return;
+    }
     if (written > 0)
       writeleft -= written;
   } while ((writeleft > 0) && ((error = ERRNO) == EINTR));
@@ -598,6 +702,8 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
       else
         got = sread(sock, reqbuf + req->offset, REQBUFSIZ-1 - req->offset);
     }
+    if(got_exit_signal)
+      return 1;
     if (got <= 0) {
       if (got < 0) {
         logmsg("recv() returned error: %d", SOCKERRNO);
@@ -643,6 +749,9 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
   /* dump the request to an external file */
   storerequest(reqbuf, req->pipelining ? req->checkindex : req->offset);
 
+  if(got_exit_signal)
+    return 1;
+
   return fail; /* return 0 on success */
 }
 
@@ -678,6 +787,8 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     count = strlen(STREAMTHIS);
     for (;;) {
       written = swrite(sock, STREAMTHIS, count);
+      if(got_exit_signal)
+        break;
       if(written != (ssize_t)count) {
         logmsg("Stopped streaming");
         break;
@@ -877,6 +988,7 @@ int main(int argc, char *argv[])
 #endif /* ENABLE_IPV6 */
   curl_socket_t sock = CURL_SOCKET_BAD;
   curl_socket_t msgsock = CURL_SOCKET_BAD;
+  int wrotepidfile = 0;
   int flag;
   unsigned short port = DEFAULT_PORT;
   char *pidname= (char *)".http.pid";
@@ -935,17 +1047,9 @@ int main(int argc, char *argv[])
 #ifdef WIN32
   win32_init();
   atexit(win32_cleanup);
-#else
+#endif
 
-#ifdef SIGPIPE
-#ifdef HAVE_SIGNAL
-  signal(SIGPIPE, sigpipe_handler);
-#endif
-#ifdef HAVE_SIGINTERRUPT
-  siginterrupt(SIGPIPE, 1);
-#endif
-#endif
-#endif
+  install_signal_handlers();
 
 #ifdef ENABLE_IPV6
   if(!use_ipv6)
@@ -960,7 +1064,7 @@ int main(int argc, char *argv[])
     error = SOCKERRNO;
     logmsg("Error creating socket: (%d) %s",
            error, strerror(error));
-    return 1;
+    goto sws_cleanup;
   }
 
   flag = 1;
@@ -969,8 +1073,7 @@ int main(int argc, char *argv[])
     error = SOCKERRNO;
     logmsg("setsockopt(SO_REUSEADDR) failed with error: (%d) %s",
            error, strerror(error));
-    sclose(sock);
-    return 1;
+    goto sws_cleanup;
   }
 
 #ifdef ENABLE_IPV6
@@ -995,13 +1098,7 @@ int main(int argc, char *argv[])
     error = SOCKERRNO;
     logmsg("Error binding socket on port %hu: (%d) %s",
            port, error, strerror(error));
-    sclose(sock);
-    return 1;
-  }
-
-  if(!write_pidfile(pidname)) {
-    sclose(sock);
-    return 1;
+    goto sws_cleanup;
   }
 
   logmsg("Running %s version on port %d", ipv_inuse, (int)port);
@@ -1012,13 +1109,18 @@ int main(int argc, char *argv[])
     error = SOCKERRNO;
     logmsg("listen() failed with error: (%d) %s",
            error, strerror(error));
-    sclose(sock);
-    return 1;
+    goto sws_cleanup;
   }
+
+  wrotepidfile = write_pidfile(pidname);
+  if(!wrotepidfile)
+    goto sws_cleanup;
 
   for (;;) {
     msgsock = accept(sock, NULL, NULL);
 
+    if(got_exit_signal)
+      break;
     if (CURL_SOCKET_BAD == msgsock) {
       error = SOCKERRNO;
       logmsg("MAJOR ERROR: accept() failed with error: (%d) %s",
@@ -1066,6 +1168,9 @@ int main(int argc, char *argv[])
     req.pipelining = FALSE;
 
     do {
+      if(got_exit_signal)
+        break;
+
       if(get_request(msgsock, &req))
         /* non-zero means error, break out of loop */
         break;
@@ -1086,6 +1191,9 @@ int main(int argc, char *argv[])
 
       send_doc(msgsock, &req);
 
+      if(got_exit_signal)
+        break;
+
       if((req.testno < 0) && (req.testno != DOCNUMBER_CONNECT)) {
         logmsg("special request received, no persistency");
         break;
@@ -1100,8 +1208,12 @@ int main(int argc, char *argv[])
       /* if we got a CONNECT, loop and get another request as well! */
     } while(req.open || (req.testno == DOCNUMBER_CONNECT));
 
+    if(got_exit_signal)
+      break;
+
     logmsg("====> Client disconnect");
     sclose(msgsock);
+    msgsock = CURL_SOCKET_BAD;
 
     clear_advisor_read_lock(SERVERLOGS_LOCK);
 
@@ -1112,10 +1224,35 @@ int main(int argc, char *argv[])
 #endif
   }
 
-  sclose(sock);
+sws_cleanup:
+
+  if((msgsock != sock) && (msgsock != CURL_SOCKET_BAD))
+    sclose(msgsock);
+
+  if(sock != CURL_SOCKET_BAD)
+    sclose(sock);
+
+  if(got_exit_signal)
+    logmsg("signalled to die");
+
+  if(wrotepidfile)
+    unlink(pidname);
 
   clear_advisor_read_lock(SERVERLOGS_LOCK);
 
+  restore_signal_handlers();
+
+  if(got_exit_signal) {
+    logmsg("========> sws exits with signal (%d)", exit_signal);
+    /*
+     * To properly set the return status of the process we
+     * must raise the same signal SIGINT or SIGTERM that we
+     * caught and let the old handler take care of it.
+     */
+    raise(exit_signal);
+  }
+
+  logmsg("========> sws quits");
   return 0;
 }
 
