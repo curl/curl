@@ -68,6 +68,8 @@ my $certfile="$srcdir/"
             . ($stuncert?"certs/$stuncert":"stunnel.pem");	# stunnel server certificate
 
 my $pidfile="$path/.$proto.pid";	# stunnel process pid file
+my $logfile="$path/log/stunnel.log";    # stunnel log file
+my $loglevel=5;
 
 # find out version info for the given stunnel binary
 my $ver_major;
@@ -90,20 +92,20 @@ if(!$ver_major) {
 elsif($ver_major < 4) {
     # stunnel version less than 4.00
     $cmd  = "$stunnel -p $certfile -P $pidfile -d $port -r $target_port ";
-    $cmd .= "2>/dev/null";
+    $cmd .= ">$logfile 2>&1";
 }
 else {
     # stunnel version 4.00 or later
     $cmd  = "$stunnel $conffile ";
-    $cmd .= "2>/dev/null";
+    $cmd .= ">$logfile 2>&1";
     # stunnel configuration file
     open(STUNCONF, ">$conffile") || exit 1;
     print STUNCONF "
 	CApath = $path
 	cert = $certfile
 	pid = $pidfile
-	debug = 0
-	output = /dev/null
+	debug = $loglevel
+	output = $logfile
 	foreground = yes
 	
 	[curltest]
@@ -120,8 +122,8 @@ if($verbose) {
 	CApath = $path
 	cert = $certfile
 	pid = $pidfile
-	debug = 0
-	output = /dev/null
+	debug = $loglevel
+	output = $logfile
 	foreground = yes
 	
 	[curltest]
