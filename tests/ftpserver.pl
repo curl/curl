@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -86,6 +86,7 @@ my $listenaddr = "127.0.0.1"; # just a default
 my $pidfile = ".ftpd.pid"; # a default, use --pidfile
 
 my $SERVERLOGS_LOCK="log/serverlogs.lock"; # server logs advisor read lock
+my $serverlogslocked=0;
 
 do {
     if($ARGV[0] eq "-v") {
@@ -123,7 +124,10 @@ sub catch_zap {
     my $signame = shift;
     print STDERR "ftpserver.pl received SIG$signame, exiting\n";
     ftpkillslaves(1);
-    clear_advisor_read_lock($SERVERLOGS_LOCK);
+    if($serverlogslocked) {
+        $serverlogslocked = 0;
+        clear_advisor_read_lock($SERVERLOGS_LOCK);
+    }
     die "Somebody sent me a SIG$signame";
 }
 $SIG{INT} = \&catch_zap;
@@ -149,7 +153,10 @@ sub sysread_or_die {
         logmsg "Error: ftp$ftpdnum$ext sysread error: $!\n";
         kill(9, $sfpid);
         waitpid($sfpid, 0);
-        clear_advisor_read_lock($SERVERLOGS_LOCK);
+        if($serverlogslocked) {
+            $serverlogslocked = 0;
+            clear_advisor_read_lock($SERVERLOGS_LOCK);
+        }
         die "Died in sysread_or_die() at $fcaller " .
             "line $lcaller. ftp$ftpdnum$ext sysread error: $!\n";
     }
@@ -159,7 +166,10 @@ sub sysread_or_die {
         logmsg "Error: ftp$ftpdnum$ext read zero\n";
         kill(9, $sfpid);
         waitpid($sfpid, 0);
-        clear_advisor_read_lock($SERVERLOGS_LOCK);
+        if($serverlogslocked) {
+            $serverlogslocked = 0;
+            clear_advisor_read_lock($SERVERLOGS_LOCK);
+        }
         die "Died in sysread_or_die() at $fcaller " .
             "line $lcaller. ftp$ftpdnum$ext read zero\n";
     }
@@ -181,7 +191,10 @@ sub startsf {
         logmsg "Failed sockfilt command: $cmd\n";
         kill(9, $sfpid);
         waitpid($sfpid, 0);
-        clear_advisor_read_lock($SERVERLOGS_LOCK);
+        if($serverlogslocked) {
+            $serverlogslocked = 0;
+            clear_advisor_read_lock($SERVERLOGS_LOCK);
+        }
         die "Failed to start sockfilt!";
     }
 }
@@ -810,6 +823,7 @@ while(1) {
     logmsg "====> Client connect\n";
 
     set_advisor_read_lock($SERVERLOGS_LOCK);
+    $serverlogslocked = 1;
 
     # flush data:
     $| = 1;
@@ -916,12 +930,18 @@ while(1) {
     } # while(1)
     logmsg "====> Client disconnected\n";
 
-    clear_advisor_read_lock($SERVERLOGS_LOCK);
+    if($serverlogslocked) {
+        $serverlogslocked = 0;
+        clear_advisor_read_lock($SERVERLOGS_LOCK);
+    }
 }
 
 print SFWRITE "QUIT\n";
 waitpid $sfpid, 0;
 
-clear_advisor_read_lock($SERVERLOGS_LOCK);
+if($serverlogslocked) {
+    $serverlogslocked = 0;
+    clear_advisor_read_lock($SERVERLOGS_LOCK);
+}
 
 exit;

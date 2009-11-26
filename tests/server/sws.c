@@ -74,6 +74,7 @@
 static bool use_ipv6 = FALSE;
 #endif
 static const char *ipv_inuse = "IPv4";
+static int serverlogslocked = 0;
 
 #define REQBUFSIZ 150000
 #define REQBUFSIZ_TXT "149999"
@@ -1112,6 +1113,11 @@ int main(int argc, char *argv[])
     goto sws_cleanup;
   }
 
+  /*
+  ** As soon as this server writes its pid file the test harness will
+  ** attempt to connect to this server and initiate its verification.
+  */
+
   wrotepidfile = write_pidfile(pidname);
   if(!wrotepidfile)
     goto sws_cleanup;
@@ -1128,7 +1134,14 @@ int main(int argc, char *argv[])
       break;
     }
 
+    /*
+    ** As soon as this server acepts a connection from the test harness it
+    ** must set the server logs advisor read lock to indicate that server
+    ** logs should not be read until this lock is removed by this server.
+    */
+
     set_advisor_read_lock(SERVERLOGS_LOCK);
+    serverlogslocked = 1;
 
 #ifdef CURL_SWS_FORK_ENABLED
     if(use_fork) {
@@ -1215,7 +1228,10 @@ int main(int argc, char *argv[])
     sclose(msgsock);
     msgsock = CURL_SOCKET_BAD;
 
-    clear_advisor_read_lock(SERVERLOGS_LOCK);
+    if(serverlogslocked) {
+      serverlogslocked = 0;
+      clear_advisor_read_lock(SERVERLOGS_LOCK);
+    }
 
     if (req.testno == DOCNUMBER_QUIT)
       break;
@@ -1238,7 +1254,10 @@ sws_cleanup:
   if(wrotepidfile)
     unlink(pidname);
 
-  clear_advisor_read_lock(SERVERLOGS_LOCK);
+  if(serverlogslocked) {
+    serverlogslocked = 0;
+    clear_advisor_read_lock(SERVERLOGS_LOCK);
+  }
 
   restore_signal_handlers();
 

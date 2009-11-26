@@ -103,6 +103,7 @@
 static bool use_ipv6 = FALSE;
 #endif
 static const char *ipv_inuse = "IPv4";
+static int serverlogslocked = 0;
 
 struct testcase {
   char *buffer;   /* holds the file data to send to the client */
@@ -546,6 +547,7 @@ int main(int argc, char **argv)
     }
 
     set_advisor_read_lock(SERVERLOGS_LOCK);
+    serverlogslocked = 1;
 
     from.sin_family = AF_INET;
 
@@ -574,13 +576,19 @@ int main(int argc, char **argv)
     }
     sclose(peer);
 
-    clear_advisor_read_lock(SERVERLOGS_LOCK);
+    if(serverlogslocked) {
+      serverlogslocked = 0;
+      clear_advisor_read_lock(SERVERLOGS_LOCK);
+    }
 
     logmsg("end of one transfer");
 
   }
 
-  clear_advisor_read_lock(SERVERLOGS_LOCK);
+  if(serverlogslocked) {
+    serverlogslocked = 0;
+    clear_advisor_read_lock(SERVERLOGS_LOCK);
+  }
 
   return result;
 }
@@ -766,7 +774,10 @@ static void timer(int signum)
 
   timeout += rexmtval;
   if(timeout >= maxtimeout) {
-    clear_advisor_read_lock(SERVERLOGS_LOCK);
+    if(serverlogslocked) {
+      serverlogslocked = 0;
+      clear_advisor_read_lock(SERVERLOGS_LOCK);
+    }
     exit(1);
   }
 #ifdef HAVE_SIGSETJMP

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -259,6 +259,12 @@ void clear_advisor_read_lock(const char *filename)
 {
   int error = 0;
   int res;
+
+  /*
+  ** Log all removal failures. Even those due to file not existing.
+  ** This allows to detect if unexpectedly the file has already been
+  ** removed by a process different than the one that should do this.
+  */
 
   do {
     res = unlink(filename);
