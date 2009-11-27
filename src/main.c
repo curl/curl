@@ -602,7 +602,7 @@ struct Configurable {
   char *ftp_account; /* for ACCT */
   char *ftp_alternative_to_user; /* send command if USER/PASS fails */
   int ftp_filemethod;
-
+  long tftp_blksize; /* TFTP BLKSIZE option */
   bool ignorecl; /* --ignore-content-length */
   bool disable_sessionid;
 
@@ -877,6 +877,7 @@ static void help(void)
     "    --stderr <file> Where to redirect stderr. - means stdout",
     "    --tcp-nodelay   Use the TCP_NODELAY option",
     " -t/--telnet-option <OPT=val> Set telnet option",
+    "    --tftp-blksize <value> Set TFTP BLKSIZE option (must be >512)",
     " -z/--time-cond <time> Transfer based on a time condition",
     " -1/--tlsv1         Use TLSv1 (SSL)",
     "    --trace <file>  Write a debug trace to the given file",
@@ -1732,12 +1733,13 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$3", "keepalive-time",  TRUE},
     {"$4", "post302",    FALSE},
     {"$5", "noproxy",    TRUE},
+
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
     {"$6", "socks5-gssapi-service",  TRUE},
     {"$7", "socks5-gssapi-nec",  FALSE},
 #endif
     {"$8", "proxy1.0",   TRUE},
-
+    {"$9", "tftp-blksize", TRUE},
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -2263,6 +2265,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         /* http 1.0 proxy */
         GetStr(&config->proxy, nextarg);
         config->proxyver = CURLPROXY_HTTP_1_0;
+        break;
+      case '9': /* --tftp-blksize */
+        str2num(&config->tftp_blksize, nextarg);
         break;
       }
       break;
@@ -4999,6 +5004,9 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         /* curl 7.19.1 (the 301 version existed in 7.18.2) */
         my_setopt(curl, CURLOPT_POSTREDIR, config->post301 |
                   (config->post302 ? CURL_REDIR_POST_302 : FALSE));
+
+        if(config->tftp_blksize)
+          my_setopt(curl, CURLOPT_TFTP_BLKSIZE, config->tftp_blksize);
 
         retry_numretries = config->req_retry;
 

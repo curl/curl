@@ -8,11 +8,19 @@
 
 
 
+Daniel Stenberg (28 Nov 2009)
+- Markus Koetter provided a polished and updated version of Chad Monroe's TFTP
+  rework patch that now integrates TFTP properly into libcurl so that it can
+  be used non-blocking with the multi interface and more. BLKSIZE also works.
+
+  The --tftp-blksize option was added to allow setting the TFTP BLKSIZE from
+  the command line.
+
 Daniel Stenberg (26 Nov 2009)
- - Extended and fixed the change I did on Dec 11 for the the progress
-   meter/callback during FTP command/response sequences. It turned out it was
-   really lame before and now the progress meter SHOULD get called at least
-   once per second.
+- Extended and fixed the change I did on Dec 11 for the the progress
+  meter/callback during FTP command/response sequences. It turned out it was
+  really lame before and now the progress meter SHOULD get called at least
+  once per second.
 
 Daniel Stenberg (23 Nov 2009)
 - Bjorn Augustsson reported a bug which made curl not report any problems even

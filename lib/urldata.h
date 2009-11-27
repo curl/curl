@@ -932,8 +932,8 @@ struct connectdata {
 #define PROT_SSL     (1<<22) /* protocol requires SSL */
 #define PROT_MISSING (1<<23)
 
-#define PROT_CLOSEACTION PROT_FTP /* these ones need action before socket
-                                     close */
+/* these ones need action before socket close */
+#define PROT_CLOSEACTION (PROT_FTP | PROT_TFTP) 
 #define PROT_DUALCHANNEL PROT_FTP /* these protocols use two connections */
 
   /* 'dns_entry' is the particular host we use. This points to an entry in the

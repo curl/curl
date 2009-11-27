@@ -11,6 +11,7 @@ This release includes the following changes:
 
  o support SSL_FILETYPE_ENGINE for client certificate
  o curl-config can now show the arguments used when building curl
+ o non-blocking TFTP
 
 This release includes the following bugfixes:
 
@@ -26,6 +27,7 @@ This release includes the following bugfixes:
  o HTTP proxy tunnel re-used connection even if tunnel got disabled
  o SSL lib post-close write
  o curl failed to report write errors for tiny failed downloads
+ o TFTP BLKSIZE
 
 This release includes the following known bugs:
 
@@ -36,6 +38,7 @@ advice from friends like these:
 
  Yang Tse, Kamil Dudka, Christian Schmitz, Constantine Sapuntzakis,
  Marco Maggi, Camille Moncelier, Claes Jakobsson, Kevin Baughman,
- Marc Kleine-Budde, Jad Chamcham, Bjorn Augustsson, David Byron
+ Marc Kleine-Budde, Jad Chamcham, Bjorn Augustsson, David Byron,
+ Markus Koetter, Chad Monroe
 
         Thanks! (and sorry if I forgot to mention someone)
