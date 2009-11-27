@@ -228,7 +228,7 @@ PDBTYPE_CONSOLIDATE = /pdbtype:consolidate
 
 CC_CMD_REL = cl.exe /nologo $(RTLIB) /DNDEBUG /O2
 CC_CMD_DBG = cl.exe /nologo $(RTLIBD) /D_DEBUG /Od /Zi /GZ
-CC_CFLAGS    = $(CFLAGS) /I. /W3 /GX /FD
+CC_CFLAGS  = $(CFLAGS) /I. /W3 /GX /FD
 
 RC_CMD_REL = rc.exe /l 0x409 /d "NDEBUG"
 RC_CMD_DBG = rc.exe /l 0x409 /d "_DEBUG"
@@ -463,3 +463,5 @@ $(PROG2_DIR): $(BASE_DIR)
 
 $(PROG3_DIR): $(BASE_DIR)
     @if not exist $(PROG3_DIR) mkdir $(PROG3_DIR)
+
+# End of Makefile.msvc
