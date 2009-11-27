@@ -1,4 +1,4 @@
-To be addressed in 7.19.8 (planned release: January 2010)
+To be addressed in 7.20.0 (planned release: January 2010)
 =========================
 
 244 - patch for [out] parameters
@@ -12,11 +12,6 @@ To be addressed in 7.19.8 (planned release: January 2010)
 
 253 - add option to disable SNI for TLS handshakes
 
-257 - bug #2891595  DNS cache
+260 - IMAP, POP3 and SMTP support
 
-258 - bug #2891591  Curl_dns_entry
-
-259 - Avoding connection re-use when using CURLOPT_HTTPPROXYTUNNEL
-
-260 -
-
+261 - 
