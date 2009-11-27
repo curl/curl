@@ -997,6 +997,7 @@ int main(int argc, char *argv[])
   int rc;
   int error;
   int arg=1;
+  long pid;
 #ifdef CURL_SWS_FORK_ENABLED
   bool use_fork = FALSE;
 #endif
@@ -1051,6 +1052,8 @@ int main(int argc, char *argv[])
 #endif
 
   install_signal_handlers();
+
+  pid = (long)getpid();
 
 #ifdef ENABLE_IPV6
   if(!use_ipv6)
@@ -1262,7 +1265,8 @@ sws_cleanup:
   restore_signal_handlers();
 
   if(got_exit_signal) {
-    logmsg("========> sws exits with signal (%d)", exit_signal);
+    logmsg("========> %s sws (port: %d pid: %ld) exits with signal (%d)",
+           ipv_inuse, (int)port, pid, exit_signal);
     /*
      * To properly set the return status of the process we
      * must raise the same signal SIGINT or SIGTERM that we
