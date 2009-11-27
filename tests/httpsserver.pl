@@ -87,7 +87,7 @@ foreach my $veropt (('-version', '-V')) {
 
 my $cmd;
 if(!$ver_major) {
-    print STDERR "no stunnel or unknown version\n";
+    print "no stunnel or unknown version\n";
 }
 elsif($ver_major < 4) {
     # stunnel version less than 4.00
@@ -132,11 +132,15 @@ if($verbose) {
 	";
 }
 
+# Set file permissions on certificate pem file.
+chmod(0600, $certfile) if(-f $certfile);
+
+
 my $rc = system($cmd);
 
 $rc >>= 8;
 #if($rc) {
-#    print STDERR "stunnel exited with $rc!\n";
+#    print "stunnel exited with $rc!\n";
 #}
 
 unlink $conffile;
