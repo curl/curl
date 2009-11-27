@@ -10,13 +10,6 @@ use Cwd;
 
 my $stunnel = "stunnel";
 
-#
-# -p pemfile
-# -P pid dir
-# -d listen port
-# -r target port
-# -s stunnel path
-
 my $verbose=0; # set to 1 for debugging
 
 my $port = 8991;        # just our default, weird enough
@@ -71,7 +64,11 @@ my $pidfile="$path/.$proto.pid";	# stunnel process pid file
 my $logfile="$path/log/stunnel.log";    # stunnel log file
 my $loglevel=5;
 
-# find out version info for the given stunnel binary
+my $ssltext = uc($proto) ." SSL/TLS:";
+
+#***************************************************************************
+# Find out version info for the given stunnel binary
+#
 my $ver_major;
 my $ver_minor;
 foreach my $veropt (('-version', '-V')) {
@@ -84,29 +81,42 @@ foreach my $veropt (('-version', '-V')) {
     }
     last if($ver_major);
 }
-
-my $cmd;
 if(!$ver_major) {
     if(-x "$stunnel" && ! -d "$stunnel") {
-        print "unknown stunnel version\n";
+        print "$ssltext Unknown stunnel version\n";
     }
     else {
-        print "no stunnel\n";
+        print "$ssltext No stunnel\n";
     }
-    exit;
+    exit 1;
 }
-elsif($ver_major < 4) {
+
+#***************************************************************************
+# Build command to execute depending on stunnel version
+#
+my $cmd;
+if($ver_major < 4) {
     # stunnel version less than 4.00
-    $cmd  = "$stunnel -p $certfile -P $pidfile -d $port -r $target_port ";
-    $cmd .= ">$logfile 2>&1";
+    $cmd  = "$stunnel -p $certfile -P $pidfile -d $port -r $target_port -f ";
+    $cmd .= "-D $loglevel >$logfile 2>&1";
+    if($verbose) {
+        print uc($proto) ." server (stunnel $ver_major.$ver_minor)\n";
+        print "cmd: $cmd\n";
+        print "pem cert file: $certfile\n";
+        print "pid file: $pidfile\n";
+        print "log file: $logfile\n";
+        print "log level: $loglevel\n";
+        print "listen on port: $port\n";
+        print "connect to port: $target_port\n";
+    }
 }
 else {
     # stunnel version 4.00 or later
     $cmd  = "$stunnel $conffile ";
     $cmd .= ">$logfile 2>&1";
     # stunnel configuration file
-    open(STUNCONF, ">$conffile") || exit 1;
-    print STUNCONF "
+    if(open(STUNCONF, ">$conffile")) {
+	print STUNCONF "
 	CApath = $path
 	cert = $certfile
 	pid = $pidfile
@@ -118,30 +128,39 @@ else {
 	accept = $port
 	connect = $target_port
 	";
-    close STUNCONF;
+        if(!close(STUNCONF)) {
+            print "$ssltext Error closing file $conffile\n";
+            exit 1;
+        }
+    }
+    else {
+        print "$ssltext Error writing file $conffile\n";
+        exit 1;
+    }
+    if($verbose) {
+        print uc($proto) ." server (stunnel $ver_major.$ver_minor)\n";
+        print "cmd: $cmd\n";
+        print "CApath = $path\n";
+        print "cert = $certfile\n";
+        print "pid = $pidfile\n";
+        print "debug = $loglevel\n";
+        print "output = $logfile\n";
+        print "foreground = yes\n";
+        print "\n";
+        print "[curltest]\n";
+        print "accept = $port\n";
+        print "connect = $target_port\n";
+    }
 }
 
-if($verbose) {
-    print uc($proto)." server: $cmd\n";
-
-   print  "
-	CApath = $path
-	cert = $certfile
-	pid = $pidfile
-	debug = $loglevel
-	output = $logfile
-	foreground = yes
-	
-	[curltest]
-	accept = $port
-	connect = $target_port
-	";
-}
-
+#***************************************************************************
 # Set file permissions on certificate pem file.
+#
 chmod(0600, $certfile) if(-f $certfile);
 
-
+#***************************************************************************
+# Run stunnel.
+#
 my $rc = system($cmd);
 
 $rc >>= 8;
