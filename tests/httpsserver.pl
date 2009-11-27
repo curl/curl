@@ -87,7 +87,13 @@ foreach my $veropt (('-version', '-V')) {
 
 my $cmd;
 if(!$ver_major) {
-    print "no stunnel or unknown version\n";
+    if(-x "$stunnel" && ! -d "$stunnel") {
+        print "unknown stunnel version\n";
+    }
+    else {
+        print "no stunnel\n";
+    }
+    exit;
 }
 elsif($ver_major < 4) {
     # stunnel version less than 4.00
