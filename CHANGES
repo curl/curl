@@ -7,6 +7,9 @@
                                   Changelog
 
 
+Yang Tse (28 Nov 2009)
+- Added Diffie-Hellman parameters to several test harness certificate files in
+  PEM format. Required by several stunnel versions used by our test harness.
 
 Daniel Stenberg (28 Nov 2009)
 - Markus Koetter provided a polished and updated version of Chad Monroe's TFTP
