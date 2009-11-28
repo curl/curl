@@ -61,7 +61,7 @@ my $certfile="$srcdir/"
             . ($stuncert?"certs/$stuncert":"stunnel.pem");	# stunnel server certificate
 
 my $pidfile="$path/.$proto.pid";	# stunnel process pid file
-my $logfile="$path/log/stunnel.log";    # stunnel log file
+my $logfile="$path/log/${proto}_stunnel.log";    # stunnel log file
 my $loglevel=5;
 
 my $ssltext = uc($proto) ." SSL/TLS:";
