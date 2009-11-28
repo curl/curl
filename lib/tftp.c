@@ -1142,7 +1142,6 @@ static CURLcode tftp_receive_packet(struct connectdata *conn)
 static long tftp_state_timeout(struct connectdata *conn, tftp_event_t *event)
 {
   time_t                current;
-  struct SessionHandle  *data = conn->data;
   tftp_state_data_t     *state = (tftp_state_data_t *)conn->proto.tftpc;
 
   if (event)
@@ -1150,7 +1149,7 @@ static long tftp_state_timeout(struct connectdata *conn, tftp_event_t *event)
 
   time(&current);
   if(current > state->max_time) {
-    DEBUGF(infof(data, "timeout: %d > %d\n",
+    DEBUGF(infof(conn->data, "timeout: %d > %d\n",
                  current, state->max_time));
     state->error = TFTP_ERR_TIMEOUT;
     state->state = TFTP_STATE_FIN;
