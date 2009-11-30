@@ -1,5 +1,7 @@
   Changelog for the c-ares project
 
+Version 1.7.0 (Nov 30, 2009)
+
 * November 26, 2009 (Yang Tse)
 - Larry Lansing fixed ares_parse_srv_reply to properly parse replies
   which might contain non-SRV answers, skipping over potential non-SRV
