@@ -828,7 +828,7 @@ sub runhttpserver {
         return (0,0);
     }
 
-    my $pid = checkserver($pidfile);
+    my $pid = processexists($pidfile);
     if($pid > 0) {
         stopserver($pid);
     }
@@ -898,7 +898,7 @@ sub runhttpsserver {
         return (0,0);
     }
 
-    my $pid = checkserver($pidfile);
+    my $pid = processexists($pidfile);
     if($pid > 0) {
         # kill previous stunnel!
         stopserver($pid);
@@ -968,7 +968,7 @@ sub runftpserver {
         return (0,0);
     }
 
-    my $pid = checkserver($pidfile);
+    my $pid = processexists($pidfile);
     if($pid > 0) {
         stopserver($pid);
     }
@@ -1045,7 +1045,7 @@ sub runftpsserver {
         return (0,0);
     }
 
-    my $pid = checkserver($pidfile);
+    my $pid = processexists($pidfile);
     if($pid > 0) {
         # kill previous stunnel!
         stopserver($pid);
@@ -1114,7 +1114,7 @@ sub runtftpserver {
         return (0,0);
     }
 
-    my $pid = checkserver($pidfile);
+    my $pid = processexists($pidfile);
     if($pid > 0) {
         stopserver($pid);
     }
@@ -1179,7 +1179,7 @@ sub runsshserver {
         return (0,0);
     }
 
-    my $pid = checkserver($pidfile);
+    my $pid = processexists($pidfile);
     if($pid > 0) {
         stopserver($pid);
     }
@@ -1254,7 +1254,7 @@ sub runsocksserver {
         return (0,0);
     }
 
-    my $pid = checkserver($pidfile);
+    my $pid = processexists($pidfile);
     if($pid > 0) {
         stopserver($pid);
     }

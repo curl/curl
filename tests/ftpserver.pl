@@ -577,7 +577,7 @@ sub PASV_command {
     my $pasvport;
     my $pidf=".sockdata$ftpdnum$ext.pid";
 
-    my $prev = checkserver($pidf);
+    my $prev = processexists($pidf);
     if($prev > 0) {
         print "kill existing server: $prev\n" if($verbose);
         kill(9, $prev);

@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -22,30 +22,48 @@
 ###########################################################################
 
 #######################################################################
-# Return the pid of the server as found in the given pid file
+# pidfromfile returns the pid stored in the given pidfile.  The value
+# of the returned pid will never be a negative value. It will be zero
+# on any file related error or if a pid can not be extracted from the
+# given file.
 #
-sub serverpid {
-    my $PIDFILE = $_[0];
-    open(PFILE, "<$PIDFILE");
-    my $PID=0+<PFILE>;
-    close(PFILE);
-    return $PID;
+sub pidfromfile {
+    my $pidfile = $_[0];
+    my $pid = 0;
+
+    if(-f $pidfile && -s $pidfile && open(PIDFH, "<$pidfile")) {
+        $pid = 0 + <PIDFH>;
+        close(PIDFH);
+        $pid = 0 unless($pid > 0);
+    }
+    return $pid;
 }
 
 #######################################################################
-# Check the given test server if it is still alive.
+# processexists checks if a process with the pid stored in the given
+# pidfile exists and is alive. This will return 0 on any file related
+# error or if a pid can not be extracted from the given file. When a
+# process with the same pid as the one extracted from the given file
+# is currently alive this returns that positive pid. Otherwise, when
+# the process is not alive, will return the negative value of the pid.
 #
-sub checkserver {
-    my ($pidfile)=@_;
-    my $pid=0;
+sub processexists {
+#   use POSIX ":sys_wait_h";
+    my $pidfile = $_[0];
 
-    # check for pidfile
-    if ( -f $pidfile ) {
-        $pid=serverpid($pidfile);
-        if ($pid ne "" && kill(0, $pid)) {
+    # fetch pid from pidfile
+    my $pid = pidfromfile($pidfile);
+
+    if($pid > 0) {
+        # verify if currently alive
+        if(kill(0, $pid)) {
             return $pid;
         }
         else {
+            # reap it if this has not already been done
+            # waitpid($pid, &WNOHANG);
+            # get rid of the certainly invalid pidfile
+            unlink($pidfile) if($pid == pidfromfile($pidfile));
             return -$pid; # negative means dead process
         }
     }
@@ -60,7 +78,7 @@ sub ftpkillslave {
     my $base;
     for $base (('filt', 'data')) {
         my $f = ".sock$base$id$ext.pid";
-        my $pid = checkserver($f);
+        my $pid = processexists($f);
         if($pid > 0) {
             printf ("* kill pid for %s => %d\n", "ftp-$base$id$ext", $pid) if($verbose);
             kill (9, $pid); # die!
