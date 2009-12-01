@@ -23,6 +23,15 @@ my $proto='https';
 
 my $stuncert;
 
+my $ver_major;
+my $ver_minor;
+my $stunnel_version;
+my $socketopt;
+my $cmd;
+
+#***************************************************************************
+# Process command line options
+#
 while(@ARGV) {
     if($ARGV[0] eq "-v") {
         $verbose=1;
@@ -69,8 +78,6 @@ my $ssltext = uc($proto) ." SSL/TLS:";
 #***************************************************************************
 # Find out version info for the given stunnel binary
 #
-my $ver_major;
-my $ver_minor;
 foreach my $veropt (('-version', '-V')) {
     foreach my $verstr (qx($stunnel $veropt 2>&1)) {
         if($verstr =~ /^stunnel (\d+)\.(\d+) on /) {
@@ -81,7 +88,7 @@ foreach my $veropt (('-version', '-V')) {
     }
     last if($ver_major);
 }
-if(!$ver_major) {
+if((!$ver_major) || (!$ver_minor)) {
     if(-x "$stunnel" && ! -d "$stunnel") {
         print "$ssltext Unknown stunnel version\n";
     }
@@ -90,15 +97,26 @@ if(!$ver_major) {
     }
     exit 1;
 }
+$stunnel_version = (100*$ver_major) + $ver_minor;
 
 #***************************************************************************
-# Build command to execute depending on stunnel version
+# Verify minimmum stunnel required version
 #
-my $cmd;
-if($ver_major < 4) {
-    # stunnel version less than 4.00
-    $cmd  = "$stunnel -p $certfile -P $pidfile -d $port -r $target_port -f ";
-    $cmd .= "-D $loglevel >$logfile 2>&1";
+if($stunnel_version < 310) {
+    print "$ssltext Unsupported stunnel version $ver_major.$ver_minor\n";
+}
+
+#***************************************************************************
+# Build command to execute for stunnel 3.X versions
+#
+if($stunnel_version < 400) {
+    if($stunnel_version >= 319) {
+        $socketopt = "-O a:SO_REUSEADDR=1";
+    }
+    $cmd  = "$stunnel -p $certfile -P $pidfile ";
+    $cmd .= "-d $port -r $target_port -f -D $loglevel ";
+    $cmd .= ($socketopt) ? "$socketopt " : "";
+    $cmd .= ">$logfile 2>&1";
     if($verbose) {
         print uc($proto) ." server (stunnel $ver_major.$ver_minor)\n";
         print "cmd: $cmd\n";
@@ -110,8 +128,12 @@ if($ver_major < 4) {
         print "connect to port: $target_port\n";
     }
 }
-else {
-    # stunnel version 4.00 or later
+
+#***************************************************************************
+# Build command to execute for stunnel 4.00 and newer
+#
+if($stunnel_version >= 400) {
+    $socketopt = "a:SO_REUSEADDR=1";
     $cmd  = "$stunnel $conffile ";
     $cmd .= ">$logfile 2>&1";
     # stunnel configuration file
@@ -122,6 +144,7 @@ else {
 	pid = $pidfile
 	debug = $loglevel
 	output = $logfile
+	socket = $socketopt
 	foreground = yes
 	
 	[curltest]
@@ -145,6 +168,7 @@ else {
         print "pid = $pidfile\n";
         print "debug = $loglevel\n";
         print "output = $logfile\n";
+        print "socket = $socketopt\n";
         print "foreground = yes\n";
         print "\n";
         print "[curltest]\n";
