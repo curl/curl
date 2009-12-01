@@ -7,6 +7,12 @@
                                   Changelog
 
 
+Daniel Stenberg (1 Dec 2009)
+- If the Expect: 100-continue header has been set by the application through
+  curl_easy_setopt with CURLOPT_HTTPHEADER, the library should set
+  data->state.expect100header accordingly - the current code (in 7.19.7 at
+  least) doesn't handle this properly. Martin Storsjo provided the fix!
+
 Yang Tse (28 Nov 2009)
 - Added Diffie-Hellman parameters to several test harness certificate files in
   PEM format. Required by several stunnel versions used by our test harness.
