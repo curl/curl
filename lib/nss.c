@@ -990,7 +990,9 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 {
   PRInt32 err;
   PRFileDesc *model = NULL;
-  PRBool ssl2, ssl3, tlsv1;
+  PRBool ssl2 = PR_FALSE;
+  PRBool ssl3 = PR_FALSE;
+  PRBool tlsv1 = PR_FALSE;
   struct SessionHandle *data = conn->data;
   curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
@@ -1105,8 +1107,6 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
     goto error;
   if(SSL_OptionSet(model, SSL_HANDSHAKE_AS_CLIENT, PR_TRUE) != SECSuccess)
     goto error;
-
-  ssl2 = ssl3 = tlsv1 = PR_FALSE;
 
   switch (data->set.ssl.version) {
   default:
