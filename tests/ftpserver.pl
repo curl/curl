@@ -122,16 +122,16 @@ do {
 
 sub catch_zap {
     my $signame = shift;
-    print STDERR "ftpserver.pl received SIG$signame, exiting\n";
     ftpkillslaves(1);
+    unlink($pidfile);
     if($serverlogslocked) {
         $serverlogslocked = 0;
         clear_advisor_read_lock($SERVERLOGS_LOCK);
     }
-    die "Somebody sent me a SIG$signame";
+    exit;
 }
 $SIG{INT} = \&catch_zap;
-$SIG{KILL} = \&catch_zap;
+$SIG{TERM} = \&catch_zap;
 
 my $sfpid;
 
@@ -153,6 +153,7 @@ sub sysread_or_die {
         logmsg "Error: ftp$ftpdnum$ext sysread error: $!\n";
         kill(9, $sfpid);
         waitpid($sfpid, 0);
+        unlink($pidfile);
         if($serverlogslocked) {
             $serverlogslocked = 0;
             clear_advisor_read_lock($SERVERLOGS_LOCK);
@@ -166,6 +167,7 @@ sub sysread_or_die {
         logmsg "Error: ftp$ftpdnum$ext read zero\n";
         kill(9, $sfpid);
         waitpid($sfpid, 0);
+        unlink($pidfile);
         if($serverlogslocked) {
             $serverlogslocked = 0;
             clear_advisor_read_lock($SERVERLOGS_LOCK);
@@ -191,6 +193,7 @@ sub startsf {
         logmsg "Failed sockfilt command: $cmd\n";
         kill(9, $sfpid);
         waitpid($sfpid, 0);
+        unlink($pidfile);
         if($serverlogslocked) {
             $serverlogslocked = 0;
             clear_advisor_read_lock($SERVERLOGS_LOCK);
@@ -198,9 +201,6 @@ sub startsf {
         die "Failed to start sockfilt!";
     }
 }
-
-# remove the file here so that if startsf() fails, it is very noticeable 
-unlink($pidfile);
 
 startsf();
 
@@ -938,6 +938,8 @@ while(1) {
 
 print SFWRITE "QUIT\n";
 waitpid $sfpid, 0;
+
+unlink($pidfile);
 
 if($serverlogslocked) {
     $serverlogslocked = 0;
