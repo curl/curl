@@ -664,6 +664,8 @@ int main(int argc, char **argv)
   struct testcase test;
   int result = 0;
 
+  memset(&test, 0, sizeof(test));
+
   while(argc>arg) {
     if(!strcmp("--version", argv[arg])) {
       printf("tftpd IPv4%s\n",
@@ -810,6 +812,11 @@ int main(int argc, char **argv)
     sclose(peer);
     peer = CURL_SOCKET_BAD;
 
+    if(test.ofile > 0) {
+      close(test.ofile);
+      test.ofile = 0;
+    }
+
     if(got_exit_signal)
       break;
 
@@ -823,6 +830,9 @@ int main(int argc, char **argv)
   }
 
 tftpd_cleanup:
+
+  if(test.ofile > 0)
+    close(test.ofile);
 
   if((peer != sock) && (peer != CURL_SOCKET_BAD))
     sclose(peer);
