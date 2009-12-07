@@ -40,6 +40,7 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Transfer-Encoding: chunked
 Content-Type: application/x-www-form-urlencoded
+Expect: 100-continue
 
 3
 one

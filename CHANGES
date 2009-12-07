@@ -7,6 +7,11 @@
                                   Changelog
 
 
+Daniel Stenberg (7 Dec 2009)
+- Martin Storsjo made libcurl use the Expect: 100-continue header for posts
+  with unknown size. Previously it was only used for posts with a known size
+  larger than 1024 bytes.
+
 Daniel Stenberg (1 Dec 2009)
 - If the Expect: 100-continue header has been set by the application through
   curl_easy_setopt with CURLOPT_HTTPHEADER, the library should set

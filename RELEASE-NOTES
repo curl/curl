@@ -12,6 +12,7 @@ This release includes the following changes:
  o support SSL_FILETYPE_ENGINE for client certificate
  o curl-config can now show the arguments used when building curl
  o non-blocking TFTP
+ o send Expect: 100-continue for POSTs with unknown sizes
 
 This release includes the following bugfixes:
 

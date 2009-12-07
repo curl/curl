@@ -2815,7 +2815,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       /* figure out the size of the postfields */
       postsize = (data->set.postfieldsize != -1)?
         data->set.postfieldsize:
-        (data->set.postfields? (curl_off_t)strlen(data->set.postfields):0);
+        (data->set.postfields? (curl_off_t)strlen(data->set.postfields):-1);
     }
     if(!data->req.upload_chunky) {
       /* We only set Content-Length and allow a custom Content-Length if
@@ -2849,7 +2849,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       data->state.expect100header =
         Curl_compareheader(ptr, "Expect:", "100-continue");
     }
-    else if(postsize > TINY_INITIAL_POST_SIZE) {
+    else if(postsize > TINY_INITIAL_POST_SIZE || postsize < 0) {
       result = expect100(data, conn, req_buffer);
       if(result)
         return result;
