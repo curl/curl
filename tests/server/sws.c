@@ -879,6 +879,9 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     }
   }
 
+  if(got_exit_signal)
+    return -1;
+
   dump = fopen(RESPONSE_DUMP, "ab"); /* b is for windows-preparing */
   if(!dump) {
     error = ERRNO;
@@ -951,13 +954,27 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
 
   if(cmdsize > 0 ) {
     char command[32];
+    int quarters;
     int num;
     ptr=cmd;
     do {
       if(2 == sscanf(ptr, "%31s %d", command, &num)) {
         if(!strcmp("wait", command)) {
           logmsg("Told to sleep for %d seconds", num);
-          sleep(num); /* wait this many seconds */
+          quarters = num * 4;
+          while(quarters > 0) {
+            quarters--;
+            res = wait_ms(250);
+            if(got_exit_signal)
+              quarters = 0;
+            if(res) {
+              /* should not happen */
+              error = SOCKERRNO;
+              logmsg("wait_ms() failed with error: (%d) %s",
+                     error, strerror(error));
+              quarters = 0;
+            }
+          }
         }
         else
           logmsg("Unknown command in reply command section");

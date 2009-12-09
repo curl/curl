@@ -203,7 +203,7 @@ int wait_ms(int timeout_ms)
     if(r != -1)
       break;
     error = SOCKERRNO;
-    if(error == EINVAL)
+    if(error && (error != EINTR))
       break;
     pending_ms = timeout_ms - (int)curlx_tvdiff(curlx_tvnow(), initial_tv);
     if(pending_ms <= 0)
