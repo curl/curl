@@ -12,7 +12,7 @@ Daniel Stenberg (10 Dec 2009)
   OpenSSL), multi interface and the CURLOPT_DEBUGFUNCTION and a certain order
   of cleaning things up. I fixed it.
 
-  (http://curl.haxx.se/bug/view.cgi?id=2891591)
+  (http://curl.haxx.se/bug/view.cgi?id=2905220)
 
 Daniel Stenberg (7 Dec 2009)
 - Martin Storsjo made libcurl use the Expect: 100-continue header for posts
