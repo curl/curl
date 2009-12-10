@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (10 Dec 2009)
+- Constantine Sapuntzakis figured out a case which would lead to libcurl
+  accessing alredy freed memory and thus crash when using HTTPS (with
+  OpenSSL), multi interface and the CURLOPT_DEBUGFUNCTION and a certain order
+  of cleaning things up. I fixed it.
+
+  (http://curl.haxx.se/bug/view.cgi?id=2891591)
 
 Daniel Stenberg (7 Dec 2009)
 - Martin Storsjo made libcurl use the Expect: 100-continue header for posts

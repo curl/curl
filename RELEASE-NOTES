@@ -30,6 +30,7 @@ This release includes the following bugfixes:
  o curl failed to report write errors for tiny failed downloads
  o TFTP BLKSIZE
  o Expect: 100-continue handling when set by the application
+ o multi interface with OpenSSL read already freed memory when closing down
 
 This release includes the following known bugs:
 
