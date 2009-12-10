@@ -1365,7 +1365,7 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
   int  ver, msg_type, txt_len;
 
   if(!conn || !conn->data || !conn->data->set.fdebug ||
-      (direction != 0 && direction != 1))
+     (direction != 0 && direction != 1))
     return;
 
   data = conn->data;
@@ -1470,7 +1470,7 @@ ossl_connect_step1(struct connectdata *conn,
       infof(data, "SSL: couldn't set callback!\n");
     }
     else if(!SSL_CTX_ctrl(connssl->ctx, SSL_CTRL_SET_MSG_CALLBACK_ARG, 0,
-                           conn)) {
+                          conn)) {
       infof(data, "SSL: couldn't set callback argument!\n");
     }
   }
