@@ -7,6 +7,14 @@
                                   Changelog
 
 Daniel Stenberg (10 Dec 2009)
+- Siegfried Gyuricsko found out that the curl manual said --retry would retry
+  on FTP errors in the transient 5xx range. Transient FTP errors are in the
+  4xx range. The code itself only tried on 5xx errors that occured _at login_.
+  Now the retry code retries on all FTP transfer failures that ended with a
+  4xx response.
+
+  (http://curl.haxx.se/bug/view.cgi?id=2911279)
+
 - Constantine Sapuntzakis figured out a case which would lead to libcurl
   accessing alredy freed memory and thus crash when using HTTPS (with
   OpenSSL), multi interface and the CURLOPT_DEBUGFUNCTION and a certain order

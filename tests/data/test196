@@ -2,7 +2,7 @@
 # Server-side
 <reply>
 <servercmd>
-REPLY PASS 530 temporarily not available
+REPLY PASS 430 temporarily not available
 </servercmd>
 </reply>
 

@@ -5066,14 +5066,14 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
                 }
               }
             } /* if CURLE_OK */
-            else if(CURLE_LOGIN_DENIED == res) {
+            else if(res) {
               curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
 
-              if(response/100 == 5)
+              if(response/100 == 4)
                 /*
                  * This is typically when the FTP server only allows a certain
-                 * amount of users and we are not one of them. It mostly
-                 * returns 530 in this case, but all 5xx codes are transient.
+                 * amount of users and we are not one of them.  All 4xx codes
+                 * are transient.
                  */
                 retry = RETRY_FTP;
             }
