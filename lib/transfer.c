@@ -383,6 +383,8 @@ static int data_pending(const struct connectdata *conn)
 static void read_rewind(struct connectdata *conn,
                         size_t thismuch)
 {
+  DEBUGASSERT(conn->read_pos >= thismuch);
+
   conn->read_pos -= thismuch;
   conn->bits.stream_was_rewound = TRUE;
 
@@ -634,18 +636,21 @@ static CURLcode readwrite_data(struct SessionHandle *data,
 
       if((-1 != k->maxdownload) &&
          (k->bytecount + nread >= k->maxdownload)) {
-        /* The 'excess' amount below can't be more than BUFSIZE which
-           always will fit in a size_t */
-        size_t excess = (size_t)(k->bytecount + nread - k->maxdownload);
-        if(excess > 0 && !k->ignorebody) {
-          infof(data,
-                "Rewinding stream by : %d"
-                " bytes on url %s (size = %" FORMAT_OFF_T
-                ", maxdownload = %" FORMAT_OFF_T
-                ", bytecount = %" FORMAT_OFF_T ", nread = %d)\n",
-                excess, data->state.path,
-                k->size, k->maxdownload, k->bytecount, nread);
-          read_rewind(conn, excess);
+
+        if(conn->data->multi && Curl_multi_canPipeline(conn->data->multi)) {
+          /* The 'excess' amount below can't be more than BUFSIZE which
+             always will fit in a size_t */
+          size_t excess = (size_t)(k->bytecount + nread - k->maxdownload);
+          if(excess > 0 && !k->ignorebody) {
+            infof(data,
+                  "Rewinding stream by : %d"
+                  " bytes on url %s (size = %" FORMAT_OFF_T
+                  ", maxdownload = %" FORMAT_OFF_T
+                  ", bytecount = %" FORMAT_OFF_T ", nread = %d)\n",
+                  excess, data->state.path,
+                  k->size, k->maxdownload, k->bytecount, nread);
+            read_rewind(conn, excess);
+          }
         }
 
         nread = (ssize_t) (k->maxdownload - k->bytecount);
