@@ -690,9 +690,17 @@ static CURLcode readwrite_data(struct SessionHandle *data,
             /* This is the default when the server sends no
                Content-Encoding header. See Curl_readwrite_init; the
                memset() call initializes k->content_encoding to zero. */
-            if(!k->ignorebody)
+            if(!k->ignorebody) {
+
+#ifndef CURL_DISABLE_POP3
+              if(conn->protocol&PROT_POP3)
+                result = Curl_pop3_write(conn, k->str, nread);
+              else
+#endif /* CURL_DISABLE_POP3 */
+
               result = Curl_client_write(conn, CLIENTWRITE_BODY, k->str,
                                          nread);
+            }
 #ifdef HAVE_LIBZ
             break;
 

@@ -1,0 +1,30 @@
+Date: December 5, 2009
+
+Pingpong
+========
+
+ Pingpong is just my (Daniel's) jestful collective name on the protocols that
+ share a very similar kind of back-and-forth procedure with command and
+ responses to and from the server. FTP was previously the only protocol in
+ that family that libcurl supported, but when POP3, IMAP and SMTP joined the
+ team I moved some of the internals into a separate pingpong module to be
+ easier to get used by all these protocols to reduce code duplication and ease
+ code re-use between these protocols.
+
+FTP
+
+ In 7.20.0 we converted code to use the new pingpong code from previously
+ having been all "native" FTP code.
+
+POP3
+
+ There's no support in the documented URL format to specify the exact mail to
+ get, but we support that as the path specified in the URL.
+
+IMAP
+
+SMTP
+
+ There's no official URL syntax defined for SMTP, but we use only the generic
+ one and we provide two additional libcurl options to specify receivers and
+ sender of the actual mail.

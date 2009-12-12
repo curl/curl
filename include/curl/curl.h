@@ -613,6 +613,12 @@ typedef enum {
 #define CURLPROTO_DICT   (1<<9)
 #define CURLPROTO_FILE   (1<<10)
 #define CURLPROTO_TFTP   (1<<11)
+#define CURLPROTO_IMAP   (1<<12)
+#define CURLPROTO_IMAPS  (1<<13)
+#define CURLPROTO_POP3   (1<<14)
+#define CURLPROTO_POP3S  (1<<15)
+#define CURLPROTO_SMTP   (1<<16)
+#define CURLPROTO_SMTPS  (1<<17)
 #define CURLPROTO_ALL    (~0) /* enable everything */
 
 /* long may be 32 or 64 bits, but we should never depend on anything else
@@ -1028,6 +1034,7 @@ typedef enum {
      essentially places a demand on the FTP server to acknowledge commands
      in a timely manner. */
   CINIT(FTP_RESPONSE_TIMEOUT, LONG, 112),
+#define CURLOPT_SERVER_RESPONSE_TIMEOUT CURLOPT_FTP_RESPONSE_TIMEOUT
 
   /* Set this option to one of the CURL_IPRESOLVE_* defines (see below) to
      tell libcurl to resolve names to those IP versions only. This only has
@@ -1271,6 +1278,12 @@ typedef enum {
 
   /* set the SSH host key callback custom pointer */
   CINIT(SSH_KEYDATA, OBJECTPOINT, 185),
+
+  /* set the SMTP mail originator */
+  CINIT(MAIL_FROM, OBJECTPOINT, 186),
+
+  /* set the SMTP mail receiver(s) */
+  CINIT(MAIL_RCPT, OBJECTPOINT, 187),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

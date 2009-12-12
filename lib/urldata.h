@@ -37,6 +37,12 @@
 #define PORT_LDAPS 636
 #define PORT_TFTP 69
 #define PORT_SSH 22
+#define PORT_IMAP 143
+#define PORT_IMAPS 993
+#define PORT_POP3 110
+#define PORT_POP3S 995
+#define PORT_SMTP 25
+#define PORT_SMTPS 465 /* sometimes called SSMTP */
 
 #define DICT_MATCH "/MATCH:"
 #define DICT_MATCH2 "/M:"
@@ -50,6 +56,11 @@
 
 /* length of longest IPv6 address string including the trailing null */
 #define MAX_IPADR_LEN sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255")
+
+/* Default FTP/IMAP etc response timeout in milliseconds.
+   Symbian OS panics when given a timeout much greater than 1/2 hour.
+*/
+#define RESP_TIMEOUT (1800*1000)
 
 #include "cookie.h"
 #include "formdata.h"
@@ -128,6 +139,11 @@
 #include "hostip.h"
 #include "hash.h"
 #include "splay.h"
+
+#include "imap.h"
+#include "pop3.h"
+#include "smtp.h"
+#include "ftp.h"
 
 #ifdef HAVE_GSSAPI
 # ifdef HAVE_GSSGNU
@@ -351,121 +367,6 @@ struct HTTP {
                         points to an allocated send_buffer struct */
 };
 
-/****************************************************************************
- * FTP unique setup
- ***************************************************************************/
-typedef enum {
-  FTP_STOP,    /* do nothing state, stops the state machine */
-  FTP_WAIT220, /* waiting for the initial 220 response immediately after
-                  a connect */
-  FTP_AUTH,
-  FTP_USER,
-  FTP_PASS,
-  FTP_ACCT,
-  FTP_PBSZ,
-  FTP_PROT,
-  FTP_CCC,
-  FTP_PWD,
-  FTP_SYST,
-  FTP_NAMEFMT,
-  FTP_QUOTE, /* waiting for a response to a command sent in a quote list */
-  FTP_RETR_PREQUOTE,
-  FTP_STOR_PREQUOTE,
-  FTP_POSTQUOTE,
-  FTP_CWD,  /* change dir */
-  FTP_MKD,  /* if the dir didn't exist */
-  FTP_MDTM, /* to figure out the datestamp */
-  FTP_TYPE, /* to set type when doing a head-like request */
-  FTP_LIST_TYPE, /* set type when about to do a dir list */
-  FTP_RETR_TYPE, /* set type when about to RETR a file */
-  FTP_STOR_TYPE, /* set type when about to STOR a file */
-  FTP_SIZE, /* get the remote file's size for head-like request */
-  FTP_RETR_SIZE, /* get the remote file's size for RETR */
-  FTP_STOR_SIZE, /* get the size for (resumed) STOR */
-  FTP_REST, /* when used to check if the server supports it in head-like */
-  FTP_RETR_REST, /* when asking for "resume" in for RETR */
-  FTP_PORT, /* generic state for PORT, LPRT and EPRT, check count1 */
-  FTP_PASV, /* generic state for PASV and EPSV, check count1 */
-  FTP_LIST, /* generic state for LIST, NLST or a custom list command */
-  FTP_RETR,
-  FTP_STOR, /* generic state for STOR and APPE */
-  FTP_QUIT,
-  FTP_LAST  /* never used */
-} ftpstate;
-
-typedef enum {
-  FTPFILE_MULTICWD  = 1, /* as defined by RFC1738 */
-  FTPFILE_NOCWD     = 2, /* use SIZE / RETR / STOR on the full path */
-  FTPFILE_SINGLECWD = 3  /* make one CWD, then SIZE / RETR / STOR on the file */
-} curl_ftpfile;
-
-typedef enum {
-  FTPTRANSFER_BODY, /* yes do transfer a body */
-  FTPTRANSFER_INFO, /* do still go through to get info/headers */
-  FTPTRANSFER_NONE, /* don't get anything and don't get info */
-  FTPTRANSFER_LAST  /* end of list marker, never used */
-} curl_ftptransfer;
-
-/* This FTP struct is used in the SessionHandle. All FTP data that is
-   connection-oriented must be in FTP_conn to properly deal with the fact that
-   perhaps the SessionHandle is changed between the times the connection is
-   used. */
-struct FTP {
-  curl_off_t *bytecountp;
-  char *user;    /* user name string */
-  char *passwd;  /* password string */
-
-  /* transfer a file/body or not, done as a typedefed enum just to make
-     debuggers display the full symbol and not just the numerical value */
-  curl_ftptransfer transfer;
-  curl_off_t downloadsize;
-};
-
-/* ftp_conn is used for struct connection-oriented data in the connectdata
-   struct */
-struct ftp_conn {
-  char *entrypath; /* the PWD reply when we logged on */
-  char **dirs;   /* realloc()ed array for path components */
-  int dirdepth;  /* number of entries used in the 'dirs' array */
-  int diralloc;  /* number of entries allocated for the 'dirs' array */
-  char *file;    /* decoded file */
-  char *cache;       /* data cache between getresponse()-calls */
-  curl_off_t cache_size; /* size of cache in bytes */
-  bool dont_check;  /* Set to TRUE to prevent the final (post-transfer)
-                       file size and 226/250 status check. It should still
-                       read the line, just ignore the result. */
-  long response_time; /* When no timeout is given, this is the amount of
-                         seconds we await for an FTP response. Initialized
-                         in Curl_ftp_connect() */
-  bool ctl_valid;   /* Tells Curl_ftp_quit() whether or not to do anything. If
-                       the connection has timed out or been closed, this
-                       should be FALSE when it gets to Curl_ftp_quit() */
-  bool cwddone;     /* if it has been determined that the proper CWD combo
-                       already has been done */
-  bool cwdfail;     /* set TRUE if a CWD command fails, as then we must prevent
-                       caching the current directory */
-  char *prevpath;   /* conn->path from the previous transfer */
-  char transfertype; /* set by ftp_transfertype for use by Curl_client_write()a
-                        and others (A/I or zero) */
-  size_t nread_resp; /* number of bytes currently read of a server response */
-  char *linestart_resp; /* line start pointer for the FTP server response
-                           reader function */
-  bool pending_resp;  /* set TRUE when a server response is pending or in
-                         progress, and is cleared once the last response is
-                         read */
-
-  int count1; /* general purpose counter for the state machine */
-  int count2; /* general purpose counter for the state machine */
-  int count3; /* general purpose counter for the state machine */
-  char *sendthis; /* allocated pointer to a buffer that is to be sent to the
-                     ftp server */
-  size_t sendleft; /* number of bytes left to send from the sendthis buffer */
-  size_t sendsize; /* total size of the sendthis buffer */
-  struct timeval response; /* set to Curl_tvnow() when a command has been sent
-                              off, used to time-out response reading */
-  ftpstate state; /* always use ftp.c:state() to change state! */
-  char * server_os;     /* The target server operating system. */
-};
 
 /****************************************************************************
  * SSH unique setup
@@ -922,18 +823,23 @@ struct connectdata {
 #define PROT_TFTP    CURLPROTO_TFTP
 #define PROT_SCP     CURLPROTO_SCP
 #define PROT_SFTP    CURLPROTO_SFTP
+#define PROT_IMAP    CURLPROTO_IMAP
+#define PROT_IMAPS   CURLPROTO_IMAPS
+#define PROT_POP3    CURLPROTO_POP3
+#define PROT_POP3S   CURLPROTO_POP3S
+#define PROT_SMTP    CURLPROTO_SMTP
+#define PROT_SMTPS   CURLPROTO_SMTPS
 
-/* CURLPROTO_TFTP (1<<11) is currently the highest used bit in the public
-   bitmask. We make sure we use "private bits" above the first 16 to make
-   things easier. */
+/* (1<<17) is currently the highest used bit in the public bitmask. We make
+   sure we use "private bits" above the public ones to make things easier. */
 
-#define PROT_EXTMASK 0xffff
+#define PROT_EXTMASK 0xfffff
 
-#define PROT_SSL     (1<<22) /* protocol requires SSL */
-#define PROT_MISSING (1<<23)
+#define PROT_SSL     (1<<25) /* protocol requires SSL */
+#define PROT_MISSING (1<<26)
 
 /* these ones need action before socket close */
-#define PROT_CLOSEACTION (PROT_FTP | PROT_TFTP) 
+#define PROT_CLOSEACTION (PROT_FTP | PROT_TFTP | PROT_IMAP | PROT_POP3)
 #define PROT_DUALCHANNEL PROT_FTP /* these protocols use two connections */
 
   /* 'dns_entry' is the particular host we use. This points to an entry in the
@@ -1035,7 +941,7 @@ struct connectdata {
   struct curl_llist *pend_pipe; /* List of pending handles on
                                    this pipeline */
   struct curl_llist *done_pipe; /* Handles that are finished, but
-				   still reference this connectdata */
+                                   still reference this connectdata */
 #define MAX_PIPELINE_LENGTH 5
 
   char* master_buffer; /* The master buffer allocated on-demand;
@@ -1075,6 +981,9 @@ struct connectdata {
     struct ftp_conn ftpc;
     struct ssh_conn sshc;
     struct tftp_state_data *tftpc;
+    struct imap_conn imapc;
+    struct pop3_conn pop3c;
+    struct smtp_conn smtpc;
   } proto;
 
   int cselect_bits; /* bitmask of socket events */
@@ -1331,6 +1240,9 @@ struct UrlState {
     void *telnet;        /* private for telnet.c-eyes only */
     void *generic;
     struct SSHPROTO *ssh;
+    struct FTP *imap;
+    struct FTP *pop3;
+    struct FTP *smtp;
   } proto;
   /* current user of this SessionHandle instance, or NULL */
   struct connectdata *current_conn;
@@ -1412,6 +1324,8 @@ enum dupstring {
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   STRING_SOCKS5_GSSAPI_SERVICE,  /* GSSAPI service name */
 #endif
+  STRING_MAIL_FROM,
+  STRING_MAIL_RCPT,
 
   /* -- end of strings -- */
   STRING_LAST /* not used, just an end-of-list marker */
@@ -1471,7 +1385,7 @@ struct UserDefined {
   void *ioctl_client;   /* pointer to pass to the ioctl callback */
   long timeout;         /* in milliseconds, 0 means no timeout */
   long connecttimeout;  /* in milliseconds, 0 means no timeout */
-  long ftp_response_timeout; /* in milliseconds, 0 means no timeout */
+  long server_response_timeout; /* in milliseconds, 0 means no timeout */
   long tftp_blksize ; /* in bytes, 0 means use default */
   curl_off_t infilesize;      /* size of file to upload, -1 means unknown */
   long low_speed_limit; /* bytes/second */
@@ -1555,7 +1469,8 @@ struct UserDefined {
   bool ftp_use_epsv;     /* if EPSV is to be attempted or not */
   bool ftp_use_eprt;     /* if EPRT is to be attempted or not */
 
-  curl_usessl ftp_ssl;   /* if AUTH TLS is to be attempted etc */
+  curl_usessl ftp_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or
+                            IMAP or POP3 or others! */
   curl_ftpauth ftpsslauth; /* what AUTH XXX to be attempted */
   curl_ftpccc ftp_ccc;   /* FTP CCC options */
   bool no_signal;        /* do not use any signal/alarm handler */

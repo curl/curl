@@ -109,6 +109,9 @@ my $TFTPPORT; # TFTP
 my $TFTP6PORT; # TFTP
 my $SSHPORT; # SCP/SFTP
 my $SOCKSPORT; # SOCKS4/5 port
+my $POP3PORT; # POP3
+my $IMAPPORT; # IMAP
+my $SMTPPORT; # SMTP
 
 my $srcdir = $ENV{'srcdir'} || '.';
 my $CURL="../src/curl"; # what curl executable to run on the tests
@@ -147,6 +150,9 @@ my $TFTPPIDFILE=".tftpd.pid";
 my $TFTP6PIDFILE=".tftp6.pid";
 my $SSHPIDFILE=".ssh.pid";
 my $SOCKSPIDFILE=".socks.pid";
+my $POP3PIDFILE=".pop3.pid";
+my $IMAPPIDFILE=".imap.pid";
+my $SMTPPIDFILE=".smtp.pid";
 
 # invoke perl like this:
 my $perl="perl -I$srcdir";
@@ -663,7 +669,7 @@ sub verifyftp {
     }
     if($pid <= 0 && $data[0]) {
         # this is not a known server
-        logmsg "RUN: Unknown server on our FTP port: $port\n";
+        logmsg "RUN: Unknown server on our $proto port: $port\n";
         return 0;
     }
     # we can/should use the time it took to verify the FTP server as a measure
@@ -671,7 +677,7 @@ sub verifyftp {
     my $took = time()-$time;
 
     if($verbose) {
-        logmsg "RUN: Verifying our test FTP server took $took seconds\n";
+        logmsg "RUN: Verifying our test $proto server took $took seconds\n";
     }
     $ftpchecktime = $took?$took:1; # make sure it never is zero
 
@@ -773,6 +779,9 @@ sub verifysocks {
 my %protofunc = ('http' => \&verifyhttp,
                  'https' => \&verifyhttp,
                  'ftp' => \&verifyftp,
+                 'pop3' => \&verifyftp,
+                 'imap' => \&verifyftp,
+                 'smtp' => \&verifyftp,
                  'ftps' => \&verifyftp,
                  'tftp' => \&verifyftp,
                  'ssh' => \&verifyssh,
@@ -942,26 +951,48 @@ sub runhttpsserver {
 }
 
 #######################################################################
-# start the ftp server
+# start the pingpong server (FTP, POP3, IMAP, SMTP)
 #
-sub runftpserver {
-    my ($id, $verbose, $ipv6) = @_;
+sub runpingpongserver {
+    my ($proto, $id, $verbose, $ipv6) = @_;
     my $STATUS;
     my $RUNNING;
-    my $port = $id?$FTP2PORT:$FTPPORT;
-    # check for pidfile
-    my $pidfile = $id?$FTP2PIDFILE:$FTPPIDFILE;
+    my $port;
+    my $pidfile;
     my $ip=$HOSTIP;
     my $nameext;
     my $cmd;
+    my $flag;
 
-    if($ipv6) {
-        # if IPv6, use a different setup
-        $pidfile = $FTP6PIDFILE;
-        $port = $FTP6PORT;
-        $ip = $HOST6IP;
-        $nameext="-ipv6";
+    if($proto eq "ftp") {
+        $port = $id?$FTP2PORT:$FTPPORT;
+        $pidfile = $id?$FTP2PIDFILE:$FTPPIDFILE;
+
+        if($ipv6) {
+            # if IPv6, use a different setup
+            $pidfile = $FTP6PIDFILE;
+            $port = $FTP6PORT;
+            $ip = $HOST6IP;
+            $nameext="-ipv6";
+        }
     }
+    elsif($proto eq "pop3") {
+        $port = $POP3PORT;
+        $pidfile = $POP3PIDFILE;
+    }
+    elsif($proto eq "imap") {
+        $port = $IMAPPORT;
+        $pidfile = $IMAPPIDFILE;
+    }
+    elsif($proto eq "smtp") {
+        $port = $SMTPPORT;
+        $pidfile = $SMTPPIDFILE;
+    }
+    else {
+        print STDERR "Unsupported protocol $proto!!\n";
+        return 0;
+    }
+    $flag .= "--proto $proto ";
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
@@ -975,7 +1006,7 @@ sub runftpserver {
     unlink($pidfile);
 
     # start our server:
-    my $flag=$debugprotocol?"-v ":"";
+    $flag.=$debugprotocol?"-v ":"";
     $flag .= "-s \"$srcdir\" ";
     my $addr;
     if($id) {
@@ -993,7 +1024,7 @@ sub runftpserver {
 
     if($ftppid <= 0 || !kill(0, $ftppid)) {
         # it is NOT alive
-        logmsg "RUN: failed to start the FTP$id$nameext server\n";
+        logmsg "RUN: failed to start the $proto$id$nameext server\n";
         stopserver("$pid2");
         displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
@@ -1001,9 +1032,9 @@ sub runftpserver {
     }
 
     # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver("ftp", $ip, $port);
+    my $pid3 = verifyserver($proto, $ip, $port);
     if(!$pid3) {
-        logmsg "RUN: FTP$id$nameext server failed verification\n";
+        logmsg "RUN: $proto$id$nameext server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$ftppid $pid2");
         displaylogs($testnumcheck);
@@ -1013,7 +1044,7 @@ sub runftpserver {
     $pid2 = $pid3;
 
     if($verbose) {
-        logmsg "RUN: FTP$id$nameext server is now running PID $ftppid\n";
+        logmsg "RUN: $proto$id$nameext server is now running PID $ftppid\n";
     }
 
     sleep(1);
@@ -1661,41 +1692,46 @@ sub checksystem {
     "* Host: $hostname",
     "* System: $hosttype");
 
-    logmsg sprintf("* Server SSL:     %s\n", $stunnel?"ON":"OFF");
-    logmsg sprintf("* libcurl SSL:    %s\n", $ssl_version?"ON":"OFF");
-    logmsg sprintf("* debug build:    %s\n", $debug_build?"ON":"OFF");
-    logmsg sprintf("* track memory:   %s\n", $curl_debug?"ON":"OFF");
-    logmsg sprintf("* valgrind:       %s\n", $valgrind?"ON":"OFF");
-    logmsg sprintf("* HTTP IPv6       %s\n", $http_ipv6?"ON":"OFF");
-    logmsg sprintf("* FTP IPv6        %s\n", $ftp_ipv6?"ON":"OFF");
-
-    logmsg sprintf("* HTTP port:      %d\n", $HTTPPORT);
-    logmsg sprintf("* FTP port:       %d\n", $FTPPORT);
-    logmsg sprintf("* FTP port 2:     %d\n", $FTP2PORT);
-    if($stunnel) {
-        logmsg sprintf("* FTPS port:      %d\n", $FTPSPORT);
-        logmsg sprintf("* HTTPS port:     %d\n", $HTTPSPORT);
+    logmsg sprintf("* Server SSL:   %8s", $stunnel?"ON ":"OFF");
+    logmsg sprintf("  libcurl SSL:  %s\n", $ssl_version?"ON ":"OFF");
+    logmsg sprintf("* debug build:  %8s", $debug_build?"ON ":"OFF");
+    logmsg sprintf("  track memory: %s\n", $curl_debug?"ON ":"OFF");
+    logmsg sprintf("* valgrind:     %8s", $valgrind?"ON ":"OFF");
+    logmsg sprintf("  HTTP IPv6     %s\n", $http_ipv6?"ON ":"OFF");
+    logmsg sprintf("* FTP IPv6      %8s", $ftp_ipv6?"ON ":"OFF");
+    logmsg sprintf("  Libtool lib:  %s\n", $libtool?"ON ":"OFF");
+    if($ssl_version) {
+        logmsg sprintf("* SSL library:       %s\n", $ssllib);
     }
+
+    logmsg "* Ports:\n";
+
+    logmsg sprintf("*   HTTP/%d ", $HTTPPORT);
+    logmsg sprintf("FTP/%d ", $FTPPORT);
+    logmsg sprintf("FTP2/%d ", $FTP2PORT);
+    if($stunnel) {
+        logmsg sprintf("FTPS/%d ", $FTPSPORT);
+        logmsg sprintf("HTTPS/%d ", $HTTPSPORT);
+    }
+    logmsg sprintf("\n*   TFTP/%d ", $TFTPPORT);
     if($http_ipv6) {
-        logmsg sprintf("* HTTP IPv6 port: %d\n", $HTTP6PORT);
+        logmsg sprintf("HTTP-IPv6/%d ", $HTTP6PORT);
     }
     if($ftp_ipv6) {
-        logmsg sprintf("* FTP IPv6 port:  %d\n", $FTP6PORT);
+        logmsg sprintf("FTP-IPv6/%d ", $FTP6PORT);
     }
-    logmsg sprintf("* TFTP port:      %d\n", $TFTPPORT);
     if($tftp_ipv6) {
-        logmsg sprintf("* TFTP IPv6 port: %d\n", $TFTP6PORT);
+        logmsg sprintf("TFTP-IPv6/%d ", $TFTP6PORT);
     }
-    logmsg sprintf("* SCP/SFTP port:  %d\n", $SSHPORT);
-    logmsg sprintf("* SOCKS port:     %d\n", $SOCKSPORT);
+    logmsg sprintf("\n*   SSH/%d ", $SSHPORT);
+    logmsg sprintf("SOCKS/%d ", $SOCKSPORT);
+    logmsg sprintf("POP3/%d ", $POP3PORT);
+    logmsg sprintf("IMAP/%d ", $IMAPPORT);
+    logmsg sprintf("SMTP/%d\n", $SMTPPORT);
 
-    if($ssl_version) {
-        logmsg sprintf("* SSL library:    %s\n", $ssllib);
-    }
 
     $has_textaware = ($^O eq 'MSWin32') || ($^O eq 'msys');
 
-    logmsg sprintf("* Libtool lib:    %s\n", $libtool?"ON":"OFF");
     logmsg "***************************************** \n";
 }
 
@@ -1720,6 +1756,9 @@ sub subVariables {
   $$thing =~ s/%TFTP6PORT/$TFTP6PORT/g;
   $$thing =~ s/%SSHPORT/$SSHPORT/g;
   $$thing =~ s/%SOCKSPORT/$SOCKSPORT/g;
+  $$thing =~ s/%POP3PORT/$POP3PORT/g;
+  $$thing =~ s/%IMAPPORT/$IMAPPORT/g;
+  $$thing =~ s/%SMTPPORT/$SMTPPORT/g;
   $$thing =~ s/%CURL/$CURL/g;
   $$thing =~ s/%USER/$USER/g;
   $$thing =~ s/%CLIENTIP/$CLIENTIP/g;
@@ -2546,19 +2585,22 @@ sub startservers {
         my $what = lc($whatlist[0]);
         $what =~ s/[^a-z0-9-]//g;
 
-        if($what eq "ftp") {
-            if(!$run{'ftp'}) {
-                ($pid, $pid2) = runftpserver("", $verbose);
+        if(($what eq "pop3") ||
+           ($what eq "ftp") ||
+           ($what eq "imap") ||
+           ($what eq "smtp")) {
+            if(!$run{$what}) {
+                ($pid, $pid2) = runpingpongserver($what, "", $verbose);
                 if($pid <= 0) {
-                    return "failed starting FTP server";
+                    return "failed starting $what server";
                 }
-                printf ("* pid ftp => %d %d\n", $pid, $pid2) if($verbose);
-                $run{'ftp'}="$pid $pid2";
+                printf ("* pid $what => %d %d\n", $pid, $pid2) if($verbose);
+                $run{$what}="$pid $pid2";
             }
         }
         elsif($what eq "ftp2") {
             if(!$run{'ftp2'}) {
-                ($pid, $pid2) = runftpserver("2", $verbose);
+                ($pid, $pid2) = runpingpongserver("ftp", "2", $verbose);
                 if($pid <= 0) {
                     return "failed starting FTP2 server";
                 }
@@ -2568,7 +2610,7 @@ sub startservers {
         }
         elsif($what eq "ftp-ipv6") {
             if(!$run{'ftp-ipv6'}) {
-                ($pid, $pid2) = runftpserver("", $verbose, "ipv6");
+                ($pid, $pid2) = runpingpongserver("ftp", "", $verbose, "ipv6");
                 if($pid <= 0) {
                     return "failed starting FTP-IPv6 server";
                 }
@@ -2609,7 +2651,7 @@ sub startservers {
             }
 
             if(!$run{'ftp'}) {
-                ($pid, $pid2) = runftpserver("", $verbose);
+                ($pid, $pid2) = runpingpongserver("ftp", "", $verbose);
                 if($pid <= 0) {
                     return "failed starting FTP server";
                 }
@@ -2939,18 +2981,21 @@ if ($gdbthis) {
     }
 }
 
-$HTTPPORT =  $base + 0; # HTTP server port
-$HTTPSPORT = $base + 1; # HTTPS server port
-$FTPPORT =   $base + 2; # FTP server port
-$FTPSPORT =  $base + 3; # FTPS server port
-$HTTP6PORT = $base + 4; # HTTP IPv6 server port (different IP protocol
+$HTTPPORT =  $base++; # HTTP server port
+$HTTPSPORT = $base++; # HTTPS server port
+$FTPPORT =   $base++; # FTP server port
+$FTPSPORT =  $base++; # FTPS server port
+$HTTP6PORT = $base++; # HTTP IPv6 server port (different IP protocol
                         # but we follow the same port scheme anyway)
-$FTP2PORT =  $base + 5; # FTP server 2 port
-$FTP6PORT =  $base + 6; # FTP IPv6 port
-$TFTPPORT =  $base + 7; # TFTP (UDP) port
-$TFTP6PORT =  $base + 8; # TFTP IPv6 (UDP) port
-$SSHPORT =   $base + 9; # SSH (SCP/SFTP) port
-$SOCKSPORT =   $base + 10; # SOCKS port
+$FTP2PORT =  $base++; # FTP server 2 port
+$FTP6PORT =  $base++; # FTP IPv6 port
+$TFTPPORT =  $base++; # TFTP (UDP) port
+$TFTP6PORT = $base++; # TFTP IPv6 (UDP) port
+$SSHPORT =   $base++; # SSH (SCP/SFTP) port
+$SOCKSPORT = $base++; # SOCKS port
+$POP3PORT =  $base++;
+$IMAPPORT =  $base++;
+$SMTPPORT =  $base++;
 
 #######################################################################
 # clear and create logging directory:

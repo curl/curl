@@ -130,6 +130,7 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
 #include "file.h"
 #include "curl_ldap.h"
 #include "ssh.h"
+#include "imap.h"
 #include "url.h"
 #include "connect.h"
 #include "inet_ntop.h"
@@ -202,6 +203,27 @@ static const struct Curl_handler * const protocols[] = {
 #ifdef USE_LIBSSH2
   &Curl_handler_scp,
   &Curl_handler_sftp,
+#endif
+
+#ifndef CURL_DISABLE_IMAP
+  &Curl_handler_imap,
+#ifdef USE_SSL
+  &Curl_handler_imaps,
+#endif
+#endif
+
+#ifndef CURL_DISABLE_POP3
+  &Curl_handler_pop3,
+#ifdef USE_SSL
+  &Curl_handler_pop3s,
+#endif
+#endif
+
+#ifndef CURL_DISABLE_SMTP
+  &Curl_handler_smtp,
+#ifdef USE_SSL
+  &Curl_handler_smtps,
+#endif
 #endif
 
   (struct Curl_handler *) NULL
@@ -950,12 +972,12 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      */
     data->set.ftp_create_missing_dirs = (int)va_arg(param, long);
     break;
-  case CURLOPT_FTP_RESPONSE_TIMEOUT:
+  case CURLOPT_SERVER_RESPONSE_TIMEOUT:
     /*
-     * An FTP option that specifies how quickly an FTP response must be
-     * obtained before it is considered failure.
+     * Option that specifies how quickly an server response must be obtained
+     * before it is considered failure. For pingpong protocols.
      */
-    data->set.ftp_response_timeout = va_arg( param , long ) * 1000;
+    data->set.server_response_timeout = va_arg( param , long ) * 1000;
     break;
   case CURLOPT_TFTP_BLKSIZE:
     /*
@@ -2286,6 +2308,16 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.redir_protocols = va_arg(param, long) & PROT_EXTMASK;
     break;
 
+  case CURLOPT_MAIL_FROM:
+    result = setstropt(&data->set.str[STRING_MAIL_FROM],
+                       va_arg(param, char *));
+    break;
+
+  case CURLOPT_MAIL_RCPT:
+    result = setstropt(&data->set.str[STRING_MAIL_RCPT],
+                       va_arg(param, char *));
+    break;
+
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_FAILED_INIT; /* correct this */
@@ -3334,6 +3366,8 @@ static CURLcode ParseURLAndFillConnection(struct SessionHandle *data,
         strcpy(conn->protostr, "DICT");
       else if(checkprefix("LDAP.", conn->host.name))
         strcpy(conn->protostr, "LDAP");
+      else if(checkprefix("IMAP.", conn->host.name))
+        strcpy(conn->protostr, "IMAP");
       else {
         strcpy(conn->protostr, "http");
       }
@@ -4069,7 +4103,7 @@ static CURLcode set_userpass(struct connectdata *conn,
                              const char *user, const char *passwd)
 {
   /* If our protocol needs a password and we have none, use the defaults */
-  if( (conn->protocol & PROT_FTP) &&
+  if( (conn->protocol & (PROT_FTP|PROT_IMAP)) &&
        !conn->bits.user_passwd) {
 
     conn->user = strdup(CURL_DEFAULT_USER);

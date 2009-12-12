@@ -11,7 +11,7 @@ CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	\
   inet_ntop.c parsedate.c select.c gtls.c sslgen.c tftp.c splay.c	\
   strdup.c socks.c ssh.c nss.c qssl.c rawstr.c curl_addrinfo.c          \
   socks_gssapi.c socks_sspi.c curl_sspi.c slist.c nonblock.c		\
-  curl_memrchr.c
+  curl_memrchr.c imap.c pop3.c smtp.c pingpong.c
 
 HHEADERS = arpa_telnet.h netrc.h file.h timeval.h qssl.h hostip.h	\
   progress.h formdata.h cookie.h http.h sendf.h ftp.h url.h dict.h	\
@@ -23,5 +23,4 @@ HHEADERS = arpa_telnet.h netrc.h file.h timeval.h qssl.h hostip.h	\
   transfer.h select.h easyif.h multiif.h parsedate.h sslgen.h gtls.h	\
   tftp.h sockaddr.h splay.h strdup.h setup_once.h socks.h ssh.h nssg.h	\
   curl_base64.h rawstr.h curl_addrinfo.h curl_sspi.h slist.h nonblock.h	\
-  curl_memrchr.h
-
+  curl_memrchr.h imap.h pop3.h smtp.h pingpong.h

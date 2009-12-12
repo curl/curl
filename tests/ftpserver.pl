@@ -22,7 +22,11 @@
 # $Id$
 ###########################################################################
 
-# This is the FTP server designed for the curl test suite.
+# This is a server designed for the curl test suite.
+#
+# In December 2009 we started remaking the server to support more protocols
+# that are similar in spirit. Like POP3, IMAP and SMTP in addition to the
+# FTP it already supported since a long time.
 #
 # It is meant to exercise curl, it is not meant to be a fully working
 # or even very standard compliant server.
@@ -88,6 +92,8 @@ my $pidfile = ".ftpd.pid"; # a default, use --pidfile
 my $SERVERLOGS_LOCK="log/serverlogs.lock"; # server logs advisor read lock
 my $serverlogslocked=0;
 
+my $proto="ftp";
+
 do {
     if($ARGV[0] eq "-v") {
         $verbose=1;
@@ -98,6 +104,11 @@ do {
     }
     elsif($ARGV[0] eq "--id") {
         $ftpdnum=$ARGV[1];
+        shift @ARGV;
+    }
+    elsif($ARGV[0] eq "--proto") {
+        # ftp pop3 imap smtp
+        $proto=$ARGV[1];
         shift @ARGV;
     }
     elsif($ARGV[0] eq "--pidfile") {
@@ -115,23 +126,28 @@ do {
     }
     elsif($ARGV[0] eq "--addr") {
         $listenaddr = $ARGV[1];
-        $listenaddr =~ s/^\[(.*)\]$/\1/;
+        $listenaddr =~ s/^\[(.*)\]$/$1/;
         shift @ARGV;
     }
 } while(shift @ARGV);
 
+# a dedicated protocol has been selected, check that it's a fine one
+if($proto !~ /^(ftp|imap|pop3|smtp)\z/) {
+    die "unsupported protocol selected";
+}
+
 sub catch_zap {
     my $signame = shift;
+    print STDERR "ftpserver.pl received SIG$signame, exiting\n";
     ftpkillslaves(1);
-    unlink($pidfile);
     if($serverlogslocked) {
         $serverlogslocked = 0;
         clear_advisor_read_lock($SERVERLOGS_LOCK);
     }
-    exit;
+    die "Somebody sent me a SIG$signame";
 }
 $SIG{INT} = \&catch_zap;
-$SIG{TERM} = \&catch_zap;
+$SIG{KILL} = \&catch_zap;
 
 my $sfpid;
 
@@ -153,7 +169,6 @@ sub sysread_or_die {
         logmsg "Error: ftp$ftpdnum$ext sysread error: $!\n";
         kill(9, $sfpid);
         waitpid($sfpid, 0);
-        unlink($pidfile);
         if($serverlogslocked) {
             $serverlogslocked = 0;
             clear_advisor_read_lock($SERVERLOGS_LOCK);
@@ -167,7 +182,6 @@ sub sysread_or_die {
         logmsg "Error: ftp$ftpdnum$ext read zero\n";
         kill(9, $sfpid);
         waitpid($sfpid, 0);
-        unlink($pidfile);
         if($serverlogslocked) {
             $serverlogslocked = 0;
             clear_advisor_read_lock($SERVERLOGS_LOCK);
@@ -193,7 +207,6 @@ sub startsf {
         logmsg "Failed sockfilt command: $cmd\n";
         kill(9, $sfpid);
         waitpid($sfpid, 0);
-        unlink($pidfile);
         if($serverlogslocked) {
             $serverlogslocked = 0;
             clear_advisor_read_lock($SERVERLOGS_LOCK);
@@ -202,9 +215,13 @@ sub startsf {
     }
 }
 
+# remove the file here so that if startsf() fails, it is very noticeable 
+unlink($pidfile);
+
 startsf();
 
-logmsg sprintf("FTP server listens on port IPv%d/$port\n", $ipv6?6:4);
+logmsg sprintf("%s server listens on port IPv%d/$port\n", uc($proto),
+               $ipv6?6:4);
 open(PID, ">$pidfile");
 print PID $$."\n";
 close(PID);
@@ -273,41 +290,66 @@ sub senddata {
     }
 }
 
-# this text is shown before the function specified below is run
-my %displaytext = ('USER' => '331 We are happy you popped in!',
-                   'PASS' => '230 Welcome you silly person',
-                   'PORT' => '200 You said PORT - I say FINE',
-                   'TYPE' => '200 I modify TYPE as you wanted',
-                   'LIST' => '150 here comes a directory',
-                   'NLST' => '150 here comes a directory',
-                   'CWD'  => '250 CWD command successful.',
-                   'SYST' => '215 UNIX Type: L8', # just fake something
-                   'QUIT' => '221 bye bye baby', # just reply something
-                   'PWD'  => '257 "/nowhere/anywhere" is current directory',
-                   'MKD'  => '257 Created your requested directory',
-                   'REST' => '350 Yeah yeah we set it there for you',
-                   'DELE' => '200 OK OK OK whatever you say',
-                   'RNFR' => '350 Received your order. Please provide more',
-                   'RNTO' => '250 Ok, thanks. File renaming completed.',
-                   'NOOP' => '200 Yes, I\'m very good at doing nothing.',
-                   'PBSZ' => '500 PBSZ not implemented',
-                   'PROT' => '500 PROT not implemented',
-                   );
+my %displaytext;
+my %commandfunc;
 
 # callback functions for certain commands
-my %commandfunc = ( 'PORT' => \&PORT_command,
-                    'EPRT' => \&PORT_command,
-                    'LIST' => \&LIST_command,
-                    'NLST' => \&NLST_command,
-                    'PASV' => \&PASV_command,
-                    'EPSV' => \&PASV_command,
-                    'RETR' => \&RETR_command,   
-                    'SIZE' => \&SIZE_command,
-                    'REST' => \&REST_command,
-                    'STOR' => \&STOR_command,
-                    'APPE' => \&STOR_command, # append looks like upload
-                    'MDTM' => \&MDTM_command,
-                    );
+# and text shown before the function specified below is run
+
+if($proto eq "ftp") {
+    %displaytext = ('USER' => '331 We are happy you popped in!',
+                    'PASS' => '230 Welcome you silly person',
+                    'PORT' => '200 You said PORT - I say FINE',
+                    'TYPE' => '200 I modify TYPE as you wanted',
+                    'LIST' => '150 here comes a directory',
+                    'NLST' => '150 here comes a directory',
+                    'CWD'  => '250 CWD command successful.',
+                    'SYST' => '215 UNIX Type: L8', # just fake something
+                    'QUIT' => '221 bye bye baby', # just reply something
+                    'PWD'  => '257 "/nowhere/anywhere" is current directory',
+                    'MKD'  => '257 Created your requested directory',
+                    'REST' => '350 Yeah yeah we set it there for you',
+                    'DELE' => '200 OK OK OK whatever you say',
+                    'RNFR' => '350 Received your order. Please provide more',
+                    'RNTO' => '250 Ok, thanks. File renaming completed.',
+                    'NOOP' => '200 Yes, I\'m very good at doing nothing.',
+                    'PBSZ' => '500 PBSZ not implemented',
+                    'PROT' => '500 PROT not implemented',
+        );
+
+    %commandfunc = ( 'PORT' => \&PORT_command,
+                     'EPRT' => \&PORT_command,
+                     'LIST' => \&LIST_command,
+                     'NLST' => \&NLST_command,
+                     'PASV' => \&PASV_command,
+                     'EPSV' => \&PASV_command,
+                     'RETR' => \&RETR_command,   
+                     'SIZE' => \&SIZE_command,
+                     'REST' => \&REST_command,
+                     'STOR' => \&STOR_command,
+                     'APPE' => \&STOR_command, # append looks like upload
+                     'MDTM' => \&MDTM_command,
+        );
+}
+elsif($proto eq "pop3") {
+    %commandfunc = ('RETR' => \&RETR_pop3,
+        );
+
+    %displaytext = ('USER' => '+OK We are happy you popped in!',
+                    'PASS' => '+OK Access granted',
+                    'QUIT' => '+OK byebye',
+        );
+
+}
+elsif($proto eq "imap") {
+    %commandfunc = ('FETCH' => \&FETCH_imap,
+        );
+
+    %displaytext = ('LOGIN' => ' OK We are happy you popped in!',
+                    'SELECT' => ' OK selection done',
+        );
+
+}
 
 
 sub close_dataconn {
@@ -330,6 +372,98 @@ sub close_dataconn {
     $slavepid=0;
 }
 
+################
+################ IMAP commands 
+################
+
+sub FETCH_imap {
+     my ($testno) = @_;
+     my @data;
+
+     if($testno =~ /^verifiedserver$/) {
+         # this is the secret command that verifies that this actually is
+         # the curl test server
+         my $response = "WE ROOLZ: $$\r\n";
+         if($verbose) {
+             print STDERR "FTPD: We returned proof we are the test server\n";
+         }
+         $data[0] = $response;
+         logmsg "return proof we are we\n";
+     }
+     else {
+         logmsg "retrieve a mail\n";
+
+         $testno =~ s/^([^0-9]*)//;
+         my $testpart = "";
+         if ($testno > 10000) {
+             $testpart = $testno % 10000;
+             $testno = int($testno / 10000);
+         }
+
+         # send mail content
+         loadtest("$srcdir/data/test$testno");
+
+         @data = getpart("reply", "data$testpart");
+     }
+
+     sendcontrol "- OK Mail transfer starts\r\n";
+
+     for my $d (@data) {
+         sendcontrol $d;
+     }
+    
+     return 0;
+}
+
+################
+################ POP3 commands 
+################
+
+sub RETR_pop3 {
+     my ($testno) = @_;
+     my @data;
+
+     if($testno =~ /^verifiedserver$/) {
+         # this is the secret command that verifies that this actually is
+         # the curl test server
+         my $response = "WE ROOLZ: $$\r\n";
+         if($verbose) {
+             print STDERR "FTPD: We returned proof we are the test server\n";
+         }
+         $data[0] = $response;
+         logmsg "return proof we are we\n";
+     }
+     else {
+         logmsg "retrieve a mail\n";
+
+         $testno =~ s/^([^0-9]*)//;
+         my $testpart = "";
+         if ($testno > 10000) {
+             $testpart = $testno % 10000;
+             $testno = int($testno / 10000);
+         }
+
+         # send mail content
+         loadtest("$srcdir/data/test$testno");
+
+         @data = getpart("reply", "data$testpart");
+     }
+
+     sendcontrol "+OK Mail transfer starts\r\n";
+
+     for my $d (@data) {
+         sendcontrol $d;
+     }
+
+     # end with the magic 5-byte end of mail marker
+     sendcontrol "\r\n.\r\n";
+    
+     return 0;
+}
+
+################
+################ FTP commands 
+################
 my $rest=0;
 sub REST_command {
     $rest = $_[0];
@@ -798,12 +932,34 @@ sub customize {
     close(CUSTOM);
 }
 
-my @welcome=(
-            '220-        _   _ ____  _     '."\r\n",
-            '220-    ___| | | |  _ \| |    '."\r\n",
-            '220-   / __| | | | |_) | |    '."\r\n",
-            '220-  | (__| |_| |  _ <| |___ '."\r\n",
-            '220    \___|\___/|_| \_\_____|'."\r\n");
+my @welcome;
+
+if($proto eq "ftp") {
+    @welcome=(
+        '220-        _   _ ____  _     '."\r\n",
+        '220-    ___| | | |  _ \| |    '."\r\n",
+        '220-   / __| | | | |_) | |    '."\r\n",
+        '220-  | (__| |_| |  _ <| |___ '."\r\n",
+        '220    \___|\___/|_| \_\_____|'."\r\n");
+}
+elsif($proto eq "pop3") {
+    @welcome=(
+        '        _   _ ____  _     '."\r\n",
+        '    ___| | | |  _ \| |    '."\r\n",
+        '   / __| | | | |_) | |    '."\r\n",
+        '  | (__| |_| |  _ <| |___ '."\r\n",
+        '   \___|\___/|_| \_\_____|'."\r\n",
+        '+OK cURL POP3 server ready to serve'."\r\n");
+}
+elsif($proto eq "imap") {
+    @welcome=(
+        '        _   _ ____  _     '."\r\n",
+        '    ___| | | |  _ \| |    '."\r\n",
+        '   / __| | | | |_) | |    '."\r\n",
+        '  | (__| |_| |  _ <| |___ '."\r\n",
+        '   \___|\___/|_| \_\_____|'."\r\n",
+        '* OK cURL IMAP server ready to serve'."\r\n");
+}
 
 
 while(1) {
@@ -872,13 +1028,28 @@ while(1) {
         # Remove trailing CRLF.
         s/[\n\r]+$//;
 
-        unless (m/^([A-Z]{3,4})\s?(.*)/i) {
-            sendcontrol "500 '$_': command not understood.\r\n";
-            last;
-        }
-        my $FTPCMD=$1;
-        my $FTPARG=$2;
+        my $cmdid;
+        my $FTPCMD;
+        my $FTPARG;
         my $full=$_;
+        if($proto eq "imap") {
+            # IMAP is different with its identifier first on the command line
+            unless (m/^([^ ]+) ([^ ]+) (.*)/i) {
+                sendcontrol "500 '$_': command not understood.\r\n";
+                last;
+            }
+            $cmdid=$1;
+            $FTPCMD=$2;
+            $FTPARG=$3;
+        }
+        else {
+            unless (m/^([A-Z]{3,4})\s?(.*)/i) {
+                sendcontrol "500 '$_': command not understood.\r\n";
+                last;
+            }
+            $FTPCMD=$1;
+            $FTPARG=$2;
+        }
                  
         logmsg "< \"$full\"\n";
 
@@ -907,7 +1078,7 @@ while(1) {
         }
         my $check;
         if($text) {
-            sendcontrol "$text\r\n";
+            sendcontrol "$cmdid$text\r\n";
         }
         else {
             $check=1; # no response yet
@@ -938,8 +1109,6 @@ while(1) {
 
 print SFWRITE "QUIT\n";
 waitpid $sfpid, 0;
-
-unlink($pidfile);
 
 if($serverlogslocked) {
     $serverlogslocked = 0;

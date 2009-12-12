@@ -158,6 +158,27 @@ static const char * const protocols[] = {
   "sftp",
 #endif
 
+#ifndef CURL_DISABLE_IMAP
+  "imap",
+#ifdef USE_SSL
+  "imaps",
+#endif
+#endif
+
+#ifndef CURL_DISABLE_POP3
+  "pop3",
+#ifdef USE_SSL
+  "pop3s",
+#endif
+#endif
+
+#ifndef CURL_DISABLE_SMTP
+  "smtp",
+#ifdef USE_SSL
+  "smtps",
+#endif
+#endif
+
   NULL
 };
 

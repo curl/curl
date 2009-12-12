@@ -500,6 +500,8 @@ struct Configurable {
   char *proxy;
   int proxyver;     /* set to CURLPROXY_HTTP* define */
   char *noproxy;
+  char *mail_from;
+  char *mail_rcpt;
   bool proxytunnel;
   bool ftp_append;         /* APPE on ftp */
   bool mute;               /* shutup */
@@ -822,6 +824,8 @@ static void help(void)
     " -L/--location      Follow Location: hints (H)",
     "    --location-trusted Follow Location: and send auth to other hosts (H)",
     " -M/--manual        Display the full manual",
+    "    --mail-from <from> Mail from this address",
+    "    --mail-rcpt <to> Mail to this receiver(s)",
     "    --max-filesize <bytes> Maximum file size to download (H/F)",
     "    --max-redirs <num> Maximum number of redirects allowed (H)",
     " -m/--max-time <seconds> Maximum time allowed for the transfer",
@@ -1740,6 +1744,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 #endif
     {"$8", "proxy1.0",   TRUE},
     {"$9", "tftp-blksize", TRUE},
+    {"$A", "mail-from", TRUE},
+    {"$B", "mail-rcpt", TRUE},
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -2268,6 +2274,12 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case '9': /* --tftp-blksize */
         str2num(&config->tftp_blksize, nextarg);
+        break;
+      case 'A': /* --mail-from */
+        GetStr(&config->mail_from, nextarg);
+        break;
+      case 'B': /* --mail-rcpt */
+        GetStr(&config->mail_rcpt, nextarg);
         break;
       }
       break;
@@ -5006,8 +5018,15 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         my_setopt(curl, CURLOPT_POSTREDIR, config->post301 |
                   (config->post302 ? CURL_REDIR_POST_302 : FALSE));
 
+        /* curl 7.20.0 */
         if(config->tftp_blksize)
           my_setopt(curl, CURLOPT_TFTP_BLKSIZE, config->tftp_blksize);
+
+        if(config->mail_from)
+          my_setopt_str(curl, CURLOPT_MAIL_FROM, config->mail_from);
+
+        if(config->mail_rcpt)
+          my_setopt_str(curl, CURLOPT_MAIL_RCPT, config->mail_rcpt);
 
         retry_numretries = config->req_retry;
 
