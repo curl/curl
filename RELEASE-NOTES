@@ -1,8 +1,8 @@
 Curl and libcurl 7.20.0
 
  Public curl releases:         114
- Command line options:         132
- curl_easy_setopt() options:   163
+ Command line options:         134
+ curl_easy_setopt() options:   165
  Public functions in libcurl:  58
  Known libcurl bindings:       39
  Contributors:                 761
@@ -13,6 +13,8 @@ This release includes the following changes:
  o curl-config can now show the arguments used when building curl
  o non-blocking TFTP
  o send Expect: 100-continue for POSTs with unknown sizes
+ o added support for IMAP, POP3 and SMTP transfers
+ o added --mail-from and --mail-rcpt for SMTP
 
 This release includes the following bugfixes:
 

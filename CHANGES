@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel Stenberg (12 Dec 2009)
+- IMAP, POP3 and SMTP support and their TLS versions (including IMAPS, POP3S
+  and SMTPS) are now supported. The current state may not yet be solid, but
+  the foundation is in place and the test suite has some initial support for
+  these protocols. Work will now persue to make them nice libcurl citizens
+  until release.
+
+  The work with supporting these new protocols was sponsored by
+  networking4all.com - thanks!
+
 Daniel Stenberg (10 Dec 2009)
 - Siegfried Gyuricsko found out that the curl manual said --retry would retry
   on FTP errors in the transient 5xx range. Transient FTP errors are in the
