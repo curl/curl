@@ -478,6 +478,57 @@ AC_HELP_STRING([--disable-tftp],[Disable TFTP support]),
        AC_MSG_RESULT(yes)
 )
 
+AC_MSG_CHECKING([whether to support pop3])
+AC_ARG_ENABLE(pop3,
+AC_HELP_STRING([--enable-pop3],[Enable POP3 support])
+AC_HELP_STRING([--disable-pop3],[Disable POP3 support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_POP3, 1, [to disable POP3])
+       AC_SUBST(CURL_DISABLE_POP3, [1])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+
+AC_MSG_CHECKING([whether to support imap])
+AC_ARG_ENABLE(imap,
+AC_HELP_STRING([--enable-imap],[Enable IMAP support])
+AC_HELP_STRING([--disable-imap],[Disable IMAP support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_IMAP, 1, [to disable IMAP])
+       AC_SUBST(CURL_DISABLE_IMAP, [1])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+
+AC_MSG_CHECKING([whether to support smtp])
+AC_ARG_ENABLE(smtp,
+AC_HELP_STRING([--enable-smtp],[Enable SMTP support])
+AC_HELP_STRING([--disable-smtp],[Disable SMTP support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_SMTP, 1, [to disable SMTP])
+       AC_SUBST(CURL_DISABLE_SMTP, [1])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+
 dnl **********************************************************************
 dnl Check for built-in manual
 dnl **********************************************************************
@@ -2505,6 +2556,15 @@ if test "x$CURL_DISABLE_DICT" != "x1"; then
 fi
 if test "x$CURL_DISABLE_TFTP" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS TFTP"
+fi
+if test "x$CURL_DISABLE_POP3" != "x1"; then
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS POP3"
+fi
+if test "x$CURL_DISABLE_IMAP" != "x1"; then
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS IMAP"
+fi
+if test "x$CURL_DISABLE_SMTP" != "x1"; then
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SMTP"
 fi
 if test "x$USE_LIBSSH2" = "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SCP"
