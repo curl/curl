@@ -2653,6 +2653,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   ca cert path:    ${capath}
   LDAP support:    ${curl_ldap_msg}
   LDAPS support:   ${curl_ldaps_msg}
+  Protocols:       ${SUPPORT_PROTOCOLS}
 ])
 
 if test "x$soname_bump" = "xyes"; then
