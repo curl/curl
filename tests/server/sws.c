@@ -407,9 +407,12 @@ static int ProcessRequest(struct httprequest *req)
             req->rcmd = RCMD_STREAM;
           }
           else if(1 == sscanf(cmd, "pipe: %d", &num)) {
-            logmsg("instructed to allow a pipe size %d", num);
-            req->pipe = num-1; /* decrease by one since we don't count the
-                                  first request in this number */
+            logmsg("instructed to allow a pipe size of %d", num);
+            if(num < 0)
+              logmsg("negative pipe size ignored");
+            else if(num > 0)
+              req->pipe = num-1; /* decrease by one since we don't count the
+                                    first request in this number */
           }
           else if(1 == sscanf(cmd, "skip: %d", &num)) {
             logmsg("instructed to skip this number of bytes %d", num);
@@ -457,7 +460,7 @@ static int ProcessRequest(struct httprequest *req)
   if(!end) {
     /* we don't have a complete request yet! */
     logmsg("ProcessRequest returned without a complete request");
-    return 0;
+    return 0; /* not complete yet */
   }
   logmsg("ProcessRequest found a complete request");
 
@@ -478,6 +481,9 @@ static int ProcessRequest(struct httprequest *req)
    */
 
   do {
+    if(got_exit_signal)
+      return 1; /* done */
+
     if((req->cl==0) && curlx_strnequal("Content-Length:", line, 15)) {
       /* If we don't ignore content-length, we read it and we read the whole
          request including the body before we return. If we've been told to
@@ -508,6 +514,7 @@ static int ProcessRequest(struct httprequest *req)
     line = strchr(line, '\n');
     if(line)
       line++;
+
   } while(line);
 
   if(!req->auth && strstr(req->reqbuf, "Authorization:")) {
@@ -565,6 +572,8 @@ static int ProcessRequest(struct httprequest *req)
   }
 
   while(req->pipe) {
+    if(got_exit_signal)
+      return 1; /* done */
     /* scan for more header ends within this chunk */
     line = &req->reqbuf[req->checkindex];
     end = strstr(line, END_OF_HEADERS);
@@ -574,13 +583,12 @@ static int ProcessRequest(struct httprequest *req)
     req->pipe--;
   }
 
-
   /* If authentication is required and no auth was provided, end now. This
      makes the server NOT wait for PUT/POST data and you can then make the
      test case send a rejection before any such data has been sent. Test case
      154 uses this.*/
   if(req->auth_req && !req->auth)
-    return 1;
+    return 1; /* done */
 
   if(req->cl > 0) {
     if(req->cl <= req->offset - (end - req->reqbuf) - strlen(END_OF_HEADERS))
@@ -626,20 +634,22 @@ static void storerequest(char *reqbuf, ssize_t totalsize)
   do {
     written = (ssize_t)fwrite((void *) &reqbuf[totalsize-writeleft],
                               1, (size_t)writeleft, dump);
-    if(got_exit_signal) {
-      res = fclose(dump);
-      return;
-    }
-    if (written > 0)
+    if(got_exit_signal)
+      goto storerequest_cleanup;
+    if(written > 0)
       writeleft -= written;
   } while ((writeleft > 0) && ((error = ERRNO) == EINTR));
 
-  if (writeleft > 0) {
+  if(writeleft == 0)
+    logmsg("Wrote request (%zd bytes) input to " REQUEST_DUMP, totalsize);
+  else if(writeleft > 0) {
     logmsg("Error writing file %s error: %d %s",
            REQUEST_DUMP, error, strerror(error));
     logmsg("Wrote only (%zd bytes) of (%zd bytes) request input to %s",
            totalsize-writeleft, totalsize, REQUEST_DUMP);
   }
+
+storerequest_cleanup:
 
   do {
     res = fclose(dump);
@@ -647,16 +657,14 @@ static void storerequest(char *reqbuf, ssize_t totalsize)
   if(res)
     logmsg("Error closing file %s error: %d %s",
            REQUEST_DUMP, error, strerror(error));
-
-  if(!writeleft)
-    logmsg("Wrote request (%zd bytes) input to " REQUEST_DUMP,
-           totalsize);
 }
 
 /* return 0 on success, non-zero on failure */
 static int get_request(curl_socket_t sock, struct httprequest *req)
 {
+  int error;
   int fail = 0;
+  int done_processing = 0;
   char *reqbuf = req->reqbuf;
   ssize_t got = 0;
 
@@ -688,7 +696,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
 
   /*** end of httprequest init ***/
 
-  while (req->offset < REQBUFSIZ-1) {
+  while(!done_processing && (req->offset < REQBUFSIZ-1)) {
     if(pipereq_length && pipereq) {
       memmove(reqbuf, pipereq, pipereq_length);
       got = pipereq_length;
@@ -705,17 +713,20 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
     }
     if(got_exit_signal)
       return 1;
-    if (got <= 0) {
-      if (got < 0) {
-        logmsg("recv() returned error: %d", SOCKERRNO);
-        return DOCNUMBER_INTERNAL;
-      }
+    if(got == 0) {
       logmsg("Connection closed by client");
+      fail = 1;
+    }
+    else if(got < 0) {
+      error = SOCKERRNO;
+      logmsg("recv() returned error: (%d) %s", error, strerror(error));
+      fail = 1;
+    }
+    if(fail) {
+      /* dump the request received so far to the external file */
       reqbuf[req->offset] = '\0';
-
-      /* dump the request receivied so far to the external file */
       storerequest(reqbuf, req->offset);
-      return DOCNUMBER_INTERNAL;
+      return 1;
     }
 
     logmsg("Read %zd bytes", got);
@@ -723,12 +734,13 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
     req->offset += (int)got;
     reqbuf[req->offset] = '\0';
 
-    if(ProcessRequest(req)) {
-      if(req->pipe--) {
-        logmsg("Waiting for another piped request");
-        continue;
-      }
-      break;
+    done_processing = ProcessRequest(req);
+    if(got_exit_signal)
+      return 1;
+    if(done_processing && req->pipe) {
+      logmsg("Waiting for another piped request");
+      done_processing = 0;
+      req->pipe--;
     }
   }
 
@@ -749,7 +761,6 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
 
   /* dump the request to an external file */
   storerequest(reqbuf, req->pipelining ? req->checkindex : req->offset);
-
   if(got_exit_signal)
     return 1;
 
@@ -789,7 +800,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     for (;;) {
       written = swrite(sock, STREAMTHIS, count);
       if(got_exit_signal)
-        break;
+        return -1;
       if(written != (ssize_t)count) {
         logmsg("Stopped streaming");
         break;
@@ -863,6 +874,9 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
       fclose(stream);
     }
 
+    if(got_exit_signal)
+      return -1;
+
     /* re-open the same file again */
     stream=fopen(filename, "rb");
     if(!stream) {
@@ -882,15 +896,6 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   if(got_exit_signal)
     return -1;
 
-  dump = fopen(RESPONSE_DUMP, "ab"); /* b is for windows-preparing */
-  if(!dump) {
-    error = ERRNO;
-    logmsg("fopen() failed with error: %d %s", error, strerror(error));
-    logmsg("Error opening file: %s", RESPONSE_DUMP);
-    logmsg("couldn't create logfile: " RESPONSE_DUMP);
-    return -1;
-  }
-
   /* If the word 'swsclose' is present anywhere in the reply chunk, the
      connection will be closed after the data has been sent to the requesting
      client... */
@@ -905,6 +910,14 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   else
     prevbounce = FALSE;
 
+  dump = fopen(RESPONSE_DUMP, "ab"); /* b is for windows-preparing */
+  if(!dump) {
+    error = ERRNO;
+    logmsg("fopen() failed with error: %d %s", error, strerror(error));
+    logmsg("Error opening file: %s", RESPONSE_DUMP);
+    logmsg("couldn't create logfile: " RESPONSE_DUMP);
+    return -1;
+  }
 
   responsesize = count;
   do {
@@ -924,6 +937,8 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     }
     /* write to file as well */
     fwrite(buffer, 1, written, dump);
+    if(got_exit_signal)
+      break;
 
     count -= written;
     buffer += written;
@@ -935,6 +950,9 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   if(res)
     logmsg("Error closing file %s error: %d %s",
            RESPONSE_DUMP, error, strerror(error));
+
+  if(got_exit_signal)
+    return -1;
 
   if(sendfailure) {
     logmsg("Sending response failed. Only (%zu bytes) of (%zu bytes) were sent",
@@ -1223,7 +1241,6 @@ int main(int argc, char *argv[])
       }
 
       send_doc(msgsock, &req);
-
       if(got_exit_signal)
         break;
 
