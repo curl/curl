@@ -3242,6 +3242,7 @@ static struct connectdata *allocate_conn(void)
   conn->sock[FIRSTSOCKET] = CURL_SOCKET_BAD;     /* no file descriptor */
   conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD; /* no file descriptor */
   conn->connectindex = -1;    /* no index */
+  conn->port = -1; /* unknown at this point */
 
   /* Default protocol-independent behavior doesn't support persistent
      connections, so we set this to force-close. Protocols that support
@@ -3498,7 +3499,8 @@ static CURLcode setup_range(struct SessionHandle *data)
 
 
 /***************************************************************
-* Setup connection internals specific to the requested protocol
+* Setup connection internals specific to the requested protocol.
+* This MUST get called after proxy magic has been figured out.
 ***************************************************************/
 static CURLcode setup_connection_internals(struct SessionHandle *data,
                                            struct connectdata *conn)
@@ -3537,7 +3539,10 @@ static CURLcode setup_connection_internals(struct SessionHandle *data,
         p = conn->handler;              /* May have changed. */
       }
 
-      conn->port = p->defport;
+      if(conn->port < 0)
+        /* we check for -1 here since if proxy was detected already, this
+           was very likely already set to the proxy port */
+        conn->port = p->defport;
       conn->remote_port = (unsigned short)p->defport;
       conn->protocol |= p->protocol;
       return CURLE_OK;
@@ -4314,7 +4319,7 @@ static CURLcode create_conn(struct SessionHandle *data,
   char *proxy = NULL;
 
   *async = FALSE;
-  
+
   /*************************************************************
    * Check input data
    *************************************************************/
@@ -4444,23 +4449,6 @@ static CURLcode create_conn(struct SessionHandle *data,
     conn->protocol &= ~PROT_MISSING; /* switch that one off again */
   }
 
-  /*************************************************************
-   * Setup internals depending on protocol
-   *************************************************************/
-  result = setup_connection_internals(data, conn);
-  if(result != CURLE_OK) {
-    Curl_safefree(proxy);
-    return result;
-  }
-
-  /*************************************************************
-   * Parse a user name and password in the URL and strip it out
-   * of the host name
-   *************************************************************/
-  result = parse_url_userpass(data, conn, user, passwd);
-  if(result != CURLE_OK)
-    return result;
-
 #ifndef CURL_DISABLE_PROXY
   /*************************************************************
    * Extract the user and password from the authentication string
@@ -4482,7 +4470,6 @@ static CURLcode create_conn(struct SessionHandle *data,
       return CURLE_OUT_OF_MEMORY;
     }
   }
-
 
   if(data->set.str[STRING_NOPROXY] &&
      check_noproxy(conn->host.name, data->set.str[STRING_NOPROXY])) {
@@ -4511,15 +4498,13 @@ static CURLcode create_conn(struct SessionHandle *data,
     conn->bits.proxy = TRUE;
   }
   else {
-      /* we aren't using the proxy after all... */
-      conn->bits.proxy = FALSE;
-      conn->bits.httpproxy = FALSE;
-      conn->bits.proxy_user_passwd = FALSE;
-      conn->bits.tunnel_proxy = FALSE;
+    /* we aren't using the proxy after all... */
+    conn->bits.proxy = FALSE;
+    conn->bits.httpproxy = FALSE;
+    conn->bits.proxy_user_passwd = FALSE;
+    conn->bits.tunnel_proxy = FALSE;
   }
-#endif /* CURL_DISABLE_PROXY */
 
-#ifndef CURL_DISABLE_PROXY
   /***********************************************************************
    * If this is supposed to use a proxy, we need to figure out the proxy
    * host name, so that we can re-use an existing connection
@@ -4533,6 +4518,24 @@ static CURLcode create_conn(struct SessionHandle *data,
       return result;
   }
 #endif /* CURL_DISABLE_PROXY */
+
+  /*************************************************************
+   * Setup internals depending on protocol. Needs to be done after
+   * we figured out what/if proxy to use.
+   *************************************************************/
+  result = setup_connection_internals(data, conn);
+  if(result != CURLE_OK) {
+    Curl_safefree(proxy);
+    return result;
+  }
+
+  /*************************************************************
+   * Parse a user name and password in the URL and strip it out
+   * of the host name
+   *************************************************************/
+  result = parse_url_userpass(data, conn, user, passwd);
+  if(result != CURLE_OK)
+    return result;
 
   /***********************************************************************
    * file: is a special case in that it doesn't need a network connection
@@ -4689,7 +4692,7 @@ static CURLcode create_conn(struct SessionHandle *data,
  * create_conn() is all done.
  *
  * setup_conn() also handles reused connections
- * 
+ *
  * conn->data MUST already have been setup fine (in create_conn)
  */
 
@@ -4845,7 +4848,7 @@ CURLcode Curl_async_resolved(struct connectdata *conn,
 
   if(conn->async.dns) {
     conn->dns_entry = conn->async.dns;
-    conn->async.dns = NULL;    
+    conn->async.dns = NULL;
   }
 
   code = setup_conn(conn, protocol_done);

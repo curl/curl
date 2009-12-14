@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel Stenberg (15 Dec 2009)
+- Jon Nelson found a regression that turned out to be a flaw in how libcurl
+  detects and uses proxies based on the environment variables. If the proxy
+  was given as an explicit option it worked, but due to the setup order
+  mistake proxies would not be used fine for a few protocols when picked up
+  from '[protocol]_proxy'. Obviously this broke after 7.19.4. I now also added
+  test case 1106 that verifies this functionality.
+
+  (http://curl.haxx.se/bug/view.cgi?id=2913886)
+
 Daniel Stenberg (12 Dec 2009)
 - IMAP, POP3 and SMTP support and their TLS versions (including IMAPS, POP3S
   and SMTPS) are now supported. The current state may not yet be solid, but

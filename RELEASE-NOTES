@@ -34,6 +34,7 @@ This release includes the following bugfixes:
  o Expect: 100-continue handling when set by the application
  o multi interface with OpenSSL read already freed memory when closing down
  o --retry didn't do right for FTP transient errors
+ o some *_proxy environment variables didn't function
 
 This release includes the following known bugs:
 
@@ -45,6 +46,7 @@ advice from friends like these:
  Yang Tse, Kamil Dudka, Christian Schmitz, Constantine Sapuntzakis,
  Marco Maggi, Camille Moncelier, Claes Jakobsson, Kevin Baughman,
  Marc Kleine-Budde, Jad Chamcham, Bjorn Augustsson, David Byron,
- Markus Koetter, Chad Monroe, Martin Storsjo, Siegfried Gyuricsko
+ Markus Koetter, Chad Monroe, Martin Storsjo, Siegfried Gyuricsko,
+ Jon Nelson,
 
         Thanks! (and sorry if I forgot to mention someone)
