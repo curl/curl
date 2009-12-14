@@ -408,7 +408,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn,
          that there may even be additional "headers" after the body. */
       size_t chunk = pp->cache_size;
 
-      if(chunk > filesize)
+      if(chunk > (size_t)filesize)
         /* the conversion from curl_off_t to size_t is always fine here */
         chunk = (size_t)filesize;
 
