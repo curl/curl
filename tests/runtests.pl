@@ -669,7 +669,7 @@ sub verifyftp {
     }
     if($pid <= 0 && $data[0]) {
         # this is not a known server
-        logmsg "RUN: Unknown server on our $proto port: $port\n";
+        logmsg "RUN: Unknown server on our ". uc($proto) ." port: $port\n";
         return 0;
     }
     # we can/should use the time it took to verify the FTP server as a measure
@@ -677,7 +677,8 @@ sub verifyftp {
     my $took = time()-$time;
 
     if($verbose) {
-        logmsg "RUN: Verifying our test $proto server took $took seconds\n";
+        logmsg "RUN: Verifying our test ". uc($proto) .
+               " server took $took seconds\n";
     }
     $ftpchecktime = $took?$took:1; # make sure it never is zero
 
@@ -1006,7 +1007,7 @@ sub runpingpongserver {
     unlink($pidfile);
 
     # start our server:
-    $flag.=$debugprotocol?"-v ":"";
+    $flag .= $debugprotocol?"-v ":"";
     $flag .= "-s \"$srcdir\" ";
     my $addr;
     if($id) {
@@ -1024,7 +1025,7 @@ sub runpingpongserver {
 
     if($ftppid <= 0 || !kill(0, $ftppid)) {
         # it is NOT alive
-        logmsg "RUN: failed to start the $proto$id$nameext server\n";
+        logmsg "RUN: failed to start the ". uc($proto) ."$id$nameext server\n";
         stopserver("$pid2");
         displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
@@ -1034,7 +1035,7 @@ sub runpingpongserver {
     # Server is up. Verify that we can speak to it.
     my $pid3 = verifyserver($proto, $ip, $port);
     if(!$pid3) {
-        logmsg "RUN: $proto$id$nameext server failed verification\n";
+        logmsg "RUN: ". uc($proto) ."$id$nameext server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$ftppid $pid2");
         displaylogs($testnumcheck);
@@ -1044,7 +1045,8 @@ sub runpingpongserver {
     $pid2 = $pid3;
 
     if($verbose) {
-        logmsg "RUN: $proto$id$nameext server is now running PID $ftppid\n";
+        logmsg "RUN: ". uc($proto) ."$id$nameext server is now running".
+               " PID $ftppid\n";
     }
 
     sleep(1);
@@ -2592,7 +2594,7 @@ sub startservers {
             if(!$run{$what}) {
                 ($pid, $pid2) = runpingpongserver($what, "", $verbose);
                 if($pid <= 0) {
-                    return "failed starting $what server";
+                    return "failed starting ". uc($what) ." server";
                 }
                 printf ("* pid $what => %d %d\n", $pid, $pid2) if($verbose);
                 $run{$what}="$pid $pid2";
