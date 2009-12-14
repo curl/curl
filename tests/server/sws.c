@@ -91,10 +91,10 @@ static bool prevbounce=FALSE; /* instructs the server to increase the part
 
 struct httprequest {
   char reqbuf[REQBUFSIZ]; /* buffer area for the incoming request */
-  int checkindex; /* where to start checking of the request */
-  int offset;     /* size of the incoming request */
-  long testno;     /* test number found in the request */
-  long partno;     /* part number found in the request */
+  size_t checkindex; /* where to start checking of the request */
+  size_t offset;     /* size of the incoming request */
+  long testno;       /* test number found in the request */
+  long partno;       /* part number found in the request */
   bool open;      /* keep connection open info, as found in the request */
   bool auth_req;  /* authentication required, don't wait for body unless
                      there's an Authorization header */
@@ -109,12 +109,12 @@ struct httprequest {
                      bytes said in Content-Length, but the server only reads N
                      - skip bytes. */
   int rcmd;       /* doing a special command, see defines above */
-  int prot_version; /* HTTP version * 10 */
-  bool pipelining; /* true if request is pipelined */
+  int prot_version;  /* HTTP version * 10 */
+  bool pipelining;   /* true if request is pipelined */
 };
 
 static int ProcessRequest(struct httprequest *req);
-static void storerequest(char *reqbuf, ssize_t totalsize);
+static void storerequest(char *reqbuf, size_t totalsize);
 
 #define DEFAULT_PORT 8999
 
@@ -367,7 +367,6 @@ static int ProcessRequest(struct httprequest *req)
 
       sprintf(logbuf, "Requested test number %ld part %ld",
               req->testno, req->partno);
-
       logmsg("%s", logbuf);
 
       filename = test2file(req->testno);
@@ -601,24 +600,18 @@ static int ProcessRequest(struct httprequest *req)
 }
 
 /* store the entire request in a file */
-static void storerequest(char *reqbuf, ssize_t totalsize)
+static void storerequest(char *reqbuf, size_t totalsize)
 {
   int res;
   int error = 0;
-  ssize_t written;
-  ssize_t writeleft;
+  size_t written;
+  size_t writeleft;
   FILE *dump;
 
   if (reqbuf == NULL)
     return;
-
   if (totalsize == 0)
     return;
-  else if (totalsize < 0) {
-    logmsg("Invalid size (%zd bytes) for request input. Not written to %s",
-           totalsize, REQUEST_DUMP);
-    return;
-  }
 
   do {
     dump = fopen(REQUEST_DUMP, "ab");
@@ -632,8 +625,8 @@ static void storerequest(char *reqbuf, ssize_t totalsize)
 
   writeleft = totalsize;
   do {
-    written = (ssize_t)fwrite((void *) &reqbuf[totalsize-writeleft],
-                              1, (size_t)writeleft, dump);
+    written = fwrite(&reqbuf[totalsize-writeleft],
+                     1, writeleft, dump);
     if(got_exit_signal)
       goto storerequest_cleanup;
     if(written > 0)
@@ -641,11 +634,11 @@ static void storerequest(char *reqbuf, ssize_t totalsize)
   } while ((writeleft > 0) && ((error = ERRNO) == EINTR));
 
   if(writeleft == 0)
-    logmsg("Wrote request (%zd bytes) input to " REQUEST_DUMP, totalsize);
+    logmsg("Wrote request (%zu bytes) input to " REQUEST_DUMP, totalsize);
   else if(writeleft > 0) {
     logmsg("Error writing file %s error: %d %s",
            REQUEST_DUMP, error, strerror(error));
-    logmsg("Wrote only (%zd bytes) of (%zd bytes) request input to %s",
+    logmsg("Wrote only (%zu bytes) of (%zu bytes) request input to %s",
            totalsize-writeleft, totalsize, REQUEST_DUMP);
   }
 
@@ -669,7 +662,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
   ssize_t got = 0;
 
   char *pipereq = NULL;
-  int pipereq_length = 0;
+  size_t pipereq_length = 0;
 
   if(req->pipelining) {
     pipereq = reqbuf + req->checkindex;
@@ -731,7 +724,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
 
     logmsg("Read %zd bytes", got);
 
-    req->offset += (int)got;
+    req->offset += (size_t)got;
     reqbuf[req->offset] = '\0';
 
     done_processing = ProcessRequest(req);
@@ -849,8 +842,6 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
       buffer = doc404;
       break;
     }
-    ptr = NULL;
-    stream=NULL;
 
     count = strlen(buffer);
   }
@@ -910,7 +901,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   else
     prevbounce = FALSE;
 
-  dump = fopen(RESPONSE_DUMP, "ab"); /* b is for windows-preparing */
+  dump = fopen(RESPONSE_DUMP, "ab");
   if(!dump) {
     error = ERRNO;
     logmsg("fopen() failed with error: %d %s", error, strerror(error));
