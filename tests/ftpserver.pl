@@ -169,13 +169,14 @@ sub sysread_or_die {
         logmsg "Error: ftp$ftpdnum$ext sysread error: $!\n";
         kill(9, $sfpid);
         waitpid($sfpid, 0);
+        logmsg "Exited from sysread_or_die() at $fcaller " .
+               "line $lcaller. ftp$ftpdnum$ext sysread error: $!\n";
         unlink($pidfile);
         if($serverlogslocked) {
             $serverlogslocked = 0;
             clear_advisor_read_lock($SERVERLOGS_LOCK);
         }
-        die "Died in sysread_or_die() at $fcaller " .
-            "line $lcaller. ftp$ftpdnum$ext sysread error: $!\n";
+        exit;
     }
     elsif($result == 0) {
         ($fcaller, $lcaller) = (caller)[1,2];
@@ -183,13 +184,14 @@ sub sysread_or_die {
         logmsg "Error: ftp$ftpdnum$ext read zero\n";
         kill(9, $sfpid);
         waitpid($sfpid, 0);
+        logmsg "Exited from sysread_or_die() at $fcaller " .
+               "line $lcaller. ftp$ftpdnum$ext read zero\n";
         unlink($pidfile);
         if($serverlogslocked) {
             $serverlogslocked = 0;
             clear_advisor_read_lock($SERVERLOGS_LOCK);
         }
-        die "Died in sysread_or_die() at $fcaller " .
-            "line $lcaller. ftp$ftpdnum$ext read zero\n";
+        exit;
     }
 
     return $result;
