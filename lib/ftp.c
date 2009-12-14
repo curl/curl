@@ -381,8 +381,10 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
                              size_t *size) /* size of the response */
 {
   struct connectdata *conn = pp->conn;
+#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
   struct SessionHandle *data = conn->data;
   char * const buf = data->state.buffer;
+#endif
   CURLcode result = CURLE_OK;
   int code;
 

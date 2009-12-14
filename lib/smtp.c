@@ -108,7 +108,9 @@ static int smtp_getsock(struct connectdata *conn,
 static CURLcode smtp_doing(struct connectdata *conn,
                            bool *dophase_done);
 static CURLcode smtp_setup_connection(struct connectdata * conn);
+#if 0
 static void smtp_respinit(struct connectdata *conn);
+#endif
 
 /*
  * SMTP protocol handler.
@@ -320,7 +322,9 @@ static CURLcode smtp_mail(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
+#if 0
   struct FTP *smtp = data->state.proto.smtp;
+#endif
 
   /* send MAIL */
   result = Curl_pp_sendf(&conn->proto.smtpc.pp, "MAIL FROM:<%s>",
@@ -439,9 +443,7 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
       if(data->set.ftp_ssl && !conn->ssl[FIRSTSOCKET].use) {
         /* We don't have a SSL/TLS connection yet, but SSL is requested. Switch
            to TLS connection now */
-        const char *str;
-
-        result = Curl_pp_sendf(&smtpc->pp, "STARTTLS", str);
+        result = Curl_pp_sendf(&smtpc->pp, "STARTTLS", NULL);
         state(conn, SMTP_STARTTLS);
       }
       else
@@ -804,8 +806,11 @@ static CURLcode smtp_disconnect(struct connectdata *conn)
 static CURLcode smtp_parse_url_path(struct connectdata *conn)
 {
   /* the smtp struct is already inited in smtp_connect() */
+#if 0
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   struct SessionHandle *data = conn->data;
+#endif
+  (void)conn;
 
   /* url decode... */
 
