@@ -22,6 +22,9 @@ hello
 
 # Client-side
 <client>
+<features>
+ftp
+</features>
 <server>
 http
 </server>
@@ -32,10 +35,8 @@ FTP URL and with ftp_proxy environment variable set
 <setenv>
 ftp_proxy=http://%HOSTIP:%HTTPPORT/
 </setenv>
-# note that we need quotes around the URL below to make sure the shell doesn't
-# treat the semicolon as a separator!
  <command>
-"ftp://%HOSTIP:23456/1106"
+ftp://%HOSTIP:23456/1106
 </command>
 
 </client>
