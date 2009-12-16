@@ -85,7 +85,11 @@ sub killpid {
     # stop it, otherwise reap it if this has not been done yet.
     my @signalled;
     my $prev = 0;
-    my @pids = sort({$a <=> $b} split(/\s+/, $pidlist));
+    my @pids = split(' ', $pidlist);
+    if(scalar(@pids) > 2) {
+        my @sorted = sort({$a <=> $b} @pids);
+        @pids = @sorted;
+    }
     foreach my $tmp (@pids) {
         chomp $tmp;
         if($tmp =~ /^(\d+)$/) {

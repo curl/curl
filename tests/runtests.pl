@@ -2518,7 +2518,7 @@ sub stopservers {
         my $pid;
         my $prev;
 
-        foreach $pid (split(/\s+/, $pids)) {
+        foreach $pid (split(' ', $pids)) {
             if($pid != $prev) {
                 # no need to kill same pid twice!
                 logmsg sprintf("* kill pid for %s => %d\n",

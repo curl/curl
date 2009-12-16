@@ -927,7 +927,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
       logmsg("Sent off %zd bytes", written);
     }
     /* write to file as well */
-    fwrite(buffer, 1, written, dump);
+    fwrite(buffer, 1, (size_t)written, dump);
     if(got_exit_signal)
       break;
 
