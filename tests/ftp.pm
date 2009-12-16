@@ -48,7 +48,7 @@ sub pidfromfile {
 # the process is not alive, will return the negative value of the pid.
 #
 sub processexists {
-#   use POSIX ":sys_wait_h";
+    use POSIX ":sys_wait_h";
     my $pidfile = $_[0];
 
     # fetch pid from pidfile
@@ -61,7 +61,7 @@ sub processexists {
         }
         else {
             # reap it if this has not already been done
-            # waitpid($pid, &WNOHANG);
+            waitpid($pid, &WNOHANG);
             # get rid of the certainly invalid pidfile
             unlink($pidfile) if($pid == pidfromfile($pidfile));
             return -$pid; # negative means dead process
@@ -70,35 +70,124 @@ sub processexists {
     return 0;
 }
 
+#######################################################################
+# killpid attempts to gracefully stop processes in the given pid list
+# with a SIGTERM signal and SIGKILLs those which haven't died on time.
+#
+sub killpid {
+    use POSIX ":sys_wait_h";
+    my ($verbose, $pidlist) = @_;
+
+    # The 'pidlist' argument is a string of whitespace separated pids.
+    return if(not defined $pidlist);
+
+    # For each pid which is alive send it a SIGTERM to gracefully
+    # stop it, otherwise reap it if this has not been done yet.
+    my @signalled;
+    my $prev = 0;
+    my @pids = sort({$a <=> $b} split(/\s+/, $pidlist));
+    foreach my $tmp (@pids) {
+        chomp $tmp;
+        if($tmp =~ /^(\d+)$/) {
+            my $pid = $1;
+            if(($pid > 0) && ($prev != $pid)) {
+                $prev = $pid;
+                if(kill(0, $pid)) {
+                    print("RUN: Process with pid $pid signalled to die\n")
+                        if($verbose);
+                    kill("TERM", $pid);
+                    push @signalled, $pid;
+                }
+                else {
+                    print("RUN: Process with pid $pid already dead\n")
+                        if($verbose);
+                    waitpid($pid, &WNOHANG);
+                }
+            }
+        }
+    }
+    return if(not scalar(@signalled));
+
+    # Allow all signalled processes five seconds to gracefully die.
+    my $quarters = 20;
+    while($quarters--) {
+        for(my $i = scalar(@signalled) - 1; $i >= 0; $i--) {
+            my $pid = $signalled[$i];
+            if(!kill(0, $pid)) {
+                print("RUN: Process with pid $pid gracefully died\n")
+                    if($verbose);
+                waitpid($pid, &WNOHANG);
+                splice @signalled, $i, 1;
+            }
+        }
+        return if(not scalar(@signalled));
+        select(undef, undef, undef, 0.25);
+    }
+
+    # Mercilessly SIGKILL processes still alive.
+    foreach my $pid (@signalled) {
+        print("RUN: Process with pid $pid forced to die with SIGKILL\n")
+            if($verbose);
+        kill("KILL", $pid);
+        waitpid($pid, 0);
+    }
+}
+
 #############################################################################
 # Kill a specific slave
 #
 sub ftpkillslave {
     my ($id, $ext, $verbose)=@_;
     my $base;
+    my $pidlist;
+    my @pidfiles;
+
     for $base (('filt', 'data')) {
         my $f = ".sock$base$id$ext.pid";
         my $pid = processexists($f);
         if($pid > 0) {
-            printf ("* kill pid for %s => %d\n", "ftp-$base$id$ext", $pid) if($verbose);
-            kill (9, $pid); # die!
-            waitpid($pid, 0);
+            printf ("* kill pid for %s => %d\n", "ftp-$base$id$ext", $pid)
+                if($verbose);
+            $pidlist .= "$pid ";
         }
-        unlink($f);
+        push @pidfiles, $f;
+    }
+
+    killpid($verbose, $pidlist);
+
+    foreach my $pidfile (@pidfiles) {
+        unlink($pidfile);
     }
 }
-
 
 #############################################################################
 # Make sure no FTP leftovers are still running. Kill all slave processes.
 # This uses pidfiles since it might be used by other processes.
 #
 sub ftpkillslaves {
-    my ($versbose) = @_;
-    for $ext (("", "ipv6")) {
-        for $id (("", "2")) {
-            ftpkillslave ($id, $ext, $verbose);
+    my ($verbose) = @_;
+    my $pidlist;
+    my @pidfiles;
+
+    for $ext (('', 'ipv6')) {
+        for $id (('', '2')) {
+            for $base (('filt', 'data')) {
+                my $f = ".sock$base$id$ext.pid";
+                my $pid = processexists($f);
+                if($pid > 0) {
+                    printf ("* kill pid for %s => %d\n", "ftp-$base$id$ext",
+                        $pid) if($verbose);
+                    $pidlist .= "$pid ";
+                }
+                push @pidfiles, $f;
+            }
         }
+    }
+
+    killpid($verbose, $pidlist);
+
+    foreach my $pidfile (@pidfiles) {
+        unlink($pidfile);
     }
 }
 

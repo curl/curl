@@ -39,25 +39,55 @@
 
 use strict;
 use IPC::Open2;
-#use Time::HiRes qw( gettimeofday ); # not available in perl 5.6
 
 require "getpart.pm";
 require "ftp.pm";
 
+BEGIN {
+    if($] >= 5.006) {
+        use Time::HiRes qw( gettimeofday );
+    }
+}
 
 my $ftpdnum="";
 
-# open and close each time to allow removal at any time
+my $logfilename = 'log/logfile.log'; # Override this for each test server
+
+#######################################################################
+# getlogfilename returns a log file name depending on given arguments.
+#
+sub getlogfilename {
+    my ($proto, $ipversion, $ssl, $instance, $sockfilter) = @_;
+    my $filename;
+
+    # For now, simply mimic old behavior.
+    $filename = "log/ftpd$ftpdnum.log";
+
+    return $filename;
+}
+
+#######################################################################
+# logmsg is general message logging subroutine for our test servers.
+#
 sub logmsg {
- # if later than perl 5.6 is used
- #   my ($seconds, $microseconds) = gettimeofday;
-    my $seconds = time();
-    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
-        localtime($seconds);
-    open(FTPLOG, ">>log/ftpd$ftpdnum.log");
-    printf FTPLOG ("%02d:%02d:%02d ", $hour, $min, $sec);
-    print FTPLOG @_;
-    close(FTPLOG);
+    my $now;
+    if($] >= 5.006) {
+        my ($seconds, $usec) = gettimeofday();
+        my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+            localtime($seconds);
+        $now = sprintf("%02d:%02d:%02d.%06d ", $hour, $min, $sec, $usec);
+    }
+    else {
+        my $seconds = time();
+        my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+            localtime($seconds);
+        $now = sprintf("%02d:%02d:%02d ", $hour, $min, $sec);
+    }
+    if(open(LOGFILEFH, ">>$logfilename")) {
+        print LOGFILEFH $now;
+        print LOGFILEFH @_;
+        close(LOGFILEFH);
+    }
 }
 
 sub ftpmsg {
@@ -138,7 +168,7 @@ if($proto !~ /^(ftp|imap|pop3|smtp)\z/) {
 
 sub catch_zap {
     my $signame = shift;
-    ftpkillslaves(1);
+    ftpkillslaves($verbose);
     unlink($pidfile);
     if($serverlogslocked) {
         $serverlogslocked = 0;
@@ -167,8 +197,7 @@ sub sysread_or_die {
         ($fcaller, $lcaller) = (caller)[1,2];
         logmsg "Failed to read input\n";
         logmsg "Error: ftp$ftpdnum$ext sysread error: $!\n";
-        kill(9, $sfpid);
-        waitpid($sfpid, 0);
+        killpid($verbose, $sfpid);
         logmsg "Exited from sysread_or_die() at $fcaller " .
                "line $lcaller. ftp$ftpdnum$ext sysread error: $!\n";
         unlink($pidfile);
@@ -182,8 +211,7 @@ sub sysread_or_die {
         ($fcaller, $lcaller) = (caller)[1,2];
         logmsg "Failed to read input\n";
         logmsg "Error: ftp$ftpdnum$ext read zero\n";
-        kill(9, $sfpid);
-        waitpid($sfpid, 0);
+        killpid($verbose, $sfpid);
         logmsg "Exited from sysread_or_die() at $fcaller " .
                "line $lcaller. ftp$ftpdnum$ext read zero\n";
         unlink($pidfile);
@@ -209,8 +237,7 @@ sub startsf {
 
     if($pong !~ /^PONG/) {
         logmsg "Failed sockfilt command: $cmd\n";
-        kill(9, $sfpid);
-        waitpid($sfpid, 0);
+        killpid($verbose, $sfpid);
         unlink($pidfile);
         if($serverlogslocked) {
             $serverlogslocked = 0;
@@ -219,6 +246,8 @@ sub startsf {
         die "Failed to start sockfilt!";
     }
 }
+
+$logfilename = getlogfilename();
 
 startsf();
 
@@ -716,8 +745,7 @@ sub PASV_command {
     my $prev = processexists($pidf);
     if($prev > 0) {
         print "kill existing server: $prev\n" if($verbose);
-        kill(9, $prev);
-        waitpid($prev, 0);
+        killpid($verbose, $prev);
     }
 
     # We fire up a new sockfilt to do the data transfer for us.
@@ -730,8 +758,7 @@ sub PASV_command {
     sysread_or_die(\*DREAD, \$pong, 5);
 
     if($pong !~ /^PONG/) {
-        kill(9, $slavepid);
-        waitpid($slavepid, 0);
+        killpid($verbose, $slavepid);
         sendcontrol "500 no free ports!\r\n";
         logmsg "failed to run sockfilt for data connection\n";
         return 0;
@@ -865,8 +892,7 @@ sub PORT_command {
 
     if($pong !~ /^PONG/) {
         logmsg "Failed sockfilt for data connection\n";
-        kill(9, $slavepid);
-        waitpid($slavepid, 0);
+        killpid($verbose, $slavepid);
     }
 
     logmsg "====> Client DATA connect to port $port\n";
@@ -986,8 +1012,7 @@ while(1) {
     # flush data:
     $| = 1;
 
-    kill(9, $slavepid) if($slavepid);
-    waitpid($slavepid, 0) if($slavepid);
+    killpid($verbose, $slavepid);
     $slavepid=0;
         
     &customize(); # read test control instructions

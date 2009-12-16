@@ -86,7 +86,7 @@ void logmsg(const char *msg, ...)
   vsnprintf(buffer, sizeof(buffer), msg, ap);
   va_end(ap);
 
-  logfp = fopen(serverlogfile, "a");
+  logfp = fopen(serverlogfile, "ab");
   if(logfp) {
     fprintf(logfp, "%s %s\n", timebuf, buffer);
     fclose(logfp);
@@ -221,7 +221,7 @@ int write_pidfile(const char *filename)
   long pid;
 
   pid = (long)getpid();
-  pidfile = fopen(filename, "w");
+  pidfile = fopen(filename, "wb");
   if(!pidfile) {
     logmsg("Couldn't write pid file: %s %s", filename, strerror(ERRNO));
     return 0; /* fail */

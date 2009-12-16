@@ -61,7 +61,6 @@ BEGIN {
 }
 
 use strict;
-#use Time::HiRes qw( gettimeofday );
 #use warnings;
 use Cwd;
 
@@ -240,19 +239,12 @@ my $torture;
 my $tortnum;
 my $tortalloc;
 
-# open and close each time to allow removal at any time
+#######################################################################
+# logmsg is our general message logging subroutine.
+#
 sub logmsg {
-# uncomment the Time::HiRes usage for this
-#    my ($seconds, $microseconds) = gettimeofday;
-#    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
-#        localtime($seconds);
-    my $t;
-    if(1) {
-#        $t = sprintf ("%02d:%02d:%02d.%06d ", $hour, $min, $sec,
-#                      $microseconds);
-    }
     for(@_) {
-        print "${t}$_";
+        print "$_";
     }
 }
 
@@ -272,7 +264,7 @@ $ENV{'HOME'}=$pwd;
 sub catch_zap {
     my $signame = shift;
     logmsg "runtests.pl received SIG$signame, exiting\n";
-    stopservers(1);
+    stopservers($verbose);
     die "Somebody sent me a SIG$signame";
 }
 $SIG{INT} = \&catch_zap;
@@ -550,45 +542,9 @@ sub torture {
 # stop the given test server (pid)
 #
 sub stopserver {
-    my ($pid) = @_;
+    my ($pidlist) = @_;
 
-    if(not defined $pid || $pid <= 0) {
-        return; # whad'da'ya wanna'da with no pid ?
-    }
-
-    # It might be more than one pid
-    # Send each one a SIGTERM to gracefully kill it
-
-    my @killed;
-    my @pids = split(/\s+/, $pid);
-    for (@pids) {
-        chomp($_);
-        if($_ =~ /^(\d+)$/) {
-            if(($1 > 0) && kill(0, $1)) {
-                if($verbose) {
-                    logmsg "RUN: Test server pid $1 signalled to die\n";
-                }
-                kill(15, $1); # die!
-                push @killed, $1;
-            }
-        }
-    }
-
-    # Give each process killed up to a few seconds to die, then send
-    # a SIGKILL to finish it off for good.
-    for (@killed) {
-        my $count = 5; # wait for this many seconds for server to die
-	while($count--) {
-            if (!kill(0, $_) || checkdied($_)) {
-                last;
-            }
-            sleep(1);
-        }
-        if ($count < 0) {
-            logmsg "RUN: forcing pid $_ to die with SIGKILL\n";
-            kill(9, $_); # die!
-        }
-    }
+    killpid($verbose, $pidlist);
 }
 
 #######################################################################
@@ -2554,23 +2510,26 @@ sub singletest {
 # Stop all running test servers
 sub stopservers {
     my ($verbose)=@_;
+    my $pidlist;
+
     for(keys %run) {
         my $server = $_;
         my $pids=$run{$server};
         my $pid;
         my $prev;
 
-        foreach $pid (split(" ", $pids)) {
+        foreach $pid (split(/\s+/, $pids)) {
             if($pid != $prev) {
                 # no need to kill same pid twice!
                 logmsg sprintf("* kill pid for %s => %d\n",
                                $server, $pid) if($verbose);
-                stopserver($pid);
+                $pidlist .= "$pid ";
+                $prev = $pid;
             }
-            $prev = $pid;
         }
         delete $run{$server};
     }
+    killpid($verbose, $pidlist);
     ftpkillslaves($verbose);
 }
 
