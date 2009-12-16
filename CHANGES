@@ -6,6 +6,21 @@
 
                                   Changelog
 
+Daniel Stenberg (17 Dec 2009)
+- Follow-up fix for the proxy fix I did for Jon Nelson's bug. It turned out I
+  was a bit too quick and broke test case 1101 with that change. The order of
+  some of the setups is sensitive. I now changed it slightly again to make
+  sure we do them in this order:
+
+  1 - parse URL and figure out what protocol is used in the URL
+  2 - prepend protocol:// to URL if missing
+  3 - parse name+password off URL, which needs to know what protocol is used
+      (since only some allows for name+password in the URL)
+  4 - figure out if a proxy should be used set by an option
+  5 - if no proxy option, check proxy environment variables
+  6 - run the protocol-specific setup function, which needs to have the proxy
+      already set
+
 Daniel Stenberg (15 Dec 2009)
 - Jon Nelson found a regression that turned out to be a flaw in how libcurl
   detects and uses proxies based on the environment variables. If the proxy

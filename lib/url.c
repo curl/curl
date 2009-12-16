@@ -3255,11 +3255,53 @@ static struct connectdata *allocate_conn(void)
   return conn;
 }
 
+static CURLcode findprotocol(struct SessionHandle *data,
+                             struct connectdata *conn)
+{
+  const struct Curl_handler * const *pp;
+  const struct Curl_handler *p;
+
+  /* Scan protocol handler table and match against 'protostr' to set a few
+     variables based on the URL. Now that the handler may be changed later
+     when the protocol specific setup function is called. */
+  for (pp = protocols; (p = *pp) != NULL; pp++) {
+    if(Curl_raw_equal(p->scheme, conn->protostr)) {
+      /* Protocol found in table. Check if allowed */
+      if(!(data->set.allowed_protocols & p->protocol))
+        /* nope, get out */
+        break;
+
+      /* it is allowed for "normal" request, now do an extra check if this is
+         the result of a redirect */
+      if(data->state.this_is_a_follow &&
+         !(data->set.redir_protocols & p->protocol))
+        /* nope, get out */
+        break;
+
+      /* Perform setup complement if some. */
+      conn->handler = p;
+      conn->protocol |= p->protocol;
+
+      /* 'port' and 'remote_port' are set in setup_connection_internals() */
+      return CURLE_OK;
+    }
+  }
+
+
+  /* The protocol was not found in the table, but we don't have to assign it
+     to anything since it is already assigned to a dummy-struct in the
+     create_conn() function when the connectdata struct is allocated. */
+  failf(data, "Protocol %s not supported or disabled in " LIBCURL_NAME,
+        conn->protostr);
+
+  return CURLE_UNSUPPORTED_PROTOCOL;
+}
+
 /*
  * Parse URL and fill in the relevant members of the connection struct.
  */
-static CURLcode ParseURLAndFillConnection(struct SessionHandle *data,
-                                          struct connectdata *conn)
+static CURLcode parseurlandfillconn(struct SessionHandle *data,
+                                    struct connectdata *conn)
 {
   char *at;
   char *tmp;
@@ -3455,8 +3497,8 @@ static CURLcode ParseURLAndFillConnection(struct SessionHandle *data,
    *   conn->host.name is B
    *   data->state.path is /C
    */
-  (void)rc;
-  return CURLE_OK;
+
+  return findprotocol(data, conn);
 }
 
 static void llist_dtor(void *user, void *element)
@@ -3502,10 +3544,8 @@ static CURLcode setup_range(struct SessionHandle *data)
 * Setup connection internals specific to the requested protocol.
 * This MUST get called after proxy magic has been figured out.
 ***************************************************************/
-static CURLcode setup_connection_internals(struct SessionHandle *data,
-                                           struct connectdata *conn)
+static CURLcode setup_connection_internals(struct connectdata *conn)
 {
-  const struct Curl_handler * const * pp;
   const struct Curl_handler * p;
   CURLcode result;
 
@@ -3513,47 +3553,26 @@ static CURLcode setup_connection_internals(struct SessionHandle *data,
 
   /* Scan protocol handler table. */
 
-  for (pp = protocols; (p = *pp) != NULL; pp++)
-    if(Curl_raw_equal(p->scheme, conn->protostr)) {
-      /* Protocol found in table. Check if allowed */
-      if(!(data->set.allowed_protocols & p->protocol))
-        /* nope, get out */
-        break;
+  /* Perform setup complement if some. */
+  p = conn->handler;
 
-      /* it is allowed for "normal" request, now do an extra check if this is
-         the result of a redirect */
-      if(data->state.this_is_a_follow &&
-         !(data->set.redir_protocols & p->protocol))
-        /* nope, get out */
-        break;
+  if(p->setup_connection) {
+    result = (*p->setup_connection)(conn);
 
-      /* Perform setup complement if some. */
-      conn->handler = p;
+    if(result != CURLE_OK)
+      return result;
 
-      if(p->setup_connection) {
-        result = (*p->setup_connection)(conn);
+    p = conn->handler;              /* May have changed. */
+  }
 
-        if(result != CURLE_OK)
-          return result;
+  if(conn->port < 0)
+    /* we check for -1 here since if proxy was detected already, this
+       was very likely already set to the proxy port */
+    conn->port = p->defport;
+  conn->remote_port = (unsigned short)p->defport;
+  conn->protocol |= p->protocol;
 
-        p = conn->handler;              /* May have changed. */
-      }
-
-      if(conn->port < 0)
-        /* we check for -1 here since if proxy was detected already, this
-           was very likely already set to the proxy port */
-        conn->port = p->defport;
-      conn->remote_port = (unsigned short)p->defport;
-      conn->protocol |= p->protocol;
-      return CURLE_OK;
-    }
-
-  /* The protocol was not found in the table, but we don't have to assign it
-     to anything since it is already assigned to a dummy-struct in the
-     create_conn() function when the connectdata struct is allocated. */
-  failf(data, "Protocol %s not supported or disabled in " LIBCURL_NAME,
-        conn->protostr);
-  return CURLE_UNSUPPORTED_PROTOCOL;
+  return CURLE_OK;
 }
 
 #ifndef CURL_DISABLE_PROXY
@@ -3989,7 +4008,7 @@ static CURLcode parse_remote_port(struct SessionHandle *data,
   char endbracket;
 
   /* Note that at this point, the IPv6 address cannot contain any scope
-     suffix as that has already been removed in the ParseURLAndFillConnection()
+     suffix as that has already been removed in the parseurlandfillconn()
      function */
   if((1 == sscanf(conn->host.name, "[%*45[0123456789abcdefABCDEF:.]%c",
                   &endbracket)) &&
@@ -4423,7 +4442,7 @@ static CURLcode create_conn(struct SessionHandle *data,
   conn->host.name = conn->host.rawalloc;
   conn->host.name[0] = 0;
 
-  result = ParseURLAndFillConnection(data, conn);
+  result = parseurlandfillconn(data, conn);
   if(result != CURLE_OK) {
       return result;
   }
@@ -4448,6 +4467,14 @@ static CURLcode create_conn(struct SessionHandle *data,
     data->change.url_alloc = TRUE; /* free this later */
     conn->protocol &= ~PROT_MISSING; /* switch that one off again */
   }
+
+  /*************************************************************
+   * Parse a user name and password in the URL and strip it out
+   * of the host name
+   *************************************************************/
+  result = parse_url_userpass(data, conn, user, passwd);
+  if(result != CURLE_OK)
+    return result;
 
 #ifndef CURL_DISABLE_PROXY
   /*************************************************************
@@ -4523,19 +4550,11 @@ static CURLcode create_conn(struct SessionHandle *data,
    * Setup internals depending on protocol. Needs to be done after
    * we figured out what/if proxy to use.
    *************************************************************/
-  result = setup_connection_internals(data, conn);
+  result = setup_connection_internals(conn);
   if(result != CURLE_OK) {
     Curl_safefree(proxy);
     return result;
   }
-
-  /*************************************************************
-   * Parse a user name and password in the URL and strip it out
-   * of the host name
-   *************************************************************/
-  result = parse_url_userpass(data, conn, user, passwd);
-  if(result != CURLE_OK)
-    return result;
 
   /***********************************************************************
    * file: is a special case in that it doesn't need a network connection
@@ -4598,12 +4617,6 @@ static CURLcode create_conn(struct SessionHandle *data,
   if(result != CURLE_OK)
     return result;
 
-  /*************************************************************
-   * Check the current list of connections to see if we can
-   * re-use an already existing one or if we have to create a
-   * new one.
-   *************************************************************/
-
   /* Get a cloned copy of the SSL config situation stored in the
      connection struct. But to get this going nicely, we must first make
      sure that the strings in the master copy are pointing to the correct
@@ -4623,6 +4636,12 @@ static CURLcode create_conn(struct SessionHandle *data,
 
   if(!Curl_clone_ssl_config(&data->set.ssl, &conn->ssl_config))
     return CURLE_OUT_OF_MEMORY;
+
+  /*************************************************************
+   * Check the current list of connections to see if we can
+   * re-use an already existing one or if we have to create a
+   * new one.
+   *************************************************************/
 
   /* reuse_fresh is TRUE if we are told to use a new connection by force, but
      we only acknowledge this option if this is not a re-used connection
