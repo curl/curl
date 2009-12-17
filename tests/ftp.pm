@@ -60,11 +60,12 @@ sub processexists {
             return $pid;
         }
         else {
-            # reap it if this has not already been done
-            waitpid($pid, &WNOHANG);
             # get rid of the certainly invalid pidfile
             unlink($pidfile) if($pid == pidfromfile($pidfile));
-            return -$pid; # negative means dead process
+            # reap its dead children, if not done yet
+            # waitpid($pid, &WNOHANG);
+            # negative return value means dead process
+            return -$pid;
         }
     }
     return 0;
@@ -77,25 +78,31 @@ sub processexists {
 sub killpid {
     use POSIX ":sys_wait_h";
     my ($verbose, $pidlist) = @_;
+    my @requested;
+    my @signalled;
+    my @reapchild;
 
     # The 'pidlist' argument is a string of whitespace separated pids.
-    return if(not defined $pidlist);
+    return if(not defined($pidlist));
 
-    # For each pid which is alive send it a SIGTERM to gracefully
-    # stop it, otherwise reap it if this has not been done yet.
-    my @signalled;
-    my $prev = 0;
-    my @pids = split(' ', $pidlist);
-    if(scalar(@pids) > 2) {
-        my @sorted = sort({$a <=> $b} @pids);
-        @pids = @sorted;
+    # Make 'requested' hold the non-duplicate pids from 'pidlist'.
+    @requested = split(' ', $pidlist);
+    return if(not defined(@requested));
+    if(scalar(@requested) > 2) {
+        @requested = sort({$a <=> $b} @requested);
     }
-    foreach my $tmp (@pids) {
+    for(my $i = scalar(@requested) - 2; $i >= 0; $i--) {
+        if($requested[$i] == $requested[$i+1]) {
+            splice @requested, $i+1, 1;
+        }
+    }
+
+    # Send a SIGTERM to processes which are alive to gracefully stop them.
+    foreach my $tmp (@requested) {
         chomp $tmp;
         if($tmp =~ /^(\d+)$/) {
             my $pid = $1;
-            if(($pid > 0) && ($prev != $pid)) {
-                $prev = $pid;
+            if($pid > 0) {
                 if(kill(0, $pid)) {
                     print("RUN: Process with pid $pid signalled to die\n")
                         if($verbose);
@@ -105,35 +112,49 @@ sub killpid {
                 else {
                     print("RUN: Process with pid $pid already dead\n")
                         if($verbose);
-                    waitpid($pid, &WNOHANG);
+                    push @reapchild, $pid;
                 }
             }
         }
     }
-    return if(not scalar(@signalled));
 
     # Allow all signalled processes five seconds to gracefully die.
-    my $quarters = 20;
-    while($quarters--) {
-        for(my $i = scalar(@signalled) - 1; $i >= 0; $i--) {
-            my $pid = $signalled[$i];
-            if(!kill(0, $pid)) {
-                print("RUN: Process with pid $pid gracefully died\n")
-                    if($verbose);
-                waitpid($pid, &WNOHANG);
-                splice @signalled, $i, 1;
+    if(defined(@signalled)) {
+        my $eighths = 40;
+        while($eighths--) {
+            for(my $i = scalar(@signalled) - 1; $i >= 0; $i--) {
+                my $pid = $signalled[$i];
+                if(!kill(0, $pid)) {
+                    print("RUN: Process with pid $pid gracefully died\n")
+                        if($verbose);
+                    splice @signalled, $i, 1;
+                    push @reapchild, $pid;
+                }
             }
+            last if(not scalar(@signalled));
+            select(undef, undef, undef, 0.125);
         }
-        return if(not scalar(@signalled));
-        select(undef, undef, undef, 0.25);
     }
 
     # Mercilessly SIGKILL processes still alive.
-    foreach my $pid (@signalled) {
-        print("RUN: Process with pid $pid forced to die with SIGKILL\n")
-            if($verbose);
-        kill("KILL", $pid);
-        waitpid($pid, 0);
+    if(defined(@signalled)) {
+        foreach my $pid (@signalled) {
+            if($pid > 0) {
+                print("RUN: Process with pid $pid forced to die with SIGKILL\n")
+                    if($verbose);
+                kill("KILL", $pid);
+                push @reapchild, $pid;
+            }
+        }
+    }
+
+    # Reap processes dead children.
+    if(defined(@reapchild)) {
+        foreach my $pid (@reapchild) {
+            if($pid > 0) {
+                waitpid($pid, 0);
+            }
+        }
     }
 }
 
