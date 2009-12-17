@@ -35,6 +35,7 @@ This release includes the following bugfixes:
  o multi interface with OpenSSL read already freed memory when closing down
  o --retry didn't do right for FTP transient errors
  o some *_proxy environment variables didn't function
+ o libcurl-OpenSSL engine cleanup
 
 This release includes the following known bugs:
 

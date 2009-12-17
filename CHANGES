@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel Stenberg (17 Dec 2009)
+- David Byron fixed Curl_ossl_cleanup to actually call ENGINE_cleanup when
+  available.
+  
 - Follow-up fix for the proxy fix I did for Jon Nelson's bug. It turned out I
   was a bit too quick and broke test case 1101 with that change. The order of
   some of the setups is sensitive. I now changed it slightly again to make

@@ -1397,6 +1397,7 @@ if test X"$OPT_SSL" != Xno; then
     AC_CHECK_FUNCS( RAND_status \
                     RAND_screen \
                     RAND_egd \
+                    ENGINE_cleanup \
                     CRYPTO_cleanup_all_ex_data \
                     SSL_get_shutdown )
 

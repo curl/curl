@@ -709,7 +709,7 @@ void Curl_ossl_cleanup(void)
   /* EVP_cleanup() removes all ciphers and digests from the table. */
   EVP_cleanup();
 
-#ifdef HAVE_ENGINE_cleanup
+#ifdef HAVE_ENGINE_CLEANUP
   ENGINE_cleanup();
 #endif
 
