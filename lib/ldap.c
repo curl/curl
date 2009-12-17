@@ -582,7 +582,7 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
   if(!conn->data ||
       !conn->data->state.path ||
       conn->data->state.path[0] != '/' ||
-      !checkprefix(conn->protostr, conn->data->change.url))
+      !checkprefix("LDAP", conn->data->change.url))
     return LDAP_INVALID_SYNTAX;
 
   ludp->lud_scope = LDAP_SCOPE_BASE;
