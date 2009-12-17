@@ -3312,7 +3312,7 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
   char protobuf[16];
   const char *protop;
 
-  prot_missing = FALSE;
+  *prot_missing = FALSE;
 
   /*************************************************************
    * Parse the URL.
