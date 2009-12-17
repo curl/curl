@@ -44,7 +44,7 @@ require "getpart.pm";
 require "ftp.pm";
 
 BEGIN {
-    if($] >= 5.006) {
+    if($] > 5.006) {
         use Time::HiRes qw( gettimeofday );
     }
 }
@@ -71,7 +71,7 @@ sub getlogfilename {
 #
 sub logmsg {
     my $now;
-    if($] >= 5.006) {
+    if($] > 5.006) {
         my ($seconds, $usec) = gettimeofday();
         my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
             localtime($seconds);
