@@ -2752,7 +2752,7 @@ ConnectionExists(struct SessionHandle *data,
          it is a non-SSL protocol tunneled over the same http proxy name and
          port number */
 
-      if(Curl_raw_equal(needle->protostr, check->protostr) &&
+      if(Curl_raw_equal(needle->handler->scheme, check->handler->scheme) &&
          Curl_raw_equal(needle->host.name, check->host.name) &&
          (needle->remote_port == check->remote_port) ) {
         if(needle->protocol & PROT_SSL) {
@@ -3256,7 +3256,8 @@ static struct connectdata *allocate_conn(void)
 }
 
 static CURLcode findprotocol(struct SessionHandle *data,
-                             struct connectdata *conn)
+                             struct connectdata *conn,
+                             const char *protostr)
 {
   const struct Curl_handler * const *pp;
   const struct Curl_handler *p;
@@ -3265,7 +3266,7 @@ static CURLcode findprotocol(struct SessionHandle *data,
      variables based on the URL. Now that the handler may be changed later
      when the protocol specific setup function is called. */
   for (pp = protocols; (p = *pp) != NULL; pp++) {
-    if(Curl_raw_equal(p->scheme, conn->protostr)) {
+    if(Curl_raw_equal(p->scheme, protostr)) {
       /* Protocol found in table. Check if allowed */
       if(!(data->set.allowed_protocols & p->protocol))
         /* nope, get out */
@@ -3292,7 +3293,7 @@ static CURLcode findprotocol(struct SessionHandle *data,
      to anything since it is already assigned to a dummy-struct in the
      create_conn() function when the connectdata struct is allocated. */
   failf(data, "Protocol %s not supported or disabled in " LIBCURL_NAME,
-        conn->protostr);
+        protostr);
 
   return CURLE_UNSUPPORTED_PROTOCOL;
 }
@@ -3307,6 +3308,8 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
   char *tmp;
   char *path = data->state.path;
   int rc;
+  char protobuf[16];
+  const char *protop;
 
   /*************************************************************
    * Parse the URL.
@@ -3317,8 +3320,8 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
    * url ...
    ************************************************************/
   if((2 == sscanf(data->change.url, "%15[^:]:%[^\n]",
-                  conn->protostr,
-                  path)) && Curl_raw_equal(conn->protostr, "file")) {
+                  protobuf, path)) &&
+     Curl_raw_equal(protobuf, "file")) {
     if(path[0] == '/' && path[1] == '/') {
       /* Allow omitted hostname (e.g. file:/<path>).  This is not strictly
        * speaking a valid file: URL by RFC 1738, but treating file:/<path> as
@@ -3364,7 +3367,7 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
       }
     }
 
-    strcpy(conn->protostr, "file"); /* store protocol string lowercase */
+    protop = "file"; /* protocol string */
   }
   else {
     /* clear path */
@@ -3372,7 +3375,7 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
 
     if(2 > sscanf(data->change.url,
                    "%15[^\n:]://%[^\n/]%[^\n]",
-                   conn->protostr,
+                   protobuf,
                    conn->host.name, path)) {
 
       /*
@@ -3404,19 +3407,21 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
        * lib/version.c too! */
 
       if(checkprefix("FTP.", conn->host.name))
-        strcpy(conn->protostr, "ftp");
+        protop = "ftp";
       else if(checkprefix("DICT.", conn->host.name))
-        strcpy(conn->protostr, "DICT");
+        protop = "DICT";
       else if(checkprefix("LDAP.", conn->host.name))
-        strcpy(conn->protostr, "LDAP");
+        protop = "LDAP";
       else if(checkprefix("IMAP.", conn->host.name))
-        strcpy(conn->protostr, "IMAP");
+        protop = "IMAP";
       else {
-        strcpy(conn->protostr, "http");
+        protop = "http";
       }
 
       conn->protocol |= PROT_MISSING; /* not given in URL */
     }
+    else
+      protop = protobuf;
   }
 
   /* We search for '?' in the host name (but only on the right side of a
@@ -3493,12 +3498,12 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
 
   /*
    * So if the URL was A://B/C,
-   *   conn->protostr is A
+   *   protop is A
    *   conn->host.name is B
    *   data->state.path is /C
    */
 
-  return findprotocol(data, conn);
+  return findprotocol(data, conn, protop);
 }
 
 static void llist_dtor(void *user, void *element)
@@ -3685,7 +3690,7 @@ static char *detect_proxy(struct connectdata *conn)
 
   if(!check_noproxy(conn->host.name, no_proxy)) {
     /* It was not listed as without proxy */
-    char *protop = conn->protostr;
+    const char *protop = conn->handler->scheme;
     char *envp = proxy_env;
     char *prox;
 
@@ -4036,18 +4041,18 @@ static CURLcode parse_remote_port(struct SessionHandle *data,
     if(conn->bits.httpproxy) {
       /* we need to create new URL with the new port number */
       char *url;
-      bool isftp = (bool)(Curl_raw_equal("ftp", conn->protostr) ||
-                          Curl_raw_equal("ftps", conn->protostr));
+      /* FTPS connections have the FTP bit set too, so they match as well */
+      bool isftp = (bool)conn->protocol & PROT_FTP;
 
       /*
        * This synthesized URL isn't always right--suffixes like ;type=A
        * are stripped off. It would be better to work directly from the
        * original URL and simply replace the port part of it.
        */
-      url = aprintf("%s://%s%s%s:%d%s%s", conn->protostr,
-             conn->bits.ipv6_ip?"[":"", conn->host.name,
-             conn->bits.ipv6_ip?"]":"", conn->remote_port,
-             isftp?"/":"", data->state.path);
+      url = aprintf("%s://%s%s%s:%d%s%s", conn->handler->scheme,
+                    conn->bits.ipv6_ip?"[":"", conn->host.name,
+                    conn->bits.ipv6_ip?"]":"", conn->remote_port,
+                    isftp?"/":"", data->state.path);
       if(!url)
         return CURLE_OUT_OF_MEMORY;
 
@@ -4456,7 +4461,7 @@ static CURLcode create_conn(struct SessionHandle *data,
        part added so that we have a valid URL. */
     char *reurl;
 
-    reurl = aprintf("%s://%s", conn->protostr, data->change.url);
+    reurl = aprintf("%s://%s", conn->handler->scheme, data->change.url);
 
     if(!reurl) {
       Curl_safefree(proxy);

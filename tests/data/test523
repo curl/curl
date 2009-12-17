@@ -50,7 +50,7 @@ http://www.haxx.se:999/523 http://%HOSTIP:%HTTPPORT
 ^User-Agent:.*
 </strip>
 <protocol>
-GET http://www.haxx.se:19999/523 HTTP/1.1
+GET HTTP://www.haxx.se:19999/523 HTTP/1.1
 Authorization: Basic eHh4Onl5eQ==
 Host: www.haxx.se:19999
 Accept: */*

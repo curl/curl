@@ -703,7 +703,6 @@ struct connectdata {
 
   unsigned int scope;    /* address scope for IPv6 */
 
-  char protostr[16];  /* store the protocol string in this buffer */
   int socktype;  /* SOCK_STREAM or SOCK_DGRAM */
 
   struct hostname host;
